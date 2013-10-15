@@ -17,19 +17,19 @@
  *       Czech Technical University, Faculty of Civil Engineering,
  *   Department of Structural Mechanics, 166 29 Prague, Czech Republic
  *
- *  This program is free software; you can redistribute it and/or modify
- *  it under the terms of the GNU General Public License as published by
- *  the Free Software Foundation; either version 2 of the License, or
- *  (at your option) any later version.
+ *  This library is free software; you can redistribute it and/or
+ *  modify it under the terms of the GNU Lesser General Public
+ *  License as published by the Free Software Foundation; either
+ *  version 2.1 of the License, or (at your option) any later version.
  *
  *  This program is distributed in the hope that it will be useful,
  *  but WITHOUT ANY WARRANTY; without even the implied warranty of
- *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- *  GNU General Public License for more details.
+ *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+ *  Lesser General Public License for more details.
  *
- *  You should have received a copy of the GNU General Public License
- *  along with this program; if not, write to the Free Software
- *  Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
+ *  You should have received a copy of the GNU Lesser General Public
+ *  License along with this library; if not, write to the Free Software
+ *  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  */
 
 #include "xfemmanager.h"
@@ -50,6 +50,7 @@
 #include "datareader.h"
 #include "datastream.h"
 #include "contextioerr.h"
+#include "dynamicinputrecord.h"
 
 namespace oofem {
 XfemManager :: XfemManager(Domain *domain)
@@ -72,17 +73,6 @@ XfemManager :: clear()
     enrichmentItemList = NULL;
     numberOfEnrichmentItems = -1;
 }
-
-#if 0
-void XfemManager :: giveActiveEIsFor(IntArray &answer, const Element *elem)
-{
-    for ( int i = 1; i <= this->giveNumberOfEnrichmentItems(); i++ ) {
-        if ( this->giveEnrichmentItem(i)->isElementEnriched(elem) ) {
-            answer.followedBy( enrichmentItemList->at(i)->giveNumber() );
-        }
-    }
-}
-#endif
 
 bool XfemManager :: isElementEnriched(const Element *elem)
 {
@@ -112,46 +102,12 @@ void
 XfemManager :: createEnrichedDofs()
 {
     // Creates new dofs due to enrichment and appends them to the dof managers
-    ///@todo: need to add check if dof already exists in the dofmanager
-    int nrDofMan = this->giveDomain()->giveNumberOfDofManagers();
     IntArray dofIdArray;
 
     for ( int j = 1; j <= this->giveNumberOfEnrichmentItems(); j++ ) {
         EnrichmentItem *ei = this->giveEnrichmentItem(j);
-
-        for ( int i = 1; i <= nrDofMan; i++ ) {
-            DofManager *dMan = this->giveDomain()->giveDofManager(i);
-
-            if ( ei->isDofManEnriched(* dMan) ) {
-                ei->computeDofManDofIdArray(dofIdArray, dMan);
-                int nDofs = dMan->giveNumberOfDofs();
-                for ( int m = 1; m <= dofIdArray.giveSize(); m++ ) {
-                    //                      printf("Creating enriched dof. dManI: %d (nDofs + m): %d dofIdArray.at(m): %d\n", i, (nDofs + m), dofIdArray.at(m) );
-                    dMan->appendDof( new MasterDof( nDofs + m, dMan, ( DofIDItem ) ( dofIdArray.at(m) ) ) );
-                }
-            }
-        }
-
-        //        }
+        ei->createEnrichedDofs();
     }
-
-    /*
-     *  for (int j = 1; j <= this->giveNumberOfEnrichmentItems(); j++ ) {
-     *      EnrichmentItem *ei = this->giveEnrichmentItem(j);
-     *      for ( int k = 1; k <= ei->giveNumberOfEnrichmentDomains(); k++ ) {
-     *          for ( int i = 1; i <= nrDofMan; i++ ) {
-     *              DofManager *dMan = this->giveDomain()->giveDofManager(i);
-     *              if ( ei->isDofManEnrichedByEnrichmentDomain(dMan,k) ) {
-     *                  ei->computeDofManDofIdArray(dofIdArray, dMan, k);
-     *                  int nDofs = dMan->giveNumberOfDofs();
-     *                  for ( int m = 1; m<= dofIdArray.giveSize(); m++ ) {
-     *                      dMan->appendDof( new MasterDof( nDofs + m, dMan, ( DofIDItem ) ( dofIdArray.at(m) ) ) );
-     *                  }
-     *              }
-     *          }
-     *      }
-     *  }
-     */
 }
 
 
@@ -168,6 +124,13 @@ IRResultType XfemManager :: initializeFrom(InputRecord *ir)
     return IRRT_OK;
 }
 
+
+void XfemManager :: giveInputRecord(DynamicInputRecord &input)
+{
+    input.setRecordKeywordField(_IFT_XfemManager_Name, 1);
+	input.setField(numberOfEnrichmentItems, _IFT_XfemManager_numberOfEnrichmentItems);
+	input.setField(mNumGpPerTri, _IFT_XfemManager_numberOfGpPerTri);
+}
 
 int XfemManager :: instanciateYourself(DataReader *dr)
 {
@@ -197,6 +160,17 @@ int XfemManager :: instanciateYourself(DataReader *dr)
     return 1;
 }
 
+void XfemManager :: setDomain(Domain *ipDomain)
+{
+	domain = ipDomain;
+
+	int numEI = enrichmentItemList->giveSize();
+
+	for(int i = 1; i <= numEI; i++) {
+		enrichmentItemList->at(i)->setDomain(ipDomain);
+	}
+
+}
 
 contextIOResultType XfemManager :: saveContext(DataStream *stream, ContextMode mode, void *obj)
 {
@@ -268,4 +242,12 @@ void XfemManager :: updateYourself()
         enrichmentItemList->at(i)->updateGeometry();
     }
 }
+
+void XfemManager :: propagateFronts()
+{
+    for ( int i = 1; i <= enrichmentItemList->giveSize(); i++ ) {
+        enrichmentItemList->at(i)->propagateFronts();
+    }
+}
+
 } // end namespace oofem

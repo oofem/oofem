@@ -17,19 +17,19 @@
  *       Czech Technical University, Faculty of Civil Engineering,
  *   Department of Structural Mechanics, 166 29 Prague, Czech Republic
  *
- *  This program is free software; you can redistribute it and/or modify
- *  it under the terms of the GNU General Public License as published by
- *  the Free Software Foundation; either version 2 of the License, or
- *  (at your option) any later version.
+ *  This library is free software; you can redistribute it and/or
+ *  modify it under the terms of the GNU Lesser General Public
+ *  License as published by the Free Software Foundation; either
+ *  version 2.1 of the License, or (at your option) any later version.
  *
  *  This program is distributed in the hope that it will be useful,
  *  but WITHOUT ANY WARRANTY; without even the implied warranty of
- *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- *  GNU General Public License for more details.
+ *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+ *  Lesser General Public License for more details.
  *
- *  You should have received a copy of the GNU General Public License
- *  along with this program; if not, write to the Free Software
- *  Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
+ *  You should have received a copy of the GNU Lesser General Public
+ *  License along with this library; if not, write to the Free Software
+ *  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  */
 
 #include "supgelement.h"
@@ -81,60 +81,7 @@ SUPGElement :: giveCharacteristicMatrix(FloatMatrix &answer,
 // returns characteristics matrix of receiver according to mtrx
 //
 {
-    if ( mtrx == AccelerationTerm_MB ) {
-        this->computeAccelerationTerm_MB(answer, tStep);
-    } else if ( mtrx == AdvectionDerivativeTerm_MB ) {
-        this->computeAdvectionDerivativeTerm_MB(answer, tStep);
-    } else if ( mtrx == DiffusionDerivativeTerm_MB ) {
-        this->computeDiffusionDerivativeTerm_MB(answer, TangentStiffness, tStep);
-    } else if ( mtrx == SecantDiffusionDerivativeTerm_MB ) {
-        this->computeDiffusionDerivativeTerm_MB(answer, SecantStiffness, tStep);
-    } else if ( mtrx == TangentDiffusionDerivativeTerm_MB ) {
-        this->computeDiffusionDerivativeTerm_MB(answer, TangentStiffness, tStep);
-    } else if ( mtrx == InitialDiffusionDerivativeTerm_MB ) {
-        this->computeDiffusionDerivativeTerm_MB(answer, ElasticStiffness, tStep);
-    } else if ( mtrx == PressureTerm_MB ) {
-        this->computePressureTerm_MB(answer, tStep);
-    } else if ( mtrx == LinearAdvectionTerm_MC ) {
-        this->computeLinearAdvectionTerm_MC(answer, tStep);
-    } else if ( mtrx == AdvectionDerivativeTerm_MC ) {
-        this->computeAdvectionDerivativeTerm_MC(answer, tStep);
-    } else if ( mtrx == DiffusionDerivativeTerm_MC ) {
-        this->computeDiffusionDerivativeTerm_MC(answer, tStep);
-    } else if ( mtrx == AccelerationTerm_MC ) {
-        this->computeAccelerationTerm_MC(answer, tStep);
-    } else if ( mtrx == PressureTerm_MC ) {
-        this->computePressureTerm_MC(answer, tStep);
-    } else if ( mtrx == BCLhsTerm_MB ) {
-      this->computeBCLhsTerm_MB(answer, tStep);
-    } else if ( mtrx == BCLhsPressureTerm_MB ) {
-      this->computeBCLhsPressureTerm_MB(answer, tStep);
-    } else if ( mtrx == BCLhsPressureTerm_MC ) {
-      this->computeBCLhsPressureTerm_MC(answer, tStep);
-    } else if ( mtrx == LSICStabilizationTerm_MB ) {
-      this->computeLSICStabilizationTerm_MB(answer, tStep);
-    } else if ( mtrx == StiffnessMatrix) {
-        // support for stokes solver
-        IntArray vloc, ploc;
-        FloatMatrix h;
-        int size = this->computeNumberOfDofs(EID_MomentumBalance_ConservationEquation);
-        this->giveLocalVelocityDofMap(vloc);
-        this->giveLocalPressureDofMap(ploc);
-        answer.resize(size,size); answer.zero();
-        //this->computeAdvectionDerivativeTerm_MB(h, tStep);  answer.assemble(h, vloc);
-        this->computeDiffusionDerivativeTerm_MB(h, TangentStiffness, tStep); answer.assemble(h, vloc);
-        this->computePressureTerm_MB(h, tStep); answer.assemble(h, vloc, ploc);
-        this->computeLinearAdvectionTerm_MC(h, tStep); answer.assemble(h, ploc, vloc);
-        this->computeAdvectionDerivativeTerm_MC(h, tStep); answer.assemble(h, ploc, vloc);
-        this->computeDiffusionDerivativeTerm_MC(h, tStep); answer.assemble(h, ploc, vloc);
-        this->computePressureTerm_MC(h, tStep); answer.assemble(h, ploc);
-        this->computeBCLhsTerm_MB(h, tStep); answer.assemble(h, vloc);
-        this->computeBCLhsPressureTerm_MB(h, tStep); answer.assemble(h, vloc, ploc);
-        this->computeBCLhsPressureTerm_MC(h, tStep); answer.assemble(h, ploc, vloc);
-        //this->computeLSICStabilizationTerm_MB(h, tStep); answer.assemble(h, vloc);
-    } else {
-        _error("giveCharacteristicMatrix: Unknown Type of characteristic mtrx.");
-    }
+    _error("giveCharacteristicMatrix: Unknown Type of characteristic mtrx.");
 }
 
 
@@ -145,33 +92,24 @@ SUPGElement :: giveCharacteristicVector(FloatArray &answer, CharType mtrx, Value
 // returns characteristics vector of receiver according to requested type
 //
 {
-    if ( mtrx == AdvectionTerm_MB ) {
-        this->computeAdvectionTerm_MB(answer, tStep);
-    } else if ( mtrx == DiffusionTerm_MB ) {
-        this->computeDiffusionTerm_MB(answer, tStep);
-    } else if ( mtrx == AdvectionTerm_MC ) {
-        this->computeAdvectionTerm_MC(answer, tStep);
-    } else if ( mtrx == BCRhsTerm_MB ) {
-        this->computeBCRhsTerm_MB(answer, tStep);
-    } else if ( mtrx == BCRhsTerm_MC ) {
-        this->computeBCRhsTerm_MC(answer, tStep);
-    } else if ( mtrx == DiffusionTerm_MC ) {
-        this->computeDiffusionTerm_MC(answer, tStep);
-    } else if ( mtrx == ExternalForcesVector) {
+    if ( mtrx == ExternalForcesVector) {
         // stokes flow
         IntArray vloc, ploc;
         FloatArray h;
-        int size = this->computeNumberOfDofs(EID_MomentumBalance_ConservationEquation);
+        int size = this->computeNumberOfDofs();
         this->giveLocalVelocityDofMap(vloc);
         this->giveLocalPressureDofMap(ploc);
-        answer.resize(size); answer.zero();
+        answer.resize(size);
+        answer.zero();
         this->computeBCRhsTerm_MB(h, tStep); answer.assemble(h, vloc);
         this->computeBCRhsTerm_MC(h, tStep); answer.assemble(h, ploc);
-    } else if ( mtrx == InternalForcesVector) {
+    }
+#if 0 
+    else if ( mtrx == InternalForcesVector) {
         // stokes flow
         IntArray vloc, ploc;
         FloatArray h;
-        int size = this->computeNumberOfDofs(EID_MomentumBalance_ConservationEquation);
+        int size = this->computeNumberOfDofs();
         this->giveLocalVelocityDofMap(vloc);
         this->giveLocalPressureDofMap(ploc);
         answer.resize(size); answer.zero();
@@ -205,7 +143,9 @@ SUPGElement :: giveCharacteristicVector(FloatArray &answer, CharType mtrx, Value
         h.beProductOf(m1, v);
         answer.assemble(h, ploc);
 
-    } else {
+    } 
+#endif
+    else {
         _error("giveCharacteristicVector: Unknown Type of characteristic mtrx.");
     }
 }
@@ -232,35 +172,28 @@ SUPGElement :: computeBCLhsTerm_MB(FloatMatrix &answer, TimeStep *atTime)
 {
     bcType boundarytype;
     int nLoads = 0;
-    int undofs = this->computeNumberOfDofs(EID_MomentumBalance);
-    Load *load;
     //bcType loadtype;
     FloatMatrix helpMatrix;
     // loop over boundary load array
-    helpMatrix.resize(undofs, undofs);
-    helpMatrix.zero();
 
-    answer.resize(undofs, undofs);
-    answer.zero();
+    answer.resize(0, 0);
 
     nLoads = this->giveBoundaryLoadArray()->giveSize() / 2;
     if ( nLoads ) {
         for ( int i = 1; i <= nLoads; i++ ) {
             int n = boundaryLoadArray.at(1 + ( i - 1 ) * 2);
             int side = boundaryLoadArray.at(i * 2);
-            load = domain->giveLoad(n);
+            Load *load = domain->giveLoad(n);
             boundarytype = load->giveType();
             if ( boundarytype == SlipWithFriction ) {
                 this->computeSlipWithFrictionBCTerm_MB(helpMatrix, load, side, atTime);
+                answer.add(helpMatrix);
             } else if ( boundarytype == PenetrationWithResistance ) {
                 this->computePenetrationWithResistanceBCTerm_MB(helpMatrix, load, side, atTime);
+                answer.add(helpMatrix);
             } else {
-                helpMatrix.resize(undofs, undofs);
-                helpMatrix.zero();
                 // _error("computeForceLoadVector : unsupported load type class");
             }
-
-            answer.add(helpMatrix);
         }
     }
     nLoads = this->giveBodyLoadArray()->giveSize();
@@ -268,10 +201,11 @@ SUPGElement :: computeBCLhsTerm_MB(FloatMatrix &answer, TimeStep *atTime)
     if ( nLoads ) { 
         bcGeomType ltype;
         for ( int i = 1; i <= nLoads; i++ ) {
-            load  = domain->giveLoad( bodyLoadArray.at(i) );
+            Load *load = domain->giveLoad( bodyLoadArray.at(i) );
             ltype = load->giveBCGeoType();
             if ( ( ltype == BodyLoadBGT ) && ( load->giveBCValType() == ReinforceBVT ) ) {
                 this->computeHomogenizedReinforceTerm_MB(helpMatrix, load, atTime);
+                answer.add(helpMatrix);
             }
         }
     }
@@ -282,17 +216,10 @@ SUPGElement :: computeBCLhsPressureTerm_MB(FloatMatrix &answer, TimeStep *atTime
 {
     bcType boundarytype;
     int nLoads = 0;
-    int undofs = this->computeNumberOfDofs(EID_MomentumBalance);
-    int pndofs = this->computeNumberOfDofs(EID_ConservationEquation);
-    Load *load;
     //bcType loadtype;
     FloatMatrix helpMatrix;
     // loop over boundary load array
-    helpMatrix.resize(undofs, pndofs);
-    helpMatrix.zero();
-
-    answer.resize(undofs, pndofs);
-    answer.zero();
+    answer.resize(0, 0);
 
     nLoads = this->giveBoundaryLoadArray()->giveSize() / 2;
 
@@ -300,17 +227,14 @@ SUPGElement :: computeBCLhsPressureTerm_MB(FloatMatrix &answer, TimeStep *atTime
         for ( int i = 1; i <= nLoads; i++ ) {
             int n = boundaryLoadArray.at(1 + ( i - 1 ) * 2);
             int side = boundaryLoadArray.at(i * 2);
-            load = domain->giveLoad(n);
+            Load *load = domain->giveLoad(n);
             boundarytype = load->giveType();
             if ( boundarytype == OutFlowBC ) {
                 this->computeOutFlowBCTerm_MB(helpMatrix, side, atTime);
+                answer.add(helpMatrix);
             } else {
-                helpMatrix.resize(undofs, pndofs);
-                helpMatrix.zero();
                 //_warning("computeForceLoadVector : unsupported load type class");
             }
-
-            answer.add(helpMatrix);
         }
     }
 }
@@ -318,28 +242,21 @@ SUPGElement :: computeBCLhsPressureTerm_MB(FloatMatrix &answer, TimeStep *atTime
 void
 SUPGElement :: computeBCLhsPressureTerm_MC(FloatMatrix &answer, TimeStep *atTime)
 {
- 
     int nLoads = 0;
-    int undofs = this->computeNumberOfDofs(EID_MomentumBalance);
-    int pndofs = this->computeNumberOfDofs(EID_ConservationEquation);
-    Load *load;
     //bcType loadtype;
     FloatMatrix helpMatrix;
 
     nLoads = this->giveBodyLoadArray()->giveSize();
-    answer.resize(pndofs, undofs);
-    answer.zero();
-    helpMatrix.resize(pndofs, undofs);
-    helpMatrix.zero();
+    answer.resize(0, 0);
     if ( nLoads ) { 
         bcGeomType ltype;
         for ( int i = 1; i <= nLoads; i++ ) {
-            load  = domain->giveLoad( bodyLoadArray.at(i) );
+            Load *load  = domain->giveLoad( bodyLoadArray.at(i) );
             ltype = load->giveBCGeoType();
             if ( ( ltype == BodyLoadBGT ) && ( load->giveBCValType() == ReinforceBVT ) ) {
                 this->computeHomogenizedReinforceTerm_MC(helpMatrix, load, atTime);
+                answer.add(helpMatrix);
             }
-            answer.add(helpMatrix);
         }
     }
 }

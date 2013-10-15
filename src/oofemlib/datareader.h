@@ -17,25 +17,25 @@
  *       Czech Technical University, Faculty of Civil Engineering,
  *   Department of Structural Mechanics, 166 29 Prague, Czech Republic
  *
- *  This program is free software; you can redistribute it and/or modify
- *  it under the terms of the GNU General Public License as published by
- *  the Free Software Foundation; either version 2 of the License, or
- *  (at your option) any later version.
+ *  This library is free software; you can redistribute it and/or
+ *  modify it under the terms of the GNU Lesser General Public
+ *  License as published by the Free Software Foundation; either
+ *  version 2.1 of the License, or (at your option) any later version.
  *
  *  This program is distributed in the hope that it will be useful,
  *  but WITHOUT ANY WARRANTY; without even the implied warranty of
- *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- *  GNU General Public License for more details.
+ *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+ *  Lesser General Public License for more details.
  *
- *  You should have received a copy of the GNU General Public License
- *  along with this program; if not, write to the Free Software
- *  Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
+ *  You should have received a copy of the GNU Lesser General Public
+ *  License along with this library; if not, write to the Free Software
+ *  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  */
 
 #ifndef datareader_h
 #define datareader_h
 
-
+#include "oofemcfg.h"
 #include "inputrecord.h"
 
 namespace oofem {
@@ -47,7 +47,7 @@ namespace oofem {
  * component initialization. The input record identification facilitates the
  * implementation of database readers with direct or random access.
  */
-class DataReader
+class OOFEM_EXPORT DataReader
 {
 protected:
     /// Output file name (first line in OOFEM input files).
@@ -61,7 +61,7 @@ public:
         IR_domainRec, IR_outManRec, IR_domainCompRec, IR_geometryRec, IR_gbpmRec,
         IR_emodelRec, IR_mstepRec, IR_expModuleRec, IR_dofmanRec, IR_elemRec,
         IR_crosssectRec, IR_matRec, IR_nlocBarRec, IR_bcRec, IR_icRec, IR_ltfRec, IR_setRec,
-        IR_nRandomFieldGenRec, IR_xfemManRec, IR_enrichFuncRec, IR_geoRec, IR_enrichItemRec, IR_enrichFrontRec
+        IR_nRandomFieldGenRec, IR_xfemManRec, IR_enrichFuncRec, IR_geoRec, IR_enrichItemRec, IR_enrichFrontRec, IR_propagationLawRec
     };
 
     DataReader() { }

@@ -17,19 +17,19 @@
  *       Czech Technical University, Faculty of Civil Engineering,
  *   Department of Structural Mechanics, 166 29 Prague, Czech Republic
  *
- *  This program is free software; you can redistribute it and/or modify
- *  it under the terms of the GNU General Public License as published by
- *  the Free Software Foundation; either version 2 of the License, or
- *  (at your option) any later version.
+ *  This library is free software; you can redistribute it and/or
+ *  modify it under the terms of the GNU Lesser General Public
+ *  License as published by the Free Software Foundation; either
+ *  version 2.1 of the License, or (at your option) any later version.
  *
  *  This program is distributed in the hope that it will be useful,
  *  but WITHOUT ANY WARRANTY; without even the implied warranty of
- *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- *  GNU General Public License for more details.
+ *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+ *  Lesser General Public License for more details.
  *
- *  You should have received a copy of the GNU General Public License
- *  along with this program; if not, write to the Free Software
- *  Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
+ *  You should have received a copy of the GNU Lesser General Public
+ *  License along with this library; if not, write to the Free Software
+ *  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  */
 
 #include "structuralelement.h"
@@ -309,7 +309,7 @@ StructuralElement :: computeEdgeLoadVectorAt(FloatArray &answer, Load *load,
 
 
         this->giveEdgeDofMapping(mask, iEdge);
-        answer.resize( this->computeNumberOfDofs(EID_MomentumBalance) );
+        answer.resize( this->computeNumberOfDofs() );
         answer.zero();
         answer.assemble(reducedAnswer, mask);
 
@@ -390,7 +390,7 @@ StructuralElement :: computeSurfaceLoadVectorAt(FloatArray &answer, Load *load,
 
         delete iRule;
         this->giveSurfaceDofMapping(mask, iSurf);
-        answer.resize( this->computeNumberOfDofs(EID_MomentumBalance) );
+        answer.resize( this->computeNumberOfDofs() );
         answer.zero();
         answer.assemble(reducedAnswer, mask);
 
@@ -452,7 +452,7 @@ void
 StructuralElement :: computeConsistentMassMatrix(FloatMatrix &answer, TimeStep *tStep, double &mass)
 // Computes numerically the consistent (full) mass matrix of the receiver.
 {
-    int nip, ndofs = computeNumberOfDofs(EID_MomentumBalance);
+    int nip, ndofs = computeNumberOfDofs();
     double density, dV;
     FloatMatrix n;
     GaussIntegrationRule iRule(1, this, 1, 1);
@@ -486,11 +486,9 @@ StructuralElement :: computeConsistentMassMatrix(FloatMatrix &answer, TimeStep *
         if ( mask.isEmpty() ) {
             answer.plusProductSymmUpper(n, n, density * dV);
         } else {
-            double summ;
-
             for ( int i = 1; i <= ndofs; i++ ) {
                 for ( int j = i; j <= ndofs; j++ ) {
-                    summ = 0.;
+                    double summ = 0.;
                     for ( int k = 1; k <= n.giveNumberOfRows(); k++ ) {
                         if ( mask.at(k) == 0 ) {
                             continue;
@@ -604,7 +602,7 @@ StructuralElement :: computeLumpedMassMatrix(FloatMatrix &answer, TimeStep *tSte
     double summ;
 
     if ( !this->isActivated(tStep) ) {
-        int ndofs = computeNumberOfDofs(EID_MomentumBalance);
+        int ndofs = computeNumberOfDofs();
         answer.resize(ndofs, ndofs);
         answer.zero();
         return;
@@ -717,8 +715,7 @@ StructuralElement :: computeStiffnessMatrix(FloatMatrix &answer, MatResponseMode
     IntegrationRule *iRule;
     bool matStiffSymmFlag = this->giveCrossSection()->isCharacteristicMtrxSymmetric(rMode, this->material);
 
-    answer.resize( computeNumberOfDofs(EID_MomentumBalance), computeNumberOfDofs(EID_MomentumBalance) );
-    answer.zero();
+    answer.resize(0, 0);
 
     if ( !this->isActivated(tStep) ) {
         return;
@@ -786,12 +783,9 @@ void StructuralElement :: computeStiffnessMatrix_withIRulesAsSubcells(FloatMatri
                                                                       MatResponseMode rMode, TimeStep *tStep)
 {
     FloatMatrix temp, bj, d, dbj;
-    IntegrationRule *iRule;
-    GaussPoint *gp;
-    int ndofs = this->computeNumberOfDofs(EID_MomentumBalance);
+    int ndofs = this->computeNumberOfDofs();
     bool matStiffSymmFlag = this->giveCrossSection()->isCharacteristicMtrxSymmetric( rMode, this->giveMaterial()->giveNumber() );
     IntArray irlocnum;
-    double dV;
 
     answer.resize(ndofs, ndofs);
     answer.zero();
@@ -803,14 +797,14 @@ void StructuralElement :: computeStiffnessMatrix_withIRulesAsSubcells(FloatMatri
 
     // loop over individual integration rules
     for ( int ir = 0; ir < numberOfIntegrationRules; ir++ ) {
-        iRule = integrationRulesArray [ ir ];
+        IntegrationRule *iRule = integrationRulesArray [ ir ];
         // loop over individual integration points
         for ( int j = 0; j < iRule->giveNumberOfIntegrationPoints(); j++ ) {
-            gp = iRule->getIntegrationPoint(j);
+            GaussPoint *gp = iRule->getIntegrationPoint(j);
+            double dV = this->computeVolumeAround(gp);
             this->computeBmatrixAt(gp, bj);
             this->computeConstitutiveMatrixAt(d, rMode, gp, tStep);
 
-            dV = this->computeVolumeAround(gp);
             dbj.beProductOf(d, bj);
             if ( matStiffSymmFlag ) {
                 m->plusProductSymmUpper(bj, dbj, dV);
@@ -894,8 +888,6 @@ StructuralElement :: giveInternalForcesVector(FloatArray &answer,
         u.subtract(*initialDisplacements);
     }
 
-    // do not resize answer to computeNumberOfDofs(EID_MomentumBalance)
-    // as this is valid only if receiver has no nodes with slaves
     // zero answer will resize accordingly when adding first contribution
     answer.resize(0);
 
@@ -960,8 +952,6 @@ StructuralElement :: giveInternalForcesVector_withIRulesAsSubcells(FloatArray &a
         u.subtract(*initialDisplacements);
     }
 
-    // do not resize answer to computeNumberOfDofs(EID_MomentumBalance)
-    // as this is valid only if receiver has no nodes with slaves
     // zero answer will resize accordingly when adding first contribution
     answer.resize(0);
 
@@ -1180,7 +1170,6 @@ StructuralElement :: condense(FloatMatrix *stiff, FloatMatrix *mass, FloatArray 
     int i, ii, j, k;
     int nkon = what->giveSize();
     int size = stiff->giveNumberOfRows();
-    int ndofs = this->computeNumberOfDofs(EID_MomentumBalance);
     long double coeff, dii, lii = 0;
     FloatArray *gaussCoeff = NULL;
     // stored gauss coefficient
@@ -1210,7 +1199,7 @@ StructuralElement :: condense(FloatMatrix *stiff, FloatMatrix *mass, FloatArray 
 
     for ( i = 1; i <= nkon; i++ ) {
         ii  = what->at(i);
-        if ( ( ii > ndofs ) || ( ii <= 0 ) ) {
+        if ( ( ii > size ) || ( ii <= 0 ) ) {
             _error("condense: wrong dof number");
         }
 
@@ -1365,12 +1354,14 @@ StructuralElement :: adaptiveUpdate(TimeStep *tStep)
 IRResultType
 StructuralElement :: initializeFrom(InputRecord *ir)
 {
-    //const char *__proc = "initializeFrom"; // Required by IR_GIVE_FIELD macro
-    IRResultType result;                   // Required by IR_GIVE_FIELD macro
+    return Element :: initializeFrom(ir);
+}
 
-    result = Element :: initializeFrom(ir);
+void StructuralElement :: giveInputRecord(DynamicInputRecord &input)
+{
+	Element :: giveInputRecord(input);
 
-    return result;
+	/// TODO: Should initialDisplacements be stored? /ES
 }
 
 

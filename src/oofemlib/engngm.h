@@ -17,24 +17,25 @@
  *       Czech Technical University, Faculty of Civil Engineering,
  *   Department of Structural Mechanics, 166 29 Prague, Czech Republic
  *
- *  This program is free software; you can redistribute it and/or modify
- *  it under the terms of the GNU General Public License as published by
- *  the Free Software Foundation; either version 2 of the License, or
- *  (at your option) any later version.
+ *  This library is free software; you can redistribute it and/or
+ *  modify it under the terms of the GNU Lesser General Public
+ *  License as published by the Free Software Foundation; either
+ *  version 2.1 of the License, or (at your option) any later version.
  *
  *  This program is distributed in the hope that it will be useful,
  *  but WITHOUT ANY WARRANTY; without even the implied warranty of
- *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- *  GNU General Public License for more details.
+ *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+ *  Lesser General Public License for more details.
  *
- *  You should have received a copy of the GNU General Public License
- *  along with this program; if not, write to the Free Software
- *  Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
+ *  You should have received a copy of the GNU Lesser General Public
+ *  License along with this library; if not, write to the Free Software
+ *  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  */
 
 #ifndef engngm_h
 #define engngm_h
 
+#include "oofemcfg.h"
 #include "inputrecord.h"
 #include "alist.h"
 #include "intarray.h"
@@ -125,7 +126,7 @@ class CommunicatorBuff;
  * master problem (the class representing staggered problem, for example). The subproblems are
  * then created in so-called maintained (or slave) mode and they request the context from master.
  */
-class EngngModelContext
+class OOFEM_EXPORT EngngModelContext
 {
 protected:
     /// Common fieldManager providing shared field register for the problem.
@@ -183,7 +184,7 @@ public:
  *   instead of requesting EngngModel. The EngngModel is fully responsible to update this
  *   dictionary for each dof with all necessary unknowns (see updateDofUnknownsDictionary function).
  */
-class EngngModel
+class OOFEM_EXPORT EngngModel
 {
 public:
 #ifdef __PARALLEL_MODE
@@ -907,19 +908,6 @@ public:
     virtual void assemble(SparseMtrx *answer, TimeStep *tStep, EquationID eid,
             CharType type, const UnknownNumberingScheme &r_s, const UnknownNumberingScheme &c_s, Domain *domain);
     /**
-     * Assembles characteristic matrix of required type into given sparse matrix.
-     * @param answer Assembled matrix.
-     * @param tStep Time step, when answer is assembled.
-     * @param r_id Determines type of equation and corresponding element code numbers for matrix rows.
-     * @param c_id Determines type of equation and corresponding element code numbers for matrix columns.
-     * @param s Determines the equation numbering scheme.
-     * @param type Characteristic components of type type are requested from elements and assembled.
-     * @param domain Source domain.
-     */
-    virtual void assemble(SparseMtrx *answer, TimeStep *tStep, EquationID r_id, EquationID c_id,
-            CharType type, const UnknownNumberingScheme &s, Domain *domain);
-
-    /**
      * Assembles characteristic vector of required type from dofManagers, element, and active boundary conditions, into given vector.
      * This routine is simple a convenient call to all three subroutines, since this is most likely what any engineering model will want to do.
      * The return value is used to normalize the residual when checking for convergence in nonlinear problems.
@@ -934,9 +922,8 @@ public:
      * @param eNorms If non-NULL, squared norms of each internal force will be added to this, split up into dof IDs.
      * @return Sum of element/node norm (squared) of assembled vector.
      */
-    double assembleVector(FloatArray &answer, TimeStep *tStep, EquationID eid,
-                          CharType type, ValueModeType mode,
-                          const UnknownNumberingScheme &s, Domain *domain, FloatArray *eNorms = NULL);
+    void assembleVector(FloatArray &answer, TimeStep *tStep, EquationID eid, CharType type, ValueModeType mode,
+                        const UnknownNumberingScheme &s, Domain *domain, FloatArray *eNorms = NULL);
     /**
      * Assembles characteristic vector of required type from dofManagers into given vector.
      * @param answer Assembled vector.
@@ -948,8 +935,7 @@ public:
      * @param domain Domain to assemble from.
      * @return Sum of element norm (squared) of assembled vector.
      */
-    void assembleVectorFromDofManagers(FloatArray &answer, TimeStep *tStep, EquationID eid,
-                                       CharType type, ValueModeType mode,
+    void assembleVectorFromDofManagers(FloatArray &answer, TimeStep *tStep, CharType type, ValueModeType mode,
                                        const UnknownNumberingScheme &s, Domain *domain, FloatArray *eNorms = NULL);
     /**
      * Assembles characteristic vector of required type from elements into given vector.

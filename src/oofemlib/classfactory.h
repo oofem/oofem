@@ -17,24 +17,25 @@
  *       Czech Technical University, Faculty of Civil Engineering,
  *   Department of Structural Mechanics, 166 29 Prague, Czech Republic
  *
- *  This program is free software; you can redistribute it and/or modify
- *  it under the terms of the GNU General Public License as published by
- *  the Free Software Foundation; either version 2 of the License, or
- *  (at your option) any later version.
+ *  This library is free software; you can redistribute it and/or
+ *  modify it under the terms of the GNU Lesser General Public
+ *  License as published by the Free Software Foundation; either
+ *  version 2.1 of the License, or (at your option) any later version.
  *
  *  This program is distributed in the hope that it will be useful,
  *  but WITHOUT ANY WARRANTY; without even the implied warranty of
- *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- *  GNU General Public License for more details.
+ *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+ *  Lesser General Public License for more details.
  *
- *  You should have received a copy of the GNU General Public License
- *  along with this program; if not, write to the Free Software
- *  Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
+ *  You should have received a copy of the GNU Lesser General Public
+ *  License along with this library; if not, write to the Free Software
+ *  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  */
 
 #ifndef classfactory_h
 #define classfactory_h
 
+#include "oofemcfg.h"
 #include "sparsemtrxtype.h"
 #include "errorestimatortype.h"
 #include "doftype.h"
@@ -88,6 +89,7 @@ class EnrichmentFunction;
 class EnrichmentDomain;
 class BasicGeometry;
 class EnrichmentFront;
+class PropagationLaw;
 
 // Templates to wrap constructors into functions
 template< typename T > Element *elemCreator(int n, Domain *d) { return new T(n, d); }
@@ -118,6 +120,7 @@ template< typename T > EnrichmentFunction *enrichFuncCreator(int n, Domain *d) {
 template< typename T > EnrichmentDomain *enrichmentDomainCreator() { return new T(); }
 template< typename T > BasicGeometry *geometryCreator() { return new T(); }
 template< typename T > EnrichmentFront *enrichFrontCreator() { return new T(); }
+template< typename T > PropagationLaw *propagationLawCreator() { return new T(); }
 
 ///@name Macros for registering new components. Unique dummy variables must be created as a result (design flaw in C++).
 //@{
@@ -147,6 +150,7 @@ template< typename T > EnrichmentFront *enrichFrontCreator() { return new T(); }
 #define REGISTER_EnrichmentDomain(class) static bool __dummy_##class = GiveClassFactory().registerEnrichmentDomain(_IFT_##class##_Name, enrichmentDomainCreator< class >);
 #define REGISTER_Geometry(class) static bool __dummy_##class = GiveClassFactory().registerGeometry(_IFT_##class##_Name, geometryCreator< class >);
 #define REGISTER_EnrichmentFront(class) static bool __dummy_##class = GiveClassFactory().registerEnrichmentFront(_IFT_##class##_Name, enrichFrontCreator< class >);
+#define REGISTER_PropagationLaw(class) static bool __dummy_##class = GiveClassFactory().registerPropagationLaw(_IFT_##class##_Name, propagationLawCreator< class >);
 //@}
 
 /**
@@ -157,14 +161,14 @@ template< typename T > EnrichmentFront *enrichFrontCreator() { return new T(); }
  * 
  * @note To register new elements on startup, you must call GiveClassFactory to ensure that the global class factory is created first. This is ensured if you use the corresponding macro.
  */
-class ClassFactory
+class OOFEM_EXPORT ClassFactory
 {
     struct CaseComp
     {
         int operator()(const std :: string &a, const std :: string &b) const;
     };
 
-protected:
+private:
     /// Associative container containing element creators with element name as key.
     std :: map < std :: string, Element * ( * )(int, Domain *), CaseComp > elemList;
     /// Associative container containing dofmanager creators with dofmanager  name as key.
@@ -218,6 +222,8 @@ protected:
     std :: map < std :: string, EnrichmentDomain * ( * )(), CaseComp > enrichmentDomainList;
     /// Associative container containing enrichment front creators
     std :: map < std :: string, EnrichmentFront * ( * )(), CaseComp > enrichmentFrontList;
+    /// Associative container containing propagation law creators
+    std :: map < std :: string, PropagationLaw * ( * )(), CaseComp > propagationLawList;
 
 public:
     /// Constructor, registers all classes
@@ -477,6 +483,9 @@ public:
 
     EnrichmentFront *createEnrichmentFront(const char *name);
     bool registerEnrichmentFront(const char *name, EnrichmentFront * ( *creator )());
+
+    PropagationLaw *createPropagationLaw(const char *name);
+    bool registerPropagationLaw(const char *name, PropagationLaw * ( *creator )());
 
     BasicGeometry *createGeometry(const char *name);
     bool registerGeometry(const char *name, BasicGeometry * ( *creator )());

@@ -194,6 +194,7 @@ set (core_xfem
     xfem/enrichmentitem.C
     xfem/patchintegrationrule.C
     xfem/enrichmentdomain.C
+    xfem/propagationlaw.C
     xfem/XFEMDebugTools.C
     )
 
@@ -230,8 +231,11 @@ set (core_bc
     reinforcement.C
     surfacetensionbc.C
     linearconstraintbc.C
-    userdefdirichletbc.C
     )
+
+if (USE_PYTHON)
+    list (APPEND core_bc userdefdirichletbc.C)
+endif ()
 
 set (core_mapping
     mmaclosestiptransfer.C

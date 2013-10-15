@@ -17,19 +17,19 @@
  *       Czech Technical University, Faculty of Civil Engineering,
  *   Department of Structural Mechanics, 166 29 Prague, Czech Republic
  *
- *  This program is free software; you can redistribute it and/or modify
- *  it under the terms of the GNU General Public License as published by
- *  the Free Software Foundation; either version 2 of the License, or
- *  (at your option) any later version.
+ *  This library is free software; you can redistribute it and/or
+ *  modify it under the terms of the GNU Lesser General Public
+ *  License as published by the Free Software Foundation; either
+ *  version 2.1 of the License, or (at your option) any later version.
  *
  *  This program is distributed in the hope that it will be useful,
  *  but WITHOUT ANY WARRANTY; without even the implied warranty of
- *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- *  GNU General Public License for more details.
+ *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+ *  Lesser General Public License for more details.
  *
- *  You should have received a copy of the GNU General Public License
- *  along with this program; if not, write to the Free Software
- *  Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
+ *  You should have received a copy of the GNU Lesser General Public
+ *  License along with this library; if not, write to the Free Software
+ *  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  */
 
 #ifndef brick1_ht_h
@@ -55,7 +55,6 @@ class Brick1_ht : public TransportElement, public SpatialLocalizerInterface, pub
 {
 protected:
     static FEI3dHexaLin interpolation;
-    int numberOfGaussPoints;
 
 public:
     Brick1_ht(int n, Domain *d);
@@ -68,8 +67,8 @@ public:
     virtual const char *giveClassName() const { return "Brick1_ht"; }
     virtual classType giveClassID() const { return Brick1_htClass; }
 
-    // virtual int computeNumberOfDofs(EquationID ut) { return ( emode == HeatTransferEM ) ? 8 : 16; }
-    virtual int computeNumberOfDofs(EquationID ut) { return 8; }
+    // virtual int computeNumberOfDofs() { return ( emode == HeatTransferEM ) ? 8 : 16; }
+    virtual int computeNumberOfDofs() { return 8; }
     virtual IRResultType initializeFrom(InputRecord *ir);
     virtual MaterialMode giveMaterialMode() { return _3dHeat; }
 
@@ -116,7 +115,7 @@ public:
     virtual const char *giveInputRecordName() const { return _IFT_Brick1_hmt_Name; }
     virtual const char *giveClassName() const { return "Brick1_hmt"; }
     virtual classType giveClassID() const { return Brick1_hmtClass; }
-    virtual int computeNumberOfDofs(EquationID ut) { return 16; }
+    virtual int computeNumberOfDofs() { return 16; }
     virtual MaterialMode giveMaterialMode() { return _3dHeMo; }
 };
 
@@ -131,7 +130,7 @@ public:
     virtual const char *giveInputRecordName() const { return _IFT_Brick1_mt_Name; }
     virtual const char *giveClassName() const { return "Brick1_mt"; }
     virtual classType giveClassID() const { return Brick1_mtClass; }
-    virtual int computeNumberOfDofs(EquationID ut) { return 8; }
+    virtual int computeNumberOfDofs() { return 8; }
     virtual MaterialMode giveMaterialMode() { return _3dHeat; }
 };
 } // end namespace oofem

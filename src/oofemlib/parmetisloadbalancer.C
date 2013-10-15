@@ -17,19 +17,19 @@
  *       Czech Technical University, Faculty of Civil Engineering,
  *   Department of Structural Mechanics, 166 29 Prague, Czech Republic
  *
- *  This program is free software; you can redistribute it and/or modify
- *  it under the terms of the GNU General Public License as published by
- *  the Free Software Foundation; either version 2 of the License, or
- *  (at your option) any later version.
+ *  This library is free software; you can redistribute it and/or
+ *  modify it under the terms of the GNU Lesser General Public
+ *  License as published by the Free Software Foundation; either
+ *  version 2.1 of the License, or (at your option) any later version.
  *
  *  This program is distributed in the hope that it will be useful,
  *  but WITHOUT ANY WARRANTY; without even the implied warranty of
- *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- *  GNU General Public License for more details.
+ *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+ *  Lesser General Public License for more details.
  *
- *  You should have received a copy of the GNU General Public License
- *  along with this program; if not, write to the Free Software
- *  Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
+ *  You should have received a copy of the GNU Lesser General Public
+ *  License along with this library; if not, write to the Free Software
+ *  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  */
 
 #ifdef __PARALLEL_MODE
@@ -80,12 +80,12 @@ ParmetisLoadBalancer :: ~ParmetisLoadBalancer()
 void
 ParmetisLoadBalancer :: calculateLoadTransfer()
 {
-    idxtype *eind, *eptr, *xadj, *adjncy, *vwgt, *vsize;
-    idxtype *part;
+    idx_t *eind, *eptr, *xadj, *adjncy, *vwgt, *vsize;
+    idx_t *part;
     int i, nlocalelems, eind_size, nelem = domain->giveNumberOfElements();
     int ndofman, idofman, numflag, ncommonnodes, options [ 4 ], ie, nproc;
     int edgecut, wgtflag, ncon;
-    float ubvec [ 1 ], itr;
+    real_t ubvec [ 1 ], itr;
     Element *ielem;
     MPI_Comm communicator = MPI_COMM_WORLD;
     LoadBalancerMonitor *lbm = domain->giveEngngModel()->giveLoadBalancerMonitor();
@@ -107,8 +107,8 @@ ParmetisLoadBalancer :: calculateLoadTransfer()
     }
 
     // allocate eind and eptr arrays
-    eind = new idxtype [ eind_size ];
-    eptr = new idxtype [ nlocalelems + 1 ];
+    eind = new idx_t [ eind_size ];
+    eptr = new idx_t [ nlocalelems + 1 ];
     if ( ( eind == NULL ) || ( eptr == NULL ) ) {
         OOFEM_ERROR("ParmetisLoadBalancer::balanceLoad: failed to allocate eind and eptr arrays");
     }
@@ -167,7 +167,7 @@ ParmetisLoadBalancer :: calculateLoadTransfer()
     // set partition weights by quering load balance monitor
     lbm->giveProcessorWeights(_procweights);
     if ( tpwgts == NULL ) {
-        if ( ( tpwgts = new float [ nproc ] ) == NULL ) {
+        if ( ( tpwgts = new real_t [ nproc ] ) == NULL ) {
             OOFEM_ERROR("ParmetisLoadBalancer::balanceLoad: failed to allocate tpwgts");
         }
     }
@@ -184,11 +184,11 @@ ParmetisLoadBalancer :: calculateLoadTransfer()
      */
 
     // obtain vertices weights (element weights) representing relative computational cost
-    if ( ( vwgt = new idxtype [ nlocalelems ] ) == NULL ) {
+    if ( ( vwgt = new idx_t [ nlocalelems ] ) == NULL ) {
         OOFEM_ERROR("ParmetisLoadBalancer::balanceLoad: failed to allocate vwgt");
     }
 
-    if ( ( vsize = new idxtype [ nlocalelems ] ) == NULL ) {
+    if ( ( vsize = new idx_t [ nlocalelems ] ) == NULL ) {
         OOFEM_ERROR("ParmetisLoadBalancer::balanceLoad: failed to allocate vsize");
     }
 
@@ -203,7 +203,7 @@ ParmetisLoadBalancer :: calculateLoadTransfer()
     wgtflag = 2;
     numflag = 0;
     ncon = 1;
-    if ( ( part = new idxtype [ nlocalelems ] ) == NULL ) {
+    if ( ( part = new idx_t [ nlocalelems ] ) == NULL ) {
         OOFEM_ERROR("ParmetisLoadBalancer::balanceLoad: failed to allocate part");
     }
 
@@ -261,7 +261,7 @@ ParmetisLoadBalancer :: initGlobalParmetisElementNumbering()
 
     //if (procElementCounts) delete procElementCounts;
     if ( elmdist == NULL ) {
-        elmdist = new idxtype [ nproc + 1 ];
+        elmdist = new idx_t [ nproc + 1 ];
         if ( elmdist == NULL ) {
             OOFEM_ERROR("ParmetisLoadBalancer::initGlobalParmetisNumbering: failed to allocate elmdist array");
         }

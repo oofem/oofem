@@ -17,19 +17,19 @@
  *       Czech Technical University, Faculty of Civil Engineering,
  *   Department of Structural Mechanics, 166 29 Prague, Czech Republic
  *
- *  This program is free software; you can redistribute it and/or modify
- *  it under the terms of the GNU General Public License as published by
- *  the Free Software Foundation; either version 2 of the License, or
- *  (at your option) any later version.
+ *  This library is free software; you can redistribute it and/or
+ *  modify it under the terms of the GNU Lesser General Public
+ *  License as published by the Free Software Foundation; either
+ *  version 2.1 of the License, or (at your option) any later version.
  *
  *  This program is distributed in the hope that it will be useful,
  *  but WITHOUT ANY WARRANTY; without even the implied warranty of
- *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- *  GNU General Public License for more details.
+ *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+ *  Lesser General Public License for more details.
  *
- *  You should have received a copy of the GNU General Public License
- *  along with this program; if not, write to the Free Software
- *  Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
+ *  You should have received a copy of the GNU Lesser General Public
+ *  License along with this library; if not, write to the Free Software
+ *  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  */
 
 #include "xfemelementinterface.h"
@@ -188,6 +188,120 @@ void XfemElementInterface :: XfemElementInterface_createEnrBmatrixAt(FloatMatrix
     }
 }
 
+void XfemElementInterface :: XfemElementInterface_createEnrNmatrixAt(FloatMatrix &oAnswer, const FloatArray &iLocCoord, Element &iEl)
+{
+
+    const int dim = 2;
+    const int nDofMan = iEl.giveNumberOfDofManagers();
+
+    FloatArray Nc;
+    FEInterpolation *interp = iEl.giveInterpolation();
+    interp->evalN( Nc, iLocCoord, FEIElementGeometryWrapper(& iEl) );
+
+    const IntArray &elNodes = iEl.giveDofManArray();
+
+    // Compute global coordinates of Gauss point
+    FloatArray globalCoord;
+    globalCoord.setValues(2, 0.0, 0.0);
+
+    for ( int i = 1; i <= nDofMan; i++ ) {
+        DofManager *dMan = iEl.giveDofManager(i);
+        globalCoord.at(1) += Nc.at(i) * dMan->giveCoordinate(1);
+        globalCoord.at(2) += Nc.at(i) * dMan->giveCoordinate(2);
+    }
+
+
+    // XFEM part of N-matrix
+    XfemManager *xMan = iEl.giveDomain()->giveXfemManager();
+
+
+    std :: vector< FloatMatrix > Bd(nDofMan); // One Bd per node
+
+    int counter = nDofMan * dim;
+
+    std::vector< std::vector<double> > Nd(nDofMan);
+
+    for ( int j = 1; j <= nDofMan; j++ ) {
+
+        DofManager *dMan = iEl.giveDofManager(j);
+
+    	// Compute the total number of enrichments for node j
+    	int numEnrNode = 0;
+        for ( int i = 1; i <= xMan->giveNumberOfEnrichmentItems(); i++ ) {
+            EnrichmentItem *ei = xMan->giveEnrichmentItem(i);
+            if ( ei->isDofManEnriched(* dMan) ) {
+            	numEnrNode += ei->giveNumDofManEnrichments(* dMan);
+            }
+        }
+
+        std::vector<double> &NdNode = Nd [ j - 1 ];
+        NdNode.assign(numEnrNode, 0.0);
+
+
+        int globalNodeInd = dMan->giveGlobalNumber();
+
+
+        for ( int i = 1; i <= xMan->giveNumberOfEnrichmentItems(); i++ ) {
+        	EnrichmentItem *ei = xMan->giveEnrichmentItem(i);
+
+        	double levelSetGP = 0.0;
+        	ei->interpLevelSet(levelSetGP, Nc, elNodes);
+
+
+
+        	if ( ei->isDofManEnriched(* dMan) ) {
+
+                int numEnr = ei->giveNumDofManEnrichments(* dMan);
+
+
+                // Enrichment function in Gauss Point
+                std :: vector< double >efGP;
+                ei->evaluateEnrFuncAt(efGP, globalCoord, levelSetGP, globalNodeInd);
+
+
+                const FloatArray &nodePos = * ( dMan->giveCoordinates() );
+
+                double levelSetNode  = 0.0;
+                ei->evalLevelSetNormalInNode( levelSetNode, dMan->giveGlobalNumber() );
+
+                std :: vector< double >efNode;
+                ei->evaluateEnrFuncAt(efNode, nodePos, levelSetNode, globalNodeInd);
+
+
+				for(int k = 0; k < numEnr; k++) {
+					NdNode[k] = ( efGP[k] - efNode[k] ) * Nc.at(j) ;
+					counter ++;
+				}
+			}
+
+		}
+    }
+
+    int numN = nDofMan;
+
+    for ( int j = 1; j <= nDofMan; j++ ) {
+    	numN += Nd[j-1].size();
+    }
+
+    FloatArray NTot;
+    NTot.resize(numN);
+    NTot.zero();
+    int column = 1;
+
+    for(int i = 1; i <= nDofMan; i++) {
+        NTot.at(column) = Nc.at(i);
+        column++;
+
+        const std::vector<double> &NdNode = Nd[i-1];
+        for(size_t j = 1; j <= NdNode.size(); j++) {
+        	NTot.at(column) = NdNode[j-1];
+        	column++;
+        }
+    }
+
+    oAnswer.beNMatrixOf(NTot,2);
+}
+
 void XfemElementInterface :: XfemElementInterface_partitionElement(std::vector< Triangle > &oTriangles, const std :: vector< FloatArray > &iPoints)
 {
     Delaunay dl;
@@ -212,10 +326,11 @@ void XfemElementInterface :: XfemElementInterface_updateIntegrationRule()
 
 #if XFEM_DEBUG_VTK > 0
         std :: stringstream str3;
+        int elIndex = this->element->giveGlobalNumber();
         str3 << "TriEl" << elIndex << ".vtk";
         std :: string name3 = str3.str();
 
-        XFEMDebugTools :: WriteTrianglesToVTK(name3, triangles);
+        XFEMDebugTools :: WriteTrianglesToVTK(name3, allTri);
 #endif
 
 
@@ -379,4 +494,46 @@ void XfemElementInterface :: XfemElementInterface_prepareNodesForDelaunay(std ::
     }
 
 }
+
+void XfemElementInterface :: recomputeGaussPoints() {
+
+	bool recompute = false;
+
+
+	// Do checks to determine if the Gauss points need to be recomputed
+	// For now, we choose to always recompute cut elements.
+    XfemManager *xMan = element->giveDomain()->giveXfemManager();
+
+    for(int i = 1; i <= xMan->giveNumberOfEnrichmentItems(); i++) {
+    	std::vector<FloatArray> intersecPoints;
+    	EnrichmentItem *ei = xMan->giveEnrichmentItem(i);
+
+        std::vector< int > intersecEdgeInd;
+    	ei->computeIntersectionPoints(intersecPoints, intersecEdgeInd, element);
+    	int numIntersecPoints = intersecPoints.size();
+
+        if ( numIntersecPoints > 0 )
+        {
+        	recompute = true;
+        }
+
+    }
+
+
+	if( recompute ) {
+
+		// Fetch old Gauss points
+
+
+		// Create new partitioning (and delete old Gauss points)
+
+        this->XfemElementInterface_updateIntegrationRule();
+
+		// Map Gauss point variables
+		// (area weighted least squares?)
+
+	}
+
+}
+
 } // end namespace oofem

@@ -17,24 +17,25 @@
  *       Czech Technical University, Faculty of Civil Engineering,
  *   Department of Structural Mechanics, 166 29 Prague, Czech Republic
  *
- *  This program is free software; you can redistribute it and/or modify
- *  it under the terms of the GNU General Public License as published by
- *  the Free Software Foundation; either version 2 of the License, or
- *  (at your option) any later version.
+ *  This library is free software; you can redistribute it and/or
+ *  modify it under the terms of the GNU Lesser General Public
+ *  License as published by the Free Software Foundation; either
+ *  version 2.1 of the License, or (at your option) any later version.
  *
  *  This program is distributed in the hope that it will be useful,
  *  but WITHOUT ANY WARRANTY; without even the implied warranty of
- *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- *  GNU General Public License for more details.
+ *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+ *  Lesser General Public License for more details.
  *
- *  You should have received a copy of the GNU General Public License
- *  along with this program; if not, write to the Free Software
- *  Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
+ *  You should have received a copy of the GNU Lesser General Public
+ *  License along with this library; if not, write to the Free Software
+ *  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  */
 
 #ifndef geometry_h
 #define geometry_h
 
+#include "oofemcfg.h"
 #include "domain.h"
 #include "floatarray.h"
 #include "node.h"
@@ -73,11 +74,14 @@ namespace oofem {
  * @author chamrova
  * @author Erik Svenning
  */
-class BasicGeometry //: public Geometry
+class OOFEM_EXPORT BasicGeometry //: public Geometry
 {
 protected:
     /// List of geometry vertices.
-    AList< FloatArray > *vertices;
+	// AList does not provide elementary operations like insert,
+	// therefore use std::vector instead.
+//    AList< FloatArray > *vertices;
+	std::vector< FloatArray > mVertices;
 public:
     /// Constructor.
     BasicGeometry();
@@ -87,8 +91,11 @@ public:
 
     /// Destructor.
     virtual ~BasicGeometry();
+
+    virtual BasicGeometry* Clone() = 0;
+
     /// Computes normal signed distance between this object and a point.
-    virtual double computeDistanceTo(FloatArray *point) { return 0; }
+    virtual double computeDistanceTo(const FloatArray *point) { return 0; }
 
     virtual double computeTangentialSignDist(FloatArray *point) { return 0; }
 
@@ -106,15 +113,21 @@ public:
     virtual void computeIntersectionPoints(Element *element, std::vector< FloatArray > &oIntersectionPoints) { }
 
     /// Accessor.
-    FloatArray *giveVertex(int n);
-    const FloatArray &giveVertex(int n) const {return *(vertices->at(n));}
+//    FloatArray *giveVertex(int n);
+    const FloatArray &giveVertex(int n) const {return mVertices[n-1];}
 
     /// Modifier.
     void setVertex(FloatArray *vertex);
+
+    void insertVertexFront(const FloatArray &iP) {mVertices.insert( mVertices.begin(), iP );}
+    void insertVertexBack(const FloatArray &iP) {mVertices.push_back(iP);}
+
+
     /// Accessor.
-    AList< FloatArray > *giveVertices() { return this->vertices; }
+//    AList< FloatArray > *giveVertices() { return this->vertices; }
     /// Initializes the Geometry from the InputRecord.
     virtual IRResultType initializeFrom(InputRecord *ir) { return IRRT_OK; }
+    virtual void giveInputRecord(DynamicInputRecord &input) {OOFEM_ERROR("giveInputRecord is not implemented for this subclass of BasicGeometry.");}
     /// Gives class name.
     virtual const char *giveClassName() const { return NULL; }
     /**
@@ -125,7 +138,7 @@ public:
      */
     virtual classType giveClassID() const { return BasicGeometryClass; }
     /// Returns number of Geometry vertices.
-    int giveNrVertices() const { return this->vertices->giveSize(); }
+    int giveNrVertices() const { return mVertices.size(); }
     virtual bool isOutside(BasicGeometry *bg) { return false; }
     virtual bool isInside(Element *el) { return false; }
     virtual bool isInside(FloatArray &point) { return false; }
@@ -154,14 +167,16 @@ public:
 #endif
 };
 
-class Line : public BasicGeometry
+class OOFEM_EXPORT Line : public BasicGeometry
 {
 public:
     Line() : BasicGeometry() { }
     virtual ~Line() { }
     Line(FloatArray *pointA, FloatArray *pointB);
 
-    virtual double computeDistanceTo(FloatArray *point);
+    virtual BasicGeometry* Clone() {return new Line(*this);}
+
+    virtual double computeDistanceTo(const FloatArray *point);
     /// Computes tangential distance to a point
 
     virtual void computeNormalSignDist(double &oDist, const FloatArray &iPoint) const {OOFEM_ERROR("Line::computeNormalSignDist -- not implemented");};
@@ -181,11 +196,13 @@ public:
     virtual bool isOutside(BasicGeometry *bg);
 };
 
-class Triangle : public BasicGeometry
+class OOFEM_EXPORT Triangle : public BasicGeometry
 {
 public:
     Triangle(FloatArray *p1, FloatArray *p2, FloatArray *p3);
     virtual ~Triangle() { }
+
+    virtual BasicGeometry* Clone() {return new Triangle(*this);}
 
     virtual void computeNormalSignDist(double &oDist, const FloatArray &iPoint) const {OOFEM_ERROR("Triangle::computeNormalSignDist -- not implemented");};
     virtual void computeTangentialSignDist(double &oDist, const FloatArray &iPoint) const {OOFEM_ERROR("Triangle::computeTangentialSignDist -- not implemented");};
@@ -200,7 +217,7 @@ public:
     void changeToAnticlockwise();
 };
 
-class Circle : public BasicGeometry
+class OOFEM_EXPORT Circle : public BasicGeometry
 {
 protected:
     double radius;
@@ -209,8 +226,11 @@ public:
     Circle() : BasicGeometry(), radius(0.0), mTangSignDist(1.0) { }
     virtual ~Circle() { }
     Circle(FloatArray *center, double radius);
+
+    virtual BasicGeometry* Clone() {return new Circle(*this);}
+
     /// Computes the normal distance to the surface not to the center.
-    virtual double computeDistanceTo(FloatArray *point);
+    virtual double computeDistanceTo(const FloatArray *point);
 
     virtual void computeNormalSignDist(double &oDist, const FloatArray &iPoint) const;
 
@@ -230,15 +250,18 @@ public:
     virtual void printYourself();
 };
 
-class PolygonLine : public BasicGeometry
+class OOFEM_EXPORT PolygonLine : public BasicGeometry
 {
     static int nextLineIdNumber;
-
+    int stepInd;
 public:
 	PolygonLine();
     virtual ~PolygonLine() { }
+
+    virtual BasicGeometry* Clone() {return new PolygonLine(*this);}
+
     /// Computes the normal distance to the surface not to the center.
-    virtual double computeDistanceTo(FloatArray *point);
+    virtual double computeDistanceTo(const FloatArray *point);
 
     virtual double computeTangentialSignDist(FloatArray *point);
 
@@ -246,6 +269,7 @@ public:
     virtual void computeTangentialSignDist(double &oDist, const FloatArray &iPoint) const;
 
     virtual IRResultType initializeFrom(InputRecord *ir);
+    virtual void giveInputRecord(DynamicInputRecord &input);
     virtual const char *giveClassName() const { return "PolygonLine"; }
 
 #ifdef __BOOST_MODULE
@@ -280,7 +304,7 @@ public:
 };
 
 
-class PointSwarm : public BasicGeometry
+class OOFEM_EXPORT PointSwarm : public BasicGeometry
 {
 protected:
     std::list< int > idList;
@@ -288,6 +312,8 @@ public:
     PointSwarm() : BasicGeometry() { }
     virtual ~PointSwarm() { }
     PointSwarm(std::list<int> pointsID);
+
+    virtual BasicGeometry* Clone() {return new PointSwarm(*this);}
 
     virtual void computeNormalSignDist(double &oDist, const FloatArray &iPoint) const {OOFEM_ERROR("PointSwarm::computeNormalSignDist -- not implemented");};
     virtual void computeTangentialSignDist(double &oDist, const FloatArray &iPoint) const {OOFEM_ERROR("PointSwarm::computeTangentialSignDist -- not implemented");};

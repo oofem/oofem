@@ -1,8 +1,35 @@
 /*
- * userdefdirichletbc.C
  *
- *  Created on: Aug 7, 2013
- *      Author: svennine
+ *                 #####    #####   ######  ######  ###   ###
+ *               ##   ##  ##   ##  ##      ##      ## ### ##
+ *              ##   ##  ##   ##  ####    ####    ##  #  ##
+ *             ##   ##  ##   ##  ##      ##      ##     ##
+ *            ##   ##  ##   ##  ##      ##      ##     ##
+ *            #####    #####   ##      ######  ##     ##
+ *
+ *
+ *             OOFEM : Object Oriented Finite Element Code
+ *
+ *               Copyright (C) 1993 - 2013   Borek Patzak
+ *
+ *
+ *
+ *       Czech Technical University, Faculty of Civil Engineering,
+ *   Department of Structural Mechanics, 166 29 Prague, Czech Republic
+ *
+ *  This library is free software; you can redistribute it and/or
+ *  modify it under the terms of the GNU Lesser General Public
+ *  License as published by the Free Software Foundation; either
+ *  version 2.1 of the License, or (at your option) any later version.
+ *
+ *  This program is distributed in the hope that it will be useful,
+ *  but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+ *  Lesser General Public License for more details.
+ *
+ *  You should have received a copy of the GNU Lesser General Public
+ *  License along with this library; if not, write to the Free Software
+ *  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  */
 
 #include "userdefdirichletbc.h"
@@ -13,50 +40,40 @@
 #include "verbose.h"
 #include "dynamicinputrecord.h"
 #include "classfactory.h"
-
 #include "dofmanager.h"
 
-#ifdef BOOST_PYTHON
 #include <Python.h>
-#endif
 
 namespace oofem {
 
-
 REGISTER_BoundaryCondition( UserDefDirichletBC );
-
-#ifdef BOOST_PYTHON
-PythonInitializer mPythonInitializer;
-#endif
 
 UserDefDirichletBC :: UserDefDirichletBC(int i, Domain *d) : BoundaryCondition(i, d)
 {
-
 }
 
-/// Destructor
+
 UserDefDirichletBC :: ~UserDefDirichletBC()
 {
-#ifdef BOOST_PYTHON
     Py_DECREF(mpName);
     Py_DECREF(mpModule);
     Py_DECREF(mpFunc);
-#endif
 }
 
-double UserDefDirichletBC :: give(Dof *dof, ValueModeType mode, TimeStep *stepN)
+
+double
+UserDefDirichletBC :: give(Dof *dof, ValueModeType mode, TimeStep *stepN)
 {
-#ifdef BOOST_PYTHON
     double factor = this->giveLoadTimeFunction()->evaluate(stepN, mode);
     DofManager *dMan = dof->giveDofManager();
 
 
-    /**
+    /*
      * The Python function takes two input arguments:
      * 	1) An array with node coordinates
      * 	2) The dof id
      */
-    int numArgs = 2;
+    int numArgs = 3;
 
     // Create array with node coordinates
     int dim = dMan->giveCoordinates()->giveSize();
@@ -77,34 +94,33 @@ double UserDefDirichletBC :: give(Dof *dof, ValueModeType mode, TimeStep *stepN)
     PyTuple_SetItem(pArgs, 1, pValDofNum);
 
 
+    // Time
+    PyObject *pTargetTime = PyFloat_FromDouble( stepN->giveTargetTime() );
+    PyTuple_SetItem(pArgs, 2, pTargetTime);
+
     // Value returned from the Python function
     PyObject *pRetVal;
 
-    if (PyCallable_Check(mpFunc)) {
-    	pRetVal = PyObject_CallObject(mpFunc, pArgs);
+    if ( PyCallable_Check(mpFunc) ) {
+        pRetVal = PyObject_CallObject(mpFunc, pArgs);
     } else {
-    	OOFEM_ERROR("UserDefDirichletBC :: give: Python function is not callable.");
+        OOFEM_ERROR("UserDefDirichletBC :: give: Python function is not callable.");
     }
 
     // Get return value
     double retVal = 0.0;
-    if(pRetVal != NULL) {
-    	retVal = PyFloat_AsDouble(pRetVal);
+    if ( pRetVal != NULL ) {
+        retVal = PyFloat_AsDouble(pRetVal);
     }
     else {
-    	OOFEM_ERROR("UserDefDirichletBC :: give: Failed to fetch Python return value.");
+        OOFEM_ERROR("UserDefDirichletBC :: give: Failed to fetch Python return value.");
     }
 
     // Decrement reference count on pointers
     Py_DECREF(pArgs);
     Py_DECREF(pRetVal);
 
-
     return retVal*factor;
-#else
-	OOFEM_ERROR("UserDefDirichletBC :: give requires BOOST_PYTHON.");
-    return 0.0;
-#endif
 }
 
 
@@ -118,23 +134,20 @@ UserDefDirichletBC :: initializeFrom(InputRecord *ir)
     const char *__proc = "initializeFrom"; // Required by IR_GIVE_FIELD macro
     IRResultType result;                // Required by IR_GIVE_FIELD macro
 
-    IR_GIVE_FIELD(ir, mFileName, _IFT_UserDefDirichletBC_filename);
+    IR_GIVE_FIELD(ir, this->mFileName, _IFT_UserDefDirichletBC_filename);
 
-#ifdef BOOST_PYTHON
     // Import Python file
-    mpName = PyString_FromString( mFileName.c_str() );
+    mpName = PyString_FromString( this->mFileName.c_str() );
     mpModule = PyImport_Import( mpName );
 
-    if (mpModule != NULL) {
-    	// Load and call Python function
-    	mpFunc = PyObject_GetAttrString(mpModule, "giveUserDefBC");
+    if ( mpModule != NULL ) {
+        // Load and call Python function
+        mpFunc = PyObject_GetAttrString(mpModule, "giveUserDefBC");
     }
 
     Py_INCREF(mpName);
     Py_INCREF(mpModule);
     Py_INCREF(mpFunc);
-
-#endif
 
     return IRRT_OK;
 }
@@ -143,8 +156,8 @@ UserDefDirichletBC :: initializeFrom(InputRecord *ir)
 void
 UserDefDirichletBC :: giveInputRecord(DynamicInputRecord &input)
 {
-//    GeneralBoundaryCondition :: giveInputRecord(input);
-//    input.setField(this->values, _IFT_BoundaryCondition_values);
+    GeneralBoundaryCondition :: giveInputRecord(input);
+    input.setField(this->mFileName, _IFT_UserDefDirichletBC_filename);
 }
 
 
@@ -161,23 +174,5 @@ UserDefDirichletBC :: scale(double s)
 {
     values.times(s);
 }
-
-#ifdef BOOST_PYTHON
-PythonInitializer :: PythonInitializer()
-{
-    Py_Initialize();
-
-
-    // Adding . to the system path allows us to run Python
-    // functions stored in the working directory.
-    PyRun_SimpleString("import sys");
-    PyRun_SimpleString("sys.path.append(\".\")");
-}
-
-PythonInitializer :: ~PythonInitializer()
-{
-    Py_Finalize();
-}
-#endif
 
 } // end namespace oofem

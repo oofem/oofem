@@ -17,19 +17,19 @@
  *       Czech Technical University, Faculty of Civil Engineering,
  *   Department of Structural Mechanics, 166 29 Prague, Czech Republic
  *
- *  This program is free software; you can redistribute it and/or modify
- *  it under the terms of the GNU General Public License as published by
- *  the Free Software Foundation; either version 2 of the License, or
- *  (at your option) any later version.
+ *  This library is free software; you can redistribute it and/or
+ *  modify it under the terms of the GNU Lesser General Public
+ *  License as published by the Free Software Foundation; either
+ *  version 2.1 of the License, or (at your option) any later version.
  *
  *  This program is distributed in the hope that it will be useful,
  *  but WITHOUT ANY WARRANTY; without even the implied warranty of
- *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- *  GNU General Public License for more details.
+ *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+ *  Lesser General Public License for more details.
  *
- *  You should have received a copy of the GNU General Public License
- *  along with this program; if not, write to the Free Software
- *  Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
+ *  You should have received a copy of the GNU Lesser General Public
+ *  License along with this library; if not, write to the Free Software
+ *  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  */
 
 #include "mixedgradientpressureweakperiodic.h"
@@ -103,7 +103,7 @@ IRResultType MixedGradientPressureWeakPeriodic :: initializeFrom(InputRecord *ir
     }
 
     int nsd = this->domain->giveNumberOfSpatialDimensions();
-    int total = nsd * nsd * pow(order + 1, nsd - 1);
+    int total = nsd * nsd * (int)pow(order + 1, nsd - 1);
     this->tractionsdman->setNumberOfDofs( total );
     for ( int i = 1; i <= total; ++i ) {
         // Simply use t_i = S_i . n, where S_1 = [1,0,0;0,0,0;0,0,0], S_2 = [0,1,0;0,0,0;0,0,0], etc.
@@ -218,7 +218,7 @@ void MixedGradientPressureWeakPeriodic :: integrateTractionVelocityTangent(Float
     int maxorder = this->order + interp->giveInterpolationOrder()*3 - 2;
     IntegrationRule *ir = interp->giveBoundaryIntegrationRule(maxorder, boundary);
     int nsd = el->giveDomain()->giveNumberOfSpatialDimensions();
-    int total = nsd * nsd * pow(order + 1, nsd - 1);
+    int total = nsd * nsd * (int)pow(order + 1, nsd - 1);
 
     surfCoords.resize( nsd - 1 );
     mMatrix.resize( nsd, total );
@@ -271,7 +271,7 @@ void MixedGradientPressureWeakPeriodic :: integrateTractionXTangent(FloatMatrix 
     int maxorder = this->order + interp->giveInterpolationOrder()*3 - 2;
     IntegrationRule *ir = interp->giveBoundaryIntegrationRule(maxorder, boundary);
     int nsd = el->giveDomain()->giveNumberOfSpatialDimensions();
-    int total = nsd * nsd * pow(order + 1, nsd - 1);
+    int total = nsd * nsd * (int)pow(order + 1, nsd - 1);
 
     surfCoords.resize( nsd - 1 );
 
@@ -321,7 +321,7 @@ void MixedGradientPressureWeakPeriodic :: integrateTractionDev(FloatArray &answe
     int maxorder = this->order + interp->giveInterpolationOrder()*3 - 2;
     IntegrationRule *ir = interp->giveBoundaryIntegrationRule(maxorder, boundary);
     int nsd = el->giveDomain()->giveNumberOfSpatialDimensions();
-    int total = nsd * nsd * pow(order + 1, nsd - 1);
+    int total = nsd * nsd * (int)pow(order + 1, nsd - 1);
 
     surfCoords.resize(nsd - 1);
     contrib.resize( total );
@@ -368,7 +368,7 @@ MixedGradientPressureWeakPeriodic :: evaluateTractionBasisFunctions(FloatArray &
 {
     // This evaluates the function x^a * y^b, for a, b in [0,order]
     int nsd = coords.giveSize() + 1;
-    int total = pow(order + 1, nsd - 1);
+    int total = (int)pow(order + 1, nsd - 1);
     answer.resize(total);
     int pos = 0;
     double tx = 1.;

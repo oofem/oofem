@@ -3,6 +3,7 @@
 \usepackage{graphicx}
 %\usepackage{hyperref}
 \usepackage{amssymb,amsmath}
+\usepackage{longtable}
 \input{include.tex}
 
 \renewcommand{\topfraction}{0.99}    % 99% of page top can be a float
@@ -1394,19 +1395,23 @@ $$
 is the second deviatoric strain invariant,
 and $k$ is a model parameter that corresponds to the ratio between the uniaxial
 compressive strength $f_c$ and uniaxial tensile strength $f_t$.
-\item {\bf Griffith} definition, combining Rankine criterion in tension and 
-Griffith's solution on inclined elipsoidal inclusion. This definition
+\item {\bf Griffith} definition with a solution on inclined elipsoidal inclusion. This definition
 handles materials in pure tension and also in compression, where
-tensile stresses usually appear on the elipsoidal inclusion.
-First check if Rankine criterion exists
-\begin{eqnarray}
-\label{griffith1}
-\tilde\varepsilon&=&{\del{1}{E}}\max_{I=1}^{3}\bar{\sigma}_I
-\end{eqnarray}
-and if not, use Griffith's solution with ordered principal stresses $\sigma_1>\sigma_3$
+tensile stresses usually appear on specifically oriented elipsoidal inclusion.
+The derivation of Griffith's criterion is summarized in \cite{Hoek}.
+In impementation, 
+% first check if Rankine criterion exists
+% \begin{eqnarray}
+% \label{griffith1}
+% \tilde\varepsilon&=&{\del{1}{E}}\max_{I=1}^{3}\bar{\sigma}_I
+% \end{eqnarray}
+% and if not, 
+use Griffith's solution with ordered principal stresses $\sigma_1>\sigma_3$.
+The optional parameter \param{griff\_n} is by default 8 and represents the uniaxial compression/tensile strength ratio.
+
 \begin{eqnarray}
 \label{griffith2}
-\tilde\varepsilon&=&{\del{1}{E}}\cdot{\del{-(\sigma_1-\sigma_3)^2}{8(\sigma_1+\sigma_3)}}
+\tilde\varepsilon&=&{\del{1}{E}}\cdot{\del{-(\sigma_1-\sigma_3)^2}{\param{griff\_n}(\sigma_1+\sigma_3)}}
 \end{eqnarray}
 \end{itemize}
 
@@ -1483,6 +1488,13 @@ In the list of input variables, the tensile strength $f_t$ is not specified
 directly but through the corresponding strain at peak stress, 
 $\varepsilon_0=f_t/E$, denoted by keyword {\it e0}. Another input parameter
 is the characteristic crack opening $w_f$, denoted by keyword {\it wf}.
+
+Derivative can be expressed explicitly
+$$
+\frac{\partial\omega}{\partial\varepsilon} = - \frac{(\omega \varepsilon_f  - \varepsilon_f) \exp \left ( \frac{\omega \varepsilon}{\varepsilon_f}\right ) - \omega \varepsilon_0}{\varepsilon_f \varepsilon \exp \left ( \frac{\omega \varepsilon}{\varepsilon_f}\right ) - \varepsilon_0 \varepsilon}
+$$
+
+
 \item
 {\bf Cohesive crack with linear softening} is based on the same correspondence
 between crack opening and inelastic strain, but the cohesive law is assumed
@@ -1505,7 +1517,11 @@ at complete failure (zero cohesive stress) and is related to fracture energy by
 a modified formula $w_f=2G_f/f_t$.
 The expression for maximum element size, $h_{max}=w_f/\varepsilon_0$, remains
 the same as for cohesive law with exponential softening, but in terms
-of the material properties it is now translated as $h_{max}=2EG_f/f_t^2$.
+of the material properties it is now translated as $h_{max}=2EG_f/f_t^2$. The derivative
+with respect to $\varepsilon$ yields
+$$
+\frac{\partial\omega}{\partial\varepsilon} = \frac{\varepsilon_0}{\varepsilon^2 \left ( 1-\frac{h \varepsilon_0}{w_f}\right )}
+$$
 \item
 {\bf Cohesive crack with bilinear softening} is implemented in an
 approximate fashion and gives for different mesh sizes the same
@@ -1531,12 +1547,18 @@ $$
 \omega =\frac{\varepsilon_f}{\varepsilon_f-\varepsilon_0}\left(1-\frac{\varepsilon_0}{\varepsilon}\right)
 $$
 Again, to cover general conditions, $\varepsilon$ is replaced by $\kappa$.
+$$
+\frac{\partial\omega}{\partial\varepsilon} = \frac{\varepsilon_0 \varepsilon_f}{\varepsilon^2 ( \varepsilon_f - \varepsilon_0 )}
+$$
 \item
 {\bf Exponential softening stress-strain law} also uses two parameters
  $\varepsilon_0$ and $\varepsilon_f$, denoted by keywords {\it e0}
 and {\it ef}, but leads to a modified dependence of damage on strain:
 $$
 \omega =1-\frac{\varepsilon_0}{\varepsilon}\exp\left(-\frac{\varepsilon-\varepsilon_0}{\varepsilon_f-\varepsilon_0}\right)
+$$
+$$
+\frac{\partial\omega}{\partial\varepsilon} = \left[ \frac{1}{\varepsilon(\varepsilon_f-\varepsilon_0)} + \frac{1}{\varepsilon^2} \right] \varepsilon_0 \exp \left (\frac{\varepsilon_0-\varepsilon}{\varepsilon_f-\varepsilon_0} \right )
 $$
 \item
 {\bf Mazars stress-strain law} uses three parameters, $\varepsilon_0$,
@@ -1609,10 +1631,12 @@ and also because for exponential softening the approach based on an exponential 
 \end{figure}
 
 
-\begin{table}[!htb]
+% \begin{table}[!htb]
 %\begin{center}
-  \small
-\begin{tabular}{|l|p{9cm}|}
+%  \small
+% \begin{tabular}{|l|p{9cm}|}
+\begin{longtable}{|l|p{9cm}|}
+
 \hline
 Description & Isotropic damage model for concrete in tension\\
 \hline
@@ -1656,7 +1680,7 @@ of equivalent strain:
 \item[4 -] standard Rankine, eq.~(\ref{rankinestandard})
 \item[5 -] elestic energy based on positive stress
 \item[6 -] elestic energy based on positive strain
-\item[7 -] Rankine and Griffith criterion eqs.~(\ref{griffith1})(\ref{griffith2})
+\item[7 -] Griffith criterion eq.~(\ref{griffith2})
 
 \end{itemize}\\
 &- \param{k} ratio between uniaxial compressive and tensile strength, needed only if equivstraintype=3, default value 1\\
@@ -1685,6 +1709,7 @@ of equivalent strain:
 &- \param{e1} parameter used only by damage law 7\\
 &- \param{e2} parameter used only by damage law 7\\
 &- \param{nd} exponent used only by damage law 7\\
+&- \param{griff\_n} uniaxial compression/tensile ratio for Griffith's criterion\\
 &- \param{maxOmega} maximum damage, used for convergence improvement
 (its value is between 0 and 0.999999 (default), and it affects only the secant stiffness
 but not the stress)\\
@@ -1692,11 +1717,12 @@ but not the stress)\\
 Supported modes& 3dMat, PlaneStress, PlaneStrain, 1dMat\\
 Features & Adaptivity support\\
 \hline
-\end{tabular}
+%\end{tabular}
 \caption{Isotropic damage model for tensile failure -- summary.}
 \label{id_table}
 %\end{center}
-\end{table}
+%\end{table}
+\end{longtable}
 
 \subsubsection{Nonlocal isotropic damage model for tensile failure - Idmnl1}
 \label{sec:nidm}
@@ -4969,6 +4995,9 @@ Note that the matrices $\mbf{K}(\mbf{r}), \mbf{C}(\mbf{r})$ and the vector $\mbf
   structures, John Wiley, 2001.
 \bibitem{Hansen} P.F. Hansen: Coupled Moisture/Heat Transport in
   Cross Sections of Structures, Beton og Konstruktionsinstituttet, 1985.
+\bibitem{Hoek} E. Hoek and Z.T. Bieniawski: Brittle Rock Fracture Propagation
+In Rock Under Compression, International Journal of Fracture Mechanics
+1(3), 137-155, 1965.
 \bibitem{Kuenzel} H.M. K{\"u}nzel, H.M.: Simultaneous heat and
   moisture transport in building components, Ph.D. thesis, IRB-Verlag,
   1995.

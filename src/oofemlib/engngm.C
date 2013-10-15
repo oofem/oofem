@@ -17,19 +17,19 @@
  *       Czech Technical University, Faculty of Civil Engineering,
  *   Department of Structural Mechanics, 166 29 Prague, Czech Republic
  *
- *  This program is free software; you can redistribute it and/or modify
- *  it under the terms of the GNU General Public License as published by
- *  the Free Software Foundation; either version 2 of the License, or
- *  (at your option) any later version.
+ *  This library is free software; you can redistribute it and/or
+ *  modify it under the terms of the GNU Lesser General Public
+ *  License as published by the Free Software Foundation; either
+ *  version 2.1 of the License, or (at your option) any later version.
  *
  *  This program is distributed in the hope that it will be useful,
  *  but WITHOUT ANY WARRANTY; without even the implied warranty of
- *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- *  GNU General Public License for more details.
+ *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+ *  Lesser General Public License for more details.
  *
- *  You should have received a copy of the GNU General Public License
- *  along with this program; if not, write to the Free Software
- *  Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
+ *  You should have received a copy of the GNU Lesser General Public
+ *  License along with this library; if not, write to the Free Software
+ *  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  */
 
 // Milan ?????????????????
@@ -915,82 +915,13 @@ void EngngModel :: assemble(SparseMtrx *answer, TimeStep *tStep, EquationID eid,
     answer->assembleEnd();
 }
 
-void EngngModel :: assemble(SparseMtrx *answer, TimeStep *tStep, EquationID r_id, EquationID c_id,
-                            CharType type, const UnknownNumberingScheme &ns,
-                            Domain *domain)
-//
-// assembles matrix
-//
-{
-    IntArray r_loc, c_loc;
-    FloatMatrix mat, Rr, Rc;
-    Element *element;
-
-    if ( answer == NULL ) {
-        _error("assemble: NULL pointer encountered.");
-    }
-
-    this->timer.resumeTimer(EngngModelTimer :: EMTT_NetComputationalStepTimer);
-    int nelem = domain->giveNumberOfElements();
-#ifdef _OPENMP
- #pragma omp parallel for private(element, mat, Rr, Rc, r_loc, c_loc)
-#endif
-    for ( int ielem = 1; ielem <= nelem; ielem++ ) {
-        element = domain->giveElement(ielem);
-#ifdef __PARALLEL_MODE
-        // skip remote elements (these are used as mirrors of remote elements on other domains
-        // when nonlocal constitutive models are used. They introduction is necessary to
-        // allow local averaging on domains without fine grain communication between domains).
-        if ( element->giveParallelMode() == Element_remote ) {
-            continue;
-        }
-
-#endif
-        if ( !element->isActivated(tStep) ) {
-            continue;
-        }
-
-        this->giveElementCharacteristicMatrix(mat, ielem, type, tStep, domain);
-
-        if ( mat.isNotEmpty() ) {
-            element->giveLocationArray(r_loc, r_id, ns);
-            element->giveLocationArray(c_loc, c_id, ns);
-            // Rotate it
-            if ( element->giveRotationMatrix(Rr, r_id) ) {
-                FloatMatrix tmpMat;
-                tmpMat.beTProductOf(Rr, mat); ///@todo Check transpose here
-                mat = tmpMat;
-            }
-
-            if ( element->giveRotationMatrix(Rc, c_id) ) {
-                FloatMatrix tmpMat;
-                tmpMat.beProductOf(mat, Rc); ///@todo Check transpose here
-                mat = tmpMat;
-            }
-
-#ifdef _OPENMP
- #pragma omp critical
-#endif
-            if ( answer->assemble(r_loc, c_loc, mat) == 0 ) {
-                _error("assemble: sparse matrix assemble error");
-            }
-        }
-    }
-
-    ///@todo This function is rarely called. Do we need the active bc to assemble here as well?
-
-    this->timer.pauseTimer(EngngModelTimer :: EMTT_NetComputationalStepTimer);
-
-    answer->assembleBegin();
-    answer->assembleEnd();
-}
 
 void EngngModel :: assemble(SparseMtrx *answer, TimeStep *tStep, EquationID eid,
                             CharType type, const UnknownNumberingScheme &rs, const UnknownNumberingScheme &cs,
                             Domain *domain)
 // Same as assemble, but with different numbering for rows and columns
 {
-    IntArray r_loc, c_loc;
+    IntArray r_loc, c_loc, dofids(0);
     FloatMatrix mat, R;
     Element *element;
     if ( answer == NULL ) {
@@ -1047,9 +978,9 @@ void EngngModel :: assemble(SparseMtrx *answer, TimeStep *tStep, EquationID eid,
 }
 
 
-double EngngModel :: assembleVector(FloatArray &answer, TimeStep *tStep, EquationID eid,
-                                    CharType type, ValueModeType mode,
-                                    const UnknownNumberingScheme &s, Domain *domain, FloatArray *eNorms)
+void EngngModel :: assembleVector(FloatArray &answer, TimeStep *tStep, EquationID eid,
+                                  CharType type, ValueModeType mode,
+                                  const UnknownNumberingScheme &s, Domain *domain, FloatArray *eNorms)
 {
     if ( eNorms ) {
         int maxdofids = domain->giveMaxDofID();
@@ -1064,7 +995,7 @@ double EngngModel :: assembleVector(FloatArray &answer, TimeStep *tStep, Equatio
         eNorms->zero();
     }
 
-    this->assembleVectorFromDofManagers(answer, tStep, eid, type, mode, s, domain, eNorms);
+    this->assembleVectorFromDofManagers(answer, tStep, type, mode, s, domain, eNorms);
     this->assembleVectorFromElements(answer, tStep, eid, type, mode, s, domain, eNorms);
     this->assembleVectorFromBC(answer, tStep, eid, type, mode, s, domain, eNorms);
 
@@ -1077,12 +1008,10 @@ double EngngModel :: assembleVector(FloatArray &answer, TimeStep *tStep, Equatio
         }
     }
 #endif
-    return eNorms ? eNorms->sum() : 0.;
 }
 
 
-void EngngModel :: assembleVectorFromDofManagers(FloatArray &answer, TimeStep *tStep, EquationID eid,
-                                                 CharType type, ValueModeType mode,
+void EngngModel :: assembleVectorFromDofManagers(FloatArray &answer, TimeStep *tStep, CharType type, ValueModeType mode,
                                                  const UnknownNumberingScheme &s, Domain *domain, FloatArray *eNorms)
 //
 // assembles matrix answer by  calling

@@ -17,19 +17,19 @@
  *       Czech Technical University, Faculty of Civil Engineering,
  *   Department of Structural Mechanics, 166 29 Prague, Czech Republic
  *
- *  This program is free software; you can redistribute it and/or modify
- *  it under the terms of the GNU General Public License as published by
- *  the Free Software Foundation; either version 2 of the License, or
- *  (at your option) any later version.
+ *  This library is free software; you can redistribute it and/or
+ *  modify it under the terms of the GNU Lesser General Public
+ *  License as published by the Free Software Foundation; either
+ *  version 2.1 of the License, or (at your option) any later version.
  *
  *  This program is distributed in the hope that it will be useful,
  *  but WITHOUT ANY WARRANTY; without even the implied warranty of
- *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- *  GNU General Public License for more details.
+ *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+ *  Lesser General Public License for more details.
  *
- *  You should have received a copy of the GNU General Public License
- *  along with this program; if not, write to the Free Software
- *  Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
+ *  You should have received a copy of the GNU Lesser General Public
+ *  License along with this library; if not, write to the Free Software
+ *  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  */
 
 #ifndef geotoolbox_h
@@ -38,10 +38,11 @@
 #include <list>
 #include <cstdlib>
 
+#include "oofemcfg.h"
+#include "floatarray.h"
 #ifdef __OOFEG
  #include "oofeggraphiccontext.h"
 #endif
-#include "floatarray.h"
 
 
 namespace oofem {
@@ -55,7 +56,7 @@ namespace oofem {
  * The attributes of a vertex are its coordinates.
  * This class is a part of geometry toolbox.
  */
-class Vertex
+class OOFEM_EXPORT Vertex
 {
 public:
     FloatArray coords;
@@ -86,7 +87,7 @@ public:
  * testing if point is inside polygon are provided. Also iterators over polygon vertices and edges are provided.
  * This class is a part of geometry toolbox.
  */
-class Polygon
+class OOFEM_EXPORT Polygon
 {
     std :: list< Vertex >vertices;
 public:
@@ -174,7 +175,7 @@ public:
  * that can represent various boolean operations.
  * This class is a part of geometry toolbox.
  */
-class Graph
+class OOFEM_EXPORT Graph
 {
 protected:
     enum nodeStatus { NS_Vertex, NS_IntersectionVertex, NS_Intersection };
@@ -229,7 +230,7 @@ protected:
     void clear();
 };
 
-class GT_Exception
+class OOFEM_EXPORT GT_Exception
 {
     const char *msg, *file;
     int line;

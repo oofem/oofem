@@ -52,6 +52,7 @@ set (sm_emodel
     structengngmodel.C
     linearstatic.C
     nlinearstatic.C
+    xfemstatic.C
     nlineardynamic.C
     eigenvaluedynamic.C
     linearstability.C

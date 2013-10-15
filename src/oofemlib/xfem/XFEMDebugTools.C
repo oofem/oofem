@@ -12,10 +12,10 @@ XFEMDebugTools :: XFEMDebugTools() {}
 
 XFEMDebugTools :: ~XFEMDebugTools() {}
 
-void XFEMDebugTools :: WriteTrianglesToVTK(const std :: string &iName, const AList< Triangle > &iTriangles)
+void XFEMDebugTools :: WriteTrianglesToVTK(const std :: string &iName, const std::vector< Triangle > &iTriangles)
 {
     //	printf("Entering XFEMDebugTools::WriteTrianglesToVTK().\n");
-    int numTri = iTriangles.giveSize();
+	size_t numTri = iTriangles.size();
 
 
     std :: ofstream file;
@@ -32,10 +32,10 @@ void XFEMDebugTools :: WriteTrianglesToVTK(const std :: string &iName, const ALi
     // Write points
     file << "POINTS " << numPoints << "double\n";
 
-    for ( int i = 1; i <= numTri; i++ ) {
+    for ( size_t i = 0; i < numTri; i++ ) {
         for ( int j = 1; j <= 3; j++ ) {
-            const double &x = iTriangles.at(i)->giveVertex(j)->at(1);
-            const double &y = iTriangles.at(i)->giveVertex(j)->at(2);
+            const double &x = iTriangles.at(i).giveVertex(j).at(1);
+            const double &y = iTriangles.at(i).giveVertex(j).at(2);
             file << x << " " << y << " 0.0\n";
         }
     }
@@ -44,7 +44,7 @@ void XFEMDebugTools :: WriteTrianglesToVTK(const std :: string &iName, const ALi
     // Write segments
     file << "CELLS " << numTri << " " << numTri * 4 << "\n";
 
-    for ( int i = 0; i < numTri; i++ ) {
+    for ( size_t i = 0; i < numTri; i++ ) {
         file << 3 << " " << 3 * i << " " << 3 * i + 1 << " " << 3 * i + 2 << "\n";
     }
 
@@ -52,7 +52,7 @@ void XFEMDebugTools :: WriteTrianglesToVTK(const std :: string &iName, const ALi
     // Write cell types
     file << "CELL_TYPES " << numTri << "\n";
     int vtkCellType = 5;     // triangle
-    for ( int i = 0; i < numTri; i++ ) {
+    for ( size_t i = 0; i < numTri; i++ ) {
         file << vtkCellType << "\n";
     }
 
