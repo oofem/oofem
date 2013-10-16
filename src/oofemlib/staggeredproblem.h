@@ -79,7 +79,7 @@ namespace oofem {
  *
  * @todo Move to oofemlib
  */
-class StaggeredProblem : public EngngModel
+class OOFEM_EXPORT StaggeredProblem : public EngngModel
 {
 protected:
     /// Number of engineering models to run.

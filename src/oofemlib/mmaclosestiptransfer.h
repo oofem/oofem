@@ -45,7 +45,7 @@ class TimeStep;
 /**
  * The class implements the closest integration point transfer of state variables.
  */
-class MMAClosestIPTransfer : public MaterialMappingAlgorithm
+class OOFEM_EXPORT MMAClosestIPTransfer : public MaterialMappingAlgorithm
 {
 protected:
     GaussPoint *source;

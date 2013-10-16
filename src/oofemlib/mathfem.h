@@ -167,7 +167,7 @@ public:
 };
 
 
-class c_fun
+class OOFEM_EXPORT c_fun
 {
     double ( *func )(double);
 public:

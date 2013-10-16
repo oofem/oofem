@@ -43,7 +43,7 @@ namespace oofem {
  * The instances are typically used in EngngModel to assemble characteristic contributions and they
  * allow to control the numbering of unknowns.
  */
-class UnknownNumberingScheme
+class OOFEM_EXPORT UnknownNumberingScheme
 {
 public:
     UnknownNumberingScheme(void) {};
@@ -76,7 +76,7 @@ public:
  * by the engineering model itself to individual DOFs. Therefore, this call is a simple shell around
  * DofEquationNumbering interface, forwarding all the requests to individual DOFs.
  */
-class EModelDefaultEquationNumbering : public UnknownNumberingScheme
+class OOFEM_EXPORT EModelDefaultEquationNumbering : public UnknownNumberingScheme
 {
 public:
     EModelDefaultEquationNumbering(void) : UnknownNumberingScheme() {}
@@ -93,7 +93,7 @@ public:
  * Therefore, this call is a simple shell around
  * DofEquationNumbering interface, forwarding all the requests to individual DOFs.
  */
-class EModelDefaultPrescribedEquationNumbering : public UnknownNumberingScheme
+class OOFEM_EXPORT EModelDefaultPrescribedEquationNumbering : public UnknownNumberingScheme
 {
 public:
     EModelDefaultPrescribedEquationNumbering(void) : UnknownNumberingScheme() {}

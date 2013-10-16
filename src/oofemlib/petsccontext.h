@@ -41,6 +41,7 @@
   #include <petscvec.h>
  #endif
 
+ #include "oofemcfg.h"
  #include "parallelordering.h"
  #include "equationid.h"
 
@@ -56,7 +57,7 @@ class DofManager;
  * - Creating suitable parallel objects.
  * - Determining owner for shared dof managers.
  */
-class PetscContext
+class OOFEM_EXPORT PetscContext
 {
 protected:
     int di;

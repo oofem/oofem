@@ -36,7 +36,7 @@
 #define fieldmanager_h
 
 //#define FIELDMANAGER_USE_SHARED_PTR
-
+#include "oofemcfg.h"
 #include "field.h"
 
 #include <map>
@@ -52,7 +52,7 @@ typedef std::tr1::shared_ptr<Field> FM_FieldPtr ;
 typedef Field* FM_FieldPtr ;
 #endif
 
-class FieldManager
+class OOFEM_EXPORT FieldManager
 {
 protected:
 

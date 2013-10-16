@@ -41,7 +41,7 @@ namespace oofem {
 /**
  * Class representing implementation of linear hexahedra interpolation class.
  */
-class FEI3dHexaLin : public FEInterpolation3d
+class OOFEM_EXPORT FEI3dHexaLin : public FEInterpolation3d
 {
 public:
     FEI3dHexaLin() : FEInterpolation3d(1) { }

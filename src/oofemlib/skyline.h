@@ -63,7 +63,7 @@ namespace oofem {
  *
  * @see SparseMtrx class
  */
-class Skyline : public SparseMtrx
+class OOFEM_EXPORT Skyline : public SparseMtrx
 {
 protected:
     /// Total number of nonzero coefficients stored.

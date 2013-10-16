@@ -79,7 +79,7 @@ namespace oofem {
 /**
  * Implementation of sparse matrix stored in compressed column storage.
  */
-class CompCol : public SparseMtrx
+class OOFEM_EXPORT CompCol : public SparseMtrx
 {
 protected:
 

@@ -35,6 +35,7 @@
 #ifndef spatiallocalizer_h
 #define spatiallocalizer_h
 
+#include "oofemcfg.h"
 #include "interface.h"
 #include "logger.h"
 #include "error.h"
@@ -53,7 +54,7 @@ class IntArray;
 /**
  * The spatial localizer element interface associated to spatial localizer.
  */
-class SpatialLocalizerInterface : public Interface
+class OOFEM_EXPORT SpatialLocalizerInterface : public Interface
 {
 public:
     SpatialLocalizerInterface() : Interface() { }
@@ -112,7 +113,7 @@ public:
  * Typical services include searching the closes node to give position, searching of an element containing given point, etc.
  * If special element algorithms required, these should be included using interface concept.
  */
-class SpatialLocalizer
+class OOFEM_EXPORT SpatialLocalizer
 {
 protected:
     /// Link to domain object

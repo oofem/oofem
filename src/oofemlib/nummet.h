@@ -35,6 +35,7 @@
 #ifndef nummet_h
 #define nummet_h
 
+#include "oofemcfg.h"
 #include "inputrecord.h"
 #include "contextioresulttype.h"
 #include "contextmode.h"
@@ -76,7 +77,7 @@ class DataStream;
  * instance may also represent interface to an existing procedure
  * written in C or Fortran.
  */
-class NumericalMethod
+class OOFEM_EXPORT NumericalMethod
 {
 protected:
     /// Pointer to domain

@@ -35,6 +35,7 @@
 #ifndef contable_h
 #define contable_h
 
+#include "oofemcfg.h"
 #include "alist.h"
 
 namespace oofem {
@@ -50,7 +51,7 @@ class Domain;
  * - Returning number of Elements belonging to node.
  * - Returning j-th element belonging to node i.
  */
-class ConnectivityTable
+class OOFEM_EXPORT ConnectivityTable
 {
 private:
     /// Pointer to domain to which receiver belongs to.

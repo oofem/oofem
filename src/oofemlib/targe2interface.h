@@ -47,7 +47,7 @@ class TimeStep;
  *   based on information from remeshing criteria.
  * - possibly to launch the mesher and transform its output to oofem input (using targe2oofem)
  */
-class Targe2Interface : public MesherInterface
+class OOFEM_EXPORT Targe2Interface : public MesherInterface
 {
 public:
     /// Constructor

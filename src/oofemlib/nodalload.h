@@ -65,7 +65,7 @@ class TimeStep;
  * @note{Load is not restricted to structural problems. For example, in thermal
  * analysis, a nodal load would be a concentrated heat source.}
  */
-class NodalLoad : public Load
+class OOFEM_EXPORT NodalLoad : public Load
 {
 protected:
     /**

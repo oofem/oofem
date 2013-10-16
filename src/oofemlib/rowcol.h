@@ -35,6 +35,8 @@
 #ifndef rowcol_h
 #define rowcol_h
 
+#include "oofemcfg.h"
+
 namespace oofem {
 class FloatArray;
 class IntArray;
@@ -60,7 +62,7 @@ class IntArray;
  * - enlarging itself in order to accommodate more coefficients (method 'growTo')
  * - resetting to zero all of its coefficients (method 'reinitialized').
  */
-class RowColumn
+class OOFEM_NO_EXPORT RowColumn
 {
 protected:
 

@@ -50,7 +50,7 @@ class TimeStep;
  * Declares the required services at element level, which
  * are required by MMAShapeFunctProjection algorithm.
  */
-class MMAShapeFunctProjectionInterface : public Interface
+class OOFEM_EXPORT MMAShapeFunctProjectionInterface : public Interface
 {
 public:
     /**
@@ -105,7 +105,7 @@ public:
  * and is used by all IPs. Also it should be used only for mapping of one internal variable.
  * For each internal variable there should be corresponding mapper instance.
  */
-class MMAShapeFunctProjection : public MaterialMappingAlgorithm
+class OOFEM_EXPORT MMAShapeFunctProjection : public MaterialMappingAlgorithm
 {
 protected:
     /// Smother.

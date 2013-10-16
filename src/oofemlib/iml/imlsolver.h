@@ -57,7 +57,7 @@ class FloatMatrix;
  * Implements the solution of linear system of equation in the form @f$ A\cdot x=b @f$ using iterative solvers
  * from IML++ library. Can work with any sparse matrix implementation.
  */
-class IMLSolver : public SparseLinearSystemNM
+class OOFEM_EXPORT IMLSolver : public SparseLinearSystemNM
 {
 private:
     /// Solver type.

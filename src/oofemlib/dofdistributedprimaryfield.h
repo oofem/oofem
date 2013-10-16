@@ -46,7 +46,7 @@ namespace oofem {
  * a shell that allows to access these repositories using field services.
  * The class contains also a solution vector for temporal storage of unknowns. The vector needs to be projected back to DOFs.
  */
-class DofDistributedPrimaryField : public PrimaryField
+class OOFEM_EXPORT DofDistributedPrimaryField : public PrimaryField
 {
 public:
     /**

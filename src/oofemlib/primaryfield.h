@@ -53,7 +53,7 @@ class Dof;
 /**
  * Element interface class. Declares the functionality required to support PrimaryField element interpolation.
  */
-class EIPrimaryFieldInterface : public Interface
+class OOFEM_EXPORT EIPrimaryFieldInterface : public Interface
 {
 public:
 
@@ -95,7 +95,7 @@ public:
  * strongly coupled problems). Then masked primary field can be used to select only certain DOFs
  * (based on DofID) from its master PrimaryField.
  */
-class PrimaryField : public Field
+class OOFEM_EXPORT PrimaryField : public Field
 {
 protected:
     int actualStepNumber;

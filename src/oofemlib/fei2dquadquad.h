@@ -49,7 +49,7 @@ namespace oofem {
  *  |         |
  * (1)--(5)--(2)
  */
-class FEI2dQuadQuad : public FEInterpolation2d
+class OOFEM_EXPORT FEI2dQuadQuad : public FEInterpolation2d
 {
 public:
     FEI2dQuadQuad(int ind1, int ind2) : FEInterpolation2d(2, ind1, ind2) {}

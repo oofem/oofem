@@ -76,7 +76,7 @@ class IntArray;
  * always value reported by boundary condition is taken into account.
  * @see EngngModel::giveNumberOfTimeStepWhenIcApply
  */
-class InitialCondition : public FEMComponent
+class OOFEM_EXPORT InitialCondition : public FEMComponent
 {
 private:
     /// Dictionary of initial values.

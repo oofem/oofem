@@ -145,7 +145,7 @@ enum elementParallelMode {
  *   Local DOF ordering must be taken into account when assembling various local characteristic
  *   vectors and matrices.
  */
-class Element : public FEMComponent
+class OOFEM_EXPORT Element : public FEMComponent
 {
 protected:
     /// Number of dofmanagers

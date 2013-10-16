@@ -49,7 +49,7 @@ class TimeStep;
  *   based on information from remeshing criteria.
  * - possibly to launch the mesher and transform its output to oofem input (using t3d2oofem)
  */
-class T3DInterface : public MesherInterface
+class OOFEM_EXPORT T3DInterface : public MesherInterface
 {
 public:
     /// Constructor

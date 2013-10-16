@@ -8,11 +8,13 @@
 #ifndef XFEMDEBUGTOOLS_H_
 #define XFEMDEBUGTOOLS_H_
 
+#include "oofemcfg.h"
 #include "geometry.h"
+
 #include <fstream>
 
 namespace oofem {
-class XFEMDebugTools
+class OOFEM_EXPORT XFEMDebugTools
 {
 public:
     XFEMDebugTools();

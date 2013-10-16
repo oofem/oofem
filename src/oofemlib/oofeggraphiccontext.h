@@ -38,7 +38,7 @@
 
 #ifdef __OOFEG
 
-
+ #include "oofemcfg.h"
  #include "intarray.h"
  #include "nodalrecoverymodel.h"
  #include "internalstatemode.h"
@@ -125,7 +125,7 @@ enum ScaleMode { SM_Autoscale, SM_UserDefined };
 
  #define OOFEG_YIELD_STEPS 3
 
-class oofegGraphicContext
+class OOFEM_EXPORT oofegGraphicContext
 {
 protected:
 

@@ -44,7 +44,7 @@ namespace oofem {
  * Class representing a field of an internal variable smoothed from integration points
  * into nodes. It is relying on NodalRecoveryModel to smooth the data.
  */
-class SmoothedNodalInternalVariableField : public Field
+class OOFEM_EXPORT SmoothedNodalInternalVariableField : public Field
 {
 protected:
     /// Smoother type

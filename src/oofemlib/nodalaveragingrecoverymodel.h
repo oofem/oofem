@@ -47,7 +47,7 @@ class ProcessCommunicator;
  * on nodal averaging or projection process in which element contributions are averaged
  * at node with the same weight.
  */
-class NodalAveragingRecoveryModel : public NodalRecoveryModel
+class OOFEM_EXPORT NodalAveragingRecoveryModel : public NodalRecoveryModel
 {
 protected:
     /**
@@ -83,7 +83,7 @@ private:
 /**
  * The element interface required by NodalAvergagingRecoveryModel.
  */
-class NodalAveragingRecoveryModelInterface : public Interface
+class OOFEM_EXPORT NodalAveragingRecoveryModelInterface : public Interface
 {
 public:
     /// Constructor

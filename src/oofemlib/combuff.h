@@ -37,6 +37,7 @@
 
 #ifdef __PARALLEL_MODE
 
+ #include "oofemcfg.h"
  #include "parallel.h"
 
 namespace oofem {
@@ -52,7 +53,7 @@ class FloatMatrix;
  */
 typedef char ComBuff_BYTE_TYPE;
 
-class MPIBuffer
+class OOFEM_EXPORT MPIBuffer
 {
 protected:
     /// Size and current position in buffer in bytes (sizeof(char)).
@@ -209,7 +210,7 @@ private:
  * send and receive buffer to selected destination.
  *
  */
-class CommunicationBuffer
+class OOFEM_EXPORT CommunicationBuffer
 {
 protected:
     MPI_Comm communicator;
@@ -402,7 +403,7 @@ public:
 
 
 
-class StaticCommunicationBuffer : public CommunicationBuffer , public MPIBuffer
+class OOFEM_EXPORT StaticCommunicationBuffer : public CommunicationBuffer , public MPIBuffer
 {
 public:
     StaticCommunicationBuffer(MPI_Comm comm, int size, bool dynamic = 0) : CommunicationBuffer(comm, size, dynamic),

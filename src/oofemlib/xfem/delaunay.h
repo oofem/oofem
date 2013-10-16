@@ -35,6 +35,7 @@
 #ifndef delaunay_h
 #define delaunay_h
 
+#include "oofemcfg.h"
 #include "alist.h"
 #include <vector>
 
@@ -50,10 +51,10 @@ class Triangle;
  *	// will tell if it is too slow ... /ES
  * @author Erik Svenning
  */
-class Delaunay
+class OOFEM_EXPORT Delaunay
 {
 public:
-	Delaunay():mTol(1.0e-12) {}
+    Delaunay():mTol(1.0e-12) {}
 
     bool colinear(FloatArray *p1, FloatArray *p2, FloatArray *p3);
     void printTriangles(AList< Triangle > *triangles);

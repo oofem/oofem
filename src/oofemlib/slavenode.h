@@ -55,7 +55,7 @@ namespace oofem {
  * they are determined completely from master dof conditions except for dofs of master type.
  * @see{HangingNode}
  */
-class SlaveNode : public Node
+class OOFEM_EXPORT SlaveNode : public Node
 {
 protected:
     /// Master nodes for all dofs.

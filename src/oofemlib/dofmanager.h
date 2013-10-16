@@ -118,7 +118,7 @@ class IntArray;
  * - managing the list of subjected loads (typically, concentrated forces and moments).
  * - constructing the location array for assembling loads (also used by elements for assembling matrices).
  */
-class DofManager : public FEMComponent
+class OOFEM_EXPORT DofManager : public FEMComponent
 {
 protected:
     /// Total number of DOFs.

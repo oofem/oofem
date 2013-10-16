@@ -58,7 +58,7 @@ class IntArray;
 /**
  * Interpolation for B-splines.
  */
-class BSplineInterpolation : public FEInterpolation
+class OOFEM_EXPORT BSplineInterpolation : public FEInterpolation
 {
 protected:
     /// Number of spatial directions.

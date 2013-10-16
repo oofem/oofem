@@ -79,7 +79,7 @@ class Dof;
  * - Returning a value of isImposedTimeFunction, indicating whether b.c. is imposed or not
  *   in given time (nonzero indicates imposed BC) - method isImposed.
  */
-class BoundaryCondition : public GeneralBoundaryCondition
+class OOFEM_EXPORT BoundaryCondition : public GeneralBoundaryCondition
 {
 protected:
     /// Prescribed values for each resp. dof

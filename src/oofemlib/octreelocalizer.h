@@ -35,6 +35,7 @@
 #ifndef octreelocalizer_h
 #define octreelocalizer_h
 
+#include "oofemcfg.h"
 #include "spatiallocalizer.h"
 #include "floatarray.h"
 #include "alist.h"
@@ -61,7 +62,7 @@ class OctreeSpatialLocalizer;
  * Maintains links to possible child octree cells as well as its position and size.
  * Also list of node numbers contained in given octree cell can be maintained if cell is terminal cell.
  */
-class OctantRec
+class OOFEM_NO_EXPORT OctantRec
 {
 protected:
     /// Link to octree class.
@@ -181,7 +182,7 @@ public:
  * Typical services include searching the closes node to give position, searching of an element containing given point, etc.
  * If special element algorithms required, these should be included using interface concept.
  */
-class OctreeSpatialLocalizer : public SpatialLocalizer
+class OOFEM_EXPORT OctreeSpatialLocalizer : public SpatialLocalizer
 {
 protected:
     /// Root cell of octree.

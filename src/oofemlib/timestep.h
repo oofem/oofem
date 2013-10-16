@@ -40,6 +40,7 @@
 #ifndef timestep_h
 #define timestep_h
 
+#include "oofemcfg.h"
 #include "femcmpnn.h"
 #include "engngm.h"
 #include "contextioresulttype.h"
@@ -74,7 +75,7 @@ namespace oofem {
  * Then, easy check is done for finding differences between frozen solution state counter and their value with
  * current solution state requested from solution step and recompute the values if necessary.
  */
-class TimeStep
+class OOFEM_EXPORT TimeStep
 {
 protected:
     /// Engineering model reference.

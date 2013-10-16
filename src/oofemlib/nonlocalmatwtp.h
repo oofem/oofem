@@ -62,7 +62,7 @@ class GaussPoint;
  * extension to efficiently handle nonlocal dependency of
  * nonlocal materials via remote elements.
  */
-class NonlocalMaterialWTP : public LoadBalancer :: WorkTransferPlugin
+class OOFEM_EXPORT NonlocalMaterialWTP : public LoadBalancer :: WorkTransferPlugin
 {
 protected:
     std :: map< int, IntArray >nonlocElementDependencyMap;

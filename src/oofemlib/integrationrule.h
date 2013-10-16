@@ -35,6 +35,7 @@
 #ifndef integrationrule_h
 #define integrationrule_h
 
+#include "oofemcfg.h"
 #include "materialmode.h"
 #include "integrationdomain.h"
 #include "contextioresulttype.h"
@@ -90,7 +91,7 @@ enum IntegrationRuleType {
  * - initializing for new time step
  * - saving & restoring context
  */
-class IntegrationRule
+class OOFEM_EXPORT IntegrationRule
 {
 protected:
 

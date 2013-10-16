@@ -48,7 +48,7 @@ class Node;
  * Abstract representation of a part of element after subdivision.
  * @author chamrova
  */
-class Patch : public BasicGeometry
+class OOFEM_EXPORT Patch : public BasicGeometry
 {
 public:
     enum PatchType { PT_Unknown, PT_TrianglePatch };
@@ -89,7 +89,7 @@ public:
  #endif
 };
 
-class TrianglePatch : public Patch
+class OOFEM_EXPORT TrianglePatch : public Patch
 {
 public:
     TrianglePatch(Element *parent) : Patch(parent) {}

@@ -61,7 +61,7 @@ class TimeStep;
  * including mapping, unchanged, because all instances of this class
  * provide the common interface.
  */
-class SparseNonLinearSystemNM : public NumericalMethod
+class OOFEM_EXPORT SparseNonLinearSystemNM : public NumericalMethod
 {
 public:
     /**

@@ -76,7 +76,7 @@ namespace oofem {
  * force load, or boundary condition prescribed directly on some dof) and should declare
  * the basic common interface.
  */
-class GeneralBoundaryCondition : public FEMComponent
+class OOFEM_EXPORT GeneralBoundaryCondition : public FEMComponent
 {
 protected:
     /// Associated load time function.

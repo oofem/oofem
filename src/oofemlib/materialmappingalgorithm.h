@@ -35,6 +35,7 @@
 #ifndef materialmappingalgorithm_h
 #define materialmappingalgorithm_h
 
+#include "oofemcfg.h"
 #include "interface.h"
 #include "intarray.h"
 #include "inputrecord.h"
@@ -76,7 +77,7 @@ class DynamicInputRecord;
  * their initialization.
  *
  */
-class MaterialMappingAlgorithm
+class OOFEM_EXPORT MaterialMappingAlgorithm
 {
 public:
     /// Constructor.

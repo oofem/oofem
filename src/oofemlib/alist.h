@@ -55,7 +55,7 @@ namespace oofem {
  * component is very efficient. On the other hand, the resizing of array is relative time expensive (the whole
  * existing pointer table must be transferred) and is recommended to set size of the array to the final size.
  */
-template< class T >class AList
+template< class T >class OOFEM_EXPORT AList
 {
 protected:
     /// Array or list size (number of components to store).

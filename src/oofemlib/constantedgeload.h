@@ -60,7 +60,7 @@ namespace oofem {
  * This class is not restricted to structural problems. For example, in thermal
  * analysis, a boundary load load would be a  heat source.
  */
-class ConstantEdgeLoad : public BoundaryLoad
+class OOFEM_EXPORT ConstantEdgeLoad : public BoundaryLoad
 {
 public:
     ConstantEdgeLoad(int i, Domain *d) : BoundaryLoad(i, d) { }

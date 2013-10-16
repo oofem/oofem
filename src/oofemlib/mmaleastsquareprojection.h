@@ -75,7 +75,7 @@ enum MMALeastSquareProjectionPatchType { MMALSPPatchType_1dq, MMALSPPatchType_2d
  * mapper as static material member.
  *
  */
-class MMALeastSquareProjection : public MaterialMappingAlgorithm
+class OOFEM_EXPORT MMALeastSquareProjection : public MaterialMappingAlgorithm
 {
 protected:
     /// If set, then only IP in the neighbourhood with same state can be used to interpolate the values.

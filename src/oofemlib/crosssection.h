@@ -91,7 +91,7 @@ enum CrossSectionProperty {
  * slave as parameter and integrates results.
  * @see GaussPoint class for more detail.
  */
-class CrossSection : public FEMComponent
+class OOFEM_EXPORT CrossSection : public FEMComponent
 {
 protected:
     /**

@@ -36,6 +36,7 @@
 #ifndef PROPAGATIONLAW_H_
 #define PROPAGATIONLAW_H_
 
+#include "oofemcfg.h"
 #include "inputrecord.h"
 
 #define _IFT_PLDoNothing_Name "propagationlawdonothing"
@@ -56,10 +57,11 @@ class DynamicInputRecord;
  * @author Erik Svenning
  */
 
-class PropagationLaw {
+class OOFEM_EXPORT PropagationLaw
+{
 public:
-	PropagationLaw();
-	virtual ~PropagationLaw();
+    PropagationLaw();
+    virtual ~PropagationLaw();
 
     virtual const char *giveClassName() const = 0;
     virtual const char *giveInputRecordName() const = 0;
@@ -70,10 +72,10 @@ public:
 	virtual void propagateInterfaces(EnrichmentDomain &iEnrDom) = 0;
 };
 
-class PLDoNothing: public PropagationLaw {
+class OOFEM_EXPORT PLDoNothing: public PropagationLaw {
 public:
-	PLDoNothing() {};
-	virtual ~PLDoNothing() {};
+    PLDoNothing() {};
+    virtual ~PLDoNothing() {};
 
     virtual const char *giveClassName() const { return "PLDoNothing"; }
     virtual const char *giveInputRecordName() const { return _IFT_PLDoNothing_Name; }
@@ -84,10 +86,10 @@ public:
 	virtual void propagateInterfaces(EnrichmentDomain &ioEnrDom) {};
 };
 
-class PLCrackPrescribedDir: public PropagationLaw {
+class OOFEM_EXPORT PLCrackPrescribedDir: public PropagationLaw {
 public:
-	PLCrackPrescribedDir():mAngle(0.0), mIncrementLength(0.0) {};
-	virtual ~PLCrackPrescribedDir() {};
+    PLCrackPrescribedDir():mAngle(0.0), mIncrementLength(0.0) {};
+    virtual ~PLCrackPrescribedDir() {};
 
     virtual const char *giveClassName() const { return "PLCrackPrescribedDir"; }
     virtual const char *giveInputRecordName() const { return _IFT_PLCrackPrescribedDir_Name; }
@@ -95,10 +97,10 @@ public:
     virtual IRResultType initializeFrom(InputRecord *ir);
     virtual void giveInputRecord(DynamicInputRecord &input);
 
-	virtual void propagateInterfaces(EnrichmentDomain &ioEnrDom);
+    virtual void propagateInterfaces(EnrichmentDomain &ioEnrDom);
 
 protected:
-	double mAngle, mIncrementLength;
+    double mAngle, mIncrementLength;
 };
 
 } // end namespace oofem

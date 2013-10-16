@@ -58,7 +58,7 @@ class SparseLinearSystemNM;
  * 
  * @author Mikael Öhman
  */
-class MixedGradientPressureWeakPeriodic : public MixedGradientPressureBC
+class OOFEM_EXPORT MixedGradientPressureWeakPeriodic : public MixedGradientPressureBC
 {
 protected:
     /// Prescribed gradient @f$ d_{\mathrm{dev},ij} @f$.

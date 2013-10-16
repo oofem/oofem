@@ -44,7 +44,7 @@ namespace oofem {
  * The functions that need geometric information, a linear interpolation is assumed (for geometry). This means functions such as evaldNdx.
  * @author Mikael Öhman
  */
-class FEI2dLineHermite : public FEInterpolation2d
+class OOFEM_EXPORT FEI2dLineHermite : public FEInterpolation2d
 {
 public:
     FEI2dLineHermite(int ind1, int ind2) : FEInterpolation2d(1, ind1, ind2) {}

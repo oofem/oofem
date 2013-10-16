@@ -63,7 +63,7 @@ namespace oofem {
 /**
  * Class implementing single timer, providing wall clock and user time capabilities.
  */
-class Timer
+class OOFEM_EXPORT Timer
 {
     /// Wall clock time structures.
     oofem_timeval start_wtime, end_wtime;
@@ -123,7 +123,7 @@ private:
  * It can handle several timers independently, each corresponding to different solution stage, etc.
  * Each timer is capable to track elapsed wall clock time as well as user time.
  */
-class EngngModelTimer
+class OOFEM_EXPORT EngngModelTimer
 {
 public:
     /**

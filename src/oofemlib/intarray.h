@@ -41,6 +41,7 @@
 #ifndef intarray_h
 #define intarray_h
 
+#include "oofemcfg.h"
 #include "contextioresulttype.h"
 #include "contextmode.h"
 
@@ -72,7 +73,7 @@ class CommunicationBuffer;
  * if further request for growing then is necessary memory reallocation.
  * This process is controlled in resize member function.
  */
-class IntArray
+class OOFEM_EXPORT IntArray
 {
 private:
     /// Size of array.

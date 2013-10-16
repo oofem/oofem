@@ -41,6 +41,7 @@
 #ifndef gausspoint_h
 #define gausspoint_h
 
+#include "oofemcfg.h"
 #include "integrationrule.h"
 #include "integrationpointstatus.h"
 #include "element.h"
@@ -89,7 +90,7 @@ class IntegrationRule;
  * to compute its jacobian, for example. These coordinates are stored in localCoordinates attribute.
  *
  */
-class GaussPoint
+class OOFEM_EXPORT GaussPoint
 {
 private:
     /// Number.

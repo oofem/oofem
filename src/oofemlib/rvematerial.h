@@ -55,7 +55,7 @@ namespace oofem {
 /**
  * @author Carl Sandström
  */
-class RVEMaterial //: virtual public Material
+class OOFEM_EXPORT RVEMaterial //: virtual public Material
 {
 private:
     //int stdoutFID;

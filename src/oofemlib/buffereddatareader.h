@@ -50,7 +50,7 @@ namespace oofem {
  * written in correct order, which determined by the coded sequence of
  * component initialization and described in input manual.
  */
-class BufferedDataReader : public DataReader
+class OOFEM_EXPORT BufferedDataReader : public DataReader
 {
 protected:
     OOFEMTXTInputRecord ir;

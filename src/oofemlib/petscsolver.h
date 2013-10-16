@@ -46,7 +46,7 @@ class FloatMatrix;
  * Implements the solution of linear system of equation in the form @f$A\cdot x=b@f$ using solvers
  * from PETSc library. Only works with the PETSc sparse matrix implementation.
  */
-class PetscSolver : public SparseLinearSystemNM
+class OOFEM_EXPORT PetscSolver : public SparseLinearSystemNM
 {
 public:
     /**

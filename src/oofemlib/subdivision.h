@@ -69,7 +69,7 @@ class TimeStep;
  * based on M.C. Rivara. Local modification of meshes for adaptive and/or multigrid
  * finite-element methods. J. Comput. Appl. Math., 36:79–89, 1991.
  */
-class Subdivision : public MesherInterface
+class OOFEM_EXPORT Subdivision : public MesherInterface
 {
 protected:
     class RS_Mesh;

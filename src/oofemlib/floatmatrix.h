@@ -41,6 +41,7 @@
 #ifndef flotmtrx_h
 #define flotmtrx_h
 
+#include "oofemcfg.h"
 #include "contextioresulttype.h"
 #include "contextmode.h"
 
@@ -85,7 +86,7 @@ class CommunicationBuffer;
  *   If further request for growing then is necessary memory reallocation.
  *   This process is controlled in resize member function.
  */
-class FloatMatrix
+class OOFEM_EXPORT FloatMatrix
 {
 protected:
     /// Number of rows.

@@ -37,6 +37,8 @@
 #include <vector>
 #include <string>
 
+#include "oofemcfg.h"
+
 namespace oofem {
 /**
  * String bracket- and quotation-aware string tokenizer.
@@ -45,7 +47,7 @@ namespace oofem {
  * Tokenizer recognizes "quoted strings" and structured tokens that are
  * bounded by '{' '}' pairs, can be nested and represent single token.
  */
-class Tokenizer
+class OOFEM_EXPORT Tokenizer
 {
 private:
     /// Array of tokens

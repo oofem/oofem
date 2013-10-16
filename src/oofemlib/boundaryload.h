@@ -104,7 +104,7 @@ class TimeStep;
  *   (number of DOFs is also size of load component array attribute and should correspond to number of DOFs on loaded
  *   entity).
  */
-class BoundaryLoad : public Load
+class OOFEM_EXPORT BoundaryLoad : public Load
 {
        
 public:    

@@ -44,7 +44,7 @@ namespace oofem {
 /**
  * This class provides an sparse matrix interface to PETSc Matrices
  */
-class PetscSparseMtrx : public SparseMtrx
+class OOFEM_EXPORT PetscSparseMtrx : public SparseMtrx
 {
 protected:
     Mat mtrx;

@@ -49,7 +49,7 @@ namespace oofem {
  *
  * Its task is to return the body force @f$ \rho a @f$
  */
-class DeadWeight : public BodyLoad
+class OOFEM_EXPORT DeadWeight : public BodyLoad
 {
 public:
     /// Constructor

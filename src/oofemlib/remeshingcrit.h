@@ -58,7 +58,7 @@ enum RemeshingStrategy { NoRemeshing_RS, RemeshingFromCurrentState_RS, Remeshing
  * The remeshing criteria is maintained by the corresponding error estimator. This is mainly due to fact, that is
  * necessary for given EE to create compatible RC. In our concept, the EE is responsible.
  */
-class RemeshingCriteria : public FEMComponent
+class OOFEM_EXPORT RemeshingCriteria : public FEMComponent
 {
 protected:
     ErrorEstimator *ee;

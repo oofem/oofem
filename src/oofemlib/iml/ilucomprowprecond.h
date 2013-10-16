@@ -52,7 +52,7 @@ namespace oofem {
  * Implemantation of ILU (Incomplete LU) Preconditioner for compressed row sparse matrices.
  * Fill - up supported.
  */
-class CompRow_ILUPreconditioner : public Preconditioner
+class OOFEM_EXPORT CompRow_ILUPreconditioner : public Preconditioner
 {
 private:
     DynCompRow A;

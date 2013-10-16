@@ -55,7 +55,7 @@ namespace oofem {
  * The values are repeated after 'period'. 'AddTF' parameter specifies number
  * of function to add.
  */
-class PeriodicPiecewiseLinFunction : public PiecewiseLinFunction
+class OOFEM_EXPORT PeriodicPiecewiseLinFunction : public PiecewiseLinFunction
 {
 private:
     /// If nonzero, the value of time function specified by addTF is added to computed value.

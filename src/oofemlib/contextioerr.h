@@ -35,6 +35,7 @@
 #ifndef contextioerr_h
 #define contextioerr_h
 
+#include "oofemcfg.h"
 #include "contextioresulttype.h"
 
 namespace oofem {
@@ -42,7 +43,7 @@ namespace oofem {
  * Context IO exception class
  * @todo Document more.
  */
-class ContextIOERR
+class OOFEM_EXPORT ContextIOERR
 {
     contextIOResultType error;
     const char *msg, *file;

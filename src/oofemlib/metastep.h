@@ -35,6 +35,7 @@
 #ifndef metastep_h
 #define metastep_h
 
+#include "oofemcfg.h"
 #include "inputrecord.h"
 
 ///@name Input fields for meta step
@@ -57,7 +58,7 @@ class EngngModel;
  * The meta step maintains its number, the total number of steps it represent, time increment and
  * its e-model attributes.
  */
-class MetaStep
+class OOFEM_EXPORT MetaStep
 {
 protected:
     /// Engineering model of receiver.

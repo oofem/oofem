@@ -38,10 +38,11 @@
 #include <list>
 #include <cstdlib>
 
+#include "oofemcfg.h"
+#include "floatarray.h"
 #ifdef __OOFEG
  #include "oofeggraphiccontext.h"
 #endif
-#include "floatarray.h"
 
 
 namespace oofem {
@@ -55,7 +56,7 @@ namespace oofem {
  * The attributes of a vertex are its coordinates.
  * This class is a part of geometry toolbox.
  */
-class Vertex
+class OOFEM_EXPORT Vertex
 {
 public:
     FloatArray coords;
@@ -86,7 +87,7 @@ public:
  * testing if point is inside polygon are provided. Also iterators over polygon vertices and edges are provided.
  * This class is a part of geometry toolbox.
  */
-class Polygon
+class OOFEM_EXPORT Polygon
 {
     std :: list< Vertex >vertices;
 public:
@@ -174,7 +175,7 @@ public:
  * that can represent various boolean operations.
  * This class is a part of geometry toolbox.
  */
-class Graph
+class OOFEM_EXPORT Graph
 {
 protected:
     enum nodeStatus { NS_Vertex, NS_IntersectionVertex, NS_Intersection };
@@ -229,7 +230,7 @@ protected:
     void clear();
 };
 
-class GT_Exception
+class OOFEM_EXPORT GT_Exception
 {
     const char *msg, *file;
     int line;

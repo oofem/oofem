@@ -45,7 +45,7 @@ class FloatMatrix;
 /**
  * Specialization of a floating point array for representing a stress state.
  */
-class StressVector : public StressStrainBaseVector
+class OOFEM_EXPORT StressVector : public StressStrainBaseVector
 {
 public:
     /// Constructor. Creates zero value stress/strain vector for given material mode.

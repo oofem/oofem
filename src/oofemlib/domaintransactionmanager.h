@@ -36,6 +36,9 @@
 #define domaintransactionmanager_h
 
 #ifdef __PARALLEL_MODE
+
+ #include "oofemcfg.h"
+
  #include <map>
 
 namespace oofem {
@@ -71,7 +74,7 @@ class Element;
  * manager keeps only modified records, the original records are not returned. They must be requested from original domain,
  * so it is clear that their modification is not part of transaction but it directly changes domain data.
  */
-class DomainTransactionManager
+class OOFEM_EXPORT DomainTransactionManager
 {
 public:
     enum DomainComponentType { DCT_DofManager, DCT_Element };

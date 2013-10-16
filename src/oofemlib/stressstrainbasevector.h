@@ -53,7 +53,7 @@ typedef char StressStrainMatMode;
  * relations (at element level), and corresponding component are included stress/strain reduced vectors.
  * Methods for converting vectors between reduced and full format are provided.
  */
-class StressStrainBaseVector : public FloatArray
+class OOFEM_EXPORT StressStrainBaseVector : public FloatArray
 {
 protected:
     /// Stress strain mode.

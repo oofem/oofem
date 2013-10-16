@@ -57,7 +57,7 @@ namespace oofem {
  *
  * @author Carl Sandström
  */
-class MatlabExportModule : public ExportModule
+class OOFEM_EXPORT MatlabExportModule : public ExportModule
 {
 protected:
     /// list of InternalStateType values, identifying the selected vars for export

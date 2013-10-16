@@ -47,7 +47,7 @@ class EngngModel;
  * Class representing and implementing InitModuleManager. It is attribute of EngngModel.
  * It manages the init modules, which perform module - specific init oprations.
  */
-class InitModuleManager : public ModuleManager< InitModule >
+class OOFEM_EXPORT InitModuleManager : public ModuleManager< InitModule >
 {
 public:
     InitModuleManager(EngngModel *emodel);

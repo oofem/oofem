@@ -46,7 +46,7 @@ namespace oofem {
  * Class representing the Input Record for OOFEM txt input file format.
  * The input record is represented as string consisting of several fields.
  */
-class OOFEMTXTInputRecord : public InputRecord
+class OOFEM_EXPORT OOFEMTXTInputRecord : public InputRecord
 {
 protected:
     /**

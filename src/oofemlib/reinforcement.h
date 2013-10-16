@@ -55,7 +55,7 @@ namespace oofem {
  *
  * Its task is to return the body force @f$ \rho a @f$
  */
-class Reinforcement : public BodyLoad
+class OOFEM_EXPORT Reinforcement : public BodyLoad
 {
  protected:
   double porosity;

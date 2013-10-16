@@ -82,7 +82,7 @@ class NonlocalMaterialStatusExtension;
  * @note{Materials statuses are attributes of GaussPoints, they are stored in
  * MatStatus variable of GaussPoint class instance.}
  */
-class MaterialStatus : public IntegrationPointStatus
+class OOFEM_EXPORT MaterialStatus : public IntegrationPointStatus
 {
 public:
     /**

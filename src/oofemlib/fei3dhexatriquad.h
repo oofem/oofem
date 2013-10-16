@@ -42,7 +42,7 @@ namespace oofem {
  * Class representing implementation of tri-quadratic hexahedra interpolation class.
  * @author Mikael Öhman
  */
-class FEI3dHexaTriQuad : public FEI3dHexaQuad
+class OOFEM_EXPORT FEI3dHexaTriQuad : public FEI3dHexaQuad
 {
 public:
     FEI3dHexaTriQuad() : FEI3dHexaQuad() { }

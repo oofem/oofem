@@ -78,7 +78,7 @@ namespace oofem {
  * which are requested by particular material models. These parameters can be requested using get service and
  * include those defined by CrossSectionProperty.
  */
-class SimpleCrossSection : public StructuralCrossSection
+class OOFEM_EXPORT SimpleCrossSection : public StructuralCrossSection
 {
 public:
     /** 

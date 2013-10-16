@@ -35,6 +35,7 @@
 #ifndef sloangraph_h
 #define sloangraph_h
 
+#include "oofemcfg.h"
 #include "sloangraphnode.h"
 #include "sloanlevelstruct.h"
 #include "intarray.h"
@@ -75,7 +76,7 @@ class Domain;
  * @author Milan Jirasek
  * @author Borek Patzak
  */
-class SloanGraph
+class OOFEM_EXPORT SloanGraph
 {
 public:
     /// Quality type definition.
@@ -205,7 +206,7 @@ private:
 #endif
 };
 
-class SloanNodalDegreeOrderingCrit
+class OOFEM_EXPORT SloanNodalDegreeOrderingCrit
 {
     SloanGraph *graph;
 public:

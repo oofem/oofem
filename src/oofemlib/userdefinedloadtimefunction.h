@@ -53,7 +53,7 @@ namespace oofem {
  * Load time function typically belongs to domain and is
  * attribute of one or more loads. Generally load time function is real function of time (@f$y=f(t)@f$).
  */
-class UserDefinedLoadTimeFunction : public LoadTimeFunction
+class OOFEM_EXPORT UserDefinedLoadTimeFunction : public LoadTimeFunction
 {
 private:
     /// Expression for the function value.

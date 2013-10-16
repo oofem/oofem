@@ -78,7 +78,7 @@ namespace oofem {
  * Implementation of symmetric sparse matrix stored using compressed column/row storage.
  * Only the lower part is stored.
  */
-class SymCompCol : public CompCol
+class OOFEM_EXPORT SymCompCol : public CompCol
 {
 public:
     /**

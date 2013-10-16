@@ -35,6 +35,7 @@
 #ifndef classfactory_h
 #define classfactory_h
 
+#include "oofemcfg.h"
 #include "sparsemtrxtype.h"
 #include "errorestimatortype.h"
 #include "doftype.h"
@@ -171,14 +172,14 @@ template< typename T > FailureCriteriaStatus *failureCriteriaCreator(int n, Fail
  * 
  * @note To register new elements on startup, you must call GiveClassFactory to ensure that the global class factory is created first. This is ensured if you use the corresponding macro.
  */
-class ClassFactory
+class OOFEM_EXPORT ClassFactory
 {
     struct CaseComp
     {
         int operator()(const std :: string &a, const std :: string &b) const;
     };
 
-protected:
+private:
     /// Associative container containing element creators with element name as key.
     std :: map < std :: string, Element * ( * )(int, Domain *), CaseComp > elemList;
     /// Associative container containing dofmanager creators with dofmanager  name as key.

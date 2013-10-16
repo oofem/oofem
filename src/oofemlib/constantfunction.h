@@ -44,7 +44,7 @@ namespace oofem {
 /**
  * Class implementing time function that is constant in time; @f$ f(t) = C @f$.
  */
-class ConstantFunction : public LoadTimeFunction
+class OOFEM_EXPORT ConstantFunction : public LoadTimeFunction
 {
 private:
     /// Value of receiver.

@@ -57,7 +57,7 @@ class TimeStep;
  * This base class is an abstraction/implementation for numerical method solving
  * line search optimization problem.
  */
-class LineSearchNM : public NumericalMethod
+class OOFEM_EXPORT LineSearchNM : public NumericalMethod
 {
 public:
     enum LS_status { ls_ok, ls_failed };

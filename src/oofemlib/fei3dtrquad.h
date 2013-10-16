@@ -44,7 +44,7 @@ namespace oofem {
  * @author Jim Brozoulis
  * @author Mikael Öhman
  */
-class FEI3dTrQuad : public FEInterpolation3d
+class OOFEM_EXPORT FEI3dTrQuad : public FEInterpolation3d
 {
 public:
     FEI3dTrQuad() : FEInterpolation3d(2) { }

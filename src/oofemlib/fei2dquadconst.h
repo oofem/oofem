@@ -41,7 +41,7 @@ namespace oofem {
 /**
  * Class representing a 2d quadrilateral with constant interpolation.
  */
-class FEI2dQuadConst : public FEInterpolation2d
+class OOFEM_EXPORT FEI2dQuadConst : public FEInterpolation2d
 {
 public:
     FEI2dQuadConst(int ind1, int ind2) : FEInterpolation2d(0, ind1, ind2) {}

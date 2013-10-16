@@ -44,7 +44,7 @@
 #include <cstdio>
 
 namespace oofem {
-class Logger
+class OOFEM_EXPORT Logger
 {
 public:
     /// Type defining basic log levels.
@@ -89,8 +89,8 @@ protected:
     const char *giveLevelName(logLevelType l) const;
 };
 
-extern Logger oofem_logger;
-extern Logger oofem_errLogger;
+extern OOFEM_EXPORT Logger oofem_logger;
+extern OOFEM_EXPORT Logger oofem_errLogger;
 
 /**@
  * General log-family macros (those for error and warning reporting).

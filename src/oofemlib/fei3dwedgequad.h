@@ -45,7 +45,7 @@ namespace oofem {
  * @author Milan Jirasek
  * @author Mikael Öhman
  */
-class FEI3dWedgeQuad : public FEInterpolation3d
+class OOFEM_EXPORT FEI3dWedgeQuad : public FEInterpolation3d
 {
 protected:
 

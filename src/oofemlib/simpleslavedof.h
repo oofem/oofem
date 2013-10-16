@@ -67,7 +67,7 @@ class InitialCondition;
  * (i.e. displacement in x-dir, or rotations) in such node.
  *
  */
-class SimpleSlaveDof : public Dof
+class OOFEM_EXPORT SimpleSlaveDof : public Dof
 {
 private:
     /// Number of DofManager containing master dof (Master DofManager)

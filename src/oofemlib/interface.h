@@ -35,6 +35,8 @@
 #ifndef interface_h
 #define interface_h
 
+#include "oofemcfg.h"
+
 namespace oofem {
 /**
  * Class Interface. Interface class is abstract base class.
@@ -75,7 +77,7 @@ namespace oofem {
  * clearly defined units (well structured code) which can be selectively implemented by some classes.
  */
 
-class Interface
+class OOFEM_EXPORT Interface
 {
 public:
     /// Constructor.

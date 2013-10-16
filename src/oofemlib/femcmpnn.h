@@ -43,6 +43,7 @@
 
 #include <string>
 
+#include "oofemcfg.h"
 #include "error.h"
 #include "interfacetype.h"
 #include "inputrecord.h"
@@ -75,7 +76,7 @@ class DynamicInputRecord;
  * @see error handles error reporting.
  * @see checkConsistency to ensure, whether internal data structures are consistent.
  */
-class FEMComponent
+class OOFEM_EXPORT FEMComponent
 {
 protected:
     /// Component number

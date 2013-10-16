@@ -44,7 +44,7 @@ namespace oofem {
 /**
  * Interpolation class for NURBS.
  */
-class NURBSInterpolation : public BSplineInterpolation
+class OOFEM_EXPORT NURBSInterpolation : public BSplineInterpolation
 {
 public:
     NURBSInterpolation(int nsd) : BSplineInterpolation(nsd) { }

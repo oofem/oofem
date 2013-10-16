@@ -48,7 +48,7 @@ namespace oofem {
  * The Skyline contains 'size' row-column segments, each of them of any size;
  * these are stored in the attribute 'rowColumns'.
  */
-class SkylineUnsym : public SparseMtrx
+class OOFEM_EXPORT SkylineUnsym : public SparseMtrx
 {
 protected:
     /// Row column segments

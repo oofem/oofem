@@ -89,7 +89,7 @@ class InitialCondition;
  *   unknown corresponds.
  *
  */
-class MasterDof  : public Dof
+class OOFEM_EXPORT MasterDof  : public Dof
 {
 protected:
     /// Corresponding equation number (positive value) or prescribed equation number (negative value).

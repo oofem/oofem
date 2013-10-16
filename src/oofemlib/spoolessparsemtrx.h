@@ -47,7 +47,7 @@ namespace oofem {
 /**
  * This class provides an sparse matrix interface to SPOOLES InpMtrx
  */
-class SpoolesSparseMtrx : public SparseMtrx
+class OOFEM_EXPORT SpoolesSparseMtrx : public SparseMtrx
 {
 protected:
     InpMtx *mtrx;

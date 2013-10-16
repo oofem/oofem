@@ -35,6 +35,7 @@
 #ifndef precond_h
 #define precond_h
 
+#include "oofemcfg.h"
 #include "floatarray.h"
 #include "sparsemtrx.h"
 #include "inputrecord.h"
@@ -49,7 +50,7 @@ namespace oofem {
  * course of a basic iterartion, and thus can be seen as taking some input vector
  * and return a corresponding vector.
  */
-class Preconditioner
+class OOFEM_EXPORT Preconditioner
 {
 public:
     /**

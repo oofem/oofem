@@ -35,6 +35,7 @@
 #ifndef homogenize_h
 #define homogenize_h
 
+#include "oofemcfg.h"
 #include "floatarray.h"
 #include "floatmatrix.h"
 #include "error.h"
@@ -46,7 +47,7 @@ namespace oofem {
  * Only isotropic materials and spherical inclusions are considered for the homogenization. Many schemes work with unlimited number of elastic phases.
  */
 
-class Homogenize
+class OOFEM_EXPORT Homogenize
 {
 public:
 

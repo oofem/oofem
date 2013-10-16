@@ -87,7 +87,7 @@ class EngngModel;
  * changes are necessary in the computational sequence.
  * The above artifice has been introduced by Payne and Irons.
  */
-class NRSolver : public SparseNonLinearSystemNM
+class OOFEM_EXPORT NRSolver : public SparseNonLinearSystemNM
 {
 private:
     enum nrsolver_ModeType { nrsolverModifiedNRM, nrsolverFullNRM, nrsolverAccelNRM };

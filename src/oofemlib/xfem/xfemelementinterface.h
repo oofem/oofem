@@ -54,7 +54,7 @@ class XfemManager;
  * Provides Xfem interface for an element.
  * @author Erik Svenning
  */
-class XfemElementInterface : public Interface
+class OOFEM_EXPORT XfemElementInterface : public Interface
 {
 protected:
     Element *element;

@@ -48,7 +48,7 @@ class TimeStep;
  *   based on the remeshing criteria.
  * - Possibly to launch the mesher and transform its output to oofem input.
  */
-class FreemInterface : public MesherInterface
+class OOFEM_EXPORT FreemInterface : public MesherInterface
 {
 public:
     /// Constructor

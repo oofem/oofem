@@ -53,7 +53,7 @@ class TimeStep;
  * This interface allows material model to add those services required to
  * compute and assemble nonlocal contribution to stiffness matrix.
  */
-class NonlocalMaterialStiffnessInterface : public Interface
+class OOFEM_EXPORT NonlocalMaterialStiffnessInterface : public Interface
 {
 public:
     /// Constructor.

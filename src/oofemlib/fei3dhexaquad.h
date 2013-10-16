@@ -67,7 +67,7 @@ namespace oofem {
  * @author Ladislav Svoboda
  * @author Mikael Öhman
  */
-class FEI3dHexaQuad : public FEInterpolation3d
+class OOFEM_EXPORT FEI3dHexaQuad : public FEInterpolation3d
 {
 public:
     FEI3dHexaQuad() : FEInterpolation3d(2) { }

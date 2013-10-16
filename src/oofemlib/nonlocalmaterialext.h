@@ -85,7 +85,7 @@ struct localIntegrationRecord {
  * @see localIntegrationRecord
  * @see MaterialStatus::buildNonlocalPointTable
  */
-class NonlocalMaterialStatusExtensionInterface : public Interface
+class OOFEM_EXPORT NonlocalMaterialStatusExtensionInterface : public Interface
 {
 protected:
     /// List containing localIntegrationRecord values.
@@ -131,7 +131,7 @@ public:
  * from one of its derived classes (which declare services and variables corresponding to specific
  * analysis type).
  */
-class NonlocalMaterialExtensionInterface : public Interface
+class OOFEM_EXPORT NonlocalMaterialExtensionInterface : public Interface
 {
 protected:
     /*

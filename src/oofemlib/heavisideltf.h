@@ -56,7 +56,7 @@ namespace oofem {
  * H(t) = \begin{cases} 0,& t\leq 0  \\ 1, & t>0 \end{cases}
  * @f]
  */
-class HeavisideLTF : public LoadTimeFunction
+class OOFEM_EXPORT HeavisideLTF : public LoadTimeFunction
 {
 private:
     double origin, value;

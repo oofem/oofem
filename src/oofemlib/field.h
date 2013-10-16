@@ -35,6 +35,7 @@
 #ifndef field_h
 #define field_h
 
+#include "oofemcfg.h"
 #include "domain.h"
 #include "valuemodetype.h"
 #include "contextioresulttype.h"
@@ -71,7 +72,7 @@ class FloatArray;
  * Field is able to evaluate its value at any point of interest. The field is usually associated to
  * specific domain.
  */
-class Field
+class OOFEM_EXPORT Field
 {
 protected:
     FieldType type;

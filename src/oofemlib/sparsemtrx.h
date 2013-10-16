@@ -35,6 +35,7 @@
 #ifndef sparsemtrx_h
 #define sparsemtrx_h
 
+#include "oofemcfg.h"
 #include "floatarray.h"
 #include "floatmatrix.h"
 #include "intarray.h"
@@ -57,7 +58,7 @@ class TimeStep;
  * - Multiplication by array
  * - Possible factorization and back substitution.
  */
-class SparseMtrx
+class OOFEM_EXPORT SparseMtrx
 {
 public:
     typedef long SparseMtrxVersionType;

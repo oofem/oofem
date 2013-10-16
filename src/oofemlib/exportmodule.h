@@ -35,6 +35,7 @@
 #ifndef exportmodule_h
 #define exportmodule_h
 
+#include "oofemcfg.h"
 #include "intarray.h"
 #include "inputrecord.h"
 
@@ -63,7 +64,7 @@ class Range;
  * The output for given time step is done only if this step is selected by one of above
  * described method.
  */
-class ExportModule
+class OOFEM_EXPORT ExportModule
 {
 protected:
     /// Component number.

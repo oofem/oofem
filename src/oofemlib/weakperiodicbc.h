@@ -62,7 +62,7 @@ enum basisType { monomial=0, trigonometric=1, legendre=2 };
  *
  * @author Carl Sandström
  */
-class WeakPeriodicBoundaryCondition : public ActiveBoundaryCondition
+class OOFEM_EXPORT WeakPeriodicBoundaryCondition : public ActiveBoundaryCondition
 {
 private:
 

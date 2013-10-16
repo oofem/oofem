@@ -54,7 +54,7 @@ namespace oofem {
  * Usually, an instance of randomGenerator is used to generate
  * the values in integration points.
  */
-class RandomMaterialStatusExtensionInterface : public Interface
+class OOFEM_EXPORT RandomMaterialStatusExtensionInterface : public Interface
 {
 protected:
     /// Dictionary containing material model values.
@@ -89,7 +89,7 @@ public:
  * The default implementation of provided services assumes that material statuses
  * created by the material are derived from base RandomMaterialStatusExtensionInterface.
  */
-class RandomMaterialExtensionInterface : public Interface
+class OOFEM_EXPORT RandomMaterialExtensionInterface : public Interface
 {
 protected:
     /// Array of randomized variables (identified by a key).

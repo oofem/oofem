@@ -50,7 +50,7 @@ class InputRecord;
  * @author Mikael Öhman
  * @todo InputRecordType is ignored. It shouldn't be too difficult to respect it, but it's not necessary.
  */
-class DynamicDataReader : public DataReader
+class OOFEM_EXPORT DynamicDataReader : public DataReader
 {
 protected:
     /// Keeps track of the current position in the list

@@ -59,7 +59,7 @@ class FloatMatrix;
  * Implements the solution of linear system of equation in the form @f$ A\cdot x = b @f$ using solvers
  * from SPOOLES library. Can work with only SPOOLES sparse matrix implementation.
  */
-class SpoolesSolver : public SparseLinearSystemNM
+class OOFEM_EXPORT SpoolesSolver : public SparseLinearSystemNM
 {
 private:
     /// Last mapped LHS matrix

@@ -57,7 +57,7 @@ namespace oofem {
  * the product of its value (stored in componentArray) by the value of
  * the associated load time function at given time step.
  */
-class Load : public GeneralBoundaryCondition
+class OOFEM_EXPORT Load : public GeneralBoundaryCondition
 {
 public:
     /**

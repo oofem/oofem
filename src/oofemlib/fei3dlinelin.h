@@ -41,7 +41,7 @@ namespace oofem {
 /**
  * Class representing a linear line interpolation in 3D.
  */
-class FEI3dLineLin : public FEInterpolation3d
+class OOFEM_EXPORT FEI3dLineLin : public FEInterpolation3d
 {
 public:
     FEI3dLineLin() : FEInterpolation3d(1) { };

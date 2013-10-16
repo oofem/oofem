@@ -44,7 +44,7 @@ namespace oofem {
  * The slave dof is fully dependent upon master dofs, therefore it's equation number is undefined.
  * It can have own boundary conditions - it is not yet implemented.
  */
-class SlaveDof : public Dof
+class OOFEM_EXPORT SlaveDof : public Dof
 {
 protected:
     /// Count of master DofManagers.

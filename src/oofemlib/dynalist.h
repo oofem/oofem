@@ -39,7 +39,7 @@ namespace oofem {
 template< class T >class dynaList;
 template< class T >class dynaListIterator;
 
-template< class T >class listItem
+template< class T >class OOFEM_EXPORT listItem
 {
 public:
     T data;
@@ -67,7 +67,7 @@ public:
  * constant time, no elements are moved, only internal pointers are manipulated.
  * To access elements in a list, you must use iterators. List provide efficient bidirectional iterator.
  */
-template< class T >class dynaList
+template< class T >class OOFEM_EXPORT dynaList
 {
 public:
     /// List iterator type.
@@ -125,14 +125,13 @@ public:
     iterator end() { return last; }
     iterator end() const { return last; }
 
-protected:
     friend class dynaListIterator< T >;
 };
 
 /**
  * Bidirectional iterator for dynaList.
  */
-template< class T >class dynaListIterator
+template< class T >class OOFEM_EXPORT dynaListIterator
 {
 protected:
     listItem< T > *node;

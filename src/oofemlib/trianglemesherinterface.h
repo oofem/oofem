@@ -37,6 +37,7 @@
 
 #include "floatarray.h"
 #include "intarray.h"
+#include "oofemcfg.h"
 
 #include <vector>
 
@@ -61,7 +62,7 @@ struct Triangle_PSLG
  * @see http://www.cs.cmu.edu/~quake/triangle.html
  * @author Mikael Öhman
  */
-class TriangleMesherInterface
+class OOFEM_EXPORT TriangleMesherInterface
 {
 protected:
     double minAngle;

@@ -35,6 +35,7 @@
 #ifndef nodalrecoverymodel_h
 #define nodalrecoverymodel_h
 
+#include "oofemcfg.h"
 #include "tdictionary.h"
 #include "intarray.h"
 #include "floatarray.h"
@@ -63,7 +64,7 @@ class ProblemCommunicator;
  * The NodalRecoveryModel class provides common array of nodal dictionaries, where
  * the recovered nodal values are stored for each region.
  */
-class NodalRecoveryModel
+class OOFEM_EXPORT NodalRecoveryModel
 {
 public:
     enum NodalRecoveryModelType { NRM_NodalAveraging = 0, NRM_ZienkiewiczZhu = 1,  NRM_SPR = 2 };

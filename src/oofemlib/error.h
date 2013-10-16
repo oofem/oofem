@@ -44,7 +44,7 @@
 
 namespace oofem {
 /** Cause oofem program termination by calling exit. */
-void oofem_exit(int code);
+OOFEM_EXPORT void oofem_exit(int code);
 
 /**@
  * Macros calling the error/warning service, which is defined for all classes

@@ -48,7 +48,7 @@ namespace oofem {
  * - Appending another pair to itself.
  *
  */
-class Pair
+class OOFEM_EXPORT Pair
 {
 private:
     /// Key.

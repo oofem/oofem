@@ -42,7 +42,7 @@ class StressVector;
 /**
  * Specialization of a floating point array for representing a strain state.
  */
-class StrainVector : public StressStrainBaseVector
+class OOFEM_EXPORT StrainVector : public StressStrainBaseVector
 {
 public:
     /// Constructor. Creates zero value stress/strain vector for given material mode.

@@ -35,6 +35,7 @@
 #define loadbalancer_h
 
 #ifdef __PARALLEL_MODE
+ #include "oofemcfg.h"
  #include "inputrecord.h"
  #include "interface.h"
  #include "alist.h"
@@ -85,7 +86,7 @@ class TimeStep;
  * It provides partition weights, reflecting their relative computational performance. These weights should
  * be continuously updated to reflect changing work load during solution process.
  */
-class LoadBalancerMonitor
+class OOFEM_EXPORT LoadBalancerMonitor
 {
 protected:
     EngngModel *emodel;
@@ -118,7 +119,7 @@ public:
  * on particular nodes. When difference in wall clock solution times is greater
  * than a threshold value, the load migration is performed.
  */
-class WallClockLoadBalancerMonitor : public LoadBalancerMonitor
+class OOFEM_EXPORT WallClockLoadBalancerMonitor : public LoadBalancerMonitor
 {
 protected:
     /// Declares min abs imbalance to perform relative imbalance check.
@@ -160,7 +161,7 @@ public:
  * preserving the locality as much as possible. In other words the new and existing partitioning
  * should be "similar".
  */
-class LoadBalancer
+class OOFEM_EXPORT LoadBalancer
 {
 public:
     /**
@@ -272,7 +273,7 @@ protected:
 };
 
 
-class LoadBalancerElementInterface : public Interface
+class OOFEM_EXPORT LoadBalancerElementInterface : public Interface
 {
 public:
     LoadBalancerElementInterface() { }
