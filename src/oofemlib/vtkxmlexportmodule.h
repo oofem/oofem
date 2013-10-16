@@ -193,9 +193,14 @@ public:
     /// Returns the smoother for primary variables (nodal averaging).
     NodalRecoveryModel *givePrimVarSmoother();
 
-    //Experimental // JB
+    
     #ifdef __VTK_MODULE
         vtkSmartPointer<vtkUnstructuredGrid> fileStream;
+        vtkSmartPointer<vtkPoints> nodes;
+        vtkSmartPointer<vtkIdList> elemNodeArray;
+
+        vtkSmartPointer<vtkDoubleArray> intVarArray;
+        vtkSmartPointer<vtkDoubleArray> primVarArray;
     #else
         FILE *fileStream;
     #endif
@@ -210,7 +215,7 @@ public:
 
 protected:
     /// Gives the full form of given symmetrically stored tensors, missing components are filled with zeros.
-    void makeFullForm(FloatArray &answer, const FloatArray &reducedForm, InternalStateValueType type, const IntArray &redIndx);
+    void makeFullForm(FloatArray &answer, const FloatArray &reducedForm);
 
     /// Returns the filename for the given time step.
     std::string giveOutputFileName(TimeStep *tStep);
@@ -310,8 +315,17 @@ void getCellVariableFromIS(FloatArray &answer, Element *el, InternalStateType ty
      */
     void writeVTKCollection();
 
-    void writeVTKPointData(FloatArray &valueArray, const char *name);
-    void writeVTKCellData(FloatArray &valueArray, const char *name);
+    #ifdef __VTK_MODULE
+        void writeVTKPointData(const char *name, vtkSmartPointer<vtkDoubleArray> varArray);
+    #else
+        void writeVTKPointData(FloatArray &valueArray);
+    #endif
+
+    #ifdef __VTK_MODULE
+        void writeVTKCellData(const char *name, vtkSmartPointer<vtkDoubleArray> varArray);
+    #else
+        void writeVTKCellData(FloatArray &valueArray);
+    #endif
 
     // Export of composite elements (built up from several subcells)
    

@@ -74,6 +74,10 @@ VTKXMLExportModule :: VTKXMLExportModule(int n, EngngModel *e) : ExportModule(n,
     primVarSmoother = NULL;
     smoother = NULL;
     redToFull.setValues(6, 1, 5, 9, 6, 3, 2);//position of xx, yy, zz, yz, xz, xy in tensor 
+
+#ifdef __VTK_MODULE
+    //this->intVarArray = vtkSmartPointer<vtkDoubleArray>::New();
+#endif
 }
 
 
@@ -132,30 +136,24 @@ VTKXMLExportModule :: terminate()
 
 
 void
-VTKXMLExportModule :: makeFullForm(FloatArray &answer, const FloatArray &reducedForm, InternalStateValueType type, const IntArray &redIndx)
+VTKXMLExportModule :: makeFullForm(FloatArray &answer, const FloatArray &reducedForm)
 {
     answer.resize(9);
     answer.zero();
-    if ( type == ISVT_TENSOR_S3 ) {
-        for (int i = 1; i <= redIndx.giveSize(); i++) {
-            if (redIndx.at(i) > 0) {
-                answer.at(redToFull.at(i)) = reducedForm.at(redIndx.at(i));
-            }
-        }
-    } else if ( type == ISVT_TENSOR_S3E ) {
-        for (int i = 1; i <= redIndx.giveSize(); i++) {
-            if (redIndx.at(i) > 3) {
-                answer.at(redToFull.at(i)) = reducedForm.at(i)*0.5;
-            } else if (redIndx.at(i) > 0) {
-                answer.at(redToFull.at(i)) = reducedForm.at(i);
-            }
-        }
+
+    for (int i = 1; i <= reducedForm.giveSize(); i++) {
+        answer.at(redToFull.at(i)) = reducedForm.at(i);
     }
+
     // Symmetrize
     answer.at(4) = answer.at(2);
     answer.at(7) = answer.at(3);
     answer.at(8) = answer.at(6);
+
 }
+
+
+
 
 std::string
 VTKXMLExportModule :: giveOutputFileName(TimeStep *tStep)
@@ -358,8 +356,8 @@ VTKXMLExportModule :: doOutput(TimeStep *tStep, bool forcedOutput)
 
 #ifdef __VTK_MODULE
     this->fileStream = vtkSmartPointer<vtkUnstructuredGrid>::New();
-    vtkSmartPointer<vtkPoints> nodes = vtkSmartPointer<vtkPoints>::New();
-    vtkSmartPointer<vtkIdList> elemNodeArray = vtkSmartPointer<vtkIdList>::New();
+    this->nodes = vtkSmartPointer<vtkPoints>::New();
+    this->elemNodeArray = vtkSmartPointer<vtkIdList>::New();
 
 #else
     this->fileStream = this->giveOutputStream(tStep); 
@@ -433,9 +431,9 @@ VTKXMLExportModule :: doOutput(TimeStep *tStep, bool forcedOutput)
     // Finilize the output:
     std::string fname = giveOutputFileName(tStep);
     #ifdef __VTK_MODULE
-// Code fragment intended for future support of composite elements in binary format
-
+    
 #if 0
+    // Code fragment intended for future support of composite elements in binary format
     // Doesn't as well as I would want it to, interface to VTK is to limited to control this.
     // * The PVTU-file is written by every process (seems to be impossible to avoid).
     // * Part files are renamed and time step and everything else is cut off => name collisions
@@ -444,14 +442,19 @@ VTKXMLExportModule :: doOutput(TimeStep *tStep, bool forcedOutput)
     writer->SetNumberOfPieces( this->emodel->giveNumberOfProcesses() );
     writer->SetStartPiece( this->emodel->giveRank() );
     writer->SetEndPiece( this->emodel->giveRank() );
+    
+
 #else
     vtkSmartPointer<vtkXMLUnstructuredGridWriter> writer = vtkSmartPointer<vtkXMLUnstructuredGridWriter>::New();
 #endif
+
     writer->SetFileName(fname.c_str());
-    writer->SetInput(this->fileStream);
+    writer->SetInput(this->fileStream); // VTK 4
+    //writer->SetInputData(this->fileStream); // VTK 6
+
     // Optional - set the mode. The default is binary.
     //writer->SetDataModeToBinary();
-    //writer->SetDataModeToAscii();
+    writer->SetDataModeToAscii();
     writer->Write();
     #else
         fprintf(this->fileStream, "</UnstructuredGrid>\n</VTKFile>");
@@ -679,14 +682,20 @@ VTKXMLExportModule :: writeVTKPiece(VTKPiece &vtkPiece, TimeStep *tStep)
     // Write output: node coords
     int numNodes = vtkPiece.giveNumberOfNodes();
     int numEl = vtkPiece.giveNumberOfCells();
-    FloatArray coords;
+    FloatArray vtkCoords(3), coords;
+
     #ifdef __VTK_MODULE
         for ( int inode = 1; inode <= numNodes; inode++ ) {
-            coords = &vtkPiece.nodeCoords[inode-1];
-            int dims = coords->giveSize();
-            nodes->InsertNextPoint(coords->at(1), dims >= 2 ? coords->at(2) : 0.0, dims >= 3 ? coords->at(3) : 0.0);
+            coords = vtkPiece.giveNodeCoords(inode);
+            vtkCoords.zero();
+            for ( int i = 1; i <= coords.giveSize(); i++ ) {
+                vtkCoords.at(i) = coords.at(i);
+            }        
+
+            this->nodes->InsertNextPoint(vtkCoords.at(1), vtkCoords.at(2), vtkCoords.at(3) );
+            this->fileStream->SetPoints(nodes);
         }
-        this->fileStream->SetPoints(nodes);
+    
     #else
         fprintf(this->fileStream, "<Piece NumberOfPoints=\"%d\" NumberOfCells=\"%d\">\n", numNodes, numEl);
         fprintf(this->fileStream, "<Points>\n <DataArray type=\"Float64\" NumberOfComponents=\"3\" format=\"ascii\"> ");
@@ -999,7 +1008,7 @@ VTKXMLExportModule :: getNodalVariableFromIS(FloatArray &answer, Node *node, Tim
         }
 
     } else if ( valType == ISVT_TENSOR_S3 || valType == ISVT_TENSOR_S3E ) {
-        this->makeFullForm(answer, *val, valType, redIndx); ///@todo broken since redIndx is not a valid array /JB
+        this->makeFullForm(answer, *val); 
       
     } else if ( valType == ISVT_TENSOR_G ) { // export general tensor values as scalars
         int isize = min( val->giveSize(), 9 );
@@ -1018,6 +1027,8 @@ VTKXMLExportModule :: getNodalVariableFromXFEMST(FloatArray &answer, Node *node,
 {
     // Recovers nodal values from XFEM state variables (e.g. levelset function)
     // Should return an array with proper size supported by VTK (1, 3 or 9)
+    // This could be moved into EnrichmentItem such that VTKExport doesn't need to know anything about XFEM
+
     const FloatArray *val = NULL;
     FloatArray valueArray;
 
@@ -1061,8 +1072,9 @@ VTKXMLExportModule :: getNodalVariableFromXFEMST(FloatArray &answer, Node *node,
             answer.at(i) = val->at(i);
         }
 
-    //} else if ( valType == ISVT_TENSOR_S3 || valType == ISVT_TENSOR_S3E ) {
-//        this->makeFullForm(answer, *val, valType, regionVarMap);
+
+    } else if ( valType == ISVT_TENSOR_S3 || valType == ISVT_TENSOR_S3E ) {
+        this->makeFullForm(answer, *val);
       
     } else if ( valType == ISVT_TENSOR_G ) { // export general tensor values as scalars
         int isize = min( val->giveSize(), 9 );
@@ -1087,23 +1099,34 @@ VTKXMLExportModule :: writeIntVars(VTKPiece &vtkPiece)
         int ncomponents = giveInternalStateTypeSize(valType);
         const char *name = __InternalStateTypeToString(type);
         int numNodes = vtkPiece.giveNumberOfNodes();
+        FloatArray valueArray;
 
         // Header  
         #ifdef __VTK_MODULE
-            vtkSmartPointer<vtkDoubleArray> intVarArray = vtkSmartPointer<vtkDoubleArray>::New();
-            intVarArray->SetName(name);
-            intVarArray->SetNumberOfComponents(ncomponents);
-            intVarArray->SetNumberOfTuples(numNodes);
-    
+            vtkSmartPointer<vtkDoubleArray> varArray = vtkSmartPointer<vtkDoubleArray>::New();
+            varArray->SetName(name);
+            varArray->SetNumberOfComponents(ncomponents);
+            varArray->SetNumberOfTuples(numNodes);
+
+            for ( int inode = 1; inode <= numNodes; inode++ ) {
+                valueArray = vtkPiece.giveInternalVarInNode(i, inode);
+                for (int i = 1; i <= ncomponents; ++i) {
+                    varArray->SetComponent( inode-1, i-1, valueArray.at(i) );
+                }
+            }
+            this->writeVTKPointData(name, varArray);
+
         #else
             fprintf( this->fileStream, " <DataArray type=\"Float64\" Name=\"%s\" NumberOfComponents=\"%d\" format=\"ascii\"> ", name, ncomponents );    
+            for ( int inode = 1; inode <= numNodes; inode++ ) {
+                valueArray = vtkPiece.giveInternalVarInNode(i, inode);
+                this->writeVTKPointData(valueArray);
+            } 
         #endif
 
-        FloatArray valueArray;
-        for ( int inode = 1; inode <= numNodes; inode++ ) {
-            valueArray = vtkPiece.giveInternalVarInNode(i, inode);
-            this->writeVTKPointData(valueArray, name);
-        } 
+        
+
+
 
         // Footer
         #ifndef __VTK_MODULE
@@ -1135,18 +1158,24 @@ VTKXMLExportModule :: writeXFEMVars(VTKPiece &vtkPiece)
             sprintf( name, "%s_%d ", namePart, xFemMan->giveEnrichmentItem(enrItIndex)->giveNumber() ); 
         
             #ifdef __VTK_MODULE
-                vtkSmartPointer<vtkDoubleArray> intVarArray = vtkSmartPointer<vtkDoubleArray>::New();
-                intVarArray->SetName(name);
-                intVarArray->SetNumberOfComponents(ncomponents);
-                intVarArray->SetNumberOfTuples(numNodes);
+                vtkSmartPointer<vtkDoubleArray> varArray = vtkSmartPointer<vtkDoubleArray>::New();
+                varArray->SetName(name);
+                varArray->SetNumberOfComponents(ncomponents);
+                varArray->SetNumberOfTuples(numNodes);
+                for ( int inode = 1; inode <= numNodes; inode++ ) {
+                    valueArray = vtkPiece.giveInternalXFEMVarInNode(field, enrItIndex, inode);
+                    for (int i = 1; i <= ncomponents; ++i) {
+                        varArray->SetComponent( inode-1, i-1, valueArray.at(i) );
+                    }
+                }
+                this->writeVTKPointData(name, varArray);
             #else
                 fprintf( this->fileStream, " <DataArray type=\"Float64\" Name=\"%s\" NumberOfComponents=\"%d\" format=\"ascii\"> ", name, ncomponents );    
+                for ( int inode = 1; inode <= numNodes; inode++ ) {            
+                    valueArray = vtkPiece.giveInternalXFEMVarInNode(field, enrItIndex, inode);
+                    this->writeVTKPointData(valueArray);
+                } 
             #endif
-            
-            for ( int inode = 1; inode <= numNodes; inode++ ) {            
-                valueArray = vtkPiece.giveInternalXFEMVarInNode(field, enrItIndex, inode);
-                this->writeVTKPointData(valueArray, name);
-            } 
 
             // Footer
             #ifndef __VTK_MODULE
@@ -1163,72 +1192,79 @@ VTKXMLExportModule :: writeXFEMVars(VTKPiece &vtkPiece)
 //----------------------------------------------------
 // Misc. functions
 //----------------------------------------------------
-void
-VTKXMLExportModule :: writeVTKPointData(FloatArray &valueArray, const char *name)
-{
-    
-    // Write the data to file 
-    int ncomponents = valueArray.giveSize();
 #ifdef __VTK_MODULE
-    for (int i = 1; i <= ncomponents; ++i) {
-        intVarArray->SetComponent(inode-1, i-1, valueArray.at(i));
-    }
+void
+VTKXMLExportModule :: writeVTKPointData(const char *name, vtkSmartPointer<vtkDoubleArray> varArray)
+{
+    // Write the data to file 
+    int ncomponents = varArray->GetNumberOfComponents();
     switch ( ncomponents ) {
     case 1:
         this->fileStream->GetPointData()->SetActiveScalars(name);
-        this->fileStream->GetPointData()->SetScalars(intVarArray);
+        this->fileStream->GetPointData()->SetScalars(varArray);
         break;
-    case 3
+    case 3:
         this->fileStream->GetPointData()->SetActiveVectors(name);
-        this->fileStream->GetPointData()->SetVectors(intVarArray);
-    case 9
+        this->fileStream->GetPointData()->SetVectors(varArray);
+        break;
+    case 9:
         this->fileStream->GetPointData()->SetActiveTensors(name);
-        this->fileStream->GetPointData()->SetTensors(intVarArray);
+        this->fileStream->GetPointData()->SetTensors(varArray);
         break;
     }
+
+}
 #else
-    for ( int i = 1; i <= ncomponents; i++ ) {
+void
+VTKXMLExportModule :: writeVTKPointData(FloatArray &valueArray)
+{   
+    // Write the data to file 
+    for ( int i = 1; i <= valueArray.giveSize(); i++ ) {
         fprintf( this->fileStream, "%e ", valueArray.at(i) );
     }
+}
 #endif
+
+
+
+
+
+#ifdef __VTK_MODULE
+void
+VTKXMLExportModule :: writeVTKCellData(const char *name, vtkSmartPointer<vtkDoubleArray> varArray)
+{
+  
+    // Write the data to file 
+    int ncomponents = varArray->GetNumberOfComponents();
+    switch ( ncomponents ) {
+    case 1:
+        this->fileStream->GetCellData()->SetActiveScalars(name);
+        this->fileStream->GetCellData()->SetScalars(varArray);
+        break;
+    case 3:
+        this->fileStream->GetCellData()->SetActiveVectors(name);
+        this->fileStream->GetCellData()->SetVectors(varArray);
+        break;
+    case 9:
+        this->fileStream->GetCellData()->SetActiveTensors(name);
+        this->fileStream->GetCellData()->SetTensors(varArray);
+        break;
+    }
 
 }
 
+#else
 
 void
-VTKXMLExportModule :: writeVTKCellData(FloatArray &valueArray, const char *name)
+VTKXMLExportModule :: writeVTKCellData(FloatArray &valueArray)
 {
-    
-    // Write the data to file 
-    int ncomponents = valueArray.giveSize();
-#ifdef __VTK_MODULE
-        switch ( ncomponents ) {
-        case 1:
-            cellVarsArray->SetTuple1(ielem-1, valueArray.at(1) ); 
-            this->fileStream->GetCellData()->SetActiveScalars(name);
-            this->fileStream->GetCellData()->SetScalars(cellVarsArray);
-            break;
-        case 3
-            cellVarsArray->SetTuple3(ielem-1,  valueArray.at(1), valueArray.at(2), valueArray.at(3) );
-            this->fileStream->GetCellData()->SetActiveVectors(name);
-            this->fileStream->GetCellData()->SetVectors(cellVarsArray);
-            break;
-        case 9:
-            for (int i = 1; i <= ncomponents; ++i) {
-                cellVarsArray->SetComponent(ielem-1, i-1, answer.at(i));
-            }
-            this->fileStream->GetCellData()->SetActiveTensors(name);
-            this->fileStream->GetCellData()->SetTensors(cellVarsArray);
-            break;
-        }
-#else
-        for ( int i = 1; i <= ncomponents; i++ ) {
-            fprintf( this->fileStream, "%e ", valueArray.at(i) );
-        }
+    // Write the data to file ///@todo exact copy of writeVTKPointData so remove
+    for ( int i = 1; i <= valueArray.giveSize(); i++ ) {
+        fprintf( this->fileStream, "%e ", valueArray.at(i) );
+    }
+}
 #endif
 
-
-}
 
 
 
@@ -1459,24 +1495,31 @@ VTKXMLExportModule :: writePrimaryVars(VTKPiece &vtkPiece)
         int ncomponents = giveInternalStateTypeSize(valType);
         int numNodes = vtkPiece.giveNumberOfNodes();
         const char *name = __UnknownTypeToString(type);
+        FloatArray valueArray; 
 
         // Header
     #ifdef __VTK_MODULE
-        vtkSmartPointer<vtkDoubleArray> primVarArray = vtkSmartPointer<vtkDoubleArray>::New();
-        primVarArray->SetName(name);
-    
-        primVarArray->SetNumberOfComponents(ncomponents);
-        primVarArray->SetNumberOfTuples(numNodes);
-        //fprintf( stderr, "VTKXMLExportModule::exportPrimVarAs: unsupported variable type %s\n", __UnknownTypeToString(type) );
-    #else
-        fprintf( this->fileStream, " <DataArray type=\"Float64\" Name=\"%s\" NumberOfComponents=\"%d\" format=\"ascii\"> ", name, ncomponents );    
-    #endif
-
-        FloatArray valueArray;        
+        vtkSmartPointer<vtkDoubleArray> varArray = vtkSmartPointer<vtkDoubleArray>::New();
+        varArray->SetName(name);
+        varArray->SetNumberOfComponents(ncomponents);
+        varArray->SetNumberOfTuples(numNodes);
+        
         for ( int inode = 1; inode <= numNodes; inode++ ) {
             valueArray = vtkPiece.givePrimaryVarInNode(i, inode);
-            this->writeVTKPointData(valueArray, name);
+            for (int i = 1; i <= ncomponents; ++i) {
+                varArray->SetComponent( inode-1, i-1, valueArray.at(i) );
+            }
         }
+        this->writeVTKPointData(name, varArray);
+
+    #else
+        fprintf( this->fileStream, " <DataArray type=\"Float64\" Name=\"%s\" NumberOfComponents=\"%d\" format=\"ascii\"> ", name, ncomponents );    
+        for ( int inode = 1; inode <= numNodes; inode++ ) {
+            valueArray = vtkPiece.givePrimaryVarInNode(i, inode);
+            this->writeVTKPointData(valueArray);
+        }
+    #endif
+
 
         // Footer
         #ifndef __VTK_MODULE
@@ -1573,13 +1616,12 @@ VTKXMLExportModule :: getCellVariableFromIS(FloatArray &answer, Element *el, Int
         // compute cell average from ip values
         IntegrationRule *iRule = el->giveDefaultIntegrationRulePtr();  
         computeIPAverage(temp, iRule, el, type, tStep); // if element has more than one iRule?? /JB
-
             
         // Reshape the Voigt vectors to include all components (duplicated if necessary, VTK insists on 9 components for tensors.)
         #if 1
         // Is this part necessary now when giveIPValue returns full form? Only need to symmetrize in case of 6 components /JB
         if ( ncomponents == 9 && temp.giveSize() != 9) { // If it has 9 components, then it is assumed to be proper already.
-            this->makeFullForm(valueArray, temp, valType, redIndx); //remove argument redIndx
+            this->makeFullForm(valueArray, temp); 
         } else if ( valType == ISVT_VECTOR && temp.giveSize() < 3) {
             valueArray.setValues(3,
                                 temp.giveSize() > 1 ? temp.at(1) : 0.0,
@@ -1615,16 +1657,25 @@ VTKXMLExportModule :: writeCellVars(VTKPiece &vtkPiece)
             cellVarsArray->SetName(name);
             cellVarsArray->SetNumberOfComponents(ncomponents);
             cellVarsArray->SetNumberOfTuples(numCells);
+            for ( int ielem = 1; ielem <= numCells; ielem++ ) {
+                valueArray = vtkPiece.giveCellVar(i, ielem);
+                for (int i = 1; i <= ncomponents; ++i) {
+                    cellVarsArray->SetComponent(ielem-1, i-1, valueArray.at(i));
+                }
+            }
+            this->writeVTKCellData(name, cellVarsArray);
+
         #else
             fprintf( this->fileStream, " <DataArray type=\"Float64\" Name=\"%s\" NumberOfComponents=\"%d\" format=\"ascii\"> ", name, ncomponents );    
+            valueArray.resize(ncomponents);
+            for ( int ielem = 1; ielem <= numCells; ielem++ ) {
+                valueArray = vtkPiece.giveCellVar(i, ielem);
+                this->writeVTKCellData(valueArray);
+            }
         #endif
 
 
-        valueArray.resize(ncomponents);
-        for ( int ielem = 1; ielem <= numCells; ielem++ ) {
-            valueArray = vtkPiece.giveCellVar(i, ielem);
-            this->writeVTKCellData(valueArray, name);
-        }
+
 
         // Footer
         #ifndef __VTK_MODULE
