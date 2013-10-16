@@ -184,7 +184,7 @@ IntMatBilinearCZFagerstrom :: giveFirstPKTraction_3d(FloatArray &answer, GaussPo
 
         //Qold.rotatedWith(Rot,'n');
 
-        double alphaOld = status->giveDamage();
+        //double alphaOld = status->giveDamage();
 
         //if (alphaOld>0.1) {
         //    double bbb=1; ///@todo Should this be used for anything Martin? /JB

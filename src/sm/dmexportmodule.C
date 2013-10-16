@@ -103,7 +103,7 @@ DofManExportModule :: doOutput(TimeStep *tStep, bool forcedOutput)
     int ndmInList = this->dofManList.giveSize();
     
     int ndm = (ndmInList > 0) ? ndmInList : nTotaldm;
-    /*
+    
     fprintf(stream, "%% Primary fields \n");
     for ( int idm = 1; idm <= ndm; idm++ ) {
         if ( ndm < nTotaldm ) {
@@ -123,23 +123,23 @@ DofManExportModule :: doOutput(TimeStep *tStep, bool forcedOutput)
         }
         fprintf(stream, "\n");
     }
-    */
+    
 
-    fprintf(stream, "%% Reaction forces \n");
-    for ( int idm = 1; idm <= ndm; idm++ ) {
-        int dManNum = this->dofManList.at(idm);
-        dm = d->giveDofManager( dManNum );
-        fprintf(stream, "%d", dManNum);
+    //fprintf(stream, "%% Reaction forces \n");
+    //for ( int idm = 1; idm <= ndm; idm++ ) {
+    //    int dManNum = this->dofManList.at(idm);
+    //    dm = d->giveDofManager( dManNum );
+    //    fprintf(stream, "%d", dManNum);
 
-        for ( int i = 1; i <= numRestrDofs; i++ ) {
-            if ( dofManMap.at(i) == dManNum ) { // dofman has reaction
-                //double reaction =  reactions.at( eqnMap.at(i) ); 
-                double reaction =  reactions.at( i ); 
-                fprintf(stream, " %g", reaction);
-            }
-        }
-        fprintf(stream, "\n");
-    }
+    //    for ( int i = 1; i <= numRestrDofs; i++ ) {
+    //        if ( dofManMap.at(i) == dManNum ) { // dofman has reaction
+    //            //double reaction =  reactions.at( eqnMap.at(i) ); 
+    //            double reaction =  reactions.at( i ); 
+    //            fprintf(stream, " %g", reaction);
+    //        }
+    //    }
+    //    fprintf(stream, "\n");
+    //}
 
     /*
     for ( int i = 1; i <= numRestrDofs; i++ ) {   
