@@ -705,9 +705,9 @@ The element features are summarized in Table~\ref{trshell01summary}.
 \elementDescription{CS properties}{Cross section thickness is required.}
 \elementDescription{Loads}{Body loads are supported. Boundary loads are not supported now.}
 \elementDescription{Output}{On output, the generalized strains are printed in a vector with 12 components, with the following meaning:
-$$e=\{\varepsilon_x, \varepsilon_y, \varepsilon_z, \gamma_{yz}, \gamma_{zx}, \gamma_{xy}, \kappa_x, \kappa_y, \kappa_z, \kappa_{yz}, \kappa_{xz}, \kappa_{xy}\},$$where $\varepsilon_x, \varepsilon_y, \varepsilon_z$ are membrane normal deformations, $\gamma_{yz}, \gamma_{zx}, \gamma_{xy}$ are shear componets, and $\kappa_x, \kappa_y, \kappa_z, \kappa_{yz}, \kappa_{xz}, \kappa_{xy}$ are curvatures.
+$$e=\{\varepsilon_x, \varepsilon_y, \varepsilon_z, \gamma_{yz}, \gamma_{zx}, \gamma_{xy}, \kappa_x, \kappa_y, \kappa_z, \kappa_{yz}, \kappa_{zx}, \kappa_{xy}\},$$where $\varepsilon_x, \varepsilon_y, \varepsilon_z$ are membrane normal deformations, $\gamma_{yz}, \gamma_{zx}, \gamma_{xy}$ are shear componets, and $\kappa_x, \kappa_y, \kappa_z, \kappa_{yz}, \kappa_{zx}, \kappa_{xy}$ are curvatures.
 The generalized stress vector contains corresponding integral forces/moments:
-$$s=\{n_x, n_y, n_y, v_{yz}, v_{zx}, v_{xy}, m_x, m_y, m_z, m_{yz}, m_{xz}, m_{xy}\}.$$ Please note, for example, that bending moment $m_x$ is defined as $m_x=\int \sigma_x z\ dz$, so it acts along the y-axis and positive value causes tension in bottom layer.}
+$$s=\{n_x, n_y, n_z, v_{yz}, v_{zx}, v_{xy}, m_x, m_y, m_z, m_{yz}, m_{zx}, m_{xy}\}.$$ Please note, for example, that bending moment $m_x$ is defined as $m_x=\int \sigma_x z\ dz$, so it acts along the y-axis and positive value causes tension in bottom layer.}
 \elementDescription{Nlgeo}{0.}
 \elementDescription{Status}{Reliable}
 \end{elementsummary}
