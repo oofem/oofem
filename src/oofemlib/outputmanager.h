@@ -39,6 +39,7 @@
 #include "domain.h"
 #include "engngm.h"
 #include "intarray.h"
+#include "range.h"
 
 #include <list>
 
@@ -57,8 +58,6 @@
 //@}
 
 namespace oofem {
-
-class Range;
 
 /**
  * Represents output manager. It controls and manages the time step output.

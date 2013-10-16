@@ -24,7 +24,7 @@ endif ()
 if (MSVC)
     add_definitions (-D_USE_MATH_DEFINES)
     set (CMAKE_REQUIRED_DEFINITIONS "-D_USE_MATH_DEFINES")
-    set (CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -W4 -wd4786 -wd4100 -wd4996 -wd4706 -wd4512")
+    set (CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -W4 -wd4786 -wd4100 -wd4996 -wd4706 -wd4512 -wd4251")
 else ()
     set (CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall -fPIC")
 endif ()
@@ -506,10 +506,10 @@ if (USE_SHARED_LIB)
     install (TARGETS liboofem DESTINATION lib)
 
     # This should be set automatically, but I think TARGET:objs confuses cmake:
-    set_target_properties (core PROPERTIES DEFINES liboofem_EXPORTS)
-    set_target_properties (fm PROPERTIES DEFINES liboofem_EXPORTS)
-    set_target_properties (sm PROPERTIES DEFINES liboofem_EXPORTS)
-    set_target_properties (tm PROPERTIES DEFINES liboofem_EXPORTS)
+    set_target_properties (core PROPERTIES COMPILE_DEFINITIONS "liboofem_EXPORTS")
+    set_target_properties (fm PROPERTIES COMPILE_DEFINITIONS "liboofem_EXPORTS")
+    set_target_properties (sm PROPERTIES COMPILE_DEFINITIONS "liboofem_EXPORTS")
+    set_target_properties (tm PROPERTIES COMPILE_DEFINITIONS "liboofem_EXPORTS")
 
     generate_export_header (liboofem
         BASE_NAME OOFEM
