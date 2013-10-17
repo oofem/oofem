@@ -182,8 +182,12 @@ MatlabExportModule :: doOutputMesh(TimeStep *tStep, FILE *FID)
 
 	fprintf(FID, "\tmesh.p=[");
 	for ( int i = 1; i <= domain->giveNumberOfDofManagers(); i++ ) {
-		double x = domain->giveDofManager(i)->giveCoordinate(1), y = domain->giveDofManager(i)->giveCoordinate(2);
-		fprintf(FID, "%f,%f;", x, y);
+        for ( int j = 1; j<=domain->giveNumberOfSpatialDimensions(); j++) {
+        //double x = domain->giveDofManager(i)->giveCoordinate(1), y = domain->giveDofManager(i)->giveCoordinate(2);
+        double c = domain->giveDofManager(i)->giveCoordinate(j);
+        fprintf(FID, "%f, ", c);
+        }
+        fprintf(FID, "; ");
 	}
 
 	fprintf(FID, "]';\n");
