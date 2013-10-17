@@ -45,12 +45,37 @@
 #include "floatarray.h"
 #include "floatmatrix.h"
 #include "enrichmentdomain.h"
+#include "dynamicinputrecord.h"
+
+#include "structuralinterfacematerial.h"
 
 #include "XFEMDebugTools.h"
 #include <string>
 #include <sstream>
 
 namespace oofem {
+
+XfemElementInterface :: XfemElementInterface(Element *e) :
+Interface(),
+element(e),
+mpCZMat(NULL),
+mCZMaterialNum(-1),
+mCSNumGaussPoints(3),
+mpCZIntegrationRule(NULL),
+mCrackLength(0.0)
+{
+
+}
+
+XfemElementInterface :: ~XfemElementInterface()
+{
+	if( mpCZIntegrationRule != NULL ) {
+		delete mpCZIntegrationRule;
+		mpCZIntegrationRule = NULL;
+	}
+
+}
+
 void XfemElementInterface :: XfemElementInterface_createEnrBmatrixAt(FloatMatrix &oAnswer, GaussPoint &iGP, Element &iEl)
 {
     const int dim = 2;
@@ -317,7 +342,9 @@ void XfemElementInterface :: XfemElementInterface_updateIntegrationRule()
         std :: vector< Triangle >allTri;
 
         // Get the points describing each subdivision of the element
-        this->XfemElementInterface_prepareNodesForDelaunay(pointPartitions);
+        FloatArray startPoint, endPoint;
+        this->XfemElementInterface_prepareNodesForDelaunay(pointPartitions, startPoint, endPoint);
+        mCrackLength = startPoint.distance(endPoint);
 
         for ( int i = 0; i < int( pointPartitions.size() ); i++ ) {
         	// Triangulate the subdivisions
@@ -343,10 +370,64 @@ void XfemElementInterface :: XfemElementInterface_updateIntegrationRule()
 
         irlist.put(1, intRule);
         element->setIntegrationRules(& irlist);
+
+        if( mpCZMat != NULL ) {
+        	printf("Adding CZ Gauss points.\n");
+
+        	if( mpCZIntegrationRule != NULL ) {
+        		delete mpCZIntegrationRule;
+        	}
+
+            int czRuleNum = 1;
+        	mpCZIntegrationRule = new GaussIntegrationRule(czRuleNum, element);
+        	const FloatArray **coords = new const FloatArray*[2];
+        	coords[0] = new FloatArray(startPoint);
+        	coords[1] = new FloatArray(endPoint);
+        	mpCZIntegrationRule->SetUpPointsOn2DEmbeddedLine(mCSNumGaussPoints, matMode, coords);
+
+        	delete coords[0];
+        	delete coords[1];
+        	delete [] coords;
+
+
+        	////////////////////////////////////////////////////////////////////////
+        	// Write CZ GP to VTK
+
+        	std :: vector< FloatArray >czGPCoord;
+
+        	for(int i = 0; i < mpCZIntegrationRule->giveNumberOfIntegrationPoints(); i++) {
+        		czGPCoord.push_back( *(mpCZIntegrationRule->getIntegrationPoint(i)->giveCoordinates()) );
+        	}
+
+            double time = 0.0;
+
+            Element *el = element;
+
+            Domain *dom = el->giveDomain();
+            if(dom != NULL) {
+            	EngngModel *em = dom->giveEngngModel();
+            	if(em != NULL) {
+            		TimeStep *ts = em->giveCurrentStep();
+            		if(ts != NULL) {
+            			time = ts->giveTargetTime();
+            		}
+            	}
+            }
+
+            int elIndex = el->giveGlobalNumber();
+            std :: stringstream str;
+            str << "CZGaussPointsTime" << time << "El" << elIndex << ".vtk";
+            std :: string name = str.str();
+
+            XFEMDebugTools :: WritePointsToVTK(name, czGPCoord);
+        	////////////////////////////////////////////////////////////////////////
+
+
+        }
     }
 }
 
-void XfemElementInterface :: XfemElementInterface_prepareNodesForDelaunay(std :: vector< std :: vector< FloatArray > > &oPointPartitions)
+void XfemElementInterface :: XfemElementInterface_prepareNodesForDelaunay(std :: vector< std :: vector< FloatArray > > &oPointPartitions, FloatArray &oCrackStartPoint, FloatArray &oCrackEndPoint)
 {
     XfemManager *xMan = this->element->giveDomain()->giveXfemManager();
 
@@ -391,6 +472,12 @@ void XfemElementInterface :: XfemElementInterface_prepareNodesForDelaunay(std ::
             	oPointPartitions[1].push_back(*node);
             }
         }
+
+
+        // Export start and end points of
+        // the intersection line.
+        oCrackStartPoint = intersecPoints[0];
+        oCrackEndPoint = intersecPoints[1];
     }
     else if( intersecPoints.size() == 1 )
     {
@@ -480,6 +567,12 @@ void XfemElementInterface :: XfemElementInterface_prepareNodesForDelaunay(std ::
 				oPointPartitions[2*i-2].push_back(tipCoord);
 
 			}
+
+	        // Export start and end points of
+	        // the intersection line.
+	        oCrackStartPoint = intersecPoints[0];
+	        oCrackEndPoint = tipCoord;
+
         } // If a tip was found
         else
         {
@@ -490,6 +583,11 @@ void XfemElementInterface :: XfemElementInterface_prepareNodesForDelaunay(std ::
                 const FloatArray &nodeCoord = *element->giveDofManager(i)->giveCoordinates();
                 oPointPartitions[0].push_back(nodeCoord);
             }
+
+	        // Export start and end points of
+	        // the intersection line.
+	        oCrackStartPoint = intersecPoints[0];
+	        oCrackEndPoint = intersecPoints[0];
         }
     }
 
@@ -533,6 +631,323 @@ void XfemElementInterface :: recomputeGaussPoints() {
 		// (area weighted least squares?)
 
 	}
+
+}
+
+void XfemElementInterface :: computeCohesiveForces(FloatArray &answer, TimeStep *tStep)
+{
+//	FloatArray intForceLoc;
+//	intForceLoc.resize( element->giveNumberOfDofs() );
+//	intForceLoc.zero();
+
+//	answer.resize( element->giveNumberOfDofs() );
+//	answer.zero();
+
+	if( hasCohesiveZone() ) {
+//		printf("Entering XfemElementInterface :: computeCohesiveForces().\n");
+
+		FloatArray solVec;
+		element->computeVectorOf(EID_MomentumBalance, VM_Total, tStep, solVec);
+
+
+		int numGP = mpCZIntegrationRule->giveNumberOfIntegrationPoints();
+
+		for(int gpIndex = 0; gpIndex < numGP; gpIndex++) {
+
+			GaussPoint &gp = *(mpCZIntegrationRule->getIntegrationPoint(gpIndex));
+
+		    ////////////////////////////////////////////////////////
+		    // Compute a (slightly modified) N-matrix
+
+			FloatMatrix NMatrix;
+			computeNCohesive(NMatrix, gp);
+
+		    ////////////////////////////////////////////////////////
+
+			// Compute jump vector
+			FloatArray jump2D;
+			computeDisplacementJump(gp, jump2D, solVec, NMatrix);
+
+			FloatArray jump3D;
+			jump3D.setValues(3, jump2D.at(1), jump2D.at(2), 0.0);
+
+			// Compute traction
+			FloatArray T;
+			FloatMatrix F;
+			F.resize(3,3);
+			F.beUnitMatrix(); // TODO: Compute properly
+			// TODO: Rotate to the coordinate system of the crack.
+			mpCZMat->giveFirstPKTraction_3d(T, &gp, jump3D, F, tStep);
+//			printf("T: "); T.printYourself();
+			// TODO: and rotate back
+
+			FloatArray T2D;
+			T2D.setValues(2, T.at(1), T.at(2) );
+
+
+			// Add to internal force
+			FloatArray NTimesT;
+
+			NTimesT.beTProductOf(NMatrix, T2D);
+			double thickness = 1.0e-3; //TODO: Fix
+			double dA = 0.5*mCrackLength*thickness;
+			answer.add(dA, NTimesT);
+		}
+
+
+
+
+	}
+}
+
+void XfemElementInterface :: computeCohesiveTangent(FloatMatrix &answer, TimeStep *tStep)
+{
+	if( hasCohesiveZone() ) {
+//		printf("Entering XfemElementInterface :: computeCohesiveTangent().\n");
+
+		if( hasCohesiveZone() ) {
+
+			FloatArray solVec;
+			element->computeVectorOf(EID_MomentumBalance, VM_Total, tStep, solVec);
+
+
+			int numGP = mpCZIntegrationRule->giveNumberOfIntegrationPoints();
+
+			for(int gpIndex = 0; gpIndex < numGP; gpIndex++) {
+
+				GaussPoint &gp = *(mpCZIntegrationRule->getIntegrationPoint(gpIndex));
+
+			    ////////////////////////////////////////////////////////
+			    // Compute a (slightly modified) N-matrix
+
+				FloatMatrix NMatrix;
+				computeNCohesive(NMatrix, gp);
+
+			    ////////////////////////////////////////////////////////
+
+				// Compute jump vector
+				FloatArray jump2D;
+				computeDisplacementJump(gp, jump2D, solVec, NMatrix);
+
+				FloatArray jump3D;
+				jump3D.setValues(3, jump2D.at(1), jump2D.at(2), 0.0);
+
+				// Compute traction
+				FloatArray T;
+				FloatMatrix F;
+				F.resize(3,3);
+				F.beUnitMatrix(); // TODO: Compute properly
+
+				// TODO: Rotate to the coordinate system of the crack.
+				FloatMatrix K3D;
+				mpCZMat->give3dStiffnessMatrix_dTdj(K3D, TangentStiffness, &gp, tStep);
+				FloatMatrix K2D;
+				K2D.resize(2,2);
+				K2D.at(1,1) = K3D.at(1,1);
+				K2D.at(1,2) = K3D.at(1,2);
+				K2D.at(2,1) = K3D.at(2,1);
+				K2D.at(2,2) = K3D.at(2,2);
+				// TODO: and rotate back
+
+				FloatMatrix tmp, tmp2;
+				tmp.beProductOf(K2D, NMatrix);
+				tmp2.beTProductOf(NMatrix, tmp);
+
+				double thickness = 1.0e-3; //TODO: Fix
+				double dA = 0.5*mCrackLength*thickness;
+				answer.add(dA, tmp2);
+/*
+				mpCZMat->giveFirstPKTraction_3d(T, &gp, jump3D, F, tStep);
+				printf("T: "); T.printYourself();
+
+				FloatArray T2D;
+				T2D.setValues(2, T.at(1), T.at(2) );
+
+
+				// Add to internal force
+				FloatArray NTimesT;
+
+				NTimesT.beTProductOf(NMatrix, T2D);
+				double thickness = 1.0e-3; //TODO: Fix
+				double dA = 0.5*mCrackLength*thickness;
+				answer.add(dA, NTimesT);
+*/
+			}
+
+
+		}
+
+	}
+}
+
+void XfemElementInterface :: computeCohesiveTangentAt(FloatMatrix &answer, TimeStep *tStep)
+{
+	if( hasCohesiveZone() ) {
+
+		printf("Entering XfemElementInterface :: computeCohesiveTangentAt().\n");
+
+	}
+}
+
+IRResultType
+XfemElementInterface :: initializeCZFrom(InputRecord *ir)
+{
+    const char *__proc = "initializeFrom"; // Required by IR_GIVE_FIELD macro
+    IRResultType result;                   // Required by IR_GIVE_FIELD macro
+
+    int material = -1;
+    IR_GIVE_OPTIONAL_FIELD(ir, material, _IFT_XfemElementInterface_CohesiveZoneMaterial);
+    mCZMaterialNum = material;
+
+//    printf("In XfemElementInterface :: initializeCZFrom(): mCZMaterialNum: %d\n", mCZMaterialNum );
+
+    return IRRT_OK;
+}
+
+void XfemElementInterface :: giveCZInputRecord(DynamicInputRecord &input)
+{
+	if( mCZMaterialNum > 0 ) {
+		input.setField(mCZMaterialNum, _IFT_XfemElementInterface_CohesiveZoneMaterial);
+	}
+}
+
+void XfemElementInterface :: initializeCZMaterial()
+{
+//	printf("Entering XfemElementInterface :: initializeCZMaterial().\n");
+    if ( mCZMaterialNum > 0 ) {
+    	mpCZMat = dynamic_cast<StructuralInterfaceMaterial*>(this->element->giveDomain()->giveMaterial(mCZMaterialNum) );
+
+    	if( mpCZMat == NULL ) {
+    		OOFEM_ERROR("In XfemElementInterface :: initializeCZMaterial(): Failed to fetch pointer for mpCZMat.\n");
+    	}
+    }
+}
+
+void XfemElementInterface :: updateYourselfCZ(TimeStep *tStep)
+{
+//	printf("Entering XfemElementInterface :: updateYourselfCZ().\n");
+
+	if(mpCZIntegrationRule != NULL) {
+//		printf("mpCZIntegrationRule != NULL.\n");
+		mpCZIntegrationRule->updateYourself(tStep);
+
+		if(mpCZMat != NULL){
+			int numGP = mpCZIntegrationRule->giveNumberOfIntegrationPoints();
+			for(int i = 0; i < numGP; i++) {
+				GaussPoint *gp = mpCZIntegrationRule->getIntegrationPoint(i);
+				mpCZMat->updateYourself(gp, tStep);
+			}
+		}
+	}
+//	else {
+//		printf("mpCZIntegrationRule == NULL.\n");
+//	}
+
+
+}
+
+void XfemElementInterface :: computeDisplacementJump(GaussPoint &iGP, FloatArray &oJump, const FloatArray &iSolVec, const FloatMatrix &iNMatrix)
+{
+	const int dim = 2;
+
+	oJump.resize(dim);
+	oJump.zero();
+	int numNodes = element->giveNumberOfDofManagers();
+
+
+
+
+
+    oJump.beProductOf(iNMatrix, iSolVec);
+//    printf("oJump: "); oJump.printYourself();
+}
+
+void XfemElementInterface :: computeNCohesive(FloatMatrix &oN, GaussPoint &iGP)
+{
+
+	const int dim = 2;
+
+    FloatArray Nc, globalCoord, localCoord;
+    globalCoord = *(iGP.giveCoordinates());
+    element->computeLocalCoordinates(localCoord, globalCoord);
+    FEInterpolation *interp = element->giveInterpolation();
+    interp->evalN( Nc, localCoord, FEIElementGeometryWrapper(element) );
+
+    const int nDofMan = element->giveNumberOfDofManagers();
+
+    // XFEM part of N-matrix
+    XfemManager *xMan = element->giveDomain()->giveXfemManager();
+
+
+    int counter = nDofMan * dim;
+
+    std::vector< std::vector<double> > Nd(nDofMan);
+
+    for ( int j = 1; j <= nDofMan; j++ ) {
+
+        DofManager *dMan = element->giveDofManager(j);
+
+    	// Compute the total number of enrichments for node j
+    	int numEnrNode = 0;
+        for ( int i = 1; i <= xMan->giveNumberOfEnrichmentItems(); i++ ) {
+            EnrichmentItem *ei = xMan->giveEnrichmentItem(i);
+            if ( ei->isDofManEnriched(* dMan) ) {
+            	numEnrNode += ei->giveNumDofManEnrichments(* dMan);
+            }
+        }
+
+        std::vector<double> &NdNode = Nd [ j - 1 ];
+        NdNode.assign(numEnrNode, 0.0);
+
+
+        int globalNodeInd = dMan->giveGlobalNumber();
+
+
+        for ( int i = 1; i <= xMan->giveNumberOfEnrichmentItems(); i++ ) {
+        	EnrichmentItem *ei = xMan->giveEnrichmentItem(i);
+
+        	if ( ei->isDofManEnriched(* dMan) ) {
+
+                int numEnr = ei->giveNumDofManEnrichments(* dMan);
+
+                std::vector<double> efJumps;
+                ei->evaluateEnrFuncJumps(efJumps, globalNodeInd);
+
+				for(int k = 0; k < numEnr; k++) {
+					NdNode[k] = efJumps[k] * Nc.at(j) ;
+					counter ++;
+				}
+			}
+
+		}
+    }
+
+    int numN = nDofMan;
+
+    for ( int j = 1; j <= nDofMan; j++ ) {
+    	numN += Nd[j-1].size();
+    }
+
+    FloatArray NTot;
+    NTot.resize(numN);
+    NTot.zero();
+    int column = 1;
+
+    for(int i = 1; i <= nDofMan; i++) {
+
+//        NTot.at(column) = Nc.at(i); // We do not want the continuous part.
+        column++;
+
+        const std::vector<double> &NdNode = Nd[i-1];
+        for(size_t j = 1; j <= NdNode.size(); j++) {
+        	NTot.at(column) = NdNode[j-1];
+        	column++;
+        }
+    }
+
+    oN.beNMatrixOf(NTot,2);
+//    oN.printYourself();
+
 
 }
 

@@ -147,6 +147,7 @@ public:
 
     void evaluateEnrFuncAt(std :: vector< double > &oEnrFunc, const FloatArray &iPos, const double &iLevelSet, int iNodeInd = -1) const;
     void evaluateEnrFuncDerivAt(std :: vector< FloatArray > &oEnrFuncDeriv, const FloatArray &iPos, const double &iLevelSet, const FloatArray &iGradLevelSet, int iNodeInd) const;
+    void evaluateEnrFuncJumps(std :: vector< double > &oEnrFuncJumps, int iNodeInd ) const;
     
     void evalLevelSetNormalInNode(double &oLevelSet, int iNodeInd) const { oLevelSet = mLevelSetNormalDir [ iNodeInd - 1 ]; }
     void evalLevelSetTangInNode(double &oLevelSet, int iNodeInd) const { oLevelSet = mLevelSetTangDir [ iNodeInd - 1 ]; }
@@ -376,6 +377,7 @@ public:
 	// Evaluate the enrichment function and its derivative in front nodes.
 	virtual void evaluateEnrFuncAt(std::vector<double> &oEnrFunc, const FloatArray &iPos, const double &iLevelSet, int iNodeInd) const = 0;
 	virtual void evaluateEnrFuncDerivAt(std::vector<FloatArray> &oEnrFuncDeriv, const FloatArray &iPos, const double &iLevelSet, const FloatArray &iGradLevelSet, int iNodeInd) const = 0;
+	virtual void evaluateEnrFuncJumps(std :: vector< double > &oEnrFuncJumps) const = 0;
 
     virtual const char *giveClassName() const = 0;
     virtual const char *giveInputRecordName() const = 0;
@@ -413,6 +415,7 @@ public:
 	// Evaluate the enrichment function and its derivative in front nodes.
 	virtual void evaluateEnrFuncAt(std::vector<double> &oEnrFunc, const FloatArray &iPos, const double &iLevelSet, int iNodeInd) const {};
 	virtual void evaluateEnrFuncDerivAt(std::vector<FloatArray> &oEnrFuncDeriv, const FloatArray &iPos, const double &iLevelSet, const FloatArray &iGradLevelSet, int iNodeInd) const {};
+	virtual void evaluateEnrFuncJumps(std :: vector< double > &oEnrFuncJumps) const {};
 
     virtual const char *giveClassName() const { return "EnrFrontDoNothing"; }
     virtual const char *giveInputRecordName() const { return _IFT_EnrFrontDoNothing_Name; }
@@ -437,6 +440,7 @@ public:
 	// Evaluate the enrichment function and its derivative in front nodes.
 	virtual void evaluateEnrFuncAt(std::vector<double> &oEnrFunc, const FloatArray &iPos, const double &iLevelSet, int iNodeInd) const {};
 	virtual void evaluateEnrFuncDerivAt(std::vector<FloatArray> &oEnrFuncDeriv, const FloatArray &iPos, const double &iLevelSet, const FloatArray &iGradLevelSet, int iNodeInd) const {};
+	virtual void evaluateEnrFuncJumps(std :: vector< double > &oEnrFuncJumps) const {};
 
 
     virtual const char *giveClassName() const { return "EnrFrontExtend"; }
@@ -459,6 +463,7 @@ public:
 	// Evaluate the enrichment function and its derivative in front nodes.
 	virtual void evaluateEnrFuncAt(std::vector<double> &oEnrFunc, const FloatArray &iPos, const double &iLevelSet, int iNodeInd) const;
 	virtual void evaluateEnrFuncDerivAt(std::vector<FloatArray> &oEnrFuncDeriv, const FloatArray &iPos, const double &iLevelSet, const FloatArray &iGradLevelSet, int iNodeInd) const;
+	virtual void evaluateEnrFuncJumps(std :: vector< double > &oEnrFuncJumps) const;
 
     virtual const char *giveClassName() const { return "EnrFrontLinearBranchFuncRadius"; }
     virtual const char *giveInputRecordName() const { return _IFT_EnrFrontLinearBranchFuncRadius_Name; }

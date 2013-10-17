@@ -38,6 +38,8 @@
 #include "structuralinterfacematerial.h"
 #include "structuralinterfacematerialstatus.h"
 
+#include "dynamicinputrecord.h"
+
 ///@name Input fields for IntMatBilinearCZFagerstrom
 //@{
 #define _IFT_IntMatBilinearCZFagerstrom_Name "intmatbilinearczfagerstrom"
@@ -187,7 +189,8 @@ public:
     virtual int giveIPValue(FloatArray &answer, GaussPoint *gp, InternalStateType type, TimeStep *tStep);
     virtual InternalStateValueType giveIPValueType(InternalStateType type);
     virtual IRResultType initializeFrom(InputRecord *ir);
-    
+    virtual void giveInputRecord(DynamicInputRecord &input);
+
     virtual MaterialStatus *CreateStatus(GaussPoint *gp) const { return new IntMatBilinearCZFagerstromStatus(1, domain, gp); } //@Martin: Why new?
     void printYourself();
 protected:
