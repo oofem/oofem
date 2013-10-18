@@ -151,7 +151,7 @@ XFEMStatic :: terminate(TimeStep *tStep)
     // Update element subdivisions if necessary
     // (e.g. if a crack has moved and cut a new element)
     for( int domInd = 1; domInd <= this->giveNumberOfDomains(); domInd++ ) {
-#if 1
+#if 0
     	Domain *domain = this->giveDomain(domInd);
 
 

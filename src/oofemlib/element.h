@@ -813,7 +813,7 @@ public:
      * @param gcoords Global coordinates.
      * @return Nonzero if point is inside element; zero otherwise.
      */
-    virtual int computeLocalCoordinates(FloatArray &answer, const FloatArray &gcoords);
+    virtual bool computeLocalCoordinates(FloatArray &answer, const FloatArray &gcoords);
     /**
      * Returns local coordinate system of receiver
      * Required by material models with ortho- and anisotrophy.

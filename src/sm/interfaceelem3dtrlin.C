@@ -121,11 +121,11 @@ InterfaceElement3dTrLin :: computeGlobalCoordinates(FloatArray &answer, const Fl
 }
 
 
-int
+bool
 InterfaceElement3dTrLin :: computeLocalCoordinates(FloatArray &answer, const FloatArray &gcoords)
 {
     _error("Not implemented");
-    return 0;
+    return false;
 }
 
 

@@ -107,7 +107,7 @@ public:
     virtual const FloatMatrix *computeGtoLRotationMatrix();
     virtual bool computeGtoLRotationMatrix(FloatMatrix &answer);
 
-    virtual int computeLocalCoordinates(FloatArray &answer, const FloatArray &gcoords);
+    virtual bool computeLocalCoordinates(FloatArray &answer, const FloatArray &gcoords);
     virtual int computeGlobalCoordinates(FloatArray &answer, const FloatArray &lcoords);
 
     virtual int giveLocalCoordinateSystem(FloatMatrix &answer)

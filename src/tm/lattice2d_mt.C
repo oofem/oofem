@@ -402,13 +402,13 @@ Lattice2d_mt :: computeGlobalCoordinates(FloatArray &answer, const FloatArray &l
 
 #define POINT_TOL 1.e-3
 
-int
+bool
 Lattice2d_mt :: computeLocalCoordinates(FloatArray &answer, const FloatArray &coords)
 {
     answer.resize(1);
     answer.at(1) = 0.;
 
-    return 1;
+    return true;
 }
 
 

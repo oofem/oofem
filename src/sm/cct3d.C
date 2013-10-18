@@ -108,7 +108,7 @@ CCTPlate3d :: giveDofManDofIDMask(int inode, EquationID ut, IntArray &answer) co
 }
 
 
-int
+bool
 CCTPlate3d :: computeLocalCoordinates(FloatArray &answer, const FloatArray &coords)
 //converts global coordinates to local planar area coordinates,
 //does not return a coordinate in the thickness direction, but
