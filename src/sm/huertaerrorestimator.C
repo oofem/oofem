@@ -387,7 +387,8 @@ HuertaErrorEstimator :: estimateError(EE_ErrorMode mode, TimeStep *tStep)
         OOFEM_LOG_INFO("Relative error estimate [step number %5d]: %6.3f%% (weighted)\n",
                        d->giveEngngModel()->giveCurrentStep()->giveNumber(), pwe * 100.0);
     }
-
+    this->globalErrorEstimate = pe;
+    
     //fflush(stdout);
 
     if ( maxSkipSteps != 0 && this->mode == HEE_nlinear ) {
@@ -550,8 +551,9 @@ HuertaErrorEstimator :: giveValue(EE_ValueType type, TimeStep *tStep)
         return this->globalUNorm;
     } else if ( type == globalWeightedErrorEEV ) {
         return this->globalWENorm;
+    } else if ( type == relativeErrorEstimateEEV) {
+        return this->globalErrorEstimate;
     }
-
     return 0.0;
 }
 

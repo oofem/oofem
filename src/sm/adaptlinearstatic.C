@@ -75,6 +75,18 @@ AdaptiveLinearStatic::updateYourself(TimeStep *stepN)
     }
 }
 
+void
+AdaptiveLinearStatic :: terminate(TimeStep *tStep)
+{
+    LinearStatic :: terminate(tStep);
+    //
+    // print estimated error
+    //
+    fprintf(outputStream, "\nRelative error estimate: %5.2f%%\n", this->defaultErrEstimator->giveValue(relativeErrorEstimateEEV, tStep)*100.0);
+}
+
+
+
 
 int
 AdaptiveLinearStatic :: initializeAdaptive(int stepNumber)

@@ -152,6 +152,7 @@ ZZErrorEstimator :: estimateError(EE_ErrorMode mode, TimeStep *tStep)
 
     this->globalENorm = sqrt(this->globalENorm);
     this->globalSNorm = sqrt(this->globalSNorm);
+    this->globalErrorEstimate = pe;
 
 
     this->stateCounter = tStep->giveSolutionStateCounter();
@@ -195,10 +196,10 @@ ZZErrorEstimator :: giveValue(EE_ValueType type, TimeStep *tStep)
     this->estimateError(equilibratedEM, tStep);
     if ( type == globalErrorEEV ) {
         return this->globalENorm;
-    }
-    // return sqrt (this->globalENorm/(this->globalENorm + this->globalSNorm));
-    else if ( type == globalNormEEV ) {
+    } else if ( type == globalNormEEV ) {
         return this->globalSNorm;
+    } else if ( type == relativeErrorEstimateEEV) {
+        return this->globalErrorEstimate;
     } else {
         return 0.0;
     }
