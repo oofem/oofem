@@ -146,10 +146,9 @@ namespace oofem {
     ENUM_ITEM_WITH_VALUE(IST_CauchyStressTensor, 96) \
     ENUM_ITEM_WITH_VALUE(IST_InterfaceJump, 97) \
     ENUM_ITEM_WITH_VALUE(IST_InterfaceTraction, 98) \
-    ENUM_ITEM_WITH_VALUE(IST_InterfaceFirstPKTraction, 99) 
-
-        
-
+    ENUM_ITEM_WITH_VALUE(IST_InterfaceFirstPKTraction, 99) \
+    ENUM_ITEM_WITH_VALUE(IST_StressTensor_Reduced, 100) \
+    ENUM_ITEM_WITH_VALUE(IST_StrainTensor_Reduced, 101)
 /**
  * Type  representing the physical meaning of element or constitutive model internal variable.
  * Values of this type are used, when these internal variables are requested.

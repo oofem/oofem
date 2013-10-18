@@ -66,14 +66,26 @@ AdaptiveLinearStatic::updateYourself(TimeStep *stepN)
 
         if ( result == MesherInterface :: MI_OK ) {} else if ( result == MesherInterface :: MI_NEEDS_EXTERNAL_ACTION ) {
             // terminate step
-            this->terminate( stepN );
-            this->terminateAnalysis();
-            exit(1);
+            //this->terminate( stepN );
+            //this->terminateAnalysis();
+            //exit(1);
         } else {
             _error("solveYourselfAt: MesherInterface::createMesh failed");
         }
     }
 }
+
+void
+AdaptiveLinearStatic :: terminate(TimeStep *tStep)
+{
+    LinearStatic :: terminate(tStep);
+    //
+    // print estimated error
+    //
+    fprintf(outputStream, "\nRelative error estimate: %5.2f%%\n", this->defaultErrEstimator->giveValue(relativeErrorEstimateEEV, tStep)*100.0);
+}
+
+
 
 
 int
