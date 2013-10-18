@@ -66,9 +66,9 @@ AdaptiveLinearStatic::updateYourself(TimeStep *stepN)
 
         if ( result == MesherInterface :: MI_OK ) {} else if ( result == MesherInterface :: MI_NEEDS_EXTERNAL_ACTION ) {
             // terminate step
-            this->terminate( stepN );
-            this->terminateAnalysis();
-            exit(1);
+            //this->terminate( stepN );
+            //this->terminateAnalysis();
+            //exit(1);
         } else {
             _error("solveYourselfAt: MesherInterface::createMesh failed");
         }
