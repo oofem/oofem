@@ -575,7 +575,7 @@ void ParmetisLoadBalancer :: addSharedDofmanPartitions(int _locnum, IntArray _pa
 void ParmetisLoadBalancer :: handleMasterSlaveDofManLinks()
 {
     int idofman, ndofman = domain->giveNumberOfDofManagers();
-    DofManager *dofman, *_masterPtr;
+    DofManager *dofman;
     //int myrank = domain->giveEngngModel()->giveRank();
     int __i, __j, __partition, _master;
     bool isSlave;
@@ -601,7 +601,6 @@ void ParmetisLoadBalancer :: handleMasterSlaveDofManLinks()
             for ( __i = 1; __i <= slaveMastersDofMans.giveSize(); __i++ ) {
                 // loop over all slave masters
                 _master = slaveMastersDofMans.at(__i);
-                _masterPtr = domain->giveDofManager(_master);
 
                 // now loop over all slave new partitions and annd then to master's partitions
                 for ( __j = 1; __j <= dofManPartitions [ idofman - 1 ].giveSize(); __j++ ) {
