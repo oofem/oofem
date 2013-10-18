@@ -292,29 +292,33 @@ ZZErrorEstimatorInterface :: ZZErrorEstimatorI_computeElementContributions(doubl
             sNorm += sig.computeSquaredNorm() * dV;
         }
     } else if ( norm == ZZErrorEstimator :: EnergyNorm ) {
-        FloatArray help;
+      FloatArray help, ldiff_reduced, lsig_reduced;
         FloatMatrix D, DInv;
+	StructuralMaterial* mat =  static_cast< StructuralMaterial * >( elem->giveMaterial() );
 
         for ( int i = 0; i < iRule->giveNumberOfIntegrationPoints(); i++ ) {
             GaussPoint *gp = iRule->getIntegrationPoint(i);
             double dV = elem->computeVolumeAround(gp);
             interpol->evalN( n, *gp->giveCoordinates(), FEIElementGeometryWrapper(elem));
-            static_cast< StructuralMaterial * >( elem->giveMaterial() )->
-                giveStiffnessMatrix(D, TangentStiffness, gp, tStep);
+            mat->giveStiffnessMatrix(D, TangentStiffness, gp, tStep);
             DInv.beInverseOf(D);
 
             diff.beTProductOf(nodalRecoveredStreses, n);
 
-            elem->giveIPValue(sig, gp, type, tStep); 
+	    
+            elem->giveIPValue(sig, gp, type, tStep); // returns full value now
             diff.subtract(sig);
             /* the internal stress difference is in global coordinate system */
             /* needs to be transformed into local system to compute associated energy */
             this->ZZErrorEstimatorI_computeLocalStress(ldiff, diff);
-            help.beProductOf(DInv, ldiff);
-            eNorm += ldiff.dotProduct(help) * dV;
+	    mat->giveReducedSymVectorForm(ldiff_reduced, ldiff, gp->giveMaterialMode());
+
+            help.beProductOf(DInv, ldiff_reduced);
+            eNorm += ldiff_reduced.dotProduct(help) * dV;
             this->ZZErrorEstimatorI_computeLocalStress(lsig, sig);
-            help.beProductOf(DInv, lsig);
-            sNorm += lsig.dotProduct(help) * dV;
+	    mat->giveReducedSymVectorForm(lsig_reduced, lsig, gp->giveMaterialMode());
+            help.beProductOf(DInv, lsig_reduced);
+            sNorm += lsig_reduced.dotProduct(help) * dV;
         }
     } else {
         OOFEM_ERROR("ZZErrorEstimatorInterface::ZZErrorEstimatorI_computeElementContributions unsupported norm type");
