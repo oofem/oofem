@@ -1307,12 +1307,12 @@ VTKXMLExportModule :: initRegionNodeNumbering(IntArray &regionG2LNodalNumbers,
             continue;
         }
         
-#ifdef __PARALLEL_MODE
+        #ifdef __PARALLEL_MODE
         if ( element->giveParallelMode() != Element_local ) {
             continue;
         }
+        #endif
 
-#endif
         regionSingleCells++;
         elemNodes = element->giveNumberOfNodes();
         //  elemSides = element->giveNumberOfSides();
@@ -1549,7 +1549,12 @@ VTKXMLExportModule :: exportCellVars(VTKPiece &vtkPiece, int numCells, TimeStep 
         type = ( InternalStateType ) cellVarsToExport.at(field);
                
         for ( int ielem = 1; ielem <= numCells; ielem++ ) {
-            Element *el = d->giveElement(ielem); ///@todo WRONG! should be a pointer ta an element in the region /JB
+            Element *el = d->giveElement(ielem); ///@todo should be a pointer to an element in the region /JB
+            #ifdef __PARALLEL_MODE
+            if ( el->giveParallelMode() != Element_local ) {
+                continue;
+            }
+            #endif
             this->getCellVariableFromIS(valueArray, el, type, tStep);
             vtkPiece.setCellVar(field, ielem, valueArray);
         }
@@ -1571,12 +1576,6 @@ VTKXMLExportModule :: getCellVariableFromIS(FloatArray &answer, Element *el, Int
     int ncomponents = giveInternalStateTypeSize(valType);
 
     valueArray.resize(ncomponents);
-
-#ifdef __PARALLEL_MODE
-    if ( el->giveParallelMode() != Element_local ) {
-        continue;
-    }
-#endif
 
     switch ( type ) {
 
