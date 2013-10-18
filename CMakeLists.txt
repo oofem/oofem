@@ -24,7 +24,7 @@ endif ()
 if (MSVC)
     add_definitions (-D_USE_MATH_DEFINES)
     set (CMAKE_REQUIRED_DEFINITIONS "-D_USE_MATH_DEFINES")
-    set (CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -W4 -wd4786 -wd4100 -wd4996 -wd4706 -wd4512")
+    set (CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -W4 -wd4786 -wd4100 -wd4996 -wd4706 -wd4512 -wd4251")
 else ()
     set (CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall -fPIC")
 endif ()
@@ -506,10 +506,10 @@ if (USE_SHARED_LIB)
     install (TARGETS liboofem DESTINATION lib)
 
     # This should be set automatically, but I think TARGET:objs confuses cmake:
-    set_target_properties (core PROPERTIES DEFINES liboofem_EXPORTS)
-    set_target_properties (fm PROPERTIES DEFINES liboofem_EXPORTS)
-    set_target_properties (sm PROPERTIES DEFINES liboofem_EXPORTS)
-    set_target_properties (tm PROPERTIES DEFINES liboofem_EXPORTS)
+    set_target_properties (core PROPERTIES COMPILE_DEFINITIONS "liboofem_EXPORTS")
+    set_target_properties (fm PROPERTIES COMPILE_DEFINITIONS "liboofem_EXPORTS")
+    set_target_properties (sm PROPERTIES COMPILE_DEFINITIONS "liboofem_EXPORTS")
+    set_target_properties (tm PROPERTIES COMPILE_DEFINITIONS "liboofem_EXPORTS")
 
     generate_export_header (liboofem
         BASE_NAME OOFEM
@@ -696,16 +696,29 @@ endforeach (case)
 #add_test (test-${case}-check "python" "${oofem_SOURCE_DIR}/tools/extractor.py" "-f" ${case} "-c")
 
 # Custom targets for test and benchmarks (which can conveniently be accessed from IDEs)
-add_custom_target (tests
-#   "-j 2" option can fail on production machine doing nightly test`
-#   COMMAND ${CMAKE_CTEST_COMMAND} "-j" "2" "-R" "test"
-    COMMAND ${CMAKE_CTEST_COMMAND} "-R" "test"
-    WORKING_DIRECTORY ${oofem_BINARY_DIR}
-    )
-add_custom_target (benchmarks
-    COMMAND ${CMAKE_CTEST_COMMAND} "-j" "2" "-R" "benchmark"
-    WORKING_DIRECTORY ${oofem_BINARY_DIR}
-    )
+
+if (MSVC)
+    add_custom_target (tests
+        COMMAND ${CMAKE_CTEST_COMMAND} "-j" "2" "-R" "test" "-C" "Debug"
+        WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}
+        )
+    add_custom_target (benchmarks
+        COMMAND ${CMAKE_CTEST_COMMAND} "-j" "2" "-R" "benchmark" "-C" "Debug"
+        WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}
+        )
+else ()
+    add_custom_target (tests
+        #COMMAND ${CMAKE_CTEST_COMMAND} "-j" "2" "-R" "test"
+        COMMAND ${CMAKE_CTEST_COMMAND} "-R" "test"
+        WORKING_DIRECTORY ${oofem_BINARY_DIR}
+        )
+    add_custom_target (benchmarks
+        COMMAND ${CMAKE_CTEST_COMMAND} "-j" "2" "-R" "benchmark"
+        WORKING_DIRECTORY ${oofem_BINARY_DIR}
+        )
+endif ()
+    
+
 
 #######################################################################
 ######################## Packing ######################################

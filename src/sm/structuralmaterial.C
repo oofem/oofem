@@ -621,6 +621,7 @@ StructuralMaterial :: convert_P_2_S(FloatArray &answer, const FloatArray &reduce
     S.beProductOf(invF, P);
     FloatArray vS;
     vS.beSymVectorForm(S); // 6 components
+
     StructuralMaterial :: giveReducedSymVectorForm(answer, vS, matMode); // convert back to reduced size
 }
 

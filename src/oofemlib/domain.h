@@ -69,6 +69,7 @@
 #define _IFT_Domain_topology "topology"
 #define _IFT_Domain_nxfemman "nxfemman" /// [in,optional] Specifies if there is an xfem-manager.
 #define _IFT_Domain_numberOfSpatialDimensions "nsd" ///< [in,optional] Specifies how many spatial dimensions the domain has.
+#define _IFT_Domain_nfracman "nfracman" /// [in,optional] Specifies if there is a fracture manager.
 //@}
 
 namespace oofem {
@@ -95,6 +96,7 @@ class XfemManager;
 class TopologyDescription;
 class DataReader;
 class Set;
+class FractureManager;
 
 #ifdef __PARALLEL_MODE
 class ProcessCommunicator;
@@ -190,7 +192,10 @@ private:
     StateCounterType nonlocalUpdateStateCounter;
     /// XFEM Manager
     XfemManager *xfemManager;
-     
+
+    /// Fracture Manager
+    FractureManager *fracManager;
+
     /// Topology description
     TopologyDescription *topology;
     
@@ -383,7 +388,9 @@ public:
     int giveNumberOfNonlocalBarriers() const { return nonlocalBarierList->giveSize(); }
     /// Returns number of random field generators
     int giveNumberOfRandomFieldGenerators() const { return randomFieldGeneratorList->giveSize(); }
-    
+    /// Returns number of sets
+    int giveNumberOfSets() const { return setList->giveSize(); }    
+
     int giveCorrespondingCoordinateIndex(int);
     /// Returns number of spatial dimensions.
     int giveNumberOfSpatialDimensions();
@@ -438,6 +445,10 @@ public:
 
     XfemManager *giveXfemManager();
     bool hasXfemManager();
+    
+    FractureManager *giveFractureManager(); 
+    bool hasFractureManager();
+
     /// List of Xfemmanagers.
     /**
      * Sets receiver's associated topology description.

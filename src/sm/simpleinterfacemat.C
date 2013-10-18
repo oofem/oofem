@@ -85,7 +85,8 @@ SimpleInterfaceMaterial :: give3dMaterialStiffnessMatrix(FloatMatrix &answer,
 
 void
 SimpleInterfaceMaterial :: giveRealStressVector(FloatArray &answer, GaussPoint *gp,
-                                                const FloatArray &totalStrain,
+                                                //const FloatArray &totalStrain,// @todo temporary -should not be here /JB
+                                                const FloatArray &strainVector,
                                                 TimeStep *atTime)
 //
 // returns real stress vector in 3d stress space of receiver according to
@@ -95,9 +96,10 @@ SimpleInterfaceMaterial :: giveRealStressVector(FloatArray &answer, GaussPoint *
 {
     SimpleInterfaceMaterialStatus *status = static_cast< SimpleInterfaceMaterialStatus * >( this->giveStatus(gp) );
     this->initGpForNewStep(gp);
-    FloatArray shearStrain(2), shearStress, strainVector;
+    FloatArray shearStrain(2), shearStress;//, strainVector;
     StructuralElement *el = static_cast< StructuralElement * >( gp->giveElement() );
-    el->computeStrainVector(strainVector, gp, atTime);
+    //el->computeStrainVector(strainVector, gp, atTime); 
+
     FloatArray tempShearStressShift = status->giveTempShearStressShift();
     const double normalStrain = strainVector.at(1);
     double normalStress, maxShearStress, dp;
@@ -133,6 +135,7 @@ SimpleInterfaceMaterial :: giveRealStressVector(FloatArray &answer, GaussPoint *
         answer.at(2) = shearStress.at(1);
         break;
     case _3dInterface:
+    case _3dMat: //JB 
         answer.resize(3);
         shearStrain.at(1) = strainVector.at(2);
         shearStrain.at(2) = strainVector.at(3);

@@ -68,6 +68,7 @@ public:
     enum CoordSystType {
         CST_Global, ///< Load is specified in global c.s.
         CST_Local, ///< Load is specified in local element c.s.
+        CST_UpdatedGlobal, ///< Load is specified in global c.s. but follows the deformation
     };
 
     /**
