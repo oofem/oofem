@@ -42,8 +42,7 @@
 namespace oofem {
 
 StructuralInterfaceMaterialStatus :: StructuralInterfaceMaterialStatus(int n, Domain *d, GaussPoint *g) :
-    MaterialStatus(n, d, g), jump(), traction(), firstPKTraction(),
-    tempTraction(), tempJump(), F(), tempF(), tempFirstPKTraction()
+    MaterialStatus(n, d, g), jump(), traction(), tempTraction(), tempJump(), firstPKTraction(), tempFirstPKTraction(), F(), tempF()
 {
     int size = StructuralMaterial :: giveSizeOfVoigtSymVector( gp->giveMaterialMode() ); ///@todo how to best get rid of matMode?
 

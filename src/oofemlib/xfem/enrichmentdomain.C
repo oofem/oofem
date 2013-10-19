@@ -132,12 +132,10 @@ DofManList :: addDofManagers(IntArray &dofManNumbers)
         p = std::find(this->dofManList.begin( ), this->dofManList.end( ), dofManNumbers.at(i));
         if ( p == this->dofManList.end( ) ) { // if new node
             this->dofManList.push_back( dofManNumbers.at(i) );
-        }       
+        }
     }
 
     std::sort(dofManList.begin( ), this->dofManList.end( ));
-
-    int sz = dofManList.size();
 }
 
 // remove?

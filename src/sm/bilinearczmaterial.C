@@ -194,18 +194,17 @@ BilinearCZMaterial :: give3dInterfaceMaterialStiffnessMatrix(FloatMatrix &answer
 }
 
 
-
 int
 BilinearCZMaterial :: giveIPValue(FloatArray &answer, GaussPoint *aGaussPoint, InternalStateType type, TimeStep *atTime)
 {
-    BilinearCZMaterialStatus *status = static_cast< BilinearCZMaterialStatus * >( this->giveStatus(aGaussPoint) );
+    //BilinearCZMaterialStatus *status = static_cast< BilinearCZMaterialStatus * >( this->giveStatus(aGaussPoint) );
     if ( type == IST_DamageScalar ) {
         answer.resize(1);
         answer.at(1) = 0.0; // no damage
         return 1;
     } else {
         return StructuralMaterial :: giveIPValue(answer, aGaussPoint, type, atTime);
-    }    
+    }
 }
 
 
@@ -214,8 +213,6 @@ BilinearCZMaterial :: giveIPValueType(InternalStateType type)
 {
     return StructuralMaterial :: giveIPValueType(type);
 }
-
-
 
 
 const double tolerance = 1.0e-12; // small number

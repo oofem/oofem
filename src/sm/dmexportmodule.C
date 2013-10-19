@@ -90,11 +90,9 @@ DofManExportModule :: doOutput(TimeStep *tStep, bool forcedOutput)
     
     IntArray dofManMap, dofMap, eqnMap;
     StructuralEngngModel *strEngMod = dynamic_cast<StructuralEngngModel*>(emodel); 
-    int numRestrDofs = 0;
     if ( strEngMod ) {
         strEngMod->buildReactionTable(dofManMap, dofMap, eqnMap, tStep, domainIndex);
         strEngMod->computeReaction(reactions, tStep, 1);
-        numRestrDofs = strEngMod->giveNumberOfDomainEquations(domainIndex, EModelDefaultPrescribedEquationNumbering());
     }
 
     
@@ -123,30 +121,29 @@ DofManExportModule :: doOutput(TimeStep *tStep, bool forcedOutput)
         }
         fprintf(stream, "\n");
     }
-    
 
-    //fprintf(stream, "%% Reaction forces \n");
-    //for ( int idm = 1; idm <= ndm; idm++ ) {
-    //    int dManNum = this->dofManList.at(idm);
-    //    dm = d->giveDofManager( dManNum );
-    //    fprintf(stream, "%d", dManNum);
+#if 0
+    fprintf(stream, "%% Reaction forces \n");
+    for ( int idm = 1; idm <= ndm; idm++ ) {
+        int dManNum = this->dofManList.at(idm);
+        dm = d->giveDofManager( dManNum );
+        fprintf(stream, "%d", dManNum);
 
-    //    for ( int i = 1; i <= numRestrDofs; i++ ) {
-    //        if ( dofManMap.at(i) == dManNum ) { // dofman has reaction
-    //            //double reaction =  reactions.at( eqnMap.at(i) ); 
-    //            double reaction =  reactions.at( i ); 
-    //            fprintf(stream, " %g", reaction);
-    //        }
-    //    }
-    //    fprintf(stream, "\n");
-    //}
+        for ( int i = 1; i <= numRestrDofs; i++ ) {
+            if ( dofManMap.at(i) == dManNum ) { // dofman has reaction
+                //double reaction =  reactions.at( eqnMap.at(i) ); 
+                double reaction =  reactions.at( i ); 
+                fprintf(stream, " %g", reaction);
+            }
+        }
+        fprintf(stream, "\n");
+    }
 
-    /*
     for ( int i = 1; i <= numRestrDofs; i++ ) {   
         double reaction =  reactions.at( i ); 
         fprintf(stream, " %g", reaction);
     }
-    */
+#endif
     fclose(stream);
 }
 
