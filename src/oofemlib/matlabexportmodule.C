@@ -367,8 +367,6 @@ MatlabExportModule :: doOutputSpecials(TimeStep *tStep,    FILE *FID)
 }
 
 
-
-
 void
 MatlabExportModule :: doOutputReactionForces(TimeStep *tStep,    FILE *FID)
 {
@@ -376,15 +374,16 @@ MatlabExportModule :: doOutputReactionForces(TimeStep *tStep,    FILE *FID)
     int domainIndex = 1;
     Domain *domain  = emodel->giveDomain( domainIndex );
 
-    FloatArray reactions;    
+    FloatArray reactions;
     IntArray dofManMap, dofMap, eqnMap;
+#if __SM_MODULE
     StructuralEngngModel *strEngMod = dynamic_cast<StructuralEngngModel*>(emodel); 
-    int numRestrDofs = 0;
     if ( strEngMod ) {
         strEngMod->buildReactionTable(dofManMap, dofMap, eqnMap, tStep, domainIndex);
         strEngMod->computeReaction(reactions, tStep, 1);
-        numRestrDofs = strEngMod->giveNumberOfDomainEquations(domainIndex, EModelDefaultPrescribedEquationNumbering());
-    } else {
+    } else 
+#endif
+    {
         OOFEM_ERROR("MatlabExportModule :: doOutputReactionForces - Cannot export reaction forces - only implemented for structural problems.");
     }
 
@@ -420,7 +419,6 @@ MatlabExportModule :: doOutputReactionForces(TimeStep *tStep,    FILE *FID)
     IntArray dofIDs;
     for ( int i = 1; i <= numDofManToExport; i++ ) {
         int dManNum = this->reactionForcesDofManList.at(i);
-        
 
         fprintf(FID, "\tReactionForces.ReactionForces{%i} = [", i);
         if ( dofManMap.contains( dManNum ) ) {
@@ -442,7 +440,6 @@ MatlabExportModule :: doOutputReactionForces(TimeStep *tStep,    FILE *FID)
             }
         }
         fprintf(FID, "];\n");
-    
 
         // Output dof ID's
         
@@ -453,11 +450,8 @@ MatlabExportModule :: doOutputReactionForces(TimeStep *tStep,    FILE *FID)
             }  
         }
         fprintf(FID, "];\n");
-        
     }
 }
-
-
 
 
 void
@@ -525,7 +519,7 @@ MatlabExportModule :: doOutputIntegrationPointFields(TimeStep *tStep,    FILE *F
 
                 // export Gauss point coordinates
                 fprintf( FID, "\tIntegrationPointFields.Elements{%i}.integrationRule{%i}.ip{%i}.coords = [",
-                    ielem, i+1, j+1, weight );
+                    ielem, i+1, j+1 );
                 
                 FloatArray coords;
                 el->computeGlobalCoordinates( coords, * ( ip->giveCoordinates() ) );
