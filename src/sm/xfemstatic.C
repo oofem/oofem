@@ -44,7 +44,6 @@
 
 #include "exportmodulemanager.h"
 #include "vtkxmlexportmodule.h"
-
 #include "gausspoint.h"
 
 namespace oofem {
@@ -151,53 +150,63 @@ XFEMStatic :: terminate(TimeStep *tStep)
     // Update element subdivisions if necessary
     // (e.g. if a crack has moved and cut a new element)
     for( int domInd = 1; domInd <= this->giveNumberOfDomains(); domInd++ ) {
-#if 0
     	Domain *domain = this->giveDomain(domInd);
 
-
-        // Take copy of the domain to allow mapping of state variables
-        // to the new Gauss points.
-        Domain *dNew = domain->Clone();
-
-        this->domainList->put(1, dNew); 
-        //this->domainList->at(1)->giveXfemManager()->updateYourself();
-
-
-        domain = this->giveDomain(1);
-
-        // Set domain pointer to various components ...
-        this->nMethod->setDomain(domain);
-
-        int numExpModules = this->exportModuleManager->giveNumberOfModules();
-        for(int i = 1; i <= numExpModules; i++) {
-
-        	//  ... by diving deep into the hierarchies ... :-/
-        	VTKXMLExportModule *vtkxmlMod = dynamic_cast<VTKXMLExportModule*> (this->exportModuleManager->giveModule(i) );
-        	if(vtkxmlMod != NULL) {
-        		vtkxmlMod->giveSmoother()->setDomain(domain);
-        		vtkxmlMod->givePrimVarSmoother()->setDomain(domain);
-        	}
-
+        // Temporary check: does the domain need to be copied and mapped
+        bool mapVariables = false;
+        XfemManager *xMan = domain->giveXfemManager();
+        for ( int i = 1; i <= xMan->giveNumberOfEnrichmentItems(); i++ ) {
+            if ( xMan->giveEnrichmentItem(i)->hasPropagationLaw() ) {;
+                mapVariables = true;
+                continue;
+            }
         }
 
+        if ( mapVariables ) {
+            // Take copy of the domain to allow mapping of state variables
+            // to the new Gauss points.
+            Domain *dNew = domain->Clone();
 
-        int numEl = domain->giveNumberOfElements();
+            this->domainList->put(1, dNew); 
+            //this->domainList->at(1)->giveXfemManager()->updateYourself();
 
-    	for(int i = 1; i <= numEl; i++) {
-    		Element *el = domain->giveElement(i);
 
-    		// Compute new distribution of Gauss points ...
-    		XfemElementInterface *xfemEl = dynamic_cast<XfemElementInterface*> (el);
+            domain = this->giveDomain(1);
 
-    		if( xfemEl != NULL ) {
-    			xfemEl->recomputeGaussPoints();
+            // Set domain pointer to various components ...
+            this->nMethod->setDomain(domain);
 
-    			// ... and map state variables to the new Gauss points
-//    			el->adaptiveMap(dNew, tStep);
-    		}
+            int numExpModules = this->exportModuleManager->giveNumberOfModules();
+            for(int i = 1; i <= numExpModules; i++) {
 
-    	}
-#endif
+        	    //  ... by diving deep into the hierarchies ... :-/
+        	    VTKXMLExportModule *vtkxmlMod = dynamic_cast<VTKXMLExportModule*> (this->exportModuleManager->giveModule(i) );
+        	    if(vtkxmlMod != NULL) {
+        		    vtkxmlMod->giveSmoother()->setDomain(domain);
+        		    vtkxmlMod->givePrimVarSmoother()->setDomain(domain);
+        	    }
+
+            }
+
+
+            int numEl = domain->giveNumberOfElements();
+
+    	    for(int i = 1; i <= numEl; i++) {
+    		    Element *el = domain->giveElement(i);
+
+    		    // Compute new distribution of Gauss points ...
+    		    XfemElementInterface *xfemEl = dynamic_cast<XfemElementInterface*> (el);
+
+    		    if( xfemEl != NULL ) {
+    			    xfemEl->recomputeGaussPoints();
+
+    			    // ... and map state variables to the new Gauss points
+                    //     el->adaptiveMap(dNew, tStep);
+    		    }
+
+    	    }
+        }
+
     }
     
     // Fracture/failure mechanics evaluation    
