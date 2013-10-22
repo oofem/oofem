@@ -191,6 +191,7 @@ IntMatBilinearCZFagerstrom :: giveFirstPKTraction_3d(FloatArray &answer, GaussPo
         //}
 
         if (loadFun/sigf < 0.0000001) {
+        //if ( 1 ) {
             dAlpha = 0.0;	// new_alpha=old_alpha
 		    status->letTempEffectiveMandelTractionBe(Qtemp);		
 			Qtemp.times(1-oldDamage);
