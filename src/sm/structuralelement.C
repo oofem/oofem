@@ -1260,6 +1260,15 @@ StructuralElement :: condense(FloatMatrix *stiff, FloatMatrix *mass, FloatArray 
 int
 StructuralElement :: giveIPValue(FloatArray &answer, GaussPoint *aGaussPoint, InternalStateType type, TimeStep *atTime)
 {
+    if ( type == IST_DisplacementVector ) {
+        FloatArray u;
+        FloatMatrix N;
+        this->computeVectorOf(EID_MomentumBalance, VM_Total, atTime, u);
+        this->computeNmatrixAt(aGaussPoint, N);
+        answer.beProductOf(N, u);
+        return 1;
+    }
+    
     return Element :: giveIPValue(answer, aGaussPoint, type, atTime);
 }
 

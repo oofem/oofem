@@ -1737,20 +1737,6 @@ StructuralMaterial :: giveIPValue(FloatArray &answer, GaussPoint *aGaussPoint, I
 
         this->computePrincipalValues(answer, s, principal_strain);
         return 1;
-    } else if ( type == IST_DisplacementVector ) {
-        OOFEM_ERROR("Not implemented");
-        Element *elem = aGaussPoint->giveElement();
-        EIPrimaryUnknownMapperInterface *interface;
-       interface = static_cast< EIPrimaryUnknownMapperInterface * > (elem->giveInterface(EIPrimaryUnknownMapperInterfaceType) );
-//         FloatArray *coords;
-//         FloatArray u;
-//         FloatMatrix N;
-//         elem->computeVectorOf(EID_MomentumBalance, VM_Total, atTime, u);
-//         elem->computeNmatrixAt(aGaussPoint, N);
-//         answer.beProductOf(N, u);
-        const FloatArray &coords = *aGaussPoint->giveCoordinates();
-        interface->EIPrimaryUnknownMI_computePrimaryUnknownVectorAt(VM_Total, atTime, coords, answer);
-        return 1;
     } else if ( type == IST_Temperature ) {
         /* add external source, if provided, such as staggered analysis */
         FieldManager *fm = domain->giveEngngModel()->giveContext()->giveFieldManager();
