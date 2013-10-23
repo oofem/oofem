@@ -70,6 +70,8 @@ PlaneStress2dXfem :: computeGaussPoints()
     {
     	std::vector<FloatArray> intersecPoints;
     	EnrichmentItem *ei = xMan->giveEnrichmentItem(i);
+        // Compute the value of the enrichment function in the nodes 
+        // in order to construction a shifted enrichment
 
         std::vector< int > intersecEdgeInd;
     	ei->computeIntersectionPoints(intersecPoints, intersecEdgeInd, this);

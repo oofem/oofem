@@ -98,7 +98,7 @@ CBS :: initializeFrom(InputRecord *ir)
 
     val = 0;
     IR_GIVE_OPTIONAL_FIELD(ir, val, _IFT_CBS_scaleflag);
-    equationScalingFlag = val;
+    equationScalingFlag = val > 0;
     if ( equationScalingFlag ) {
         IR_GIVE_FIELD(ir, lscale, _IFT_CBS_lscale);
         IR_GIVE_FIELD(ir, uscale, _IFT_CBS_uscale);

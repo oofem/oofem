@@ -247,11 +247,11 @@ InterfaceElem1d :: computeGlobalCoordinates(FloatArray &answer, const FloatArray
 }
 
 
-int
+bool
 InterfaceElem1d :: computeLocalCoordinates(FloatArray &answer, const FloatArray &gcoords)
 {
     _error("Not implemented");
-    return 0;
+    return false;
 }
 
 double

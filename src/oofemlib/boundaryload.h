@@ -106,6 +106,20 @@ class TimeStep;
  */
 class OOFEM_EXPORT BoundaryLoad : public Load
 {
+       
+public:    
+    CoordSystType CST_UpdatedGlobal;
+     /**
+     * Load coordinate system type. Variable of this type can have following values BL_GlobalMode
+     * (indicates that load given in global coordinate system) or BL_LocalMode
+     * (entity dependent local coordinate system will be  used).
+     */
+    enum BL_CoordSystType {
+        BL_GlobalMode, ///< Global mode i.e. load is specified in global c.s.
+        BL_LocalMode, ///< Local entity (edge or surface) coordinate system.
+        BL_UpdatedGlobalMode, ///< Load is specified in global c.s. and follows the deformation (only supported on el. level)
+    };
+
 protected:
     /// Number of "DOFs" which represent load geometry.
     int nDofs;

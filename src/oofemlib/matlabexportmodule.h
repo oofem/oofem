@@ -46,6 +46,13 @@
 #define _IFT_MatlabExportModule_data "data"
 #define _IFT_MatlabExportModule_area "area"
 #define _IFT_MatlabExportModule_specials "specials"
+// Reaction forces
+#define _IFT_MatlabExportModule_ReactionForces "reactionforces"
+#define _IFT_MatlabExportModule_DofManList "dofmanlist"
+// Integration points
+#define _IFT_MatlabExportModule_IntegrationPoints "integrationpoints"
+#define _IFT_MatlabExportModule_internalVarsToExport "internalvars"
+#define _IFT_MatlabExportModule_ElementList "elementlist"
 //@}
 
 namespace oofem {
@@ -60,6 +67,7 @@ class OOFEM_EXPORT MatlabExportModule : public ExportModule
 protected:
     /// list of InternalStateType values, identifying the selected vars for export
     IntArray internalVarsToExport;
+    IntArray elList;
     /// list of primary unknowns to export
     IntArray primaryVarsToExport;
     std :: string functionname;
@@ -75,9 +83,14 @@ protected:
     bool exportData;
     bool exportArea;
     bool exportSpecials;
+    bool exportReactionForces;
+    bool exportIntegrationPointFields;
 
 private:
     void computeArea();
+
+    // Export reaction forces
+    IntArray reactionForcesDofManList; // Holds which dof managers reaction forces should be exported from.
 
 public:
     MatlabExportModule(int n, EngngModel *e);
@@ -87,12 +100,16 @@ public:
     virtual void initialize();
     virtual void terminate();
 
-    void doOutputMesh(TimeStep *tStep,  FILE *FID);
-    void doOutputData(TimeStep *tStep,  FILE *FID);
-    void doOutputSpecials(TimeStep *tStep,      FILE *FID);
+    void doOutputMesh(TimeStep *tStep, FILE *FID);
+    void doOutputData(TimeStep *tStep, FILE *FID);
+    void doOutputSpecials(TimeStep *tStep, FILE *FID);
+    void doOutputReactionForces(TimeStep *tStep, FILE *FID);
+    void doOutputIntegrationPointFields(TimeStep *tStep, FILE *FID);
 
     virtual const char *giveClassName() const { return "MatlabExportModule"; };
     virtual const char *giveInputRecordName() const { return _IFT_MatlabExportModule_Name; }
+
+
 };
 } // end namespace oofem
 #endif // matlabexportmodule_h_

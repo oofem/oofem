@@ -63,6 +63,7 @@
 #include "errorestimator.h"
 #include "range.h"
 #include "compiler.h"
+#include "fracturemanager.h"
 #include "dynamicinputrecord.h"
 #include "dynamicdatareader.h"
 #include "oofemtxtdatareader.h"
@@ -119,6 +120,7 @@ Domain :: Domain(int n, int serNum, EngngModel *e) : defaultNodeDofIDArry()
     outputManager         = new OutputManager(this);
     smoother              = NULL;
     topology              = NULL;
+    fracManager           = NULL;
 
     nonlocalUpdateStateCounter = 0;
 
@@ -172,6 +174,16 @@ Domain* Domain :: Clone()
     inputRec->setField(this->giveNumberOfBoundaryConditions(), 	_IFT_Domain_nbc);
     inputRec->setField(this->giveNumberOfInitialConditions(), 	_IFT_Domain_nic);
     inputRec->setField(this->giveNumberOfLoadTimeFunctions(), 	_IFT_Domain_nloadtimefunct);
+    inputRec->setField(this->giveNumberOfSets(),            	_IFT_Domain_nset);
+
+
+    // fields to add:
+    // inputRec->setField( , _IFT_Domain_nbarrier);
+    // inputRec->setField( , _IFT_Domain_nrandgen);
+    // inputRec->setField( , _IFT_Domain_topology);
+    // inputRec->setField( , _IFT_Domain_numberOfSpatialDimensions);
+    // inputRec->setField( , _IFT_Domain_nfracman);
+
 
     bool nxfemMan = 0;
     if(this->hasXfemManager()) {
@@ -269,6 +281,18 @@ Domain* Domain :: Clone()
    	    dataReader.insertInputRecord(DataReader::IR_ltfRec, ltfRec);
     }
 
+
+    //Sets
+    int nSets = this->giveNumberOfSets();
+    for(int i = 1; i <= nSets; i++) {
+
+    	Set *set = this->giveSet(i);
+
+        DynamicInputRecord* ltfRec = new DynamicInputRecord();
+        set->giveInputRecord(*ltfRec);
+
+   	    dataReader.insertInputRecord(DataReader::IR_ltfRec, ltfRec);
+    }
 
     //XFEM manager
     if(this->xfemManager != NULL) {
@@ -589,6 +613,23 @@ Domain :: hasXfemManager()
 }
 
 
+bool
+Domain :: hasFractureManager()
+{
+    return fracManager != NULL;
+}
+
+FractureManager *
+Domain :: giveFractureManager()
+{
+#ifdef DEBUG
+    if ( !fracManager ) {
+        _error("giveFractureManager: undefined fracture manager");
+    }
+#endif
+    return fracManager;
+}
+
 EngngModel *
 Domain :: giveEngngModel()
 // Returns the time integration algorithm. Creates it if it does not
@@ -638,6 +679,7 @@ Domain :: instanciateYourself(DataReader *dr)
     std :: string name, topologytype;
     int nnode, nelem, nmat, nload, nic, nloadtimefunc, ncrossSections, nbarrier, nrfg, nset=0;
     bool nxfemman = false;
+    bool nfracman = false;
     RandomFieldGenerator *rfg;
     //XfemManager *xMan;
     // mapping from label to local numbers for dofmans and elements
@@ -680,6 +722,8 @@ Domain :: instanciateYourself(DataReader *dr)
     IR_GIVE_OPTIONAL_FIELD(ir, topologytype, _IFT_Domain_topology);
     this->nsd = -1; ///@todo Change this to default 0 when the domaintype record has been removed.
     IR_GIVE_OPTIONAL_FIELD(ir, this->nsd, _IFT_Domain_numberOfSpatialDimensions);
+    IR_GIVE_OPTIONAL_FIELD(ir, nfracman, _IFT_Domain_nfracman);
+
 
     // read optional number of nonlocalBarriers
     nbarrier = 0;
@@ -1033,6 +1077,16 @@ Domain :: instanciateYourself(DataReader *dr)
     if ( topologytype.length() > 0 ) VERBOSE_PRINT0("Instanciated topologies ", topologytype.length());
 #  endif
 
+
+    if ( nfracman ) {
+        fracManager = new FractureManager(this);
+        ir = dr->giveInputRecord(DataReader ::IR_fracManRec, 1);
+        fracManager->initializeFrom(ir);
+        fracManager->instanciateYourself(dr);
+    }
+#  ifdef VERBOSE
+    if ( nfracman ) VERBOSE_PRINT0("Instanciated fracture manager ", nxfemman);
+#  endif
 
     // change internal component references from labels to assigned local numbers
     MapBasedEntityRenumberingFunctor labelToLocNumFunctor(dofManLabelMap, elemLabelMap);

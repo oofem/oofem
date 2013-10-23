@@ -705,9 +705,9 @@ The element features are summarized in Table~\ref{trshell01summary}.
 \elementDescription{CS properties}{Cross section thickness is required.}
 \elementDescription{Loads}{Body loads are supported. Boundary loads are not supported now.}
 \elementDescription{Output}{On output, the generalized strains are printed in a vector with 12 components, with the following meaning:
-$$e=\{\varepsilon_x, \varepsilon_y, \varepsilon_z, \gamma_{yz}, \gamma_{zx}, \gamma_{xy}, \kappa_x, \kappa_y, \kappa_z, \kappa_{yz}, \kappa_{xz}, \kappa_{xy}\},$$where $\varepsilon_x, \varepsilon_y, \varepsilon_z$ are membrane normal deformations, $\gamma_{yz}, \gamma_{zx}, \gamma_{xy}$ are shear componets, and $\kappa_x, \kappa_y, \kappa_z, \kappa_{yz}, \kappa_{xz}, \kappa_{xy}$ are curvatures.
+$$e=\{\varepsilon_x, \varepsilon_y, \varepsilon_z, \gamma_{yz}, \gamma_{zx}, \gamma_{xy}, \kappa_x, \kappa_y, \kappa_z, \kappa_{yz}, \kappa_{zx}, \kappa_{xy}\},$$where $\varepsilon_x, \varepsilon_y, \varepsilon_z$ are membrane normal deformations, $\gamma_{yz}, \gamma_{zx}, \gamma_{xy}$ are shear componets, and $\kappa_x, \kappa_y, \kappa_z, \kappa_{yz}, \kappa_{zx}, \kappa_{xy}$ are curvatures.
 The generalized stress vector contains corresponding integral forces/moments:
-$$s=\{n_x, n_y, n_y, v_{yz}, v_{zx}, v_{xy}, m_x, m_y, m_z, m_{yz}, m_{xz}, m_{xy}\}.$$ Please note, for example, that bending moment $m_x$ is defined as $m_x=\int \sigma_x z\ dz$, so it acts along the y-axis and positive value causes tension in bottom layer.}
+$$s=\{n_x, n_y, n_z, v_{yz}, v_{zx}, v_{xy}, m_x, m_y, m_z, m_{yz}, m_{zx}, m_{xy}\}.$$ Please note, for example, that bending moment $m_x$ is defined as $m_x=\int \sigma_x z\ dz$, so it acts along the y-axis and positive value causes tension in bottom layer.}
 \elementDescription{Nlgeo}{0.}
 \elementDescription{Status}{Reliable}
 \end{elementsummary}
@@ -728,6 +728,28 @@ Implements the lumped mass matrix. The element features are summarized in Table~
 \elementDescription{Loads}{Dead weight loads, and edge loads are supported.}
 \elementDescription{Nlgeo}{0.}
 \elementDescription{Reference}{\cite{RobertCook1989}}
+\elementDescription{Status}{Experimental}
+\end{elementsummary}
+
+
+
+
+
+\subsubsection{Tr2Shell7 Element} \label{tr2shell7}
+This class implements a triangular, quadratic, six-node shell element. The element is a so-called seven parameter shell with seven dofs per node -- a displacement field (3 dofs), an extensible director field (3 dofs) and a seventh dof representing inhomogenous thickness strain. This last parameter is included in the model in order to deal with volumetric/Poisson lock effects.
+
+The element features are summarized in Table~\ref{quad1mindlinsummary}.
+
+\begin{elementsummary}{tr2shell7}{Triangular, quadratic, six-node shell with 7 dofs/node}{\optField{NIP}{in}}{tr2shell7 element summary}{quad1mindlinsummary}
+
+\elementDescription{Unknowns}{Seven dofs (displacement in u, v and w-direction; change in director field in u, v and w-direction; and inhomgenous thickness stretch) are required in each node.}
+\elementDescription{Approximation}{Quadratic for all unknowns.}
+\elementDescription{Integration}{Default uses 6 integration points in the midsurface plane. Number of integration points in the thickness direction is determined by the Layered cross section.}
+\elementDescription{Features}{Layered cross section support.}
+\elementDescription{CS properties}{This element must be used with a Layered cross section.}
+\elementDescription{Loads}{Edge loads, constant pressure loads and surface loads are supported.}
+\elementDescription{Nlgeo}{Not applicable. The implementation is for large defomrations and hence geometrical nonlinearities will always be present, regardless the value of Nlgeo.}
+\elementDescription{Reference}{\cite{RagnarLarsson2011}}
 \elementDescription{Status}{Experimental}
 \end{elementsummary}
 

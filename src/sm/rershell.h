@@ -78,7 +78,7 @@ public:
 
     void giveLocalCoordinates(FloatArray &answer, const FloatArray &global);
 
-    virtual int computeLocalCoordinates(FloatArray &answer, const FloatArray &gcoords);
+    virtual bool computeLocalCoordinates(FloatArray &answer, const FloatArray &gcoords);
     //
     void giveCharacteristicTensor(FloatMatrix &answer, CharTensor type, GaussPoint *gp, TimeStep *tStep);
     virtual void printOutputAt(FILE *file, TimeStep *tStep);

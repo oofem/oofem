@@ -79,6 +79,7 @@ bool EDCrack :: giveClosestTipInfo(const FloatArray &iCoords, TipInfo &oInfo) co
 		double distS = bg->giveVertex(1).distance(iCoords);
 		double distE = bg->giveVertex(nVert).distance(iCoords);
 
+
 		if(distS < distE)
 		{
 			const FloatArray &p1 = (bg->giveVertex(1));
@@ -122,9 +123,34 @@ bool EDCrack :: giveClosestTipInfo(const FloatArray &iCoords, TipInfo &oInfo) co
 	return false;
 }
 
-bool EDCrack :: giveTipInfos(std::vector<TipInfo> &oInfo) const {
+void
+DofManList :: addDofManagers(IntArray &dofManNumbers)
+{
+    for ( int i = 1; i <= dofManNumbers.giveSize(); i++) {
+        //std::list< int > :: iterator p;
+        std::vector< int > :: iterator p;
+        p = std::find(this->dofManList.begin( ), this->dofManList.end( ), dofManNumbers.at(i));
+        if ( p == this->dofManList.end( ) ) { // if new node
+            this->dofManList.push_back( dofManNumbers.at(i) );
+        }
+    }
+
+    std::sort(dofManList.begin( ), this->dofManList.end( ));
+}
+
+// remove?
+void
+DofManList :: updateEnrichmentDomain(IntArray &dofManNumbers)
+{
+    this->addDofManagers(dofManNumbers);
+
+}
 
 
+
+
+bool EDCrack :: giveTipInfos(std::vector<TipInfo> &oInfo) const
+{
 	int nVert = bg->giveNrVertices();
 	if( nVert > 1 )
 	{
@@ -209,6 +235,10 @@ void DofManList :: CallNodeEnrMarkerUpdate(EnrichmentItem &iEnrItem, XfemManager
     iEnrItem.updateNodeEnrMarker(ixFemMan, * this);
 }
 
+void DofManList :: computeSurfaceNormalSignDist(double &oDist, const FloatArray &iPoint) const
+{
+    oDist = iPoint.at(3) - this->xi; // will only work for plane el
+}
 
 IRResultType DofManList :: initializeFrom(InputRecord *ir)
 {
@@ -220,7 +250,9 @@ IRResultType DofManList :: initializeFrom(InputRecord *ir)
     for ( int i = 1; i <= idList.giveSize(); i++ ) {
         this->dofManList.push_back( idList.at(i) );
     }
-
+    std::sort(dofManList.begin( ), this->dofManList.end( ));
+    //IR_GIVE_FIELD(ir, this->xi, _IFT_DofManList_DelaminationLevel);
+    
     return IRRT_OK;
 }
 

@@ -120,7 +120,7 @@ public:
 
     virtual Interface *giveInterface(InterfaceType it);
 
-    virtual int computeLocalCoordinates(FloatArray &answer, const FloatArray &gcoords);
+    virtual bool computeLocalCoordinates(FloatArray &answer, const FloatArray &gcoords);
     virtual int giveIPValue(FloatArray &answer, GaussPoint *aGaussPoint, InternalStateType type, TimeStep *atTime);
 
     virtual Element *ZZNodalRecoveryMI_giveElement() { return this; }

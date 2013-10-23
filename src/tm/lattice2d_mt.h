@@ -81,7 +81,7 @@ public:
 
     virtual int computeGlobalCoordinates(FloatArray &answer, const FloatArray &lcoords);
 
-    virtual int computeLocalCoordinates(FloatArray &answer, const FloatArray &gcoords);
+    virtual bool computeLocalCoordinates(FloatArray &answer, const FloatArray &gcoords);
 
     virtual void computeConductivityMatrix(FloatMatrix &answer, MatResponseMode rMode, TimeStep *tStep);
 

@@ -41,7 +41,7 @@
 
 #include "rcsde.h"
 #include "structuralnonlocalmaterialext.h"
-
+#include "structuralmaterial.h"
 ///@name Input fields for RCSDNLMaterial
 //@{
 #define _IFT_RCSDNLMaterial_Name "rcsdnl"

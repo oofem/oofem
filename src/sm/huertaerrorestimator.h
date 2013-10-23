@@ -105,6 +105,8 @@ protected:
     double globalWENorm;
     /// Global norm of primary unknown.
     double globalUNorm;
+    /// Global error estimate (relative)
+    double globalErrorEstimate;
     /// Cache storing element norms.
     FloatArray eNorms;
     /// Type of norm used.

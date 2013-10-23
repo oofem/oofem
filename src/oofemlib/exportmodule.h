@@ -38,6 +38,7 @@
 #include "oofemcfg.h"
 #include "intarray.h"
 #include "inputrecord.h"
+#include "range.h"
 
 #include <list>
 
@@ -53,7 +54,6 @@
 namespace oofem {
 class EngngModel;
 class TimeStep;
-class Range;
 
 /**
  * Represents export output module - a base class for all output modules. ExportModule is an abstraction

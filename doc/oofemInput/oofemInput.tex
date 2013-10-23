@@ -1610,6 +1610,7 @@ Currently, the supported export modules are following
   \recentry{\entKeywordInst{vtkxml}}{\optField{vars}{ia}}
   \recentry{}{\optField{primvars}{ia}}
   \recentry{}{\optField{cellvars}{ia}}
+  \recentry{}{\optField{ipvars}{ia}}
   \recentry{}{\optField{stype}{in}}
   \recentry{}{\optField{regionstoskip}{ia}}
   \recentry{}{\optField{nvr}{in}}
@@ -1621,7 +1622,7 @@ Currently, the supported export modules are following
 \item The vtk module is obsolete, use vtkxml instead. Vtkxml allows to export results recovered on region by region basis and has more features.
 
 \item The array \param{vars} contains identifiers for those internal
-variables which are to be exported. The id values are defined by
+variables which are to be exported. These variables will be smoothed and transfered to nodes. The id values are defined by
 InternalStateType enumeration, which is defined in include file
 ``src/oofemlib/internal\-statetype.h''.
 
@@ -1636,6 +1637,13 @@ supported by particular material model or analysis type.
 \item The array \param{cellvars} contains identifiers of constant variables defined
 on an element (cell), e.g. a material number. Identifier numbers are specified in
 ``src/oofemlib/internalstatetype.h''.
+
+\item The array \param{ipvars} contains identifiers for those internal
+variables which are to be exported. These variables will be directly exported (no smoothing) as point dataset, where each point corresponds to individual integration point. A separate vtu file for these raw, point data will be created. 
+The id values are defined by
+InternalStateType enumeration, which is defined in include file
+``src/oofemlib/internal\-statetype.h''.
+
 
 \item The parameter \param{stype} allows to select smoothing procedure for
 internal variables, which is used to compute nodal values from values

@@ -36,7 +36,7 @@
 #define XFEMSTATIC_H_
 
 #include "nlinearstatic.h"
-
+#include "fracturemanager.h" // JB
 #include <map>
 
 ///@name Input fields for XFEMStatic
@@ -88,6 +88,10 @@ protected:
     // Map for updating initialLoadVector after resize
     // Maps <domain index, node index, local dof index> to global equation number
     std::map< std::vector<int>, int > mDofEqnNumMap;
+
+    // Jim
+    FractureManager *fMan;
+    
 };
 
 } /* namespace oofem */

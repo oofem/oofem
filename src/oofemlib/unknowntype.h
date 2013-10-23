@@ -34,7 +34,7 @@
 
 #ifndef unknowntype_h
 #define unknowntype_h
-
+//#include "internalstatetype.h"
 #include "enumitem.h"
 
 namespace oofem {
@@ -58,6 +58,9 @@ enum UnknownType {
 #undef ENUM_ITEM
 #undef ENUM_ITEM_WITH_VALUE
 #undef enumitem_h
+
+
+
 
 const char *__UnknownTypeToString(UnknownType _value);
 } // end namespace oofem

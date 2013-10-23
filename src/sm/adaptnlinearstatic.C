@@ -95,7 +95,7 @@ AdaptiveNonLinearStatic :: initializeFrom(InputRecord *ir)
     IR_GIVE_OPTIONAL_FIELD(ir, equilibrateMappedConfigurationFlag, _IFT_AdaptiveNonLinearStatic_equilmc);
     _val = 0;
     IR_GIVE_OPTIONAL_FIELD(ir, _val, _IFT_AdaptiveNonLinearStatic_preMappingLoadBalancingFlag);
-    preMappingLoadBalancingFlag = _val;
+    preMappingLoadBalancingFlag = _val > 0;
 
     return IRRT_OK;
 }

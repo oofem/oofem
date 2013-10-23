@@ -621,6 +621,7 @@ StructuralMaterial :: convert_P_2_S(FloatArray &answer, const FloatArray &reduce
     S.beProductOf(invF, P);
     FloatArray vS;
     vS.beSymVectorForm(S); // 6 components
+
     StructuralMaterial :: giveReducedSymVectorForm(answer, vS, matMode); // convert back to reduced size
 }
 
@@ -1685,6 +1686,9 @@ StructuralMaterial :: giveIPValue(FloatArray &answer, GaussPoint *aGaussPoint, I
     if ( type == IST_StressTensor ) {
         StructuralMaterial :: giveFullSymVectorForm(answer, status->giveStressVector(), aGaussPoint->giveMaterialMode());
         return 1;
+    } else if (type == IST_StressTensor_Reduced ) {
+        answer = status->giveStressVector();
+        return 1;
     } else if ( type == IST_vonMisesStress ) {
         ///@todo What about the stress meassure in large deformations here? The internal state type should specify "Cauchy" or something.
         answer.resize(1);
@@ -1693,6 +1697,10 @@ StructuralMaterial :: giveIPValue(FloatArray &answer, GaussPoint *aGaussPoint, I
     } else if ( type == IST_StrainTensor ) {
         ///@todo Fill in correct full form values here! This just adds zeros!
         StructuralMaterial :: giveFullSymVectorForm(answer, status->giveStrainVector(), aGaussPoint->giveMaterialMode());
+        return 1;
+    } else if ( type == IST_StrainTensor_Reduced ) {
+        ///@todo Fill in correct full form values here! This just adds zeros!
+        answer = status->giveStrainVector();
         return 1;
     } else if ( type == IST_StressTensorTemp ) {
         ///@todo Fill in correct full form values here! This just adds zeros!

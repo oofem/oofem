@@ -386,6 +386,34 @@ bool ClassFactory :: registerGeometry(const char *name, BasicGeometry * ( *creat
     return true;
 }
 
+
+// Failure module:
+
+FailureCriteria* ClassFactory :: createFailureCriteria(const char *name, int number, FractureManager *fracManager)
+{
+    return ( failureCriteriaList.count(name) == 1 ) ? failureCriteriaList [ name ](number, fracManager) : NULL;
+}
+
+bool ClassFactory :: registerFailureCriteria(const char *name, FailureCriteria * ( *creator )(int, FractureManager *))
+{
+    failureCriteriaList[name] = creator;
+    return true;
+}
+
+FailureCriteriaStatus* ClassFactory :: createFailureCriteriaStatus(const char *name, int number, FailureCriteria *fc)
+{
+    return ( failureCriteriaList.count(name) == 1 ) ? failureCriteriaStatusList [ name ](number, fc) : NULL;
+}
+
+bool ClassFactory :: registerFailureCriteriaStatus(const char *name, FailureCriteriaStatus * ( *creator )(int, FailureCriteria *))
+{
+    failureCriteriaStatusList[name] = creator;
+    return true;
+}
+
+
+
+
 SparseGeneralEigenValueSystemNM* ClassFactory :: createGeneralizedEigenValueSolver(GenEigvalSolverType st, Domain *d, EngngModel *m)
 {
     if ( st == GES_SubspaceIt ) {

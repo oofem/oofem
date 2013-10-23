@@ -257,6 +257,9 @@ enum classType {
     StokesFlowClass,
     DarcyFlowClass,
     FluidMaterialEvaluatorClass,
+    StaticFractureClass,
+
+    FractureManagerClass,
 
     NumericalMethodClass,
     SparseLinearSystemNMClass,
@@ -348,6 +351,8 @@ enum classType {
     ConcreteDPM2Class,
     LatticeDamage2dClass,
     IsoInterfaceDamageMaterialClass,
+    BilinearCZMaterialClass,
+    ExpCZMaterialClass,
     CebFipSlip90MaterialClass,
     DustMaterialClass,
     RVEMaterialClass,
