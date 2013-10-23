@@ -1376,8 +1376,7 @@ StructuralCrossSection *StructuralElement::giveStructuralCrossSection()
 
 //
 int
-StructuralElement :: giveInternalStateAtNode(FloatArray &answer, InternalStateType type, InternalStateMode mode,
-                                             int node, TimeStep *atTime)
+StructuralElement :: giveInternalStateAtNode(FloatArray &answer, InternalStateType type, InternalStateMode mode, int node, TimeStep *atTime)
 {
     if ( type == IST_DisplacementVector ) {
         Node *n = this->giveNode(node);
