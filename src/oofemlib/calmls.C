@@ -441,6 +441,10 @@ restart:
                 break;
             }
         }
+
+	// output of per iteration data 
+	// engngModel->giveExportModuleManager()->exportModuleManager->doOutput(stepN, true);
+
     } while ( !converged || ( nite < minIterations ) );
 
     //
