@@ -723,6 +723,7 @@ The corresponding meta step solver parameters (\param{solverParams}) are:\\
   \recentry{}{\optField{initialStepLength}{rn}}
   \recentry{}{\optField{forcedInitialStepLength}{rn}}
   \recentry{}{\optField{reqIterations}{in}}
+  \recentry{}{\optField{maxrestarts}{in}}
   \recentry{}{\optField{minIter}{in}}
   \recentry{}{\optField{manrmsteps}{in}}
   \recentry{}{\optField{hpcmode}{in} \optField{hpc}{ia} \optField{hpcw}{ia}}
@@ -747,6 +748,7 @@ be decreased, computation terminates.
 \item \param{initialsteplength} - determines the initial step length (the arc-length). If not provided, the maximum step length (determined by \param{stepLength} parameter) will be used as the value of initial step length. 
 \item \param{forcedInitialStepLength} - When simulation is restarted, the last predicted step length is used. Use \param{forcedInitialStepLength} parameter to override the value of step length. This parameter will also override the value of initial step length set by \param{initialsteplength} parameter.
 \item \param{reqIterations} - approximate number of iterations controlled by changing the step length.
+\item \param{maxrestarts} - maximum number of restarting computation when convergence not reached up to \param{MaxIter}.
 \item \param{minIter} - minimum number of iterations which always proceed during the iterative solution. \param{reqIterations} are set to be the same, \param{MaxIter} are increased if lower.
 \item \param{manrmsteps} - Forces the use of accelerated
 Newton Raphson met\-hod, where stiffness is updated after

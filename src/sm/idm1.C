@@ -416,14 +416,14 @@ IsotropicDamageMaterial1 :: computeEquivalentStrain(double &kappa, const FloatAr
         stress.beProductOf(de, strain);
         StructuralMaterial :: giveFullSymVectorForm( fullStress, stress, gp->giveMaterialMode() );
         this->computePrincipalValues(principalStress, fullStress, principal_stress);
-        //Rankine - causes bad convergence when coupled with Griffith
-//         for ( int i = 1; i <= 3; i++ ) {
-//             if ( principalStress.at(i) > 0.0 && sum < principalStress.at(i) ) {
-//                  sum = principalStress.at(i);
-//             }
-//         }
+        //Rankine - may cause convergence problems when coupled with Griffith
+        for ( int i = 1; i <= 3; i++ ) {
+            if ( principalStress.at(i) > 0.0 && sum < principalStress.at(i) ) {
+                 sum = principalStress.at(i);
+            }
+        }
 
-//         Use Griffith criterion if Rankine not applied
+        // Use Griffith's criterion if Rankine not applied
          if ( sum == 0. && principalStress.at(1)/principalStress.at(3) >= -0.33333 ) {
             sum = -(principalStress.at(1) - principalStress.at(3))*(principalStress.at(1) - principalStress.at(3)) / this->griff_n / ( principalStress.at(1) + principalStress.at(3) );
         }
