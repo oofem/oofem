@@ -358,7 +358,8 @@ MatlabExportModule :: giveOutputStream(TimeStep *tStep)
 
 	size_t foundDot;
 	foundDot = fileName.rfind(".");
-	fileName.erase(foundDot);
+    fileName.replace(foundDot, 1, "_");
+    //fileName.erase(foundDot);
 
 	functionname = fileName;
 
