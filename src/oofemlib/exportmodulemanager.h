@@ -57,8 +57,9 @@ public:
     /**
      * Writes the output. Loops over all modules and calls corresponding doOutput module service.
      * @param tStep Time step.
+     * @param substepFlag is set to true, only the modules with substepFlag set to true will be processed.
      */
-    void doOutput(TimeStep *tStep);
+    void doOutput(TimeStep *tStep, bool substepFlag = false);
     /**
      * Initializes output manager. The corresponding initialize module services are called.
      */
