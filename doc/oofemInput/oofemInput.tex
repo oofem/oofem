@@ -1580,6 +1580,7 @@ is the following:\\
   \recentry{\entKeyword{EntType}}{[\fieldnotype{tstep\_all}]}
   \recentry{}{\optField{tstep\_step}{in}}
   \recentry{}{\optField{tsteps\_out}{rl}}
+  \recentry{}{\optField{subtsteps\_out}{rl}}
   \recentry{}{[\fieldnotype{domain\_all}]}
   \recentry{}{\optField{domain\_mask}{in}}
 \end{record}
@@ -1593,6 +1594,9 @@ To select output for all domain of the problem the \param{domain\_all}
 keyword can be used. To select only specific domains,
 \param{domain\_mask} array can be used, where the values of the array
 specify the domain numbers to be exported.
+The parameter \param{subtsteps\_out} turns on the export of intermediate results, 
+for example during the substepping or individual equilibrium iterations. This option requires support from the solver.
+
 Currently, the supported export modules are following
 \begin{itemize}
 \item VTK export, \textbf{DEPRECATED - Use VTKXML}
