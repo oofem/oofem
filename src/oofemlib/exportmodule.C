@@ -67,7 +67,7 @@ ExportModule :: initializeFrom(InputRecord *ir)
     IR_GIVE_OPTIONAL_FIELD(ir, tsteps_out, _IFT_ExportModule_tstepsout);
 
     tstep_substeps_out_flag = 0;
-    IR_GIVE_OPTIONAL_FIELD(ir, tsteps_out, _IFT_ExportModule_subtstepsout);
+    IR_GIVE_OPTIONAL_FIELD(ir, tstep_substeps_out_flag, _IFT_ExportModule_subtstepsout);
 
     domain_all_flag = ir->hasField(_IFT_ExportModule_domainall);
 
