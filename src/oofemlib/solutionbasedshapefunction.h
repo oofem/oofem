@@ -42,33 +42,61 @@
 #define _IFT_SolutionbasedShapeFunction_Set "set"
 #define _IFT_SolutionbasedShapeFunction_ShapeFunctionFile "shapefunctionfile"
 
-
 namespace oofem {
+
+struct SurfaceDataStruct {
+    bool isPlus;
+    bool isMinus;
+    bool isZeroBoundary;
+    DofIDItem DofID;
+    DofManager *DofMan;
+    double value;
+};
+
+struct modeStruct {
+    double am, ap;
+    EngngModel *myEngngModel;
+    std::vector<SurfaceDataStruct *> SurfaceData;
+    std::vector<DofManager *> ZeroBoundary;
+
+};
+
 class OOFEM_EXPORT SolutionbasedShapeFunction : public ActiveBoundaryCondition {
 private:
-	Node *myNode;
-	int set;
-	std::string filename;
-	bool useConstantBase;
-	bool isLoaded;
-    std::vector<EngngModel *> myEngngModels;
+    Node *myNode;
+    int set;
+    double TOL;
+    std::string filename;
+    bool useConstantBase;
+    bool isLoaded;
+
+    std::vector< modeStruct *> modes;
+
+    //std::vector< EngngModel *> myEngngModels;
+    //std::vector< std::vector<DofManager *> *> ZeroBoundary;
     TimeStep *thisTimestep;
 
     FloatArray maxCoord, minCoord;
 
-	double computeBaseFunctionValueAt(FloatArray *coords, Dof *dof, int d);
+    void setBoundaryConditionOnDof(Dof *d, double value);
 
-	void setLoads(EngngModel *myEngngModel, int d);
-	void loadProblem();
-	void init();
+    double computeBaseFunctionValueAt(FloatArray &coords, DofIDItem dofID, EngngModel &myEngngModel);
+
+    void setLoads(EngngModel *myEngngModel, int d);
+    void loadProblem();
+    void init();
+
+    void computeCorrectionFactors(EngngModel &myEngngModel, IntArray *Dofs, double *Am, double *Ap, double *c0, double *cm, double *cp);
+
+    double giveValueAtPoint(const FloatArray &coords, DofIDItem dofID, EngngModel &myEngngModel);
 
 public:
-	SolutionbasedShapeFunction(int n, Domain *d);
-	virtual ~SolutionbasedShapeFunction();
+    SolutionbasedShapeFunction(int n, Domain *d);
+    virtual ~SolutionbasedShapeFunction();
 
-	IRResultType initializeFrom(InputRecord *ir);
+    IRResultType initializeFrom(InputRecord *ir);
 
-	virtual bool requiresActiveDofs() {return true;};
+    virtual bool requiresActiveDofs() {return true;}
     virtual int giveNumberOfInternalDofManagers() { return 1; }
     virtual DofManager *giveInternalDofManager(int i) { return myNode; }
 
@@ -77,12 +105,11 @@ public:
 
     virtual bool hasBc(ActiveDof *dof, TimeStep *tStep) { return false; }
 
-    virtual bool isPrimaryDof(ActiveDof *dof) { return false; };
+    virtual bool isPrimaryDof(ActiveDof *dof) { return false; }
 
     virtual void computeDofTransformation(ActiveDof *dof, FloatArray &masterContribs);
 
-
-    virtual int giveNumberOfMasterDofs(ActiveDof *dof) {return this->giveDomain()->giveNumberOfSpatialDimensions(); };
+    virtual int giveNumberOfMasterDofs(ActiveDof *dof) {return this->giveDomain()->giveNumberOfSpatialDimensions(); }
     virtual Dof *giveMasterDof(ActiveDof *dof, int mdof);
 
     virtual const char *giveClassName() const { return "SolutionbasedShapeFunction"; }
