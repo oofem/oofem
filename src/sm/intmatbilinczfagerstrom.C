@@ -184,12 +184,7 @@ IntMatBilinearCZFagerstrom :: giveFirstPKTraction_3d(FloatArray &answer, GaussPo
 
         //Qold.rotatedWith(Rot,'n');
 
-        double alphaOld = status->giveDamage();
-
-        //if (alphaOld>0.1) {
-        //    double bbb=1; ///@todo Should this be used for anything Martin? /JB
-        //}
-
+    
         if (loadFun/sigf < 0.0000001) {
             dAlpha = 0.0;	// new_alpha=old_alpha
 		    status->letTempEffectiveMandelTractionBe(Qtemp);		
@@ -280,6 +275,26 @@ IntMatBilinearCZFagerstrom :: giveFirstPKTraction_3d(FloatArray &answer, GaussPo
 
                 loadFun = sigf*pow(Qt/(gamma*sigf),2) + sigf*pow((Qn_M/sigf),2) - sigf;
             }
+
+			if (oldDamage+dAlpha > 1) {														// Martin: resolving issues with negative traction upon full damage
+				dAlpha = 1.0-oldDamage;
+				//Smat.at(1,1) = 1.0 + gammaGf*dAlpha*S*2*Kstiff.at(1,1)/(pow(gamma,2)*sigf);		
+                //Smat.at(2,2) = 1.0 + gammaGf*dAlpha*S*2*Kstiff.at(2,2)/(pow(gamma,2)*sigf);
+				//if (Qn_M>0) {
+                //    Smat.at(3,3) = 1.0 + dAlpha*S*2*Kstiff.at(3,3)/(sigf);
+                //} else {
+                //    Smat.at(3,3) = 1.0;
+                //}
+				//Smat.at(1,4) = gammaGf*S*M.at(1);			// S_mat(1:2,3) = S*M(1:2)
+                //Smat.at(2,4) = gammaGf*S*M.at(2);
+                //Smat.at(3,4) = S*M.at(3);
+                    
+                //Smat.at(4,1) = M.at(1)*Kstiff.at(1,1);      // S_mat(3,1:2) = MATMUL(M(1:2),Keye3(1:2,1:2))
+                //Smat.at(4,2) = M.at(2)*Kstiff.at(2,2);
+                //Smat.at(4,3) = M.at(3)*Kstiff.at(3,3);
+
+                //Smati.beInverseOf(Smat);
+			}
                 
             FloatMatrix Iep(3,3);
             Iep = Smati;
@@ -304,7 +319,7 @@ IntMatBilinearCZFagerstrom :: giveFirstPKTraction_3d(FloatArray &answer, GaussPo
 				} else {
 					status->letTempEffectiveMandelTractionBe(Qtemp);						// SHOULD NEVER BE USED
 					Qtemp.times(1-oldDamage-dAlpha);
-					Qtemp.at(3) = (1-oldDamage)*(Qold.at(3) + Kstiff.at(3,3)*dJElastic.at(3));
+					Qtemp.at(3) = (1-oldDamage)*(Qold.at(3) + Kstiff.at(3,3)*dJElastic.at(3)); // dJElastic.at(3) is always equal to dJ.at(3) if dJ.at(3)<0
 				}
 			}
 		}
