@@ -17,19 +17,19 @@
  *       Czech Technical University, Faculty of Civil Engineering,
  *   Department of Structural Mechanics, 166 29 Prague, Czech Republic
  *
- *  This program is free software; you can redistribute it and/or modify
- *  it under the terms of the GNU General Public License as published by
- *  the Free Software Foundation; either version 2 of the License, or
- *  (at your option) any later version.
+ *  This library is free software; you can redistribute it and/or
+ *  modify it under the terms of the GNU Lesser General Public
+ *  License as published by the Free Software Foundation; either
+ *  version 2.1 of the License, or (at your option) any later version.
  *
  *  This program is distributed in the hope that it will be useful,
  *  but WITHOUT ANY WARRANTY; without even the implied warranty of
- *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- *  GNU General Public License for more details.
+ *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+ *  Lesser General Public License for more details.
  *
- *  You should have received a copy of the GNU General Public License
- *  along with this program; if not, write to the Free Software
- *  Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
+ *  You should have received a copy of the GNU Lesser General Public
+ *  License along with this library; if not, write to the Free Software
+ *  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  */
 
 #include "mathfem.h"
@@ -42,6 +42,7 @@
 #include "classfactory.h"
 #include "enrichmentfunction.h"
 #include "xfemmanager.h"
+#include "dynamicinputrecord.h"
 
 #include <algorithm>
 
@@ -57,6 +58,13 @@ REGISTER_EnrichmentDomain(EDCrack)
 
 EnrichmentDomain :: EnrichmentDomain()
 {}
+
+void EnrichmentDomain_BG :: giveInputRecord(DynamicInputRecord &input)
+{
+    input.setRecordKeywordField(this->giveInputRecordName(), 1);
+
+    bg->giveInputRecord(input);
+}
 
 void EnrichmentDomain_BG :: CallNodeEnrMarkerUpdate(EnrichmentItem &iEnrItem, XfemManager &ixFemMan) const
 {
@@ -124,12 +132,10 @@ DofManList :: addDofManagers(IntArray &dofManNumbers)
         p = std::find(this->dofManList.begin( ), this->dofManList.end( ), dofManNumbers.at(i));
         if ( p == this->dofManList.end( ) ) { // if new node
             this->dofManList.push_back( dofManNumbers.at(i) );
-        }       
+        }
     }
 
     std::sort(dofManList.begin( ), this->dofManList.end( ));
-
-    int sz = dofManList.size();
 }
 
 // remove?
@@ -216,7 +222,9 @@ bool EDCrack :: propagateTips(const std::vector<TipPropagation> &iTipProp) {
 
 	// For debugging only
 	PolygonLine *pl = dynamic_cast<PolygonLine*>(bg);
-	pl->printVTK();
+	if( pl != NULL ) {
+		pl->printVTK();
+	}
 
 	return true;
 }
@@ -248,8 +256,28 @@ IRResultType DofManList :: initializeFrom(InputRecord *ir)
     return IRRT_OK;
 }
 
+void DofManList :: giveInputRecord(DynamicInputRecord &input)
+{
+    input.setRecordKeywordField(this->giveInputRecordName(), 1);
+
+	IntArray idList;
+	idList.resize(dofManList.size());
+    for ( size_t i = 0; i < dofManList.size(); i++ ) {
+    	idList.at(i+1) = dofManList[i];
+    }
+
+    input.setField(idList, _IFT_DofManList_list);
+}
+
 void WholeDomain :: CallNodeEnrMarkerUpdate(EnrichmentItem &iEnrItem, XfemManager &ixFemMan) const
 {
     iEnrItem.updateNodeEnrMarker(ixFemMan, * this);
 }
+
+void WholeDomain :: giveInputRecord(DynamicInputRecord &input)
+{
+    input.setRecordKeywordField(this->giveInputRecordName(), 1);
+
+}
+
 } // end namespace oofem

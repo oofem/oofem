@@ -17,19 +17,19 @@
  *       Czech Technical University, Faculty of Civil Engineering,
  *   Department of Structural Mechanics, 166 29 Prague, Czech Republic
  *
- *  This program is free software; you can redistribute it and/or modify
- *  it under the terms of the GNU General Public License as published by
- *  the Free Software Foundation; either version 2 of the License, or
- *  (at your option) any later version.
+ *  This library is free software; you can redistribute it and/or
+ *  modify it under the terms of the GNU Lesser General Public
+ *  License as published by the Free Software Foundation; either
+ *  version 2.1 of the License, or (at your option) any later version.
  *
  *  This program is distributed in the hope that it will be useful,
  *  but WITHOUT ANY WARRANTY; without even the implied warranty of
- *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- *  GNU General Public License for more details.
+ *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+ *  Lesser General Public License for more details.
  *
- *  You should have received a copy of the GNU General Public License
- *  along with this program; if not, write to the Free Software
- *  Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
+ *  You should have received a copy of the GNU Lesser General Public
+ *  License along with this library; if not, write to the Free Software
+ *  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  */
 
 #include "linearconstraintbc.h"
@@ -64,7 +64,7 @@ IRResultType LinearConstraintBC :: initializeFrom(InputRecord *ir)
     ActiveBoundaryCondition :: initializeFrom(ir);
     const char *__proc = "initializeFrom";
     IRResultType result;
-    rhsLtf = 0.;
+    rhsLtf = 0;
     
     IR_GIVE_FIELD(ir, weights, _IFT_LinearConstraintBC_weights);
     IR_GIVE_FIELD(ir, rhs, _IFT_LinearConstraintBC_rhs);
@@ -118,7 +118,7 @@ void LinearConstraintBC :: assemble(SparseMtrx *answer, TimeStep *tStep, Equatio
       for ( int _i = 1; _i <= size; _i++ ) { // loop over dofs
         double factor=1.;
         if(weightsLtf.giveSize()){
-	  factor = domain->giveLoadTimeFunction(weightsLtf.at(_i))->__at(tStep->giveIntrinsicTime());
+            factor = domain->giveLoadTimeFunction(weightsLtf.at(_i))->__at(tStep->giveIntrinsicTime());
         }
         contrib.at(_i, 1) = this->weights.at(_i)*factor;
       }
@@ -159,8 +159,8 @@ void LinearConstraintBC :: assembleVector(FloatArray &answer, TimeStep *tStep, E
             factor = domain->giveLoadTimeFunction(weightsLtf.at(_i))->__at(tStep->giveIntrinsicTime());
         }
         idof = this->domain->giveDofManager( this->dofmans.at(_i) )->giveDof( this->dofs.at(_i) );
-	answer.at(s.giveDofEquationNumber(idof)) += md->giveDof(1)->giveUnknown(mode, tStep) * this->weights.at(_i)*factor;
-	answer.at(s.giveDofEquationNumber( md->giveDof(1) )) += idof->giveUnknown(mode, tStep) * this->weights.at(_i)*factor;
+        answer.at(s.giveDofEquationNumber(idof)) += md->giveDof(1)->giveUnknown(mode, tStep) * this->weights.at(_i)*factor;
+        answer.at(s.giveDofEquationNumber( md->giveDof(1) )) += idof->giveUnknown(mode, tStep) * this->weights.at(_i)*factor;
     }
 
   } else {

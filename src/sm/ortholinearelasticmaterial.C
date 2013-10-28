@@ -17,19 +17,19 @@
  *       Czech Technical University, Faculty of Civil Engineering,
  *   Department of Structural Mechanics, 166 29 Prague, Czech Republic
  *
- *  This program is free software; you can redistribute it and/or modify
- *  it under the terms of the GNU General Public License as published by
- *  the Free Software Foundation; either version 2 of the License, or
- *  (at your option) any later version.
+ *  This library is free software; you can redistribute it and/or
+ *  modify it under the terms of the GNU Lesser General Public
+ *  License as published by the Free Software Foundation; either
+ *  version 2.1 of the License, or (at your option) any later version.
  *
  *  This program is distributed in the hope that it will be useful,
  *  but WITHOUT ANY WARRANTY; without even the implied warranty of
- *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- *  GNU General Public License for more details.
+ *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+ *  Lesser General Public License for more details.
  *
- *  You should have received a copy of the GNU General Public License
- *  along with this program; if not, write to the Free Software
- *  Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
+ *  You should have received a copy of the GNU Lesser General Public
+ *  License along with this library; if not, write to the Free Software
+ *  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  */
 
 #include "linearelasticmaterial.h"
@@ -41,6 +41,7 @@
 #include "gausspoint.h"
 #include "mathfem.h"
 #include "classfactory.h"
+#include "dynamicinputrecord.h"
 
 namespace oofem {
 #define ZERO_LENGTH 1.e-6
@@ -206,6 +207,54 @@ OrthotropicLinearElasticMaterial :: initializeFrom(InputRecord *ir)
     return IRRT_OK;
 }
 
+
+void
+OrthotropicLinearElasticMaterial :: giveInputRecord(DynamicInputRecord &input)
+{
+    Material :: giveInputRecord(input);
+
+
+    input.setField(propertyDictionary->at(Ex), _IFT_OrthotropicLinearElasticMaterial_ex);
+
+
+    input.setField(propertyDictionary->at(Ey), _IFT_OrthotropicLinearElasticMaterial_ey);
+
+
+    input.setField(propertyDictionary->at(Ez), _IFT_OrthotropicLinearElasticMaterial_ez);
+
+
+    input.setField(propertyDictionary->at(NYyz), _IFT_OrthotropicLinearElasticMaterial_nyyz);
+
+
+    input.setField(propertyDictionary->at(NYxz), _IFT_OrthotropicLinearElasticMaterial_nyxz);
+
+
+    input.setField(propertyDictionary->at(NYxy), _IFT_OrthotropicLinearElasticMaterial_nyxy);
+
+
+    input.setField(propertyDictionary->at(Gyz), _IFT_OrthotropicLinearElasticMaterial_gyz);
+
+
+    input.setField(propertyDictionary->at(Gxz), _IFT_OrthotropicLinearElasticMaterial_gxz);
+
+
+    input.setField(propertyDictionary->at(Gxy), _IFT_OrthotropicLinearElasticMaterial_gxy);
+
+
+    input.setField(propertyDictionary->at(tAlphax), _IFT_OrthotropicLinearElasticMaterial_talphax);
+
+
+    input.setField(propertyDictionary->at(tAlphay), _IFT_OrthotropicLinearElasticMaterial_talphay);
+
+
+    input.setField(propertyDictionary->at(tAlphaz), _IFT_OrthotropicLinearElasticMaterial_talphaz);
+
+
+    ///@todo Should add optional arguments:
+    // _IFT_OrthotropicLinearElasticMaterial_lcs
+    // _IFT_OrthotropicLinearElasticMaterial_scs
+
+}
 
 double
 OrthotropicLinearElasticMaterial :: give(int aProperty, GaussPoint *gp)

@@ -1,7 +1,7 @@
 testTrShell7XFEM.out
 Cantilever beam split in two parts by delamination subjected to edge load
-XFEMStatic nsteps 1 lstype 0 smtype 0 rtolf 1.0e-4 rtold -1.0 manrmsteps 1 controllmode 1 nmodules 1 initialguess 1 
-vtkxml tstep_all dofman_all element_all primvars 1 1 
+XFEMStatic nsteps 1 lstype 0 smtype 0 rtolf 1.0e-4 rtold -1.0 manrmsteps 1 controllmode 1 nmodules 0 initialguess 1 
+#vtkxml tstep_all dofman_all element_all primvars 1 1 
 domain 3dDirShell 
 OutputManager tstep_all dofman_all element_all
 ndofman 15 nelem 4 ncrosssect 1 nmat 1 nbc 2 nic 0 nltf 1 nxfemman 1 	
@@ -30,11 +30,12 @@ BoundaryCondition 1 loadTimeFunction 1 prescribedvalue 0.0
 ConstantEdgeLoad 2 ndofs 8 loadType 2 loadTimeFunction 1 Components 8 0. 0. 1.0 0. 0. 0. 0.0 1.0
 ConstantFunction 1 f(t) 1.
 XfemManager 1 numberofenrichmentitems 1 
-delamination 1 enrichmentdomains 1 1  enrichmentfunction 1  enrichmentdomain 1 enrichmentfront 1 delaminationxicoord 0.0  
+#delamination 1 enrichmentdomains 1 1  enrichmentfunction 1  enrichmentdomain 1 enrichmentfront 1 delaminationxicoord 0.0  
+delamination 1 interfacenum 1 csnum 1  
 DiscontinuousFunction 1 
 DofManList 1 list 12  2 3 5 6 7 8 9 10 12 13 14 15
-EnrFrontDoNothing 1
-PLDoNothing 1
+#EnrFrontDoNothing 1
+#PLDoNothing 1
 #%BEGIN_CHECK% tolerance 1.e-5
 ## Check unknowns in node 13 (mid edge node)
 #NODE tStep 0 number 13 dof 8 unknown d value 2.13801213e-005

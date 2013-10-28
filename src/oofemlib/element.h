@@ -17,19 +17,19 @@
  *       Czech Technical University, Faculty of Civil Engineering,
  *   Department of Structural Mechanics, 166 29 Prague, Czech Republic
  *
- *  This program is free software; you can redistribute it and/or modify
- *  it under the terms of the GNU General Public License as published by
- *  the Free Software Foundation; either version 2 of the License, or
- *  (at your option) any later version.
+ *  This library is free software; you can redistribute it and/or
+ *  modify it under the terms of the GNU Lesser General Public
+ *  License as published by the Free Software Foundation; either
+ *  version 2.1 of the License, or (at your option) any later version.
  *
  *  This program is distributed in the hope that it will be useful,
  *  but WITHOUT ANY WARRANTY; without even the implied warranty of
- *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- *  GNU General Public License for more details.
+ *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+ *  Lesser General Public License for more details.
  *
- *  You should have received a copy of the GNU General Public License
- *  along with this program; if not, write to the Free Software
- *  Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
+ *  You should have received a copy of the GNU Lesser General Public
+ *  License along with this library; if not, write to the Free Software
+ *  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  */
 
 #ifndef element_h
@@ -145,7 +145,7 @@ enum elementParallelMode {
  *   Local DOF ordering must be taken into account when assembling various local characteristic
  *   vectors and matrices.
  */
-class Element : public FEMComponent
+class OOFEM_EXPORT Element : public FEMComponent
 {
 protected:
     /// Number of dofmanagers
@@ -186,6 +186,12 @@ protected:
      * local domain number.
      */
     int globalNumber;
+
+    /**
+     * Number of integration points as specified by nip.
+     */
+    int numberOfGaussPoints;
+
 #ifdef __PARALLEL_MODE
     elementParallelMode parallel_mode;
     /**
@@ -369,14 +375,14 @@ public:
      * @param eid Id of equation that DOFs belong to.
      * @return Number of DOFs belonging to ut.
      */
-    virtual int computeNumberOfDofs(EquationID eid) { return 0; }
+    virtual int computeNumberOfDofs() { return 0; }
     /**
      * Computes the total number of element's global dofs.
      * The transitions from global c.s. to nodal c.s. should NOT be included.
      * @param eid Id of equation that DOFs belong to.
      * @return Total number of DOFs belonging to ut.
      */
-    virtual int computeNumberOfGlobalDofs(EquationID eid);
+    virtual int computeNumberOfGlobalDofs();
     /**
      * Computes the total number of element's primary master DOFs.
      * @param eid ID of equation that DOFs belong to.
@@ -807,7 +813,7 @@ public:
      * @param gcoords Global coordinates.
      * @return Nonzero if point is inside element; zero otherwise.
      */
-    virtual int computeLocalCoordinates(FloatArray &answer, const FloatArray &gcoords);
+    virtual bool computeLocalCoordinates(FloatArray &answer, const FloatArray &gcoords);
     /**
      * Returns local coordinate system of receiver
      * Required by material models with ortho- and anisotrophy.
@@ -1011,6 +1017,7 @@ public:
 
     // Overloaded methods:
     virtual IRResultType initializeFrom(InputRecord *ir);
+    virtual void giveInputRecord(DynamicInputRecord &input);
     virtual contextIOResultType saveContext(DataStream *stream, ContextMode mode, void *obj = NULL);
     virtual contextIOResultType restoreContext(DataStream *stream, ContextMode mode, void *obj = NULL);
     virtual void printOutputAt(FILE *file, TimeStep *tStep);

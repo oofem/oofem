@@ -17,19 +17,19 @@
  *       Czech Technical University, Faculty of Civil Engineering,
  *   Department of Structural Mechanics, 166 29 Prague, Czech Republic
  *
- *  This program is free software; you can redistribute it and/or modify
- *  it under the terms of the GNU General Public License as published by
- *  the Free Software Foundation; either version 2 of the License, or
- *  (at your option) any later version.
+ *  This library is free software; you can redistribute it and/or
+ *  modify it under the terms of the GNU Lesser General Public
+ *  License as published by the Free Software Foundation; either
+ *  version 2.1 of the License, or (at your option) any later version.
  *
  *  This program is distributed in the hope that it will be useful,
  *  but WITHOUT ANY WARRANTY; without even the implied warranty of
- *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- *  GNU General Public License for more details.
+ *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+ *  Lesser General Public License for more details.
  *
- *  You should have received a copy of the GNU General Public License
- *  along with this program; if not, write to the Free Software
- *  Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
+ *  You should have received a copy of the GNU Lesser General Public
+ *  License along with this library; if not, write to the Free Software
+ *  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  */
 
 #include "cct.h"
@@ -285,16 +285,8 @@ CCTPlate :: giveNodeCoordinates(double &x1, double &x2, double &x3,
 IRResultType
 CCTPlate :: initializeFrom(InputRecord *ir)
 {
-    const char *__proc = "initializeFrom"; // Required by IR_GIVE_FIELD macro
-    IRResultType result;                 // Required by IR_GIVE_FIELD macro
-
-    this->NLStructuralElement :: initializeFrom(ir);
     numberOfGaussPoints = 1;
-    IR_GIVE_OPTIONAL_FIELD(ir, numberOfGaussPoints, _IFT_Element_nip);
-    //if ( numberOfGaussPoints != 1 ) {
-    //    numberOfGaussPoints = 1;
-    //}
-    return IRRT_OK;
+	return this->NLStructuralElement :: initializeFrom(ir);
 }
 
 
@@ -384,7 +376,7 @@ CCTPlate :: giveInterface(InterfaceType interface)
 
 #define POINT_TOL 1.e-3
 
-int
+bool
 CCTPlate :: computeLocalCoordinates(FloatArray &answer, const FloatArray &coords)
 //converts global coordinates to local planar area coordinates,
 //does not return a coordinate in the thickness direction, but
@@ -395,7 +387,7 @@ CCTPlate :: computeLocalCoordinates(FloatArray &answer, const FloatArray &coords
     this->giveNodeCoordinates(x1, x2, x3, y1, y2, y3, z);
 
     // Fetch local coordinates.
-    int ok = this->interp_lin.global2local( answer, coords, FEIElementGeometryWrapper(this) );
+    bool ok = this->interp_lin.global2local( answer, coords, FEIElementGeometryWrapper(this) );
 
     //get midplane location at this point
     double midplZ;
@@ -407,17 +399,17 @@ CCTPlate :: computeLocalCoordinates(FloatArray &answer, const FloatArray &coords
 
     if ( elthick / 2.0 + midplZ - fabs( coords.at(3) ) < -POINT_TOL ) {
         answer.zero();
-        return 0;
+        return false;
     }
 
     //check that the point is in the element and set flag
     for ( int i = 1; i <= 3; i++ ) {
         if ( answer.at(i) < ( 0. - POINT_TOL ) ) {
-            return 0;
+            return false;
         }
 
         if ( answer.at(i) > ( 1. + POINT_TOL ) ) {
-            return 0;
+            return false;
         }
     }
 

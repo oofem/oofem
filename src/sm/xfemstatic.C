@@ -17,19 +17,19 @@
  *       Czech Technical University, Faculty of Civil Engineering,
  *   Department of Structural Mechanics, 166 29 Prague, Czech Republic
  *
- *  This program is free software; you can redistribute it and/or modify
- *  it under the terms of the GNU General Public License as published by
- *  the Free Software Foundation; either version 2 of the License, or
- *  (at your option) any later version.
+ *  This library is free software; you can redistribute it and/or
+ *  modify it under the terms of the GNU Lesser General Public
+ *  License as published by the Free Software Foundation; either
+ *  version 2.1 of the License, or (at your option) any later version.
  *
  *  This program is distributed in the hope that it will be useful,
  *  but WITHOUT ANY WARRANTY; without even the implied warranty of
- *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- *  GNU General Public License for more details.
+ *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+ *  Lesser General Public License for more details.
  *
- *  You should have received a copy of the GNU General Public License
- *  along with this program; if not, write to the Free Software
- *  Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
+ *  You should have received a copy of the GNU Lesser General Public
+ *  License along with this library; if not, write to the Free Software
+ *  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  */
 
 
@@ -41,6 +41,10 @@
 #include "dofmanager.h"
 #include "xfemelementinterface.h"
 #include "element.h"
+
+#include "exportmodulemanager.h"
+#include "vtkxmlexportmodule.h"
+#include "gausspoint.h"
 
 namespace oofem {
 
@@ -146,31 +150,73 @@ XFEMStatic :: terminate(TimeStep *tStep)
     // Update element subdivisions if necessary
     // (e.g. if a crack has moved and cut a new element)
     for( int domInd = 1; domInd <= this->giveNumberOfDomains(); domInd++ ) {
+    	Domain *domain = this->giveDomain(domInd);
 
-        Domain *domain = this->giveDomain(domInd);
-    	int numEl = domain->giveNumberOfElements();
+        // Temporary check: does the domain need to be copied and mapped
+        bool mapVariables = false;
+        XfemManager *xMan = domain->giveXfemManager();
+        for ( int i = 1; i <= xMan->giveNumberOfEnrichmentItems(); i++ ) {
+            if ( xMan->giveEnrichmentItem(i)->hasPropagationLaw() ) {;
+                mapVariables = true;
+                continue;
+            }
+        }
 
-    	for(int i = 1; i <= numEl; i++) {
-    		Element *el = domain->giveElement(i);
+        if ( mapVariables ) {
+            // Take copy of the domain to allow mapping of state variables
+            // to the new Gauss points.
+            Domain *dNew = domain->Clone();
 
-    		XfemElementInterface *xfemEl = dynamic_cast<XfemElementInterface*> (el);
+            this->domainList->put(1, dNew); 
+            //this->domainList->at(1)->giveXfemManager()->updateYourself();
 
-    		if( xfemEl != NULL ) {
-    			xfemEl->recomputeGaussPoints();
-    		}
 
-    	}
+            domain = this->giveDomain(1);
+
+            // Set domain pointer to various components ...
+            this->nMethod->setDomain(domain);
+
+            int numExpModules = this->exportModuleManager->giveNumberOfModules();
+            for(int i = 1; i <= numExpModules; i++) {
+
+        	    //  ... by diving deep into the hierarchies ... :-/
+        	    VTKXMLExportModule *vtkxmlMod = dynamic_cast<VTKXMLExportModule*> (this->exportModuleManager->giveModule(i) );
+        	    if(vtkxmlMod != NULL) {
+        		    vtkxmlMod->giveSmoother()->setDomain(domain);
+        		    vtkxmlMod->givePrimVarSmoother()->setDomain(domain);
+        	    }
+
+            }
+
+
+            int numEl = domain->giveNumberOfElements();
+
+    	    for(int i = 1; i <= numEl; i++) {
+    		    Element *el = domain->giveElement(i);
+
+    		    // Compute new distribution of Gauss points ...
+    		    XfemElementInterface *xfemEl = dynamic_cast<XfemElementInterface*> (el);
+
+    		    if( xfemEl != NULL ) {
+    			    xfemEl->recomputeGaussPoints();
+
+    			    // ... and map state variables to the new Gauss points
+                    //     el->adaptiveMap(dNew, tStep);
+    		    }
+
+    	    }
+        }
 
     }
     
     // Fracture/failure mechanics evaluation    
     for( int i = 1; i <= numDom; i++ ) {
         if ( this->giveDomain(i)->hasFractureManager() ) { // Will most likely fail if numDom > 1
-    
-        this->fMan->evaluateYourself(tStep);
-        this->fMan->updateXFEM(tStep); // Update XFEM structure based on the fracture manager
+            FractureManager *fracMan  = this->giveDomain(i)->giveFractureManager();
+            fracMan->evaluateYourself(tStep);
+            fracMan->updateXFEM(tStep); // Update XFEM structure based on the fracture manager
 
-        this->setUpdateStructureFlag( this->fMan->giveUpdateFlag() ); // if the internal structure need to be updated
+            this->setUpdateStructureFlag( fracMan->giveUpdateFlag() ); // if the internal structure need to be updated
         }
     }
 

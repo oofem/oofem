@@ -17,19 +17,19 @@
  *       Czech Technical University, Faculty of Civil Engineering,
  *   Department of Structural Mechanics, 166 29 Prague, Czech Republic
  *
- *  This program is free software; you can redistribute it and/or modify
- *  it under the terms of the GNU General Public License as published by
- *  the Free Software Foundation; either version 2 of the License, or
- *  (at your option) any later version.
+ *  This library is free software; you can redistribute it and/or
+ *  modify it under the terms of the GNU Lesser General Public
+ *  License as published by the Free Software Foundation; either
+ *  version 2.1 of the License, or (at your option) any later version.
  *
  *  This program is distributed in the hope that it will be useful,
  *  but WITHOUT ANY WARRANTY; without even the implied warranty of
- *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- *  GNU General Public License for more details.
+ *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+ *  Lesser General Public License for more details.
  *
- *  You should have received a copy of the GNU General Public License
- *  along with this program; if not, write to the Free Software
- *  Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
+ *  You should have received a copy of the GNU Lesser General Public
+ *  License along with this library; if not, write to the Free Software
+ *  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  */
 
 #include "planstrssxfem.h"
@@ -98,63 +98,12 @@ void PlaneStress2dXfem :: computeBmatrixAt(GaussPoint *gp, FloatMatrix &answer, 
 
 void PlaneStress2dXfem :: computeNmatrixAt(GaussPoint *gp, FloatMatrix &answer)
 {
-	OOFEM_ERROR("PlaneStress2dXfem :: computeNmatrixAt is not yet implemented.");
-/*
-    FloatArray Nc;
-    interpolation.evalN( Nc, *gp->giveCoordinates(), FEIElementGeometryWrapper(this) );
-    // assemble xfem part of strain-displacement matrix
-    XfemManager *xMan = this->giveDomain()->giveXfemManager();
-    FloatArray Nd;
-    Nd.resize(4);
-    IntArray mask(4);
-    int counter = 4;
-    FloatArray N, coords;
-    for ( int i = 1; i <= xMan->giveNumberOfEnrichmentItems(); i++ ) {
-        EnrichmentItem *ei = xMan->giveEnrichmentItem(i);
-        EnrichmentDomain *ed = ei->giveEnrichmentDomain(1);    
-
-        // Enrichment function and its gradient evaluated at the gauss point     
-        EnrichmentFunction *ef = ei->giveEnrichmentFunction(1);
-        this->computeGlobalCoordinates(coords, *gp->giveCoordinates());
-        double efgp = ef->evaluateFunctionAt(&coords, ed);
-
-        // adds up the number of the dofs from an enrichment item
-        // this part is used for the construction of a shifted enrichment
-        for ( int j = 1; j <= this->giveNumberOfDofManagers(); j++ ) {
-            DofManager *dMan = this->giveDofManager(j);
-            if ( ei->isDofManEnriched( dMan ) ) {
-                
-                FloatArray *nodecoords = dMan->giveCoordinates();
-                double efnode = ef->evaluateFunctionAt(nodecoords, ed);
-                Nd.at(j) = ( efgp - efnode ) * Nc.at(j) ;
-                
-                counter++;
-                mask.at(j) = 1;
-            } else {
-                mask.at(j) = 0;
-            }
-        }
-
-        // Create the total B-matrix by appending each contribution to B after one another.
-        N.resize(counter);
-        int column = 1;
-
-        for ( int i = 1; i <= 4; i++ ) {
-            N.at(column) = Nc.at(i);
-            column ++;
-            if ( mask.at(i) ) {
-                N.at(column) = Nd.at(i);
-                column++;
-            }
-        }
-    }
-    answer.beNMatrixOf(N,2);
-*/
+	XfemElementInterface_createEnrNmatrixAt(answer, *(gp->giveLocalCoordinates()), *this);
 }
 
 
 
-int PlaneStress2dXfem :: computeNumberOfDofs(EquationID ut)
+int PlaneStress2dXfem :: computeNumberOfDofs()
 {
     int ndofs = 0;
     for ( int i = 1; i <= this->giveNumberOfDofManagers(); i++ ) {

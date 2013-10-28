@@ -17,19 +17,19 @@
  *       Czech Technical University, Faculty of Civil Engineering,
  *   Department of Structural Mechanics, 166 29 Prague, Czech Republic
  *
- *  This program is free software; you can redistribute it and/or modify
- *  it under the terms of the GNU General Public License as published by
- *  the Free Software Foundation; either version 2 of the License, or
- *  (at your option) any later version.
+ *  This library is free software; you can redistribute it and/or
+ *  modify it under the terms of the GNU Lesser General Public
+ *  License as published by the Free Software Foundation; either
+ *  version 2.1 of the License, or (at your option) any later version.
  *
  *  This program is distributed in the hope that it will be useful,
  *  but WITHOUT ANY WARRANTY; without even the implied warranty of
- *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- *  GNU General Public License for more details.
+ *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+ *  Lesser General Public License for more details.
  *
- *  You should have received a copy of the GNU General Public License
- *  along with this program; if not, write to the Free Software
- *  Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
+ *  You should have received a copy of the GNU Lesser General Public
+ *  License along with this library; if not, write to the Free Software
+ *  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  */
 
 #include "xfemmanager.h"
@@ -39,7 +39,6 @@
 #include "floatarray.h"
 #include "alist.h"
 #include "domain.h"
-//#include "enrichmentitem.h"
 #include "enrichmentdomain.h"
 #include "element.h"
 #include "dofmanager.h"
@@ -50,14 +49,19 @@
 #include "datareader.h"
 #include "datastream.h"
 #include "contextioerr.h"
+#include "dynamicinputrecord.h"
+#include "internalstatevaluetype.h"
 
 namespace oofem {
+
 XfemManager :: XfemManager(Domain *domain)
 {
     this->domain = domain;
     this->enrichmentItemList = new AList< EnrichmentItem >(0);
     numberOfEnrichmentItems = -1;
     mNumGpPerTri = 12;
+    doVTKExport = false;
+    vtkExportFields.resize(0);
 }
 
 XfemManager :: ~XfemManager()
@@ -71,6 +75,22 @@ XfemManager :: clear()
     delete enrichmentItemList;
     enrichmentItemList = NULL;
     numberOfEnrichmentItems = -1;
+}
+
+InternalStateValueType 
+XfemManager :: giveXFEMStateValueType(XFEMStateType type)
+{
+    switch ( type ) {
+    case XFEMST_Enrichment:
+    case XFEMST_LevelSetPhi:
+    case XFEMST_LevelSetGamma:
+    case XFEMST_NumIntersecPoints:
+    case XFEMST_NodeEnrMarker:
+        return ISVT_SCALAR;
+    default:
+        return ISVT_UNDEFINED;
+
+    }
 }
 
 
@@ -108,7 +128,6 @@ XfemManager :: createEnrichedDofs()
     for ( int j = 1; j <= this->giveNumberOfEnrichmentItems(); j++ ) {
         EnrichmentItem *ei = this->giveEnrichmentItem(j);
         ei->createEnrichedDofs();
-        
     }
 
 }
@@ -116,7 +135,7 @@ XfemManager :: createEnrichedDofs()
 
 void 
 XfemManager :: addEnrichedDofsTo( DofManager *dMan, IntArray &dofIdArray )
-{   
+{
     int nDofs = dMan->giveNumberOfDofs();
     for ( int j = 1; j <= dofIdArray.giveSize(); j++ ) {                      
             dMan->appendDof( new MasterDof( nDofs + j, dMan, ( DofIDItem ) ( dofIdArray.at(j) ) ) );   
@@ -134,9 +153,25 @@ IRResultType XfemManager :: initializeFrom(InputRecord *ir)
 
     IR_GIVE_OPTIONAL_FIELD(ir, mNumGpPerTri, _IFT_XfemManager_numberOfGpPerTri);
 
+    IR_GIVE_OPTIONAL_FIELD(ir, doVTKExport, _IFT_XfemManager_VTKExport);
+    if ( doVTKExport ) {
+        IntArray exportFields;
+        IR_GIVE_FIELD(ir, this->vtkExportFields, _IFT_XfemManager_VTKExportFields);
+    }
+
     return IRRT_OK;
 }
 
+
+void XfemManager :: giveInputRecord(DynamicInputRecord &input)
+{
+    input.setRecordKeywordField(_IFT_XfemManager_Name, 1);
+    input.setField(numberOfEnrichmentItems, _IFT_XfemManager_numberOfEnrichmentItems);
+    input.setField(mNumGpPerTri, _IFT_XfemManager_numberOfGpPerTri);
+    input.setField(doVTKExport, _IFT_XfemManager_VTKExport);
+    input.setField(vtkExportFields, _IFT_XfemManager_VTKExportFields);
+
+}
 
 int XfemManager :: instanciateYourself(DataReader *dr)
 {
@@ -166,6 +201,17 @@ int XfemManager :: instanciateYourself(DataReader *dr)
     return 1;
 }
 
+void XfemManager :: setDomain(Domain *ipDomain)
+{
+    domain = ipDomain;
+
+    int numEI = enrichmentItemList->giveSize();
+
+    for(int i = 1; i <= numEI; i++) {
+        enrichmentItemList->at(i)->setDomain(ipDomain);
+    }
+
+}
 
 contextIOResultType XfemManager :: saveContext(DataStream *stream, ContextMode mode, void *obj)
 {

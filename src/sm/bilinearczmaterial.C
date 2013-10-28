@@ -156,8 +156,8 @@ BilinearCZMaterial :: give3dInterfaceMaterialStiffnessMatrix(FloatMatrix &answer
     //@todo for now only study normal stress
     // jumpVector = [shear 1 shear 2 normal]
     double gn  = jumpVector.at(3);
-    double gs1 = jumpVector.at(1);
-    double gs2 = jumpVector.at(2);
+    //double gs1 = jumpVector.at(1);
+    //double gs2 = jumpVector.at(2);
 
 
     //if ( ( rMode == ElasticStiffness ) || ( rMode == SecantStiffness ) || ( rMode == TangentStiffness ) ) {
@@ -194,18 +194,17 @@ BilinearCZMaterial :: give3dInterfaceMaterialStiffnessMatrix(FloatMatrix &answer
 }
 
 
-
 int
 BilinearCZMaterial :: giveIPValue(FloatArray &answer, GaussPoint *aGaussPoint, InternalStateType type, TimeStep *atTime)
 {
-    BilinearCZMaterialStatus *status = static_cast< BilinearCZMaterialStatus * >( this->giveStatus(aGaussPoint) );
+    //BilinearCZMaterialStatus *status = static_cast< BilinearCZMaterialStatus * >( this->giveStatus(aGaussPoint) );
     if ( type == IST_DamageScalar ) {
         answer.resize(1);
         answer.at(1) = 0.0; // no damage
         return 1;
     } else {
         return StructuralMaterial :: giveIPValue(answer, aGaussPoint, type, atTime);
-    }    
+    }
 }
 
 
@@ -214,8 +213,6 @@ BilinearCZMaterial :: giveIPValueType(InternalStateType type)
 {
     return StructuralMaterial :: giveIPValueType(type);
 }
-
-
 
 
 const double tolerance = 1.0e-12; // small number
@@ -242,7 +239,7 @@ BilinearCZMaterial :: initializeFrom(InputRecord *ir)
     this->gs0 = sigfs / (ks0 + tolerance);                   // shear jump at damage initiation
     this->gnmax = 2.0 * GIc / sigfn;                         // @todo defaults to zero - will this cause problems?
     this->kn1 = - this->sigfn / ( this->gnmax - this->gn0 ); // slope during softening part in normal dir
-    double kn0min = 0.5*sigfn*sigfn/GIc;
+    
     this->checkConsistency();                                // check validity of the material paramters
     this->printYourself();
     return IRRT_OK;

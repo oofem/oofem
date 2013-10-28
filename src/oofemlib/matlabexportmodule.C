@@ -17,19 +17,19 @@
  *       Czech Technical University, Faculty of Civil Engineering,
  *   Department of Structural Mechanics, 166 29 Prague, Czech Republic
  *
- *  This program is free software; you can redistribute it and/or modify
- *  it under the terms of the GNU General Public License as published by
- *  the Free Software Foundation; either version 2 of the License, or
- *  (at your option) any later version.
+ *  This library is free software; you can redistribute it and/or
+ *  modify it under the terms of the GNU Lesser General Public
+ *  License as published by the Free Software Foundation; either
+ *  version 2.1 of the License, or (at your option) any later version.
  *
  *  This program is distributed in the hope that it will be useful,
  *  but WITHOUT ANY WARRANTY; without even the implied warranty of
- *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- *  GNU General Public License for more details.
+ *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+ *  Lesser General Public License for more details.
  *
- *  You should have received a copy of the GNU General Public License
- *  along with this program; if not, write to the Free Software
- *  Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
+ *  You should have received a copy of the GNU Lesser General Public
+ *  License along with this library; if not, write to the Free Software
+ *  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  */
 
 #include <algorithm>
@@ -54,12 +54,27 @@
 #include "stokesflow.h"
 #endif
 
+#ifdef __SM_MODULE
+#include "structengngmodel.h"
+#endif
+
+#include "unknownnumberingscheme.h"
+
 namespace oofem {
 
 REGISTER_ExportModule( MatlabExportModule )
 
 				MatlabExportModule :: MatlabExportModule(int n, EngngModel *e) : ExportModule(n, e), internalVarsToExport(), primaryVarsToExport()
-{}
+{
+    exportMesh = false;
+    exportData = false;
+    exportArea = false;
+    exportSpecials = false;
+    exportReactionForces = false;
+    reactionForcesDofManList.resize(0);
+    exportIntegrationPointFields = false;
+    elList.resize(0);
+}
 
 
 MatlabExportModule :: ~MatlabExportModule()
@@ -69,10 +84,24 @@ MatlabExportModule :: ~MatlabExportModule()
 IRResultType
 MatlabExportModule :: initializeFrom(InputRecord *ir)
 {
+    const char *__proc = "initializeFrom";  // Required by IR_GIVE_FIELD macro
+    IRResultType result;                    // Required by IR_GIVE_FIELD macro
+
 	exportMesh = ir->hasField(_IFT_MatlabExportModule_mesh);
 	exportData = ir->hasField(_IFT_MatlabExportModule_data);
 	exportArea = ir->hasField(_IFT_MatlabExportModule_area);
 	exportSpecials = ir->hasField(_IFT_MatlabExportModule_specials);
+
+    exportReactionForces = ir->hasField(_IFT_MatlabExportModule_ReactionForces);
+    if ( exportReactionForces ) {
+       IR_GIVE_OPTIONAL_FIELD(ir, reactionForcesDofManList, _IFT_MatlabExportModule_DofManList);
+    }
+
+    exportIntegrationPointFields = ir->hasField(_IFT_MatlabExportModule_IntegrationPoints);
+    if ( exportIntegrationPointFields ) {
+       IR_GIVE_FIELD(ir, internalVarsToExport, _IFT_MatlabExportModule_internalVarsToExport);
+       IR_GIVE_OPTIONAL_FIELD(ir, elList, _IFT_MatlabExportModule_ElementList);
+    }
 
 	return IRRT_OK;
 }
@@ -125,7 +154,12 @@ MatlabExportModule :: doOutput(TimeStep *tStep, bool forcedOutput)
 	Domain *domain  = emodel->giveDomain(1);
 	ndim=domain->giveNumberOfSpatialDimensions();
 
-	fprintf( FID, "function [mesh area data specials]=%s\n\n", functionname.c_str() );
+    // Output header
+    fprintf( FID, "%%%% OOFEM generated export file \n"); 
+    fprintf( FID, "%% Output for time %f\n", tStep->giveTargetTime() );
+
+
+	fprintf( FID, "function [mesh area data specials ReactionForces IntegrationPointFields]=%s\n\n", functionname.c_str() );
 
 	if ( exportMesh ) {
 		doOutputMesh(tStep, FID);
@@ -167,6 +201,20 @@ MatlabExportModule :: doOutput(TimeStep *tStep, bool forcedOutput)
 		doOutputSpecials(tStep, FID);
 	} else {
 		fprintf(FID, "\tspecials=[];\n");
+	}
+
+    // Reaction forces
+	if ( exportReactionForces ) {
+		doOutputReactionForces(tStep, FID);
+	} else {
+		fprintf(FID, "\tReactionForces=[];\n");
+	}
+
+    // Internal variables in integration points
+	if ( exportIntegrationPointFields ) {
+		doOutputIntegrationPointFields(tStep, FID);
+	} else {
+		fprintf(FID, "\tIntegrationPointFields=[];\n");
 	}
 
 	fprintf(FID, "\nend\n");
@@ -320,6 +368,190 @@ MatlabExportModule :: doOutputSpecials(TimeStep *tStep,    FILE *FID)
 
 
 void
+MatlabExportModule :: doOutputReactionForces(TimeStep *tStep,    FILE *FID)
+{
+
+    int domainIndex = 1;
+    Domain *domain  = emodel->giveDomain( domainIndex );
+
+    FloatArray reactions;
+    IntArray dofManMap, dofMap, eqnMap;
+#if __SM_MODULE
+    StructuralEngngModel *strEngMod = dynamic_cast<StructuralEngngModel*>(emodel); 
+    if ( strEngMod ) {
+        strEngMod->buildReactionTable(dofManMap, dofMap, eqnMap, tStep, domainIndex);
+        strEngMod->computeReaction(reactions, tStep, 1);
+    } else 
+#endif
+    {
+        OOFEM_ERROR("MatlabExportModule :: doOutputReactionForces - Cannot export reaction forces - only implemented for structural problems.");
+    }
+
+    int numDofManToExport = this->reactionForcesDofManList.giveSize();
+    if ( numDofManToExport == 0 ) { // No dofMan's given - export every dMan with reaction forces
+
+        for (int i = 1; i <= domain->giveNumberOfDofManagers(); i++) {
+            if ( dofManMap.contains(i) ) {
+                this->reactionForcesDofManList.followedBy(i);
+            }
+        }
+        numDofManToExport = this->reactionForcesDofManList.giveSize();
+    }
+
+
+    // Output header
+    fprintf( FID, "\n %%%% Export of reaction forces \n\n" );
+
+    // Output the dofMan numbers that are exported
+    fprintf( FID, "\tReactionForces.DofManNumbers = [" );
+    for ( int i = 1; i <= numDofManToExport; i++ ) {
+        fprintf( FID, "%i ", this->reactionForcesDofManList.at(i) );
+    }
+    fprintf( FID, "];\n" );
+
+
+    // Define the reaction forces as a cell object
+    fprintf( FID, "\tReactionForces.ReactionForces = cell(%i,1); \n", numDofManToExport );
+    fprintf( FID, "\tReactionForces.DofIDs = cell(%i,1); \n", numDofManToExport );
+
+
+    // Output the reaction forces for each dofMan. If a certain dof is not prescribed zero is exported.
+    IntArray dofIDs;
+    for ( int i = 1; i <= numDofManToExport; i++ ) {
+        int dManNum = this->reactionForcesDofManList.at(i);
+
+        fprintf(FID, "\tReactionForces.ReactionForces{%i} = [", i);
+        if ( dofManMap.contains( dManNum ) ) {
+
+            DofManager *dofMan = domain->giveDofManager( dManNum );
+            dofIDs.resize( dofMan->giveNumberOfDofs() );
+            dofIDs.zero();
+
+            for ( int j = 1; j <= dofMan->giveNumberOfDofs(); j++ ) {
+                Dof *dof = dofMan->giveDof(j);
+                int num = dof->giveEquationNumber( EModelDefaultPrescribedEquationNumbering() );
+                int pos = eqnMap.findFirstIndexOf( num );
+                dofIDs.at(j) = (int) dof->giveDofID();
+                if ( pos > 0 ) {
+                    fprintf( FID, "%e ", reactions.at( pos ) );
+                } else {
+                    fprintf( FID, "%e ", 0.0 ); // if not prescibed output zero
+                }
+            }
+        }
+        fprintf(FID, "];\n");
+
+        // Output dof ID's
+        
+        fprintf( FID, "\tReactionForces.DofIDs{%i} = [", i);
+        if ( dofManMap.contains( dManNum ) ) {
+            for ( int j = 1; j <= dofIDs.giveSize(); j++ ) {
+                fprintf( FID, "%i ", dofIDs.at( j ) );
+            }  
+        }
+        fprintf(FID, "];\n");
+    }
+}
+
+
+void
+MatlabExportModule :: doOutputIntegrationPointFields(TimeStep *tStep,    FILE *FID)
+{
+
+    //if ( !testTimeStepOutput(tStep) ) {
+    //    return;
+    //}
+
+    int domainIndex = 1;
+    Domain *domain  = emodel->giveDomain( domainIndex );
+
+    // Output header
+    fprintf( FID, "\n %%%% Export of internal variables in integration points \n\n" );
+    fprintf( FID, "\n %% for interpretation of internal var. numbers see internalstatetype.h\n");
+
+    
+    int numVars = this->internalVarsToExport.giveSize();
+    // Output the internalVarsToExport-list
+    fprintf( FID, "\tIntegrationPointFields.InternalVarsToExport = [" );
+    for ( int i = 1; i <= numVars; i++ ) {
+        fprintf( FID, "%i ", this->internalVarsToExport.at(i) );
+    }
+    fprintf( FID, "];\n" );
+
+
+    
+
+   
+    FloatArray valueArray;
+
+    int nelem = this->elList.giveSize();
+    if ( nelem == 0 ) { // no list given, export all elements
+        nelem = domain->giveNumberOfElements();
+        this->elList.resize(nelem);
+        for ( int i = 1; i <= nelem; i++ ) {
+            this->elList.at(i) = i;
+        }
+    }
+    
+    fprintf( FID, "\tIntegrationPointFields.Elements = cell(%i,1); \n", nelem );
+
+    for ( int ielem = 1; ielem <= nelem; ielem++ ) {
+        Element *el = domain->giveElement( this->elList.at(ielem) );
+        fprintf( FID, "\tIntegrationPointFields.Elements{%i}.elementNumber = %i; \n", ielem, el->giveNumber());
+    
+        int numIntRules = el->giveNumberOfIntegrationRules();
+        fprintf( FID, "\tIntegrationPointFields.Elements{%i}.integrationRule = cell(%i,1); \n", ielem, numIntRules);
+        for ( int i = 1; i <= numIntRules; i++ ) {
+            IntegrationRule *iRule = el->giveIntegrationRule(i-1);
+
+            fprintf( FID, "\tIntegrationPointFields.Elements{%i}.integrationRule{%i}.ip = cell(%i,1); \n ", 
+                ielem, i, iRule->giveNumberOfIntegrationPoints() );
+
+            // Loop over integration points
+            for ( int j = 1; j <= iRule->giveNumberOfIntegrationPoints(); j++ ) {
+                IntegrationPoint *ip = iRule->getIntegrationPoint(j-1);
+
+                double weight = ip->giveWeight();
+
+                fprintf( FID, "\tIntegrationPointFields.Elements{%i}.integrationRule{%i}.ip{%i}.ipWeight = %e; \n ",
+                    ielem, i, j, weight );
+
+
+                // export Gauss point coordinates
+                fprintf( FID, "\tIntegrationPointFields.Elements{%i}.integrationRule{%i}.ip{%i}.coords = [",
+                    ielem, i, j );
+                
+                FloatArray coords;
+                el->computeGlobalCoordinates( coords, * ( ip->giveCoordinates() ) );
+                for ( int ic = 1; ic <= coords.giveSize(); ic++ ) {
+                    fprintf( FID, "%e ", coords.at(ic) );
+                }
+                fprintf( FID, "]; \n" );
+
+                // export internal variables
+                fprintf( FID, "\tIntegrationPointFields.Elements{%i}.integrationRule{%i}.ip{%i}.valArray = cell(%i,1); \n", 
+                    ielem, i, j, numVars );
+
+                for ( int iv = 1; iv <= numVars; iv++ ) {
+                    fprintf( FID, "\tIntegrationPointFields.Elements{%i}.integrationRule{%i}.ip{%i}.valArray{%i} = [", 
+                        ielem, i, j, iv );
+                    InternalStateType vartype = ( InternalStateType ) this->internalVarsToExport.at(iv);
+                    el->giveIPValue(valueArray, ip, vartype, tStep);
+                    int nv = valueArray.giveSize();
+                    for ( int ic = 1; ic <= nv; ic++ ) {
+                        fprintf( FID, "%.6e ", valueArray.at(ic) );
+                    }
+                    fprintf( FID, "]; \n" );
+                }
+            }
+    
+            }
+        }
+
+}
+
+
+void
 MatlabExportModule :: initialize()
 {}
 
@@ -342,6 +574,10 @@ MatlabExportModule :: giveOutputStream(TimeStep *tStep)
 	size_t foundDot;
 	foundDot = fileName.rfind(".");
 	fileName.erase(foundDot);
+
+    char fext[100];
+    sprintf( fext, "_m%d_%d", this->number, tStep->giveNumber() );
+    fileName += fext;
 
 	functionname = fileName;
 

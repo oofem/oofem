@@ -17,19 +17,19 @@
  *       Czech Technical University, Faculty of Civil Engineering,
  *   Department of Structural Mechanics, 166 29 Prague, Czech Republic
  *
- *  This program is free software; you can redistribute it and/or modify
- *  it under the terms of the GNU General Public License as published by
- *  the Free Software Foundation; either version 2 of the License, or
- *  (at your option) any later version.
+ *  This library is free software; you can redistribute it and/or
+ *  modify it under the terms of the GNU Lesser General Public
+ *  License as published by the Free Software Foundation; either
+ *  version 2.1 of the License, or (at your option) any later version.
  *
  *  This program is distributed in the hope that it will be useful,
  *  but WITHOUT ANY WARRANTY; without even the implied warranty of
- *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- *  GNU General Public License for more details.
+ *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+ *  Lesser General Public License for more details.
  *
- *  You should have received a copy of the GNU General Public License
- *  along with this program; if not, write to the Free Software
- *  Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
+ *  You should have received a copy of the GNU Lesser General Public
+ *  License along with this library; if not, write to the Free Software
+ *  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  */
 
 #include "domain.h"
@@ -64,6 +64,15 @@
 #include "range.h"
 #include "compiler.h"
 #include "fracturemanager.h"
+#include "dynamicinputrecord.h"
+#include "dynamicdatareader.h"
+#include "oofemtxtdatareader.h"
+#include "initmodulemanager.h"
+#include "exportmodulemanager.h"
+#include "enrichmentitem.h"
+#include "enrichmentfunction.h"
+#include "enrichmentdomain.h"
+#include "propagationlaw.h"
 
  // For automatic dof creation, (should try to do without this) (move that stuff into DofManager class)
 #include "boundarycondition.h"
@@ -123,6 +132,189 @@ Domain :: Domain(int n, int serNum, EngngModel *e) : defaultNodeDofIDArry()
 #endif
 }
 
+
+Domain* Domain :: Clone()
+{
+    /////////////////////////////////////////////////////////
+    // Create a copy of the domain using
+	// the dynamic data reader.
+
+    EngngModel *eModel = this->giveEngngModel();
+
+    int domNum = this->giveNumber();
+    int serNum = this->giveSerialNumber();
+    Domain *dNew = new Domain( domNum, serNum, eModel );
+
+
+    DynamicDataReader dataReader;
+    DynamicInputRecord *inputRec;
+
+
+    //Domain
+    inputRec = new DynamicInputRecord();
+    inputRec->setField(mDomainType, _IFT_Domain_type);
+    dataReader.insertInputRecord(DataReader::IR_domainRec, inputRec);
+
+
+    //Output
+    inputRec = new DynamicInputRecord();
+    inputRec->setRecordKeywordField(_IFT_OutputManager_name, 1);
+    inputRec->setField(_IFT_OutputManager_name);
+    inputRec->setField(_IFT_OutputManager_tstepall);
+    inputRec->setField(_IFT_OutputManager_dofmanall);
+    inputRec->setField(_IFT_OutputManager_elementall);
+    dataReader.insertInputRecord(DataReader::IR_outManRec, inputRec);
+
+    //Components size record
+    inputRec = new DynamicInputRecord();
+    inputRec->setField(this->giveNumberOfDofManagers(), 		_IFT_Domain_ndofman);
+    inputRec->setField(this->giveNumberOfElements(), 			_IFT_Domain_nelem);
+    inputRec->setField(this->giveNumberOfCrossSectionModels(), 	_IFT_Domain_ncrosssect);
+    inputRec->setField(this->giveNumberOfMaterialModels(), 		_IFT_Domain_nmat);
+    inputRec->setField(this->giveNumberOfBoundaryConditions(), 	_IFT_Domain_nbc);
+    inputRec->setField(this->giveNumberOfInitialConditions(), 	_IFT_Domain_nic);
+    inputRec->setField(this->giveNumberOfLoadTimeFunctions(), 	_IFT_Domain_nloadtimefunct);
+    inputRec->setField(this->giveNumberOfSets(),            	_IFT_Domain_nset);
+
+
+    // fields to add:
+    // inputRec->setField( , _IFT_Domain_nbarrier);
+    // inputRec->setField( , _IFT_Domain_nrandgen);
+    // inputRec->setField( , _IFT_Domain_topology);
+    // inputRec->setField( , _IFT_Domain_numberOfSpatialDimensions);
+    // inputRec->setField( , _IFT_Domain_nfracman);
+
+
+    bool nxfemMan = 0;
+    if(this->hasXfemManager()) {
+    	nxfemMan = 1;
+    }
+    inputRec->setField(nxfemMan								, 	_IFT_Domain_nxfemman);
+
+
+    dataReader.insertInputRecord(DataReader::IR_domainCompRec, inputRec);
+
+
+    //Nodes
+    int nDofMan = this->giveNumberOfDofManagers();
+    for(int i = 1; i <= nDofMan; i++) {
+
+        DofManager *dMan = this->giveDofManager(i);
+
+        DynamicInputRecord* nodeRec = new DynamicInputRecord();
+   		dMan->giveInputRecord(*nodeRec);
+
+   	    dataReader.insertInputRecord(DataReader::IR_dofmanRec, nodeRec);
+    }
+
+    //Elements
+    int nEl = this->giveNumberOfElements();
+    for(int i = 1; i <= nEl; i++) {
+
+    	Element *el = this->giveElement(i);
+
+        DynamicInputRecord* elRec = new DynamicInputRecord();
+        el->giveInputRecord(*elRec);
+
+   	    dataReader.insertInputRecord(DataReader::IR_elemRec, elRec);
+    }
+
+
+    //CrossSection
+    int nCS = this->giveNumberOfCrossSectionModels();
+    for(int i = 1; i <= nCS; i++) {
+
+    	CrossSection *cs = this->giveCrossSection(i);
+
+        DynamicInputRecord* csRec = new DynamicInputRecord();
+        cs->giveInputRecord(*csRec);
+
+   	    dataReader.insertInputRecord(DataReader::IR_crosssectRec, csRec);
+    }
+
+
+    //Material
+    int nMat = this->giveNumberOfMaterialModels();
+    for(int i = 1; i <= nMat; i++) {
+
+    	Material *mat = this->giveMaterial(i);
+
+        DynamicInputRecord* matRec = new DynamicInputRecord();
+        mat->giveInputRecord(*matRec);
+
+   	    dataReader.insertInputRecord(DataReader::IR_matRec, matRec);
+    }
+
+    //Boundary Conditions
+    int nBC = this->giveNumberOfBoundaryConditions();
+    for(int i = 1; i <= nBC; i++) {
+
+    	GeneralBoundaryCondition *bc = this->giveBc(i);
+
+        DynamicInputRecord* bcRec = new DynamicInputRecord();
+        bc->giveInputRecord(*bcRec);
+
+   	    dataReader.insertInputRecord(DataReader::IR_bcRec, bcRec);
+    }
+
+    //Initial Conditions
+    int nIC = this->giveNumberOfInitialConditions();
+    for(int i = 1; i <= nIC; i++) {
+
+    	InitialCondition *ic = this->giveIc(i);
+
+    	DynamicInputRecord* icRec = new DynamicInputRecord();
+    	ic->giveInputRecord(*icRec);
+
+   	    dataReader.insertInputRecord(DataReader::IR_icRec, icRec);
+    }
+
+    //Load-time functions
+    int nLoads = this->giveNumberOfLoadTimeFunctions();
+    for(int i = 1; i <= nLoads; i++) {
+
+    	LoadTimeFunction *ltf = this->giveLoadTimeFunction(i);
+
+        DynamicInputRecord* ltfRec = new DynamicInputRecord();
+        ltf->giveInputRecord(*ltfRec);
+
+   	    dataReader.insertInputRecord(DataReader::IR_ltfRec, ltfRec);
+    }
+
+
+    //Sets
+    int nSets = this->giveNumberOfSets();
+    for(int i = 1; i <= nSets; i++) {
+
+    	Set *set = this->giveSet(i);
+
+        DynamicInputRecord* ltfRec = new DynamicInputRecord();
+        set->giveInputRecord(*ltfRec);
+
+   	    dataReader.insertInputRecord(DataReader::IR_ltfRec, ltfRec);
+    }
+
+    //XFEM manager
+    if(this->xfemManager != NULL) {
+		DynamicInputRecord* xmanRec = new DynamicInputRecord();
+		xfemManager->giveInputRecord(*xmanRec);
+		dataReader.insertInputRecord(DataReader::IR_xfemManRec, xmanRec);
+
+
+		// Enrichment items
+		int nEI = xfemManager->giveNumberOfEnrichmentItems();
+		for(int i = 1; i <= nEI; i++) {
+
+			EnrichmentItem *ei = xfemManager->giveEnrichmentItem(i);
+			ei->giveInputRecord(dataReader);
+		}
+    }
+
+    dNew->instanciateYourself(&dataReader);
+    dNew->postInitialize();
+
+    return dNew;
+}
 
 Domain :: ~Domain()
 // Destructor.
@@ -427,6 +619,17 @@ Domain :: hasFractureManager()
     return fracManager != NULL;
 }
 
+FractureManager *
+Domain :: giveFractureManager()
+{
+#ifdef DEBUG
+    if ( !fracManager ) {
+        _error("giveFractureManager: undefined fracture manager");
+    }
+#endif
+    return fracManager;
+}
+
 EngngModel *
 Domain :: giveEngngModel()
 // Returns the time integration algorithm. Creates it if it does not
@@ -487,6 +690,8 @@ Domain :: instanciateYourself(DataReader *dr)
     // read type of Domain to be solved
     InputRecord *ir = dr->giveInputRecord(DataReader :: IR_domainRec, 1);
     IR_GIVE_FIELD(ir, name, _IFT_Domain_type); // This is inconsistent, "domain" isn't  exactly a field, but the actual record keyword.
+
+    mDomainType = name;
 
     ir->finish();
 

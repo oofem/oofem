@@ -17,19 +17,19 @@
  *       Czech Technical University, Faculty of Civil Engineering,
  *   Department of Structural Mechanics, 166 29 Prague, Czech Republic
  *
- *  This program is free software; you can redistribute it and/or modify
- *  it under the terms of the GNU General Public License as published by
- *  the Free Software Foundation; either version 2 of the License, or
- *  (at your option) any later version.
+ *  This library is free software; you can redistribute it and/or
+ *  modify it under the terms of the GNU Lesser General Public
+ *  License as published by the Free Software Foundation; either
+ *  version 2.1 of the License, or (at your option) any later version.
  *
  *  This program is distributed in the hope that it will be useful,
  *  but WITHOUT ANY WARRANTY; without even the implied warranty of
- *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- *  GNU General Public License for more details.
+ *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+ *  Lesser General Public License for more details.
  *
- *  You should have received a copy of the GNU General Public License
- *  along with this program; if not, write to the Free Software
- *  Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
+ *  You should have received a copy of the GNU Lesser General Public
+ *  License along with this library; if not, write to the Free Software
+ *  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  */
 
 #include "dofmanager.h"
@@ -435,7 +435,8 @@ DofManager :: initializeFrom(InputRecord *ir)
     delete dofICmap; dofICmap = NULL;
 
     IntArray dofIDArry;
-    IntArray bc, ic, masterMask, dofTypeMask;
+    IntArray ic, masterMask, dofTypeMask;
+    mBC.resize(0);
 
     loadArray.resize(0);
     IR_GIVE_OPTIONAL_FIELD(ir, loadArray, _IFT_DofManager_load);
@@ -451,8 +452,8 @@ DofManager :: initializeFrom(InputRecord *ir)
         dofIDArry = domain->giveDefaultNodeDofIDArry();
     }
 
-    bc.resize(0);
-    IR_GIVE_OPTIONAL_FIELD(ir, bc, _IFT_DofManager_bc);
+    mBC.resize(0);
+    IR_GIVE_OPTIONAL_FIELD(ir, mBC, _IFT_DofManager_bc);
 
     ic.resize(0);
     IR_GIVE_OPTIONAL_FIELD(ir, ic, _IFT_DofManager_ic);
@@ -491,7 +492,7 @@ DofManager :: initializeFrom(InputRecord *ir)
 
 
     bool hasIc = !( ic.giveSize() == 0 );
-    bool hasBc = !( bc.giveSize() == 0 );
+    bool hasBc = !( mBC.giveSize() == 0 );
     bool hasTypeinfo = !( dofTypeMask.giveSize() == 0 );
 
     ///@todo This should eventually be removed, still here to preserve backwards compatibility:
@@ -499,13 +500,13 @@ DofManager :: initializeFrom(InputRecord *ir)
 
     // check sizes
     if ( hasBc ) {
-        if ( bc.giveSize() != dofIDArry.giveSize() ) {
-            _error3( "initializeFrom: bc size mismatch. Size is %d and need %d", bc.giveSize(), dofIDArry.giveSize() );
+        if ( mBC.giveSize() != dofIDArry.giveSize() ) {
+            _error3( "initializeFrom: bc size mismatch. Size is %d and need %d", mBC.giveSize(), dofIDArry.giveSize() );
         }
         this->dofBCmap = new std::map< int, int >();
-        for (int i = 1; i <= bc.giveSize(); ++i) {
-            if ( bc.at(i) > 0 ) {
-                (*this->dofBCmap)[dofIDArry.at(i)] = bc.at(i);
+        for (int i = 1; i <= mBC.giveSize(); ++i) {
+            if ( mBC.at(i) > 0 ) {
+                (*this->dofBCmap)[dofIDArry.at(i)] = mBC.at(i);
             }
         }
     }
@@ -555,12 +556,18 @@ void DofManager :: giveInputRecord(DynamicInputRecord &input)
 {
     FEMComponent :: giveInputRecord(input);
     if ( this->dofidmask ) input.setField(*this->dofidmask, _IFT_DofManager_dofidmask);
+
+    if( mBC.giveSize() > 0 ) {
+    	input.setField(mBC, _IFT_DofManager_bc);
+    }
+
     if ( this->dofTypemap ) {
         IntArray typeMask( this->dofidmask->giveSize() );
         for ( int i = 1; i <= dofidmask->giveSize(); ++i )
             typeMask.at(i) = (*this->dofTypemap)[dofidmask->at(i)];
         input.setField(typeMask, _IFT_DofManager_doftypemask);
     }
+
     if ( this->dofMastermap ) {
         IntArray masterMask( this->dofidmask->giveSize() );
         for ( int i = 1; i <= dofidmask->giveSize(); ++i )
@@ -1034,6 +1041,13 @@ bool DofManager :: requiresTransformation()
 
 void DofManager :: updateLocalNumbering(EntityRenumberingFunctor &f)
 {
+  //update masterNode numbering
+	if (this->dofMastermap) {
+		std::map<int,int>::iterator it = this->dofMastermap->begin();
+		for (; it != this->dofMastermap->end(); it++) {
+				(*it).second = f((*it).second, ERS_DofManager);
+		}
+	}
     for ( int i = 1; i <= numberOfDofs; i++ ) {
         this->giveDof(i)->updateLocalNumbering(f);
     }

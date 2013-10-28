@@ -17,19 +17,19 @@
  *       Czech Technical University, Faculty of Civil Engineering,
  *   Department of Structural Mechanics, 166 29 Prague, Czech Republic
  *
- *  This program is free software; you can redistribute it and/or modify
- *  it under the terms of the GNU General Public License as published by
- *  the Free Software Foundation; either version 2 of the License, or
- *  (at your option) any later version.
+ *  This library is free software; you can redistribute it and/or
+ *  modify it under the terms of the GNU Lesser General Public
+ *  License as published by the Free Software Foundation; either
+ *  version 2.1 of the License, or (at your option) any later version.
  *
  *  This program is distributed in the hope that it will be useful,
  *  but WITHOUT ANY WARRANTY; without even the implied warranty of
- *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- *  GNU General Public License for more details.
+ *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+ *  Lesser General Public License for more details.
  *
- *  You should have received a copy of the GNU General Public License
- *  along with this program; if not, write to the Free Software
- *  Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
+ *  You should have received a copy of the GNU Lesser General Public
+ *  License along with this library; if not, write to the Free Software
+ *  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  */
 
 #ifndef enrichmentitem_h
@@ -46,9 +46,6 @@
 
 ///@name Input fields for XFEM
 //@{
-//#define _IFT_CrackTip_Name "cracktip"
-//#define _IFT_CrackInterior_Name "crackinterior"
-
 #define _IFT_Inclusion_Name "inclusion"
 #define _IFT_Inclusion_material "material"
 
@@ -59,8 +56,9 @@
 #define _IFT_EnrichmentItem_propagationlaw "propagationlaw"
 
 #define _IFT_Delamination_Name "delamination"
-#define _IFT_Delamination_xiCoords "delaminationxicoords" // old
 #define _IFT_Delamination_xiCoord "delaminationxicoord"
+#define _IFT_Delamination_interfacenum "interfacenum"
+#define _IFT_Delamination_csnum "csnum"
 #define _IFT_Delamination_CohesiveZoneMaterial "czmaterial"
 //#define _IFT_MultipleDelamination_Name "multipledelamination"
 //@}
@@ -86,6 +84,7 @@ class WholeDomain;
 class EnrichmentFront;
 class LinElBranchFunction;
 class PropagationLaw;
+class DynamicDataReader;
 /**
  * Abstract class representing entity, which is included in the FE model using one (or more)
  * global functions. Such entity may represent crack, material interface, etc.
@@ -98,7 +97,7 @@ class PropagationLaw;
  * @author Jim Brouzoulis
  * @author Erik Svenning
  */
-class EnrichmentItem : public FEMComponent
+class OOFEM_EXPORT EnrichmentItem : public FEMComponent
 {
 public:
     /// Constructor / destructor
@@ -106,22 +105,23 @@ public:
     virtual ~EnrichmentItem();
 
     virtual IRResultType initializeFrom(InputRecord *ir);
+
+    /**
+     * Note the special treatment here, the "normal" syntax
+     * would be giveInputRecord(DynamicInputRecord &input).
+     * Passing the entire DataReader instead allows us
+     * to have separate InputRecords for the
+     * EnrichmentDomain, EnrichmentFront and PropagationLaw
+     * without have to keep track of them globally.
+     */
+    virtual void giveInputRecord(DynamicDataReader &oDR);
+
     int instanciateYourself(DataReader *dr);
     virtual const char *giveClassName() const = 0;
     const IntArray *giveEnrichesDofsWithIdArray() const { return mpEnrichesDofsWithIdArray; }
     int giveNumberOfEnrDofs() const;
 
-    // Enrichment domains
-    EnrichmentDomain *giveEnrichmentDomain(int i) { return mpEnrichmentDomain; } // remove later - JB
-    int giveNumberOfEnrichmentDomains() const { return 1; /*this->numberOfEnrichmentDomains;*/ }
-    void addEnrichmentDomain( EnrichmentDomain *ed );
-
-    // Enrichment functions
-//    EnrichmentFunction *giveEnrichmentFunction(int n);
-//    int giveNumberOfEnrichmentfunctions() { return this->numberOfEnrichmentFunctions; }
-
     // Spatial query
-//    bool isDofManEnriched(DofManager *dMan);
     bool isDofManEnrichedByEnrichmentDomain(DofManager *dMan, int edNumber) const;
     bool isElementEnriched(const Element *element) const;
     bool isElementEnrichedByEnrichmentDomain(const Element *element, int edNumber) const;
@@ -187,47 +187,30 @@ public:
     double calcXiZeroLevel(const double &iQ1, const double &iQ2) const;
     static void calcPolarCoord(double &oR, double &oTheta, const FloatArray &iOrigin, const FloatArray &iPos, const FloatArray &iN, const FloatArray &iT);
 
+    PropagationLaw *givePropagationLaw() { return this->mpPropagationLaw; };
+    bool hasPropagationLaw() { return this->mPropLawIndex != 0; };
+
 protected:
 
-    /////////////////////////
-    // New objects
     EnrichmentDomain *mpEnrichmentDomain;
-    int mEnrDomainIndex;
 
     EnrichmentFunction *mpEnrichmentFunc;
-    int mEnrFuncIndex;
 
     EnrichmentFront *mpEnrichmentFront;
+
+    /// mEnrFrontIndex: nonzero if an enrichment front is present, zero otherwise.
     int mEnrFrontIndex;
 
     PropagationLaw *mpPropagationLaw;
+
+    /// mPropLawIndex: nonzero if a propagation law is present, zero otherwise.
     int mPropLawIndex;
 
-    /// Link to associated Xfem manager.
-    XfemManager *xMan;
     int startOfDofIdPool; // points to the first available dofId number associated with the ei
     int endOfDofIdPool;
 
     /// Geometry associated with EnrichmentItem.
-    IntArray enrichmentDomainNumbers;
     IntArray *mpEnrichesDofsWithIdArray;
-
-    /// EnrichmentFunction associated with the EnrichmentItem. - should generally be a list of functions
-    int enrichmentFunction;
-
-    // TODO: Remove and allow only one EnrichmentDomain per EnrichmentItem
-    /// Geometry object
-    AList< EnrichmentDomain > *enrichmentDomainList;
-    int numberOfEnrichmentDomains;
-
-    // TODO: Remove and allow only one EnrichmentFunction per EnrichmentItem
-    /// Enrichment function list.
-    AList< EnrichmentFunction > *enrichmentFunctionList;
-    int numberOfEnrichmentFunctions;
-
-
-
-
 
 
     // Level set for signed distance to the interface.
@@ -258,7 +241,7 @@ protected:
 
 
 /** Inclusion. */
-class Inclusion : public EnrichmentItem
+class OOFEM_EXPORT Inclusion : public EnrichmentItem
 {
 protected:
     Material *mat;
@@ -278,21 +261,25 @@ public:
 
 
 /** Delamination. */
-class Delamination : public EnrichmentItem
+class OOFEM_EXPORT Delamination : public EnrichmentItem
 {
 protected:
     Material *mat;  // Material for cohesive zone model
+    int interfaceNum;
+    int crossSectionNum;
+    int matNum;
+    double delamXiCoord;    // defines at what local xi-coord the delamination is defined
 public:
     Delamination(int n, XfemManager *xm, Domain *aDomain);
+
     virtual const char *giveClassName() const { return "Delamination"; }
     virtual const char *giveInputRecordName() const { return _IFT_Delamination_Name; }
     virtual IRResultType initializeFrom(InputRecord *ir);
-
-    double delamXiCoord;    // defines at what local xi-coord the delamination is defined
-
+    virtual void giveInputRecord(DynamicDataReader &oDR);
+    
+    double giveDelamXiCoord() { return delamXiCoord; };
     virtual Material *giveMaterial() { return mat; }
     virtual void updateGeometry(FailureCriteriaStatus *fc, TimeStep *tStep);
-    virtual void updateLevelSets(XfemManager &ixFemMan);
 };
 
 
@@ -300,10 +287,11 @@ public:
 
 
 /** Concrete representation of Crack. */
-class Crack : public EnrichmentItem
+class OOFEM_EXPORT Crack : public EnrichmentItem
 {
 public:
     Crack(int n, XfemManager *xm, Domain *aDomain);
+
     virtual const char *giveClassName() const { return "Crack"; }
     virtual const char *giveInputRecordName() const { return _IFT_Crack_Name; }
     virtual IRResultType initializeFrom(InputRecord *ir);
@@ -363,7 +351,7 @@ void EnrichmentItem :: interpSurfaceLevelSet(double &oLevelSet, const FloatArray
  *
  * 	Erik Svenning - August 2013
  */
-class EnrichmentFront
+class OOFEM_EXPORT EnrichmentFront
 {
 public:
     EnrichmentFront() {};
@@ -396,6 +384,7 @@ public:
     virtual const char *giveInputRecordName() const = 0;
 
     virtual IRResultType initializeFrom(InputRecord *ir) = 0;
+    virtual void giveInputRecord(DynamicInputRecord &input) = 0;
 
     virtual bool giveElementTipCoord(FloatArray &oCoord, int iElIndex) const;
 
@@ -413,7 +402,7 @@ protected:
     void giveNodeTipIndices(int iNodeInd, std::vector<int> &oTipIndices) const;
 };
 
-class EnrFrontDoNothing: public EnrichmentFront{
+class OOFEM_EXPORT EnrFrontDoNothing: public EnrichmentFront{
 public:
 	EnrFrontDoNothing() {};
 	virtual ~EnrFrontDoNothing() {};
@@ -432,10 +421,11 @@ public:
     virtual const char *giveInputRecordName() const { return _IFT_EnrFrontDoNothing_Name; }
 
     virtual IRResultType initializeFrom(InputRecord *ir) {return IRRT_OK;}
+    virtual void giveInputRecord(DynamicInputRecord &input);
 
 };
 
-class EnrFrontExtend: public EnrichmentFront{
+class OOFEM_EXPORT EnrFrontExtend: public EnrichmentFront{
 public:
 	EnrFrontExtend() {};
 	virtual ~EnrFrontExtend() {};
@@ -456,9 +446,10 @@ public:
     virtual const char *giveInputRecordName() const { return _IFT_EnrFrontExtend_Name; }
 
     virtual IRResultType initializeFrom(InputRecord *ir) {return IRRT_OK;}
+    virtual void giveInputRecord(DynamicInputRecord &input);
 };
 
-class EnrFrontLinearBranchFuncRadius: public EnrichmentFront{
+class OOFEM_EXPORT EnrFrontLinearBranchFuncRadius: public EnrichmentFront{
 public:
 	EnrFrontLinearBranchFuncRadius();
 	virtual ~EnrFrontLinearBranchFuncRadius();
@@ -476,6 +467,7 @@ public:
     virtual const char *giveInputRecordName() const { return _IFT_EnrFrontLinearBranchFuncRadius_Name; }
 
     virtual IRResultType initializeFrom(InputRecord *ir);
+    virtual void giveInputRecord(DynamicInputRecord &input);
 
 private:
 	double mEnrichmentRadius;
