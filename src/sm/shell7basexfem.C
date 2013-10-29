@@ -67,8 +67,10 @@ Shell7BaseXFEM :: postInitialize()
     Shell7Base :: postInitialize();
 
     this->xMan =  this->giveDomain()->giveXfemManager();
-    if ( this->czMatNum > 0 ) {
-        this->czMat = this->giveDomain()->giveMaterial(this->czMatNum);
+    LayeredCrossSection *layeredCS = this->layeredCS = dynamic_cast< LayeredCrossSection * >(this->giveCrossSection());
+    if ( layeredCS->giveCZMaterialNumber() > 0 ) {
+        //this->czMat = this->giveDomain()->giveMaterial(this->czMatNum);
+        this->czMat = this->giveDomain()->giveMaterial( layeredCS->giveCZMaterialNumber() );
     }
 
 }

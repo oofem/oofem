@@ -142,7 +142,7 @@ IntMatBilinearCZFagerstrom :: giveFirstPKTraction_3d(FloatArray &answer, GaussPo
         double gamma = this->gamma;
         double gammaGf = this->GIIc/this->GIc;
 		double mu = this->mu;
-		printf("  mu    = %e \n", mu);
+		//printf("  mu    = %e \n", mu);
 
         double Qn_M = 0.5*(Qn + fabs(Qn));
 //        double loadFun = sigf*pow(Qt/(gamma*sigf),2) + sigf*pow((Qn_M/sigf),2) - sigf;	///@todo Martin: no use of parameter mu!!!

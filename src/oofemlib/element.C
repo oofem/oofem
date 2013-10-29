@@ -681,9 +681,11 @@ Element :: initializeFrom(InputRecord *ir)
 #  ifdef VERBOSE
     // VERBOSE_PRINT1("Instanciating element ",number);
 #  endif
-    IR_GIVE_FIELD(ir, material, _IFT_Element_mat);
+    //IR_GIVE_FIELD(ir, material, _IFT_Element_mat);
+    IR_GIVE_OPTIONAL_FIELD(ir, material, _IFT_Element_mat);
 
-    IR_GIVE_FIELD(ir, crossSection, _IFT_Element_crosssect);
+    //IR_GIVE_FIELD(ir, crossSection, _IFT_Element_crosssect);
+    IR_GIVE_OPTIONAL_FIELD(ir, crossSection, _IFT_Element_crosssect);
 
     IR_GIVE_FIELD(ir, dofManArray, _IFT_Element_nodes);
 
