@@ -17,19 +17,19 @@
  *       Czech Technical University, Faculty of Civil Engineering,
  *   Department of Structural Mechanics, 166 29 Prague, Czech Republic
  *
- *  This program is free software; you can redistribute it and/or modify
- *  it under the terms of the GNU General Public License as published by
- *  the Free Software Foundation; either version 2 of the License, or
- *  (at your option) any later version.
+ *  This library is free software; you can redistribute it and/or
+ *  modify it under the terms of the GNU Lesser General Public
+ *  License as published by the Free Software Foundation; either
+ *  version 2.1 of the License, or (at your option) any later version.
  *
  *  This program is distributed in the hope that it will be useful,
  *  but WITHOUT ANY WARRANTY; without even the implied warranty of
- *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- *  GNU General Public License for more details.
+ *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+ *  Lesser General Public License for more details.
  *
- *  You should have received a copy of the GNU General Public License
- *  along with this program; if not, write to the Free Software
- *  Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
+ *  You should have received a copy of the GNU Lesser General Public
+ *  License along with this library; if not, write to the Free Software
+ *  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  */
 
 #ifndef structengngmodel_h
@@ -68,18 +68,6 @@ protected:
      * @param id Domain number.
      */
     void printReactionForces(TimeStep *tStep, int id);
-    /**
-     * Builds the reaction force table. For each prescribed equation number it will find
-     * corresponding node and dof number. The entries in the restrDofMans, restrDofs, and eqn
-     * arrays are sorted with increasing dofman number and with increasing dof number as
-     * a second minor criterion.
-     * @param restrDofMans Contains numbers of restrained Dofmanagers, with size equal to total number of prescribed equations.
-     * @param restrDofs Contains numbers of restrained Dofs, with size equal to total number of prescribed equations.
-     * @param eqn Contains the corresponding restrained equation numbers.
-     * @param tStep Time step.
-     * @param di Domain number.
-     */
-    void buildReactionTable(IntArray &restrDofMans, IntArray &restrDofs, IntArray &eqn, TimeStep *tStep, int di);
 
     /**
      * Computes the contribution external loading to reaction forces in given domain. Default implementations adds the
@@ -132,6 +120,20 @@ public:
      * @param di Domain number.
      */
     void computeReaction(FloatArray &answer, TimeStep *tStep, int di);
+
+    /**
+     * Builds the reaction force table. For each prescribed equation number it will find
+     * corresponding node and dof number. The entries in the restrDofMans, restrDofs, and eqn
+     * arrays are sorted with increasing dofman number and with increasing dof number as
+     * a second minor criterion.
+     * @param restrDofMans Contains numbers of restrained Dofmanagers, with size equal to total number of prescribed equations.
+     * @param restrDofs Contains numbers of restrained Dofs, with size equal to total number of prescribed equations.
+     * @param eqn Contains the corresponding restrained equation numbers.
+     * @param tStep Time step.
+     * @param di Domain number.
+     */
+    void buildReactionTable(IntArray &restrDofMans, IntArray &restrDofs, IntArray &eqn, TimeStep *tStep, int di);
+
 
 #ifdef __PETSC_MODULE
     /**

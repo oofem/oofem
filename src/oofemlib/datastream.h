@@ -17,23 +17,25 @@
  *       Czech Technical University, Faculty of Civil Engineering,
  *   Department of Structural Mechanics, 166 29 Prague, Czech Republic
  *
- *  This program is free software; you can redistribute it and/or modify
- *  it under the terms of the GNU General Public License as published by
- *  the Free Software Foundation; either version 2 of the License, or
- *  (at your option) any later version.
+ *  This library is free software; you can redistribute it and/or
+ *  modify it under the terms of the GNU Lesser General Public
+ *  License as published by the Free Software Foundation; either
+ *  version 2.1 of the License, or (at your option) any later version.
  *
  *  This program is distributed in the hope that it will be useful,
  *  but WITHOUT ANY WARRANTY; without even the implied warranty of
- *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- *  GNU General Public License for more details.
+ *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+ *  Lesser General Public License for more details.
  *
- *  You should have received a copy of the GNU General Public License
- *  along with this program; if not, write to the Free Software
- *  Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
+ *  You should have received a copy of the GNU Lesser General Public
+ *  License along with this library; if not, write to the Free Software
+ *  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  */
 
 #ifndef datastream_h
 #define datastream_h
+
+#include "oofemcfg.h"
 
 #include <sstream>
 #include <cstdio>
@@ -50,7 +52,7 @@ class ProcessCommunicatorBuff;
  * (such as load balancing), without writing new (and very similar) routines.
  * This  will lead to a  better consistency of code.
  */
-class DataStream
+class OOFEM_EXPORT DataStream
 {
 public:
     /// Destructor
@@ -108,7 +110,7 @@ public:
  * not provide any methods for opening/closing file. This is the responsibility of user.
  * @see DataStream class.
  */
-class FileDataStream : public DataStream
+class OOFEM_EXPORT FileDataStream : public DataStream
 {
 private:
     /// FILE pointer of associated stream
@@ -141,7 +143,7 @@ public:
  * This class creates a DataStream shell around communication buffer routines.
  * @see DataStream class.
  */
-class ComBuffDataStream : public DataStream
+class OOFEM_EXPORT ComBuffDataStream : public DataStream
 {
 private:
     /// Associated communication buffer
@@ -174,7 +176,7 @@ public:
  * This class creates a DataStream shell around process communicator routines.
  * @see DataStream class.
  */
-class ProcessCommDataStream : public DataStream
+class OOFEM_EXPORT ProcessCommDataStream : public DataStream
 {
 private:
     /// Associated process communicator buffer

@@ -17,19 +17,19 @@
  *       Czech Technical University, Faculty of Civil Engineering,
  *   Department of Structural Mechanics, 166 29 Prague, Czech Republic
  *
- *  This program is free software; you can redistribute it and/or modify
- *  it under the terms of the GNU General Public License as published by
- *  the Free Software Foundation; either version 2 of the License, or
- *  (at your option) any later version.
+ *  This library is free software; you can redistribute it and/or
+ *  modify it under the terms of the GNU Lesser General Public
+ *  License as published by the Free Software Foundation; either
+ *  version 2.1 of the License, or (at your option) any later version.
  *
  *  This program is distributed in the hope that it will be useful,
  *  but WITHOUT ANY WARRANTY; without even the implied warranty of
- *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- *  GNU General Public License for more details.
+ *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+ *  Lesser General Public License for more details.
  *
- *  You should have received a copy of the GNU General Public License
- *  along with this program; if not, write to the Free Software
- *  Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
+ *  You should have received a copy of the GNU Lesser General Public
+ *  License along with this library; if not, write to the Free Software
+ *  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  */
 
 #include "simplecrosssection.h"
@@ -128,6 +128,21 @@ SimpleCrossSection :: giveRealStress_Shell(FloatArray &answer, GaussPoint *gp, c
     status->letTempStressVectorBe(answer);
 }
 
+
+void
+SimpleCrossSection :: giveRealStress_MembraneRot(FloatArray &answer, GaussPoint *gp, const FloatArray &strain, TimeStep *tStep)
+{
+    FloatMatrix tangent;
+    this->giveMembraneRotStiffMtrx(tangent, ElasticStiffness, gp, tStep);
+    answer.beProductOf(tangent, strain);
+
+    StructuralMaterialStatus *status = static_cast< StructuralMaterialStatus* >( gp->giveElement()->giveMaterial()->giveStatus(gp) );
+    status->letTempStrainVectorBe(strain);
+    status->letTempStressVectorBe(answer);
+
+    ///@todo We should support nonlinear behavior for the membrane part. In fact, should be even bundle the rotation part with the membrane?
+    /// We gain nothing from this design anyway as the rotation field is always separate. Separate manual integration by the element would be an option.
+}
 
 
 void
@@ -272,6 +287,17 @@ SimpleCrossSection :: give3dShellStiffMtrx(FloatMatrix &answer, MatResponseMode 
 }
 
 
+void
+SimpleCrossSection :: giveMembraneRotStiffMtrx(FloatMatrix &answer, MatResponseMode rMode, GaussPoint *gp, TimeStep *tStep)
+{
+    StructuralMaterial *mat = dynamic_cast< StructuralMaterial * >( gp->giveElement()->giveMaterial() );
+    //this->givePlaneStressStiffMtrx(answer, ElasticStiffness, gp, tStep);
+    mat->givePlaneStressStiffMtrx(answer, ElasticStiffness, gp, tStep);
+    answer.resizeWithData(4, 4);
+    answer.at(4,4) = this->give(CS_DrillingStiffness);
+}
+
+
 IRResultType
 SimpleCrossSection :: initializeFrom(InputRecord *ir)
 //
@@ -330,6 +356,10 @@ SimpleCrossSection :: initializeFrom(InputRecord *ir)
     if (value == 0.0) value=beamshearcoeff * area;
     propertyDictionary->add(CS_ShearAreaZ, value);
 
+    value = 0.0;
+    IR_GIVE_OPTIONAL_FIELD(ir, value, _IFT_SimpleCrossSection_drillStiffness);
+    propertyDictionary->add(CS_DrillingStiffness, value);
+
     return IRRT_OK;
 }
 
@@ -337,15 +367,43 @@ SimpleCrossSection :: initializeFrom(InputRecord *ir)
 void SimpleCrossSection :: giveInputRecord(DynamicInputRecord &input)
 {
     StructuralCrossSection :: giveInputRecord(input);
-    input.setField(this->give(CS_Thickness), _IFT_SimpleCrossSection_thick);
-    input.setField(this->give(CS_Width), _IFT_SimpleCrossSection_width);
-    input.setField(this->give(CS_Area), _IFT_SimpleCrossSection_area);
-    input.setField(this->give(CS_TorsionMomentX), _IFT_SimpleCrossSection_ik);
-    input.setField(this->give(CS_InertiaMomentY), _IFT_SimpleCrossSection_iy);
-    input.setField(this->give(CS_InertiaMomentZ), _IFT_SimpleCrossSection_iz);
-    input.setField(this->give(CS_ShearAreaY), _IFT_SimpleCrossSection_shearareay);
-    input.setField(this->give(CS_ShearAreaY), _IFT_SimpleCrossSection_shearareaz);
-    input.setField(this->give(CS_BeamShearCoeff), _IFT_SimpleCrossSection_shearcoeff);
+
+    if( this->propertyDictionary->includes(CS_Thickness) ) {
+    	input.setField(this->give(CS_Thickness), _IFT_SimpleCrossSection_thick);
+    }
+
+    if( this->propertyDictionary->includes(CS_Width) ) {
+    	input.setField(this->give(CS_Width), _IFT_SimpleCrossSection_width);
+    }
+
+    if( this->propertyDictionary->includes(CS_Area) ) {
+    	input.setField(this->give(CS_Area), _IFT_SimpleCrossSection_area);
+    }
+
+    if( this->propertyDictionary->includes(CS_TorsionMomentX) ) {
+    	input.setField(this->give(CS_TorsionMomentX), _IFT_SimpleCrossSection_ik);
+    }
+
+    if( this->propertyDictionary->includes(CS_InertiaMomentY) ) {
+    	input.setField(this->give(CS_InertiaMomentY), _IFT_SimpleCrossSection_iy);
+    }
+
+    if( this->propertyDictionary->includes(CS_InertiaMomentZ) ) {
+    	input.setField(this->give(CS_InertiaMomentZ), _IFT_SimpleCrossSection_iz);
+    }
+
+    if( this->propertyDictionary->includes(CS_ShearAreaY) ) {
+    	input.setField(this->give(CS_ShearAreaY), _IFT_SimpleCrossSection_shearareay);
+    }
+
+    if( this->propertyDictionary->includes(CS_ShearAreaY) ) {
+		// TODO: Reading shearareaz and setting it to CS_ShearAreaY. Bug or feature ?! // Erik
+		input.setField(this->give(CS_ShearAreaY), _IFT_SimpleCrossSection_shearareaz);
+    }
+
+    if( this->propertyDictionary->includes(CS_BeamShearCoeff) ) {
+    	input.setField(this->give(CS_BeamShearCoeff), _IFT_SimpleCrossSection_shearcoeff);
+    }
 }
 
 

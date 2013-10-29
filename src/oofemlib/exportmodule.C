@@ -17,19 +17,19 @@
  *       Czech Technical University, Faculty of Civil Engineering,
  *   Department of Structural Mechanics, 166 29 Prague, Czech Republic
  *
- *  This program is free software; you can redistribute it and/or modify
- *  it under the terms of the GNU General Public License as published by
- *  the Free Software Foundation; either version 2 of the License, or
- *  (at your option) any later version.
+ *  This library is free software; you can redistribute it and/or
+ *  modify it under the terms of the GNU Lesser General Public
+ *  License as published by the Free Software Foundation; either
+ *  version 2.1 of the License, or (at your option) any later version.
  *
  *  This program is distributed in the hope that it will be useful,
  *  but WITHOUT ANY WARRANTY; without even the implied warranty of
- *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- *  GNU General Public License for more details.
+ *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+ *  Lesser General Public License for more details.
  *
- *  You should have received a copy of the GNU General Public License
- *  along with this program; if not, write to the Free Software
- *  Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
+ *  You should have received a copy of the GNU Lesser General Public
+ *  License along with this library; if not, write to the Free Software
+ *  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  */
 
 #include "exportmodule.h"
@@ -66,6 +66,9 @@ ExportModule :: initializeFrom(InputRecord *ir)
 
     IR_GIVE_OPTIONAL_FIELD(ir, tsteps_out, _IFT_ExportModule_tstepsout);
 
+    tstep_substeps_out_flag = 0;
+    IR_GIVE_OPTIONAL_FIELD(ir, tstep_substeps_out_flag, _IFT_ExportModule_subtstepsout);
+
     domain_all_flag = ir->hasField(_IFT_ExportModule_domainall);
 
     if ( !domain_all_flag ) {
@@ -80,13 +83,28 @@ std::string
 ExportModule :: giveOutputBaseFileName(TimeStep *tStep)
 {
     char fext[100];
+
+    if (this->testSubStepOutput()) {
+      // include tStep version in output file name
 #ifdef __PARALLEL_MODE
-    if (this->emodel->isParallel() && this->emodel->giveNumberOfProcesses() > 1)
-        sprintf( fext, "_%03d.m%d.%d", emodel->giveRank(), this->number, tStep->giveNumber() );
-    else
+      if (this->emodel->isParallel() && this->emodel->giveNumberOfProcesses() > 1)
+        sprintf( fext, "_%03d.m%d.%d.%d", emodel->giveRank(), this->number, tStep->giveNumber(), tStep->giveSubstepNumber() );
+      else
 #endif
-    sprintf( fext, ".m%d.%d", this->number, tStep->giveNumber() );
-    return this->emodel->giveOutputBaseFileName() + fext;
+	sprintf( fext, ".m%d.%d.%d", this->number, tStep->giveNumber(), tStep->giveSubstepNumber());
+      return this->emodel->giveOutputBaseFileName() + fext;
+
+
+    } else {
+
+#ifdef __PARALLEL_MODE
+      if (this->emodel->isParallel() && this->emodel->giveNumberOfProcesses() > 1)
+        sprintf( fext, "_%03d.m%d.%d", emodel->giveRank(), this->number, tStep->giveNumber() );
+      else
+#endif
+	sprintf( fext, ".m%d.%d", this->number, tStep->giveNumber() );
+      return this->emodel->giveOutputBaseFileName() + fext;
+    }
 }
 
 bool

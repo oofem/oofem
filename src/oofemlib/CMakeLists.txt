@@ -159,6 +159,9 @@ set (core_element
 
 set (core_fei
     feinterpol.C
+    feinterpol1d.C
+    feinterpol2d.C
+    feinterpol3d.C
     fei1dlin.C
     fei1dquad.C
     fei1dhermite.C
@@ -191,6 +194,7 @@ set (core_xfem
     xfem/enrichmentitem.C
     xfem/patchintegrationrule.C
     xfem/enrichmentdomain.C
+    xfem/propagationlaw.C
     xfem/XFEMDebugTools.C
     )
 
@@ -228,6 +232,10 @@ set (core_bc
     surfacetensionbc.C
     linearconstraintbc.C
     )
+
+if (USE_PYTHON)
+    list (APPEND core_bc userdefdirichletbc.C)
+endif ()
 
 set (core_mapping
     mmaclosestiptransfer.C

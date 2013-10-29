@@ -17,19 +17,19 @@
  *       Czech Technical University, Faculty of Civil Engineering,
  *   Department of Structural Mechanics, 166 29 Prague, Czech Republic
  *
- *  This program is free software; you can redistribute it and/or modify
- *  it under the terms of the GNU General Public License as published by
- *  the Free Software Foundation; either version 2 of the License, or
- *  (at your option) any later version.
+ *  This library is free software; you can redistribute it and/or
+ *  modify it under the terms of the GNU Lesser General Public
+ *  License as published by the Free Software Foundation; either
+ *  version 2.1 of the License, or (at your option) any later version.
  *
  *  This program is distributed in the hope that it will be useful,
  *  but WITHOUT ANY WARRANTY; without even the implied warranty of
- *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- *  GNU General Public License for more details.
+ *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+ *  Lesser General Public License for more details.
  *
- *  You should have received a copy of the GNU General Public License
- *  along with this program; if not, write to the Free Software
- *  Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
+ *  You should have received a copy of the GNU Lesser General Public
+ *  License along with this library; if not, write to the Free Software
+ *  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  */
 
 #ifndef load_h
@@ -57,8 +57,28 @@ namespace oofem {
  * the product of its value (stored in componentArray) by the value of
  * the associated load time function at given time step.
  */
-class Load : public GeneralBoundaryCondition
+class OOFEM_EXPORT Load : public GeneralBoundaryCondition
 {
+public:
+    /**
+     * Load coordinate system type. Variable of this type can have following values CST_Global
+     * (indicates that load given in global coordinate system) or CST_Local
+     * (entity dependent local coordinate system will be  used).
+     */
+    enum CoordSystType {
+        CST_Global, ///< Load is specified in global c.s.
+        CST_Local, ///< Load is specified in local element c.s.
+        CST_UpdatedGlobal, ///< Load is specified in global c.s. but follows the deformation
+    };
+
+    /**
+     * Type determining the type of formulation (entity local or global one).
+     */
+    enum FormulationType {
+        FT_Entity,
+        FT_Global,
+    };
+
 protected:
     /// Components of boundary condition.
     FloatArray componentArray;
@@ -112,6 +132,26 @@ public:
      * @return Nonzero if excluded, zero otherwise.
      */
     int isDofExcluded(int index);
+
+    /**
+     * Returns receiver's coordinate system.
+     */
+    virtual CoordSystType giveCoordSystMode() { return CST_Global; }
+    /**
+     * Specifies is load should take local or global coordinates.
+     */
+    virtual FormulationType giveFormulationType() { return FT_Entity; }
+    /**
+     * @return Approximation order of load geometry.
+     */
+    virtual int giveApproxOrder() { return 0; }
+    /**
+     * Returns the value of a property 'aProperty'. Property must be identified
+     * by unique integer id.
+     * @param aProperty id of property requested
+     * @return property value
+     */
+    virtual double giveProperty(int aProperty) { OOFEM_ERROR("Load :: giveProperty - Not supported for this boundary condition."); return 0; }
 
     virtual IRResultType initializeFrom(InputRecord *ir);
     virtual void giveInputRecord(DynamicInputRecord &input);

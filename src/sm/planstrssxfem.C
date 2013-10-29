@@ -17,19 +17,19 @@
  *       Czech Technical University, Faculty of Civil Engineering,
  *   Department of Structural Mechanics, 166 29 Prague, Czech Republic
  *
- *  This program is free software; you can redistribute it and/or modify
- *  it under the terms of the GNU General Public License as published by
- *  the Free Software Foundation; either version 2 of the License, or
- *  (at your option) any later version.
+ *  This library is free software; you can redistribute it and/or
+ *  modify it under the terms of the GNU Lesser General Public
+ *  License as published by the Free Software Foundation; either
+ *  version 2.1 of the License, or (at your option) any later version.
  *
  *  This program is distributed in the hope that it will be useful,
  *  but WITHOUT ANY WARRANTY; without even the implied warranty of
- *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- *  GNU General Public License for more details.
+ *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+ *  Lesser General Public License for more details.
  *
- *  You should have received a copy of the GNU General Public License
- *  along with this program; if not, write to the Free Software
- *  Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
+ *  You should have received a copy of the GNU Lesser General Public
+ *  License along with this library; if not, write to the Free Software
+ *  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  */
 
 #include "planstrssxfem.h"
@@ -46,7 +46,19 @@
 
 namespace oofem {
 
-REGISTER_Element( PlaneStress2dXfem );
+REGISTER_Element( PlaneStress2dXfem )
+
+void PlaneStress2dXfem :: updateYourself(TimeStep *tStep)
+{
+	PlaneStress2d::updateYourself(tStep);
+	XfemElementInterface::updateYourselfCZ(tStep);
+}
+
+void PlaneStress2dXfem :: postInitialize()
+{
+	PlaneStress2d::postInitialize();
+	XfemElementInterface :: initializeCZMaterial();
+}
 
 Interface *
 PlaneStress2dXfem :: giveInterface(InterfaceType it)
@@ -65,159 +77,45 @@ void
 PlaneStress2dXfem :: computeGaussPoints()
 {
     XfemManager *xMan = this->giveDomain()->giveXfemManager();
-    EnrichmentItem *ei = xMan->giveEnrichmentItem(1);
-    EnrichmentDomain *ed = ei->giveEnrichmentDomain(1);
-    Inclusion *iei = dynamic_cast< Inclusion * > (ei); 
-    EDBGCircle *edc = dynamic_cast< EDBGCircle *> (ed);
-    // update integration rule only if element is cut by the ed
-    if ( iei && edc && edc->computeNumberOfIntersectionPoints(this) > 0) { 
-        this->XfemElementInterface_updateIntegrationRule();
-    } else {
-        PlaneStress2d ::computeGaussPoints();
+
+    for(int i = 1; i <= xMan->giveNumberOfEnrichmentItems(); i++)
+    {
+    	std::vector<FloatArray> intersecPoints;
+    	EnrichmentItem *ei = xMan->giveEnrichmentItem(i);
+        // Compute the value of the enrichment function in the nodes 
+        // in order to construction a shifted enrichment
+
+        std::vector< int > intersecEdgeInd;
+    	ei->computeIntersectionPoints(intersecPoints, intersecEdgeInd, this);
+    	int numIntersecPoints = intersecPoints.size();
+
+        if ( numIntersecPoints > 0 )
+        {
+            this->XfemElementInterface_updateIntegrationRule();
+        } else
+        {
+            PlaneStress2d ::computeGaussPoints();
+        }
+
     }
+
 }
 
 ///@todo: Computation of N and B can be moved to the xfem interface and thus handle all continuum elements in the same way
 void PlaneStress2dXfem :: computeBmatrixAt(GaussPoint *gp, FloatMatrix &answer, int li, int ui)
 {
-    FloatMatrix dNdx;
-    FloatArray N;
-    interpolation.evaldNdx( dNdx, * gp->giveCoordinates(), FEIElementGeometryWrapper(this) );
-    interpolation.evalN(     N  , * gp->giveCoordinates(), FEIElementGeometryWrapper(this) );
- 
-    FloatMatrix Bc[4];
-    // Assemble standard FEM part of strain-displacement matrix
-    for ( int i = 1; i <= this->giveNumberOfDofManagers(); i++ ) {
-        FloatMatrix &BNode = Bc[i-1];
-        BNode.resize(3, 2);
-        BNode.zero();
-        BNode.at(1, 1) = dNdx.at(i, 1);
-        BNode.at(2, 2) = dNdx.at(i, 2);
-        BNode.at(3, 1) = dNdx.at(i, 2);
-        BNode.at(3, 2) = dNdx.at(i, 1);
-    }
-
-    // Assemble xfem part of strain-displacement matrix
-    XfemManager *xMan = this->giveDomain()->giveXfemManager();
-    FloatMatrix Bd[4];
-
-    int counter = 8;
-    for ( int i = 1; i <= xMan->giveNumberOfEnrichmentItems(); i++ ) {
-        EnrichmentItem *ei = xMan->giveEnrichmentItem(i);
-        EnrichmentDomain *ed = ei->giveEnrichmentDomain(1);
-        // Enrichment function and its gradient evaluated at the gauss point
-        EnrichmentFunction *ef = ei->giveEnrichmentFunction(1);
-        double efgp = ef->evaluateFunctionAt(gp, ed);
-        FloatArray efgpD;
-        ef->evaluateDerivativeAt(efgpD, gp, ed);
-
-        // adds up the number of the dofs from an enrichment item
-        // this part is used for the construction of a shifted enrichment
-        for ( int j = 1; j <= this->giveNumberOfDofManagers(); j++ ) {
-
-            DofManager *dMan = this->giveDofManager(j);
-            if ( ei->isDofManEnriched( dMan ) ) {
-                FloatMatrix &BdNode = Bd[j-1];
-                BdNode.resize(3, 2);
-                BdNode.zero();
-
-                FloatArray *nodecoords = dMan->giveCoordinates();
-                // should ask after specific EF in a loop
-                double efnode = ef->evaluateFunctionAt(nodecoords, ed);
-
-                // matrix to be added anytime a node is enriched
-                // Creates nabla*(ef*N)
-                FloatArray help;
-                help.resize(2);
-                for ( int p = 1; p <= 2; p++ ) {
-                    help.at(p) = dNdx.at(j, p) * ( efgp - efnode ) + N.at(j) * efgpD.at(p);
-                }
-
-                for ( int k = 1; k <= 2; k++ ) {
-                    BdNode.at(k, k) = help.at(k);
-                    if ( k == 1 ) {
-                        BdNode.at(3, k) = help.at(2);
-                    } else if ( k == 2 ) {
-                        BdNode.at(3, k) = help.at(1);
-                    }
-                }
-                counter += 2;
-            }
-        }
-
-        // Create the total B-matrix by appending each contribution to B after one another.
-        answer.resize(3, counter);
-        answer.zero();
-        int column = 1;
-        for ( int i = 0; i < 4; i++ ) {
-            answer.setSubMatrix(Bc[i],1,column);
-            column += 2;
-            if ( Bd[i].isNotEmpty() ) {
-                answer.setSubMatrix(Bd[i],1,column);
-                column += 2;
-            }
-        }
-    }
+	XfemElementInterface_createEnrBmatrixAt(answer, *gp, *this);
 }
 
 
 void PlaneStress2dXfem :: computeNmatrixAt(GaussPoint *gp, FloatMatrix &answer)
 {
-
-    FloatArray Nc;
-    interpolation.evalN( Nc, *gp->giveCoordinates(), FEIElementGeometryWrapper(this) );
-    // assemble xfem part of strain-displacement matrix
-    XfemManager *xMan = this->giveDomain()->giveXfemManager();
-    FloatArray Nd;
-    Nd.resize(4);
-    IntArray mask(4);
-    int counter = 4;
-    FloatArray N, coords;
-    for ( int i = 1; i <= xMan->giveNumberOfEnrichmentItems(); i++ ) {
-        EnrichmentItem *ei = xMan->giveEnrichmentItem(i);
-        EnrichmentDomain *ed = ei->giveEnrichmentDomain(1);    
-
-        // Enrichment function and its gradient evaluated at the gauss point     
-        EnrichmentFunction *ef = ei->giveEnrichmentFunction(1);
-        this->computeGlobalCoordinates(coords, *gp->giveCoordinates());
-        double efgp = ef->evaluateFunctionAt(&coords, ed);
-
-        // adds up the number of the dofs from an enrichment item
-        // this part is used for the construction of a shifted enrichment
-        for ( int j = 1; j <= this->giveNumberOfDofManagers(); j++ ) {
-            DofManager *dMan = this->giveDofManager(j);
-            if ( ei->isDofManEnriched( dMan ) ) {
-                
-                FloatArray *nodecoords = dMan->giveCoordinates();
-                double efnode = ef->evaluateFunctionAt(nodecoords, ed);
-                Nd.at(j) = ( efgp - efnode ) * Nc.at(j) ;
-                
-                counter++;
-                mask.at(j) = 1;
-            } else {
-                mask.at(j) = 0;
-            }
-        }
-
-        // Create the total B-matrix by appending each contribution to B after one another.
-        N.resize(counter);
-        int column = 1;
-
-        for ( int i = 1; i <= 4; i++ ) {
-            N.at(column) = Nc.at(i);
-            column ++;
-            if ( mask.at(i) ) {
-                N.at(column) = Nd.at(i);
-                column++;
-            }
-        }
-    }
-    answer.beNMatrixOf(N,2);
+	XfemElementInterface_createEnrNmatrixAt(answer, *(gp->giveLocalCoordinates()), *this);
 }
 
 
 
-int PlaneStress2dXfem :: computeNumberOfDofs(EquationID ut)
+int PlaneStress2dXfem :: computeNumberOfDofs()
 {
     int ndofs = 0;
     for ( int i = 1; i <= this->giveNumberOfDofManagers(); i++ ) {
@@ -239,45 +137,91 @@ PlaneStress2dXfem :: giveDofManDofIDMask(int inode, EquationID, IntArray &answer
 void PlaneStress2dXfem :: computeConstitutiveMatrixAt(FloatMatrix &answer, MatResponseMode rMode, GaussPoint *gp, TimeStep *tStep)
 {
     XfemManager *xMan = this->giveDomain()->giveXfemManager();
-    ///@todo: only works for circles
-    EDBGCircle *edc = static_cast< EDBGCircle * > ( xMan->giveEnrichmentItem(1)->giveEnrichmentDomain(1) );
-    
-    FloatArray coords;
-    this->computeGlobalCoordinates(coords, *(gp->giveCoordinates()) );
-    if ( edc->bg->isInside( coords ) ) {
-        Inclusion *ei = static_cast< Inclusion * > ( xMan->giveEnrichmentItem(1) );    
-        StructuralMaterial *sm = static_cast< StructuralMaterial * >( ei->giveMaterial() );
-        sm->giveStiffnessMatrix(answer, rMode, gp, tStep);
-    } else {
-        PlaneStress2d :: computeConstitutiveMatrixAt(answer, rMode, gp, tStep);
+    int nEI = xMan->giveNumberOfEnrichmentItems();
+    StructuralMaterial *sm = NULL;
+
+    for(int i = 1; i <= nEI; i++)
+    {
+    	EnrichmentItem &ei = *(xMan->giveEnrichmentItem(i));
+    	if( ei.isMaterialModified(*gp, *this, sm) )
+    	{
+
+    		if(sm != NULL)
+    		{
+    	        sm->giveStiffnessMatrix(answer, rMode, gp, tStep);
+    			return;
+    		}
+    		else
+    		{
+    			OOFEM_ERROR("PlaneStress2dXfem :: computeConstitutiveMatrixAt: failed to fetch StructuralMaterial\n");
+    		}
+    	}
+
     }
+
+
+    // If no enrichment modifies the material,
+    // compute stiffness based on the bulk material.
+    PlaneStress2d :: computeConstitutiveMatrixAt(answer, rMode, gp, tStep);
 }
 
 void
 PlaneStress2dXfem :: computeStressVector(FloatArray &answer, const FloatArray &strain, GaussPoint *gp, TimeStep *stepN)
 {
+//    FloatArray Epsilon;
+//    this->computeStrainVector(Epsilon, gp, stepN);
+
+
+    //////////////////
+    // Necessary for postprocessing
+    StructuralCrossSection *cs = static_cast< StructuralCrossSection * >( this->giveCrossSection() );
+    cs->giveRealStresses(answer, gp, strain, stepN);
+    //////////////////
+
+
     XfemManager *xMan = this->giveDomain()->giveXfemManager();
-    EDBGCircle *edc = dynamic_cast< EDBGCircle * > ( xMan->giveEnrichmentItem(1)->giveEnrichmentDomain(1) );
-    FloatArray coords;
-    this->computeGlobalCoordinates(coords, *(gp->giveCoordinates()) );
-    if ( edc->bg->isInside( coords ) ) {
-        Inclusion *ei = static_cast< Inclusion * > ( xMan->giveEnrichmentItem(1) );
-        StructuralMaterial *sm = static_cast< StructuralMaterial * >( ei->giveMaterial() );
-        sm->giveRealStressVector_PlaneStress(answer, gp, strain, stepN);
-    } else {
-        this->giveStructuralCrossSection()->giveRealStress_PlaneStress(answer, gp, strain, stepN);
+
+    int nEI = xMan->giveNumberOfEnrichmentItems();
+
+    StructuralMaterial *sm = NULL;
+    for(int i = 1; i <= nEI; i++)
+    {
+    	EnrichmentItem &ei = *(xMan->giveEnrichmentItem(i));
+    	if( ei.isMaterialModified(*gp, *this, sm) )
+    	{
+//    	    printf("In PlaneStress2dXfem :: computeStressVector: Epsilon: "); Epsilon.printYourself();
+
+    		if(sm != NULL)
+    		{
+    	        sm->giveRealStressVector(answer, gp, strain, stepN);
+    			return;
+    		}
+    		else
+    		{
+    			OOFEM_ERROR("PlaneStress2dXfem :: computeStressVector: failed to fetch StructuralMaterial\n");
+    		}
+    	}
+
     }
+
+
+    // If no enrichment modifies the material,
+    // compute stress based on the bulk material.
+//    StructuralCrossSection *cs = static_cast< StructuralCrossSection * >( this->giveCrossSection() );
+//    cs->giveRealStresses(answer, gp, Epsilon, stepN);
 }
 
 void PlaneStress2dXfem :: computeStiffnessMatrix(FloatMatrix &answer, MatResponseMode rMode, TimeStep *tStep)
 {
-    this->computeStiffnessMatrix_withIRulesAsSubcells(answer, rMode, tStep);
+	PlaneStress2d::computeStiffnessMatrix(answer, rMode, tStep);
+	XfemElementInterface::computeCohesiveTangent(answer, tStep);
 }
 
 void
 PlaneStress2dXfem :: giveInternalForcesVector(FloatArray &answer, TimeStep *tStep, int useUpdatedGpRecord) 
 {
-    this->giveInternalForcesVector_withIRulesAsSubcells(answer, tStep, useUpdatedGpRecord);
+	PlaneStress2d::giveInternalForcesVector(answer, tStep, useUpdatedGpRecord);
+	XfemElementInterface::computeCohesiveForces(answer, tStep);
 }
 
 Element_Geometry_Type 
@@ -306,6 +250,8 @@ void PlaneStress2dXfem :: drawRawGeometry(oofegGraphicContext &context)
         PlaneStress2d :: drawRawGeometry(context);
     } else {
         if ( numberOfIntegrationRules > 1 ) {
+        	// TODO: Implement visualization
+/*
             PatchIntegrationRule *iRule;
             for ( int i = 0; i < numberOfIntegrationRules; i++ ) {
                 iRule = dynamic_cast< PatchIntegrationRule * >( integrationRulesArray [ i ] );
@@ -313,6 +259,7 @@ void PlaneStress2dXfem :: drawRawGeometry(oofegGraphicContext &context)
                     iRule->givePatch()->draw(context);
                 }
             }
+*/
         } else {
             PlaneStress2d :: drawRawGeometry(context);
         }
@@ -354,7 +301,8 @@ void PlaneStress2dXfem :: drawScalar(oofegGraphicContext &context)
                 val /= iRule->giveNumberOfIntegrationPoints();
  #endif
                 s.at(1) = s.at(2) = s.at(3) = val;
-                iRule->givePatch()->drawWD(context, s);
+            	// TODO: Implement visualization
+//                iRule->givePatch()->drawWD(context, s);
             }
         } else {
             PlaneStress2d :: drawScalar(context);
@@ -362,4 +310,26 @@ void PlaneStress2dXfem :: drawScalar(oofegGraphicContext &context)
     }
 }
 #endif
+
+
+IRResultType
+PlaneStress2dXfem :: initializeFrom(InputRecord *ir)
+{
+    IRResultType result;
+
+    result = PlaneStress2d :: initializeFrom(ir);
+    if( result != IRRT_OK) {
+    	return result;
+    }
+
+    result = XfemElementInterface :: initializeCZFrom(ir);
+    return result;
+}
+
+void PlaneStress2dXfem :: giveInputRecord(DynamicInputRecord &input)
+{
+	PlaneStress2d::giveInputRecord(input);
+	XfemElementInterface::giveCZInputRecord(input);
+}
+
 } // end namespace oofem

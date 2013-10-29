@@ -17,211 +17,228 @@
  *       Czech Technical University, Faculty of Civil Engineering,
  *   Department of Structural Mechanics, 166 29 Prague, Czech Republic
  *
- *  This program is free software; you can redistribute it and/or modify
- *  it under the terms of the GNU General Public License as published by
- *  the Free Software Foundation; either version 2 of the License, or
- *  (at your option) any later version.
+ *  This library is free software; you can redistribute it and/or
+ *  modify it under the terms of the GNU Lesser General Public
+ *  License as published by the Free Software Foundation; either
+ *  version 2.1 of the License, or (at your option) any later version.
  *
  *  This program is distributed in the hope that it will be useful,
  *  but WITHOUT ANY WARRANTY; without even the implied warranty of
- *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- *  GNU General Public License for more details.
+ *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+ *  Lesser General Public License for more details.
  *
- *  You should have received a copy of the GNU General Public License
- *  along with this program; if not, write to the Free Software
- *  Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
+ *  You should have received a copy of the GNU Lesser General Public
+ *  License along with this library; if not, write to the Free Software
+ *  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  */
 
 #include "mathfem.h"
 #include "alist.h"
 #include "enrichmentdomain.h"
+#include "enrichmentitem.h"
 #include "element.h"
 #include "dofmanager.h"
 #include "connectivitytable.h"
 #include "classfactory.h"
 #include "enrichmentfunction.h"
 #include "xfemmanager.h"
+#include "dynamicinputrecord.h"
 
 #include <algorithm>
 
 #include <cmath>
 
 namespace oofem {
+REGISTER_EnrichmentDomain(DofManList)
+REGISTER_EnrichmentDomain(WholeDomain)
+REGISTER_EnrichmentDomain(EDBGCircle)
 
-REGISTER_EnrichmentDomain( DofManList )
-REGISTER_EnrichmentDomain( WholeDomain )
-REGISTER_EnrichmentDomain( EDBGCircle )
+REGISTER_EnrichmentDomain(EDCrack)
 
-#ifdef __BOOST_MODULE
-REGISTER_EnrichmentDomain( EDCrack )
-#endif
-//REGISTER_EnrichmentDomain( BasicGeometryDomain<Line> )
 
-// General 
+EnrichmentDomain :: EnrichmentDomain()
+{}
 
-EnrichmentDomain::EnrichmentDomain()
-#ifdef __BOOST_MODULE
-:
-levelSetsNeedUpdate(true),
-levelSetTol(1.0e-12), levelSetTol2(1.0e-12)
-#endif
+void EnrichmentDomain_BG :: giveInputRecord(DynamicInputRecord &input)
 {
+    input.setRecordKeywordField(this->giveInputRecordName(), 1);
 
+    bg->giveInputRecord(input);
 }
 
-
-bool 
-EnrichmentDomain :: isElementEnriched(Element *element) 
+void EnrichmentDomain_BG :: CallNodeEnrMarkerUpdate(EnrichmentItem &iEnrItem, XfemManager &ixFemMan) const
 {
-    for ( int i = 1; i <= element->giveNumberOfDofManagers(); i++ ) {
-        if ( this->isDofManagerEnriched( element->giveDofManager(i) ) ) {
-            return true;
-        }
-    }
-    return false;
+    iEnrItem.updateNodeEnrMarker(ixFemMan, * this);
 }
 
-bool EnrichmentDomain :: isAllElNodesEnriched(const Element *element)
+bool EDCrack :: giveClosestTipInfo(const FloatArray &iCoords, TipInfo &oInfo) const
 {
-    for ( int i = 1; i <= element->giveNumberOfDofManagers(); i++ ) {
-        if ( !this->isDofManagerEnriched( element->giveDofManager(i) ) ) {
-            return false;
-        }
-    }
-    return true;
-
-}
-
-#ifdef __BOOST_MODULE
-void EnrichmentDomain :: updateLevelSets(XfemManager &ixFemMan)
-{
-	int nNodes = ixFemMan.giveDomain()->giveNumberOfDofManagers();
-
-	levelSetPhi.resize(nNodes, 0.0);
-	levelSetGamma.resize(nNodes, 0.0);
-
-
-	int dim = ixFemMan.giveDomain()->giveNumberOfSpatialDimensions();
-
-	if(dim == 2)
+	int nVert = bg->giveNrVertices();
+	if( nVert > 1 )
 	{
-		for ( int n = 1; n <= nNodes; n++ )
+		double distS = bg->giveVertex(1).distance(iCoords);
+		double distE = bg->giveVertex(nVert).distance(iCoords);
+
+
+		if(distS < distE)
 		{
-			Node *node = ixFemMan.giveDomain()->giveNode(n);
+			const FloatArray &p1 = (bg->giveVertex(1));
+			const FloatArray &p2 = (bg->giveVertex(2));
 
-			// Extract node coord
-			const double &x = node->giveCoordinate(1);
-			const double &y = node->giveCoordinate(2);
+			// Tip position
+			oInfo.mGlobalCoord = p1;
 
-			// Calc normal sign dist
-			double phi = 0.0;
-			this->computeNormalSignDist(phi, x, y);
-			levelSetPhi[n-1] = phi;
+			// Tip tangent
+			oInfo.mTangDir.beDifferenceOf(p1,p2);
+			oInfo.mTangDir.normalize();
 
-			// Calc tangential sign dist
-			double gamma = 0.0;
-			this->computeTangentialSignDist(gamma, x, y);
-			levelSetGamma[n-1] = gamma;
+			// Tip normal
+			oInfo.mNormalDir.setValues(2, -oInfo.mTangDir.at(2), oInfo.mTangDir.at(1) );
 
-		}
-	}
-	else
-	{
-		if(dim == 3)
-		{
-            OOFEM_ERROR2( "EnrichmentDomain :: updateLevelSets - Unsupported number of space dimensions: %d\n", dim );
+			oInfo.mTipIndex = 0;
+
+			return true;
 		}
 		else
 		{
-            OOFEM_ERROR2( "EnrichmentDomain :: updateLevelSets - Unsupported number of space dimensions: %d\n", dim );
+			const FloatArray &p1 = (bg->giveVertex(nVert-1));
+			const FloatArray &p2 = (bg->giveVertex(nVert));
+
+			// Tip position
+			oInfo.mGlobalCoord = p2;
+
+			// Tip tangent
+			oInfo.mTangDir.beDifferenceOf(p2,p1);
+			oInfo.mTangDir.normalize();
+
+			// Tip normal
+			oInfo.mNormalDir.setValues(2, -oInfo.mTangDir.at(2), oInfo.mTangDir.at(1) );
+
+			oInfo.mTipIndex = 1;
+
+			return true;
 		}
 	}
 
+	return false;
+}
 
-	levelSetsNeedUpdate = false;
+void
+DofManList :: addDofManagers(IntArray &dofManNumbers)
+{
+    for ( int i = 1; i <= dofManNumbers.giveSize(); i++) {
+        //std::list< int > :: iterator p;
+        std::vector< int > :: iterator p;
+        p = std::find(this->dofManList.begin( ), this->dofManList.end( ), dofManNumbers.at(i));
+        if ( p == this->dofManList.end( ) ) { // if new node
+            this->dofManList.push_back( dofManNumbers.at(i) );
+        }
+    }
 
+    std::sort(dofManList.begin( ), this->dofManList.end( ));
+}
 
-	updateNodeEnrMarker(ixFemMan);
-
+// remove?
+void
+DofManList :: updateEnrichmentDomain(IntArray &dofManNumbers)
+{
+    this->addDofManagers(dofManNumbers);
 
 }
 
-void EnrichmentDomain :: updateNodeEnrMarker(XfemManager &ixFemMan)
+
+
+
+bool EDCrack :: giveTipInfos(std::vector<TipInfo> &oInfo) const
 {
-	Domain *d = ixFemMan.giveDomain();
-	int nEl = d->giveNumberOfElements();
-	int nNodes = d->giveNumberOfDofManagers();
-
-	nodeEnrichmentMarker.resize(nNodes, 0);
-
-	// Loop over elements and use Phi and Gamma to determine if the element nodes are enriched.
-	for(int elIndex = 1; elIndex <= nEl; elIndex++)
+	int nVert = bg->giveNrVertices();
+	if( nVert > 1 )
 	{
-		Element *el = d->giveElement(elIndex);
-		int nElNodes = el->giveNumberOfNodes();
 
-		int minSignPhi 	= 1, maxSignPhi 	= -1;
-		int minSignGamma = 1, maxSignGamma = -1;
+		// Start tip
+		TipInfo info1;
+		const FloatArray &p1S = (bg->giveVertex(1));
+		const FloatArray &p2S = (bg->giveVertex(2));
 
-		for(int elNodeInd = 1; elNodeInd <= nElNodes; elNodeInd++)
-		{
-			int nGlob = el->giveNode(elNodeInd)->giveGlobalNumber();
+		// Tip position
+		info1.mGlobalCoord = p1S;
 
-			minSignPhi = min( bSign(minSignPhi), bSign(levelSetPhi[nGlob-1]) );
-			maxSignPhi = max( bSign(maxSignPhi), bSign(levelSetPhi[nGlob-1]) );
+		// Tip tangent
+		info1.mTangDir.beDifferenceOf(p1S,p2S);
+		info1.mTangDir.normalize();
 
-			minSignGamma = min( bSign(minSignGamma), bSign( levelSetGamma[nGlob-1]) );
-			maxSignGamma = max( bSign(maxSignGamma), bSign( levelSetGamma[nGlob-1]) );
-		}
+		// Tip normal
+		info1.mNormalDir.setValues(2, -info1.mTangDir.at(2), info1.mTangDir.at(1) );
 
+		info1.mTipIndex = 0;
 
-		if( minSignPhi*maxSignPhi < 0 && minSignGamma > 0 && maxSignGamma > 0 )
-		{
-			// Element completely cut by the crack
-			// -> Apply step enrichment to all element nodes
+		oInfo.push_back(info1);
 
-			for(int elNodeInd = 1; elNodeInd <= nElNodes; elNodeInd++)
-			{
-				int nGlob = el->giveNode(elNodeInd)->giveGlobalNumber();
+		// End tip
+		TipInfo info2;
+		const FloatArray &p1E = (bg->giveVertex(nVert-1));
+		const FloatArray &p2E = (bg->giveVertex(nVert));
 
-				if( nodeEnrichmentMarker[nGlob-1] == 0 )
-				{
-					nodeEnrichmentMarker[nGlob-1] = 1;
-				}
+		// Tip position
+		info2.mGlobalCoord = p2E;
 
-			}
+		// Tip tangent
+		info2.mTangDir.beDifferenceOf(p2E,p1E);
+		info2.mTangDir.normalize();
 
+		// Tip normal
+		info2.mNormalDir.setValues(2, -info2.mTangDir.at(2), info2.mTangDir.at(1) );
 
-		}
+		info2.mTipIndex = 1;
 
-		if( minSignPhi*maxSignPhi < 0 && minSignGamma*maxSignGamma < 0 )
-		{
-			// Element partly cut by the crack
-			// -> Apply crack tip enrichment
+		oInfo.push_back(info2);
 
-		}
-
+		return true;
 
 	}
 
-}
-#endif
+	return false;
 
-void EnrichmentDomain_BG :: computeNormalSignDist(double &oDist, const double &iX, const double &iY)
+}
+
+bool EDCrack :: propagateTips(const std::vector<TipPropagation> &iTipProp) {
+
+	for(size_t i = 0; i < iTipProp.size(); i++) {
+
+		if(iTipProp[i].mTipIndex == 0) {
+			// Propagate start point
+			FloatArray pos( bg->giveVertex(1) );
+			pos.add(iTipProp[i].mPropagationLength, iTipProp[i].mPropagationDir);
+			bg->insertVertexFront(pos);
+		}
+		else if(iTipProp[i].mTipIndex == 1) {
+			// Propagate end point
+			FloatArray pos( bg->giveVertex(bg->giveNrVertices()) );
+			pos.add(iTipProp[i].mPropagationLength, iTipProp[i].mPropagationDir);
+			bg->insertVertexBack(pos);
+		}
+
+	}
+
+	// For debugging only
+	PolygonLine *pl = dynamic_cast<PolygonLine*>(bg);
+	if( pl != NULL ) {
+		pl->printVTK();
+	}
+
+	return true;
+}
+
+
+void DofManList :: CallNodeEnrMarkerUpdate(EnrichmentItem &iEnrItem, XfemManager &ixFemMan) const
 {
-	// TODO: Clean up interface
-	FloatArray p; p.setValues(2, iX, iY);
-	oDist = bg->computeDistanceTo(&p);
+    iEnrItem.updateNodeEnrMarker(ixFemMan, * this);
 }
 
-void EnrichmentDomain_BG :: computeTangentialSignDist(double &oDist, const double &iX, const double &iY)
+void DofManList :: computeSurfaceNormalSignDist(double &oDist, const FloatArray &iPoint) const
 {
-	FloatArray p; p.setValues(2, iX, iY);
-	oDist = bg->computeTangentialSignDist(&p);
+    oDist = iPoint.at(3) - this->xi; // will only work for plane el
 }
-
-
-// Node list
 
 IRResultType DofManList :: initializeFrom(InputRecord *ir)
 {
@@ -230,201 +247,37 @@ IRResultType DofManList :: initializeFrom(InputRecord *ir)
 
     IntArray idList;
     IR_GIVE_FIELD(ir, idList, _IFT_DofManList_list);
-    for ( int i = 1; i<=idList.giveSize(); i++) {
+    for ( int i = 1; i <= idList.giveSize(); i++ ) {
         this->dofManList.push_back( idList.at(i) );
     }
+    std::sort(dofManList.begin( ), this->dofManList.end( ));
+    //IR_GIVE_FIELD(ir, this->xi, _IFT_DofManList_DelaminationLevel);
+    
     return IRRT_OK;
-    
 }
 
-
-bool DofManList :: isDofManagerEnriched(DofManager *dMan)
+void DofManList :: giveInputRecord(DynamicInputRecord &input)
 {
-    int dManNumber = dMan->giveNumber();
-    std::list< int > :: iterator p;
-    p = std::find(this->dofManList.begin( ), this->dofManList.end( ), dManNumber);
-    
-    if ( p == this->dofManList.end( ) ) {
-        return false;
-    } else {
-        return true;
+    input.setRecordKeywordField(this->giveInputRecordName(), 1);
+
+	IntArray idList;
+	idList.resize(dofManList.size());
+    for ( size_t i = 0; i < dofManList.size(); i++ ) {
+    	idList.at(i+1) = dofManList[i];
     }
+
+    input.setField(idList, _IFT_DofManList_list);
 }
 
-
-
-
-// Circle
-bool 
-EDBGCircle :: isDofManagerEnriched(DofManager *dMan)
-{ 
-#if 0
-    // Only enrich the dofmans that are actually inside the domain
-    FloatArray coords; 
-    coords = *(dMan->giveCoordinates());
-    return this->bg->isInside(coords);
-#else
-    // If any dofman of the neighboring elements is inside then the current dofman wil be enriched
-    // => all dofmans of an element will be enriched if one dofman is inside.
-    int node = dMan->giveGlobalNumber();
-    Domain *d = dMan->giveDomain();
-    Element *el;
-    const IntArray *neighbours = d->giveConnectivityTable()->giveDofManConnectivityArray(node);
-    for ( int i = 1; i <= neighbours->giveSize(); i++ ) {
-        el = d->giveElement( neighbours->at(i) );
-        for ( int j = 1; j <= el->giveNumberOfDofManagers(); j++ ) {
-            if ( this->bg->isInside( * el->giveDofManager(j)->giveCoordinates() ) ) {
-                return true;
-            }
-        }
-    }
-
-    return false;
-#endif
-};
-
-
-bool
-EDBGCircle :: isElementEnriched(Element *element) 
+void WholeDomain :: CallNodeEnrMarkerUpdate(EnrichmentItem &iEnrItem, XfemManager &ixFemMan) const
 {
-    for ( int i = 1; i <= element->giveNumberOfDofManagers(); i++ ) {
-        if ( this->isDofManagerEnriched( element->giveDofManager(i) ) ) {
-            return true;
-        }
-    }
-    return false;
-};
-
-
-
-
-
-#ifdef __BOOST_MODULE
-// Crack
-bool
-EDCrack :: isDofManagerEnriched(DofManager *dMan)
-{
-	if( levelSetsNeedUpdate )
-	{
-		XfemManager *xMan = dMan->giveDomain()->giveXfemManager();
-		updateLevelSets(*xMan);
-	}
-
-	// Use the the nodeEnrichmentMarker to check if the node is enriched.
-	return ( nodeEnrichmentMarker[dMan->giveGlobalNumber()-1] != 0 );
-
-};
-
-
-bool
-EDCrack :: isElementEnriched(Element *element)
-{
-
-    for ( int i = 1; i <= element->giveNumberOfDofManagers(); i++ ) {
-        if ( this->isDofManagerEnriched( element->giveDofManager(i) ) ) {
-            return true;
-        }
-    }
-
-    return false;
-};
-
-void EDCrack :: computeIntersectionPoints(std::vector< FloatArray > &oIntersectionPoints, Element *element)
-{
-
-	if( isElementEnriched(element) )
-	{
-		// Use the level set functions to compute intersection points
-
-		// Loop over element edges; an edge is intersected if the
-		// node values of the level set functions have different signs
-
-		int numEdges = element->giveNumberOfBoundarySides();
-
-		for( int edgeIndex = 1; edgeIndex <= numEdges; edgeIndex++ )
-		{
-			IntArray bNodes;
-			element->giveInterpolation()->boundaryGiveNodes(bNodes, edgeIndex);
-
-			int nsLoc = bNodes.at( 1 );
-			int nsGlob = element->giveNode(nsLoc)->giveGlobalNumber();
-			int neLoc = bNodes.at( bNodes.giveSize() );
-			int neGlob = element->giveNode(neLoc)->giveGlobalNumber();
-
-
-			const double &phiS = levelSetPhi[nsGlob-1];
-			const double &phiE = levelSetPhi[neGlob-1];
-
-			if( phiS*phiE < levelSetTol2 )
-			{
-				// Intersection detected
-
-				double xi = 0.0;
-
-				if( fabs(phiS-phiE) > levelSetTol )
-				{
-					xi = (phiS+phiE)/(phiS-phiE);
-				}
-
-				if( xi < -1.0)
-				{
-					xi = -1.0;
-				}
-
-				if( xi > 1.0)
-				{
-					xi = 1.0;
-				}
-
-
-				FloatArray *ps = new FloatArray( *( element->giveDofManager(nsLoc)->giveCoordinates() ) );
-				FloatArray *pe = new FloatArray( *( element->giveDofManager(neLoc)->giveCoordinates() ) );
-
-				int nDim = ps->giveSize();
-				FloatArray p;
-				p.resize(nDim);
-
-				for( int i = 1; i <= nDim; i++ )
-				{
-					(p.at(i)) = 0.5*(1.0-xi)*((ps->at(i))) + 0.5*(1.0+xi)*((pe->at(i)));
-				}
-
-
-				// Check that the intersection point has not already been identified.
-				// This may happen if the crack intersects the element exactly at a node,
-				// so that intersection is detected for both element edges in that node.
-
-				bool alreadyFound = false;
-
-
-				int numPointsOld = oIntersectionPoints.size();
-				for(int k = 1; k <= numPointsOld; k++)
-				{
-					double dist = p.distance( oIntersectionPoints[k-1] );
-
-					if( dist < levelSetTol )
-					{
-						alreadyFound = true;
-						break;
-					}
-
-				}
-
-				if(!alreadyFound)
-				{
-					oIntersectionPoints.push_back(p);
-				}
-
-			}
-
-		}
-
-
-	}
-
+    iEnrItem.updateNodeEnrMarker(ixFemMan, * this);
 }
 
-#endif // __BOOST_MODULE
+void WholeDomain :: giveInputRecord(DynamicInputRecord &input)
+{
+    input.setRecordKeywordField(this->giveInputRecordName(), 1);
 
+}
 
 } // end namespace oofem

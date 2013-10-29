@@ -8,20 +8,20 @@
 #ifndef XFEMDEBUGTOOLS_H_
 #define XFEMDEBUGTOOLS_H_
 
+#include "oofemcfg.h"
 #include "geometry.h"
+
 #include <fstream>
 
 namespace oofem {
-
-class XFEMDebugTools {
+class OOFEM_EXPORT XFEMDebugTools
+{
 public:
-	XFEMDebugTools();
-	virtual ~XFEMDebugTools();
+    XFEMDebugTools();
+    virtual ~XFEMDebugTools();
 
-	static void WriteTrianglesToVTK( const std::string &iName, const AList< Triangle > &iTriangles );
-
-
+    static void WriteTrianglesToVTK(const std :: string &iName, const std::vector< Triangle > &iTriangles);
+    static void WritePointsToVTK(const std :: string &iName, const std :: vector< FloatArray > &iPoints);
 };
-
 } /* namespace oofem */
 #endif /* XFEMDEBUGTOOLS_H_ */

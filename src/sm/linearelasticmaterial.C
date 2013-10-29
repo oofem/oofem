@@ -17,19 +17,19 @@
  *       Czech Technical University, Faculty of Civil Engineering,
  *   Department of Structural Mechanics, 166 29 Prague, Czech Republic
  *
- *  This program is free software; you can redistribute it and/or modify
- *  it under the terms of the GNU General Public License as published by
- *  the Free Software Foundation; either version 2 of the License, or
- *  (at your option) any later version.
+ *  This library is free software; you can redistribute it and/or
+ *  modify it under the terms of the GNU Lesser General Public
+ *  License as published by the Free Software Foundation; either
+ *  version 2.1 of the License, or (at your option) any later version.
  *
  *  This program is distributed in the hope that it will be useful,
  *  but WITHOUT ANY WARRANTY; without even the implied warranty of
- *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- *  GNU General Public License for more details.
+ *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+ *  Lesser General Public License for more details.
  *
- *  You should have received a copy of the GNU General Public License
- *  along with this program; if not, write to the Free Software
- *  Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
+ *  You should have received a copy of the GNU Lesser General Public
+ *  License along with this library; if not, write to the Free Software
+ *  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  */
 
 #include "linearelasticmaterial.h"
@@ -38,48 +38,6 @@
 #include "structuralms.h"
 
 namespace oofem {
-int
-LinearElasticMaterial :: hasMaterialModeCapability(MaterialMode mode)
-//
-// returns whether receiver supports given mode
-//
-{
-    return mode == _3dMat || mode == _PlaneStress || mode == _PlaneStrain || mode == _1dMat ||
-           mode == _PlateLayer || mode == _2dBeamLayer || mode == _Fiber ||
-           mode == _PlaneStressRot;
-}
-
-
-void
-LinearElasticMaterial :: giveStiffnessMatrix(FloatMatrix &answer,
-                                                  MatResponseMode rMode,
-                                                  GaussPoint *gp,
-                                                  TimeStep *atTime)
-{
-    if ( gp->giveMaterialMode() == _PlaneStressRot ) {
-        this->givePlaneStressRotStiffMtrx(answer, rMode, gp, atTime);
-    } else {
-        StructuralMaterial :: giveStiffnessMatrix(answer, rMode, gp, atTime);
-    }
-}
-
-
-void
-LinearElasticMaterial :: givePlaneStressRotStiffMtrx(FloatMatrix &answer,
-                                                     MatResponseMode rMode,
-                                                     GaussPoint *gp,
-                                                     TimeStep *tStep)
-{
-    FloatMatrix mat;
-
-    this->givePlaneStressStiffMtrx(mat, rMode, gp, tStep);
-
-    answer.resize(4, 4);
-    answer.zero();
-    answer.setSubMatrix(mat, 1, 1);
-    answer.at(4, 4) = mat.at(3, 3);
-}
-
 
 void
 LinearElasticMaterial :: giveRealStressVector(FloatArray &answer,
@@ -114,7 +72,6 @@ LinearElasticMaterial :: giveRealStressVector_3d(FloatArray &answer, GaussPoint 
     FloatMatrix d;
     StructuralMaterialStatus *status = static_cast< StructuralMaterialStatus * >( this->giveStatus(gp) );
 
-    reducedStrain.printYourself();
     this->giveStressDependentPartOfStrainVector(strainVector, gp, reducedStrain, tStep, VM_Total);
 
     this->give3dMaterialStiffnessMatrix(d, TangentStiffness, gp, tStep);

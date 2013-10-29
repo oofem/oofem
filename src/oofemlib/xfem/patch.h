@@ -17,26 +17,27 @@
  *       Czech Technical University, Faculty of Civil Engineering,
  *   Department of Structural Mechanics, 166 29 Prague, Czech Republic
  *
- *  This program is free software; you can redistribute it and/or modify
- *  it under the terms of the GNU General Public License as published by
- *  the Free Software Foundation; either version 2 of the License, or
- *  (at your option) any later version.
+ *  This library is free software; you can redistribute it and/or
+ *  modify it under the terms of the GNU Lesser General Public
+ *  License as published by the Free Software Foundation; either
+ *  version 2.1 of the License, or (at your option) any later version.
  *
  *  This program is distributed in the hope that it will be useful,
  *  but WITHOUT ANY WARRANTY; without even the implied warranty of
- *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- *  GNU General Public License for more details.
+ *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+ *  Lesser General Public License for more details.
  *
- *  You should have received a copy of the GNU General Public License
- *  along with this program; if not, write to the Free Software
- *  Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
+ *  You should have received a copy of the GNU Lesser General Public
+ *  License along with this library; if not, write to the Free Software
+ *  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  */
 
+#if 0
 #ifndef patch_h
-#define patch_h
+ #define patch_h
 
-#include "geometry.h"
-#include "fei2dtrlin.h"
+ #include "geometry.h"
+ #include "fei2dtrlin.h"
 
 namespace oofem {
 class Element;
@@ -47,7 +48,7 @@ class Node;
  * Abstract representation of a part of element after subdivision.
  * @author chamrova
  */
-class Patch : public BasicGeometry
+class OOFEM_EXPORT Patch : public BasicGeometry
 {
 public:
     enum PatchType { PT_Unknown, PT_TrianglePatch };
@@ -63,6 +64,11 @@ public:
     Patch(Element *parent, int material);
     Patch(Element *parent, AList< FloatArray > *vertices);
     virtual ~Patch() { }
+
+
+    virtual void computeNormalSignDist(double &oDist, const FloatArray &iPoint) const { OOFEM_ERROR("Patch::computeNormalSignDist -- not implemented"); };
+    virtual void computeTangentialSignDist(double &oDist, const FloatArray &iPoint) const { OOFEM_ERROR("Patch::computeTangentialSignDist -- not implemented"); };
+
     /// Converts the GP into the parental system of an element.
     virtual void convertGPIntoParental(GaussPoint *gp) = 0;
     /// Returns material id associated to receiver.
@@ -75,30 +81,35 @@ public:
     virtual contextIOResultType saveContext(DataStream *stream, ContextMode mode, void *obj = NULL);
     virtual contextIOResultType restoreContext(DataStream *stream, ContextMode mode, void *obj = NULL);
 
-#ifdef __OOFEG
+ #ifdef __OOFEG
     /// Draw pure geometry.
     void draw(oofegGraphicContext &gc) { BasicGeometry :: draw(gc); }
     /// Draw with vertex data.
     virtual void drawWD(oofegGraphicContext &gc, FloatArray &vd) { };
-#endif
+ #endif
 };
 
-class TrianglePatch : public Patch
+class OOFEM_EXPORT TrianglePatch : public Patch
 {
 public:
     TrianglePatch(Element *parent) : Patch(parent) {}
     TrianglePatch(Element *parent, int material) : Patch(parent, material) { }
     TrianglePatch(Element *parent, AList< FloatArray > *vertices) : Patch(parent, vertices) { }
     virtual ~TrianglePatch() { }
+
+    virtual void computeNormalSignDist(double &oDist, const FloatArray &iPoint) const { OOFEM_ERROR("TrianglePatch::computeNormalSignDist -- not implemented"); };
+    virtual void computeTangentialSignDist(double &oDist, const FloatArray &iPoint) const { OOFEM_ERROR("TrianglePatch::computeTangentialSignDist -- not implemented"); };
+
     // interpolation
     static FEI2dTrLin interpolation;
     void convertGPIntoParental(GaussPoint *gp);
     /// Returns patch type id of receiver
     PatchType givePatchType() { return PT_TrianglePatch; }
-#ifdef __OOFEG
+ #ifdef __OOFEG
     void draw(oofegGraphicContext &gc);
     void drawWD(oofegGraphicContext &gc, FloatArray &vd);
-#endif
+ #endif
 };
 } // end namespace oofem
 #endif // patch_h
+#endif

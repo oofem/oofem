@@ -17,19 +17,19 @@
  *       Czech Technical University, Faculty of Civil Engineering,
  *   Department of Structural Mechanics, 166 29 Prague, Czech Republic
  *
- *  This program is free software; you can redistribute it and/or modify
- *  it under the terms of the GNU General Public License as published by
- *  the Free Software Foundation; either version 2 of the License, or
- *  (at your option) any later version.
+ *  This library is free software; you can redistribute it and/or
+ *  modify it under the terms of the GNU Lesser General Public
+ *  License as published by the Free Software Foundation; either
+ *  version 2.1 of the License, or (at your option) any later version.
  *
  *  This program is distributed in the hope that it will be useful,
  *  but WITHOUT ANY WARRANTY; without even the implied warranty of
- *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- *  GNU General Public License for more details.
+ *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+ *  Lesser General Public License for more details.
  *
- *  You should have received a copy of the GNU General Public License
- *  along with this program; if not, write to the Free Software
- *  Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
+ *  You should have received a copy of the GNU Lesser General Public
+ *  License along with this library; if not, write to the Free Software
+ *  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  */
 
 #ifndef layeredcrosssection_h
@@ -39,6 +39,7 @@
 #include "floatarray.h"
 #include "floatmatrix.h"
 #include "interface.h"
+#include "gaussintegrationrule.h"
 
 ///@name Input fields for LayeredCrossSection
 //@{
@@ -105,6 +106,7 @@ public:
     virtual ~LayeredCrossSection() { }
 
     virtual IRResultType initializeFrom(InputRecord *ir);
+    virtual void giveInputRecord(DynamicInputRecord &input);
 
     virtual int setupIntegrationPoints(IntegrationRule &irule, int npoints, Element *element);
 
@@ -117,7 +119,7 @@ public:
     virtual void giveRealStress_Beam3d(FloatArray &answer, GaussPoint *gp, const FloatArray &generalizedStrain, TimeStep *tStep);
     virtual void giveRealStress_Plate(FloatArray &answer, GaussPoint *gp, const FloatArray &generalizedStrain, TimeStep *tStep);
     virtual void giveRealStress_Shell(FloatArray &answer, GaussPoint *gp, const FloatArray &generalizedStrain, TimeStep *tStep);
-
+    virtual void giveRealStress_MembraneRot(FloatArray &answer, GaussPoint *gp, const FloatArray &generalizedStrain, TimeStep *tStep);
 
     virtual void giveCharMaterialStiffnessMatrix(FloatMatrix &answer, MatResponseMode mode, GaussPoint *gp, TimeStep *tStep);
 
@@ -127,6 +129,7 @@ public:
     virtual void give3dBeamStiffMtrx(FloatMatrix &answer, MatResponseMode rMode, GaussPoint *gp, TimeStep *tStep);
     virtual void give2dPlateStiffMtrx(FloatMatrix &answer, MatResponseMode mode, GaussPoint *gp, TimeStep *tStep);
     virtual void give3dShellStiffMtrx(FloatMatrix &answer,MatResponseMode mode, GaussPoint *gp, TimeStep *tStep);
+    virtual void giveMembraneRotStiffMtrx(FloatMatrix &answer, MatResponseMode rMode, GaussPoint *gp, TimeStep *tStep);
 
     virtual FloatArray *imposeStressConstrainsOnGradient(GaussPoint *gp, FloatArray *);
     virtual FloatArray *imposeStrainConstrainsOnGradient(GaussPoint *gp, FloatArray *);
@@ -159,6 +162,7 @@ public:
     double giveMidSurfaceXiCoordFromBottom() {
         return this->midSurfaceXiCoordFromBottom;
     }
+    void giveInterfaceXiCoords(FloatArray &answer);
 
     // identification and auxiliary functions
     virtual const char *giveInputRecordName() const { return _IFT_LayeredCrossSection_Name; }
@@ -173,8 +177,10 @@ public:
     virtual contextIOResultType restoreIPContext(DataStream *stream, ContextMode mode, GaussPoint *gp);
 
 
-    void mapLayerGpCoordsToShellCoords(LayeredCrossSection *layeredCS, IntegrationRule **layerIntegrationRulesArray);
+    void mapLayerGpCoordsToShellCoords(IntegrationRule **&layerIntegrationRulesArray);
 
+    void setupLayeredIntegrationRule(IntegrationRule **&layerIntegrationRulesArray, Element *el, int numInPlanePoints);
+    
 #ifdef __PARALLEL_MODE
     int packUnknowns(CommunicationBuffer &buff, TimeStep *stepN, GaussPoint *ip)
     {
@@ -208,10 +214,8 @@ public:
     LayeredCrossSectionInterface() { }
 
     /**
-     * Computes full 3D strain vector in element layer. This function is necessary
-     * if layered cross section is specified. If it is implemented, the testElementExtension
-     * service should return nonzero for Element_LayeredSupport parameter. This service is used by
-     * layered cross section models.
+     * Computes full 3D strain vector in element layer.
+     * This function is necessary if layered cross section is specified..
      * @param answer Full layer strain vector.
      * @param masterGp Element integration point.
      * @param slaveGp Slave integration point representing particular layer.
@@ -219,5 +223,29 @@ public:
      */
     virtual void computeStrainVectorInLayer(FloatArray &answer, const FloatArray &masterGpStrain, GaussPoint *slaveGp, TimeStep *tStep) = 0;
 };
+
+class LayeredIntegrationRule : public IntegrationRule
+{
+    public:
+    LayeredIntegrationRule(int n, Element *e, int startIndx, int endIndx, bool dynamic = false);
+    LayeredIntegrationRule(int n, Element *e);
+    virtual ~LayeredIntegrationRule();
+
+    //virtual classType giveClassID() const { return LayeredIntegrationRuleClass; }
+    virtual const char *giveClassName() const { return "LayeredIntegrationRule"; }
+    virtual IRResultType initializeFrom(InputRecord *ir) { return IRRT_OK; }
+
+    //virtual int getRequiredNumberOfIntegrationPoints(integrationDomain dType, int approxOrder);
+
+    // Stores the ip numbers of the points lying on the lower and upper surface of the element.
+    // Thus they will correspond to points lying on the interface between layers.
+    IntArray lowerInterfacePoints, upperInterfacePoints;
+
+    //virtual int SetUpPointsOnLine(int, MaterialMode);      // could be used for beams
+    //virtual int SetUpPointsOnCube(int, MaterialMode mode); // could be used for plates/shells/solids
+    virtual int SetUpPointsOnWedge(int nPointsTri, int nPointsDepth, MaterialMode mode);
+};
+
+
 } // end namespace oofem
 #endif // layeredcrosssection_h

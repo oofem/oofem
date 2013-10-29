@@ -17,19 +17,19 @@
  *       Czech Technical University, Faculty of Civil Engineering,
  *   Department of Structural Mechanics, 166 29 Prague, Czech Republic
  *
- *  This program is free software; you can redistribute it and/or modify
- *  it under the terms of the GNU General Public License as published by
- *  the Free Software Foundation; either version 2 of the License, or
- *  (at your option) any later version.
+ *  This library is free software; you can redistribute it and/or
+ *  modify it under the terms of the GNU Lesser General Public
+ *  License as published by the Free Software Foundation; either
+ *  version 2.1 of the License, or (at your option) any later version.
  *
  *  This program is distributed in the hope that it will be useful,
  *  but WITHOUT ANY WARRANTY; without even the implied warranty of
- *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- *  GNU General Public License for more details.
+ *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+ *  Lesser General Public License for more details.
  *
- *  You should have received a copy of the GNU General Public License
- *  along with this program; if not, write to the Free Software
- *  Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
+ *  You should have received a copy of the GNU Lesser General Public
+ *  License along with this library; if not, write to the Free Software
+ *  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  */
 
 #include "lumpedmasselement.h"
@@ -60,7 +60,7 @@ LumpedMassElement :: computeLumpedMassMatrix(FloatMatrix &answer, TimeStep *tSte
 // Returns the lumped mass matrix of the receiver. This expression is
 // valid in both local and global axes.
 {
-    int ndofs = this->computeNumberOfDofs(EID_MomentumBalance);
+    int ndofs = this->computeNumberOfDofs();
     answer.resize(ndofs, ndofs);
     answer.zero();
 
@@ -90,7 +90,7 @@ LumpedMassElement :: checkConsistency()
 //
 {
     int _result = StructuralElement :: checkConsistency();
-    int _ndofs = this->computeNumberOfDofs(EID_MomentumBalance);
+    int _ndofs = this->computeNumberOfDofs();
     if ( _ndofs != this->components.giveSize() ) {
         _warning("checkConsistency : component array size mismatch");
         _result = 0;
@@ -101,7 +101,7 @@ LumpedMassElement :: checkConsistency()
 
 
 int
-LumpedMassElement :: computeNumberOfDofs(EquationID ut)
+LumpedMassElement :: computeNumberOfDofs()
 {
     DofManager *dman = this->giveDofManager(1);
     int _i, _ndof = dman->giveNumberOfDofs();

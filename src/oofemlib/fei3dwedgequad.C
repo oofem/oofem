@@ -17,25 +17,26 @@
  *       Czech Technical University, Faculty of Civil Engineering,
  *   Department of Structural Mechanics, 166 29 Prague, Czech Republic
  *
- *  This program is free software; you can redistribute it and/or modify
- *  it under the terms of the GNU General Public License as published by
- *  the Free Software Foundation; either version 2 of the License, or
- *  (at your option) any later version.
+ *  This library is free software; you can redistribute it and/or
+ *  modify it under the terms of the GNU Lesser General Public
+ *  License as published by the Free Software Foundation; either
+ *  version 2.1 of the License, or (at your option) any later version.
  *
  *  This program is distributed in the hope that it will be useful,
  *  but WITHOUT ANY WARRANTY; without even the implied warranty of
- *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- *  GNU General Public License for more details.
+ *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+ *  Lesser General Public License for more details.
  *
- *  You should have received a copy of the GNU General Public License
- *  along with this program; if not, write to the Free Software
- *  Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
+ *  You should have received a copy of the GNU Lesser General Public
+ *  License along with this library; if not, write to the Free Software
+ *  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  */
 
 #include "fei3dwedgequad.h"
 #include "floatarray.h"
 #include "floatmatrix.h"
 #include "intarray.h"
+#include "gaussintegrationrule.h"
 
 namespace oofem {
 
@@ -141,53 +142,56 @@ FEI3dWedgeQuad :: giveLocalDerivative(FloatMatrix &dN, const FloatArray &lcoords
 
     dN.resize(15, 3);
 
-    dN.at( 1, 1) = 1./2. - ((z - 1.)*(x + y - 1.))/2. - z*z/2. - ((x + y)*(z - 1.))/2.; 
-    dN.at( 2, 1) = z*z/2. - (x*(z - 1.))/2. - ((x - 1.)*(z - 1.))/2. - 1./2.;
-    dN.at( 3, 1) = 0.;
-    dN.at( 4, 1) = ((x + y)*(z + 1.))/2. + ((z + 1.)*(x + y - 1.))/2. - z*z/2. + 1./2.;
-    dN.at( 5, 1) = ((x - 1.)*(z + 1.))/2. + (x*(z + 1.))/2. + z*z/2. - 1./2.;
-    dN.at( 6, 1) = 0.;
-    dN.at( 7, 1) = (z - 1.)*(x + y - 1.) + x*(z - 1.);
-    dN.at( 8, 1) = -y*(z - 1.);
-    dN.at( 9, 1) = y*(z - 1.);
-    dN.at(10, 1) = - (z + 1.)*(x + y - 1.) - x*(z + 1.);
-    dN.at(11, 1) = y*(z + 1.);
-    dN.at(12, 1) = -y*(z + 1.); 
-    dN.at(13, 1) = z*z - 1.;
-    dN.at(14, 1) = 1. - z*z;
-    dN.at(15, 1) = 0.;
+    dN.at(1, 1)  =  1./2. - (z - 1.)*(x + y - 1.) - z*z/2. - ((z - 1.)*(2.*x + 2.*y - 1.))/2.;
+    dN.at(2, 1)  =  z*z/2. - x*(z - 1.) - ((2.*x - 1.)*(z - 1.))/2. - 1/2.;
+    dN.at(3, 1)  =  0.;
+    dN.at(4, 1)  = ((z + 1.)*(2.*x + 2.*y - 1.))/2. + (z + 1.)*(x + y - 1.) - z*z/2. + 1./2.;
+    dN.at(5, 1)  = ((2.*x - 1.)*(z + 1.))/2. + x*(z + 1.) + z*z/2. - 1./2.;
+    dN.at(6, 1)  =  0.;
+    dN.at(7, 1)  = (z - 1.)*(2.*x + 2.*y - 2.) + 2.*x*(z - 1.);
+    dN.at(8, 1)  = -2.*y*(z - 1.);
+    dN.at(9, 1)  =  2.*y*(z - 1.);
+    dN.at(10, 1) = -2.*(z + 1.)*(x + y - 1.) - 2.*x*(z + 1.);
+    dN.at(11, 1) =  2.*y*(z + 1.);
+    dN.at(12, 1) = -2.*y*(z + 1.);
+    dN.at(13, 1) =  z*z - 1.;
+    dN.at(14, 1) =  1. - z*z;
+    dN.at(15, 1) =  0.;
 
-    dN.at( 1, 2) = 1./2. - ((z - 1.)*(x + y - 1.))/2. - z*z/2. - ((x + y)*(z - 1.))/2.;
-    dN.at( 2, 2) = 0.;
-    dN.at( 3, 2) = z*z/2. - (y*(z - 1.))/2. - ((y - 1.)*(z - 1.))/2. - 1./2.;
-    dN.at( 4, 2) = ((x + y)*(z + 1.))/2. + ((z + 1.)*(x + y - 1.))/2. - z*z/2. + 1./2.;
-    dN.at( 5, 2) = 0.;
-    dN.at( 6, 2) = ((y - 1.)*(z + 1.))/2. + (y*(z + 1.))/2. + z*z/2. - 1./2.;
-    dN.at( 7, 2) = x*(z - 1.);
-    dN.at( 8, 2) = -x*(z - 1.);
-    dN.at( 9, 2) = (z - 1.)*(x + y - 1.) + y*(z - 1.);
-    dN.at(10, 2) = -x*(z + 1.);
-    dN.at(11, 2) = x*(z + 1.);
-    dN.at(12, 2) = - (z + 1.)*(x + y - 1.) - y*(z + 1.);
-    dN.at(13, 2) = z*z - 1.;
-    dN.at(14, 2) = 0.;
-    dN.at(15, 2) = 1. - z*z;
 
-    dN.at( 1, 3) = - ((x + y)*(x + y - 1.))/2. - z*(x + y - 1.);
-    dN.at( 2, 3) = x*z - (x*(x - 1.))/2.;
-    dN.at( 3, 3) = y*z - (y*(y - 1.))/2.;
-    dN.at( 4, 3) = ((x + y)*(x + y - 1.))/2. - z*(x + y - 1.);
-    dN.at( 5, 3) = x*z + (x*(x - 1.))/2.;
-    dN.at( 6, 3) = y*z + (y*(y - 1.))/2.;
-    dN.at( 7, 3) = x*(x + y - 1.);
-    dN.at( 8, 3) = -x*y;
-    dN.at( 9, 3) = y*(x + y - 1.);
-    dN.at(10, 3) = -x*(x + y - 1.);
-    dN.at(11, 3) = x*y;
-    dN.at(12, 3) = -y*(x + y - 1.);
-    dN.at(13, 3) = 2.*z*(x + y - 1.);
-    dN.at(14, 3) = -2.*x*z; 
+    dN.at(1, 2) =   1./2. - (z - 1.)*(x + y - 1.) - z*z/2. - ((z - 1.)*(2.*x + 2.*y - 1.))/2.;
+    dN.at(2, 2) =   0.;
+    dN.at(3, 2) =   z*z/2. - y*(z - 1.) - ((2.*y - 1.)*(z - 1.))/2. - 1./2.;
+    dN.at(4, 2) = ((z + 1.)*(2.*x + 2.*y - 1.))/2. + (z + 1.)*(x + y - 1.) - z*z/2. + 1./2.;
+    dN.at(5, 2) =   0.;
+    dN.at(6, 2) = ((2.*y - 1.)*(z + 1.))/2. + y*(z + 1.) + z*z/2. - 1./2.;
+    dN.at(7, 2) =   2.*x*(z - 1.);
+    dN.at(8, 2) =  -2.*x*(z - 1.);
+    dN.at(9, 2) =   2.*(z - 1.)*(x + y - 1.) + 2.*y*(z - 1.);
+    dN.at(10, 2) = -2.*x*(z + 1.);
+    dN.at(11, 2) =  2.*x*(z + 1.);
+    dN.at(12, 2) = -2.*(z + 1.)*(x + y - 1.) - 2.*y*(z + 1.);
+    dN.at(13, 2) =  z*z - 1.;
+    dN.at(14, 2) =  0.;
+    dN.at(15, 2) =  1. - z*z;
+
+
+    dN.at(1, 3) =  -z*(x + y - 1.) - ((2.*x + 2.*y - 1.)*(x + y - 1.))/2.;
+    dN.at(2, 3) =   x*z - (x*(2.*x - 1.))/2.;
+    dN.at(3, 3) =   y*z - (y*(2*y - 1.))/2.;
+    dN.at(4, 3) =  ((2.*x + 2.*y - 1.)*(x + y - 1.))/2. - z*(x + y - 1.);
+    dN.at(5, 3) =  (x*(2.*x - 1.))/2. + x*z;
+    dN.at(6, 3) =  (y*(2.*y - 1.))/2. + y*z;
+    dN.at(7, 3) =   x*(2.*x + 2.*y - 2.);
+    dN.at(8, 3) =  -2.*x*y;
+    dN.at(9, 3) =   2.*y*(x + y - 1.);
+    dN.at(10, 3) = -2.*x*(x + y - 1.);
+    dN.at(11, 3) =  2.*x*y;
+    dN.at(12, 3) = -2.*y*(x + y - 1.);
+    dN.at(13, 3) =  2.*z*(x + y - 1.);
+    dN.at(14, 3) = -2.*x*z;
     dN.at(15, 3) = -2.*y*z;
+
 }
 
 
@@ -263,6 +267,8 @@ FEI3dWedgeQuad :: surfaceEvalN(FloatArray &answer, int isurf, const FloatArray &
     double eta = lcoords.at(2);
 
     if ( isurf <= 2 ) {
+        ///@todo Definitely wrong: There should be 6 basis functions!
+        OOFEM_ERROR("FIXME: Code likely buggy here");
         answer.resize(3);
         answer.at(1) = ksi;
         answer.at(2) = eta;
@@ -322,6 +328,35 @@ FEI3dWedgeQuad :: surfaceGiveTransformationJacobian(int isurf, const FloatArray 
 {
     OOFEM_ERROR("FEI3dWedgeQuad :: surfaceGiveTransformationJacobian not implemented");
     return 0;
+}
+
+
+IntegrationRule *
+FEI3dWedgeQuad :: giveIntegrationRule(int order)
+{
+    IntegrationRule *iRule = new GaussIntegrationRule(1, NULL);
+    ///@todo This function below isn't supported. We must decide on how to deal with wedges.
+    //int points = iRule->getRequiredNumberOfIntegrationPoints(_Wedge, order);
+    OOFEM_WARNING("Warning.. ignoring 'order' argument: FIXME");
+    int pointsZeta = 1;
+    int pointsTriangle = 1;
+    iRule->SetUpPointsOnWedge(pointsTriangle, pointsZeta, _Unknown);
+    return iRule;
+}
+
+IntegrationRule *
+FEI3dWedgeQuad :: giveBoundaryIntegrationRule(int order, int boundary)
+{
+    IntegrationRule *iRule = new GaussIntegrationRule(1, NULL);
+    if ( boundary <= 2 ) {
+        int points = iRule->getRequiredNumberOfIntegrationPoints(_Triangle, order + 2);
+        iRule->SetUpPointsOnTriangle(points, _Unknown);
+    } else {
+        ///@todo Is +2 correct for dealing with "detJ" on this surface?
+        int points = iRule->getRequiredNumberOfIntegrationPoints(_Square, order + 2);
+        iRule->SetUpPointsOnSquare(points, _Unknown);
+    }
+    return iRule;
 }
 
 } // end namespace oofem

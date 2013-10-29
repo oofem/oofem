@@ -17,25 +17,26 @@
  *       Czech Technical University, Faculty of Civil Engineering,
  *   Department of Structural Mechanics, 166 29 Prague, Czech Republic
  *
- *  This program is free software; you can redistribute it and/or modify
- *  it under the terms of the GNU General Public License as published by
- *  the Free Software Foundation; either version 2 of the License, or
- *  (at your option) any later version.
+ *  This library is free software; you can redistribute it and/or
+ *  modify it under the terms of the GNU Lesser General Public
+ *  License as published by the Free Software Foundation; either
+ *  version 2.1 of the License, or (at your option) any later version.
  *
  *  This program is distributed in the hope that it will be useful,
  *  but WITHOUT ANY WARRANTY; without even the implied warranty of
- *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- *  GNU General Public License for more details.
+ *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+ *  Lesser General Public License for more details.
  *
- *  You should have received a copy of the GNU General Public License
- *  along with this program; if not, write to the Free Software
- *  Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
+ *  You should have received a copy of the GNU Lesser General Public
+ *  License along with this library; if not, write to the Free Software
+ *  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  */
 
 #include "fei3dwedgelin.h"
 #include "floatarray.h"
 #include "floatmatrix.h"
 #include "intarray.h"
+#include "gaussintegrationrule.h"
 
 namespace oofem {
 void
@@ -285,6 +286,35 @@ FEI3dWedgeLin :: surfaceGiveTransformationJacobian(int isurf, const FloatArray &
 {
     OOFEM_ERROR("FEI3dWedgeLin :: surfaceGiveTransformationJacobian not implemented");
     return 0;
+}
+
+
+IntegrationRule *
+FEI3dWedgeLin :: giveIntegrationRule(int order)
+{
+    IntegrationRule *iRule = new GaussIntegrationRule(1, NULL);
+    ///@todo This function below isn't supported for wedges. We must decide how we should do this.
+    //int points = iRule->getRequiredNumberOfIntegrationPoints(_Wedge, order);
+    OOFEM_WARNING("Warning.. ignoring 'order' argument: FIXME");
+    int pointsZeta = 1;
+    int pointsTriangle = 1;
+    iRule->SetUpPointsOnWedge(pointsTriangle, pointsZeta, _Unknown);
+    return iRule;
+}
+
+
+IntegrationRule *
+FEI3dWedgeLin :: giveBoundaryIntegrationRule(int order, int boundary)
+{
+    IntegrationRule *iRule = new GaussIntegrationRule(1, NULL);
+    if ( boundary <= 2 ) {
+        int points = iRule->getRequiredNumberOfIntegrationPoints(_Triangle, order + 0);
+        iRule->SetUpPointsOnTriangle(points, _Unknown);
+    } else {
+        int points = iRule->getRequiredNumberOfIntegrationPoints(_Square, order + 2);
+        iRule->SetUpPointsOnSquare(points, _Unknown);
+    }
+    return iRule;
 }
 
 } // end namespace oofem

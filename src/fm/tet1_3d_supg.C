@@ -17,19 +17,19 @@
  *       Czech Technical University, Faculty of Civil Engineering,
  *   Department of Structural Mechanics, 166 29 Prague, Czech Republic
  *
- *  This program is free software; you can redistribute it and/or modify
- *  it under the terms of the GNU General Public License as published by
- *  the Free Software Foundation; either version 2 of the License, or
- *  (at your option) any later version.
+ *  This library is free software; you can redistribute it and/or
+ *  modify it under the terms of the GNU Lesser General Public
+ *  License as published by the Free Software Foundation; either
+ *  version 2.1 of the License, or (at your option) any later version.
  *
  *  This program is distributed in the hope that it will be useful,
  *  but WITHOUT ANY WARRANTY; without even the implied warranty of
- *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- *  GNU General Public License for more details.
+ *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+ *  Lesser General Public License for more details.
  *
- *  You should have received a copy of the GNU General Public License
- *  along with this program; if not, write to the Free Software
- *  Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
+ *  You should have received a copy of the GNU Lesser General Public
+ *  License along with this library; if not, write to the Free Software
+ *  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  */
 
 #include "tet1_3d_supg.h"
@@ -69,39 +69,10 @@ Tet1_3D_SUPG :: ~Tet1_3D_SUPG()
 // Destructor
 { }
 
-
 int
-Tet1_3D_SUPG :: giveTermIntergationRuleIndex(CharType termType)
+Tet1_3D_SUPG :: computeNumberOfDofs()
 {
-    if ( ( termType == AccelerationTerm_MB ) || ( termType == AdvectionTerm_MB ) || ( termType == AdvectionDerivativeTerm_MB ) ||
-        ( termType == DiffusionTerm_MB ) || ( termType == DiffusionDerivativeTerm_MB ) || ( termType == PressureTerm_MB ) ||
-        ( termType == AdvectionTerm_MC ) || ( termType == AdvectionDerivativeTerm_MC ) || ( termType == DiffusionDerivativeTerm_MC ) ||
-        ( termType == BCRhsTerm_MC ) ) {
-        return 1;
-    } else if ( ( termType == LSICStabilizationTerm_MB ) || ( termType == LinearAdvectionTerm_MC ) ||
-               ( termType == DiffusionTerm_MC ) || ( termType == AccelerationTerm_MC ) || ( termType == PressureTerm_MC ) ||
-               ( termType == BCRhsTerm_MB ) ) {
-        return 0;
-    } else {
-        _error("giveNumeberOfIntergationRule: Unknown approximation type encountered");
-    }
-
-    return 0;
-}
-
-
-int
-Tet1_3D_SUPG :: computeNumberOfDofs(EquationID ut)
-{
-    if ( ut == EID_MomentumBalance ) {
-        return 12;
-    } else if ( ut == EID_ConservationEquation ) {
-        return 4;
-    } else {
-        _error("computeNumberOfDofs: Unknown equation id encountered");
-    }
-
-    return 0;
+    return 16;
 }
 
 void
@@ -119,7 +90,7 @@ Tet1_3D_SUPG :: giveDofManDofIDMask(int inode, EquationID ut, IntArray &answer) 
 }
 
 void
-Tet1_3D_SUPG ::   giveElementDofIDMask(EquationID ut, IntArray &answer) const
+Tet1_3D_SUPG :: giveElementDofIDMask(EquationID ut, IntArray &answer) const
 {
     this->giveDofManDofIDMask(1, ut, answer);
 }
@@ -138,13 +109,16 @@ Tet1_3D_SUPG :: computeGaussPoints()
 // Sets up the array containing the integration points of the receiver.
 {
     if ( !integrationRulesArray ) {
-        numberOfIntegrationRules = 2;
-        integrationRulesArray = new IntegrationRule * [ 2 ];
+        numberOfIntegrationRules = 3;
+        integrationRulesArray = new IntegrationRule * [ numberOfIntegrationRules ];
         integrationRulesArray [ 0 ] = new GaussIntegrationRule(1, this, 1, 3);
         this->giveCrossSection()->setupIntegrationPoints( *integrationRulesArray[0], 1, this );
 
-        integrationRulesArray [ 1 ] = new GaussIntegrationRule(1, this, 1, 3);
+        integrationRulesArray [ 1 ] = new GaussIntegrationRule(2, this, 1, 3);
         this->giveCrossSection()->setupIntegrationPoints( *integrationRulesArray[1], 4, this );
+
+        integrationRulesArray [ 2 ] = new GaussIntegrationRule(3, this, 1, 3);
+        this->giveCrossSection()->setupIntegrationPoints( *integrationRulesArray[2], 4, this );
     }
 }
 
@@ -226,14 +200,13 @@ Tet1_3D_SUPG :: computeGradUMatrix(FloatMatrix &answer, GaussPoint *gp, TimeStep
 void
 Tet1_3D_SUPG :: computeBMatrix(FloatMatrix &answer, GaussPoint *gp)
 {
-    int i;
     FloatMatrix dn(4, 3);
     interpolation.evaldNdx(dn, * gp->giveCoordinates(), FEIElementGeometryWrapper(this));
 
     answer.resize(6, 12);
     answer.zero();
 
-    for ( i = 1; i <= 4; i++ ) {
+    for ( int i = 1; i <= 4; i++ ) {
         answer.at(1, 3 * i - 2) = dn.at(i, 1);
         answer.at(2, 3 * i - 1) = dn.at(i, 2);
         answer.at(3, 3 * i - 0) = dn.at(i, 3);
@@ -252,14 +225,13 @@ Tet1_3D_SUPG :: computeBMatrix(FloatMatrix &answer, GaussPoint *gp)
 void
 Tet1_3D_SUPG :: computeDivUMatrix(FloatMatrix &answer, GaussPoint *gp)
 {
-    int i;
     FloatMatrix dn(4, 3);
     interpolation.evaldNdx(dn, * gp->giveCoordinates(), FEIElementGeometryWrapper(this));
 
     answer.resize(1, 12);
     answer.zero();
 
-    for ( i = 1; i <= 4; i++ ) {
+    for ( int i = 1; i <= 4; i++ ) {
         answer.at(1, 3 * i - 2) = dn.at(i, 1);
         answer.at(1, 3 * i - 1) = dn.at(i, 2);
         answer.at(1, 3 * i - 0) = dn.at(i, 3);

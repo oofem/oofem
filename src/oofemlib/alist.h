@@ -17,19 +17,19 @@
  *       Czech Technical University, Faculty of Civil Engineering,
  *   Department of Structural Mechanics, 166 29 Prague, Czech Republic
  *
- *  This program is free software; you can redistribute it and/or modify
- *  it under the terms of the GNU General Public License as published by
- *  the Free Software Foundation; either version 2 of the License, or
- *  (at your option) any later version.
+ *  This library is free software; you can redistribute it and/or
+ *  modify it under the terms of the GNU Lesser General Public
+ *  License as published by the Free Software Foundation; either
+ *  version 2.1 of the License, or (at your option) any later version.
  *
  *  This program is distributed in the hope that it will be useful,
  *  but WITHOUT ANY WARRANTY; without even the implied warranty of
- *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- *  GNU General Public License for more details.
+ *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+ *  Lesser General Public License for more details.
  *
- *  You should have received a copy of the GNU General Public License
- *  along with this program; if not, write to the Free Software
- *  Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
+ *  You should have received a copy of the GNU Lesser General Public
+ *  License along with this library; if not, write to the Free Software
+ *  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  */
 
 #ifndef alist_h
@@ -55,7 +55,7 @@ namespace oofem {
  * component is very efficient. On the other hand, the resizing of array is relative time expensive (the whole
  * existing pointer table must be transferred) and is recommended to set size of the array to the final size.
  */
-template< class T >class AList
+template< class T >class OOFEM_EXPORT AList
 {
 protected:
     /// Array or list size (number of components to store).
@@ -127,7 +127,7 @@ public:
     T *unlink(int i);
 };
 
-template< class T >AList< T > ::  AList(int s, int sizeIncrement)
+template< class T >AList< T > :: AList(int s, int sizeIncrement)
 // Constructor : creates a list of size s.
 {
     register int i;

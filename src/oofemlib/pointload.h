@@ -17,19 +17,19 @@
  *       Czech Technical University, Faculty of Civil Engineering,
  *   Department of Structural Mechanics, 166 29 Prague, Czech Republic
  *
- *  This program is free software; you can redistribute it and/or modify
- *  it under the terms of the GNU General Public License as published by
- *  the Free Software Foundation; either version 2 of the License, or
- *  (at your option) any later version.
+ *  This library is free software; you can redistribute it and/or
+ *  modify it under the terms of the GNU Lesser General Public
+ *  License as published by the Free Software Foundation; either
+ *  version 2.1 of the License, or (at your option) any later version.
  *
  *  This program is distributed in the hope that it will be useful,
  *  but WITHOUT ANY WARRANTY; without even the implied warranty of
- *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- *  GNU General Public License for more details.
+ *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+ *  Lesser General Public License for more details.
  *
- *  You should have received a copy of the GNU General Public License
- *  along with this program; if not, write to the Free Software
- *  Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
+ *  You should have received a copy of the GNU Lesser General Public
+ *  License along with this library; if not, write to the Free Software
+ *  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  */
 
 #ifndef pointload_h
@@ -60,34 +60,15 @@ class TimeStep;
  * This class is not restricted to structural problems. For example, in thermal
  * analysis, a point load load could be a point heat source.
  */
-class PointLoad : public BodyLoad
+class OOFEM_EXPORT PointLoad : public BodyLoad
 {
-public:
-    /**
-     * Load coordinate system type. Variable of this type can have following values BL_GlobalMode
-     * (indicates that load given in global coordinate system) or BL_LocalMode
-     * (entity dependent local coordinate system will be  used).
-     */
-    enum PL_CoordSystType {
-        PL_GlobalMode, ///< Global mode i.e. load is specified in global c.s.
-        PL_LocalMode, ///< Local entity (edge or surface) coordinate system.
-    };
-
-    /**
-     * Type determining the type of formulation (entity local or global one).
-     */
-    enum PL_FormulationType {
-        PL_EntityFormulation,
-        PL_GlobalFormulation,
-    };
-
 protected:
     /// Number of "DOFs" which represent load geometry.
     int nDofs;
     /// Load type (its physical meaning).
     bcType lType;
     /// Load coordinate system.
-    PL_CoordSystType coordSystemType;
+    CoordSystType coordSystemType;
     /// Additional properties (coordinates, point of application).
     FloatArray coords;
 
@@ -99,7 +80,7 @@ public:
      */
     PointLoad(int n, Domain *d) : BodyLoad(n, d) {
         nDofs = 0;
-        coordSystemType = PL_GlobalMode;
+        coordSystemType = CST_Global;
     }
 
     virtual void computeValueAt(FloatArray &answer, TimeStep *tStep, FloatArray &coords, ValueModeType mode);
@@ -111,14 +92,9 @@ public:
      * Return receiver's number of "DOFs". Should correspond to number of DOFs on loaded entity.
      */
     int giveNumberOfDofs() { return nDofs; }
-    /**
-     * Returns receiver's coordinate system
-     */
-    PL_CoordSystType giveCoordSystMode() { return coordSystemType; }
-    /*
-     * Return formulation type
-     */
-    //virtual PL_FormulationType giveFormulationType () {return BL_EntityFormulation;}
+
+    virtual CoordSystType giveCoordSystMode() { return coordSystemType; }
+    //virtual FormulationType giveFormulationType () { return FT_Entity; }
 
     virtual IRResultType initializeFrom(InputRecord *ir);
     virtual void giveInputRecord(DynamicInputRecord &input);

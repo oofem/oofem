@@ -17,19 +17,19 @@
  *       Czech Technical University, Faculty of Civil Engineering,
  *   Department of Structural Mechanics, 166 29 Prague, Czech Republic
  *
- *  This program is free software; you can redistribute it and/or modify
- *  it under the terms of the GNU General Public License as published by
- *  the Free Software Foundation; either version 2 of the License, or
- *  (at your option) any later version.
+ *  This library is free software; you can redistribute it and/or
+ *  modify it under the terms of the GNU Lesser General Public
+ *  License as published by the Free Software Foundation; either
+ *  version 2.1 of the License, or (at your option) any later version.
  *
  *  This program is distributed in the hope that it will be useful,
  *  but WITHOUT ANY WARRANTY; without even the implied warranty of
- *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- *  GNU General Public License for more details.
+ *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+ *  Lesser General Public License for more details.
  *
- *  You should have received a copy of the GNU General Public License
- *  along with this program; if not, write to the Free Software
- *  Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
+ *  You should have received a copy of the GNU Lesser General Public
+ *  License along with this library; if not, write to the Free Software
+ *  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  */
 
 #include "xfemmanager.h"
@@ -39,7 +39,6 @@
 #include "floatarray.h"
 #include "alist.h"
 #include "domain.h"
-#include "enrichmentitem.h"
 #include "enrichmentdomain.h"
 #include "element.h"
 #include "dofmanager.h"
@@ -50,13 +49,19 @@
 #include "datareader.h"
 #include "datastream.h"
 #include "contextioerr.h"
+#include "dynamicinputrecord.h"
+#include "internalstatevaluetype.h"
 
 namespace oofem {
+
 XfemManager :: XfemManager(Domain *domain)
 {
     this->domain = domain;
     this->enrichmentItemList = new AList< EnrichmentItem >(0);
     numberOfEnrichmentItems = -1;
+    mNumGpPerTri = 12;
+    doVTKExport = false;
+    vtkExportFields.resize(0);
 }
 
 XfemManager :: ~XfemManager()
@@ -72,47 +77,34 @@ XfemManager :: clear()
     numberOfEnrichmentItems = -1;
 }
 
-
-void XfemManager :: giveActiveEIsFor(IntArray &answer, const Element *elem)
+InternalStateValueType 
+XfemManager :: giveXFEMStateValueType(XFEMStateType type)
 {
-    for ( int i = 1; i <= this->giveNumberOfEnrichmentItems(); i++ ) {
-        if ( this->giveEnrichmentItem(i)->isElementEnriched(elem) ) {
-            answer.followedBy( enrichmentItemList->at(i)->giveNumber() );
-        }
+    switch ( type ) {
+    case XFEMST_Enrichment:
+    case XFEMST_LevelSetPhi:
+    case XFEMST_LevelSetGamma:
+    case XFEMST_NumIntersecPoints:
+    case XFEMST_NodeEnrMarker:
+        return ISVT_SCALAR;
+    default:
+        return ISVT_UNDEFINED;
+
     }
 }
+
 
 bool XfemManager :: isElementEnriched(const Element *elem)
 {
-    // Loop over all EI which asks if el is enriched. 
-    for ( int i = 1; i <= this->giveNumberOfEnrichmentItems(); i++ ){
-        if ( this->giveEnrichmentItem(i)->isElementEnriched(elem) ){ 
-            return true; 
-        };
-    } 
-    return false;
-}
-
-bool XfemManager :: isAllElNodesEnriched(const Element *elem)
-{
-    for ( int i = 1; i <= this->giveNumberOfEnrichmentItems(); i++ ){
-
-    	EnrichmentItem *eI = this->giveEnrichmentItem(i);
-    	for( int j = 1; j <= eI->giveNumberOfEnrichmentDomains(); j++)
-    	{
-
-    		EnrichmentDomain *eD = eI->giveEnrichmentDomain(j);
-    		if( eD->isAllElNodesEnriched(elem) )
-    		{
-    			return true;
-    		}
-
-    	}
+    // Loop over all EI which asks if el is enriched.
+    for ( int i = 1; i <= this->giveNumberOfEnrichmentItems(); i++ ) {
+        if ( this->giveEnrichmentItem(i)->isElementEnriched(elem) ) {
+            return true;
+        }
     }
 
     return false;
 }
-
 
 EnrichmentItem *XfemManager :: giveEnrichmentItem(int n)
 {
@@ -122,72 +114,34 @@ EnrichmentItem *XfemManager :: giveEnrichmentItem(int n)
     } else {
         OOFEM_ERROR2("giveEnrichmentItem: undefined enrichmentItem (%d)", n);
     }
+
     return NULL;
 }
 
 
-// Old method: strange workflow in this method
-///@todo: Broken but not in use and should be rewritten anyway
-XfemManager :: XfemType XfemManager :: computeNodeEnrichmentType(int nodeNumber)
-{
-    XfemType ret;
-    int intersectionCount = 0;
-
-    // elements surrounding one node
-    const IntArray *neighbours = this->giveDomain()->giveConnectivityTable()->giveDofManConnectivityArray(nodeNumber);
-    for ( int i = 1; i <= neighbours->giveSize(); i++ ) {
-        IntArray interactedEnrEl;
-        // list of the EI's that are active in the element
-        giveActiveEIsFor( interactedEnrEl, this->giveDomain()->giveElement( neighbours->at(i) ) );
-        for ( int j = 1; j <= interactedEnrEl.giveSize(); j++ ) {
-            // sums up number of intersections the geometry have with a given element
-            //intersectionCount += this->giveEnrichmentItem( interactedEnrEl.at(j) )->computeNumberOfIntersectionPoints( this->giveDomain()->giveElement( neighbours->at(i) ) );
-        }
-
-        interactedEnrEl.zero();
-    }
-    // very specialized
-    // only for 2d. Won't work if several ei are active in the neighboring element to a node.
-    // one node could also have several TYPEs, Tip + inclusion etc.
-    if ( intersectionCount == 0 ) {
-        ret = STANDARD;
-    } else if ( intersectionCount == 1 ) {
-        ret = TIP;
-    } else /*if ( intersectionCount > 1 )*/ {
-        ret = SPLIT;
-    }
-
-    return ret;
-}
-
-
-
-void 
+void
 XfemManager :: createEnrichedDofs()
 {
     // Creates new dofs due to enrichment and appends them to the dof managers
-    ///@todo: need to add check if dof already exists in the dofmanager
-    int nrDofMan = this->giveDomain()->giveNumberOfDofManagers();
     IntArray dofIdArray;
- 
-    for (int j = 1; j <= this->giveNumberOfEnrichmentItems(); j++ ) {
+
+    for ( int j = 1; j <= this->giveNumberOfEnrichmentItems(); j++ ) {
         EnrichmentItem *ei = this->giveEnrichmentItem(j);
-        for ( int k = 1; k <= ei->giveNumberOfEnrichmentDomains(); k++ ) {
-            for ( int i = 1; i <= nrDofMan; i++ ) {
-                DofManager *dMan = this->giveDomain()->giveDofManager(i); 
-                if ( ei->isDofManEnrichedByEnrichmentDomain(dMan,k) ) {
-                    ei->computeDofManDofIdArray(dofIdArray, dMan, k);
-                    int nDofs = dMan->giveNumberOfDofs();
-                    for ( int m = 1; m<= dofIdArray.giveSize(); m++ ) {
-                        dMan->appendDof( new MasterDof( nDofs + m, dMan, ( DofIDItem ) ( dofIdArray.at(m) ) ) );   
-                    }
-                }
-            }
-        }
+        ei->createEnrichedDofs();
     }
 
 }
 
+
+void 
+XfemManager :: addEnrichedDofsTo( DofManager *dMan, IntArray &dofIdArray )
+{
+    int nDofs = dMan->giveNumberOfDofs();
+    for ( int j = 1; j <= dofIdArray.giveSize(); j++ ) {                      
+            dMan->appendDof( new MasterDof( nDofs + j, dMan, ( DofIDItem ) ( dofIdArray.at(j) ) ) );   
+    }
+
+}
 
 
 IRResultType XfemManager :: initializeFrom(InputRecord *ir)
@@ -196,9 +150,28 @@ IRResultType XfemManager :: initializeFrom(InputRecord *ir)
     IRResultType result; // Required by IR_GIVE_FIELD macro
 
     IR_GIVE_FIELD(ir, numberOfEnrichmentItems, _IFT_XfemManager_numberOfEnrichmentItems);
+
+    IR_GIVE_OPTIONAL_FIELD(ir, mNumGpPerTri, _IFT_XfemManager_numberOfGpPerTri);
+
+    IR_GIVE_OPTIONAL_FIELD(ir, doVTKExport, _IFT_XfemManager_VTKExport);
+    if ( doVTKExport ) {
+        IntArray exportFields;
+        IR_GIVE_FIELD(ir, this->vtkExportFields, _IFT_XfemManager_VTKExportFields);
+    }
+
     return IRRT_OK;
 }
 
+
+void XfemManager :: giveInputRecord(DynamicInputRecord &input)
+{
+    input.setRecordKeywordField(_IFT_XfemManager_Name, 1);
+    input.setField(numberOfEnrichmentItems, _IFT_XfemManager_numberOfEnrichmentItems);
+    input.setField(mNumGpPerTri, _IFT_XfemManager_numberOfGpPerTri);
+    input.setField(doVTKExport, _IFT_XfemManager_VTKExport);
+    input.setField(vtkExportFields, _IFT_XfemManager_VTKExportFields);
+
+}
 
 int XfemManager :: instanciateYourself(DataReader *dr)
 {
@@ -224,38 +197,40 @@ int XfemManager :: instanciateYourself(DataReader *dr)
         ei->instanciateYourself(dr);
         this->enrichmentItemList->put(i, ei);
     }
+
     return 1;
 }
 
-
-
-void XfemManager :: updateIntegrationRule()
+void XfemManager :: setDomain(Domain *ipDomain)
 {
-    for ( int i = 1; i <= this->giveDomain()->giveNumberOfElements(); i++ ) {
-        Element *el = this->giveDomain()->giveElement(i);
-        XfemElementInterface *xei = static_cast< XfemElementInterface * >( el->giveInterface(XfemElementInterfaceType) );
-        xei->XfemElementInterface_updateIntegrationRule();
-    }
-}
+    domain = ipDomain;
 
+    int numEI = enrichmentItemList->giveSize();
+
+    for(int i = 1; i <= numEI; i++) {
+        enrichmentItemList->at(i)->setDomain(ipDomain);
+    }
+
+}
 
 contextIOResultType XfemManager :: saveContext(DataStream *stream, ContextMode mode, void *obj)
 {
     contextIOResultType iores;
 
-    if (mode & CM_Definition) {
-        if ( !stream->write(&this->numberOfEnrichmentItems, 1) ) {
+    if ( mode & CM_Definition ) {
+        if ( !stream->write(& this->numberOfEnrichmentItems, 1) ) {
             THROW_CIOERR(CIO_IOERR);
         }
     }
 
     for ( int i = 1; i <= this->numberOfEnrichmentItems; i++ ) {
-        EnrichmentItem* obj = this->giveEnrichmentItem(i);
+        EnrichmentItem *obj = this->giveEnrichmentItem(i);
         if ( ( mode & CM_Definition ) ) {
-            if ( !stream->write(obj->giveInputRecordName()) ) {
+            if ( !stream->write( obj->giveInputRecordName() ) ) {
                 THROW_CIOERR(CIO_IOERR);
             }
         }
+
         if ( ( iores = obj->saveContext(stream, mode) ) != CIO_OK ) {
             THROW_CIOERR(iores);
         }
@@ -265,47 +240,66 @@ contextIOResultType XfemManager :: saveContext(DataStream *stream, ContextMode m
 }
 
 
-contextIOResultType XfemManager:: restoreContext(DataStream *stream, ContextMode mode, void *obj)
+contextIOResultType XfemManager :: restoreContext(DataStream *stream, ContextMode mode, void *obj)
 {
     contextIOResultType iores;
 
-    if (mode & CM_Definition) {
-        if ( !stream->read(&this->numberOfEnrichmentItems, 1) ) {
+    if ( mode & CM_Definition ) {
+        if ( !stream->read(& this->numberOfEnrichmentItems, 1) ) {
             THROW_CIOERR(CIO_IOERR);
         }
     }
 
     if ( mode & CM_Definition ) {
-        this->enrichmentItemList->growTo(this->numberOfEnrichmentItems );
+        this->enrichmentItemList->growTo(this->numberOfEnrichmentItems);
     }
-    for ( int i = 1; i <= this->numberOfEnrichmentItems ; i++ ) {
-        EnrichmentItem  *obj;
+
+    for ( int i = 1; i <= this->numberOfEnrichmentItems; i++ ) {
+        EnrichmentItem *obj;
         if ( mode & CM_Definition ) {
-            std::string name;
+            std :: string name;
             if ( !stream->read(name) ) {
                 THROW_CIOERR(CIO_IOERR);
             }
+
             obj = classFactory.createEnrichmentItem(name.c_str(), i, this, this->domain);
-            enrichmentItemList->put (i, obj);
+            enrichmentItemList->put(i, obj);
         } else {
-            obj = this->giveEnrichmentItem (i);
+            obj = this->giveEnrichmentItem(i);
         }
+
         if ( ( iores = obj->restoreContext(stream, mode) ) != CIO_OK ) {
             THROW_CIOERR(CIO_IOERR);
         }
     }
+
     return CIO_OK;
 }
 
-void XfemManager:: updateYourself()
+void XfemManager :: updateYourself()
 {
-	// Update level sets
-	for ( int i = 1; i <= enrichmentItemList->giveSize(); i++)
-	{
-		enrichmentItemList->at(i)->updateGeometry();
+    // Update level sets
+    for ( int i = 1; i <= enrichmentItemList->giveSize(); i++ ) {
+        enrichmentItemList->at(i)->updateGeometry();
+    }
+}
 
-	}
+void XfemManager :: propagateFronts()
+{
+    for ( int i = 1; i <= enrichmentItemList->giveSize(); i++ ) {
+        enrichmentItemList->at(i)->propagateFronts();
+    }
+}
 
+bool XfemManager :: hasPropagatingFronts()
+{
+    for ( int i = 1; i <= enrichmentItemList->giveSize(); i++ ) {
+    	if( enrichmentItemList->at(i)->hasPropagatingFronts() ) {
+    		return true;
+    	}
+    }
+
+	return false;
 }
 
 } // end namespace oofem

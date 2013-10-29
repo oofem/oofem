@@ -17,19 +17,19 @@
  *       Czech Technical University, Faculty of Civil Engineering,
  *   Department of Structural Mechanics, 166 29 Prague, Czech Republic
  *
- *  This program is free software; you can redistribute it and/or modify
- *  it under the terms of the GNU General Public License as published by
- *  the Free Software Foundation; either version 2 of the License, or
- *  (at your option) any later version.
+ *  This library is free software; you can redistribute it and/or
+ *  modify it under the terms of the GNU Lesser General Public
+ *  License as published by the Free Software Foundation; either
+ *  version 2.1 of the License, or (at your option) any later version.
  *
  *  This program is distributed in the hope that it will be useful,
  *  but WITHOUT ANY WARRANTY; without even the implied warranty of
- *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- *  GNU General Public License for more details.
+ *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+ *  Lesser General Public License for more details.
  *
- *  You should have received a copy of the GNU General Public License
- *  along with this program; if not, write to the Free Software
- *  Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
+ *  You should have received a copy of the GNU Lesser General Public
+ *  License along with this library; if not, write to the Free Software
+ *  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  */
 
 #include "quad1mindlinshell3d.h"
@@ -59,10 +59,9 @@ IntArray Quad1MindlinShell3D :: drillOrdering(4);
 bool Quad1MindlinShell3D :: __initialized = Quad1MindlinShell3D :: initOrdering();
 
 Quad1MindlinShell3D :: Quad1MindlinShell3D(int n, Domain *aDomain) :
-    NLStructuralElement(n, aDomain),
-    numberOfGaussPoints(4),
-    alpha(0.)
+    NLStructuralElement(n, aDomain)
 {
+	numberOfGaussPoints = 4;
     this->numberOfDofMans = 4;
     this->lnodes[0] = new FloatArray();
     this->lnodes[1] = new FloatArray();
@@ -274,6 +273,7 @@ Quad1MindlinShell3D :: giveInternalForcesVector(FloatArray &answer, TimeStep *tS
     shellForces.zero();
     drillMoment.zero();
     StructuralCrossSection *cs = this->giveStructuralCrossSection();
+    double drillCoeff = cs->give(CS_DrillingStiffness);
 
     IntegrationRule *iRule = integrationRulesArray [ 0 ];
     for ( int i = 0; i < iRule->giveNumberOfIntegrationPoints(); i++ ) {
@@ -290,15 +290,13 @@ Quad1MindlinShell3D :: giveInternalForcesVector(FloatArray &answer, TimeStep *tS
         shellForces.plusProduct(b, stress, dV);
 
         // Drilling stiffness is here for improved numerical properties
-        if (alpha > 0.) {
-            this->computeConstitutiveMatrixAt(d, ElasticStiffness, gp, tStep);
-            double Et = d.at(1,1); // Elasticity modulus * thickness, taken from the membrane part of d
+        if (drillCoeff > 0.) {
             this->interp.evalN(n, *gp->giveCoordinates(), FEIVoidCellGeometry());
             for ( int j = 0; j < 4; j++) {
                 n(j) -= 0.25;
             }
             double dtheta = n.dotProduct(drillUnknowns);
-            drillMoment.add(this->alpha * Et * dV * dtheta, n); ///@todo Decide on how to alpha should be defined.
+            drillMoment.add(drillCoeff * dV * dtheta, n); ///@todo Decide on how to alpha should be defined.
         }
     }
 
@@ -306,7 +304,7 @@ Quad1MindlinShell3D :: giveInternalForcesVector(FloatArray &answer, TimeStep *tS
     answer.zero();
     answer.assemble(shellForces, this->shellOrdering);
 
-    if (alpha > 0.) {
+    if (drillCoeff > 0.) {
         answer.assemble(drillMoment, this->drillOrdering);
     }
 }
@@ -323,6 +321,7 @@ Quad1MindlinShell3D :: computeStiffnessMatrix(FloatMatrix &answer, MatResponseMo
     FloatMatrix shellStiffness(20, 20), drillStiffness(4, 4);
     shellStiffness.zero();
     drillStiffness.zero();
+    double drillCoeff = this->giveStructuralCrossSection()->give(CS_DrillingStiffness);
 
     IntegrationRule *iRule = integrationRulesArray [ 0 ];
     for ( int i = 0; i < iRule->giveNumberOfIntegrationPoints(); i++ ) {
@@ -336,14 +335,12 @@ Quad1MindlinShell3D :: computeStiffnessMatrix(FloatMatrix &answer, MatResponseMo
         shellStiffness.plusProductSymmUpper(b, db, dV);
 
         // Drilling stiffness is here for improved numerical properties
-        if (alpha > 0.) {
-            ///@todo Sort out the drilling stiffness thing.
-            double Et = d.at(1,1); ///@todo Elasticity modulus * thickness, taken from the membrane part of d
+        if (drillCoeff > 0.) {
             this->interp.evalN(n, *gp->giveCoordinates(), FEIVoidCellGeometry());
             for ( int j = 0; j < 4; j++) {
                 n(j) -= 0.25;
             }
-            drillStiffness.plusDyadSymmUpper(n, this->alpha * Et * dV); ///@todo Decide on how to alpha should be defined.
+            drillStiffness.plusDyadSymmUpper(n, drillCoeff * dV);
         }
     }
     shellStiffness.symmetrized();
@@ -352,7 +349,7 @@ Quad1MindlinShell3D :: computeStiffnessMatrix(FloatMatrix &answer, MatResponseMo
     answer.zero();
     answer.assemble(shellStiffness, this->shellOrdering);
 
-    if (alpha > 0.) {
+    if (drillCoeff > 0.) {
         drillStiffness.symmetrized();
         answer.assemble(drillStiffness, this->drillOrdering);
     }
@@ -371,9 +368,6 @@ Quad1MindlinShell3D :: initializeFrom(InputRecord *ir)
 {
     const char *__proc = "initializeFrom"; // Required by IR_GIVE_FIELD macro
     IRResultType result;                 // Required by IR_GIVE_FIELD macro
-
-    IR_GIVE_OPTIONAL_FIELD(ir, this->alpha, _IFT_Quad1MindlinShell3D_alpha);
-    this->alpha = 1.0;
 
     IR_GIVE_OPTIONAL_FIELD(ir, this->numberOfGaussPoints, _IFT_Element_nip);
 

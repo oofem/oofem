@@ -41,7 +41,7 @@ namespace oofem {
  * Incomplete Cholesky IC(0) (no fill - up) preconditioner for
  * symmetric, positive definite matrices.
  */
-class CompCol_ICPreconditioner : public Preconditioner
+class OOFEM_EXPORT CompCol_ICPreconditioner : public Preconditioner
 {
 private:
     FloatArray val_;

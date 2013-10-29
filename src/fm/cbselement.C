@@ -17,19 +17,19 @@
  *       Czech Technical University, Faculty of Civil Engineering,
  *   Department of Structural Mechanics, 166 29 Prague, Czech Republic
  *
- *  This program is free software; you can redistribute it and/or modify
- *  it under the terms of the GNU General Public License as published by
- *  the Free Software Foundation; either version 2 of the License, or
- *  (at your option) any later version.
+ *  This library is free software; you can redistribute it and/or
+ *  modify it under the terms of the GNU Lesser General Public
+ *  License as published by the Free Software Foundation; either
+ *  version 2.1 of the License, or (at your option) any later version.
  *
  *  This program is distributed in the hope that it will be useful,
  *  but WITHOUT ANY WARRANTY; without even the implied warranty of
- *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- *  GNU General Public License for more details.
+ *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+ *  Lesser General Public License for more details.
  *
- *  You should have received a copy of the GNU General Public License
- *  along with this program; if not, write to the Free Software
- *  Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
+ *  You should have received a copy of the GNU Lesser General Public
+ *  License along with this library; if not, write to the Free Software
+ *  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  */
 
 #include "cbselement.h"
@@ -139,24 +139,23 @@ CBSElement :: computePrescribedTermsI(FloatArray &answer, ValueModeType mode, Ti
     FloatMatrix mass;
     FloatArray usp;
     this->computeConsistentMassMtrx(mass, tStep);
-    this->computeVectorOfPrescribed(EID_MomentumBalance, mode, tStep, usp);
+    this->computeVectorOf(EID_MomentumBalance, mode, tStep, usp);
     answer.beProductOf(mass, usp);
     answer.negated();
 }
 
-/*
- * void
- * CBSElement :: computePrescribedTermsII (FloatArray& answer, ValueModeType mode, TimeStep* tStep)
- * {
- * FloatMatrix lhs;
- * FloatArray usp;
- * this->computePressureLhs (lhs, tStep);
- * this->computeVectorOfPrescribed (EID_ConservationEquation, mode, tStep, usp);
- * answer.beProductOf (lhs, usp);
- * answer.negated();
- * }
- */
-
+#if 0
+void
+CBSElement :: computePrescribedTermsII (FloatArray& answer, ValueModeType mode, TimeStep* tStep)
+{
+    FloatMatrix lhs;
+    FloatArray usp;
+    this->computePressureLhs (lhs, tStep);
+    this->computeVectorOf(EID_ConservationEquation, mode, tStep, usp);
+    answer.beProductOf (lhs, usp);
+    answer.negated();
+}
+#endif
 
 int
 CBSElement :: checkConsistency()
@@ -183,22 +182,6 @@ CBSElement :: updateInternalState(TimeStep *stepN)
         for ( int j = 0; j < iRule->giveNumberOfIntegrationPoints(); j++ ) {
             computeDeviatoricStress(stress, iRule->getIntegrationPoint(j), stepN);
         }
-    }
-}
-
-
-void
-CBSElement :: printOutputAt(FILE *file, TimeStep *stepN)
-// Performs end-of-step operations.
-{
-#ifdef __PARALLEL_MODE
-    fprintf( file, "element %d [%8d] :\n", this->giveNumber(), this->giveGlobalNumber() );
-#else
-    fprintf(file, "element %d :\n", number);
-#endif
-
-    for ( int i = 0; i < numberOfIntegrationRules; i++ ) {
-        integrationRulesArray [ i ]->printOutputAt(file, stepN);
     }
 }
 

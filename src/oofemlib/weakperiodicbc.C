@@ -17,19 +17,19 @@
  *       Czech Technical University, Faculty of Civil Engineering,
  *   Department of Structural Mechanics, 166 29 Prague, Czech Republic
  *
- *  This program is free software; you can redistribute it and/or modify
- *  it under the terms of the GNU General Public License as published by
- *  the Free Software Foundation; either version 2 of the License, or
- *  (at your option) any later version.
+ *  This library is free software; you can redistribute it and/or
+ *  modify it under the terms of the GNU Lesser General Public
+ *  License as published by the Free Software Foundation; either
+ *  version 2.1 of the License, or (at your option) any later version.
  *
  *  This program is distributed in the hope that it will be useful,
  *  but WITHOUT ANY WARRANTY; without even the implied warranty of
- *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- *  GNU General Public License for more details.
+ *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+ *  Lesser General Public License for more details.
  *
- *  You should have received a copy of the GNU General Public License
- *  along with this program; if not, write to the Free Software
- *  Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
+ *  You should have received a copy of the GNU Lesser General Public
+ *  License along with this library; if not, write to the Free Software
+ *  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  */
 
 #include <cstdio>
@@ -265,7 +265,7 @@ void WeakPeriodicBoundaryCondition :: addElementSide(int newElement, int newSide
 		//normalNew.printYourself();
 		giveEdgeNormal( normal0, element [ 0 ].at(0), side [ 0 ].at(0) );
 		double d = sqrt( pow(normalNew.at(1) - normal0.at(1), 2) + pow(normalNew.at(2) - normal0.at(2), 2) );
-		if ( abs(d) < 0.001 ) {
+		if ( fabs(d) < 0.001 ) {
 			addToList = 0;
 		} else {
 			addToList = 1;
@@ -273,7 +273,7 @@ void WeakPeriodicBoundaryCondition :: addElementSide(int newElement, int newSide
 	} else {
 		// Otherwise, check the normal in order to decide upon which direction the parameter runs (x or y)
 		giveEdgeNormal(normalNew, newElement, newSide);
-		if ( abs(abs( normalNew.at(1) ) - 1) < 0.0001 ) {               // Normal point in x direction, thus set direction to y
+		if ( fabs(fabs( normalNew.at(1) ) - 1.) < 0.0001 ) {               // Normal point in x direction, thus set direction to y
 			direction = 2;
 		} else {
 			direction = 1;
@@ -364,10 +364,6 @@ void WeakPeriodicBoundaryCondition :: assemble(SparseMtrx *answer, TimeStep *tSt
 			// Find dofs for this element side
 			IntArray r_sideLoc, c_sideLoc;
 
-			///@todo See todo on assembleVector
-			//thisElement->giveBoundaryLocationArray(r_sideLoc, side [ thisSide ].at(ielement), dofids, eid, r_s);
-			//thisElement->giveBoundaryLocationArray(c_sideLoc, side [ thisSide ].at(ielement), dofids, eid, c_s);
-
 			// Find dofs for this element which should be periodic
 			IntArray bNodes, nodeDofIDMask, periodicDofIDMask, nodalArray;
 			periodicDofIDMask.resize(1);
@@ -375,6 +371,11 @@ void WeakPeriodicBoundaryCondition :: assemble(SparseMtrx *answer, TimeStep *tSt
 
 			FEInterpolation *interpolation = thisElement->giveInterpolation( (DofIDItem)dofid );
 			interpolation->boundaryGiveNodes( bNodes, side [ thisSide ].at(ielement) );
+
+            ///@todo See todo on assembleVector
+            //thisElement->giveBoundaryLocationArray(r_sideLoc, bNodes, dofids, eid, r_s);
+            //thisElement->giveBoundaryLocationArray(c_sideLoc, bNodes, dofids, eid, c_s);
+
 			r_sideLoc.resize(0);
 			c_sideLoc.resize(0);
 			dofCountOnBoundary = 0;
@@ -471,9 +472,6 @@ void WeakPeriodicBoundaryCondition :: assembleVector(FloatArray &answer, TimeSte
 
 			Element *thisElement = this->domain->giveElement( element [ thisSide ].at(ielement) );
 
-			///@todo Support explicitly asking specifying dofids instead of equation ids (Jim needed this feature as well, and it makes sense to have it)
-			//thisElement->giveBoundaryLocationArray(sideLocation, side [ thisSide ].at(ielement), &dofids, eid, s, &masterDofIDs);
-
 			// Find dofs for this element which should be periodic
 			IntArray bNodes, nodeDofIDMask, periodicDofIDMask, nodalArray;
 			periodicDofIDMask.resize(1);
@@ -481,6 +479,11 @@ void WeakPeriodicBoundaryCondition :: assembleVector(FloatArray &answer, TimeSte
 
 			FEInterpolation *interpolation = thisElement->giveInterpolation( (DofIDItem)dofid );
 			interpolation->boundaryGiveNodes( bNodes, side [ thisSide ].at(ielement) );
+
+            ///@todo Carl, change to this:
+            //thisElement->giveBoundaryLocationArray(sideLocation, bNodes, &dofids, eid, s, &masterDofIDs);
+            //thisElement->computeBoundaryVectorOf(bNodes, eid, VM_Total, tStep, a);
+
 			sideLocation.resize(0);
 			masterDofIDs.resize(0);
 			a.resize(0);

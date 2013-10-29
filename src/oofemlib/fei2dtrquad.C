@@ -17,25 +17,26 @@
  *       Czech Technical University, Faculty of Civil Engineering,
  *   Department of Structural Mechanics, 166 29 Prague, Czech Republic
  *
- *  This program is free software; you can redistribute it and/or modify
- *  it under the terms of the GNU General Public License as published by
- *  the Free Software Foundation; either version 2 of the License, or
- *  (at your option) any later version.
+ *  This library is free software; you can redistribute it and/or
+ *  modify it under the terms of the GNU Lesser General Public
+ *  License as published by the Free Software Foundation; either
+ *  version 2.1 of the License, or (at your option) any later version.
  *
  *  This program is distributed in the hope that it will be useful,
  *  but WITHOUT ANY WARRANTY; without even the implied warranty of
- *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- *  GNU General Public License for more details.
+ *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+ *  Lesser General Public License for more details.
  *
- *  You should have received a copy of the GNU General Public License
- *  along with this program; if not, write to the Free Software
- *  Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
+ *  You should have received a copy of the GNU Lesser General Public
+ *  License along with this library; if not, write to the Free Software
+ *  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  */
 
 #include "fei2dtrquad.h"
 #include "mathfem.h"
 #include "floatmatrix.h"
 #include "floatarray.h"
+#include "gaussintegrationrule.h"
 
 namespace oofem {
 void
@@ -385,7 +386,8 @@ FEI2dTrQuad :: giveDerivatives(FloatMatrix &dn, const FloatArray &lc)
     dn.at(6, 2) = -4.0 * l1;
 }
 
-double FEI2dTrQuad :: giveArea(const FEICellGeometry &cellgeo) const
+double
+FEI2dTrQuad :: giveArea(const FEICellGeometry &cellgeo) const
 {
     const FloatArray *p;
     double x1, x2, x3, x4, x5, x6, y1, y2, y3, y4, y5, y6;
@@ -413,7 +415,8 @@ double FEI2dTrQuad :: giveArea(const FEICellGeometry &cellgeo) const
             x1*(-y2 + y3 + 4*y4 - 4*y6) + x3*(-y1 + y2 - 4*y5 + 4*y6))/6;
 }
 
-double FEI2dTrQuad :: evalNXIntegral(int iEdge, const FEICellGeometry& cellgeo)
+double
+FEI2dTrQuad :: evalNXIntegral(int iEdge, const FEICellGeometry& cellgeo)
 {
     IntArray eNodes;
     const FloatArray *node;
@@ -434,6 +437,15 @@ double FEI2dTrQuad :: evalNXIntegral(int iEdge, const FEICellGeometry& cellgeo)
     y3 = node->at ( yind );
 
     return - ( x1 * y2 - x2 * y1 + 4 * ( x3 * ( y1 - y2 ) + y3 * ( x2 - x1 ) ) ) / 3.0;
+}
+
+IntegrationRule *
+FEI2dTrQuad :: giveIntegrationRule(int order)
+{
+    IntegrationRule *iRule = new GaussIntegrationRule(1, NULL);
+    int points = iRule->getRequiredNumberOfIntegrationPoints(_Triangle, order + 2);
+    iRule->SetUpPointsOnTriangle(points, _Unknown);
+    return iRule;
 }
 
 } // end namespace oofem

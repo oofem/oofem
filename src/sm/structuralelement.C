@@ -17,19 +17,19 @@
  *       Czech Technical University, Faculty of Civil Engineering,
  *   Department of Structural Mechanics, 166 29 Prague, Czech Republic
  *
- *  This program is free software; you can redistribute it and/or modify
- *  it under the terms of the GNU General Public License as published by
- *  the Free Software Foundation; either version 2 of the License, or
- *  (at your option) any later version.
+ *  This library is free software; you can redistribute it and/or
+ *  modify it under the terms of the GNU Lesser General Public
+ *  License as published by the Free Software Foundation; either
+ *  version 2.1 of the License, or (at your option) any later version.
  *
  *  This program is distributed in the hope that it will be useful,
  *  but WITHOUT ANY WARRANTY; without even the implied warranty of
- *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- *  GNU General Public License for more details.
+ *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+ *  Lesser General Public License for more details.
  *
- *  You should have received a copy of the GNU General Public License
- *  along with this program; if not, write to the Free Software
- *  Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
+ *  You should have received a copy of the GNU Lesser General Public
+ *  License along with this library; if not, write to the Free Software
+ *  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  */
 
 #include "structuralelement.h"
@@ -125,39 +125,18 @@ void StructuralElement :: computeBoundaryLoadVector(FloatArray &answer, Boundary
         OOFEM_ERROR("StructuralElement :: computeBoundaryLoadVector - No interpolator available\n");
     }
 
-    ///@todo This determines if its a edge or surface. We should make it more general and just have a "boundary"
-    bool surface;
-    if ( this->testElementExtension(Element_SurfaceLoadSupport) ) {
-        surface = true;
-    } else if ( this->testElementExtension(Element_EdgeLoadSupport) ) {
-        surface = false;
-    } else {
-        _error("computeBoundaryLoadVector : no boundary load support");
-        surface = true;
-    }
-
     FloatArray n_vec;
     FloatMatrix n, T;
     FloatArray force, globalIPcoords;
     int nsd = fei->giveNsd();
 
-    int approxOrder = load->giveApproxOrder() + this->giveApproxOrder();
-
-    ///@todo Have interpolator set up integration rule here instead.
-    IntegrationRule *iRule;
-
-    if ( surface ) {
-        iRule = this->GetSurfaceIntegrationRule(approxOrder);
-    } else {
-        iRule = new GaussIntegrationRule(1, this, 1, 1);
-        iRule->SetUpPointsOnLine(( int ) ceil( ( approxOrder + 1. ) / 2. ), _Unknown);
-    }
+    IntegrationRule *iRule = fei->giveBoundaryIntegrationRule(load->giveApproxOrder(), boundary);
 
     for ( int i = 0; i < iRule->giveNumberOfIntegrationPoints(); i++ ) {
         GaussPoint *gp = iRule->getIntegrationPoint(i);
         FloatArray &lcoords = *gp->giveCoordinates();
 
-        if ( load->giveFormulationType() == BoundaryLoad :: BL_EntityFormulation ) {
+        if ( load->giveFormulationType() == Load :: FT_Entity ) {
             load->computeValueAt(force, tStep, lcoords, mode);
         } else {
             fei->boundaryLocal2Global(globalIPcoords, boundary, lcoords, FEIElementGeometryWrapper(this));
@@ -167,20 +146,14 @@ void StructuralElement :: computeBoundaryLoadVector(FloatArray &answer, Boundary
         ///@todo Make sure this part is correct.
         // We always want the global values in the end, so we might as well compute them here directly:
         // transform force
-        if ( load->giveCoordSystMode() == BoundaryLoad :: BL_GlobalMode ) {
+        if ( load->giveCoordSystMode() == Load :: CST_Global ) {
             // then just keep it in global c.s
         } else {
-            // transform from local edge to element local c.s
-            ///@todo This determines if its a edge or surface. We should make it more general and just have a "boundary"
-            if ( surface ) {
-                if ( this->computeLoadLSToLRotationMatrix(T, boundary, gp) ) {
-                    force.rotatedWith(T, 'n');
-                }
-            } else {
-                if ( this->computeLoadLEToLRotationMatrix(T, boundary, gp) ) {
-                    force.rotatedWith(T, 'n');
-                }
-            }
+            ///@todo Support this...
+            // transform from local boundary to element local c.s
+            /*if ( this->computeLoadLSToLRotationMatrix(T, boundary, gp) ) {
+                force.rotatedWith(T, 'n');
+            }*/
             // then to global c.s
             if ( this->computeLoadGToLRotationMtrx(T) ) {
                 force.rotatedWith(T, 't');
@@ -191,14 +164,9 @@ void StructuralElement :: computeBoundaryLoadVector(FloatArray &answer, Boundary
         fei->boundaryEvalN(n_vec, boundary, lcoords, FEIElementGeometryWrapper(this));
         n.beNMatrixOf(n_vec, nsd);
 
-        double dV;
-        ///@todo This determines if its a edge or surface. We should make it more general and just have a "boundary"
-        if ( surface ) {
-            dV = this->computeSurfaceVolumeAround(gp, boundary);
-        } else {
-            dV = this->computeEdgeVolumeAround(gp, boundary);
-        }
-
+        ///@todo Some way to ask for the thickness at a global coordinate maybe?
+        double thickness = 1.0; // Should be the circumference for axisymm-elements.
+        double dV = thickness * gp->giveWeight() * fei->boundaryGiveTransformationJacobian(boundary, lcoords, FEIElementGeometryWrapper(this));
         answer.plusProduct(n, force, dV);
     }
 
@@ -267,7 +235,7 @@ StructuralElement :: computePointLoadVectorAt(FloatArray &answer, Load *load, Ti
     }
 
     // transform force
-    if ( pointLoad->giveCoordSystMode() == PointLoad :: PL_GlobalMode ) {
+    if ( pointLoad->giveCoordSystMode() == Load :: CST_Global ) {
         // transform from global to element local c.s
         if ( this->computeLoadGToLRotationMtrx(T) ) {
             answer.rotatedWith(T, 'n');
@@ -315,7 +283,7 @@ StructuralElement :: computeEdgeLoadVectorAt(FloatArray &answer, Load *load,
             this->computeEgdeNMatrixAt(n, iEdge, gp);
             dV  = this->computeEdgeVolumeAround(gp, iEdge);
 
-            if ( edgeLoad->giveFormulationType() == BoundaryLoad :: BL_EntityFormulation ) {
+            if ( edgeLoad->giveFormulationType() == Load :: FT_Entity ) {
                 edgeLoad->computeValueAt(force, tStep, * ( gp->giveCoordinates() ), mode);
             } else {
                 this->computeEdgeIpGlobalCoords(globalIPcoords, gp, iEdge);
@@ -323,7 +291,7 @@ StructuralElement :: computeEdgeLoadVectorAt(FloatArray &answer, Load *load,
             }
 
             // transform force
-            if ( edgeLoad->giveCoordSystMode() == BoundaryLoad :: BL_GlobalMode ) {
+            if ( edgeLoad->giveCoordSystMode() == Load :: CST_Global ) {
                 // transform from global to element local c.s
                 if ( this->computeLoadGToLRotationMtrx(T) ) {
                     force.rotatedWith(T, 'n');
@@ -341,7 +309,7 @@ StructuralElement :: computeEdgeLoadVectorAt(FloatArray &answer, Load *load,
 
 
         this->giveEdgeDofMapping(mask, iEdge);
-        answer.resize( this->computeNumberOfDofs(EID_MomentumBalance) );
+        answer.resize( this->computeNumberOfDofs() );
         answer.zero();
         answer.assemble(reducedAnswer, mask);
 
@@ -396,7 +364,7 @@ StructuralElement :: computeSurfaceLoadVectorAt(FloatArray &answer, Load *load,
             this->computeSurfaceNMatrixAt(n, iSurf, gp);
             dV  = this->computeSurfaceVolumeAround(gp, iSurf);
 
-            if ( surfLoad->giveFormulationType() == BoundaryLoad :: BL_EntityFormulation ) {
+            if ( surfLoad->giveFormulationType() == Load :: FT_Entity ) {
                 surfLoad->computeValueAt(force, tStep, * ( gp->giveCoordinates() ), mode);
             } else {
                 this->computeSurfIpGlobalCoords(globalIPcoords, gp, iSurf);
@@ -404,7 +372,7 @@ StructuralElement :: computeSurfaceLoadVectorAt(FloatArray &answer, Load *load,
             }
 
             // transform force
-            if ( surfLoad->giveCoordSystMode() == BoundaryLoad :: BL_GlobalMode ) {
+            if ( surfLoad->giveCoordSystMode() == Load :: CST_Global ) {
                 // transform from global to element local c.s
                 if ( this->computeLoadGToLRotationMtrx(T) ) {
                     force.rotatedWith(T, 'n');
@@ -422,7 +390,7 @@ StructuralElement :: computeSurfaceLoadVectorAt(FloatArray &answer, Load *load,
 
         delete iRule;
         this->giveSurfaceDofMapping(mask, iSurf);
-        answer.resize( this->computeNumberOfDofs(EID_MomentumBalance) );
+        answer.resize( this->computeNumberOfDofs() );
         answer.zero();
         answer.assemble(reducedAnswer, mask);
 
@@ -442,7 +410,6 @@ StructuralElement :: computePrescribedStrainLocalLoadVectorAt(FloatArray &answer
 {
     // TemperatureLoad   *load;
     double dV;
-    GaussPoint *gp;
     FloatArray et, de, bde;
     FloatMatrix b, d;
     IntegrationRule *iRule = integrationRulesArray [ giveDefaultIntegrationRule() ];
@@ -455,7 +422,7 @@ StructuralElement :: computePrescribedStrainLocalLoadVectorAt(FloatArray &answer
     // complete volume
     answer.resize(0);
     for ( int i = 0; i < iRule->giveNumberOfIntegrationPoints(); i++ ) {
-        gp = iRule->getIntegrationPoint(i);
+        GaussPoint *gp = iRule->getIntegrationPoint(i);
         cs->computeStressIndependentStrainVector(et, gp, tStep, mode);
         if ( et.giveSize() ) {
             this->computeBmatrixAt(gp, b);
@@ -485,10 +452,9 @@ void
 StructuralElement :: computeConsistentMassMatrix(FloatMatrix &answer, TimeStep *tStep, double &mass)
 // Computes numerically the consistent (full) mass matrix of the receiver.
 {
-    int nip, ndofs = computeNumberOfDofs(EID_MomentumBalance);
+    int nip, ndofs = computeNumberOfDofs();
     double density, dV;
     FloatMatrix n;
-    GaussPoint *gp;
     GaussIntegrationRule iRule(1, this, 1, 1);
     IntArray mask;
 
@@ -511,7 +477,7 @@ StructuralElement :: computeConsistentMassMatrix(FloatMatrix &answer, TimeStep *
     mass = 0.;
 
     for ( int i = 0; i < iRule.giveNumberOfIntegrationPoints(); i++ ) {
-        gp = iRule.getIntegrationPoint(i);
+        GaussPoint *gp = iRule.getIntegrationPoint(i);
         this->computeNmatrixAt(gp, n);
         density = this->giveMaterial()->give('d', gp);
         dV = this->computeVolumeAround(gp);
@@ -520,11 +486,9 @@ StructuralElement :: computeConsistentMassMatrix(FloatMatrix &answer, TimeStep *
         if ( mask.isEmpty() ) {
             answer.plusProductSymmUpper(n, n, density * dV);
         } else {
-            double summ;
-
             for ( int i = 1; i <= ndofs; i++ ) {
                 for ( int j = i; j <= ndofs; j++ ) {
-                    summ = 0.;
+                    double summ = 0.;
                     for ( int k = 1; k <= n.giveNumberOfRows(); k++ ) {
                         if ( mask.at(k) == 0 ) {
                             continue;
@@ -638,7 +602,7 @@ StructuralElement :: computeLumpedMassMatrix(FloatMatrix &answer, TimeStep *tSte
     double summ;
 
     if ( !this->isActivated(tStep) ) {
-        int ndofs = computeNumberOfDofs(EID_MomentumBalance);
+        int ndofs = computeNumberOfDofs();
         answer.resize(ndofs, ndofs);
         answer.zero();
         return;
@@ -751,8 +715,7 @@ StructuralElement :: computeStiffnessMatrix(FloatMatrix &answer, MatResponseMode
     IntegrationRule *iRule;
     bool matStiffSymmFlag = this->giveCrossSection()->isCharacteristicMtrxSymmetric(rMode, this->material);
 
-    answer.resize( computeNumberOfDofs(EID_MomentumBalance), computeNumberOfDofs(EID_MomentumBalance) );
-    answer.zero();
+    answer.resize(0, 0);
 
     if ( !this->isActivated(tStep) ) {
         return;
@@ -820,12 +783,9 @@ void StructuralElement :: computeStiffnessMatrix_withIRulesAsSubcells(FloatMatri
                                                                       MatResponseMode rMode, TimeStep *tStep)
 {
     FloatMatrix temp, bj, d, dbj;
-    IntegrationRule *iRule;
-    GaussPoint *gp;
-    int ndofs = this->computeNumberOfDofs(EID_MomentumBalance);
+    int ndofs = this->computeNumberOfDofs();
     bool matStiffSymmFlag = this->giveCrossSection()->isCharacteristicMtrxSymmetric( rMode, this->giveMaterial()->giveNumber() );
     IntArray irlocnum;
-    double dV;
 
     answer.resize(ndofs, ndofs);
     answer.zero();
@@ -837,14 +797,14 @@ void StructuralElement :: computeStiffnessMatrix_withIRulesAsSubcells(FloatMatri
 
     // loop over individual integration rules
     for ( int ir = 0; ir < numberOfIntegrationRules; ir++ ) {
-        iRule = integrationRulesArray [ ir ];
+        IntegrationRule *iRule = integrationRulesArray [ ir ];
         // loop over individual integration points
         for ( int j = 0; j < iRule->giveNumberOfIntegrationPoints(); j++ ) {
-            gp = iRule->getIntegrationPoint(j);
+            GaussPoint *gp = iRule->getIntegrationPoint(j);
+            double dV = this->computeVolumeAround(gp);
             this->computeBmatrixAt(gp, bj);
             this->computeConstitutiveMatrixAt(d, rMode, gp, tStep);
 
-            dV = this->computeVolumeAround(gp);
             dbj.beProductOf(d, bj);
             if ( matStiffSymmFlag ) {
                 m->plusProductSymmUpper(bj, dbj, dV);
@@ -928,8 +888,6 @@ StructuralElement :: giveInternalForcesVector(FloatArray &answer,
         u.subtract(*initialDisplacements);
     }
 
-    // do not resize answer to computeNumberOfDofs(EID_MomentumBalance)
-    // as this is valid only if receiver has no nodes with slaves
     // zero answer will resize accordingly when adding first contribution
     answer.resize(0);
 
@@ -994,8 +952,6 @@ StructuralElement :: giveInternalForcesVector_withIRulesAsSubcells(FloatArray &a
         u.subtract(*initialDisplacements);
     }
 
-    // do not resize answer to computeNumberOfDofs(EID_MomentumBalance)
-    // as this is valid only if receiver has no nodes with slaves
     // zero answer will resize accordingly when adding first contribution
     answer.resize(0);
 
@@ -1214,7 +1170,6 @@ StructuralElement :: condense(FloatMatrix *stiff, FloatMatrix *mass, FloatArray 
     int i, ii, j, k;
     int nkon = what->giveSize();
     int size = stiff->giveNumberOfRows();
-    int ndofs = this->computeNumberOfDofs(EID_MomentumBalance);
     long double coeff, dii, lii = 0;
     FloatArray *gaussCoeff = NULL;
     // stored gauss coefficient
@@ -1244,7 +1199,7 @@ StructuralElement :: condense(FloatMatrix *stiff, FloatMatrix *mass, FloatArray 
 
     for ( i = 1; i <= nkon; i++ ) {
         ii  = what->at(i);
-        if ( ( ii > ndofs ) || ( ii <= 0 ) ) {
+        if ( ( ii > size ) || ( ii <= 0 ) ) {
             _error("condense: wrong dof number");
         }
 
@@ -1305,6 +1260,15 @@ StructuralElement :: condense(FloatMatrix *stiff, FloatMatrix *mass, FloatArray 
 int
 StructuralElement :: giveIPValue(FloatArray &answer, GaussPoint *aGaussPoint, InternalStateType type, TimeStep *atTime)
 {
+    if ( type == IST_DisplacementVector ) {
+        FloatArray u;
+        FloatMatrix N;
+        this->computeVectorOf(EID_MomentumBalance, VM_Total, atTime, u);
+        this->computeNmatrixAt(aGaussPoint, N);
+        answer.beProductOf(N, u);
+        return 1;
+    }
+    
     return Element :: giveIPValue(answer, aGaussPoint, type, atTime);
 }
 
@@ -1399,12 +1363,14 @@ StructuralElement :: adaptiveUpdate(TimeStep *tStep)
 IRResultType
 StructuralElement :: initializeFrom(InputRecord *ir)
 {
-    //const char *__proc = "initializeFrom"; // Required by IR_GIVE_FIELD macro
-    IRResultType result;                   // Required by IR_GIVE_FIELD macro
+    return Element :: initializeFrom(ir);
+}
 
-    result = Element :: initializeFrom(ir);
+void StructuralElement :: giveInputRecord(DynamicInputRecord &input)
+{
+	Element :: giveInputRecord(input);
 
-    return result;
+	/// TODO: Should initialDisplacements be stored? /ES
 }
 
 
@@ -1419,8 +1385,7 @@ StructuralCrossSection *StructuralElement::giveStructuralCrossSection()
 
 //
 int
-StructuralElement :: giveInternalStateAtNode(FloatArray &answer, InternalStateType type, InternalStateMode mode,
-                                             int node, TimeStep *atTime)
+StructuralElement :: giveInternalStateAtNode(FloatArray &answer, InternalStateType type, InternalStateMode mode, int node, TimeStep *atTime)
 {
     if ( type == IST_DisplacementVector ) {
         Node *n = this->giveNode(node);

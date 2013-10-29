@@ -42,7 +42,7 @@ namespace oofem {
  * Implemantation of ILU (Incomplete LU) Preconditioner.
  * No fill-up - ILU(0).
  */
-class CompCol_ILUPreconditioner : public Preconditioner
+class OOFEM_EXPORT CompCol_ILUPreconditioner : public Preconditioner
 {
 private:
     FloatArray l_val_;

@@ -17,19 +17,19 @@
  *       Czech Technical University, Faculty of Civil Engineering,
  *   Department of Structural Mechanics, 166 29 Prague, Czech Republic
  *
- *  This program is free software; you can redistribute it and/or modify
- *  it under the terms of the GNU General Public License as published by
- *  the Free Software Foundation; either version 2 of the License, or
- *  (at your option) any later version.
+ *  This library is free software; you can redistribute it and/or
+ *  modify it under the terms of the GNU Lesser General Public
+ *  License as published by the Free Software Foundation; either
+ *  version 2.1 of the License, or (at your option) any later version.
  *
  *  This program is distributed in the hope that it will be useful,
  *  but WITHOUT ANY WARRANTY; without even the implied warranty of
- *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- *  GNU General Public License for more details.
+ *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+ *  Lesser General Public License for more details.
  *
- *  You should have received a copy of the GNU General Public License
- *  along with this program; if not, write to the Free Software
- *  Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
+ *  You should have received a copy of the GNU Lesser General Public
+ *  License along with this library; if not, write to the Free Software
+ *  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  */
 
 #include "set.h"
@@ -44,7 +44,7 @@
 #include "feinterpol2d.h"
 #include "feinterpol3d.h"
 #include "contextioerr.h"
-
+#include "dynamicinputrecord.h"
 #include <list>
 
 namespace oofem {
@@ -76,6 +76,26 @@ IRResultType Set :: initializeFrom(InputRecord* ir)
 
     return IRRT_OK;
 }
+
+
+void Set :: giveInputRecord(DynamicInputRecord &input)
+{
+    input.setRecordKeywordField(_IFT_Set_Name, this->giveNumber());
+
+    if ( this->giveNodeList().giveSize() ) {
+        input.setField(this->nodes, _IFT_Set_nodes);
+    }
+    if ( this->giveElementList().giveSize() ) {
+        input.setField(this->elements, _IFT_Set_elements);
+    }
+    if ( this->giveBoundaryList().giveSize() ) {
+        input.setField(this->elementBoundaries, _IFT_Set_elementBoundaries);
+    }
+    if ( this->giveEdgeList().giveSize() ) {
+        input.setField(this->elementEdges, _IFT_Set_elementEdges);
+    }
+}
+
 
 void Set :: computeIntArray(IntArray& answer, const IntArray& specified, std::list< Range > ranges)
 {

@@ -17,19 +17,19 @@
  *       Czech Technical University, Faculty of Civil Engineering,
  *   Department of Structural Mechanics, 166 29 Prague, Czech Republic
  *
- *  This program is free software; you can redistribute it and/or modify
- *  it under the terms of the GNU General Public License as published by
- *  the Free Software Foundation; either version 2 of the License, or
- *  (at your option) any later version.
+ *  This library is free software; you can redistribute it and/or
+ *  modify it under the terms of the GNU Lesser General Public
+ *  License as published by the Free Software Foundation; either
+ *  version 2.1 of the License, or (at your option) any later version.
  *
  *  This program is distributed in the hope that it will be useful,
  *  but WITHOUT ANY WARRANTY; without even the implied warranty of
- *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- *  GNU General Public License for more details.
+ *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+ *  Lesser General Public License for more details.
  *
- *  You should have received a copy of the GNU General Public License
- *  along with this program; if not, write to the Free Software
- *  Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
+ *  You should have received a copy of the GNU Lesser General Public
+ *  License along with this library; if not, write to the Free Software
+ *  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  */
 
 #include "nlstructuralelement.h"
@@ -43,6 +43,7 @@
 #include "floatarray.h"
 #include "floatmatrix.h"
 #include "structuralcrosssection.h"
+#include "dynamicinputrecord.h"
 
 namespace oofem {
 NLStructuralElement :: NLStructuralElement(int n, Domain *aDomain) :
@@ -128,8 +129,6 @@ NLStructuralElement :: giveInternalForcesVector(FloatArray &answer, TimeStep *tS
         u.subtract(*initialDisplacements);
     }
 
-    // do not resize answer to computeNumberOfDofs(EID_MomentumBalance)
-    // as this is valid only if receiver has no nodes with slaves
     // zero answer will resize accordingly when adding first contribution
     answer.resize(0);
 
@@ -214,8 +213,6 @@ NLStructuralElement :: giveInternalForcesVector_withIRulesAsSubcells(FloatArray 
         m = & temp;
     }
 
-    // do not resize answer to computeNumberOfDofs(EID_MomentumBalance)
-    // as this is valid only if receiver has no nodes with slaves
     // zero answer will resize accordingly when adding first contribution
     answer.resize(0);
 
@@ -287,31 +284,33 @@ NLStructuralElement :: computeStiffnessMatrix(FloatMatrix &answer,
                                               MatResponseMode rMode, TimeStep *tStep)
 {
     StructuralCrossSection *cs = this->giveStructuralCrossSection();
-    bool matStiffSymmFlag = true;
+    bool matStiffSymmFlag = cs->isCharacteristicMtrxSymmetric(rMode, this->material);
 
-    answer.resize( computeNumberOfDofs(EID_MomentumBalance), computeNumberOfDofs(EID_MomentumBalance) );
+    answer.resize(0, 0);
+
     if ( !this->isActivated(tStep) ) {
         return;
     }
 
     // Compute matrix from material stiffness (total stiffness for small def.) - B^T * dS/dE * B
-    FloatMatrix B, D, DB;
     if ( numberOfIntegrationRules == 1 ) {
+        FloatMatrix B, D, DB;
         IntegrationRule *iRule = integrationRulesArray [ giveDefaultIntegrationRule() ];
         for ( int j = 0; j < iRule->giveNumberOfIntegrationPoints(); j++ ) {
             GaussPoint *gp = iRule->getIntegrationPoint(j);
 
-            // Engineering (small strain) stiffness dSig/dEps
+            // Engineering (small strain) stiffness
             if ( nlGeometry == 0 ) {
                 this->computeBmatrixAt(gp, B);
-                cs->giveCharMaterialStiffnessMatrix(D, rMode, gp, tStep);
-                //cs->give_dSigdEps_StiffnessMatrix(D, rMode, gp, tStep);
+                this->computeConstitutiveMatrixAt(D, rMode, gp, tStep);
             } else if ( nlGeometry == 1 ) {
                 if ( this->domain->giveEngngModel()->giveFormulation() == AL ) { // Material stiffness dC/de
                     this->computeBmatrixAt(gp, B);
+                    /// @todo We probably need overloaded function (like above) here as well.
                     cs->giveStiffnessMatrix_dCde(D, rMode, gp, tStep);
                 } else { // Material stiffness dP/dF
                     this->computeBHmatrixAt(gp, B);
+                    /// @todo We probably need overloaded function (like above) here as well.
                     cs->giveStiffnessMatrix_dPdF(D, rMode, gp, tStep);
                 }
             }
@@ -336,7 +335,7 @@ NLStructuralElement :: computeStiffnessMatrix(FloatMatrix &answer,
         }
 
         int iStartIndx, iEndIndx, jStartIndx, jEndIndx;
-        FloatMatrix Bi, BHi, Bj, BHj, Dij, DBj;
+        FloatMatrix Bi, Bj, D, Dij, DBj;
         for ( int i = 0; i < numberOfIntegrationRules; i++ ) {
             iStartIndx = integrationRulesArray [ i ]->getStartIndexOfLocalStrainWhereApply();
             iEndIndx   = integrationRulesArray [ i ]->getEndIndexOfLocalStrainWhereApply();
@@ -358,14 +357,13 @@ NLStructuralElement :: computeStiffnessMatrix(FloatMatrix &answer,
                     // Engineering (small strain) stiffness dSig/dEps
                     if ( nlGeometry == 0 ) {
                         this->computeBmatrixAt(gp, Bi, iStartIndx, iEndIndx);
-                        cs->giveCharMaterialStiffnessMatrix(D, rMode, gp, tStep);
-                        //cs->give_dSigdEps_StiffnessMatrix(D, rMode, gp, tStep);
+                        this->computeConstitutiveMatrixAt(D, rMode, gp, tStep);
                     } else if ( nlGeometry == 1 ) {
                         if ( this->domain->giveEngngModel()->giveFormulation() == AL ) {                         // Material stiffness dC/de
-                            this->computeBmatrixAt(gp, B);
+                            this->computeBmatrixAt(gp, Bi);
                             cs->giveStiffnessMatrix_dCde(D, rMode, gp, tStep);
                         } else {                        // Material stiffness dP/dF
-                            this->computeBHmatrixAt(gp, B);
+                            this->computeBHmatrixAt(gp, Bi);
                             cs->giveStiffnessMatrix_dPdF(D, rMode, gp, tStep);
                         }
                     }
@@ -376,14 +374,13 @@ NLStructuralElement :: computeStiffnessMatrix(FloatMatrix &answer,
                             this->computeBmatrixAt(gp, Bj, jStartIndx, jEndIndx);
                         } else if ( nlGeometry == 1 ) {
                             if ( this->domain->giveEngngModel()->giveFormulation() == AL ) {
-                                this->computeBmatrixAt(gp, B);
+                                this->computeBmatrixAt(gp, Bj);
                             } else {
                                 this->computeBHmatrixAt(gp, Bj);
                             }
                         }
                     } else {
                         Bj  = Bi;
-                        BHj = BHi;
                     }
 
                     Dij.beSubMatrixOf(D, iStartIndx, iEndIndx, jStartIndx, jEndIndx);
@@ -432,10 +429,6 @@ NLStructuralElement :: computeStiffnessMatrix_withIRulesAsSubcells(FloatMatrix &
 
             if ( nlGeometry == 0 ) {
                 this->computeBmatrixAt(gp, B);
-                //cs->giveCharMaterialStiffnessMatrix(D, rMode, gp, tStep);
-
-                //@todo This is a special treatment - asks the element instead of the cross section
-                // This method is only used by one XFEM element which deals with inclusions
                 this->computeConstitutiveMatrixAt(D, rMode, gp, tStep);
             } else if ( nlGeometry == 1 ) {
                 if ( this->domain->giveEngngModel()->giveFormulation() == AL ) { // Material stiffness dC/de
@@ -475,42 +468,38 @@ NLStructuralElement :: computeInitialStressMatrix(FloatMatrix &answer, TimeStep 
     FloatArray stress, stressFull(6);
     FloatMatrix B, stress_ident, stress_identFull;
     IntArray indx;
-    Material *mat = this->giveMaterial();
 
-    answer.resize( computeNumberOfDofs(EID_MomentumBalance), computeNumberOfDofs(EID_MomentumBalance) );
-    answer.zero();
+    answer.resize(0, 0);
 
     IntegrationRule *iRule = integrationRulesArray [ giveDefaultIntegrationRule() ];
     // assemble initial stress matrix
     for ( int i = 0; i < iRule->giveNumberOfIntegrationPoints(); i++ ) {
         GaussPoint *gp = iRule->getIntegrationPoint(i);
-        stress = static_cast< StructuralMaterialStatus * >( mat->giveStatus(gp) )->giveStressVector();
+        // This function fetches the full form of the tensor
+        this->giveIPValue(stress, gp, IST_StressTensor, tStep);
         if ( stress.giveSize() ) {
             // Construct the stress_ident matrix
-            StructuralMaterial :: giveVoigtSymVectorMask( indx, gp->giveMaterialMode() );
-            stressFull.zero();
-            stressFull.assemble(stress, indx);
             // The complicated part, the not-so-pretty product here: s_il delta_jk
             {
-                stress_ident.at(1, 1) = stress.at(1);
-                stress_ident.at(2, 2) = stress.at(2);
-                stress_ident.at(3, 3) = stress.at(3);
-                stress_ident.at(4, 4) = stress.at(2) + stress.at(3);
-                stress_ident.at(5, 5) = stress.at(1) + stress.at(3);
-                stress_ident.at(6, 6) = stress.at(1) + stress.at(2);
+                stress_identFull.at(1, 1) = stress.at(1);
+                stress_identFull.at(2, 2) = stress.at(2);
+                stress_identFull.at(3, 3) = stress.at(3);
+                stress_identFull.at(4, 4) = stress.at(2) + stress.at(3);
+                stress_identFull.at(5, 5) = stress.at(1) + stress.at(3);
+                stress_identFull.at(6, 6) = stress.at(1) + stress.at(2);
 
-                stress_ident.at(1, 5) = stress.at(5);
-                stress_ident.at(1, 6) = stress.at(6);
+                stress_identFull.at(1, 5) = stress.at(5);
+                stress_identFull.at(1, 6) = stress.at(6);
 
-                stress_ident.at(2, 4) = stress.at(4);
-                stress_ident.at(2, 5) = stress.at(6);
+                stress_identFull.at(2, 4) = stress.at(4);
+                stress_identFull.at(2, 5) = stress.at(6);
 
-                stress_ident.at(3, 4) = stress.at(4);
-                stress_ident.at(3, 5) = stress.at(5);
+                stress_identFull.at(3, 4) = stress.at(4);
+                stress_identFull.at(3, 5) = stress.at(5);
 
-                stress_ident.at(4, 5) = stress.at(6);
-                stress_ident.at(4, 6) = stress.at(5);
-                stress_ident.at(5, 6) = stress.at(4);
+                stress_identFull.at(4, 5) = stress.at(6);
+                stress_identFull.at(4, 6) = stress.at(5);
+                stress_identFull.at(5, 6) = stress.at(4);
             }
             stress_ident.beSubMatrixOf(stress_identFull, indx, indx);
             stress_ident.symmetrized();
@@ -537,6 +526,13 @@ NLStructuralElement :: initializeFrom(InputRecord *ir)
     IR_GIVE_OPTIONAL_FIELD(ir, nlGeometry, _IFT_NLStructuralElement_nlgeoflag);
 
     return IRRT_OK;
+}
+
+void NLStructuralElement :: giveInputRecord(DynamicInputRecord &input)
+{
+	StructuralElement::giveInputRecord(input);
+
+	input.setField(nlGeometry, _IFT_NLStructuralElement_nlgeoflag);
 }
 
 int

@@ -17,19 +17,19 @@
  *       Czech Technical University, Faculty of Civil Engineering,
  *   Department of Structural Mechanics, 166 29 Prague, Czech Republic
  *
- *  This program is free software; you can redistribute it and/or modify
- *  it under the terms of the GNU General Public License as published by
- *  the Free Software Foundation; either version 2 of the License, or
- *  (at your option) any later version.
+ *  This library is free software; you can redistribute it and/or
+ *  modify it under the terms of the GNU Lesser General Public
+ *  License as published by the Free Software Foundation; either
+ *  version 2.1 of the License, or (at your option) any later version.
  *
  *  This program is distributed in the hope that it will be useful,
  *  but WITHOUT ANY WARRANTY; without even the implied warranty of
- *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- *  GNU General Public License for more details.
+ *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+ *  Lesser General Public License for more details.
  *
- *  You should have received a copy of the GNU General Public License
- *  along with this program; if not, write to the Free Software
- *  Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
+ *  You should have received a copy of the GNU Lesser General Public
+ *  License along with this library; if not, write to the Free Software
+ *  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  */
 
 #ifndef matlabexportmodule_h_
@@ -46,6 +46,13 @@
 #define _IFT_MatlabExportModule_data "data"
 #define _IFT_MatlabExportModule_area "area"
 #define _IFT_MatlabExportModule_specials "specials"
+// Reaction forces
+#define _IFT_MatlabExportModule_ReactionForces "reactionforces"
+#define _IFT_MatlabExportModule_DofManList "dofmanlist"
+// Integration points
+#define _IFT_MatlabExportModule_IntegrationPoints "integrationpoints"
+#define _IFT_MatlabExportModule_internalVarsToExport "internalvars"
+#define _IFT_MatlabExportModule_ElementList "elementlist"
 //@}
 
 namespace oofem {
@@ -55,11 +62,12 @@ namespace oofem {
  *
  * @author Carl Sandström
  */
-class MatlabExportModule : public ExportModule
+class OOFEM_EXPORT MatlabExportModule : public ExportModule
 {
 protected:
     /// list of InternalStateType values, identifying the selected vars for export
     IntArray internalVarsToExport;
+    IntArray elList;
     /// list of primary unknowns to export
     IntArray primaryVarsToExport;
     std :: string functionname;
@@ -75,9 +83,14 @@ protected:
     bool exportData;
     bool exportArea;
     bool exportSpecials;
+    bool exportReactionForces;
+    bool exportIntegrationPointFields;
 
 private:
     void computeArea();
+
+    // Export reaction forces
+    IntArray reactionForcesDofManList; // Holds which dof managers reaction forces should be exported from.
 
 public:
     MatlabExportModule(int n, EngngModel *e);
@@ -87,12 +100,16 @@ public:
     virtual void initialize();
     virtual void terminate();
 
-    void doOutputMesh(TimeStep *tStep,  FILE *FID);
-    void doOutputData(TimeStep *tStep,  FILE *FID);
-    void doOutputSpecials(TimeStep *tStep,      FILE *FID);
+    void doOutputMesh(TimeStep *tStep, FILE *FID);
+    void doOutputData(TimeStep *tStep, FILE *FID);
+    void doOutputSpecials(TimeStep *tStep, FILE *FID);
+    void doOutputReactionForces(TimeStep *tStep, FILE *FID);
+    void doOutputIntegrationPointFields(TimeStep *tStep, FILE *FID);
 
     virtual const char *giveClassName() const { return "MatlabExportModule"; };
     virtual const char *giveInputRecordName() const { return _IFT_MatlabExportModule_Name; }
+
+
 };
 } // end namespace oofem
 #endif // matlabexportmodule_h_

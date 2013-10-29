@@ -17,19 +17,19 @@
  *       Czech Technical University, Faculty of Civil Engineering,
  *   Department of Structural Mechanics, 166 29 Prague, Czech Republic
  *
- *  This program is free software; you can redistribute it and/or modify
- *  it under the terms of the GNU General Public License as published by
- *  the Free Software Foundation; either version 2 of the License, or
- *  (at your option) any later version.
+ *  This library is free software; you can redistribute it and/or
+ *  modify it under the terms of the GNU Lesser General Public
+ *  License as published by the Free Software Foundation; either
+ *  version 2.1 of the License, or (at your option) any later version.
  *
  *  This program is distributed in the hope that it will be useful,
  *  but WITHOUT ANY WARRANTY; without even the implied warranty of
- *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- *  GNU General Public License for more details.
+ *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+ *  Lesser General Public License for more details.
  *
- *  You should have received a copy of the GNU General Public License
- *  along with this program; if not, write to the Free Software
- *  Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
+ *  You should have received a copy of the GNU Lesser General Public
+ *  License along with this library; if not, write to the Free Software
+ *  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  */
 
 #ifndef ConcreteDPM2_h
@@ -61,11 +61,11 @@
 #define _IFT_ConcreteDPM2_dhard "dhard"
 #define _IFT_ConcreteDPM2_dilation "dilation"
 #define _IFT_ConcreteDPM2_asoft "asoft"
-#define _IFT_ConcreteDPM2_bsoft "bsoft"
 #define _IFT_ConcreteDPM2_hp "hp"
 #define _IFT_ConcreteDPM2_yieldtol "yieldtol"
 #define _IFT_ConcreteDPM2_newtoniter "newtoniter"
 #define _IFT_ConcreteDPM2_wf "wf"
+#define _IFT_ConcreteDPM2_efc "efc"
 #define _IFT_ConcreteDPM2_softeningType "stype"
 #define _IFT_ConcreteDPM2_ftOne "ft1"
 #define _IFT_ConcreteDPM2_wfOne "wf1"
@@ -593,7 +593,7 @@ protected:
     double hardeningModulus;
 
     /// Parameter of the ductilityMeasure of the damage model.
-    double ASoft, BSoft;
+    double ASoft;
 
     /// Parameter of the hardening law of the plasticity model.
     double yieldHardPrimePeak;
@@ -635,12 +635,15 @@ protected:
     double nu;
 
     /// Control parameter for the exponential softening law.
+    double efCompression;
+
+    /// Control parameter for the linear/bilinear softening law in tension.
     double wf;
 
-    /// Control parameter for the exponential softening law.
+    /// Control parameter for the bilinear softening law in tension.
     double wfOne;
 
-    /// Control parameter for the exponential softening law.
+    /// Control parameter for the bilinear softening law.
     double ftOne;
 
     /// yield tolerance for the plasticity model.
@@ -713,7 +716,7 @@ public:
      * @param tempKappa Hardening variable.
      */
 
-    bool checkForVertexCase(double answer,
+    bool checkForVertexCase(double &answer,
                             const double sig,
                             const double tempKappa);
 
@@ -918,7 +921,9 @@ public:
     double computeAlpha(StressVector &effectiveStressTension, StressVector &effectiveStressCompression, StressVector &effectiveStress);
 
     /// Compute damage parameter.
-    virtual double computeDamageParam(double equivStrain, double kappaOne, double kappaTwo, GaussPoint *gp);
+    virtual double computeDamageParamTension(double equivStrain, double kappaOne, double kappaTwo, double le);
+
+    virtual double computeDamageParamCompression(double equivStrain, double kappaOne, double kappaTwo);
 
     /// Compute equivalent strain value.
     double computeDeltaPlasticStrainNormTension(double tempKappaD, double kappaD, GaussPoint *gp);

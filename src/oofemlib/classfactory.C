@@ -17,19 +17,19 @@
  *       Czech Technical University, Faculty of Civil Engineering,
  *   Department of Structural Mechanics, 166 29 Prague, Czech Republic
  *
- *  This program is free software; you can redistribute it and/or modify
- *  it under the terms of the GNU General Public License as published by
- *  the Free Software Foundation; either version 2 of the License, or
- *  (at your option) any later version.
+ *  This library is free software; you can redistribute it and/or
+ *  modify it under the terms of the GNU Lesser General Public
+ *  License as published by the Free Software Foundation; either
+ *  version 2.1 of the License, or (at your option) any later version.
  *
  *  This program is distributed in the hope that it will be useful,
  *  but WITHOUT ANY WARRANTY; without even the implied warranty of
- *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- *  GNU General Public License for more details.
+ *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+ *  Lesser General Public License for more details.
  *
- *  You should have received a copy of the GNU General Public License
- *  along with this program; if not, write to the Free Software
- *  Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
+ *  You should have received a copy of the GNU Lesser General Public
+ *  License along with this library; if not, write to the Free Software
+ *  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  */
 
 #include "classfactory.h"
@@ -153,6 +153,7 @@ InitialCondition * ClassFactory :: createInitialCondition(const char *name, int 
     return NULL;
 }
 
+/*
 Patch * ClassFactory :: createPatch(Patch :: PatchType type, Element *e)
 {
     if ( type == Patch :: PT_TrianglePatch ) {
@@ -160,7 +161,7 @@ Patch * ClassFactory :: createPatch(Patch :: PatchType type, Element *e)
     }
     return NULL;
 }
-
+*/
 NodalRecoveryModel * ClassFactory :: createNodalRecoveryModel(NodalRecoveryModel :: NodalRecoveryModelType type, Domain *d)
 {
     if ( type == NodalRecoveryModel :: NRM_NodalAveraging ) {
@@ -352,6 +353,28 @@ bool ClassFactory :: registerEnrichmentDomain(const char *name, EnrichmentDomain
     return true;
 }
 
+EnrichmentFront* ClassFactory :: createEnrichmentFront(const char *name)
+{
+    return ( enrichmentFrontList.count(name) == 1 ) ? enrichmentFrontList [ name ]() : NULL;
+}
+
+bool ClassFactory :: registerEnrichmentFront(const char *name, EnrichmentFront * ( *creator )())
+{
+    enrichmentFrontList[name] = creator;
+    return true;
+}
+
+PropagationLaw* ClassFactory :: createPropagationLaw(const char *name)
+{
+    return ( propagationLawList.count(name) == 1 ) ? propagationLawList [ name ]() : NULL;
+}
+
+bool ClassFactory :: registerPropagationLaw(const char *name, PropagationLaw * ( *creator )())
+{
+    propagationLawList[name] = creator;
+    return true;
+}
+
 BasicGeometry* ClassFactory :: createGeometry(const char *name)
 {
     return ( geometryList.count(name) == 1 ) ? geometryList [ name ]() : NULL;
@@ -362,6 +385,34 @@ bool ClassFactory :: registerGeometry(const char *name, BasicGeometry * ( *creat
     geometryList[name] = creator;
     return true;
 }
+
+
+// Failure module:
+
+FailureCriteria* ClassFactory :: createFailureCriteria(const char *name, int number, FractureManager *fracManager)
+{
+    return ( failureCriteriaList.count(name) == 1 ) ? failureCriteriaList [ name ](number, fracManager) : NULL;
+}
+
+bool ClassFactory :: registerFailureCriteria(const char *name, FailureCriteria * ( *creator )(int, FractureManager *))
+{
+    failureCriteriaList[name] = creator;
+    return true;
+}
+
+FailureCriteriaStatus* ClassFactory :: createFailureCriteriaStatus(const char *name, int number, FailureCriteria *fc)
+{
+    return ( failureCriteriaList.count(name) == 1 ) ? failureCriteriaStatusList [ name ](number, fc) : NULL;
+}
+
+bool ClassFactory :: registerFailureCriteriaStatus(const char *name, FailureCriteriaStatus * ( *creator )(int, FailureCriteria *))
+{
+    failureCriteriaStatusList[name] = creator;
+    return true;
+}
+
+
+
 
 SparseGeneralEigenValueSystemNM* ClassFactory :: createGeneralizedEigenValueSolver(GenEigvalSolverType st, Domain *d, EngngModel *m)
 {

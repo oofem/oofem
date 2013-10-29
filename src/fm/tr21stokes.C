@@ -17,19 +17,19 @@
  *       Czech Technical University, Faculty of Civil Engineering,
  *   Department of Structural Mechanics, 166 29 Prague, Czech Republic
  *
- *  This program is free software; you can redistribute it and/or modify
- *  it under the terms of the GNU General Public License as published by
- *  the Free Software Foundation; either version 2 of the License, or
- *  (at your option) any later version.
+ *  This library is free software; you can redistribute it and/or
+ *  modify it under the terms of the GNU Lesser General Public
+ *  License as published by the Free Software Foundation; either
+ *  version 2.1 of the License, or (at your option) any later version.
  *
  *  This program is distributed in the hope that it will be useful,
  *  but WITHOUT ANY WARRANTY; without even the implied warranty of
- *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- *  GNU General Public License for more details.
+ *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+ *  Lesser General Public License for more details.
  *
- *  You should have received a copy of the GNU General Public License
- *  along with this program; if not, write to the Free Software
- *  Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
+ *  You should have received a copy of the GNU Lesser General Public
+ *  License along with this library; if not, write to the Free Software
+ *  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  */
 
 #include "tr21stokes.h"
@@ -90,19 +90,9 @@ void Tr21Stokes :: computeGaussPoints()
     }
 }
 
-int Tr21Stokes :: computeNumberOfDofs(EquationID ut)
+int Tr21Stokes :: computeNumberOfDofs()
 {
-    if ( ut == EID_MomentumBalance_ConservationEquation ) {
-        return 15;
-    } else if ( ut == EID_MomentumBalance ) {
-        return 12;
-    } else if ( ut == EID_ConservationEquation ) {
-        return 3;
-    } else {
-        OOFEM_ERROR("computeNumberOfDofs: Unknown equation id encountered");
-    }
-
-    return 0;
+    return 15;
 }
 
 void Tr21Stokes :: giveDofManDofIDMask(int inode, EquationID ut, IntArray &answer) const
@@ -297,14 +287,14 @@ void Tr21Stokes :: computeBoundaryLoadVector(FloatArray &answer, BoundaryLoad *l
             FloatArray *lcoords = gp->giveCoordinates();
 
             this->interpolation_quad.edgeEvalN(N, boundary, * lcoords, FEIElementGeometryWrapper(this));
-            double detJ = fabs(this->interpolation_quad.edgeGiveTransformationJacobian(boundary, * lcoords, FEIElementGeometryWrapper(this)));
+            double detJ = fabs(this->interpolation_quad.boundaryGiveTransformationJacobian(boundary, * lcoords, FEIElementGeometryWrapper(this)));
             double dS = gp->giveWeight() * detJ;
 
-            if ( boundaryLoad->giveFormulationType() == BoundaryLoad :: BL_EntityFormulation ) { // Edge load in xi-eta system
+            if ( boundaryLoad->giveFormulationType() == Load :: FT_Entity ) { // Edge load in xi-eta system
                 boundaryLoad->computeValueAt(t, tStep, * lcoords, VM_Total);
             } else { // Edge load in x-y system
                 FloatArray gcoords;
-                this->interpolation_quad.edgeLocal2global(gcoords, boundary, * lcoords, FEIElementGeometryWrapper(this));
+                this->interpolation_quad.boundaryLocal2Global(gcoords, boundary, * lcoords, FEIElementGeometryWrapper(this));
                 boundaryLoad->computeValueAt(t, tStep, gcoords, VM_Total);
             }
 

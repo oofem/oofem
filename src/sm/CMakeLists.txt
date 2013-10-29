@@ -35,8 +35,8 @@ set (sm_element
     qplanestressgrad.C
     latticestructuralelement.C
     lattice2d.C
-	shell7base.C
-	tr2shell7.C
+    shell7base.C
+    tr2shell7.C
     shell7basexfem.C
     tr2shell7xfem.C
     trplanestressrotallman.C
@@ -52,6 +52,7 @@ set (sm_emodel
     structengngmodel.C
     linearstatic.C
     nlinearstatic.C
+    xfemstatic.C
     nlineardynamic.C
     eigenvaluedynamic.C
     linearstability.C
@@ -61,6 +62,7 @@ set (sm_emodel
     diidynamic.C
     nldeidynamic.C
     incrementallinearstatic.C
+    fracturemanager.C
     )
 
 set (sm_loads
@@ -75,6 +77,7 @@ set (sm_loads
 set (sm_material
     abaqususermaterial.C
     structuralmaterial.C
+    structuralinterfacematerial.C
     linearelasticmaterial.C
     isolinearelasticmaterial.C
     ortholinearelasticmaterial.C
@@ -91,6 +94,7 @@ set (sm_material
     druckerpragercutmat.C
     masonry02.C
     isointerfacedamage01.C
+    isointerfacedamage02.C
     j2mat.C
     mat_cebfip90.C
     hellmat.C
@@ -112,6 +116,9 @@ set (sm_material
     latticedamage2d.C
     dustmat.C
     lsmastermat.C lsmastermatgrad.C
+    bilinearczmaterial.C
+    intmatbilinczfagerstrom.C
+    intmatbilinearcz.C
     )
 
 set (sm_error
@@ -134,6 +141,7 @@ set (sm_barrier
 
 set (sm_status
     structuralms.C
+	structuralinterfacematerialstatus.C
     rheoChM.C maxwellChM.C kelvinChM.C
     rcm2.C
     isodamagemodel.C

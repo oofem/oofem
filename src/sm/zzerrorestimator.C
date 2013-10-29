@@ -17,19 +17,19 @@
  *       Czech Technical University, Faculty of Civil Engineering,
  *   Department of Structural Mechanics, 166 29 Prague, Czech Republic
  *
- *  This program is free software; you can redistribute it and/or modify
- *  it under the terms of the GNU General Public License as published by
- *  the Free Software Foundation; either version 2 of the License, or
- *  (at your option) any later version.
+ *  This library is free software; you can redistribute it and/or
+ *  modify it under the terms of the GNU Lesser General Public
+ *  License as published by the Free Software Foundation; either
+ *  version 2.1 of the License, or (at your option) any later version.
  *
  *  This program is distributed in the hope that it will be useful,
  *  but WITHOUT ANY WARRANTY; without even the implied warranty of
- *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- *  GNU General Public License for more details.
+ *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+ *  Lesser General Public License for more details.
  *
- *  You should have received a copy of the GNU General Public License
- *  along with this program; if not, write to the Free Software
- *  Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
+ *  You should have received a copy of the GNU Lesser General Public
+ *  License along with this library; if not, write to the Free Software
+ *  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  */
 
 #include "zzerrorestimator.h"
@@ -152,6 +152,7 @@ ZZErrorEstimator :: estimateError(EE_ErrorMode mode, TimeStep *tStep)
 
     this->globalENorm = sqrt(this->globalENorm);
     this->globalSNorm = sqrt(this->globalSNorm);
+    this->globalErrorEstimate = pe;
 
 
     this->stateCounter = tStep->giveSolutionStateCounter();
@@ -195,10 +196,10 @@ ZZErrorEstimator :: giveValue(EE_ValueType type, TimeStep *tStep)
     this->estimateError(equilibratedEM, tStep);
     if ( type == globalErrorEEV ) {
         return this->globalENorm;
-    }
-    // return sqrt (this->globalENorm/(this->globalENorm + this->globalSNorm));
-    else if ( type == globalNormEEV ) {
+    } else if ( type == globalNormEEV ) {
         return this->globalSNorm;
+    } else if ( type == relativeErrorEstimateEEV) {
+        return this->globalErrorEstimate;
     } else {
         return 0.0;
     }
@@ -292,29 +293,33 @@ ZZErrorEstimatorInterface :: ZZErrorEstimatorI_computeElementContributions(doubl
             sNorm += sig.computeSquaredNorm() * dV;
         }
     } else if ( norm == ZZErrorEstimator :: EnergyNorm ) {
-        FloatArray help;
+      FloatArray help, ldiff_reduced, lsig_reduced;
         FloatMatrix D, DInv;
+	StructuralMaterial* mat =  static_cast< StructuralMaterial * >( elem->giveMaterial() );
 
         for ( int i = 0; i < iRule->giveNumberOfIntegrationPoints(); i++ ) {
             GaussPoint *gp = iRule->getIntegrationPoint(i);
             double dV = elem->computeVolumeAround(gp);
             interpol->evalN( n, *gp->giveCoordinates(), FEIElementGeometryWrapper(elem));
-            static_cast< StructuralMaterial * >( elem->giveMaterial() )->
-                giveStiffnessMatrix(D, TangentStiffness, gp, tStep);
+            mat->giveStiffnessMatrix(D, TangentStiffness, gp, tStep);
             DInv.beInverseOf(D);
 
             diff.beTProductOf(nodalRecoveredStreses, n);
 
-            elem->giveIPValue(sig, gp, type, tStep); 
+	    
+            elem->giveIPValue(sig, gp, type, tStep); // returns full value now
             diff.subtract(sig);
             /* the internal stress difference is in global coordinate system */
             /* needs to be transformed into local system to compute associated energy */
             this->ZZErrorEstimatorI_computeLocalStress(ldiff, diff);
-            help.beProductOf(DInv, ldiff);
-            eNorm += ldiff.dotProduct(help) * dV;
+	    mat->giveReducedSymVectorForm(ldiff_reduced, ldiff, gp->giveMaterialMode());
+
+            help.beProductOf(DInv, ldiff_reduced);
+            eNorm += ldiff_reduced.dotProduct(help) * dV;
             this->ZZErrorEstimatorI_computeLocalStress(lsig, sig);
-            help.beProductOf(DInv, lsig);
-            sNorm += lsig.dotProduct(help) * dV;
+	    mat->giveReducedSymVectorForm(lsig_reduced, lsig, gp->giveMaterialMode());
+            help.beProductOf(DInv, lsig_reduced);
+            sNorm += lsig_reduced.dotProduct(help) * dV;
         }
     } else {
         OOFEM_ERROR("ZZErrorEstimatorInterface::ZZErrorEstimatorI_computeElementContributions unsupported norm type");
