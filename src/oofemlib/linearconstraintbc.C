@@ -159,8 +159,12 @@ void LinearConstraintBC :: assembleVector(FloatArray &answer, TimeStep *tStep, E
             factor = domain->giveLoadTimeFunction(weightsLtf.at(_i))->__at(tStep->giveIntrinsicTime());
         }
         idof = this->domain->giveDofManager( this->dofmans.at(_i) )->giveDof( this->dofs.at(_i) );
-        answer.at(s.giveDofEquationNumber(idof)) += md->giveDof(1)->giveUnknown(mode, tStep) * this->weights.at(_i)*factor;
-        answer.at(s.giveDofEquationNumber( md->giveDof(1) )) += idof->giveUnknown(mode, tStep) * this->weights.at(_i)*factor;
+        if(s.giveDofEquationNumber(idof)){
+            answer.at(s.giveDofEquationNumber(idof)) += md->giveDof(1)->giveUnknown(mode, tStep) * this->weights.at(_i)*factor;
+        }
+        if (s.giveDofEquationNumber( md->giveDof(1) )){
+            answer.at(s.giveDofEquationNumber( md->giveDof(1) )) += idof->giveUnknown(mode, tStep) * this->weights.at(_i)*factor;
+        }
     }
 
   } else {

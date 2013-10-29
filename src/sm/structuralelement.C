@@ -1268,7 +1268,6 @@ StructuralElement :: giveIPValue(FloatArray &answer, GaussPoint *aGaussPoint, In
         answer.beProductOf(N, u);
         return 1;
     }
-    
     return Element :: giveIPValue(answer, aGaussPoint, type, atTime);
 }
 
