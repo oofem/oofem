@@ -217,10 +217,10 @@ void FluidMaterialEvaluator :: doStepOutput(TimeStep *tStep)
         this->outfile << '\n';
     }
 
+    outfile << tStep->giveIntrinsicTime();
     for ( int i = 1; i <= d->giveNumberOfMaterialModels(); i++ ) {
         GaussPoint *gp = gps.at(i);
         FluidDynamicMaterial *mat = static_cast< FluidDynamicMaterial* >(d->giveMaterial(i));
-        outfile << tStep->giveIntrinsicTime();
         for ( int j = 1; j <= this->vars.giveSize(); ++j ) {
             mat->giveIPValue(outputValue, gp, (InternalStateType)this->vars.at(j), tStep);
             outfile << " " << outputValue;
