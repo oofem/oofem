@@ -52,6 +52,7 @@
 #include "XFEMDebugTools.h"
 #include <string>
 #include <sstream>
+#include <math.h>
 
 namespace oofem {
 
