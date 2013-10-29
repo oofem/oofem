@@ -294,4 +294,15 @@ void XfemManager :: propagateFronts()
     }
 }
 
+bool XfemManager :: hasPropagatingFronts()
+{
+    for ( int i = 1; i <= enrichmentItemList->giveSize(); i++ ) {
+    	if( enrichmentItemList->at(i)->hasPropagatingFronts() ) {
+    		return true;
+    	}
+    }
+
+	return false;
+}
+
 } // end namespace oofem

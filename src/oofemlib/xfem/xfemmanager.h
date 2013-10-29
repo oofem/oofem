@@ -169,6 +169,7 @@ public:
     void updateYourself();
 
     void propagateFronts();
+    bool hasPropagatingFronts();
 
 };
 } // end namespace oofem

@@ -103,6 +103,8 @@ public:
     bool hasCohesiveZone() const {return (mpCZMat != NULL && mpCZIntegrationRule);}
 
     void computeCohesiveForces(FloatArray &answer, TimeStep *tStep);
+    void computeGlobalCohesiveTractionVector(FloatArray &oT, const FloatArray &iJump, const FloatArray &iCrackNormal, const FloatMatrix &iNMatrix, GaussPoint &iGP, TimeStep *tStep);
+
     void computeCohesiveTangent(FloatMatrix &answer, TimeStep *tStep);
     void computeCohesiveTangentAt(FloatMatrix &answer, TimeStep *tStep);
 
@@ -114,7 +116,16 @@ public:
     void updateYourselfCZ(TimeStep *tStep);
 
     void computeDisplacementJump(GaussPoint &iGP, FloatArray &oJump, const FloatArray &iSolVec, const FloatMatrix &iNMatrix);
+
+    /**
+     * Compute N-matrix for cohesive zone.
+     */
     void computeNCohesive(FloatMatrix &oN, GaussPoint &iGP);
+
+    /**
+     * Compute the crack normal in a point.
+     */
+    bool computeNormalInPoint(const FloatArray &iGlobalCoord, FloatArray &oNormal);
 };
 } // end namespace oofem
 #endif // xfemelementinterface_h

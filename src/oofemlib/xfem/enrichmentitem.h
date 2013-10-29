@@ -138,6 +138,8 @@ public:
     virtual void updateGeometry();
     virtual void propagateFronts();
 
+    virtual bool hasPropagatingFronts() const {return mPropLawIndex != 0;}
+
 
     int giveStartOfDofIdPool() const { return this->startOfDofIdPool; };
     int giveEndOfDofIdPool() const { return this->endOfDofIdPool; };
@@ -159,6 +161,9 @@ public:
     // Any container that contains int and implements [] is legal.
     template< typename T >
     void interpLevelSet(double &oLevelSet, const FloatArray &iN, const T &iNodeInd) const;
+
+    template< typename T >
+    void interpLevelSetTangential(double &oLevelSet, const FloatArray &iN, const T &iNodeInd) const;
 
     template< typename T >
     void interpGradLevelSet(FloatArray &oGradLevelSet, const FloatMatrix &idNdX, const T &iNodeInd) const;
@@ -305,6 +310,15 @@ void EnrichmentItem :: interpLevelSet(double &oLevelSet, const FloatArray &iN, c
     oLevelSet = 0.0;
     for ( int i = 1; i <= iN.giveSize(); i++ ) {
         oLevelSet += iN.at(i) * mLevelSetNormalDir [ iNodeInd [ i - 1 ] - 1 ];
+    }
+}
+
+template< typename T >
+void EnrichmentItem :: interpLevelSetTangential(double &oLevelSet, const FloatArray &iN, const T &iNodeInd) const
+{
+    oLevelSet = 0.0;
+    for ( int i = 1; i <= iN.giveSize(); i++ ) {
+        oLevelSet += iN.at(i) * mLevelSetTangDir [ iNodeInd [ i - 1 ] - 1 ];
     }
 }
 
