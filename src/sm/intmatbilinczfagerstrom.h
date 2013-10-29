@@ -184,6 +184,11 @@ public:
                                          const FloatMatrix &F, TimeStep *tStep);
     virtual void give3dStiffnessMatrix_dTdj(FloatMatrix &answer, MatResponseMode rMode, GaussPoint *gp, TimeStep *tStep);
 
+    /**
+     * Tells if the model has implemented analytical tangent stiffness.
+     * If not, the tangent must be computed numerically.
+     */
+    virtual bool hasAnalyticalTangentStiffness() const {return true;}
 
     
     virtual int giveIPValue(FloatArray &answer, GaussPoint *gp, InternalStateType type, TimeStep *tStep);

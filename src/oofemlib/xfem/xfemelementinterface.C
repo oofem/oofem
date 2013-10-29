@@ -393,6 +393,7 @@ void XfemElementInterface :: XfemElementInterface_updateIntegrationRule()
         	delete [] coords;
 
 
+#if XFEM_DEBUG_VTK > 0
         	////////////////////////////////////////////////////////////////////////
         	// Write CZ GP to VTK
 
@@ -424,7 +425,7 @@ void XfemElementInterface :: XfemElementInterface_updateIntegrationRule()
 
             XFEMDebugTools :: WritePointsToVTK(name, czGPCoord);
         	////////////////////////////////////////////////////////////////////////
-
+#endif
 
         }
     }
@@ -661,7 +662,7 @@ void XfemElementInterface :: computeCohesiveForces(FloatArray &answer, TimeStep 
 		    ////////////////////////////////////////////////////////
 
 
-			// Compute traction
+			// Traction
 			FloatArray T2D;
 
 
@@ -674,16 +675,13 @@ void XfemElementInterface :: computeCohesiveForces(FloatArray &answer, TimeStep 
 				computeDisplacementJump(gp, jump2D, solVec, NMatrix);
 
 				computeGlobalCohesiveTractionVector(T2D, jump2D, crackNormal, NMatrix, gp, tStep);
-//				printf("T2D: "); T2D.printYourself();
 
 				// Add to internal force
 				FloatArray NTimesT;
 
 				NTimesT.beTProductOf(NMatrix, T2D);
-//				printf("NTimesT: "); NTimesT.printYourself();
 				CrossSection *cs  = element->giveCrossSection();
 				double thickness = cs->give(CS_Thickness);
-	//			printf("weight: %e", gp.giveWeight() );
 				double dA = 0.5*mCrackLength*thickness*gp.giveWeight();
 				answer.add(dA, NTimesT);
 			}
@@ -711,49 +709,32 @@ void XfemElementInterface :: computeGlobalCohesiveTractionVector(FloatArray &oT,
 
 	FloatArray crackNormal3D;
 	crackNormal3D.setValues(3, iCrackNormal.at(1), iCrackNormal.at(2), 0.0);
-//				printf("crackNormal3D: "); crackNormal3D.printYourself();
 
 	FloatArray ez;
 	ez.setValues(3, 0.0, 0.0, 1.0);
 	FloatArray crackTangent3D;
 	crackTangent3D.beVectorProductOf(crackNormal3D, ez);
-//				printf("crackTangent3D: "); crackTangent3D.printYourself();
 
 	FloatMatrix locToGlob(3,3);
 	locToGlob.setColumn(crackTangent3D, 1);
 	locToGlob.setColumn(crackNormal3D, 2);
 	locToGlob.setColumn(ez, 3);
-//				locToGlob.beUnitMatrix();
 
 	FloatArray TLoc(3), jump3DLoc, TLocRenumbered(3);
 	jump3DLoc.beTProductOf(locToGlob, jump3D);
-//				jump3DLoc = jump3D;
 
-//				printf("jump3D: "); jump3D.printYourself();
-//				printf("jump3DLoc: "); jump3DLoc.printYourself();
 	FloatArray jump3DLocRenumbered;
 	jump3DLocRenumbered.setValues(3, jump3DLoc.at(3), jump3DLoc.at(1), jump3DLoc.at(2));
-//				printf("jump3DLocRenumbered: "); jump3DLocRenumbered.printYourself();
-
-//				jump3DLocRenumbered = jump3DLoc;
 
 	mpCZMat->giveFirstPKTraction_3d(TLocRenumbered, &iGP, jump3DLocRenumbered, F, tStep);
 
-//				printf("TLocRenumbered: "); TLocRenumbered.printYourself();
 	TLoc.setValues(3, TLocRenumbered.at(2), TLocRenumbered.at(3), TLocRenumbered.at(1));
 
-//				TLoc = TLocRenumbered;
 
 	FloatArray T;
 	T.beProductOf(locToGlob, TLoc);
-//				T = TLoc;
-//				printf("TLoc: "); TLoc.printYourself();
-//				printf("T: "); T.printYourself();
 
-//	FloatArray T2D;
 	oT.setValues(2, T.at(1), T.at(2) );
-
-
 }
 
 void XfemElementInterface :: computeCohesiveTangent(FloatMatrix &answer, TimeStep *tStep)
@@ -795,151 +776,93 @@ void XfemElementInterface :: computeCohesiveTangent(FloatMatrix &answer, TimeSte
 				FloatMatrix K3DRenumbered, K3DGlob;
 
 
-
-#if 0
-				FloatMatrix K3D;
-				mpCZMat->give3dStiffnessMatrix_dTdj(K3DRenumbered, TangentStiffness, &gp, tStep);
-#endif
-
-#if 1
-				///////////////////////////////////////////////////
-				// Numerical tangent
-				double eps = 1.0e-9;
 				FloatMatrix K2D;
 				K2D.resize(2,2);
 				K2D.zero();
 
-				FloatArray T, TPert;
+				if( mpCZMat->hasAnalyticalTangentStiffness() ){
+					///////////////////////////////////////////////////
+					// Analytical tangent
 
-				FloatArray crackNormal;
-				if( computeNormalInPoint( *(gp.giveCoordinates()), crackNormal ) ) {
+					FloatMatrix K3D;
+					mpCZMat->give3dStiffnessMatrix_dTdj(K3DRenumbered, TangentStiffness, &gp, tStep);
 
-					computeGlobalCohesiveTractionVector(T, jump2D, crackNormal, NMatrix, gp, tStep);
+					K3D.resize(3,3);
+					K3D.zero();
+					K3D.at(1,1) = K3DRenumbered.at(2,2);
+					K3D.at(1,2) = K3DRenumbered.at(2,3);
+					K3D.at(1,3) = K3DRenumbered.at(2,1);
 
+					K3D.at(2,1) = K3DRenumbered.at(3,2);
+					K3D.at(2,2) = K3DRenumbered.at(3,3);
+					K3D.at(2,3) = K3DRenumbered.at(3,1);
 
-					FloatArray jump2DPert;
-
-
-					jump2DPert = jump2D;
-					jump2DPert.at(1) += eps;
-					computeGlobalCohesiveTractionVector(TPert, jump2DPert, crackNormal, NMatrix, gp, tStep);
-
-					K2D.at(1,1) = (TPert.at(1) - T.at(1))/eps;
-					K2D.at(2,1) = (TPert.at(2) - T.at(2))/eps;
-
-					jump2DPert = jump2D;
-					jump2DPert.at(2) += eps;
-					computeGlobalCohesiveTractionVector(TPert, jump2DPert, crackNormal, NMatrix, gp, tStep);
+					K3D.at(3,1) = K3DRenumbered.at(1,2);
+					K3D.at(3,2) = K3DRenumbered.at(1,3);
+					K3D.at(3,3) = K3DRenumbered.at(1,1);
 
 
-					K2D.at(1,2) = (TPert.at(1) - T.at(1))/eps;
-					K2D.at(2,2) = (TPert.at(2) - T.at(2))/eps;
+					FloatArray crackNormal;
+					computeNormalInPoint( *(gp.giveCoordinates()), crackNormal );
+					FloatArray crackNormal3D;
+					crackNormal3D.setValues(3, crackNormal.at(1), crackNormal.at(2), 0.0);
 
-					computeGlobalCohesiveTractionVector(T, jump2D, crackNormal, NMatrix, gp, tStep);
+					FloatArray ez;
+					ez.setValues(3, 0.0, 0.0, 1.0);
+					FloatArray crackTangent3D;
+					crackTangent3D.beVectorProductOf(crackNormal3D, ez);
 
+					FloatMatrix locToGlob(3,3);
+					locToGlob.setColumn(crackTangent3D, 1);
+					locToGlob.setColumn(crackNormal3D, 2);
+					locToGlob.setColumn(ez, 3);
+
+
+					FloatMatrix tmp3(3,3);
+					tmp3.beProductTOf(K3D, locToGlob);
+					K3DGlob.beProductOf(locToGlob, tmp3);
+
+					K2D.at(1,1) = K3DGlob.at(1,1);
+					K2D.at(1,2) = K3DGlob.at(1,2);
+					K2D.at(2,1) = K3DGlob.at(2,1);
+					K2D.at(2,2) = K3DGlob.at(2,2);
 				}
-#endif
-#if 0
-				///////////////////////////////////////////////////
-				// Numerical tangent
-				double eps = 1.0e-9;
-				FloatMatrix K3D;
-				K3D.resize(3,3);
-				K3D.zero();
+				else {
+
+					///////////////////////////////////////////////////
+					// Numerical tangent
+					double eps = 1.0e-9;
+
+					FloatArray T, TPert;
+
+					FloatArray crackNormal;
+					if( computeNormalInPoint( *(gp.giveCoordinates()), crackNormal ) ) {
+
+						computeGlobalCohesiveTractionVector(T, jump2D, crackNormal, NMatrix, gp, tStep);
 
 
-				FloatArray T, TPert;
-				FloatArray jump3DPert;
-
-				// TODO: Rotate to the coordinate system of the crack.
-				mpCZMat->giveFirstPKTraction_3d(T, &gp, jump3D, F, tStep);
+						FloatArray jump2DPert;
 
 
-				jump3DPert = jump3D;
-				jump3DPert.at(1) += eps;
-				mpCZMat->giveFirstPKTraction_3d(TPert, &gp, jump3DPert, F, tStep);
-				K3D.at(1,1) = (TPert.at(1) - T.at(1))/eps;
-				K3D.at(2,1) = (TPert.at(2) - T.at(2))/eps;
-				K3D.at(3,1) = (TPert.at(3) - T.at(3))/eps;
+						jump2DPert = jump2D;
+						jump2DPert.at(1) += eps;
+						computeGlobalCohesiveTractionVector(TPert, jump2DPert, crackNormal, NMatrix, gp, tStep);
+
+						K2D.at(1,1) = (TPert.at(1) - T.at(1))/eps;
+						K2D.at(2,1) = (TPert.at(2) - T.at(2))/eps;
+
+						jump2DPert = jump2D;
+						jump2DPert.at(2) += eps;
+						computeGlobalCohesiveTractionVector(TPert, jump2DPert, crackNormal, NMatrix, gp, tStep);
 
 
-				jump3DPert = jump3D;
-				jump3DPert.at(2) += eps;
-				mpCZMat->giveFirstPKTraction_3d(TPert, &gp, jump3DPert, F, tStep);
-				K3D.at(1,2) = (TPert.at(1) - T.at(1))/eps;
-				K3D.at(2,2) = (TPert.at(2) - T.at(2))/eps;
-				K3D.at(3,2) = (TPert.at(3) - T.at(3))/eps;
+						K2D.at(1,2) = (TPert.at(1) - T.at(1))/eps;
+						K2D.at(2,2) = (TPert.at(2) - T.at(2))/eps;
 
+						computeGlobalCohesiveTractionVector(T, jump2D, crackNormal, NMatrix, gp, tStep);
 
-				jump3DPert = jump3D;
-				jump3DPert.at(3) += eps;
-				mpCZMat->giveFirstPKTraction_3d(TPert, &gp, jump3DPert, F, tStep);
-				K3D.at(1,3) = (TPert.at(1) - T.at(1))/eps;
-				K3D.at(2,3) = (TPert.at(2) - T.at(2))/eps;
-				K3D.at(3,3) = (TPert.at(3) - T.at(3))/eps;
-
-				///////////////////////////////////////////////////
-#endif
-
-#if 0
-				K3D.resize(3,3);
-				K3D.zero();
-				K3D.at(1,1) = K3DRenumbered.at(2,2);
-				K3D.at(1,2) = K3DRenumbered.at(2,3);
-				K3D.at(1,3) = K3DRenumbered.at(2,1);
-
-				K3D.at(2,1) = K3DRenumbered.at(3,2);
-				K3D.at(2,2) = K3DRenumbered.at(3,3);
-				K3D.at(2,3) = K3DRenumbered.at(3,1);
-
-				K3D.at(3,1) = K3DRenumbered.at(1,2);
-				K3D.at(3,2) = K3DRenumbered.at(1,3);
-				K3D.at(3,3) = K3DRenumbered.at(1,1);
-
-
-//				K3D = K3DRenumbered;
-
-//				printf("K3DRenumbered: "); K3DRenumbered.printYourself();
-//				printf("K3D: "); K3D.printYourself();
-
-				FloatArray crackNormal;
-				computeNormalInPoint( *(gp.giveCoordinates()), crackNormal );
-				FloatArray crackNormal3D;
-				crackNormal3D.setValues(3, crackNormal.at(1), crackNormal.at(2), 0.0);
-
-				FloatArray ez;
-				ez.setValues(3, 0.0, 0.0, 1.0);
-				FloatArray crackTangent3D;
-				crackTangent3D.beVectorProductOf(crackNormal3D, ez);
-//				printf("crackTangent3D: "); crackTangent3D.printYourself();
-
-				FloatMatrix locToGlob(3,3);
-				locToGlob.setColumn(crackTangent3D, 1);
-				locToGlob.setColumn(crackNormal3D, 2);
-				locToGlob.setColumn(ez, 3);
-//				printf("locToGlob: "); locToGlob.printYourself();
-//				locToGlob.beUnitMatrix();
-
-
-				FloatMatrix tmp3(3,3);
-				tmp3.beProductTOf(K3D, locToGlob);
-				K3DGlob.beProductOf(locToGlob, tmp3);
-//				tmp3.beProductOf(K3D, locToGlob);
-//				K3DGlob.beTProductOf(locToGlob, tmp3);
-//				printf("K3D: "); K3D.printYourself();
-//				printf("tmp3: "); tmp3.printYourself();
-//				printf("K3DGlob: "); K3DGlob.printYourself();
-
-//				K3DGlob = K3D;
-
-				FloatMatrix K2D;
-				K2D.resize(2,2);
-				K2D.at(1,1) = K3DGlob.at(1,1);
-				K2D.at(1,2) = K3DGlob.at(1,2);
-				K2D.at(2,1) = K3DGlob.at(2,1);
-				K2D.at(2,2) = K3DGlob.at(2,2);
-//				printf("K2D: "); K2D.printYourself();
-#endif
+					}
+				}
 
 
 				FloatMatrix tmp, tmp2;
@@ -948,7 +871,7 @@ void XfemElementInterface :: computeCohesiveTangent(FloatMatrix &answer, TimeSte
 
 				CrossSection *cs  = element->giveCrossSection();
 				double thickness = cs->give(CS_Thickness);
-				double dA = 1.0*0.5*mCrackLength*thickness*gp.giveWeight();
+				double dA = 0.5*mCrackLength*thickness*gp.giveWeight();
 				answer.add(dA, tmp2);
 			}
 
@@ -991,7 +914,6 @@ void XfemElementInterface :: giveCZInputRecord(DynamicInputRecord &input)
 
 void XfemElementInterface :: initializeCZMaterial()
 {
-//	printf("Entering XfemElementInterface :: initializeCZMaterial().\n");
     if ( mCZMaterialNum > 0 ) {
     	mpCZMat = dynamic_cast<StructuralInterfaceMaterial*>(this->element->giveDomain()->giveMaterial(mCZMaterialNum) );
 
@@ -1004,7 +926,6 @@ void XfemElementInterface :: initializeCZMaterial()
 void XfemElementInterface :: updateYourselfCZ(TimeStep *tStep)
 {
 	if(mpCZIntegrationRule != NULL) {
-//		printf("mpCZIntegrationRule != NULL.\n");
 		mpCZIntegrationRule->updateYourself(tStep);
 
 		if(mpCZMat != NULL){
@@ -1015,9 +936,6 @@ void XfemElementInterface :: updateYourselfCZ(TimeStep *tStep)
 			}
 		}
 	}
-//	else {
-//		printf("mpCZIntegrationRule == NULL.\n");
-//	}
 
 
 }
@@ -1025,17 +943,8 @@ void XfemElementInterface :: updateYourselfCZ(TimeStep *tStep)
 void XfemElementInterface :: computeDisplacementJump(GaussPoint &iGP, FloatArray &oJump, const FloatArray &iSolVec, const FloatMatrix &iNMatrix)
 {
 	const int dim = 2;
-
 	oJump.resize(dim);
-	oJump.zero();
-	int numNodes = element->giveNumberOfDofManagers();
-
-
-
-
-
     oJump.beProductOf(iNMatrix, iSolVec);
-//    printf("oJump: "); oJump.printYourself();
 }
 
 void XfemElementInterface :: computeNCohesive(FloatMatrix &oN, GaussPoint &iGP)
@@ -1122,9 +1031,6 @@ void XfemElementInterface :: computeNCohesive(FloatMatrix &oN, GaussPoint &iGP)
     }
 
     oN.beNMatrixOf(NTot,2);
-//    oN.printYourself();
-
-
 }
 
 bool XfemElementInterface :: computeNormalInPoint(const FloatArray &iGlobalCoord, FloatArray &oNormal)
@@ -1153,9 +1059,6 @@ bool XfemElementInterface :: computeNormalInPoint(const FloatArray &iGlobalCoord
 
     	FloatArray gradLevelSet;
     	ei->interpGradLevelSet(gradLevelSet, dNdx, elNodes);
-
-//    	printf("levelSet: %e levelSetTang: %e gradLevelSet: ", levelSet, levelSetTang);
-//    	gradLevelSet.printYourself();
 
 
     	// If the normal level set is sufficiently small,
