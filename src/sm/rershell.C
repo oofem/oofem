@@ -433,7 +433,7 @@ RerShell :: giveLocalCoordinateSystem(FloatMatrix &answer)
 //converts global coordinates to local planar area coordinates, does not return a coordinate in the thickness direction, but
 //does check that the point is in the element thickness
 #define POINT_TOL 1.e-3
-int
+bool
 RerShell :: computeLocalCoordinates(FloatArray &answer, const FloatArray &coords)
 {
     //set size of return value to 3 area coordinates
@@ -483,21 +483,21 @@ RerShell :: computeLocalCoordinates(FloatArray &answer, const FloatArray &coords
 
     if ( elthick / 2.0 + midplZ - fabs( inputCoords_ElCS.at(3) ) < -POINT_TOL ) {
         answer.zero();
-        return 0;
+        return false;
     }
 
     //check that the point is in the element and set flag
     for ( int i = 1; i <= 3; i++ ) {
         if ( answer.at(i) < ( 0. - POINT_TOL ) ) {
-            return 0;
+            return false;
         }
 
         if ( answer.at(i) > ( 1. + POINT_TOL ) ) {
-            return 0;
+            return false;
         }
     }
 
-    return 1;
+    return true;
 }
 
 

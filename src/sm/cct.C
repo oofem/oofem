@@ -376,7 +376,7 @@ CCTPlate :: giveInterface(InterfaceType interface)
 
 #define POINT_TOL 1.e-3
 
-int
+bool
 CCTPlate :: computeLocalCoordinates(FloatArray &answer, const FloatArray &coords)
 //converts global coordinates to local planar area coordinates,
 //does not return a coordinate in the thickness direction, but
@@ -387,7 +387,7 @@ CCTPlate :: computeLocalCoordinates(FloatArray &answer, const FloatArray &coords
     this->giveNodeCoordinates(x1, x2, x3, y1, y2, y3, z);
 
     // Fetch local coordinates.
-    int ok = this->interp_lin.global2local( answer, coords, FEIElementGeometryWrapper(this) );
+    bool ok = this->interp_lin.global2local( answer, coords, FEIElementGeometryWrapper(this) );
 
     //get midplane location at this point
     double midplZ;
@@ -399,17 +399,17 @@ CCTPlate :: computeLocalCoordinates(FloatArray &answer, const FloatArray &coords
 
     if ( elthick / 2.0 + midplZ - fabs( coords.at(3) ) < -POINT_TOL ) {
         answer.zero();
-        return 0;
+        return false;
     }
 
     //check that the point is in the element and set flag
     for ( int i = 1; i <= 3; i++ ) {
         if ( answer.at(i) < ( 0. - POINT_TOL ) ) {
-            return 0;
+            return false;
         }
 
         if ( answer.at(i) > ( 1. + POINT_TOL ) ) {
-            return 0;
+            return false;
         }
     }
 

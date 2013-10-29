@@ -12,6 +12,7 @@ rt_dof      = 9997
 rt_elem     = 9996
 rt_reaction = 9995
 rt_loadlevel= 9994
+rt_errorestimate = 9993
 
 global rectime, recnumber, recdofnum, recvalue
 global firstTimeStepFlag, debug
@@ -30,6 +31,7 @@ global error_on_missing_record
 #('rr', solution_step, node_id, dof_id, value) - reaction
 #('llr',solution_step, value) - load level record
 #('time') - time, only extractor mode
+#('ee', solution_step, value) - error estimate
 #('include', result) - inclusion and processing of another file
 
 #set default tolerance
@@ -106,6 +108,13 @@ gp_re = re.compile(r"""
         (\d+)           # gp number
         \s*:.*          # eat some chars
         """,re.X)
+
+errorestimate_re = re.compile(r"""
+        ^               # begining of line
+        Relative\ error\ estimate:\s*   # ee id string
+        ([-+ ]\d+\.\d+(e[+-]\d+)*) # value
+        """, re.X)
+
 
 gpstress_re = re.compile (r"""[ ]stresses\s*([\s+-e\d]+)""",re.X)
 gpstrain_re = re.compile (r"""[ ]strains\s*([\s+-e\d]+)""",re.X)
@@ -234,6 +243,16 @@ def parse_input_rec (context, recline):
         except ValueError:
             print "Input error on\n",recline
             return None
+    elif re.search('^#ERRORESTIMATE', recline):
+        if (mode == 'c'): tstep = float(getKeywordValue(context.infilename, recline, 'tStep'))
+        else: tstep = 0
+        try:
+            value = float(getKeywordValue(context.infilename, recline, 'value', 0.0))
+            return ('ee', tstep, value)
+        except ValueError:
+            print "Input error on\n",recline
+            return None
+        
     elif (mode == 'e') and re.search('^#TIME',recline):
         return ('time', 0.0, 0.0)
 
@@ -307,7 +326,15 @@ def check_time_rec (context):
         if (mode == 'e') and (rec[0] == 'time'):
             context.recVal[irec]=context.rectime
 
+#check errorestimate rec
+def check_errorestimate_rec (context):
+    for irec,rec in enumerate(context.userrec):
+        if (mode == 'e'): timeflag = 1
+        else: timeflag = (rec[1] == context.rectime)
 
+        if ((rec[0] == 'ee') and timeflag):
+            context.recVal[irec]=context.recvalue
+    
 
 def match_primary_rec (context, line):
     global mode, debug
@@ -365,6 +392,15 @@ def match_primary_rec (context, line):
         context.recvalue  = float(match.group(4))
         check_reaction_rec (context)
         return None
+
+    match = errorestimate_re.search(line)
+    if match:
+        if debug: print "ee:", line
+        context.rectype = rt_errorestimate
+        context.recvalue  = float(match.group(1))
+        check_errorestimate_rec (context)
+        return None
+
 
 def match_dofrec (context):
     global debug
@@ -662,7 +698,7 @@ def process_file (infilename, parentfilename):
         print "No end record found"
         return 2
 
-    if debug: print userrec
+    if debug: print context.userrec
     context.infile.close()
 
     #process oofem output file

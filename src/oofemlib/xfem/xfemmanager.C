@@ -128,7 +128,6 @@ XfemManager :: createEnrichedDofs()
     for ( int j = 1; j <= this->giveNumberOfEnrichmentItems(); j++ ) {
         EnrichmentItem *ei = this->giveEnrichmentItem(j);
         ei->createEnrichedDofs();
-        
     }
 
 }
@@ -136,7 +135,7 @@ XfemManager :: createEnrichedDofs()
 
 void 
 XfemManager :: addEnrichedDofsTo( DofManager *dMan, IntArray &dofIdArray )
-{   
+{
     int nDofs = dMan->giveNumberOfDofs();
     for ( int j = 1; j <= dofIdArray.giveSize(); j++ ) {                      
             dMan->appendDof( new MasterDof( nDofs + j, dMan, ( DofIDItem ) ( dofIdArray.at(j) ) ) );   
@@ -156,10 +155,8 @@ IRResultType XfemManager :: initializeFrom(InputRecord *ir)
 
     IR_GIVE_OPTIONAL_FIELD(ir, doVTKExport, _IFT_XfemManager_VTKExport);
     if ( doVTKExport ) {
-        int numFields;
         IntArray exportFields;
         IR_GIVE_FIELD(ir, this->vtkExportFields, _IFT_XfemManager_VTKExportFields);
-
     }
 
     return IRRT_OK;
@@ -169,8 +166,8 @@ IRResultType XfemManager :: initializeFrom(InputRecord *ir)
 void XfemManager :: giveInputRecord(DynamicInputRecord &input)
 {
     input.setRecordKeywordField(_IFT_XfemManager_Name, 1);
-	input.setField(numberOfEnrichmentItems, _IFT_XfemManager_numberOfEnrichmentItems);
-	input.setField(mNumGpPerTri, _IFT_XfemManager_numberOfGpPerTri);
+    input.setField(numberOfEnrichmentItems, _IFT_XfemManager_numberOfEnrichmentItems);
+    input.setField(mNumGpPerTri, _IFT_XfemManager_numberOfGpPerTri);
     input.setField(doVTKExport, _IFT_XfemManager_VTKExport);
     input.setField(vtkExportFields, _IFT_XfemManager_VTKExportFields);
 
@@ -206,13 +203,13 @@ int XfemManager :: instanciateYourself(DataReader *dr)
 
 void XfemManager :: setDomain(Domain *ipDomain)
 {
-	domain = ipDomain;
+    domain = ipDomain;
 
-	int numEI = enrichmentItemList->giveSize();
+    int numEI = enrichmentItemList->giveSize();
 
-	for(int i = 1; i <= numEI; i++) {
-		enrichmentItemList->at(i)->setDomain(ipDomain);
-	}
+    for(int i = 1; i <= numEI; i++) {
+        enrichmentItemList->at(i)->setDomain(ipDomain);
+    }
 
 }
 

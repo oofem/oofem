@@ -151,8 +151,6 @@ XFEMStatic :: terminate(TimeStep *tStep)
     // Update element subdivisions if necessary
     // (e.g. if a crack has moved and cut a new element)
     for( int domInd = 1; domInd <= this->giveNumberOfDomains(); domInd++ ) {
-
-//#if 0
     	Domain *domain = this->giveDomain(domInd);
 
     	if( domain->giveXfemManager()->hasPropagatingFronts() ) {
@@ -195,7 +193,7 @@ XFEMStatic :: terminate(TimeStep *tStep)
 					xfemEl->recomputeGaussPoints();
 
 					// ... and map state variables to the new Gauss points
-	//    			el->adaptiveMap(dNew, tStep);
+					// el->adaptiveMap(dNew, tStep);
 				}
 
 			}

@@ -214,7 +214,7 @@ protected:
         const IntArray *giveNeighbors() { return & this->neghbours_base_elements; }
         int giveNeighbor(int iside) { return neghbours_base_elements.at(iside); }
         void setNeighbor(int iside, int nb) { this->neghbours_base_elements.at(iside) = nb; }
-        bool containsNode(int _node) { return nodes.findFirstIndexOf(_node); }
+        bool containsNode(int _node) { return nodes.findFirstIndexOf(_node) > 0; }
         virtual void giveSideNodes(int iside, IntArray &snodes) = 0;
         int giveParent() { return this->parent; }
         int giveTopParent();

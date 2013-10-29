@@ -71,6 +71,7 @@ public:
      * generated domain(s) and by mapping procedure.
      */
     virtual int initializeAdaptive(int stepNumber);
+    virtual void terminate(TimeStep *tStep);
 
     virtual contextIOResultType restoreContext(DataStream *stream, ContextMode mode, void *obj = NULL);
 

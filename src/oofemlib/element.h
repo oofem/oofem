@@ -252,7 +252,7 @@ public:
     //@{
     /**
      * Computes characteristic matrix of receiver of requested type in given time step.
-     * @param answer Requested characteristic matrix.
+     * @param answer Requested characteristic matrix (stiffness, tangent, ...).
      * If element has no capability to compute requested type of characteristic matrix
      * error function is invoked.
      * @param type   Id of characteristic component requested.
@@ -813,7 +813,7 @@ public:
      * @param gcoords Global coordinates.
      * @return Nonzero if point is inside element; zero otherwise.
      */
-    virtual int computeLocalCoordinates(FloatArray &answer, const FloatArray &gcoords);
+    virtual bool computeLocalCoordinates(FloatArray &answer, const FloatArray &gcoords);
     /**
      * Returns local coordinate system of receiver
      * Required by material models with ortho- and anisotrophy.

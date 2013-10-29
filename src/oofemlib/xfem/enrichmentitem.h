@@ -193,6 +193,9 @@ public:
     double calcXiZeroLevel(const double &iQ1, const double &iQ2) const;
     static void calcPolarCoord(double &oR, double &oTheta, const FloatArray &iOrigin, const FloatArray &iPos, const FloatArray &iN, const FloatArray &iT);
 
+    PropagationLaw *givePropagationLaw() { return this->mpPropagationLaw; };
+    bool hasPropagationLaw() { return this->mPropLawIndex != 0; };
+
 protected:
 
     EnrichmentDomain *mpEnrichmentDomain;

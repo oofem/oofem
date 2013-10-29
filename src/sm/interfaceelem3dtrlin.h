@@ -55,7 +55,7 @@ public:
     virtual ~InterfaceElement3dTrLin() { }
 
     virtual int computeGlobalCoordinates(FloatArray &answer, const FloatArray &lcoords);
-    virtual int computeLocalCoordinates(FloatArray &answer, const FloatArray &gcoords);
+    virtual bool computeLocalCoordinates(FloatArray &answer, const FloatArray &gcoords);
 
     virtual int computeNumberOfDofs() { return 18; }
     virtual void giveDofManDofIDMask(int inode, EquationID ut, IntArray &answer) const;
