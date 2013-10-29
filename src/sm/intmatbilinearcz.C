@@ -37,57 +37,6 @@ mDamageOld(0.0)
 
 	mDamageOld = 0.0;
 	mDamageNew = 0.0;
-
-/*
-    oldMaterialJump.resize(3);
-    oldMaterialJump.zero();
-    tempMaterialJump = oldMaterialJump;
-
-    damage = tempDamage = 0.0;
-
-    QEffective = oldMaterialJump;
-    tempQEffective = oldMaterialJump;
-
-
-    tempFInv.resize(3,3);
-    tempFInv.zero();
-    tempFInv.at(1,1)=1.;
-    tempFInv.at(2,2)=1.;
-    tempFInv.at(3,3)=1.;
-
-
-	#if 0
-	//@todo Martin: Very bad implementation of intialisation of Rot
-    //*************************************************************
-    FloatMatrix Gcov;
-    FloatArray N;
-
-    Shell7Base *shell = dynamic_cast< Shell7Base* >(gp->giveElement());
-    if ( !shell ) {
-        OOFEM_ERROR("BilinearCZMaterialFagerstrom :: giveRealStressVector - oh no wrong element type");
-    }
-    FloatArray lCoords(3);
-    lCoords.at(1) = gp->giveCoordinate(1);
-    lCoords.at(2) = gp->giveCoordinate(2);
-    shell->evalInitialCovarBaseVectorsAt(lCoords, Gcov);
-
-    FloatArray G1, G2;
-    Gcov.copyColumn(G1,1);
-    Gcov.copyColumn(G2,2);
-    N.beVectorProductOf(G1,G2);
-    N.normalize();
-
-    tempRot.resize(3,3);
-    G1.normalize();
-    G2.beVectorProductOf(N, G1);
-    tempRot.setColumn(G1,1);
-    tempRot.setColumn(G2,2);
-    tempRot.setColumn(N,3);
-#endif
-
-    Iep = tempFInv;
-    alphav = oldMaterialJump;
-*/
 }
 
 
@@ -98,24 +47,7 @@ IntMatBilinearCZStatus :: ~IntMatBilinearCZStatus()
 
 void IntMatBilinearCZStatus :: initTempStatus()
 {
-/*
-    ///@todo Martin: Is this really necessary in this particular case??
-    StructuralInterfaceMaterialStatus :: initTempStatus();
 
-    tempMaterialJump = oldMaterialJump;
-    tempDamage = damage;
-    tempQEffective = QEffective;
-
-    tempFInv.resize(3,3);
-    tempFInv.zero();
-
-    Iep = tempFInv;
-    alphav = oldMaterialJump;
-
-    tempFInv.at(1,1)=1.;
-    tempFInv.at(2,2)=1.;
-    tempFInv.at(3,3)=1.;
-*/
 }
 
 void IntMatBilinearCZStatus :: updateYourself(TimeStep *atTime)
@@ -178,7 +110,6 @@ void IntMatBilinearCZ::giveFirstPKTraction_3d(FloatArray &answer, GaussPoint *gp
 	answer = tractionTrial;
 
     if( phiTr < 0.0 ) {
-//    	printf("Elastic response.\n");
     	status->mDamageNew = status->mDamageOld;
     	answer.beScaled((1.0-status->mDamageNew), answer);
 
@@ -186,12 +117,10 @@ void IntMatBilinearCZ::giveFirstPKTraction_3d(FloatArray &answer, GaussPoint *gp
     	return;
     }
     else {
-//    	printf("Plastic response.\n");
 
     	// Iterate to find plastic strain increment.
     	int maxIter = 50;
     	double absTol = 1.0e-9;
-//    	double relTol = 1.0e-6;
     	double eps = 1.0e-9; // Small value for perturbation when computing numerical Jacobian
 		double plastMultInc = 0.0;
 
@@ -207,12 +136,8 @@ void IntMatBilinearCZ::giveFirstPKTraction_3d(FloatArray &answer, GaussPoint *gp
 //    	    printf("iter: %d res: %e\n", iter, fabs(phi) );
 
     	    if( fabs(phi) < absTol ) {
-//    	    	printf("Solution converged.\n");
-//    	    	printf("TTang: %e TNormal: %e\n", TTang, TNormal);
-
 
     	    	// Add damage evolution
-
     	    	double S = mGIc/mSigmaF;
     	    	double damageInc = plastMultInc/S;
     	    	status->mDamageNew = status->mDamageOld + damageInc;
@@ -221,10 +146,8 @@ void IntMatBilinearCZ::giveFirstPKTraction_3d(FloatArray &answer, GaussPoint *gp
     	    		status->mDamageNew = 1.0;
     	    	}
 
-//    	    	printf("answer before: "); answer.printYourself();
     	    	answer.beScaled((1.0-status->mDamageNew), answer);
     	    	status->mTractionNew = answer;
-//    	    	printf("answer after: "); answer.printYourself();
 
     	    	return;
     	    }
@@ -238,14 +161,11 @@ void IntMatBilinearCZ::giveFirstPKTraction_3d(FloatArray &answer, GaussPoint *gp
 
     	    double Jac = (phiPert - phi)/eps;
     	    plastMultInc -= (1.0/Jac)*phi;
-//    	    printf("phi: %e, Jac: %e\n", phi, Jac);
     	}
 
     }
 
     OOFEM_ERROR("Warning: No convergence in IntMatBilinearCZ::giveFirstPKTraction_3d().\n");
-//    printf("status->mDamageNew: %e\n", status->mDamageNew );
-
 }
 
 void IntMatBilinearCZ::give3dStiffnessMatrix_dTdj(FloatMatrix &answer, MatResponseMode rMode, GaussPoint *gp, TimeStep *tStep)
@@ -270,9 +190,6 @@ void IntMatBilinearCZ::computeTraction( FloatArray &oT, const FloatArray &iTTria
 	double gammaF =  mGIIc/mGIc;
 
 	// Tangential part
-//	oT.at(1) = iTTrial.at(1)/( 1.0 + (2.0*gammaF/mGamma)*mPenaltyStiffness*iPlastMultInc );
-//	oT.at(2) = iTTrial.at(2)/( 1.0 + (2.0*gammaF/mGamma)*mPenaltyStiffness*iPlastMultInc );
-
 	oT.at(1) = iTTrial.at(1)/( 1.0 + (2.0*mPenaltyStiffness*gammaF)*iPlastMultInc/(mGamma*mGamma*mSigmaF) );
 	oT.at(2) = iTTrial.at(2)/( 1.0 + (2.0*mPenaltyStiffness*gammaF)*iPlastMultInc/(mGamma*mGamma*mSigmaF) );
 

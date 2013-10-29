@@ -684,13 +684,14 @@ void TrPlaneStress2dXFEM :: drawScalar(oofegGraphicContext &context)
 IRResultType
 TrPlaneStress2dXFEM :: initializeFrom(InputRecord *ir)
 {
-    const char *__proc = "initializeFrom"; // Required by IR_GIVE_FIELD macro
     IRResultType result;                   // Required by IR_GIVE_FIELD macro
-    TrPlaneStress2d :: initializeFrom(ir);
+    result = TrPlaneStress2d :: initializeFrom(ir);
+    if( result != IRRT_OK) {
+    	return result;
+    }
 
-    XfemElementInterface :: initializeCZFrom(ir);
-
-    return IRRT_OK;
+    result = XfemElementInterface :: initializeCZFrom(ir);
+    return result;
 }
 
 void TrPlaneStress2dXFEM :: giveInputRecord(DynamicInputRecord &input)
