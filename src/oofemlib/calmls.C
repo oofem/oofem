@@ -44,6 +44,7 @@
 #include "node.h"
 #include "dof.h"
 #include "contextioerr.h"
+#include "exportmodulemanager.h"
 
 namespace oofem {
 #define CALM_RESET_STEP_REDUCE 0.25
@@ -443,7 +444,7 @@ restart:
         }
 
 	// output of per iteration data 
-	// engngModel->giveExportModuleManager()->exportModuleManager->doOutput(stepN, true);
+	engngModel->giveExportModuleManager()->doOutput(tNow, true);
 
     } while ( !converged || ( nite < minIterations ) );
 
