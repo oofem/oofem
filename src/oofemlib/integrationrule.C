@@ -40,6 +40,25 @@
 #include "contextioerr.h"
 
 namespace oofem {
+
+IntegrationRule :: iterator :: iterator(IntegrationRule* ir, int pos): pos( pos ), ir( ir ) { }
+
+bool
+IntegrationRule :: iterator :: operator!=(const IntegrationRule :: iterator& other) const { return pos != other.pos; }
+
+GaussPoint &
+IntegrationRule :: iterator :: operator*() const { return *(ir->getIntegrationPoint(pos)); }
+
+const IntegrationRule :: iterator&
+IntegrationRule :: iterator :: operator++() { ++pos; return *this; }
+
+IntegrationRule :: iterator
+IntegrationRule :: begin() { return iterator(this, 0); }
+
+IntegrationRule :: iterator
+IntegrationRule :: end() { return iterator(this, this->numberOfIntegrationPoints); }
+
+
 IntegrationRule :: IntegrationRule(int n, Element *e, int startIndx, int endIndx, bool dynamic)
 {
     number = n;
