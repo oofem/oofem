@@ -62,11 +62,22 @@ IRResultType Set :: initializeFrom(InputRecord* ir)
     IR_GIVE_OPTIONAL_FIELD(ir, inputNodeRanges, _IFT_Set_nodeRanges);
     this->computeIntArray(this->nodes, inputNodes, inputNodeRanges);
 
-    IntArray inputElements;
-    std::list< Range > inputElementRanges;
-    IR_GIVE_OPTIONAL_FIELD(ir, inputElements, _IFT_Set_elements);
-    IR_GIVE_OPTIONAL_FIELD(ir, inputElementRanges, _IFT_Set_elementRanges);
-    this->computeIntArray(this->elements, inputElements, inputElementRanges);
+
+    if (ir->hasField(_IFT_Set_allElements)) { // generate a list with all the el numbers
+        int numEl = this->giveDomain()->giveNumberOfElements();
+        this->elements.resize(numEl);
+        for (int i = 1; i <= numEl; i++){
+            this->elements.at(i) = i;
+        }
+    } else {
+        IntArray inputElements;
+        std::list< Range > inputElementRanges;
+        IR_GIVE_OPTIONAL_FIELD(ir, inputElements, _IFT_Set_elements);
+        IR_GIVE_OPTIONAL_FIELD(ir, inputElementRanges, _IFT_Set_elementRanges);    
+        this->computeIntArray(this->elements, inputElements, inputElementRanges);
+    }
+    
+
 
     this->elementBoundaries.resize(0);
     IR_GIVE_OPTIONAL_FIELD(ir, this->elementBoundaries, _IFT_Set_elementBoundaries);

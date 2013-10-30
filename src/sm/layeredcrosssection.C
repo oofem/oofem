@@ -584,6 +584,8 @@ LayeredCrossSection :: initializeFrom(InputRecord *ir)
     const char *__proc = "initializeFrom"; // Required by IR_GIVE_FIELD macro
     IRResultType result;                // Required by IR_GIVE_FIELD macro
 
+    CrossSection :: initializeFrom(ir);
+
     IR_GIVE_FIELD(ir, numberOfLayers, _IFT_LayeredCrossSection_nlayers);
     IR_GIVE_FIELD(ir, layerMaterials, _IFT_LayeredCrossSection_layermaterials);
     IR_GIVE_FIELD(ir, layerThicks, _IFT_LayeredCrossSection_thicks);
