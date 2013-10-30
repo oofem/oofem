@@ -481,6 +481,23 @@ IntMatBilinearCZFagerstrom :: initializeFrom(InputRecord *ir)
     return IRRT_OK;
 }
 
+void IntMatBilinearCZFagerstrom :: giveInputRecord(DynamicInputRecord &input)
+{
+	StructuralInterfaceMaterial::giveInputRecord(input);
+
+	input.setField(kn0, _IFT_IntMatBilinearCZFagerstrom_kn);
+	input.setField(knc, _IFT_IntMatBilinearCZFagerstrom_knc);
+	input.setField(ks0, _IFT_IntMatBilinearCZFagerstrom_ks);
+
+	input.setField(GIc, _IFT_IntMatBilinearCZFagerstrom_g1c);
+	input.setField(GIIc, _IFT_IntMatBilinearCZFagerstrom_g2c);
+
+	input.setField(sigf, _IFT_IntMatBilinearCZFagerstrom_sigf);
+	input.setField(mu, _IFT_IntMatBilinearCZFagerstrom_mu);
+	input.setField(gamma, _IFT_IntMatBilinearCZFagerstrom_gamma);
+
+}
+
 int
 IntMatBilinearCZFagerstrom :: checkConsistency()
 {

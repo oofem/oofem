@@ -158,6 +158,12 @@ public:
         { _error("give3dStiffnessMatrix_Eng: not implemented "); }
     //@}
 
+    /**
+     * Tells if the model has implemented analytical tangent stiffness.
+     * If not, the tangent must be computed numerically.
+     */
+    virtual bool hasAnalyticalTangentStiffness() const {return false;}
+
     // identification and auxiliary functions
     virtual const char *giveClassName() const { return "StructuralInterfaceMaterial"; }
     virtual IRResultType initializeFrom(InputRecord *ir);

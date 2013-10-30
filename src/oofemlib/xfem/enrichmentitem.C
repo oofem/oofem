@@ -430,6 +430,21 @@ void EnrichmentItem :: evaluateEnrFuncDerivAt(std::vector<FloatArray> &oEnrFuncD
     }
 }
 
+void EnrichmentItem :: evaluateEnrFuncJumps(std :: vector< double > &oEnrFuncJumps, int iNodeInd ) const
+{
+    if(mNodeEnrMarker[iNodeInd-1] == 1)
+    {
+        // Bulk enrichment
+    	oEnrFuncJumps.resize(1);
+    	mpEnrichmentFunc->giveJump(oEnrFuncJumps);
+    }
+    else
+    {
+        // Front enrichment
+    	mpEnrichmentFront->evaluateEnrFuncJumps(oEnrFuncJumps);
+    }
+}
+
 
 void EnrichmentItem :: updateLevelSets(XfemManager &ixFemMan)
 {
@@ -1349,6 +1364,11 @@ void EnrFrontLinearBranchFuncRadius :: evaluateEnrFuncDerivAt(std::vector<FloatA
             oEnrFuncDeriv[j] = enrFuncDerivGlob;
         }
     }
+}
+
+void EnrFrontLinearBranchFuncRadius :: evaluateEnrFuncJumps(std :: vector< double > &oEnrFuncJumps) const
+{
+	mpBranchFunc->giveJump(oEnrFuncJumps);
 }
 
 IRResultType EnrFrontLinearBranchFuncRadius :: initializeFrom(InputRecord *ir)
