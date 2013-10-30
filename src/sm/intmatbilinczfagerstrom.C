@@ -142,7 +142,7 @@ IntMatBilinearCZFagerstrom :: giveFirstPKTraction_3d(FloatArray &answer, GaussPo
         double gamma = this->gamma;
         double gammaGf = this->GIIc/this->GIc;
 		double mu = this->mu;
-		printf("  mu    = %e \n", mu);
+		//printf("  mu    = %e \n", mu);
 
         double Qn_M = 0.5*(Qn + fabs(Qn));
 //        double loadFun = sigf*pow(Qt/(gamma*sigf),2) + sigf*pow((Qn_M/sigf),2) - sigf;	///@todo Martin: no use of parameter mu!!!
@@ -273,8 +273,18 @@ IntMatBilinearCZFagerstrom :: giveFirstPKTraction_3d(FloatArray &answer, GaussPo
 			}
                 
             FloatMatrix Iep(3,3);
-            Iep = Smati;
-            status->letTempIepBe(Iep);
+            //Iep = Smati;				//Martin: potential bug (should be submatrix of Smati(1:3,1:3)
+
+			IntArray Indx(3);
+			Indx.at(1) = 1;
+			Indx.at(2) = 2;
+			Indx.at(3) = 3;
+
+			Iep.beSubMatrixOf(Smati,Indx,Indx);
+
+
+
+			status->letTempIepBe(Iep);
                                                                 
             FloatArray alpha_v(3);
             alpha_v.at(1) = Smati.at(4,1);			// alpha_v(1:2) = S_mati(3,1:2)
