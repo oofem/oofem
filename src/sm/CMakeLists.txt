@@ -118,6 +118,7 @@ set (sm_material
     lsmastermat.C lsmastermatgrad.C
     bilinearczmaterial.C
     intmatbilinczfagerstrom.C
+    intmatbilinearcz.C
     )
 
 set (sm_error

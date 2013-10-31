@@ -47,6 +47,7 @@
 #include "engngm.h"
 #include "fieldmanager.h"
 #include "dynamicinputrecord.h"
+#include "eleminterpmapperinterface.h"
 
 namespace oofem {
 int
@@ -1791,6 +1792,7 @@ StructuralMaterial :: giveIPValue(FloatArray &answer, GaussPoint *aGaussPoint, I
     } else {
         return Material :: giveIPValue(answer, aGaussPoint, type, atTime);
     }
+    return 0;
 }
 
 

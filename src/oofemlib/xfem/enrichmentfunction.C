@@ -135,4 +135,18 @@ void LinElBranchFunction :: evaluateEnrFuncDerivAt(std :: vector< FloatArray > &
     dP.setValues(2, dP4dr * drdx + dP4dt * dtdx, dP4dr * drdy + dP4dt * dtdy);
     oEnrFuncDeriv.push_back(dP);
 }
+
+void LinElBranchFunction :: giveJump(std::vector<double> &oJumps) const
+{
+	/**
+	 * Psi1 is discontinuous with jump magnitude 2, the others are continuous.
+	 */
+
+	oJumps.clear();
+	oJumps.push_back(2.0);
+	oJumps.push_back(0.0);
+	oJumps.push_back(0.0);
+	oJumps.push_back(0.0);
+}
+
 } // end namespace oofem

@@ -50,6 +50,10 @@ namespace oofem {
  */
 class PlaneStress2dXfem : public PlaneStress2d, public XfemElementInterface, public VTKXMLExportModuleElementInterface
 {
+protected:
+    virtual void updateYourself(TimeStep *tStep);
+    virtual void postInitialize();
+
 public:
     /// Constructor
     PlaneStress2dXfem(int n, Domain *d) : PlaneStress2d(n, d), XfemElementInterface(this), VTKXMLExportModuleElementInterface() { }
@@ -71,8 +75,8 @@ public:
     virtual void giveDofManDofIDMask(int inode, EquationID, IntArray & answer) const;
     virtual void computeConstitutiveMatrixAt(FloatMatrix &answer, MatResponseMode rMode, GaussPoint *, TimeStep *tStep);
     virtual void computeStressVector(FloatArray &answer, const FloatArray &strain, GaussPoint *gp, TimeStep *stepN);
-//    virtual void computeStiffnessMatrix(FloatMatrix &answer, MatResponseMode rMode, TimeStep *tStep);
-//    virtual void giveInternalForcesVector(FloatArray &answer, TimeStep *tStep, int useUpdatedGpRecord);
+    virtual void computeStiffnessMatrix(FloatMatrix &answer, MatResponseMode rMode, TimeStep *tStep);
+    virtual void giveInternalForcesVector(FloatArray &answer, TimeStep *tStep, int useUpdatedGpRecord);
 
     virtual Element_Geometry_Type giveGeometryType() const;
     
@@ -83,6 +87,11 @@ public:
     //virtual void drawSpecial(oofegGraphicContext &);
     //void drawInternalState(oofegGraphicContext&);
 #endif
+
+    virtual IRResultType initializeFrom(InputRecord *ir);
+    virtual void giveInputRecord(DynamicInputRecord &input);
+
+
 };
 } // end namespace oofem
 #endif

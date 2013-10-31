@@ -56,6 +56,11 @@ namespace oofem {
 
 class TrPlaneStress2dXFEM : public TrPlaneStress2d, public XfemElementInterface, public VTKXMLExportModuleElementInterface
 {
+protected:
+    virtual void updateYourself(TimeStep *tStep);
+    virtual void postInitialize();
+
+
 public:
 
 	TrPlaneStress2dXFEM(int n, Domain *d) : TrPlaneStress2d(n, d), XfemElementInterface(this), VTKXMLExportModuleElementInterface() { }
@@ -91,8 +96,8 @@ public:
     virtual void giveDofManDofIDMask(int inode, EquationID ut, IntArray & answer) const;
 //    virtual void computeConstitutiveMatrixAt(FloatMatrix &answer, MatResponseMode rMode, GaussPoint *, TimeStep *tStep);
 //    virtual void computeStressVector(FloatArray &answer, GaussPoint *gp, TimeStep *stepN);
-//    virtual void computeStiffnessMatrix(FloatMatrix &answer, MatResponseMode rMode, TimeStep *tStep);
-//    virtual void giveInternalForcesVector(FloatArray &answer, TimeStep *tStep, int useUpdatedGpRecord);
+    virtual void computeStiffnessMatrix(FloatMatrix &answer, MatResponseMode rMode, TimeStep *tStep);
+    virtual void giveInternalForcesVector(FloatArray &answer, TimeStep *tStep, int useUpdatedGpRecord);
 
 //    virtual Element_Geometry_Type giveGeometryType() const;
 
@@ -105,6 +110,8 @@ public:
     //void drawInternalState(oofegGraphicContext&);
 #endif
 
+    virtual IRResultType initializeFrom(InputRecord *ir);
+    virtual void giveInputRecord(DynamicInputRecord &input);
 
     // For mapping of primary unknowns
     virtual int EIPrimaryUnknownMI_computePrimaryUnknownVectorAt(ValueModeType u,
