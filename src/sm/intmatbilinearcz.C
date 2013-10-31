@@ -1,8 +1,35 @@
 /*
- * intmatbilinearcz.C
  *
- *  Created on: Oct 20, 2013
- *      Author: svennine
+ *                 #####    #####   ######  ######  ###   ###
+ *               ##   ##  ##   ##  ##      ##      ## ### ##
+ *              ##   ##  ##   ##  ####    ####    ##  #  ##
+ *             ##   ##  ##   ##  ##      ##      ##     ##
+ *            ##   ##  ##   ##  ##      ##      ##     ##
+ *            #####    #####   ##      ######  ##     ##
+ *
+ *
+ *             OOFEM : Object Oriented Finite Element Code
+ *
+ *               Copyright (C) 1993 - 2013   Borek Patzak
+ *
+ *
+ *
+ *       Czech Technical University, Faculty of Civil Engineering,
+ *   Department of Structural Mechanics, 166 29 Prague, Czech Republic
+ *
+ *  This library is free software; you can redistribute it and/or
+ *  modify it under the terms of the GNU Lesser General Public
+ *  License as published by the Free Software Foundation; either
+ *  version 2.1 of the License, or (at your option) any later version.
+ *
+ *  This program is distributed in the hope that it will be useful,
+ *  but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+ *  Lesser General Public License for more details.
+ *
+ *  You should have received a copy of the GNU Lesser General Public
+ *  License along with this library; if not, write to the Free Software
+ *  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  */
 
 #include "gausspoint.h"
@@ -18,7 +45,6 @@ namespace oofem {
 
 REGISTER_Material( IntMatBilinearCZ );
 
-//IntMatBilinearCZFagerstromStatus :: IntMatBilinearCZFagerstromStatus(int n, Domain *d, GaussPoint *g) : StructuralMaterialStatus(n, d, g)
 IntMatBilinearCZStatus :: IntMatBilinearCZStatus(int n, Domain *d, GaussPoint *g) : StructuralInterfaceMaterialStatus(n, d, g),
 mDamageNew(0.0),
 mDamageOld(0.0)
@@ -58,7 +84,12 @@ void IntMatBilinearCZStatus :: updateYourself(TimeStep *atTime)
 }
 
 
-IntMatBilinearCZ::IntMatBilinearCZ(int n, Domain *d) : StructuralInterfaceMaterial(n, d)
+IntMatBilinearCZ::IntMatBilinearCZ(int n, Domain *d) : StructuralInterfaceMaterial(n, d),
+mPenaltyStiffness(0.0),
+mGIc(0.0), mGIIc(0.0),
+mSigmaF(0.0),
+mMu(0.0),
+mGamma(0.0)
 {
 
 }
@@ -72,14 +103,6 @@ int IntMatBilinearCZ::checkConsistency()
 {
 	return 1;
 }
-
-/*
-void IntMatBilinearCZ::give3dInterfaceMaterialStiffnessMatrix(FloatMatrix &answer, MatResponseMode rMode,
-                                                                 GaussPoint *gp, TimeStep *atTime)
-{
-
-}
-*/
 
 void IntMatBilinearCZ::giveFirstPKTraction_3d(FloatArray &answer, GaussPoint *gp, const FloatArray &jump,
                                      const FloatMatrix &F, TimeStep *tStep)
@@ -98,7 +121,7 @@ void IntMatBilinearCZ::giveFirstPKTraction_3d(FloatArray &answer, GaussPoint *gp
     double TTrTang 		= sqrt( pow(tractionTrial.at(1),2.0) + pow(tractionTrial.at(2),2.0) );
     double phiTr = computeYieldFunction(TTrNormal, TTrTang);
 
-    double damageTol = 1.0e-6;
+    const double damageTol = 1.0e-6;
     if( status->mDamageOld > (1.0-damageTol) ) {
     	status->mDamageNew = 1.0;
     	answer.zero();
@@ -120,9 +143,11 @@ void IntMatBilinearCZ::giveFirstPKTraction_3d(FloatArray &answer, GaussPoint *gp
 
     	// Iterate to find plastic strain increment.
     	int maxIter = 50;
-    	double absTol = 1.0e-9;
+    	double absTol = 1.0e-9; // Absolute error tolerance
+    	double relTol = 1.0e-9; // Relative error tolerance
     	double eps = 1.0e-9; // Small value for perturbation when computing numerical Jacobian
 		double plastMultInc = 0.0;
+		double initialRes = 0.0;
 
 		for(int iter = 0; iter < maxIter; iter++) {
 
@@ -133,9 +158,16 @@ void IntMatBilinearCZ::giveFirstPKTraction_3d(FloatArray &answer, GaussPoint *gp
     	    double TTang 		= sqrt( pow(answer.at(1),2.0) + pow(answer.at(2),2.0) );
     	    double phi = computeYieldFunction(TNormal, TTang);
 
-//    	    printf("iter: %d res: %e\n", iter, fabs(phi) );
+//    	    if(iter > 20) {
+//    	    	printf("iter: %d res: %e\n", iter, fabs(phi) );
+//    	    }
 
-    	    if( fabs(phi) < absTol ) {
+    	    if(iter == 0) {
+    	    	initialRes = fabs(phi);
+    	    	initialRes = max(initialRes, 1.0e-12);
+    	    }
+
+    	    if( fabs(phi) < absTol || (iter > 0 && (fabs(phi)/initialRes) < relTol ) ) {
 
     	    	// Add damage evolution
     	    	double S = mGIc/mSigmaF;
@@ -165,7 +197,7 @@ void IntMatBilinearCZ::giveFirstPKTraction_3d(FloatArray &answer, GaussPoint *gp
 
     }
 
-    OOFEM_ERROR("Warning: No convergence in IntMatBilinearCZ::giveFirstPKTraction_3d().\n");
+    OOFEM_ERROR("ERROR: No convergence in IntMatBilinearCZ::giveFirstPKTraction_3d().\n");
 }
 
 void IntMatBilinearCZ::give3dStiffnessMatrix_dTdj(FloatMatrix &answer, MatResponseMode rMode, GaussPoint *gp, TimeStep *tStep)
@@ -186,7 +218,6 @@ void IntMatBilinearCZ::computeTraction( FloatArray &oT, const FloatArray &iTTria
 	// Note that the traction vector is assumed to be decomposed into its tangential and normal part,
 	// with tangential directions (1,2) and normal direction (3).
 
-//	double gammaF = mGamma*mGIIc/mGIc;
 	double gammaF =  mGIIc/mGIc;
 
 	// Tangential part

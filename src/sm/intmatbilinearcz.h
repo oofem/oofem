@@ -70,89 +70,24 @@ namespace oofem {
 class IntMatBilinearCZStatus : public StructuralInterfaceMaterialStatus
 {
 public:
-/*
-    // material jump
-    FloatArray oldMaterialJump;
-    // temporary material jump
-    FloatArray tempMaterialJump;
-*/
-    // damage variable
-    double mDamageNew, mDamageOld;
-
-    FloatArray mTractionOld, mTractionNew;
-    FloatArray mJumpOld, mJumpNew;
-/*
-    // temporary damage value
-    double tempDamage;
-
-    // Effective Mandel traction
-    FloatArray QEffective;
-    // Temporary effective Mandel traction
-    FloatArray tempQEffective;
-
-    // Temporary inverse of deformation gradient
-    FloatMatrix tempFInv;
-
-    // Temporary array for coordinate transformation
-    FloatMatrix tempRot;
-
-    // tempArrays for stiffness calculation
-    FloatMatrix Iep;
-    FloatArray	alphav;
-*/
-
-
-public:
-
     IntMatBilinearCZStatus(int n, Domain *d, GaussPoint *g);
-
     virtual ~IntMatBilinearCZStatus();
 
-//    virtual void printOutputAt(FILE *file, TimeStep *tStep);
+    /// damage variable
+    double mDamageNew, mDamageOld;
 
-    // definition
+    /// Traction
+    FloatArray mTractionOld, mTractionNew;
+
+    /// Discontinuity
+    FloatArray mJumpOld, mJumpNew;
+
     virtual const char *giveClassName() const { return "IntMatBilinearCZStatus"; }
     virtual classType giveClassID() const { return MaterialStatusClass; }
 
-//    double giveDamage() const { return mDamage; }
-//    void setDamage(const double &iDamage) {mDamage = iDamage;}
-
-
-/*
-    double giveTempDamage() { return tempDamage; }
-
-    const FloatArray &giveOldMaterialJump() {return oldMaterialJump; }
-    const FloatArray &giveTempMaterialJump() {return tempMaterialJump; }
-
-    const FloatArray &giveEffectiveMandelTraction() { return  QEffective; }
-    const FloatArray &giveTempEffectiveMandelTraction() {return tempQEffective; }
-
-    const FloatMatrix &giveTempInverseDefGrad() {return tempFInv; }
-    const FloatMatrix &giveTempRotationMatrix() {return tempRot; }
-    const FloatMatrix &giveTempIep() {return Iep; }
-    const FloatArray &giveTempAlphav() {return alphav; }
-
-*/
-//    void letTempDamageBe(double v) { tempDamage = v; }
-/*
-    void letTempEffectiveMandelTractionBe(const FloatArray &v) { tempQEffective = v; }
-    void letTempMaterialJumpBe(const FloatArray &v) { tempMaterialJump = v; }
-
-    void letTempInverseDefGradBe(const FloatMatrix &v) { tempFInv = v; }
-    void letTempRotationMatrix(const FloatMatrix &v) { tempRot = v; }
-    void letTempIepBe(const FloatMatrix &v) { Iep = v; }
-    void letTempAlphavBe(const FloatArray &v) { alphav = v; }
-
-*/
-
     virtual void initTempStatus();
     virtual void updateYourself(TimeStep *tStep);
-
-
-    //virtual contextIOResultType saveContext(DataStream *stream, ContextMode mode, void *obj = NULL);
-    //virtual contextIOResultType restoreContext(DataStream *stream, ContextMode mode, void *obj = NULL);
 };
-
 
 
 class IntMatBilinearCZ : public StructuralInterfaceMaterial {
@@ -170,16 +105,12 @@ protected:
     double mMu;    // loading function parameter
     double mGamma; // loading function parameter
 
-
     virtual int checkConsistency();
-//    void give3dInterfaceMaterialStiffnessMatrix(FloatMatrix &answer, MatResponseMode rMode,
- //                                                                    GaussPoint *gp, TimeStep *atTime);
 
 public:
 
     virtual int hasNonLinearBehaviour()   { return 1; }
 
-//    virtual int hasMaterialModeCapability(MaterialMode mode); // remove
     virtual const char *giveClassName() const { return "IntMatBilinearCZ"; }
     virtual classType giveClassID() const { return MaterialStatusClass; }
     virtual const char *giveInputRecordName() const { return _IFT_IntMatBilinearCZ_Name; }
@@ -187,9 +118,14 @@ public:
 
     virtual void giveFirstPKTraction_3d(FloatArray &answer, GaussPoint *gp, const FloatArray &jump,
                                          const FloatMatrix &F, TimeStep *tStep);
+
+    // Dummy implementation, we must rely on numerical computation of the tangent.
     virtual void give3dStiffnessMatrix_dTdj(FloatMatrix &answer, MatResponseMode rMode, GaussPoint *gp, TimeStep *tStep);
 
+    virtual bool hasAnalyticalTangentStiffness() const {return false;}
+
 private:
+    // Help functions
     double computeYieldFunction(const double &iTractionNormal, const double &iTractionTang) const;
     void computeTraction( FloatArray &oT, const FloatArray &iTTrial, const double &iPlastMultInc ) const;
 

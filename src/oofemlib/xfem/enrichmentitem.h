@@ -423,7 +423,7 @@ public:
 	EnrFrontDoNothing() {};
 	virtual ~EnrFrontDoNothing() {};
 
-	virtual void MarkNodesAsFront(std::vector<int> &ioNodeEnrMarker, XfemManager &ixFemMan, const std::vector<double> &iLevelSetNormalDir, const std::vector<double> &iLevelSetTangDir, const std::vector<TipInfo> &iTipInfo) {printf("Entering EnrFrontDoNothing::MarkNodesAsFront().\n"); }
+	virtual void MarkNodesAsFront(std::vector<int> &ioNodeEnrMarker, XfemManager &ixFemMan, const std::vector<double> &iLevelSetNormalDir, const std::vector<double> &iLevelSetTangDir, const std::vector<TipInfo> &iTipInfo) {/*printf("Entering EnrFrontDoNothing::MarkNodesAsFront().\n");*/ }
 
 	// No special tip enrichments are applied with this model.
 	virtual int  giveNumEnrichments(const DofManager &iDMan) const {return 0;}
