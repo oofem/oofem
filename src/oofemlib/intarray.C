@@ -64,6 +64,18 @@
 
 namespace oofem {
 
+IntArray :: iterator :: iterator(const IntArray* vec, int pos): pos( pos ), vec( vec ) { }
+
+bool IntArray :: iterator :: operator!=(const IntArray :: iterator& other) const { return pos != other.pos; }
+
+int IntArray :: iterator :: operator*() const { return (*vec)(pos); }
+
+const IntArray :: iterator & IntArray :: iterator :: operator++() { ++pos; return *this; }
+
+IntArray :: iterator IntArray :: begin() { return iterator(this, 0); }
+IntArray :: iterator IntArray :: end() { return iterator(this, this->size); }
+
+
 IntArray :: IntArray() :
     size(0),
     allocatedSize(0),

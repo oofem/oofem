@@ -330,7 +330,6 @@ PetscSparseMtrx :: buildInternalStructure(EngngModel *eModel, int di, EquationID
         for ( int n = 1; n <= domain->giveNumberOfBoundaryConditions(); n++ ) {
             ActiveBoundaryCondition *activebc = dynamic_cast<ActiveBoundaryCondition*>(domain->giveBc(n));
             if (activebc) {
-                ///@todo Deal with the CharType here.
                 activebc->giveLocationArrays(r_locs, c_locs, ut, TangentStiffnessMatrix, r_s, c_s);
                 for (std::size_t k = 0; k < r_locs.size(); k++) {
                     IntArray &krloc = r_locs[k];
@@ -540,7 +539,6 @@ PetscSparseMtrx :: buildInternalStructure(EngngModel *eModel, int di, EquationID
         for ( int n = 1; n <= domain->giveNumberOfBoundaryConditions(); n++ ) {
             ActiveBoundaryCondition *activebc = dynamic_cast<ActiveBoundaryCondition*>(domain->giveBc(n));
             if (activebc) {
-                ///@todo Deal with the CharType here.
                 activebc->giveLocationArrays(r_locs, c_locs, ut, TangentStiffnessMatrix, s, s);
                 for (std::size_t k = 0; k < r_locs.size(); k++) {
                     IntArray &krloc = r_locs[k];
@@ -599,22 +597,22 @@ int
 PetscSparseMtrx :: assemble(const IntArray &loc, const FloatMatrix &mat)
 {
     int ndofe = mat.giveNumberOfRows();
+    IntArray gloc(ndofe);
 
 #ifdef __PARALLEL_MODE
     if ( emodel->isParallel() ) {
         // translate local code numbers to global ones
-        IntArray gloc(ndofe);
         emodel->givePetscContext(this->di)->giveN2Gmap()->map2New(gloc, loc, 0);
 
         //fprintf (stderr, "[?] gloc=");
         //for (int i=1; i<=ndofe; i++) fprintf (stderr, "%d ", gloc.at(i));
 
-        MatSetValues(this->mtrx, ndofe, gloc.givePointer(), ndofe, gloc.givePointer(), mat.givePointer(), ADD_VALUES);
-    } else {
+    } else
 #endif
-    IntArray gloc(ndofe);
-    for ( int i = 1; i <= ndofe; i++ ) {
-        gloc.at(i) = loc.at(i) - 1;
+    {
+        for ( int i = 1; i <= ndofe; i++ ) {
+            gloc.at(i) = loc.at(i) - 1;
+        }
     }
 
     MatSetValues(this->mtrx, ndofe, gloc.givePointer(), ndofe, gloc.givePointer(), mat.givePointer(), ADD_VALUES);
@@ -622,9 +620,6 @@ PetscSparseMtrx :: assemble(const IntArray &loc, const FloatMatrix &mat)
     //mat.printYourself();
     //loc.printYourself();
     //MatView(this->mtrx,PETSC_VIEWER_STDOUT_SELF);
-#ifdef __PARALLEL_MODE
-}
-#endif
     this->version++;
     this->newValues = true;
     return 1;
