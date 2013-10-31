@@ -41,6 +41,7 @@
 #define _IFT_SolutionbasedShapeFunction_Name "solutionbasedshapefunction"
 #define _IFT_SolutionbasedShapeFunction_Set "set"
 #define _IFT_SolutionbasedShapeFunction_ShapeFunctionFile "shapefunctionfile"
+#define _IFT_SolutionbasedShapeFunction_Externalset "externalset"
 
 namespace oofem {
 
@@ -48,6 +49,7 @@ struct SurfaceDataStruct {
     bool isPlus;
     bool isMinus;
     bool isZeroBoundary;
+    bool isFree;
     DofIDItem DofID;
     DofManager *DofMan;
     double value;
@@ -57,14 +59,14 @@ struct modeStruct {
     double am, ap;
     EngngModel *myEngngModel;
     std::vector<SurfaceDataStruct *> SurfaceData;
-    std::vector<DofManager *> ZeroBoundary;
-
 };
 
 class OOFEM_EXPORT SolutionbasedShapeFunction : public ActiveBoundaryCondition {
 private:
     Node *myNode;
     int set;
+    int externalSet;
+    int order;
     double TOL;
     std::string filename;
     bool useConstantBase;
@@ -72,8 +74,7 @@ private:
 
     std::vector< modeStruct *> modes;
 
-    //std::vector< EngngModel *> myEngngModels;
-    //std::vector< std::vector<DofManager *> *> ZeroBoundary;
+    void updateModelWithFactors(modeStruct *m);
     TimeStep *thisTimestep;
 
     FloatArray maxCoord, minCoord;
@@ -86,9 +87,12 @@ private:
     void loadProblem();
     void init();
 
-    void computeCorrectionFactors(EngngModel &myEngngModel, IntArray *Dofs, double *Am, double *Ap, double *c0, double *cm, double *cp);
+    void computeCorrectionFactors(EngngModel &myEngngModel, IntArray *Dofs, long double *Am, long double *Ap, long double *c0, long double *cm, long double *cp);
 
     double giveValueAtPoint(const FloatArray &coords, DofIDItem dofID, EngngModel &myEngngModel);
+
+    void initializeSurfaceData(modeStruct *mode);
+    void copyDofManagerToSurfaceData(SurfaceDataStruct *surfaceData, int DofManID, int DofIDItem, EngngModel *m, bool isPlus, bool isMinus, bool isZeroBoundary);
 
 public:
     SolutionbasedShapeFunction(int n, Domain *d);
@@ -114,6 +118,8 @@ public:
 
     virtual const char *giveClassName() const { return "SolutionbasedShapeFunction"; }
     virtual const char *giveInputRecordName() const { return _IFT_SolutionbasedShapeFunction_Name; }
+
+    void checkIncompressibility(EngngModel &myEngngModel);
 };
 }
 
