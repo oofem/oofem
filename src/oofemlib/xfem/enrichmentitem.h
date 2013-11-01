@@ -155,6 +155,7 @@ public:
     void evalLevelSetTangInNode(double &oLevelSet, int iNodeInd) const { oLevelSet = mLevelSetTangDir [ iNodeInd - 1 ]; }
     void evalNodeEnrMarkerInNode(double &oLevelSet, int iNodeInd) const { oLevelSet = mNodeEnrMarker [ iNodeInd - 1 ]; }
 
+    bool levelSetChangesSignInEl(const IntArray &iElNodes) const;
 
     // By templating the function this way, we may choose if we want to pass iNodeInd as
     // an IntArray, a std::vector<int> or something else.

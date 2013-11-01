@@ -40,6 +40,7 @@
 #include "xfemmanager.h"
 
 #define _IFT_XfemElementInterface_CohesiveZoneMaterial "czmaterial"
+#define _IFT_XfemElementInterface_NumIntPointsCZ "nipcz"
 
 namespace oofem {
 class FloatArray;

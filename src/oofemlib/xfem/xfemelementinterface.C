@@ -909,8 +909,13 @@ XfemElementInterface :: initializeCZFrom(InputRecord *ir)
     int material = -1;
     IR_GIVE_OPTIONAL_FIELD(ir, material, _IFT_XfemElementInterface_CohesiveZoneMaterial);
     mCZMaterialNum = material;
-
 //    printf("In XfemElementInterface :: initializeCZFrom(): mCZMaterialNum: %d\n", mCZMaterialNum );
+
+
+    // Number of Gauss points used when integrating the cohesive zone
+    IR_GIVE_OPTIONAL_FIELD(ir, mCSNumGaussPoints, _IFT_XfemElementInterface_NumIntPointsCZ);
+//    printf("mCSNumGaussPoints: %d\n", mCSNumGaussPoints );
+
 
     return IRRT_OK;
 }
@@ -1069,9 +1074,6 @@ bool XfemElementInterface :: computeNormalInPoint(const FloatArray &iGlobalCoord
     for ( int i = 1; i <= xMan->giveNumberOfEnrichmentItems(); i++ ) {
     	EnrichmentItem *ei = xMan->giveEnrichmentItem(i);
 
-    	double levelSet = 0.0;
-    	ei->interpLevelSet(levelSet, N, elNodes);
-
     	double levelSetTang = 0.0;
     	ei->interpLevelSetTangential(levelSetTang, N, elNodes);
 
@@ -1079,11 +1081,13 @@ bool XfemElementInterface :: computeNormalInPoint(const FloatArray &iGlobalCoord
     	ei->interpGradLevelSet(gradLevelSet, dNdx, elNodes);
 
 
-    	// If the normal level set is sufficiently small,
+    	// If the normal level set changes sign,
     	// and the tangential level set is positive,
     	// we have found the correct enrichment item.
-    	double normalTol = 1.0e-2; // TODO: Should be related to the element size.
-    	if( fabs(levelSet) < normalTol &&  levelSetTang > 0.0) {
+    	// TODO: If several cracks pass through the element,
+    	// we want to pick the crack that has the lowest level
+    	// set value in the point.
+    	if( (ei->levelSetChangesSignInEl(elNodes)) &&  levelSetTang > 0.0) {
 
     		// If so, take the normal as the gradient of the level set function
 
