@@ -700,7 +700,7 @@ void XfemElementInterface :: computeCohesiveForces(FloatArray &answer, TimeStep 
 				answer.add(dA, NTimesT);
 			}
 			else {
-				OOFEM_ERROR("In XfemElementInterface :: computeCohesiveForces: Failed to compute normal in Gauss point.\n");
+//				OOFEM_ERROR("In XfemElementInterface :: computeCohesiveForces: Failed to compute normal in Gauss point.\n");
 			}
 		}
 
