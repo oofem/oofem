@@ -143,10 +143,10 @@ void MixedGradientPressureDirichlet :: computeDofTransformation(ActiveDof *dof, 
         } else if (nsd == 3) {
             masterContribs.at(2) = dx.at(1);      // d_dev_11
             masterContribs.at(3) = 0.0;           // d_dev_22
-            masterContribs.at(3) = 0.0;           // d_dev_33
-            masterContribs.at(4) = 0.0;           // gamma_23
-            masterContribs.at(5) = dx.at(3)/2.0;  // gamma_13
-            masterContribs.at(6) = dx.at(2)/2.0;  // gamma_12
+            masterContribs.at(4) = 0.0;           // d_dev_33
+            masterContribs.at(5) = 0.0;           // gamma_23
+            masterContribs.at(6) = dx.at(3)/2.0;  // gamma_13
+            masterContribs.at(7) = dx.at(2)/2.0;  // gamma_12
         }
     } else if ( id == D_v || id == V_v ) {
         masterContribs.at(1) = dx.at(2)/3.0;      // d_vol
@@ -166,10 +166,10 @@ void MixedGradientPressureDirichlet :: computeDofTransformation(ActiveDof *dof, 
         masterContribs.at(1) = dx.at(3)/3.0;  // d_vol
         masterContribs.at(2) = 0.0;           // d_dev_11
         masterContribs.at(3) = 0.0;           // d_dev_22
-        masterContribs.at(3) = dx.at(3);      // d_dev_33
-        masterContribs.at(4) = dx.at(2)/2.0;  // gamma_23
-        masterContribs.at(4) = dx.at(1)/2.0;  // gamma_13
-        masterContribs.at(4) = 0.0;           // gamma_12
+        masterContribs.at(4) = dx.at(3);      // d_dev_33
+        masterContribs.at(5) = dx.at(2)/2.0;  // gamma_23
+        masterContribs.at(6) = dx.at(1)/2.0;  // gamma_13
+        masterContribs.at(7) = 0.0;           // gamma_12
     } else {
         OOFEM_ERROR("MixedGradientPressureDirichlet :: computeDofTransformation - Incompatible id on subjected dof\n");
     }
@@ -327,6 +327,7 @@ void MixedGradientPressureDirichlet :: computeTangents(
         Ep.at(i) += 1.0;
         Cd.at(i) += 1.0;
     }
+
 #if 0
     // Makes Ed 4th order deviatoric, in Voigt form (!)
     for (int i = 1; i <= Ed.giveNumberOfColumns(); ++i) {

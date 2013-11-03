@@ -162,7 +162,7 @@ public:
      * Tells if the model has implemented analytical tangent stiffness.
      * If not, the tangent must be computed numerically.
      */
-    virtual bool hasAnalyticalTangentStiffness() const {return false;}
+    virtual bool hasAnalyticalTangentStiffness() const = 0;
 
     // identification and auxiliary functions
     virtual const char *giveClassName() const { return "StructuralInterfaceMaterial"; }

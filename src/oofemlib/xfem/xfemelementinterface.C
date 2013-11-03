@@ -63,7 +63,8 @@ mpCZMat(NULL),
 mCZMaterialNum(-1),
 mCSNumGaussPoints(4),
 mpCZIntegrationRule(NULL),
-mCrackLength(0.0)
+mCrackLength(0.0),
+mCZEnrItemIndex(-1)
 {
 
 }
@@ -344,8 +345,10 @@ void XfemElementInterface :: XfemElementInterface_updateIntegrationRule()
 
         // Get the points describing each subdivision of the element
         FloatArray startPoint, endPoint;
-        this->XfemElementInterface_prepareNodesForDelaunay(pointPartitions, startPoint, endPoint);
+        int enrItemInd = -1;
+        this->XfemElementInterface_prepareNodesForDelaunay(pointPartitions, startPoint, endPoint, enrItemInd);
         mCrackLength = startPoint.distance(endPoint);
+        mCZEnrItemIndex = enrItemInd;
 
         for ( int i = 0; i < int( pointPartitions.size() ); i++ ) {
         	// Triangulate the subdivisions
@@ -432,7 +435,7 @@ void XfemElementInterface :: XfemElementInterface_updateIntegrationRule()
     }
 }
 
-void XfemElementInterface :: XfemElementInterface_prepareNodesForDelaunay(std :: vector< std :: vector< FloatArray > > &oPointPartitions, FloatArray &oCrackStartPoint, FloatArray &oCrackEndPoint)
+void XfemElementInterface :: XfemElementInterface_prepareNodesForDelaunay(std :: vector< std :: vector< FloatArray > > &oPointPartitions, FloatArray &oCrackStartPoint, FloatArray &oCrackEndPoint, int &oEnrItemIndex)
 {
     XfemManager *xMan = this->element->giveDomain()->giveXfemManager();
 
@@ -442,160 +445,170 @@ void XfemElementInterface :: XfemElementInterface_prepareNodesForDelaunay(std ::
     // TODO:    Can we do this recursively to achieve proper splitting
     //			when several enrichment items interact with the
     //			same element?
-    for ( int i = 1; i <= xMan->giveNumberOfEnrichmentItems(); i++ ) {
-        xMan->giveEnrichmentItem(i)->computeIntersectionPoints(intersecPoints, intersecEdgeInd, element);
-    }
+    for ( int eiInd = 1; eiInd <= xMan->giveNumberOfEnrichmentItems(); eiInd++ ) {
+        xMan->giveEnrichmentItem(eiInd)->computeIntersectionPoints(intersecPoints, intersecEdgeInd, element);
 
 
-    if ( intersecPoints.size() == 2 ) {
-        // The element is completely cut in two.
-        // Therefore, we create two subpartitions:
-        // one on each side of the interface.
-        oPointPartitions.resize(2);
 
-        for ( int i = 1; i <= int(intersecPoints.size()); i++ ) {
-        	oPointPartitions[0].push_back(intersecPoints[i-1]);
-            oPointPartitions[1].push_back(intersecPoints[i-1]);
-        }
+		if ( intersecPoints.size() == 2 ) {
+			// The element is completely cut in two.
+			// Therefore, we create two subpartitions:
+			// one on each side of the interface.
+			oPointPartitions.resize(2);
 
-
-        // Check on which side of the interface each node is located.
-        const double &x1 = intersecPoints [ 0 ].at(1);
-        const double &x2 = intersecPoints [ 1 ].at(1);
-        const double &y1 = intersecPoints [ 0 ].at(2);
-        const double &y2 = intersecPoints [ 1 ].at(2);
-
-        for ( int i = 1; i <= this->element->giveNumberOfDofManagers(); i++ ) {
-        	const double &x = element->giveDofManager(i)->giveCoordinates()->at(1);
-            const double &y = element->giveDofManager(i)->giveCoordinates()->at(2);
-            double det = ( x1 - x ) * ( y2 - y ) - ( x2 - x ) * ( y1 - y );
-            FloatArray *node = element->giveDofManager(i)->giveCoordinates();
-
-            if ( det > 0.0 ) {
-            	oPointPartitions[0].push_back(*node);
-            } else {
-            	oPointPartitions[1].push_back(*node);
-            }
-        }
-
-
-        // Export start and end points of
-        // the intersection line.
-        oCrackStartPoint = intersecPoints[0];
-        oCrackEndPoint = intersecPoints[1];
-    }
-    else if( intersecPoints.size() == 1 )
-    {
-    	// TODO: For now, assume that the number of element edges is
-    	// equal to the number of nodes.
-    	int nNodes = this->element->giveNumberOfNodes();
-    	std::vector<FloatArray> edgeCoords, nodeCoords;
-
-        FloatArray tipCoord;
-        int dim = element->giveDofManager(1)->giveCoordinates()->giveSize();
-        tipCoord.resize(dim);
-
-        bool foundTip = false;
-        for ( int i = 1; i <= xMan->giveNumberOfEnrichmentItems(); i++ ) {
-            EnrichmentItem *ei = xMan->giveEnrichmentItem(i);
-
-            if ( ei->giveElementTipCoord( tipCoord, element->giveNumber() ) ) {
-                foundTip = true;
-                break;
-            }
-        }
-
-        if(foundTip)
-        {
-
-			for(int i = 1; i <= nNodes; i++)
-			{
-				// Store edge points
-				if( i == intersecEdgeInd[0] )
-				{
-					// Take the intersection point ...
-					edgeCoords.push_back(intersecPoints[0]);
-				}
-				else
-				{
-					// ... or the center of the edge.
-					IntArray bNodes;
-					this->element->giveInterpolation()->boundaryGiveNodes(bNodes, i);
-
-					int nsLoc = bNodes.at( 1 );
-					int neLoc = bNodes.at( bNodes.giveSize() );
-
-					const FloatArray &coordS = *(element->giveDofManager(nsLoc)->giveCoordinates());
-					const FloatArray &coordE = *(element->giveDofManager(neLoc)->giveCoordinates());
-
-					FloatArray coordEdge;
-					coordEdge = 0.5*coordS + 0.5*coordE;
-					edgeCoords.push_back(coordEdge);
-				}
-
-				// Store node coords
-				const FloatArray &coord = *(element->giveDofManager(i)->giveCoordinates());
-				nodeCoords.push_back( coord );
-
+			for ( int i = 1; i <= int(intersecPoints.size()); i++ ) {
+				oPointPartitions[0].push_back(intersecPoints[i-1]);
+				oPointPartitions[1].push_back(intersecPoints[i-1]);
 			}
 
-			oPointPartitions.resize((2*nNodes));
 
-			// Divide into subdomains
-			for(int i = 1; i <= nNodes; i++)
-			{
-				////////////////
-				// Take edge center or intersection point
-				oPointPartitions[2*i-1].push_back(edgeCoords[i-1]);
+			// Check on which side of the interface each node is located.
+			const double &x1 = intersecPoints [ 0 ].at(1);
+			const double &x2 = intersecPoints [ 1 ].at(1);
+			const double &y1 = intersecPoints [ 0 ].at(2);
+			const double &y2 = intersecPoints [ 1 ].at(2);
 
-				// Take crack tip position
-				oPointPartitions[2*i-1].push_back(tipCoord);
+			for ( int i = 1; i <= this->element->giveNumberOfDofManagers(); i++ ) {
+				const double &x = element->giveDofManager(i)->giveCoordinates()->at(1);
+				const double &y = element->giveDofManager(i)->giveCoordinates()->at(2);
+				double det = ( x1 - x ) * ( y2 - y ) - ( x2 - x ) * ( y1 - y );
+				FloatArray *node = element->giveDofManager(i)->giveCoordinates();
 
-				// Take node
-				oPointPartitions[2*i-1].push_back( *(element->giveDofManager(i)->giveCoordinates()) );
-
-				////////////////
-				// Take edge center or intersection point
-				oPointPartitions[2*i-2].push_back(edgeCoords[i-1]);
-
-				// Take next node
-				if(i == nNodes)
-				{
-					oPointPartitions[2*i-2].push_back( *(element->giveDofManager(1)->giveCoordinates()) );
+				if ( det > 0.0 ) {
+					oPointPartitions[0].push_back(*node);
+				} else {
+					oPointPartitions[1].push_back(*node);
 				}
-				else
-				{
-					oPointPartitions[2*i-2].push_back( *(element->giveDofManager(i+1)->giveCoordinates()) );
-				}
-
-				// Take crack tip position
-				oPointPartitions[2*i-2].push_back(tipCoord);
-
 			}
 
-	        // Export start and end points of
-	        // the intersection line.
-	        oCrackStartPoint = intersecPoints[0];
-	        oCrackEndPoint = tipCoord;
 
-        } // If a tip was found
-        else
-        {
-        	oPointPartitions.resize(1);
+			// Export start and end points of
+			// the intersection line.
+			oCrackStartPoint = intersecPoints[0];
+			oCrackEndPoint = intersecPoints[1];
 
-            for ( int i = 1; i <= this->element->giveNumberOfDofManagers(); i++ )
-            {
-                const FloatArray &nodeCoord = *element->giveDofManager(i)->giveCoordinates();
-                oPointPartitions[0].push_back(nodeCoord);
-            }
+			oEnrItemIndex = eiInd;
 
-	        // Export start and end points of
-	        // the intersection line.
-	        oCrackStartPoint = intersecPoints[0];
-	        oCrackEndPoint = intersecPoints[0];
-        }
-    }
+			// TODO: Handle multiple intersections
+			return;
+		}
+		else if( intersecPoints.size() == 1 )
+		{
+			// TODO: For now, assume that the number of element edges is
+			// equal to the number of nodes.
+			int nNodes = this->element->giveNumberOfNodes();
+			std::vector<FloatArray> edgeCoords, nodeCoords;
 
+			FloatArray tipCoord;
+			int dim = element->giveDofManager(1)->giveCoordinates()->giveSize();
+			tipCoord.resize(dim);
+
+			bool foundTip = false;
+			for ( int i = 1; i <= xMan->giveNumberOfEnrichmentItems(); i++ ) {
+				EnrichmentItem *ei = xMan->giveEnrichmentItem(i);
+
+				if ( ei->giveElementTipCoord( tipCoord, element->giveNumber() ) ) {
+					foundTip = true;
+					break;
+				}
+			}
+
+			if(foundTip)
+			{
+
+				for(int i = 1; i <= nNodes; i++)
+				{
+					// Store edge points
+					if( i == intersecEdgeInd[0] )
+					{
+						// Take the intersection point ...
+						edgeCoords.push_back(intersecPoints[0]);
+					}
+					else
+					{
+						// ... or the center of the edge.
+						IntArray bNodes;
+						this->element->giveInterpolation()->boundaryGiveNodes(bNodes, i);
+
+						int nsLoc = bNodes.at( 1 );
+						int neLoc = bNodes.at( bNodes.giveSize() );
+
+						const FloatArray &coordS = *(element->giveDofManager(nsLoc)->giveCoordinates());
+						const FloatArray &coordE = *(element->giveDofManager(neLoc)->giveCoordinates());
+
+						FloatArray coordEdge;
+						coordEdge = 0.5*coordS + 0.5*coordE;
+						edgeCoords.push_back(coordEdge);
+					}
+
+					// Store node coords
+					const FloatArray &coord = *(element->giveDofManager(i)->giveCoordinates());
+					nodeCoords.push_back( coord );
+
+				}
+
+				oPointPartitions.resize((2*nNodes));
+
+				// Divide into subdomains
+				for(int i = 1; i <= nNodes; i++)
+				{
+					////////////////
+					// Take edge center or intersection point
+					oPointPartitions[2*i-1].push_back(edgeCoords[i-1]);
+
+					// Take crack tip position
+					oPointPartitions[2*i-1].push_back(tipCoord);
+
+					// Take node
+					oPointPartitions[2*i-1].push_back( *(element->giveDofManager(i)->giveCoordinates()) );
+
+					////////////////
+					// Take edge center or intersection point
+					oPointPartitions[2*i-2].push_back(edgeCoords[i-1]);
+
+					// Take next node
+					if(i == nNodes)
+					{
+						oPointPartitions[2*i-2].push_back( *(element->giveDofManager(1)->giveCoordinates()) );
+					}
+					else
+					{
+						oPointPartitions[2*i-2].push_back( *(element->giveDofManager(i+1)->giveCoordinates()) );
+					}
+
+					// Take crack tip position
+					oPointPartitions[2*i-2].push_back(tipCoord);
+
+				}
+
+				// Export start and end points of
+				// the intersection line.
+				oCrackStartPoint = intersecPoints[0];
+				oCrackEndPoint = tipCoord;
+
+			} // If a tip was found
+			else
+			{
+				oPointPartitions.resize(1);
+
+				for ( int i = 1; i <= this->element->giveNumberOfDofManagers(); i++ )
+				{
+					const FloatArray &nodeCoord = *element->giveDofManager(i)->giveCoordinates();
+					oPointPartitions[0].push_back(nodeCoord);
+				}
+
+				// Export start and end points of
+				// the intersection line.
+				oCrackStartPoint = intersecPoints[0];
+				oCrackEndPoint = intersecPoints[0];
+			}
+
+			oEnrItemIndex = eiInd;
+
+			return;
+		}
+
+    } // for ( int i = 1; i <= xMan->giveNumberOfEnrichmentItems(); i++ )
 }
 
 void XfemElementInterface :: recomputeGaussPoints() {
@@ -740,143 +753,139 @@ void XfemElementInterface :: computeGlobalCohesiveTractionVector(FloatArray &oT,
 
 void XfemElementInterface :: computeCohesiveTangent(FloatMatrix &answer, TimeStep *tStep)
 {
+
 	if( hasCohesiveZone() ) {
 
-		if( hasCohesiveZone() ) {
-
-			FloatArray solVec;
-			element->computeVectorOf(EID_MomentumBalance, VM_Total, tStep, solVec);
+		FloatArray solVec;
+		element->computeVectorOf(EID_MomentumBalance, VM_Total, tStep, solVec);
 
 
-			int numGP = mpCZIntegrationRule->giveNumberOfIntegrationPoints();
+		int numGP = mpCZIntegrationRule->giveNumberOfIntegrationPoints();
 
-			for(int gpIndex = 0; gpIndex < numGP; gpIndex++) {
+		for(int gpIndex = 0; gpIndex < numGP; gpIndex++) {
 
-				GaussPoint &gp = *(mpCZIntegrationRule->getIntegrationPoint(gpIndex));
+			GaussPoint &gp = *(mpCZIntegrationRule->getIntegrationPoint(gpIndex));
 
-			    ////////////////////////////////////////////////////////
-			    // Compute a (slightly modified) N-matrix
+			////////////////////////////////////////////////////////
+			// Compute a (slightly modified) N-matrix
 
-				FloatMatrix NMatrix;
-				computeNCohesive(NMatrix, gp);
+			FloatMatrix NMatrix;
+			computeNCohesive(NMatrix, gp);
 
-			    ////////////////////////////////////////////////////////
+			////////////////////////////////////////////////////////
 
-				// Compute jump vector
-				FloatArray jump2D;
-				computeDisplacementJump(gp, jump2D, solVec, NMatrix);
+			// Compute jump vector
+			FloatArray jump2D;
+			computeDisplacementJump(gp, jump2D, solVec, NMatrix);
 
-				FloatArray jump3D;
-				jump3D.setValues(3, 0.0, jump2D.at(1), jump2D.at(2));
+			FloatArray jump3D;
+			jump3D.setValues(3, 0.0, jump2D.at(1), jump2D.at(2));
 
-				// Compute traction
-				FloatMatrix F;
-				F.resize(3,3);
-				F.beUnitMatrix(); // TODO: Compute properly
+			// Compute traction
+			FloatMatrix F;
+			F.resize(3,3);
+			F.beUnitMatrix(); // TODO: Compute properly
 
-				FloatMatrix K3DRenumbered, K3DGlob;
-
-
-				FloatMatrix K2D;
-				K2D.resize(2,2);
-				K2D.zero();
-
-				if( mpCZMat->hasAnalyticalTangentStiffness() ){
-					///////////////////////////////////////////////////
-					// Analytical tangent
-
-					FloatMatrix K3D;
-					mpCZMat->give3dStiffnessMatrix_dTdj(K3DRenumbered, TangentStiffness, &gp, tStep);
-
-					K3D.resize(3,3);
-					K3D.zero();
-					K3D.at(1,1) = K3DRenumbered.at(2,2);
-					K3D.at(1,2) = K3DRenumbered.at(2,3);
-					K3D.at(1,3) = K3DRenumbered.at(2,1);
-
-					K3D.at(2,1) = K3DRenumbered.at(3,2);
-					K3D.at(2,2) = K3DRenumbered.at(3,3);
-					K3D.at(2,3) = K3DRenumbered.at(3,1);
-
-					K3D.at(3,1) = K3DRenumbered.at(1,2);
-					K3D.at(3,2) = K3DRenumbered.at(1,3);
-					K3D.at(3,3) = K3DRenumbered.at(1,1);
+			FloatMatrix K3DRenumbered, K3DGlob;
 
 
-					FloatArray crackNormal;
-					computeNormalInPoint( *(gp.giveCoordinates()), crackNormal );
-					FloatArray crackNormal3D;
-					crackNormal3D.setValues(3, crackNormal.at(1), crackNormal.at(2), 0.0);
+			FloatMatrix K2D;
+			K2D.resize(2,2);
+			K2D.zero();
 
-					FloatArray ez;
-					ez.setValues(3, 0.0, 0.0, 1.0);
-					FloatArray crackTangent3D;
-					crackTangent3D.beVectorProductOf(crackNormal3D, ez);
+			if( mpCZMat->hasAnalyticalTangentStiffness() ){
+				///////////////////////////////////////////////////
+				// Analytical tangent
 
-					FloatMatrix locToGlob(3,3);
-					locToGlob.setColumn(crackTangent3D, 1);
-					locToGlob.setColumn(crackNormal3D, 2);
-					locToGlob.setColumn(ez, 3);
+				FloatMatrix K3D;
+				mpCZMat->give3dStiffnessMatrix_dTdj(K3DRenumbered, TangentStiffness, &gp, tStep);
+
+				K3D.resize(3,3);
+				K3D.zero();
+				K3D.at(1,1) = K3DRenumbered.at(2,2);
+				K3D.at(1,2) = K3DRenumbered.at(2,3);
+				K3D.at(1,3) = K3DRenumbered.at(2,1);
+
+				K3D.at(2,1) = K3DRenumbered.at(3,2);
+				K3D.at(2,2) = K3DRenumbered.at(3,3);
+				K3D.at(2,3) = K3DRenumbered.at(3,1);
+
+				K3D.at(3,1) = K3DRenumbered.at(1,2);
+				K3D.at(3,2) = K3DRenumbered.at(1,3);
+				K3D.at(3,3) = K3DRenumbered.at(1,1);
 
 
-					FloatMatrix tmp3(3,3);
-					tmp3.beProductTOf(K3D, locToGlob);
-					K3DGlob.beProductOf(locToGlob, tmp3);
+				FloatArray crackNormal;
+				computeNormalInPoint( *(gp.giveCoordinates()), crackNormal );
+				FloatArray crackNormal3D;
+				crackNormal3D.setValues(3, crackNormal.at(1), crackNormal.at(2), 0.0);
 
-					K2D.at(1,1) = K3DGlob.at(1,1);
-					K2D.at(1,2) = K3DGlob.at(1,2);
-					K2D.at(2,1) = K3DGlob.at(2,1);
-					K2D.at(2,2) = K3DGlob.at(2,2);
+				FloatArray ez;
+				ez.setValues(3, 0.0, 0.0, 1.0);
+				FloatArray crackTangent3D;
+				crackTangent3D.beVectorProductOf(crackNormal3D, ez);
+
+				FloatMatrix locToGlob(3,3);
+				locToGlob.setColumn(crackTangent3D, 1);
+				locToGlob.setColumn(crackNormal3D, 2);
+				locToGlob.setColumn(ez, 3);
+
+
+				FloatMatrix tmp3(3,3);
+				tmp3.beProductTOf(K3D, locToGlob);
+				K3DGlob.beProductOf(locToGlob, tmp3);
+
+				K2D.at(1,1) = K3DGlob.at(1,1);
+				K2D.at(1,2) = K3DGlob.at(1,2);
+				K2D.at(2,1) = K3DGlob.at(2,1);
+				K2D.at(2,2) = K3DGlob.at(2,2);
+			}
+			else {
+
+				///////////////////////////////////////////////////
+				// Numerical tangent
+				double eps = 1.0e-9;
+
+				FloatArray T, TPert;
+
+				FloatArray crackNormal;
+				if( computeNormalInPoint( *(gp.giveCoordinates()), crackNormal ) ) {
+
+					computeGlobalCohesiveTractionVector(T, jump2D, crackNormal, NMatrix, gp, tStep);
+
+
+					FloatArray jump2DPert;
+
+
+					jump2DPert = jump2D;
+					jump2DPert.at(1) += eps;
+					computeGlobalCohesiveTractionVector(TPert, jump2DPert, crackNormal, NMatrix, gp, tStep);
+
+					K2D.at(1,1) = (TPert.at(1) - T.at(1))/eps;
+					K2D.at(2,1) = (TPert.at(2) - T.at(2))/eps;
+
+					jump2DPert = jump2D;
+					jump2DPert.at(2) += eps;
+					computeGlobalCohesiveTractionVector(TPert, jump2DPert, crackNormal, NMatrix, gp, tStep);
+
+
+					K2D.at(1,2) = (TPert.at(1) - T.at(1))/eps;
+					K2D.at(2,2) = (TPert.at(2) - T.at(2))/eps;
+
+					computeGlobalCohesiveTractionVector(T, jump2D, crackNormal, NMatrix, gp, tStep);
+
 				}
-				else {
-
-					///////////////////////////////////////////////////
-					// Numerical tangent
-					double eps = 1.0e-9;
-
-					FloatArray T, TPert;
-
-					FloatArray crackNormal;
-					if( computeNormalInPoint( *(gp.giveCoordinates()), crackNormal ) ) {
-
-						computeGlobalCohesiveTractionVector(T, jump2D, crackNormal, NMatrix, gp, tStep);
-
-
-						FloatArray jump2DPert;
-
-
-						jump2DPert = jump2D;
-						jump2DPert.at(1) += eps;
-						computeGlobalCohesiveTractionVector(TPert, jump2DPert, crackNormal, NMatrix, gp, tStep);
-
-						K2D.at(1,1) = (TPert.at(1) - T.at(1))/eps;
-						K2D.at(2,1) = (TPert.at(2) - T.at(2))/eps;
-
-						jump2DPert = jump2D;
-						jump2DPert.at(2) += eps;
-						computeGlobalCohesiveTractionVector(TPert, jump2DPert, crackNormal, NMatrix, gp, tStep);
-
-
-						K2D.at(1,2) = (TPert.at(1) - T.at(1))/eps;
-						K2D.at(2,2) = (TPert.at(2) - T.at(2))/eps;
-
-						computeGlobalCohesiveTractionVector(T, jump2D, crackNormal, NMatrix, gp, tStep);
-
-					}
-				}
-
-
-				FloatMatrix tmp, tmp2;
-				tmp.beProductOf(K2D, NMatrix);
-				tmp2.beTProductOf(NMatrix, tmp);
-
-				CrossSection *cs  = element->giveCrossSection();
-				double thickness = cs->give(CS_Thickness);
-				double dA = 0.5*mCrackLength*thickness*gp.giveWeight();
-				answer.add(dA, tmp2);
 			}
 
 
+			FloatMatrix tmp, tmp2;
+			tmp.beProductOf(K2D, NMatrix);
+			tmp2.beTProductOf(NMatrix, tmp);
+
+			CrossSection *cs  = element->giveCrossSection();
+			double thickness = cs->give(CS_Thickness);
+			double dA = 0.5*mCrackLength*thickness*gp.giveWeight();
+			answer.add(dA, tmp2);
 		}
 
 	}
@@ -989,6 +998,7 @@ void XfemElementInterface :: computeNCohesive(FloatMatrix &oN, GaussPoint &iGP)
         int globalNodeInd = dMan->giveGlobalNumber();
 
 
+        int ndNodeInd = 0;
         for ( int i = 1; i <= xMan->giveNumberOfEnrichmentItems(); i++ ) {
         	EnrichmentItem *ei = xMan->giveEnrichmentItem(i);
 
@@ -1000,8 +1010,15 @@ void XfemElementInterface :: computeNCohesive(FloatMatrix &oN, GaussPoint &iGP)
                 ei->evaluateEnrFuncJumps(efJumps, globalNodeInd);
 
 				for(int k = 0; k < numEnr; k++) {
-					NdNode[k] = efJumps[k] * Nc.at(j) ;
+
+					if( i == mCZEnrItemIndex ) {
+						NdNode[ndNodeInd] = efJumps[k] * Nc.at(j);
+					}
+					else {
+						NdNode[ndNodeInd] = 0.0;
+					}
 					counter ++;
+					ndNodeInd++;
 				}
 			}
 
@@ -1065,7 +1082,7 @@ bool XfemElementInterface :: computeNormalInPoint(const FloatArray &iGlobalCoord
     	// If the normal level set is sufficiently small,
     	// and the tangential level set is positive,
     	// we have found the correct enrichment item.
-    	double normalTol = 0.1; // TODO: Should be related to the element size.
+    	double normalTol = 1.0e-2; // TODO: Should be related to the element size.
     	if( fabs(levelSet) < normalTol &&  levelSetTang > 0.0) {
 
     		// If so, take the normal as the gradient of the level set function

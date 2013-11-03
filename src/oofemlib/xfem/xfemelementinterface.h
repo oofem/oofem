@@ -71,6 +71,9 @@ protected:
     /// Length of the crack segment in the element
     double mCrackLength;
 
+    /// Index of enrichment item associated with cohesive zone
+    int mCZEnrItemIndex;
+
 
 public:
     /// Constructor.
@@ -91,7 +94,7 @@ public:
 
     /// Helpful routine to put the nodes for triangulation together, should be in protected members probably.
     /// Returns an array of array of points. Each array of points defines the points of a subregion of the element.
-    virtual void XfemElementInterface_prepareNodesForDelaunay(std :: vector< std :: vector< FloatArray > > &oPointPartitions, FloatArray &oCrackStartPoint, FloatArray &oCrackEndPoint);
+    virtual void XfemElementInterface_prepareNodesForDelaunay(std :: vector< std :: vector< FloatArray > > &oPointPartitions, FloatArray &oCrackStartPoint, FloatArray &oCrackEndPoint, int &oEnrItemIndex);
 
     /**
      * If the enrichment evolves in time, the element subdivision

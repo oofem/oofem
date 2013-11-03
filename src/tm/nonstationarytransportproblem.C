@@ -70,7 +70,9 @@ NonStationaryTransportProblem :: NonStationaryTransportProblem(int i, EngngModel
 }
 
 NonStationaryTransportProblem :: ~NonStationaryTransportProblem()
-{}
+{
+    delete linSolver;
+}
 
 
 NumericalMethod *NonStationaryTransportProblem :: giveNumericalMethod(MetaStep *mStep)
