@@ -1115,6 +1115,28 @@ Domain :: postInitialize()
     for ( int i = 1; i <= this->dofManagerList->giveSize(); i++ ) {
         this->dofManagerList->at(i)->postInitialize();
     }
+
+    // New  - in development /JB
+    // set element cross sections based on element set definition and set the corresponding 
+    // material based on the cs
+    for (int i = 1; i <= this->giveNumberOfCrossSectionModels(); i++) {
+
+        if ( int setNum = this->giveCrossSection(i)->giveSetNumber() ) {
+
+            Set *set = this->giveSet(setNum);
+            const IntArray &elements = set->giveElementList();
+            for (int ielem = 1; ielem <= elements.giveSize(); ++ielem) {
+                Element *element = this->giveElement(elements.at(ielem));
+                element->setCrossSection(i);           
+                element->setMaterial( element->giveCrossSection()->giveMaterialNumber() );
+                //element->setCZMaterial(element->giveCrossSection()->giveCZMaterialNumber());
+            }
+        }
+
+    }
+
+    //----
+
     for ( int i = 1; i <= this->elementList->giveSize(); i++ ) {
         this->elementList->at(i)->postInitialize();
     }
