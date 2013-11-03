@@ -129,14 +129,6 @@ HydratingConcreteMat :: computeInternalSourceVector(FloatArray &val, GaussPoint 
 }
 
 
-void
-HydratingConcreteMat :: updateInternalState(const FloatArray &vec, GaussPoint *gp, TimeStep *atTime)
-{
-    HydratingConcreteMatStatus *ms = static_cast< HydratingConcreteMatStatus * >( this->giveStatus(gp) );
-    ms->letTempStateVectorBe(vec);
-}
-
-
 double
 HydratingConcreteMat :: giveCharacteristicValue(MatResponseMode mode, GaussPoint *gp, TimeStep *atTime)
 {

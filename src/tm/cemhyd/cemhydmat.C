@@ -132,13 +132,6 @@ CemhydMat :: computeInternalSourceVector(FloatArray &val, GaussPoint *gp, TimeSt
     //val.at(1) = 1500;//constant source
 }
 
-void
-CemhydMat :: updateInternalState(const FloatArray &vec, GaussPoint *gp, TimeStep *atTime)
-{
-    CemhydMatStatus *ms = ( CemhydMatStatus * ) this->giveStatus(gp);
-    ms->letTempStateVectorBe(vec);
-}
-
 
 int CemhydMat :: giveCycleNumber(GaussPoint *gp)
 {

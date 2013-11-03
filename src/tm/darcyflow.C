@@ -197,7 +197,6 @@ void DarcyFlow :: printDofOutputAt(FILE *stream, Dof *iDof, TimeStep *atTime)
 
 void DarcyFlow :: updateYourself (TimeStep *tStep)
 {
-    //this->updateInternalState(tStep);
     EngngModel :: updateYourself(tStep);
 
 }
