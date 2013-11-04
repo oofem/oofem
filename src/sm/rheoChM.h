@@ -66,7 +66,9 @@ protected:
     /// Number of units in the chain.
     int nUnits;
     /// Hidden (internal) variables, the meaning of which depends on the type of chain.
-    FloatArray **hiddenVars;
+    std :: vector< FloatArray > hiddenVars; 
+    std :: vector< FloatArray > tempHiddenVars; 
+
     /**
      * Total shrinkage strain (needed only when the shrinkage evolution
      * is described in the incremental form).
@@ -79,8 +81,10 @@ public:
 
     virtual void printOutputAt(FILE *file, TimeStep *tStep);
 
-    FloatArray *giveHiddenVarsVector(int i) { return hiddenVars [ i - 1 ]; }
+    FloatArray &giveHiddenVarsVector(int i) { return hiddenVars [ i - 1 ]; }
+    FloatArray &giveTempHiddenVarsVector(int i) { return tempHiddenVars [ i - 1 ]; }
     FloatArray *letHiddenVarsVectorBe(int i, FloatArray *);
+    void letTempHiddenVarsVectorBe(int i, FloatArray &valueArray);
 
     FloatArray *giveShrinkageStrainVector() { return & shrinkageStrain; }
     void setShrinkageStrainVector(const FloatArray &src) { shrinkageStrain = src; }
@@ -163,9 +167,6 @@ public:
 
     /// Evaluation of the moduli of individual units.
     virtual void computeCharCoefficients(FloatArray &answer, double atTime) = 0;
-
-    /// Update of MatStatus to the newly reached (equilibrium) state.
-    virtual void updateYourself(GaussPoint *gp, TimeStep *tStep) = 0;
 
     // identification and auxiliary functions
     virtual int hasNonLinearBehaviour() { return 0; }

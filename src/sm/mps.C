@@ -219,6 +219,26 @@ MPSMaterial :: initializeFrom(InputRecord *ir)
     return IRRT_OK;
 }
 
+
+void 
+MPSMaterial :: giveRealStressVector(FloatArray &answer, GaussPoint *gp, const FloatArray &reducedStrain, TimeStep *tStep)
+{
+    KelvinChainSolidMaterial :: giveRealStressVector(answer, gp, reducedStrain, tStep);
+
+    MPSMaterialStatus *status = static_cast< MPSMaterialStatus * >( this->giveStatus(gp) );
+
+    if ( this->CoupledAnalysis == MPS ) {
+        status->setEquivalentTime( this->computeEquivalentTime(gp, tStep, 1) );
+        // set humidity and temperature to zero
+        status->setHum(-1.);
+        status->setHumIncrement(-1.);
+        status->setT(-1.);
+        status->setTIncrement(-1.);
+    }
+
+}
+
+#if 0
 void
 MPSMaterial :: updateYourself(GaussPoint *gp, TimeStep *atTime)
 {
@@ -237,6 +257,8 @@ MPSMaterial :: updateYourself(GaussPoint *gp, TimeStep *atTime)
     // at the end of updating it will call material status to be updated.
     KelvinChainSolidMaterial :: updateYourself(gp, atTime);
 }
+#endif
+
 
 void
 MPSMaterial :: giveThermalDilatationVector(FloatArray &answer,
