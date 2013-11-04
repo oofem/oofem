@@ -104,6 +104,9 @@ IntMatBilinearCZJansson :: giveFirstPKTraction_3d(FloatArray &answer, GaussPoint
     Qtemp.zero();
 	 Qtemp_comp.zero();
 
+        if (dJ.at(3)<0) {
+			Qtemp_comp.at(3) = this->knc*dJ.at(3);
+		}
 
 
     if (oldDamage < 0.99) {
@@ -117,9 +120,6 @@ IntMatBilinearCZJansson :: giveFirstPKTraction_3d(FloatArray &answer, GaussPoint
         Kstiff.at(1,1) = this->ks0;
         Kstiff.at(2,2) = this->ks0;
 		Kstiff.at(3,3) = this->kn0;
-        if (dJ.at(3)<0) {
-			Qtemp_comp.at(3) = this->knc*dJ.at(3);
-		}
 		//} else {
 		//	Kstiff.at(3,3) = this->kn0/(1-oldDamage);
 		//}
