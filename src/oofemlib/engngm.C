@@ -1346,7 +1346,7 @@ contextIOResultType EngngModel :: saveContext(DataStream *stream, ContextMode mo
 {
     contextIOResultType iores;
     int closeFlag = 0;
-    FILE *file;
+    FILE *file = NULL;
 
 
     OOFEM_LOG_INFO("Storing context\n");
@@ -1439,7 +1439,7 @@ contextIOResultType EngngModel :: restoreContext(DataStream *stream, ContextMode
     contextIOResultType iores;
     int closeFlag = 0, istep, iversion;
     Domain *domain;
-    FILE *file;
+    FILE *file = NULL;
 
     this->resolveCorrespondingStepNumber(istep, iversion, obj);
     OOFEM_LOG_RELEVANT("Restoring context for time step %d.%d\n", istep, iversion);

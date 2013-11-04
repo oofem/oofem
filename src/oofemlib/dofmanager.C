@@ -664,13 +664,11 @@ contextIOResultType DofManager :: saveContext(DataStream *stream, ContextMode mo
             THROW_CIOERR(iores);
         }
 
-        _val = ( int ) isBoundaryFlag;
-        if ( !stream->write(& _val, 1) ) {
+        if ( !stream->write(& isBoundaryFlag, 1) ) {
             THROW_CIOERR(CIO_IOERR);
         }
 
-        _val = ( int ) hasSlaveDofs;
-        if ( !stream->write(& _val, 1) ) {
+        if ( !stream->write(& hasSlaveDofs, 1) ) {
             THROW_CIOERR(CIO_IOERR);
         }
 
@@ -708,7 +706,6 @@ contextIOResultType DofManager :: restoreContext(DataStream *stream, ContextMode
 //
 {
     contextIOResultType iores;
-    int _val;
 
     if ( ( iores = FEMComponent :: restoreContext(stream, mode, obj) ) != CIO_OK ) {
         THROW_CIOERR(iores);
@@ -764,16 +761,14 @@ contextIOResultType DofManager :: restoreContext(DataStream *stream, ContextMode
             THROW_CIOERR(iores);
         }
 
-        if ( !stream->read(& _val, 1) ) {
+        if ( !stream->read(& isBoundaryFlag, 1) ) {
             THROW_CIOERR(CIO_IOERR);
         }
 
-        isBoundaryFlag = ( bool ) _val;
-        if ( !stream->read(& _val, 1) ) {
+        if ( !stream->read(& hasSlaveDofs, 1) ) {
             THROW_CIOERR(CIO_IOERR);
         }
 
-        hasSlaveDofs = ( bool ) _val;
 #ifdef __PARALLEL_MODE
         if ( !stream->read(& globalNumber, 1) ) {
             THROW_CIOERR(CIO_IOERR);
@@ -926,15 +921,15 @@ void DofManager :: giveUnknownVectorOfType(FloatArray &answer, UnknownType ut, V
 }
 
 
-int DofManager :: hasAnySlaveDofs()
+bool DofManager :: hasAnySlaveDofs()
 {
     for ( int i = 1; i <= numberOfDofs; i++ ) {
         if ( !this->giveDof(i)->isPrimaryDof() ) {
-            return 1;
+            return true;
         }
     }
 
-    return 0;
+    return false;
 }
 
 

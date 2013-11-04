@@ -1171,7 +1171,7 @@ StructuralElement :: condense(FloatMatrix *stiff, FloatMatrix *mass, FloatArray 
     int i, ii, j, k;
     int nkon = what->giveSize();
     int size = stiff->giveNumberOfRows();
-    long double coeff, dii, lii = 0;
+    double coeff, dii, lii = 0;
     FloatArray *gaussCoeff = NULL;
     // stored gauss coefficient
     // for mass condensation
