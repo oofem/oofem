@@ -129,7 +129,8 @@ FiberedCrossSection :: giveRealStress_Beam3d(FloatArray &answer, GaussPoint *gp,
         answer.at(6) -= reducedFiberStress.at(1) * fiberWidth * fiberThick * fiberYCoord;
     }
 
-    // now we must update master gp
+    // now we must update master gp ///@ todo is this correct? assumes that the material status of the master gp is 
+    // the same as for the slaves /JB
     StructuralMaterialStatus *status = static_cast< StructuralMaterialStatus * >( gp->giveMaterial()->giveStatus(gp) );
     status->letTempStrainVectorBe(strain);
     status->letTempStressVectorBe(answer);
@@ -348,7 +349,8 @@ FiberedCrossSection :: imposeStrainConstrainsOnGradient(GaussPoint *gp,
 int
 FiberedCrossSection :: giveIPValue(FloatArray &answer, GaussPoint *aGaussPoint, InternalStateType type, TimeStep *atTime)
 {
-    StructuralMaterialStatus *status = static_cast< StructuralMaterialStatus * >( aGaussPoint->giveMaterial()->giveStatus(aGaussPoint) );
+    Material *mat = this->giveDomain()->giveMaterial( fiberMaterials.at(1) ); // For now, create material status according to the first fiber material
+    StructuralMaterialStatus *status = static_cast< StructuralMaterialStatus * >( mat->giveStatus(aGaussPoint) ); 
 
     if ( type == IST_BeamForceMomentumTensor ) {
         answer = status->giveStressVector();
@@ -587,7 +589,30 @@ FiberedCrossSection :: computeStressIndependentStrainVector(FloatArray &answer, 
 bool FiberedCrossSection :: isCharacteristicMtrxSymmetric(MatResponseMode rMode, int mat)
 {
     ///@todo As far as I can see, it only uses diagonal components for the 3dbeam, but there is no way to check here.
+    ///@todo This should loop through the fiber materials and check if each is symmetric.
     return domain->giveMaterial(mat)->isCharacteristicMtrxSymmetric(rMode);
 }
+
+
+int
+FiberedCrossSection :: checkConsistency()
+//
+// check internal consistency
+// mainly tests, whether material and crossSection data
+// are safe for conversion to "Structural" versions
+//
+{
+    int result = 1;
+    for ( int i = 1; this->fiberMaterials.giveSize(); i++ ) {
+        Material *mat = this->giveDomain()->giveMaterial( this->fiberMaterials.at(i) );
+        if ( !dynamic_cast< StructuralMaterial * >( mat ) ) {
+            _warning2("checkConsistency : material %s without structural support", mat->giveClassName());
+            result = 0;
+            continue;
+        }
+    }
+    return result;
+}
+
 
 } // end namespace oofem

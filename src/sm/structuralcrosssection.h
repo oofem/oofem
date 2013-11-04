@@ -38,6 +38,13 @@
 #include "crosssection.h"
 #include "structuralmaterial.h"
 
+///@name Input fields for CrossSection
+//@{
+#define _StructuralCrossSection_MaterialNumber "material"
+#define _StructuralCrossSection_czMaterialNumber "czmaterial"
+//@}
+
+
 namespace oofem {
 class GaussPoint;
 class Element;
@@ -72,7 +79,8 @@ public:
      * @param n Cross section number.
      * @param d Domain to which new cross section will belong.
      */
-    StructuralCrossSection(int n, Domain *d) : CrossSection(n, d) { }
+    StructuralCrossSection(int n, Domain *d) : CrossSection(n, d) {
+    }
     /// Destructor.
     virtual ~StructuralCrossSection() { }
 
@@ -265,6 +273,22 @@ public:
     virtual const char *giveClassName() const { return "StructuralCrossSection"; }
 
     virtual int testCrossSectionExtension(CrossSectExtension ext) { return ( ( ext == CS_StructuralCapability ) ? 1 : 0 ); }
+
+    
+    
+    IRResultType  initializeFrom(InputRecord *ir);
+
+    int hasMaterialModeCapability(MaterialMode mode); // JB
+    virtual Material *giveMaterial(IntegrationPoint *ip);    
+    int const giveMaterialNumber() { return this->materialNumber; };
+    int const giveCZMaterialNumber() { return this->czMaterialNumber; };
+    int const setCZMaterialNumber(int matNum) { this->czMaterialNumber = matNum; };
+
+    virtual int checkConsistency();
+
+private:
+    int materialNumber;   // material number
+    int czMaterialNumber; // cohesive zone material number
 };
 } // end namespace oofem
 #endif // structuralcrosssection_h

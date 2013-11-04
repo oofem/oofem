@@ -168,6 +168,8 @@ public:
     virtual contextIOResultType saveIPContext(DataStream *stream, ContextMode mode, GaussPoint *gp);
     virtual contextIOResultType restoreIPContext(DataStream *stream, ContextMode mode, GaussPoint *gp);
 
+    virtual int checkConsistency();
+
 #ifdef __PARALLEL_MODE
     int packUnknowns(CommunicationBuffer &buff, TimeStep *stepN, GaussPoint *ip)
     {

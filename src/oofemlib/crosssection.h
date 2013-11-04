@@ -47,8 +47,6 @@
 ///@name Input fields for CrossSection
 //@{
 #define _CrossSection_SetNumber "set"
-#define _CrossSection_MaterialNumber "material"
-#define _CrossSection_czMaterialNumber "czmaterial"
 //@}
 
 namespace oofem {
@@ -109,8 +107,7 @@ protected:
     Dictionary *propertyDictionary;
 
     int setNumber;        // el set number the cross section is applied to
-    int materialNumber;   // material number
-    int czMaterialNumber; // cohesive zone material number
+
 public:
     /**
      * Constructor. Creates cross section with number n belonging to domain d.
@@ -120,22 +117,20 @@ public:
     CrossSection(int n, Domain *d) : FEMComponent(n, d)
     { propertyDictionary = new Dictionary(); 
       setNumber = 0;
-      materialNumber = 0;
-      czMaterialNumber = 0;
     }
     /// Destructor.
     virtual ~CrossSection() { delete propertyDictionary; }
 
     int const giveSetNumber() { return this->setNumber; };
-    int const giveMaterialNumber() { return this->materialNumber; };
-    int const giveCZMaterialNumber() { return this->czMaterialNumber; };
-    int const setCZMaterialNumber(int matNum) { this->czMaterialNumber = matNum; };
+
     /**
      * Returns the value of cross section property.
      * @param a Id of requested property.
      * @return Property value.
      */
     virtual double give(CrossSectionProperty a);
+
+    virtual double give(int aProperty, GaussPoint *gp){ return 0.0; }; // JB
     /**
      * Check for symmetry of stiffness matrix.
      * Default implementation returns true.
@@ -267,6 +262,7 @@ public:
      * @exception throws an ContextIOERR exception if error encountered.
      */
     virtual contextIOResultType restoreIPContext(DataStream *stream, ContextMode mode, GaussPoint *gp);
+
 };
 } // end namespace oofem
 #endif // crosssection_h

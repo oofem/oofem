@@ -46,6 +46,7 @@
 #define _IFT_LayeredCrossSection_Name "layeredcs"
 #define _IFT_LayeredCrossSection_nlayers "nlayers"
 #define _IFT_LayeredCrossSection_layermaterials "layermaterials"
+#define _IFT_LayeredCrossSection_interfacematerials "interfacematerials"
 #define _IFT_LayeredCrossSection_thicks "thicks"
 #define _IFT_LayeredCrossSection_widths "widths"
 #define _IFT_LayeredCrossSection_midsurf "midsurf"
@@ -85,6 +86,7 @@ class LayeredCrossSection : public StructuralCrossSection
 {
 protected:
     IntArray layerMaterials; ///< Material of each layer.
+    IntArray interfacerMaterials; ///< Interface (cohesive zone) material for each interface.
     FloatArray layerThicks; ///< Thickness for each layer.
     FloatArray layerWidths; ///< Width for each layer.
     FloatArray layerMidZ;   ///< z-coord of the mid plane for each layer
@@ -146,6 +148,17 @@ public:
     int giveLayerMaterial(int layer) { 
         return this->layerMaterials.at(layer); 
     }
+
+    int giveInterfaceMaterialNum(int interface) { 
+        return this->interfacerMaterials.at(interface); 
+    }
+
+    Material *giveInterfaceMaterial(int interface) { 
+        return this->giveDomain()->giveMaterial(this->interfacerMaterials.at(interface)); 
+    }
+
+    virtual int checkConsistency();
+
     double giveLayerMidZ(int layer) { 
         // Gives the z-coord measured from the geometric midplane of the (total) cross section.
         return this->layerMidZ.at(layer); 
