@@ -40,12 +40,15 @@ set (sm_element
     shell7basexfem.C
     tr2shell7xfem.C
     trplanestressrotallman.C
+    structuralinterfaceelement.C
+    intelline2.C
     )
 
 set (sm_crosssection
     structuralcrosssection.C
     layeredcrosssection.C
     fiberedcs.C
+    structuralinterfacecrosssection.C
     )
 
 set (sm_emodel

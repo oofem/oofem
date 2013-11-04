@@ -387,7 +387,7 @@ CCTPlate :: computeLocalCoordinates(FloatArray &answer, const FloatArray &coords
     this->giveNodeCoordinates(x1, x2, x3, y1, y2, y3, z);
 
     // Fetch local coordinates.
-    bool ok = this->interp_lin.global2local( answer, coords, FEIElementGeometryWrapper(this) );
+    bool ok = this->interp_lin.global2local( answer, coords, FEIElementGeometryWrapper(this) ) > 0;
 
     //get midplane location at this point
     double midplZ;

@@ -32,16 +32,40 @@
  *  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  */
 
-#ifndef crosssectextension_h
-#define crosssectextension_h
+#include "structuralinterfacecrosssection.h"
+#include "structuralinterfacematerialstatus.h"
+#include "gausspoint.h"
+#include "element.h"
+#include "structuralinterfacematerial.h"
+#include "floatarray.h"
 
 namespace oofem {
-/// Type representing cross section extension for run time testing.
-enum CrossSectExtension {
-    CS_StructuralCapability, ///< Structural capability.
-    CS_StructuralInterfaceCapability, ///< Structural interface capability.
-    CS_HeatCapability, ///< Heat capability.
-};
-} // end namespace oofem
-#endif // crosssectextension_h
 
+StructuralInterfaceMaterial 
+*StructuralInterfaceCrossSection :: giveInterfaceMaterial() 
+{
+    return static_cast< StructuralInterfaceMaterial *>  ( this->giveDomain()->giveMaterial( this->materialNum ) );
+}
+
+const FloatArray 
+&StructuralInterfaceCrossSection :: giveTraction(IntegrationPoint *ip) 
+{ 
+    // Returns the traction vector stored in the material status
+    return static_cast< StructuralInterfaceMaterialStatus *> ( this->giveInterfaceMaterial()->giveStatus(ip) )->giveTraction(); 
+}
+
+int
+StructuralInterfaceCrossSection :: checkConsistency()
+{
+    // Checks if the given cross section material is a 'StructuralInterfaceMaterial'
+    int result = 1;
+    Material *mat = this->giveDomain()->giveMaterial( this->materialNum );
+    if ( !dynamic_cast< StructuralInterfaceMaterial * >( mat ) ) {
+        OOFEM_ERROR2("StructuralInterfaceCrossSection :: checkConsistency : material %s is not a structural interface material", mat->giveClassName());
+        result = 0;
+    }
+
+    return result;
+}
+
+} // end namespace oofem
