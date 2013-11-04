@@ -587,13 +587,6 @@ NonLinearStatic :: updateComponent(TimeStep *tStep, NumericalCmpn cmpn, Domain *
         // update internalForces and internalForcesEBENorm concurrently
         this->giveInternalForces(internalForces, true, d->giveNumber(), tStep);
         break;
-    case NonLinearRhs_Incremental:
-#ifdef VERBOSE
-        OOFEM_LOG_DEBUG("Updating incremental reference load vectors\n");
-#endif
-        this->assembleIncrementalReferenceLoadVectors(incrementalLoadVector, incrementalLoadVectorOfPrescribed,
-                                                      refLoadInputMode, d, EID_MomentumBalance, tStep);
-        break;
 
     default:
         _error("updateComponent: Unknown Type of component.");
