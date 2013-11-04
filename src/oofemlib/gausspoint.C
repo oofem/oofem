@@ -125,13 +125,20 @@ GaussPoint *GaussPoint :: giveSlaveGaussPoint(int index)
 void GaussPoint :: updateYourself(TimeStep *tStep)
 // Performs end-of-step updates.
 {
-    this->giveMaterial()->updateYourself(this, tStep);
+    IntegrationPointStatus *status;
+    TDictionaryIterator< int, IntegrationPointStatus > it( &this->statusDict );
+    while( status = it.next() ){
+        status->updateYourself(tStep);
+    }
+
     if ( numberOfGp != 0 ) { // layered material
         for ( int i = 0; i < numberOfGp; i++ ) {
             gaussPointArray [ i ]->updateYourself(tStep);
         }
     }
 }
+
+
 
 /*
  * contextIOResultType

@@ -199,7 +199,6 @@ StructuralElement :: computeBodyLoadVectorAt(FloatArray &answer, Load *forLoad, 
     if ( this->computeLoadGToLRotationMtrx(T) ) {
       force.rotatedWith(T, 'n');
     }
-    //force.times( this->giveMaterial()->give('d') );
 
     answer.resize(0);
 
@@ -208,7 +207,8 @@ StructuralElement :: computeBodyLoadVectorAt(FloatArray &answer, Load *forLoad, 
             gp  = iRule->getIntegrationPoint(i);
             this->computeNmatrixAt(gp, n);
             dV  = this->computeVolumeAround(gp);
-            dens = this->giveMaterial()->give('d', gp);
+            //dens = this->giveMaterial()->give('d', gp);
+            dens = this->giveCrossSection()->give('d', gp);
             ntf.beTProductOf(n, force);
             answer.add(dV * dens, ntf);
         }
@@ -473,13 +473,13 @@ StructuralElement :: computeConsistentMassMatrix(FloatMatrix &answer, TimeStep *
 
     this->giveMassMtrxIntegrationgMask(mask);
 
-    //density = this->giveMaterial()->give('d');
     mass = 0.;
 
     for ( int i = 0; i < iRule.giveNumberOfIntegrationPoints(); i++ ) {
         GaussPoint *gp = iRule.getIntegrationPoint(i);
         this->computeNmatrixAt(gp, n);
-        density = this->giveMaterial()->give('d', gp);
+        density = this->giveCrossSection()->give('d', gp);
+
         dV = this->computeVolumeAround(gp);
         mass += density * dV;
 
@@ -1145,10 +1145,11 @@ StructuralElement :: checkConsistency()
 //
 {
     int result = 1;
-    if ( !dynamic_cast< StructuralMaterial * >( this->giveMaterial() ) ) {
-        _warning2("checkConsistency : material %s without structural support", this->giveMaterial()->giveClassName());
-        result = 0;
-    }
+    // now handled in cross section
+    //if ( !dynamic_cast< StructuralMaterial * >( this->giveMaterial() ) ) {
+    //    _warning2("checkConsistency : material %s without structural support", this->giveMaterial()->giveClassName());
+    //    result = 0;
+    //}
 
     if ( !this->giveCrossSection()->testCrossSectionExtension(CS_StructuralCapability) ) {
         _warning2("checkConsistency : cross-section %s without structural support", this->giveCrossSection()->giveClassName());

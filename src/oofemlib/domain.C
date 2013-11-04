@@ -1128,13 +1128,11 @@ Domain :: postInitialize()
             for (int ielem = 1; ielem <= elements.giveSize(); ++ielem) {
                 Element *element = this->giveElement(elements.at(ielem));
                 element->setCrossSection(i);           
-                element->setMaterial( element->giveCrossSection()->giveMaterialNumber() );
-                //element->setCZMaterial(element->giveCrossSection()->giveCZMaterialNumber());
+                element->MAT_GIVEN_BY_CS = true; // code development flag
             }
         }
 
     }
-
     //----
 
     for ( int i = 1; i <= this->elementList->giveSize(); i++ ) {

@@ -68,6 +68,8 @@ Element :: Element(int n, Domain *aDomain) :
     numberOfIntegrationRules = 0;
     activityLtf = 0;
     integrationRulesArray  = NULL;
+
+    MAT_GIVEN_BY_CS = false; // Temporary var will be removed later 
 }
 
 
@@ -817,9 +819,11 @@ Element :: updateYourself(TimeStep *tStep)
 #  ifdef VERBOSE
     // VERBOSE_PRINT1("Updating Element ",number)
 #  endif
+
     for ( int i = 0; i < numberOfIntegrationRules; i++ ) {
         integrationRulesArray [ i ]->updateYourself(tStep);
     }
+
 }
 
 
