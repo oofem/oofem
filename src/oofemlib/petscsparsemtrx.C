@@ -296,18 +296,18 @@ PetscSparseMtrx :: buildInternalStructure(EngngModel *eModel, int di, EquationID
 
     geqs = leqs = nRows;
 
+    int total_nnz;
     IntArray d_nnz(leqs), d_nnz_sym(leqs);
-    
+
     {
         //determine nonzero structure of matrix
         int ii, jj;
-        Element *elem;
         IntArray r_loc, c_loc;
         std :: vector< std :: set< int > >rows_upper(nRows), rows_lower(nRows);
 
         nelem = domain->giveNumberOfElements();
         for ( int n = 1; n <= nelem; n++ ) {
-            elem = domain->giveElement(n);
+            Element *elem = domain->giveElement(n);
             elem->giveLocationArray(r_loc, ut, r_s);
             elem->giveLocationArray(c_loc, ut, c_s);
             for ( int i = 1; i <= r_loc.giveSize(); i++ ) {
@@ -352,24 +352,26 @@ PetscSparseMtrx :: buildInternalStructure(EngngModel *eModel, int di, EquationID
             }
         }
 
+        total_nnz = 0;
         for ( int i = 0; i < leqs; i++ ) {
-            d_nnz_sym( i ) = rows_upper[ i ].size();
-            d_nnz( i ) = d_nnz_sym( i ) + rows_lower[ i ].size();
+            d_nnz( i ) = rows_upper[ i ].size() + rows_lower[ i ].size();
         }
     }
 
     // create PETSc mat
     MatCreate(PETSC_COMM_SELF, & mtrx);
     MatSetSizes(mtrx, nRows, nColumns, nRows, nColumns);
-    MatSetType(mtrx, MATSEQAIJ);
     MatSetFromOptions(mtrx);
+
+    if ( total_nnz > nRows*nColumns / 10 ) { // More than 10% nnz, then we just force the dense matrix.
+        MatSetType(mtrx, MATDENSE);
+    } else {
+        MatSetType(mtrx, MATSEQAIJ);
+    }
 
     //The incompatible preallocations are ignored automatically.
     MatSetUp(mtrx);
     MatSeqAIJSetPreallocation( mtrx, 0, d_nnz.givePointer() );
-    ///@todo Can we easily support other blocksizes?
-    MatSeqBAIJSetPreallocation( mtrx, 1, 0, d_nnz.givePointer() );
-    MatSeqSBAIJSetPreallocation( mtrx, 1, 0, d_nnz_sym.givePointer() );
 
     MatSetOption(mtrx, MAT_ROW_ORIENTED, PETSC_FALSE); // To allow the insertion of values using MatSetValues in column major order
     MatSetOption(mtrx, MAT_NEW_NONZERO_ALLOCATION_ERR, PETSC_FALSE);
