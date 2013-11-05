@@ -290,13 +290,6 @@ bool EnrichmentItem :: isElementEnriched(const Element *element) const
     return false;
 }
 
-
-bool EnrichmentItem :: isDofManEnriched(const DofManager &iDMan) const
-{
-    int nodeInd     = iDMan.giveGlobalNumber();
-    return std :: binary_search(mEnrNodeIndices.begin(), mEnrNodeIndices.end(), nodeInd);
-}
-
 int EnrichmentItem :: giveNumDofManEnrichments(const DofManager &iDMan) const
 {
     std :: vector< int > :: const_iterator begin = mEnrNodeIndices.begin();
@@ -445,6 +438,28 @@ void EnrichmentItem :: evaluateEnrFuncJumps(std :: vector< double > &oEnrFuncJum
     }
 }
 
+bool EnrichmentItem :: levelSetChangesSignInEl(const IntArray &iElNodes) const
+{
+
+	double maxLevelSet = 0.0, minLevelSet = 0.0;
+	double levelSetNode = 0.0;
+	evalLevelSetNormalInNode(levelSetNode, iElNodes.at(1) );
+	maxLevelSet = levelSetNode;
+	minLevelSet = levelSetNode;
+
+	for(int j = 2; j < iElNodes.giveSize(); j++) {
+		evalLevelSetNormalInNode(levelSetNode, iElNodes.at(j));
+
+		maxLevelSet = std::max(maxLevelSet, levelSetNode);
+		minLevelSet = std::min(minLevelSet, levelSetNode);
+	}
+
+	if(maxLevelSet*minLevelSet < 0.0) {
+		return true;
+	}
+
+	return false;
+}
 
 void EnrichmentItem :: updateLevelSets(XfemManager &ixFemMan)
 {

@@ -40,6 +40,7 @@
 #include "enrichmentdomain.h"
 #include "structuralcrosssection.h"
 #include "vtkxmlexportmodule.h"
+#include "dynamicinputrecord.h"
 #ifdef __OOFEG
 #include "patchintegrationrule.h"
 #endif
@@ -170,7 +171,6 @@ PlaneStress2dXfem :: computeStressVector(FloatArray &answer, const FloatArray &s
 {
 //    FloatArray Epsilon;
 //    this->computeStrainVector(Epsilon, gp, stepN);
-
 
     //////////////////
     // Necessary for postprocessing
@@ -324,6 +324,11 @@ PlaneStress2dXfem :: initializeFrom(InputRecord *ir)
 
     result = XfemElementInterface :: initializeCZFrom(ir);
     return result;
+}
+
+MaterialMode PlaneStress2dXfem :: giveMaterialMode()
+{
+	return XfemElementInterface::giveMaterialMode();
 }
 
 void PlaneStress2dXfem :: giveInputRecord(DynamicInputRecord &input)
