@@ -208,7 +208,7 @@ void XfemElementInterface :: XfemElementInterface_createEnrBmatrixAt(FloatMatrix
 
 
     // Create the total B-matrix by appending each contribution to B after one another.
-    oAnswer.resize(3, counter);
+    oAnswer.resize(numRows, counter);
     oAnswer.zero();
     int column = 1;
     for ( int i = 0; i < nDofMan; i++ ) {
