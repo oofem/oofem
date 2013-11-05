@@ -694,6 +694,11 @@ TrPlaneStress2dXFEM :: initializeFrom(InputRecord *ir)
     return result;
 }
 
+MaterialMode TrPlaneStress2dXFEM :: giveMaterialMode()
+{
+	return XfemElementInterface::giveMaterialMode();
+}
+
 void TrPlaneStress2dXFEM :: giveInputRecord(DynamicInputRecord &input)
 {
 	TrPlaneStress2d::giveInputRecord(input);

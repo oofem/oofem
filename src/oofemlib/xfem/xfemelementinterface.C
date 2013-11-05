@@ -64,7 +64,8 @@ mCZMaterialNum(-1),
 mCSNumGaussPoints(4),
 mpCZIntegrationRule(NULL),
 mCrackLength(0.0),
-mCZEnrItemIndex(-1)
+mCZEnrItemIndex(-1),
+mUsePlaneStrain(false)
 {
 
 }
@@ -82,6 +83,12 @@ void XfemElementInterface :: XfemElementInterface_createEnrBmatrixAt(FloatMatrix
 {
     const int dim = 2;
     const int nDofMan = iEl.giveNumberOfDofManagers();
+
+    int shearInd = 3, numRows = 3;
+    if(mUsePlaneStrain) {
+    	shearInd = 4;
+    	numRows = 4;
+    }
 
     FloatMatrix dNdx;
     FloatArray N;
@@ -106,12 +113,12 @@ void XfemElementInterface :: XfemElementInterface_createEnrBmatrixAt(FloatMatrix
     std :: vector< FloatMatrix > Bc(nDofMan);
     for ( int i = 1; i <= nDofMan; i++ ) {
         FloatMatrix &BNode = Bc [ i - 1 ];
-        BNode.resize(3, 2);
+        BNode.resize(numRows, 2);
         BNode.zero();
-        BNode.at(1, 1) = dNdx.at(i, 1);
-        BNode.at(2, 2) = dNdx.at(i, 2);
-        BNode.at(3, 1) = dNdx.at(i, 2);
-        BNode.at(3, 2) = dNdx.at(i, 1);
+        BNode.at(1, 1) 			= dNdx.at(i, 1);
+        BNode.at(2, 2) 			= dNdx.at(i, 2);
+        BNode.at(shearInd, 1) 	= dNdx.at(i, 2);
+        BNode.at(shearInd, 2) 	= dNdx.at(i, 1);
     }
 
 
@@ -137,7 +144,7 @@ void XfemElementInterface :: XfemElementInterface_createEnrBmatrixAt(FloatMatrix
         }
 
         FloatMatrix &BdNode = Bd [ j - 1 ];
-        BdNode.resize(3, numEnrNode * dim);
+        BdNode.resize(numRows, numEnrNode * dim);
         BdNode.zero();
 
 
@@ -151,7 +158,7 @@ void XfemElementInterface :: XfemElementInterface_createEnrBmatrixAt(FloatMatrix
         	double levelSetGP = 0.0;
         	ei->interpLevelSet(levelSetGP, N, elNodes);
 
-        	FloatArray gradLevelSetGP;
+        	FloatArray gradLevelSetGP(dim);
         	ei->interpGradLevelSet(gradLevelSetGP, dNdx, elNodes);
 
 
@@ -186,10 +193,10 @@ void XfemElementInterface :: XfemElementInterface_createEnrBmatrixAt(FloatMatrix
 						grad_ef_N.at(p) = dNdx.at(j, p) * ( efGP[k] - efNode[k] ) + N.at(j) * efgpD[k].at(p);
 					}
 
-					BdNode.at(1, nodeEnrCounter+1) = grad_ef_N.at(1);
-					BdNode.at(2, nodeEnrCounter+2) = grad_ef_N.at(2);
-					BdNode.at(3, nodeEnrCounter+1) = grad_ef_N.at(2);
-					BdNode.at(3, nodeEnrCounter+2) = grad_ef_N.at(1);
+					BdNode.at(1, nodeEnrCounter+1) 			= grad_ef_N.at(1);
+					BdNode.at(2, nodeEnrCounter+2) 			= grad_ef_N.at(2);
+					BdNode.at(shearInd, nodeEnrCounter+1) 	= grad_ef_N.at(2);
+					BdNode.at(shearInd, nodeEnrCounter+2) 	= grad_ef_N.at(1);
 
 					nodeEnrCounter += 2;
 					counter += 2;
@@ -916,8 +923,23 @@ XfemElementInterface :: initializeCZFrom(InputRecord *ir)
     IR_GIVE_OPTIONAL_FIELD(ir, mCSNumGaussPoints, _IFT_XfemElementInterface_NumIntPointsCZ);
 //    printf("mCSNumGaussPoints: %d\n", mCSNumGaussPoints );
 
+    int planeStrainFlag = -1;
+    IR_GIVE_OPTIONAL_FIELD(ir, planeStrainFlag, _IFT_XfemElementInterface_PlaneStrain);
+    if( planeStrainFlag == 1 ) {
+    	mUsePlaneStrain = true;
+    }
 
     return IRRT_OK;
+}
+
+MaterialMode XfemElementInterface :: giveMaterialMode()
+{
+	if(mUsePlaneStrain) {
+		return _PlaneStrain;
+	}
+	else {
+		return _PlaneStress;
+	}
 }
 
 void XfemElementInterface :: giveCZInputRecord(DynamicInputRecord &input)
@@ -925,6 +947,11 @@ void XfemElementInterface :: giveCZInputRecord(DynamicInputRecord &input)
 	if( mCZMaterialNum > 0 ) {
 		input.setField(mCZMaterialNum, _IFT_XfemElementInterface_CohesiveZoneMaterial);
 	}
+
+	if(mUsePlaneStrain) {
+		input.setField(1, _IFT_XfemElementInterface_PlaneStrain);
+	}
+
 }
 
 void XfemElementInterface :: initializeCZMaterial()
@@ -1058,6 +1085,8 @@ void XfemElementInterface :: computeNCohesive(FloatMatrix &oN, GaussPoint &iGP)
 
 bool XfemElementInterface :: computeNormalInPoint(const FloatArray &iGlobalCoord, FloatArray &oNormal)
 {
+	const int dim = 2;
+
 	bool foundNormal = false;
 
     XfemManager *xMan = element->giveDomain()->giveXfemManager();
@@ -1077,7 +1106,7 @@ bool XfemElementInterface :: computeNormalInPoint(const FloatArray &iGlobalCoord
     	double levelSetTang = 0.0;
     	ei->interpLevelSetTangential(levelSetTang, N, elNodes);
 
-    	FloatArray gradLevelSet;
+    	FloatArray gradLevelSet(dim);
     	ei->interpGradLevelSet(gradLevelSet, dNdx, elNodes);
 
 

@@ -111,6 +111,7 @@ public:
 #endif
 
     virtual IRResultType initializeFrom(InputRecord *ir);
+    virtual MaterialMode giveMaterialMode();
     virtual void giveInputRecord(DynamicInputRecord &input);
 
     // For mapping of primary unknowns

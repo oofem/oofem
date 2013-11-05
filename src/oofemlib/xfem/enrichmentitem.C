@@ -290,13 +290,6 @@ bool EnrichmentItem :: isElementEnriched(const Element *element) const
     return false;
 }
 
-
-bool EnrichmentItem :: isDofManEnriched(const DofManager &iDMan) const
-{
-    int nodeInd     = iDMan.giveGlobalNumber();
-    return std :: binary_search(mEnrNodeIndices.begin(), mEnrNodeIndices.end(), nodeInd);
-}
-
 int EnrichmentItem :: giveNumDofManEnrichments(const DofManager &iDMan) const
 {
     std :: vector< int > :: const_iterator begin = mEnrNodeIndices.begin();
