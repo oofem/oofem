@@ -376,7 +376,7 @@ VTKXMLExportModule :: doOutput(TimeStep *tStep, bool forcedOutput)
     fprintf(this->fileStream, "<UnstructuredGrid>\n");
 #endif
 
-    this->giveSmoother(); // make sure smoother is created, Neccessary? If it doesn't exist it is created /JB
+    this->giveSmoother(); // make sure smoother is created, Necessary? If it doesn't exist it is created /JB
 
     /* Loop over pieces  ///@todo: this feature has been broken but not checked if it currently works /JB
      * Start default pieces containing all single cell elements. Elements built up from several vtk
@@ -1163,11 +1163,6 @@ VTKXMLExportModule :: writeXFEMVars(VTKPiece &vtkPiece)
                 valueArray = vtkPiece.giveInternalXFEMVarInNode(field, enrItIndex, inode);
                 this->writeVTKPointData(valueArray);
             }
-
-#endif
-
-            // Footer
-#ifndef __VTK_MODULE
             fprintf(this->fileStream, "</DataArray>\n");
 #endif
         }
@@ -1501,12 +1496,6 @@ VTKXMLExportModule :: writePrimaryVars(VTKPiece &vtkPiece)
             valueArray = vtkPiece.givePrimaryVarInNode(i, inode);
             this->writeVTKPointData(valueArray);
         }
-
-#endif
-
-
-        // Footer
-#ifndef __VTK_MODULE
         fprintf(this->fileStream, "</DataArray>\n");
 #endif
     }
@@ -1662,14 +1651,6 @@ VTKXMLExportModule :: writeCellVars(VTKPiece &vtkPiece)
             valueArray = vtkPiece.giveCellVar(i, ielem);
             this->writeVTKCellData(valueArray);
         }
-
-#endif
-
-
-
-
-        // Footer
-#ifndef __VTK_MODULE
         fprintf(this->fileStream, "</DataArray>\n");
 #endif
     }

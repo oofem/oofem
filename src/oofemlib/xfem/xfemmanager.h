@@ -79,6 +79,10 @@ enum XFEMStateType {
     XFEMStateType_DEF
 };
 
+#undef ENUM_ITEM
+#undef ENUM_ITEM_WITH_VALUE
+#undef enumitem_h
+
 const char *__XFEMStateTypeToString(XFEMStateType _value);
 
 /**
