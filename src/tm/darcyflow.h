@@ -62,7 +62,6 @@ public:
     virtual contextIOResultType restoreContext(DataStream *stream, ContextMode mode, void *obj = NULL) { return CIO_IOERR; };
     virtual int checkConsistency() { return 1; };
     virtual fMode giveFormulation() { return TL; }
-    virtual void updateInternalState(TimeStep *stepN) { return; };
 
     virtual void updateComponent(TimeStep *tStep, NumericalCmpn cmpn, Domain *d);
 

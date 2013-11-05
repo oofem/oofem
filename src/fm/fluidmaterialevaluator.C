@@ -143,7 +143,7 @@ void FluidMaterialEvaluator :: solveYourself()
             }
             for ( int j = 1; j <= sControl.giveSize(); ++j ) {
                 int p = sControl.at(j);
-                stressDevC.at(p) = d->giveLoadTimeFunction(cmpntFunctions.at(p))->evaluate(tStep, VM_Total);
+                stressDevC.at(j) = d->giveLoadTimeFunction(cmpntFunctions.at(p))->evaluate(tStep, VM_Total);
             }
             if ( pressureControl ) {
                 pressure = d->giveLoadTimeFunction(volFunction)->evaluate(tStep, VM_Total);

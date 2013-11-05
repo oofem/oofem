@@ -44,31 +44,31 @@
 
 
 namespace oofem {
-class OOFEM_EXPORT SolutionbasedShapeFunction : public ActiveBoundaryCondition {
+class OOFEM_EXPORT SolutionbasedShapeFunction : public ActiveBoundaryCondition
+{
 private:
-	Node *myNode;
-	int set;
-	std::string filename;
-	bool useConstantBase;
-	bool isLoaded;
+    Node *myNode;
+    std::string filename;
+    bool useConstantBase;
+    bool isLoaded;
     EngngModel *myEngngModel;
     TimeStep *thisTimestep;
 
     FloatArray maxCoord, minCoord;
 
-	double computeBaseFunctionValueAt(FloatArray *coords, Dof *dof);
+    double computeBaseFunctionValueAt(FloatArray *coords, Dof *dof);
 
-	void setLoads();
-	void loadProblem();
-	void init();
+    void setLoads();
+    void loadProblem();
+    void init();
 
 public:
-	SolutionbasedShapeFunction(int n, Domain *d);
-	virtual ~SolutionbasedShapeFunction();
+    SolutionbasedShapeFunction(int n, Domain *d);
+    virtual ~SolutionbasedShapeFunction();
 
-	IRResultType initializeFrom(InputRecord *ir);
+    IRResultType initializeFrom(InputRecord *ir);
 
-	virtual bool requiresActiveDofs() {return true;};
+    virtual bool requiresActiveDofs() {return true;};
     virtual int giveNumberOfInternalDofManagers() { return 1; }
     virtual DofManager *giveInternalDofManager(int i) { return myNode; }
 

@@ -47,7 +47,7 @@ namespace oofem {
 
 TimeStep :: TimeStep(int n, EngngModel *e, int mn, double tt, double dt, StateCounterType counter, TimeDiscretizationType td) :
     eModel(e), targetTime(tt), intrinsicTime(tt), deltaT(dt), solutionStateCounter(counter), 
-    number(n), version(0), mstepNumber(mn), substepNumber(0), timeDiscretization(td)
+    number(n), version(0), substepNumber(0), mstepNumber(mn), timeDiscretization(td)
 {
     // Target time and intrinsic time is the same in the constructor.
 }

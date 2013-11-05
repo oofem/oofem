@@ -196,7 +196,7 @@ NlIsoMoistureMaterial :: givePermeability(GaussPoint *gp, TimeStep *atTime)
 double
 NlIsoMoistureMaterial :: giveHumidity(GaussPoint *gp, ValueModeType mode)
 {
-    const FloatArray &tempState = static_cast< TransportMaterialStatus * >( this->giveStatus(gp) )->giveTempStateVector();
+    const FloatArray &tempState = static_cast< TransportMaterialStatus * >( this->giveStatus(gp) )->giveTempField();
     if ((tempState.at(1) > 1.0)||(tempState.at(1) < 0.0)) {
         OOFEM_ERROR2("NlIsoMoistureMaterial :: giveHumidity : Relative humidity %.3f is out of range", tempState.at(1));
         return 0.0;
