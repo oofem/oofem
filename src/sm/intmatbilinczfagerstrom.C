@@ -110,38 +110,6 @@ IntMatBilinearCZFagerstrom :: giveFirstPKTraction_3d(FloatArray &answer, GaussPo
     // 	SUBROUTINE stress_damage_XFEM_direct_Mandel(dJ,N,Qold,old_alpha,Fci,Q,Ea,new_alpha,adtim,dalpha_new,dalpha_old,diss,sig_f,fall);
     if (oldDamage < 0.99) {
         
-        #if 0
-        FloatArray N;
-        FloatMatrix Gcov;
-
-        Shell7Base *shell = dynamic_cast< Shell7Base* >(gp->giveElement());
-        if ( !shell ) {
-            OOFEM_ERROR("BilinearCZMaterialFagerstrom :: giveRealStressVector - oh no wrong element type");
-        }
-        FloatArray lCoords(3);
-        lCoords.at(1) = gp->giveCoordinate(1);
-        lCoords.at(2) = gp->giveCoordinate(2);
-        lCoords.at(3) = xi;
-        shell->evalInitialCovarBaseVectorsAt(lCoords, Gcov);
-
-        FloatArray G1, G2;
-        Gcov.copyColumn(G1,1);
-        Gcov.copyColumn(G2,2);
-        N.beVectorProductOf(G1,G2);
-        N.normalize();
-
-        FloatArray Qtrial = status->giveEffectiveMandelTraction(); 
-
-        FloatMatrix Rot(3,3);
-        G1.normalize();
-        G2.beVectorProductOf(N, G1);
-        Rot.setColumn(G1,1);
-        Rot.setColumn(G2,2);
-        Rot.setColumn(N,3);		
-
-        Qtrial.rotatedWith(Rot,'n');
-        #endif
-
         FloatArray Qtrial = status->giveEffectiveMandelTraction(); 
 
         FloatMatrix Kstiff(3,3);
@@ -183,9 +151,12 @@ IntMatBilinearCZFagerstrom :: giveFirstPKTraction_3d(FloatArray &answer, GaussPo
         double sigf = this->sigf;
         double gamma = this->gamma;
         double gammaGf = this->GIIc/this->GIc;
+		double mu = this->mu;
+
 
         double Qn_M = 0.5*(Qn + fabs(Qn));
-        double loadFun = sigf*pow(Qt/(gamma*sigf),2) + sigf*pow((Qn_M/sigf),2) - sigf;	///@todo Martin: no use of parameter mu!!!
+        //double loadFun = sigf*pow(Qt/(gamma*sigf),2) + sigf*pow((Qn_M/sigf),2) - sigf;	///@todo Martin: no use of parameter mu!!!
+		double loadFun = sigf*pow(Qt/(gamma*sigf),2) + (sigf/gamma)*(gamma-mu)*pow((Qn_M/sigf),2) - 1/gamma*(gamma*sigf-mu*Qn); // Added support for parameter mu
 
         Qold = status->giveEffectiveMandelTraction();  ///@todo Martin: check with Mikael/Jim
         Qtemp = Qtrial;
@@ -259,7 +230,8 @@ IntMatBilinearCZFagerstrom :: giveFirstPKTraction_3d(FloatArray &answer, GaussPo
                     
                 Smat.at(4,1) = M.at(1)*Kstiff.at(1,1);      // S_mat(3,1:2) = MATMUL(M(1:2),Keye3(1:2,1:2))
                 Smat.at(4,2) = M.at(2)*Kstiff.at(2,2);
-                Smat.at(4,3) = M.at(3)*Kstiff.at(3,3);
+                //Smat.at(4,3) = M.at(3)*Kstiff.at(3,3);
+                Smat.at(4,3) = (2*(gamma-mu)/(gamma*sigf)*Qn_M + mu/gamma)*Kstiff.at(3,3);	//Martin: included parameter mu
 
                 //FloatArray inc;
                 //bool transpose = false;
@@ -281,13 +253,15 @@ IntMatBilinearCZFagerstrom :: giveFirstPKTraction_3d(FloatArray &answer, GaussPo
                 Qt1 = Qtemp.at(1);
                 Qt2 = Qtemp.at(2);
                 Qt = sqrt(pow(Qt1,2) + pow(Qt2,2));
+				Qn = Qtemp.at(3);							// Martin: included parameter mu
                 Qn_M = 0.5*(Qtemp.at(3)+fabs(Qtemp.at(3)));
 
                 M.at(1) = 2*Qt1/(pow(gamma,2)*sigf);    // Qt = sqrt(Qt1^2 + Qt2^2)
                 M.at(2) = 2*Qt2/(pow(gamma,2)*sigf);
                 M.at(3) = 2*Qn_M/sigf;	
 
-                loadFun = sigf*pow(Qt/(gamma*sigf),2) + sigf*pow((Qn_M/sigf),2) - sigf;
+                //loadFun = sigf*pow(Qt/(gamma*sigf),2) + sigf*pow((Qn_M/sigf),2) - sigf;
+		        loadFun = sigf*pow(Qt/(gamma*sigf),2) + (sigf/gamma)*(gamma-mu)*pow((Qn_M/sigf),2) - 1/gamma*(gamma*sigf-mu*Qn);	//Martin: included parameter mu
             }
 //			printf("converged, loadfun = %e, oldDamage = %e \n",loadFun, oldDamage);
 			if (oldDamage + dAlpha > 1) {
@@ -645,7 +619,7 @@ IntMatBilinearCZFagerstrom  :: printYourself()
     printf("  GIc   = %e \n", this->GIc);
     printf("  GIIc  = %e \n", this->GIIc);
     printf("  gamma = sigfs/sigfn = %e \n", this->gamma);
-    printf("  mu    = %e \n", this->GIc);
+    printf("  mu    = %e \n", this->mu);
 
     printf("-Stiffness parameters \n");
     printf("  kn0  = %e \n", this->kn0);
