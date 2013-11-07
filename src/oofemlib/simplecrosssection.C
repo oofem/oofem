@@ -505,9 +505,9 @@ SimpleCrossSection :: computeStressIndependentStrainVector(FloatArray &answer,
 #endif
 
 
-bool SimpleCrossSection :: isCharacteristicMtrxSymmetric(MatResponseMode rMode, int mat)
+bool SimpleCrossSection :: isCharacteristicMtrxSymmetric(MatResponseMode rMode)
 {
-    return domain->giveMaterial(mat)->isCharacteristicMtrxSymmetric(rMode);
+    return this->domain->giveMaterial(this->giveMaterialNumber())->isCharacteristicMtrxSymmetric(rMode);
 }
 
 Material 

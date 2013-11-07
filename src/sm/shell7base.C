@@ -2740,7 +2740,8 @@ Shell7Base :: recoverShearStress(TimeStep *tStep)
                 this->computeBmatrixForStressRecAt(*gp->giveCoordinates(), B, layer);
                 dS.beProductOf(B,aS*(-dz)); // stress increment
 
-                StructuralMaterialStatus* status = dynamic_cast< StructuralMaterialStatus* > (gp->giveMaterialStatus(1));
+                //StructuralMaterialStatus* status = dynamic_cast< StructuralMaterialStatus* > (gp->giveMaterialStatus(1));
+                StructuralMaterialStatus* status = dynamic_cast< StructuralMaterialStatus* > ( gp->giveMaterialStatus() );
                 Sold = status->giveStressVector();
                 
                 Smat.at(1,j+1) += dS.at(1); // add increment from each level

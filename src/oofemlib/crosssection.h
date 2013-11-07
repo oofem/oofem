@@ -130,7 +130,14 @@ public:
      */
     virtual double give(CrossSectionProperty a);
 
-    virtual double give(int aProperty, GaussPoint *gp){ return 0.0; }; // JB
+    /**
+     * Returns the value of cross section property.
+     * @param a Id of requested property.
+     * @param gp Integration point.
+     * @return Property value.
+     */
+    virtual double give(int aProperty, GaussPoint *gp){ return 0.0; };
+
     /**
      * Check for symmetry of stiffness matrix.
      * Default implementation returns true.
@@ -138,9 +145,18 @@ public:
      * @param rMode Response mode of material.
      * @param mat Material index.
      * @return True if stiffness matrix of receiver is symmetric.
+     * @deprected will be removed in the future when cross sections stores the material 
      */
     virtual bool isCharacteristicMtrxSymmetric(MatResponseMode rMode, int mat);
-
+    
+    /**
+     * Check for symmetry of stiffness matrix.
+     * Default implementation returns true.
+     * It can be moved to base Cross section class in the future.
+     * @param rMode Response mode of material.
+     * @return True if stiffness matrix of receiver is symmetric.
+     */
+    virtual bool isCharacteristicMtrxSymmetric(MatResponseMode rMode) { return false; }; 
     virtual void printYourself();
 
     /**

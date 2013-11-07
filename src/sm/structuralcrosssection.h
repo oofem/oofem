@@ -281,14 +281,16 @@ public:
     int hasMaterialModeCapability(MaterialMode mode); // JB
     virtual Material *giveMaterial(IntegrationPoint *ip);    
     int const giveMaterialNumber() { return this->materialNumber; };
-    int const giveCZMaterialNumber() { return this->czMaterialNumber; };
-    int const setCZMaterialNumber(int matNum) { this->czMaterialNumber = matNum; };
+    int const setMaterialNumber(int matNum) { this->materialNumber = matNum; };
 
     virtual int checkConsistency();
+    virtual Interface *giveInterface(InterfaceType t, IntegrationPoint *ip);
+    virtual bool StructuralCrossSection :: isCharacteristicMtrxSymmetric(MatResponseMode rMode);
+    virtual bool StructuralCrossSection :: isCharacteristicMtrxSymmetric(MatResponseMode rMode, int mat);
 
 private:
     int materialNumber;   // material number
-    int czMaterialNumber; // cohesive zone material number
+
 };
 } // end namespace oofem
 #endif // structuralcrosssection_h

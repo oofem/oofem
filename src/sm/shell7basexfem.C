@@ -231,7 +231,7 @@ Shell7BaseXFEM :: evalCovarBaseVectorsAt(FloatArray &lCoords, FloatMatrix &gcov,
     FloatArray N, dGenEps;
     FloatMatrix gcovd; 
     std :: vector< double > ef;
-    for ( int i = 1; i <= this->xMan->giveNumberOfEnrichmentItems(); i++ ) { // Only one is supported at the moment
+    for ( int i = 1; i <= this->xMan->giveNumberOfEnrichmentItems(); i++ ) { 
         Delamination *dei =  dynamic_cast< Delamination * >( this->xMan->giveEnrichmentItem(i) ); // should check success
 
         if ( dei->isElementEnriched(this) ) {

@@ -914,7 +914,7 @@ LayeredCrossSection :: computeStressIndependentStrainVector(FloatArray &answer,
     }
 }
 
-bool LayeredCrossSection :: isCharacteristicMtrxSymmetric(MatResponseMode rMode, int mat)
+bool LayeredCrossSection :: isCharacteristicMtrxSymmetric(MatResponseMode rMode)
 {
     for ( int i = 1; i <= this->numberOfLayers; i++ ) {
         if ( !this->domain->giveMaterial(this->giveLayerMaterial(i))->isCharacteristicMtrxSymmetric(rMode) ) {
@@ -1074,5 +1074,17 @@ LayeredCrossSection :: checkConsistency()
     return result;
 }
 
+
+int
+LayeredCrossSection :: giveIPValue(FloatArray &answer, GaussPoint *ip, InternalStateType type, TimeStep *atTime)
+{  
+    ///@todo so far this only works for el where each layer has its own integration rule
+    if ( ip->giveElement()->MAT_GIVEN_BY_CS ) {
+        int layer = ip->giveIntegrationRule()->giveNumber();
+        return this->giveDomain()->giveMaterial( this->giveLayerMaterial(layer) )->giveIPValue(answer, ip, type, atTime); 
+    } else {
+        return ip->giveMaterial()->giveIPValue(answer, ip, type, atTime);
+    }
+}
 
 } // end namespace oofem

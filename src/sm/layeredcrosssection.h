@@ -125,7 +125,7 @@ public:
 
     virtual void giveCharMaterialStiffnessMatrix(FloatMatrix &answer, MatResponseMode mode, GaussPoint *gp, TimeStep *tStep);
 
-    virtual bool isCharacteristicMtrxSymmetric(MatResponseMode rMode, int mat);
+    virtual bool isCharacteristicMtrxSymmetric(MatResponseMode rMode);
 
     virtual void give2dBeamStiffMtrx(FloatMatrix &answer, MatResponseMode rMode, GaussPoint *gp, TimeStep *tStep);
     virtual void give3dBeamStiffMtrx(FloatMatrix &answer, MatResponseMode rMode, GaussPoint *gp, TimeStep *tStep);
@@ -194,6 +194,8 @@ public:
 
     void setupLayeredIntegrationRule(IntegrationRule **&layerIntegrationRulesArray, Element *el, int numInPlanePoints);
     
+    virtual int giveIPValue(FloatArray &answer, GaussPoint *ip, InternalStateType type, TimeStep *atTime);
+
 #ifdef __PARALLEL_MODE
     int packUnknowns(CommunicationBuffer &buff, TimeStep *stepN, GaussPoint *ip)
     {

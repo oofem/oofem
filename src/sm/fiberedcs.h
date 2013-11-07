@@ -129,7 +129,7 @@ public:
     virtual void give3dShellStiffMtrx(FloatMatrix &answer,MatResponseMode mode, GaussPoint *gp, TimeStep *tStep);
     virtual void giveMembraneRotStiffMtrx(FloatMatrix &answer, MatResponseMode rMode, GaussPoint *gp, TimeStep *tStep);
 
-    virtual bool isCharacteristicMtrxSymmetric(MatResponseMode rMode, int mat);
+    virtual bool isCharacteristicMtrxSymmetric(MatResponseMode rMode);
 
     virtual FloatArray *imposeStressConstrainsOnGradient(GaussPoint *gp, FloatArray *gradientStressVector3d);
     virtual FloatArray *imposeStrainConstrainsOnGradient(GaussPoint *gp, FloatArray *gradientStrainVector3d);

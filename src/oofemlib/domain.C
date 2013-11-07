@@ -74,6 +74,8 @@
 #include "enrichmentdomain.h"
 #include "propagationlaw.h"
 
+#include "structengngmodel.h"; // temporary should be removed
+
  // For automatic dof creation, (should try to do without this) (move that stuff into DofManager class)
 #include "boundarycondition.h"
 #include "activebc.h"
@@ -1129,10 +1131,13 @@ Domain :: postInitialize()
                 Element *element = this->giveElement(elements.at(ielem));
                 element->setCrossSection(i);           
                 element->MAT_GIVEN_BY_CS = true; // code development flag
+                //element->setMaterial(1); ///@todo temporary since giveIPValue still asks el for material
             }
         }
 
     }
+    
+ 
     //----
 
     for ( int i = 1; i <= this->elementList->giveSize(); i++ ) {

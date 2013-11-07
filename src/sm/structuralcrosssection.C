@@ -37,6 +37,7 @@
 #include "element.h"
 #include "structuralmaterial.h"
 #include "floatarray.h"
+#include "structuralms.h"
 
 namespace oofem {
 
@@ -295,9 +296,6 @@ StructuralCrossSection :: initializeFrom(InputRecord *ir)
     // Read a cohesive zone material
     IR_GIVE_OPTIONAL_FIELD(ir, this->materialNumber, _StructuralCrossSection_MaterialNumber);
 
-    // Read a cohesive zone material
-    IR_GIVE_OPTIONAL_FIELD(ir, this->czMaterialNumber, _StructuralCrossSection_czMaterialNumber);
-
     return IRRT_OK;
 }
 
@@ -341,5 +339,30 @@ Material
         return ip->giveElement()->giveMaterial();
     }
 }
+
+
+Interface 
+*StructuralCrossSection :: giveInterface(InterfaceType t, IntegrationPoint *ip)
+{
+    if ( this->giveMaterialNumber() ) {
+        return this->giveDomain()->giveMaterial( this->giveMaterialNumber() )->giveInterface(t);
+    } else {
+        return ip->giveMaterial()->giveInterface(t);
+    }    
+    //return this->giveDomain()->giveMaterial( this->giveMaterialNumber() )->giveInterface(t);
+}
+
+bool 
+StructuralCrossSection :: isCharacteristicMtrxSymmetric(MatResponseMode rMode)
+{
+    return this->domain->giveMaterial(this->giveMaterialNumber())->isCharacteristicMtrxSymmetric(rMode);
+}
+
+bool
+StructuralCrossSection :: isCharacteristicMtrxSymmetric(MatResponseMode rMode, int mat)
+{
+    return domain->giveMaterial(mat)->isCharacteristicMtrxSymmetric(rMode);
+}
+
 
 } // end namespace oofem

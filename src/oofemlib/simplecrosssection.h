@@ -106,7 +106,7 @@ public:
 
 
     virtual void giveCharMaterialStiffnessMatrix(FloatMatrix &answer, MatResponseMode rMode, GaussPoint *gp, TimeStep *tStep);
-    virtual bool isCharacteristicMtrxSymmetric(MatResponseMode rMode, int mat);
+    virtual bool isCharacteristicMtrxSymmetric(MatResponseMode rMode);
 
 
     virtual void give2dBeamStiffMtrx(FloatMatrix &answer, MatResponseMode rMode, GaussPoint *gp, TimeStep *tStep);

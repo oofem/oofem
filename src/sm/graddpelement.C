@@ -438,7 +438,7 @@ GradDpElement :: computeStiffnessMatrix_uu(FloatMatrix &answer, MatResponseMode 
 
     nlGeo = elem->giveGeometryMode();
     IntegrationRule *iRule = elem->giveIntegrationRule(0);
-    bool matStiffSymmFlag = elem->giveCrossSection()->isCharacteristicMtrxSymmetric(rMode, elem->material);
+    bool matStiffSymmFlag = elem->giveCrossSection()->isCharacteristicMtrxSymmetric(rMode);
     answer.resize(locSize, locSize);
     for ( int j = 0; j < iRule->giveNumberOfIntegrationPoints(); j++ ) {
         gp = iRule->getIntegrationPoint(j);

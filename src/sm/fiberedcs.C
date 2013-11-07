@@ -586,11 +586,16 @@ FiberedCrossSection :: computeStressIndependentStrainVector(FloatArray &answer, 
     }
 }
 
-bool FiberedCrossSection :: isCharacteristicMtrxSymmetric(MatResponseMode rMode, int mat)
+bool FiberedCrossSection :: isCharacteristicMtrxSymmetric(MatResponseMode rMode)
 {
     ///@todo As far as I can see, it only uses diagonal components for the 3dbeam, but there is no way to check here.
-    ///@todo This should loop through the fiber materials and check if each is symmetric.
-    return domain->giveMaterial(mat)->isCharacteristicMtrxSymmetric(rMode);
+
+    for ( int i = 1; i <= this->numberOfFibers; i++ ) {
+        if ( !this->domain->giveMaterial(this->fiberMaterials.at(i))->isCharacteristicMtrxSymmetric(rMode) ) {
+            return false;
+        }
+    }
+    return true;
 }
 
 
