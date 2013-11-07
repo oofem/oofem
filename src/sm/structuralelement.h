@@ -333,10 +333,6 @@ public:
     virtual void computeLoadVector(FloatArray &answer, Load *load, CharType type, ValueModeType mode, TimeStep *tStep);
     virtual void computeBoundaryLoadVector(FloatArray &answer, BoundaryLoad *load, int boundary, CharType type, ValueModeType mode, TimeStep *tStep);
 
-protected:
-    /// Helper function which returns the structural cross-section for the element.
-    StructuralCrossSection *giveStructuralCrossSection();
-
     /**
      * Computes constitutive matrix of receiver. Default implementation uses element cross section
      * giveCharMaterialStiffnessMatrix service.
@@ -348,6 +344,10 @@ protected:
     virtual void computeConstitutiveMatrixAt(FloatMatrix &answer,
                                              MatResponseMode rMode, GaussPoint *gp,
                                              TimeStep *tStep);
+
+protected:
+    /// Helper function which returns the structural cross-section for the element.
+    StructuralCrossSection *giveStructuralCrossSection();
 
     /**
      * Computes the load vector due to body load acting on receiver, at given time step.

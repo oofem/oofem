@@ -780,7 +780,7 @@ VTKXMLExportModule :: writeVTKPiece(VTKPiece &vtkPiece, TimeStep *tStep)
     std :: string pointHeader, cellHeader;
     this->giveDataHeaders(pointHeader, cellHeader);
 
-    fprintf( this->fileStream, pointHeader.c_str() );
+    fprintf(this->fileStream, "%s", pointHeader.c_str() );
 #endif
 
     this->writePrimaryVars(vtkPiece);       // Variables availablie in the nodes
@@ -792,7 +792,7 @@ VTKXMLExportModule :: writeVTKPiece(VTKPiece &vtkPiece, TimeStep *tStep)
 
 #ifndef __VTK_MODULE
     fprintf(this->fileStream, "</PointData>\n");
-    fprintf( this->fileStream, cellHeader.c_str() );
+    fprintf(this->fileStream, "%s", cellHeader.c_str() );
 #endif
 
     this->writeCellVars(vtkPiece);          // Single cell variables ( if given in the integration points then an average will be exported)
