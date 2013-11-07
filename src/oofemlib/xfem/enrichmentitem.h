@@ -44,6 +44,9 @@
 
 #include <memory>
 
+#include "dofmanager.h"
+#include <algorithm>
+
 ///@name Input fields for XFEM
 //@{
 #define _IFT_Inclusion_Name "inclusion"
@@ -126,7 +129,7 @@ public:
     bool isElementEnriched(const Element *element) const;
     bool isElementEnrichedByEnrichmentDomain(const Element *element, int edNumber) const;
     bool isElementFullyEnrichedByEnrichmentDomain(const Element *element, int edNumber); 
-    bool isDofManEnriched(const DofManager &iDMan) const;
+    inline bool isDofManEnriched(const DofManager &iDMan) const;
     int  giveNumDofManEnrichments(const DofManager &iDMan) const;
 
     // Returns true if the enrichment item assigns a different material to the Gauss point
@@ -155,6 +158,7 @@ public:
     void evalLevelSetTangInNode(double &oLevelSet, int iNodeInd) const { oLevelSet = mLevelSetTangDir [ iNodeInd - 1 ]; }
     void evalNodeEnrMarkerInNode(double &oLevelSet, int iNodeInd) const { oLevelSet = mNodeEnrMarker [ iNodeInd - 1 ]; }
 
+    bool levelSetChangesSignInEl(const IntArray &iElNodes) const;
 
     // By templating the function this way, we may choose if we want to pass iNodeInd as
     // an IntArray, a std::vector<int> or something else.
@@ -245,6 +249,10 @@ protected:
 
 };
 
+inline bool EnrichmentItem :: isDofManEnriched(const DofManager &iDMan) const
+{
+    return std :: binary_search(mEnrNodeIndices.begin(), mEnrNodeIndices.end(), iDMan.giveGlobalNumber());
+}
 
 /** Inclusion. */
 class OOFEM_EXPORT Inclusion : public EnrichmentItem
@@ -329,7 +337,11 @@ template< typename T >
 void EnrichmentItem :: interpGradLevelSet(FloatArray &oGradLevelSet, const FloatMatrix &idNdX, const T &iNodeInd) const
 {
     int dim = idNdX.giveNumberOfColumns();
-    oGradLevelSet.resize(dim);
+
+    if( oGradLevelSet.giveSize() != dim ) {
+    	oGradLevelSet.resize(dim);
+    }
+
     oGradLevelSet.zero();
 
     for ( int i = 1; i <= idNdX.giveNumberOfRows(); i++ ) {

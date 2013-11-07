@@ -40,6 +40,8 @@
 #include "xfemmanager.h"
 
 #define _IFT_XfemElementInterface_CohesiveZoneMaterial "czmaterial"
+#define _IFT_XfemElementInterface_NumIntPointsCZ "nipcz"
+#define _IFT_XfemElementInterface_PlaneStrain "useplanestrain"
 
 namespace oofem {
 class FloatArray;
@@ -74,6 +76,8 @@ protected:
     /// Index of enrichment item associated with cohesive zone
     int mCZEnrItemIndex;
 
+    /// Flag that tells if plane stress or plane strain is assumed
+    bool mUsePlaneStrain;
 
 public:
     /// Constructor.
@@ -112,6 +116,7 @@ public:
     void computeCohesiveTangentAt(FloatMatrix &answer, TimeStep *tStep);
 
     virtual IRResultType initializeCZFrom(InputRecord *ir);
+    MaterialMode giveMaterialMode();
     virtual void giveCZInputRecord(DynamicInputRecord &input);
 
     void initializeCZMaterial();

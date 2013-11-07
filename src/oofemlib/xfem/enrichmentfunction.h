@@ -40,6 +40,7 @@
 #include "femcmpnn.h"
 
 #define _IFT_DiscontinuousFunction_Name "discontinuousfunction"
+#define _IFT_HeavisideFunction_Name "heavisidefunction"
 #define _IFT_RampFunction_Name "rampfunction"
 
 namespace oofem {
@@ -106,6 +107,23 @@ public:
 
     virtual const char *giveClassName() const { return "DiscontinuousFunction"; }
     virtual const char *giveInputRecordName() const { return _IFT_DiscontinuousFunction_Name; }
+};
+
+/** Class representing Heaviside EnrichmentFunction. */
+class OOFEM_EXPORT HeavisideFunction : public EnrichmentFunction
+{
+public:
+	HeavisideFunction(int n, Domain *aDomain) : EnrichmentFunction(n, aDomain) {
+        this->numberOfDofs = 1;
+    }
+
+    virtual void evaluateEnrFuncAt(double &oEnrFunc, const FloatArray &iPos, const double &iLevelSet, const EnrichmentDomain *ipEnrDom) const;
+    virtual void evaluateEnrFuncDerivAt(FloatArray &oEnrFuncDeriv, const FloatArray &iPos, const double &iLevelSet, const FloatArray &iGradLevelSet, const EnrichmentDomain *ipEnrDom) const;
+
+    virtual void giveJump(std::vector<double> &oJumps) const {oJumps.clear(); oJumps.push_back(1.0);}
+
+    virtual const char *giveClassName() const { return "HeavisideFunction"; }
+    virtual const char *giveInputRecordName() const { return _IFT_HeavisideFunction_Name; }
 };
 
 /** Class representing the four classical linear elastic branch functions. */
