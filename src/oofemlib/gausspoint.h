@@ -113,7 +113,8 @@ protected:
     /// List of slave integration points.
     GaussPoint **gaussPointArray;
     //Disctionary of managed MaterialStatuses
-    TDictionary<int,IntegrationPointStatus> statusDict;
+    //TDictionary<int,IntegrationPointStatus> statusDict;
+    IntegrationPointStatus *materialStatus;
 
 public:
     /**
@@ -149,8 +150,7 @@ public:
     IntegrationRule *giveIntegrationRule() { return irule; }
     /// Returns corresponding element to receiver.
     Element *giveElement() { return irule->giveElement(); }
-    /// Sets element of gp.
-    //void setElement(Element* e) { element=e;}
+
     /// Returns corresponding material mode of receiver.
     MaterialMode giveMaterialMode() { return this->materialMode; }
     /// Sets material mode of receiver.
@@ -162,25 +162,35 @@ public:
 
     /// Returns reference to cross section associated to related element of receiver.
     CrossSection *giveCrossSection() { return giveElement()->giveCrossSection(); }
+    
     /**
      * Returns reference to associated material status (NULL if not defined).
-     * @param n Material number
      */
-    IntegrationPointStatus *giveMaterialStatus(int n) { 
-        return statusDict.at(n); 
-    }
+    IntegrationPointStatus *giveMaterialStatus() { return this->materialStatus; }; 
+    
     /**
      * Sets Material status managed by receiver.
      * @param ptr Pointer to new status of receiver.
      * @param i classID of class storing status
      * @return Pointer to new status.
+     * @deprecated should be removed since only one mat stat is saved in the integration point 
      */
     IntegrationPointStatus *setMaterialStatus(IntegrationPointStatus *ptr, int n)
     {
-        if (this->statusDict.includes(n)) {
-            OOFEM_ERROR (" MaterialStatus::setMaterialStatus status already exist");
+        return this->setMaterialStatus(ptr);
+    }
+
+    /**
+     * Sets Material status managed by receiver.
+     * @param ptr Pointer to new status of receiver.
+     * @return Pointer to new status.
+     */
+    IntegrationPointStatus *setMaterialStatus(IntegrationPointStatus *ptr)
+    {
+        if ( this->materialStatus != NULL ) {
+            OOFEM_ERROR (" MaterialStatus :: setMaterialStatus status already exist");
         }
-        this->statusDict.add(n, ptr);
+        this->materialStatus = ptr;
         return ptr;
     }
     /**

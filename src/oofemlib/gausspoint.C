@@ -38,7 +38,8 @@
 
 namespace oofem {
 
-GaussPoint :: GaussPoint(IntegrationRule *ir, int n, FloatArray *a, double w, MaterialMode mode) : statusDict()
+//GaussPoint :: GaussPoint(IntegrationRule *ir, int n, FloatArray *a, double w, MaterialMode mode) : statusDict()
+GaussPoint :: GaussPoint(IntegrationRule *ir, int n, FloatArray *a, double w, MaterialMode mode)
 // Constructor. Creates a Gauss point belonging to element e, with number
 // n, with coordinates a, with weight w.
 {
@@ -51,6 +52,7 @@ GaussPoint :: GaussPoint(IntegrationRule *ir, int n, FloatArray *a, double w, Ma
     materialMode = mode;
 
     localCoordinates = NULL;
+    materialStatus = NULL;
 }
 
 
@@ -85,10 +87,8 @@ void GaussPoint :: printOutputAt(FILE *File, TimeStep *stepN)
     fprintf(File, "  GP %2d.%-2d :", iruleNumber, number);
 
     // invoke printOutputAt method for all managed statuses
-    IntegrationPointStatus* status;
-    TDictionaryIterator<int, IntegrationPointStatus > iterator( &this->statusDict );
-    iterator.initialize( &this->statusDict );
-    while ( ( status = iterator.next() ) ) {
+    IntegrationPointStatus* status = this->giveMaterialStatus();
+    if ( status ) {
         status->printOutputAt(File, stepN);
     }
 
@@ -124,10 +124,9 @@ GaussPoint *GaussPoint :: giveSlaveGaussPoint(int index)
 
 void GaussPoint :: updateYourself(TimeStep *tStep)
 // Performs end-of-step updates.
-{
-    IntegrationPointStatus *status;
-    TDictionaryIterator< int, IntegrationPointStatus > it( &this->statusDict );
-    while( status = it.next() ){
+{ 
+    IntegrationPointStatus *status = this->giveMaterialStatus();
+    if ( status ) { 
         status->updateYourself(tStep);
     }
 
