@@ -63,21 +63,6 @@ StructuralInterfaceMaterial :: giveIPValue(FloatArray &answer, GaussPoint *gp, I
     }
 }
 
-
-InternalStateValueType
-StructuralInterfaceMaterial :: giveIPValueType(InternalStateType type)
-{
-    if ( ( type == IST_InterfaceJump ) || ( type == IST_InterfaceTraction ) ||
-        ( type == IST_InterfaceFirstPKTraction ) ) {
-        return ISVT_VECTOR; 
-    } else if ( type == IST_DeformationGradientTensor ) {
-        return ISVT_TENSOR_G;
-    } else {
-        return Material :: giveIPValueType(type);
-    }
-}
-
-
 // Currently not in use
 IRResultType
 StructuralInterfaceMaterial :: initializeFrom(InputRecord *ir)

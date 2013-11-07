@@ -790,26 +790,6 @@ MisesMat :: giveIPValue(FloatArray &answer, GaussPoint *aGaussPoint, InternalSta
     }
 }
 
-
-
-
-InternalStateValueType
-MisesMat :: giveIPValueType(InternalStateType type)
-{
-    if ( type == IST_PlasticStrainTensor ) {
-        return ISVT_TENSOR_S3;
-    } else if ( type == IST_MaxEquivalentStrainLevel || type == IST_DamageScalar ) {
-        return ISVT_SCALAR;
-    } else {
-        return StructuralMaterial :: giveIPValueType(type);
-    }
-}
-
-
-
-
-
-
 //=============================================================================
 
 MisesMatStatus :: MisesMatStatus(int n, Domain *d, GaussPoint *g) :

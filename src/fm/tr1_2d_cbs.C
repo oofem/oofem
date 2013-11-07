@@ -1095,18 +1095,6 @@ TR1_2D_CBS :: giveIPValue(FloatArray &answer, GaussPoint *aGaussPoint, InternalS
     }
 }
 
-
-InternalStateValueType
-TR1_2D_CBS :: giveIPValueType(InternalStateType type)
-{
-    if ( type == IST_VOFFraction ) {
-        return ISVT_SCALAR;
-    } else {
-        return CBSElement :: giveIPValueType(type);
-    }
-}
-
-
 void
 TR1_2D_CBS :: NodalAveragingRecoveryMI_computeNodalValue(FloatArray &answer, int node,
                                                          InternalStateType type, TimeStep *tStep)

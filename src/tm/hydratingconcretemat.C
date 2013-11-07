@@ -247,17 +247,6 @@ HydratingConcreteMat :: giveIPValue(FloatArray &answer, GaussPoint *gp, Internal
 }
 
 
-InternalStateValueType
-HydratingConcreteMat :: giveIPValueType(InternalStateType type)
-{
-    if ( type == IST_HydrationDegree ) {
-        return ISVT_SCALAR;
-    } else {
-        return TransportMaterial :: giveIPValueType(type);
-    }
-}
-
-
 MaterialStatus *
 HydratingConcreteMat :: CreateStatus(GaussPoint *gp) const
 {

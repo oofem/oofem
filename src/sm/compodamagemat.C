@@ -369,16 +369,6 @@ int CompoDamageMat :: giveIPValue(FloatArray &answer, GaussPoint *aGaussPoint, I
     return 1;
 }
 
-InternalStateValueType CompoDamageMat :: giveIPValueType(InternalStateType type)
-{
-    if ( type == IST_DamageTensor ) {
-        return ISVT_TENSOR_S3;
-    } else {
-        return StructuralMaterial :: giveIPValueType(type);
-    }
-}
-
-
 void CompoDamageMat :: giveUnrotated3dMaterialStiffnessMatrix(FloatMatrix &answer, MatResponseMode mode, GaussPoint *gp)
 {
     double denom;

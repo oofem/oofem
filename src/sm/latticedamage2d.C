@@ -700,22 +700,6 @@ LatticeDamage2d :: giveIPValue(FloatArray &answer,
 }
 
 
-InternalStateValueType
-LatticeDamage2d :: giveIPValueType(InternalStateType type)
-{
-    if ( type == IST_CrackStatuses || type == IST_DamageScalar || type == IST_DissWork || type == IST_DeltaDissWork ) {
-        return ISVT_SCALAR;
-    } else if ( type == IST_DamageTensor ) {
-        return ISVT_TENSOR_S3;
-    } else {
-        return StructuralMaterial :: giveIPValueType(type);
-    }
-}
-
-
-
-
-
 LatticeDamage2dStatus :: LatticeDamage2dStatus(int n, Domain *d, GaussPoint *g) :
     LatticeMaterialStatus(n, d, g), RandomMaterialStatusExtensionInterface(), reducedStrain(3), tempReducedStrain(3)
 {

@@ -2746,27 +2746,6 @@ double HellmichMaterial :: give(int aProperty, GaussPoint *gp)
     }
 }
 
-// === Postprocessing ===
-InternalStateValueType
-HellmichMaterial :: giveIPValueType(InternalStateType type)
-{
-    // strains components packed in engineering notation
-    if ( type == IST_PlasticStrainTensor ) {
-        return ISVT_TENSOR_S3E;
-    } else if ( type == IST_PrincipalPlasticStrainTensor ) {
-        return ISVT_VECTOR;
-    } else if ( type == IST_DamageTensor ) {
-        return ISVT_SCALAR;
-    } else if ( type == IST_HydrationDegree ) {
-        return ISVT_SCALAR;
-    } else if ( type == IST_Temperature ) {
-        return ISVT_SCALAR;
-    } else {
-        return StructuralMaterial :: giveIPValueType(type);
-    }
-}
-
-
 // end of HellmichMaterial implemantation
 
 // ========================  STATUS implementation ===================================

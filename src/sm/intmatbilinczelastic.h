@@ -138,7 +138,6 @@ public:
 
     virtual void give3dStiffnessMatrix_dTdj(FloatMatrix &answer, MatResponseMode rMode, GaussPoint *gp, TimeStep *tStep);
     virtual int giveIPValue(FloatArray &answer, GaussPoint *gp, InternalStateType type, TimeStep *tStep);
-    virtual InternalStateValueType giveIPValueType(InternalStateType type);
     virtual IRResultType initializeFrom(InputRecord *ir);
     
     virtual MaterialStatus *CreateStatus(GaussPoint *gp) const { return new IntMatBilinearCZElasticStatus(1, domain, gp); }

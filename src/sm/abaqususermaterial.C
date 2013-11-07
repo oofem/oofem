@@ -501,13 +501,4 @@ int AbaqusUserMaterial :: giveIPValue(FloatArray& answer, GaussPoint *gp, Intern
     }
 }
 
-InternalStateValueType AbaqusUserMaterial :: giveIPValueType(InternalStateType type)
-{
-    if ( type == IST_Undefined ) {
-        return ISVT_VECTOR;
-    } else {
-        return StructuralMaterial :: giveIPValueType(type);
-    }
-}
-
 } // end namespace oofem

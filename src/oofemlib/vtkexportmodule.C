@@ -838,10 +838,7 @@ VTKExportModule :: exportIntVarAs(InternalStateType valID, InternalStateValueTyp
 
     this->giveSmoother();
 
-    int nindx = 1;
-    if ( type == ISVT_TENSOR_G ) {
-        nindx = this->smoother->giveRegionRecordSize(1, valID);
-    }
+    int nindx = giveInternalStateTypeSize( type );
 
     for ( int indx = 1; indx <= nindx; indx++ ) {
         // print header
@@ -874,7 +871,7 @@ VTKExportModule :: exportIntVarAs(InternalStateType valID, InternalStateValueTyp
             this->initRegionNodeNumbering(regionNodalNumbers, regionDofMans, offset, d, ireg, 1);
             if ( !( ( valID == IST_DisplacementVector ) || ( valID == IST_MaterialInterfaceVal ) ) ) {
                 // assemble local->global map
-                defaultSize = this->smoother->giveRegionRecordSize(ireg, valID);
+                defaultSize = giveInternalStateTypeSize( type );
             } else {
                 regionDofMans = nnodes;
             }

@@ -482,8 +482,6 @@ public:
                             InternalStateType type,
                             TimeStep *atTime);
 
-    virtual InternalStateValueType giveIPValueType(InternalStateType type);
-
     virtual bool isCharacteristicMtrxSymmetric(MatResponseMode rMode) { return false; }
 
     virtual void giveThermalDilatationVector(FloatArray &answer, GaussPoint *gp, TimeStep *atTime)

@@ -439,19 +439,6 @@ IntMatBilinearCZFagerstrom :: giveIPValue(FloatArray &answer, GaussPoint *aGauss
 
 }
 
-
-InternalStateValueType
-IntMatBilinearCZFagerstrom :: giveIPValueType(InternalStateType type)
-{
-    //@todoMartin Insert code here if necessaryfor returning type of internal state
-    return StructuralInterfaceMaterial :: giveIPValueType(type);
-}
-
-
-
-
-
-
 const double tolerance = 1.0e-12; // small number
 IRResultType
 IntMatBilinearCZFagerstrom :: initializeFrom(InputRecord *ir)

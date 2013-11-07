@@ -187,7 +187,6 @@ public:
 	virtual bool hasAnalyticalTangentStiffness() const {return true;}
     
     virtual int giveIPValue(FloatArray &answer, GaussPoint *gp, InternalStateType type, TimeStep *tStep);
-    virtual InternalStateValueType giveIPValueType(InternalStateType type);
     virtual IRResultType initializeFrom(InputRecord *ir);
     
     virtual MaterialStatus *CreateStatus(GaussPoint *gp) const { return new IntMatBilinearCZJanssonStatus(1, domain, gp); } //@Martin: Why new?

@@ -214,14 +214,6 @@ IntMatBilinearCZElastic :: giveIPValue(FloatArray &answer, GaussPoint *aGaussPoi
     }
 }
 
-
-InternalStateValueType
-IntMatBilinearCZElastic :: giveIPValueType(InternalStateType type)
-{
-    return StructuralInterfaceMaterial :: giveIPValueType(type);
-}
-
-
 const double tolerance = 1.0e-12; // small number
 IRResultType
 IntMatBilinearCZElastic :: initializeFrom(InputRecord *ir)

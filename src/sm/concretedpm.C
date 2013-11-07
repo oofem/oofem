@@ -1946,21 +1946,6 @@ ConcreteDPM :: giveIPValue(FloatArray &answer, GaussPoint *gp, InternalStateType
     return StructuralMaterial :: giveIPValue(answer, gp, type, atTime);
 }
 
-
-InternalStateValueType
-ConcreteDPM :: giveIPValueType(InternalStateType type)
-{
-    if ( type == IST_PlasticStrainTensor ) {
-        return ISVT_TENSOR_S3E;
-    } else if ( type == IST_DamageTensor || type == IST_DamageTensorTemp ) {
-        return ISVT_TENSOR_S3;
-    } else if ( type == IST_DamageScalar || type == IST_CumPlasticStrain || type == IST_CumPlasticStrain_2 || type == IST_VolumetricPlasticStrain ) {
-        return ISVT_SCALAR;
-    } else {
-        return StructuralMaterial :: giveIPValueType(type);
-    }
-}
-
 MaterialStatus *
 ConcreteDPM :: CreateStatus(GaussPoint *gp) const
 {

@@ -188,14 +188,7 @@ public:
      */
     virtual int giveIPValue(FloatArray &answer, GaussPoint *ip, InternalStateType type, TimeStep *atTime)
     { return ip->giveMaterial()->giveIPValue(answer, ip, type, atTime); }
-    /**
-     * Returns the type of internal variable (scalar, vector, tensor,...).
-     * @param type Determines the type of internal variable.
-     * @param mat Material to check.
-     * @return Type of internal variable.
-     */
-    virtual InternalStateValueType giveIPValueType(InternalStateType type, Material *mat)
-    { return mat->giveIPValueType(type); }
+
 
 #ifdef __PARALLEL_MODE
     /**

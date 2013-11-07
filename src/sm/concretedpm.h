@@ -744,8 +744,6 @@ public:
                             InternalStateType type,
                             TimeStep *tStep);
 
-    virtual InternalStateValueType giveIPValueType(InternalStateType type);
-
 protected:
     virtual MaterialStatus *CreateStatus(GaussPoint *gp) const;
 };

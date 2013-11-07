@@ -233,18 +233,4 @@ TransportMaterial :: giveIPValue(FloatArray &answer, GaussPoint *aGaussPoint, In
     return Material :: giveIPValue(answer, aGaussPoint, type, atTime);
 }
 
-
-InternalStateValueType
-TransportMaterial :: giveIPValueType(InternalStateType type)
-{
-    if ( type == IST_Temperature || type == IST_Pressure || type == IST_MassConcentration_1 || type == IST_Humidity ) {
-        return ISVT_SCALAR;
-    } else if ( type == IST_Velocity || IST_PressureGradient ) {
-        return ISVT_VECTOR;
-    } else {
-        return Material :: giveIPValueType(type);
-    }
-}
-
-
 } // end namespace oofem

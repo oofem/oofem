@@ -751,12 +751,6 @@ public:
      * @return Nonzero if o.k, zero otherwise.
      */
     virtual int giveIPValue(FloatArray &answer, GaussPoint *gp, InternalStateType type, TimeStep *tStep);
-    /**
-     * Returns the type of internal variable (scalar, vector, tensor,...).
-     * @param type Determines the type of internal variable.
-     * @return Type of internal variable.
-     */
-    virtual InternalStateValueType giveIPValueType(InternalStateType type);
 
     // characteristic length in gp (for some material models)
     /**

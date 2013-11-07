@@ -1269,19 +1269,6 @@ Element :: giveIPValue(FloatArray &answer, GaussPoint *aGaussPoint, InternalStat
     }
 }
 
-
-InternalStateValueType
-Element :: giveIPValueType(InternalStateType type)
-{
-    if ( ( type == IST_ErrorIndicatorLevel ) || ( type == IST_RelMeshDensity ) ||
-        ( type == IST_InternalStressError ) || ( type == IST_PrimaryUnknownError ) ) {
-        return ISVT_SCALAR;
-    } else {
-        return this->giveCrossSection()->giveIPValueType( type, this->giveMaterial() );
-    }
-}
-
-
 int
 Element :: giveSpatialDimension()
 {
