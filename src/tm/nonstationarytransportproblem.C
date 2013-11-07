@@ -704,7 +704,7 @@ NonStationaryTransportProblem :: applyIC(TimeStep *stepWhenIcApply)
         CemhydMat *cem = dynamic_cast< CemhydMat * >( element->giveMaterial() );
         //assign status to each integration point on each element
         if ( cem ) {
-            element->giveMaterial()->initMaterial(element); //create microstructures and statuses on specific GPs
+            cem->initMaterial(element); //create microstructures and statuses on specific GPs
             element->updateInternalState(stepWhenIcApply);   //store temporary unequilibrated temperature
             element->updateYourself(stepWhenIcApply);   //store equilibrated temperature
             cem->clearWeightTemperatureProductVolume(element);
