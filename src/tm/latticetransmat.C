@@ -256,9 +256,7 @@ LatticeTransportMaterial :: CreateStatus(GaussPoint *gp) const
 MaterialStatus *
 LatticeTransportMaterial :: giveStatus(GaussPoint *gp) const
 {
-    MaterialStatus *status;
-
-    status = ( MaterialStatus * ) gp->giveMaterialStatus( this->giveNumber() );
+    MaterialStatus *status = ( MaterialStatus * ) gp->giveMaterialStatus();
     if ( status == NULL ) {
         status = this->CreateStatus(gp);
 

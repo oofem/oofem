@@ -328,7 +328,7 @@ LatticeDamage2d :: CreateStatus(GaussPoint *gp) const
 MaterialStatus *
 LatticeDamage2d :: giveStatus(GaussPoint *gp) const
 {
-    MaterialStatus *status = static_cast< MaterialStatus * >( gp->giveMaterialStatus( this->giveNumber() ) );
+    MaterialStatus *status = static_cast< MaterialStatus * >( gp->giveMaterialStatus() );
     if ( status == NULL ) {
         // create a new one
         status = this->CreateStatus(gp);
