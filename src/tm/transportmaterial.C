@@ -67,9 +67,8 @@ TransportMaterial :: updateInternalState(const FloatArray &stateVec, GaussPoint 
 
 
 TransportMaterialStatus :: TransportMaterialStatus(int n, Domain *d, GaussPoint *g) :
-    MaterialStatus(n, d, g), stateVector(), tempStateVector()
+    MaterialStatus(n, d, g), temp_field(), temp_gradient(), temp_flux(), field(), gradient(), flux(), maturity(0.)
 {
-    maturity = 0.;
 }
 
 void TransportMaterialStatus :: printOutputAt(FILE *File, TimeStep *tNow)
@@ -82,8 +81,8 @@ void TransportMaterialStatus :: printOutputAt(FILE *File, TimeStep *tNow)
 
     fprintf(File, "  state");
 
-    for ( int i = 1; i <= stateVector.giveSize(); i++ ) {
-        fprintf( File, " % .4e", stateVector.at(i) );
+    for ( int i = 1; i <= field.giveSize(); i++ ) {
+        fprintf( File, " % .4e", field.at(i) );
     }
 
     transpElem->computeFlow(flowVec, gp, tNow);
@@ -105,7 +104,6 @@ TransportMaterialStatus :: updateYourself(TimeStep *tStep)
     gradient = temp_gradient;
     field = temp_field;
     flux = temp_flux;
-    stateVector = tempStateVector;
 }
 
 
@@ -119,7 +117,6 @@ TransportMaterialStatus :: initTempStatus()
     temp_gradient = gradient;
     temp_field = field;
     temp_flux = flux;
-    tempStateVector = stateVector;
 }
 
 
@@ -147,10 +144,6 @@ TransportMaterialStatus :: saveContext(DataStream *stream, ContextMode mode, voi
     }
 
     if ( ( iores = flux.storeYourself(stream, mode) ) != CIO_OK ) {
-        THROW_CIOERR(iores);
-    }
-
-    if ( ( iores = stateVector.storeYourself(stream, mode) ) != CIO_OK ) {
         THROW_CIOERR(iores);
     }
 
@@ -183,9 +176,6 @@ TransportMaterialStatus :: restoreContext(DataStream *stream, ContextMode mode, 
     if ( ( iores = flux.restoreYourself(stream, mode) ) != CIO_OK ) {
         THROW_CIOERR(iores);
     }
-    if ( ( iores = stateVector.restoreYourself(stream, mode) ) != CIO_OK ) {
-        THROW_CIOERR(iores);
-    }
 
     return CIO_OK;
 }
@@ -197,7 +187,7 @@ TransportMaterial :: giveIPValue(FloatArray &answer, GaussPoint *aGaussPoint, In
 {
     TransportMaterialStatus *ms = static_cast< TransportMaterialStatus * >( this->giveStatus(aGaussPoint) );
     if ( type == IST_Temperature || type == IST_MassConcentration_1 || type == IST_Humidity ) {
-        FloatArray vec = ms->giveStateVector();
+        FloatArray vec = ms->giveField();
         answer.resize(1);
         answer.at(1) = vec.at( ( type == IST_Temperature ) ? 1 : 2 );
         return 1;

@@ -121,6 +121,7 @@ set (sm_material
     lsmastermat.C lsmastermatgrad.C
     intmatbilinczfagerstrom.C
 	intmatbilinczjansson.C
+    intmatbilinearcz.C
 	intmatbilinczelastic.C
     )
 

@@ -76,7 +76,6 @@ public:
     /// Return true if hydration heat source is present.
     virtual int hasInternalSource() { return 1; };
     virtual void computeInternalSourceVector(FloatArray &val, GaussPoint *gp, TimeStep *atTime, ValueModeType mode);
-    virtual void updateInternalState(const FloatArray &state, GaussPoint *gp, TimeStep *tStep);
 
     virtual double giveCharacteristicValue(MatResponseMode mode,
                                            GaussPoint *gp,

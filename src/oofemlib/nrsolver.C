@@ -44,6 +44,7 @@
 #include "loadtimefunction.h"
 #include "linesearch.h"
 #include "classfactory.h"
+#include "exportmodulemanager.h"
 
 #ifdef __PETSC_MODULE
  #include "petscsolver.h"
@@ -300,8 +301,10 @@ NRSolver :: solve(SparseMtrx *k, FloatArray *R, FloatArray *R0,
         X->add(ddX);
         dX->add(ddX);
         tNow->incrementStateCounter(); // update solution state counter
-
+	tNow->incrementSubstepNumber();
         nite++; // iteration increment
+    
+        engngModel->giveExportModuleManager()->doOutput(tNow, true);
     } while ( true ); // end of iteration
 
     status |= NM_Success;

@@ -14,7 +14,9 @@ def printRVE(rveSampleNumber, rveSize, rvePosition):
     print('%d inclusions in RVE'%len(rveInclusions))
 
     n = nelem*2 + 1;
-    X, Y, Z = mgrid[0:rveSize:n*1j, 0:rveSize:n*1j, 0:rveSize:n*1j ]
+    X, Y, Z = mgrid[rvePosition[0]:(rvePosition[0]+rveSize):n*1j,
+                    rvePosition[1]:(rvePosition[1]+rveSize):n*1j,
+                    rvePosition[2]:(rvePosition[2]+rveSize):n*1j ]
 
     # Convenient numbering of nodes (keeping track of all 27 nodes for the fixed grid is almost impossible otherwise).
     nX, nY, nZ = mgrid[0:n, 0:n, 0:n ].astype(int)
@@ -116,12 +118,12 @@ def printRVE(rveSampleNumber, rveSize, rvePosition):
     print('NewtonianFluid 2 d 1 mu 5', file=f)
     #print('IsoLE 1 d 1 E 1 n 0.45 talpha 0', file=f)
     #print('IsoLE 2 d 1 E 5 n 0.45 talpha 0', file=f)
-    print('BoundaryCondition 1 d 0.0 loadTimeFunction 1 dofs 6 1 2 3 7 8 9 set 0', file=f)
-    print('BoundaryCondition 2 d 1.0 loadTimeFunction 1 dofs 6 1 2 3 7 8 9 set 0', file=f)
-    print('DeadWeight 3 loadTimeFunction 1 components 3 0 0 -1 set 0', file=f)
-    #print('MixedGradientPressureNeumann 4 loadTimeFunction 1 set 1 devgradient 6 0 0 0 1 1 1 pressure 0', file=f)
-    print('MixedGradientPressureDirichlet 4 loadTimeFunction 1 set 1 dofs 6 1 2 3 7 8 9 devgradient 6 0 0 0 1 1 1 pressure 0', file=f)
-    #print('PrescribedGradient 4 loadTimeFunction 1 set 1 dofs 6 1 2 3 7 8 9 gradient 3 3 {0 0 1; 0 0 0; 1 0 0}', file=f)
+    #print('MixedGradientPressureNeumann 1 loadTimeFunction 1 set 1 devgradient 6 0 0 0 1 1 1 pressure 0', file=f)
+    print('MixedGradientPressureDirichlet 1 loadTimeFunction 1 set 1 dofs 6 1 2 3 7 8 9 devgradient 6 0 0 0 1 1 1 pressure 0', file=f)
+    #print('PrescribedGradient 1 loadTimeFunction 1 set 1 dofs 6 1 2 3 7 8 9 gradient 3 3 {0 0 1; 0 0 0; 1 0 0}', file=f)
+    print('BoundaryCondition 2 d 0.0 loadTimeFunction 1 dofs 6 1 2 3 7 8 9 set 0', file=f)
+    print('BoundaryCondition 3 d 1.0 loadTimeFunction 1 dofs 6 1 2 3 7 8 9 set 0', file=f)
+    print('DeadWeight 4 loadTimeFunction 1 components 3 0 0 -1 set 0', file=f)
     print('ConstantFunction 1 f(t) 1.0', file=f)
     print('Set 1 elementboundaries', 2*6*nelem*nelem, end=' ', file=f)
 
@@ -197,7 +199,7 @@ inclusions = rveToolbox.generateSphericalInclusions(density, boxSize, averageRad
 
 
 totalSamples = 10
-rveSize = 3
+rveSize = 1
 
 for rveSampleNumber in range(totalSamples):
     print('Generating RVE %d'%rveSampleNumber)

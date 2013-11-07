@@ -142,6 +142,8 @@ public:
     
     virtual MaterialStatus *CreateStatus(GaussPoint *gp) const { return new IntMatBilinearCZElasticStatus(1, domain, gp); }
     void printYourself();
+    virtual bool hasAnalyticalTangentStiffness() const {return true;};
+
 protected:
    
 };

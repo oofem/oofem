@@ -30,8 +30,6 @@
 #include "dynamicinputrecord.h"
 #include "bodyload.h"
 
-//#include "classfactory.h"
-
 #include <vector>
 
 namespace oofem {

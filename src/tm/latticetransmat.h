@@ -75,7 +75,7 @@ public:
     void printOutputAt(FILE *, TimeStep *);
 
     /// Returns pressure
-    double givePressure() { return stateVector.at(1); }
+    double givePressure() { return field.at(1); }
 
     /// Sets the mass
     void setMass(double input) { this->mass = input; }
@@ -151,20 +151,18 @@ public:
 
     /**
      * Computes the conductivity.
-     * @param stateVector Capillary stress
+     * @param suction Capillary stress
      * @param gp Integration point.
      * @param stepN Time step.
      */
-
-    double computeConductivity(FloatArray &stateVector, GaussPoint *gp, TimeStep *stepN);
+    double computeConductivity(double suction, GaussPoint *gp, TimeStep *stepN);
 
     /**
      * Computes the capacity.
-     * @param stateVector Capillary stress
+     * @param suction Capillary stress
      * @param gp Integration point.
      */
-
-    double computeCapacity(FloatArray &stateVector, GaussPoint *gp);
+    double computeCapacity(double suction, GaussPoint *gp);
 
     /**
      * Computes the mass.

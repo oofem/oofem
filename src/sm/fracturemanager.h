@@ -43,21 +43,16 @@
 #include "contextmode.h"
 #include "timestep.h"
 #include "interface.h"
+#include "enumitem.h"
 
 namespace oofem {
 class Domain;
 class IntArray;
 class Element;
-
 class FractureManager;
 class FailureCriteria;
 class FailureCriteriaStatus;
-/**
- * This class manages the fracture mechanics part
- *
- * @author Jim Brouzoulis
- */
-#include "enumitem.h"
+
 
 ///@name Input fields for FractureManager
 //@{
@@ -82,7 +77,9 @@ enum FailureCriteriaType {
 };
 
 
-
+#undef ENUM_ITEM
+#undef ENUM_ITEM_WITH_VALUE
+#undef enumitem_h
 
 
 class FailureCriteriaStatus
@@ -104,13 +101,13 @@ public:
     { 
         this->number = number;
         this->failCrit = failCrit;
-    };
+    }
 
     FailureCriteriaStatus(Element *el, FailureCriteria *failCrit)
     { 
         this->el = el;
         this->failCrit = failCrit;
-    };
+    }
 
     FailureCriteriaStatus(){};
     ~FailureCriteriaStatus(){}; // must destroy object correctly
@@ -143,8 +140,8 @@ private:
     FailureCriteriaType type;       // local, nonlocal 
     FractureManager *fMan;          // pointer to its corresponding manager
     int number;
-public:
 
+public:
     FailureCriteria(int number, FractureManager *fMan)
         {
             this->number = number;
@@ -215,7 +212,11 @@ public:
 
 
 
-
+/**
+ * This class manages the fracture mechanics part
+ *
+ * @author Jim Brouzoulis
+ */
 class FractureManager
 {
 private:
@@ -242,7 +243,6 @@ public:
     
     IRResultType initializeFrom(InputRecord *ir);
     int instanciateYourself(DataReader *dr);
-    virtual classType giveClassID() const { return FractureManagerClass; }
     const char *giveClassName() const { return "FractureManager"; }
     const char *giveInputRecordName() const { return "FractureManager"; }
     void clear();

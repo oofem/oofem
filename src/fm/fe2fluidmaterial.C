@@ -389,7 +389,10 @@ void FE2FluidMaterialStatus :: markOldTangents() { this->oldTangents = true; }
 
 void FE2FluidMaterialStatus :: computeTangents(TimeStep *tStep)
 {
-    if ( this->oldTangents ) { ///@todo Consider tStep
+    if ( !tStep->isTheCurrentTimeStep() ) {
+        OOFEM_ERROR("FE2FluidMaterialStatus :: computeTangents - Only current timestep supported.\n");
+    }
+    if ( this->oldTangents ) {
         bc->computeTangents(this->giveDeviatoricTangent(),
                     this->giveDeviatoricPressureTangent(),
                     this->giveVolumetricDeviatoricTangent(),
@@ -407,16 +410,16 @@ double FE2FluidMaterial :: giveEffectiveViscosity(GaussPoint *gp, TimeStep *tSte
     // Project against the normalized I_dev
     double v;
     if ( gp->giveMaterialMode() == _3dFlow ) {
-        v = (t.at(1,1)*2. + t.at(1,2) + t.at(1,3))/3. + 
-            (t.at(2,1) + t.at(2,2)*2. + t.at(2,3))/3. + 
-            (t.at(3,1) + t.at(3,2) + t.at(2,3)*2.)/3. + 
-            t.at(4,4) + t.at(5,5) + t.at(6,6);
-        v /= 5.;
+        v = ( t.at(1,1)*2. - t.at(1,2)    - t.at(1,3))/3. + 
+            (-t.at(2,1)    + t.at(2,2)*2. - t.at(2,3))/3. + 
+            (-t.at(3,1)    - t.at(3,2)    + t.at(3,3)*2.)/3. + 
+            4.* (t.at(4,4) + t.at(5,5) + t.at(6,6));
+        v /= 16.;
     } else {
-        v = (t.at(1,1)*2. + t.at(1,2))/3. + 
-            (t.at(2,1) + t.at(2,2)*2.)/3. + 
-            t.at(3,3);
-        v *= 19./9.;
+        v = ( t.at(1,1)*2. - t.at(1,2))/3. + 
+            (-t.at(2,1)    + t.at(2,2)*2.)/3. + 
+            4.* t.at(3,3);
+        v *= 9. / 56.;
     }
     return v;
 }

@@ -196,7 +196,7 @@ HydratingIsoHeatMaterial :: giveCharacteristicValue(MatResponseMode rmode, Gauss
     } else if ( !hydrationLHS ) {
         answer = 0;
     } else if ( hydrationModel ) { //!!! better via HydrationModelInterface
-        vec = static_cast< TransportMaterialStatus * >( giveStatus(gp) )->giveTempStateVector();
+        vec = static_cast< TransportMaterialStatus * >( giveStatus(gp) )->giveTempField();
         if ( vec.giveSize() < 2 ) {
             vec.resize(2);
             vec.at(2) = 1.; // saturated if undefined

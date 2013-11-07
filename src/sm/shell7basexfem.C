@@ -1104,7 +1104,7 @@ Shell7BaseXFEM :: computeEdgeLoadVectorAt(FloatArray &answer, Load *load, int iE
 
         // Continuous part
         FloatArray fT;
-        this->computeTractionForce(fT, iEdge, edgeLoad, tStep);
+        this->computeTractionForce(fT, iEdge, edgeLoad, tStep, mode);
 
         IntArray activeDofs, ordering; 
         this->computeOrderingArray(ordering, activeDofs, NULL); 
@@ -1126,7 +1126,7 @@ Shell7BaseXFEM :: computeEdgeLoadVectorAt(FloatArray &answer, Load *load, int iE
             if ( dei != NULL && dei->isElementEnriched(this) ) {
                 double xi0 = dei->giveDelamXiCoord();
                 if ( xi > xi0 ) {
-                    this->computeTractionForce(temp, iEdge, edgeLoad, tStep);
+                    this->computeTractionForce(temp, iEdge, edgeLoad, tStep, mode);
                     // Assemble
                     this->computeOrderingArray(ordering, activeDofs, dei); 
                     tempRed.beSubArrayOf(temp, activeDofs);
@@ -1156,7 +1156,7 @@ Shell7BaseXFEM :: computeSurfaceLoadVectorAt(FloatArray &answer, Load *load,
         // Continuous part
         FloatArray solVec, force;
         this->giveUpdatedSolutionVector(solVec, tStep);
-        this->computePressureForce(force, solVec, iSurf, surfLoad, tStep);
+        this->computePressureForce(force, solVec, iSurf, surfLoad, tStep, mode);
 
         IntArray activeDofs, ordering, eiDofIdArray;
         this->computeOrderingArray(ordering, activeDofs, NULL); 
@@ -1180,7 +1180,7 @@ Shell7BaseXFEM :: computeSurfaceLoadVectorAt(FloatArray &answer, Load *load,
                 if ( ef[0] > 0.1 ) {
                    dei->giveEIDofIdArray(eiDofIdArray); 
                    this->giveSolutionVector(solVecD, eiDofIdArray, tStep);  
-                   this->computePressureForce(temp, solVecD, iSurf, surfLoad, tStep);
+                   this->computePressureForce(temp, solVecD, iSurf, surfLoad, tStep, mode);
                    // Assemble
                    this->computeOrderingArray(ordering, activeDofs, dei);
                    tempRed.beSubArrayOf(temp, activeDofs);

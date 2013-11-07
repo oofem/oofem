@@ -1411,7 +1411,7 @@ Shell7Base :: computeEdgeLoadVectorAt(FloatArray &answer, Load *load, int iEdge,
 {
     BoundaryLoad *edgeLoad = dynamic_cast< BoundaryLoad * >( load );
     if ( edgeLoad ) {
-        this->computeTractionForce(answer, iEdge, edgeLoad, tStep);
+        this->computeTractionForce(answer, iEdge, edgeLoad, tStep, mode);
         return;
     } else {
         _error("Shell7Base :: computeEdgeLoadVectorAt: load type not supported");
@@ -1429,7 +1429,7 @@ Shell7Base :: computeSurfaceLoadVectorAt(FloatArray &answer, Load *load,
     if ( surfLoad ) {
         FloatArray solVec, force;
         this->giveUpdatedSolutionVector(solVec, tStep);
-        this->computePressureForce(force, solVec, iSurf, surfLoad, tStep);
+        this->computePressureForce(force, solVec, iSurf, surfLoad, tStep, mode);
         IntArray mask;
         this->giveSurfaceDofMapping(mask, 1);         // same dofs regardless of iSurf->1
         answer.resize( this->computeNumberOfDofs() );
@@ -1444,7 +1444,7 @@ Shell7Base :: computeSurfaceLoadVectorAt(FloatArray &answer, Load *load,
 }
 
 void
-Shell7Base :: computePressureForce(FloatArray &answer, FloatArray solVec, const int iSurf, BoundaryLoad *surfLoad, TimeStep *tStep)
+Shell7Base :: computePressureForce(FloatArray &answer, FloatArray solVec, const int iSurf, BoundaryLoad *surfLoad, TimeStep *tStep, ValueModeType mode)
 {
     // Computes pressure loading. Acts normal to the current (deformed) surface.
     ConstantPressureLoad* pLoad = dynamic_cast< ConstantPressureLoad * >( surfLoad );
@@ -1462,7 +1462,7 @@ Shell7Base :: computePressureForce(FloatArray &answer, FloatArray solVec, const 
         this->computeNmatrixAt(lCoords, N);
         this->giveUpdatedSolutionVector(solVecC, tStep);
         genEpsC.beProductOf(B, solVecC);       
-        this->computePressureForceAt(ip, traction, iSurf, genEpsC, surfLoad, tStep);
+        this->computePressureForceAt(ip, traction, iSurf, genEpsC, surfLoad, tStep, mode);
       
         genEps.beProductOf(B, solVec);
         this->computeLambdaNMatrix(lambda, genEps, zeta);
@@ -1480,7 +1480,7 @@ Shell7Base :: computePressureForce(FloatArray &answer, FloatArray solVec, const 
 
 
 void
-Shell7Base :: computePressureForceAt(GaussPoint *gp, FloatArray &traction, const int iSurf, FloatArray genEps, BoundaryLoad *surfLoad, TimeStep *tStep)
+Shell7Base :: computePressureForceAt(GaussPoint *gp, FloatArray &traction, const int iSurf, FloatArray genEps, BoundaryLoad *surfLoad, TimeStep *tStep, ValueModeType mode)
 {
     // Computes pressure loading. Acts normal to the current (deformed) surface.
     //@todo traction load should be moved outside this method
@@ -1500,11 +1500,11 @@ Shell7Base :: computePressureForceAt(GaussPoint *gp, FloatArray &traction, const
         this->evalCovarBaseVectorsAt(lcoords, gcov, genEps); 
         g1.beColumnOf(gcov,1);
         g2.beColumnOf(gcov,2);
-        surfLoad->computeValueAt(load, tStep, lcoords, VM_Total);        // pressure component
+        surfLoad->computeValueAt(load, tStep, lcoords, mode);        // pressure component
         traction.beVectorProductOf(g1, g2);        // normal vector (should not be normalized due to integraton in reference config.)
         traction.times( -load.at(1) );
     } else if ( dynamic_cast< ConstantSurfaceLoad * >( surfLoad ) ) {
-        surfLoad->computeValueAt(traction, tStep, * ( gp->giveCoordinates() ), VM_Total);        // traction vector
+        surfLoad->computeValueAt(traction, tStep, * ( gp->giveCoordinates() ), mode);        // traction vector
     } else {
         _error("computePressureForceAt: incompatible load type");
     }
@@ -1536,7 +1536,7 @@ Shell7Base :: evalInitialCovarNormalAt(FloatArray &nCov, FloatArray &lCoords)
 }
 
 void
-Shell7Base :: computeTractionForce(FloatArray &answer, const int iEdge, BoundaryLoad *edgeLoad, TimeStep *tStep)
+Shell7Base :: computeTractionForce(FloatArray &answer, const int iEdge, BoundaryLoad *edgeLoad, TimeStep *tStep, ValueModeType mode)
 {
     // 
     IntegrationRule *iRule = specialIntegrationRulesArray [ 2 ];   // rule #3 for edge integration of distributed loads given in [*/m]
@@ -1554,7 +1554,7 @@ Shell7Base :: computeTractionForce(FloatArray &answer, const int iEdge, Boundary
         gp = iRule->getIntegrationPoint(i);
         lcoords = * gp->giveCoordinates();
 
-        edgeLoad->computeValueAt(components, tStep, lcoords, VM_Total);
+        edgeLoad->computeValueAt(components, tStep, lcoords, mode);
         FloatArray lCoords =*gp->giveCoordinates();
         this->edgeComputeNmatrixAt(lCoords, N);
 

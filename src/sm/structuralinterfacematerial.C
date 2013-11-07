@@ -67,11 +67,7 @@ StructuralInterfaceMaterial :: giveIPValue(FloatArray &answer, GaussPoint *gp, I
 IRResultType
 StructuralInterfaceMaterial :: initializeFrom(InputRecord *ir)
 {
-    const char *__proc = "initializeFrom"; // Required by IR_GIVE_FIELD macro
-    IRResultType result;                   // Required by IR_GIVE_FIELD macro
-
-    this->Material :: initializeFrom(ir);
-    return IRRT_OK;
+	return this->Material :: initializeFrom(ir);
 }
 
 

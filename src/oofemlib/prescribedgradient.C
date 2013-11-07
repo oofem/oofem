@@ -257,14 +257,14 @@ void PrescribedGradient :: computeTangent(FloatMatrix &tangent, EquationID eid, 
     if ( !Kff ) {
         OOFEM_ERROR2("MixedGradientPressureBC :: computeTangents - Couldn't create sparse matrix of type %d\n", stype);
     }
-    Kff->buildInternalStructure( rve, 1, eid, fnum, fnum );
+    Kff->buildInternalStructure( rve, 1, eid, fnum );
     Kfp->buildInternalStructure( rve, 1, eid, fnum, pnum );
     Kpf->buildInternalStructure( rve, 1, eid, pnum, fnum );
-    Kpp->buildInternalStructure( rve, 1, eid, pnum, pnum );
-    rve->assemble(Kff, tStep, eid, StiffnessMatrix, fnum, fnum, this->domain );
+    Kpp->buildInternalStructure( rve, 1, eid, pnum );
+    rve->assemble(Kff, tStep, eid, StiffnessMatrix, fnum, this->domain );
     rve->assemble(Kfp, tStep, eid, StiffnessMatrix, fnum, pnum, this->domain );
     rve->assemble(Kpf, tStep, eid, StiffnessMatrix, pnum, fnum, this->domain );
-    rve->assemble(Kpp, tStep, eid, StiffnessMatrix, pnum, pnum, this->domain );
+    rve->assemble(Kpp, tStep, eid, StiffnessMatrix, pnum, this->domain );
 
     FloatMatrix C, X, Kpfa, KfpC, a;
     

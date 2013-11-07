@@ -858,7 +858,6 @@ void EngngModel :: assemble(SparseMtrx *answer, TimeStep *tStep, EquationID eid,
 {
     IntArray loc;
     FloatMatrix mat, R;
-    Element *element;
 
     if ( answer == NULL ) {
         _error("assemble: NULL pointer encountered.");
@@ -867,10 +866,10 @@ void EngngModel :: assemble(SparseMtrx *answer, TimeStep *tStep, EquationID eid,
     this->timer.resumeTimer(EngngModelTimer :: EMTT_NetComputationalStepTimer);
     int nelem = domain->giveNumberOfElements();
 #ifdef _OPENMP
- #pragma omp parallel for private(element, mat, R, loc)
+ #pragma omp parallel for shared(answer) private(mat, R, loc)
 #endif
     for ( int ielem = 1; ielem <= nelem; ielem++ ) {
-        element = domain->giveElement(ielem);
+        Element *element = domain->giveElement(ielem);
 #ifdef __PARALLEL_MODE
         // skip remote elements (these are used as mirrors of remote elements on other domains
         // when nonlocal constitutive models are used. They introduction is necessary to
@@ -923,7 +922,6 @@ void EngngModel :: assemble(SparseMtrx *answer, TimeStep *tStep, EquationID eid,
 {
     IntArray r_loc, c_loc, dofids(0);
     FloatMatrix mat, R;
-    Element *element;
     if ( answer == NULL ) {
         OOFEM_ERROR("EngngModel :: assemble: NULL pointer encountered.");
     }
@@ -931,10 +929,10 @@ void EngngModel :: assemble(SparseMtrx *answer, TimeStep *tStep, EquationID eid,
     this->timer.resumeTimer(EngngModelTimer :: EMTT_NetComputationalStepTimer);
     int nelem = domain->giveNumberOfElements();
 #ifdef _OPENMP
- #pragma omp parallel for private(element, mat, R, r_loc, c_loc)
+ #pragma omp parallel for shared(answer) private(mat, R, r_loc, c_loc)
 #endif
     for ( int ielem = 1; ielem <= nelem; ielem++ ) {
-        element = domain->giveElement(ielem);
+        Element *element = domain->giveElement(ielem);
 #ifdef __PARALLEL_MODE
         if ( element->giveParallelMode() == Element_remote ) {
             continue;
@@ -1033,7 +1031,7 @@ void EngngModel :: assembleVectorFromDofManagers(FloatArray &answer, TimeStep *t
     this->timer.resumeTimer(EngngModelTimer :: EMTT_NetComputationalStepTimer);
     // Note! For normal master dofs, loc is unique to each node, but there can be slave dofs, so we must keep it shared, unfortunately.
 #ifdef _OPENMP
- #pragma omp parallel for shared(answer, eNorms) private(node, R, charVec, loc, dofids)
+ #pragma omp parallel for shared(answer, eNorms) private(R, charVec, loc, dofids)
 #endif
     for ( int i = 1; i <= nnode; i++ ) {
         DofManager *node = domain->giveDofManager(i);
@@ -1048,11 +1046,15 @@ void EngngModel :: assembleVectorFromDofManagers(FloatArray &answer, TimeStep *t
             if ( node->computeM2LTransformation(R, dofIDarry) ) charVec.rotatedWith(R, 't');
 
             node->giveCompleteLocationArray(loc, s);
-            answer.assemble(charVec, loc);
-
-            if ( eNorms ) {
-                node->giveCompleteMasterDofIDArray(dofids);
-                eNorms->assembleSquared(charVec, dofids);
+#ifdef _OPENMP
+ #pragma omp critical
+#endif
+            {
+                answer.assemble(charVec, loc);
+                if ( eNorms ) {
+                    node->giveCompleteMasterDofIDArray(dofids);
+                    eNorms->assembleSquared(charVec, dofids);
+                }
             }
         }
     }
@@ -1178,7 +1180,7 @@ void EngngModel :: assembleVectorFromElements(FloatArray &answer, TimeStep *tSte
     this->timer.resumeTimer(EngngModelTimer :: EMTT_NetComputationalStepTimer);
     ///@todo Consider using private answer variables and sum them up at the end, but it just might be slower then a shared variable.
 #ifdef _OPENMP
- #pragma omp parallel for shared(answer, eNorms) private(element, R, charVec, loc, dofids) reduction(+:norm)
+ #pragma omp parallel for shared(answer, eNorms) private(R, charVec, loc, dofids)
 #endif
     for ( int i = 1; i <= nelem; i++ ) {
         Element *element = domain->giveElement(i);
@@ -1198,11 +1200,15 @@ void EngngModel :: assembleVectorFromElements(FloatArray &answer, TimeStep *tSte
         this->giveElementCharacteristicVector(charVec, i, type, mode, tStep, domain);
         if ( charVec.isNotEmpty() ) {
             if ( element->giveRotationMatrix(R, eid) ) charVec.rotatedWith(R, 't');
-
             element->giveLocationArray(loc, eid, s, &dofids);
-            answer.assemble(charVec, loc);
 
-            if ( eNorms ) eNorms->assembleSquared(charVec, dofids);
+#ifdef _OPENMP
+ #pragma omp critical
+#endif
+            {
+                answer.assemble(charVec, loc);
+                if ( eNorms ) eNorms->assembleSquared(charVec, dofids);
+            }
         }
     }
 

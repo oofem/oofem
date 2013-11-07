@@ -256,7 +256,7 @@ public:
     //@{
     /**
      * Computes characteristic matrix of receiver of requested type in given time step.
-     * @param answer Requested characteristic matrix.
+     * @param answer Requested characteristic matrix (stiffness, tangent, ...).
      * If element has no capability to compute requested type of characteristic matrix
      * error function is invoked.
      * @param type   Id of characteristic component requested.

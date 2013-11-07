@@ -1269,6 +1269,14 @@ StructuralElement :: condense(FloatMatrix *stiff, FloatMatrix *mass, FloatArray 
 int
 StructuralElement :: giveIPValue(FloatArray &answer, GaussPoint *aGaussPoint, InternalStateType type, TimeStep *atTime)
 {
+    if ( type == IST_DisplacementVector ) {
+        FloatArray u;
+        FloatMatrix N;
+        this->computeVectorOf(EID_MomentumBalance, VM_Total, atTime, u);
+        this->computeNmatrixAt(aGaussPoint, N);
+        answer.beProductOf(N, u);
+        return 1;
+    }
     return Element :: giveIPValue(answer, aGaussPoint, type, atTime);
 }
 
@@ -1389,8 +1397,7 @@ StructuralCrossSection *StructuralElement::giveStructuralCrossSection()
 
 //
 int
-StructuralElement :: giveInternalStateAtNode(FloatArray &answer, InternalStateType type, InternalStateMode mode,
-                                             int node, TimeStep *atTime)
+StructuralElement :: giveInternalStateAtNode(FloatArray &answer, InternalStateType type, InternalStateMode mode, int node, TimeStep *atTime)
 {
     if ( type == IST_DisplacementVector ) {
         Node *n = this->giveNode(node);
