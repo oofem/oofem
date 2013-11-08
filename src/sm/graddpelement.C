@@ -284,15 +284,13 @@ GradDpElement :: giveLocalInternalForcesVector(FloatArray &answer, TimeStep *tSt
     FloatMatrix B;
     for ( int i = 0; i < iRule->giveNumberOfIntegrationPoints(); i++ ) {
         GaussPoint *gp = iRule->getIntegrationPoint(i);
-        Material *mat  = gp->giveMaterial();
 
         if ( nlGeo == 0 || elem->domain->giveEngngModel()->giveFormulation() == AL ) {
             elem->computeBmatrixAt(gp, B);
         } else if ( nlGeo == 1 ) {
             elem->computeBHmatrixAt(gp, B);
         }
-
-        vStress = static_cast< StructuralMaterialStatus * >( mat->giveStatus(gp) )->giveTempStressVector();
+        vStress = static_cast< StructuralMaterialStatus * >( gp->giveMaterialStatus() )->giveTempStressVector();
 
         if ( vStress.giveSize() == 0 ) {         /// @todo is this check really necessary?
             break;

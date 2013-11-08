@@ -69,16 +69,6 @@ Shell7BaseXFEM :: postInitialize()
     this->xMan =  this->giveDomain()->giveXfemManager();
     LayeredCrossSection *layeredCS = this->layeredCS = dynamic_cast< LayeredCrossSection * >(this->giveCrossSection());
 
-    // CZ material
-    // If defined on element level use that for backward compatability - should be remove in later versions
-    //if ( this->czMatNum > 0 ) {
-    //    this->czMat = this->giveDomain()->giveMaterial(this->czMatNum);
-    //}
-    // If defined in cross section use that instead
-    //if ( layeredCS->giveCZMaterialNumber() > 0 ) {
-    //    this->czMat = this->giveDomain()->giveMaterial( layeredCS->giveCZMaterialNumber() );
-    //}
-
 }
 
 void

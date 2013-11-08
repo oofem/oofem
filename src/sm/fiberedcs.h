@@ -130,7 +130,11 @@ public:
     virtual void giveMembraneRotStiffMtrx(FloatMatrix &answer, MatResponseMode rMode, GaussPoint *gp, TimeStep *tStep);
 
     virtual bool isCharacteristicMtrxSymmetric(MatResponseMode rMode);
-
+    virtual double give(int aProperty, GaussPoint *gp) 
+        {
+            OOFEM_ERROR1("FiberedCrossSection :: give - not implemented yet");
+            return 0.0;
+        };
     virtual FloatArray *imposeStressConstrainsOnGradient(GaussPoint *gp, FloatArray *gradientStressVector3d);
     virtual FloatArray *imposeStrainConstrainsOnGradient(GaussPoint *gp, FloatArray *gradientStrainVector3d);
 

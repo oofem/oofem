@@ -344,10 +344,10 @@ public:
     virtual void computeConstitutiveMatrixAt(FloatMatrix &answer,
                                              MatResponseMode rMode, GaussPoint *gp,
                                              TimeStep *tStep);
-
-protected:
     /// Helper function which returns the structural cross-section for the element.
     StructuralCrossSection *giveStructuralCrossSection();
+protected:
+
 
     /**
      * Computes the load vector due to body load acting on receiver, at given time step.

@@ -286,7 +286,7 @@ TR1_2D_CBS :: computeDiffusionTermsI(FloatArray &answer, TimeStep *tStep)
     FloatArray gVector;
     double ar3 = area / 3.0;
 
-    stress = static_cast< FluidDynamicMaterialStatus * >( mat->giveStatus(gp) )->giveDeviatoricStressVector();
+    stress = static_cast< FluidDynamicMaterialStatus * >( gp->giveMaterialStatus() )->giveDeviatoricStressVector();
     stress.times(1. / Re);
 
     // \int dNu/dxj \Tau_ij

@@ -288,6 +288,14 @@ public:
     virtual bool StructuralCrossSection :: isCharacteristicMtrxSymmetric(MatResponseMode rMode);
     virtual bool StructuralCrossSection :: isCharacteristicMtrxSymmetric(MatResponseMode rMode, int mat);
 
+    virtual double give(int aProperty, GaussPoint *gp) = 0; 
+
+    virtual double give(CrossSectionProperty aProperty) = 0;
+    /*{ 
+        OOFEM_ERROR1("StructuralCrossSection :: give - not supported");
+        return 0.0;
+    }*/
+
 private:
     int materialNumber;   // material number
 

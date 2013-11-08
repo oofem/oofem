@@ -35,7 +35,7 @@
 #include "libeam3dnl.h"
 #include "node.h"
 #include "material.h"
-#include "crosssection.h"
+#include "structuralcrosssection.h"
 #include "gausspoint.h"
 #include "gaussintegrationrule.h"
 #include "structuralms.h"
@@ -199,7 +199,6 @@ LIBeam3dNL :: computeXMtrx(FloatMatrix &answer, TimeStep *tStep)
 void
 LIBeam3dNL :: giveInternalForcesVector(FloatArray &answer, TimeStep *tStep, int useUpdatedGpRecord)
 {
-    Material *mat = this->giveMaterial();
     IntegrationRule *iRule = integrationRulesArray [ giveDefaultIntegrationRule() ];
     GaussPoint *gp = iRule->getIntegrationPoint(0);
     FloatArray nm(6), stress, strain;
@@ -210,7 +209,7 @@ LIBeam3dNL :: giveInternalForcesVector(FloatArray &answer, TimeStep *tStep, int 
     this->updateTempTriad(tStep);
 
     if ( useUpdatedGpRecord == 1 ) {
-        stress = static_cast< StructuralMaterialStatus * >( mat->giveStatus(gp) )->giveStressVector();
+        stress = static_cast< StructuralMaterialStatus * >( gp->giveMaterialStatus() )->giveStrainVector();
     } else {
         this->computeStrainVector(strain, gp, tStep);
         this->computeStressVector(stress, strain, gp, tStep);
@@ -409,12 +408,9 @@ LIBeam3dNL :: computeLumpedMassMatrix(FloatMatrix &answer, TimeStep *tStep)
 // Returns the lumped mass matrix of the receiver. This expression is
 // valid in both local and global axes.
 {
-    Material *mat;
-    double halfMass;
     GaussPoint *gp = integrationRulesArray [ 0 ]->getIntegrationPoint(0);
-
-    mat        = this->giveMaterial();
-    halfMass   = mat->give('d', gp) * this->giveCrossSection()->give(CS_Area) * this->giveLength() / 2.;
+    double density = this->giveStructuralCrossSection()->give('d', gp);
+    double halfMass   = density * this->giveCrossSection()->give(CS_Area) * this->giveLength() / 2.;
     answer.resize(12, 12);
     answer.zero();
     answer.at(1, 1) = answer.at(2, 2) = answer.at(3, 3) = halfMass;
@@ -424,7 +420,7 @@ LIBeam3dNL :: computeLumpedMassMatrix(FloatMatrix &answer, TimeStep *tStep)
     Ik   = this->giveCrossSection()->give(CS_TorsionMomentX);
     Iy   = this->giveCrossSection()->give(CS_InertiaMomentY);
     Iz   = this->giveCrossSection()->give(CS_InertiaMomentZ);
-    halfMass   = mat->give('d', gp) * this->giveLength() / 2.;
+    halfMass   = density * this->giveLength() / 2.;
     answer.at(4, 4) = answer.at(10, 10) = Ik * halfMass;
     answer.at(5, 5) = answer.at(11, 11) = Iy * halfMass;
     answer.at(6, 6) = answer.at(12, 12) = Iz * halfMass;
@@ -700,10 +696,9 @@ LIBeam3dNL :: initForNewStep()
 void
 LIBeam3dNL :: computeTempCurv(FloatArray &answer, TimeStep *tStep)
 {
-    Material *mat = this->giveMaterial();
     IntegrationRule *iRule = integrationRulesArray [ giveDefaultIntegrationRule() ];
     GaussPoint *gp = iRule->getIntegrationPoint(0);
-    ;
+    
     FloatArray ui(3), xd(3), curv(3), ac(3), PrevEpsilon;
     FloatMatrix sc(3, 3), tmid(3, 3);
 
@@ -734,7 +729,10 @@ LIBeam3dNL :: computeTempCurv(FloatArray &answer, TimeStep *tStep)
     answer.times(1 / this->l0);
 
     // ask for previous kappa
-    PrevEpsilon = static_cast< StructuralMaterialStatus * >( mat->giveStatus(gp) )->giveStrainVector();
+    StructuralMaterialStatus *matStat = static_cast< StructuralMaterialStatus * >( gp->giveMaterialStatus() );
+    if ( matStat ) {
+        PrevEpsilon = matStat->giveStrainVector();
+    }
     if ( PrevEpsilon.giveSize() ) {
         answer.at(1) += PrevEpsilon.at(4);
         answer.at(2) += PrevEpsilon.at(5);

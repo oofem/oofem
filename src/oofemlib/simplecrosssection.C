@@ -521,16 +521,16 @@ Material
 }
 
 
-// JB
 double
 SimpleCrossSection :: give(int aProperty, GaussPoint *gp)
 // Returns the value of the property aProperty (e.g. the Young's modulus
 // 'E') of the receiver.
-// atTime allows time dependent behavior to be taken into account
 {
-
-    return this->giveMaterial(gp)->give(aProperty, gp);
-    
+    if ( this->giveMaterialNumber() ) {
+        return this->giveMaterial(gp)->give(aProperty, gp);
+    } else {
+        return gp->giveMaterial()->give(aProperty, gp);
+    }
 }
 
 } // end namespace oofem

@@ -633,8 +633,8 @@ void CompoDamageMatStatus :: printOutputAt(FILE *file, TimeStep *tStep)
             fprintf( file, "%.2e ", this->kappa.at(6 * j + i) );
         }
     }
-
-    fprintf( file, " MatNum %d", gp->giveMaterial()->giveNumber() );
+    ///todo should we simply not allow a gp to ask for the material? /JB
+    //fprintf( file, " MatNum %d", gp->giveMaterial()->giveNumber() );
 
     fprintf(file, "}\n");
 }

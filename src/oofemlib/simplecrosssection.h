@@ -135,7 +135,7 @@ public:
     virtual const char *giveInputRecordName() const { return _IFT_SimpleCrossSection_Name; }
     virtual classType giveClassID() const { return SimpleCrossSectionClass; }
 
-    virtual double give(int aProperty, GaussPoint *gp); //JB
+    virtual double give(int aProperty, GaussPoint *gp); 
     virtual Material *giveMaterial(IntegrationPoint *ip);    
 
 

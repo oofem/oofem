@@ -67,7 +67,7 @@ StructuralCrossSection :: giveRealStresses(FloatArray &answer, GaussPoint *gp, c
         this->giveRealStress_1d(answer, gp, strain, tStep);
     } else {
         // This should never happen ?
-        StructuralMaterial *mat = dynamic_cast< StructuralMaterial * >( gp->giveElement()->giveMaterial() );
+        StructuralMaterial *mat = dynamic_cast< StructuralMaterial * >( this->giveMaterial(gp) );
         if ( mat->hasMaterialModeCapability(gp->giveMaterialMode()) ) {
             mat->giveRealStressVector(answer, gp, strain, tStep);
         } else {
@@ -349,7 +349,6 @@ Interface
     } else {
         return ip->giveMaterial()->giveInterface(t);
     }    
-    //return this->giveDomain()->giveMaterial( this->giveMaterialNumber() )->giveInterface(t);
 }
 
 bool 

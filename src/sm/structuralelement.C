@@ -1130,7 +1130,6 @@ StructuralElement :: updateBeforeNonlocalAverage(TimeStep *atTime)
             // allows to update internal vars to be averaged to new state
 
             // not possible - produces wrong result
-            //StructuralNonlocalMaterial* material = DYNAMIC_CAST(StructuralNonlocalMaterial, this->giveMaterial());
             StructuralNonlocalMaterialExtensionInterface *materialExt;
             materialExt =  static_cast< StructuralNonlocalMaterialExtensionInterface * >( this->giveStructuralCrossSection()->
                 giveInterface(NonlocalMaterialExtensionInterfaceType, ip) );

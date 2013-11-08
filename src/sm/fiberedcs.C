@@ -129,9 +129,9 @@ FiberedCrossSection :: giveRealStress_Beam3d(FloatArray &answer, GaussPoint *gp,
         answer.at(6) -= reducedFiberStress.at(1) * fiberWidth * fiberThick * fiberYCoord;
     }
 
-    // now we must update master gp ///@ todo is this correct? assumes that the material status of the master gp is 
-    // the same as for the slaves /JB
-    StructuralMaterialStatus *status = static_cast< StructuralMaterialStatus * >( gp->giveMaterial()->giveStatus(gp) );
+    // now we must update master gp ///@ todo simply chosen the first fiber material as master material /JB
+    StructuralMaterialStatus *status = static_cast< StructuralMaterialStatus * >
+        ( domain->giveMaterial( fiberMaterials.at(1) )->giveStatus(gp) );
     status->letTempStrainVectorBe(strain);
     status->letTempStressVectorBe(answer);
 }
@@ -349,7 +349,7 @@ FiberedCrossSection :: imposeStrainConstrainsOnGradient(GaussPoint *gp,
 int
 FiberedCrossSection :: giveIPValue(FloatArray &answer, GaussPoint *aGaussPoint, InternalStateType type, TimeStep *atTime)
 {
-    Material *mat = this->giveDomain()->giveMaterial( fiberMaterials.at(1) ); // For now, create material status according to the first fiber material
+    Material *mat = this->giveDomain()->giveMaterial( fiberMaterials.at(1) ); ///@todo For now, create material status according to the first fiber material
     StructuralMaterialStatus *status = static_cast< StructuralMaterialStatus * >( mat->giveStatus(aGaussPoint) ); 
 
     if ( type == IST_BeamForceMomentumTensor ) {
@@ -542,8 +542,9 @@ FiberedCrossSection :: give(CrossSectionProperty aProperty)
         return this->thick;
     } else if ( aProperty == CS_Width ) {
         return this->width;
-    } else if ( aProperty == CS_Area ) {
+    } else if ( aProperty == CS_Area ) { // not given in input
         return this->giveArea();
+    } else if ( aProperty == CS_Area ) { // not given in input
     }
 
     return CrossSection :: give(aProperty);

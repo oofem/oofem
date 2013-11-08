@@ -292,7 +292,7 @@ public:
     virtual void giveInputRecord(DynamicDataReader &oDR);
     
     double giveDelamXiCoord() { return delamXiCoord; };
-    virtual Material *giveMaterial() { return mat; }
+    //virtual Material *giveMaterial() { return mat; }
     virtual void updateGeometry(FailureCriteriaStatus *fc, TimeStep *tStep);
 };
 

@@ -1350,8 +1350,8 @@ Shell7Base :: computeConvectiveMassForce(FloatArray &answer, TimeStep *tStep)
         double a1, a2, a3, h, h2, h3, h5, fac1, fac2, fac3, rho;
         FloatArray coeff;
 
-
-        rho = this->giveMaterial()->give('d', gp);
+        Material *mat = domain->giveMaterial( this->layeredCS->giveLayerMaterial(1) ); ///@todo fix this method
+        rho = mat->give('d', gp);
         h   = this->giveCrossSection()->give(CS_Thickness);
         h2  = h * h;
         h3 = h2 * h;
