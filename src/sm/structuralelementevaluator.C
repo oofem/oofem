@@ -397,7 +397,7 @@ void StructuralElementEvaluator :: computeStiffnessMatrix(FloatMatrix &answer, M
     StructuralCrossSection *cs = static_cast< StructuralCrossSection * >( elem->giveCrossSection() );
     int ndofs = elem->computeNumberOfDofs();
     bool matStiffSymmFlag = false;
-    if ( cs->giveMaterialNumber() ) {
+    if ( cs->giveMaterialNumber() > 0 ) {
         matStiffSymmFlag = cs->isCharacteristicMtrxSymmetric(rMode);
     } else {
         matStiffSymmFlag = cs->isCharacteristicMtrxSymmetric( rMode, elem->giveMaterial()->giveNumber() );

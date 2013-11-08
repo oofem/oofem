@@ -156,6 +156,10 @@ public:
         { _error("give2dStiffnessMatrix_Eng: not implemented "); }
     virtual void give3dStiffnessMatrix_Eng(FloatMatrix &answer,  MatResponseMode mode, GaussPoint *gp, TimeStep *tStep)
         { _error("give3dStiffnessMatrix_Eng: not implemented "); }
+
+    // Numerical stiffness
+    //virtual void give3dStiffnessMatrix_dTdj_Num(FloatMatrix &answer, MatResponseMode rMode, GaussPoint *gp, TimeStep *tStep);
+        
     //@}
 
     /**

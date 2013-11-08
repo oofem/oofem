@@ -35,7 +35,7 @@
 #include "structuralinterfacematerial.h"
 #include "structuralinterfacematerialstatus.h"
 #include "dynamicinputrecord.h"
-
+#include "gausspoint.h"
 namespace oofem {
 
 int
@@ -77,5 +77,50 @@ StructuralInterfaceMaterial :: giveInputRecord(DynamicInputRecord &input)
     Material :: giveInputRecord(input);
 }
 
+#if 0
+void
+StructuralInterfaceMaterial :: give3dStiffnessMatrix_dTdj_Num(FloatMatrix &answer, MatResponseMode rMode, GaussPoint *gp, TimeStep *tStep)
+{
+
+    // Numerical tangent
+    // Computes the material stiffness using a central difference method
+	
+    answer.resize(3,3);
+    answer.zero();
+
+    StructuralInterfaceMaterialStatus *status = static_cast< StructuralInterfaceMaterialStatus * > ( gp->giveMaterialStatus() );
+    if ( status ) {
+        const double eps = 1.0e-9;
+        FloatArray T, TPlus, TMinus;
+        FloatMatrix F;
+        F = status->giveTempF();
+        FloatArray jump, jumpPlus, jumpMinus, Kcolumn;
+        jump = status->giveTempJump();
+
+    
+        for ( int i = 1; i <= 3; i++ ) {
+            jumpPlus = jumpMinus = jump;
+            jumpPlus.at(i)  += eps; 
+            jumpMinus.at(i) -= eps;
+            this->giveFirstPKTraction_3d(TPlus, gp, jumpPlus, F, tStep);
+            this->giveFirstPKTraction_3d(TMinus, gp, jumpMinus, F, tStep);
+
+            Kcolumn = (TPlus - TMinus);
+            answer.setColumn(Kcolumn, i);
+        }
+        answer.times( 1.0/(2*eps) );
+
+        this->giveFirstPKTraction_3d(T, gp, jump, F, tStep); // reset temp values by recomputing the stress
+
+        FloatMatrix D_analytical;
+        give3dStiffnessMatrix_dTdj_Num(D_analytical, rMode, gp, tStep);
+
+        answer.subtract(D_analytical);
+        answer.printYourself();
+    }
+
+}
+
+#endif
 
 } // end namespace oofem
