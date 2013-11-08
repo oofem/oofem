@@ -145,7 +145,7 @@ public:
      * @param tStep Time step.
      * @param mass Total mass of receiver.
      */
-    virtual void computeConsistentMassMatrix(FloatMatrix &answer, TimeStep *tStep, double &mass);
+    virtual void computeConsistentMassMatrix(FloatMatrix &answer, TimeStep *tStep, double &mass, const double *ipDensity = NULL);
     /**
      * Returns mask indicating, which unknowns (their type and ordering is the same as
      * element unknown vector) participate in mass matrix integration.
@@ -574,6 +574,8 @@ protected:
      */
     virtual void computeBmatrixAt(GaussPoint *gp, FloatMatrix &answer,
                                   int lowerIndx = 1, int upperIndx = ALL_STRAINS) = 0;
+
+public:
     /**
      * Computes interpolation matrix for element unknowns.
      * The order and meaning of unknowns is element dependent.
@@ -582,6 +584,7 @@ protected:
      */
     virtual void computeNmatrixAt(GaussPoint *gp, FloatMatrix &answer) = 0;
 
+protected:
     /**
      * Returns maximum approximation order used by receiver.
      * Must be implemented by derived classes

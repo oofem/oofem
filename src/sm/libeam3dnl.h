@@ -74,7 +74,7 @@ public:
     virtual ~LIBeam3dNL() { }
 
     virtual void computeLumpedMassMatrix(FloatMatrix &answer, TimeStep *tStep);
-    virtual void computeConsistentMassMatrix(FloatMatrix &answer, TimeStep *tStep, double &mass)
+    virtual void computeConsistentMassMatrix(FloatMatrix &answer, TimeStep *tStep, double &mass, const double *ipDensity = NULL)
     { computeLumpedMassMatrix(answer, tStep); }
     virtual void computeStrainVector(FloatArray &answer, GaussPoint *gp, TimeStep *tStep);
     //int computeGtoLRotationMatrix(FloatMatrix &answer);

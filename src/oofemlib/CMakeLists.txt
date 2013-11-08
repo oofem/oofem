@@ -20,6 +20,7 @@ set (core_unsorted
     errorestimator.C meshqualityerrorestimator.C remeshingcrit.C
     sloangraph.C sloangraphnode.C sloanlevelstruct.C
     eleminterpunknownmapper.C primaryunknownmapper.C materialmappingalgorithm.C
+    primvarmapper.C
     nonlocalmaterialext.C randommaterialext.C
     inputrecord.C oofemtxtinputrecord.C dynamicinputrecord.C
     dynamicdatareader.C buffereddatareader.C oofemtxtdatareader.C tokenizer.C parser.C
@@ -242,6 +243,7 @@ set (core_mapping
     mmashapefunctprojection.C
     mmaleastsquareprojection.C
     mmacontainingelementprojection.C
+    matstatmapperint.C
     )
 
 set (core_mesher

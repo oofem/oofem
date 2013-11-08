@@ -178,4 +178,28 @@ StructuralInterfaceMaterialStatus :: restoreContext(DataStream *stream, ContextM
 
     return CIO_OK;
 }
+
+void StructuralInterfaceMaterialStatus :: copyStateVariables(const MaterialStatus &iStatus)
+{
+	MaterialStatus &tmpStat = const_cast<MaterialStatus&>(iStatus);
+	printf("tmpStat.giveClassName(): %s\n", tmpStat.giveClassName() );
+	const StructuralInterfaceMaterialStatus &structStatus = dynamic_cast<StructuralInterfaceMaterialStatus&>(tmpStat);
+
+	jump 				= structStatus.giveJump();
+	traction			= structStatus.giveTraction();
+	tempTraction		= structStatus.giveTempTraction();
+	tempJump			= structStatus.giveTempJump();
+	firstPKTraction		= structStatus.giveFirstPKTraction();
+	tempFirstPKTraction	= structStatus.giveTempFirstPKTraction();
+	F					= structStatus.giveF();
+	tempF				= structStatus.giveTempF();
+}
+
+
+void StructuralInterfaceMaterialStatus :: addStateVariables(const MaterialStatus &iStatus)
+{
+	OOFEM_ERROR("Error: StructuralInterfaceMaterialStatus :: addStateVariables is not implemented.\n");
+}
+
+
 } // end namespace oofem

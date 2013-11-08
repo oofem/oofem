@@ -48,6 +48,7 @@
 #include "dynamicinputrecord.h"
 
 #include "structuralinterfacematerial.h"
+#include "structuralelement.h"
 
 #include "XFEMDebugTools.h"
 #include <string>
@@ -280,7 +281,6 @@ void XfemElementInterface :: XfemElementInterface_createEnrNmatrixAt(FloatMatrix
 
         	double levelSetGP = 0.0;
         	ei->interpLevelSet(levelSetGP, Nc, elNodes);
-
 
 
         	if ( ei->isDofManEnriched(* dMan) ) {
@@ -905,6 +905,77 @@ void XfemElementInterface :: computeCohesiveTangentAt(FloatMatrix &answer, TimeS
 		printf("Entering XfemElementInterface :: computeCohesiveTangentAt().\n");
 
 	}
+}
+
+void XfemElementInterface :: XfemElementInterface_computeConsistentMassMatrix(FloatMatrix &answer, TimeStep *tStep, double &mass, const double *ipDensity)
+{
+//	printf("Entering XfemElementInterface :: XfemElementInterface_computeConsistentMassMatrix().\n");
+
+	StructuralElement *structEl = dynamic_cast<StructuralElement*> (element);
+	if(structEl == NULL) {
+		OOFEM_ERROR("Error in XfemElementInterface :: XfemElementInterface_computeConsistentMassMatrix().\n");
+	}
+
+    int nip, ndofs = structEl->computeNumberOfDofs();
+    double density, dV;
+    FloatMatrix n;
+//    GaussIntegrationRule iRule(1, structEl, 1, 1);
+    IntegrationRule *iRule = element->giveIntegrationRule(0);
+    IntArray mask;
+
+    answer.resize(ndofs, ndofs);
+    answer.zero();
+    if ( !structEl->isActivated(tStep) ) {
+        return;
+    }
+
+//    if ( ( nip = structEl->giveNumberOfIPForMassMtrxIntegration() ) == 0 ) {
+//        OOFEM_ERROR("computeConsistentMassMatrix no integration points available");
+//    }
+
+//    iRule.setUpIntegrationPoints( structEl->giveIntegrationDomain(),
+//                                 nip, this->giveMaterialMode() );
+
+    structEl->giveMassMtrxIntegrationgMask(mask);
+
+    //density = this->giveMaterial()->give('d');
+    mass = 0.;
+
+    for ( int i = 0; i < iRule->giveNumberOfIntegrationPoints(); i++ ) {
+        GaussPoint *gp = iRule->getIntegrationPoint(i);
+        structEl->computeNmatrixAt(gp, n);
+        density = structEl->giveMaterial()->give('d', gp);
+
+        if(ipDensity != NULL) {
+        	// Override density if desired
+        	density = *ipDensity;
+        }
+
+        dV = structEl->computeVolumeAround(gp);
+        mass += density * dV;
+
+        if ( mask.isEmpty() ) {
+            answer.plusProductSymmUpper(n, n, density * dV);
+        } else {
+            for ( int i = 1; i <= ndofs; i++ ) {
+                for ( int j = i; j <= ndofs; j++ ) {
+                    double summ = 0.;
+                    for ( int k = 1; k <= n.giveNumberOfRows(); k++ ) {
+                        if ( mask.at(k) == 0 ) {
+                            continue;
+                        }
+
+                        summ += n.at(k, i) * n.at(k, j);
+                    }
+
+                    answer.at(i, j) += summ * density * dV;
+                }
+            }
+        }
+    }
+
+    answer.symmetrized();
+
 }
 
 IRResultType

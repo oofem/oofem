@@ -56,6 +56,7 @@
 #include "dofmanager.h"
 #include "node.h"
 #include "dynamicinputrecord.h"
+#include "matstatmapperint.h"
 
 #include <cstdio>
 
@@ -1375,6 +1376,40 @@ Element :: adaptiveMap(Domain *oldd, TimeStep *tStep)
         iRule = integrationRulesArray [ i ];
         for ( int j = 0; j < iRule->giveNumberOfIntegrationPoints(); j++ ) {
             result &= interface->MMI_map(iRule->getIntegrationPoint(j), oldd, tStep);
+        }
+    }
+
+    return result;
+}
+
+int
+Element :: mapStateVariables(const Domain &iOldDom, const TimeStep &iTStep)
+{
+    int result = 1;
+
+    for ( int i = 0; i < numberOfIntegrationRules; i++ ) {
+    	IntegrationRule *iRule = integrationRulesArray [ i ];
+        for ( int j = 0; j < iRule->giveNumberOfIntegrationPoints(); j++ ) {
+
+
+        	GaussPoint &gp = *(iRule->getIntegrationPoint(j));
+
+        	MaterialStatus *ms = this->giveMaterial()->giveStatus(&gp);
+        	if(ms == NULL) {
+        		OOFEM_ERROR("In Element :: mapStateVariables(): Failed to fetch material status.\n");
+        	}
+
+            MaterialStatusMapperInterface *interface = dynamic_cast< MaterialStatusMapperInterface * >
+                                                      ( this->giveMaterial()->giveStatus(&gp) );
+
+            if ( interface == NULL ) {
+            	printf("this->giveMaterial()->giveClassName(): %s\n", this->giveMaterial()->giveClassName() );
+            	gp.giveCoordinates()->printYourself();
+            	printf("this->giveMaterial()->giveStatus(&gp)->giveClassName(): %s\n", this->giveMaterial()->giveStatus(&gp)->giveClassName());
+        		OOFEM_ERROR("In Element :: mapStateVariables(): Failed to fetch MaterialStatusMapperInterface.\n");
+            }
+
+            result &= interface->MSMI_map(gp, iOldDom, iTStep, *( this->giveMaterial()->giveStatus(&gp) ) );
         }
     }
 

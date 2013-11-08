@@ -47,13 +47,19 @@
 
 #include "gausspoint.h"
 
+#include "primvarmapper.h"
+#include "matstatmapperint.h"
+#include "structuralinterfacematerial.h"
+#include "structuralinterfacematerialstatus.h"
+
 namespace oofem {
 
 REGISTER_EngngModel( XFEMStatic );
 
 XFEMStatic::XFEMStatic(int i, EngngModel *_master):
 NonLinearStatic(i, _master),
-updateStructureFlag(false)
+updateStructureFlag(false),
+mForceRemap(false)
 {
 	printf("Entering XFEMStatic::XFEMStatic(int i, EngngModel *_master).\n");
 }
@@ -78,7 +84,7 @@ XFEMStatic :: solveYourselfAt(TimeStep *tStep)
 //    initialLoadVector.printYourself();
     // Initialization
     int neq = this->giveNumberOfDomainEquations(1, EModelDefaultEquationNumbering()); // 1 stands for domain?
-    if ( totalDisplacement.giveSize() != neq ) {
+    if ( this->needsStructureUpdate() ) {
 
     	printf("Increasing size of displacement array.\n");
 
@@ -153,16 +159,82 @@ XFEMStatic :: terminate(TimeStep *tStep)
     for( int domInd = 1; domInd <= this->giveNumberOfDomains(); domInd++ ) {
     	Domain *domain = this->giveDomain(domInd);
 
-    	if( domain->giveXfemManager()->hasPropagatingFronts() ) {
+    	if( domain->giveXfemManager()->hasPropagatingFronts() || mForceRemap ) {
 
 			// Take copy of the domain to allow mapping of state variables
 			// to the new Gauss points.
 			Domain *dNew = domain->Clone();
 
+
+			// Map primary variables
+			LSPrimaryVariableMapper primMapper;
+			FloatArray u;
+			primMapper.mapPrimaryVariables(u, *domain, *dNew, VM_Total, *tStep);
+
+
+			if(totalDisplacement.giveSize() == u.giveSize()) {
+				FloatArray diff;
+				diff.beDifferenceOf(totalDisplacement, u);
+
+				printf("diff norm: %e\n", diff.computeNorm() );
+			}
+
+			totalDisplacement = u;
+
+
+			primMapper.mapPrimaryVariables(incrementOfDisplacement, *domain, *dNew, VM_Incremental, *tStep);
+
+
+			int numEl = dNew->giveNumberOfElements();
+
+			for(int i = 1; i <= numEl; i++) {
+
+				////////////////////////////////////////////////////////
+				// Map state variables for regualr Gauss points
+				Element *el = dNew->giveElement(i);
+				el->mapStateVariables(*domain, *tStep);
+
+
+				////////////////////////////////////////////////////////
+				// Map state variables for cohesive zone if applicable
+				XfemElementInterface *xFemEl = dynamic_cast<XfemElementInterface*>(el);
+				if(xFemEl != NULL) {
+					if(xFemEl->mpCZIntegrationRule != NULL) {
+
+						for ( int j = 0; j < xFemEl->mpCZIntegrationRule->giveNumberOfIntegrationPoints(); j++ ) {
+
+
+							GaussPoint &gp = *(xFemEl->mpCZIntegrationRule->getIntegrationPoint(j));
+
+							MaterialStatus *ms = xFemEl->mpCZMat->giveStatus(&gp);
+							if(ms == NULL) {
+								OOFEM_ERROR("In Element :: mapStateVariables(): Failed to fetch material status.\n");
+							}
+
+							MaterialStatusMapperInterface *interface = dynamic_cast< MaterialStatusMapperInterface * >
+																	  ( xFemEl->mpCZMat->giveStatus(&gp) );
+
+							if ( interface == NULL ) {
+								OOFEM_ERROR("In XFEMStatic :: mapStateVariables(): Failed to fetch MaterialStatusMapperInterface.\n");
+							}
+
+							printf("In XFEMStatic xFemEl->mpCZMat->giveStatus(&gp)->giveClassName(): %s\n", xFemEl->mpCZMat->giveStatus(&gp)->giveClassName() );
+
+							MaterialStatus *matStat = dynamic_cast<MaterialStatus*>(xFemEl->mpCZMat->giveStatus(&gp));
+							StructuralInterfaceMaterialStatus *siMatStat = dynamic_cast<StructuralInterfaceMaterialStatus*>( matStat );
+							if(siMatStat == NULL) {
+								OOFEM_ERROR("In XFEMStatic :: terminate: Failed to cast to StructuralInterfaceMaterialStatus.\n");
+							}
+							interface->MSMI_map(gp, *domain, *tStep, *siMatStat);
+
+						}
+					}
+				}
+
+			}
+
+
 			this->domainList->put(1, dNew);
-			//this->domainList->at(1)->giveXfemManager()->updateYourself();
-
-
 			domain = this->giveDomain(1);
 
 			// Set domain pointer to various components ...
@@ -181,23 +253,11 @@ XFEMStatic :: terminate(TimeStep *tStep)
 			}
 
 
-			int numEl = domain->giveNumberOfElements();
-
-			for(int i = 1; i <= numEl; i++) {
-				Element *el = domain->giveElement(i);
-
-				// Compute new distribution of Gauss points ...
-				XfemElementInterface *xfemEl = dynamic_cast<XfemElementInterface*> (el);
-
-				if( xfemEl != NULL ) {
-					xfemEl->recomputeGaussPoints();
-
-					// ... and map state variables to the new Gauss points
-					// el->adaptiveMap(dNew, tStep);
-				}
-
-			}
+		    this->setUpdateStructureFlag(false);
+//			this->setUpdateStructureFlag(true);
+//			initializeDofUnknownsDictionary(tStep);
     	} // if( domain->giveXfemManager()->hasPropagatingFronts() )
+
 //#endif
     }
     
@@ -365,6 +425,24 @@ XFEMStatic ::  giveUnknownComponent(ValueModeType mode, TimeStep *tStep, Domain 
         return NonLinearStatic ::  giveUnknownComponent(mode, tStep, d, dof);
     }
 
+}
+
+IRResultType XFEMStatic :: initializeFrom(InputRecord *ir)
+{
+    const char *__proc = "initializeFrom"; // Required by IR_GIVE_FIELD macro
+    IRResultType result;                // Required by IR_GIVE_FIELD macro
+
+	NonLinearStatic::initializeFrom(ir);
+
+	int remapFlag = 0;
+    IR_GIVE_OPTIONAL_FIELD(ir, remapFlag, _IFT_XFEMStatic_ForceRemap);
+
+    if(remapFlag == 1) {
+    	printf("Forcing remapping.\n");
+    	mForceRemap = true;
+    }
+
+    return IRRT_OK;
 }
 
 void

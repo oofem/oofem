@@ -99,6 +99,8 @@ public:
     virtual void computeStiffnessMatrix(FloatMatrix &answer, MatResponseMode rMode, TimeStep *tStep);
     virtual void giveInternalForcesVector(FloatArray &answer, TimeStep *tStep, int useUpdatedGpRecord);
 
+    virtual void computeConsistentMassMatrix(FloatMatrix &answer, TimeStep *tStep, double &mass, const double *ipDensity = NULL) { XfemElementInterface::XfemElementInterface_computeConsistentMassMatrix(answer, tStep, mass, ipDensity);}
+
 //    virtual Element_Geometry_Type giveGeometryType() const;
 
 #ifdef __OOFEG

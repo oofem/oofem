@@ -449,7 +449,7 @@ StructuralElement :: computePrescribedStrainLoadVectorAt(FloatArray &answer, Tim
 
 
 void
-StructuralElement :: computeConsistentMassMatrix(FloatMatrix &answer, TimeStep *tStep, double &mass)
+StructuralElement :: computeConsistentMassMatrix(FloatMatrix &answer, TimeStep *tStep, double &mass, const double *ipDensity)
 // Computes numerically the consistent (full) mass matrix of the receiver.
 {
     int nip, ndofs = computeNumberOfDofs();
@@ -480,6 +480,12 @@ StructuralElement :: computeConsistentMassMatrix(FloatMatrix &answer, TimeStep *
         GaussPoint *gp = iRule.getIntegrationPoint(i);
         this->computeNmatrixAt(gp, n);
         density = this->giveMaterial()->give('d', gp);
+
+        if(ipDensity != NULL) {
+        	// Override density if desired
+        	density = *ipDensity;
+        }
+
         dV = this->computeVolumeAround(gp);
         mass += density * dV;
 
