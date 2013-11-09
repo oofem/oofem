@@ -53,9 +53,10 @@ class RVEStokesFlowMaterialStatus : public TransportMaterialStatus
 protected:
     FloatMatrix temp_TangentMatrix, tangentMatrix;
     FloatArray *solutionVector;
+    EngngModel *rve;
 
 public:
-    RVEStokesFlowMaterialStatus(int n, Domain *d, GaussPoint *g);
+    RVEStokesFlowMaterialStatus(int n, Domain *d, GaussPoint *g, EngngModel *rve);
 
     virtual ~RVEStokesFlowMaterialStatus();
 
@@ -74,7 +75,7 @@ public:
      * Export this RVE. The files produced is named ./[.in-file].rve/Rve_[ID]_[GP number] where is is the global element number any GP number is
      * the number of the Gausspoint where the RVE is evaluated
      */
-    void exportFilter(EngngModel *E, GaussPoint *gp, TimeStep *tStep);
+    void exportFilter(GaussPoint *gp, TimeStep *tStep);
 
     virtual const char *giveClassName() const { return "RVEStokesFlowMaterialStatus"; }
     virtual classType giveClassID() const { return RVEStokesFlowMaterialStatusClass; }
