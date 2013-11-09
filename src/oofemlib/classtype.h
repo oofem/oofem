@@ -225,7 +225,6 @@ enum classType {
     InterfaceElem1dClass,
     InterfaceElem2dQuadClass,
     InterfaceElement3dTrLinClass,
-    IntElLine2Class,
 
     BsplinePlaneStressElementClass,
     NURBSPlaneStressElementClass,

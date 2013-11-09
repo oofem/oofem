@@ -48,12 +48,12 @@
 
 
 namespace oofem {
-StructuralInterfaceElement :: StructuralInterfaceElement(int n, Domain *aDomain) :
-    Element(n, aDomain)
-    // Constructor. Creates an element with number n, belonging to aDomain.
+StructuralInterfaceElement :: StructuralInterfaceElement(int n, Domain *aDomain) : Element(n, aDomain)
 {
+    // Constructor. Creates an element with number n, belonging to aDomain.
     activityLtf = 0;
     initialDisplacements = NULL;
+    nlGeometry = 0;
 }
 
 
@@ -65,7 +65,7 @@ StructuralInterfaceElement :: ~StructuralInterfaceElement()
     }
 }
 
-
+#if 0
 void
 StructuralInterfaceElement :: computeConstitutiveMatrixAt(FloatMatrix &answer,
                                                  MatResponseMode rMode, IntegrationPoint *ip,
@@ -74,19 +74,17 @@ StructuralInterfaceElement :: computeConstitutiveMatrixAt(FloatMatrix &answer,
 // rMode parameter determines type of stiffness matrix to be requested
 // (tangent, secant, ...)
 {
-    if ( this->giveSpatialDimension() == 1 ) {
-        this->giveInterfaceCrossSection()->give1dStiffnessMatrix_Eng(answer, rMode, ip, tStep);
-    } else if ( this->giveSpatialDimension() == 2 ) {
-        this->giveInterfaceCrossSection()->give2dStiffnessMatrix_Eng(answer, rMode, ip, tStep);
-    } else if ( this->giveSpatialDimension() == 3 ) {
+    if ( this->nlGeometry == 0 ) {
         this->giveInterfaceCrossSection()->give3dStiffnessMatrix_Eng(answer, rMode, ip, tStep);
+    } else if ( this->nlGeometry = 1 ) {
+        this->giveInterfaceCrossSection()->give3dStiffnessMatrix_dTdj(answer, rMode, ip, tStep);
     } else {
-        // Will it ever run this part?
+
         OOFEM_ERROR("Spatial dimension must be 1-3!")
     }
 
 }
-
+#endif
 
 
 
@@ -108,8 +106,16 @@ StructuralInterfaceElement :: computeStiffnessMatrix(FloatMatrix &answer, MatRes
     FloatMatrix rotationMatGtoL;
     for ( int j = 0; j < iRule->giveNumberOfIntegrationPoints(); j++ ) {
         IntegrationPoint *ip = iRule->getIntegrationPoint(j);
- 
-        this->computeConstitutiveMatrixAt(D, rMode, ip, tStep);
+        
+        if ( this->nlGeometry == 0 ) {
+            this->giveInterfaceCrossSection()->give3dStiffnessMatrix_Eng(D, rMode, ip, tStep);
+        } else if ( this->nlGeometry = 1 ) {
+            this->giveInterfaceCrossSection()->give3dStiffnessMatrix_dTdj(D, rMode, ip, tStep);
+        } else {
+            OOFEM_ERROR("nlgemoetry must be 0 or 1!")
+        }
+        //this->computeConstitutiveMatrixAt(D, rMode, ip, tStep);
+
         this->computeTransformationMatrixAt(ip, rotationMatGtoL); 
         D.rotatedWith(rotationMatGtoL, 't');                      // transform stiffness to global coord system
         
@@ -133,13 +139,13 @@ StructuralInterfaceElement :: computeStiffnessMatrix(FloatMatrix &answer, MatRes
 void
 StructuralInterfaceElement :: computeSpatialJump(FloatArray &answer, IntegrationPoint *ip, TimeStep *tStep)
 {
-    // Computes the vector containing the spatial jump vector at the Gauss point (ip) of
+    // Computes the spatial jump vector (allways 3 components) at the Gauss point (ip) of
     // the receiver, at time step (tStep). jump = N*u
     FloatMatrix N;
     FloatArray u;
 
     if ( !this->isActivated(tStep) ) {
-        answer.resize( this->giveSpatialDimension() );
+        answer.resize(3);
         answer.zero();
         return;
     }
@@ -151,7 +157,9 @@ StructuralInterfaceElement :: computeSpatialJump(FloatArray &answer, Integration
     if ( initialDisplacements ) {
         u.subtract(*initialDisplacements);
     }
+
     answer.beProductOf(N, u);
+
 }
 
 
@@ -169,10 +177,11 @@ StructuralInterfaceElement :: giveInternalForcesVector(FloatArray &answer,
     // has been called for the same time step.
 
     IntegrationRule *iRule = integrationRulesArray [ giveDefaultIntegrationRule() ];
+    StructuralInterfaceCrossSection *CS = this->giveInterfaceCrossSection();
 
-    FloatMatrix N;
+    FloatMatrix N, rotationMatGtoL;
     FloatArray u, traction, jump;
-    FloatMatrix rotationMatGtoL;
+
     this->computeVectorOf(EID_MomentumBalance, VM_Total, tStep, u);
     // subtract initial displacements, if defined
     if ( initialDisplacements ) {
@@ -182,6 +191,7 @@ StructuralInterfaceElement :: giveInternalForcesVector(FloatArray &answer,
     // zero answer will resize accordingly when adding first contribution
     answer.resize(0);
 
+    FloatMatrix F(3,3);
     for ( int i = 0; i < iRule->giveNumberOfIntegrationPoints(); i++ ) {
         IntegrationPoint *ip = iRule->getIntegrationPoint(i);
         this->computeNmatrixAt(ip, N);
@@ -189,15 +199,25 @@ StructuralInterfaceElement :: giveInternalForcesVector(FloatArray &answer,
         if ( useUpdatedGpRecord == 1 ) {
             traction = this->giveInterfaceCrossSection()->giveTraction(ip);
         } else {
-            if ( !this->isActivated(tStep) ) {
-                jump.resize( this->giveSpatialDimension() + 1 );
+            if ( this->isActivated(tStep) ) {
+                jump.beProductOf(N, u);
+            } else {
+                jump.resize(3);
                 jump.zero();
             }
-            jump.beProductOf(N, u);
-            
             this->computeTransformationMatrixAt(ip, rotationMatGtoL); 
+            //jump.printYourself();
             jump.rotatedWith(rotationMatGtoL, 'n');             // transform jump to local coord system
-            this->computeTraction(traction, ip, jump, tStep);   
+            //jump.printYourself();
+            if( this->nlGeometry == 0 ) {
+                CS->giveEngTraction_3d(traction, ip, jump, tStep); 
+            } else if( this->nlGeometry == 1) {
+                //compute F
+                F.beUnitMatrix();
+                F.rotatedWith(rotationMatGtoL, 'n');
+                CS->giveFirstPKTraction_3d(traction, ip, jump, F, tStep); 
+            }
+
             traction.rotatedWith(rotationMatGtoL,'t');          // transform traction to global coord system
         }
 
@@ -205,11 +225,11 @@ StructuralInterfaceElement :: giveInternalForcesVector(FloatArray &answer,
             break;
         }
 
-        // compute internal cohesive forces as f = N^T*traction dV
+        // compute internal cohesive forces as f = N^T*traction dA
         double dA = this->computeAreaAround(ip);
         answer.plusProduct(N, traction, dA);
     }
-
+    answer.printYourself();
     // if inactive update state, but no contribution to global system
     if ( !this->isActivated(tStep) ) {
         answer.zero();
@@ -221,16 +241,17 @@ void
 StructuralInterfaceElement :: computeTraction(FloatArray &traction, IntegrationPoint *ip, FloatArray &jump, TimeStep *tStep)
 {
     StructuralInterfaceCrossSection *CS = this->giveInterfaceCrossSection();
-    if ( this->giveSpatialDimension() == 1 ) {
+/*    if ( this->giveSpatialDimension() == 1 ) {
         CS->giveEngTraction_1d(traction, ip, jump,  tStep);
     } else if ( this->giveSpatialDimension() == 2 ) {
         CS->giveEngTraction_2d(traction, ip, jump,  tStep);
     } else if ( this->giveSpatialDimension() == 3 ) {
-        CS->giveEngTraction_3d(traction, ip, jump,  tStep);
-    } else {
+    */
+    CS->giveEngTraction_3d(traction, ip, jump,  tStep);
+    //} else {
         // Will it ever run this part?
-        OOFEM_ERROR("Spatial dimension must be 1-3!")
-    }
+    //    OOFEM_ERROR("Spatial dimension must be 1-3!")
+    //}
 }
 
 
@@ -269,8 +290,6 @@ StructuralInterfaceElement :: giveCharacteristicVector(FloatArray &answer, CharT
          * and this will cause to integrate internal forces using existing (nontemp, equlibrated) stresses in
          * statuses. Mainly used to compute reaction forces */
         this->giveInternalForcesVector(answer, tStep, 1);
-    } else {
-        _error2( "giveCharacteristicVector: Unknown Type of characteristic vector (%s)", __CharTypeToString(mtrx) );
     }
 }
 
@@ -316,7 +335,7 @@ StructuralInterfaceElement :: checkConsistency()
 {
     // check if the cross section is a 'StructuralInterfaceCrossSection'
     int result = 1;
-    if ( !this->giveCrossSection()->testCrossSectionExtension( this->giveInterfaceCrossSection()->crossSectionType ) ) {
+    if ( !this->giveInterfaceCrossSection()->testCrossSectionExtension( this->giveInterfaceCrossSection()->crossSectionType ) ) {
         OOFEM_ERROR2("StructuralInterfaceElement :: checkConsistency : cross section %s is not a structural interface cross section", this->giveCrossSection()->giveClassName() );
         result = 0;
     }
