@@ -170,7 +170,6 @@ void IncrementalLinearStatic :: solveYourselfAt(TimeStep *tStep)
 
     // Initiates the total displacement to zero.
     if ( tStep->isTheFirstStep() ) {
-        printf("start!\n");
         Domain *d = this->giveDomain(1);
         for ( int i = 1; i <= d->giveNumberOfDofManagers(); i++ ) {
             DofManager *dofman = d->giveDofManager(i);
