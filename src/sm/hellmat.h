@@ -835,7 +835,6 @@ public:
 
     // === Postprocessing functions ===
     virtual int giveIPValue(FloatArray &answer, GaussPoint *aGaussPoint, InternalStateType type, TimeStep *atTime);
-    virtual InternalStateValueType giveIPValueType(InternalStateType type);
 
 protected:
     MaterialStatus *CreateStatus(GaussPoint *gp) const;

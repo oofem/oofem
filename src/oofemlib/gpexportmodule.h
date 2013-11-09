@@ -41,7 +41,8 @@
 
 ///@name Input fields for Gausspoint export module
 //@{
-#define _IFT_GPExportModule_Name "gp"
+// gpexportmodule consistent with the documentation
+#define _IFT_GPExportModule_Name "gpexportmodule" 
 #define _IFT_GPExportModule_vartypes "vars"
 #define _IFT_GPExportModule_ncoords "ncoords"
 //@}

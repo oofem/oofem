@@ -343,18 +343,6 @@ RankineMatGrad :: giveIPValue(FloatArray &answer, GaussPoint *aGaussPoint, Inter
     }
 }
 
-
-InternalStateValueType
-RankineMatGrad :: giveIPValueType(InternalStateType type)
-{
-    if ( type == IST_CumPlasticStrain_2 || type == IST_MaxEquivalentStrainLevel ) {
-        return ISVT_SCALAR;
-    } else {
-        return RankineMat :: giveIPValueType(type);
-    }
-}
-
-
 //=============================================================================
 // GRADIENT RANKINE MATERIAL STATUS
 //=============================================================================

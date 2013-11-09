@@ -42,7 +42,7 @@
 #include "intarray.h"
 #include "mathfem.h"
 #include "fei3dtetlin.h"
-#include "crosssection.h"
+#include "structuralcrosssection.h"
 #include "classfactory.h"
 
 #ifdef __OOFEG
@@ -254,7 +254,8 @@ LTRSpace :: computeLumpedMassMatrix(FloatMatrix &answer, TimeStep *tStep)
     gp = integrationRulesArray [ 0 ]->getIntegrationPoint(0);
 
     dV = this->computeVolumeAround(gp);
-    mss1 = dV * this->giveMaterial()->give('d', gp) / 4.;
+    double density = this->giveStructuralCrossSection()->give('d', gp);
+    mss1 = dV * density / 4.;
 
     for ( int i = 1; i <= 12; i++ ) {
         answer.at(i, i) = mss1;

@@ -37,8 +37,13 @@
 #include "element.h"
 #include "structuralmaterial.h"
 #include "floatarray.h"
+#include "structuralms.h"
 
 namespace oofem {
+
+
+
+
 
 void
 StructuralCrossSection :: giveRealStresses(FloatArray &answer, GaussPoint *gp, const FloatArray &strain, TimeStep *tStep)
@@ -62,7 +67,7 @@ StructuralCrossSection :: giveRealStresses(FloatArray &answer, GaussPoint *gp, c
         this->giveRealStress_1d(answer, gp, strain, tStep);
     } else {
         // This should never happen ?
-        StructuralMaterial *mat = dynamic_cast< StructuralMaterial * >( gp->giveElement()->giveMaterial() );
+        StructuralMaterial *mat = dynamic_cast< StructuralMaterial * >( this->giveMaterial(gp) );
         if ( mat->hasMaterialModeCapability(gp->giveMaterialMode()) ) {
             mat->giveRealStressVector(answer, gp, strain, tStep);
         } else {
@@ -80,7 +85,8 @@ StructuralCrossSection :: giveFirstPKStresses(FloatArray &answer, GaussPoint *gp
     // mode stored in the each gp.
 
     MaterialMode mode = gp->giveMaterialMode();
-    StructuralMaterial *mat = static_cast< StructuralMaterial * >( gp->giveElement()->giveMaterial() );
+    StructuralMaterial *mat = dynamic_cast< StructuralMaterial * >( this->giveMaterial(gp) );
+    
     if ( mode == _3dMat ) {
         mat->giveFirstPKStressVector_3d(answer, gp, reducedvF, tStep);
     } else if ( mode == _PlaneStrain ) {
@@ -103,7 +109,8 @@ StructuralCrossSection :: giveCauchyStresses(FloatArray &answer, GaussPoint *gp,
     // mode stored in the each gp.
 
     MaterialMode mode = gp->giveMaterialMode();
-    StructuralMaterial *mat = static_cast< StructuralMaterial * >( gp->giveElement()->giveMaterial() );
+    StructuralMaterial *mat = dynamic_cast< StructuralMaterial * >( this->giveMaterial(gp) );
+    
     if ( mode == _3dMat ) {
         mat->giveCauchyStressVector_3d(answer, gp, reducedvF, tStep);
     } else if ( mode == _PlaneStrain ) {
@@ -121,7 +128,8 @@ StructuralCrossSection :: giveStiffnessMatrix_dPdF(FloatMatrix &answer,
                                                    MatResponseMode rMode, GaussPoint *gp,
                                                    TimeStep *tStep)
 {
-    StructuralMaterial *mat = dynamic_cast< StructuralMaterial * >( gp->giveElement()->giveMaterial() );
+    StructuralMaterial *mat = dynamic_cast< StructuralMaterial * >( this->giveMaterial(gp) );
+    
     MaterialMode mode = gp->giveMaterialMode();
     if ( mode == _3dMat ) {
         mat->give3dMaterialStiffnessMatrix_dPdF(answer, rMode, gp, tStep);
@@ -142,7 +150,8 @@ StructuralCrossSection :: giveStiffnessMatrix_dCde(FloatMatrix &answer,
                                                    MatResponseMode rMode, GaussPoint *gp,
                                                    TimeStep *tStep)
 {
-    StructuralMaterial *mat = dynamic_cast< StructuralMaterial * >( gp->giveElement()->giveMaterial() );
+    StructuralMaterial *mat = dynamic_cast< StructuralMaterial * >( this->giveMaterial(gp) );
+    
     MaterialMode mode = gp->giveMaterialMode();
     if ( mode == _3dMat ) {
         mat->give3dMaterialStiffnessMatrix_dCde(answer, rMode, gp, tStep);
@@ -268,8 +277,91 @@ StructuralCrossSection :: computeStressIndependentStrainVector(FloatArray &answe
 // takes into account form of load vector assumed by engngModel (Incremental or Total Load form).
 //
 {
-    StructuralMaterial *mat = static_cast< StructuralMaterial * >( gp->giveElement()->giveMaterial() );
+    StructuralMaterial *mat = dynamic_cast< StructuralMaterial * >( this->giveMaterial(gp) );
     // add parts caused by  material
     mat->computeStressIndependentStrainVector(answer, gp, stepN, mode);
 }
+
+
+
+IRResultType
+StructuralCrossSection :: initializeFrom(InputRecord *ir)
+//
+// instanciates receiver from input record
+//
+{
+    const char *__proc = "initializeFrom"; // Required by IR_GIVE_FIELD macro
+    IRResultType result;                // Required by IR_GIVE_FIELD macro
+
+    // Read a cohesive zone material
+    IR_GIVE_OPTIONAL_FIELD(ir, this->materialNumber, _StructuralCrossSection_MaterialNumber);
+
+    return IRRT_OK;
+}
+
+
+int
+StructuralCrossSection :: hasMaterialModeCapability(MaterialMode mode)
+//
+// returns whether receiver supports given mode
+//
+{
+    return mode == _3dMat || mode == _PlaneStress || mode == _PlaneStrain  || mode == _1dMat ||
+           mode == _PlateLayer || mode == _2dBeamLayer || mode == _Fiber;
+}
+
+
+int
+StructuralCrossSection :: checkConsistency()
+//
+// check internal consistency
+// mainly tests, whether material and crossSection data
+// are safe for conversion to "Structural" versions
+//
+{
+    int result = 1;
+    Material *mat = this->giveDomain()->giveMaterial(this->materialNumber);
+    if ( !dynamic_cast< StructuralMaterial * >( mat ) ) {
+        _warning2("checkConsistency : material %s without structural support", mat->giveClassName());
+        result = 0;
+    }
+
+    return result;
+}
+
+
+Material 
+*StructuralCrossSection :: giveMaterial(IntegrationPoint *ip) 
+{ 
+    if ( ip->giveElement()->MAT_GIVEN_BY_CS ) {
+        return this->giveDomain()->giveMaterial( this->giveMaterialNumber() ); 
+    } else {
+        return ip->giveElement()->giveMaterial();
+    }
+}
+
+
+Interface 
+*StructuralCrossSection :: giveInterface(InterfaceType t, IntegrationPoint *ip)
+{
+    if ( this->giveMaterialNumber() ) {
+        return this->giveDomain()->giveMaterial( this->giveMaterialNumber() )->giveInterface(t);
+    } else {
+        return ip->giveMaterial()->giveInterface(t);
+    }    
+}
+
+bool 
+StructuralCrossSection :: isCharacteristicMtrxSymmetric(MatResponseMode rMode)
+{
+    return this->domain->giveMaterial(this->giveMaterialNumber())->isCharacteristicMtrxSymmetric(rMode);
+}
+
+bool
+StructuralCrossSection :: isCharacteristicMtrxSymmetric(MatResponseMode rMode, int mat)
+{
+    return domain->giveMaterial(mat)->isCharacteristicMtrxSymmetric(rMode);
+}
+
+
 } // end namespace oofem

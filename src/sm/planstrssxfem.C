@@ -40,6 +40,7 @@
 #include "enrichmentdomain.h"
 #include "structuralcrosssection.h"
 #include "vtkxmlexportmodule.h"
+#include "dynamicinputrecord.h"
 #ifdef __OOFEG
 #include "patchintegrationrule.h"
 #endif
@@ -47,6 +48,18 @@
 namespace oofem {
 
 REGISTER_Element( PlaneStress2dXfem )
+
+void PlaneStress2dXfem :: updateYourself(TimeStep *tStep)
+{
+	PlaneStress2d::updateYourself(tStep);
+	XfemElementInterface::updateYourselfCZ(tStep);
+}
+
+void PlaneStress2dXfem :: postInitialize()
+{
+	PlaneStress2d::postInitialize();
+	XfemElementInterface :: initializeCZMaterial();
+}
 
 Interface *
 PlaneStress2dXfem :: giveInterface(InterfaceType it)
@@ -159,7 +172,6 @@ PlaneStress2dXfem :: computeStressVector(FloatArray &answer, const FloatArray &s
 //    FloatArray Epsilon;
 //    this->computeStrainVector(Epsilon, gp, stepN);
 
-
     //////////////////
     // Necessary for postprocessing
     StructuralCrossSection *cs = static_cast< StructuralCrossSection * >( this->giveCrossSection() );
@@ -198,18 +210,20 @@ PlaneStress2dXfem :: computeStressVector(FloatArray &answer, const FloatArray &s
 //    StructuralCrossSection *cs = static_cast< StructuralCrossSection * >( this->giveCrossSection() );
 //    cs->giveRealStresses(answer, gp, Epsilon, stepN);
 }
-/*
+
 void PlaneStress2dXfem :: computeStiffnessMatrix(FloatMatrix &answer, MatResponseMode rMode, TimeStep *tStep)
 {
-    this->computeStiffnessMatrix_withIRulesAsSubcells(answer, rMode, tStep);
+	PlaneStress2d::computeStiffnessMatrix(answer, rMode, tStep);
+	XfemElementInterface::computeCohesiveTangent(answer, tStep);
 }
 
 void
 PlaneStress2dXfem :: giveInternalForcesVector(FloatArray &answer, TimeStep *tStep, int useUpdatedGpRecord) 
 {
-    this->giveInternalForcesVector_withIRulesAsSubcells(answer, tStep, useUpdatedGpRecord);
+	PlaneStress2d::giveInternalForcesVector(answer, tStep, useUpdatedGpRecord);
+	XfemElementInterface::computeCohesiveForces(answer, tStep);
 }
-*/
+
 Element_Geometry_Type 
 PlaneStress2dXfem :: giveGeometryType() const
 { 
@@ -296,4 +310,31 @@ void PlaneStress2dXfem :: drawScalar(oofegGraphicContext &context)
     }
 }
 #endif
+
+
+IRResultType
+PlaneStress2dXfem :: initializeFrom(InputRecord *ir)
+{
+    IRResultType result;
+
+    result = PlaneStress2d :: initializeFrom(ir);
+    if( result != IRRT_OK) {
+    	return result;
+    }
+
+    result = XfemElementInterface :: initializeCZFrom(ir);
+    return result;
+}
+
+MaterialMode PlaneStress2dXfem :: giveMaterialMode()
+{
+	return XfemElementInterface::giveMaterialMode();
+}
+
+void PlaneStress2dXfem :: giveInputRecord(DynamicInputRecord &input)
+{
+	PlaneStress2d::giveInputRecord(input);
+	XfemElementInterface::giveCZInputRecord(input);
+}
+
 } // end namespace oofem

@@ -170,8 +170,6 @@ public:
                                                TimeStep *tStep);
 
     virtual int giveIPValue(FloatArray &answer, GaussPoint *gp, InternalStateType type, TimeStep *atTime);
-    virtual InternalStateValueType giveIPValueType(InternalStateType type);
-
     virtual MaterialStatus *CreateStatus(GaussPoint *gp) const;
 
 protected:

@@ -156,7 +156,17 @@ public:
         { _error("give2dStiffnessMatrix_Eng: not implemented "); }
     virtual void give3dStiffnessMatrix_Eng(FloatMatrix &answer,  MatResponseMode mode, GaussPoint *gp, TimeStep *tStep)
         { _error("give3dStiffnessMatrix_Eng: not implemented "); }
+
+    // Numerical stiffness
+    //virtual void give3dStiffnessMatrix_dTdj_Num(FloatMatrix &answer, MatResponseMode rMode, GaussPoint *gp, TimeStep *tStep);
+        
     //@}
+
+    /**
+     * Tells if the model has implemented analytical tangent stiffness.
+     * If not, the tangent must be computed numerically.
+     */
+    virtual bool hasAnalyticalTangentStiffness() const = 0;
 
     // identification and auxiliary functions
     virtual const char *giveClassName() const { return "StructuralInterfaceMaterial"; }
@@ -166,7 +176,6 @@ public:
 
     //virtual int setIPValue(const FloatArray &value, GaussPoint *gp, InternalStateType type);
     virtual int giveIPValue(FloatArray &answer, GaussPoint *gp, InternalStateType type, TimeStep *tStep);
-    virtual InternalStateValueType giveIPValueType(InternalStateType type);
 
 protected:
    

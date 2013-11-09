@@ -35,7 +35,7 @@
 #include "truss1d.h"
 #include "node.h"
 #include "material.h"
-#include "crosssection.h"
+#include "structuralcrosssection.h"
 #include "gausspoint.h"
 #include "gaussintegrationrule.h"
 #include "floatmatrix.h"
@@ -85,12 +85,9 @@ Truss1d :: computeLumpedMassMatrix(FloatMatrix &answer, TimeStep *tStep)
 // Returns the lumped mass matrix of the receiver. This expression is
 // valid in both local and global axes.
 {
-    Material *mat;
-    double halfMass;
     GaussPoint *gp = integrationRulesArray [ 0 ]->getIntegrationPoint(0);
-
-    mat = this->giveMaterial();
-    halfMass = mat->give('d', gp) * this->giveCrossSection()->give(CS_Area) * this->computeLength() * 0.5;
+    double density = this->giveStructuralCrossSection()->give('d', gp);
+    double halfMass = density * this->giveCrossSection()->give(CS_Area) * this->computeLength() * 0.5;
     answer.resize(2, 2);
     answer.zero();
     answer.at(1, 1) = halfMass;

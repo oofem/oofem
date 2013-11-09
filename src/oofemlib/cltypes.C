@@ -198,7 +198,7 @@ int giveInternalStateTypeSize(InternalStateValueType valType)
     }
 }
 
-// New /JB
+
 InternalStateValueType giveInternalStateValueType(UnknownType type)
 {
     if ( ( type == DisplacementVector ) || ( type == EigenVector ) || ( type == VelocityVector ) || ( type == DirectorField ) ) {
@@ -207,10 +207,9 @@ InternalStateValueType giveInternalStateValueType(UnknownType type)
         return ISVT_SCALAR;
     } else {
         OOFEM_ERROR2( "giveInternalStateValueType: unsupported UnknownType %s", __UnknownTypeToString(type) );
+        return ISVT_SCALAR; // To make compiler happy.
     }
-
 }
-
 
 
 ContextIOERR :: ContextIOERR(contextIOResultType e, const char *file, int line)

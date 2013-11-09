@@ -43,8 +43,8 @@
 #include "zznodalrecoverymodel.h"
 #include "sprnodalrecoverymodel.h"
 #include "timestep.h"
+#include "structuralelement.h"
 #include "structuralmaterial.h"
-#include "structuralms.h"
 #include "integrationrule.h"
 #include "feinterpol.h"
 #include "connectivitytable.h"
@@ -286,38 +286,37 @@ ZZErrorEstimatorInterface :: ZZErrorEstimatorI_computeElementContributions(doubl
             diff.beTProductOf(nodalRecoveredStreses, n);
 
             elem->giveIPValue(sig, gp, type, tStep);
-	    /* the internal stress difference is in global coordinate system */
+            /* the internal stress difference is in global coordinate system */
             diff.subtract(sig);
 
             eNorm += diff.computeSquaredNorm() * dV;
             sNorm += sig.computeSquaredNorm() * dV;
         }
     } else if ( norm == ZZErrorEstimator :: EnergyNorm ) {
-      FloatArray help, ldiff_reduced, lsig_reduced;
+        FloatArray help, ldiff_reduced, lsig_reduced;
         FloatMatrix D, DInv;
-	StructuralMaterial* mat =  static_cast< StructuralMaterial * >( elem->giveMaterial() );
+        StructuralElement *selem = static_cast< StructuralElement * >( elem );
 
         for ( int i = 0; i < iRule->giveNumberOfIntegrationPoints(); i++ ) {
             GaussPoint *gp = iRule->getIntegrationPoint(i);
             double dV = elem->computeVolumeAround(gp);
             interpol->evalN( n, *gp->giveCoordinates(), FEIElementGeometryWrapper(elem));
-            mat->giveStiffnessMatrix(D, TangentStiffness, gp, tStep);
+            selem->computeConstitutiveMatrixAt(D, TangentStiffness, gp, tStep);
             DInv.beInverseOf(D);
 
             diff.beTProductOf(nodalRecoveredStreses, n);
 
-	    
             elem->giveIPValue(sig, gp, type, tStep); // returns full value now
             diff.subtract(sig);
             /* the internal stress difference is in global coordinate system */
             /* needs to be transformed into local system to compute associated energy */
             this->ZZErrorEstimatorI_computeLocalStress(ldiff, diff);
-	    mat->giveReducedSymVectorForm(ldiff_reduced, ldiff, gp->giveMaterialMode());
+            StructuralMaterial :: giveReducedSymVectorForm(ldiff_reduced, ldiff, gp->giveMaterialMode());
 
             help.beProductOf(DInv, ldiff_reduced);
             eNorm += ldiff_reduced.dotProduct(help) * dV;
             this->ZZErrorEstimatorI_computeLocalStress(lsig, sig);
-	    mat->giveReducedSymVectorForm(lsig_reduced, lsig, gp->giveMaterialMode());
+            StructuralMaterial :: giveReducedSymVectorForm(lsig_reduced, lsig, gp->giveMaterialMode());
             help.beProductOf(DInv, lsig_reduced);
             sNorm += lsig_reduced.dotProduct(help) * dV;
         }

@@ -100,7 +100,7 @@ protected:
 
 public:
     /// Constructor
-    DustMaterialStatus(int n, Domain *d, GaussPoint *gp);
+    DustMaterialStatus(int n, Domain *d, GaussPoint *gp, double q0);
 
     /// Destructor
     virtual ~DustMaterialStatus();
@@ -482,8 +482,6 @@ public:
                             InternalStateType type,
                             TimeStep *atTime);
 
-    virtual InternalStateValueType giveIPValueType(InternalStateType type);
-
     virtual bool isCharacteristicMtrxSymmetric(MatResponseMode rMode) { return false; }
 
     virtual void giveThermalDilatationVector(FloatArray &answer, GaussPoint *gp, TimeStep *atTime)
@@ -493,7 +491,7 @@ public:
 
     virtual MaterialStatus *CreateStatus(GaussPoint *gp) const;
 
-    double giveQ0() { return q0; }
+    double giveQ0() const { return q0; }
 };
 } // end namespace oofem
 #endif // dustmat_h

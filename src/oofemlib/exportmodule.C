@@ -66,6 +66,9 @@ ExportModule :: initializeFrom(InputRecord *ir)
 
     IR_GIVE_OPTIONAL_FIELD(ir, tsteps_out, _IFT_ExportModule_tstepsout);
 
+    tstep_substeps_out_flag = 0;
+    IR_GIVE_OPTIONAL_FIELD(ir, tstep_substeps_out_flag, _IFT_ExportModule_subtstepsout);
+
     domain_all_flag = ir->hasField(_IFT_ExportModule_domainall);
 
     if ( !domain_all_flag ) {
@@ -80,13 +83,28 @@ std::string
 ExportModule :: giveOutputBaseFileName(TimeStep *tStep)
 {
     char fext[100];
+
+    if (this->testSubStepOutput()) {
+      // include tStep version in output file name
 #ifdef __PARALLEL_MODE
-    if (this->emodel->isParallel() && this->emodel->giveNumberOfProcesses() > 1)
-        sprintf( fext, "_%03d.m%d.%d", emodel->giveRank(), this->number, tStep->giveNumber() );
-    else
+      if (this->emodel->isParallel() && this->emodel->giveNumberOfProcesses() > 1)
+        sprintf( fext, "_%03d.m%d.%d.%d", emodel->giveRank(), this->number, tStep->giveNumber(), tStep->giveSubstepNumber() );
+      else
 #endif
-    sprintf( fext, ".m%d.%d", this->number, tStep->giveNumber() );
-    return this->emodel->giveOutputBaseFileName() + fext;
+	sprintf( fext, ".m%d.%d.%d", this->number, tStep->giveNumber(), tStep->giveSubstepNumber());
+      return this->emodel->giveOutputBaseFileName() + fext;
+
+
+    } else {
+
+#ifdef __PARALLEL_MODE
+      if (this->emodel->isParallel() && this->emodel->giveNumberOfProcesses() > 1)
+        sprintf( fext, "_%03d.m%d.%d", emodel->giveRank(), this->number, tStep->giveNumber() );
+      else
+#endif
+	sprintf( fext, ".m%d.%d", this->number, tStep->giveNumber() );
+      return this->emodel->giveOutputBaseFileName() + fext;
+    }
 }
 
 bool

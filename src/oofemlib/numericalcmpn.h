@@ -46,7 +46,6 @@ namespace oofem {
 enum NumericalCmpn {
     InternalRhs,
     NonLinearLhs,
-    NonLinearRhs_Incremental,
 };
 } // end namespace oofem
 #endif // numericalcmpn_h

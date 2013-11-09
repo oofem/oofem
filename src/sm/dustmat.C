@@ -51,12 +51,12 @@ namespace oofem {
 
 REGISTER_Material( DustMaterial );
 
-DustMaterialStatus :: DustMaterialStatus(int n, Domain *d, GaussPoint *gp) :
+DustMaterialStatus :: DustMaterialStatus(int n, Domain *d, GaussPoint *gp, double q0) :
     StructuralMaterialStatus(n, d, gp),
     plasticStrain( gp->giveMaterialMode() ),
     tempPlasticStrain( gp->giveMaterialMode() )
 {
-    q = static_cast< DustMaterial * >( gp->giveMaterial() )->giveQ0();
+    q = q0;
 }
 
 DustMaterialStatus :: ~DustMaterialStatus()
@@ -578,27 +578,10 @@ DustMaterial :: giveIPValue(FloatArray &answer,
     return 0;
 }
 
-
-InternalStateValueType
-DustMaterial :: giveIPValueType(InternalStateType type)
-{
-    if ( type == IST_PlasticStrainTensor ) {
-        return ISVT_TENSOR_S3E;
-    } else if ( type == IST_PrincipalPlasticStrainTensor ) {
-        return ISVT_VECTOR;
-    } else if ( type == IST_StressCapPos || type == IST_VolumetricPlasticStrain ) {
-        return ISVT_SCALAR;
-    } else {
-        return StructuralMaterial :: giveIPValueType(type);
-    }
-}
-
 MaterialStatus *
 DustMaterial :: CreateStatus(GaussPoint *gp) const
 {
-    DustMaterialStatus *status =
-        new  DustMaterialStatus(1, StructuralMaterial :: giveDomain(), gp);
-    return status;
+    return new DustMaterialStatus(1, StructuralMaterial :: giveDomain(), gp, this->giveQ0());
 }
 
 double

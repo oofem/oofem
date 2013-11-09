@@ -84,6 +84,27 @@ private:
     int *values;
 
 public:
+    /// @name Iterator for for-each loops:
+    //@{
+    class iterator {
+    private:
+        int pos;
+        const IntArray *vec;
+
+    public:
+        iterator(const IntArray* vec, int pos);
+
+        bool operator!=(const IntArray :: iterator& other) const;
+
+        int operator*() const;
+
+        const IntArray :: iterator& operator++();
+    };
+
+    IntArray :: iterator begin();
+    IntArray :: iterator end();
+    //@}
+
     /// Constructor for zero sized array
     IntArray();
     /// Constructor for sized array. Data is zeroed.

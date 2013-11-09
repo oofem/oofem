@@ -47,8 +47,6 @@
 ///@name Input fields for CrossSection
 //@{
 #define _CrossSection_SetNumber "set"
-#define _CrossSection_MaterialNumber "material"
-#define _CrossSection_czMaterialNumber "czmaterial"
 //@}
 
 namespace oofem {
@@ -109,8 +107,7 @@ protected:
     Dictionary *propertyDictionary;
 
     int setNumber;        // el set number the cross section is applied to
-    int materialNumber;   // material number
-    int czMaterialNumber; // cohesive zone material number
+
 public:
     /**
      * Constructor. Creates cross section with number n belonging to domain d.
@@ -120,22 +117,27 @@ public:
     CrossSection(int n, Domain *d) : FEMComponent(n, d)
     { propertyDictionary = new Dictionary(); 
       setNumber = 0;
-      materialNumber = 0;
-      czMaterialNumber = 0;
     }
     /// Destructor.
     virtual ~CrossSection() { delete propertyDictionary; }
 
     int const giveSetNumber() { return this->setNumber; };
-    int const giveMaterialNumber() { return this->materialNumber; };
-    int const giveCZMaterialNumber() { return this->czMaterialNumber; };
-    int const setCZMaterialNumber(int matNum) { this->czMaterialNumber = matNum; };
+
     /**
      * Returns the value of cross section property.
      * @param a Id of requested property.
      * @return Property value.
      */
     virtual double give(CrossSectionProperty a);
+
+    /**
+     * Returns the value of cross section property.
+     * @param a Id of requested property.
+     * @param gp Integration point.
+     * @return Property value.
+     */
+    virtual double give(int aProperty, GaussPoint *gp){ return 0.0; };
+
     /**
      * Check for symmetry of stiffness matrix.
      * Default implementation returns true.
@@ -143,9 +145,18 @@ public:
      * @param rMode Response mode of material.
      * @param mat Material index.
      * @return True if stiffness matrix of receiver is symmetric.
+     * @deprected will be removed in the future when cross sections stores the material 
      */
     virtual bool isCharacteristicMtrxSymmetric(MatResponseMode rMode, int mat);
-
+    
+    /**
+     * Check for symmetry of stiffness matrix.
+     * Default implementation returns true.
+     * It can be moved to base Cross section class in the future.
+     * @param rMode Response mode of material.
+     * @return True if stiffness matrix of receiver is symmetric.
+     */
+    virtual bool isCharacteristicMtrxSymmetric(MatResponseMode rMode) { return false; }; 
     virtual void printYourself();
 
     /**
@@ -177,14 +188,7 @@ public:
      */
     virtual int giveIPValue(FloatArray &answer, GaussPoint *ip, InternalStateType type, TimeStep *atTime)
     { return ip->giveMaterial()->giveIPValue(answer, ip, type, atTime); }
-    /**
-     * Returns the type of internal variable (scalar, vector, tensor,...).
-     * @param type Determines the type of internal variable.
-     * @param mat Material to check.
-     * @return Type of internal variable.
-     */
-    virtual InternalStateValueType giveIPValueType(InternalStateType type, Material *mat)
-    { return mat->giveIPValueType(type); }
+
 
 #ifdef __PARALLEL_MODE
     /**
@@ -267,6 +271,7 @@ public:
      * @exception throws an ContextIOERR exception if error encountered.
      */
     virtual contextIOResultType restoreIPContext(DataStream *stream, ContextMode mode, GaussPoint *gp);
+
 };
 } // end namespace oofem
 #endif // crosssection_h

@@ -94,7 +94,6 @@ enum IntegrationRuleType {
 class OOFEM_EXPORT IntegrationRule
 {
 protected:
-
     /// Number.
     int number;
     /// Element which integration rule is coupled to.
@@ -119,6 +118,27 @@ protected:
     bool isDynamic;
 
 public:
+    /// @name Iterator for for-each loops:
+    //@{
+    class iterator {
+    private:
+        int pos;
+        IntegrationRule *ir;
+
+    public:
+        iterator(IntegrationRule* ir, int pos);
+
+        bool operator!=(const IntegrationRule :: iterator& other) const;
+
+        GaussPoint & operator*() const;
+
+        const IntegrationRule :: iterator& operator++();
+    };
+
+    IntegrationRule :: iterator begin();
+    IntegrationRule :: iterator end();
+    //@}
+
     /**
      * Constructor.
      * @param n Number associated with receiver.

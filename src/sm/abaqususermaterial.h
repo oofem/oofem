@@ -130,7 +130,6 @@ public:
                               const FloatArray &reducedF, TimeStep *tStep);
 
     virtual int giveIPValue(FloatArray &answer, GaussPoint *aGaussPoint, InternalStateType type, TimeStep *atTime);
-    virtual InternalStateValueType giveIPValueType(InternalStateType type);
 
     virtual int hasNonLinearBehaviour() { return true; }
     virtual const char *giveClassName() const { return "AbaqusUserMaterial"; }

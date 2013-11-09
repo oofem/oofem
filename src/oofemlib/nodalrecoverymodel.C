@@ -240,7 +240,7 @@ NodalRecoveryModel :: giveRegionRecordSize(int reg, InternalStateType type)
 
     for ( int ielem = 1; ielem <= nelem; ielem++ ) {
         if ( this->giveElementVirtualRegionNumber(ielem) == reg ) {
-            return domain->giveElement(ielem)->giveIPValueType(type);
+            //return domain->giveElement(ielem)->giveIPValueType(type);
         }
     }
 

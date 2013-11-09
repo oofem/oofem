@@ -135,13 +135,13 @@ NLStructuralElement :: giveInternalForcesVector(FloatArray &answer, TimeStep *tS
     IntegrationRule *iRule = integrationRulesArray [ giveDefaultIntegrationRule() ];
     for ( int i = 0; i < iRule->giveNumberOfIntegrationPoints(); i++ ) {
         GaussPoint *gp = iRule->getIntegrationPoint(i);
-        Material *mat = gp->giveMaterial();
+        StructuralMaterialStatus *matStat = static_cast< StructuralMaterialStatus * >( gp->giveMaterialStatus() );
 
         // Engineering (small strain) stress
         if ( nlGeometry == 0 ) {
             this->computeBmatrixAt(gp, B);
             if ( useUpdatedGpRecord == 1 ) {
-                vStress = static_cast< StructuralMaterialStatus * >( mat->giveStatus(gp) )->giveStressVector();
+                vStress = matStat->giveStressVector();
             } else {
                 ///@todo Is this really what we should do for inactive elements?
                 if ( !this->isActivated(tStep) ) {
@@ -154,7 +154,7 @@ NLStructuralElement :: giveInternalForcesVector(FloatArray &answer, TimeStep *tS
         } else if ( nlGeometry == 1 ) {  // First Piola-Kirchhoff stress
             if ( this->domain->giveEngngModel()->giveFormulation() == AL ) { // Cauchy stress
                 if ( useUpdatedGpRecord == 1 ) {
-                    vStress = static_cast< StructuralMaterialStatus * >( mat->giveStatus(gp) )->giveCVector();
+                    vStress = matStat->giveCVector();
                 } else {
                     this->computeCauchyStressVector(vStress, gp, tStep);
                 }
@@ -162,7 +162,7 @@ NLStructuralElement :: giveInternalForcesVector(FloatArray &answer, TimeStep *tS
                 this->computeBmatrixAt(gp, B);
             } else { // First Piola-Kirchhoff stress
                 if ( useUpdatedGpRecord == 1 ) {
-                    vStress = static_cast< StructuralMaterialStatus * >( mat->giveStatus(gp) )->givePVector();
+                    vStress = matStat->givePVector();
                 } else {
                     this->computeFirstPKStressVector(vStress, gp, tStep);
                     ///@todo This is actaully inefficient since it constructs B and twice and collects the nodal unknowns over and over.
@@ -202,7 +202,6 @@ NLStructuralElement :: giveInternalForcesVector_withIRulesAsSubcells(FloatArray 
      * Each integration rule is considered to represent a separate sub-cell/element. Typically this would be used when
      * integration of the element domain needs special treatment, e.g. when using the XFEM.
      */
-    Material *mat = this->giveMaterial();
 
     FloatMatrix B;
     FloatArray vStress, vStrain;
@@ -216,17 +215,19 @@ NLStructuralElement :: giveInternalForcesVector_withIRulesAsSubcells(FloatArray 
     // zero answer will resize accordingly when adding first contribution
     answer.resize(0);
 
+
     // loop over individual integration rules
     for ( int ir = 0; ir < numberOfIntegrationRules; ir++ ) {
         IntegrationRule *iRule = integrationRulesArray [ ir ];
 
         for ( int i = 0; i < iRule->giveNumberOfIntegrationPoints(); i++ ) {
             GaussPoint *gp = iRule->getIntegrationPoint(i);
+            StructuralMaterialStatus *matStat = static_cast< StructuralMaterialStatus * >( gp->giveMaterialStatus() );
 
             if ( nlGeometry == 0 ) {
                 this->computeBmatrixAt(gp, B);
                 if ( useUpdatedGpRecord == 1 ) {
-                    vStress = static_cast< StructuralMaterialStatus * >( mat->giveStatus(gp) )->giveStressVector();
+                    vStress = matStat->giveStressVector();
                 } else {
                     this->computeStrainVector(vStrain, gp, tStep);
                     this->computeStressVector(vStress, vStrain, gp, tStep);
@@ -234,7 +235,7 @@ NLStructuralElement :: giveInternalForcesVector_withIRulesAsSubcells(FloatArray 
             } else if ( nlGeometry == 1 ) {
                 if ( this->domain->giveEngngModel()->giveFormulation() == AL ) { // Cauchy stress
                     if ( useUpdatedGpRecord == 1 ) {
-                        vStress = static_cast< StructuralMaterialStatus * >( mat->giveStatus(gp) )->giveCVector();
+                         vStress = matStat->giveCVector();
                     } else {
                         this->computeCauchyStressVector(vStress, gp, tStep);
                     }
@@ -242,7 +243,7 @@ NLStructuralElement :: giveInternalForcesVector_withIRulesAsSubcells(FloatArray 
                     this->computeBmatrixAt(gp, B);
                 } else { // First Piola-Kirchhoff stress
                     if ( useUpdatedGpRecord == 1 ) {
-                        vStress = static_cast< StructuralMaterialStatus * >( mat->giveStatus(gp) )->givePVector();
+                        vStress = matStat->givePVector();
                     } else {
                         this->computeFirstPKStressVector(vStress, gp, tStep);
                     }
@@ -284,7 +285,12 @@ NLStructuralElement :: computeStiffnessMatrix(FloatMatrix &answer,
                                               MatResponseMode rMode, TimeStep *tStep)
 {
     StructuralCrossSection *cs = this->giveStructuralCrossSection();
-    bool matStiffSymmFlag = cs->isCharacteristicMtrxSymmetric(rMode, this->material);
+    bool matStiffSymmFlag = false; 
+    if ( this->MAT_GIVEN_BY_CS ) {
+        matStiffSymmFlag = cs->isCharacteristicMtrxSymmetric( rMode );
+    } else {
+        matStiffSymmFlag = cs->isCharacteristicMtrxSymmetric( rMode, this->giveMaterial()->giveNumber() );
+    }
 
     answer.resize(0, 0);
 
@@ -359,10 +365,10 @@ NLStructuralElement :: computeStiffnessMatrix(FloatMatrix &answer,
                         this->computeBmatrixAt(gp, Bi, iStartIndx, iEndIndx);
                         this->computeConstitutiveMatrixAt(D, rMode, gp, tStep);
                     } else if ( nlGeometry == 1 ) {
-                        if ( this->domain->giveEngngModel()->giveFormulation() == AL ) {                         // Material stiffness dC/de
+                        if ( this->domain->giveEngngModel()->giveFormulation() == AL ) { // Material stiffness dC/de
                             this->computeBmatrixAt(gp, Bi);
                             cs->giveStiffnessMatrix_dCde(D, rMode, gp, tStep);
-                        } else {                        // Material stiffness dP/dF
+                        } else { // Material stiffness dP/dF
                             this->computeBHmatrixAt(gp, Bi);
                             cs->giveStiffnessMatrix_dPdF(D, rMode, gp, tStep);
                         }
@@ -407,7 +413,12 @@ NLStructuralElement :: computeStiffnessMatrix_withIRulesAsSubcells(FloatMatrix &
                                                                    MatResponseMode rMode, TimeStep *tStep)
 {
     StructuralCrossSection *cs = this->giveStructuralCrossSection();
-    bool matStiffSymmFlag = cs->isCharacteristicMtrxSymmetric(rMode, this->material);
+    bool matStiffSymmFlag = false; 
+    if ( this->MAT_GIVEN_BY_CS ) {
+        matStiffSymmFlag = cs->isCharacteristicMtrxSymmetric( rMode );
+    } else {
+        matStiffSymmFlag = cs->isCharacteristicMtrxSymmetric( rMode, this->giveMaterial()->giveNumber() );
+    }
     answer.resize(0, 0);
     if ( !this->isActivated(tStep) ) {
         return;

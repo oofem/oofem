@@ -120,8 +120,10 @@ set (sm_material
     latticedamage2d.C
     dustmat.C
     lsmastermat.C lsmastermatgrad.C
-    bilinearczmaterial.C
     intmatbilinczfagerstrom.C
+	intmatbilinczjansson.C
+    intmatbilinearcz.C
+	intmatbilinczelastic.C
     )
 
 set (sm_error

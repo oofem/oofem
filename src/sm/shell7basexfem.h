@@ -70,8 +70,7 @@ protected:
     virtual void updateYourself(TimeStep *tStep);
     virtual void postInitialize();
     void computeOrderingArray( IntArray &orderingArray, IntArray &activeDofsArray,  EnrichmentItem *ei);
-    
-   
+
     virtual void evalCovarBaseVectorsAt(FloatArray &lCoords, FloatMatrix &gcon, FloatArray &solVec);
     void discGiveInitialSolutionVector(FloatArray &answer, IntArray &eiDofIdArray); // should be replaced with general function
     void computeDiscGeneralizedStrainVector(FloatArray &dGenEps, FloatArray &lCoords, EnrichmentItem *ei, TimeStep *tStep);
@@ -114,14 +113,13 @@ public:
     
     void giveMaxCZDamages(FloatArray &answer, TimeStep *tStep);
     virtual const char *giveClassName()  const { return "Shell7BaseXFEM"; }
-    //virtual classType giveClassID()      const { return Shell7BaseXFEMClass; }
     virtual Interface *giveInterface(InterfaceType it);
     
     virtual IRResultType initializeFrom(InputRecord *ir);
     virtual void giveDofManDofIDMask(int inode, EquationID ut, IntArray &answer) const;
     virtual int giveNumberOfDofs();
 
-    bool hasCohesiveZone();
+    bool hasCohesiveZone(int interfaceNum);
     IntegrationRule **czIntegrationRulesArray;
     IntegrationRule giveCZIntegrationRulesArray() { return **czIntegrationRulesArray; };
 };

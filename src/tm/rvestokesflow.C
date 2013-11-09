@@ -196,7 +196,7 @@ RVEStokesFlow :: giveIPValue(FloatArray &answer, GaussPoint *aGaussPoint, Intern
         answer.at(4) = temp.at(2, 2);
         break;
     default:
-        return TransportMaterial :: giveIPValueType(type);
+        return TransportMaterial :: giveIPValue(answer, aGaussPoint, type, atTime);
     }
 
     return 1;

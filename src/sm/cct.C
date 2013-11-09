@@ -101,7 +101,6 @@ CCTPlate :: computeBodyLoadVectorAt(FloatArray &answer, Load *forLoad, TimeStep 
 // (should be global coordinate system, but there may be defined
 //  different coordinate system in each node)
 {
-    double dens, dV, load;
     GaussPoint *gp = NULL;
     FloatArray force;
     FloatMatrix T;
@@ -118,14 +117,13 @@ CCTPlate :: computeBodyLoadVectorAt(FloatArray &answer, Load *forLoad, TimeStep 
 
     if ( force.giveSize() ) {
         gp = irule.getIntegrationPoint(0);
-
-        dens = this->giveMaterial()->give('d', gp);
-        dV   = this->computeVolumeAround(gp) * this->giveCrossSection()->give(CS_Thickness);
+        double dens = this->giveStructuralCrossSection()->give('d', gp);
+        double dV   = this->computeVolumeAround(gp) * this->giveCrossSection()->give(CS_Thickness);
 
         answer.resize(9);
         answer.zero();
 
-        load = force.at(1) * dens * dV / 3.0;
+        double load = force.at(1) * dens * dV / 3.0;
         answer.at(1) = load;
         answer.at(4) = load;
         answer.at(7) = load;
@@ -335,16 +333,14 @@ void
 CCTPlate :: computeLumpedMassMatrix(FloatMatrix &answer, TimeStep *tStep)
 // Returns the lumped mass matrix of the receiver.
 {
-    GaussPoint *gp;
-    double dV, mss1;
-
     answer.resize(9, 9);
     answer.zero();
 
-    gp = integrationRulesArray [ 0 ]->getIntegrationPoint(0);
+    GaussPoint *gp = integrationRulesArray [ 0 ]->getIntegrationPoint(0);
 
-    dV = this->computeVolumeAround(gp);
-    mss1 = dV * this->giveCrossSection()->give(CS_Thickness) * this->giveMaterial()->give('d', gp) / 3.;
+    double dV = this->computeVolumeAround(gp);
+    double density = this->giveStructuralCrossSection()->give('d', gp);
+    double mss1 = dV * this->giveCrossSection()->give(CS_Thickness) * density / 3.;
 
     answer.at(1, 1) = mss1;
     answer.at(4, 4) = mss1;
@@ -421,10 +417,10 @@ int
 CCTPlate :: giveIPValue(FloatArray &answer, GaussPoint *gp, InternalStateType type, TimeStep *atTime)
 {
     if ( type == IST_ShellForceMomentumTensor ) {
-        answer = static_cast< StructuralMaterialStatus * >( this->giveMaterial()->giveStatus(gp) )->giveStressVector();
+        answer = static_cast< StructuralMaterialStatus * >( gp->giveMaterialStatus() )->giveStressVector();
         return 1;
     } else if ( type == IST_ShellStrainCurvatureTensor ) {
-        answer = static_cast< StructuralMaterialStatus * >( this->giveMaterial()->giveStatus(gp) )->giveStrainVector();
+        answer = static_cast< StructuralMaterialStatus * >( gp->giveMaterialStatus() )->giveStrainVector();
         return 1;
     } else {
       return NLStructuralElement::giveIPValue(answer, gp, type, atTime);
@@ -450,10 +446,10 @@ CCTPlate :: NodalAveragingRecoveryMI_computeNodalValue(FloatArray &answer, int n
     GaussPoint *gp;
     if ( type == IST_ShellForceMomentumTensor ) {
         gp = integrationRulesArray [ 0 ]->getIntegrationPoint(0);
-        answer = static_cast< StructuralMaterialStatus * >( this->giveMaterial()->giveStatus(gp) )->giveStressVector();
+        answer = static_cast< StructuralMaterialStatus * >( gp->giveMaterialStatus() )->giveStressVector();
     } else if ( type == IST_ShellStrainCurvatureTensor ) {
         gp = integrationRulesArray [ 0 ]->getIntegrationPoint(0);
-        answer = static_cast< StructuralMaterialStatus * >( this->giveMaterial()->giveStatus(gp) )->giveStrainVector();
+        answer = static_cast< StructuralMaterialStatus * >( gp->giveMaterialStatus() )->giveStrainVector();
     } else {
         answer.resize(0);
     }

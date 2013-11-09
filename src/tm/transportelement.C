@@ -511,6 +511,7 @@ TransportElement :: computeConstitutiveMatrixAt(FloatMatrix &answer,
 void
 TransportElement :: computeInternalForcesVectorAt(FloatArray &answer, TimeStep *tStep, ValueModeType mode)
 {
+    FloatArray tmp;
     FloatArray unknowns;
     FloatMatrix s;
     this->computeVectorOf(EID_ConservationEquation, mode, tStep, unknowns);
@@ -518,11 +519,13 @@ TransportElement :: computeInternalForcesVectorAt(FloatArray &answer, TimeStep *
     this->computeConductivityMatrix(s, Conductivity, tStep);
     answer.beProductOf(s, unknowns);
 
-    ///@todo Convective b.c.s should be treated as a active boundary condition instead (same for every bc that has contributions to the residual and/or tangent).
+    this->computeInternalSourceRhsVectorAt(tmp, tStep, mode);
+    answer.subtract(tmp);
+
+    ///@todo Convective b.c.s
     FloatMatrix bc_tangent;
     this->computeBCMtrxAt(bc_tangent, tStep, VM_Total);
     if ( bc_tangent.isNotEmpty() ) {
-        FloatArray tmp;
         tmp.beProductOf(bc_tangent, unknowns);
         answer.add(tmp);
     }
@@ -712,10 +715,7 @@ TransportElement :: computeBoundaryEdgeLoadVector(FloatArray &answer, BoundaryLo
 void
 TransportElement :: computeExternalForcesVectorAt(FloatArray &answer, TimeStep *tStep, ValueModeType mode)
 {
-    FloatArray tmp;
-    this->computeInternalSourceRhsVectorAt(answer, tStep, mode);
-    this->computeBCVectorAt(tmp, tStep, mode);
-    answer.add(tmp);
+    this->computeBCVectorAt(answer, tStep, mode);
 }
 
 void

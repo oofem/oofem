@@ -104,7 +104,7 @@ Quad1Mindlin :: computeBodyLoadVectorAt(FloatArray &answer, Load *forLoad, TimeS
 
             this->interp_lin.evalN(n, *gp->giveCoordinates(), FEIElementGeometryWrapper(this));
             dV = this->computeVolumeAround(gp) * this->giveCrossSection()->give(CS_Thickness);
-            load = this->giveMaterial()->give('d', gp) * gravity.at(3) * dV;
+            load = this->giveStructuralCrossSection()->give('d', gp) * gravity.at(3) * dV;
 
             force.add(load, n);
         }
@@ -220,7 +220,7 @@ Quad1Mindlin :: computeLumpedMassMatrix(FloatMatrix &answer, TimeStep *tStep)
         gp = ir->getIntegrationPoint(i);
 
         dV = this->computeVolumeAround(gp);
-        mass += dV * this->giveMaterial()->give('d', gp);
+        mass += dV * this->giveStructuralCrossSection()->give('d', gp);
     }
 
     answer.resize(12, 12);
@@ -236,10 +236,10 @@ int
 Quad1Mindlin :: giveIPValue(FloatArray &answer, GaussPoint *gp, InternalStateType type, TimeStep *atTime)
 {
     if ( type == IST_ShellForceMomentumTensor ) {
-        answer = static_cast< StructuralMaterialStatus * >( this->giveMaterial()->giveStatus(gp) )->giveStressVector();
+        answer = static_cast< StructuralMaterialStatus * >( gp->giveMaterialStatus() )->giveStressVector();
         return 1;
     } else if ( type == IST_ShellStrainCurvatureTensor ) {
-        answer = static_cast< StructuralMaterialStatus * >( this->giveMaterial()->giveStatus(gp) )->giveStrainVector();
+        answer = static_cast< StructuralMaterialStatus * >( gp->giveMaterialStatus() )->giveStrainVector();
         return 1;
     } else {
         return NLStructuralElement::giveIPValue(answer, gp, type, atTime);

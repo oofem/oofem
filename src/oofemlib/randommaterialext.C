@@ -89,7 +89,8 @@ RandomMaterialExtensionInterface :: giveInputRecord(DynamicInputRecord &ir)
 bool
 RandomMaterialExtensionInterface :: give(int key, GaussPoint *gp, double &value)
 {
-    MaterialStatus *status = gp->giveMaterial()->giveStatus(gp);
+    //MaterialStatus *status = gp->giveMaterial()->giveStatus(gp);
+    MaterialStatus *status = static_cast < MaterialStatus * > ( gp->giveMaterialStatus() );
     RandomMaterialStatusExtensionInterface *interface = static_cast< RandomMaterialStatusExtensionInterface * >
                                                         ( status->giveInterface(RandomMaterialStatusExtensionInterfaceType) );
     return interface->_giveProperty(key, value);
@@ -100,8 +101,9 @@ RandomMaterialExtensionInterface :: _generateStatusVariables(GaussPoint *gp) con
 {
     int size = randVariables.giveSize();
     double value;
+    MaterialStatus *matStat = static_cast < MaterialStatus * > ( gp->giveMaterialStatus() );
     RandomMaterialStatusExtensionInterface *status = static_cast< RandomMaterialStatusExtensionInterface * >
-                                                     ( gp->giveMaterial()->giveStatus(gp)->giveInterface(RandomMaterialStatusExtensionInterfaceType) );
+                                                     ( matStat->giveInterface(RandomMaterialStatusExtensionInterfaceType) );
 
     for ( int i = 1; i <= size; i++ ) {
         gp->giveElement()->giveDomain()->

@@ -202,16 +202,6 @@ public:
      * @returns Nonzero if the assignment can be done, zero if this type of variable is not supported.
      */
     virtual int giveIPValue(FloatArray &answer, GaussPoint *aGaussPoint, InternalStateType type, TimeStep *atTime);
-    /**
-     * Returns the type of internal variable (scalar, vector, tensor,...).
-     * @param type Determines the type of internal variable.
-     * @returns Type of internal variable.
-     */
-    virtual InternalStateValueType giveIPValueType(InternalStateType type)
-    {
-        _error("giveIPValueType: unsupported InternalStateType");
-        return ISVT_UNDEFINED;
-    }
     //@}
 
     virtual IRResultType initializeFrom(InputRecord *ir);

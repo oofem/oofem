@@ -723,6 +723,7 @@ The corresponding meta step solver parameters (\param{solverParams}) are:\\
   \recentry{}{\optField{initialStepLength}{rn}}
   \recentry{}{\optField{forcedInitialStepLength}{rn}}
   \recentry{}{\optField{reqIterations}{in}}
+  \recentry{}{\optField{maxrestarts}{in}}
   \recentry{}{\optField{minIter}{in}}
   \recentry{}{\optField{manrmsteps}{in}}
   \recentry{}{\optField{hpcmode}{in} \optField{hpc}{ia} \optField{hpcw}{ia}}
@@ -747,6 +748,7 @@ be decreased, computation terminates.
 \item \param{initialsteplength} - determines the initial step length (the arc-length). If not provided, the maximum step length (determined by \param{stepLength} parameter) will be used as the value of initial step length. 
 \item \param{forcedInitialStepLength} - When simulation is restarted, the last predicted step length is used. Use \param{forcedInitialStepLength} parameter to override the value of step length. This parameter will also override the value of initial step length set by \param{initialsteplength} parameter.
 \item \param{reqIterations} - approximate number of iterations controlled by changing the step length.
+\item \param{maxrestarts} - maximum number of restarting computation when convergence not reached up to \param{MaxIter}.
 \item \param{minIter} - minimum number of iterations which always proceed during the iterative solution. \param{reqIterations} are set to be the same, \param{MaxIter} are increased if lower.
 \item \param{manrmsteps} - Forces the use of accelerated
 Newton Raphson met\-hod, where stiffness is updated after
@@ -1578,6 +1580,7 @@ is the following:\\
   \recentry{\entKeyword{EntType}}{[\fieldnotype{tstep\_all}]}
   \recentry{}{\optField{tstep\_step}{in}}
   \recentry{}{\optField{tsteps\_out}{rl}}
+  \recentry{}{\optField{subtsteps\_out}{rl}}
   \recentry{}{[\fieldnotype{domain\_all}]}
   \recentry{}{\optField{domain\_mask}{in}}
 \end{record}
@@ -1591,6 +1594,9 @@ To select output for all domain of the problem the \param{domain\_all}
 keyword can be used. To select only specific domains,
 \param{domain\_mask} array can be used, where the values of the array
 specify the domain numbers to be exported.
+The parameter \param{subtsteps\_out} turns on the export of intermediate results, 
+for example during the substepping or individual equilibrium iterations. This option requires support from the solver.
+
 Currently, the supported export modules are following
 \begin{itemize}
 \item VTK export, \textbf{DEPRECATED - Use VTKXML}
@@ -1608,6 +1614,7 @@ Currently, the supported export modules are following
   \recentry{\entKeywordInst{vtkxml}}{\optField{vars}{ia}}
   \recentry{}{\optField{primvars}{ia}}
   \recentry{}{\optField{cellvars}{ia}}
+  \recentry{}{\optField{ipvars}{ia}}
   \recentry{}{\optField{stype}{in}}
   \recentry{}{\optField{regionstoskip}{ia}}
   \recentry{}{\optField{nvr}{in}}
@@ -1619,7 +1626,7 @@ Currently, the supported export modules are following
 \item The vtk module is obsolete, use vtkxml instead. Vtkxml allows to export results recovered on region by region basis and has more features.
 
 \item The array \param{vars} contains identifiers for those internal
-variables which are to be exported. The id values are defined by
+variables which are to be exported. These variables will be smoothed and transfered to nodes. The id values are defined by
 InternalStateType enumeration, which is defined in include file
 ``src/oofemlib/internal\-statetype.h''.
 
@@ -1634,6 +1641,13 @@ supported by particular material model or analysis type.
 \item The array \param{cellvars} contains identifiers of constant variables defined
 on an element (cell), e.g. a material number. Identifier numbers are specified in
 ``src/oofemlib/internalstatetype.h''.
+
+\item The array \param{ipvars} contains identifiers for those internal
+variables which are to be exported. These variables will be directly exported (no smoothing) as point dataset, where each point corresponds to individual integration point. A separate vtu file for these raw, point data will be created. 
+The id values are defined by
+InternalStateType enumeration, which is defined in include file
+``src/oofemlib/internal\-statetype.h''.
+
 
 \item The parameter \param{stype} allows to select smoothing procedure for
 internal variables, which is used to compute nodal values from values

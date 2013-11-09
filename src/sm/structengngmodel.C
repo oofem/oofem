@@ -101,12 +101,9 @@ StructuralEngngModel :: printReactionForces(TimeStep *tStep, int di)
 void
 StructuralEngngModel :: computeReaction(FloatArray &answer, TimeStep *tStep, int di)
 {
-    int numRestrDofs = 0;
     FloatArray contribution;
-    FloatArray EquivForces;
 
-    numRestrDofs = this->giveNumberOfDomainEquations(di, EModelDefaultPrescribedEquationNumbering());
-    answer.resize(numRestrDofs);
+    answer.resize(this->giveNumberOfDomainEquations(di, EModelDefaultPrescribedEquationNumbering()));
     answer.zero();
 
     // Add internal forces
@@ -129,10 +126,6 @@ StructuralEngngModel :: computeReaction(FloatArray &answer, TimeStep *tStep, int
 void
 StructuralEngngModel :: computeExternalLoadReactionContribution(FloatArray &reactions, TimeStep *tStep, int di)
 {
-    int numRestrDofs = this->giveNumberOfDomainEquations(di, EModelDefaultPrescribedEquationNumbering());
-    reactions.resize(numRestrDofs);
-    reactions.zero();
-
     reactions.resize( this->giveNumberOfDomainEquations(di, EModelDefaultPrescribedEquationNumbering()) );
     reactions.zero();
     this->assembleVector( reactions, tStep, EID_MomentumBalance, ExternalForcesVector, VM_Total,
@@ -156,7 +149,7 @@ StructuralEngngModel :: giveInternalForces(FloatArray &answer, bool normFlag, in
     }
 #endif
 
-answer.resize( this->giveNumberOfDomainEquations(di, EModelDefaultEquationNumbering()) );
+    answer.resize( this->giveNumberOfDomainEquations(di, EModelDefaultEquationNumbering()) );
     answer.zero();
     this->assembleVector( answer, stepN, EID_MomentumBalance, InternalForcesVector, VM_Total,
                           EModelDefaultEquationNumbering(), domain, normFlag ? &this->internalForcesEBENorm : NULL );

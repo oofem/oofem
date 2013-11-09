@@ -86,7 +86,10 @@ public:
      * @param n Cross section number.
      * @param d Associated domain.
      */
-    SimpleCrossSection(int n, Domain *d) : StructuralCrossSection(n, d) { }
+    SimpleCrossSection(int n, Domain *d) : StructuralCrossSection(n, d) {
+      materialNumber = 0;
+      czMaterialNumber = 0;
+    }
 
     virtual double give(CrossSectionProperty a);
 
@@ -103,7 +106,7 @@ public:
 
 
     virtual void giveCharMaterialStiffnessMatrix(FloatMatrix &answer, MatResponseMode rMode, GaussPoint *gp, TimeStep *tStep);
-    virtual bool isCharacteristicMtrxSymmetric(MatResponseMode rMode, int mat);
+    virtual bool isCharacteristicMtrxSymmetric(MatResponseMode rMode);
 
 
     virtual void give2dBeamStiffMtrx(FloatMatrix &answer, MatResponseMode rMode, GaussPoint *gp, TimeStep *tStep);
@@ -131,6 +134,14 @@ public:
     virtual const char *giveClassName() const { return "SimpleCrossSection"; }
     virtual const char *giveInputRecordName() const { return _IFT_SimpleCrossSection_Name; }
     virtual classType giveClassID() const { return SimpleCrossSectionClass; }
+
+    virtual double give(int aProperty, GaussPoint *gp); 
+    virtual Material *giveMaterial(IntegrationPoint *ip);    
+
+
+private:
+    int materialNumber;   // material number
+    int czMaterialNumber; // cohesive zone material number
 };
 } // end namespace oofem
 #endif // simplecrosssection_h

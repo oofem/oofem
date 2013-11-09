@@ -316,31 +316,6 @@ IsotropicDamageMaterial :: giveIPValue(FloatArray &answer, GaussPoint *aGaussPoi
 }
 
 
-InternalStateValueType
-IsotropicDamageMaterial :: giveIPValueType(InternalStateType type)
-{
-    if ( type == IST_DamageTensor || type == IST_DamageTensorTemp ) {
-        return ISVT_TENSOR_S3;
-    } else if ( type == IST_MaxEquivalentStrainLevel || type == IST_CharacteristicLength || type == IST_CrackDirs ) {
-        return ISVT_SCALAR;
-    } else if ( type == IST_CrackVector || type == IST_PrincipalDamageTensor || type == IST_PrincipalDamageTempTensor ) {
-        return ISVT_VECTOR;
-
-#ifdef keep_track_of_dissipated_energy
-    } else if ( type == IST_DissWorkDensity ) {
-        return ISVT_SCALAR;
-    } else if ( type == IST_StressWorkDensity ) {
-        return ISVT_SCALAR;
-    } else if ( type == IST_FreeEnergyDensity ) {
-        return ISVT_SCALAR;
-
-#endif
-    } else {
-        return StructuralMaterial :: giveIPValueType(type);
-    }
-}
-
-
 void
 IsotropicDamageMaterial :: giveThermalDilatationVector(FloatArray &answer,
                                                        GaussPoint *gp,  TimeStep *tStep)

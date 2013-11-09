@@ -635,7 +635,7 @@ VTKExportModule :: exportCellVars(FILE *stream, int elemToProcess, TimeStep *tSt
                     vec.resize(0);
                     for (int i = 0; i < elem->giveDefaultIntegrationRulePtr()->giveNumberOfIntegrationPoints(); ++i) {
                         gp = elem->giveDefaultIntegrationRulePtr()->getIntegrationPoint(i);
-                        elem->giveMaterial()->giveIPValue(temp, gp, type, tStep);
+                        elem->giveIPValue(temp, gp, type, tStep);
                         gptot += gp->giveWeight();
                         vec.add(gp->giveWeight(), temp);
                     }
@@ -653,7 +653,7 @@ VTKExportModule :: exportCellVars(FILE *stream, int elemToProcess, TimeStep *tSt
 
                     for ( ielem = 1; ielem <= nelem; ielem++ ) {
                         elem = d->giveElement(ielem);
-                        elem->giveMaterial()->giveIPValue(vec, elem->giveDefaultIntegrationRulePtr()->getIntegrationPoint(1), type, tStep);
+                        elem->giveIPValue(vec, elem->giveDefaultIntegrationRulePtr()->getIntegrationPoint(1), type, tStep);
                         fprintf( stream, "%e ", vec.at(indx) );
                     }
                 }
@@ -838,10 +838,7 @@ VTKExportModule :: exportIntVarAs(InternalStateType valID, InternalStateValueTyp
 
     this->giveSmoother();
 
-    int nindx = 1;
-    if ( type == ISVT_TENSOR_G ) {
-        nindx = this->smoother->giveRegionRecordSize(1, valID);
-    }
+    int nindx = giveInternalStateTypeSize( type );
 
     for ( int indx = 1; indx <= nindx; indx++ ) {
         // print header
@@ -874,7 +871,7 @@ VTKExportModule :: exportIntVarAs(InternalStateType valID, InternalStateValueTyp
             this->initRegionNodeNumbering(regionNodalNumbers, regionDofMans, offset, d, ireg, 1);
             if ( !( ( valID == IST_DisplacementVector ) || ( valID == IST_MaterialInterfaceVal ) ) ) {
                 // assemble local->global map
-                defaultSize = this->smoother->giveRegionRecordSize(ireg, valID);
+                defaultSize = giveInternalStateTypeSize( type );
             } else {
                 regionDofMans = nnodes;
             }

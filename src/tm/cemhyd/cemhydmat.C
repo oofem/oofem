@@ -132,13 +132,6 @@ CemhydMat :: computeInternalSourceVector(FloatArray &val, GaussPoint *gp, TimeSt
     //val.at(1) = 1500;//constant source
 }
 
-void
-CemhydMat :: updateInternalState(const FloatArray &vec, GaussPoint *gp, TimeStep *atTime)
-{
-    CemhydMatStatus *ms = ( CemhydMatStatus * ) this->giveStatus(gp);
-    ms->letTempStateVectorBe(vec);
-}
-
 
 int CemhydMat :: giveCycleNumber(GaussPoint *gp)
 {
@@ -270,9 +263,10 @@ CemhydMat :: giveCharacteristicValue(MatResponseMode mode, GaussPoint *gp, TimeS
     if ( mode == Capacity ) {
         return ( giveConcreteCapacity(gp) * giveConcreteDensity(gp) );
     } else if ( mode == IntSource ) { //for nonlinear solver, return dHeat/dTemperature
+        TransportMaterialStatus *status = static_cast< TransportMaterialStatus * >( this->giveStatus(gp) );
         //it suffices to compute derivative of Arrhenius equation
-        //double actualTemperature = ((TransportMaterialStatus *) giveStatus(gp))->giveTempStateVector().at(1);
-        double lastEquilibratedTemperature = ( ( TransportMaterialStatus * ) giveStatus(gp) )->giveStateVector().at(1);
+        //double actualTemperature = status->giveTempField().at(1);
+        double lastEquilibratedTemperature = status->giveField().at(1);
         //double dt = atTime->giveTimeIncrement();
         double krate, EaOverR, val;
         CemhydMatStatus *ms = ( CemhydMatStatus * ) this->giveStatus(gp);
@@ -356,14 +350,6 @@ CemhydMat :: giveIPValue(FloatArray &answer, GaussPoint *aGaussPoint, InternalSt
         return TransportMaterial :: giveIPValue(answer, aGaussPoint, type, atTime);
     }
 }
-
-
-InternalStateValueType
-CemhydMat :: giveIPValueType(InternalStateType type)
-{
-    return TransportMaterial :: giveIPValueType(type);
-}
-
 
 int
 CemhydMat :: initMaterial(Element *element)
@@ -14388,7 +14374,8 @@ CemhydMatStatus :: updateYourself(TimeStep *atTime)
     TransportMaterialStatus :: updateYourself(atTime);
 };
 
-double CemhydMatStatus :: giveAverageTemperature() {
+double CemhydMatStatus :: giveAverageTemperature()
+{
     CemhydMat *cemhydmat = ( CemhydMat * ) this->gp->giveMaterial();
     CemhydMatStatus *ms = ( CemhydMatStatus * ) cemhydmat->giveStatus(gp);
     double ret;
@@ -14396,7 +14383,7 @@ double CemhydMatStatus :: giveAverageTemperature() {
     if ( !cemhydmat->eachGP ) {
         ret = cemhydmat->MasterCemhydMatStatus->averageTemperature;
     } else {
-        ret = ms->giveStateVector().at(1);
+        ret = ms->giveField().at(1);
     }
 
     return ret;

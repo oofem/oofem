@@ -916,22 +916,6 @@ RCM2Material :: giveIPValue(FloatArray &answer, GaussPoint *aGaussPoint, Interna
     }
 }
 
-
-InternalStateValueType
-RCM2Material :: giveIPValueType(InternalStateType type)
-{
-    if ( type == IST_CrackedFlag ) {
-        return ISVT_SCALAR;
-    } else if ( type == IST_CrackDirs ) {
-        return ISVT_VECTOR;
-    } else if ( type == IST_CrackStatuses ) {
-        return ISVT_VECTOR;
-    } else {
-        return StructuralMaterial :: giveIPValueType(type);
-    }
-}
-
-
 void
 RCM2Material :: give3dMaterialStiffnessMatrix(FloatMatrix &answer,
                                               MatResponseMode mode,

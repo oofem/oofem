@@ -129,14 +129,6 @@ HydratingConcreteMat :: computeInternalSourceVector(FloatArray &val, GaussPoint 
 }
 
 
-void
-HydratingConcreteMat :: updateInternalState(const FloatArray &vec, GaussPoint *gp, TimeStep *atTime)
-{
-    HydratingConcreteMatStatus *ms = static_cast< HydratingConcreteMatStatus * >( this->giveStatus(gp) );
-    ms->letTempStateVectorBe(vec);
-}
-
-
 double
 HydratingConcreteMat :: giveCharacteristicValue(MatResponseMode mode, GaussPoint *gp, TimeStep *atTime)
 {
@@ -145,8 +137,8 @@ HydratingConcreteMat :: giveCharacteristicValue(MatResponseMode mode, GaussPoint
     } else if ( mode == IntSource ) { //for nonlinear solver, return dHeat/dTemperature
         HydratingConcreteMatStatus *ms = static_cast< HydratingConcreteMatStatus * >( this->giveStatus(gp) );
         //it suffices to compute derivative of scaling Arrhenius equation with respect to temporary temperature
-        double stateVec = ms->giveStateVector().at(1) + 273.15;
-        double tempStateVec = ms->giveTempStateVector().at(1) + 273.15;
+        double stateVec = ms->giveField().at(1) + 273.15;
+        double tempStateVec = ms->giveTempField().at(1) + 273.15;
         return this->activationEnergy / ( 8.314 * tempStateVec * tempStateVec) * exp(1. / stateVec -  1. / tempStateVec ) ;
     } else {
         OOFEM_ERROR2( "giveCharacteristicValue : unknown mode (%s)\n", __MatResponseModeToString(mode) );
@@ -247,17 +239,6 @@ HydratingConcreteMat :: giveIPValue(FloatArray &answer, GaussPoint *gp, Internal
 }
 
 
-InternalStateValueType
-HydratingConcreteMat :: giveIPValueType(InternalStateType type)
-{
-    if ( type == IST_HydrationDegree ) {
-        return ISVT_SCALAR;
-    } else {
-        return TransportMaterial :: giveIPValueType(type);
-    }
-}
-
-
 MaterialStatus *
 HydratingConcreteMat :: CreateStatus(GaussPoint *gp) const
 {
@@ -348,7 +329,7 @@ double HydratingConcreteMatStatus :: GivePower(TimeStep *atTime)
 double HydratingConcreteMatStatus :: scaleTemperature(void)
 {
     HydratingConcreteMat *mat = static_cast< HydratingConcreteMat * >( this->gp->giveMaterial() );
-    return exp( mat->activationEnergy / 8.314 * ( 1. / ( 273.15 + mat->referenceTemperature ) - 1. / ( 273.15 + this->giveTempStateVector().at(1) ) ) );
+    return exp( mat->activationEnergy / 8.314 * ( 1. / ( 273.15 + mat->referenceTemperature ) - 1. / ( 273.15 + this->giveTempField().at(1) ) ) );
 }
 
 double HydratingConcreteMatStatus :: affinity25(double DoH)
@@ -376,7 +357,7 @@ HydratingConcreteMatStatus :: updateYourself(TimeStep *atTime)
     this->lastDegreeOfHydration = this->degreeOfHydration;
     //average from last and current temperatures, in C*hour
     if(!atTime->isIcApply() && this->gp->giveMaterial()->giveCastingTime() < atTime->giveIntrinsicTime() ) {
-        this->maturity += ( (this->giveStateVector().at(1) + this->giveTempStateVector().at(1)) /2. - mat->giveMaturityT0() ) * atTime->giveTimeIncrement()/3600.;
+        this->maturity += ( (this->giveField().at(1) + this->giveTempField().at(1)) /2. - mat->giveMaturityT0() ) * atTime->giveTimeIncrement()/3600.;
     }
     TransportMaterialStatus :: updateYourself(atTime);
 }

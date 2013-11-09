@@ -47,6 +47,7 @@
 #define _IFT_ExportModule_tstepall "tstep_all"
 #define _IFT_ExportModule_tstepstep "tstep_step"
 #define _IFT_ExportModule_tstepsout "tsteps_out"
+#define _IFT_ExportModule_subtstepsout "subtsteps_out"
 #define _IFT_ExportModule_domainall "domain_all"
 #define _IFT_ExportModule_domainmask "domain_mask"
 //@}
@@ -77,6 +78,13 @@ protected:
     int tstep_step_out;
     /// List of user selected step numbers.
     std::list< Range >tsteps_out;
+    /**
+     * Flag turning output in solution step substeps/itarations. Allows to visualize the 
+     * varibles during equilibrium iterations, etc. Usefull for debugging.
+     * In this case the export module output name will contain timeStep substep number.
+     *  This tStep substep must be set/managed by corresponding engineering model.
+     */
+    bool tstep_substeps_out_flag;
 
     /// Indicates all domains.
     bool domain_all_flag;
@@ -107,6 +115,10 @@ public:
      * Initializes receiver.
      * The init file messages should be printed.
      */
+    /**
+     * Returns true if module is configured to export indvidual substep/iterations.
+     */
+    bool testSubStepOutput() {return this->tstep_substeps_out_flag;}
 
     virtual void initialize() { }
     /**

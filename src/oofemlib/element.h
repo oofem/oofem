@@ -147,6 +147,10 @@ enum elementParallelMode {
  */
 class OOFEM_EXPORT Element : public FEMComponent
 {
+public:
+    /// Flag for code development: gives if the cross section stores all the material data
+    bool MAT_GIVEN_BY_CS;
+
 protected:
     /// Number of dofmanagers
     int numberOfDofMans;
@@ -252,7 +256,7 @@ public:
     //@{
     /**
      * Computes characteristic matrix of receiver of requested type in given time step.
-     * @param answer Requested characteristic matrix.
+     * @param answer Requested characteristic matrix (stiffness, tangent, ...).
      * If element has no capability to compute requested type of characteristic matrix
      * error function is invoked.
      * @param type   Id of characteristic component requested.
@@ -747,12 +751,6 @@ public:
      * @return Nonzero if o.k, zero otherwise.
      */
     virtual int giveIPValue(FloatArray &answer, GaussPoint *gp, InternalStateType type, TimeStep *tStep);
-    /**
-     * Returns the type of internal variable (scalar, vector, tensor,...).
-     * @param type Determines the type of internal variable.
-     * @return Type of internal variable.
-     */
-    virtual InternalStateValueType giveIPValueType(InternalStateType type);
 
     // characteristic length in gp (for some material models)
     /**

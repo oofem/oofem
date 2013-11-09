@@ -673,7 +673,7 @@ Beam2d :: computeConsistentMassMatrix(FloatMatrix &answer, TimeStep *tStep, doub
     double l = this->giveLength();
     double kappa = this->giveKappaCoeff();
     double kappa2 = kappa * kappa;
-    double density = this->giveMaterial()->give('d', gp);
+    double density = this->giveStructuralCrossSection()->give('d', gp);
     double area = this->giveCrossSection()->give(CS_Area);
     double c2 = ( area * density ) / ( ( 1. + 2. * kappa ) * ( 1. + 2. * kappa ) );
     double c1 = ( area * density );
