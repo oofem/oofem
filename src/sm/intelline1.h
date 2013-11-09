@@ -32,17 +32,16 @@
  *  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  */
 
-#ifndef intelline2_h
-#define intelline2_h
+#ifndef intelline1_h
+#define intelline1_h
 
-#include "intelline1.h"
 #include "structuralinterfaceelement.h"
 
-
-#define _IFT_IntElLine2_Name "intelline2"
+#define _IFT_IntElLine1_Name "intelline1"
 
 namespace oofem {
-class FEI2dLineQuad;
+
+class FEI2dLineLin;
 
 /**
  * This class implements a two dimensional interface element.
@@ -50,28 +49,39 @@ class FEI2dLineQuad;
  * If not straight, the rotation matrix depends on actual integration point
  * and stiffness and strain computations should be modified.
  */
-class IntElLine2 : public IntElLine1
+class IntElLine1 : public StructuralInterfaceElement
 {
 protected:
-    static FEI2dLineQuad interp;
+    static FEI2dLineLin interp;
 
 public:
-    IntElLine2(int n, Domain *d);
-    virtual ~IntElLine2() { }
+    IntElLine1(int n, Domain *d);
+    virtual ~IntElLine1() { }
+
     virtual FEInterpolation *giveInterpolation() const;
-    virtual int computeNumberOfDofs() { return 12; }
+
+    virtual int computeNumberOfDofs() { return 8; }
+    virtual void giveDofManDofIDMask(int inode, EquationID ut, IntArray &answer) const;
+
+    virtual double computeAreaAround(GaussPoint *gp);
+    virtual void computeTransformationMatrixAt(GaussPoint *gp, FloatMatrix &answer);
+    virtual void computeCovarBaseVectorAt(GaussPoint *gp, FloatArray &G);
+
+    virtual int testElementExtension(ElementExtension ext) { return 0; }
+
+    virtual Interface *giveInterface(InterfaceType) { return NULL; }
 
     // definition & identification
-    virtual const char *giveInputRecordName() const { return _IFT_IntElLine2_Name; }
-    virtual const char *giveClassName() const { return "IntElLine2"; }
-    //virtual classType giveClassID() const { return IntElLine2Class; }
-    
+    virtual const char *giveInputRecordName() const { return _IFT_IntElLine1_Name; }
+    virtual const char *giveClassName() const { return "IntElLine1"; }
+    virtual IRResultType initializeFrom(InputRecord *ir);
+
 protected:
     virtual void computeNmatrixAt(GaussPoint *gp, FloatMatrix &answer);
     virtual void computeGaussPoints();
 
-    virtual int giveApproxOrder() { return 2; }
-    Element_Geometry_Type giveGeometryType() const { return EGT_quad_21_interface; };
+    virtual int giveApproxOrder() { return 1; }
+    Element_Geometry_Type giveGeometryType() const { return EGT_quad_1_interface; };
 };
 } // end namespace oofem
 #endif 
