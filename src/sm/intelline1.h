@@ -76,6 +76,16 @@ public:
     virtual const char *giveClassName() const { return "IntElLine1"; }
     virtual IRResultType initializeFrom(InputRecord *ir);
 
+    virtual void giveEngTraction ( FloatArray &answer, GaussPoint *gp, const FloatArray &jump, TimeStep *tStep )
+    {
+        this->giveInterfaceCrossSection ()->giveEngTraction_2d ( answer, gp, jump, tStep );
+    }
+
+    virtual void giveStiffnessMatrix_Eng ( FloatMatrix &answer, MatResponseMode rMode, IntegrationPoint *ip, TimeStep *tStep )
+    {
+        this->giveInterfaceCrossSection ()->give2dStiffnessMatrix_Eng ( answer, rMode, ip, tStep );
+    }
+
 protected:
     virtual void computeNmatrixAt(GaussPoint *gp, FloatMatrix &answer);
     virtual void computeGaussPoints();

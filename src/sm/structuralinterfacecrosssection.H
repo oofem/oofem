@@ -120,6 +120,8 @@ public:
             //this->giveInterfaceMaterial()->giveEngTraction_3d(answer, gp, jump, tStep); 
         }
     
+    //void giveStiffnessMatrix_dTdj ( FloatMatrix &answer, MatResponseMode rMode, GaussPoint *gp, TimeStep *tStep );
+
     void give1dStiffnessMatrix_dTdj(FloatMatrix &answer, MatResponseMode rMode, GaussPoint *gp, TimeStep *tStep)
         { this->giveInterfaceMaterial()->give1dStiffnessMatrix_dTdj(answer, rMode, gp, tStep); }
     void give2dStiffnessMatrix_dTdj(FloatMatrix &answer, MatResponseMode rMode, GaussPoint *gp, TimeStep *tStep)
