@@ -130,7 +130,7 @@ IntArray :: IntArray(std::initializer_list<int> list)
 
 IntArray &IntArray :: operator=(std::initializer_list<int> list)
 {
-    RESIZE(list.size());
+    RESIZE((int)list.size());
     int *p = this->values;
     for (int x: list) {
         *p = x;
@@ -622,12 +622,47 @@ int IntArray :: insertSorted(int _val, int allocChunk)
 
 int IntArray :: insertSortedOnce(int _val, int allocChunk)
 {
-    int res;
-    if ( ( res = findSorted(_val) ) ) {
-        return res;                          // value already present
-    }
+    int first = 0;
+    int last = size - 1;
 
-    return insertSorted(_val, allocChunk);
+    if ( size == 0 || values[first] > _val ) {
+        // first = 0 is correct already
+    } else if ( values[last] < _val ) {
+        first = size;
+    } else {
+        while ( first <= last ) { //while we haven't reached the end of
+            int mid = ( first + last ) / 2; //rule out half of the data by spliting the array
+            if ( values [ mid ] == _val ) { //if we have found the target
+                return mid + 1;
+            } else if ( values [ mid ] > _val ) {
+                last = mid - 1; //the desired value is in the lower part of the array
+            } else {
+                first = mid + 1; //the desired value is in the upper part of the array
+            }
+        }
+    }
+    // After this loop, "first" is the new position to fill in
+
+    int newSize = size + 1;
+    if ( newSize > allocatedSize ) {
+        int *newValues = ALLOC(newSize + allocChunk);
+        if ( values ) {
+            memcpy(newValues, values, sizeof(int)*first); // Copy over the values before _val
+            memcpy(&newValues[first+1], &values[first], sizeof(int)*(size - first)); // Copy over the values after _val, leaving a gap
+            // Replace the old data:
+            free(values);
+        }
+        values = newValues;
+        allocatedSize = newSize + allocChunk;
+        size = newSize;
+    } else {
+        memmove(&values[first + 1], &values[ first ], sizeof(int)*(size - first));
+        size = newSize;
+    }
+    // Finally we can insert the new value:
+    values[ first ] = _val;
+
+    return first;
 }
 
 
