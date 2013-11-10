@@ -63,11 +63,17 @@ StructuralInterfaceMaterial :: giveIPValue(FloatArray &answer, GaussPoint *gp, I
     }
 }
 
-// Currently not in use
+
 IRResultType
 StructuralInterfaceMaterial :: initializeFrom(InputRecord *ir)
 {
-	return this->Material :: initializeFrom(ir);
+
+    const char *__proc = "initializeFrom";  // Required by IR_GIVE_FIELD macro
+    IRResultType result;                    // Required by IR_GIVE_FIELD macro
+
+    IR_GIVE_OPTIONAL_FIELD(ir, this->useNumericalTangent, _IFT_StructuralInterfaceMaterial_useNumericalTangent);
+
+    return IRRT_OK;
 }
 
 
@@ -77,28 +83,30 @@ StructuralInterfaceMaterial :: giveInputRecord(DynamicInputRecord &input)
     Material :: giveInputRecord(input);
 }
 
-#if 0
+
+#if 1
 void
-StructuralInterfaceMaterial :: give3dStiffnessMatrix_dTdj_Num(FloatMatrix &answer, MatResponseMode rMode, GaussPoint *gp, TimeStep *tStep)
+StructuralInterfaceMaterial :: giveStiffnessMatrix_dTdj_Num(FloatMatrix &answer, MatResponseMode rMode, GaussPoint *gp, TimeStep *tStep)
 {
 
     // Numerical tangent
     // Computes the material stiffness using a central difference method
 	
-    answer.resize(3,3);
-    answer.zero();
-
-    StructuralInterfaceMaterialStatus *status = static_cast< StructuralInterfaceMaterialStatus * > ( gp->giveMaterialStatus() );
+    StructuralInterfaceMaterialStatus *status = static_cast< StructuralInterfaceMaterialStatus * >( this->giveStatus(gp) );
     if ( status ) {
-        const double eps = 1.0e-9;
-        FloatArray T, TPlus, TMinus;
         FloatMatrix F;
         F = status->giveTempF();
+        int dim = F.giveNumberOfRows();
+        answer.resize(dim,dim);
+        answer.zero();
+        const double eps = 1.0e-9;
+        FloatArray T, TPlus, TMinus;
+        
+        
         FloatArray jump, jumpPlus, jumpMinus, Kcolumn;
         jump = status->giveTempJump();
 
-    
-        for ( int i = 1; i <= 3; i++ ) {
+        for ( int i = 1; i <= dim; i++ ) {
             jumpPlus = jumpMinus = jump;
             jumpPlus.at(i)  += eps; 
             jumpMinus.at(i) -= eps;
@@ -112,11 +120,6 @@ StructuralInterfaceMaterial :: give3dStiffnessMatrix_dTdj_Num(FloatMatrix &answe
 
         this->giveFirstPKTraction_3d(T, gp, jump, F, tStep); // reset temp values by recomputing the stress
 
-        FloatMatrix D_analytical;
-        give3dStiffnessMatrix_dTdj_Num(D_analytical, rMode, gp, tStep);
-
-        answer.subtract(D_analytical);
-        answer.printYourself();
     }
 
 }

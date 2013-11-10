@@ -50,6 +50,7 @@ StructuralInterfaceMaterialStatus :: StructuralInterfaceMaterialStatus(int n, Do
     this->traction.resize(size);
     this->firstPKTraction.resize(size);
     this->F.resize(size,size);
+    this->F.beUnitMatrix();
 
     // reset temp vars.
     this->tempJump            = this->jump;

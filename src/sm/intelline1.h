@@ -78,12 +78,12 @@ public:
 
     virtual void giveEngTraction ( FloatArray &answer, GaussPoint *gp, const FloatArray &jump, TimeStep *tStep )
     {
-        this->giveInterfaceCrossSection ()->giveEngTraction_2d ( answer, gp, jump, tStep );
+        this->giveInterfaceCrossSection()->giveEngTraction_2d ( answer, gp, jump, tStep );
     }
 
     virtual void giveStiffnessMatrix_Eng ( FloatMatrix &answer, MatResponseMode rMode, IntegrationPoint *ip, TimeStep *tStep )
     {
-        this->giveInterfaceCrossSection ()->give2dStiffnessMatrix_Eng ( answer, rMode, ip, tStep );
+        this->giveInterfaceCrossSection()->give2dStiffnessMatrix_Eng ( answer, rMode, ip, tStep );
     }
 
 protected:

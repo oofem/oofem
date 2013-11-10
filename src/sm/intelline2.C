@@ -63,7 +63,7 @@ IntElLine2 :: computeNmatrixAt(GaussPoint *ip, FloatMatrix &answer)
     FloatArray N;
     interp.evalN( N, * ip->giveCoordinates(), FEIElementGeometryWrapper(this) );
 
-    answer.resize(3, 12);
+    answer.resize(2, 12);
     answer.zero();
     answer.at(1, 1) = answer.at(2, 2) = -N.at(1);
     answer.at(1, 3) = answer.at(2, 4) = -N.at(2);

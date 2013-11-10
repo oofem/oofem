@@ -66,28 +66,6 @@ StructuralInterfaceElement :: ~StructuralInterfaceElement()
     }
 }
 
-#if 0
-void
-StructuralInterfaceElement :: computeConstitutiveMatrixAt(FloatMatrix &answer,
-                                                 MatResponseMode rMode, IntegrationPoint *ip,
-                                                 TimeStep *tStep)
-// Returns the  material matrix {E= dT/dJ} of the receiver.
-// rMode parameter determines type of stiffness matrix to be requested
-// (tangent, secant, ...)
-{
-    if ( this->nlGeometry == 0 ) {
-        this->giveInterfaceCrossSection()->give3dStiffnessMatrix_Eng(answer, rMode, ip, tStep);
-    } else if ( this->nlGeometry = 1 ) {
-        this->giveInterfaceCrossSection()->give3dStiffnessMatrix_dTdj(answer, rMode, ip, tStep);
-    } else {
-
-        OOFEM_ERROR("Spatial dimension must be 1-3!")
-    }
-
-}
-#endif
-
-
 
 
 void
@@ -180,7 +158,7 @@ StructuralInterfaceElement :: giveInternalForcesVector(FloatArray &answer,
     StructuralInterfaceCrossSection *CS = this->giveInterfaceCrossSection();
 
     FloatMatrix N, rotationMatGtoL;
-    FloatArray u, traction, jump;
+    FloatArray u, traction, tractionTemp, jump;
 
     this->computeVectorOf(EID_MomentumBalance, VM_Total, tStep, u);
     // subtract initial displacements, if defined
@@ -191,24 +169,30 @@ StructuralInterfaceElement :: giveInternalForcesVector(FloatArray &answer,
     // zero answer will resize accordingly when adding first contribution
     answer.resize(0);
 
-    FloatMatrix F(3,3);
     for ( int i = 0; i < iRule->giveNumberOfIntegrationPoints(); i++ ) {
         IntegrationPoint *ip = iRule->getIntegrationPoint(i);
         this->computeNmatrixAt(ip, N);
 
-        if ( useUpdatedGpRecord == 1 ) {
-            static_cast<StructuralInterfaceMaterialStatus *> 
-                (ip->giveMaterialStatus())->giveTraction();
-            
-        } else {
+        //if ( useUpdatedGpRecord == 1 ) {  
+        //    tractionTemp = static_cast<StructuralInterfaceMaterialStatus *> (ip->giveMaterialStatus())->giveTraction();
+        //    // modify sizes if stored traction has 3 components and the spatial dimension is less
+        //    int spatialDim = this->giveSpatialDimension();
+        //    if ( traction.giveSize() == 3 && spatialDim == 1 ) {
+        //        traction.setValues(1, tractionTemp.at(3) );
+        //    } else if ( traction.giveSize() == 3 && spatialDim == 2 ) {
+        //        traction.setValues(2, tractionTemp.at(1), tractionTemp.at(3) );
+        //    } else {
+        //        traction = tractionTemp;
+        //    }
+        //} else {
             if ( this->isActivated(tStep) ) {
                 jump.beProductOf(N, u);
             } else {
                 jump.resize(3);
                 jump.zero();
             }
-            this->computeTraction ( traction, ip, jump, tStep );
-        }
+            this->computeTraction( traction, ip, jump, tStep );
+        //}
 
         if ( traction.giveSize() == 0 ) {
             break;
@@ -218,8 +202,9 @@ StructuralInterfaceElement :: giveInternalForcesVector(FloatArray &answer,
         double dA = this->computeAreaAround(ip);
         answer.plusProduct(N, traction, dA);
     }
-    answer.printYourself();
+
     // if inactive update state, but no contribution to global system
+    ///@todo why do we need to do this? 
     if ( !this->isActivated(tStep) ) {
         answer.zero();
         return;
@@ -229,22 +214,23 @@ StructuralInterfaceElement :: giveInternalForcesVector(FloatArray &answer,
 void 
 StructuralInterfaceElement :: computeTraction(FloatArray &traction, IntegrationPoint *ip, FloatArray &jump, TimeStep *tStep)
 {
+    
     // Returns the traction in global coordinate system
     StructuralInterfaceCrossSection *CS = this->giveInterfaceCrossSection();
     FloatMatrix rotationMatGtoL, F;
-    this->computeTransformationMatrixAt ( ip, rotationMatGtoL );
-    jump.rotatedWith ( rotationMatGtoL, 'n' );    // transform jump to local coord system
+    this->computeTransformationMatrixAt( ip, rotationMatGtoL );
+    jump.rotatedWith( rotationMatGtoL, 'n' );    // transform jump to local coord system
+    
     if (this->nlGeometry == 0) {
-        this->giveEngTraction ( traction, ip, jump, tStep );
-    }
-    else if (this->nlGeometry == 1) {
-        //compute F
-        F.beUnitMatrix ( );
-        F.rotatedWith ( rotationMatGtoL, 'n' );
-        this->giveFirstPKTraction ( traction, ip, jump, F, tStep );
+        this->giveEngTraction( traction, ip, jump, tStep );
+    } else if (this->nlGeometry == 1) {
+        ///@todo compute F in a proper way
+        F.beUnitMatrix();
+        F.rotatedWith( rotationMatGtoL, 'n' );
+        this->giveFirstPKTraction( traction, ip, jump, F, tStep );
     }
 
-    traction.rotatedWith ( rotationMatGtoL, 't' );          // transform traction to global coord system
+    traction.rotatedWith( rotationMatGtoL, 't' );   // transform traction to global coord system
 
 }
 
@@ -368,10 +354,13 @@ StructuralInterfaceCrossSection *StructuralInterfaceElement :: giveInterfaceCros
 void
 StructuralInterfaceElement :: giveEngTraction( FloatArray &answer, GaussPoint *gp, const FloatArray &jump, TimeStep *tStep )
 {
-    // Default implementation uses the First PK version if available
+    // Default implementation uses the First PK version if available.
+    ///@todo Should probably convert to 2nd PK traction to be consistent with continuum elements.
+    ///@todo compute F properly
     FloatMatrix F(3,3); 
     F.beUnitMatrix();
     this->giveFirstPKTraction ( answer, gp, jump, F, tStep );
+    // T_PK2 = inv(F)* T_PK1
 }
 
 
@@ -380,6 +369,7 @@ StructuralInterfaceElement :: giveStiffnessMatrix_Eng( FloatMatrix &answer, MatR
 {
     // Default implementation uses the First PK version if available
     this->giveStiffnessMatrix_dTdj( answer, rMode, ip, tStep );
+    ///@todo dT1dj = d(F*T2)/dj = dF/dj*T2 + F*dT2/dj - should we assume dFdj = 0? Otherwise it will be very complex! 
 }
 
 } // end namespace oofem

@@ -100,48 +100,36 @@ public:
     void giveFirstPKTraction_3d(FloatArray &answer, GaussPoint *gp, const FloatArray &jump, const FloatMatrix &F, TimeStep *tStep) 
         { this->giveInterfaceMaterial()->giveFirstPKTraction_3d(answer, gp, jump, F, tStep); }
 
+
     void giveEngTraction_1d(FloatArray &answer, GaussPoint *gp, const FloatArray &jump, TimeStep *tStep)
-        { this->giveInterfaceMaterial()->giveEngTraction_1d(answer, gp, jump, tStep); }
+        { 
+            this->giveInterfaceMaterial()->giveEngTraction_1d(answer, gp, jump, tStep);}
     void giveEngTraction_2d(FloatArray &answer, GaussPoint *gp, const FloatArray &jump, TimeStep *tStep)
         { 
-            //this->giveInterfaceMaterial()->giveEngTraction_2d(answer, gp, jump, tStep); 
-            FloatMatrix F(3,3);
-            F.beUnitMatrix();
-            FloatArray jump3d(3), trac3d(3);
-            jump3d.setValues(3, jump.at(1), jump.at(2), 0.0);
-            this->giveInterfaceMaterial()->giveFirstPKTraction_3d(trac3d, gp, jump3d, F, tStep);
-            answer.setValues(2, trac3d.at(1), trac3d.at(2));
+            FloatArray jump3D, answer3D;
+            jump3D.setValues(3,  jump.at(1), 0.0, jump.at(2) );
+            this->giveInterfaceMaterial()->giveEngTraction_2d(answer3D, gp, jump3D, tStep);
+            answer.setValues(2,  answer3D.at(1), answer3D.at(3) );
         }
     void giveEngTraction_3d(FloatArray &answer, GaussPoint *gp, const FloatArray &jump, TimeStep *tStep)
         { 
-            FloatMatrix F(3,3);
-            F.beUnitMatrix();
-            this->giveInterfaceMaterial()->giveFirstPKTraction_3d(answer, gp, jump, F, tStep);   
-            //this->giveInterfaceMaterial()->giveEngTraction_3d(answer, gp, jump, tStep); 
+            this->giveInterfaceMaterial()->giveEngTraction_3d(answer, gp, jump, tStep); 
         }
     
-    //void giveStiffnessMatrix_dTdj ( FloatMatrix &answer, MatResponseMode rMode, GaussPoint *gp, TimeStep *tStep );
+    void give1dStiffnessMatrix_dTdj(FloatMatrix &answer, MatResponseMode rMode, GaussPoint *gp, TimeStep *tStep);
 
-    void give1dStiffnessMatrix_dTdj(FloatMatrix &answer, MatResponseMode rMode, GaussPoint *gp, TimeStep *tStep)
-        { this->giveInterfaceMaterial()->give1dStiffnessMatrix_dTdj(answer, rMode, gp, tStep); }
-    void give2dStiffnessMatrix_dTdj(FloatMatrix &answer, MatResponseMode rMode, GaussPoint *gp, TimeStep *tStep)
-        { this->giveInterfaceMaterial()->give2dStiffnessMatrix_dTdj(answer, rMode, gp, tStep); }
-    void give3dStiffnessMatrix_dTdj(FloatMatrix &answer, MatResponseMode rMode, GaussPoint *gp, TimeStep *tStep)
-        { this->giveInterfaceMaterial()->give3dStiffnessMatrix_dTdj(answer, rMode, gp, tStep); }
+    void give2dStiffnessMatrix_dTdj(FloatMatrix &answer, MatResponseMode rMode, GaussPoint *gp, TimeStep *tStep);
+
+    void give3dStiffnessMatrix_dTdj(FloatMatrix &answer, MatResponseMode rMode, GaussPoint *gp, TimeStep *tStep);
+
 
     void give1dStiffnessMatrix_Eng(FloatMatrix &answer,  MatResponseMode rMode, GaussPoint *gp, TimeStep *tStep)
         { this->giveInterfaceMaterial()->give1dStiffnessMatrix_Eng(answer, rMode, gp, tStep); }
-    void give2dStiffnessMatrix_Eng(FloatMatrix &answer,  MatResponseMode rMode, GaussPoint *gp, TimeStep *tStep)
-        { 
-            //this->giveInterfaceMaterial()->give2dStiffnessMatrix_Eng(answer, rMode, gp, tStep);
-            FloatMatrix stiffness3d;
-            this->giveInterfaceMaterial()->give3dStiffnessMatrix_dTdj(stiffness3d, rMode, gp, tStep);
-            answer.beSubMatrixOf(stiffness3d, 1,2,1,2);
-        }
+    void give2dStiffnessMatrix_Eng(FloatMatrix &answer,  MatResponseMode rMode, GaussPoint *gp, TimeStep *tStep);
+
     void give3dStiffnessMatrix_Eng(FloatMatrix &answer,  MatResponseMode rMode, GaussPoint *gp, TimeStep *tStep)
         { 
-            this->giveInterfaceMaterial()->give3dStiffnessMatrix_dTdj(answer, rMode, gp, tStep);
-            //this->giveInterfaceMaterial()->give3dStiffnessMatrix_Eng(answer, rMode, gp, tStep); 
+            this->giveInterfaceMaterial()->give3dStiffnessMatrix_Eng(answer, rMode, gp, tStep); 
         }
     //@}
     

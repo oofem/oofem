@@ -266,6 +266,8 @@ IRResultType IntMatBilinearCZ::initializeFrom(InputRecord *ir)
 
     IR_GIVE_FIELD(ir, mGamma, _IFT_IntMatBilinearCZ_gamma);
 
+    StructuralInterfaceMaterial :: initializeFrom(ir);
+
     this->checkConsistency();
     this->printYourself();
     return IRRT_OK;

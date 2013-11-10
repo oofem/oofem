@@ -341,6 +341,7 @@ void
 IntMatBilinearCZFagerstrom :: give3dStiffnessMatrix_dTdj(FloatMatrix &answer, MatResponseMode rMode, GaussPoint *gp, TimeStep *tStep)
 {
 
+#if 1
    	answer.resize(3,3);
 	answer.zero();
 //	this->give3dStiffnessMatrix_dTdj_num(answer, rMode, gp, tStep);
@@ -437,6 +438,7 @@ IntMatBilinearCZFagerstrom :: give3dStiffnessMatrix_dTdj(FloatMatrix &answer, Ma
 	//printf("analytical tangent \n");
     //answer.printYourself();
 
+#endif
 }
 
 
@@ -555,6 +557,8 @@ IntMatBilinearCZFagerstrom :: initializeFrom(InputRecord *ir)
     IR_GIVE_FIELD(ir, mu, _IFT_IntMatBilinearCZFagerstrom_mu);
 
     IR_GIVE_FIELD(ir, gamma, _IFT_IntMatBilinearCZFagerstrom_gamma);
+
+    StructuralInterfaceMaterial ::initializeFrom(ir);
 
     this->checkConsistency();                                // check validity of the material paramters
     this->printYourself();

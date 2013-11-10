@@ -1284,6 +1284,7 @@ Element :: giveSpatialDimension()
     case EGT_quad_1:
     case EGT_quad_2:
     case EGT_quad9_2:
+    case EGT_quad_21_interface:
         return 2;
 
     case EGT_tetra_1:

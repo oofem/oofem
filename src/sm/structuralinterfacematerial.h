@@ -42,6 +42,9 @@
 
 ///@name Input fields for StructuralInterfaceMaterial
 //@{
+
+#define _IFT_StructuralInterfaceMaterial_useNumericalTangent "use_num_tangent"
+
 //@}
 
 namespace oofem {
@@ -85,7 +88,10 @@ public:
      * @param n Material number.
      * @param d Domain to which new material will belong.
      */
-    StructuralInterfaceMaterial(int n, Domain *d) : Material(n, d) { }
+    StructuralInterfaceMaterial(int n, Domain *d) : Material(n, d) 
+    {
+        this->useNumericalTangent = false;
+    }
     /// Destructor.
     virtual ~StructuralInterfaceMaterial() { }
 
@@ -115,11 +121,24 @@ public:
         { _error("giveFirstPKTraction_3d: not implemented "); }
 
     virtual void giveEngTraction_1d(FloatArray &answer, GaussPoint *gp, const FloatArray &jump, TimeStep *tStep)
-        { _error("giveEngTraction_1d: not implemented "); }
+        { 
+            FloatArray modifiedJump(3);
+            modifiedJump.setValues(3, 0.0, 0.0, jump.at(3));
+            this->giveEngTraction_3d(answer, gp, modifiedJump, tStep);
+        }
     virtual void giveEngTraction_2d(FloatArray &answer, GaussPoint *gp, const FloatArray &jump, TimeStep *tStep)
-        { _error("giveEngTraction_2d: not implemented "); }
+        { 
+            FloatArray modifiedJump(3);
+            modifiedJump.setValues(3, jump.at(1), 0.0, jump.at(3));
+            this->giveEngTraction_3d(answer, gp, modifiedJump, tStep);
+        }
     virtual void giveEngTraction_3d(FloatArray &answer, GaussPoint *gp, const FloatArray &jump, TimeStep *tStep)
-        { _error("giveEngTraction_3d: not implemented "); }
+        { 
+            //_error("giveEngTraction_3d: not implemented "); 
+            FloatMatrix F(3,3);
+            F.beUnitMatrix();
+            giveFirstPKTraction_3d(answer, gp, jump, F, tStep); 
+        }
     
     
     
@@ -151,14 +170,43 @@ public:
         { _error("give3dStiffnessMatrix_dTdj: not implemented "); }
 
     virtual void give1dStiffnessMatrix_Eng(FloatMatrix &answer,  MatResponseMode mode, GaussPoint *gp, TimeStep *tStep)
-        { _error("give1dStiffnessMatrix_Eng: not implemented "); }
+        { 
+            give3dStiffnessMatrix_Eng(answer, mode, gp, tStep);
+        }
     virtual void give2dStiffnessMatrix_Eng(FloatMatrix &answer,  MatResponseMode mode, GaussPoint *gp, TimeStep *tStep)
-        { _error("give2dStiffnessMatrix_Eng: not implemented "); }
-    virtual void give3dStiffnessMatrix_Eng(FloatMatrix &answer,  MatResponseMode mode, GaussPoint *gp, TimeStep *tStep)
-        { _error("give3dStiffnessMatrix_Eng: not implemented "); }
+        { 
+            FloatMatrix answer3D;
+            give3dStiffnessMatrix_Eng(answer3D, mode, gp, tStep);
+            IntArray mask;
+            mask.setValues(2,  1, 3);
+            answer.beSubMatrixOf(answer3D,mask,mask);
 
-    // Numerical stiffness
-    //virtual void give3dStiffnessMatrix_dTdj_Num(FloatMatrix &answer, MatResponseMode rMode, GaussPoint *gp, TimeStep *tStep);
+
+            //debug
+            printf("analytical tangent \n");
+            answer3D.printYourself();
+
+            FloatMatrix answerNum;
+            StructuralInterfaceMaterial :: giveStiffnessMatrix_dTdj_Num(answerNum, mode, gp, tStep);
+            printf("numerical tangent \n");
+            answerNum.printYourself();
+
+            FloatMatrix comp;
+            comp = answer3D;
+            comp.subtract(answerNum);
+            printf("difference in numerical tangent to mat method \n");
+            comp.printYourself();
+
+        }
+  
+    virtual void give3dStiffnessMatrix_Eng(FloatMatrix &answer,  MatResponseMode mode, GaussPoint *gp, TimeStep *tStep)
+        { 
+            //_error("give3dStiffnessMatrix_Eng: not implemented ");
+            give3dStiffnessMatrix_dTdj(answer, mode, gp, tStep);
+        }
+
+    // Numerical stiffness (intended to work regardless of dimension)
+    virtual void giveStiffnessMatrix_dTdj_Num(FloatMatrix &answer, MatResponseMode rMode, GaussPoint *gp, TimeStep *tStep);
         
     //@}
 
@@ -176,6 +224,8 @@ public:
 
     //virtual int setIPValue(const FloatArray &value, GaussPoint *gp, InternalStateType type);
     virtual int giveIPValue(FloatArray &answer, GaussPoint *gp, InternalStateType type, TimeStep *tStep);
+
+    bool useNumericalTangent; ///@todo make private
 
 protected:
    
@@ -203,6 +253,8 @@ protected:
     static void giveJumpTranformationMtrx(FloatMatrix &answer, const FloatMatrix &base,
                                            bool transpose = false);
    
+
+
 };
 } // end namespace oofem
 #endif // StructuralInterfaceMaterial_h

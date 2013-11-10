@@ -68,7 +68,7 @@ IntElLine1 :: computeNmatrixAt(GaussPoint *ip, FloatMatrix &answer)
     FEInterpolation *interp = this->giveInterpolation(); 
     interp->evalN( N, * ip->giveCoordinates(), FEIElementGeometryWrapper(this) );
 
-    answer.resize(3, 8);
+    answer.resize(2, 8);
     answer.zero();
     answer.at(1, 1) = answer.at(2, 2) = -N.at(1);
     answer.at(1, 3) = answer.at(2, 4) = -N.at(2);
@@ -97,20 +97,17 @@ IntElLine1 :: computeCovarBaseVectorAt(IntegrationPoint *ip, FloatArray &G)
     FloatMatrix dNdxi;
     FEInterpolation *interp = this->giveInterpolation(); 
     interp->evaldNdxi(dNdxi, * ip->giveCoordinates(), FEIElementGeometryWrapper(this) );
-    FloatArray Xi, p1, p2;;
-    G.resize(0);
+    G.resize(2);
     G.zero();
-
     int numNodes = this->giveNumberOfNodes();
     for ( int i = 1; i <= dNdxi.giveNumberOfRows(); i++ ) {
-        p1 = *this->giveNode(i)->giveCoordinates();
-        p2 = *this->giveNode(i+numNodes/2)->giveCoordinates();
-        Xi = 0.5* ( *this->giveNode(i)->giveCoordinates() + *this->giveNode(i+numNodes/2)->giveCoordinates() ); // (mean) point on the fictious mid surface
-        G.add(dNdxi.at(i,1), Xi); // Curvilinear base vector
+        double X1_i = 0.5* ( this->giveNode(i)->giveCoordinate(1) + this->giveNode(i+numNodes/2)->giveCoordinate(1) ); // (mean) point on the fictious mid surface
+        double X2_i = 0.5* ( this->giveNode(i)->giveCoordinate(2) + this->giveNode(i+numNodes/2)->giveCoordinate(2) );
+        G.at(1) += dNdxi.at(i,1) * X1_i;
+        G.at(2) += dNdxi.at(i,1) * X2_i;
     }
-    if ( G.giveSize() < 3 ) { 
-        G.resizeWithValues(3);
-    }
+
+    
 }
 
 double
@@ -147,6 +144,13 @@ IntElLine1 :: computeTransformationMatrixAt(GaussPoint *gp, FloatMatrix &answer)
     this->computeCovarBaseVectorAt(gp, G);
     G.normalize();
 
+    answer.resize(2,2);
+    answer.at(1,1) =  G.at(1);
+    answer.at(2,1) =  G.at(2);
+    answer.at(1,2) = -G.at(2);
+    answer.at(2,2) =  G.at(1);
+
+    /*
     answer.resize(3,3);
     answer.at(1,1) =  G.at(1);
     answer.at(2,1) =  G.at(2);
@@ -155,7 +159,7 @@ IntElLine1 :: computeTransformationMatrixAt(GaussPoint *gp, FloatMatrix &answer)
     answer.at(2,2) =  G.at(1);
     answer.at(3,2) =  0.0;
     answer.at(3,3) =  1.0;
-
+    */
 }
 
 FEInterpolation *
