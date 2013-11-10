@@ -65,6 +65,7 @@ ConcreteDPMStatus :: ConcreteDPMStatus(int n, Domain *d, GaussPoint *gp) :
     state_flag = temp_state_flag = ConcreteDPMStatus :: ConcreteDPM_Elastic;
 #ifdef SOPHISTICATED_SIZEDEPENDENT_ADJUSTMENT
     epsloc = -1.; // negative value means that it has not been set yet
+    tempEpsloc = -1.0;
 #endif
     le = 0.;
 }
@@ -83,11 +84,13 @@ ConcreteDPMStatus :: initTempStatus()
     tempDamage = damage;
     tempEquivStrain = equivStrain;
     temp_state_flag = state_flag;
+    tempEpsloc = epsloc;
 }
 
 void
 ConcreteDPMStatus :: updateYourself(TimeStep *atTime)
 {
+#if 0
 #ifdef SOPHISTICATED_SIZEDEPENDENT_ADJUSTMENT
     // check whether the second-order work is negative
     // (must be done !!!before!!! the update of strain and stress)
@@ -107,7 +110,7 @@ ConcreteDPMStatus :: updateYourself(TimeStep *atTime)
     }
 
 #endif
-
+#endif
     // Call corresponding function of the parent class to update
     // variables defined there.
     StructuralMaterialStatus :: updateYourself(atTime);
@@ -119,6 +122,7 @@ ConcreteDPMStatus :: updateYourself(TimeStep *atTime)
     damage = tempDamage;
     equivStrain = tempEquivStrain;
     state_flag = temp_state_flag;
+    epsloc = tempEpsloc;
 }
 
 void
@@ -505,6 +509,31 @@ ConcreteDPM :: giveRealStressVector(FloatArray &answer,
     assignStateFlag(gp);
 
     answer = stress;
+
+    // Moved from material status updateYourself /JB
+#ifdef SOPHISTICATED_SIZEDEPENDENT_ADJUSTMENT
+    // check whether the second-order work is negative
+    // (must be done !!!before!!! the update of strain and stress)
+    if ( status->giveEpsLoc() < 0.) {
+        FloatArray strainIncrement = strainVector;
+        strainIncrement.subtract ( status->giveStrainVector() ); // old value
+        FloatArray stressIncrement = stress;
+        stressIncrement.subtract ( status->giveStressVector() ); // old value
+        int n = strainIncrement.giveSize ( );
+        double work = strainIncrement.dotProduct ( stressIncrement, n );
+        //printf(" work : %g\n", work);
+        if (work < 0.) {
+            double E = this->give ( 'E', gp );
+            double ft = this->give ( ft_strength, gp );
+            double kappaD = status->giveTempKappaD();
+            double damage = status->giveTempDamage();
+            double epsloc = kappaD + damage * ft / E;
+            status->letTempEpslocBe ( epsloc );
+        }
+    }
+
+#endif
+
 }
 
 
