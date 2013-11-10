@@ -50,10 +50,7 @@
 #include "datastream.h"
 #include "loadtimefunction.h"
 #include "contextioerr.h"
-#include "petscsparsemtrx.h"
-#ifdef TIME_REPORT
- #include "timer.h"
-#endif
+#include "timer.h"
 
 namespace oofem {
 /* define if implicit interface update required */

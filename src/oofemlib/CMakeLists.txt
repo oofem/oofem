@@ -73,8 +73,11 @@ set (core_nm
     nrsolver.C
     linesearch.C
     calmls.C
-    petscsolver.C
     )
+
+if (USE_PETSC)
+    list (APPEND core_nm petscsolver.C petscsparsemtrx.C)
+endif ()
 
 set (core_fields
     fieldmanager.C
@@ -145,7 +148,6 @@ set (core_arrays
     stressvector.C
     strainvector.C
     floatmatrix.C
-    petscsparsemtrx.C
     )
 
 set (core_engng

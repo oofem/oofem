@@ -32,8 +32,6 @@
  *  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  */
 
-#ifdef __PETSC_MODULE
-
 #include "petscsparsemtrx.h"
 #include "engngm.h"
 #include "activebc.h"
@@ -428,14 +426,8 @@ PetscSparseMtrx :: buildInternalStructure(EngngModel *eModel, int di, EquationID
             // determine nonzero structure of a "local (maintained)" part of matrix, and the off-diagonal part
             // allocation map
             ///@todo Split this into upper and lower triangular part like for the sequential matrix (we can then use SBAIJ which is a huge performance boost)
-#define __USE_INTARRAY
-#ifdef __USE_INTARRAY
             std :: vector< IntArray > d_rows_upper(leqs), d_rows_lower(leqs);  // diagonal sub-matrix allocation
             std :: vector< IntArray > o_rows_upper(leqs), o_rows_lower(leqs);  // off-diagonal allocation
-#else
-            std :: vector< std :: set< int > >d_rows_upper(leqs), d_rows_lower(leqs);  // diagonal sub-matrix allocation
-            std :: vector< std :: set< int > >o_rows_upper(leqs), o_rows_lower(leqs);  // off-diagonal allocation
-#endif
 
             IntArray lloc, gloc;
 
@@ -759,4 +751,3 @@ PetscSparseMtrx :: writeToFile(const char* fname) const
 }
 
 } // end namespace oofem
-#endif //ifdef __PETSC_MODULE
