@@ -40,6 +40,7 @@
 
 ///@name Input fields for meta step
 //@{
+#define _IFT_MetaStep_Name "metastep"
 #define _IFT_MetaStep_nsteps "nsteps"
 //@}
 

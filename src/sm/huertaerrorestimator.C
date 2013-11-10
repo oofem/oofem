@@ -49,20 +49,21 @@
 #include "dof.h"
 #include "util.h"
 #include "eleminterpunknownmapper.h"
-#include "buffereddatareader.h"
 #include "adaptnlinearstatic.h"
 #include "adaptlinearstatic.h"
 #include "verbose.h"
 #include "datastream.h"
 #include "contextioerr.h"
 #include "timer.h"
-#include "oofem_limits.h"
 #include "calmls.h"
 #include "nrsolver.h"
 #include "errorestimatortype.h"
 #include "classfactory.h"
 #include "dynamicdatareader.h"
 #include "dynamicinputrecord.h"
+#include "heavisideltf.h"
+#include "outputmanager.h"
+#include "boundarycondition.h"
 
 #include <vector>
 #include <string>
@@ -121,7 +122,7 @@ static FloatArray exactCoarseError;
 
 //static FloatArray uNormArray;
 
-static BufferedDataReader refinedReader;
+static DynamicDataReader refinedReader;
 
 static int impMat, perMat;
 static FloatArray impPos;
@@ -1120,7 +1121,7 @@ HuertaErrorEstimatorInterface :: setupRefinedElementProblem1D(Element *element, 
                                                               IntArray &controlNode, IntArray &controlDof,
                                                               HuertaErrorEstimator :: AnalysisMode aMode, const char *edgetype)
 {
-    char line [ OOFEM_MAX_LINE_LENGTH + 1 ];
+    std::list< FloatArray > newNodes;
     IntArray *connectivity, boundary(1);
     int startNode, endNode, inode, m, pos, nd, bc, dofs;
     Node *node;
@@ -1181,7 +1182,7 @@ HuertaErrorEstimatorInterface :: setupRefinedElementProblem1D(Element *element, 
     if ( mode == HuertaErrorEstimatorInterface :: NodeMode ) {
         double x, y, z, u, du = 1.0 / ( level + 1 );
         double xc, yc, zc, xm, ym, zm;
-        int idof, iload, loads, sideNumBc, bcId, bcDofId;
+        int idof, sideNumBc, bcId, bcDofId;
         IntArray sideBcDofId, dofIdArray, *loadArray;
         FloatMatrix *lcs;
         bool hasBc;
@@ -1213,6 +1214,8 @@ HuertaErrorEstimatorInterface :: setupRefinedElementProblem1D(Element *element, 
             for ( m = 0; m < level + 2; m++, u += du, pos++ ) {
                 nd = connectivity->at(pos);
                 if ( localNodeIdArray.at(nd) == 0 ) {
+                    DynamicInputRecord *ir = new DynamicInputRecord();
+
                     localNodeIdArray.at(nd) = ++localNodeId;
                     globalNodeIdArray.at(localNodeId) = nd;
 
@@ -1220,14 +1223,19 @@ HuertaErrorEstimatorInterface :: setupRefinedElementProblem1D(Element *element, 
                     y = yc * ( 1.0 - u ) + ym * u;
                     z = zc * ( 1.0 - u ) + zm * u;
 
-                    sprintf(line, "node %d coords 3 %f %f %f", localNodeId, x, y, z);
-                    str = line;
+                    FloatArray coord;
+                    coord.setValues(3, x, y, z);
+                    newNodes.push_back(coord);
+
+                    ir->setRecordKeywordField(_IFT_Node_Name, localNodeId);
+                    ir->setField(coord, _IFT_Node_coords);
 
                     if ( ( lcs = node->giveLocalCoordinateTriplet() ) != NULL ) {
-                        sprintf( line, " lcs 6 %f %f %f %f %f %f",
+                        FloatArray lcs_vec;
+                        lcs_vec.setValues(6,
                                 lcs->at(1, 1), lcs->at(1, 2), lcs->at(1, 3),
                                 lcs->at(2, 1), lcs->at(2, 2), lcs->at(2, 3) );
-                        str += line;
+                        ir->setField(lcs_vec, _IFT_Node_lcs);
                     }
 
                     // setup boundary conditions (for element (nodeId == 0), for patch (nodeId != 0))
@@ -1254,46 +1262,35 @@ HuertaErrorEstimatorInterface :: setupRefinedElementProblem1D(Element *element, 
 
                     if ( bc == 1 ) {
                         if ( aMode == HuertaErrorEstimator :: HEE_linear ) {
-                            sprintf(line, " bc %d", dofs);
-                            str += line;
+                            FloatArray bcs(dofs);
                             for ( idof = 0; idof < dofs; idof++ ) {
-                                sprintf(line, " %d", ++localBcId);
-                                str += line;
+                                bcs(idof) = ++localBcId;
                             }
+                            ir->setField(bcs, _IFT_DofManager_bc);
                         }
                     } else {
                         if ( hasBc == true ) {
                             // it is necessary to reproduce bc from coarse mesh
 
                             if ( m == 0 ) {       // at node
-                                sprintf(line, " bc %d", dofs);
-                                str += line;
-
+                                FloatArray bcs(dofs);
                                 for ( idof = 1; idof <= dofs; idof++ ) {
                                     bcDofId = 0;
                                     nodeDof = node->giveDof(idof);
                                     if ( nodeDof->hasBc(tStep) != 0 ) {
                                         bcDofId = nodeDof->giveBcId();
                                     }
-
-                                    sprintf(line, " %d", bcDofId);
-                                    str += line;
+                                    bcs.at(idof) = bcDofId;
                                 }
+                                ir->setField(bcs, _IFT_DofManager_bc);
 
                                 // copy node load
-
-                                if ( ( loads = ( loadArray = node->giveLoadArray() )->giveSize() ) != 0 ) {
-                                    sprintf(line, " load %d", loads);
-                                    str += line;
-                                    for ( iload = 1; iload <= loads; iload++ ) {
-                                        sprintf( line, " %d", loadArray->at(iload) );
-                                        str += line;
-                                    }
+                                if ( ( loadArray = node->giveLoadArray() )->giveSize() != 0 ) {
+                                    ir->setField(*loadArray, _IFT_DofManager_load);
                                 }
                             } else {
                                 if ( sideNumBc != 0 ) {
-                                    sprintf(line, " bc %d", dofs);
-                                    str += line;
+                                    FloatArray bcs(dofs);
 
                                     // I rely on the fact that bc dofs to be reproduced are ordered with respect to the dof ordering of the corner node
 
@@ -1308,28 +1305,23 @@ HuertaErrorEstimatorInterface :: setupRefinedElementProblem1D(Element *element, 
                                             }
                                         }
 
-                                        sprintf(line, " %d", bcDofId);
-                                        str += line;
+                                        bcs.at(idof) = bcDofId;
                                     }
+                                    ir->setField(bcs, _IFT_DofManager_bc);
                                 }
                             }
                         } else {
                             // copy node load
 
                             if ( m == 0 ) {
-                                if ( ( loads = ( loadArray = node->giveLoadArray() )->giveSize() ) != 0 ) {
-                                    sprintf(line, " load %d", loads);
-                                    str += line;
-                                    for ( iload = 1; iload <= loads; iload++ ) {
-                                        sprintf( line, " %d", loadArray->at(iload) );
-                                        str += line;
-                                    }
+                                if ( ( loadArray = node->giveLoadArray() )->giveSize() != 0 ) {
+                                    ir->setField(*loadArray, _IFT_DofManager_load);
                                 }
                             }
                         }
                     }
 
-                    refinedReader.appendInputString(str);
+                    refinedReader.insertInputRecord(DataReader::IR_dofmanRec, ir);
                 }
             }
         }
@@ -1337,10 +1329,11 @@ HuertaErrorEstimatorInterface :: setupRefinedElementProblem1D(Element *element, 
         return;
     }
 
+    std::vector< FloatArray > newNodesVec(newNodes.begin(), newNodes.end());
     if ( mode == HuertaErrorEstimatorInterface :: ElemMode ) {
-        int mat, csect, iload, loads, material;
+        int mat, csect, material;
         int nd1, nd2;
-        IntArray *loadArray, boundaryLoadArray;
+        IntArray boundaryLoadArray;
         bool hasLoad;
 
         mat = element->giveMaterial()->giveNumber();
@@ -1352,7 +1345,9 @@ HuertaErrorEstimatorInterface :: setupRefinedElementProblem1D(Element *element, 
             hasLoad = refinedElement->giveBoundaryLoadArray1D(inode, element, boundaryLoadArray);
 
             for ( m = 0; m < level + 1; m++ ) {
+                DynamicInputRecord *ir = new DynamicInputRecord();
                 localElemId++;
+                ir->setRecordKeywordField(edgetype, localElemId);
 
                 nd = m + 1;
 
@@ -1361,22 +1356,12 @@ HuertaErrorEstimatorInterface :: setupRefinedElementProblem1D(Element *element, 
 
                 material = mat;
                 if ( impMat != 0 && impMat == mat ) {
-                    int i;
-                    //     InputRecord &ir();
                     FloatArray coordinates1, coordinates2;
-                    const char *__proc = "sesetupRefinedElementProblem1D"; // Required by IR_GIVE_FIELD macro
-                    IRResultType result;                    // Required by IR_GIVE_FIELD macro
-
-                    refinedReader.seek(nd1 + 6);
-                    InputRecord *ir = refinedReader.giveInputRecord(DataReader :: IR_dofmanRec, nd1);
-                    IR_GIVE_FIELD(ir, coordinates1, _IFT_HuertaErrorEstimatorInterface_coords);
-
-                    refinedReader.seek(nd2 + 6);
-                    ir = refinedReader.giveInputRecord(DataReader :: IR_dofmanRec, nd2);
-                    IR_GIVE_FIELD(ir, coordinates2, _IFT_HuertaErrorEstimatorInterface_coords);
+                    coordinates1 = newNodesVec[nd1-1];
+                    coordinates2 = newNodesVec[nd2-1];
 
                     material = impMat;
-                    for ( i = 1; i <= impPos.giveSize(); i++ ) {
+                    for ( int i = 1; i <= impPos.giveSize(); i++ ) {
                         if ( impPos.at(i) < min( coordinates1.at(i), coordinates2.at(i) ) ) {
                             material = perMat;
                             break;
@@ -1389,33 +1374,26 @@ HuertaErrorEstimatorInterface :: setupRefinedElementProblem1D(Element *element, 
                     }
                 }
 
-                sprintf(line, "%s %d nodes 2 %d %d mat %d crossSect %d",
-                        edgetype, localElemId, nd1, nd2, material, csect);
-                str = line;
+                FloatArray nd(2);
+                nd.setValues(nd1, nd2);
+
+                ir->setField(nd, "nodes");
+                ir->setField(material, "mat");
+                ir->setField(csect, "crosssect");
 
                 // copy body and boundary loads
 
-                if ( ( loads = ( loadArray = element->giveBodyLoadArray() )->giveSize() ) != 0 ) {
-                    sprintf(line, " bodyLoads %d", loads);
-                    str += line;
-                    for ( iload = 1; iload <= loads; iload++ ) {
-                        sprintf( line, " %d", loadArray->at(iload) );
-                        str += line;
-                    }
+                if ( element->giveBodyLoadArray()->giveSize() != 0 ) {
+                    ir->setField(*element->giveBodyLoadArray(), "bodyloads");
                 }
 
                 if ( hasLoad == true ) {
-                    if ( ( loads = boundaryLoadArray.giveSize() ) != 0 ) {
-                        sprintf(line, " boundaryLoads %d", loads);
-                        str += line;
-                        for ( iload = 1; iload <= loads; iload++ ) {
-                            sprintf( line, " %d", boundaryLoadArray.at(iload) );
-                            str += line;
-                        }
+                    if ( boundaryLoadArray.giveSize() != 0 ) {
+                        ir->setField(boundaryLoadArray, "boundaryloads");
                     }
                 }
 
-                refinedReader.appendInputString(str);
+                refinedReader.insertInputRecord(DataReader::IR_elemRec, ir);
             }
         }
     }
@@ -1494,9 +1472,11 @@ HuertaErrorEstimatorInterface :: setupRefinedElementProblem1D(Element *element, 
 
                             // first loadtime function must be constant 1.0
                             for ( idof = 1; idof <= dofs; idof++ ) {
-                                sprintf( line, "BoundaryCondition %d loadTimeFunction %d prescribedvalue %e",
-                                        ++localBcId, 1, uFine.at(idof) );
-                                refinedReader.appendInputString(line);
+                                DynamicInputRecord *ir = new DynamicInputRecord();
+                                ir->setRecordKeywordField(_IFT_BoundaryCondition_Name, ++localBcId);
+                                ir->setField(1, _IFT_GeneralBoundaryCondition_LoadTimeFunct);
+                                ir->setField(uFine.at(idof), _IFT_BoundaryCondition_PrescribedValue);
+                                refinedReader.insertInputRecord(DataReader::IR_bcRec, ir);
                             }
                         }
                     }
@@ -1563,7 +1543,6 @@ HuertaErrorEstimatorInterface :: setupRefinedElementProblem2D(Element *element, 
                                                               IntArray &controlNode, IntArray &controlDof,
                                                               HuertaErrorEstimator :: AnalysisMode aMode, const char *quadtype)
 {
-    char line [ OOFEM_MAX_LINE_LENGTH + 1 ];
     IntArray *connectivity, boundary(2);
     int startNode, endNode, inode, n, m, pos, nd, bc, dofs;
     Node *node;
@@ -1643,7 +1622,7 @@ HuertaErrorEstimatorInterface :: setupRefinedElementProblem2D(Element *element, 
     }
 
     if ( mode == HuertaErrorEstimatorInterface :: NodeMode ) {
-        int iside, s1, s2, idof, index, iload, loads;
+        int iside, s1, s2, idof, index;
         double x, y, z, u, v, du = 1.0 / ( level + 1 ), dv = 1.0 / ( level + 1 );
         double xc, yc, zc, xs1, ys1, zs1, xs2, ys2, zs2, xm, ym, zm;
         int bcId, bcDofId;
@@ -1700,6 +1679,9 @@ HuertaErrorEstimatorInterface :: setupRefinedElementProblem2D(Element *element, 
                 for ( m = 0; m < level + 2; m++, u += du, pos++ ) {
                     nd = connectivity->at(pos);
                     if ( localNodeIdArray.at(nd) == 0 ) {
+                        DynamicInputRecord *ir = new DynamicInputRecord();
+                        ir->setRecordKeywordField("node", localNodeId);
+
                         localNodeIdArray.at(nd) = ++localNodeId;
                         globalNodeIdArray.at(localNodeId) = nd;
 
@@ -1707,14 +1689,16 @@ HuertaErrorEstimatorInterface :: setupRefinedElementProblem2D(Element *element, 
                         y = ( yc * ( 1.0 - u ) + ys1 * u ) * ( 1.0 - v ) + ( ys2 * ( 1.0 - u ) + ym * u ) * v;
                         z = ( zc * ( 1.0 - u ) + zs1 * u ) * ( 1.0 - v ) + ( zs2 * ( 1.0 - u ) + zm * u ) * v;
 
-                        sprintf(line, "node %d coords 3 %f %f %f", localNodeId, x, y, z);
-                        str = line;
+                        FloatArray coords;
+                        coords.setValues(3, x, y, z);
+
+                        ir->setField(coords, "coords");
 
                         if ( ( lcs = node->giveLocalCoordinateTriplet() ) != NULL ) {
-                            sprintf( line, " lcs 6 %f %f %f %f %f %f",
-                                    lcs->at(1, 1), lcs->at(1, 2), lcs->at(1, 3),
+                            FloatArray lcs_vec;
+                            lcs_vec.setValues(6, lcs->at(1, 1), lcs->at(1, 2), lcs->at(1, 3),
                                     lcs->at(2, 1), lcs->at(2, 2), lcs->at(2, 3) );
-                            str += line;
+                            ir->setField(lcs_vec, _IFT_Node_lcs);
                         }
 
                         // setup boundary conditions (for element (nodeId == 0), for patch (nodeId != 0))
@@ -1761,20 +1745,18 @@ HuertaErrorEstimatorInterface :: setupRefinedElementProblem2D(Element *element, 
 
                         if ( bc == 1 ) {
                             if ( aMode == HuertaErrorEstimator :: HEE_linear ) {
-                                sprintf(line, " bc %d", dofs);
-                                str += line;
+                                FloatArray bcs(dofs);
                                 for ( idof = 0; idof < dofs; idof++ ) {
-                                    sprintf(line, " %d", ++localBcId);
-                                    str += line;
+                                    bcs.at(idof) = ++localBcId;
                                 }
+                                ir->setField(bcs, "bc");
                             }
                         } else {
                             if ( hasBc == true && ( m == 0 || n == 0 ) ) {
                                 // it is necessary to reproduce bc from coarse mesh
 
                                 if ( m == 0 && n == 0 ) {    // at node
-                                    sprintf(line, " bc %d", dofs);
-                                    str += line;
+                                    FloatArray bcs(dofs);
 
                                     for ( idof = 1; idof <= dofs; idof++ ) {
                                         bcDofId = 0;
@@ -1783,19 +1765,14 @@ HuertaErrorEstimatorInterface :: setupRefinedElementProblem2D(Element *element, 
                                             bcDofId = nodeDof->giveBcId();
                                         }
 
-                                        sprintf(line, " %d", bcDofId);
-                                        str += line;
+                                        bcs.at(idof) = bcDofId;
                                     }
+                                    ir->setField(bcs, "bc");
 
                                     // copy node load
 
-                                    if ( ( loads = ( loadArray = node->giveLoadArray() )->giveSize() ) != 0 ) {
-                                        sprintf(line, " load %d", loads);
-                                        str += line;
-                                        for ( iload = 1; iload <= loads; iload++ ) {
-                                            sprintf( line, " %d", loadArray->at(iload) );
-                                            str += line;
-                                        }
+                                    if ( ( loadArray = node->giveLoadArray() )->giveSize() != 0 ) {
+                                        ir->setField(*loadArray, "load");
                                     }
                                 } else {
                                     index = 0;
@@ -1808,8 +1785,7 @@ HuertaErrorEstimatorInterface :: setupRefinedElementProblem2D(Element *element, 
                                     }
 
                                     if ( index != 0 ) {
-                                        sprintf(line, " bc %d", dofs);
-                                        str += line;
+                                        FloatArray bcs(dofs);
 
                                         // I rely on the fact that bc dofs to be reproduced are ordered with respect to the dof ordering of the corner node
 
@@ -1825,28 +1801,23 @@ HuertaErrorEstimatorInterface :: setupRefinedElementProblem2D(Element *element, 
                                                 }
                                             }
 
-                                            sprintf(line, " %d", bcDofId);
-                                            str += line;
+                                            bcs.at(idof) = bcDofId;
                                         }
+                                        ir->setField(bcs, "bc");
                                     }
                                 }
                             } else {
                                 // copy node load
 
                                 if ( m == 0 && n == 0 ) {
-                                    if ( ( loads = ( loadArray = node->giveLoadArray() )->giveSize() ) != 0 ) {
-                                        sprintf(line, " load %d", loads);
-                                        str += line;
-                                        for ( iload = 1; iload <= loads; iload++ ) {
-                                            sprintf( line, " %d", loadArray->at(iload) );
-                                            str += line;
-                                        }
+                                    if ( ( loadArray = node->giveLoadArray() )->giveSize() != 0 ) {
+                                        ir->setField(*loadArray, "load");
                                     }
                                 }
                             }
                         }
 
-                        refinedReader.appendInputString(str);
+                        refinedReader.insertInputRecord(DataReader::IR_dofmanRec, ir);
                     }
                 }
             }
@@ -1856,7 +1827,7 @@ HuertaErrorEstimatorInterface :: setupRefinedElementProblem2D(Element *element, 
     }
 
     if ( mode == HuertaErrorEstimatorInterface :: ElemMode ) {
-        int mat, csect, iside, iload, loads, index;
+        int mat, csect, iside, index;
         int nd1, nd2, nd3, nd4;
         IntArray *loadArray;
         AList< IntArray >boundaryLoadList;
@@ -1878,6 +1849,9 @@ HuertaErrorEstimatorInterface :: setupRefinedElementProblem2D(Element *element, 
 
             for ( n = 0; n < level + 1; n++ ) {
                 for ( m = 0; m < level + 1; m++ ) {
+                    DynamicInputRecord *ir = new DynamicInputRecord();
+                    ir->setRecordKeywordField(quadtype, localElemId);
+
                     localElemId++;
 
                     nd = n * ( level + 2 ) + m + 1;
@@ -1887,26 +1861,24 @@ HuertaErrorEstimatorInterface :: setupRefinedElementProblem2D(Element *element, 
                     nd3 = localNodeIdArray.at( connectivity->at(nd + level + 3) );
                     nd4 = localNodeIdArray.at( connectivity->at(nd + level + 2) );
 
-                    sprintf(line, "%s %d nodes 4 %d %d %d %d mat %d crossSect %d",
-                            quadtype, localElemId, nd1, nd2, nd3, nd4, mat, csect);
-                    str = line;
+                    IntArray nd;
+                    nd.setValues(4, nd1, nd2, nd3, nd4);
+
+                    ir->setField(nd, "nodes");
+                    ir->setField(mat, "mat");
+                    ir->setField(csect, "crosssect");
 
                     // copy body and boundary loads
 
-                    if ( ( loads = ( loadArray = element->giveBodyLoadArray() )->giveSize() ) != 0 ) {
-                        sprintf(line, " bodyLoads %d", loads);
-                        str += line;
-                        for ( iload = 1; iload <= loads; iload++ ) {
-                            sprintf( line, " %d", loadArray->at(iload) );
-                            str += line;
-                        }
+                    if ( ( loadArray = element->giveBodyLoadArray() )->giveSize() != 0 ) {
+                        ir->setField(*loadArray, "bodyloads");
                     }
 
                     // boundary load is not copied on non-boundary sides
 
                     if ( hasLoad == true && ( m == 0 || n == 0 ) ) {
                         if ( m == 0 && n == 0 ) {
-                            loads = 0;
+                            int loads = 0;
                             for ( iside = 1; iside <= 2; iside++ ) {
                                 if ( boundary.at(iside) == 0 ) {
                                     continue;
@@ -1916,21 +1888,16 @@ HuertaErrorEstimatorInterface :: setupRefinedElementProblem2D(Element *element, 
                             }
 
                             if ( loads != 0 ) {
-                                sprintf(line, " boundaryLoads %d", loads);
-                                str += line;
                                 for ( iside = 1; iside <= 2; iside++ ) {
                                     if ( boundary.at(iside) == 0 ) {
                                         continue;
                                     }
 
-                                    if ( ( loads = ( loadArray = boundaryLoadList.at(iside) )->giveSize() ) == 0 ) {
+                                    if ( ( loadArray = boundaryLoadList.at(iside) )->giveSize() == 0 ) {
                                         continue;
                                     }
 
-                                    for ( iload = 1; iload <= loads; iload++ ) {
-                                        sprintf( line, " %d", loadArray->at(iload) );
-                                        str += line;
-                                    }
+                                    ir->setField(*loadArray, "boundaryloads");
                                 }
                             }
                         } else {
@@ -1944,18 +1911,13 @@ HuertaErrorEstimatorInterface :: setupRefinedElementProblem2D(Element *element, 
                             }
 
                             if ( index != 0 ) {
-                                loads = ( loadArray = boundaryLoadList.at(index) )->giveSize();
-                                sprintf(line, " boundaryLoads %d", loads);
-                                str += line;
-                                for ( iload = 1; iload <= loads; iload++ ) {
-                                    sprintf( line, " %d", loadArray->at(iload) );
-                                    str += line;
-                                }
+                                loadArray = boundaryLoadList.at(index);
+                                ir->setField(loadArray, "boundaryloads");
                             }
                         }
                     }
 
-                    refinedReader.appendInputString(str);
+                    refinedReader.insertInputRecord(DataReader::IR_elemRec, ir);
                 }
             }
         }
@@ -2071,9 +2033,11 @@ HuertaErrorEstimatorInterface :: setupRefinedElementProblem2D(Element *element, 
 
                                 // first loadtime function must be constant 1.0
                                 for ( idof = 1; idof <= dofs; idof++ ) {
-                                    sprintf( line, "BoundaryCondition %d loadTimeFunction %d prescribedvalue %e",
-                                            ++localBcId, 1, uFine.at(idof) );
-                                    refinedReader.appendInputString(line);
+                                    DynamicInputRecord *ir = new DynamicInputRecord();
+                                    ir->setRecordKeywordField("BoundaryCondition", ++localBcId);
+                                    ir->setField(1, "loadtimefunction");
+                                    ir->setField(uFine.at(idof), "prescribedvalue");
+                                    refinedReader.insertInputRecord(DataReader::IR_bcRec, ir);
                                 }
                             }
                         }
@@ -2164,7 +2128,6 @@ HuertaErrorEstimatorInterface :: setupRefinedElementProblem3D(Element *element, 
                                                               IntArray &controlNode, IntArray &controlDof,
                                                               HuertaErrorEstimator :: AnalysisMode aMode, const char *hexatype)
 {
-    char line [ OOFEM_MAX_LINE_LENGTH + 1 ];
     IntArray *connectivity, boundary(3);
     int startNode, endNode, inode, k, n, m, pos, nd, bc, dofs;
     Node *node;
@@ -2268,7 +2231,7 @@ HuertaErrorEstimatorInterface :: setupRefinedElementProblem3D(Element *element, 
     }
 
     if ( mode == HuertaErrorEstimatorInterface :: NodeMode ) {
-        int iside, iface, s1, s2, s3, f1, f2, f3, idof, index, iload, loads;
+        int iside, iface, s1, s2, s3, f1, f2, f3, idof, index;
         double x, y, z, u, v, w, du = 1.0 / ( level + 1 ), dv = 1.0 / ( level + 1 ), dw = 1.0 / ( level + 1 );
         double xc, yc, zc, xm, ym, zm;
         double xs1, ys1, zs1, xs2, ys2, zs2, xs3, ys3, zs3;
@@ -2353,6 +2316,9 @@ HuertaErrorEstimatorInterface :: setupRefinedElementProblem3D(Element *element, 
                     for ( m = 0; m < level + 2; m++, u += du, pos++ ) {
                         nd = connectivity->at(pos);
                         if ( localNodeIdArray.at(nd) == 0 ) {
+                            DynamicInputRecord *ir = new DynamicInputRecord();
+                            ir->setRecordKeywordField("node", localNodeId);
+
                             localNodeIdArray.at(nd) = ++localNodeId;
                             globalNodeIdArray.at(localNodeId) = nd;
 
@@ -2363,14 +2329,15 @@ HuertaErrorEstimatorInterface :: setupRefinedElementProblem3D(Element *element, 
                             z = ( ( zc * ( 1.0 - u ) + zs1 * u ) * ( 1.0 - v ) + ( zs2 * ( 1.0 - u ) + zf1 * u ) * v ) * ( 1.0 - w )
                                 + ( ( zs3 * ( 1.0 - u ) + zf2 * u ) * ( 1.0 - v ) + ( zf3 * ( 1.0 - u ) + zm * u ) * v ) * w;
 
-                            sprintf(line, "node %d coords 3 %f %f %f", localNodeId, x, y, z);
-                            str = line;
+                            FloatArray coords;
+                            coords.setValues(3, x, y, z);
+                            ir->setField(coords, "coords");
 
                             if ( ( lcs = node->giveLocalCoordinateTriplet() ) != NULL ) {
-                                sprintf( line, " lcs 6 %f %f %f %f %f %f",
-                                        lcs->at(1, 1), lcs->at(1, 2), lcs->at(1, 3),
+                                FloatArray lcs_vec;
+                                lcs_vec.setValues(6, lcs->at(1, 1), lcs->at(1, 2), lcs->at(1, 3),
                                         lcs->at(2, 1), lcs->at(2, 2), lcs->at(2, 3) );
-                                str += line;
+                                ir->setField(lcs_vec, _IFT_Node_lcs);
                             }
 
                             // setup boundary conditions (for element (nodeId == 0), for patch (nodeId != 0))
@@ -2425,20 +2392,18 @@ HuertaErrorEstimatorInterface :: setupRefinedElementProblem3D(Element *element, 
 
                             if ( bc == 1 ) {
                                 if ( aMode == HuertaErrorEstimator :: HEE_linear ) {
-                                    sprintf(line, " bc %d", dofs);
-                                    str += line;
+                                    FloatArray bcs(dofs);
                                     for ( idof = 0; idof < dofs; idof++ ) {
-                                        sprintf(line, " %d", ++localBcId);
-                                        str += line;
+                                        bcs.at(idof) = ++localBcId;
                                     }
+                                    ir->setField(bcs, "bc");
                                 }
                             } else {
                                 if ( hasBc == true && ( m == 0 || n == 0 || k == 0 ) ) {
                                     // it is necessary to reproduce bc from coarse mesh
 
                                     if ( m == 0 && n == 0 && k == 0 ) { // at node
-                                        sprintf(line, " bc %d", dofs);
-                                        str += line;
+                                        FloatArray bcs(dofs);
 
                                         for ( idof = 1; idof <= dofs; idof++ ) {
                                             bcDofId = 0;
@@ -2447,19 +2412,14 @@ HuertaErrorEstimatorInterface :: setupRefinedElementProblem3D(Element *element, 
                                                 bcDofId = nodeDof->giveBcId();
                                             }
 
-                                            sprintf(line, " %d", bcDofId);
-                                            str += line;
+                                            bcs.at(idof) = bcDofId;
                                         }
+                                        ir->setField(bcs, "bc");
 
                                         // copy node load
 
-                                        if ( ( loads = ( loadArray = node->giveLoadArray() )->giveSize() ) != 0 ) {
-                                            sprintf(line, " load %d", loads);
-                                            str += line;
-                                            for ( iload = 1; iload <= loads; iload++ ) {
-                                                sprintf( line, " %d", loadArray->at(iload) );
-                                                str += line;
-                                            }
+                                        if ( ( loadArray = node->giveLoadArray() )->giveSize() != 0 ) {
+                                            ir->setField(*loadArray, "load");
                                         }
                                     } else {
                                         if ( ( m == 0 && n == 0 ) || ( m == 0 && k == 0 ) || ( n == 0 && k == 0 ) ) {
@@ -2477,8 +2437,7 @@ HuertaErrorEstimatorInterface :: setupRefinedElementProblem3D(Element *element, 
                                             }
 
                                             if ( index != 0 ) {
-                                                sprintf(line, " bc %d", dofs);
-                                                str += line;
+                                                FloatArray bcs(dofs);
 
                                                 // I rely on the fact that bc dofs to be reproduced are ordered with respect to the dof ordering of the corner node
 
@@ -2494,9 +2453,9 @@ HuertaErrorEstimatorInterface :: setupRefinedElementProblem3D(Element *element, 
                                                         }
                                                     }
 
-                                                    sprintf(line, " %d", bcDofId);
-                                                    str += line;
+                                                    bcs.at(idof) = bcDofId;
                                                 }
+                                                ir->setField(bcs, "bc");
                                             }
                                         } else {
                                             index = 0;
@@ -2513,8 +2472,7 @@ HuertaErrorEstimatorInterface :: setupRefinedElementProblem3D(Element *element, 
                                             }
 
                                             if ( index != 0 ) {
-                                                sprintf(line, " bc %d", dofs);
-                                                str += line;
+                                                FloatArray bcs(dofs);
 
                                                 // I rely on the fact that bc dofs to be reproduced are ordered with respect to the dof ordering of the corner node
 
@@ -2530,9 +2488,9 @@ HuertaErrorEstimatorInterface :: setupRefinedElementProblem3D(Element *element, 
                                                         }
                                                     }
 
-                                                    sprintf(line, " %d", bcDofId);
-                                                    str += line;
+                                                    bcs.at(idof) = bcDofId;
                                                 }
+                                                ir->setField(bcs, "bc");
                                             }
                                         }
                                     }
@@ -2540,19 +2498,14 @@ HuertaErrorEstimatorInterface :: setupRefinedElementProblem3D(Element *element, 
                                     // copy node load
 
                                     if ( m == 0 && n == 0 ) {
-                                        if ( ( loads = ( loadArray = node->giveLoadArray() )->giveSize() ) != 0 ) {
-                                            sprintf(line, " load %d", loads);
-                                            str += line;
-                                            for ( iload = 1; iload <= loads; iload++ ) {
-                                                sprintf( line, " %d", loadArray->at(iload) );
-                                                str += line;
-                                            }
+                                        if ( ( loadArray = node->giveLoadArray() )->giveSize() != 0 ) {
+                                            ir->setField(*loadArray, "loads");
                                         }
                                     }
                                 }
                             }
 
-                            refinedReader.appendInputString(str);
+                            refinedReader.insertInputRecord(DataReader::IR_dofmanRec, ir);
                         }
                     }
                 }
@@ -2563,7 +2516,7 @@ HuertaErrorEstimatorInterface :: setupRefinedElementProblem3D(Element *element, 
     }
 
     if ( mode == HuertaErrorEstimatorInterface :: ElemMode ) {
-        int mat, csect, iside, iload, loads;
+        int mat, csect, iside;
         int nd1, nd2, nd3, nd4, nd5, nd6, nd7, nd8;
         IntArray *loadArray;
         AList< IntArray >boundaryLoadList;
@@ -2586,6 +2539,8 @@ HuertaErrorEstimatorInterface :: setupRefinedElementProblem3D(Element *element, 
             for ( k = 0; k < level + 1; k++ ) {
                 for ( n = 0; n < level + 1; n++ ) {
                     for ( m = 0; m < level + 1; m++ ) {
+                        DynamicInputRecord *ir = new DynamicInputRecord();
+
                         localElemId++;
 
                         nd = k * ( level + 2 ) * ( level + 2 ) + n * ( level + 2 ) + m + 1;
@@ -2602,25 +2557,24 @@ HuertaErrorEstimatorInterface :: setupRefinedElementProblem3D(Element *element, 
                         nd7 = localNodeIdArray.at( connectivity->at(nd + level + 3) );
                         nd8 = localNodeIdArray.at( connectivity->at(nd + level + 2) );
 
-                        sprintf(line, "%s %d nodes 8 %d %d %d %d %d %d %d %d mat %d crossSect %d",
-                                hexatype, localElemId, nd1, nd2, nd3, nd4, nd5, nd6, nd7, nd8, mat, csect);
-                        str = line;
+                        FloatArray nd;
+                        nd.setValues(nd1, nd2, nd3, nd4, nd5, nd6, nd7, nd8);
+
+                        ir->setRecordKeywordField(hexatype, localElemId);
+                        ir->setField(nd, "nodes");
+                        ir->setField(mat, "mat");
+                        ir->setField(csect, "csect");
 
                         // copy body and boundary loads
 
-                        if ( ( loads = ( loadArray = element->giveBodyLoadArray() )->giveSize() ) != 0 ) {
-                            sprintf(line, " bodyLoads %d", loads);
-                            str += line;
-                            for ( iload = 1; iload <= loads; iload++ ) {
-                                sprintf( line, " %d", loadArray->at(iload) );
-                                str += line;
-                            }
+                        if ( ( loadArray = element->giveBodyLoadArray() )->giveSize() != 0 ) {
+                            ir->setField(*loadArray, "bodyloads");
                         }
 
                         // boundary load is not copied on non-boundary sides
 
                         if ( hasLoad == true && ( m == 0 || n == 0 || k == 0 ) ) {
-                            loads = 0;
+                            int loads = 0;
                             for ( iside = 1; iside <= 3; iside++ ) {
                                 if ( boundary.at(iside) == 0 ) {
                                     continue;
@@ -2642,8 +2596,6 @@ HuertaErrorEstimatorInterface :: setupRefinedElementProblem3D(Element *element, 
                             }
 
                             if ( loads != 0 ) {
-                                sprintf(line, " boundaryLoads %d", loads);
-                                str += line;
                                 for ( iside = 1; iside <= 3; iside++ ) {
                                     if ( boundary.at(iside) == 0 ) {
                                         continue;
@@ -2661,19 +2613,16 @@ HuertaErrorEstimatorInterface :: setupRefinedElementProblem3D(Element *element, 
                                         continue;
                                     }
 
-                                    if ( ( loads = ( loadArray = boundaryLoadList.at(iside) )->giveSize() ) == 0 ) {
+                                    if ( ( loadArray = boundaryLoadList.at(iside) )->giveSize() == 0 ) {
                                         continue;
                                     }
 
-                                    for ( iload = 1; iload <= loads; iload++ ) {
-                                        sprintf( line, " %d", loadArray->at(iload) );
-                                        str += line;
-                                    }
+                                    ir->setField(*loadArray, "boundaryloads");
                                 }
                             }
                         }
 
-                        refinedReader.appendInputString(str);
+                        refinedReader.insertInputRecord(DataReader::IR_elemRec, ir);
                     }
                 }
             }
@@ -2699,8 +2648,8 @@ HuertaErrorEstimatorInterface :: setupRefinedElementProblem3D(Element *element, 
 
             // create a fictitious integration point
             locCoord = new FloatArray;
-            IntegrationRule ir(0, element);
-            gp = new GaussPoint( &ir, 1, locCoord, 1.0, mode);
+            IntegrationRule irule(0, element);
+            gp = new GaussPoint( &irule, 1, locCoord, 1.0, mode);
 
             for ( inode = startNode; inode <= endNode; inode++ ) {
                 s1 = hexaSideNode [ inode - 1 ] [ 0 ];
@@ -2823,9 +2772,11 @@ HuertaErrorEstimatorInterface :: setupRefinedElementProblem3D(Element *element, 
 
                                     // first loadtime function must be constant 1.0
                                     for ( idof = 1; idof <= dofs; idof++ ) {
-                                        sprintf( line, "BoundaryCondition %d loadTimeFunction %d prescribedvalue %e",
-                                                ++localBcId, 1, uFine.at(idof) );
-                                        refinedReader.appendInputString(line);
+                                        DynamicInputRecord *ir = new DynamicInputRecord();
+                                        ir->setRecordKeywordField("boundarycondition", ++localBcId);
+                                        ir->setField(1, "loadtimefunction");
+                                        ir->setField(uFine.at(idof), "prescribedvalue");
+                                        refinedReader.insertInputRecord(DataReader::IR_bcRec, ir);
                                     }
                                 }
                             }
@@ -3082,7 +3033,6 @@ HuertaErrorEstimator :: solveRefinedElementProblem(int elemId, IntArray &localNo
 #ifdef TIME_INFO
     timer.startTimer();
 #endif
-    refinedReader.rewind();
     refinedProblem = InstanciateProblem(& refinedReader, _processor, contextFlag);
     refinedReader.finish();
 #ifdef TIME_INFO
@@ -3656,7 +3606,6 @@ HuertaErrorEstimator :: solveRefinedPatchProblem(int nodeId, IntArray &localNode
 #ifdef TIME_INFO
     timer.startTimer();
 #endif
-    refinedReader.rewind();
     refinedProblem = InstanciateProblem(& refinedReader, _processor, contextFlag);
     refinedReader.finish();
 #ifdef TIME_INFO
@@ -3883,9 +3832,7 @@ HuertaErrorEstimator :: solveRefinedWholeProblem(IntArray &localNodeIdArray, Int
  #ifdef TIME_INFO
     timer.startTimer();
  #endif
-    refinedReader.rewind();
     refinedProblem = InstanciateProblem(& refinedReader, _processor, contextFlag);
-    refinedReader.finish();
  #ifdef TIME_INFO
     timer.stopTimer();
     et_init = timer.getUtime();
@@ -4121,9 +4068,8 @@ HuertaErrorEstimator :: setupRefinedProblemProlog(const char *problemName, int p
                                                   int nodes, int elems, int csects, int mats, int loads, int ltfuncs,
                                                   IntArray &controlNode, IntArray &controlDof, TimeStep *tStep)
 {
-    char line [ OOFEM_MAX_LINE_LENGTH + 1 ];
+    char line [ 1024 ];
     EngngModel *problem = this->domain->giveEngngModel();
-    InputRecord *ir;
     std :: string str;
     int i, nmstep, nsteps = 0;
     int ddltf = 0, ddmSize = 0, ddvSize = 0, hpcSize = 0, hpcwSize = 0, renumber = 1;
@@ -4133,8 +4079,6 @@ HuertaErrorEstimator :: setupRefinedProblemProlog(const char *problemName, int p
     FloatArray ddv, hpcw;
     const char *__proc = "setupRefinedProblemProlog"; // Required by IR_GIVE_FIELD macro
     IRResultType result;                           // Required by IR_GIVE_FIELD macro
-
-    char skipUpdateString [ 32 ] = "", parallelFlagString [ 32 ] = "", useContextString [ 32 ] = "";
 
 #if defined ( USE_OUTPUT_FILE ) || defined ( USE_CONTEXT_FILE )
     sprintf(line, "/home/dr/Huerta/%s_%d.out", problemName, problemId);
@@ -4148,20 +4092,25 @@ HuertaErrorEstimator :: setupRefinedProblemProlog(const char *problemName, int p
 
 #ifdef USE_CONTEXT_FILE
     int contextOutputStep = 1;
-    sprintf(useContextString, "contextOutputStep %d ", contextOutputStep);
-#endif
-#ifdef __PARALLEL_MODE
-    sprintf(parallelFlagString, "parallelFlag 0 ");
 #endif
 
     sprintf(line, "Refined problem on %s %d", problemName, problemId);
     refinedReader.setDescription(line);
 
     if ( dynamic_cast< AdaptiveLinearStatic * >( problem ) ) {
-        sprintf(line, "LinearStatic nsteps 1 renumber %d %s %s %s",
-                renumber, skipUpdateString, useContextString, parallelFlagString);
-        refinedReader.appendInputString(line);
+        DynamicInputRecord *ir = new DynamicInputRecord();
+        ir->setRecordKeywordField(_IFT_LinearStatic_Name, 0);
+        ir->setField(1, _IFT_EngngModel_nsteps);
+        ir->setField(renumber, _IFT_EngngModel_renumberFlag);
+#ifdef USE_CONTEXT_FILE
+        ir->setField(contextOutputStep, _IFT_EngngModel_contextoutputstep);
+#endif
+#ifdef __PARALLEL_MODE
+        ir->setField(0, _IFT_EngngModel_parallelFlag);
+#endif
+        refinedReader.insertInputRecord(DataReader::IR_emodelRec, ir);
     } else if ( dynamic_cast< AdaptiveNonLinearStatic * >( problem ) ) {
+        InputRecord *ir;
         nmstep = tStep->giveMetaStepNumber();
         ir = problem->giveMetaStep(nmstep)->giveAttributesRecord();
 
@@ -4207,6 +4156,8 @@ HuertaErrorEstimator :: setupRefinedProblemProlog(const char *problemName, int p
         }
 
         if ( problemId != 0 ) {
+            DynamicInputRecord *ir = new DynamicInputRecord();
+
             int bcSize = controlNode.giveSize(), ddActiveSize = 0;
 
             if ( controlMode == 1 ) {
@@ -4229,15 +4180,30 @@ HuertaErrorEstimator :: setupRefinedProblemProlog(const char *problemName, int p
                 // do not specify context because that would result in recursive call to HEE
                 // because adaptnlinearstatic analysis type is used
 
-                sprintf(line, "adaptnlinearstatic nsteps %d renumber %d rtolv %e maxiter %d reqiterations %d minsteplength %e stiffmode %d manrmsteps %d equilmc 1 controlmode 1 %s %s ",
-                        tStep->giveNumber(), renumber, rtolv, maxIter, reqIter, minStepLength, stiffMode, manrmsteps,
-                        skipUpdateString, parallelFlagString);
-                str = line;
+                ir->setRecordKeywordField(_IFT_AdaptiveNonLinearStatic_Name, 0);
+                ir->setField(tStep->giveNumber(), _IFT_EngngModel_nsteps);
+                ir->setField(renumber, _IFT_EngngModel_renumberFlag);
+                ir->setField(rtolv, "rtolv");
+                ir->setField(maxIter, "maxiter");
+                ir->setField(reqIter, "reqiterations");
+                ir->setField(minStepLength, "minsteplength");
+                ir->setField(stiffMode, "stiffmode");
+                ir->setField(manrmsteps, "manrmsteps");
+                ir->setField(manrmsteps, "manrmsteps");
+                //ir->setField(skipUpdate, "skipupdate");
+#ifdef USE_CONTEXT_FILE
+                ir->setField(contextOutputStep, _IFT_EngngModel_contextoutputstep);
+#endif
+#ifdef __PARALLEL_MODE
+                ir->setField(0, _IFT_EngngModel_parallelFlag);
+#endif
 
                 // this is not relevant but it is required
                 // the refined problem is made adaptive only to enable call to initializeAdaptiveFrom
-                sprintf(line, "eetype 3 meshpackage 0 requiredError 0.10 minelemsize 0.01 ");
-                str += line;
+                ir->setField(3, "eetype");
+                ir->setField(0, "meshpackage");
+                ir->setField(0.1, "requiredError");
+                ir->setField(0.01, "minelemsize");
             } else {
                 // if there are more than just a single metastep, it is necessary to produce input with at least the
                 // same number of metasteps as is the number of active metastep,
@@ -4247,16 +4213,28 @@ HuertaErrorEstimator :: setupRefinedProblemProlog(const char *problemName, int p
                 // do not specify context because that would result in recursive call to HEE
                 // because adaptnlinearstatic analysis type is used
 
-                sprintf(line, "adaptnlinearstatic nsteps 1 nmsteps %d renumber %d equilmc 1 controlmode 1 %s %s ",
-                        nmstep, renumber, skipUpdateString, parallelFlagString);
-                str = line;
+                ir->setRecordKeywordField(_IFT_AdaptiveNonLinearStatic_Name, 0);
+                ir->setField(1, _IFT_EngngModel_nsteps);
+                ir->setField(nmstep, _IFT_EngngModel_nmsteps);
+                ir->setField(renumber, _IFT_EngngModel_renumberFlag);
+                ir->setField(1, "equilmc");
+                ir->setField(1, "controlmode");
+                //ir->setField(skipUpdate, "skipupdate");
+#ifdef USE_CONTEXT_FILE
+                ir->setField(contextOutputStep, _IFT_EngngModel_contextoutputstep);
+#endif
+#ifdef __PARALLEL_MODE
+                ir->setField(0, _IFT_EngngModel_parallelFlag);
+#endif
 
                 // this is not relevant but it is required
                 // the refined problem is made adaptive only to enable call to initializeAdaptiveFrom
-                sprintf(line, "eetype 3 meshpackage 0 requiredError 0.10 minelemsize 0.01 ");
-                str += line;
+                ir->setField(3, "eetype");
+                ir->setField(0, "meshpackage");
+                ir->setField(0.1, "requiredError");
+                ir->setField(0.01, "minelemsize");
 
-                refinedReader.appendInputString(str);
+                refinedReader.insertInputRecord(DataReader::IR_emodelRec, ir);
 
                 // IMPORTANT: the total number of steps should be equal to the current step number
                 //            (to enable skipUpdate)
@@ -4264,26 +4242,34 @@ HuertaErrorEstimator :: setupRefinedProblemProlog(const char *problemName, int p
 
                 // create fictitious metasteps
                 for ( i = 1; i < nmstep; i++ ) {
-                    sprintf(line, "metastep %d nsteps %d rtolv %e",
-                            i, problem->giveMetaStep(i)->giveNumberOfSteps(), rtolv);
-                    refinedReader.appendInputString(line);
+                    DynamicInputRecord *ir_meta = new DynamicInputRecord();
+                    ir_meta->setRecordKeywordField(_IFT_MetaStep_Name, i);
+                    ir_meta->setField(problem->giveMetaStep(i)->giveNumberOfSteps(), _IFT_MetaStep_nsteps);
+                    ir_meta->setField(rtolv, "rtolv");
+                    refinedReader.insertInputRecord(DataReader::IR_mstepRec, ir_meta);
                     nsteps += problem->giveMetaStep(i)->giveNumberOfSteps();
                 }
 
                 // create active metastep
-                sprintf(line, "metastep %d nsteps %d rtolv %e maxiter %d reqiterations %d minsteplength %e stiffmode %d manrmsteps %d equilmc 1 controlmode 1 ",
-                        nmstep, tStep->giveNumber() - nsteps,
-                        rtolv, maxIter, reqIter, minStepLength, stiffMode, manrmsteps);
-                str = line;
+                ir = new DynamicInputRecord();
+                ir->setRecordKeywordField(_IFT_MetaStep_Name, nmstep);
+                ir->setField(tStep->giveNumber() - nsteps, _IFT_MetaStep_nsteps);
+                ir->setField(rtolv, "rtolv");
+                ir->setField(maxIter, "maxiter");
+                ir->setField(reqIter, "reqiterations");
+                ir->setField(minStepLength, "minsteplength");
+                ir->setField(stiffMode, "stiffmode");
+                ir->setField(manrmsteps, "manrmsteps");
+                ir->setField(1, "equilmc");
+                ir->setField(1, "controlmode");
             }
 
-            sprintf( line, "ddm %d ", 2 * ( bcSize + ddActiveSize ) );
-            str += line;
-
             // apply refine problem bc as dd
+            IntArray ddm_vals(2 * ( bcSize + ddActiveSize ));
+
             for ( i = 1; i <= bcSize; i++ ) {
-                sprintf( line, "%d %d ", controlNode.at(i), controlDof.at(i) );
-                str += line;
+                ddm_vals.at(i*2-1) = controlNode.at(i);
+                ddm_vals.at(i*2) = controlDof.at(i);
             }
 
             if ( controlMode == 1 ) {
@@ -4293,18 +4279,17 @@ HuertaErrorEstimator :: setupRefinedProblemProlog(const char *problemName, int p
                         continue;
                     }
 
-                    sprintf( line, "%d %d ", -localNodeIdArray.at( ddm.at(i) ), ddm.at(i + 1) );
-                    str += line;
+                    ddm_vals.at(bcSize*2 + i*2-1) = -localNodeIdArray.at( ddm.at(i) );
+                    ddm_vals.at(bcSize*2 + i*2) = ddm.at(i + 1);
                 }
             }
+            ir->setField(ddm_vals, "ddm");
 
-            sprintf(line, "ddv %d ", bcSize + ddActiveSize);
-            str += line;
+            FloatArray ddv_vals(bcSize + ddActiveSize);
 
             // apply refined problem bc values
             for ( i = 1; i <= bcSize; i++ ) {
-                sprintf(line, "%3.1f ", 0.0); // no further increment required, just to recover equilibrium of mapped state
-                str += line;
+                ddv_vals.at(i) = 0.; // no further increment required, just to recover equilibrium of mapped state
             }
 
             if ( controlMode == 1 ) {
@@ -4314,16 +4299,15 @@ HuertaErrorEstimator :: setupRefinedProblemProlog(const char *problemName, int p
                         continue;
                     }
 
-                    sprintf( line, "%e ", ddv.at(i) );
-                    str += line;
+                    ddv_vals.at(bcSize + i) = ddv.at(i);
                 }
             }
+            ir->setField(ddv_vals, "ddv");
 
             // use last ltf to control dd
-            sprintf(line, "ddltf %d ", ltfuncs);
-            str += line;
+            ir->setField(ltfuncs, "ddltf");
 
-            refinedReader.appendInputString(str);
+            refinedReader.insertInputRecord(DataReader::IR_mstepRec, ir);
         } else {
             // it makes not too much sense to solve exact problem from beginning if adaptive restart is used
             // because the mesh may be already derefined in regions of no interest (but anyway ...)
@@ -4335,98 +4319,109 @@ HuertaErrorEstimator :: setupRefinedProblemProlog(const char *problemName, int p
             // do not prescribe skipUpdate here !!!
 
             // HUHU dodelat metasteps, dodelat paralelni zpracovani
-            sprintf(line, "nonlinearstatic nsteps %d renumber %d rtolv %e maxiter %d reqiterations %d minsteplength %e stiffmode %d manrmsteps %d equilmc 1 controlmode %d %s ",
-                    ( int ) ( problem->giveCurrentStep()->giveTargetTime() + 1.5 ), renumber,
-                    rtolv, maxIter, reqIter, minStepLength, stiffMode, manrmsteps, controlMode, useContextString);
-            str = line;
+            DynamicInputRecord *ir = new DynamicInputRecord();
+            ir->setRecordKeywordField("nonlinearstatic", 0);
+            ir->setField(( int ) ( problem->giveCurrentStep()->giveTargetTime() + 1.5 ), "nsteps");
+            ir->setField(renumber, "renumber");
+            ir->setField(rtolv, "rtolv");
+            ir->setField(maxIter, "maxiter");
+            ir->setField(reqIter, "reqiterations");
+            ir->setField(minStepLength, "minsteplength");
+            ir->setField(stiffMode, "stiffmode");
+            ir->setField(manrmsteps, "manrmsteps");
+            ir->setField(1, "equilmc");
+            ir->setField(controlMode, "controlmode");
+#ifdef USE_CONTEXT_FILE
+            ir->setField(contextOutputStep, _IFT_EngngModel_contextoutputstep);
+#endif
 
             switch ( controlMode ) {
             case 0:
-                sprintf(line, "stepLength %e initialStepLength %e psi %e hpcmode %d ",
-                        stepLength, initialStepLength, psi, hpcMode);
-                str += line;
+                ir->setField(stepLength, "stepLength");
+                ir->setField(initialStepLength, "initialStepLength");
+                ir->setField(psi, "psi");
+                ir->setField(hpcMode, "hpcmode");
 
                 if ( hpcSize != 0 ) {
                     // apply all original hpc
-                    sprintf(line, "hpc %d ", hpcSize);
-                    str += line;
+                    IntArray hpc_vals(hpcSize);
                     for ( i = 1; i <= hpcSize; i += 2 ) {
-                        sprintf( line, "%d %d ", -localNodeIdArray.at( hpc.at(i) ), hpc.at(i + 1) );
-                        str += line;
+                        hpc_vals.at(i*2 - 1) = -localNodeIdArray.at( hpc.at(i) );
+                        hpc_vals.at(i*2) = hpc.at(i + 1);
                     }
+                    ir->setField(hpc_vals, "hpc");
                 }
 
                 if ( hpcwSize != 0 ) {
-                    sprintf(line, "hpcw %d ", hpcwSize);
-                    str += line;
-                    for ( i = 1; i <= hpcwSize; i++ ) {
-                        sprintf( line, "%e ", hpcw.at(i) );
-                        str += line;
-                    }
+                    ir->setField(hpcw, "hpcw");
                 }
 
                 break;
             case 1:
                 if ( ddmSize != 0 ) {
                     // apply all original dd
-                    sprintf(line, "ddm %d ", ddmSize);
-                    str += line;
+                    IntArray ddm_vals(ddmSize);
                     for ( i = 1; i <= ddmSize; i += 2 ) {
-                        sprintf( line, "%d %d ", -localNodeIdArray.at( ddm.at(i) ), ddm.at(i + 1) );
-                        str += line;
+                        ddm_vals.at(i*2-1) = -localNodeIdArray.at( ddm.at(i) );
+                        ddm_vals.at(i*2) = ddm.at(i + 1);
                     }
+                    ir->setField("ddm");
                 }
 
                 if ( ddvSize != 0 ) {
-                    sprintf(line, "ddv %d ", ddvSize);
-                    str += line;
-                    for ( i = 1; i <= ddvSize; i++ ) {
-                        sprintf( line, "%e ", ddv.at(i) );
-                        str += line;
-                    }
+                    ir->setField(ddv, "ddv");
                 }
 
                 // use the original ltf to control dd
-                sprintf(line, "ddltf %d ", ddltf);
-                str += line;
+                ir->setField(ddltf, "ddltf");
                 break;
             }
 
-            refinedReader.appendInputString(str);
+            refinedReader.insertInputRecord(DataReader::IR_emodelRec, ir);
         }
     } else {
         _error("setupRefinedProblemProlog: Unsupported analysis type");
     }
 
+    DynamicInputRecord *ir = new DynamicInputRecord();
     switch ( this->domain->giveDomainType() ) {
     case _1dTrussMode:
-        sprintf(line, "domain 1dtruss");
+        ir->setField("1dtruss", _IFT_Domain_type);
         break;
     case _PlaneStrainMode:
-        sprintf(line, "domain planestrain");
+        ir->setField("planestrain", _IFT_Domain_type);
         break;
     case _2dPlaneStressMode:
-        sprintf(line, "domain 2dPlaneStress");
+        ir->setField("2dplanestress", _IFT_Domain_type);
         break;
     case _3dMode:
-        sprintf(line, "domain 3d");
+        ir->setField("3d", _IFT_Domain_type);
         break;
     default:
         _error("solveRefinedElementProblem: Unsupported domain type");
     }
 
-    refinedReader.appendInputString(line);
+    refinedReader.insertInputRecord(DataReader::IR_domainCompRec, ir);
 
+    ir = new DynamicInputRecord();
+    ir->setRecordKeywordField(_IFT_OutputManager_Name, 0);
 #ifdef USE_OUTPUT_FILE
-    sprintf(line, "OutputManager tstep_all dofman_all element_all");
-#else
-    sprintf(line, "OutputManager");
+    ir->setField(_IFT_OutputManager_tstepall);
+    ir->setField(_IFT_OutputManager_dofmanall);
+    ir->setField(_IFT_OutputManager_elementall);
 #endif
 
-    refinedReader.appendInputString(line);
+    refinedReader.insertInputRecord(DataReader::IR_outManRec, ir);
 
-    sprintf(line, "%d %d %d %d %d %d", nodes, elems, mats, csects, loads, ltfuncs);
-    refinedReader.appendInputString(line);
+    ir = new DynamicInputRecord();
+    ir->setRecordKeywordField("", 0);
+    ir->setField(nodes, _IFT_Domain_ndofman);
+    ir->setField(elems, _IFT_Domain_nelem);
+    ir->setField(mats, _IFT_Domain_ncrosssect);
+    ir->setField(csects, _IFT_Domain_nmat);
+    ir->setField(loads, _IFT_Domain_nbc);
+    ir->setField(ltfuncs, _IFT_Domain_nloadtimefunct);
+    refinedReader.insertInputRecord(DataReader::IR_domainCompRec, ir);
 }
 
 
@@ -4439,25 +4434,21 @@ HuertaErrorEstimator :: setupRefinedProblemEpilog1(int csects, int mats, int loa
     /* copy csects, mats, loads */
 
     for ( int i = 1; i <= csects; i++ ) {
-        DynamicInputRecord ir;
-        domain->giveCrossSection(i)->giveInputRecord(ir);
-        ///@todo Use DynamicDataReader instead of storing strings.
-        std::string str = ir.giveRecordAsString();
-        refinedReader.appendInputString(str);
+        DynamicInputRecord *ir = new DynamicInputRecord();
+        domain->giveCrossSection(i)->giveInputRecord(*ir);
+        refinedReader.insertInputRecord(DataReader::IR_crosssectRec, ir);
     }
 
     for ( int i = 1; i <= mats; i++ ) {
-        DynamicInputRecord ir;
-        domain->giveMaterial(i)->giveInputRecord(ir);
-        std::string str = ir.giveRecordAsString();
-        refinedReader.appendInputString(str);
+        DynamicInputRecord *ir = new DynamicInputRecord();
+        domain->giveMaterial(i)->giveInputRecord(*ir);
+        refinedReader.insertInputRecord(DataReader::IR_matRec, ir);
     }
 
     for ( int i = 1; i <= loads; i++ ) {
-        DynamicInputRecord ir;
-        domain->giveLoad(i)->giveInputRecord(ir);
-        std::string str = ir.giveRecordAsString();
-        refinedReader.appendInputString(str);
+        DynamicInputRecord *ir = new DynamicInputRecord();
+        domain->giveLoad(i)->giveInputRecord(*ir);
+        refinedReader.insertInputRecord(DataReader::IR_bcRec, ir);
     }
 }
 
@@ -4466,22 +4457,22 @@ HuertaErrorEstimator :: setupRefinedProblemEpilog1(int csects, int mats, int loa
 void
 HuertaErrorEstimator :: setupRefinedProblemEpilog2(int ltfuncs)
 {
-    char line [ OOFEM_MAX_LINE_LENGTH + 1 ];
     Domain *domain = this->domain;
 
     /* copy tfuncs */
 
     for ( int i = 1; i <= ltfuncs; i++ ) {
-        DynamicInputRecord ir;
-        domain->giveLoadTimeFunction(i)->giveInputRecord(ir);
-        std :: string str = ir.giveRecordAsString();
-        refinedReader.appendInputString(str);
+        DynamicInputRecord *ir = new DynamicInputRecord();
+        domain->giveLoadTimeFunction(i)->giveInputRecord(*ir);
+        refinedReader.insertInputRecord(DataReader::IR_ltfRec, ir);
     }
 
     if ( this->mode == HEE_nlinear ) {
-        sprintf(line, "heavisideltf %d origin %e value 1.0", ltfuncs + 1,
-                this->domain->giveEngngModel()->giveCurrentStep()->giveTargetTime() - 0.1);
-        refinedReader.appendInputString(line);
+        DynamicInputRecord *ir = new DynamicInputRecord();
+        ir->setRecordKeywordField(_IFT_HeavisideLTF_Name, ltfuncs + 1);
+        ir->setField(this->domain->giveEngngModel()->giveCurrentStep()->giveTargetTime() - 0.1, _IFT_HeavisideLTF_origin);
+        ir->setField(1., _IFT_HeavisideLTF_value);
+        refinedReader.insertInputRecord(DataReader::IR_ltfRec, ir);
     }
 }
 } // end namespace oofem

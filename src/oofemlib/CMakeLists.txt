@@ -22,7 +22,7 @@ set (core_unsorted
     eleminterpunknownmapper.C primaryunknownmapper.C materialmappingalgorithm.C
     nonlocalmaterialext.C randommaterialext.C
     inputrecord.C oofemtxtinputrecord.C dynamicinputrecord.C
-    dynamicdatareader.C buffereddatareader.C oofemtxtdatareader.C tokenizer.C parser.C
+    dynamicdatareader.C oofemtxtdatareader.C tokenizer.C parser.C
     spatiallocalizer.C dummylocalizer.C octreelocalizer.C
     integrationrule.C gaussintegrationrule.C lobattoir.C
     smoothednodalintvarfield.C dofmanvalfield.C
