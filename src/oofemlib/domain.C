@@ -1130,9 +1130,8 @@ Domain :: postInitialize()
             for (int ielem = 1; ielem <= elements.giveSize(); ++ielem) {
                 Element *element = this->giveElement(elements.at(ielem));
                 element->setCrossSection(i);           
-                element->MAT_GIVEN_BY_CS = true; // code development flag
-                //element->setMaterial(1); ///@todo temporary since giveIPValue still asks el for material
             }
+            this->giveCrossSection( i )->MAT_GIVEN_BY_CS = true;
         }
 
     }

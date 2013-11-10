@@ -78,13 +78,14 @@ HellmichMaterial :: createMaterialGp()
     if ( !materialGp ) {
         _error("Could not create the material-level gp.");
     }
-
+    
     static_cast< HellmichMaterialStatus * >( giveStatus(materialGp) )->setInitialTemperature(initialTemperature); // set material temperature in K
  #ifdef VERBOSE_HELLMAT
     // output to check if it worked
     printf("\n Hellmat::createMaterialGp:");
     printf("\n  Auxiliary element input record: %s", eirstr);
-    printf( "\n  Created auxiliary element with material %s.", elem->giveMaterial()->giveClassName() );
+    //printf( "\n  Created auxiliary element with material %s.", elem->giveMaterial()->giveClassName() );
+    printf( "\n  Created auxiliary element with cross section %s.", elem->giveCrossSection()->giveClassName() ); ///@todo replaced with cross section number instead of material
     printf( "\n  Created material-level gp with material %s.", materialGp->giveMaterial()->giveClassName() );
     printf( "\n  Material temperature set to %f.", giveTemperature(NULL) );
  #endif

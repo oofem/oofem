@@ -333,7 +333,7 @@ StructuralCrossSection :: checkConsistency()
 Material 
 *StructuralCrossSection :: giveMaterial(IntegrationPoint *ip) 
 { 
-    if ( ip->giveElement()->MAT_GIVEN_BY_CS ) {
+    if ( this->MAT_GIVEN_BY_CS ) {
         return this->giveDomain()->giveMaterial( this->giveMaterialNumber() ); 
     } else {
         return ip->giveElement()->giveMaterial();

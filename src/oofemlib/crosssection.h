@@ -117,11 +117,14 @@ public:
     CrossSection(int n, Domain *d) : FEMComponent(n, d)
     { propertyDictionary = new Dictionary(); 
       setNumber = 0;
+      MAT_GIVEN_BY_CS = false; // Temporary var will be removed later 
     }
     /// Destructor.
     virtual ~CrossSection() { delete propertyDictionary; }
 
     int const giveSetNumber() { return this->setNumber; };
+
+    bool MAT_GIVEN_BY_CS;
 
     /**
      * Returns the value of cross section property.

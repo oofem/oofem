@@ -68,8 +68,6 @@ Element :: Element(int n, Domain *aDomain) :
     numberOfIntegrationRules = 0;
     activityLtf = 0;
     integrationRulesArray  = NULL;
-
-    MAT_GIVEN_BY_CS = false; // Temporary var will be removed later 
 }
 
 

@@ -147,10 +147,6 @@ enum elementParallelMode {
  */
 class OOFEM_EXPORT Element : public FEMComponent
 {
-public:
-    /// Flag for code development: gives if the cross section stores all the material data
-    bool MAT_GIVEN_BY_CS;
-
 protected:
     /// Number of dofmanagers
     int numberOfDofMans;

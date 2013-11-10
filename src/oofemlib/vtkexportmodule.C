@@ -58,6 +58,7 @@
 #include "element.h"
 #include "material.h"
 #include "classfactory.h"
+#include "crosssection.h"
 
 #include <vector>
 
@@ -579,8 +580,9 @@ VTKExportModule :: exportCellVars(FILE *stream, int elemToProcess, TimeStep *tSt
                     continue;
                 }
 #endif
-                if ( type == IST_MaterialNumber ) {
-                    fprintf( stream, "%d\n", elem->giveMaterial()->giveNumber() );
+                if (type == IST_MaterialNumber || type == IST_CrossSectionNumber) {
+                    OOFEM_WARNING1 ( "VTKExportModule - Material numbers are deprecated, outputing cross section number instead..." );
+                    fprintf( stream, "%d\n", elem->giveCrossSection()->giveNumber() );
                 } else if ( type == IST_ElementNumber ) {
                     fprintf( stream, "%d\n", elem->giveNumber() );
                 } else {

@@ -106,6 +106,7 @@ public:
         thick = 0.;
         width = 0.;
         area = -1.0;
+        MAT_GIVEN_BY_CS = true;
     }
 
     virtual ~FiberedCrossSection()  { }

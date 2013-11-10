@@ -713,7 +713,7 @@ StructuralElement :: computeStiffnessMatrix(FloatMatrix &answer, MatResponseMode
     GaussPoint *gp;
     IntegrationRule *iRule;
     bool matStiffSymmFlag = false; 
-    if ( this->MAT_GIVEN_BY_CS ) {
+    if ( this->giveCrossSection()->MAT_GIVEN_BY_CS ) {
         matStiffSymmFlag = this->giveCrossSection()->isCharacteristicMtrxSymmetric( rMode );
     } else {
         matStiffSymmFlag = this->giveCrossSection()->isCharacteristicMtrxSymmetric( rMode, this->giveMaterial()->giveNumber() );
@@ -788,7 +788,7 @@ void StructuralElement :: computeStiffnessMatrix_withIRulesAsSubcells(FloatMatri
     FloatMatrix temp, bj, d, dbj;
     int ndofs = this->computeNumberOfDofs();
     bool matStiffSymmFlag = false; 
-    if ( this->MAT_GIVEN_BY_CS ) {
+    if ( this->giveCrossSection()->MAT_GIVEN_BY_CS ) {
         matStiffSymmFlag = this->giveCrossSection()->isCharacteristicMtrxSymmetric( rMode );
     } else {
         matStiffSymmFlag = this->giveCrossSection()->isCharacteristicMtrxSymmetric( rMode, this->giveMaterial()->giveNumber() );
@@ -1147,17 +1147,11 @@ int
 StructuralElement :: checkConsistency()
 //
 // check internal consistency
-// mainly tests, whether material and crossSection data
-// are safe for conversion to "Structural" versions
+// mainly tests, whether crossSection data
+// are safe for conversion to "Structural" version
 //
 {
     int result = 1;
-    // now handled in cross section
-    //if ( !dynamic_cast< StructuralMaterial * >( this->giveMaterial() ) ) {
-    //    _warning2("checkConsistency : material %s without structural support", this->giveMaterial()->giveClassName());
-    //    result = 0;
-    //}
-
     if ( !this->giveCrossSection()->testCrossSectionExtension(CS_StructuralCapability) ) {
         _warning2("checkConsistency : cross-section %s without structural support", this->giveCrossSection()->giveClassName());
         result = 0;
@@ -1512,7 +1506,7 @@ StructuralElement :: showExtendedSparseMtrxStructure(CharType mtrx, oofegGraphic
         // loop over element IP
         for ( i = 0; i < iRule->giveNumberOfIntegrationPoints(); i++ ) {
             IntegrationPoint *ip = iRule->getIntegrationPoint(i);
-            if ( this->MAT_GIVEN_BY_CS ) {
+            if ( this->giveCrossSection()->MAT_GIVEN_BY_CS ) {
                 interface =  static_cast< NonlocalMaterialStiffnessInterface * >( this->giveStructuralCrossSection()->
                     giveInterface(NonlocalMaterialStiffnessInterfaceType, ip) );
             } else {

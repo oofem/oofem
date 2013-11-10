@@ -43,6 +43,7 @@
 #include "cltypes.h"
 #include "material.h"
 #include "classfactory.h"
+#include "crosssection.h"
 
 //#include "xfemmanager.h"
 #include "enrichmentitem.h"
@@ -242,7 +243,7 @@ VTKXMLExportModule :: giveNumberOfNodesPerCell(int cellType)
 
     case 13:
     case 22:
-        case 30:
+    case 30:
         return 6;
 
     case 12:
@@ -1569,7 +1570,9 @@ VTKXMLExportModule :: getCellVariableFromIS(FloatArray &answer, Element *el, Int
     switch ( type ) {
         // Special scalars
     case IST_MaterialNumber:
-        valueArray.at(1) = ( double ) el->giveMaterial()->giveNumber();
+        OOFEM_WARNING1 ( "VTKExportModule - Material numbers are deprecated, outputing cross section number instead..." );
+    case IST_CrossSectionNumber:
+        valueArray.at(1) = ( double ) el->giveCrossSection()->giveNumber();
         break;
     case IST_ElementNumber:
         valueArray.at(1) = ( double ) el->giveNumber();
