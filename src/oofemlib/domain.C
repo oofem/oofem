@@ -158,8 +158,7 @@ Domain* Domain :: Clone()
 
     //Output
     inputRec = new DynamicInputRecord();
-    inputRec->setRecordKeywordField(_IFT_OutputManager_name, 1);
-    inputRec->setField(_IFT_OutputManager_name);
+    inputRec->setRecordKeywordField(_IFT_OutputManager_Name, 1);
     inputRec->setField(_IFT_OutputManager_tstepall);
     inputRec->setField(_IFT_OutputManager_dofmanall);
     inputRec->setField(_IFT_OutputManager_elementall);
