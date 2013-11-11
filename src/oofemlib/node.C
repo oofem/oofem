@@ -268,7 +268,7 @@ Node :: giveUpdatedCoordinate(int ic, TimeStep *tStep, double scale)
             for ( int i = 1; i <= numberOfDofs; i++ ) {
                 Dof *d = this->giveDof(i);
                 DofIDItem id = d->giveDofID();
-                if  ( id == ic )
+                if  ( id == ic ) {
                     coordinate += scale * d->giveUnknown(VM_Total, tStep);
                     break;
                 }
@@ -287,11 +287,11 @@ Node :: giveUpdatedCoordinate(int ic, TimeStep *tStep, double scale)
                 Dof *d = this->giveDof(i);
                 DofIDItem id = d->giveDofID();
                 if ( id == D_u || id == D_v || id == D_w ) {
-                    int ic = id - D_w + 1;
-                    displacements.at(j) = scale * d->giveUnknown(VM_Total, tStep);
+                    int ic2 = id - D_w + 1;
+                    displacements.at(ic2) = scale * d->giveUnknown(VM_Total, tStep);
                 } else if ( id == V_u || id == V_v || id == V_w ) {
-                    int ic = id - V_w + 1;
-                    displacements.at(j) = scale * d->giveUnknown(VM_Total, tStep);
+                    int ic2 = id - V_w + 1;
+                    displacements.at(ic2) = scale * d->giveUnknown(VM_Total, tStep);
                 }
             }
 
