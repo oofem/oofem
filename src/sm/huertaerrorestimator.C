@@ -4384,22 +4384,11 @@ HuertaErrorEstimator :: setupRefinedProblemProlog(const char *problemName, int p
     }
 
     DynamicInputRecord *ir = new DynamicInputRecord();
-    switch ( this->domain->giveDomainType() ) {
-    case _1dTrussMode:
-        ir->setField("1dtruss", _IFT_Domain_type);
-        break;
-    case _PlaneStrainMode:
-        ir->setField("planestrain", _IFT_Domain_type);
-        break;
-    case _2dPlaneStressMode:
-        ir->setField("2dplanestress", _IFT_Domain_type);
-        break;
-    case _3dMode:
-        ir->setField("3d", _IFT_Domain_type);
-        break;
-    default:
-        _error("solveRefinedElementProblem: Unsupported domain type");
+    ir->setField(this->domain->giveNumberOfSpatialDimensions(), _IFT_Domain_numberOfSpatialDimensions);
+    if ( this->domain->isAxisymmetric() ) {
+        ir->setField(_IFT_Domain_axisymmetric);
     }
+
 
     refinedReader.insertInputRecord(DataReader::IR_domainCompRec, ir);
 
