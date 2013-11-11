@@ -123,7 +123,7 @@ void Beam3d :: computeGaussPoints()
 
 
 void
-Beam3d :: computeNmatrixAt(GaussPoint *aGaussPoint, FloatMatrix &answer)
+Beam3d :: computeNmatrixAt(const FloatArray &iLocCoord, FloatMatrix &answer)
 // Returns the displacement interpolation matrix {N} of the receiver, eva-
 // luated at aGaussPoint. Used for numerical calculation of consistent mass
 // matrix. Must contain only interpolation for displacement terms,
@@ -133,7 +133,7 @@ Beam3d :: computeNmatrixAt(GaussPoint *aGaussPoint, FloatMatrix &answer)
     double l, ksi, ksi2, ksi3, kappay, kappaz, c1y, c1z;
 
     l     = this->giveLength();
-    ksi =   0.5 + 0.5 * aGaussPoint->giveCoordinate(1);
+    ksi =   0.5 + 0.5 * iLocCoord.at(1);
     kappay = this->giveKappayCoeff();
     kappaz = this->giveKappazCoeff();
     c1y = 1. + 2. * kappay;

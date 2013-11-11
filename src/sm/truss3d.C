@@ -159,12 +159,12 @@ Truss3d :: computeLumpedMassMatrix(FloatMatrix &answer, TimeStep *tStep)
 
 
 void
-Truss3d :: computeNmatrixAt(GaussPoint *gp, FloatMatrix &answer)
+Truss3d :: computeNmatrixAt(const FloatArray &iLocCoord, FloatMatrix &answer)
 // Returns the displacement interpolation matrix {N} of the receiver, eva-
 // luated at gp.
 {
     FloatArray n;
-    this->interp.evalN(n, *gp->giveCoordinates(), FEIElementGeometryWrapper(this));
+    this->interp.evalN(n, iLocCoord, FEIElementGeometryWrapper(this));
 
     answer.resize(3, 6);
     answer.zero();
@@ -249,7 +249,7 @@ Truss3d :: giveDofManDofIDMask(int inode, EquationID, IntArray &answer) const
 void
 Truss3d :: computeEgdeNMatrixAt(FloatMatrix &answer, int iedge, GaussPoint *gp)
 {
-    this->computeNmatrixAt(gp, answer);
+    this->computeNmatrixAt(*(gp->giveLocalCoordinates()), answer);
 }
 
 

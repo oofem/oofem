@@ -129,7 +129,7 @@ Beam2d :: computeGaussPoints()
 
 
 void
-Beam2d :: computeNmatrixAt(GaussPoint *gp, FloatMatrix &answer)
+Beam2d :: computeNmatrixAt(const FloatArray &iLocCoord, FloatMatrix &answer)
 // Returns the displacement interpolation matrix {N} of the receiver, eva-
 // luated at gp. Used for numerical calculation of consistent mass
 // matrix. Must contain only interpolation for displacement terms,
@@ -140,7 +140,7 @@ Beam2d :: computeNmatrixAt(GaussPoint *gp, FloatMatrix &answer)
     double l, ksi, ksi2, ksi3, kappa, c1;
 
     l     = this->giveLength();
-    ksi =   0.5 + 0.5 * gp->giveCoordinate(1);
+    ksi =   0.5 + 0.5 * iLocCoord.at(1);
     kappa = this->giveKappaCoeff();
     c1 = 1. + 2. * kappa;
     ksi2 = ksi * ksi;

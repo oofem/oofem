@@ -93,7 +93,7 @@ TrPlanestressRotAllman :: computeLocalCoordinates(FloatArray lxy[6])
 
 
 void
-TrPlanestressRotAllman :: computeNmatrixAt(GaussPoint *aGaussPoint, FloatMatrix &answer)
+TrPlanestressRotAllman :: computeNmatrixAt(const FloatArray &iLocCoord, FloatMatrix &answer)
 // Returns the displacement interpolation matrix {N} of the receiver, eva-
 // luated at aGaussPoint.
 {
@@ -104,8 +104,8 @@ TrPlanestressRotAllman :: computeNmatrixAt(GaussPoint *aGaussPoint, FloatMatrix 
     answer.zero();
 
     this->computeLocalCoordinates(lxy); // get ready for tranformation into 3d
-    this->qinterpolation.evalN( n, * aGaussPoint->giveCoordinates(), FEIVertexListGeometryWrapper(6, lxyptr) );
-    this->interp.evalN (L, * aGaussPoint->giveCoordinates(), FEIElementGeometryWrapper(this) );
+    this->qinterpolation.evalN( n, iLocCoord, FEIVertexListGeometryWrapper(6, lxyptr) );
+    this->interp.evalN (L, iLocCoord, FEIElementGeometryWrapper(this) );
 
     answer.at(1,1) = answer.at(2,2) = n.at(1)+n.at(4)/2.+n.at(6)/2.;
     answer.at(1,4) = answer.at(2,5) = n.at(2)+n.at(4)/2.+n.at(5)/2.;

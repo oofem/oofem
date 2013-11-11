@@ -943,7 +943,7 @@ void XfemElementInterface :: XfemElementInterface_computeConsistentMassMatrix(Fl
 
     for ( int i = 0; i < iRule->giveNumberOfIntegrationPoints(); i++ ) {
         GaussPoint *gp = iRule->getIntegrationPoint(i);
-        structEl->computeNmatrixAt(gp, n);
+        structEl->computeNmatrixAt( *(gp->giveLocalCoordinates()) , n);
         density = structEl->giveMaterial()->give('d', gp);
 
         if(ipDensity != NULL) {

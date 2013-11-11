@@ -224,7 +224,7 @@ XFEMStatic :: terminate(TimeStep *tStep)
 			for(int i = 1; i <= numEl; i++) {
 
 				////////////////////////////////////////////////////////
-				// Map state variables for regualr Gauss points
+				// Map state variables for regular Gauss points
 				Element *el = dNew->giveElement(i);
 				el->mapStateVariables(*domain, *tStep);
 

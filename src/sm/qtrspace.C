@@ -131,7 +131,7 @@ QTRSpace :: giveMaterialMode()
 
 
 void
-QTRSpace :: computeNmatrixAt(GaussPoint *aGaussPoint, FloatMatrix &answer)
+QTRSpace :: computeNmatrixAt(const FloatArray &iLocCoord, FloatMatrix &answer)
 // Returns the displacement interpolation matrix {N} of the receiver, eva-
 // luated at aGaussPoint.
 {
@@ -140,7 +140,7 @@ QTRSpace :: computeNmatrixAt(GaussPoint *aGaussPoint, FloatMatrix &answer)
     answer.resize(3, 30);
     answer.zero();
 
-    this->interpolation.evalN(n, * aGaussPoint->giveCoordinates(), FEIElementGeometryWrapper(this));
+    this->interpolation.evalN(n, iLocCoord, FEIElementGeometryWrapper(this));
 
     for ( int i = 1; i <= 10; i++ ) {
         answer.at(1, 3 * i - 2) = n.at(i);

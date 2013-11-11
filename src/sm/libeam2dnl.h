@@ -102,7 +102,7 @@ protected:
     virtual void computeBmatrixAt(GaussPoint *gp, FloatMatrix &answer, int = 1, int = ALL_STRAINS);
     // nonlinear part of geometrical eqs. for i-th component of strain vector.
     virtual void computeNLBMatrixAt(FloatMatrix &answer, GaussPoint *gp, int);
-    virtual void computeNmatrixAt(GaussPoint *gp, FloatMatrix &answer);
+    virtual void computeNmatrixAt(const FloatArray &iLocCoord, FloatMatrix &answer);
     virtual void computeGaussPoints();
     double giveLength();
     double givePitch();

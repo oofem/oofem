@@ -121,12 +121,12 @@ Q27Space :: computeGaussPoints()
 
 
 void
-Q27Space :: computeNmatrixAt(GaussPoint *aGaussPoint, FloatMatrix &answer)
+Q27Space :: computeNmatrixAt(const FloatArray &iLocCoord, FloatMatrix &answer)
 // Returns the displacement interpolation matrix {N} of the receiver, eva-
 // luated at aGaussPoint.
 {
     FloatArray n;
-    this->interpolation.evalN(n, * aGaussPoint->giveCoordinates(), FEIElementGeometryWrapper(this));
+    this->interpolation.evalN(n, iLocCoord, FEIElementGeometryWrapper(this));
     answer.beNMatrixOf(n, 3);
 }
 

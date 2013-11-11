@@ -153,7 +153,7 @@ void LSPrimaryVariableMapper::mapPrimaryVariables(FloatArray &oU, Domain &iOldDo
 
 					// New N-matrix
 					FloatMatrix NNew;
-					elNew->computeNmatrixAt(gp, NNew);
+					elNew->computeNmatrixAt( *(gp->giveLocalCoordinates()), NNew);
 
 
 					//////////////
@@ -192,12 +192,11 @@ void LSPrimaryVariableMapper::mapPrimaryVariables(FloatArray &oU, Domain &iOldDo
 					// Compute N-Matrix for the old element
 					FloatMatrix NOld;
 
-					// TODO: Infinitely dirty :-/
-					IntegrationRule *dummyIR = new IntegrationRule(1, elOld);
-					FloatArray *a = new FloatArray(localCoordOld);
-					GaussPoint dummyGP(dummyIR, 0, a, 0.0, _Unknown);
-					dummyGP.setCoordinates(localCoordOld);
-					elOld->computeNmatrixAt(&dummyGP, NOld);
+//					IntegrationRule *dummyIR = new IntegrationRule(1, elOld);
+//					FloatArray *a = new FloatArray(localCoordOld);
+//					GaussPoint dummyGP(dummyIR, 0, a, 0.0, _Unknown);
+//					dummyGP.setCoordinates(localCoordOld);
+					elOld->computeNmatrixAt(localCoordOld, NOld);
 
 					// Fetch nodal displacements for the new element
 					FloatArray nodeDispNew(elDofsGlob.giveSize());

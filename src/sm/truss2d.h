@@ -111,7 +111,7 @@ protected:
     virtual int computeLoadLEToLRotationMatrix(FloatMatrix &, int, GaussPoint *gp);
     virtual void computeBmatrixAt(GaussPoint *gp, FloatMatrix &, int = 1, int = ALL_STRAINS);
     virtual void computeBHmatrixAt(GaussPoint *gp, FloatMatrix &);
-    virtual void computeNmatrixAt(GaussPoint *gp, FloatMatrix &);
+    virtual void computeNmatrixAt(const FloatArray &iLocCoord, FloatMatrix &);
     virtual void computeGaussPoints();
 
     double giveLength();

@@ -254,12 +254,12 @@ Q4Axisymm :: computeBHmatrixAt(GaussPoint *aGaussPoint, FloatMatrix &answer)
 }
 
 void
-Q4Axisymm :: computeNmatrixAt(GaussPoint *aGaussPoint, FloatMatrix &answer)
+Q4Axisymm :: computeNmatrixAt(const FloatArray &iLocCoord, FloatMatrix &answer)
 // Returns the displacement interpolation matrix {N} of the receiver,
 // evaluated at aGaussPoint.
 {
     FloatArray n;
-    this->interp.evalN( n, * aGaussPoint->giveCoordinates(), FEIElementGeometryWrapper(this) );
+    this->interp.evalN( n, iLocCoord, FEIElementGeometryWrapper(this) );
 
     answer.resize(2, 16);
     answer.zero();

@@ -158,12 +158,12 @@ void TrPlaneStrain :: computeGaussPoints()
 
 
 void
-TrPlaneStrain :: computeNmatrixAt(GaussPoint *gp, FloatMatrix &answer)
+TrPlaneStrain :: computeNmatrixAt(const FloatArray &iLocCoord, FloatMatrix &answer)
 // Returns the displacement interpolation matrix {N} of the receiver, eva-
 // luated at gp.
 {
     FloatArray n;
-    this->interp.evalN( n, * gp->giveCoordinates(), FEIElementGeometryWrapper(this) );
+    this->interp.evalN( n, iLocCoord, FEIElementGeometryWrapper(this) );
 
     answer.resize(2, 6);
     answer.zero();

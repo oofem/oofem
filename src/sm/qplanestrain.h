@@ -89,7 +89,7 @@ public:
 protected:
     void computeBmatrixAt(GaussPoint *gp, FloatMatrix &answer, int = 1, int = ALL_STRAINS);
     void computeBHmatrixAt(GaussPoint *gp, FloatMatrix &answer);
-    void computeNmatrixAt(GaussPoint *gp, FloatMatrix &answer);
+    void computeNmatrixAt(const FloatArray &iLocCoord, FloatMatrix &answer);
     void computeGaussPoints();
 };
 } // end namespace oofem

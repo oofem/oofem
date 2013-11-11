@@ -145,7 +145,7 @@ public:
 protected:
     virtual void computeBmatrixAt(GaussPoint *, FloatMatrix &, int = 1, int = ALL_STRAINS)
     { _error("TR_SHELL01 :: computeBmatrixAt: calling of this function is not allowed"); }
-    virtual void computeNmatrixAt(GaussPoint *, FloatMatrix &)
+    virtual void computeNmatrixAt(const FloatArray &iLocCoord, FloatMatrix &)
     { _error("TR_SHELL01 :: computeNmatrixAt: calling of this function is not allowed"); }
 
     /// @todo In time delete

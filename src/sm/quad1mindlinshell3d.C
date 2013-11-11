@@ -239,12 +239,12 @@ Quad1MindlinShell3D :: computeBmatrixAt(GaussPoint *gp, FloatMatrix &answer, int
 
 
 void
-Quad1MindlinShell3D :: computeNmatrixAt(GaussPoint *gp, FloatMatrix &answer)
+Quad1MindlinShell3D :: computeNmatrixAt(const FloatArray &iLocCoord, FloatMatrix &answer)
 // Returns the [3x9] displacement interpolation matrix {N} of the receiver,
 // evaluated at gp.
 {
     FloatArray n;
-    this->interp.evalN(n, *gp->giveCoordinates(), FEIVoidCellGeometry());
+    this->interp.evalN(n, iLocCoord, FEIVoidCellGeometry());
     answer.beNMatrixOf(n, 3);
 }
 

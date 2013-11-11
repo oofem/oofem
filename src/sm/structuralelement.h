@@ -579,10 +579,10 @@ public:
     /**
      * Computes interpolation matrix for element unknowns.
      * The order and meaning of unknowns is element dependent.
-     * @param gp Integration point for which answer is assembled.
+     * @param iLocCoord Local coordinates.
      * @param answer Interpolation matrix evaluated at gp.
      */
-    virtual void computeNmatrixAt(GaussPoint *gp, FloatMatrix &answer) = 0;
+    virtual void computeNmatrixAt(const FloatArray &iLocCoord, FloatMatrix &answer) = 0;
 
 protected:
     /**
