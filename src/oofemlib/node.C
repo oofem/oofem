@@ -234,15 +234,14 @@ Node :: updateYourself(TimeStep *tStep)
 
     if ( mode == AL ) { // updated Lagrange
         for ( int i = 1; i <= numberOfDofs; i++ ) {
-            int ic = domain->giveCorrespondingCoordinateIndex(i);
-            if ( ic != 0 ) {
-                Dof *d = this->giveDof(i);
-                DofIDItem id = d->giveDofID();
-                if ( id == D_u || id == D_v || id == D_w ) {
-                    coordinates.at(ic) += d->giveUnknown(VM_Incremental, tStep);
-                } else if ( id == V_u || id == V_v || id == V_w ) {
-                    coordinates.at(ic) += d->giveUnknown(VM_Total, tStep) * dt;
-                }
+            Dof *d = this->giveDof(i);
+            DofIDItem id = d->giveDofID();
+            if ( id == D_u || id == D_v || id == D_w ) {
+                int ic = id - D_w + 1;
+                coordinates.at(ic) += d->giveUnknown(VM_Incremental, tStep);
+            } else if ( id == V_u || id == V_v || id == V_w ) {
+                int ic = id - V_w + 1;
+                coordinates.at(ic) += d->giveUnknown(VM_Total, tStep) * dt;
             }
         }
     }
@@ -267,10 +266,10 @@ Node :: giveUpdatedCoordinate(int ic, TimeStep *tStep, double scale)
         if ( !this->hasLocalCS() ) {
             // this has no local cs.
             for ( int i = 1; i <= numberOfDofs; i++ ) {
-                int j = domain->giveCorrespondingCoordinateIndex(i);
-                if ( ( j != 0 ) && ( j == ic ) ) {
-                    coordinate +=
-                        scale * this->giveDof(i)->giveUnknown(VM_Total, tStep);
+                Dof *d = this->giveDof(i);
+                DofIDItem id = d->giveDofID();
+                if  ( id == ic )
+                    coordinate += scale * d->giveUnknown(VM_Total, tStep);
                     break;
                 }
             }
@@ -285,10 +284,14 @@ Node :: giveUpdatedCoordinate(int ic, TimeStep *tStep, double scale)
             displacements.zero();
 
             for ( int i = 1; i <= numberOfDofs; i++ ) {
-                int j = domain->giveCorrespondingCoordinateIndex(i);
-                if ( j != 0 ) { // && (this->giveDof(i)->giveUnknownType()==DisplacementVector))
-                    displacements.at(j) = scale * this->giveDof(i)->
-                                          giveUnknown(VM_Total, tStep);
+                Dof *d = this->giveDof(i);
+                DofIDItem id = d->giveDofID();
+                if ( id == D_u || id == D_v || id == D_w ) {
+                    int ic = id - D_w + 1;
+                    displacements.at(j) = scale * d->giveUnknown(VM_Total, tStep);
+                } else if ( id == V_u || id == V_v || id == V_w ) {
+                    int ic = id - V_w + 1;
+                    displacements.at(j) = scale * d->giveUnknown(VM_Total, tStep);
                 }
             }
 

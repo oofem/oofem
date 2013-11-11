@@ -391,7 +391,6 @@ public:
     /// Returns number of sets
     int giveNumberOfSets() const { return setList->giveSize(); }    
 
-    int giveCorrespondingCoordinateIndex(int);
     /// Returns number of spatial dimensions.
     int giveNumberOfSpatialDimensions();
     /**

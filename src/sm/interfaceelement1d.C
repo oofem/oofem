@@ -66,27 +66,15 @@ InterfaceElem1d :: InterfaceElem1d(int n, Domain *aDomain) :
 void
 InterfaceElem1d :: setCoordMode()
 {
-    switch ( domain->giveDomainType() ) {
-    case _2dPlaneStressMode:
-        this->mode = ie1d_2d;
-        break;
-    case _PlaneStrainMode:
-        this->mode = ie1d_2d;
-        break;
-    case _3dMode:
-        this->mode = ie1d_3d;
-        break;
-    case _3dAxisymmMode:
-        this->mode = ie1d_3d;
-        break;
-    case _2dTrussMode:
-        this->mode = ie1d_2d;
-        break;
-    case _1dTrussMode:
+    switch ( domain->giveNumberOfSpatialDimensions() ) {
+    case 1:
         this->mode = ie1d_1d;
         break;
-    case _2dBeamMode:
+    case 2:
         this->mode = ie1d_2d;
+        break;
+    case 3:
+        this->mode = ie1d_3d;
         break;
     default:
         _error("setCoordMode: Unsupported domain type")
