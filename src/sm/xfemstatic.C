@@ -59,7 +59,8 @@ REGISTER_EngngModel( XFEMStatic );
 XFEMStatic::XFEMStatic(int i, EngngModel *_master):
 NonLinearStatic(i, _master),
 updateStructureFlag(false),
-mForceRemap(false)
+mForceRemap(false),
+mSetValsFromDofMap(true)
 {
 	printf("Entering XFEMStatic::XFEMStatic(int i, EngngModel *_master).\n");
 }
@@ -91,37 +92,66 @@ XFEMStatic :: solveYourselfAt(TimeStep *tStep)
 //        totalDisplacement.resize(neq);
 //        totalDisplacement.zero();
         if ( totalDisplacement.giveSize() != neq ) {
-        	FloatArray totalDisplacementNew;
-            setValsFromDofMap(totalDisplacementNew, totalDisplacement);
-            totalDisplacement = totalDisplacementNew;
+
+        	if(mSetValsFromDofMap) {
+				FloatArray totalDisplacementNew;
+				setValsFromDofMap(totalDisplacementNew, totalDisplacement);
+				totalDisplacement = totalDisplacementNew;
+        	}
+        	else {
+        		totalDisplacement.resize(neq);
+        		totalDisplacement.zero();
+        	}
         }
 
 
         if ( incrementOfDisplacement.giveSize() != neq ) {
-        	FloatArray incrementOfDisplacementNew;
-            setValsFromDofMap(incrementOfDisplacementNew, incrementOfDisplacement);
-            incrementOfDisplacement = incrementOfDisplacementNew;
+
+        	if(mSetValsFromDofMap) {
+				FloatArray incrementOfDisplacementNew;
+				setValsFromDofMap(incrementOfDisplacementNew, incrementOfDisplacement);
+				incrementOfDisplacement = incrementOfDisplacementNew;
+        	}
+        	else {
+        		incrementOfDisplacement.resize(neq);
+        		incrementOfDisplacement.zero();
+        	}
         }
 
 //        incrementOfDisplacement.resize(neq);
 //        incrementOfDisplacement.zero();
-        this->setTotalDisplacementFromUnknownsInDictionary(EID_MomentumBalance, VM_Total, tStep);
-
+    	if(mSetValsFromDofMap) {
+    		this->setTotalDisplacementFromUnknownsInDictionary(EID_MomentumBalance, VM_Total, tStep);
+    	}
 
         if ( incrementalLoadVector.giveSize() != neq ) {
-        	FloatArray incrementalLoadVectorNew;
-            incrementalLoadVector.zero(); // temp JB - load vector needs to be recomputed if xfem dofs are introduced 
-            setValsFromDofMap(incrementalLoadVectorNew, incrementalLoadVector);
-            incrementalLoadVector = incrementalLoadVectorNew;
+
+        	if(mSetValsFromDofMap) {
+				FloatArray incrementalLoadVectorNew;
+				incrementalLoadVector.zero(); // temp JB - load vector needs to be recomputed if xfem dofs are introduced
+				setValsFromDofMap(incrementalLoadVectorNew, incrementalLoadVector);
+				incrementalLoadVector = incrementalLoadVectorNew;
+        	}
+        	else {
+        		incrementalLoadVector.resize(neq);
+        		incrementalLoadVector.zero();
+        	}
         }
 
         ///////////////////////////////////////////////////////////////////
         // Map values in the old initialLoadVector to the new initialLoadVector
         if ( initialLoadVector.giveSize() != neq ) {
-        	FloatArray initialLoadVectorNew;
-            initialLoadVector.zero(); // temp JB - load vector needs to be recomputed if xfem dofs are introduced
-            setValsFromDofMap(initialLoadVectorNew, initialLoadVector);
-            initialLoadVector = initialLoadVectorNew;
+
+        	if(mSetValsFromDofMap) {
+				FloatArray initialLoadVectorNew;
+				initialLoadVector.zero(); // temp JB - load vector needs to be recomputed if xfem dofs are introduced
+				setValsFromDofMap(initialLoadVectorNew, initialLoadVector);
+				initialLoadVector = initialLoadVectorNew;
+        	}
+        	else {
+        		initialLoadVector.resize(neq);
+        		initialLoadVector.zero();
+        	}
         }
 
     }
@@ -160,6 +190,10 @@ XFEMStatic :: terminate(TimeStep *tStep)
     	Domain *domain = this->giveDomain(domInd);
 
     	if( domain->giveXfemManager()->hasPropagatingFronts() || mForceRemap ) {
+
+    		// If domain cloning is performed, there is no need to
+    		// set values from the dof map.
+    		mSetValsFromDofMap = false;
 
 			// Take copy of the domain to allow mapping of state variables
 			// to the new Gauss points.
@@ -253,8 +287,8 @@ XFEMStatic :: terminate(TimeStep *tStep)
 			}
 
 
-		    this->setUpdateStructureFlag(false);
-//			this->setUpdateStructureFlag(true);
+//		    this->setUpdateStructureFlag(false);
+			this->setUpdateStructureFlag(true);
 //			initializeDofUnknownsDictionary(tStep);
     	} // if( domain->giveXfemManager()->hasPropagatingFronts() )
 

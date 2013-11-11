@@ -88,6 +88,9 @@ protected:
     bool updateStructureFlag;
 
     bool mForceRemap;
+
+    bool mSetValsFromDofMap;
+
     // Map for updating initialLoadVector after resize
     // Maps <domain index, node index, local dof index> to global equation number
     std::map< std::vector<int>, int > mDofEqnNumMap;
