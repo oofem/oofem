@@ -75,16 +75,7 @@ LSPrimaryVariableMapper::~LSPrimaryVariableMapper()
 
 void LSPrimaryVariableMapper::mapPrimaryVariables(FloatArray &oU, Domain &iOldDom, Domain &iNewDom, ValueModeType iMode, TimeStep &iTStep)
 {
-	EngngModel *engngModNew = iNewDom.giveEngngModel();
-
-	// The domain pointer in the EngngModel causes trouble here,
-	// because it has to point to the domain we are currently working with.
-	// However, switching domain kills the old domain if we don't
-	// prevent deallocation.
-
-	bool deallocateOld = false;
-	engngModNew->setDomain(1, &iNewDom, deallocateOld);
-	engngModNew->forceEquationNumbering();
+	EngngModel *engngMod = iNewDom.giveEngngModel();
 
 
 	const int dim = iNewDom.giveNumberOfSpatialDimensions();
@@ -92,9 +83,7 @@ void LSPrimaryVariableMapper::mapPrimaryVariables(FloatArray &oU, Domain &iOldDo
 	int numElNew = iNewDom.giveNumberOfElements();
 
 	// Count dofs
-	int numDofsNew = 0;
-
-	numDofsNew = engngModNew->giveNumberOfDomainEquations(1, engngModNew->giveUnknownNumberingScheme(EID_MomentumBalance) );
+	int numDofsNew = engngMod->giveNumberOfDomainEquations(1, engngMod->giveUnknownNumberingScheme(EID_MomentumBalance) );
 
 
 	oU.resize(numDofsNew);
@@ -108,9 +97,8 @@ void LSPrimaryVariableMapper::mapPrimaryVariables(FloatArray &oU, Domain &iOldDo
 //	DSSMatrix K( DSSMatrix::sym_LL ,numDofsNew);
 //	DSSMatrix K( DSSMatrix::unsym_LU ,numDofsNew);
 
-	EngngModel *engngMod = iNewDom.giveEngngModel();
 
-	K.buildInternalStructure( engngMod, 1, EID_MomentumBalance, engngModNew->giveUnknownNumberingScheme(EID_MomentumBalance) );
+	K.buildInternalStructure( engngMod, 1, EID_MomentumBalance, engngMod->giveUnknownNumberingScheme(EID_MomentumBalance) );
 
 	int maxIter = 1;
 
@@ -139,7 +127,7 @@ void LSPrimaryVariableMapper::mapPrimaryVariables(FloatArray &oU, Domain &iOldDo
 			elRes.zero();
 
 			IntArray elDofsGlob;
-			elNew->giveLocationArray(elDofsGlob, EID_MomentumBalance, engngModNew->giveUnknownNumberingScheme(EID_MomentumBalance) );
+			elNew->giveLocationArray(elDofsGlob, EID_MomentumBalance, engngMod->giveUnknownNumberingScheme(EID_MomentumBalance) );
 
 
 			// Loop over Gauss points
@@ -167,7 +155,6 @@ void LSPrimaryVariableMapper::mapPrimaryVariables(FloatArray &oU, Domain &iOldDo
 
 					const IntArray &elNodes = elNew->giveDofManArray();
 
-					// Compute global coordinates of Gauss point
 					FloatArray globalCoord(dim);
 					globalCoord.zero();
 
@@ -191,11 +178,6 @@ void LSPrimaryVariableMapper::mapPrimaryVariables(FloatArray &oU, Domain &iOldDo
 
 					// Compute N-Matrix for the old element
 					FloatMatrix NOld;
-
-//					IntegrationRule *dummyIR = new IntegrationRule(1, elOld);
-//					FloatArray *a = new FloatArray(localCoordOld);
-//					GaussPoint dummyGP(dummyIR, 0, a, 0.0, _Unknown);
-//					dummyGP.setCoordinates(localCoordOld);
 					elOld->computeNmatrixAt(localCoordOld, NOld);
 
 					// Fetch nodal displacements for the new element
@@ -269,10 +251,6 @@ void LSPrimaryVariableMapper::mapPrimaryVariables(FloatArray &oU, Domain &iOldDo
 
 		oU.add(du);
 	}
-
-	bool deallocate = false;
-	engngModNew->setDomain(1, &iOldDom, deallocate);
-	engngModNew->forceEquationNumbering();
 
 }
 

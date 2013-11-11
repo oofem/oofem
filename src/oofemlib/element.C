@@ -1403,9 +1403,7 @@ Element :: mapStateVariables(const Domain &iOldDom, const TimeStep &iTStep)
                                                       ( this->giveMaterial()->giveStatus(&gp) );
 
             if ( interface == NULL ) {
-            	printf("this->giveMaterial()->giveClassName(): %s\n", this->giveMaterial()->giveClassName() );
             	gp.giveCoordinates()->printYourself();
-            	printf("this->giveMaterial()->giveStatus(&gp)->giveClassName(): %s\n", this->giveMaterial()->giveStatus(&gp)->giveClassName());
         		OOFEM_ERROR("In Element :: mapStateVariables(): Failed to fetch MaterialStatusMapperInterface.\n");
             }
 

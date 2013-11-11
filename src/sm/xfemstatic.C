@@ -199,6 +199,9 @@ XFEMStatic :: terminate(TimeStep *tStep)
 			// to the new Gauss points.
 			Domain *dNew = domain->Clone();
 
+			bool deallocateOld = false;
+			setDomain(1, dNew, deallocateOld);
+			forceEquationNumbering();
 
 			// Map primary variables
 			LSPrimaryVariableMapper primMapper;
@@ -268,7 +271,8 @@ XFEMStatic :: terminate(TimeStep *tStep)
 			}
 
 
-			this->domainList->put(1, dNew);
+//			this->domainList->put(1, dNew);
+			delete domain;
 			domain = this->giveDomain(1);
 
 			// Set domain pointer to various components ...
@@ -287,9 +291,7 @@ XFEMStatic :: terminate(TimeStep *tStep)
 			}
 
 
-//		    this->setUpdateStructureFlag(false);
 			this->setUpdateStructureFlag(true);
-//			initializeDofUnknownsDictionary(tStep);
     	} // if( domain->giveXfemManager()->hasPropagatingFronts() )
 
 //#endif
