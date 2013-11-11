@@ -4106,7 +4106,7 @@ HuertaErrorEstimator :: setupRefinedProblemProlog(const char *problemName, int p
         ir->setField(contextOutputStep, _IFT_EngngModel_contextoutputstep);
 #endif
 #ifdef __PARALLEL_MODE
-        ir->setField(0, _IFT_EngngModel_parallelFlag);
+        ir->setField(0, _IFT_EngngModel_parallelflag);
 #endif
         refinedReader.insertInputRecord(DataReader::IR_emodelRec, ir);
     } else if ( dynamic_cast< AdaptiveNonLinearStatic * >( problem ) ) {
@@ -4195,7 +4195,7 @@ HuertaErrorEstimator :: setupRefinedProblemProlog(const char *problemName, int p
                 ir->setField(contextOutputStep, _IFT_EngngModel_contextoutputstep);
 #endif
 #ifdef __PARALLEL_MODE
-                ir->setField(0, _IFT_EngngModel_parallelFlag);
+                ir->setField(0, _IFT_EngngModel_parallelflag);
 #endif
 
                 // this is not relevant but it is required
@@ -4224,7 +4224,7 @@ HuertaErrorEstimator :: setupRefinedProblemProlog(const char *problemName, int p
                 ir->setField(contextOutputStep, _IFT_EngngModel_contextoutputstep);
 #endif
 #ifdef __PARALLEL_MODE
-                ir->setField(0, _IFT_EngngModel_parallelFlag);
+                ir->setField(0, _IFT_EngngModel_parallelflag);
 #endif
 
                 // this is not relevant but it is required
