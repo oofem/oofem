@@ -708,7 +708,9 @@ Domain :: instanciateYourself(DataReader *dr)
             name.c_str(), giveDefaultNodeDofIDArry().giveSize() );
 
     // read output manager record
+    std::string tmp;
     ir = dr->giveInputRecord(DataReader :: IR_outManRec, 1);
+    ir->giveRecordKeywordField(tmp);
     outputManager->initializeFrom(ir);
     ir->finish();
 
