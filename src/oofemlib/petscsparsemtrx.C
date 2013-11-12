@@ -178,30 +178,29 @@ PetscSparseMtrx :: times(const FloatMatrix &B, FloatMatrix &answer) const
     int nr = this->giveNumberOfRows();
     int nc = B.giveNumberOfColumns();
     answer.resize(nr, nc);
-    double *aptr = answer.givePointer();
 
-#if 0
-     // Approach using several vectors. Not sure if it is optimal, but it includes petsc calls which i suspect are inefficient. / Mikael
-     // UNTESTED!
-     Vec globX, globY;
-     VecCreate(PETSC_COMM_SELF, &globY);
-     VecSetType(globY, VECSEQ);
-     VecSetSizes(globY, PETSC_DECIDE, nr);
-     int nrB = B.giveNumberOfRows();
-     for (int k = 0; k < nc; k++) {
-         double colVals[nrB];
-         for (int i = 0; i < nrB; i++) colVals[i] = B(i,k); // B.copyColumn(Bk,k);
-         VecCreateSeqWithArray(PETSC_COMM_SELF, nrB, colVals, &globX);
-         MatMult(this->mtrx, globX, globY );
-                 double *ptr;
-                 VecGetArray(globY, &ptr);
-                 for (int i = 0; i < nr; i++) *aptr++ = ptr[i]; // answer.setColumn(Ak,k);
-                 VecRestoreArray(globY, &ptr);
-                 VecDestroy(globX);
+#if 1
+    // Using several vectors are necessary because PETSc is missing most of it operations on symmetric matrices.
+    // If PETSc ever adds the missing "MatMatMult_***_***" implementations, we can use the second approach below
+    Vec globX, globY;
+    VecCreate(PETSC_COMM_SELF, &globY);
+    VecSetType(globY, VECSEQ);
+    VecSetSizes(globY, PETSC_DECIDE, nr);
+    int nrB = B.giveNumberOfRows();
+    FloatArray colVals(B.giveNumberOfRows());
+    FloatArray colResults(nr);
+    double *resultsPtr = colResults.givePointer();
+    for (int k = 0; k < nc; k++) {
+        B.copyColumn(colVals, k+1);
+        VecCreateSeqWithArray(PETSC_COMM_SELF, 1, nrB, colVals.givePointer(), &globX);
+        MatMult(this->mtrx, globX, globY);
+        VecGetArray(globY, &resultsPtr);
+        answer.setColumn(colResults, k+1);
+        VecRestoreArray(globY, &resultsPtr);
+        VecDestroy(&globX);
      }
-     VecDestroy(globY);
-#endif
-
+     VecDestroy(&globY);
+#else
     Mat globB, globC;
     MatCreateSeqDense(PETSC_COMM_SELF, B.giveNumberOfRows(), B.giveNumberOfColumns(), B.givePointer(), & globB);
     MatMatMult(this->mtrx, globB, MAT_INITIAL_MATRIX, PETSC_DEFAULT, & globC);
@@ -216,6 +215,7 @@ PetscSparseMtrx :: times(const FloatMatrix &B, FloatMatrix &answer) const
 
     MatDestroy(&globB);
     MatDestroy(&globC);
+#endif
 }
 
 void
