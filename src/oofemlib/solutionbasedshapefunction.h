@@ -72,6 +72,11 @@ private:
     bool useConstantBase;
     bool isLoaded;
 
+    double bigNorm;
+    int worstIndex;
+
+    bool isCoeff(ActiveDof *dof);
+
     std::vector< modeStruct *> modes;
 
     void updateModelWithFactors(modeStruct *m);
@@ -81,18 +86,33 @@ private:
 
     void setBoundaryConditionOnDof(Dof *d, double value);
 
-    double computeBaseFunctionValueAt(FloatArray &coords, DofIDItem dofID, EngngModel &myEngngModel);
 
     void setLoads(EngngModel *myEngngModel, int d);
     void loadProblem();
     void init();
 
-    void computeCorrectionFactors(EngngModel &myEngngModel, IntArray *Dofs, long double *Am, long double *Ap, long double *c0, long double *cm, long double *cp);
+    void computeCorrectionFactors(modeStruct &myMode, IntArray *Dofs, double *am, double *ap);
 
-    double giveValueAtPoint(const FloatArray &coords, DofIDItem dofID, EngngModel &myEngngModel);
+    /**
+     * @brief giveValueAtPoint
+     * @param answer        Values as point corresponding to the coordinate and dofID
+     * @param coords        Coordinated at which evaluation takes place
+     * @param dofID         Specifies DofIDs to evaluate
+     * @param myEngngModel  EngngModel
+     */
+    void giveValueAtPoint(FloatArray &answer, const FloatArray &coords, IntArray &dofID, EngngModel &myEngngModel);
+
+    void giveCorrectedValueAtPoint(FloatArray &answer, const FloatArray &coords, IntArray &dofID, EngngModel &myEngngModel);
+
+    void splitBoundaryNodeIDs(modeStruct &mode, Element &e, IntArray &boundary, IntArray &pList, IntArray &mList, IntArray &zList, FloatMatrix &nodeValues);
+
+    void computeBaseFunctionValueAt(FloatArray &answer, FloatArray &coords, IntArray &dofIDs, EngngModel &myEngngModel);
 
     void initializeSurfaceData(modeStruct *mode);
-    void copyDofManagerToSurfaceData(SurfaceDataStruct *surfaceData, int DofManID, int DofIDItem, EngngModel *m, bool isPlus, bool isMinus, bool isZeroBoundary);
+
+    void copyDofManagersToSurfaceData(modeStruct *mode, IntArray nodeList, bool isPlus, bool isMinus, bool isZero);
+
+    void whichBoundary(FloatArray &coord, bool &isPlus, bool &isMinus, bool &isZero);
 
 public:
     SolutionbasedShapeFunction(int n, Domain *d);
@@ -100,7 +120,7 @@ public:
 
     IRResultType initializeFrom(InputRecord *ir);
 
-    virtual bool requiresActiveDofs() {return true;}
+    virtual bool requiresActiveDofs() { return true; }
     virtual int giveNumberOfInternalDofManagers() { return 1; }
     virtual DofManager *giveInternalDofManager(int i) { return myNode; }
 
@@ -119,7 +139,7 @@ public:
     virtual const char *giveClassName() const { return "SolutionbasedShapeFunction"; }
     virtual const char *giveInputRecordName() const { return _IFT_SolutionbasedShapeFunction_Name; }
 
-    void checkIncompressibility(EngngModel &myEngngModel);
+    double checkIncompressibility(EngngModel &myEngngModel);
 };
 }
 

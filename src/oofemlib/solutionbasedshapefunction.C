@@ -69,20 +69,26 @@ SolutionbasedShapeFunction::SolutionbasedShapeFunction(int n, Domain *d) : Activ
     isLoaded=false;
     order=8;
     TOL=1e-5;
+    bigNorm=0.0;
+
     // TODO Auto-generated constructor stub
 
 }
 
 SolutionbasedShapeFunction::~SolutionbasedShapeFunction()
 {
-
+    for (int i=1; i<=myNode->giveNumberOfDofs(); i++) {
+        Dof *d=myNode->giveDof(i);
+        printf("eq id: %u\n", d->giveEqn());
+    }
 }
-void
+
+double
 SolutionbasedShapeFunction :: checkIncompressibility(EngngModel &myEngngModel)
 {
 
     EngngModel *m=&myEngngModel;
-    Set *mySet=m->giveDomain(1)->giveSet( externalSet );// this->domain->giveSet( this->giveSetNumber() );
+    Set *mySet=m->giveDomain(1)->giveSet( externalSet );
     IntArray BoundaryList = mySet->giveBoundaryList();
     double NetInflow=0.0;
 
@@ -99,12 +105,13 @@ SolutionbasedShapeFunction :: checkIncompressibility(EngngModel &myEngngModel)
 
         IntArray bnodes;
         FloatMatrix values;
+
         interp->boundaryGiveNodes(bnodes, Boundary);
         values.resize(3, bnodes.giveSize());
 
         for (int j=1; j<=bnodes.giveSize(); j++) {
             for (int k=1; k<=3; k++) {
-                values.at(k, j)=e->giveNode(bnodes.at(j))->giveDof(k)->giveUnknown(VM_Total, m->giveCurrentStep());
+                values.at(k, j)=e->giveDofManager(bnodes.at(j))->giveDof(k)->giveUnknown(VM_Total, m->giveCurrentStep());
             }
         }
 
@@ -117,14 +124,12 @@ SolutionbasedShapeFunction :: checkIncompressibility(EngngModel &myEngngModel)
             interp->boundaryEvalN(N, Boundary, *lcoords, FEIElementGeometryWrapper(e));
 
             v.beProductOf(values, N);
-            //v.printYourself();
-            NetInflow=+v.dotProduct(normal)*detJ;
-            //printf("Net inflow @ (%f, %f):%10.10f\n", gp->giveCoordinates()->at(1), gp->giveCoordinates()->at(2), NetInflow);
-
+            NetInflow=NetInflow+v.dotProduct(normal)*fabs(detJ);
         }
+
     }
 
-    printf("Net inflow:%15.15f\n", NetInflow);
+    return NetInflow;
 
 }
 
@@ -146,22 +151,29 @@ SolutionbasedShapeFunction :: initializeFrom(InputRecord *ir)
     IR_GIVE_OPTIONAL_FIELD(ir, externalSet, _IFT_SolutionbasedShapeFunction_Externalset);
 
     // Set up master dofs
-    myNode = new Node(0, this->giveDomain());
+    myNode = new Node(1, this->giveDomain());
 
     for (int i=1; i<=this->giveDofIDs().giveSize(); i++) {
-        MasterDof *newDof = new MasterDof( 0, myNode, (DofIDItem)this->domain->giveNextFreeDofID() );
+        int DofID=this->domain->giveNextFreeDofID();
+        MasterDof *newDof = new MasterDof( i, myNode, (DofIDItem) DofID );
         myNode->appendDof( newDof );
-        if (i==1) {
-            //setBoundaryConditionOnDof(newDof, 1.0);
-        } else {
-            //setBoundaryConditionOnDof(newDof, 0.0);
-        }
     }
 
     init();
 
     return IRRT_OK;
 
+}
+
+bool
+SolutionbasedShapeFunction :: isCoeff(ActiveDof *dof)
+{
+    for (int i=1; i<=myNode->giveNumberOfDofs(); i++) {
+        if (dof==myNode->giveDof(i)) {
+            return true;
+        }
+    }
+    return false;
 }
 
 void
@@ -182,25 +194,21 @@ SolutionbasedShapeFunction :: init()
 }
 
 void
-SolutionbasedShapeFunction :: computeCorrectionFactors(EngngModel &myEngngModel, IntArray *Dofs, long double *Am, long double *Ap, long double *c0, long double *cm, long double *cp)
+SolutionbasedShapeFunction :: computeCorrectionFactors(modeStruct &myMode, IntArray *Dofs, double *am, double *ap)
 {
     /*
-     *Compute c0, cp, cm, Ap and Am
+     *Compute c0, cp, cm, Bp, Bm, Ap and Am
      */
 
-    *Am=0.0;
-    *Ap=0.0;
-    *c0=0.0;
-    *cm=0.0;
-    *cp=0.0;
-    IntArray surfaceNodes;
-    long double NetInflow1=0.0, NetInflow2=0.0;
-    long double d0=0.0, dm=0.0, dp=0.0;
-    IntArray pList, mList, zList;
+    double A0p=0.0, App=0.0, A0m=0.0, Amm=0.0, Bp=0.0, Bm=0.0, c0=0.0, cp=0.0, cm=0.0;
+
+
+    double NetInflow1=0.0, NetInflow2=0.0;
 
     //modeStruct *mode=this->modes.at(EngngModelID);
-    EngngModel *m=&myEngngModel;
+    EngngModel *m=myMode.myEngngModel;
     Set *mySet=m->giveDomain(1)->giveSet( externalSet );// this->domain->giveSet( this->giveSetNumber() );
+
     IntArray BoundaryList = mySet->giveBoundaryList();
 
     for (int i=0; i<BoundaryList.giveSize()/2; i++) {
@@ -209,44 +217,16 @@ SolutionbasedShapeFunction :: computeCorrectionFactors(EngngModel &myEngngModel,
 
         Element *thisElement=m->giveDomain(1)->giveElement(ElementID);
         FEInterpolation *geoInterpolation = thisElement->giveInterpolation();
-        IntArray bnodes, bnodesIDs, zNodes, pNodes, mNodes;
-        FloatArray nodeValues;
-
-        //printf("*** Element %u (%u), boundary %u (i=%u)\n", ElementID, thisElement->giveNumber(), Boundary, i);
+        IntArray bnodes, zNodes, pNodes, mNodes;
+        FloatMatrix nodeValues;
 
         geoInterpolation->boundaryGiveNodes(bnodes, Boundary);
-        bnodesIDs.resize(bnodes.giveSize());
+
+        nodeValues.resize(this->dofs.giveSize(), bnodes.giveSize());
+        nodeValues.zero();
 
         // Change to global ID for bnodes and identify the intersection of bnodes and the zero boundary
-        for (int j=1; j<=bnodes.giveSize(); j++) {
-            DofManager *dman=thisElement->giveDofManager(bnodes.at(j));
-            bnodesIDs.at(j)= dman->giveNumber();
-            surfaceNodes.insertOnce(dman->giveNumber());
-
-            //printf("Node %u @ (%f, %f, %f)\n", bnodesIDs.at(j), dman->giveCoordinates()->at(1), dman->giveCoordinates()->at(2), dman->giveCoordinates()->at(3));
-
-            bool isZero = false;
-            bool isPlus = false;
-            bool isMinus = false;
-
-            for (int k=1; k<=dman->giveCoordinates()->giveSize(); k++) {
-                isPlus = isPlus || (fabs(dman->giveCoordinates()->at(k)-maxCoord.at(k))<TOL);
-                isMinus = isMinus || (fabs(dman->giveCoordinates()->at(k)-minCoord.at(k))<TOL);
-            }
-
-            isZero = isPlus && isMinus;
-
-            if (isZero) {
-                zNodes.insertSorted(j);
-                zList.insertOnce(dman->giveNumber());
-            } else if (isPlus) {
-                pNodes.insertSorted(j);
-                pList.insertOnce(dman->giveNumber());
-            } else if (isMinus) {
-                mNodes.insertSorted(j);
-                mList.insertOnce(dman->giveNumber());
-            }
-        }
+        splitBoundaryNodeIDs(myMode, *thisElement, bnodes, pNodes, mNodes, zNodes, nodeValues);
 
         GaussIntegrationRule iRule(order, thisElement);
 
@@ -258,97 +238,127 @@ SolutionbasedShapeFunction :: computeCorrectionFactors(EngngModel &myEngngModel,
             GaussPoint *gp = iRule.getIntegrationPoint(j);
             FloatArray *lcoords = gp->giveCoordinates();
             FloatArray gcoords, normal, N;
+            FloatArray Phi;
 
             double detJ = fabs( geoInterpolation->boundaryGiveTransformationJacobian( Boundary, * lcoords, FEIElementGeometryWrapper(thisElement) ) )*gp->giveWeight();
 
             geoInterpolation->boundaryEvalNormal(normal, Boundary, * lcoords, FEIElementGeometryWrapper(thisElement));
-            //logDataMsg("normal: ", normal);
             geoInterpolation->boundaryEvalN(N, Boundary, *lcoords, FEIElementGeometryWrapper(thisElement) );
             geoInterpolation->boundaryLocal2Global( gcoords, Boundary, * lcoords, FEIElementGeometryWrapper(thisElement) );
-
-            //logDataMsg("N:", N);
-            //N.times(detJ);
-            //logDataMsg("N*detJ:", N);
 
             FloatArray pPhi, mPhi, zPhi;
             pPhi.resize(Dofs->giveSize()); pPhi.zero();
             mPhi.resize(Dofs->giveSize()); mPhi.zero();
             zPhi.resize(Dofs->giveSize()); zPhi.zero();
 
-            // For each DofID
-            for (int k=1; k<=Dofs->giveSize(); k++) {
+            // Build phi (analytical averaging, not projected onto the mesh)
+            computeBaseFunctionValueAt(Phi, gcoords, *Dofs, *myMode.myEngngModel);
 
-                // Build array containing node values
-                nodeValues.resize(bnodes.giveSize());
-                for (int l=1; l<=bnodes.giveSize(); l++) {
-                    nodeValues.at(l) = giveValueAtPoint(gcoords, (DofIDItem) Dofs->at(k), myEngngModel);
+            // Build zPhi for this DofID
+            //logDataMsg ("zNodes =", zNodes);
+            //logDataMsg ("N =", N);
+
+            for (int l=1; l<=zNodes.giveSize(); l++) {
+                int nodeID = zNodes.at(l);
+                for (int m=1; m<=this->dofs.giveSize(); m++) {
+                    zPhi.at(m)=zPhi.at(m)+N.at(nodeID)*nodeValues.at(m, nodeID);
                 }
-
-
-                // Build zPhi for this DofID
-                //printf("zeroNodes=[zeroNodes, ");
-                for (int l=1; l<=zNodes.giveSize(); l++) {
-                    int nodeID = zNodes.at(l);
-                    //printf("%u, ", bnodesIDs.at(nodeID));
-                    zPhi.at(k)=zPhi.at(k)+N.at(nodeID)*nodeValues.at(nodeID);
-                }
-                //printf("];\n");
-
-                // Build pPhi for this DofID
-                //printf("plusNodes=[plusNodes, ");
-                for (int l=1; l<=pNodes.giveSize(); l++) {
-                    int nodeID = pNodes.at(l);
-                    //printf("%u, ", bnodesIDs.at(nodeID));
-                    pPhi.at(k)=pPhi.at(k)+N.at(nodeID)*nodeValues.at(nodeID);
-                }
-                //printf("];\n");
-
-                // Build mPhi for this DofID
-                //printf("minusNodes=[minusNodes, ");
-                for (int l=1; l<=mNodes.giveSize(); l++) {
-                    int nodeID = mNodes.at(l);
-                    //printf("%u, ", bnodesIDs.at(nodeID));
-                    mPhi.at(k)=mPhi.at(k)+N.at(nodeID)*nodeValues.at(nodeID);
-                }
-                //printf("];\n");
-
             }
 
-            //logDataMsg("zPhi = ", zPhi);
-            //logDataMsg("mPhi = ", mPhi);
-            //logDataMsg("pPhi = ", pPhi);
 
+            // Build pPhi for this DofID
+            for (int l=1; l<=pNodes.giveSize(); l++) {
+                int nodeID = pNodes.at(l);
+                for (int m=1; m<=this->dofs.giveSize(); m++) {
+                    pPhi.at(m)=pPhi.at(m)+N.at(nodeID)*nodeValues.at(m, nodeID);
+                }
+            }
 
-            *c0=*c0 + (long double) zPhi.dotProduct(normal, 3)*detJ;
-            *cp=*cp + (long double) pPhi.dotProduct(normal, 3)*detJ;
-            *cm=*cm + (long double) mPhi.dotProduct(normal, 3)*detJ;
-            d0=d0 + (long double) zPhi.dotProduct(normal, 3)*detJ;
-            dm=dm + (long double) mPhi.dotProduct(normal, 3)*detJ;
-            dp=dp + (long double) pPhi.dotProduct(normal, 3)*detJ;
+            // Build mPhi for this DofID
+            for (int l=1; l<=mNodes.giveSize(); l++) {
+                int nodeID = mNodes.at(l);
+                for (int m=1; m<=this->dofs.giveSize(); m++) {
+                    mPhi.at(m)=mPhi.at(m)+N.at(nodeID)*nodeValues.at(m, nodeID);
+                }
+            }
+
+            /*            logDataMsg("zPhi = ", zPhi);
+            logDataMsg("mPhi = ", mPhi);
+            logDataMsg("pPhi = ", pPhi);*/
+
+            c0=c0 + zPhi.dotProduct(normal, 3)*detJ;
+            cp=cp + pPhi.dotProduct(normal, 3)*detJ;
+            cm=cm + mPhi.dotProduct(normal, 3)*detJ;
+
+            App=App+pPhi.dotProduct(pPhi, 3)*detJ;
+            Amm=Amm+mPhi.dotProduct(mPhi, 3)*detJ;
+            A0p=A0p+zPhi.dotProduct(pPhi, 3)*detJ;
+            A0m=A0m+zPhi.dotProduct(mPhi, 3)*detJ;
+
+            Bp=Bp+Phi.dotProduct(pPhi, 3)*detJ;
+            Bm=Bm+Phi.dotProduct(mPhi, 3)*detJ;
+
+            //            printf("c0:%15.15f, cp:%f, cm:%f, App:%f, Amm:%f, A0p:%f, A0m:%f, Bp:%f, Bm:%f\n", c0, cp, cm, App, Amm, A0p, A0m, Bp, Bm);
 
             NetInflow1=+ (zPhi.dotProduct(normal, 3) + pPhi.dotProduct(normal, 3) + mPhi.dotProduct(normal, 3))*detJ;
-            NetInflow2=+d0+dp+dm;
-
-            //printf("Net inflow @ (%f, %f):%10.10f *\n", gp->giveCoordinates()->at(1), gp->giveCoordinates()->at(2), NetInflow);
-
-            *Ap=*Ap+pPhi.dotProduct(pPhi, 3)*detJ;
-            *Am=*Am+mPhi.dotProduct(mPhi, 3)*detJ;
+            NetInflow2=+c0+cp+cm;
 
         }
     }
 
-    printf("c0:%Lf, cp:%Lf, cm:%Lf, Ap:%Lf, Am:%Lf\n", *c0, *cp, *cm, *Ap, *Am);
-    printf("Net inflow1=%Lf *\n", NetInflow1);
-    printf("Net inflow2=%Lf *\n", NetInflow2);
-    printf("c0+cp+cm=%Lf\n", *c0+*cp+*cm);
+    *am=-(A0m*cp*cp - Bm*cp*cp - A0p*cm*cp + App*c0*cm + Bp*cm*cp)/(App*cm*cm + Amm*cp*cp);
+    *ap=-(A0p*cm*cm - Bp*cm*cm - A0m*cm*cp + Amm*c0*cp + Bm*cm*cp)/(App*cm*cm + Amm*cp*cp);
+
+    /*    printf("c0:%15.15f, cp:%f, cm:%f, App:%f, Amm:%f, A0p:%f, A0m:%f, Bp:%f, Bm:%f\n", c0, cp, cm, App, Amm, A0p, A0m, Bp, Bm);
+    printf("Net inflow1=%f *\n", NetInflow1);
+    printf("Net inflow2=%f *\n", NetInflow2);
+    printf("c0+cp+cm=%f\n", c0+cp+cm);
     logDataMsg("pList=[", pList, "]");
     logDataMsg("mList=[", mList, "]");
-    logDataMsg("zList=[", zList, "]");
-    /*for (int i=1; i<=surfaceNodes.giveSize(); i++) {
-        printf("%u ", surfaceNodes.at(i));
-    }
-    printf("\n");*/
+    logDataMsg("zList=[", zList, "]"); */
 
+}
+
+void
+SolutionbasedShapeFunction :: splitBoundaryNodeIDs(modeStruct &mode, Element &e, IntArray &bnodes, IntArray &pList, IntArray &mList, IntArray &zList, FloatMatrix &nodeValues)
+{
+
+    pList.resize(0);
+    mList.resize(0);
+    zList.resize(0);
+
+    for (int j=1; j<=bnodes.giveSize(); j++) {
+        DofManager *dman=e.giveDofManager(bnodes.at(j));
+
+        bool isZero = false;
+        bool isPlus = false;
+        bool isMinus = false;
+
+        whichBoundary(*dman->giveCoordinates(), isPlus, isMinus, isZero);
+
+        if (isZero) {
+            zList.insertSorted(j);
+        } else if (isPlus) {
+            pList.insertSorted(j);
+        } else if (isMinus) {
+            mList.insertSorted(j);
+        }
+
+        // Find global DofManager and fetch nodal values
+        for (size_t k=0; k<mode.SurfaceData.size(); k++) {
+            if (mode.SurfaceData.at(k)->DofMan == dman) {
+                int IndexOfDofIDItem;
+                for (int l=1; l<=dofs.giveSize(); l++) {
+                    if (dofs.at(l)== mode.SurfaceData.at(k)->DofID) {
+                        IndexOfDofIDItem = l;
+                        break;
+                    }
+                }
+                nodeValues.at(IndexOfDofIDItem, j) = mode.SurfaceData.at(k)->value;
+            }
+        }
+
+    }
 }
 
 double
@@ -378,11 +388,64 @@ SolutionbasedShapeFunction :: computeDofTransformation(ActiveDof *dof, FloatArra
 {
     if (!isLoaded) loadProblem();
 
+    FloatArray values, masterContribs2, d, values2;
+
     masterContribs.resize(this->giveDomain()->giveNumberOfSpatialDimensions());
+    masterContribs2.resize(this->giveDomain()->giveNumberOfSpatialDimensions());
+
+    IntArray dofIDs;
+    dofIDs.setValues(1, (int) dof->giveDofID());
+
+    bool isPlus, isMinus, isZero, found;
+    whichBoundary(*dof->giveDofManager()->giveCoordinates(), isPlus, isMinus, isZero);
+
+    //    printf("isPlus:%u, isMinus:%u, isZero:%u, ", isPlus, isMinus, isZero);
+    //logDataMsg("Coord: ", *dof->giveDofManager()->giveCoordinates());
 
     for (int i=1; i<=this->giveDomain()->giveNumberOfSpatialDimensions(); i++) {
-        masterContribs.at(i) = giveValueAtPoint(*dof->giveDofManager()->giveCoordinates(), dof->giveDofID(), *modes.at(i-1)->myEngngModel);
+
+        double factor = 1.0;
+        found=false;
+
+        modeStruct *ms=modes.at(i-1);
+        for (size_t j=0; j<ms->SurfaceData.size(); j++) {
+            SurfaceDataStruct *sd=ms->SurfaceData.at(j);
+            if (sd->DofMan->giveNumber() == dof->giveDofManager()->giveNumber()) {
+                if (sd->DofID == dof->giveDofID()) {
+                    values.resize(1);
+                    values.at(1)=sd->value;
+                    found=true;
+                    break;
+                }
+            }
+        }
+
+        if (!found) {
+            printf("%u\n", dof->giveDofManager()->giveNumber());
+            OOFEM_ERROR ("Node not found");
+        }
+
+        giveValueAtPoint(values2, *dof->giveDofManager()->giveCoordinates(), dofIDs, *modes.at(i-1)->myEngngModel);
+
+        //printf ("Mode %u, DofManager: %u, DofIDItem %u, value %10.10f\n", i, dof->giveDofManager()->giveNumber(), dof->giveDofID(), values.at(1));
+
+        factor = isPlus  ? modes.at(i-1)->ap : factor;
+        factor = isMinus ? modes.at(i-1)->am : factor;
+        factor = isZero  ? 1.0 : factor;
+
+        // factor = 1.0;
+
+        /*double thisNorm = fabs(values.at(1)-values2.at(1));
+
+        if (thisNorm > bigNorm) {
+            bigNorm = bigNorm > thisNorm ? bigNorm : thisNorm;
+            worstIndex=dof->giveDofManager()->giveNumber();
+        }*/
+
+        masterContribs.at(i) = factor * values2.at(1);
+
     }
+
 }
 
 Dof *
@@ -394,6 +457,9 @@ SolutionbasedShapeFunction :: giveMasterDof(ActiveDof *dof, int mdof)
 void
 SolutionbasedShapeFunction :: loadProblem()
 {
+
+    //this->giveDomain()->giveEngngModel()->forceEquationNumbering();
+    // Compute number of dofs of different types
 
     for (int i=0; i<this->domain->giveNumberOfSpatialDimensions(); i++) {
         //    for (int i=2; i>=0; i--) {
@@ -409,6 +475,29 @@ SolutionbasedShapeFunction :: loadProblem()
         thisTimestep = myEngngModel->giveNextStep();
         myEngngModel->init();
         this->setLoads(myEngngModel, i+1);
+
+        // Check
+        for (int j=1; j<=myEngngModel->giveDomain(1)->giveNumberOfElements(); j++) {
+            Element *e = myEngngModel->giveDomain(1)->giveElement(j);
+            FloatArray centerCoord;
+            int vlockCount=0;
+            centerCoord.resize(3);
+            centerCoord.zero();
+
+            for (int k=1; k<=e->giveNumberOfDofManagers(); k++) {
+                DofManager *dman = e->giveDofManager(k);
+                centerCoord.add(*dman->giveCoordinates());
+                for (int l=1; l<=3; l++) {
+                    if (dman->giveDof(l)->giveBcId()!=0) {
+                        vlockCount++;
+                    }
+                }
+            }
+            if (vlockCount==30) {
+                printf("Element over-constrained (%u)! Center coordinate: %f, %f, %f\n", e->giveNumber(), centerCoord.at(1)/10, centerCoord.at(2)/10, centerCoord.at(3)/10 );
+            }
+        }
+
         myEngngModel->solveYourselfAt(thisTimestep);
         isLoaded=true;
 
@@ -418,74 +507,117 @@ SolutionbasedShapeFunction :: loadProblem()
         if (i==0) originalFilename = originalFilename + "_X";
         if (i==1) originalFilename = originalFilename + "_Y";
         if (i==2) originalFilename = originalFilename + "_Z";
-        myEngngModel->letOutputBaseFileNameBe(originalFilename);
-
+        myEngngModel->letOutputBaseFileNameBe(originalFilename + "_1_Base");
         myEngngModel->doStepOutput(thisTimestep);
 
         modeStruct *mode=new(modeStruct);
         mode->myEngngModel=myEngngModel;
 
+        // Check elements
+
         // Set unknowns to the mean value of opposite sides of the domain.
         // Loop thru all nodes and compute phi for all degrees of freedom on the boundary. Save phi in a list for later use.
+
         initializeSurfaceData(mode);
+        // Update with factor
+        double am=1.0, ap=1.0, eps=1e-14;
+        computeCorrectionFactors(*mode, &dofs, &am, &ap );
 
-        mode->myEngngModel->doStepOutput(mode->myEngngModel->giveCurrentStep());
+        OOFEM_LOG_INFO("Correction factors: am=%f, ap=%f\n", am, ap);
 
-        //Project mode onto descretized surface
-        for (size_t j=0; j<mode->SurfaceData.size(); j++) {
+        mode->ap=ap;
+        mode->am=am;
 
-            DofManager *dman=mode->SurfaceData.at(j)->DofMan;
-            Dof *d=dman->giveDofWithID(mode->SurfaceData.at(j)->DofID);
+        updateModelWithFactors(mode);
 
-            //Add BC if dof is a master and has no existing boundary conditions
-            MasterDof *dMaster = dynamic_cast<MasterDof *>( d );
+        myEngngModel->letOutputBaseFileNameBe(originalFilename + "_2_Updated");
+        //myEngngModel->doStepOutput(thisTimestep);
+        //myEngngModel->forceEquationNumbering();
 
-            //printf("%u @ (%f, %f, %f) DofIDItem %u, ", dman->giveNumber(), dman->giveCoordinates()->at(1), dman->giveCoordinates()->at(2), dman->giveCoordinates()->at(3), m->SurfaceData.at(j)->DofID);
+        //myEngngModel->letOutputBaseFileNameBe(originalFilename + "_3_Solved");
+        //myEngngModel->solveYourselfAt(thisTimestep);
+        //myEngngModel->doStepOutput(thisTimestep);
 
-            mode->SurfaceData.at(j)->isFree=dMaster && dMaster->giveBcId()==0;
+        modes.push_back(mode);
 
-            if (mode->SurfaceData.at(j)->isFree) {
-                this->setBoundaryConditionOnDof(dman->giveDofWithID(mode->SurfaceData.at(j)->DofID), mode->SurfaceData.at(j)->value);
-            }
 
-            //printf("\n");
+        //        myEngngModel->solveYourselfAt(thisTimestep);
+        //        myEngngModel->doStepOutput(thisTimestep);
+        /*
+        computeCorrectionFactors(*mode, &dofs, &am, &ap );
+        updateModelWithFactors(mode);
+        printf("am=%f, ap=%f\n", am, ap);
 
+        for (int j=0; j<50; j++) {
+            mode->ap=ap;
+            mode->am=am;
+            updateModelWithFactors(mode);
+            double I=checkIncompressibility(*mode->myEngngModel);
+
+            mode->ap=ap+eps;
+            mode->am=am;
+            updateModelWithFactors(mode);
+            double Ip=checkIncompressibility(*mode->myEngngModel);
+
+            mode->ap=ap;
+            mode->am=am+eps;
+            updateModelWithFactors(mode);
+            double Im=checkIncompressibility(*mode->myEngngModel);
+
+            double dIdap=(Ip-I)/eps;
+            double dIdam=(Im-I)/eps;
+
+            double dap=-I*1/(dIdap)*1e-1;
+            double dam=-I*1/(dIdam)*1e-1;
+
+            ap=ap+dap;
+            am=am+dam;
+            printf("%u: am=%15.15f, ap=%15.15f\n", j, am, ap);
         }
+
+        mode->ap=ap;
+        mode->am=am;
+        updateModelWithFactors(mode);
+*/
+        //        myEngngModel->solveYourselfAt(thisTimestep);
+
+        /*        myEngngModel->doStepOutput(thisTimestep);
+        computeCorrectionFactors(*mode, &dofs, &am, &ap );
+        printf("am=%15.15f, ap=%15.15f\n", am, ap);*/
+
+        //        myEngngModel->solveYourselfAt(myEngngModel->giveCurrentStep());
+
+        //        myEngngModel->doStepOutput(thisTimestep);
+        /*
 
         mode->myEngngModel->doStepOutput(mode->myEngngModel->giveCurrentStep());
 
         //Compute correctionfactors
-        long double Am, Ap, c0, cm, cp;
         double ap, am;
         checkIncompressibility(*mode->myEngngModel);
 
-        computeCorrectionFactors(*mode->myEngngModel, &dofs, &Am, &Ap, &c0, &cm, &cp );
-
-        ap=-(- Ap*cm*cm + Am*cp*cm + Am*c0*cp)/(Ap*cm*cm + Am*cp*cp);
-        am=-(- Am*cp*cp + Ap*cm*cp + Ap*c0*cm)/(Ap*cm*cm + Am*cp*cp);
+        computeCorrectionFactors(*mode, &dofs, &am, &ap );
 
         mode->ap=ap;
         mode->am=am;
 
-        printf("am=%f, ap=%f, error in incompressibility=%Lf\n", mode->am, mode->ap, c0+cm+cp);
+        printf("am=%f, ap=%f, error in incompressibility=%f\n", am, ap);
 
-        updateModelWithFactors(mode);
+        // Update mesh
 
-        /*        // Perturbation in ap
-        mode->ap=ap+1e-6;
-        mode->am=am;
-        updateModelWithFactors(mode);
+//        for (size_t j=0; j<mode->SurfaceData.size(); j++) {
+//            SurfaceDataStruct *sd = mode->SurfaceData.at(j);
+//            DofManager *dman = sd->DofMan;
+//            Dof *d = sd->DofMan->giveDofWithID(sd->DofID);
+
+//            if (sd->isFree) {
+//                setBoundaryConditionOnDof(d, sd->value);
+//            }
+//        }
+
         checkIncompressibility(*mode->myEngngModel);
 
-        // Perturbation in am
-        mode->ap=ap;
-        mode->am=am-1e-6;
-        updateModelWithFactors(mode);
-        checkIncompressibility(*mode->myEngngModel);*/
-
-        mode->myEngngModel->doStepOutput(mode->myEngngModel->giveCurrentStep());
-
-        modes.push_back(mode);
+        mode->myEngngModel->doStepOutput(mode->myEngngModel->giveCurrentStep()); */
 
         OOFEM_LOG_INFO("************************** Microproblem at %p instanciated \n", myEngngModel);
 
@@ -495,6 +627,9 @@ SolutionbasedShapeFunction :: loadProblem()
 void
 SolutionbasedShapeFunction :: updateModelWithFactors(modeStruct *m)
 {
+
+    // OOFEM_ERROR("Do not update the model!");
+
     //Update values with correction factors
     for (size_t j=0; j<m->SurfaceData.size(); j++) {
         SurfaceDataStruct *sd = m->SurfaceData.at(j);
@@ -506,14 +641,25 @@ SolutionbasedShapeFunction :: updateModelWithFactors(modeStruct *m)
         factor = m->SurfaceData.at(j)->isMinus ? m->am : factor;
         factor = m->SurfaceData.at(j)->isZeroBoundary ? 1.0 : factor;
 
-        //factor=1.0;
-
         //printf("%u @ (%f, %f, %f): isPlus:%u isMinus:%u isZero:%u Factor:%f\n", dman->giveNumber(), dman->giveCoordinates()->at(1),dman->giveCoordinates()->at(2),dman->giveCoordinates()->at(3), m->SurfaceData.at(j)->isPlus,  m->SurfaceData.at(j)->isMinus, m->SurfaceData.at(j)->isZeroBoundary, factor);
 
-        if (dynamic_cast<MasterDof *>( d ) && m->SurfaceData.at(j)->isFree) {
-            this->setBoundaryConditionOnDof(dman->giveDofWithID(m->SurfaceData.at(j)->DofID), m->SurfaceData.at(j)->value*factor);
+        if (dynamic_cast<MasterDof *>( d ) && m->SurfaceData.at(j)->isFree ) {
+
+            //printf("%10.10f-%10.10f=%f10.10\n", u, m->SurfaceData.at(j)->value*factor, u-m->SurfaceData.at(j)->value*factor);
+            double u=m->SurfaceData.at(j)->value;
+            this->setBoundaryConditionOnDof(dman->giveDofWithID(m->SurfaceData.at(j)->DofID), u*factor);
+
+            //printf("(%f, %f, %f) u=%10.10f, factor=%10.10f, u*factor=%10.10f\n", dman->giveCoordinates()->at(1), dman->giveCoordinates()->at(2), dman->giveCoordinates()->at(3), u, factor, u*factor);
+            FloatArray values;
+            giveValueAtPoint(values, *dman->giveCoordinates(), dofs, *m->myEngngModel);
+            int index = dman->findDofWithDofId(m->SurfaceData.at(j)->DofID);
+            double v=values.at(index);
+            if (fabs(v-u*factor)>1e-5) {
+                printf("test");
+            }
         }
     }
+
 }
 
 void
@@ -544,16 +690,18 @@ SolutionbasedShapeFunction :: setLoads(EngngModel *myEngngModel, int d)
     }
 }
 
-double
-SolutionbasedShapeFunction :: computeBaseFunctionValueAt(FloatArray &coords, DofIDItem dofID, EngngModel &myEngngModel)
+void
+SolutionbasedShapeFunction :: computeBaseFunctionValueAt(FloatArray &answer, FloatArray &coords, IntArray &dofIDs, EngngModel &myEngngModel)
 {
 
+    answer.resize(dofIDs.giveSize());
+    answer.zero();
+
     if (useConstantBase) {
-        return 1.0;
+        for (int i=1; i<=answer.giveSize(); i++) {answer.at(i)=1;};
     } else {
         std :: vector <FloatArray *> checkcoords;
         std :: vector <int> permuteIndex;
-        double outvalue=0.0;
         int n=0;
 
         if (!isLoaded) loadProblem();
@@ -605,58 +753,58 @@ SolutionbasedShapeFunction :: computeBaseFunctionValueAt(FloatArray &coords, Dof
         checkcoords.clear();
         checkcoords.push_back(tempCoord);
 #endif
-
+        FloatArray values;
         for (size_t i=0; i<checkcoords.size(); i++) {
-            double value = giveValueAtPoint(*checkcoords.at(i), dofID, myEngngModel);
+            giveValueAtPoint(values, *checkcoords.at(i), dofIDs, myEngngModel);
+            //printf("Values at (%f, %f, %f) are [%f, %f, %f]\n", checkcoords.at(i)->at(1), checkcoords.at(i)->at(2), checkcoords.at(i)->at(3), values.at(1), values.at(2), values.at(3));
 #if USEWPBC == 1
-            outvalue = value;
+            for (int j=1; j<=values.giveSize(); j++) {
+                answer.at(j) = values.at(j);
+            }
 #else
-            outvalue = outvalue + value / ( (double) pow(2.0, n));
+            for (int j=1; j<=values.giveSize(); j++) {
+                answer.at(j) = answer.at(j) + values.at(j) / ( (double) pow(2.0, n));
+            }
 #endif
+            delete(checkcoords.at(i));
         }
-        return outvalue;
+        //logDataMsg("Answer: ", answer);
     }
 }
 
-double
-SolutionbasedShapeFunction :: giveValueAtPoint(const FloatArray &coords, DofIDItem dofID, EngngModel &myEngngModel)
+void
+SolutionbasedShapeFunction :: giveValueAtPoint(FloatArray &answer, const FloatArray &coords, IntArray &dofIDs, EngngModel &myEngngModel)
 {
 
-    FloatArray checkCoords;
-    checkCoords.resize(coords.giveSize());
-
-    for (int j=1; j<=checkCoords.giveSize(); j++) {
-        checkCoords.at(j)=coords.at(j);
-        if (fabs(checkCoords.at(j)-minCoord.at(j))<=TOL) {
-            //            checkCoords.at(j)=minCoord.at(j);//+TOL;
-        }
-        if (fabs(checkCoords.at(j)-maxCoord.at(j))<=TOL) {
-            //            checkCoords.at(j)=maxCoord.at(j);//-TOL;
-        }
-    }
-
-    // printf("Find value at (%f, %f, %f) for DofID %u\n", checkCoords.at(1), checkCoords.at(2), checkCoords.at(3), dofID);
+    answer.resize(dofIDs.giveSize());
 
     FloatArray closest, lcoords, values;
 
-    Element *elementAtCoords = myEngngModel.giveDomain(1)->giveSpatialLocalizer()->giveElementContainingPoint (checkCoords);
+    Element *elementAtCoords = myEngngModel.giveDomain(1)->giveSpatialLocalizer()->giveElementContainingPoint (coords);
 
     if (elementAtCoords==NULL) {
-        elementAtCoords = myEngngModel.giveDomain(1)->giveSpatialLocalizer()->giveElementClosestToPoint(lcoords, closest, checkCoords, 1);
+        elementAtCoords = myEngngModel.giveDomain(1)->giveSpatialLocalizer()->giveElementClosestToPoint(lcoords, closest, coords, 1);
         if (elementAtCoords==NULL) {
             printf("Cannot find element closest to point\n");
-            checkCoords.pY();
+            coords.pY();
         }
     }
 
     EIPrimaryUnknownMapperInterface *em = dynamic_cast<EIPrimaryUnknownMapperInterface*> ( elementAtCoords->giveInterface ( EIPrimaryUnknownMapperInterfaceType ) );
 
-    IntArray dofids;
+    IntArray eldofids;
 
-    em->EIPrimaryUnknownMI_givePrimaryUnknownVectorDofID(dofids);
-    em->EIPrimaryUnknownMI_computePrimaryUnknownVectorAt(VM_Total, thisTimestep, checkCoords, values);
+    em->EIPrimaryUnknownMI_givePrimaryUnknownVectorDofID(eldofids);
+    em->EIPrimaryUnknownMI_computePrimaryUnknownVectorAt(VM_Total, thisTimestep, coords, values);
 
-    return values.at(dofids.findFirstIndexOf(dofID));
+    for (int i=1; i<=dofIDs.giveSize(); i++) {
+        for (int j=1; j<=eldofids.giveSize(); j++) {
+            if (dofIDs.at(i) == eldofids.at(j)) {
+                answer.at(i) = values.at(j);
+                break;
+            }
+        }
+    }
 }
 
 void
@@ -694,18 +842,9 @@ SolutionbasedShapeFunction :: initializeSurfaceData(modeStruct *mode)
     IntArray pNodes, mNodes, zNodes;
 
     Set *mySet=this->domain->giveSet( this->giveSetNumber() );
-    /*    IntArray NodeList = mySet->giveNodeList();
-
-    printf("Nodes=[");
-    for (int i=1; i<=NodeList.giveSize(); i++) {
-        printf("%u, ", NodeList.at(i));
-    }
-    printf("\n");
-*/
     IntArray BoundaryList = mySet->giveBoundaryList();
 
     // First add all nodes to pNodes or nNodes respectively depending on coordinate and normal.
-
     for (int i=0; i<BoundaryList.giveSize()/2; i++) {
 
         int ElementID=BoundaryList(2*i);
@@ -799,26 +938,11 @@ SolutionbasedShapeFunction :: initializeSurfaceData(modeStruct *mode)
     }
 
     // Compute base function values on nodes for dofids
-    for (int j=1; j<=dofs.giveSize(); j++) {
-        for (int i=1; i<=pNodes.giveSize(); i++) {
-            SurfaceDataStruct *surfaceData = new (SurfaceDataStruct);
-            copyDofManagerToSurfaceData(surfaceData, pNodes.at(i), dofs.at(j), mode->myEngngModel, true, false, false);
-            mode->SurfaceData.push_back(surfaceData);
-        }
+    copyDofManagersToSurfaceData(mode, pNodes, true, false, false);
+    copyDofManagersToSurfaceData(mode, mNodes, false, true, false);
+    copyDofManagersToSurfaceData(mode, zNodes, false, false, true);
 
-        for (int i=1; i<=mNodes.giveSize(); i++) {
-            SurfaceDataStruct *surfaceData = new (SurfaceDataStruct);
-            copyDofManagerToSurfaceData(surfaceData, mNodes.at(i), dofs.at(j), mode->myEngngModel, false, true, false);
-            mode->SurfaceData.push_back(surfaceData);
-        }
-
-        for (int i=1; i<=zNodes.giveSize(); i++) {
-            SurfaceDataStruct *surfaceData = new (SurfaceDataStruct);
-            copyDofManagerToSurfaceData(surfaceData, zNodes.at(i), dofs.at(j), mode->myEngngModel, false, false, true);
-            mode->SurfaceData.push_back(surfaceData);
-        }
-    }
-
+    printf ("Length of surfaceData:%u\n", (int) mode->SurfaceData.size());
 
 #if 0
     printf("p2=[");
@@ -859,19 +983,49 @@ SolutionbasedShapeFunction :: initializeSurfaceData(modeStruct *mode)
 }
 
 void
-SolutionbasedShapeFunction :: copyDofManagerToSurfaceData(SurfaceDataStruct *surfaceData, int DofManID, int DofType, EngngModel *m, bool isPlus, bool isMinus, bool isZeroBoundary)
+SolutionbasedShapeFunction :: whichBoundary(FloatArray &coord, bool &isPlus, bool &isMinus, bool &isZero)
 {
 
-    surfaceData->DofID = (DofIDItem) DofType;
-    surfaceData->DofMan = m->giveDomain(1)->giveDofManager(DofManID);
-    surfaceData->isPlus = isPlus;
-    surfaceData->isMinus = isMinus;
-    surfaceData->isZeroBoundary = isZeroBoundary;
-    //    if ((surfaceData->DofMan->giveNumber()==6228) || (surfaceData->DofMan->giveNumber()==5532)) {
-    //        printf("DofManager number:%u\n", surfaceData->DofMan->giveNumber());
-    //        surfaceData->DofMan->giveCoordinates()->printYourself();
-    //    }
-    surfaceData->value = computeBaseFunctionValueAt(*surfaceData->DofMan->giveCoordinates(), (DofIDItem) DofType, *m);
+    isPlus = false;
+    isMinus = false;
+    isZero = false;
+
+    for (int k=1; k<=coord.giveSize(); k++) {
+        isPlus = isPlus || (fabs(coord.at(k)-maxCoord.at(k))<TOL);
+        isMinus = isMinus || (fabs(coord.at(k)-minCoord.at(k))<TOL);
+    }
+
+    isZero = isPlus && isMinus;
 
 }
+
+void
+SolutionbasedShapeFunction :: copyDofManagersToSurfaceData(modeStruct *mode, IntArray nodeList, bool isPlus, bool isMinus, bool isZeroBoundary)
+{
+    for (int i=1; i<=nodeList.giveSize(); i++) {
+        FloatArray values;
+        DofManager *dman = mode->myEngngModel->giveDomain(1)->giveDofManager(nodeList.at(i));
+
+        computeBaseFunctionValueAt(values, *dman->giveCoordinates(), this->dofs, *mode->myEngngModel );
+        //dman->giveUnknownVector(values, dofs, VM_Total, mode->myEngngModel->giveCurrentStep());
+
+        for (int j=1; j<=this->dofs.giveSize(); j++) {
+
+            SurfaceDataStruct *surfaceData = new(SurfaceDataStruct);
+            Dof *d = dman->giveDofWithID(dofs.at(j));
+
+            surfaceData->DofID = (DofIDItem) this->dofs.at(j);
+            surfaceData->DofMan = dman;
+            surfaceData->isPlus = isPlus;
+            surfaceData->isMinus = isMinus;
+            surfaceData->isZeroBoundary = isZeroBoundary;
+            surfaceData->isFree = d->giveBcId() == 0;
+            surfaceData->value = values.at(j);
+
+            mode->SurfaceData.push_back(surfaceData);
+
+        }
+    }
+}
+
 }
