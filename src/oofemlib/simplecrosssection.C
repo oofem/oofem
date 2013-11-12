@@ -564,13 +564,13 @@ SimpleCrossSection :: checkConsistency()
 
 
 Interface 
-*SimpleCrossSection :: giveInterface(InterfaceType t, IntegrationPoint *ip)
+*SimpleCrossSection :: giveMaterialInterface(InterfaceType t, IntegrationPoint *ip)
 {
     if ( this->giveMaterialNumber() ) {
         return this->giveDomain()->giveMaterial( this->giveMaterialNumber() )->giveInterface(t);
     } else {
         return ip->giveMaterial()->giveInterface(t);
-    }    
+    }
 }
 
 

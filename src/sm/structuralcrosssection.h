@@ -280,7 +280,7 @@ public:
 
 
     virtual int checkConsistency() = 0;
-    virtual Interface *giveInterface(InterfaceType t, IntegrationPoint *ip) { return NULL; };
+    virtual Interface *giveMaterialInterface(InterfaceType t, IntegrationPoint *ip) { return NULL; }
     virtual bool isCharacteristicMtrxSymmetric(MatResponseMode rMode) = 0;
     //virtual bool isCharacteristicMtrxSymmetric(MatResponseMode rMode, int mat);
 

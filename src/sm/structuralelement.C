@@ -1123,7 +1123,7 @@ StructuralElement :: updateBeforeNonlocalAverage(TimeStep *atTime)
             // not possible - produces wrong result
             StructuralNonlocalMaterialExtensionInterface *materialExt;
             materialExt =  static_cast< StructuralNonlocalMaterialExtensionInterface * >( this->giveStructuralCrossSection()->
-                giveInterface(NonlocalMaterialExtensionInterfaceType, ip) );
+                giveMaterialInterface(NonlocalMaterialExtensionInterfaceType, ip) );
 
             if ( !materialExt ) {
                 return;             //_error ("updateBeforeNonlocalAverage: material with no StructuralNonlocalMaterial support");
@@ -1281,7 +1281,7 @@ StructuralElement :: giveNonlocalLocationArray(IntArray &locationArray, const Un
     for ( int i = 0; i < iRule->giveNumberOfIntegrationPoints(); i++ ) {
         IntegrationPoint *ip = iRule->getIntegrationPoint(i);
         interface =  static_cast< NonlocalMaterialStiffnessInterface * >( this->giveStructuralCrossSection()->
-            giveInterface(NonlocalMaterialStiffnessInterfaceType, ip) );
+            giveMaterialInterface(NonlocalMaterialStiffnessInterfaceType, ip) );
 
             
         if ( interface == NULL ) {        
@@ -1318,9 +1318,9 @@ StructuralElement :: addNonlocalStiffnessContributions(SparseMtrx &dest, const U
     // loop over element IP
     for ( int i = 0; i < iRule->giveNumberOfIntegrationPoints(); i++ ) {
         IntegrationPoint *ip = iRule->getIntegrationPoint(i);
-        interface =  static_cast< NonlocalMaterialStiffnessInterface * >( this->giveStructuralCrossSection()->
-            giveInterface(NonlocalMaterialStiffnessInterfaceType, ip) );
-        if ( interface == NULL ) {        
+        interface = static_cast< NonlocalMaterialStiffnessInterface * >( this->giveStructuralCrossSection()->
+            giveMaterialInterface(NonlocalMaterialStiffnessInterfaceType, ip) );
+        if ( interface == NULL ) {
             return;
         }
 
@@ -1342,10 +1342,10 @@ StructuralElement :: adaptiveUpdate(TimeStep *tStep)
         iRule = integrationRulesArray [ i ];
         for ( int j = 0; j < iRule->giveNumberOfIntegrationPoints(); j++ ) {
             IntegrationPoint *ip = iRule->getIntegrationPoint(i);
-            interface =  static_cast< MaterialModelMapperInterface * >( this->giveStructuralCrossSection()->
-                giveInterface(MaterialModelMapperInterfaceType, ip) );
+            interface = static_cast< MaterialModelMapperInterface * >( this->giveStructuralCrossSection()->
+                giveMaterialInterface(MaterialModelMapperInterfaceType, ip) );
 
-            if ( interface == NULL ) {        
+            if ( interface == NULL ) {
                 return 0;
             }
             this->computeStrainVector(strain, ip, tStep);

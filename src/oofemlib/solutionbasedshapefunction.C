@@ -269,7 +269,7 @@ SolutionbasedShapeFunction :: splitBoundaryNodeIDs(modeStruct &mode, Element &e,
         // Find global DofManager and fetch nodal values
         for (size_t k=0; k<mode.SurfaceData.size(); k++) {
             if (mode.SurfaceData.at(k)->DofMan == dman) {
-                int IndexOfDofIDItem;
+                int IndexOfDofIDItem = 0;
                 for (int l=1; l<=dofs.giveSize(); l++) {
                     if (dofs.at(l)== mode.SurfaceData.at(k)->DofID) {
                         IndexOfDofIDItem = l;
