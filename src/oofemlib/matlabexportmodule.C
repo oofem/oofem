@@ -126,8 +126,6 @@ MatlabExportModule :: computeArea()
 			smax.at(j)=max(smax.at(j), domain->giveDofManager(i+1)->giveCoordinate(j+1));
 			smin.at(j)=min(smin.at(j), domain->giveDofManager(i+1)->giveCoordinate(j+1));
 		}
-//		std :: copy(smax.begin(), smax.end(), std :: ostream_iterator<double>(std :: cout, " "));
-//		std :: cout << std :: endl;
 	}
 
 
@@ -349,7 +347,7 @@ MatlabExportModule :: doOutputSpecials(TimeStep *tStep,    FILE *FID)
 	fprintf(FID, "];\n");
 
 	// Output weak periodic boundary conditions
-	unsigned int wpbccount = 1;
+    unsigned int wpbccount = 1, sbsfcount = 1;
 
 	for ( int i = 1; i <= domain->giveNumberOfBoundaryConditions(); i++ ) {
 		WeakPeriodicBoundaryCondition *wpbc = dynamic_cast< WeakPeriodicBoundaryCondition * >( domain->giveBc(i) );
