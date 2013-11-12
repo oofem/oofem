@@ -712,12 +712,8 @@ StructuralElement :: computeStiffnessMatrix(FloatMatrix &answer, MatResponseMode
     FloatMatrix d, bi, bj, dbj, dij;
     GaussPoint *gp;
     IntegrationRule *iRule;
-    bool matStiffSymmFlag = false; 
-    if ( this->giveCrossSection()->MAT_GIVEN_BY_CS ) {
-        matStiffSymmFlag = this->giveCrossSection()->isCharacteristicMtrxSymmetric( rMode );
-    } else {
-        matStiffSymmFlag = this->giveCrossSection()->isCharacteristicMtrxSymmetric( rMode, this->giveMaterial()->giveNumber() );
-    }
+    bool matStiffSymmFlag = this->giveCrossSection()->isCharacteristicMtrxSymmetric( rMode );
+
     answer.resize(0, 0);
 
     if ( !this->isActivated(tStep) ) {
@@ -787,12 +783,7 @@ void StructuralElement :: computeStiffnessMatrix_withIRulesAsSubcells(FloatMatri
 {
     FloatMatrix temp, bj, d, dbj;
     int ndofs = this->computeNumberOfDofs();
-    bool matStiffSymmFlag = false; 
-    if ( this->giveCrossSection()->MAT_GIVEN_BY_CS ) {
-        matStiffSymmFlag = this->giveCrossSection()->isCharacteristicMtrxSymmetric( rMode );
-    } else {
-        matStiffSymmFlag = this->giveCrossSection()->isCharacteristicMtrxSymmetric( rMode, this->giveMaterial()->giveNumber() );
-    }
+    bool matStiffSymmFlag = this->giveCrossSection()->isCharacteristicMtrxSymmetric( rMode );
     IntArray irlocnum;
 
     answer.resize(ndofs, ndofs);

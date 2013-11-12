@@ -375,40 +375,39 @@ void SimpleCrossSection :: giveInputRecord(DynamicInputRecord &input)
     StructuralCrossSection :: giveInputRecord(input);
 
     if( this->propertyDictionary->includes(CS_Thickness) ) {
-    	input.setField(this->give(CS_Thickness), _IFT_SimpleCrossSection_thick);
+        input.setField(this->give(CS_Thickness), _IFT_SimpleCrossSection_thick);
     }
 
     if( this->propertyDictionary->includes(CS_Width) ) {
-    	input.setField(this->give(CS_Width), _IFT_SimpleCrossSection_width);
+        input.setField(this->give(CS_Width), _IFT_SimpleCrossSection_width);
     }
 
     if( this->propertyDictionary->includes(CS_Area) ) {
-    	input.setField(this->give(CS_Area), _IFT_SimpleCrossSection_area);
+        input.setField(this->give(CS_Area), _IFT_SimpleCrossSection_area);
     }
 
     if( this->propertyDictionary->includes(CS_TorsionMomentX) ) {
-    	input.setField(this->give(CS_TorsionMomentX), _IFT_SimpleCrossSection_ik);
+        input.setField(this->give(CS_TorsionMomentX), _IFT_SimpleCrossSection_ik);
     }
 
     if( this->propertyDictionary->includes(CS_InertiaMomentY) ) {
-    	input.setField(this->give(CS_InertiaMomentY), _IFT_SimpleCrossSection_iy);
+        input.setField(this->give(CS_InertiaMomentY), _IFT_SimpleCrossSection_iy);
     }
 
     if( this->propertyDictionary->includes(CS_InertiaMomentZ) ) {
-    	input.setField(this->give(CS_InertiaMomentZ), _IFT_SimpleCrossSection_iz);
+        input.setField(this->give(CS_InertiaMomentZ), _IFT_SimpleCrossSection_iz);
     }
 
     if( this->propertyDictionary->includes(CS_ShearAreaY) ) {
-    	input.setField(this->give(CS_ShearAreaY), _IFT_SimpleCrossSection_shearareay);
+        input.setField(this->give(CS_ShearAreaY), _IFT_SimpleCrossSection_shearareay);
     }
 
-    if( this->propertyDictionary->includes(CS_ShearAreaY) ) {
-		// TODO: Reading shearareaz and setting it to CS_ShearAreaY. Bug or feature ?! // Erik
-		input.setField(this->give(CS_ShearAreaY), _IFT_SimpleCrossSection_shearareaz);
+    if( this->propertyDictionary->includes(CS_ShearAreaZ) ) {
+        input.setField(this->give(CS_ShearAreaZ), _IFT_SimpleCrossSection_shearareaz);
     }
 
     if( this->propertyDictionary->includes(CS_BeamShearCoeff) ) {
-    	input.setField(this->give(CS_BeamShearCoeff), _IFT_SimpleCrossSection_shearcoeff);
+        input.setField(this->give(CS_BeamShearCoeff), _IFT_SimpleCrossSection_shearcoeff);
     }
 }
 
@@ -510,13 +509,17 @@ SimpleCrossSection :: computeStressIndependentStrainVector(FloatArray &answer,
 
 bool SimpleCrossSection :: isCharacteristicMtrxSymmetric(MatResponseMode rMode)
 {
-    return this->domain->giveMaterial(this->giveMaterialNumber())->isCharacteristicMtrxSymmetric(rMode);
+    if ( this->giveMaterialNumber() ) {
+        return this->domain->giveMaterial(this->giveMaterialNumber())->isCharacteristicMtrxSymmetric(rMode);
+    } else {
+        return false; // Bet false...
+    }
 }
 
 Material 
 *SimpleCrossSection :: giveMaterial(IntegrationPoint *ip) 
 { 
-    if ( this->MAT_GIVEN_BY_CS ) {
+    if ( this->giveMaterialNumber() ) {
         return this->giveDomain()->giveMaterial( this->giveMaterialNumber() ); 
     } else {
         return ip->giveElement()->giveMaterial();

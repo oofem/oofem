@@ -396,17 +396,7 @@ void StructuralElementEvaluator :: computeStiffnessMatrix(FloatMatrix &answer, M
     Element *elem = this->giveElement();
     StructuralCrossSection *cs = static_cast< StructuralCrossSection * >( elem->giveCrossSection() );
     int ndofs = elem->computeNumberOfDofs();
-    bool matStiffSymmFlag = false;
-    printf(" computeStiffnessMatrix start \n");
-    printf(" material number %i \n", elem->giveMaterial()->giveNumber());
-    if ( cs->MAT_GIVEN_BY_CS > 0 ) {
-        matStiffSymmFlag = cs->isCharacteristicMtrxSymmetric(rMode);
-    } else {
-        printf(" a \n");
-        matStiffSymmFlag = elem->giveCrossSection()->isCharacteristicMtrxSymmetric( rMode, elem->giveMaterial()->giveNumber() );
-        printf(" b \n");
-    }
-    printf(" computeStiffnessMatrix end \n");
+    bool matStiffSymmFlag = cs->isCharacteristicMtrxSymmetric(rMode);
     IntArray irlocnum;
 
     answer.resize(ndofs, ndofs);
