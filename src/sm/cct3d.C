@@ -124,7 +124,7 @@ CCTPlate3d :: computeLocalCoordinates(FloatArray &answer, const FloatArray &coor
     }
     FEIVertexListGeometryWrapper wr(3, lcptr);
     FEI2dTrLin _interp(1,2);
-    bool inplane = _interp.global2local(llc, inputCoords_ElCS, wr);
+    bool inplane = _interp.global2local(llc, inputCoords_ElCS, wr) > 0;
     // now check if the thid local coordinate is within the thickness of element
     bool outofplane = (fabs(inputCoords_ElCS.at(3)) <= this->giveCrossSection()->give(CS_Thickness)/2.); 
     return inplane && outofplane;
@@ -222,8 +222,7 @@ CCTPlate3d :: giveCharacteristicTensor(FloatMatrix &answer, CharTensor type, Gau
 // strain vector = (Kappa_x, Kappa_y, Kappa_xy, Gamma_zx, Gamma_zy)
 {
     FloatArray charVect;
-    Material *mat = this->giveMaterial();
-    StructuralMaterialStatus *ms = static_cast< StructuralMaterialStatus * >( mat->giveStatus(gp) );
+    StructuralMaterialStatus *ms = static_cast< StructuralMaterialStatus * >( gp->giveMaterialStatus() );
 
     answer.resize(3, 3);
     answer.zero();
@@ -346,7 +345,7 @@ CCTPlate3d :: computeBodyLoadVectorAt(FloatArray &answer, Load *forLoad, TimeSte
     if ( force.giveSize() ) {
         gp = irule.getIntegrationPoint(0);
 
-        dens = this->giveMaterial()->give('d', gp);
+        dens = this->giveStructuralCrossSection()->give('d', gp);
         dV   = this->computeVolumeAround(gp) * this->giveCrossSection()->give(CS_Thickness);
 
         answer.resize(18);

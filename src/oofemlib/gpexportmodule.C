@@ -113,12 +113,12 @@ GPExportModule :: doOutput(TimeStep *tStep, bool forcedOutput)
                 gp = iRule->getIntegrationPoint(j);
                 // export:
                 // 1) element number
-                // 2) material number
+                // 2) material number ///@todo deprecated returns -1
                 // 3) Integration rule number
                 // 4) Gauss point number
                 // 5) contributing volume around Gauss point
                 weight = elem->computeVolumeAround(gp);
-                fprintf(stream, "%d %d %d %d %.6e ", elem->giveNumber(), elem->giveMaterial()->giveNumber(), i + 1, j + 1, weight);
+                fprintf(stream, "%d %d %d %d %.6e ", elem->giveNumber(), -1, i + 1, j + 1, weight);
 
                 // export Gauss point coordinates
                 if ( ncoords ) { // no coordinates exported if ncoords==0

@@ -1895,21 +1895,6 @@ MPlasticMaterial2 :: giveIPValue(FloatArray &answer, GaussPoint *aGaussPoint, In
     }
 }
 
-
-InternalStateValueType
-MPlasticMaterial2 :: giveIPValueType(InternalStateType type)
-{
-    // strains components packed in engineering notation
-    if ( type == IST_PlasticStrainTensor ) {
-        return ISVT_TENSOR_S3E;
-    } else if ( type == IST_PrincipalPlasticStrainTensor ) {
-        return ISVT_VECTOR;
-    } else {
-        return StructuralMaterial :: giveIPValueType(type);
-    }
-}
-
-
 long
 MPlasticMaterial2 :: getPopulationSignature(IntArray &mask)
 {

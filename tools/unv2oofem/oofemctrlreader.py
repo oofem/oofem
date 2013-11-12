@@ -59,54 +59,11 @@ class oofem_elementProperties:
 
 class CTRLParser:
     """ a simple CTRL object structure"""
-
-#   Table of element properties. It contains mapping of nodes, edges and faces between unv and OOFEM element.
-    oofem_elemProp = []
-    oofem_elemProp.append(oofem_elementProperties("None", [0], [], []))#leave this line [0] as it is
-    oofem_elemProp.append(oofem_elementProperties("RepresentsBoundaryLoad", [],[],[]))#special element representing boundary load
-    oofem_elemProp.append(oofem_elementProperties("Truss1D", [0,1], [], []))
-    oofem_elemProp.append(oofem_elementProperties("Interface1d", oofem_elemProp[-1]))
-    oofem_elemProp.append(oofem_elementProperties("Truss2D", [0,1], [0,1],[]))
-    oofem_elemProp.append(oofem_elementProperties("Truss3D",oofem_elemProp[-1]))
-    oofem_elemProp.append(oofem_elementProperties("Beam2D",oofem_elemProp[-1]))
-    oofem_elemProp.append(oofem_elementProperties("LIBeam2D",oofem_elemProp[-1]))
-    oofem_elemProp.append(oofem_elementProperties("LIBeam2Dnl",oofem_elemProp[-1]))
-    oofem_elemProp.append(oofem_elementProperties("Beam3D",oofem_elemProp[-1]))
-    oofem_elemProp.append(oofem_elementProperties("LIBeam3D",oofem_elemProp[-1]))
-    oofem_elemProp.append(oofem_elementProperties("LIBeam3D2",oofem_elemProp[-1]))
-    oofem_elemProp.append(oofem_elementProperties("LIBeam3Dnl",oofem_elemProp[-1]))
-    oofem_elemProp.append(oofem_elementProperties("LIBeam3Dnl2",oofem_elemProp[-1]))
-    oofem_elemProp.append(oofem_elementProperties("TrPlaneStress2D", [0,2,1], [[0,2],[2,1],[1,0]],[])) #checked - current numbering of triangle nodes is anti-clockwise, the same orientation as in OOFEM.
-    oofem_elemProp.append(oofem_elementProperties("TrPlaneStress2dXFEM", [0,2,1], [[0,2],[2,1],[1,0]],[])) #checked - current numbering of triangle nodes is anti-clockwise, the same orientation as in OOFEM.
-    #oofem_elemProp.append(oofem_elementProperties("TrPlaneStress2D", [0,1,2], [[0,1],[1,2],[2,0]],[])) #old version of UNV export in SALOME, nodes on triangular elements are numbered clockwise
-    oofem_elemProp.append(oofem_elementProperties("TrplaneStrain",oofem_elemProp[-1]))
-    oofem_elemProp.append(oofem_elementProperties("Axisymm3D",oofem_elemProp[-1]))
-    oofem_elemProp.append(oofem_elementProperties("Tr1ht",oofem_elemProp[-1]))
-    oofem_elemProp.append(oofem_elementProperties("Traxisym1ht",oofem_elemProp[-1]))
-    oofem_elemProp.append(oofem_elementProperties("TrPlaneStrRot",oofem_elemProp[-1]))
-    oofem_elemProp.append(oofem_elementProperties("CCTplate",oofem_elemProp[-1]))
-    oofem_elemProp.append(oofem_elementProperties("CCTplate3D",oofem_elemProp[-1]))
-    oofem_elemProp.append(oofem_elementProperties("QTrPlStr", [2,0,4,1,5,3], [[2,1,0],[0,5,4],[4,3,2]],[]))#checked
-    oofem_elemProp.append(oofem_elementProperties("PlaneStress2D", [0,1,2,3], [[0,1],[1,2],[2,3],[3,0]],[]))#checked
-    oofem_elemProp.append(oofem_elementProperties("PlaneStress2DXfem", [0,1,2,3], [[0,1],[1,2],[2,3],[3,0]],[]))#checked
-    oofem_elemProp.append(oofem_elementProperties("Quad1PlaneStrain", oofem_elemProp[-1]))
-    oofem_elemProp.append(oofem_elementProperties("Quad1ht", oofem_elemProp[-1]))
-    oofem_elemProp.append(oofem_elementProperties("Quadaxisym1ht", oofem_elemProp[-1]))
-    oofem_elemProp.append(oofem_elementProperties("QPlaneStress2D", [2,4,6,0,3,5,7,1], [[2,3,4],[4,5,6],[6,7,0],[0,1,2]],[]))#checked
-    oofem_elemProp.append(oofem_elementProperties("LSpace", [4,7,6,5,0,3,2,1], [[4,7],[7,6],[6,5],[5,4],[4,0],[7,3],[6,2],[5,1],[0,3],[3,2],[2,0],[1,0]], [[4,7,6,5],[0,3,2,1],[4,0,3,7],[7,3,2,6],[6,2,1,5],[5,1,0,4]]))#checked
-    oofem_elemProp.append(oofem_elementProperties("Brick1ht", oofem_elemProp[-1]))
-    oofem_elemProp.append(oofem_elementProperties("LSpaceBB", oofem_elemProp[-1]))
-    oofem_elemProp.append(oofem_elementProperties("QSpace", [12,18,16,14,0,6,4,2,19,17,15,13,7,5,3,1,8,11,10,9], [[12,19,18],[18,17,16],[16,15,14],[14,13,12],[12,8,0],[18,11,6],[16,10,4],[14,9,2],[0,7,6],[6,5,4],[4,3,2],[2,1,0]], [[12,19,18,17,16,15,14,13],[0,7,6,5,4,3,2,1],[12,8,0,7,6,11,18,19],[18,11,6,5,4,10,16,17],[16,10,4,3,2,9,14,15],[14,9,2,1,0,8,12,13]])) #checked [brick nodes], [edges nodes], [faces nodes]
-    oofem_elemProp.append(oofem_elementProperties("QBrick1ht", oofem_elemProp[-1]))
-    oofem_elemProp.append(oofem_elementProperties("QBrick1hmt", oofem_elemProp[-1]))
-    oofem_elemProp.append(oofem_elementProperties("LTRSpace", [0,1,2,3], [[0,1],[1,2],[2,0],[0,3],[1,3],[2,3]], [[0,1,2],[0,1,3],[1,2,3],[0,2,3]]))#checked
-    oofem_elemProp.append(oofem_elementProperties("Tetrah1ht", oofem_elemProp[-1]))
-    oofem_elemProp.append(oofem_elementProperties("Tet1supg", [0,1,2,3], [[0,1],[1,2],[2,0],[0,3],[1,3],[2,3]], [[0,1,2],[0,1,3],[1,2,3],[0,2,3]]))
+    #oofem_elemProp = []
+    #oofem_elemProp.append(oofem_elementProperties("None", [0], [], []))#leave this line [0] as it is
+    # Node assembly
     
-    #for i in oofem_elemProp:
-        #print i.name, i.edgeMask
-    
-    def __init__(self, filename):
+    def __init__(self, filename, mapping):
         self.filename=filename
         self.file=None
         self.header=""
@@ -116,6 +73,9 @@ class CTRLParser:
         self.nbc=0
         self.nic=0
         self.nltf=0
+        self.nset=0
+        self.wplist=[[], [], []] # wp, element, edge
+        self.oofem_elemProp=mapping
         self.nxfemman=0
 
     def getRecordLine(self):
@@ -163,15 +123,26 @@ class CTRLParser:
                         break;
                     #print "Line: ", line,
                     if lineSplit[0].lower() == 'nodeprop':
-                        for igroup in groups:
-                            __gr=self.getNodeGroup(FEM,igroup)
-                            if __gr:
-                                __gr.oofem_properties=' '.join(lineSplit[1:])
-                                str = "\t\tGroup of nodes \"%s\" has properties: %s" % (igroup, __gr.oofem_properties)
-                                print str
-                            else:
-                                str = "WARNING: Group of nodes \"%s\" does not exist" % igroup
-                                print str
+                        if (lineSplit[1].lower()=='set'):
+                            for igroup in groups:
+                                __gr=self.getNodeGroup(FEM, igroup)
+                                if __gr:
+                                    __gr.oofem_sets.append(int(lineSplit[2]));
+                                    str = "\t\tGroup of nodes belongs to set %d" % int(lineSplit[2])
+                                    print str
+                                else:
+                                    str = "WARNING: Group of nodes \"%s\" does not exist" % igroup
+                                    print str
+                        else:
+                            for igroup in groups:
+                                __gr=self.getNodeGroup(FEM,igroup)
+                                if __gr:
+                                    __gr.oofem_properties=' '.join(lineSplit[1:])
+                                    str = "\t\tGroup of nodes \"%s\" has properties: %s" % (igroup, __gr.oofem_properties)
+                                    print str
+                                else:
+                                    str = "WARNING: Group of nodes \"%s\" does not exist" % igroup
+                                    print str
                     elif lineSplit[0].lower() == 'elemprop':
                         if (lineSplit[1].lower()=='bloadnum'):#check if the group represents a boundary load
                             for igroup in groups:
@@ -183,6 +154,18 @@ class CTRLParser:
                                     print str
                                 else:
                                     str = "WARNING: Group of elements \"%s\" for boundary load does no exist" % (igroup)
+                        elif (lineSplit[1].lower()=='set'):#check if the group represents a set
+                            for igroup in groups:
+                                __gr=self.getElementGroup(FEM,igroup)
+                                if __gr:
+                                    # Save id of set
+                                    __gr.oofem_sets.append(int(lineSplit[2]))
+                                    # Save orientation
+                                    str = "\t\tGroup of elements \"%s\" belongs to set: %s" % (igroup, lineSplit[2])
+                                    print str
+                                else:
+                                    str = "WARNING: Group of elements \"%s\" for set does no exist" % (igroup)
+                                    print str
                         else:#not boundary loads
                             for igroup in groups:
                                 __gr=self.getElementGroup(FEM,igroup)
@@ -201,6 +184,8 @@ class CTRLParser:
                             if __gr:
                                 if (__gr.oofem_boundaryLoadsNum):
                                     elemName = 'RepresentsBoundaryLoad'#assign this name to an element so we know it represents a boundary load
+                                elif (__gr.oofem_sets):
+                                    elemName = 'RepresentsBoundaryLoad'
                                 else:
                                     elemName = lineSplit[1].strip().rstrip('\n')
                                 #check that elemName exists in a list and assign
@@ -250,14 +235,19 @@ class CTRLParser:
         self.nic=int(dataline[7])
         self.nltf=int(dataline[9])
         
-	if len(dataline)>=10:
+	print dataline
+
+	if len(dataline)>=11:
 		if dataline[10].lower()=="nxfemman":
 			self.nxfemman=int(dataline[11])
 
         #read crossSect, material, bc, ic, and lft records into footer
         count = 0
+         
         while count < (self.ncrosssect+self.nmat+self.nbc+self.nic+self.nltf):
             line=self.file.readline()
+            dataline=line.split()
+            
             self.footer+= line
             if not line.startswith('#'):
                 count+= 1
@@ -265,6 +255,10 @@ class CTRLParser:
         #attach all following lines until empty line is hit. This is the end of OOFEM section
         while True:
             line=self.file.readline()
+            splitLine=line.split();
+            if(len(splitLine)>0):
+                if (splitLine[0].lower()=='set'):
+                    self.nset+=1
             if line.strip() == '':
                 break
             self.footer+= line
@@ -284,11 +278,13 @@ class CTRLParser:
         #init group properties on UNV data
         for igroup in FEM.nodesets:#defined in ctrl file
             igroup.oofem_properties=""
+            igroup.oofem_sets=[]
         for igroup in FEM.elemsets:#defined in ctrl file
             igroup.oofem_properties=""
             igroup.oofem_elemtype=0
             igroup.oofem_etypemap={}
             igroup.oofem_boundaryLoadsNum=[]#numbers of boundary loads
+            igroup.oofem_sets=[]
             igroup.oofem_groupNameForLoads=""#CTRL-group name
         # read and parse individual group records
         while True:

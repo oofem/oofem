@@ -351,14 +351,6 @@ CemhydMat :: giveIPValue(FloatArray &answer, GaussPoint *aGaussPoint, InternalSt
     }
 }
 
-
-InternalStateValueType
-CemhydMat :: giveIPValueType(InternalStateType type)
-{
-    return TransportMaterial :: giveIPValueType(type);
-}
-
-
 int
 CemhydMat :: initMaterial(Element *element)
 {

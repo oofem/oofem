@@ -284,7 +284,6 @@ LIBeam3dNL2 :: computeXMtrx(FloatMatrix &answer, TimeStep *tStep)
 void
 LIBeam3dNL2 :: giveInternalForcesVector(FloatArray &answer, TimeStep *tStep, int useUpdatedGpRecord)
 {
-    Material *mat = this->giveMaterial();
     IntegrationRule *iRule = integrationRulesArray [ giveDefaultIntegrationRule() ];
     GaussPoint *gp = iRule->getIntegrationPoint(0);
     FloatArray nm(6), stress, strain;
@@ -296,7 +295,7 @@ LIBeam3dNL2 :: giveInternalForcesVector(FloatArray &answer, TimeStep *tStep, int
     this->computeRotMtrxFromQuaternion(tempTc, this->tempQ);
 
     if ( useUpdatedGpRecord == 1 ) {
-        stress = static_cast< StructuralMaterialStatus * >( mat->giveStatus(gp) )->giveStressVector();
+        stress = static_cast< StructuralMaterialStatus * >( gp->giveMaterialStatus() )->giveStressVector();
     } else {
         this->computeStrainVector(strain, gp, tStep);
         this->computeStressVector(stress, strain, gp, tStep);
@@ -511,12 +510,9 @@ LIBeam3dNL2 :: computeLumpedMassMatrix(FloatMatrix &answer, TimeStep *tStep)
 // Returns the lumped mass matrix of the receiver. This expression is
 // valid in both local and global axes.
 {
-    Material *mat;
-    double halfMass;
     GaussPoint *gp = integrationRulesArray [ 0 ]->getIntegrationPoint(0);
-
-    mat        = this->giveMaterial();
-    halfMass   = mat->give('d', gp) * this->giveCrossSection()->give(CS_Area) * this->giveLength() / 2.;
+    double density = this->giveStructuralCrossSection()->give('d', gp);
+    double halfMass   = density * this->giveCrossSection()->give(CS_Area) * this->giveLength() / 2.;
     answer.resize(12, 12);
     answer.zero();
     answer.at(1, 1) = answer.at(2, 2) = answer.at(3, 3) = halfMass;
@@ -792,7 +788,6 @@ LIBeam3dNL2 :: initForNewStep()
 void
 LIBeam3dNL2 :: computeTempCurv(FloatArray &answer, TimeStep *tStep)
 {
-    Material *mat = this->giveMaterial();
     IntegrationRule *iRule = integrationRulesArray [ giveDefaultIntegrationRule() ];
     GaussPoint *gp = iRule->getIntegrationPoint(0);
     FloatArray ui(3), xd(3), curv(3), ac(3), PrevEpsilon;
@@ -887,7 +882,10 @@ LIBeam3dNL2 :: computeTempCurv(FloatArray &answer, TimeStep *tStep)
     }
 
     // ask for previous kappa
-    PrevEpsilon = static_cast< StructuralMaterialStatus * >( mat->giveStatus(gp) )->giveStrainVector();
+    StructuralMaterialStatus *matStat = static_cast< StructuralMaterialStatus * >( gp->giveMaterialStatus() );
+    if ( matStat ) {
+        PrevEpsilon = matStat->giveStrainVector();
+    }
     if ( PrevEpsilon.giveSize() ) {
         answer.at(1) += PrevEpsilon.at(4);
         answer.at(2) += PrevEpsilon.at(5);

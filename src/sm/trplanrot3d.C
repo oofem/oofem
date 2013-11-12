@@ -34,7 +34,7 @@
 
 #include "trplanrot3d.h"
 #include "material.h"
-#include "crosssection.h"
+#include "structuralcrosssection.h"
 #include "node.h"
 #include "load.h"
 #include "structuralms.h"
@@ -178,8 +178,7 @@ TrPlaneStrRot3d :: giveCharacteristicTensor(FloatMatrix &answer, CharTensor type
 // strain vector = (Eps_X, Eps_y, Gamma_xy, Kappa_z)
 {
     FloatArray charVect;
-    Material *mat = this->giveMaterial();
-    StructuralMaterialStatus *ms = static_cast< StructuralMaterialStatus * >( mat->giveStatus(gp) );
+    StructuralMaterialStatus *ms = static_cast< StructuralMaterialStatus * >( gp->giveMaterialStatus() );
 
     answer.resize(3, 3);
     answer.zero();
@@ -295,7 +294,7 @@ TrPlaneStrRot3d :: computeBodyLoadVectorAt(FloatArray &answer, Load *forLoad, Ti
     if ( force.giveSize() ) {
         gp = integrationRulesArray [ 0 ]->getIntegrationPoint(0);
 
-        dens = this->giveMaterial()->give('d', gp);
+        dens = this->giveStructuralCrossSection()->give('d', gp);
         dV   = this->computeVolumeAround(gp) * this->giveCrossSection()->give(CS_Thickness);
 
         answer.resize(18);

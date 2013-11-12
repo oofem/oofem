@@ -415,14 +415,6 @@ ExpCZMaterial :: giveIPValue(FloatArray &answer, GaussPoint *aGaussPoint, Intern
     
 }
 
-
-InternalStateValueType
-ExpCZMaterial :: giveIPValueType(InternalStateType type)
-{
-    return StructuralMaterial :: giveIPValueType(type);
-}
-
-
 int
 ExpCZMaterial :: giveIntVarCompFullIndx(IntArray &answer, InternalStateType type, MaterialMode mmode)
 {

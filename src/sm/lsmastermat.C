@@ -476,24 +476,6 @@ LargeStrainMasterMaterial :: giveIPValue(FloatArray &answer, GaussPoint *aGaussP
 }
 
 
-InternalStateValueType
-LargeStrainMasterMaterial :: giveIPValueType(InternalStateType type)
-{
-    Material *mat;
-    StructuralMaterial *sMat;
-    FloatMatrix stiffness;
-    mat = domain->giveMaterial(slaveMat);
-    sMat = dynamic_cast< StructuralMaterial * >(mat);
-    if ( sMat == NULL ) {
-        _warning2("checkConsistency: material %d has no Structural support", slaveMat);
-    }
-
-    InternalStateValueType result = sMat->giveIPValueType(type);
-    return result;
-}
-
-
-
 //=============================================================================
 
 LargeStrainMasterMaterialStatus :: LargeStrainMasterMaterialStatus(int n, Domain *d, GaussPoint *g, int s) : StructuralMaterialStatus(n, d, g),

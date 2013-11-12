@@ -42,12 +42,12 @@ newtonianfluid 1 mu 1.000000  d 1.000000
 deadweight 1 components 2 -1.0 -0.0 loadTimeFunction 1 valtype 4 set 7
 BoundaryCondition 2 loadTimeFunction 1 set 5 values 1 0. dofs 1 11
 BoundaryCondition 3 loadTimeFunction 1 set 6 values 2 0. 0. dofs 2 7 8
-weakperiodicbc 4 elementsidespositiveset 1 elementsidesnegativeset 2 loadTimeFunction 1 order 2 dofid 7
-weakperiodicbc 5 elementsidespositiveset 3 elementsidesnegativeset 4 loadTimeFunction 1 order 2 dofid 7
-weakperiodicbc 6 elementsidespositiveset 1 elementsidesnegativeset 2 loadTimeFunction 1 order 2 dofid 8
-weakperiodicbc 7 elementsidespositiveset 3 elementsidesnegativeset 4 loadTimeFunction 1 order 2 dofid 8
-weakperiodicbc 8 elementsidespositiveset 1 elementsidesnegativeset 2 loadTimeFunction 1 order 2 dofid 11
-weakperiodicbc 9 elementsidespositiveset 3 elementsidesnegativeset 4 loadTimeFunction 1 order 2 dofid 11
+weakperiodicbc 4 elementsidespositiveset 1 elementsidesnegativeset 2 loadTimeFunction 1 order 2 dofid 7 descritizationtype 1
+weakperiodicbc 5 elementsidespositiveset 3 elementsidesnegativeset 4 loadTimeFunction 1 order 2 dofid 7 descritizationtype 1
+weakperiodicbc 6 elementsidespositiveset 1 elementsidesnegativeset 2 loadTimeFunction 1 order 2 dofid 8 descritizationtype 1
+weakperiodicbc 7 elementsidespositiveset 3 elementsidesnegativeset 4 loadTimeFunction 1 order 2 dofid 8 descritizationtype 1
+weakperiodicbc 8 elementsidespositiveset 1 elementsidesnegativeset 2 loadTimeFunction 1 order 2 dofid 11 descritizationtype 1
+weakperiodicbc 9 elementsidespositiveset 3 elementsidesnegativeset 4 loadTimeFunction 1 order 2 dofid 11 descritizationtype 1
 ConstantFunction 1 f(t) 1.0
 # Positive X
 set 1 elementboundaries 2 3 1

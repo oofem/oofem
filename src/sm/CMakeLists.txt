@@ -40,12 +40,16 @@ set (sm_element
     shell7basexfem.C
     tr2shell7xfem.C
     trplanestressrotallman.C
+    structuralinterfaceelement.C
+    intelline1.C
+    intelline2.C
     )
 
 set (sm_crosssection
     structuralcrosssection.C
     layeredcrosssection.C
     fiberedcs.C
+    structuralinterfacecrosssection.C
     )
 
 set (sm_emodel
@@ -116,9 +120,10 @@ set (sm_material
     latticedamage2d.C
     dustmat.C
     lsmastermat.C lsmastermatgrad.C
-    bilinearczmaterial.C
     intmatbilinczfagerstrom.C
+	intmatbilinczjansson.C
     intmatbilinearcz.C
+	intmatbilinczelastic.C
     )
 
 set (sm_error

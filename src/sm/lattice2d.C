@@ -76,9 +76,7 @@ Lattice2d :: giveCrackFlag()
     GaussPoint *gp;
     IntegrationRule *iRule = integrationRulesArray [ giveDefaultIntegrationRule() ];
     gp = iRule->getIntegrationPoint(0);
-    Material *mat = this->giveMaterial();
-
-    status = static_cast< LatticeMaterialStatus * >( mat->giveStatus(gp) );
+    status = static_cast< LatticeMaterialStatus * >( gp->giveMaterialStatus() );
     int crackFlag = 0;
     crackFlag = status->giveCrackFlag();
 
@@ -94,9 +92,7 @@ Lattice2d :: giveCrackWidth()
     GaussPoint *gp;
     IntegrationRule *iRule = integrationRulesArray [ giveDefaultIntegrationRule() ];
     gp = iRule->getIntegrationPoint(0);
-    Material *mat = this->giveMaterial();
-
-    status = static_cast< LatticeMaterialStatus * >( mat->giveStatus(gp) );
+    status = static_cast< LatticeMaterialStatus * >( gp->giveMaterialStatus() );
     double crackWidth = 0;
     crackWidth = status->giveCrackWidth();
 
@@ -111,9 +107,7 @@ Lattice2d :: giveDissipation()
     GaussPoint *gp;
     IntegrationRule *iRule = integrationRulesArray [ giveDefaultIntegrationRule() ];
     gp = iRule->getIntegrationPoint(0);
-    Material *mat = this->giveMaterial();
-
-    status = static_cast< LatticeMaterialStatus * >( mat->giveStatus(gp) );
+    status = static_cast< LatticeMaterialStatus * >( gp->giveMaterialStatus() );
     double dissipation = 0;
     dissipation = status->giveDissipation();
 
@@ -129,9 +123,7 @@ Lattice2d :: giveDeltaDissipation()
     GaussPoint *gp;
     IntegrationRule *iRule = integrationRulesArray [ giveDefaultIntegrationRule() ];
     gp = iRule->getIntegrationPoint(0);
-    Material *mat = this->giveMaterial();
-
-    status = static_cast< LatticeMaterialStatus * >( mat->giveStatus(gp) );
+    status = static_cast< LatticeMaterialStatus * >( gp->giveMaterialStatus() );
     double deltaDissipation = 0;
     deltaDissipation = status->giveDeltaDissipation();
 
@@ -301,9 +293,7 @@ Lattice2d :: giveNormalStress()
   GaussPoint* gp;
   IntegrationRule* iRule = integrationRulesArray[giveDefaultIntegrationRule()];
   gp = iRule->getIntegrationPoint(0);
-  Material *mat = this->giveMaterial();
-
-  status = (LatticeMaterialStatus*) mat->giveStatus(gp);
+  status = static_cast< LatticeMaterialStatus * >( gp->giveMaterialStatus() );
   double normalStress =0;
   normalStress = status->giveNormalStress();
   
