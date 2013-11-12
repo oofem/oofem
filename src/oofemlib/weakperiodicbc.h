@@ -135,11 +135,11 @@ private:
     FloatMatrix gsMatrix;
 public:
     WeakPeriodicBoundaryCondition(int n, Domain *d);
-    virtual ~WeakPeriodicBoundaryCondition() { };
+    virtual ~WeakPeriodicBoundaryCondition() { }
 
     virtual IRResultType initializeFrom(InputRecord *ir);
 
-    basisType giveBasisType() {return useBasisType; };
+    basisType giveBasisType() {return useBasisType; }
 
     virtual void assemble(SparseMtrx *answer, TimeStep *tStep, EquationID eid, CharType type, 
                           const UnknownNumberingScheme &r_s, const UnknownNumberingScheme &c_s);

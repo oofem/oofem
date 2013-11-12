@@ -58,7 +58,7 @@ REGISTER_BoundaryCondition( WeakPeriodicBoundaryCondition );
 
 WeakPeriodicBoundaryCondition :: WeakPeriodicBoundaryCondition(int n, Domain *d) : ActiveBoundaryCondition(n, d)
 {
-	useBasisType = trigonometric;
+    useBasisType = monomial;
 	doUpdateSminmax = true;
 }
 
@@ -73,7 +73,7 @@ WeakPeriodicBoundaryCondition :: initializeFrom(InputRecord *ir)
 	orderOfPolygon = 2;
 	IR_GIVE_OPTIONAL_FIELD(ir, orderOfPolygon, _IFT_WeakPeriodicBoundaryCondition_order);
 
-	int t = ( int ) trigonometric;
+    int t = ( int ) monomial;
 	IR_GIVE_OPTIONAL_FIELD(ir, t, _IFT_WeakPeriodicBoundaryCondition_descritizationType);
 	useBasisType = ( basisType ) t;  // Fourierseries by default
 
