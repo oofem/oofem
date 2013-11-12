@@ -363,6 +363,9 @@ SimpleCrossSection :: initializeFrom(InputRecord *ir)
     IR_GIVE_OPTIONAL_FIELD(ir, value, _IFT_SimpleCrossSection_drillStiffness);
     propertyDictionary->add(CS_DrillingStiffness, value);
 
+    // Read a cohesive zone material
+    IR_GIVE_OPTIONAL_FIELD(ir, this->materialNumber, _IFT_SimpleCrossSection_MaterialNumber);
+
     return IRRT_OK;
 }
 
@@ -532,5 +535,155 @@ SimpleCrossSection :: give(int aProperty, GaussPoint *gp)
         return gp->giveMaterial()->give(aProperty, gp);
     }
 }
+
+
+
+int
+SimpleCrossSection :: checkConsistency()
+//
+// check internal consistency
+// mainly tests, whether material and crossSection data
+// are safe for conversion to "Structural" versions
+//
+{
+    int result = 1;
+    Material *mat = this->giveDomain()->giveMaterial(this->materialNumber);
+    if ( !dynamic_cast< StructuralMaterial * >( mat ) ) {
+        _warning2("checkConsistency : material %s without structural support", mat->giveClassName());
+        result = 0;
+    }
+
+    return result;
+}
+
+
+
+
+
+Interface 
+*SimpleCrossSection :: giveInterface(InterfaceType t, IntegrationPoint *ip)
+{
+    if ( this->giveMaterialNumber() ) {
+        return this->giveDomain()->giveMaterial( this->giveMaterialNumber() )->giveInterface(t);
+    } else {
+        return ip->giveMaterial()->giveInterface(t);
+    }    
+}
+
+
+
+
+
+
+
+
+
+void
+SimpleCrossSection :: giveFirstPKStresses(FloatArray &answer, GaussPoint *gp, const FloatArray &reducedvF, TimeStep *tStep)
+{
+    // This function returns the first Piola-Kirchoff stress in vector format
+    // corresponding to a given deformation gradient according to the stress-deformation
+    // mode stored in the each gp.
+
+    MaterialMode mode = gp->giveMaterialMode();
+    StructuralMaterial *mat = dynamic_cast< StructuralMaterial * >( this->giveMaterial(gp) );
+    
+    if ( mode == _3dMat ) {
+        mat->giveFirstPKStressVector_3d(answer, gp, reducedvF, tStep);
+    } else if ( mode == _PlaneStrain ) {
+        mat->giveFirstPKStressVector_PlaneStrain(answer, gp, reducedvF, tStep);
+    } else if ( mode == _PlaneStress ) {
+        mat->giveFirstPKStressVector_PlaneStress(answer, gp, reducedvF, tStep);
+    } else if ( mode == _1dMat ) {
+        mat->giveFirstPKStressVector_1d(answer, gp, reducedvF, tStep);
+    } else {
+        OOFEM_ERROR2("StructuralCrossSection :: giveStiffnessMatrix_dPdF : unknown mode (%s)", __MaterialModeToString(mode) );
+    }
+}
+
+
+void
+SimpleCrossSection :: giveCauchyStresses(FloatArray &answer, GaussPoint *gp, const FloatArray &reducedvF, TimeStep *tStep)
+{
+    // This function returns the Cauchy stress in vector format
+    // corresponding to a given deformation gradient according to the stress-deformation
+    // mode stored in the each gp.
+
+    MaterialMode mode = gp->giveMaterialMode();
+    StructuralMaterial *mat = dynamic_cast< StructuralMaterial * >( this->giveMaterial(gp) );
+    
+    if ( mode == _3dMat ) {
+        mat->giveCauchyStressVector_3d(answer, gp, reducedvF, tStep);
+    } else if ( mode == _PlaneStrain ) {
+        mat->giveCauchyStressVector_PlaneStrain(answer, gp, reducedvF, tStep);
+    } else if ( mode == _PlaneStress ) {
+        mat->giveCauchyStressVector_PlaneStress(answer, gp, reducedvF, tStep);
+    } else if ( mode == _1dMat ) {
+        mat->giveCauchyStressVector_1d(answer, gp, reducedvF, tStep);
+    }
+}
+
+
+void
+SimpleCrossSection :: giveStiffnessMatrix_dPdF(FloatMatrix &answer,
+                                                   MatResponseMode rMode, GaussPoint *gp,
+                                                   TimeStep *tStep)
+{
+    StructuralMaterial *mat = dynamic_cast< StructuralMaterial * >( this->giveMaterial(gp) );
+    
+    MaterialMode mode = gp->giveMaterialMode();
+    if ( mode == _3dMat ) {
+        mat->give3dMaterialStiffnessMatrix_dPdF(answer, rMode, gp, tStep);
+    } else if ( mode == _PlaneStress ) {
+        mat->givePlaneStressStiffMtrx_dPdF(answer, rMode, gp, tStep);
+    } else if ( mode == _PlaneStrain ) {
+        mat->givePlaneStrainStiffMtrx_dPdF(answer, rMode, gp, tStep);
+    } else if ( mode == _1dMat ) {
+        mat->give1dStressStiffMtrx_dPdF(answer, rMode, gp, tStep);
+    } else {
+        OOFEM_ERROR2("StructuralCrossSection :: giveStiffnessMatrix_dPdF : unknown mode (%s)", __MaterialModeToString(mode) );
+    }
+}
+
+
+void
+SimpleCrossSection :: giveStiffnessMatrix_dCde(FloatMatrix &answer,
+                                                   MatResponseMode rMode, GaussPoint *gp,
+                                                   TimeStep *tStep)
+{
+    StructuralMaterial *mat = dynamic_cast< StructuralMaterial * >( this->giveMaterial(gp) );
+    
+    MaterialMode mode = gp->giveMaterialMode();
+    if ( mode == _3dMat ) {
+        mat->give3dMaterialStiffnessMatrix_dCde(answer, rMode, gp, tStep);
+    } else if ( mode == _PlaneStress ) {
+        mat->givePlaneStressStiffMtrx_dCde(answer, rMode, gp, tStep);
+    } else if ( mode == _PlaneStrain ) {
+        mat->givePlaneStrainStiffMtrx_dCde(answer, rMode, gp, tStep);
+    } else if ( mode == _1dMat ) {
+        mat->give1dStressStiffMtrx_dCde(answer, rMode, gp, tStep);
+    } else {
+        OOFEM_ERROR2("StructuralCrossSection :: giveStiffnessMatrix_dCde : unknown mode (%s)", __MaterialModeToString(mode) );
+    }
+}
+
+
+
+void
+SimpleCrossSection :: computeStressIndependentStrainVector(FloatArray &answer,
+                                                               GaussPoint *gp, TimeStep *stepN, ValueModeType mode)
+//
+// returns initial strain vector induced by stress independent effects
+// like temperatue or shrinkage.
+// takes into account form of load vector assumed by engngModel (Incremental or Total Load form).
+//
+{
+    StructuralMaterial *mat = dynamic_cast< StructuralMaterial * >( this->giveMaterial(gp) );
+    // add parts caused by  material
+    mat->computeStressIndependentStrainVector(answer, gp, stepN, mode);
+}
+
+
+
 
 } // end namespace oofem

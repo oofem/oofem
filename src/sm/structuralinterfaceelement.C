@@ -88,7 +88,7 @@ StructuralInterfaceElement :: computeStiffnessMatrix(FloatMatrix &answer, MatRes
         
         if ( this->nlGeometry == 0 ) {
             this->giveStiffnessMatrix_Eng(D, rMode, ip, tStep);
-        } else if ( this->nlGeometry = 1 ) {
+        } else if ( this->nlGeometry == 1 ) {
             this->giveStiffnessMatrix_dTdj(D, rMode, ip, tStep);
         } else {
             OOFEM_ERROR("nlgeometry must be 0 or 1!")

@@ -141,7 +141,7 @@ public:
     virtual void computeSpatialJump(FloatArray &answer, GaussPoint *gp, TimeStep *stepN);
     virtual int giveIPValue(FloatArray &answer, GaussPoint *gp, InternalStateType type, TimeStep *tStep);
 
-    virtual Interface *giveInterface(InterfaceType) { return NULL; }
+    virtual Interface *giveInterface(InterfaceType) { return NULL; };
 
     //@}
 

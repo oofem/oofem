@@ -222,6 +222,17 @@ public:
     }
 #endif
 
+
+    virtual void giveFirstPKStresses(FloatArray &answer, GaussPoint *gp, const FloatArray &reducedFIncrement, TimeStep *tStep)
+        { OOFEM_ERROR("giveFirstPKStresses not implemented for layered cross section"); };
+    virtual void giveCauchyStresses(FloatArray &answer, GaussPoint *gp, const FloatArray &reducedFIncrement, TimeStep *tStep)
+        { OOFEM_ERROR("giveCauchyStresses not implemented for layered cross section"); };
+    virtual void giveStiffnessMatrix_dPdF(FloatMatrix &answer, MatResponseMode rMode, GaussPoint *gp, TimeStep *tStep)
+        { OOFEM_ERROR("giveStiffnessMatrix_dPdF not implemented for layered cross section"); };
+    virtual void giveStiffnessMatrix_dCde(FloatMatrix &answer, MatResponseMode rMode, GaussPoint *gp, TimeStep *tStep)
+        { OOFEM_ERROR("giveStiffnessMatrix_dCde not implemented for layered cross section"); };
+
+
 protected:
     double giveArea();
 };

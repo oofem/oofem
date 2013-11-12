@@ -53,6 +53,7 @@
 #define _IFT_SimpleCrossSection_shearareay "shearareay" ///< Shear area y direction
 #define _IFT_SimpleCrossSection_shearareaz "shearareaz" ///< Shear area z direction
 #define _IFT_SimpleCrossSection_drillStiffness "drillstiffness" ///< Penalty term for drilling stiffness.
+#define _IFT_SimpleCrossSection_MaterialNumber "material" ///< Material number for the bulk material
 //@}
 
 namespace oofem {
@@ -137,6 +138,21 @@ public:
 
     virtual double give(int aProperty, GaussPoint *gp); 
     virtual Material *giveMaterial(IntegrationPoint *ip);    
+    
+    int const giveMaterialNumber() { return this->materialNumber; };
+    void setMaterialNumber(int matNum) { this->materialNumber = matNum; };
+    virtual int checkConsistency();
+    virtual Interface *giveInterface(InterfaceType t, IntegrationPoint *ip);
+
+
+
+
+    virtual void giveFirstPKStresses(FloatArray &answer, GaussPoint *gp, const FloatArray &reducedFIncrement, TimeStep *tStep);
+    virtual void giveCauchyStresses(FloatArray &answer, GaussPoint *gp, const FloatArray &reducedFIncrement, TimeStep *tStep);
+    virtual void giveStiffnessMatrix_dPdF(FloatMatrix &answer, MatResponseMode rMode, GaussPoint *gp, TimeStep *tStep);
+    virtual void giveStiffnessMatrix_dCde(FloatMatrix &answer, MatResponseMode rMode, GaussPoint *gp, TimeStep *tStep);
+
+    virtual void computeStressIndependentStrainVector(FloatArray &answer, GaussPoint *gp, TimeStep *stepN, ValueModeType mode);
 
 
 private:

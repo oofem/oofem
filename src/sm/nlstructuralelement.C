@@ -289,7 +289,7 @@ NLStructuralElement :: computeStiffnessMatrix(FloatMatrix &answer,
     if ( cs->MAT_GIVEN_BY_CS ) {
         matStiffSymmFlag = cs->isCharacteristicMtrxSymmetric( rMode );
     } else {
-        matStiffSymmFlag = cs->isCharacteristicMtrxSymmetric( rMode, this->giveMaterial()->giveNumber() );
+        matStiffSymmFlag = this->giveCrossSection()->isCharacteristicMtrxSymmetric( rMode, this->giveMaterial()->giveNumber() );
     }
 
     answer.resize(0, 0);
@@ -417,7 +417,7 @@ NLStructuralElement :: computeStiffnessMatrix_withIRulesAsSubcells(FloatMatrix &
     if ( cs->MAT_GIVEN_BY_CS ) {
         matStiffSymmFlag = cs->isCharacteristicMtrxSymmetric( rMode );
     } else {
-        matStiffSymmFlag = cs->isCharacteristicMtrxSymmetric( rMode, this->giveMaterial()->giveNumber() );
+        matStiffSymmFlag = this->giveCrossSection()->isCharacteristicMtrxSymmetric( rMode, this->giveMaterial()->giveNumber() );
     }
     answer.resize(0, 0);
     if ( !this->isActivated(tStep) ) {
