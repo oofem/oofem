@@ -281,12 +281,12 @@ public:
     int hasMaterialModeCapability(MaterialMode mode); // JB
     virtual Material *giveMaterial(IntegrationPoint *ip);    
     int const giveMaterialNumber() { return this->materialNumber; };
-    int const setMaterialNumber(int matNum) { this->materialNumber = matNum; };
+    void setMaterialNumber(int matNum) { this->materialNumber = matNum; };
 
     virtual int checkConsistency();
     virtual Interface *giveInterface(InterfaceType t, IntegrationPoint *ip);
-    virtual bool StructuralCrossSection :: isCharacteristicMtrxSymmetric(MatResponseMode rMode);
-    virtual bool StructuralCrossSection :: isCharacteristicMtrxSymmetric(MatResponseMode rMode, int mat);
+    virtual bool isCharacteristicMtrxSymmetric(MatResponseMode rMode);
+    virtual bool isCharacteristicMtrxSymmetric(MatResponseMode rMode, int mat);
 
     virtual double give(int aProperty, GaussPoint *gp) = 0; 
 

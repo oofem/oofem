@@ -245,7 +245,7 @@ void DofManager :: giveLocationArray(const IntArray &dofIDArry, IntArray &locati
         locationArray.resize(size);
         for ( int i = 1; i <= size; i++ ) {
             if ( ( indx = this->findDofWithDofId( ( DofIDItem ) dofIDArry.at(i) ) ) == 0 ) {
-                _error("giveLocationArray: incompatible dof requested");
+                _error2("giveLocationArray: incompatible dof (%d) requested", dofIDArry.at(i));
             }
 
             locationArray.at(i) = s.giveDofEquationNumber( this->giveDof(indx) );

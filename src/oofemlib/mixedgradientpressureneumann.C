@@ -243,8 +243,8 @@ void MixedGradientPressureNeumann :: giveLocationArrays(std::vector<IntArray> &r
     int nsd = this->domain->giveNumberOfSpatialDimensions();
     DofIDItem id0 = this->domain->giveDofManager(1)->hasDofID(V_u) ? V_u : D_u; // Just check the first node if it has V_u or D_u.
     dofids.resize(nsd);
-    for ( int i = 1; i <= nsd; ++i ) {
-        dofids.at(i) = id0 + i;
+    for ( int i = 0; i < nsd; ++i ) {
+        dofids(i) = id0 + i;
     }
 
     // Fetch the columns/rows for the stress contributions;

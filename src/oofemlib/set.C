@@ -180,6 +180,8 @@ const IntArray& Set :: giveNodeList()
     return this->totalNodes;
 }
 
+const IntArray & Set :: giveSpecifiedNodeList() { return this->nodes; }
+
 void Set :: setElementList(const IntArray& newElements) { this->elements = newElements; }
 
 void Set :: setBoundaryList(const IntArray& newBoundaries) { this->elementBoundaries = newBoundaries; }

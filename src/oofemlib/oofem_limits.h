@@ -36,8 +36,6 @@
 #define oofem_limits_h
 
 namespace oofem {
-/// Maximum input line length read.
-#define OOFEM_MAX_LINE_LENGTH 32768
 /// Maximum length of error message.
 #define MAX_ERROR_MSG_LENGTH 2048
 } // end namespace oofem

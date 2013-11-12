@@ -136,7 +136,7 @@ public:
      StructuralInterfaceMaterial *giveInterfaceMaterial();
      const FloatArray &giveTraction(IntegrationPoint *ip);
 
-     virtual int StructuralInterfaceCrossSection :: checkConsistency();
+     virtual int checkConsistency();
 
 
     // identification and auxiliary functions

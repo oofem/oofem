@@ -126,6 +126,8 @@ Domain :: Domain(int n, int serNum, EngngModel *e) : defaultNodeDofIDArry()
 
     nonlocalUpdateStateCounter = 0;
 
+    nsd = 0;
+    axisymm = false;
     freeDofID = MaxDofID;
 
 #ifdef __PARALLEL_MODE
@@ -139,7 +141,7 @@ Domain* Domain :: Clone()
 {
     /////////////////////////////////////////////////////////
     // Create a copy of the domain using
-	// the dynamic data reader.
+    // the dynamic data reader.
 
     EngngModel *eModel = this->giveEngngModel();
 
@@ -160,8 +162,7 @@ Domain* Domain :: Clone()
 
     //Output
     inputRec = new DynamicInputRecord();
-    inputRec->setRecordKeywordField(_IFT_OutputManager_name, 1);
-    inputRec->setField(_IFT_OutputManager_name);
+    inputRec->setRecordKeywordField(_IFT_OutputManager_Name, 1);
     inputRec->setField(_IFT_OutputManager_tstepall);
     inputRec->setField(_IFT_OutputManager_dofmanall);
     inputRec->setField(_IFT_OutputManager_elementall);
@@ -177,21 +178,24 @@ Domain* Domain :: Clone()
     inputRec->setField(this->giveNumberOfInitialConditions(), 	_IFT_Domain_nic);
     inputRec->setField(this->giveNumberOfLoadTimeFunctions(), 	_IFT_Domain_nloadtimefunct);
     inputRec->setField(this->giveNumberOfSets(),            	_IFT_Domain_nset);
+    inputRec->setField(this->giveNumberOfSpatialDimensions(),   _IFT_Domain_numberOfSpatialDimensions);
+    if ( this->isAxisymmetric() ) {
+        inputRec->setField(_IFT_Domain_axisymmetric);
+    }
 
 
     // fields to add:
     // inputRec->setField( , _IFT_Domain_nbarrier);
     // inputRec->setField( , _IFT_Domain_nrandgen);
     // inputRec->setField( , _IFT_Domain_topology);
-    // inputRec->setField( , _IFT_Domain_numberOfSpatialDimensions);
     // inputRec->setField( , _IFT_Domain_nfracman);
 
 
     bool nxfemMan = 0;
     if(this->hasXfemManager()) {
-    	nxfemMan = 1;
+        nxfemMan = 1;
     }
-    inputRec->setField(nxfemMan								, 	_IFT_Domain_nxfemman);
+    inputRec->setField(nxfemMan, _IFT_Domain_nxfemman);
 
 
     dataReader.insertInputRecord(DataReader::IR_domainCompRec, inputRec);
@@ -204,21 +208,21 @@ Domain* Domain :: Clone()
         DofManager *dMan = this->giveDofManager(i);
 
         DynamicInputRecord* nodeRec = new DynamicInputRecord();
-   		dMan->giveInputRecord(*nodeRec);
+        dMan->giveInputRecord(*nodeRec);
 
-   	    dataReader.insertInputRecord(DataReader::IR_dofmanRec, nodeRec);
+        dataReader.insertInputRecord(DataReader::IR_dofmanRec, nodeRec);
     }
 
     //Elements
     int nEl = this->giveNumberOfElements();
     for(int i = 1; i <= nEl; i++) {
 
-    	Element *el = this->giveElement(i);
+        Element *el = this->giveElement(i);
 
         DynamicInputRecord* elRec = new DynamicInputRecord();
         el->giveInputRecord(*elRec);
 
-   	    dataReader.insertInputRecord(DataReader::IR_elemRec, elRec);
+        dataReader.insertInputRecord(DataReader::IR_elemRec, elRec);
     }
 
 
@@ -226,12 +230,12 @@ Domain* Domain :: Clone()
     int nCS = this->giveNumberOfCrossSectionModels();
     for(int i = 1; i <= nCS; i++) {
 
-    	CrossSection *cs = this->giveCrossSection(i);
+        CrossSection *cs = this->giveCrossSection(i);
 
         DynamicInputRecord* csRec = new DynamicInputRecord();
         cs->giveInputRecord(*csRec);
 
-   	    dataReader.insertInputRecord(DataReader::IR_crosssectRec, csRec);
+        dataReader.insertInputRecord(DataReader::IR_crosssectRec, csRec);
     }
 
 
@@ -239,48 +243,48 @@ Domain* Domain :: Clone()
     int nMat = this->giveNumberOfMaterialModels();
     for(int i = 1; i <= nMat; i++) {
 
-    	Material *mat = this->giveMaterial(i);
+        Material *mat = this->giveMaterial(i);
 
         DynamicInputRecord* matRec = new DynamicInputRecord();
         mat->giveInputRecord(*matRec);
 
-   	    dataReader.insertInputRecord(DataReader::IR_matRec, matRec);
+        dataReader.insertInputRecord(DataReader::IR_matRec, matRec);
     }
 
     //Boundary Conditions
     int nBC = this->giveNumberOfBoundaryConditions();
     for(int i = 1; i <= nBC; i++) {
 
-    	GeneralBoundaryCondition *bc = this->giveBc(i);
+        GeneralBoundaryCondition *bc = this->giveBc(i);
 
         DynamicInputRecord* bcRec = new DynamicInputRecord();
         bc->giveInputRecord(*bcRec);
 
-   	    dataReader.insertInputRecord(DataReader::IR_bcRec, bcRec);
+        dataReader.insertInputRecord(DataReader::IR_bcRec, bcRec);
     }
 
     //Initial Conditions
     int nIC = this->giveNumberOfInitialConditions();
     for(int i = 1; i <= nIC; i++) {
 
-    	InitialCondition *ic = this->giveIc(i);
+        InitialCondition *ic = this->giveIc(i);
 
-    	DynamicInputRecord* icRec = new DynamicInputRecord();
-    	ic->giveInputRecord(*icRec);
+        DynamicInputRecord* icRec = new DynamicInputRecord();
+        ic->giveInputRecord(*icRec);
 
-   	    dataReader.insertInputRecord(DataReader::IR_icRec, icRec);
+        dataReader.insertInputRecord(DataReader::IR_icRec, icRec);
     }
 
     //Load-time functions
     int nLoads = this->giveNumberOfLoadTimeFunctions();
     for(int i = 1; i <= nLoads; i++) {
 
-    	LoadTimeFunction *ltf = this->giveLoadTimeFunction(i);
+        LoadTimeFunction *ltf = this->giveLoadTimeFunction(i);
 
         DynamicInputRecord* ltfRec = new DynamicInputRecord();
         ltf->giveInputRecord(*ltfRec);
 
-   	    dataReader.insertInputRecord(DataReader::IR_ltfRec, ltfRec);
+        dataReader.insertInputRecord(DataReader::IR_ltfRec, ltfRec);
     }
 
 
@@ -288,28 +292,28 @@ Domain* Domain :: Clone()
     int nSets = this->giveNumberOfSets();
     for(int i = 1; i <= nSets; i++) {
 
-    	Set *set = this->giveSet(i);
+        Set *set = this->giveSet(i);
 
         DynamicInputRecord* ltfRec = new DynamicInputRecord();
         set->giveInputRecord(*ltfRec);
 
-   	    dataReader.insertInputRecord(DataReader::IR_ltfRec, ltfRec);
+        dataReader.insertInputRecord(DataReader::IR_ltfRec, ltfRec);
     }
 
     //XFEM manager
     if(this->xfemManager != NULL) {
-		DynamicInputRecord* xmanRec = new DynamicInputRecord();
-		xfemManager->giveInputRecord(*xmanRec);
-		dataReader.insertInputRecord(DataReader::IR_xfemManRec, xmanRec);
+        DynamicInputRecord* xmanRec = new DynamicInputRecord();
+        xfemManager->giveInputRecord(*xmanRec);
+        dataReader.insertInputRecord(DataReader::IR_xfemManRec, xmanRec);
 
 
-		// Enrichment items
-		int nEI = xfemManager->giveNumberOfEnrichmentItems();
-		for(int i = 1; i <= nEI; i++) {
+        // Enrichment items
+        int nEI = xfemManager->giveNumberOfEnrichmentItems();
+        for(int i = 1; i <= nEI; i++) {
 
-			EnrichmentItem *ei = xfemManager->giveEnrichmentItem(i);
-			ei->giveInputRecord(dataReader);
-		}
+            EnrichmentItem *ei = xfemManager->giveEnrichmentItem(i);
+            ei->giveInputRecord(dataReader);
+        }
     }
 
     dNew->instanciateYourself(&dataReader);
@@ -706,7 +710,9 @@ Domain :: instanciateYourself(DataReader *dr)
             name.c_str(), giveDefaultNodeDofIDArry().giveSize() );
 
     // read output manager record
+    std::string tmp;
     ir = dr->giveInputRecord(DataReader :: IR_outManRec, 1);
+    ir->giveRecordKeywordField(tmp);
     outputManager->initializeFrom(ir);
     ir->finish();
 
@@ -724,7 +730,21 @@ Domain :: instanciateYourself(DataReader *dr)
     IR_GIVE_OPTIONAL_FIELD(ir, topologytype, _IFT_Domain_topology);
     this->nsd = -1; ///@todo Change this to default 0 when the domaintype record has been removed.
     IR_GIVE_OPTIONAL_FIELD(ir, this->nsd, _IFT_Domain_numberOfSpatialDimensions);
+    this->axisymm = ir->hasField(_IFT_Domain_axisymmetric);
     IR_GIVE_OPTIONAL_FIELD(ir, nfracman, _IFT_Domain_nfracman);
+    
+    ///@todo Eventually remove this backwards compatibility:
+    //_HeatTransferMode _HeatMass1Mode // Are these deprecated?
+    if ( dType == _1dTrussMode ) {
+        nsd = 1;
+    } else if ( dType == _2dIncompressibleFlow || dType == _2dBeamMode || dType == _2dTrussMode || dType == _2dMindlinPlateMode || dType == _PlaneStrainMode || dType == _2dPlaneStressMode || dType == _2dPlaneStressRotMode ) {
+        nsd = 2;
+    } else if ( dType == _3dIncompressibleFlow || dType == _3dShellMode || dType == _3dMode || dType == _3dDirShellMode ) {
+        nsd = 3;
+    } else if ( dType == _3dAxisymmMode ) {
+        nsd = 2;
+        axisymm = true;
+    }
 
 
     // read optional number of nonlocalBarriers
@@ -1232,23 +1252,14 @@ Domain :: giveDefaultNodeDofIDArry()
 int
 Domain :: giveNumberOfSpatialDimensions()
 {
-    if ( nsd >= 0 ) {
-        return nsd;
-    }
-    ///@todo Backwards compatible option:
-    //_HeatTransferMode _HeatMass1Mode // Are these deprecated?
-    // Perhaps i shouldn't use the modes to determine this at all, but i couldn't see any other good way.
-    if ( dType == _1dTrussMode ) {
-        return 1;
-    }
+    return nsd;
+}
 
-    if ( dType == _2dIncompressibleFlow || dType == _2dBeamMode || dType == _2dTrussMode || dType == _2dMindlinPlateMode || dType == _3dAxisymmMode || dType == _PlaneStrainMode || dType == _2dPlaneStressMode || dType == _2dPlaneStressRotMode ) {
-        return 2;
-    } else if ( dType == _3dIncompressibleFlow || dType == _3dShellMode || dType == _3dMode || dType == _3dDirShellMode ) {
-        return 3;
-    } else {
-        return 0;
-    }
+
+bool
+Domain :: isAxisymmetric()
+{
+    return axisymm;
 }
 
 
@@ -1405,129 +1416,8 @@ Domain :: giveSpatialLocalizer()
 }
 
 
-int
-Domain :: giveCorrespondingCoordinateIndex(int idof)
-//
-// find corresponding coordinate axis to idof
-// if no - coordinate axis corespond to idof returns 0;
-//
-// if idof corresponds to displacement in direction of axis i then finction returns i
-// otherwise 0;
-//
-{
-    switch ( dType ) {
-    case _2dBeamMode:
-        if ( idof == 1 ) {
-            return 1;
-        } else if ( idof == 2 ) {
-            return 3;
-        }
-
-        return 0;
-
-    case _2dPlaneStressMode:
-    case _PlaneStrainMode:
-    case _2dLatticeMode:
-        if ( idof == 1 ) {
-            return 1;
-        } else if ( idof == 2 ) {
-            return 2;
-        }
-
-        return 0;
-
-    case _2dPlaneStressRotMode:
-        if ( idof == 1 ) {
-            return 1;
-        } else if ( idof == 2 ) {
-            return 2;
-        }
-
-        return 0;
-
-    case _2dTrussMode:
-        if ( idof == 1 ) {
-            return 1;
-        } else if ( idof == 2 ) {
-            return 3;
-        }
-
-        return 0;
-
-    case _1dTrussMode:
-        if ( idof == 1 ) {
-            return 1;
-        }
-
-        return 0;
-
-    case _2dMindlinPlateMode:
-        if ( idof == 1 ) {
-            return 3;
-        }
-
-        return 0;
-
-    case _3dMode:
-        if ( idof == 1 ) {
-            return 1;
-        } else if ( idof == 2 ) {
-            return 2;
-        } else if ( idof == 3 ) {
-            return 3;
-        }
-
-        return 0;
-
-    case _3dAxisymmMode:
-        if ( idof == 1 ) {
-            return 1;
-        } else if ( idof == 2 ) {
-            return 2;
-        }
-
-        return 0;
-
-    case _3dShellMode:
-        if ( idof == 1 ) {
-            return 1;
-        } else if ( idof == 2 ) {
-            return 2;
-        } else if ( idof == 3 ) {
-            return 3;
-        }
-
-        return 0;
-
-    case _3dIncompressibleFlow:
-        if ( idof == 1 ) {
-            return 1;
-        } else if ( idof == 2 ) {
-            return 2;
-        } else if ( idof == 3 ) {
-            return 3;
-        }
-
-        return 0;
-
-    case _2dIncompressibleFlow:
-        if ( idof == 1 ) {
-            return 1;
-        } else if ( idof == 2 ) {
-            return 2;
-        }
-
-        return 0;
-
-    default:
-        _error("giveCorrespondingCoordinateIndex : unsupported domain type");
-    }
-
-    return 0;
-}
-
-
-void Domain :: createDofs()
+void
+Domain :: createDofs()
 {
     IntArray dofids;
 
