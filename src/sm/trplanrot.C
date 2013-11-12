@@ -575,7 +575,6 @@ TrPlaneStrRot :: giveInternalForcesVector(FloatArray &answer, TimeStep *tStep, i
     IntegrationRule *iRule = integrationRulesArray [ giveDefaultIntegrationRule() ];
     for ( int i = 0; i < iRule->giveNumberOfIntegrationPoints(); i++ ) {
         GaussPoint *gp = iRule->getIntegrationPoint(i);
-        Material *mat = gp->giveMaterial();
 
         // Engineering (small strain) stress
         if ( nlGeometry == 0 ) {
@@ -592,7 +591,7 @@ TrPlaneStrRot :: giveInternalForcesVector(FloatArray &answer, TimeStep *tStep, i
             if ( useUpdatedGpRecord == 1 && false ) {
                 ///@todo This is problematic, it only saves the plane stress components. Should we just keep the curvature field completely separate, 
                 /// or introduce the membrane+rotation mode directly into the cross-section.
-                vStress = static_cast< StructuralMaterialStatus * >( mat->giveStatus(gp) )->giveStressVector();
+                vStress = static_cast< StructuralMaterialStatus * >( gp->giveStatus() )->giveStressVector();
 /*
                 // Curvature field:
                 vStress.resizeWithValues(4);

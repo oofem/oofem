@@ -551,7 +551,6 @@ LTRSpace :: drawSpecial(oofegGraphicContext &gc)
     int i, j, k;
     WCRec q [ 4 ];
     GraphicObj *tr;
-    StructuralMaterial *mat = static_cast< StructuralMaterial * >( this->giveMaterial() );
     IntegrationRule *iRule = integrationRulesArray [ 0 ];
     GaussPoint *gp;
     TimeStep *tStep = domain->giveEngngModel()->giveCurrentStep();
@@ -574,7 +573,7 @@ LTRSpace :: drawSpecial(oofegGraphicContext &gc)
         //   for (igp=1 ; igp<= integrationRulesArray [ 0 ]->giveNumberOfIntegrationPoints() ; igp++) {
         {
             gp = iRule->getIntegrationPoint(0);
-            if ( mat->giveIPValue(cf, gp, IST_CrackedFlag, tStep) == 0 ) {
+            if ( this->giveIPValue(cf, gp, IST_CrackedFlag, tStep) == 0 ) {
                 return;
             }
 
@@ -603,8 +602,8 @@ LTRSpace :: drawSpecial(oofegGraphicContext &gc)
             yc = yc / 4.;
             zc = zc / 4.;
             length = TR_LENGHT_REDUCT * pow(this->computeVolumeAround(gp), 1. / 3.) / 2.0;
-            if ( mat->giveIPValue(crackDir, gp, IST_CrackDirs, tStep) ) {
-                mat->giveIPValue(crackStatuses, gp, IST_CrackStatuses, tStep);
+            if ( this->giveIPValue(crackDir, gp, IST_CrackDirs, tStep) ) {
+                this->giveIPValue(crackStatuses, gp, IST_CrackStatuses, tStep);
 
 
                 for ( i = 1; i <= 3; i++ ) {

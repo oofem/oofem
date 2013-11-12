@@ -1354,6 +1354,7 @@ HuertaErrorEstimatorInterface :: setupRefinedElementProblem1D(Element *element, 
                 nd1 = localNodeIdArray.at( connectivity->at(nd) );
                 nd2 = localNodeIdArray.at( connectivity->at(nd + 1) );
 
+                ///@todo This should change the cross-section number instead of the material number.
                 material = mat;
                 if ( impMat != 0 && impMat == mat ) {
                     FloatArray coordinates1, coordinates2;
@@ -1827,13 +1828,12 @@ HuertaErrorEstimatorInterface :: setupRefinedElementProblem2D(Element *element, 
     }
 
     if ( mode == HuertaErrorEstimatorInterface :: ElemMode ) {
-        int mat, csect, iside, index;
+        int csect, iside, index;
         int nd1, nd2, nd3, nd4;
         IntArray *loadArray;
         AList< IntArray >boundaryLoadList;
         bool hasLoad;
 
-        mat = element->giveMaterial()->giveNumber();
         csect = element->giveCrossSection()->giveNumber();
 
         boundaryLoadList.growTo(2);
@@ -1865,7 +1865,6 @@ HuertaErrorEstimatorInterface :: setupRefinedElementProblem2D(Element *element, 
                     nd.setValues(4, nd1, nd2, nd3, nd4);
 
                     ir->setField(nd, "nodes");
-                    ir->setField(mat, "mat");
                     ir->setField(csect, "crosssect");
 
                     // copy body and boundary loads
@@ -2516,13 +2515,12 @@ HuertaErrorEstimatorInterface :: setupRefinedElementProblem3D(Element *element, 
     }
 
     if ( mode == HuertaErrorEstimatorInterface :: ElemMode ) {
-        int mat, csect, iside;
+        int csect, iside;
         int nd1, nd2, nd3, nd4, nd5, nd6, nd7, nd8;
         IntArray *loadArray;
         AList< IntArray >boundaryLoadList;
         bool hasLoad;
 
-        mat = element->giveMaterial()->giveNumber();
         csect = element->giveCrossSection()->giveNumber();
 
         boundaryLoadList.growTo(3);
@@ -2562,8 +2560,7 @@ HuertaErrorEstimatorInterface :: setupRefinedElementProblem3D(Element *element, 
 
                         ir->setRecordKeywordField(hexatype, localElemId);
                         ir->setField(nd, "nodes");
-                        ir->setField(mat, "mat");
-                        ir->setField(csect, "csect");
+                        ir->setField(csect, "crosssect");
 
                         // copy body and boundary loads
 

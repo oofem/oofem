@@ -473,18 +473,8 @@ void
 TrPlaneStress2d :: NodalAveragingRecoveryMI_computeNodalValue(FloatArray &answer, int node,
                                                               InternalStateType type, TimeStep *tStep)
 {
-    GaussPoint *gp;
-    gp = integrationRulesArray [ 0 ]->getIntegrationPoint(0);
+    GaussPoint *gp = integrationRulesArray [ 0 ]->getIntegrationPoint(0);
     this->giveIPValue(answer, gp, type, tStep);
-    /*
-     * if (type == IST_StressTensor) {
-     * gp = integrationRulesArray[0]-> getIntegrationPoint(0) ;
-     * answer = ((StructuralMaterialStatus*) this->giveMaterial()->giveStatus(gp)) -> giveStressVector();
-     * } else if (type == IST_StrainTensor) {
-     * gp = integrationRulesArray[0]-> getIntegrationPoint(0) ;
-     * answer = ((StructuralMaterialStatus*) this->giveMaterial()->giveStatus(gp)) -> giveStrainVector();
-     * }else answer.resize(0);
-     */
 }
 
 void
@@ -714,7 +704,6 @@ TrPlaneStress2d :: drawSpecial(oofegGraphicContext &gc)
 {
     WCRec l [ 2 ];
     GraphicObj *tr;
-    StructuralMaterial *mat = static_cast< StructuralMaterial * >( this->giveMaterial() );
     GaussPoint *gp;
     TimeStep *tStep = domain->giveEngngModel()->giveCurrentStep();
     double defScale = gc.getDefScale();
@@ -732,7 +721,7 @@ TrPlaneStress2d :: drawSpecial(oofegGraphicContext &gc)
 
         for ( int i = 1; i <= integrationRulesArray [ 0 ]->giveNumberOfIntegrationPoints(); i++ ) {
             gp = integrationRulesArray [ 0 ]->getIntegrationPoint(i - 1);
-            if ( mat->giveIPValue(cf, gp, IST_CrackedFlag, tStep) == 0 ) {
+            if ( this->giveIPValue(cf, gp, IST_CrackedFlag, tStep) == 0 ) {
                 return;
             }
 
@@ -740,8 +729,8 @@ TrPlaneStress2d :: drawSpecial(oofegGraphicContext &gc)
                 return;
             }
 
-            if ( mat->giveIPValue(crackDir, gp, IST_CrackDirs, tStep) ) {
-                mat->giveIPValue(crackStatuses, gp, IST_CrackStatuses, tStep);
+            if ( this->giveIPValue(crackDir, gp, IST_CrackDirs, tStep) ) {
+                this->giveIPValue(crackStatuses, gp, IST_CrackStatuses, tStep);
                 for ( i = 1; i <= 3; i++ ) {
                     crackStatus = ( int ) crackStatuses.at(i);
                     if ( ( crackStatus != pscm_NONE ) && ( crackStatus != pscm_CLOSED ) ) {

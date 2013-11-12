@@ -40,7 +40,7 @@
 #include "constantpressureload.h"
 #include "simpleinterfacemat.h"
 #include "connectivitytable.h"
-#include "bilinearczmaterialFagerstrom.H" ///@todo change to .h
+#include "bilinearczmaterialFagerstrom.h"
 #include "mathfem.h"
 
 namespace oofem {

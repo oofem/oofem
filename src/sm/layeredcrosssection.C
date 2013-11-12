@@ -128,9 +128,10 @@ LayeredCrossSection :: giveRealStress_Beam2d(FloatArray &answer, GaussPoint *gp,
         answer.at(3) += reducedLayerStress.at(2) * layerWidth * layerThick;
     }
 
-    // now we must update master gp
-    //StructuralMaterialStatus *status = static_cast< StructuralMaterialStatus * >( gp->giveMaterial()->giveStatus(gp) );
     // Create material status according to the first layer material
+    ///@todo This should be replaced with a general "CrossSectionStatus"
+    //CrossSectionStatus *status = new CrossSectionStatus(gp);
+    //gp->setMaterialStatus(status);
     StructuralMaterialStatus *status = static_cast< StructuralMaterialStatus * >
         ( domain->giveMaterial( layerMaterials.at(1) )->giveStatus(gp) );
     status->letTempStrainVectorBe(strain);
@@ -187,8 +188,10 @@ LayeredCrossSection :: giveRealStress_Plate(FloatArray &answer, GaussPoint *gp, 
     }
 
     // now we must update master gp
-    //StructuralMaterialStatus *status = static_cast< StructuralMaterialStatus * >( gp->giveMaterial()->giveStatus(gp) ); // old
     // Create material status according to the first layer material
+    ///@todo This should be replaced with a general "CrossSectionStatus"
+    //CrossSectionStatus *status = new CrossSectionStatus(gp);
+    //gp->setMaterialStatus(status);
     StructuralMaterialStatus *status = static_cast< StructuralMaterialStatus * >
         ( domain->giveMaterial( layerMaterials.at(1) )->giveStatus(gp) );
     status->letTempStrainVectorBe(strain);
@@ -244,7 +247,9 @@ LayeredCrossSection :: giveRealStress_Shell(FloatArray &answer, GaussPoint *gp, 
     }
 
     // now we must update master gp
-    //StructuralMaterialStatus *status = static_cast< StructuralMaterialStatus * >( gp->giveMaterial()->giveStatus(gp) );
+    ///@todo This should be replaced with a general "CrossSectionStatus"
+    //CrossSectionStatus *status = new CrossSectionStatus(gp);
+    //gp->setMaterialStatus(status);
     // Create material status according to the first layer material
     StructuralMaterialStatus *status = static_cast< StructuralMaterialStatus * >
         ( domain->giveMaterial( layerMaterials.at(1) )->giveStatus(gp) );

@@ -803,7 +803,6 @@ PlaneStress2d :: drawSpecial(oofegGraphicContext &gc)
     int i;
     WCRec l [ 2 ];
     GraphicObj *tr;
-    StructuralMaterial *mat = static_cast< StructuralMaterial * >( this->giveMaterial() );
     GaussPoint *gp;
     TimeStep *tStep = domain->giveEngngModel()->giveCurrentStep();
     double defScale = gc.getDefScale();
@@ -823,7 +822,7 @@ PlaneStress2d :: drawSpecial(oofegGraphicContext &gc)
         for ( igp = 1; igp <= integrationRulesArray [ 0 ]->giveNumberOfIntegrationPoints(); igp++ ) {
             gp = integrationRulesArray [ 0 ]->getIntegrationPoint(igp - 1);
 
-            if ( mat->giveIPValue(cf, gp, IST_CrackedFlag, tStep) == 0 ) {
+            if ( this->giveIPValue(cf, gp, IST_CrackedFlag, tStep) == 0 ) {
                 return;
             }
 
@@ -831,8 +830,8 @@ PlaneStress2d :: drawSpecial(oofegGraphicContext &gc)
                 return;
             }
 
-            if ( mat->giveIPValue(crackDir, gp, IST_CrackDirs, tStep) ) {
-                mat->giveIPValue(crackStatuses, gp, IST_CrackStatuses, tStep);
+            if ( this->giveIPValue(crackDir, gp, IST_CrackDirs, tStep) ) {
+                this->giveIPValue(crackStatuses, gp, IST_CrackStatuses, tStep);
                 for ( i = 1; i <= 3; i++ ) {
                     crackStatus = ( int ) crackStatuses.at(i);
                     if ( ( crackStatus != pscm_NONE ) && ( crackStatus != pscm_CLOSED ) ) {
