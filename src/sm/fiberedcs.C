@@ -129,8 +129,9 @@ FiberedCrossSection :: giveRealStress_Beam3d(FloatArray &answer, GaussPoint *gp,
         answer.at(6) -= reducedFiberStress.at(1) * fiberWidth * fiberThick * fiberYCoord;
     }
 
-    // now we must update master gp
-    StructuralMaterialStatus *status = static_cast< StructuralMaterialStatus * >( gp->giveMaterial()->giveStatus(gp) );
+    // now we must update master gp ///@ todo simply chosen the first fiber material as master material /JB
+    StructuralMaterialStatus *status = static_cast< StructuralMaterialStatus * >
+        ( domain->giveMaterial( fiberMaterials.at(1) )->giveStatus(gp) );
     status->letTempStrainVectorBe(strain);
     status->letTempStressVectorBe(answer);
 }
@@ -348,7 +349,8 @@ FiberedCrossSection :: imposeStrainConstrainsOnGradient(GaussPoint *gp,
 int
 FiberedCrossSection :: giveIPValue(FloatArray &answer, GaussPoint *aGaussPoint, InternalStateType type, TimeStep *atTime)
 {
-    StructuralMaterialStatus *status = static_cast< StructuralMaterialStatus * >( aGaussPoint->giveMaterial()->giveStatus(aGaussPoint) );
+    Material *mat = this->giveDomain()->giveMaterial( fiberMaterials.at(1) ); ///@todo For now, create material status according to the first fiber material
+    StructuralMaterialStatus *status = static_cast< StructuralMaterialStatus * >( mat->giveStatus(aGaussPoint) ); 
 
     if ( type == IST_BeamForceMomentumTensor ) {
         answer = status->giveStressVector();
@@ -540,8 +542,9 @@ FiberedCrossSection :: give(CrossSectionProperty aProperty)
         return this->thick;
     } else if ( aProperty == CS_Width ) {
         return this->width;
-    } else if ( aProperty == CS_Area ) {
+    } else if ( aProperty == CS_Area ) { // not given in input
         return this->giveArea();
+    } else if ( aProperty == CS_Area ) { // not given in input
     }
 
     return CrossSection :: give(aProperty);
@@ -584,10 +587,38 @@ FiberedCrossSection :: computeStressIndependentStrainVector(FloatArray &answer, 
     }
 }
 
-bool FiberedCrossSection :: isCharacteristicMtrxSymmetric(MatResponseMode rMode, int mat)
+bool FiberedCrossSection :: isCharacteristicMtrxSymmetric(MatResponseMode rMode)
 {
     ///@todo As far as I can see, it only uses diagonal components for the 3dbeam, but there is no way to check here.
-    return domain->giveMaterial(mat)->isCharacteristicMtrxSymmetric(rMode);
+
+    for ( int i = 1; i <= this->numberOfFibers; i++ ) {
+        if ( !this->domain->giveMaterial(this->fiberMaterials.at(i))->isCharacteristicMtrxSymmetric(rMode) ) {
+            return false;
+        }
+    }
+    return true;
 }
+
+
+int
+FiberedCrossSection :: checkConsistency()
+//
+// check internal consistency
+// mainly tests, whether material and crossSection data
+// are safe for conversion to "Structural" versions
+//
+{
+    int result = 1;
+    for ( int i = 1; this->fiberMaterials.giveSize(); i++ ) {
+        Material *mat = this->giveDomain()->giveMaterial( this->fiberMaterials.at(i) );
+        if ( !dynamic_cast< StructuralMaterial * >( mat ) ) {
+            _warning2("checkConsistency : material %s without structural support", mat->giveClassName());
+            result = 0;
+            continue;
+        }
+    }
+    return result;
+}
+
 
 } // end namespace oofem

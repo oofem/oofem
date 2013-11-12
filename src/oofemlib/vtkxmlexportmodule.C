@@ -43,6 +43,7 @@
 #include "cltypes.h"
 #include "material.h"
 #include "classfactory.h"
+#include "crosssection.h"
 
 //#include "xfemmanager.h"
 #include "enrichmentitem.h"
@@ -194,8 +195,10 @@ VTKXMLExportModule :: giveCellType(Element *elem)
         vtkCellType = 10;
     } else if ( elemGT == EGT_tetra_2 ) {
         vtkCellType = 24;
-    } else if ( elemGT == EGT_quad_1 ) {
+    } else if ( elemGT == EGT_quad_1 || EGT_quad_1_interface ) {
         vtkCellType = 9;
+    } else if ( elemGT == EGT_quad_21_interface ) {
+        vtkCellType = 30;
     } else if ( elemGT == EGT_quad_2 ) {
         vtkCellType = 23;
     } else if ( elemGT == EGT_quad9_2 ) {
@@ -240,6 +243,7 @@ VTKXMLExportModule :: giveNumberOfNodesPerCell(int cellType)
 
     case 13:
     case 22:
+    case 30:
         return 6;
 
     case 12:
@@ -307,13 +311,26 @@ VTKXMLExportModule :: giveElementCell(IntArray &answer, Element *elem)
         answer.resize(nelemNodes);
         for ( int i = 1; i <= nelemNodes; i++ ) {
             answer.at(i) = elem->giveNode(WedgeQuadNodeMapping [ i - 1 ])->giveNumber();
-        }
+        } 
     } else if ( elemGT == EGT_quad9_2 ) {
         nelemNodes = elem->giveNumberOfNodes();
         answer.resize(nelemNodes);
         for ( int i = 1; i <= nelemNodes; i++ ) {
             answer.at(i) = elem->giveNode(i)->giveNumber();
         }
+    } else if ( elemGT == EGT_quad_1_interface ) {int mapping [] = { 1, 2, 4, 3 };
+        nelemNodes = elem->giveNumberOfNodes();    
+        answer.resize(nelemNodes);
+        for ( int i = 1; i <= nelemNodes; i++ ) {
+            answer.at(i) = elem->giveNode(mapping [ i - 1 ])->giveNumber() ;
+        }    
+    //} else if ( elemGT == EGT_quad_21_interface ) {int mapping [] = { 1, 2, 5, 4, 3, 6 };
+    } else if ( elemGT == EGT_quad_21_interface ) {int mapping [] = { 1, 3, 2, 5, 6, 4 }; /// this is not the same ordering as defined in the VTK reference (typo?)
+        nelemNodes = elem->giveNumberOfNodes();  
+        answer.resize(nelemNodes);
+        for ( int i = 1; i <= nelemNodes; i++ ) {
+            answer.at(i) = elem->giveNode(mapping [ i - 1 ])->giveNumber() ;
+        }    
     } else {
         OOFEM_ERROR("VTKXMLExportModule: unsupported element geometry type");
     }
@@ -649,7 +666,8 @@ VTKXMLExportModule :: setupVTKPiece(VTKPiece &vtkPiece, TimeStep *tStep, int reg
             this->giveElementCell(cellNodes, elem);  // node numbering of the cell with according to the VTK format
 
             // Map from global to local node numbers for the current piece
-            int numElNodes = elem->giveNumberOfNodes();
+            //int numElNodes = elem->giveNumberOfNodes();
+            int numElNodes = cellNodes.giveSize();
             IntArray connectivity(numElNodes);
             for ( int i = 1; i <= numElNodes; i++ ) {
                 connectivity.at(i) = mapG2L.at( cellNodes.at(i) );
@@ -659,7 +677,8 @@ VTKXMLExportModule :: setupVTKPiece(VTKPiece &vtkPiece, TimeStep *tStep, int reg
 
             vtkPiece.setCellType( cellNum, this->giveCellType(elem) ); // VTK cell type
 
-            offset += elem->giveNumberOfNodes();
+            //offset += elem->giveNumberOfNodes();
+            offset += numElNodes;
             vtkPiece.setOffset(cellNum, offset);
         }
 
@@ -1551,7 +1570,9 @@ VTKXMLExportModule :: getCellVariableFromIS(FloatArray &answer, Element *el, Int
     switch ( type ) {
         // Special scalars
     case IST_MaterialNumber:
-        valueArray.at(1) = ( double ) el->giveMaterial()->giveNumber();
+        OOFEM_WARNING1 ( "VTKExportModule - Material numbers are deprecated, outputing cross section number instead..." );
+    case IST_CrossSectionNumber:
+        valueArray.at(1) = ( double ) el->giveCrossSection()->giveNumber();
         break;
     case IST_ElementNumber:
         valueArray.at(1) = ( double ) el->giveNumber();

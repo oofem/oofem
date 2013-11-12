@@ -773,23 +773,6 @@ MDM :: giveIPValue(FloatArray &answer, GaussPoint *aGaussPoint, InternalStateTyp
     }
 }
 
-
-
-
-InternalStateValueType
-MDM :: giveIPValueType(InternalStateType type)
-{
-    if ( type == IST_DamageTensor || type == IST_DamageTensorTemp ||
-         type == IST_DamageInvTensor || type == IST_DamageInvTensorTemp ) {
-        return ISVT_TENSOR_S3;
-    } else if ( type == IST_MicroplaneDamageValues || type == IST_PrincipalDamageTensor || type == IST_PrincipalDamageTempTensor ) {
-        return ISVT_VECTOR;
-    } else {
-        return StructuralMaterial :: giveIPValueType(type);
-    }
-}
-
-
 void
 MDM :: giveThermalDilatationVector(FloatArray &answer,
                                    GaussPoint *gp,  TimeStep *tStep)

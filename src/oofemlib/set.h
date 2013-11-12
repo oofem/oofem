@@ -46,6 +46,7 @@ namespace oofem {
 #define _IFT_Set_nodes "nodes" ///< List of specific node indices.
 #define _IFT_Set_nodeRanges "noderanges" ///< List of node index ranges.
 #define _IFT_Set_elements "elements" ///< List of specific element indices.
+#define _IFT_Set_allElements "allelements" ///< Will generate a list of att the elements in the domain)
 #define _IFT_Set_elementRanges "elementranges" ///< List of element index ranges.
 #define _IFT_Set_elementBoundaries "elementboundaries" ///< Interleaved array of element index + boundary number
 #define _IFT_Set_elementEdges "elementedges" ///< Interleaved array of element index + edge number

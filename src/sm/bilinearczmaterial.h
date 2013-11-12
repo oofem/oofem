@@ -135,7 +135,6 @@ public:
                                           TimeStep *tStep);
     
     virtual int giveIPValue(FloatArray &answer, GaussPoint *gp, InternalStateType type, TimeStep *tStep);
-    virtual InternalStateValueType giveIPValueType(InternalStateType type);
     virtual IRResultType initializeFrom(InputRecord *ir);
     
     virtual MaterialStatus *CreateStatus(GaussPoint *gp) const { return new BilinearCZMaterialStatus(1, domain, gp); }

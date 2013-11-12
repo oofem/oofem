@@ -92,9 +92,7 @@ MicroplaneMaterial :: giveMicroplaneStatus(GaussPoint *gp)
  * returns material status in gp corresponding to specific material class
  */
 {
-    IntegrationPointStatus *status;
-
-    status = gp->giveMaterialStatus( this->giveNumber() );
+    IntegrationPointStatus *status = gp->giveMaterialStatus();
     if ( status == NULL ) {
         // create a new one
         status = this->CreateMicroplaneStatus(gp);

@@ -135,6 +135,7 @@ protected:
     ///  @name History variable of the modified size-dependent adjustment
     /// (indicating value of omega*ft/E+kappaD at the onset of localization)
     double epsloc;
+    double tempEpsloc;
 #endif
 
 public:
@@ -220,6 +221,13 @@ public:
      * @returns Variable epsloc.
      */
     double giveEpsLoc() const { return epsloc; }
+
+    /**History variable of the modified size-dependent adjustment
+    * Assign the temp value of the damage variable of the damage model.
+    * @param v New temp value of the damage variable.
+    */
+    void letTempEpslocBe ( const double v ) { tempEpsloc = v; }
+
 #endif
 
     /**
@@ -352,6 +360,8 @@ public:
      * vertex case yielding).
      */
     void letTempStateFlagBe(const int v) { temp_state_flag = v; }
+
+
 };
 
 
@@ -743,8 +753,6 @@ public:
                             GaussPoint *gp,
                             InternalStateType type,
                             TimeStep *tStep);
-
-    virtual InternalStateValueType giveIPValueType(InternalStateType type);
 
 protected:
     virtual MaterialStatus *CreateStatus(GaussPoint *gp) const;

@@ -41,7 +41,7 @@
 #include "structuralelement.h"
 #include "structuralelementevaluator.h"
 #include "activebc.h"
-
+#include "structuralinterfaceelement.h"
 namespace oofem {
 
 StructuralEngngModel::StructuralEngngModel(int i, EngngModel* _master) : EngngModel(i, _master),
@@ -183,9 +183,10 @@ StructuralEngngModel :: checkConsistency()
     for ( int i = 1; i <= nelem; i++ ) {
         Element *ePtr = domain->giveElement(i);
         StructuralElement *sePtr = dynamic_cast< StructuralElement * >(ePtr);
+        StructuralInterfaceElement *siePtr = dynamic_cast< StructuralInterfaceElement * >(ePtr);
         StructuralElementEvaluator *see = dynamic_cast< StructuralElementEvaluator * >(ePtr);
 
-        if ( sePtr == NULL && see == NULL ) {
+        if ( sePtr == NULL && see == NULL && siePtr == NULL ) {
             _warning2("checkConsistency: element %d has no Structural support", i);
             return 0;
         }

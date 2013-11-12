@@ -1418,14 +1418,6 @@ TR21_2D_SUPG :: giveIPValue(FloatArray &answer, GaussPoint *aGaussPoint, Interna
     return SUPGElement2 :: giveIPValue(answer, aGaussPoint, type, atTime);
 }
 
-
-InternalStateValueType
-TR21_2D_SUPG :: giveIPValueType(InternalStateType type)
-{
-    return SUPGElement2 :: giveIPValueType(type);
-}
-
-
 contextIOResultType TR21_2D_SUPG :: saveContext(DataStream *stream, ContextMode mode, void *obj)
 //
 // saves full element context (saves state variables, that completely describe

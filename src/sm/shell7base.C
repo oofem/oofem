@@ -1350,8 +1350,8 @@ Shell7Base :: computeConvectiveMassForce(FloatArray &answer, TimeStep *tStep)
         double a1, a2, a3, h, h2, h3, h5, fac1, fac2, fac3, rho;
         FloatArray coeff;
 
-
-        rho = this->giveMaterial()->give('d', gp);
+        Material *mat = domain->giveMaterial( this->layeredCS->giveLayerMaterial(1) ); ///@todo fix this method
+        rho = mat->give('d', gp);
         h   = this->giveCrossSection()->give(CS_Thickness);
         h2  = h * h;
         h3 = h2 * h;
@@ -1545,9 +1545,8 @@ Shell7Base :: computeTractionForce(FloatArray &answer, const int iEdge, Boundary
     FloatMatrix N, Q;
     FloatArray fT(7), components, lcoords;
     
-    //BoundaryLoad :: BL_CoordSystType coordSystType = edgeLoad->giveCoordSystMode();
-    BoundaryLoad :: CoordSystType coordSystType = edgeLoad->giveCoordSystMode();
-    
+    //BoundaryLoad :: CoordSystType coordSystType = edgeLoad->giveCoordSystMode();
+    Load :: CoordSystType coordSystType = edgeLoad->giveCoordSystMode();
 
     FloatArray Nftemp(21), Nf(21);
     Nf.zero();
@@ -1559,7 +1558,9 @@ Shell7Base :: computeTractionForce(FloatArray &answer, const int iEdge, Boundary
         FloatArray lCoords =*gp->giveCoordinates();
         this->edgeComputeNmatrixAt(lCoords, N);
 
-        if ( coordSystType ==  BoundaryLoad :: BL_UpdatedGlobalMode ) {
+        //if ( coordSystType ==  BoundaryLoad :: BL_UpdatedGlobalMode ) {
+        if ( coordSystType ==  Load :: CST_UpdatedGlobal ) {
+            
             // Updated global coord system
             FloatMatrix gcov;
             FloatArray lCoords = *gp->giveCoordinates();
@@ -1575,7 +1576,8 @@ Shell7Base :: computeTractionForce(FloatArray &answer, const int iEdge, Boundary
             fT.addSubVector(t2,4);
             fT.at(7) = components.at(7); // don't do anything with the 'gamma'-load
 
-        } else if( coordSystType == BoundaryLoad :: BL_GlobalMode ) { 
+        //} else if( coordSystType == BoundaryLoad :: BL_GlobalMode ) { 
+        } else if( coordSystType == Load :: CST_Global ) { 
             // Undeformed global coord system
             for ( int i = 1; i <= 7; i++) {
                 fT.at(i) = components.at(i);
@@ -2738,7 +2740,8 @@ Shell7Base :: recoverShearStress(TimeStep *tStep)
                 this->computeBmatrixForStressRecAt(*gp->giveCoordinates(), B, layer);
                 dS.beProductOf(B,aS*(-dz)); // stress increment
 
-                StructuralMaterialStatus* status = dynamic_cast< StructuralMaterialStatus* > (gp->giveMaterialStatus(1));
+                //StructuralMaterialStatus* status = dynamic_cast< StructuralMaterialStatus* > (gp->giveMaterialStatus(1));
+                StructuralMaterialStatus* status = dynamic_cast< StructuralMaterialStatus* > ( gp->giveMaterialStatus() );
                 Sold = status->giveStressVector();
                 
                 Smat.at(1,j+1) += dS.at(1); // add increment from each level

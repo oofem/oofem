@@ -207,14 +207,6 @@ BilinearCZMaterial :: giveIPValue(FloatArray &answer, GaussPoint *aGaussPoint, I
     }
 }
 
-
-InternalStateValueType
-BilinearCZMaterial :: giveIPValueType(InternalStateType type)
-{
-    return StructuralMaterial :: giveIPValueType(type);
-}
-
-
 const double tolerance = 1.0e-12; // small number
 IRResultType
 BilinearCZMaterial :: initializeFrom(InputRecord *ir)

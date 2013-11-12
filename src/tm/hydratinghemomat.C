@@ -295,16 +295,6 @@ HydratingHeMoMaterial :: giveIPValue(FloatArray &answer, GaussPoint *aGaussPoint
     }
 }
 
-InternalStateValueType
-HydratingHeMoMaterial :: giveIPValueType(InternalStateType type)
-{
-    if ( type == IST_HydrationDegree ) {
-        return ISVT_SCALAR;
-    } else {
-        return HeMoTKMaterial :: giveIPValueType(type);
-    }
-}
-
 MaterialStatus *
 HydratingHeMoMaterial :: CreateStatus(GaussPoint *gp) const
 {

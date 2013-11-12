@@ -764,7 +764,7 @@ Beam3d :: computeConsistentMassMatrix(FloatMatrix &answer, TimeStep *tStep, doub
     double kappaz = this->giveKappazCoeff();
     double kappay2 = kappay * kappay;
     double kappaz2 = kappaz * kappaz;
-    double density = this->giveMaterial()->give('d', gp);
+    double density = this->giveStructuralCrossSection()->give('d', gp);
     double area = this->giveCrossSection()->give(CS_Area);
     double c2y = ( area * density ) / ( ( 1. + 2. * kappay ) * ( 1. + 2. * kappay ) );
     double c2z = ( area * density ) / ( ( 1. + 2. * kappaz ) * ( 1. + 2. * kappaz ) );

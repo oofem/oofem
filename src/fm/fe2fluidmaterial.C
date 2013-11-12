@@ -277,15 +277,6 @@ int FE2FluidMaterial :: giveIPValue(FloatArray &answer, GaussPoint *gp, Internal
     }
 }
 
-InternalStateValueType FE2FluidMaterial :: giveIPValueType(InternalStateType type)
-{
-    if ( type == IST_VOFFraction ) {
-        return ISVT_SCALAR;
-    } else {
-        return FluidDynamicMaterial :: giveIPValueType(type);
-    }
-}
-
 void FE2FluidMaterial :: giveInputRecord(DynamicInputRecord &input)
 {
     FluidDynamicMaterial :: giveInputRecord(input);

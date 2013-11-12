@@ -990,17 +990,16 @@ B3SolidMaterial :: CreateStatus(GaussPoint *gp) const
 }
 
 
-void
-B3SolidMaterial :: updateYourself(GaussPoint *gp, TimeStep *tNow)
+void 
+B3SolidMaterial :: giveRealStressVector(FloatArray &answer, GaussPoint *gp, const FloatArray &reducedStrain, TimeStep *tStep)
 {
+    KelvinChainMaterial ::giveRealStressVector(answer, gp, reducedStrain, tStep);
+
     B3SolidMaterialStatus *status = static_cast< B3SolidMaterialStatus * >( this->giveStatus(gp) );
     if ( this->MicroPrestress == 1 ) {
-        status->setMPS( this->computeMicroPrestress(gp, tNow, 1) );
+        status->setMPS( this->computeMicroPrestress(gp, tStep, 1) );
     }
 
-    // now we call Kelvin to update itself
-    // at the end of updating it will call material status to be updated.
-    KelvinChainMaterial :: updateYourself(gp, tNow);
 }
 
 

@@ -983,8 +983,6 @@ public:
                             InternalStateType type,
                             TimeStep *atTime);
 
-    virtual InternalStateValueType giveIPValueType(InternalStateType type);
-
 protected:
     MaterialStatus *CreateStatus(GaussPoint *gp) const;
 };

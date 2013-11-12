@@ -44,12 +44,13 @@ namespace oofem {
 StructuralInterfaceMaterialStatus :: StructuralInterfaceMaterialStatus(int n, Domain *d, GaussPoint *g) :
     MaterialStatus(n, d, g), jump(), traction(), tempTraction(), tempJump(), firstPKTraction(), tempFirstPKTraction(), F(), tempF()
 {
-    int size = StructuralMaterial :: giveSizeOfVoigtSymVector( gp->giveMaterialMode() ); ///@todo how to best get rid of matMode?
-
+    //int size = StructuralMaterial :: giveSizeOfVoigtSymVector( gp->giveMaterialMode() ); ///@todo how to best get rid of matMode?
+    int size = 3;
     this->jump.resize(size);
     this->traction.resize(size);
     this->firstPKTraction.resize(size);
     this->F.resize(size,size);
+    this->F.beUnitMatrix();
 
     // reset temp vars.
     this->tempJump            = this->jump;
@@ -110,11 +111,15 @@ void StructuralInterfaceMaterialStatus :: initTempStatus()
 
     // see if vectors describing reached equilibrium are defined
     if ( this->giveJump().giveSize() == 0 ) {
-        this->jump.resize( StructuralMaterial :: giveSizeOfVoigtSymVector( gp->giveMaterialMode() ) );
+        //this->jump.resize( StructuralMaterial :: giveSizeOfVoigtSymVector( gp->giveMaterialMode() ) );
+        this->jump.resize(3);
+        this->jump.zero();
     }
 
     if ( this->giveTraction().giveSize() == 0 ) {
-        this->traction.resize( StructuralMaterial :: giveSizeOfVoigtSymVector( gp->giveMaterialMode() ) );
+        //this->traction.resize( StructuralMaterial :: giveSizeOfVoigtSymVector( gp->giveMaterialMode() ) );
+        this->traction.resize(3);
+        this->traction.zero();
     }
 
     // reset temp vars.

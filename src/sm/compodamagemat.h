@@ -167,7 +167,6 @@ public:
     { this->giveRealStressVector(answer, gp, reducedE, tStep); }
 
     virtual int giveIPValue(FloatArray &answer, GaussPoint *aGaussPoint, InternalStateType type, TimeStep *atTime);
-    virtual InternalStateValueType giveIPValueType(InternalStateType type);
 
     /**
      * Optional parameter determining after how many iterations within the time step the damage is calculated.

@@ -445,6 +445,8 @@ Masonry02 :: computeReducedSKGradientMatrix(FloatMatrix &gradientMatrix,  int i,
     gradientMatrix.zero();
 
     if ( i == 2 ) {
+        
+#if 0
         if ( 0 ) {
             // double help = this->gfI*this->c0/(this->gfII*this->ft0);
             double k2 = strainSpaceHardeningVariables.at(2);
@@ -456,7 +458,7 @@ Masonry02 :: computeReducedSKGradientMatrix(FloatMatrix &gradientMatrix,  int i,
 
             gradientMatrix.at(1, 2) = ( -1.0 ) * ( tanfir - tanfi0 ) * c * ( -1.0 ) / this->gfII;
         }
-
+#endif
         /*
          * // test fan region
          * if (((nx*(stressVector.at(1)-c) + ny*stressVector.at(2)) > 0.0) &&

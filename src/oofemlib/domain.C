@@ -74,6 +74,8 @@
 #include "enrichmentdomain.h"
 #include "propagationlaw.h"
 
+#include "structengngmodel.h"; // temporary should be removed
+
  // For automatic dof creation, (should try to do without this) (move that stuff into DofManager class)
 #include "boundarycondition.h"
 #include "activebc.h"
@@ -1135,6 +1137,28 @@ Domain :: postInitialize()
     for ( int i = 1; i <= this->dofManagerList->giveSize(); i++ ) {
         this->dofManagerList->at(i)->postInitialize();
     }
+
+    // New  - in development /JB
+    // set element cross sections based on element set definition and set the corresponding 
+    // material based on the cs
+    for (int i = 1; i <= this->giveNumberOfCrossSectionModels(); i++) {
+
+        if ( int setNum = this->giveCrossSection(i)->giveSetNumber() ) {
+
+            Set *set = this->giveSet(setNum);
+            const IntArray &elements = set->giveElementList();
+            for (int ielem = 1; ielem <= elements.giveSize(); ++ielem) {
+                Element *element = this->giveElement(elements.at(ielem));
+                element->setCrossSection(i);           
+            }
+            this->giveCrossSection( i )->MAT_GIVEN_BY_CS = true;
+        }
+
+    }
+    
+ 
+    //----
+
     for ( int i = 1; i <= this->elementList->giveSize(); i++ ) {
         this->elementList->at(i)->postInitialize();
     }

@@ -191,7 +191,6 @@ public:
     { this->giveRealStressVector(answer, gp, reducedE, tStep); }
 
     virtual int giveIPValue(FloatArray &answer, GaussPoint *aGaussPoint, InternalStateType type, TimeStep *atTime);
-    virtual InternalStateValueType giveIPValueType(InternalStateType type);
 
     // auxiliary functions
     virtual int giveSizeOfFullHardeningVarsVector()  { return 0; }

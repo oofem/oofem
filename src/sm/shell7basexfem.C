@@ -67,9 +67,7 @@ Shell7BaseXFEM :: postInitialize()
     Shell7Base :: postInitialize();
 
     this->xMan =  this->giveDomain()->giveXfemManager();
-    if ( this->czMatNum > 0 ) {
-        this->czMat = this->giveDomain()->giveMaterial(this->czMatNum);
-    }
+    LayeredCrossSection *layeredCS = this->layeredCS = dynamic_cast< LayeredCrossSection * >(this->giveCrossSection());
 
 }
 
@@ -97,7 +95,7 @@ Shell7BaseXFEM :: computeFailureCriteriaQuantities(FailureCriteriaStatus *fcStat
 
             Shell7BaseXFEM *neighbor = 
                 dynamic_cast< Shell7BaseXFEM * > (this->giveDomain()->giveElement( neighbors.at(i) ));
-            if ( neighbor && neighbor->hasCohesiveZone() ) {
+            if ( neighbor ) {
                 neighbor->giveMaxCZDamages(damageArrayNeigh, tStep); // damage parameter for each interface
 
                 // store maximum damage from neighbors
@@ -158,18 +156,22 @@ IRResultType Shell7BaseXFEM :: initializeFrom(InputRecord *ir)
     const char *__proc = "initializeFrom"; // Required by IR_GIVE_FIELD macro
     IRResultType result;                   // Required by IR_GIVE_FIELD macro
     
-    int material = 0;
-    IR_GIVE_OPTIONAL_FIELD(ir, material, _IFT_Shell7BaseXFEM_CohesiveZoneMaterial);
-    this->czMatNum = material;
+    // old, to be removed
+    //int material = 0;
+    //IR_GIVE_OPTIONAL_FIELD(ir, material, _IFT_Shell7BaseXFEM_CohesiveZoneMaterial);
+    //this->czMatNum = material;
+    if ( ir->hasField(_IFT_Shell7BaseXFEM_CohesiveZoneMaterial) ) {
+        OOFEM_ERROR("this keyword is not in use anymore! Instead define cz material for each interface in the cross secton, ex: interfacematerials 3 x x x ");
+    }
 
     Shell7Base :: initializeFrom(ir);
     return IRRT_OK; 
 }
 
 bool 
-Shell7BaseXFEM :: hasCohesiveZone()
+Shell7BaseXFEM :: hasCohesiveZone(int interfaceNum)
 {
-    return this->czMat!= NULL;
+    return this->layeredCS->giveInterfaceMaterialNum(interfaceNum) > 0;
 }
 
 Interface
@@ -219,7 +221,7 @@ Shell7BaseXFEM :: evalCovarBaseVectorsAt(FloatArray &lCoords, FloatMatrix &gcov,
     FloatArray N, dGenEps;
     FloatMatrix gcovd; 
     std :: vector< double > ef;
-    for ( int i = 1; i <= this->xMan->giveNumberOfEnrichmentItems(); i++ ) { // Only one is supported at the moment
+    for ( int i = 1; i <= this->xMan->giveNumberOfEnrichmentItems(); i++ ) { 
         Delamination *dei =  dynamic_cast< Delamination * >( this->xMan->giveEnrichmentItem(i) ); // should check success
 
         if ( dei->isElementEnriched(this) ) {
@@ -361,7 +363,7 @@ Shell7BaseXFEM :: giveInternalForcesVector(FloatArray &answer, TimeStep *tStep, 
             answer.assemble(tempRed, ordering);
 
             // Cohesive zone model
-            if ( this->hasCohesiveZone() ) {
+            if ( this->hasCohesiveZone(i) ) {
                 this->computeCohesiveForces( fCZ, tStep, solVec, solVecD, dei); 
                 tempRed.beSubArrayOf(fCZ, activeDofs);
                 answer.assemble(tempRed, ordering);
@@ -425,21 +427,26 @@ Shell7BaseXFEM :: giveMaxCZDamages(FloatArray &answer, TimeStep *tStep)
     StructuralInterfaceMaterial *mat;
     FloatArray ipValues;
     for ( int i = 0; i < numZones; i++ ) {
-        IntegrationRule *iRule = czIntegrationRulesArray [ i ];
-        double max = 0.0;    
-        for ( int j = 0; j < iRule->giveNumberOfIntegrationPoints(); j++ ) {
-            IntegrationPoint *ip = iRule->getIntegrationPoint(j);
-            
-            mat = static_cast < StructuralInterfaceMaterial * > ( this->czMat );
-            mat->giveIPValue(ipValues, ip, IST_DamageScalar, tStep);
+        if ( hasCohesiveZone(i+1) ) {
+            IntegrationRule *iRule = czIntegrationRulesArray [ i ];
+            double max = 0.0;    
+            for ( int j = 0; j < iRule->giveNumberOfIntegrationPoints(); j++ ) {
+                IntegrationPoint *ip = iRule->getIntegrationPoint(j);
 
-            double val = ipValues.at(1);
-            if ( val > max ) {
-                max = val;
+                mat = static_cast < StructuralInterfaceMaterial * > (this->layeredCS->giveInterfaceMaterial(i+1) );
+                //mat = static_cast < StructuralInterfaceMaterial * > ( this->czMat );
+                mat->giveIPValue(ipValues, ip, IST_DamageScalar, tStep);
+
+                double val = ipValues.at(1);
+                if ( val > max ) {
+                    max = val;
+                }
+
             }
-
+                answer(i) = max;
+        } else {
+            answer(i) = 0.0;
         }
-        answer(i) = max;
     }
 
     
@@ -456,9 +463,13 @@ Shell7BaseXFEM :: computeCohesiveForces(FloatArray &answer, TimeStep *tStep, Flo
     answerTemp.zero();
 
     FloatMatrix N, B, F;  
-    IntegrationRule *iRuleL = czIntegrationRulesArray [ dei->giveNumber() - 1 ]; ///@ todo does this work with giveNumber?
+    int delamNum = dei->giveNumber();
+    IntegrationRule *iRuleL = czIntegrationRulesArray [ delamNum - 1 ]; ///@ todo does this work with giveNumber?
 
-    StructuralInterfaceMaterial *intMat = static_cast < StructuralInterfaceMaterial * > (this->czMat);
+    StructuralInterfaceMaterial *intMat = static_cast < StructuralInterfaceMaterial * > 
+        (this->layeredCS->giveInterfaceMaterial(delamNum) );
+    //StructuralInterfaceMaterial *intMat = static_cast < StructuralInterfaceMaterial * > (this->czMat);
+
     FloatMatrix lambda, lambdaN, Q;
     FloatArray Fp, T, interfaceXiCoords, nCov, xd, unknowns, genEpsC, genEpsD;
     this->layeredCS->giveInterfaceXiCoords(interfaceXiCoords);
@@ -514,18 +525,16 @@ Shell7BaseXFEM :: updateYourself(TimeStep *tStep)
 {
 	Shell7Base :: updateYourself(tStep);
 
-#  ifdef VERBOSE
-    // VERBOSE_PRINT1("Updating Element ",number)
-#  endif
-    //for ( int i = 0; i < this->xMan->giveNumberOfEnrichmentItems(); i++ ) {
     for ( int i = 0; i < this->layeredCS->giveNumberOfLayers() - 1; i++ ) {
-        czIntegrationRulesArray [ i ]->updateYourself(tStep);
-		for ( int j = 0; j < czIntegrationRulesArray [ i ]->giveNumberOfIntegrationPoints(); j++ ) {
-			GaussPoint *gp = czIntegrationRulesArray [ i ]->getIntegrationPoint(j);
-            if ( this->czMat ) {
-			    this->czMat->updateYourself(gp, tStep);
-            }
-		}
+        if ( this->hasCohesiveZone(i+1) ) {
+            czIntegrationRulesArray [ i ]->updateYourself(tStep);
+		    for ( int j = 0; j < czIntegrationRulesArray [ i ]->giveNumberOfIntegrationPoints(); j++ ) {
+			    GaussPoint *gp = czIntegrationRulesArray [ i ]->getIntegrationPoint(j);
+                if ( this->layeredCS->giveInterfaceMaterial(i+1) ) {
+			        this->layeredCS->giveInterfaceMaterial(i+1)->updateYourself(gp, tStep);
+                }
+		    }
+        }
     }
 }
 
@@ -543,8 +552,9 @@ Shell7BaseXFEM :: computeCohesiveTangent(FloatMatrix &answer, TimeStep *tStep)
     IntArray eiDofIdArray, orderingJ, activeDofsJ;
     FloatMatrix tempRed;
     for ( int i = 1; i <= this->xMan->giveNumberOfEnrichmentItems(); i++ ) {
+
         Delamination *dei =  dynamic_cast< Delamination * >( this->xMan->giveEnrichmentItem(i) );
-        if ( dei != NULL && dei->isElementEnriched(this) ) {
+        if ( dei != NULL && dei->isElementEnriched(this) && this->hasCohesiveZone(i) ) {
             dei->giveEIDofIdArray(eiDofIdArray); 
             this->giveSolutionVector(solVecD, eiDofIdArray, tStep);  
             this->computeCohesiveTangentAt(temp, tStep, solVecD, dei);
@@ -570,8 +580,11 @@ Shell7BaseXFEM :: computeCohesiveTangentAt(FloatMatrix &answer, TimeStep *tStep,
     answerTemp.resize(nDofs, nDofs); 
     answerTemp.zero();
 
+    int delamNum = dei->giveNumber();
     IntegrationRule *iRuleL = czIntegrationRulesArray [ dei->giveNumber() - 1 ];
-    StructuralInterfaceMaterial *intMat = static_cast < StructuralInterfaceMaterial * > (this->czMat);
+    //StructuralInterfaceMaterial *intMat = static_cast < StructuralInterfaceMaterial * > (this->czMat);
+    StructuralInterfaceMaterial *intMat = static_cast < StructuralInterfaceMaterial * > 
+        (this->layeredCS->giveInterfaceMaterial(delamNum) );
 
     double xi = dei->giveDelamXiCoord();
     double zeta = this->giveGlobalZcoord(xi);
@@ -690,10 +703,10 @@ Shell7BaseXFEM :: computeStiffnessMatrix(FloatMatrix &answer, MatResponseMode rM
     // Cohesive zones
 #if 1
     FloatMatrix Kcoh;
-    if ( this->hasCohesiveZone() ) {
+    //if ( this->hasCohesiveZone() ) {
         this->computeCohesiveTangent(Kcoh, tStep);
         answer.add(Kcoh);
-    }
+    //}
 #endif
 
 
