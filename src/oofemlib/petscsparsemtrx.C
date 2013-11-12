@@ -187,20 +187,20 @@ PetscSparseMtrx :: times(const FloatMatrix &B, FloatMatrix &answer) const
     VecSetType(globY, VECSEQ);
     VecSetSizes(globY, PETSC_DECIDE, nr);
     int nrB = B.giveNumberOfRows();
-    FloatArray colVals(B.giveNumberOfRows());
-    FloatArray colResults(nr);
-    double *resultsPtr = colResults.givePointer();
-    for (int k = 0; k < nc; k++) {
+    FloatArray colVals(nrB);
+    double *resultsPtr;
+    for (int k = 0; k < nc; ++k) {
         B.copyColumn(colVals, k+1);
         VecCreateSeqWithArray(PETSC_COMM_SELF, 1, nrB, colVals.givePointer(), &globX);
         MatMult(this->mtrx, globX, globY);
         VecGetArray(globY, &resultsPtr);
-        answer.setColumn(colResults, k+1);
+        for (int i = 0; i < nr; ++i) answer(i, k) = resultsPtr[i];
         VecRestoreArray(globY, &resultsPtr);
         VecDestroy(&globX);
      }
      VecDestroy(&globY);
 #else
+    double *aptr = answer.givePointer();
     Mat globB, globC;
     MatCreateSeqDense(PETSC_COMM_SELF, B.giveNumberOfRows(), B.giveNumberOfColumns(), B.givePointer(), & globB);
     MatMatMult(this->mtrx, globB, MAT_INITIAL_MATRIX, PETSC_DEFAULT, & globC);
