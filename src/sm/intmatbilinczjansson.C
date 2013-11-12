@@ -422,7 +422,7 @@ IntMatBilinearCZJansson :: give3dStiffnessMatrix_dTdj_num(FloatMatrix &answer, M
 
     IntMatBilinearCZJanssonStatus *status = static_cast< IntMatBilinearCZJanssonStatus * >( this->giveStatus(gp) );
 
-    double damage = status->giveTempDamage();
+    //double damage = status->giveTempDamage();
     FloatMatrix Finv = status->giveTempInverseDefGrad();
     FloatMatrix  F;
     FloatArray J = status->giveTempJump();

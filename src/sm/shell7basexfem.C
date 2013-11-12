@@ -67,7 +67,6 @@ Shell7BaseXFEM :: postInitialize()
     Shell7Base :: postInitialize();
 
     this->xMan =  this->giveDomain()->giveXfemManager();
-    LayeredCrossSection *layeredCS = this->layeredCS = dynamic_cast< LayeredCrossSection * >(this->giveCrossSection());
 
 }
 
@@ -153,8 +152,8 @@ Shell7BaseXFEM :: computeFailureCriteriaQuantities(FailureCriteriaStatus *fcStat
 
 IRResultType Shell7BaseXFEM :: initializeFrom(InputRecord *ir)
 {
-    const char *__proc = "initializeFrom"; // Required by IR_GIVE_FIELD macro
-    IRResultType result;                   // Required by IR_GIVE_FIELD macro
+    //const char *__proc = "initializeFrom"; // Required by IR_GIVE_FIELD macro
+    //IRResultType result;                   // Required by IR_GIVE_FIELD macro
     
     // old, to be removed
     //int material = 0;

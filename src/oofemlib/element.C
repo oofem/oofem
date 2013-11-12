@@ -1283,6 +1283,7 @@ Element :: giveSpatialDimension()
     case EGT_quad_1:
     case EGT_quad_2:
     case EGT_quad9_2:
+    case EGT_quad_1_interface:
     case EGT_quad_21_interface:
         return 2;
 
@@ -1315,6 +1316,8 @@ Element :: giveNumberOfBoundarySides()
 
     case EGT_line_1:
     case EGT_line_2:
+    case EGT_quad_1_interface:
+    case EGT_quad_21_interface:
         return 2;
 
     case EGT_triangle_1:

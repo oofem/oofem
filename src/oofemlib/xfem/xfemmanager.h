@@ -144,9 +144,6 @@ public:
     Domain *giveDomain() { return this->domain; }
     void setDomain(Domain *ipDomain);
 
-    /// Clear the receiver
-    void clear();
-
     /**
      * Stores the state of receiver to output stream.
      * @param stream Context stream.

@@ -94,7 +94,7 @@ int FractureManager :: instanciateYourself(DataReader *dr)
     std :: string name;
 
     // Create and initialize all failure criterias
-    for ( int i = 1; i <= this->criteriaList.size(); i++ ) {
+    for ( int i = 1; i <= (int)this->criteriaList.size(); i++ ) {
         
         InputRecord *mir = dr->giveInputRecord(DataReader :: IR_failCritRec, i);
         result = mir->giveRecordKeywordField(name);
@@ -151,7 +151,7 @@ FractureManager :: evaluateFailureCriterias(TimeStep *tStep)
     // Go through all the failure criterias. These in turn keep track of the failure criteria statuses 
     // which are responsible for their own evaluation
 
-    for ( int i = 1; i <= this->criteriaList.size(); i++ ) {
+    for ( int i = 1; i <= (int)this->criteriaList.size(); i++ ) {
 
         #ifdef VERBOSE
         printf( "\n  Evaluating failure criteria %i \n", i);
@@ -159,7 +159,7 @@ FractureManager :: evaluateFailureCriterias(TimeStep *tStep)
         FailureCriteria *failCrit = this->criteriaList.at(i-1);
         if ( failCrit->giveType() == ELLocal ) { 
 
-            for ( int j = 1; j <= failCrit->list.size(); j++ ) {
+            for ( int j = 1; j <= (int)failCrit->list.size(); j++ ) {
             #ifdef VERBOSE
                 printf( "\n    Evaluating for element %i \n", j);
             #endif
@@ -192,13 +192,13 @@ FractureManager :: updateXFEM(TimeStep *tStep)
             #endif
             ei = xMan->giveEnrichmentItem(k);
 
-            for ( int i = 1; i <= this->criteriaList.size(); i++ ) {
+            for ( int i = 1; i <= (int)this->criteriaList.size(); i++ ) {
                 #ifdef VERBOSE
                 printf( "based on failure criteria %i \n", i);
                 #endif
                 FailureCriteria *failCrit = this->criteriaList.at(i-1);
 
-                for ( int j = 1; j <= failCrit->list.size(); j++ ) { // each criteria (often each element)
+                for ( int j = 1; j <= (int)failCrit->list.size(); j++ ) { // each criteria (often each element)
                     #ifdef VERBOSE
                     printf( "\n  Element %i ", j);
                     #endif
@@ -253,7 +253,7 @@ DamagedNeighborLayered :: evaluateFailureCriteria(FailureCriteriaStatus *fcStatu
     DamagedNeighborLayeredStatus *status = dynamic_cast< DamagedNeighborLayeredStatus * > (fcStatus);
     bool criteriaFulfilled = false;
     status->failedFlags.resize(status->layerDamageValues.giveSize());
-    for ( int i = 1; i <= status->failedFlags.size(); i++ ) { // if there are several quantities like interfaces
+    for ( int i = 1; i <= (int)status->failedFlags.size(); i++ ) { // if there are several quantities like interfaces
 
         status->failedFlags.at(i-1) = false;
         if ( status->layerDamageValues.at(i) > this->DamageThreshold ) {
