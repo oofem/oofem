@@ -430,12 +430,9 @@ GradDpElement :: computeStiffnessMatrix_uu(FloatMatrix &answer, MatResponseMode 
     NLStructuralElement *elem = this->giveNLStructuralElement();
     FloatMatrix B, D, DB;
 
-    Interface *interface = this->giveNLStructuralElement()->giveStructuralCrossSection()
-        ->giveInterface( GradDpMaterialExtensionInterfaceType, gp );
-    GradDpMaterialExtensionInterface *dpmat = static_cast< GradDpMaterialExtensionInterface * >( interface );
-    if ( !dpmat ) {
-        OOFEM_ERROR("GradDpElement :: computeStiffnessMatrix_uu - Material doesn't implement the required DpGrad interface!");
-    }
+    StructuralCrossSection *cs = this->giveNLStructuralElement()->giveStructuralCrossSection();
+    Interface *interface; 
+    GradDpMaterialExtensionInterface *dpmat;
 
     nlGeo = elem->giveGeometryMode();
     IntegrationRule *iRule = elem->giveIntegrationRule(0);
@@ -443,6 +440,12 @@ GradDpElement :: computeStiffnessMatrix_uu(FloatMatrix &answer, MatResponseMode 
     answer.resize(locSize, locSize);
     for ( int j = 0; j < iRule->giveNumberOfIntegrationPoints(); j++ ) {
         gp = iRule->getIntegrationPoint(j);
+        
+        interface = cs->giveInterface( GradDpMaterialExtensionInterfaceType, gp );
+        dpmat = dynamic_cast< GradDpMaterialExtensionInterface * >( interface );
+        if ( !dpmat ) {
+            OOFEM_ERROR("GradDpElement :: computeStiffnessMatrix_uk - Material doesn't implement the required DpGrad interface!");
+        }
         if ( nlGeo == 0 ) {
             elem->computeBmatrixAt(gp, B);
         } else if ( nlGeo == 1 ) {
@@ -486,13 +489,9 @@ GradDpElement :: computeStiffnessMatrix_ku(FloatMatrix &answer, MatResponseMode 
     GaussPoint *gp;
     NLStructuralElement *elem = this->giveNLStructuralElement();
     FloatMatrix B, DB, D, Nk, NkT, NkDB;
-    Interface *interface = this->giveNLStructuralElement()->giveStructuralCrossSection()
-        ->giveInterface( GradDpMaterialExtensionInterfaceType, gp );
-    GradDpMaterialExtensionInterface *dpmat = static_cast< GradDpMaterialExtensionInterface * >( interface );
-
-    if ( !dpmat ) {
-        OOFEM_ERROR("GradDpElement :: computeStiffnessMatrix_ku - Material doesn't implement the required DpGrad interface!");
-    }
+    StructuralCrossSection *cs = this->giveNLStructuralElement()->giveStructuralCrossSection();
+    Interface *interface; 
+    GradDpMaterialExtensionInterface *dpmat;
 
     answer.resize(nlSize, locSize);
 
@@ -502,6 +501,13 @@ GradDpElement :: computeStiffnessMatrix_ku(FloatMatrix &answer, MatResponseMode 
 
     for ( int j = 0; j < iRule->giveNumberOfIntegrationPoints(); j++ ) {
         gp = iRule->getIntegrationPoint(j);
+
+        interface = cs->giveInterface( GradDpMaterialExtensionInterfaceType, gp );
+        dpmat = dynamic_cast< GradDpMaterialExtensionInterface * >( interface );
+        if ( !dpmat ) {
+            OOFEM_ERROR("GradDpElement :: computeStiffnessMatrix_uk - Material doesn't implement the required DpGrad interface!");
+        }
+
         elem->computeBmatrixAt(gp, B);
         if ( nlGeo == 1 ) {
             if ( elem->domain->giveEngngModel()->giveFormulation() == AL ) {
@@ -592,22 +598,23 @@ GradDpElement :: computeStiffnessMatrix_kk(FloatMatrix &answer, MatResponseMode 
     GaussPoint *gp;
     FloatMatrix lStiff;
     FloatMatrix Bk, Bt, BtB, N, Nt, NtN;
-    Interface *interface = this->giveNLStructuralElement()->giveStructuralCrossSection()
-        ->giveInterface( GradDpMaterialExtensionInterfaceType, gp );
-    GradDpMaterialExtensionInterface *dpmat = static_cast< GradDpMaterialExtensionInterface * >( interface );
-
-    if ( !dpmat ) {
-        OOFEM_ERROR("GradDpElement :: computeStiffnessMatrix_kk - Material doesn't implement the required DpGrad interface!");
-    }
+    StructuralCrossSection *cs = this->giveNLStructuralElement()->giveStructuralCrossSection();
+    Interface *interface; 
+    GradDpMaterialExtensionInterface *dpmat;
 
     IntegrationRule *iRule = elem->giveIntegrationRule(0);
 
-
     answer.resize(nlSize, nlSize);
-
 
     for ( int j = 0; j < iRule->giveNumberOfIntegrationPoints(); j++ ) {
         gp = iRule->getIntegrationPoint(j);
+
+        interface = cs->giveInterface( GradDpMaterialExtensionInterfaceType, gp );
+        dpmat = dynamic_cast< GradDpMaterialExtensionInterface * >( interface );
+        if ( !dpmat ) {
+            OOFEM_ERROR("GradDpElement :: computeStiffnessMatrix_uk - Material doesn't implement the required DpGrad interface!");
+        }
+
         this->computeNkappaMatrixAt(gp, N);
         Nt.beTranspositionOf(N);
         this->computeBkappaMatrixAt(gp, Bk);
@@ -638,24 +645,22 @@ GradDpElement :: computeStiffnessMatrix_uk(FloatMatrix &answer, MatResponseMode 
 {
     NLStructuralElement *elem = this->giveNLStructuralElement();
     double dV;
-    GaussPoint *gp;
-    Interface *interface = this->giveNLStructuralElement()->giveStructuralCrossSection()
-        ->giveInterface( GradDpMaterialExtensionInterfaceType, gp );
-    GradDpMaterialExtensionInterface *dpmat = static_cast< GradDpMaterialExtensionInterface * >( interface );
+    StructuralCrossSection *cs = this->giveNLStructuralElement()->giveStructuralCrossSection();
+    Interface *interface; 
+    GradDpMaterialExtensionInterface *dpmat;
   
-    if ( !dpmat ) {
-        OOFEM_ERROR("GradDpElement :: computeStiffnessMatrix_uk - Material doesn't implement the required DpGrad interface!");
-    }
-
     IntegrationRule *iRule = elem->giveIntegrationRule(0);
     FloatMatrix B, Bt, Nk, BSN, BS, gPSigma;
 
     answer.resize(locSize, nlSize);
 
-
-
     for ( int j = 0; j < iRule->giveNumberOfIntegrationPoints(); j++ ) {
-        gp = iRule->getIntegrationPoint(j);
+        GaussPoint *gp = iRule->getIntegrationPoint(j);
+        interface = cs->giveInterface( GradDpMaterialExtensionInterfaceType, gp );
+        dpmat = dynamic_cast< GradDpMaterialExtensionInterface * >( interface );
+        if ( !dpmat ) {
+            OOFEM_ERROR("GradDpElement :: computeStiffnessMatrix_uk - Material doesn't implement the required DpGrad interface!");
+        }
         dpmat->givePDGradMatrix_uk(gPSigma, rMode, gp, tStep);
         this->computeNkappaMatrixAt(gp, Nk);
         elem->computeBmatrixAt(gp, B);
