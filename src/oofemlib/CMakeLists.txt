@@ -22,7 +22,7 @@ set (core_unsorted
     eleminterpunknownmapper.C primaryunknownmapper.C materialmappingalgorithm.C
     nonlocalmaterialext.C randommaterialext.C
     inputrecord.C oofemtxtinputrecord.C dynamicinputrecord.C
-    dynamicdatareader.C buffereddatareader.C oofemtxtdatareader.C tokenizer.C parser.C
+    dynamicdatareader.C oofemtxtdatareader.C tokenizer.C parser.C
     spatiallocalizer.C dummylocalizer.C octreelocalizer.C
     integrationrule.C gaussintegrationrule.C lobattoir.C
     smoothednodalintvarfield.C dofmanvalfield.C
@@ -73,8 +73,11 @@ set (core_nm
     nrsolver.C
     linesearch.C
     calmls.C
-    petscsolver.C
     )
+
+if (USE_PETSC)
+    list (APPEND core_nm petscsolver.C petscsparsemtrx.C)
+endif ()
 
 set (core_fields
     fieldmanager.C
@@ -145,7 +148,6 @@ set (core_arrays
     stressvector.C
     strainvector.C
     floatmatrix.C
-    petscsparsemtrx.C
     )
 
 set (core_engng

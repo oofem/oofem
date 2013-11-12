@@ -39,7 +39,6 @@
 #include "floatarray.h"
 #include "alist.h"
 #include "domain.h"
-#include "enrichmentitem.h"
 #include "enrichmentdomain.h"
 #include "element.h"
 #include "dofmanager.h"
@@ -51,14 +50,18 @@
 #include "datastream.h"
 #include "contextioerr.h"
 #include "dynamicinputrecord.h"
+#include "internalstatevaluetype.h"
 
 namespace oofem {
+
 XfemManager :: XfemManager(Domain *domain)
 {
     this->domain = domain;
     this->enrichmentItemList = new AList< EnrichmentItem >(0);
     numberOfEnrichmentItems = -1;
     mNumGpPerTri = 12;
+    doVTKExport = false;
+    vtkExportFields.resize(0);
 }
 
 XfemManager :: ~XfemManager()
@@ -73,6 +76,23 @@ XfemManager :: clear()
     enrichmentItemList = NULL;
     numberOfEnrichmentItems = -1;
 }
+
+InternalStateValueType 
+XfemManager :: giveXFEMStateValueType(XFEMStateType type)
+{
+    switch ( type ) {
+    case XFEMST_Enrichment:
+    case XFEMST_LevelSetPhi:
+    case XFEMST_LevelSetGamma:
+    case XFEMST_NumIntersecPoints:
+    case XFEMST_NodeEnrMarker:
+        return ISVT_SCALAR;
+    default:
+        return ISVT_UNDEFINED;
+
+    }
+}
+
 
 bool XfemManager :: isElementEnriched(const Element *elem)
 {
@@ -98,6 +118,7 @@ EnrichmentItem *XfemManager :: giveEnrichmentItem(int n)
     return NULL;
 }
 
+
 void
 XfemManager :: createEnrichedDofs()
 {
@@ -108,8 +129,19 @@ XfemManager :: createEnrichedDofs()
         EnrichmentItem *ei = this->giveEnrichmentItem(j);
         ei->createEnrichedDofs();
     }
+
 }
 
+
+void 
+XfemManager :: addEnrichedDofsTo( DofManager *dMan, IntArray &dofIdArray )
+{
+    int nDofs = dMan->giveNumberOfDofs();
+    for ( int j = 1; j <= dofIdArray.giveSize(); j++ ) {                      
+            dMan->appendDof( new MasterDof( nDofs + j, dMan, ( DofIDItem ) ( dofIdArray.at(j) ) ) );   
+    }
+
+}
 
 
 IRResultType XfemManager :: initializeFrom(InputRecord *ir)
@@ -121,6 +153,12 @@ IRResultType XfemManager :: initializeFrom(InputRecord *ir)
 
     IR_GIVE_OPTIONAL_FIELD(ir, mNumGpPerTri, _IFT_XfemManager_numberOfGpPerTri);
 
+    IR_GIVE_OPTIONAL_FIELD(ir, doVTKExport, _IFT_XfemManager_VTKExport);
+    if ( doVTKExport ) {
+        IntArray exportFields;
+        IR_GIVE_FIELD(ir, this->vtkExportFields, _IFT_XfemManager_VTKExportFields);
+    }
+
     return IRRT_OK;
 }
 
@@ -128,8 +166,11 @@ IRResultType XfemManager :: initializeFrom(InputRecord *ir)
 void XfemManager :: giveInputRecord(DynamicInputRecord &input)
 {
     input.setRecordKeywordField(_IFT_XfemManager_Name, 1);
-	input.setField(numberOfEnrichmentItems, _IFT_XfemManager_numberOfEnrichmentItems);
-	input.setField(mNumGpPerTri, _IFT_XfemManager_numberOfGpPerTri);
+    input.setField(numberOfEnrichmentItems, _IFT_XfemManager_numberOfEnrichmentItems);
+    input.setField(mNumGpPerTri, _IFT_XfemManager_numberOfGpPerTri);
+    input.setField(doVTKExport, _IFT_XfemManager_VTKExport);
+    input.setField(vtkExportFields, _IFT_XfemManager_VTKExportFields);
+
 }
 
 int XfemManager :: instanciateYourself(DataReader *dr)
@@ -162,13 +203,13 @@ int XfemManager :: instanciateYourself(DataReader *dr)
 
 void XfemManager :: setDomain(Domain *ipDomain)
 {
-	domain = ipDomain;
+    domain = ipDomain;
 
-	int numEI = enrichmentItemList->giveSize();
+    int numEI = enrichmentItemList->giveSize();
 
-	for(int i = 1; i <= numEI; i++) {
-		enrichmentItemList->at(i)->setDomain(ipDomain);
-	}
+    for(int i = 1; i <= numEI; i++) {
+        enrichmentItemList->at(i)->setDomain(ipDomain);
+    }
 
 }
 
@@ -248,6 +289,17 @@ void XfemManager :: propagateFronts()
     for ( int i = 1; i <= enrichmentItemList->giveSize(); i++ ) {
         enrichmentItemList->at(i)->propagateFronts();
     }
+}
+
+bool XfemManager :: hasPropagatingFronts()
+{
+    for ( int i = 1; i <= enrichmentItemList->giveSize(); i++ ) {
+    	if( enrichmentItemList->at(i)->hasPropagatingFronts() ) {
+    		return true;
+    	}
+    }
+
+	return false;
 }
 
 } // end namespace oofem

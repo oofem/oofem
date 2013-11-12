@@ -20,7 +20,7 @@ BoundaryCondition  1 loadTimeFunction 1 prescribedvalue 0.0
 BoundaryCondition  2 loadTimeFunction 1 prescribedvalue 2.e-3
 NodalLoad 3 loadTimeFunction 1 Components 2 0.0  3.0
 NodalLoad 4 loadTimeFunction 2 Components 2 0.0 -3.0
-ConstantFunction 1 f(t) 1.0
+HeavisideLTF 1 origin 0. value 1.0
 HeavisideLTF 2 origin 400. value 1.0
 #
 #

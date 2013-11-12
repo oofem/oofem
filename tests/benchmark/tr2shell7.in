@@ -1,0 +1,42 @@
+testTrShell7.out
+Cantilever beam with edge load
+Nonlinearstatic nsteps 1 lstype 0 smtype 0 rtolf 1.0e-4 rtold -1.0 manrmsteps 1 controllmode 1 nmodules 1 initialguess 1 
+vtkxml tstep_all dofman_all element_all primvars 1 1 
+domain 3dDirShell 
+OutputManager tstep_all dofman_all element_all
+ndofman 15 nelem 4 ncrosssect 1 nmat 1 nbc 2 nic 0 nltf 1	
+node      1 coords 3        0.           0.           0.   bc 7 1 1 1 1 1 1 1 
+node      2 coords 3  0.5,           0.,           0.
+node      3 coords 3  1.,           0.,           0.
+node      4 coords 3  0.,  0.200000003,           0. bc 7 1 1 1 1 1 1 1 
+node      5 coords 3  0.5,  0.200000003,           0.
+node      6 coords 3  1.,  0.200000003,           0.
+node      7 coords 3  0.25,           0.,           0.
+node      8 coords 3  0.5,  0.100000001,           0.
+node      9 coords 3  0.25,  0.100000001,           0.
+node     10 coords 3  0.25,  0.200000003,           0.
+node     11 coords 3  0.,  0.100000001,           0. bc 7 1 1 1 1 1 1 1 
+node     12 coords 3  0.75,           0.,           0.
+node     13 coords 3  1.,  0.100000001,           0.
+node     14 coords 3  0.75,  0.100000001,           0.
+node     15 coords 3  0.75,  0.200000003,           0.
+Tr2Shell7 1	nodes	6	1  2  5  7  8  9	 mat 1 crossSect 1  
+Tr2Shell7 2	nodes	6	5  4  1 10 11  9	 mat 1 crossSect 1  
+Tr2Shell7 3	nodes	6	2  3  6 12 13 14	 mat 1 crossSect 1 		boundaryLoads  2 2 2
+Tr2Shell7 4	nodes	6   6  5  2 15  8 14	 mat 1 crossSect 1 	
+layeredCS 1 nlayers 2 layermaterials 2  1 1  thicks 2  1.00000e-002 1.00000e-002 nintegrationpoints 2  
+IsoLE 1 d 1. E 1e9. n 0.0 tAlpha 0.
+BoundaryCondition 1 loadTimeFunction 1 prescribedvalue 0.0
+ConstantEdgeLoad 2 ndofs 8 loadType 2 loadTimeFunction 1 Components 8 0. 0. 1.0 0. 0. 0. 0.0 1.0
+ConstantFunction 1 f(t) 1.
+#%BEGIN_CHECK% tolerance 1.e-5
+## Check unknowns in node 13 (mid edge node)
+#NODE tStep 0 number 13 dof 1 unknown d value -1.35301025e-007
+#NODE tStep 0 number 13 dof 2 unknown d value 3.78016490e-009
+#NODE tStep 0 number 13 dof 3 unknown d value 4.69760535e-004
+#NODE tStep 0 number 13 dof 4 unknown d value -7.50330505e-004
+#NODE tStep 0 number 13 dof 5 unknown d value -2.37203564e-006
+#NODE tStep 0 number 13 dof 6 unknown d value -2.81536282e-007
+#NODE tStep 0 number 13 dof 7 unknown d value -5.30812682e-007
+#%END_CHECK%
+  

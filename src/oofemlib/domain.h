@@ -69,6 +69,8 @@
 #define _IFT_Domain_topology "topology"
 #define _IFT_Domain_nxfemman "nxfemman" /// [in,optional] Specifies if there is an xfem-manager.
 #define _IFT_Domain_numberOfSpatialDimensions "nsd" ///< [in,optional] Specifies how many spatial dimensions the domain has.
+#define _IFT_Domain_nfracman "nfracman" /// [in,optional] Specifies if there is a fracture manager.
+#define _IFT_Domain_axisymmetric "axisymm" /// [optional] Specifies if the problem is axisymmetric.
 //@}
 
 namespace oofem {
@@ -95,6 +97,7 @@ class XfemManager;
 class TopologyDescription;
 class DataReader;
 class Set;
+class FractureManager;
 
 #ifdef __PARALLEL_MODE
 class ProcessCommunicator;
@@ -173,6 +176,7 @@ private:
     int serialNumber;
     /// Number of spatial dimensions
     int nsd;
+    bool axisymm;
     /// nodal recovery object associated to receiver.
     NodalRecoveryModel *smoother;
 
@@ -190,7 +194,10 @@ private:
     StateCounterType nonlocalUpdateStateCounter;
     /// XFEM Manager
     XfemManager *xfemManager;
-     
+
+    /// Fracture Manager
+    FractureManager *fracManager;
+
     /// Topology description
     TopologyDescription *topology;
     
@@ -230,7 +237,7 @@ public:
      */
     Domain(int n, int serNum, EngngModel *e);
 
-	/// Create a copy of the domain using the dynamic data reader.
+    /// Create a copy of the domain using the dynamic data reader.
     Domain *Clone();
 
     /// Destructor.
@@ -383,10 +390,13 @@ public:
     int giveNumberOfNonlocalBarriers() const { return nonlocalBarierList->giveSize(); }
     /// Returns number of random field generators
     int giveNumberOfRandomFieldGenerators() const { return randomFieldGeneratorList->giveSize(); }
-    
-    int giveCorrespondingCoordinateIndex(int);
+    /// Returns number of sets
+    int giveNumberOfSets() const { return setList->giveSize(); }    
+
     /// Returns number of spatial dimensions.
     int giveNumberOfSpatialDimensions();
+    /// Returns true of axisymmetry is in effect.
+    bool isAxisymmetric();
     /**
      * @name Advanced domain manipulation methods.
      */
@@ -438,6 +448,10 @@ public:
 
     XfemManager *giveXfemManager();
     bool hasXfemManager();
+    
+    FractureManager *giveFractureManager(); 
+    bool hasFractureManager();
+
     /// List of Xfemmanagers.
     /**
      * Sets receiver's associated topology description.

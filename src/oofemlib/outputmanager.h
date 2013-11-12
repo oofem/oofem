@@ -39,12 +39,13 @@
 #include "domain.h"
 #include "engngm.h"
 #include "intarray.h"
+#include "range.h"
 
 #include <list>
 
 ///@name Input fields for OutputManager
 //@{
-#define _IFT_OutputManager_name "outputmanager"
+#define _IFT_OutputManager_Name "outputmanager"
 #define _IFT_OutputManager_tstepall "tstep_all"
 #define _IFT_OutputManager_tstepstep "tstep_step"
 #define _IFT_OutputManager_dofmanall "dofman_all"
@@ -57,8 +58,6 @@
 //@}
 
 namespace oofem {
-
-class Range;
 
 /**
  * Represents output manager. It controls and manages the time step output.

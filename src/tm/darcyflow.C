@@ -197,7 +197,6 @@ void DarcyFlow :: printDofOutputAt(FILE *stream, Dof *iDof, TimeStep *atTime)
 
 void DarcyFlow :: updateYourself (TimeStep *tStep)
 {
-    //this->updateInternalState(tStep);
     EngngModel :: updateYourself(tStep);
 
 }
@@ -242,43 +241,6 @@ int DarcyFlow :: forceEquationNumbering(int id)  // Is this really needed???!?
     }
 
     return neq;
-    /*
-     * Force numbering of equations. First all velocities on domain, then pressures.
-     */
-#if 0
-    int i, j, ndofs, nnodes, nelem;
-    DofManager *inode;
-    Domain *domain = this->giveDomain(id);
-    TimeStep *currStep = this->giveCurrentStep();
-    IntArray loc;
-    Dof *jDof;
-    DofIDItem type;
-
-    this->domainNeqs.at(id) = 0;
-    this->domainPrescribedNeqs.at(id) = 0;
-
-
-    nnodes = domain->giveNumberOfDofManagers();
-
-    // and then pressures
-    for ( i = 1; i <= nnodes; i++ ) {
-        inode = domain->giveDofManager(i);
-        ndofs = inode->giveNumberOfDofs();
-        for ( j = 1; j <= ndofs; j++ ) {
-            jDof  =  inode->giveDof(j);
-            type  =  jDof->giveDofID();
-            if ( type == P_f ) {
-                jDof->askNewEquationNumber(currStep);
-            }
-        }
-    }
-
-
-    // invalidate element local copies of location arrays
-    nelem = domain->giveNumberOfElements();
-
-    return domainNeqs.at(id);
-#endif
 }
 
 NumericalMethod *DarcyFlow :: giveNumericalMethod(MetaStep *mStep)

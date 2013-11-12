@@ -1186,7 +1186,7 @@ Element :: computeGlobalCoordinates(FloatArray &answer, const FloatArray &lcoord
 }
 
 
-int
+bool
 Element :: computeLocalCoordinates(FloatArray &answer, const FloatArray &gcoords)
 {
     FEInterpolation *fei = this->giveInterpolation();

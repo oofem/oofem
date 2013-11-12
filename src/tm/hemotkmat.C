@@ -96,13 +96,8 @@ HeMoTKMaterial :: giveFluxVector(FloatArray &answer, GaussPoint *gp, const Float
 {
     TransportMaterialStatus *ms = static_cast< TransportMaterialStatus * >( this->giveStatus(gp) );
 
-    FloatArray s;
-    s = ms->giveTempStateVector();
-    if ( s.isEmpty() ) {
-        _error("matcond1d: undefined state vector");
-    }
-    double w = s.at(2);
-    double t = s.at(1);
+    double w = field.at(2);
+    double t = field.at(1);
 
     FloatArray ans_w, ans_t;
     FloatArray grad_w, grad_t;
@@ -188,7 +183,7 @@ HeMoTKMaterial :: matcond1d(FloatMatrix &d, GaussPoint *gp, MatResponseMode mode
 
     //  w = Tm->ip[ipp].av[0];
     //  t = Tm->ip[ipp].av[1];
-    s = status->giveTempStateVector();
+    s = status->giveTempField();
     if ( s.isEmpty() ) {
         _error("matcond1d: undefined state vector");
     }
@@ -227,7 +222,7 @@ HeMoTKMaterial :: matcond2d(FloatMatrix &d, GaussPoint *gp, MatResponseMode mode
 
     //  w = Tm->ip[ipp].av[0];
     //  t = Tm->ip[ipp].av[1];
-    s = status->giveTempStateVector();
+    s = status->giveTempField();
     if ( s.isEmpty() ) {
         _error("matcond2d: undefined state vector");
     }
@@ -269,7 +264,7 @@ HeMoTKMaterial :: matcond3d(FloatMatrix &d, GaussPoint *gp, MatResponseMode mode
 
     //  w = Tm->ip[ipp].av[0];
     //  t = Tm->ip[ipp].av[1];
-    s = status->giveTempStateVector();
+    s = status->giveTempField();
     if ( s.isEmpty() ) {
         _error("matcond3d: undefined state vector");
     }
@@ -313,7 +308,7 @@ double HeMoTKMaterial :: computeCapacityCoeff(MatResponseMode mode, GaussPoint *
         FloatArray s;
         double w, t;
 
-        s = status->giveTempStateVector();
+        s = status->giveTempField();
         if ( s.isEmpty() ) {
             _error("computeCapacityCoeff: undefined state vector");
         }
@@ -326,7 +321,7 @@ double HeMoTKMaterial :: computeCapacityCoeff(MatResponseMode mode, GaussPoint *
         FloatArray s;
         double w, t;
 
-        s = status->giveTempStateVector();
+        s = status->giveTempField();
         if ( s.isEmpty() ) {
             _error("computeCapacityCoeff: undefined state vector");
         }
@@ -346,12 +341,12 @@ double
 HeMoTKMaterial :: giveHumidity(GaussPoint *gp, ValueModeType mode)
 {
     TransportMaterialStatus *ms = static_cast< TransportMaterialStatus * >( this->giveStatus(gp) );
-    const FloatArray &tempState = ms->giveTempStateVector();
+    const FloatArray &tempState = ms->giveTempField();
     if ( tempState.giveSize() < 2 ) {
         _error("giveHumidity: undefined moisture status!");
     }
 
-    FloatArray state = ms->giveStateVector();
+    FloatArray state = ms->giveField();
 
     if ( mode == VM_Total ) {
         return inverse_sorption_isotherm( tempState.at(2) );

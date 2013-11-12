@@ -91,6 +91,8 @@ protected:
     double globalENorm;
     /// Global norm of quantity which error is evaluated.
     double globalSNorm;
+    /// Global error estimate (relative)
+    double globalErrorEstimate;
 #ifdef ZZErrorEstimator_ElementResultCashed
     /// Cache storing element norms.
     FloatArray eNorms;

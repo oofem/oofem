@@ -692,10 +692,6 @@ void NonLinearDynamic :: updateComponent(TimeStep *tStep, NumericalCmpn cmpn, Do
 #endif
         }
         break;
-    case NonLinearRhs_Incremental:
-        this->assembleIncrementalReferenceLoadVectors(incrementalLoadVector, incrementalLoadVectorOfPrescribed,
-                                                      refLoadInputMode, d, EID_MomentumBalance, tStep);
-        break;
     default:
         _error("updateComponent: Unknown Type of component.");
     }

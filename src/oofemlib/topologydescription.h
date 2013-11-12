@@ -63,14 +63,10 @@ class OOFEM_EXPORT TopologyDescription
 protected:
     /// Domain which topology belongs to.
     Domain *d;
-    /// If the requested property is displacement (false for velocities)
-    bool useDisplacements;
 
 public:
     TopologyDescription(Domain *d) {
         this->d = d;
-        domainType dt = d->giveDomainType();
-        this->useDisplacements = dt == _2dPlaneStressMode || dt == _PlaneStrainMode || dt == _2dPlaneStressRotMode || dt == _3dMode || dt == _3dAxisymmMode;
     }
     virtual ~TopologyDescription() { }
     /**

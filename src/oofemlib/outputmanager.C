@@ -54,11 +54,6 @@ OutputManager :: initializeFrom(InputRecord *ir)
     const char *__proc = "initializeFrom"; // Required by IR_GIVE_FIELD macro
     IRResultType result;                // Required by IR_GIVE_FIELD macro
 
-    // test if record is of OutputManager
-    if ( !ir->hasField(_IFT_OutputManager_name) ) {
-        OOFEM_ERROR("OutputManager::instanciateFrom: bad record");
-    }
-
     tstep_all_out_flag  = ir->hasField(_IFT_OutputManager_tstepall);
     tstep_step_out      = 0;
     IR_GIVE_OPTIONAL_FIELD(ir, tstep_step_out, _IFT_OutputManager_tstepstep);

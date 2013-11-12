@@ -62,12 +62,7 @@ protected:
     FloatArray gradient; ///< Vector containing the last equilibrated gradient. It is the spatial gradient of the field.
     FloatArray flux; ///< Vector containing the last equilibrated flux. The physical meaning corresponds to energy flux, mass flow, etc.
 
-    /// Equilibrated state vector in reduced form. The physical meaning corresponds to temperature, concentration etc.
-    FloatArray stateVector;
-    /// Temporary state vector in a reduced form, used mainly in a nonlinear analysis
-    FloatArray tempStateVector;
-    
-    ///A scalar containing maturity (integration of temperature over time)
+    /// A scalar containing maturity (integration of temperature over time)
     double maturity;
 
 public:
@@ -85,12 +80,8 @@ public:
     virtual contextIOResultType restoreContext(DataStream *stream, ContextMode mode, void *obj = NULL);
 
     ///@todo REMOVE THESE:
-    /// Returns the const pointer to receiver's state vector.
-    const FloatArray &giveStateVector() { return stateVector; }
-    /// Returns the const pointer to receiver's temporary state vector.
-    const FloatArray &giveTempStateVector() { return tempStateVector; }
     /// Assigns temporary state vector from a given vector v.
-    void letTempStateVectorBe(const FloatArray &v) { tempStateVector = v; }
+    void letTempStateVectorBe(const FloatArray &v) { temp_field = v; }
 
     virtual const char *giveClassName() const { return "TransportMaterialStatus"; }
     virtual classType giveClassID() const { return TransportMaterialStatusClass; }

@@ -41,12 +41,16 @@
 #include "inputrecord.h"
 #include "contextioresulttype.h"
 #include "contextmode.h"
+#include "enrichmentitem.h"
+#include "enumitem.h"
 
 ///@name Input fields for XfemManager
 //@{
 #define _IFT_XfemManager_Name "xfemmanager"
 #define _IFT_XfemManager_numberOfEnrichmentItems "numberofenrichmentitems"
 #define _IFT_XfemManager_numberOfGpPerTri "numberofgppertri"
+#define _IFT_XfemManager_VTKExport "vtkexport"
+#define _IFT_XfemManager_VTKExportFields "exportfields"
 //@}
 
 //#define ENABLE_XFEM_CPP11
@@ -58,6 +62,28 @@ class IntArray;
 class Element;
 class DataStream;
 class DynamicInputRecord;
+//class InternalStateValueType; 
+
+//
+// The following types determine the state types associated with xfem
+//
+#define XFEMStateType_DEF \
+    ENUM_ITEM_WITH_VALUE(XFEMST_Undefined, 0) \
+    ENUM_ITEM_WITH_VALUE(XFEMST_Enrichment, 1) \
+    ENUM_ITEM_WITH_VALUE(XFEMST_LevelSetPhi, 2) \
+    ENUM_ITEM_WITH_VALUE(XFEMST_LevelSetGamma, 3) \
+    ENUM_ITEM_WITH_VALUE(XFEMST_NodeEnrMarker, 4) \
+    ENUM_ITEM_WITH_VALUE(XFEMST_NumIntersecPoints, 5)
+
+enum XFEMStateType {
+    XFEMStateType_DEF
+};
+
+#undef ENUM_ITEM
+#undef ENUM_ITEM_WITH_VALUE
+#undef enumitem_h
+
+const char *__XFEMStateTypeToString(XFEMStateType _value);
 
 /**
  * This class manages the xfem part
@@ -80,8 +106,17 @@ protected:
      * subdividing cut elements.
      */
     int mNumGpPerTri;
+    bool doVTKExport;
+
 
 public:
+
+    /**
+     * List with the fields that should be exported to VTK
+     */
+    IntArray vtkExportFields; // make private later
+    InternalStateValueType giveXFEMStateValueType(XFEMStateType type);
+
     /// Constructor.
     XfemManager(Domain *domain);
     /// Destructor.
@@ -96,6 +131,7 @@ public:
     int giveNumberOfEnrichmentItems() const { return enrichmentItemList->giveSize(); }
 
     void createEnrichedDofs();
+    void addEnrichedDofsTo( DofManager *dMan, IntArray &dofIdArray );
 
     /// Initializes receiver according to object description stored in input record.
     IRResultType initializeFrom(InputRecord *ir);
@@ -137,6 +173,7 @@ public:
     void updateYourself();
 
     void propagateFronts();
+    bool hasPropagatingFronts();
 
 };
 } // end namespace oofem

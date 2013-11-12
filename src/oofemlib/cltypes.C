@@ -49,6 +49,7 @@
 #include "contextioerr.h"
 #include "field.h"
 #include "equationid.h"
+#include "xfemmanager.h"
 
 #include <cstring>
 #include <string>
@@ -95,6 +96,7 @@ InternalStateValueType giveInternalStateValueType(InternalStateType type)
     case IST_CylindricalStrainTensor:
     case IST_DeviatoricStrain:
     case IST_DeviatoricStress:
+    case IST_CauchyStressTensor:
         return ISVT_TENSOR_S3;
 
     case IST_BeamForceMomentumTensor:
@@ -176,6 +178,38 @@ InternalStateValueType giveInternalStateValueType(InternalStateType type)
     }
 }
 
+
+int giveInternalStateTypeSize(InternalStateValueType valType)
+{
+    switch ( valType ) {
+    case ISVT_TENSOR_S3:
+    case ISVT_TENSOR_S3E:
+    case ISVT_TENSOR_G:
+        return 9;
+
+    case ISVT_VECTOR:
+        return 3;
+
+    case ISVT_SCALAR:
+        return 1;
+
+    default:
+        return 0;
+    }
+}
+
+
+InternalStateValueType giveInternalStateValueType(UnknownType type)
+{
+    if ( ( type == DisplacementVector ) || ( type == EigenVector ) || ( type == VelocityVector ) || ( type == DirectorField ) ) {
+        return ISVT_VECTOR;
+    } else if ( ( type == FluxVector ) || ( type == PressureVector ) || ( type == Temperature ) ) {
+        return ISVT_SCALAR;
+    } else {
+        OOFEM_ERROR2( "giveInternalStateValueType: unsupported UnknownType %s", __UnknownTypeToString(type) );
+        return ISVT_SCALAR; // To make compiler happy.
+    }
+}
 
 
 ContextIOERR :: ContextIOERR(contextIOResultType e, const char *file, int line)
@@ -279,5 +313,10 @@ const char *__MeshPackageTypeToString(MeshPackageType _value) {
 const char *__EquationIDToString(EquationID _value) {
     TO_STRING_BODY(EquationID_DEF)
 }
+
+const char *__XFEMStateTypeToString(XFEMStateType _value) {
+    TO_STRING_BODY(XFEMStateType_DEF)
+}
+
 
 } // end namespace oofem

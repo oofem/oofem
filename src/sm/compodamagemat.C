@@ -609,7 +609,7 @@ CompoDamageMatStatus :: ~CompoDamageMatStatus()
 
 void CompoDamageMatStatus :: printOutputAt(FILE *file, TimeStep *tStep)
 {
-    int i, j, maxComponents=0;
+    int maxComponents = 0;
     StructuralMaterialStatus :: printOutputAt(file, tStep);
     fprintf(file, "status {");
     switch ( gp->giveMaterialMode() ) {
@@ -627,24 +627,22 @@ void CompoDamageMatStatus :: printOutputAt(FILE *file, TimeStep *tStep)
 
     if ( !this->omega.containsOnlyZeroes() ) {
         fprintf(file, " omega ");
-        for ( i = 1; i <= maxComponents; i++ ) {
+        for ( int i = 1; i <= maxComponents; i++ ) {
             fprintf( file, "%.4f ", this->omega.at(i) );
         }
     }
 
     fprintf(file, " Local_stress ");
-    for ( i = 1; i <= maxComponents; i++ ) {
+    for ( int i = 1; i <= maxComponents; i++ ) {
         fprintf( file, "%.2e ", this->tempStressMLCS.at(i) );
     }
 
     fprintf(file, " kappa "); //print pairs tension-compression
-    for ( i = 1; i <= maxComponents; i++ ) {
-        for ( j = 0; j < 2; j++ ) {
+    for ( int i = 1; i <= maxComponents; i++ ) {
+        for ( int j = 0; j < 2; j++ ) {
             fprintf( file, "%.2e ", this->kappa.at(6 * j + i) );
         }
     }
-
-    fprintf( file, " MatNum %d", gp->giveMaterial()->giveNumber() );
 
     fprintf(file, "}\n");
 }

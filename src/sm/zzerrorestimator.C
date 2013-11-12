@@ -43,8 +43,8 @@
 #include "zznodalrecoverymodel.h"
 #include "sprnodalrecoverymodel.h"
 #include "timestep.h"
+#include "structuralelement.h"
 #include "structuralmaterial.h"
-#include "structuralms.h"
 #include "integrationrule.h"
 #include "feinterpol.h"
 #include "connectivitytable.h"
@@ -152,6 +152,7 @@ ZZErrorEstimator :: estimateError(EE_ErrorMode mode, TimeStep *tStep)
 
     this->globalENorm = sqrt(this->globalENorm);
     this->globalSNorm = sqrt(this->globalSNorm);
+    this->globalErrorEstimate = pe;
 
 
     this->stateCounter = tStep->giveSolutionStateCounter();
@@ -195,10 +196,10 @@ ZZErrorEstimator :: giveValue(EE_ValueType type, TimeStep *tStep)
     this->estimateError(equilibratedEM, tStep);
     if ( type == globalErrorEEV ) {
         return this->globalENorm;
-    }
-    // return sqrt (this->globalENorm/(this->globalENorm + this->globalSNorm));
-    else if ( type == globalNormEEV ) {
+    } else if ( type == globalNormEEV ) {
         return this->globalSNorm;
+    } else if ( type == relativeErrorEstimateEEV) {
+        return this->globalErrorEstimate;
     } else {
         return 0.0;
     }
@@ -285,36 +286,39 @@ ZZErrorEstimatorInterface :: ZZErrorEstimatorI_computeElementContributions(doubl
             diff.beTProductOf(nodalRecoveredStreses, n);
 
             elem->giveIPValue(sig, gp, type, tStep);
-	    /* the internal stress difference is in global coordinate system */
+            /* the internal stress difference is in global coordinate system */
             diff.subtract(sig);
 
             eNorm += diff.computeSquaredNorm() * dV;
             sNorm += sig.computeSquaredNorm() * dV;
         }
     } else if ( norm == ZZErrorEstimator :: EnergyNorm ) {
-        FloatArray help;
+        FloatArray help, ldiff_reduced, lsig_reduced;
         FloatMatrix D, DInv;
+        StructuralElement *selem = static_cast< StructuralElement * >( elem );
 
         for ( int i = 0; i < iRule->giveNumberOfIntegrationPoints(); i++ ) {
             GaussPoint *gp = iRule->getIntegrationPoint(i);
             double dV = elem->computeVolumeAround(gp);
             interpol->evalN( n, *gp->giveCoordinates(), FEIElementGeometryWrapper(elem));
-            static_cast< StructuralMaterial * >( elem->giveMaterial() )->
-                giveStiffnessMatrix(D, TangentStiffness, gp, tStep);
+            selem->computeConstitutiveMatrixAt(D, TangentStiffness, gp, tStep);
             DInv.beInverseOf(D);
 
             diff.beTProductOf(nodalRecoveredStreses, n);
 
-            elem->giveIPValue(sig, gp, type, tStep); 
+            elem->giveIPValue(sig, gp, type, tStep); // returns full value now
             diff.subtract(sig);
             /* the internal stress difference is in global coordinate system */
             /* needs to be transformed into local system to compute associated energy */
             this->ZZErrorEstimatorI_computeLocalStress(ldiff, diff);
-            help.beProductOf(DInv, ldiff);
-            eNorm += ldiff.dotProduct(help) * dV;
+            StructuralMaterial :: giveReducedSymVectorForm(ldiff_reduced, ldiff, gp->giveMaterialMode());
+
+            help.beProductOf(DInv, ldiff_reduced);
+            eNorm += ldiff_reduced.dotProduct(help) * dV;
             this->ZZErrorEstimatorI_computeLocalStress(lsig, sig);
-            help.beProductOf(DInv, lsig);
-            sNorm += lsig.dotProduct(help) * dV;
+            StructuralMaterial :: giveReducedSymVectorForm(lsig_reduced, lsig, gp->giveMaterialMode());
+            help.beProductOf(DInv, lsig_reduced);
+            sNorm += lsig_reduced.dotProduct(help) * dV;
         }
     } else {
         OOFEM_ERROR("ZZErrorEstimatorInterface::ZZErrorEstimatorI_computeElementContributions unsupported norm type");

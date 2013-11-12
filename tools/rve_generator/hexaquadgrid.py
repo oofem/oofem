@@ -14,7 +14,9 @@ def printRVE(rveSampleNumber, rveSize, rvePosition):
     print('%d inclusions in RVE'%len(rveInclusions))
 
     n = nelem*2 + 1;
-    X, Y, Z = mgrid[0:rveSize:n*1j, 0:rveSize:n*1j, 0:rveSize:n*1j ]
+    X, Y, Z = mgrid[rvePosition[0]:(rvePosition[0]+rveSize):n*1j,
+                    rvePosition[1]:(rvePosition[1]+rveSize):n*1j,
+                    rvePosition[2]:(rvePosition[2]+rveSize):n*1j ]
 
     # Convenient numbering of nodes (keeping track of all 27 nodes for the fixed grid is almost impossible otherwise).
     nX, nY, nZ = mgrid[0:n, 0:n, 0:n ].astype(int)
@@ -80,13 +82,13 @@ def printRVE(rveSampleNumber, rveSize, rvePosition):
     f = open(fname+'.in','w')
     print(fname+'.out', file=f)
     print('Hex grid for incompressible stokes flow', file=f)
-    print('StokesFlow nsteps 1 rtolf 1e-6 lstype 3 smtype 7 nonlinform 1 nmodules 1', file=f)
+    print('StokesFlow nsteps 1 rtolf 1e-6 lstype 3 smtype 7 nonlinform 1 nmodules 0', file=f)
     #print('Nonlinearstatic nsteps 1 rtolf 1e-6 lstype 3 smtype 7 controlmode 1 nmodules 1', file=f)
-    print('VTKXML tstep_all domain_all primvars 2 4 5 cellvars 1 46', file=f)
+    #print('VTKXML tstep_all domain_all primvars 2 4 5 cellvars 1 46', file=f)
     #print('VTKXML tstep_all domain_all primvars 1 1 cellvars 2 46 4', file=f)
     print('Domain 3dIncompFlow', file=f)
     #print('Domain 3d', file=f)
-    print('OutputManager tstep_all dofman_all element_all', file=f)
+    print('OutputManager', file=f)
     print('ndofman', n*n*n, 'nelem', nelem*nelem*nelem, 'ncrosssect 1 nmat 2 nbc 4 nic 0 nltf 1 nset 4', file=f)
 
     # Nodes:
@@ -116,12 +118,12 @@ def printRVE(rveSampleNumber, rveSize, rvePosition):
     print('NewtonianFluid 2 d 1 mu 5', file=f)
     #print('IsoLE 1 d 1 E 1 n 0.45 talpha 0', file=f)
     #print('IsoLE 2 d 1 E 5 n 0.45 talpha 0', file=f)
-    print('BoundaryCondition 1 d 0.0 loadTimeFunction 1 dofs 6 1 2 3 7 8 9 set 0', file=f)
-    print('BoundaryCondition 2 d 1.0 loadTimeFunction 1 dofs 6 1 2 3 7 8 9 set 0', file=f)
-    print('DeadWeight 3 loadTimeFunction 1 components 3 0 0 -1 set 0', file=f)
-    #print('MixedGradientPressureNeumann 4 loadTimeFunction 1 set 1 devgradient 6 0 0 0 1 1 1 pressure 0', file=f)
-    print('MixedGradientPressureDirichlet 4 loadTimeFunction 1 set 1 dofs 6 1 2 3 7 8 9 devgradient 6 0 0 0 1 1 1 pressure 0', file=f)
-    #print('PrescribedGradient 4 loadTimeFunction 1 set 1 dofs 6 1 2 3 7 8 9 gradient 3 3 {0 0 1; 0 0 0; 1 0 0}', file=f)
+    #print('MixedGradientPressureNeumann 1 loadTimeFunction 1 set 1 devgradient 6 0 0 0 1 1 1 pressure 0', file=f)
+    print('MixedGradientPressureDirichlet 1 loadTimeFunction 1 set 1 dofs 6 1 2 3 7 8 9 devgradient 6 0 0 0 1 1 1 pressure 0', file=f)
+    #print('PrescribedGradient 1 loadTimeFunction 1 set 1 dofs 6 1 2 3 7 8 9 gradient 3 3 {0 0 1; 0 0 0; 1 0 0}', file=f)
+    print('BoundaryCondition 2 d 0.0 loadTimeFunction 1 dofs 6 1 2 3 7 8 9 set 0', file=f)
+    print('BoundaryCondition 3 d 1.0 loadTimeFunction 1 dofs 6 1 2 3 7 8 9 set 0', file=f)
+    print('DeadWeight 4 loadTimeFunction 1 components 3 0 0 -1 set 0', file=f)
     print('ConstantFunction 1 f(t) 1.0', file=f)
     print('Set 1 elementboundaries', 2*6*nelem*nelem, end=' ', file=f)
 
@@ -196,7 +198,7 @@ inclusions = rveToolbox.generateSphericalInclusions(density, boxSize, averageRad
 #rveToolbox.plotSphericalInclusions(rveInclusions, boxSize, 3, True)
 
 
-totalSamples = 10
+totalSamples = 200
 rveSize = 3
 
 for rveSampleNumber in range(totalSamples):

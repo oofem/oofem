@@ -261,7 +261,6 @@ void StructuralElementEvaluator :: computeConsistentMassMatrix(FloatMatrix &answ
 void StructuralElementEvaluator :: giveInternalForcesVector(FloatArray &answer, TimeStep *tStep, bool useUpdatedGpRecord)
 {
     Element *elem = this->giveElement();
-    StructuralCrossSection *cs = static_cast< StructuralCrossSection * >( elem->giveCrossSection() );
     Material *mat = elem->giveMaterial();
     int ndofs = elem->computeNumberOfDofs();
     FloatMatrix b;
@@ -290,7 +289,6 @@ void StructuralElementEvaluator :: giveInternalForcesVector(FloatArray &answer, 
             } else {
                 this->computeStrainVector(strain, gp, tStep, u); ///@todo This part computes the B matrix again; Inefficient.
                 this->computeStressVector(stress, strain, gp, tStep);
-                cs->giveRealStresses(stress, gp, strain, tStep);
             }
 
             if ( stress.giveSize() == 0 ) {
@@ -311,12 +309,6 @@ void StructuralElementEvaluator :: giveInternalForcesVector(FloatArray &answer, 
     if ( !this->isActivated(tStep) ) {
         answer.zero();
     }
-}
-
-
-void StructuralElementEvaluator :: computeStressVector(FloatArray &answer, const FloatArray &strain, GaussPoint *gp, TimeStep *tStep)
-{
-    static_cast< StructuralCrossSection * >( this->giveElement()->giveCrossSection() )->giveRealStresses(answer, gp, strain, tStep);
 }
 
 

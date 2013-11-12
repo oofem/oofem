@@ -77,60 +77,7 @@ SolutionbasedShapeFunction::SolutionbasedShapeFunction(int n, Domain *d) : Activ
 
 SolutionbasedShapeFunction::~SolutionbasedShapeFunction()
 {
-    for (int i=1; i<=myNode->giveNumberOfDofs(); i++) {
-        Dof *d=myNode->giveDof(i);
-        printf("eq id: %u\n", d->giveEqn());
-    }
-}
-
-double
-SolutionbasedShapeFunction :: checkIncompressibility(EngngModel &myEngngModel)
-{
-
-    EngngModel *m=&myEngngModel;
-    Set *mySet=m->giveDomain(1)->giveSet( externalSet );
-    IntArray BoundaryList = mySet->giveBoundaryList();
-    double NetInflow=0.0;
-
-    for (int i=0; i<BoundaryList.giveSize()/2; i++) {
-        int ElementID=BoundaryList(2*i);
-        int Boundary=BoundaryList(2*i+1);
-        Element *e = m->giveDomain(1)->giveElement(ElementID);
-        FEInterpolation *interp=e->giveInterpolation();
-
-        GaussIntegrationRule irule(order, e);
-        int ngp = irule.getRequiredNumberOfIntegrationPoints(_Triangle, order);
-        irule.setUpIntegrationPoints(_Triangle, ngp, _Unknown);
-
-
-        IntArray bnodes;
-        FloatMatrix values;
-
-        interp->boundaryGiveNodes(bnodes, Boundary);
-        values.resize(3, bnodes.giveSize());
-
-        for (int j=1; j<=bnodes.giveSize(); j++) {
-            for (int k=1; k<=3; k++) {
-                values.at(k, j)=e->giveDofManager(bnodes.at(j))->giveDof(k)->giveUnknown(VM_Total, m->giveCurrentStep());
-            }
-        }
-
-        for (int j=0; j<irule.giveNumberOfIntegrationPoints(); j++) {
-            GaussPoint *gp=irule.getIntegrationPoint(j);
-            FloatArray *lcoords = gp->giveCoordinates();
-            FloatArray N, normal, v;
-            double detJ=interp->boundaryGiveTransformationJacobian(Boundary, *lcoords, FEIElementGeometryWrapper(e))*gp->giveWeight();
-            interp->boundaryEvalNormal(normal, Boundary, *lcoords, FEIElementGeometryWrapper(e));
-            interp->boundaryEvalN(N, Boundary, *lcoords, FEIElementGeometryWrapper(e));
-
-            v.beProductOf(values, N);
-            NetInflow=NetInflow+v.dotProduct(normal)*fabs(detJ);
-        }
-
-    }
-
-    return NetInflow;
-
+	// TODO Auto-generated destructor stub
 }
 
 IRResultType

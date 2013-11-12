@@ -129,7 +129,7 @@ public:
     virtual const char *giveClassName() const { return "OrthotropicLinearElasticMaterial"; }
     virtual classType giveClassID() const { return OrthotropicLinearElasticMaterialClass; }
     virtual IRResultType initializeFrom(InputRecord *ir);
-
+    void giveInputRecord(DynamicInputRecord &input);
     virtual double give(int aProperty, GaussPoint *gp);
 
     virtual void give3dMaterialStiffnessMatrix(FloatMatrix &answer,

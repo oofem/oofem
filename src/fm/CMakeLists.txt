@@ -25,8 +25,6 @@ set (fm_element
     tr1bubblestokes.C
     tet1bubblestokes.C
     hexa1bubblestokes.C
-    linesurfacetension.C
-    line2surfacetension.C
     line2boundaryelement.C
     fluidmaterialevaluator.C
     )
@@ -35,7 +33,6 @@ set (fm_material
     newtonianfluid.C
     fe2fluidmaterial.C
     nonlinearfluidmaterial.C
-    surfacetensionmaterial.C
     )
 
 set (fm_loads

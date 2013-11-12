@@ -42,6 +42,7 @@
 #include <cstdio>
 #include <string>
 #include <cstring>
+
 #include <tinyxml2.h>
 
 using namespace tinyxml2;
@@ -103,7 +104,6 @@ public:
 
     virtual int hasInternalSource() { return 1; }
     virtual void computeInternalSourceVector(FloatArray &val, GaussPoint *gp, TimeStep *atTime, ValueModeType mode);
-    virtual void updateInternalState(const FloatArray &vec, GaussPoint *gp, TimeStep *atTime);
     /// Returns cycle number at the closest cycle after the target time
     virtual int giveCycleNumber(GaussPoint *gp);
     /// Returns time of the CEMHYD3D at the first cycle after the target time

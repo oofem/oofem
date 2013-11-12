@@ -60,7 +60,7 @@ class TimeStep;
 class RemeshingCriteria;
 
 /** Type characterizing different type of errors. */
-enum EE_ValueType { globalNormEEV, globalErrorEEV, globalWeightedErrorEEV };
+enum EE_ValueType { relativeErrorEstimateEEV, globalNormEEV, globalErrorEEV, globalWeightedErrorEEV };
 /** Type characterizing different type of element errors. */
 enum EE_ErrorType { unknownET, indicatorET, internalStressET, primaryUnknownET };
 /** Type determining whether temporary or equilibrated variables are used for error evaluation. */

@@ -38,6 +38,7 @@
 #include "internalstatetype.h"
 #include "internalstatevaluetype.h"
 #include "valuemodetype.h"
+#include "unknowntype.h"
 
 namespace oofem {
 /// @return Character corresponding to given ValueModeType.
@@ -45,6 +46,11 @@ char cltypesGiveUnknownTypeModeKey(ValueModeType mode);
 
 /// @return The value type of corresponding InternalStateType
 InternalStateValueType giveInternalStateValueType(InternalStateType type);
+int giveInternalStateTypeSize(InternalStateValueType type);
+
+// New /JB
+InternalStateValueType giveInternalStateValueType(UnknownType type);
+
 } // end namespace oofem
 #endif // cltypes_h
 
