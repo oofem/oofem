@@ -433,11 +433,10 @@ int Tet21Stokes :: EIPrimaryUnknownMI_computePrimaryUnknownVectorAt(ValueModeTyp
     bool ok;
     FloatArray lcoords, n, n_lin;
     ok = this->computeLocalCoordinates(lcoords, gcoords);
+    this->EIPrimaryUnknownMI_computePrimaryUnknownVectorAtLocal(mode, tStep, lcoords, answer);
     if ( !ok ) {
-        answer.resize(0);
         return false;
     }
-    this->EIPrimaryUnknownMI_computePrimaryUnknownVectorAtLocal(mode, tStep, lcoords, answer);
     return true;
 }
 

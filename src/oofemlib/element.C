@@ -1193,7 +1193,6 @@ Element :: computeLocalCoordinates(FloatArray &answer, const FloatArray &gcoords
     if (fei) {
         return fei->global2local(answer, gcoords, FEIElementGeometryWrapper(this));
     } else {
-        answer.resize(0);
         return false;
     }
 }
