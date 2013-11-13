@@ -1269,7 +1269,7 @@ MDM :: MMI_update(GaussPoint *gp,  TimeStep *tStep, FloatArray *estrain)
     // now update all internal vars accordingly
     strain = status->giveStrainVector();
     this->giveRealStressVector(intVal, gp, strain, tStep);
-    this->updateYourself(gp, tStep);
+    gp->updateYourself(tStep);
     return result;
 }
 

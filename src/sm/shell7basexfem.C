@@ -514,25 +514,18 @@ Shell7BaseXFEM :: computeCohesiveForces(FloatArray &answer, TimeStep *tStep, Flo
     int ndofs = Shell7Base :: giveNumberOfDofs();
     answer.resize(ndofs); answer.zero();
     const IntArray &ordering = this->giveOrdering(All);
-	answer.assemble(answerTemp, ordering);
-    
+    answer.assemble(answerTemp, ordering);
 }
 
 void
 Shell7BaseXFEM :: updateYourself(TimeStep *tStep)
 // Updates the receiver at end of step.
 {
-	Shell7Base :: updateYourself(tStep);
+    Shell7Base :: updateYourself(tStep);
 
     for ( int i = 0; i < this->layeredCS->giveNumberOfLayers() - 1; i++ ) {
         if ( this->hasCohesiveZone(i+1) ) {
             czIntegrationRulesArray [ i ]->updateYourself(tStep);
-		    for ( int j = 0; j < czIntegrationRulesArray [ i ]->giveNumberOfIntegrationPoints(); j++ ) {
-			    GaussPoint *gp = czIntegrationRulesArray [ i ]->getIntegrationPoint(j);
-                if ( this->layeredCS->giveInterfaceMaterial(i+1) ) {
-			        this->layeredCS->giveInterfaceMaterial(i+1)->updateYourself(gp, tStep);
-                }
-		    }
         }
     }
 }
@@ -563,7 +556,6 @@ Shell7BaseXFEM :: computeCohesiveTangent(FloatMatrix &answer, TimeStep *tStep)
             answer.assemble(tempRed, orderingJ, orderingJ);
         }
     }
-    
 }
 
 
@@ -588,7 +580,7 @@ Shell7BaseXFEM :: computeCohesiveTangentAt(FloatMatrix &answer, TimeStep *tStep,
     double xi = dei->giveDelamXiCoord();
     double zeta = this->giveGlobalZcoord(xi);
     this->computeLambdaNMatrixDis(lambda, zeta);
-	FloatMatrix Q;
+    FloatMatrix Q;
     FloatArray nCov;
     FloatArray interfaceXiCoords;
     this->layeredCS->giveInterfaceXiCoords(interfaceXiCoords);
@@ -602,7 +594,7 @@ Shell7BaseXFEM :: computeCohesiveTangentAt(FloatMatrix &answer, TimeStep *tStep,
         intMat->give3dStiffnessMatrix_dTdj(K, TangentStiffness, ip, tStep);
         this->evalInitialCovarNormalAt(nCov, lCoords);
         Q.beLocalCoordSys(nCov);
-		K.rotatedWith(Q,'t');   // rotate back to global coord system
+        K.rotatedWith(Q,'t');   // rotate back to global coord system
 
         this->computeTripleProduct(temp, lambda, K, lambda);
         this->computeTripleProduct(tangent, N, temp, N);

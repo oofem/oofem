@@ -969,14 +969,6 @@ void XfemElementInterface :: updateYourselfCZ(TimeStep *tStep)
 {
 	if(mpCZIntegrationRule != NULL) {
 		mpCZIntegrationRule->updateYourself(tStep);
-
-		if(mpCZMat != NULL){
-			int numGP = mpCZIntegrationRule->giveNumberOfIntegrationPoints();
-			for(int i = 0; i < numGP; i++) {
-				GaussPoint *gp = mpCZIntegrationRule->getIntegrationPoint(i);
-				mpCZMat->updateYourself(gp, tStep);
-			}
-		}
 	}
 
 

@@ -1203,7 +1203,7 @@ IsotropicDamageMaterial1 :: MMI_update(GaussPoint *gp,  TimeStep *tStep, FloatAr
 #else
     this->giveRealStressVector(intVal, gp, * estrain, tStep);
 #endif
-    this->updateYourself(gp, tStep);
+    gp->updateYourself(tStep);
     return result;
 }
 
