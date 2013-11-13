@@ -916,7 +916,7 @@ void XfemElementInterface :: XfemElementInterface_computeConsistentMassMatrix(Fl
 		OOFEM_ERROR("Error in XfemElementInterface :: XfemElementInterface_computeConsistentMassMatrix().\n");
 	}
 
-    int nip, ndofs = structEl->computeNumberOfDofs();
+    int ndofs = structEl->computeNumberOfDofs();
     double density, dV;
     FloatMatrix n;
 //    GaussIntegrationRule iRule(1, structEl, 1, 1);

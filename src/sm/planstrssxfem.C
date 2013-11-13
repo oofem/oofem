@@ -139,17 +139,18 @@ void PlaneStress2dXfem :: computeConstitutiveMatrixAt(FloatMatrix &answer, MatRe
 {
     XfemManager *xMan = this->giveDomain()->giveXfemManager();
     int nEI = xMan->giveNumberOfEnrichmentItems();
-    StructuralMaterial *sm = NULL;
+    CrossSection *cs = NULL;
 
     for(int i = 1; i <= nEI; i++)
     {
     	EnrichmentItem &ei = *(xMan->giveEnrichmentItem(i));
-    	if( ei.isMaterialModified(*gp, *this, sm) )
+    	if( ei.isMaterialModified(*gp, *this, cs) )
     	{
+    		StructuralCrossSection *structCS = dynamic_cast<StructuralCrossSection*>(cs);
 
-    		if(sm != NULL)
+    		if(structCS != NULL)
     		{
-    	        sm->giveStiffnessMatrix(answer, rMode, gp, tStep);
+    			structCS->giveCharMaterialStiffnessMatrix(answer, rMode, gp, tStep);
     			return;
     		}
     		else
@@ -169,46 +170,34 @@ void PlaneStress2dXfem :: computeConstitutiveMatrixAt(FloatMatrix &answer, MatRe
 void
 PlaneStress2dXfem :: computeStressVector(FloatArray &answer, const FloatArray &strain, GaussPoint *gp, TimeStep *stepN)
 {
-//    FloatArray Epsilon;
-//    this->computeStrainVector(Epsilon, gp, stepN);
-
-    //////////////////
-    // Necessary for postprocessing
     StructuralCrossSection *cs = static_cast< StructuralCrossSection * >( this->giveCrossSection() );
     cs->giveRealStresses(answer, gp, strain, stepN);
-    //////////////////
 
 
     XfemManager *xMan = this->giveDomain()->giveXfemManager();
 
     int nEI = xMan->giveNumberOfEnrichmentItems();
 
-    StructuralMaterial *sm = NULL;
+    CrossSection *csInclusion = NULL;
     for(int i = 1; i <= nEI; i++)
     {
     	EnrichmentItem &ei = *(xMan->giveEnrichmentItem(i));
-    	if( ei.isMaterialModified(*gp, *this, sm) )
+    	if( ei.isMaterialModified(*gp, *this, csInclusion) )
     	{
-//    	    printf("In PlaneStress2dXfem :: computeStressVector: Epsilon: "); Epsilon.printYourself();
+    		StructuralCrossSection *structCSInclusion = dynamic_cast<StructuralCrossSection*>(csInclusion);
 
-    		if(sm != NULL)
+    		if(structCSInclusion != NULL)
     		{
-    	        sm->giveRealStressVector(answer, gp, strain, stepN);
+    			structCSInclusion->giveRealStresses(answer, gp, strain, stepN);
     			return;
     		}
     		else
     		{
-    			OOFEM_ERROR("PlaneStress2dXfem :: computeStressVector: failed to fetch StructuralMaterial\n");
+    			OOFEM_ERROR("PlaneStress2dXfem :: computeStressVector: failed to fetch StructuralCrossSection\n");
     		}
     	}
 
     }
-
-
-    // If no enrichment modifies the material,
-    // compute stress based on the bulk material.
-//    StructuralCrossSection *cs = static_cast< StructuralCrossSection * >( this->giveCrossSection() );
-//    cs->giveRealStresses(answer, gp, Epsilon, stepN);
 }
 
 void PlaneStress2dXfem :: computeStiffnessMatrix(FloatMatrix &answer, MatResponseMode rMode, TimeStep *tStep)

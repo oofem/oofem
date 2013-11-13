@@ -10,7 +10,7 @@ LinearStatic nsteps 1 nmodules 0
 #vtkxml tstep_all domain_all primvars 1 1 cellvars 1 1
 domain 2dPlaneStress
 OutputManager tstep_all dofman_all element_all
-ndofman 441 nelem 400 ncrosssect 1 nmat 2 nbc 2 nic 0 nltf 1 nxfemman 1
+ndofman 441 nelem 400 ncrosssect 2 nmat 2 nbc 2 nic 0 nltf 1 nxfemman 1
 Node 1 coords 2 0.0 0.0 bc 2 1 1 
 Node 2 coords 2 3.0 0.0 bc 2 0 1 
 Node 3 coords 2 6.0 0.0 bc 2 0 1 
@@ -852,7 +852,8 @@ PlaneStress2dXfem 397 nodes 4 416 417 438 437 mat 1 NIP 4 crossSect 1
 PlaneStress2dXfem 398 nodes 4 417 418 439 438 mat 1 NIP 4 crossSect 1
 PlaneStress2dXfem 399 nodes 4 418 419 440 439 mat 1 NIP 4 crossSect 1
 PlaneStress2dXfem 400 nodes 4 419 420 441 440 mat 1 NIP 4 crossSect 1
-SimpleCS 1 thick 1.0
+SimpleCS 1 thick 1.0 material 1
+SimpleCS 2 thick 1.0 material 2
 IsoLE 1 tAlpha 1.2e-05 d 1 E 30000.0 n 0.3
 IsoLE 2 tAlpha 1.2e-05 d 1 E 0.1 n 0.3
 BoundaryCondition 1 loadTimeFunction 1 prescribedvalue 0.0
@@ -862,7 +863,7 @@ ConstantFunction 1 f(t) 1.0
 XfemManager 1 numberofenrichmentitems 1 
 #RampFunction 1
 #Inclusion 1 geometryitem 1 enrichmentfunction 1 material 2
-Inclusion 1 enrichmentdomains 1 1 enrichmentfunction 1 enrichmentdomain 1 enrichmentfront 1 material 2
+Inclusion 1 enrichmentdomains 1 1 enrichmentfunction 1 enrichmentdomain 1 enrichmentfront 1 crosssection 2
 RampFunction 1
 Circle 1 center 2 30.0 30.0 radius 12.5
 EnrFrontExtend 1
