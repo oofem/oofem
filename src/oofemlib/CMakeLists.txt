@@ -101,7 +101,6 @@ set (core_ltf
 set (core_cs
     crosssection.C
     emptycs.C
-    simplecrosssection.C
     )
 
 set (core_td
@@ -113,7 +112,7 @@ set (core_dofman
     node.C
     slavenode.C
     hangingnode.C
-     rigidarmnode.C
+    rigidarmnode.C
     elementinternaldofman.C
     elementside.C
     )

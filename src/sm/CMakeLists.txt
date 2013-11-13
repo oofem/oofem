@@ -47,6 +47,7 @@ set (sm_element
 
 set (sm_crosssection
     structuralcrosssection.C
+    simplecrosssection.C
     layeredcrosssection.C
     fiberedcs.C
     structuralinterfacecrosssection.C
