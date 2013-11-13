@@ -103,11 +103,10 @@ public:
 
 #ifdef __OOFEG
     // TODO: Implement OOFEG functions
-    void drawRawGeometry(oofegGraphicContext &);
+    virtual void drawRawGeometry(oofegGraphicContext &);
     //void drawDeformedGeometry(oofegGraphicContext &, UnknownType);
     virtual void drawScalar(oofegGraphicContext &context);
     //virtual void drawSpecial(oofegGraphicContext &);
-    //void drawInternalState(oofegGraphicContext&);
 #endif
 
     virtual IRResultType initializeFrom(InputRecord *ir);

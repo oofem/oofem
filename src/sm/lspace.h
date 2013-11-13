@@ -126,8 +126,8 @@ public:
     virtual IRResultType initializeFrom(InputRecord *ir);
 
 #ifdef __OOFEG
-    void drawRawGeometry(oofegGraphicContext &);
-    void drawDeformedGeometry(oofegGraphicContext &, UnknownType type);
+    virtual void drawRawGeometry(oofegGraphicContext &);
+    virtual void drawDeformedGeometry(oofegGraphicContext &, UnknownType type);
     virtual void drawScalar(oofegGraphicContext &context);
     virtual void drawSpecial(oofegGraphicContext &);
     void drawTriad(FloatArray &, int isurf);

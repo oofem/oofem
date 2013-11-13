@@ -115,11 +115,10 @@ public:
     virtual void EIPrimaryUnknownMI_givePrimaryUnknownVectorDofID(IntArray &answer);
 
 #ifdef __OOFEG
-    void drawRawGeometry(oofegGraphicContext &);
-    void drawDeformedGeometry(oofegGraphicContext &, UnknownType);
+    virtual void drawRawGeometry(oofegGraphicContext &);
+    virtual void drawDeformedGeometry(oofegGraphicContext &, UnknownType);
     virtual void drawScalar(oofegGraphicContext &context);
     virtual void drawSpecial(oofegGraphicContext &);
-    //void drawInternalState(oofegGraphicContext &);
 #endif
 
     // definition & identification

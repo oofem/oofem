@@ -80,7 +80,7 @@ public:
 
 #ifdef __OOFEG
     // Graphics output
-    void drawRawGeometry(oofegGraphicContext &);
+    virtual void drawRawGeometry(oofegGraphicContext &);
     virtual void drawScalar(oofegGraphicContext &context);
     //void drawYourself(oofegGraphicContext&);
     //virtual void drawRawGeometry(oofegGraphicContext&) {}

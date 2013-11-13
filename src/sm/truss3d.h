@@ -92,8 +92,8 @@ public:
     virtual double DirectErrorIndicatorRCI_giveCharacteristicSize() { return this->computeLength(); }
 
 #ifdef __OOFEG
-    void drawRawGeometry(oofegGraphicContext &);
-    void drawDeformedGeometry(oofegGraphicContext &, UnknownType);
+    virtual void drawRawGeometry(oofegGraphicContext &);
+    virtual void drawDeformedGeometry(oofegGraphicContext &, UnknownType);
 #endif
 
     // definition & identification

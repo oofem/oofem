@@ -82,9 +82,9 @@ public:
     virtual int checkConsistency();
 
 #ifdef __OOFEG
-    void drawRawGeometry(oofegGraphicContext &);
-    void drawDeformedGeometry(oofegGraphicContext &, UnknownType);
-    void drawScalar(oofegGraphicContext &context);
+    virtual void drawRawGeometry(oofegGraphicContext &);
+    virtual void drawDeformedGeometry(oofegGraphicContext &, UnknownType);
+    virtual void drawScalar(oofegGraphicContext &context);
 #endif
 
     // definition & identification

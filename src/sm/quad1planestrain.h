@@ -116,11 +116,10 @@ public:
     virtual int HuertaRemeshingCriteriaI_givePolynOrder() { return 1; };
 
 #ifdef __OOFEG
-    void drawRawGeometry(oofegGraphicContext &);
-    void drawDeformedGeometry(oofegGraphicContext &, UnknownType);
+    virtual void drawRawGeometry(oofegGraphicContext &);
+    virtual void drawDeformedGeometry(oofegGraphicContext &, UnknownType);
     virtual void drawScalar(oofegGraphicContext &context);
     virtual void drawSpecial(oofegGraphicContext &);
-    //void drawInternalState(oofegGraphicContext &);
 #endif
 
     // definition & identification

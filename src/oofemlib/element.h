@@ -868,7 +868,7 @@ public:
     //
     // Graphics output
     //
-    void         drawYourself(oofegGraphicContext &context);
+    virtual void drawYourself(oofegGraphicContext &context);
     virtual void drawAnnotation(oofegGraphicContext &mode);
     virtual void drawRawGeometry(oofegGraphicContext &mode) { }
     virtual void drawDeformedGeometry(oofegGraphicContext &mode, UnknownType) { }
@@ -878,7 +878,6 @@ public:
     // to determine the max and min local values, when recovery does not takes place
     virtual void giveLocalIntVarMaxMin(oofegGraphicContext &context, TimeStep *, double &emin, double &emax) { emin = emax = 0.0; }
 
-    //virtual void  drawInternalState (oofegGraphicContext& context) {}
     /**
      * Returns internal state variable (like stress,strain) at node of element in Reduced form,
      * the way how is obtained is dependent on InternalValueType.

@@ -84,10 +84,9 @@ public:
     virtual FEInterpolation *giveInterpolation() const { return & interpolation; }
 
 #ifdef __OOFEG
-    void drawRawGeometry(oofegGraphicContext &);
-    void drawDeformedGeometry(oofegGraphicContext &, UnknownType type);
+    virtual void drawRawGeometry(oofegGraphicContext &);
+    virtual void drawDeformedGeometry(oofegGraphicContext &, UnknownType type);
     virtual void drawScalar(oofegGraphicContext &context);
-    //void drawInternalState(oofegGraphicContext&);
 #endif
 
     virtual Element *ZZNodalRecoveryMI_giveElement() { return this; }

@@ -81,11 +81,10 @@ public:
     virtual Element_Geometry_Type giveGeometryType() const;
     
 #ifdef __OOFEG
-    void drawRawGeometry(oofegGraphicContext &);
+    virtual void drawRawGeometry(oofegGraphicContext &);
     //void drawDeformedGeometry(oofegGraphicContext &, UnknownType);
     virtual void drawScalar(oofegGraphicContext &context);
     //virtual void drawSpecial(oofegGraphicContext &);
-    //void drawInternalState(oofegGraphicContext&);
 #endif
 
     virtual IRResultType initializeFrom(InputRecord *ir);

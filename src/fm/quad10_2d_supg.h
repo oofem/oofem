@@ -123,7 +123,7 @@ public:
     int giveInternalStateAtNode(FloatArray &answer, InternalStateType type, InternalStateMode mode,
                                 int node, TimeStep *atTime);
     // Graphics output
-    //void drawYourself (oofegGraphicContext&);
+    //virtual void drawYourself(oofegGraphicContext&);
     virtual void drawRawGeometry(oofegGraphicContext &);
     virtual void drawScalar(oofegGraphicContext &context);
     //virtual void drawDeformedGeometry(oofegGraphicContext&, UnknownType) {}

@@ -88,8 +88,8 @@ public:
     virtual classType giveClassID() const { return LIBeam3dClass; }
 
 #ifdef __OOFEG
-    void drawRawGeometry(oofegGraphicContext &);
-    void drawDeformedGeometry(oofegGraphicContext &, UnknownType);
+    virtual void drawRawGeometry(oofegGraphicContext &);
+    virtual void drawDeformedGeometry(oofegGraphicContext &, UnknownType);
 #endif
 
     virtual integrationDomain giveIntegrationDomain() const { return _Line; }

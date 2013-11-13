@@ -90,10 +90,9 @@ public:
     virtual int SpatialLocalizerI_containsPoint(const FloatArray &coords);
 
 #ifdef __OOFEG
-    void drawRawGeometry(oofegGraphicContext &);
-    void drawDeformedGeometry(oofegGraphicContext &, UnknownType type);
+    virtual void drawRawGeometry(oofegGraphicContext &);
+    virtual void drawDeformedGeometry(oofegGraphicContext &, UnknownType type);
     virtual void drawScalar(oofegGraphicContext &context);
-    //void drawInternalState(oofegGraphicContext &);
 #endif
 
     virtual MaterialMode giveMaterialMode() { return _3dMat; }

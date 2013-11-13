@@ -107,7 +107,6 @@ public:
     //void drawRawGeometry(oofegGraphicContext &);
     //void drawDeformedGeometry(oofegGraphicContext &);
     //virtual void drawScalar(oofegGraphicContext &context);
-    //void drawInternalState(oofegGraphicContext &);
 #endif
 
     // definition & identification
