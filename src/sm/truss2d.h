@@ -80,7 +80,7 @@ public:
     virtual void giveDofManDofIDMask(int inode, EquationID eid, IntArray &answer) const;
 
     virtual double giveCharacteristicLenght(GaussPoint *gp, const FloatArray &)
-    { return this->giveLength(); }
+    { return this->computeLength(); }
 
     virtual double computeVolumeAround(GaussPoint *gp);
 
@@ -114,7 +114,7 @@ protected:
     virtual void computeNmatrixAt(GaussPoint *gp, FloatMatrix &);
     virtual void computeGaussPoints();
 
-    double giveLength();
+    virtual double computeLength();
     double givePitch();
     virtual int giveApproxOrder() { return 1; }
 };
