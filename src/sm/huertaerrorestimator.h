@@ -52,9 +52,9 @@
 #define _IFT_HuertaErrorEstimator_skipsteps "skipsteps"
 #define _IFT_HuertaErrorEstimator_initialskipsteps "initialskipsteps"
 #define _IFT_HuertaErrorEstimator_werror "werror"
-#define _IFT_HuertaErrorEstimator_permat "permat"
-#define _IFT_HuertaErrorEstimator_impmat "impmat"
-#define _IFT_HuertaErrorEstimator_imppos "imppos"
+#define _IFT_HuertaErrorEstimator_perfectCSect "perCSect"
+#define _IFT_HuertaErrorEstimator_impCSect "impCSect"
+#define _IFT_HuertaErrorEstimator_impPos "imppos"
 #define _IFT_HuertaErrorEstimator_exact "exact"
 //@}
 

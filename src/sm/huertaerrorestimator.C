@@ -124,7 +124,7 @@ static FloatArray exactCoarseError;
 
 static DynamicDataReader refinedReader;
 
-static int impMat, perMat;
+static int impCSect, perCSect;
 static FloatArray impPos;
 
 static int globalNelems;
@@ -616,15 +616,15 @@ HuertaErrorEstimator :: initializeFrom(InputRecord *ir)
     if ( masterRun == true ) {  // prevent overwriting of static variables
         masterRun = false;
 
-        perMat = 0;
-        IR_GIVE_OPTIONAL_FIELD(ir, perMat, _IFT_HuertaErrorEstimator_permat);
+        perCSect = 0;
+        IR_GIVE_OPTIONAL_FIELD(ir, perCSect, _IFT_HuertaErrorEstimator_perfectCSect);
 
-        impMat = 0;
-        IR_GIVE_OPTIONAL_FIELD(ir, impMat, _IFT_HuertaErrorEstimator_impmat);
-        IR_GIVE_OPTIONAL_FIELD(ir, impPos, _IFT_HuertaErrorEstimator_imppos);
+        impCSect = 0;
+        IR_GIVE_OPTIONAL_FIELD(ir, impCSect, _IFT_HuertaErrorEstimator_impCSect);
+        IR_GIVE_OPTIONAL_FIELD(ir, impPos, _IFT_HuertaErrorEstimator_impPos);
 
-        if ( impMat != 0 && perMat == 0 ) {
-            _error("initializeFrom: Missing perfect material specification");
+        if ( impCSect != 0 && perCSect == 0 ) {
+            _error("initializeFrom: Missing perfect material specification (through cross-section)");
         }
 
 #ifdef EXACT_ERROR
@@ -1331,12 +1331,11 @@ HuertaErrorEstimatorInterface :: setupRefinedElementProblem1D(Element *element, 
 
     std::vector< FloatArray > newNodesVec(newNodes.begin(), newNodes.end());
     if ( mode == HuertaErrorEstimatorInterface :: ElemMode ) {
-        int mat, csect, material;
+        int csect, csect2;
         int nd1, nd2;
         IntArray boundaryLoadArray;
         bool hasLoad;
 
-        mat = element->giveMaterial()->giveNumber();
         csect = element->giveCrossSection()->giveNumber();
 
         for ( inode = startNode; inode <= endNode; inode++ ) {
@@ -1355,21 +1354,21 @@ HuertaErrorEstimatorInterface :: setupRefinedElementProblem1D(Element *element, 
                 nd2 = localNodeIdArray.at( connectivity->at(nd + 1) );
 
                 ///@todo This should change the cross-section number instead of the material number.
-                material = mat;
-                if ( impMat != 0 && impMat == mat ) {
+                csect2 = csect;
+                if ( impCSect != 0 && impCSect == csect ) {
                     FloatArray coordinates1, coordinates2;
                     coordinates1 = newNodesVec[nd1-1];
                     coordinates2 = newNodesVec[nd2-1];
 
-                    material = impMat;
+                    csect2 = impCSect;
                     for ( int i = 1; i <= impPos.giveSize(); i++ ) {
                         if ( impPos.at(i) < min( coordinates1.at(i), coordinates2.at(i) ) ) {
-                            material = perMat;
+                            csect2 = perCSect;
                             break;
                         }
 
                         if ( impPos.at(i) > max( coordinates1.at(i), coordinates2.at(i) ) ) {
-                            material = perMat;
+                            csect2 = perCSect;
                             break;
                         }
                     }
@@ -1379,8 +1378,7 @@ HuertaErrorEstimatorInterface :: setupRefinedElementProblem1D(Element *element, 
                 nd.setValues(nd1, nd2);
 
                 ir->setField(nd, "nodes");
-                ir->setField(material, "mat");
-                ir->setField(csect, "crosssect");
+                ir->setField(csect2, "crosssect");
 
                 // copy body and boundary loads
 
