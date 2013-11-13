@@ -1497,15 +1497,10 @@ StructuralElement :: showExtendedSparseMtrxStructure(CharType mtrx, oofegGraphic
         // loop over element IP
         for ( i = 0; i < iRule->giveNumberOfIntegrationPoints(); i++ ) {
             IntegrationPoint *ip = iRule->getIntegrationPoint(i);
-            if ( this->giveCrossSection()->MAT_GIVEN_BY_CS ) {
-                interface =  static_cast< NonlocalMaterialStiffnessInterface * >( this->giveStructuralCrossSection()->
-                    giveInterface(NonlocalMaterialStiffnessInterfaceType, ip) );
-            } else {
-                interface = static_cast< NonlocalMaterialStiffnessInterface * >( this->giveMaterial()->
-                    giveInterface(NonlocalMaterialStiffnessInterfaceType) );
-            }
+            interface = static_cast< NonlocalMaterialStiffnessInterface * >( this->giveStructuralCrossSection()->
+                giveMaterialInterface(NonlocalMaterialStiffnessInterfaceType, ip) );
 
-            if ( interface == NULL ) {        
+            if ( interface == NULL ) {
                 return;
             }
             interface->NonlocalMaterialStiffnessInterface_showSparseMtrxStructure(iRule->getIntegrationPoint(i), gc, atTime);

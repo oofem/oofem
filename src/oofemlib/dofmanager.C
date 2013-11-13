@@ -774,6 +774,7 @@ contextIOResultType DofManager :: restoreContext(DataStream *stream, ContextMode
             THROW_CIOERR(CIO_IOERR);
         }
 
+        int _val;
         if ( !stream->read(& _val, 1) ) {
             THROW_CIOERR(CIO_IOERR);
         }
