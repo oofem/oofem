@@ -41,6 +41,7 @@
 #include "activebc.h"
 #include "inputrecord.h"
 #include "gaussintegrationrule.h"
+#include "floatmatrix.h"
 
 ///@name Input fields for WeakPeriodicBoundaryCondition
 //@{
@@ -82,7 +83,7 @@ private:
     /** Number of Gausspoints used when integrating along the element edges */
     int ngp;
 
-    /** Number of degrees of freedom */
+    /** Number of degrees of freedom (number of terms) */
     int ndof;
 
     /** Set containing positive side */
@@ -112,7 +113,9 @@ private:
 
     void updateDirection();
 
-    double computeBaseFunctionValue(int baseID, double coordinate);
+    double computeBaseFunctionValue1D(int baseID, double coordinate);
+
+    double computeBaseFunctionValue2D(int baseID, FloatArray coordinate);
 
     Node *gammaDman;
 
@@ -120,14 +123,23 @@ private:
 
     double binomial(double n , int k);
 
+    /** Compute exponent for term n. Exponents i and j are x^i*y^j */
     void getExponents(int n, int &i, int &j);
+
+    /** Compute orthogonal polynomial basis using Gram-Smidth process */
+    void computeOrthogonalBasis();
+
+    double computeProjectionCoefficient(int vIndex, int uIndex);
+
+    /** gsMatrix contains coefficients for the Gram-Schmidt polynomials*/
+    FloatMatrix gsMatrix;
 public:
     WeakPeriodicBoundaryCondition(int n, Domain *d);
-    virtual ~WeakPeriodicBoundaryCondition() { };
+    virtual ~WeakPeriodicBoundaryCondition() { }
 
     virtual IRResultType initializeFrom(InputRecord *ir);
 
-    basisType giveBasisType() {return useBasisType; };
+    basisType giveBasisType() {return useBasisType; }
 
     virtual void assemble(SparseMtrx *answer, TimeStep *tStep, EquationID eid, CharType type, 
                           const UnknownNumberingScheme &r_s, const UnknownNumberingScheme &c_s);

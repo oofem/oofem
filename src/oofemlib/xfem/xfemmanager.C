@@ -69,13 +69,6 @@ XfemManager :: ~XfemManager()
     delete enrichmentItemList;
 }
 
-void
-XfemManager :: clear()
-{
-    delete enrichmentItemList;
-    enrichmentItemList = NULL;
-    numberOfEnrichmentItems = -1;
-}
 
 InternalStateValueType 
 XfemManager :: giveXFEMStateValueType(XFEMStateType type)

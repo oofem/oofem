@@ -180,7 +180,7 @@ public:
     virtual contextIOResultType restoreContext(DataStream *stream, ContextMode mode, void *obj = NULL);
 
 #ifdef __OOFEG
-    void drawYourself(oofegGraphicContext &);
+    virtual void drawYourself(oofegGraphicContext &);
 #endif
 };
 } // end namespace oofem

@@ -112,9 +112,8 @@ Lattice2d_mt :: givePressure()
     GaussPoint *gp;
     IntegrationRule *iRule = integrationRulesArray [ giveDefaultIntegrationRule() ];
     gp = iRule->getIntegrationPoint(0);
-    Material *mat = this->giveMaterial();
 
-    status = ( LatticeTransportMaterialStatus * ) mat->giveStatus(gp);
+    status = ( LatticeTransportMaterialStatus * ) gp->giveMaterialStatus();
 
     return status->givePressure();
 }
@@ -128,9 +127,8 @@ Lattice2d_mt :: giveMass()
     GaussPoint *gp;
     IntegrationRule *iRule = integrationRulesArray [ giveDefaultIntegrationRule() ];
     gp = iRule->getIntegrationPoint(0);
-    Material *mat = this->giveMaterial();
 
-    status = ( LatticeTransportMaterialStatus * ) mat->giveStatus(gp);
+    status = static_cast< LatticeTransportMaterialStatus * >( gp->giveMaterialStatus() );
     double mass = 0;
     mass = status->giveMass();
     //multiply with volume

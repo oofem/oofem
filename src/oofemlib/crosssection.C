@@ -39,6 +39,8 @@
 #include "contextioerr.h"
 #include "gaussintegrationrule.h"
 
+
+
 namespace oofem {
 
 int
@@ -54,6 +56,12 @@ CrossSection :: initializeFrom(InputRecord *ir)
 // instanciates receiver from input record
 //
 {
+    const char *__proc = "initializeFrom"; // Required by IR_GIVE_FIELD macro
+    IRResultType result;                   // Required by IR_GIVE_FIELD macro
+
+    // Read set number the cross section is applied to
+    IR_GIVE_OPTIONAL_FIELD(ir, this->setNumber, _CrossSection_SetNumber );
+
     return IRRT_OK;
 }
 
@@ -117,11 +125,16 @@ CrossSection :: give(CrossSectionProperty aProperty)
 }
 
 
+
+
+
+
 bool
 CrossSection :: isCharacteristicMtrxSymmetric(MatResponseMode rMode, int mat)
 {
     return domain->giveMaterial(mat)->isCharacteristicMtrxSymmetric(rMode);
 }
+
 
 #ifdef __PARALLEL_MODE
 double

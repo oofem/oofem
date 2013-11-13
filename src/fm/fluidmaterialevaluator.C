@@ -184,7 +184,7 @@ void FluidMaterialEvaluator :: solveYourself()
                 OOFEM_WARNING("Residual did not converge!");
             }
             // This material model has converged, so we update it and go on to the next.
-            mat->updateYourself(gp, tStep);
+            gp->updateYourself(tStep);
         }
         this->timer.stopTimer(EngngModelTimer :: EMTT_SolutionStepTimer);
         this->doStepOutput(tStep);

@@ -119,7 +119,7 @@ public:
     virtual void giveDofManDofIDMask(int inode, EquationID ut, IntArray &answer) const;
     virtual int giveNumberOfDofs();
 
-    bool hasCohesiveZone();
+    bool hasCohesiveZone(int interfaceNum);
     IntegrationRule **czIntegrationRulesArray;
     IntegrationRule giveCZIntegrationRulesArray() { return **czIntegrationRulesArray; };
 };

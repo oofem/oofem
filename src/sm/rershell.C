@@ -304,7 +304,7 @@ RerShell :: computeLumpedMassMatrix(FloatMatrix &answer, TimeStep *tStep)
     gp = integrationRulesArray [ 0 ]->getIntegrationPoint(0);
 
     dV = this->computeVolumeAround(gp);
-    mss1 = dV * this->giveCrossSection()->give(CS_Thickness) * this->giveMaterial()->give('d', gp) / 3.;
+    mss1 = dV * this->giveCrossSection()->give(CS_Thickness) * this->giveStructuralCrossSection()->give('d', gp) / 3.;
 
     answer.at(1, 1) = mss1;
     answer.at(2, 2) = mss1;
@@ -332,13 +332,12 @@ RerShell :: computeBodyLoadVectorAt(FloatArray &answer, Load *forLoad, TimeStep 
 
 
     forLoad->computeComponentArrayAt(f, stepN, mode);
-    //f.times( this->giveMaterial()->give('d') );
 
     if ( f.giveSize() == 0 ) {
         answer.resize(0);
         return;                                             // nil resultant
     } else {
-        dens = this->giveMaterial()->give('d', gp);
+        dens = this->giveStructuralCrossSection()->give('d', gp);
         dV = this->computeVolumeAround(gp) * this->giveCrossSection()->give(CS_Thickness);
 
         answer.resize(18);
@@ -823,56 +822,6 @@ RerShell :: giveIPValue(FloatArray &answer, GaussPoint *aGaussPoint, InternalSta
 //{}
 
 
-/*
- * void
- * RerShell :: drawInternalState(oofegGraphicContext& gc)
- * //
- * // Draws internal state graphics representation
- * //
- * {
- * int i;
- * WCRec p[3];
- * GraphicObj *tr;
- * double v1,v2,v3;
- * DrawMode mode = gc.getDrawMode();
- * TimeStep *tStep = domain->giveEngngModel()->giveCurrentStep();
- * double defScale = gc.getDefScale();
- *
- * if (!gc.testElementGraphicActivity(this)) return;
- *
- * // check for valid DrawMode
- * if (!((mode == mxForce) || (mode == myForce) || (mode == mxyForce) ||
- * (mode == szxForce) || (mode == syzForce) || (mode == sxForce) ||
- * (mode == syForce) || (mode == sxyForce))) return;
- *
- * EASValsSetLayer(OOFEG_STRESS_CONTOUR_LAYER);
- * for (i=0; i< 3; i++) {
- * if (gc.getInternalVarsDefGeoFlag()) {
- *  // use deformed geometry
- *  p[i].x = (FPNum) this->giveNode(i+1)->giveUpdatedCoordinate(1,tStep,defScale);
- *  p[i].y = (FPNum) this->giveNode(i+1)->giveUpdatedCoordinate(2,tStep,defScale);
- *  p[i].z = (FPNum) this->giveNode(i+1)->giveUpdatedCoordinate(3,tStep,defScale);
- *
- * } else {
- *  p[i].x = (FPNum) this->giveNode(i+1)->giveCoordinate(1);
- *  p[i].y = (FPNum) this->giveNode(i+1)->giveCoordinate(2);
- *  p[i].z = (FPNum) this->giveNode(i+1)->giveCoordinate(3);
- * }
- * }
- *
- * int result = 0;
- * result+= this->giveInternalStateAtNode (gc, 1, &v1);
- * result+= this->giveInternalStateAtNode (gc, 2, &v2);
- * result+= this->giveInternalStateAtNode (gc, 3, &v3);
- *
- * if (result == 3) {
- *
- * tr = CreateTriangleWD3D (p,v1,v2,v3);
- * EGWithMaskChangeAttributes(LAYER_MASK, tr);
- * EMAddGraphicsToModel(ESIModel(), tr);
- * }
- * }
- */
 
 /*
  * int

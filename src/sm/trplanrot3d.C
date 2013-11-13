@@ -34,7 +34,7 @@
 
 #include "trplanrot3d.h"
 #include "material.h"
-#include "crosssection.h"
+#include "structuralcrosssection.h"
 #include "node.h"
 #include "load.h"
 #include "structuralms.h"
@@ -117,14 +117,11 @@ TrPlaneStrRot3d :: computeGtoLRotationMatrix()
 // e2'    : e3' x e1'
 {
     if ( GtoLRotationMatrix == NULL ) {
-        int i;
         FloatArray e1(3), e2(3), e3(3), help(3);
 
         // compute e1' = [N2-N1]  and  help = [N3-N1]
-        for ( i = 1; i <= 3; i++ ) {
-            e1.at(i) = ( this->giveNode(2)->giveCoordinate(i) - this->giveNode(1)->giveCoordinate(i) );
-            help.at(i) = ( this->giveNode(3)->giveCoordinate(i) - this->giveNode(1)->giveCoordinate(i) );
-        }
+        e1.beDifferenceOf(*this->giveNode(2)->giveCoordinates(),  *this->giveNode(1)->giveCoordinates());
+        help.beDifferenceOf(*this->giveNode(3)->giveCoordinates(),  *this->giveNode(1)->giveCoordinates());
 
         // let us normalize e1'
         e1.normalize();
@@ -140,7 +137,7 @@ TrPlaneStrRot3d :: computeGtoLRotationMatrix()
         //
         GtoLRotationMatrix = new FloatMatrix(3, 3);
 
-        for ( i = 1; i <= 3; i++ ) {
+        for ( int i = 1; i <= 3; i++ ) {
             GtoLRotationMatrix->at(1, i) = e1.at(i);
             GtoLRotationMatrix->at(2, i) = e2.at(i);
             GtoLRotationMatrix->at(3, i) = e3.at(i);
@@ -181,8 +178,7 @@ TrPlaneStrRot3d :: giveCharacteristicTensor(FloatMatrix &answer, CharTensor type
 // strain vector = (Eps_X, Eps_y, Gamma_xy, Kappa_z)
 {
     FloatArray charVect;
-    Material *mat = this->giveMaterial();
-    StructuralMaterialStatus *ms = static_cast< StructuralMaterialStatus * >( mat->giveStatus(gp) );
+    StructuralMaterialStatus *ms = static_cast< StructuralMaterialStatus * >( gp->giveMaterialStatus() );
 
     answer.resize(3, 3);
     answer.zero();
@@ -298,7 +294,7 @@ TrPlaneStrRot3d :: computeBodyLoadVectorAt(FloatArray &answer, Load *forLoad, Ti
     if ( force.giveSize() ) {
         gp = integrationRulesArray [ 0 ]->getIntegrationPoint(0);
 
-        dens = this->giveMaterial()->give('d', gp);
+        dens = this->giveStructuralCrossSection()->give('d', gp);
         dV   = this->computeVolumeAround(gp) * this->giveCrossSection()->give(CS_Thickness);
 
         answer.resize(18);

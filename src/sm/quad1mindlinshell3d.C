@@ -132,7 +132,7 @@ Quad1MindlinShell3D :: computeBodyLoadVectorAt(FloatArray &answer, Load *forLoad
 
             this->interp.evalN(n, *gp->giveCoordinates(), FEIVoidCellGeometry());
             dV = this->computeVolumeAround(gp) * this->giveCrossSection()->give(CS_Thickness);
-            density = this->giveMaterial()->give('d', gp);
+            density = this->giveStructuralCrossSection()->give('d', gp);
 
             forceX.add(density * gravity.at(1) * dV, n);
             forceY.add(density * gravity.at(2) * dV, n);
@@ -271,7 +271,7 @@ Quad1MindlinShell3D :: giveInternalForcesVector(FloatArray &answer, TimeStep *tS
         double dV = this->computeVolumeAround(gp);
 
         if ( useUpdatedGpRecord ) {
-            stress = static_cast< StructuralMaterialStatus * >( this->giveMaterial()->giveStatus(gp) )->giveStressVector();
+            stress = static_cast< StructuralMaterialStatus * >( gp->giveMaterialStatus() )->giveStressVector();
         } else {
             strain.beProductOf(b, shellUnknowns);
             cs->giveRealStress_Shell(stress, gp, strain, tStep);
@@ -410,7 +410,7 @@ Quad1MindlinShell3D :: computeLumpedMassMatrix(FloatMatrix &answer, TimeStep *tS
     IntegrationRule *ir = integrationRulesArray [ 0 ];
     for ( int i = 0; i < ir->giveNumberOfIntegrationPoints(); ++i) {
         GaussPoint *gp = ir->getIntegrationPoint(i);
-        mass += this->computeVolumeAround(gp) * this->giveMaterial()->give('d', gp);
+        mass += this->computeVolumeAround(gp) * this->giveStructuralCrossSection()->give('d', gp);
     }
 
     answer.resize(12, 12);
@@ -427,10 +427,10 @@ int
 Quad1MindlinShell3D :: giveIPValue(FloatArray &answer, GaussPoint *gp, InternalStateType type, TimeStep *atTime)
 {
     if ( type == IST_ShellForceMomentumTensor ) {
-        answer = static_cast< StructuralMaterialStatus * >( this->giveMaterial()->giveStatus(gp) )->giveStressVector();
+        answer = static_cast< StructuralMaterialStatus * >( gp->giveMaterialStatus() )->giveStressVector();
         return 1;
     } else if ( type == IST_ShellStrainCurvatureTensor ) {
-        answer = static_cast< StructuralMaterialStatus * >( this->giveMaterial()->giveStatus(gp) )->giveStrainVector();
+        answer = static_cast< StructuralMaterialStatus * >( gp->giveMaterialStatus() )->giveStrainVector();
         return 1;
     } else {
       return NLStructuralElement::giveIPValue(answer, gp, type, atTime);

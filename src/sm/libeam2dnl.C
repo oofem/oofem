@@ -261,7 +261,6 @@ LIBeam2dNL :: computeInitialStressMatrix(FloatMatrix &answer, TimeStep *tStep)
     IntegrationRule *iRule;
     FloatArray stress;
     FloatMatrix A;
-    Material *mat = this->giveMaterial();
 
     answer.resize(6, 6);
     answer.zero();
@@ -271,7 +270,7 @@ LIBeam2dNL :: computeInitialStressMatrix(FloatMatrix &answer, TimeStep *tStep)
     for ( int i = 0; i < iRule->giveNumberOfIntegrationPoints(); i++ ) {
         gp = iRule->getIntegrationPoint(i);
         dV = this->computeVolumeAround(gp);
-        stress = static_cast< StructuralMaterialStatus * >( mat->giveStatus(gp) )->giveStressVector();
+        stress = static_cast< StructuralMaterialStatus * >( gp->giveMaterialStatus() )->giveStressVector();
         if ( stress.giveSize() ) {
             for ( int j = 1; j <= stress.giveSize(); j++ ) {
                 // loop over each component of strain vector
@@ -303,12 +302,9 @@ LIBeam2dNL :: computeLumpedMassMatrix(FloatMatrix &answer, TimeStep *tStep)
 // Returns the lumped mass matrix of the receiver. This expression is
 // valid in both local and global axes.
 {
-    Material *mat;
-    double halfMass;
     GaussPoint *gp = integrationRulesArray [ 0 ]->getIntegrationPoint(0);
-
-    mat        = this->giveMaterial();
-    halfMass   = mat->give('d', gp) * this->giveCrossSection()->give(CS_Area) * this->giveLength() / 2.;
+    double density = this->giveStructuralCrossSection()->give('d', gp);
+    double halfMass   = density * this->giveCrossSection()->give(CS_Area) * this->giveLength() / 2.;
     answer.resize(6, 6);
     answer.zero();
     answer.at(1, 1) = halfMass;

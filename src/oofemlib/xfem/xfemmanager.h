@@ -79,6 +79,10 @@ enum XFEMStateType {
     XFEMStateType_DEF
 };
 
+#undef ENUM_ITEM
+#undef ENUM_ITEM_WITH_VALUE
+#undef enumitem_h
+
 const char *__XFEMStateTypeToString(XFEMStateType _value);
 
 /**
@@ -139,9 +143,6 @@ public:
 
     Domain *giveDomain() { return this->domain; }
     void setDomain(Domain *ipDomain);
-
-    /// Clear the receiver
-    void clear();
 
     /**
      * Stores the state of receiver to output stream.

@@ -178,7 +178,6 @@ Concrete2 :: giveRealStressVector(FloatArray &answer, GaussPoint *gp,
 //
 {
     MaterialMode mode = gp->giveMaterialMode();
-    //Concrete2MaterialStatus *status = (Concrete2MaterialStatus*) gp->giveMaterial()->giveStatus(gp);
 
     switch ( mode ) {
     case _PlateLayer:
@@ -1428,14 +1427,12 @@ Concrete2MaterialStatus :: initTempStatus()
     tempSEZ  = SEZ;
 
     if ( plasticStrainVector.giveSize() == 0 ) {
-        plasticStrainVector.resize( static_cast< StructuralMaterial * >( gp->giveMaterial() )->
-                                   StructuralMaterial :: giveSizeOfVoigtSymVector( gp->giveMaterialMode() ) );
+        plasticStrainVector.resize( StructuralMaterial :: giveSizeOfVoigtSymVector( gp->giveMaterialMode() ) );
         plasticStrainVector.zero();
     }
 
     if ( plasticStrainIncrementVector.giveSize() == 0 ) {
-        plasticStrainIncrementVector.resize( static_cast< StructuralMaterial * >( gp->giveMaterial() )->
-                                            StructuralMaterial :: giveSizeOfVoigtSymVector( gp->giveMaterialMode() ) );
+        plasticStrainIncrementVector.resize( StructuralMaterial :: giveSizeOfVoigtSymVector( gp->giveMaterialMode() ) );
         plasticStrainIncrementVector.zero();
     } else {
         plasticStrainIncrementVector.zero();

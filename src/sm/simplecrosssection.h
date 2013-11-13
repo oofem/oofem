@@ -53,6 +53,7 @@
 #define _IFT_SimpleCrossSection_shearareay "shearareay" ///< Shear area y direction
 #define _IFT_SimpleCrossSection_shearareaz "shearareaz" ///< Shear area z direction
 #define _IFT_SimpleCrossSection_drillStiffness "drillstiffness" ///< Penalty term for drilling stiffness.
+#define _IFT_SimpleCrossSection_MaterialNumber "material" ///< Material number for the bulk material
 //@}
 
 namespace oofem {
@@ -86,7 +87,10 @@ public:
      * @param n Cross section number.
      * @param d Associated domain.
      */
-    SimpleCrossSection(int n, Domain *d) : StructuralCrossSection(n, d) { }
+    SimpleCrossSection(int n, Domain *d) : StructuralCrossSection(n, d) {
+      materialNumber = 0;
+      czMaterialNumber = 0;
+    }
 
     virtual double give(CrossSectionProperty a);
 
@@ -103,7 +107,7 @@ public:
 
 
     virtual void giveCharMaterialStiffnessMatrix(FloatMatrix &answer, MatResponseMode rMode, GaussPoint *gp, TimeStep *tStep);
-    virtual bool isCharacteristicMtrxSymmetric(MatResponseMode rMode, int mat);
+    virtual bool isCharacteristicMtrxSymmetric(MatResponseMode rMode);
 
 
     virtual void give2dBeamStiffMtrx(FloatMatrix &answer, MatResponseMode rMode, GaussPoint *gp, TimeStep *tStep);
@@ -131,6 +135,29 @@ public:
     virtual const char *giveClassName() const { return "SimpleCrossSection"; }
     virtual const char *giveInputRecordName() const { return _IFT_SimpleCrossSection_Name; }
     virtual classType giveClassID() const { return SimpleCrossSectionClass; }
+
+    virtual double give(int aProperty, GaussPoint *gp);
+    virtual Material *giveMaterial(IntegrationPoint *ip);
+    
+    int const giveMaterialNumber() { return this->materialNumber; };
+    void setMaterialNumber(int matNum) { this->materialNumber = matNum; };
+    virtual int checkConsistency();
+    virtual Interface *giveMaterialInterface(InterfaceType t, IntegrationPoint *ip);
+
+
+
+
+    virtual void giveFirstPKStresses(FloatArray &answer, GaussPoint *gp, const FloatArray &reducedFIncrement, TimeStep *tStep);
+    virtual void giveCauchyStresses(FloatArray &answer, GaussPoint *gp, const FloatArray &reducedFIncrement, TimeStep *tStep);
+    virtual void giveStiffnessMatrix_dPdF(FloatMatrix &answer, MatResponseMode rMode, GaussPoint *gp, TimeStep *tStep);
+    virtual void giveStiffnessMatrix_dCde(FloatMatrix &answer, MatResponseMode rMode, GaussPoint *gp, TimeStep *tStep);
+
+    virtual void computeStressIndependentStrainVector(FloatArray &answer, GaussPoint *gp, TimeStep *stepN, ValueModeType mode);
+
+
+private:
+    int materialNumber;   // material number
+    int czMaterialNumber; // cohesive zone material number
 };
 } // end namespace oofem
 #endif // simplecrosssection_h

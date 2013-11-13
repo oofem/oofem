@@ -32,22 +32,46 @@
  *  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  */
 
-#include "surfacetensionmaterial.h"
-#include "dictionary.h"
-#include "classfactory.h"
+#ifndef intelline2_h
+#define intelline2_h
+
+#include "intelline1.h"
+#include "structuralinterfaceelement.h"
+
+
+#define _IFT_IntElLine2_Name "intelline2"
 
 namespace oofem {
+class FEI2dLineQuad;
 
-REGISTER_Material( SurfaceTensionMaterial );
-
-IRResultType SurfaceTensionMaterial :: initializeFrom(InputRecord *ir)
+/**
+ * This class implements a two dimensional interface element.
+ * Even if geometry approx is quadratic, the element is assumed straight
+ * If not straight, the rotation matrix depends on actual integration point
+ * and stiffness and strain computations should be modified.
+ */
+class IntElLine2 : public IntElLine1
 {
-    const char *__proc = "initializeFrom";
-    IRResultType result;
-    double value = 0.0;
-    IR_GIVE_OPTIONAL_FIELD(ir, value, _IFT_SurfaceTensionMaterial_isotropic);
-    this->propertyDictionary->add('g', value);
-    return result;
-}
+protected:
+    static FEI2dLineQuad interp;
 
+public:
+    IntElLine2(int n, Domain *d);
+    virtual ~IntElLine2() { }
+    virtual FEInterpolation *giveInterpolation() const;
+    virtual int computeNumberOfDofs() { return 12; }
+
+    // definition & identification
+    virtual const char *giveInputRecordName() const { return _IFT_IntElLine2_Name; }
+    virtual const char *giveClassName() const { return "IntElLine2"; }
+    //virtual classType giveClassID() const { return IntElLine2Class; }
+    
+protected:
+    virtual void computeNmatrixAt(GaussPoint *gp, FloatMatrix &answer);
+    virtual void computeGaussPoints();
+
+    virtual int giveApproxOrder() { return 2; }
+    Element_Geometry_Type giveGeometryType() const { return EGT_quad_21_interface; };
+};
 } // end namespace oofem
+#endif 

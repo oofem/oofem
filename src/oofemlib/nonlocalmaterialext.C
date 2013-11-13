@@ -107,7 +107,7 @@ NonlocalMaterialExtensionInterface :: buildNonlocalPointTable(GaussPoint *gp)
     double weight, elemVolume, integrationVolume = 0.;
 
     NonlocalMaterialStatusExtensionInterface *statusExt =
-        static_cast< NonlocalMaterialStatusExtensionInterface * >( gp->giveMaterial()->giveStatus(gp)->
+        static_cast< NonlocalMaterialStatusExtensionInterface * >( gp->giveMaterialStatus()->
         giveInterface(NonlocalMaterialStatusExtensionInterfaceType) );
     std::list< localIntegrationRecord > *iList;
 
@@ -232,7 +232,7 @@ NonlocalMaterialExtensionInterface :: rebuildNonlocalPointTable(GaussPoint *gp, 
     double weight, elemVolume, integrationVolume = 0.;
 
     NonlocalMaterialStatusExtensionInterface *statusExt =
-        static_cast< NonlocalMaterialStatusExtensionInterface * >( gp->giveMaterial()->giveStatus(gp)->
+        static_cast< NonlocalMaterialStatusExtensionInterface * >( gp->giveMaterialStatus()->
         giveInterface(NonlocalMaterialStatusExtensionInterfaceType) );
     std::list< localIntegrationRecord > *iList;
 
@@ -326,7 +326,7 @@ std::list< localIntegrationRecord > *
 NonlocalMaterialExtensionInterface :: giveIPIntegrationList(GaussPoint *gp)
 {
     NonlocalMaterialStatusExtensionInterface *statusExt =
-        static_cast< NonlocalMaterialStatusExtensionInterface * >(  gp->giveMaterial()->giveStatus(gp)->
+        static_cast< NonlocalMaterialStatusExtensionInterface * >( gp->giveMaterialStatus()->
         giveInterface(NonlocalMaterialStatusExtensionInterfaceType) );
 
     if ( !statusExt ) {
@@ -344,7 +344,7 @@ void
 NonlocalMaterialExtensionInterface :: endIPNonlocalAverage(GaussPoint *gp)
 {
     NonlocalMaterialStatusExtensionInterface *statusExt =
-        static_cast< NonlocalMaterialStatusExtensionInterface * >( gp->giveMaterial()->giveStatus(gp)->
+        static_cast< NonlocalMaterialStatusExtensionInterface * >( gp->giveMaterialStatus()->
         giveInterface(NonlocalMaterialStatusExtensionInterfaceType) );
 
     if ( !statusExt ) {

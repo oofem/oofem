@@ -243,8 +243,8 @@ void MixedGradientPressureNeumann :: giveLocationArrays(std::vector<IntArray> &r
     int nsd = this->domain->giveNumberOfSpatialDimensions();
     DofIDItem id0 = this->domain->giveDofManager(1)->hasDofID(V_u) ? V_u : D_u; // Just check the first node if it has V_u or D_u.
     dofids.resize(nsd);
-    for ( int i = 1; i <= nsd; ++i ) {
-        dofids.at(i) = id0 + i;
+    for ( int i = 0; i < nsd; ++i ) {
+        dofids(i) = id0 + i;
     }
 
     // Fetch the columns/rows for the stress contributions;
@@ -544,13 +544,15 @@ void MixedGradientPressureNeumann :: computeFields(FloatArray &sigmaDev, double 
     }
 
     // Postprocessing; vol = int v . n dA
+    IntArray bNodes;
     FloatArray unknowns, fe;
     vol = 0.;
     for (int pos = 1; pos <= boundaries.giveSize()/2; ++pos) {
         Element *e = this->giveDomain()->giveElement( boundaries.at(pos*2-1) );
         int boundary = boundaries.at(pos*2);
-        
-        e->computeBoundaryVectorOf(boundary, EID_MomentumBalance, VM_Total, tStep, unknowns);
+
+        e->giveInterpolation()->boundaryGiveNodes(bNodes, boundary);
+        e->computeBoundaryVectorOf(bNodes, EID_MomentumBalance, VM_Total, tStep, unknowns);
         this->integrateVolTangent(fe, e, boundary);
         vol += fe.dotProduct(unknowns);
     }

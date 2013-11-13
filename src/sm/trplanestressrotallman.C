@@ -34,7 +34,7 @@
 
 #include "trplanestressrotallman.h"
 #include "node.h"
-#include "crosssection.h"
+#include "structuralcrosssection.h"
 #include "gausspoint.h"
 #include "gaussintegrationrule.h"
 #include "floatmatrix.h"
@@ -213,8 +213,8 @@ TrPlanestressRotAllman :: computeStiffnessMatrixZeroEnergyStabilization(FloatMat
   b.at(1,6)-=1.0/3.0;
   b.at(1,9)-=1.0/3.0;
   // add alpha*Volume*B^T[G]B to element stiffness matrix
-  double coeff = this->giveMaterial()->give (Gxy, this->giveDefaultIntegrationRulePtr()->getIntegrationPoint(0)) * 
-    this->giveArea() * this->giveCrossSection()->give(CS_Thickness) * 1.e-6;
+  double G = this->giveStructuralCrossSection()->give(Gxy, this->giveDefaultIntegrationRulePtr()->getIntegrationPoint(0));
+  double coeff = G * this->giveArea() * this->giveCrossSection()->give(CS_Thickness) * 1.e-6;
   answer.beTProductOf (b,b);
   answer.times(coeff);
 }

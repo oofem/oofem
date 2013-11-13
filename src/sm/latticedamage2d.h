@@ -408,8 +408,6 @@ protected:
                             GaussPoint *gp,
                             InternalStateType type,
                             TimeStep *atTime);
-
-    virtual InternalStateValueType giveIPValueType(InternalStateType type);
 };
 } // end namespace oofem
 #define latticedamage2d_h

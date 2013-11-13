@@ -199,7 +199,6 @@ StructuralElement :: computeBodyLoadVectorAt(FloatArray &answer, Load *forLoad, 
     if ( this->computeLoadGToLRotationMtrx(T) ) {
       force.rotatedWith(T, 'n');
     }
-    //force.times( this->giveMaterial()->give('d') );
 
     answer.resize(0);
 
@@ -208,7 +207,7 @@ StructuralElement :: computeBodyLoadVectorAt(FloatArray &answer, Load *forLoad, 
             gp  = iRule->getIntegrationPoint(i);
             this->computeNmatrixAt( *(gp->giveLocalCoordinates()) , n);
             dV  = this->computeVolumeAround(gp);
-            dens = this->giveMaterial()->give('d', gp);
+            dens = this->giveCrossSection()->give('d', gp);
             ntf.beTProductOf(n, force);
             answer.add(dV * dens, ntf);
         }
@@ -473,13 +472,12 @@ StructuralElement :: computeConsistentMassMatrix(FloatMatrix &answer, TimeStep *
 
     this->giveMassMtrxIntegrationgMask(mask);
 
-    //density = this->giveMaterial()->give('d');
     mass = 0.;
 
     for ( int i = 0; i < iRule.giveNumberOfIntegrationPoints(); i++ ) {
         GaussPoint *gp = iRule.getIntegrationPoint(i);
         this->computeNmatrixAt( *(gp->giveLocalCoordinates()) , n);
-        density = this->giveMaterial()->give('d', gp);
+        density = this->giveCrossSection()->give('d', gp);
 
         if(ipDensity != NULL) {
         	// Override density if desired
@@ -719,7 +717,7 @@ StructuralElement :: computeStiffnessMatrix(FloatMatrix &answer, MatResponseMode
     FloatMatrix d, bi, bj, dbj, dij;
     GaussPoint *gp;
     IntegrationRule *iRule;
-    bool matStiffSymmFlag = this->giveCrossSection()->isCharacteristicMtrxSymmetric(rMode, this->material);
+    bool matStiffSymmFlag = this->giveCrossSection()->isCharacteristicMtrxSymmetric( rMode );
 
     answer.resize(0, 0);
 
@@ -790,7 +788,7 @@ void StructuralElement :: computeStiffnessMatrix_withIRulesAsSubcells(FloatMatri
 {
     FloatMatrix temp, bj, d, dbj;
     int ndofs = this->computeNumberOfDofs();
-    bool matStiffSymmFlag = this->giveCrossSection()->isCharacteristicMtrxSymmetric( rMode, this->giveMaterial()->giveNumber() );
+    bool matStiffSymmFlag = this->giveCrossSection()->isCharacteristicMtrxSymmetric( rMode );
     IntArray irlocnum;
 
     answer.resize(ndofs, ndofs);
@@ -881,7 +879,6 @@ StructuralElement :: giveInternalForcesVector(FloatArray &answer,
 // has been called for the same time step.
 //
 {
-    Material *mat = this->giveMaterial();
     IntegrationRule *iRule = integrationRulesArray [ giveDefaultIntegrationRule() ];
 
     FloatMatrix b;
@@ -899,10 +896,11 @@ StructuralElement :: giveInternalForcesVector(FloatArray &answer,
 
     for ( int i = 0; i < iRule->giveNumberOfIntegrationPoints(); i++ ) {
         GaussPoint *gp = iRule->getIntegrationPoint(i);
+        StructuralMaterialStatus *matStat = static_cast< StructuralMaterialStatus * >( gp->giveMaterialStatus() );
         this->computeBmatrixAt(gp, b);
 
         if ( useUpdatedGpRecord == 1 ) {
-            stress = static_cast< StructuralMaterialStatus * >( mat->giveStatus(gp) )->giveStressVector();
+            stress = matStat->giveStressVector();
         } else {
             if ( !this->isActivated(tStep) ) {
                 strain.resize( StructuralMaterial :: giveSizeOfVoigtSymVector(gp->giveMaterialMode()) );
@@ -945,8 +943,6 @@ StructuralElement :: giveInternalForcesVector_withIRulesAsSubcells(FloatArray &a
 // has been called for the same time step.
 //
 {
-    Material *mat = this->giveMaterial();
-
     FloatMatrix b, R;
     FloatArray temp, u, stress, strain;
     IntArray irlocnum;
@@ -972,10 +968,11 @@ StructuralElement :: giveInternalForcesVector_withIRulesAsSubcells(FloatArray &a
 
         for ( int i = 0; i < iRule->giveNumberOfIntegrationPoints(); i++ ) {
             GaussPoint *gp = iRule->getIntegrationPoint(i);
+            StructuralMaterialStatus *matStat = static_cast< StructuralMaterialStatus * >( gp->giveMaterialStatus() );
             this->computeBmatrixAt(gp, b);
 
             if ( useUpdatedGpRecord == 1 ) {
-                stress = static_cast< StructuralMaterialStatus * >( mat->giveStatus(gp) )->giveStressVector();
+                stress = matStat->giveStressVector();
             } else {
                 if ( !this->isActivated(tStep) ) {
                     strain.resize( StructuralMaterial :: giveSizeOfVoigtSymVector(gp->giveMaterialMode()) );
@@ -1118,24 +1115,24 @@ StructuralElement :: updateBeforeNonlocalAverage(TimeStep *atTime)
     }
 
 #endif
-
-    // not possible - produces wrong result
-    //StructuralNonlocalMaterial* material = DYNAMIC_CAST(StructuralNonlocalMaterial, this->giveMaterial());
-    StructuralNonlocalMaterialExtensionInterface *materialExt =
-        static_cast< StructuralNonlocalMaterialExtensionInterface * >( this->giveMaterial()->
-        giveInterface(NonlocalMaterialExtensionInterfaceType) );
-
-    if ( !materialExt ) {
-        return;             //_error ("updateBeforeNonlocalAverage: material with no StructuralNonlocalMaterial support");
-    }
-
+    
     // force updating local quantities
     for ( int i = 0; i < numberOfIntegrationRules; i++ ) {
         iRule = integrationRulesArray [ i ];
         for ( int j = 0; j < iRule->giveNumberOfIntegrationPoints(); j++ ) {
-            this->computeStrainVector(epsilon, iRule->getIntegrationPoint(j), atTime);
+            IntegrationPoint *ip = iRule->getIntegrationPoint(j);
+            this->computeStrainVector(epsilon, ip, atTime);
             // provide material local strain increment - as is provided to computeRealStresVector
             // allows to update internal vars to be averaged to new state
+
+            // not possible - produces wrong result
+            StructuralNonlocalMaterialExtensionInterface *materialExt;
+            materialExt =  static_cast< StructuralNonlocalMaterialExtensionInterface * >( this->giveStructuralCrossSection()->
+                giveMaterialInterface(NonlocalMaterialExtensionInterfaceType, ip) );
+
+            if ( !materialExt ) {
+                return;             //_error ("updateBeforeNonlocalAverage: material with no StructuralNonlocalMaterial support");
+            }
             materialExt->updateBeforeNonlocAverage(epsilon, iRule->getIntegrationPoint(j), atTime);
         }
     }
@@ -1146,16 +1143,11 @@ int
 StructuralElement :: checkConsistency()
 //
 // check internal consistency
-// mainly tests, whether material and crossSection data
-// are safe for conversion to "Structural" versions
+// mainly tests, whether crossSection data
+// are safe for conversion to "Structural" version
 //
 {
     int result = 1;
-    if ( !dynamic_cast< StructuralMaterial * >( this->giveMaterial() ) ) {
-        _warning2("checkConsistency : material %s without structural support", this->giveMaterial()->giveClassName());
-        result = 0;
-    }
-
     if ( !this->giveCrossSection()->testCrossSectionExtension(CS_StructuralCapability) ) {
         _warning2("checkConsistency : cross-section %s without structural support", this->giveCrossSection()->giveClassName());
         result = 0;
@@ -1191,7 +1183,7 @@ StructuralElement :: condense(FloatMatrix *stiff, FloatMatrix *mass, FloatArray 
     int i, ii, j, k;
     int nkon = what->giveSize();
     int size = stiff->giveNumberOfRows();
-    long double coeff, dii, lii = 0;
+    double coeff, dii, lii = 0;
     FloatArray *gaussCoeff = NULL;
     // stored gauss coefficient
     // for mass condensation
@@ -1297,35 +1289,38 @@ void
 StructuralElement :: giveNonlocalLocationArray(IntArray &locationArray, const UnknownNumberingScheme &s)
 {
     NonlocalMaterialStiffnessInterface *interface;
-    // test for material model interface
-    interface = static_cast< NonlocalMaterialStiffnessInterface * >
-                ( this->giveMaterial()->giveInterface(NonlocalMaterialStiffnessInterfaceType) );
-    if ( interface == NULL ) {
-        locationArray.resize(0);
-        return;
-    } else {
-        IntArray elemLocArry;
-        // create lit of remote elements, contributing to receiver
-        std::list< localIntegrationRecord > *integrationDomainList;
-        IntegrationRule *iRule = integrationRulesArray [ giveDefaultIntegrationRule() ];
-        std::list< localIntegrationRecord > :: iterator pos;
 
-        locationArray.resize(0);
-        // loop over element IP
-        for ( int i = 0; i < iRule->giveNumberOfIntegrationPoints(); i++ ) {
-            integrationDomainList = interface->
-                                    NonlocalMaterialStiffnessInterface_giveIntegrationDomainList( iRule->getIntegrationPoint(i) );
-            // loop over IP influencing IPs, extract corresponding element numbers and their code numbers
-            for ( pos = integrationDomainList->begin(); pos != integrationDomainList->end(); ++pos ) {
-                pos->nearGp->giveElement()->giveLocationArray(elemLocArry, EID_MomentumBalance, s);
-                /*
-                 * Currently no care given to multiple occurences of code number in locationArray.
-                 */
-                locationArray.followedBy(elemLocArry, 20);
-            }
-        } // end loop over IPs
+    IntArray elemLocArry;
+    // create lit of remote elements, contributing to receiver
+    std::list< localIntegrationRecord > *integrationDomainList;
+    IntegrationRule *iRule = integrationRulesArray [ giveDefaultIntegrationRule() ];
+    std::list< localIntegrationRecord > :: iterator pos;
 
-    }
+    locationArray.resize(0);
+    // loop over element IP
+    for ( int i = 0; i < iRule->giveNumberOfIntegrationPoints(); i++ ) {
+        IntegrationPoint *ip = iRule->getIntegrationPoint(i);
+        interface =  static_cast< NonlocalMaterialStiffnessInterface * >( this->giveStructuralCrossSection()->
+            giveMaterialInterface(NonlocalMaterialStiffnessInterfaceType, ip) );
+
+            
+        if ( interface == NULL ) {        
+            locationArray.resize(0);
+            return;
+        }
+
+        integrationDomainList = interface->
+                                NonlocalMaterialStiffnessInterface_giveIntegrationDomainList( ip );
+        // loop over IP influencing IPs, extract corresponding element numbers and their code numbers
+        for ( pos = integrationDomainList->begin(); pos != integrationDomainList->end(); ++pos ) {
+            pos->nearGp->giveElement()->giveLocationArray(elemLocArry, EID_MomentumBalance, s);
+            /*
+                * Currently no care given to multiple occurences of code number in locationArray.
+                */
+            locationArray.followedBy(elemLocArry, 20);
+        }
+    } // end loop over IPs
+
 }
 
 
@@ -1339,18 +1334,19 @@ StructuralElement :: addNonlocalStiffnessContributions(SparseMtrx &dest, const U
         return;
     }
 
-    // test for material model interface
-    interface = static_cast< NonlocalMaterialStiffnessInterface * >
-                ( this->giveMaterial()->giveInterface(NonlocalMaterialStiffnessInterfaceType) );
-    if ( interface == NULL ) {
-        return;
-    } else {
-        IntegrationRule *iRule = integrationRulesArray [ giveDefaultIntegrationRule() ];
-        // loop over element IP
-        for ( int i = 0; i < iRule->giveNumberOfIntegrationPoints(); i++ ) {
-            interface->NonlocalMaterialStiffnessInterface_addIPContribution(dest, s, iRule->getIntegrationPoint(i), atTime);
+    IntegrationRule *iRule = integrationRulesArray [ giveDefaultIntegrationRule() ];
+    // loop over element IP
+    for ( int i = 0; i < iRule->giveNumberOfIntegrationPoints(); i++ ) {
+        IntegrationPoint *ip = iRule->getIntegrationPoint(i);
+        interface = static_cast< NonlocalMaterialStiffnessInterface * >( this->giveStructuralCrossSection()->
+            giveMaterialInterface(NonlocalMaterialStiffnessInterfaceType, ip) );
+        if ( interface == NULL ) {
+            return;
         }
+
+        interface->NonlocalMaterialStiffnessInterface_addIPContribution(dest, s, iRule->getIntegrationPoint(i), atTime);
     }
+
 }
 
 
@@ -1361,19 +1357,19 @@ StructuralElement :: adaptiveUpdate(TimeStep *tStep)
     IntegrationRule *iRule;
     FloatArray strain;
 
-    MaterialModelMapperInterface *interface = static_cast< MaterialModelMapperInterface * >
-                                              ( this->giveMaterial()->giveInterface(MaterialModelMapperInterfaceType) );
-
-    if ( !interface ) {
-        return 0;
-    }
-
+    MaterialModelMapperInterface *interface; 
     for ( int i = 0; i < numberOfIntegrationRules; i++ ) {
         iRule = integrationRulesArray [ i ];
         for ( int j = 0; j < iRule->giveNumberOfIntegrationPoints(); j++ ) {
-            GaussPoint *gp = iRule->getIntegrationPoint(j);
-            this->computeStrainVector(strain, gp, tStep);
-            result &= interface->MMI_update(gp, tStep, & strain);
+            IntegrationPoint *ip = iRule->getIntegrationPoint(i);
+            interface = static_cast< MaterialModelMapperInterface * >( this->giveStructuralCrossSection()->
+                giveMaterialInterface(MaterialModelMapperInterfaceType, ip) );
+
+            if ( interface == NULL ) {
+                return 0;
+            }
+            this->computeStrainVector(strain, ip, tStep);
+            result &= interface->MMI_update(ip, tStep, & strain);
         }
     }
 
@@ -1511,15 +1507,22 @@ StructuralElement :: showExtendedSparseMtrxStructure(CharType mtrx, oofegGraphic
     NonlocalMaterialStiffnessInterface *interface;
     int i;
     if ( ( ( mtrx == StiffnessMatrix ) || ( mtrx == TangentStiffnessMatrix ) ) ) {
-        interface = static_cast< NonlocalMaterialStiffnessInterface * >
-                    ( this->giveMaterial()->giveInterface(NonlocalMaterialStiffnessInterfaceType) );
-        if ( interface == NULL ) {
-            return;
-        }
+        //interface = static_cast< NonlocalMaterialStiffnessInterface * >
+        //            ( this->giveMaterial()->giveInterface(NonlocalMaterialStiffnessInterfaceType) );
+        //if ( interface == NULL ) {
+        //    return;
+        //}
 
         IntegrationRule *iRule = integrationRulesArray [ giveDefaultIntegrationRule() ];
         // loop over element IP
         for ( i = 0; i < iRule->giveNumberOfIntegrationPoints(); i++ ) {
+            IntegrationPoint *ip = iRule->getIntegrationPoint(i);
+            interface = static_cast< NonlocalMaterialStiffnessInterface * >( this->giveStructuralCrossSection()->
+                giveMaterialInterface(NonlocalMaterialStiffnessInterfaceType, ip) );
+
+            if ( interface == NULL ) {
+                return;
+            }
             interface->NonlocalMaterialStiffnessInterface_showSparseMtrxStructure(iRule->getIntegrationPoint(i), gc, atTime);
         }
     }

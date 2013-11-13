@@ -3551,7 +3551,7 @@ Subdivision :: createMesh(TimeStep *stepN, int domainNumber, int domainSerNum, D
 
     Dof *idofPtr, *dof;
     DofManager *parentNodePtr, *node;
-    Element *parentElementPtr, *elem;
+    Element *elem;
     CrossSection *crossSection;
     Material *mat;
     NonlocalBarrier *barrier;
@@ -3813,18 +3813,19 @@ Subdivision :: createMesh(TimeStep *stepN, int domainNumber, int domainSerNum, D
         parentElemMap.at(eNum) = parent;
 #endif
         if ( parent ) {
-            parentElementPtr = domain->giveElement(parent);
-            elem = classFactory.createElement(parentElementPtr->giveClassName(), eNum, * dNew);
-            ( * dNew )->setElement(eNum, elem);
-            elem->setDofManagers( * mesh->giveElement(ielem)->giveNodes() );
-            elem->setMaterial( parentElementPtr->giveMaterial()->giveNumber() );
-            elem->setCrossSection( parentElementPtr->giveCrossSection()->giveNumber() );
+            DynamicInputRecord ir;
+            domain->giveElement(parent)->giveInputRecord(ir);
+            ir.setField(* mesh->giveElement(ielem)->giveNodes(), _IFT_Element_nodes);
+            ir.giveRecordKeywordField(name);
+            elem = classFactory.createElement(name.c_str(), eNum, * dNew);
+            elem->initializeFrom(&ir);
 #ifdef __PARALLEL_MODE
             elem->setParallelMode(Element_local);
             // not subdivided elements inherit globNum, subdivided give -1
             elem->setGlobalNumber( mesh->giveElement(ielem)->giveGlobalNumber() );
             // local elements have array partitions empty !
 #endif
+            ( * dNew )->setElement(eNum, elem);
             elem->postInitialize();
         } else {
             OOFEM_ERROR("Subdivision :: createMesh: parent element missing");

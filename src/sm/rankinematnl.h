@@ -177,7 +177,6 @@ public:
     virtual int hasBoundedSupport() { return 1; }
 
     virtual int giveIPValue(FloatArray &answer, GaussPoint *aGaussPoint, InternalStateType type, TimeStep *atTime);
-    virtual InternalStateValueType giveIPValueType(InternalStateType type);
 
 #ifdef __PARALLEL_MODE
     virtual int packUnknowns(CommunicationBuffer &buff, TimeStep *stepN, GaussPoint *ip);

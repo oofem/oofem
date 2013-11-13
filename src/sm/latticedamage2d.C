@@ -328,7 +328,7 @@ LatticeDamage2d :: CreateStatus(GaussPoint *gp) const
 MaterialStatus *
 LatticeDamage2d :: giveStatus(GaussPoint *gp) const
 {
-    MaterialStatus *status = static_cast< MaterialStatus * >( gp->giveMaterialStatus( this->giveNumber() ) );
+    MaterialStatus *status = static_cast< MaterialStatus * >( gp->giveMaterialStatus() );
     if ( status == NULL ) {
         // create a new one
         status = this->CreateStatus(gp);
@@ -698,22 +698,6 @@ LatticeDamage2d :: giveIPValue(FloatArray &answer,
         return StructuralMaterial :: giveIPValue(answer, gp, type, atTime);
     }
 }
-
-
-InternalStateValueType
-LatticeDamage2d :: giveIPValueType(InternalStateType type)
-{
-    if ( type == IST_CrackStatuses || type == IST_DamageScalar || type == IST_DissWork || type == IST_DeltaDissWork ) {
-        return ISVT_SCALAR;
-    } else if ( type == IST_DamageTensor ) {
-        return ISVT_TENSOR_S3;
-    } else {
-        return StructuralMaterial :: giveIPValueType(type);
-    }
-}
-
-
-
 
 
 LatticeDamage2dStatus :: LatticeDamage2dStatus(int n, Domain *d, GaussPoint *g) :

@@ -1257,19 +1257,6 @@ TrabBone3D :: giveIPValue(FloatArray &answer, GaussPoint *aGaussPoint, InternalS
     }
 }
 
-InternalStateValueType
-TrabBone3D :: giveIPValueType(InternalStateType type)
-{
-    if ( type == IST_PlasticStrainTensor ) {
-        return ISVT_TENSOR_S3;
-    } else if ( ( type == IST_DamageScalar ) || ( type == IST_MaxEquivalentStrainLevel ) || ( type == IST_BoneVolumeFraction ) || ( type == IST_PlasStrainEnerDens ) || ( type == IST_ElasStrainEnerDens ) || ( type == IST_TotalStrainEnerDens ) ) {
-        return ISVT_SCALAR;
-    } else {
-        return StructuralMaterial :: giveIPValueType(type);
-    }
-}
-
-
 #ifdef __PARALLEL_MODE
 double TrabBone3D :: predictRelativeComputationalCost(GaussPoint *gp)
 {

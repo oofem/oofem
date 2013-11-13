@@ -34,11 +34,9 @@
 #ifndef petscsparsemtrx_h
 #define petscsparsemtrx_h
 
-#ifdef __PETSC_MODULE
+#include "sparsemtrx.h"
 
- #include "sparsemtrx.h"
-
- #include <petscksp.h>
+#include <petscksp.h>
 
 namespace oofem {
 /**
@@ -112,8 +110,6 @@ public:
     int giveDomainIndex() const { return di; }
 
     friend class PetscSolver;
-    //friend class PETScSNESNM;
 };
 } // end namespace oofem
 #endif
-#endif // petscsparsemtrx_h

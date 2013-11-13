@@ -825,22 +825,6 @@ DruckerPragerPlasticitySM :: giveIPValue(FloatArray &answer,
     }
 }
 
-
-InternalStateValueType
-DruckerPragerPlasticitySM :: giveIPValueType(InternalStateType type)
-{
-    switch ( type ) {
-    case IST_PlasticStrainTensor:      // plastic strain tensor
-        return ISVT_TENSOR_S3E;
-    case IST_DamageTensor:     // damage tensor used for internal variables
-        return ISVT_TENSOR_S3;
-
-    default:
-        return StructuralMaterial :: giveIPValueType(type);
-
-    }
-}
-
 MaterialStatus *
 DruckerPragerPlasticitySM :: CreateStatus(GaussPoint *gp) const
 {

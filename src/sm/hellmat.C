@@ -78,13 +78,14 @@ HellmichMaterial :: createMaterialGp()
     if ( !materialGp ) {
         _error("Could not create the material-level gp.");
     }
-
+    
     static_cast< HellmichMaterialStatus * >( giveStatus(materialGp) )->setInitialTemperature(initialTemperature); // set material temperature in K
  #ifdef VERBOSE_HELLMAT
     // output to check if it worked
     printf("\n Hellmat::createMaterialGp:");
     printf("\n  Auxiliary element input record: %s", eirstr);
-    printf( "\n  Created auxiliary element with material %s.", elem->giveMaterial()->giveClassName() );
+    //printf( "\n  Created auxiliary element with material %s.", elem->giveMaterial()->giveClassName() );
+    printf( "\n  Created auxiliary element with cross section %s.", elem->giveCrossSection()->giveClassName() ); ///@todo replaced with cross section number instead of material
     printf( "\n  Created material-level gp with material %s.", materialGp->giveMaterial()->giveClassName() );
     printf( "\n  Material temperature set to %f.", giveTemperature(NULL) );
  #endif
@@ -2745,27 +2746,6 @@ double HellmichMaterial :: give(int aProperty, GaussPoint *gp)
         return this->Material :: give(aProperty, gp);
     }
 }
-
-// === Postprocessing ===
-InternalStateValueType
-HellmichMaterial :: giveIPValueType(InternalStateType type)
-{
-    // strains components packed in engineering notation
-    if ( type == IST_PlasticStrainTensor ) {
-        return ISVT_TENSOR_S3E;
-    } else if ( type == IST_PrincipalPlasticStrainTensor ) {
-        return ISVT_VECTOR;
-    } else if ( type == IST_DamageTensor ) {
-        return ISVT_SCALAR;
-    } else if ( type == IST_HydrationDegree ) {
-        return ISVT_SCALAR;
-    } else if ( type == IST_Temperature ) {
-        return ISVT_SCALAR;
-    } else {
-        return StructuralMaterial :: giveIPValueType(type);
-    }
-}
-
 
 // end of HellmichMaterial implemantation
 

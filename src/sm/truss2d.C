@@ -35,7 +35,7 @@
 #include "truss2d.h"
 #include "node.h"
 #include "material.h"
-#include "crosssection.h"
+#include "structuralcrosssection.h"
 #include "gausspoint.h"
 #include "gaussintegrationrule.h"
 #include "floatmatrix.h"
@@ -91,7 +91,7 @@ Truss2d :: computeBmatrixAt(GaussPoint *aGaussPoint, FloatMatrix &answer, int li
     answer.at(1, 3) = x2 - x1;
     answer.at(1, 4) = z2 - z1;
 
-    l = this->giveLength();
+    l = this->computeLength();
     answer.times( 1.0 / l / l );
 }
 
@@ -122,18 +122,15 @@ Truss2d :: computeLumpedMassMatrix(FloatMatrix &answer, TimeStep *tStep)
 // Returns the lumped mass matrix of the receiver. This expression is
 // valid in both local and global axes.
 {
-    Material *mat;
-    double halfMass;
-    GaussPoint *gp = integrationRulesArray [ 0 ]->getIntegrationPoint(0);
-
     answer.resize(4, 4);
     answer.zero();
     if ( !isActivated(tStep) ) {
         return;
     }
 
-    mat        = this->giveMaterial();
-    halfMass   =  mat->give('d', gp) * this->giveCrossSection()->give(CS_Area) * this->giveLength() / 2.;
+    GaussPoint *gp = integrationRulesArray [ 0 ]->getIntegrationPoint(0);
+    double density = this->giveStructuralCrossSection()->give('d', gp);
+    double halfMass = density * this->giveCrossSection()->give(CS_Area) * this->computeLength() * 0.5;
     answer.at(1, 1) = halfMass;
     answer.at(2, 2) = halfMass;
     answer.at(3, 3) = halfMass;
@@ -188,11 +185,11 @@ double Truss2d :: computeVolumeAround(GaussPoint *aGaussPoint)
 // Gauss point is used.
 {
     double weight  = aGaussPoint->giveWeight();
-    return 0.5 * this->giveLength() * weight * this->giveCrossSection()->give(CS_Area);
+    return 0.5 * this->computeLength() * weight * this->giveCrossSection()->give(CS_Area);
 }
 
 
-double Truss2d :: giveLength()
+double Truss2d :: computeLength()
 // Returns the length of the receiver.
 {
     //determine in which plane the truss is defined
@@ -367,7 +364,7 @@ Truss2d ::   computeEdgeVolumeAround(GaussPoint *aGaussPoint, int iEdge)
     }
 
     double weight  = aGaussPoint->giveWeight();
-    return 0.5 * this->giveLength() * weight;
+    return 0.5 * this->computeLength() * weight;
 }
 
 int

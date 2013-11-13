@@ -747,12 +747,6 @@ public:
      * @return Nonzero if o.k, zero otherwise.
      */
     virtual int giveIPValue(FloatArray &answer, GaussPoint *gp, InternalStateType type, TimeStep *tStep);
-    /**
-     * Returns the type of internal variable (scalar, vector, tensor,...).
-     * @param type Determines the type of internal variable.
-     * @return Type of internal variable.
-     */
-    virtual InternalStateValueType giveIPValueType(InternalStateType type);
 
     // characteristic length in gp (for some material models)
     /**
@@ -881,7 +875,7 @@ public:
     //
     // Graphics output
     //
-    void         drawYourself(oofegGraphicContext &context);
+    virtual void drawYourself(oofegGraphicContext &context);
     virtual void drawAnnotation(oofegGraphicContext &mode);
     virtual void drawRawGeometry(oofegGraphicContext &mode) { }
     virtual void drawDeformedGeometry(oofegGraphicContext &mode, UnknownType) { }
@@ -891,7 +885,6 @@ public:
     // to determine the max and min local values, when recovery does not takes place
     virtual void giveLocalIntVarMaxMin(oofegGraphicContext &context, TimeStep *, double &emin, double &emax) { emin = emax = 0.0; }
 
-    //virtual void  drawInternalState (oofegGraphicContext& context) {}
     /**
      * Returns internal state variable (like stress,strain) at node of element in Reduced form,
      * the way how is obtained is dependent on InternalValueType.

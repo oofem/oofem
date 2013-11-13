@@ -226,6 +226,7 @@ void IntMatBilinearCZ::giveFirstPKTraction_3d(FloatArray &answer, GaussPoint *gp
 void IntMatBilinearCZ::give3dStiffnessMatrix_dTdj(FloatMatrix &answer, MatResponseMode rMode, GaussPoint *gp, TimeStep *tStep)
 {
 	OOFEM_ERROR("IntMatBilinearCZ::give3dStiffnessMatrix_dTdj is not implemented. Use numerical Jacobian instead.");
+    //this->give3dStiffnessMatrix_dTdj_Num(answer, rMode, gp, tStep);
 }
 
 double IntMatBilinearCZ::computeYieldFunction(const double &iTractionNormal, const double &iTractionTang) const
@@ -270,11 +271,6 @@ int IntMatBilinearCZ::giveIPValue(FloatArray &answer, GaussPoint *gp, InternalSt
 
 }
 
-InternalStateValueType IntMatBilinearCZ::giveIPValueType(InternalStateType type)
-{
-    return StructuralInterfaceMaterial :: giveIPValueType(type);
-}
-
 IRResultType IntMatBilinearCZ::initializeFrom(InputRecord *ir)
 {
     const char *__proc = "initializeFrom";  // Required by IR_GIVE_FIELD macro
@@ -292,6 +288,8 @@ IRResultType IntMatBilinearCZ::initializeFrom(InputRecord *ir)
     IR_GIVE_FIELD(ir, mMu, _IFT_IntMatBilinearCZ_mu);
 
     IR_GIVE_FIELD(ir, mGamma, _IFT_IntMatBilinearCZ_gamma);
+
+    StructuralInterfaceMaterial :: initializeFrom(ir);
 
     this->checkConsistency();
     this->printYourself();

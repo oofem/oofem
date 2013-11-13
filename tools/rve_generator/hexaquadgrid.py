@@ -82,13 +82,13 @@ def printRVE(rveSampleNumber, rveSize, rvePosition):
     f = open(fname+'.in','w')
     print(fname+'.out', file=f)
     print('Hex grid for incompressible stokes flow', file=f)
-    print('StokesFlow nsteps 1 rtolf 1e-6 lstype 3 smtype 7 nonlinform 1 nmodules 1', file=f)
+    print('StokesFlow nsteps 1 rtolf 1e-6 lstype 3 smtype 7 nonlinform 1 nmodules 0', file=f)
     #print('Nonlinearstatic nsteps 1 rtolf 1e-6 lstype 3 smtype 7 controlmode 1 nmodules 1', file=f)
-    print('VTKXML tstep_all domain_all primvars 2 4 5 cellvars 1 46', file=f)
+    #print('VTKXML tstep_all domain_all primvars 2 4 5 cellvars 1 46', file=f)
     #print('VTKXML tstep_all domain_all primvars 1 1 cellvars 2 46 4', file=f)
     print('Domain 3dIncompFlow', file=f)
     #print('Domain 3d', file=f)
-    print('OutputManager tstep_all dofman_all element_all', file=f)
+    print('OutputManager', file=f)
     print('ndofman', n*n*n, 'nelem', nelem*nelem*nelem, 'ncrosssect 1 nmat 2 nbc 4 nic 0 nltf 1 nset 4', file=f)
 
     # Nodes:
@@ -198,8 +198,8 @@ inclusions = rveToolbox.generateSphericalInclusions(density, boxSize, averageRad
 #rveToolbox.plotSphericalInclusions(rveInclusions, boxSize, 3, True)
 
 
-totalSamples = 10
-rveSize = 1
+totalSamples = 200
+rveSize = 3
 
 for rveSampleNumber in range(totalSamples):
     print('Generating RVE %d'%rveSampleNumber)

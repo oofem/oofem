@@ -682,9 +682,11 @@ Element :: initializeFrom(InputRecord *ir)
 #  ifdef VERBOSE
     // VERBOSE_PRINT1("Instanciating element ",number);
 #  endif
-    IR_GIVE_FIELD(ir, material, _IFT_Element_mat);
+    //IR_GIVE_FIELD(ir, material, _IFT_Element_mat);
+    IR_GIVE_OPTIONAL_FIELD(ir, material, _IFT_Element_mat);
 
-    IR_GIVE_FIELD(ir, crossSection, _IFT_Element_crosssect);
+    //IR_GIVE_FIELD(ir, crossSection, _IFT_Element_crosssect);
+    IR_GIVE_OPTIONAL_FIELD(ir, crossSection, _IFT_Element_crosssect);
 
     IR_GIVE_FIELD(ir, dofManArray, _IFT_Element_nodes);
 
@@ -816,9 +818,11 @@ Element :: updateYourself(TimeStep *tStep)
 #  ifdef VERBOSE
     // VERBOSE_PRINT1("Updating Element ",number)
 #  endif
+
     for ( int i = 0; i < numberOfIntegrationRules; i++ ) {
         integrationRulesArray [ i ]->updateYourself(tStep);
     }
+
 }
 
 
@@ -1194,7 +1198,6 @@ Element :: computeLocalCoordinates(FloatArray &answer, const FloatArray &gcoords
     if (fei) {
         return fei->global2local(answer, gcoords, FEIElementGeometryWrapper(this));
     } else {
-        answer.resize(0);
         return false;
     }
 }
@@ -1264,19 +1267,6 @@ Element :: giveIPValue(FloatArray &answer, GaussPoint *aGaussPoint, InternalStat
     }
 }
 
-
-InternalStateValueType
-Element :: giveIPValueType(InternalStateType type)
-{
-    if ( ( type == IST_ErrorIndicatorLevel ) || ( type == IST_RelMeshDensity ) ||
-        ( type == IST_InternalStressError ) || ( type == IST_PrimaryUnknownError ) ) {
-        return ISVT_SCALAR;
-    } else {
-        return this->giveCrossSection()->giveIPValueType( type, this->giveMaterial() );
-    }
-}
-
-
 int
 Element :: giveSpatialDimension()
 {
@@ -1294,6 +1284,8 @@ Element :: giveSpatialDimension()
     case EGT_quad_1:
     case EGT_quad_2:
     case EGT_quad9_2:
+    case EGT_quad_1_interface:
+    case EGT_quad_21_interface:
         return 2;
 
     case EGT_tetra_1:
@@ -1325,6 +1317,8 @@ Element :: giveNumberOfBoundarySides()
 
     case EGT_line_1:
     case EGT_line_2:
+    case EGT_quad_1_interface:
+    case EGT_quad_21_interface:
         return 2;
 
     case EGT_triangle_1:

@@ -261,6 +261,7 @@ void Tr21Stokes :: computeLoadVector(FloatArray &answer, Load *load, CharType ty
     answer.resize(15);
     answer.zero();
     answer.assemble( temparray, this->momentum_ordering );
+
 }
 
 void Tr21Stokes :: computeBoundaryLoadVector(FloatArray &answer, BoundaryLoad *load, int boundary, CharType type, ValueModeType mode, TimeStep *tStep)
@@ -575,17 +576,17 @@ void Tr21Stokes :: giveIntegratedVelocity(FloatMatrix &answer, TimeStep *tStep )
         this->interpolation_quad.evalN(N, *lcoords, FEIElementGeometryWrapper(this));
         detJ = this->interpolation_quad.giveTransformationJacobian(*lcoords, FEIElementGeometryWrapper(this));
 
-        N.times(detJ*gp->giveWeight());
+        double dA = detJ*gp->giveWeight();
 
-        for (j=1; j<=6;j++) {
-            Nmatrix.at(1,j*2-1)=N.at(j);
-            Nmatrix.at(2,j*2)=N.at(j);
+        for (j=0; j<N.giveSize();j++) {
+            Nmatrix.at(1,j*2+1)+=N.at(j+1)*dA;
+            Nmatrix.at(2,j*2+2)+=N.at(j+1)*dA;
         }
 
-        ThisAnswer.beProductOf(Nmatrix,v);
-        answer.add(ThisAnswer);
-
     }
+
+    ThisAnswer.beProductOf(Nmatrix,v);
+    answer.add(ThisAnswer);
 
 }
 

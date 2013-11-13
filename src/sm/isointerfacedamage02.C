@@ -312,22 +312,6 @@ IsoInterfaceDamageMaterial_2 :: giveIPValue(FloatArray &answer, GaussPoint *aGau
     }
 }
 
-
-InternalStateValueType
-IsoInterfaceDamageMaterial_2 :: giveIPValueType(InternalStateType type)
-{
-    if ( type == IST_DamageTensor || type == IST_DamageTensorTemp ) {
-        return ISVT_TENSOR_S3;
-    } else if ( type == IST_PrincipalDamageTensor || type == IST_PrincipalDamageTempTensor ) {
-        return ISVT_VECTOR;
-    } else if ( type == IST_MaxEquivalentStrainLevel ) {
-        return ISVT_SCALAR;
-    } else {
-        return StructuralMaterial :: giveIPValueType(type);
-    }
-}
-
-
 void
 IsoInterfaceDamageMaterial_2 :: giveThermalDilatationVector(FloatArray &answer,
                                                             GaussPoint *gp,  TimeStep *tStep)

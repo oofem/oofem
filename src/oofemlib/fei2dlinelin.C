@@ -54,6 +54,13 @@ double FEI2dLineLin :: evaldNdx(FloatMatrix &answer, const FloatArray &lcoords, 
     return 0.;
 }
 
+void FEI2dLineLin :: evaldNdxi(FloatMatrix &answer, const FloatArray &lcoords, const FEICellGeometry &cellgeo)
+{
+    answer.resize(2,1);
+    answer(0,0) = -0.5;
+    answer(1,0) =  0.5;
+}
+
 void FEI2dLineLin :: local2global(FloatArray &answer, const FloatArray &lcoords, const FEICellGeometry &cellgeo)
 {
     FloatArray n;

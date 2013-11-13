@@ -571,30 +571,6 @@ RankineMat :: giveIPValue(FloatArray &answer, GaussPoint *aGaussPoint, InternalS
     }
 }
 
-InternalStateValueType
-RankineMat :: giveIPValueType(InternalStateType type)
-{
-    if ( type == IST_PlasticStrainTensor ) {
-        return ISVT_TENSOR_S3E;
-    } else if ( type == IST_DamageTensor ) {
-        return ISVT_TENSOR_S3;
-    } else if ( type == IST_CumPlasticStrain || type == IST_DamageScalar ) {
-        return ISVT_SCALAR;
-
-#ifdef keep_track_of_dissipated_energy
-    } else if ( type == IST_DissWorkDensity ) {
-        return ISVT_SCALAR;
-    } else if ( type == IST_StressWorkDensity ) {
-        return ISVT_SCALAR;
-    } else if ( type == IST_FreeEnergyDensity ) {
-        return ISVT_SCALAR;
-
-#endif
-    } else {
-        return StructuralMaterial :: giveIPValueType(type);
-    }
-}
-
 
 //=============================================================================
 // RANKINE MATERIAL STATUS

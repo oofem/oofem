@@ -125,16 +125,6 @@ public:
      * Default implementation returns true.
      */
     virtual bool isCharacteristicMtrxSymmetric(MatResponseMode rMode) { return true; }
-
-    /**
-     * Updates internal state of material in integration point after finishing time step.
-     * Default implementation  extract material status from integration point,
-     * and invokes updateYourself function on it.
-     * @param gp Integration point, where to update state.
-     * @param atTime Time step.
-     */
-    virtual void updateYourself(GaussPoint *gp, TimeStep *atTime);
-
     /**
      * Returns the value of material property 'aProperty'. Property must be identified
      * by unique int id. Integration point also passed to allow for materials with spatially
@@ -202,16 +192,6 @@ public:
      * @returns Nonzero if the assignment can be done, zero if this type of variable is not supported.
      */
     virtual int giveIPValue(FloatArray &answer, GaussPoint *aGaussPoint, InternalStateType type, TimeStep *atTime);
-    /**
-     * Returns the type of internal variable (scalar, vector, tensor,...).
-     * @param type Determines the type of internal variable.
-     * @returns Type of internal variable.
-     */
-    virtual InternalStateValueType giveIPValueType(InternalStateType type)
-    {
-        _error("giveIPValueType: unsupported InternalStateType");
-        return ISVT_UNDEFINED;
-    }
     //@}
 
     virtual IRResultType initializeFrom(InputRecord *ir);

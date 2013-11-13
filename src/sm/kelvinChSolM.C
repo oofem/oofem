@@ -90,7 +90,7 @@ KelvinChainSolidMaterial :: giveEigenStrainVector(FloatArray &answer, GaussPoint
     if ( mode == VM_Incremental ) {
         for ( mu = 1; mu <= nUnits; mu++ ) {
             betaMu = this->computeBetaMu(gp, atTime, mu);
-            sigmaVMu =  status->giveHiddenVarsVector(mu);
+            sigmaVMu =  &status->giveHiddenVarsVector(mu); // JB
 
             if ( sigmaVMu ) {
                 help.zero();
@@ -155,8 +155,19 @@ KelvinChainSolidMaterial :: computeLambdaMu(GaussPoint *gp, TimeStep *atTime, in
     return lambdaMu;
 }
 
+
+void 
+KelvinChainSolidMaterial :: giveRealStressVector(FloatArray &answer, GaussPoint *gp, const FloatArray &reducedStrain, TimeStep *tStep)
+{
+    RheoChainMaterial :: giveRealStressVector(answer, gp, reducedStrain, tStep);
+
+    // Computes hidden variables and stores them as temporary
+    this->computeHiddenVars(gp, tStep);
+}
+
+
 void
-KelvinChainSolidMaterial :: updateYourself(GaussPoint *gp, TimeStep *tNow)
+KelvinChainSolidMaterial :: computeHiddenVars(GaussPoint *gp, TimeStep *tNow)
 {
     /*
      * Updates hidden variables used to effectively trace the load history
@@ -165,7 +176,7 @@ KelvinChainSolidMaterial :: updateYourself(GaussPoint *gp, TimeStep *tNow)
     double betaMu;
     double lambdaMu;
 
-    FloatArray help, *SigmaVMu, deltaEps0, deltaSigma;
+    FloatArray help, SigmaVMu, deltaEps0, deltaSigma;
     FloatMatrix D;
     KelvinChainSolidMaterialStatus *status = static_cast< KelvinChainSolidMaterialStatus * >( this->giveStatus(gp) );
 
@@ -178,9 +189,7 @@ KelvinChainSolidMaterial :: updateYourself(GaussPoint *gp, TimeStep *tNow)
         help.subtract(deltaEps0); // should be equal to zero if there is no stress change during the time-step
     }
 
-
     this->giveUnitStiffnessMatrix(D, gp, tNow);
-
 
     help.times( this->giveEModulus(gp, tNow) );
     deltaSigma.beProductOf(D, help);
@@ -194,15 +203,14 @@ KelvinChainSolidMaterial :: updateYourself(GaussPoint *gp, TimeStep *tNow)
 
         SigmaVMu = status->giveHiddenVarsVector(mu);
 
-        if ( SigmaVMu ) {
-            SigmaVMu->times(betaMu);
-            SigmaVMu->add(help);
+        if ( SigmaVMu.giveSize() ) {
+            SigmaVMu.times(betaMu);
+            SigmaVMu.add(help);
+            status->letTempHiddenVarsVectorBe(mu, SigmaVMu);
         } else {
-            status->letHiddenVarsVectorBe( mu, ( new FloatArray(help) ) );
+            status->letTempHiddenVarsVectorBe(mu, help);
         }
     }
-
-    status->updateYourself(tNow);
 }
 
 

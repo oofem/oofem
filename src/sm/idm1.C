@@ -1135,9 +1135,7 @@ IsotropicDamageMaterial1 :: CreateStatus(GaussPoint *gp) const
 MaterialStatus *
 IsotropicDamageMaterial1 :: giveStatus(GaussPoint *gp) const
 {
-    MaterialStatus *status;
-
-    status = static_cast< MaterialStatus * >( gp->giveMaterialStatus( this->giveNumber() ) );
+    MaterialStatus *status = static_cast< MaterialStatus * >( gp->giveMaterialStatus() );
     if ( status == NULL ) {
         // create a new one
         status = this->CreateStatus(gp);
@@ -1205,7 +1203,7 @@ IsotropicDamageMaterial1 :: MMI_update(GaussPoint *gp,  TimeStep *tStep, FloatAr
 #else
     this->giveRealStressVector(intVal, gp, * estrain, tStep);
 #endif
-    this->updateYourself(gp, tStep);
+    gp->updateYourself(tStep);
     return result;
 }
 

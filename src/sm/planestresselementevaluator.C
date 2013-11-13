@@ -49,44 +49,25 @@
 namespace oofem {
 void PlaneStressStructuralElementEvaluator :: computeNMatrixAt(FloatMatrix &answer, GaussPoint *gp)
 {
-    int i, nDofMan;
     FloatArray N;
     FEInterpolation *interp = gp->giveElement()->giveInterpolation();
-
     interp->evalN(N, * gp->giveCoordinates(), FEIIGAElementGeometryWrapper( gp->giveElement(), gp->giveIntegrationRule()->giveKnotSpan() ));
-
-    if ( ( nDofMan = interp->giveNumberOfKnotSpanBasisFunctions( * ( gp->giveIntegrationRule()->giveKnotSpan() ) ) ) == 0 ) { // HUHU
-        nDofMan = gp->giveElement()->giveNumberOfDofManagers();
-    }
-
-    answer.resize(2, nDofMan * 2);
-    answer.zero();
-
-    for ( i = 1; i <= nDofMan; i++ ) {
-        answer.at(1, i * 2 - 1) = N.at(i);
-        answer.at(2, i * 2 - 0) = N.at(i);
-    }
+    answer.beNMatrixOf(N, 2);
 }
 
 void PlaneStressStructuralElementEvaluator :: computeBMatrixAt(FloatMatrix &answer, GaussPoint *gp)
 {
-    int i, nDofMan;
-    //IntArray dofmanSubElementMask;
     FloatMatrix d;
 
     FEInterpolation *interp = gp->giveElement()->giveInterpolation();
-    // this uses FEIInterpolation::nodes2coords - quite inefficient in this case (large num of dofmans)
+    // this uses FEInterpolation::nodes2coords - quite inefficient in this case (large num of dofmans)
     interp->evaldNdx(d, * gp->giveCoordinates(),
                      FEIIGAElementGeometryWrapper( gp->giveElement(), gp->giveIntegrationRule()->giveKnotSpan() ));
 
-    if ( ( nDofMan = interp->giveNumberOfKnotSpanBasisFunctions( * ( gp->giveIntegrationRule()->giveKnotSpan() ) ) ) == 0 ) { // HUHU
-        nDofMan = gp->giveElement()->giveNumberOfDofManagers();
-    }
-
-    answer.resize(3, nDofMan * 2);
+    answer.resize(3, d.giveNumberOfRows() * 2);
     answer.zero();
 
-    for ( i = 1; i <= nDofMan; i++ ) {
+    for ( int i = 1; i <= d.giveNumberOfRows(); i++ ) {
         answer.at(1, i * 2 - 1) = d.at(i, 1);
         answer.at(2, i * 2 - 0) = d.at(i, 2);
 
@@ -109,4 +90,11 @@ double PlaneStressStructuralElementEvaluator :: computeVolumeAround(GaussPoint *
 
     return volume;
 }
+
+
+void PlaneStressStructuralElementEvaluator :: computeStressVector(FloatArray &answer, const FloatArray &strain, GaussPoint *gp, TimeStep *tStep)
+{
+    static_cast< StructuralCrossSection * >( this->giveElement()->giveCrossSection() )->giveRealStress_PlaneStress(answer, gp, strain, tStep);
+}
+
 } // end namespace oofem

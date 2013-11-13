@@ -443,14 +443,6 @@ BilinearCZMaterialFagerstrom :: giveIPValue(FloatArray &answer, GaussPoint *aGau
 }
 
 
-    InternalStateValueType
-        BilinearCZMaterialFagerstrom :: giveIPValueType(InternalStateType type)
-    {
-        //@todoMartin Insert code here if necessaryfor returning type of internal state
-        return StructuralMaterial :: giveIPValueType(type);
-    }
-
-
     int
         BilinearCZMaterialFagerstrom :: giveIntVarCompFullIndx(IntArray &answer, InternalStateType type, MaterialMode mmode)
     {

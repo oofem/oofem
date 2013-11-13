@@ -199,7 +199,7 @@ void SurfaceTensionBoundaryCondition :: computeTangentFromElement(FloatMatrix &a
         answer.resize(2*nodes, 2*nodes);
         answer.zero();
 
-        if (e->giveDomain()->giveDomainType() == _3dAxisymmMode) {
+        if ( e->giveDomain()->isAxisymmetric() ) {
             FloatArray N;
             FloatArray gcoords;
             FloatArray tmpB(2*nodes);
@@ -321,7 +321,7 @@ void SurfaceTensionBoundaryCondition :: computeLoadVectorFromElement(FloatArray 
         answer.resize(2*nodes);
         answer.zero();
 
-        if (e->giveDomain()->giveDomainType() == _3dAxisymmMode) {
+        if ( e->giveDomain()->isAxisymmetric() ) {
             FloatArray N;
             FloatArray gcoords;
             for ( int k = 0; k < iRule->giveNumberOfIntegrationPoints(); k++ ) {

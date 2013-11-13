@@ -370,11 +370,9 @@ NonLinearStatic :: updateLoadVectors(TimeStep *stepN)
                 OOFEM_LOG_INFO("Fixed load level\n");
 
                 //update initialLoadVector
-                incrementalLoadVector.times(loadLevel);
-                initialLoadVector.add(incrementalLoadVector);
+                initialLoadVector.add(loadLevel, incrementalLoadVector);
 
-                incrementalLoadVectorOfPrescribed.times(loadLevel);
-                initialLoadVectorOfPrescribed.add(incrementalLoadVectorOfPrescribed);
+                initialLoadVectorOfPrescribed.add(loadLevel, incrementalLoadVectorOfPrescribed);
 
                 incrementalLoadVector.zero();
                 incrementalLoadVectorOfPrescribed.zero();
@@ -389,11 +387,9 @@ NonLinearStatic :: updateLoadVectors(TimeStep *stepN)
         //(here the loading is not proportional)
         OOFEM_LOG_DEBUG("Fixed load level\n");
 
-        incrementalLoadVector.times(loadLevel);
-        initialLoadVector.add(incrementalLoadVector);
+        initialLoadVector.add(loadLevel, incrementalLoadVector);
 
-        incrementalLoadVectorOfPrescribed.times(loadLevel);
-        initialLoadVectorOfPrescribed.add(incrementalLoadVectorOfPrescribed);
+        initialLoadVectorOfPrescribed.add(loadLevel, incrementalLoadVectorOfPrescribed);
 
         incrementalLoadVector.zero();
         incrementalLoadVectorOfPrescribed.zero();
@@ -431,10 +427,6 @@ NonLinearStatic :: proceedStep(int di, TimeStep *tStep)
         //
         // first step  create space for stiffness Matrix
         //
-        int neq = this->giveNumberOfDomainEquations(1, EModelDefaultEquationNumbering());
-        internalForces.resize(neq);
-        internalForces.zero();
-
         if ( !stiffnessMatrix ) {
             stiffnessMatrix = classFactory.createSparseMtrx(sparseMtrxType);
         }
@@ -840,9 +832,8 @@ void
 NonLinearStatic :: computeExternalLoadReactionContribution(FloatArray &reactions, TimeStep *tStep, int di)
 {
     if ( ( di == 1 ) && ( tStep == this->giveCurrentStep() ) ) {
-        reactions = incrementalLoadVectorOfPrescribed;
-        reactions.times(loadLevel);
-        reactions.add(initialLoadVectorOfPrescribed);
+        reactions = initialLoadVectorOfPrescribed;
+        reactions.add(loadLevel, incrementalLoadVectorOfPrescribed);
     } else {
         _error("computeExternalLoadReactionContribution: unable to respond due to invalid solution step or domain");
     }
@@ -886,23 +877,22 @@ int
 NonLinearStatic :: estimateMaxPackSize(IntArray &commMap, CommunicationBuffer &buff, int packUnpackType)
 {
     int mapSize = commMap.giveSize();
-    int i, j, ndofs, count = 0, pcount = 0;
+    int count = 0, pcount = 0;
     IntArray locationArray;
     Domain *domain = this->giveDomain(1);
-    DofManager *dman;
-    Dof *jdof;
 
     if ( packUnpackType == ProblemCommMode__ELEMENT_CUT ) {
-        for ( i = 1; i <= mapSize; i++ ) {
+        for ( int i = 1; i <= mapSize; i++ ) {
             count += domain->giveDofManager( commMap.at(i) )->giveNumberOfDofs();
         }
 
         return ( buff.givePackSize(MPI_DOUBLE, 1) * count );
     } else if ( packUnpackType == ProblemCommMode__NODE_CUT ) {
-        for ( i = 1; i <= mapSize; i++ ) {
-            ndofs = ( dman = domain->giveDofManager( commMap.at(i) ) )->giveNumberOfDofs();
-            for ( j = 1; j <= ndofs; j++ ) {
-                jdof = dman->giveDof(j);
+        for ( int i = 1; i <= mapSize; i++ ) {
+            DofManager *dman;
+            int ndofs = ( dman = domain->giveDofManager( commMap.at(i) ) )->giveNumberOfDofs();
+            for ( int j = 1; j <= ndofs; j++ ) {
+                Dof *jdof = dman->giveDof(j);
                 if ( jdof->isPrimaryDof() && ( jdof->__giveEquationNumber() ) ) {
                     count++;
                 } else {
@@ -914,7 +904,7 @@ NonLinearStatic :: estimateMaxPackSize(IntArray &commMap, CommunicationBuffer &b
         //printf ("\nestimated count is %d\n",count);
         return ( buff.givePackSize(MPI_DOUBLE, 1) * max(count, pcount) );
     } else if ( packUnpackType == ProblemCommMode__REMOTE_ELEMENT_MODE ) {
-        for ( i = 1; i <= mapSize; i++ ) {
+        for ( int i = 1; i <= mapSize; i++ ) {
             count += domain->giveElement( commMap.at(i) )->estimatePackSize(buff);
         }
 
@@ -962,18 +952,17 @@ void
 NonLinearStatic :: packMigratingData(TimeStep *atTime)
 {
     Domain *domain = this->giveDomain(1);
-    int ndofman =  domain->giveNumberOfDofManagers(), ndofs, idofman, idof, _eq;
-    DofManager *_dm;
-    Dof *_dof;
+    int ndofman = domain->giveNumberOfDofManagers();
     bool initialLoadVectorEmpty = initialLoadVector.isEmpty();
     bool initialLoadVectorOfPrescribedEmpty = initialLoadVectorOfPrescribed.isEmpty();
 
-    for ( idofman = 1; idofman <= ndofman; idofman++ ) {
-        _dm = domain->giveDofManager(idofman);
-        ndofs = _dm->giveNumberOfDofs();
-        for ( idof = 1; idof <= ndofs; idof++ ) {
-            _dof = _dm->giveDof(idof);
+    for ( int idofman = 1; idofman <= ndofman; idofman++ ) {
+        DofManager *_dm = domain->giveDofManager(idofman);
+        int ndofs = _dm->giveNumberOfDofs();
+        for ( int idof = 1; idof <= ndofs; idof++ ) {
+            Dof *_dof = _dm->giveDof(idof);
             if ( _dof->isPrimaryDof() ) {
+                int _eq;
                 if ( ( _eq = _dof->__giveEquationNumber() ) ) {
                     // pack values in solution vectors
                     _dof->updateUnknownsDictionary( atTime, VM_Total, totalDisplacement.at(_eq) );
@@ -1007,10 +996,8 @@ void
 NonLinearStatic :: unpackMigratingData(TimeStep *atTime)
 {
     Domain *domain = this->giveDomain(1);
-    int ndofman =  domain->giveNumberOfDofManagers(), ndofs, idofman, idof, _eq;
+    int ndofman = domain->giveNumberOfDofManagers();
     //int myrank = this->giveRank();
-    DofManager *_dm;
-    Dof *_dof;
 
     // resize target arrays
     int neq = this->giveNumberOfDomainEquations(1, EModelDefaultEquationNumbering());
@@ -1021,12 +1008,13 @@ NonLinearStatic :: unpackMigratingData(TimeStep *atTime)
     initialLoadVectorOfPrescribed.resize( giveNumberOfDomainEquations(1, EModelDefaultPrescribedEquationNumbering()) );
     incrementalLoadVectorOfPrescribed.resize( giveNumberOfDomainEquations(1, EModelDefaultPrescribedEquationNumbering()) );
 
-    for ( idofman = 1; idofman <= ndofman; idofman++ ) {
-        _dm = domain->giveDofManager(idofman);
-        ndofs = _dm->giveNumberOfDofs();
-        for ( idof = 1; idof <= ndofs; idof++ ) {
-            _dof = _dm->giveDof(idof);
+    for ( int idofman = 1; idofman <= ndofman; idofman++ ) {
+        DofManager *_dm = domain->giveDofManager(idofman);
+        int ndofs = _dm->giveNumberOfDofs();
+        for ( int idof = 1; idof <= ndofs; idof++ ) {
+            Dof *_dof = _dm->giveDof(idof);
             if ( _dof->isPrimaryDof() ) {
+                int _eq;
                 if ( ( _eq = _dof->__giveEquationNumber() ) ) {
                     // pack values in solution vectors
                     _dof->giveUnknownsDictionaryValue( atTime, VM_Total, totalDisplacement.at(_eq) );

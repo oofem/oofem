@@ -346,7 +346,7 @@ PlaneStress2d :: giveCharacteristicSize(GaussPoint *gp, FloatArray &normalToCrac
     int nGP = iRule->giveNumberOfIntegrationPoints();
     for ( int i = 0; i < nGP; i++ ) {
         GaussPoint *gpi = iRule->getIntegrationPoint(i);
-        StructuralMaterialStatus *matstatus = dynamic_cast< StructuralMaterialStatus* >( this->giveMaterial()->giveStatus(gpi));
+        StructuralMaterialStatus *matstatus = dynamic_cast< StructuralMaterialStatus* >( gpi->giveMaterialStatus() );
         if (matstatus) sumstrain.add( matstatus->giveTempStrainVector() );
     }
 
@@ -784,7 +784,6 @@ PlaneStress2d :: drawSpecial(oofegGraphicContext &gc)
     int i;
     WCRec l [ 2 ];
     GraphicObj *tr;
-    StructuralMaterial *mat = static_cast< StructuralMaterial * >( this->giveMaterial() );
     GaussPoint *gp;
     TimeStep *tStep = domain->giveEngngModel()->giveCurrentStep();
     double defScale = gc.getDefScale();
@@ -804,7 +803,7 @@ PlaneStress2d :: drawSpecial(oofegGraphicContext &gc)
         for ( igp = 1; igp <= integrationRulesArray [ 0 ]->giveNumberOfIntegrationPoints(); igp++ ) {
             gp = integrationRulesArray [ 0 ]->getIntegrationPoint(igp - 1);
 
-            if ( mat->giveIPValue(cf, gp, IST_CrackedFlag, tStep) == 0 ) {
+            if ( this->giveIPValue(cf, gp, IST_CrackedFlag, tStep) == 0 ) {
                 return;
             }
 
@@ -812,8 +811,8 @@ PlaneStress2d :: drawSpecial(oofegGraphicContext &gc)
                 return;
             }
 
-            if ( mat->giveIPValue(crackDir, gp, IST_CrackDirs, tStep) ) {
-                mat->giveIPValue(crackStatuses, gp, IST_CrackStatuses, tStep);
+            if ( this->giveIPValue(crackDir, gp, IST_CrackDirs, tStep) ) {
+                this->giveIPValue(crackStatuses, gp, IST_CrackStatuses, tStep);
                 for ( i = 1; i <= 3; i++ ) {
                     crackStatus = ( int ) crackStatuses.at(i);
                     if ( ( crackStatus != pscm_NONE ) && ( crackStatus != pscm_CLOSED ) ) {
@@ -885,206 +884,6 @@ PlaneStress2d :: drawSpecial(oofegGraphicContext &gc)
         }
     }
 }
-
-/*
- * void PlaneStress2d :: drawInternalState (oofegGraphicContext &gc)
- * //
- * // Draws internal state graphics representation
- * //
- * {
- * WCRec p[4],l[2];
- * GraphicObj *tr;
- * StructuralMaterial *mat = (StructuralMaterial*) this->giveMaterial();
- * TimeStep *tStep = domain->giveEngngModel()->giveCurrentStep();
- * GaussPoint* gp;
- * double v1,v2,v3,v4, ratio;
- * int i, nPlastGp;
- * DrawMode mode = gc.getDrawMode();
- * double defScale = gc.getDefScale();
- *
- * if (!gc.testElementGraphicActivity(this)) return;
- *
- * // check for yield mode
- * if (mode == yieldState) {
- * // loop over available GPs
- * nPlastGp = 0;
- * for (i=1 ; i<= integrationRulesArray [ 0 ]->giveNumberOfIntegrationPoints() ; i++) {
- *  gp = integrationRulesArray[0]-> getIntegrationPoint(i-1) ;
- *  nPlastGp += (mat->giveStatusCharFlag(gp,ms_yield_flag) != 0);
- * }
- * if (nPlastGp == 0) return;
- * // nPlastGp should contain number of yielded gp in element
- * // good way should be select color accordingly
- * ratio = nPlastGp / integrationRulesArray [ 0 ]->giveNumberOfIntegrationPoints();
- * EASValsSetLayer(OOFEG_YIELD_PATTERN_LAYER);
- * for (i=0; i< 4; i++) {
- * if (gc.getInternalVarsDefGeoFlag()) {
- *  // use deformed geometry
- *  p[i].x = (FPNum) this->giveNode(i+1)->giveUpdatedCoordinate(1,tStep,defScale);
- *  p[i].y = (FPNum) this->giveNode(i+1)->giveUpdatedCoordinate(2,tStep,defScale);
- *  p[i].z = 0.;
- *
- * } else {
- *  p[i].x = (FPNum) this->giveNode(i+1)->giveCoordinate(1);
- *  p[i].y = (FPNum) this->giveNode(i+1)->giveCoordinate(2);
- *  p[i].z = 0.;
- * }
- * }
- *
- * EASValsSetColor(gc.getYieldPlotColor(ratio));
- * tr =  CreateQuad3D(p);
- * EGWithMaskChangeAttributes(WIDTH_MASK | COLOR_MASK | FILL_MASK | LAYER_MASK, tr);
- * EMAddGraphicsToModel(ESIModel(), tr);
- *
- * } else if (mode == crackedState) {
- * // ask if any active crack exist
- * int igp, crackStatus;
- * double ax,ay,bx,by,norm,xc,yc,length;
- * FloatMatrix crackDir;
- * FloatArray gpglobalcoords;
- *
- * for (igp=1 ; igp<= integrationRulesArray [ 0 ]->giveNumberOfIntegrationPoints() ; igp++) {
- *  gp = integrationRulesArray[0]-> getIntegrationPoint(igp-1);
- *
- *  if (mat->giveStatusCharFlag (gp,ms_isCracked_flag) == 0) return;
- *  if (mat->GiveStatusCharMtrx(crackDir, gp,ms_crackDirection_flag)) {
- *  for (i = 1; i <= 3; i++) {
- *   crackStatus = (int) mat->giveStatusCharValue(gp, ms_crackStatus_flag,i);
- *   if ((crackStatus != pscm_NONE) && (crackStatus != pscm_CLOSED)) {
- *    // draw a crack
- *    // this element is 2d element in x-y plane
- *    //
- *    // compute perpendicular line to normal in xy plane
- *    ax = crackDir.at(1,i);
- *    ay = crackDir.at(2,i);
- *    if (fabs(ax) > 1.e-6) {
- *     by = 1.;
- *     bx = -ay*by/ax;
- *     norm = sqrt(bx*bx+by*by);
- *     bx = bx/norm;   // normalize to obtain unit vector
- *     by = by/norm;
- *    } else { by = 0.0; bx = 1.0;}
- *    // obtain gp global coordinates
- *    if (gc.getInternalVarsDefGeoFlag()) {
- *     double ksi, eta, n1, n2, n3, n4;
- *     ksi = gp->giveCoordinate(1);
- *     eta = gp->giveCoordinate(2);
- *
- *     n1 = (1. + ksi) * (1. + eta) * 0.25 ;
- *     n2 = (1. - ksi) * (1. + eta) * 0.25 ;
- *     n3 = (1. - ksi) * (1. - eta) * 0.25 ;
- *     n4 = (1. + ksi) * (1. - eta) * 0.25 ;
- *
- *     gpglobalcoords.resize (2);
- *
- *     gpglobalcoords.at(1) = (n1 * this->giveNode(1)->giveUpdatedCoordinate(1,tStep,defScale) +
- *                 n2 * this->giveNode(2)->giveUpdatedCoordinate(1,tStep,defScale) +
- *                 n3 * this->giveNode(3)->giveUpdatedCoordinate(1,tStep,defScale) +
- *                 n4 * this->giveNode(4)->giveUpdatedCoordinate(1,tStep,defScale));
- *     gpglobalcoords.at(2) = (n1*this->giveNode(1)->giveUpdatedCoordinate(2,tStep,defScale) +
- *                 n2*this->giveNode(2)->giveUpdatedCoordinate(2,tStep,defScale) +
- *                 n3 * this->giveNode(3)->giveUpdatedCoordinate(2,tStep,defScale)+
- *                 n4 * this->giveNode(4)->giveUpdatedCoordinate(2,tStep,defScale));
- *    } else {
- *     computeGlobalCoordinates (gpglobalcoords, *(gp->giveCoordinates()));
- *    }
- *    xc = gpglobalcoords.at(1);
- *    yc = gpglobalcoords.at(2);
- *    length = sqrt(computeVolumeAround(gp)/this->giveCrossSection()->give('t'))/2.;
- *    l[0].x = (FPNum) xc+bx*length;
- *    l[0].y = (FPNum) yc+by*length;
- *    l[0].z = 0.;
- *    l[1].x = (FPNum) xc-bx*length;
- *    l[1].y = (FPNum) yc-by*length;
- *    l[1].z = 0.;
- *    EASValsSetLayer(OOFEG_CRACK_PATTERN_LAYER);
- *    EASValsSetLineWidth(OOFEG_CRACK_PATTERN_WIDTH);
- *    if ((crackStatus == pscm_SOFTENING)||(crackStatus == pscm_OPEN))
- *     EASValsSetColor(gc.getActiveCrackColor());
- *    else
- *     EASValsSetColor(gc.getCrackPatternColor());
- *    tr = CreateLine3D (l);
- *    EGWithMaskChangeAttributes(WIDTH_MASK | COLOR_MASK | LAYER_MASK, tr);
- *    EMAddGraphicsToModel(ESIModel(), tr);
- *   }
- *  }
- *  //delete crackDir;
- * }
- * }
- * } else if (mode == damageLevel) {
- * double damage= 0.0;
- * for (i=1 ; i<= integrationRulesArray [ 0 ]->giveNumberOfIntegrationPoints() ; i++) {
- *  gp = integrationRulesArray[0]-> getIntegrationPoint(i-1) ;
- *  damage += mat->giveStatusCharValue(gp,ms_damage_flag);
- * }
- * damage /= integrationRulesArray [ 0 ]->giveNumberOfIntegrationPoints();
- * EASValsSetLayer(OOFEG_YIELD_PATTERN_LAYER);
- * for (i=0; i< 4; i++) {
- * if (gc.getInternalVarsDefGeoFlag()) {
- *  // use deformed geometry
- *  p[i].x = (FPNum) this->giveNode(i+1)->giveUpdatedCoordinate(1,tStep,defScale);
- *  p[i].y = (FPNum) this->giveNode(i+1)->giveUpdatedCoordinate(2,tStep,defScale);
- *  p[i].z = 0.;
- *
- * } else {
- *  p[i].x = (FPNum) this->giveNode(i+1)->giveCoordinate(1);
- *  p[i].y = (FPNum) this->giveNode(i+1)->giveCoordinate(2);
- *  p[i].z = 0.;
- * }
- * }
- *
- * //EASValsSetColor(gc.getYieldPlotColor(ratio));
- * tr =  CreateQuadWD3D(p, damage, damage, damage, damage);
- * EGWithMaskChangeAttributes(LAYER_MASK, tr);
- * EMAddGraphicsToModel(ESIModel(), tr);
- *
- *
- * }
- * // check for valid stress-strain mode
- * if (!((mode == sxForce) || (mode == syForce) || (mode == sxyForce))) return ;
- *
- * EASValsSetLayer(OOFEG_STRESS_CONTOUR_LAYER);
- * for (i=0; i< 4; i++) {
- * if (gc.getInternalVarsDefGeoFlag()) {
- * // use deformed geometry
- * p[i].x = (FPNum) this->giveNode(i+1)->giveUpdatedCoordinate(1,tStep,defScale);
- * p[i].y = (FPNum) this->giveNode(i+1)->giveUpdatedCoordinate(2,tStep,defScale);
- * p[i].z = 0.;
- *
- * } else {
- * p[i].x = (FPNum) this->giveNode(i+1)->giveCoordinate(1);
- * p[i].y = (FPNum) this->giveNode(i+1)->giveCoordinate(2);
- * p[i].z = 0.;
- * }
- * }
- * int indx, result;
- * FloatArray *val1, *val2, *val3, *val4;
- *
- * if (mode == sxForce) indx = 1;
- * else if (mode == syForce) indx = 2;
- * else indx = 3;
- *
- * result = this->giveDomain()->giveSmoother()->giveNodalVector(val1, this->giveNode(1)->giveNumber(),
- *                     this->giveDomain()->giveSmoother()->giveElementRegion(this));
- * result +=this->giveDomain()->giveSmoother()->giveNodalVector(val2, this->giveNode(2)->giveNumber(),
- *                     this->giveDomain()->giveSmoother()->giveElementRegion(this));
- * result +=this->giveDomain()->giveSmoother()->giveNodalVector(val3,this->giveNode(3)->giveNumber(),
- *                     this->giveDomain()->giveSmoother()->giveElementRegion(this));
- * result +=this->giveDomain()->giveSmoother()->giveNodalVector(val4,this->giveNode(4)->giveNumber(),
- *                     this->giveDomain()->giveSmoother()->giveElementRegion(this));
- *
- * if (result == 4) {
- * v1 = val1->at(indx);
- * v2 = val2->at(indx);
- * v3 = val3->at(indx);
- * v4 = val4->at(indx);
- *
- * tr = CreateQuadWD3D (p,v1,v2,v3, v4);
- * EGWithMaskChangeAttributes(LAYER_MASK, tr);
- * EMAddGraphicsToModel(ESIModel(), tr);
- * }
- * }
- */
 
 #endif
 

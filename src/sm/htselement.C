@@ -153,7 +153,7 @@ HTSelement :: giveSideNode(int elementSideNumber, int nodeNumber)
 
 
 double
-HTSelement :: computeVolumeAround(GaussPoint *gp, int elemSideNumber)
+HTSelement :: computeVolumeAroundSide(GaussPoint *gp, int elemSideNumber)
 // Returns the length of the receiver. This method is valid only if 1
 // Gauss point is used.
 {
@@ -196,7 +196,7 @@ HTSelement :: computeStiffnessMatrix(FloatMatrix &answer, MatResponseMode rMode,
         this->computeOutwardNormalMatrix(N,i+1);
         for(int j = 0; j < iRule->giveNumberOfIntegrationPoints(); j++ ) {
             gp = iRule->getIntegrationPoint(j);
-            dV = this->computeVolumeAround(gp,i+1);
+            dV = this->computeVolumeAroundSide(gp,i+1);
             this->computeFMatrixAt(Fedge,N,gp,i+1);
             Fedge.times(dV); 
             this->computeAMatrixAt(Aedge,N,gp,i+1);
@@ -278,7 +278,7 @@ HTSelement :: computePrescribedDisplacementLoadVectorAt(FloatArray &answer, Time
         iRule =  this->giveIntegrationRule(i);
         for(int j = 0; j < iRule->giveNumberOfIntegrationPoints(); j++ ) {
             gp = iRule->getIntegrationPoint(j);
-            dV = this->computeVolumeAround(gp,i+1);
+            dV = this->computeVolumeAroundSide(gp,i+1);
             this -> computePuVectorAt(PuEdge,N,u,gp,i+1);  
             PuEdge.times(dV); 
             answer.add(PuEdge);
@@ -305,7 +305,7 @@ HTSelement :: computeEdgeLoadVectorAt(FloatArray &answer, Load *load,
         for ( int j = 0; j < iRule->giveNumberOfIntegrationPoints(); j++ ) {
             gp = iRule->getIntegrationPoint(j);
             edgeLoad->computeValueAt(force, tStep, * ( gp->giveCoordinates() ), mode);
-            dV = this->computeVolumeAround(gp,i+1);
+            dV = this->computeVolumeAroundSide(gp,i+1);
             this->computePsVectorAt(PsEdge,force,gp);  
             PsEdge.times(dV); 
             Ps.add(PsEdge);

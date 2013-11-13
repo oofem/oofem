@@ -17,48 +17,46 @@
  *       Czech Technical University, Faculty of Civil Engineering,
  *   Department of Structural Mechanics, 166 29 Prague, Czech Republic
  *
- *  This program is free software; you can redistribute it and/or modify
- *  it under the terms of the GNU General Public License as published by
- *  the Free Software Foundation; either version 2 of the License, or
- *  (at your option) any later version.
+ *  This library is free software; you can redistribute it and/or
+ *  modify it under the terms of the GNU Lesser General Public
+ *  License as published by the Free Software Foundation; either
+ *  version 2.1 of the License, or (at your option) any later version.
  *
  *  This program is distributed in the hope that it will be useful,
  *  but WITHOUT ANY WARRANTY; without even the implied warranty of
- *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- *  GNU General Public License for more details.
+ *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+ *  Lesser General Public License for more details.
  *
- *  You should have received a copy of the GNU General Public License
- *  along with this program; if not, write to the Free Software
- *  Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
+ *  You should have received a copy of the GNU Lesser General Public
+ *  License along with this library; if not, write to the Free Software
+ *  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  */
 
-#ifndef bilinearczmaterialFagerstrom_h
-#define bilinearczmaterialFagerstrom_h
+#ifndef intmatbilinearczmaterialJansson_h
+#define intmatbilinearczmaterialJansson_h
 
-#include "structuralmaterial.h"
-#include "structuralms.h"
 #include "structuralinterfacematerial.h"
+#include "structuralinterfacematerialstatus.h"
 
-
-///@name Input fields for BilinearCZMaterialFagerstrom
+///@name Input fields for IntMatBilinearCZJansson
 //@{
-#define _IFT_BilinearCZMaterialFagerstrom_Name "bilinearczmaterialFagerstrom"
-#define _IFT_BilinearCZMaterialFagerstrom_kn "kn"
-#define _IFT_BilinearCZMaterialFagerstrom_ks "ks"
-#define _IFT_BilinearCZMaterialFagerstrom_knc "knc"
-#define _IFT_BilinearCZMaterialFagerstrom_g1c "g1c"
-#define _IFT_BilinearCZMaterialFagerstrom_g2c "g2c"
-#define _IFT_BilinearCZMaterialFagerstrom_mu "mu"
-#define _IFT_BilinearCZMaterialFagerstrom_gamma "gamma"
-#define _IFT_BilinearCZMaterialFagerstrom_sigf "sigf"
+#define _IFT_IntMatBilinearCZJansson_Name "intmatbilinearczjansson"
+#define _IFT_IntMatBilinearCZJansson_kn "kn"
+#define _IFT_IntMatBilinearCZJansson_ks "ks"
+#define _IFT_IntMatBilinearCZJansson_knc "knc"
+#define _IFT_IntMatBilinearCZJansson_g1c "g1c"
+#define _IFT_IntMatBilinearCZJansson_g2c "g2c"
+#define _IFT_IntMatBilinearCZJansson_mu "mu"
+#define _IFT_IntMatBilinearCZJansson_gamma "gamma"
+#define _IFT_IntMatBilinearCZJansson_sigf "sigf"
 //@}
 
 namespace oofem {
 
 /**
- * This class implements associated Material Status for ...
+ * This class implements associated Material Status for IntMatBilinearCZJansson
  */
-class BilinearCZMaterialFagerstromStatus : public StructuralMaterialStatus
+class IntMatBilinearCZJanssonStatus : public StructuralInterfaceMaterialStatus
 {
 protected:
 
@@ -87,17 +85,18 @@ protected:
     FloatMatrix Iep;
     FloatArray	alphav;
 
+
     
 public:
     /// Constructor
-    BilinearCZMaterialFagerstromStatus(int n, Domain *d, GaussPoint *g);
+    IntMatBilinearCZJanssonStatus(int n, Domain *d, GaussPoint *g);
     /// Destructor
-    virtual ~BilinearCZMaterialFagerstromStatus();
+    virtual ~IntMatBilinearCZJanssonStatus();
 
     virtual void printOutputAt(FILE *file, TimeStep *tStep);
 
     // definition
-    virtual const char *giveClassName() const { return "BilinearCZMaterialFagerstromStatus"; }
+    virtual const char *giveClassName() const { return "IntMatBilinearCZJanssonStatus"; }
     virtual classType giveClassID() const { return MaterialStatusClass; }
 
     double giveDamage() { return damage; }
@@ -146,7 +145,7 @@ public:
  * is governed by normal component of generalized strain vector (normal relative displacement)
  * by an exponential softening law.
  */
-class BilinearCZMaterialFagerstrom : public StructuralMaterial
+class IntMatBilinearCZJansson : public StructuralInterfaceMaterial
 {
 protected:
     /// Material parameters
@@ -154,48 +153,43 @@ protected:
     double ks0;   // initial shear stiffness
     double knc;   // stiffness in compression  
     double GIc;   // fracture energy, mode 1
-    double GIIc;   // fracture energy, mode 1
+    double GIIc;  // fracture energy, mode 1
     double sigf;  // max stress
 
-    double mu;   // loading function parameter
-    double gamma;   // loading function parameter
+    double mu;    // loading function parameter
+    double gamma; // loading function parameter
 
 
     virtual int checkConsistency();
     void give3dInterfaceMaterialStiffnessMatrix(FloatMatrix &answer, MatResponseMode rMode,
                                                                      GaussPoint *gp, TimeStep *atTime);
+
 public:
     /// Constructor
-    BilinearCZMaterialFagerstrom(int n, Domain *d);
+    IntMatBilinearCZJansson(int n, Domain *d);
     /// Destructor
-    virtual ~BilinearCZMaterialFagerstrom();
+    virtual ~IntMatBilinearCZJansson();
 
     virtual int hasNonLinearBehaviour()   { return 1; }
 
-    virtual int hasMaterialModeCapability(MaterialMode mode);
-    virtual const char *giveClassName() const { return "BilinearCZMaterialFagerstrom"; }
+    virtual int hasMaterialModeCapability(MaterialMode mode); // remove
+    virtual const char *giveClassName() const { return "IntMatBilinearCZJansson"; }
     virtual classType giveClassID() const { return MaterialStatusClass; }
-    virtual const char *giveInputRecordName() const { return _IFT_BilinearCZMaterialFagerstrom_Name; }
+    virtual const char *giveInputRecordName() const { return _IFT_IntMatBilinearCZJansson_Name; }
     
+    
+    virtual void giveFirstPKTraction_3d(FloatArray &answer, GaussPoint *gp, const FloatArray &jump,
+                                         const FloatMatrix &F, TimeStep *tStep);
+    virtual void give3dStiffnessMatrix_dTdj(FloatMatrix &answer, MatResponseMode rMode, GaussPoint *gp, TimeStep *tStep);
 
-    virtual void giveRealStressVector(FloatArray &answer, GaussPoint *gp,
-                              const FloatArray &reducedStrain, TimeStep *tStep);
+	virtual void give3dStiffnessMatrix_dTdj_num(FloatMatrix &answer, MatResponseMode rMode, GaussPoint *gp, TimeStep *tStep);
 
-    virtual void giveStiffnessMatrix(FloatMatrix &answer,
-                                          MatResponseMode mode,
-                                          GaussPoint *gp,
-                                          TimeStep *tStep);
+	virtual bool hasAnalyticalTangentStiffness() const {return true;}
     
     virtual int giveIPValue(FloatArray &answer, GaussPoint *gp, InternalStateType type, TimeStep *tStep);
-    virtual int giveIntVarCompFullIndx(IntArray &answer, InternalStateType type, MaterialMode mmode);
-    virtual InternalStateValueType giveIPValueType(InternalStateType type);
-    virtual int giveIPValueSize(InternalStateType type, GaussPoint *gp);
-    //virtual void giveThermalDilatationVector(FloatArray &answer, GaussPoint *gp, TimeStep *tStep);
-
-
     virtual IRResultType initializeFrom(InputRecord *ir);
     
-    virtual MaterialStatus *CreateStatus(GaussPoint *gp) const { return new BilinearCZMaterialFagerstromStatus(1, domain, gp); }
+    virtual MaterialStatus *CreateStatus(GaussPoint *gp) const { return new IntMatBilinearCZJanssonStatus(1, domain, gp); } //@Martin: Why new?
     void printYourself();
 protected:
    

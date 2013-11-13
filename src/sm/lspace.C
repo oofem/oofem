@@ -302,7 +302,6 @@ LSpace :: NodalAveragingRecoveryMI_computeNodalValue(FloatArray &answer, int nod
 {
     double x1 = 0.0, x2 = 0.0, x3 = 0.0, y = 0.0;
     GaussPoint *gp;
-    //StructuralMaterialStatus* status;
     IntegrationRule *iRule = integrationRulesArray [ 0 ];
     FloatMatrix A(4, 4);
     FloatMatrix b, r;
@@ -327,8 +326,6 @@ LSpace :: NodalAveragingRecoveryMI_computeNodalValue(FloatArray &answer, int nod
         u = coord->at(1);
         v = coord->at(2);
         w = coord->at(3);
-
-        //status = (StructuralMaterialStatus*) this->giveMaterial()->giveStatus(gp);
 
         A.at(1, 1) += 1;
         A.at(1, 2) += u;
@@ -824,7 +821,6 @@ LSpace :: drawSpecial(oofegGraphicContext &gc)
     int igp, i, j, k;
     WCRec q [ 4 ];
     GraphicObj *tr;
-    StructuralMaterial *mat = static_cast< StructuralMaterial * >( this->giveMaterial() );
     IntegrationRule *iRule;
     GaussPoint *gp;
     TimeStep *tStep = domain->giveEngngModel()->giveCurrentStep();
@@ -843,7 +839,7 @@ LSpace :: drawSpecial(oofegGraphicContext &gc)
         iRule = integrationRulesArray [ giveDefaultIntegrationRule() ];
         for ( igp = 0; igp < iRule->giveNumberOfIntegrationPoints(); igp++ ) {
             gp = iRule->getIntegrationPoint(igp);
-            if ( mat->giveIPValue(cf, gp, IST_CrackedFlag, tStep) == 0 ) {
+            if ( this->giveIPValue(cf, gp, IST_CrackedFlag, tStep) == 0 ) {
                 return;
             }
 
@@ -855,8 +851,8 @@ LSpace :: drawSpecial(oofegGraphicContext &gc)
             // obtain gp global coordinates
             this->computeGlobalCoordinates( gpc, * gp->giveCoordinates() );
             length = 0.3333 * pow(this->computeVolumeAround(gp), 1. / 3.);
-            if ( mat->giveIPValue(crackDir, gp, IST_CrackDirs, tStep) ) {
-                mat->giveIPValue(crackStatuses, gp, IST_CrackStatuses, tStep);
+            if ( this->giveIPValue(crackDir, gp, IST_CrackDirs, tStep) ) {
+                this->giveIPValue(crackStatuses, gp, IST_CrackStatuses, tStep);
 
 
                 for ( i = 1; i <= 3; i++ ) {
