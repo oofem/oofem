@@ -78,6 +78,38 @@ SimpleCrossSection :: giveRealStress_1d(FloatArray &answer, GaussPoint *gp, cons
 
 
 void
+SimpleCrossSection :: giveStiffnessMatrix_3d(FloatMatrix &answer, MatResponseMode rMode, GaussPoint *gp, TimeStep *tStep)
+{
+    StructuralMaterial *mat = dynamic_cast< StructuralMaterial * >( this->giveMaterial(gp) );
+    mat->give3dMaterialStiffnessMatrix(answer, rMode, gp, tStep);
+}
+
+
+void
+SimpleCrossSection :: giveStiffnessMatrix_PlaneStress(FloatMatrix &answer, MatResponseMode rMode, GaussPoint *gp, TimeStep *tStep)
+{
+    StructuralMaterial *mat = dynamic_cast< StructuralMaterial * >( this->giveMaterial(gp) );
+    mat->givePlaneStressStiffMtrx(answer, rMode, gp, tStep);
+}
+
+
+void
+SimpleCrossSection :: giveStiffnessMatrix_PlaneStrain(FloatMatrix &answer, MatResponseMode rMode, GaussPoint *gp, TimeStep *tStep)
+{
+    StructuralMaterial *mat = dynamic_cast< StructuralMaterial * >( this->giveMaterial(gp) );
+    mat->givePlaneStrainStiffMtrx(answer, rMode, gp, tStep);
+}
+
+
+void
+SimpleCrossSection :: giveStiffnessMatrix_1d(FloatMatrix &answer, MatResponseMode rMode, GaussPoint *gp, TimeStep *tStep)
+{
+    StructuralMaterial *mat = dynamic_cast< StructuralMaterial * >( this->giveMaterial(gp) );
+    mat->give1dStressStiffMtrx(answer, rMode, gp, tStep);
+}
+
+
+void
 SimpleCrossSection :: giveRealStress_Beam2d(FloatArray &answer, GaussPoint *gp, const FloatArray &strain, TimeStep *tStep)
 {
     FloatMatrix tangent;

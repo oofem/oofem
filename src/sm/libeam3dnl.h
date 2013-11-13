@@ -85,6 +85,9 @@ public:
     virtual double computeVolumeAround(GaussPoint *gp);
     virtual int computeGlobalCoordinates(FloatArray &answer, const FloatArray &lcoords);
 
+    virtual void computeStressVector(FloatArray &answer, const FloatArray &strain, GaussPoint *gp, TimeStep *tStep);
+    virtual void computeConstitutiveMatrixAt(FloatMatrix &answer, MatResponseMode rMode, GaussPoint *gp, TimeStep *tStep);
+
     // definition & identification
     virtual const char *giveInputRecordName() const { return _IFT_LIBeam3dNL_Name; }
     virtual const char *giveClassName() const { return "LIBeam3dNL"; }
@@ -102,6 +105,7 @@ public:
 
     virtual integrationDomain giveIntegrationDomain() const { return _Line; }
     virtual MaterialMode giveMaterialMode() { return _3dBeam; }
+
 
 protected:
     // edge load support

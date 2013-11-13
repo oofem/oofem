@@ -252,6 +252,20 @@ LIBeam3d2 :: computeGlobalCoordinates(FloatArray &answer, const FloatArray &lcoo
 }
 
 
+void
+LIBeam3d2 :: computeConstitutiveMatrixAt(FloatMatrix &answer, MatResponseMode rMode, GaussPoint *gp, TimeStep *tStep)
+{
+    this->giveStructuralCrossSection()->give3dBeamStiffMtrx(answer, rMode, gp, tStep);
+}
+
+
+void
+LIBeam3d2 :: computeStressVector(FloatArray &answer, const FloatArray &strain, GaussPoint *gp, TimeStep *tStep)
+{
+    this->giveStructuralCrossSection()->giveRealStress_Beam3d(answer, gp, strain, tStep);
+}
+
+
 int
 LIBeam3d2 :: testElementExtension(ElementExtension ext)
 {

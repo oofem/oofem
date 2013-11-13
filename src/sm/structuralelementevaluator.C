@@ -345,7 +345,6 @@ void StructuralElementEvaluator :: updateInternalState(TimeStep *tStep)
 {
     FloatArray u;
     Element *elem = this->giveElement();
-    StructuralCrossSection *cs = static_cast< StructuralCrossSection * >( elem->giveCrossSection() );
 
     elem->computeVectorOf(EID_MomentumBalance, VM_Total, tStep, u);
 
@@ -365,7 +364,7 @@ void StructuralElementEvaluator :: updateInternalState(TimeStep *tStep)
         for ( int j = 0; j < iRule->giveNumberOfIntegrationPoints(); j++ ) {
             GaussPoint *gp = iRule->getIntegrationPoint(j);
             this->computeStrainVector(strain, gp, tStep, u);
-            cs->giveRealStresses(stress, gp, strain, tStep);
+            this->computeStressVector(stress, strain, gp, tStep);
         }
     }
 
@@ -422,8 +421,7 @@ void StructuralElementEvaluator :: computeStiffnessMatrix(FloatMatrix &answer, M
             GaussPoint *gp = iRule->getIntegrationPoint(j);
             double dV = this->computeVolumeAround(gp);
             this->computeBMatrixAt(bj, gp);
-            //elem->computeConstitutiveMatrixAt(d, rMode, gp, tStep);
-            cs->giveCharMaterialStiffnessMatrix(d, rMode, gp, tStep);
+            this->computeConstitutiveMatrixAt(d, rMode, gp, tStep);
 
             dbj.beProductOf(d, bj);
             if ( matStiffSymmFlag ) {

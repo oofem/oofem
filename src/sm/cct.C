@@ -255,6 +255,20 @@ CCTPlate :: computeNmatrixAt(GaussPoint *gp, FloatMatrix &answer)
 
 
 void
+CCTPlate :: computeStressVector(FloatArray &answer, const FloatArray &strain, GaussPoint *gp, TimeStep *stepN)
+{
+    this->giveStructuralCrossSection()->giveRealStress_Plate(answer, gp, strain, stepN);
+}
+
+
+void
+CCTPlate :: computeConstitutiveMatrixAt(FloatMatrix &answer, MatResponseMode rMode, GaussPoint *gp, TimeStep *tStep)
+{
+    this->giveStructuralCrossSection()->give2dPlateStiffMtrx(answer, rMode, gp, tStep);
+}
+
+
+void
 CCTPlate :: giveNodeCoordinates(double &x1, double &x2, double &x3,
                                 double &y1, double &y2, double &y3,
                                 double *z)

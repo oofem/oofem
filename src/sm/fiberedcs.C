@@ -76,6 +76,33 @@ FiberedCrossSection :: giveRealStress_1d(FloatArray &answer, GaussPoint *gp, con
 
 
 void
+FiberedCrossSection :: giveStiffnessMatrix_3d(FloatMatrix &answer, MatResponseMode rMode, GaussPoint *gp, TimeStep *tStep)
+{
+    OOFEM_ERROR("FiberedCrossSection :: giveStiffnessMatrix_3d - Not supported\n");
+}
+
+
+void
+FiberedCrossSection :: giveStiffnessMatrix_PlaneStress(FloatMatrix &answer, MatResponseMode rMode, GaussPoint *gp, TimeStep *tStep)
+{
+    OOFEM_ERROR("FiberedCrossSection :: giveStiffnessMatrix_PlaneStress - Not supported\n");
+}
+
+
+void
+FiberedCrossSection :: giveStiffnessMatrix_PlaneStrain(FloatMatrix &answer, MatResponseMode rMode, GaussPoint *gp, TimeStep *tStep)
+{
+    OOFEM_ERROR("FiberedCrossSection :: giveStiffnessMatrix_PlaneStrain - Not supported\n");
+}
+
+
+void
+FiberedCrossSection :: giveStiffnessMatrix_1d(FloatMatrix &answer, MatResponseMode rMode, GaussPoint *gp, TimeStep *tStep)
+{
+    OOFEM_ERROR("FiberedCrossSection :: giveStiffnessMatrix_1d - Not supported\n");
+}
+
+void
 FiberedCrossSection :: giveRealStress_Beam2d(FloatArray &answer, GaussPoint *gp, const FloatArray &strain, TimeStep *tStep)
 {
     OOFEM_ERROR("FiberedCrossSection :: giveRealStress_Beam2d - Not supported\n");

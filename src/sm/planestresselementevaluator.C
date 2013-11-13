@@ -97,4 +97,9 @@ void PlaneStressStructuralElementEvaluator :: computeStressVector(FloatArray &an
     static_cast< StructuralCrossSection * >( this->giveElement()->giveCrossSection() )->giveRealStress_PlaneStress(answer, gp, strain, tStep);
 }
 
+void PlaneStressStructuralElementEvaluator :: computeConstitutiveMatrixAt(FloatMatrix &answer, MatResponseMode rMode, GaussPoint *gp, TimeStep *tStep)
+{
+    static_cast< StructuralCrossSection * >( this->giveElement()->giveCrossSection() )->giveStiffnessMatrix_PlaneStress(answer, rMode, gp, tStep);
+}
+
 } // end namespace oofem
