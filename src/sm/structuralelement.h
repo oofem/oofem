@@ -346,6 +346,9 @@ public:
                                              TimeStep *tStep);
     /// Helper function which returns the structural cross-section for the element.
     StructuralCrossSection *giveStructuralCrossSection();
+
+    virtual void createMaterialStatus();
+
 protected:
 
 

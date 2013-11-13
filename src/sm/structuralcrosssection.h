@@ -278,6 +278,7 @@ public:
 
     int hasMaterialModeCapability(MaterialMode mode); // JB
 
+    virtual void createMaterialStatus(GaussPoint &iGP) = 0; // ES
 
     virtual int checkConsistency() = 0;
     virtual Interface *giveMaterialInterface(InterfaceType t, IntegrationPoint *ip) { return NULL; }

@@ -409,8 +409,18 @@ void SimpleCrossSection :: giveInputRecord(DynamicInputRecord &input)
     if( this->propertyDictionary->includes(CS_BeamShearCoeff) ) {
         input.setField(this->give(CS_BeamShearCoeff), _IFT_SimpleCrossSection_shearcoeff);
     }
+
+    if(materialNumber > 0) {
+        input.setField(materialNumber, _IFT_SimpleCrossSection_MaterialNumber);
+    }
 }
 
+void SimpleCrossSection :: createMaterialStatus(GaussPoint &iGP)
+{
+	Material *mat = domain->giveMaterial(materialNumber);
+	MaterialStatus *matStat = mat->CreateStatus(&iGP);
+	iGP.setMaterialStatus(matStat);
+}
 
 double
 SimpleCrossSection :: give(CrossSectionProperty aProperty)

@@ -10,7 +10,7 @@ node 2     coords 3  1        0        0       bc 2 1 1
 node 3     coords 3  1        1        0       bc 2 2 1
 node 4     coords 3  0        1        0       bc 2 2 1
 PlaneStress2DXfem 1    nodes 4   1   2   3  4   mat 1 crosssect 1 nip 9 nlgeo 0 czmaterial 2
-SimpleCS 1 thick 1.0
+SimpleCS 1 thick 1.0 material 1
 #
 #Linear elasticity
 IsoLE 1 d 0.0 E 1.0e5 n 0.0 tAlpha 0.0

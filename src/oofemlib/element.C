@@ -1388,20 +1388,17 @@ Element :: mapStateVariables(const Domain &iOldDom, const TimeStep &iTStep)
 
         	GaussPoint &gp = *(iRule->getIntegrationPoint(j));
 
-        	MaterialStatus *ms = this->giveMaterial()->giveStatus(&gp);
+        	MaterialStatus *ms = dynamic_cast<MaterialStatus*>(gp.giveMaterialStatus() );
         	if(ms == NULL) {
-        		OOFEM_ERROR("In Element :: mapStateVariables(): Failed to fetch material status.\n");
+        		OOFEM_ERROR("In Element :: mapStateVariables(): failed to fetch MaterialStatus.\n");
         	}
 
-            MaterialStatusMapperInterface *interface = dynamic_cast< MaterialStatusMapperInterface * >
-                                                      ( this->giveMaterial()->giveStatus(&gp) );
-
+            MaterialStatusMapperInterface *interface = dynamic_cast< MaterialStatusMapperInterface * > ( ms );
             if ( interface == NULL ) {
-            	gp.giveCoordinates()->printYourself();
         		OOFEM_ERROR("In Element :: mapStateVariables(): Failed to fetch MaterialStatusMapperInterface.\n");
             }
 
-            result &= interface->MSMI_map(gp, iOldDom, iTStep, *( this->giveMaterial()->giveStatus(&gp) ) );
+            result &= interface->MSMI_map(gp, iOldDom, iTStep, *( ms ) );
         }
     }
 

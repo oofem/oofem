@@ -1395,6 +1395,17 @@ StructuralCrossSection *StructuralElement::giveStructuralCrossSection()
     return static_cast< StructuralCrossSection * >( this->giveCrossSection() );
 }
 
+void StructuralElement :: createMaterialStatus()
+{
+	StructuralCrossSection *cs = giveStructuralCrossSection();
+    for ( int i = 0; i < numberOfIntegrationRules; i++ ) {
+    	IntegrationRule *iRule = integrationRulesArray [ i ];
+        for ( int j = 0; j < iRule->giveNumberOfIntegrationPoints(); j++ ) {
+        	GaussPoint &gp = *(iRule->getIntegrationPoint(j));
+        	cs->createMaterialStatus(gp);
+        }
+    }
+}
 
 
 #ifdef __OOFEG

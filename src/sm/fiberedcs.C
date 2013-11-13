@@ -404,6 +404,16 @@ FiberedCrossSection :: initializeFrom(InputRecord *ir)
     return IRRT_OK;
 }
 
+void FiberedCrossSection :: createMaterialStatus(GaussPoint &iGP)
+{
+    for ( int i = 1; i <= numberOfFibers; i++ ) {
+        GaussPoint *fiberGp = this->giveSlaveGaussPoint(&iGP, i - 1);
+        StructuralMaterial *mat = static_cast< StructuralMaterial * >( domain->giveMaterial( fiberMaterials.at(i) ) );
+    	MaterialStatus *matStat = mat->CreateStatus(fiberGp);
+    	iGP.setMaterialStatus(matStat);
+    }
+}
+
 GaussPoint *
 FiberedCrossSection :: giveSlaveGaussPoint(GaussPoint *masterGp, int i)
 //

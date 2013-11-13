@@ -13,13 +13,13 @@ node 5     coords 2  3        1       bc 2 2 3
 node 6     coords 2  2        1       bc 2 0 0
 node 7     coords 2  1        1       bc 2 0 0
 node 8     coords 2  0        1       bc 2 1 1
-TrPlaneStress2dXFEM 1    nodes 3   1   2   8   mat 1 crosssect 1 nlgeo 0
-TrPlaneStress2dXFEM 2    nodes 3   2   7   8   mat 1 crosssect 1 nlgeo 0
-TrPlaneStress2dXFEM 3    nodes 3   2   6   7   mat 1 crosssect 1 nlgeo 0
-TrPlaneStress2dXFEM 4    nodes 3   2   3   6   mat 1 crosssect 1 nlgeo 0
-TrPlaneStress2dXFEM 5    nodes 3   3   4   6   mat 1 crosssect 1 nlgeo 0
-TrPlaneStress2dXFEM 6    nodes 3   4   5   6   mat 1 crosssect 1 nlgeo 0
-SimpleCS 1 thick 1.0e-3
+TrPlaneStress2dXFEM 1    nodes 3   1   2   8   mat 1 crosssect 1 nip 12 nlgeo 0
+TrPlaneStress2dXFEM 2    nodes 3   2   7   8   mat 1 crosssect 1 nip 12 nlgeo 0
+TrPlaneStress2dXFEM 3    nodes 3   2   6   7   mat 1 crosssect 1 nip 12 nlgeo 0
+TrPlaneStress2dXFEM 4    nodes 3   2   3   6   mat 1 crosssect 1 nip 12 nlgeo 0
+TrPlaneStress2dXFEM 5    nodes 3   3   4   6   mat 1 crosssect 1 nip 12 nlgeo 0
+TrPlaneStress2dXFEM 6    nodes 3   4   5   6   mat 1 crosssect 1 nip 12 nlgeo 0
+SimpleCS 1 thick 1.0e-3 material 1
 IsoLE 1 d 0.0 E 210.0e9 n 0.3 tAlpha 0.0
 BoundaryCondition 1 loadTimeFunction 1 prescribedvalue 0.0
 BoundaryCondition 2 loadTimeFunction 1 prescribedvalue 0.2

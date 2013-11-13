@@ -131,6 +131,9 @@ public:
     virtual IRResultType initializeFrom(InputRecord *ir);
     virtual void giveInputRecord(DynamicInputRecord &input);
 
+    virtual void createMaterialStatus(GaussPoint &iGP); // ES
+
+
     // identification and auxiliary functions
     virtual const char *giveClassName() const { return "SimpleCrossSection"; }
     virtual const char *giveInputRecordName() const { return _IFT_SimpleCrossSection_Name; }

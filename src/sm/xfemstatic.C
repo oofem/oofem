@@ -41,6 +41,7 @@
 #include "dofmanager.h"
 #include "xfemelementinterface.h"
 #include "element.h"
+#include "structuralelement.h"
 
 #include "exportmodulemanager.h"
 #include "vtkxmlexportmodule.h"
@@ -228,7 +229,8 @@ XFEMStatic :: terminate(TimeStep *tStep)
 
 				////////////////////////////////////////////////////////
 				// Map state variables for regular Gauss points
-				Element *el = dNew->giveElement(i);
+				StructuralElement *el = dynamic_cast<StructuralElement*>( dNew->giveElement(i) );
+				el->createMaterialStatus();
 				el->mapStateVariables(*domain, *tStep);
 
 
