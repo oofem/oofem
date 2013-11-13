@@ -138,28 +138,6 @@ LTRSpace :: computeBmatrixAt(GaussPoint *aGaussPoint, FloatMatrix &answer, int l
 }
 
 
-
-
-void
-LTRSpace :: computeNmatrixAt(const FloatArray &iLocCoord, FloatMatrix &answer)
-// Returns the displacement interpolation matrix {N} of the receiver, eva-
-// luated at aGaussPoint.
-{
-    FloatArray n(4);
-
-    this->interpolation.evalN( n, iLocCoord, FEIElementGeometryWrapper(this) );
-
-    answer.resize(3, 12);
-    answer.zero();
-
-    for ( int i = 1; i <= 4; i++ ) {
-        answer.at(1, 3 * i - 2)  = n.at(i);
-        answer.at(2, 3 * i - 1)  = n.at(i);
-        answer.at(3, 3 * i - 0)  = n.at(i);
-    }
-}
-
-
 void
 LTRSpace :: computeBHmatrixAt(GaussPoint *aGaussPoint, FloatMatrix &answer)
 // Returns the [9x24] displacement gradient matrix {BH} of the receiver,

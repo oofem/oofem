@@ -107,22 +107,6 @@ void QTruss1d :: computeGaussPoints()
 }
 
 void
-QTruss1d :: computeNmatrixAt(const FloatArray &iLocCoord, FloatMatrix &answer)
-// Returns the displacement interpolation matrix {N} of the receiver, eva-
-// luated at gp.
-{
-    FloatArray n;
-    answer.resize(1, 3);
-    answer.zero();
-
-    this->interpolation.evalN( n, iLocCoord, FEIElementGeometryWrapper(this) );
-    answer.at(1, 1) = n.at(1);
-    answer.at(1, 2) = n.at(2);
-    answer.at(1, 3) = n.at(3);
-}
-
-
-void
 QTruss1d :: computeBmatrixAt(GaussPoint *gp, FloatMatrix &answer, int li, int ui)
 //
 // Returns linear part of geometrical equations of the receiver at gp.

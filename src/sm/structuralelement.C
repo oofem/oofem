@@ -1165,6 +1165,21 @@ StructuralElement :: checkConsistency()
 }
 
 void
+StructuralElement :: computeNmatrixAt(const FloatArray &iLocCoord, FloatMatrix &answer)
+{
+		const int numNodes = this->giveNumberOfDofManagers();
+		FloatArray N( numNodes );
+
+		const int dim = this->giveSpatialDimension();
+
+	    answer.resize(dim, dim*numNodes);
+	    answer.zero();
+	    giveInterpolation()->evalN( N, iLocCoord, FEIElementGeometryWrapper(this) );
+
+	    answer.beNMatrixOf(N, dim);
+}
+
+void
 StructuralElement :: condense(FloatMatrix *stiff, FloatMatrix *mass, FloatArray *load, IntArray *what)
 {
     /*

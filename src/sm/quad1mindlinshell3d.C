@@ -239,17 +239,6 @@ Quad1MindlinShell3D :: computeBmatrixAt(GaussPoint *gp, FloatMatrix &answer, int
 
 
 void
-Quad1MindlinShell3D :: computeNmatrixAt(const FloatArray &iLocCoord, FloatMatrix &answer)
-// Returns the [3x9] displacement interpolation matrix {N} of the receiver,
-// evaluated at gp.
-{
-    FloatArray n;
-    this->interp.evalN(n, iLocCoord, FEIVoidCellGeometry());
-    answer.beNMatrixOf(n, 3);
-}
-
-
-void
 Quad1MindlinShell3D :: giveInternalForcesVector(FloatArray &answer, TimeStep *tStep, int useUpdatedGpRecord)
 {
     // We need to overload this for practical reasons (this 3d shell has all 9 dofs, but the shell part only cares for the first 8)

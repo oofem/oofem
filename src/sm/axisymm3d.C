@@ -89,17 +89,6 @@ Axisymm3d :: giveInterface(InterfaceType interface)
 
 
 void
-Axisymm3d :: computeNmatrixAt(const FloatArray &iLocCoord, FloatMatrix &answer)
-// Returns the displacement interpolation matrix {N} of the receiver,
-// evaluated at aGaussPoint.
-{
-    FloatArray n;
-    this->interpolation.evalN( n, iLocCoord, FEIElementGeometryWrapper(this) );
-    answer.beNMatrixOf(n, 2);
-}
-
-
-void
 Axisymm3d :: computeBmatrixAt(GaussPoint *aGaussPoint, FloatMatrix &answer, int li, int ui)
 // Returns the [6x6] strain-displacement matrix {B} of the receiver, eva-
 // luated at aGaussPoint.

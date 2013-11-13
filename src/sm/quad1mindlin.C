@@ -152,17 +152,6 @@ Quad1Mindlin :: computeBmatrixAt(GaussPoint *gp, FloatMatrix &answer, int li, in
 }
 
 
-void
-Quad1Mindlin :: computeNmatrixAt(const FloatArray &iLocCoord, FloatMatrix &answer)
-// Returns the [3x9] displacement interpolation matrix {N} of the receiver,
-// evaluated at gp.
-{
-    FloatArray n;
-    this->interp_lin.evalN(n, iLocCoord, FEIElementGeometryWrapper(this));
-    answer.beNMatrixOf(n, 3);
-}
-
-
 IRResultType
 Quad1Mindlin :: initializeFrom(InputRecord *ir)
 {

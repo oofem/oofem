@@ -139,7 +139,6 @@ protected:
     int computeLoadLEToLRotationMatrix(FloatMatrix &answer, int iEdge, GaussPoint *gp);
 
     virtual void computeBmatrixAt(GaussPoint *gp, FloatMatrix &answer, int = 1, int = ALL_STRAINS);
-    virtual void computeNmatrixAt(const FloatArray &iLocCoord, FloatMatrix &answer);
     virtual void computeBHmatrixAt(GaussPoint *aGaussPoint, FloatMatrix &answer);
     virtual void computeGaussPoints();
 

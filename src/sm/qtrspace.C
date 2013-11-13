@@ -131,29 +131,6 @@ QTRSpace :: giveMaterialMode()
 
 
 void
-QTRSpace :: computeNmatrixAt(const FloatArray &iLocCoord, FloatMatrix &answer)
-// Returns the displacement interpolation matrix {N} of the receiver, eva-
-// luated at aGaussPoint.
-{
-    FloatArray n(10);
-
-    answer.resize(3, 30);
-    answer.zero();
-
-    this->interpolation.evalN(n, iLocCoord, FEIElementGeometryWrapper(this));
-
-    for ( int i = 1; i <= 10; i++ ) {
-        answer.at(1, 3 * i - 2) = n.at(i);
-        answer.at(2, 3 * i - 1) = n.at(i);
-        answer.at(3, 3 * i - 0) = n.at(i);
-    }
-}
-
-#if 1
-
-#endif
-
-void
 QTRSpace :: computeBmatrixAt(GaussPoint *aGaussPoint, FloatMatrix &answer, int li, int ui)
 // Returns the [6x30] strain-displacement matrix {B} of the receiver, eva-
 // luated at aGaussPoint.

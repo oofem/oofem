@@ -582,7 +582,7 @@ public:
      * @param iLocCoord Local coordinates.
      * @param answer Interpolation matrix evaluated at gp.
      */
-    virtual void computeNmatrixAt(const FloatArray &iLocCoord, FloatMatrix &answer) = 0;
+    virtual void computeNmatrixAt(const FloatArray &iLocCoord, FloatMatrix &answer);
 
 protected:
     /**

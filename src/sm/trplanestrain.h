@@ -161,7 +161,6 @@ protected:
     virtual void computeBHmatrixAt(GaussPoint *gp, FloatMatrix &);
 
 
-    virtual void computeNmatrixAt(const FloatArray &iLocCoord, FloatMatrix &);
     virtual void computeGaussPoints();
 
     virtual int giveApproxOrder() { return 1; }
