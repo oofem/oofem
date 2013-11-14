@@ -93,8 +93,8 @@ void LSPrimaryVariableMapper::mapPrimaryVariables(FloatArray &oU, Domain &iOldDo
 	du.zero();
 
 	FloatArray res(numDofsNew);
-    SparseMtrx *K = classFactory.createSparseMtrx(SMT_DSS_sym_LDL);
-    SparseLinearSystemNM *solver = classFactory.createSparseLinSolver(ST_DSS, &iOldDom, engngMod);
+    SparseMtrx *K = classFactory.createSparseMtrx(SMT_Skyline);
+    SparseLinearSystemNM *solver = classFactory.createSparseLinSolver(ST_Direct, &iOldDom, engngMod);
 
 
 	K->buildInternalStructure( engngMod, 1, EID_MomentumBalance, engngMod->giveUnknownNumberingScheme(EID_MomentumBalance) );
