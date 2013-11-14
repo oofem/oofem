@@ -74,7 +74,7 @@ public:
     virtual ~LIBeam3dNL() { }
 
     virtual void computeLumpedMassMatrix(FloatMatrix &answer, TimeStep *tStep);
-    virtual void computeConsistentMassMatrix(FloatMatrix &answer, TimeStep *tStep, double &mass)
+    virtual void computeConsistentMassMatrix(FloatMatrix &answer, TimeStep *tStep, double &mass, const double *ipDensity = NULL)
     { computeLumpedMassMatrix(answer, tStep); }
     virtual void computeStrainVector(FloatArray &answer, GaussPoint *gp, TimeStep *tStep);
     //int computeGtoLRotationMatrix(FloatMatrix &answer);
@@ -84,6 +84,9 @@ public:
     virtual void giveDofManDofIDMask(int inode, EquationID, IntArray &) const;
     virtual double computeVolumeAround(GaussPoint *gp);
     virtual int computeGlobalCoordinates(FloatArray &answer, const FloatArray &lcoords);
+
+    virtual void computeStressVector(FloatArray &answer, const FloatArray &strain, GaussPoint *gp, TimeStep *tStep);
+    virtual void computeConstitutiveMatrixAt(FloatMatrix &answer, MatResponseMode rMode, GaussPoint *gp, TimeStep *tStep);
 
     // definition & identification
     virtual const char *giveInputRecordName() const { return _IFT_LIBeam3dNL_Name; }
@@ -103,6 +106,7 @@ public:
     virtual integrationDomain giveIntegrationDomain() const { return _Line; }
     virtual MaterialMode giveMaterialMode() { return _3dBeam; }
 
+
 protected:
     // edge load support
     virtual void computeEgdeNMatrixAt(FloatMatrix &answer, int iedge, GaussPoint *gp);
@@ -120,7 +124,7 @@ protected:
     { _error("computeBmatrixAt: not implemented"); }
     //int computeGtoLRotationMatrix(FloatMatrix& answer);
 
-    virtual void computeNmatrixAt(GaussPoint *gp, FloatMatrix &answer);
+    virtual void computeNmatrixAt(const FloatArray &iLocCoord, FloatMatrix &answer);
     virtual void computeGaussPoints();
     double giveLength();
     //double givePitch();

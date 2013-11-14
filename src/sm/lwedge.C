@@ -117,7 +117,7 @@ LWedge :: computeGaussPoints()
 
 
 void
-LWedge :: computeNmatrixAt(GaussPoint *aGaussPoint, FloatMatrix &answer)
+LWedge :: computeNmatrixAt(const FloatArray &iLocCoord, FloatMatrix &answer)
 // Returns the displacement interpolation matrix {N} of the receiver, eva-
 // luated at aGaussPoint.
 {
@@ -126,7 +126,7 @@ LWedge :: computeNmatrixAt(GaussPoint *aGaussPoint, FloatMatrix &answer)
     answer.resize(3, 18);
     answer.zero();
 
-    this->interpolation.evalN(n, * aGaussPoint->giveCoordinates(), FEIElementGeometryWrapper(this));
+    this->interpolation.evalN(n, iLocCoord, FEIElementGeometryWrapper(this));
 
     for ( int i = 1; i <= 6; i++ ) {
         answer.at(1, 3 * i - 2) = n.at(i);

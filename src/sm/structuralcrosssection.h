@@ -99,12 +99,34 @@ public:
      */
     //@{
     void giveRealStresses(FloatArray &answer, GaussPoint *gp, const FloatArray &reducedStrain, TimeStep *tStep);
-
     virtual void giveRealStress_3d(FloatArray &answer, GaussPoint *gp, const FloatArray &reducedStrain, TimeStep *tStep) = 0;
     virtual void giveRealStress_PlaneStrain(FloatArray &answer, GaussPoint *gp, const FloatArray &reducedStrain, TimeStep *tStep) = 0;
     virtual void giveRealStress_PlaneStress(FloatArray &answer, GaussPoint *gp, const FloatArray &reducedStrain, TimeStep *tStep) = 0;
     virtual void giveRealStress_1d(FloatArray &answer, GaussPoint *gp, const FloatArray &reducedStrain, TimeStep *tStep) = 0;
+    //@}
 
+    /**
+     * Method for computing the stiffness matrix.
+     * @param answer Stiffness matrix.
+     * @param mode Material response mode.
+     * @param gp Integration point, which load history is used.
+     * @param tStep Time step (most models are able to respond only when atTime is current time step).
+     */
+    //@{
+    virtual void giveStiffnessMatrix_3d(FloatMatrix &answer, MatResponseMode rMode, GaussPoint *gp, TimeStep *tStep) = 0;
+    virtual void giveStiffnessMatrix_PlaneStress(FloatMatrix &answer, MatResponseMode rMode, GaussPoint *gp, TimeStep *tStep) = 0;
+    virtual void giveStiffnessMatrix_PlaneStrain(FloatMatrix &answer, MatResponseMode rMode, GaussPoint *gp, TimeStep *tStep) = 0;
+    virtual void giveStiffnessMatrix_1d(FloatMatrix &answer, MatResponseMode rMode, GaussPoint *gp, TimeStep *tStep) = 0;
+    //@}
+
+    /**
+     * Computes the generalized stress vector for given strain and integration point.
+     * @param answer Contains result.
+     * @param gp Integration point.
+     * @param reducedStrain Strain vector in reduced generalized form.
+     * @param tStep Current time step (most models are able to respond only when tStep is current time step).
+     */
+    //@{
     virtual void giveRealStress_Beam2d(FloatArray &answer, GaussPoint *gp, const FloatArray &generalizedStrain, TimeStep *tStep) = 0;
     virtual void giveRealStress_Beam3d(FloatArray &answer, GaussPoint *gp, const FloatArray &generalizedStrain, TimeStep *tStep) = 0;
     virtual void giveRealStress_Plate(FloatArray &answer, GaussPoint *gp, const FloatArray &generalizedStrain, TimeStep *tStep) = 0;
@@ -278,6 +300,7 @@ public:
 
     int hasMaterialModeCapability(MaterialMode mode); // JB
 
+    virtual void createMaterialStatus(GaussPoint &iGP) = 0; // ES
 
     virtual int checkConsistency() = 0;
     virtual Interface *giveMaterialInterface(InterfaceType t, IntegrationPoint *ip) { return NULL; }

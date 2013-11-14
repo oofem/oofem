@@ -176,15 +176,15 @@ RerShell :: computeGaussPoints()
 
 
 void
-RerShell :: computeNmatrixAt(GaussPoint *aGaussPoint, FloatMatrix &answer)
+RerShell :: computeNmatrixAt(const FloatArray &iLocCoord, FloatMatrix &answer)
 // Returns the displacement interpolation matrix {N} of the receiver,
 // evaluated at aGaussPoint.
 {
     double x1, x2, x3, y1, y2, y3, l1, l2, l3, b1, b2, b3, c1, c2, c3;
     FloatArray nodeCoords;
 
-    l1 = aGaussPoint->giveCoordinate(1);
-    l2 = aGaussPoint->giveCoordinate(2);
+    l1 = iLocCoord.at(1);
+    l2 = iLocCoord.at(2);
     l3 = 1.0 - l1 - l2;
 
     this->giveLocalCoordinates( nodeCoords, * ( this->giveNode(1)->giveCoordinates() ) );

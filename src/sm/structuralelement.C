@@ -205,7 +205,7 @@ StructuralElement :: computeBodyLoadVectorAt(FloatArray &answer, Load *forLoad, 
     if ( force.giveSize() ) {
         for ( int i = 0; i < iRule->giveNumberOfIntegrationPoints(); i++ ) {
             gp  = iRule->getIntegrationPoint(i);
-            this->computeNmatrixAt(gp, n);
+            this->computeNmatrixAt( *(gp->giveLocalCoordinates()) , n);
             dV  = this->computeVolumeAround(gp);
             dens = this->giveCrossSection()->give('d', gp);
             ntf.beTProductOf(n, force);
@@ -227,7 +227,7 @@ StructuralElement :: computePointLoadVectorAt(FloatArray &answer, Load *load, Ti
     pointLoad->computeValueAt(force, tStep, coords, mode);
     if ( this->computeLocalCoordinates(lcoords, coords) ) {
         GaussPoint __gp(NULL, 0, (new FloatArray(lcoords)), 1.0, _Unknown);
-        this->computeNmatrixAt(& __gp, n);
+        this->computeNmatrixAt( *(__gp.giveLocalCoordinates()) , n);
         answer.beTProductOf(n, force);
     } else {
         _warning("computePointLoadVectorAt: point load outside element");
@@ -448,7 +448,7 @@ StructuralElement :: computePrescribedStrainLoadVectorAt(FloatArray &answer, Tim
 
 
 void
-StructuralElement :: computeConsistentMassMatrix(FloatMatrix &answer, TimeStep *tStep, double &mass)
+StructuralElement :: computeConsistentMassMatrix(FloatMatrix &answer, TimeStep *tStep, double &mass, const double *ipDensity)
 // Computes numerically the consistent (full) mass matrix of the receiver.
 {
     int nip, ndofs = computeNumberOfDofs();
@@ -476,8 +476,13 @@ StructuralElement :: computeConsistentMassMatrix(FloatMatrix &answer, TimeStep *
 
     for ( int i = 0; i < iRule.giveNumberOfIntegrationPoints(); i++ ) {
         GaussPoint *gp = iRule.getIntegrationPoint(i);
-        this->computeNmatrixAt(gp, n);
+        this->computeNmatrixAt( *(gp->giveLocalCoordinates()) , n);
         density = this->giveCrossSection()->give('d', gp);
+
+        if(ipDensity != NULL) {
+        	// Override density if desired
+        	density = *ipDensity;
+        }
 
         dV = this->computeVolumeAround(gp);
         mass += density * dV;
@@ -1152,6 +1157,21 @@ StructuralElement :: checkConsistency()
 }
 
 void
+StructuralElement :: computeNmatrixAt(const FloatArray &iLocCoord, FloatMatrix &answer)
+{
+		const int numNodes = this->giveNumberOfDofManagers();
+		FloatArray N( numNodes );
+
+		const int dim = this->giveSpatialDimension();
+
+	    answer.resize(dim, dim*numNodes);
+	    answer.zero();
+	    giveInterpolation()->evalN( N, iLocCoord, FEIElementGeometryWrapper(this) );
+
+	    answer.beNMatrixOf(N, dim);
+}
+
+void
 StructuralElement :: condense(FloatMatrix *stiff, FloatMatrix *mass, FloatArray *load, IntArray *what)
 {
     /*
@@ -1257,7 +1277,7 @@ StructuralElement :: giveIPValue(FloatArray &answer, GaussPoint *aGaussPoint, In
         FloatArray u;
         FloatMatrix N;
         this->computeVectorOf(EID_MomentumBalance, VM_Total, atTime, u);
-        this->computeNmatrixAt(aGaussPoint, N);
+        this->computeNmatrixAt( *(aGaussPoint->giveLocalCoordinates()) , N);
         answer.beProductOf(N, u);
         return 1;
     }
@@ -1375,6 +1395,17 @@ StructuralCrossSection *StructuralElement::giveStructuralCrossSection()
     return static_cast< StructuralCrossSection * >( this->giveCrossSection() );
 }
 
+void StructuralElement :: createMaterialStatus()
+{
+	StructuralCrossSection *cs = giveStructuralCrossSection();
+    for ( int i = 0; i < numberOfIntegrationRules; i++ ) {
+    	IntegrationRule *iRule = integrationRulesArray [ i ];
+        for ( int j = 0; j < iRule->giveNumberOfIntegrationPoints(); j++ ) {
+        	GaussPoint &gp = *(iRule->getIntegrationPoint(j));
+        	cs->createMaterialStatus(gp);
+        }
+    }
+}
 
 
 #ifdef __OOFEG

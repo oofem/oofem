@@ -37,6 +37,9 @@
 #include "domain.h"
 #include "material.h"
 #include "gausspoint.h"
+#include "matstatmapperint.h"
+#include "xfemelementinterface.h"
+#include "structuralinterfacematerial.h"
 
 namespace oofem {
 
@@ -44,10 +47,23 @@ MMAClosestIPTransfer :: MMAClosestIPTransfer() : MaterialMappingAlgorithm()
 { }
 
 void
-MMAClosestIPTransfer :: __init(Domain *dold, IntArray &type, FloatArray &coords, int region, TimeStep *tStep)
+MMAClosestIPTransfer :: __init(Domain *dold, IntArray &type, FloatArray &coords, int region, TimeStep *tStep, bool iCohesiveZoneGP)
 {
     SpatialLocalizer *sl = dold->giveSpatialLocalizer();
-    this->source = sl->giveClosestIP(coords, region);
+    this->source = sl->giveClosestIP(coords, region, iCohesiveZoneGP);
+
+    if(iCohesiveZoneGP) {
+    	XfemElementInterface *xFemEl = dynamic_cast<XfemElementInterface*>(source->giveElement());
+
+    	if(xFemEl == NULL) {
+    		OOFEM_ERROR("In MMAClosestIPTransfer :: __init: xFemEl == NULL.\n");
+    	}
+
+    	mpMaterialStatus = xFemEl->mpCZMat->giveStatus(source);
+    }
+    else {
+    	mpMaterialStatus = source->giveMaterial()->giveStatus(source);
+    }
 
     if ( !source ) {
         OOFEM_ERROR("MMAClosestIPTransfer::__init : no suitable source found");
@@ -65,4 +81,23 @@ MMAClosestIPTransfer :: __mapVariable(FloatArray &answer, FloatArray &coords,
 
     return 0;
 }
+
+int
+MMAClosestIPTransfer :: mapStatus(MaterialStatus &oStatus) const
+{
+
+    if ( mpMaterialStatus != NULL ) {
+
+    	MaterialStatusMapperInterface &interface = dynamic_cast<MaterialStatusMapperInterface&>(oStatus);
+    	interface.copyStateVariables(*mpMaterialStatus);
+
+    	return 1;
+    }
+    else {
+    	OOFEM_ERROR("Error in MMAClosestIPTransfer :: mapStatus(): source not set.\n");
+    }
+
+	return 0;
+}
+
 } // end namespace oofem

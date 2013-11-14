@@ -87,6 +87,10 @@ public:
 
     virtual void initTempStatus();
     virtual void updateYourself(TimeStep *tStep);
+
+    /// Functions for MaterialStatusMapperInterface
+	virtual void copyStateVariables(const MaterialStatus &iStatus);
+	virtual void addStateVariables(const MaterialStatus &iStatus);
 };
 
 

@@ -61,7 +61,7 @@ class StructuralInterfaceMaterial;
  */
 class OOFEM_EXPORT XfemElementInterface : public Interface
 {
-protected:
+public:
     Element *element;
 
     // Cohesive Zone variables
@@ -114,6 +114,8 @@ public:
 
     void computeCohesiveTangent(FloatMatrix &answer, TimeStep *tStep);
     void computeCohesiveTangentAt(FloatMatrix &answer, TimeStep *tStep);
+
+    void XfemElementInterface_computeConsistentMassMatrix(FloatMatrix &answer, TimeStep *tStep, double &mass, const double *ipDensity = NULL);
 
     virtual IRResultType initializeCZFrom(InputRecord *ir);
     MaterialMode giveMaterialMode();

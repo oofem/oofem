@@ -48,6 +48,7 @@ class TimeStep;
 class FloatArray;
 class GaussPoint;
 class DynamicInputRecord;
+class MaterialStatus;
 
 /**
  * The class representing the general material model mapping algorithm.
@@ -95,7 +96,7 @@ public:
      * @param gp Integration point of to initialize.
      * @param tStep Time step.
      */
-    void init(Domain *dold, IntArray &varTypes, GaussPoint *gp, TimeStep *tStep);
+    void init(Domain *dold, IntArray &varTypes, GaussPoint *gp, TimeStep *tStep, bool iCohesiveZoneGP = false);
     /**
      * Initializes the receiver state before mapping. The idea is to place some
      * common global operations before mapping particular IP's if necessary.
@@ -107,7 +108,7 @@ public:
      * @param region If > 0 region id of receiver point, if < 0 ignore regions.
      * @param tStep Time step.
      */
-    virtual void __init(Domain *dold, IntArray &varTypes, FloatArray &coords, int region, TimeStep *tStep) = 0;
+    virtual void __init(Domain *dold, IntArray &varTypes, FloatArray &coords, int region, TimeStep *tStep, bool iCohesiveZoneGP = false) = 0;
     /**
      * Finishes the mapping for given time step. Used to perform cleanup.
      * Typically some mappers require to compute some global mesh data related to
@@ -142,6 +143,12 @@ public:
      * belonging to receiver. Receiver may use value-name extracting functions
      * to extract particular field from record.
      */
+
+    /**
+     * Map all internal state variables in one stroke.
+     */
+    virtual int mapStatus(MaterialStatus &oStatus) const = 0;
+
     virtual IRResultType initializeFrom(InputRecord *ir) { return IRRT_OK; }
     /**
      * Setups the input record of receiver.

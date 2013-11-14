@@ -78,6 +78,38 @@ SimpleCrossSection :: giveRealStress_1d(FloatArray &answer, GaussPoint *gp, cons
 
 
 void
+SimpleCrossSection :: giveStiffnessMatrix_3d(FloatMatrix &answer, MatResponseMode rMode, GaussPoint *gp, TimeStep *tStep)
+{
+    StructuralMaterial *mat = dynamic_cast< StructuralMaterial * >( this->giveMaterial(gp) );
+    mat->give3dMaterialStiffnessMatrix(answer, rMode, gp, tStep);
+}
+
+
+void
+SimpleCrossSection :: giveStiffnessMatrix_PlaneStress(FloatMatrix &answer, MatResponseMode rMode, GaussPoint *gp, TimeStep *tStep)
+{
+    StructuralMaterial *mat = dynamic_cast< StructuralMaterial * >( this->giveMaterial(gp) );
+    mat->givePlaneStressStiffMtrx(answer, rMode, gp, tStep);
+}
+
+
+void
+SimpleCrossSection :: giveStiffnessMatrix_PlaneStrain(FloatMatrix &answer, MatResponseMode rMode, GaussPoint *gp, TimeStep *tStep)
+{
+    StructuralMaterial *mat = dynamic_cast< StructuralMaterial * >( this->giveMaterial(gp) );
+    mat->givePlaneStrainStiffMtrx(answer, rMode, gp, tStep);
+}
+
+
+void
+SimpleCrossSection :: giveStiffnessMatrix_1d(FloatMatrix &answer, MatResponseMode rMode, GaussPoint *gp, TimeStep *tStep)
+{
+    StructuralMaterial *mat = dynamic_cast< StructuralMaterial * >( this->giveMaterial(gp) );
+    mat->give1dStressStiffMtrx(answer, rMode, gp, tStep);
+}
+
+
+void
 SimpleCrossSection :: giveRealStress_Beam2d(FloatArray &answer, GaussPoint *gp, const FloatArray &strain, TimeStep *tStep)
 {
     FloatMatrix tangent;
@@ -363,7 +395,6 @@ SimpleCrossSection :: initializeFrom(InputRecord *ir)
     IR_GIVE_OPTIONAL_FIELD(ir, value, _IFT_SimpleCrossSection_drillStiffness);
     propertyDictionary->add(CS_DrillingStiffness, value);
 
-    // Read a cohesive zone material
     IR_GIVE_OPTIONAL_FIELD(ir, this->materialNumber, _IFT_SimpleCrossSection_MaterialNumber);
 
     return IRRT_OK;
@@ -409,8 +440,17 @@ void SimpleCrossSection :: giveInputRecord(DynamicInputRecord &input)
     if( this->propertyDictionary->includes(CS_BeamShearCoeff) ) {
         input.setField(this->give(CS_BeamShearCoeff), _IFT_SimpleCrossSection_shearcoeff);
     }
+
+    input.setField(this->materialNumber, _IFT_SimpleCrossSection_MaterialNumber);
 }
 
+void
+SimpleCrossSection :: createMaterialStatus(GaussPoint &iGP)
+{
+	Material *mat = domain->giveMaterial(materialNumber);
+	MaterialStatus *matStat = mat->CreateStatus(&iGP);
+	iGP.setMaterialStatus(matStat);
+}
 
 double
 SimpleCrossSection :: give(CrossSectionProperty aProperty)

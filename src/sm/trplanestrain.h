@@ -46,6 +46,7 @@
 #include "mmashapefunctprojection.h"
 #include "huertaerrorestimator.h"
 #include "fei2dtrlin.h"
+#include "gausspoint.h"
 
 #define _IFT_TrPlaneStrain_Name "trplanestrain"
 
@@ -121,7 +122,7 @@ public:
     virtual void HuertaErrorEstimatorI_computeLocalCoords(FloatArray &answer, const FloatArray &coords)
     { computeLocalCoordinates(answer, coords); }
     virtual void HuertaErrorEstimatorI_computeNmatrixAt(GaussPoint *aGaussPoint, FloatMatrix &answer)
-    { computeNmatrixAt(aGaussPoint, answer); }
+    { computeNmatrixAt(*(aGaussPoint->giveLocalCoordinates()), answer); }
 
     // ZZRemeshingCriteriaInterface
     virtual double ZZRemeshingCriteriaI_giveCharacteristicSize() { return DirectErrorIndicatorRCI_giveCharacteristicSize(); }
@@ -159,7 +160,6 @@ protected:
     virtual void computeBHmatrixAt(GaussPoint *gp, FloatMatrix &);
 
 
-    virtual void computeNmatrixAt(GaussPoint *gp, FloatMatrix &);
     virtual void computeGaussPoints();
 
     virtual int giveApproxOrder() { return 1; }

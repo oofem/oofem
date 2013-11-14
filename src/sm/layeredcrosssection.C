@@ -90,6 +90,44 @@ LayeredCrossSection :: giveRealStress_1d(FloatArray &answer, GaussPoint *gp, con
 
 
 void
+LayeredCrossSection :: giveStiffnessMatrix_3d(FloatMatrix &answer, MatResponseMode rMode, GaussPoint *gp, TimeStep *tStep)
+{
+    if ( gp->giveIntegrationRule()->giveIntegrationDomain() == _Cube || gp->giveIntegrationRule()->giveIntegrationDomain() == _Wedge ) {
+        // Determine which layer the gp belongs to. This code assumes that the gauss point are created consistently (through CrossSection::setupIntegrationPoints)
+        int ngps = gp->giveIntegrationRule()->giveNumberOfIntegrationPoints();
+        int gpnum = gp->giveNumber();
+        int gpsperlayer = ngps / this->numberOfLayers;
+        int layer = (gpnum - 1) / gpsperlayer + 1;
+        Material *layerMat = this->domain->giveMaterial( this->giveLayerMaterial(layer) );
+        static_cast< StructuralMaterial * >( layerMat )->give3dMaterialStiffnessMatrix(answer, rMode, gp, tStep);
+    } else {
+        OOFEM_ERROR("LayeredCrossSection :: giveRealStress_3d - Only cubes and wedges are meaningful for layered cross-sections");
+    }
+}
+
+
+void
+LayeredCrossSection :: giveStiffnessMatrix_PlaneStress(FloatMatrix &answer, MatResponseMode rMode, GaussPoint *gp, TimeStep *tStep)
+{
+    OOFEM_ERROR("LayeredCrossSection :: giveStiffnessMatrix_PlaneStress - Not supported");
+}
+
+
+void
+LayeredCrossSection :: giveStiffnessMatrix_PlaneStrain(FloatMatrix &answer, MatResponseMode rMode, GaussPoint *gp, TimeStep *tStep)
+{
+    OOFEM_ERROR("LayeredCrossSection :: giveStiffnessMatrix_PlaneStrain - Not supported");
+}
+
+
+void
+LayeredCrossSection :: giveStiffnessMatrix_1d(FloatMatrix &answer, MatResponseMode rMode, GaussPoint *gp, TimeStep *tStep)
+{
+    OOFEM_ERROR("LayeredCrossSection :: giveStiffnessMatrix_1d - Not supported");
+}
+
+
+void
 LayeredCrossSection :: giveRealStress_Beam2d(FloatArray &answer, GaussPoint *gp, const FloatArray &strain, TimeStep *tStep)
 {
     double layerThick, layerWidth, layerZCoord, top, bottom, layerZeta;
@@ -648,6 +686,15 @@ void LayeredCrossSection :: giveInputRecord(DynamicInputRecord &input)
 
 }
 
+void LayeredCrossSection :: createMaterialStatus(GaussPoint &iGP)
+{
+    for ( int i = 1; i <= numberOfLayers; i++ ) {
+        GaussPoint *layerGp = giveSlaveGaussPoint(&iGP, i - 1);
+        StructuralMaterial *mat = static_cast< StructuralMaterial* >( domain->giveMaterial( this->giveLayerMaterial(layerGp->giveNumber()) ) );
+    	MaterialStatus *matStat = mat->CreateStatus(layerGp);
+    	layerGp->setMaterialStatus(matStat);
+    }
+}
 
 
 void

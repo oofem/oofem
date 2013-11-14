@@ -219,7 +219,7 @@ public:
     virtual Element *giveElementContainingPoint(const FloatArray &coords, const IntArray *regionList = NULL);
     virtual Element *giveElementCloseToPoint(const FloatArray &coords, const IntArray *regionList = NULL);
     virtual Element *giveElementClosestToPoint(FloatArray &lcoords, FloatArray &closest, const FloatArray &gcoords, int region);
-    virtual GaussPoint *giveClosestIP(const FloatArray &coords, int region);
+    virtual GaussPoint *giveClosestIP(const FloatArray &coords, int region, bool iCohesiveZoneGP = false);
     virtual void giveAllElementsWithIpWithinBox(elementContainerType &elemSet, const FloatArray &coords, const double radius);
     virtual void giveAllNodesWithinBox(nodeContainerType &nodeList, const FloatArray &coords, const double radius);
 

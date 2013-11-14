@@ -173,7 +173,7 @@ void LSpace :: computeGaussPoints()
 
 
 void
-LSpace :: computeNmatrixAt(GaussPoint *aGaussPoint, FloatMatrix &answer)
+LSpace :: computeNmatrixAt(const FloatArray &iLocCoord, FloatMatrix &answer)
 // Returns the displacement interpolation matrix {N} of the receiver, eva-
 // luated at aGaussPoint.
 {
@@ -181,7 +181,7 @@ LSpace :: computeNmatrixAt(GaussPoint *aGaussPoint, FloatMatrix &answer)
 
     answer.resize(3, 24);
     answer.zero();
-    this->interpolation.evalN( n, * aGaussPoint->giveCoordinates(), FEIElementGeometryWrapper(this) );
+    this->interpolation.evalN( n, iLocCoord, FEIElementGeometryWrapper(this) );
 
     for ( int i = 1; i <= 8; i++ ) {
         answer.at(1, 3 * i - 2) = n.at(i);

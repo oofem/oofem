@@ -60,6 +60,7 @@ protected:
     virtual void computeBMatrixAt(FloatMatrix &answer, GaussPoint *gp);
     virtual double computeVolumeAround(GaussPoint *gp);
     virtual void computeStressVector(FloatArray &answer, const FloatArray &strain, GaussPoint *gp, TimeStep *tStep);
+    virtual void computeConstitutiveMatrixAt(FloatMatrix &answer, MatResponseMode rMode, GaussPoint *gp, TimeStep *tStep);
     void giveDofManDofIDMask(int inode, EquationID u, IntArray &answer) const {
         answer.setValues(3, D_u, D_v, D_w);
     }

@@ -121,18 +121,6 @@ Q27Space :: computeGaussPoints()
 
 
 void
-Q27Space :: computeNmatrixAt(GaussPoint *aGaussPoint, FloatMatrix &answer)
-// Returns the displacement interpolation matrix {N} of the receiver, eva-
-// luated at aGaussPoint.
-{
-    FloatArray n;
-    this->interpolation.evalN(n, * aGaussPoint->giveCoordinates(), FEIElementGeometryWrapper(this));
-    answer.beNMatrixOf(n, 3);
-}
-
-
-
-void
 Q27Space :: computeBmatrixAt(GaussPoint *aGaussPoint, FloatMatrix &answer, int li, int ui)
 // Returns the [6x60] strain-displacement matrix {B} of the receiver, eva-
 // luated at aGaussPoint.

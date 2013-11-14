@@ -145,7 +145,7 @@ public:
      * @param tStep Time step.
      * @param mass Total mass of receiver.
      */
-    virtual void computeConsistentMassMatrix(FloatMatrix &answer, TimeStep *tStep, double &mass);
+    virtual void computeConsistentMassMatrix(FloatMatrix &answer, TimeStep *tStep, double &mass, const double *ipDensity = NULL);
     /**
      * Returns mask indicating, which unknowns (their type and ordering is the same as
      * element unknown vector) participate in mass matrix integration.
@@ -346,6 +346,9 @@ public:
                                              TimeStep *tStep);
     /// Helper function which returns the structural cross-section for the element.
     StructuralCrossSection *giveStructuralCrossSection();
+
+    virtual void createMaterialStatus();
+
 protected:
 
 
@@ -574,14 +577,17 @@ protected:
      */
     virtual void computeBmatrixAt(GaussPoint *gp, FloatMatrix &answer,
                                   int lowerIndx = 1, int upperIndx = ALL_STRAINS) = 0;
+
+public:
     /**
      * Computes interpolation matrix for element unknowns.
      * The order and meaning of unknowns is element dependent.
-     * @param gp Integration point for which answer is assembled.
+     * @param iLocCoord Local coordinates.
      * @param answer Interpolation matrix evaluated at gp.
      */
-    virtual void computeNmatrixAt(GaussPoint *gp, FloatMatrix &answer) = 0;
+    virtual void computeNmatrixAt(const FloatArray &iLocCoord, FloatMatrix &answer);
 
+protected:
     /**
      * Returns maximum approximation order used by receiver.
      * Must be implemented by derived classes

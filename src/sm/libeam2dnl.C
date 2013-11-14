@@ -315,14 +315,14 @@ LIBeam2dNL :: computeLumpedMassMatrix(FloatMatrix &answer, TimeStep *tStep)
 
 
 void
-LIBeam2dNL :: computeNmatrixAt(GaussPoint *aGaussPoint, FloatMatrix &answer)
+LIBeam2dNL :: computeNmatrixAt(const FloatArray &iLocCoord, FloatMatrix &answer)
 // Returns the displacement interpolation matrix {N} of the receiver, eva-
 // luated at aGaussPoint.
 {
     double ksi, n1, n2, n3;
     double l = this->giveLength();
 
-    ksi = aGaussPoint->giveCoordinate(1);
+    ksi = iLocCoord.at(1);
     n1  = ( 1. - ksi ) * 0.5;
     n2  = ( 1. + ksi ) * 0.5;
     n3  = ( 1. - ksi * ksi );
@@ -486,7 +486,7 @@ LIBeam2dNL :: computeEgdeNMatrixAt(FloatMatrix &answer, int iedge, GaussPoint *a
      * without regarding particular side
      */
 
-    this->computeNmatrixAt(aGaussPoint, answer);
+    this->computeNmatrixAt(*(aGaussPoint->giveLocalCoordinates()), answer);
 }
 
 

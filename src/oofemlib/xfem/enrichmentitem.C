@@ -313,7 +313,7 @@ int EnrichmentItem :: giveNumDofManEnrichments(const DofManager &iDMan) const
     return 0;
 }
 
-bool EnrichmentItem :: isMaterialModified(GaussPoint &iGP, Element &iEl, StructuralMaterial * &opSM) const
+bool EnrichmentItem :: isMaterialModified(GaussPoint &iGP, Element &iEl, CrossSection * &opCS) const
 {
     return false;
 }
@@ -932,19 +932,19 @@ void EnrichmentItem :: calcPolarCoord(double &oR, double &oTheta, const FloatArr
 
 Inclusion :: Inclusion(int n, XfemManager *xm, Domain *aDomain) :
     EnrichmentItem(n, xm, aDomain),
-    mat(NULL)
+    mpCrossSection(NULL)
 {
     mpEnrichesDofsWithIdArray->setValues(3, D_u, D_v, D_w);
 }
 
 Inclusion :: ~Inclusion()
 {
-    if ( mat != NULL ) {
-        mat = NULL;
+    if ( mpCrossSection != NULL ) {
+    	mpCrossSection = NULL;
     }
 }
 
-bool Inclusion :: isMaterialModified(GaussPoint &iGP, Element &iEl, StructuralMaterial * &opSM) const
+bool Inclusion :: isMaterialModified(GaussPoint &iGP, Element &iEl, CrossSection * &opCS) const
 {
     // Check if the point is located inside the inclusion
 
@@ -958,7 +958,7 @@ bool Inclusion :: isMaterialModified(GaussPoint &iGP, Element &iEl, StructuralMa
     this->interpLevelSet(levelSetGP, N, elNodes);
 
     if ( levelSetGP < 0.0 ) {
-        opSM = static_cast< StructuralMaterial * >(mat);
+        opCS = mpCrossSection;
         return true;
     }
 
@@ -970,9 +970,9 @@ IRResultType Inclusion :: initializeFrom(InputRecord *ir)
     EnrichmentItem :: initializeFrom(ir);
     const char *__proc = "initializeFrom";
     IRResultType result;
-    int material = 0;
-    IR_GIVE_FIELD(ir, material, _IFT_Inclusion_material);
-    this->mat = this->giveDomain()->giveMaterial(material);
+    int crossSectionIndex = 0;
+    IR_GIVE_FIELD(ir, crossSectionIndex, _IFT_Inclusion_CrossSection);
+    mpCrossSection = this->giveDomain()->giveCrossSection(crossSectionIndex);
 
     return IRRT_OK;
 }

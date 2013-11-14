@@ -207,7 +207,7 @@ CCTPlate :: computeBmatrixAt(GaussPoint *gp, FloatMatrix &answer, int li, int ui
 
 
 void
-CCTPlate :: computeNmatrixAt(GaussPoint *gp, FloatMatrix &answer)
+CCTPlate :: computeNmatrixAt(const FloatArray &iLocCoord, FloatMatrix &answer)
 // Returns the [3x9] displacement interpolation matrix {N} of the receiver,
 // evaluated at gp.
 {
@@ -226,8 +226,8 @@ CCTPlate :: computeNmatrixAt(GaussPoint *gp, FloatMatrix &answer)
     c2 = x1 - x3;
     c3 = x2 - x1;
 
-    l1 = gp->giveCoordinate(1);
-    l2 = gp->giveCoordinate(2);
+    l1 = iLocCoord.at(1);
+    l2 = iLocCoord.at(2);
     l3 = 1.0 - l1 - l2;
 
     //
@@ -251,6 +251,20 @@ CCTPlate :: computeNmatrixAt(GaussPoint *gp, FloatMatrix &answer)
     answer.at(3, 3) = l1;
     answer.at(3, 6) = l2;
     answer.at(3, 9) = l3;
+}
+
+
+void
+CCTPlate :: computeStressVector(FloatArray &answer, const FloatArray &strain, GaussPoint *gp, TimeStep *stepN)
+{
+    this->giveStructuralCrossSection()->giveRealStress_Plate(answer, gp, strain, stepN);
+}
+
+
+void
+CCTPlate :: computeConstitutiveMatrixAt(FloatMatrix &answer, MatResponseMode rMode, GaussPoint *gp, TimeStep *tStep)
+{
+    this->giveStructuralCrossSection()->give2dPlateStiffMtrx(answer, rMode, gp, tStep);
 }
 
 
