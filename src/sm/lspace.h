@@ -43,6 +43,7 @@
 #include "spatiallocalizer.h"
 #include "eleminterpmapperinterface.h"
 #include "huertaerrorestimator.h"
+#include "gausspoint.h"
 
 #define _IFT_LSpace_Name "lspace"
 
@@ -113,7 +114,7 @@ public:
     virtual void HuertaErrorEstimatorI_computeLocalCoords(FloatArray &answer, const FloatArray &coords)
     { computeLocalCoordinates(answer, coords); }
     virtual void HuertaErrorEstimatorI_computeNmatrixAt(GaussPoint *aGaussPoint, FloatMatrix &answer)
-    { computeNmatrixAt(aGaussPoint, answer); }
+    { computeNmatrixAt(*(aGaussPoint->giveLocalCoordinates()), answer); }
 
     // HuertaRemeshingCriteriaInterface
     virtual double HuertaRemeshingCriteriaI_giveCharacteristicSize();
@@ -138,7 +139,7 @@ public:
 protected:
     virtual void computeBmatrixAt(GaussPoint *gp, FloatMatrix &answer, int = 1, int = ALL_STRAINS);
     virtual void computeBHmatrixAt(GaussPoint *gp, FloatMatrix &answer);
-    virtual void computeNmatrixAt(GaussPoint *gp, FloatMatrix &answer);
+    virtual void computeNmatrixAt(const FloatArray &iLocCoord, FloatMatrix &answer);
     virtual void computeGaussPoints();
     virtual int giveApproxOrder() { return 1; }
     virtual int giveNumberOfIPForMassMtrxIntegration() { return 8; }

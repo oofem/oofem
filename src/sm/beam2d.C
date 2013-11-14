@@ -129,7 +129,7 @@ Beam2d :: computeGaussPoints()
 
 
 void
-Beam2d :: computeNmatrixAt(GaussPoint *gp, FloatMatrix &answer)
+Beam2d :: computeNmatrixAt(const FloatArray &iLocCoord, FloatMatrix &answer)
 // Returns the displacement interpolation matrix {N} of the receiver, eva-
 // luated at gp. Used for numerical calculation of consistent mass
 // matrix. Must contain only interpolation for displacement terms,
@@ -140,7 +140,7 @@ Beam2d :: computeNmatrixAt(GaussPoint *gp, FloatMatrix &answer)
     double l, ksi, ksi2, ksi3, kappa, c1;
 
     l     = this->giveLength();
-    ksi =   0.5 + 0.5 * gp->giveCoordinate(1);
+    ksi =   0.5 + 0.5 * iLocCoord.at(1);
     kappa = this->giveKappaCoeff();
     c1 = 1. + 2. * kappa;
     ksi2 = ksi * ksi;
@@ -659,7 +659,7 @@ Beam2d :: computePrescribedStrainLocalLoadVectorAt(FloatArray &answer, TimeStep 
 
 
 void
-Beam2d :: computeConsistentMassMatrix(FloatMatrix &answer, TimeStep *tStep, double &mass)
+Beam2d :: computeConsistentMassMatrix(FloatMatrix &answer, TimeStep *tStep, double &mass, const double *ipDensity)
 {
     // computes mass matrix of the receiver
 
@@ -673,7 +673,13 @@ Beam2d :: computeConsistentMassMatrix(FloatMatrix &answer, TimeStep *tStep, doub
     double l = this->giveLength();
     double kappa = this->giveKappaCoeff();
     double kappa2 = kappa * kappa;
-    double density = this->giveStructuralCrossSection()->give('d', gp);
+
+    double density = this->giveMaterial()->give('d', gp);
+    if(ipDensity != NULL) {
+    	// Override density if desired
+    	density = *ipDensity;
+    }
+
     double area = this->giveCrossSection()->give(CS_Area);
     double c2 = ( area * density ) / ( ( 1. + 2. * kappa ) * ( 1. + 2. * kappa ) );
     double c1 = ( area * density );

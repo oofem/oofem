@@ -158,25 +158,6 @@ PlaneStress2d :: computeGaussPoints()
 }
 
 void
-PlaneStress2d :: computeNmatrixAt(GaussPoint *aGaussPoint, FloatMatrix &answer)
-// Returns the displacement interpolation matrix {N} of the receiver,
-// evaluated at aGaussPoint.
-{
-    FloatArray n(4);
-
-    answer.resize(2, 8);
-    answer.zero();
-    this->interpolation.evalN( n, * aGaussPoint->giveCoordinates(), FEIElementGeometryWrapper(this) );
-
-    for ( int i = 1; i <= 4; i++ ) {
-        answer.at(1, 2 * i - 1) = n.at(i);
-        answer.at(2, 2 * i - 0) = n.at(i);
-    }
-}
-
-
-
-void
 PlaneStress2d :: computeEgdeNMatrixAt(FloatMatrix &answer, int iedge, GaussPoint *aGaussPoint)
 {
     /*

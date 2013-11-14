@@ -686,6 +686,15 @@ void LayeredCrossSection :: giveInputRecord(DynamicInputRecord &input)
 
 }
 
+void LayeredCrossSection :: createMaterialStatus(GaussPoint &iGP)
+{
+    for ( int i = 1; i <= numberOfLayers; i++ ) {
+        GaussPoint *layerGp = giveSlaveGaussPoint(&iGP, i - 1);
+        StructuralMaterial *mat = static_cast< StructuralMaterial* >( domain->giveMaterial( this->giveLayerMaterial(layerGp->giveNumber()) ) );
+    	MaterialStatus *matStat = mat->CreateStatus(layerGp);
+    	layerGp->setMaterialStatus(matStat);
+    }
+}
 
 
 void

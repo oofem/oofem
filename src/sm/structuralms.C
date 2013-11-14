@@ -183,4 +183,29 @@ StructuralMaterialStatus :: restoreContext(DataStream *stream, ContextMode mode,
 
     return CIO_OK;
 }
+
+void StructuralMaterialStatus :: copyStateVariables(const MaterialStatus &iStatus)
+{
+	MaterialStatus &tmpStat = const_cast<MaterialStatus&>(iStatus);
+	const StructuralMaterialStatus &structStatus = dynamic_cast<StructuralMaterialStatus&>(tmpStat);
+
+	strainVector = structStatus.giveStrainVector();
+	stressVector = structStatus.giveStressVector();
+	tempStressVector = structStatus.giveTempStressVector();
+	tempStrainVector = structStatus.giveTempStrainVector();
+
+	PVector = structStatus.givePVector();
+	tempPVector = structStatus.giveTempPVector();
+	CVector = structStatus.giveCVector();
+	tempCVector = structStatus.giveTempCVector();
+	FVector = structStatus.giveFVector();
+	tempFVector = structStatus.giveTempFVector();
+
+}
+
+void StructuralMaterialStatus :: addStateVariables(const MaterialStatus &iStatus)
+{
+	printf("Entering StructuralMaterialStatus :: addStateVariables().\n");
+}
+
 } // end namespace oofem

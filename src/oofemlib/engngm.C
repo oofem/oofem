@@ -1687,13 +1687,19 @@ EngngModel :: giveDomain(int i)
 }
 
 void
-EngngModel :: setDomain(int i, Domain *ptr)
+EngngModel :: setDomain(int i, Domain *ptr, bool iDeallocateOld)
 {
-    if ( ( i > 0 ) && ( i <= this->ndomains ) ) {
-        this->domainList->put(i, ptr);
-    } else {
-        _error3("setDomain: Domain index %d out of range [1,%d]", i, this->ndomains);
-    }
+	if(!iDeallocateOld) {
+		printf("Unlinking old domain.\n");
+		this->domainList->unlink(i);
+	}
+
+	if ( ( i > 0 ) && ( i <= this->ndomains ) ) {
+		this->domainList->put(i, ptr);
+	} else {
+		_error3("setDomain: Domain index %d out of range [1,%d]", i, this->ndomains);
+	}
+
 }
 
 

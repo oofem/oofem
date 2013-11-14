@@ -74,7 +74,7 @@ public:
     virtual ~LIBeam3dNL() { }
 
     virtual void computeLumpedMassMatrix(FloatMatrix &answer, TimeStep *tStep);
-    virtual void computeConsistentMassMatrix(FloatMatrix &answer, TimeStep *tStep, double &mass)
+    virtual void computeConsistentMassMatrix(FloatMatrix &answer, TimeStep *tStep, double &mass, const double *ipDensity = NULL)
     { computeLumpedMassMatrix(answer, tStep); }
     virtual void computeStrainVector(FloatArray &answer, GaussPoint *gp, TimeStep *tStep);
     //int computeGtoLRotationMatrix(FloatMatrix &answer);
@@ -124,7 +124,7 @@ protected:
     { _error("computeBmatrixAt: not implemented"); }
     //int computeGtoLRotationMatrix(FloatMatrix& answer);
 
-    virtual void computeNmatrixAt(GaussPoint *gp, FloatMatrix &answer);
+    virtual void computeNmatrixAt(const FloatArray &iLocCoord, FloatMatrix &answer);
     virtual void computeGaussPoints();
     double giveLength();
     //double givePitch();

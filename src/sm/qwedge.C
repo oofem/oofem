@@ -118,29 +118,6 @@ QWedge :: computeGaussPoints()
 }
 
 
-void
-QWedge :: computeNmatrixAt(GaussPoint *aGaussPoint, FloatMatrix &answer)
-// Returns the displacement interpolation matrix {N} of the receiver, eva-
-// luated at aGaussPoint.
-{
-    FloatArray n(15);
-
-    answer.resize(3, 45);
-    answer.zero();
-
-    this->interpolation.evalN(n, * aGaussPoint->giveCoordinates(), FEIElementGeometryWrapper(this));
-
-    for ( int i = 1; i <= 15; i++ ) {
-        answer.at(1, 3 * i - 2) = n.at(i);
-        answer.at(2, 3 * i - 1) = n.at(i);
-        answer.at(3, 3 * i - 0) = n.at(i);
-    }
-}
-
-#if 1
-
-#endif
-
 MaterialMode
 QWedge :: giveMaterialMode()
 {

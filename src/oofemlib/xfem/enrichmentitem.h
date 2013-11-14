@@ -50,7 +50,7 @@
 ///@name Input fields for XFEM
 //@{
 #define _IFT_Inclusion_Name "inclusion"
-#define _IFT_Inclusion_material "material"
+#define _IFT_Inclusion_CrossSection "crosssection"
 
 #define _IFT_EnrichmentItem_domains "enrichmentdomains"
 #define _IFT_EnrichmentItem_domain "enrichmentdomain"
@@ -133,7 +133,7 @@ public:
     int  giveNumDofManEnrichments(const DofManager &iDMan) const;
 
     // Returns true if the enrichment item assigns a different material to the Gauss point
-    virtual bool isMaterialModified(GaussPoint &iGP, Element &iEl, StructuralMaterial * &opSM) const;
+    virtual bool isMaterialModified(GaussPoint &iGP, Element &iEl, CrossSection * &opCS) const;
 
     // Should update receiver geometry to the state reached at given time step.
     virtual void updateGeometry(TimeStep *tStep) {};
@@ -258,19 +258,19 @@ inline bool EnrichmentItem :: isDofManEnriched(const DofManager &iDMan) const
 class OOFEM_EXPORT Inclusion : public EnrichmentItem
 {
 protected:
-    Material *mat;
+	CrossSection *mpCrossSection;
 public:
     Inclusion(int n, XfemManager *xm, Domain *aDomain);
     virtual ~Inclusion();
 
     // Returns true if the enrichment item assigns a different material to the Gauss point
-    virtual bool isMaterialModified(GaussPoint &iGP, Element &iEl, StructuralMaterial * &opSM) const;
+    virtual bool isMaterialModified(GaussPoint &iGP, Element &iEl, CrossSection * &opCS) const;
 
 
     virtual const char *giveClassName() const { return "Inclusion"; }
     virtual const char *giveInputRecordName() const { return _IFT_Inclusion_Name; }
     virtual IRResultType initializeFrom(InputRecord *ir);
-    virtual Material *giveMaterial() { return mat; }
+    CrossSection* giveCrossSection() {return mpCrossSection;}
 };
 
 

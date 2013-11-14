@@ -110,6 +110,8 @@ public:
     virtual IRResultType initializeFrom(InputRecord *ir);
     virtual void giveInputRecord(DynamicInputRecord &input);
 
+    virtual void createMaterialStatus(GaussPoint &iGP); // ES
+
     virtual int setupIntegrationPoints(IntegrationRule &irule, int npoints, Element *element);
 
     virtual void giveRealStress_3d(FloatArray &answer, GaussPoint *gp, const FloatArray &reducedStrain, TimeStep *tStep);

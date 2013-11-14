@@ -444,6 +444,13 @@ void SimpleCrossSection :: giveInputRecord(DynamicInputRecord &input)
     input.setField(this->materialNumber, _IFT_SimpleCrossSection_MaterialNumber);
 }
 
+void
+SimpleCrossSection :: createMaterialStatus(GaussPoint &iGP)
+{
+	Material *mat = domain->giveMaterial(materialNumber);
+	MaterialStatus *matStat = mat->CreateStatus(&iGP);
+	iGP.setMaterialStatus(matStat);
+}
 
 double
 SimpleCrossSection :: give(CrossSectionProperty aProperty)

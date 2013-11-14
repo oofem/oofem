@@ -172,7 +172,7 @@ public:
      * @return The IP belonging to associated domain (only those provided by elements in default integration rule
      * are taken into account), NULL otherwise
      */
-    virtual GaussPoint *giveClosestIP(const FloatArray &coords, int region) = 0;
+    virtual GaussPoint *giveClosestIP(const FloatArray &coords, int region, bool iCohesiveZoneGP = false) = 0;
 
     /**
      * Returns container (set) of all domain elements having integration point within given box.

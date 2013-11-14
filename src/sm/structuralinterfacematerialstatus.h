@@ -37,6 +37,8 @@
 
 #include "matstatus.h"
 #include "floatarray.h"
+#include "matstatmapperint.h"
+#include "floatmatrix.h"
 
 namespace oofem {
 class GaussPoint;
@@ -61,7 +63,7 @@ class Domain;
  * - printingYourself()
  * - updating Yourself after a new equilibrium state has been reached.
  */
-class StructuralInterfaceMaterialStatus : public MaterialStatus
+class StructuralInterfaceMaterialStatus : public MaterialStatus, public MaterialStatusMapperInterface
 {
 protected:
     /// Equilibrated jump (discontinuity)
@@ -97,21 +99,21 @@ public:
     virtual contextIOResultType restoreContext(DataStream *stream, ContextMode mode, void *obj = NULL);
 
     /// Returns the const pointer to receiver's jump.
-    const FloatArray &giveJump() { return jump; }
+    const FloatArray &giveJump() const { return jump; }
     /// Returns the const pointer to receiver's traction vector.
-    const FloatArray &giveTraction() { return traction; }
+    const FloatArray &giveTraction() const { return traction; }
     /// Returns the const pointer to receiver's first Piola-Kirchhoff traction vector.
-    const FloatArray &giveFirstPKTraction() { return firstPKTraction; }
+    const FloatArray &giveFirstPKTraction() const { return firstPKTraction; }
     /// Returns the const pointer to receiver's deformation gradient vector.
-    const FloatMatrix &giveF() { return F; }
+    const FloatMatrix &giveF() const { return F; }
     /// Returns the const pointer to receiver's temporary jump.
-    const FloatArray &giveTempJump() { return tempJump; }
+    const FloatArray &giveTempJump() const { return tempJump; }
     /// Returns the const pointer to receiver's temporary traction vector.
-    const FloatArray &giveTempTraction() { return tempTraction; }
+    const FloatArray &giveTempTraction() const { return tempTraction; }
     /// Returns the const pointer to receiver's temporary first Piola-Kirchhoff traction vector.
-    const FloatArray &giveTempFirstPKTraction() { return tempFirstPKTraction; }
+    const FloatArray &giveTempFirstPKTraction() const { return tempFirstPKTraction; }
     /// Returns the const pointer to receiver's temporary deformation gradient vector.
-    const FloatMatrix &giveTempF() { return tempF; }
+    const FloatMatrix &giveTempF() const { return tempF; }
     /// Assigns jump to given vector v.
     void letJumpBe(const FloatArray &v) { jump = v; }
     /// Assigns traction to given vector v.
@@ -131,6 +133,11 @@ public:
 
     virtual const char *giveClassName() const { return "StructuralInterfaceMaterialStatus"; }
     //virtual classType giveClassID() const { return StructuralInterfaceMaterialStatus; }
+
+    /// Functions for MaterialStatusMapperInterface
+	virtual void copyStateVariables(const MaterialStatus &iStatus);
+	virtual void addStateVariables(const MaterialStatus &iStatus);
+
 };
 } // end namespace oofem
 #endif // structuralinterfacematerialstatus_h

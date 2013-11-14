@@ -32,30 +32,45 @@
  *  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  */
 
-#include "materialmappingalgorithm.h"
-#include "gausspoint.h"
-#include "element.h"
+#ifndef PRIMVARMAPPER_H_
+#define PRIMVARMAPPER_H_
+
+#include "valuemodetype.h"
 
 namespace oofem {
-void
-MaterialMappingAlgorithm :: init(Domain *dold, IntArray &type, GaussPoint *gp, TimeStep *tStep, bool iCohesiveZoneGP)
-{
-    FloatArray coords;
-    if ( gp->giveElement()->computeGlobalCoordinates( coords, * ( gp->giveCoordinates() ) ) == 0 ) {
-        OOFEM_ERROR("MaterialMappingAlgorithm::init: computeGlobalCoordinates failed");
-    }
 
-    this->__init(dold, type, coords, gp->giveElement()->giveRegionNumber(), tStep, iCohesiveZoneGP);
-}
+class FloatArray;
+class Domain;
+class TimeStep;
 
-int
-MaterialMappingAlgorithm :: mapVariable(FloatArray &answer, GaussPoint *gp, InternalStateType type, TimeStep *tStep)
-{
-    FloatArray coords;
-    if ( gp->giveElement()->computeGlobalCoordinates( coords, * ( gp->giveCoordinates() ) ) == 0 ) {
-        OOFEM_ERROR("MaterialMappingAlgorithm::init : computeGlobalCoordinates failed");
-    }
+/**
+ * Base class for mapping of primary variables between domains.
+ * The reason for not using the existing PrimaryUnknownMapper is that I need to handle
+ * cases where the number of dofs per node may change (for example XFEM enrichments).
+ *
+ * Created on: Nov 7, 2013
+ * @author Erik Svenning
+ */
+class PrimaryVariableMapper {
+public:
+	PrimaryVariableMapper();
+	virtual ~PrimaryVariableMapper();
 
-    return this->__mapVariable(answer, coords, type, tStep);
-}
-} // end namespace oofem
+	virtual void mapPrimaryVariables(FloatArray &oU, Domain &iOldDom, Domain &iNewDom, ValueModeType iMode, TimeStep &iTStep) = 0;
+};
+
+/**
+ * LSPrimaryVariableMapper: Least-squares primary variable mapper.
+ * 
+ * @author Erik Svenning
+ */
+class LSPrimaryVariableMapper {
+public:
+	LSPrimaryVariableMapper();
+	virtual ~LSPrimaryVariableMapper();
+
+	virtual void mapPrimaryVariables(FloatArray &oU, Domain &iOldDom, Domain &iNewDom, ValueModeType iMode, TimeStep &iTStep);
+};
+
+} /* namespace oofem */
+#endif /* PRIMVARMAPPER_H_ */

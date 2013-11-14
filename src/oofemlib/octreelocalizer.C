@@ -44,6 +44,7 @@
 #include "mathfem.h"
 #include "timer.h"
 #include "error.h"
+#include "xfemelementinterface.h"
 
 #include <iostream>
 
@@ -810,11 +811,12 @@ OctreeSpatialLocalizer :: giveElementClosestToPoint(FloatArray &lcoords, FloatAr
     double radius, prevRadius;
     FloatArray c;
 
+    this->initElementDataStructure(region);
+
     this->rootCell->giveOrigin(c);
     // Maximum distance given coordinate and furthest terminal cell ( center_distance + width/2*sqrt(3) )
     double minDist = c.distance(gcoords) + this->rootCell->giveWidth() * 0.87;
 
-    this->initElementDataStructure(region);
 
     // found terminal octant containing point
     currCell = this->findTerminalContaining(rootCell, gcoords);
@@ -941,7 +943,7 @@ OctreeSpatialLocalizer :: giveElementCloseToPointWithinOctant(OctantRec *cell, c
 
 
 GaussPoint *
-OctreeSpatialLocalizer :: giveClosestIP(const FloatArray &coords, int region)
+OctreeSpatialLocalizer :: giveClosestIP(const FloatArray &coords, int region, bool iCohesiveZoneGP)
 {
     double dist, minDist;
     OctantRec *currCell;
@@ -980,21 +982,47 @@ OctreeSpatialLocalizer :: giveClosestIP(const FloatArray &coords, int region)
                 continue;
             }
 
-            // test if element already visited
-            // if (!visitedElems.insert(*pos).second) continue;
-            iRule = ielem->giveDefaultIntegrationRulePtr();
-            for ( int j = 0; j < iRule->giveNumberOfIntegrationPoints(); j++ ) {
-                jGp = iRule->getIntegrationPoint(j);
-                if ( ielem->computeGlobalCoordinates( jGpCoords, * ( jGp->giveCoordinates() ) ) ) {
-                    // compute distance
-                    dist = coords.distance(jGpCoords);
-                    if ( dist < minDist ) {
-                        minDist   = dist;
-                        nearestGp = jGp;
-                    }
-                } else {
-                    OOFEM_ERROR("OctreeSpatialLocalizer :: giveClosestIP: computeGlobalCoordinates failed");
-                }
+            if(!iCohesiveZoneGP) {
+				// test if element already visited
+				// if (!visitedElems.insert(*pos).second) continue;
+				iRule = ielem->giveDefaultIntegrationRulePtr();
+				for ( int j = 0; j < iRule->giveNumberOfIntegrationPoints(); j++ ) {
+					jGp = iRule->getIntegrationPoint(j);
+					if ( ielem->computeGlobalCoordinates( jGpCoords, * ( jGp->giveCoordinates() ) ) ) {
+						// compute distance
+						dist = coords.distance(jGpCoords);
+						if ( dist < minDist ) {
+							minDist   = dist;
+							nearestGp = jGp;
+						}
+					} else {
+						OOFEM_ERROR("OctreeSpatialLocalizer :: giveClosestIP: computeGlobalCoordinates failed");
+					}
+				}
+            }
+            else{
+				////////////////////////////////
+				// Check for cohesive zone Gauss points
+				XfemElementInterface *xFemEl = dynamic_cast<XfemElementInterface*> (ielem);
+				if(xFemEl != NULL) {
+					iRule = xFemEl->mpCZIntegrationRule;
+					if(iRule != NULL) {
+						for ( int j = 0; j < iRule->giveNumberOfIntegrationPoints(); j++ ) {
+							jGp = iRule->getIntegrationPoint(j);
+							if ( ielem->computeGlobalCoordinates( jGpCoords, * ( jGp->giveCoordinates() ) ) ) {
+								// compute distance
+								dist = coords.distance(jGpCoords);
+								if ( dist < minDist ) {
+									minDist   = dist;
+									nearestGp = jGp;
+								}
+							} else {
+								OOFEM_ERROR("OctreeSpatialLocalizer :: giveClosestIP: computeGlobalCoordinates failed");
+							}
+						}
+					}
+				}
+				////////////////////////////////
             }
         }
     }

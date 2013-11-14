@@ -239,17 +239,6 @@ Quad1MindlinShell3D :: computeBmatrixAt(GaussPoint *gp, FloatMatrix &answer, int
 
 
 void
-Quad1MindlinShell3D :: computeNmatrixAt(GaussPoint *gp, FloatMatrix &answer)
-// Returns the [3x9] displacement interpolation matrix {N} of the receiver,
-// evaluated at gp.
-{
-    FloatArray n;
-    this->interp.evalN(n, *gp->giveCoordinates(), FEIVoidCellGeometry());
-    answer.beNMatrixOf(n, 3);
-}
-
-
-void
 Quad1MindlinShell3D :: computeStressVector(FloatArray &answer, const FloatArray &strain, GaussPoint *gp, TimeStep *stepN)
 {
     this->giveStructuralCrossSection()->giveRealStress_Shell(answer, gp, strain, stepN);

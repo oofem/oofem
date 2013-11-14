@@ -170,6 +170,9 @@ public:
     virtual const char *giveClassName() const { return "FiberedCrossSection"; }
     virtual classType giveClassID() const { return FiberedCrossSectionClass; }
     virtual IRResultType initializeFrom(InputRecord *ir);
+
+    virtual void createMaterialStatus(GaussPoint &iGP); // ES
+
     virtual void printYourself();
     double computeIntegralThickWidth();
     MaterialMode giveCorrespondingSlaveMaterialMode(MaterialMode);

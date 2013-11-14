@@ -98,7 +98,7 @@ protected:
     virtual void computeBmatrixAt(GaussPoint *gp, FloatMatrix &answer,
                           int lowerIndx = 1, int upperIndx = ALL_STRAINS)
     {}
-    virtual void computeNmatrixAt(GaussPoint *gp, FloatMatrix &answer) {}
+    virtual void computeNmatrixAt(const FloatArray &iLocCoord, FloatMatrix &answer) {}
 };
 } // end namespace oofem
 #endif // lumpedmasselement_h

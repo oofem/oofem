@@ -85,24 +85,6 @@ L4Axisymm :: giveInterface(InterfaceType interface)
 
 
 void
-L4Axisymm :: computeNmatrixAt(GaussPoint *aGaussPoint, FloatMatrix &answer)
-// Returns the displacement interpolation matrix {N} of the receiver,
-// evaluated at aGaussPoint.
-{
-    FloatArray n(4);
-
-    answer.resize(2, 8);
-    answer.zero();
-    this->interpolation.evalN( n, * aGaussPoint->giveCoordinates(), FEIElementGeometryWrapper(this) );
-
-    for ( int i = 1; i <= 4; i++ ) {
-        answer.at(1, 2 * i - 1) = n.at(i);
-        answer.at(2, 2 * i - 0) = n.at(i);
-    }
-}
-
-
-void
 L4Axisymm :: computeBmatrixAt(GaussPoint *aGaussPoint, FloatMatrix &answer, int li, int ui)
 //
 // Returns the [6x8] strain-displacement matrix {B} of the receiver,

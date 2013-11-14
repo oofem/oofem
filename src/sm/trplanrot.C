@@ -190,7 +190,7 @@ TrPlaneStrRot :: computeBmatrixAt(GaussPoint *aGaussPoint, FloatMatrix &answer, 
 
 
 void
-TrPlaneStrRot :: computeNmatrixAt(GaussPoint *aGaussPoint, FloatMatrix &answer)
+TrPlaneStrRot :: computeNmatrixAt(const FloatArray &iLocCoord, FloatMatrix &answer)
 // Returns the displacement interpolation matrix {N} of the receiver
 // evaluated at aGaussPoint.
 {
@@ -216,8 +216,8 @@ TrPlaneStrRot :: computeNmatrixAt(GaussPoint *aGaussPoint, FloatMatrix &answer)
     //
     double l1, l2, l3, f11, f12, f13, f21, f22, f23;
 
-    l1 = aGaussPoint->giveCoordinate(1);
-    l2 = aGaussPoint->giveCoordinate(2);
+    l1 = iLocCoord.at(1);
+    l2 = iLocCoord.at(2);
     l3 = 1. - l1 - l2;
 
     f11 = d.at(2) / 2. *l1 *l3 *sin( angles->at(2) ) - d.at(3) / 2. *l2 *l1 *sin( angles->at(3) );

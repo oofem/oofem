@@ -126,12 +126,12 @@ Quad1PlaneStrain :: computeGaussPoints()
 
 
 void
-Quad1PlaneStrain :: computeNmatrixAt(GaussPoint *gp, FloatMatrix &answer)
+Quad1PlaneStrain :: computeNmatrixAt(const FloatArray &iLocCoord, FloatMatrix &answer)
 // Returns the displacement interpolation matrix {N} of the receiver,
 // evaluated at gp.
 {
     FloatArray n;
-    this->interp.evalN( n, * gp->giveCoordinates(), FEIElementGeometryWrapper(this) );
+    this->interp.evalN( n, iLocCoord, FEIElementGeometryWrapper(this) );
 
     answer.resize(2, 8);
     answer.zero();
