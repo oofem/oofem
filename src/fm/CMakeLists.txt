@@ -30,6 +30,7 @@ set (fm_element
     )
 
 set (fm_material
+    fluidcrosssection.C
     newtonianfluid.C
     fe2fluidmaterial.C
     nonlinearfluidmaterial.C

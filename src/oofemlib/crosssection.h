@@ -121,7 +121,7 @@ public:
     /// Destructor.
     virtual ~CrossSection() { delete propertyDictionary; }
 
-    int const giveSetNumber() { return this->setNumber; };
+    int giveSetNumber() const { return this->setNumber; };
 
     /**
      * Returns the value of cross section property.

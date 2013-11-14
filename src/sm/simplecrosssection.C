@@ -395,7 +395,6 @@ SimpleCrossSection :: initializeFrom(InputRecord *ir)
     IR_GIVE_OPTIONAL_FIELD(ir, value, _IFT_SimpleCrossSection_drillStiffness);
     propertyDictionary->add(CS_DrillingStiffness, value);
 
-    // Read a cohesive zone material
     IR_GIVE_OPTIONAL_FIELD(ir, this->materialNumber, _IFT_SimpleCrossSection_MaterialNumber);
 
     return IRRT_OK;
@@ -441,6 +440,8 @@ void SimpleCrossSection :: giveInputRecord(DynamicInputRecord &input)
     if( this->propertyDictionary->includes(CS_BeamShearCoeff) ) {
         input.setField(this->give(CS_BeamShearCoeff), _IFT_SimpleCrossSection_shearcoeff);
     }
+
+    input.setField(this->materialNumber, _IFT_SimpleCrossSection_MaterialNumber);
 }
 
 

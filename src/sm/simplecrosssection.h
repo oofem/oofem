@@ -145,7 +145,7 @@ public:
     virtual double give(int aProperty, GaussPoint *gp);
     virtual Material *giveMaterial(IntegrationPoint *ip);
     
-    int const giveMaterialNumber() { return this->materialNumber; };
+    int giveMaterialNumber() const { return this->materialNumber; };
     void setMaterialNumber(int matNum) { this->materialNumber = matNum; };
     virtual int checkConsistency();
     virtual Interface *giveMaterialInterface(InterfaceType t, IntegrationPoint *ip);
