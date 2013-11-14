@@ -664,11 +664,11 @@ contextIOResultType DofManager :: saveContext(DataStream *stream, ContextMode mo
             THROW_CIOERR(iores);
         }
 
-        if ( !stream->write(& isBoundaryFlag, 1) ) {
+        if ( !stream->write(isBoundaryFlag) ) {
             THROW_CIOERR(CIO_IOERR);
         }
 
-        if ( !stream->write(& hasSlaveDofs, 1) ) {
+        if ( !stream->write(hasSlaveDofs) ) {
             THROW_CIOERR(CIO_IOERR);
         }
 
@@ -761,11 +761,11 @@ contextIOResultType DofManager :: restoreContext(DataStream *stream, ContextMode
             THROW_CIOERR(iores);
         }
 
-        if ( !stream->read(& isBoundaryFlag, 1) ) {
+        if ( !stream->read(isBoundaryFlag) ) {
             THROW_CIOERR(CIO_IOERR);
         }
 
-        if ( !stream->read(& hasSlaveDofs, 1) ) {
+        if ( !stream->read(hasSlaveDofs) ) {
             THROW_CIOERR(CIO_IOERR);
         }
 

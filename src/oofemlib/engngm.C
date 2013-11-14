@@ -1390,7 +1390,7 @@ contextIOResultType EngngModel :: saveContext(DataStream *stream, ContextMode mo
     }
 
     // store renumber flag
-    if ( !stream->write(& renumberFlag, 1) ) {
+    if ( !stream->write(renumberFlag) ) {
         THROW_CIOERR(CIO_IOERR);
     }
 
@@ -1503,7 +1503,7 @@ contextIOResultType EngngModel :: restoreContext(DataStream *stream, ContextMode
     }
 
     // restore renumber flag
-    if ( !stream->read(& renumberFlag, 1) ) {
+    if ( !stream->read(renumberFlag) ) {
         THROW_CIOERR(CIO_IOERR);
     }
 

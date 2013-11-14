@@ -74,8 +74,8 @@ public:
     virtual int read(double *data, unsigned int count) = 0;
     /// Reads count char values into array pointed by data.
     virtual int read(char *data, unsigned int count) = 0;
-    /// Reads count bool values into array pointed by data.
-    virtual int read(bool *data, unsigned int count) = 0;
+    /// Reads a bool value from data.
+    virtual int read(bool &data) = 0;
     /// Reads a string (stored as an int for the length followed by char*).
     int read(std::string &data);
     //@}
@@ -96,8 +96,8 @@ public:
     virtual int write(const double *data, unsigned int count) = 0;
     /// Writes count char values from array pointed by data.
     virtual int write(const char *data, unsigned int count) = 0;
-    /// Writes count bool values from array pointed by data.
-    virtual int write(const bool *data, unsigned int count) = 0;
+    /// Writes a bool value.
+    virtual int write(bool data) = 0;
     /// Reads a string (stored as an int for the length followed by char*).
     int write(const std::string &data);
     //@}
@@ -126,14 +126,14 @@ public:
     virtual int read ( long *data, unsigned int count );
     virtual int read ( double *data, unsigned int count );
     virtual int read ( char *data, unsigned int count );
-    virtual int read ( bool *data, unsigned int count );
+    virtual int read ( bool &data );
 
     virtual int write ( const int *data, unsigned int count );
     virtual int write ( const unsigned long *data, unsigned int count );
     virtual int write ( const long *data, unsigned int count );
     virtual int write ( const double *data, unsigned int count );
     virtual int write ( const char *data, unsigned int count );
-    virtual int write ( const bool *data, unsigned int count );
+    virtual int write ( bool data );
 };
 
 #ifdef __PARALLEL_MODE
@@ -160,14 +160,14 @@ public:
     virtual int read(long *data, unsigned int count);
     virtual int read(double *data, unsigned int count);
     virtual int read(char *data, unsigned int count);
-    virtual int read(bool *data, unsigned int count);
+    virtual int read(bool &data);
 
     virtual int write(const int *data, unsigned int count);
     virtual int write(const unsigned long *data, unsigned int count);
     virtual int write(const long *data, unsigned int count);
     virtual int write(const double *data, unsigned int count);
     virtual int write(const char *data, unsigned int count);
-    virtual int write(const bool *data, unsigned int count);
+    virtual int write(bool data);
 };
 
 
@@ -193,14 +193,14 @@ public:
     virtual int read(long *data, unsigned int count);
     virtual int read(double *data, unsigned int count);
     virtual int read(char *data, unsigned int count);
-    virtual int read(bool *data, unsigned int count);
+    virtual int read(bool &data);
 
     virtual int write(const int *data, unsigned int count);
     virtual int write(const unsigned long *data, unsigned int count);
     virtual int write(const long *data, unsigned int count);
     virtual int write(const double *data, unsigned int count);
     virtual int write(const char *data, unsigned int count);
-    virtual int write(const bool *data, unsigned int count);
+    virtual int write(bool data);
 };
 
 #endif
