@@ -9,12 +9,109 @@ import getopt, sys, os.path
 
 # New naming convention: "problemtype_approximation"
 keyword_renaming = {
-"tr21stokes" : "stokes_tr21",
-"tr1darcy" : "darcy_tr1",
-"l4axisymm" : "structaxisym_quad1",
-"quad_10_2d_supg" : "supg_quad10",
+# Fluid elements:
+"tr1bubblestokes"   : "stokes_tr1bubble",
+"tet1bubblestokes"  : "stokes_tet1bubble",
+"hexa1bubblestokes" : "stokes_hexa1bubble",
+"tr21stokes"        : "stokes_tr21",
+"tet21stokes"       : "stokes_tet21",
+"hexa21stokes"      : "stokes_hexa21",
+"line2boundary"     : "fluidboundary_line2",
+"tr1supg"           : "supg_tr1",
+"tr21supg"          : "supg_tr21",
+"tr1supgaxi"        : "supgaxi_tr1",
+"tet1supg"          : "supg_tet1",
+"quad1supg"         : "supg_quad1",
+"tr1supg2"          : "supg2_tr1",
+"tr1supg2axi"       : "supg2axi_tr1",
+"tr1cbs"            : "cbs_tr1",
+# Solid structural elements:
+"spring" : "spring",
+"beam2d" : "beam2d",
+"beam3d" : "beam3d",
+"libeam2d" : "libeam2d",
+"libeam2dnl" : "libeam2dnl",
+"libeam3d" : "libeam3d",
+"libeam3d2" : "libeam3d2",
+"libeam3dnl" : "libeam3dnl",
+"libeam3dnl2" : "libeam3dnl2",
+"cctplate" : "plate_tr1",
+"cctplate3d" : "plate3d_tr1",
+"quad1mindlin" : "platemindlin_quad1",
+"quad1mindlinshell3d" : "shellmindlin_quad1",
+"rershell" : "shellrer_", # ??? what does rer stand for?
+"tr2shell7" : "shell7_tr2",
+"tr2shell7xfem" : "shell7_tr2xfem",
+"tr_shell01" : "shell????_tr1", # ???
+"trplanestressrotallman" : "solidrotplanestressallman_tr1", # ???
+"trplanestrrot" : "solidrotplanestress_tr1", # ???
+"trplanestrrot3d" : "solidrotlanestress_tr1", # ???
+# "Normal" SM elements
+"axisymm3d" : "solidaxi_tr1",
+"bsplineplanestresselement" : "solidplanestress_bspline",
+"nurbsplanestresselement"   : "solidplanestress_nurbs",
+"tsplineplanestresselement" : "solidplanestress_tspline",
+"planestress2d"             : "solidplanestress_quad1",
+"qplanestress2d"            : "solidplanestress_quad2",
+"q9planestress2d"           : "solidplanestress_quad9",
+"planestress2dxfem"         : "solidplanestress_quad1xfem",
+"trplanestress2d"           : "solidplanestress_tr1",
+"qtrplstr"                  : "solidplanestress_tr2",
+"trplanestress2dxfem"       : "solidplanestress_tr1xfem",
+"trplanestrain"             : "solidplanestrain_tr1",
+"qtrplanestrain"            : "solidplanestrain_tr2",
+"quad1planestrain"          : "solidplanestrain_quad1",
+"qplanestrain"              : "solidplanestrain_quad2",
+"q4axisymm"                 : "solidaxi_quad2",
+"lspace"                    : "solid_hexa1",
+"qspace"                    : "solid_hexa2",
+"q27space"                  : "solid_hexa27",
+"ltrspace"                  : "solid_tet1",
+"qtrspace"  : "solid_tet2",
+"lwedge"    : "solid_wedge1",
+"qwedge"    : "solid_wedge2",
+"lspacebb"  : "solidbbar_hexa1",
+"truss1d"   : "truss1d",
+"truss2d"   : "truss2d",
+"truss3d"   : "truss3d", # alt. "solid_line1" ?
+"qtruss1d"  : "truss1d_2",
+# SM interfaces
+"intelline1" : "solidinterface_line1",
+"intelline2" : "solidinterface_line2",
+"interface2dquad" : "", #?
+"interface3dlin" : "", #?
+"interface1d" : "", #?
+# Other
+"lattice2d" : "solidlattice2d",
+"macrolspace" : "solidmacro_hexa1",
+# Grad (most of them are named quite strangely) inconsistent with quadratic and linear interpolators..
+"qplanestraingrad"  : "gradplanestrain_quad1",
+"qplanestressgrad"  : "gradplanestress_quad1",
+"qtrplstrgrad"      : "gradplanestress_tr2",
+"qspacegrad"        : "grad_hexa1",
+"qtrspacegrad"      : "grad_tet1",
+"qtruss1dgrad"      : "grad_line2",
+"qwedgegrad"        : "grad_wedge1",
+# Transport elements
+"tr1darcy"          : "darcy_tr1",
+"tr1ht"             : "heat_tr1",
+"quad1ht"           : "heat_quad1",
+"quadaxisym1ht"     : "heataxi_quad1",
+"traxisym1ht"       : "heataxi_tr1",
+"tetrah1ht"         : "heat_tet1",
+"brick1ht"          : "heat_hexa1",
+"qbrick1ht"         : "heat_hexa2",
+"tr1hmt"            : "heatmass_tr1",
+"quad1hmt"          : "heatmass_quad1",
+"quadaxisym1hmt"    : "heatmassaxi_quad1",
+"tetrah1hmt"        : "heatmass_tetra1",
+"brick1hmt"         : "heatmass_hexa1",
+"qbrick1hmt"        : "heatmass_hexa2",
+"quad1mt"           : "mass_quad1",
+"quadaxisym1mt"     : "massaxi_quad1",
+"brick1mt"          : "mass_hexa1",
+"latticemt2d"       : "mass_lattice2d",
 }
-# ADD MORE!
 
 
 # Converts from the domain type to the "nsd" parameter

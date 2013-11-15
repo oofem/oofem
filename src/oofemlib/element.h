@@ -739,7 +739,7 @@ public:
     /**@name Methods required by some specialized models */
     //@{
     /**
-     * Returns the integration point corresponding value in reduced form.
+     * Returns the integration point corresponding value in full form.
      * @param answer Contain corresponding integration point value, zero sized if not available.
      * @param gp Integration point to check.
      * @param type Determines the type of internal variable.
