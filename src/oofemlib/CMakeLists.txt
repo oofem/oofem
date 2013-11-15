@@ -191,7 +191,6 @@ set (core_xfem
     xfem/delaunay.C
     xfem/xfemelementinterface.C
     xfem/enrichmentfunction.C
-    xfem/patch.C
     xfem/xfemmanager.C
     xfem/enrichmentitem.C
     xfem/patchintegrationrule.C

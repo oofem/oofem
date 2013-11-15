@@ -249,6 +249,9 @@ void LSPrimaryVariableMapper::mapPrimaryVariables(FloatArray &oU, Domain &iOldDo
 		oU.add(du);
 	}
 
+	delete solver;
+	delete K;
+
 }
 
 } /* namespace oofem */

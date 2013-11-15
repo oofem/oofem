@@ -309,7 +309,7 @@ Domain* Domain :: Clone()
         for(int i = 1; i <= nEI; i++) {
 
             EnrichmentItem *ei = xfemManager->giveEnrichmentItem(i);
-            ei->giveInputRecord(dataReader);
+            ei->appendInputRecords(dataReader);
         }
     }
 

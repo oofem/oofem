@@ -48,7 +48,6 @@
 
 
 namespace oofem {
-
 class EnrichmentDomain;
 class DynamicInputRecord;
 
@@ -72,7 +71,7 @@ public:
     virtual void propagateInterfaces(EnrichmentDomain &iEnrDom) = 0;
 };
 
-class OOFEM_EXPORT PLDoNothing: public PropagationLaw
+class OOFEM_EXPORT PLDoNothing : public PropagationLaw
 {
 public:
     PLDoNothing() {};
@@ -81,16 +80,16 @@ public:
     virtual const char *giveClassName() const { return "PLDoNothing"; }
     virtual const char *giveInputRecordName() const { return _IFT_PLDoNothing_Name; }
 
-    virtual IRResultType initializeFrom(InputRecord *ir) {return IRRT_OK;}
+    virtual IRResultType initializeFrom(InputRecord *ir) { return IRRT_OK; }
     virtual void giveInputRecord(DynamicInputRecord &input);
 
     virtual void propagateInterfaces(EnrichmentDomain &ioEnrDom) {};
 };
 
-class OOFEM_EXPORT PLCrackPrescribedDir: public PropagationLaw
+class OOFEM_EXPORT PLCrackPrescribedDir : public PropagationLaw
 {
 public:
-    PLCrackPrescribedDir():mAngle(0.0), mIncrementLength(0.0) {};
+    PLCrackPrescribedDir() : mAngle(0.0), mIncrementLength(0.0) {};
     virtual ~PLCrackPrescribedDir() {};
 
     virtual const char *giveClassName() const { return "PLCrackPrescribedDir"; }
@@ -104,7 +103,6 @@ public:
 protected:
     double mAngle, mIncrementLength;
 };
-
 } // end namespace oofem
 
 #endif /* PROPAGATIONLAW_H_ */

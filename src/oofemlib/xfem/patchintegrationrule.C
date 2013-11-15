@@ -47,8 +47,8 @@
 #include "XFEMDebugTools.h"
 
 #if PATCH_INT_DEBUG > 0
-#include "timestep.h"
-#include "engngm.h"
+ #include "timestep.h"
+ #include "engngm.h"
 #endif
 
 namespace oofem {
@@ -84,17 +84,17 @@ PatchIntegrationRule :: SetUpPointsOnTriangle(int nPoints, MaterialMode mode)
     // and keep only those triangles.
 
     double totArea = 0.0;
-    for(size_t i = 0; i < mTriangles.size(); i++) {
-    	totArea += mTriangles[i].getArea();
+    for ( size_t i = 0; i < mTriangles.size(); i++ ) {
+        totArea += mTriangles [ i ].getArea();
     }
 
-    std::vector<int> triToKeep;
-    const double triTol = ( 1.0e-6 )*totArea;
+    std :: vector< int >triToKeep;
+    const double triTol = ( 1.0e-6 ) * totArea;
 
-    for(size_t i = 0; i < mTriangles.size(); i++) {
-    	if( mTriangles[i].getArea() > triTol ) {
-    		triToKeep.push_back(i);
-    	}
+    for ( size_t i = 0; i < mTriangles.size(); i++ ) {
+        if ( mTriangles [ i ].getArea() > triTol ) {
+            triToKeep.push_back(i);
+        }
     }
 
     int nPointsTot = nPoints * triToKeep.size();
@@ -111,10 +111,10 @@ PatchIntegrationRule :: SetUpPointsOnTriangle(int nPoints, MaterialMode mode)
     // Loop over triangles
     for ( int i = 0; i < int( triToKeep.size() ); i++ ) {
         // TODO: Probably unnecessary to allocate here
-        const FloatArray **coords = new const FloatArray * [ mTriangles [ triToKeep[i] ].giveNrVertices() ];
+        const FloatArray **coords = new const FloatArray * [ mTriangles [ triToKeep [ i ] ].giveNrVertices() ];
         // this we should put into the function before
-        for ( int k = 0; k < mTriangles [ triToKeep[i] ].giveNrVertices(); k++ ) {
-            coords [ k ] = new FloatArray( ( mTriangles [ triToKeep[i] ].giveVertex(k + 1) ) );
+        for ( int k = 0; k < mTriangles [ triToKeep [ i ] ].giveNrVertices(); k++ ) {
+            coords [ k ] = new FloatArray( ( mTriangles [ triToKeep [ i ] ].giveVertex(k + 1) ) );
         }
 
         // Can not be used because it writes to the start of the array instead of appending.
@@ -132,7 +132,7 @@ PatchIntegrationRule :: SetUpPointsOnTriangle(int nPoints, MaterialMode mode)
 
 
             mTriInterp.local2global( global, * gp->giveCoordinates(),
-                                     FEIVertexListGeometryWrapper(mTriangles [ triToKeep[i] ].giveNrVertices(), coords) );
+                                     FEIVertexListGeometryWrapper(mTriangles [ triToKeep [ i ] ].giveNrVertices(), coords) );
 
             newGPCoord.push_back(global);
 
@@ -147,14 +147,14 @@ PatchIntegrationRule :: SetUpPointsOnTriangle(int nPoints, MaterialMode mode)
 
             double refElArea = this->elem->giveParentElSize();
 
-            gp->setWeight(2.0 * refElArea * gp->giveWeight() * mTriangles [ triToKeep[i] ].getArea() / parentArea); // update integration weight
+            gp->setWeight(2.0 * refElArea * gp->giveWeight() * mTriangles [ triToKeep [ i ] ].getArea() / parentArea); // update integration weight
 
 
             pointsPassed++;
         }
 
 
-        for ( int k = 0; k < mTriangles [ triToKeep[i] ].giveNrVertices(); k++ ) {
+        for ( int k = 0; k < mTriangles [ triToKeep [ i ] ].giveNrVertices(); k++ ) {
             delete coords [ k ];
         }
 
@@ -166,18 +166,19 @@ PatchIntegrationRule :: SetUpPointsOnTriangle(int nPoints, MaterialMode mode)
     double time = 0.0;
 
     Element *el = this->elem;
-    if(el != NULL) {
-    	Domain *dom = el->giveDomain();
-    	if(dom != NULL) {
-    		EngngModel *em = dom->giveEngngModel();
-    		if(em != NULL) {
-    			TimeStep *ts = em->giveCurrentStep();
-    			if(ts != NULL) {
-    				time = ts->giveTargetTime();
-    			}
-    		}
-    	}
+    if ( el != NULL ) {
+        Domain *dom = el->giveDomain();
+        if ( dom != NULL ) {
+            EngngModel *em = dom->giveEngngModel();
+            if ( em != NULL ) {
+                TimeStep *ts = em->giveCurrentStep();
+                if ( ts != NULL ) {
+                    time = ts->giveTargetTime();
+                }
+            }
+        }
     }
+
     int elIndex = this->elem->giveGlobalNumber();
     std :: stringstream str;
     str << "GaussPointsTime" << time << "El" << elIndex << ".vtk";
