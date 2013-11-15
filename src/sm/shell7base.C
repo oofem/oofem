@@ -131,9 +131,9 @@ Shell7Base :: computeGlobalCoordinates(FloatArray &answer, const FloatArray &lco
 
 
 double
-Shell7Base :: giveGlobalZcoord(double xi)
+Shell7Base :: giveGlobalZcoord(double xi, FloatArray &lc)
 {
-    return xi * this->layeredCS->give(CS_Thickness) * 0.5;
+  return xi * this->layeredCS->give(CS_Thickness, &lc, NULL, this) * 0.5;
 }
 
 double // @todo move to layered crosssection
@@ -152,7 +152,7 @@ Shell7Base :: giveGlobalZcoordInLayer(double xi, int layer)
 void
 Shell7Base :: evalInitialCovarBaseVectorsAt(FloatArray &lcoords, FloatMatrix &Gcov)
 {
-    double zeta = giveGlobalZcoord(lcoords.at(3));
+    double zeta = giveGlobalZcoord(lcoords.at(3), lcoords);
     FloatArray M;
     FloatMatrix dNdxi;
 
@@ -324,7 +324,7 @@ Shell7Base :: evalCovarBaseVectorsAt(FloatArray &lcoords, FloatMatrix &gcov, Flo
 {
     // Evaluates the covariant base vectors in the current configuration
     FloatArray g1; FloatArray g2; FloatArray g3;
-    double zeta = giveGlobalZcoord(lcoords.at(3));
+    double zeta = giveGlobalZcoord(lcoords.at(3),lcoords);
 
     FloatArray dxdxi1, dxdxi2, m, dmdxi1, dmdxi2;
     double dgamdxi1, dgamdxi2, gam;
@@ -535,7 +535,7 @@ Shell7Base :: new_computeBulkTangentMatrix(FloatMatrix &answer, FloatArray &solV
             // Material stiffness
             Shell7Base :: computeLinearizedStiffness(gp, mat, tStep, A, genEps);
 
-            double zeta = giveGlobalZcoord(gp->giveCoordinate(3));
+            double zeta = giveGlobalZcoord(gp->giveCoordinate(3), lCoords);
             this->computeLambdaGMatrices(lambdaI, genEpsI, zeta);
             this->computeLambdaGMatrices(lambdaJ, genEpsJ, zeta);
 
@@ -714,7 +714,6 @@ Shell7Base :: computePressureTangentMatrix(FloatMatrix &answer, Load *load, cons
     FloatMatrix lambdaG [ 3 ], lambdaN;
 
     double xi   = pLoad->giveLoadOffset();
-    double zeta = this->giveGlobalZcoord(xi);
     this->giveUpdatedSolutionVector(solVec, tStep);
 
     int ndof = Shell7Base :: giveNumberOfDofs();
@@ -726,6 +725,7 @@ Shell7Base :: computePressureTangentMatrix(FloatMatrix &answer, Load *load, cons
         lcoords.at(2) = ip->giveCoordinate(2);
         lcoords.at(3) = xi;     // local coord where load is applied
 
+	double zeta = this->giveGlobalZcoord(xi, *ip->giveCoordinates());
         this->computeNmatrixAt(lcoords, N);
         this->computeBmatrixAt(lcoords, B);
         genEps.beProductOf(B, solVec);     
@@ -939,7 +939,7 @@ Shell7Base :: computeSectionalForces(FloatArray &answer, TimeStep *tStep, FloatA
             this->giveUpdatedSolutionVector(totalSolVec, tStep); 
             this->computeGeneralizedStrainVectorNew(genEps, totalSolVec, B);
 
-            double zeta = giveGlobalZcoord(gp->giveCoordinate(3));
+            double zeta = giveGlobalZcoord(gp->giveCoordinate(3), lCoords);
             this->computeSectionalForcesAt(sectionalForces, gp, mat, tStep, genEps, genEpsD, zeta);
 
             // Computation of sectional forces: f = B^t*[N M T Ms Ts]^t
@@ -1136,7 +1136,7 @@ Shell7Base :: giveMassFactorsAt(GaussPoint *gp, FloatArray &factors, double &gam
     double a2 = coeff.at(2);
     double a3 = coeff.at(3);
 
-    double h  = this->giveCrossSection()->give(CS_Thickness);
+    double h  = this->giveCrossSection()->give(CS_Thickness, gp->giveCoordinates(), NULL, this);
     double h2 = h * h;
     double h3 = h2 * h;
     double h5 = h2 * h3;
@@ -1279,7 +1279,7 @@ Shell7Base :: computeMassMatrixNum(FloatMatrix &answer, TimeStep *tStep)
             this->computeBmatrixAt(lCoords, B);
             genEps.beProductOf(B, solVec);    
             //double zeta = giveGlobalZcoord(gp);
-            double zeta = giveGlobalZcoord(gp->giveCoordinate(3));
+            double zeta = giveGlobalZcoord(gp->giveCoordinate(3), lCoords);
             this->computeLambdaNMatrix(lambda, genEps, zeta);
             
             // could also create lambda*N and then plusProdSymm - probably faster
@@ -1352,7 +1352,7 @@ Shell7Base :: computeConvectiveMassForce(FloatArray &answer, TimeStep *tStep)
 
         Material *mat = domain->giveMaterial( this->layeredCS->giveLayerMaterial(1) ); ///@todo fix this method
         rho = mat->give('d', gp);
-        h   = this->giveCrossSection()->give(CS_Thickness);
+        h   = this->giveCrossSection()->give(CS_Thickness, &lCoords, NULL, this);
         h2  = h * h;
         h3 = h2 * h;
         h5 = h2 * h3;
@@ -1454,10 +1454,10 @@ Shell7Base :: computePressureForce(FloatArray &answer, FloatArray solVec, const 
     FloatArray Fp, fp, genEps, genEpsC, lCoords, traction, solVecC;
     answer.resize( Shell7Base :: giveNumberOfDofs() );
     answer.zero();
-    double zeta = this->giveGlobalZcoord(pLoad->giveLoadOffset());
     for ( int i = 0; i < iRule->giveNumberOfIntegrationPoints(); i++ ) {
         IntegrationPoint *ip = iRule->getIntegrationPoint(i);
         lCoords = *ip->giveCoordinates();
+	double zeta = this->giveGlobalZcoord(pLoad->giveLoadOffset(), lCoords);
         this->computeBmatrixAt(lCoords, B);
         this->computeNmatrixAt(lCoords, N);
         this->giveUpdatedSolutionVector(solVecC, tStep);
@@ -1786,7 +1786,7 @@ void Shell7Base :: NodalAveragingRecoveryMI_computeNodalValue(FloatArray &answer
         answer.at(1) += this->giveNode(node)->giveDofWithID(W_u)->giveUnknown(VM_Total, tStep);
         answer.at(2) += this->giveNode(node)->giveDofWithID(W_v)->giveUnknown(VM_Total, tStep);
         answer.at(3) += this->giveNode(node)->giveDofWithID(W_w)->giveUnknown(VM_Total, tStep);
-        answer.times( this->giveCrossSection()->give(CS_Thickness) );
+        answer.times( this->giveCrossSection()->give(CS_Thickness, NULL, this->giveNode(node)->giveCoordinates(), this) );
     } else {
         answer.resize(0);
     }
@@ -2920,7 +2920,7 @@ Shell7Base :: giveVoigtIndex(int ind1, int ind2)
 }
 
 void
-Shell7Base :: computeStrainVectorInLayer(FloatArray &answer, const FloatArray &masterGpStrain, GaussPoint *slaveGp, TimeStep *tStep)
+Shell7Base :: computeStrainVectorInLayer(FloatArray &answer, const FloatArray &masterGpStrain, GaussPoint* masterGp, GaussPoint *slaveGp, TimeStep *tStep)
 {
     OOFEM_ERROR("Shell7Base :: computeStrainVectorInLayer - Should not be called! Not meaningful for this element.");
 }

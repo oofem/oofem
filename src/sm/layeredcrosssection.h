@@ -146,7 +146,8 @@ public:
 
     virtual void computeStressIndependentStrainVector(FloatArray &answer, GaussPoint *gp, TimeStep *tStep, ValueModeType mode);
 
-    virtual double give(CrossSectionProperty a);
+    virtual double give(CrossSectionProperty a, GaussPoint *gp);
+    virtual double give(CrossSectionProperty a, const FloatArray* lc, const FloatArray* gc, Element* elem);
     int giveNumberOfLayers();
 
     /// Returns the total thickness of all layers.
@@ -256,11 +257,12 @@ public:
      * Computes full 3D strain vector in element layer.
      * This function is necessary if layered cross section is specified..
      * @param answer Full layer strain vector.
+     * @param masterGpStrain strain in masterGP with master related components.
      * @param masterGp Element integration point.
      * @param slaveGp Slave integration point representing particular layer.
      * @param tStep Time step.
      */
-    virtual void computeStrainVectorInLayer(FloatArray &answer, const FloatArray &masterGpStrain, GaussPoint *slaveGp, TimeStep *tStep) = 0;
+    virtual void computeStrainVectorInLayer(FloatArray &answer, const FloatArray &masterGpStrain, GaussPoint *masterGp, GaussPoint *slaveGp, TimeStep *tStep) = 0;
 };
 
 class LayeredIntegrationRule : public IntegrationRule

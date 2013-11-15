@@ -702,7 +702,7 @@ void XfemElementInterface :: computeCohesiveForces(FloatArray &answer, TimeStep 
 
 				NTimesT.beTProductOf(NMatrix, T2D);
 				CrossSection *cs  = element->giveCrossSection();
-				double thickness = cs->give(CS_Thickness);
+				double thickness = cs->give(CS_Thickness, &gp);
 				double dA = 0.5*mCrackLength*thickness*gp.giveWeight();
 				answer.add(dA, NTimesT);
 			}
@@ -890,7 +890,7 @@ void XfemElementInterface :: computeCohesiveTangent(FloatMatrix &answer, TimeSte
 			tmp2.beTProductOf(NMatrix, tmp);
 
 			CrossSection *cs  = element->giveCrossSection();
-			double thickness = cs->give(CS_Thickness);
+			double thickness = cs->give(CS_Thickness, &gp);
 			double dA = 0.5*mCrackLength*thickness*gp.giveWeight();
 			answer.add(dA, tmp2);
 		}

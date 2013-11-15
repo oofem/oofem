@@ -329,7 +329,7 @@ double TrPlaneStress2d :: computeVolumeAround(GaussPoint *gp)
     weight = gp->giveWeight();
     detJ = fabs( this->interp.giveTransformationJacobian( * gp->giveCoordinates(), FEIElementGeometryWrapper(this) ) );
 
-    return detJ * weight * this->giveCrossSection()->give(CS_Thickness);
+    return detJ * weight * this->giveCrossSection()->give(CS_Thickness, gp);
 }
 
 

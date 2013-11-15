@@ -124,11 +124,26 @@ public:
     int giveSetNumber() const { return this->setNumber; };
 
     /**
-     * Returns the value of cross section property.
+     * Returns the value of cross section property at given point.
+     * The default implementation assumes constant properties stored in propertyDictionary.
      * @param a Id of requested property.
+     * @param gp Integration point
      * @return Property value.
      */
-    virtual double give(CrossSectionProperty a);
+    virtual double give(CrossSectionProperty a, GaussPoint *gp);
+    /**
+     * Returns the value of cross section property at given point (belonging to given element).
+     * the point coordinates can be specified using its local element coordinates or 
+     * global coordinates (one of these two can be set to NULL)
+     * The default implementation assumes constant properties stored in propertyDictionary.
+     * @param a Id of requested property.
+     * @param lc local coordinates of point (optional, can be NULL)
+     * @param gc global coordinates of point (optional, can be NULL)
+     * @param elem reference to underlying element
+     * @param gp Integration point
+     * @return Property value.
+     */
+    virtual double give(CrossSectionProperty a, const FloatArray* lc, const FloatArray* gc, Element* elem);
 
     /**
      * Returns the value of cross section property.

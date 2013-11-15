@@ -163,7 +163,7 @@ public:
     virtual void computeStressIndependentStrainVector(FloatArray &answer,
                                                       GaussPoint *gp, TimeStep *tStep, ValueModeType mode);
 
-    virtual double give(CrossSectionProperty a);
+    virtual double give(CrossSectionProperty a, GaussPoint* gp);
 
     // identification and auxiliary functions
     virtual const char *giveInputRecordName() const { return _IFT_FiberedCrossSection_Name; }

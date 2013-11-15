@@ -139,8 +139,8 @@ LayeredCrossSection :: giveRealStress_Beam2d(FloatArray &answer, GaussPoint *gp,
     answer.zero();
 
     // perform integration over layers
-    bottom = this->give(CS_BottomZCoord);
-    top = this->give(CS_TopZCoord);
+    bottom = this->give(CS_BottomZCoord, gp);
+    top = this->give(CS_TopZCoord, gp);
 
     if ( interface == NULL ) {
         _error("giveRealStresses - element with no layer support encountered");
@@ -157,7 +157,7 @@ LayeredCrossSection :: giveRealStress_Beam2d(FloatArray &answer, GaussPoint *gp,
         layerZCoord = 0.5 * ( ( 1. - layerZeta ) * bottom + ( 1. + layerZeta ) * top );
 
         // Compute the layer stress
-        interface->computeStrainVectorInLayer(layerStrain, strain, layerGp, tStep);
+        interface->computeStrainVectorInLayer(layerStrain, strain, gp, layerGp, tStep);
 
         layerMat->giveRealStressVector_2dBeamLayer(reducedLayerStress, layerGp, layerStrain, tStep);
 
@@ -196,8 +196,8 @@ LayeredCrossSection :: giveRealStress_Plate(FloatArray &answer, GaussPoint *gp, 
     answer.zero();
 
     // perform integration over layers
-    bottom = this->give(CS_BottomZCoord);
-    top = this->give(CS_TopZCoord);
+    bottom = this->give(CS_BottomZCoord, gp);
+    top = this->give(CS_TopZCoord, gp);
 
     if ( interface == NULL ) {
         _error("giveRealStresses - element with no layer support encountered");
@@ -214,7 +214,7 @@ LayeredCrossSection :: giveRealStress_Plate(FloatArray &answer, GaussPoint *gp, 
         layerZCoord = 0.5 * ( ( 1. - layerZeta ) * bottom + ( 1. + layerZeta ) * top );
 
         // Compute the layer stress
-        interface->computeStrainVectorInLayer(layerStrain, strain, layerGp, tStep);
+        interface->computeStrainVectorInLayer(layerStrain, strain, gp, layerGp, tStep);
 
         layerMat->giveRealStressVector_PlateLayer(reducedLayerStress, layerGp, layerStrain, tStep);
 
@@ -249,8 +249,8 @@ LayeredCrossSection :: giveRealStress_Shell(FloatArray &answer, GaussPoint *gp, 
     answer.zero();
 
     // perform integration over layers
-    bottom = this->give(CS_BottomZCoord);
-    top = this->give(CS_TopZCoord);
+    bottom = this->give(CS_BottomZCoord, gp);
+    top = this->give(CS_TopZCoord, gp);
 
     if ( interface == NULL ) {
         _error("giveRealStresses - element with no layer support encountered");
@@ -267,7 +267,7 @@ LayeredCrossSection :: giveRealStress_Shell(FloatArray &answer, GaussPoint *gp, 
         layerZCoord = 0.5 * ( ( 1. - layerZeta ) * bottom + ( 1. + layerZeta ) * top );
 
         // Compute the layer stress
-        interface->computeStrainVectorInLayer(layerStrain, strain, layerGp, tStep);
+        interface->computeStrainVectorInLayer(layerStrain, strain, gp, layerGp, tStep);
 
         layerMat->giveRealStressVector_PlateLayer(reducedLayerStress, layerGp, layerStrain, tStep);
 
@@ -360,8 +360,8 @@ LayeredCrossSection :: give2dPlateStiffMtrx(FloatMatrix &answer,
     answer.zero();
 
     // perform integration over layers
-    bottom = this->give(CS_BottomZCoord);
-    top = this->give(CS_TopZCoord);
+    bottom = this->give(CS_BottomZCoord, gp);
+    top = this->give(CS_TopZCoord, gp);
 
     for ( int i = 1; i <= numberOfLayers; i++ ) {
         GaussPoint *layerGp = giveSlaveGaussPoint(gp, i - 1);
@@ -427,8 +427,8 @@ LayeredCrossSection :: give3dShellStiffMtrx(FloatMatrix &answer,
     answer.resize(8, 8);
     answer.zero();
     // perform integration over layers
-    bottom = this->give(CS_BottomZCoord);
-    top = this->give(CS_TopZCoord);
+    bottom = this->give(CS_BottomZCoord, gp);
+    top = this->give(CS_TopZCoord, gp);
 
     for ( int i = 1; i <= numberOfLayers; i++ ) {
         GaussPoint *layerGp = giveSlaveGaussPoint(gp, i - 1);
@@ -505,8 +505,8 @@ LayeredCrossSection :: give2dBeamStiffMtrx(FloatMatrix &answer,
     double layerZCoord2;
 
     // perform integration over layers
-    bottom = this->give(CS_BottomZCoord);
-    top = this->give(CS_TopZCoord);
+    bottom = this->give(CS_BottomZCoord, gp);
+    top = this->give(CS_TopZCoord, gp);
 
     answer.resize(3, 3);
     answer.zero();
@@ -756,8 +756,8 @@ LayeredCrossSection :: giveSlaveGaussPoint(GaussPoint *masterGp, int i)
         MaterialMode slaveMode, masterMode = masterGp->giveMaterialMode();
         slaveMode = this->giveCorrespondingSlaveMaterialMode(masterMode);
 
-        bottom = this->give(CS_BottomZCoord);
-        top = this->give(CS_TopZCoord);
+        bottom = this->give(CS_BottomZCoord, masterGp);
+        top = this->give(CS_TopZCoord, masterGp);
 
         masterGp->numberOfGp = this->numberOfLayers;                        // Generalize to multiple integration points per layer
         masterGp->gaussPointArray = new GaussPoint * [ numberOfLayers ];
@@ -914,7 +914,7 @@ LayeredCrossSection :: giveCorrespondingSlaveMaterialMode(MaterialMode masterMod
 
 
 double
-LayeredCrossSection :: give(CrossSectionProperty aProperty)
+LayeredCrossSection :: give(CrossSectionProperty aProperty, GaussPoint *gp)
 {
     if ( aProperty == CS_Thickness ) {
         return this->computeIntegralThick();
@@ -929,7 +929,25 @@ LayeredCrossSection :: give(CrossSectionProperty aProperty)
         return this->numberOfLayers;
     }
 
-    return CrossSection :: give(aProperty);
+    return CrossSection :: give(aProperty, gp);
+}
+double
+LayeredCrossSection :: give(CrossSectionProperty aProperty, const FloatArray* lc, const FloatArray* gc, Element* elem)
+{
+    if ( aProperty == CS_Thickness ) {
+        return this->computeIntegralThick();
+    } else if ( aProperty == CS_TopZCoord ) {
+        this->computeIntegralThick();
+        return totalThick - midSurfaceZcoordFromBottom;
+    } else if ( aProperty == CS_BottomZCoord ) {
+        return -midSurfaceZcoordFromBottom;
+    } else if ( aProperty == CS_Area ) {
+        return this->giveArea();
+    } else if ( aProperty == CS_NumLayers ) {
+        return this->numberOfLayers;
+    }
+
+    return CrossSection :: give(aProperty, lc, gc, elem);
 }
 
 

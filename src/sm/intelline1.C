@@ -119,7 +119,7 @@ IntElLine1 :: computeAreaAround(IntegrationPoint *ip)
     double weight  = ip->giveWeight();
     double ds = sqrt( G.dotProduct(G) ) * weight;
 
-    double thickness  = this->giveCrossSection()->give(CS_Thickness);    
+    double thickness  = this->giveCrossSection()->give(CS_Thickness, ip);    
     return ds * thickness;
 }
 

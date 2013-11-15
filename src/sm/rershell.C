@@ -304,7 +304,7 @@ RerShell :: computeLumpedMassMatrix(FloatMatrix &answer, TimeStep *tStep)
     gp = integrationRulesArray [ 0 ]->getIntegrationPoint(0);
 
     dV = this->computeVolumeAround(gp);
-    mss1 = dV * this->giveCrossSection()->give(CS_Thickness) * this->giveStructuralCrossSection()->give('d', gp) / 3.;
+    mss1 = dV * this->giveCrossSection()->give(CS_Thickness, gp) * this->giveStructuralCrossSection()->give('d', gp) / 3.;
 
     answer.at(1, 1) = mss1;
     answer.at(2, 2) = mss1;
@@ -338,7 +338,7 @@ RerShell :: computeBodyLoadVectorAt(FloatArray &answer, Load *forLoad, TimeStep 
         return;                                             // nil resultant
     } else {
         dens = this->giveStructuralCrossSection()->give('d', gp);
-        dV = this->computeVolumeAround(gp) * this->giveCrossSection()->give(CS_Thickness);
+        dV = this->computeVolumeAround(gp) * this->giveCrossSection()->give(CS_Thickness, gp);
 
         answer.resize(18);
 
@@ -475,10 +475,12 @@ RerShell :: computeLocalCoordinates(FloatArray &answer, const FloatArray &coords
     midplZ = z1 * answer.at(1) + z2 *answer.at(2) + z3 *answer.at(3);
 
     //check that the z is within the element
-    StructuralCrossSection *cs = this->giveStructuralCrossSection();;
+    StructuralCrossSection *cs = this->giveStructuralCrossSection();
+    GaussPoint _gp(NULL, 1, new FloatArray(answer), 1.0, _2dPlate);
+    
     double elthick;
 
-    elthick = cs->give(CS_Thickness);
+    elthick = cs->give(CS_Thickness, &_gp);
 
     if ( elthick / 2.0 + midplZ - fabs( inputCoords_ElCS.at(3) ) < -POINT_TOL ) {
         answer.zero();
@@ -624,7 +626,7 @@ RerShell :: giveCharacteristicTensor(FloatMatrix &answer, CharTensor type, Gauss
 
 void
 RerShell :: computeStrainVectorInLayer(FloatArray &answer, const FloatArray &masterGpStrain,
-                                       GaussPoint *slaveGp, TimeStep *tStep)
+                                       GaussPoint *masterGp, GaussPoint *slaveGp, TimeStep *tStep)
 //
 // returns full 3d strain vector of given layer (whose z-coordinate from center-line is
 // stored in slaveGp) for given tStep
@@ -632,8 +634,8 @@ RerShell :: computeStrainVectorInLayer(FloatArray &answer, const FloatArray &mas
 {
     double layerZeta, layerZCoord, top, bottom;
 
-    top    = this->giveCrossSection()->give(CS_TopZCoord);
-    bottom = this->giveCrossSection()->give(CS_BottomZCoord);
+    top    = this->giveCrossSection()->give(CS_TopZCoord, masterGp);
+    bottom = this->giveCrossSection()->give(CS_BottomZCoord, masterGp);
     layerZeta = slaveGp->giveCoordinate(3);
     layerZCoord = 0.5 * ( ( 1. - layerZeta ) * bottom + ( 1. + layerZeta ) * top );
 

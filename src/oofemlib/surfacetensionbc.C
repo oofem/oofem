@@ -230,9 +230,9 @@ void SurfaceTensionBoundaryCondition :: computeTangentFromElement(FloatMatrix &a
             }
 
         } else {
-            double t = e->giveCrossSection()->give(CS_Thickness); ///@todo The thickness is not often relevant or used in FM.
             for ( int k = 0; k < iRule->giveNumberOfIntegrationPoints(); k++ ) {
                 GaussPoint *gp = iRule->getIntegrationPoint(k);
+		double t = e->giveCrossSection()->give(CS_Thickness, gp); ///@todo The thickness is not often relevant or used in FM.
                 fei2d->edgeEvaldNds(dNds, side, * gp->giveCoordinates(), FEIElementGeometryWrapper(e));
                 double J = fei->boundaryGiveTransformationJacobian(side, * gp->giveCoordinates(), FEIElementGeometryWrapper(e));
 
@@ -343,9 +343,9 @@ void SurfaceTensionBoundaryCondition :: computeLoadVectorFromElement(FloatArray 
             }
 
         } else {
-            double t = e->giveCrossSection()->give(CS_Thickness);
             for ( int k = 0; k < iRule->giveNumberOfIntegrationPoints(); k++ ) {
                 GaussPoint *gp = iRule->getIntegrationPoint(k);
+		double t = e->giveCrossSection()->give(CS_Thickness, gp);
                 fei2d->edgeEvaldNds(dNds, side, * gp->giveCoordinates(), FEIElementGeometryWrapper(e));
                 double J = fei->boundaryGiveTransformationJacobian(side, * gp->giveCoordinates(), FEIElementGeometryWrapper(e));
                 es.beProductOf(xy, dNds);

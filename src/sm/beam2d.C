@@ -270,12 +270,12 @@ Beam2d :: computeGtoLRotationMatrix(FloatMatrix &answer)
 double
 Beam2d :: computeVolumeAround(GaussPoint *gp)
 {
-    return 0.5 * this->giveLength() * gp->giveWeight();
+  return 0.5 * this->giveLength() * gp->giveWeight();
 }
 
 
 void
-Beam2d :: computeStrainVectorInLayer(FloatArray &answer, const FloatArray &masterGpStrain, GaussPoint *slaveGp, TimeStep *tStep)
+Beam2d :: computeStrainVectorInLayer(FloatArray &answer, const FloatArray &masterGpStrain, GaussPoint *masterGp, GaussPoint *slaveGp, TimeStep *tStep)
 //
 // returns full 3d strain vector of given layer (whose z-coordinate from center-line is
 // stored in slaveGp) for given tStep
@@ -283,8 +283,8 @@ Beam2d :: computeStrainVectorInLayer(FloatArray &answer, const FloatArray &maste
 {
     double layerZeta, layerZCoord, top, bottom;
 
-    top    = this->giveCrossSection()->give(CS_TopZCoord);
-    bottom = this->giveCrossSection()->give(CS_BottomZCoord);
+    top    = this->giveCrossSection()->give(CS_TopZCoord, masterGp);
+    bottom = this->giveCrossSection()->give(CS_BottomZCoord, masterGp);
     layerZeta = slaveGp->giveCoordinate(3);
     layerZCoord = 0.5 * ( ( 1. - layerZeta ) * bottom + ( 1. + layerZeta ) * top );
 
@@ -585,8 +585,9 @@ Beam2d :: computeEdgeLoadVectorAt(FloatArray &answer, Load *load, int iedge, Tim
 void
 Beam2d :: computeBodyLoadVectorAt(FloatArray &answer, Load *load, TimeStep *tStep, ValueModeType mode)
 {
+    FloatArray lc(1);
     StructuralElement::computeBodyLoadVectorAt(answer, load, tStep, mode);
-    answer.times(this->giveCrossSection()->give(CS_Area));
+    answer.times(this->giveCrossSection()->give(CS_Area, &lc, NULL, this)); 
 }
 
 
@@ -674,13 +675,13 @@ Beam2d :: computeConsistentMassMatrix(FloatMatrix &answer, TimeStep *tStep, doub
     double kappa = this->giveKappaCoeff();
     double kappa2 = kappa * kappa;
 
-    double density = this->giveMaterial()->give('d', gp);
+    double density = this->giveMaterial()->give('d', gp); // constant density assumed
     if(ipDensity != NULL) {
     	// Override density if desired
     	density = *ipDensity;
     }
 
-    double area = this->giveCrossSection()->give(CS_Area);
+    double area = this->giveCrossSection()->give(CS_Area, gp); // constant area assumed
     double c2 = ( area * density ) / ( ( 1. + 2. * kappa ) * ( 1. + 2. * kappa ) );
     double c1 = ( area * density );
 

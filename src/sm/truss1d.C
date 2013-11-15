@@ -87,7 +87,7 @@ Truss1d :: computeLumpedMassMatrix(FloatMatrix &answer, TimeStep *tStep)
 {
     GaussPoint *gp = integrationRulesArray [ 0 ]->getIntegrationPoint(0);
     double density = this->giveStructuralCrossSection()->give('d', gp);
-    double halfMass = density * this->giveCrossSection()->give(CS_Area) * this->computeLength() * 0.5;
+    double halfMass = density * this->giveCrossSection()->give(CS_Area, gp) * this->computeLength() * 0.5;
     answer.resize(2, 2);
     answer.zero();
     answer.at(1, 1) = halfMass;
@@ -140,7 +140,7 @@ Truss1d :: computeVolumeAround(GaussPoint *gp)
 // Gauss point is used.
 {
     double detJ = fabs( this->interp.giveTransformationJacobian( * gp->giveCoordinates(), FEIElementGeometryWrapper(this) ) );
-    return detJ * gp->giveWeight() * this->giveCrossSection()->give(CS_Area);
+    return detJ * gp->giveWeight() * this->giveCrossSection()->give(CS_Area, gp);
 }
 
 

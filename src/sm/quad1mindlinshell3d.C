@@ -131,7 +131,7 @@ Quad1MindlinShell3D :: computeBodyLoadVectorAt(FloatArray &answer, Load *forLoad
             gp = ir->getIntegrationPoint(i);
 
             this->interp.evalN(n, *gp->giveCoordinates(), FEIVoidCellGeometry());
-            dV = this->computeVolumeAround(gp) * this->giveCrossSection()->give(CS_Thickness);
+            dV = this->computeVolumeAround(gp) * this->giveCrossSection()->give(CS_Thickness, gp);
             density = this->giveStructuralCrossSection()->give('d', gp);
 
             forceX.add(density * gravity.at(1) * dV, n);
@@ -260,6 +260,7 @@ Quad1MindlinShell3D :: giveInternalForcesVector(FloatArray &answer, TimeStep *tS
     FloatMatrix b, d;
     FloatArray n, strain, stress;
     FloatArray shellUnknowns(20), drillUnknowns(4), unknowns;
+    bool drillCoeffFlag = false;
 
     this->computeVectorOf(EID_MomentumBalance, VM_Total, tStep, unknowns);
     // Split this for practical reasons into normal shell dofs and drilling dofs
@@ -276,13 +277,13 @@ Quad1MindlinShell3D :: giveInternalForcesVector(FloatArray &answer, TimeStep *tS
     shellForces.zero();
     drillMoment.zero();
     StructuralCrossSection *cs = this->giveStructuralCrossSection();
-    double drillCoeff = cs->give(CS_DrillingStiffness);
 
     IntegrationRule *iRule = integrationRulesArray [ 0 ];
     for ( int i = 0; i < iRule->giveNumberOfIntegrationPoints(); i++ ) {
         GaussPoint *gp = iRule->getIntegrationPoint(i);
         this->computeBmatrixAt(gp, b);
         double dV = this->computeVolumeAround(gp);
+	double drillCoeff = cs->give(CS_DrillingStiffness, gp);
 
         if ( useUpdatedGpRecord ) {
             stress = static_cast< StructuralMaterialStatus * >( gp->giveMaterialStatus() )->giveStressVector();
@@ -300,6 +301,7 @@ Quad1MindlinShell3D :: giveInternalForcesVector(FloatArray &answer, TimeStep *tS
             }
             double dtheta = n.dotProduct(drillUnknowns);
             drillMoment.add(drillCoeff * dV * dtheta, n); ///@todo Decide on how to alpha should be defined.
+	    drillCoeffFlag = true;
         }
     }
 
@@ -307,7 +309,7 @@ Quad1MindlinShell3D :: giveInternalForcesVector(FloatArray &answer, TimeStep *tS
     answer.zero();
     answer.assemble(shellForces, this->shellOrdering);
 
-    if (drillCoeff > 0.) {
+    if (drillCoeffFlag) {
         answer.assemble(drillMoment, this->drillOrdering);
     }
 }
@@ -320,17 +322,18 @@ Quad1MindlinShell3D :: computeStiffnessMatrix(FloatMatrix &answer, MatResponseMo
     // This elements adds an additional stiffness for the so called drilling dofs, meaning we need to work with all 9 components.
     FloatMatrix d, b, db;
     FloatArray n;
+    bool drillCoeffFlag = false;
 
     FloatMatrix shellStiffness(20, 20), drillStiffness(4, 4);
     shellStiffness.zero();
     drillStiffness.zero();
-    double drillCoeff = this->giveStructuralCrossSection()->give(CS_DrillingStiffness);
 
     IntegrationRule *iRule = integrationRulesArray [ 0 ];
     for ( int i = 0; i < iRule->giveNumberOfIntegrationPoints(); i++ ) {
         GaussPoint *gp = iRule->getIntegrationPoint(i);
         this->computeBmatrixAt(gp, b);
         double dV = this->computeVolumeAround(gp);
+	double drillCoeff = this->giveStructuralCrossSection()->give(CS_DrillingStiffness, gp);
 
         this->computeConstitutiveMatrixAt(d, rMode, gp, tStep);
 
@@ -344,6 +347,7 @@ Quad1MindlinShell3D :: computeStiffnessMatrix(FloatMatrix &answer, MatResponseMo
                 n(j) -= 0.25;
             }
             drillStiffness.plusDyadSymmUpper(n, drillCoeff * dV);
+	    drillCoeffFlag = true;
         }
     }
     shellStiffness.symmetrized();
@@ -352,7 +356,7 @@ Quad1MindlinShell3D :: computeStiffnessMatrix(FloatMatrix &answer, MatResponseMo
     answer.zero();
     answer.assemble(shellStiffness, this->shellOrdering);
 
-    if (drillCoeff > 0.) {
+    if (drillCoeffFlag) {
         drillStiffness.symmetrized();
         answer.assemble(drillStiffness, this->drillOrdering);
     }

@@ -103,7 +103,7 @@ Quad1Mindlin :: computeBodyLoadVectorAt(FloatArray &answer, Load *forLoad, TimeS
             gp = ir->getIntegrationPoint(i);
 
             this->interp_lin.evalN(n, *gp->giveCoordinates(), FEIElementGeometryWrapper(this));
-            dV = this->computeVolumeAround(gp) * this->giveCrossSection()->give(CS_Thickness);
+            dV = this->computeVolumeAround(gp) * this->giveCrossSection()->give(CS_Thickness, gp);
             load = this->giveStructuralCrossSection()->give('d', gp) * gravity.at(3) * dV;
 
             force.add(load, n);

@@ -147,7 +147,7 @@ public:
 
     // layered cross section support functions
     virtual void computeStrainVectorInLayer(FloatArray &answer, const FloatArray &masterGpStrain,
-                                    GaussPoint *slaveGp, TimeStep *tStep);
+					    GaussPoint *masterGp, GaussPoint *slaveGp, TimeStep *tStep);
 
 #ifdef __OOFEG
     virtual void drawRawGeometry(oofegGraphicContext &);

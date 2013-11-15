@@ -92,8 +92,6 @@ public:
       czMaterialNumber = 0;
     }
 
-    virtual double give(CrossSectionProperty a);
-
     virtual void giveRealStress_3d(FloatArray &answer, GaussPoint *gp, const FloatArray &reducedStrain, TimeStep *tStep);
     virtual void giveRealStress_PlaneStrain(FloatArray &answer, GaussPoint *gp, const FloatArray &reducedStrain, TimeStep *tStep);
     virtual void giveRealStress_PlaneStress(FloatArray &answer, GaussPoint *gp, const FloatArray &reducedStrain, TimeStep *tStep);
@@ -146,6 +144,8 @@ public:
     virtual classType giveClassID() const { return SimpleCrossSectionClass; }
 
     virtual double give(int aProperty, GaussPoint *gp);
+    virtual double give(CrossSectionProperty a, GaussPoint *gp) {return CrossSection::give(a,gp);}
+    virtual double give(CrossSectionProperty a, const FloatArray* lc, const FloatArray* gc, Element* elem) {return CrossSection::give(a,lc,gc,elem);}
     virtual Material *giveMaterial(IntegrationPoint *ip);
     
     int giveMaterialNumber() const { return this->materialNumber; };

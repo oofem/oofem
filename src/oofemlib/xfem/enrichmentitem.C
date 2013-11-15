@@ -1043,7 +1043,7 @@ IRResultType Delamination :: initializeFrom(InputRecord *ir)
         OOFEM_ERROR( "Delamination :: initializeFrom - requires a layered cross section reference as input" );
     }
     this->delamXiCoord = -1.0;
-    double totalThickness = layeredCS->give(CS_Thickness);
+    double totalThickness = layeredCS->give(CS_Thickness, NULL, NULL, NULL); // no position available
     for ( int i = 1; i <= this->interfaceNum; i++ ) {
         this->delamXiCoord += layeredCS->giveLayerThickness(i)/totalThickness*2.0;
     }

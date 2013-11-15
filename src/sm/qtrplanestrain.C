@@ -148,7 +148,7 @@ QTrPlaneStrain :: computeVolumeAround(GaussPoint *aGaussPoint)
     determinant = fabs( this->interpolation.giveTransformationJacobian( * aGaussPoint->giveCoordinates(),
                                                                        FEIElementGeometryWrapper(this) ) );
     weight = aGaussPoint->giveWeight();
-    thickness = this->giveCrossSection()->give(CS_Thickness);
+    thickness = this->giveCrossSection()->give(CS_Thickness, aGaussPoint);
     return determinant * weight * thickness;
 }
 
@@ -445,10 +445,10 @@ QTrPlaneStrain :: DirectErrorIndicatorRCI_giveCharacteristicSize()
 
     for ( int i = 0; i < iRule->giveNumberOfIntegrationPoints(); i++ ) {
         gp  = iRule->getIntegrationPoint(i);
-        volume += this->computeVolumeAround(gp);
+        volume += this->computeVolumeAround(gp)/ this->giveCrossSection()->give(CS_Thickness, gp);
     }
 
-    return sqrt( volume * 2.0 / this->giveCrossSection()->give(CS_Thickness) );
+    return sqrt( volume * 2.0 );
 }
 
 int

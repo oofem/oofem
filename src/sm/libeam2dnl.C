@@ -304,7 +304,7 @@ LIBeam2dNL :: computeLumpedMassMatrix(FloatMatrix &answer, TimeStep *tStep)
 {
     GaussPoint *gp = integrationRulesArray [ 0 ]->getIntegrationPoint(0);
     double density = this->giveStructuralCrossSection()->give('d', gp);
-    double halfMass   = density * this->giveCrossSection()->give(CS_Area) * this->giveLength() / 2.;
+    double halfMass   = density * this->giveCrossSection()->give(CS_Area, gp) * this->giveLength() / 2.;
     answer.resize(6, 6);
     answer.zero();
     answer.at(1, 1) = halfMass;
@@ -380,7 +380,7 @@ double LIBeam2dNL :: computeVolumeAround(GaussPoint *aGaussPoint)
 
 
 void
-LIBeam2dNL :: computeStrainVectorInLayer(FloatArray &answer, const FloatArray &masterGpStrain, GaussPoint *slaveGp, TimeStep *tStep)
+LIBeam2dNL :: computeStrainVectorInLayer(FloatArray &answer, const FloatArray &masterGpStrain, GaussPoint *masterGp, GaussPoint *slaveGp, TimeStep *tStep)
 //
 // returns full 3d strain vector of given layer (whose z-coordinate from center-line is
 // stored in slaveGp) for given tStep
@@ -388,8 +388,8 @@ LIBeam2dNL :: computeStrainVectorInLayer(FloatArray &answer, const FloatArray &m
 {
     double layerZeta, layerZCoord, top, bottom;
 
-    top    = this->giveCrossSection()->give(CS_TopZCoord);
-    bottom = this->giveCrossSection()->give(CS_BottomZCoord);
+    top    = this->giveCrossSection()->give(CS_TopZCoord, masterGp);
+    bottom = this->giveCrossSection()->give(CS_BottomZCoord, masterGp);
     layerZeta = slaveGp->giveCoordinate(3);
     layerZCoord = 0.5 * ( ( 1. - layerZeta ) * bottom + ( 1. + layerZeta ) * top );
 
@@ -568,8 +568,9 @@ LIBeam2dNL :: computeLoadLEToLRotationMatrix(FloatMatrix &answer, int iEdge, Gau
 void
 LIBeam2dNL :: computeBodyLoadVectorAt(FloatArray &answer, Load *load, TimeStep *tStep, ValueModeType mode)
 {
-    StructuralElement::computeBodyLoadVectorAt(answer, load, tStep, mode);
-    answer.times(this->giveCrossSection()->give(CS_Area));
+  FloatArray lc(1);
+  StructuralElement::computeBodyLoadVectorAt(answer, load, tStep, mode);
+  answer.times(this->giveCrossSection()->give(CS_Area, &lc, NULL, this)); 
 }
 
 

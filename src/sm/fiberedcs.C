@@ -573,7 +573,7 @@ FiberedCrossSection :: giveCorrespondingSlaveMaterialMode(MaterialMode masterMod
 
 
 double
-FiberedCrossSection :: give(CrossSectionProperty aProperty)
+FiberedCrossSection :: give(CrossSectionProperty aProperty, GaussPoint* gp)
 {
     if ( aProperty == CS_Thickness ) {
         return this->thick;
@@ -584,7 +584,7 @@ FiberedCrossSection :: give(CrossSectionProperty aProperty)
     } else if ( aProperty == CS_Area ) { // not given in input
     }
 
-    return CrossSection :: give(aProperty);
+    return CrossSection :: give(aProperty, gp);
 }
 
 
