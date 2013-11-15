@@ -61,17 +61,10 @@ protected:
     bool newValues;
 
 public:
-    PetscSparseMtrx(int n, int m) : SparseMtrx(n, m),
-        mtrx(NULL), symmFlag(false), leqs(0), geqs(0), di(0), kspInit(false), newValues(true) {}
-    PetscSparseMtrx() : SparseMtrx(),
-        mtrx(NULL), symmFlag(false), leqs(0), geqs(0), di(0), kspInit(false), newValues(true)  {}
+    PetscSparseMtrx(int n, int m);
+    PetscSparseMtrx();
 
-    virtual ~PetscSparseMtrx() {
-        MatDestroy(&this->mtrx);
-        if ( this->kspInit ) {
-            KSPDestroy(&this->ksp);
-        }
-    }
+    virtual ~PetscSparseMtrx();
 
     // Overloaded methods:
     virtual SparseMtrx *GiveCopy() const;
@@ -97,17 +90,17 @@ public:
     virtual void printStatistics() const;
     virtual void printYourself() const;
     void printMatlab() const;
-    virtual SparseMtrxType  giveType() const { return SMT_PetscMtrx; }
-    virtual bool isAsymmetric() const { return !symmFlag; }
+    virtual SparseMtrxType  giveType() const;
+    virtual bool isAsymmetric() const;
 
     virtual void writeToFile(const char* fname) const;
 
     // Internals (should be documented)
-    Mat *giveMtrx() { return & this->mtrx; }
-    bool giveSymmetryFlag() const { return symmFlag; }
-    int setOption(MatOption op, PetscBool flag) { return MatSetOption(this->mtrx, op, flag); }
-    int giveLeqs() { return leqs; }
-    int giveDomainIndex() const { return di; }
+    Mat *giveMtrx();
+    bool giveSymmetryFlag() const;
+    int setOption(MatOption op, PetscBool flag);
+    int giveLeqs();
+    int giveDomainIndex() const;
 
     friend class PetscSolver;
 };

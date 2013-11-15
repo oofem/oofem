@@ -47,6 +47,24 @@ namespace oofem {
 
 REGISTER_SparseMtrx( PetscSparseMtrx, SMT_PetscMtrx);
 
+
+PetscSparseMtrx :: PetscSparseMtrx(int n, int m): SparseMtrx(n, m),
+    mtrx(NULL), symmFlag(false), leqs(0), geqs(0), di(0), kspInit(false), newValues(true) {}
+
+
+PetscSparseMtrx :: PetscSparseMtrx(): SparseMtrx(),
+    mtrx(NULL), symmFlag(false), leqs(0), geqs(0), di(0), kspInit(false), newValues(true) {}
+
+
+PetscSparseMtrx :: ~PetscSparseMtrx()
+{
+    MatDestroy(&this->mtrx);
+    if (this->kspInit) {
+        KSPDestroy(&this->ksp);
+    }
+}
+
+
 SparseMtrx *
 PetscSparseMtrx :: GiveCopy() const
 {
@@ -748,6 +766,42 @@ PetscSparseMtrx :: writeToFile(const char* fname) const
     PetscViewerASCIIOpen(PETSC_COMM_WORLD, fname, &viewer);
     MatView(this->mtrx, viewer);
     PetscViewerDestroy(&viewer);
+}
+
+
+SparseMtrxType PetscSparseMtrx :: giveType() const
+{
+    return SMT_PetscMtrx;
+}
+
+bool PetscSparseMtrx :: isAsymmetric() const
+{
+    return !symmFlag;
+}
+
+Mat *PetscSparseMtrx :: giveMtrx()
+{
+    return & this->mtrx;
+}
+
+bool PetscSparseMtrx :: giveSymmetryFlag() const
+{
+    return symmFlag;
+}
+
+int PetscSparseMtrx :: setOption(MatOption op, PetscBool flag)
+{
+    return MatSetOption(this->mtrx, op, flag);
+}
+
+int PetscSparseMtrx :: giveLeqs()
+{
+    return leqs;
+}
+
+int PetscSparseMtrx :: giveDomainIndex() const
+{
+    return di;
 }
 
 } // end namespace oofem
