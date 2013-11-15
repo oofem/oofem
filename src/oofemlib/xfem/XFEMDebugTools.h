@@ -20,7 +20,7 @@ public:
     XFEMDebugTools();
     virtual ~XFEMDebugTools();
 
-    static void WriteTrianglesToVTK(const std :: string &iName, const std::vector< Triangle > &iTriangles);
+    static void WriteTrianglesToVTK(const std :: string &iName, const std :: vector< Triangle > &iTriangles);
     static void WritePointsToVTK(const std :: string &iName, const std :: vector< FloatArray > &iPoints);
 };
 } /* namespace oofem */

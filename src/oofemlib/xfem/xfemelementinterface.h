@@ -92,7 +92,7 @@ public:
     void XfemElementInterface_createEnrNmatrixAt(FloatMatrix &oAnswer, const FloatArray &iLocCoord, Element &iEl);
 
     /// Partitions the element into patches by a triangulation.
-    virtual void XfemElementInterface_partitionElement(std::vector< Triangle > &oTriangles, const std :: vector< FloatArray > &iPoints);
+    virtual void XfemElementInterface_partitionElement(std :: vector< Triangle > &oTriangles, const std :: vector< FloatArray > &iPoints);
     /// Updates integration rule based on the triangulation.
     virtual void XfemElementInterface_updateIntegrationRule();
 
@@ -111,7 +111,7 @@ public:
     /**
      * Cohesive Zone functions
      */
-    bool hasCohesiveZone() const {return (mpCZMat != NULL && mpCZIntegrationRule);}
+    bool hasCohesiveZone() const { return ( mpCZMat != NULL && mpCZIntegrationRule ); }
 
     void computeCohesiveForces(FloatArray &answer, TimeStep *tStep);
     void computeGlobalCohesiveTractionVector(FloatArray &oT, const FloatArray &iJump, const FloatArray &iCrackNormal, const FloatMatrix &iNMatrix, GaussPoint &iGP, TimeStep *tStep);

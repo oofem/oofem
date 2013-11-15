@@ -73,7 +73,7 @@ public:
     virtual void giveInputRecord(DynamicInputRecord &input) = 0;
 
     // Update of description
-    virtual void updateEnrichmentDomain(){};
+    virtual void updateEnrichmentDomain() {};
 
     virtual const char *giveInputRecordName() const = 0;
     virtual const char *giveClassName() const = 0;
@@ -89,13 +89,13 @@ public:
     virtual void CallNodeEnrMarkerUpdate(EnrichmentItem &iEnrItem, XfemManager &ixFemMan) const {}
 
 
-    virtual bool giveClosestTipInfo(const FloatArray &iCoords, TipInfo &oInfo) const {return false;}
+    virtual bool giveClosestTipInfo(const FloatArray &iCoords, TipInfo &oInfo) const { return false; }
 
     /// Return array with info about all tips
-    virtual bool giveTipInfos(std::vector<TipInfo> &oInfo) const {return false;}
+    virtual bool giveTipInfos(std :: vector< TipInfo > &oInfo) const { return false; }
 
     /// Propagate tips
-    virtual bool propagateTips(const std::vector<TipPropagation> &iTipProp) {return false;}
+    virtual bool propagateTips(const std :: vector< TipPropagation > &iTipProp) { return false; }
 };
 
 
@@ -151,9 +151,8 @@ public:
     virtual const char *giveClassName() const { return "EDCrack"; }
 
     virtual bool giveClosestTipInfo(const FloatArray &iCoords, TipInfo &oInfo) const;
-    virtual bool giveTipInfos(std::vector<TipInfo> &oInfo) const;
-    virtual bool propagateTips(const std::vector<TipPropagation> &iTipProp);
-
+    virtual bool giveTipInfos(std :: vector< TipInfo > &oInfo) const;
+    virtual bool propagateTips(const std :: vector< TipPropagation > &iTipProp);
 };
 
 
@@ -163,16 +162,16 @@ public:
 class OOFEM_EXPORT DofManList : public EnrichmentDomain
 {
 protected:
-    std::vector< int > dofManList;
+    std :: vector< int >dofManList;
     double xi;
 public:
-    DofManList():xi(0.0) { }
+    DofManList() : xi(0.0) { }
     virtual ~DofManList() { }
 
     const std :: vector< int > &giveDofManList() const { return dofManList; }
 
     virtual void computeNormalSignDist(double &oDist, const FloatArray &iPoint) const { oDist = 0.0; };
-    virtual void computeTangentialSignDist(double &oDist, const FloatArray &iPoint) const { oDist = 0.0;};
+    virtual void computeTangentialSignDist(double &oDist, const FloatArray &iPoint) const { oDist = 0.0; };
     virtual void computeSurfaceNormalSignDist(double &oDist, const FloatArray &iPoint) const; // new /JB
     // Use double dispatch to call the correct version of CallNodeEnrMarkerUpdate.
     virtual void CallNodeEnrMarkerUpdate(EnrichmentItem &iEnrItem, XfemManager &ixFemMan) const;

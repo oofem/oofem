@@ -53,7 +53,6 @@
 #include "internalstatevaluetype.h"
 
 namespace oofem {
-
 XfemManager :: XfemManager(Domain *domain)
 {
     this->domain = domain;
@@ -70,7 +69,7 @@ XfemManager :: ~XfemManager()
 }
 
 
-InternalStateValueType 
+InternalStateValueType
 XfemManager :: giveXFEMStateValueType(XFEMStateType type)
 {
     switch ( type ) {
@@ -80,9 +79,9 @@ XfemManager :: giveXFEMStateValueType(XFEMStateType type)
     case XFEMST_NumIntersecPoints:
     case XFEMST_NodeEnrMarker:
         return ISVT_SCALAR;
+
     default:
         return ISVT_UNDEFINED;
-
     }
 }
 
@@ -122,7 +121,6 @@ XfemManager :: createEnrichedDofs()
         EnrichmentItem *ei = this->giveEnrichmentItem(j);
         ei->createEnrichedDofs();
     }
-
 }
 
 IRResultType XfemManager :: initializeFrom(InputRecord *ir)
@@ -151,7 +149,6 @@ void XfemManager :: giveInputRecord(DynamicInputRecord &input)
     input.setField(mNumGpPerTri, _IFT_XfemManager_numberOfGpPerTri);
     input.setField(doVTKExport, _IFT_XfemManager_VTKExport);
     input.setField(vtkExportFields, _IFT_XfemManager_VTKExportFields);
-
 }
 
 int XfemManager :: instanciateYourself(DataReader *dr)
@@ -188,10 +185,9 @@ void XfemManager :: setDomain(Domain *ipDomain)
 
     int numEI = enrichmentItemList->giveSize();
 
-    for(int i = 1; i <= numEI; i++) {
+    for ( int i = 1; i <= numEI; i++ ) {
         enrichmentItemList->at(i)->setDomain(ipDomain);
     }
-
 }
 
 contextIOResultType XfemManager :: saveContext(DataStream *stream, ContextMode mode, void *obj)
@@ -275,12 +271,11 @@ void XfemManager :: propagateFronts()
 bool XfemManager :: hasPropagatingFronts()
 {
     for ( int i = 1; i <= enrichmentItemList->giveSize(); i++ ) {
-    	if( enrichmentItemList->at(i)->hasPropagatingFronts() ) {
-    		return true;
-    	}
+        if ( enrichmentItemList->at(i)->hasPropagatingFronts() ) {
+            return true;
+        }
     }
 
-	return false;
+    return false;
 }
-
 } // end namespace oofem

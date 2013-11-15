@@ -11,8 +11,6 @@
 #include "floatarray.h"
 
 namespace oofem {
-
-
 /*
  * struct TipInfo gathers useful information about a crack tip,
  * like its position and tangent direction. The purpose of the
@@ -24,25 +22,24 @@ namespace oofem {
  */
 struct TipInfo {
 public:
-	TipInfo() {}
-	~TipInfo() {}
+    TipInfo() {}
+    ~TipInfo() {}
 
-	FloatArray 	mGlobalCoord;
-	FloatArray 	mTangDir;
-	FloatArray 	mNormalDir;
-	int 		mElIndex;
-	int 		mTipIndex;
+    FloatArray mGlobalCoord;
+    FloatArray mTangDir;
+    FloatArray mNormalDir;
+    int mElIndex;
+    int mTipIndex;
 };
 
 struct TipPropagation {
-	TipPropagation() {}
-	~TipPropagation() {}
+    TipPropagation() {}
+    ~TipPropagation() {}
 
-	int 		mTipIndex;
-	FloatArray	mPropagationDir;
-	double		mPropagationLength;
+    int mTipIndex;
+    FloatArray mPropagationDir;
+    double mPropagationLength;
 };
-
 } // end namespace oofem
 
 
