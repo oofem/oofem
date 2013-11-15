@@ -102,7 +102,6 @@ PlaneStress2dXfem :: computeGaussPoints()
 
 }
 
-///@todo: Computation of N and B can be moved to the xfem interface and thus handle all continuum elements in the same way
 void PlaneStress2dXfem :: computeBmatrixAt(GaussPoint *gp, FloatMatrix &answer, int li, int ui)
 {
 	XfemElementInterface_createEnrBmatrixAt(answer, *gp, *this);
@@ -137,67 +136,13 @@ PlaneStress2dXfem :: giveDofManDofIDMask(int inode, EquationID, IntArray &answer
 
 void PlaneStress2dXfem :: computeConstitutiveMatrixAt(FloatMatrix &answer, MatResponseMode rMode, GaussPoint *gp, TimeStep *tStep)
 {
-    XfemManager *xMan = this->giveDomain()->giveXfemManager();
-    int nEI = xMan->giveNumberOfEnrichmentItems();
-    CrossSection *cs = NULL;
-
-    for(int i = 1; i <= nEI; i++)
-    {
-    	EnrichmentItem &ei = *(xMan->giveEnrichmentItem(i));
-    	if( ei.isMaterialModified(*gp, *this, cs) )
-    	{
-    		StructuralCrossSection *structCS = dynamic_cast<StructuralCrossSection*>(cs);
-
-    		if(structCS != NULL)
-    		{
-    			structCS->giveCharMaterialStiffnessMatrix(answer, rMode, gp, tStep);
-    			return;
-    		}
-    		else
-    		{
-    			OOFEM_ERROR("PlaneStress2dXfem :: computeConstitutiveMatrixAt: failed to fetch StructuralMaterial\n");
-    		}
-    	}
-
-    }
-
-
-    // If no enrichment modifies the material,
-    // compute stiffness based on the bulk material.
-    PlaneStress2d :: computeConstitutiveMatrixAt(answer, rMode, gp, tStep);
+	XfemElementInterface :: XfemElementInterface_computeConstitutiveMatrixAt(answer, rMode, gp, tStep);
 }
 
 void
 PlaneStress2dXfem :: computeStressVector(FloatArray &answer, const FloatArray &strain, GaussPoint *gp, TimeStep *stepN)
 {
-    StructuralCrossSection *cs = static_cast< StructuralCrossSection * >( this->giveCrossSection() );
-    cs->giveRealStresses(answer, gp, strain, stepN);
-
-
-    XfemManager *xMan = this->giveDomain()->giveXfemManager();
-
-    int nEI = xMan->giveNumberOfEnrichmentItems();
-
-    CrossSection *csInclusion = NULL;
-    for(int i = 1; i <= nEI; i++)
-    {
-    	EnrichmentItem &ei = *(xMan->giveEnrichmentItem(i));
-    	if( ei.isMaterialModified(*gp, *this, csInclusion) )
-    	{
-    		StructuralCrossSection *structCSInclusion = dynamic_cast<StructuralCrossSection*>(csInclusion);
-
-    		if(structCSInclusion != NULL)
-    		{
-    			structCSInclusion->giveRealStresses(answer, gp, strain, stepN);
-    			return;
-    		}
-    		else
-    		{
-    			OOFEM_ERROR("PlaneStress2dXfem :: computeStressVector: failed to fetch StructuralCrossSection\n");
-    		}
-    	}
-
-    }
+	XfemElementInterface::XfemElementInterface_computeStressVector(answer, strain, gp, stepN);
 }
 
 void PlaneStress2dXfem :: computeStiffnessMatrix(FloatMatrix &answer, MatResponseMode rMode, TimeStep *tStep)

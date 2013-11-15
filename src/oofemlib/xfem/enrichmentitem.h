@@ -117,7 +117,8 @@ public:
      * EnrichmentDomain, EnrichmentFront and PropagationLaw
      * without have to keep track of them globally.
      */
-    virtual void giveInputRecord(DynamicDataReader &oDR);
+    virtual void giveInputRecord(DynamicInputRecord &input) {OOFEM_ERROR("In EnrichmentItem::giveInputRecord(): This function must be called with DynamicDataReader as input.\n");}
+    virtual void appendInputRecords(DynamicDataReader &oDR);
 
     int instanciateYourself(DataReader *dr);
     virtual const char *giveClassName() const = 0;
@@ -125,10 +126,7 @@ public:
     int giveNumberOfEnrDofs() const;
 
     // Spatial query
-    bool isDofManEnrichedByEnrichmentDomain(DofManager *dMan, int edNumber) const;
     bool isElementEnriched(const Element *element) const;
-    bool isElementEnrichedByEnrichmentDomain(const Element *element, int edNumber) const;
-    bool isElementFullyEnrichedByEnrichmentDomain(const Element *element, int edNumber); 
     inline bool isDofManEnriched(const DofManager &iDMan) const;
     int  giveNumDofManEnrichments(const DofManager &iDMan) const;
 
@@ -136,7 +134,6 @@ public:
     virtual bool isMaterialModified(GaussPoint &iGP, Element &iEl, CrossSection * &opCS) const;
 
     // Should update receiver geometry to the state reached at given time step.
-    virtual void updateGeometry(TimeStep *tStep) {};
     virtual void updateGeometry(FailureCriteriaStatus *fc, TimeStep *tStep){};
     virtual void updateGeometry();
     virtual void propagateFronts();
@@ -289,7 +286,7 @@ public:
     virtual const char *giveClassName() const { return "Delamination"; }
     virtual const char *giveInputRecordName() const { return _IFT_Delamination_Name; }
     virtual IRResultType initializeFrom(InputRecord *ir);
-    virtual void giveInputRecord(DynamicDataReader &oDR);
+    virtual void appendInputRecords(DynamicDataReader &oDR);
     
     double giveDelamXiCoord() { return delamXiCoord; };
     //virtual Material *giveMaterial() { return mat; }
@@ -300,7 +297,10 @@ public:
 
 
 
-/** Concrete representation of Crack. */
+/**
+ * Crack.
+ * @author Erik Svenning
+ */
 class OOFEM_EXPORT Crack : public EnrichmentItem
 {
 public:
@@ -376,7 +376,8 @@ void EnrichmentItem :: interpSurfaceLevelSet(double &oLevelSet, const FloatArray
  *
  *  The desired behavior is obtained by choosing a suitable EnrichmentFront.
  *
- * 	Erik Svenning - August 2013
+ * @author Erik Svenning
+ * August 2013
  */
 class OOFEM_EXPORT EnrichmentFront
 {

@@ -96,17 +96,21 @@ public:
     /// Updates integration rule based on the triangulation.
     virtual void XfemElementInterface_updateIntegrationRule();
 
-    /// Helpful routine to put the nodes for triangulation together, should be in protected members probably.
     /// Returns an array of array of points. Each array of points defines the points of a subregion of the element.
     virtual void XfemElementInterface_prepareNodesForDelaunay(std :: vector< std :: vector< FloatArray > > &oPointPartitions, FloatArray &oCrackStartPoint, FloatArray &oCrackEndPoint, int &oEnrItemIndex);
 
     /**
-     * If the enrichment evolves in time, the element subdivision
-     * need to be updated. That is done by recomputeGaussPoints.
+     * XfemElementInterface_computeConstitutiveMatrixAt.
+     * The reason for having a special implementation of this function is
+     * that the enrichment item may have a different material than
+     * the bulk material inside.
      */
-    virtual void recomputeGaussPoints();
+    virtual void XfemElementInterface_computeConstitutiveMatrixAt(FloatMatrix &answer, MatResponseMode rMode, GaussPoint *, TimeStep *tStep);
+    virtual void XfemElementInterface_computeStressVector(FloatArray &answer, const FloatArray &strain, GaussPoint *gp, TimeStep *stepN);
 
-    // Cohesive Zone functions
+    /**
+     * Cohesive Zone functions
+     */
     bool hasCohesiveZone() const {return (mpCZMat != NULL && mpCZIntegrationRule);}
 
     void computeCohesiveForces(FloatArray &answer, TimeStep *tStep);

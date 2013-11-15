@@ -126,12 +126,10 @@ public:
 
     bool isElementEnriched(const Element *elem);
 
-    /// Accessor.
     EnrichmentItem *giveEnrichmentItem(int n);
     int giveNumberOfEnrichmentItems() const { return enrichmentItemList->giveSize(); }
 
     void createEnrichedDofs();
-    void addEnrichedDofsTo( DofManager *dMan, IntArray &dofIdArray );
 
     /// Initializes receiver according to object description stored in input record.
     IRResultType initializeFrom(InputRecord *ir);

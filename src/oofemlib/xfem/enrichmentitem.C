@@ -101,20 +101,6 @@ EnrichmentItem :: ~EnrichmentItem()
 
 }
 
-bool EnrichmentItem :: isElementFullyEnrichedByEnrichmentDomain(const Element *element, int edNumber) 
-{
-    // Checks if all of the dofmanagers are enriched
-    int count = 0;
-    for ( int i = 1; i <= element->giveNumberOfDofManagers(); i++ ) {
-        DofManager *dMan = element->giveDofManager(i);
-        if ( isDofManEnrichedByEnrichmentDomain(dMan, edNumber) ){
-            count++;
-        }
-    }
-    return count == element->giveNumberOfDofManagers();
-}
-
-
 IRResultType EnrichmentItem :: initializeFrom(InputRecord *ir)
 {
     const char *__proc = "initializeFrom"; // Required by IR_GIVE_FIELD macro
@@ -131,7 +117,7 @@ IRResultType EnrichmentItem :: initializeFrom(InputRecord *ir)
     return IRRT_OK;
 }
 
-void EnrichmentItem :: giveInputRecord(DynamicDataReader &oDR)
+void EnrichmentItem :: appendInputRecords(DynamicDataReader &oDR)
 {
     DynamicInputRecord *eiRec = new DynamicInputRecord();
     FEMComponent::giveInputRecord(*eiRec);
@@ -271,13 +257,6 @@ EnrichmentItem :: giveNumberOfEnrDofs() const
 
     return numEnrDofs;
 }
-
-bool EnrichmentItem :: isDofManEnrichedByEnrichmentDomain(DofManager *dMan, int edNumber) const
-{
-    return this->isDofManEnriched(*dMan);
-
-}
-
 
 bool EnrichmentItem :: isElementEnriched(const Element *element) const
 {
@@ -686,15 +665,10 @@ void EnrichmentItem :: createEnrichedDofs()
 
                 if ( !dMan->hasDofID( ( DofIDItem ) ( dofIdArray.at(m) ) ) ) {
                     dMan->appendDof( new MasterDof( nDofs + m, dMan, ( DofIDItem ) ( dofIdArray.at(m) ) ) );
-                    //printf("appending dof number %i \n", nDofs + m);
                 }
             }
         }
     }
-
-    // TODO: Map values from old to new dofs
-
-
 
     // Remove old dofs
     int poolStart 	= giveStartOfDofIdPool();
@@ -894,18 +868,15 @@ double EnrichmentItem :: calcXiZeroLevel(const double &iQ1, const double &iQ2) c
 {
     double xi = 0.0;
 
-    if( fabs(iQ1-iQ2) > mLevelSetTol )
-    {
+    if( fabs(iQ1-iQ2) > mLevelSetTol ) {
         xi = (iQ1+iQ2)/(iQ1-iQ2);
     }
 
-    if( xi < -1.0)
-    {
+    if( xi < -1.0) {
         xi = -1.0;
     }
 
-    if( xi > 1.0)
-    {
+    if( xi > 1.0) {
         xi = 1.0;
     }
 
@@ -995,6 +966,10 @@ Delamination :: updateGeometry(FailureCriteriaStatus *fc, TimeStep *tStep)
          for ( int i = 1; i <= el->giveNumberOfDofManagers(); i++ ) {  
              // ugly piece of code that will skip enrichment of dofmans that have any bc's
              // which is not generally what you want
+
+        	 // @Jim: Is it a problem to add enrichments on nodes with Dirichlet BCs?
+        	 // I think not. We can add enriched dofs to Dirichlet nodes
+        	 // without setting Dirichlet BCs on the enriched dofs. //ES
              #if 1
              bool hasBc= false;
              for ( int j = 1; j <= el->giveDofManager(i)->giveNumberOfDofs(); j++ ) {
@@ -1061,9 +1036,9 @@ IRResultType Delamination :: initializeFrom(InputRecord *ir)
 
 
 void 
-Delamination :: giveInputRecord(DynamicDataReader &oDR)
+Delamination :: appendInputRecords(DynamicDataReader &oDR)
 {
-    ///@todo everything is copied from EnrichmentItem :: giveInputRecord, should be written in a better way
+    ///@todo almost everything is copied from EnrichmentItem :: giveInputRecord, should be written in a better way
     DynamicInputRecord *eiRec = new DynamicInputRecord();
     FEMComponent::giveInputRecord(*eiRec);
 

@@ -125,18 +125,6 @@ XfemManager :: createEnrichedDofs()
 
 }
 
-
-void 
-XfemManager :: addEnrichedDofsTo( DofManager *dMan, IntArray &dofIdArray )
-{
-    int nDofs = dMan->giveNumberOfDofs();
-    for ( int j = 1; j <= dofIdArray.giveSize(); j++ ) {                      
-            dMan->appendDof( new MasterDof( nDofs + j, dMan, ( DofIDItem ) ( dofIdArray.at(j) ) ) );   
-    }
-
-}
-
-
 IRResultType XfemManager :: initializeFrom(InputRecord *ir)
 {
     const char *__proc = "initializeFrom"; // Required by IR_GIVE_FIELD macro

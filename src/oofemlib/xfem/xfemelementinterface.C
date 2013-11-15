@@ -618,45 +618,72 @@ void XfemElementInterface :: XfemElementInterface_prepareNodesForDelaunay(std ::
     } // for ( int i = 1; i <= xMan->giveNumberOfEnrichmentItems(); i++ )
 }
 
-void XfemElementInterface :: recomputeGaussPoints() {
-
-	bool recompute = false;
-
-
-	// Do checks to determine if the Gauss points need to be recomputed
-	// For now, we choose to always recompute cut elements.
+void XfemElementInterface :: XfemElementInterface_computeConstitutiveMatrixAt(FloatMatrix &answer, MatResponseMode rMode, GaussPoint *gp, TimeStep *tStep)
+{
     XfemManager *xMan = element->giveDomain()->giveXfemManager();
+    int nEI = xMan->giveNumberOfEnrichmentItems();
+    CrossSection *cs = NULL;
 
-    for(int i = 1; i <= xMan->giveNumberOfEnrichmentItems(); i++) {
-    	std::vector<FloatArray> intersecPoints;
-    	EnrichmentItem *ei = xMan->giveEnrichmentItem(i);
+    for(int i = 1; i <= nEI; i++)
+    {
+    	EnrichmentItem &ei = *(xMan->giveEnrichmentItem(i));
+    	if( ei.isMaterialModified(*gp, *element, cs) )
+    	{
+    		StructuralCrossSection *structCS = dynamic_cast<StructuralCrossSection*>(cs);
 
-        std::vector< int > intersecEdgeInd;
-    	ei->computeIntersectionPoints(intersecPoints, intersecEdgeInd, element);
-    	int numIntersecPoints = intersecPoints.size();
-
-        if ( numIntersecPoints > 0 )
-        {
-        	recompute = true;
-        }
+    		if(structCS != NULL)
+    		{
+    			structCS->giveCharMaterialStiffnessMatrix(answer, rMode, gp, tStep);
+    			return;
+    		}
+    		else
+    		{
+    			OOFEM_ERROR("XfemElementInterface :: XfemElementInterface_computeConstitutiveMatrixAt: failed to fetch StructuralMaterial\n");
+    		}
+    	}
 
     }
 
 
-	if( recompute ) {
+    // If no enrichment modifies the material,
+    // compute stiffness based on the bulk material.
+    StructuralElement &structEl = dynamic_cast<StructuralElement&>( (*element) );
+    structEl.StructuralElement::computeConstitutiveMatrixAt(answer, rMode, gp, tStep);
+}
 
-		// Fetch old Gauss points
+void XfemElementInterface :: XfemElementInterface_computeStressVector(FloatArray &answer, const FloatArray &strain, GaussPoint *gp, TimeStep *stepN)
+{
+    StructuralCrossSection *cs = dynamic_cast< StructuralCrossSection * >( element->giveCrossSection() );
+    if(cs == NULL) {
+    	OOFEM_ERROR("In XfemElementInterface :: XfemElementInterface_computeStressVector: cs == NULL.\n");
+    }
+    cs->giveRealStresses(answer, gp, strain, stepN);
 
 
-		// Create new partitioning (and delete old Gauss points)
+    XfemManager *xMan = element->giveDomain()->giveXfemManager();
 
-        this->XfemElementInterface_updateIntegrationRule();
+    int nEI = xMan->giveNumberOfEnrichmentItems();
 
-		// Map Gauss point variables
-		// (area weighted least squares?)
+    CrossSection *csInclusion = NULL;
+    for(int i = 1; i <= nEI; i++)
+    {
+    	EnrichmentItem &ei = *(xMan->giveEnrichmentItem(i));
+    	if( ei.isMaterialModified(*gp, *element, csInclusion) )
+    	{
+    		StructuralCrossSection *structCSInclusion = dynamic_cast<StructuralCrossSection*>(csInclusion);
 
-	}
+    		if(structCSInclusion != NULL)
+    		{
+    			structCSInclusion->giveRealStresses(answer, gp, strain, stepN);
+    			return;
+    		}
+    		else
+    		{
+    			OOFEM_ERROR("PlaneStress2dXfem :: computeStressVector: failed to fetch StructuralCrossSection\n");
+    		}
+    	}
 
+    }
 }
 
 void XfemElementInterface :: computeCohesiveForces(FloatArray &answer, TimeStep *tStep)
@@ -909,8 +936,6 @@ void XfemElementInterface :: computeCohesiveTangentAt(FloatMatrix &answer, TimeS
 
 void XfemElementInterface :: XfemElementInterface_computeConsistentMassMatrix(FloatMatrix &answer, TimeStep *tStep, double &mass, const double *ipDensity)
 {
-//	printf("Entering XfemElementInterface :: XfemElementInterface_computeConsistentMassMatrix().\n");
-
 	StructuralElement *structEl = dynamic_cast<StructuralElement*> (element);
 	if(structEl == NULL) {
 		OOFEM_ERROR("Error in XfemElementInterface :: XfemElementInterface_computeConsistentMassMatrix().\n");
@@ -919,7 +944,6 @@ void XfemElementInterface :: XfemElementInterface_computeConsistentMassMatrix(Fl
     int ndofs = structEl->computeNumberOfDofs();
     double density, dV;
     FloatMatrix n;
-//    GaussIntegrationRule iRule(1, structEl, 1, 1);
     IntegrationRule *iRule = element->giveIntegrationRule(0);
     IntArray mask;
 
@@ -929,16 +953,8 @@ void XfemElementInterface :: XfemElementInterface_computeConsistentMassMatrix(Fl
         return;
     }
 
-//    if ( ( nip = structEl->giveNumberOfIPForMassMtrxIntegration() ) == 0 ) {
-//        OOFEM_ERROR("computeConsistentMassMatrix no integration points available");
-//    }
-
-//    iRule.setUpIntegrationPoints( structEl->giveIntegrationDomain(),
-//                                 nip, this->giveMaterialMode() );
-
     structEl->giveMassMtrxIntegrationgMask(mask);
 
-    //density = this->giveMaterial()->give('d');
     mass = 0.;
 
     for ( int i = 0; i < iRule->giveNumberOfIntegrationPoints(); i++ ) {

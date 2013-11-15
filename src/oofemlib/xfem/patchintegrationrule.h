@@ -40,7 +40,6 @@
 
 #include "gaussintegrationrule.h"
 #include "classtype.h"
-//#include "patch.h"
 
 namespace oofem {
 class FEI2dTrLin;
@@ -53,7 +52,7 @@ class Triangle;
  *  -Element *e:	parent element pointer
  *  -iTriangles:	array of triangles describing the subdivision of the element.
  *
- *  * @author Erik Svenning (Major modifications)
+ * @author Erik Svenning (Major modifications)
  *
  */
 class OOFEM_EXPORT PatchIntegrationRule : public GaussIntegrationRule

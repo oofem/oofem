@@ -84,7 +84,6 @@ public:
     virtual IRResultType initializeFrom(InputRecord *ir);
     virtual void giveInputRecord(DynamicInputRecord &input);
     virtual const char *giveClassName() const { return "EnrichmentFunction"; }
-    /// Accessor.
     int giveNumberOfDofs() const { return numberOfDofs; }
 
 protected:
@@ -109,7 +108,11 @@ public:
     virtual const char *giveInputRecordName() const { return _IFT_DiscontinuousFunction_Name; }
 };
 
-/** Class representing Heaviside EnrichmentFunction. */
+/**
+ * Class representing Heaviside EnrichmentFunction.
+ *
+ * \author Erik Svenning
+ */
 class OOFEM_EXPORT HeavisideFunction : public EnrichmentFunction
 {
 public:
