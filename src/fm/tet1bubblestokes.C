@@ -45,7 +45,7 @@
 #include "fluiddynamicmaterial.h"
 #include "fei3dtetlin.h"
 #include "masterdof.h"
-#include "crosssection.h"
+#include "fluidcrosssection.h"
 #include "classfactory.h"
 
 namespace oofem {
@@ -151,7 +151,7 @@ void Tet1BubbleStokes :: giveCharacteristicMatrix(FloatMatrix &answer,
 void Tet1BubbleStokes :: computeInternalForcesVector(FloatArray &answer, TimeStep *tStep)
 {
     IntegrationRule *iRule = integrationRulesArray [ 0 ];
-    FluidDynamicMaterial *mat = static_cast< FluidDynamicMaterial * >( this->giveMaterial() );
+    FluidDynamicMaterial *mat = static_cast< FluidCrossSection * >( this->giveCrossSection() )->giveFluidMaterial();
     FloatArray a_pressure, a_velocity, devStress, epsp, N, dNv(15);
     double r_vol, pressure;
     FloatMatrix dN, B(6, 15);
@@ -237,6 +237,7 @@ void Tet1BubbleStokes :: computeLoadVector(FloatArray &answer, Load *load, CharT
         return;
     }
 
+    FluidDynamicMaterial *mat = static_cast< FluidCrossSection * >( this->giveCrossSection() )->giveFluidMaterial();
     IntegrationRule *iRule = this->integrationRulesArray [ 0 ];
     GaussPoint *gp;
     FloatArray N, gVector, *lcoords, temparray(15);
@@ -250,7 +251,7 @@ void Tet1BubbleStokes :: computeLoadVector(FloatArray &answer, Load *load, CharT
             gp = iRule->getIntegrationPoint(k);
             lcoords = gp->giveCoordinates();
 
-            rho = this->giveMaterial()->give('d', gp);
+            rho = mat->give('d', gp);
             detJ = fabs( this->interp.giveTransformationJacobian(* lcoords, FEIElementGeometryWrapper(this)) );
             dV = detJ * gp->giveWeight() * rho;
 
@@ -329,7 +330,7 @@ void Tet1BubbleStokes :: computeBoundaryLoadVector(FloatArray &answer, BoundaryL
 void Tet1BubbleStokes :: computeStiffnessMatrix(FloatMatrix &answer, TimeStep *tStep)
 {
     // Note: Working with the components; [K, G+Dp; G^T+Dv^T, C] . [v,p]
-    FluidDynamicMaterial *mat = static_cast< FluidDynamicMaterial * >( this->giveMaterial() );
+    FluidDynamicMaterial *mat = static_cast< FluidCrossSection * >( this->giveCrossSection() )->giveFluidMaterial();
     IntegrationRule *iRule = this->integrationRulesArray [ 0 ];
     GaussPoint *gp;
     FloatMatrix B(6, 15), EdB, K(15,15), G, Dp, DvT, C, Ed, dN;
