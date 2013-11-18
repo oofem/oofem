@@ -189,11 +189,21 @@ double MasterDof :: giveUnknown(ValueModeType mode, TimeStep *stepN)
     //             _error2( "giveUnknown:  Dof unknowns dictionary does not contain unknown of value mode (%s)", __ValueModeTypeToString(mode) );
     //         }
     //  }
-
-    if ( !dofManager->giveDomain()->giveEngngModel()->requiresUnknownsDictionaryUpdate() && this->hasBc(stepN) ) {
-        value = this->giveBcValue(mode, stepN);
-        return value;
+       
+    if (mode != VM_Intermediate)
+    {
+	  if(stepN->giveNumber() < 0)
+	  {
+	    value = 0.;
+	    return value;
+	  }
+	  if ( !dofManager->giveDomain()->giveEngngModel()->requiresUnknownsDictionaryUpdate() && this->hasBc(stepN) )
+	  {
+	    value = this->giveBcValue(mode, stepN);
+	    return value;
+	  }
     }
+    
 
     return ( dofManager->giveDomain()->giveEngngModel()->
             giveUnknownComponent(mode, stepN, dofManager->giveDomain(), this) );

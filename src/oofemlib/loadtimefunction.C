@@ -67,6 +67,8 @@ LoadTimeFunction :: evaluate(TimeStep *atTime, ValueModeType mode)
         } else {
             return this->__at( atTime->giveIntrinsicTime() ) - this->__at( atTime->giveIntrinsicTime() - atTime->giveTimeIncrement() );
         }
+    } else if (mode == VM_Intermediate) {
+      return this->__at( atTime->giveIntrinsicTime() );
     } else {
         _error2("LoadTimeFunction:: evaluate: unsupported mode(%d)", mode);
     }

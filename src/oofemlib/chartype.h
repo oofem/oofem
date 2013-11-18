@@ -85,7 +85,31 @@ namespace oofem {
     ENUM_ITEM_WITH_VALUE(NSTP_MidpointLhs,156) /* NonStationaryTransportProblem - LHS for midpoint discretization alg. */ \
     ENUM_ITEM_WITH_VALUE(NSTP_MidpointRhs,157) /* NonStationaryTransportProblem - RHS for midpoint discretization alg. */ \
     ENUM_ITEM_WITH_VALUE(IntSourceLHSMatrix,158) /* LHS due to material internal source (Transport problems) */           \
-    ENUM_ITEM_WITH_VALUE(PrescribedRhsVector,159)
+    ENUM_ITEM_WITH_VALUE(PrescribedRhsVector,159) \
+    /* PFEM */	\
+    ENUM_ITEM(AuxVelocityLhs,200)                                     \
+    ENUM_ITEM(VelocityLhs,201)                                        \
+    ENUM_ITEM(LoadVector,202)						\
+      /*for pressureLhs see CBS */					\
+    ENUM_ITEM(PressureGradientMatrix,203)                                     \
+    ENUM_ITEM(DivergenceMatrix,204)					\
+    ENUM_ITEM(PFEMSubstitutionMatrix,205)                                     \
+    ENUM_ITEM(VelocityLaplacianMatrix,206)                                     \
+    ENUM_ITEM(PressureLaplacianMatrix,207)					\
+    ENUM_ITEM(StabilizedLaplacianMatrix,208)                                 \
+    ENUM_ITEM(StabilizationGradientMatrix,209)				 \
+    ENUM_ITEM(StabilizationMassMatrix,210)				\
+    ENUM_ITEM(InvertedStabilizationMassMatrix,211)		\
+    /* PFEM vectors */  \
+    ENUM_ITEM(PressureGradientVector,212)		                          \
+    ENUM_ITEM(MassVelocityVector,213)		                          \
+    ENUM_ITEM(MassAuxVelocityVector,214)		                          \
+    ENUM_ITEM(StabilizedLaplacePressureVector,215)		                          \
+    ENUM_ITEM(LaplacePressureVector,216)		                          \
+    ENUM_ITEM(LaplaceVelocityVector,217)		                          \
+    ENUM_ITEM(DivergenceVelocityVector,218)		                          \
+    ENUM_ITEM(QMhat_invQTpressureVector,219)
+
 
 enum CharType {
     CharType_DEF

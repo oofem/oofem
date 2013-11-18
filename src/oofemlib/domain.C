@@ -670,6 +670,7 @@ void Domain :: setRandomFieldGenerator(int i, RandomFieldGenerator *obj) { rando
 void Domain :: setSet(int i, Set *obj) { setList->put(i, obj); }
 
 void Domain :: clearBoundaryConditions() { bcList->clear(true); };
+void Domain :: clearElements() {elementList->clear(true);};
 
 int
 Domain :: instanciateYourself(DataReader *dr)
@@ -1323,6 +1324,8 @@ Domain :: drawYourself(oofegGraphicContext &context)
         this->drawNodes(context);
     } else {
         this->drawElements(context);
+	
+	    this->drawNodes(context);
     }
 }
 

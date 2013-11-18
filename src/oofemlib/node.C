@@ -903,7 +903,11 @@ Node :: drawYourself(oofegGraphicContext &gc)
             EGWithMaskChangeAttributes(COLOR_MASK | LAYER_MASK, go);
             EMAddGraphicsToModel(ESIModel(), go);
         }
-    }
+	
+    } else if ( mode == OGC_scalarPlot ) {
+      this->drawScalar(gc);
+}
+    
 }
 
 #endif

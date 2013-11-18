@@ -100,6 +100,9 @@ enum classType {
     RigidArmNodeClass,
     HangingNodeClass,
     ElementSideClass,
+
+    PFEMParticleClass,
+
     ElementDofManagerClass,
     RigidArmSlaveDofClass,
     HangingDofClass,
@@ -122,6 +125,8 @@ enum classType {
     TR21_2D_SUPGClass,
     Quad10_2D_SUPGClass,
     SUPGElementClass,
+    PFEMElementClass,
+    PFEMElement2dClass,
     Tr21StokesElementClass,
     Tet21StokesElementClass,
     Hexa21StokesElementClass,
@@ -254,6 +259,7 @@ enum classType {
     StaggeredProblemClass,
     CBSClass,
     SUPGClass,
+    PFEMClass,
     StokesFlowClass,
     DarcyFlowClass,
     FluidMaterialEvaluatorClass,
@@ -487,6 +493,7 @@ enum classType {
     SpatialLocalizerClass,
     DummySpatialLocalizerClass,
     OctreeSpatialLocalizerClass,
+    OctreeSpatialLocalizer2Class,
 
     NonlocalBarrierClass,
     PolylineNonlocalBarrierClass,

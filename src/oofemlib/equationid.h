@@ -46,7 +46,10 @@ namespace oofem {
     ENUM_ITEM_WITH_VALUE(EID_MomentumBalance, 1) \
     ENUM_ITEM_WITH_VALUE(EID_ConservationEquation, 3) \
     ENUM_ITEM_WITH_VALUE(EID_MomentumBalance_ConservationEquation, 4) \
-
+    ENUM_ITEM_WITH_VALUE(EID_AuxVelocityEquation, 5)	\
+    ENUM_ITEM_WITH_VALUE(EID_PressureEquation, 6)	\
+    ENUM_ITEM_WITH_VALUE(EID_VelocityEquation, 7) \
+      ENUM_ITEM_WITH_VALUE(EID_AuxMomentumBalance, 8)
 /**
  * This type identifies the governing equation.
  */
