@@ -55,7 +55,6 @@
 #define _IFT_TR1_2D_PFEM_Name "tr1pfem"
 //@}
 namespace oofem {
-
 class TimeStep;
 class Node;
 class Material;
@@ -65,41 +64,41 @@ class FloatArray;
 class IntArray;
 
 /**
- * This class is the implementation of triangular PFEM element with linear (and equal order) interpolation of velocity and pressure fields.   
+ * This class is the implementation of triangular PFEM element with linear (and equal order) interpolation of velocity and pressure fields.
  */
- class TR1_2D_PFEM : public PFEMElement2d
+class TR1_2D_PFEM : public PFEMElement2d
 {
- protected:
-  //double a[3];
-  // ?????????????????????
-  double b [ 3 ];
-  double c [ 3 ];
-  double area;
+protected:
+    //double a[3];
+    // ?????????????????????
+    double b [ 3 ];
+    double c [ 3 ];
+    double area;
 
 
-  
-  static FEI2dTrLin velocityInterpolation;
-  static FEI2dTrLin pressureInterpolation;
 
-  static IntArray ordering;
-  static IntArray edge_ordering [ 3 ];
+    static FEI2dTrLin velocityInterpolation;
+    static FEI2dTrLin pressureInterpolation;
+
+    static IntArray ordering;
+    static IntArray edge_ordering [ 3 ];
 public:
     /// Constructor - not used
     TR1_2D_PFEM(int, Domain *);
-	/// Constructor - used
+    /// Constructor - used
     TR1_2D_PFEM(int, Domain *, int, int, int, int, int);
-	// Destructor
+    // Destructor
     ~TR1_2D_PFEM();
 
     virtual void          computeConsistentMassMtrx(FloatMatrix &answer, TimeStep *);
     virtual void          computeDiagonalMassMtrx(FloatArray &answer, TimeStep *);
     virtual void          computeDiagonalMassMtrx(FloatMatrix &answer, TimeStep *);
-    
+
     // NOT IN USE
     virtual void computeInvertedStabilizationDiagonalMassMtrx(FloatMatrix &answer, TimeStep *atTime);
 
     double giveCharacteristicLenght(GaussPoint *gp, const FloatArray &inDirection);
-    void computeStabilizationParameters (FloatArray &answer, GaussPoint *gp, TimeStep *atTime);
+    void computeStabilizationParameters(FloatArray &answer, GaussPoint *gp, TimeStep *atTime);
 
     /// calculates critical time step
     virtual double        computeCriticalTimeStep(TimeStep *tStep);
@@ -125,8 +124,8 @@ public:
     classType                giveClassID() const { return PFEMElementClass; }
     Element_Geometry_Type giveGeometryType() const { return EGT_triangle_1; }
 
-    virtual void giveElementDofIDMask(EquationID, IntArray & answer) const;
-	
+    virtual void giveElementDofIDMask(EquationID, IntArray &answer) const;
+
     virtual void           giveDofManDofIDMask(int inode, EquationID ut, IntArray &answer) const;
     virtual int            computeNumberOfDofs();
     IRResultType           initializeFrom(InputRecord *ir);
@@ -149,7 +148,7 @@ public:
 
     /** Interface requesting service */
     Interface *giveInterface(InterfaceType);
-    
+
     virtual Element *giveElement() { return this; }
 
     //@}
@@ -182,28 +181,26 @@ public:
     /** Prints output of receiver to stream, for given time step */
     virtual void   printOutputAt(FILE *, TimeStep *);
 
-    virtual FEInterpolation * giveVelocityInterpolation(){return & velocityInterpolation;}
-    virtual FEInterpolation * givePressureInterpolation(){return & pressureInterpolation;}
+    virtual FEInterpolation *giveVelocityInterpolation() { return & velocityInterpolation; }
+    virtual FEInterpolation *givePressureInterpolation() { return & pressureInterpolation; }
 
 
- protected:
-       
+protected:
+
     void computeGaussPoints();
     virtual void computeDeviatoricStress(FloatArray &answer, GaussPoint *gp, TimeStep *);
-      
-    virtual void computeForceVector(FloatArray &answer, TimeStep *atTime);//F
+
+    virtual void computeForceVector(FloatArray &answer, TimeStep *atTime); //F
 
     // NOT IN USE
-    virtual void computePFEMSubstitutionMatrix(FloatMatrix &answer, TimeStep *atTime );//S
+    virtual void computePFEMSubstitutionMatrix(FloatMatrix &answer, TimeStep *atTime); //S
 
 
-	/// Calculates the body load vector
+    /// Calculates the body load vector
     virtual void computeBodyLoadVectorAt(FloatArray &answer, Load *load, TimeStep *atTime);
-	/// Calculates the boundary condition sub-vector on an edge
+    /// Calculates the boundary condition sub-vector on an edge
     virtual void computeEdgeBCSubVectorAt(FloatArray &answer, Load *load, int iEdge, TimeStep *atTime);
-
 };
-
 } // end namespace oofem
 #endif // tr1_2d_pfem_h
 

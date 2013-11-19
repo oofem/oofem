@@ -51,7 +51,6 @@
 #include "fei2dtrlin.h"
 
 namespace oofem {
-
 class TimeStep;
 class Node;
 class Material;
@@ -64,23 +63,23 @@ class IntArray;
  * This class is the implementation of general 2d element with arbitrary interpolation of velocity and pressure fields.
  * Should be used with PFEM solution algorithm.
  */
- class PFEMElement2d : public PFEMElement
-   
+class PFEMElement2d : public PFEMElement
+
 {
 protected:
-  
+
 public:
     /// Constructor
     PFEMElement2d(int, Domain *);
-	/// Destructor
+    /// Destructor
     ~PFEMElement2d();
 
     virtual void          computeConsistentMassMtrx(FloatMatrix &answer, TimeStep *) = 0;
     virtual void          computeDiagonalMassMtrx(FloatArray &answer, TimeStep *) = 0;
 
 
-	/// Calculates the stabilization parameters
-    virtual void computeStabilizationParameters (FloatArray &answer, GaussPoint *gp, TimeStep *atTime) = 0;
+    /// Calculates the stabilization parameters
+    virtual void computeStabilizationParameters(FloatArray &answer, GaussPoint *gp, TimeStep *atTime) = 0;
 
 
     /// calculates critical time step
@@ -105,7 +104,7 @@ public:
     classType                giveClassID() const { return PFEMElementClass; }
     virtual Element_Geometry_Type giveGeometryType() const { return EGT_triangle_1; }
 
-    virtual void giveElementDofIDMask(EquationID, IntArray & answer) const = 0;
+    virtual void giveElementDofIDMask(EquationID, IntArray &answer) const = 0;
     virtual void           giveDofManDofIDMask(int inode, EquationID ut, IntArray &answer) const = 0;
     virtual int            computeNumberOfDofs() = 0;
     IRResultType           initializeFrom(InputRecord *ir);
@@ -132,7 +131,7 @@ public:
     virtual Element *giveElement() { return this; }
 
     //@}
-     /**
+    /**
      * Returns the integration point corresponding value in REDUCED form.
      * @param answer contain corresponding ip value, zero sized if not available.
      * @param aGaussPoint integration point
@@ -146,14 +145,14 @@ public:
 
 
 #ifdef __OOFEG
-virtual    int giveInternalStateAtNode(FloatArray &answer, InternalStateType type, InternalStateMode mode,
-                                int node, TimeStep *atTime) = 0;
+    virtual int giveInternalStateAtNode(FloatArray &answer, InternalStateType type, InternalStateMode mode,
+                                        int node, TimeStep *atTime) = 0;
     //
     // Graphics output
     //
     //void          drawYourself (oofegGraphicContext&);
-// virtual void  drawRawGeometry(oofegGraphicContext &);
-//  virtual void  drawScalar(oofegGraphicContext &context);
+    // virtual void  drawRawGeometry(oofegGraphicContext &);
+    //  virtual void  drawScalar(oofegGraphicContext &context);
     //virtual void  drawDeformedGeometry(oofegGraphicContext&, UnknownType) {}
 #endif
 
@@ -161,42 +160,40 @@ virtual    int giveInternalStateAtNode(FloatArray &answer, InternalStateType typ
     virtual void   printOutputAt(FILE *, TimeStep *);
 
 
-    virtual FEInterpolation * giveVelocityInterpolation() = 0;
-    virtual FEInterpolation * givePressureInterpolation() = 0;
+    virtual FEInterpolation *giveVelocityInterpolation() = 0;
+    virtual FEInterpolation *givePressureInterpolation() = 0;
 
 protected:
-    virtual void computeGaussPoints()=0;
-    virtual void computeDeviatoricStress(FloatArray &answer, GaussPoint *gp, TimeStep *)=0;
-    
+    virtual void computeGaussPoints() = 0;
+    virtual void computeDeviatoricStress(FloatArray &answer, GaussPoint *gp, TimeStep *) = 0;
+
     virtual void computeBMatrix(FloatMatrix &answer, GaussPoint *gp);
-    virtual void computeStiffnessMatrix(FloatMatrix &answer, MatResponseMode mode, TimeStep *atTime);//K
-    virtual void computePressureLaplacianMatrix (FloatMatrix &answer, TimeStep *atTime); //L
-    virtual void computeDivergenceMatrix (FloatMatrix &answerx, TimeStep *atTime );//D
-    virtual void computeForceVector(FloatArray &answer, TimeStep *atTime) = 0;//F
-    virtual void computeGradientMatrix (FloatMatrix &answer, TimeStep *atTime );//G
+    virtual void computeStiffnessMatrix(FloatMatrix &answer, MatResponseMode mode, TimeStep *atTime); //K
+    virtual void computePressureLaplacianMatrix(FloatMatrix &answer, TimeStep *atTime); //L
+    virtual void computeDivergenceMatrix(FloatMatrix &answerx, TimeStep *atTime); //D
+    virtual void computeForceVector(FloatArray &answer, TimeStep *atTime) = 0; //F
+    virtual void computeGradientMatrix(FloatMatrix &answer, TimeStep *atTime); //G
 
     // NOT IN USE
     virtual void computeNuMatrix(FloatMatrix &answer, GaussPoint *gp);
     virtual void computeNpMatrix(FloatMatrix &answer, GaussPoint *gp);
-    virtual void computeVelocityLaplacianMatrix (FloatMatrix &answer, TimeStep *atTime);
-    virtual void computeStabilizedLaplacianMatrix (FloatMatrix &answer, TimeStep *atTime); //L_tau
-    virtual void computeStabilizationGradientMatrix (FloatMatrix &answer, TimeStep *atTime);//Q
-    virtual void computeStabilizationMassMatrix (FloatMatrix &answer, TimeStep *atTime);//M_hat
-    virtual void computePFEMSubstitutionMatrix(FloatMatrix &answer, TimeStep *atTime) = 0;//S
+    virtual void computeVelocityLaplacianMatrix(FloatMatrix &answer, TimeStep *atTime);
+    virtual void computeStabilizedLaplacianMatrix(FloatMatrix &answer, TimeStep *atTime); //L_tau
+    virtual void computeStabilizationGradientMatrix(FloatMatrix &answer, TimeStep *atTime); //Q
+    virtual void computeStabilizationMassMatrix(FloatMatrix &answer, TimeStep *atTime); //M_hat
+    virtual void computePFEMSubstitutionMatrix(FloatMatrix &answer, TimeStep *atTime) = 0; //S
     // NOT IN USE - UP TO HERE
-    
+
     void computePrescribedRhsVector(FloatArray &answer, TimeStep *tStep, ValueModeType mode);
-	/// Calculates the shape function matrix on an edge
-    void computeEdgeNMatrixAt (FloatMatrix &answer, int iedge, GaussPoint *gp);
+    /// Calculates the shape function matrix on an edge
+    void computeEdgeNMatrixAt(FloatMatrix &answer, int iedge, GaussPoint *gp);
     /// Calculates the shape function vector on an edge
     void computeEgdeNVectorAt(FloatArray &answer, int iedge, GaussPoint *gp);
     /// Calculates the volume around an edge
     double computeEdgeVolumeAround(GaussPoint *gp, int iEdge);
     /// Gives the mapping for degrees of freedom on an edge
     void  giveEdgeDofMapping(IntArray &answer, int iEdge) const;
-
 };
-
 } // end namespace oofem
 #endif // pfemelement_2d_h
 

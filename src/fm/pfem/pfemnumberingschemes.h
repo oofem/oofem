@@ -41,32 +41,31 @@
 #include "dofmanager.h"
 
 namespace oofem {
-  
 /**
  * Numbering scheme that takes into account only pressure DOFs.
  * It takes the advantage that pressure is a scalar unknown in each node.
  */
 class PressureNumberingScheme : public UnknownNumberingScheme
 {
- protected:
-  Domain *domain;
-  IntArray nodalPressureEquationNumbers;
-  int neq;
-  int pres_neq;
-  bool isInitialized;
+protected:
+    Domain *domain;
+    IntArray nodalPressureEquationNumbers;
+    int neq;
+    int pres_neq;
+    bool isInitialized;
 
- public:
-  /// Constructor
-  PressureNumberingScheme();
-  /// Destructor
-  virtual ~PressureNumberingScheme();
+public:
+    /// Constructor
+    PressureNumberingScheme();
+    /// Destructor
+    virtual ~PressureNumberingScheme();
 
 
-  virtual void init();
+    virtual void init();
     /**
      * Initializes the receiver, if necessary.
      */
-  virtual void init(Domain* domain, TimeStep* tStep) ;
+    virtual void init(Domain *domain, TimeStep *tStep);
     /**
      * Returns true, if receiver is the default engngModel equation numbering scheme;
      * This is useful for some components (typically elements), that cache their code numbers
@@ -84,71 +83,69 @@ class PressureNumberingScheme : public UnknownNumberingScheme
      */
     virtual int giveRequiredNumberOfDomainEquation() const;
 
-	/// Returns total number of equations
+    /// Returns total number of equations
     virtual int giveTotalNumberOfEquations() const;
 
-	/// Returns total number of prescribed equations
+    /// Returns total number of prescribed equations
     virtual int giveTotalNumberOfPrescribedEquations() const;
 
-	/// Resets the numbering in order to start numbering again from 1
-	virtual void reset();
+    /// Resets the numbering in order to start numbering again from 1
+    virtual void reset();
 };
 
-  /**
-   * Velocity numbering scheme for PFEM purposes
-   */
-  class VelocityNumberingScheme : public UnknownNumberingScheme
-  {
-  protected:
+/**
+ * Velocity numbering scheme for PFEM purposes
+ */
+class VelocityNumberingScheme : public UnknownNumberingScheme
+{
+protected:
     int numEqs;
-	/// prescribed equations or not
+    /// prescribed equations or not
     bool prescribed;
 
-  public:
-	/// Constructor
+public:
+    /// Constructor
     VelocityNumberingScheme(bool prescribed);
-	/// Destructor
+    /// Destructor
     virtual ~VelocityNumberingScheme();
 
-	/// Resets the numbering in order to start numbering again from 1
-    void reset() {numEqs = 0;}
+    /// Resets the numbering in order to start numbering again from 1
+    void reset() { numEqs = 0; }
     virtual bool isDefault() const { return !prescribed; }
     virtual int giveDofEquationNumber(Dof *dof) const;
     virtual int giveRequiredNumberOfDomainEquation() const { return numEqs; }
-    
-	/// Asks new equation number
-    int askNewEquationNumber() { return ++numEqs; }
-  };
 
-  /**
-   * Numbering scheme for auxiliary velocity, taking advantage that no boundary conditions is applied,
-   * so every single node has full set of equations
-   */
-  class AuxVelocityNumberingScheme : public UnknownNumberingScheme
-  {
-  protected:
+    /// Asks new equation number
+    int askNewEquationNumber() { return ++numEqs; }
+};
+
+/**
+ * Numbering scheme for auxiliary velocity, taking advantage that no boundary conditions is applied,
+ * so every single node has full set of equations
+ */
+class AuxVelocityNumberingScheme : public UnknownNumberingScheme
+{
+protected:
     Domain *domain;
-	/// Nodal equation numbers are stored in an IntArray
+    /// Nodal equation numbers are stored in an IntArray
     IntArray nodalAuxVelocityEquationNumbers;
     int neq;
-    
-  public:
-	/// Constructor
+
+public:
+    /// Constructor
     AuxVelocityNumberingScheme();
-	/// Destructor
+    /// Destructor
     virtual ~AuxVelocityNumberingScheme();
 
     /// Resets the numbering in order to start numbering again from 1
-	virtual void reset() {neq = 0;}
-    
-	/// Initializes the numbering schem
+    virtual void reset() { neq = 0; }
+
+    /// Initializes the numbering schem
     virtual void init();
-    virtual void init(Domain* domain);
-    
+    virtual void init(Domain *domain);
+
     virtual int giveDofEquationNumber(Dof *dof) const;
     virtual int giveRequiredNumberOfDomainEquation() const;
-  };
-
-
+};
 } // end namespace oofem
 #endif // pfemnumberingschemes_h

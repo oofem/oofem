@@ -49,18 +49,17 @@
 #include "timestep.h"
 #include "boundaryload.h"
 #ifndef __MAKEDEPEND
-#include <math.h>
-#include <stdio.h>
+ #include <math.h>
+ #include <stdio.h>
 #endif
 #include "contextioerr.h"
 
 #ifdef __OOFEG
-#include "oofeggraphiccontext.h"
-#include "conTable.h"
+ #include "oofeggraphiccontext.h"
+ #include "conTable.h"
 #endif
 
 namespace oofem {
-
 FEI2dTrLin TR1_2D_PFEM :: velocityInterpolation(1, 2);
 FEI2dTrLin TR1_2D_PFEM :: pressureInterpolation(1, 2);
 
@@ -77,7 +76,7 @@ TR1_2D_PFEM :: TR1_2D_PFEM(int n, Domain *aDomain) :
     numberOfDofMans  = 3;
 }
 
-  TR1_2D_PFEM :: TR1_2D_PFEM(int n, Domain *aDomain, int par1, int par2, int par3, int mat, int cs) :
+TR1_2D_PFEM :: TR1_2D_PFEM(int n, Domain *aDomain, int par1, int par2, int par3, int mat, int cs) :
     PFEMElement2d(n, aDomain)
 
 {
@@ -93,7 +92,7 @@ TR1_2D_PFEM :: TR1_2D_PFEM(int n, Domain *aDomain) :
     this->setBodyLoads(aBodyLoadArry);
     this->setMaterial(mat);
     this->setCrossSection(cs);
-    this->postInitialize();    
+    this->postInitialize();
 }
 TR1_2D_PFEM :: ~TR1_2D_PFEM()
 // Destructor
@@ -102,7 +101,7 @@ TR1_2D_PFEM :: ~TR1_2D_PFEM()
 int
 TR1_2D_PFEM :: computeNumberOfDofs()
 {
-  return 9;
+    return 9;
 }
 
 void
@@ -149,13 +148,12 @@ void
 TR1_2D_PFEM :: computeGaussPoints()
 // Sets up the array containing the four Gauss points of the receiver.
 {
-
-  if (!integrationRulesArray) {
-    numberOfIntegrationRules = 1;
-    integrationRulesArray = new IntegrationRule * [ 1 ];
-    integrationRulesArray [ 0 ] = new GaussIntegrationRule(1, this, 1, 3);
-    integrationRulesArray [ 0 ]->setUpIntegrationPoints(_Triangle, 3, _2dFlow);
-  }
+    if ( !integrationRulesArray ) {
+        numberOfIntegrationRules = 1;
+        integrationRulesArray = new IntegrationRule * [ 1 ];
+        integrationRulesArray [ 0 ] = new GaussIntegrationRule(1, this, 1, 3);
+        integrationRulesArray [ 0 ]->setUpIntegrationPoints(_Triangle, 3, _2dFlow);
+    }
 }
 
 // NOT IN USE
@@ -170,44 +168,43 @@ TR1_2D_PFEM :: giveCharacteristicLenght(GaussPoint *gp, const FloatArray &inDire
 
 // NOT IN USE
 void
-TR1_2D_PFEM :: computeStabilizationParameters (FloatArray &answer, GaussPoint *gp, TimeStep *atTime)
+TR1_2D_PFEM :: computeStabilizationParameters(FloatArray &answer, GaussPoint *gp, TimeStep *atTime)
 {
-  
-  double mu = static_cast<FluidDynamicMaterial*>(this->giveMaterial())->giveEffectiveViscosity(gp, atTime);
+    double mu = static_cast< FluidDynamicMaterial * >( this->giveMaterial() )->giveEffectiveViscosity(gp, atTime);
 
 
-  answer.resize(2);
-  answer.zero();
+    answer.resize(2);
+    answer.zero();
 
-  FloatArray dirX(3), dirY(3), h(2);
-  dirX.zero();
-  dirX.at(1) = 1.0;
-  dirY.zero();
-  dirY.at(2) = 1.0;
+    FloatArray dirX(3), dirY(3), h(2);
+    dirX.zero();
+    dirX.at(1) = 1.0;
+    dirY.zero();
+    dirY.at(2) = 1.0;
 
-  h.at(1) = this->giveCharacteristicLenght(gp, dirX);
-  h.at(2) = this->giveCharacteristicLenght(gp, dirY);
-  
-  answer.at(1) = 3.0 * h.at(1) * h.at(1) / (8.0 * mu);
-  answer.at(2) = 3.0 * h.at(2) * h.at(2) / (8.0 * mu);
+    h.at(1) = this->giveCharacteristicLenght(gp, dirX);
+    h.at(2) = this->giveCharacteristicLenght(gp, dirY);
 
-  answer.zero();
-  
-  return;
+    answer.at(1) = 3.0 * h.at(1) * h.at(1) / ( 8.0 * mu );
+    answer.at(2) = 3.0 * h.at(2) * h.at(2) / ( 8.0 * mu );
+
+    answer.zero();
+
+    return;
 }
 
 void
-TR1_2D_PFEM :: computeForceVector(FloatArray &answer, TimeStep *atTime)//F
+TR1_2D_PFEM :: computeForceVector(FloatArray &answer, TimeStep *atTime) //F
 {
-  //copied form tr21stokes.C :: computeLoadVector
-  int i, load_number, load_id;
+    //copied form tr21stokes.C :: computeLoadVector
+    int i, load_number, load_id;
     Load *load;
     bcGeomType ltype;
     FloatArray vec;
 
     int nLoads = this->boundaryLoadArray.giveSize() / 2;
-	answer.resize(6);
-	//	answer.resize(15);
+    answer.resize(6);
+    //	answer.resize(15);
     answer.zero();
     for ( i = 1; i <= nLoads; i++ ) {  // For each Neumann boundary condition
         load_number = this->boundaryLoadArray.at(2 * i - 1);
@@ -234,8 +231,8 @@ TR1_2D_PFEM :: computeForceVector(FloatArray &answer, TimeStep *atTime)//F
     return;
 }
 
-  //copied from tr21stokes
-void 
+//copied from tr21stokes
+void
 TR1_2D_PFEM :: computeBodyLoadVectorAt(FloatArray &answer, Load *load, TimeStep *atTime)
 {
     IntegrationRule *iRule = this->integrationRulesArray [ 0 ];
@@ -245,7 +242,7 @@ TR1_2D_PFEM :: computeBodyLoadVectorAt(FloatArray &answer, Load *load, TimeStep 
 
     answer.resize(6);
     answer.zero();
-    
+
     load->computeComponentArrayAt(gVector, atTime, VM_Total);
     temparray.zero();
     if ( gVector.giveSize() ) {
@@ -253,18 +250,18 @@ TR1_2D_PFEM :: computeBodyLoadVectorAt(FloatArray &answer, Load *load, TimeStep 
             gp = iRule->getIntegrationPoint(k);
             lcoords = gp->giveCoordinates();
 
-            rho = this->giveMaterial()->give('d', integrationRulesArray [ 0 ]->getIntegrationPoint(0));
+            rho = this->giveMaterial()->give( 'd', integrationRulesArray [ 0 ]->getIntegrationPoint(0) );
             //detJ = this->interpolation_quad.giveTransformationJacobian(this->domain, this->dofManArray, *lcoords, 0.0);
-	    //????? pressure x velocity
-            detJ = this->pressureInterpolation.giveTransformationJacobian(* lcoords, FEIElementGeometryWrapper(this) );
+            //????? pressure x velocity
+            detJ = this->pressureInterpolation.giveTransformationJacobian( * lcoords, FEIElementGeometryWrapper(this) );
             dA = detJ * gp->giveWeight();
-	    //????? pressure x velocity
-            this->pressureInterpolation.evalN(N, * lcoords, FEIElementGeometryWrapper(this) );
+            //????? pressure x velocity
+            this->pressureInterpolation.evalN( N, * lcoords, FEIElementGeometryWrapper(this) );
             for ( int j = 0; j < 3; j++ ) {
-	          answer(2 * j)     += N(j) * rho * gVector(0) * dA;
-		  answer(2 * j + 1) += N(j) * rho * gVector(1) * dA;
-	      //    temparray(2 * j)     += N(j) * rho * gVector(0) * dA;
-	      //                temparray(2 * j + 1) += N(j) * rho * gVector(1) * dA;
+                answer(2 * j)     += N(j) * rho * gVector(0) * dA;
+                answer(2 * j + 1) += N(j) * rho * gVector(1) * dA;
+                //    temparray(2 * j)     += N(j) * rho * gVector(0) * dA;
+                //                temparray(2 * j + 1) += N(j) * rho * gVector(1) * dA;
             }
         }
     }
@@ -276,8 +273,8 @@ TR1_2D_PFEM :: computeBodyLoadVectorAt(FloatArray &answer, Load *load, TimeStep 
 
 
 // NOT IN USE
-  //copied from tr21stokes
-void 
+//copied from tr21stokes
+void
 TR1_2D_PFEM :: computeEdgeBCSubVectorAt(FloatArray &answer, Load *load, int iEdge, TimeStep *atTime)
 {
     answer.resize(15);
@@ -301,16 +298,16 @@ TR1_2D_PFEM :: computeEdgeBCSubVectorAt(FloatArray &answer, Load *load, int iEdg
             FloatArray *lcoords = gp->giveCoordinates();
 
             //this->interpolation_quad.edgeEvalN (N, *(gp->giveCoordinates()), 0.0);
-	    //????? pressure x velocity
-            this->pressureInterpolation.edgeEvalN(N, iEdge, * lcoords, FEIElementGeometryWrapper(this) );
-            double dS = gp->giveWeight() * this->pressureInterpolation.edgeGiveTransformationJacobian(iEdge, * lcoords, FEIElementGeometryWrapper(this) );
+            //????? pressure x velocity
+            this->pressureInterpolation.edgeEvalN( N, iEdge, * lcoords, FEIElementGeometryWrapper(this) );
+            double dS = gp->giveWeight() * this->pressureInterpolation.edgeGiveTransformationJacobian( iEdge, * lcoords, FEIElementGeometryWrapper(this) );
 
-            if ( boundaryLoad->giveFormulationType() == Load :: FT_Entity) {         // Edge load in xi-eta system
+            if ( boundaryLoad->giveFormulationType() == Load :: FT_Entity ) {         // Edge load in xi-eta system
                 boundaryLoad->computeValueAt(t, atTime, * lcoords, VM_Total);
-            } else   { // Edge load in x-y system
+            } else {   // Edge load in x-y system
                 FloatArray gcoords;
-		//????? pressure x velocity
-                this->pressureInterpolation.edgeLocal2global(gcoords, iEdge, * lcoords, FEIElementGeometryWrapper(this) );
+                //????? pressure x velocity
+                this->pressureInterpolation.edgeLocal2global( gcoords, iEdge, * lcoords, FEIElementGeometryWrapper(this) );
                 boundaryLoad->computeValueAt(t, atTime, gcoords, VM_Total);
             }
 
@@ -322,7 +319,7 @@ TR1_2D_PFEM :: computeEdgeBCSubVectorAt(FloatArray &answer, Load *load, int iEdg
         }
 
         answer.assemble(f, this->edge_ordering [ iEdge - 1 ]);
-    } else   {
+    } else {
         OOFEM_ERROR("Strange boundary condition type");
     }
 }
@@ -330,24 +327,24 @@ TR1_2D_PFEM :: computeEdgeBCSubVectorAt(FloatArray &answer, Load *load, int iEdg
 
 // NOT IN USE
 void
-TR1_2D_PFEM :: computePFEMSubstitutionMatrix(FloatMatrix &answer, TimeStep *atTime)//S
+TR1_2D_PFEM :: computePFEMSubstitutionMatrix(FloatMatrix &answer, TimeStep *atTime) //S
 {
-  answer.zero();
-  FloatMatrix Q, M_hat, L_tau, temp, temp2;
-  this->computeStabilizationGradientMatrix(Q, atTime);
-  this->computeStabilizationMassMatrix(M_hat, atTime);
-  this->computeStabilizedLaplacianMatrix(L_tau, atTime);
-  //this->computeStabilizedLaplacianMatrix(L_tau, gp, atTime);
-  
-  temp.beInverseOf(M_hat);
-  temp2.beProductOf(Q, temp);
-  answer.beProductTOf(temp2,Q);
-  
-  answer.times(-1.0);
+    answer.zero();
+    FloatMatrix Q, M_hat, L_tau, temp, temp2;
+    this->computeStabilizationGradientMatrix(Q, atTime);
+    this->computeStabilizationMassMatrix(M_hat, atTime);
+    this->computeStabilizedLaplacianMatrix(L_tau, atTime);
+    //this->computeStabilizedLaplacianMatrix(L_tau, gp, atTime);
 
-  answer.add(L_tau);
+    temp.beInverseOf(M_hat);
+    temp2.beProductOf(Q, temp);
+    answer.beProductTOf(temp2, Q);
 
-  return;
+    answer.times(-1.0);
+
+    answer.add(L_tau);
+
+    return;
 }
 
 // NOT IN USE
@@ -357,7 +354,7 @@ TR1_2D_PFEM :: computeConsistentMassMtrx(FloatMatrix &answer, TimeStep *atTime)
     answer.resize(6, 6);
     answer.zero();
     //double rho = this->giveMaterial()->give('d');
-    double rho = this->giveMaterial()->give('d', integrationRulesArray [ 0 ]->getIntegrationPoint(0));
+    double rho = this->giveMaterial()->give( 'd', integrationRulesArray [ 0 ]->getIntegrationPoint(0) );
 
     double ar6 = rho * area / 6.0;
     double ar12 = rho * area / 12.0;
@@ -384,7 +381,7 @@ TR1_2D_PFEM :: computeDiagonalMassMtrx(FloatArray &answer, TimeStep *atTime)
     answer.zero();
 
     //double rho = this->giveMaterial()->give('d');
-    double rho = this->giveMaterial()->give('d', integrationRulesArray [ 0 ]->getIntegrationPoint(0));
+    double rho = this->giveMaterial()->give( 'd', integrationRulesArray [ 0 ]->getIntegrationPoint(0) );
     double mm = rho * this->area / 3.0;
     for ( i = 1; i <= 6; i++ ) {
         answer.at(i) = mm;
@@ -396,14 +393,14 @@ void
 TR1_2D_PFEM :: computeDiagonalMassMtrx(FloatMatrix &answer, TimeStep *atTime)
 {
     int i;
-    answer.resize(6,6);
+    answer.resize(6, 6);
     answer.zero();
 
     //double rho = this->giveMaterial()->give('d');
-    double rho = this->giveMaterial()->give('d', integrationRulesArray [ 0 ]->getIntegrationPoint(0));
+    double rho = this->giveMaterial()->give( 'd', integrationRulesArray [ 0 ]->getIntegrationPoint(0) );
     double mm = rho * this->area / 3.0;
     for ( i = 1; i <= 6; i++ ) {
-      answer.at(i,i) = mm;
+        answer.at(i, i) = mm;
     }
 }
 
@@ -412,16 +409,16 @@ void
 TR1_2D_PFEM :: computeInvertedStabilizationDiagonalMassMtrx(FloatMatrix &answer, TimeStep *atTime)
 {
     int i;
-    answer.resize(6,6);
+    answer.resize(6, 6);
     answer.zero();
     FloatArray tau;
-    this -> computeStabilizationParameters(tau, integrationRulesArray [ 0 ]->getIntegrationPoint(0), atTime);
-    
+    this->computeStabilizationParameters(tau, integrationRulesArray [ 0 ]->getIntegrationPoint(0), atTime);
+
     double mm = 3.0 / this->area;
-    
+
     for ( i = 1; i <= 3; i++ ) {
-      answer.at(2*i-1,2*i-1) = mm / tau.at(1);
-      answer.at(2*i,2*i) = mm / tau.at(2);
+        answer.at(2 * i - 1, 2 * i - 1) = mm / tau.at(1);
+        answer.at(2 * i, 2 * i) = mm / tau.at(2);
     }
 }
 
@@ -436,10 +433,10 @@ TR1_2D_PFEM :: computeGlobalCoordinates(FloatArray &answer, const FloatArray &lc
     l3 = 1.0 - l1 - l2;
 
     answer.resize(2);
-    answer.at(1) = l1 * this->giveNode(1)->giveCoordinate(1) + l2 * this->giveNode(2)->giveCoordinate(1) +
-    l3 * this->giveNode(3)->giveCoordinate(1);
-    answer.at(2) = l1 * this->giveNode(1)->giveCoordinate(2) + l2 * this->giveNode(2)->giveCoordinate(2) +
-    l3 * this->giveNode(3)->giveCoordinate(2);
+    answer.at(1) = l1 * this->giveNode(1)->giveCoordinate(1) + l2 *this->giveNode(2)->giveCoordinate(1) +
+    l3 *this->giveNode(3)->giveCoordinate(1);
+    answer.at(2) = l1 * this->giveNode(1)->giveCoordinate(2) + l2 *this->giveNode(2)->giveCoordinate(2) +
+    l3 *this->giveNode(3)->giveCoordinate(2);
 
     return 1;
 }
@@ -450,19 +447,19 @@ Interface *
 TR1_2D_PFEM :: giveInterface(InterfaceType interface)
 {
     if ( interface == ZZNodalRecoveryModelInterfaceType ) {
-      //        return ( ZZNodalRecoveryModelInterface * ) this;
-    } else if ( interface == NodalAveragingRecoveryModelInterfaceType )  {
-      //        return ( NodalAveragingRecoveryModelInterface * ) this;
-    } else if ( interface == SPRNodalRecoveryModelInterfaceType )                                                                                                                                {
-      //        return ( SPRNodalRecoveryModelInterface * ) this;
-    } else if ( interface == SpatialLocalizerInterfaceType )                                                                                                                                                                                                                                                  {
-      //        return ( SpatialLocalizerInterface * ) this;
-    } else if ( interface == EIPrimaryFieldInterfaceType )                                                                                                                                                                                                                                                                                                                                                          {
-      //        return ( EIPrimaryFieldInterface * ) this;
+        //        return ( ZZNodalRecoveryModelInterface * ) this;
+    } else if ( interface == NodalAveragingRecoveryModelInterfaceType ) {
+        //        return ( NodalAveragingRecoveryModelInterface * ) this;
+    } else if ( interface == SPRNodalRecoveryModelInterfaceType ) {
+        //        return ( SPRNodalRecoveryModelInterface * ) this;
+    } else if ( interface == SpatialLocalizerInterfaceType ) {
+        //        return ( SpatialLocalizerInterface * ) this;
+    } else if ( interface == EIPrimaryFieldInterfaceType ) {
+        //        return ( EIPrimaryFieldInterface * ) this;
     }
     //<RESTRICTED_SECTION>
     else if ( interface == LEPlicElementInterfaceType ) {
-      //        return ( LEPlicElementInterface * ) this;
+        //        return ( LEPlicElementInterface * ) this;
     }
 
     //</RESTRICTED_SECTION>
@@ -564,59 +561,62 @@ TR1_2D_PFEM :: checkConsistency()
 double
 TR1_2D_PFEM :: computeCriticalTimeStep(TimeStep *tStep)
 {
-	double deltaT = tStep->giveTimeIncrement();
+    double deltaT = tStep->giveTimeIncrement();
 #if 1
-  FloatArray u;
-  this->computeVectorOf(EID_MomentumBalance, VM_Total, tStep, u);  
-  double vn1 = sqrt( u.at(1) * u.at(1) + u.at(2) * u.at(2) );
-  double vn2 = sqrt( u.at(3) * u.at(3) + u.at(4) * u.at(4) );
-  double vn3 = sqrt( u.at(5) * u.at(5) + u.at(6) * u.at(6) );
-  
-  Node *node1, *node2, *node3;
- 
-  node1 = giveNode(1);
-  node2 = giveNode(2);
-  node3 = giveNode(3);
+    FloatArray u;
+    this->computeVectorOf(EID_MomentumBalance, VM_Total, tStep, u);
+    double vn1 = sqrt( u.at(1) * u.at(1) + u.at(2) * u.at(2) );
+    double vn2 = sqrt( u.at(3) * u.at(3) + u.at(4) * u.at(4) );
+    double vn3 = sqrt( u.at(5) * u.at(5) + u.at(6) * u.at(6) );
 
-  double x1, x2, x3, y1, y2, y3;
-  double l12, l23, l31;
-  
-  x1 = node1->giveCoordinate(1);
-  x2 = node2->giveCoordinate(1);
-  x3 = node3->giveCoordinate(1);
-  
-  y1 = node1->giveCoordinate(2);
-  y2 = node2->giveCoordinate(2);
-  y3 = node3->giveCoordinate(2);
-  
+    Node *node1, *node2, *node3;
 
-  l12 = sqrt( (x2-x1)*(x2-x1) + (y2-y1)*(y2-y1) );
-  l23 = sqrt( (x3-x2)*(x3-x2) + (y3-y2)*(y3-y2) );
-  l31 = sqrt( (x1-x3)*(x1-x3) + (y1-y3)*(y1-y3) );
+    node1 = giveNode(1);
+    node2 = giveNode(2);
+    node3 = giveNode(3);
 
-  double dt1, dt2, dt3;
+    double x1, x2, x3, y1, y2, y3;
+    double l12, l23, l31;
 
-  if(vn1 < 1.e-6)
-    dt1 = deltaT;
-  else
-    dt1 = min(l12,l31) / vn1;
+    x1 = node1->giveCoordinate(1);
+    x2 = node2->giveCoordinate(1);
+    x3 = node3->giveCoordinate(1);
 
-  if(vn2 < 1.e-6)
-    dt2 = deltaT;
-  else
-    dt2 = min(l12,l23) / vn2;
-  
-  if(vn3 < 1.e-6)
-    dt3 = deltaT;
-  else
-    dt3 = min(l23,l31) / vn3;
- 
-  double dt_min = min(dt1, min (dt2,dt3));
+    y1 = node1->giveCoordinate(2);
+    y2 = node2->giveCoordinate(2);
+    y3 = node3->giveCoordinate(2);
 
-  return dt_min;
+
+    l12 = sqrt( ( x2 - x1 ) * ( x2 - x1 ) + ( y2 - y1 ) * ( y2 - y1 ) );
+    l23 = sqrt( ( x3 - x2 ) * ( x3 - x2 ) + ( y3 - y2 ) * ( y3 - y2 ) );
+    l31 = sqrt( ( x1 - x3 ) * ( x1 - x3 ) + ( y1 - y3 ) * ( y1 - y3 ) );
+
+    double dt1, dt2, dt3;
+
+    if ( vn1 < 1.e-6 ) {
+        dt1 = deltaT;
+    } else {
+        dt1 = min(l12, l31) / vn1;
+    }
+
+    if ( vn2 < 1.e-6 ) {
+        dt2 = deltaT;
+    } else {
+        dt2 = min(l12, l23) / vn2;
+    }
+
+    if ( vn3 < 1.e-6 ) {
+        dt3 = deltaT;
+    } else {
+        dt3 = min(l23, l31) / vn3;
+    }
+
+    double dt_min = min( dt1, min(dt2, dt3) );
+
+    return dt_min;
 
 #else
-          FloatArray u;
+    FloatArray u;
     double dt1, dt2, dt;
     //double Re = domain->giveEngngModel()->giveUnknownComponent(ReynoldsNumber, VM_Unknown, tStep, domain, NULL);
     double Re = 1.0;
@@ -644,6 +644,7 @@ TR1_2D_PFEM :: computeCriticalTimeStep(TimeStep *tStep)
     }
 
     return dt;
+
 #endif
 }
 
@@ -654,7 +655,6 @@ void
 TR1_2D_PFEM :: updateYourself(TimeStep *tStep)
 {
     PFEMElement :: updateYourself(tStep);
-
 }
 
 // NOT IN USE
@@ -664,14 +664,14 @@ TR1_2D_PFEM :: giveIPValue(FloatArray &answer, GaussPoint *aGaussPoint, Internal
     //<RESTRICTED_SECTION>
     if ( type == IST_VOFFraction ) {
         answer.resize(1);
-	//        answer.at(1) = this->giveTempVolumeFraction();
+        //        answer.at(1) = this->giveTempVolumeFraction();
         return 1;
     } else
     //</RESTRICTED_SECTION>
     if ( type == IST_Density ) {
         answer.resize(1);
         //answer.at(1) = this->giveMaterial()->giveCharacteristicValue(MRM_Density, aGaussPoint, atTime);
-		answer.at(1) = this->giveMaterial()->give('d', integrationRulesArray [ 0 ]->getIntegrationPoint(0));
+        answer.at(1) = this->giveMaterial()->give( 'd', integrationRulesArray [ 0 ]->getIntegrationPoint(0) );
         return 1;
     } else {
         return PFEMElement :: giveIPValue(answer, aGaussPoint, type, atTime);
@@ -752,7 +752,7 @@ TR1_2D_PFEM :: computeVolumeAround(GaussPoint *aGaussPoint)
 {
     double determinant, weight, volume;
 
-    determinant = fabs( this->velocityInterpolation.giveTransformationJacobian(* aGaussPoint->giveCoordinates(), FEIElementGeometryWrapper(this) ) );
+    determinant = fabs( this->velocityInterpolation.giveTransformationJacobian( * aGaussPoint->giveCoordinates(), FEIElementGeometryWrapper(this) ) );
 
 
     weight      = aGaussPoint->giveWeight();
@@ -764,12 +764,12 @@ TR1_2D_PFEM :: computeVolumeAround(GaussPoint *aGaussPoint)
 #ifdef __OOFEG
 int
 TR1_2D_PFEM :: giveInternalStateAtNode(FloatArray &answer, InternalStateType type, InternalStateMode mode,
-                                      int node, TimeStep *atTime)
+                                       int node, TimeStep *atTime)
 {
     //<RESTRICTED_SECTION>
     if ( type == IST_VOFFraction ) {
         answer.resize(1);
-	//        answer.at(1) = this->giveTempVolumeFraction();
+        //        answer.at(1) = this->giveTempVolumeFraction();
         return 1;
     } else
     //</RESTRICTED_SECTION>

@@ -39,118 +39,113 @@
 #include "mathfem.h"
 
 namespace oofem {
+DelaunayTriangle :: DelaunayTriangle(Domain *d, int node1, int node2, int node3) :
+    nodes(3)
+    , circumCircle(3)
+    , domain(d)
+    , validFlag(true)
+    , listOfCellsContainedInAndPosition(NULL)
+{
+    nodes.at(1) = node1;
+    nodes.at(2) = node2;
+    nodes.at(3) = node3;
 
-	DelaunayTriangle::DelaunayTriangle(Domain* d, int node1, int node2, int node3)
-		: nodes(3)
-		, circumCircle(3)
-		, domain(d)
-		, validFlag(true)
-		, listOfCellsContainedInAndPosition(NULL)
-	{
-		nodes.at(1) = node1;
-		nodes.at(2) = node2;
-		nodes.at(3) = node3;
+    computeCircumcircle();
+}
 
-		computeCircumcircle();
-	}
+DelaunayTriangle :: ~DelaunayTriangle()
+{
+    if ( listOfCellsContainedInAndPosition ) {
+        listOfCellsContainedInAndPosition->clear();
+        delete listOfCellsContainedInAndPosition;
+    }
+}
 
-	DelaunayTriangle::~DelaunayTriangle()
-	{
-		if(listOfCellsContainedInAndPosition)
-		{
-			listOfCellsContainedInAndPosition->clear();
-			delete listOfCellsContainedInAndPosition;
-		}
-	}
+void
+DelaunayTriangle :: setCircumCircle(double x, double y, double r)
+{
+    this->circumCircle.at(1) = x;
+    this->circumCircle.at(2) = y;
+    this->circumCircle.at(3) = r;
+}
 
-	void
-	DelaunayTriangle::setCircumCircle (double x, double y, double r)
-	{
-		this->circumCircle.at(1)=x;
-		this->circumCircle.at(2)=y;
-		this->circumCircle.at(3)=r;
-	}
+double
+DelaunayTriangle :: giveDistanceToCenter(const FloatArray &coords)
+{
+    double x = coords.at(1);
+    double y = coords.at(2);
 
-	double 
-	DelaunayTriangle::giveDistanceToCenter(const FloatArray &coords)
-	{
-		double x = coords.at(1);
-		double y = coords.at(2);
+    double xC = giveXCenterCoordinate();
+    double yC = giveYCenterCoordinate();
 
-		double xC = giveXCenterCoordinate();
-		double yC = giveYCenterCoordinate();
+    return ( sqrt( ( xC - x ) * ( xC - x ) + ( yC - y ) * ( yC - y ) ) );
+}
 
-		return (sqrt((xC-x)*(xC-x)+(yC-y)*(yC-y)));
-	}
+void
+DelaunayTriangle :: computeCircumcircle()
+{
+    double x1, x2, x3;
+    double y1, y2, y3;
 
-	void
-	DelaunayTriangle::computeCircumcircle()
-	{
+    double a, bx, by, c;
 
-		double x1, x2, x3;
-		double y1, y2, y3;
+    DofManager *dmanA, *dmanB, *dmanC;
 
-		double a, bx, by, c;
+    dmanA = domain->giveDofManager( giveNode(1) );
+    x1 = dmanA->giveCoordinate(1);
+    y1 = dmanA->giveCoordinate(2);
 
-		DofManager *dmanA, * dmanB, * dmanC;
+    dmanB = domain->giveDofManager( giveNode(2) );
+    x2 = dmanB->giveCoordinate(1);
+    y2 = dmanB->giveCoordinate(2);
 
-		dmanA = domain->giveDofManager(giveNode(1));
-		x1 = dmanA->giveCoordinate(1);
-		y1 = dmanA->giveCoordinate(2);
+    dmanC = domain->giveDofManager( giveNode(3) );
+    x3 = dmanC->giveCoordinate(1);
+    y3 = dmanC->giveCoordinate(2);
 
-		dmanB = domain->giveDofManager(giveNode(2));
-		x2 = dmanB->giveCoordinate(1);
-		y2 = dmanB->giveCoordinate(2);
+    a = x1 * y2 + y1 * x3 + x2 * y3 - 1.0 * ( x1 * y3 + y1 * x2 + y2 * x3 );
+    bx = -1.0 * ( ( ( x1 * x1 + y1 * y1 ) * y2 + y1 * ( x3 * x3 + y3 * y3 ) + ( x2 * x2 + y2 * y2 ) * y3 )
+                 - 1.0 * ( ( x1 * x1 + y1 * y1 ) * y3 + y1 * ( x2 * x2 + y2 * y2 ) + y2 * ( x3 * x3 + y3 * y3 ) ) );
+    by = ( ( ( x1 * x1 + y1 * y1 ) * x2 + x1 * ( x3 * x3 + y3 * y3 ) + ( x2 * x2 + y2 * y2 ) * x3 )
+          - 1.0 * ( ( x1 * x1 + y1 * y1 ) * x3 + x1 * ( x2 * x2 + y2 * y2 ) + x2 * ( x3 * x3 + y3 * y3 ) ) );
+    c = ( ( ( x1 * x1 + y1 * y1 ) * x2 * y3 + x1 * y2 * ( x3 * x3 + y3 * y3 ) + y1 * ( x2 * x2 + y2 * y2 ) * x3 )
+         - 1.0 * ( ( x1 * x1 + y1 * y1 ) * y2 * x3 + x1 * ( x2 * x2 + y2 * y2 ) * y3 + y1 * x2 * ( x3 * x3 + y3 * y3 ) ) );
 
-		dmanC = domain->giveDofManager(giveNode(3));
-		x3 = dmanC->giveCoordinate(1);
-		y3 = dmanC->giveCoordinate(2);
+    double xCenterCoordinate = ( -1.0 * bx / ( 2 * a ) );
+    double yCenterCoordinate = ( -1.0 * by / ( 2 * a ) );
+    double absA = a < 0 ? -1.0 * a : a;
 
-		a = x1*y2 + y1*x3 + x2*y3 - 1.0*(x1*y3 + y1*x2 + y2*x3);
-		bx = -1.0 *(((x1*x1+y1*y1)*y2 + y1*(x3*x3+y3*y3) + (x2*x2+y2*y2)*y3) 
-			-1.0*((x1*x1+y1*y1)*y3 + y1*(x2*x2+y2*y2) + y2*(x3*x3+y3*y3)));
-		by = (((x1*x1+y1*y1)*x2 + x1*(x3*x3+y3*y3) + (x2*x2+y2*y2)*x3) 
-			-1.0*((x1*x1+y1*y1)*x3 + x1*(x2*x2+y2*y2) + x2*(x3*x3+y3*y3)));
-		c = (((x1*x1+y1*y1)*x2*y3 + x1*y2*(x3*x3+y3*y3) + y1*(x2*x2+y2*y2)*x3) 
-			-1.0*((x1*x1+y1*y1)*y2*x3 + x1*(x2*x2+y2*y2)*y3 + y1*x2*(x3*x3+y3*y3)));
+    double radius = ( ( sqrt(bx * bx + by * by + 4.0 * a * c) ) / ( 2.0 * absA ) );
 
-		double xCenterCoordinate = (-1.0 * bx / (2*a));
-		double yCenterCoordinate = (-1.0 * by / (2*a));
-		double absA = a < 0 ? -1.0*a : a;
+    setCircumCircle(xCenterCoordinate, yCenterCoordinate, radius);
+}
 
-		double radius = ((sqrt(bx*bx + by*by + 4.0*a*c))/(2.0*absA));
+std :: list< LocalInsertionData< DelaunayTriangle * > > *
+DelaunayTriangle :: giveListOfCellsAndPosition()
+{
+    if ( listOfCellsContainedInAndPosition == NULL ) {
+        listOfCellsContainedInAndPosition = new std :: list< LocalInsertionData< DelaunayTriangle * > >;
+    }
 
-		setCircumCircle(xCenterCoordinate, yCenterCoordinate, radius);
-	}
+    return listOfCellsContainedInAndPosition;
+}
 
-	std::list<LocalInsertionData<DelaunayTriangle*> >*
-	DelaunayTriangle::giveListOfCellsAndPosition()
-	{
-		if(listOfCellsContainedInAndPosition == NULL)
-		{
-			listOfCellsContainedInAndPosition = new std::list<LocalInsertionData<DelaunayTriangle*> >;
-		}
+double
+DelaunayTriangle :: giveShortestEdgeLength()
+{
+    double length1 = giveEdgeLength(1, 2);
+    double length2 = giveEdgeLength(2, 3);
+    double length3 = giveEdgeLength(3, 1);
+    return min( length1, min(length2, length3) );
+}
 
-		return listOfCellsContainedInAndPosition;
-	}
+double
+DelaunayTriangle :: giveEdgeLength(int nodeA, int nodeB)
+{
+    DofManager *dmanA = domain->giveDofManager( giveNode(nodeA) );
+    DofManager *dmanB = domain->giveDofManager( giveNode(nodeB) );
 
-	double
-	DelaunayTriangle::giveShortestEdgeLength()
-	{
-		double length1 = giveEdgeLength(1, 2);
-		double length2 = giveEdgeLength(2, 3);
-		double length3 = giveEdgeLength(3, 1);
-		return min(length1, min(length2, length3));
-	}
-
-	double
-	DelaunayTriangle::giveEdgeLength(int nodeA, int nodeB)
-	{
-		DofManager* dmanA = domain->giveDofManager(giveNode(nodeA));
-		DofManager* dmanB = domain->giveDofManager(giveNode(nodeB));
-
-		return dmanA->giveCoordinates()->distance(dmanB->giveCoordinates());
-	}
-
+    return dmanA->giveCoordinates()->distance( dmanB->giveCoordinates() );
+}
 } // end namespace oofem
 

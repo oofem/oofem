@@ -38,7 +38,7 @@
 #include "node.h"
 
 #ifndef __MAKEDEPEND
-#include <stdio.h>
+ #include <stdio.h>
 #endif
 
 ///@name Input fields for Pfemparticle
@@ -49,7 +49,6 @@
 //@}
 
 namespace oofem {
-
 class FloatArray;
 class IntArray;
 
@@ -58,56 +57,54 @@ class IntArray;
  */
 class PFEMParticle : public Node
 {
-  private:
-	  /// a particle is not building any element
-	  bool free;
-  
+private:
+    /// a particle is not building any element
+    bool free;
+
 public:
-  /**
-   * Constructor. Creates a particle  with number n, belonging to aDomain.
-   * @param n node number in domain aDomain
-   * @param aDomain domain to which node belongs
-   */
-  PFEMParticle(int n, Domain *aDomain);
-  /**
-   * Destructor.
-   */
-  ~PFEMParticle(void) { }
-  
-  /**
-   * Initializes receiver acording to object description stored in input record.
-   */
-  IRResultType initializeFrom(InputRecord *ir);
-  /**
-   * Checks internal data consistency in node.
-   * @return nonzero if receiver check is o.k.
-   */
-  int checkConsistency();
-  
-  virtual void updateYourself(TimeStep *tStep);
+    /**
+     * Constructor. Creates a particle  with number n, belonging to aDomain.
+     * @param n node number in domain aDomain
+     * @param aDomain domain to which node belongs
+     */
+    PFEMParticle(int n, Domain * aDomain);
+    /**
+     * Destructor.
+     */
+    ~PFEMParticle(void) { }
 
-  /// Returns the free-propery flag
-  bool isFree() {return free;}
-  /// Sets the free-property flag
-  virtual void setFree(bool newFlag = true) {free = newFlag;}
+    /**
+     * Initializes receiver acording to object description stored in input record.
+     */
+    IRResultType initializeFrom(InputRecord *ir);
+    /**
+     * Checks internal data consistency in node.
+     * @return nonzero if receiver check is o.k.
+     */
+    int checkConsistency();
 
-  virtual void printOutputAt(FILE *stream, TimeStep *stepN);
+    virtual void updateYourself(TimeStep *tStep);
 
-  /**
-   * Returns class name of the receiver.
-   */
-  const char *giveClassName() const { return "PFEMParticle"; }
-  /**
-   * Returns classType id of receiver.
-   * @see FEMComponent::giveClassID
-   */
-  classType giveClassID() const { return PFEMParticleClass; }
-  
+    /// Returns the free-propery flag
+    bool isFree() { return free; }
+    /// Sets the free-property flag
+    virtual void setFree(bool newFlag = true) { free = newFlag; }
+
+    virtual void printOutputAt(FILE *stream, TimeStep *stepN);
+
+    /**
+     * Returns class name of the receiver.
+     */
+    const char *giveClassName() const { return "PFEMParticle"; }
+    /**
+     * Returns classType id of receiver.
+     * @see FEMComponent::giveClassID
+     */
+    classType giveClassID() const { return PFEMParticleClass; }
+
 #ifdef __OOFEG
-    virtual void drawScalar (oofegGraphicContext &gc);
+    virtual void drawScalar(oofegGraphicContext &gc);
 #endif
-    
 };
-
 } // end namespace oofem
 #endif // pfemparticle_h

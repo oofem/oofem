@@ -66,888 +66,845 @@
 #include "leplic.h"
 //</RESTRICTED_SECTION>
 #ifndef __MAKEDEPEND
-#include <stdio.h>
+ #include <stdio.h>
 #endif
 #ifdef TIME_REPORT
-#ifndef __MAKEDEPEND
-#include <time.h>
-#endif
+ #ifndef __MAKEDEPEND
+  #include <time.h>
+ #endif
 //#include "clock.h"
 #endif
 #include "contextioerr.h"
 
 namespace oofem {
+REGISTER_EngngModel(PFEM);
 
-	REGISTER_EngngModel( PFEM );
-
-	NumericalMethod *PFEM :: giveNumericalMethod(TimeStep *atTime)
-	{
-		if ( nMethod ) {
-			return nMethod;
-		}
-		
-		nMethod = classFactory.createSparseLinSolver(solverType, this->giveDomain(1), this);
-		if ( nMethod == NULL ) {
-			_error("giveNumericalMethod: linear solver creation failed");
-		}
-
-		return nMethod;
-	}
-
-
-	int
-	PFEM :: forceEquationNumbering(int id)
-	{
-		resetEquationNumberings();
-		// forces equation renumbering for current time step
-		// intended mainly for problems with changes of static system
-		// during solution
-		// OUTPUT:
-		// sets this->numberOfEquations and this->numberOfPrescribedEquations and returns this value
-
-		// first initialize default numbering (for velocity unknowns only)
-
-		int i, j, ndofs, nnodes, nelem;
-		DofManager *inode;
-		Domain *domain = this->giveDomain(id);
-		TimeStep *currStep = this->giveCurrentStep();
-		IntArray loc;
-		Dof *jDof;
-		DofIDItem type;
-
-		this->domainNeqs.at(id) = 0;
-		this->domainPrescribedNeqs.at(id) = 0;
-
-
-		nnodes = domain->giveNumberOfDofManagers();
-		nelem = domain->giveNumberOfElements();
-
-		// number first velocities
-		for ( i = 1; i <= nnodes; i++ ) {
-			inode = domain->giveDofManager(i);
-			ndofs = inode->giveNumberOfDofs();
-			for ( j = 1; j <= ndofs; j++ ) {
-				jDof  =  inode->giveDof(j);
-				type  =  jDof->giveDofID();
-				if ( ( type == V_u ) || ( type == V_v ) || ( type == V_w ) ) {
-					jDof->askNewEquationNumber(currStep);
-				}
-			}
-		}
-
-		// invalidate element local copies of location arrays
-		//    for ( i = 1; i <= nelem; i++ ) {
-		//        domain->giveElement(i)->invalidateLocationArray();
-		//    }
-
-		// initialize the separate pressure equation numbering
-		pns.init(domain, currStep);
-		numberOfConservationEqs =  pns.giveTotalNumberOfEquations();
-		numberOfPrescribedConservationEqs = pns.giveTotalNumberOfPrescribedEquations();
-
-		avns.init(domain);
-
-		return domainNeqs.at(id);
-	}
-
-
-
-	IRResultType
-	PFEM :: initializeFrom(InputRecord *ir)
-	{
-
-		const char *__proc = "initializeFrom"; // Required by IR_GIVE_FIELD macro
-		IRResultType result;                // Required by IR_GIVE_FIELD macro
-
-		EngngModel :: initializeFrom(ir);
-		int val = 0;
-		IR_GIVE_OPTIONAL_FIELD(ir, val, _IFT_EngngModel_lstype);
-		solverType = ( LinSystSolverType ) val;
-
-		val = 0;
-		IR_GIVE_OPTIONAL_FIELD(ir, val, _IFT_EngngModel_smtype);
-		sparseMtrxType = ( SparseMtrxType ) val;
-
-		IR_GIVE_FIELD(ir, deltaT, _IFT_CBS_deltat);
-		minDeltaT = 0.;
-		IR_GIVE_OPTIONAL_FIELD(ir, minDeltaT, _IFT_CBS_mindeltat);
-				
-		alphaShapeCoef = 1.0;
-		IR_GIVE_OPTIONAL_FIELD(ir, alphaShapeCoef, _IFT_PFEM_alphashapecoef);
-
-
-		return IRRT_OK;
-	}
-
-	
-
-	double
-		PFEM :: giveUnknownComponent(ValueModeType mode, TimeStep *tStep, Domain *d, Dof *dof)
-		// returns unknown quantity like displacement, velocity of dof
-	{
-		//#ifdef DEBUG
-		//  if (dof->giveDofID() != P_f && mode != VM_Intermediate) // uses other equation numbering
-		//  {  
-		//  if ( dof->__giveEquationNumber() == 0 ) {
-		//        _error("giveUnknownComponent: invalid equation number");
-		//    }
-		//  }
-		//#endif
-		if (mode == VM_Intermediate)
-		{
-			if ( AuxVelocity.isNotEmpty() ) {
-				return AuxVelocity.at(avns.giveDofEquationNumber(dof));
-			} else {
-				return 0.;
-			}
-		}
-		else
-		{
-			if ( this->requiresUnknownsDictionaryUpdate() )
-			{
-				int hash = this->giveUnknownDictHashIndx(mode, tStep);
-				if ( dof->giveUnknowns()->includes(hash) ) {
-					return dof->giveUnknowns()->at(hash);
-				} else {
-					OOFEM_ERROR2( "giveUnknown:  Dof unknowns dictionary does not contain unknown of value mode (%s)", __ValueModeTypeToString(mode) );
-				}
-			}
-			else
-			{
-				if ( dof->giveDofID() == P_f ) { // pressures
-					return PressureField.giveUnknownValue(dof, mode, tStep);
-				} else { // velocities
-					return VelocityField.giveUnknownValue(dof, mode, tStep);
-				}
-			}
-		}
-	}
-
-	
-	TimeStep *
-	PFEM :: giveSolutionStepWhenIcApply()
-	{
-		if ( stepWhenIcApply == NULL ) {
-			stepWhenIcApply = new TimeStep(giveNumberOfTimeStepWhenIcApply(), this, 0, 0.0, deltaT, 0);
-		}
-
-		return stepWhenIcApply;
-	}
-
-	TimeStep *
-	PFEM :: giveNextStep()
-	{
-		int istep = this->giveNumberOfFirstStep();
-		int i, nelem, nnodes;
-		double totalTime = 0;
-		double dt = deltaT;
-		StateCounterType counter = 1;
-		delete previousStep;
-		DofManager* dman = nullptr;
-		Domain *domain = this->giveDomain(1);
-		Dof* jDof = nullptr;
-		DofIDItem type;
-
-
-		if ( currentStep == NULL ) {
-			// first step -> generate initial step
-			currentStep = new TimeStep( * giveSolutionStepWhenIcApply() );
-		}
-		else
-		{
-			istep =  currentStep->giveNumber() + 1;
-			counter = currentStep->giveSolutionStateCounter() + 1;
-			domain->clearElements();
-		}
-	
-		DelaunayTriangulator myMesher (domain, alphaShapeCoef);
-		myMesher.generateMesh();
-
-		nnodes = domain->giveNumberOfDofManagers();
-		for (i = 1; i <= nnodes; i++) 
-		{
-			dynamic_cast<PFEMParticle*>(domain->giveDofManager(i))->setFree();
-		}
-
-		nelem = domain->giveNumberOfElements();
-		if(nelem)
-		{
-			for ( i = 1; i <= nelem; i++ ) {
-				Element* element = domain->giveElement(i);
-				element->checkConsistency();
-
-				for (int j = 1; j <= element->giveNumberOfDofManagers(); j++)
-				{
-					dynamic_cast<PFEMParticle*>(element->giveDofManager(j))->setFree(false);
-				}
-			}
-		}
-		else
-		{
-			VERBOSE_PRINTS("Mesh generation failed", "0 elements created");
-		}
-
-
-		nnodes = domain->giveNumberOfDofManagers();
-		for (i = 1; i <= nnodes; i++) 
-		{
-			dman = domain->giveDofManager(i);
-			for ( int j = 1; j <=dman->giveNumberOfDofs(); j++ ) {
-				jDof  =  dman->giveDof(j);
-				type  =  jDof->giveDofID();
-				if ( ( type == V_u ) || ( type == V_v ) || ( type == V_w ) ) {
-					if(jDof->giveBcId()) {
-						dynamic_cast<PFEMParticle*>(dman)->setFree(false);
-						break;
-					}
-				}
-			}
-		}
-
-		previousStep = currentStep;
-
-		// FORCE EQUATION NUMBERING
-		this->forceEquationNumbering();
-		
-		// check for critical time step
-		for ( i = 1; i <= domain->giveNumberOfElements(); i++ ) {
-			dt = min( dt, ( ( PFEMElement * ) domain->giveElement(i) )->computeCriticalTimeStep(previousStep) );
-		}
-		// UP error computeCriticalTimeStep
-
-		dt *= 0.5;
-		dt = max(dt, minDeltaT);
-				
-
-		if ( currentStep != NULL ) {
-			totalTime = currentStep->giveTargetTime() + dt;
-		}
-
-		currentStep = new TimeStep(istep, this, 1, totalTime, dt, counter);
-		// time and dt variables are set eq to 0 for staics - has no meaning
-
-		OOFEM_LOG_INFO( "SolutionStep %d : t = %e, dt = %e\n", istep, totalTime * this->giveVariableScale(VST_Time), dt * this->giveVariableScale(VST_Time) );
-
-		return currentStep;
-	}
-
-	void
-		PFEM :: solveYourselfAt(TimeStep *tStep)
-	{
-		int auxmomneq = this->giveNumberOfDomainEquations(1, avns);
-		int momneq =  this->giveNumberOfDomainEquations(1, vns);
-		int presneq =  this->giveNumberOfDomainEquations(1, pns);
-		
-		double deltaT = tStep->giveTimeIncrement();
-
-		FloatArray rhs(auxmomneq);
-
-		
-		double d_pnorm = 1.0;
-		double d_vnorm = 1.0;
-		
-		//  if ( initFlag ) {
-		deltaAuxVelocity.resize(auxmomneq);
-		AuxVelocity.resize(auxmomneq);
-				
-		if(avLhs)
-		{
-			delete avLhs;
-		}
-		avLhs = classFactory.createSparseMtrx(sparseMtrxType);
-		if ( avLhs == NULL ) {
-			_error("solveYourselfAt: sparse matrix creation failed");
-		}
-		avLhs->buildInternalStructure(this, 1, EID_AuxMomentumBalance, avns);
-
-		// ??? stepWhenIcApply
-		this->assemble( avLhs, tStep, EID_AuxMomentumBalance, LumpedMassMatrix, avns, this->giveDomain(1) );
-				
-		if(pLhs)
-		{
-			delete pLhs;
-		}
-		pLhs = classFactory.createSparseMtrx(sparseMtrxType);
-		if ( pLhs == NULL ) {
-			_error("solveYourselfAt: sparse matrix creation failed");
-		}
-
-		pLhs->buildInternalStructure(this, 1, EID_ConservationEquation, pns);
-
-		this->assemble( pLhs, tStep, EID_ConservationEquation, PressureLaplacianMatrix, pns, this->giveDomain(1) );
-
-		pLhs->times(deltaT);
-
-		//////////////////////////////////////////////////////////////////////////
-
-		if (vLhs)
-		{
-			delete vLhs;
-		}
-		
-		vLhs = classFactory.createSparseMtrx(sparseMtrxType);
-		if ( vLhs == NULL ) {
-			_error("solveYourselfAt: sparse matrix creation failed");
-		}
-				
-		vLhs->buildInternalStructure(this, 1, EID_MomentumBalance, vns);
-		this->assemble( vLhs, tStep, EID_MomentumBalance, LumpedMassMatrix, vns, this->giveDomain(1) );
-
-		initFlag = 0;
-
-		if ( tStep->giveNumber() == giveNumberOfFirstStep() ) {
-			TimeStep *stepWhenIcApply = tStep->givePreviousStep();
-			this->applyIC(stepWhenIcApply);
-		}
-
-		VelocityField.advanceSolution(tStep);
-		PressureField.advanceSolution(tStep);
-
-		FloatArray *velocityVector = VelocityField.giveSolutionVector(tStep);
-		FloatArray *prevVelocityVector = VelocityField.giveSolutionVector( tStep->givePreviousStep() );
-		FloatArray *pressureVector = PressureField.giveSolutionVector(tStep);
-
-		FloatArray velocityVectorThisStep(*velocityVector);
-		FloatArray velocityVectorLastStep(*velocityVector);
-
-		FloatArray pressureVectorThisStep(*pressureVector);
-		FloatArray pressureVectorLastStep(*pressureVector);
-
-		if (tStep -> isTheFirstStep())
-		{
-			for (int i = 1; i <= this->giveDomain(1)->giveNumberOfDofManagers(); i++)
-			{
-				this->updateDofUnknownsDictionary(this->giveDomain(1)->giveDofManager(i), tStep);
-			}
-		}
-
-		int iteration = 0;
-		do
-		{
-			iteration++;
-
-			velocityVectorLastStep = velocityVectorThisStep;
-			pressureVectorLastStep = pressureVectorThisStep;
-
-			/************************** STEP 1 - calculates auxiliary velocities *************************/
-
-			rhs.resize(auxmomneq);
-			rhs.zero();
-
-			bool tStepNumberTricked = false;
-			//in order not to get bc-value in getUnknown
-			//will be reset
-
-			if(tStep->givePreviousStep()->isIcApply())
-			{
-				tStep->givePreviousStep()->setNumber(-1);
-				tStepNumberTricked = true;
-			}
-
-			if (iteration > 1)
-			{
-				this->assembleVectorFromElements( rhs, tStep, EID_AuxMomentumBalance, LaplaceVelocityVector, VM_Total, avns, this->giveDomain(1) );
-			}
-
-
-			rhs.times(-1.0);
-
-			this->assembleVectorFromElements( rhs, tStep, EID_AuxMomentumBalance, LoadVector, VM_Total, avns, this->giveDomain(1) );
-
-			rhs.times(deltaT);
-
-			this->assembleVectorFromElements( rhs, tStep->givePreviousStep() , EID_AuxMomentumBalance, MassVelocityVector, VM_Total, avns, this->giveDomain(1) );
-
-			if(tStepNumberTricked)
-			{
-				tStep->givePreviousStep()->setNumber(0);
-			}
-
-			this->giveNumericalMethod(tStep);
-			nMethod->solve(avLhs, & rhs, & AuxVelocity);
-
-			/************************* STEP 2 - calculates pressure ************************************/
-			
-			rhs.resize(presneq);
-			rhs.zero();
-
-			this->assembleVectorFromElements( rhs, tStep, EID_ConservationEquation, PrescribedRhsVector, VM_Total, pns, this->giveDomain(1) );
-
-			rhs.times(-1.0);
-						
-			this->assembleVectorFromElements( rhs, tStep, EID_ConservationEquation, DivergenceVelocityVector, VM_Total, pns, this->giveDomain(1) );
-
-			this->giveNumericalMethod(tStep);
-			pressureVector->resize(presneq);
-			nMethod->solve(pLhs, & rhs, pressureVector);
-
-			for (int i = 1; i <= this->giveDomain(1)->giveNumberOfDofManagers(); i++)
-			{
-				this->updateDofUnknownsDictionaryPressure(this->giveDomain(1)->giveDofManager(i), tStep);
-			}
-
-			/**************************** STEP 3 - velocity correction step ********************************/
-
-			
-
-			rhs.resize(momneq);
-			rhs.zero();
-			velocityVector->resize(momneq);
-
-			this->assembleVectorFromElements( rhs, tStep, EID_MomentumBalance, PressureGradientVector, VM_Total, vns, this->giveDomain(1) );
-
-			rhs.times(-1.0);
-			
-			rhs.times(deltaT);
-
-			this->assembleVectorFromElements( rhs, tStep, EID_AuxMomentumBalance, MassAuxVelocityVector, VM_Total, vns, this->giveDomain(1) );
-
-
-
-			this->giveNumericalMethod(tStep);
-
-			nMethod->solve(vLhs, & rhs, velocityVector);
-
-			/*for (int i = 1; i <= this->giveDomain(1)->giveNumberOfDofManagers(); i++)
-			{
-			  this->updateDofUnknownsDictionaryVelocities(this->giveDomain(1)->giveDofManager(i), tStep);
-			}*/
-
-			velocityVectorThisStep = *velocityVector;
-			pressureVectorThisStep = *pressureVector;
-			
-			if (iteration == 1)
-			{
-				d_vnorm = velocityVectorThisStep.computeNorm();
-				d_pnorm = pressureVectorThisStep.computeNorm();
-			}
-			else
-			{
-				FloatArray diffVelocity = velocityVectorThisStep;
-				diffVelocity.subtract(velocityVectorLastStep);
-				d_vnorm = diffVelocity.computeNorm() / velocityVectorLastStep.computeNorm();
-
-				FloatArray diffPressure = pressureVectorThisStep;
-				diffPressure.subtract(pressureVectorLastStep);
-				d_pnorm = diffPressure.computeNorm() / pressureVectorLastStep.computeNorm();
-			}
-		}
-		while ((d_vnorm > 1.e-1 || d_pnorm > 1.e-1) && iteration < 50);
-		
-		if (iteration > 49)
-		{
-			OOFEM_ERROR("Maximal iteration count exceded");
-		}
-		else
-		{
-			printf("\n %i iterations performed.\n", iteration);
-		}
-
-		Domain* d = this->giveDomain(1);
-		for (int i = 1; i <= this->giveDomain(1)->giveNumberOfDofManagers(); i++)
-		{
-			PFEMParticle* particle = dynamic_cast <PFEMParticle*>(d->giveDofManager(i));
-			if (particle->isFree())
-			{
-				for (int j = 1; j <= particle->giveNumberOfDofs(); j++)
-				{
-					Dof* dof = particle->giveDof(j);
-					DofIDItem type  =  dof->giveDofID();
-					if ( ( type == V_u ) || ( type == V_v ) || ( type == V_w ) )
-					{
-						int eqnum = dof->giveEquationNumber(vns);
-						if (eqnum)
-						{
-							double newVelocity = prevVelocityVector->at(eqnum);
-							Load* load = d->giveLoad(3);
-							FloatArray gVector;
-							load->computeComponentArrayAt(gVector, tStep, VM_Total);
-							newVelocity += gVector.at(j) * deltaT;
-							velocityVector->at(eqnum) = newVelocity;
-						}
-					}
-				}
-			}
-		}
-				
-
-		tStep->incrementStateCounter();
-
-		this->updateYourself( this->giveCurrentStep() );
-	}
-
-
-	void
-		PFEM :: updateYourself(TimeStep *stepN)
-	{
-		this->updateInternalState(stepN);
-		EngngModel :: updateYourself(stepN);
-				
-	}
-
-
-
-	void
-		PFEM :: updateInternalState(TimeStep *stepN)
-	{
-		int j, nnodes;
-		Domain *domain;
-
-		for ( int idomain = 1; idomain <= this->giveNumberOfDomains(); idomain++ ) {
-			domain = this->giveDomain(idomain);
-
-			nnodes = domain->giveNumberOfDofManagers();
-			if ( requiresUnknownsDictionaryUpdate() ) {
-				for ( j = 1; j <= nnodes; j++ ) {
-					this->updateDofUnknownsDictionary(domain->giveDofManager(j), stepN);
-				}
-			}
-
-			int nelem = domain->giveNumberOfElements();
-			for ( j = 1; j <= nelem; j++ ) {
-				domain->giveElement(j)->updateInternalState(stepN);
-			}
-		}
-	}
-
-
-
-	void
-		PFEM :: updateDofUnknownsDictionary(DofManager *inode, TimeStep *tStep)
-	{
-		int ndofs = inode->giveNumberOfDofs();
-
-		for ( int i = 1; i <= ndofs; i++ ) {
-			Dof *iDof = inode->giveDof(i);
-			int eqNum = 0;
-			double val = 0;
-			if ( iDof->hasBc(tStep) ) { // boundary condition
-				val = iDof->giveBcValue(VM_Total, tStep);
-			} else {
-				if (iDof->giveDofID() == P_f)
-				{
-					eqNum = pns.giveDofEquationNumber(iDof);
-					FloatArray *vect = PressureField.giveSolutionVector(tStep);
-					if (vect->giveSize() > 0) // in the first step -> zero will be set
-					{
-						val = vect->at(eqNum);
-					}
-				}
-				else // velocities
-				{
-					eqNum = iDof->__giveEquationNumber();
-					FloatArray *vect = VelocityField.giveSolutionVector(tStep);
-					if (vect->giveSize() > 0)
-					{
-						val = vect->at(eqNum);
-					}
-				}
-			}
-
-			iDof->updateUnknownsDictionary(tStep, VM_Total, val);
-		}
-	}
-
-	void
-	PFEM :: updateDofUnknownsDictionaryPressure(DofManager *inode, TimeStep *tStep)
-	{
-		Dof *iDof = inode->giveDofWithID(P_f);
-		if ( iDof->hasBc(tStep) == false) { // boundary condition
-			int eqNum = pns.giveDofEquationNumber(iDof);
-			FloatArray *vect = PressureField.giveSolutionVector(tStep);
-			double val = vect->at(eqNum);
-			iDof->updateUnknownsDictionary(tStep, VM_Total, val);
-		}
-	}
-
-  void
-  PFEM::updateDofUnknownsDictionaryVelocities(DofManager *inode, TimeStep *tStep)
-  {
+NumericalMethod *PFEM :: giveNumericalMethod(TimeStep *atTime)
+{
+    if ( nMethod ) {
+        return nMethod;
+    }
+
+    nMethod = classFactory.createSparseLinSolver(solverType, this->giveDomain(1), this);
+    if ( nMethod == NULL ) {
+        _error("giveNumericalMethod: linear solver creation failed");
+    }
+
+    return nMethod;
+}
+
+
+int
+PFEM :: forceEquationNumbering(int id)
+{
+    resetEquationNumberings();
+    // forces equation renumbering for current time step
+    // intended mainly for problems with changes of static system
+    // during solution
+    // OUTPUT:
+    // sets this->numberOfEquations and this->numberOfPrescribedEquations and returns this value
+
+    // first initialize default numbering (for velocity unknowns only)
+
+    int i, j, ndofs, nnodes, nelem;
+    DofManager *inode;
+    Domain *domain = this->giveDomain(id);
+    TimeStep *currStep = this->giveCurrentStep();
+    IntArray loc;
+    Dof *jDof;
+    DofIDItem type;
+
+    this->domainNeqs.at(id) = 0;
+    this->domainPrescribedNeqs.at(id) = 0;
+
+
+    nnodes = domain->giveNumberOfDofManagers();
+    nelem = domain->giveNumberOfElements();
+
+    // number first velocities
+    for ( i = 1; i <= nnodes; i++ ) {
+        inode = domain->giveDofManager(i);
+        ndofs = inode->giveNumberOfDofs();
+        for ( j = 1; j <= ndofs; j++ ) {
+            jDof  =  inode->giveDof(j);
+            type  =  jDof->giveDofID();
+            if ( ( type == V_u ) || ( type == V_v ) || ( type == V_w ) ) {
+                jDof->askNewEquationNumber(currStep);
+            }
+        }
+    }
+
+    // invalidate element local copies of location arrays
+    //    for ( i = 1; i <= nelem; i++ ) {
+    //        domain->giveElement(i)->invalidateLocationArray();
+    //    }
+
+    // initialize the separate pressure equation numbering
+    pns.init(domain, currStep);
+    numberOfConservationEqs =  pns.giveTotalNumberOfEquations();
+    numberOfPrescribedConservationEqs = pns.giveTotalNumberOfPrescribedEquations();
+
+    avns.init(domain);
+
+    return domainNeqs.at(id);
+}
+
+
+
+IRResultType
+PFEM :: initializeFrom(InputRecord *ir)
+{
+    const char *__proc = "initializeFrom";            // Required by IR_GIVE_FIELD macro
+    IRResultType result;                            // Required by IR_GIVE_FIELD macro
+
+    EngngModel :: initializeFrom(ir);
+    int val = 0;
+    IR_GIVE_OPTIONAL_FIELD(ir, val, _IFT_EngngModel_lstype);
+    solverType = ( LinSystSolverType ) val;
+
+    val = 0;
+    IR_GIVE_OPTIONAL_FIELD(ir, val, _IFT_EngngModel_smtype);
+    sparseMtrxType = ( SparseMtrxType ) val;
+
+    IR_GIVE_FIELD(ir, deltaT, _IFT_CBS_deltat);
+    minDeltaT = 0.;
+    IR_GIVE_OPTIONAL_FIELD(ir, minDeltaT, _IFT_CBS_mindeltat);
+
+    alphaShapeCoef = 1.0;
+    IR_GIVE_OPTIONAL_FIELD(ir, alphaShapeCoef, _IFT_PFEM_alphashapecoef);
+
+
+    return IRRT_OK;
+}
+
+
+
+double
+PFEM :: giveUnknownComponent(ValueModeType mode, TimeStep *tStep, Domain *d, Dof *dof)
+// returns unknown quantity like displacement, velocity of dof
+{
+    //#ifdef DEBUG
+    //  if (dof->giveDofID() != P_f && mode != VM_Intermediate) // uses other equation numbering
+    //  {
+    //  if ( dof->__giveEquationNumber() == 0 ) {
+    //        _error("giveUnknownComponent: invalid equation number");
+    //    }
+    //  }
+    //#endif
+    if ( mode == VM_Intermediate ) {
+        if ( AuxVelocity.isNotEmpty() ) {
+            return AuxVelocity.at( avns.giveDofEquationNumber(dof) );
+        } else {
+            return 0.;
+        }
+    } else   {
+        if ( this->requiresUnknownsDictionaryUpdate() ) {
+            int hash = this->giveUnknownDictHashIndx(mode, tStep);
+            if ( dof->giveUnknowns()->includes(hash) ) {
+                return dof->giveUnknowns()->at(hash);
+            } else {
+                OOFEM_ERROR2( "giveUnknown:  Dof unknowns dictionary does not contain unknown of value mode (%s)", __ValueModeTypeToString(mode) );
+            }
+        } else   {
+            if ( dof->giveDofID() == P_f ) {                     // pressures
+                return PressureField.giveUnknownValue(dof, mode, tStep);
+            } else {                     // velocities
+                return VelocityField.giveUnknownValue(dof, mode, tStep);
+            }
+        }
+    }
+}
+
+
+TimeStep *
+PFEM :: giveSolutionStepWhenIcApply()
+{
+    if ( stepWhenIcApply == NULL ) {
+        stepWhenIcApply = new TimeStep(giveNumberOfTimeStepWhenIcApply(), this, 0, 0.0, deltaT, 0);
+    }
+
+    return stepWhenIcApply;
+}
+
+TimeStep *
+PFEM :: giveNextStep()
+{
+    int istep = this->giveNumberOfFirstStep();
+    int i, nelem, nnodes;
+    double totalTime = 0;
+    double dt = deltaT;
+    StateCounterType counter = 1;
+    delete previousStep;
+    DofManager *dman = nullptr;
+    Domain *domain = this->giveDomain(1);
+    Dof *jDof = nullptr;
+    DofIDItem type;
+
+
+    if ( currentStep == NULL ) {
+        // first step -> generate initial step
+        currentStep = new TimeStep( *giveSolutionStepWhenIcApply() );
+    } else   {
+        istep =  currentStep->giveNumber() + 1;
+        counter = currentStep->giveSolutionStateCounter() + 1;
+        domain->clearElements();
+    }
+
+    DelaunayTriangulator myMesher(domain, alphaShapeCoef);
+    myMesher.generateMesh();
+
+    nnodes = domain->giveNumberOfDofManagers();
+    for ( i = 1; i <= nnodes; i++ ) {
+        dynamic_cast< PFEMParticle * >( domain->giveDofManager(i) )->setFree();
+    }
+
+    nelem = domain->giveNumberOfElements();
+    if ( nelem ) {
+        for ( i = 1; i <= nelem; i++ ) {
+            Element *element = domain->giveElement(i);
+            element->checkConsistency();
+
+            for ( int j = 1; j <= element->giveNumberOfDofManagers(); j++ ) {
+                dynamic_cast< PFEMParticle * >( element->giveDofManager(j) )->setFree(false);
+            }
+        }
+    } else   {
+        VERBOSE_PRINTS("Mesh generation failed", "0 elements created");
+    }
+
+
+    nnodes = domain->giveNumberOfDofManagers();
+    for ( i = 1; i <= nnodes; i++ ) {
+        dman = domain->giveDofManager(i);
+        for ( int j = 1; j <= dman->giveNumberOfDofs(); j++ ) {
+            jDof  =  dman->giveDof(j);
+            type  =  jDof->giveDofID();
+            if ( ( type == V_u ) || ( type == V_v ) || ( type == V_w ) ) {
+                if ( jDof->giveBcId() ) {
+                    dynamic_cast< PFEMParticle * >(dman)->setFree(false);
+                    break;
+                }
+            }
+        }
+    }
+
+    previousStep = currentStep;
+
+    // FORCE EQUATION NUMBERING
+    this->forceEquationNumbering();
+
+    // check for critical time step
+    for ( i = 1; i <= domain->giveNumberOfElements(); i++ ) {
+        dt = min( dt, ( ( PFEMElement * ) domain->giveElement(i) )->computeCriticalTimeStep(previousStep) );
+    }
+
+    // UP error computeCriticalTimeStep
+
+    dt *= 0.5;
+    dt = max(dt, minDeltaT);
+
+
+    if ( currentStep != NULL ) {
+        totalTime = currentStep->giveTargetTime() + dt;
+    }
+
+    currentStep = new TimeStep(istep, this, 1, totalTime, dt, counter);
+    // time and dt variables are set eq to 0 for staics - has no meaning
+
+    OOFEM_LOG_INFO( "SolutionStep %d : t = %e, dt = %e\n", istep, totalTime * this->giveVariableScale(VST_Time), dt * this->giveVariableScale(VST_Time) );
+
+    return currentStep;
+}
+
+void
+PFEM :: solveYourselfAt(TimeStep *tStep)
+{
+    int auxmomneq = this->giveNumberOfDomainEquations(1, avns);
+    int momneq =  this->giveNumberOfDomainEquations(1, vns);
+    int presneq =  this->giveNumberOfDomainEquations(1, pns);
+
+    double deltaT = tStep->giveTimeIncrement();
+
+    FloatArray rhs(auxmomneq);
+
+
+    double d_pnorm = 1.0;
+    double d_vnorm = 1.0;
+
+    //  if ( initFlag ) {
+    deltaAuxVelocity.resize(auxmomneq);
+    AuxVelocity.resize(auxmomneq);
+
+    if ( avLhs ) {
+        delete avLhs;
+    }
+
+    avLhs = classFactory.createSparseMtrx(sparseMtrxType);
+    if ( avLhs == NULL ) {
+        _error("solveYourselfAt: sparse matrix creation failed");
+    }
+
+    avLhs->buildInternalStructure(this, 1, EID_AuxMomentumBalance, avns);
+
+    // ??? stepWhenIcApply
+    this->assemble( avLhs, tStep, EID_AuxMomentumBalance, LumpedMassMatrix, avns, this->giveDomain(1) );
+
+    if ( pLhs ) {
+        delete pLhs;
+    }
+
+    pLhs = classFactory.createSparseMtrx(sparseMtrxType);
+    if ( pLhs == NULL ) {
+        _error("solveYourselfAt: sparse matrix creation failed");
+    }
+
+    pLhs->buildInternalStructure(this, 1, EID_ConservationEquation, pns);
+
+    this->assemble( pLhs, tStep, EID_ConservationEquation, PressureLaplacianMatrix, pns, this->giveDomain(1) );
+
+    pLhs->times(deltaT);
+
+    //////////////////////////////////////////////////////////////////////////
+
+    if ( vLhs ) {
+        delete vLhs;
+    }
+
+    vLhs = classFactory.createSparseMtrx(sparseMtrxType);
+    if ( vLhs == NULL ) {
+        _error("solveYourselfAt: sparse matrix creation failed");
+    }
+
+    vLhs->buildInternalStructure(this, 1, EID_MomentumBalance, vns);
+    this->assemble( vLhs, tStep, EID_MomentumBalance, LumpedMassMatrix, vns, this->giveDomain(1) );
+
+    initFlag = 0;
+
+    if ( tStep->giveNumber() == giveNumberOfFirstStep() ) {
+        TimeStep *stepWhenIcApply = tStep->givePreviousStep();
+        this->applyIC(stepWhenIcApply);
+    }
+
+    VelocityField.advanceSolution(tStep);
+    PressureField.advanceSolution(tStep);
+
+    FloatArray *velocityVector = VelocityField.giveSolutionVector(tStep);
+    FloatArray *prevVelocityVector = VelocityField.giveSolutionVector( tStep->givePreviousStep() );
+    FloatArray *pressureVector = PressureField.giveSolutionVector(tStep);
+
+    FloatArray velocityVectorThisStep(*velocityVector);
+    FloatArray velocityVectorLastStep(*velocityVector);
+
+    FloatArray pressureVectorThisStep(*pressureVector);
+    FloatArray pressureVectorLastStep(*pressureVector);
+
+    if ( tStep->isTheFirstStep() ) {
+        for ( int i = 1; i <= this->giveDomain(1)->giveNumberOfDofManagers(); i++ ) {
+            this->updateDofUnknownsDictionary(this->giveDomain(1)->giveDofManager(i), tStep);
+        }
+    }
+
+    int iteration = 0;
+    do {
+        iteration++;
+
+        velocityVectorLastStep = velocityVectorThisStep;
+        pressureVectorLastStep = pressureVectorThisStep;
+
+        /************************** STEP 1 - calculates auxiliary velocities *************************/
+
+        rhs.resize(auxmomneq);
+        rhs.zero();
+
+        bool tStepNumberTricked = false;
+        //in order not to get bc-value in getUnknown
+        //will be reset
+
+        if ( tStep->givePreviousStep()->isIcApply() ) {
+            tStep->givePreviousStep()->setNumber(-1);
+            tStepNumberTricked = true;
+        }
+
+        if ( iteration > 1 ) {
+            this->assembleVectorFromElements( rhs, tStep, EID_AuxMomentumBalance, LaplaceVelocityVector, VM_Total, avns, this->giveDomain(1) );
+        }
+
+
+        rhs.times(-1.0);
+
+        this->assembleVectorFromElements( rhs, tStep, EID_AuxMomentumBalance, LoadVector, VM_Total, avns, this->giveDomain(1) );
+
+        rhs.times(deltaT);
+
+        this->assembleVectorFromElements( rhs, tStep->givePreviousStep(), EID_AuxMomentumBalance, MassVelocityVector, VM_Total, avns, this->giveDomain(1) );
+
+        if ( tStepNumberTricked ) {
+            tStep->givePreviousStep()->setNumber(0);
+        }
+
+        this->giveNumericalMethod(tStep);
+        nMethod->solve(avLhs, & rhs, & AuxVelocity);
+
+        /************************* STEP 2 - calculates pressure ************************************/
+
+        rhs.resize(presneq);
+        rhs.zero();
+
+        this->assembleVectorFromElements( rhs, tStep, EID_ConservationEquation, PrescribedRhsVector, VM_Total, pns, this->giveDomain(1) );
+
+        rhs.times(-1.0);
+
+        this->assembleVectorFromElements( rhs, tStep, EID_ConservationEquation, DivergenceVelocityVector, VM_Total, pns, this->giveDomain(1) );
+
+        this->giveNumericalMethod(tStep);
+        pressureVector->resize(presneq);
+        nMethod->solve(pLhs, & rhs, pressureVector);
+
+        for ( int i = 1; i <= this->giveDomain(1)->giveNumberOfDofManagers(); i++ ) {
+            this->updateDofUnknownsDictionaryPressure(this->giveDomain(1)->giveDofManager(i), tStep);
+        }
+
+        /**************************** STEP 3 - velocity correction step ********************************/
+
+
+
+        rhs.resize(momneq);
+        rhs.zero();
+        velocityVector->resize(momneq);
+
+        this->assembleVectorFromElements( rhs, tStep, EID_MomentumBalance, PressureGradientVector, VM_Total, vns, this->giveDomain(1) );
+
+        rhs.times(-1.0);
+
+        rhs.times(deltaT);
+
+        this->assembleVectorFromElements( rhs, tStep, EID_AuxMomentumBalance, MassAuxVelocityVector, VM_Total, vns, this->giveDomain(1) );
+
+
+
+        this->giveNumericalMethod(tStep);
+
+        nMethod->solve(vLhs, & rhs, velocityVector);
+
+        /*for (int i = 1; i <= this->giveDomain(1)->giveNumberOfDofManagers(); i++)
+         * {
+         * this->updateDofUnknownsDictionaryVelocities(this->giveDomain(1)->giveDofManager(i), tStep);
+         * }*/
+
+        velocityVectorThisStep = * velocityVector;
+        pressureVectorThisStep = * pressureVector;
+
+        if ( iteration == 1 ) {
+            d_vnorm = velocityVectorThisStep.computeNorm();
+            d_pnorm = pressureVectorThisStep.computeNorm();
+        } else   {
+            FloatArray diffVelocity = velocityVectorThisStep;
+            diffVelocity.subtract(velocityVectorLastStep);
+            d_vnorm = diffVelocity.computeNorm() / velocityVectorLastStep.computeNorm();
+
+            FloatArray diffPressure = pressureVectorThisStep;
+            diffPressure.subtract(pressureVectorLastStep);
+            d_pnorm = diffPressure.computeNorm() / pressureVectorLastStep.computeNorm();
+        }
+    } while ( ( d_vnorm > 1.e-1 || d_pnorm > 1.e-1 ) && iteration < 50 );
+
+    if ( iteration > 49 ) {
+        OOFEM_ERROR("Maximal iteration count exceded");
+    } else   {
+        printf("\n %i iterations performed.\n", iteration);
+    }
+
+    Domain *d = this->giveDomain(1);
+    for ( int i = 1; i <= this->giveDomain(1)->giveNumberOfDofManagers(); i++ ) {
+        PFEMParticle *particle = dynamic_cast< PFEMParticle * >( d->giveDofManager(i) );
+        if ( particle->isFree() ) {
+            for ( int j = 1; j <= particle->giveNumberOfDofs(); j++ ) {
+                Dof *dof = particle->giveDof(j);
+                DofIDItem type  =  dof->giveDofID();
+                if ( ( type == V_u ) || ( type == V_v ) || ( type == V_w ) ) {
+                    int eqnum = dof->giveEquationNumber(vns);
+                    if ( eqnum ) {
+                        double newVelocity = prevVelocityVector->at(eqnum);
+                        Load *load = d->giveLoad(3);
+                        FloatArray gVector;
+                        load->computeComponentArrayAt(gVector, tStep, VM_Total);
+                        newVelocity += gVector.at(j) * deltaT;
+                        velocityVector->at(eqnum) = newVelocity;
+                    }
+                }
+            }
+        }
+    }
+
+
+    tStep->incrementStateCounter();
+
+    this->updateYourself( this->giveCurrentStep() );
+}
+
+
+void
+PFEM :: updateYourself(TimeStep *stepN)
+{
+    this->updateInternalState(stepN);
+    EngngModel :: updateYourself(stepN);
+}
+
+
+
+void
+PFEM :: updateInternalState(TimeStep *stepN)
+{
+    int j, nnodes;
+    Domain *domain;
+
+    for ( int idomain = 1; idomain <= this->giveNumberOfDomains(); idomain++ ) {
+        domain = this->giveDomain(idomain);
+
+        nnodes = domain->giveNumberOfDofManagers();
+        if ( requiresUnknownsDictionaryUpdate() ) {
+            for ( j = 1; j <= nnodes; j++ ) {
+                this->updateDofUnknownsDictionary(domain->giveDofManager(j), stepN);
+            }
+        }
+
+        int nelem = domain->giveNumberOfElements();
+        for ( j = 1; j <= nelem; j++ ) {
+            domain->giveElement(j)->updateInternalState(stepN);
+        }
+    }
+}
+
+
+
+void
+PFEM :: updateDofUnknownsDictionary(DofManager *inode, TimeStep *tStep)
+{
     int ndofs = inode->giveNumberOfDofs();
 
     for ( int i = 1; i <= ndofs; i++ ) {
-      Dof *iDof = inode->giveDof(i);
-      int eqNum = 0;
-      double val = 0;
-      if ( iDof->hasBc(tStep) ) { // boundary condition
-        val = iDof->giveBcValue(VM_Total, tStep);
-      } else {
-        DofIDItem type = iDof->giveDofID();
-        if (type == V_u || type == V_v || type == V_w)
-        {
-          eqNum = iDof->__giveEquationNumber();
-          FloatArray *vect = VelocityField.giveSolutionVector(tStep);
-          if (vect->giveSize() > 0)
-          {
-            val = vect->at(eqNum);
-          }
+        Dof *iDof = inode->giveDof(i);
+        int eqNum = 0;
+        double val = 0;
+        if ( iDof->hasBc(tStep) ) {                 // boundary condition
+            val = iDof->giveBcValue(VM_Total, tStep);
+        } else {
+            if ( iDof->giveDofID() == P_f ) {
+                eqNum = pns.giveDofEquationNumber(iDof);
+                FloatArray *vect = PressureField.giveSolutionVector(tStep);
+                if ( vect->giveSize() > 0 ) {                     // in the first step -> zero will be set
+                    val = vect->at(eqNum);
+                }
+            } else   {               // velocities
+                eqNum = iDof->__giveEquationNumber();
+                FloatArray *vect = VelocityField.giveSolutionVector(tStep);
+                if ( vect->giveSize() > 0 ) {
+                    val = vect->at(eqNum);
+                }
+            }
         }
-      }
 
-      iDof->updateUnknownsDictionary(tStep, VM_Total, val);
+        iDof->updateUnknownsDictionary(tStep, VM_Total, val);
     }
-  }
+}
 
-	
-	// NOT ACTIVE
-	contextIOResultType
-		PFEM :: saveContext(DataStream *stream, ContextMode mode, void *obj)
-		//
-		// saves state variable - displacement vector
-		//
-	{
-		contextIOResultType iores;
-		int closeFlag = 0;
-		FILE *file = NULL;
+void
+PFEM :: updateDofUnknownsDictionaryPressure(DofManager *inode, TimeStep *tStep)
+{
+    Dof *iDof = inode->giveDofWithID(P_f);
+    if ( iDof->hasBc(tStep) == false ) {            // boundary condition
+        int eqNum = pns.giveDofEquationNumber(iDof);
+        FloatArray *vect = PressureField.giveSolutionVector(tStep);
+        double val = vect->at(eqNum);
+        iDof->updateUnknownsDictionary(tStep, VM_Total, val);
+    }
+}
 
-		if ( stream == NULL ) {
-			if ( !this->giveContextFile(& file, this->giveCurrentStep()->giveNumber(),
-				this->giveCurrentStep()->giveVersion(), contextMode_write) ) {
-					THROW_CIOERR(CIO_IOERR); // override
-			}
+void
+PFEM :: updateDofUnknownsDictionaryVelocities(DofManager *inode, TimeStep *tStep)
+{
+    int ndofs = inode->giveNumberOfDofs();
 
-			stream = new FileDataStream(file);
-			closeFlag = 1;
-		}
+    for ( int i = 1; i <= ndofs; i++ ) {
+        Dof *iDof = inode->giveDof(i);
+        int eqNum = 0;
+        double val = 0;
+        if ( iDof->hasBc(tStep) ) { // boundary condition
+            val = iDof->giveBcValue(VM_Total, tStep);
+        } else {
+            DofIDItem type = iDof->giveDofID();
+            if ( type == V_u || type == V_v || type == V_w ) {
+                eqNum = iDof->__giveEquationNumber();
+                FloatArray *vect = VelocityField.giveSolutionVector(tStep);
+                if ( vect->giveSize() > 0 ) {
+                    val = vect->at(eqNum);
+                }
+            }
+        }
 
-		if ( ( iores = EngngModel :: saveContext(stream, mode) ) != CIO_OK ) {
-			THROW_CIOERR(iores);
-		}
-
-		if ( ( iores = PressureField.saveContext(stream, mode) ) != CIO_OK ) {
-			THROW_CIOERR(iores);
-		}
-
-		if ( ( iores = VelocityField.saveContext(stream, mode) ) != CIO_OK ) {
-			THROW_CIOERR(iores);
-		}
-
-		if ( ( iores = prescribedTractionPressure.storeYourself(stream, mode) ) != CIO_OK ) {
-			THROW_CIOERR(iores);
-		}
-
-
-		if ( closeFlag ) {
-			fclose(file);
-			delete stream;
-			stream = NULL;
-		}                                                       // ensure consistent records
-
-		return CIO_OK;
-	}
+        iDof->updateUnknownsDictionary(tStep, VM_Total, val);
+    }
+}
 
 
-	// NOT ACTIVE
-	contextIOResultType
-		PFEM :: restoreContext(DataStream *stream, ContextMode mode, void *obj)
-		//
-		// restore state variable - displacement vector
-		//
-	{
-		contextIOResultType iores;
-		int closeFlag = 0;
-		int istep, iversion;
-		FILE *file = NULL;
+// NOT ACTIVE
+contextIOResultType
+PFEM :: saveContext(DataStream *stream, ContextMode mode, void *obj)
+//
+// saves state variable - displacement vector
+//
+{
+    contextIOResultType iores;
+    int closeFlag = 0;
+    FILE *file = NULL;
 
-		this->resolveCorrespondingStepNumber(istep, iversion, obj);
+    if ( stream == NULL ) {
+        if ( !this->giveContextFile(& file, this->giveCurrentStep()->giveNumber(),
+                                    this->giveCurrentStep()->giveVersion(), contextMode_write) ) {
+            THROW_CIOERR(CIO_IOERR);                             // override
+        }
 
-		if ( stream == NULL ) {
-			if ( !this->giveContextFile(& file, istep, iversion, contextMode_read) ) {
-				THROW_CIOERR(CIO_IOERR); // override
-			}
+        stream = new FileDataStream(file);
+        closeFlag = 1;
+    }
 
-			stream = new FileDataStream(file);
-			closeFlag = 1;
-		}
+    if ( ( iores = EngngModel :: saveContext(stream, mode) ) != CIO_OK ) {
+        THROW_CIOERR(iores);
+    }
 
-		if ( ( iores = EngngModel :: restoreContext(stream, mode, obj) ) != CIO_OK ) {
-			THROW_CIOERR(iores);
-		}
+    if ( ( iores = PressureField.saveContext(stream, mode) ) != CIO_OK ) {
+        THROW_CIOERR(iores);
+    }
 
-		if ( ( iores = PressureField.restoreContext(stream, mode) ) != CIO_OK ) {
-			THROW_CIOERR(iores);
-		}
+    if ( ( iores = VelocityField.saveContext(stream, mode) ) != CIO_OK ) {
+        THROW_CIOERR(iores);
+    }
 
-		if ( ( iores = VelocityField.restoreContext(stream, mode) ) != CIO_OK ) {
-			THROW_CIOERR(iores);
-		}
+    if ( ( iores = prescribedTractionPressure.storeYourself(stream, mode) ) != CIO_OK ) {
+        THROW_CIOERR(iores);
+    }
 
-		if ( ( iores = prescribedTractionPressure.restoreYourself(stream, mode) ) != CIO_OK ) {
-			THROW_CIOERR(iores);
-		}
 
-		if ( closeFlag ) {
-			fclose(file);
-			delete stream;
-			stream = NULL;
-		}                                                       // ensure consistent records
+    if ( closeFlag ) {
+        fclose(file);
+        delete stream;
+        stream = NULL;
+    }                                                                   // ensure consistent records
 
-		return CIO_OK;
-	}
+    return CIO_OK;
+}
 
-	
-	int
-		PFEM :: checkConsistency()
-	{
-		// check internal consistency
-		// if success returns nonzero
-		int i, nelem;
-		Element *ePtr;
-		PFEMElement *sePtr;
-		Domain *domain = this->giveDomain(1);
 
-		nelem = domain->giveNumberOfElements();
-		// check for proper element type
-		
-		for ( i = 1; i <= nelem; i++ ) {
-			ePtr = domain->giveElement(i);
-			sePtr = dynamic_cast< PFEMElement * >( ePtr );
-			if ( sePtr == NULL ) {
-				_warning2("Element %d has no PFEM base", i);
-				return 0;
-			}
-		}
+// NOT ACTIVE
+contextIOResultType
+PFEM :: restoreContext(DataStream *stream, ContextMode mode, void *obj)
+//
+// restore state variable - displacement vector
+//
+{
+    contextIOResultType iores;
+    int closeFlag = 0;
+    int istep, iversion;
+    FILE *file = NULL;
 
-		EngngModel :: checkConsistency();
+    this->resolveCorrespondingStepNumber(istep, iversion, obj);
 
-		return 1;
-	}
+    if ( stream == NULL ) {
+        if ( !this->giveContextFile(& file, istep, iversion, contextMode_read) ) {
+            THROW_CIOERR(CIO_IOERR);                     // override
+        }
 
-	
-	void
-		PFEM :: printDofOutputAt(FILE *stream, Dof *iDof, TimeStep *atTime)
-	{
-		DofIDItem type = iDof->giveDofID();
-		if ( ( type == V_u ) || ( type == V_v ) || ( type == V_w ) ) {
-			iDof->printSingleOutputAt(stream, atTime, 'x', VM_Intermediate);
-			iDof->printSingleOutputAt(stream, atTime, 'v', VM_Total);
-		} else if ( ( type == P_f ) )    {
-			iDof->printSingleOutputAt(stream, atTime, 'p', VM_Total);
-		} else {
-			_error("printDofOutputAt: unsupported dof type");
-		}
+        stream = new FileDataStream(file);
+        closeFlag = 1;
+    }
 
-	}
+    if ( ( iores = EngngModel :: restoreContext(stream, mode, obj) ) != CIO_OK ) {
+        THROW_CIOERR(iores);
+    }
 
-	void
-		PFEM :: applyIC(TimeStep *stepWhenIcApply)
-	{
-		Domain *domain = this->giveDomain(1);
-		int mbneq =  this->giveNumberOfDomainEquations(1, vns);
-		int pdneq =  this->giveNumberOfDomainEquations(1, pns);
-		FloatArray *velocityVector, *pressureVector;
+    if ( ( iores = PressureField.restoreContext(stream, mode) ) != CIO_OK ) {
+        THROW_CIOERR(iores);
+    }
+
+    if ( ( iores = VelocityField.restoreContext(stream, mode) ) != CIO_OK ) {
+        THROW_CIOERR(iores);
+    }
+
+    if ( ( iores = prescribedTractionPressure.restoreYourself(stream, mode) ) != CIO_OK ) {
+        THROW_CIOERR(iores);
+    }
+
+    if ( closeFlag ) {
+        fclose(file);
+        delete stream;
+        stream = NULL;
+    }                                                                   // ensure consistent records
+
+    return CIO_OK;
+}
+
+
+int
+PFEM :: checkConsistency()
+{
+    // check internal consistency
+    // if success returns nonzero
+    int i, nelem;
+    Element *ePtr;
+    PFEMElement *sePtr;
+    Domain *domain = this->giveDomain(1);
+
+    nelem = domain->giveNumberOfElements();
+    // check for proper element type
+
+    for ( i = 1; i <= nelem; i++ ) {
+        ePtr = domain->giveElement(i);
+        sePtr = dynamic_cast< PFEMElement * >(ePtr);
+        if ( sePtr == NULL ) {
+            _warning2("Element %d has no PFEM base", i);
+            return 0;
+        }
+    }
+
+    EngngModel :: checkConsistency();
+
+    return 1;
+}
+
+
+void
+PFEM :: printDofOutputAt(FILE *stream, Dof *iDof, TimeStep *atTime)
+{
+    DofIDItem type = iDof->giveDofID();
+    if ( ( type == V_u ) || ( type == V_v ) || ( type == V_w ) ) {
+        iDof->printSingleOutputAt(stream, atTime, 'x', VM_Intermediate);
+        iDof->printSingleOutputAt(stream, atTime, 'v', VM_Total);
+    } else if ( ( type == P_f ) ) {
+        iDof->printSingleOutputAt(stream, atTime, 'p', VM_Total);
+    } else {
+        _error("printDofOutputAt: unsupported dof type");
+    }
+}
+
+void
+PFEM :: applyIC(TimeStep *stepWhenIcApply)
+{
+    Domain *domain = this->giveDomain(1);
+    int mbneq =  this->giveNumberOfDomainEquations(1, vns);
+    int pdneq =  this->giveNumberOfDomainEquations(1, pns);
+    FloatArray *velocityVector, *pressureVector;
 
 #ifdef VERBOSE
-		OOFEM_LOG_INFO("Applying initial conditions\n");
+    OOFEM_LOG_INFO("Applying initial conditions\n");
 #endif
-		int nDofs, j, k, jj;
-		int nman  = domain->giveNumberOfDofManagers();
-		DofManager *node;
-		Dof *iDof;
-		DofIDItem type;
+    int nDofs, j, k, jj;
+    int nman  = domain->giveNumberOfDofManagers();
+    DofManager *node;
+    Dof *iDof;
+    DofIDItem type;
 
-		VelocityField.advanceSolution(stepWhenIcApply);
-		velocityVector = VelocityField.giveSolutionVector(stepWhenIcApply);
-		velocityVector->resize(mbneq);
-		velocityVector->zero();
+    VelocityField.advanceSolution(stepWhenIcApply);
+    velocityVector = VelocityField.giveSolutionVector(stepWhenIcApply);
+    velocityVector->resize(mbneq);
+    velocityVector->zero();
 
-		PressureField.advanceSolution(stepWhenIcApply);
-		pressureVector = PressureField.giveSolutionVector(stepWhenIcApply);
-		pressureVector->resize(pdneq);
-		pressureVector->zero();
+    PressureField.advanceSolution(stepWhenIcApply);
+    pressureVector = PressureField.giveSolutionVector(stepWhenIcApply);
+    pressureVector->resize(pdneq);
+    pressureVector->zero();
 
 
-		for ( j = 1; j <= nman; j++ ) {
-			node = domain->giveDofManager(j);
-			nDofs = node->giveNumberOfDofs();
+    for ( j = 1; j <= nman; j++ ) {
+        node = domain->giveDofManager(j);
+        nDofs = node->giveNumberOfDofs();
 
-			for ( k = 1; k <= nDofs; k++ ) {
-				// ask for initial values obtained from
-				// bc (boundary conditions) and ic (initial conditions)
-				iDof  =  node->giveDof(k);
-				if ( !iDof->isPrimaryDof() ) {
-					continue;
-				}
+        for ( k = 1; k <= nDofs; k++ ) {
+            // ask for initial values obtained from
+            // bc (boundary conditions) and ic (initial conditions)
+            iDof  =  node->giveDof(k);
+            if ( !iDof->isPrimaryDof() ) {
+                continue;
+            }
 
-				jj = iDof->__giveEquationNumber();
-				type = iDof->giveDofID();
+            jj = iDof->__giveEquationNumber();
+            type = iDof->giveDofID();
 
-				if ( jj ) {
-					if ( ( type == V_u ) || ( type == V_v ) || ( type == V_w ) ) {
-						velocityVector->at(jj) = iDof->giveUnknown(VM_Total, stepWhenIcApply);
-					} else {
-						pressureVector->at(jj) = iDof->giveUnknown(VM_Total, stepWhenIcApply);
-					}
-				}
-			}
-		}
+            if ( jj ) {
+                if ( ( type == V_u ) || ( type == V_v ) || ( type == V_w ) ) {
+                    velocityVector->at(jj) = iDof->giveUnknown(VM_Total, stepWhenIcApply);
+                } else {
+                    pressureVector->at(jj) = iDof->giveUnknown(VM_Total, stepWhenIcApply);
+                }
+            }
+        }
+    }
 
-		// update element state according to given ic
-		int nelem = domain->giveNumberOfElements();
-		PFEMElement *element;
+    // update element state according to given ic
+    int nelem = domain->giveNumberOfElements();
+    PFEMElement *element;
 
-		for ( j = 1; j <= nelem; j++ ) {
-			element = ( PFEMElement * ) domain->giveElement(j);
-			element->updateInternalState(stepWhenIcApply);
-			element->updateYourself(stepWhenIcApply);
-		}
-	}
+    for ( j = 1; j <= nelem; j++ ) {
+        element = ( PFEMElement * ) domain->giveElement(j);
+        element->updateInternalState(stepWhenIcApply);
+        element->updateYourself(stepWhenIcApply);
+    }
+}
 
-	int
-		PFEM :: giveNewEquationNumber(int domain, DofIDItem id)
-	{
-		if ( ( id == V_u ) || ( id == V_v ) || ( id == V_w ) ) {
-			return this->vns.askNewEquationNumber();
-		} else {
-			_error("giveNewEquationNumber:: Unknown DofIDItem");
-		}
+int
+PFEM :: giveNewEquationNumber(int domain, DofIDItem id)
+{
+    if ( ( id == V_u ) || ( id == V_v ) || ( id == V_w ) ) {
+        return this->vns.askNewEquationNumber();
+    } else {
+        _error("giveNewEquationNumber:: Unknown DofIDItem");
+    }
 
-		return 0;
-	}
+    return 0;
+}
 
-	int
-		PFEM :: giveNewPrescribedEquationNumber(int domain, DofIDItem id)
-	{
-		if ( ( id == V_u ) || ( id == V_v ) || ( id == V_w ) ) {
-			return prescribedVns.askNewEquationNumber();
-		} else {
-			_error("giveNewPrescribedEquationNumber:: Unknown DofIDItem");
-		}
+int
+PFEM :: giveNewPrescribedEquationNumber(int domain, DofIDItem id)
+{
+    if ( ( id == V_u ) || ( id == V_v ) || ( id == V_w ) ) {
+        return prescribedVns.askNewEquationNumber();
+    } else {
+        _error("giveNewPrescribedEquationNumber:: Unknown DofIDItem");
+    }
 
-		return 0;
-	}
-		
-	int PFEM :: giveNumberOfDomainEquations(int d, const UnknownNumberingScheme &numberingScheme) {    //
-		// returns number of equations of current problem
-		// this method is implemented here, because some method may add some
-		// conditions in to system and this may results into increased number of
-		// equations.
-		//
+    return 0;
+}
 
-		if ( !equationNumberingCompleted ) {
-			this->forceEquationNumbering();
-		}
+int PFEM :: giveNumberOfDomainEquations(int d, const UnknownNumberingScheme &numberingScheme) {            //
+    // returns number of equations of current problem
+    // this method is implemented here, because some method may add some
+    // conditions in to system and this may results into increased number of
+    // equations.
+    //
 
-		return numberingScheme.giveRequiredNumberOfDomainEquation();
-	}
-		
-	// NOT ACTIVE called in masterdof - outcommented at the moment
-	bool
-		PFEM ::  giveBCEnforcementFlag(EquationID eid)
-	{
-		if(eid == EID_AuxMomentumBalance)
-			return false;
-		else
-			return true;
-	}
+    if ( !equationNumberingCompleted ) {
+        this->forceEquationNumbering();
+    }
 
-	void 
-		PFEM :: resetEquationNumberings()
-	{
-		vns.reset();
-		prescribedVns.reset();
-		pns.reset();
-		avns.reset();
-	}
+    return numberingScheme.giveRequiredNumberOfDomainEquation();
+}
 
+// NOT ACTIVE called in masterdof - outcommented at the moment
+bool
+PFEM ::  giveBCEnforcementFlag(EquationID eid)
+{
+    if ( eid == EID_AuxMomentumBalance ) {
+        return false;
+    } else {
+        return true;
+    }
+}
+
+void
+PFEM :: resetEquationNumberings()
+{
+    vns.reset();
+    prescribedVns.reset();
+    pns.reset();
+    avns.reset();
+}
 } // end namespace oofem

@@ -49,7 +49,6 @@
 #include "primaryfield.h"
 
 namespace oofem {
-
 class TimeStep;
 class Node;
 class Material;
@@ -70,24 +69,24 @@ protected:
 public:
     /// Constructor
     PFEMElement(int, Domain *);
-	// Destructor
+    // Destructor
     ~PFEMElement();
 
     ///Initializes receiver acording to object description stored in input record.
     IRResultType initializeFrom(InputRecord *ir);
 
     // characteristic  matrix
-    void giveCharacteristicMatrix(FloatMatrix & answer, CharType, TimeStep *);
-    void giveCharacteristicVector(FloatArray & answer, CharType, ValueModeType, TimeStep *);
+    void giveCharacteristicMatrix(FloatMatrix &answer, CharType, TimeStep *);
+    void giveCharacteristicVector(FloatArray &answer, CharType, ValueModeType, TimeStep *);
     virtual double giveCharacteristicValue(CharType, TimeStep *);
 
     /** Calculates consistent mass matrix */
     virtual void          computeConsistentMassMtrx(FloatMatrix &answer, TimeStep *) = 0;
     /** Calculates diagonal mass matrix in form of an FloatArray*/
     virtual void          computeDiagonalMassMtrx(FloatArray &answer, TimeStep *) = 0;
-	/** Calculates diagonal mass matrix */
+    /** Calculates diagonal mass matrix */
     virtual void          computeDiagonalMassMtrx(FloatMatrix &answer, TimeStep *) = 0;
-	/** Calculates inverted stabilization diagonal mass matrix*/
+    /** Calculates inverted stabilization diagonal mass matrix*/
     virtual void computeInvertedStabilizationDiagonalMassMtrx(FloatMatrix &answer, TimeStep *atTime) = 0;
 
     /// Calculates critical time step
@@ -102,11 +101,11 @@ public:
     void                  updateInternalState(TimeStep *);
     void                  printOutputAt(FILE *, TimeStep *);
     virtual int           checkConsistency();
-	
-	/// returns the interpolation for velocity
-    virtual FEInterpolation * giveVelocityInterpolation() = 0;
-	/// returns the interpolation for the pressure
-    virtual FEInterpolation * givePressureInterpolation() = 0;
+
+    /// returns the interpolation for velocity
+    virtual FEInterpolation *giveVelocityInterpolation() = 0;
+    /// returns the interpolation for the pressure
+    virtual FEInterpolation *givePressureInterpolation() = 0;
 
     // definition
     const char *giveClassName() const { return "PFEMElement"; }
@@ -132,39 +131,38 @@ public:
 #endif
 
 protected:
-	/// Computes deviatoric stress vector in given integration point and solution step from given total strain vector
+    /// Computes deviatoric stress vector in given integration point and solution step from given total strain vector
     virtual void computeDeviatoricStress(FloatArray &answer, GaussPoint *gp, TimeStep *) = 0;
 
     /// Calculates the element shape funciton matrix for velocity degrees of freedom
     virtual void computeNuMatrix(FloatMatrix &answer, GaussPoint *gp) = 0;
-	/// Calculates the element shape funciton matrix for pressure degrees of freedom
+    /// Calculates the element shape funciton matrix for pressure degrees of freedom
     virtual void computeNpMatrix(FloatMatrix &answer, GaussPoint *gp) = 0;
-	/// Calculates the element shape function derivative matrix
+    /// Calculates the element shape function derivative matrix
     virtual void computeBMatrix(FloatMatrix &answer, GaussPoint *gp) = 0;
-	/// Calculates the stiffness matrix
-    virtual void computeStiffnessMatrix(FloatMatrix &answer, MatResponseMode mode, TimeStep *atTime) = 0;//K
-	/// Calculates the velocity laplacian matrix
-    virtual void computeVelocityLaplacianMatrix (FloatMatrix &answer, TimeStep *atTime) = 0;
-	/// Calculates the pressure laplacian matrix
-    virtual void computePressureLaplacianMatrix (FloatMatrix &answer, TimeStep *atTime) = 0;
-	/// Calculates the stabilized pressure laplacian matrix
-    virtual void computeStabilizedLaplacianMatrix (FloatMatrix &answer, TimeStep *atTime) = 0;//L_tau
-	/// Calculates the pressure gradient matrix
-    virtual void computeGradientMatrix (FloatMatrix &answer, TimeStep *atTime) = 0;//G
-	/// Calculates the velocity divergence matrix
-    virtual void computeDivergenceMatrix (FloatMatrix &answer, TimeStep *atTime) = 0;//D
-	/// Calculates the stabilized gradient matrix
-    virtual void computeStabilizationGradientMatrix (FloatMatrix &answer, TimeStep *atTime) = 0;//Q
-	/// Calculates the stabilized mass matrix
-    virtual void computeStabilizationMassMatrix (FloatMatrix &answer, TimeStep *atTime) = 0;//M_hat
-	/// Calculates the force vector
-    virtual void computeForceVector(FloatArray &answer, TimeStep *atTime) = 0;//F
-	/// Calculates the so called substitution matrix
-    virtual void computePFEMSubstitutionMatrix(FloatMatrix &answer,  TimeStep *atTime) = 0;//S
-	/// Calculates the prescribed velocity vector for the right hand side of the pressure equation
-    virtual void computePrescribedRhsVector (FloatArray &answer, TimeStep *tStep, ValueModeType mode) =0;
+    /// Calculates the stiffness matrix
+    virtual void computeStiffnessMatrix(FloatMatrix &answer, MatResponseMode mode, TimeStep *atTime) = 0; //K
+    /// Calculates the velocity laplacian matrix
+    virtual void computeVelocityLaplacianMatrix(FloatMatrix &answer, TimeStep *atTime) = 0;
+    /// Calculates the pressure laplacian matrix
+    virtual void computePressureLaplacianMatrix(FloatMatrix &answer, TimeStep *atTime) = 0;
+    /// Calculates the stabilized pressure laplacian matrix
+    virtual void computeStabilizedLaplacianMatrix(FloatMatrix &answer, TimeStep *atTime) = 0; //L_tau
+    /// Calculates the pressure gradient matrix
+    virtual void computeGradientMatrix(FloatMatrix &answer, TimeStep *atTime) = 0; //G
+    /// Calculates the velocity divergence matrix
+    virtual void computeDivergenceMatrix(FloatMatrix &answer, TimeStep *atTime) = 0; //D
+    /// Calculates the stabilized gradient matrix
+    virtual void computeStabilizationGradientMatrix(FloatMatrix &answer, TimeStep *atTime) = 0; //Q
+    /// Calculates the stabilized mass matrix
+    virtual void computeStabilizationMassMatrix(FloatMatrix &answer, TimeStep *atTime) = 0; //M_hat
+    /// Calculates the force vector
+    virtual void computeForceVector(FloatArray &answer, TimeStep *atTime) = 0; //F
+    /// Calculates the so called substitution matrix
+    virtual void computePFEMSubstitutionMatrix(FloatMatrix &answer,  TimeStep *atTime) = 0; //S
+    /// Calculates the prescribed velocity vector for the right hand side of the pressure equation
+    virtual void computePrescribedRhsVector(FloatArray &answer, TimeStep *tStep, ValueModeType mode) = 0;
 };
-
 } // end namespace oofem
 #endif // pfemelement_h
 

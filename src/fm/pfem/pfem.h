@@ -44,7 +44,7 @@
 #include "materialinterface.h"
 //</RESTRICTED_SECTION>
 #ifndef __MAKEDEPEND
-#include <stdio.h>
+ #include <stdio.h>
 #endif
 
 #include "pfemnumberingschemes.h"
@@ -60,7 +60,6 @@
 //@}
 
 namespace oofem {
-
 /**
  * This class represents PFEM method for solving incompressible Navier-Stokes equations
  */
@@ -78,10 +77,10 @@ protected:
 
     /// Pressure field
     PrimaryField PressureField;
-	//DofDistributedPrimaryField PressureField;
+    //DofDistributedPrimaryField PressureField;
     /// Velocity field
     PrimaryField VelocityField;
-	//DofDistributedPrimaryField VelocityField;
+    //DofDistributedPrimaryField VelocityField;
     FloatArray deltaAuxVelocity;
     FloatArray AuxVelocity;
     FloatArray prescribedTractionPressure;
@@ -94,43 +93,43 @@ protected:
 
     /// time step and its minimal value
     double deltaT, minDeltaT;
-    
+
     double alphaShapeCoef;
 
     int initFlag;
-    
+
 
     int numberOfMomentumEqs, numberOfConservationEqs;
     int numberOfPrescribedMomentumEqs, numberOfPrescribedConservationEqs;
-	
+
     /// Pressure numbering
     PressureNumberingScheme pns;
-	/// Auxiliary Velocity numbering
+    /// Auxiliary Velocity numbering
     AuxVelocityNumberingScheme avns;
-	/// Velocity numbering
+    /// Velocity numbering
     VelocityNumberingScheme vns;
-	/// Prescribed velocity numbering
+    /// Prescribed velocity numbering
     VelocityNumberingScheme prescribedVns;
-    
+
 public:
-    PFEM(int i, EngngModel *_master = NULL)
-		: EngngModel(i, _master)
-		, PressureField(this, 1, FT_Pressure, EID_ConservationEquation, 1)
-		, VelocityField(this, 1, FT_Velocity, EID_MomentumBalance, 1)
-		, pns()
-		, vns(false)
-		, prescribedVns(true)
-		, avLhs(NULL)
-		, pLhs(NULL)
-		, vLhs(NULL)
-	{
+    PFEM(int i, EngngModel * _master = NULL) :
+        EngngModel(i, _master)
+        , PressureField(this, 1, FT_Pressure, EID_ConservationEquation, 1)
+        , VelocityField(this, 1, FT_Velocity, EID_MomentumBalance, 1)
+        , pns()
+        , vns(false)
+        , prescribedVns(true)
+        , avLhs(NULL)
+        , pLhs(NULL)
+        , vLhs(NULL)
+    {
         initFlag = 1;
         lhs = NULL;
         ndomains = 1;
         nMethod = NULL;
         numberOfMomentumEqs = numberOfConservationEqs = numberOfPrescribedMomentumEqs = numberOfPrescribedConservationEqs = 0;
     }
-    ~PFEM() {}
+    ~PFEM() { }
 
     void solveYourselfAt(TimeStep *);
     /**
@@ -140,12 +139,12 @@ public:
      * updateInternalState service.giv
      */
     virtual void               updateYourself(TimeStep *);
-    
+
     double giveUnknownComponent(ValueModeType mode, TimeStep *tStep, Domain *d, Dof *dof);
-	    
+
     contextIOResultType saveContext(DataStream *stream, ContextMode mode, void *obj = NULL);
     contextIOResultType restoreContext(DataStream *stream, ContextMode mode, void *obj = NULL);
-	 
+
 
     TimeStep *giveNextStep();
     TimeStep *giveSolutionStepWhenIcApply();
@@ -164,7 +163,7 @@ public:
      */
     virtual int       forceEquationNumbering() { return EngngModel :: forceEquationNumbering(); }
 
-	virtual int requiresUnknownsDictionaryUpdate() { return true; }
+    virtual int requiresUnknownsDictionaryUpdate() { return true; }
 
 
     /// Initialization from given input record
@@ -186,24 +185,24 @@ public:
      *  @param atTime solution step
      */
     virtual void printDofOutputAt(FILE *stream, Dof *iDof, TimeStep *atTime);
-	    
-    virtual int giveNumberOfDomainEquations(int, const UnknownNumberingScheme& num);
-   
+
+    virtual int giveNumberOfDomainEquations(int, const UnknownNumberingScheme &num);
+
     virtual int giveNewEquationNumber(int domain, DofIDItem);
     virtual int giveNewPrescribedEquationNumber(int domain, DofIDItem);
-	
-    virtual bool giveBCEnforcementFlag(EquationID eid);
-    virtual bool giveBCEnforcementFlag(PrimaryField &field) {return true;}
 
-	
-	virtual int giveUnknownDictHashIndx(ValueModeType mode, TimeStep *stepN) {return (int)mode;}
-	virtual void updateDofUnknownsDictionary(DofManager *inode, TimeStep *tStep);
-	
-	/// Writes pressures into the dof unknown dictionaries
-	void updateDofUnknownsDictionaryPressure(DofManager *inode, TimeStep *tStep);
-	/// Writes velocities into the dof unknown dictionaries
+    virtual bool giveBCEnforcementFlag(EquationID eid);
+    virtual bool giveBCEnforcementFlag(PrimaryField &field) { return true; }
+
+
+    virtual int giveUnknownDictHashIndx(ValueModeType mode, TimeStep *stepN) { return ( int ) mode; }
+    virtual void updateDofUnknownsDictionary(DofManager *inode, TimeStep *tStep);
+
+    /// Writes pressures into the dof unknown dictionaries
+    void updateDofUnknownsDictionaryPressure(DofManager *inode, TimeStep *tStep);
+    /// Writes velocities into the dof unknown dictionaries
     void updateDofUnknownsDictionaryVelocities(DofManager *inode, TimeStep *tStep);
-	void resetEquationNumberings();
+    void resetEquationNumberings();
 protected:
     /**
      * Updates nodal values
@@ -214,6 +213,5 @@ protected:
     void updateInternalState(TimeStep *);
     void applyIC(TimeStep *);
 };
-
 } // end namespace oofem
 #endif // pfem_h

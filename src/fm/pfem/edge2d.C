@@ -36,50 +36,46 @@
 #include "delaunaytriangle.h"
 
 namespace oofem {
+Edge2D :: Edge2D(int node1, int node2) :
+    nodes(2)
+{
+    nodes.at(1) = node1;
+    nodes.at(2) = node2;
+}
 
-	Edge2D :: Edge2D (int node1, int node2)
-		: nodes(2)
-	{
-		nodes.at(1) = node1;
-		nodes.at(2) = node2;
-	}
+Edge2D :: ~Edge2D()
+{ }
 
-	Edge2D :: ~Edge2D()
-	{}
-
-	bool
-	Edge2D::operator== (const Edge2D& right)
-	{
-		if ((this->nodes.at(1) == right.nodes.at(1) && this->nodes.at(2) == right.nodes.at(2)) || 
-			(this->nodes.at(1) == right.nodes.at(2) && this->nodes.at(2) == right.nodes.at(1)))
-		{
-			return true;
-		}
-		else
-		{
-			return false;
-		}
-	}
+bool
+Edge2D :: operator == ( const Edge2D & right )
+{
+    if ( ( this->nodes.at(1) == right.nodes.at(1) && this->nodes.at(2) == right.nodes.at(2) ) ||
+        ( this->nodes.at(1) == right.nodes.at(2) && this->nodes.at(2) == right.nodes.at(1) ) ) {
+        return true;
+    } else   {
+        return false;
+    }
+}
 
 
 
-	AlphaEdge2D::AlphaEdge2D(int node1, int node2, double _length)
-		: Edge2D(node1, node2)
-		, isOnConvexHull(true)
-		, outerAlphaBound(0.0)
-		, innerAlphaBound(0.0)
-		, length(_length)
-	{
-		sharedByTriangles[0] = NULL;
-		sharedByTriangles[1] = NULL;
-	}
+AlphaEdge2D :: AlphaEdge2D(int node1, int node2, double _length) :
+    Edge2D(node1, node2)
+    , isOnConvexHull(true)
+    , outerAlphaBound(0.0)
+    , innerAlphaBound(0.0)
+    , length(_length)
+{
+    sharedByTriangles [ 0 ] = NULL;
+    sharedByTriangles [ 1 ] = NULL;
+}
 
-	AlphaEdge2D::~AlphaEdge2D()
-	{}
+AlphaEdge2D :: ~AlphaEdge2D()
+{ }
 
-	void
-	AlphaEdge2D :: setSharing(int n, DelaunayTriangle *pTE)
-	{
-		sharedByTriangles[n-1] = pTE;
-	}
+void
+AlphaEdge2D :: setSharing(int n, DelaunayTriangle *pTE)
+{
+    sharedByTriangles [ n - 1 ] = pTE;
+}
 }

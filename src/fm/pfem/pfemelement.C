@@ -51,22 +51,20 @@
 #include "elementside.h"
 #include "mathfem.h"
 #ifndef __MAKEDEPEND
-#include <stdlib.h>
-#include <stdio.h>
+ #include <stdlib.h>
+ #include <stdio.h>
 #endif
 
 #ifdef __OOFEG
-#include "oofeggraphiccontext.h"
-#include "conTable.h"
+ #include "oofeggraphiccontext.h"
+ #include "conTable.h"
 #endif
 
 namespace oofem {
-
 PFEMElement :: PFEMElement(int n, Domain *aDomain) :
     FMElement(n, aDomain)
     // Constructor. Creates an element with number n, belonging to aDomain.
-{ 
-}
+{ }
 
 
 PFEMElement :: ~PFEMElement()
@@ -89,38 +87,38 @@ PFEMElement :: initializeFrom(InputRecord *ir)
 
 void
 PFEMElement ::  giveCharacteristicMatrix(FloatMatrix &answer,
-                                        CharType mtrx, TimeStep *tStep)
+                                         CharType mtrx, TimeStep *tStep)
 //
 // returns characteristics matrix of receiver according to mtrx
 //
 {
-  if ( mtrx == MassMatrix )  {
-    this->computeConsistentMassMtrx(answer, tStep);
-  } else if ( mtrx == LumpedMassMatrix )  {
-    this->computeDiagonalMassMtrx(answer, tStep);
-  } else if ( mtrx == StiffnessMatrix )  { //Tangent stiffness matrix set as default
-    this->computeStiffnessMatrix(answer, TangentStiffness, tStep);
-  } else if ( mtrx == TangentStiffnessMatrix )  { 
-    this->computeStiffnessMatrix(answer, TangentStiffness, tStep);
-  } else if ( mtrx == PressureGradientMatrix )  { 
-    this->computeGradientMatrix(answer, tStep);
-  } else if ( mtrx == PFEMSubstitutionMatrix )  { 
-    this->computePFEMSubstitutionMatrix(answer, tStep);
-  } else if ( mtrx == DivergenceMatrix )  { 
-    this->computeDivergenceMatrix(answer, tStep);
-  } else if ( mtrx == PressureLaplacianMatrix )  { 
-    this->computePressureLaplacianMatrix(answer, tStep);
-  } else if ( mtrx == StabilizedLaplacianMatrix )  { 
-    this->computeStabilizedLaplacianMatrix(answer, tStep);
-  } else if ( mtrx == StabilizationGradientMatrix )  { 
-    this->computeStabilizationGradientMatrix(answer, tStep);
-  } else if ( mtrx == InvertedStabilizationMassMatrix )  { 
-    this->computeInvertedStabilizationDiagonalMassMtrx(answer, tStep);
-  } else if ( mtrx == VelocityLaplacianMatrix )  { 
-    this->computeVelocityLaplacianMatrix(answer, tStep);
-  } else {
-    _error("giveCharacteristicMatrix: Unknown Type of characteristic mtrx.");
-  }
+    if ( mtrx == MassMatrix ) {
+        this->computeConsistentMassMtrx(answer, tStep);
+    } else if ( mtrx == LumpedMassMatrix ) {
+        this->computeDiagonalMassMtrx(answer, tStep);
+    } else if ( mtrx == StiffnessMatrix ) { //Tangent stiffness matrix set as default
+        this->computeStiffnessMatrix(answer, TangentStiffness, tStep);
+    } else if ( mtrx == TangentStiffnessMatrix ) {
+        this->computeStiffnessMatrix(answer, TangentStiffness, tStep);
+    } else if ( mtrx == PressureGradientMatrix ) {
+        this->computeGradientMatrix(answer, tStep);
+    } else if ( mtrx == PFEMSubstitutionMatrix ) {
+        this->computePFEMSubstitutionMatrix(answer, tStep);
+    } else if ( mtrx == DivergenceMatrix ) {
+        this->computeDivergenceMatrix(answer, tStep);
+    } else if ( mtrx == PressureLaplacianMatrix ) {
+        this->computePressureLaplacianMatrix(answer, tStep);
+    } else if ( mtrx == StabilizedLaplacianMatrix ) {
+        this->computeStabilizedLaplacianMatrix(answer, tStep);
+    } else if ( mtrx == StabilizationGradientMatrix ) {
+        this->computeStabilizationGradientMatrix(answer, tStep);
+    } else if ( mtrx == InvertedStabilizationMassMatrix ) {
+        this->computeInvertedStabilizationDiagonalMassMtrx(answer, tStep);
+    } else if ( mtrx == VelocityLaplacianMatrix ) {
+        this->computeVelocityLaplacianMatrix(answer, tStep);
+    } else {
+        _error("giveCharacteristicMatrix: Unknown Type of characteristic mtrx.");
+    }
 
     return;
 }
@@ -128,70 +126,70 @@ PFEMElement ::  giveCharacteristicMatrix(FloatMatrix &answer,
 
 void
 PFEMElement ::  giveCharacteristicVector(FloatArray &answer, CharType mtrx, ValueModeType mode,
-                                        TimeStep *tStep)
+                                         TimeStep *tStep)
 //
 // returns characteristics vector of receiver according to requested type
 //
 {
     if ( mtrx == LumpedMassMatrix ) {
-      this->computeDiagonalMassMtrx(answer, tStep);
-    } else if ( mtrx == LoadVector )  {
+        this->computeDiagonalMassMtrx(answer, tStep);
+    } else if ( mtrx == LoadVector ) {
         this->computeForceVector(answer, tStep);
-    } else if ( mtrx == PressureGradientVector )  {
+    } else if ( mtrx == PressureGradientVector ) {
         FloatMatrix g;
         this->computeGradientMatrix(g, tStep);
         FloatArray p;
         this->computeVectorOf(EID_ConservationEquation, VM_Total, tStep, p);
         answer.beProductOf(g, p);
-    } else if ( mtrx == MassVelocityVector )  {
+    } else if ( mtrx == MassVelocityVector ) {
         FloatMatrix m;
         FloatArray u;
         this->giveCharacteristicMatrix(m, LumpedMassMatrix, tStep);
         this->computeVectorOf(EID_MomentumBalance, VM_Total, tStep, u);
         answer.beProductOf(m, u);
-    } else if ( mtrx == LaplaceVelocityVector )  {
+    } else if ( mtrx == LaplaceVelocityVector ) {
         FloatMatrix l;
         FloatArray u;
         this->giveCharacteristicMatrix(l, StiffnessMatrix, tStep);
         this->computeVectorOf(EID_MomentumBalance, VM_Total, tStep, u);
         answer.beProductOf(l, u);
-    } else if ( mtrx == MassAuxVelocityVector )  {
+    } else if ( mtrx == MassAuxVelocityVector ) {
         FloatMatrix m;
         FloatArray u;
         this->giveCharacteristicMatrix(m, LumpedMassMatrix, tStep);
         this->computeVectorOf(EID_AuxMomentumBalance, VM_Intermediate, tStep, u);
         answer.beProductOf(m, u);
-    } else if ( mtrx == StabilizedLaplacePressureVector )  {
-      // NOT IN USE
+    } else if ( mtrx == StabilizedLaplacePressureVector ) {
+        // NOT IN USE
         FloatMatrix l;
         FloatArray p;
         this->giveCharacteristicMatrix(l, StabilizedLaplacianMatrix, tStep);
         this->computeVectorOf(EID_ConservationEquation, VM_Total, tStep, p);
         answer.beProductOf(l, p);
-    } else if ( mtrx == DivergenceVelocityVector )  {
+    } else if ( mtrx == DivergenceVelocityVector ) {
         FloatMatrix d;
         this->giveCharacteristicMatrix(d, DivergenceMatrix, tStep);
         FloatArray u;
         this->computeVectorOf(EID_AuxMomentumBalance, VM_Intermediate, tStep, u);
         answer.beProductOf(d, u);
-    } else if ( mtrx == QMhat_invQTpressureVector )  {
-      // NOT IN USE
+    } else if ( mtrx == QMhat_invQTpressureVector ) {
+        // NOT IN USE
         FloatMatrix Minv, QMinv, QMinvQT;
         FloatMatrix Q;
         this->giveCharacteristicMatrix(Q, StabilizationGradientMatrix, tStep);
         this->giveCharacteristicMatrix(Minv, InvertedStabilizationMassMatrix, tStep);
         FloatArray p;
         this->computeVectorOf(EID_ConservationEquation, VM_Total, tStep, p);
-        QMinv.beProductOf(Q,Minv);
-        QMinvQT.beProductTOf(QMinv,Q);
+        QMinv.beProductOf(Q, Minv);
+        QMinvQT.beProductTOf(QMinv, Q);
         answer.beProductOf(QMinvQT, p);
     } else if ( mtrx == PrescribedVelocityRhsVector ) {
-      // NOT IN USE
+        // NOT IN USE
         FloatMatrix k;
         FloatArray u;
         this->giveCharacteristicMatrix(k, StiffnessMatrix, tStep);
         this->computeVectorOfPrescribed(EID_MomentumBalance, mode, tStep, u);
-        answer.beProductOf(k,u);
+        answer.beProductOf(k, u);
         answer.negated();
     } else if ( mtrx ==  PrescribedRhsVector ) {
         this->computePrescribedRhsVector(answer, tStep, mode);
@@ -219,7 +217,7 @@ PFEMElement :: checkConsistency()
 // no check at the moment
 {
     int result = 1;
-    
+
     return result;
 }
 
@@ -260,7 +258,7 @@ PFEMElement :: printOutputAt(FILE *file, TimeStep *stepN)
 #ifdef __OOFEG
 int
 PFEMElement :: giveInternalStateAtNode(FloatArray &answer, InternalStateType type, InternalStateMode mode,
-                                      int node, TimeStep *atTime)
+                                       int node, TimeStep *atTime)
 {
     int indx = 1;
     Node *n = this->giveNode(node);
@@ -309,15 +307,15 @@ PFEMElement :: giveInternalStateAtNode(FloatArray &answer, InternalStateType typ
 //         if ( mask.findFirstIndexOf(V_u) ) {
 //             answer.at(1) = indx++;
 //         }
-// 
+//
 //         if ( mask.findFirstIndexOf(V_v) ) {
 //             answer.at(2) = indx++;
 //         }
-// 
+//
 //         if ( mask.findFirstIndexOf(V_w) ) {
 //             answer.at(3) = indx++;
 //         }
-// 
+//
 //         return 1;
 //     } else if ( type == IST_Pressure ) {
 //         answer.resize(1);
@@ -327,6 +325,4 @@ PFEMElement :: giveInternalStateAtNode(FloatArray &answer, InternalStateType typ
 //         return Element :: giveIntVarCompFullIndx(answer, type);
 //     }
 // }
-
-
 } // end namespace oofem
