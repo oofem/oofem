@@ -116,12 +116,13 @@ public:
         EngngModel(i, _master)
         , PressureField(this, 1, FT_Pressure, EID_ConservationEquation, 1)
         , VelocityField(this, 1, FT_Velocity, EID_MomentumBalance, 1)
-        , pns()
-        , vns(false)
-        , prescribedVns(true)
         , avLhs(NULL)
         , pLhs(NULL)
         , vLhs(NULL)
+		, pns()
+        , vns(false)
+        , prescribedVns(true)
+        
     {
         initFlag = 1;
         lhs = NULL;

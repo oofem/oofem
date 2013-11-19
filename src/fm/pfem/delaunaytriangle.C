@@ -41,8 +41,8 @@
 namespace oofem {
 DelaunayTriangle :: DelaunayTriangle(Domain *d, int node1, int node2, int node3) :
     nodes(3)
+	, domain(d)
     , circumCircle(3)
-    , domain(d)
     , validFlag(true)
     , listOfCellsContainedInAndPosition(NULL)
 {

@@ -817,8 +817,7 @@ public:
         }
 
         if ( filter.isBBXStage2Defined(BBS2) ) {
-            oofemOctantRec2_BoundingBoxStatus BBStatus;
-            BBStatus = terminal->testBoundingBox(BBS2);
+            OctantRec::BoundingBoxStatus BBStatus = terminal->testBoundingBox(BBS2);
             if ( BBStatus == OctantRec :: BBS_ContainsCell ) {
                 giveListOfTerminalCellsInBoundingBox(* cellListPostSearch, BBS2, rootCell);
                 for ( cellListPos = cellListPostSearch->begin(); cellListPos != cellListPostSearch->end(); ++cellListPos ) {
@@ -1031,9 +1030,7 @@ protected:
     void giveListOfTerminalCellsInBoundingBox(std :: list< CellPtrType > &cellList, BoundingBox &BBX, CellPtrType currentCell)
     {
         int i, j, k;
-        oofemOctantRec2_BoundingBoxStatus BBStatus;
-
-        BBStatus = currentCell->testBoundingBox(BBX);
+		OctantRec :: BoundingBoxStatus BBStatus = currentCell->testBoundingBox(BBX);
         if ( ( BBStatus == OctantRec :: BBS_InsideCell ) || ( BBStatus == OctantRec :: BBS_ContainsCell ) ) {
             if ( currentCell->isTerminalOctant() ) {
                 cellList.push_back(currentCell);

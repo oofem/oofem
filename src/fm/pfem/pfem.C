@@ -235,9 +235,9 @@ PFEM :: giveNextStep()
     double dt = deltaT;
     StateCounterType counter = 1;
     delete previousStep;
-    DofManager *dman = nullptr;
+    DofManager *dman = NULL;
     Domain *domain = this->giveDomain(1);
-    Dof *jDof = nullptr;
+    Dof *jDof = NULL;
     DofIDItem type;
 
 
