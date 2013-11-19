@@ -579,6 +579,7 @@ public:
             distanceToClosestNode = startingPosition->distance( this->domain->giveNode( * ( closestNodeIndices.begin() ) )->giveCoordinates() );
             initFlag = true;
         }
+	return true;
     }
 
     void giveResult(std :: list< int > &answer) {

@@ -48,8 +48,7 @@
 namespace oofem {
 //////////////////////////////////////////////////////////////////////////
 DelaunayTriangulator :: DelaunayTriangulator(Domain *d, double setAlpha) :
-    triangleOctree(3, d)
-    , alphaShapeEdgeList(0)
+  alphaShapeEdgeList(0), triangleOctree(3, d)
 {
     domain = d;
     alphaValue = setAlpha;
@@ -68,8 +67,8 @@ DelaunayTriangulator :: ~DelaunayTriangulator()
     }
 
     // clean up alpha edge list
-    for ( auto it = alphaShapeEdgeList.begin(); it != alphaShapeEdgeList.end(); ++it ) {
-        delete(* it);
+    for ( elIT = alphaShapeEdgeList.begin(); elIT != alphaShapeEdgeList.end(); ++elIT ) {
+        delete(* elIT);
     }
 }
 

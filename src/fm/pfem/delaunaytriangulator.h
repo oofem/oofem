@@ -48,7 +48,7 @@
 #include "timer.h"
 #include "octreelocalizert.h"
 #include "intarray.h"
-#include "Edge2d.h"
+#include "edge2d.h"
 
 namespace oofem {
 class Domain;
