@@ -226,6 +226,7 @@ enum classType {
     Tr2Shell7XFEMClass,
     MacroLSpaceClass,
     MicroMaterialClass,
+    DKTPlateClass,
 
     InterfaceElem1dClass,
     InterfaceElem2dQuadClass,

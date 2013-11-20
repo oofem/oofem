@@ -106,7 +106,7 @@ PFEM :: forceEquationNumbering(int id)
 
     // first initialize default numbering (for velocity unknowns only)
 
-    int i, j, ndofs, nnodes, nelem;
+    int i, j, ndofs, nnodes;
     DofManager *inode;
     Domain *domain = this->giveDomain(id);
     TimeStep *currStep = this->giveCurrentStep();
@@ -119,7 +119,6 @@ PFEM :: forceEquationNumbering(int id)
 
 
     nnodes = domain->giveNumberOfDofManagers();
-    nelem = domain->giveNumberOfElements();
 
     // number first velocities
     for ( i = 1; i <= nnodes; i++ ) {
@@ -204,6 +203,7 @@ PFEM :: giveUnknownComponent(ValueModeType mode, TimeStep *tStep, Domain *d, Dof
                 return dof->giveUnknowns()->at(hash);
             } else {
                 OOFEM_ERROR2( "giveUnknown:  Dof unknowns dictionary does not contain unknown of value mode (%s)", __ValueModeTypeToString(mode) );
+		return 0.; // to make compiler happy
             }
         } else   {
             if ( dof->giveDofID() == P_f ) {                     // pressures

@@ -981,6 +981,7 @@ protected:
                 }
             }
         }
+	return 1;
     }
 
     /// Removes member from cell using insertion functor to ensure member is contained in
@@ -1007,6 +1008,7 @@ protected:
                 }
             }
         }
+	return 1;
     }
 
     /// Gives the maximal tree depth from given cell

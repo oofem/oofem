@@ -56,7 +56,7 @@
 
 #ifdef __OOFEG
  #include "oofeggraphiccontext.h"
- #include "conTable.h"
+ #include "connectivitytable.h"
 #endif
 
 namespace oofem {
@@ -75,14 +75,7 @@ PFEMElement2d :: ~PFEMElement2d()
 IRResultType
 PFEMElement2d :: initializeFrom(InputRecord *ir)
 {
-    //<RESTRICTED_SECTION>
-    const char *__proc = "initializeFrom"; // Required by IR_GIVE_FIELD macro
-    IRResultType result;                // Required by IR_GIVE_FIELD macro
-    //</RESTRICTED_SECTION>
-
-    this->PFEMElement :: initializeFrom(ir);
-
-    return IRRT_OK;
+    return this->PFEMElement :: initializeFrom(ir);
 }
 
 int

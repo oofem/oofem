@@ -113,8 +113,8 @@ PressureNumberingScheme :: giveTotalNumberOfPrescribedEquations() const
 
 VelocityNumberingScheme :: VelocityNumberingScheme(bool prescribed) :
     UnknownNumberingScheme()
-    , prescribed(prescribed)
     , numEqs(0)
+    , prescribed(prescribed)
 { }
 
 VelocityNumberingScheme :: ~VelocityNumberingScheme()

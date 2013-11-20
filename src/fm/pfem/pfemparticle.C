@@ -59,13 +59,7 @@ PFEMParticle :: PFEMParticle(int n, Domain *aDomain) : Node(n, aDomain), free(tr
 IRResultType
 PFEMParticle :: initializeFrom(InputRecord *ir)
 {
-    const char *__proc = "initializeFrom"; // Required by IR_GIVE_FIELD macro
-    IRResultType result;                 // Required by IR_GIVE_FIELD macro
-
-    Node :: initializeFrom(ir);
-
-
-    return IRRT_OK;
+  return Node :: initializeFrom(ir);
 }
 
 
@@ -103,7 +97,6 @@ void PFEMParticle :: drawScalar(oofegGraphicContext &gc)
 {
     GraphicObj *go;
     TimeStep *tStep = domain->giveEngngModel()->giveCurrentStep();
-    int i;
     if ( gc.giveIntVarType() == IST_Pressure ) {
         WCRec p [ 1 ]; /* point */
         p [ 0 ].x = ( FPNum ) this->giveCoordinate(1);
@@ -113,7 +106,7 @@ void PFEMParticle :: drawScalar(oofegGraphicContext &gc)
         int dofindx;
         double pressVal;
         if ( ( dofindx = this->findDofWithDofId(P_f) ) ) {
-            pressVal = this->giveDof(dofindx)->giveUnknown(EID_ConservationEquation, VM_Total, tStep);
+            pressVal = this->giveDof(dofindx)->giveUnknown(VM_Total, tStep);
         }
 
         EASValsSetLayer(OOFEG_VARPLOT_PATTERN_LAYER);

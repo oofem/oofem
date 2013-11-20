@@ -56,7 +56,7 @@
 
 #ifdef __OOFEG
  #include "oofeggraphiccontext.h"
- #include "conTable.h"
+ #include "connectivitytable.h"
 #endif
 
 namespace oofem {
@@ -133,11 +133,6 @@ TR1_2D_PFEM ::   giveElementDofIDMask(EquationID ut, IntArray &answer) const
 IRResultType
 TR1_2D_PFEM :: initializeFrom(InputRecord *ir)
 {
-    //<RESTRICTED_SECTION>
-    const char *__proc = "initializeFrom"; // Required by IR_GIVE_FIELD macro
-    IRResultType result;                // Required by IR_GIVE_FIELD macro
-    //</RESTRICTED_SECTION>
-
     this->PFEMElement :: initializeFrom(ir);
 
     this->computeGaussPoints();
@@ -775,7 +770,7 @@ TR1_2D_PFEM :: giveInternalStateAtNode(FloatArray &answer, InternalStateType typ
     //</RESTRICTED_SECTION>
     if ( type == IST_Density ) {
         answer.resize(1);
-        answer.at(1) = this->giveMaterial()->giveCharacteristicValue(MRM_Density, integrationRulesArray [ 0 ]->getIntegrationPoint(0), atTime);
+        answer.at(1) = this->giveMaterial()->give('d', integrationRulesArray [ 0 ]->getIntegrationPoint(0));
         return 1;
     } else {
         return PFEMElement :: giveInternalStateAtNode(answer, type, mode, node, atTime);
@@ -843,11 +838,7 @@ void TR1_2D_PFEM :: drawScalar(oofegGraphicContext &context)
         return;
     }
 
-    this->giveIntVarCompFullIndx( map, context.giveIntVarType() );
-
-    if ( ( indx = map.at( context.giveIntVarIndx() ) ) == 0 ) {
-        return;
-    }
+    indx = context.giveIntVarIndx();
 
     s [ 0 ] = v1.at(indx);
     s [ 1 ] = v2.at(indx);

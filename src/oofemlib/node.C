@@ -905,7 +905,7 @@ Node :: drawYourself(oofegGraphicContext &gc)
         }
 	
     } else if ( mode == OGC_scalarPlot ) {
-      this->drawScalar(gc);
+      //this->drawScalar(gc);
 }
     
 }
