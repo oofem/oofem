@@ -450,7 +450,7 @@ IntMatBilinearCZFagerstrom :: give3dStiffnessMatrix_dTdj(FloatMatrix &answer, Ma
 	//printf("analytical tangent \n");
     //answer.printYourself();
 
-#endif
+
 }
 
 
