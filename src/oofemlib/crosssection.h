@@ -46,7 +46,7 @@
 
 ///@name Input fields for CrossSection
 //@{
-#define _CrossSection_SetNumber "set"
+#define _IFT_CrossSection_SetNumber "set"
 //@}
 
 namespace oofem {
@@ -138,17 +138,6 @@ public:
      */
     virtual double give(int aProperty, GaussPoint *gp){ return 0.0; };
 
-    /**
-     * Check for symmetry of stiffness matrix.
-     * Default implementation returns true.
-     * It can be moved to base Cross section class in the future.
-     * @param rMode Response mode of material.
-     * @param mat Material index.
-     * @return True if stiffness matrix of receiver is symmetric.
-     * @deprected will be removed in the future when cross sections stores the material 
-     */
-    virtual bool isCharacteristicMtrxSymmetric(MatResponseMode rMode, int mat);
-    
     /**
      * Check for symmetry of stiffness matrix.
      * Default implementation returns true.

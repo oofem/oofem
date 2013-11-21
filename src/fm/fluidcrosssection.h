@@ -73,6 +73,9 @@ public:
 
     virtual int checkConsistency();
 
+    virtual bool isCharacteristicMtrxSymmetric(MatResponseMode rMode);
+    virtual int giveIPValue(FloatArray &answer, GaussPoint *ip, InternalStateType type, TimeStep *atTime);
+
     FluidDynamicMaterial *giveFluidMaterial();
 
     virtual const char *giveClassName() const { return "FluidCrossSection"; }

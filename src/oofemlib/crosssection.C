@@ -60,7 +60,7 @@ CrossSection :: initializeFrom(InputRecord *ir)
     IRResultType result;                   // Required by IR_GIVE_FIELD macro
 
     // Read set number the cross section is applied to
-    IR_GIVE_OPTIONAL_FIELD(ir, this->setNumber, _CrossSection_SetNumber );
+    IR_GIVE_OPTIONAL_FIELD(ir, this->setNumber, _IFT_CrossSection_SetNumber );
 
     return IRRT_OK;
 }
@@ -122,17 +122,6 @@ CrossSection :: give(CrossSectionProperty aProperty)
     }
 
     return 0.0;
-}
-
-
-
-
-
-
-bool
-CrossSection :: isCharacteristicMtrxSymmetric(MatResponseMode rMode, int mat)
-{
-    return domain->giveMaterial(mat)->isCharacteristicMtrxSymmetric(rMode);
 }
 
 
