@@ -46,6 +46,7 @@
 #define _IFT_HOMExportModule_Name "hom"
 #define _IFT_HOMExportModule_scale "scale"
 #define _IFT_HOMExportModule_matnum "matnum"
+#define _IFT_HOMExportModule_tmExport "tmexport"
 //@}
 
 namespace oofem {
@@ -62,6 +63,7 @@ class OOFEM_EXPORT HOMExportModule : public ExportModule
 protected:
     /// Scale of all homogenized values.
     double scale;
+    bool tmexport;
 #ifdef RBR_SUPPORT
     enum omodeType { wdmode, rbrmode }; // WholeDomain or RegionByRegion output
     omodeType omode;

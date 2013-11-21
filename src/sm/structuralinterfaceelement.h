@@ -85,7 +85,8 @@ protected:
     FloatArray *initialDisplacements;
     FEInterpolation *interpolation;
     virtual FEInterpolation *giveInterpolation() const { return interpolation; };
-
+    /// Flag indicating if geometrical nonlinearities apply.
+    int nlGeometry;
 public:
     /**
      * Constructor. Creates structural element with given number, belonging to given domain.
@@ -121,8 +122,6 @@ public:
      */
     virtual void computeStiffnessMatrix(FloatMatrix &answer, MatResponseMode rMode, TimeStep *tStep);
 
-    // stress equivalent vector in nodes (vector of internal forces)
-    // - mainly for nonLinear Analysis.
     /**
      * Returns equivalent nodal forces vectors. Useful for nonlinear analysis.
      * Default implementation computes result as @f$ F=\int_v B^{\mathrm{T}} \sigma \mathrm{d}V @f$, where @f$ \sigma @f$ is the
@@ -142,6 +141,7 @@ public:
     virtual void computeSpatialJump(FloatArray &answer, GaussPoint *gp, TimeStep *stepN);
     virtual int giveIPValue(FloatArray &answer, GaussPoint *gp, InternalStateType type, TimeStep *tStep);
 
+    virtual Interface *giveInterface(InterfaceType) { return NULL; };
 
     //@}
 
@@ -152,109 +152,25 @@ public:
     virtual IRResultType initializeFrom(InputRecord *ir);
     virtual void giveInputRecord(DynamicInputRecord &input);
     virtual const char *giveClassName() const { return "StructuralInterfaceElement"; };
-    //virtual classType giveClassID() const { return StructuralInterfaceElementClass; }
-
+    
     StructuralInterfaceCrossSection *giveInterfaceCrossSection();
     virtual double computeAreaAround(GaussPoint *gp) = 0;
 
+    virtual Element_Geometry_Type giveGeometryType() const { return EGT_unknown; };
+
+    //virtual methods that should be overloaded by the elements
+    virtual void giveEngTraction( FloatArray &answer, GaussPoint *gp, const FloatArray &jump, TimeStep *tStep );
+    virtual void giveFirstPKTraction ( FloatArray &answer, GaussPoint *gp, const FloatArray &jump, const FloatMatrix &F, TimeStep *tStep )
+    {
+        OOFEM_ERROR1 ( "giveFirstPKTraction not implemented for the current element" );
+    }
+
+    virtual void giveStiffnessMatrix_Eng ( FloatMatrix &answer, MatResponseMode rMode, IntegrationPoint *ip, TimeStep *tStep );
+    virtual void giveStiffnessMatrix_dTdj ( FloatMatrix &answer, MatResponseMode rMode, IntegrationPoint *ip, TimeStep *tStep )
+    {
+        OOFEM_ERROR1 ( "giveStiffnessMatrix_dTdj not implemented for the current element" );
+    }
 protected:
-
-
-
-    /**
-     * Computes constitutive matrix of receiver. Default implementation uses element cross section
-     * giveCharMaterialStiffnessMatrix service.
-     * @param answer Constitutive matrix.
-     * @param rMode Material response mode of answer.
-     * @param gp Integration point for which constitutive matrix is computed.
-     * @param tStep Time step.
-     */
-    virtual void computeConstitutiveMatrixAt(FloatMatrix &answer,
-                                             MatResponseMode rMode, GaussPoint *gp,
-                                             TimeStep *tStep);
-
-
-    /**
-     * Computes volume related to integration point on local surface.
-     * @param gp Surface integration point.
-     * @param iSurf Surface number.
-     */
-    virtual double computeSurfaceVolumeAround(GaussPoint *gp, int iSurf) { return 0.; }
-
-    /**
-     * Computes global coordinates of integration point on  local surface.
-     * @param answer Global coordinates.
-     * @param gp Surface integration point.
-     * @param iSurf Surface number.
-     */
-    virtual void computeSurfIpGlobalCoords(FloatArray &answer, GaussPoint *gp, int iSurf) { answer.resize(0); }
-
-    // Global to local element c.s transformation for load vector dofs
-    /**
-     * Returns transformation matrix from global coordinate system to local
-     * element coordinate system for element load vector components.
-     * If no transformation is necessary, answer is empty matrix (default);
-     * @param answer Transformation matrix.
-     * @return Nonzero if transformation matrix is not empty matrix, zero otherwise.
-     */
-    virtual int computeLoadGToLRotationMtrx(FloatMatrix &answer) {
-        answer.beEmptyMtrx();
-        return 0;
-    }
-
-    // Local edge (LE-local Edge c.s) or surface (LS-local surface c.s) c.s
-    // to element local c.s for load vector dofs
-    /**
-     * Returns transformation matrix from local edge c.s  to element local coordinate system
-     * of load vector components. Necessary, because integration must be done in local coordinate
-     * system of entity (edge or surface).
-     * If no transformation is necessary, answer is empty matrix (default);
-     * @param answer Computed rotation matrix.
-     * @param iEdge Edge number.
-     * @param gp Integration point (point, where transformation is computed, useful for curved edges).
-     * @return Nonzero if transformation matrix is not empty matrix, zero otherwise.
-     */
-    virtual int computeLoadLEToLRotationMatrix(FloatMatrix &answer, int iEdge, GaussPoint *gp) {
-        answer.beEmptyMtrx();
-        return 0;
-    }
-    /**
-     * Returns transformation matrix from local surface c.s  to element local coordinate system
-     * of load vector components. Necessary, because integration must be done in local coordinate
-     * system of entity (edge or surface).
-     * If no transformation is necessary, answer is empty matrix (default);
-     * @param answer Computed rotation matrix.
-     * @param iSurf Surface number.
-     * @param gp Integration point (point, where transformation is computed, useful for curved surfaces)
-     * @return Nonzero if transformation matrix is not empty matrix, zero otherwise.
-     */
-    virtual int computeLoadLSToLRotationMatrix(FloatMatrix &answer, int iSurf, GaussPoint *gp) {
-        answer.beEmptyMtrx();
-        return 0;
-    }
-    //@}
-
-
-    /**
-     * Computes the stress vector of receiver at given integration point, at time step stepN.
-     * The nature of these stresses depends on the element's type.
-     * @param answer Stress vector.
-     * @param gp Integration point.
-     * @param tStep Time step.
-     */
-    //virtual void computeStressVector(FloatArray &answer, const FloatArray &strain, GaussPoint *gp, TimeStep *tStep);
-
-    /**
-     * Computes the geometrical matrix of receiver in given integration point.
-     * The product of this matrix (assembled at given integration point) and element displacement
-     * vector is element strain vector. If lowerIndx and upperIndx parameters are specified,
-     * answer is formed only for strains within this interval. This will affects the size of answer.
-     *
-     * @param gp Integration point for which answer is computed.
-     * @param answer Geometric matrix of receiver.
-
-     */
-    virtual void computeBmatrixAt(GaussPoint *gp, FloatMatrix &answer){};
 
     /**
      * Computes modified interpolation matrix (N) for the element which multiplied 
@@ -264,6 +180,7 @@ protected:
      */
     virtual void computeNmatrixAt(GaussPoint *gp, FloatMatrix &answer) = 0;
 
+    // transformation matrix from local to global
     virtual void computeTransformationMatrixAt(GaussPoint *gp, FloatMatrix &answer) = 0;
 
 
@@ -273,14 +190,17 @@ protected:
      * @return Order of approximation.
      */
     virtual int giveApproxOrder() { return 0; }
+
     /**
      * Return desired number of integration points for consistent mass matrix
      * computation, if required.
      * @return Number of integration points for mass matrix.
+     * @todo not sure if we should allow these elements to have mass - JB
      */
     virtual int giveNumberOfIPForMassMtrxIntegration() { return 0; }
 
     virtual int testCrossSectionExtension(CrossSectExtension ext) { return ( ( ext == CS_StructuralInterfaceCapability ) ? 1 : 0 ); }
+    virtual int testElementExtension(ElementExtension ext) { return 0; } ///@ necessary to define?
 };
 } // end namespace oofem
 #endif // structuralinterfaceelement_h

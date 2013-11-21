@@ -72,8 +72,6 @@ public:
     KelvinChainMaterial(int n, Domain *d);
     virtual ~KelvinChainMaterial() {}
 
-    virtual void updateYourself(GaussPoint *gp, TimeStep *tStep);
-
     // identification and auxiliary functions
     virtual int hasNonLinearBehaviour() { return 0; }
     virtual const char *giveClassName() const { return "KelvinChainMaterial"; }
@@ -90,6 +88,10 @@ public:
     virtual void  giveEigenStrainVector(FloatArray &answer, GaussPoint *gp, TimeStep *tStep, ValueModeType mode);
 
     virtual MaterialStatus *CreateStatus(GaussPoint *gp) const;
+
+    virtual void giveRealStressVector(FloatArray &answer, GaussPoint *gp, const FloatArray &reducedStrain, TimeStep *tStep);
+
+    void computeHiddenVars(GaussPoint *gp, TimeStep *tNow);
 
 protected:
     virtual int hasIncrementalShrinkageFormulation() { return 0; }

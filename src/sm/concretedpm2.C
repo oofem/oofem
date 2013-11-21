@@ -2541,23 +2541,6 @@ ConcreteDPM2 :: giveIPValue(FloatArray &answer,
     }
 }
 
-
-InternalStateValueType
-ConcreteDPM2 :: giveIPValueType(InternalStateType type)
-{
-    switch ( type ) {
-    case IST_PlasticStrainTensor: // plastic strain tensor
-        return ISVT_TENSOR_S3E;
-
-    case IST_DamageTensor: // damage tensor used for internal variables
-        return ISVT_TENSOR_S3;
-
-    default:
-        return StructuralMaterial :: giveIPValueType(type);
-
-    }
-}
-
 MaterialStatus *
 ConcreteDPM2 :: CreateStatus(GaussPoint *gp) const
 {

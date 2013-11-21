@@ -32,8 +32,6 @@
  *  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  */
 
-#ifdef __PETSC_MODULE
-
 #include "petscsparsemtrx.h"
 #include "engngm.h"
 #include "activebc.h"
@@ -41,7 +39,6 @@
 #include "sparsemtrxtype.h"
 #include "classfactory.h"
 
-#include <set>
 #include <vector>
 #include <petscksp.h>
 #include <petscvec.h>
@@ -296,18 +293,18 @@ PetscSparseMtrx :: buildInternalStructure(EngngModel *eModel, int di, EquationID
 
     geqs = leqs = nRows;
 
+    int total_nnz;
     IntArray d_nnz(leqs), d_nnz_sym(leqs);
-    
+
     {
         //determine nonzero structure of matrix
         int ii, jj;
-        Element *elem;
         IntArray r_loc, c_loc;
-        std :: vector< std :: set< int > >rows_upper(nRows), rows_lower(nRows);
+        std :: vector< IntArray > rows_upper(nRows), rows_lower(nRows);
 
         nelem = domain->giveNumberOfElements();
         for ( int n = 1; n <= nelem; n++ ) {
-            elem = domain->giveElement(n);
+            Element *elem = domain->giveElement(n);
             elem->giveLocationArray(r_loc, ut, r_s);
             elem->giveLocationArray(c_loc, ut, c_s);
             for ( int i = 1; i <= r_loc.giveSize(); i++ ) {
@@ -316,9 +313,9 @@ PetscSparseMtrx :: buildInternalStructure(EngngModel *eModel, int di, EquationID
                         jj = c_loc.at(j);
                         if ( jj ) {
                             if ( jj >= ii ) {
-                                rows_upper[ ii - 1 ].insert( jj - 1 );
+                                rows_upper[ ii - 1 ].insertSortedOnce( jj - 1, c_loc.giveSize()/2 );
                             } else {
-                                rows_lower[ ii - 1 ].insert( jj - 1 );
+                                rows_lower[ ii - 1 ].insertSortedOnce( jj - 1, c_loc.giveSize()/2 );
                             }
                         }
                     }
@@ -330,7 +327,6 @@ PetscSparseMtrx :: buildInternalStructure(EngngModel *eModel, int di, EquationID
         for ( int n = 1; n <= domain->giveNumberOfBoundaryConditions(); n++ ) {
             ActiveBoundaryCondition *activebc = dynamic_cast<ActiveBoundaryCondition*>(domain->giveBc(n));
             if (activebc) {
-                ///@todo Deal with the CharType here.
                 activebc->giveLocationArrays(r_locs, c_locs, ut, TangentStiffnessMatrix, r_s, c_s);
                 for (std::size_t k = 0; k < r_locs.size(); k++) {
                     IntArray &krloc = r_locs[k];
@@ -341,9 +337,9 @@ PetscSparseMtrx :: buildInternalStructure(EngngModel *eModel, int di, EquationID
                                 jj = kcloc.at(j);
                                 if ( jj ) {
                                     if ( jj >= ii ) {
-                                        rows_upper[ ii - 1 ].insert( jj - 1 );
+                                        rows_upper[ ii - 1 ].insertSortedOnce( jj - 1, kcloc.giveSize()/2 );
                                     } else {
-                                        rows_lower[ ii - 1 ].insert( jj - 1 );
+                                        rows_lower[ ii - 1 ].insertSortedOnce( jj - 1, kcloc.giveSize()/2 );
                                     }
                                 }
                             }
@@ -353,24 +349,26 @@ PetscSparseMtrx :: buildInternalStructure(EngngModel *eModel, int di, EquationID
             }
         }
 
+        total_nnz = 0;
         for ( int i = 0; i < leqs; i++ ) {
-            d_nnz_sym( i ) = rows_upper[ i ].size();
-            d_nnz( i ) = d_nnz_sym( i ) + rows_lower[ i ].size();
+            d_nnz( i ) = rows_upper[ i ].giveSize() + rows_lower[ i ].giveSize();
         }
     }
 
     // create PETSc mat
     MatCreate(PETSC_COMM_SELF, & mtrx);
     MatSetSizes(mtrx, nRows, nColumns, nRows, nColumns);
-    MatSetType(mtrx, MATSEQAIJ);
     MatSetFromOptions(mtrx);
+
+    if ( total_nnz > nRows*nColumns / 10 ) { // More than 10% nnz, then we just force the dense matrix.
+        MatSetType(mtrx, MATDENSE);
+    } else {
+        MatSetType(mtrx, MATSEQAIJ);
+    }
 
     //The incompatible preallocations are ignored automatically.
     MatSetUp(mtrx);
     MatSeqAIJSetPreallocation( mtrx, 0, d_nnz.givePointer() );
-    ///@todo Can we easily support other blocksizes?
-    MatSeqBAIJSetPreallocation( mtrx, 1, 0, d_nnz.givePointer() );
-    MatSeqSBAIJSetPreallocation( mtrx, 1, 0, d_nnz_sym.givePointer() );
 
     MatSetOption(mtrx, MAT_ROW_ORIENTED, PETSC_FALSE); // To allow the insertion of values using MatSetValues in column major order
     MatSetOption(mtrx, MAT_NEW_NONZERO_ALLOCATION_ERR, PETSC_FALSE);
@@ -428,8 +426,8 @@ PetscSparseMtrx :: buildInternalStructure(EngngModel *eModel, int di, EquationID
             // determine nonzero structure of a "local (maintained)" part of matrix, and the off-diagonal part
             // allocation map
             ///@todo Split this into upper and lower triangular part like for the sequential matrix (we can then use SBAIJ which is a huge performance boost)
-            std :: vector< std :: set< int > >d_rows_upper(leqs), d_rows_lower(leqs);  // diagonal sub-matrix allocation
-            std :: vector< std :: set< int > >o_rows_upper(leqs), o_rows_lower(leqs);  // off-diagonal allocation
+            std :: vector< IntArray > d_rows_upper(leqs), d_rows_lower(leqs);  // diagonal sub-matrix allocation
+            std :: vector< IntArray > o_rows_upper(leqs), o_rows_lower(leqs);  // off-diagonal allocation
 
             IntArray lloc, gloc;
 
@@ -451,15 +449,15 @@ PetscSparseMtrx :: buildInternalStructure(EngngModel *eModel, int di, EquationID
                             if ( ( jj = gloc.at(j) ) >= 0 ) { // if negative, then it is prescribed
                                 if ( lloc.at(j) ) { // if true, then its the local part (the diagonal block matrix)
                                     if ( jj >= (ii-1) ) { // NOTE: ii (the rows) is in 1-based indexing, jj is in 0-base (!)
-                                        d_rows_upper[ ii - 1 ].insert(jj);
+                                        d_rows_upper[ ii - 1 ].insertSortedOnce(jj, loc.giveSize()/2);
                                     } else {
-                                        d_rows_lower[ ii - 1 ].insert(jj);
+                                        d_rows_lower[ ii - 1 ].insertSortedOnce(jj, loc.giveSize()/2);
                                     }
                                 } else { // Otherwise it must be off-diagonal
                                     if ( jj >= (ii-1) ) {
-                                        o_rows_upper[ ii - 1 ].insert(jj);
+                                        o_rows_upper[ ii - 1 ].insertSortedOnce(jj, loc.giveSize()/2);
                                     } else {
-                                        o_rows_lower[ ii - 1 ].insert(jj);
+                                        o_rows_lower[ ii - 1 ].insertSortedOnce(jj, loc.giveSize()/2);
                                     }
                                 }
                             }
@@ -474,16 +472,16 @@ PetscSparseMtrx :: buildInternalStructure(EngngModel *eModel, int di, EquationID
             IntArray *n2lmap = n2l->giveN2Lmap();
             for ( int n = 1; n <= n2lmap->giveSize(); ++n ) {
                 if ( n2lmap->at(n) ) {
-                    d_rows_upper [ n2lmap->at(n)-1 ].insert( n2gmap->at(n) );
+                    d_rows_upper [ n2lmap->at(n)-1 ].insertSortedOnce( n2gmap->at(n) );
                 }
             }
 
             for ( int i = 0; i < leqs; i++ ) {
-                d_nnz(i) = d_rows_upper[ i ].size() + d_rows_lower[ i ].size();
-                o_nnz(i) = o_rows_upper[ i ].size() + o_rows_lower[ i ].size();
+                d_nnz(i) = d_rows_upper[ i ].giveSize() + d_rows_lower[ i ].giveSize();
+                o_nnz(i) = o_rows_upper[ i ].giveSize() + o_rows_lower[ i ].giveSize();
 
-                d_nnz_sym(i) = d_rows_upper[ i ].size();
-                o_nnz_sym(i) = o_rows_upper[ i ].size();
+                d_nnz_sym(i) = d_rows_upper[ i ].giveSize();
+                o_nnz_sym(i) = o_rows_upper[ i ].giveSize();
             }
         }
 
@@ -516,7 +514,7 @@ PetscSparseMtrx :: buildInternalStructure(EngngModel *eModel, int di, EquationID
 
     {
         // allocation map:
-        std :: vector< std :: set< int > >rows_upper(leqs);
+        std :: vector< IntArray > rows_upper(leqs);
 
         nelem = domain->giveNumberOfElements();
         for ( int n = 1; n <= nelem; n++ ) {
@@ -528,7 +526,7 @@ PetscSparseMtrx :: buildInternalStructure(EngngModel *eModel, int di, EquationID
                     for ( int j = 1; j <= loc.giveSize(); j++ ) {
                         jj = loc.at(j);
                         if ( jj >= ii ) {
-                            rows_upper[ ii - 1 ].insert( jj - 1 );
+                            rows_upper[ ii - 1 ].insertSortedOnce( jj - 1, loc.giveSize() );
                         }
                     }
                 }
@@ -540,7 +538,6 @@ PetscSparseMtrx :: buildInternalStructure(EngngModel *eModel, int di, EquationID
         for ( int n = 1; n <= domain->giveNumberOfBoundaryConditions(); n++ ) {
             ActiveBoundaryCondition *activebc = dynamic_cast<ActiveBoundaryCondition*>(domain->giveBc(n));
             if (activebc) {
-                ///@todo Deal with the CharType here.
                 activebc->giveLocationArrays(r_locs, c_locs, ut, TangentStiffnessMatrix, s, s);
                 for (std::size_t k = 0; k < r_locs.size(); k++) {
                     IntArray &krloc = r_locs[k];
@@ -551,7 +548,7 @@ PetscSparseMtrx :: buildInternalStructure(EngngModel *eModel, int di, EquationID
                             for ( int j = 1; j <= kcloc.giveSize(); j++ ) {
                                 jj = kcloc.at(j);
                                 if ( jj >= ii ) {
-                                    rows_upper[ ii - 1 ].insert( jj - 1 );
+                                    rows_upper[ ii - 1 ].insertSortedOnce( jj - 1, loc.giveSize() );
                                 }
                             }
                         }
@@ -561,11 +558,11 @@ PetscSparseMtrx :: buildInternalStructure(EngngModel *eModel, int di, EquationID
         }
 
         for ( int i = 0; i < leqs; i++ ) {
-            d_nnz_sym( i ) = rows_upper[ i ].size();
+            d_nnz_sym( i ) = rows_upper[ i ].giveSize();
             // We can optimize to use only rows_upper by using the fact that the problem has symmetric nonzero-structure. 
             d_nnz( i ) += d_nnz_sym( i );
-            for ( std::set< int >::iterator it = rows_upper[ i ].begin(); it != rows_upper[ i ].end(); ++it ) {
-                if ( *it != i ) d_nnz( *it )++;
+            for ( int j = 1; j <= rows_upper[ i ].giveSize(); ++j ) {
+                if ( rows_upper[ i ].at(j) != i ) d_nnz( rows_upper[ i ].at(j) )++;
             }
         }
     }
@@ -585,6 +582,7 @@ PetscSparseMtrx :: buildInternalStructure(EngngModel *eModel, int di, EquationID
 
     MatSetOption(mtrx, MAT_ROW_ORIENTED, PETSC_FALSE); // To allow the insertion of values using MatSetValues in column major order
     MatSetOption(mtrx, MAT_NEW_NONZERO_ALLOCATION_ERR, PETSC_FALSE);
+    //MatSetOption(mtrx, MAT_STRUCTURALLY_SYMMETRIC, PETSC_TRUE);
 
 #ifdef __PARALLEL_MODE
     }
@@ -599,22 +597,22 @@ int
 PetscSparseMtrx :: assemble(const IntArray &loc, const FloatMatrix &mat)
 {
     int ndofe = mat.giveNumberOfRows();
+    IntArray gloc(ndofe);
 
 #ifdef __PARALLEL_MODE
     if ( emodel->isParallel() ) {
         // translate local code numbers to global ones
-        IntArray gloc(ndofe);
         emodel->givePetscContext(this->di)->giveN2Gmap()->map2New(gloc, loc, 0);
 
         //fprintf (stderr, "[?] gloc=");
         //for (int i=1; i<=ndofe; i++) fprintf (stderr, "%d ", gloc.at(i));
 
-        MatSetValues(this->mtrx, ndofe, gloc.givePointer(), ndofe, gloc.givePointer(), mat.givePointer(), ADD_VALUES);
-    } else {
+    } else
 #endif
-    IntArray gloc(ndofe);
-    for ( int i = 1; i <= ndofe; i++ ) {
-        gloc.at(i) = loc.at(i) - 1;
+    {
+        for ( int i = 1; i <= ndofe; i++ ) {
+            gloc.at(i) = loc.at(i) - 1;
+        }
     }
 
     MatSetValues(this->mtrx, ndofe, gloc.givePointer(), ndofe, gloc.givePointer(), mat.givePointer(), ADD_VALUES);
@@ -622,9 +620,6 @@ PetscSparseMtrx :: assemble(const IntArray &loc, const FloatMatrix &mat)
     //mat.printYourself();
     //loc.printYourself();
     //MatView(this->mtrx,PETSC_VIEWER_STDOUT_SELF);
-#ifdef __PARALLEL_MODE
-}
-#endif
     this->version++;
     this->newValues = true;
     return 1;
@@ -756,4 +751,3 @@ PetscSparseMtrx :: writeToFile(const char* fname) const
 }
 
 } // end namespace oofem
-#endif //ifdef __PETSC_MODULE

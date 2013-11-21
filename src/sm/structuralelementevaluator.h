@@ -125,7 +125,7 @@ protected:
     bool isActivated(TimeStep *atTime) { return true; }
     void updateInternalState(TimeStep *stepN);
 
-    virtual void computeStressVector(FloatArray &answer, const FloatArray &strain, GaussPoint *gp, TimeStep *tStep);
+    virtual void computeStressVector(FloatArray &answer, const FloatArray &strain, GaussPoint *gp, TimeStep *tStep) = 0;
 
     /**
      * Optimized version, allowing to pass element displacements as parameter.

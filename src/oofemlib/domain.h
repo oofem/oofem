@@ -70,6 +70,7 @@
 #define _IFT_Domain_nxfemman "nxfemman" /// [in,optional] Specifies if there is an xfem-manager.
 #define _IFT_Domain_numberOfSpatialDimensions "nsd" ///< [in,optional] Specifies how many spatial dimensions the domain has.
 #define _IFT_Domain_nfracman "nfracman" /// [in,optional] Specifies if there is a fracture manager.
+#define _IFT_Domain_axisymmetric "axisymm" /// [optional] Specifies if the problem is axisymmetric.
 //@}
 
 namespace oofem {
@@ -175,6 +176,7 @@ private:
     int serialNumber;
     /// Number of spatial dimensions
     int nsd;
+    bool axisymm;
     /// nodal recovery object associated to receiver.
     NodalRecoveryModel *smoother;
 
@@ -235,7 +237,7 @@ public:
      */
     Domain(int n, int serNum, EngngModel *e);
 
-	/// Create a copy of the domain using the dynamic data reader.
+    /// Create a copy of the domain using the dynamic data reader.
     Domain *Clone();
 
     /// Destructor.
@@ -391,9 +393,10 @@ public:
     /// Returns number of sets
     int giveNumberOfSets() const { return setList->giveSize(); }    
 
-    int giveCorrespondingCoordinateIndex(int);
     /// Returns number of spatial dimensions.
     int giveNumberOfSpatialDimensions();
+    /// Returns true of axisymmetry is in effect.
+    bool isAxisymmetric();
     /**
      * @name Advanced domain manipulation methods.
      */

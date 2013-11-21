@@ -302,7 +302,6 @@ LSpace :: NodalAveragingRecoveryMI_computeNodalValue(FloatArray &answer, int nod
 {
     double x1 = 0.0, x2 = 0.0, x3 = 0.0, y = 0.0;
     GaussPoint *gp;
-    //StructuralMaterialStatus* status;
     IntegrationRule *iRule = integrationRulesArray [ 0 ];
     FloatMatrix A(4, 4);
     FloatMatrix b, r;
@@ -327,8 +326,6 @@ LSpace :: NodalAveragingRecoveryMI_computeNodalValue(FloatArray &answer, int nod
         u = coord->at(1);
         v = coord->at(2);
         w = coord->at(3);
-
-        //status = (StructuralMaterialStatus*) this->giveMaterial()->giveStatus(gp);
 
         A.at(1, 1) += 1;
         A.at(1, 2) += u;

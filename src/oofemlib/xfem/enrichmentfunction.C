@@ -42,6 +42,7 @@
 
 namespace oofem {
 REGISTER_EnrichmentFunction(DiscontinuousFunction)
+REGISTER_EnrichmentFunction(HeavisideFunction)
 REGISTER_EnrichmentFunction(RampFunction)
 
 IRResultType EnrichmentFunction :: initializeFrom(InputRecord *ir)
@@ -57,6 +58,22 @@ void EnrichmentFunction :: giveInputRecord(DynamicInputRecord &input)
 void DiscontinuousFunction :: evaluateEnrFuncAt(double &oEnrFunc, const FloatArray &iPos, const double &iLevelSet, const EnrichmentDomain *ipEnrDom) const
 {
     oEnrFunc = sgn(iLevelSet);
+}
+
+void HeavisideFunction :: evaluateEnrFuncDerivAt(FloatArray &oEnrFuncDeriv, const FloatArray &iPos, const double &iLevelSet, const FloatArray &iGradLevelSet, const EnrichmentDomain *ipEnrDom) const
+{
+    oEnrFuncDeriv.resize(2);
+    oEnrFuncDeriv.zero();
+}
+
+void HeavisideFunction :: evaluateEnrFuncAt(double &oEnrFunc, const FloatArray &iPos, const double &iLevelSet, const EnrichmentDomain *ipEnrDom) const
+{
+	if(iLevelSet > 0.0) {
+		oEnrFunc = 1.0;
+	}
+	else {
+		oEnrFunc = 0.0;
+	}
 }
 
 void DiscontinuousFunction :: evaluateEnrFuncDerivAt(FloatArray &oEnrFuncDeriv, const FloatArray &iPos, const double &iLevelSet, const FloatArray &iGradLevelSet, const EnrichmentDomain *ipEnrDom) const
@@ -135,4 +152,18 @@ void LinElBranchFunction :: evaluateEnrFuncDerivAt(std :: vector< FloatArray > &
     dP.setValues(2, dP4dr * drdx + dP4dt * dtdx, dP4dr * drdy + dP4dt * dtdy);
     oEnrFuncDeriv.push_back(dP);
 }
+
+void LinElBranchFunction :: giveJump(std::vector<double> &oJumps) const
+{
+	/**
+	 * Psi1 is discontinuous with jump magnitude 2, the others are continuous.
+	 */
+
+	oJumps.clear();
+	oJumps.push_back(2.0);
+	oJumps.push_back(0.0);
+	oJumps.push_back(0.0);
+	oJumps.push_back(0.0);
+}
+
 } // end namespace oofem

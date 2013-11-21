@@ -160,15 +160,6 @@ TwoFluidMaterial :: giveDeviatoricStiffnessMatrix(FloatMatrix &answer, MatRespon
 double
 TwoFluidMaterial :: giveTempVOF(GaussPoint *gp)
 {
-    /*
-     * Element* elem = gp->giveElement();
-     * LEPlicElementInterface *interface = (LEPlicElementInterface*) elem->giveInterface(LEPlicElementInterfaceType);
-     * if (interface) {
-     * return interface->giveTempVolumeFraction();
-     * } else {
-     * return 0.0; // the default
-     * }
-     */
     FloatArray vof(2);
     MaterialInterface *mi = domain->giveEngngModel()->giveMaterialInterface( domain->giveNumber() );
     if ( mi ) {

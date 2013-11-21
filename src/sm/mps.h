@@ -203,7 +203,8 @@ public:
 
     virtual IRResultType initializeFrom(InputRecord *ir);
 
-    virtual void updateYourself(GaussPoint *gp, TimeStep *tStep);
+    virtual void giveRealStressVector(FloatArray &answer, GaussPoint *gp, const FloatArray &reducedStrain, TimeStep *tStep);
+    //virtual void updateYourself(GaussPoint *gp, TimeStep *tStep);
 
     virtual void giveThermalDilatationVector(FloatArray &answer, GaussPoint *gp, TimeStep *tStep);
 

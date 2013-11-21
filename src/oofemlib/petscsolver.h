@@ -60,7 +60,6 @@ public:
 
     virtual NM_Status solve(SparseMtrx *A, FloatArray *b, FloatArray *x);
 
-#ifdef __PETSC_MODULE
     /**
      * Solves the given linear system.
      * @param A Coefficient matrix.
@@ -69,7 +68,7 @@ public:
      * @return NM_Status value.
      */
     NM_Status petsc_solve(PetscSparseMtrx *A, Vec b, Vec x);
-#endif
+
     virtual const char *giveClassName() const { return "PetscSolver"; }
     virtual LinSystSolverType giveLinSystSolverType() const { return ST_Petsc; }
 };

@@ -35,12 +35,13 @@
 #ifndef intelline2_h
 #define intelline2_h
 
+#include "intelline1.h"
 #include "structuralinterfaceelement.h"
+
 
 #define _IFT_IntElLine2_Name "intelline2"
 
 namespace oofem {
-
 class FEI2dLineQuad;
 
 /**
@@ -49,7 +50,7 @@ class FEI2dLineQuad;
  * If not straight, the rotation matrix depends on actual integration point
  * and stiffness and strain computations should be modified.
  */
-class IntElLine2 : public StructuralInterfaceElement
+class IntElLine2 : public IntElLine1
 {
 protected:
     static FEI2dLineQuad interp;
@@ -57,36 +58,20 @@ protected:
 public:
     IntElLine2(int n, Domain *d);
     virtual ~IntElLine2() { }
-
     virtual FEInterpolation *giveInterpolation() const;
-
     virtual int computeNumberOfDofs() { return 12; }
-    virtual void giveDofManDofIDMask(int inode, EquationID ut, IntArray &answer) const;
-
-    virtual double computeAreaAround(GaussPoint *gp);
-    virtual void computeTransformationMatrixAt(GaussPoint *gp, FloatMatrix &answer);
-    virtual void computeCovarBaseVectorAt(GaussPoint *gp, FloatArray &G);
-
-    virtual int testElementExtension(ElementExtension ext) { return 0; }
-
-    virtual Interface *giveInterface(InterfaceType) { return NULL; }
-
-
 
     // definition & identification
     virtual const char *giveInputRecordName() const { return _IFT_IntElLine2_Name; }
     virtual const char *giveClassName() const { return "IntElLine2"; }
-    virtual classType giveClassID() const { return IntElLine2Class; }
-    virtual IRResultType initializeFrom(InputRecord *ir);
-    //virtual MaterialMode giveMaterialMode() { return _2dInterface; }
-
+    //virtual classType giveClassID() const { return IntElLine2Class; }
+    
 protected:
-    //virtual void computeBmatrixAt(GaussPoint *gp, FloatMatrix &answer, int = 1, int = ALL_STRAINS);
     virtual void computeNmatrixAt(GaussPoint *gp, FloatMatrix &answer);
     virtual void computeGaussPoints();
 
-    virtual int giveApproxOrder() { return 1; }
-    virtual bool computeGtoLRotationMatrix(FloatMatrix &answer);
+    virtual int giveApproxOrder() { return 2; }
+    Element_Geometry_Type giveGeometryType() const { return EGT_quad_21_interface; };
 };
 } // end namespace oofem
 #endif 

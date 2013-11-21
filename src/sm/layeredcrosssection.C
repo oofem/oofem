@@ -129,7 +129,10 @@ LayeredCrossSection :: giveRealStress_Beam2d(FloatArray &answer, GaussPoint *gp,
     }
 
     // now we must update master gp
-    StructuralMaterialStatus *status = static_cast< StructuralMaterialStatus * >( gp->giveMaterial()->giveStatus(gp) );
+    //StructuralMaterialStatus *status = static_cast< StructuralMaterialStatus * >( gp->giveMaterial()->giveStatus(gp) );
+    // Create material status according to the first layer material
+    StructuralMaterialStatus *status = static_cast< StructuralMaterialStatus * >
+        ( domain->giveMaterial( layerMaterials.at(1) )->giveStatus(gp) );
     status->letTempStrainVectorBe(strain);
     status->letTempStressVectorBe(answer);
 }
@@ -184,7 +187,10 @@ LayeredCrossSection :: giveRealStress_Plate(FloatArray &answer, GaussPoint *gp, 
     }
 
     // now we must update master gp
-    StructuralMaterialStatus *status = static_cast< StructuralMaterialStatus * >( gp->giveMaterial()->giveStatus(gp) );
+    //StructuralMaterialStatus *status = static_cast< StructuralMaterialStatus * >( gp->giveMaterial()->giveStatus(gp) ); // old
+    // Create material status according to the first layer material
+    StructuralMaterialStatus *status = static_cast< StructuralMaterialStatus * >
+        ( domain->giveMaterial( layerMaterials.at(1) )->giveStatus(gp) );
     status->letTempStrainVectorBe(strain);
     status->letTempStressVectorBe(answer);
 }
@@ -238,7 +244,10 @@ LayeredCrossSection :: giveRealStress_Shell(FloatArray &answer, GaussPoint *gp, 
     }
 
     // now we must update master gp
-    StructuralMaterialStatus *status = static_cast< StructuralMaterialStatus * >( gp->giveMaterial()->giveStatus(gp) );
+    //StructuralMaterialStatus *status = static_cast< StructuralMaterialStatus * >( gp->giveMaterial()->giveStatus(gp) );
+    // Create material status according to the first layer material
+    StructuralMaterialStatus *status = static_cast< StructuralMaterialStatus * >
+        ( domain->giveMaterial( layerMaterials.at(1) )->giveStatus(gp) );
     status->letTempStrainVectorBe(strain);
     status->letTempStressVectorBe(answer);
 }
@@ -601,6 +610,10 @@ LayeredCrossSection :: initializeFrom(InputRecord *ir)
         _error("instanciateFrom : numberOfLayers<= 0 is not allowed");
     }
 
+    // Interface materials // add check if correct numbers
+    interfacerMaterials.resize(numberOfLayers-1);
+    interfacerMaterials.zero();
+    IR_GIVE_OPTIONAL_FIELD(ir, interfacerMaterials, _IFT_LayeredCrossSection_interfacematerials);
 
     numberOfIntegrationPoints = 1;
     IR_GIVE_OPTIONAL_FIELD(ir, numberOfIntegrationPoints, _IFT_LayeredCrossSection_nintegrationpoints);
@@ -901,7 +914,7 @@ LayeredCrossSection :: computeStressIndependentStrainVector(FloatArray &answer,
     }
 }
 
-bool LayeredCrossSection :: isCharacteristicMtrxSymmetric(MatResponseMode rMode, int mat)
+bool LayeredCrossSection :: isCharacteristicMtrxSymmetric(MatResponseMode rMode)
 {
     for ( int i = 1; i <= this->numberOfLayers; i++ ) {
         if ( !this->domain->giveMaterial(this->giveLayerMaterial(i))->isCharacteristicMtrxSymmetric(rMode) ) {
@@ -984,8 +997,6 @@ LayeredCrossSection :: mapLayerGpCoordsToShellCoords(IntegrationRule **&layerInt
 }
 
 
-
-
 LayeredIntegrationRule :: LayeredIntegrationRule(int n, Element *e,
                                              int startIndx, int endIndx, bool dynamic) :
     IntegrationRule(n, e, startIndx, endIndx, dynamic) { }
@@ -1042,5 +1053,34 @@ LayeredIntegrationRule :: SetUpPointsOnWedge(int nPointsTri, int nPointsThicknes
     return numberOfIntegrationPoints;
 }
 
+
+int
+LayeredCrossSection :: checkConsistency()
+//
+// check internal consistency
+// mainly tests, whether material and crossSection data
+// are safe for conversion to "Structural" versions
+//
+{
+    int result = 1;
+    for ( int i = 1; this->giveNumberOfLayers(); i++ ) {
+        Material *mat = this->giveDomain()->giveMaterial( this->giveLayerMaterial(i) );
+        if ( !dynamic_cast< StructuralMaterial * >( mat ) ) {
+            _warning2("checkConsistency : material %s without structural support", mat->giveClassName());
+            result = 0;
+            continue;
+        }
+    }
+    return result;
+}
+
+
+int
+LayeredCrossSection :: giveIPValue(FloatArray &answer, GaussPoint *ip, InternalStateType type, TimeStep *atTime)
+{  
+    ///@todo so far this only works for el where each layer has its own integration rule
+    int layer = ip->giveIntegrationRule()->giveNumber();
+    return this->giveDomain()->giveMaterial( this->giveLayerMaterial(layer) )->giveIPValue(answer, ip, type, atTime); 
+}
 
 } // end namespace oofem

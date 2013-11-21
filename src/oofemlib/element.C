@@ -817,9 +817,11 @@ Element :: updateYourself(TimeStep *tStep)
 #  ifdef VERBOSE
     // VERBOSE_PRINT1("Updating Element ",number)
 #  endif
+
     for ( int i = 0; i < numberOfIntegrationRules; i++ ) {
         integrationRulesArray [ i ]->updateYourself(tStep);
     }
+
 }
 
 
@@ -1265,19 +1267,6 @@ Element :: giveIPValue(FloatArray &answer, GaussPoint *aGaussPoint, InternalStat
     }
 }
 
-
-InternalStateValueType
-Element :: giveIPValueType(InternalStateType type)
-{
-    if ( ( type == IST_ErrorIndicatorLevel ) || ( type == IST_RelMeshDensity ) ||
-        ( type == IST_InternalStressError ) || ( type == IST_PrimaryUnknownError ) ) {
-        return ISVT_SCALAR;
-    } else {
-        return this->giveCrossSection()->giveIPValueType( type, this->giveMaterial() );
-    }
-}
-
-
 int
 Element :: giveSpatialDimension()
 {
@@ -1295,6 +1284,7 @@ Element :: giveSpatialDimension()
     case EGT_quad_1:
     case EGT_quad_2:
     case EGT_quad9_2:
+    case EGT_quad_21_interface:
         return 2;
 
     case EGT_tetra_1:

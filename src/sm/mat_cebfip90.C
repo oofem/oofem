@@ -180,14 +180,6 @@ CebFipSlip90Material :: giveIPValue(FloatArray &answer, GaussPoint *aGaussPoint,
     return StructuralMaterial :: giveIPValue(answer, aGaussPoint, type, atTime);
 }
 
-
-InternalStateValueType
-CebFipSlip90Material :: giveIPValueType(InternalStateType type)
-{
-    return StructuralMaterial :: giveIPValueType(type);
-}
-
-
 void
 CebFipSlip90Material :: giveThermalDilatationVector(FloatArray &answer,
                                                     GaussPoint *gp,  TimeStep *tStep)

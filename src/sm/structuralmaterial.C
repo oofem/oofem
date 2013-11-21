@@ -47,6 +47,7 @@
 #include "engngm.h"
 #include "fieldmanager.h"
 #include "dynamicinputrecord.h"
+#include "eleminterpmapperinterface.h"
 
 namespace oofem {
 int
@@ -1791,28 +1792,8 @@ StructuralMaterial :: giveIPValue(FloatArray &answer, GaussPoint *aGaussPoint, I
     } else {
         return Material :: giveIPValue(answer, aGaussPoint, type, atTime);
     }
+    return 0;
 }
-
-
-InternalStateValueType
-StructuralMaterial :: giveIPValueType(InternalStateType type)
-{
-    if ( type == IST_StressTensor || type == IST_StressTensorTemp || type == IST_CylindricalStressTensor ) {
-        return ISVT_TENSOR_S3;
-    }
-    // strains components packed in engineering notation
-    else if ( type == IST_StrainTensor || type == IST_StrainTensorTemp || type == IST_CylindricalStrainTensor ) {
-        return ISVT_TENSOR_S3E;
-    } else if ( type == IST_PrincipalStressTensor || type == IST_PrincipalStrainTensor ||
-               type == IST_PrincipalStressTempTensor || type == IST_PrincipalStrainTempTensor ) {
-        return ISVT_VECTOR;
-    } else if ( type == IST_Temperature || type == IST_vonMisesStress ) {
-        return ISVT_SCALAR;
-    } else {
-        return Material :: giveIPValueType(type);
-    }
-}
-
 
 void
 StructuralMaterial :: computeStressIndependentStrainVector(FloatArray &answer,

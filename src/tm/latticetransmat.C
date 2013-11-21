@@ -129,14 +129,13 @@ LatticeTransportMaterial :: giveCharacteristicValue(MatResponseMode mode,
                                                     GaussPoint *gp,
                                                     TimeStep *atTime)
 {
-    FloatArray stateVector;
     LatticeTransportMaterialStatus *status = ( LatticeTransportMaterialStatus * ) this->giveStatus(gp);
-    stateVector = status->giveTempStateVector();
+    double suction = status->giveTempField().at(1);
 
     if ( mode == Capacity ) {
-        return computeCapacity(stateVector, gp);
+        return computeCapacity(suction, gp);
     } else if ( mode == Conductivity ) {
-        return computeConductivity(stateVector, gp, atTime);
+        return computeConductivity(suction, gp, atTime);
     } else {
         _error("giveCharacteristicValue : unknown mode");
     }
@@ -146,15 +145,13 @@ LatticeTransportMaterial :: giveCharacteristicValue(MatResponseMode mode,
 
 
 double
-LatticeTransportMaterial :: computeConductivity(FloatArray &stateVector,
+LatticeTransportMaterial :: computeConductivity(double suction,
                                                 GaussPoint *gp,
                                                 TimeStep *stepN)
 {
     LatticeTransportMaterialStatus *status = static_cast< LatticeTransportMaterialStatus * >( this->giveStatus(gp) );
 
     this->density = this->give('d', gp);
-
-    double suction = stateVector.at(1);
 
     double relativePermeability;
     double conductivity;
@@ -223,9 +220,8 @@ LatticeTransportMaterial :: computeConductivity(FloatArray &stateVector,
 
 
 double
-LatticeTransportMaterial :: computeCapacity(FloatArray &stateVector, GaussPoint *gp)
+LatticeTransportMaterial :: computeCapacity(double suction, GaussPoint *gp)
 {
-    double suction = stateVector.at(1);
     double capacity = 0.;
 
     this->density = this->give('d', gp);
@@ -256,9 +252,7 @@ LatticeTransportMaterial :: CreateStatus(GaussPoint *gp) const
 MaterialStatus *
 LatticeTransportMaterial :: giveStatus(GaussPoint *gp) const
 {
-    MaterialStatus *status;
-
-    status = ( MaterialStatus * ) gp->giveMaterialStatus( this->giveNumber() );
+    MaterialStatus *status = ( MaterialStatus * ) gp->giveMaterialStatus();
     if ( status == NULL ) {
         status = this->CreateStatus(gp);
 
@@ -277,8 +271,8 @@ void LatticeTransportMaterialStatus :: printOutputAt(FILE *File, TimeStep *tNow)
 
     fprintf(File, "  state");
 
-    for ( int i = 1; i <= stateVector.giveSize(); i++ ) {
-        fprintf( File, " % .4e", stateVector.at(i) );
+    for ( int i = 1; i <= field.giveSize(); i++ ) {
+        fprintf( File, " % .4e", field.at(i) );
     }
 
     fprintf(File, "  mass %.8e", mass);

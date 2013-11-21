@@ -73,7 +73,9 @@ public:
     MaxwellChainMaterial(int n, Domain *d);
     virtual ~MaxwellChainMaterial() {}
 
-    virtual void updateYourself(GaussPoint *gp, TimeStep *tStep);
+    // overload thesse function such that computation of hidden vars can be done after the computation of stress
+    virtual void giveRealStressVector(FloatArray &answer, GaussPoint *gp, const FloatArray &reducedStrain, TimeStep *tStep);
+    void computeHiddenVars(GaussPoint *gp, TimeStep *tNow);
 
     // identification and auxiliary functions
     virtual int hasNonLinearBehaviour() { return 0; }

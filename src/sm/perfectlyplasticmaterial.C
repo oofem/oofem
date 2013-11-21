@@ -702,21 +702,6 @@ PerfectlyPlasticMaterial :: giveIPValue(FloatArray &answer, GaussPoint *aGaussPo
 }
 
 
-InternalStateValueType
-PerfectlyPlasticMaterial :: giveIPValueType(InternalStateType type)
-{
-    // strains components packed in enginnering notation
-    if ( type == IST_PlasticStrainTensor ) {
-        return ISVT_TENSOR_S3E;
-    } else if ( type == IST_PrincipalPlasticStrainTensor ) {
-        return ISVT_VECTOR;
-    } else {
-        return StructuralMaterial :: giveIPValueType(type);
-    }
-}
-
-
-
 //##################################################################################################
 
 

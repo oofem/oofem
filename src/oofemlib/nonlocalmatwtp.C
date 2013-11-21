@@ -85,8 +85,8 @@ NonlocalMaterialWTP :: giveNonlocalDepArryElementPlugin(GaussPoint *gp, std :: s
     int remoteElemNum;
 
     NonlocalMaterialStatusExtensionInterface *interface =
-        static_cast< NonlocalMaterialStatusExtensionInterface * >( gp->giveElement()->giveMaterial()->
-                                                        giveStatus(gp)->giveInterface(NonlocalMaterialStatusExtensionInterfaceType) );
+        static_cast< NonlocalMaterialStatusExtensionInterface * >( gp->giveMaterialStatus()->
+        giveInterface(NonlocalMaterialStatusExtensionInterfaceType) );
     if ( interface ) {
         std::list< localIntegrationRecord > *lir = interface->giveIntegrationDomainList();
         std::list< localIntegrationRecord > :: iterator listIter;

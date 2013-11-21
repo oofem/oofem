@@ -41,7 +41,7 @@
 #include "structuralelement.h"
 #include "structuralelementevaluator.h"
 #include "activebc.h"
-
+#include "structuralinterfaceelement.h"
 namespace oofem {
 
 StructuralEngngModel::StructuralEngngModel(int i, EngngModel* _master) : EngngModel(i, _master),
@@ -101,12 +101,9 @@ StructuralEngngModel :: printReactionForces(TimeStep *tStep, int di)
 void
 StructuralEngngModel :: computeReaction(FloatArray &answer, TimeStep *tStep, int di)
 {
-    int numRestrDofs = 0;
     FloatArray contribution;
-    FloatArray EquivForces;
 
-    numRestrDofs = this->giveNumberOfDomainEquations(di, EModelDefaultPrescribedEquationNumbering());
-    answer.resize(numRestrDofs);
+    answer.resize(this->giveNumberOfDomainEquations(di, EModelDefaultPrescribedEquationNumbering()));
     answer.zero();
 
     // Add internal forces
@@ -129,10 +126,6 @@ StructuralEngngModel :: computeReaction(FloatArray &answer, TimeStep *tStep, int
 void
 StructuralEngngModel :: computeExternalLoadReactionContribution(FloatArray &reactions, TimeStep *tStep, int di)
 {
-    int numRestrDofs = this->giveNumberOfDomainEquations(di, EModelDefaultPrescribedEquationNumbering());
-    reactions.resize(numRestrDofs);
-    reactions.zero();
-
     reactions.resize( this->giveNumberOfDomainEquations(di, EModelDefaultPrescribedEquationNumbering()) );
     reactions.zero();
     this->assembleVector( reactions, tStep, EID_MomentumBalance, ExternalForcesVector, VM_Total,
@@ -156,7 +149,7 @@ StructuralEngngModel :: giveInternalForces(FloatArray &answer, bool normFlag, in
     }
 #endif
 
-answer.resize( this->giveNumberOfDomainEquations(di, EModelDefaultEquationNumbering()) );
+    answer.resize( this->giveNumberOfDomainEquations(di, EModelDefaultEquationNumbering()) );
     answer.zero();
     this->assembleVector( answer, stepN, EID_MomentumBalance, InternalForcesVector, VM_Total,
                           EModelDefaultEquationNumbering(), domain, normFlag ? &this->internalForcesEBENorm : NULL );
@@ -190,9 +183,10 @@ StructuralEngngModel :: checkConsistency()
     for ( int i = 1; i <= nelem; i++ ) {
         Element *ePtr = domain->giveElement(i);
         StructuralElement *sePtr = dynamic_cast< StructuralElement * >(ePtr);
+        StructuralInterfaceElement *siePtr = dynamic_cast< StructuralInterfaceElement * >(ePtr);
         StructuralElementEvaluator *see = dynamic_cast< StructuralElementEvaluator * >(ePtr);
 
-        if ( sePtr == NULL && see == NULL ) {
+        if ( sePtr == NULL && see == NULL && siePtr == NULL ) {
             _warning2("checkConsistency: element %d has no Structural support", i);
             return 0;
         }
@@ -220,18 +214,18 @@ StructuralEngngModel :: updateInternalState(TimeStep *stepN)
             }
         }
 
-	int nbc = domain->giveNumberOfBoundaryConditions();
-	for ( int i = 1; i <= nbc; ++i ) {
-	  GeneralBoundaryCondition *bc = domain->giveBc(i);
-	  ActiveBoundaryCondition *abc;
+        int nbc = domain->giveNumberOfBoundaryConditions();
+        for ( int i = 1; i <= nbc; ++i ) {
+            GeneralBoundaryCondition *bc = domain->giveBc(i);
+            ActiveBoundaryCondition *abc;
 
-	  if ( ( abc = dynamic_cast< ActiveBoundaryCondition * >( bc ) ) ) {
-	    int ndman = abc->giveNumberOfInternalDofManagers();
-	    for ( int j = 1; j <= ndman; j++ ) {
-	      this->updateDofUnknownsDictionary(abc->giveInternalDofManager(j), stepN);
-	    }
-	  }
-	}
+            if ( ( abc = dynamic_cast< ActiveBoundaryCondition * >( bc ) ) ) {
+                int ndman = abc->giveNumberOfInternalDofManagers();
+                for ( int j = 1; j <= ndman; j++ ) {
+                    this->updateDofUnknownsDictionary(abc->giveInternalDofManager(j), stepN);
+                }
+            }
+        }
 
         if ( internalVarUpdateStamp != stepN->giveSolutionStateCounter() ) {
             int nelem = domain->giveNumberOfElements();

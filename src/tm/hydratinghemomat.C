@@ -217,7 +217,7 @@ HydratingHeMoMaterial :: giveCharacteristicValue(MatResponseMode rmode, GaussPoi
         if ( !hydrationLHS ) {
             answer = 0;
         } else if ( hydrationModel ) {  //!!! better via HydrationModelInterface
-            FloatArray vec = static_cast< TransportMaterialStatus * >( giveStatus(gp) )->giveTempStateVector();
+            FloatArray vec = static_cast< TransportMaterialStatus * >( giveStatus(gp) )->giveTempField();
 
             if ( vec.giveSize() < 2 ) {
                 vec.resize(2);
@@ -292,16 +292,6 @@ HydratingHeMoMaterial :: giveIPValue(FloatArray &answer, GaussPoint *aGaussPoint
         return 1;
     } else {
         return HeMoTKMaterial :: giveIPValue(answer, aGaussPoint, type, atTime);
-    }
-}
-
-InternalStateValueType
-HydratingHeMoMaterial :: giveIPValueType(InternalStateType type)
-{
-    if ( type == IST_HydrationDegree ) {
-        return ISVT_SCALAR;
-    } else {
-        return HeMoTKMaterial :: giveIPValueType(type);
     }
 }
 

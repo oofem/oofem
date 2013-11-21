@@ -41,7 +41,8 @@ namespace oofem {
 
 REGISTER_Material( IsotropicHeatTransferMaterial );
 
-IsotropicHeatTransferMaterial :: IsotropicHeatTransferMaterial(int n, Domain *d) : TransportMaterial(n, d) {
+IsotropicHeatTransferMaterial :: IsotropicHeatTransferMaterial(int n, Domain *d) : TransportMaterial(n, d)
+{
     // constructor
     maturityT0 = 0.;
 }

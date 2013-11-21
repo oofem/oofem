@@ -35,7 +35,7 @@
 #include "structuralinterfacematerial.h"
 #include "structuralinterfacematerialstatus.h"
 #include "dynamicinputrecord.h"
-
+#include "gausspoint.h"
 namespace oofem {
 
 int
@@ -64,28 +64,15 @@ StructuralInterfaceMaterial :: giveIPValue(FloatArray &answer, GaussPoint *gp, I
 }
 
 
-InternalStateValueType
-StructuralInterfaceMaterial :: giveIPValueType(InternalStateType type)
-{
-    if ( ( type == IST_InterfaceJump ) || ( type == IST_InterfaceTraction ) ||
-        ( type == IST_InterfaceFirstPKTraction ) ) {
-        return ISVT_VECTOR; 
-    } else if ( type == IST_DeformationGradientTensor ) {
-        return ISVT_TENSOR_G;
-    } else {
-        return Material :: giveIPValueType(type);
-    }
-}
-
-
-// Currently not in use
 IRResultType
 StructuralInterfaceMaterial :: initializeFrom(InputRecord *ir)
 {
-    const char *__proc = "initializeFrom"; // Required by IR_GIVE_FIELD macro
-    IRResultType result;                   // Required by IR_GIVE_FIELD macro
 
-    this->Material :: initializeFrom(ir);
+    const char *__proc = "initializeFrom";  // Required by IR_GIVE_FIELD macro
+    IRResultType result;                    // Required by IR_GIVE_FIELD macro
+
+    IR_GIVE_OPTIONAL_FIELD(ir, this->useNumericalTangent, _IFT_StructuralInterfaceMaterial_useNumericalTangent);
+
     return IRRT_OK;
 }
 
@@ -96,5 +83,47 @@ StructuralInterfaceMaterial :: giveInputRecord(DynamicInputRecord &input)
     Material :: giveInputRecord(input);
 }
 
+
+#if 1
+void
+StructuralInterfaceMaterial :: giveStiffnessMatrix_dTdj_Num(FloatMatrix &answer, MatResponseMode rMode, GaussPoint *gp, TimeStep *tStep)
+{
+
+    // Numerical tangent
+    // Computes the material stiffness using a central difference method
+	
+    StructuralInterfaceMaterialStatus *status = static_cast< StructuralInterfaceMaterialStatus * >( this->giveStatus(gp) );
+    if ( status ) {
+        FloatMatrix F;
+        F = status->giveTempF();
+        int dim = F.giveNumberOfRows();
+        answer.resize(dim,dim);
+        answer.zero();
+        const double eps = 1.0e-9;
+        FloatArray T, TPlus, TMinus;
+        
+        
+        FloatArray jump, jumpPlus, jumpMinus, Kcolumn;
+        jump = status->giveTempJump();
+
+        for ( int i = 1; i <= dim; i++ ) {
+            jumpPlus = jumpMinus = jump;
+            jumpPlus.at(i)  += eps; 
+            jumpMinus.at(i) -= eps;
+            this->giveFirstPKTraction_3d(TPlus, gp, jumpPlus, F, tStep);
+            this->giveFirstPKTraction_3d(TMinus, gp, jumpMinus, F, tStep);
+
+            Kcolumn = (TPlus - TMinus);
+            answer.setColumn(Kcolumn, i);
+        }
+        answer.times( 1.0/(2*eps) );
+
+        this->giveFirstPKTraction_3d(T, gp, jump, F, tStep); // reset temp values by recomputing the stress
+
+    }
+
+}
+
+#endif
 
 } // end namespace oofem

@@ -82,7 +82,7 @@ BazantNajjarMoistureTransferMaterial :: givePermeability(GaussPoint *gp, TimeSte
 double
 BazantNajjarMoistureTransferMaterial :: giveHumidity(GaussPoint *gp, ValueModeType mode)
 {
-    FloatArray tempState = static_cast< TransportMaterialStatus * >( giveStatus(gp) )->giveTempStateVector();
+    FloatArray tempState = static_cast< TransportMaterialStatus * >( giveStatus(gp) )->giveTempField();
     if ( ( tempState.at(1) > 1.0 ) || ( tempState.at(1) < 0.0 ) ) {
         OOFEM_ERROR2( "BazantNajjarMoistureTransferMaterial :: giveHumidity : Relative humidity %.3f is out of range", tempState.at(1) );
         return 0.;

@@ -286,7 +286,7 @@ TR1_2D_CBS :: computeDiffusionTermsI(FloatArray &answer, TimeStep *tStep)
     FloatArray gVector;
     double ar3 = area / 3.0;
 
-    stress = static_cast< FluidDynamicMaterialStatus * >( mat->giveStatus(gp) )->giveDeviatoricStressVector();
+    stress = static_cast< FluidDynamicMaterialStatus * >( gp->giveMaterialStatus() )->giveDeviatoricStressVector();
     stress.times(1. / Re);
 
     // \int dNu/dxj \Tau_ij
@@ -1094,18 +1094,6 @@ TR1_2D_CBS :: giveIPValue(FloatArray &answer, GaussPoint *aGaussPoint, InternalS
         return CBSElement :: giveIPValue(answer, aGaussPoint, type, atTime);
     }
 }
-
-
-InternalStateValueType
-TR1_2D_CBS :: giveIPValueType(InternalStateType type)
-{
-    if ( type == IST_VOFFraction ) {
-        return ISVT_SCALAR;
-    } else {
-        return CBSElement :: giveIPValueType(type);
-    }
-}
-
 
 void
 TR1_2D_CBS :: NodalAveragingRecoveryMI_computeNodalValue(FloatArray &answer, int node,

@@ -42,7 +42,7 @@
 #include "domain.h"
 #include "engngm.h"
 #include "classfactory.h"
-
+#include "gausspoint.h"
 #include <cassert>
 
 namespace oofem {
@@ -87,7 +87,7 @@ GPInitModule :: doInit()
         // loop over Gauss points
         for ( igp = 0; igp < iRule->giveNumberOfIntegrationPoints(); igp++ ) {
             gp = iRule->getIntegrationPoint(igp);
-            MaterialStatus *status = mat->giveStatus(gp);
+            MaterialStatus *status = static_cast< MaterialStatus *> ( gp->giveMaterialStatus() );
             if ( fscanf(initStream, "%d %d", & ie, & ig) != 2 ) {
                 OOFEM_ERROR("GPInitModule :: doInit: initStream reading error");
             }

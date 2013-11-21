@@ -109,7 +109,9 @@ public:
     B3SolidMaterial(int n, Domain *d) : KelvinChainMaterial(n, d) { shMode = B3_NoShrinkage; }
     virtual ~B3SolidMaterial() { }
 
-    virtual void updateYourself(GaussPoint *gp, TimeStep *tStep);
+    virtual void giveRealStressVector(FloatArray &answer, GaussPoint *gp,
+                                      const FloatArray &reducedStrain, TimeStep *tStep);
+    //virtual void updateYourself(GaussPoint *gp, TimeStep *tStep);
 
     virtual void giveShrinkageStrainVector(FloatArray &answer, GaussPoint *gp, TimeStep *tStep, ValueModeType mode);
 

@@ -459,7 +459,7 @@ public:
      */
     void setBoundaryFlag(bool isBoundary) { this->isBoundaryFlag = isBoundary; }
     /// @return True if receiver contains slave dofs
-    virtual int hasAnySlaveDofs();
+    virtual bool hasAnySlaveDofs();
     /**
      * Returns true if the receiver is linked (its slave DOFs depend on master values) to some other dof managers.
      * In this case, the masters array should contain the list of masters.

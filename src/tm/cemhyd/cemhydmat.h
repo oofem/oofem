@@ -104,7 +104,6 @@ public:
 
     virtual int hasInternalSource() { return 1; }
     virtual void computeInternalSourceVector(FloatArray &val, GaussPoint *gp, TimeStep *atTime, ValueModeType mode);
-    virtual void updateInternalState(const FloatArray &vec, GaussPoint *gp, TimeStep *atTime);
     /// Returns cycle number at the closest cycle after the target time
     virtual int giveCycleNumber(GaussPoint *gp);
     /// Returns time of the CEMHYD3D at the first cycle after the target time
@@ -122,7 +121,6 @@ public:
     virtual double giveCharacteristicValue(MatResponseMode mode, GaussPoint *gp, TimeStep *atTime);
 
     virtual int giveIPValue(FloatArray &answer, GaussPoint *aGaussPoint, InternalStateType type, TimeStep *atTime);
-    virtual InternalStateValueType giveIPValueType(InternalStateType type);
     virtual int initMaterial(Element *element);
     /// Clear temperatures multiplied with volume around GPs - need before temperature averaging.
     virtual void clearWeightTemperatureProductVolume(Element *element);

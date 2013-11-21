@@ -70,7 +70,9 @@ NonStationaryTransportProblem :: NonStationaryTransportProblem(int i, EngngModel
 }
 
 NonStationaryTransportProblem :: ~NonStationaryTransportProblem()
-{}
+{
+    delete linSolver;
+}
 
 
 NumericalMethod *NonStationaryTransportProblem :: giveNumericalMethod(MetaStep *mStep)
@@ -426,7 +428,7 @@ NonStationaryTransportProblem :: saveContext(DataStream *stream, ContextMode mod
 {
     contextIOResultType iores;
     int closeFlag = 0;
-    FILE *file;
+    FILE *file = NULL;
 
     if ( stream == NULL ) {
         if ( !this->giveContextFile(& file, this->giveCurrentStep()->giveNumber(),
@@ -468,7 +470,7 @@ NonStationaryTransportProblem :: restoreContext(DataStream *stream, ContextMode 
     contextIOResultType iores;
     int closeFlag = 0;
     int istep, iversion;
-    FILE *file;
+    FILE *file = NULL;
 
     this->resolveCorrespondingStepNumber(istep, iversion, obj);
 
@@ -702,7 +704,7 @@ NonStationaryTransportProblem :: applyIC(TimeStep *stepWhenIcApply)
         CemhydMat *cem = dynamic_cast< CemhydMat * >( element->giveMaterial() );
         //assign status to each integration point on each element
         if ( cem ) {
-            element->giveMaterial()->initMaterial(element); //create microstructures and statuses on specific GPs
+            cem->initMaterial(element); //create microstructures and statuses on specific GPs
             element->updateInternalState(stepWhenIcApply);   //store temporary unequilibrated temperature
             element->updateYourself(stepWhenIcApply);   //store equilibrated temperature
             cem->clearWeightTemperatureProductVolume(element);

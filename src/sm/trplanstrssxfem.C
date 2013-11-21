@@ -45,6 +45,18 @@ namespace oofem {
 
 REGISTER_Element( TrPlaneStress2dXFEM );
 
+void TrPlaneStress2dXFEM :: updateYourself(TimeStep *tStep)
+{
+	TrPlaneStress2d::updateYourself(tStep);
+	XfemElementInterface::updateYourselfCZ(tStep);
+}
+
+void TrPlaneStress2dXFEM :: postInitialize()
+{
+	TrPlaneStress2d::postInitialize();
+	XfemElementInterface :: initializeCZMaterial();
+}
+
 
 TrPlaneStress2dXFEM::~TrPlaneStress2dXFEM() {
 
@@ -577,18 +589,20 @@ TrPlaneStress2dXFEM :: giveDofManDofIDMask(int inode, EquationID ut, IntArray &a
 
 
 }
-/*
+
 void TrPlaneStress2dXFEM :: computeStiffnessMatrix(FloatMatrix &answer, MatResponseMode rMode, TimeStep *tStep)
 {
-    this->computeStiffnessMatrix_withIRulesAsSubcells(answer, rMode, tStep);
+	TrPlaneStress2d::computeStiffnessMatrix(answer, rMode, tStep);
+	XfemElementInterface::computeCohesiveTangent(answer, tStep);
 }
 
 void
 TrPlaneStress2dXFEM :: giveInternalForcesVector(FloatArray &answer, TimeStep *tStep, int useUpdatedGpRecord)
 {
-    this->giveInternalForcesVector_withIRulesAsSubcells(answer, tStep, useUpdatedGpRecord);
+	TrPlaneStress2d::giveInternalForcesVector(answer, tStep, useUpdatedGpRecord);
+	XfemElementInterface::computeCohesiveForces(answer, tStep);
 }
-*/
+
 
 #ifdef __OOFEG
 // TODO: FIX OOFEG implementation
@@ -667,6 +681,29 @@ void TrPlaneStress2dXFEM :: drawScalar(oofegGraphicContext &context)
 }
 #endif
 
+IRResultType
+TrPlaneStress2dXFEM :: initializeFrom(InputRecord *ir)
+{
+    IRResultType result;                   // Required by IR_GIVE_FIELD macro
+    result = TrPlaneStress2d :: initializeFrom(ir);
+    if( result != IRRT_OK) {
+    	return result;
+    }
+
+    result = XfemElementInterface :: initializeCZFrom(ir);
+    return result;
+}
+
+MaterialMode TrPlaneStress2dXFEM :: giveMaterialMode()
+{
+	return XfemElementInterface::giveMaterialMode();
+}
+
+void TrPlaneStress2dXFEM :: giveInputRecord(DynamicInputRecord &input)
+{
+	TrPlaneStress2d::giveInputRecord(input);
+	XfemElementInterface::giveCZInputRecord(input);
+}
 
 
 int

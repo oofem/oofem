@@ -34,16 +34,15 @@
 
 #include "petscsolver.h"
 
-#ifdef __PETSC_MODULE
- #include "petscsparsemtrx.h"
- #include "engngm.h"
- #include "floatarray.h"
- #include "verbose.h"
- #include "timer.h"
- #include "error.h"
- #include "classfactory.h"
+#include "petscsparsemtrx.h"
+#include "engngm.h"
+#include "floatarray.h"
+#include "verbose.h"
+#include "timer.h"
+#include "error.h"
+#include "classfactory.h"
 
- #include <petscksp.h>
+#include <petscksp.h>
 
 namespace oofem {
 
@@ -242,22 +241,4 @@ NM_Status PetscSolver :: solve(SparseMtrx *A, FloatMatrix &B, FloatMatrix &X)
 #endif
 
 } // end namespace oofem
-#endif //ifdef __PETSC_MODULE
 
-#ifndef __PETSC_MODULE
-
-#include "error.h"
-
-namespace oofem {
-PetscSolver :: PetscSolver(Domain *d, EngngModel *m) : SparseLinearSystemNM(d, m)
-{
-    OOFEM_ERROR("PETScSolver :: PetscSolver: can't create, PETSc support not compiled");
-}
-
-PetscSolver :: ~PetscSolver() { }
-
-NM_Status
-PetscSolver :: solve(SparseMtrx *A, FloatArray *b, FloatArray *x) { return NM_NoSuccess; }
-
-} // end namespace oofem
-#endif

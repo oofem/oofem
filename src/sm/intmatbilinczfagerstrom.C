@@ -450,6 +450,7 @@ IntMatBilinearCZFagerstrom :: give3dStiffnessMatrix_dTdj(FloatMatrix &answer, Ma
 	//printf("analytical tangent \n");
     //answer.printYourself();
 
+#endif
 }
 
 
@@ -544,19 +545,6 @@ IntMatBilinearCZFagerstrom :: giveIPValue(FloatArray &answer, GaussPoint *aGauss
 
 }
 
-
-InternalStateValueType
-IntMatBilinearCZFagerstrom :: giveIPValueType(InternalStateType type)
-{
-    //@todoMartin Insert code here if necessaryfor returning type of internal state
-    return StructuralInterfaceMaterial :: giveIPValueType(type);
-}
-
-
-
-
-
-
 const double tolerance = 1.0e-12; // small number
 IRResultType
 IntMatBilinearCZFagerstrom :: initializeFrom(InputRecord *ir)
@@ -581,6 +569,8 @@ IntMatBilinearCZFagerstrom :: initializeFrom(InputRecord *ir)
     IR_GIVE_FIELD(ir, mu, _IFT_IntMatBilinearCZFagerstrom_mu);
 
     IR_GIVE_FIELD(ir, gamma, _IFT_IntMatBilinearCZFagerstrom_gamma);
+
+    StructuralInterfaceMaterial ::initializeFrom(ir);
 
     this->checkConsistency();                                // check validity of the material paramters
     this->printYourself();

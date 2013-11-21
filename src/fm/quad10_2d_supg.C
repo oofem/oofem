@@ -604,17 +604,6 @@ Quad10_2D_SUPG :: giveIPValue(FloatArray &answer, GaussPoint *aGaussPoint, Inter
 }
 
 
-InternalStateValueType
-Quad10_2D_SUPG :: giveIPValueType(InternalStateType type)
-{
-    if ( type == IST_VOFFraction || type == IST_Density ) {
-        return ISVT_SCALAR;
-    } else {
-        return SUPGElement :: giveIPValueType(type);
-    }
-}
-
-
 contextIOResultType
 Quad10_2D_SUPG :: saveContext(DataStream *stream, ContextMode mode, void *obj)
 //

@@ -37,11 +37,11 @@
 #include "floatmatrix.h"
 #include "domain.h"
 #include "node.h"
-#include "element.h"
+#include "structuralelement.h"
 #include "gausspoint.h"
 #include "gaussintegrationrule.h"
 #include "matresponsemode.h"
-#include "crosssection.h"
+#include "structuralcrosssection.h"
 #include "structuralcrosssection.h"
 #include "structuralmaterial.h"
 #include "structuralms.h"
@@ -207,7 +207,8 @@ void StructuralElementEvaluator :: computeLumpedMassMatrix(FloatMatrix &answer, 
 void StructuralElementEvaluator :: computeConsistentMassMatrix(FloatMatrix &answer, TimeStep *tStep, double &mass)
 // Computes numerically the consistent (full) mass matrix of the receiver.
 {
-    Element *elem = this->giveElement();
+    //Element *elem = this->giveElement();
+    StructuralElement *elem = static_cast < StructuralElement *> ( this->giveElement() );
     int ndofs = elem->computeNumberOfDofs();
     FloatMatrix n;
     IntegrationRule *iRule;
@@ -229,7 +230,7 @@ void StructuralElementEvaluator :: computeConsistentMassMatrix(FloatMatrix &answ
 
     for ( int ip = 0; ip < iRule->giveNumberOfIntegrationPoints(); ip++ ) {
         GaussPoint *gp = iRule->getIntegrationPoint(ip);
-        double density = elem->giveMaterial()->give('d', gp);
+        double density = elem->giveStructuralCrossSection()->give('d', gp);
         double dV      = this->computeVolumeAround(gp);
         mass   += density * dV;
         this->computeNMatrixAt(n, gp);
@@ -261,8 +262,6 @@ void StructuralElementEvaluator :: computeConsistentMassMatrix(FloatMatrix &answ
 void StructuralElementEvaluator :: giveInternalForcesVector(FloatArray &answer, TimeStep *tStep, bool useUpdatedGpRecord)
 {
     Element *elem = this->giveElement();
-    StructuralCrossSection *cs = static_cast< StructuralCrossSection * >( elem->giveCrossSection() );
-    Material *mat = elem->giveMaterial();
     int ndofs = elem->computeNumberOfDofs();
     FloatMatrix b;
     FloatArray strain, stress, u, temp;
@@ -286,11 +285,10 @@ void StructuralElementEvaluator :: giveInternalForcesVector(FloatArray &answer, 
             GaussPoint *gp = iRule->getIntegrationPoint(i);
             this->computeBMatrixAt(b, gp);
             if ( useUpdatedGpRecord ) {
-                stress = static_cast< StructuralMaterialStatus * >( mat->giveStatus(gp) )->giveStressVector();
+                stress = static_cast< StructuralMaterialStatus * >( gp->giveMaterialStatus() )->giveStressVector();
             } else {
                 this->computeStrainVector(strain, gp, tStep, u); ///@todo This part computes the B matrix again; Inefficient.
                 this->computeStressVector(stress, strain, gp, tStep);
-                cs->giveRealStresses(stress, gp, strain, tStep);
             }
 
             if ( stress.giveSize() == 0 ) {
@@ -311,12 +309,6 @@ void StructuralElementEvaluator :: giveInternalForcesVector(FloatArray &answer, 
     if ( !this->isActivated(tStep) ) {
         answer.zero();
     }
-}
-
-
-void StructuralElementEvaluator :: computeStressVector(FloatArray &answer, const FloatArray &strain, GaussPoint *gp, TimeStep *tStep)
-{
-    static_cast< StructuralCrossSection * >( this->giveElement()->giveCrossSection() )->giveRealStresses(answer, gp, strain, tStep);
 }
 
 
@@ -404,7 +396,17 @@ void StructuralElementEvaluator :: computeStiffnessMatrix(FloatMatrix &answer, M
     Element *elem = this->giveElement();
     StructuralCrossSection *cs = static_cast< StructuralCrossSection * >( elem->giveCrossSection() );
     int ndofs = elem->computeNumberOfDofs();
-    bool matStiffSymmFlag = elem->giveCrossSection()->isCharacteristicMtrxSymmetric( rMode, elem->giveMaterial()->giveNumber() );
+    bool matStiffSymmFlag = false;
+    printf(" computeStiffnessMatrix start \n");
+    printf(" material number %i \n", elem->giveMaterial()->giveNumber());
+    if ( cs->MAT_GIVEN_BY_CS > 0 ) {
+        matStiffSymmFlag = cs->isCharacteristicMtrxSymmetric(rMode);
+    } else {
+        printf(" a \n");
+        matStiffSymmFlag = elem->giveCrossSection()->isCharacteristicMtrxSymmetric( rMode, elem->giveMaterial()->giveNumber() );
+        printf(" b \n");
+    }
+    printf(" computeStiffnessMatrix end \n");
     IntArray irlocnum;
 
     answer.resize(ndofs, ndofs);

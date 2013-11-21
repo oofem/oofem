@@ -332,18 +332,4 @@ DruckerPragerCutMat :: giveIPValue(FloatArray &answer, GaussPoint *aGaussPoint, 
     }
 }
 
-
-InternalStateValueType
-DruckerPragerCutMat :: giveIPValueType(InternalStateType type)
-{
-    if ( type == IST_PlasticStrainTensor || type == IST_DamageTensor ) {
-        return ISVT_TENSOR_S3;
-    } else if ( type == IST_MaxEquivalentStrainLevel || type == IST_DamageScalar ) {
-        return ISVT_SCALAR;
-    } else {
-        return StructuralMaterial :: giveIPValueType(type);
-    }
-}
-
-
 } // end namespace oofem

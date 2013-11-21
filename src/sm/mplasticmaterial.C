@@ -1372,20 +1372,6 @@ MPlasticMaterial :: giveIPValue(FloatArray &answer, GaussPoint *aGaussPoint, Int
 }
 
 
-InternalStateValueType
-MPlasticMaterial :: giveIPValueType(InternalStateType type)
-{
-    // strains components packed in engineering notation
-    if ( type == IST_PlasticStrainTensor ) {
-        return ISVT_TENSOR_S3E;
-    } else if ( type == IST_PrincipalPlasticStrainTensor ) {
-        return ISVT_VECTOR;
-    } else {
-        return StructuralMaterial :: giveIPValueType(type);
-    }
-}
-
-
 MPlasticMaterialStatus :: MPlasticMaterialStatus(int n, Domain *d, GaussPoint *g) :
     StructuralMaterialStatus(n, d, g), plasticStrainVector(), tempPlasticStrainVector(),
     strainSpaceHardeningVarsVector(), tempStrainSpaceHardeningVarsVector(),

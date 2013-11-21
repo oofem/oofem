@@ -101,7 +101,13 @@ public:
      * @return List of node numbers.
      */
     const IntArray &giveNodeList();
-    
+    /**
+     * Returns list of all directly specified nodes (excluding those generated from elements).
+     * This list is exactly the list given in the input.
+     * @note This is useful in for example, remeshing code, and should rarely be used elsewhere.
+     * @return List of node numbers.
+     */
+    const IntArray &giveSpecifiedNodeList();    
     /**
      * Sets list of elements within set. 
      */

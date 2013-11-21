@@ -51,7 +51,7 @@ namespace oofem {
 
 REGISTER_Material( RVEStokesFlow );
 
-RVEStokesFlowMaterialStatus :: RVEStokesFlowMaterialStatus(int n, Domain *d, GaussPoint *g) :
+RVEStokesFlowMaterialStatus :: RVEStokesFlowMaterialStatus(int n, Domain *d, GaussPoint *g, EngngModel *rve) :
     TransportMaterialStatus(n, d, g)
 {
     temp_gradient.resize(2);
@@ -64,13 +64,15 @@ RVEStokesFlowMaterialStatus :: RVEStokesFlowMaterialStatus(int n, Domain *d, Gau
     temp_TangentMatrix.zero();
 
     solutionVector = new FloatArray;
+
+    this->rve = rve;
 }
 
 RVEStokesFlowMaterialStatus :: ~RVEStokesFlowMaterialStatus()
 {}
 
 void
-RVEStokesFlowMaterialStatus :: exportFilter(EngngModel *E, GaussPoint *gp, TimeStep *tStep)
+RVEStokesFlowMaterialStatus :: exportFilter(GaussPoint *gp, TimeStep *tStep)
 {
     // Fix name for RVE output file and print output
 
@@ -86,16 +88,16 @@ RVEStokesFlowMaterialStatus :: exportFilter(EngngModel *E, GaussPoint *gp, TimeS
     FloatArray grapP = this->giveTempGradient(), seepageVelocity;
 
     rveEngngModel *rveE;
-    rveE = dynamic_cast< rveEngngModel * >(E);
+    rveE = dynamic_cast< rveEngngModel * >(this->rve);
 
     rveE->rveSetBoundaryConditions(10, grapP);
     rveE->rveGiveCharacteristicData(1, &grapP, &seepageVelocity, tStep);
 
-    basefilename = E->giveOutputBaseFileName();
+    basefilename = this->rve->giveOutputBaseFileName();
 
-    E->letOutputBaseFileNameBe(filename);
-    E->doStepOutput(tStep);
-    E->letOutputBaseFileNameBe(basefilename);
+    this->rve->letOutputBaseFileNameBe(filename);
+    this->rve->doStepOutput(tStep);
+    this->rve->letOutputBaseFileNameBe(basefilename);
 }
 
 void
@@ -110,15 +112,8 @@ RVEStokesFlowMaterialStatus :: updateYourself(TimeStep *tStep)
     TransportMaterialStatus :: updateYourself(tStep);
     tangentMatrix = temp_TangentMatrix;
 
-    EngngModel *E;
-
-    RVEStokesFlow *Mtrl;
-    Mtrl = dynamic_cast< RVEStokesFlow * >( gp->giveMaterial() );
-    E = dynamic_cast< EngngModel * >(Mtrl->rve);
-
-    Mtrl->suppressStdout();
-    this->exportFilter(E, gp, tStep);
-    Mtrl->enableStdout();
+    //Mtrl->suppressStdout();
+    //Mtrl->enableStdout();
 }
 
 
@@ -196,7 +191,7 @@ RVEStokesFlow :: giveIPValue(FloatArray &answer, GaussPoint *aGaussPoint, Intern
         answer.at(4) = temp.at(2, 2);
         break;
     default:
-        return TransportMaterial :: giveIPValueType(type);
+        return TransportMaterial :: giveIPValue(answer, aGaussPoint, type, atTime);
     }
 
     return 1;
@@ -288,7 +283,7 @@ RVEStokesFlow :: giveCharacteristicMatrix(FloatMatrix &answer, MatResponseMode, 
 MaterialStatus *
 RVEStokesFlow :: CreateStatus(GaussPoint *gp) const
 {
-    return new RVEStokesFlowMaterialStatus(1, this->giveDomain(), gp);
+    return new RVEStokesFlowMaterialStatus(1, this->giveDomain(), gp, this->rve);
 }
 
 }
