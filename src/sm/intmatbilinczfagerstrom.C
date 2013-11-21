@@ -199,6 +199,7 @@ IntMatBilinearCZFagerstrom :: giveFirstPKTraction_3d(FloatArray &answer, GaussPo
 				if (iter>40) {
                     OOFEM_ERROR("BilinearCZMaterialFagerstrom :: giveRealStressVector - no convergence in constitutive driver");
                     }
+				status->letTempDamageDevBe(true);
                 Smat.zero();	// S_mat=0.d0
 
                 R.at(1) = dJElastic.at(1) - (dJ.at(1) - gammaGf*S*dAlpha*M.at(1));		// R(1:2) = dJtn_e(1:2) - (dJtn_v(1:2) - S*dalpha*M(1:2))
@@ -341,13 +342,22 @@ void
 IntMatBilinearCZFagerstrom :: give3dStiffnessMatrix_dTdj(FloatMatrix &answer, MatResponseMode rMode, GaussPoint *gp, TimeStep *tStep)
 {
 
-   	answer.resize(3,3);
+    //this->initGpForNewStep(gp);
+
+	answer.resize(3,3);
 	answer.zero();
 //	this->give3dStiffnessMatrix_dTdj_num(answer, rMode, gp, tStep);
 //	printf("numerical tangent \n");
 //	answer.printYourself();
 
 	IntMatBilinearCZFagerstromStatus *status = static_cast< IntMatBilinearCZFagerstromStatus * >( this->giveStatus(gp) );
+
+	if (status->giveOldDamageDev()) {
+		answer = status->giveOlddTdJ();
+		answer.printYourself();
+		status->letOldDamageDevBe(false);
+	} else {
+	
 
     double damage = status->giveTempDamage();
     FloatMatrix Finv = status->giveTempInverseDefGrad();
@@ -391,6 +401,7 @@ IntMatBilinearCZFagerstrom :: give3dStiffnessMatrix_dTdj(FloatMatrix &answer, Ma
 
 			//printf("elastic step");
         } else {
+			
             FloatMatrix Iep = status->giveTempIep();
 			
 			//Iep.printYourself();
@@ -431,6 +442,8 @@ IntMatBilinearCZFagerstrom :: give3dStiffnessMatrix_dTdj(FloatMatrix &answer, Ma
             answer.subtract(t1hatFinvOpen);
         }
     }
+	}
+	status->letTempdTdJBe(answer);
                                                             
     //Finv.printYourself();
     //Kstiff.printYourself();
@@ -648,6 +661,11 @@ IntMatBilinearCZFagerstromStatus :: IntMatBilinearCZFagerstromStatus(int n, Doma
     tempFInv.at(2,2)=1.;
     tempFInv.at(3,3)=1.;
 
+	old_dTdJ.resize(3,3);
+	old_dTdJ.zero();
+
+	oldDamageDev = false;
+
 
 	#if 0
 	//@todo Martin: Very bad implementation of intialisation of Rot
@@ -723,6 +741,10 @@ void
     tempFInv.at(2,2)=1.;
     tempFInv.at(3,3)=1.;
 
+//	temp_dTdJ.resize(3,3);
+//	temp_dTdJ.zero();
+
+	tempDamageDev = false;
 	
 
 
@@ -736,7 +758,9 @@ void
     StructuralInterfaceMaterialStatus :: updateYourself(atTime);
     damage = tempDamage;
     oldMaterialJump = tempMaterialJump;
-    QEffective = tempQEffective;
+	QEffective = tempQEffective;
+	old_dTdJ = temp_dTdJ;
+	oldDamageDev = tempDamageDev;
 }
 
 
