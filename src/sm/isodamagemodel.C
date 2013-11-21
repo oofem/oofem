@@ -257,7 +257,12 @@ int
 IsotropicDamageMaterial :: giveIPValue(FloatArray &answer, GaussPoint *aGaussPoint, InternalStateType type, TimeStep *atTime)
 {
     IsotropicDamageMaterialStatus *status = static_cast< IsotropicDamageMaterialStatus * >( this->giveStatus(aGaussPoint) );
-    if ( type == IST_DamageTensor ) {
+    if ( type == IST_DamageScalar ) {
+        answer.resize(1);
+        answer.zero();
+        answer.at(1) = status->giveDamage();
+        return 1;
+    } else if ( type == IST_DamageTensor ) {
         answer.resize(6);
         answer.zero();
         answer.at(1) = answer.at(2) = answer.at(3) = status->giveDamage();

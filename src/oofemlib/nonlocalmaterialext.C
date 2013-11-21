@@ -381,11 +381,31 @@ NonlocalMaterialExtensionInterface :: computeWeightFunction(double distance)
     case WFT_Green: // Function corresponding in 1D to Green's function of Helmholtz equation (implicit gradient model)
         return exp(-aux) / iwf;
 
+    case WFT_Green_21: // Green function reduced from 2D to 1D
+      {
+	if (this->domain->giveNumberOfSpatialDimensions() != 1){
+	  OOFEM_ERROR("NonlocalMaterialExtensionInterface :: computeWeightFunction - this type of weight function can be used for a 1D problem only\n");
+	}
+	iwf = giveIntegralOfWeightFunction(2); // indeed
+	double x = distance;
+	double y = 0.;
+	double r = sqrt(x*x + y*y);
+	double sum = exp(-r / this->cl);
+	double h = suprad / 100.; // 100 should later be replaced by an optional parameter
+	do {
+	  y += h;
+	  r = sqrt(x*x + y*y);
+	  sum += 2.*exp(-r / this->cl);
+	}
+	while (r <= suprad);
+        return sum / iwf;
+      }
+
     case WFT_Uniform: // uniform function over an interaction distance
         return 1. / iwf;
 
     default:
-        OOFEM_WARNING2("IDNLMaterial :: computeWeightFunction - unknown type of weight function %d", weightFun);
+        OOFEM_WARNING2("NonlocalMaterialExtensionInterface :: computeWeightFunction - unknown type of weight function %d", weightFun);
         return 0.0;
     }
 }
