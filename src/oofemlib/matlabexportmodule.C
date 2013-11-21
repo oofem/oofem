@@ -45,6 +45,7 @@
 #include "mathfem.h"
 #include "gausspoint.h"
 #include "weakperiodicbc.h"
+#include "solutionbasedshapefunction.h"
 #include "timestep.h"
 #include "classfactory.h"
 
@@ -125,8 +126,6 @@ MatlabExportModule :: computeArea()
 			smax.at(j)=max(smax.at(j), domain->giveDofManager(i+1)->giveCoordinate(j+1));
 			smin.at(j)=min(smin.at(j), domain->giveDofManager(i+1)->giveCoordinate(j+1));
 		}
-//		std :: copy(smax.begin(), smax.end(), std :: ostream_iterator<double>(std :: cout, " "));
-//		std :: cout << std :: endl;
 	}
 
 
@@ -229,8 +228,12 @@ MatlabExportModule :: doOutputMesh(TimeStep *tStep, FILE *FID)
 
 	fprintf(FID, "\tmesh.p=[");
 	for ( int i = 1; i <= domain->giveNumberOfDofManagers(); i++ ) {
-		double x = domain->giveDofManager(i)->giveCoordinate(1), y = domain->giveDofManager(i)->giveCoordinate(2);
-		fprintf(FID, "%f,%f;", x, y);
+        for ( int j = 1; j<=domain->giveNumberOfSpatialDimensions(); j++) {
+        //double x = domain->giveDofManager(i)->giveCoordinate(1), y = domain->giveDofManager(i)->giveCoordinate(2);
+        double c = domain->giveDofManager(i)->giveCoordinate(j);
+        fprintf(FID, "%f, ", c);
+        }
+        fprintf(FID, "; ");
 	}
 
 	fprintf(FID, "]';\n");
@@ -344,7 +347,7 @@ MatlabExportModule :: doOutputSpecials(TimeStep *tStep,    FILE *FID)
 	fprintf(FID, "];\n");
 
 	// Output weak periodic boundary conditions
-	unsigned int wpbccount = 1;
+    unsigned int wpbccount = 1, sbsfcount = 1;
 
 	for ( int i = 1; i <= domain->giveNumberOfBoundaryConditions(); i++ ) {
 		WeakPeriodicBoundaryCondition *wpbc = dynamic_cast< WeakPeriodicBoundaryCondition * >( domain->giveBc(i) );
@@ -362,6 +365,18 @@ MatlabExportModule :: doOutputSpecials(TimeStep *tStep,    FILE *FID)
 				fprintf(FID, "];\n");
 				wpbccount++;
 			}
+		}
+		SolutionbasedShapeFunction *sbsf = dynamic_cast< SolutionbasedShapeFunction *>( domain->giveBc(i));
+		if (sbsf) {
+			fprintf(FID, "\tspecials.solutionbasedsf{%u}.values=[", sbsfcount);
+			for ( int k = 1; k <= sbsf->giveInternalDofManager(1)->giveNumberOfDofs(); k++ ) {      // Only one internal dof manager
+				FloatArray unknowns;
+				IntArray DofMask;
+				double X = sbsf->giveInternalDofManager(1)->giveDof(k)->giveUnknown(VM_Total, tStep);
+				fprintf(FID, "%e\t", X);
+			}
+			fprintf(FID, "];\n");
+			sbsfcount++;
 		}
 	}
 }
@@ -573,11 +588,15 @@ MatlabExportModule :: giveOutputStream(TimeStep *tStep)
 
 	size_t foundDot;
 	foundDot = fileName.rfind(".");
-	fileName.erase(foundDot);
+    fileName.replace(foundDot, 1, "_");
+    //fileName.erase(foundDot);
+
+/* 	fileName.erase(foundDot);
 
     char fext[100];
     sprintf( fext, "_m%d_%d", this->number, tStep->giveNumber() );
     fileName += fext;
+*/
 
 	functionname = fileName;
 

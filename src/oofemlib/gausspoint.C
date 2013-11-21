@@ -72,6 +72,11 @@ GaussPoint :: ~GaussPoint()
     if ( localCoordinates ) {
         delete localCoordinates;
     }
+
+    if ( materialStatus != NULL ) {
+    	delete materialStatus;
+    	materialStatus = NULL;
+    }
 }
 
 

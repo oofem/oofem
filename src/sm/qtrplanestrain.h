@@ -73,8 +73,8 @@ public:
     virtual int testElementExtension(ElementExtension ext) { return ( ( ext == Element_EdgeLoadSupport ) ? 0 : 0 ); }
 
 #ifdef __OOFEG
-    void drawRawGeometry(oofegGraphicContext &);
-    void drawDeformedGeometry(oofegGraphicContext &, UnknownType);
+    virtual void drawRawGeometry(oofegGraphicContext &);
+    virtual void drawDeformedGeometry(oofegGraphicContext &, UnknownType);
     virtual void drawScalar(oofegGraphicContext &context);
     virtual void drawSpecial(oofegGraphicContext &);
 #endif
@@ -108,7 +108,6 @@ public:
 protected:
     virtual void computeBmatrixAt(GaussPoint *gp, FloatMatrix &answer, int = 1, int = ALL_STRAINS);
     virtual void computeBHmatrixAt(GaussPoint *gp, FloatMatrix &);
-    virtual void computeNmatrixAt(GaussPoint *gp, FloatMatrix &answer);
     virtual void computeGaussPoints();
     virtual int giveApproxOrder() { return 2; }
     virtual int giveNumberOfIPForMassMtrxIntegration() { return 4; }

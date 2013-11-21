@@ -207,7 +207,7 @@ CCTPlate :: computeBmatrixAt(GaussPoint *gp, FloatMatrix &answer, int li, int ui
 
 
 void
-CCTPlate :: computeNmatrixAt(GaussPoint *gp, FloatMatrix &answer)
+CCTPlate :: computeNmatrixAt(const FloatArray &iLocCoord, FloatMatrix &answer)
 // Returns the [3x9] displacement interpolation matrix {N} of the receiver,
 // evaluated at gp.
 {
@@ -226,8 +226,8 @@ CCTPlate :: computeNmatrixAt(GaussPoint *gp, FloatMatrix &answer)
     c2 = x1 - x3;
     c3 = x2 - x1;
 
-    l1 = gp->giveCoordinate(1);
-    l2 = gp->giveCoordinate(2);
+    l1 = iLocCoord.at(1);
+    l2 = iLocCoord.at(2);
     l3 = 1.0 - l1 - l2;
 
     //
@@ -251,6 +251,20 @@ CCTPlate :: computeNmatrixAt(GaussPoint *gp, FloatMatrix &answer)
     answer.at(3, 3) = l1;
     answer.at(3, 6) = l2;
     answer.at(3, 9) = l3;
+}
+
+
+void
+CCTPlate :: computeStressVector(FloatArray &answer, const FloatArray &strain, GaussPoint *gp, TimeStep *stepN)
+{
+    this->giveStructuralCrossSection()->giveRealStress_Plate(answer, gp, strain, stepN);
+}
+
+
+void
+CCTPlate :: computeConstitutiveMatrixAt(FloatMatrix &answer, MatResponseMode rMode, GaussPoint *gp, TimeStep *tStep)
+{
+    this->giveStructuralCrossSection()->give2dPlateStiffMtrx(answer, rMode, gp, tStep);
 }
 
 
@@ -777,65 +791,6 @@ CCTPlate :: drawScalar(oofegGraphicContext &context)
         EMAddGraphicsToModel(ESIModel(), tr);
     }
 }
-
-/*
- * void
- * CCTPlate :: drawInternalState (oofegGraphicContext & gc)
- * //
- * // Draws internal state graphics representation
- * //
- * {
- * WCRec p[3];
- * GraphicObj *tr;
- * double v1,v2,v3;
- * DrawMode mode = gc.getDrawMode();
- * TimeStep *tStep = domain->giveEngngModel()->giveCurrentStep();
- * double defScale = gc.getDefScale();
- *
- * if (!gc.testElementGraphicActivity(this)) return;
- *
- * // check for valid DrawMode
- * if (!((mode == mxForce) || (mode == myForce) || (mode == mxyForce) ||
- * (mode == szxForce) || (mode == syzForce))) return;
- *
- *
- *
- * EASValsSetLayer(OOFEG_STRESS_CONTOUR_LAYER);
- * if (gc.getInternalVarsDefGeoFlag()) {
- * // use deformed geometry
- * p[0].x = (FPNum) this->giveNode(1)->giveUpdatedCoordinate(1,tStep,defScale);
- * p[0].y = (FPNum) this->giveNode(1)->giveUpdatedCoordinate(2,tStep,defScale);
- * p[0].z = (FPNum) this->giveNode(1)->giveUpdatedCoordinate(3,tStep,defScale);
- * p[1].x = (FPNum) this->giveNode(2)->giveUpdatedCoordinate(1,tStep,defScale);
- * p[1].y = (FPNum) this->giveNode(2)->giveUpdatedCoordinate(2,tStep,defScale);
- * p[1].z = (FPNum) this->giveNode(2)->giveUpdatedCoordinate(3,tStep,defScale);
- * p[2].x = (FPNum) this->giveNode(3)->giveUpdatedCoordinate(1,tStep,defScale);
- * p[2].y = (FPNum) this->giveNode(3)->giveUpdatedCoordinate(2,tStep,defScale);
- * p[2].z = (FPNum) this->giveNode(3)->giveUpdatedCoordinate(3,tStep,defScale);
- * } else {
- * p[0].x = (FPNum) this->giveNode(1)->giveCoordinate(1);
- * p[0].y = (FPNum) this->giveNode(1)->giveCoordinate(2);
- * p[0].z = (FPNum) this->giveNode(1)->giveCoordinate(3);
- * p[1].x = (FPNum) this->giveNode(2)->giveCoordinate(1);
- * p[1].y = (FPNum) this->giveNode(2)->giveCoordinate(2);
- * p[1].z = (FPNum) this->giveNode(2)->giveCoordinate(3);
- * p[2].x = (FPNum) this->giveNode(3)->giveCoordinate(1);
- * p[2].y = (FPNum) this->giveNode(3)->giveCoordinate(2);
- * p[2].z = (FPNum) this->giveNode(3)->giveCoordinate(3);
- * }
- *
- * int result = 0;
- * result+= this->giveInternalStateAtNode (gc, 1, &v1);
- * result+= this->giveInternalStateAtNode (gc, 2, &v2);
- * result+= this->giveInternalStateAtNode (gc, 3, &v3);
- *
- * if (result == 3) {
- * tr = CreateTriangleWD3D (p,v1,v2,v3);
- * EGWithMaskChangeAttributes(LAYER_MASK, tr);
- * EMAddGraphicsToModel(ESIModel(), tr);
- * }
- * }
- */
 
 #endif
 } // end namespace oofem

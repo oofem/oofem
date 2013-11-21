@@ -56,6 +56,7 @@
 #include "dofmanager.h"
 #include "node.h"
 #include "dynamicinputrecord.h"
+#include "matstatmapperint.h"
 
 #include <cstdio>
 
@@ -1197,7 +1198,6 @@ Element :: computeLocalCoordinates(FloatArray &answer, const FloatArray &gcoords
     if (fei) {
         return fei->global2local(answer, gcoords, FEIElementGeometryWrapper(this));
     } else {
-        answer.resize(0);
         return false;
     }
 }
@@ -1284,6 +1284,7 @@ Element :: giveSpatialDimension()
     case EGT_quad_1:
     case EGT_quad_2:
     case EGT_quad9_2:
+    case EGT_quad_1_interface:
     case EGT_quad_21_interface:
         return 2;
 
@@ -1316,6 +1317,8 @@ Element :: giveNumberOfBoundarySides()
 
     case EGT_line_1:
     case EGT_line_2:
+    case EGT_quad_1_interface:
+    case EGT_quad_21_interface:
         return 2;
 
     case EGT_triangle_1:
@@ -1367,6 +1370,35 @@ Element :: adaptiveMap(Domain *oldd, TimeStep *tStep)
         iRule = integrationRulesArray [ i ];
         for ( int j = 0; j < iRule->giveNumberOfIntegrationPoints(); j++ ) {
             result &= interface->MMI_map(iRule->getIntegrationPoint(j), oldd, tStep);
+        }
+    }
+
+    return result;
+}
+
+int
+Element :: mapStateVariables(const Domain &iOldDom, const TimeStep &iTStep)
+{
+    int result = 1;
+
+    for ( int i = 0; i < numberOfIntegrationRules; i++ ) {
+    	IntegrationRule *iRule = integrationRulesArray [ i ];
+        for ( int j = 0; j < iRule->giveNumberOfIntegrationPoints(); j++ ) {
+
+
+        	GaussPoint &gp = *(iRule->getIntegrationPoint(j));
+
+        	MaterialStatus *ms = dynamic_cast<MaterialStatus*>(gp.giveMaterialStatus() );
+        	if(ms == NULL) {
+        		OOFEM_ERROR("In Element :: mapStateVariables(): failed to fetch MaterialStatus.\n");
+        	}
+
+            MaterialStatusMapperInterface *interface = dynamic_cast< MaterialStatusMapperInterface * > ( ms );
+            if ( interface == NULL ) {
+        		OOFEM_ERROR("In Element :: mapStateVariables(): Failed to fetch MaterialStatusMapperInterface.\n");
+            }
+
+            result &= interface->MSMI_map(gp, iOldDom, iTStep, *( ms ) );
         }
     }
 

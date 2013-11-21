@@ -3,7 +3,7 @@ pipe test,  inlet velocity (constant), outlet: pressure, no friction
 cbs nsteps 10 lstype 0 smtype 0 deltaT 0.01 cmflag 0 theta1 0.5 theta2 0.5
 domain 2dIncompFlow
 OutputManager tstep_all dofman_all element_all
-ndofman 9 nelem 8 ncrosssect 1 nmat 1 nbc 3 nic 1 nltf 1 nset 3
+ndofman 9 nelem 8 ncrosssect 1 nmat 1 nbc 3 nic 1 nltf 1 nset 4
 node 1 coords 3 0. 0. 0. boundary
 node 2 coords 3 0. 1. 0. boundary
 node 3 coords 3 0. 2. 0. boundary
@@ -21,7 +21,7 @@ tr1cbs 5 nodes 3 4 7 5 crosssect 1 mat 1 bsides 1 1 bcodes 1 6
 tr1cbs 6 nodes 3 8 5 7 crosssect 1 mat 1 bsides 1 3 bcodes 1 8
 tr1cbs 7 nodes 3 5 8 6 crosssect 1 mat 1 bsides 0
 tr1cbs 8 nodes 3 9 6 8 crosssect 1 mat 1 bsides 2 1 3 bcodes 2 6 8
-emptycs 1
+fluidcs 1 mat 1 set 4
 newtonianfluid 1 d 1.0 mu 1.0
 #prescribed inlet velocity v = 1m/s
 BoundaryCondition 1 loadTimeFunction 1 prescribedvalue 1.0 valtype 5 set 1 dofs 1 7
@@ -35,6 +35,7 @@ ConstantFunction 1 f(t) 1.0
 Set 1 nodes 3 1 2 3
 Set 2 nodes 6 1 3 4 6 7 9
 Set 3 nodes 3 7 8 9
+Set 4 elementranges {(1 8)}
 
 
 #%BEGIN_CHECK%

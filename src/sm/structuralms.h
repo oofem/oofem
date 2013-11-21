@@ -37,6 +37,7 @@
 
 #include "matstatus.h"
 #include "floatarray.h"
+#include "matstatmapperint.h"
 
 namespace oofem {
 class GaussPoint;
@@ -61,7 +62,7 @@ class Domain;
  * - printingYourself()
  * - updating Yourself after a new equilibrium state has been reached.
  */
-class StructuralMaterialStatus : public MaterialStatus
+class StructuralMaterialStatus : public MaterialStatus, public MaterialStatusMapperInterface
 {
 protected:
     /// Equilibrated strain vector in reduced form
@@ -101,25 +102,25 @@ public:
     virtual contextIOResultType restoreContext(DataStream *stream, ContextMode mode, void *obj = NULL);
 
     /// Returns the const pointer to receiver's strain vector.
-    const FloatArray &giveStrainVector() { return strainVector; }
+    const FloatArray &giveStrainVector() const { return strainVector; }
     /// Returns the const pointer to receiver's stress vector.
-    const FloatArray &giveStressVector() { return stressVector; }
+    const FloatArray &giveStressVector() const { return stressVector; }
     /// Returns the const pointer to receiver's first Piola-Kirchhoff stress vector.
-    const FloatArray &givePVector() { return PVector; }
+    const FloatArray &givePVector() const { return PVector; }
     /// Returns the const pointer to receiver's Cauchy stress vector.
-    const FloatArray &giveCVector() { return CVector; }
+    const FloatArray &giveCVector() const { return CVector; }
     /// Returns the const pointer to receiver's deformation gradient vector.
-    const FloatArray &giveFVector() { return FVector; }
+    const FloatArray &giveFVector() const { return FVector; }
     /// Returns the const pointer to receiver's temporary strain vector.
-    const FloatArray &giveTempStrainVector() { return tempStrainVector; }
+    const FloatArray &giveTempStrainVector() const { return tempStrainVector; }
     /// Returns the const pointer to receiver's temporary stress vector.
-    const FloatArray &giveTempStressVector() { return tempStressVector; }
+    const FloatArray &giveTempStressVector() const { return tempStressVector; }
     /// Returns the const pointer to receiver's temporary first Piola-Kirchhoff stress vector.
-    const FloatArray &giveTempPVector() { return tempPVector; }
+    const FloatArray &giveTempPVector() const { return tempPVector; }
     /// Returns the const pointer to receiver's temporary Cauchy stress vector.
-    const FloatArray &giveTempCVector() { return tempCVector; }
+    const FloatArray &giveTempCVector() const { return tempCVector; }
     /// Returns the const pointer to receiver's temporary deformation gradient vector.
-    const FloatArray &giveTempFVector() { return tempFVector; }
+    const FloatArray &giveTempFVector() const { return tempFVector; }
     /// Assigns strain vector to given vector v.
     void letStrainVectorBe(const FloatArray &v) { strainVector = v; }
     /// Assigns stressVector to given vector v.
@@ -143,6 +144,11 @@ public:
 
     virtual const char *giveClassName() const { return "StructuralMaterialStatus"; }
     virtual classType giveClassID() const { return StructuralMaterialStatusClass; }
+
+    /// Functions for MaterialStatusMapperInterface
+	virtual void copyStateVariables(const MaterialStatus &iStatus);
+	virtual void addStateVariables(const MaterialStatus &iStatus);
+
 };
 } // end namespace oofem
 #endif // structuralms_h

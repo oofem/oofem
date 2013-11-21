@@ -100,10 +100,9 @@ public:
     virtual contextIOResultType restoreContext(DataStream *stream, ContextMode mode, void *obj = NULL);
 
 #ifdef __OOFEG
-    void drawRawGeometry(oofegGraphicContext &);
-    void drawDeformedGeometry(oofegGraphicContext &, UnknownType type);
+    virtual void drawRawGeometry(oofegGraphicContext &);
+    virtual void drawDeformedGeometry(oofegGraphicContext &, UnknownType type);
     virtual void drawScalar(oofegGraphicContext &context);
-    //void drawInternalState(oofegGraphicContext &);
 #endif
     // the membrane and plate irules are same (chacked in initializeFrom)
     virtual int giveDefaultIntegrationRule() const { return plate->giveDefaultIntegrationRule();}
@@ -145,7 +144,7 @@ public:
 protected:
     virtual void computeBmatrixAt(GaussPoint *, FloatMatrix &, int = 1, int = ALL_STRAINS)
     { _error("TR_SHELL01 :: computeBmatrixAt: calling of this function is not allowed"); }
-    virtual void computeNmatrixAt(GaussPoint *, FloatMatrix &)
+    virtual void computeNmatrixAt(const FloatArray &iLocCoord, FloatMatrix &)
     { _error("TR_SHELL01 :: computeNmatrixAt: calling of this function is not allowed"); }
 
     /// @todo In time delete

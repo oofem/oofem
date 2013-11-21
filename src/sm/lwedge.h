@@ -98,7 +98,7 @@ public:
 
 protected:
     virtual void computeGaussPoints();
-    virtual void computeNmatrixAt(GaussPoint *, FloatMatrix &);
+    virtual void computeNmatrixAt(const FloatArray &iLocCoord, FloatMatrix &);
     virtual void computeBmatrixAt(GaussPoint *, FloatMatrix &, int = 1, int = ALL_STRAINS);
     virtual void computeBHmatrixAt(GaussPoint *, FloatMatrix &);
 };

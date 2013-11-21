@@ -88,8 +88,8 @@ public:
     virtual classType giveClassID() const { return LIBeam3dClass; }
 
 #ifdef __OOFEG
-    void drawRawGeometry(oofegGraphicContext &);
-    void drawDeformedGeometry(oofegGraphicContext &, UnknownType);
+    virtual void drawRawGeometry(oofegGraphicContext &);
+    virtual void drawDeformedGeometry(oofegGraphicContext &, UnknownType);
 #endif
 
     virtual integrationDomain giveIntegrationDomain() const { return _Line; }
@@ -107,7 +107,7 @@ protected:
     virtual void computeBodyLoadVectorAt(FloatArray &answer, Load *load, TimeStep *tStep, ValueModeType mode);
 
     virtual void computeBmatrixAt(GaussPoint *gp, FloatMatrix &answer, int = 1, int = ALL_STRAINS);
-    virtual void computeNmatrixAt(GaussPoint *gp, FloatMatrix &answer);
+    virtual void computeNmatrixAt(const FloatArray &iLocCoord, FloatMatrix &answer);
     virtual void computeGaussPoints();
     virtual void computeConstitutiveMatrixAt(FloatMatrix &answer, MatResponseMode rMode, GaussPoint *gp, TimeStep *tStep);
     virtual void computeStressVector(FloatArray &answer, const FloatArray &strain, GaussPoint *gp, TimeStep *tStep);

@@ -43,10 +43,12 @@ set (sm_element
     structuralinterfaceelement.C
     intelline1.C
     intelline2.C
+    dkt.C
     )
 
 set (sm_crosssection
     structuralcrosssection.C
+    simplecrosssection.C
     layeredcrosssection.C
     fiberedcs.C
     structuralinterfacecrosssection.C

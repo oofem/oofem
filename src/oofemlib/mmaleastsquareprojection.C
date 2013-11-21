@@ -52,7 +52,7 @@ MMALeastSquareProjection :: MMALeastSquareProjection() : MaterialMappingAlgorith
 MMALeastSquareProjection :: ~MMALeastSquareProjection() { }
 
 void
-MMALeastSquareProjection :: __init(Domain *dold, IntArray &type, FloatArray &coords, int region, TimeStep *tStep)
+MMALeastSquareProjection :: __init(Domain *dold, IntArray &type, FloatArray &coords, int region, TimeStep *tStep, bool iCohesiveZoneGP)
 //(Domain* dold, IntArray& varTypes, GaussPoint* gp, TimeStep* tStep)
 {
     GaussPoint *sourceIp;
@@ -367,6 +367,13 @@ MMALeastSquareProjection :: __mapVariable(FloatArray &answer, FloatArray &target
     return 1;
 }
 
+int
+MMALeastSquareProjection :: mapStatus(MaterialStatus &oStatus) const
+{
+	OOFEM_ERROR("ERROR: MMALeastSquareProjection :: mapStatus() is not implemented yet.")
+
+	return 0;
+}
 
 void
 MMALeastSquareProjection :: computePolynomialTerms(FloatArray &P, FloatArray &coords, MMALeastSquareProjectionPatchType type)

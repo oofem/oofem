@@ -75,7 +75,7 @@ public:
     virtual int computeNumberOfDofs() { return 6 * giveNumberOfNodes(); }
     virtual void giveDofManDofIDMask(int inode, EquationID ut, IntArray &answer) const;
     double giveLength();
-    virtual void computeNmatrixAt(GaussPoint *gp, FloatMatrix &answer) {};
+    virtual void computeNmatrixAt(const FloatArray &iLocCoord, FloatMatrix &answer) {};
     virtual int computeGlobalCoordinates(FloatArray &answer, const FloatArray &lcoords);
 
     // definition & identification
@@ -88,9 +88,9 @@ public:
     virtual void printOutputAt(FILE *file, TimeStep *tStep);
 
 #ifdef __OOFEG
-    void drawRawGeometry(oofegGraphicContext &);
-    void drawDeformedGeometry(oofegGraphicContext &, UnknownType);
-    void drawScalar(oofegGraphicContext &context);
+    virtual void drawRawGeometry(oofegGraphicContext &);
+    virtual void drawDeformedGeometry(oofegGraphicContext &, UnknownType);
+    virtual void drawScalar(oofegGraphicContext &context);
 #endif
 
 protected:

@@ -46,7 +46,7 @@
 #include "fluiddynamicmaterial.h"
 #include "fei2dtrlin.h"
 #include "fei2dtrquad.h"
-#include "crosssection.h"
+#include "fluidcrosssection.h"
 #include "classfactory.h"
 
 namespace oofem {
@@ -157,7 +157,7 @@ void Tr21Stokes :: giveCharacteristicMatrix(FloatMatrix &answer,
 void Tr21Stokes :: computeInternalForcesVector(FloatArray &answer, TimeStep *tStep)
 {
     IntegrationRule *iRule = integrationRulesArray [ 0 ];
-    FluidDynamicMaterial *mat = static_cast< FluidDynamicMaterial * >( this->giveMaterial() );
+    FluidDynamicMaterial *mat = static_cast< FluidCrossSection * >( this->giveCrossSection() )->giveFluidMaterial();
     FloatArray a_pressure, a_velocity, devStress, epsp, Nh, dNv(12);
     double r_vol, pressure;
     FloatMatrix dN, B(3, 12);
@@ -236,6 +236,7 @@ void Tr21Stokes :: computeLoadVector(FloatArray &answer, Load *load, CharType ty
         return;
     }
 
+    FluidDynamicMaterial *mat = static_cast<FluidCrossSection * >( this->giveCrossSection() )->giveFluidMaterial();
     IntegrationRule *iRule = this->integrationRulesArray [ 0 ];
     FloatArray N, gVector, temparray(12);
 
@@ -246,7 +247,7 @@ void Tr21Stokes :: computeLoadVector(FloatArray &answer, Load *load, CharType ty
             GaussPoint *gp = iRule->getIntegrationPoint(k);
             FloatArray *lcoords = gp->giveCoordinates();
 
-            double rho = this->giveMaterial()->give('d', gp);
+            double rho = mat->give('d', gp);
             double detJ = fabs( this->interpolation_quad.giveTransformationJacobian(* lcoords, FEIElementGeometryWrapper(this)) );
             double dA = detJ * gp->giveWeight();
 
@@ -261,6 +262,7 @@ void Tr21Stokes :: computeLoadVector(FloatArray &answer, Load *load, CharType ty
     answer.resize(15);
     answer.zero();
     answer.assemble( temparray, this->momentum_ordering );
+
 }
 
 void Tr21Stokes :: computeBoundaryLoadVector(FloatArray &answer, BoundaryLoad *load, int boundary, CharType type, ValueModeType mode, TimeStep *tStep)
@@ -316,7 +318,7 @@ void Tr21Stokes :: computeBoundaryLoadVector(FloatArray &answer, BoundaryLoad *l
 void Tr21Stokes :: computeStiffnessMatrix(FloatMatrix &answer, TimeStep *tStep)
 {
     // Note: Working with the components; [K, G+Dp; G^T+Dv^T, C] . [v,p]
-    FluidDynamicMaterial *mat = static_cast< FluidDynamicMaterial * >( this->giveMaterial() );
+    FluidDynamicMaterial *mat = static_cast<FluidCrossSection * >( this->giveCrossSection() )->giveFluidMaterial();
     IntegrationRule *iRule = this->integrationRulesArray [ 0 ];
     FloatMatrix B(3, 12), EdB, K, G, Dp, DvT, C, Ed, dN;
     FloatArray dN_V(12), Nlin, Ep, Cd, tmpA, tmpB;
@@ -575,17 +577,17 @@ void Tr21Stokes :: giveIntegratedVelocity(FloatMatrix &answer, TimeStep *tStep )
         this->interpolation_quad.evalN(N, *lcoords, FEIElementGeometryWrapper(this));
         detJ = this->interpolation_quad.giveTransformationJacobian(*lcoords, FEIElementGeometryWrapper(this));
 
-        N.times(detJ*gp->giveWeight());
+        double dA = detJ*gp->giveWeight();
 
-        for (j=1; j<=6;j++) {
-            Nmatrix.at(1,j*2-1)=N.at(j);
-            Nmatrix.at(2,j*2)=N.at(j);
+        for (j=0; j<N.giveSize();j++) {
+            Nmatrix.at(1,j*2+1)+=N.at(j+1)*dA;
+            Nmatrix.at(2,j*2+2)+=N.at(j+1)*dA;
         }
 
-        ThisAnswer.beProductOf(Nmatrix,v);
-        answer.add(ThisAnswer);
-
     }
+
+    ThisAnswer.beProductOf(Nmatrix,v);
+    answer.add(ThisAnswer);
 
 }
 

@@ -81,7 +81,11 @@ protected:
     virtual void computeGaussPoints();
     virtual void computeBodyLoadVectorAt(FloatArray &answer, Load *load, TimeStep *tStep, ValueModeType mode);
     virtual void computeBmatrixAt(GaussPoint *gp, FloatMatrix &answer, int = 1, int = ALL_STRAINS);
-    virtual void computeNmatrixAt(GaussPoint *gp, FloatMatrix &answer);
+    virtual void computeNmatrixAt(const FloatArray &iLocCoord, FloatMatrix &answer);
+
+    virtual void computeStressVector(FloatArray &answer, const FloatArray &strain, GaussPoint *gp, TimeStep *tStep);
+    virtual void computeConstitutiveMatrixAt(FloatMatrix &answer, MatResponseMode rMode, GaussPoint *gp, TimeStep *tStep);
+
 
     virtual void giveNodeCoordinates(double &x1, double &x2, double &x3,
                                      double &y1, double &y2, double &y3,
@@ -146,10 +150,9 @@ public:
                                     GaussPoint *slaveGp, TimeStep *tStep);
 
 #ifdef __OOFEG
-    void drawRawGeometry(oofegGraphicContext &);
-    void drawDeformedGeometry(oofegGraphicContext &, UnknownType type);
+    virtual void drawRawGeometry(oofegGraphicContext &);
+    virtual void drawDeformedGeometry(oofegGraphicContext &, UnknownType type);
     virtual void drawScalar(oofegGraphicContext &context);
-    //void drawInternalState(oofegGraphicContext&);
 #endif
 };
 } // end namespace oofem

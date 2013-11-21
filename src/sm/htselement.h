@@ -63,7 +63,7 @@ public:
 
 protected:
     virtual void computeBmatrixAt(GaussPoint *gp, FloatMatrix &answer,int, int){;}
-    virtual void computeNmatrixAt(GaussPoint *gp, FloatMatrix &answer){;}
+    virtual void computeNmatrixAt(const FloatArray &iLocCoord, FloatMatrix &answer){;}
     virtual void computeStiffnessMatrix(FloatMatrix &answer, MatResponseMode rMode, TimeStep *tStep);
     double computeVolumeAroundSide(GaussPoint *gp, int elemSideNumber);    
     Node* giveSideNode(int elementSideNumber, int nodeNumber);

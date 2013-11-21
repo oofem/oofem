@@ -1390,7 +1390,7 @@ contextIOResultType EngngModel :: saveContext(DataStream *stream, ContextMode mo
     }
 
     // store renumber flag
-    if ( !stream->write(& renumberFlag, 1) ) {
+    if ( !stream->write(renumberFlag) ) {
         THROW_CIOERR(CIO_IOERR);
     }
 
@@ -1503,7 +1503,7 @@ contextIOResultType EngngModel :: restoreContext(DataStream *stream, ContextMode
     }
 
     // restore renumber flag
-    if ( !stream->read(& renumberFlag, 1) ) {
+    if ( !stream->read(renumberFlag) ) {
         THROW_CIOERR(CIO_IOERR);
     }
 
@@ -1687,13 +1687,19 @@ EngngModel :: giveDomain(int i)
 }
 
 void
-EngngModel :: setDomain(int i, Domain *ptr)
+EngngModel :: setDomain(int i, Domain *ptr, bool iDeallocateOld)
 {
-    if ( ( i > 0 ) && ( i <= this->ndomains ) ) {
-        this->domainList->put(i, ptr);
-    } else {
-        _error3("setDomain: Domain index %d out of range [1,%d]", i, this->ndomains);
-    }
+	if(!iDeallocateOld) {
+		printf("Unlinking old domain.\n");
+		this->domainList->unlink(i);
+	}
+
+	if ( ( i > 0 ) && ( i <= this->ndomains ) ) {
+		this->domainList->put(i, ptr);
+	} else {
+		_error3("setDomain: Domain index %d out of range [1,%d]", i, this->ndomains);
+	}
+
 }
 
 

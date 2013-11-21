@@ -41,7 +41,6 @@
 #include "contextioerr.h"
 
 namespace oofem {
-
 double
 Material :: give(int aProperty, GaussPoint *gp)
 // Returns the value of the property aProperty (e.g. the Young's modulus
@@ -102,7 +101,7 @@ Material :: initializeFrom(InputRecord *ir)
 
 
 void
-Material :: giveInputRecord(DynamicInputRecord& input)
+Material :: giveInputRecord(DynamicInputRecord &input)
 {
     FEMComponent :: giveInputRecord(input);
     input.setField(this->propertyDictionary->at('d'), _IFT_Material_density);
@@ -218,7 +217,7 @@ Material :: giveStatus(GaussPoint *gp) const
         // dont include it. specific instance
         // does not have status.
         if ( status != NULL ) {
-            gp->setMaterialStatus(status, this->giveNumber());
+            gp->setMaterialStatus( status, this->giveNumber() );
         }
     }
 
@@ -260,12 +259,4 @@ Material :: initMaterial(Element *element)
     return 0;
 }
 
-void
-Material :: updateYourself(GaussPoint *gp, TimeStep *atTime)
-//
-// We call MaterialStatus->updateYourself()
-//
-{
-    this->giveStatus(gp)->updateYourself(atTime);
-}
 } // end namespace oofem

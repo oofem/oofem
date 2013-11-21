@@ -85,9 +85,9 @@ int FileDataStream::read ( char* data, unsigned int count )
     return ( fread ( data, sizeof ( char ), count, stream ) == count );
 }
 
-int FileDataStream::read ( bool* data, unsigned int count )
+int FileDataStream::read ( bool &data )
 {
-    return ( fread ( data, sizeof ( bool ), count, stream ) == count );
+    return ( fread ( &data, sizeof ( bool ), 1, stream ) == 1 );
 }
 
 int FileDataStream::write ( const int* data, unsigned int count )
@@ -115,9 +115,9 @@ int FileDataStream::write ( const char* data, unsigned int count )
     return ( fwrite ( data, sizeof ( char ), count, stream ) == count );
 }
 
-int FileDataStream::write ( const bool* data, unsigned int count )
+int FileDataStream::write ( bool data )
 {
-    return ( fwrite ( data, sizeof ( bool ), count, stream ) == count );
+    return ( fwrite ( &data, sizeof ( bool ), 1, stream ) == 1 );
 }
 
 #ifdef __PARALLEL_MODE
@@ -147,10 +147,12 @@ int ComBuffDataStream::read ( char* data, unsigned int count )
     return buff->unpackArray ( data, count );
 }
 
-int ComBuffDataStream::read ( bool* data, unsigned int count )
+int ComBuffDataStream::read ( bool &data )
 {
-    OOFEM_ERROR("ComBuffDataStream :: Can't read bool type");
-    return 0;
+    char val;
+    int ret = buff->unpackArray ( &val, 1 );
+    data = val != 0;
+    return ret;
 }
 
 int ComBuffDataStream::write ( const int* data, unsigned int count )
@@ -178,10 +180,10 @@ int ComBuffDataStream::write ( const char* data, unsigned int count )
     return buff->packArray ( data, count );
 }
 
-int ComBuffDataStream::write ( const bool* data, unsigned int count )
+int ComBuffDataStream::write ( bool data )
 {
-    OOFEM_ERROR("ComBuffDataStream :: Can't write bool type");
-    return 0;
+    char val = data;
+    return buff->packArray ( &val, 1 );
 }
 
 int ProcessCommDataStream::read ( int* data, unsigned int count )
@@ -209,10 +211,12 @@ int ProcessCommDataStream::read ( char* data, unsigned int count )
     return pc->unpackArray ( data, count );
 }
 
-int ProcessCommDataStream::read ( bool* data, unsigned int count )
+int ProcessCommDataStream::read ( bool &data )
 {
-    OOFEM_ERROR("ProcessCommDataStream :: Can't read bool type");
-    return 0;
+    char val;
+    int ret = pc->unpackArray ( &val, 1 );
+    data = val != 0;
+    return ret;
 }
 
 int ProcessCommDataStream::write ( const int* data, unsigned int count )
@@ -240,10 +244,10 @@ int ProcessCommDataStream::write ( const char* data, unsigned int count )
     return pc->packArray ( data, count );
 }
 
-int ProcessCommDataStream::write ( const bool* data, unsigned int count )
+int ProcessCommDataStream::write ( bool data )
 {
-    OOFEM_ERROR("ProcessCommDataStream :: Can't write bool type");
-    return 0;
+    char val = data;
+    return pc->packArray ( &val, 1 );
 }
 
 #endif //__PARALLEL_MODE

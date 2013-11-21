@@ -89,13 +89,13 @@ StructuralCrossSection :: giveRealStresses(FloatArray &answer, GaussPoint *gp, c
 //    StructuralMaterial *mat = dynamic_cast< StructuralMaterial * >( this->giveMaterial(gp) );
 //    
 //    if ( mode == _3dMat ) {
-//        mat->giveFirstPKStressVector_3d(answer, gp, reducedvF, tStep);
+//        this->giveFirstPKStress_3d(answer, gp, reducedvF, tStep);
 //    } else if ( mode == _PlaneStrain ) {
-//        mat->giveFirstPKStressVector_PlaneStrain(answer, gp, reducedvF, tStep);
+//        this->giveFirstPKStress_PlaneStrain(answer, gp, reducedvF, tStep);
 //    } else if ( mode == _PlaneStress ) {
-//        mat->giveFirstPKStressVector_PlaneStress(answer, gp, reducedvF, tStep);
+//        this->giveFirstPKStress_PlaneStress(answer, gp, reducedvF, tStep);
 //    } else if ( mode == _1dMat ) {
-//        mat->giveFirstPKStressVector_1d(answer, gp, reducedvF, tStep);
+//        this->giveFirstPKStress_1d(answer, gp, reducedvF, tStep);
 //    } else {
 //        OOFEM_ERROR2("StructuralCrossSection :: giveStiffnessMatrix_dPdF : unknown mode (%s)", __MaterialModeToString(mode) );
 //    }
@@ -113,13 +113,13 @@ StructuralCrossSection :: giveRealStresses(FloatArray &answer, GaussPoint *gp, c
 //    StructuralMaterial *mat = dynamic_cast< StructuralMaterial * >( this->giveMaterial(gp) );
 //    
 //    if ( mode == _3dMat ) {
-//        mat->giveCauchyStressVector_3d(answer, gp, reducedvF, tStep);
+//        this->giveCauchyStress_3d(answer, gp, reducedvF, tStep);
 //    } else if ( mode == _PlaneStrain ) {
-//        mat->giveCauchyStressVector_PlaneStrain(answer, gp, reducedvF, tStep);
+//        this->giveCauchyStress_PlaneStrain(answer, gp, reducedvF, tStep);
 //    } else if ( mode == _PlaneStress ) {
-//        mat->giveCauchyStressVector_PlaneStress(answer, gp, reducedvF, tStep);
+//        this->giveCauchyStress_PlaneStress(answer, gp, reducedvF, tStep);
 //    } else if ( mode == _1dMat ) {
-//        mat->giveCauchyStressVector_1d(answer, gp, reducedvF, tStep);
+//        this->giveCauchyStress_1d(answer, gp, reducedvF, tStep);
 //    }
 //}
 //
@@ -133,13 +133,13 @@ StructuralCrossSection :: giveRealStresses(FloatArray &answer, GaussPoint *gp, c
 //    
 //    MaterialMode mode = gp->giveMaterialMode();
 //    if ( mode == _3dMat ) {
-//        mat->give3dMaterialStiffnessMatrix_dPdF(answer, rMode, gp, tStep);
+//        this->give3dMaterialStiffnessMatrix_dPdF(answer, rMode, gp, tStep);
 //    } else if ( mode == _PlaneStress ) {
-//        mat->givePlaneStressStiffMtrx_dPdF(answer, rMode, gp, tStep);
+//        this->givePlaneStressStiffMtrx_dPdF(answer, rMode, gp, tStep);
 //    } else if ( mode == _PlaneStrain ) {
-//        mat->givePlaneStrainStiffMtrx_dPdF(answer, rMode, gp, tStep);
+//        this->givePlaneStrainStiffMtrx_dPdF(answer, rMode, gp, tStep);
 //    } else if ( mode == _1dMat ) {
-//        mat->give1dStressStiffMtrx_dPdF(answer, rMode, gp, tStep);
+//        this->give1dStressStiffMtrx_dPdF(answer, rMode, gp, tStep);
 //    } else {
 //        OOFEM_ERROR2("StructuralCrossSection :: giveStiffnessMatrix_dPdF : unknown mode (%s)", __MaterialModeToString(mode) );
 //    }
@@ -155,13 +155,13 @@ StructuralCrossSection :: giveRealStresses(FloatArray &answer, GaussPoint *gp, c
 //    
 //    MaterialMode mode = gp->giveMaterialMode();
 //    if ( mode == _3dMat ) {
-//        mat->give3dMaterialStiffnessMatrix_dCde(answer, rMode, gp, tStep);
+//        this->give3dMaterialStiffnessMatrix_dCde(answer, rMode, gp, tStep);
 //    } else if ( mode == _PlaneStress ) {
-//        mat->givePlaneStressStiffMtrx_dCde(answer, rMode, gp, tStep);
+//        this->givePlaneStressStiffMtrx_dCde(answer, rMode, gp, tStep);
 //    } else if ( mode == _PlaneStrain ) {
-//        mat->givePlaneStrainStiffMtrx_dCde(answer, rMode, gp, tStep);
+//        this->givePlaneStrainStiffMtrx_dCde(answer, rMode, gp, tStep);
 //    } else if ( mode == _1dMat ) {
-//        mat->give1dStressStiffMtrx_dCde(answer, rMode, gp, tStep);
+//        this->give1dStressStiffMtrx_dCde(answer, rMode, gp, tStep);
 //    } else {
 //        OOFEM_ERROR2("StructuralCrossSection :: giveStiffnessMatrix_dCde : unknown mode (%s)", __MaterialModeToString(mode) );
 //    }
@@ -269,22 +269,6 @@ StructuralCrossSection :: imposeStrainConstrainsOnGradient(GaussPoint *gp,
 }
 
 
-//void
-//StructuralCrossSection :: computeStressIndependentStrainVector(FloatArray &answer,
-//                                                               GaussPoint *gp, TimeStep *stepN, ValueModeType mode)
-//
-// returns initial strain vector induced by stress independent effects
-// like temperatue or shrinkage.
-// takes into account form of load vector assumed by engngModel (Incremental or Total Load form).
-//
-//{
-//    StructuralMaterial *mat = dynamic_cast< StructuralMaterial * >( this->giveMaterial(gp) );
-//     add parts caused by  material
-//    mat->computeStressIndependentStrainVector(answer, gp, stepN, mode);
-//}
-
-
-
 IRResultType
 StructuralCrossSection :: initializeFrom(InputRecord *ir)
 //
@@ -294,7 +278,7 @@ StructuralCrossSection :: initializeFrom(InputRecord *ir)
     return IRRT_OK;
 }
 
-///@todo make static? /JB
+///@todo make static? /JB - No. Remove it. / Mikael
 int
 StructuralCrossSection :: hasMaterialModeCapability(MaterialMode mode)
 //
@@ -304,20 +288,5 @@ StructuralCrossSection :: hasMaterialModeCapability(MaterialMode mode)
     return mode == _3dMat || mode == _PlaneStress || mode == _PlaneStrain  || mode == _1dMat ||
            mode == _PlateLayer || mode == _2dBeamLayer || mode == _Fiber;
 }
-
-
-
-
-
-//bool
-//StructuralCrossSection :: isCharacteristicMtrxSymmetric(MatResponseMode rMode, int mat)
-//{
-//    if( !domain ) {
-//        printf(" Domain is a null pointer \n");
-//    }
-//    printf(" domain = %i \n", domain->giveNumber());
-//    return domain->giveMaterial(mat)->isCharacteristicMtrxSymmetric(rMode);
-//}
-
 
 } // end namespace oofem

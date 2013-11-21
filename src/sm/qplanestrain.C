@@ -108,7 +108,7 @@ QPlaneStrain :: computeBHmatrixAt(GaussPoint *gp, FloatMatrix &answer)
 }
 
 void
-QPlaneStrain :: computeNmatrixAt(GaussPoint *aGaussPoint, FloatMatrix &answer)
+QPlaneStrain :: computeNmatrixAt(const FloatArray &iLocCoord, FloatMatrix &answer)
 // Returns the displacement interpolation matrix {N} of the receiver,
 // evaluated at aGaussPoint.
 {
@@ -117,7 +117,7 @@ QPlaneStrain :: computeNmatrixAt(GaussPoint *aGaussPoint, FloatMatrix &answer)
     answer.resize(2, 16);
     answer.zero();
 
-    this->interpolation.evalN( n, * aGaussPoint->giveCoordinates(), FEIElementGeometryWrapper(this) );
+    this->interpolation.evalN( n, iLocCoord, FEIElementGeometryWrapper(this) );
 
     for ( int i = 1; i <= 8; i++ ) {
         answer.at(1, 2 * i - 1) = n.at(i);

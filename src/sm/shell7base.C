@@ -2322,7 +2322,7 @@ Shell7Base :: computeBmatrixAt(FloatArray &lcoords, FloatMatrix &answer, int li,
 
 
 void
-Shell7Base :: computeNmatrixAt(FloatArray &lcoords, FloatMatrix &answer)
+Shell7Base :: computeNmatrixAt(const FloatArray &iLocCoord, FloatMatrix &answer)
 {
     // Returns the displacement interpolation matrix {N} of the receiver,
     // evaluated at aGaussPoint.
@@ -2332,7 +2332,7 @@ Shell7Base :: computeNmatrixAt(FloatArray &lcoords, FloatMatrix &answer)
     answer.resize(7, ndofs);
     answer.zero();
     FloatArray N;
-    this->fei->evalN( N, lcoords, FEIElementGeometryWrapper(this) );
+    this->fei->evalN( N, iLocCoord, FEIElementGeometryWrapper(this) );
     //N.printYourself();
     //lcoords.printYourself();
     /*   nno*3 nno*3 nno

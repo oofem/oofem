@@ -739,7 +739,7 @@ public:
     /**@name Methods required by some specialized models */
     //@{
     /**
-     * Returns the integration point corresponding value in reduced form.
+     * Returns the integration point corresponding value in full form.
      * @param answer Contain corresponding integration point value, zero sized if not available.
      * @param gp Integration point to check.
      * @param type Determines the type of internal variable.
@@ -833,6 +833,13 @@ public:
      */
     virtual int adaptiveMap(Domain *oldd, TimeStep *tStep);
     /**
+     * Maps the internal state variables stored in all IPs from the old domain to the new domain.
+     * @param iOldDom Old domain.
+     * @param iTStep Time step.
+     * @return Nonzero if o.k, otherwise zero.
+     */
+    virtual int mapStateVariables(const Domain &iOldDom, const TimeStep &iTStep);
+    /**
      * Updates the internal state variables stored in all IPs according to
      * already mapped state.
      * @param tStep Time step.
@@ -868,7 +875,7 @@ public:
     //
     // Graphics output
     //
-    void         drawYourself(oofegGraphicContext &context);
+    virtual void drawYourself(oofegGraphicContext &context);
     virtual void drawAnnotation(oofegGraphicContext &mode);
     virtual void drawRawGeometry(oofegGraphicContext &mode) { }
     virtual void drawDeformedGeometry(oofegGraphicContext &mode, UnknownType) { }
@@ -878,7 +885,6 @@ public:
     // to determine the max and min local values, when recovery does not takes place
     virtual void giveLocalIntVarMaxMin(oofegGraphicContext &context, TimeStep *, double &emin, double &emax) { emin = emax = 0.0; }
 
-    //virtual void  drawInternalState (oofegGraphicContext& context) {}
     /**
      * Returns internal state variable (like stress,strain) at node of element in Reduced form,
      * the way how is obtained is dependent on InternalValueType.

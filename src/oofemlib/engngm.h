@@ -362,7 +362,7 @@ public:
      * @param i Domain index.
      * @param ptr Pointer to valid domain instance.
      */
-    void setDomain (int i, Domain *ptr);
+    void setDomain (int i, Domain *ptr, bool iDeallocateOld = true);
     /// Returns number of domains in problem.
     int giveNumberOfDomains() { return ndomains; }
 

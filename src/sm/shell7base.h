@@ -261,11 +261,11 @@ protected:
     //void computeBmatricesAt(GaussPoint *gp, FloatMatrix &B11, FloatMatrix &B22, FloatMatrix &B32, FloatMatrix &B43, FloatMatrix &B53);
     //void computeNmatricesAt(GaussPoint *gp, FloatMatrix &N11, FloatMatrix &N22, FloatMatrix &N33);
     virtual void computeBmatrixAt(GaussPoint *gp, FloatMatrix &answer, int li = 1, int ui = ALL_STRAINS){};
-    virtual void computeNmatrixAt(GaussPoint *gp, FloatMatrix &answer){};
+//    virtual void computeNmatrixAt(GaussPoint *gp, FloatMatrix &answer){};
     //virtual void edgeComputeNmatrixAt(GaussPoint *gp, FloatMatrix &answer);
     //virtual void edgeComputeBmatrixAt(GaussPoint *gp, FloatMatrix &answer, int li = 1, int ui = ALL_STRAINS);
     virtual void computeBmatrixAt(FloatArray &lCoords, FloatMatrix &answer, int li = 1, int ui = ALL_STRAINS);
-    virtual void computeNmatrixAt(FloatArray &lCoords, FloatMatrix &answer);
+    virtual void computeNmatrixAt(const FloatArray &iLocCoords, FloatMatrix &answer);
     virtual void edgeComputeNmatrixAt(FloatArray &lCoords, FloatMatrix &answer);
 
     virtual void computeStrainVectorInLayer(FloatArray &answer, const FloatArray &masterGpStrain, GaussPoint *slaveGp, TimeStep *tStep);
