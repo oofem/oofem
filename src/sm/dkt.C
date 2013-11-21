@@ -623,26 +623,13 @@ DKTPlate :: computeStrainVectorInLayer(FloatArray &answer, const FloatArray &mas
 void
 DKTPlate :: computeEgdeNMatrixAt(FloatMatrix &answer, int iedge, GaussPoint *gp)
 {
-    IntArray edgeNodes;
     FloatArray n;
-    double b,c, n12;
 
     this->interp_lin.edgeEvalN( n, iedge, * gp->giveCoordinates(), FEIElementGeometryWrapper(this) );
-    this->interp_lin.computeLocalEdgeMapping(edgeNodes, iedge);
-
-    n12 = 0.5 * n.at(1)*n.at(2);
-    b = this->giveNode(edgeNodes.at(1))->giveCoordinate(2) - this->giveNode(edgeNodes.at(2))->giveCoordinate(2);
-    c = this->giveNode(edgeNodes.at(2))->giveCoordinate(1) - this->giveNode(edgeNodes.at(1))->giveCoordinate(1);
-
 
     answer.resize(3, 6);
     answer.at(1, 1) = n.at(1);
-    answer.at(1, 2) = n12 * b;
-    answer.at(1, 3) = n12 * c;
-    answer.at(1, 4)  = n.at(2);
-    answer.at(1, 5) = - n12 * b;
-    answer.at(1, 6) = - n12 * c;
-    // 
+    answer.at(1, 4) = n.at(2);
     answer.at(2, 2) = answer.at(3, 3) = n.at(1);
     answer.at(2, 5) = answer.at(3, 6) = n.at(2);
 }
