@@ -167,6 +167,7 @@ IntMatBilinearCZJansson :: giveFirstPKTraction_3d(FloatArray &answer, GaussPoint
 		    status->letTempEffectiveMandelTractionBe(Qtemp);		
 			Qtemp.times(1-oldDamage);
 		} else {
+			status->letTempDamageDevBe(true);
 
              // dalpha = datr
             double C1,C2;
@@ -332,7 +333,13 @@ IntMatBilinearCZJansson :: give3dStiffnessMatrix_dTdj(FloatMatrix &answer, MatRe
 	
     IntMatBilinearCZJanssonStatus *status = static_cast< IntMatBilinearCZJanssonStatus * >( this->giveStatus(gp) );
 
-    double damage = status->giveTempDamage();
+    if (status->giveOldDamageDev()) {
+		answer = status->giveOlddTdJ();
+		//answer.printYourself();
+		status->letOldDamageDevBe(false);
+	} else {
+	
+	double damage = status->giveTempDamage();
     FloatMatrix Finv = status->giveTempInverseDefGrad();
     FloatMatrix help;
     FloatMatrix Kstiff(3,3);
@@ -408,7 +415,9 @@ IntMatBilinearCZJansson :: give3dStiffnessMatrix_dTdj(FloatMatrix &answer, MatRe
             answer.subtract(t1hatFinvOpen);
         }
     }
-                                                            
+	}
+    status->letTempdTdJBe(answer);
+
     //Finv.printYourself();
     //Kstiff.printYourself();
 	//printf("analytical tangent \n");
@@ -507,6 +516,13 @@ IntMatBilinearCZJansson :: giveIPValue(FloatArray &answer, GaussPoint *aGaussPoi
 
 }
 
+
+
+
+
+
+
+
 const double tolerance = 1.0e-12; // small number
 IRResultType
 IntMatBilinearCZJansson :: initializeFrom(InputRecord *ir)
@@ -594,6 +610,11 @@ IntMatBilinearCZJanssonStatus :: IntMatBilinearCZJanssonStatus(int n, Domain *d,
     tempFInv.at(2,2)=1.;
     tempFInv.at(3,3)=1.;
 
+	old_dTdJ.resize(3,3);
+	old_dTdJ.zero();
+
+	oldDamageDev = false;
+
 
 	#if 0
 	//@todo Martin: Very bad implementation of intialisation of Rot
@@ -669,7 +690,8 @@ void
     tempFInv.at(2,2)=1.;
     tempFInv.at(3,3)=1.;
 
-	
+	tempDamageDev = false;
+
 
 
 
@@ -683,6 +705,10 @@ void
     damage = tempDamage;
     oldMaterialJump = tempMaterialJump;
     QEffective = tempQEffective;
+
+	old_dTdJ = temp_dTdJ;
+	oldDamageDev = tempDamageDev;
+
 }
 
 

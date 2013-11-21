@@ -87,6 +87,17 @@ protected:
     FloatMatrix Iep;
     FloatArray	alphav;
 
+	// indicator for davae development of preceding time step
+	bool tempDamageDev;
+	bool oldDamageDev;
+
+	// tangent stiffness from previous time step
+	FloatMatrix temp_dTdJ;
+	FloatMatrix old_dTdJ;
+
+
+
+
 
     
 public:
@@ -103,6 +114,7 @@ public:
 
     double giveDamage() { return damage; }
     double giveTempDamage() { return tempDamage; }
+	bool giveOldDamageDev() {return oldDamageDev;}
 
     const FloatArray &giveOldMaterialJump() {return oldMaterialJump; }
     const FloatArray &giveTempMaterialJump() {return tempMaterialJump; }
@@ -114,11 +126,16 @@ public:
     const FloatMatrix &giveTempRotationMatrix() {return tempRot; }
     const FloatMatrix &giveTempIep() {return Iep; }
     const FloatArray &giveTempAlphav() {return alphav; }
+    const FloatMatrix &giveOlddTdJ() {return old_dTdJ; }
 
 
     void letTempDamageBe(double v) { tempDamage = v; }
-    void letTempEffectiveMandelTractionBe(const FloatArray &v) { tempQEffective = v; }
+    void letTempDamageDevBe(bool v) { tempDamageDev = v; }
+    void letOldDamageDevBe(bool v) { oldDamageDev = v; }
+
+	void letTempEffectiveMandelTractionBe(const FloatArray &v) { tempQEffective = v; }
     void letTempMaterialJumpBe(const FloatArray &v) { tempMaterialJump = v; }
+    void letTempdTdJBe(FloatMatrix &v) { temp_dTdJ = v; }
 
     void letTempInverseDefGradBe(const FloatMatrix &v) { tempFInv = v; }
     void letTempRotationMatrix(const FloatMatrix &v) { tempRot = v; }
