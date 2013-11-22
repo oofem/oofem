@@ -568,9 +568,9 @@ def print_step_results (context):
     for ival in sorted(context.recVal.keys()):
         try:
             value = float(context.recVal[ival])
-            print ( "%15e"%value, ) 
+            print ( "%15e"%value, end='') 
         except ValueError: 
-            print ( "%15s"%'---', )
+            print ( "%15s"%'---', end='')
         context.recVal[ival]='--' 
     print ()
 
