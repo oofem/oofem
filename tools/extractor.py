@@ -3,6 +3,9 @@
 #
 #  Extractor.py        (c) 2009 Borek Patzak, www.oofem.org
 #
+#The following allows to use "print" as a function (required by Python 3) (and not as a statement) in older python releases (>2.6)
+from __future__ import print_function
+#
 import re
 import getopt, sys, os.path
 
