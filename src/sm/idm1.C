@@ -435,7 +435,7 @@ IsotropicDamageMaterial1 :: computeEquivalentStrain(double &kappa, const FloatAr
     }
 }
 
-//Computes derivative of the equivalent strain with regards to strain
+//Computes derivative of the equivalent strain with regards to strain, used in tangent formulation
 void
 IsotropicDamageMaterial1 :: computeEta(FloatArray &answer, const FloatArray &strain, GaussPoint *gp, TimeStep *atTime)
 {
