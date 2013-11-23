@@ -57,6 +57,8 @@ RankineMat :: RankineMat(int n, Domain *d) : StructuralMaterial(n, d)
     H0 = 0.;
     sig0 = 0.;
     delSigY = 0.;
+    ep=0.;
+    damlaw=1;
 }
 
 
@@ -64,7 +66,7 @@ RankineMat :: RankineMat(int n, Domain *d) : StructuralMaterial(n, d)
 int
 RankineMat :: hasMaterialModeCapability(MaterialMode mode)
 {
-    return mode == _PlaneStress;
+  return ( (mode == _PlaneStress) || (mode == _1dMat) );
 }
 
 
@@ -86,18 +88,36 @@ RankineMat :: initializeFrom(InputRecord *ir)
     IR_GIVE_OPTIONAL_FIELD(ir, H0, _IFT_RankineMat_h); // hardening modulus
 
     plasthardtype = 0;
-    IR_GIVE_OPTIONAL_FIELD(ir, plasthardtype, _IFT_RankineMat_plasthardtype); // type of plastic hardening (0=linear, 1=exponential)
+    IR_GIVE_OPTIONAL_FIELD(ir, plasthardtype, _IFT_RankineMat_plasthardtype); // type of plastic hardening (0=linear, 1=exponential, 2= prepeak hardening + linear softening )
 
     delSigY = 0.;
-    if ( plasthardtype == 1 ) {
+    if ( plasthardtype == 0 ){
+      //no extra required variables
+    }else if ( plasthardtype == 1 ){
         IR_GIVE_FIELD(ir, delSigY, _IFT_RankineMat_delsigy); // final increment of yield stress (at infinite cumulative plastic strain)
+    } else if ( plasthardtype == 2 ){
+      IR_GIVE_FIELD(ir, ep, _IFT_RankineMat_ep);
+      ep = ep - sig0/E; // user input is strain at peak stress sig0 and is converted to plastic strain at peak stress sig0
+
+    } else {
+      OOFEM_ERROR2(" Plasticity hardening type number  %d is unknown",plasthardtype );
     }
 
     yieldtol = 1.e-10;
     IR_GIVE_OPTIONAL_FIELD(ir, yieldtol, _IFT_RankineMat_yieldtol); // relative tolerance in yield condition
 
+    damlaw=0;
+    IR_GIVE_OPTIONAL_FIELD(ir, damlaw, _IFT_RankineMat_damlaw); // type of damage law (0=exponential, 1=exponential and  damage starts after peak stress sig0)
+
+    if  ( damlaw == 0 ){
     a = 0.;
     IR_GIVE_OPTIONAL_FIELD(ir, a, _IFT_RankineMat_a); // coefficient in damage law
+ }else  if ( damlaw == 1 ){
+    IR_GIVE_FIELD(ir, param1, _IFT_RankineMat_param1); // coefficient in damage law
+    IR_GIVE_FIELD(ir, param2, _IFT_RankineMat_param2); // coefficient in damage law. If b<1 use only stiffmode=1
+    }else{
+      OOFEM_ERROR2("Damage law number  %d is unknown", damlaw);
+    }
 
     double gf = 0.;
     IR_GIVE_OPTIONAL_FIELD(ir, gf, _IFT_RankineMat_gf); // dissipated energy per unit VOLUME
@@ -134,6 +154,37 @@ RankineMat :: CreateStatus(GaussPoint *gp) const
 
 
 // computes the stress vector corresponding to given (final) strain
+void
+RankineMat :: giveRealStressVector_1d(FloatArray &answer, GaussPoint *gp, const FloatArray &totalStrain, TimeStep *atTime)
+{
+    FloatArray strainVector;
+    FloatMatrix d;
+    RankineMatStatus *status = static_cast< RankineMatStatus * >( this->giveStatus(gp) );
+
+    // initialization
+    this->initTempStatus(gp);
+    this->initGpForNewStep(gp);
+
+    // elastoplasticity
+    this->performPlasticityReturn(gp, totalStrain);
+
+    // damage
+    double omega = computeDamage(gp, atTime);
+    status->giveTempEffectiveStress(answer);
+    answer.times(1. - omega);
+    
+    // store variables in status
+    status->setTempDamage(omega);
+    status->letTempStrainVectorBe(totalStrain);
+    status->letTempStressVectorBe(answer);
+#ifdef keep_track_of_dissipated_energy
+    double gf = sig0 * sig0 / E; // only estimated, but OK for this purpose
+    status->computeWork_1d(gp, gf);
+#endif
+
+}
+
+
 void
 RankineMat :: giveRealStressVector_PlaneStress(FloatArray &answer,
                                    GaussPoint *gp,
@@ -175,25 +226,44 @@ RankineMat :: evalYieldFunction(const FloatArray &sigPrinc, const double kappa)
 double
 RankineMat :: evalYieldStress(const double kappa)
 {
-    if ( plasthardtype == 0 ) { // linear hardening
-        return sig0 + H0 * kappa;
-    } else { // exponential hardening
-        if ( delSigY == 0. ) {
-            return sig0;
-        } else {
-            return sig0 + delSigY * ( 1. - exp(-H0 * kappa / delSigY) );
-        }
+  double yieldStress;
+  if ( plasthardtype == 0 ) { // linear hardening
+    yieldStress= sig0 + H0 * kappa;
+  } else if (plasthardtype ==1) { // exponential hardening
+    if ( delSigY == 0. ) {
+      yieldStress=sig0;
+    } else {
+      yieldStress= sig0 + delSigY * ( 1. - exp(-H0 * kappa / delSigY) );
     }
+  } else if ( plasthardtype == 2 ){ // exponential hardening before the peak stress sig0 and linear after the peak stress sig0
+    if(kappa<=ep){
+      //1st branch in the rankine variation 2 trying to match the 1st branch of the smooth extended damage law reported by Grassl and Jirasek (2010)
+      double md = 1./log(E*50*ep/sig0); // variable needed for the 1st plasticity branch
+      yieldStress= 50*E*kappa*exp(-1/md*pow(kappa/ep,md));
+    }else{ //linear hardening branch
+      yieldStress= sig0+H0*kappa;
+    }
+  }
+  return yieldStress;
 }
 
 double
 RankineMat :: evalPlasticModulus(const double kappa)
 {
+  double plasticModulus;
     if ( plasthardtype == 0 ) { // linear hardening
-        return H0;
-    } else { // exponential hardening
-        return H0 * exp(-H0 * kappa / delSigY);
+        plasticModulus= H0;
+    } else if (plasthardtype == 1) { // exponential hardening
+        plasticModulus= H0 * exp(-H0 * kappa / delSigY);
+    } else if ( plasthardtype == 2 ){ // exponential hardening before the peak stress sig0 and linear after the peak stress sig0
+      if(kappa <= ep){//1st branch of yield stress
+	double md = 1./log(E*50*ep/sig0); // variable needed for the 1st plasticity branch
+	plasticModulus= 50*E*exp(-1/md*pow(kappa/ep,md))-50*E*kappa*pow(kappa/ep,md)*exp(-1/md*pow(kappa/ep,md));
+    }else {//2nd branch of yield stress
+	plasticModulus= H0;
+      }
     }
+    return plasticModulus;
 }
 
 
@@ -221,6 +291,28 @@ RankineMat :: performPlasticityReturn(GaussPoint *gp, const FloatArray &totalStr
     // get principal trial stresses (ordered) and principal stress directions
     finalStress.computePrincipalValDir(sigPrinc, nPrinc);
     double ftrial = evalYieldFunction(sigPrinc, tempKappa);
+    if(mode==_1dMat){ //1d case
+  //// Plastic Corrector
+    if ( ftrial > 0. ) {
+      double f = ftrial;
+      // calculate the increment of cumulative plastic strain
+      int i = 1;
+      do {
+	i= i + 1;
+	if ( i > 1000 ) {
+	  printf("kappa, ftrial: %g %g\n", kappa, ftrial);
+	  OOFEM_ERROR("RankineMat::giveRealStressVector: no convergence of regular stress return algorithm");
+      }
+      
+      double ddKappa = f / ( E + evalPlasticModulus(tempKappa));     
+      finalStress.at(1) -= E * ddKappa;
+      tempKappa += ddKappa;
+      f = finalStress.at(1) - evalYieldStress(tempKappa);
+       } while ( fabs(f) > yieldtol*sig0 );
+    }
+    tempPlasticStrain.at(1)=tempKappa;
+    //End of Dimitris change
+    }else{ //Plane stress case
     double difPrincTrialStresses = sigPrinc.at(1) - sigPrinc.at(2);
     double tanG = E / ( 2. * ( 1. + nu ) );
 
@@ -321,12 +413,12 @@ RankineMat :: performPlasticityReturn(GaussPoint *gp, const FloatArray &totalStr
             }
         }
     }
-
+    status->setTangentShearStiffness(tanG);// store shear stiffness.Used in 2d/3d cases
+    }
     // store the effective stress, plastic strain and cumulative plastic strain
     status->letTempEffectiveStressBe(finalStress);
     status->letTempPlasticStrainBe(tempPlasticStrain);
     status->setTempCumulativePlasticStrain(tempKappa);
-    status->setTangentShearStiffness(tanG);
 }
 
 double
@@ -334,7 +426,12 @@ RankineMat :: computeDamageParam(double tempKappa)
 {
     double tempDam;
     if ( tempKappa > 0. ) {
-        tempDam = 1.0 - exp(-a * tempKappa);
+      if (damlaw == 0){
+	tempDam = 1.0 - exp(-a * tempKappa);	
+      }else if (damlaw == 1){
+	if (tempKappa<=ep) tempDam = 0.;
+	else tempDam = 1.0 - exp(-param1 * pow((tempKappa-ep)/ep,param2));
+      }
     } else {
         tempDam = 0.;
     }
@@ -347,7 +444,12 @@ RankineMat :: computeDamageParamPrime(double tempKappa)
 {
     double tempDam;
     if ( tempKappa >= 0. ) {
+      if (damlaw == 0)
         tempDam = a * exp(-a * tempKappa);
+      else if (damlaw == 1){
+	if (tempKappa <=ep) tempDam = 0.;
+	else tempDam = param1*param2*pow((tempKappa-ep)/ep,param2-1)/ep*exp(-param1 * pow((tempKappa-ep)/ep,param2));	
+      }
     } else {
         tempDam = 0.;
     }
@@ -387,6 +489,26 @@ RankineMat :: givePlaneStressStiffMtrx(FloatMatrix &answer,
     double tempKappa = status->giveTempCumulativePlasticStrain();
     double gprime = computeDamageParamPrime(tempKappa);
     evaluatePlaneStressStiffMtrx(answer, mode, gp, atTime, gprime);
+}
+
+void
+RankineMat :: give1dStressStiffMtrx(FloatMatrix &answer, MatResponseMode mode,GaussPoint *gp, TimeStep *tStep)
+{
+
+    RankineMatStatus *status = (RankineMatStatus * ) this->giveStatus(gp);
+    double om;
+    if ( mode == ElasticStiffness ) {
+        om = 0.0;
+    }else if (mode == SecantStiffness){
+        om = status->giveTempDamage();
+	answer.resize(1, 1);
+	answer.at(1, 1) = this->E;	
+	answer.times(1.0 - om);
+    }else{
+    _error("RankineMatNl :: give1dStressStiffMtrx ... unknown type of stiffness (secant stiffness not implemented for 1d)\n");
+    }
+    return;
+
 }
 
 // this method is also used by the gradient version,
@@ -780,5 +902,35 @@ RankineMatStatus :: computeWork_PlaneStress(GaussPoint *gp, double gf)
         tempDissWork = 0.;
     }
 }
+
+void
+RankineMatStatus :: computeWork_1d(GaussPoint *gp, double gf)
+{
+    // int n = deps.giveSize(); // would not work for gradient version
+    int n=1;
+   
+
+    // strain increment
+    FloatArray deps;
+    deps.beDifferenceOf(tempStrainVector, strainVector, n);
+
+    // increment of stress work density
+    double dSW = ( tempStressVector.dotProduct(deps, n) + stressVector.dotProduct(deps, n) ) / 2.;
+    tempStressWork = stressWork + dSW;
+
+    // elastically stored energy density
+    FloatArray tempElasticStrainVector;
+    tempElasticStrainVector.beDifferenceOf(tempStrainVector, tempPlasticStrain, n);
+    double We = tempStressVector.dotProduct(tempElasticStrainVector, n) / 2.;
+
+    // dissipative work density
+    tempDissWork = tempStressWork - We;
+    // to avoid extremely small negative dissipation due to round-off error
+    // (note: gf is the dissipation density at complete failure, per unit volume)
+    if ( fabs(tempDissWork) < 1.e-12 * gf ) {
+        tempDissWork = 0.;
+    }
+}
+
 #endif
 } // end namespace oofem
