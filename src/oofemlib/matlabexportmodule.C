@@ -148,6 +148,9 @@ MatlabExportModule :: computeArea()
 void
 MatlabExportModule :: doOutput(TimeStep *tStep, bool forcedOutput)
 {
+
+    printf("Doing matlab export...\n");
+
 	FILE *FID;
 	FID = giveOutputStream(tStep);
 	Domain *domain  = emodel->giveDomain(1);
@@ -588,15 +591,18 @@ MatlabExportModule :: giveOutputStream(TimeStep *tStep)
 
 	size_t foundDot;
 	foundDot = fileName.rfind(".");
-    fileName.replace(foundDot, 1, "_");
-    //fileName.erase(foundDot);
 
-/* 	fileName.erase(foundDot);
+    // CARL
+    //fileName.replace(foundDot, 1, "_"); 
+ 
+    // JIM
+ 	//fileName.erase(foundDot);
+    fileName.replace(foundDot, 1, "_");
 
     char fext[100];
     sprintf( fext, "_m%d_%d", this->number, tStep->giveNumber() );
     fileName += fext;
-*/
+
 
 	functionname = fileName;
 
