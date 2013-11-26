@@ -26,6 +26,7 @@ public:
     ~TipInfo() {}
 
     FloatArray mGlobalCoord;
+    double mArcPos;
     FloatArray mTangDir;
     FloatArray mNormalDir;
     int mElIndex;

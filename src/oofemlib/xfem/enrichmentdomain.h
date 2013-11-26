@@ -82,8 +82,9 @@ public:
     /// Functions for computing signed distance in normal and tangential direction.
     /// Used by XFEM level set functions.
     virtual void computeNormalSignDist(double &oDist, const FloatArray &iPoint) const = 0;
-    virtual void computeTangentialSignDist(double &oDist, const FloatArray &iPoint) const = 0;
+    virtual void computeTangentialSignDist(double &oDist, const FloatArray &iPoint, double &oMinDistArcPos) const = 0;
     virtual void computeSurfaceNormalSignDist(double &oDist, const FloatArray &iPoint) const = 0;
+    virtual void giveSubPolygon(std::vector<FloatArray> &oPoints, const double &iXiStart, const double &iXiEnd) const {OOFEM_ERROR("EnrichmentDomain::giveSubPolygon() is not implemented.\n");}
 
     // Use double dispatch to call the correct version of CallNodeEnrMarkerUpdate.
     virtual void CallNodeEnrMarkerUpdate(EnrichmentItem &iEnrItem, XfemManager &ixFemMan) const {}
@@ -118,8 +119,10 @@ public:
      * Used by XFEM level set functions.
      */
     virtual void computeNormalSignDist(double &oDist, const FloatArray &iPoint) const { bg->computeNormalSignDist(oDist, iPoint); };
-    virtual void computeTangentialSignDist(double &oDist, const FloatArray &iPoint) const { bg->computeTangentialSignDist(oDist, iPoint); };
+    virtual void computeTangentialSignDist(double &oDist, const FloatArray &iPoint, double &oMinDistArcPos) const { bg->computeTangentialSignDist(oDist, iPoint, oMinDistArcPos); };
     virtual void computeSurfaceNormalSignDist(double &oDist, const FloatArray &iPoint) const { OOFEM_ERROR("EnrichmentDomain_BG::computeNormalSignDist -- not implemented"); };
+    virtual void giveSubPolygon(std::vector<FloatArray> &oPoints, const double &iXiStart, const double &iXiEnd) const {bg->giveSubPolygon(oPoints, iXiStart, iXiEnd);}
+
     // Use double dispatch to call the correct version of CallNodeEnrMarkerUpdate.
     virtual void CallNodeEnrMarkerUpdate(EnrichmentItem &iEnrItem, XfemManager &ixFemMan) const;
 };
@@ -171,7 +174,7 @@ public:
     const std :: vector< int > &giveDofManList() const { return dofManList; }
 
     virtual void computeNormalSignDist(double &oDist, const FloatArray &iPoint) const { oDist = 0.0; };
-    virtual void computeTangentialSignDist(double &oDist, const FloatArray &iPoint) const { oDist = 0.0; };
+    virtual void computeTangentialSignDist(double &oDist, const FloatArray &iPoint, double &oMinDistArcPos) const { oDist = 0.0; };
     virtual void computeSurfaceNormalSignDist(double &oDist, const FloatArray &iPoint) const; // new /JB
     // Use double dispatch to call the correct version of CallNodeEnrMarkerUpdate.
     virtual void CallNodeEnrMarkerUpdate(EnrichmentItem &iEnrItem, XfemManager &ixFemMan) const;
@@ -197,7 +200,7 @@ public:
     virtual ~WholeDomain() { }
 
     virtual void computeNormalSignDist(double &oDist, const FloatArray &iPoint) const { OOFEM_ERROR("WholeDomain::computeNormalSignDist -- not implemented"); };
-    virtual void computeTangentialSignDist(double &oDist, const FloatArray &iPoint) const { OOFEM_ERROR("WholeDomain::computeTangentialSignDist -- not implemented"); };
+    virtual void computeTangentialSignDist(double &oDist, const FloatArray &iPoint, double &oMinDistArcPos) const { OOFEM_ERROR("WholeDomain::computeTangentialSignDist -- not implemented"); };
     virtual void computeSurfaceNormalSignDist(double &oDist, const FloatArray &iPoint) const { OOFEM_ERROR("WholeDomain::computeNormalSignDist -- not implemented"); };
     // Use double dispatch to call the correct version of CallNodeEnrMarkerUpdate.
     virtual void CallNodeEnrMarkerUpdate(EnrichmentItem &iEnrItem, XfemManager &ixFemMan) const;

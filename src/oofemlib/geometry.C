@@ -699,7 +699,8 @@ double PolygonLine :: computeTangentialSignDist(FloatArray *point)
 //		bSeg2 crackSeg( crackP1, crackP2 );
 
 //		double distSeg = bDist(x, crackSeg);
-		double distSeg = x.distance(crackP1, crackP2);
+		double arcPos = -1.0;
+		double distSeg = x.distance(crackP1, crackP2, arcPos);
 
 		if( distSeg < minDistSeg )
 		{
@@ -875,7 +876,8 @@ void PolygonLine :: computeNormalSignDist(double &oDist, const FloatArray &iPoin
 		}
 		else
 		{
-			dist = point.distance(crackP1, crackP2);
+			double arcPos = -1.0;
+			dist = point.distance(crackP1, crackP2, arcPos);
 		}
 
 
@@ -898,8 +900,10 @@ void PolygonLine :: computeNormalSignDist(double &oDist, const FloatArray &iPoin
 }
 
 
-void PolygonLine :: computeTangentialSignDist(double &oDist, const FloatArray &iPoint) const
+void PolygonLine :: computeTangentialSignDist(double &oDist, const FloatArray &iPoint, double &oMinArcDist) const
 {
+	double totalArcLength = computeLength();
+
 	int numSeg = this->giveNrVertices()-1;
 
 	// TODO: This can probably be done in a nicer way.
@@ -912,11 +916,12 @@ void PolygonLine :: computeTangentialSignDist(double &oDist, const FloatArray &i
 	const FloatArray &crackPE(this->giveVertex(numSeg+1));
 
 	double minDist = min( point.distance(crackPS), point.distance(crackPE) );
-
+	double xiEl = 0.0;
 
 	// Find the closest segment to determine the sign of the distance
 	double minDistSeg = std::numeric_limits<double>::max();
 	int minDistSegIndex = 0;
+	double arcDistPassed = 0.0, minArcDist = 0.0;
 	for( int segId = 1; segId <= numSeg; segId++ )
 	{
 		// Crack segment
@@ -924,14 +929,30 @@ void PolygonLine :: computeTangentialSignDist(double &oDist, const FloatArray &i
 
 		const FloatArray &crackP2(this->giveVertex(segId+1));
 
-		double distSeg = point.distance(crackP1, crackP2);
+		double distSeg = point.distance(crackP1, crackP2, xiEl);
 
 		if( distSeg < minDistSeg )
 		{
 			minDistSeg = distSeg;
 			minDistSegIndex = segId;
+
+			if(xiEl >= 0.0 && xiEl <= 1.0) {
+				minArcDist = arcDistPassed + xiEl*crackP1.distance(crackP2)/totalArcLength;
+			}
+			else {
+				if(segId == 1) {
+					minArcDist = arcDistPassed + 0.0;
+				}
+				else if(segId == numSeg) {
+					minArcDist = arcDistPassed + 1.0;
+				}
+			}
 		}
+
+		arcDistPassed += crackP1.distance(crackP2)/totalArcLength;
 	}
+
+	oMinArcDist = minArcDist;
 
 	if( minDistSegIndex > 1 && minDistSegIndex < numSeg)
 	{
@@ -988,6 +1009,72 @@ void PolygonLine :: computeTangentialSignDist(double &oDist, const FloatArray &i
 
 }
 
+void PolygonLine :: computeLocalCoordinates(FloatArray &oLocCoord, const FloatArray &iPoint) const
+{
+
+}
+
+double PolygonLine :: computeLength() const
+{
+	double L = 0.0;
+
+	size_t numSeg = mVertices.size()-1;
+	for(size_t i = 0; i < numSeg; i++) {
+		L += mVertices[i].distance(mVertices[i+1]);
+	}
+
+	return L;
+}
+
+void PolygonLine :: giveSubPolygon(std::vector<FloatArray> &oPoints, const double &iXiStart, const double &iXiEnd) const
+{
+	printf("Entering PolygonLine :: giveSubPolygon().\n");
+
+	double L = computeLength();
+	double xSegStart = 0.0, xSegEnd = 0.0;
+	double xiSegStart = 0.0, xiSegEnd = 0.0;
+	size_t numSeg = mVertices.size()-1;
+	const double xiTol = 1.0e-9;
+	if(iXiStart < xiTol) {
+		// Add first point
+		oPoints.push_back(mVertices[0]);
+	}
+
+	for(size_t i = 0; i < numSeg; i++) {
+
+		xSegEnd += mVertices[i].distance(mVertices[i+1]);
+
+		xiSegStart = xSegStart/L;
+		xiSegEnd 	= xSegEnd/L;
+
+		if( iXiStart > xiSegStart && iXiStart < xiSegEnd ) {
+			// Start point is within the segment
+			FloatArray p;
+			double elXi = (iXiStart - xiSegStart)/(xiSegEnd - xiSegStart);
+			p.beScaled( (1.0-elXi), mVertices[i] );
+			p.add(elXi, mVertices[i+1]);
+			oPoints.push_back(p);
+		}
+
+
+		if( iXiEnd > xiSegStart && iXiEnd < xiSegEnd ) {
+			// End point is within the segment
+			FloatArray p;
+			double elXi = (iXiEnd - xiSegStart)/(xiSegEnd - xiSegStart);
+			p.beScaled( (1.0-elXi), mVertices[i] );
+			p.add(elXi, mVertices[i+1]);
+			oPoints.push_back(p);
+		}
+
+		if( xiSegEnd > iXiStart && xiSegEnd < iXiEnd ) {
+			// End point of the segment is within range
+			oPoints.push_back(mVertices[i+1]);
+		}
+
+		xSegStart = xSegEnd;
+	}
+
+}
 
 IRResultType PolygonLine :: initializeFrom(InputRecord *ir)
 {

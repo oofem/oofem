@@ -84,6 +84,8 @@ protected:
     /// Temporary deformation gradient in reduced form (to find balanced state)
     FloatMatrix tempF;
 
+    /// Interface normal direction
+    FloatArray mNormalDir;
 public:
     /// Constructor. Creates new StructuralInterfaceMaterialStatus with number n, belonging to domain d and IntegrationPoint g.
     StructuralInterfaceMaterialStatus(int n, Domain *d, GaussPoint *g);
@@ -114,6 +116,8 @@ public:
     const FloatArray &giveTempFirstPKTraction() const { return tempFirstPKTraction; }
     /// Returns the const pointer to receiver's temporary deformation gradient vector.
     const FloatMatrix &giveTempF() const { return tempF; }
+    /// Returns const reference to normal vector.
+    const FloatArray &giveNormal() const {return mNormalDir;}
     /// Assigns jump to given vector v.
     void letJumpBe(const FloatArray &v) { jump = v; }
     /// Assigns traction to given vector v.
@@ -130,6 +134,8 @@ public:
     void letTempFirstPKTractionBe(const FloatArray &v) { tempFirstPKTraction = v; }
     /// Assigns tempFVector to given vector v
     void letTempFBe(const FloatMatrix &v) { tempF = v; }
+    /// Assigns normal vector
+    void letNormalBe(const FloatArray &iN) {mNormalDir = iN;}
 
     virtual const char *giveClassName() const { return "StructuralInterfaceMaterialStatus"; }
     //virtual classType giveClassID() const { return StructuralInterfaceMaterialStatus; }

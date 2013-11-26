@@ -53,7 +53,7 @@ class Element;
 class XfemManager;
 class StructuralInterfaceMaterial;
 
-//#define XFEM_DEBUG_VTK 1
+#define XFEM_DEBUG_VTK 1
 
 /**
  * Provides Xfem interface for an element.
@@ -68,13 +68,10 @@ public:
     StructuralInterfaceMaterial *mpCZMat;
     int mCZMaterialNum;
     int mCSNumGaussPoints;
-    IntegrationRule *mpCZIntegrationRule;
+    std::vector<IntegrationRule*> mpCZIntegrationRules;
 
-    /// Length of the crack segment in the element
-    double mCrackLength;
-
-    /// Index of enrichment item associated with cohesive zone
-    int mCZEnrItemIndex;
+    /// Index of enrichment items associated with cohesive zones
+    std::vector<int> mCZEnrItemIndices; // TODO: Not nice. /ES
 
     /// Flag that tells if plane stress or plane strain is assumed
     bool mUsePlaneStrain;
@@ -94,10 +91,13 @@ public:
     /// Partitions the element into patches by a triangulation.
     virtual void XfemElementInterface_partitionElement(std :: vector< Triangle > &oTriangles, const std :: vector< FloatArray > &iPoints);
     /// Updates integration rule based on the triangulation.
-    virtual void XfemElementInterface_updateIntegrationRule();
+    virtual bool XfemElementInterface_updateIntegrationRule();
 
     /// Returns an array of array of points. Each array of points defines the points of a subregion of the element.
-    virtual void XfemElementInterface_prepareNodesForDelaunay(std :: vector< std :: vector< FloatArray > > &oPointPartitions, FloatArray &oCrackStartPoint, FloatArray &oCrackEndPoint, int &oEnrItemIndex);
+//    virtual void XfemElementInterface_prepareNodesForDelaunay(std :: vector< std :: vector< FloatArray > > &oPointPartitions, FloatArray &oCrackStartPoint, FloatArray &oCrackEndPoint, int &oEnrItemIndex);
+
+    // New syntax
+    virtual void XfemElementInterface_prepareNodesForDelaunay(std :: vector< std :: vector< FloatArray > > &oPointPartitions, double &oCrackStartXi, double &oCrackEndXi, int iEnrItemIndex, bool &oIntersection);
 
     /**
      * XfemElementInterface_computeConstitutiveMatrixAt.
@@ -111,7 +111,7 @@ public:
     /**
      * Cohesive Zone functions
      */
-    bool hasCohesiveZone() const { return ( mpCZMat != NULL && mpCZIntegrationRule ); }
+    bool hasCohesiveZone() const { return ( mpCZMat != NULL && mpCZIntegrationRules.size() > 0 ); }
 
     void computeCohesiveForces(FloatArray &answer, TimeStep *tStep);
     void computeGlobalCohesiveTractionVector(FloatArray &oT, const FloatArray &iJump, const FloatArray &iCrackNormal, const FloatMatrix &iNMatrix, GaussPoint &iGP, TimeStep *tStep);
@@ -134,7 +134,7 @@ public:
     /**
      * Compute N-matrix for cohesive zone.
      */
-    void computeNCohesive(FloatMatrix &oN, GaussPoint &iGP);
+    void computeNCohesive(FloatMatrix &oN, GaussPoint &iGP, int iEnrItemIndex);
 
     /**
      * Compute the crack normal in a point.

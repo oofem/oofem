@@ -441,8 +441,8 @@ void EnrichmentItem :: updateLevelSets(XfemManager &ixFemMan)
         mLevelSetNormalDir [ n - 1 ] = phi;
 
         // Calc tangential sign dist
-        double gamma = 0.0;
-        mpEnrichmentDomain->computeTangentialSignDist(gamma, pos);
+        double gamma = 0.0, arcPos = -1.0;
+        mpEnrichmentDomain->computeTangentialSignDist(gamma, pos, arcPos);
         mLevelSetTangDir [ n - 1 ] = gamma;
     }
 
@@ -668,7 +668,7 @@ void EnrichmentItem :: createEnrichedDofs()
     }
 }
 
-void EnrichmentItem :: computeIntersectionPoints(std :: vector< FloatArray > &oIntersectionPoints, std :: vector< int > &oIntersectedEdgeInd, Element *element)
+void EnrichmentItem :: computeIntersectionPoints(std :: vector< FloatArray > &oIntersectionPoints, std :: vector< int > &oIntersectedEdgeInd, Element *element, std::vector<double> &oMinDistArcPos)
 {
     if ( isElementEnriched(element) ) {
         // Use the level set functions to compute intersection points
@@ -728,6 +728,11 @@ void EnrichmentItem :: computeIntersectionPoints(std :: vector< FloatArray > &oI
 
                         if ( !alreadyFound ) {
                             oIntersectionPoints.push_back(ps);
+
+                            double arcPos = 0.0, tangDist = 0.0;
+                            mpEnrichmentDomain->computeTangentialSignDist(tangDist, ps, arcPos);
+                            oMinDistArcPos.push_back(arcPos);
+
                             oIntersectedEdgeInd.push_back(edgeIndex);
                         }
 
@@ -745,6 +750,11 @@ void EnrichmentItem :: computeIntersectionPoints(std :: vector< FloatArray > &oI
 
                         if ( !alreadyFound ) {
                             oIntersectionPoints.push_back(pe);
+
+                            double arcPos = 0.0, tangDist = 0.0;
+                            mpEnrichmentDomain->computeTangentialSignDist(tangDist, pe, arcPos);
+                            oMinDistArcPos.push_back(arcPos);
+
                             oIntersectedEdgeInd.push_back(edgeIndex);
                         }
                     } else   {
@@ -779,6 +789,11 @@ void EnrichmentItem :: computeIntersectionPoints(std :: vector< FloatArray > &oI
 
                         if ( !alreadyFound ) {
                             oIntersectionPoints.push_back(p);
+
+                            double arcPos = 0.0, tangDist = 0.0;
+                            mpEnrichmentDomain->computeTangentialSignDist(tangDist, p, arcPos);
+                            oMinDistArcPos.push_back(arcPos);
+
                             oIntersectedEdgeInd.push_back(edgeIndex);
                         }
                     }
@@ -788,10 +803,11 @@ void EnrichmentItem :: computeIntersectionPoints(std :: vector< FloatArray > &oI
     }
 }
 
-bool EnrichmentItem :: giveElementTipCoord(FloatArray &oCoord, int iElIndex) const
+bool EnrichmentItem :: giveElementTipCoord(FloatArray &oCoord, double &oArcPos, int iElIndex) const
 {
     if ( mpEnrichmentFront != NULL ) {
-        return mpEnrichmentFront->giveElementTipCoord(oCoord, iElIndex);
+    	double arcPos = -1.0;
+        return mpEnrichmentFront->giveElementTipCoord(oCoord, arcPos, iElIndex);
     } else   {
         return false;
     }
@@ -830,6 +846,11 @@ void EnrichmentItem :: calcPolarCoord(double &oR, double &oTheta, const FloatArr
     } else   {
         oTheta = -acos( q.dotProduct(iT) );
     }
+}
+
+void EnrichmentItem :: giveSubPolygon(std::vector<FloatArray> &oPoints, const double &iXiStart, const double &iXiEnd) const
+{
+	mpEnrichmentDomain->giveSubPolygon(oPoints, iXiStart, iXiEnd);
 }
 
 
@@ -1027,11 +1048,12 @@ REGISTER_EnrichmentFront(EnrFrontDoNothing)
 REGISTER_EnrichmentFront(EnrFrontExtend)
 REGISTER_EnrichmentFront(EnrFrontLinearBranchFuncRadius)
 
-bool EnrichmentFront :: giveElementTipCoord(FloatArray &oCoord, int iElIndex) const
+bool EnrichmentFront :: giveElementTipCoord(FloatArray &oCoord, double &oArcPos, int iElIndex) const
 {
     for ( size_t i = 0; i < mTipInfo.size(); i++ ) {
         if ( mTipInfo [ i ].mElIndex == iElIndex ) {
             oCoord = mTipInfo [ i ].mGlobalCoord;
+            oArcPos = mTipInfo [ i ].mArcPos;
             return true;
         }
     }
