@@ -1797,7 +1797,7 @@ VTKXMLExportModule :: exportIntVarsInGpAs(IntArray valIDs, TimeStep *tStep)
 {
     Domain *d = emodel->giveDomain(1);
     int nip = 0;
-    int j, k, nc;
+    int j, k, nc=0;
     int nelem = d->giveNumberOfElements();
     FloatArray *lc, gc, value;
     FILE *stream;

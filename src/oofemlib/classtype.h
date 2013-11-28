@@ -129,6 +129,7 @@ enum classType {
     Tet1BubbleStokesElementClass,
     LineSurfaceTensionElementClass,
     Line2SurfaceTensionElementClass,
+    
 
     BoundaryElementClass,
     Line2BoundaryElementClass,
@@ -221,6 +222,7 @@ enum classType {
     Tr2Shell7XFEMClass,
     MacroLSpaceClass,
     MicroMaterialClass,
+    DKTPlateClass,
 
     InterfaceElem1dClass,
     InterfaceElem2dQuadClass,

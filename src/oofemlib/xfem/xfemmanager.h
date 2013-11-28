@@ -62,7 +62,7 @@ class IntArray;
 class Element;
 class DataStream;
 class DynamicInputRecord;
-//class InternalStateValueType; 
+//class InternalStateValueType;
 
 //
 // The following types determine the state types associated with xfem
@@ -122,16 +122,14 @@ public:
     /// Destructor.
     virtual ~XfemManager();
 
-    int giveNumGpPerTri() const {return mNumGpPerTri;} /// Number of Gauss points per sub-triangle in cut elements.
+    int giveNumGpPerTri() const { return mNumGpPerTri; } /// Number of Gauss points per sub-triangle in cut elements.
 
     bool isElementEnriched(const Element *elem);
 
-    /// Accessor.
     EnrichmentItem *giveEnrichmentItem(int n);
     int giveNumberOfEnrichmentItems() const { return enrichmentItemList->giveSize(); }
 
     void createEnrichedDofs();
-    void addEnrichedDofsTo( DofManager *dMan, IntArray &dofIdArray );
 
     /// Initializes receiver according to object description stored in input record.
     IRResultType initializeFrom(InputRecord *ir);
@@ -171,7 +169,6 @@ public:
 
     void propagateFronts();
     bool hasPropagatingFronts();
-
 };
 } // end namespace oofem
 #endif // xfemmanager_h

@@ -63,7 +63,7 @@ updateStructureFlag(false),
 mForceRemap(false),
 mSetValsFromDofMap(true)
 {
-	printf("Entering XFEMStatic::XFEMStatic(int i, EngngModel *_master).\n");
+
 }
 
 XFEMStatic::~XFEMStatic() {
@@ -81,17 +81,12 @@ XFEMStatic :: solveYourselfAt(TimeStep *tStep)
         this->initializeDofUnknownsDictionary(tStep);
     }
 
-
-//    printf("Before: ");
-//    initialLoadVector.printYourself();
     // Initialization
     int neq = this->giveNumberOfDomainEquations(1, EModelDefaultEquationNumbering()); // 1 stands for domain?
     if ( this->needsStructureUpdate() ) {
 
-    	printf("Increasing size of displacement array.\n");
+//    	printf("Increasing size of displacement array.\n");
 
-//        totalDisplacement.resize(neq);
-//        totalDisplacement.zero();
         if ( totalDisplacement.giveSize() != neq ) {
 
         	if(mSetValsFromDofMap) {
@@ -119,8 +114,6 @@ XFEMStatic :: solveYourselfAt(TimeStep *tStep)
         	}
         }
 
-//        incrementOfDisplacement.resize(neq);
-//        incrementOfDisplacement.zero();
     	if(mSetValsFromDofMap) {
     		this->setTotalDisplacementFromUnknownsInDictionary(EID_MomentumBalance, VM_Total, tStep);
     	}
@@ -156,11 +149,6 @@ XFEMStatic :: solveYourselfAt(TimeStep *tStep)
         }
 
     }
-
-//    printf("After: ");
-//    initialLoadVector.printYourself();
-
-
 
     this->setUpdateStructureFlag(false);
     NonLinearStatic :: solveYourselfAt(tStep);
@@ -257,7 +245,6 @@ XFEMStatic :: terminate(TimeStep *tStep)
 								OOFEM_ERROR("In XFEMStatic :: mapStateVariables(): Failed to fetch MaterialStatusMapperInterface.\n");
 							}
 
-							printf("In XFEMStatic xFemEl->mpCZMat->giveStatus(&gp)->giveClassName(): %s\n", xFemEl->mpCZMat->giveStatus(&gp)->giveClassName() );
 
 							MaterialStatus *matStat = dynamic_cast<MaterialStatus*>(xFemEl->mpCZMat->giveStatus(&gp));
 							StructuralInterfaceMaterialStatus *siMatStat = dynamic_cast<StructuralInterfaceMaterialStatus*>( matStat );
@@ -273,7 +260,6 @@ XFEMStatic :: terminate(TimeStep *tStep)
 			}
 
 
-//			this->domainList->put(1, dNew);
 			delete domain;
 			domain = this->giveDomain(1);
 
@@ -422,9 +408,6 @@ XFEMStatic :: updateYourself(TimeStep *tStep)
 {
     NonLinearStatic :: updateYourself(tStep);
 
-
-
-
     // TODO: Check if update is actually needed
     this->setUpdateStructureFlag( true );
 
@@ -457,6 +440,8 @@ XFEMStatic ::  giveUnknownComponent(ValueModeType mode, TimeStep *tStep, Domain 
             return dof->giveUnknowns()->at(hash);
         } else { // Value is not initiated in UnknownsDictionary
             return 0.0; ///@todo: how should one treat newly created dofs?
+            			// If we are not happy with setting them to zero,
+            			// I suggest that we use the primary variable mapper. /ES
             //OOFEM_ERROR2( "giveUnknown:  Dof unknowns dictionary does not contain unknown of value mode (%s)", __ValueModeTypeToString(mode) );
         }
     } else {

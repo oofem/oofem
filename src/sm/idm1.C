@@ -134,7 +134,7 @@ IsotropicDamageMaterial1 :: initializeFrom(InputRecord *ir)
 
     // specify the type of formula for damage evolution law
     IR_GIVE_OPTIONAL_FIELD(ir, damageLaw, _IFT_IsotropicDamageMaterial1_damageLaw);
-    if ( damageLaw != 6 ) {
+    if ( ( damageLaw != 6 ) && ( damageLaw != 7 ) ) {
         IR_GIVE_FIELD(ir, e0, _IFT_IsotropicDamageMaterial1_e0);
     }
 
@@ -435,7 +435,7 @@ IsotropicDamageMaterial1 :: computeEquivalentStrain(double &kappa, const FloatAr
     }
 }
 
-//Computes derivative of the equivalent strain with regards to strain
+//Computes derivative of the equivalent strain with regards to strain, used in tangent formulation
 void
 IsotropicDamageMaterial1 :: computeEta(FloatArray &answer, const FloatArray &strain, GaussPoint *gp, TimeStep *atTime)
 {

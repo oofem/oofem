@@ -507,9 +507,15 @@ if (USE_SHARED_LIB)
 
     # This should be set automatically, but I think TARGET:objs confuses cmake:
     set_target_properties (core PROPERTIES COMPILE_DEFINITIONS "liboofem_EXPORTS")
-    set_target_properties (fm PROPERTIES COMPILE_DEFINITIONS "liboofem_EXPORTS")
-    set_target_properties (sm PROPERTIES COMPILE_DEFINITIONS "liboofem_EXPORTS")
-    set_target_properties (tm PROPERTIES COMPILE_DEFINITIONS "liboofem_EXPORTS")
+    if (USE_FM)
+      set_target_properties (fm PROPERTIES COMPILE_DEFINITIONS "liboofem_EXPORTS")
+    endif()
+    if (USE_SM)
+      set_target_properties (sm PROPERTIES COMPILE_DEFINITIONS "liboofem_EXPORTS")
+    endif()
+    if (USE_TM)
+      set_target_properties (tm PROPERTIES COMPILE_DEFINITIONS "liboofem_EXPORTS")
+    endif()
 
     generate_export_header (liboofem
         BASE_NAME OOFEM
@@ -672,15 +678,23 @@ foreach (case ${sm_tests})
     #set_tests_properties ("extr_${case}" PROPERTIES DEPENDS "test_${case}")
     #list (APPEND CTEST_CUSTOM_MEMCHECK_IGNORE "extr_${case}")
 endforeach (case)
-foreach (case ${fm_tests})
+if (USE_FM)
+  foreach (case ${fm_tests})
     add_test (NAME "test_${case}" WORKING_DIRECTORY ${oofem_TEST_DIR}/fm COMMAND ${test_cmd} ${oofem_cmd} ${case} "s")
-endforeach (case)
-foreach (case ${tm_tests})
+  endforeach (case)
+endif()
+
+if (USE_TM)
+  foreach (case ${tm_tests})
     add_test (NAME "test_${case}" WORKING_DIRECTORY ${oofem_TEST_DIR}/tm COMMAND ${test_cmd} ${oofem_cmd} ${case} "s")
-endforeach (case)
-foreach (case ${tmsm_tests})
+  endforeach (case)
+endif()
+
+if (USE_TM AND USE_SM)
+  foreach (case ${tmsm_tests})
     add_test (NAME "test_${case}" WORKING_DIRECTORY ${oofem_TEST_DIR}/tmsm COMMAND ${test_cmd} ${oofem_cmd} ${case} "s")
-endforeach (case)
+  endforeach (case)
+endif()
 
 # Benchmarks
 file (GLOB benchmarks RELATIVE "${oofem_TEST_DIR}/benchmark" "${oofem_TEST_DIR}/benchmark/*.in")

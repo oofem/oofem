@@ -47,7 +47,7 @@
 #include "fluiddynamicmaterial.h"
 #include "fei3dtetlin.h"
 #include "fei3dtetquad.h"
-#include "crosssection.h"
+#include "fluidcrosssection.h"
 #include "classfactory.h"
 
 namespace oofem {
@@ -149,7 +149,7 @@ void Tet21Stokes :: giveCharacteristicMatrix(FloatMatrix &answer,
 void Tet21Stokes :: computeInternalForcesVector(FloatArray &answer, TimeStep *tStep)
 {
     IntegrationRule *iRule = integrationRulesArray [ 0 ];
-    FluidDynamicMaterial *mat = static_cast<FluidDynamicMaterial * >( this->giveMaterial() );
+    FluidDynamicMaterial *mat = static_cast< FluidCrossSection * >( this->giveCrossSection() )->giveFluidMaterial();
     FloatArray a_pressure, a_velocity, devStress, epsp, Nh, dN_V(30);
     FloatMatrix dN, B(6, 30);
     double r_vol, pressure;
@@ -226,6 +226,7 @@ void Tet21Stokes :: computeLoadVector(FloatArray &answer, Load *load, CharType t
         return;
     }
 
+    FluidDynamicMaterial *mat = static_cast<FluidCrossSection * >( this->giveCrossSection() )->giveFluidMaterial();
     IntegrationRule *iRule = this->integrationRulesArray [ 0 ];
     FloatArray N, gVector, temparray(30);
 
@@ -236,7 +237,7 @@ void Tet21Stokes :: computeLoadVector(FloatArray &answer, Load *load, CharType t
             GaussPoint *gp = iRule->getIntegrationPoint(k);
             FloatArray *lcoords = gp->giveCoordinates();
 
-            double rho = this->giveMaterial()->give('d', gp);
+            double rho = mat->give('d', gp);
             double detJ = fabs( this->interpolation_quad.giveTransformationJacobian(* lcoords, FEIElementGeometryWrapper(this)) );
             double dA = detJ * gp->giveWeight();
 
@@ -308,7 +309,7 @@ void Tet21Stokes :: computeBoundaryLoadVector(FloatArray &answer, BoundaryLoad *
 
 void Tet21Stokes :: computeStiffnessMatrix(FloatMatrix &answer, TimeStep *tStep)
 {
-    FluidDynamicMaterial *mat = static_cast< FluidDynamicMaterial * >( this->giveMaterial() );
+    FluidDynamicMaterial *mat = static_cast<FluidCrossSection * >( this->giveCrossSection() )->giveFluidMaterial();
     IntegrationRule *iRule = this->integrationRulesArray [ 0 ];
     FloatMatrix B(6, 30), EdB, K, G, Dp, DvT, C, Ed, dN;
     FloatArray dN_V(30), Nlin, Ep, Cd, tmpA, tmpB;

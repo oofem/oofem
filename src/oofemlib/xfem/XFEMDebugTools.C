@@ -12,10 +12,10 @@ XFEMDebugTools :: XFEMDebugTools() {}
 
 XFEMDebugTools :: ~XFEMDebugTools() {}
 
-void XFEMDebugTools :: WriteTrianglesToVTK(const std :: string &iName, const std::vector< Triangle > &iTriangles)
+void XFEMDebugTools :: WriteTrianglesToVTK(const std :: string &iName, const std :: vector< Triangle > &iTriangles)
 {
     //	printf("Entering XFEMDebugTools::WriteTrianglesToVTK().\n");
-	size_t numTri = iTriangles.size();
+    size_t numTri = iTriangles.size();
 
 
     std :: ofstream file;

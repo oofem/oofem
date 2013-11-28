@@ -65,9 +65,9 @@ void Delaunay :: printTriangles(AList< Triangle > *triangles)
 
 bool Delaunay :: isInsideCC(FloatArray *p, FloatArray *p1,  FloatArray *p2,  FloatArray *p3)
 {
-    FloatArray *nodesCopy1 = new FloatArray(*p1);
-    FloatArray *nodesCopy2 = new FloatArray(*p2);
-    FloatArray *nodesCopy3 = new FloatArray(*p3);
+    FloatArray *nodesCopy1 = new FloatArray(* p1);
+    FloatArray *nodesCopy2 = new FloatArray(* p2);
+    FloatArray *nodesCopy3 = new FloatArray(* p3);
     Triangle *tr = new Triangle(nodesCopy1, nodesCopy2, nodesCopy3);
     double r = tr->getRadiusOfCircumCircle();
     FloatArray circumCenter;
@@ -81,7 +81,7 @@ bool Delaunay :: isInsideCC(FloatArray *p, FloatArray *p1,  FloatArray *p2,  Flo
     }
 }
 
-void Delaunay :: triangulate(const std :: vector< FloatArray > &iVertices, std::vector< Triangle > &oTriangles)
+void Delaunay :: triangulate(const std :: vector< FloatArray > &iVertices, std :: vector< Triangle > &oTriangles)
 {
     // 4th order algorithm - four loops, only for testing purposes
 
@@ -103,7 +103,7 @@ void Delaunay :: triangulate(const std :: vector< FloatArray > &iVertices, std::
                 bool isTriangle = true;
                 if ( colinear(& vertices [ i - 1 ], & vertices [ j - 1 ], & vertices [ k - 1 ]) ) {
                     isTriangle = false;
-                } else   {
+                } else {
                     for ( int a = 1; a <= n; a++ ) {
                         if ( a != i && a != j && a != k ) {
                             // checks whether a point a is inside a circumcircle of a triangle ijk
@@ -117,7 +117,6 @@ void Delaunay :: triangulate(const std :: vector< FloatArray > &iVertices, std::
                 }
 
                 if ( isTriangle ) {
-
                     // here we switch to old vertices
                     FloatArray *p1 = new FloatArray();
                     * p1 =  iVertices [ i - 1 ];
