@@ -45,6 +45,7 @@
 #include "classfactory.h"
 #include "lobattoir.h"
 #include "dynamicinputrecord.h"
+#include "cltypes.h"
 
 namespace oofem {
 
@@ -63,48 +64,48 @@ LayeredCrossSection :: giveRealStress_3d(FloatArray &answer, GaussPoint *gp, con
         Material *layerMat = this->domain->giveMaterial( this->giveLayerMaterial(layer) );
         if ( this->layerRots.at(layer) != 0. ) {
             double rot = this->layerRots.at(layer);
-            double c = cos(rot);
-            double s = sin(rot);
+            double c = cos(rot*M_PI/180.);
+            double s = sin(rot*M_PI/180.);
 
             FloatArray rotStress;
 #if 0
             FloatArray rotStrain = {
-                c*c*strain.at(1) + 2*c*s*strain.at(6) + s*s*strain.at(2),
-                c*c*strain.at(2) - 2*c*s*strain.at(6) + s*s*strain.at(1),
+                c*c*strain.at(1) - c*s*strain.at(6) + s*s*strain.at(2),
+                c*c*strain.at(2) + c*s*strain.at(6) + s*s*strain.at(1),
                 strain.at(3),
-                c*strain.at(4) - s*strain.at(5),
-                c*strain.at(5) + s*strain.at(4),
-                c*(c*strain.at(6) + s*strain.at(2)) - s*(c*strain.at(1) + s*strain.at(6))
+                c*strain.at(4) + s*strain.at(5),
+                c*strain.at(5) - s*strain.at(4),
+                (c*c - s*s)*strain.at(6) + 2*c*s*(strain.at(1)-strain.at(2)),
             };
 #else
             FloatArray rotStrain(6);
-            rotStrain.at(1) = c*c*strain.at(1) + 2*c*s*strain.at(6) + s*s*strain.at(2);
-            rotStrain.at(2) = c*c*strain.at(2) - 2*c*s*strain.at(6) + s*s*strain.at(1);
+            rotStrain.at(1) = c*c*strain.at(1) - c*s*strain.at(6) + s*s*strain.at(2);
+            rotStrain.at(2) = c*c*strain.at(2) + c*s*strain.at(6) + s*s*strain.at(1);
             rotStrain.at(3) = strain.at(3);
-            rotStrain.at(4) = c*strain.at(4) - s*strain.at(5);
-            rotStrain.at(5) = c*strain.at(5) + s*strain.at(4);
-            rotStrain.at(6) = c*(c*strain.at(6) + s*strain.at(2)) - s*(c*strain.at(1) + s*strain.at(6));
+            rotStrain.at(4) = c*strain.at(4) + s*strain.at(5);
+            rotStrain.at(5) = c*strain.at(5) - s*strain.at(4);
+            rotStrain.at(6) = (c*c - s*s)*strain.at(6) + 2*c*s*(strain.at(1) - strain.at(2));
 #endif
 
             static_cast< StructuralMaterial * >( layerMat )->giveRealStressVector_3d(rotStress, gp, rotStrain, tStep);
 
 #if 0
             answer = {
-                c*c*rotStress.at(1) - 2*c*s*rotStress.at(6) + s*s*rotStress.at(2),
-                c*c*rotStress.at(2) + 2*c*s*rotStress.at(6) + s*s*rotStress.at(1),
+                c*c*rotStress.at(1) + 2*c*s*rotStress.at(6) + s*s*rotStress.at(2),
+                c*c*rotStress.at(2) - 2*c*s*rotStress.at(6) + s*s*rotStress.at(1),
                 rotStress.at(3),
-                c*rotStress.at(4) + s*rotStress.at(5),
-                c*rotStress.at(5) - s*rotStress.at(4),
-                c*c*rotStress.at(6) + c*s*(rotStress.at(1) - rotStress.at(2)) - s*s*rotStress.at(6)
+                c*rotStress.at(4) - s*rotStress.at(5),
+                c*rotStress.at(5) + s*rotStress.at(4),
+                (c*c - s*s)*rotStress.at(6) - c*s*(rotStress.at(1) - rotStress.at(2)),
             }
 #else
             answer.resize(6);
-            answer.at(1) = c*c*rotStress.at(1) - 2*c*s*rotStress.at(6) + s*s*rotStress.at(2);
-            answer.at(2) = c*c*rotStress.at(2) + 2*c*s*rotStress.at(6) + s*s*rotStress.at(1);
+            answer.at(1) = c*c*rotStress.at(1) + 2*c*s*rotStress.at(6) + s*s*rotStress.at(2);
+            answer.at(2) = c*c*rotStress.at(2) - 2*c*s*rotStress.at(6) + s*s*rotStress.at(1);
             answer.at(3) = rotStress.at(3);
-            answer.at(4) = c*rotStress.at(4) + s*rotStress.at(5);
-            answer.at(5) = c*rotStress.at(5) - s*rotStress.at(4);
-            answer.at(6) = c*c*rotStress.at(6) + c*s*(rotStress.at(1) - rotStress.at(2)) - s*s*rotStress.at(6);
+            answer.at(4) = c*rotStress.at(4) - s*rotStress.at(5);
+            answer.at(5) = c*rotStress.at(5) + s*rotStress.at(4);
+            answer.at(6) = (c*c - s*s)*rotStress.at(6) - c*s*(rotStress.at(1) - rotStress.at(2));
 #endif
         } else {
             static_cast< StructuralMaterial * >( layerMat )->giveRealStressVector_3d(answer, gp, strain, tStep);
@@ -150,36 +151,36 @@ LayeredCrossSection :: giveStiffnessMatrix_3d(FloatMatrix &answer, MatResponseMo
 
         if ( this->layerRots.at(layer) != 0. ) {
             double rot = this->layerRots.at(layer);
-            double c = cos(rot);
-            double s = sin(rot);
-#if 1
+            double c = cos(rot*M_PI/180.);
+            double s = sin(rot*M_PI/180.);
+#if 0
             FloatMatrix rotTangent = {
-                {c*c, s*s, 0,  0, 0,  -2*c*s},
-                {s*s, c*c, 0,  0, 0,  -2*c*s},
-                {  0,   0, 1,  0, 0,       0},
-                {  0,   0, 0,  c, s,       0},
-                {  0,   0, 0, -s, c,       0},
-                {c*s, c*s, 0,  0, 0, c*c-s*s}
+                {  c*c,    s*s, 0,  0,  0,    -c*s},
+                {  s*s,    c*c, 0,  0,  0,     c*s},
+                {    0,      0, 1,  0,  0,       0},
+                {    0,      0, 0,  c,  s,       0},
+                {    0,      0, 0, -s,  c,       0},
+                {2*c*s, -2*c*s, 0,  0,  0, c*c-s*s}
             };
 #else
             FloatMatrix rotTangent(6,6);
             rotTangent.zero();
             rotTangent.at(1, 1) = c*c;
             rotTangent.at(1, 2) = s*s;
-            rotTangent.at(1, 6) = -c*s;
+            rotTangent.at(1, 6) = 2*c*s;
             rotTangent.at(2, 1) = s*s;
             rotTangent.at(2, 2) = c*c;
-            rotTangent.at(2, 6) = c*s;
+            rotTangent.at(2, 6) = -2*c*s;
             rotTangent.at(3, 3) = 1;
             rotTangent.at(4, 4) = c;
-            rotTangent.at(4, 5) = s;
-            rotTangent.at(5, 4) = -s;
+            rotTangent.at(4, 5) = -s;
+            rotTangent.at(5, 4) = s;
             rotTangent.at(5, 5) = c;
-            rotTangent.at(6, 1) = 2*c*s;
-            rotTangent.at(6, 2) = -2*c*s;
+            rotTangent.at(6, 1) = -c*s;
+            rotTangent.at(6, 2) = c*s;
             rotTangent.at(6, 6) = c*c - s*s;
 #endif
-            answer.rotatedWith(rotTangent, 'n'); ///@todo Check transpose!!!
+            answer.rotatedWith(rotTangent, 't');
         }
     } else {
         OOFEM_ERROR("LayeredCrossSection :: giveRealStress_3d - Only cubes and wedges are meaningful for layered cross-sections");
@@ -227,20 +228,20 @@ LayeredCrossSection :: giveRealStress_Beam2d(FloatArray &answer, GaussPoint *gp,
         _error("giveRealStresses - element with no layer support encountered");
     }
 
-    for ( int i = 1; i <= numberOfLayers; i++ ) {
-        GaussPoint *layerGp = this->giveSlaveGaussPoint(gp, i - 1);
-        StructuralMaterial *layerMat = static_cast< StructuralMaterial * >( domain->giveMaterial( layerMaterials.at(i) ) );
+    for ( int layer = 1; layer <= numberOfLayers; layer++ ) {
+        GaussPoint *layerGp = this->giveSlaveGaussPoint(gp, layer - 1);
+        StructuralMaterial *layerMat = static_cast< StructuralMaterial * >( domain->giveMaterial( layerMaterials.at(layer) ) );
 
         // resolve current layer z-coordinate
-        layerThick = this->layerThicks.at(i);
-        layerWidth = this->layerWidths.at(i);
+        layerThick = this->layerThicks.at(layer);
+        layerWidth = this->layerWidths.at(layer);
         layerZeta = layerGp->giveCoordinate(3);
         layerZCoord = 0.5 * ( ( 1. - layerZeta ) * bottom + ( 1. + layerZeta ) * top );
 
         // Compute the layer stress
         interface->computeStrainVectorInLayer(layerStrain, strain, layerGp, tStep);
 
-        if ( this->layerRots.at(i) != 0. ) {
+        if ( this->layerRots.at(layer) != 0. ) {
             OOFEM_ERROR("LayeredCrossSection :: giveRealStress_Beam2d - Rotation not supported for beams");
         } else {
             layerMat->giveRealStressVector_2dBeamLayer(reducedLayerStress, layerGp, layerStrain, tStep);
@@ -288,59 +289,59 @@ LayeredCrossSection :: giveRealStress_Plate(FloatArray &answer, GaussPoint *gp, 
         _error("giveRealStresses - element with no layer support encountered");
     }
 
-    for ( int i = 1; i <= numberOfLayers; i++ ) {
-        GaussPoint *layerGp = this->giveSlaveGaussPoint(gp, i - 1);
-        StructuralMaterial *layerMat = static_cast< StructuralMaterial * >( domain->giveMaterial( layerMaterials.at(i) ) );
+    for ( int layer = 1; layer <= numberOfLayers; layer++ ) {
+        GaussPoint *layerGp = this->giveSlaveGaussPoint(gp, layer - 1);
+        StructuralMaterial *layerMat = static_cast< StructuralMaterial * >( domain->giveMaterial( layerMaterials.at(layer) ) );
 
         // resolve current layer z-coordinate
-        layerThick = this->layerThicks.at(i);
-        layerWidth = this->layerWidths.at(i);
+        layerThick = this->layerThicks.at(layer);
+        layerWidth = this->layerWidths.at(layer);
         layerZeta = layerGp->giveCoordinate(3);
         layerZCoord = 0.5 * ( ( 1. - layerZeta ) * bottom + ( 1. + layerZeta ) * top );
 
         // Compute the layer stress
         interface->computeStrainVectorInLayer(layerStrain, strain, layerGp, tStep);
 
-        if ( this->layerRots.at(i) != 0. ) {
-            double rot = this->layerRots.at(i);
-            double c = cos(rot);
-            double s = sin(rot);
+        if ( this->layerRots.at(layer) != 0. ) {
+            double rot = this->layerRots.at(layer);
+            double c = cos(rot*M_PI/180.);
+            double s = sin(rot*M_PI/180.);
 
             FloatArray rotStress;
 #if 0
             FloatArray rotStrain = {
-                c*c*strain.at(1) + 2*c*s*strain.at(5) + s*s*strain.at(2),
-                c*c*strain.at(2) - 2*c*s*strain.at(5) + s*s*strain.at(1),
-                c*strain.at(3) - s*strain.at(4),
-                c*strain.at(4) + s*strain.at(3),
-                c*(c*strain.at(5) + s*strain.at(2)) - s*(c*strain.at(1) + s*strain.at(5))
+                c*c*strain.at(1) - c*s*strain.at(5) + s*s*strain.at(2),
+                c*c*strain.at(2) + c*s*strain.at(5) + s*s*strain.at(1),
+                c*strain.at(3) + s*strain.at(4),
+                c*strain.at(4) - s*strain.at(3),
+                (c*c - s*s)*strain.at(5) + c*s*(strain.at(1)-strain.at(2)),
             };
 #else
             FloatArray rotStrain(5);
-            rotStrain.at(1) = c*c*strain.at(1) + 2*c*s*strain.at(5) + s*s*strain.at(2);
-            rotStrain.at(2) = c*c*strain.at(2) - 2*c*s*strain.at(5) + s*s*strain.at(1);
-            rotStrain.at(3) = c*strain.at(3) - s*strain.at(4);
-            rotStrain.at(4) = c*strain.at(4) + s*strain.at(3);
-            rotStrain.at(5) = c*(c*strain.at(5) + s*strain.at(2)) - s*(c*strain.at(1) + s*strain.at(5));
+            rotStrain.at(1) = c*c*strain.at(1) - c*s*strain.at(5) + s*s*strain.at(2);
+            rotStrain.at(2) = c*c*strain.at(2) + c*s*strain.at(5) + s*s*strain.at(1);
+            rotStrain.at(3) = c*strain.at(3) + s*strain.at(4);
+            rotStrain.at(4) = c*strain.at(4) - s*strain.at(3);
+            rotStrain.at(5) = (c*c - s*s)*strain.at(5) + c*s*(strain.at(1)-strain.at(2));
 #endif
 
-            static_cast< StructuralMaterial * >( layerMat )->giveRealStressVector_3d(rotStress, gp, rotStrain, tStep);
+            static_cast< StructuralMaterial * >( layerMat )->giveRealStressVector_PlateLayer(rotStress, gp, rotStrain, tStep);
 
 #if 0
             answer = {
-                c*c*rotStress.at(1) - 2*c*s*rotStress.at(5) + s*s*rotStress.at(2),
-                c*c*rotStress.at(2) + 2*c*s*rotStress.at(5) + s*s*rotStress.at(1),
-                c*rotStress.at(3) + s*rotStress.at(4),
-                c*rotStress.at(4) - s*rotStress.at(3),
-                c*c*rotStress.at(5) + c*s*(rotStress.at(1) - rotStress.at(2)) - s*s*rotStress.at(5)
+                c*c*rotStress.at(1) + 2*c*s*rotStress.at(5) + s*s*rotStress.at(2),
+                c*c*rotStress.at(2) - 2*c*s*rotStress.at(5) + s*s*rotStress.at(1),
+                c*rotStress.at(3) - s*rotStress.at(4),
+                c*rotStress.at(4) + s*rotStress.at(3),
+                (c*c - s*s)*rotStress.at(5) - c*s*(rotStress.at(1) - rotStress.at(2)),
             }
 #else
             answer.resize(5);
-            answer.at(1) = c*c*rotStress.at(1) - 2*c*s*rotStress.at(5) + s*s*rotStress.at(2);
-            answer.at(2) = c*c*rotStress.at(2) + 2*c*s*rotStress.at(5) + s*s*rotStress.at(1);
-            answer.at(3) = c*rotStress.at(3) + s*rotStress.at(4);
-            answer.at(4) = c*rotStress.at(4) - s*rotStress.at(3);
-            answer.at(5) = c*c*rotStress.at(5) + c*s*(rotStress.at(1) - rotStress.at(2)) - s*s*rotStress.at(5);
+            answer.at(1) = c*c*rotStress.at(1) + 2*c*s*rotStress.at(5) + s*s*rotStress.at(2);
+            answer.at(2) = c*c*rotStress.at(2) - 2*c*s*rotStress.at(5) + s*s*rotStress.at(1);
+            answer.at(3) = c*rotStress.at(3) - s*rotStress.at(4);
+            answer.at(4) = c*rotStress.at(4) + s*rotStress.at(3);
+            answer.at(5) = (c*c - s*s)*rotStress.at(5) - c*s*(rotStress.at(1) - rotStress.at(2));
 #endif
         } else {
             layerMat->giveRealStressVector_PlateLayer(reducedLayerStress, layerGp, layerStrain, tStep);
@@ -384,59 +385,59 @@ LayeredCrossSection :: giveRealStress_Shell(FloatArray &answer, GaussPoint *gp, 
         _error("giveRealStresses - element with no layer support encountered");
     }
 
-    for ( int i = 1; i <= numberOfLayers; i++ ) {
-        GaussPoint *layerGp = this->giveSlaveGaussPoint(gp, i - 1);
-        StructuralMaterial *layerMat = static_cast< StructuralMaterial * >( domain->giveMaterial( layerMaterials.at(i) ) );
+    for ( int layer = 1; layer <= numberOfLayers; layer++ ) {
+        GaussPoint *layerGp = this->giveSlaveGaussPoint(gp, layer - 1);
+        StructuralMaterial *layerMat = static_cast< StructuralMaterial * >( domain->giveMaterial( layerMaterials.at(layer) ) );
 
         // resolve current layer z-coordinate
-        layerThick = this->layerThicks.at(i);
-        layerWidth = this->layerWidths.at(i);
+        layerThick = this->layerThicks.at(layer);
+        layerWidth = this->layerWidths.at(layer);
         layerZeta = layerGp->giveCoordinate(3);
         layerZCoord = 0.5 * ( ( 1. - layerZeta ) * bottom + ( 1. + layerZeta ) * top );
 
         // Compute the layer stress
         interface->computeStrainVectorInLayer(layerStrain, strain, layerGp, tStep);
 
-        if ( this->layerRots.at(i) != 0. ) {
-            double rot = this->layerRots.at(i);
-            double c = cos(rot);
-            double s = sin(rot);
+        if ( this->layerRots.at(layer) != 0. ) {
+            double rot = this->layerRots.at(layer);
+            double c = cos(rot*M_PI/180.);
+            double s = sin(rot*M_PI/180.);
 
             FloatArray rotStress;
 #if 0
             FloatArray rotStrain = {
-                c*c*strain.at(1) + 2*c*s*strain.at(5) + s*s*strain.at(2),
-                c*c*strain.at(2) - 2*c*s*strain.at(5) + s*s*strain.at(1),
-                c*strain.at(3) - s*strain.at(4),
-                c*strain.at(4) + s*strain.at(3),
-                c*(c*strain.at(5) + s*strain.at(2)) - s*(c*strain.at(1) + s*strain.at(5))
+                c*c*strain.at(1) - c*s*strain.at(5) + s*s*strain.at(2),
+                c*c*strain.at(2) + c*s*strain.at(5) + s*s*strain.at(1),
+                c*strain.at(3) + s*strain.at(4),
+                c*strain.at(4) - s*strain.at(3),
+                (c*c - s*s)*strain.at(5) + c*s*(strain.at(1)-strain.at(2)),
             };
 #else
             FloatArray rotStrain(5);
-            rotStrain.at(1) = c*c*strain.at(1) + 2*c*s*strain.at(5) + s*s*strain.at(2);
-            rotStrain.at(2) = c*c*strain.at(2) - 2*c*s*strain.at(5) + s*s*strain.at(1);
-            rotStrain.at(3) = c*strain.at(3) - s*strain.at(4);
-            rotStrain.at(4) = c*strain.at(4) + s*strain.at(3);
-            rotStrain.at(5) = c*(c*strain.at(5) + s*strain.at(2)) - s*(c*strain.at(1) + s*strain.at(5));
+            rotStrain.at(1) = c*c*strain.at(1) - c*s*strain.at(5) + s*s*strain.at(2);
+            rotStrain.at(2) = c*c*strain.at(2) + c*s*strain.at(5) + s*s*strain.at(1);
+            rotStrain.at(3) = c*strain.at(3) + s*strain.at(4);
+            rotStrain.at(4) = c*strain.at(4) - s*strain.at(3);
+            rotStrain.at(5) = (c*c - s*s)*strain.at(5) + c*s*(strain.at(1)-strain.at(2));
 #endif
 
-            static_cast< StructuralMaterial * >( layerMat )->giveRealStressVector_3d(rotStress, gp, rotStrain, tStep);
+            static_cast< StructuralMaterial * >( layerMat )->giveRealStressVector_PlateLayer(rotStress, gp, rotStrain, tStep);
 
 #if 0
             answer = {
-                c*c*rotStress.at(1) - 2*c*s*rotStress.at(5) + s*s*rotStress.at(2),
-                c*c*rotStress.at(2) + 2*c*s*rotStress.at(5) + s*s*rotStress.at(1),
-                c*rotStress.at(3) + s*rotStress.at(4),
-                c*rotStress.at(4) - s*rotStress.at(3),
-                c*c*rotStress.at(5) + c*s*(rotStress.at(1) - rotStress.at(2)) - s*s*rotStress.at(5)
+                c*c*rotStress.at(1) + 2*c*s*rotStress.at(5) + s*s*rotStress.at(2),
+                c*c*rotStress.at(2) - 2*c*s*rotStress.at(5) + s*s*rotStress.at(1),
+                c*rotStress.at(3) - s*rotStress.at(4),
+                c*rotStress.at(4) + s*rotStress.at(3),
+                (c*c - s*s)*rotStress.at(5) - c*s*(rotStress.at(1) - rotStress.at(2)),
             }
 #else
             answer.resize(5);
-            answer.at(1) = c*c*rotStress.at(1) - 2*c*s*rotStress.at(5) + s*s*rotStress.at(2);
-            answer.at(2) = c*c*rotStress.at(2) + 2*c*s*rotStress.at(5) + s*s*rotStress.at(1);
-            answer.at(3) = c*rotStress.at(3) + s*rotStress.at(4);
-            answer.at(4) = c*rotStress.at(4) - s*rotStress.at(3);
-            answer.at(5) = c*c*rotStress.at(5) + c*s*(rotStress.at(1) - rotStress.at(2)) - s*s*rotStress.at(5);
+            answer.at(1) = c*c*rotStress.at(1) + 2*c*s*rotStress.at(5) + s*s*rotStress.at(2);
+            answer.at(2) = c*c*rotStress.at(2) - 2*c*s*rotStress.at(5) + s*s*rotStress.at(1);
+            answer.at(3) = c*rotStress.at(3) - s*rotStress.at(4);
+            answer.at(4) = c*rotStress.at(4) + s*rotStress.at(3);
+            answer.at(5) = (c*c - s*s)*rotStress.at(5) - c*s*(rotStress.at(1) - rotStress.at(2));
 #endif
         } else {
             layerMat->giveRealStressVector_PlateLayer(reducedLayerStress, layerGp, layerStrain, tStep);
@@ -534,49 +535,49 @@ LayeredCrossSection :: give2dPlateStiffMtrx(FloatMatrix &answer,
     bottom = this->give(CS_BottomZCoord);
     top = this->give(CS_TopZCoord);
 
-    for ( int i = 1; i <= numberOfLayers; i++ ) {
-        GaussPoint *layerGp = giveSlaveGaussPoint(gp, i - 1);
+    for ( int layer = 1; layer <= numberOfLayers; layer++ ) {
+        GaussPoint *layerGp = giveSlaveGaussPoint(gp, layer - 1);
 
         ///@todo Just using the gp number doesn't nicely support more than 1 gp per layer. Must rethink.
-        StructuralMaterial *mat = static_cast< StructuralMaterial* >( domain->giveMaterial( this->giveLayerMaterial(i) ) );
+        StructuralMaterial *mat = static_cast< StructuralMaterial* >( domain->giveMaterial( this->giveLayerMaterial(layer) ) );
         mat->givePlateLayerStiffMtrx(layerMatrix, rMode, layerGp, tStep);
-        if ( this->layerRots.at(i) != 0. ) {
-            double rot = this->layerRots.at(i);
-            double c = cos(rot);
-            double s = sin(rot);
-#if 1
+        if ( this->layerRots.at(layer) != 0. ) {
+            double rot = this->layerRots.at(layer);
+            double c = cos(rot*M_PI/180.);
+            double s = sin(rot*M_PI/180.);
+#if 0
             FloatMatrix rotTangent = {
-                {c*c, s*s,  0, 0,  -2*c*s},
-                {s*s, c*c,  0, 0,  -2*c*s},
-                {  0,   0,  c, s,       0},
-                {  0,   0, -s, c,       0},
-                {c*s, c*s,  0, 0, c*c-s*s}
+                {  c*c,    s*s,  0,  0,    -c*s},
+                {  s*s,    c*c,  0,  0,     c*s},
+                {    0,      0,  c,  s,       0},
+                {    0,      0, -s,  c,       0},
+                {2*c*s, -2*c*s,  0,  0, c*c-s*s}
             };
 #else
-            FloatMatrix rotTangent(6,6);
+            FloatMatrix rotTangent(5,5);
             rotTangent.zero();
             rotTangent.at(1, 1) = c*c;
             rotTangent.at(1, 2) = s*s;
-            rotTangent.at(1, 5) = -c*s;
+            rotTangent.at(1, 5) = 2*c*s;
             rotTangent.at(2, 1) = s*s;
             rotTangent.at(2, 2) = c*c;
-            rotTangent.at(2, 5) = c*s;
+            rotTangent.at(2, 5) = -2*c*s;
             rotTangent.at(3, 3) = c;
-            rotTangent.at(3, 4) = s;
-            rotTangent.at(4, 3) = -s;
+            rotTangent.at(3, 4) = -s;
+            rotTangent.at(4, 3) = s;
             rotTangent.at(4, 4) = c;
-            rotTangent.at(5, 1) = 2*c*s;
-            rotTangent.at(5, 2) = -2*c*s;
+            rotTangent.at(5, 1) = -c*s;
+            rotTangent.at(5, 2) = c*s;
             rotTangent.at(5, 5) = c*c - s*s;
 #endif
-            layerMatrix.rotatedWith(rotTangent, 'n'); ///@todo Check transpose!
+            layerMatrix.rotatedWith(rotTangent, 'n');
         }
 
         //
         // resolve current layer z-coordinate
         //
-        layerThick = this->layerThicks.at(i);
-        layerWidth  = this->layerWidths.at(i);
+        layerThick = this->layerThicks.at(layer);
+        layerWidth  = this->layerWidths.at(layer);
         layerZeta   = layerGp->giveCoordinate(3);
         layerZCoord = 0.5 * ( ( 1. - layerZeta ) * bottom + ( 1. + layerZeta ) * top );
         layerZCoord2 = layerZCoord * layerZCoord;
@@ -632,40 +633,40 @@ LayeredCrossSection :: give3dShellStiffMtrx(FloatMatrix &answer,
     bottom = this->give(CS_BottomZCoord);
     top = this->give(CS_TopZCoord);
 
-    for ( int i = 1; i <= numberOfLayers; i++ ) {
-        GaussPoint *layerGp = giveSlaveGaussPoint(gp, i - 1);
+    for ( int layer = 1; layer <= numberOfLayers; layer++ ) {
+        GaussPoint *layerGp = giveSlaveGaussPoint(gp, layer - 1);
 
         ///@todo The logic in this whole class is pretty messy to support both slave-gp's and normal gps. Rethinking the approach is necessary.
         /// Just using the gp number doesn't nicely support more than 1 gp per layer. Must rethink.
-        StructuralMaterial *mat = static_cast< StructuralMaterial* >( domain->giveMaterial( this->giveLayerMaterial(i) ) );
+        StructuralMaterial *mat = static_cast< StructuralMaterial* >( domain->giveMaterial( this->giveLayerMaterial(layer) ) );
         mat->givePlateLayerStiffMtrx(layerMatrix, rMode, layerGp, tStep);
-        if ( this->layerRots.at(i) != 0. ) {
-            double rot = this->layerRots.at(i);
+        if ( this->layerRots.at(layer) != 0. ) {
+            double rot = this->layerRots.at(layer);
             double c = cos(rot);
             double s = sin(rot);
-#if 1
+#if 0
             FloatMatrix rotTangent = {
-                {c*c, s*s,  0, 0,  -2*c*s},
-                {s*s, c*c,  0, 0,  -2*c*s},
-                {  0,   0,  c, s,       0},
-                {  0,   0, -s, c,       0},
-                {c*s, c*s,  0, 0, c*c-s*s}
+                {  c*c,    s*s,  0,  0,    -c*s},
+                {  s*s,    c*c,  0,  0,     c*s},
+                {    0,      0,  c,  s,       0},
+                {    0,      0, -s,  c,       0},
+                {2*c*s, -2*c*s,  0,  0, c*c-s*s}
             };
 #else
-            FloatMatrix rotTangent(6,6);
+            FloatMatrix rotTangent(5,5);
             rotTangent.zero();
             rotTangent.at(1, 1) = c*c;
             rotTangent.at(1, 2) = s*s;
-            rotTangent.at(1, 5) = -c*s;
+            rotTangent.at(1, 5) = 2*c*s;
             rotTangent.at(2, 1) = s*s;
             rotTangent.at(2, 2) = c*c;
-            rotTangent.at(2, 5) = c*s;
+            rotTangent.at(2, 5) = -2*c*s;
             rotTangent.at(3, 3) = c;
-            rotTangent.at(3, 4) = s;
-            rotTangent.at(4, 3) = -s;
+            rotTangent.at(3, 4) = -s;
+            rotTangent.at(4, 3) = s;
             rotTangent.at(4, 4) = c;
-            rotTangent.at(5, 1) = 2*c*s;
-            rotTangent.at(5, 2) = -2*c*s;
+            rotTangent.at(5, 1) = -c*s;
+            rotTangent.at(5, 2) = c*s;
             rotTangent.at(5, 5) = c*c - s*s;
 #endif
             layerMatrix.rotatedWith(rotTangent, 'n'); ///@todo Check transpose!
@@ -674,8 +675,8 @@ LayeredCrossSection :: give3dShellStiffMtrx(FloatMatrix &answer,
         //
         // resolve current layer z-coordinate
         //
-        layerThick = this->layerThicks.at(i);
-        layerWidth  = this->layerWidths.at(i);
+        layerThick = this->layerThicks.at(layer);
+        layerWidth  = this->layerWidths.at(layer);
         layerZeta   = layerGp->giveCoordinate(3);
         layerZCoord = 0.5 * ( ( 1. - layerZeta ) * bottom + ( 1. + layerZeta ) * top );
         layerZCoord2 = layerZCoord * layerZCoord;
@@ -1373,11 +1374,89 @@ LayeredCrossSection :: checkConsistency()
 
 
 int
-LayeredCrossSection :: giveIPValue(FloatArray &answer, GaussPoint *ip, InternalStateType type, TimeStep *atTime)
+LayeredCrossSection :: giveIPValue(FloatArray &answer, GaussPoint *gp, InternalStateType type, TimeStep *atTime)
 {
-    ///@todo so far this only works for el where each layer has its own integration rule
-    int layer = ip->giveIntegrationRule()->giveNumber();
-    return this->giveDomain()->giveMaterial( this->giveLayerMaterial(layer) )->giveIPValue(answer, ip, type, atTime); 
+    if ( gp->giveIntegrationRule()->giveIntegrationDomain() == _Cube || gp->giveIntegrationRule()->giveIntegrationDomain() == _Wedge ) {
+        // Determine which layer the gp belongs to. This code assumes that the gauss point are created consistently (through CrossSection::setupIntegrationPoints)
+        int ngps = gp->giveIntegrationRule()->giveNumberOfIntegrationPoints();
+        int gpnum = gp->giveNumber();
+        int gpsperlayer = ngps / this->numberOfLayers;
+        int layer = (gpnum - 1) / gpsperlayer + 1;
+        Material *layerMat = this->domain->giveMaterial( this->giveLayerMaterial(layer) );
+        if ( this->layerRots.at(layer) != 0. ) {
+            FloatArray rotVal; // the requested value in the material c.s.
+            InternalStateValueType valType = giveInternalStateValueType(type);
+            double rot = this->layerRots.at(layer);
+            double c = cos(rot*M_PI/180.);
+            double s = sin(rot*M_PI/180.);
+
+            int ret = layerMat->giveIPValue(rotVal, gp, type, atTime); 
+            if ( ret == 0 ) {
+                return 0;
+            }
+
+            // Determine how to rotate it according to the value type
+            if ( valType == ISVT_TENSOR_S3 ) {
+#if 0
+                answer = {
+                    c*c*rotVal.at(1) + 2*c*s*rotVal.at(6) + s*s*rotVal.at(2),
+                    c*c*rotVal.at(2) - 2*c*s*rotVal.at(6) + s*s*rotVal.at(1),
+                    rotVal.at(3),
+                    c*rotVal.at(4) - s*rotVal.at(5),
+                    c*rotVal.at(5) + s*rotVal.at(4),
+                    (c*c - s*s)*rotVal.at(6) - c*s*(rotVal.at(1) - rotVal.at(2)),
+                };
+#else
+                answer.resize(6);
+                answer.at(1) = c*c*rotVal.at(1) + 2*c*s*rotVal.at(6) + s*s*rotVal.at(2);
+                answer.at(2) = c*c*rotVal.at(2) - 2*c*s*rotVal.at(6) + s*s*rotVal.at(1);
+                answer.at(3) = rotVal.at(3);
+                answer.at(4) = c*rotVal.at(4) - s*rotVal.at(5);
+                answer.at(5) = c*rotVal.at(5) + s*rotVal.at(4);
+                answer.at(6) = (c*c - s*s)*rotVal.at(6) - c*s*(rotVal.at(1) - rotVal.at(2));
+#endif
+            } else if ( valType == ISVT_TENSOR_S3E ) {
+#if 0
+                answer = {
+                    c*c*rotVal.at(1) + c*s*rotVal.at(6) + s*s*rotVal.at(2),
+                    c*c*rotVal.at(2) - c*s*rotVal.at(6) + s*s*rotVal.at(1),
+                    rotVal.at(3),
+                    c*rotVal.at(4) - s*rotVal.at(5),
+                    c*rotVal.at(5) + s*rotVal.at(4),
+                    (c*c - s*s)*rotVal.at(6) - 2*c*s*(rotVal.at(1) - rotVal.at(2)),
+                };
+#else
+                answer.resize(6);
+                answer.at(1) = c*c*rotVal.at(1) + c*s*rotVal.at(6) + s*s*rotVal.at(2);
+                answer.at(2) = c*c*rotVal.at(2) - c*s*rotVal.at(6) + s*s*rotVal.at(1);
+                answer.at(3) = rotVal.at(3);
+                answer.at(4) = c*rotVal.at(4) - s*rotVal.at(5);
+                answer.at(5) = c*rotVal.at(5) + s*rotVal.at(4);
+                answer.at(6) = (c*c - s*s)*rotVal.at(6) - 2*c*s*(rotVal.at(1) - rotVal.at(2));
+#endif
+            } else if ( valType == ISVT_VECTOR ) {
+#if 0
+                answer = {c*rotVal.at(1) - s*rotVal.at(2), s*rotVal.at(1), + c*rotVal.at(2), rotVal.at(3)};
+#else
+                answer.resize(3);
+                answer.at(1) = c*rotVal.at(1) - s*rotVal.at(2);
+                answer.at(2) = s*rotVal.at(1) + c*rotVal.at(2);
+                answer.at(3) = rotVal.at(3);
+#endif
+            } else if ( valType == ISVT_SCALAR ) {
+                answer = rotVal;
+            } else {
+                return 0;
+            }
+            return 1;
+        } else {
+            return layerMat->giveIPValue(answer, gp, type, atTime); 
+        }
+    } else {
+        ///@todo so far this only works for el where each layer has its own integration rule
+        int layer = gp->giveIntegrationRule()->giveNumber();
+        return this->giveDomain()->giveMaterial( this->giveLayerMaterial(layer) )->giveIPValue(answer, gp, type, atTime); 
+    }
 }
 
 } // end namespace oofem
