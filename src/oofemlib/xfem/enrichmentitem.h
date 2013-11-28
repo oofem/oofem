@@ -184,8 +184,8 @@ public:
 
     void createEnrichedDofs();
 
-    virtual void computeIntersectionPoints(std :: vector< FloatArray > &oIntersectionPoints, std :: vector< int > &oIntersectedEdgeInd, Element *element, std::vector<double> &oMinDistArcPos) const;
-    virtual void computeIntersectionPoints(std :: vector< FloatArray > &oIntersectionPoints, std :: vector< int > &oIntersectedEdgeInd, Element *element, const Triangle &iTri, std::vector<double> &oMinDistArcPos) const;
+    virtual void computeIntersectionPoints(std :: vector< FloatArray > &oIntersectionPoints, std :: vector< int > &oIntersectedEdgeInd, Element *element, std :: vector< double > &oMinDistArcPos) const;
+    virtual void computeIntersectionPoints(std :: vector< FloatArray > &oIntersectionPoints, std :: vector< int > &oIntersectedEdgeInd, Element *element, const Triangle &iTri, std :: vector< double > &oMinDistArcPos) const;
 
 
     // Return the coordinates of the tip in element iElIndex,
@@ -200,7 +200,7 @@ public:
     PropagationLaw *givePropagationLaw() { return this->mpPropagationLaw; };
     bool hasPropagationLaw() { return this->mPropLawIndex != 0; };
 
-    void giveSubPolygon(std::vector<FloatArray> &oPoints, const double &iXiStart, const double &iXiEnd) const;
+    void giveSubPolygon(std :: vector< FloatArray > &oPoints, const double &iXiStart, const double &iXiEnd) const;
 
 protected:
 

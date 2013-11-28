@@ -98,7 +98,7 @@ bool EDCrack :: giveClosestTipInfo(const FloatArray &iCoords, TipInfo &oInfo) co
             oInfo.mArcPos = 0.0;
 
             return true;
-        } else   {
+        } else {
             const FloatArray &p1 = ( bg->giveVertex(nVert - 1) );
             const FloatArray &p2 = ( bg->giveVertex(nVert) );
 
@@ -205,7 +205,7 @@ bool EDCrack :: propagateTips(const std :: vector< TipPropagation > &iTipProp) {
             FloatArray pos( bg->giveVertex(1) );
             pos.add(iTipProp [ i ].mPropagationLength, iTipProp [ i ].mPropagationDir);
             bg->insertVertexFront(pos);
-        } else if ( iTipProp [ i ].mTipIndex == 1 )         {
+        } else if ( iTipProp [ i ].mTipIndex == 1 ) {
             // Propagate end point
             FloatArray pos( bg->giveVertex( bg->giveNrVertices() ) );
             pos.add(iTipProp [ i ].mPropagationLength, iTipProp [ i ].mPropagationDir);
@@ -214,11 +214,11 @@ bool EDCrack :: propagateTips(const std :: vector< TipPropagation > &iTipProp) {
     }
 
     // For debugging only
-    if(mDebugVTK) {
-		PolygonLine *pl = dynamic_cast< PolygonLine * >( bg );
-		if ( pl != NULL ) {
-			pl->printVTK();
-		}
+    if ( mDebugVTK ) {
+        PolygonLine *pl = dynamic_cast< PolygonLine * >( bg );
+        if ( pl != NULL ) {
+            pl->printVTK();
+        }
     }
 
     return true;

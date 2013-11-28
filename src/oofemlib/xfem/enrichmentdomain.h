@@ -84,7 +84,7 @@ public:
     virtual void computeNormalSignDist(double &oDist, const FloatArray &iPoint) const = 0;
     virtual void computeTangentialSignDist(double &oDist, const FloatArray &iPoint, double &oMinDistArcPos) const = 0;
     virtual void computeSurfaceNormalSignDist(double &oDist, const FloatArray &iPoint) const = 0;
-    virtual void giveSubPolygon(std::vector<FloatArray> &oPoints, const double &iXiStart, const double &iXiEnd) const {OOFEM_ERROR("EnrichmentDomain::giveSubPolygon() is not implemented.\n");}
+    virtual void giveSubPolygon(std :: vector< FloatArray > &oPoints, const double &iXiStart, const double &iXiEnd) const { OOFEM_ERROR("EnrichmentDomain::giveSubPolygon() is not implemented.\n"); }
 
     // Use double dispatch to call the correct version of CallNodeEnrMarkerUpdate.
     virtual void CallNodeEnrMarkerUpdate(EnrichmentItem &iEnrItem, XfemManager &ixFemMan) const {}
@@ -121,7 +121,7 @@ public:
     virtual void computeNormalSignDist(double &oDist, const FloatArray &iPoint) const { bg->computeNormalSignDist(oDist, iPoint); };
     virtual void computeTangentialSignDist(double &oDist, const FloatArray &iPoint, double &oMinDistArcPos) const { bg->computeTangentialSignDist(oDist, iPoint, oMinDistArcPos); };
     virtual void computeSurfaceNormalSignDist(double &oDist, const FloatArray &iPoint) const { OOFEM_ERROR("EnrichmentDomain_BG::computeNormalSignDist -- not implemented"); };
-    virtual void giveSubPolygon(std::vector<FloatArray> &oPoints, const double &iXiStart, const double &iXiEnd) const {bg->giveSubPolygon(oPoints, iXiStart, iXiEnd);}
+    virtual void giveSubPolygon(std :: vector< FloatArray > &oPoints, const double &iXiStart, const double &iXiEnd) const { bg->giveSubPolygon(oPoints, iXiStart, iXiEnd); }
 
     // Use double dispatch to call the correct version of CallNodeEnrMarkerUpdate.
     virtual void CallNodeEnrMarkerUpdate(EnrichmentItem &iEnrItem, XfemManager &ixFemMan) const;
@@ -145,7 +145,7 @@ public:
 class OOFEM_EXPORT EDCrack : public EnrichmentDomain_BG
 {
 public:
-    EDCrack():mDebugVTK(false) { bg = new PolygonLine; }
+    EDCrack() : mDebugVTK(false) { bg = new PolygonLine; }
     virtual ~EDCrack() { delete bg; }
 
     virtual IRResultType initializeFrom(InputRecord *ir) { return bg->initializeFrom(ir); }

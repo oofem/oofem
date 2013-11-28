@@ -173,8 +173,8 @@ public:
     void propagateFronts();
     bool hasPropagatingFronts();
 
-    bool giveVtkDebug() const {return mDebugVTK;}
-    void setVtkDebug(bool iDebug) {mDebugVTK = iDebug;}
+    bool giveVtkDebug() const { return mDebugVTK; }
+    void setVtkDebug(bool iDebug) { mDebugVTK = iDebug; }
 };
 } // end namespace oofem
 #endif // xfemmanager_h

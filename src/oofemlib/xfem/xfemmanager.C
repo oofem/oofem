@@ -141,8 +141,8 @@ IRResultType XfemManager :: initializeFrom(InputRecord *ir)
 
     int vtkDebug = 0;
     IR_GIVE_OPTIONAL_FIELD(ir, vtkDebug, _IFT_XfemManager_debugVTK);
-    if( vtkDebug == 1 ) {
-    	mDebugVTK = true;
+    if ( vtkDebug == 1 ) {
+        mDebugVTK = true;
     }
 
     return IRRT_OK;
@@ -157,8 +157,8 @@ void XfemManager :: giveInputRecord(DynamicInputRecord &input)
     input.setField(doVTKExport, _IFT_XfemManager_VTKExport);
     input.setField(vtkExportFields, _IFT_XfemManager_VTKExportFields);
 
-    if(mDebugVTK) {
-    	input.setField(1, _IFT_XfemManager_debugVTK);
+    if ( mDebugVTK ) {
+        input.setField(1, _IFT_XfemManager_debugVTK);
     }
 }
 

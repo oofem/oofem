@@ -160,33 +160,33 @@ PatchIntegrationRule :: SetUpPointsOnTriangle(int nPoints, MaterialMode mode)
     }
 
     XfemManager *xMan = elem->giveDomain()->giveXfemManager();
-    if(xMan != NULL) {
-		if( xMan->giveVtkDebug() ) {
+    if ( xMan != NULL ) {
+        if ( xMan->giveVtkDebug() ) {
+            double time = 0.0;
 
-			double time = 0.0;
+            Element *el = this->elem;
+            if ( el != NULL ) {
+                Domain *dom = el->giveDomain();
+                if ( dom != NULL ) {
+                    EngngModel *em = dom->giveEngngModel();
+                    if ( em != NULL ) {
+                        TimeStep *ts = em->giveCurrentStep();
+                        if ( ts != NULL ) {
+                            time = ts->giveTargetTime();
+                        }
+                    }
+                }
+            }
 
-			Element *el = this->elem;
-			if ( el != NULL ) {
-				Domain *dom = el->giveDomain();
-				if ( dom != NULL ) {
-					EngngModel *em = dom->giveEngngModel();
-					if ( em != NULL ) {
-						TimeStep *ts = em->giveCurrentStep();
-						if ( ts != NULL ) {
-							time = ts->giveTargetTime();
-						}
-					}
-				}
-			}
+            int elIndex = this->elem->giveGlobalNumber();
+            std :: stringstream str;
+            str << "GaussPointsTime" << time << "El" << elIndex << ".vtk";
+            std :: string name = str.str();
 
-			int elIndex = this->elem->giveGlobalNumber();
-			std :: stringstream str;
-			str << "GaussPointsTime" << time << "El" << elIndex << ".vtk";
-			std :: string name = str.str();
-
-			XFEMDebugTools :: WritePointsToVTK(name, newGPCoord);
-		}
+            XFEMDebugTools :: WritePointsToVTK(name, newGPCoord);
+        }
     }
+
     numberOfIntegrationPoints = pointsPassed;
 
 

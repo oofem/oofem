@@ -70,7 +70,7 @@ void HeavisideFunction :: evaluateEnrFuncAt(double &oEnrFunc, const FloatArray &
 {
     if ( iLevelSet > 0.0 ) {
         oEnrFunc = 1.0;
-    } else   {
+    } else {
         oEnrFunc = 0.0;
     }
 }

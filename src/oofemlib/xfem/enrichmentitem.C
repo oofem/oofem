@@ -170,7 +170,7 @@ int EnrichmentItem :: instanciateYourself(DataReader *dr)
     mpEnrichmentFunc = classFactory.createEnrichmentFunction( name.c_str(), 1, this->giveDomain() );
     if ( mpEnrichmentFunc != NULL ) {
         mpEnrichmentFunc->initializeFrom(mir);
-    } else   {
+    } else {
         OOFEM_ERROR2( "EnrichmentItem::instanciateYourself: failed to create enrichment function (%s)", name.c_str() );
     }
 
@@ -193,7 +193,7 @@ int EnrichmentItem :: instanciateYourself(DataReader *dr)
     // Instantiate EnrichmentFront
     if ( mEnrFrontIndex == 0 ) {
         mpEnrichmentFront = new EnrFrontDoNothing();
-    } else   {
+    } else {
         std :: string enrFrontName;
 
         InputRecord *enrFrontir = dr->giveInputRecord(DataReader :: IR_enrichFrontRec, mEnrFrontIndex);
@@ -202,7 +202,7 @@ int EnrichmentItem :: instanciateYourself(DataReader *dr)
         mpEnrichmentFront = classFactory.createEnrichmentFront( enrFrontName.c_str() );
         if ( mpEnrichmentFront != NULL ) {
             mpEnrichmentFront->initializeFrom(enrFrontir);
-        } else   {
+        } else {
             OOFEM_ERROR2( "EnrichmentItem::instanciateYourself: Failed to create enrichment front (%s)", enrFrontName.c_str() );
         }
     }
@@ -211,7 +211,7 @@ int EnrichmentItem :: instanciateYourself(DataReader *dr)
     // Instantiate PropagationLaw
     if ( mPropLawIndex == 0 ) {
         mpPropagationLaw = new PLDoNothing();
-    } else   {
+    } else {
         std :: string propLawName;
 
         InputRecord *propLawir = dr->giveInputRecord(DataReader :: IR_propagationLawRec, mPropLawIndex);
@@ -220,7 +220,7 @@ int EnrichmentItem :: instanciateYourself(DataReader *dr)
         mpPropagationLaw = classFactory.createPropagationLaw( propLawName.c_str() );
         if ( mpPropagationLaw != NULL ) {
             mpPropagationLaw->initializeFrom(propLawir);
-        } else   {
+        } else {
             OOFEM_ERROR2( "EnrichmentItem::instanciateYourself: Failed to create propagation law (%s)", propLawName.c_str() );
         }
     }
@@ -364,7 +364,7 @@ void EnrichmentItem :: evaluateEnrFuncAt(std :: vector< double > &oEnrFunc, cons
             // Bulk enrichment
             oEnrFunc.resize(1, 0.0);
             mpEnrichmentFunc->evaluateEnrFuncAt(oEnrFunc [ 0 ], iPos, iLevelSet, mpEnrichmentDomain);
-        } else   {
+        } else {
             // Front enrichment
             mpEnrichmentFront->evaluateEnrFuncAt(oEnrFunc, iPos, iLevelSet, iNodeInd);
         }
@@ -380,7 +380,7 @@ void EnrichmentItem :: evaluateEnrFuncDerivAt(std :: vector< FloatArray > &oEnrF
         // Bulk enrichment
         oEnrFuncDeriv.resize(1);
         mpEnrichmentFunc->evaluateEnrFuncDerivAt(oEnrFuncDeriv [ 0 ], iPos, iLevelSet, iGradLevelSet, mpEnrichmentDomain);
-    } else   {
+    } else {
         // Front enrichment
         mpEnrichmentFront->evaluateEnrFuncDerivAt(oEnrFuncDeriv, iPos, iLevelSet, iGradLevelSet, iNodeInd);
     }
@@ -392,7 +392,7 @@ void EnrichmentItem :: evaluateEnrFuncJumps(std :: vector< double > &oEnrFuncJum
         // Bulk enrichment
         oEnrFuncJumps.resize(1);
         mpEnrichmentFunc->giveJump(oEnrFuncJumps);
-    } else   {
+    } else {
         // Front enrichment
         mpEnrichmentFront->evaluateEnrFuncJumps(oEnrFuncJumps);
     }
@@ -527,7 +527,7 @@ void EnrichmentItem :: updateNodeEnrMarker(XfemManager &ixFemMan, const Enrichme
                         mNodeEnrMarker [ nGlob - 1 ] = 1;
                     }
                 }
-            } else   {
+            } else {
                 // Store indices of elements containing an interface tip.
                 if ( numEdgeIntersec == 1 ) {
                     TipInfo tipInfo;
@@ -668,7 +668,7 @@ void EnrichmentItem :: createEnrichedDofs()
     }
 }
 
-void EnrichmentItem :: computeIntersectionPoints(std :: vector< FloatArray > &oIntersectionPoints, std :: vector< int > &oIntersectedEdgeInd, Element *element, std::vector<double> &oMinDistArcPos) const
+void EnrichmentItem :: computeIntersectionPoints(std :: vector< FloatArray > &oIntersectionPoints, std :: vector< int > &oIntersectedEdgeInd, Element *element, std :: vector< double > &oMinDistArcPos) const
 {
     if ( isElementEnriched(element) ) {
         // Use the level set functions to compute intersection points
@@ -757,7 +757,7 @@ void EnrichmentItem :: computeIntersectionPoints(std :: vector< FloatArray > &oI
 
                             oIntersectedEdgeInd.push_back(edgeIndex);
                         }
-                    } else   {
+                    } else {
                         FloatArray ps( * ( element->giveDofManager(nsLoc)->giveCoordinates() ) );
                         FloatArray pe( * ( element->giveDofManager(neLoc)->giveCoordinates() ) );
 
@@ -803,178 +803,175 @@ void EnrichmentItem :: computeIntersectionPoints(std :: vector< FloatArray > &oI
     }
 }
 
-void EnrichmentItem :: computeIntersectionPoints(std :: vector< FloatArray > &oIntersectionPoints, std :: vector< int > &oIntersectedEdgeInd, Element *element, const Triangle &iTri, std::vector<double> &oMinDistArcPos) const
+void EnrichmentItem :: computeIntersectionPoints(std :: vector< FloatArray > &oIntersectionPoints, std :: vector< int > &oIntersectedEdgeInd, Element *element, const Triangle &iTri, std :: vector< double > &oMinDistArcPos) const
 {
+    // Use the level set functions to compute intersection points
 
-	// Use the level set functions to compute intersection points
+    // Loop over element edges; an edge is intersected if the
+    // node values of the level set functions have different signs
 
-	// Loop over element edges; an edge is intersected if the
-	// node values of the level set functions have different signs
+    const int numEdges = 3;
 
-	const int numEdges = 3;
+    for ( int edgeIndex = 1; edgeIndex <= numEdges; edgeIndex++ ) {
+        FloatArray xS, xE;
 
-	for ( int edgeIndex = 1; edgeIndex <= numEdges; edgeIndex++ ) {
+        // Global coordinates of vertices
+        switch ( edgeIndex ) {
+        case 1:
+            xS = iTri.giveVertex(1);
+            xE = iTri.giveVertex(2);
+            break;
+        case 2:
+            xS = iTri.giveVertex(2);
+            xE = iTri.giveVertex(3);
+            break;
 
-		FloatArray xS, xE;
+        case 3:
+            xS = iTri.giveVertex(3);
+            xE = iTri.giveVertex(1);
+            break;
+        default:
+            break;
+        }
 
-		// Global coordinates of vertices
-		switch(edgeIndex){
-		case 1:
-			xS = iTri.giveVertex(1);
-			xE = iTri.giveVertex(2);
-			break;
-		case 2:
-			xS = iTri.giveVertex(2);
-			xE = iTri.giveVertex(3);
-			break;
+        // Local coordinates of vertices
+        FloatArray xiS;
+        element->computeLocalCoordinates(xiS, xS);
+        FloatArray xiE;
+        element->computeLocalCoordinates(xiE, xE);
 
-		case 3:
-			xS = iTri.giveVertex(3);
-			xE = iTri.giveVertex(1);
-			break;
-		default:
-			break;
-		}
+        const IntArray &elNodes = element->giveDofManArray();
+        FloatArray Ns, Ne;
+        FEInterpolation *interp = element->giveInterpolation();
 
-		// Local coordinates of vertices
-		FloatArray xiS;
-	    element->computeLocalCoordinates(xiS, xS);
-		FloatArray xiE;
-	    element->computeLocalCoordinates(xiE, xE);
-
-	    const IntArray &elNodes = element->giveDofManArray();
-	    FloatArray Ns, Ne;
-	    FEInterpolation *interp = element->giveInterpolation();
-
-	    interp->evalN( Ns, xiS, FEIElementGeometryWrapper(element) );
-	    interp->evalN( Ne, xiE, FEIElementGeometryWrapper(element) );
+        interp->evalN( Ns, xiS, FEIElementGeometryWrapper(element) );
+        interp->evalN( Ne, xiE, FEIElementGeometryWrapper(element) );
 
 
-	    double phiS 	= 0.0, phiE 	= 0.0;
-	    double gammaS 	= 0.0, gammaE 	= 0.0;
+        double phiS         = 0.0, phiE     = 0.0;
+        double gammaS       = 0.0, gammaE   = 0.0;
 
-	    for(int i = 1; i <= Ns.giveSize(); i++) {
-	    	phiS += Ns.at(i)*mLevelSetNormalDir[ elNodes[i-1]-1 ];
-	    	gammaS += Ns.at(i)*mLevelSetTangDir[ elNodes[i-1]-1 ];
+        for ( int i = 1; i <= Ns.giveSize(); i++ ) {
+            phiS += Ns.at(i) * mLevelSetNormalDir [ elNodes [ i - 1 ] - 1 ];
+            gammaS += Ns.at(i) * mLevelSetTangDir [ elNodes [ i - 1 ] - 1 ];
 
-	    	phiE += Ne.at(i)*mLevelSetNormalDir[ elNodes[i-1]-1 ];
-	    	gammaE += Ne.at(i)*mLevelSetTangDir[ elNodes[i-1]-1 ];
-	    }
+            phiE += Ne.at(i) * mLevelSetNormalDir [ elNodes [ i - 1 ] - 1 ];
+            gammaE += Ne.at(i) * mLevelSetTangDir [ elNodes [ i - 1 ] - 1 ];
+        }
 
-		if ( phiS * phiE < mLevelSetTol2 ) {
-			// Intersection detected
+        if ( phiS * phiE < mLevelSetTol2 ) {
+            // Intersection detected
 
-			double xi = calcXiZeroLevel(phiS, phiE);
-			double gamma = 0.5 * ( 1.0 - xi ) * gammaS + 0.5 * ( 1.0 + xi ) * gammaE;
+            double xi = calcXiZeroLevel(phiS, phiE);
+            double gamma = 0.5 * ( 1.0 - xi ) * gammaS + 0.5 * ( 1.0 + xi ) * gammaE;
 
-			// If we are inside in tangential direction
-			if ( gamma > 0.0 ) {
-				if ( fabs(phiS - phiE) < mLevelSetTol ) {
-					// If the crack is parallel to the edge.
+            // If we are inside in tangential direction
+            if ( gamma > 0.0 ) {
+                if ( fabs(phiS - phiE) < mLevelSetTol ) {
+                    // If the crack is parallel to the edge.
 
-					FloatArray ps( xS );
-					FloatArray pe( xE );
+                    FloatArray ps(xS);
+                    FloatArray pe(xE);
 
-					// Check that the intersection points have not already been identified.
-					// This may happen if the crack intersects the element exactly at a node,
-					// so that intersection is detected for both element edges in that node.
+                    // Check that the intersection points have not already been identified.
+                    // This may happen if the crack intersects the element exactly at a node,
+                    // so that intersection is detected for both element edges in that node.
 
-					bool alreadyFound = false;
+                    bool alreadyFound = false;
 
-					int numPointsOld = oIntersectionPoints.size();
-					for ( int k = 1; k <= numPointsOld; k++ ) {
-						double dist = ps.distance(oIntersectionPoints [ k - 1 ]);
+                    int numPointsOld = oIntersectionPoints.size();
+                    for ( int k = 1; k <= numPointsOld; k++ ) {
+                        double dist = ps.distance(oIntersectionPoints [ k - 1 ]);
 
-						if ( dist < mLevelSetTol ) {
-							alreadyFound = true;
-							break;
-						}
-					}
+                        if ( dist < mLevelSetTol ) {
+                            alreadyFound = true;
+                            break;
+                        }
+                    }
 
-					if ( !alreadyFound ) {
-						oIntersectionPoints.push_back(ps);
+                    if ( !alreadyFound ) {
+                        oIntersectionPoints.push_back(ps);
 
-						double arcPos = 0.0, tangDist = 0.0;
-						mpEnrichmentDomain->computeTangentialSignDist(tangDist, ps, arcPos);
-						oMinDistArcPos.push_back(arcPos);
+                        double arcPos = 0.0, tangDist = 0.0;
+                        mpEnrichmentDomain->computeTangentialSignDist(tangDist, ps, arcPos);
+                        oMinDistArcPos.push_back(arcPos);
 
-						oIntersectedEdgeInd.push_back(edgeIndex);
-					}
+                        oIntersectedEdgeInd.push_back(edgeIndex);
+                    }
 
-					alreadyFound = false;
+                    alreadyFound = false;
 
-					numPointsOld = oIntersectionPoints.size();
-					for ( int k = 1; k <= numPointsOld; k++ ) {
-						double dist = pe.distance(oIntersectionPoints [ k - 1 ]);
+                    numPointsOld = oIntersectionPoints.size();
+                    for ( int k = 1; k <= numPointsOld; k++ ) {
+                        double dist = pe.distance(oIntersectionPoints [ k - 1 ]);
 
-						if ( dist < mLevelSetTol ) {
-							alreadyFound = true;
-							break;
-						}
-					}
+                        if ( dist < mLevelSetTol ) {
+                            alreadyFound = true;
+                            break;
+                        }
+                    }
 
-					if ( !alreadyFound ) {
-						oIntersectionPoints.push_back(pe);
+                    if ( !alreadyFound ) {
+                        oIntersectionPoints.push_back(pe);
 
-						double arcPos = 0.0, tangDist = 0.0;
-						mpEnrichmentDomain->computeTangentialSignDist(tangDist, pe, arcPos);
-						oMinDistArcPos.push_back(arcPos);
+                        double arcPos = 0.0, tangDist = 0.0;
+                        mpEnrichmentDomain->computeTangentialSignDist(tangDist, pe, arcPos);
+                        oMinDistArcPos.push_back(arcPos);
 
-						oIntersectedEdgeInd.push_back(edgeIndex);
-					}
-				} else   {
-					FloatArray ps( xS );
-					FloatArray pe( xE );
+                        oIntersectedEdgeInd.push_back(edgeIndex);
+                    }
+                } else {
+                    FloatArray ps(xS);
+                    FloatArray pe(xE);
 
-					int nDim = ps.giveSize();
-					FloatArray p;
-					p.resize(nDim);
+                    int nDim = ps.giveSize();
+                    FloatArray p;
+                    p.resize(nDim);
 
-					for ( int i = 1; i <= nDim; i++ ) {
-						( p.at(i) ) = 0.5 * ( 1.0 - xi ) * ( ( ps.at(i) ) ) + 0.5 * ( 1.0 + xi ) * ( ( pe.at(i) ) );
-					}
-
-
-					// Check that the intersection point has not already been identified.
-					// This may happen if the crack intersects the element exactly at a node,
-					// so that intersection is detected for both element edges in that node.
-
-					bool alreadyFound = false;
+                    for ( int i = 1; i <= nDim; i++ ) {
+                        ( p.at(i) ) = 0.5 * ( 1.0 - xi ) * ( ( ps.at(i) ) ) + 0.5 * ( 1.0 + xi ) * ( ( pe.at(i) ) );
+                    }
 
 
-					int numPointsOld = oIntersectionPoints.size();
-					for ( int k = 1; k <= numPointsOld; k++ ) {
-						double dist = p.distance(oIntersectionPoints [ k - 1 ]);
+                    // Check that the intersection point has not already been identified.
+                    // This may happen if the crack intersects the element exactly at a node,
+                    // so that intersection is detected for both element edges in that node.
 
-						if ( dist < mLevelSetTol ) {
-							alreadyFound = true;
-							break;
-						}
-					}
+                    bool alreadyFound = false;
 
-					if ( !alreadyFound ) {
-						oIntersectionPoints.push_back(p);
 
-						double arcPos = 0.0, tangDist = 0.0;
-						mpEnrichmentDomain->computeTangentialSignDist(tangDist, p, arcPos);
-						oMinDistArcPos.push_back(arcPos);
+                    int numPointsOld = oIntersectionPoints.size();
+                    for ( int k = 1; k <= numPointsOld; k++ ) {
+                        double dist = p.distance(oIntersectionPoints [ k - 1 ]);
 
-						oIntersectedEdgeInd.push_back(edgeIndex);
-					}
-				}
-			}
-		}
-	}
+                        if ( dist < mLevelSetTol ) {
+                            alreadyFound = true;
+                            break;
+                        }
+                    }
 
+                    if ( !alreadyFound ) {
+                        oIntersectionPoints.push_back(p);
+
+                        double arcPos = 0.0, tangDist = 0.0;
+                        mpEnrichmentDomain->computeTangentialSignDist(tangDist, p, arcPos);
+                        oMinDistArcPos.push_back(arcPos);
+
+                        oIntersectedEdgeInd.push_back(edgeIndex);
+                    }
+                }
+            }
+        }
+    }
 }
 
 
 bool EnrichmentItem :: giveElementTipCoord(FloatArray &oCoord, double &oArcPos, int iElIndex) const
 {
     if ( mpEnrichmentFront != NULL ) {
-    	double arcPos = -1.0;
+        double arcPos = -1.0;
         return mpEnrichmentFront->giveElementTipCoord(oCoord, arcPos, iElIndex);
-    } else   {
+    } else {
         return false;
     }
 }
@@ -982,12 +979,12 @@ bool EnrichmentItem :: giveElementTipCoord(FloatArray &oCoord, double &oArcPos, 
 bool EnrichmentItem :: giveElementTipCoord(FloatArray &oCoord, double &oArcPos, int iElIndex, const Triangle &iTri) const
 {
     if ( mpEnrichmentFront != NULL ) {
-    	double arcPos = -1.0;
-    	if(mpEnrichmentFront->giveElementTipCoord(oCoord, arcPos, iElIndex)) {
-    		if( iTri.pointIsInTriangle(oCoord) ) {
-    			return true;
-    		}
-    	}
+        double arcPos = -1.0;
+        if ( mpEnrichmentFront->giveElementTipCoord(oCoord, arcPos, iElIndex) ) {
+            if ( iTri.pointIsInTriangle(oCoord) ) {
+                return true;
+            }
+        }
     }
 
     return false;
@@ -1023,14 +1020,14 @@ void EnrichmentItem :: calcPolarCoord(double &oR, double &oTheta, const FloatArr
 
     if ( q.dotProduct(iN) > 0.0 ) {
         oTheta =  acos( q.dotProduct(iT) );
-    } else   {
+    } else {
         oTheta = -acos( q.dotProduct(iT) );
     }
 }
 
-void EnrichmentItem :: giveSubPolygon(std::vector<FloatArray> &oPoints, const double &iXiStart, const double &iXiEnd) const
+void EnrichmentItem :: giveSubPolygon(std :: vector< FloatArray > &oPoints, const double &iXiStart, const double &iXiEnd) const
 {
-	mpEnrichmentDomain->giveSubPolygon(oPoints, iXiStart, iXiEnd);
+    mpEnrichmentDomain->giveSubPolygon(oPoints, iXiStart, iXiEnd);
 }
 
 

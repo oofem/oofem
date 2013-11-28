@@ -66,10 +66,10 @@ public:
     StructuralInterfaceMaterial *mpCZMat;
     int mCZMaterialNum;
     int mCSNumGaussPoints;
-    std::vector<IntegrationRule*> mpCZIntegrationRules;
+    std :: vector< IntegrationRule * >mpCZIntegrationRules;
 
     /// Index of enrichment items associated with cohesive zones
-    std::vector<int> mCZEnrItemIndices; // TODO: Not nice. /ES
+    std :: vector< int >mCZEnrItemIndices; // TODO: Not nice. /ES
 
     /// Flag that tells if plane stress or plane strain is assumed
     bool mUsePlaneStrain;
@@ -96,7 +96,7 @@ public:
     virtual void XfemElementInterface_prepareNodesForDelaunay(std :: vector< std :: vector< FloatArray > > &oPointPartitions, double &oCrackStartXi, double &oCrackEndXi, const Triangle &iTri, int iEnrItemIndex, bool &oIntersection);
 
     // Help functions for partitioning
-    void putPointsInCorrectPartition(std :: vector< std :: vector< FloatArray > > &oPointPartitions, const std :: vector< FloatArray > &iIntersecPoints, const std::vector<const FloatArray*> &iNodeCoord) const;
+    void putPointsInCorrectPartition(std :: vector< std :: vector< FloatArray > > &oPointPartitions, const std :: vector< FloatArray > &iIntersecPoints, const std :: vector< const FloatArray * > &iNodeCoord) const;
 
     /**
      * XfemElementInterface_computeConstitutiveMatrixAt.
@@ -134,7 +134,6 @@ public:
      * Compute N-matrix for cohesive zone.
      */
     void computeNCohesive(FloatMatrix &oN, GaussPoint &iGP, int iEnrItemIndex);
-
 };
 } // end namespace oofem
 #endif // xfemelementinterface_h

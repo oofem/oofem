@@ -97,14 +97,14 @@ void Delaunay :: triangulate(const std :: vector< FloatArray > &iVertices, std :
         for ( int j = i + 1; j <= n; j++ ) {
             for ( int k = j + 1; k <= n; k++ ) {
                 bool isTriangle = true;
-                if ( colinear( vertices [ i - 1 ],  vertices [ j - 1 ],  vertices [ k - 1 ]) ) {
+                if ( colinear(vertices [ i - 1 ],  vertices [ j - 1 ],  vertices [ k - 1 ]) ) {
                     isTriangle = false;
                 } else {
                     for ( int a = 1; a <= n; a++ ) {
                         if ( a != i && a != j && a != k ) {
                             // checks whether a point a is inside a circumcircle of a triangle ijk
-                            if ( isInsideCC( vertices [ a - 1 ],  vertices [ i - 1 ],  vertices [ j - 1 ],
-                                             vertices [ k - 1 ]) ) {
+                            if ( isInsideCC(vertices [ a - 1 ],  vertices [ i - 1 ],  vertices [ j - 1 ],
+                                            vertices [ k - 1 ]) ) {
                                 isTriangle = false;
                                 break;
                             }
