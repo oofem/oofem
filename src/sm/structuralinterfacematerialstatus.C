@@ -187,7 +187,6 @@ StructuralInterfaceMaterialStatus :: restoreContext(DataStream *stream, ContextM
 void StructuralInterfaceMaterialStatus :: copyStateVariables(const MaterialStatus &iStatus)
 {
 	MaterialStatus &tmpStat = const_cast<MaterialStatus&>(iStatus);
-	printf("tmpStat.giveClassName(): %s\n", tmpStat.giveClassName() );
 	const StructuralInterfaceMaterialStatus &structStatus = dynamic_cast<StructuralInterfaceMaterialStatus&>(tmpStat);
 
 	jump 				= structStatus.giveJump();
@@ -198,6 +197,7 @@ void StructuralInterfaceMaterialStatus :: copyStateVariables(const MaterialStatu
 	tempFirstPKTraction	= structStatus.giveTempFirstPKTraction();
 	F					= structStatus.giveF();
 	tempF				= structStatus.giveTempF();
+	mNormalDir			= structStatus.giveNormal();
 }
 
 

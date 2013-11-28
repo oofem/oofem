@@ -526,7 +526,7 @@ double FloatArray :: distance(const FloatArray &x) const
     return sqrt( this->distance_square(x) );
 }
 
-double FloatArray::distance(const FloatArray &iP1, const FloatArray &iP2) const
+double FloatArray::distance(const FloatArray &iP1, const FloatArray &iP2, double &oXi) const
 {
 	double dist = 0.0;
 
@@ -548,6 +548,7 @@ double FloatArray::distance(const FloatArray &iP1, const FloatArray &iP2) const
 		{
 			// X is closest to P1
 			dist = this->distance(iP1);
+			oXi = 0.0;
 			return dist;
 		}
 		else
@@ -556,12 +557,13 @@ double FloatArray::distance(const FloatArray &iP1, const FloatArray &iP2) const
 			{
 				// X is closest to P2
 				dist = this->distance(iP2);
+				oXi = 1.0;
 				return dist;
 			}
 			else
 			{
-				double xi = s/l;
-				FloatArray q = (1.0-xi)*iP1 + xi*iP2;
+				oXi = s/l;
+				FloatArray q = (1.0-oXi)*iP1 + oXi*iP2;
 				dist = this->distance(q);
 				return dist;
 			}
@@ -575,6 +577,7 @@ double FloatArray::distance(const FloatArray &iP1, const FloatArray &iP2) const
 		// we can compute the distance to any
 		// of these points.
 		dist = this->distance(iP1);
+		oXi = 0.5;
 		return dist;
 	}
 

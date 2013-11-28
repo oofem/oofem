@@ -88,6 +88,7 @@ class EnrichmentFront;
 class LinElBranchFunction;
 class PropagationLaw;
 class DynamicDataReader;
+class Triangle;
 /**
  * Abstract class representing entity, which is included in the FE model using one (or more)
  * global functions. Such entity may represent crack, material interface, etc.
@@ -183,12 +184,14 @@ public:
 
     void createEnrichedDofs();
 
-    virtual void computeIntersectionPoints(std :: vector< FloatArray > &oIntersectionPoints, std :: vector< int > &oIntersectedEdgeInd, Element *element);
+    virtual void computeIntersectionPoints(std :: vector< FloatArray > &oIntersectionPoints, std :: vector< int > &oIntersectedEdgeInd, Element *element, std :: vector< double > &oMinDistArcPos) const;
+    virtual void computeIntersectionPoints(std :: vector< FloatArray > &oIntersectionPoints, std :: vector< int > &oIntersectedEdgeInd, Element *element, const Triangle &iTri, std :: vector< double > &oMinDistArcPos) const;
 
 
     // Return the coordinates of the tip in element iElIndex,
     // if the element contains a tip.
-    bool giveElementTipCoord(FloatArray &oCoord, int iElIndex) const;
+    bool giveElementTipCoord(FloatArray &oCoord, double &oArcPos, int iElIndex) const;
+    bool giveElementTipCoord(FloatArray &oCoord, double &oArcPos, int iElIndex, const Triangle &iTri) const;
 
     // Help functions
     double calcXiZeroLevel(const double &iQ1, const double &iQ2) const;
@@ -196,6 +199,8 @@ public:
 
     PropagationLaw *givePropagationLaw() { return this->mpPropagationLaw; };
     bool hasPropagationLaw() { return this->mPropLawIndex != 0; };
+
+    void giveSubPolygon(std :: vector< FloatArray > &oPoints, const double &iXiStart, const double &iXiEnd) const;
 
 protected:
 
@@ -414,7 +419,7 @@ public:
     virtual IRResultType initializeFrom(InputRecord *ir) = 0;
     virtual void giveInputRecord(DynamicInputRecord &input) = 0;
 
-    virtual bool giveElementTipCoord(FloatArray &oCoord, int iElIndex) const;
+    virtual bool giveElementTipCoord(FloatArray &oCoord, double &oArcPos, int iElIndex) const;
 
 protected:
     std :: vector< TipInfo >mTipInfo;

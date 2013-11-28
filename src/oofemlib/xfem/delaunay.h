@@ -56,10 +56,10 @@ class OOFEM_EXPORT Delaunay
 public:
     Delaunay() : mTol(1.0e-12) {}
 
-    bool colinear(FloatArray *p1, FloatArray *p2, FloatArray *p3);
+    bool colinear(const FloatArray &iP1, const FloatArray &iP2, const FloatArray &iP3) const;
     void printTriangles(AList< Triangle > *triangles);
-    bool isInsideCC(FloatArray *p, FloatArray *p1, FloatArray *p2, FloatArray *p3);
-    void triangulate(const std :: vector< FloatArray > &iVertices, std :: vector< Triangle > &oTriangles);
+    bool isInsideCC(const FloatArray &iP, const FloatArray &iP1, const FloatArray &iP2, const FloatArray &iP3) const;
+    void triangulate(const std :: vector< FloatArray > &iVertices, std :: vector< Triangle > &oTriangles) const;
 
 private:
     const double mTol; /// Tolerance used when checking if points are colinear.

@@ -95,8 +95,10 @@ bool EDCrack :: giveClosestTipInfo(const FloatArray &iCoords, TipInfo &oInfo) co
 
             oInfo.mTipIndex = 0;
 
+            oInfo.mArcPos = 0.0;
+
             return true;
-        } else   {
+        } else {
             const FloatArray &p1 = ( bg->giveVertex(nVert - 1) );
             const FloatArray &p2 = ( bg->giveVertex(nVert) );
 
@@ -111,6 +113,8 @@ bool EDCrack :: giveClosestTipInfo(const FloatArray &iCoords, TipInfo &oInfo) co
             oInfo.mNormalDir.setValues( 2, -oInfo.mTangDir.at(2), oInfo.mTangDir.at(1) );
 
             oInfo.mTipIndex = 1;
+
+            oInfo.mArcPos = 1.0;
 
             return true;
         }
@@ -164,6 +168,7 @@ bool EDCrack :: giveTipInfos(std :: vector< TipInfo > &oInfo) const
         info1.mNormalDir.setValues( 2, -info1.mTangDir.at(2), info1.mTangDir.at(1) );
 
         info1.mTipIndex = 0;
+        info1.mArcPos = 0.0;
 
         oInfo.push_back(info1);
 
@@ -183,6 +188,7 @@ bool EDCrack :: giveTipInfos(std :: vector< TipInfo > &oInfo) const
         info2.mNormalDir.setValues( 2, -info2.mTangDir.at(2), info2.mTangDir.at(1) );
 
         info2.mTipIndex = 1;
+        info2.mArcPos = 1.0;
 
         oInfo.push_back(info2);
 
@@ -199,7 +205,7 @@ bool EDCrack :: propagateTips(const std :: vector< TipPropagation > &iTipProp) {
             FloatArray pos( bg->giveVertex(1) );
             pos.add(iTipProp [ i ].mPropagationLength, iTipProp [ i ].mPropagationDir);
             bg->insertVertexFront(pos);
-        } else if ( iTipProp [ i ].mTipIndex == 1 )         {
+        } else if ( iTipProp [ i ].mTipIndex == 1 ) {
             // Propagate end point
             FloatArray pos( bg->giveVertex( bg->giveNrVertices() ) );
             pos.add(iTipProp [ i ].mPropagationLength, iTipProp [ i ].mPropagationDir);
@@ -208,9 +214,11 @@ bool EDCrack :: propagateTips(const std :: vector< TipPropagation > &iTipProp) {
     }
 
     // For debugging only
-    PolygonLine *pl = dynamic_cast< PolygonLine * >( bg );
-    if ( pl != NULL ) {
-        pl->printVTK();
+    if ( mDebugVTK ) {
+        PolygonLine *pl = dynamic_cast< PolygonLine * >( bg );
+        if ( pl != NULL ) {
+            pl->printVTK();
+        }
     }
 
     return true;

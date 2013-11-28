@@ -47,6 +47,7 @@
 #define _IFT_LayeredCrossSection_nlayers "nlayers"
 #define _IFT_LayeredCrossSection_layermaterials "layermaterials"
 #define _IFT_LayeredCrossSection_interfacematerials "interfacematerials"
+#define _IFT_LayeredCrossSection_layerRotations "rotations"
 #define _IFT_LayeredCrossSection_thicks "thicks"
 #define _IFT_LayeredCrossSection_widths "widths"
 #define _IFT_LayeredCrossSection_midsurf "midsurf"
@@ -90,6 +91,7 @@ protected:
     FloatArray layerThicks; ///< Thickness for each layer.
     FloatArray layerWidths; ///< Width for each layer.
     FloatArray layerMidZ;   ///< z-coord of the mid plane for each layer
+    FloatArray layerRots;   ///< Rotation of the material in each layer.
     int numberOfLayers;
     int numberOfIntegrationPoints; ///< num integration points per layer
     double midSurfaceZcoordFromBottom;

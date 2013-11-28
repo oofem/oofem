@@ -305,7 +305,6 @@ public:
     virtual int checkConsistency() = 0;
     virtual Interface *giveMaterialInterface(InterfaceType t, IntegrationPoint *ip) { return NULL; }
     virtual bool isCharacteristicMtrxSymmetric(MatResponseMode rMode) = 0;
-    //virtual bool isCharacteristicMtrxSymmetric(MatResponseMode rMode, int mat);
 
     virtual double give(int aProperty, GaussPoint *gp) = 0; 
 

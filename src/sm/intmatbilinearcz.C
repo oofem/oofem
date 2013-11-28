@@ -86,7 +86,6 @@ void IntMatBilinearCZStatus :: updateYourself(TimeStep *atTime)
 
 void IntMatBilinearCZStatus :: copyStateVariables(const MaterialStatus &iStatus)
 {
-	printf("iStatus.giveClassName(): %s\n", iStatus.giveClassName());
 	StructuralInterfaceMaterialStatus::copyStateVariables(iStatus);
 
 	MaterialStatus &tmpStat = const_cast<MaterialStatus&>(iStatus);
