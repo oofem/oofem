@@ -668,7 +668,7 @@ void EnrichmentItem :: createEnrichedDofs()
     }
 }
 
-void EnrichmentItem :: computeIntersectionPoints(std :: vector< FloatArray > &oIntersectionPoints, std :: vector< int > &oIntersectedEdgeInd, Element *element, std::vector<double> &oMinDistArcPos)
+void EnrichmentItem :: computeIntersectionPoints(std :: vector< FloatArray > &oIntersectionPoints, std :: vector< int > &oIntersectedEdgeInd, Element *element, std::vector<double> &oMinDistArcPos) const
 {
     if ( isElementEnriched(element) ) {
         // Use the level set functions to compute intersection points
@@ -803,6 +803,172 @@ void EnrichmentItem :: computeIntersectionPoints(std :: vector< FloatArray > &oI
     }
 }
 
+void EnrichmentItem :: computeIntersectionPoints(std :: vector< FloatArray > &oIntersectionPoints, std :: vector< int > &oIntersectedEdgeInd, Element *element, const Triangle &iTri, std::vector<double> &oMinDistArcPos) const
+{
+
+	// Use the level set functions to compute intersection points
+
+	// Loop over element edges; an edge is intersected if the
+	// node values of the level set functions have different signs
+
+	const int numEdges = 3;
+
+	for ( int edgeIndex = 1; edgeIndex <= numEdges; edgeIndex++ ) {
+
+		FloatArray xS, xE;
+
+		// Global coordinates of vertices
+		switch(edgeIndex){
+		case 1:
+			xS = iTri.giveVertex(1);
+			xE = iTri.giveVertex(2);
+			break;
+		case 2:
+			xS = iTri.giveVertex(2);
+			xE = iTri.giveVertex(3);
+			break;
+
+		case 3:
+			xS = iTri.giveVertex(3);
+			xE = iTri.giveVertex(1);
+			break;
+		default:
+			break;
+		}
+
+		// Local coordinates of vertices
+		FloatArray xiS;
+	    element->computeLocalCoordinates(xiS, xS);
+		FloatArray xiE;
+	    element->computeLocalCoordinates(xiE, xE);
+
+	    const IntArray &elNodes = element->giveDofManArray();
+	    FloatArray Ns, Ne;
+	    FEInterpolation *interp = element->giveInterpolation();
+
+	    interp->evalN( Ns, xiS, FEIElementGeometryWrapper(element) );
+	    interp->evalN( Ne, xiE, FEIElementGeometryWrapper(element) );
+
+
+	    double phiS 	= 0.0, phiE 	= 0.0;
+	    double gammaS 	= 0.0, gammaE 	= 0.0;
+
+	    for(int i = 1; i <= Ns.giveSize(); i++) {
+	    	phiS += Ns.at(i)*mLevelSetNormalDir[ elNodes[i-1]-1 ];
+	    	gammaS += Ns.at(i)*mLevelSetTangDir[ elNodes[i-1]-1 ];
+
+	    	phiE += Ne.at(i)*mLevelSetNormalDir[ elNodes[i-1]-1 ];
+	    	gammaE += Ne.at(i)*mLevelSetTangDir[ elNodes[i-1]-1 ];
+	    }
+
+		if ( phiS * phiE < mLevelSetTol2 ) {
+			// Intersection detected
+
+			double xi = calcXiZeroLevel(phiS, phiE);
+			double gamma = 0.5 * ( 1.0 - xi ) * gammaS + 0.5 * ( 1.0 + xi ) * gammaE;
+
+			// If we are inside in tangential direction
+			if ( gamma > 0.0 ) {
+				if ( fabs(phiS - phiE) < mLevelSetTol ) {
+					// If the crack is parallel to the edge.
+
+					FloatArray ps( xS );
+					FloatArray pe( xE );
+
+					// Check that the intersection points have not already been identified.
+					// This may happen if the crack intersects the element exactly at a node,
+					// so that intersection is detected for both element edges in that node.
+
+					bool alreadyFound = false;
+
+					int numPointsOld = oIntersectionPoints.size();
+					for ( int k = 1; k <= numPointsOld; k++ ) {
+						double dist = ps.distance(oIntersectionPoints [ k - 1 ]);
+
+						if ( dist < mLevelSetTol ) {
+							alreadyFound = true;
+							break;
+						}
+					}
+
+					if ( !alreadyFound ) {
+						oIntersectionPoints.push_back(ps);
+
+						double arcPos = 0.0, tangDist = 0.0;
+						mpEnrichmentDomain->computeTangentialSignDist(tangDist, ps, arcPos);
+						oMinDistArcPos.push_back(arcPos);
+
+						oIntersectedEdgeInd.push_back(edgeIndex);
+					}
+
+					alreadyFound = false;
+
+					numPointsOld = oIntersectionPoints.size();
+					for ( int k = 1; k <= numPointsOld; k++ ) {
+						double dist = pe.distance(oIntersectionPoints [ k - 1 ]);
+
+						if ( dist < mLevelSetTol ) {
+							alreadyFound = true;
+							break;
+						}
+					}
+
+					if ( !alreadyFound ) {
+						oIntersectionPoints.push_back(pe);
+
+						double arcPos = 0.0, tangDist = 0.0;
+						mpEnrichmentDomain->computeTangentialSignDist(tangDist, pe, arcPos);
+						oMinDistArcPos.push_back(arcPos);
+
+						oIntersectedEdgeInd.push_back(edgeIndex);
+					}
+				} else   {
+					FloatArray ps( xS );
+					FloatArray pe( xE );
+
+					int nDim = ps.giveSize();
+					FloatArray p;
+					p.resize(nDim);
+
+					for ( int i = 1; i <= nDim; i++ ) {
+						( p.at(i) ) = 0.5 * ( 1.0 - xi ) * ( ( ps.at(i) ) ) + 0.5 * ( 1.0 + xi ) * ( ( pe.at(i) ) );
+					}
+
+
+					// Check that the intersection point has not already been identified.
+					// This may happen if the crack intersects the element exactly at a node,
+					// so that intersection is detected for both element edges in that node.
+
+					bool alreadyFound = false;
+
+
+					int numPointsOld = oIntersectionPoints.size();
+					for ( int k = 1; k <= numPointsOld; k++ ) {
+						double dist = p.distance(oIntersectionPoints [ k - 1 ]);
+
+						if ( dist < mLevelSetTol ) {
+							alreadyFound = true;
+							break;
+						}
+					}
+
+					if ( !alreadyFound ) {
+						oIntersectionPoints.push_back(p);
+
+						double arcPos = 0.0, tangDist = 0.0;
+						mpEnrichmentDomain->computeTangentialSignDist(tangDist, p, arcPos);
+						oMinDistArcPos.push_back(arcPos);
+
+						oIntersectedEdgeInd.push_back(edgeIndex);
+					}
+				}
+			}
+		}
+	}
+
+}
+
+
 bool EnrichmentItem :: giveElementTipCoord(FloatArray &oCoord, double &oArcPos, int iElIndex) const
 {
     if ( mpEnrichmentFront != NULL ) {
@@ -811,6 +977,20 @@ bool EnrichmentItem :: giveElementTipCoord(FloatArray &oCoord, double &oArcPos, 
     } else   {
         return false;
     }
+}
+
+bool EnrichmentItem :: giveElementTipCoord(FloatArray &oCoord, double &oArcPos, int iElIndex, const Triangle &iTri) const
+{
+    if ( mpEnrichmentFront != NULL ) {
+    	double arcPos = -1.0;
+    	if(mpEnrichmentFront->giveElementTipCoord(oCoord, arcPos, iElIndex)) {
+    		if( iTri.pointIsInTriangle(oCoord) ) {
+    			return true;
+    		}
+    	}
+    }
+
+    return false;
 }
 
 double EnrichmentItem :: calcXiZeroLevel(const double &iQ1, const double &iQ2) const

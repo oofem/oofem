@@ -71,6 +71,8 @@ public:
     /// Destructor.
     virtual ~PatchIntegrationRule();
 
+    virtual const char *giveClassName() const { return "PatchIntegrationRule"; }
+
     // TODO: Give this function a better name.
     // Note: the fact that this function is inherited complicates name change.
     virtual int SetUpPointsOnTriangle(int nPoints, MaterialMode mode);

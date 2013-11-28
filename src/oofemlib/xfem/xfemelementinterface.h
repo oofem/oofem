@@ -94,10 +94,11 @@ public:
     virtual bool XfemElementInterface_updateIntegrationRule();
 
     /// Returns an array of array of points. Each array of points defines the points of a subregion of the element.
-//    virtual void XfemElementInterface_prepareNodesForDelaunay(std :: vector< std :: vector< FloatArray > > &oPointPartitions, FloatArray &oCrackStartPoint, FloatArray &oCrackEndPoint, int &oEnrItemIndex);
-
-    // New syntax
     virtual void XfemElementInterface_prepareNodesForDelaunay(std :: vector< std :: vector< FloatArray > > &oPointPartitions, double &oCrackStartXi, double &oCrackEndXi, int iEnrItemIndex, bool &oIntersection);
+    virtual void XfemElementInterface_prepareNodesForDelaunay(std :: vector< std :: vector< FloatArray > > &oPointPartitions, double &oCrackStartXi, double &oCrackEndXi, const Triangle &iTri, int iEnrItemIndex, bool &oIntersection);
+
+    // Help functions for partitioning
+    void putPointsInCorrectPartition(std :: vector< std :: vector< FloatArray > > &oPointPartitions, const std :: vector< FloatArray > &iIntersecPoints, const std::vector<const FloatArray*> &iNodeCoord) const;
 
     /**
      * XfemElementInterface_computeConstitutiveMatrixAt.
@@ -136,10 +137,6 @@ public:
      */
     void computeNCohesive(FloatMatrix &oN, GaussPoint &iGP, int iEnrItemIndex);
 
-    /**
-     * Compute the crack normal in a point.
-     */
-    bool computeNormalInPoint(const FloatArray &iGlobalCoord, FloatArray &oNormal);
 };
 } // end namespace oofem
 #endif // xfemelementinterface_h

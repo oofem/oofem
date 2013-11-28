@@ -1006,7 +1006,7 @@ OctreeSpatialLocalizer :: giveClosestIP(const FloatArray &coords, int region, bo
 				XfemElementInterface *xFemEl = dynamic_cast<XfemElementInterface*> (ielem);
 
 				if(xFemEl != NULL) {
-					int numCZRules = xFemEl->mpCZIntegrationRules.size();
+					size_t numCZRules = xFemEl->mpCZIntegrationRules.size();
 					for(size_t czRuleIndex = 0; czRuleIndex < numCZRules; czRuleIndex++) {
 
 						iRule = xFemEl->mpCZIntegrationRules[czRuleIndex];
@@ -1180,7 +1180,7 @@ OctreeSpatialLocalizer :: giveClosestIPWithinOctant(OctantRec *currentCell, //el
     				XfemElementInterface *xFemEl = dynamic_cast<XfemElementInterface*> (ielem);
 
     				if(xFemEl != NULL) {
-    					int numCZRules = xFemEl->mpCZIntegrationRules.size();
+    					size_t numCZRules = xFemEl->mpCZIntegrationRules.size();
     					for(size_t czRuleIndex = 0; czRuleIndex < numCZRules; czRuleIndex++) {
 
     						iRule = xFemEl->mpCZIntegrationRules[czRuleIndex];
@@ -1304,7 +1304,7 @@ OctreeSpatialLocalizer :: giveElementsWithIPWithinBox(elementContainerType &elem
     				XfemElementInterface *xFemEl = dynamic_cast<XfemElementInterface*> (ielem);
 
     				if(xFemEl != NULL) {
-    					int numCZRules = xFemEl->mpCZIntegrationRules.size();
+    					size_t numCZRules = xFemEl->mpCZIntegrationRules.size();
     					for(size_t czRuleIndex = 0; czRuleIndex < numCZRules; czRuleIndex++) {
 
     						iRule = xFemEl->mpCZIntegrationRules[czRuleIndex];
