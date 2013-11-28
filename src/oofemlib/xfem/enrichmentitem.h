@@ -197,6 +197,8 @@ public:
     PropagationLaw *givePropagationLaw() { return this->mpPropagationLaw; };
     bool hasPropagationLaw() { return this->mPropLawIndex != 0; };
 
+    virtual void postInitialize();
+
 protected:
 
     EnrichmentDomain *mpEnrichmentDomain;

@@ -833,6 +833,13 @@ void EnrichmentItem :: calcPolarCoord(double &oR, double &oTheta, const FloatArr
 }
 
 
+void EnrichmentItem :: postInitialize() 
+{
+    ///@todo is there anything more that should be checked?
+    this->mpEnrichmentDomain->postInitialize( this->giveDomain() );
+}
+
+
 Inclusion :: Inclusion(int n, XfemManager *xm, Domain *aDomain) :
     EnrichmentItem(n, xm, aDomain),
     mpCrossSection(NULL)

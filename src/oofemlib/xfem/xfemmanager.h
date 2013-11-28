@@ -136,6 +136,8 @@ public:
     virtual void giveInputRecord(DynamicInputRecord &input);
 
     int instanciateYourself(DataReader *dr);
+    void postInitialize();
+
     const char *giveClassName() const { return "XfemManager"; }
     const char *giveInputRecordName() const { return _IFT_XfemManager_Name; }
 

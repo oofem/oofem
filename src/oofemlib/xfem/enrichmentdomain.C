@@ -43,6 +43,7 @@
 #include "enrichmentfunction.h"
 #include "xfemmanager.h"
 #include "dynamicinputrecord.h"
+#include "set.h"
 
 #include <algorithm>
 
@@ -224,7 +225,7 @@ void DofManList :: CallNodeEnrMarkerUpdate(EnrichmentItem &iEnrItem, XfemManager
 
 void DofManList :: computeSurfaceNormalSignDist(double &oDist, const FloatArray &iPoint) const
 {
-    oDist = iPoint.at(3) - this->xi;     // will only work for plane el
+    oDist = iPoint.at(3) - this->xi;     
 }
 
 IRResultType DofManList :: initializeFrom(InputRecord *ir)
@@ -232,16 +233,36 @@ IRResultType DofManList :: initializeFrom(InputRecord *ir)
     const char *__proc = "initializeFrom";     // Required by IR_GIVE_FIELD macro
     IRResultType result;     // Required by IR_GIVE_FIELD macro
 
-    IntArray idList;
-    IR_GIVE_FIELD(ir, idList, _IFT_DofManList_list);
+    IntArray idList(0);
+    IR_GIVE_OPTIONAL_FIELD(ir, idList, _IFT_DofManList_list);
     for ( int i = 1; i <= idList.giveSize(); i++ ) {
         this->dofManList.push_back( idList.at(i) );
     }
+    
+    // Read node set if given - initialization is done in postinitialize
+    this->setNumber = 0;
+    if ( ir->hasField(_IFT_DofManList_SetNumber) ) {
+        IR_GIVE_FIELD(ir, this->setNumber, _IFT_DofManList_SetNumber);
+    }
 
-    std :: sort( dofManList.begin(), this->dofManList.end() );
-    //IR_GIVE_FIELD(ir, this->xi, _IFT_DofManList_DelaminationLevel);
-
+    //std :: sort( dofManList.begin(), this->dofManList.end() );
+    
     return IRRT_OK;
+}
+
+void DofManList :: postInitialize(Domain *d) 
+{
+    // Set the nodes based on a given node set
+    if ( this->setNumber > 0 ) {
+        Set *set = d->giveSet( this->setNumber );
+        const IntArray &nodes = set->giveNodeList();
+        for ( int i = 1; i <= nodes.giveSize(); i++ ) {
+            this->dofManList.push_back( nodes.at(i) );
+        }
+    }
+   
+    std :: sort( dofManList.begin(), this->dofManList.end() );
+
 }
 
 void DofManList :: giveInputRecord(DynamicInputRecord &input)
@@ -256,6 +277,7 @@ void DofManList :: giveInputRecord(DynamicInputRecord &input)
 
     input.setField(idList, _IFT_DofManList_list);
 }
+
 
 void WholeDomain :: CallNodeEnrMarkerUpdate(EnrichmentItem &iEnrItem, XfemManager &ixFemMan) const
 {
