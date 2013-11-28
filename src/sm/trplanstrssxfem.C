@@ -92,19 +92,13 @@ void TrPlaneStress2dXFEM :: computeGaussPoints()
 {
     XfemManager *xMan = this->giveDomain()->giveXfemManager();
 
-    for ( int i = 1; i <= xMan->giveNumberOfEnrichmentItems(); i++ ) {
-        std :: vector< FloatArray >intersecPoints;
-        EnrichmentItem *ei = xMan->giveEnrichmentItem(i);
-
-        std :: vector< int >intersecEdgeInd;
-        ei->computeIntersectionPoints(intersecPoints, intersecEdgeInd, this);
-        int numIntersecPoints = intersecPoints.size();
-
-        if ( numIntersecPoints > 0 ) {
-            this->XfemElementInterface_updateIntegrationRule();
-        } else {
-            TrPlaneStress2d :: computeGaussPoints();
-        }
+    if( xMan->isElementEnriched(this) ) {
+    	if(!this->XfemElementInterface_updateIntegrationRule()) {
+        	TrPlaneStress2d :: computeGaussPoints();
+    	}
+    }
+    else {
+    	TrPlaneStress2d :: computeGaussPoints();
     }
 }
 

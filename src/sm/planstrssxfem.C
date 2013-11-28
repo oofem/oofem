@@ -78,21 +78,13 @@ PlaneStress2dXfem :: computeGaussPoints()
 {
     XfemManager *xMan = this->giveDomain()->giveXfemManager();
 
-    for ( int i = 1; i <= xMan->giveNumberOfEnrichmentItems(); i++ ) {
-        std :: vector< FloatArray >intersecPoints;
-        EnrichmentItem *ei = xMan->giveEnrichmentItem(i);
-        // Compute the value of the enrichment function in the nodes
-        // in order to construction a shifted enrichment
-
-        std :: vector< int >intersecEdgeInd;
-        ei->computeIntersectionPoints(intersecPoints, intersecEdgeInd, this);
-        int numIntersecPoints = intersecPoints.size();
-
-        if ( numIntersecPoints > 0 ) {
-            this->XfemElementInterface_updateIntegrationRule();
-        } else {
+    if( xMan->isElementEnriched(this) ) {
+    	if(!this->XfemElementInterface_updateIntegrationRule()) {
             PlaneStress2d :: computeGaussPoints();
-        }
+    	}
+    }
+    else {
+        PlaneStress2d :: computeGaussPoints();
     }
 }
 

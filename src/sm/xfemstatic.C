@@ -226,34 +226,44 @@ XFEMStatic :: terminate(TimeStep *tStep)
 				// Map state variables for cohesive zone if applicable
 				XfemElementInterface *xFemEl = dynamic_cast<XfemElementInterface*>(el);
 				if(xFemEl != NULL) {
-					if(xFemEl->mpCZIntegrationRule != NULL) {
 
-						for ( int j = 0; j < xFemEl->mpCZIntegrationRule->giveNumberOfIntegrationPoints(); j++ ) {
+					if(xFemEl->mpCZMat != NULL) {
+
+						size_t numCzRules = xFemEl->mpCZIntegrationRules.size();
+
+						for(size_t czIndex = 0; czIndex < numCzRules; czIndex++) {
+							if(xFemEl->mpCZIntegrationRules[czIndex] != NULL) {
+
+								for ( int j = 0; j < xFemEl->mpCZIntegrationRules[czIndex]->giveNumberOfIntegrationPoints(); j++ ) {
 
 
-							GaussPoint &gp = *(xFemEl->mpCZIntegrationRule->getIntegrationPoint(j));
+									GaussPoint &gp = *(xFemEl->mpCZIntegrationRules[czIndex]->getIntegrationPoint(j));
 
-							MaterialStatus *ms = xFemEl->mpCZMat->giveStatus(&gp);
-							if(ms == NULL) {
-								OOFEM_ERROR("In Element :: mapStateVariables(): Failed to fetch material status.\n");
+									MaterialStatus *ms = xFemEl->mpCZMat->giveStatus(&gp);
+									if(ms == NULL) {
+										OOFEM_ERROR("In Element :: mapStateVariables(): Failed to fetch material status.\n");
+									}
+
+									MaterialStatusMapperInterface *interface = dynamic_cast< MaterialStatusMapperInterface * >
+																			  ( xFemEl->mpCZMat->giveStatus(&gp) );
+
+									if ( interface == NULL ) {
+										OOFEM_ERROR("In XFEMStatic :: mapStateVariables(): Failed to fetch MaterialStatusMapperInterface.\n");
+									}
+
+
+									MaterialStatus *matStat = dynamic_cast<MaterialStatus*>(xFemEl->mpCZMat->giveStatus(&gp));
+									StructuralInterfaceMaterialStatus *siMatStat = dynamic_cast<StructuralInterfaceMaterialStatus*>( matStat );
+									if(siMatStat == NULL) {
+										OOFEM_ERROR("In XFEMStatic :: terminate: Failed to cast to StructuralInterfaceMaterialStatus.\n");
+									}
+									interface->MSMI_map(gp, *domain, *tStep, *siMatStat);
+
+								}
 							}
-
-							MaterialStatusMapperInterface *interface = dynamic_cast< MaterialStatusMapperInterface * >
-																	  ( xFemEl->mpCZMat->giveStatus(&gp) );
-
-							if ( interface == NULL ) {
-								OOFEM_ERROR("In XFEMStatic :: mapStateVariables(): Failed to fetch MaterialStatusMapperInterface.\n");
-							}
-
-
-							MaterialStatus *matStat = dynamic_cast<MaterialStatus*>(xFemEl->mpCZMat->giveStatus(&gp));
-							StructuralInterfaceMaterialStatus *siMatStat = dynamic_cast<StructuralInterfaceMaterialStatus*>( matStat );
-							if(siMatStat == NULL) {
-								OOFEM_ERROR("In XFEMStatic :: terminate: Failed to cast to StructuralInterfaceMaterialStatus.\n");
-							}
-							interface->MSMI_map(gp, *domain, *tStep, *siMatStat);
 
 						}
+
 					}
 				}
 

@@ -360,9 +360,10 @@ public:
     /**
      * Computes distance between the position represented by the reciever and a line segment represented by it's start
      * point iP1 and it's end point iP2.
+     * The local coordinate oXi is in the range [0,1]
      * Written by Erik Svenning, August 2013.
      */
-    double distance(const FloatArray &iP1, const FloatArray &iP2) const;
+    double distance(const FloatArray &iP1, const FloatArray &iP2, double &oXi) const;
 
     /**
      * Computes the square of distance between position represented by receiver and position given as parameter.

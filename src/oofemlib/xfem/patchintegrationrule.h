@@ -35,9 +35,6 @@
 #ifndef patchintegrationrule_h
 #define patchintegrationrule_h
 
-//#define PATCH_INT_DEBUG 1
-#define PATCH_INT_DEBUG 0
-
 #include "gaussintegrationrule.h"
 #include "classtype.h"
 
@@ -70,6 +67,8 @@ public:
     PatchIntegrationRule(int n, Element *e, const std :: vector< Triangle > &iTriangles);
     /// Destructor.
     virtual ~PatchIntegrationRule();
+
+    virtual const char *giveClassName() const { return "PatchIntegrationRule"; }
 
     // TODO: Give this function a better name.
     // Note: the fact that this function is inherited complicates name change.
