@@ -199,13 +199,20 @@ public:
     virtual void computeTangentialSignDist(double &oDist, const FloatArray &iPoint, double &oMinDistArcPos) const {OOFEM_ERROR("Triangle::computeTangentialSignDist -- not implemented");};
 
     double getArea();
-    void computeBarycentrCoor(FloatArray &answer);
+    void computeBarycentrCoor(FloatArray &answer) const;
     double getRadiusOfCircumCircle();
     void computeCenterOfCircumCircle(FloatArray &answer);
     virtual void printYourself();
     virtual int computeNumberOfIntersectionPoints(Element *element) { return 0; }
     bool isOrientedAnticlockwise();
     void changeToAnticlockwise();
+
+    /**
+     * Checks if the projection of the the point iP onto the
+     * triangle plane is inside the triangle.
+     * @author Erik Svenning
+     */
+    bool pointIsInTriangle(const FloatArray &iP) const;
 };
 
 class OOFEM_EXPORT Circle : public BasicGeometry

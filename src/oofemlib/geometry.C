@@ -332,7 +332,7 @@ double Triangle :: getRadiusOfCircumCircle()
            mVertices[0].distance( mVertices[2] ) / this->getArea();
 }
 
-void Triangle :: computeBarycentrCoor(FloatArray &answer)
+void Triangle :: computeBarycentrCoor(FloatArray &answer) const
 {
     double c = mVertices[0].distance( mVertices[1] );
     double a = mVertices[1].distance( mVertices[2] );
@@ -398,6 +398,77 @@ void Triangle :: changeToAnticlockwise()
 //    this->vertices->remove(3);
 //    this->vertices->put(2, p2e);
 //    this->vertices->put(3, p3e);
+}
+
+bool Triangle :: pointIsInTriangle(const FloatArray &iP) const
+{
+	// Compute triangle normal
+	FloatArray p1p2;
+	p1p2.beDifferenceOf(mVertices[1], mVertices[0]);
+
+	FloatArray p1p3;
+	p1p3.beDifferenceOf(mVertices[2], mVertices[0]);
+
+	FloatArray N;
+	N.beVectorProductOf(p1p2, p1p3);
+	N.normalize();
+
+	// Compute normal distance from triangle to point
+	FloatArray p1p;
+	p1p.beDifferenceOf(iP, mVertices[0]);
+	double d = p1p.dotProduct(N);
+
+	// Project point onto triangle plane
+	FloatArray pProj = iP;
+	pProj.add(-d, N);
+
+	// Check if the point is on the correct side of all edges
+
+	// Edge 1
+	FloatArray t1;
+	t1.beDifferenceOf(mVertices[1], mVertices[0]);
+	t1.normalize();
+	FloatArray a1;
+	a1.beVectorProductOf(N, t1);
+	a1.normalize();
+
+	FloatArray p1pProj;
+	p1pProj.beDifferenceOf(pProj, mVertices[0]);
+	if( p1pProj.dotProduct(a1) < 0.0 ) {
+		return false;
+	}
+
+
+	// Edge 2
+	FloatArray t2;
+	t2.beDifferenceOf(mVertices[2], mVertices[1]);
+	t2.normalize();
+	FloatArray a2;
+	a2.beVectorProductOf(N, t2);
+	a2.normalize();
+
+	FloatArray p2pProj;
+	p2pProj.beDifferenceOf(pProj, mVertices[1]);
+	if( p2pProj.dotProduct(a2) < 0.0 ) {
+		return false;
+	}
+
+
+	// Edge 3
+	FloatArray t3;
+	t3.beDifferenceOf(mVertices[0], mVertices[2]);
+	t3.normalize();
+	FloatArray a3;
+	a3.beVectorProductOf(N, t3);
+	a3.normalize();
+
+	FloatArray p3pProj;
+	p3pProj.beDifferenceOf(pProj, mVertices[2]);
+	if( p3pProj.dotProduct(a3) < 0.0 ) {
+		return false;
+	}
+
+	return true;
 }
 
 Circle :: Circle(FloatArray *center, double radius):
