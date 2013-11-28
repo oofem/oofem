@@ -457,7 +457,7 @@ int main(void) { return 0; }" HAVE_MACRO_VA_ARGS)
 if (USE_SHARED_LIB)
     set (OOFEM_EXPORT_HEADER "#include \"oofem_export.h\"")
     # For consistant library on linux and windows platforms.
-    #add_compiler_export_flags ()
+    add_compiler_export_flags ()
 else ()
     set (OOFEM_EXPORT_HEADER "#define OOFEM_EXPORT\n#define OOFEM_NO_EXPORT")
 endif ()
