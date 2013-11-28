@@ -1,0 +1,57 @@
+xfemMultipleCracks1.out
+XFEM simulation: A single element with three cracks and cohesive zones, loaded in shear. Written by Erik Svenning, Chalmers University of Technology.
+XFEMStatic nsteps 5 deltat 1.0 controlmode 1 rtolv 1.0e-6 MaxIter 25 minIter 2 stiffmode 0 nmodules 0 lstype 0 smtype 1 manrmsteps 1 forceremap 1
+#vtkxml tstep_all domain_all primvars 1 1 cellvars 1 1
+domain 2dPlaneStress
+OutputManager tstep_all dofman_all element_all
+ndofman 4 nelem 1 ncrosssect 1 nmat 2 nbc 2 nic 0 nltf 1 nxfemman 1
+node 1     coords 3  0        0        0       bc 2 1 1
+node 2     coords 3  1        0        0       bc 2 1 1
+node 3     coords 3  1        1        0       bc 2 2 1
+node 4     coords 3  0        1        0       bc 2 1 1
+PlaneStress2DXfem 1    nodes 4   1   2   3  4   mat 1 crosssect 1 nip 4 nlgeo 0 czmaterial 2
+SimpleCS 1 thick 1.0 material 1
+#
+#Linear elasticity
+IsoLE 1 d 0.0 E 1.0e5 n 0.0 tAlpha 0.0
+#Bilinear cohesive zone material
+intmatbilinearcz 2 kn 1.0e5 g1c 1.0e0 g2c 1.0e0 mu 0.0 gamma 0.5 sigf 1.e2
+#intmatbilinearcz 2 kn 1.0e6 g1c 1.0e4 g2c 1.5e4 mu 0.0 gamma 0.5 sigf 1.e4
+BoundaryCondition 1 loadTimeFunction 1 prescribedvalue 0.0
+BoundaryCondition 2 loadTimeFunction 1 prescribedvalue 0.2e-1
+#
+PiecewiseLinFunction 1 npoints 2 t 2 0.0 5.0 f(t) 2 0.0 1.0
+XfemManager 1 numberofenrichmentitems 3 numberofgppertri 1
+#DiscontinuousFunction 1
+#polygoncrack 1 points 6 -0.1 0.3 0.5 0.3 1.1 0.3
+# Crack 1
+crack 1 
+HeavisideFunction 1
+#DiscontinuousFunction 1
+polygoncrack 1 points 6 -0.5 0.3 -0.2 0.3 1.1 0.3
+###################################
+# Crack 2
+crack 2 
+HeavisideFunction 1
+#DiscontinuousFunction 1
+polygoncrack 2 points 6 0.5 1.1 0.5 0.5 0.5 -0.1
+###################################
+# Crack 3
+crack 3 
+HeavisideFunction 1
+#DiscontinuousFunction 1
+polygoncrack 2 points 8 -0.1 0.8 0.4 0.5 0.7 -0.1 0.8 -0.2
+###################################
+#
+#
+#%BEGIN_CHECK% tolerance 1.e-12
+## step 2
+#REACTION tStep 1. number 3 dof 1 value 5.0145e+01
+#REACTION tStep 1. number 4 dof 1 value -2.3630e+01
+## step 3
+#REACTION tStep 2. number 3 dof 1 value 4.8467e+01
+#REACTION tStep 2. number 4 dof 1 value -2.1225e+01
+## step 4
+#REACTION tStep 3. number 3 dof 1 value 4.1057e+01
+#REACTION tStep 3. number 4 dof 1 value -1.7607e+01
+#%END_CHECK%
