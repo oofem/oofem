@@ -549,14 +549,14 @@ bool XfemElementInterface :: XfemElementInterface_updateIntegrationRule()
     	// Therefore, we can set up integration
     	// points on each triangle.
 
-#if XFEM_DEBUG_VTK > 0
-        std :: stringstream str3;
-        int elIndex = this->element->giveGlobalNumber();
-        str3 << "TriEl" << elIndex << ".vtk";
-        std :: string name3 = str3.str();
+    	if( xMan->giveVtkDebug() ) {
+			std :: stringstream str3;
+			int elIndex = this->element->giveGlobalNumber();
+			str3 << "TriEl" << elIndex << ".vtk";
+			std :: string name3 = str3.str();
 
-        XFEMDebugTools :: WriteTrianglesToVTK(name3, allTri);
-#endif
+			XFEMDebugTools :: WriteTrianglesToVTK(name3, allTri);
+    	}
 
 
         int ruleNum = 1;
@@ -571,7 +571,7 @@ bool XfemElementInterface :: XfemElementInterface_updateIntegrationRule()
         }
 
 
-#if XFEM_DEBUG_VTK > 0
+    	if( xMan->giveVtkDebug() ) {
             ////////////////////////////////////////////////////////////////////////
             // Write CZ GP to VTK
 
@@ -599,13 +599,13 @@ bool XfemElementInterface :: XfemElementInterface_updateIntegrationRule()
             }
 
             std :: stringstream str;
+			int elIndex = this->element->giveGlobalNumber();
             str << "CZGaussPointsTime" << time << "El" << elIndex << ".vtk";
             std :: string name = str.str();
 
             XFEMDebugTools :: WritePointsToVTK(name, czGPCoord);
             ////////////////////////////////////////////////////////////////////////
-#endif
-
+    	}
     }
 
     return partitionSucceeded;

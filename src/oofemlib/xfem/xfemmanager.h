@@ -49,6 +49,7 @@
 #define _IFT_XfemManager_Name "xfemmanager"
 #define _IFT_XfemManager_numberOfEnrichmentItems "numberofenrichmentitems"
 #define _IFT_XfemManager_numberOfGpPerTri "numberofgppertri"
+#define _IFT_XfemManager_debugVTK "debugvtk"
 #define _IFT_XfemManager_VTKExport "vtkexport"
 #define _IFT_XfemManager_VTKExportFields "exportfields"
 //@}
@@ -108,6 +109,8 @@ protected:
     int mNumGpPerTri;
     bool doVTKExport;
 
+    /// If extra debug vtk files should be written.
+    bool mDebugVTK;
 
 public:
 
@@ -169,6 +172,9 @@ public:
 
     void propagateFronts();
     bool hasPropagatingFronts();
+
+    bool giveVtkDebug() const {return mDebugVTK;}
+    void setVtkDebug(bool iDebug) {mDebugVTK = iDebug;}
 };
 } // end namespace oofem
 #endif // xfemmanager_h

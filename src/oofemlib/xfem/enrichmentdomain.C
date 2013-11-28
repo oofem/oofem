@@ -214,9 +214,11 @@ bool EDCrack :: propagateTips(const std :: vector< TipPropagation > &iTipProp) {
     }
 
     // For debugging only
-    PolygonLine *pl = dynamic_cast< PolygonLine * >( bg );
-    if ( pl != NULL ) {
-        pl->printVTK();
+    if(mDebugVTK) {
+		PolygonLine *pl = dynamic_cast< PolygonLine * >( bg );
+		if ( pl != NULL ) {
+			pl->printVTK();
+		}
     }
 
     return true;

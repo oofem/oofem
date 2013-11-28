@@ -35,9 +35,6 @@
 #ifndef patchintegrationrule_h
 #define patchintegrationrule_h
 
-//#define PATCH_INT_DEBUG 1
-#define PATCH_INT_DEBUG 0
-
 #include "gaussintegrationrule.h"
 #include "classtype.h"
 

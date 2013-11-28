@@ -145,7 +145,7 @@ public:
 class OOFEM_EXPORT EDCrack : public EnrichmentDomain_BG
 {
 public:
-    EDCrack() { bg = new PolygonLine; }
+    EDCrack():mDebugVTK(false) { bg = new PolygonLine; }
     virtual ~EDCrack() { delete bg; }
 
     virtual IRResultType initializeFrom(InputRecord *ir) { return bg->initializeFrom(ir); }
@@ -156,6 +156,8 @@ public:
     virtual bool giveClosestTipInfo(const FloatArray &iCoords, TipInfo &oInfo) const;
     virtual bool giveTipInfos(std :: vector< TipInfo > &oInfo) const;
     virtual bool propagateTips(const std :: vector< TipPropagation > &iTipProp);
+private:
+    bool mDebugVTK;
 };
 
 

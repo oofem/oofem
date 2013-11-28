@@ -53,8 +53,6 @@ class Element;
 class XfemManager;
 class StructuralInterfaceMaterial;
 
-//#define XFEM_DEBUG_VTK 1
-
 /**
  * Provides Xfem interface for an element.
  * @author Erik Svenning

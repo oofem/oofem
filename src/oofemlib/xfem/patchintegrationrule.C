@@ -46,10 +46,8 @@
 
 #include "XFEMDebugTools.h"
 
-#if PATCH_INT_DEBUG > 0
- #include "timestep.h"
- #include "engngm.h"
-#endif
+#include "timestep.h"
+#include "engngm.h"
 
 namespace oofem {
 PatchIntegrationRule :: PatchIntegrationRule(int n, Element *e, const std :: vector< Triangle > &iTriangles) :
@@ -161,32 +159,34 @@ PatchIntegrationRule :: SetUpPointsOnTriangle(int nPoints, MaterialMode mode)
         delete [] coords;
     }
 
-#if PATCH_INT_DEBUG > 0
+    XfemManager *xMan = elem->giveDomain()->giveXfemManager();
+    if(xMan != NULL) {
+		if( xMan->giveVtkDebug() ) {
 
-    double time = 0.0;
+			double time = 0.0;
 
-    Element *el = this->elem;
-    if ( el != NULL ) {
-        Domain *dom = el->giveDomain();
-        if ( dom != NULL ) {
-            EngngModel *em = dom->giveEngngModel();
-            if ( em != NULL ) {
-                TimeStep *ts = em->giveCurrentStep();
-                if ( ts != NULL ) {
-                    time = ts->giveTargetTime();
-                }
-            }
-        }
+			Element *el = this->elem;
+			if ( el != NULL ) {
+				Domain *dom = el->giveDomain();
+				if ( dom != NULL ) {
+					EngngModel *em = dom->giveEngngModel();
+					if ( em != NULL ) {
+						TimeStep *ts = em->giveCurrentStep();
+						if ( ts != NULL ) {
+							time = ts->giveTargetTime();
+						}
+					}
+				}
+			}
+
+			int elIndex = this->elem->giveGlobalNumber();
+			std :: stringstream str;
+			str << "GaussPointsTime" << time << "El" << elIndex << ".vtk";
+			std :: string name = str.str();
+
+			XFEMDebugTools :: WritePointsToVTK(name, newGPCoord);
+		}
     }
-
-    int elIndex = this->elem->giveGlobalNumber();
-    std :: stringstream str;
-    str << "GaussPointsTime" << time << "El" << elIndex << ".vtk";
-    std :: string name = str.str();
-
-    XFEMDebugTools :: WritePointsToVTK(name, newGPCoord);
-#endif
-
     numberOfIntegrationPoints = pointsPassed;
 
 

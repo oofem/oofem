@@ -190,7 +190,7 @@ public:
 class OOFEM_EXPORT Triangle : public BasicGeometry
 {
 public:
-    Triangle(FloatArray *p1, FloatArray *p2, FloatArray *p3);
+    Triangle(const FloatArray &iP1, const FloatArray &iP2, const FloatArray &iP3);
     virtual ~Triangle() { }
 
     virtual BasicGeometry* Clone() {return new Triangle(*this);}
@@ -201,7 +201,7 @@ public:
     double getArea();
     void computeBarycentrCoor(FloatArray &answer) const;
     double getRadiusOfCircumCircle();
-    void computeCenterOfCircumCircle(FloatArray &answer);
+    void computeCenterOfCircumCircle(FloatArray &answer) const;
     virtual void printYourself();
     virtual int computeNumberOfIntersectionPoints(Element *element) { return 0; }
     bool isOrientedAnticlockwise();
@@ -227,9 +227,6 @@ public:
 
     virtual BasicGeometry* Clone() {return new Circle(*this);}
 
-    /// Computes the normal distance to the surface not to the center.
-    virtual double computeDistanceTo(const FloatArray *point);
-
     virtual void computeNormalSignDist(double &oDist, const FloatArray &iPoint) const;
 
     // Irrelevant for a closed interface: we can always consider ourselves to be "inside" a closed interface in
@@ -252,16 +249,12 @@ class OOFEM_EXPORT PolygonLine : public BasicGeometry
 {
     static int nextLineIdNumber;
     int stepInd;
+    bool mDebugVtk;
 public:
 	PolygonLine();
     virtual ~PolygonLine() { }
 
     virtual BasicGeometry* Clone() {return new PolygonLine(*this);}
-
-    /// Computes the normal distance to the surface not to the center.
-    virtual double computeDistanceTo(const FloatArray *point);
-
-    virtual double computeTangentialSignDist(FloatArray *point);
 
     virtual void computeNormalSignDist(double &oDist, const FloatArray &iPoint) const;
     virtual void computeTangentialSignDist(double &oDist, const FloatArray &iPoint, double &oMinDistArcPos) const;
