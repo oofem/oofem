@@ -570,7 +570,7 @@ LayeredCrossSection :: give2dPlateStiffMtrx(FloatMatrix &answer,
             rotTangent.at(5, 2) = c*s;
             rotTangent.at(5, 5) = c*c - s*s;
 #endif
-            layerMatrix.rotatedWith(rotTangent, 'n');
+            layerMatrix.rotatedWith(rotTangent, 't');
         }
 
         //
@@ -669,7 +669,7 @@ LayeredCrossSection :: give3dShellStiffMtrx(FloatMatrix &answer,
             rotTangent.at(5, 2) = c*s;
             rotTangent.at(5, 5) = c*c - s*s;
 #endif
-            layerMatrix.rotatedWith(rotTangent, 'n'); ///@todo Check transpose!
+            layerMatrix.rotatedWith(rotTangent, 't');
         }
 
         //
