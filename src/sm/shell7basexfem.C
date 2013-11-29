@@ -45,6 +45,8 @@
 
 namespace oofem {
 
+    const double DISC_DOF_SCALE_FAC = 1.0e-3;
+
 Shell7BaseXFEM :: Shell7BaseXFEM(int n, Domain *aDomain) : Shell7Base(n, aDomain), XfemElementInterface(this) 
 {
     czMat = NULL;
@@ -229,7 +231,7 @@ Shell7BaseXFEM :: evalCovarBaseVectorsAt(FloatArray &lCoords, FloatMatrix &gcov,
             double levelSet = lCoords.at(3) - dei->giveDelamXiCoord(); 
             dei->evaluateEnrFuncAt(ef, lCoords, levelSet);  
             
-            if ( ef[0] > 0.1 ) {           
+            if ( ef[0] > 0.1 ) {  
                 computeDiscGeneralizedStrainVector(dGenEps, lCoords, dei, tStep); 
                 Shell7Base :: evalCovarBaseVectorsAt(lCoords, gcovd, dGenEps);
                 gcov.add(ef[0],gcovd); 
@@ -246,6 +248,7 @@ Shell7BaseXFEM :: computeDiscGeneralizedStrainVector(FloatArray &answer, FloatAr
     IntArray eiDofIdArray;
     ei->giveEIDofIdArray(eiDofIdArray); 
     this->giveSolutionVector(solVecD, eiDofIdArray, tStep);  
+    solVecD.times(DISC_DOF_SCALE_FAC);
     FloatMatrix B;
     Shell7Base :: computeBmatrixAt(lCoords, B, 0, 0);
     Shell7Base :: computeGeneralizedStrainVectorNew(answer, solVecD, B);
@@ -355,6 +358,7 @@ Shell7BaseXFEM :: giveInternalForcesVector(FloatArray &answer, TimeStep *tStep, 
             
             dei->giveEIDofIdArray(eiDofIdArray); 
             this->giveSolutionVector(solVecD, eiDofIdArray, tStep);  
+            solVecD.times(DISC_DOF_SCALE_FAC);
             this->discComputeSectionalForces(temp, tStep, solVec, solVecD, dei);
 
             this->computeOrderingArray(ordering, activeDofs, dei);
@@ -404,7 +408,7 @@ Shell7BaseXFEM :: discComputeSectionalForces(FloatArray &answer, TimeStep *tStep
                 // Computation of nodal forces: f = B^t*[N M T Ms Ts]^t
                 ftemp.beTProductOf(B,sectionalForces);
                 double dV = this->computeVolumeAroundLayer(gp, layer);
-                f.add(dV*ef[0], ftemp);            
+                f.add(dV*ef[0]*DISC_DOF_SCALE_FAC, ftemp);            
             }
 
         }
@@ -549,9 +553,11 @@ Shell7BaseXFEM :: computeCohesiveTangent(FloatMatrix &answer, TimeStep *tStep)
         if ( dei != NULL && dei->isElementEnriched(this) && this->hasCohesiveZone(i) ) {
             dei->giveEIDofIdArray(eiDofIdArray); 
             this->giveSolutionVector(solVecD, eiDofIdArray, tStep);  
+            solVecD.times(DISC_DOF_SCALE_FAC);
             this->computeCohesiveTangentAt(temp, tStep, solVecD, dei);
             // Assemble part correpsonding to active dofs
             this->computeOrderingArray(orderingJ, activeDofsJ, dei); //
+            temp.times(DISC_DOF_SCALE_FAC*DISC_DOF_SCALE_FAC);
             tempRed.beSubMatrixOf(temp, activeDofsJ, activeDofsJ);
             answer.assemble(tempRed, orderingJ, orderingJ);
         }
@@ -639,6 +645,8 @@ Shell7BaseXFEM :: computeStiffnessMatrix(FloatMatrix &answer, MatResponseMode rM
         for ( int i = 0; i < iRule->giveNumberOfIntegrationPoints(); i++ ) {
             IntegrationPoint *ip = iRule->getIntegrationPoint(i);
             this->discComputeBulkTangentMatrix(KCC, KCD, KDD, ip, mat, layer, tStep);
+            KCD.times(DISC_DOF_SCALE_FAC);
+            KDD.times(DISC_DOF_SCALE_FAC*DISC_DOF_SCALE_FAC);
             lCoords = *ip->giveCoordinates();
 
             // Continuous part K_{c,c}
@@ -665,6 +673,7 @@ Shell7BaseXFEM :: computeStiffnessMatrix(FloatMatrix &answer, MatResponseMode rM
                     double levelSetM = lCoords.at(3) - deiM->giveDelamXiCoord();
                     deiM->evaluateEnrFuncAt(efM, lCoords, levelSetM); 
                     if ( efM[0] > 0.1 ) {
+                        
                         tempRed.beSubMatrixOf(KCD, activeDofsC, activeDofsArrays[m-1]);
                         answer.assemble(tempRed, orderingC, orderingArrays[m-1]);
                         tempRedT.beTranspositionOf(tempRed);
@@ -736,6 +745,7 @@ Shell7BaseXFEM :: computeStiffnessMatrix(FloatMatrix &answer, MatResponseMode rM
 
                         // con-dis & dis-con
                         if ( efM[0] > 0.1 ) {
+                            KCD.times(DISC_DOF_SCALE_FAC);
                             tempRed.beSubMatrixOf(KCD, activeDofsC, activeDofsJ);
                             answer.assemble(tempRed, orderingC, orderingJ);
                             tempRedT.beTranspositionOf(tempRed);
@@ -752,6 +762,7 @@ Shell7BaseXFEM :: computeStiffnessMatrix(FloatMatrix &answer, MatResponseMode rM
                                     IntArray &orderingK = orderingArrays[k-1];
                                     IntArray &activeDofsK = activeDofsArrays[k-1];
                                     tempRed.beSubMatrixOf(KDD, activeDofsJ, activeDofsK);
+                                    KDD.times(DISC_DOF_SCALE_FAC*DISC_DOF_SCALE_FAC);
                                     answer.assemble(tempRed, orderingJ, orderingK);
                                 }
                             }
@@ -1108,6 +1119,7 @@ Shell7BaseXFEM :: computeEdgeLoadVectorAt(FloatArray &answer, Load *load, int iE
                 double xi0 = dei->giveDelamXiCoord();
                 if ( xi > xi0 ) {
                     this->computeTractionForce(temp, iEdge, edgeLoad, tStep, mode);
+                    temp.times(DISC_DOF_SCALE_FAC);
                     // Assemble
                     this->computeOrderingArray(ordering, activeDofs, dei); 
                     tempRed.beSubArrayOf(temp, activeDofs);
@@ -1161,7 +1173,9 @@ Shell7BaseXFEM :: computeSurfaceLoadVectorAt(FloatArray &answer, Load *load,
                 if ( ef[0] > 0.1 ) {
                    dei->giveEIDofIdArray(eiDofIdArray); 
                    this->giveSolutionVector(solVecD, eiDofIdArray, tStep);  
+                   solVecD.times(DISC_DOF_SCALE_FAC);
                    this->computePressureForce(temp, solVecD, iSurf, surfLoad, tStep, mode);
+                   temp.times(DISC_DOF_SCALE_FAC);
                    // Assemble
                    this->computeOrderingArray(ordering, activeDofs, dei);
                    tempRed.beSubArrayOf(temp, activeDofs);
@@ -1216,6 +1230,7 @@ Shell7BaseXFEM :: vtkEvalUpdatedGlobalCoordinateAt(FloatArray &localCoords, int 
                 IntArray eiDofIdArray;
                 dei->giveEIDofIdArray(eiDofIdArray); 
                 this->giveSolutionVector(solVecD, eiDofIdArray, tStep); 
+                solVecD.times(DISC_DOF_SCALE_FAC);
                 this->giveUnknownsAt(localCoords, solVecD, xd, md, gamd, tStep);
                 double fac = ( zeta + 0.5 * gamd * zeta * zeta );
                 xtemp = xd;
