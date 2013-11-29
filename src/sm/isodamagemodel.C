@@ -338,6 +338,10 @@ IsotropicDamageMaterial :: giveThermalDilatationVector(FloatArray &answer,
     answer.at(3) = this->tempDillatCoeff;
 }
 
+double IsotropicDamageMaterial :: give(int aProperty, GaussPoint *gp)
+{
+    return linearElasticMaterial->give(aProperty,gp);
+}
 
 IRResultType
 IsotropicDamageMaterial :: initializeFrom(InputRecord *ir)

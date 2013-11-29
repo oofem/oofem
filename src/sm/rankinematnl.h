@@ -172,6 +172,9 @@ public:
 
     virtual void giveRealStressVector_PlaneStress(FloatArray &answer, GaussPoint *gp, const FloatArray &strainVector, TimeStep *atTime);
 
+    // Computes 1D stress
+    virtual void giveRealStressVector_1d(FloatArray &answer, GaussPoint *gp, const FloatArray &strainVector, TimeStep *atTime);
+
     virtual void updateBeforeNonlocAverage(const FloatArray &strainVector, GaussPoint *gp, TimeStep *atTime);
 
     virtual int hasBoundedSupport() { return 1; }
