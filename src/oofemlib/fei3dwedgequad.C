@@ -324,10 +324,75 @@ FEI3dWedgeQuad :: computeLocalSurfaceMapping(IntArray &nodes, int isurf)
 
 
 double
+FEI3dWedgeQuad :: surfaceEvalNormal(FloatArray &answer, int isurf, const FloatArray &lcoords, const FEICellGeometry &cellgeo)
+{
+    FloatArray a, b, dNdksi, dNdeta;
+    IntArray snodes;
+
+    this->computeLocalSurfaceMapping(snodes, isurf);
+
+    if ( snodes.giveSize() == 6 ) {
+        double l1, l2, l3;
+        l1 = lcoords.at(1);
+        l2 = lcoords.at(2);
+        l3 = 1.0 - l1 - l2;
+
+        dNdksi.resize(6);
+        dNdksi(0) = 4.0 * l1 - 1.0;
+        dNdksi(1) = 0.0;
+        dNdksi(2) = -1.0 * ( 4.0 * l3 - 1.0 );
+        dNdksi(3) = 4.0 * l2;
+        dNdksi(4) = -4.0 * l2;
+        dNdksi(5) = 4.0 * l3 - 4.0 * l1;
+
+        dNdeta.resize(6);
+        dNdeta(0) = 0.0;
+        dNdeta(1) = 4.0 * l2 - 1.0;
+        dNdeta(2) = -1.0 * ( 4.0 * l3 - 1.0 );
+        dNdeta(3) = 4.0 * l1;
+        dNdeta(4) = 4.0 * l3 - 4.0 * l2;
+        dNdeta(5) = -4.0 * l1;
+    } else {
+        double ksi, eta;
+        ksi = lcoords.at(1);
+        eta = lcoords.at(2);
+
+        dNdksi.resize(8);
+        dNdksi.at(1) =  0.25 * ( 1. + eta ) * ( 2.0 * ksi + eta );
+        dNdksi.at(2) = -0.25 * ( 1. + eta ) * ( -2.0 * ksi + eta );
+        dNdksi.at(3) = -0.25 * ( 1. - eta ) * ( -2.0 * ksi - eta );
+        dNdksi.at(4) =  0.25 * ( 1. - eta ) * ( 2.0 * ksi - eta );
+        dNdksi.at(5) = -ksi * ( 1. + eta );
+        dNdksi.at(6) = -0.5 * ( 1. - eta * eta );
+        dNdksi.at(7) = -ksi * ( 1. - eta );
+        dNdksi.at(8) =  0.5 * ( 1. - eta * eta );
+
+        dNdeta.resize(8);
+        dNdeta.at(1) =  0.25 * ( 1. + ksi ) * ( 2.0 * eta + ksi );
+        dNdeta.at(2) =  0.25 * ( 1. - ksi ) * ( 2.0 * eta - ksi );
+        dNdeta.at(3) = -0.25 * ( 1. - ksi ) * ( -2.0 * eta - ksi );
+        dNdeta.at(4) = -0.25 * ( 1. + ksi ) * ( -2.0 * eta + ksi );
+        dNdeta.at(5) =  0.5 * ( 1. - ksi * ksi );
+        dNdeta.at(6) = -eta * ( 1. - ksi );
+        dNdeta.at(7) = -0.5 * ( 1. - ksi * ksi );
+        dNdeta.at(8) = -eta * ( 1. + ksi );
+    }
+
+    for ( int i = 1; i <= snodes.giveSize(); ++i ) {
+        a.add(dNdksi.at(i), *cellgeo.giveVertexCoordinates(snodes.at(i)));
+        b.add(dNdeta.at(i), *cellgeo.giveVertexCoordinates(snodes.at(i)));
+    }
+
+    answer.beVectorProductOf(a, b);
+    return answer.normalize();
+}
+
+
+double
 FEI3dWedgeQuad :: surfaceGiveTransformationJacobian(int isurf, const FloatArray &lcoords, const FEICellGeometry &cellgeo)
 {
-    OOFEM_ERROR("FEI3dWedgeQuad :: surfaceGiveTransformationJacobian not implemented");
-    return 0;
+    FloatArray normal;
+    return this->surfaceEvalNormal(normal, isurf, lcoords, cellgeo);
 }
 
 
