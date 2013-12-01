@@ -195,7 +195,7 @@ VTKXMLExportModule :: giveCellType(Element *elem)
         vtkCellType = 10;
     } else if ( elemGT == EGT_tetra_2 ) {
         vtkCellType = 24;
-    } else if ( elemGT == EGT_quad_1 || EGT_quad_1_interface ) {
+    } else if ( elemGT == EGT_quad_1 || elemGT == EGT_quad_1_interface ) {
         vtkCellType = 9;
     } else if ( elemGT == EGT_quad_21_interface ) {
         vtkCellType = 30;
@@ -319,18 +319,18 @@ VTKXMLExportModule :: giveElementCell(IntArray &answer, Element *elem)
             answer.at(i) = elem->giveNode(i)->giveNumber();
         }
     } else if ( elemGT == EGT_quad_1_interface ) {int mapping [] = { 1, 2, 4, 3 };
-        nelemNodes = elem->giveNumberOfNodes();    
+        nelemNodes = elem->giveNumberOfNodes();
         answer.resize(nelemNodes);
         for ( int i = 1; i <= nelemNodes; i++ ) {
             answer.at(i) = elem->giveNode(mapping [ i - 1 ])->giveNumber() ;
-        }    
+        }
     //} else if ( elemGT == EGT_quad_21_interface ) {int mapping [] = { 1, 2, 5, 4, 3, 6 };
     } else if ( elemGT == EGT_quad_21_interface ) {int mapping [] = { 1, 3, 2, 5, 6, 4 }; /// this is not the same ordering as defined in the VTK reference (typo?)
-        nelemNodes = elem->giveNumberOfNodes();  
+        nelemNodes = elem->giveNumberOfNodes();
         answer.resize(nelemNodes);
         for ( int i = 1; i <= nelemNodes; i++ ) {
             answer.at(i) = elem->giveNode(mapping [ i - 1 ])->giveNumber() ;
-        }    
+        }
     } else {
         OOFEM_ERROR("VTKXMLExportModule: unsupported element geometry type");
     }
