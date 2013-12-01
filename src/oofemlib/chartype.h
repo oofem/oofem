@@ -108,7 +108,8 @@ namespace oofem {
     ENUM_ITEM_WITH_VALUE(LaplacePressureVector,216)		                 \
     ENUM_ITEM_WITH_VALUE(LaplaceVelocityVector,217)		                 \
     ENUM_ITEM_WITH_VALUE(DivergenceVelocityVector,218)		                 \
-    ENUM_ITEM_WITH_VALUE(QMhat_invQTpressureVector,219)
+    ENUM_ITEM_WITH_VALUE(QMhat_invQTpressureVector,219)						\
+	ENUM_ITEM_WITH_VALUE(PrescribedPressureRhsVector, 220)
 
 
 enum CharType {

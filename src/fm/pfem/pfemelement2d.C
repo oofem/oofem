@@ -524,6 +524,44 @@ PFEMElement2d :: computePrescribedRhsVector(FloatArray &answer, TimeStep *tStep,
     return;
 }
 
+// NOT FINISHED !!! NOT IN USE, BECAUSE NOT NEEDED
+void
+PFEMElement2d:: computePrescribedPressureRhsVector(FloatArray &answer, TimeStep *tStep, ValueModeType mode)
+{
+	answer.resize(6);
+	answer.zero();
+
+	int i;
+	int numberOfGaussPoints = 3;
+    double dV;
+    FloatMatrix T;
+    FloatArray globalIPcoords;
+	    
+    GaussIntegrationRule iRule(1, this, 1, 1);
+    iRule.setUpIntegrationPoints(_Line, numberOfGaussPoints, _Unknown);
+    GaussPoint *gp;
+    FloatArray reducedAnswer, force, ntf, N, temp;
+    IntArray mask;
+    FloatMatrix Nmtrx;
+	    
+	FloatArray p_presq;
+    this->computeVectorOf(EID_ConservationEquation, VM_Total, tStep, p_presq);
+
+	double p_norm = p_presq.computeNorm();
+	if (p_norm > 1.e-2)
+		int kl = 1;
+
+	for ( int iEdge = 1; iEdge <= 3; iEdge++ ) {
+        reducedAnswer.zero();
+        for ( i = 0; i < iRule.giveNumberOfIntegrationPoints(); i++ ) {
+			gp  = iRule.getIntegrationPoint(i);
+			this->computeEgdeNVectorAt(N, iEdge, gp);
+            this->computeEdgeNMatrixAt(Nmtrx, iEdge, gp);
+            dV  = this->computeEdgeVolumeAround(gp, iEdge);
+		}
+	}
+}
+
 void
 PFEMElement2d :: giveEdgeDofMapping(IntArray &answer, int iEdge) const
 {

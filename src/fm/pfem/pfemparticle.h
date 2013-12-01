@@ -58,8 +58,11 @@ class IntArray;
 class PFEMParticle : public Node
 {
 private:
-    /// a particle is not building any element
+    /// the particle is not building any element
     bool free;
+
+	/// the particle is a part of alpha-shape
+	bool alphaShapeFlag;
 
 public:
     /**
@@ -89,6 +92,11 @@ public:
     bool isFree() { return free; }
     /// Sets the free-property flag
     virtual void setFree(bool newFlag = true) { free = newFlag; }
+
+	/// Returns true if the particle is on alpha shape
+	bool isOnAlphaShape() { return alphaShapeFlag; }
+	/// Sets the alphaShapeFlag
+	virtual void setOnAlphaShape(bool newFlag = true) { alphaShapeFlag = newFlag; }
 
     virtual void printOutputAt(FILE *stream, TimeStep *stepN);
 

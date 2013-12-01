@@ -478,9 +478,10 @@ PFEM :: solveYourselfAt(TimeStep *tStep)
 
         rhs.times(deltaT);
 
-        this->assembleVectorFromElements( rhs, tStep, EID_AuxMomentumBalance, MassAuxVelocityVector, VM_Total, vns, this->giveDomain(1) );
+        this->assembleVectorFromElements( rhs, tStep, EID_MomentumBalance, MassAuxVelocityVector, VM_Total, vns, this->giveDomain(1) );
 
-
+		// deactivated, problem of prescribed pressure solved by improvement in alpha shape free surface definition
+		// this->assembleVectorFromElements(rhs, tStep, EID_MomentumBalance, PrescribedPressureRhsVector, VM_Total, vns, this->giveDomain(1) );
 
         this->giveNumericalMethod(tStep);
 

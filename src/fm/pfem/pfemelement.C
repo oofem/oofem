@@ -193,6 +193,8 @@ PFEMElement ::  giveCharacteristicVector(FloatArray &answer, CharType mtrx, Valu
         answer.negated();
     } else if ( mtrx ==  PrescribedRhsVector ) {
         this->computePrescribedRhsVector(answer, tStep, mode);
+	} else if ( mtrx == PrescribedPressureRhsVector) {
+		this->computePrescribedPressureRhsVector(answer, tStep, mode);
     } else {
         _error("giveCharacteristicVector: Unknown Type of characteristic mtrx.");
     }

@@ -42,6 +42,7 @@
 #include "verbose.h"
 #include "timer.h"
 #include "mathfem.h"
+#include "pfemparticle.h"
 
 #define _USING_OCTREE
 
@@ -154,14 +155,17 @@ void DelaunayTriangulator :: writeMesh()
         num++;
     }
 
-    // first reset all pressure boundary conditions
+    // first reset all pressure boundary conditions and alphaShapeProperty
     for ( int i = 1; i <= domain->giveNumberOfDofManagers(); i++ ) {
         Dof *jDof = domain->giveDofManager(i)->giveDofWithID(P_f);
         jDof->setBcId(0);
+
+		dynamic_cast<PFEMParticle*>(domain->giveDofManager(i))->setOnAlphaShape(false);
     }
 
     // and then prescribe zero pressure on the free surface
     for ( elIT = alphaShapeEdgeList.begin(); elIT != alphaShapeEdgeList.end(); elIT++ ) {
+		bool oneIsFree = false;
         for ( int i = 1; i <= 2; i++ ) {
             hasNoBcOnItself = true;
             dman = domain->giveDofManager( ( * elIT )->giveNode(i) );
@@ -176,9 +180,16 @@ void DelaunayTriangulator :: writeMesh()
             }
 
             if ( hasNoBcOnItself ) {
-                dman->giveDofWithID(P_f)->setBcId(2);
+				oneIsFree = true;
+                //dman->giveDofWithID(P_f)->setBcId(2);
             }
+			dynamic_cast<PFEMParticle*>(dman)->setOnAlphaShape();
         }
+		if (oneIsFree)
+		{
+			domain->giveDofManager( ( * elIT )->giveNode(1) )->giveDofWithID(P_f)->setBcId(2);
+			domain->giveDofManager( ( * elIT )->giveNode(2) )->giveDofWithID(P_f)->setBcId(2);
+		}
     }
 }
 

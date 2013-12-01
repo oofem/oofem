@@ -162,6 +162,11 @@ protected:
     virtual void computePFEMSubstitutionMatrix(FloatMatrix &answer,  TimeStep *atTime) = 0; //S
     /// Calculates the prescribed velocity vector for the right hand side of the pressure equation
     virtual void computePrescribedRhsVector(FloatArray &answer, TimeStep *tStep, ValueModeType mode) = 0;
+	/**
+	 * Calculates the prescribed pressure vector for the right hand side of the velocity equation
+	 * Implementation not finished yet. At the moment not needed due to improved boundary condition setting in alpha shape
+	 */ 
+	virtual void computePrescribedPressureRhsVector(FloatArray &answer, TimeStep *tStep, ValueModeType mode) = 0;
 };
 } // end namespace oofem
 #endif // pfemelement_h

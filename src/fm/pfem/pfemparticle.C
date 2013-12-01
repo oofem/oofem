@@ -49,7 +49,7 @@ REGISTER_DofManager(PFEMParticle);
 /**
  * Constructor. Creates a particle with number n, belonging to aDomain.
  */
-PFEMParticle :: PFEMParticle(int n, Domain *aDomain) : Node(n, aDomain), free(true)
+PFEMParticle :: PFEMParticle(int n, Domain *aDomain) : Node(n, aDomain), free(true), alphaShapeFlag(false)
 { }
 //from hanging node
 
