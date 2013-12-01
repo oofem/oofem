@@ -263,17 +263,23 @@ double FEI3dWedgeQuad :: edgeGiveTransformationJacobian(int iedge, const FloatAr
 void
 FEI3dWedgeQuad :: surfaceEvalN(FloatArray &answer, int isurf, const FloatArray &lcoords, const FEICellGeometry &cellgeo)
 {
-    double ksi = lcoords.at(1);
-    double eta = lcoords.at(2);
-
     if ( isurf <= 2 ) {
-        ///@todo Definitely wrong: There should be 6 basis functions!
-        OOFEM_ERROR("FIXME: Code likely buggy here");
-        answer.resize(3);
-        answer.at(1) = ksi;
-        answer.at(2) = eta;
-        answer.at(3) = 1.0 - ksi - eta;
+        double l1, l2, l3;
+        l1 = lcoords.at(1);
+        l2 = lcoords.at(2);
+        l3 = 1.0 - l1 - l2;
+
+        answer.resize(6);
+        answer.at(1) = ( 2. * l1 - 1. ) * l1;
+        answer.at(2) = ( 2. * l2 - 1. ) * l2;
+        answer.at(3) = ( 2. * l3 - 1. ) * l3;
+        answer.at(4) = 4. * l1 * l2;
+        answer.at(5) = 4. * l2 * l3;
+        answer.at(6) = 4. * l3 * l1;
     } else {
+        double ksi = lcoords.at(1);
+        double eta = lcoords.at(2);
+
         answer.resize(8);
         answer.at(1) = ( 1. + ksi ) * ( 1. + eta ) * 0.25 * ( ksi + eta - 1. );
         answer.at(2) = ( 1. - ksi ) * ( 1. + eta ) * 0.25 * ( -ksi + eta - 1. );
