@@ -1218,7 +1218,8 @@ Delamination :: appendInputRecords(DynamicDataReader &oDR)
 
 Crack :: Crack(int n, XfemManager *xm, Domain *aDomain) : EnrichmentItem(n, xm, aDomain)
 {
-    mpEnrichesDofsWithIdArray->setValues(3, D_u, D_v, D_w);
+    //mpEnrichesDofsWithIdArray->setValues(3, D_u, D_v, D_w);
+    mpEnrichesDofsWithIdArray->setValues(6, D_u, D_v, D_w, W_u, W_v, W_w);
 }
 
 IRResultType Crack :: initializeFrom(InputRecord *ir)

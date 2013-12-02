@@ -85,6 +85,7 @@ protected:
     // Tangent matrices
     void computeLambdaGMatricesDis(FloatMatrix lambdaD [ 3 ], double zeta);
     void computeLambdaNMatrixDis(FloatMatrix &lambda_xd, double zeta);
+    virtual void computeStiffnessMatrixOLD(FloatMatrix &answer, MatResponseMode rMode, TimeStep *tStep);
     virtual void computeStiffnessMatrix(FloatMatrix &answer, MatResponseMode rMode, TimeStep *tStep);
     virtual void discComputeBulkTangentMatrix(FloatMatrix &KCC, FloatMatrix &KCD, FloatMatrix &KDD, IntegrationPoint *ip, Material *mat, int layer, TimeStep *tStep);
 
