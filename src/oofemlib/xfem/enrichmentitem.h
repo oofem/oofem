@@ -200,6 +200,7 @@ public:
     PropagationLaw *givePropagationLaw() { return this->mpPropagationLaw; };
     bool hasPropagationLaw() { return this->mPropLawIndex != 0; };
 
+    virtual void postInitialize();
     void giveSubPolygon(std :: vector< FloatArray > &oPoints, const double &iXiStart, const double &iXiEnd) const;
 
 protected:

@@ -64,6 +64,9 @@
 #define _IFT_NRSolver_rtolv "rtolv"
 #define _IFT_NRSolver_rtolf "rtolf"
 #define _IFT_NRSolver_rtold "rtold"
+#define _IFT_NRSolver_constrainedNR "constrainednr"
+#define _IFT_NRSolver_constrainedNRalpha "constrainednralpha"
+#define _IFT_NRSolver_constrainedNRminiter "constrainednrminiter"
 //@}
 
 namespace oofem {
@@ -128,9 +131,17 @@ private:
     /// Computed reactions. They are stored in order to print them in printState method.
     FloatArray lastReactions;
     /// Flag indicating whether to use line-search
-    int lsFlag;
+    bool lsFlag;
     /// Line search solver
     LineSearchNM *linesearchSolver;
+    /// Constrained Newton - updates the solution by a constant factor times the increment.
+    /// Is only activated if the sum of squared residuals are larger at the current iteration than in the previous one.
+    /// Flag indicating whether to use constrained Newton
+    bool constrainedNRFlag;
+    /// Scale factor for dX, dX_new = alpha * dX
+    double constrainedNRalpha;
+    /// Minimum number of iterations before constraint is activated
+    int constrainedNRminiter;
 
 #ifdef __PETSC_MODULE
     IS prescribedEgsIS;
@@ -177,6 +188,7 @@ public:
 protected:
     /// Constructs and returns a line search solver.
     LineSearchNM *giveLineSearchSolver();
+
     /// Initiates prescribed equations
     void initPrescribedEqs();
     void applyConstraintsToStiffness(SparseMtrx *k);
@@ -189,6 +201,11 @@ protected:
      */
     bool checkConvergence(FloatArray &RT, FloatArray &F, FloatArray &rhs, FloatArray &ddX, FloatArray &X,
                           double RRT, const FloatArray &internalForcesEBENorm, int nite, bool &errorOutOfRange, TimeStep *tNow);
+
+    ///NEW JB
+    FloatArray forceErrVec;
+    FloatArray forceErrVecOld;
+
 };
 } // end namespace oofem
 #endif // nrsolver_h

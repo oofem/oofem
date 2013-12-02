@@ -1031,6 +1031,13 @@ void EnrichmentItem :: giveSubPolygon(std :: vector< FloatArray > &oPoints, cons
 }
 
 
+void EnrichmentItem :: postInitialize() 
+{
+    ///@todo is there anything more that should be checked?
+    this->mpEnrichmentDomain->postInitialize( this->giveDomain() );
+}
+
+
 Inclusion :: Inclusion(int n, XfemManager *xm, Domain *aDomain) :
     EnrichmentItem(n, xm, aDomain),
     mpCrossSection(NULL)

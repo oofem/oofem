@@ -289,4 +289,14 @@ bool XfemManager :: hasPropagatingFronts()
 
     return false;
 }
+
+
+void XfemManager :: postInitialize() 
+{
+    for ( int i = 1; i <= enrichmentItemList->giveSize(); i++ ) {
+        this->giveEnrichmentItem(i)->postInitialize();
+    }
+    
+    
+}
 } // end namespace oofem

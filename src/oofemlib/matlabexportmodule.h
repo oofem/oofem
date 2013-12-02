@@ -49,10 +49,12 @@
 // Reaction forces
 #define _IFT_MatlabExportModule_ReactionForces "reactionforces"
 #define _IFT_MatlabExportModule_DofManList "dofmanlist"
+#define _IFT_MatlabExportModule_ReactionForcesNodeSet "reactionforcesnodeset"
 // Integration points
 #define _IFT_MatlabExportModule_IntegrationPoints "integrationpoints"
 #define _IFT_MatlabExportModule_internalVarsToExport "internalvars"
 #define _IFT_MatlabExportModule_ElementList "elementlist"
+#define _IFT_MatlabExportModule_IPFieldsElSet "ipelset"
 //@}
 
 namespace oofem {
@@ -61,6 +63,7 @@ namespace oofem {
  * along with the pertinent results.
  *
  * @author Carl Sandström
+ * @author Jim Brouzoulis
  */
 class OOFEM_EXPORT MatlabExportModule : public ExportModule
 {
@@ -85,6 +88,9 @@ protected:
     bool exportSpecials;
     bool exportReactionForces;
     bool exportIntegrationPointFields;
+
+    int reactionForcesNodeSet;
+    int IPFieldsElSet;
 
 private:
     void computeArea();

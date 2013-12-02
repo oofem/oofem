@@ -1153,11 +1153,14 @@ Domain :: postInitialize()
     }
     
  
-    //----
+    if ( this->hasXfemManager() ) {
+        this->giveXfemManager()->postInitialize();
+    }
 
     for ( int i = 1; i <= this->elementList->giveSize(); i++ ) {
         this->elementList->at(i)->postInitialize();
     }
+
     for ( int i = 1; i <= this->bcList->giveSize(); i++ ) {
         this->bcList->at(i)->postInitialize();
     }

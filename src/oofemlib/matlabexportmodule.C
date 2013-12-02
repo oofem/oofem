@@ -48,6 +48,7 @@
 #include "solutionbasedshapefunction.h"
 #include "timestep.h"
 #include "classfactory.h"
+#include "set.h"
 
 #ifdef __FM_MODULE
 #include "tr21stokes.h"
@@ -74,6 +75,8 @@ REGISTER_ExportModule( MatlabExportModule )
     exportReactionForces = false;
     reactionForcesDofManList.resize(0);
     exportIntegrationPointFields = false;
+    reactionForcesNodeSet = 0;
+    IPFieldsElSet = 0;
     elList.resize(0);
 }
 
@@ -94,18 +97,25 @@ MatlabExportModule :: initializeFrom(InputRecord *ir)
 	exportSpecials = ir->hasField(_IFT_MatlabExportModule_specials);
 
     exportReactionForces = ir->hasField(_IFT_MatlabExportModule_ReactionForces);
+    reactionForcesDofManList.resize(0);
     if ( exportReactionForces ) {
        IR_GIVE_OPTIONAL_FIELD(ir, reactionForcesDofManList, _IFT_MatlabExportModule_DofManList);
+       this->reactionForcesNodeSet = 0;
+       IR_GIVE_OPTIONAL_FIELD(ir, this->reactionForcesNodeSet, _IFT_MatlabExportModule_ReactionForcesNodeSet);
     }
 
     exportIntegrationPointFields = ir->hasField(_IFT_MatlabExportModule_IntegrationPoints);
+    elList.resize(0);
     if ( exportIntegrationPointFields ) {
        IR_GIVE_FIELD(ir, internalVarsToExport, _IFT_MatlabExportModule_internalVarsToExport);
        IR_GIVE_OPTIONAL_FIELD(ir, elList, _IFT_MatlabExportModule_ElementList);
+       IPFieldsElSet = 0;
+       IR_GIVE_OPTIONAL_FIELD(ir, IPFieldsElSet, _IFT_MatlabExportModule_IPFieldsElSet);
     }
 
 	return IRRT_OK;
 }
+
 
 
 void
@@ -148,6 +158,9 @@ MatlabExportModule :: computeArea()
 void
 MatlabExportModule :: doOutput(TimeStep *tStep, bool forcedOutput)
 {
+
+    printf("Doing matlab export...\n");
+
 	FILE *FID;
 	FID = giveOutputStream(tStep);
 	Domain *domain  = emodel->giveDomain(1);
@@ -402,6 +415,14 @@ MatlabExportModule :: doOutputReactionForces(TimeStep *tStep,    FILE *FID)
         OOFEM_ERROR("MatlabExportModule :: doOutputReactionForces - Cannot export reaction forces - only implemented for structural problems.");
     }
 
+    // Set the nodes and elements to export based on sets
+    if ( this->reactionForcesNodeSet > 0 ) {
+        Set *set = domain->giveSet( this->reactionForcesNodeSet );
+        reactionForcesDofManList = set->giveNodeList();
+        reactionForcesDofManList.printYourself();
+    }
+
+
     int numDofManToExport = this->reactionForcesDofManList.giveSize();
     if ( numDofManToExport == 0 ) { // No dofMan's given - export every dMan with reaction forces
 
@@ -493,8 +514,13 @@ MatlabExportModule :: doOutputIntegrationPointFields(TimeStep *tStep,    FILE *F
     }
     fprintf( FID, "];\n" );
 
-
     
+
+
+    if ( this->IPFieldsElSet > 0 ) {
+        Set *set = domain->giveSet( this->IPFieldsElSet );
+        elList = set->giveElementList();
+    }
 
    
     FloatArray valueArray;
@@ -588,15 +614,18 @@ MatlabExportModule :: giveOutputStream(TimeStep *tStep)
 
 	size_t foundDot;
 	foundDot = fileName.rfind(".");
-    fileName.replace(foundDot, 1, "_");
-    //fileName.erase(foundDot);
 
-/* 	fileName.erase(foundDot);
+    // CARL
+    //fileName.replace(foundDot, 1, "_"); 
+ 
+    // JIM
+ 	//fileName.erase(foundDot);
+    fileName.replace(foundDot, 1, "_");
 
     char fext[100];
     sprintf( fext, "_m%d_%d", this->number, tStep->giveNumber() );
     fileName += fext;
-*/
+
 
 	functionname = fileName;
 
