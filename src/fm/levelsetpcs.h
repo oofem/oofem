@@ -157,6 +157,7 @@ public:
     virtual void updateYourself(TimeStep *tStep) { previousLevelSetValues = levelSetValues; }
     virtual double computeCriticalTimeStep(TimeStep *tStep);
     virtual IRResultType initializeFrom(InputRecord *ir);
+    virtual void giveInputRecord(DynamicInputRecord &input);
     virtual void reinitialization(TimeStep *atTime);
 
     virtual void giveMaterialMixtureAt(FloatArray &answer, FloatArray &position);

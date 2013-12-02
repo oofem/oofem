@@ -117,8 +117,6 @@ public:
     Tet21Stokes(int n, Domain *d);
     virtual ~Tet21Stokes();
 
-    virtual IRResultType initializeFrom(InputRecord *ir);
-
     virtual void computeGaussPoints();
     virtual void giveCharacteristicVector(FloatArray &answer, CharType type, ValueModeType mode, TimeStep *tStep);
     virtual void giveCharacteristicMatrix(FloatMatrix &answer, CharType type, TimeStep *tStep);

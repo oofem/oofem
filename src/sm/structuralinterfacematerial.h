@@ -88,15 +88,11 @@ public:
      * @param n Material number.
      * @param d Domain to which new material will belong.
      */
-    StructuralInterfaceMaterial(int n, Domain *d) : Material(n, d) 
-    {
-        this->useNumericalTangent = false;
-    }
+    StructuralInterfaceMaterial(int n, Domain *d);
     /// Destructor.
     virtual ~StructuralInterfaceMaterial() { }
 
 
-    //@{
     /**
      * Computes the first Piola-Kirchoff traction vector for given total jump/gap and integration point.
      * The total gap is computed from the displacement field at the given time step.
@@ -105,7 +101,6 @@ public:
      * The temporary history variables are moved into equilibrium ones after global structure
      * equilibrium has been reached by iteration process.
      * @param answer Contains result.
-     * @param form Material response form.
      * @param gp Integration point.
      * @param reducedF Deformation gradient in in reduced form.
      * @param tStep Current time step (most models are able to respond only when atTime is current time step).
@@ -120,44 +115,14 @@ public:
         const FloatMatrix &F, TimeStep *tStep) 
         { _error("giveFirstPKTraction_3d: not implemented "); }
 
-    virtual void giveEngTraction_1d(FloatArray &answer, GaussPoint *gp, const FloatArray &jump, TimeStep *tStep)
-        { 
-            FloatArray modifiedJump(3);
-            modifiedJump.setValues(3, 0.0, 0.0, jump.at(3));
-            this->giveEngTraction_3d(answer, gp, modifiedJump, tStep);
-        }
-    virtual void giveEngTraction_2d(FloatArray &answer, GaussPoint *gp, const FloatArray &jump, TimeStep *tStep)
-        { 
-            FloatArray modifiedJump(3);
-            modifiedJump.setValues(3, jump.at(1), 0.0, jump.at(3));
-            this->giveEngTraction_3d(answer, gp, modifiedJump, tStep);
-        }
-    virtual void giveEngTraction_3d(FloatArray &answer, GaussPoint *gp, const FloatArray &jump, TimeStep *tStep)
-        { 
-            //_error("giveEngTraction_3d: not implemented "); 
-            FloatMatrix F(3,3);
-            F.beUnitMatrix();
-            giveFirstPKTraction_3d(answer, gp, jump, F, tStep); 
-        }
-    
-    
-    
-        /**
-     * Computes the stiffness matrix of receiver in given integration point, respecting its history.
-     * The algorithm should use temporary or equilibrium  history variables stored in integration point status
-     * to compute and return required result.
-     * @param answer Contains result.
-     * @param form Material response form.
-     * @param mode Material response mode.
-     * @param gp Integration point.
-     * @param tStep Time step (most models are able to respond only when atTime is current time step).
-     */
+    virtual void giveEngTraction_1d(FloatArray &answer, GaussPoint *gp, const FloatArray &jump, TimeStep *tStep);
+    virtual void giveEngTraction_2d(FloatArray &answer, GaussPoint *gp, const FloatArray &jump, TimeStep *tStep);
+    virtual void giveEngTraction_3d(FloatArray &answer, GaussPoint *gp, const FloatArray &jump, TimeStep *tStep);
 
     /**
      * Gives the tangent: @f$ \frac{\partial T}{\partial j} @f$.
      * Where T is the first PK traction and j is the spatial jump between the two sides, x(+) - x(-)
      * @param answer The computed tangent from the last evaluated first-PK-stress.
-     * @param form Material response form.
      * @param rMode Material mode.
      * @param gp Gauss point.
      * @param tStep Time step.
@@ -166,49 +131,15 @@ public:
         { _error("give1dStiffnessMatrix_dTdj: not implemented "); }
     virtual void give2dStiffnessMatrix_dTdj(FloatMatrix &answer, MatResponseMode rMode, GaussPoint *gp, TimeStep *tStep)
         { _error("give2dStiffnessMatrix_dTdj: not implemented "); }
-    virtual void give3dStiffnessMatrix_dTdj(FloatMatrix &answer, MatResponseMode rMode, GaussPoint *gp, TimeStep *tStep)
-        { _error("give3dStiffnessMatrix_dTdj: not implemented "); }
+    virtual void give3dStiffnessMatrix_dTdj(FloatMatrix &answer, MatResponseMode rMode, GaussPoint *gp, TimeStep *tStep);
 
-    virtual void give1dStiffnessMatrix_Eng(FloatMatrix &answer,  MatResponseMode mode, GaussPoint *gp, TimeStep *tStep)
-        { 
-            give3dStiffnessMatrix_Eng(answer, mode, gp, tStep);
-        }
-    virtual void give2dStiffnessMatrix_Eng(FloatMatrix &answer,  MatResponseMode mode, GaussPoint *gp, TimeStep *tStep)
-        { 
-            FloatMatrix answer3D;
-            give3dStiffnessMatrix_Eng(answer3D, mode, gp, tStep);
-            IntArray mask;
-            mask.setValues(2,  1, 3);
-            answer.beSubMatrixOf(answer3D,mask,mask);
-
-
-            //debug
-            printf("analytical tangent \n");
-            answer3D.printYourself();
-
-            FloatMatrix answerNum;
-            StructuralInterfaceMaterial :: giveStiffnessMatrix_dTdj_Num(answerNum, mode, gp, tStep);
-            printf("numerical tangent \n");
-            answerNum.printYourself();
-
-            FloatMatrix comp;
-            comp = answer3D;
-            comp.subtract(answerNum);
-            printf("difference in numerical tangent to mat method \n");
-            comp.printYourself();
-
-        }
-  
-    virtual void give3dStiffnessMatrix_Eng(FloatMatrix &answer,  MatResponseMode mode, GaussPoint *gp, TimeStep *tStep)
-        { 
-            //_error("give3dStiffnessMatrix_Eng: not implemented ");
-            give3dStiffnessMatrix_dTdj(answer, mode, gp, tStep);
-        }
+    virtual void give1dStiffnessMatrix_Eng(FloatMatrix &answer,  MatResponseMode mode, GaussPoint *gp, TimeStep *tStep);
+    virtual void give2dStiffnessMatrix_Eng(FloatMatrix &answer,  MatResponseMode mode, GaussPoint *gp, TimeStep *tStep);
+    virtual void give3dStiffnessMatrix_Eng(FloatMatrix &answer,  MatResponseMode mode, GaussPoint *gp, TimeStep *tStep);
 
     // Numerical stiffness (intended to work regardless of dimension)
     virtual void giveStiffnessMatrix_dTdj_Num(FloatMatrix &answer, MatResponseMode rMode, GaussPoint *gp, TimeStep *tStep);
-        
-    //@}
+
 
     /**
      * Tells if the model has implemented analytical tangent stiffness.
@@ -228,8 +159,6 @@ public:
     bool useNumericalTangent; ///@todo make private
 
 protected:
-   
-    
     /**
      * Transforms traction vector into another coordinate system.
      * @param answer Transformed traction vector
@@ -242,7 +171,6 @@ protected:
     static void transformTractionTo(FloatArray &answer, const FloatMatrix &base,
                                  const FloatArray &strainVector, bool transpose = false);
 
-
     /**
      * Computes jump vector transformation matrix from standard vector transformation matrix.
      * @param answer Transformation matrix for strain vector.
@@ -252,8 +180,6 @@ protected:
      */
     static void giveJumpTranformationMtrx(FloatMatrix &answer, const FloatMatrix &base,
                                            bool transpose = false);
-   
-
 
 };
 } // end namespace oofem

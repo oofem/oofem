@@ -160,7 +160,7 @@ protected:
     bool permanentNonlocTableFlag;
 
     /// Type characterizing the nonlocal weight function.
-    enum WeightFunctionType { WFT_Unknown, WFT_Bell, WFT_Gauss, WFT_Green, WFT_Uniform, WFT_UniformOverElement };
+    enum WeightFunctionType { WFT_Unknown, WFT_Bell, WFT_Gauss, WFT_Green, WFT_Uniform, WFT_UniformOverElement, WFT_Green_21 };
     /// Parameter specifying the type of nonlocal weight function.
     WeightFunctionType weightFun;
 

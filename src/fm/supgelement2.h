@@ -67,6 +67,7 @@ public:
     virtual ~SUPGElement2();
 
     virtual IRResultType initializeFrom(InputRecord *ir);
+    virtual void giveInputRecord(DynamicInputRecord &input);
 
     // characteristic  matrix
     virtual void giveCharacteristicMatrix(FloatMatrix & answer, CharType, TimeStep *tStep);

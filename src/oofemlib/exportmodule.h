@@ -101,14 +101,13 @@ public:
     virtual IRResultType initializeFrom(InputRecord *ir);
     /**
      * Writes the output. Abstract service.
-     * @param tStep time step.
-     * @param bool if true, no testTimeStepOutput should be done
+     * @param tStep Time step.
+     * @param forcedOutput If true, no testTimeStepOutput should be done.
      */
     virtual void doOutput(TimeStep *tStep, bool forcedOutput=false) = 0;
     /**
      * Writes the output. Abstract service.
      * @param tStep time step.
-     * @param bool if true, no testTimeStepOutput should be done
      */
     void doForcedOutput(TimeStep *tStep) { doOutput(tStep,true); }
     /**

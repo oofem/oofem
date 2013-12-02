@@ -513,7 +513,7 @@ Quad1MindlinShell3D :: computeLoadLEToLRotationMatrix(FloatMatrix &answer, int i
     dy = nodeB->giveCoordinate(2) - nodeA->giveCoordinate(2);
     length = sqrt(dx * dx + dy * dy);
 
-    /// @TODO TODO I haven't even looked at this code yet / Mikael
+    /// @todo I haven't even looked at this code yet / Mikael
     answer.at(1, 1) = 1.0;
     answer.at(2, 2) = dx / length;
     answer.at(2, 3) = -dy / length;

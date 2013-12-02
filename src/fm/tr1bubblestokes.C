@@ -75,12 +75,6 @@ Tr1BubbleStokes :: ~Tr1BubbleStokes()
     delete this->bubble;
 }
 
-IRResultType Tr1BubbleStokes :: initializeFrom(InputRecord *ir)
-{
-    this->FMElement :: initializeFrom(ir);
-    return IRRT_OK;
-}
-
 void Tr1BubbleStokes :: computeGaussPoints()
 {
     if ( !integrationRulesArray ) {

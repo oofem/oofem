@@ -58,6 +58,10 @@
 #define _IFT_RankineMat_delsigy "delsigy"
 #define _IFT_RankineMat_yieldtol "yieldtol"
 #define _IFT_RankineMat_gf "gf"
+#define _IFT_RankineMat_ep "ep"
+#define _IFT_RankineMat_damlaw "damlaw"
+#define _IFT_RankineMat_param1 "param1"
+#define _IFT_RankineMat_param2 "param2"
 //@}
 
 namespace oofem {
@@ -105,6 +109,19 @@ protected:
     /// Parameter that controls damage evolution (a=0 turns damage off).
     double a;
 
+    /// Total Strain at peak stress sig0--Used only if plasthardtype=2
+    double ep;
+
+    /// type of damage law (0=exponential, 1=exponential and  damage starts after peak stress sig0)
+    int  damlaw;
+
+    /// coefficient required when damlaw=1
+    double     param1;
+
+    /// coefficient required when  damlaw =1
+    double     param2;
+
+
 public:
     RankineMat(int n, Domain *d);
     virtual ~RankineMat() { }
@@ -137,8 +154,9 @@ public:
 
     virtual void giveRealStressVector_PlaneStress(FloatArray &answer, GaussPoint *gp,
                                       const FloatArray &reducesStrain, TimeStep *tStep);
-
+    virtual void  giveRealStressVector_1d(FloatArray &answer, GaussPoint *gp, const FloatArray &totalStrain, TimeStep *tStep);
 protected:
+    virtual void give1dStressStiffMtrx(FloatMatrix &answer, MatResponseMode mode,GaussPoint *gp, TimeStep *tStep);
     virtual void givePlaneStressStiffMtrx(FloatMatrix &answer,
                                           MatResponseMode mode,
                                           GaussPoint *gp,
@@ -278,6 +296,7 @@ public:
      * set to zero if not available).
      */
     void computeWork_PlaneStress(GaussPoint *gp, double gf);
+    void computeWork_1d(GaussPoint *gp, double gf);
 #endif
 
     virtual const char *giveClassName() const { return "RankineMatStatus"; }

@@ -108,7 +108,6 @@ protected:
      * @f]
      *
      * @param[out] answer Array with coefficients
-     * @param gp Integration point.
      * @param atTime Age of material when load is applied ???
      */
     virtual void computeCharCoefficients(FloatArray &answer, double atTime);

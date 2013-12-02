@@ -237,7 +237,7 @@ public:
     /**
      * Returns the full dof ID array of receiver. 
      * Mainly used at EngngModel level to assemble internal norms fronm DofManager contribution (typically load vector).
-     * @param dofIDaArray Complete dof ID array of receiver.
+     * @param dofIDArray Complete dof ID array of receiver.
      */
     void giveCompleteMasterDofIDArray(IntArray &dofIDArray) const;
     /**
@@ -290,7 +290,7 @@ public:
      * Assembles the complete unknown vector in node. Does not transform and local->global coordinate systems.
      * @param answer Complete vector of all dof values in receiver.
      * @param mode Mode of unknowns.
-     * @param tstepN Time step when unknown is requested.
+     * @param stepN Time step when unknown is requested.
      */
     void giveCompleteUnknownVector(FloatArray &answer, ValueModeType mode, TimeStep *stepN);
     /**

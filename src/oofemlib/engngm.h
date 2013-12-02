@@ -927,12 +927,12 @@ public:
     /**
      * Assembles characteristic vector of required type from dofManagers into given vector.
      * @param answer Assembled vector.
-     * @param eid Determines type of equation and corresponding element code numbers.
      * @param mode Mode of unknown (total, incremental, rate of change).
      * @param tStep Time step, when answer is assembled.
      * @param type Characteristic components of type type are requested.
      * @param s Determines the equation numbering scheme.
      * @param domain Domain to assemble from.
+     * @param eNorms Norms for each dofid (optional).
      * @return Sum of element norm (squared) of assembled vector.
      */
     void assembleVectorFromDofManagers(FloatArray &answer, TimeStep *tStep, CharType type, ValueModeType mode,
@@ -947,6 +947,7 @@ public:
      * from elements and assembled using prescribed eqn numbers.
      * @param s Determines the equation numbering scheme.
      * @param domain Domain to assemble from.
+     * @param eNorms Norms for each dofid (optional).
      * @return Sum of element norm (squared) of assembled vector.
      */
     void assembleVectorFromElements(FloatArray &answer, TimeStep *tStep, EquationID eid,
@@ -963,6 +964,7 @@ public:
      * from elements and assembled using prescribed eqn numbers.
      * @param s Determines the equation numbering scheme.
      * @param domain Domain to assemble from.
+     * @param eNorms Norms for each dofid (optional).
      */
     void assembleVectorFromBC(FloatArray &answer, TimeStep *tStep, EquationID eid,
                               CharType type, ValueModeType mode,

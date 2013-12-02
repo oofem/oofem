@@ -72,12 +72,6 @@ Hexa21Stokes :: Hexa21Stokes(int n, Domain *aDomain) : FMElement(n, aDomain)
 Hexa21Stokes :: ~Hexa21Stokes()
 {}
 
-IRResultType Hexa21Stokes :: initializeFrom(InputRecord *ir)
-{
-    this->FMElement :: initializeFrom(ir);
-    return IRRT_OK;
-}
-
 void Hexa21Stokes :: computeGaussPoints()
 {
     if ( !integrationRulesArray ) {

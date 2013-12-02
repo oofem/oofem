@@ -249,7 +249,7 @@ public:
      * Creates new instance of element corresponding to given keyword.
      * @param name Keyword string determining the type of new instance.
      * @param num  Element number.
-     * @param d    Domain assigned to new element.
+     * @param domain Domain assigned to new element.
      * @return Newly allocated object of requested type, null if keyword not supported.
      */
     Element *createElement(const char *name, int num, Domain *domain);
@@ -262,7 +262,7 @@ public:
      * Creates new instance of Dof manager corresponding to given keyword.
      * @param name Keyword string determining the type of new instance.
      * @param num  dofmanager number.
-     * @param d    Domain assigned to new instance.
+     * @param domain Domain assigned to new instance.
      * @return Newly allocated object of requested type, null if keyword not supported.
      */
     DofManager *createDofManager(const char *name, int num, Domain *domain);
@@ -275,7 +275,7 @@ public:
      * Creates new instance of boundary condition corresponding to given keyword.
      * @param name Keyword string determining the type of new instance.
      * @param num  number of new object.
-     * @param d    Domain assigned to new object.
+     * @param domain Domain assigned to new object.
      * @return Newly allocated object of requested type, null if keyword not supported.
      */
     GeneralBoundaryCondition *createBoundaryCondition(const char *name, int num, Domain *domain);
@@ -288,7 +288,7 @@ public:
      * Creates new instance of cross section corresponding to given keyword.
      * @param name Keyword string determining the type of new instance.
      * @param num  object's number.
-     * @param d    Domain assigned to new object.
+     * @param domain Domain assigned to new object.
      * @return Newly allocated object of requested type, null if keyword not supported.
      */
     CrossSection *createCrossSection(const char *name, int num, Domain *domain);
@@ -301,7 +301,7 @@ public:
      * Creates new instance of material corresponding to given keyword.
      * @param name Keyword string determining the type of new instance.
      * @param num  material number.
-     * @param d    Domain assigned to new material.
+     * @param domain Domain assigned to new material.
      * @return Newly allocated object of requested type, null if keyword not supported.
      */
     Material *createMaterial(const char *name, int num, Domain *domain);
@@ -327,7 +327,7 @@ public:
      * Creates new instance of load time function corresponding to given keyword.
      * @param name Keyword string determining the type of new instance.
      * @param num  object's number.
-     * @param d    Domain assigned to new object.
+     * @param domain Domain assigned to new object.
      * @return Newly allocated object of requested type, null if keyword not supported.
      */
     LoadTimeFunction *createLoadTimeFunction(const char *name, int num, Domain *domain);
@@ -340,7 +340,7 @@ public:
      * Creates new instance of nonlocal barrier corresponding to given keyword.
      * @param name Keyword string determining the type of new instance.
      * @param num  object's number.
-     * @param d    Domain assigned to new object.
+     * @param domain Domain assigned to new object.
      * @return Newly allocated object of requested type, null if keyword not supported.
      */
     NonlocalBarrier *createNonlocalBarrier(const char *name, int num, Domain *domain);
@@ -353,7 +353,7 @@ public:
      * Creates new instance of random field generator corresponding to given keyword.
      * @param name Keyword string determining the type of new instance.
      * @param num  object's number.
-     * @param d    Domain assigned to new object.
+     * @param domain Domain assigned to new object.
      * @return Newly allocated object of requested type, null if keyword not supported.
      */
     RandomFieldGenerator *createRandomFieldGenerator(const char *name, int num, Domain *domain);
@@ -378,12 +378,11 @@ public:
     /**
      * Creates new instance of nonlinear solver corresponding to given keyword.
      * @param name Keyword string determining the type of new instance.
-     * @param d    Domain assigned to new object.
+     * @param domain Domain assigned to new object.
      * @param emodel Engineering model that object belongs to.
-     * @param eid Equation ID of sys of equations.
      * @return Newly allocated object of requested type, null if keyword not supported.
      */
-    SparseNonLinearSystemNM* createNonLinearSolver(const char *name, Domain *d, EngngModel *emodel);
+    SparseNonLinearSystemNM* createNonLinearSolver(const char *name, Domain *domain, EngngModel *emodel);
     /**
      * Registers a new nonlinear solver in the class factory.
      * @param name Keyword string.
@@ -396,7 +395,7 @@ public:
      * @param emodel Engineering model that object belongs to.
      * @return Newly allocated object of requested type, null if keyword not supported.
      */
-    InitModule* createInitModule(const char *name, int number, EngngModel *emodel);
+    InitModule* createInitModule(const char *name, int num, EngngModel *emodel);
     /**
      * Registers a new init module in the class factory.
      * @param name Keyword string.
@@ -413,10 +412,10 @@ public:
     /**
      * Creates new instance of topology description corresponding to given keyword.
      * @param name Keyword string determining the type of new instance.
-     * @param d    Domain assigned to new object.
+     * @param domain Domain assigned to new object.
      * @return Newly allocated object of requested type, null if keyword not supported.
      */
-    TopologyDescription* createTopology(const char *name, Domain *d);
+    TopologyDescription* createTopology(const char *name, Domain *domain);
     /**
      * Registers a new topology description in the class factory.
      * @param name Keyword string.
@@ -426,8 +425,6 @@ public:
     /**
      * Creates new instance of sparse matrix corresponding to given keyword.
      * @param type SparseMtrxType id determining the type of new instance.
-     * @param num  object's number.
-     * @param d    Domain assigned to new object.
      * @return Newly allocated object of requested type, null if keyword not supported.
      */
     SparseMtrx *createSparseMtrx(SparseMtrxType type);
@@ -447,7 +444,7 @@ public:
     /**
      * Creates new instance of SparseLinearSystemNM corresponding
      * to given type.
-     * @param type LinSystSolverType id determining the type of new instance.
+     * @param st LinSystSolverType id determining the type of new instance.
      * @param d Domain assigned to new object.
      * @param m EngngModel  assigned to new object.
      * @return Newly allocated object of requested type, null if keyword not supported.

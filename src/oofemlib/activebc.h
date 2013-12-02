@@ -106,7 +106,6 @@ public:
      * @param type Type of matrix to assemble.
      * @param r_s Row numbering scheme.
      * @param c_s Column numbering scheme.
-     * @param domain Domain to assemble from.
      */
     virtual void assemble(SparseMtrx *answer, TimeStep *tStep, EquationID eid,
                           CharType type, const UnknownNumberingScheme &r_s, const UnknownNumberingScheme &c_s) {}
@@ -119,6 +118,7 @@ public:
      * @param type Type of matrix to assemble.
      * @param mode Mode of value.
      * @param s Numbering scheme.
+     * @param eNorms Norms for each dofid (optional).
      * @return Equivalent of the sum of the element norm (squared) of assembled vector.
      */
     virtual void assembleVector(FloatArray &answer, TimeStep *tStep, EquationID eid,

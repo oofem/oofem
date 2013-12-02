@@ -74,12 +74,6 @@ Tr21Stokes :: Tr21Stokes(int n, Domain *aDomain) : FMElement(n, aDomain)
 Tr21Stokes :: ~Tr21Stokes()
 {}
 
-IRResultType Tr21Stokes :: initializeFrom(InputRecord *ir)
-{
-    this->FMElement :: initializeFrom(ir);
-    return IRRT_OK;
-}
-
 void Tr21Stokes :: computeGaussPoints()
 {
     if ( !integrationRulesArray ) {

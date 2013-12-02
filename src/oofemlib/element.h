@@ -309,7 +309,7 @@ public:
      * @note Elements which do not have an contribution should resize the vector to be empty.
      * @param answer Requested contribution of load.
      * @param load Load to compute contribution from.
-     * @param boundary Edge number.
+     * @param edge Edge number.
      * @param type Type of the contribution.
      * @param mode Determines mode of answer.
      * @param tStep Time step when answer is computed.
@@ -372,15 +372,13 @@ public:
     /**
      * Computes or simply returns total number of element's local DOFs.
      * Must be defined by particular element.
-     * @param eid Id of equation that DOFs belong to.
-     * @return Number of DOFs belonging to ut.
+     * @return Number of local DOFs of element.
      */
     virtual int computeNumberOfDofs() { return 0; }
     /**
      * Computes the total number of element's global dofs.
      * The transitions from global c.s. to nodal c.s. should NOT be included.
-     * @param eid Id of equation that DOFs belong to.
-     * @return Total number of DOFs belonging to ut.
+     * @return Total number of global DOFs of element.
      */
     virtual int computeNumberOfGlobalDofs();
     /**

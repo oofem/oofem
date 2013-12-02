@@ -84,6 +84,7 @@ IRResultType FluidMaterialEvaluator :: initializeFrom(InputRecord *ir)
     return IRRT_OK;
 }
 
+
 void FluidMaterialEvaluator :: solveYourself()
 {
     Domain *d = this->giveDomain(1);

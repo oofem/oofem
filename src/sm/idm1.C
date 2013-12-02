@@ -134,7 +134,7 @@ IsotropicDamageMaterial1 :: initializeFrom(InputRecord *ir)
 
     // specify the type of formula for damage evolution law
     IR_GIVE_OPTIONAL_FIELD(ir, damageLaw, _IFT_IsotropicDamageMaterial1_damageLaw);
-    if ( damageLaw != 6 ) {
+    if ( ( damageLaw != 6 ) && ( damageLaw != 7 ) ) {
         IR_GIVE_FIELD(ir, e0, _IFT_IsotropicDamageMaterial1_e0);
     }
 
@@ -408,34 +408,67 @@ IsotropicDamageMaterial1 :: computeEquivalentStrain(double &kappa, const FloatAr
         c = 12 * k * J2e / ( ( 1 + nu ) * ( 1 + nu ) );
         kappa = a + 1 / ( 2 * k ) * sqrt(b + c);
     } else if ( this->equivStrainType == EST_Griffith ) {
-        double sum = 0.;
+        kappa = 0.0;
         FloatArray stress, fullStress, principalStress;
         FloatMatrix de;
-        
         lmat->giveStiffnessMatrix(de, SecantStiffness, gp, atTime);
         stress.beProductOf(de, strain);
         StructuralMaterial :: giveFullSymVectorForm( fullStress, stress, gp->giveMaterialMode() );
         this->computePrincipalValues(principalStress, fullStress, principal_stress);
-        //Rankine - may cause convergence problems when coupled with Griffith
-        for ( int i = 1; i <= 3; i++ ) {
-            if ( principalStress.at(i) > 0.0 && sum < principalStress.at(i) ) {
-                 sum = principalStress.at(i);
-            }
+        // Try Griffith's criterion first
+        if ( principalStress.at(1)/principalStress.at(3) >= -0.33333 && fabs( principalStress.at(1) + principalStress.at(3))>1.e-8 ) {
+            kappa = -(principalStress.at(1) - principalStress.at(3))*(principalStress.at(1) - principalStress.at(3)) / this->griff_n / ( principalStress.at(1) + principalStress.at(3) ) / lmat->give('E', gp);
         }
+        // Mohr-Coulomb
+        double phi=52.4*M_PI/180.;
+        double c0=260.;
+        double f = (1.+sin(phi))/2.*principalStress.at(1) - (1.-sin(phi))/2.*principalStress.at(3) - c0*cos(phi);
+        if (f>0) {
+//             kappa = f/lmat->give('E', gp);
+//              kappa = -(principalStress.at(1) - principalStress.at(3))*(principalStress.at(1) - principalStress.at(3)) / this->griff_n / ( principalStress.at(1) + principalStress.at(3) ) / lmat->give('E', gp);
+//             double sum = 0.;
+//             FloatArray principalStrains;
+//             this->computePrincipalValues(principalStrains, fullStrain, principal_strain);
+//             for ( int i = 1; i <= 3; i++ ) {
+//                     if ( principalStrains.at(i) > 0.0 ) {
+//                         sum += principalStrains.at(i) * principalStrains.at(i);
+//                 }
+//             }
+//             kappa = sqrt(sum);
 
-        // Use Griffith's criterion if Rankine not applied
-         if ( sum == 0. && principalStress.at(1)/principalStress.at(3) >= -0.33333 ) {
-            sum = -(principalStress.at(1) - principalStress.at(3))*(principalStress.at(1) - principalStress.at(3)) / this->griff_n / ( principalStress.at(1) + principalStress.at(3) );
+//             for ( int i = 1; i <= 3; i++ ) {
+//                 if ( principalStress.at(i) > 0.0 && sum < principalStress.at(i) ) {
+//                     sum = principalStress.at(i);
+//                     sum = 10000.0;
+//                     printf("B ");
+//                 }
+//             }
+//             kappa = sum / lmat->give('E', gp);
+            
         }
-
-        sum = max(sum, 0.0);
-        kappa = sum / lmat->give('E', gp);
+        
+        kappa = max(kappa, 0.0);
+//         kappa = 0.;
+//      Try Rankine if Griffith does not apply. Do not use Rankine equivalent strain measure, which causes a slow convergence. Use Mazars' equivalent strain instead.
+//         if ( kappa == 0.) {
+//             double sum = 0.;
+//             FloatArray principalStrains;
+//             if ( principalStress.at(1) > 0.0 || principalStress.at(2) > 0.0 || principalStress.at(3) > 0.0 ) {
+//                 this->computePrincipalValues(principalStrains, fullStrain, principal_strain);
+//                 for ( int i = 1; i <= 3; i++ ) {
+//                     if ( principalStrains.at(i) > 0.0 ) {
+//                         sum += principalStrains.at(i) * principalStrains.at(i);
+//                     }
+//                 }
+//             kappa = sqrt(sum);
+//             }
+//         }
     } else {
         _error("computeEquivalentStrain: unknown EquivStrainType");
     }
 }
 
-//Computes derivative of the equivalent strain with regards to strain
+//Computes derivative of the equivalent strain with regards to strain, used in tangent formulation
 void
 IsotropicDamageMaterial1 :: computeEta(FloatArray &answer, const FloatArray &strain, GaussPoint *gp, TimeStep *atTime)
 {
@@ -543,7 +576,7 @@ IsotropicDamageMaterial1 :: computeEta(FloatArray &answer, const FloatArray &str
         stress.beProductOf(de, strain);
 
         if ( gp->giveMaterialMode() == _1dMat ) {
-            StressVector  fullStress(stress, _1dMat);
+            StressVector fullStress(stress, _1dMat);
             fullStress.computePrincipalValDir(principalStress, N);
             principalStress.resizeWithValues(3);
             dim = 1;
@@ -994,7 +1027,6 @@ IsotropicDamageMaterial1 :: initDamaged(double kappa, FloatArray &strainVector, 
             stress.beProductOf(de, strainVector);
             StructuralMaterial :: giveFullSymVectorForm( fullStress, stress, gp->giveMaterialMode() );
             this->computePrincipalValDir(principalStress, principalDir, fullStress, principal_stress);
-            //             this->computePrincipalValDir(principalStrains, principalDir, fullStrain, principal_strain);
             if (  principalStress.at(1) <= 1.e-10 && principalStress.at(2) <= 1.e-10 && principalStress.at(3) <= 1.e-10 ) {
                 int indexMax = principalStress.giveIndexMaxElem();
                 int indexMin = principalStress.giveIndexMinElem();

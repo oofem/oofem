@@ -461,6 +461,7 @@ public:
      * Returns the receiver 'a' transformed using give transformation matrix r.
      * The method performs the operation  @f$ a = r^{\mathrm{T}} \cdot a \cdot r@f$ .
      * @param r Transformation matrix.
+     * @param mode If set to 't' then the transpose of the rotation matrix is used instead.
      */
     void rotatedWith(const FloatMatrix &r, char mode='n');
     /**

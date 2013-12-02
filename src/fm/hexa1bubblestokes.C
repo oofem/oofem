@@ -75,12 +75,6 @@ Hexa1BubbleStokes :: ~Hexa1BubbleStokes()
     delete this->bubble;
 }
 
-IRResultType Hexa1BubbleStokes :: initializeFrom(InputRecord *ir)
-{
-    this->FMElement :: initializeFrom(ir);
-    return IRRT_OK;
-}
-
 void Hexa1BubbleStokes :: computeGaussPoints()
 {
     if ( !integrationRulesArray ) {

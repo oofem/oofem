@@ -98,6 +98,7 @@ public:
     virtual classType giveClassID() const { return TR1_2D_SUPG2_AXIClass; }
     virtual MaterialMode giveMaterialMode() { return _2dAxiFlow; }
     virtual IRResultType initializeFrom(InputRecord *ir);
+    virtual void giveInputRecord(DynamicInputRecord &input);
 
     virtual void printOutputAt(FILE *file, TimeStep *tStep);
 

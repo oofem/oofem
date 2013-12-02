@@ -96,14 +96,6 @@ Tet1_3D_SUPG :: giveElementDofIDMask(EquationID ut, IntArray &answer) const
 }
 
 
-IRResultType
-Tet1_3D_SUPG :: initializeFrom(InputRecord *ir)
-{
-    //const char*__proc = "initializeFrom"; // Required by IR_GIVE_FIELD macro
-    //IRResultType result;                  // Required by IR_GIVE_FIELD macro
-    return SUPGElement2 :: initializeFrom(ir);
-}
-
 void
 Tet1_3D_SUPG :: computeGaussPoints()
 // Sets up the array containing the integration points of the receiver.

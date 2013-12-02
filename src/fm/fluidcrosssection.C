@@ -77,6 +77,20 @@ FluidCrossSection :: checkConsistency()
 }
 
 
+int
+FluidCrossSection :: giveIPValue(FloatArray &answer, GaussPoint *ip, InternalStateType type, TimeStep *atTime)
+{
+    return this->domain->giveMaterial(this->matNumber)->giveIPValue(answer, ip, type, atTime);
+}
+
+
+bool
+FluidCrossSection :: isCharacteristicMtrxSymmetric(MatResponseMode rMode)
+{
+    return this->domain->giveMaterial(this->matNumber)->isCharacteristicMtrxSymmetric(rMode);
+}
+
+
 FluidDynamicMaterial *
 FluidCrossSection :: giveFluidMaterial()
 {

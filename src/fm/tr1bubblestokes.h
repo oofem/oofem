@@ -89,8 +89,6 @@ public:
     Tr1BubbleStokes(int n, Domain *d);
     virtual ~Tr1BubbleStokes();
 
-    virtual IRResultType initializeFrom(InputRecord *ir);
-
     virtual double computeVolumeAround(GaussPoint *gp);
 
     virtual void computeGaussPoints();

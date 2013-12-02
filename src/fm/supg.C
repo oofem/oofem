@@ -78,7 +78,7 @@ SUPG :: initializeFrom(InputRecord *ir)
     const char *__proc = "initializeFrom"; // Required by IR_GIVE_FIELD macro
     IRResultType result;                // Required by IR_GIVE_FIELD macro
 
-    EngngModel :: initializeFrom(ir);
+    FluidModel :: initializeFrom(ir);
 
     IR_GIVE_FIELD(ir, rtolv, _IFT_SUPG_rtolv);
     atolv = 1.e-15;
@@ -144,8 +144,8 @@ SUPG :: initializeFrom(InputRecord *ir)
         mask.setValues(3, V_u, V_v, V_w);
 
 #ifdef  FIELDMANAGER_USE_SHARED_PTR
-	std::tr1::shared_ptr<Field> _velocityField (new MaskedPrimaryField (FT_Velocity, this->VelocityPressureField, mask));
-	fm->registerField(_velocityField, FT_Velocity);
+        std::tr1::shared_ptr<Field> _velocityField (new MaskedPrimaryField (FT_Velocity, this->VelocityPressureField, mask));
+        fm->registerField(_velocityField, FT_Velocity);
 #else
         MaskedPrimaryField* _velocityField = new MaskedPrimaryField (FT_Velocity, this->VelocityPressureField, mask);
         fm->registerField(_velocityField, FT_Velocity, true);

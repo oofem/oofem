@@ -4258,9 +4258,10 @@ where three parameters $\tau$, $\beta$ and $\alpha_\infty$ are needed. Some mean
 
 The \param{hydrationmodeltype} = 2 is inspired by Cervera et al. \cite{Cervera:99}, who proposed an analytical form of the normalized affinity which was refined in \cite{Gawin:06a}. A slightly modified formulation is proposed here. The affinity model is formulated for a reference temperature 25\C
 \begin{eqnarray}
-\frac{\ud \alpha}{\ud t} = \tilde{A}_{25}(\alpha) k_{rate}= B_1 \left( \frac{B_2}{\alpha_\infty} + \alpha \right ) \left( \alpha_\infty - \alpha \right) \exp\left(-\bar{\eta}\frac{\alpha}{\alpha_\infty}\right) k_{rate} \label{eq:affinity2}
+\frac{\ud \alpha}{\ud t} &=& \tilde{A}_{25}(\alpha) k_{rate}= B_1 \left( \frac{B_2}{\alpha_\infty} + \alpha \right ) \left( \alpha_\infty - \alpha \right) f_s \exp\left(-\bar{\eta}\frac{\alpha}{\alpha_\infty}\right) k_{rate}\label{eq:affinity2}\\
+\alpha &>& DoH_1 \Rightarrow f_s = 1+P_1(\alpha - DoH_1)~\mathrm{else}~f_s = 1 \label{eq:affinity3}
 \end{eqnarray}
-where $B_1, B_2$ are coefficients to be calibrated, $\alpha_\infty$ is the ultimate hydration degree and $\bar{\eta}$ represents microdiffusion of free water through formed hydrates. The solution proceeds incrementally, where $\alpha$ is the unknown. During one macroscopic time step, \refeq{eq:affinity2} needs to be integrated in finer inner steps. This is controlled with two optional variables; \param{maxmodelintegrationtime} specifies maximum integration time in the loop while \param{minmodeltimestepintegrations} specifies minimum number of integration steps.
+where $B_1, B_2$ are coefficients to be calibrated, $\alpha_\infty$ is the ultimate hydration degree and $\bar{\eta}$ represents microdiffusion of free water through formed hydrates. The function $f_s$ adds additional peak which may occur in slag-rich blended cements with two parameters $DoH_1,P_1$. The solution proceeds incrementally, where $\alpha$ is the unknown. During one macroscopic time step, \refeq{eq:affinity2} needs to be integrated in finer inner steps. This is controlled with two optional variables; \param{maxmodelintegrationtime} specifies maximum integration time in the loop while \param{minmodeltimestepintegrations} specifies minimum number of integration steps.
 
 \begin{table}[!htb]
 %\begin{center}
@@ -4277,6 +4278,8 @@ Parameters &- \param{num} material model number\\
 &- \param{Qpot} Potential heat of hydration, about 500 kJ/kg of cement\\
 &- \param{masscement} Cement mass per 1m$^3$ of concrete, about 200-450\\
 &- \param{activationenergy} Arrhenius activation energy, 38400. (default)\\
+&- \param{DoHinf} degree of hydration at infinite time\\
+&- \param{B1,B2,eta,DoH1,P1} parameters from \refeq{eq:affinity2}-\refeq{eq:affinity3}\\
 &- \param{reinforcementDegree} specifies the area fraction of reinforcement. Typical values is 0.015. Steel reinforcement slightly increases concrete conductivity and slightly decreases its capacity. Thermal properties of steel are considered 20~W/m/K and 500~J/kg/K.\\
 &- \param{densityType} 0 (default)\\
 &- \param{conductivityType} 0 (default), 1 compute as $\lambda = \textrm{k} (1.33-0.33\alpha)$ \cite{Ruiz:01}\\

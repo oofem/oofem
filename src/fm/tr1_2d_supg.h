@@ -129,6 +129,7 @@ public:
     virtual void giveDofManDofIDMask(int inode, EquationID ut, IntArray &answer) const;
     virtual int computeNumberOfDofs();
     virtual IRResultType initializeFrom(InputRecord *ir);
+    virtual void giveInputRecord(DynamicInputRecord &input);
     virtual void updateYourself(TimeStep *tStep);
     /// Used to check consistency and initialize some element geometry data (area,b,c).
     virtual int checkConsistency();

@@ -53,6 +53,7 @@
 #include "contextioerr.h"
 #include "reinforcement.h"
 #include "crosssection.h"
+#include "dynamicinputrecord.h"
 #include "classfactory.h"
 
 #ifdef __OOFEG
@@ -112,7 +113,7 @@ TR1_2D_SUPG :: initializeFrom(InputRecord *ir)
     const char *__proc = "initializeFrom"; // Required by IR_GIVE_FIELD macro
     IRResultType result;               // Required by IR_GIVE_FIELD macro
 
-    this->SUPGElement :: initializeFrom(ir);
+    SUPGElement :: initializeFrom(ir);
 
     this->vof = 0.0;
     IR_GIVE_OPTIONAL_FIELD(ir, vof, _IFT_Tr1SUPG_pvof);
@@ -128,6 +129,19 @@ TR1_2D_SUPG :: initializeFrom(InputRecord *ir)
     this->initGeometry();
     return IRRT_OK;
 }
+
+
+void
+TR1_2D_SUPG :: giveInputRecord(DynamicInputRecord &input)
+{
+    SUPGElement :: giveInputRecord(input);
+    if ( this->permanentVofFlag ) {
+        input.setField(this->vof, _IFT_Tr1SUPG_pvof);
+    } else {
+        input.setField(this->vof, _IFT_Tr1SUPG_vof);
+    }
+}
+
 
 void
 TR1_2D_SUPG :: computeGaussPoints()
