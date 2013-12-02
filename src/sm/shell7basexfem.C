@@ -204,6 +204,7 @@ Shell7BaseXFEM :: giveDofManDofIDMask(int inode, EquationID ut, IntArray &answer
         if ( ei->isDofManEnriched(*dMan) ) {
             IntArray eiDofIdArray;
             ei->giveEIDofIdArray(eiDofIdArray); 
+            //eiDofIdArray.printYourself();
             answer.followedBy(eiDofIdArray);
         }
      }

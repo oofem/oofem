@@ -188,7 +188,7 @@ int EnrichmentItem :: instanciateYourself(DataReader *dr)
     }
 
     mpEnrichmentDomain->initializeFrom(mir);
-
+    mpEnrichmentDomain->instanciateYourself( this->giveDomain() );
 
     // Instantiate EnrichmentFront
     if ( mEnrFrontIndex == 0 ) {

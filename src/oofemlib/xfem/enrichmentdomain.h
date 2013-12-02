@@ -71,6 +71,7 @@ public:
     EnrichmentDomain();
     virtual ~EnrichmentDomain() { }
     virtual IRResultType initializeFrom(InputRecord *ir) { return IRRT_OK; }
+    virtual int instanciateYourself(Domain *d) { return 1; };
     virtual void giveInputRecord(DynamicInputRecord &input) = 0;
     virtual void postInitialize(Domain *d) {};
 
@@ -175,7 +176,6 @@ protected:
 public:
     DofManList() : xi(0.0) { setNumber = 0; }
     virtual ~DofManList() { }
-    virtual void postInitialize(Domain *d);
 
     const std :: vector< int > &giveDofManList() const { return dofManList; }
 
@@ -186,6 +186,7 @@ public:
     virtual void CallNodeEnrMarkerUpdate(EnrichmentItem &iEnrItem, XfemManager &ixFemMan) const;
 
     virtual IRResultType initializeFrom(InputRecord *ir);
+    virtual int instanciateYourself(Domain *d);
     void addDofManagers(IntArray &dofManNumbers);
     virtual void giveInputRecord(DynamicInputRecord &input);
     virtual void updateEnrichmentDomain(IntArray &dofManNumbers);
