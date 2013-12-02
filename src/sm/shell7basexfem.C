@@ -208,6 +208,7 @@ Shell7BaseXFEM :: giveDofManDofIDMask(int inode, EquationID ut, IntArray &answer
             answer.followedBy(eiDofIdArray);
         }
      }
+    answer.printYourself();
 }
 
 
@@ -224,16 +225,26 @@ Shell7BaseXFEM :: evalCovarBaseVectorsAt(FloatArray &lCoords, FloatMatrix &gcov,
     FloatMatrix gcovd; 
     std :: vector< double > ef;
     for ( int i = 1; i <= this->xMan->giveNumberOfEnrichmentItems(); i++ ) { 
-        Delamination *dei =  dynamic_cast< Delamination * >( this->xMan->giveEnrichmentItem(i) ); // should check success
+        //Delamination *dei =  dynamic_cast< Delamination * >( this->xMan->giveEnrichmentItem(i) ); // should check success
+        EnrichmentItem *ei = this->xMan->giveEnrichmentItem(i);
 
-        if ( dei->isElementEnriched(this) ) {
+        //if ( dei && dei->isElementEnriched(this) ) {
+        if ( ei->isElementEnriched(this) ) {
 
             this->fei->evalN( N, lCoords, FEIElementGeometryWrapper(this) );
-            double levelSet = lCoords.at(3) - dei->giveDelamXiCoord(); 
-            dei->evaluateEnrFuncAt(ef, lCoords, levelSet);  
+            if ( dynamic_cast< Delamination * >( ei ) ) {
+                double levelSet = lCoords.at(3) - dynamic_cast< Delamination * >( ei )->giveDelamXiCoord(); 
+                ei->evaluateEnrFuncAt(ef, lCoords, levelSet);  
+            } else if ( dynamic_cast< Crack * >( ei ) ) {
+                double levelSet = 0.0; 
+                const IntArray &elNodes = this->giveDofManArray();
+                ei->interpLevelSet(levelSet, N, elNodes);
+                ei->evaluateEnrFuncAt(ef, lCoords, levelSet);  
+            }
+
             
             if ( ef[0] > 0.1 ) {  
-                computeDiscGeneralizedStrainVector(dGenEps, lCoords, dei, tStep); 
+                computeDiscGeneralizedStrainVector(dGenEps, lCoords, ei, tStep); 
                 Shell7Base :: evalCovarBaseVectorsAt(lCoords, gcovd, dGenEps);
                 gcov.add(ef[0],gcovd); 
             }
@@ -359,14 +370,15 @@ Shell7BaseXFEM :: giveInternalForcesVector(FloatArray &answer, TimeStep *tStep, 
     FloatArray solVecD, tempRed, fCZ;
     for ( int i = 1; i <= this->xMan->giveNumberOfEnrichmentItems(); i++ ) { 
         Delamination *dei =  dynamic_cast< Delamination * >( this->xMan->giveEnrichmentItem(i) ); // should check success
+        EnrichmentItem *ei = this->xMan->giveEnrichmentItem(i);
 
-        if ( dei->isElementEnriched(this) ) {
-            
-            dei->giveEIDofIdArray(eiDofIdArray); 
+        if ( ei->isElementEnriched(this) ) {
+
+            ei->giveEIDofIdArray(eiDofIdArray); 
             this->giveDisSolutionVector(solVecD, eiDofIdArray, tStep);  
-            this->discComputeSectionalForces(temp, tStep, solVec, solVecD, dei);
+            this->discComputeSectionalForces(temp, tStep, solVec, solVecD, ei);
 
-            this->computeOrderingArray(ordering, activeDofs, dei);
+            this->computeOrderingArray(ordering, activeDofs, ei);
             tempRed.beSubArrayOf(temp, activeDofs);
             answer.assemble(tempRed, ordering);
 
@@ -381,6 +393,7 @@ Shell7BaseXFEM :: giveInternalForcesVector(FloatArray &answer, TimeStep *tStep, 
     
 }
 
+#if 0
 void
 Shell7BaseXFEM :: discComputeSectionalForces(FloatArray &answer, TimeStep *tStep, FloatArray &solVec, FloatArray &solVecD, Delamination *dei)
 //
@@ -402,6 +415,62 @@ Shell7BaseXFEM :: discComputeSectionalForces(FloatArray &answer, TimeStep *tStep
             double levelSet = lCoords.at(3) - dei->giveDelamXiCoord();
             dei->evaluateEnrFuncAt(ef, lCoords, levelSet);  
             
+            if ( ef[0] > 0.1 ) {  
+                this->computeBmatrixAt(lCoords, B);
+                this->computeGeneralizedStrainVectorNew(genEps,  solVec,  B);
+                this->computeGeneralizedStrainVectorNew(genEpsD, solVecD, B);
+
+                double zeta = giveGlobalZcoord(gp->giveCoordinate(3));
+                this->computeSectionalForcesAt(sectionalForces, gp, mat, tStep, genEps, genEpsD, zeta);
+
+                // Computation of nodal forces: f = B^t*[N M T Ms Ts]^t
+                ftemp.beTProductOf(B,sectionalForces);
+                double dV = this->computeVolumeAroundLayer(gp, layer);
+                f.add(dV*ef[0]*DISC_DOF_SCALE_FAC, ftemp);            
+            }
+
+        }
+    }
+
+    answer.resize(ndofs); answer.zero();
+    const IntArray &ordering_all = this->giveOrdering(All);
+    answer.assemble(f, ordering_all);
+
+}
+
+#endif
+
+// NEW - through the thickness crack
+void
+Shell7BaseXFEM :: discComputeSectionalForces(FloatArray &answer, TimeStep *tStep, FloatArray &solVec, FloatArray &solVecD, EnrichmentItem *ei)
+//
+{
+    int ndofs = Shell7Base :: giveNumberOfDofs();
+    int numberOfLayers = this->layeredCS->giveNumberOfLayers(); 
+    FloatArray f(ndofs), genEps, genEpsD, ftemp, lCoords, sectionalForces, N;
+    FloatMatrix B;
+    f.zero();
+    std :: vector< double > ef;
+    double levelSet = 0.0;
+    for ( int layer = 1; layer <= numberOfLayers; layer++ ) {
+        IntegrationRule *iRuleL = integrationRulesArray [ layer - 1 ];
+        Material *mat = domain->giveMaterial( this->layeredCS->giveLayerMaterial(layer) );
+
+        for ( int j = 1; j <= iRuleL->giveNumberOfIntegrationPoints(); j++ ) {
+            GaussPoint *gp = iRuleL->getIntegrationPoint(j - 1);
+            lCoords = *gp->giveCoordinates();
+            
+            if ( dynamic_cast< Delamination * >( ei ) ) {
+                levelSet = lCoords.at(3) - dynamic_cast< Delamination * >( ei )->giveDelamXiCoord();                   
+            } else if ( dynamic_cast< Crack * >( ei ) ) {
+                const IntArray &elNodes = this->giveDofManArray();
+                this->fei->evalN( N, lCoords, FEIElementGeometryWrapper(this) );
+                ei->interpLevelSet(levelSet, N, elNodes);
+                ei->evaluateEnrFuncAt(ef, lCoords, levelSet);  
+            }          
+
+            ei->evaluateEnrFuncAt(ef, lCoords, levelSet);
+
             if ( ef[0] > 0.1 ) {  
                 this->computeBmatrixAt(lCoords, B);
                 this->computeGeneralizedStrainVectorNew(genEps,  solVec,  B);
