@@ -60,9 +60,9 @@
 
 namespace oofem {
 /**
- * Class implementing linear constraint on selected DOFs in the form $\sum_i w_ir_i = c$,
- * where r_i is i-th degree of freedom entering contraint, w_i is corresponding weight,
- * and c is given value. The weights and constant can have associated loadtime function,
+ * Class implementing linear constraint on selected DOFs in the form @f$ \sum_i w_i r_i = c @f$,
+ * where @f$ r_i @f$ is i-th degree of freedom entering contraint, w_i is corresponding weight,
+ * and @f$ c @f$ is given value. The weights and constant can have associated loadtime function,
  * so they can evolve in time. By default, the loadtimefunction value for all weights and 
  * constant is set to 1.0. 
  * This boundary condition is introduced as additional stationary condition in energy 

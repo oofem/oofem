@@ -64,7 +64,6 @@ public:
      * Initiates the receiver.
      * @param em Engineering model to determine general information about the problem.
      * @param di Domain index.
-     * @param et Equation type.
      */
     virtual void init(EngngModel *em, int di, const UnknownNumberingScheme &u) = 0;
 

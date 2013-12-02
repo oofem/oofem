@@ -80,7 +80,6 @@ private:
 public:
     /**
      * Constructor.
-     * @param i Solver index.
      * @param d Domain which solver belongs to.
      * @param m Engineering model which solver belongs to.
      */

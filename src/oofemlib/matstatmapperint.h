@@ -37,6 +37,13 @@
 
 namespace oofem {
 
+class MaterialStatus;
+class StructuralInterfaceMaterialStatus;
+class MaterialMappingAlgorithm;
+class GaussPoint;
+class Domain;
+class TimeStep;
+
 /**
  * matstatmapperint.h
  *
@@ -55,29 +62,20 @@ namespace oofem {
  * @author Erik Svenning
  *  Created on: Nov 6, 2013
  */
-
-class MaterialStatus;
-class StructuralInterfaceMaterialStatus;
-class MaterialMappingAlgorithm;
-class GaussPoint;
-class Domain;
-class TimeStep;
-
 class MaterialStatusMapperInterface {
 public:
-	MaterialStatusMapperInterface();
-	virtual ~MaterialStatusMapperInterface();
+    MaterialStatusMapperInterface();
+    virtual ~MaterialStatusMapperInterface();
 
-	virtual void copyStateVariables(const MaterialStatus &iStatus) = 0;
-	virtual void addStateVariables(const MaterialStatus &iStatus) = 0;
+    virtual void copyStateVariables(const MaterialStatus &iStatus) = 0;
+    virtual void addStateVariables(const MaterialStatus &iStatus) = 0;
 //    virtual void callCopyStateVariables(MaterialStatusMapperInterface &oStatus) = 0;
 
 
     /**
      * Maps all internal state variables from
      * the old domain to the given gp status.
-     * @param iGP Integration point belonging
-     * to the new domain.
+     * @param iGP Integration point belonging to the new domain.
      * @param iOldDom Old domain.
      * @param iTStep Time step.
      * @return Nonzero if o.k.
@@ -87,9 +85,7 @@ public:
     virtual int MSMI_map(const GaussPoint &iGP, const Domain &iOldDom, const TimeStep &iTStep, StructuralInterfaceMaterialStatus &oStatus);
     /**
      * Updates the internal state variables from previously mapped values.
-     * @param iGP Integration point belonging
-     * to the new domain.
-     * @param iOldDom Old domain.
+     * @param iGP Integration point belonging to the new domain.
      * @param iTStep Time step.
      * @return Nonzero if o.k.
      */

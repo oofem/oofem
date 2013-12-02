@@ -65,12 +65,12 @@ int FileDataStream::read ( int* data, unsigned int count )
     return ( fread ( data, sizeof ( int ), count, stream ) == count );
 }
 
-int FileDataStream::read ( long unsigned int* data, unsigned int count )
+int FileDataStream::read ( unsigned long * data, unsigned int count )
 {
     return ( fread ( data, sizeof ( unsigned long ), count, stream ) == count );
 }
 
-int FileDataStream::read ( long int* data, unsigned int count )
+int FileDataStream::read ( long * data, unsigned int count )
 {
     return ( fread ( data, sizeof ( long ), count, stream ) == count );
 }
@@ -95,12 +95,12 @@ int FileDataStream::write ( const int* data, unsigned int count )
     return ( fwrite ( data, sizeof ( int ), count, stream ) == count );
 }
 
-int FileDataStream::write ( const long unsigned int* data, unsigned int count )
+int FileDataStream::write ( const unsigned long * data, unsigned int count )
 {
     return ( fwrite ( data, sizeof ( unsigned long ), count, stream ) == count );
 }
 
-int FileDataStream::write ( const long int* data, unsigned int count )
+int FileDataStream::write ( const long * data, unsigned int count )
 {
     return ( fwrite ( data, sizeof ( long ), count, stream ) == count );
 }
@@ -127,12 +127,12 @@ int ComBuffDataStream::read ( int* data, unsigned int count )
     return buff->unpackArray ( data, count );
 }
 
-int ComBuffDataStream::read ( long unsigned int* data, unsigned int count )
+int ComBuffDataStream::read ( unsigned long * data, unsigned int count )
 {
     return buff->unpackArray ( data, count );
 }
 
-int ComBuffDataStream::read ( long int* data, unsigned int count )
+int ComBuffDataStream::read ( long * data, unsigned int count )
 {
     return buff->unpackArray ( data, count );
 }
@@ -160,12 +160,12 @@ int ComBuffDataStream::write ( const int* data, unsigned int count )
     return buff->packArray ( data, count );
 }
 
-int ComBuffDataStream::write ( const long unsigned int* data, unsigned int count )
+int ComBuffDataStream::write ( const unsigned long * data, unsigned int count )
 {
     return buff->packArray ( data, count );
 }
 
-int ComBuffDataStream::write ( const long int* data, unsigned int count )
+int ComBuffDataStream::write ( const long * data, unsigned int count )
 {
     return buff->packArray ( data, count );
 }
@@ -191,12 +191,12 @@ int ProcessCommDataStream::read ( int* data, unsigned int count )
     return pc->unpackArray ( data, count );
 }
 
-int ProcessCommDataStream::read ( long unsigned int* data, unsigned int count )
+int ProcessCommDataStream::read ( unsigned long * data, unsigned int count )
 {
     return pc->unpackArray ( data, count );
 }
 
-int ProcessCommDataStream::read ( long int* data, unsigned int count )
+int ProcessCommDataStream::read ( long * data, unsigned int count )
 {
     return pc->unpackArray ( data, count );
 }
@@ -224,12 +224,12 @@ int ProcessCommDataStream::write ( const int* data, unsigned int count )
     return pc->packArray ( data, count );
 }
 
-int ProcessCommDataStream::write ( const long unsigned int* data, unsigned int count )
+int ProcessCommDataStream::write ( const unsigned long * data, unsigned int count )
 {
     return pc->packArray ( data, count );
 }
 
-int ProcessCommDataStream::write ( const long int* data, unsigned int count )
+int ProcessCommDataStream::write ( const long * data, unsigned int count )
 {
     return pc->packArray ( data, count );
 }

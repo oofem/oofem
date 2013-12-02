@@ -171,7 +171,6 @@ public:
     /**
      * Sets Material status managed by receiver.
      * @param ptr Pointer to new status of receiver.
-     * @param i classID of class storing status
      * @return Pointer to new status.
      * @deprecated should be removed since only one mat stat is saved in the integration point 
      */

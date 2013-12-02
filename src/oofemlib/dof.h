@@ -211,7 +211,6 @@ public:
      * at given time step. Unknown is characterized by its physical meaning (i.g., displacement)
      * an by its mode (e.g., value of displacement, velocity of displacement or acceleration of
      * displacement). UnknownType of requested unknown must be same as UnknownType of Dof.
-     * @param type Physical meaning of  unknown.
      * @param mode Mode of unknown (e.g, total value, velocity or acceleration of unknown).
      * @param stepN Time step when unknown is requested. See documentation of particular EngngModel
      * class for valid stepN values (most implementation can return only values for current
@@ -237,7 +236,6 @@ public:
      * at given time step associated to given field. For primary dof it returns is associated unknown value,
      * for slave dofs it returns an array of master values (in recursive way).
      * @param masterUnknowns Values of master unknowns for receiver.
-     * @param eid Equation ID for unknowns.
      * @param mode Value mode for unknowns.
      * @param stepN Time step for when unknowns are requested.
      */
@@ -377,13 +375,9 @@ public:
      * In fact on EngngModel level only incremental solution is stored, but total values are
      * always stored in dofs dictionaries.
      * Implementation is not provided, only interface declared. Children must implement this method.
-     * @param tStep time step when unknowns are updated. In current version it is unused parameter.
+     * @param tStep Time step when unknowns are updated. In current version it is unused parameter.
      * It is EngngModel responsibility to update values, and values stored in dictionary
      * are always related to timeStep when they were lastly updated.
-     * @param type identifies type of unknown. It is not possible to store values of different
-     * UnknownType types then  UnknownType type of receiver.
-     * @param tStep Time step.
-     * @param type Type of equation that value belongs to.
      * @param mode Mode of stored unknown.
      * @param dofValue Value of unknown. Old value will generally be lost.
      * @see EngngModel::requiresUnknownsDictionaryUpdate
@@ -392,7 +386,6 @@ public:
     /**
      * Access dictionary value, if not present zero is returned.
      * @param tStep Time step.
-     * @param type Type of equation that value belongs to.
      * @param mode Mode of value.
      * @param dofValue Value of the dof.
      */

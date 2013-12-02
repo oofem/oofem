@@ -237,7 +237,7 @@ public:
      * @param[out] answer Contains the resulting derivative.
      * @param strain Strain vector.
      * @param gp Integration point.
-     * @param tStep Time step.
+     * @param atTime Time step.
      */
     virtual void computeEta(FloatArray &answer, const FloatArray &strain, GaussPoint *gp, TimeStep *atTime) { _error("IsotropicDamageMaterial: computeEta is not implemented"); }
     /**
