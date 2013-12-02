@@ -74,6 +74,7 @@ protected:
     virtual void evalCovarBaseVectorsAt(FloatArray &lCoords, FloatMatrix &gcon, FloatArray &solVec);
     void discGiveInitialSolutionVector(FloatArray &answer, IntArray &eiDofIdArray); // should be replaced with general function
     void computeDiscGeneralizedStrainVector(FloatArray &dGenEps, FloatArray &lCoords, EnrichmentItem *ei, TimeStep *tStep);
+    void giveDisSolutionVector(FloatArray &answer, const IntArray &dofIdArray, TimeStep *tStep);
 
     // Internal forces
     void giveInternalForcesVector(FloatArray &answer, TimeStep *tStep, int useUpdatedGpRecord);

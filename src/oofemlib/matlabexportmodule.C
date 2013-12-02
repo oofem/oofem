@@ -419,7 +419,6 @@ MatlabExportModule :: doOutputReactionForces(TimeStep *tStep,    FILE *FID)
     if ( this->reactionForcesNodeSet > 0 ) {
         Set *set = domain->giveSet( this->reactionForcesNodeSet );
         reactionForcesDofManList = set->giveNodeList();
-        reactionForcesDofManList.printYourself();
     }
 
 

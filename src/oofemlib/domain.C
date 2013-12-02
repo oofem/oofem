@@ -1428,6 +1428,7 @@ Domain :: createDofs()
         Element *element = this->giveElement(i);
         for (int j = 1; j <= element->giveNumberOfNodes(); ++j) {
             element->giveDefaultDofManDofIDMask(j, dofids);
+            //dofids.printYourself();
             for (int k = 1; k <= dofids.giveSize(); k++) {
                 node_dofs[element->giveNode(j)->giveNumber()-1].insert(dofids.at(k));
             }
