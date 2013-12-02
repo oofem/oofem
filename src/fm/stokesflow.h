@@ -112,13 +112,6 @@ public:
 
     virtual int forceEquationNumbering(int id);
 
-    /**
-     * Initialization from given input record.
-     * Reads
-     * - mstype Sparse matrix type (enum, optional, default SMT_PetscMtrx).
-     * - deltat Time increment (real, optional, default 1.0).
-     * - nodalupdatescheme How to update nodal positions (enum, optional, default US_None).
-     */
     virtual IRResultType initializeFrom(InputRecord *ir);
 
 #ifdef __PETSC_MODULE

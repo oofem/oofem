@@ -40,6 +40,7 @@
 #include "floatarray.h"
 #include "floatmatrix.h"
 #include "fluiddynamicmaterial.h"
+#include "dynamicinputrecord.h"
 
 #ifdef __OOFEG
  #include "oofeggraphiccontext.h"
@@ -72,6 +73,16 @@ SUPGElement :: initializeFrom(InputRecord *ir)
     return IRRT_OK;
 }
 
+
+void
+SUPGElement :: giveInputRecord(DynamicInputRecord &input)
+{
+    FMElement :: giveInputRecord(input);
+    if ( !boundarySides.isEmpty() ) {
+        input.setField(this->boundarySides, _IFT_SUPGElement_bsides);
+        input.setField(this->boundaryCodes, _IFT_SUPGElement_bcodes);
+    }
+}
 
 
 void

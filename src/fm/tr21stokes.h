@@ -93,8 +93,6 @@ public:
     void giveElementFMatrix(FloatMatrix &answer);
     // **
 
-    virtual IRResultType initializeFrom(InputRecord *ir);
-
     virtual double computeVolumeAround(GaussPoint *gp);
 
     virtual void computeGaussPoints();

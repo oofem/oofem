@@ -181,6 +181,7 @@ public:
     double giveUpdatedYCoordinate(int num) { return updated_YCoords.at(num); }
 
     virtual IRResultType initializeFrom(InputRecord *ir);
+    virtual void giveInputRecord(DynamicInputRecord &input);
 
     // identification
     virtual const char *giveClassName() const { return "LEPlic"; }

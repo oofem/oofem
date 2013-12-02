@@ -266,6 +266,13 @@ IRResultType FE2FluidMaterial :: initializeFrom(InputRecord *ir)
     return this->FluidDynamicMaterial :: initializeFrom(ir);
 }
 
+void FE2FluidMaterial :: giveInputRecord(DynamicInputRecord &input)
+{
+    FluidDynamicMaterial :: giveInputRecord(input);
+    input.setField(this->inputfile, _IFT_FE2FluidMaterial_fileName);
+}
+
+
 int FE2FluidMaterial :: giveIPValue(FloatArray &answer, GaussPoint *gp, InternalStateType type, TimeStep *tStep)
 {
     FE2FluidMaterialStatus *status = static_cast<FE2FluidMaterialStatus *>(this->giveStatus(gp));
@@ -275,12 +282,6 @@ int FE2FluidMaterial :: giveIPValue(FloatArray &answer, GaussPoint *gp, Internal
     } else {
         return FluidDynamicMaterial::giveIPValue(answer, gp, type, tStep);
     }
-}
-
-void FE2FluidMaterial :: giveInputRecord(DynamicInputRecord &input)
-{
-    FluidDynamicMaterial :: giveInputRecord(input);
-    input.setField(this->inputfile, _IFT_FE2FluidMaterial_fileName);
 }
 
 

@@ -140,6 +140,14 @@ Quad10_2D_SUPG :: initializeFrom(InputRecord *ir)
 
 
 void
+Quad10_2D_SUPG :: giveInputRecord(DynamicInputRecord &input)
+{
+    SUPGElement2 :: giveInputRecord(input);
+    this->pressureNode.giveInputRecord(input);
+}
+
+
+void
 Quad10_2D_SUPG :: computeGaussPoints()
 // Sets up the array containing the four Gauss points of the receiver.
 {

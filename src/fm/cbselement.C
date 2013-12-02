@@ -38,6 +38,7 @@
 #include "intarray.h"
 #include "floatarray.h"
 #include "floatmatrix.h"
+#include "dynamicinputrecord.h"
 
 #ifdef __OOFEG
  #include "oofeggraphiccontext.h"
@@ -58,14 +59,23 @@ CBSElement :: initializeFrom(InputRecord *ir)
     const char *__proc = "initializeFrom"; // Required by IR_GIVE_FIELD macro
     IRResultType result;                   // Required by IR_GIVE_FIELD macro
 
-    FMElement :: initializeFrom(ir);
-
     IR_GIVE_OPTIONAL_FIELD(ir, boundarySides, _IFT_CBSElement_bsides);
     if ( !boundarySides.isEmpty() ) {
         IR_GIVE_FIELD(ir, boundaryCodes, _IFT_CBSElement_bcodes);
     }
 
-    return IRRT_OK;
+    return FMElement :: initializeFrom(ir);
+}
+
+
+void
+CBSElement :: giveInputRecord(DynamicInputRecord &input)
+{
+    FMElement :: giveInputRecord(input);
+    if ( boundarySides.giveSize() > 0 ) {
+        input.setField(this->boundarySides, _IFT_CBSElement_bsides);
+        input.setField(this->boundaryCodes, _IFT_CBSElement_bcodes);
+    }
 }
 
 
