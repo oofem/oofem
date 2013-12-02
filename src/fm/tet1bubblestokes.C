@@ -75,12 +75,6 @@ Tet1BubbleStokes :: ~Tet1BubbleStokes()
     delete this->bubble;
 }
 
-IRResultType Tet1BubbleStokes :: initializeFrom(InputRecord *ir)
-{
-    this->FMElement :: initializeFrom(ir);
-    return IRRT_OK;
-}
-
 void Tet1BubbleStokes :: computeGaussPoints()
 {
     if ( !integrationRulesArray ) {

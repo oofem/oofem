@@ -74,12 +74,6 @@ Tet21Stokes :: Tet21Stokes(int n, Domain *aDomain) : FMElement(n, aDomain)
 Tet21Stokes :: ~Tet21Stokes()
 {}
 
-IRResultType Tet21Stokes :: initializeFrom(InputRecord *ir)
-{
-    this->FMElement :: initializeFrom(ir);
-    return IRRT_OK;
-}
-
 void Tet21Stokes :: computeGaussPoints()
 {
     if ( !integrationRulesArray ) {

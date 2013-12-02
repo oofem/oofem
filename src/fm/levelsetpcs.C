@@ -123,6 +123,14 @@ LevelSetPCS :: initializeFrom(InputRecord *ir)
 
 
 void
+LevelSetPCS :: giveInputRecord(DynamicInputRecord &input)
+{
+    _error("giveInputRecord not implemented yet");
+    //input.setField(this->..., _IFT_..._...);
+}
+
+
+void
 LevelSetPCS :: updatePosition(TimeStep *atTime)
 {
     int i, j, l, inodes, inode;

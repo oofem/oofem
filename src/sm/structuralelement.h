@@ -442,6 +442,7 @@ protected:
      * The integration point is specified using two-dimensional iso coordinates, or using area coordinates
      * for triangular surface.
      * @param answer Interpolation matrix of surface.
+     * @param iSurf Surface number.
      * @param gp Integration point.
      */
     virtual void computeSurfaceNMatrixAt(FloatMatrix &answer, int iSurf, GaussPoint *gp) { answer.resize(0, 0); }
@@ -557,6 +558,7 @@ protected:
      * Computes the stress vector of receiver at given integration point, at time step stepN.
      * The nature of these stresses depends on the element's type.
      * @param answer Stress vector.
+     * @param strain Strain vector.
      * @param gp Integration point.
      * @param tStep Time step.
      */

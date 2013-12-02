@@ -113,7 +113,7 @@ public:
      * Computes the first Piola-Kirchhoff stress tensor on Voigt format. This method will
      * be called if nlGeo = 1 and mode = TL. This method computes the deformation gradient F and passes
      * it on to the crossection which then asks for the stress from the material.
-     * @Note: P is related to S through F*S.
+     * @note P is related to S through F*S.
      *
      * @param answer Computed stress vector in Voigt form.
      * @param gp Gauss point at which the stress is evaluated.
@@ -135,7 +135,7 @@ public:
     /**
      * Computes the stiffness matrix of receiver.
      * The response is evaluated using @f$ \int B_{\mathrm{H}}^{\mathrm{T}} D B_{\mathrm{H}} \;\mathrm{d}v @f$, where
-     * @f$ B_{\mathrm{H}} @f$ is the B-matrix which produces the displacement gradient vector H_{\mathrm{V}} when multiplied with
+     * @f$ B_{\mathrm{H}} @f$ is the B-matrix which produces the displacement gradient vector @f$ H_{\mathrm{V}} @f$ when multiplied with
      * the solution vector a.
      * Reduced integration are taken into account.
      *
@@ -159,9 +159,9 @@ public:
     /**
      * Computes the stiffness matrix of receiver.
      * The response is evaluated using @f$ \int B_{\mathrm{H}}^{\mathrm{T}} D B_{\mathrm{H}} \;\mathrm{d}v @f$, where
-     * @f$ B_{\mathrm{H}} @f$ is the B-matrix which produces the displacement gradient vector H_{\mathrm{V}} when multiplied with
+     * @f$ B_{\mathrm{H}} @f$ is the B-matrix which produces the displacement gradient vector @f$ H_{\mathrm{V}} @f$ when multiplied with
      * the solution vector a.
-     * @Note: reduced intergration is not taken into account.
+     * @note Reduced intergration is not taken into account.
      * The integration procedure uses an integrationRulesArray for numerical integration. Each integration rule is
      * considered to represent a separate sub-cell/element. Typically this would be used when integration of the element
      * domain needs special treatment, e.g. when using the XFEM.
@@ -216,20 +216,6 @@ public:
     virtual classType giveClassID() const { return NLStructuralElementClass; }
 
 protected:
-    /**
-     * Computes the nonlinear part of strain-displacement (geometrical) equation
-     * related to i-th component of strain vector.
-     * @param answer Returned nonlinear strain vector component contribution.
-     * @param gp Integration point.
-     * @param i Determines the component of strain vector for which contribution is assembled.
-     * @see computeStrainVector
-     */
-
-
-    void computeStressStiffness(FloatMatrix &answer, FloatArray &S, MaterialMode matMode);
-    int giveVoigtIndexSym(int ind1, int ind2);
-    void giveSymPartOf(const FloatArray &A, FloatArray &answer);
-
     int checkConsistency();
     /**
      * Computes a matrix which, multiplied by the column matrix of nodal displacements,

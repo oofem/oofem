@@ -216,7 +216,15 @@ public:
     virtual int giveIPValue(FloatArray &answer, GaussPoint *aGaussPoint, InternalStateType type, TimeStep *atTime);
 
     virtual void giveThermalDilatationVector(FloatArray &answer, GaussPoint *, TimeStep *);
-
+    /**
+     * Returns the value of material property 'aProperty'. Property must be identified
+     * by unique int id. Integration point also passed to allow for materials with spatially
+     * varying properties
+     * @param aProperty ID of property requested.
+     * @param gp Integration point,
+     * @return Property value.
+     */
+    virtual double give(int aProperty, GaussPoint *gp);
     /**
      * Computes the equivalent strain measure from given strain vector (full form).
      * @param[out] kappa Return parameter, containing the corresponding equivalent strain.
@@ -229,7 +237,7 @@ public:
      * @param[out] answer Contains the resulting derivative.
      * @param strain Strain vector.
      * @param gp Integration point.
-     * @param tStep Time step.
+     * @param atTime Time step.
      */
     virtual void computeEta(FloatArray &answer, const FloatArray &strain, GaussPoint *gp, TimeStep *atTime) { _error("IsotropicDamageMaterial: computeEta is not implemented"); }
     /**

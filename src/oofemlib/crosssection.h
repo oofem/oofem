@@ -125,14 +125,14 @@ public:
 
     /**
      * Returns the value of cross section property.
-     * @param a Id of requested property.
+     * @param aProperty Id of requested property.
      * @return Property value.
      */
-    virtual double give(CrossSectionProperty a);
+    virtual double give(CrossSectionProperty aProperty);
 
     /**
      * Returns the value of cross section property.
-     * @param a Id of requested property.
+     * @param aProperty Id of requested property.
      * @param gp Integration point.
      * @return Property value.
      */
@@ -152,11 +152,8 @@ public:
      * Sets up integration rule for the given element.
      * Default behavior is just to call the Gauss integration rule, but for example the layered and fibered crosssections need to do their own thing.
      * @param irule Integration rule to set up.
-     * @param intd Integration domain of element.
-     * @param element Element which the integration rule belongs to.
      * @param npoints Number of integration points.
-     * @param lu Lower index of the "strain" components (or equivalent).
-     * @param li Upper index of the "strain" components (or equivalent).
+     * @param element Element which the integration rule belongs to.
      * @return Number of integration points.
      */
     virtual int setupIntegrationPoints(IntegrationRule &irule, int npoints, Element *element);

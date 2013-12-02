@@ -1698,6 +1698,13 @@ StructuralMaterial :: giveIPValue(FloatArray &answer, GaussPoint *aGaussPoint, I
     } else if ( type == IST_StrainTensor ) {
         ///@todo Fill in correct full form values here! This just adds zeros!
         StructuralMaterial :: giveFullSymVectorForm(answer, status->giveStrainVector(), aGaussPoint->giveMaterialMode());
+        if(aGaussPoint->giveMaterialMode()==_PlaneStress){
+            double Nxy = this->give(NYxy, aGaussPoint);
+            double Nxz = this->give(NYxz, aGaussPoint);
+            double Nyz = this->give(NYyz, aGaussPoint);
+            double Nyx = Nxy*this->give(Ey, aGaussPoint)/this->give(Ex, aGaussPoint);
+            answer.at(3)=(-(Nxz+Nxy*Nyz)*answer.at(1)-(Nyz+Nxz*Nyx)*answer.at(2))/(1.-Nxy*Nyx);
+        }
         return 1;
     } else if ( type == IST_StrainTensor_Reduced ) {
         ///@todo Fill in correct full form values here! This just adds zeros!

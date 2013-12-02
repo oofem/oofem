@@ -53,6 +53,7 @@
 #include "geotoolbox.h"
 #include "contextioerr.h"
 #include "crosssection.h"
+#include "dynamicinputrecord.h"
 #include "classfactory.h"
 
 #ifdef __OOFEG
@@ -127,7 +128,7 @@ TR1_2D_SUPG2 :: initializeFrom(InputRecord *ir)
     const char *__proc = "initializeFrom"; // Required by IR_GIVE_FIELD macro
     IRResultType result;               // Required by IR_GIVE_FIELD macro
 
-    this->SUPGElement :: initializeFrom(ir);
+    SUPGElement :: initializeFrom(ir);
 
     this->vof = 0.0;
     IR_GIVE_OPTIONAL_FIELD(ir, vof, _IFT_Tr1SUPG_pvof);
@@ -146,6 +147,20 @@ TR1_2D_SUPG2 :: initializeFrom(InputRecord *ir)
     this->material = this->mat [ 0 ];
 
     return IRRT_OK;
+}
+
+
+void
+TR1_2D_SUPG2 :: giveInputRecord(DynamicInputRecord &input)
+{
+    SUPGElement :: giveInputRecord(input);
+    if ( this->permanentVofFlag ) {
+        input.setField(this->vof, _IFT_Tr1SUPG_pvof);
+    } else {
+        input.setField(this->vof, _IFT_Tr1SUPG_vof);
+    }
+    input.setField(this->mat [ 0 ], _IFT_Tr1SUPG2_mat0);
+    input.setField(this->mat [ 1 ], _IFT_Tr1SUPG2_mat1);
 }
 
 

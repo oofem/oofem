@@ -499,9 +499,7 @@ FEI3dTetQuad :: surfaceEvalNormal(FloatArray &answer, int isurf, const FloatArra
         b.add(dNdeta(i), *cellgeo.giveVertexCoordinates(snodes(i)));
     }
     answer.beVectorProductOf(a, b);
-    double J = answer.computeNorm();
-    answer.times(1/J);
-    return J;
+    return answer.normalize();
 }
 
 double
