@@ -473,13 +473,6 @@ public:
      */
     bool registerErrorEstimator(ErrorEstimatorType type, ErrorEstimator * ( * )(int, Domain*) );
     /**
-     * Creates new instance of patch corresponding to given type.
-     * @param type ID determining the type of new instance.
-     * @param e Element assigned to new object.
-     * @return Newly allocated object of requested type, null if keyword not supported.
-     */
-//    Patch *createPatch(Patch :: PatchType type, Element *e);
-    /**
      * Creates new instance of nodal recovery model corresponding to given type.
      * @param type ID determining the type of new instance.
      * @param d Domain assigned to new object.
