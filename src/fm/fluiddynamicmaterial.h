@@ -86,9 +86,6 @@ public:
      */
     void letTempDeviatoricStressVectorBe(const FloatArray &v) { deviatoricStressVector = v; }
     void letTempDeviatoricStrainRateVectorBe(const FloatArray &v) { deviatoricStrainRateVector = v; }
-
-    virtual const char *giveClassName() const { return "FluidDynamicMaterialStatus"; }
-    virtual classType giveClassID() const { return FluidDynamicMaterialStatusClass; }
 };
 
 

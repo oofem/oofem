@@ -207,6 +207,8 @@ public:
     /// @return Equation ID coupled to the field.
     EquationID giveEquationID() { return this->ut; }
 
+    virtual const char *giveClassName() const { return "PrimaryField"; }
+
 protected:
     int resolveIndx(TimeStep *atTime, int shift);
     virtual FloatArray *giveSolutionVector(int);

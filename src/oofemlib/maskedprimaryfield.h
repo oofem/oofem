@@ -67,6 +67,8 @@ public:
 
     virtual contextIOResultType restoreContext(DataStream *stream, ContextMode mode) { return CIO_OK; }
     virtual contextIOResultType saveContext(DataStream *stream, ContextMode mode) { return CIO_OK; }
+
+    virtual const char *giveClassName() const { return "MaskedPrimaryField"; }
 };
 
 } // end namespace oofem

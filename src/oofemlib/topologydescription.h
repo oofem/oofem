@@ -105,7 +105,7 @@ public:
     /**
      * Gives the name of the class.
      */
-    virtual const char *giveClassName() const { return "TopologyDescription"; }
+    virtual const char *giveClassName() const = 0;
 };
 
 } // end namespace oofem

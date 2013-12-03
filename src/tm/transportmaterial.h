@@ -201,9 +201,6 @@ public:
      */
     virtual double giveHumidity(GaussPoint *gp, ValueModeType mode) { return -1.0; }
 
-    virtual const char *giveClassName() const { return "TransportMaterial"; }
-    virtual classType giveClassID() const { return TransportMaterialClass; }
-
     // post-processing
     virtual int giveIPValue(FloatArray &answer, GaussPoint *aGaussPoint, InternalStateType type, TimeStep *atTime);
 

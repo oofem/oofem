@@ -95,7 +95,6 @@ public:
     void letTempDeviatoricStrainVectorBe(const FloatArray &v) { temp_deviatoricStrainVector = v; }
 
     virtual const char *giveClassName() const { return "BinghamFluidMaterialStatus"; }
-    virtual classType giveClassID() const { return BinghamFluidMaterialStatusClass; }
 };
 
 

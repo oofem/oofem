@@ -1043,9 +1043,9 @@ public:
 
     // identification
     /// Returns class name of the receiver.
-    virtual const char *giveClassName() const { return "EngngModel"; }
+    virtual const char *giveClassName() const = 0;
     /// Returns classType id of receiver.
-    virtual classType giveClassID() const { return EngngModelClass; }
+    virtual classType giveClassID() const = 0;
     /// Returns nonzero if receiver does incremental analysis.
     virtual int isIncremental() { return 0; }
     /// Returns nonzero if nonlocal stiffness option activated.

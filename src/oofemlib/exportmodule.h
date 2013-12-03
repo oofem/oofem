@@ -127,7 +127,7 @@ public:
      */
     virtual void terminate() { }
     /// Returns class name of the receiver.
-    virtual const char *giveClassName() const { return "ExportModule"; }
+    virtual const char *giveClassName() const = 0;
 
 protected:
     /**

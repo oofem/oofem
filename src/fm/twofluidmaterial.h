@@ -114,7 +114,7 @@ public:
     FluidDynamicMaterialStatus *getSlaveStatus0() const { return this->slaveStatus0; }
     FluidDynamicMaterialStatus *getSlaveStatus1() const { return this->slaveStatus1; }
 
-    virtual const char *giveClassName() const { return "BinghamFluidMaterialStatus"; }
+    virtual const char *giveClassName() const { return "TwoFluidMaterialStatus"; }
 };
 
 } // end namespace oofem

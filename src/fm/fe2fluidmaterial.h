@@ -110,7 +110,6 @@ public:
     virtual contextIOResultType restoreContext(DataStream *stream, ContextMode mode, void *obj = NULL);
 
     virtual const char *giveClassName() const { return "FE2FluidMaterialStatus"; }
-    virtual classType giveClassID() const { return FE2FluidMaterialStatusClass; }
 };
 
 

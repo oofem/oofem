@@ -129,7 +129,7 @@ public:
      */
     virtual IRResultType initializeFrom(InputRecord *ir) = 0;
     /// Returns class name of the receiver.
-    virtual const char *giveClassName() const { return "ModuleManager"; }
+    virtual const char *giveClassName() const = 0;
 
     /**
      * Returns the required module.

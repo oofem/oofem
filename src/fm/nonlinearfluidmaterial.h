@@ -77,7 +77,6 @@ public:
     void  letTempDeviatoricStrainVectorBe(const FloatArray &v) { temp_deviatoricStrainVector = v; }
 
     virtual const char *giveClassName() const { return "NonlinearFluidMaterialStatus"; }
-    virtual classType giveClassID() const { return NonlinearFluidMaterialStatusClass; }
 };
 
 /**

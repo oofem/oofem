@@ -111,6 +111,9 @@ public:
 
     virtual contextIOResultType saveContext(DataStream *stream, ContextMode mode, void *obj = NULL);
     virtual contextIOResultType restoreContext(DataStream *stream, ContextMode mode, void *obj = NULL);
+
+    virtual const char *giveClassName() const { return "LinearConstraintBC"; }
+
 protected:
     void giveLocArray(const UnknownNumberingScheme &r_s,  IntArray &locr, int& lambdaeq);
 };

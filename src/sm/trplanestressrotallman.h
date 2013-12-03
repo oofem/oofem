@@ -69,7 +69,7 @@ protected:
 
     virtual double giveArea();
     virtual int giveApproxOrder() { return 2; }
-    void computeLocalCoordinates(FloatArray lxy[6]);
+    void computeLocalNodalCoordinates(FloatArray lxy[6]);
     /** 
      * Computes the stiffness matrix stabilization of zero energy mode (equal rotations)
      * 

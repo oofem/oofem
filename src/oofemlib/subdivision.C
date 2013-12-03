@@ -3814,13 +3814,15 @@ Subdivision :: createMesh(TimeStep *stepN, int domainNumber, int domainSerNum, D
 #endif
         if ( parent ) {
             DynamicInputRecord ir;
+            // Copy most of the existing parent element:
             domain->giveElement(parent)->giveInputRecord(ir);
             ir.setField(* mesh->giveElement(ielem)->giveNodes(), _IFT_Element_nodes);
             ir.giveRecordKeywordField(name);
             elem = classFactory.createElement(name.c_str(), eNum, * dNew);
             elem->initializeFrom(&ir);
+
 #ifdef __PARALLEL_MODE
-            elem->setParallelMode(Element_local);
+            //ir.setRecordKeywordNumber( mesh->giveElement(ielem)->giveGlobalNumber() );
             // not subdivided elements inherit globNum, subdivided give -1
             elem->setGlobalNumber( mesh->giveElement(ielem)->giveGlobalNumber() );
             // local elements have array partitions empty !
@@ -3832,7 +3834,6 @@ Subdivision :: createMesh(TimeStep *stepN, int domainNumber, int domainSerNum, D
         }
     } // end loop over elements
 
-    std :: string irString;
     // create the rest of the model description (BCs, CrossSections, Materials, etc)
     // cross sections
     int ncrosssect = domain->giveNumberOfCrossSectionModels();

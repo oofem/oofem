@@ -155,7 +155,7 @@ public:
     //@}
 
     /// @return Class name of the receiver.
-    virtual const char *giveClassName() const { return "Field"; }
+    virtual const char *giveClassName() const = 0;
 };
 } // end namespace oofem
 #endif // field_h

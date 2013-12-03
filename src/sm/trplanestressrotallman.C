@@ -75,19 +75,19 @@ TrPlanestressRotAllman :: giveInterface(InterfaceType interface)
 }
 
 void
-TrPlanestressRotAllman :: computeLocalCoordinates(FloatArray lxy[6])
+TrPlanestressRotAllman :: computeLocalNodalCoordinates(FloatArray lxy[6])
 {
-  for (int i=0; i<3; i++) {
-    lxy[i] = *this->giveNode(i+1)->giveCoordinates();
-  }
-  lxy[3].resize(2);
-  lxy[4].resize(2);
-  lxy[5].resize(2);
-  for (int i=1; i<=2; i++) {
-    lxy[3].at(i) = 0.5*(lxy[0].at(i)+lxy[1].at(i));
-    lxy[4].at(i) = 0.5*(lxy[1].at(i)+lxy[2].at(i));
-    lxy[5].at(i) = 0.5*(lxy[2].at(i)+lxy[0].at(i));
-  }
+    for (int i=0; i<3; i++) {
+        lxy[i] = *this->giveNode(i+1)->giveCoordinates();
+    }
+    lxy[3].resize(2);
+    lxy[4].resize(2);
+    lxy[5].resize(2);
+    for (int i=1; i<=2; i++) {
+        lxy[3].at(i) = 0.5*(lxy[0].at(i)+lxy[1].at(i));
+        lxy[4].at(i) = 0.5*(lxy[1].at(i)+lxy[2].at(i));
+        lxy[5].at(i) = 0.5*(lxy[2].at(i)+lxy[0].at(i));
+    }
 }
 
 
@@ -103,7 +103,7 @@ TrPlanestressRotAllman :: computeNmatrixAt(const FloatArray &iLocCoord, FloatMat
     answer.resize(3, 9);
     answer.zero();
 
-    this->computeLocalCoordinates(lxy); // get ready for tranformation into 3d
+    this->computeLocalNodalCoordinates(lxy); // get ready for tranformation into 3d
     this->qinterpolation.evalN( n, iLocCoord, FEIVertexListGeometryWrapper(6, lxyptr) );
     this->interp.evalN (L, iLocCoord, FEIElementGeometryWrapper(this) );
 
@@ -131,7 +131,7 @@ TrPlanestressRotAllman :: computeBmatrixAt(GaussPoint *aGaussPoint, FloatMatrix 
   FloatArray  lxy[6];
   const FloatArray *lxyptr[]={lxy, lxy+1, lxy+2, lxy+3, lxy+4, lxy+5};
 
-  this->computeLocalCoordinates(lxy); // get ready for tranformation into 3d
+  this->computeLocalNodalCoordinates(lxy); // get ready for tranformation into 3d
   this->qinterpolation.evaldNdx( dnx, * aGaussPoint->giveCoordinates(), FEIVertexListGeometryWrapper(6, lxyptr) );
 
   answer.resize(3, 9);
@@ -190,7 +190,7 @@ TrPlanestressRotAllman :: computeStiffnessMatrixZeroEnergyStabilization(FloatMat
   const FloatArray *lxyptr[]={lxy, lxy+1, lxy+2, lxy+3, lxy+4, lxy+5};
 
   lec.setValues(3, 0.333333333333, 0.333333333333, 0.333333333333); // element center in local coordinates
-  this->computeLocalCoordinates(lxy); // get ready for tranformation into 3d
+  this->computeLocalNodalCoordinates(lxy); // get ready for tranformation into 3d
   this->qinterpolation.evaldNdx( dnx, lec, FEIVertexListGeometryWrapper(6, lxyptr) );
 
   // evaluate (dv/dx-du/dy)/2. at element center
@@ -260,7 +260,7 @@ TrPlanestressRotAllman :: computeEgdeNMatrixAt(FloatMatrix &answer, int iedge, G
   IntArray en;
   FEI2dTrQuad qi (1,2);
 
-  this->computeLocalCoordinates(lxy); // get ready for tranformation into 3d
+  this->computeLocalNodalCoordinates(lxy); // get ready for tranformation into 3d
   qi.edgeEvalN( n, iedge, *gp->giveCoordinates(), FEIVertexListGeometryWrapper(6, lxyptr) );
   qi.computeLocalEdgeMapping (en, iedge); // get edge mapping
   this->interp.edgeEvalN( l, iedge, *gp->giveCoordinates(), FEIElementGeometryWrapper(this) );

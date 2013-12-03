@@ -218,9 +218,6 @@ public:
         return 0.0;
     }
     //@}
-
-    virtual classType giveClassID() const { return ActiveBoundaryConditionClass; }
-    virtual const char *giveClassName() const { return "ActiveBoundaryCondition"; }
 };
 } // end namespace oofem
 #endif // activebc_h
