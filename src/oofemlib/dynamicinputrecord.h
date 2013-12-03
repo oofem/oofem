@@ -97,6 +97,7 @@ public:
     virtual void printYourself();
     // Setters, unique for the dynamic input record
     virtual void setRecordKeywordField(const std::string &keyword, int number);
+    virtual void setRecordKeywordNumber(int number);
     virtual void setField(int item, InputFieldType id);
     virtual void setField(double item, InputFieldType id);
     virtual void setField(bool item, InputFieldType id);
@@ -109,6 +110,8 @@ public:
     virtual void setField(const std::list< Range > &item, InputFieldType id);
     /// Sets an empty field with given id.
     virtual void setField(InputFieldType id);
+    /// Removes given field from record.
+    virtual void unsetField(InputFieldType id);
 
     virtual void report_error(const char *_class, const char *proc, InputFieldType id,
                               IRResultType result, const char *file, int line);

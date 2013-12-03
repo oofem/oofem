@@ -235,6 +235,11 @@ void DynamicInputRecord :: setRecordKeywordField(const std::string &keyword, int
     this->recordNumber = value;
 }
 
+void DynamicInputRecord :: setRecordKeywordNumber(int value)
+{
+    this->recordNumber = value;
+}
+
 void DynamicInputRecord :: setField(int item, InputFieldType id)
 {
     this->intRecord[id] = item;
@@ -288,6 +293,21 @@ void DynamicInputRecord :: setField(const std::list< Range > &item, InputFieldTy
 void DynamicInputRecord :: setField(InputFieldType id)
 {
     this->emptyRecord.insert(id);
+}
+
+void DynamicInputRecord :: unsetField(InputFieldType id)
+{
+    this->emptyRecord.erase(id);
+    this->intRecord.erase(id);
+    this->doubleRecord.erase(id);
+    this->boolRecord.erase(id);
+    this->stringRecord.erase(id);
+    this->floatArrayRecord.erase(id);
+    this->intArrayRecord.erase(id);
+    this->matrixRecord.erase(id);
+    this->stringListRecord.erase(id);
+    this->dictionaryRecord.erase(id);
+    this->rangeRecord.erase(id);
 }
 
 void
