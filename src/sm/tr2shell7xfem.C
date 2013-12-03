@@ -93,12 +93,20 @@ void
 Tr2Shell7XFEM :: computeGaussPoints()
 {
     if ( !integrationRulesArray ) {
-        //int nPointsTri  = 6;   // points in the plane
-        int nPointsTri  = 25;   // points in the plane
+        int nPointsTri  = 6;   // points in the plane
+        //int nPointsTri  = 25;   // points in the plane
         int nPointsEdge = 2;   // edge integration
 
         // need to check if interface has failed but also need to update the integration rule later
         XfemManager *xMan = this->giveDomain()->giveXfemManager();
+
+        if( xMan->isElementEnriched(this) ) {
+            if(!this->XfemElementInterface_updateIntegrationRule()) {
+                //PlaneStress2d :: computeGaussPoints();
+            }
+
+        }
+
         for ( int i = 1; i <= xMan->giveNumberOfEnrichmentItems(); i++ ) { 
             Delamination *dei =  dynamic_cast< Delamination * >( xMan->giveEnrichmentItem(i) ); 
             if (dei) {
@@ -132,6 +140,7 @@ Tr2Shell7XFEM :: computeGaussPoints()
         specialIntegrationRulesArray [ 0 ] = new GaussIntegrationRule(1, this);
         specialIntegrationRulesArray [ 0 ]->SetUpPointsOnLine(this->layeredCS->giveNumIntegrationPointsInLayer(), _3dMat);
 
+        
 
 
 
