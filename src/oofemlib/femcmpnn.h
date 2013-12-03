@@ -95,13 +95,6 @@ public:
     /// Virtual destructor.
     virtual ~FEMComponent() { }
 
-    /**
-     * Returns classType id of receiver. Intended for run time
-     * type checking. Every derived class have to overload this method.
-     * @see classType.
-     * @return Class type of receiver.
-     */
-    virtual classType giveClassID() const { return FEMComponentClass; }
     /// @return Class name of the receiver.
     virtual const char *giveClassName() const = 0;
     /// @return Input record name of the receiver.

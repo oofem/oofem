@@ -658,12 +658,7 @@ RerShell :: printOutputAt(FILE *file, TimeStep *stepN)
 
     for ( int i = 1; i <= integrationRulesArray [ 0 ]->giveNumberOfIntegrationPoints(); i++ ) {
         gp = integrationRulesArray [ 0 ]->getIntegrationPoint(i - 1);
-        if ( !domain->giveEngngModel()->isIncremental() ) {
-            // delete this -> ComputeStrainVector(gp,stepN) ;
-            // delete this -> ComputeStressVector(gp,stepN) ;
-        }
-
-        //gp   -> printOutputAt(file,stepN) ;
+        //gp->printOutputAt(file,stepN);
 
 
         fprintf( file, "  GP %d :", gp->giveNumber() );
