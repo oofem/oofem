@@ -33,98 +33,79 @@
  *  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  */
 #if 0
+
+
 #ifndef phasefieldelement_h
 #define phasefieldelement_h
 
-#include "nlstructuralelement.h"
+#include "coupledfieldselement.h"
+#include "fei2dquadlin.h"
 
 namespace oofem {
 /**
- * Abstract class for gradient formulation of coupled damage-plasticity model(GradDp).
- * Yield function is formulated in the effective stress space and damage is driven by the nonlocal(over-nonlocal) cumulated plastic strain.
- * The new nonlocal degrees of freedom (with the meaning of the nonlocal cumulated plastic strain) are introduced with lower order of approximation functions than the displacement field to avoid spurious stress oscillations
+ * Abstract class for phase field formulation
  */
-class PhaseFieldElement : public NLStructuralElement
+class PhaseFieldElement : public CoupledFieldsElement
 {
 protected:
-    int nPrimNodes, nPrimVars, nSecNodes, nSecVars;
-    IntArray locU, locK;
-    int totalSize, nlSize, locSize;
-    int averType, nlGeo;
+    IntArray loc_u, loc_d;
+    int nlGeo;
 
 public:
-    //PhaseFieldElement();
-    PhaseFieldElement(int i, Domain *aDomain);
+    PhaseFieldElement(int i, Domain *aDomain) : CoupledFieldsElement(i, aDomain) {};
     virtual ~PhaseFieldElement() {}
 
     virtual IRResultType initializeFrom(InputRecord *ir);
-    //virtual void giveDofManDofIDMask (int inode, EquationID ut, IntArray& answer) const;
+    virtual void giveDofManDofIDMask_u(IntArray &answer) = 0;
+    virtual void giveDofManDofIDMask_d(IntArray &answer) = 0;
 
     // definition & identification
     virtual const char *giveClassName() const { return "PhaseFieldElement"; }
-    //virtual classType giveClassID() const { return PhaseFieldElementClass; }
-    /***********************Predelat************************************/
-    virtual int getNprimNodes() { return 0; }
-    virtual int getNprimVars() { return 0; }
-    virtual int getNsecNodes() { return 0; }
-    virtual int getNsecVars() { return 0; }
-
-    /************************************************************/
-    //  virtual int  computeNumberOfDofs (EquationID ut){return (nPrimNodes*nPrimVars+nSecNodes*nSecVars);};
-    //virtual int    checkConsistency();
 
 protected:
-    virtual NLStructuralElement *giveNLStructuralElement() = 0;
-
-    virtual void computeNkappaMatrixAt(GaussPoint *, FloatMatrix &) = 0;
-    virtual void computeBkappaMatrixAt(GaussPoint *, FloatMatrix &) = 0;
 
     virtual void computeNStressAt(GaussPoint *, FloatArray &) = 0;
     virtual void computeBStressAt(GaussPoint *, FloatArray &) = 0;
     virtual double computeVolumeAround(GaussPoint *) = 0;
 
-    //void initialize();
-    void setDisplacementLocationArray(IntArray &answer, int nPrimNodes, int nPrimVars, int nSecNodes, int nSecVars);
-    void setNonlocalLocationArray(IntArray &answer, int nPrimNodes, int nPrimVars, int nSecNodes, int nSecVars);
-
     void computeStiffnessMatrix(FloatMatrix &, MatResponseMode, TimeStep *);
 
-    void computeStiffnessMatrixGen(FloatMatrix &, MatResponseMode, TimeStep *);
-
-    //remove
-    void computeStiffnessMatrix_uu(FloatMatrix &, MatResponseMode, TimeStep *);
-    void computeStiffnessMatrix_uk(FloatMatrix &, MatResponseMode, TimeStep *);
-    void computeStiffnessMatrix_kk(FloatMatrix &, MatResponseMode, TimeStep *);
-    void computeStiffnessMatrix_ku(FloatMatrix &, MatResponseMode, TimeStep *);
-
-    void computeDisplacementDegreesOfFreedom(FloatArray &answer, TimeStep *stepN);
-    void computeNonlocalDegreesOfFreedom(FloatArray &answer, TimeStep *stepN);
-    void computeNonlocalGradient(FloatArray &answer, GaussPoint *gp, TimeStep *stepN);
-
-    void computeLocalStrainVector(FloatArray &answer, GaussPoint *gp, TimeStep *stepN);
-    //void computeDeformationGradientVector(FloatArray &answer, GaussPoint *gp, TimeStep *stepN);
-    void computeNonlocalCumulatedStrain(double &answer, GaussPoint *gp, TimeStep *stepN);
-
-    void giveInternalForcesVector(FloatArray &answer, TimeStep *tStep, int useUpdatedGpRecord);
-    void giveInternalForcesVectorGen(FloatArray &answer, TimeStep *tStep, int useUpdatedGpRecord);
-    void giveInternalForcesVectorGen(FloatArray &answer, TimeStep *tStep, int useUpdatedGpRecord, 
+    void computeStiffnessMatrixGen(FloatMatrix &, MatResponseMode, TimeStep *, 
         void (*Nfunc)(GaussPoint*, FloatMatrix), void (*Bfunc)(GaussPoint*, FloatMatrix),
-        void (*NStress)(GaussPoint*, FloatArray), void (*BStress)(GaussPoint*, FloatArray),
+        void (*NStiffness)(GaussPoint*, FloatMatrix), void (*BStiffness)(GaussPoint*, FloatMatrix),
         double (*volumeAround)(GaussPoint*)
         );
 
-    void giveLocalInternalForcesVector(FloatArray &answer, TimeStep *tStep, int useUpdatedGpRecord);
-    void giveNonlocalInternalForcesVector(FloatArray &answer, TimeStep *tStep, int useUpdatedGpRecord);
+    void computeStiffnessMatrix_uu(FloatMatrix &, MatResponseMode, TimeStep *);
+    void computeStiffnessMatrix_ud(FloatMatrix &, MatResponseMode, TimeStep *);
+    void computeStiffnessMatrix_dd(FloatMatrix &, MatResponseMode, TimeStep *);
+    void computeStiffnessMatrix_du(FloatMatrix &, MatResponseMode, TimeStep *);
 
-    void computeStressVectorAndLocalCumulatedStrain(FloatArray &answer, double localCumulatedPlasticStrain, GaussPoint *gp, TimeStep *stepN);
-    void computeForceLoadVector(FloatArray &answer, TimeStep *stepN, ValueModeType mode);
-    void computeLocForceLoadVector(FloatArray &answer, TimeStep *stepN, ValueModeType mode);
-    void computeLocNonForceLoadVector(FloatArray &answer, TimeStep *stepN, ValueModeType mode);
-    void computeNonForceLoadVector(FloatArray &answer, TimeStep *stepN, ValueModeType mode);
-    
-    void computeDistanceToBoundary();
+    void Duu_B(FloatMatrix &, MatResponseMode, GaussPoint *, TimeStep *);
+    void Duu_d(FloatMatrix &, MatResponseMode, GaussPoint *, TimeStep *);
+    double computeG(GaussPoint *gp, ValueModeType valueMode, TimeStep *stepN);
+    double computeGPrim(GaussPoint *gp, ValueModeType valueMode, TimeStep *stepN);
+    double computeDamageAt(GaussPoint *gp, ValueModeType valueMode, TimeStep *stepN);
 
+    void giveInternalForcesVector(FloatArray &answer, TimeStep *tStep, int useUpdatedGpRecord);
+    void giveInternalForcesVector_u(FloatArray &answer, TimeStep *tStep, int useUpdatedGpRecord);
+    void giveInternalForcesVector_d(FloatArray &answer, TimeStep *tStep, int useUpdatedGpRecord);
+
+    void computeBStress_u(FloatArray &answer, GaussPoint *gp, TimeStep *tStep, int useUpdatedGpRecord);
+    void computeNStress_d(FloatArray &answer, GaussPoint *gp, TimeStep *tStep, int useUpdatedGpRecord);
+    void computeBStress_d(FloatArray &answer, GaussPoint *gp, TimeStep *tStep, int useUpdatedGpRecord);
     
+
+    void computeDisplacementUnknowns(FloatArray &answer, ValueModeType valueMode, TimeStep *stepN);
+    void computeDamageUnknowns(FloatArray &answer, ValueModeType valueMode, TimeStep *stepN);
+    
+    //Interpolation matrices
+    virtual void computeBd_matrixAt(GaussPoint *, FloatMatrix &, int = 1, int = ALL_STRAINS);
+    //virtual void computeBmatrixAt(GaussPoint *aGaussPoint, FloatMatrix &answer, int li, int ui)
+    virtual void computeNd_matrixAt(const FloatArray &lCoords, FloatMatrix &N);
+
+    static FEI2dQuadLin interpolation_u;
+    static FEI2dQuadLin interpolation_d;
 };
 } // end namespace oofem
 

@@ -126,6 +126,7 @@ set (sm_material
 	intmatbilinczjansson.C
     intmatbilinearcz.C
 	intmatbilinczelastic.C
+    coupledfieldselement.C
     phasefieldelement.C
     )
 

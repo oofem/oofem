@@ -32,179 +32,114 @@
  *  License along with this library; if not, write to the Free Software
  *  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  */
-
 #if 0
 #include "phasefieldelement.h"
 #include "node.h"
 #include "material.h"
 #include "gausspoint.h"
 #include "gaussintegrationrule.h"
-#include "floatmatrix.h"
-#include "floatarray.h"
-#include "intarray.h"
 #include "domain.h"
-#include "cltypes.h"
-#include "structuralms.h"
 #include "mathfem.h"
 #include "structuralcrosssection.h"
-#include "nlstructuralelement.h"
-#include "nonlocalbarrier.h"
-#include "nlstructuralelement.h"
-#include "graddpmaterialextensioninterface.h"
-
+#include "timestep.h"
+#include "structuralms.h"
 #include <cstdio>
 
+
+
 namespace oofem {
-PhaseFieldElement :: PhaseFieldElement(int i, Domain *aDomain) : NLStructuralElement(i, aDomain)
-// Constructor.
+
+FEI2dQuadLin PhaseFieldElement :: interpolation_u(1, 2);
+FEI2dQuadLin PhaseFieldElement :: interpolation_d(1, 2);
+
+void
+PhaseFieldElement :: computeDisplacementUnknowns(FloatArray &answer, ValueModeType valueMode, TimeStep *stepN)
 {
-    nlGeo = 0;
-    averType = 0;
+    IntArray dofIdArray;
+    this->giveDofManDofIDMask_u(dofIdArray);
+    this->computeVectorOfDofIDs(dofIdArray, valueMode, stepN, answer);
 }
 
 void
-PhaseFieldElement :: setDisplacementLocationArray(IntArray &answer, int nPrimNodes, int nPrimVars, int nSecNodes, int nSecVars)
+PhaseFieldElement :: computeDamageUnknowns(FloatArray &answer, ValueModeType valueMode, TimeStep *stepN)
 {
-    answer.resize(locSize);
-
-    for ( int i = 1; i <= totalSize; i++ ) {
-        if ( i < nSecNodes * nPrimVars + 1 ) {
-            answer.at(i) = i + ( int )( ( ( i - 1 ) / nPrimVars ) ) * nSecVars;
-        } else if ( i > nSecNodes * ( nPrimVars + nSecVars ) )  {
-            answer.at(i - nSecVars * nSecNodes) = i;
-        }
-    }
+    IntArray dofIdArray;
+    this->giveDofManDofIDMask_u(dofIdArray);
+    this->computeVectorOfDofIDs(dofIdArray, valueMode, stepN, answer);
 }
+
+//void
+//PhaseFieldElement :: computeStressVectorAndLocalCumulatedStrain(FloatArray &answer, double localCumulatedStrain, GaussPoint *gp, TimeStep *stepN)
+////PhaseFieldElement :: computeStressVector(FloatArray &answer, double localCumulatedStrain, GaussPoint *gp, TimeStep *stepN)
+//{
+//    NLStructuralElement *elem = this->giveNLStructuralElement();
+//
+//    nlGeo = elem->giveGeometryMode();
+//    StructuralCrossSection *cs = this->giveNLStructuralElement()->giveStructuralCrossSection();
+//
+//    //this->computeDamage(alpha, gp, stepN);
+//    if ( nlGeo == 0 ) {
+//        FloatArray Epsilon;
+//        this->computeLocalStrainVector(Epsilon, gp, stepN);
+//        
+//        if(cs->hasMaterialModeCapability( gp->giveMaterialMode() ) ) {
+//            //dpmat->giveRealStressVector(answer, gp, Epsilon, nlCumulatedStrain, stepN);
+//            return;
+//        } else {
+//            OOFEM_ERROR("giveRealStresses : unsupported mode");
+//        }
+//    } else if ( nlGeo == 1 ) {
+//        if ( elem->giveDomain()->giveEngngModel()->giveFormulation() == TL ) {
+//            FloatArray vF;
+//            this->computeDeformationGradientVector(vF, gp, stepN);
+//            if( cs->hasMaterialModeCapability( gp->giveMaterialMode() ) ) {
+//              //  dpmat->giveFirstPKStressVector(answer, gp, vF, nlCumulatedStrain, stepN);
+//                return;
+//            } else {
+//                OOFEM_ERROR("giveRealStresses : unsupported mode");
+//            }
+//        }
+//
+//    }
+//}
 
 void
-PhaseFieldElement :: setNonlocalLocationArray(IntArray &answer, int nPrimNodes, int nPrimVars, int nSecNodes, int nSecVars)
+PhaseFieldElement :: giveInternalForcesVector(FloatArray &answer, TimeStep *tStep, int useUpdatedGpRecord)
 {
-    answer.resize(nlSize);
-    for ( int i = 1; i <= nlSize; i++ ) {
-        answer.at(i) = i * nPrimVars + i;
-    }
+    //answer.resize(totalSize);
+    answer.zero();
+    FloatArray answer_u(0);
+    FloatArray answer_d(0);
+
+    this->giveInternalForcesVector_u(answer_u, tStep, useUpdatedGpRecord);
+    this->giveInternalForcesVector_d(answer_d, tStep, useUpdatedGpRecord);
+    IntArray IdMask_u, IdMask_d;
+    this->giveDofManDofIDMask_u(IdMask_u);
+    this->giveDofManDofIDMask_d(IdMask_d);
+    this->computeLocationArrayOfDofIDs(IdMask_u, loc_u);
+    this->computeLocationArrayOfDofIDs(IdMask_d, loc_d);
+    answer.assemble(answer_u, loc_u);
+    answer.assemble(answer_d, loc_d);
 }
 
-
+//void
+//PhaseFieldElement :: giveInternalForcesVector_u(FloatArray &answer, TimeStep *tStep, int useUpdatedGpRecord)
+//{
+//    // computes int_V ( B_u^t * BSgima_u ) * dV
+//    this->giveInternalForcesVectorGen(answer, tStep, useUpdatedGpRecord, 
+//        NULL, 
+//        &this->computeBmatrixAt,
+//        NULL, 
+//        &this->computeBStress_u,
+//        &this->computeVolumeAround
+//        );
+//
+//}
 void
-PhaseFieldElement :: computeDisplacementDegreesOfFreedom(FloatArray &answer, TimeStep *stepN)
+PhaseFieldElement :: giveInternalForcesVector_u(FloatArray &answer, TimeStep *tStep, int useUpdatedGpRecord)
 {
-//    StructuralElement *elem = this->giveStructuralElement();
-    FloatArray u;
-    answer.resize(locSize);
-
-  //  elem->computeVectorOf(EID_MomentumBalance, VM_Total, stepN, u);
-    u.resizeWithValues(totalSize);
-    for ( int i = 1; i <= locSize; i++ ) {
-        answer.at(i) = u.at( locU.at(i) );
-    }
-}
-
-void PhaseFieldElement :: computeNonlocalDegreesOfFreedom(FloatArray &answer, TimeStep *stepN)
-{
-    //StructuralElement *elem = this->giveStructuralElement();
-    FloatArray u;
-    answer.resize(nlSize);
-
-//    elem->computeVectorOf(EID_MomentumBalance, VM_Total, stepN, u);
-    u.resizeWithValues(totalSize);
-    for  ( int i = 1; i <= nlSize; i++ ) {
-        answer.at(i) = u.at( locK.at(i) );
-    }
-}
-
-void
-PhaseFieldElement :: computeStressVectorAndLocalCumulatedStrain(FloatArray &answer, double localCumulatedStrain, GaussPoint *gp, TimeStep *stepN)
-//PhaseFieldElement :: computeStressVector(FloatArray &answer, double localCumulatedStrain, GaussPoint *gp, TimeStep *stepN)
-{
-    NLStructuralElement *elem = this->giveNLStructuralElement();
-
-    nlGeo = elem->giveGeometryMode();
-    StructuralCrossSection *cs = this->giveNLStructuralElement()->giveStructuralCrossSection();
-    GradDpMaterialExtensionInterface *dpmat = static_cast< GradDpMaterialExtensionInterface * >( 
-            cs->giveMaterialInterface( GradDpMaterialExtensionInterfaceType, gp ) );
-
-    if ( !dpmat ) {
-        OOFEM_ERROR("PhaseFieldElement :: computeStiffnessMatrix_uu - Material doesn't implement the required DpGrad interface!");
-    }
-
-    //this->computeDamage(alpha, gp, stepN);
-    if ( nlGeo == 0 ) {
-        FloatArray Epsilon;
-        this->computeLocalStrainVector(Epsilon, gp, stepN);
-        
-        if(cs->hasMaterialModeCapability( gp->giveMaterialMode() ) ) {
-            //dpmat->giveRealStressVector(answer, gp, Epsilon, nlCumulatedStrain, stepN);
-            return;
-        } else {
-            OOFEM_ERROR("giveRealStresses : unsupported mode");
-        }
-    } else if ( nlGeo == 1 ) {
-        if ( elem->giveDomain()->giveEngngModel()->giveFormulation() == TL ) {
-            FloatArray vF;
-            this->computeDeformationGradientVector(vF, gp, stepN);
-            if( cs->hasMaterialModeCapability( gp->giveMaterialMode() ) ) {
-              //  dpmat->giveFirstPKStressVector(answer, gp, vF, nlCumulatedStrain, stepN);
-                return;
-            } else {
-                OOFEM_ERROR("giveRealStresses : unsupported mode");
-            }
-        }
-
-    }
-}
-
-
-
-
-
-void
-PhaseFieldElement :: giveNonlocalInternalForcesVector(FloatArray &answer, TimeStep *tStep, int useUpdatedGpRecord)
-{
-    double dV, localCumulatedStrain=0.;
-    GaussPoint *gp;
-    NLStructuralElement *elem = this->giveNLStructuralElement();
-    IntegrationRule *iRule =  elem->giveIntegrationRule(0);
-    FloatMatrix stiffKappa, Nk;
-    FloatArray fKappa(nlSize), aux(nlSize), dKappa, stress;
-
-    aux.zero();
-    int size = nSecVars * nSecNodes;
-
-    //set displacement and nonlocal location array
-    this->setDisplacementLocationArray(locU, nPrimNodes, nPrimVars, nSecNodes, nSecVars);
-    this->setNonlocalLocationArray(locK, nPrimNodes, nPrimVars, nSecNodes, nSecVars);
-
-    answer.resize(size);
-    for ( int i = 0; i < iRule->giveNumberOfIntegrationPoints(); i++ ) {
-        gp = iRule->getIntegrationPoint(i);
-        this->computeNkappaMatrixAt(gp, Nk);
-        for ( int j = 1; j <= nlSize; j++ ) {
-            fKappa.at(j) = Nk.at(1, j);
-        }
-
-        dV  = elem->computeVolumeAround(gp);
-        this->computeStressVectorAndLocalCumulatedStrain(stress, localCumulatedStrain, gp, tStep);
-        fKappa.times(localCumulatedStrain);
-        fKappa.times(-dV);
-        aux.add(fKappa);
-    }
-
-    this->computeStiffnessMatrix_kk(stiffKappa, TangentStiffness, tStep);
-    this->computeNonlocalDegreesOfFreedom(dKappa, tStep);
-    answer.beProductOf(stiffKappa, dKappa);
-    answer.add(aux);
-}
-
-
-void
-PhaseFieldElement :: giveInternalForcesVectorGen(FloatArray &answer, TimeStep *tStep, int useUpdatedGpRecord, 
-    void (*Nfunc)(GaussPoint*, FloatMatrix), void (*Bfunc)(GaussPoint*, FloatMatrix),
-    void (*NStressFunc)(GaussPoint*, FloatArray), void (*BStressFunc)(GaussPoint*, FloatArray),
-    double (*dVFunc)(GaussPoint*))
-{
-    
-    IntegrationRule *iRule = this->giveIntegrationRule(0);
+    // computes int_V ( B_u^t * BSgima_u ) * dV
+     IntegrationRule *iRule = this->giveIntegrationRule(0);
     FloatArray NStress, BStress, vGenStress, NS, BS;
     FloatMatrix N, B;
 
@@ -213,174 +148,180 @@ PhaseFieldElement :: giveInternalForcesVectorGen(FloatArray &answer, TimeStep *t
 
         for ( int i = 0; i < iRule->giveNumberOfIntegrationPoints(); i++ ) {
             GaussPoint *gp = iRule->getIntegrationPoint(i);
-
-            // Compute N and B matrices
-            Nfunc(gp, N);
-            Bfunc(gp, B);
-            //this->computeBmatrixAt(gp, B);
-            //this->computeNmatrixAt(gp, N);
     
-            // compute generalized stress measures
-            NStressFunc(gp, NStress);
-            BStressFunc(gp, BStress);
-
-            // Compute (generalized) internal forces as f = sum_gp( N^T*GenStress_N + B^T*GenStress_B ) * dV
             double dV  = this->computeVolumeAround(gp);
-            NS.beTProductOf(N, NStress);
-            BS.beTProductOf(B, BStress);
-            answer.add(dV, NS);
-            answer.add(dV, BS);
-        }
-    }
-}
-
-
-void
-PhaseFieldElement :: giveLocalInternalForcesVector(FloatArray &answer, TimeStep *tStep, int useUpdatedGpRecord)
-{
-
-   // example -> (answer, tstep, upgp, N, B, sigN, sigB, dV)
-    this->giveInternalForcesVectorGen(answer, tStep, useUpdatedGpRecord, 
-        &this->computeNkappaMatrixAt, &this->computeBkappaMatrixAt,
-        &this->computeNStressAt, &this->computeNStressAt, &this->computeVolumeAround);
-
-}
-
-
-
-void
-PhaseFieldElement :: computeStiffnessMatrixGen(FloatMatrix &answer, MatResponseMode rMode, TimeStep *tStep)
-{
-    FloatMatrix B, D, DB;
-
-    StructuralCrossSection *cs = this->giveNLStructuralElement()->giveStructuralCrossSection();
-    IntegrationRule *iRule = elem->giveIntegrationRule(0);
-    bool matStiffSymmFlag = elem->giveCrossSection()->isCharacteristicMtrxSymmetric(rMode);
-    answer.resize(locSize, locSize);
-    for ( int j = 0; j < iRule->giveNumberOfIntegrationPoints(); j++ ) {
-        GaussPoint *gp = iRule->getIntegrationPoint(j);
-        
-            // Compute N and B matrices
-            //Nfunc(gp, N);
-            //Bfunc(gp, B);
             
-
-        //dpmat->givePDGradMatrix_uu(D, rMode, gp, tStep);
-        double dV = elem->computeVolumeAround(gp);
-        DB.beProductOf(D, B);
-        if ( matStiffSymmFlag ) {
-            answer.plusProductSymmUpper(B, DB, dV);
-        } else {
-            answer.plusProductUnsym(B, DB, dV);
+            // compute generalized stress measure
+                this->computeBmatrixAt(gp, B, 1, 3);
+                this->computeBStress_u(BStress, gp, tStep, useUpdatedGpRecord);
+                //BStressFunc(gp, BStress);
+                BS.beTProductOf(B, BStress);
+                answer.add(dV, BS);      
         }
     }
-
-    if ( elem->domain->giveEngngModel()->giveFormulation() == AL ) {
-        FloatMatrix initialStressMatrix;
-        elem->computeInitialStressMatrix(initialStressMatrix, tStep);
-        answer.add(initialStressMatrix);
-    }
-
-    if ( matStiffSymmFlag ) {
-        answer.symmetrized();
-    }
 }
 
 
 
-
-
-
+//void
+//PhaseFieldElement :: giveInternalForcesVector_d(FloatArray &answer, TimeStep *tStep, int useUpdatedGpRecord)
+//{
+//    // computes int_V ( N_d^t * NSgima_d + B_d^t * BSgima_d ) * dV
+//    this->giveInternalForcesVectorGen(answer, tStep, useUpdatedGpRecord, 
+//        &this->computeNmatrixAt, 
+//        &this->computeBmatrixAt,
+//        &this->computeNStress_d, 
+//        &this->computeBStress_d,
+//        &this->computeVolumeAround
+//        );
+//
+//}
 void
-PhaseFieldElement :: giveInternalForcesVector(FloatArray &answer, TimeStep *tStep, int useUpdatedGpRecord)
+PhaseFieldElement :: giveInternalForcesVector_d(FloatArray &answer, TimeStep *tStep, int useUpdatedGpRecord)
 {
-    answer.resize(totalSize);
-    answer.zero();
-    FloatArray answerU;
-    answerU.resize(locSize);
-    answer.zero();
-    FloatArray answerK(nlSize);
-    answerK.zero();
+ IntegrationRule *iRule = this->giveIntegrationRule(0);
+    FloatArray NStress, BStress, vGenStress, NS, BS;
+    FloatMatrix N, B;
 
-    this->giveNonlocalInternalForcesVector(answerK, tStep, useUpdatedGpRecord);
-    this->giveLocalInternalForcesVector(answerU, tStep, useUpdatedGpRecord);
+    for ( int j = 0; j < this->giveNumberOfIntegrationRules(); j++ ) {
+        IntegrationRule *iRule = this->giveIntegrationRule(j);
 
+        for ( int i = 0; i < iRule->giveNumberOfIntegrationPoints(); i++ ) {
+            GaussPoint *gp = iRule->getIntegrationPoint(i);
+    
+            double dV  = this->computeVolumeAround(gp);
+            
+            // compute generalized stress measures
+            //if ( NStressFunc && Nfunc ) {
+                //Nfunc(gp, N);
+                this->computeNd_matrixAt( *gp->giveCoordinates(), N);
+                //NStressFunc(gp, NStress);
+                computeNStress_d(NStress, gp, tStep, useUpdatedGpRecord);
+                NStress.beTProductOf(N, NStress);
+                answer.add(dV, NS);
+            //}
 
-    answer.assemble(answerU, locU);
-    answer.assemble(answerK, locK);
-}
+            //if ( BStressFunc && Bfunc ) {
+                //Bfunc(gp, B, 1, 3);
+                this->computeBd_matrixAt(gp, B, 1, 3);
+                //BStressFunc(gp, BStress);
+                computeBStress_d(BStress, gp, tStep, useUpdatedGpRecord);
+                BS.beTProductOf(B, BStress);
+                answer.add(dV, BS);
+            //}
 
-void
-PhaseFieldElement :: computeForceLoadVector(FloatArray &answer, TimeStep *stepN, ValueModeType mode)
-{
-    //set displacement and nonlocal location array
-    this->setDisplacementLocationArray(locU, nPrimNodes, nPrimVars, nSecNodes, nSecVars);
-    this->setNonlocalLocationArray(locK, nPrimNodes, nPrimVars, nSecNodes, nSecVars);
-
-
-    FloatArray localForces(locSize);
-    FloatArray nlForces(nlSize);
-    answer.resize(totalSize);
-
-    this->computeLocForceLoadVector(localForces, stepN, mode);
-
-    answer.assemble(localForces, locU);
-    answer.assemble(nlForces, locK);
-}
-
-void
-PhaseFieldElement :: computeNonForceLoadVector(FloatArray &answer, TimeStep *stepN, ValueModeType mode)
-{
-    //set displacement and nonlocal location array
-    this->setDisplacementLocationArray(locU, nPrimNodes, nPrimVars, nSecNodes, nSecVars);
-    this->setNonlocalLocationArray(locK, nPrimNodes, nPrimVars, nSecNodes, nSecVars);
-
-    FloatArray localForces(locSize);
-    FloatArray nlForces(nlSize);
-    answer.resize(totalSize);
-    answer.zero();
-
-    this->computeLocNonForceLoadVector(answer, stepN, mode);
-}
-
-
-/************************************************************************/
-void
-PhaseFieldElement :: computeLocForceLoadVector(FloatArray &answer, TimeStep *stepN, ValueModeType mode)
-// computes the part of load vector, which is imposed by force loads acting
-// on element volume (surface).
-// When reactions forces are computed, they are computed from element::GiveRealStressVector
-// in this vector a real forces are stored (temperature part is subtracted).
-// so we need further sobstract part corresponding to non-nodeal loading.
-{
-    FloatMatrix T;
-    NLStructuralElement *elem = this->giveNLStructuralElement();
-    elem->computeLocalForceLoadVector(answer, stepN, mode);
-
-    // transform result from global cs to nodal cs. if necessary
-    if ( answer.isNotEmpty() ) {
-        if ( elem->computeGtoLRotationMatrix(T) ) {
-            // first back to global cs from element local
-            answer.rotatedWith(T, 't');
+            
         }
-    } else   {
-        answer.resize(locSize);
-        answer.zero();
     }
 }
 
 
-void
-PhaseFieldElement :: computeLocNonForceLoadVector(FloatArray &answer, TimeStep *stepN, ValueModeType mode)
-// Computes the load vector of the receiver, at stepN.
-{
-    FloatArray helpLoadVector;
-    StructuralElement *elem = this->giveStructuralElement();
-    answer.resize(0);
 
-    elem->computePrescribedStrainLoadVectorAt(helpLoadVector, stepN, mode);
-    if ( helpLoadVector.giveSize() ) {
-        answer.add(helpLoadVector);
+void
+PhaseFieldElement :: computeBStress_u(FloatArray &answer, GaussPoint *gp, TimeStep *tStep, int useUpdatedGpRecord)
+{
+    // computes G(d)*sig(u)
+    StructuralCrossSection *cs = dynamic_cast< StructuralCrossSection *> ( this->giveCrossSection() );
+    FloatArray reducedStrain, a_u;
+    FloatMatrix B_u;
+    this->computeBmatrixAt(gp, B_u, 1, 3);
+
+    this->computeDisplacementUnknowns(a_u, VM_Total, tStep);
+    reducedStrain.beProductOf(B_u, a_u);
+    cs->giveRealStresses(answer, gp, reducedStrain, tStep);
+
+    answer.times( this->computeG(gp, VM_Total, tStep) );
+
+}
+
+void
+PhaseFieldElement :: computeNStress_d(FloatArray &answer, GaussPoint *gp, TimeStep *tStep, int useUpdatedGpRecord)
+{
+    // computes (t*/Delta t) *(d - d_old) + g_c/l*d + G'*Psibar
+    
+    //PhaseFieldCrossSection *cs = static_cast... 
+    double Delta_t = tStep->giveTimeIncrement();
+    // t_star = cs->give
+    double t_star = 1.0;
+    //double d = computeDamageAt(gp, tStep)
+    //double d_old = computeDamageAt(gp, tStep_prev)
+    double d = 0.0;
+    double d_old = 0.0;
+    // cs->giveInternalLength() 
+    double l = 0.1;
+    // cs->giveCriticalEnergy()
+    double g_c = 1.0;
+    // double Gprim = this->computeGPrim(gp);
+    double Gprim = this->computeGPrim(gp, VM_Total, tStep);
+    // double Psibar = cs->computeFreeEnergy(gp)
+}
+
+void
+PhaseFieldElement :: computeBStress_d(FloatArray &answer, GaussPoint *gp, TimeStep *tStep, int useUpdatedGpRecord)
+{
+    // computes g_c*l
+    // PhaseFieldCrossSection *cs = static_cast... 
+    double l = 0.1;
+    double g_c = 1.0;
+    answer.resize(1);
+    answer.at(1) = g_c*l;
+}
+
+double 
+PhaseFieldElement :: computeDamageAt(GaussPoint *gp, ValueModeType valueMode, TimeStep *stepN)
+{
+    // d = N_d * a_d
+    FloatArray dVec;
+    computeDamageUnknowns(dVec, valueMode, stepN);
+    FloatArray Nvec;
+    this->interpolation_d.evalN(Nvec, *gp->giveCoordinates(), FEIElementGeometryWrapper(this));
+    return Nvec.dotProduct(dVec);
+}
+
+double
+PhaseFieldElement :: computeG(GaussPoint *gp, ValueModeType valueMode, TimeStep *stepN)
+{
+    // compute (1-d)^2 + r0
+    double d = this->computeDamageAt(gp, valueMode, stepN);
+    double r0 = 1.0e-10;
+    return (1.0 - d) * (1.0 - d) + r0;
+}
+
+double 
+PhaseFieldElement :: computeGPrim(GaussPoint *gp, ValueModeType valueMode, TimeStep *stepN)
+{
+    // compute -2*d
+    double d = this->computeDamageAt(gp, valueMode, stepN);
+    return -2.0*d;
+}
+
+void
+PhaseFieldElement :: computeNd_matrixAt(const FloatArray &lCoords, FloatMatrix &N)
+{
+    FloatArray Nvec;
+    this->interpolation_d.evalN(Nvec, lCoords, FEIElementGeometryWrapper(this));
+    N.resize(1, Nvec.giveSize());
+    N.beNMatrixOf(Nvec,1);
+
+}
+
+void
+PhaseFieldElement :: computeBd_matrixAt(GaussPoint *aGaussPoint, FloatMatrix &answer, int li, int ui)
+//
+// Returns the [2x4] gradient matrix {B_d} of the receiver,
+// evaluated at aGaussPoint.
+// a = ( d1, d2, d3, d4)
+{
+
+    FloatMatrix dnx;
+    this->interpolation_d.evaldNdx( dnx, * aGaussPoint->giveCoordinates(), FEIElementGeometryWrapper(this) );
+
+    answer.resize(2, 4);
+    answer.zero();
+
+    for ( int i = 1; i <= 4; i++ ) {
+        answer.at(1, i) = dnx.at(i, 1);
+        answer.at(2, i) = dnx.at(i, 2);
     }
 }
 
@@ -389,273 +330,180 @@ void
 PhaseFieldElement :: computeStiffnessMatrix(FloatMatrix &answer, MatResponseMode rMode, TimeStep *tStep)
 {
     //set displacement and nonlocal location array
-    this->setDisplacementLocationArray(locU, nPrimNodes, nPrimVars, nSecNodes, nSecVars);
-    this->setNonlocalLocationArray(locK, nPrimNodes, nPrimVars, nSecNodes, nSecVars);
+    //this->setDisplacementLocationArray(locU, nPrimNodes, nPrimVars, nSecNodes, nSecVars);
+    //this->setNonlocalLocationArray(locK, nPrimNodes, nPrimVars, nSecNodes, nSecVars);
 
 
-    answer.resize(totalSize, totalSize);
+    //answer.resize(totalSize, totalSize);
     answer.zero();
 
     FloatMatrix answer1, answer2, answer3, answer4;
     this->computeStiffnessMatrix_uu(answer1, rMode, tStep);
-    this->computeStiffnessMatrix_uk(answer2, rMode, tStep);
-    this->computeStiffnessMatrix_ku(answer3, rMode, tStep);
-    this->computeStiffnessMatrix_kk(answer4, rMode, tStep);
-    answer.assemble(answer1, locU);
-    answer.assemble(answer2, locU, locK);
-    answer.assemble(answer3, locK, locU);
-    answer.assemble(answer4, locK);
+    this->computeStiffnessMatrix_ud(answer2, rMode, tStep);
+    this->computeStiffnessMatrix_du(answer3, rMode, tStep);
+    this->computeStiffnessMatrix_dd(answer4, rMode, tStep);
+    answer.assemble(answer1, loc_u);
+    answer.assemble(answer2, loc_u, loc_d);
+    answer.assemble(answer3, loc_d, loc_u);
+    answer.assemble(answer4, loc_d);
 }
 
-
-
-
+//void
+//PhaseFieldElement :: computeStiffnessMatrix_uu(FloatMatrix &answer, MatResponseMode rMode, TimeStep *tStep)
+//{
+//    // This is the regular stiffness matrix times G
+//        
+//    this->computeStiffnessMatrixGen(answer, rMode, tStep, 
+//        NULL, 
+//        &this->computeBmatrixAt,
+//        NULL, 
+//        &this->Duu_B,
+//        this->computeVolumeAround 
+//        );
+//
+//}
 void
 PhaseFieldElement :: computeStiffnessMatrix_uu(FloatMatrix &answer, MatResponseMode rMode, TimeStep *tStep)
 {
-    NLStructuralElement *elem = this->giveNLStructuralElement();
-    FloatMatrix B, D, DB;
+    // This is the regular stiffness matrix times G
+    FloatMatrix B, DB, N, DN, D_B, D_N;
+    StructuralCrossSection *cs = dynamic_cast<StructuralCrossSection* > (this->giveCrossSection() );
 
-    StructuralCrossSection *cs = this->giveNLStructuralElement()->giveStructuralCrossSection();
+    IntegrationRule *iRule = this->giveIntegrationRule(0);
+    bool matStiffSymmFlag = cs->isCharacteristicMtrxSymmetric(rMode);
+    answer.resize(0,0);
 
-    nlGeo = elem->giveGeometryMode();
-    IntegrationRule *iRule = elem->giveIntegrationRule(0);
-    bool matStiffSymmFlag = elem->giveCrossSection()->isCharacteristicMtrxSymmetric(rMode);
-    answer.resize(locSize, locSize);
     for ( int j = 0; j < iRule->giveNumberOfIntegrationPoints(); j++ ) {
         GaussPoint *gp = iRule->getIntegrationPoint(j);
         
-        GradDpMaterialExtensionInterface *dpmat = dynamic_cast< GradDpMaterialExtensionInterface * >( 
-                    cs->giveMaterialInterface( GradDpMaterialExtensionInterfaceType, gp ) );
-        if ( !dpmat ) {
-            OOFEM_ERROR("PhaseFieldElement :: computeStiffnessMatrix_uk - Material doesn't implement the required DpGrad interface!");
-        }
-        if ( nlGeo == 0 ) {
-            elem->computeBmatrixAt(gp, B);
-        } else if ( nlGeo == 1 ) {
-            if ( elem->domain->giveEngngModel()->giveFormulation() == AL ) {
-                elem->computeBmatrixAt(gp, B);
-            } else {
-                elem->computeBHmatrixAt(gp, B);
-            }
-        }
+        double dV = this->computeVolumeAround(gp);
+        // compute int_V ( B^t * D_B * B )dV
+        this->computeBmatrixAt(gp, B, 1, 3);
+        cs->giveCharMaterialStiffnessMatrix(D_B, rMode, gp, tStep);
+        D_B.times( computeG(gp, VM_Total, tStep) );
+        DB.beProductOf(D_B, B);
 
-        dpmat->givePDGradMatrix_uu(D, rMode, gp, tStep);
-        double dV = elem->computeVolumeAround(gp);
-        DB.beProductOf(D, B);
         if ( matStiffSymmFlag ) {
             answer.plusProductSymmUpper(B, DB, dV);
         } else {
             answer.plusProductUnsym(B, DB, dV);
-        }
+        }    
+        
     }
 
-    if ( elem->domain->giveEngngModel()->giveFormulation() == AL ) {
-        FloatMatrix initialStressMatrix;
-        elem->computeInitialStressMatrix(initialStressMatrix, tStep);
-        answer.add(initialStressMatrix);
-    }
 
     if ( matStiffSymmFlag ) {
         answer.symmetrized();
     }
+    
 }
-
-
-
-
-
-
 void
-PhaseFieldElement :: computeStiffnessMatrix_ku(FloatMatrix &answer, MatResponseMode rMode, TimeStep *tStep)
+PhaseFieldElement :: computeStiffnessMatrix_ud(FloatMatrix &answer, MatResponseMode rMode, TimeStep *tStep)
 {
-    double dV;
-    NLStructuralElement *elem = this->giveNLStructuralElement();
-    FloatMatrix B, DB, D, Nk, NkT, NkDB;
-    StructuralCrossSection *cs = this->giveNLStructuralElement()->giveStructuralCrossSection();
+    FloatMatrix B, DB, N, DN, D_B, D_N, S(3,1);
+    FloatArray stress;
+    StructuralCrossSection *cs = dynamic_cast<StructuralCrossSection* > (this->giveCrossSection() );
 
-    answer.resize(nlSize, locSize);
-
-    IntegrationRule *iRule = elem->giveIntegrationRule(0);
-    int nlGeo = this->giveNLStructuralElement()->giveGeometryMode();
+    IntegrationRule *iRule = this->giveIntegrationRule(0);
+    bool matStiffSymmFlag = cs->isCharacteristicMtrxSymmetric(rMode);
+    answer.resize(0,0);
 
     for ( int j = 0; j < iRule->giveNumberOfIntegrationPoints(); j++ ) {
         GaussPoint *gp = iRule->getIntegrationPoint(j);
-
-        GradDpMaterialExtensionInterface *dpmat = dynamic_cast< GradDpMaterialExtensionInterface * >( 
-                    cs->giveMaterialInterface( GradDpMaterialExtensionInterfaceType, gp ) );
-        if ( !dpmat ) {
-            OOFEM_ERROR("PhaseFieldElement :: computeStiffnessMatrix_uk - Material doesn't implement the required DpGrad interface!");
-        }
-
-        elem->computeBmatrixAt(gp, B);
-        if ( nlGeo == 1 ) {
-            if ( elem->domain->giveEngngModel()->giveFormulation() == AL ) {
-                elem->computeBmatrixAt(gp, B);
-            } else {
-                elem->computeBHmatrixAt(gp, B);
-            }
-        }
-
-        dpmat->givePDGradMatrix_ku(D, rMode, gp, tStep);
-        this->computeNkappaMatrixAt(gp, Nk);
-        NkT.beTranspositionOf(Nk);
-        dV = elem->computeVolumeAround(gp);
-        DB.beProductOf(D, B);
-        NkDB.beProductOf(NkT, DB);
-        NkDB.times(-dV);
-        answer.add(NkDB);
-
-        if ( dpmat->giveAveragingType() == 2 ) {
-            double dl1, dl2, dl3;
-            FloatArray Gk;
-            FloatMatrix DB, LDB;
-            FloatMatrix Bk, BkT, Nk, BktM22, BktM22Gk, BktM12, BktM12Gk, M22(2, 2), M12(2, 2);
-            FloatMatrix dL1(1, 3), dL2(1, 3), result, result1, result2, dLdS, n(2, 2);
-
-            this->computeBkappaMatrixAt(gp, Bk);
-            BkT.beTranspositionOf(Bk);
-            dpmat->givePDGradMatrix_uu(D, rMode, gp, tStep);
-            dpmat->givePDGradMatrix_LD(dLdS, rMode, gp, tStep);
-            this->computeNonlocalGradient(Gk, gp, tStep);
-
-            dl1 = dLdS.at(3, 3);
-            dl2 = dLdS.at(4, 4);
-            dl3 = dLdS.at(5, 5);
-
-            n.at(1, 1) = dLdS.at(1, 1);
-            n.at(1, 2) = dLdS.at(1, 2);
-            n.at(2, 1) = dLdS.at(2, 1);
-            n.at(2, 2) = dLdS.at(2, 2);
-            // first term BkT M22 G L1 D B
-            // M22 = n2 \otimes n2
-            M22.at(1, 1) = n.at(1, 2) * n.at(1, 2);
-            M22.at(1, 2) = n.at(1, 2) * n.at(2, 2);
-            M22.at(2, 1) = n.at(2, 2) * n.at(1, 2);
-            M22.at(2, 2) = n.at(2, 2) * n.at(2, 2);
-            // dL1
-            dL1.at(1, 1) = dl1 * n.at(1, 1) * n.at(1, 1) + dl2 *n.at(1, 2) * n.at(1, 2);
-            dL1.at(1, 2) = dl1 * n.at(2, 1) * n.at(2, 1) + dl2 *n.at(2, 2) * n.at(2, 2);
-            dL1.at(1, 3) = dl1 * n.at(1, 1) * n.at(2, 1) + dl2 *n.at(1, 2) * n.at(2, 2);
-
-            DB.beProductOf(D, B);
-            LDB.beProductOf(dL1, DB);
-            BktM22.beProductOf(BkT, M22);
-            //BktM22Gk.beProductOf(BktM22,Gk);
-            result1.beProductOf(BktM22Gk, LDB);
-
-            // M12 + M21  = n1 \otimes n2 + n2 \otimes n1
-            M12.at(1, 1) = n.at(1, 1) * n.at(1, 2) + n.at(1, 2) * n.at(1, 1);
-            M12.at(1, 2) = n.at(1, 1) * n.at(2, 2) + n.at(1, 2) * n.at(2, 1);
-            M12.at(2, 1) = n.at(2, 1) * n.at(1, 2) + n.at(2, 2) * n.at(1, 1);
-            M12.at(2, 2) = n.at(2, 1) * n.at(2, 2) + n.at(2, 2) * n.at(2, 1);
-            //dL2
-            dL2.at(1, 1) = dl3 * ( n.at(1, 1) * n.at(1, 2) + n.at(1, 1) * n.at(1, 2) );
-            dL2.at(1, 2) = dl3 * ( n.at(2, 1) * n.at(2, 2) + n.at(2, 1) * n.at(2, 2) );
-            dL2.at(1, 3) = dl3 * ( n.at(1, 2) * n.at(2, 1) + n.at(1, 1) * n.at(2, 2) );
-
-            LDB.beProductOf(dL2, DB);
-            BktM12.beProductOf(BkT, M12);
-            //BktM12Gk.beProductOf(BktM12,Gk);
-            result2.beProductOf(BktM12Gk, LDB);
-
-            result = result1;
-            result.add(result2);
-
-            result.times(dV);
-            answer.add(result);
-        }
+        
+        double dV = this->computeVolumeAround(gp);
+        // compute int_V ( B^t * D_B * B )dV
+        this->computeBmatrixAt(gp, B, 1, 3);
+        this->computeNd_matrixAt(*gp->giveCoordinates(), N);
+        N.times( this->computeGPrim(gp, VM_Total, tStep) );
+        stress = static_cast< StructuralMaterialStatus * >( gp->giveMaterialStatus() )->giveStressVector();
+        
+        S.setColumn(stress,1);
+        DN.beProductOf(S, N);
+        answer.plusProductUnsym(B, DN, dV);        
     }
+
 }
 
-
 void
-PhaseFieldElement :: computeStiffnessMatrix_kk(FloatMatrix &answer, MatResponseMode rMode, TimeStep *tStep)
+PhaseFieldElement :: computeStiffnessMatrix_du(FloatMatrix &answer, MatResponseMode rMode, TimeStep *tStep)
 {
-    StructuralElement *elem = this->giveStructuralElement();
-    double dV;
-    double l;
-    FloatMatrix lStiff;
-    FloatMatrix Bk, Bt, BtB, N, Nt, NtN;
-    StructuralCrossSection *cs = this->giveNLStructuralElement()->giveStructuralCrossSection();
 
-    IntegrationRule *iRule = elem->giveIntegrationRule(0);
+}
 
-    answer.resize(nlSize, nlSize);
+//void
+//PhaseFieldElement :: computeStiffnessMatrix_dd(FloatMatrix &answer, MatResponseMode rMode, TimeStep *tStep)
+//{
+//   
+//    StructuralCrossSection *cs = this->giveStructuralCrossSection();
+//        
+//    this->computeStiffnessMatrixGen(answer, rMode, tStep, 
+//        NULL, 
+//        &this->computeBmatrixAt,
+//        NULL, 
+//        &this->Duu_B,
+//        this->computeVolumeAround 
+//        );
+//
+//}
+void
+PhaseFieldElement :: computeStiffnessMatrix_dd(FloatMatrix &answer, MatResponseMode rMode, TimeStep *tStep)
+{
+
+        double Delta_t = tStep->giveTimeIncrement();
+    // t_star = cs->give
+    double t_star = 1.0;
+    //double d = computeDamageAt(gp, tStep)
+    //double d_old = computeDamageAt(gp, tStep_prev)
+    double d = 0.0;
+    double d_old = 0.0;
+    // cs->giveInternalLength() 
+    double l = 0.1;
+    // cs->giveCriticalEnergy()
+    double g_c = 1.0;
+    // double Gprim = this->computeGPrim(gp);
+    
+
+    FloatMatrix B, DB, N, DN, D_B, D_N, S(3,1);
+    FloatArray stress;
+    StructuralCrossSection *cs = dynamic_cast<StructuralCrossSection* > (this->giveCrossSection() );
+
+    IntegrationRule *iRule = this->giveIntegrationRule(0);
+    bool matStiffSymmFlag = cs->isCharacteristicMtrxSymmetric(rMode);
+    answer.resize(0,0);
 
     for ( int j = 0; j < iRule->giveNumberOfIntegrationPoints(); j++ ) {
         GaussPoint *gp = iRule->getIntegrationPoint(j);
-
-        GradDpMaterialExtensionInterface *dpmat = dynamic_cast< GradDpMaterialExtensionInterface * >( 
-                cs->giveMaterialInterface( GradDpMaterialExtensionInterfaceType, gp ) );
-        if ( !dpmat ) {
-            OOFEM_ERROR("PhaseFieldElement :: computeStiffnessMatrix_uk - Material doesn't implement the required DpGrad interface!");
-        }
-
-        this->computeNkappaMatrixAt(gp, N);
-        Nt.beTranspositionOf(N);
-        this->computeBkappaMatrixAt(gp, Bk);
-        Bt.beTranspositionOf(Bk);
-        dV = elem->computeVolumeAround(gp);
-        dpmat->givePDGradMatrix_kk(lStiff, rMode, gp, tStep);
-        NtN.beProductOf(Nt, N);
-        NtN.times(dV);
-        answer.add(NtN);
-        if ( averType == 0 || averType == 1 ) {
-            l = lStiff.at(1, 1);
-            BtB.beProductOf(Bt, Bk);
-            BtB.times(l * l * dV);
-            answer.add(BtB);
-        } else if ( averType == 2 ) {
-            FloatMatrix BtL, BtLB;
-            BtL.beProductOf(Bt, lStiff);
-            BtLB.beProductOf(BtL, Bk);
-            BtLB.times(dV);
-            answer.add(BtLB);
-        }
+        
+        double dV = this->computeVolumeAround(gp);
+        
+        this->computeNd_matrixAt(*gp->giveCoordinates(), N);
+        this->computeBd_matrixAt(gp, B, 1, 3);
+        
+        double Gprim = this->computeGPrim(gp, VM_Total, tStep);
+        double freeEnergy = 1.0e-5;
+        //double factorN = t_star/Delta_t + g_c/l + freeEnergy*Gprim;
+        double factorN = t_star/Delta_t + g_c/l + freeEnergy*(-2.0);
+        double factorB = l*l;
+        
+        answer.plusProductSymmUpper(N, N, factorN*dV);
+        answer.plusProductSymmUpper(B, B, factorB*dV);   
+          
     }
-}
 
+    answer.symmetrized();
+}
 
 void
-PhaseFieldElement :: computeStiffnessMatrix_uk(FloatMatrix &answer, MatResponseMode rMode, TimeStep *tStep)
+PhaseFieldElement :: Duu_B(FloatMatrix &answer, MatResponseMode rMode, GaussPoint *gp, TimeStep *tStep)
 {
-    NLStructuralElement *elem = this->giveNLStructuralElement();
-    double dV;
-    StructuralCrossSection *cs = this->giveNLStructuralElement()->giveStructuralCrossSection();
-  
-    IntegrationRule *iRule = elem->giveIntegrationRule(0);
-    FloatMatrix B, Bt, Nk, BSN, BS, gPSigma;
+    // G*dSig/dEps
+    //StructuralCrossSection *cs = this->giveStructuralCrossSection();
+    //cs->giveCharMaterialStiffnessMatrix(answer, rMode, gp, tStep);
 
-    answer.resize(locSize, nlSize);
-
-    for ( int j = 0; j < iRule->giveNumberOfIntegrationPoints(); j++ ) {
-        GaussPoint *gp = iRule->getIntegrationPoint(j);
-
-        GradDpMaterialExtensionInterface *dpmat = dynamic_cast< GradDpMaterialExtensionInterface * >( 
-                cs->giveMaterialInterface( GradDpMaterialExtensionInterfaceType, gp ) );
-        if ( !dpmat ) {
-            OOFEM_ERROR("PhaseFieldElement :: computeStiffnessMatrix_uk - Material doesn't implement the required DpGrad interface!");
-        }
-        dpmat->givePDGradMatrix_uk(gPSigma, rMode, gp, tStep);
-        this->computeNkappaMatrixAt(gp, Nk);
-        elem->computeBmatrixAt(gp, B);
-        if ( nlGeo == 1 ) {
-            if ( elem->domain->giveEngngModel()->giveFormulation() == AL ) {
-                elem->computeBmatrixAt(gp, B);
-            } else {
-                elem->computeBHmatrixAt(gp, B);
-            }
-        }
-
-        Bt.beTranspositionOf(B);
-        dV = elem->computeVolumeAround(gp);
-        BS.beProductOf(Bt, gPSigma);
-        BSN.beProductOf(BS, Nk);
-        BSN.times(-dV);
-        answer.add(BSN);
-    }
+    //answer.times( this->computeG(gp) );
 }
+
 
 IRResultType
 PhaseFieldElement :: initializeFrom(InputRecord *ir)
@@ -666,6 +514,7 @@ PhaseFieldElement :: initializeFrom(InputRecord *ir)
 
     return IRRT_OK;
 }
+
 
 
 } // end namespace oofem
