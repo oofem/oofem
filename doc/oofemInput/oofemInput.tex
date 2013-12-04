@@ -353,8 +353,10 @@ problem. The export modules are specified after initialization modules. Export m
 allow to export computed data into external software for
 postprocessing. The available export modules are described in section
 \ref{ExportModulesSec}.
-\item \param{nxfemman} - number of xfem managers.
-Xfem managers wrap eXtended Finite Element (xfem) data: they  manage the list of enrichment items and associated enrichment functions, and their geometry representation. The number of xfem managers required is problem dependent, typically a single xfem manager is used. The syntax of xfem manager record and related records is described in section \ref{_XFEMManagerRecords}.
+\item \param{nxfemman} - 1 implies that an XFEM manager is created, 0 implies
+that no XFEM manager is created. The XFEM manager stores a list of enrichment
+items. The syntax of the XFEM manager record and related records is described in
+section \ref{_XFEMManagerRecords}.
 \item \param{eetype} - optional error estimator type used for the problem.
 Used for adaptive analysis, but can also be used to compute and write error estimates to the output files. See adaptive engineering models for details.
 \end{itemize}
@@ -2643,34 +2645,69 @@ Very general, but relatively slow.
 
 \subsection{Xfem manager record and associated records}
 \label{_XFEMManagerRecords}
-This record creates corresponding xfem manager and specifies the number of its components, in terms of number of enrichment functions, enrichment items, and geometry items. The global shape functions are represented by  individual enrichment functions. The enrichment items are abstractions of entities, which are included in the FE model using one or more global functions. Such entity may represent crack, material interface, slipping interface, etc. The particular records will follow immediately in input file. The general format is:\\
+This record specifies the number of enrichment items and simulation options
+common for all enrichment items. Functions used for enrichment (e.g. Heaviside,
+abs or branch functions) are not specified here, they are specified for each
+enrichment item separately. The same holds for the geometrical representation of
+each enrichment item (e.g. a polygon line or a circle). Currently, OOFEM
+supports XFEM simulations of cracks and material interfaces in 2D. The input
+format for the XFEM manager is:\\
 \begin{record}
-  \recentry{\entKeywordInst{XfemManager}}{\field{numberofenrichmentfunctions}{in}}
-  \recentry{}{\field{numberofenrichmentitems}{in}}
-  \recentry{}{\field{numberofgeometryitems}{in}}
+  \recentry{\entKeywordInst{XfemManager}}{\field{numberofenrichmentitems}{in}}
+  \recentry{}{\field{numberofgppertri}{in}}
+  \recentry{}{\field{debugvtk}{in}}
+  \recentry{}{\field{vtkexport}{in}}
+  \recentry{}{\field{exportfields}{in}}
 \end{record}
-where \param{numberofenrichmentfunctions} represents number of enrichment functions and their associated records, \param{numberofenrichmentitems}
-represents number of enrichment items and corresponding records, and \param{number\-of\-geometry\-items} represents number of geometry items, that are used to define the geometry of individual enrichment items.
+where \param{numberofenrichmentitems} represents number of enrichment items,
+\param{numberofgppertri} denotes the number of Gauss points in each subtriangle
+of a cut element (default 12) and \param{debugvtk} controls if additional debug
+vtk files should be written (1 activates the option, 0 is default).
 
-The enrichment function records describe individual enrichment functions. The general format is following:\\
+The specification of an enrichment item may consist of several lines, see e.g.
+the test \textit{sm/xFemCrackValBranch.in}. First, the enrichment item type is
+specified together with some optional parameters according to\\
+\noindent
+\begin{record}
+  \recentry{\entKeyword{EntType}}{\componentNum}
+  \recentry{}{\field{enrichmentfront}{in}}
+  \recentry{}{\field{propagationlaw}{in}}
+\end{record}
+where \param{enrichmentfront} specifies an enrichment front (we may for example
+employ branch functions at a crack tip and Heaviside enrichment along the rest
+of the crack, hence the ``front'' of the enrichment is treated separately) and
+\param{propagationlaw} specifies a rule for crack propagation (this feature is
+still highly experimental though). Specification of an \param{enrichmentfront}
+and a \param{propagationlaw} is optional.
+
+The next line specifies the enrichment function to be used:\\
 \noindent
 \begin{record}
   \recentry{\entKeyword{EntType}}{\componentNum}
 \end{record}
 
-The geometry item records describe individual geometries of enrichment items. The general format is following:\\
+This is followed by a line specifying the geometric description (e.g. a polygon
+line or a circle) according to\\
 \noindent
 \begin{record}
-  \recentry{\entKeyword{EntType}}{\componentNum}
+  \recentry{\entKeyword{EntType}}{\componentNum \ extra fields}
+\end{record}
+where the number and type of extra fields to specify will vary depending on the
+geometry chosen, e.g. center and radius for a circle or a number of points for a
+polygon line.
+
+If an enrichment front was specified previously, the type and properties of the
+enrichment front are specified on the next line according to\\
+\noindent
+\begin{record}
+  \recentry{\entKeyword{EntType}}{\componentNum \ extra fields}
 \end{record}
 
-
-The enrichment item records describe individual enrichment items. The general format is following:\\
+If a propagation law was specified previously, it's type and properties are also
+specified on a separate line according to\\
 \noindent
 \begin{record}
-  \recentry{\entKeyword{EntType}}{\componentNum}
-  \recentry{}{\field{geometryitem}{in}}
-  \recentry{}{\field{enrichmentfunction}{in}}
+  \recentry{\entKeyword{EntType}}{\componentNum \ extra fields}
 \end{record}
 
 
