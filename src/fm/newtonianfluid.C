@@ -42,8 +42,7 @@
 #include "classfactory.h"
 
 namespace oofem {
-
-REGISTER_Material( NewtonianFluidMaterial );
+REGISTER_Material(NewtonianFluidMaterial);
 
 int
 NewtonianFluidMaterial :: hasMaterialModeCapability(MaterialMode mode)
@@ -205,5 +204,4 @@ NewtonianFluidMaterial :: checkConsistency()
 
     return 1;
 }
-
 } // end namespace oofem

@@ -46,8 +46,7 @@
 #include <cstdlib>
 
 namespace oofem {
-
-REGISTER_Material( NonlinearFluidMaterial );
+REGISTER_Material(NonlinearFluidMaterial);
 
 int
 NonlinearFluidMaterial :: hasMaterialModeCapability(MaterialMode mode)

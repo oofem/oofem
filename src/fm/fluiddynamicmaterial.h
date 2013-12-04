@@ -43,7 +43,6 @@
 
 
 namespace oofem {
-
 /**
  * This class implements a transport material status information. It is an attribute of
  * a Gauss point. This is only an abstract class, for every instance of material class

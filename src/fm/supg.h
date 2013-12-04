@@ -126,8 +126,11 @@ public:
     }
     virtual ~SUPG() {
         if ( VelocityPressureField ) { delete VelocityPressureField; }
+
         if ( materialInterface ) { delete materialInterface; }
+
         if ( nMethod ) { delete nMethod; }
+
         if ( lhs ) { delete lhs; }
     }
 
@@ -183,8 +186,8 @@ protected:
     void updateDofUnknownsDictionary_predictor(TimeStep *tStep);
     void updateDofUnknownsDictionary_corrector(TimeStep *tStep);
 
-    void updateSolutionVectors(FloatArray& solutionVector, FloatArray& accelerationVector, FloatArray& incrementalSolutionVector, TimeStep* tStep);
-    void updateSolutionVectors_predictor(FloatArray& solutionVector, FloatArray& accelerationVector, TimeStep* tStep);
+    void updateSolutionVectors(FloatArray &solutionVector, FloatArray &accelerationVector, FloatArray &incrementalSolutionVector, TimeStep *tStep);
+    void updateSolutionVectors_predictor(FloatArray &solutionVector, FloatArray &accelerationVector, TimeStep *tStep);
 
     //void initDofManActivityMap ();
     //void updateDofManActivityMap (TimeStep* tStep);

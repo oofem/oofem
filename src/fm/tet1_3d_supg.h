@@ -42,7 +42,6 @@
 #define _IFT_Tet1_3D_SUPG_Name "tet1supg"
 
 namespace oofem {
-
 /**
  * Class representing 3d linear tetrahedral element
  * for solving incompressible fluid with SUPG solver

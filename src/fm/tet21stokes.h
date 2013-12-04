@@ -44,7 +44,6 @@
 #define _IFT_Tet21Stokes_Name "tet21stokes"
 
 namespace oofem {
-
 class FEI3dTetLin;
 class FEI3dTetQuad;
 
@@ -75,41 +74,42 @@ protected:
 
     /// Defines the ordering of the dofs in the local stiffness matrix.
     static bool initOrdering() {
-        for (int i = 0, j = 1; i < 10; ++i) {
-            momentum_ordering(i*3+0) = j++;
-            momentum_ordering(i*3+1) = j++;
-            momentum_ordering(i*3+2) = j++;
-            if ( i <= 3 ) j++;
+        for ( int i = 0, j = 1; i < 10; ++i ) {
+            momentum_ordering(i * 3 + 0) = j++;
+            momentum_ordering(i * 3 + 1) = j++;
+            momentum_ordering(i * 3 + 2) = j++;
+            if ( i <= 3 ) { j++; }
         }
+
         conservation_ordering.setValues(4, 4, 8, 12, 16);
 
         surf_ordering [ 0 ].setValues(18, 1,  2,  3,  // node 1
-                                          9, 10, 11,  // node 3
-                                          5,  6,  7,  // node 2
-                                         23, 24, 25,  // node 7
-                                         20, 21, 22,  // node 6
-                                         17, 18, 19); // node 5
+                                      9, 10, 11,      // node 3
+                                      5,  6,  7,      // node 2
+                                      23, 24, 25,     // node 7
+                                      20, 21, 22,     // node 6
+                                      17, 18, 19);    // node 5
 
         surf_ordering [ 1 ].setValues(18, 1,  2,  3,  // node 1
-                                          5,  6,  7,  // node 2
-                                         13, 14, 15,  // node 4
-                                         17, 18, 19,  // node 5
-                                         29, 30, 31,  // node 9
-                                         26, 27, 28); // node 8
+                                      5,  6,  7,      // node 2
+                                      13, 14, 15,     // node 4
+                                      17, 18, 19,     // node 5
+                                      29, 30, 31,     // node 9
+                                      26, 27, 28);    // node 8
 
         surf_ordering [ 2 ].setValues(18, 5,  6,  7,  // node 2
-                                          9, 10, 11,  // node 3
-                                         13, 14, 15,  // node 4
-                                         20, 21, 22,  // node 6
-                                         32, 33, 34,  // node 10
-                                         29, 30, 31); // node 9
+                                      9, 10, 11,      // node 3
+                                      13, 14, 15,     // node 4
+                                      20, 21, 22,     // node 6
+                                      32, 33, 34,     // node 10
+                                      29, 30, 31);    // node 9
 
         surf_ordering [ 2 ].setValues(18, 1,  2,  3,  // node 1
-                                         13, 14, 15,  // node 4
-                                          9, 10, 11,  // node 3
-                                         26, 27, 28,  // node 8
-                                         32, 33, 34,  // node 10
-                                         23, 24, 25); // node 7
+                                      13, 14, 15,     // node 4
+                                      9, 10, 11,      // node 3
+                                      26, 27, 28,     // node 8
+                                      32, 33, 34,     // node 10
+                                      23, 24, 25);    // node 7
         return true;
     }
 
@@ -157,16 +157,16 @@ public:
 
     // Element interpolation interface:
     virtual int EIPrimaryUnknownMI_computePrimaryUnknownVectorAt(ValueModeType u,
-            TimeStep *stepN, const FloatArray &coords, FloatArray &answer);
+                                                                 TimeStep *stepN, const FloatArray &coords, FloatArray &answer);
     virtual void EIPrimaryUnknownMI_computePrimaryUnknownVectorAtLocal(ValueModeType u,
-            TimeStep *stepN, const FloatArray &coords, FloatArray &answer);
+                                                                       TimeStep *stepN, const FloatArray &coords, FloatArray &answer);
     virtual void EIPrimaryUnknownMI_givePrimaryUnknownVectorDofID(IntArray &answer);
 
     // Nodal averaging interface:
     virtual void NodalAveragingRecoveryMI_computeNodalValue(FloatArray &answer, int node, InternalStateType type, TimeStep *tStep);
     virtual void NodalAveragingRecoveryMI_computeSideValue(FloatArray &answer, int side, InternalStateType type, TimeStep *tStep);
 
-    void giveIntegratedVelocity(FloatMatrix &answer, TimeStep *tStep );
+    void giveIntegratedVelocity(FloatMatrix &answer, TimeStep *tStep);
 };
 } // end namespace oofem
 #endif // tet21stokes_h

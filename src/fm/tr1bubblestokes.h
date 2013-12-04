@@ -45,7 +45,6 @@
 #define _IFT_Tr1BubbleStokes_Name "tr1bubblestokes"
 
 namespace oofem {
-
 class FEI2dTrLin;
 
 /**
@@ -53,7 +52,7 @@ class FEI2dTrLin;
  * Linear+Bubble interpolation of velocity, and linear interpolation of pressures.
  * The element is exported as a linear triangle (bubble dofs are not exported).
  * It can deal with nonlinear material models, but it is assumed that the fluid is without memory (which is usually the case).
- * 
+ *
  * @author Mikael Öhman
  */
 class Tr1BubbleStokes : public FMElement,
@@ -129,9 +128,9 @@ public:
 
     // Element interpolation interface:
     virtual int EIPrimaryUnknownMI_computePrimaryUnknownVectorAt(ValueModeType u,
-            TimeStep *stepN, const FloatArray &coords, FloatArray &answer);
+                                                                 TimeStep *stepN, const FloatArray &coords, FloatArray &answer);
     virtual void EIPrimaryUnknownMI_computePrimaryUnknownVectorAtLocal(ValueModeType u,
-            TimeStep *stepN, const FloatArray &coords, FloatArray &answer);
+                                                                       TimeStep *stepN, const FloatArray &coords, FloatArray &answer);
     virtual void EIPrimaryUnknownMI_givePrimaryUnknownVectorDofID(IntArray &answer);
 
     virtual Element *ZZNodalRecoveryMI_giveElement() { return this; }

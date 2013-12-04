@@ -97,9 +97,9 @@ public:
 
 
     virtual void NodalAveragingRecoveryMI_computeNodalValue(FloatArray &answer, int node,
-                                                    InternalStateType type, TimeStep *tStep);
+                                                            InternalStateType type, TimeStep *tStep);
     virtual void NodalAveragingRecoveryMI_computeSideValue(FloatArray &answer, int side,
-                                                   InternalStateType type, TimeStep *tStep);
+                                                           InternalStateType type, TimeStep *tStep);
 
     /// @name Helping functions for computing VOFFractions.
     //@{
@@ -135,8 +135,8 @@ public:
     virtual Interface *giveInterface(InterfaceType);
 
 protected:
-    virtual void giveLocalVelocityDofMap (IntArray &map);
-    virtual void giveLocalPressureDofMap (IntArray &map);
+    virtual void giveLocalVelocityDofMap(IntArray &map);
+    virtual void giveLocalPressureDofMap(IntArray &map);
 
     virtual void computeGaussPoints();
     virtual void computeNuMatrix(FloatMatrix &answer, GaussPoint *gp);

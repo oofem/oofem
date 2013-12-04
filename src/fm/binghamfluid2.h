@@ -74,7 +74,7 @@ public:
     /// Destructor
     virtual ~BinghamFluidMaterial2Status() { }
 
-    virtual  void printOutputAt(FILE *file, TimeStep *tStep);
+    virtual void printOutputAt(FILE *file, TimeStep *tStep);
 
     virtual void initTempStatus();
     virtual void updateYourself(TimeStep *tStep);
@@ -146,7 +146,7 @@ protected:
     double computeDevStressMagnitude(MaterialMode mmode, const FloatArray &sigd);
     void computeDeviatoricStrain(FloatArray &answer, const FloatArray &eps, MaterialMode mmode);
     void computeDeviatoricStress(FloatArray &answer, const FloatArray &deps,
-                                    double _nu, MaterialMode mmode);
+                                 double _nu, MaterialMode mmode);
 
     void __debug(GaussPoint *gp, TimeStep *atTime);
 };

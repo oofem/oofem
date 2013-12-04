@@ -67,7 +67,7 @@ protected:
     FloatArray normal, temp_normal;
 
 public:
-    LEPlicElementInterface(): permanentVofFlag(false), vof(0.), temp_vof(0.) { }
+    LEPlicElementInterface() : permanentVofFlag(false), vof(0.), temp_vof(0.) { }
     /**
      * @name The element interface required by LEPlicElementInterface
      */
@@ -203,7 +203,7 @@ protected:
         double target_vof;
         bool upd;
 public:
-        computeLEPLICVolumeFractionWrapper(LEPlicElementInterface *i, LEPlic *mi, const FloatArray &n, const double target_vof_val, bool upd_val):
+        computeLEPLICVolumeFractionWrapper(LEPlicElementInterface *i, LEPlic *mi, const FloatArray &n, const double target_vof_val, bool upd_val) :
             iface(i), minterf(mi), normal(n), target_vof(target_vof_val), upd(upd_val) { }
         void setNormal(const FloatArray &n) { normal = n; }
         double eval(double x) { return fabs(iface->computeLEPLICVolumeFraction(normal, x, minterf, upd) - target_vof); }

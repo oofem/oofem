@@ -38,8 +38,7 @@
 #include "classfactory.h"
 
 namespace oofem {
-
-REGISTER_CrossSection( FluidCrossSection );
+REGISTER_CrossSection(FluidCrossSection);
 
 FluidCrossSection :: FluidCrossSection(int n, Domain *d) : CrossSection(n, d), matNumber(0) { }
 
@@ -73,7 +72,7 @@ int
 FluidCrossSection :: checkConsistency()
 {
     CrossSection :: checkConsistency();
-    return dynamic_cast< FluidDynamicMaterial* >( this->domain->giveMaterial(this->matNumber) ) != NULL;
+    return dynamic_cast< FluidDynamicMaterial * >( this->domain->giveMaterial(this->matNumber) ) != NULL;
 }
 
 
@@ -94,7 +93,6 @@ FluidCrossSection :: isCharacteristicMtrxSymmetric(MatResponseMode rMode)
 FluidDynamicMaterial *
 FluidCrossSection :: giveFluidMaterial()
 {
-    return static_cast< FluidDynamicMaterial* >( this->domain->giveMaterial(this->matNumber) );
+    return static_cast< FluidDynamicMaterial * >( this->domain->giveMaterial(this->matNumber) );
 }
-
 } // end namespace oofem

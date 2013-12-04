@@ -70,9 +70,9 @@ public:
     virtual void giveInputRecord(DynamicInputRecord &input);
 
     // characteristic  matrix
-    virtual void giveCharacteristicMatrix(FloatMatrix & answer, CharType, TimeStep *tStep);
-    virtual void giveCharacteristicVector(FloatArray & answer, CharType, ValueModeType, TimeStep *tStep);
-    virtual double giveCharacteristicValue(CharType, TimeStep *tStep);
+    virtual void giveCharacteristicMatrix(FloatMatrix & answer, CharType, TimeStep * tStep);
+    virtual void giveCharacteristicVector(FloatArray & answer, CharType, ValueModeType, TimeStep * tStep);
+    virtual double giveCharacteristicValue(CharType, TimeStep * tStep);
     virtual void updateElementForNewInterfacePosition(TimeStep *tStep) { }
 
     virtual void computeAccelerationTerm_MB(FloatMatrix &answer, TimeStep *atTime);

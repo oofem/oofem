@@ -43,20 +43,19 @@
 //#include "leplic.h"
 
 namespace oofem {
-
-REGISTER_Material( TwoFluidMaterial );
+REGISTER_Material(TwoFluidMaterial);
 
 int
 TwoFluidMaterial :: checkConsistency()
 {
-    return this->giveMaterial(0)->checkConsistency() && 
+    return this->giveMaterial(0)->checkConsistency() &&
            this->giveMaterial(1)->checkConsistency();
 }
 
 int
 TwoFluidMaterial :: hasMaterialModeCapability(MaterialMode mode)
 {
-    return this->giveMaterial(0)->hasMaterialModeCapability(mode) && 
+    return this->giveMaterial(0)->hasMaterialModeCapability(mode) &&
            this->giveMaterial(1)->hasMaterialModeCapability(mode);
 }
 
@@ -71,6 +70,7 @@ TwoFluidMaterial :: initializeFrom(InputRecord *ir)
     if ( this->slaveMaterial.giveSize() != 2 ) {
         _error("initializeFrom: mat array should have two values\n");
     }
+
     return IRRT_OK;
 }
 
@@ -88,7 +88,7 @@ TwoFluidMaterial :: giveEffectiveViscosity(GaussPoint *gp, TimeStep *tStep)
 {
     double vof = this->giveTempVOF(gp);
     return ( 1.0 - vof ) * giveMaterial(0)->giveEffectiveViscosity(gp, tStep) +
-                     vof * giveMaterial(1)->giveEffectiveViscosity(gp, tStep);
+           vof *giveMaterial(1)->giveEffectiveViscosity(gp, tStep);
 }
 
 
@@ -99,16 +99,16 @@ TwoFluidMaterial :: give(int aProperty, GaussPoint *gp)
 // 'E') of the receiver.
 //
 {
-    if ( (aProperty == Viscosity) || (aProperty == 'd' ) ) {
+    if ( ( aProperty == Viscosity ) || ( aProperty == 'd' ) ) {
         double vof = this->giveTempVOF(gp);
         return ( ( 1.0 - vof ) * giveMaterial(0)->give(aProperty, gp) +
-            vof * giveMaterial(1)->give(aProperty, gp) );
-    /*
-    } else if ( aProperty == YieldStress ) {
-        double vof = this->giveTempVOF(gp);
-        return ( ( 1.0 - vof ) * giveMaterial(0)->give(YieldStress, gp) +
-            vof * giveMaterial(1)->give(YieldStress, gp) );
-    */
+                 vof * giveMaterial(1)->give(aProperty, gp) );
+        /*
+         * } else if ( aProperty == YieldStress ) {
+         *  double vof = this->giveTempVOF(gp);
+         *  return ( ( 1.0 - vof ) * giveMaterial(0)->give(YieldStress, gp) +
+         *      vof * giveMaterial(1)->give(YieldStress, gp) );
+         */
     } else {
         _error("give: sorry, do not know, how to return any property for two fluid material");
     }
@@ -197,8 +197,8 @@ TwoFluidMaterialStatus :: TwoFluidMaterialStatus(int n, Domain *d, GaussPoint *g
     deviatoricStrainRateVector.resize(_size);
     deviatoricStrainRateVector.zero();
 
-    this->slaveStatus0 = static_cast< FluidDynamicMaterialStatus * >( domain->giveMaterial(slaveMaterial( 0 ))->CreateStatus(gp) );
-    this->slaveStatus1 = static_cast< FluidDynamicMaterialStatus * >( domain->giveMaterial(slaveMaterial( 1 ))->CreateStatus(gp) );
+    this->slaveStatus0 = static_cast< FluidDynamicMaterialStatus * >( domain->giveMaterial( slaveMaterial(0) )->CreateStatus(gp) );
+    this->slaveStatus1 = static_cast< FluidDynamicMaterialStatus * >( domain->giveMaterial( slaveMaterial(1) )->CreateStatus(gp) );
 }
 
 
@@ -244,6 +244,4 @@ TwoFluidMaterialStatus :: restoreContext(DataStream *stream, ContextMode mode, v
     this->slaveStatus1->restoreContext(stream, mode, obj);
     return CIO_OK;
 }
-
-
 } // end namespace oofem

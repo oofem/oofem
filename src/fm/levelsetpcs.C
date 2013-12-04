@@ -59,7 +59,7 @@ LevelSetPCS :: initialize()
             previousLevelSetValues.resize(nnodes);
             for ( int i = 1; i <= nnodes; i++ ) {
                 previousLevelSetValues.at(i) = ( -1.0 ) * initialRefMatVol.pointDistance( domain->giveNode(i)->giveCoordinate(ci1),
-                                                                                         domain->giveNode(i)->giveCoordinate(ci2) );
+                                                                                          domain->giveNode(i)->giveCoordinate(ci2) );
             }
         }
 
@@ -335,17 +335,17 @@ LevelSetPCS :: giveElementMaterialMixture(FloatArray &answer, int ie)
 void
 LevelSetPCS :: reinitialization(TimeStep *atTime)
 {
-     if ( reinit_alg == 0 ) {
+    if ( reinit_alg == 0 ) {
         return;
-     } else if ( reinit_alg == 1 ) {
+    } else if ( reinit_alg == 1 ) {
         this->redistance(atTime);
-     } else if ( reinit_alg == 2 ) {
+    } else if ( reinit_alg == 2 ) {
         FloatArray ls1;
         this->FMMReinitialization(ls1);
         levelSetValues = ls1;
-     } else {
+    } else {
         OOFEM_ERROR2("LevelSetPCS::reinitialization: unknown reinitialization scheme (%d)", reinit_alg);
-     }
+    }
 }
 
 
@@ -415,7 +415,7 @@ LevelSetPCS :: redistance(TimeStep *atTime)
 
             if ( fabs( w.at(inode) ) > 0.0 ) {
                 c = dt * fs.at(inode) / w.at(inode);
-                cm = max( cm, fabs(c / levelSetValues.at(inode)) );
+                cm = max( cm, fabs( c / levelSetValues.at(inode) ) );
                 levelSetValues.at(inode) = levelSetValues.at(inode) - c;
             } else {
                 //printf ("(%d) ", inode);
@@ -434,7 +434,7 @@ LevelSetPCS :: redistance(TimeStep *atTime)
                     //two stage integration
                     // update
                     d.at(inode) = 0.5 * ( d_old.at(inode) + d.at(inode) ) -
-                        0.5 *dt *fs.at(inode) / w.at(inode);
+                                  0.5 *dt *fs.at(inode) / w.at(inode);
                     cm = max( cm, fabs( ( d.at(inode) - d_old.at(inode) ) / d_old.at(inode) ) );
                 }
             }
@@ -507,6 +507,7 @@ LevelSetPCS :: pcs_stage1(FloatArray &ls, FloatArray &fs, FloatArray &w, TimeSte
                     k.at(i) = 0.0;
                 }
             }
+
             dfi = fi.dotProduct(k);
             for ( i = 1; i <= inodes; i++ ) {
                 help = 0.0;
@@ -541,7 +542,6 @@ LevelSetPCS :: pcs_stage1(FloatArray &ls, FloatArray &fs, FloatArray &w, TimeSte
             OOFEM_ERROR2("LevelSetPCS::updatePosition: element %d does not implement LevelSetPCSElementInterfaceType", ie);
         }
     } // end loop over elements
-
 }
 
 
@@ -640,7 +640,7 @@ LevelSetPCS :: saveContext(DataStream *stream, ContextMode mode, void *obj)
     contextIOResultType iores;
 
     if ( !stream->write(& levelSetVersion, 1) ) {
-      THROW_CIOERR(CIO_IOERR);
+        THROW_CIOERR(CIO_IOERR);
     }
 
     if ( ( iores = levelSetValues.storeYourself(stream, mode) ) != CIO_OK ) {
@@ -656,14 +656,15 @@ LevelSetPCS :: restoreContext(DataStream *stream, ContextMode mode, void *obj)
 {
     contextIOResultType iores;
 
-    if ( !stream->read(&levelSetVersion, 1) ) {
-       THROW_CIOERR(CIO_IOERR);
+    if ( !stream->read(& levelSetVersion, 1) ) {
+        THROW_CIOERR(CIO_IOERR);
     }
 
     if ( ( iores = levelSetValues.restoreYourself(stream, mode) ) != CIO_OK ) {
         THROW_CIOERR(iores);
     }
-    previousLevelSetValues=levelSetValues;
+
+    previousLevelSetValues = levelSetValues;
 #ifdef LevelSetPCS_CACHE_ELEMENT_VOF
     elemVofLevelSetVersion = 0;
 #endif
