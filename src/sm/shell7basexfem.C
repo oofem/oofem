@@ -42,10 +42,11 @@
 #include "connectivitytable.h"
 #include "bilinearczmaterialFagerstrom.h"
 #include "mathfem.h"
+#include "node.h"
 
 namespace oofem {
 
-    const double DISC_DOF_SCALE_FAC = 1.0e-0;
+    const double DISC_DOF_SCALE_FAC = 1.0e-3;
 
 Shell7BaseXFEM :: Shell7BaseXFEM(int n, Domain *aDomain) : Shell7Base(n, aDomain), XfemElementInterface(this) 
 {
@@ -219,21 +220,14 @@ Shell7BaseXFEM :: evalCovarBaseVectorsAt(FloatArray &lCoords, FloatMatrix &gcov,
 
     // Discontinuous part
     TimeStep *tStep = this->giveDomain()->giveEngngModel()->giveCurrentStep();
-    FloatArray N, dGenEps;
+    FloatArray dGenEps;
     FloatMatrix gcovd; 
     std :: vector< double > ef;
     for ( int i = 1; i <= this->xMan->giveNumberOfEnrichmentItems(); i++ ) { 
         EnrichmentItem *ei = this->xMan->giveEnrichmentItem(i);
 
         if ( ei->isElementEnriched(this) ) {
-            double levelSet = 0.0;
-            if ( dynamic_cast< Delamination * >( ei ) ) {
-                levelSet = lCoords.at(3) - dynamic_cast< Delamination * >( ei )->giveDelamXiCoord(); 
-            } else if ( dynamic_cast< Crack * >( ei ) ) {
-                const IntArray &elNodes = this->giveDofManArray();
-                this->fei->evalN( N, lCoords, FEIElementGeometryWrapper(this) );
-                ei->interpLevelSet(levelSet, N, elNodes);
-            }
+            double levelSet = this->evaluateLevelSet(lCoords, ei);
             ei->evaluateEnrFuncAt(ef, lCoords, levelSet);  
             
             if ( ef[0] > 0.1 ) {  
@@ -434,7 +428,7 @@ Shell7BaseXFEM :: discComputeSectionalForces(FloatArray &answer, TimeStep *tStep
 
 #endif
 
-// NEW - through the thickness crack
+// NEW - with through the thickness crack
 void
 Shell7BaseXFEM :: discComputeSectionalForces(FloatArray &answer, TimeStep *tStep, FloatArray &solVec, FloatArray &solVecD, EnrichmentItem *ei)
 //
@@ -445,24 +439,16 @@ Shell7BaseXFEM :: discComputeSectionalForces(FloatArray &answer, TimeStep *tStep
     FloatMatrix B;
     f.zero();
     std :: vector< double > ef;
-    double levelSet = 0.0;
     for ( int layer = 1; layer <= numberOfLayers; layer++ ) {
         IntegrationRule *iRuleL = integrationRulesArray [ layer - 1 ];
         Material *mat = domain->giveMaterial( this->layeredCS->giveLayerMaterial(layer) );
 
         for ( int j = 1; j <= iRuleL->giveNumberOfIntegrationPoints(); j++ ) {
             GaussPoint *gp = iRuleL->getIntegrationPoint(j - 1);
-            lCoords = *gp->giveCoordinates();
-            
-            if ( dynamic_cast< Delamination * >( ei ) ) {
-                levelSet = lCoords.at(3) - dynamic_cast< Delamination * >( ei )->giveDelamXiCoord();                   
-            } else if ( dynamic_cast< Crack * >( ei ) ) {
-                const IntArray &elNodes = this->giveDofManArray();
-                this->fei->evalN( N, lCoords, FEIElementGeometryWrapper(this) );
-                ei->interpLevelSet(levelSet, N, elNodes);
-            }          
-
+            lCoords = *gp->giveCoordinates();           
+            double levelSet = this->evaluateLevelSet(lCoords, ei);
             ei->evaluateEnrFuncAt(ef, lCoords, levelSet);
+            //printf("ef = %e \n", ef[0]);
 
             if ( ef[0] > 0.1 ) {  
                 this->computeBmatrixAt(lCoords, B);
@@ -487,6 +473,21 @@ Shell7BaseXFEM :: discComputeSectionalForces(FloatArray &answer, TimeStep *tStep
 
 }
 
+double 
+Shell7BaseXFEM :: evaluateLevelSet(const FloatArray &lCoords, EnrichmentItem *ei)
+{
+    // Evaluates the corresponding level set depending on the type of enrichment
+    double levelSet = 0.0;
+    if ( dynamic_cast< Delamination * >( ei ) ) {
+        levelSet = lCoords.at(3) - dynamic_cast< Delamination * >( ei )->giveDelamXiCoord();                   
+    } else if ( dynamic_cast< Crack * >( ei ) ) {
+        FloatArray N;
+        const IntArray &elNodes = this->giveDofManArray();
+        this->fei->evalN( N, lCoords, FEIElementGeometryWrapper(this) );
+        ei->interpLevelSet(levelSet, N, elNodes);
+    }          
+    return levelSet;
+}
 
 void
 Shell7BaseXFEM :: giveMaxCZDamages(FloatArray &answer, TimeStep *tStep)
@@ -899,15 +900,15 @@ Shell7BaseXFEM :: computeStiffnessMatrix(FloatMatrix &answer, MatResponseMode rM
                         this->computeOrderingArray( orderingArrays[m-1], activeDofsArrays[m-1], eiM); 
                     }
 
-
-                    double levelSetM = 0.0;
+                    /*double levelSetM = 0.0;
                     if ( dynamic_cast< Delamination * >( eiM ) ) {
                         levelSetM = lCoords.at(3) - dynamic_cast< Delamination * >( eiM )->giveDelamXiCoord();                   
                     } else if ( dynamic_cast< Crack * >( eiM ) ) {
                         const IntArray &elNodes = this->giveDofManArray();
                         this->fei->evalN( N, lCoords, FEIElementGeometryWrapper(this) );
                         eiM->interpLevelSet(levelSetM, N, elNodes);
-                    }   
+                    }   */
+                    double levelSetM = this->evaluateLevelSet(lCoords, eiM);
                     eiM->evaluateEnrFuncAt(efM, lCoords, levelSetM);
 
 
@@ -925,14 +926,15 @@ Shell7BaseXFEM :: computeStiffnessMatrix(FloatMatrix &answer, MatResponseMode rM
 
                         if ( eiK->isElementEnriched(this) ) {
 
-                            double levelSetK = 0.0;
+                            /*double levelSetK = 0.0;
                             if ( dynamic_cast< Delamination * >( eiK ) ) {
                                 levelSetK = lCoords.at(3) - dynamic_cast< Delamination * >( eiK )->giveDelamXiCoord();                   
                             } else if ( dynamic_cast< Crack * >( eiK ) ) {
                                 const IntArray &elNodes = this->giveDofManArray();
                                 this->fei->evalN( N, lCoords, FEIElementGeometryWrapper(this) );
                                 eiK->interpLevelSet(levelSetK, N, elNodes);
-                            }   
+                            }   */
+                            double levelSetK = this->evaluateLevelSet(lCoords, eiK);
                             eiK->evaluateEnrFuncAt(efK, lCoords, levelSetK);   
                             
                             if ( efM[0] > 0.1 && efK[0] > 0.1 ) {
@@ -1470,8 +1472,6 @@ Shell7BaseXFEM :: vtkEvalUpdatedGlobalCoordinateAt(FloatArray &localCoords, int 
 
 #if 1
     // Discontinuous part
-    FloatArray lCoords(3);
-    lCoords.zero();
     std :: vector< double > ef;
     FloatArray solVecD, xd, md, xtemp(3), N; double gamd=0;
     for ( int i = 1; i <= this->xMan->giveNumberOfEnrichmentItems(); i++ ) { 
@@ -1487,8 +1487,9 @@ Shell7BaseXFEM :: vtkEvalUpdatedGlobalCoordinateAt(FloatArray &localCoords, int 
                 
                 this->fei->evalN( N, localCoords, FEIElementGeometryWrapper(this) );
                 ei->interpLevelSet(levelSet, N, elNodes);
-            }   
-            ei->evaluateEnrFuncAt(ef, lCoords, levelSet); 
+            }
+            //double levelSet = this->evaluateLevelSet(localCoords, ei);
+            ei->evaluateEnrFuncAt(ef, localCoords, levelSet); 
 
             if ( ef[0] > 0.1 ) {
                 IntArray eiDofIdArray;
@@ -1505,6 +1506,67 @@ Shell7BaseXFEM :: vtkEvalUpdatedGlobalCoordinateAt(FloatArray &localCoords, int 
         
     }
 #endif
+}
+
+
+void
+Shell7BaseXFEM :: giveCompositeExportData(VTKPiece &vtkPiece, IntArray &primaryVarsToExport, IntArray &internalVarsToExport, IntArray cellVarsToExport, TimeStep *tStep )
+{
+    Shell7Base ::giveCompositeExportData(vtkPiece, primaryVarsToExport, internalVarsToExport, cellVarsToExport, tStep );
+
+    // Export of XFEM related quantities
+
+
+    int numCells = this->layeredCS->giveNumberOfLayers();
+    const int numCellNodes  = 15; // quadratic wedge
+    int numTotalNodes = numCellNodes*numCells;
+
+    XfemManager *xFemMan =  this->xMan;
+    int nEnrIt = xFemMan->giveNumberOfEnrichmentItems();
+
+
+    IntArray wedgeToTriMap;
+    wedgeToTriMap.setValues(15, 1, 2, 3, 1, 2, 3, 4, 5, 6, 4, 5, 6, 1, 2, 3 );
+
+
+    vtkPiece.setNumberOfInternalXFEMVarsToExport(xFemMan->vtkExportFields.giveSize(), nEnrIt, numTotalNodes);
+    for ( int field = 1; field <= xFemMan->vtkExportFields.giveSize(); field++ ) {
+        XFEMStateType xfemstype = ( XFEMStateType ) xFemMan->vtkExportFields [ field - 1 ];
+        
+        for ( int enrItIndex = 1; enrItIndex <= nEnrIt; enrItIndex++ ) {
+            EnrichmentItem *ei = xFemMan->giveEnrichmentItem(enrItIndex);
+            int nodeNum = 1;
+            for ( int layer = 1; layer <= numCells; layer++ ) {
+
+                for ( int nodeIndx = 1; nodeIndx <= numCellNodes; nodeIndx++ ) {
+
+                    Node *node = this->giveNode( wedgeToTriMap.at(nodeIndx) );
+                    FloatArray valueArray;
+                    const FloatArray *val = NULL;
+                    if ( xfemstype == XFEMST_LevelSetPhi ) {
+                        valueArray.resize(1);
+                        val = & valueArray;
+                        ei->evalLevelSetNormalInNode( valueArray.at(1), node->giveNumber() );
+                    } else if ( xfemstype == XFEMST_LevelSetGamma ) {
+                        valueArray.resize(1);
+                        val = & valueArray;
+                        ei->evalLevelSetTangInNode( valueArray.at(1), node->giveNumber() );
+                    } else if ( xfemstype == XFEMST_NodeEnrMarker ) {
+                        valueArray.resize(1);
+                        val = & valueArray;
+                        ei->evalNodeEnrMarkerInNode( valueArray.at(1), node->giveNumber() );
+                    } else {
+                        //OOFEM_WARNING2("VTKXMLExportModule::getNodalVariableFromXFEMST: invalid data in node %d", inode);
+                    }
+
+                    vtkPiece.setInternalXFEMVarInNode(field, enrItIndex, nodeNum, valueArray);
+                    nodeNum += 1;
+                }
+            }
+        }
+    }
+    
+
 }
 
 } // end namespace oofem

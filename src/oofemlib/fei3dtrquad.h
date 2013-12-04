@@ -92,6 +92,7 @@ public:
 
     virtual IntegrationRule *giveIntegrationRule(int order);
     virtual IntegrationRule *giveBoundaryIntegrationRule(int order, int boundary);
+    double giveArea(const FEICellGeometry &cellgeo) const;
 
 protected:
     double edgeComputeLength(IntArray &edgeNodes, const FEICellGeometry &cellgeo);

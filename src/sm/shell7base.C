@@ -42,6 +42,7 @@
 #include "gaussintegrationrule.h"
 #include "gausspoint.h"
 #include "feinterpol3d.h"
+#include "fei3dtrquad.h"
 #include "boundaryload.h"
 #include "constantpressureload.h"
 #include "constantsurfaceload.h"
@@ -2823,5 +2824,12 @@ Shell7Base :: evaluateFailureCriteriaQuantities(FailureCriteriaStatus *fc, TimeS
     //};
 }
 
+
+double
+Shell7Base :: computeArea()
+{
+    FEI3dTrQuad *test = dynamic_cast< FEI3dTrQuad * >( this->giveInterpolation() );
+    return test->giveArea(FEIElementGeometryWrapper(this));
+}
 
 } // end namespace oofem
