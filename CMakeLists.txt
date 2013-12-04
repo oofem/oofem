@@ -56,11 +56,7 @@ set (PARMETIS_DIR CACHE PATH "Manual ParMetis directory")
 #######################################################################
 option (USE_OOFEG "Enable OOFEG" OFF)
 if (${CMAKE_VERSION} VERSION_GREATER "2.8.7") # Compability with older version of cmake
-    if (WIN32) # Shared libraries aren't working on windows.
-        option (USE_SHARED_LIB "Build shared library" OFF)
-    else ()
-        option (USE_SHARED_LIB "Build shared library" ON)
-    endif ()
+    option (USE_SHARED_LIB "Build shared library" ON)
 else ()
     set (USE_SHARED_LIB OFF)
 endif ()
