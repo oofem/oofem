@@ -89,7 +89,6 @@ public:
     // definition & identification
     virtual const char *giveInputRecordName() const { return _IFT_LTRSpace_Name; }
     virtual const char *giveClassName() const { return "LTRSpace"; }
-    virtual classType giveClassID() const { return LTRSpaceClass; }
     virtual IRResultType initializeFrom(InputRecord *ir);
     virtual MaterialMode giveMaterialMode();
 

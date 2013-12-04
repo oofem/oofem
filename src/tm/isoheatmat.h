@@ -82,7 +82,6 @@ public:
 
     virtual const char *giveInputRecordName() const { return _IFT_IsotropicHeatTransferMaterial_Name; }
     virtual const char *giveClassName() const { return "IsotropicHeatTransferMaterial"; }
-    virtual classType giveClassID() const { return IsotropicHeatTransferMaterialClass; }
 
     virtual IRResultType initializeFrom(InputRecord *ir);
 

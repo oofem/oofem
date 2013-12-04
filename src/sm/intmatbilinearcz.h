@@ -83,7 +83,6 @@ public:
     FloatArray mJumpOld, mJumpNew;
 
     virtual const char *giveClassName() const { return "IntMatBilinearCZStatus"; }
-    virtual classType giveClassID() const { return MaterialStatusClass; }
 
     virtual void initTempStatus();
     virtual void updateYourself(TimeStep *tStep);
@@ -116,7 +115,6 @@ public:
     virtual int hasNonLinearBehaviour()   { return 1; }
 
     virtual const char *giveClassName() const { return "IntMatBilinearCZ"; }
-    virtual classType giveClassID() const { return MaterialStatusClass; }
     virtual const char *giveInputRecordName() const { return _IFT_IntMatBilinearCZ_Name; }
 
 

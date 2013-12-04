@@ -59,7 +59,6 @@ public:
 
     virtual const char *giveInputRecordName() const { return _IFT_HTSelement_Name; }
     virtual const char *giveClassName() const { return "HTSelement"; }
-    virtual classType giveClassID() const { return HTSelementClass; }
 
 protected:
     virtual void computeBmatrixAt(GaussPoint *gp, FloatMatrix &answer,int, int){;}

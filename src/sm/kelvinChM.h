@@ -58,7 +58,6 @@ public:
 
     // definition
     virtual const char *giveClassName() const { return "KelvinChainMaterialStatus"; }
-    virtual classType giveClassID() const { return KelvinChainMaterialStatusClass; }
 };
 
 
@@ -75,7 +74,6 @@ public:
     // identification and auxiliary functions
     virtual int hasNonLinearBehaviour() { return 0; }
     virtual const char *giveClassName() const { return "KelvinChainMaterial"; }
-    virtual classType giveClassID() const { return KelvinChainMaterialClass; }
 
     virtual IRResultType initializeFrom(InputRecord *ir);
 

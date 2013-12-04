@@ -98,7 +98,6 @@ public:
     // identification
     virtual const char *giveInputRecordName() const { return _IFT_LinearStatic_Name; }
     virtual const char *giveClassName() const { return "LinearStatic"; }
-    virtual classType giveClassID() const { return LinearStaticClass; }
     virtual fMode giveFormulation() { return TL; }
 
 #ifdef __PARALLEL_MODE

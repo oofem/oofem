@@ -93,7 +93,6 @@ public:
 
     IRResultType initializeFrom(InputRecord *ir);
     virtual const char *giveInputRecordName() const { return _IFT_LinearConstraintBC_Name; }
-    virtual classType giveClassID() const { return LinearConstraintClass; }
     virtual void assemble(SparseMtrx *answer, TimeStep *tStep, EquationID eid,
                           CharType type, const UnknownNumberingScheme &r_s, const UnknownNumberingScheme &c_s);
     virtual void assembleVector(FloatArray &answer, TimeStep *tStep, EquationID eid,

@@ -154,7 +154,6 @@ public:
     // identification
     virtual const char *giveClassName() const { return "SUPG"; }
     virtual const char *giveInputRecordName() const { return _IFT_SUPG_Name; }
-    virtual classType giveClassID() const { return SUPGClass; }
 
     virtual fMode giveFormulation() { return TL; }
 

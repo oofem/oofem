@@ -80,7 +80,6 @@ public:
 
     virtual const char *giveInputRecordName() const { return _IFT_SymmetryBarrier_Name; }
     virtual const char *giveClassName() const { return "SymmetryBarrier"; }
-    virtual classType giveClassID() const { return SymmetryBarrierClass; }
 };
 } // end namespace oofem
 #endif // symmetrybarrier_h

@@ -170,7 +170,6 @@ public:
     void letTempTangentBe(FloatMatrix &t) { tempTangent = t; hasTangentFlag = true; }
 
     virtual const char *giveClassName() const { return "AbaqusUserMaterialStatus"; }
-    virtual classType giveClassID() const { return AbaqusUserMaterialStatusClass; }
 };
 
 

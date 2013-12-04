@@ -161,7 +161,6 @@ public:
     // Identification
     virtual const char *giveInputRecordName() const { return _IFT_NonLinearDynamic_Name; }
     virtual const char *giveClassName() const { return "NonLinearDynamic"; }
-    virtual classType giveClassID() const { return NonLinearDynamicClass; }
     virtual fMode giveFormulation() { return nonLinFormulation; }
     virtual int useNonlocalStiffnessOption() { return this->nonlocalStiffnessFlag; }
     /// For load balancing purposes we store all values with same EquationID; so hash is computed from mode value only

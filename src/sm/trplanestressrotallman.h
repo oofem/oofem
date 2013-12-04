@@ -82,7 +82,6 @@ public:
     // definition & identification
     virtual const char *giveInputRecordName() const { return _IFT_TrPlanestressRotAllman_Name; }
     virtual const char *giveClassName() const { return "TrPlanestressRotAllman"; }
-    virtual classType giveClassID() const { return TrPlanestressRotAllmanClass; }
     virtual IRResultType initializeFrom(InputRecord *ir);
     virtual MaterialMode giveMaterialMode() { return _PlaneStress; }
     virtual integrationDomain giveIntegrationDomain() const { return _Triangle; }

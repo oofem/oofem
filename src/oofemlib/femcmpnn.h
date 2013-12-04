@@ -48,7 +48,6 @@
 #include "interfacetype.h"
 #include "inputrecord.h"
 #include "datareader.h"
-#include "classtype.h"
 #include "entityrenumberingscheme.h"
 #include "contextioresulttype.h"
 #include "contextmode.h"

@@ -123,7 +123,6 @@ public:
 
     virtual const char *giveInputRecordName() const { return _IFT_NlIsoMoistureMaterial_Name; }
     virtual const char *giveClassName() const { return "NlIsoMoistureMaterial"; }
-    virtual classType giveClassID() const { return NlIsoMoistureMaterialClass; }
 
     virtual double giveHumidity(GaussPoint *gp, ValueModeType mode);
 

@@ -240,8 +240,6 @@ public:
      */
     //contextIOResultType restoreContext(FILE* stream, void *obj = NULL);
 
-    /// Returns classType id of receiver.
-    virtual classType giveClassID() const { return GaussPointClass; }
     /// Returns class name of the receiver.
     virtual const char *giveClassName() const { return "GaussPoint"; }
     /// Initializes receiver according to object description stored in input record.

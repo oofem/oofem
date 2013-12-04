@@ -185,7 +185,6 @@ public:
 
     // identification
     virtual const char *giveClassName() const { return "LEPlic"; }
-    virtual classType giveClassID() const { return LEPlicClass; }
 
 protected:
     void doLagrangianPhase(TimeStep *atTime);

@@ -85,7 +85,6 @@ public:
     virtual double __derAt(double t);
     virtual double __accelAt(double t);
 
-    virtual classType giveClassID() const { return UserDefinedLoadTimeFunctionClass; }
     virtual const char *giveClassName() const { return "UserDefinedLoadTimeFunction"; }
     virtual const char *giveInputRecordName() const { return _IFT_UserDefinedLoadTimeFunction_Name; }
 };

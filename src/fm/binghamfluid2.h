@@ -137,7 +137,6 @@ public:
     virtual int hasMaterialModeCapability(MaterialMode mode);
     virtual const char *giveClassName() const { return "BinghamFluidMaterial2"; }
     virtual const char *giveInputRecordName() const { return _IFT_BinghamFluidMaterial2_Name; }
-    virtual classType giveClassID() const { return BinghamFluidMaterial2Class; }
     virtual int checkConsistency();
     virtual MaterialStatus *CreateStatus(GaussPoint *gp) const;
 

@@ -65,7 +65,6 @@ public:
     // definition & identification
     virtual const char *giveInputRecordName() const { return _IFT_Brick1_ht_Name; }
     virtual const char *giveClassName() const { return "Brick1_ht"; }
-    virtual classType giveClassID() const { return Brick1_htClass; }
 
     // virtual int computeNumberOfDofs() { return ( emode == HeatTransferEM ) ? 8 : 16; }
     virtual int computeNumberOfDofs() { return 8; }
@@ -114,7 +113,6 @@ public:
 
     virtual const char *giveInputRecordName() const { return _IFT_Brick1_hmt_Name; }
     virtual const char *giveClassName() const { return "Brick1_hmt"; }
-    virtual classType giveClassID() const { return Brick1_hmtClass; }
     virtual int computeNumberOfDofs() { return 16; }
     virtual MaterialMode giveMaterialMode() { return _3dHeMo; }
 };
@@ -129,7 +127,6 @@ public:
 
     virtual const char *giveInputRecordName() const { return _IFT_Brick1_mt_Name; }
     virtual const char *giveClassName() const { return "Brick1_mt"; }
-    virtual classType giveClassID() const { return Brick1_mtClass; }
     virtual int computeNumberOfDofs() { return 8; }
     virtual MaterialMode giveMaterialMode() { return _3dHeat; }
 };

@@ -97,7 +97,6 @@ public:
     // definition & identification
     virtual const char *giveInputRecordName() const { return _IFT_Truss1d_Name; }
     virtual const char *giveClassName() const { return "Truss1d"; }
-    virtual classType giveClassID() const { return Truss1dClass; }
     virtual IRResultType initializeFrom(InputRecord *ir);
     virtual MaterialMode giveMaterialMode() { return _1dMat; }
 

@@ -114,7 +114,6 @@ public:
 
     virtual const char *giveClassName() const { return "DruckerPragerCutMat"; }
     virtual const char *giveInputRecordName() const { return _IFT_DruckerPragerCutMat_Name; }
-    virtual classType giveClassID() const { return DruckerPragerCutMatClass; }
 
     /// Returns a reference to the basic elastic material.
     LinearElasticMaterial *giveLinearElasticMaterial() { return linearElasticMaterial; }

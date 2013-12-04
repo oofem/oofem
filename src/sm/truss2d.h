@@ -94,7 +94,6 @@ public:
     // definition & identification
     virtual const char *giveInputRecordName() const { return _IFT_Truss2d_Name; }
     virtual const char *giveClassName() const { return "Truss2d"; }
-    virtual classType giveClassID() const { return Truss2dClass; }
     virtual IRResultType initializeFrom(InputRecord *ir);
     ///@todo Introduce interpolator and remove these:
     virtual Element_Geometry_Type giveGeometryType() const { return EGT_line_1; }

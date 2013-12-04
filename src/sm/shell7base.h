@@ -69,7 +69,6 @@ public:
 
     // Definition & identification
     virtual const char *giveClassName() const { return "Shell7Base"; }
-    virtual classType giveClassID() const { return Shell7BaseClass; }
     virtual MaterialMode giveMaterialMode() { return _3dMat; }
 
 

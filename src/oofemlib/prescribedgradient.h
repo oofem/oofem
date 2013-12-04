@@ -145,7 +145,6 @@ public:
 
     virtual const char *giveClassName() const { return "PrescribedGradient"; }
     virtual const char *giveInputRecordName() const { return _IFT_PrescribedGradient_Name; }
-    virtual classType giveClassID() const { return PrescribedGradientClass; }
     
 protected:
     double domainSize();

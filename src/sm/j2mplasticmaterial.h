@@ -68,7 +68,6 @@ public:
     virtual IRResultType initializeFrom(InputRecord *ir);
     virtual const char *giveInputRecordName() const { return _IFT_J2MPlasticMaterial_Name; }
     virtual const char *giveClassName() const { return "J2MPlasticMaterial"; }
-    virtual classType giveClassID() const { return J2MPlasticMaterialClass; }
 
     virtual MaterialStatus *CreateStatus(GaussPoint *gp) const;
 

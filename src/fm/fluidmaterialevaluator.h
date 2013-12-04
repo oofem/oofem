@@ -100,7 +100,6 @@ public:
 
     virtual const char *giveClassName() const { return "FluidMaterialEvaluator"; }
     virtual const char *giveInputRecordName() const { return _IFT_FluidMaterialEvaluator_Name; }
-    virtual classType giveClassID() const { return FluidMaterialEvaluatorClass; }
 };
 } // end namespace oofem
 

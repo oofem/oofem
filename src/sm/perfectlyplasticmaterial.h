@@ -92,7 +92,6 @@ public:
 
     // definition
     virtual const char *giveClassName() const { return "PerfectlyPlasticMaterialStatus"; }
-    virtual classType giveClassID() const { return PerfectlyPlasticMaterialStatusClass; }
 };
 
 /**
@@ -158,7 +157,6 @@ public:
     virtual int hasNonLinearBehaviour() { return 1; }
     virtual int hasMaterialModeCapability(MaterialMode mode);
     virtual const char *giveClassName() const { return "PerfectlyPlasticMaterial"; }
-    virtual classType giveClassID() const { return PerfectlyPlasticMaterialClass; }
     virtual IRResultType initializeFrom(InputRecord *ir);
     LinearElasticMaterial *giveLinearElasticMaterial() { return linearElasticMaterial; }
 

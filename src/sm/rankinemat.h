@@ -143,7 +143,6 @@ public:
     virtual int hasNonLinearBehaviour() { return 1; }
     virtual const char *giveInputRecordName() const { return _IFT_RankineMat_Name; }
     virtual const char *giveClassName() const { return "RankineMat"; }
-    virtual classType giveClassID() const { return RankineMatClass; }
 
     /// Returns a reference to the basic elastic material.
     LinearElasticMaterial *giveLinearElasticMaterial() { return linearElasticMaterial; }
@@ -300,7 +299,6 @@ public:
 #endif
 
     virtual const char *giveClassName() const { return "RankineMatStatus"; }
-    virtual classType giveClassID() const { return RankineMatStatusClass; }
 };
 } // end namespace oofem
 #endif // rankinemat_h

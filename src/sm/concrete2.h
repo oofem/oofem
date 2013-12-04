@@ -141,7 +141,6 @@ public:
 
     // definition
     virtual const char *giveClassName() const { return "Concrete2MaterialStatus"; }
-    virtual classType giveClassID() const { return Concrete2MaterialStatusClass; }
 };
 
 
@@ -214,7 +213,6 @@ public:
     virtual int hasNonLinearBehaviour() { return 1; }
     virtual const char *giveClassName() const { return "Concrete2"; }
     virtual const char *giveInputRecordName() const { return _IFT_Concrete2_Name; }
-    virtual classType giveClassID() const { return Concrete2Class; }
     virtual IRResultType initializeFrom(InputRecord *ir);
 };
 } // end namespace oofem

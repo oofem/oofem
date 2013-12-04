@@ -71,7 +71,6 @@ public:
     virtual IRResultType initializeFrom(InputRecord *ir);
     virtual const char *giveInputRecordName() const { return _IFT_Particle_Name; }
     virtual const char *giveClassName() const { return "Particle"; }
-    virtual classType giveClassID() const { return ParticleClass; }
 
     /// Returns the radius of the particle.
     double giveRadius() const { return radius; }

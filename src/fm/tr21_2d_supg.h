@@ -72,7 +72,6 @@ public:
     // definition
     virtual const char *giveClassName() const { return "TR21_2D_SUPG"; }
     virtual const char *giveInputRecordName() const { return _IFT_TR21_2D_SUPG_Name; }
-    virtual classType giveClassID() const { return TR21_2D_SUPGClass; }
     virtual MaterialMode giveMaterialMode() { return _2dFlow; }
 
     virtual void giveElementDofIDMask(EquationID, IntArray & answer) const;

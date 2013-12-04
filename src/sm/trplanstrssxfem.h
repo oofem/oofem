@@ -75,7 +75,6 @@ public:
 
     virtual const char *giveInputRecordName() const { return _IFT_TrPlaneStress2dXFEM_Name; }
     virtual const char *giveClassName() const { return "TrPlaneStress2dXFEM"; }
-    virtual classType giveClassID() const { return TrPlaneStress2dXFEMClass; }
 
     virtual int computeNumberOfDofs();
     virtual void computeGaussPoints();

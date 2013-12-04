@@ -156,7 +156,6 @@ public:
 
     virtual void restoreConsistency();
     virtual const char *giveClassName() const { return "ConcreteDPMStatus"; }
-    virtual classType giveClassID() const { return ConcreteDPMStatusClass; }
 
     /**
      * Get the full plastic strain vector from the material status.
@@ -478,7 +477,6 @@ public:
 
     virtual const char *giveClassName() const { return "ConcreteDPM"; }
     virtual const char *giveInputRecordName() const { return _IFT_ConcreteDPM_Name; }
-    virtual classType giveClassID() const { return ConcreteDPMClass; }
 
     virtual ConcreteDPMStatus *giveStatus(GaussPoint *gp) const
     { return static_cast< ConcreteDPMStatus * >( this->Material :: giveStatus(gp) ); }

@@ -157,7 +157,6 @@ public:
 
     virtual const char *giveClassName() const { return "MixedGradientPressureNeumann"; }
     virtual const char *giveInputRecordName() const { return _IFT_MixedGradientPressureNeumann_Name; }
-    virtual classType giveClassID() const { return MixedGradientPressureNeumannClass; }
     
 protected:
     /// Helper function that integrates the deviatoric tangent contribution from a single element boundary.

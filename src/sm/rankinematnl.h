@@ -73,7 +73,6 @@ public:
     void setLocalCumPlasticStrainForAverage(double ls) { localCumPlasticStrainForAverage = ls; }
 
     virtual const char *giveClassName() const { return "RankineMatNlStatus"; }
-    virtual classType giveClassID() const { return RankineMatClass; }
 
     virtual void initTempStatus();
 
@@ -102,7 +101,6 @@ public:
     virtual ~RankineMatNl() {; }
 
     virtual const char *giveClassName() const { return "RankineMatNl"; }
-    virtual classType giveClassID() const { return RankineMatNlClass; }
     virtual const char *giveInputRecordName() const { return _IFT_RankineMatNl_Name; }
 
     virtual IRResultType initializeFrom(InputRecord *ir);

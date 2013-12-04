@@ -64,7 +64,6 @@ public:
 
     // definition
     virtual const char *giveClassName() const { return "B3SolidMaterialStatus"; }
-    virtual classType giveClassID() const { return B3SolidMaterialStatusClass; }
 };
 
 
@@ -117,7 +116,6 @@ public:
 
     virtual const char *giveClassName() const { return "B3SolidMaterial"; }
     virtual const char *giveInputRecordName() const { return _IFT_B3SolidMaterial_Name; }
-    virtual classType giveClassID() const { return B3SolidMaterialClass; }
     virtual IRResultType initializeFrom(InputRecord *ir);
 
     virtual void giveThermalDilatationVector(FloatArray &answer, GaussPoint *, TimeStep *);

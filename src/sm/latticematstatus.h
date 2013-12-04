@@ -67,8 +67,6 @@ public:
 
     virtual const char *giveClassName() const { return "LatticeMaterialStatus"; }
 
-    virtual classType giveClassID() const { return LatticeMaterialStatusClass; }
-
     ///Sets the temp_crack_flag
     virtual void setTempCrackFlag(int val) = 0;
 

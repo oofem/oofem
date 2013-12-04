@@ -70,7 +70,6 @@ public:
 
     // definition
     virtual const char *giveClassName() const { return "BilinearCZMaterialStatus"; }
-    virtual classType giveClassID() const { return MaterialStatusClass; }
 
     virtual void initTempStatus();
     virtual void updateYourself(TimeStep *tStep);
@@ -122,7 +121,6 @@ public:
 
     virtual int hasMaterialModeCapability(MaterialMode mode);
     virtual const char *giveClassName() const { return "BilinearCZMaterial"; }
-    virtual classType giveClassID() const { return BilinearCZMaterialClass; }
     virtual const char *giveInputRecordName() const { return _IFT_BilinearCZMaterial_Name; }
     
 

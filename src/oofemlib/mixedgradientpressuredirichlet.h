@@ -161,7 +161,6 @@ public:
 
     virtual const char *giveClassName() const { return "MixedGradientPressureDirichlet"; }
     virtual const char *giveInputRecordName() const { return _IFT_MixedGradientPressureDirichlet_Name; }
-    virtual classType giveClassID() const { return MixedGradientPressureDirichletClass; }
 };
 } // end namespace oofem
 

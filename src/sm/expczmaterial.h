@@ -68,7 +68,6 @@ public:
 
     // definition
     virtual const char *giveClassName() const { return "ExpCZMaterialStatus"; }
-    virtual classType giveClassID() const { return MaterialStatusClass; }
 
     virtual void initTempStatus();
     virtual void updateYourself(TimeStep *tStep);
@@ -119,9 +118,6 @@ public:
 
     virtual int hasMaterialModeCapability(MaterialMode mode);
     virtual const char *giveClassName() const { return "ExpCZMaterial"; }
-    virtual classType giveClassID() const { return ExpCZMaterialClass; }
-
-    
 
     virtual void giveRealStressVector(FloatArray &answer, MatResponseForm form, GaussPoint *gp,
                               const FloatArray &reducedStrain, TimeStep *tStep);
@@ -142,8 +138,6 @@ public:
     
     virtual MaterialStatus *CreateStatus(GaussPoint *gp) const { return new ExpCZMaterialStatus(1, domain, gp); }
     void printYourself();
-protected:
-   
 };
 } // end namespace oofem
 #endif // isointerfacedamage01_h

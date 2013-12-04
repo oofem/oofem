@@ -106,7 +106,6 @@ public:
 
     // identification and auxiliary functions
     virtual const char *giveClassName() const { return "IsotropicLinearElasticMaterial"; }
-    virtual classType giveClassID() const { return IsotropicLinearElasticMaterialClass; }
     virtual const char *giveInputRecordName() const { return _IFT_IsotropicLinearElasticMaterial_Name; }
     /**
      * Initializes receiver according to object description stored in input record.

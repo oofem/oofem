@@ -42,7 +42,6 @@
 #include "fieldmanager.h"
 #include "timer.h"
 #include "chartype.h"
-#include "classtype.h"
 #include "unknowntype.h"
 #include "varscaletype.h"
 #include "equationid.h"

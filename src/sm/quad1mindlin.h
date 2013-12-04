@@ -77,7 +77,6 @@ public:
     // definition & identification
     virtual const char *giveInputRecordName() const { return _IFT_Quad1Mindlin_Name; }
     virtual const char *giveClassName() const { return "Quad1Mindlin"; }
-    virtual classType giveClassID() const { return Quad1MindlinClass; }
     virtual IRResultType initializeFrom(InputRecord *ir);
 
     virtual int computeNumberOfDofs() { return 12; }

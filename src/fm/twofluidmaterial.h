@@ -79,7 +79,6 @@ public:
     virtual int hasMaterialModeCapability(MaterialMode mode);
     virtual const char *giveClassName() const { return "TwoFluidMaterial"; }
     virtual const char *giveInputRecordName() const { return _IFT_TwoFluidMaterial_Name; }
-    virtual classType giveClassID() const { return TwoFluidMaterialClass; }
     virtual int checkConsistency();
     virtual MaterialStatus *CreateStatus(GaussPoint *gp) const;
 

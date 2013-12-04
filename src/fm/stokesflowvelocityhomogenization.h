@@ -74,7 +74,6 @@ public:
 
     virtual const char *giveClassName() const { return "StokesFlowVelocityHomogenization"; }
     virtual const char *giveInputRecordName() const { return _IFT_StokesFlowVelocityHomogenization_Name; }
-    virtual classType giveClassID() const { return StokesFlowVelocityHomogenizationClass; }
 
     void updateC();
 

@@ -121,13 +121,6 @@ public:
     virtual void giveInputRecord(DynamicInputRecord &input) {OOFEM_ERROR("giveInputRecord is not implemented for this subclass of BasicGeometry.");}
     /// Gives class name.
     virtual const char *giveClassName() const { return NULL; }
-    /**
-     * Returns classType id of receiver. Intended for run time
-     * type checking. Every derived class have to overload this method.
-     * @see classType.
-     * @return Class type of receiver.
-     */
-    virtual classType giveClassID() const { return BasicGeometryClass; }
     /// Returns number of Geometry vertices.
     int giveNrVertices() const { return mVertices.size(); }
     virtual bool isOutside(BasicGeometry *bg) { return false; }

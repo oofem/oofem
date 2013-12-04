@@ -213,7 +213,6 @@ public:
     // identification
     virtual const char *giveClassName() const { return "CBS"; }
     virtual const char *giveInputRecordName() const { return _IFT_CBS_Name; }
-    virtual classType giveClassID() const { return CBSClass; }
     virtual fMode giveFormulation() { return TL; }
 
     virtual void printDofOutputAt(FILE *stream, Dof *iDof, TimeStep *tStep);

@@ -144,7 +144,6 @@ public:
 
     // definition
     virtual const char *giveClassName() const { return "IsotropicDamageMaterialModelStatus"; }
-    virtual classType giveClassID() const { return IsotropicDamageMaterialStatusClass; }
 
     virtual void initTempStatus();
     virtual void updateYourself(TimeStep *tStep);
@@ -189,7 +188,6 @@ public:
 
     virtual int hasMaterialModeCapability(MaterialMode mode);
     virtual const char *giveClassName() const { return "IsotropicDamageMaterial"; }
-    virtual classType giveClassID() const { return IsotropicDamageMaterialClass; }
 
     /// Returns reference to undamaged (bulk) material
     LinearElasticMaterial *giveLinearElasticMaterial() { return linearElasticMaterial; }

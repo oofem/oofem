@@ -74,7 +74,6 @@ public:
 
     // definition
     virtual const char *giveClassName() const { return "SimpleInterfaceMaterialStatus"; }
-    virtual classType giveClassID() const { return SimpleInterfaceMaterialStatusClass; }
 
     virtual void initTempStatus();
     virtual void updateYourself(TimeStep *tStep);
@@ -113,7 +112,6 @@ public:
     virtual int hasMaterialModeCapability(MaterialMode mode);
     virtual const char *giveInputRecordName() const { return _IFT_SimpleInterfaceMaterial_Name; }
     virtual const char *giveClassName() const { return "SimpleInterfaceMaterial"; }
-    virtual classType giveClassID() const { return SimpleInterfaceMaterialClass; }
 
     virtual void give3dMaterialStiffnessMatrix(FloatMatrix &answer,
                                                MatResponseMode mode,

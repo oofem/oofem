@@ -53,7 +53,6 @@ public:
 
     //virtual const char *giveInputRecordName() const { return _IFT_QtrPlaneStrainGrad_Name; }
     virtual const char *giveClassName() const { return "QTrPlaneStrainGrad"; }
-    virtual classType giveClassID() const { return QTrPlaneStrainGradClass; }
 
 protected:
     virtual void computeBkappaMatrixAt(GaussPoint *gp, FloatMatrix &answer);

@@ -73,7 +73,6 @@ public:
     void give3dGprime(FloatMatrix &answer, MatResponseMode mode, GaussPoint *gp, TimeStep *atTime);
     void giveInternalLength(FloatMatrix &answer, MatResponseMode mode, GaussPoint *gp, TimeStep *atTime);
     virtual const char *giveClassName() const { return "LargeStrainMasterMaterialGrad"; }
-    virtual classType giveClassID() const { return LargeStrainMasterMaterialClass; }
 
     MaterialStatus *CreateStatus(GaussPoint *gp) const;
 
@@ -99,8 +98,6 @@ public:
     virtual contextIOResultType saveContext(DataStream *stream, ContextMode mode, void *obj = NULL);
     virtual contextIOResultType restoreContext(DataStream *stream, ContextMode mode, void *obj = NULL);
     virtual const char *giveClassName() const { return "LargeStrainMasterMaterialGradStatus"; }
-
-    classType giveClassID() const { return LargeStrainMasterMaterialStatusClass; }
 };
 } // end namespace oofem
 #endif // misesmat_h

@@ -70,7 +70,6 @@ public:
     // definition & identification
     virtual const char *giveInputRecordName() const { return _IFT_QTruss1d_Name; }
     virtual const char *giveClassName() const { return "QTruss1d"; }
-    virtual classType giveClassID() const { return QTruss1dClass; }
 
     virtual MaterialMode giveMaterialMode() { return _1dMat; }
     virtual int computeGlobalCoordinates(FloatArray &answer, const FloatArray &lcoords);

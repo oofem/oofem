@@ -101,7 +101,6 @@ public:
     // definition & identification
     virtual const char *giveInputRecordName() const { return _IFT_QSpace_Name; }
     virtual const char *giveClassName() const { return "QSpace"; }
-    virtual classType giveClassID() const { return QSpaceClass; }
     virtual int computeNumberOfDofs() { return 60; }
     virtual MaterialMode giveMaterialMode();
 

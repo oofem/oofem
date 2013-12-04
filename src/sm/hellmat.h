@@ -485,7 +485,6 @@ public:
 
     // identification
     virtual const char *giveClassName() const { return "HellmichMaterialStatus"; }
-    virtual classType giveClassID() const { return ( classType ) HellmichMaterialStatusClass; }
 };
 
 
@@ -829,7 +828,6 @@ public:
 
     virtual const char *giveInputRecordName() const { return _IFT_HellmichMaterial_Name; }
     virtual const char *giveClassName() const { return "HellmichMaterial"; }
-    virtual classType giveClassID() const { return HellmichMaterialClass; }
 
     virtual double give(int aProperty, GaussPoint *gp);
 
@@ -853,7 +851,6 @@ public:
                               const FloatArray &strain, TimeStep *tstep) { answer.resize(0); }
 
     virtual const char *giveClassName() const { return "HellmichMaterial"; }
-    virtual classType giveClassID() const { return HellmichMaterialClass; }
 };
 #endif
 } // end namespace oofem

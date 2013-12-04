@@ -166,7 +166,6 @@ public:
 
     virtual const char *giveInputRecordName() const { return NULL; }
     virtual const char *giveClassName() const { return "HuertaErrorEstimator"; }
-    virtual classType giveClassID() const { return HuertaErrorEstimatorClass; }
 
     AnalysisMode giveAnalysisMode() { return mode; }
 
@@ -325,7 +324,6 @@ public:
 
     virtual const char *giveInputRecordName() const { return NULL; }
     virtual const char *giveClassName() const { return "HuertaErrorEstimator"; }
-    virtual classType giveClassID() const { return HuertaRemeshingCriteriaClass; }
 };
 
 

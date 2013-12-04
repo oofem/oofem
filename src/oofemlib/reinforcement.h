@@ -81,7 +81,6 @@ public:
     virtual bcGeomType giveBCGeoType() const { return BodyLoadBGT; }
     
     virtual IRResultType initializeFrom(InputRecord *ir);
-    virtual classType giveClassID() const { return ReinforcementClass; }
     virtual const char *giveClassName() const { return "Reinforcement"; }
     virtual const char *giveInputRecordName() const { return _IFT_Reinforcement_Name; }
 

@@ -61,7 +61,6 @@ public:
     virtual void scale(double s) { }
     virtual const char *giveClassName() const { return "TractionPressureBC"; }
     virtual const char *giveInputRecordName() const { return _IFT_TractionPressureBC_Name; }
-    virtual classType giveClassID() const { return TractionPressureBCClass; }
 };
 } // end namespace oofem
 #endif // tractionpressurebc_h

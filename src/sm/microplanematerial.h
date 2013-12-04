@@ -176,7 +176,6 @@ public:
 
     // identification and auxiliary functions
     virtual const char *giveClassName() const { return "MicroplaneMaterial"; }
-    virtual classType giveClassID() const { return MicroplaneMaterialClass; }
 
     virtual IntegrationPointStatus *giveMicroplaneStatus(GaussPoint *gp);
 

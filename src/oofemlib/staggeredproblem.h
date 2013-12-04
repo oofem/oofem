@@ -144,7 +144,6 @@ public:
     // identification
     virtual const char *giveClassName() const { return "StaggeredProblem"; }
     virtual const char *giveInputRecordName() const { return _IFT_StaggeredProblem_Name; }
-    virtual classType giveClassID() const { return StaggeredProblemClass; }
     virtual int useNonlocalStiffnessOption() { return 0; }
 
     virtual fMode giveFormulation() { return UNKNOWN; }

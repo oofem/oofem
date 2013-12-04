@@ -67,7 +67,6 @@ public:
 
     // definition
     virtual const char *giveClassName() const { return "MisesMatGradStatus"; }
-    virtual classType giveClassID() const { return MisesMatClass; }
 
     virtual void initTempStatus();
     virtual void updateYourself(TimeStep *tStep);
@@ -93,7 +92,6 @@ public:
     // definition
     virtual const char *giveInputRecordName() const { return _IFT_MisesMatGrad_Name; }
     virtual const char *giveClassName() const { return "MisesMatGrad"; }
-    virtual classType giveClassID() const { return MisesMatClass; }
 
     virtual IRResultType initializeFrom(InputRecord *ir);
     virtual int hasMaterialModeCapability(MaterialMode mode);

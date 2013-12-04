@@ -58,7 +58,6 @@ public:
 
     // definition
     virtual const char *giveClassName() const { return "MaxwellChainMaterialStatus"; }
-    virtual classType giveClassID() const { return MaxwellChainMaterialStatusClass; }
 };
 
 
@@ -80,7 +79,6 @@ public:
     // identification and auxiliary functions
     virtual int hasNonLinearBehaviour() { return 0; }
     virtual const char *giveClassName() const { return "MaxwellChainMaterial"; }
-    virtual classType giveClassID() const { return MaxwellChainMaterialClass; }
     virtual IRResultType initializeFrom(InputRecord *ir);
 
     virtual void giveShrinkageStrainVector(FloatArray &answer,

@@ -84,7 +84,6 @@ public:
     void letTempStateVectorBe(const FloatArray &v) { temp_field = v; }
 
     virtual const char *giveClassName() const { return "TransportMaterialStatus"; }
-    virtual classType giveClassID() const { return TransportMaterialStatusClass; }
 
     /// Set gradient.
     void setTempGradient(const FloatArray &grad);

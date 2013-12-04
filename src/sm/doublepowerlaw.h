@@ -65,7 +65,6 @@ public:
 
     virtual const char *giveClassName() const { return "DoublePowerLawMaterial"; }
     virtual const char *giveInputRecordName() const { return _IFT_DoublePowerLawMaterial_Name; }
-    virtual classType giveClassID() const { return DoublePowerLawMaterialClass; }
     virtual IRResultType initializeFrom(InputRecord *ir);
 
 protected:

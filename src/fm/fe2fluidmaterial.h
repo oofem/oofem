@@ -161,7 +161,6 @@ public:
 
     virtual const char *giveClassName() const { return "FE2FluidMaterial"; }
     virtual const char *giveInputRecordName() const { return _IFT_FE2FluidMaterial_Name; }
-    virtual classType giveClassID() const { return FE2FluidMaterialClass; }
 };
 
 } // end namespace oofem

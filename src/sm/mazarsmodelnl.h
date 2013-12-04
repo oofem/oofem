@@ -72,7 +72,6 @@ public:
     // definition
     virtual const char *giveInputRecordName() const { return _IFT_MazarsNLMaterial_Name; }
     virtual const char *giveClassName() const { return "MazarsNLMaterialStatus"; }
-    virtual classType giveClassID() const { return IsotropicDamageMaterialStatusClass; }
 
     virtual void initTempStatus();
     virtual void updateYourself(TimeStep *tStep);
@@ -113,7 +112,6 @@ public:
 
     // identification and auxiliary functions
     virtual const char *giveClassName() const { return "MazarsNLMaterial"; }
-    virtual classType giveClassID() const { return MazarsNLMaterialClass; }
 
     virtual IRResultType initializeFrom(InputRecord *ir);
     virtual Interface *giveInterface(InterfaceType it);

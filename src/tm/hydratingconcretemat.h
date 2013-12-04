@@ -85,7 +85,6 @@ public:
 
     // identification and auxiliary functions
     virtual const char *giveClassName() const { return "HydratingConcreteMat"; }
-    virtual classType giveClassID() const { return HydratingConcreteMatClass; }
 
     virtual IRResultType initializeFrom(InputRecord *ir);
 

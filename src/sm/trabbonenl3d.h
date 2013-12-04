@@ -76,7 +76,6 @@ public:
 
     // definition
     virtual const char *giveClassName() const { return "TrabBoneNL3DStatus"; }
-    virtual classType giveClassID() const { return TrabBone3DStatusClass; }
 
     virtual void initTempStatus();
     virtual void updateYourself(TimeStep *tStep);
@@ -100,7 +99,6 @@ public:
     virtual ~TrabBoneNL3D();
 
     virtual const char *giveClassName() const { return "TrabBoneNL3D"; }
-    virtual classType giveClassID() const { return TrabBoneNL3DClass; }
     virtual const char *giveInputRecordName() const { return _IFT_TrabBoneNL3D_Name; }
 
     virtual IRResultType initializeFrom(InputRecord *ir);

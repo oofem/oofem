@@ -217,7 +217,6 @@ public:
 
     // definition
     virtual const char *giveClassName() const { return "LatticeDamage2dStatus"; }
-    virtual classType giveClassID() const { return LatticeDamage2dStatusClass; }
 
     virtual void initTempStatus();
 
@@ -295,7 +294,6 @@ public:
 
     virtual const char *giveInputRecordName() const { return _IFT_LatticeDamage2d_Name; }
     virtual const char *giveClassName() const { return "LatticeDamage2d"; }
-    virtual classType giveClassID() const { return LatticeDamage2dClass; }
 
     virtual IRResultType initializeFrom(InputRecord *ir);
 

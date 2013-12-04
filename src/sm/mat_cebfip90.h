@@ -83,7 +83,6 @@ public:
 
     // definition
     virtual const char *giveClassName() const { return "CebFipSlip90MaterialStatus"; }
-    virtual classType giveClassID() const { return MaterialStatusClass; }
 
     virtual void initTempStatus();
     virtual void updateYourself(TimeStep *tStep);
@@ -126,7 +125,6 @@ public:
 
     virtual const char *giveInputRecordName() const { return _IFT_CebFipSlip90Material_Name; }
     virtual const char *giveClassName() const { return "CebFipSlip90Material"; }
-    virtual classType giveClassID() const { return CebFipSlip90MaterialClass; }
 
     virtual void give3dMaterialStiffnessMatrix(FloatMatrix &answer,
                                                MatResponseMode mode,

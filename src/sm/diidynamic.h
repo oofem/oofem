@@ -109,7 +109,6 @@ public:
     // identification
     virtual const char *giveClassName() const { return "DIIDynamic"; }
     virtual const char *giveInputRecordName() const { return _IFT_DIIDynamic_Name; }
-    virtual classType giveClassID() const { return DIIDynamicClass; }
     virtual fMode giveFormulation() { return TL; }
     virtual int giveNumberOfTimeStepWhenIcApply() { return 0; }
 

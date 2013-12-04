@@ -91,7 +91,6 @@ public:
 
     virtual const char *giveClassName() const { return "HangingNode"; }
     virtual const char *giveInputRecordName() const { return _IFT_HangingNode_Name; }
-    virtual classType giveClassID() const { return HangingNodeClass; }
 };
 } // end namespace oofem
 #endif // hangingnode_h

@@ -81,7 +81,6 @@ public:
     // definition & identification
     virtual const char *giveClassName() const { return "CohesiveSurface3d"; }
     virtual const char *giveInputRecordName() const { return _IFT_CohesiveSurface3d_Name; }
-    virtual classType giveClassID() const { return CohesiveSurface3dClass; }
 
     // input and output
     virtual IRResultType initializeFrom(InputRecord *ir);
