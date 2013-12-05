@@ -144,7 +144,6 @@ public:
     CrossSectExtension crossSectionType;
     /// @return Input record name of the receiver.
     virtual const char *giveInputRecordName() const { return _IFT_StructuralInterfaceCrossSection_Name; };   
-
 private:
     int materialNum;
 

@@ -124,7 +124,8 @@ set (sm_material
 	intmatbilinczjansson.C
     intmatbilinearcz.C
 	intmatbilinczelastic.C
-    )
+    intmatbilinczfagerstromrate.C
+	)
 
 set (sm_error
     huertaerrorestimator.C
