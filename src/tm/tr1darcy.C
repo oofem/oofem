@@ -115,7 +115,7 @@ void Tr1Darcy :: computeStiffnessMatrix(FloatMatrix &answer, TimeStep *atTime)
 void Tr1Darcy :: giveCharacteristicVector(FloatArray &answer, CharType mtrx, ValueModeType mode, TimeStep *tStep)
 {
     if ( mtrx == ExternalForcesVector ) {
-        this->computeLoadVector(answer, tStep);
+        this->computeExternalForcesVector(answer, tStep, mode);
     } else if ( mtrx == InternalForcesVector ) {
         this->computeInternalForcesVector(answer, tStep);
     } else {
@@ -154,7 +154,7 @@ void Tr1Darcy :: computeInternalForcesVector(FloatArray &answer, TimeStep *atTim
     }
 }
 
-void Tr1Darcy :: computeLoadVector(FloatArray &answer, TimeStep *atTime)
+void Tr1Darcy :: computeExternalForcesVector(FloatArray &answer, TimeStep *atTime, ValueModeType mode)
 {
     // TODO: Implement support for body forces
 
@@ -177,7 +177,7 @@ void Tr1Darcy :: computeLoadVector(FloatArray &answer, TimeStep *atTime)
         ltype = load->giveBCGeoType();
 
         if ( ltype == EdgeLoadBGT ) {
-            this->computeEdgeBCSubVectorAt(vec, load, load_id, atTime);
+            this->computeEdgeBCSubVectorAt(vec, load, load_id, atTime, mode, 0);
         }
 
         answer.add(vec);
@@ -186,7 +186,7 @@ void Tr1Darcy :: computeLoadVector(FloatArray &answer, TimeStep *atTime)
     answer.negated();
 }
 
-void Tr1Darcy :: computeEdgeBCSubVectorAt(FloatArray &answer, Load *load, int iEdge, TimeStep *tStep)
+void Tr1Darcy :: computeEdgeBCSubVectorAt(FloatArray &answer, Load *load, int iEdge, TimeStep *tStep, ValueModeType mode, int indx)
 {
     /*
      * Given the load *load, return it's contribution.
@@ -219,11 +219,11 @@ void Tr1Darcy :: computeEdgeBCSubVectorAt(FloatArray &answer, Load *load, int iE
             double dV = this->computeEdgeVolumeAround(gp, iEdge);
 
             if ( boundaryLoad->giveFormulationType() == Load :: FT_Entity ) {                // Edge load in xi-eta system
-                boundaryLoad->computeValueAt(loadValue, tStep, *lcoords, VM_Total);
+                boundaryLoad->computeValueAt(loadValue, tStep, *lcoords, mode);
             } else {  // Edge load in x-y system
                 FloatArray gcoords;
                 this->interpolation_lin.edgeLocal2global(gcoords, iEdge, *lcoords, FEIElementGeometryWrapper(this));
-                boundaryLoad->computeValueAt(loadValue, tStep, gcoords, VM_Total);
+                boundaryLoad->computeValueAt(loadValue, tStep, gcoords, mode);
             }
 
             reducedAnswer.add(loadValue.at(1) * dV, N);
