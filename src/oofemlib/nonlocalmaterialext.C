@@ -384,9 +384,11 @@ NonlocalMaterialExtensionInterface :: computeWeightFunction(double distance)
 
     case WFT_Green_21: // Green function reduced from 2D to 1D
       {
+	/*
 	if (this->domain->giveNumberOfSpatialDimensions() != 1){
 	  OOFEM_ERROR("NonlocalMaterialExtensionInterface :: computeWeightFunction - this type of weight function can be used for a 1D problem only\n");
 	}
+	*/
 	iwf = giveIntegralOfWeightFunction(2); // indeed
 	double x = distance;
 	double y = 0.;

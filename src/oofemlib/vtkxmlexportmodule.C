@@ -646,8 +646,9 @@ VTKXMLExportModule :: setupVTKPiece(VTKPiece &vtkPiece, TimeStep *tStep, int reg
         vtkPiece.setNumberOfCells(numRegionEl);
 
         int offset = 0;
-        for ( int cellNum = 1; cellNum <= emodel->giveDomain(1)->giveNumberOfElements(); cellNum++ ) {
-            elem = d->giveElement(cellNum);
+	int cellNum = 0;
+        for ( int elNum = 1; elNum <= emodel->giveDomain(1)->giveNumberOfElements(); elNum++ ) {
+            elem = d->giveElement(elNum);
 
             // Skip elements that:
             // are inactivated or of composite type ( these are exported individually later)
@@ -661,6 +662,13 @@ VTKXMLExportModule :: setupVTKPiece(VTKPiece &vtkPiece, TimeStep *tStep, int reg
             }
 
 #endif
+
+	    // skip elements not in active region
+	    if ( ( region > 0 ) && ( this->smoother->giveElementVirtualRegionNumber(elNum) != region ) ) {
+	      continue;
+	    }
+	    
+	    cellNum++;
 
             // Set the connectivity
             this->giveElementCell(cellNodes, elem);  // node numbering of the cell with according to the VTK format

@@ -7474,7 +7474,7 @@ double CemhydMatStatus :: MoveCycles(double GiveTemp, int cycles)
     double PartHeat;
     double castingTime = 0.;
 #ifdef __TM_MODULE
-    this->gp->giveMaterial()->giveCastingTime();
+    castingTime = this->gp->giveMaterial()->giveCastingTime();
 #endif
 
     disrealnew(GiveTemp, -1., cycles); //perform amount of hydration cycles controlled
