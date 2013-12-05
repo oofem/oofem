@@ -66,7 +66,6 @@ public:
 
     virtual IRResultType initializeFrom(InputRecord *ir);
     virtual void giveInputRecord(DynamicInputRecord &input);
-    virtual classType giveClassID() const { return PiecewiceClass; }
     virtual const char *giveClassName() const { return "PiecewiceLinFunction"; }
     virtual const char *giveInputRecordName() const { return _IFT_PiecewiseLinFunction_Name; }
 

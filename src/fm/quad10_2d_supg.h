@@ -46,7 +46,6 @@
 #define _IFT_Quad10_2D_SUPG_Name "quad1supg"
 
 namespace oofem {
-
 class FEI2dQuadLin;
 class FEI2dQuadConst;
 
@@ -72,7 +71,6 @@ public:
     // definition
     virtual const char *giveClassName() const { return "Quad1_2D_SUPG"; }
     virtual const char *giveInputRecordName() const { return _IFT_Quad10_2D_SUPG_Name; }
-    virtual classType giveClassID() const { return Quad10_2D_SUPGClass; }
     virtual MaterialMode giveMaterialMode() { return _2dFlow; }
 
     virtual void giveInternalDofManDofIDMask(int i, EquationID, IntArray & answer) const;
@@ -88,7 +86,7 @@ public:
 
     virtual double LS_PCS_computeF(LevelSetPCS *ls, TimeStep *tStep);
     virtual void LS_PCS_computedN(FloatMatrix &answer);
-    virtual double LS_PCS_computeVolume() {return 0.0;};
+    virtual double LS_PCS_computeVolume() { return 0.0; };
     virtual double LS_PCS_computeS(LevelSetPCS *ls, TimeStep *tStep);
     virtual void LS_PCS_computeVOFFractions(FloatArray &answer, FloatArray &fi);
 
@@ -97,9 +95,9 @@ public:
     virtual Element *ZZNodalRecoveryMI_giveElement() { return this; }
 
     virtual void NodalAveragingRecoveryMI_computeNodalValue(FloatArray &answer, int node,
-                                                    InternalStateType type, TimeStep *tStep);
+                                                            InternalStateType type, TimeStep *tStep);
     void NodalAveragingRecoveryMI_computeSideValue(FloatArray &answer, int side,
-                            InternalStateType type, TimeStep *tStep);
+                                                   InternalStateType type, TimeStep *tStep);
 
     /// @name Helping functions for computing VOFFractions.
     //@{
@@ -146,8 +144,8 @@ public:
     virtual DofManager *giveInternalDofManager(int i) const;
 
 protected:
-    virtual void giveLocalVelocityDofMap (IntArray &map);
-    virtual void giveLocalPressureDofMap (IntArray &map);
+    virtual void giveLocalVelocityDofMap(IntArray &map);
+    virtual void giveLocalPressureDofMap(IntArray &map);
 
     virtual void computeGaussPoints();
     virtual void computeNuMatrix(FloatMatrix &answer, GaussPoint *gp);
@@ -163,6 +161,5 @@ protected:
 
     virtual void updateStabilizationCoeffs(TimeStep *tStep);
 };
-
 } // end namespace oofem
 #endif // quad10_supg_h

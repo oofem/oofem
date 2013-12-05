@@ -169,7 +169,6 @@ public:
 
     // identification
     virtual const char *giveClassName() const { return "LevelSetPCS"; }
-    virtual classType giveClassID() const { return LevelSetPCSClass; }
 
     virtual contextIOResultType saveContext(DataStream *stream, ContextMode mode, void *obj = NULL);
     virtual contextIOResultType restoreContext(DataStream *stream, ContextMode mode, void *obj = NULL);

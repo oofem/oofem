@@ -46,7 +46,6 @@
 //@}
 
 namespace oofem {
-
 class StokesFlow;
 
 /**
@@ -78,7 +77,7 @@ public:
      * @param gp Gauss point that the status belongs to.
      * @param inputfile The input file describing the micro problem.
      */
-    FE2FluidMaterialStatus(int n, Domain *d, GaussPoint *gp, const std::string &inputfile);
+    FE2FluidMaterialStatus(int n, Domain *d, GaussPoint *gp, const std :: string &inputfile);
     /// Destructor
     virtual ~FE2FluidMaterialStatus();
 
@@ -91,7 +90,7 @@ public:
     double giveVOFFraction() { return this->voffraction; }
 
     /// Creates/Initiates the RVE problem.
-    virtual bool createRVE(int n, GaussPoint *gp, const std::string &inputfile);
+    virtual bool createRVE(int n, GaussPoint *gp, const std :: string &inputfile);
 
     /// Copies time step data to RVE.
     virtual void setTimeStep(TimeStep *tStep);
@@ -126,7 +125,7 @@ public:
 class FE2FluidMaterial : public FluidDynamicMaterial
 {
 private:
-    std::string inputfile;
+    std :: string inputfile;
     static int n;
 
 public:
@@ -161,8 +160,6 @@ public:
 
     virtual const char *giveClassName() const { return "FE2FluidMaterial"; }
     virtual const char *giveInputRecordName() const { return _IFT_FE2FluidMaterial_Name; }
-    virtual classType giveClassID() const { return FE2FluidMaterialClass; }
 };
-
 } // end namespace oofem
 #endif // rvesinteringmaterial_h

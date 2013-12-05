@@ -112,7 +112,6 @@ public:
     // definition & identification
     virtual const char *giveInputRecordName() const { return _IFT_RerShell_Name; }
     virtual const char *giveClassName() const { return "RerShell"; }
-    virtual classType giveClassID() const { return RerShellClass; }
 
     virtual IRResultType initializeFrom(InputRecord *ir);
 

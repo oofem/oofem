@@ -124,7 +124,6 @@ public:
 
     virtual IRResultType initializeFrom(InputRecord *ir);
     virtual const char *giveClassName() const { return "ZZErrorEstimator"; }
-    virtual classType giveClassID() const { return ZZErrorEstimatorClass; }
 };
 
 
@@ -214,7 +213,6 @@ public:
 
     virtual const char *giveInputRecordName() const { return NULL; }
     virtual const char *giveClassName() const { return "ZZErrorEstimator"; }
-    virtual classType giveClassID() const { return ZZRemeshingCriteriaClass; }
 };
 
 /**

@@ -305,7 +305,6 @@ public:
     virtual IRResultType initializeFrom(InputRecord *ir);
     virtual void giveInputRecord(DynamicInputRecord &input);
     virtual const char *giveClassName() const { return "StructuralElement"; }
-    virtual classType giveClassID() const { return StructuralElementClass; }
 
 #ifdef __OOFEG
     /**

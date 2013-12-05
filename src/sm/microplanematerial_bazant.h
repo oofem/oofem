@@ -69,7 +69,6 @@ public:
     virtual void updateVolumetricStressTo(Microplane *mPlane, double sigv) = 0;
 
     virtual const char *giveClassName() const { return "MicroplaneMaterial_Bazant"; }
-    virtual classType giveClassID() const { return MicroplaneMaterial_BazantClass; }
 
     virtual MaterialStatus *CreateStatus(GaussPoint *gp) const { return new StructuralMaterialStatus(1, domain, gp); }
 };

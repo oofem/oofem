@@ -80,7 +80,6 @@ public:
 
     virtual const char *giveInputRecordName() const { return _IFT_BazantNajjarMoistureTransferMaterial_Name; }
     virtual const char *giveClassName() const { return "BazantNajjarMoistureTransferMaterial"; }
-    virtual classType giveClassID() const { return BazantNajjarMoistureTransferMaterialClass; }
 
     virtual IRResultType initializeFrom(InputRecord *ir);
 

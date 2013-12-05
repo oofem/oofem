@@ -78,7 +78,6 @@ public:
     virtual IRResultType initializeFrom(InputRecord *ir);
     virtual bcGeomType giveBCGeoType() const { return SurfaceLoadBGT; }
 
-    virtual classType giveClassID() const { return ConstantSurfaceLoadClass; }
     virtual const char *giveClassName() const { return "ConstantSurfaceLoad"; }
     virtual const char *giveInputRecordName() const { return _IFT_ConstantSurfaceLoad_Name; }
 

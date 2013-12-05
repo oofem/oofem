@@ -65,7 +65,6 @@ public:
     // definition & identification
     virtual const char *giveInputRecordName() const { return _IFT_QBrick1_ht_Name; }
     virtual const char *giveClassName() const { return "QBrick1_ht"; }
-    virtual classType giveClassID() const { return QBrick1_htClass; }
 
     virtual int computeNumberOfDofs() { return ( emode == HeatTransferEM ) ? 20 : 40; }
     virtual IRResultType initializeFrom(InputRecord *ir);
@@ -100,7 +99,6 @@ public:
     virtual MaterialMode giveMaterialMode() { return _3dHeMo; }
     virtual const char *giveInputRecordName() const { return _IFT_QBrick1_hmt_Name; }
     virtual const char *giveClassName() const { return "QBrick1_hmt"; }
-    virtual classType giveClassID() const { return QBrick1_hmtClass; }
 };
 
 } // end namespace oofem

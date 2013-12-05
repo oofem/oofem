@@ -50,8 +50,7 @@ namespace oofem {
 SUPGElement2 :: SUPGElement2(int n, Domain *aDomain) :
     SUPGElement(n, aDomain)
     // Constructor. Creates an element with number n, belonging to aDomain.
-{
-}
+{}
 
 
 SUPGElement2 :: ~SUPGElement2()
@@ -77,7 +76,7 @@ SUPGElement2 :: giveInputRecord(DynamicInputRecord &input)
 
 void
 SUPGElement2 :: giveCharacteristicMatrix(FloatMatrix &answer,
-                                          CharType mtrx, TimeStep *tStep)
+                                         CharType mtrx, TimeStep *tStep)
 //
 // returns characteristics matrix of receiver according to mtrx
 //
@@ -118,7 +117,7 @@ SUPGElement2 :: giveCharacteristicMatrix(FloatMatrix &answer,
 
 void
 SUPGElement2 :: giveCharacteristicVector(FloatArray &answer, CharType mtrx, ValueModeType mode,
-                                          TimeStep *tStep)
+                                         TimeStep *tStep)
 //
 // returns characteristics vector of receiver according to requested type
 //
@@ -138,7 +137,7 @@ SUPGElement2 :: giveCharacteristicVector(FloatArray &answer, CharType mtrx, Valu
         answer.assemble(h, ploc);
     } else
 #if 0
-        if ( mtrx == InternalForcesVector ) {
+    if ( mtrx == InternalForcesVector ) {
         // stokes flow
         IntArray vloc, ploc;
         FloatArray h;
@@ -298,7 +297,7 @@ SUPGElement2 :: computeAccelerationTerm_MB(FloatMatrix &answer, TimeStep *atTime
 {
     FloatMatrix n, b;
 
-    answer.resize(0,0);
+    answer.resize(0, 0);
 
     int rule = 2;
     IntegrationRule *iRule = this->integrationRulesArray [ rule ];
@@ -381,7 +380,7 @@ SUPGElement2 :: computeDiffusionTerm_MB(FloatArray &answer, TimeStep *atTime)
 {
     FloatArray u, eps, stress, bs, dDB_u;
     FloatMatrix b, un_gu, dDB;
-    double Re = static_cast<FluidModel*>(domain->giveEngngModel())->giveReynoldsNumber();
+    double Re = static_cast< FluidModel * >( domain->giveEngngModel() )->giveReynoldsNumber();
 
     answer.resize(0);
 
@@ -410,7 +409,7 @@ void
 SUPGElement2 :: computeDiffusionDerivativeTerm_MB(FloatMatrix &answer, MatResponseMode mode, TimeStep *atTime)
 {
     FloatMatrix _db, _d, _b, dDB, un_gu;
-    double Re = static_cast<FluidModel*>(domain->giveEngngModel())->giveReynoldsNumber();
+    double Re = static_cast< FluidModel * >( domain->giveEngngModel() )->giveReynoldsNumber();
     FloatArray dDB_u;
 
     answer.resize(0, 0);
@@ -668,7 +667,6 @@ SUPGElement2 :: computePressureTerm_MC(FloatMatrix &answer, TimeStep *atTime)
 void
 SUPGElement2 :: computeBCRhsTerm_MB(FloatArray &answer, TimeStep *atTime)
 {
-
     int nLoads;
 
     answer.resize(0);
@@ -830,5 +828,4 @@ SUPGElement2 :: computeDeviatoricStress(FloatArray &answer, GaussPoint *gp, Time
     // call material to compute stress
     static_cast< FluidDynamicMaterial * >( this->giveMaterial() )->computeDeviatoricStressVector(answer, gp, eps, tStep);
 }
-
 } // end namespace oofem

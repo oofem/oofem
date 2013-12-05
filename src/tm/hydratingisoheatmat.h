@@ -59,7 +59,6 @@ public:
 
     virtual Interface *giveInterface(InterfaceType t);
     virtual const char *giveClassName() const { return "HydratingTransportMaterialStatus"; }
-    virtual classType giveClassID() const { return HydratingTransportMaterialStatusClass; }
 
     virtual void updateYourself(TimeStep *atTime) {
         HydrationModelStatusInterface :: updateYourself(atTime);
@@ -99,7 +98,6 @@ public:
     // identification and auxiliary functions
     virtual const char *giveInputRecordName() const { return _IFT_HydratingIsoHeatMaterial_Name; }
     virtual const char *giveClassName() const { return "HydratingIsoHeatMaterial"; }
-    virtual classType giveClassID() const { return HydratingIsoHeatMaterialClass; }
 
     virtual IRResultType initializeFrom(InputRecord *ir);
 

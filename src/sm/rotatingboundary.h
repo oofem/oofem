@@ -82,7 +82,6 @@ public:
 
     virtual const char *giveInputRecordName() const { return _IFT_RotatingBoundary_Name; }
     virtual const char *giveClassName() const { return "RotatingBoundary"; }
-    virtual classType giveClassID() const { return RotatingBoundaryClass; }
 };
 } // end namespace oofem
 #endif // rotatingboundary_h

@@ -70,7 +70,6 @@ public:
     virtual IRResultType initializeFrom(InputRecord *ir);
     virtual bcGeomType giveBCGeoType() const { return EdgeLoadBGT; }
 
-    virtual classType giveClassID() const { return ConstantEdgeLoadClass; }
     virtual const char *giveClassName() const { return "ConstantEdgeLoad"; }
     virtual const char *giveInputRecordName() const { return _IFT_ConstantEdgeLoad_Name; }
 

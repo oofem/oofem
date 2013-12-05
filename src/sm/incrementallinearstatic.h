@@ -117,7 +117,6 @@ public:
 
     virtual const char *giveInputRecordName() const { return _IFT_IncrementalLinearStatic_Name; }
     virtual const char *giveClassName() const { return "IncrementalLinearStatic"; }
-    virtual classType giveClassID() const { return IncrementalLinearStaticClass; }
 
     virtual int requiresUnknownsDictionaryUpdate() { return true; }
     virtual bool requiresEquationRenumbering(TimeStep *) { return true; }

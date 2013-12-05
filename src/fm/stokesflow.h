@@ -128,7 +128,6 @@ public:
 
     virtual const char *giveClassName() const { return "StokesFlow"; }
     virtual const char *giveInputRecordName() const { return _IFT_StokesFlow_Name; }
-    virtual classType giveClassID() const { return StokesFlowClass; }
 };
 } // end namespace oofem
 

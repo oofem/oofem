@@ -79,7 +79,6 @@ public:
     // definition & identification
     virtual const char *giveInputRecordName() const { return _IFT_TrPlaneStrRot_Name; }
     virtual const char *giveClassName() const { return "TrPlaneStrRot"; }
-    virtual classType giveClassID() const { return TrPlaneStrRotClass; }
     virtual IRResultType initializeFrom(InputRecord *ir);
     virtual MaterialMode giveMaterialMode() { return _PlaneStressRot; }
 

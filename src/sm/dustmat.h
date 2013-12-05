@@ -113,7 +113,6 @@ public:
     virtual contextIOResultType restoreContext(DataStream *stream, ContextMode mode, void *obj = NULL);
 
     virtual const char *giveClassName() const { return "DustMaterialStatus"; }
-    virtual classType giveClassID() const { return DustMaterialStatusClass; }
 
     /**
      * Get the full plastic strain vector from the material status.
@@ -459,7 +458,6 @@ public:
 
     virtual const char *giveClassName() const { return "DustMaterial"; }
     virtual const char *giveInputRecordName() const { return _IFT_DustMaterial_Name; }
-    virtual classType giveClassID() const { return DustMaterialClass; }
 
     virtual void giveRealStressVector(FloatArray &answer,
                                       GaussPoint *gp,

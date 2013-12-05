@@ -190,7 +190,6 @@ public:
     // identification and auxiliary functions
     virtual const char *giveInputRecordName() const { return _IFT_LayeredCrossSection_Name; }
     virtual const char *giveClassName() const { return "LayeredCrossSection"; }
-    virtual classType giveClassID() const { return LayeredCrossSectionClass; }
     virtual void printYourself();
 
     MaterialMode giveCorrespondingSlaveMaterialMode(MaterialMode mode);
@@ -272,7 +271,6 @@ class LayeredIntegrationRule : public IntegrationRule
     LayeredIntegrationRule(int n, Element *e);
     virtual ~LayeredIntegrationRule();
 
-    //virtual classType giveClassID() const { return LayeredIntegrationRuleClass; }
     virtual const char *giveClassName() const { return "LayeredIntegrationRule"; }
     virtual IRResultType initializeFrom(InputRecord *ir) { return IRRT_OK; }
 

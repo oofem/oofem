@@ -123,7 +123,6 @@ public:
     // definition & identification
     virtual const char *giveInputRecordName() const { return _IFT_LSpace_Name; }
     virtual const char *giveClassName() const { return "LSpace"; }
-    virtual classType giveClassID() const { return LSpaceClass; }
     virtual IRResultType initializeFrom(InputRecord *ir);
 
 #ifdef __OOFEG

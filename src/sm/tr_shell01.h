@@ -85,7 +85,6 @@ public:
     // definition & identification
     virtual const char *giveInputRecordName() const { return _IFT_TR_SHELL01_Name; }
     virtual const char *giveClassName() const { return "TR_SHELL01"; }
-    virtual classType giveClassID() const { return TR_SHELL01Class; }
     virtual IRResultType initializeFrom(InputRecord *ir);
 
     virtual void giveCharacteristicVector(FloatArray &answer, CharType mtrx, ValueModeType mode, TimeStep *tStep);

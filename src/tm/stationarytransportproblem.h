@@ -96,7 +96,6 @@ public:
     // identification
     virtual const char *giveInputRecordName() const { return _IFT_StationaryTransportProblem_Name; }
     virtual const char *giveClassName() const { return "StationaryTransportProblem"; }
-    virtual classType giveClassID() const { return StationaryTransportProblemClass; }
     virtual fMode giveFormulation() { return TL; }
 
 #ifdef __PETSC_MODULE

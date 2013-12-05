@@ -100,7 +100,6 @@ public:
     /// Returns input record name of the receiver. 
     virtual const char *giveInputRecordName() const { return _IFT_CemhydMat_Name; }
     virtual const char *giveClassName() const { return "CemhydMat"; }
-    virtual classType giveClassID() const { return CemhydMatClass; }
 
     virtual int hasInternalSource() { return 1; }
     virtual void computeInternalSourceVector(FloatArray &val, GaussPoint *gp, TimeStep *atTime, ValueModeType mode);
@@ -169,7 +168,6 @@ public:
     virtual ~CemhydMatStatus();
     //virtual Interface *giveInterface(InterfaceType);
     virtual const char *giveClassName() const { return "CemhydMatStatus"; }
-    virtual classType giveClassID() const { return CemhydMatStatusClass; }
     virtual void updateYourself(TimeStep *atTime);
     virtual void printOutputAt(FILE *file, TimeStep *atTime);
 #elif CEMPY

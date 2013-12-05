@@ -63,7 +63,6 @@ public:
     // definition
     virtual const char *giveInputRecordName() const { return _IFT_Tr1_ht_Name; }
     virtual const char *giveClassName() const { return "Tr1_htElement"; }
-    virtual classType giveClassID() const { return Tr1_htClass; }
 
     virtual int computeNumberOfDofs() { return ( emode == HeatTransferEM ) ? 3 : 6; }
     virtual IRResultType initializeFrom(InputRecord *ir);
@@ -102,7 +101,6 @@ public:
 
     virtual const char *giveInputRecordName() const { return _IFT_Tr1_hmt_Name; }
     virtual const char *giveClassName() const { return "Tr1_hmt"; }
-    virtual classType giveClassID() const { return Tr1_hmtClass; }
     virtual MaterialMode giveMaterialMode() { return _2dHeMo; }
 };
 

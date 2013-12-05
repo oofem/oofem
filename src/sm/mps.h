@@ -142,7 +142,6 @@ public:
 
     // definition
     virtual const char *giveClassName() const { return "MPSMaterialStatus"; }
-    virtual classType giveClassID() const { return MPSMaterialStatusClass; }
 };
 
 
@@ -199,7 +198,6 @@ public:
 
     virtual const char *giveInputRecordName() const { return _IFT_MPSMaterial_Name; }
     virtual const char *giveClassName() const { return "MPSMaterial"; }
-    virtual classType giveClassID() const { return MPSMaterialClass; }
 
     virtual IRResultType initializeFrom(InputRecord *ir);
 

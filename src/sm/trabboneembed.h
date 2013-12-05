@@ -84,7 +84,6 @@ public:
 
     // definition
     virtual const char *giveClassName() const { return "TrabBoneEmbedStatus"; }
-    virtual classType giveClassID() const { return TrabBoneEmbedStatusClass; }
 
     virtual void initTempStatus();
     virtual void updateYourself(TimeStep *tStep);
@@ -127,7 +126,6 @@ public:
 
     virtual const char *giveInputRecordName() const { return _IFT_TrabBoneEmbed_Name; }
     virtual const char *giveClassName() const { return "TrabBoneEmbed"; }
-    virtual classType giveClassID() const { return TrabBoneEmbedClass; }
 
     virtual IRResultType initializeFrom(InputRecord *ir);
 

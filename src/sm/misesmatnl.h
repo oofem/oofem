@@ -79,7 +79,6 @@ public:
 
     // DEFINITION
     virtual const char *giveClassName() const { return "MisesMatNlStatus"; }
-    virtual classType giveClassID() const { return MisesMatClass; }
 
     virtual void initTempStatus();
 
@@ -108,7 +107,6 @@ public:
     virtual ~MisesMatNl();
 
     virtual const char *giveClassName() const { return "MisesMatNl"; }
-    virtual classType giveClassID() const { return MisesMatClass; }
     virtual const char *giveInputRecordName() const { return _IFT_MisesMatNl_Name; }
 
     virtual IRResultType initializeFrom(InputRecord *ir);

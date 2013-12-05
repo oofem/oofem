@@ -99,9 +99,8 @@ public:
 
     // definition
     virtual const char *giveClassName() const { return "PlasticMaterialStatus"; }
-    virtual classType giveClassID() const { return PerfectlyPlasticMaterialStatusClass; }
 
-    virtual void printYourself() {printf("I am a PlasticMaterialStatus. plasticStrainVector: \n"); plasticStrainVector.printYourself(); }
+    virtual void printYourself();
 
     /// Functions for MaterialStatusMapperInterface
 	virtual void copyStateVariables(const MaterialStatus &iStatus);
@@ -133,7 +132,6 @@ public:
     virtual int hasNonLinearBehaviour() { return 1; }
     virtual int hasMaterialModeCapability(MaterialMode mode);
     virtual const char *giveClassName() const { return "PlasticMaterial"; }
-    virtual classType giveClassID() const { return PerfectlyPlasticMaterialClass; }
 
     /// Returns reference to undamaged (bulk) material.
     LinearElasticMaterial *giveLinearElasticMaterial() { return linearElasticMaterial; }

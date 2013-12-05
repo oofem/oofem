@@ -155,8 +155,6 @@ public:
 
     // identification
     virtual const char *giveClassName() const { return "NonLinearStatic"; }
-    virtual classType giveClassID() const { return NonLinearStaticClass; }
-    virtual int isIncremental() { return 1; }
     virtual fMode giveFormulation() { return nonLinFormulation; }
     virtual int useNonlocalStiffnessOption() { return this->nonlocalStiffnessFlag; }
     /// For load balancing purposes we store all values so hash is computed from mode value only

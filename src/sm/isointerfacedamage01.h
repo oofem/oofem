@@ -89,7 +89,6 @@ public:
 
     // definition
     virtual const char *giveClassName() const { return "IsoInterfaceDamageMaterialStatus"; }
-    virtual classType giveClassID() const { return MaterialStatusClass; }
 
     virtual void initTempStatus();
     virtual void updateYourself(TimeStep *tStep);
@@ -140,7 +139,6 @@ public:
     virtual int hasMaterialModeCapability(MaterialMode mode);
     virtual const char *giveInputRecordName() const { return _IFT_IsoInterfaceDamageMaterial_Name; }
     virtual const char *giveClassName() const { return "IsoInterfaceDamageMaterial"; }
-    virtual classType giveClassID() const { return IsoInterfaceDamageMaterialClass; }
 
     virtual void give3dMaterialStiffnessMatrix(FloatMatrix &answer,
                                                MatResponseMode mode,

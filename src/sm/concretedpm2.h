@@ -179,7 +179,6 @@ public:
     virtual contextIOResultType saveContext(DataStream *, ContextMode mode, void *obj = NULL);
     virtual contextIOResultType restoreContext(DataStream *, ContextMode mode, void *obj = NULL);
     virtual const char *giveClassName() const { return "ConcreteDPM2Status"; }
-    virtual classType giveClassID() const { return ConcreteDPM2StatusClass; }
 
     // Inline functions for access to state variables
     // give:
@@ -679,7 +678,6 @@ public:
 
     virtual const char *giveClassName() const { return "ConcreteDPM2"; }
     virtual const char *giveInputRecordName() const { return _IFT_ConcreteDPM2_Name; }
-    virtual classType giveClassID() const { return ConcreteDPM2Class; }
 
     LinearElasticMaterial *giveLinearElasticMaterial()
     { return linearElasticMaterial; }

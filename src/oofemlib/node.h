@@ -168,7 +168,6 @@ public:
     // miscellaneous
     virtual const char *giveClassName() const { return "Node"; }
     virtual const char *giveInputRecordName() const { return _IFT_Node_Name; }
-    virtual classType giveClassID() const { return NodeClass; }
     virtual IRResultType initializeFrom(InputRecord *ir);
     virtual void giveInputRecord(DynamicInputRecord &input);
     virtual void printYourself();

@@ -66,7 +66,6 @@ public:
 
     virtual const char *giveInputRecordName() const { return _IFT_IsotropicLinMoistureTransferMaterial_Name; }
     virtual const char *giveClassName() const { return "IsotropicLinMoistureTransferMaterial"; }
-    virtual classType giveClassID() const { return IsotropicLinMoistureTransferMaterialClass; }
 
     virtual IRResultType initializeFrom(InputRecord *ir);
 };

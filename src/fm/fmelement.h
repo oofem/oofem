@@ -39,7 +39,6 @@
 #include "intarray.h"
 
 namespace oofem {
-
 ///@name Declaration of basic boundary codes.
 //@{
 #define FMElement_PrescribedTractionBC ( 1 << 0 )

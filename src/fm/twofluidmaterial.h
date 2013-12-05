@@ -79,12 +79,11 @@ public:
     virtual int hasMaterialModeCapability(MaterialMode mode);
     virtual const char *giveClassName() const { return "TwoFluidMaterial"; }
     virtual const char *giveInputRecordName() const { return _IFT_TwoFluidMaterial_Name; }
-    virtual classType giveClassID() const { return TwoFluidMaterialClass; }
     virtual int checkConsistency();
     virtual MaterialStatus *CreateStatus(GaussPoint *gp) const;
 
 protected:
-    FluidDynamicMaterial *giveMaterial(int i) const { return static_cast< FluidDynamicMaterial * >( domain->giveMaterial(slaveMaterial( i )) ); }
+    FluidDynamicMaterial *giveMaterial(int i) const { return static_cast< FluidDynamicMaterial * >( domain->giveMaterial( slaveMaterial(i) ) ); }
     double giveTempVOF(GaussPoint *gp);
 };
 
@@ -101,7 +100,7 @@ public:
     /// Destructor
     virtual ~TwoFluidMaterialStatus() { }
 
-    virtual  void printOutputAt(FILE *file, TimeStep *tStep);
+    virtual void printOutputAt(FILE *file, TimeStep *tStep);
 
     virtual void initTempStatus();
     virtual void updateYourself(TimeStep *tStep);
@@ -116,6 +115,5 @@ public:
 
     virtual const char *giveClassName() const { return "TwoFluidMaterialStatus"; }
 };
-
 } // end namespace oofem
 #endif // twofluidmaterial_h

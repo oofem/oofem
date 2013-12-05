@@ -38,7 +38,6 @@
 #include "engngm.h"
 
 namespace oofem {
-
 /**
  * Base class for fluid problems.
  *

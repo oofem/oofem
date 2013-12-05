@@ -112,7 +112,6 @@ public:
     // definition & identification
     virtual const char *giveClassName() const { return "DKTPlate"; }
     virtual const char *giveInputRecordName() const { return _IFT_DKTPlate_Name; }
-    virtual classType giveClassID() const { return DKTPlateClass; }
     virtual IRResultType initializeFrom(InputRecord *ir);
 
     virtual int computeNumberOfDofs() { return 9; }

@@ -99,7 +99,6 @@ public:
 
     // definition
     virtual const char *giveClassName() const { return "RCSDMaterialStatus"; }
-    virtual classType giveClassID() const { return RCSDMaterialStatusClass; }
 
     virtual void initTempStatus();
     virtual void updateYourself(TimeStep *tStep);
@@ -129,7 +128,6 @@ public:
     // identification and auxiliary functions
     virtual const char *giveInputRecordName() const { return _IFT_RCSDMaterial_Name; }
     virtual const char *giveClassName() const { return "RCSDMaterial"; }
-    virtual classType giveClassID() const { return RCSDMaterialClass; }
 
     virtual IRResultType initializeFrom(InputRecord *ir);
 

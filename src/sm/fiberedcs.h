@@ -168,7 +168,6 @@ public:
     // identification and auxiliary functions
     virtual const char *giveInputRecordName() const { return _IFT_FiberedCrossSection_Name; }
     virtual const char *giveClassName() const { return "FiberedCrossSection"; }
-    virtual classType giveClassID() const { return FiberedCrossSectionClass; }
     virtual IRResultType initializeFrom(InputRecord *ir);
 
     virtual void createMaterialStatus(GaussPoint &iGP); // ES

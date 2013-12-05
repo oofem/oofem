@@ -145,7 +145,6 @@ public:
     // definition & identification
     virtual const char *giveInputRecordName() const { return _IFT_TrPlaneStrain_Name; }
     virtual const char *giveClassName() const { return "TrPlaneStrain"; }
-    virtual classType giveClassID() const { return TrPlaneStrainClass; }
     virtual IRResultType initializeFrom(InputRecord *ir);
     virtual MaterialMode giveMaterialMode() { return _PlaneStrain; }
 

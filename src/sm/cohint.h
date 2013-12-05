@@ -69,7 +69,6 @@ public:
 
     // definition
     virtual const char *giveClassName() const { return "CohesiveInterfaceMaterialStatus"; }
-    virtual classType giveClassID() const { return CohesiveInterfaceMaterialStatusClass; }
 
     virtual void initTempStatus();
     virtual void updateYourself(TimeStep *tStep);
@@ -101,7 +100,6 @@ public:
 
     virtual const char *giveClassName() const { return "CohesiveInterfaceMaterial"; }
     virtual const char *giveInputRecordName() const { return _IFT_CohesiveInterfaceMaterial_Name; }
-    virtual classType giveClassID() const { return CohesiveInterfaceMaterialClass; }
 
     virtual void give3dMaterialStiffnessMatrix(FloatMatrix & answer,
                                                MatResponseMode,

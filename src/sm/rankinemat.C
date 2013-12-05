@@ -58,7 +58,13 @@ RankineMat :: RankineMat(int n, Domain *d) : StructuralMaterial(n, d)
     sig0 = 0.;
     delSigY = 0.;
     ep = 0.;
+    md = 0.;
     damlaw = 1;
+    param1 = 0.;
+    param2 = 0.;
+    param3 = 0.;
+    param4 = 0.;
+    param5 = 0.;
 }
 
 
@@ -98,6 +104,7 @@ RankineMat :: initializeFrom(InputRecord *ir)
     } else if ( plasthardtype == 2 ) {
         IR_GIVE_FIELD(ir, ep, _IFT_RankineMat_ep);
         ep = ep - sig0 / E; // user input is strain at peak stress sig0 and is converted to plastic strain at peak stress sig0
+        md = 1. / log(50. * E * ep / sig0); // exponent used on the 1st plasticity branch
     } else {
         OOFEM_ERROR2(" Plasticity hardening type number  %d is unknown", plasthardtype);
     }
@@ -114,7 +121,13 @@ RankineMat :: initializeFrom(InputRecord *ir)
     } else if ( damlaw == 1 )  {
         IR_GIVE_FIELD(ir, param1, _IFT_RankineMat_param1); // coefficient in damage law
         IR_GIVE_FIELD(ir, param2, _IFT_RankineMat_param2); // coefficient in damage law. If b<1 use only stiffmode=1
-    } else  {
+     } else if ( damlaw == 2 )  {
+        IR_GIVE_FIELD(ir, param1, _IFT_RankineMat_param1); // coefficients in damage law
+        IR_GIVE_FIELD(ir, param2, _IFT_RankineMat_param2); 
+        IR_GIVE_FIELD(ir, param3, _IFT_RankineMat_param3); 
+        IR_GIVE_FIELD(ir, param4, _IFT_RankineMat_param4); 
+        IR_GIVE_FIELD(ir, param5, _IFT_RankineMat_param5); 
+   } else  {
         OOFEM_ERROR2("Damage law number  %d is unknown", damlaw);
     }
 
@@ -236,13 +249,11 @@ RankineMat :: evalYieldStress(const double kappa)
     } else if ( plasthardtype == 2 ) { // exponential hardening before the peak stress sig0 and linear after the peak stress sig0
         if ( kappa <= ep ) {
             //1st branch in the rankine variation 2 trying to match the 1st branch of the smooth extended damage law reported by Grassl and Jirasek (2010)
-            double md = 1. / log(E * 50 * ep / sig0); // variable needed for the 1st plasticity branch
-            yieldStress = 50 *E *kappa *exp( -1 / md *pow(kappa / ep, md) );
+            yieldStress = 50. * E * kappa * exp( -pow(kappa / ep, md) / md );
         } else  { //linear hardening branch
             yieldStress = sig0 + H0 * kappa;
         }
     }
-
     return yieldStress;
 }
 
@@ -256,13 +267,12 @@ RankineMat :: evalPlasticModulus(const double kappa)
         plasticModulus = H0 * exp(-H0 * kappa / delSigY);
     } else if ( plasthardtype == 2 ) { // exponential hardening before the peak stress sig0 and linear after the peak stress sig0
         if ( kappa <= ep ) { //1st branch of yield stress
-            double md = 1. / log(E * 50 * ep / sig0); // variable needed for the 1st plasticity branch
-            plasticModulus = 50 *E *exp( -1 / md *pow(kappa / ep, md) ) - 50 *E *kappa *pow(kappa / ep, md) * exp( -1 / md * pow(kappa / ep, md) );
+	    double aux = pow(kappa / ep, md);
+	    plasticModulus = 50. * E * exp( - aux / md ) * (1. - aux );
         } else  { //2nd branch of yield stress
             plasticModulus = H0;
         }
     }
-
     return plasticModulus;
 }
 
@@ -431,15 +441,11 @@ RankineMat :: computeDamageParam(double tempKappa)
     if ( tempKappa > 0. ) {
         if ( damlaw == 0 ) {
             tempDam = 1.0 - exp(-a * tempKappa);
-        } else if ( damlaw == 1 )    {
-            if ( tempKappa <= ep ) {
-                tempDam = 0.;
-            } else {
-                tempDam = 1.0 - exp( -param1 * pow( ( tempKappa - ep ) / ep, param2 ) );
-            }
-        }
-    } else {
-        tempDam = 0.;
+        } else if ( damlaw == 1 && tempKappa > ep ) {
+	      tempDam = 1.0 - exp( -param1 * pow( ( tempKappa - ep ) / ep, param2 ) );
+        } else if ( damlaw == 2 && tempKappa > ep ) {
+	      tempDam = 1.0 - param5 * exp( -param1 * pow( ( tempKappa - ep ) / ep, param2 ) ) - ( 1. - param5 ) * exp( -param3 * pow( ( tempKappa - ep ) / ep, param4 ) );
+	}
     }
 
     return tempDam;
@@ -452,15 +458,11 @@ RankineMat :: computeDamageParamPrime(double tempKappa)
     if ( tempKappa >= 0. ) {
         if ( damlaw == 0 ) {
             tempDam = a * exp(-a * tempKappa);
-        } else if ( damlaw == 1 ) {
-            if ( tempKappa <= ep ) {
-                tempDam = 0.;
-            } else {
+        } else if ( damlaw == 1 && tempKappa >= ep ) {
                 tempDam = param1 * param2 * pow( ( tempKappa - ep ) / ep, param2 - 1 ) / ep *exp( -param1 *pow( ( tempKappa - ep ) / ep, param2 ) );
-            }
+        } else if ( damlaw == 2 && tempKappa >= ep ) {
+	      tempDam = param5 * param1 * param2 * pow( ( tempKappa - ep ) / ep, param2 - 1 ) / ep *exp( -param1 *pow( ( tempKappa - ep ) / ep, param2 ) ) + ( 1. - param5 ) * param3 * param4 * pow( ( tempKappa - ep ) / ep, param4 - 1 ) / ep *exp( -param3 *pow( ( tempKappa - ep ) / ep, param4 ) );
         }
-    } else {
-        tempDam = 0.;
     }
 
     return tempDam;
@@ -694,7 +696,6 @@ RankineMat :: giveIPValue(FloatArray &answer, GaussPoint *aGaussPoint, InternalS
         answer.resize(1);
         answer.at(1) = status->giveStressWork() - status->giveDissWork();
         return 1;
-
 #endif
     } else {
         return StructuralMaterial :: giveIPValue(answer, aGaussPoint, type, atTime);

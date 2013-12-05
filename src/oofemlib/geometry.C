@@ -1042,7 +1042,7 @@ bool PolygonLine :: intersects(Element *element)
 	// overlap with the element
 	for( int segId = 1; segId <= numSeg; segId++ )
 	{
-		if( element->giveClassID() == TrPlaneStress2dXFEMClass )
+		if( element->giveGeometryType() == EGT_triangle_1 )
 		{
 			// Crack segment
 			bPoint2 crackP1( this->giveVertex(segId)->at(1), this->giveVertex(segId)->at(2) );

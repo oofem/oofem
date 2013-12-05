@@ -95,7 +95,6 @@ public:
     // definition
     virtual const char *giveClassName() const { return "TR1_2D_SUPG2_AXI"; }
     virtual const char *giveInputRecordName() const { return _IFT_TR1_2D_SUPG2_AXI_Name; }
-    virtual classType giveClassID() const { return TR1_2D_SUPG2_AXIClass; }
     virtual MaterialMode giveMaterialMode() { return _2dAxiFlow; }
     virtual IRResultType initializeFrom(InputRecord *ir);
     virtual void giveInputRecord(DynamicInputRecord &input);
@@ -116,7 +115,7 @@ protected:
     virtual void computeGaussPoints();
     virtual void computeDeviatoricStress(FloatArray &answer, GaussPoint *gp, TimeStep *);
     void updateVolumePolygons(Polygon &referenceFluidPoly, Polygon &secondFluidPoly, int &rfPoints, int &sfPoints,
-                               const FloatArray &normal, const double p, bool updFlag);
+                              const FloatArray &normal, const double p, bool updFlag);
     double computeVolumeAroundID(GaussPoint *gp, integrationDomain id, const FloatArray **idpoly);
     double computeRadiusAt(GaussPoint *gp);
     void computeBMtrx(FloatMatrix &answer, GaussPoint *gp);
@@ -127,9 +126,9 @@ protected:
     virtual Element *ZZNodalRecoveryMI_giveElement() { return this; }
 
     virtual void NodalAveragingRecoveryMI_computeNodalValue(FloatArray &answer, int node,
-                                                    InternalStateType type, TimeStep *tStep);
+                                                            InternalStateType type, TimeStep *tStep);
     virtual void NodalAveragingRecoveryMI_computeSideValue(FloatArray &answer, int side,
-                                                   InternalStateType type, TimeStep *tStep);
+                                                           InternalStateType type, TimeStep *tStep);
 
     virtual void SPRNodalRecoveryMI_giveSPRAssemblyPoints(IntArray &pap);
     virtual void SPRNodalRecoveryMI_giveDofMansDeterminedByPatch(IntArray &answer, int pap);

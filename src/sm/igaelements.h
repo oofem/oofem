@@ -82,7 +82,6 @@ public:
     // definition & identification
     virtual const char *giveInputRecordName() const { return _IFT_BsplinePlaneStressElement_Name; }
     virtual const char *giveClassName() const { return "BsplinePlaneStressElement"; }
-    virtual classType giveClassID() const { return BsplinePlaneStressElementClass; }
 
 #ifdef __OOFEG
     //
@@ -128,7 +127,6 @@ public:
     // definition & identification
     virtual const char *giveInputRecordName() const { return _IFT_NURBSPlaneStressElement_Name; }
     virtual const char *giveClassName() const { return "NURBSPlaneStressElement"; }
-    virtual classType giveClassID() const { return NURBSPlaneStressElementClass; }
 #ifdef __OOFEG
     //
     // Graphics output
@@ -179,7 +177,6 @@ public:
     // definition & identification
     virtual const char *giveInputRecordName() const { return _IFT_TSplinePlaneStressElement_Name; }
     virtual const char *giveClassName() const { return "TSplinePlaneStressElement"; }
-    virtual classType giveClassID() const { return TSplinePlaneStressElementClass; }
 #ifdef __OOFEG
     // Graphics output
     virtual void  drawScalar(oofegGraphicContext &context);
@@ -220,7 +217,6 @@ public:
     // definition & identification
     virtual const char *giveInputRecordName() const { return _IFT_NURBSSpace3dElement_Name; }
     virtual const char *giveClassName() const { return "NURBSSpace3dElement"; }
-    virtual classType giveClassID() const { return NURBSSpace3dElementClass; }
 #ifdef __OOFEG
     // Graphics output
     virtual void drawScalar(oofegGraphicContext &context);

@@ -63,7 +63,7 @@
 namespace oofem {
 #define TRSUPG_ZERO_VOF 1.e-8
 
-REGISTER_Element( TR1_2D_SUPG2_AXI );
+REGISTER_Element(TR1_2D_SUPG2_AXI);
 
 //#define TR1_2D_SUPG2_AXI_DEBUG
 
@@ -118,6 +118,7 @@ TR1_2D_SUPG2_AXI :: giveInputRecord(DynamicInputRecord &input)
     } else {
         input.setField(this->vof, _IFT_Tr1SUPG_vof);
     }
+
     input.setField(this->mat [ 0 ], _IFT_Tr1SUPG2_mat0);
     input.setField(this->mat [ 1 ], _IFT_Tr1SUPG2_mat1);
 }
@@ -309,7 +310,7 @@ TR1_2D_SUPG2_AXI :: computeDiffusionTerm_MB(FloatArray &answer, TimeStep *atTime
     answer.resize(6);
     answer.zero();
     FloatArray u, un, eps(3), stress;
-    double dV, Re = static_cast<FluidModel*>(domain->giveEngngModel())->giveReynoldsNumber();
+    double dV, Re = static_cast< FluidModel * >( domain->giveEngngModel() )->giveReynoldsNumber();
     //double dudx,dudy,dvdx,dvdy;
     GaussPoint *gp;
 
@@ -358,7 +359,7 @@ TR1_2D_SUPG2_AXI :: computeDiffusionDerivativeTerm_MB(FloatMatrix &answer, MatRe
     FloatMatrix _db, _d, _b(3, 6), _bs(3, 6);
     //FloatArray un;
     GaussPoint *gp;
-    double Re = static_cast<FluidModel*>(domain->giveEngngModel())->giveReynoldsNumber();
+    double Re = static_cast< FluidModel * >( domain->giveEngngModel() )->giveReynoldsNumber();
     FloatArray un(6), u(6), n(3), eps, stress;
     double _u, _v, _r;
 
@@ -588,7 +589,7 @@ void TR1_2D_SUPG2_AXI :: computeDiffusionTerm_MC(FloatArray &answer, TimeStep *a
     answer.zero();
 
 #if 1
-    double Re = static_cast<FluidModel*>(domain->giveEngngModel())->giveReynoldsNumber();
+    double Re = static_cast< FluidModel * >( domain->giveEngngModel() )->giveReynoldsNumber();
     double rho;
     double dV, _r;
     GaussPoint *gp;
@@ -624,7 +625,7 @@ void TR1_2D_SUPG2_AXI :: computeDiffusionDerivativeTerm_MC(FloatMatrix &answer, 
     answer.zero();
 
 #if 1
-    double Re = static_cast<FluidModel*>(domain->giveEngngModel())->giveReynoldsNumber();
+    double Re = static_cast< FluidModel * >( domain->giveEngngModel() )->giveReynoldsNumber();
     double rho;
     double dV, _r;
     GaussPoint *gp;
@@ -891,8 +892,8 @@ TR1_2D_SUPG2_AXI :: updateStabilizationCoeffs(TimeStep *atTime)
         gp = integrationRulesArray [ 1 ]->getIntegrationPoint(0);
     }
 
-    nu0 = this->_giveMaterial(0)->giveCharacteristicValue(MRM_Viscosity, gp, atTime->givePreviousStep());
-    nu1 = this->_giveMaterial(1)->giveCharacteristicValue(MRM_Viscosity, gp, atTime->givePreviousStep());
+    nu0 = this->_giveMaterial(0)->giveCharacteristicValue( MRM_Viscosity, gp, atTime->givePreviousStep() );
+    nu1 = this->_giveMaterial(1)->giveCharacteristicValue( MRM_Viscosity, gp, atTime->givePreviousStep() );
     nu = vof * nu0 + ( 1. - vof ) * nu1;
 
     //this -> computeVectorOf(EID_MomentumBalance,VM_Total,atTime->givePreviousStep(),un) ;
@@ -1069,8 +1070,8 @@ TR1_2D_SUPG2_AXI :: updateStabilizationCoeffs(TimeStep *atTime)
         gp = integrationRulesArray [ 1 ]->getIntegrationPoint(0);
     }
 
-    nu0 = static_cast< FluidDynamicMaterial* >(this->_giveMaterial(0))->giveEffectiveViscosity(gp, atTime->givePreviousStep());
-    nu1 = static_cast< FluidDynamicMaterial* >(this->_giveMaterial(1))->giveEffectiveViscosity(gp, atTime->givePreviousStep());
+    nu0 = static_cast< FluidDynamicMaterial * >( this->_giveMaterial(0) )->giveEffectiveViscosity( gp, atTime->givePreviousStep() );
+    nu1 = static_cast< FluidDynamicMaterial * >( this->_giveMaterial(1) )->giveEffectiveViscosity( gp, atTime->givePreviousStep() );
     nu = vof * nu0 + ( 1. - vof ) * nu1;
     nu *= domain->giveEngngModel()->giveVariableScale(VST_Viscosity);
 
@@ -1295,10 +1296,10 @@ TR1_2D_SUPG2_AXI :: formVolumeInterfacePoly(Polygon &matvolpoly, LEPlic *matInte
             if ( nodeIn [ i - 1 ] ) {
                 if ( updFlag ) {
                     v.setCoords( matInterface->giveUpdatedXCoordinate( this->giveNode(i)->giveNumber() ),
-                                matInterface->giveUpdatedYCoordinate( this->giveNode(i)->giveNumber() ) );
+                                 matInterface->giveUpdatedYCoordinate( this->giveNode(i)->giveNumber() ) );
                 } else {
                     v.setCoords( this->giveNode(i)->giveCoordinate(1),
-                                this->giveNode(i)->giveCoordinate(2) );
+                                 this->giveNode(i)->giveCoordinate(2) );
                 }
 
                 matvolpoly.addVertex(v);
@@ -1328,7 +1329,7 @@ TR1_2D_SUPG2_AXI :: formVolumeInterfacePoly(Polygon &matvolpoly, LEPlic *matInte
                     if ( nodeIn [ i - 1 ] ) {
                         if ( updFlag ) {
                             v.setCoords( matInterface->giveUpdatedXCoordinate( this->giveNode(next)->giveNumber() ),
-                                        matInterface->giveUpdatedYCoordinate( this->giveNode(next)->giveNumber() ) );
+                                         matInterface->giveUpdatedYCoordinate( this->giveNode(next)->giveNumber() ) );
                         } else {
                             v.setCoords( this->giveNode(next)->giveCoordinate(1), this->giveNode(next)->giveCoordinate(2) );
                         }
@@ -1339,7 +1340,7 @@ TR1_2D_SUPG2_AXI :: formVolumeInterfacePoly(Polygon &matvolpoly, LEPlic *matInte
                         matvolpoly.addVertex(v);
                         if ( updFlag ) {
                             v.setCoords( matInterface->giveUpdatedXCoordinate( this->giveNode(next)->giveNumber() ),
-                                        matInterface->giveUpdatedYCoordinate( this->giveNode(next)->giveNumber() ) );
+                                         matInterface->giveUpdatedYCoordinate( this->giveNode(next)->giveNumber() ) );
                         } else {
                             v.setCoords( this->giveNode(next)->giveCoordinate(1), this->giveNode(next)->giveCoordinate(2) );
                         }
@@ -1349,7 +1350,6 @@ TR1_2D_SUPG2_AXI :: formVolumeInterfacePoly(Polygon &matvolpoly, LEPlic *matInte
                 }
             }
         } // end loop over elem nodes
-
     }
 }
 
@@ -1410,13 +1410,13 @@ TR1_2D_SUPG2_AXI :: updateVolumePolygons(Polygon &referenceFluidPoly, Polygon &s
             next = i < 3 ? i + 1 : 1;
             if ( nodeIn [ i - 1 ] ) {
                 v.setCoords( this->giveNode(i)->giveCoordinate(1),
-                            this->giveNode(i)->giveCoordinate(2) );
+                             this->giveNode(i)->giveCoordinate(2) );
 
                 referenceFluidPoly.addVertex(v);
                 rfPoints++;
             } else {
                 v.setCoords( this->giveNode(i)->giveCoordinate(1),
-                            this->giveNode(i)->giveCoordinate(2) );
+                             this->giveNode(i)->giveCoordinate(2) );
 
                 secondFluidPoly.addVertex(v);
                 sfPoints++;
@@ -1459,7 +1459,6 @@ TR1_2D_SUPG2_AXI :: updateVolumePolygons(Polygon &referenceFluidPoly, Polygon &s
                 }
             }
         } // end loop over elem nodes
-
     }
 }
 
@@ -1624,13 +1623,13 @@ TR1_2D_SUPG2_AXI :: updateIntegrationRules()
             nip = 4;
         }
 
-        this->giveCrossSection()->setupIntegrationPoints( *integrationRulesArray[i], nip, this );
+        this->giveCrossSection()->setupIntegrationPoints(* integrationRulesArray [ i ], nip, this);
 
         // remap ip coords into area coords of receiver
         for ( int ip = 0; ip < integrationRulesArray [ i ]->giveNumberOfIntegrationPoints(); ip++ ) {
             gp = integrationRulesArray [ i ]->getIntegrationPoint(ip);
-            approx->local2global(gc, * gp->giveCoordinates(), FEIVertexListGeometryWrapper(c [ i ], vcoords [ i ]));
-            triaApprox.global2local(lc, gc, FEIElementGeometryWrapper(this));
+            approx->local2global( gc, * gp->giveCoordinates(), FEIVertexListGeometryWrapper(c [ i ], vcoords [ i ]) );
+            triaApprox.global2local( lc, gc, FEIElementGeometryWrapper(this) );
             // modify original ip coords to target ones
             gp->setLocalCoordinates( * gp->giveCoordinates() );
             gp->setCoordinates(lc);
@@ -1695,10 +1694,10 @@ TR1_2D_SUPG2_AXI :: computeVolumeAroundID(GaussPoint *gp, integrationDomain id, 
 
     if ( id == _Triangle ) {
         FEI2dTrLin __interpolation(1, 2);
-        return _r * weight * fabs( __interpolation.giveTransformationJacobian(* gp->giveLocalCoordinates(), FEIVertexListGeometryWrapper(3, idpoly)) );
+        return _r * weight * fabs( __interpolation.giveTransformationJacobian( * gp->giveLocalCoordinates(), FEIVertexListGeometryWrapper(3, idpoly) ) );
     } else {
         FEI2dQuadLin __interpolation(1, 2);
-        double det = fabs( __interpolation.giveTransformationJacobian(* gp->giveLocalCoordinates(), FEIVertexListGeometryWrapper(4, idpoly)) );
+        double det = fabs( __interpolation.giveTransformationJacobian( * gp->giveLocalCoordinates(), FEIVertexListGeometryWrapper(4, idpoly) ) );
         return _r * det * weight;
     }
 }
@@ -1757,7 +1756,7 @@ void TR1_2D_SUPG2_AXI :: computeBMtrx(FloatMatrix &_b, GaussPoint *gp)
 void
 TR1_2D_SUPG2_AXI :: computeNVector(FloatArray &n, GaussPoint *gp)
 {
-    this->interp.evalN(n, *gp->giveCoordinates(), FEIElementGeometryWrapper(this));
+    this->interp.evalN( n, * gp->giveCoordinates(), FEIElementGeometryWrapper(this) );
 }
 
 void
@@ -1813,8 +1812,8 @@ TR1_2D_SUPG2_AXI :: SPRNodalRecoveryMI_giveDofMansDeterminedByPatch(IntArray &an
 {
     answer.resize(1);
     if ( ( pap == this->giveNode(1)->giveNumber() ) ||
-        ( pap == this->giveNode(2)->giveNumber() ) ||
-        ( pap == this->giveNode(3)->giveNumber() ) ) {
+         ( pap == this->giveNode(2)->giveNumber() ) ||
+         ( pap == this->giveNode(3)->giveNumber() ) ) {
         answer.at(1) = pap;
     } else {
         _error("SPRNodalRecoveryMI_giveDofMansDeterminedByPatch: node unknown");

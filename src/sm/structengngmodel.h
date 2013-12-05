@@ -105,10 +105,6 @@ public:
 
     virtual int checkConsistency();
 
-    // identification
-    virtual const char *giveClassName() const { return "StructuralEngngModel"; }
-    virtual classType giveClassID() const { return StructuralEngngModelClass; }
-
     /**
      * Computes reaction forces. The implementation assumes, that real
      * stresses corresponding to reached state are already computed (uses giveInternalForcesVector

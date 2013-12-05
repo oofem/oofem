@@ -68,7 +68,6 @@ public:
     virtual IRResultType initializeFrom(InputRecord *ir);
     virtual void giveInputRecord(DynamicInputRecord &input);
 
-    virtual classType giveClassID() const { return ConstantFunctionClass; }
     virtual const char *giveClassName() const { return "ConstantFunction"; }
     virtual const char *giveInputRecordName() const { return _IFT_ConstantFunction_Name; }
 };

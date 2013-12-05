@@ -117,7 +117,6 @@ public:
     // identification
     virtual const char *giveInputRecordName() const { return _IFT_NonStationaryTransportProblem_Name; }
     virtual const char *giveClassName() const { return "NonStationaryTransportProblem"; }
-    virtual classType giveClassID() const { return NonStationaryTransportProblemClass; }
     virtual fMode giveFormulation() { return TL; }
 
     /// Allows to change number of equations during solution.

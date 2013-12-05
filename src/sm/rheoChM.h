@@ -97,7 +97,6 @@ public:
 
     // definition
     virtual const char *giveClassName() const { return "RheoChainMaterialStatus"; }
-    virtual classType giveClassID() const { return RheoChainMaterialStatusClass; }
 };
 
 
@@ -172,7 +171,6 @@ public:
     virtual int hasNonLinearBehaviour() { return 0; }
     virtual int hasMaterialModeCapability(MaterialMode mode);
     virtual const char *giveClassName() const { return "RheoChainMaterial"; }
-    virtual classType giveClassID() const { return RheoChainMaterialClass; }
     virtual IRResultType initializeFrom(InputRecord *ir);
 
     // store & restore context functions

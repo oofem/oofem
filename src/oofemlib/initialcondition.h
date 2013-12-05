@@ -146,7 +146,6 @@ public:
     // Overloaded methods:
     virtual IRResultType initializeFrom(InputRecord *ir);
     virtual void printYourself();
-    virtual classType giveClassID() const { return InitialConditionClass; }
     virtual const char *giveClassName() const { return "InitialCondition"; }
     virtual const char *giveInputRecordName() const { return _IFT_InitialCondition_Name; }
 };

@@ -62,6 +62,9 @@
 #define _IFT_RankineMat_damlaw "damlaw"
 #define _IFT_RankineMat_param1 "param1"
 #define _IFT_RankineMat_param2 "param2"
+#define _IFT_RankineMat_param3 "param3"
+#define _IFT_RankineMat_param4 "param4"
+#define _IFT_RankineMat_param5 "param5"
 //@}
 
 namespace oofem {
@@ -109,17 +112,29 @@ protected:
     /// Parameter that controls damage evolution (a=0 turns damage off).
     double a;
 
-    /// Total Strain at peak stress sig0--Used only if plasthardtype=2
+    /// Total strain at peak stress sig0--Used only if plasthardtype=2
     double ep;
+
+   /// Exponent in hardening law--Used only if plasthardtype=2
+    double md;
 
     /// type of damage law (0=exponential, 1=exponential and  damage starts after peak stress sig0)
     int  damlaw;
 
-    /// coefficient required when damlaw=1
+    /// coefficient required when damlaw=1 or 2
     double     param1;
 
-    /// coefficient required when  damlaw =1
+    /// coefficient required when  damlaw=1 or 2
     double     param2;
+
+    /// coefficient required when damlaw=2
+    double     param3;
+
+    /// coefficient required when damlaw=2
+    double     param4;
+
+    /// coefficient required when damlaw=2
+    double     param5;
 
 
 public:
@@ -143,7 +158,6 @@ public:
     virtual int hasNonLinearBehaviour() { return 1; }
     virtual const char *giveInputRecordName() const { return _IFT_RankineMat_Name; }
     virtual const char *giveClassName() const { return "RankineMat"; }
-    virtual classType giveClassID() const { return RankineMatClass; }
 
     /// Returns a reference to the basic elastic material.
     LinearElasticMaterial *giveLinearElasticMaterial() { return linearElasticMaterial; }
@@ -300,7 +314,6 @@ public:
 #endif
 
     virtual const char *giveClassName() const { return "RankineMatStatus"; }
-    virtual classType giveClassID() const { return RankineMatStatusClass; }
 };
 } // end namespace oofem
 #endif // rankinemat_h

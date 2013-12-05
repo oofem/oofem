@@ -139,7 +139,6 @@ public:
 
     // --- identification and auxiliary functions ---
     virtual const char *giveClassName() const { return "HydrationModelStatus"; }
-    virtual classType giveClassID() const { return ( classType ) HydrationModelStatusClass; }
 };
 
 
@@ -268,7 +267,6 @@ public:
     // --- identification and auxiliary functions ---
     virtual const char *giveInputRecordName() const { return _IFT_HydrationModel_Name; }
     virtual const char *giveClassName() const { return "HydrationModel"; }
-    virtual classType giveClassID() const { return ( classType ) HydrationModelClass; }
 
 protected:
     /// Creates and returns new HydrationModelStatus instance

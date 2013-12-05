@@ -64,9 +64,9 @@
 namespace oofem {
 #define TRSUPG_ZERO_VOF 1.e-8
 
-REGISTER_Element( TR1_2D_SUPG );
+REGISTER_Element(TR1_2D_SUPG);
 
-FEI2dTrLin TR1_2D_SUPG :: interp(1,2);
+FEI2dTrLin TR1_2D_SUPG :: interp(1, 2);
 
 TR1_2D_SUPG :: TR1_2D_SUPG(int n, Domain *aDomain) :
     SUPGElement(n, aDomain), LEPlicElementInterface()
@@ -151,7 +151,7 @@ TR1_2D_SUPG :: computeGaussPoints()
         numberOfIntegrationRules = 1;
         integrationRulesArray = new IntegrationRule * [ 1 ];
         integrationRulesArray [ 0 ] = new GaussIntegrationRule(1, this, 1, 3);
-        this->giveCrossSection()->setupIntegrationPoints( *integrationRulesArray[0], 1, this );
+        this->giveCrossSection()->setupIntegrationPoints(* integrationRulesArray [ 0 ], 1, this);
     }
 }
 
@@ -162,7 +162,7 @@ TR1_2D_SUPG :: computeAccelerationTerm_MB(FloatMatrix &answer, TimeStep *atTime)
     answer.resize(6, 6);
     answer.zero();
     FloatArray un;
-    double rho = this->giveMaterial()->give('d', integrationRulesArray [ 0 ]->getIntegrationPoint(0));
+    double rho = this->giveMaterial()->give( 'd', integrationRulesArray [ 0 ]->getIntegrationPoint(0) );
 
     double ar6 = rho * area / 6.0;
     double ar12 = rho * area / 12.0;
@@ -221,7 +221,7 @@ TR1_2D_SUPG :: computeAdvectionTerm_MB(FloatArray &answer, TimeStep *atTime)
     answer.zero();
 
     FloatArray u, un;
-    double rho = this->giveMaterial()->give('d', integrationRulesArray [ 0 ]->getIntegrationPoint(0));
+    double rho = this->giveMaterial()->give( 'd', integrationRulesArray [ 0 ]->getIntegrationPoint(0) );
     double dudx, dudy, dvdx, dvdy, usum, vsum, coeff;
     this->computeVectorOf(EID_MomentumBalance, VM_Total, atTime->givePreviousStep(), un);
     this->computeVectorOf(EID_MomentumBalance, VM_Total, atTime, u);
@@ -265,7 +265,7 @@ TR1_2D_SUPG :: computeAdvectionDerivativeTerm_MB(FloatMatrix &answer, TimeStep *
     answer.zero();
 
     FloatArray u, un;
-    double rho = this->giveMaterial()->give('d', integrationRulesArray [ 0 ]->getIntegrationPoint(0));
+    double rho = this->giveMaterial()->give( 'd', integrationRulesArray [ 0 ]->getIntegrationPoint(0) );
     this->computeVectorOf(EID_MomentumBalance, VM_Total, atTime, u);
     this->computeVectorOf(EID_MomentumBalance, VM_Total, atTime->givePreviousStep(), un);
 
@@ -292,7 +292,7 @@ TR1_2D_SUPG :: computeAdvectionDerivativeTerm_MB(FloatMatrix &answer, TimeStep *
                     dij = ( i == j );
                     coeff = ( m == k ) ? area / 6. : area / 12.;
                     answer.at(w_dof_addr, u_dof_addr) = rho * ( 0.0 * d1j * dudx [ i - 1 ] [ 0 ] * coeff + dij * b [ m - 1 ] * ar12 * ( usum [ 0 ] + un.at( ( k - 1 ) * 2 + 1 ) ) +
-                                                               0.0 * d2j * dudx [ i - 1 ] [ 1 ] * coeff + dij * c [ m - 1 ] * ar12 * ( usum [ 1 ] + un.at( ( k - 1 ) * 2 + 2 ) ) );
+                                                                0.0 * d2j * dudx [ i - 1 ] [ 1 ] * coeff + dij * c [ m - 1 ] * ar12 * ( usum [ 1 ] + un.at( ( k - 1 ) * 2 + 2 ) ) );
                 }
             }
         }
@@ -338,7 +338,7 @@ TR1_2D_SUPG :: computeDiffusionTerm_MB(FloatArray &answer, TimeStep *atTime)
     answer.resize(6);
     answer.zero();
     FloatArray u, eps(3), stress;
-    double Re = static_cast<FluidModel*>(domain->giveEngngModel())->giveReynoldsNumber();
+    double Re = static_cast< FluidModel * >( domain->giveEngngModel() )->giveReynoldsNumber();
 
     this->computeVectorOf(EID_MomentumBalance, VM_Total, atTime, u);
 
@@ -346,7 +346,7 @@ TR1_2D_SUPG :: computeDiffusionTerm_MB(FloatArray &answer, TimeStep *atTime)
     eps.at(2) = ( c [ 0 ] * u.at(2) + c [ 1 ] * u.at(4) + c [ 2 ] * u.at(6) );
     eps.at(3) = ( b [ 0 ] * u.at(2) + b [ 1 ] * u.at(4) + b [ 2 ] * u.at(6) + c [ 0 ] * u.at(1) + c [ 1 ] * u.at(3) + c [ 2 ] * u.at(5) );
     static_cast< FluidDynamicMaterial * >( this->giveMaterial() )->computeDeviatoricStressVector(stress, integrationRulesArray [ 0 ]->getIntegrationPoint(0),
-                                                                                       eps, atTime);
+                                                                                                 eps, atTime);
     stress.times(1. / Re);
 
     // \int dNu/dxj \Tau_ij
@@ -366,7 +366,7 @@ TR1_2D_SUPG :: computeDiffusionDerivativeTerm_MB(FloatMatrix &answer, MatRespons
     answer.resize(6, 6);
     answer.zero();
     FloatMatrix _db, _d, _b(3, 6);
-    double Re = static_cast<FluidModel*>(domain->giveEngngModel())->giveReynoldsNumber();
+    double Re = static_cast< FluidModel * >( domain->giveEngngModel() )->giveReynoldsNumber();
 
     _b.at(1, 1) = b [ 0 ];
     _b.at(1, 2) = 0.;
@@ -388,8 +388,8 @@ TR1_2D_SUPG :: computeDiffusionDerivativeTerm_MB(FloatMatrix &answer, MatRespons
     _b.at(3, 6) = b [ 2 ];
 
     static_cast< FluidDynamicMaterial * >( this->giveMaterial() )->giveDeviatoricStiffnessMatrix(_d, mode,
-                                                                                       integrationRulesArray [ 0 ]->getIntegrationPoint(0),
-                                                                                       atTime);
+                                                                                                 integrationRulesArray [ 0 ]->getIntegrationPoint(0),
+                                                                                                 atTime);
     _db.beProductOf(_d, _b);
     answer.plusProductUnsym(_b, _db, area); //answer.plusProduct (_b,_db,area);
     //answer.symmetrized() ;
@@ -453,7 +453,7 @@ TR1_2D_SUPG :: computeLSICStabilizationTerm_MB(FloatMatrix &answer, TimeStep *at
 {
     answer.resize(6, 6);
     answer.zero();
-    double rho = this->giveMaterial()->give('d', integrationRulesArray [ 0 ]->getIntegrationPoint(0));
+    double rho = this->giveMaterial()->give( 'd', integrationRulesArray [ 0 ]->getIntegrationPoint(0) );
     double coeff = area * t_lsic * rho;
     double n[] = {
         b [ 0 ], c [ 0 ], b [ 1 ], c [ 1 ], b [ 2 ], c [ 2 ]
@@ -572,7 +572,7 @@ TR1_2D_SUPG :: computeAccelerationTerm_MC(FloatMatrix &answer, TimeStep *atTime)
 void
 TR1_2D_SUPG :: computePressureTerm_MC(FloatMatrix &answer, TimeStep *atTime)
 {
-    double rho = this->giveMaterial()->give('d', integrationRulesArray [ 0 ]->getIntegrationPoint(0));
+    double rho = this->giveMaterial()->give( 'd', integrationRulesArray [ 0 ]->getIntegrationPoint(0) );
     double coeff = t_pspg * area / rho;
     answer.resize(3, 3);
 
@@ -602,7 +602,7 @@ TR1_2D_SUPG :: computeSlipWithFrictionBCTerm_MB(FloatMatrix &answer, Load *load,
     answer.zero();
     //beta
     //area
-    BoundaryLoad *edgeLoad = static_cast< BoundaryLoad * >(load);
+    BoundaryLoad *edgeLoad = static_cast< BoundaryLoad * >( load );
     beta = edgeLoad->giveProperty('a');
     node1 = side;
     node2 = ( node1 == 3 ? 1 : node1 + 1 );
@@ -625,13 +625,13 @@ TR1_2D_SUPG :: computeSlipWithFrictionBCTerm_MB(FloatMatrix &answer, Load *load,
     t1 = _t1 / l;
     t2 = _t2 / l;
 
-    double t11 = t1*t1;
-    double t12 = t1*t2;
-    double t22 = t2*t2;
-    
-    double d12 = d1*d2;
-    double d13 = d1*d3;
-    double d23 = d2*d3;
+    double t11 = t1 * t1;
+    double t12 = t1 * t2;
+    double t22 = t2 * t2;
+
+    double d12 = d1 * d2;
+    double d13 = d1 * d3;
+    double d23 = d2 * d3;
 
     answer.at(1, 1) = ( l / 3 ) * beta * d1 * t11;
     answer.at(1, 2) = ( l / 3 ) * beta * d1 * t12;
@@ -698,7 +698,7 @@ TR1_2D_SUPG :: computePenetrationWithResistanceBCTerm_MB(FloatMatrix &answer, Lo
     answer.resize(6, 6);
     answer.zero();
 
-    BoundaryLoad *edgeLoad = static_cast< BoundaryLoad * >(load);
+    BoundaryLoad *edgeLoad = static_cast< BoundaryLoad * >( load );
     alpha = edgeLoad->giveProperty('a');
     node1 = side;
     node2 = ( node1 == 3 ? 1 : node1 + 1 );
@@ -724,13 +724,13 @@ TR1_2D_SUPG :: computePenetrationWithResistanceBCTerm_MB(FloatMatrix &answer, Lo
     n1 = _t2 / l;
     n2 = -_t1 / l;
 
-    double n11 = n1*n1;
-    double n12 = n1*n2;
-    double n22 = n2*n2;
-    
-    double d12 = d1*d2;
-    double d13 = d1*d3;
-    double d23 = d2*d3;
+    double n11 = n1 * n1;
+    double n12 = n1 * n2;
+    double n22 = n2 * n2;
+
+    double d12 = d1 * d2;
+    double d13 = d1 * d3;
+    double d23 = d2 * d3;
 
     answer.at(1, 1) = ( l / 3 ) * ( 1 / alpha ) * d1 * n11;
     answer.at(1, 2) = ( l / 3 ) * ( 1 / alpha ) * d1 * n12;
@@ -783,7 +783,7 @@ TR1_2D_SUPG :: computePenetrationWithResistanceBCTerm_MB(FloatMatrix &answer, Lo
 void
 TR1_2D_SUPG :: computeOutFlowBCTerm_MB(FloatMatrix &answer, int side, TimeStep *atTime)
 {
-    int node1, node2, node3 ;
+    int node1, node2, node3;
     int d1 = 1;
     int d2 = 1;
     int d3 = 1;
@@ -850,19 +850,19 @@ TR1_2D_SUPG :: computeHomogenizedReinforceTerm_MB(FloatMatrix &answer, Load *loa
 
     usum [ 0 ] = un.at(1) + un.at(3) + un.at(5);
     usum [ 1 ] = un.at(2) + un.at(4) + un.at(6);
-    Reinforcement* reinfload  = dynamic_cast< Reinforcement* >(load );
+    Reinforcement *reinfload  = dynamic_cast< Reinforcement * >( load );
     double kx = reinfload->givePermeability()->at(1);
     double ky = reinfload->givePermeability()->at(2);
     // double tau_0 = this->giveMaterial()->give( YieldStress, integrationRulesArray [ 0 ]->getIntegrationPoint(0) );
     double mu_0 = this->giveMaterial()->give( Viscosity, integrationRulesArray [ 0 ]->getIntegrationPoint(0) );
-    coeffx = area * mu_0 / (12.0 * kx);
-    coeffy = area * mu_0 / (12.0 * ky);
-    for( int i = 1; i <= 3; i++){
-        answer.at(2*i-1, 2*i-1) -=  coeffx;
-        answer.at(2*i, 2*i) -= coeffy;
-        for ( int j = 1; j <= 3; j++){
-            answer.at(2*i-1, 2*j-1) -= coeffx * ( 1.0 + 4.0 * t_supg * ( b [ i - 1 ] * usum [ 0 ] + c [ i - 1 ] * usum [ 1 ] ) );
-            answer.at(2*i, 2*j) -= coeffy * ( 1.0 + 4.0 * t_supg * ( b [ i - 1 ] * usum [ 0 ] + c [ i - 1 ] * usum [ 1 ] ) );//pozor na b[i], c[i]!!!
+    coeffx = area * mu_0 / ( 12.0 * kx );
+    coeffy = area * mu_0 / ( 12.0 * ky );
+    for ( int i = 1; i <= 3; i++ ) {
+        answer.at(2 * i - 1, 2 * i - 1) -=  coeffx;
+        answer.at(2 * i, 2 * i) -= coeffy;
+        for ( int j = 1; j <= 3; j++ ) {
+            answer.at(2 * i - 1, 2 * j - 1) -= coeffx * ( 1.0 + 4.0 * t_supg * ( b [ i - 1 ] * usum [ 0 ] + c [ i - 1 ] * usum [ 1 ] ) );
+            answer.at(2 * i, 2 * j) -= coeffy * ( 1.0 + 4.0 * t_supg * ( b [ i - 1 ] * usum [ 0 ] + c [ i - 1 ] * usum [ 1 ] ) ); //pozor na b[i], c[i]!!!
         }
     }
 }
@@ -872,18 +872,18 @@ TR1_2D_SUPG :: computeHomogenizedReinforceTerm_MC(FloatMatrix &answer, Load *loa
 {
     double coeffx, coeffy;
 
-    Reinforcement* reinfload  = dynamic_cast< Reinforcement* >(load );
+    Reinforcement *reinfload  = dynamic_cast< Reinforcement * >( load );
     double kx = reinfload->givePermeability()->at(1);
     double ky = reinfload->givePermeability()->at(2);
     // double tau_0 = this->giveMaterial()->give( YieldStress, integrationRulesArray [ 0 ]->getIntegrationPoint(0) );
     double mu_0 = this->giveMaterial()->give( Viscosity, integrationRulesArray [ 0 ]->getIntegrationPoint(0) );
-    double rho = this->giveMaterial()->give('d', integrationRulesArray [ 0 ]->getIntegrationPoint(0));
-    coeffx = area * mu_0 / (3.0 * kx * rho);
-    coeffy = area * mu_0 / (3.0 * ky * rho);
-    for( int i = 1; i <= 3; i++){
-        for ( int j = 1; j <= 3; j++){
-            answer.at(i, 2*j-1) -= coeffx *  t_pspg *  b [ i - 1 ];
-            answer.at(i, 2*j) -= coeffy * t_pspg * c [ i - 1 ];
+    double rho = this->giveMaterial()->give( 'd', integrationRulesArray [ 0 ]->getIntegrationPoint(0) );
+    coeffx = area * mu_0 / ( 3.0 * kx * rho );
+    coeffy = area * mu_0 / ( 3.0 * ky * rho );
+    for ( int i = 1; i <= 3; i++ ) {
+        for ( int j = 1; j <= 3; j++ ) {
+            answer.at(i, 2 * j - 1) -= coeffx *  t_pspg *  b [ i - 1 ];
+            answer.at(i, 2 * j) -= coeffy * t_pspg * c [ i - 1 ];
         }
     }
 }
@@ -898,7 +898,7 @@ TR1_2D_SUPG :: computeBCRhsTerm_MB(FloatArray &answer, TimeStep *atTime)
     double usum [ 2 ];
     Load *load;
     bcGeomType ltype;
-    double rho = this->giveMaterial()->give('d', integrationRulesArray [ 0 ]->getIntegrationPoint(0));
+    double rho = this->giveMaterial()->give( 'd', integrationRulesArray [ 0 ]->getIntegrationPoint(0) );
     FloatArray un, gVector;
 
     // add body load (gravity) termms
@@ -923,8 +923,9 @@ TR1_2D_SUPG :: computeBCRhsTerm_MB(FloatArray &answer, TimeStep *atTime)
                 answer.at(6) += coeff * ( gVector.at(2) * ( 1.0 + t_supg * ( b [ 2 ] * usum [ 0 ] + c [ 2 ] * usum [ 1 ] ) ) );
             }
         }
+
         if ( ( ltype == BodyLoadBGT ) && ( load->giveBCValType() == ReinforceBVT ) ) {
-            Reinforcement* load  = dynamic_cast< Reinforcement* >( domain->giveLoad(bodyLoadArray.at(i) ) );
+            Reinforcement *load  = dynamic_cast< Reinforcement * >( domain->giveLoad( bodyLoadArray.at(i) ) );
             double phi = load->givePorosity();
             double alpha = load->giveshapefactor();
             double kx = load->givePermeability()->at(1);
@@ -932,9 +933,9 @@ TR1_2D_SUPG :: computeBCRhsTerm_MB(FloatArray &answer, TimeStep *atTime)
             double tau_0 = this->giveMaterial()->give( YieldStress, integrationRulesArray [ 0 ]->getIntegrationPoint(0) );
             //double mu_0 = this->giveMaterial()->give( Viscosity, integrationRulesArray [ 0 ]->getIntegrationPoint(0) );
             gVector.resize(2);
-            gVector.at(1) = tau_0 * sqrt(kx * phi) / (kx * alpha);
-            gVector.at(2) = tau_0 * sqrt(ky * phi) / (ky * alpha);
-            
+            gVector.at(1) = tau_0 * sqrt(kx * phi) / ( kx * alpha );
+            gVector.at(2) = tau_0 * sqrt(ky * phi) / ( ky * alpha );
+
             answer.at(1) -= area * ( gVector.at(1) * ( 1.0 + t_supg * ( b [ 0 ] * usum [ 0 ] + c [ 0 ] * usum [ 1 ] ) ) );
             answer.at(2) -= area * ( gVector.at(2) * ( 1.0 + t_supg * ( b [ 0 ] * usum [ 0 ] + c [ 0 ] * usum [ 1 ] ) ) );
             answer.at(3) -= area * ( gVector.at(1) * ( 1.0 + t_supg * ( b [ 1 ] * usum [ 0 ] + c [ 1 ] * usum [ 1 ] ) ) );
@@ -990,8 +991,6 @@ TR1_2D_SUPG :: computeBCRhsTerm_MB(FloatArray &answer, TimeStep *atTime)
             }
         }
     }
-
- 
 }
 
 void
@@ -1018,19 +1017,20 @@ TR1_2D_SUPG :: computeBCRhsTerm_MC(FloatArray &answer, TimeStep *atTime)
                 answer.at(3) += coeff * ( b [ 2 ] * gVector.at(1) + c [ 2 ] * gVector.at(2) );
             }
         }
+
         if ( ( ltype == BodyLoadBGT ) && ( load->giveBCValType() == ReinforceBVT ) ) {
-            Reinforcement* load  = dynamic_cast< Reinforcement* >( domain->giveLoad(bodyLoadArray.at(i) ) );
+            Reinforcement *load  = dynamic_cast< Reinforcement * >( domain->giveLoad( bodyLoadArray.at(i) ) );
             double phi = load->givePorosity();
             double alpha = load->giveshapefactor();
             double kx = load->givePermeability()->at(1);
             double ky = load->givePermeability()->at(2);
             double tau_0 = this->giveMaterial()->give( YieldStress, integrationRulesArray [ 0 ]->getIntegrationPoint(0) );
-            double rho = this->giveMaterial()->give('d', integrationRulesArray [ 0 ]->getIntegrationPoint(0));
+            double rho = this->giveMaterial()->give( 'd', integrationRulesArray [ 0 ]->getIntegrationPoint(0) );
             //double mu_0 = this->giveMaterial()->give( Viscosity, integrationRulesArray [ 0 ]->getIntegrationPoint(0) );
             gVector.resize(2);
-            gVector.at(1) = tau_0 * sqrt(kx * phi) / (kx * alpha * rho);
-            gVector.at(2) = tau_0 * sqrt(ky * phi) / (ky * alpha * rho);
-            
+            gVector.at(1) = tau_0 * sqrt(kx * phi) / ( kx * alpha * rho );
+            gVector.at(2) = tau_0 * sqrt(ky * phi) / ( ky * alpha * rho );
+
             answer.at(1) -= coeff * ( b [ 0 ] * gVector.at(1) + c [ 0 ] * gVector.at(2) );
             answer.at(2) -= coeff * ( b [ 1 ] * gVector.at(1) + c [ 1 ] * gVector.at(2) );
             answer.at(3) -= coeff * ( b [ 2 ] * gVector.at(1) + c [ 2 ] * gVector.at(2) );
@@ -1060,7 +1060,7 @@ TR1_2D_SUPG :: updateStabilizationCoeffs(TimeStep *atTime)
     }
 
     nu = this->giveMaterial()->giveCharacteristicValue( MRM_Viscosity, gp, atTime->givePreviousStep() );
-    rho = this->giveMaterial()->give( 'd', integrationRulesArray [ 0 ]->getIntegrationPoint(0));
+    rho = this->giveMaterial()->give( 'd', integrationRulesArray [ 0 ]->getIntegrationPoint(0) );
 
     //this -> computeVectorOf(EID_MomentumBalance,VM_Total,atTime->givePreviousStep(),un) ;
     this->computeVectorOf(EID_MomentumBalance, VM_Total, atTime->givePreviousStep(), u);
@@ -1144,7 +1144,7 @@ TR1_2D_SUPG :: updateStabilizationCoeffs(TimeStep *atTime)
                     dij = ( i == j );
                     coeff = ( m == k ) ? area / 6. : area / 12.;
                     __tmp.at(w_dof_addr, u_dof_addr) = rho * ( 0.0 * d1j * dudx [ i - 1 ] [ 0 ] * coeff + dij * b [ m - 1 ] * ( area / 12. ) * ( usum [ 0 ] + un.at( ( k - 1 ) * 2 + 1 ) ) +
-                                                              0.0 * d2j * dudx [ i - 1 ] [ 1 ] * coeff + dij * c [ m - 1 ] * ( area / 12. ) * ( usum [ 1 ] + un.at( ( k - 1 ) * 2 + 2 ) ) );
+                                                               0.0 * d2j * dudx [ i - 1 ] [ 1 ] * coeff + dij * c [ m - 1 ] * ( area / 12. ) * ( usum [ 1 ] + un.at( ( k - 1 ) * 2 + 2 ) ) );
                 }
             }
         }
@@ -1295,7 +1295,7 @@ TR1_2D_SUPG :: updateStabilizationCoeffs(TimeStep *atTime)
         gp = integrationRulesArray [ 1 ]->getIntegrationPoint(0);
     }
 
-    nu = static_cast< FluidDynamicMaterial* >(this->giveMaterial())->giveEffectiveViscosity(gp, atTime->givePreviousStep() );
+    nu = static_cast< FluidDynamicMaterial * >( this->giveMaterial() )->giveEffectiveViscosity( gp, atTime->givePreviousStep() );
     nu *= domain->giveEngngModel()->giveVariableScale(VST_Viscosity);
 
     dt = atTime->giveTimeIncrement() * tscale;
@@ -1573,8 +1573,8 @@ TR1_2D_SUPG :: computeNMtrx(FloatArray &answer, GaussPoint *gp)
 
 
 /* Note this LEPLIC implementation will not work for axi elements as the true volume
-   is not taken into account (the effect of radius) !
-*/
+ * is not taken into account (the effect of radius) !
+ */
 
 
 double
@@ -1674,10 +1674,10 @@ TR1_2D_SUPG :: formVolumeInterfacePoly(Polygon &matvolpoly, LEPlic *matInterface
             if ( nodeIn [ i - 1 ] ) {
                 if ( updFlag ) {
                     v.setCoords( matInterface->giveUpdatedXCoordinate( this->giveNode(i)->giveNumber() ),
-                                matInterface->giveUpdatedYCoordinate( this->giveNode(i)->giveNumber() ) );
+                                 matInterface->giveUpdatedYCoordinate( this->giveNode(i)->giveNumber() ) );
                 } else {
                     v.setCoords( this->giveNode(i)->giveCoordinate(1),
-                                this->giveNode(i)->giveCoordinate(2) );
+                                 this->giveNode(i)->giveCoordinate(2) );
                 }
 
                 matvolpoly.addVertex(v);
@@ -1707,7 +1707,7 @@ TR1_2D_SUPG :: formVolumeInterfacePoly(Polygon &matvolpoly, LEPlic *matInterface
                     if ( nodeIn [ i - 1 ] ) {
                         if ( updFlag ) {
                             v.setCoords( matInterface->giveUpdatedXCoordinate( this->giveNode(next)->giveNumber() ),
-                                        matInterface->giveUpdatedYCoordinate( this->giveNode(next)->giveNumber() ) );
+                                         matInterface->giveUpdatedYCoordinate( this->giveNode(next)->giveNumber() ) );
                         } else {
                             v.setCoords( this->giveNode(next)->giveCoordinate(1), this->giveNode(next)->giveCoordinate(2) );
                         }
@@ -1718,7 +1718,7 @@ TR1_2D_SUPG :: formVolumeInterfacePoly(Polygon &matvolpoly, LEPlic *matInterface
                         matvolpoly.addVertex(v);
                         if ( updFlag ) {
                             v.setCoords( matInterface->giveUpdatedXCoordinate( this->giveNode(next)->giveNumber() ),
-                                        matInterface->giveUpdatedYCoordinate( this->giveNode(next)->giveNumber() ) );
+                                         matInterface->giveUpdatedYCoordinate( this->giveNode(next)->giveNumber() ) );
                         } else {
                             v.setCoords( this->giveNode(next)->giveCoordinate(1), this->giveNode(next)->giveCoordinate(2) );
                         }
@@ -1728,7 +1728,6 @@ TR1_2D_SUPG :: formVolumeInterfacePoly(Polygon &matvolpoly, LEPlic *matInterface
                 }
             }
         } // end loop over elem nodes
-
     }
 }
 
@@ -1812,7 +1811,7 @@ double
 TR1_2D_SUPG :: computeCriticalLEPlicTimeStep(TimeStep *tStep)
 {
     FloatArray u;
-    double Re = static_cast<FluidModel*>(domain->giveEngngModel())->giveReynoldsNumber();
+    double Re = static_cast< FluidModel * >( domain->giveEngngModel() )->giveReynoldsNumber();
 
     this->computeVectorOf(EID_MomentumBalance, VM_Total, tStep, u);
 
@@ -1957,8 +1956,8 @@ TR1_2D_SUPG :: SPRNodalRecoveryMI_giveDofMansDeterminedByPatch(IntArray &answer,
 {
     answer.resize(1);
     if ( ( pap == this->giveNode(1)->giveNumber() ) ||
-        ( pap == this->giveNode(2)->giveNumber() ) ||
-        ( pap == this->giveNode(3)->giveNumber() ) ) {
+         ( pap == this->giveNode(2)->giveNumber() ) ||
+         ( pap == this->giveNode(3)->giveNumber() ) ) {
         answer.at(1) = pap;
     } else {
         _error("SPRNodalRecoveryMI_giveDofMansDeterminedByPatch: node unknown");
@@ -1982,7 +1981,7 @@ TR1_2D_SUPG :: printOutputAt(FILE *file, TimeStep *stepN)
 // Performs end-of-step operations.
 {
     SUPGElement :: printOutputAt(file, stepN);
-    double rho = this->giveMaterial()->give('d', integrationRulesArray [ 0 ]->getIntegrationPoint(0));
+    double rho = this->giveMaterial()->give( 'd', integrationRulesArray [ 0 ]->getIntegrationPoint(0) );
     fprintf(file, "VOF %e, density %e\n\n", this->giveVolumeFraction(), rho);
 }
 

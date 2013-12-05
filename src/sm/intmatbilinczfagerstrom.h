@@ -99,7 +99,6 @@ public:
 
     // definition
     virtual const char *giveClassName() const { return "IntMatBilinearCZFagerstromStatus"; }
-    virtual classType giveClassID() const { return MaterialStatusClass; }
 
     double giveDamage() { return damage; }
     double giveTempDamage() { return tempDamage; }
@@ -176,7 +175,6 @@ public:
 
     virtual int hasMaterialModeCapability(MaterialMode mode); // remove
     virtual const char *giveClassName() const { return "IntMatBilinearCZFagerstrom"; }
-    virtual classType giveClassID() const { return MaterialStatusClass; }
     virtual const char *giveInputRecordName() const { return _IFT_IntMatBilinearCZFagerstrom_Name; }
     
     

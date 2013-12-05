@@ -49,14 +49,15 @@
 #include "classfactory.h"
 
 namespace oofem {
-
-REGISTER_Element( Tet1BubbleStokes );
+REGISTER_Element(Tet1BubbleStokes);
 
 FEI3dTetLin Tet1BubbleStokes :: interp;
 // Set up ordering vectors (for assembling)
 IntArray Tet1BubbleStokes :: momentum_ordering(15);
 IntArray Tet1BubbleStokes :: conservation_ordering(4);
-IntArray Tet1BubbleStokes :: surf_ordering [ 4 ] = { IntArray(9), IntArray(9), IntArray(9), IntArray(9) };
+IntArray Tet1BubbleStokes :: surf_ordering [ 4 ] = {
+    IntArray(9), IntArray(9), IntArray(9), IntArray(9)
+};
 bool Tet1BubbleStokes :: __initialized = Tet1BubbleStokes :: initOrdering();
 
 Tet1BubbleStokes :: Tet1BubbleStokes(int n, Domain *aDomain) : FMElement(n, aDomain)
@@ -65,9 +66,9 @@ Tet1BubbleStokes :: Tet1BubbleStokes(int n, Domain *aDomain) : FMElement(n, aDom
     this->numberOfGaussPoints = 24;
 
     this->bubble = new ElementDofManager(1, aDomain, this);
-    this->bubble->appendDof(new MasterDof(1, this->bubble, V_u));
-    this->bubble->appendDof(new MasterDof(2, this->bubble, V_v));
-    this->bubble->appendDof(new MasterDof(3, this->bubble, V_w));
+    this->bubble->appendDof( new MasterDof(1, this->bubble, V_u) );
+    this->bubble->appendDof( new MasterDof(2, this->bubble, V_v) );
+    this->bubble->appendDof( new MasterDof(3, this->bubble, V_w) );
 }
 
 Tet1BubbleStokes :: ~Tet1BubbleStokes()
@@ -81,7 +82,7 @@ void Tet1BubbleStokes :: computeGaussPoints()
         numberOfIntegrationRules = 1;
         integrationRulesArray = new IntegrationRule * [ 2 ];
         integrationRulesArray [ 0 ] = new GaussIntegrationRule(1, this, 1, 3);
-        this->giveCrossSection()->setupIntegrationPoints( *integrationRulesArray[0], this->numberOfGaussPoints, this );
+        this->giveCrossSection()->setupIntegrationPoints(* integrationRulesArray [ 0 ], this->numberOfGaussPoints, this);
     }
 }
 
@@ -114,12 +115,12 @@ void Tet1BubbleStokes :: giveInternalDofManDofIDMask(int i, EquationID eid, IntA
 
 double Tet1BubbleStokes :: computeVolumeAround(GaussPoint *gp)
 {
-    double detJ = fabs(this->interp.giveTransformationJacobian(*gp->giveCoordinates(), FEIElementGeometryWrapper(this)));
+    double detJ = fabs( this->interp.giveTransformationJacobian( * gp->giveCoordinates(), FEIElementGeometryWrapper(this) ) );
     return detJ * gp->giveWeight();
 }
 
 void Tet1BubbleStokes :: giveCharacteristicVector(FloatArray &answer, CharType mtrx, ValueModeType mode,
-                                            TimeStep *tStep)
+                                                  TimeStep *tStep)
 {
     // Compute characteristic vector for this element. I.e the load vector(s)
     if ( mtrx == ExternalForcesVector ) {
@@ -132,7 +133,7 @@ void Tet1BubbleStokes :: giveCharacteristicVector(FloatArray &answer, CharType m
 }
 
 void Tet1BubbleStokes :: giveCharacteristicMatrix(FloatMatrix &answer,
-                                            CharType mtrx, TimeStep *tStep)
+                                                  CharType mtrx, TimeStep *tStep)
 {
     // Compute characteristic matrix for this element. The only option is the stiffness matrix...
     if ( mtrx == StiffnessMatrix ) {
@@ -150,7 +151,7 @@ void Tet1BubbleStokes :: computeInternalForcesVector(FloatArray &answer, TimeSte
     double r_vol, pressure;
     FloatMatrix dN, B(6, 15);
     B.zero();
-    
+
     this->computeVectorOf(EID_MomentumBalance, VM_Total, tStep, a_velocity);
     this->computeVectorOf(EID_ConservationEquation, VM_Total, tStep, a_pressure);
 
@@ -160,8 +161,8 @@ void Tet1BubbleStokes :: computeInternalForcesVector(FloatArray &answer, TimeSte
         GaussPoint *gp = iRule->getIntegrationPoint(i);
         FloatArray *lcoords = gp->giveCoordinates();
 
-        double detJ = fabs( this->interp.evaldNdx(dN, * lcoords, FEIElementGeometryWrapper(this)) );
-        this->interp.evalN(N, * lcoords, FEIElementGeometryWrapper(this));
+        double detJ = fabs( this->interp.evaldNdx( dN, * lcoords, FEIElementGeometryWrapper(this) ) );
+        this->interp.evalN( N, * lcoords, FEIElementGeometryWrapper(this) );
         double dV = detJ * gp->giveWeight();
 
         for ( int j = 0, k = 0; j < dN.giveNumberOfRows(); j++, k += 3 ) {
@@ -169,10 +170,11 @@ void Tet1BubbleStokes :: computeInternalForcesVector(FloatArray &answer, TimeSte
             dNv(k + 1) = B(1, k + 1) = B(5, k + 0) = B(3, k + 2) = dN(j, 1);
             dNv(k + 2) = B(2, k + 2) = B(4, k + 0) = B(3, k + 1) = dN(j, 2);
         }
+
         // Bubble contribution;
-        dNv(12) = B(0,12) = B(5,13) = B(4,14) = dN(0,0)*N(1)*N(2)*N(3) + N(0)*dN(1,0)*N(2)*N(3) + N(0)*N(1)*dN(2,0)*N(3) + N(0)*N(1)*N(2)*dN(3,0);
-        dNv(13) = B(1,13) = B(5,12) = B(3,14) = dN(0,1)*N(1)*N(2)*N(3) + N(0)*dN(1,1)*N(2)*N(3) + N(0)*N(1)*dN(2,1)*N(3) + N(0)*N(1)*N(2)*dN(3,1);
-        dNv(14) = B(2,14) = B(4,12) = B(3,13) = dN(0,2)*N(1)*N(2)*N(3) + N(0)*dN(1,2)*N(2)*N(3) + N(0)*N(1)*dN(2,2)*N(3) + N(0)*N(1)*N(2)*dN(3,2);
+        dNv(12) = B(0, 12) = B(5, 13) = B(4, 14) = dN(0, 0) * N(1) * N(2) * N(3) + N(0) * dN(1, 0) * N(2) * N(3) + N(0) * N(1) * dN(2, 0) * N(3) + N(0) * N(1) * N(2) * dN(3, 0);
+        dNv(13) = B(1, 13) = B(5, 12) = B(3, 14) = dN(0, 1) * N(1) * N(2) * N(3) + N(0) * dN(1, 1) * N(2) * N(3) + N(0) * N(1) * dN(2, 1) * N(3) + N(0) * N(1) * N(2) * dN(3, 1);
+        dNv(14) = B(2, 14) = B(4, 12) = B(3, 13) = dN(0, 2) * N(1) * N(2) * N(3) + N(0) * dN(1, 2) * N(2) * N(3) + N(0) * N(1) * dN(2, 2) * N(3) + N(0) * N(1) * N(2) * dN(3, 2);
 
         pressure = N.dotProduct(a_pressure);
         epsp.beProductOf(B, a_velocity);
@@ -180,8 +182,8 @@ void Tet1BubbleStokes :: computeInternalForcesVector(FloatArray &answer, TimeSte
         mat->computeDeviatoricStressVector(devStress, r_vol, gp, epsp, pressure, tStep);
 
         momentum.plusProduct(B, devStress, dV);
-        momentum.add(-pressure*dV, dNv);
-        conservation.add(r_vol*dV, N);
+        momentum.add(-pressure * dV, dNv);
+        conservation.add(r_vol * dV, N);
     }
 
     answer.resize(19);
@@ -203,10 +205,11 @@ void Tet1BubbleStokes :: computeExternalForcesVector(FloatArray &answer, TimeSte
         bcGeomType ltype = load->giveBCGeoType();
 
         if ( ltype == SurfaceLoadBGT ) {
-            this->computeBoundaryLoadVector(vec, static_cast<BoundaryLoad*>(load), load_id, ExternalForcesVector, VM_Total, tStep);
+            this->computeBoundaryLoadVector(vec, static_cast< BoundaryLoad * >( load ), load_id, ExternalForcesVector, VM_Total, tStep);
         } else {
             OOFEM_ERROR2("Tet1BubbleStokes :: computeLoadVector - Unsupported boundary condition: %d", load_id);
         }
+
         answer.add(vec);
     }
 
@@ -246,24 +249,25 @@ void Tet1BubbleStokes :: computeLoadVector(FloatArray &answer, Load *load, CharT
             lcoords = gp->giveCoordinates();
 
             rho = mat->give('d', gp);
-            detJ = fabs( this->interp.giveTransformationJacobian(* lcoords, FEIElementGeometryWrapper(this)) );
+            detJ = fabs( this->interp.giveTransformationJacobian( * lcoords, FEIElementGeometryWrapper(this) ) );
             dV = detJ * gp->giveWeight() * rho;
 
-            this->interp.evalN(N, * lcoords, FEIElementGeometryWrapper(this));
+            this->interp.evalN( N, * lcoords, FEIElementGeometryWrapper(this) );
             for ( int j = 0; j < N.giveSize(); j++ ) {
                 temparray(3 * j + 0) += N(j) * rho * gVector(0) * dV;
                 temparray(3 * j + 1) += N(j) * rho * gVector(1) * dV;
                 temparray(3 * j + 2) += N(j) * rho * gVector(2) * dV;
             }
-            temparray(12) += N(0)*N(1)*N(2)*N(3) * rho * gVector(0) * dV;
-            temparray(13) += N(0)*N(1)*N(2)*N(3) * rho * gVector(1) * dV;
-            temparray(14) += N(0)*N(1)*N(2)*N(3) * rho * gVector(1) * dV;
+
+            temparray(12) += N(0) * N(1) * N(2) * N(3) * rho * gVector(0) * dV;
+            temparray(13) += N(0) * N(1) * N(2) * N(3) * rho * gVector(1) * dV;
+            temparray(14) += N(0) * N(1) * N(2) * N(3) * rho * gVector(1) * dV;
         }
     }
 
     answer.resize(19);
     answer.zero();
-    answer.assemble( temparray, this->momentum_ordering );
+    answer.assemble(temparray, this->momentum_ordering);
 }
 
 
@@ -291,15 +295,15 @@ void Tet1BubbleStokes :: computeBoundaryLoadVector(FloatArray &answer, BoundaryL
             gp = iRule.getIntegrationPoint(i);
             FloatArray *lcoords = gp->giveCoordinates();
 
-            this->interp.surfaceEvalN(N, iSurf, * lcoords, FEIElementGeometryWrapper(this));
-            double detJ = fabs(this->interp.surfaceGiveTransformationJacobian(iSurf, * lcoords, FEIElementGeometryWrapper(this)));
+            this->interp.surfaceEvalN( N, iSurf, * lcoords, FEIElementGeometryWrapper(this) );
+            double detJ = fabs( this->interp.surfaceGiveTransformationJacobian( iSurf, * lcoords, FEIElementGeometryWrapper(this) ) );
             double dA = gp->giveWeight() * detJ;
 
             if ( boundaryLoad->giveFormulationType() == Load :: FT_Entity ) { // Edge load in xi-eta system
                 boundaryLoad->computeValueAt(t, tStep, * lcoords, VM_Total);
             } else { // Edge load in x-y system
                 FloatArray gcoords;
-                this->interp.boundaryLocal2Global(gcoords, iSurf, * lcoords, FEIElementGeometryWrapper(this));
+                this->interp.boundaryLocal2Global( gcoords, iSurf, * lcoords, FEIElementGeometryWrapper(this) );
                 boundaryLoad->computeValueAt(t, tStep, gcoords, VM_Total);
             }
 
@@ -310,7 +314,7 @@ void Tet1BubbleStokes :: computeBoundaryLoadVector(FloatArray &answer, BoundaryL
                 f(3 * j + 2) += N(j) * t(2) * dA;
             }
 
-            this->interp.surfaceEvalNormal(N, iSurf, * lcoords, FEIElementGeometryWrapper(this));
+            this->interp.surfaceEvalNormal( N, iSurf, * lcoords, FEIElementGeometryWrapper(this) );
         }
 
         answer.resize(19);
@@ -327,7 +331,7 @@ void Tet1BubbleStokes :: computeStiffnessMatrix(FloatMatrix &answer, TimeStep *t
     FluidDynamicMaterial *mat = static_cast< FluidCrossSection * >( this->giveCrossSection() )->giveFluidMaterial();
     IntegrationRule *iRule = this->integrationRulesArray [ 0 ];
     GaussPoint *gp;
-    FloatMatrix B(6, 15), EdB, K(15,15), G, Dp, DvT, C, Ed, dN;
+    FloatMatrix B(6, 15), EdB, K(15, 15), G, Dp, DvT, C, Ed, dN;
     FloatArray *lcoords, dNv(15), N, Ep, Cd, tmpA, tmpB;
     double Cp;
 
@@ -340,19 +344,20 @@ void Tet1BubbleStokes :: computeStiffnessMatrix(FloatMatrix &answer, TimeStep *t
         gp = iRule->getIntegrationPoint(i);
         lcoords = gp->giveCoordinates();
 
-        double detJ = fabs( this->interp.evaldNdx(dN, * lcoords, FEIElementGeometryWrapper(this)) );
+        double detJ = fabs( this->interp.evaldNdx( dN, * lcoords, FEIElementGeometryWrapper(this) ) );
         double dV = detJ * gp->giveWeight();
-        this->interp.evalN(N, * lcoords, FEIElementGeometryWrapper(this));
- 
+        this->interp.evalN( N, * lcoords, FEIElementGeometryWrapper(this) );
+
         for ( int j = 0, k = 0; j < 4; j++, k += 3 ) {
             dNv(k + 0) = B(0, k + 0) = B(5, k + 1) = B(4, k + 2) = dN(j, 0);
             dNv(k + 1) = B(1, k + 1) = B(5, k + 0) = B(3, k + 2) = dN(j, 1);
             dNv(k + 2) = B(2, k + 2) = B(4, k + 0) = B(3, k + 1) = dN(j, 2);
         }
+
         // Bubble contribution;
-        dNv(12) = B(0,12) = B(5,13) = B(4,14) = dN(0,0)*N(1)*N(2)*N(3) + N(0)*dN(1,0)*N(2)*N(3) + N(0)*N(1)*dN(2,0)*N(3) + N(0)*N(1)*N(2)*dN(3,0);
-        dNv(13) = B(1,13) = B(5,12) = B(3,14) = dN(0,1)*N(1)*N(2)*N(3) + N(0)*dN(1,1)*N(2)*N(3) + N(0)*N(1)*dN(2,1)*N(3) + N(0)*N(1)*N(2)*dN(3,1);
-        dNv(14) = B(2,14) = B(4,12) = B(3,13) = dN(0,2)*N(1)*N(2)*N(3) + N(0)*dN(1,2)*N(2)*N(3) + N(0)*N(1)*dN(2,2)*N(3) + N(0)*N(1)*N(2)*dN(3,2);
+        dNv(12) = B(0, 12) = B(5, 13) = B(4, 14) = dN(0, 0) * N(1) * N(2) * N(3) + N(0) * dN(1, 0) * N(2) * N(3) + N(0) * N(1) * dN(2, 0) * N(3) + N(0) * N(1) * N(2) * dN(3, 0);
+        dNv(13) = B(1, 13) = B(5, 12) = B(3, 14) = dN(0, 1) * N(1) * N(2) * N(3) + N(0) * dN(1, 1) * N(2) * N(3) + N(0) * N(1) * dN(2, 1) * N(3) + N(0) * N(1) * N(2) * dN(3, 1);
+        dNv(14) = B(2, 14) = B(4, 12) = B(3, 13) = dN(0, 2) * N(1) * N(2) * N(3) + N(0) * dN(1, 2) * N(2) * N(3) + N(0) * N(1) * dN(2, 2) * N(3) + N(0) * N(1) * N(2) * dN(3, 2);
 
         // Computing the internal forces should have been done first.
         mat->giveDeviatoricStiffnessMatrix(Ed, TangentStiffness, gp, tStep); // dsigma_dev/deps_dev
@@ -360,10 +365,10 @@ void Tet1BubbleStokes :: computeStiffnessMatrix(FloatMatrix &answer, TimeStep *t
         mat->giveVolumetricDeviatoricStiffness(Cd, TangentStiffness, gp, tStep); // deps_vol/deps_dev
         mat->giveVolumetricPressureStiffness(Cp, TangentStiffness, gp, tStep); // deps_vol/dp
 
-        EdB.beProductOf(Ed,B);
+        EdB.beProductOf(Ed, B);
         K.plusProductSymmUpper(B, EdB, dV);
         G.plusDyadUnsym(dNv, N, -dV);
-        C.plusDyadSymmUpper(N, Cp*dV);
+        C.plusDyadSymmUpper(N, Cp * dV);
 
         tmpA.beTProductOf(B, Ep);
         Dp.plusDyadUnsym(tmpA, N, dV);
@@ -390,12 +395,12 @@ void Tet1BubbleStokes :: computeStiffnessMatrix(FloatMatrix &answer, TimeStep *t
 
 FEInterpolation *Tet1BubbleStokes :: giveInterpolation() const
 {
-    return &interp;
+    return & interp;
 }
 
 FEInterpolation *Tet1BubbleStokes :: giveInterpolation(DofIDItem id) const
 {
-    return &interp;
+    return & interp;
 }
 
 void Tet1BubbleStokes :: updateYourself(TimeStep *tStep)
@@ -407,15 +412,18 @@ void Tet1BubbleStokes :: updateYourself(TimeStep *tStep)
 
 Interface *Tet1BubbleStokes :: giveInterface(InterfaceType it)
 {
-    switch (it) {
-        case ZZNodalRecoveryModelInterfaceType:
-            return static_cast< ZZNodalRecoveryModelInterface * >(this);
-        case SpatialLocalizerInterfaceType:
-            return static_cast< SpatialLocalizerInterface * >(this);
-        case EIPrimaryUnknownMapperInterfaceType:
-            return static_cast< EIPrimaryUnknownMapperInterface * >(this);
-        default:
-            return FMElement :: giveInterface(it);
+    switch ( it ) {
+    case ZZNodalRecoveryModelInterfaceType:
+        return static_cast< ZZNodalRecoveryModelInterface * >( this );
+
+    case SpatialLocalizerInterfaceType:
+        return static_cast< SpatialLocalizerInterface * >( this );
+
+    case EIPrimaryUnknownMapperInterfaceType:
+        return static_cast< EIPrimaryUnknownMapperInterface * >( this );
+
+    default:
+        return FMElement :: giveInterface(it);
     }
 }
 
@@ -426,20 +434,21 @@ int Tet1BubbleStokes :: SpatialLocalizerI_containsPoint(const FloatArray &coords
 }
 
 void Tet1BubbleStokes :: EIPrimaryUnknownMI_computePrimaryUnknownVectorAtLocal(ValueModeType mode,
-        TimeStep *tStep, const FloatArray &lcoords, FloatArray &answer)
+                                                                               TimeStep *tStep, const FloatArray &lcoords, FloatArray &answer)
 {
     FloatArray n, n_lin;
-    this->interp.evalN(n, lcoords, FEIElementGeometryWrapper(this));
-    this->interp.evalN(n_lin, lcoords, FEIElementGeometryWrapper(this));
+    this->interp.evalN( n, lcoords, FEIElementGeometryWrapper(this) );
+    this->interp.evalN( n_lin, lcoords, FEIElementGeometryWrapper(this) );
     answer.resize(4);
     answer.zero();
-    for (int i = 1; i <= n.giveSize(); i++) {
-        answer(0) += n.at(i)*this->giveNode(i)->giveDofWithID(V_u)->giveUnknown(mode, tStep);
-        answer(1) += n.at(i)*this->giveNode(i)->giveDofWithID(V_v)->giveUnknown(mode, tStep);
-        answer(2) += n.at(i)*this->giveNode(i)->giveDofWithID(V_w)->giveUnknown(mode, tStep);
+    for ( int i = 1; i <= n.giveSize(); i++ ) {
+        answer(0) += n.at(i) * this->giveNode(i)->giveDofWithID(V_u)->giveUnknown(mode, tStep);
+        answer(1) += n.at(i) * this->giveNode(i)->giveDofWithID(V_v)->giveUnknown(mode, tStep);
+        answer(2) += n.at(i) * this->giveNode(i)->giveDofWithID(V_w)->giveUnknown(mode, tStep);
     }
-    for (int i = 1; i <= n_lin.giveSize(); i++) {
-        answer(3) += n_lin.at(i)*this->giveNode(i)->giveDofWithID(P_f)->giveUnknown(mode, tStep);
+
+    for ( int i = 1; i <= n_lin.giveSize(); i++ ) {
+        answer(3) += n_lin.at(i) * this->giveNode(i)->giveDofWithID(P_f)->giveUnknown(mode, tStep);
     }
 }
 
@@ -447,10 +456,11 @@ int Tet1BubbleStokes :: EIPrimaryUnknownMI_computePrimaryUnknownVectorAt(ValueMo
 {
     FloatArray lcoords, n, n_lin;
     bool ok = this->computeLocalCoordinates(lcoords, gcoords);
-    if (!ok) {
+    if ( !ok ) {
         answer.resize(0);
         return false;
     }
+
     this->EIPrimaryUnknownMI_computePrimaryUnknownVectorAtLocal(mode, tStep, lcoords, answer);
     return true;
 }
@@ -465,8 +475,7 @@ double Tet1BubbleStokes :: SpatialLocalizerI_giveDistanceFromParametricCenter(co
     FloatArray center;
     FloatArray lcoords;
     lcoords.setValues(4, 0.333333, 0.333333, 0.333333, 0.333333);
-    this->interp.local2global(center, lcoords, FEIElementGeometryWrapper(this));
+    this->interp.local2global( center, lcoords, FEIElementGeometryWrapper(this) );
     return center.distance(coords);
 }
-
 } // end namespace oofem

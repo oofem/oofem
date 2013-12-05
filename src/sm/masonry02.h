@@ -110,7 +110,6 @@ public:
 
     virtual const char *giveInputRecordName() const { return _IFT_Masonry02_Name; }
     virtual const char *giveClassName() const { return "Masonry02"; }
-    virtual classType giveClassID() const { return Masonry02Class; }
 
     virtual void giveStiffnessMatrix(FloatMatrix &answer,
                                           MatResponseMode mode,

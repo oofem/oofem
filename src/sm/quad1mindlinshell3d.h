@@ -104,7 +104,6 @@ public:
     // definition & identification
     virtual const char *giveInputRecordName() const { return _IFT_Quad1MindlinShell3D_Name; }
     virtual const char *giveClassName() const { return "Quad1MindlinShell3D"; }
-    virtual classType giveClassID() const { return Quad1MindlinShell3DClass; }
     virtual IRResultType initializeFrom(InputRecord *ir);
 
     virtual int computeNumberOfDofs() { return 24; }

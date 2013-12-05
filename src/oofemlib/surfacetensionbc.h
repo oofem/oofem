@@ -82,7 +82,6 @@ public:
     virtual void giveLocationArrays(std::vector<IntArray> &rows, std::vector<IntArray> &cols, EquationID eid, CharType type,
                                     const UnknownNumberingScheme &r_s, const UnknownNumberingScheme &c_s);
 
-    virtual classType giveClassID() const { return SurfaceTensionBoundaryConditionClass; }
     virtual const char *giveClassName() const { return "SurfaceTensionBoundaryCondition"; }
     virtual const char *giveInputRecordName() const { return _IFT_SurfaceTensionBoundaryCondition_Name; }
 

@@ -64,7 +64,6 @@ public:
     virtual MaterialStatus *CreateStatus(GaussPoint *gp) const;
     // identification and auxiliary functions
     virtual const char *giveClassName() const { return "IDGMaterial"; }
-    virtual classType giveClassID() const { return IDGMaterialClass; }
     virtual const char *giveInputRecordName() const { return _IFT_IDGMaterial_Name; }
     virtual IRResultType initializeFrom(InputRecord *ir);
 
@@ -103,7 +102,6 @@ public:
     virtual ~IDGMaterialStatus();
 
     virtual const char *giveClassName() const { return "IDGMaterialStatus"; }
-    virtual classType giveClassID() const { return IDGMaterialClass; }
 
     virtual void initTempStatus();
     virtual void updateYourself(TimeStep *);

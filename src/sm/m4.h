@@ -67,7 +67,6 @@ public:
 
     // definition
     virtual const char *giveClassName() const { return "M4MaterialStatus"; }
-    virtual classType giveClassID() const { return M4MaterialStatusClass; }
 
     virtual void initTempStatus();
     virtual void updateYourself(TimeStep *tStep);
@@ -128,7 +127,6 @@ public:
     virtual IRResultType initializeFrom(InputRecord *ir);
     virtual const char *giveInputRecordName() const { return _IFT_M4Material_Name; }
     virtual const char *giveClassName() const { return "M4Material"; }
-    virtual classType giveClassID() const { return M4MaterialClass; }
 
 protected:
     MaterialStatus *CreateMicroplaneStatus(GaussPoint *gp) { return new M4MaterialStatus(1, domain, gp); }

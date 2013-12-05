@@ -52,7 +52,6 @@ public:
     virtual double computeVolumeAround(GaussPoint *gp);
     virtual const char *giveInputRecordName() const { return _IFT_TrAxisym1_ht_Name; }
     virtual const char *giveClassName() const { return "TrAxisym1_htElement"; }
-    virtual classType giveClassID() const { return TrAxisym1_htClass; }
 
     virtual double giveThicknessAt(const FloatArray &gcoords);
 

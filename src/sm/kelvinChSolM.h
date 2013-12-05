@@ -57,7 +57,6 @@ public:
 
     // definition
     virtual const char *giveClassName() const { return "KelvinChainSolidMaterialStatus"; }
-    virtual classType giveClassID() const { return KelvinChainSolidMaterialStatusClass; }
 };
 
 
@@ -77,7 +76,6 @@ public:
     // identification and auxiliary functions
     virtual int hasNonLinearBehaviour() { return 0; }
     virtual const char *giveClassName() const { return "KelvinChainSolidMaterial"; }
-    virtual classType giveClassID() const { return KelvinChainSolidMaterialClass; }
     virtual IRResultType initializeFrom(InputRecord *ir);
 
     virtual void  giveShrinkageStrainVector(FloatArray &answer,

@@ -114,7 +114,6 @@ public:
     virtual contextIOResultType restoreContext(DataStream *stream, ContextMode mode, void *obj);
 
     virtual const char *giveClassName() const { return "CompoDamageMatStatus"; }
-    virtual classType giveClassID() const { return CompoDamageMatStatusClass; }
 };
 
 
@@ -145,7 +144,6 @@ public:
     virtual ~CompoDamageMat();
 
     virtual const char *giveClassName() const { return "CompositeDamageMaterial"; }
-    virtual classType giveClassID() const { return CompoDamageMatClass; }
     virtual const char *giveInputRecordName() const { return _IFT_CompoDamageMat_Name; }
 
     virtual IRResultType initializeFrom(InputRecord *ir);

@@ -147,7 +147,6 @@ public:
 
     // definition
     virtual const char *giveClassName() const { return "RCM2MaterialStatus"; }
-    virtual classType giveClassID() const { return RCMMaterialStatusClass; }
 
     virtual void initTempStatus();
     virtual void updateYourself(TimeStep *tStep);
@@ -185,7 +184,6 @@ public:
     virtual int hasMaterialModeCapability(MaterialMode mode);
 
     virtual const char *giveClassName() const { return "RCM2Material"; }
-    virtual classType giveClassID() const { return RCMMaterialClass; }
 
     virtual IRResultType initializeFrom(InputRecord *ir);
 

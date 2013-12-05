@@ -122,7 +122,6 @@ public:
 
     // identification
     virtual const char *giveClassName() const { return "EigenValueDynamic"; }
-    virtual classType giveClassID() const { return EigenValueDynamicClass; }
 };
 } // end namespace oofem
 #endif // eigenvaluedynamic_h

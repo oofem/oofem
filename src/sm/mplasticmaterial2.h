@@ -133,7 +133,6 @@ public:
 
     // definition
     virtual const char *giveClassName() const { return "MPlasticMaterial2Status"; }
-    virtual classType giveClassID() const { return MPlasticMaterialStatusClass; }
 };
 
 /**
@@ -197,7 +196,6 @@ public:
     virtual int hasNonLinearBehaviour() { return 1; }
     virtual int hasMaterialModeCapability(MaterialMode mode);
     virtual const char *giveClassName() const { return "MPlasticMaterial2"; }
-    virtual classType giveClassID() const { return MPlasticMaterialClass; }
 
     /// Returns reference to undamaged (bulk) material
     LinearElasticMaterial *giveLinearElasticMaterial() { return linearElasticMaterial; }

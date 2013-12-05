@@ -71,7 +71,6 @@ public:
 
     // definition
     virtual const char *giveClassName() const { return "RankineMatGradStatus"; }
-    virtual classType giveClassID() const { return RankineMatClass; }
 
     virtual void initTempStatus();
     virtual void updateYourself(TimeStep *tStep);
@@ -100,7 +99,6 @@ public:
     virtual ~RankineMatGrad() {; }
 
     virtual const char *giveClassName() const { return "RankineMatGrad"; }
-    virtual classType giveClassID() const { return RankineMatGradClass; }
     virtual const char *giveInputRecordName() const { return _IFT_RankineMatGrad_Name; }
 
     virtual IRResultType initializeFrom(InputRecord *ir);

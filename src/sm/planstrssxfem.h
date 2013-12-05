@@ -63,7 +63,6 @@ public:
 
     virtual const char *giveInputRecordName() const { return _IFT_PlaneStress2dXfem_Name; }
     virtual const char *giveClassName() const { return "PlaneStress2dXfem"; }
-    virtual classType giveClassID() const { return PlaneStress2dXfemClass; }
     virtual int computeNumberOfDofs();
     virtual void computeGaussPoints();
     virtual void computeNmatrixAt(const FloatArray &iLocCoord, FloatMatrix &answer);

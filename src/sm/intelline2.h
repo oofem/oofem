@@ -64,7 +64,6 @@ public:
     // definition & identification
     virtual const char *giveInputRecordName() const { return _IFT_IntElLine2_Name; }
     virtual const char *giveClassName() const { return "IntElLine2"; }
-    //virtual classType giveClassID() const { return IntElLine2Class; }
     
 protected:
     virtual void computeNmatrixAt(GaussPoint *gp, FloatMatrix &answer);

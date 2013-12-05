@@ -132,7 +132,6 @@ public:
 
     // definition
     virtual const char *giveClassName() const { return "MDMStatus"; }
-    virtual classType giveClassID() const { return MicroplaneDamageMaterialStatusClass; }
 
     virtual void printOutputAt(FILE *file, TimeStep *tStep);
 
@@ -266,7 +265,6 @@ public:
     // identification and auxiliary functions
     virtual const char *giveInputRecordName() const { return _IFT_MDM_Name; }
     virtual const char *giveClassName() const { return "MDM"; }
-    virtual classType giveClassID() const { return MDMClass; }
 
     virtual void giveRealMicroplaneStressVector(FloatArray &answer, Microplane *mplane,
                                                 const FloatArray &strain, TimeStep *tStep) { };

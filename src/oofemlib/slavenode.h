@@ -80,7 +80,6 @@ public:
 
     virtual const char *giveClassName() const { return "SlaveNode"; }
     virtual const char *giveInputRecordName() const { return _IFT_SlaveNode_Name; }
-    virtual classType giveClassID() const { return SlaveNodeClass; }
 };
 } // end namespace oofem
 #endif // slavenode_h

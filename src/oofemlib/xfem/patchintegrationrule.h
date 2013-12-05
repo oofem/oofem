@@ -36,7 +36,6 @@
 #define patchintegrationrule_h
 
 #include "gaussintegrationrule.h"
-#include "classtype.h"
 
 namespace oofem {
 class FEI2dTrLin;
@@ -76,7 +75,6 @@ public:
 
     virtual contextIOResultType saveContext(DataStream *stream, ContextMode mode, void *obj);
     virtual contextIOResultType restoreContext(DataStream *stream, ContextMode mode, void *obj);
-    virtual classType giveClassID() const { return PatchIntegrationRuleClass; }
 };
 } // end namespace oofem
 #endif // patchintegrationrule_h

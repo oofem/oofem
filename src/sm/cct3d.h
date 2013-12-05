@@ -98,7 +98,6 @@ public:
     // definition & identification
     virtual const char *giveClassName() const { return "CCTPlate3d"; }
     virtual const char *giveInputRecordName() const { return _IFT_CCTPlate3d_Name; }
-    virtual classType giveClassID() const { return CCTPlate3dClass; }
 
     virtual int computeNumberOfDofs() { return 9; }
     virtual int computeNumberOfGlobalDofs() { return 18; }

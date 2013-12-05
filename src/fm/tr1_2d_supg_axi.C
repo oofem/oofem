@@ -56,8 +56,7 @@
 #endif
 
 namespace oofem {
-
-REGISTER_Element( TR1_2D_SUPG_AXI );
+REGISTER_Element(TR1_2D_SUPG_AXI);
 
 TR1_2D_SUPG_AXI :: TR1_2D_SUPG_AXI(int n, Domain *aDomain) : TR1_2D_SUPG(n, aDomain)
     // Constructor.
@@ -75,7 +74,7 @@ TR1_2D_SUPG_AXI :: computeGaussPoints()
         numberOfIntegrationRules = 1;
         integrationRulesArray = new IntegrationRule * [ 1 ];
         integrationRulesArray [ 0 ] = new GaussIntegrationRule(1, this, 1, 3);
-        this->giveCrossSection()->setupIntegrationPoints( *integrationRulesArray[0], 7, this );
+        this->giveCrossSection()->setupIntegrationPoints(* integrationRulesArray [ 0 ], 7, this);
     }
 }
 
@@ -227,7 +226,7 @@ TR1_2D_SUPG_AXI :: computeDiffusionTerm_MB(FloatArray &answer, TimeStep *atTime)
     answer.resize(6);
     answer.zero();
     FloatArray u, eps, stress;
-    double Re = static_cast<FluidModel*>(domain->giveEngngModel())->giveReynoldsNumber();
+    double Re = static_cast< FluidModel * >( domain->giveEngngModel() )->giveReynoldsNumber();
     this->computeVectorOf(EID_MomentumBalance, VM_Total, atTime, u);
     FluidDynamicMaterial *mat = static_cast< FluidDynamicMaterial * >( this->giveMaterial() );
     FloatMatrix _b(4, 6);
@@ -273,7 +272,7 @@ TR1_2D_SUPG_AXI :: computeDiffusionDerivativeTerm_MB(FloatMatrix &answer, MatRes
     answer.resize(6, 6);
     answer.zero();
     FloatMatrix _db, _d, _b(4, 6);
-    double Re = static_cast<FluidModel*>(domain->giveEngngModel())->giveReynoldsNumber();
+    double Re = static_cast< FluidModel * >( domain->giveEngngModel() )->giveReynoldsNumber();
     FluidDynamicMaterial *mat = static_cast< FluidDynamicMaterial * >( this->giveMaterial() );
     double dV;
     GaussPoint *gp;
@@ -372,7 +371,7 @@ TR1_2D_SUPG_AXI :: computeLSICStabilizationTerm_MB(FloatMatrix &answer, TimeStep
     };
     double dV, rho;
     GaussPoint *gp;
- 
+
     for ( int ip = 0; ip < integrationRulesArray [ 0 ]->giveNumberOfIntegrationPoints(); ip++ ) {
         gp = integrationRulesArray [ 0 ]->getIntegrationPoint(ip);
         dV = this->computeVolumeAround(gp);
@@ -492,7 +491,7 @@ void TR1_2D_SUPG_AXI :: computeDiffusionTerm_MC(FloatArray &answer, TimeStep *at
     answer.zero();
 
 #if 1
-    double Re = static_cast<FluidModel*>(domain->giveEngngModel())->giveReynoldsNumber();
+    double Re = static_cast< FluidModel * >( domain->giveEngngModel() )->giveReynoldsNumber();
     double dV, _r, rho;
     GaussPoint *gp;
     FloatArray eps, stress, u(6);
@@ -525,7 +524,7 @@ void TR1_2D_SUPG_AXI :: computeDiffusionDerivativeTerm_MC(FloatMatrix &answer, T
     answer.zero();
 
 #if 1
-    double Re = static_cast<FluidModel*>(domain->giveEngngModel())->giveReynoldsNumber();
+    double Re = static_cast< FluidModel * >( domain->giveEngngModel() )->giveReynoldsNumber();
     FluidDynamicMaterial *mat = static_cast< FluidDynamicMaterial * >( this->giveMaterial() );
     double dV, _r, rho;
     GaussPoint *gp;
@@ -817,7 +816,7 @@ TR1_2D_SUPG_AXI :: computeSlipWithFrictionBCTerm_MB(FloatMatrix &answer, Load *l
     answer.resize(6, 6);
     answer.zero();
 
-    BoundaryLoad *edgeLoad = static_cast< BoundaryLoad * >(load);
+    BoundaryLoad *edgeLoad = static_cast< BoundaryLoad * >( load );
     beta = edgeLoad->giveProperty('a');
     node1 = side;
     node2 = ( node1 == 3 ? 1 : node1 + 1 );
@@ -865,7 +864,7 @@ TR1_2D_SUPG_AXI :: computePenetrationWithResistanceBCTerm_MB(FloatMatrix &answer
     answer.resize(6, 6);
     answer.zero();
 
-    BoundaryLoad *edgeLoad = static_cast< BoundaryLoad * >(load);
+    BoundaryLoad *edgeLoad = static_cast< BoundaryLoad * >( load );
     alpha = edgeLoad->giveProperty('a');
     node1 = side;
     node2 = ( node1 == 3 ? 1 : node1 + 1 );
@@ -995,8 +994,8 @@ TR1_2D_SUPG_AXI :: computeRadiusAt(GaussPoint *gp)
     this->computeNVector(n, gp);
 
     return n.at(1) * this->giveNode(1)->giveCoordinate(1)
-         + n.at(2) * this->giveNode(2)->giveCoordinate(1)
-         + n.at(3) * this->giveNode(3)->giveCoordinate(1);
+           + n.at(2) * this->giveNode(2)->giveCoordinate(1)
+           + n.at(3) * this->giveNode(3)->giveCoordinate(1);
 }
 
 void TR1_2D_SUPG_AXI :: computeBMtrx(FloatMatrix &_b, GaussPoint *gp)
@@ -1048,7 +1047,7 @@ void TR1_2D_SUPG_AXI :: computeBMtrx(FloatMatrix &_b, GaussPoint *gp)
 void
 TR1_2D_SUPG_AXI :: computeNVector(FloatArray &n, GaussPoint *gp)
 {
-    this->interp.evalN(n, *gp->giveLocalCoordinates(), FEIElementGeometryWrapper(this));
+    this->interp.evalN( n, * gp->giveLocalCoordinates(), FEIElementGeometryWrapper(this) );
 }
 
 double
@@ -1056,7 +1055,7 @@ TR1_2D_SUPG_AXI :: computeVolumeAround(GaussPoint *gp)
 {
     double _r, weight, detJ;
 
-    detJ = fabs( this->interp.giveTransformationJacobian(*gp->giveLocalCoordinates(), FEIElementGeometryWrapper(this)) );
+    detJ = fabs( this->interp.giveTransformationJacobian( * gp->giveLocalCoordinates(), FEIElementGeometryWrapper(this) ) );
     weight = gp->giveWeight();
     _r = computeRadiusAt(gp);
 
@@ -1069,8 +1068,8 @@ TR1_2D_SUPG_AXI :: initGeometry()
     TR1_2D_SUPG :: initGeometry();
 
     this->rc = ( this->giveNode(1)->giveCoordinate(1) +
-                this->giveNode(2)->giveCoordinate(1) +
-                this->giveNode(3)->giveCoordinate(1) ) / 3.0;
+                 this->giveNode(2)->giveCoordinate(1) +
+                 this->giveNode(3)->giveCoordinate(1) ) / 3.0;
     //this->rc = 1.0;
 }
 
@@ -1103,7 +1102,7 @@ TR1_2D_SUPG_AXI :: updateStabilizationCoeffs(TimeStep *atTime)
         gp = integrationRulesArray [ 1 ]->getIntegrationPoint(0);
     }
 
-    nu = static_cast< FluidDynamicMaterial* >(this->giveMaterial())->giveEffectiveViscosity( gp, atTime->givePreviousStep() );
+    nu = static_cast< FluidDynamicMaterial * >( this->giveMaterial() )->giveEffectiveViscosity( gp, atTime->givePreviousStep() );
     nu *= domain->giveEngngModel()->giveVariableScale(VST_Viscosity);
 
     dt = atTime->giveTimeIncrement() * tscale;
@@ -1217,8 +1216,8 @@ TR1_2D_SUPG_AXI :: LS_PCS_computeVOFFractions(FloatArray &answer, FloatArray &fi
 
 
             // compute volume associated to triangle (x1,y1; x2,y2; x3,y3)
-            double __volume = 0.5 * ( x2 * y3 + x1 * y2 + y1 * x3 - x2 * y1 - x3 * y2 - x1 * y3 ) * ((x1+x2+x3)/3.);
-            double volume = this->area*((this->giveNode(1)->giveCoordinate(1)+this->giveNode(2)->giveCoordinate(1)+this->giveNode(3)->giveCoordinate(1))/3.);
+            double __volume = 0.5 * ( x2 * y3 + x1 * y2 + y1 * x3 - x2 * y1 - x3 * y2 - x1 * y3 ) * ( ( x1 + x2 + x3 ) / 3. );
+            double volume = this->area * ( ( this->giveNode(1)->giveCoordinate(1) + this->giveNode(2)->giveCoordinate(1) + this->giveNode(3)->giveCoordinate(1) ) / 3. );
             if ( fabs(__volume) / volume > 1.00001 ) {
                 OOFEM_ERROR("TR1_2D_SUPG::LS_PCS_computeVOFFractions: internal consistency error");
             }
@@ -1242,6 +1241,4 @@ TR1_2D_SUPG_AXI :: LS_PCS_computeVOFFractions(FloatArray &answer, FloatArray &fi
         }
     }
 }
-
-
 } // end namespace oofem

@@ -78,7 +78,6 @@ public:
     void exportFilter(GaussPoint *gp, TimeStep *tStep);
 
     virtual const char *giveClassName() const { return "RVEStokesFlowMaterialStatus"; }
-    virtual classType giveClassID() const { return RVEStokesFlowMaterialStatusClass; }
 };
 
 
@@ -113,7 +112,6 @@ public:
 
     virtual const char *giveClassName() const { return "RVEStokesFlow"; }
     virtual const char *giveInputRecordName() const { return _IFT_RVEStokesFlow_Name; }
-    virtual classType giveClassID() const { return RVEStokesFlowClass; }
 };
 }
 

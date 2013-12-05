@@ -138,7 +138,6 @@ public:
     void letNormalBe(const FloatArray &iN) {mNormalDir = iN;}
 
     virtual const char *giveClassName() const { return "StructuralInterfaceMaterialStatus"; }
-    //virtual classType giveClassID() const { return StructuralInterfaceMaterialStatus; }
 
     /// Functions for MaterialStatusMapperInterface
 	virtual void copyStateVariables(const MaterialStatus &iStatus);

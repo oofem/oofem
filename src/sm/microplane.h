@@ -95,7 +95,6 @@ public:
 
     virtual void printOutputAt(FILE *file, TimeStep *tStep);
 
-    virtual classType giveClassID() const { return MicroplaneClass; }
     virtual const char *giveClassName() const { return "Microplane"; }
 };
 } // end namespace oofem

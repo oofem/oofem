@@ -67,7 +67,6 @@ public:
     // definition & identification
     virtual const char *giveInputRecordName() const { return _IFT_QSpaceGrad_Name; }
     virtual const char *giveClassName() const { return "QSpaceGrad"; }
-    virtual classType giveClassID() const { return QSpaceGradClass; }
     virtual int computeNumberOfDofs() { return 68; }
     virtual MaterialMode giveMaterialMode() { return _3dMat; }
 
