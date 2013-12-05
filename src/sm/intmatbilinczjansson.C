@@ -180,11 +180,10 @@ IntMatBilinearCZJansson :: giveFirstPKTraction_3d(FloatArray &answer, GaussPoint
 			if (Qn >=0) {
 				xi = (-C2 + sqrt(pow(C2,2)+4*C1))/(2*C1);
 			} else {
-				if (1-c*Qn/sigf>0) {
-					xi = (sigf*gamma/Qt)*sqrt(1-c*Qn/sigf);
-				} else {
-					OOFEM_ERROR2("IntMatBilinearCZJansson :: giveFirstPKTraction_3d: Inconsistent cohesive model specification, 1-c*Qn/sigf =  %e", 1-c*Qn/sigf);
-				}
+				if (1-c*Qn/sigf <= 0) {
+                    OOFEM_ERROR2("IntMatBilinearCZJansson :: giveFirstPKTraction_3d: Inconsistent cohesive model specification, 1-c*Qn/sigf =  %e", 1-c*Qn/sigf);
+                }
+                xi = (sigf*gamma/Qt)*sqrt(1-c*Qn/sigf);
 			}
 
 			Qt = xi*Qt;
