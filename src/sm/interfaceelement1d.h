@@ -77,9 +77,9 @@ public:
     virtual Interface *giveInterface(InterfaceType it) { return NULL; }
 
 #ifdef __OOFEG
-    void drawRawGeometry(oofegGraphicContext &);
-    void drawDeformedGeometry(oofegGraphicContext &, UnknownType);
-    void drawScalar(oofegGraphicContext &context);
+    virtual void drawRawGeometry(oofegGraphicContext &);
+    virtual void drawDeformedGeometry(oofegGraphicContext &, UnknownType);
+    virtual void drawScalar(oofegGraphicContext &context);
 #endif
 
     // definition & identification
@@ -93,7 +93,7 @@ public:
 
 protected:
     virtual void computeBmatrixAt(GaussPoint *gp, FloatMatrix &answer, int = 1, int = ALL_STRAINS);
-    virtual void computeNmatrixAt(GaussPoint *gp, FloatMatrix &answer) { }
+    virtual void computeNmatrixAt(const FloatArray &iLocCoord, FloatMatrix &answer) { }
     virtual void computeGaussPoints();
     void evaluateLocalCoordinateSystem(FloatMatrix &);
 

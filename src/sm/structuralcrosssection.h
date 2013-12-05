@@ -99,12 +99,34 @@ public:
      */
     //@{
     void giveRealStresses(FloatArray &answer, GaussPoint *gp, const FloatArray &reducedStrain, TimeStep *tStep);
-
     virtual void giveRealStress_3d(FloatArray &answer, GaussPoint *gp, const FloatArray &reducedStrain, TimeStep *tStep) = 0;
     virtual void giveRealStress_PlaneStrain(FloatArray &answer, GaussPoint *gp, const FloatArray &reducedStrain, TimeStep *tStep) = 0;
     virtual void giveRealStress_PlaneStress(FloatArray &answer, GaussPoint *gp, const FloatArray &reducedStrain, TimeStep *tStep) = 0;
     virtual void giveRealStress_1d(FloatArray &answer, GaussPoint *gp, const FloatArray &reducedStrain, TimeStep *tStep) = 0;
+    //@}
 
+    /**
+     * Method for computing the stiffness matrix.
+     * @param answer Stiffness matrix.
+     * @param mode Material response mode.
+     * @param gp Integration point, which load history is used.
+     * @param tStep Time step (most models are able to respond only when atTime is current time step).
+     */
+    //@{
+    virtual void giveStiffnessMatrix_3d(FloatMatrix &answer, MatResponseMode mode, GaussPoint *gp, TimeStep *tStep) = 0;
+    virtual void giveStiffnessMatrix_PlaneStress(FloatMatrix &answer, MatResponseMode mode, GaussPoint *gp, TimeStep *tStep) = 0;
+    virtual void giveStiffnessMatrix_PlaneStrain(FloatMatrix &answer, MatResponseMode mode, GaussPoint *gp, TimeStep *tStep) = 0;
+    virtual void giveStiffnessMatrix_1d(FloatMatrix &answer, MatResponseMode mode, GaussPoint *gp, TimeStep *tStep) = 0;
+    //@}
+
+    /**
+     * Computes the generalized stress vector for given strain and integration point.
+     * @param answer Contains result.
+     * @param gp Integration point.
+     * @param generalizedStrain Strain vector in reduced generalized form.
+     * @param tStep Current time step (most models are able to respond only when tStep is current time step).
+     */
+    //@{
     virtual void giveRealStress_Beam2d(FloatArray &answer, GaussPoint *gp, const FloatArray &generalizedStrain, TimeStep *tStep) = 0;
     virtual void giveRealStress_Beam3d(FloatArray &answer, GaussPoint *gp, const FloatArray &generalizedStrain, TimeStep *tStep) = 0;
     virtual void giveRealStress_Plate(FloatArray &answer, GaussPoint *gp, const FloatArray &generalizedStrain, TimeStep *tStep) = 0;
@@ -157,7 +179,7 @@ public:
      * @param gp Integration point.
      * @param tStep Time step (most models are able to respond only when tStep is current time step).
      */
-    virtual void giveStiffnessMatrix_dPdF(FloatMatrix &answer, MatResponseMode rMode, GaussPoint *gp, TimeStep *tStep) = 0;
+    virtual void giveStiffnessMatrix_dPdF(FloatMatrix &answer, MatResponseMode mode, GaussPoint *gp, TimeStep *tStep) = 0;
         
     /**
      * Computes the material stiffness matrix dCde of receiver in a given integration point, respecting its history.
@@ -171,7 +193,7 @@ public:
      * @param gp Integration point.
      * @param tStep Time step (most models are able to respond only when tStep is current time step).
      */
-    virtual void giveStiffnessMatrix_dCde(FloatMatrix &answer, MatResponseMode rMode, GaussPoint *gp, TimeStep *tStep) = 0;
+    virtual void giveStiffnessMatrix_dCde(FloatMatrix &answer, MatResponseMode mode, GaussPoint *gp, TimeStep *tStep) = 0;
 
 
     /**
@@ -191,19 +213,19 @@ public:
     /**
      * Computes the stiffness matrix for 2d beams.
      * @param answer The requested matrix.
-     * @param rMode Material response mode.
+     * @param mode Material response mode.
      * @param gp Integration point.
      * @param tStep Time step.
      */
-    virtual void give2dBeamStiffMtrx(FloatMatrix &answer, MatResponseMode rMode, GaussPoint *gp, TimeStep *tStep) = 0;
+    virtual void give2dBeamStiffMtrx(FloatMatrix &answer, MatResponseMode mode, GaussPoint *gp, TimeStep *tStep) = 0;
     /**
      * Computes the stiffness matrix for 2d beams.
      * @param answer The requested matrix.
-     * @param rMode Material response mode.
+     * @param mode Material response mode.
      * @param gp Integration point.
      * @param tStep Time step.
      */
-    virtual void give3dBeamStiffMtrx(FloatMatrix &answer, MatResponseMode rMode, GaussPoint *gp, TimeStep *tStep) = 0;
+    virtual void give3dBeamStiffMtrx(FloatMatrix &answer, MatResponseMode mode, GaussPoint *gp, TimeStep *tStep) = 0;
 
     /**
      * Method for computing 2d plate stiffness matrix.
@@ -228,7 +250,7 @@ public:
      * @param gp Integration point, which load history is used.
      * @param tStep Time step (most models are able to respond only when atTime is current time step).
      */
-    virtual void giveMembraneRotStiffMtrx(FloatMatrix &answer, MatResponseMode rMode, GaussPoint *gp, TimeStep *tStep) = 0;
+    virtual void giveMembraneRotStiffMtrx(FloatMatrix &answer, MatResponseMode mode, GaussPoint *gp, TimeStep *tStep) = 0;
     /**
      * Computes reduced strain vector not dependent on stresses in given integration point.
      * Returned vector is generated by temperature or shrinkage effects, for example.
@@ -278,11 +300,11 @@ public:
 
     int hasMaterialModeCapability(MaterialMode mode); // JB
 
+    virtual void createMaterialStatus(GaussPoint &iGP) = 0; // ES
 
     virtual int checkConsistency() = 0;
-    virtual Interface *giveInterface(InterfaceType t, IntegrationPoint *ip) { return NULL; };
-    virtual bool isCharacteristicMtrxSymmetric(MatResponseMode rMode) = 0;
-    //virtual bool isCharacteristicMtrxSymmetric(MatResponseMode rMode, int mat);
+    virtual Interface *giveMaterialInterface(InterfaceType t, IntegrationPoint *ip) { return NULL; }
+    virtual bool isCharacteristicMtrxSymmetric(MatResponseMode mode) = 0;
 
     virtual double give(int aProperty, GaussPoint *gp) = 0; 
 

@@ -123,7 +123,7 @@ void Beam3d :: computeGaussPoints()
 
 
 void
-Beam3d :: computeNmatrixAt(GaussPoint *aGaussPoint, FloatMatrix &answer)
+Beam3d :: computeNmatrixAt(const FloatArray &iLocCoord, FloatMatrix &answer)
 // Returns the displacement interpolation matrix {N} of the receiver, eva-
 // luated at aGaussPoint. Used for numerical calculation of consistent mass
 // matrix. Must contain only interpolation for displacement terms,
@@ -133,7 +133,7 @@ Beam3d :: computeNmatrixAt(GaussPoint *aGaussPoint, FloatMatrix &answer)
     double l, ksi, ksi2, ksi3, kappay, kappaz, c1y, c1z;
 
     l     = this->giveLength();
-    ksi =   0.5 + 0.5 * aGaussPoint->giveCoordinate(1);
+    ksi =   0.5 + 0.5 * iLocCoord.at(1);
     kappay = this->giveKappayCoeff();
     kappaz = this->giveKappazCoeff();
     c1y = 1. + 2. * kappay;
@@ -748,7 +748,7 @@ Beam3d :: computePrescribedStrainLocalLoadVectorAt(FloatArray &answer, TimeStep 
 
 
 void
-Beam3d :: computeConsistentMassMatrix(FloatMatrix &answer, TimeStep *tStep, double &mass)
+Beam3d :: computeConsistentMassMatrix(FloatMatrix &answer, TimeStep *tStep, double &mass, const double *ipDensity)
 {
     // computes mass matrix of the receiver
 
@@ -764,7 +764,13 @@ Beam3d :: computeConsistentMassMatrix(FloatMatrix &answer, TimeStep *tStep, doub
     double kappaz = this->giveKappazCoeff();
     double kappay2 = kappay * kappay;
     double kappaz2 = kappaz * kappaz;
-    double density = this->giveStructuralCrossSection()->give('d', gp);
+
+    double density = this->giveMaterial()->give('d', gp);
+    if(ipDensity != NULL) {
+    	// Override density if desired
+    	density = *ipDensity;
+    }
+
     double area = this->giveCrossSection()->give(CS_Area);
     double c2y = ( area * density ) / ( ( 1. + 2. * kappay ) * ( 1. + 2. * kappay ) );
     double c2z = ( area * density ) / ( ( 1. + 2. * kappaz ) * ( 1. + 2. * kappaz ) );

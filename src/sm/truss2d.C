@@ -91,7 +91,7 @@ Truss2d :: computeBmatrixAt(GaussPoint *aGaussPoint, FloatMatrix &answer, int li
     answer.at(1, 3) = x2 - x1;
     answer.at(1, 4) = z2 - z1;
 
-    l = this->giveLength();
+    l = this->computeLength();
     answer.times( 1.0 / l / l );
 }
 
@@ -139,13 +139,13 @@ Truss2d :: computeLumpedMassMatrix(FloatMatrix &answer, TimeStep *tStep)
 
 
 void
-Truss2d :: computeNmatrixAt(GaussPoint *aGaussPoint, FloatMatrix &answer)
+Truss2d :: computeNmatrixAt(const FloatArray &iLocCoord, FloatMatrix &answer)
 // Returns the displacement interpolation matrix {N} of the receiver, eva-
 // luated at aGaussPoint.
 {
     double ksi, n1, n2;
 
-    ksi = aGaussPoint->giveCoordinate(1);
+    ksi = iLocCoord.at(1);
     n1  = ( 1. - ksi ) * 0.5;
     n2  = ( 1. + ksi ) * 0.5;
 
@@ -185,11 +185,11 @@ double Truss2d :: computeVolumeAround(GaussPoint *aGaussPoint)
 // Gauss point is used.
 {
     double weight  = aGaussPoint->giveWeight();
-    return 0.5 * this->giveLength() * weight * this->giveCrossSection()->give(CS_Area);
+    return 0.5 * this->computeLength() * weight * this->giveCrossSection()->give(CS_Area);
 }
 
 
-double Truss2d :: giveLength()
+double Truss2d :: computeLength()
 // Returns the length of the receiver.
 {
     //determine in which plane the truss is defined
@@ -332,7 +332,7 @@ Truss2d :: computeEgdeNMatrixAt(FloatMatrix &answer, int iedge, GaussPoint *aGau
      * without regarding particular side
      */
 
-    this->computeNmatrixAt(aGaussPoint, answer);
+    this->computeNmatrixAt( *(aGaussPoint->giveLocalCoordinates()) , answer);
 }
 
 
@@ -364,7 +364,7 @@ Truss2d ::   computeEdgeVolumeAround(GaussPoint *aGaussPoint, int iEdge)
     }
 
     double weight  = aGaussPoint->giveWeight();
-    return 0.5 * this->giveLength() * weight;
+    return 0.5 * this->computeLength() * weight;
 }
 
 int

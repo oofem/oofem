@@ -73,7 +73,7 @@ StructuralInterfaceElement :: computeStiffnessMatrix(FloatMatrix &answer, MatRes
 {
     // Computes the stiffness matrix of the receiver
     FloatMatrix N, D, DN;
-    bool matStiffSymmFlag = this->giveCrossSection()->isCharacteristicMtrxSymmetric(rMode, this->material);
+    bool matStiffSymmFlag = this->giveCrossSection()->isCharacteristicMtrxSymmetric(rMode);
 
     answer.resize(0, 0);
 
@@ -155,7 +155,6 @@ StructuralInterfaceElement :: giveInternalForcesVector(FloatArray &answer,
     // has been called for the same time step.
 
     IntegrationRule *iRule = integrationRulesArray [ giveDefaultIntegrationRule() ];
-    StructuralInterfaceCrossSection *CS = this->giveInterfaceCrossSection();
 
     FloatMatrix N, rotationMatGtoL;
     FloatArray u, traction, tractionTemp, jump;
@@ -216,7 +215,6 @@ StructuralInterfaceElement :: computeTraction(FloatArray &traction, IntegrationP
 {
     
     // Returns the traction in global coordinate system
-    StructuralInterfaceCrossSection *CS = this->giveInterfaceCrossSection();
     FloatMatrix rotationMatGtoL, F;
     this->computeTransformationMatrixAt( ip, rotationMatGtoL );
     jump.rotatedWith( rotationMatGtoL, 'n' );    // transform jump to local coord system

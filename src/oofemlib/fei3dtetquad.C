@@ -252,6 +252,7 @@ FEI3dTetQuad :: global2local(FloatArray &answer, const FloatArray &gcoords, cons
         lcoords_guess.add(delta);
     }
     if ( error > convergence_limit) { // Imperfect, could give false negatives.
+    	answer.resize(4);
         answer.zero();
         return false;
     }
@@ -273,7 +274,9 @@ FEI3dTetQuad :: global2local(FloatArray &answer, const FloatArray &gcoords, cons
     }
     
     answer(3) = 1.0 - answer(0) - answer(1) - answer(2); // Do this afterwards, since it might get clamped.
-
+    if ( answer(3) < 0. - POINT_TOL ) {
+    	return false;
+    }
     return inside;
 }
 
@@ -496,9 +499,7 @@ FEI3dTetQuad :: surfaceEvalNormal(FloatArray &answer, int isurf, const FloatArra
         b.add(dNdeta(i), *cellgeo.giveVertexCoordinates(snodes(i)));
     }
     answer.beVectorProductOf(a, b);
-    double J = answer.computeNorm();
-    answer.times(1/J);
-    return J;
+    return answer.normalize();
 }
 
 double

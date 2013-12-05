@@ -134,7 +134,6 @@ public:
      * Local coordinate system is taken into account and the answer is given in global coordinates.
      * @param answer Updated coordinate.
      * @param tStep Time step for the displacement.
-     * @param type Equation ID for displacement of node.
      * @param scale Scaling of displacement.
      */
     virtual void giveUpdatedCoordinates(FloatArray &answer, TimeStep *tStep, double scale = 1.);
@@ -180,7 +179,7 @@ public:
     virtual contextIOResultType restoreContext(DataStream *stream, ContextMode mode, void *obj = NULL);
 
 #ifdef __OOFEG
-    void drawYourself(oofegGraphicContext &);
+    virtual void drawYourself(oofegGraphicContext &);
 #endif
 };
 } // end namespace oofem

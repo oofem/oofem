@@ -70,7 +70,7 @@ public:
     Beam2d(int n, Domain *aDomain);
     virtual ~Beam2d();
 
-    virtual void computeConsistentMassMatrix(FloatMatrix &answer, TimeStep *tStep, double &mass);
+    virtual void computeConsistentMassMatrix(FloatMatrix &answer, TimeStep *tStep, double &mass, const double *ipDensity = NULL);
     virtual void computeInitialStressMatrix(FloatMatrix &answer, TimeStep *tStep);
     virtual void computeStiffnessMatrix(FloatMatrix &answer, MatResponseMode rMode, TimeStep *tStep);
     virtual int giveLocalCoordinateSystem(FloatMatrix &answer);
@@ -96,8 +96,8 @@ public:
     virtual IRResultType initializeFrom(InputRecord *ir);
 
 #ifdef __OOFEG
-    void drawRawGeometry(oofegGraphicContext &);
-    void drawDeformedGeometry(oofegGraphicContext &, UnknownType);
+    virtual void drawRawGeometry(oofegGraphicContext &);
+    virtual void drawDeformedGeometry(oofegGraphicContext &, UnknownType);
 #endif
 
     virtual void computeStrainVectorInLayer(FloatArray &answer, const FloatArray &masterGpStrain,
@@ -107,7 +107,7 @@ protected:
     virtual void computeEdgeLoadVectorAt(FloatArray &answer, Load *, int, TimeStep *, ValueModeType mode);
     virtual void computePrescribedStrainLocalLoadVectorAt(FloatArray &answer, TimeStep *tStep, ValueModeType mode);
     virtual void computeBmatrixAt(GaussPoint *, FloatMatrix &, int = 1, int = ALL_STRAINS);
-    virtual void computeNmatrixAt(GaussPoint *, FloatMatrix &);
+    virtual void computeNmatrixAt(const FloatArray &iLocCoord, FloatMatrix &);
     virtual bool computeGtoLRotationMatrix(FloatMatrix &answer);
 
     virtual void computeConstitutiveMatrixAt(FloatMatrix &answer, MatResponseMode rMode, GaussPoint *gp, TimeStep *tStep);

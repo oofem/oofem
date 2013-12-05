@@ -56,7 +56,7 @@ FEI2dQuadLin Quad1Mindlin :: interp_lin(1, 2);
 Quad1Mindlin :: Quad1Mindlin(int n, Domain *aDomain) :
     NLStructuralElement(n, aDomain)
 {
-	numberOfGaussPoints = 4;
+    numberOfGaussPoints = 4;
     numberOfDofMans = 4;
 }
 
@@ -153,13 +153,16 @@ Quad1Mindlin :: computeBmatrixAt(GaussPoint *gp, FloatMatrix &answer, int li, in
 
 
 void
-Quad1Mindlin :: computeNmatrixAt(GaussPoint *gp, FloatMatrix &answer)
-// Returns the [3x9] displacement interpolation matrix {N} of the receiver,
-// evaluated at gp.
+Quad1Mindlin :: computeStressVector(FloatArray &answer, const FloatArray &strain, GaussPoint *gp, TimeStep *stepN)
 {
-    FloatArray n;
-    this->interp_lin.evalN(n, *gp->giveCoordinates(), FEIElementGeometryWrapper(this));
-    answer.beNMatrixOf(n, 3);
+    this->giveStructuralCrossSection()->giveRealStress_Plate(answer, gp, strain, stepN);
+}
+
+
+void
+Quad1Mindlin :: computeConstitutiveMatrixAt(FloatMatrix &answer, MatResponseMode rMode, GaussPoint *gp, TimeStep *tStep)
+{
+    this->giveStructuralCrossSection()->give2dPlateStiffMtrx(answer, rMode, gp, tStep);
 }
 
 

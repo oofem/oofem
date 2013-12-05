@@ -181,7 +181,7 @@ inline double bDist(const bSeg2 &iLS1, const bSeg2 &iLS2, bPoint2 *oIntersection
         }
 
         return bDist(p, q);
-    } else   {
+    } else {
         // The lines are parallel (or we have screwed up the input).
 
         // TODO: Check with end points properly.
@@ -222,7 +222,7 @@ inline bool bSolve2by2(const bMatrix &iA, const bPoint2 &ib, bPoint2 &ox)
         ox.x( ( iA(1, 1) * ib.x() - iA(0, 1) * ib.y() ) / det );
         ox.y( ( -iA(1, 0) * ib.x() + iA(0, 0) * ib.y() ) / det );
         return true;
-    } else   {
+    } else {
         return false;
         //		printf("Warning in bSolve2by2. det: %e\n", det);
     }

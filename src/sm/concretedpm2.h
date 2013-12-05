@@ -195,7 +195,7 @@ public:
     }
     /**
      * Get the plastic strain deviator from the material status.
-     * @param answer Plastic strain deviator.
+     * @return Plastic strain deviator.
      */
     const StrainVector & givePlasticStrain() const { return plasticStrain; }
 
@@ -312,10 +312,10 @@ public:
     double giveRateStrain() const
     { return rateStrain; }
 
-    void letTempRateStrainBe(const double v)
+    void letTempRateStrainBe(double v)
     { tempRateStrain = v; }
 
-    void letTempAlphaBe(const double v)
+    void letTempAlphaBe(double v)
     { tempAlpha = v; }
 
     /**
@@ -331,7 +331,7 @@ public:
     // Functions used to access the temp variables.
     /**
      * Get the temp value of the full plastic strain vector from the material status.
-     * @param answer Temp value of plastic strain vector.
+     * @return Temp value of plastic strain vector.
      */
     const StrainVector & giveTempPlasticStrain() const { return tempPlasticStrain; }
 
@@ -430,98 +430,98 @@ public:
      * Assign the temp value of the rate factor of the damage model.
      * @param v New temp value of the damage variable
      */
-    void letDeltaLambdaBe(const double v)
+    void letDeltaLambdaBe(double v)
     { deltaLambda = v; }
 
     /**
      * Assign the temp value of the hardening variable of the plasticity model.
      * @param v New temp value of the hardening variable
      */
-    void letTempKappaPBe(const double v)
+    void letTempKappaPBe(double v)
     { tempKappaP = v; }
 
     /**
      * Assign the temp value of the rate factor of the damage model.
      * @param v New temp value of the damage variable
      */
-    void letTempKappaDTensionBe(const double v)
+    void letTempKappaDTensionBe(double v)
     { tempKappaDTension = v; }
 
     /**
      * Assign the temp value of the rate factor of the damage model.
      * @param v New temp value of the damage variable
      */
-    void letTempKappaDCompressionBe(const double v)
+    void letTempKappaDCompressionBe(double v)
     { tempKappaDCompression = v; }
 
     /**
      * Assign the temp value of the hardening variable of the damage model.
      * @param v New temp value of the hardening variable
      */
-    void letTempKappaDTensionOneBe(const double v)
+    void letTempKappaDTensionOneBe(double v)
     { tempKappaDTensionOne = v; }
 
     /**
      * Assign the temp value of the hardening variable of the damage model.
      * @param v New temp value of the hardening variable
      */
-    void letTempKappaDCompressionOneBe(const double v)
+    void letTempKappaDCompressionOneBe(double v)
     { tempKappaDCompressionOne = v; }
 
     /**
      * Assign the temp value of the second tension hardening variable of the damage model.
      * @param v New temp value of the second tension hardening variable
      */
-    void letTempKappaDTensionTwoBe(const double v)
+    void letTempKappaDTensionTwoBe(double v)
     { tempKappaDTensionTwo = v; }
 
     /**
      * Assign the temp value of the second compression hardening variable of the damage model.
      * @param v New temp value of the second compression hardening variable
      */
-    void letTempKappaDCompressionTwoBe(const double v)
+    void letTempKappaDCompressionTwoBe(double v)
     { tempKappaDCompressionTwo = v; }
 
     /**
      * Assign the temp value of the tensile damage variable of the damage model.
      * @param v New temp value of the tensile damage variable
      */
-    void letTempDamageTensionBe(const double v)
+    void letTempDamageTensionBe(double v)
     { tempDamageTension = v; }
 
     /**
      * Assign the temp value of the compressive damage variable of the damage model.
      * @param v New temp value of the compressive damage variable
      */
-    void letTempDamageCompressionBe(const double v)
+    void letTempDamageCompressionBe(double v)
     { tempDamageCompression = v; }
 
     /**
      * Assign the temp value of the rate factor of the damage model.
      * @param v New temp value of the damage variable
      */
-    void letTempRateFactorBe(const double v)
+    void letTempRateFactorBe(double v)
     { tempRateFactor = v; }
 
     /**
      * Assign the temp value of the rate factor of the damage model.
      * @param v New temp value of the damage variable
      */
-    void letTempEquivStrainBe(const double v)
+    void letTempEquivStrainBe(double v)
     { tempEquivStrain = v; }
 
     /**
      * Assign the temp value of the rate factor of the damage model.
      * @param v New temp value of the damage variable
      */
-    void letTempEquivStrainTensionBe(const double v)
+    void letTempEquivStrainTensionBe(double v)
     { tempEquivStrainTension = v; }
 
     /**
      * Assign the temp value of the rate factor of the damage model.
      * @param v New temp value of the damage variable
      */
-    void letTempEquivStrainCompressionBe(const double v)
+    void letTempEquivStrainCompressionBe(double v)
     { tempEquivStrainCompression = v; }
 
 

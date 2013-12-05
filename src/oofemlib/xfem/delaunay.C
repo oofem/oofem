@@ -44,10 +44,10 @@
 #include <map>
 
 namespace oofem {
-bool Delaunay :: colinear(FloatArray *p1, FloatArray *p2, FloatArray *p3)
+bool Delaunay :: colinear(const FloatArray &iP1, const FloatArray &iP2, const FloatArray &iP3) const
 {
-    double dist = p1->at(1) * ( p2->at(2) - p3->at(2) ) + p2->at(1) * ( p3->at(2) - p1->at(2) ) +
-                  p3->at(1) * ( p1->at(2) - p2->at(2) );
+    double dist = iP1.at(1) * ( iP2.at(2) - iP3.at(2) ) + iP2.at(1) * ( iP3.at(2) - iP1.at(2) ) +
+                  iP3.at(1) * ( iP1.at(2) - iP2.at(2) );
 
     if ( dist < mTol && dist > -mTol ) {
         return true;
@@ -63,17 +63,13 @@ void Delaunay :: printTriangles(AList< Triangle > *triangles)
     }
 }
 
-bool Delaunay :: isInsideCC(FloatArray *p, FloatArray *p1,  FloatArray *p2,  FloatArray *p3)
+bool Delaunay :: isInsideCC(const FloatArray &iP, const FloatArray &iP1, const FloatArray &iP2, const FloatArray &iP3) const
 {
-    FloatArray *nodesCopy1 = new FloatArray(*p1);
-    FloatArray *nodesCopy2 = new FloatArray(*p2);
-    FloatArray *nodesCopy3 = new FloatArray(*p3);
-    Triangle *tr = new Triangle(nodesCopy1, nodesCopy2, nodesCopy3);
-    double r = tr->getRadiusOfCircumCircle();
+    Triangle tr(iP1, iP2, iP3);
+    double r = tr.getRadiusOfCircumCircle();
     FloatArray circumCenter;
-    tr->computeCenterOfCircumCircle(circumCenter);
-    double distance = circumCenter.distance(p);
-    delete tr;
+    tr.computeCenterOfCircumCircle(circumCenter);
+    double distance = circumCenter.distance(iP);
     if ( distance < r ) {
         return true;
     } else {
@@ -81,7 +77,7 @@ bool Delaunay :: isInsideCC(FloatArray *p, FloatArray *p1,  FloatArray *p2,  Flo
     }
 }
 
-void Delaunay :: triangulate(const std :: vector< FloatArray > &iVertices, std::vector< Triangle > &oTriangles)
+void Delaunay :: triangulate(const std :: vector< FloatArray > &iVertices, std :: vector< Triangle > &oTriangles) const
 {
     // 4th order algorithm - four loops, only for testing purposes
 
@@ -101,14 +97,14 @@ void Delaunay :: triangulate(const std :: vector< FloatArray > &iVertices, std::
         for ( int j = i + 1; j <= n; j++ ) {
             for ( int k = j + 1; k <= n; k++ ) {
                 bool isTriangle = true;
-                if ( colinear(& vertices [ i - 1 ], & vertices [ j - 1 ], & vertices [ k - 1 ]) ) {
+                if ( colinear(vertices [ i - 1 ],  vertices [ j - 1 ],  vertices [ k - 1 ]) ) {
                     isTriangle = false;
-                } else   {
+                } else {
                     for ( int a = 1; a <= n; a++ ) {
                         if ( a != i && a != j && a != k ) {
                             // checks whether a point a is inside a circumcircle of a triangle ijk
-                            if ( isInsideCC(& vertices [ a - 1 ], & vertices [ i - 1 ], & vertices [ j - 1 ],
-                                            & vertices [ k - 1 ]) ) {
+                            if ( isInsideCC(vertices [ a - 1 ],  vertices [ i - 1 ],  vertices [ j - 1 ],
+                                            vertices [ k - 1 ]) ) {
                                 isTriangle = false;
                                 break;
                             }
@@ -117,17 +113,8 @@ void Delaunay :: triangulate(const std :: vector< FloatArray > &iVertices, std::
                 }
 
                 if ( isTriangle ) {
-
                     // here we switch to old vertices
-                    FloatArray *p1 = new FloatArray();
-                    * p1 =  iVertices [ i - 1 ];
-                    FloatArray *p2 = new FloatArray();
-                    * p2 =  iVertices [ j - 1 ];
-                    FloatArray *p3 = new FloatArray();
-                    * p3 =  iVertices [ k - 1 ];
-
-
-                    Triangle tri(p1, p2, p3);
+                    Triangle tri(iVertices [ i - 1 ], iVertices [ j - 1 ], iVertices [ k - 1 ]);
                     if ( !tri.isOrientedAnticlockwise() ) {
                         tri.changeToAnticlockwise();
                     }

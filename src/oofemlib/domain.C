@@ -74,9 +74,6 @@
 #include "enrichmentdomain.h"
 #include "propagationlaw.h"
 
-#include "structengngmodel.h"; // temporary should be removed
-
- // For automatic dof creation, (should try to do without this) (move that stuff into DofManager class)
 #include "boundarycondition.h"
 #include "activebc.h"
 #include "simpleslavedof.h"
@@ -312,7 +309,7 @@ Domain* Domain :: Clone()
         for(int i = 1; i <= nEI; i++) {
 
             EnrichmentItem *ei = xfemManager->giveEnrichmentItem(i);
-            ei->giveInputRecord(dataReader);
+            ei->appendInputRecords(dataReader);
         }
     }
 
@@ -1151,17 +1148,19 @@ Domain :: postInitialize()
                 Element *element = this->giveElement(elements.at(ielem));
                 element->setCrossSection(i);           
             }
-            this->giveCrossSection( i )->MAT_GIVEN_BY_CS = true;
         }
 
     }
     
  
-    //----
+    if ( this->hasXfemManager() ) {
+        this->giveXfemManager()->postInitialize();
+    }
 
     for ( int i = 1; i <= this->elementList->giveSize(); i++ ) {
         this->elementList->at(i)->postInitialize();
     }
+
     for ( int i = 1; i <= this->bcList->giveSize(); i++ ) {
         this->bcList->at(i)->postInitialize();
     }
@@ -1429,6 +1428,7 @@ Domain :: createDofs()
         Element *element = this->giveElement(i);
         for (int j = 1; j <= element->giveNumberOfNodes(); ++j) {
             element->giveDefaultDofManDofIDMask(j, dofids);
+            //dofids.printYourself();
             for (int k = 1; k <= dofids.giveSize(); k++) {
                 node_dofs[element->giveNode(j)->giveNumber()-1].insert(dofids.at(k));
             }

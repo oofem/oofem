@@ -867,4 +867,29 @@ PlasticMaterialStatus :: restoreContext(DataStream *stream, ContextMode mode, vo
     return CIO_OK; // return success
 }
 
+void PlasticMaterialStatus :: copyStateVariables(const MaterialStatus &iStatus)
+{
+	StructuralMaterialStatus::copyStateVariables(iStatus);
+
+	MaterialStatus &tmpStat = const_cast<MaterialStatus&>(iStatus);
+	const PlasticMaterialStatus &plastStatus = dynamic_cast<PlasticMaterialStatus&>(tmpStat);
+
+	plasticStrainVector = plastStatus.givePlasticStrainVector();
+	tempPlasticStrainVector = plastStatus.giveTempPlasticStrainVector();
+
+	strainSpaceHardeningVarsVector = plastStatus.giveStrainSpaceHardeningVars();
+	tempStrainSpaceHardeningVarsVector = plastStatus.givetempStrainSpaceHardeningVarsVector();
+
+	state_flag = plastStatus.giveStateFlag();
+	temp_state_flag = plastStatus.giveTempStateFlag();
+
+	gamma = plastStatus.givePlasticConsistencyPrameter();
+	temp_gamma = plastStatus.giveTempPlasticConsistencyPrameter();
+}
+
+void PlasticMaterialStatus :: addStateVariables(const MaterialStatus &iStatus)
+{
+	printf("Entering PlasticMaterialStatus :: copyAddVariables().\n");
+}
+
 } // end namespace oofem

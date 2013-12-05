@@ -20,6 +20,7 @@ set (core_unsorted
     errorestimator.C meshqualityerrorestimator.C remeshingcrit.C
     sloangraph.C sloangraphnode.C sloanlevelstruct.C
     eleminterpunknownmapper.C primaryunknownmapper.C materialmappingalgorithm.C
+    primvarmapper.C
     nonlocalmaterialext.C randommaterialext.C
     inputrecord.C oofemtxtinputrecord.C dynamicinputrecord.C
     dynamicdatareader.C oofemtxtdatareader.C tokenizer.C parser.C
@@ -101,7 +102,6 @@ set (core_ltf
 set (core_cs
     crosssection.C
     emptycs.C
-    simplecrosssection.C
     )
 
 set (core_td
@@ -113,7 +113,7 @@ set (core_dofman
     node.C
     slavenode.C
     hangingnode.C
-     rigidarmnode.C
+    rigidarmnode.C
     elementinternaldofman.C
     elementside.C
     )
@@ -191,7 +191,6 @@ set (core_xfem
     xfem/delaunay.C
     xfem/xfemelementinterface.C
     xfem/enrichmentfunction.C
-    xfem/patch.C
     xfem/xfemmanager.C
     xfem/enrichmentitem.C
     xfem/patchintegrationrule.C
@@ -244,6 +243,7 @@ set (core_mapping
     mmashapefunctprojection.C
     mmaleastsquareprojection.C
     mmacontainingelementprojection.C
+    matstatmapperint.C
     )
 
 set (core_mesher

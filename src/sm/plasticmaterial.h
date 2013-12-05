@@ -40,6 +40,7 @@
 #include "floatarray.h"
 #include "floatmatrix.h"
 #include "structuralms.h"
+#include "matstatmapperint.h"
 
 namespace oofem {
 class GaussPoint;
@@ -88,10 +89,10 @@ public:
     void letTempStrainSpaceHardeningVarsVectorBe(const FloatArray &v) { tempStrainSpaceHardeningVarsVector = v; }
     void letStrainSpaceHardeningVarsVectorBe(const FloatArray &v) { strainSpaceHardeningVarsVector = v; }
 
-    int giveStateFlag() { return state_flag; }
-    int giveTempStateFlag() { return temp_state_flag; }
-    double givePlasticConsistencyPrameter() { return gamma; }
-    double giveTempPlasticConsistencyPrameter() { return temp_gamma; }
+    int giveStateFlag() const { return state_flag; }
+    int giveTempStateFlag() const { return temp_state_flag; }
+    double givePlasticConsistencyPrameter() const { return gamma; }
+    double giveTempPlasticConsistencyPrameter() const { return temp_gamma; }
     void letTempPlasticConsistencyPrameterBe(double v) { gamma = v; }
 
     void letTempStateFlagBe(int v) { temp_state_flag = v; }
@@ -100,8 +101,11 @@ public:
     virtual const char *giveClassName() const { return "PlasticMaterialStatus"; }
     virtual classType giveClassID() const { return PerfectlyPlasticMaterialStatusClass; }
 
-//    virtual void printYourself() {printf("I am a PlasticMaterialStatus. plasticStrainVector: \n"); plasticStrainVector.printYourself(); }
-    virtual void printYourself() { }
+    virtual void printYourself() {printf("I am a PlasticMaterialStatus. plasticStrainVector: \n"); plasticStrainVector.printYourself(); }
+
+    /// Functions for MaterialStatusMapperInterface
+	virtual void copyStateVariables(const MaterialStatus &iStatus);
+	virtual void addStateVariables(const MaterialStatus &iStatus);
 
 };
 

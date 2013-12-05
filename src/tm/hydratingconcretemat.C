@@ -47,6 +47,7 @@ HydratingConcreteMat :: HydratingConcreteMat(int n, Domain *d) : IsotropicHeatTr
     // constructor
     maxModelIntegrationTime = 0.;
     minModelTimeStepIntegrations = 0;
+    P1 = 0.;
 }
 
 
@@ -84,6 +85,8 @@ HydratingConcreteMat :: initializeFrom(InputRecord *ir)
         IR_GIVE_FIELD(ir, B2, _IFT_HydratingConcreteMat_B2);
         IR_GIVE_FIELD(ir, eta, _IFT_HydratingConcreteMat_eta);
         IR_GIVE_FIELD(ir, DoHInf, _IFT_HydratingConcreteMat_DoHInf);
+        IR_GIVE_OPTIONAL_FIELD(ir, DoH1, _IFT_HydratingConcreteMat_DoH1);
+        IR_GIVE_OPTIONAL_FIELD(ir, P1, _IFT_HydratingConcreteMat_P1);
     } else {
         OOFEM_ERROR2("Unknown hdyration model type %d", hydrationModelType);
     }
@@ -333,10 +336,15 @@ double HydratingConcreteMat :: scaleTemperature(GaussPoint *gp)
 
 double HydratingConcreteMat :: affinity25(double DoH)
 {
-
+    
     double result =  this->B1 * ( this->B2 / this->DoHInf + DoH ) * ( this->DoHInf - DoH ) * exp(-this->eta * DoH / this->DoHInf);
     if (result<0.){//numerical instabilities
         return 0.;
+    }
+    
+    //add slag reaction
+    if (this->P1 != 0. && DoH >= this->DoH1) {
+        result *= 1.+this->P1*(DoH - this->DoH1);
     }
     return result;
 }

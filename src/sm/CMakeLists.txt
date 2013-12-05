@@ -43,10 +43,12 @@ set (sm_element
     structuralinterfaceelement.C
     intelline1.C
     intelline2.C
+    dkt.C
     )
 
 set (sm_crosssection
     structuralcrosssection.C
+    simplecrosssection.C
     layeredcrosssection.C
     fiberedcs.C
     structuralinterfacecrosssection.C
@@ -124,7 +126,8 @@ set (sm_material
 	intmatbilinczjansson.C
     intmatbilinearcz.C
 	intmatbilinczelastic.C
-    intmatbilinczfagerstromrate.C
+    coupledfieldselement.C
+    phasefieldelement.C
 	)
 
 set (sm_error

@@ -121,12 +121,12 @@ Truss1d :: computeBHmatrixAt(GaussPoint *gp, FloatMatrix &answer)
 
 
 void
-Truss1d :: computeNmatrixAt(GaussPoint *gp, FloatMatrix &answer)
+Truss1d :: computeNmatrixAt(const FloatArray &iLocCoord, FloatMatrix &answer)
 // Returns the displacement interpolation matrix {N} of the receiver,
 // evaluated at gp.
 {
     FloatArray n;
-    this->interp.evalN( n, * gp->giveCoordinates(), FEIElementGeometryWrapper(this) );
+    this->interp.evalN( n, iLocCoord, FEIElementGeometryWrapper(this) );
     // Reshape
     answer.resize(1, 2); ///@todo It would be more suitable to follow the column-major order and just do answer.setColumn(...)
     answer.at(1, 1) = n.at(1);

@@ -42,6 +42,7 @@
 #include "spatiallocalizer.h"
 #include "contextioerr.h"
 #include "element.h"
+#include "dynamicinputrecord.h"
 
 namespace oofem {
 #define LEPLIC_ZERO_VOF  1.e-8
@@ -657,6 +658,14 @@ LEPlic :: initializeFrom(InputRecord *ir)
     IR_GIVE_OPTIONAL_FIELD(ir, orig_reference_fluid_volume, _IFT_LEPLIC_refVol);
     return IRRT_OK;
 }
+
+
+void
+LEPlic :: giveInputRecord(DynamicInputRecord &input)
+{
+    input.setField(this->orig_reference_fluid_volume, _IFT_LEPLIC_refVol);
+}
+
 
 double
 LEPlic :: computeCriticalTimeStep(TimeStep *tStep)

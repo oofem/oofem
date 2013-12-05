@@ -51,6 +51,7 @@
 #include "geotoolbox.h"
 #include "crosssection.h"
 #include "contextioerr.h"
+#include "dynamicinputrecord.h"
 #include "classfactory.h"
 
 #ifdef __OOFEG
@@ -116,7 +117,7 @@ TR1_2D_CBS :: initializeFrom(InputRecord *ir)
     IRResultType result;                // Required by IR_GIVE_FIELD macro
     //</RESTRICTED_SECTION>
 
-    this->CBSElement :: initializeFrom(ir);
+    CBSElement :: initializeFrom(ir);
 
     //<RESTRICTED_SECTION>
     this->vof = 0.0;
@@ -134,6 +135,19 @@ TR1_2D_CBS :: initializeFrom(InputRecord *ir)
 
     return IRRT_OK;
 }
+
+
+void
+TR1_2D_CBS :: giveInputRecord(DynamicInputRecord &input)
+{
+    CBSElement :: giveInputRecord(input);
+    if ( this->permanentVofFlag ) {
+        input.setField(this->vof, _IFT_Tr1CBS_pvof);
+    } else {
+        input.setField(this->vof, _IFT_Tr1CBS_vof);
+    }
+}
+
 
 void
 TR1_2D_CBS :: computeGaussPoints()

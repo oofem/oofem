@@ -45,7 +45,7 @@
 #include "fluiddynamicmaterial.h"
 #include "fei3dhexalin.h"
 #include "masterdof.h"
-#include "crosssection.h"
+#include "fluidcrosssection.h"
 #include "classfactory.h"
 
 namespace oofem {
@@ -73,12 +73,6 @@ Hexa1BubbleStokes :: Hexa1BubbleStokes(int n, Domain *aDomain) : FMElement(n, aD
 Hexa1BubbleStokes :: ~Hexa1BubbleStokes()
 {
     delete this->bubble;
-}
-
-IRResultType Hexa1BubbleStokes :: initializeFrom(InputRecord *ir)
-{
-    this->FMElement :: initializeFrom(ir);
-    return IRRT_OK;
 }
 
 void Hexa1BubbleStokes :: computeGaussPoints()
@@ -151,7 +145,7 @@ void Hexa1BubbleStokes :: giveCharacteristicMatrix(FloatMatrix &answer,
 void Hexa1BubbleStokes :: computeInternalForcesVector(FloatArray &answer, TimeStep *tStep)
 {
     IntegrationRule *iRule = integrationRulesArray [ 0 ];
-    FluidDynamicMaterial *mat = static_cast< FluidDynamicMaterial * >( this->giveMaterial() );
+    FluidDynamicMaterial *mat = static_cast< FluidCrossSection * >( this->giveCrossSection() )->giveFluidMaterial();
     FloatArray a_pressure, a_velocity, devStress, epsp, N, dNv(27);
     double r_vol, pressure;
     FloatMatrix dN, B(6, 27);
@@ -249,6 +243,7 @@ void Hexa1BubbleStokes :: computeLoadVector(FloatArray &answer, Load *load, Char
         return;
     }
 
+    FluidDynamicMaterial *mat = static_cast< FluidCrossSection * >( this->giveCrossSection() )->giveFluidMaterial();
     IntegrationRule *iRule = this->integrationRulesArray [ 0 ];
     FloatArray N, gVector, temparray(27);
 
@@ -260,7 +255,7 @@ void Hexa1BubbleStokes :: computeLoadVector(FloatArray &answer, Load *load, Char
             GaussPoint *gp = iRule->getIntegrationPoint(k);
             FloatArray *lcoords = gp->giveCoordinates();
 
-            double rho = this->giveMaterial()->give('d', gp);
+            double rho = mat->give('d', gp);
             double detJ = fabs( this->interp.giveTransformationJacobian(* lcoords, FEIElementGeometryWrapper(this)) );
             double dV = detJ * gp->giveWeight() * rho;
 
@@ -339,7 +334,7 @@ void Hexa1BubbleStokes :: computeBoundaryLoadVector(FloatArray &answer, Boundary
 void Hexa1BubbleStokes :: computeStiffnessMatrix(FloatMatrix &answer, TimeStep *tStep)
 {
     // Note: Working with the components; [K, G+Dp; G^T+Dv^T, C] . [v,p]
-    FluidDynamicMaterial *mat = static_cast< FluidDynamicMaterial * >( this->giveMaterial() );
+    FluidDynamicMaterial *mat = static_cast< FluidCrossSection * >( this->giveCrossSection() )->giveFluidMaterial();
     IntegrationRule *iRule = this->integrationRulesArray [ 0 ];
     FloatMatrix B(6, 27), EdB, K, G, Dp, DvT, C, Ed, dN;
     FloatArray dNv(27), N, Ep, Cd, tmpA, tmpB;

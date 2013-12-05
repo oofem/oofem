@@ -379,13 +379,35 @@ NonlocalMaterialExtensionInterface :: computeWeightFunction(double distance)
         return exp(-aux * aux) / iwf;
 
     case WFT_Green: // Function corresponding in 1D to Green's function of Helmholtz equation (implicit gradient model)
+      //printf("%14g %14g\n",distance,exp(-aux) / iwf);
         return exp(-aux) / iwf;
+
+    case WFT_Green_21: // Green function reduced from 2D to 1D
+      {
+	if (this->domain->giveNumberOfSpatialDimensions() != 1){
+	  OOFEM_ERROR("NonlocalMaterialExtensionInterface :: computeWeightFunction - this type of weight function can be used for a 1D problem only\n");
+	}
+	iwf = giveIntegralOfWeightFunction(2); // indeed
+	double x = distance;
+	double y = 0.;
+	double r = sqrt(x*x + y*y);
+	double sum = exp(-r / this->cl);
+	double h = this->cl / 10.; // 10 could later be replaced by an optional parameter
+	do {
+	  y += h;
+	  r = sqrt(x*x + y*y);
+	  sum += 2.*exp(-r / this->cl);
+	}
+	while (r <= suprad);
+	//printf("%14g %14g\n",distance,sum * h / iwf);
+        return sum * h / iwf;
+      }
 
     case WFT_Uniform: // uniform function over an interaction distance
         return 1. / iwf;
 
     default:
-        OOFEM_WARNING2("IDNLMaterial :: computeWeightFunction - unknown type of weight function %d", weightFun);
+        OOFEM_WARNING2("NonlocalMaterialExtensionInterface :: computeWeightFunction - unknown type of weight function %d", weightFun);
         return 0.0;
     }
 }
@@ -424,6 +446,7 @@ NonlocalMaterialExtensionInterface :: giveIntegralOfWeightFunction(const int spa
         }
 
     case WFT_Green:
+    case WFT_Green_21:
         switch ( spatial_dimension ) {
         case 1: return cl * 2.;
 
@@ -464,7 +487,7 @@ NonlocalMaterialExtensionInterface :: evaluateSupportRadius()
 
     case WFT_Gauss: return 2.5 * cl;
 
-    case WFT_Green: return 6. * cl;
+    case WFT_Green: case WFT_Green_21: return 6. * cl;
 
     case WFT_Uniform:  return cl;
 

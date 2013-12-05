@@ -106,7 +106,6 @@ public:
         thick = 0.;
         width = 0.;
         area = -1.0;
-        MAT_GIVEN_BY_CS = true;
     }
 
     virtual ~FiberedCrossSection()  { }
@@ -116,21 +115,27 @@ public:
     virtual void giveRealStress_PlaneStress(FloatArray &answer, GaussPoint *gp, const FloatArray &reducedStrain, TimeStep *tStep);
     virtual void giveRealStress_1d(FloatArray &answer, GaussPoint *gp, const FloatArray &reducedStrain, TimeStep *tStep);
 
+    virtual void giveStiffnessMatrix_3d(FloatMatrix &answer, MatResponseMode mode, GaussPoint *gp, TimeStep *tStep);
+    virtual void giveStiffnessMatrix_PlaneStress(FloatMatrix &answer, MatResponseMode mode, GaussPoint *gp, TimeStep *tStep);
+    virtual void giveStiffnessMatrix_PlaneStrain(FloatMatrix &answer, MatResponseMode mode, GaussPoint *gp, TimeStep *tStep);
+    virtual void giveStiffnessMatrix_1d(FloatMatrix &answer, MatResponseMode mode, GaussPoint *gp, TimeStep *tStep);
+
+
     virtual void giveRealStress_Beam2d(FloatArray &answer, GaussPoint *gp, const FloatArray &generalizedStrain, TimeStep *tStep);
     virtual void giveRealStress_Beam3d(FloatArray &answer, GaussPoint *gp, const FloatArray &generalizedStrain, TimeStep *tStep);
     virtual void giveRealStress_Plate(FloatArray &answer, GaussPoint *gp, const FloatArray &generalizedStrain, TimeStep *tStep);
     virtual void giveRealStress_Shell(FloatArray &answer, GaussPoint *gp, const FloatArray &generalizedStrain, TimeStep *tStep);
     virtual void giveRealStress_MembraneRot(FloatArray &answer, GaussPoint *gp, const FloatArray &generalizedStrain, TimeStep *tStep);
 
-    virtual void giveCharMaterialStiffnessMatrix(FloatMatrix &answer, MatResponseMode rMode, GaussPoint *gp, TimeStep *tStep);
+    virtual void giveCharMaterialStiffnessMatrix(FloatMatrix &answer, MatResponseMode mode, GaussPoint *gp, TimeStep *tStep);
 
-    virtual void give2dBeamStiffMtrx(FloatMatrix &answer, MatResponseMode rMode, GaussPoint *gp, TimeStep *tStep);
-    virtual void give3dBeamStiffMtrx(FloatMatrix &answer, MatResponseMode rMode, GaussPoint *gp, TimeStep *tStep);
+    virtual void give2dBeamStiffMtrx(FloatMatrix &answer, MatResponseMode mode, GaussPoint *gp, TimeStep *tStep);
+    virtual void give3dBeamStiffMtrx(FloatMatrix &answer, MatResponseMode mode, GaussPoint *gp, TimeStep *tStep);
     virtual void give2dPlateStiffMtrx(FloatMatrix &answer, MatResponseMode mode, GaussPoint *gp, TimeStep *tStep);
     virtual void give3dShellStiffMtrx(FloatMatrix &answer,MatResponseMode mode, GaussPoint *gp, TimeStep *tStep);
-    virtual void giveMembraneRotStiffMtrx(FloatMatrix &answer, MatResponseMode rMode, GaussPoint *gp, TimeStep *tStep);
+    virtual void giveMembraneRotStiffMtrx(FloatMatrix &answer, MatResponseMode mode, GaussPoint *gp, TimeStep *tStep);
 
-    virtual bool isCharacteristicMtrxSymmetric(MatResponseMode rMode);
+    virtual bool isCharacteristicMtrxSymmetric(MatResponseMode mode);
     virtual double give(int aProperty, GaussPoint *gp) 
         {
             OOFEM_ERROR1("FiberedCrossSection :: give - not implemented yet");
@@ -148,12 +153,12 @@ public:
      * However, this reduction is quite time consuming and if it is possible,
      * it is recommended to overload this method and provide direct method for computing
      * particular stiffness matrix.
-     * @param answer Stiffness matrix.
-     * @param mmode Material response mode.
+     * @param fiberMatrix Stiffness matrix.
+     * @param mode Material response mode.
      * @param layerGp Integration point.
      * @param tStep Time step (most models are able to respond only when atTime is current time step).
      */
-    void giveFiberMaterialStiffnessMatrix(FloatMatrix &fiberMatrix, MatResponseMode rMode, GaussPoint *layerGp, TimeStep *tStep);
+    void giveFiberMaterialStiffnessMatrix(FloatMatrix &fiberMatrix, MatResponseMode mode, GaussPoint *layerGp, TimeStep *tStep);
 
     virtual void computeStressIndependentStrainVector(FloatArray &answer,
                                                       GaussPoint *gp, TimeStep *tStep, ValueModeType mode);
@@ -165,6 +170,9 @@ public:
     virtual const char *giveClassName() const { return "FiberedCrossSection"; }
     virtual classType giveClassID() const { return FiberedCrossSectionClass; }
     virtual IRResultType initializeFrom(InputRecord *ir);
+
+    virtual void createMaterialStatus(GaussPoint &iGP); // ES
+
     virtual void printYourself();
     double computeIntegralThickWidth();
     MaterialMode giveCorrespondingSlaveMaterialMode(MaterialMode);
@@ -222,7 +230,7 @@ public:
      * Computes full 3d strain vector in element fiber. This function is necessary
      * if layered cross section is specified.
      * @param answer Full fiber strain vector.
-     * @param masterGp Element integration point.
+     * @param masterGpStrain Strain vector at master gauss point.
      * @param slaveGp Slave integration point representing particular fiber.
      * @param tStep Time step.
      */

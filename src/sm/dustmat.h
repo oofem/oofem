@@ -117,7 +117,7 @@ public:
 
     /**
      * Get the full plastic strain vector from the material status.
-     * @param answer Plastic strain.
+     * @return Plastic strain.
      */
     const StrainVector & givePlasticStrain() const { return plasticStrain; }
     /**
@@ -138,7 +138,7 @@ public:
 
     /**
      * Get the temp value of the full plastic strain vector from the material status.
-     * @param answer Temp value of plastic strain vector.
+     * @return Temp value of plastic strain vector.
      */
     const StrainVector & giveTempPlasticStrain() const { return tempPlasticStrain; }
     /**

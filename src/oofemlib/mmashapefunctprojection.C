@@ -53,7 +53,7 @@ MMAShapeFunctProjection :: ~MMAShapeFunctProjection()
 { }
 
 void
-MMAShapeFunctProjection :: __init(Domain *dold, IntArray &varTypes, FloatArray &coords, int region, TimeStep *tStep)
+MMAShapeFunctProjection :: __init(Domain *dold, IntArray &varTypes, FloatArray &coords, int region, TimeStep *tStep, bool iCohesiveZoneGP)
 //(Domain* dold, IntArray& varTypes, GaussPoint* gp, TimeStep* tStep)
 {
     int nvar = varTypes.giveSize();
@@ -161,4 +161,13 @@ MMAShapeFunctProjection :: __mapVariable(FloatArray &answer, FloatArray &coords,
 
     return 1;
 }
+
+int
+MMAShapeFunctProjection :: mapStatus(MaterialStatus &oStatus) const
+{
+	OOFEM_ERROR("ERROR: MMAShapeFunctProjection :: mapStatus() is not implemented yet.")
+
+	return 0;
+}
+
 } // end namespace oofem

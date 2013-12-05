@@ -46,7 +46,7 @@
 
 ///@name Input fields for CrossSection
 //@{
-#define _CrossSection_SetNumber "set"
+#define _IFT_CrossSection_SetNumber "set"
 //@}
 
 namespace oofem {
@@ -117,41 +117,27 @@ public:
     CrossSection(int n, Domain *d) : FEMComponent(n, d)
     { propertyDictionary = new Dictionary(); 
       setNumber = 0;
-      MAT_GIVEN_BY_CS = false; // Temporary var will be removed later 
     }
     /// Destructor.
     virtual ~CrossSection() { delete propertyDictionary; }
 
-    int const giveSetNumber() { return this->setNumber; };
-
-    bool MAT_GIVEN_BY_CS;
+    int giveSetNumber() const { return this->setNumber; };
 
     /**
      * Returns the value of cross section property.
-     * @param a Id of requested property.
+     * @param aProperty Id of requested property.
      * @return Property value.
      */
-    virtual double give(CrossSectionProperty a);
+    virtual double give(CrossSectionProperty aProperty);
 
     /**
      * Returns the value of cross section property.
-     * @param a Id of requested property.
+     * @param aProperty Id of requested property.
      * @param gp Integration point.
      * @return Property value.
      */
     virtual double give(int aProperty, GaussPoint *gp){ return 0.0; };
 
-    /**
-     * Check for symmetry of stiffness matrix.
-     * Default implementation returns true.
-     * It can be moved to base Cross section class in the future.
-     * @param rMode Response mode of material.
-     * @param mat Material index.
-     * @return True if stiffness matrix of receiver is symmetric.
-     * @deprected will be removed in the future when cross sections stores the material 
-     */
-    virtual bool isCharacteristicMtrxSymmetric(MatResponseMode rMode, int mat);
-    
     /**
      * Check for symmetry of stiffness matrix.
      * Default implementation returns true.
@@ -166,11 +152,8 @@ public:
      * Sets up integration rule for the given element.
      * Default behavior is just to call the Gauss integration rule, but for example the layered and fibered crosssections need to do their own thing.
      * @param irule Integration rule to set up.
-     * @param intd Integration domain of element.
-     * @param element Element which the integration rule belongs to.
      * @param npoints Number of integration points.
-     * @param lu Lower index of the "strain" components (or equivalent).
-     * @param li Upper index of the "strain" components (or equivalent).
+     * @param element Element which the integration rule belongs to.
      * @return Number of integration points.
      */
     virtual int setupIntegrationPoints(IntegrationRule &irule, int npoints, Element *element);

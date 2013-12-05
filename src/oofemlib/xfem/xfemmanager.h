@@ -49,6 +49,7 @@
 #define _IFT_XfemManager_Name "xfemmanager"
 #define _IFT_XfemManager_numberOfEnrichmentItems "numberofenrichmentitems"
 #define _IFT_XfemManager_numberOfGpPerTri "numberofgppertri"
+#define _IFT_XfemManager_debugVTK "debugvtk"
 #define _IFT_XfemManager_VTKExport "vtkexport"
 #define _IFT_XfemManager_VTKExportFields "exportfields"
 //@}
@@ -62,7 +63,7 @@ class IntArray;
 class Element;
 class DataStream;
 class DynamicInputRecord;
-//class InternalStateValueType; 
+//class InternalStateValueType;
 
 //
 // The following types determine the state types associated with xfem
@@ -108,6 +109,8 @@ protected:
     int mNumGpPerTri;
     bool doVTKExport;
 
+    /// If extra debug vtk files should be written.
+    bool mDebugVTK;
 
 public:
 
@@ -122,30 +125,27 @@ public:
     /// Destructor.
     virtual ~XfemManager();
 
-    int giveNumGpPerTri() const {return mNumGpPerTri;} /// Number of Gauss points per sub-triangle in cut elements.
+    int giveNumGpPerTri() const { return mNumGpPerTri; } /// Number of Gauss points per sub-triangle in cut elements.
 
     bool isElementEnriched(const Element *elem);
 
-    /// Accessor.
     EnrichmentItem *giveEnrichmentItem(int n);
     int giveNumberOfEnrichmentItems() const { return enrichmentItemList->giveSize(); }
 
     void createEnrichedDofs();
-    void addEnrichedDofsTo( DofManager *dMan, IntArray &dofIdArray );
 
     /// Initializes receiver according to object description stored in input record.
     IRResultType initializeFrom(InputRecord *ir);
     virtual void giveInputRecord(DynamicInputRecord &input);
 
     int instanciateYourself(DataReader *dr);
+    void postInitialize();
+
     const char *giveClassName() const { return "XfemManager"; }
     const char *giveInputRecordName() const { return _IFT_XfemManager_Name; }
 
     Domain *giveDomain() { return this->domain; }
     void setDomain(Domain *ipDomain);
-
-    /// Clear the receiver
-    void clear();
 
     /**
      * Stores the state of receiver to output stream.
@@ -175,6 +175,8 @@ public:
     void propagateFronts();
     bool hasPropagatingFronts();
 
+    bool giveVtkDebug() const { return mDebugVTK; }
+    void setVtkDebug(bool iDebug) { mDebugVTK = iDebug; }
 };
 } // end namespace oofem
 #endif // xfemmanager_h

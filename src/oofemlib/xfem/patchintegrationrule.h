@@ -35,12 +35,8 @@
 #ifndef patchintegrationrule_h
 #define patchintegrationrule_h
 
-//#define PATCH_INT_DEBUG 1
-#define PATCH_INT_DEBUG 0
-
 #include "gaussintegrationrule.h"
 #include "classtype.h"
-//#include "patch.h"
 
 namespace oofem {
 class FEI2dTrLin;
@@ -53,7 +49,7 @@ class Triangle;
  *  -Element *e:	parent element pointer
  *  -iTriangles:	array of triangles describing the subdivision of the element.
  *
- *  * @author Erik Svenning (Major modifications)
+ * @author Erik Svenning (Major modifications)
  *
  */
 class OOFEM_EXPORT PatchIntegrationRule : public GaussIntegrationRule
@@ -71,6 +67,8 @@ public:
     PatchIntegrationRule(int n, Element *e, const std :: vector< Triangle > &iTriangles);
     /// Destructor.
     virtual ~PatchIntegrationRule();
+
+    virtual const char *giveClassName() const { return "PatchIntegrationRule"; }
 
     // TODO: Give this function a better name.
     // Note: the fact that this function is inherited complicates name change.

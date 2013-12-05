@@ -41,6 +41,7 @@
 #include "structuralcrosssection.h"
 #include "mathfem.h"
 #include "classfactory.h"
+#include "dynamicinputrecord.h"
 
 namespace oofem {
 
@@ -92,6 +93,21 @@ J2plasticMaterial :: initializeFrom(InputRecord *ir)
     }
 
     return IRRT_OK;
+}
+
+void J2plasticMaterial :: giveInputRecord(DynamicInputRecord &input)
+{
+	PlasticMaterial::giveInputRecord(input);
+
+	IsotropicLinearElasticMaterial *isoLE = dynamic_cast<IsotropicLinearElasticMaterial*> (linearElasticMaterial);
+    input.setField(isoLE->giveYoungsModulus(), _IFT_IsotropicLinearElasticMaterial_e);
+    input.setField(isoLE->givePoissonsRatio(), _IFT_IsotropicLinearElasticMaterial_n);
+    input.setField(0.0, _IFT_IsotropicLinearElasticMaterial_talpha); // TODO: dirty fix
+
+
+	input.setField(k*sqrt(3.0), _IFT_J2plasticMaterial_ry);
+	input.setField(kinematicModuli, _IFT_J2plasticMaterial_khm);
+	input.setField(isotropicModuli, _IFT_J2plasticMaterial_ihm);
 }
 
 

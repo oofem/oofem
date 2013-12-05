@@ -68,6 +68,12 @@ SUPGElement2 :: initializeFrom(InputRecord *ir)
 }
 
 
+void
+SUPGElement2 :: giveInputRecord(DynamicInputRecord &input)
+{
+    SUPGElement :: giveInputRecord(input);
+}
+
 
 void
 SUPGElement2 :: giveCharacteristicMatrix(FloatMatrix &answer,

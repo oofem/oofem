@@ -1,0 +1,58 @@
+dkt_twist01.out
+"Patch test of DKT elements -> twisting of a square plate"
+LinearStatic nsteps 1
+domain 2dMindlinPlate
+OutputManager tstep_all dofman_all element_all
+ndofman 4 nelem 2 ncrosssect  1 nmat 1 nbc 2 nic 0 nltf 1
+node 1 coords 3  0.0  0.0  0.0   bc 3 1 0 0
+node 2 coords 3  8.0  0.0  0.0   bc 3 1 0 0
+node 3 coords 3  8.0  8.0  0.0   bc 3 0 0 0 load 1 2
+node 4 coords 3  0.0  8.0  0.0   bc 3 1 0 0 
+DKTPlate 1 nodes 3  1 2 3 mat 1 crossSect 1
+DKTPlate 2 nodes 3  3 4 1 mat 1 crossSect 1
+SimpleCS 1 thick 1.0
+IsoLE 1 d 2500.  E 10000.0  n 0.3 tAlpha 0.000012
+BoundaryCondition  1 loadTimeFunction 1 prescribedvalue 0.0 
+NodalLoad 2 loadTimeFunction 1 Components 3 5.0 0.0 0.0
+ConstantFunction 1 f(t) 1.0
+#
+#  exact solution
+#
+#  DISPLACEMENT             w     
+#
+#  node 3                   0.2496
+#
+#         STRAIN                     STRESS
+#
+#   kapa_x  =  0.0             m_x  =  0.0
+#   kapa_y  =  0.0             m_y  =  0.0
+#   kapa_xy =  7.8e-3          m_xy = -2.5
+#   gama_xz =  0.0             q_x  =  0.0
+#   gama_yz =  0.0             q_y  =  0.0
+#
+#
+#
+#     node 1   R_w = 5.0 
+#     node 2   R_w =-5.0 
+#     node 4   R_w =-5.0
+#
+#
+#%BEGIN_CHECK% tolerance 1.e-4
+## check reactions 
+#REACTION tStep 1 number 1 dof 1 value 5.0
+#REACTION tStep 1 number 2 dof 1 value -5.0
+#REACTION tStep 1 number 4 dof 1 value -5.0
+## check all nodes
+#NODE tStep 1 number 3 dof 1 unknown d value 0.2496
+## check element no. 1 stress vector
+#ELEMENT tStep 1 number 1 gp 1 keyword "stresses" component 4  value 0.0
+#ELEMENT tStep 1 number 1 gp 1 keyword "stresses" component 5  value 0.0
+#ELEMENT tStep 1 number 1 gp 1 keyword "stresses" component 6  value -2.5
+##
+#ELEMENT tStep 1 number 2 gp 1 keyword "stresses" component 4  value 0.0
+#ELEMENT tStep 1 number 2 gp 1 keyword "stresses" component 5  value 0.0
+#ELEMENT tStep 1 number 2 gp 1 keyword "stresses" component 6  value -2.5
+##
+#%END_CHECK%
+#
+#

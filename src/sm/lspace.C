@@ -173,7 +173,7 @@ void LSpace :: computeGaussPoints()
 
 
 void
-LSpace :: computeNmatrixAt(GaussPoint *aGaussPoint, FloatMatrix &answer)
+LSpace :: computeNmatrixAt(const FloatArray &iLocCoord, FloatMatrix &answer)
 // Returns the displacement interpolation matrix {N} of the receiver, eva-
 // luated at aGaussPoint.
 {
@@ -181,7 +181,7 @@ LSpace :: computeNmatrixAt(GaussPoint *aGaussPoint, FloatMatrix &answer)
 
     answer.resize(3, 24);
     answer.zero();
-    this->interpolation.evalN( n, * aGaussPoint->giveCoordinates(), FEIElementGeometryWrapper(this) );
+    this->interpolation.evalN( n, iLocCoord, FEIElementGeometryWrapper(this) );
 
     for ( int i = 1; i <= 8; i++ ) {
         answer.at(1, 3 * i - 2) = n.at(i);
@@ -821,7 +821,6 @@ LSpace :: drawSpecial(oofegGraphicContext &gc)
     int igp, i, j, k;
     WCRec q [ 4 ];
     GraphicObj *tr;
-    StructuralMaterial *mat = static_cast< StructuralMaterial * >( this->giveMaterial() );
     IntegrationRule *iRule;
     GaussPoint *gp;
     TimeStep *tStep = domain->giveEngngModel()->giveCurrentStep();
@@ -840,7 +839,7 @@ LSpace :: drawSpecial(oofegGraphicContext &gc)
         iRule = integrationRulesArray [ giveDefaultIntegrationRule() ];
         for ( igp = 0; igp < iRule->giveNumberOfIntegrationPoints(); igp++ ) {
             gp = iRule->getIntegrationPoint(igp);
-            if ( mat->giveIPValue(cf, gp, IST_CrackedFlag, tStep) == 0 ) {
+            if ( this->giveIPValue(cf, gp, IST_CrackedFlag, tStep) == 0 ) {
                 return;
             }
 
@@ -852,8 +851,8 @@ LSpace :: drawSpecial(oofegGraphicContext &gc)
             // obtain gp global coordinates
             this->computeGlobalCoordinates( gpc, * gp->giveCoordinates() );
             length = 0.3333 * pow(this->computeVolumeAround(gp), 1. / 3.);
-            if ( mat->giveIPValue(crackDir, gp, IST_CrackDirs, tStep) ) {
-                mat->giveIPValue(crackStatuses, gp, IST_CrackStatuses, tStep);
+            if ( this->giveIPValue(crackDir, gp, IST_CrackDirs, tStep) ) {
+                this->giveIPValue(crackStatuses, gp, IST_CrackStatuses, tStep);
 
 
                 for ( i = 1; i <= 3; i++ ) {

@@ -363,8 +363,6 @@ public:
      * Sets up a suitable integration rule for numerical integrating over volume.
      * The required polynomial order for the determinant of the jacobian is added automatically.
      * @param order Polynomial order of integrand (should NOT including determinant of jacobian).
-     * @param boundary Boundary number.
-     * @param mode Material mode which is used in all the constructed GaussPoints.
      */
     virtual IntegrationRule *giveIntegrationRule(int order) = 0;
     /**

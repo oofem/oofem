@@ -79,7 +79,6 @@ public:
 protected:
     virtual void computeBmatrixAt(GaussPoint *gp, FloatMatrix &answer, int = 1, int = ALL_STRAINS);
     virtual void computeBHmatrixAt(GaussPoint *gp, FloatMatrix &answer);
-    virtual void computeNmatrixAt(GaussPoint *gp, FloatMatrix &answer);
 
     virtual void computeGaussPoints();
 

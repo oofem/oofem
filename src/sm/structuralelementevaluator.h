@@ -125,8 +125,22 @@ protected:
     bool isActivated(TimeStep *atTime) { return true; }
     void updateInternalState(TimeStep *stepN);
 
+    /**
+     * Computes the stress vector.
+     * @param answer Stress vector.
+     * @param strain Strain vector.
+     * @param gp Integration point for which stress is computed.
+     * @param tStep Time step.
+     */
     virtual void computeStressVector(FloatArray &answer, const FloatArray &strain, GaussPoint *gp, TimeStep *tStep) = 0;
-
+    /**
+     * Computes constitutive matrix of receiver.
+     * @param answer Constitutive matrix.
+     * @param rMode Material response mode of answer.
+     * @param gp Integration point for which constitutive matrix is computed.
+     * @param tStep Time step.
+     */
+    virtual void computeConstitutiveMatrixAt(FloatMatrix &answer, MatResponseMode rMode, GaussPoint *gp, TimeStep *tStep) = 0;
     /**
      * Optimized version, allowing to pass element displacements as parameter.
      * Standard version has a huge performance leak; in typical IGA element the element vector is VERY large

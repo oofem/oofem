@@ -153,15 +153,6 @@ InitialCondition * ClassFactory :: createInitialCondition(const char *name, int 
     return NULL;
 }
 
-/*
-Patch * ClassFactory :: createPatch(Patch :: PatchType type, Element *e)
-{
-    if ( type == Patch :: PT_TrianglePatch ) {
-        return new TrianglePatch(e);
-    }
-    return NULL;
-}
-*/
 NodalRecoveryModel * ClassFactory :: createNodalRecoveryModel(NodalRecoveryModel :: NodalRecoveryModelType type, Domain *d)
 {
     if ( type == NodalRecoveryModel :: NRM_NodalAveraging ) {

@@ -457,7 +457,6 @@ Lattice2d :: drawSpecial(oofegGraphicContext &gc)
 {
     WCRec l [ 2 ];
     GraphicObj *tr;
-    Material *mat = static_cast< StructuralMaterial * >( this->giveMaterial() );
     GaussPoint *gp;
     TimeStep *tStep = domain->giveEngngModel()->giveCurrentStep();
     FloatArray crackStatuses, cf;
@@ -468,7 +467,7 @@ Lattice2d :: drawSpecial(oofegGraphicContext &gc)
 
     if ( gc.giveIntVarType() == IST_CrackState ) {
         gp = integrationRulesArray [ 0 ]->getIntegrationPoint(0);
-        mat->giveIPValue(crackStatuses, gp, IST_CrackStatuses, tStep);
+        this->giveIPValue(crackStatuses, gp, IST_CrackStatuses, tStep);
         if ( crackStatuses(0) == 1. || crackStatuses(0) == 2. || crackStatuses(0) == 3 || crackStatuses(0) == 4 ) {
             double x1, y1, x2, y2;
             x1 = this->giveNode(1)->giveCoordinate(1);

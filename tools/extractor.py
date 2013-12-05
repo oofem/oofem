@@ -3,6 +3,9 @@
 #
 #  Extractor.py        (c) 2009 Borek Patzak, www.oofem.org
 #
+#The following allows to use "print" as a function (required by Python 3) (and not as a statement) in older python releases (>2.6)
+from __future__ import print_function
+#
 import re
 import getopt, sys, os.path
 
@@ -568,9 +571,9 @@ def print_step_results (context):
     for ival in sorted(context.recVal.keys()):
         try:
             value = float(context.recVal[ival])
-            print ( "%15e"%value, ) 
+            print ( "%15e"%value, end='') 
         except ValueError: 
-            print ( "%15s"%'---', )
+            print ( "%15s"%'---', end='')
         context.recVal[ival]='--' 
     print ()
 

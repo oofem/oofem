@@ -42,6 +42,7 @@
 ///@name Input fields for XFEMStatic
 //@{
 #define _IFT_XFEMStatic_Name "xfemstatic"
+#define _IFT_XFEMStatic_ForceRemap "forceremap"
 //@}
 
 //#define USE_FRACTURE_MANAGER
@@ -71,6 +72,7 @@ public:
     virtual void updateYourself(TimeStep *tStep);
 
     virtual double giveUnknownComponent(ValueModeType mode, TimeStep *tStep, Domain *d, Dof *dof);
+    virtual IRResultType initializeFrom(InputRecord *ir);
 
     void initializeDofUnknownsDictionary(TimeStep *tStep);
     void setTotalDisplacementFromUnknownsInDictionary(EquationID type, ValueModeType mode, TimeStep *tStep);
@@ -84,6 +86,10 @@ public:
 
 protected:
     bool updateStructureFlag;
+
+    bool mForceRemap;
+
+    bool mSetValsFromDofMap;
 
     // Map for updating initialLoadVector after resize
     // Maps <domain index, node index, local dof index> to global equation number

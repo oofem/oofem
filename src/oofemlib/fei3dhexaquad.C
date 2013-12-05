@@ -287,7 +287,6 @@ FEI3dHexaQuad :: surfaceEvalNormal(FloatArray &answer, int isurf, const FloatArr
     ksi = lcoords.at(1);
     eta = lcoords.at(2);
 
-    // No need to divide by 1/4, we'll normalize anyway;
     dNdksi.at(1) =  0.25 * ( 1. + eta ) * ( 2.0 * ksi + eta );
     dNdksi.at(2) = -0.25 * ( 1. + eta ) * ( -2.0 * ksi + eta );
     dNdksi.at(3) = -0.25 * ( 1. - eta ) * ( -2.0 * ksi - eta );

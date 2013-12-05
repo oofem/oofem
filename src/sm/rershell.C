@@ -176,15 +176,15 @@ RerShell :: computeGaussPoints()
 
 
 void
-RerShell :: computeNmatrixAt(GaussPoint *aGaussPoint, FloatMatrix &answer)
+RerShell :: computeNmatrixAt(const FloatArray &iLocCoord, FloatMatrix &answer)
 // Returns the displacement interpolation matrix {N} of the receiver,
 // evaluated at aGaussPoint.
 {
     double x1, x2, x3, y1, y2, y3, l1, l2, l3, b1, b2, b3, c1, c2, c3;
     FloatArray nodeCoords;
 
-    l1 = aGaussPoint->giveCoordinate(1);
-    l2 = aGaussPoint->giveCoordinate(2);
+    l1 = iLocCoord.at(1);
+    l2 = iLocCoord.at(2);
     l3 = 1.0 - l1 - l2;
 
     this->giveLocalCoordinates( nodeCoords, * ( this->giveNode(1)->giveCoordinates() ) );
@@ -822,56 +822,6 @@ RerShell :: giveIPValue(FloatArray &answer, GaussPoint *aGaussPoint, InternalSta
 //{}
 
 
-/*
- * void
- * RerShell :: drawInternalState(oofegGraphicContext& gc)
- * //
- * // Draws internal state graphics representation
- * //
- * {
- * int i;
- * WCRec p[3];
- * GraphicObj *tr;
- * double v1,v2,v3;
- * DrawMode mode = gc.getDrawMode();
- * TimeStep *tStep = domain->giveEngngModel()->giveCurrentStep();
- * double defScale = gc.getDefScale();
- *
- * if (!gc.testElementGraphicActivity(this)) return;
- *
- * // check for valid DrawMode
- * if (!((mode == mxForce) || (mode == myForce) || (mode == mxyForce) ||
- * (mode == szxForce) || (mode == syzForce) || (mode == sxForce) ||
- * (mode == syForce) || (mode == sxyForce))) return;
- *
- * EASValsSetLayer(OOFEG_STRESS_CONTOUR_LAYER);
- * for (i=0; i< 3; i++) {
- * if (gc.getInternalVarsDefGeoFlag()) {
- *  // use deformed geometry
- *  p[i].x = (FPNum) this->giveNode(i+1)->giveUpdatedCoordinate(1,tStep,defScale);
- *  p[i].y = (FPNum) this->giveNode(i+1)->giveUpdatedCoordinate(2,tStep,defScale);
- *  p[i].z = (FPNum) this->giveNode(i+1)->giveUpdatedCoordinate(3,tStep,defScale);
- *
- * } else {
- *  p[i].x = (FPNum) this->giveNode(i+1)->giveCoordinate(1);
- *  p[i].y = (FPNum) this->giveNode(i+1)->giveCoordinate(2);
- *  p[i].z = (FPNum) this->giveNode(i+1)->giveCoordinate(3);
- * }
- * }
- *
- * int result = 0;
- * result+= this->giveInternalStateAtNode (gc, 1, &v1);
- * result+= this->giveInternalStateAtNode (gc, 2, &v2);
- * result+= this->giveInternalStateAtNode (gc, 3, &v3);
- *
- * if (result == 3) {
- *
- * tr = CreateTriangleWD3D (p,v1,v2,v3);
- * EGWithMaskChangeAttributes(LAYER_MASK, tr);
- * EMAddGraphicsToModel(ESIModel(), tr);
- * }
- * }
- */
 
 /*
  * int

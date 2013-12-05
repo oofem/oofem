@@ -84,6 +84,28 @@ void IntMatBilinearCZStatus :: updateYourself(TimeStep *atTime)
 }
 
 
+void IntMatBilinearCZStatus :: copyStateVariables(const MaterialStatus &iStatus)
+{
+	StructuralInterfaceMaterialStatus::copyStateVariables(iStatus);
+
+	MaterialStatus &tmpStat = const_cast<MaterialStatus&>(iStatus);
+	const IntMatBilinearCZStatus &structStatus = dynamic_cast<IntMatBilinearCZStatus&>(tmpStat);
+
+	mDamageNew 		= structStatus.mDamageNew;
+	mDamageOld 		= structStatus.mDamageOld;
+	mTractionOld 	= structStatus.mTractionOld;
+	mTractionNew 	= structStatus.mTractionNew;
+	mJumpOld 		= structStatus.mJumpOld;
+	mJumpNew 		= structStatus.mJumpNew;
+
+}
+
+void IntMatBilinearCZStatus :: addStateVariables(const MaterialStatus &iStatus)
+{
+	OOFEM_ERROR("Error: IntMatBilinearCZStatus :: addStateVariables is not implemented.\n");
+}
+
+
 IntMatBilinearCZ::IntMatBilinearCZ(int n, Domain *d) : StructuralInterfaceMaterial(n, d),
 mPenaltyStiffness(0.0),
 mGIc(0.0), mGIIc(0.0),

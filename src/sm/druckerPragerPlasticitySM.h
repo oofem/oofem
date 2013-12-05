@@ -116,7 +116,7 @@ public:
     }
     /**
      * Get the plastic strain deviator from the material status.
-     * @param answer Plastic strain deviator.
+     * @return Plastic strain deviator.
      */
     const StrainVector & givePlasticStrainDeviator() const { return plasticStrainDeviator; }
     /**

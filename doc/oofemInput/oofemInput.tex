@@ -1656,12 +1656,11 @@ in integration points.
 \item The parameter \param{nvr} allows to set number of virual regions. The internal (state) variables defined in integration points need to be transfered into nodal values. This process is called nodal recovery. VTKXML module allows to perform recovery not only over the whole domain, but also over so called virtual regions. This allows to exactly match discontinuity along region boundary instead of smoothing it. The concept of virtual regions allows to map several true regions onto single virtual region and then perform recovery over virtual regions instead of true ones. Number of true region is given by element cross-section. If \param{nvr} is set to zero (default), the recovery is performed over whole domain (single virtual region), when positive, it should be equal to number of virtual regions and vrmap should be provided. If negative, then recovery over real regions is used.
 
 \item The array \param{vrmap} defines the mapping from real (true) regions to virtual regions. The size of this array
-should equal to number of true regions and values should be in a range $\langle 1, nvr \rangle$. When \param{nvr} is zero or negative, this parameter is ignored. The i-th value defines mapping of true region number to virtual region number. Zero or negative value causes region to be ignored. For example, to disregard all elements associated with a cross-section 2, use the line (relevant are \param{nvr} and \param{vrmap})
-
-\item \param{timeScale} scales time in output. In transport problem, basic units are seconds. Setting timeScale = 2.777777e-4 (=1/3600.) converts all time data in vtkXML from seconds to hours.
+should equal to number of true regions and values should be in a range $\langle 1, nvr \rangle$. When \param{nvr} is zero or negative, this parameter is ignored. The i-th value defines mapping of true region number to virtual region number. Zero or negative values cause a region to be ignored. For example, to consider only elements associated with a cross-section 1 and disregarding other cross sections, use the line with \param{nvr} and \param{vrmap} as
 
 {\footnotesize vtkxml tstep\_all cellvars 1 46 vars 1 1 primvars 1 1 stype 2 nvr 1 vrmap 2 1 0}
 
+\item \param{timeScale} scales time in output. In transport problem, basic units are seconds. Setting timeScale = 2.777777e-4 (=1/3600.) converts all time data in vtkXML from seconds to hours.
 
 \end{itemize}
 
@@ -2337,12 +2336,42 @@ This is typical boundary condition in multiscale analysis where $ d = \partial_x
 would a macroscopic gradient at the integration point, i.e. this is a boundary condition for prolongation.
 It is also convenient to use when one wants to test a arbitrary specimen for shear. 
 
-\item Mixed prescribed gradient / pressure boundary condition (Active Dirichlet type)
+\item Mixed prescribed gradient / pressure boundary condition (Active type)
 
 \begin{record}[0.9\textwidth]
-  \recentry{\entKeywordInst{MixedGradientPressureDirichlet}}{\field{devGradient}{ra}}
+  \recentry{\entKeywordInst{MixedGradientPressure*}}{\field{devGradient}{ra}}
   \recentry{}{\field{pressure}{rn}}
-  \recentry{}{\optField{cCoords}{ra}}
+  \recentry{}{\optField{cCoord}{ra}}
+\end{record}
+
+All boundary conditions of ensures that the deviatoric gradient and pressure is at least weakly fullfilled on the prescribed domain. They are used for computational homogenization of incompressible flow or elasticity problems.
+
+\item Mixed prescribed gradient / pressure boundary condition (Weakly periodic type)
+
+\begin{record}[0.9\textwidth]
+  \recentry{\entKeywordInst{MixedGradientPressureWeaklyPeriodic}}{\field{order}{rn}}
+\end{record}
+
+Prescribes a periodic constant (unknown) stress tensor along the specified boundaries. For \param{order} set to 1, one obtains the same results as the Neumann boundary condition.
+
+
+\item Mixed prescribed gradient / pressure boundary condition (Neumann type)
+
+\begin{record}[0.9\textwidth]
+  \recentry{\entKeywordInst{MixedGradientPressureNeumann}}{}
+\end{record}
+
+Prescribes a constant (unknown) deviatoric stress tensor along the specified boundaries.
+Additional unknowns appears, $\tens{\sigma}_\dev$, which is handled by the boundary condition itself (no control from the input file).
+The input devGradient is weakly fulfilled (homogenized over the elementsides). As with the the Dirichlet type, the volumetric gradient is free.
+This is useful in multiscale computations of RVE's that experience incompressible behavior, typically fluid problems. In that case, the element sides should cover the entire RVE boundary.
+It is also convenient to use when one wants to test a arbitrary specimen for shear, with a free volumetric part (in which case the pressure is set to zero).
+Symmetry is not assumed, so rigid body rotations are removed, but translations need to be prescribed separately.
+
+\item Mixed prescribed gradient / pressure boundary condition (Dirichlet type)
+
+\begin{record}[0.9\textwidth]
+  \recentry{\entKeywordInst{MixedGradientPressureDirichlet}}{}
 \end{record}
 
 Prescribes $ v_i = d_{\dev,ij}(x_j-\bar{x}_j) + d_\vol(x_i-\bar{x}_i)$, and a pressure $p$.
@@ -2353,20 +2382,7 @@ This unknown is in a way related to the applied pressure.
 This is useful in multiscale computations of RVE's that experience incompressible behavior, typically fluid problems. 
 It is also convenient to use when one wants to test a arbitrary specimen for shear, with a free volumetric part (in which case the pressure is set to zero).
 
-\item Mixed prescribed gradient / pressure boundary condition (Neumann type)
 
-\begin{record}[0.9\textwidth]
-  \recentry{\entKeywordInst{MixedGradientPressureNeumann}}{\field{devGradient}{ra}}
-  \recentry{}{\field{pressure}{rn}}
-  \recentry{}{\field{elementsides}{ia}}
-\end{record}
-
-Prescribes a constant (unknown) stress tensor along the specified boundaries.
-Additional unknowns appears, $\tens{\sigma}_\dev$, which is handled by the boundary condition itself (no control from the input file).
-The input devGradient is weakly fulfilled (homogenized over the elementsides). As with the the Dirichlet type, the volumetric gradient is free.
-This is useful in multiscale computations of RVE's that experience incompressible behavior, typically fluid problems. In that case, the element sides should cover the entire RVE boundary.
-It is also convenient to use when one wants to test a arbitrary specimen for shear, with a free volumetric part (in which case the pressure is set to zero).
-Symmetry is not assumed, so rigid body rotations are removed, but translations need to be prescribed separately.
 
 \item Nodal fluxes (loads)
 

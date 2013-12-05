@@ -460,7 +460,7 @@ IntMatBilinearCZFagerstrom :: give3dStiffnessMatrix_dTdj_num(FloatMatrix &answer
 
     IntMatBilinearCZFagerstromStatus *status = static_cast< IntMatBilinearCZFagerstromStatus * >( this->giveStatus(gp) );
 
-    double damage = status->giveTempDamage();
+    //double damage = status->giveTempDamage();
     FloatMatrix Finv = status->giveTempInverseDefGrad();
     FloatMatrix  F;
     FloatArray J = status->giveTempJump();

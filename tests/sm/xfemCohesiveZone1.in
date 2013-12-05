@@ -1,6 +1,6 @@
 xfemCohesiveZone1.out
 XFEM simulation: A single element with bilinear cohesive zone, loaded in pure shear. Written by Erik Svenning, Chalmers University of Technology.
-XFEMStatic nsteps 5 deltat 1.0 controlmode 1 rtolv 1.0e-6 MaxIter 25 minIter 2 stiffmode 0 nmodules 0 manrmsteps 1
+XFEMStatic nsteps 5 deltat 1.0 controlmode 1 rtolv 1.0e-6 MaxIter 25 minIter 2 stiffmode 0 nmodules 0 manrmsteps 1 forceremap 1
 #vtkxml tstep_all domain_all primvars 1 1 cellvars 1 1
 domain 2dPlaneStress
 OutputManager tstep_all dofman_all element_all
@@ -10,7 +10,7 @@ node 2     coords 3  1        0        0       bc 2 1 1
 node 3     coords 3  1        1        0       bc 2 2 1
 node 4     coords 3  0        1        0       bc 2 2 1
 PlaneStress2DXfem 1    nodes 4   1   2   3  4   mat 1 crosssect 1 nip 9 nlgeo 0 czmaterial 2
-SimpleCS 1 thick 1.0
+SimpleCS 1 thick 1.0 material 1
 #
 #Linear elasticity
 IsoLE 1 d 0.0 E 1.0e5 n 0.0 tAlpha 0.0
@@ -22,8 +22,10 @@ BoundaryCondition 2 loadTimeFunction 1 prescribedvalue 0.8e-1
 PiecewiseLinFunction 1 npoints 2 t 2 0.0 5.0 f(t) 2 0.0 1.0
 XfemManager 1 numberofenrichmentitems 1
 crack 1 
-DiscontinuousFunction 1
-polygoncrack 1 points 6 -0.1 0.3 0.5 0.3 1.1 0.3
+#DiscontinuousFunction 1
+HeavisideFunction 1
+#polygoncrack 1 points 6 -0.1 0.3 0.5 0.3 1.1 0.3
+polygoncrack 1 points 6 -0.5 0.3 -0.2 0.3 1.1 0.3
 #
 #
 #%BEGIN_CHECK% tolerance 1.e-12

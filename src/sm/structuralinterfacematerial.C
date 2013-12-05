@@ -36,7 +36,14 @@
 #include "structuralinterfacematerialstatus.h"
 #include "dynamicinputrecord.h"
 #include "gausspoint.h"
+
 namespace oofem {
+
+StructuralInterfaceMaterial::StructuralInterfaceMaterial(int n, Domain *d): Material(n, d)
+{
+    this->useNumericalTangent = false;
+}
+
 
 int
 StructuralInterfaceMaterial :: giveIPValue(FloatArray &answer, GaussPoint *gp, InternalStateType type, TimeStep *atTime)
@@ -123,7 +130,77 @@ StructuralInterfaceMaterial :: giveStiffnessMatrix_dTdj_Num(FloatMatrix &answer,
     }
 
 }
-
 #endif
 
+
+void
+StructuralInterfaceMaterial::give2dStiffnessMatrix_Eng(FloatMatrix &answer, MatResponseMode mode, GaussPoint *gp, TimeStep *tStep)
+{
+    FloatMatrix answer3D;
+    give3dStiffnessMatrix_Eng(answer3D, mode, gp, tStep);
+    IntArray mask;
+    mask.setValues(2,  1, 3);
+    answer.beSubMatrixOf(answer3D, mask, mask);
+
+
+    //debug
+    printf("analytical tangent \n");
+    answer3D.printYourself();
+
+    FloatMatrix answerNum;
+    StructuralInterfaceMaterial :: giveStiffnessMatrix_dTdj_Num(answerNum, mode, gp, tStep);
+    printf("numerical tangent \n");
+    answerNum.printYourself();
+
+    FloatMatrix comp;
+    comp = answer3D;
+    comp.subtract(answerNum);
+    printf("difference in numerical tangent to mat method \n");
+    comp.printYourself();
+
+}
+
+void
+StructuralInterfaceMaterial::give3dStiffnessMatrix_Eng(FloatMatrix &answer, MatResponseMode mode, GaussPoint *gp, TimeStep *tStep)
+{
+    //_error("give3dStiffnessMatrix_Eng: not implemented ");
+    give3dStiffnessMatrix_dTdj(answer, mode, gp, tStep);
+}
+
+void
+StructuralInterfaceMaterial::give3dStiffnessMatrix_dTdj(FloatMatrix &answer, MatResponseMode rMode, GaussPoint *gp, TimeStep *tStep)
+{
+    _error("give3dStiffnessMatrix_dTdj: not implemented ")
+}
+
+void
+StructuralInterfaceMaterial::give1dStiffnessMatrix_Eng(FloatMatrix & answer, MatResponseMode mode, GaussPoint * gp, TimeStep * tStep)
+{
+    give3dStiffnessMatrix_Eng(answer, mode, gp, tStep);
+}
+
+void
+StructuralInterfaceMaterial::giveEngTraction_1d(FloatArray & answer, GaussPoint * gp, const FloatArray & jump, TimeStep * tStep)
+{
+    FloatArray modifiedJump(3);
+    modifiedJump.setValues(3, 0.0, 0.0, jump.at(3));
+    this->giveEngTraction_3d(answer, gp, modifiedJump, tStep);
+}
+
+void
+StructuralInterfaceMaterial::giveEngTraction_2d(FloatArray & answer, GaussPoint * gp, const FloatArray & jump, TimeStep * tStep)
+{
+    FloatArray modifiedJump(3);
+    modifiedJump.setValues(3, jump.at(1), 0.0, jump.at(3));
+    this->giveEngTraction_3d(answer, gp, modifiedJump, tStep);
+}
+
+void
+StructuralInterfaceMaterial::giveEngTraction_3d(FloatArray & answer, GaussPoint * gp, const FloatArray & jump, TimeStep * tStep)
+{
+    //_error("giveEngTraction_3d: not implemented ");
+    FloatMatrix F(3, 3);
+    F.beUnitMatrix();
+    giveFirstPKTraction_3d(answer, gp, jump, F, tStep);
+}
 } // end namespace oofem

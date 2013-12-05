@@ -56,11 +56,13 @@ public:
     /// Constructor
     MMAContainingElementProjection();
 
-    virtual void __init(Domain *dold, IntArray &type, FloatArray &coords, int region, TimeStep *tStep);
+    virtual void __init(Domain *dold, IntArray &type, FloatArray &coords, int region, TimeStep *tStep, bool iCohesiveZoneGP = false);
 
     virtual void finish(TimeStep *tStep) { };
 
     virtual int __mapVariable(FloatArray &answer, FloatArray &coords, InternalStateType type, TimeStep *tStep);
+
+    virtual int mapStatus(MaterialStatus &oStatus) const;
 
     virtual const char *giveClassName() const { return "MMAContainingElementProjection"; }
 };

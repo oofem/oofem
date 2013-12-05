@@ -135,6 +135,7 @@ CBS :: initializeFrom(InputRecord *ir)
     return IRRT_OK;
 }
 
+
 double
 CBS :: giveUnknownComponent(ValueModeType mode, TimeStep *tStep, Domain *d, Dof *dof)
 // returns unknown quantity like displacement, velocity of dof

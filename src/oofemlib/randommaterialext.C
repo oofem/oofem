@@ -89,8 +89,9 @@ RandomMaterialExtensionInterface :: giveInputRecord(DynamicInputRecord &ir)
 bool
 RandomMaterialExtensionInterface :: give(int key, GaussPoint *gp, double &value)
 {
-    MaterialStatus *status = static_cast < MaterialStatus * > ( gp->giveMaterialStatus() );
-    RandomMaterialStatusExtensionInterface *interface = static_cast< RandomMaterialStatusExtensionInterface * >
+    ///@todo Have to wrap it through the material to ensure that it gets an actual material status (for now at least). Doesn't play nicely with layered cross-sections.
+    MaterialStatus *status = static_cast < MaterialStatus * > ( gp->giveMaterial()->giveStatus(gp) );
+    RandomMaterialStatusExtensionInterface *interface = dynamic_cast< RandomMaterialStatusExtensionInterface * >
                                                         ( status->giveInterface(RandomMaterialStatusExtensionInterfaceType) );
     return interface->_giveProperty(key, value);
 }
@@ -98,9 +99,10 @@ RandomMaterialExtensionInterface :: give(int key, GaussPoint *gp, double &value)
 void
 RandomMaterialExtensionInterface :: _generateStatusVariables(GaussPoint *gp) const
 {
+    // Have to wrap it through the material to ensure that it gets an actual material status (for now at least)
     int size = randVariables.giveSize();
     double value;
-    MaterialStatus *matStat = static_cast < MaterialStatus * > ( gp->giveMaterialStatus() );
+    MaterialStatus *matStat = static_cast < MaterialStatus * > ( gp->giveMaterial()->giveStatus(gp) );
     RandomMaterialStatusExtensionInterface *status = static_cast< RandomMaterialStatusExtensionInterface * >
                                                      ( matStat->giveInterface(RandomMaterialStatusExtensionInterfaceType) );
 

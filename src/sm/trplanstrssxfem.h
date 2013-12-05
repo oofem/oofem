@@ -43,14 +43,13 @@
 #define _IFT_TrPlaneStress2dXFEM_Name "trplanestress2dxfem"
 
 namespace oofem {
-
 /*
  *		trplanstrssxfem.h
  *
  *
  *      Class: TrPlaneStress2dXFEM
  *      Description: 3-node triangle with XFEM kinematics
- * 		@author Erik Svenning
+ *      @author Erik Svenning
  *
  */
 
@@ -63,22 +62,12 @@ protected:
 
 public:
 
-	TrPlaneStress2dXFEM(int n, Domain *d) : TrPlaneStress2d(n, d), XfemElementInterface(this), VTKXMLExportModuleElementInterface() { }
+    TrPlaneStress2dXFEM(int n, Domain *d) : TrPlaneStress2d(n, d), XfemElementInterface(this), VTKXMLExportModuleElementInterface() { }
 
-	virtual ~TrPlaneStress2dXFEM();
+    virtual ~TrPlaneStress2dXFEM();
 
 
-	virtual int checkConsistency();
-
-#if 0
-	// Overloaded functions from XfemElementInterface
-    /// Partitions the element into patches by a triangulation.
-    virtual void XfemElementInterface_partitionElement(AList< Triangle > *answer, std :: vector< FloatArray > &together);
-    /// Updates integration rule based on the triangulation.
-    virtual void XfemElementInterface_updateIntegrationRule();
-    /// Helpful routine to put the nodes for triangulation together, should be in protected members probably.
-    virtual void XfemElementInterface_prepareNodesForDelaunay(std::vector< std::vector< FloatArray > > &oPointPartitions);
-#endif
+    virtual int checkConsistency();
 
     virtual int testElementExtension(ElementExtension ext) { return ( ( ext == Element_EdgeLoadSupport ) ? 1 : 0 ); }
 
@@ -90,24 +79,25 @@ public:
 
     virtual int computeNumberOfDofs();
     virtual void computeGaussPoints();
-    virtual void computeNmatrixAt(GaussPoint *gp, FloatMatrix &answer);
+    virtual void computeNmatrixAt(const FloatArray &iLocCoord, FloatMatrix &answer);
     virtual void computeBmatrixAt(GaussPoint *gp, FloatMatrix &answer,
-                          int lowerIndx = 1, int upperIndx = ALL_STRAINS);
-    virtual void giveDofManDofIDMask(int inode, EquationID ut, IntArray & answer) const;
-//    virtual void computeConstitutiveMatrixAt(FloatMatrix &answer, MatResponseMode rMode, GaussPoint *, TimeStep *tStep);
-//    virtual void computeStressVector(FloatArray &answer, GaussPoint *gp, TimeStep *stepN);
+                                  int lowerIndx = 1, int upperIndx = ALL_STRAINS);
+    virtual void giveDofManDofIDMask(int inode, EquationID ut, IntArray &answer) const;
+    virtual void computeConstitutiveMatrixAt(FloatMatrix &answer, MatResponseMode rMode, GaussPoint *, TimeStep *tStep);
+    virtual void computeStressVector(FloatArray &answer, const FloatArray &strain, GaussPoint *gp, TimeStep *stepN);
     virtual void computeStiffnessMatrix(FloatMatrix &answer, MatResponseMode rMode, TimeStep *tStep);
     virtual void giveInternalForcesVector(FloatArray &answer, TimeStep *tStep, int useUpdatedGpRecord);
 
-//    virtual Element_Geometry_Type giveGeometryType() const;
+    virtual void computeConsistentMassMatrix(FloatMatrix &answer, TimeStep *tStep, double &mass, const double *ipDensity = NULL) { XfemElementInterface :: XfemElementInterface_computeConsistentMassMatrix(answer, tStep, mass, ipDensity); }
+
+    //    virtual Element_Geometry_Type giveGeometryType() const;
 
 #ifdef __OOFEG
     // TODO: Implement OOFEG functions
-    void drawRawGeometry(oofegGraphicContext &);
+    virtual void drawRawGeometry(oofegGraphicContext &);
     //void drawDeformedGeometry(oofegGraphicContext &, UnknownType);
     virtual void drawScalar(oofegGraphicContext &context);
     //virtual void drawSpecial(oofegGraphicContext &);
-    //void drawInternalState(oofegGraphicContext&);
 #endif
 
     virtual IRResultType initializeFrom(InputRecord *ir);
@@ -119,9 +109,6 @@ public:
                                                                  TimeStep *stepN, const FloatArray &coords,
                                                                  FloatArray &answer);
     virtual void EIPrimaryUnknownMI_givePrimaryUnknownVectorDofID(IntArray &answer);
-
-
 };
-
 } /* namespace oofem */
 #endif /* TRPLANSTRSSXFEM_H_ */

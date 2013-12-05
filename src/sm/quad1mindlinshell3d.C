@@ -239,13 +239,16 @@ Quad1MindlinShell3D :: computeBmatrixAt(GaussPoint *gp, FloatMatrix &answer, int
 
 
 void
-Quad1MindlinShell3D :: computeNmatrixAt(GaussPoint *gp, FloatMatrix &answer)
-// Returns the [3x9] displacement interpolation matrix {N} of the receiver,
-// evaluated at gp.
+Quad1MindlinShell3D :: computeStressVector(FloatArray &answer, const FloatArray &strain, GaussPoint *gp, TimeStep *stepN)
 {
-    FloatArray n;
-    this->interp.evalN(n, *gp->giveCoordinates(), FEIVoidCellGeometry());
-    answer.beNMatrixOf(n, 3);
+    this->giveStructuralCrossSection()->giveRealStress_Shell(answer, gp, strain, stepN);
+}
+
+
+void
+Quad1MindlinShell3D :: computeConstitutiveMatrixAt(FloatMatrix &answer, MatResponseMode rMode, GaussPoint *gp, TimeStep *tStep)
+{
+    this->giveStructuralCrossSection()->give3dShellStiffMtrx(answer, rMode, gp, tStep);
 }
 
 
@@ -353,13 +356,6 @@ Quad1MindlinShell3D :: computeStiffnessMatrix(FloatMatrix &answer, MatResponseMo
         drillStiffness.symmetrized();
         answer.assemble(drillStiffness, this->drillOrdering);
     }
-}
-
-
-void
-Quad1MindlinShell3D :: computeConstitutiveMatrixAt(FloatMatrix &answer, MatResponseMode rMode, GaussPoint *gp, TimeStep *tStep)
-{
-    this->giveStructuralCrossSection()->give3dShellStiffMtrx(answer, rMode, gp, tStep);
 }
 
 
@@ -517,7 +513,7 @@ Quad1MindlinShell3D :: computeLoadLEToLRotationMatrix(FloatMatrix &answer, int i
     dy = nodeB->giveCoordinate(2) - nodeA->giveCoordinate(2);
     length = sqrt(dx * dx + dy * dy);
 
-    /// @TODO TODO I haven't even looked at this code yet / Mikael
+    /// @todo I haven't even looked at this code yet / Mikael
     answer.at(1, 1) = 1.0;
     answer.at(2, 2) = dx / length;
     answer.at(2, 3) = -dy / length;

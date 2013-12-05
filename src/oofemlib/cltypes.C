@@ -171,6 +171,7 @@ InternalStateValueType giveInternalStateValueType(InternalStateType type)
     case IST_XFEMNumIntersecPoints:
     case IST_XFEMLevelSetPhi:
     case IST_Maturity:
+    case IST_CrossSectionNumber:
         return ISVT_SCALAR;
 
     default:

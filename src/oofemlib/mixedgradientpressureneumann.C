@@ -544,13 +544,15 @@ void MixedGradientPressureNeumann :: computeFields(FloatArray &sigmaDev, double 
     }
 
     // Postprocessing; vol = int v . n dA
+    IntArray bNodes;
     FloatArray unknowns, fe;
     vol = 0.;
     for (int pos = 1; pos <= boundaries.giveSize()/2; ++pos) {
         Element *e = this->giveDomain()->giveElement( boundaries.at(pos*2-1) );
         int boundary = boundaries.at(pos*2);
-        
-        e->computeBoundaryVectorOf(boundary, EID_MomentumBalance, VM_Total, tStep, unknowns);
+
+        e->giveInterpolation()->boundaryGiveNodes(bNodes, boundary);
+        e->computeBoundaryVectorOf(bNodes, EID_MomentumBalance, VM_Total, tStep, unknowns);
         this->integrateVolTangent(fe, e, boundary);
         vol += fe.dotProduct(unknowns);
     }

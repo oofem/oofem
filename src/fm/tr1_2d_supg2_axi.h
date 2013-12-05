@@ -98,6 +98,7 @@ public:
     virtual classType giveClassID() const { return TR1_2D_SUPG2_AXIClass; }
     virtual MaterialMode giveMaterialMode() { return _2dAxiFlow; }
     virtual IRResultType initializeFrom(InputRecord *ir);
+    virtual void giveInputRecord(DynamicInputRecord &input);
 
     virtual void printOutputAt(FILE *file, TimeStep *tStep);
 
@@ -105,7 +106,7 @@ public:
     int giveInternalStateAtNode(FloatArray &answer, InternalStateType type, InternalStateMode mode,
                                 int node, TimeStep *atTime);
     // Graphics output
-    //void drawYourself (oofegGraphicContext&);
+    //virtual void drawYourself(oofegGraphicContext&);
     virtual void drawRawGeometry(oofegGraphicContext &);
     virtual void drawScalar(oofegGraphicContext &context);
     //virtual void drawDeformedGeometry(oofegGraphicContext&, UnknownType) {}

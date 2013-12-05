@@ -58,11 +58,6 @@ Line2BoundaryElement :: ~Line2BoundaryElement()
 {
 }
 
-IRResultType Line2BoundaryElement :: initializeFrom(InputRecord *ir)
-{
-    return FMElement :: initializeFrom(ir);
-}
-
 FEInterpolation * Line2BoundaryElement :: giveInterpolation() const
 {
     return &this->fei;

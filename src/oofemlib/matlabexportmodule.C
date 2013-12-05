@@ -45,8 +45,10 @@
 #include "mathfem.h"
 #include "gausspoint.h"
 #include "weakperiodicbc.h"
+#include "solutionbasedshapefunction.h"
 #include "timestep.h"
 #include "classfactory.h"
+#include "set.h"
 
 #ifdef __FM_MODULE
 #include "tr21stokes.h"
@@ -73,6 +75,8 @@ REGISTER_ExportModule( MatlabExportModule )
     exportReactionForces = false;
     reactionForcesDofManList.resize(0);
     exportIntegrationPointFields = false;
+    reactionForcesNodeSet = 0;
+    IPFieldsElSet = 0;
     elList.resize(0);
 }
 
@@ -93,18 +97,25 @@ MatlabExportModule :: initializeFrom(InputRecord *ir)
 	exportSpecials = ir->hasField(_IFT_MatlabExportModule_specials);
 
     exportReactionForces = ir->hasField(_IFT_MatlabExportModule_ReactionForces);
+    reactionForcesDofManList.resize(0);
     if ( exportReactionForces ) {
        IR_GIVE_OPTIONAL_FIELD(ir, reactionForcesDofManList, _IFT_MatlabExportModule_DofManList);
+       this->reactionForcesNodeSet = 0;
+       IR_GIVE_OPTIONAL_FIELD(ir, this->reactionForcesNodeSet, _IFT_MatlabExportModule_ReactionForcesNodeSet);
     }
 
     exportIntegrationPointFields = ir->hasField(_IFT_MatlabExportModule_IntegrationPoints);
+    elList.resize(0);
     if ( exportIntegrationPointFields ) {
        IR_GIVE_FIELD(ir, internalVarsToExport, _IFT_MatlabExportModule_internalVarsToExport);
        IR_GIVE_OPTIONAL_FIELD(ir, elList, _IFT_MatlabExportModule_ElementList);
+       IPFieldsElSet = 0;
+       IR_GIVE_OPTIONAL_FIELD(ir, IPFieldsElSet, _IFT_MatlabExportModule_IPFieldsElSet);
     }
 
 	return IRRT_OK;
 }
+
 
 
 void
@@ -125,8 +136,6 @@ MatlabExportModule :: computeArea()
 			smax.at(j)=max(smax.at(j), domain->giveDofManager(i+1)->giveCoordinate(j+1));
 			smin.at(j)=min(smin.at(j), domain->giveDofManager(i+1)->giveCoordinate(j+1));
 		}
-//		std :: copy(smax.begin(), smax.end(), std :: ostream_iterator<double>(std :: cout, " "));
-//		std :: cout << std :: endl;
 	}
 
 
@@ -149,6 +158,9 @@ MatlabExportModule :: computeArea()
 void
 MatlabExportModule :: doOutput(TimeStep *tStep, bool forcedOutput)
 {
+
+    printf("Doing matlab export...\n");
+
 	FILE *FID;
 	FID = giveOutputStream(tStep);
 	Domain *domain  = emodel->giveDomain(1);
@@ -229,8 +241,12 @@ MatlabExportModule :: doOutputMesh(TimeStep *tStep, FILE *FID)
 
 	fprintf(FID, "\tmesh.p=[");
 	for ( int i = 1; i <= domain->giveNumberOfDofManagers(); i++ ) {
-		double x = domain->giveDofManager(i)->giveCoordinate(1), y = domain->giveDofManager(i)->giveCoordinate(2);
-		fprintf(FID, "%f,%f;", x, y);
+        for ( int j = 1; j<=domain->giveNumberOfSpatialDimensions(); j++) {
+        //double x = domain->giveDofManager(i)->giveCoordinate(1), y = domain->giveDofManager(i)->giveCoordinate(2);
+        double c = domain->giveDofManager(i)->giveCoordinate(j);
+        fprintf(FID, "%f, ", c);
+        }
+        fprintf(FID, "; ");
 	}
 
 	fprintf(FID, "]';\n");
@@ -344,7 +360,7 @@ MatlabExportModule :: doOutputSpecials(TimeStep *tStep,    FILE *FID)
 	fprintf(FID, "];\n");
 
 	// Output weak periodic boundary conditions
-	unsigned int wpbccount = 1;
+    unsigned int wpbccount = 1, sbsfcount = 1;
 
 	for ( int i = 1; i <= domain->giveNumberOfBoundaryConditions(); i++ ) {
 		WeakPeriodicBoundaryCondition *wpbc = dynamic_cast< WeakPeriodicBoundaryCondition * >( domain->giveBc(i) );
@@ -362,6 +378,18 @@ MatlabExportModule :: doOutputSpecials(TimeStep *tStep,    FILE *FID)
 				fprintf(FID, "];\n");
 				wpbccount++;
 			}
+		}
+		SolutionbasedShapeFunction *sbsf = dynamic_cast< SolutionbasedShapeFunction *>( domain->giveBc(i));
+		if (sbsf) {
+			fprintf(FID, "\tspecials.solutionbasedsf{%u}.values=[", sbsfcount);
+			for ( int k = 1; k <= sbsf->giveInternalDofManager(1)->giveNumberOfDofs(); k++ ) {      // Only one internal dof manager
+				FloatArray unknowns;
+				IntArray DofMask;
+				double X = sbsf->giveInternalDofManager(1)->giveDof(k)->giveUnknown(VM_Total, tStep);
+				fprintf(FID, "%e\t", X);
+			}
+			fprintf(FID, "];\n");
+			sbsfcount++;
 		}
 	}
 }
@@ -386,6 +414,13 @@ MatlabExportModule :: doOutputReactionForces(TimeStep *tStep,    FILE *FID)
     {
         OOFEM_ERROR("MatlabExportModule :: doOutputReactionForces - Cannot export reaction forces - only implemented for structural problems.");
     }
+
+    // Set the nodes and elements to export based on sets
+    if ( this->reactionForcesNodeSet > 0 ) {
+        Set *set = domain->giveSet( this->reactionForcesNodeSet );
+        reactionForcesDofManList = set->giveNodeList();
+    }
+
 
     int numDofManToExport = this->reactionForcesDofManList.giveSize();
     if ( numDofManToExport == 0 ) { // No dofMan's given - export every dMan with reaction forces
@@ -478,8 +513,13 @@ MatlabExportModule :: doOutputIntegrationPointFields(TimeStep *tStep,    FILE *F
     }
     fprintf( FID, "];\n" );
 
-
     
+
+
+    if ( this->IPFieldsElSet > 0 ) {
+        Set *set = domain->giveSet( this->IPFieldsElSet );
+        elList = set->giveElementList();
+    }
 
    
     FloatArray valueArray;
@@ -573,11 +613,18 @@ MatlabExportModule :: giveOutputStream(TimeStep *tStep)
 
 	size_t foundDot;
 	foundDot = fileName.rfind(".");
-	fileName.erase(foundDot);
+
+    // CARL
+    //fileName.replace(foundDot, 1, "_"); 
+ 
+    // JIM
+ 	//fileName.erase(foundDot);
+    fileName.replace(foundDot, 1, "_");
 
     char fext[100];
     sprintf( fext, "_m%d_%d", this->number, tStep->giveNumber() );
     fileName += fext;
+
 
 	functionname = fileName;
 
