@@ -354,7 +354,7 @@ IntMatBilinearCZFagerstrom :: give3dStiffnessMatrix_dTdj(FloatMatrix &answer, Ma
 
 	if (status->giveOldDamageDev()) {
 		answer = status->giveOlddTdJ();
-		answer.printYourself();
+		//answer.printYourself();
 		status->letOldDamageDevBe(false);
 	} else {
 	

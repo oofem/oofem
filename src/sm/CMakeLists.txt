@@ -121,7 +121,8 @@ set (sm_material
     latticematstatus.C
     latticedamage2d.C
     dustmat.C
-    lsmastermat.C lsmastermatgrad.C
+    lsmastermat.C
+	lsmastermatgrad.C
     intmatbilinczfagerstrom.C
 	intmatbilinczjansson.C
     intmatbilinearcz.C
