@@ -127,7 +127,7 @@ InterfaceElem2dQuad :: computeVolumeAround(GaussPoint *aGaussPoint)
 
     double dx = ( dn1 * x1 ) + ( dn2 * x2 ) + ( dn3 * x3 );
     double dy = ( dn1 * y1 ) + ( dn2 * y2 ) + ( dn3 * y3 );
-    double thickness   = this->giveCrossSection()->give(CS_Thickness);
+    double thickness   = this->giveCrossSection()->give(CS_Thickness, aGaussPoint);
     return sqrt(dx * dx + dy * dy) * weight * thickness;
 }
 

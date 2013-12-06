@@ -1868,7 +1868,7 @@ StructuralMaterial :: computeStressIndependentStrainVector(FloatArray &answer,
 
         switch ( matmode ) {
         case _2dBeam:
-            thick = crossSection->give(CS_Thickness);
+	  thick = crossSection->give(CS_Thickness, gp);
             answerTemper.resize(3);
             answerTemper.zero();
             answerTemper.at(1) = e0.at(1) * ( et.at(1) - this->giveReferenceTemperature() );
@@ -1878,8 +1878,8 @@ StructuralMaterial :: computeStressIndependentStrainVector(FloatArray &answer,
 
             break;
         case _3dBeam:
-            thick = crossSection->give(CS_Thickness);
-            width = crossSection->give(CS_Width);
+	  thick = crossSection->give(CS_Thickness, gp);
+	  width = crossSection->give(CS_Width, gp);
             answerTemper.resize(6);
             answerTemper.zero();
             answerTemper.at(1) = e0.at(1) * ( et.at(1) - this->giveReferenceTemperature() );
@@ -1892,7 +1892,7 @@ StructuralMaterial :: computeStressIndependentStrainVector(FloatArray &answer,
 
             break;
         case _2dPlate:
-            thick = crossSection->give(CS_Thickness);
+	  thick = crossSection->give(CS_Thickness, gp);
             if ( et.giveSize() > 1 ) {
                 answerTemper.resize(5);
                 answerTemper.zero();
@@ -1905,7 +1905,7 @@ StructuralMaterial :: computeStressIndependentStrainVector(FloatArray &answer,
 
             break;
         case _3dShell:
-            thick = crossSection->give(CS_Thickness);
+	  thick = crossSection->give(CS_Thickness, gp);
             answerTemper.resize(8);
             answerTemper.zero();
 

@@ -135,7 +135,7 @@ LIBeam3d2 :: computeLumpedMassMatrix(FloatMatrix &answer, TimeStep *tStep)
 {
     GaussPoint *gp = integrationRulesArray [ 0 ]->getIntegrationPoint(0);
     double density = this->giveStructuralCrossSection()->give('d', gp);
-    double halfMass   = density * this->giveCrossSection()->give(CS_Area) * this->giveLength() / 2.;
+    double halfMass   = density * this->giveCrossSection()->give(CS_Area, gp) * this->giveLength() / 2.;
     answer.resize(12, 12);
     answer.zero();
     answer.at(1, 1) = answer.at(2, 2) = answer.at(3, 3) = halfMass;
@@ -406,8 +406,9 @@ LIBeam3d2 :: computeLoadGToLRotationMtrx(FloatMatrix &answer)
 void
 LIBeam3d2 :: computeBodyLoadVectorAt(FloatArray &answer, Load *load, TimeStep *tStep, ValueModeType mode)
 {
-    NLStructuralElement :: computeBodyLoadVectorAt(answer, load, tStep, mode);
-    answer.times( this->giveCrossSection()->give(CS_Area) );
+  FloatArray lc(1);
+  NLStructuralElement :: computeBodyLoadVectorAt(answer, load, tStep, mode);
+  answer.times(this->giveCrossSection()->give(CS_Area, &lc, NULL, this)); 
 }
 
 

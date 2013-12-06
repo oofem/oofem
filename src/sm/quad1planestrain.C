@@ -277,7 +277,7 @@ Quad1PlaneStrain :: computeVolumeAround(GaussPoint *gp)
 
     detJ = fabs( this->interp.giveTransformationJacobian( * gp->giveCoordinates(), FEIElementGeometryWrapper(this) ) );
     weight = gp->giveWeight();
-    thickness = this->giveCrossSection()->give(CS_Thickness);
+    thickness = this->giveCrossSection()->give(CS_Thickness, gp);
     return detJ * weight * thickness;
 }
 
@@ -729,7 +729,7 @@ Quad1PlaneStrain :: drawSpecial(oofegGraphicContext &gc)
 
                         xc = gpglobalcoords.at(1);
                         yc = gpglobalcoords.at(2);
-                        length = sqrt( computeVolumeAround(gp) / this->giveCrossSection()->give(CS_Thickness) ) / 2.;
+                        length = sqrt( computeVolumeAround(gp) / this->giveCrossSection()->give(CS_Thickness, gp) ) / 2.;
                         l [ 0 ].x = ( FPNum ) xc + bx * length;
                         l [ 0 ].y = ( FPNum ) yc + by * length;
                         l [ 0 ].z = 0.;
@@ -850,10 +850,8 @@ Quad1PlaneStrain :: DirectErrorIndicatorRCI_giveCharacteristicSize()
     iRule = integrationRulesArray [ giveDefaultIntegrationRule() ];
     for ( i = 0; i < iRule->giveNumberOfIntegrationPoints(); i++ ) {
         gp  = iRule->getIntegrationPoint(i);
-        volume += this->computeVolumeAround(gp);
+        volume += this->computeVolumeAround(gp)/this->giveCrossSection()->give(CS_Thickness, gp);
     }
-
-    volume /= this->giveCrossSection()->give(CS_Thickness);
 
     return sqrt(volume);
 }

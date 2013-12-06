@@ -246,7 +246,7 @@ TrPlaneStrRot3d :: giveIPValue(FloatArray &answer, GaussPoint *aGaussPoint, Inte
         answer.at(5) = globTensor.at(1, 3); //qxzForce
         answer.at(6) = globTensor.at(1, 2); //qxyForce
         // mutiply stresses by thickness to get forces
-        answer.times(this->giveCrossSection()->give(CS_Thickness));
+        answer.times(this->giveCrossSection()->give(CS_Thickness, aGaussPoint));
 
         if ( type == IST_ShellForceMomentumTensor ) {
             cht = GlobalMomentumTensor;
@@ -295,7 +295,7 @@ TrPlaneStrRot3d :: computeBodyLoadVectorAt(FloatArray &answer, Load *forLoad, Ti
         gp = integrationRulesArray [ 0 ]->getIntegrationPoint(0);
 
         dens = this->giveStructuralCrossSection()->give('d', gp);
-        dV   = this->computeVolumeAround(gp) * this->giveCrossSection()->give(CS_Thickness);
+        dV   = this->computeVolumeAround(gp) * this->giveCrossSection()->give(CS_Thickness, gp);
 
         answer.resize(18);
         answer.zero();

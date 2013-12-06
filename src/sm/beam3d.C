@@ -704,8 +704,9 @@ Beam3d :: computeLocalForceLoadVector(FloatArray &answer, TimeStep *stepN, Value
 void
 Beam3d :: computeBodyLoadVectorAt(FloatArray &answer, Load *load, TimeStep *tStep, ValueModeType mode)
 {
-    StructuralElement::computeBodyLoadVectorAt(answer, load, tStep, mode);
-    answer.times(this->giveCrossSection()->give(CS_Area));
+  FloatArray lc(1);
+  StructuralElement::computeBodyLoadVectorAt(answer, load, tStep, mode);
+  answer.times(this->giveCrossSection()->give(CS_Area, &lc, NULL, this)); 
 }
 
 
@@ -765,13 +766,13 @@ Beam3d :: computeConsistentMassMatrix(FloatMatrix &answer, TimeStep *tStep, doub
     double kappay2 = kappay * kappay;
     double kappaz2 = kappaz * kappaz;
 
-    double density = this->giveMaterial()->give('d', gp);
+    double density = this->giveMaterial()->give('d', gp); // constant density assumed
     if(ipDensity != NULL) {
     	// Override density if desired
     	density = *ipDensity;
     }
 
-    double area = this->giveCrossSection()->give(CS_Area);
+    double area = this->giveCrossSection()->give(CS_Area, gp); // constant area assumed
     double c2y = ( area * density ) / ( ( 1. + 2. * kappay ) * ( 1. + 2. * kappay ) );
     double c2z = ( area * density ) / ( ( 1. + 2. * kappaz ) * ( 1. + 2. * kappaz ) );
     double c1 = ( area * density );

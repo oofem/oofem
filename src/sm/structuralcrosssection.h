@@ -306,14 +306,6 @@ public:
     virtual Interface *giveMaterialInterface(InterfaceType t, IntegrationPoint *ip) { return NULL; }
     virtual bool isCharacteristicMtrxSymmetric(MatResponseMode mode) = 0;
 
-    virtual double give(int aProperty, GaussPoint *gp) = 0; 
-
-    virtual double give(CrossSectionProperty aProperty) = 0;
-    /*{ 
-        OOFEM_ERROR1("StructuralCrossSection :: give - not supported");
-        return 0.0;
-    }*/
-
 };
 } // end namespace oofem
 #endif // structuralcrosssection_h

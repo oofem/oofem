@@ -144,7 +144,7 @@ protected:
 
     void edgeEvalCovarBaseVectorsAt(FloatArray &lCoords, const int iedge, FloatMatrix &gcov, TimeStep *tStep);
 
-    virtual double giveGlobalZcoord(double xi);
+    virtual double giveGlobalZcoord(double xi, FloatArray &lc);
     virtual double giveGlobalZcoordInLayer(double xi, int layer);
 
     FloatMatrix giveAxialMatrix(const FloatArray &vec);
@@ -267,7 +267,7 @@ protected:
     virtual void computeNmatrixAt(const FloatArray &iLocCoords, FloatMatrix &answer);
     virtual void edgeComputeNmatrixAt(FloatArray &lCoords, FloatMatrix &answer);
 
-    virtual void computeStrainVectorInLayer(FloatArray &answer, const FloatArray &masterGpStrain, GaussPoint *slaveGp, TimeStep *tStep);
+    virtual void computeStrainVectorInLayer(FloatArray &answer, const FloatArray &masterGpStrain, GaussPoint *masterGp, GaussPoint *slaveGp, TimeStep *tStep);
     virtual void edgeComputeBmatrixAt(FloatArray &lCoords, FloatMatrix &answer, int li = 1, int ui = ALL_STRAINS);
 
     // Misc

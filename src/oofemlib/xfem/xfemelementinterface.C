@@ -998,7 +998,7 @@ void XfemElementInterface :: computeCohesiveForces(FloatArray &answer, TimeStep 
 
                 NTimesT.beTProductOf(NMatrix, T2D);
                 CrossSection *cs  = element->giveCrossSection();
-                double thickness = cs->give(CS_Thickness);
+                double thickness = cs->give(CS_Thickness, &gp);
                 double dA = thickness * gp.giveWeight();
                 answer.add(dA, NTimesT);
             }
@@ -1172,7 +1172,6 @@ void XfemElementInterface :: computeCohesiveTangent(FloatMatrix &answer, TimeSte
                     jump2DPert.at(2) += eps;
                     computeGlobalCohesiveTractionVector(TPert, jump2DPert, crackNormal, NMatrix, gp, tStep);
 
-
                     K2D.at(1, 2) = ( TPert.at(1) - T.at(1) ) / eps;
                     K2D.at(2, 2) = ( TPert.at(2) - T.at(2) ) / eps;
 
@@ -1185,7 +1184,7 @@ void XfemElementInterface :: computeCohesiveTangent(FloatMatrix &answer, TimeSte
                 tmp2.beTProductOf(NMatrix, tmp);
 
                 CrossSection *cs  = element->giveCrossSection();
-                double thickness = cs->give(CS_Thickness);
+                double thickness = cs->give(CS_Thickness, &gp);
                 double dA = thickness * gp.giveWeight();
                 answer.add(dA, tmp2);
             }

@@ -112,7 +112,20 @@ CrossSection :: restoreIPContext(DataStream *stream, ContextMode mode, GaussPoin
 
 
 double
-CrossSection :: give(CrossSectionProperty aProperty)
+CrossSection :: give(CrossSectionProperty aProperty, GaussPoint* gp)
+// Returns the value of the property aProperty of the receiver.
+{
+    if ( propertyDictionary->includes(aProperty) ) {
+        return propertyDictionary->at(aProperty);
+    } else {
+        OOFEM_ERROR3("Cross-section Number %d has undefined property ID %d", this->giveNumber(), aProperty);
+    }
+
+    return 0.0;
+}
+
+double
+CrossSection :: give(CrossSectionProperty aProperty, const FloatArray* lc, const FloatArray* gc, Element* elem)
 // Returns the value of the property aProperty of the receiver.
 {
     if ( propertyDictionary->includes(aProperty) ) {

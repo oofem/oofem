@@ -113,7 +113,7 @@ DKTPlate :: computeBodyLoadVectorAt(FloatArray &answer, Load *forLoad, TimeStep 
     if ( force.giveSize() ) {
         gp = irule.getIntegrationPoint(0);
         double dens = this->giveStructuralCrossSection()->give('d', gp);
-        double dV   = this->computeVolumeAround(gp) * this->giveCrossSection()->give(CS_Thickness);
+        double dV   = this->computeVolumeAround(gp) * this->giveCrossSection()->give(CS_Thickness, gp);
 
         answer.resize(9);
         answer.zero();
@@ -436,7 +436,7 @@ DKTPlate :: computeLumpedMassMatrix(FloatMatrix &answer, TimeStep *tStep)
 
     double dV = this->computeVolumeAround(gp);
     double density = this->giveStructuralCrossSection()->give('d', gp);
-    double mss1 = dV * this->giveCrossSection()->give(CS_Thickness) * density / 3.;
+    double mss1 = dV * this->giveCrossSection()->give(CS_Thickness, gp) * density / 3.;
 
     answer.at(1, 1) = mss1;
     answer.at(4, 4) = mss1;
@@ -481,19 +481,6 @@ DKTPlate :: computeLocalCoordinates(FloatArray &answer, const FloatArray &coords
     // Fetch local coordinates.
     bool ok = this->interp_lin.global2local( answer, coords, FEIElementGeometryWrapper(this) ) > 0;
 
-    //get midplane location at this point
-    double midplZ;
-    midplZ = z [ 0 ] * answer.at(1) + z [ 1 ] * answer.at(2) + z [ 2 ] * answer.at(3);
-
-    //check that the z is within the element
-    StructuralCrossSection *cs = this->giveStructuralCrossSection();
-    double elthick = cs->give(CS_Thickness);
-
-    if ( elthick / 2.0 + midplZ - fabs( coords.at(3) ) < -POINT_TOL ) {
-        answer.zero();
-        return false;
-    }
-
     //check that the point is in the element and set flag
     for ( int i = 1; i <= 3; i++ ) {
         if ( answer.at(i) < ( 0. - POINT_TOL ) ) {
@@ -504,6 +491,20 @@ DKTPlate :: computeLocalCoordinates(FloatArray &answer, const FloatArray &coords
             return false;
         }
     }
+
+    //get midplane location at this point
+    double midplZ;
+    midplZ = z [ 0 ] * answer.at(1) + z [ 1 ] * answer.at(2) + z [ 2 ] * answer.at(3);
+
+    //check that the z is within the element
+    StructuralCrossSection *cs = this->giveStructuralCrossSection();
+    double elthick = cs->give(CS_Thickness, &answer, NULL, this);
+
+    if ( elthick / 2.0 + midplZ - fabs( coords.at(3) ) < -POINT_TOL ) {
+        answer.zero();
+        return false;
+    }
+
 
     return ok;
 }
@@ -599,14 +600,14 @@ DKTPlate :: SPRNodalRecoveryMI_givePatchType()
 //
 void
 DKTPlate :: computeStrainVectorInLayer(FloatArray &answer, const FloatArray &masterGpStrain, 
-                                       GaussPoint *slaveGp, TimeStep *tStep)
+                                       GaussPoint *masterGp, GaussPoint *slaveGp, TimeStep *tStep)
 // returns full 3d strain vector of given layer (whose z-coordinate from center-line is
 // stored in slaveGp) for given tStep
 {
     double layerZeta, layerZCoord, top, bottom;
 
-    top    = this->giveCrossSection()->give(CS_TopZCoord);
-    bottom = this->giveCrossSection()->give(CS_BottomZCoord);
+    top    = this->giveCrossSection()->give(CS_TopZCoord, masterGp);
+    bottom = this->giveCrossSection()->give(CS_BottomZCoord, masterGp);
     layerZeta = slaveGp->giveCoordinate(3);
     layerZCoord = 0.5 * ( ( 1. - layerZeta ) * bottom + ( 1. + layerZeta ) * top );
 

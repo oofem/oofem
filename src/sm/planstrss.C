@@ -283,7 +283,7 @@ PlaneStress2d :: computeVolumeAround(GaussPoint *aGaussPoint)
 
 
     weight      = aGaussPoint->giveWeight();
-    thickness   = this->giveCrossSection()->give(CS_Thickness);
+    thickness   = this->giveCrossSection()->give(CS_Thickness, aGaussPoint);
     volume      = determinant * weight * thickness;
 
     return volume;
@@ -860,7 +860,7 @@ PlaneStress2d :: drawSpecial(oofegGraphicContext &gc)
 
                         xc = gpglobalcoords.at(1);
                         yc = gpglobalcoords.at(2);
-                        length = sqrt( computeVolumeAround(gp) / this->giveCrossSection()->give(CS_Thickness) ) / 2.;
+                        length = sqrt( computeVolumeAround(gp) / this->giveCrossSection()->give(CS_Thickness, gp) ) / 2.;
                         l [ 0 ].x = ( FPNum ) xc + bx * length;
                         l [ 0 ].y = ( FPNum ) yc + by * length;
                         l [ 0 ].z = 0.;
@@ -975,10 +975,8 @@ PlaneStress2d :: DirectErrorIndicatorRCI_giveCharacteristicSize()
     iRule = integrationRulesArray [ giveDefaultIntegrationRule() ];
     for ( int i = 0; i < iRule->giveNumberOfIntegrationPoints(); i++ ) {
         gp  = iRule->getIntegrationPoint(i);
-        volume += this->computeVolumeAround(gp);
+        volume += this->computeVolumeAround(gp) / this->giveCrossSection()->give(CS_Thickness, gp);
     }
-
-    volume /= this->giveCrossSection()->give(CS_Thickness);
 
     return sqrt(volume);
 }

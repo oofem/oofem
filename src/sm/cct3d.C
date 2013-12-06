@@ -125,8 +125,11 @@ CCTPlate3d :: computeLocalCoordinates(FloatArray &answer, const FloatArray &coor
     FEIVertexListGeometryWrapper wr(3, lcptr);
     FEI2dTrLin _interp(1,2);
     bool inplane = _interp.global2local(llc, inputCoords_ElCS, wr) > 0;
-    // now check if the thid local coordinate is within the thickness of element
-    bool outofplane = (fabs(inputCoords_ElCS.at(3)) <= this->giveCrossSection()->give(CS_Thickness)/2.); 
+    answer.resize(2); answer.at(1) = inputCoords_ElCS.at(1); answer.at(2) = inputCoords_ElCS.at(2);
+    GaussPoint _gp (NULL, 1, new FloatArray(answer), 2.0, _2dPlate);
+    // now check if the third local coordinate is within the thickness of element
+    bool outofplane = (fabs(inputCoords_ElCS.at(3)) <= this->giveCrossSection()->give(CS_Thickness, &_gp)/2.); 
+
     return inplane && outofplane;
 }
 
@@ -345,8 +348,8 @@ CCTPlate3d :: computeBodyLoadVectorAt(FloatArray &answer, Load *forLoad, TimeSte
     if ( force.giveSize() ) {
         gp = irule.getIntegrationPoint(0);
 
-        dens = this->giveStructuralCrossSection()->give('d', gp);
-        dV   = this->computeVolumeAround(gp) * this->giveCrossSection()->give(CS_Thickness);
+        dens = this->giveStructuralCrossSection()->give('d', gp); // constant density assumed
+        dV   = this->computeVolumeAround(gp) * this->giveCrossSection()->give(CS_Thickness, gp); // constant thickness assumed
 
         answer.resize(18);
         answer.zero();

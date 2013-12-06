@@ -85,7 +85,7 @@ public:
 
     // layered cross section support functions
     virtual void computeStrainVectorInLayer(FloatArray &answer, const FloatArray &masterGpStrain,
-                                                  GaussPoint *slaveGp, TimeStep *tStep);
+                                            GaussPoint *masterGp, GaussPoint *slaveGp, TimeStep *tStep);
 
     virtual Interface *giveInterface(InterfaceType it);
 

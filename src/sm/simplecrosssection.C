@@ -213,9 +213,9 @@ SimpleCrossSection :: give2dBeamStiffMtrx(FloatMatrix &answer, MatResponseMode r
     double area, Iy, shearAreaz;
 
     mat->give1dStressStiffMtrx(mat3d, rMode, gp, tStep);
-    area = this->give(CS_Area);
-    Iy   = this->give(CS_InertiaMomentY);
-    shearAreaz = this->give(CS_ShearAreaZ);
+    area = this->give(CS_Area, gp);
+    Iy   = this->give(CS_InertiaMomentY, gp);
+    shearAreaz = this->give(CS_ShearAreaZ, gp);
 
     answer.resize(3, 3);
     answer.zero();
@@ -238,14 +238,14 @@ SimpleCrossSection :: give3dBeamStiffMtrx(FloatMatrix &answer, MatResponseMode r
     mat->give1dStressStiffMtrx(mat3d, rMode, gp, tStep);
     E    = mat3d.at(1, 1);
     G    = mat->give('G', gp);
-    area = this->give(CS_Area);
-    Iy   = this->give(CS_InertiaMomentY);
-    Iz   = this->give(CS_InertiaMomentZ);
-    Ik   = this->give(CS_TorsionMomentX);
+    area = this->give(CS_Area, gp);
+    Iy   = this->give(CS_InertiaMomentY, gp);
+    Iz   = this->give(CS_InertiaMomentZ, gp);
+    Ik   = this->give(CS_TorsionMomentX, gp);
 
     //shearCoeff = this->give(CS_BeamShearCoeff);
-    shearAreay = this->give(CS_ShearAreaY);
-    shearAreaz = this->give(CS_ShearAreaZ);
+    shearAreay = this->give(CS_ShearAreaY, gp);
+    shearAreaz = this->give(CS_ShearAreaZ, gp);
 
     answer.resize(6, 6);
     answer.zero();
@@ -271,7 +271,7 @@ SimpleCrossSection :: give2dPlateStiffMtrx(FloatMatrix &answer, MatResponseMode 
     double thickness3, thickness;
 
     mat->givePlaneStressStiffMtrx(mat3d, rMode, gp, tStep);
-    thickness = this->give(CS_Thickness);
+    thickness = this->give(CS_Thickness, gp);
     thickness3 = thickness * thickness * thickness;
 
     answer.resize(5, 5);
@@ -296,7 +296,7 @@ SimpleCrossSection :: give3dShellStiffMtrx(FloatMatrix &answer, MatResponseMode 
 
     FloatMatrix mat3d;
 
-    double thickness = this->give(CS_Thickness);
+    double thickness = this->give(CS_Thickness, gp);
     double thickness3 = thickness * thickness * thickness;
 
     mat->givePlaneStressStiffMtrx(mat3d, rMode, gp, tStep);
@@ -329,7 +329,7 @@ SimpleCrossSection :: giveMembraneRotStiffMtrx(FloatMatrix &answer, MatResponseM
     mat = dynamic_cast< StructuralMaterial * >( this->giveMaterial(gp) );
     mat->givePlaneStressStiffMtrx(answer, ElasticStiffness, gp, tStep);
     answer.resizeWithData(4, 4);
-    answer.at(4,4) = this->give(CS_DrillingStiffness);
+    answer.at(4,4) = this->give(CS_DrillingStiffness, gp);
 }
 
 
@@ -406,39 +406,39 @@ void SimpleCrossSection :: giveInputRecord(DynamicInputRecord &input)
     StructuralCrossSection :: giveInputRecord(input);
 
     if( this->propertyDictionary->includes(CS_Thickness) ) {
-        input.setField(this->give(CS_Thickness), _IFT_SimpleCrossSection_thick);
+        input.setField(this->propertyDictionary->at(CS_Thickness), _IFT_SimpleCrossSection_thick);
     }
 
     if( this->propertyDictionary->includes(CS_Width) ) {
-        input.setField(this->give(CS_Width), _IFT_SimpleCrossSection_width);
+        input.setField(this->propertyDictionary->at(CS_Width), _IFT_SimpleCrossSection_width);
     }
 
     if( this->propertyDictionary->includes(CS_Area) ) {
-        input.setField(this->give(CS_Area), _IFT_SimpleCrossSection_area);
+        input.setField(this->propertyDictionary->at(CS_Area), _IFT_SimpleCrossSection_area);
     }
 
     if( this->propertyDictionary->includes(CS_TorsionMomentX) ) {
-        input.setField(this->give(CS_TorsionMomentX), _IFT_SimpleCrossSection_ik);
+        input.setField(this->propertyDictionary->at(CS_TorsionMomentX), _IFT_SimpleCrossSection_ik);
     }
 
     if( this->propertyDictionary->includes(CS_InertiaMomentY) ) {
-        input.setField(this->give(CS_InertiaMomentY), _IFT_SimpleCrossSection_iy);
+        input.setField(this->propertyDictionary->at(CS_InertiaMomentY), _IFT_SimpleCrossSection_iy);
     }
 
     if( this->propertyDictionary->includes(CS_InertiaMomentZ) ) {
-        input.setField(this->give(CS_InertiaMomentZ), _IFT_SimpleCrossSection_iz);
+        input.setField(this->propertyDictionary->at(CS_InertiaMomentZ), _IFT_SimpleCrossSection_iz);
     }
 
     if( this->propertyDictionary->includes(CS_ShearAreaY) ) {
-        input.setField(this->give(CS_ShearAreaY), _IFT_SimpleCrossSection_shearareay);
+        input.setField(this->propertyDictionary->at(CS_ShearAreaY), _IFT_SimpleCrossSection_shearareay);
     }
 
     if( this->propertyDictionary->includes(CS_ShearAreaZ) ) {
-        input.setField(this->give(CS_ShearAreaZ), _IFT_SimpleCrossSection_shearareaz);
+        input.setField(this->propertyDictionary->at(CS_ShearAreaZ), _IFT_SimpleCrossSection_shearareaz);
     }
 
     if( this->propertyDictionary->includes(CS_BeamShearCoeff) ) {
-        input.setField(this->give(CS_BeamShearCoeff), _IFT_SimpleCrossSection_shearcoeff);
+        input.setField(this->propertyDictionary->at(CS_BeamShearCoeff), _IFT_SimpleCrossSection_shearcoeff);
     }
 
     input.setField(this->materialNumber, _IFT_SimpleCrossSection_MaterialNumber);
@@ -450,20 +450,6 @@ SimpleCrossSection :: createMaterialStatus(GaussPoint &iGP)
 	Material *mat = domain->giveMaterial(materialNumber);
 	MaterialStatus *matStat = mat->CreateStatus(&iGP);
 	iGP.setMaterialStatus(matStat);
-}
-
-double
-SimpleCrossSection :: give(CrossSectionProperty aProperty)
-{
-    double value = 0.0;
-
-    if ( propertyDictionary->includes(aProperty) ) {
-        value = propertyDictionary->at(aProperty);
-    } else {
-        OOFEM_ERROR3("Simple cross-section Number %d has undefined property ID %d", this->giveNumber(), aProperty);
-    }
-
-    return value;
 }
 
 
@@ -501,7 +487,7 @@ SimpleCrossSection :: computeStressIndependentStrainVector(FloatArray &answer,
             answer.zero();
             answer.at(1) = e0.at(1) * (et.at(1)- mat->giveReferenceTemperature());
             if (et.giveSize() > 1) {
-                thick = this->give(THICKNESS);
+	      thick = this->give(THICKNESS, gp);
                 answer.at(2) = e0.at(1) * et.at(2)/ thick;   // kappa_x
             }
         } else if (matmode == _3dBeam) {
@@ -510,8 +496,8 @@ SimpleCrossSection :: computeStressIndependentStrainVector(FloatArray &answer,
 
             answer.at(1) = e0.at(1) * (et.at(1)- mat->giveReferenceTemperature());
             if (et.giveSize() > 1) {
-                thick = this->give(THICKNESS);
-                width = this->give(WIDTH);
+	      thick = this->give(THICKNESS, gp);
+	      width = this->give(WIDTH, gp);
                 answer.at(5) = e0.at(1) * et.at(2)/ thick;   // kappa_y
                 if (et.giveSize() > 2)
                     answer.at(6) = e0.at(1) * et.at(3)/ width;   // kappa_z
@@ -522,7 +508,7 @@ SimpleCrossSection :: computeStressIndependentStrainVector(FloatArray &answer,
                 answer.resize (5);
                 answer.zero();
 
-                thick = this->give(THICKNESS);
+                thick = this->give(THICKNESS, gp);
                 if (et.giveSize() > 1) {
                     answer.at(1) = e0.at(1) * et.at(2)/ thick;   // kappa_x
                     answer.at(2) = e0.at(2) * et.at(2)/ thick;   // kappa_y
@@ -535,7 +521,7 @@ SimpleCrossSection :: computeStressIndependentStrainVector(FloatArray &answer,
             answer.at(1) = e0.at(1) * (et.at(1)- mat->giveReferenceTemperature());
             answer.at(2) = e0.at(2) * (et.at(1)- mat->giveReferenceTemperature());
             if (et.giveSize() > 1) {
-                thick = this->give(THICKNESS);
+	      thick = this->give(THICKNESS, gp);
                 answer.at(4) = e0.at(1) * et.at(2)/ thick;   // kappa_x
                 answer.at(5) = e0.at(2) * et.at(2)/ thick;   // kappa_y
             }

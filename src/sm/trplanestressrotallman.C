@@ -214,7 +214,7 @@ TrPlanestressRotAllman :: computeStiffnessMatrixZeroEnergyStabilization(FloatMat
   b.at(1,9)-=1.0/3.0;
   // add alpha*Volume*B^T[G]B to element stiffness matrix
   double G = this->giveStructuralCrossSection()->give(Gxy, this->giveDefaultIntegrationRulePtr()->getIntegrationPoint(0));
-  double coeff = G * this->giveArea() * this->giveCrossSection()->give(CS_Thickness) * 1.e-6;
+  double coeff = G * this->giveArea() * this->giveCrossSection()->give(CS_Thickness, this->giveDefaultIntegrationRulePtr()->getIntegrationPoint(0)) * 1.e-6;
   answer.beTProductOf (b,b);
   answer.times(coeff);
 }
@@ -387,7 +387,7 @@ double TrPlanestressRotAllman :: computeVolumeAround(GaussPoint *gp)
     // safe to use linear interpolation here (geometry is linear)
     detJ = fabs( this->interp.giveTransformationJacobian( * gp->giveCoordinates(), FEIElementGeometryWrapper(this) ) );
 
-    return detJ *weight *this->giveCrossSection()->give(CS_Thickness);
+    return detJ *weight *this->giveCrossSection()->give(CS_Thickness), gp;
 }
 */
 

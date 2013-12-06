@@ -236,7 +236,7 @@ void Tr1Darcy :: computeEdgeBCSubVectorAt(FloatArray &answer, Load *load, int iE
 
 double Tr1Darcy :: giveThicknessAt(const FloatArray &gcoords)
 {
-    return this->giveCrossSection()->give(CS_Thickness);
+  return this->giveCrossSection()->give(CS_Thickness, NULL, &gcoords, this);
 }
 
 

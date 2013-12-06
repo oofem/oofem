@@ -105,7 +105,7 @@ Tr1_ht :: computeVolumeAround(GaussPoint *gp)
     double determinant, weight, volume;
     determinant = fabs( this->interp.giveTransformationJacobian(* gp->giveCoordinates(), FEIElementGeometryWrapper(this)) );
     weight = gp->giveWeight();
-    volume = determinant * weight * this->giveCrossSection()->give(CS_Thickness);
+    volume = determinant * weight * this->giveCrossSection()->give(CS_Thickness, gp);
 
     return volume;
 }
@@ -114,16 +114,16 @@ Tr1_ht :: computeVolumeAround(GaussPoint *gp)
 double
 Tr1_ht :: giveThicknessAt(const FloatArray &gcoords)
 {
-    return this->giveCrossSection()->give(CS_Thickness);
+  return this->giveCrossSection()->give(CS_Thickness, NULL, &gcoords, this);
 }
 
 
 double
 Tr1_ht :: computeEdgeVolumeAround(GaussPoint *gp, int iEdge)
 {
-    double determinant, thick;
-    determinant = fabs( this->interp.edgeGiveTransformationJacobian(iEdge, *gp->giveCoordinates(), FEIElementGeometryWrapper(this)) );
-    thick = this->giveCrossSection()->give(CS_Thickness);
+    double determinant = fabs( this->interp.edgeGiveTransformationJacobian(iEdge, *gp->giveCoordinates(), FEIElementGeometryWrapper(this)) );
+    FloatArray gc;
+    double thick = this->giveCrossSection()->give(CS_Thickness, gp->giveCoordinates(), NULL, this); // 't'
     return determinant *thick *gp->giveWeight();
 }
 

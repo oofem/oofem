@@ -100,7 +100,7 @@ public:
 #endif
 
     virtual void computeStrainVectorInLayer(FloatArray &answer, const FloatArray &masterGpStrain,
-                                     GaussPoint *slaveGp, TimeStep *tStep);
+					    GaussPoint *masterGp, GaussPoint *slaveGp, TimeStep *tStep);
 
 protected:
     virtual void computeEdgeLoadVectorAt(FloatArray &answer, Load *, int, TimeStep *, ValueModeType mode);

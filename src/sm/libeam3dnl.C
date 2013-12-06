@@ -410,16 +410,16 @@ LIBeam3dNL :: computeLumpedMassMatrix(FloatMatrix &answer, TimeStep *tStep)
 {
     GaussPoint *gp = integrationRulesArray [ 0 ]->getIntegrationPoint(0);
     double density = this->giveStructuralCrossSection()->give('d', gp);
-    double halfMass   = density * this->giveCrossSection()->give(CS_Area) * this->giveLength() / 2.;
+    double halfMass   = density * this->giveCrossSection()->give(CS_Area, gp) * this->giveLength() / 2.;
     answer.resize(12, 12);
     answer.zero();
     answer.at(1, 1) = answer.at(2, 2) = answer.at(3, 3) = halfMass;
     answer.at(7, 7) = answer.at(8, 8) = answer.at(9, 9) = halfMass;
 
     double Ik, Iy, Iz;
-    Ik   = this->giveCrossSection()->give(CS_TorsionMomentX);
-    Iy   = this->giveCrossSection()->give(CS_InertiaMomentY);
-    Iz   = this->giveCrossSection()->give(CS_InertiaMomentZ);
+    Ik   = this->giveCrossSection()->give(CS_TorsionMomentX, gp);
+    Iy   = this->giveCrossSection()->give(CS_InertiaMomentY, gp);
+    Iz   = this->giveCrossSection()->give(CS_InertiaMomentZ, gp);
     halfMass   = density * this->giveLength() / 2.;
     answer.at(4, 4) = answer.at(10, 10) = Ik * halfMass;
     answer.at(5, 5) = answer.at(11, 11) = Iy * halfMass;
@@ -673,8 +673,9 @@ LIBeam3dNL :: computeLoadLEToLRotationMatrix(FloatMatrix &answer, int iEdge, Gau
 void
 LIBeam3dNL :: computeBodyLoadVectorAt(FloatArray &answer, Load *load, TimeStep *tStep, ValueModeType mode)
 {
-    NLStructuralElement::computeBodyLoadVectorAt(answer, load, tStep, mode);
-    answer.times(this->giveCrossSection()->give(CS_Area));
+  FloatArray lc(1);
+  NLStructuralElement::computeBodyLoadVectorAt(answer, load, tStep, mode);
+  answer.times(this->giveCrossSection()->give(CS_Area, &lc, NULL, this)); 
 }
 
 

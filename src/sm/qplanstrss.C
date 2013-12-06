@@ -150,7 +150,7 @@ QPlaneStress2d :: computeVolumeAround(GaussPoint *aGaussPoint)
     determinant = fabs( this->interpolation.giveTransformationJacobian( * aGaussPoint->giveCoordinates(),
                                                                        FEIElementGeometryWrapper(this) ) );
     weight      = aGaussPoint->giveWeight();
-    thickness   = this->giveCrossSection()->give(CS_Thickness);
+    thickness   = this->giveCrossSection()->give(CS_Thickness, aGaussPoint);
     volume      = determinant * weight * thickness;
 
     return volume;
