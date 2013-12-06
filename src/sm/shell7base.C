@@ -1786,7 +1786,7 @@ void Shell7Base :: NodalAveragingRecoveryMI_computeNodalValue(FloatArray &answer
         answer.at(1) += this->giveNode(node)->giveDofWithID(W_u)->giveUnknown(VM_Total, tStep);
         answer.at(2) += this->giveNode(node)->giveDofWithID(W_v)->giveUnknown(VM_Total, tStep);
         answer.at(3) += this->giveNode(node)->giveDofWithID(W_w)->giveUnknown(VM_Total, tStep);
-        answer.times( this->giveCrossSection()->give(CS_Thickness, NULL, this->giveNode(node)->giveCoordinates(), this) );
+        answer.times( this->giveCrossSection()->give(CS_Thickness, this->giveNode(node)->giveCoordinates(), this, false) );
     } else {
         answer.resize(0);
     }

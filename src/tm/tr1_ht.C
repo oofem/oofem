@@ -114,7 +114,7 @@ Tr1_ht :: computeVolumeAround(GaussPoint *gp)
 double
 Tr1_ht :: giveThicknessAt(const FloatArray &gcoords)
 {
-  return this->giveCrossSection()->give(CS_Thickness, NULL, &gcoords, this);
+  return this->giveCrossSection()->give(CS_Thickness, &gcoords, this, false);
 }
 
 

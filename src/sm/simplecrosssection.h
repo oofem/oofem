@@ -144,7 +144,7 @@ public:
 
     virtual double give(int aProperty, GaussPoint *gp);
     virtual double give(CrossSectionProperty a, GaussPoint *gp) {return CrossSection::give(a,gp);}
-    virtual double give(CrossSectionProperty a, const FloatArray* lc, const FloatArray* gc, Element* elem) {return CrossSection::give(a,lc,gc,elem);}
+    virtual double give(CrossSectionProperty a, const FloatArray* coords, Element* elem, bool local) {return CrossSection::give(a,coords,elem,local);}
     virtual Material *giveMaterial(IntegrationPoint *ip);
     
     int giveMaterialNumber() const { return this->materialNumber; };

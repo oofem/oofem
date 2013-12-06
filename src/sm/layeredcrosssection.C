@@ -1182,7 +1182,7 @@ LayeredCrossSection :: give(CrossSectionProperty aProperty, GaussPoint *gp)
     return CrossSection :: give(aProperty, gp);
 }
 double
-LayeredCrossSection :: give(CrossSectionProperty aProperty, const FloatArray* lc, const FloatArray* gc, Element* elem)
+LayeredCrossSection :: give(CrossSectionProperty aProperty, const FloatArray* coords, Element* elem, bool local)
 {
     if ( aProperty == CS_Thickness ) {
         return this->computeIntegralThick();
@@ -1197,7 +1197,7 @@ LayeredCrossSection :: give(CrossSectionProperty aProperty, const FloatArray* lc
         return this->numberOfLayers;
     }
 
-    return CrossSection :: give(aProperty, lc, gc, elem);
+    return CrossSection :: give(aProperty, coords, elem, local);
 }
 
 

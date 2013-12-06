@@ -126,7 +126,7 @@ Quad1_ht :: computeVolumeAround(GaussPoint *gp)
 double
 Quad1_ht :: giveThicknessAt(const FloatArray &gcoords)
 {
-  return this->giveCrossSection()->give(CS_Thickness, NULL, &gcoords, this);
+  return this->giveCrossSection()->give(CS_Thickness, &gcoords, this, false);
 }
 
 
