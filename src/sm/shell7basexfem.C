@@ -378,7 +378,7 @@ Shell7BaseXFEM :: giveInternalForcesVector(FloatArray &answer, TimeStep *tStep, 
             }
         }
     }
-    
+
 }
 
 #if 0
@@ -448,7 +448,6 @@ Shell7BaseXFEM :: discComputeSectionalForces(FloatArray &answer, TimeStep *tStep
             lCoords = *gp->giveCoordinates();           
             double levelSet = this->evaluateLevelSet(lCoords, ei);
             ei->evaluateEnrFuncAt(ef, lCoords, levelSet);
-            //printf("ef = %e \n", ef[0]);
 
             if ( ef[0] > 0.1 ) {  
                 this->computeBmatrixAt(lCoords, B);
@@ -485,6 +484,8 @@ Shell7BaseXFEM :: evaluateLevelSet(const FloatArray &lCoords, EnrichmentItem *ei
         const IntArray &elNodes = this->giveDofManArray();
         this->fei->evalN( N, lCoords, FEIElementGeometryWrapper(this) );
         ei->interpLevelSet(levelSet, N, elNodes);
+    } else {
+        OOFEM_ERROR1("Shell7BaseXFEm error in evaluation of levelset");
     }          
     return levelSet;
 }
@@ -681,7 +682,7 @@ Shell7BaseXFEM :: computeCohesiveTangentAt(FloatMatrix &answer, TimeStep *tStep,
 
 
 //---------------------------------------------
-// Optimized version
+// Old version for delamination only
 void
 Shell7BaseXFEM :: computeStiffnessMatrixOLD(FloatMatrix &answer, MatResponseMode rMode, TimeStep *tStep)
 {
@@ -850,7 +851,7 @@ Shell7BaseXFEM :: computeStiffnessMatrixOLD(FloatMatrix &answer, MatResponseMode
 
 
 
-
+// Old version for through the thickness crack
 void
 Shell7BaseXFEM :: computeStiffnessMatrix(FloatMatrix &answer, MatResponseMode rMode, TimeStep *tStep)
 {
@@ -867,7 +868,6 @@ Shell7BaseXFEM :: computeStiffnessMatrix(FloatMatrix &answer, MatResponseMode rM
     std::vector<IntArray> orderingArrays;
     std::vector<IntArray> activeDofsArrays;
     
-    //new
     FloatArray lCoords, N;
     std :: vector< double > efM, efK;
 
@@ -900,18 +900,10 @@ Shell7BaseXFEM :: computeStiffnessMatrix(FloatMatrix &answer, MatResponseMode rM
                         this->computeOrderingArray( orderingArrays[m-1], activeDofsArrays[m-1], eiM); 
                     }
 
-                    /*double levelSetM = 0.0;
-                    if ( dynamic_cast< Delamination * >( eiM ) ) {
-                        levelSetM = lCoords.at(3) - dynamic_cast< Delamination * >( eiM )->giveDelamXiCoord();                   
-                    } else if ( dynamic_cast< Crack * >( eiM ) ) {
-                        const IntArray &elNodes = this->giveDofManArray();
-                        this->fei->evalN( N, lCoords, FEIElementGeometryWrapper(this) );
-                        eiM->interpLevelSet(levelSetM, N, elNodes);
-                    }   */
                     double levelSetM = this->evaluateLevelSet(lCoords, eiM);
                     eiM->evaluateEnrFuncAt(efM, lCoords, levelSetM);
 
-
+                    
                     // K_{c,dk} & K_{dk,c}                
                     if ( efM[0] > 0.1 ) {               
                         tempRed.beSubMatrixOf(KCD, activeDofsC, activeDofsArrays[m-1]);
@@ -926,14 +918,6 @@ Shell7BaseXFEM :: computeStiffnessMatrix(FloatMatrix &answer, MatResponseMode rM
 
                         if ( eiK->isElementEnriched(this) ) {
 
-                            /*double levelSetK = 0.0;
-                            if ( dynamic_cast< Delamination * >( eiK ) ) {
-                                levelSetK = lCoords.at(3) - dynamic_cast< Delamination * >( eiK )->giveDelamXiCoord();                   
-                            } else if ( dynamic_cast< Crack * >( eiK ) ) {
-                                const IntArray &elNodes = this->giveDofManArray();
-                                this->fei->evalN( N, lCoords, FEIElementGeometryWrapper(this) );
-                                eiK->interpLevelSet(levelSetK, N, elNodes);
-                            }   */
                             double levelSetK = this->evaluateLevelSet(lCoords, eiK);
                             eiK->evaluateEnrFuncAt(efK, lCoords, levelSetK);   
                             
@@ -1032,6 +1016,7 @@ Shell7BaseXFEM :: computeStiffnessMatrix(FloatMatrix &answer, MatResponseMode rM
     }
 #endif
     
+
 }
 
 
@@ -1053,7 +1038,6 @@ Shell7BaseXFEM :: discComputeBulkTangentMatrix(FloatMatrix &KCC, FloatMatrix &KC
     lCoords = *ip->giveCoordinates();
     this->computeBmatrixAt(lCoords, B, 0, 0);
     this->computeGeneralizedStrainVectorNew(genEpsC, solVecC , B);
-
     StructuralMaterial *material = static_cast< StructuralMaterial* >( domain->giveMaterial( this->layeredCS->giveLayerMaterial(layer) ) );
     Shell7Base :: computeLinearizedStiffness(ip, material, tStep, A, genEpsC);
             

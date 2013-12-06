@@ -47,6 +47,13 @@
 
 #include "tr2shell7.h"
 
+#include "patchintegrationrule.h"
+#include "XFEMDebugTools.h"
+#include "enrichmentdomain.h"
+#include <string>
+#include <sstream>
+
+
 namespace oofem {
 
 REGISTER_Element( Tr2Shell7XFEM );
@@ -92,21 +99,22 @@ FEInterpolation* Tr2Shell7XFEM :: giveInterpolation() const { return &interpolat
 void 
 Tr2Shell7XFEM :: computeGaussPoints()
 {
+
+    XfemManager *xMan = this->giveDomain()->giveXfemManager();
+
+    if ( !integrationRulesArray ) {  
+        if( xMan->isElementEnriched(this) ) {
+            this->updateIntegrationRule();
+        }
+    }
+    
     if ( !integrationRulesArray ) {
+
         int nPointsTri  = 6;   // points in the plane
         //int nPointsTri  = 25;   // points in the plane
-        int nPointsEdge = 2;   // edge integration
+        int nPointsEdge = 2;   // edge integration            
 
-        // need to check if interface has failed but also need to update the integration rule later
-        XfemManager *xMan = this->giveDomain()->giveXfemManager();
-
-        if( xMan->isElementEnriched(this) ) {
-            if(!this->XfemElementInterface_updateIntegrationRule()) {
-                //PlaneStress2d :: computeGaussPoints();
-            }
-
-        }
-
+        // Cohesive zone
         for ( int i = 1; i <= xMan->giveNumberOfEnrichmentItems(); i++ ) { 
             Delamination *dei =  dynamic_cast< Delamination * >( xMan->giveEnrichmentItem(i) ); 
             if (dei) {
@@ -115,12 +123,15 @@ Tr2Shell7XFEM :: computeGaussPoints()
                 for ( int i = 0; i < numberOfInterfaces; i++ ) {
                     czIntegrationRulesArray [ i ] = new GaussIntegrationRule(1, this);
                     czIntegrationRulesArray [ i ]->SetUpPointsOnTriangle(nPointsTri, _3dInterface);
-                    //czIntegrationRulesArray [ i ]->SetUpPointsOnTriangle(3, _3dInterface);
                 }
             }
         }
-        
 
+        // Layered cross section for bulk integration
+        this->numberOfIntegrationRules = this->layeredCS->giveNumberOfLayers();
+        this->numberOfGaussPoints = this->layeredCS->giveNumberOfLayers()*nPointsTri*this->layeredCS->giveNumIntegrationPointsInLayer();
+        this->layeredCS->setupLayeredIntegrationRule(integrationRulesArray, this, nPointsTri);
+        
         specialIntegrationRulesArray = new IntegrationRule * [ 3 ];
 
         // Midplane (Mass matrix integrated analytically through the thickness)
@@ -131,21 +142,98 @@ Tr2Shell7XFEM :: computeGaussPoints()
         specialIntegrationRulesArray [ 2 ] = new GaussIntegrationRule(1, this);
         specialIntegrationRulesArray [ 2 ]->SetUpPointsOnLine(nPointsEdge, _3dMat);
         
-        // Layered cross section for bulk integration
-        this->numberOfIntegrationRules = this->layeredCS->giveNumberOfLayers();
-        this->numberOfGaussPoints = this->layeredCS->giveNumberOfLayers()*nPointsTri*this->layeredCS->giveNumIntegrationPointsInLayer();
-        this->layeredCS->setupLayeredIntegrationRule(integrationRulesArray, this, nPointsTri);
-
         // Thickness integration for stress recovery
         specialIntegrationRulesArray [ 0 ] = new GaussIntegrationRule(1, this);
         specialIntegrationRulesArray [ 0 ]->SetUpPointsOnLine(this->layeredCS->giveNumIntegrationPointsInLayer(), _3dMat);
 
-        
-
-
-
     }
 
+}
+
+
+bool Tr2Shell7XFEM :: updateIntegrationRule()
+{
+    bool partitionSucceeded = false;
+    XfemManager *xMan = this->giveDomain()->giveXfemManager();
+
+    if ( xMan->isElementEnriched(this) ) {
+        //MaterialMode matMode = this->giveMaterialMode();
+        MaterialMode matMode = _3dMat;
+
+        std :: vector< std :: vector< FloatArray > >pointPartitions;
+        std :: vector< Triangle >allTri;
+
+        int numEI = xMan->giveNumberOfEnrichmentItems();
+        for ( int eiIndex = 1; eiIndex <= numEI; eiIndex++ ) {
+            EnrichmentItem *ei = xMan->giveEnrichmentItem(eiIndex);
+
+
+            // Get the points describing each subdivision of the element
+            double startXi, endXi;
+            bool intersection = false;
+            this->XfemElementInterface_prepareNodesForDelaunay(pointPartitions, startXi, endXi, eiIndex, intersection);
+
+            if ( intersection ) {
+                // Use XfemElementInterface_partitionElement to subdivide the element
+                for ( int i = 0; i < int( pointPartitions.size() ); i++ ) {
+                    // Triangulate the subdivisions
+                    this->XfemElementInterface_partitionElement(allTri, pointPartitions [ i ]);
+                }
+
+                partitionSucceeded = true;
+            }
+            
+
+            // For debugging only
+            EDCrack *edCrack =  dynamic_cast< EDCrack* > ( ei->giveEnrichmentDomain() );
+            PolygonLine *pl = dynamic_cast< PolygonLine * >( edCrack->bg );
+            if ( pl != NULL ) {
+                pl->printVTK();
+            }
+
+        }
+
+        ////////////////////////////////////////
+        // When we reach this point, we have a
+        // triangulation that is adapted to all
+        // cracks passing through the element.
+        // Therefore, we can set up integration
+        // points on each triangle.
+
+        if ( xMan->giveVtkDebug() ) {
+            std :: stringstream str3;
+            int elIndex = this->giveGlobalNumber();
+            str3 << "TriEl" << elIndex << ".vtk";
+            std :: string name3 = str3.str();
+
+            XFEMDebugTools :: WriteTrianglesToVTK(name3, allTri);
+        }
+        
+        // Create integrationrule based on a 'wedge patch'
+        int nPointsTri  = 6;   // points in the plane
+        int nPointsEdge = 2;   // edge integration
+
+        if ( allTri.size() == 0 ) { // No subdivision, return and create iRule as normal
+            return partitionSucceeded;
+
+        } else { // create iRule according to subdivision
+            int ruleNum = 1;
+            int numberOfLayers     = this->layeredCS->giveNumberOfLayers();
+            int numPointsThickness = this->layeredCS->giveNumIntegrationPointsInLayer();
+
+            integrationRulesArray = new IntegrationRule * [ numberOfLayers ];
+            for ( int i = 0; i < numberOfLayers; i++ ) {
+                integrationRulesArray [ i ] = new PatchIntegrationRule(ruleNum, this, allTri);
+                integrationRulesArray [ i ]->SetUpPointsOnWedge(nPointsTri, numPointsThickness, _3dMat);
+                this->layeredCS->setupLayeredIntegrationRule(integrationRulesArray, this, nPointsTri);
+
+            }
+            this->layeredCS->mapLayerGpCoordsToShellCoords(integrationRulesArray);
+            
+        }
+    }
+
+    return partitionSucceeded;
 }
 
 

@@ -87,6 +87,7 @@ protected:
     virtual double computeAreaAround(GaussPoint *gp, double xi);
 
     virtual void computeGaussPoints();
+    bool updateIntegrationRule();
     virtual void giveLocalNodeCoords(FloatArray &nodeLocalXiCoords, FloatArray &nodeLocalEtaCoords);
 
     virtual FEInterpolation *giveInterpolation() const;

@@ -338,6 +338,8 @@ void XfemElementInterface :: XfemElementInterface_partitionElement(std :: vector
     dl.triangulate(iPoints, oTriangles);
 }
 
+
+
 bool XfemElementInterface :: XfemElementInterface_updateIntegrationRule()
 {
     bool partitionSucceeded = false;
@@ -706,6 +708,8 @@ void XfemElementInterface :: XfemElementInterface_prepareNodesForDelaunay(std ::
         else {
             oPointPartitions.resize(1);
 
+            printf("Warning: No tip found.\n");
+
             for ( int i = 1; i <= this->element->giveNumberOfDofManagers(); i++ ) {
                 const FloatArray &nodeCoord = * element->giveDofManager(i)->giveCoordinates();
                 oPointPartitions [ 0 ].push_back(nodeCoord);
@@ -718,6 +722,11 @@ void XfemElementInterface :: XfemElementInterface_prepareNodesForDelaunay(std ::
         }
 
         oIntersection = true;
+
+
+        oPointPartitions.resize(0);
+        oIntersection = true;
+        false;
         return;
     }
 

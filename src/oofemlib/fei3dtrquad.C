@@ -247,7 +247,7 @@ FEI3dTrQuad :: computeLocalEdgeMapping(IntArray &edgeNodes, int iedge)
         bNode = 1;
         cNode = 6;
     } else {
-        OOFEM_ERROR2("FEI3dTrQuad :: computeEdgeMapping: wrong egde number (%d)", iedge);
+        OOFEM_ERROR2("FEI3dTrQuad :: computeEdgeMapping: wrong edge number (%d)", iedge);
     }
 
     edgeNodes.at(1) = aNode;
@@ -371,7 +371,10 @@ FEI3dTrQuad :: surfaceGiveTransformationJacobian(int isurf, const FloatArray &lc
 void
 FEI3dTrQuad :: computeLocalSurfaceMapping(IntArray &surfNodes, int isurf)
 {
-    surfNodes.setValues(6, 1, 2, 3, 4, 5, 6);
+    //surfNodes.setValues(6, 1, 2, 3, 4, 5, 6);
+    ///@todo - fix wrt xfem
+    computeLocalEdgeMapping(surfNodes, isurf);
+
 }
 
 IntegrationRule *
