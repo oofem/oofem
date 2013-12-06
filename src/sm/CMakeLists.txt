@@ -129,6 +129,7 @@ set (sm_material
 	intmatbilinczelastic.C
     coupledfieldselement.C
     phasefieldelement.C
+	intmatbilinczfagerstromrate.C
 	)
 
 set (sm_error
