@@ -404,7 +404,7 @@ IntMatBilinearCZFagerstrom :: give3dStiffnessMatrix_dTdj(FloatMatrix &answer, Ma
 			
             FloatMatrix Iep = status->giveTempIep();
 			
-			//Iep.printYourself();
+			//Iep.ourselfourself();
 			
 			//if (J.at(3)<0) {
 			//	Kstiff.at(1,1) = (1-damage)*Kstiff.at(1,1);
