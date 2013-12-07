@@ -45,7 +45,6 @@
 #define _IFT_Q27Space_Name "q27space"
 
 namespace oofem {
-
 class FEI3dHexaTriQuad;
 
 /**

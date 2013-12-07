@@ -78,12 +78,11 @@ PlaneStress2dXfem :: computeGaussPoints()
 {
     XfemManager *xMan = this->giveDomain()->giveXfemManager();
 
-    if( xMan->isElementEnriched(this) ) {
-    	if(!this->XfemElementInterface_updateIntegrationRule()) {
+    if ( xMan->isElementEnriched(this) ) {
+        if ( !this->XfemElementInterface_updateIntegrationRule() ) {
             PlaneStress2d :: computeGaussPoints();
-    	}
-    }
-    else {
+        }
+    } else   {
         PlaneStress2d :: computeGaussPoints();
     }
 }

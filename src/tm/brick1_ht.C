@@ -51,10 +51,9 @@
 #endif
 
 namespace oofem {
-
-REGISTER_Element( Brick1_ht );
-REGISTER_Element( Brick1_hmt );
-REGISTER_Element( Brick1_mt );
+REGISTER_Element(Brick1_ht);
+REGISTER_Element(Brick1_hmt);
+REGISTER_Element(Brick1_mt);
 
 FEI3dHexaLin Brick1_ht :: interpolation;
 
@@ -84,7 +83,7 @@ Brick1_ht :: computeGaussPoints()
         numberOfIntegrationRules = 1;
         integrationRulesArray = new IntegrationRule * [ 1 ];
         integrationRulesArray [ 0 ] = new GaussIntegrationRule(1, this, 1, 2);
-        this->giveCrossSection()->setupIntegrationPoints( *integrationRulesArray[0], numberOfGaussPoints, this );
+        this->giveCrossSection()->setupIntegrationPoints(* integrationRulesArray [ 0 ], numberOfGaussPoints, this);
     }
 }
 
@@ -94,12 +93,12 @@ Brick1_ht :: initializeFrom(InputRecord *ir)
 {
     numberOfGaussPoints = 8;
     IRResultType result = this->TransportElement :: initializeFrom(ir);
-	if(result != IRRT_OK) {
-		return result;
-	}
+    if ( result != IRRT_OK ) {
+        return result;
+    }
 
     if ( !( ( numberOfGaussPoints == 8 ) ||
-           ( numberOfGaussPoints == 27 ) ) ) {
+            ( numberOfGaussPoints == 27 ) ) ) {
         numberOfGaussPoints = 8;
     }
 
@@ -113,7 +112,7 @@ Brick1_ht :: computeVolumeAround(GaussPoint *aGaussPoint)
 {
     double determinant, weight, volume;
     determinant = fabs( this->interpolation.giveTransformationJacobian( * aGaussPoint->giveCoordinates(),
-                                                                       FEIElementGeometryWrapper(this) ) );
+                                                                        FEIElementGeometryWrapper(this) ) );
 
     weight = aGaussPoint->giveWeight();
     volume = determinant * weight;
@@ -125,7 +124,7 @@ double
 Brick1_ht :: computeEdgeVolumeAround(GaussPoint *gp, int iEdge)
 {
     double result = this->interpolation.edgeGiveTransformationJacobian( iEdge, * gp->giveCoordinates(),
-                                                                       FEIElementGeometryWrapper(this) );
+                                                                        FEIElementGeometryWrapper(this) );
     return result * gp->giveWeight();
 }
 

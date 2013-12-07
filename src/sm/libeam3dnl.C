@@ -51,8 +51,7 @@
 #endif
 
 namespace oofem {
-
-REGISTER_Element( LIBeam3dNL );
+REGISTER_Element(LIBeam3dNL);
 
 LIBeam3dNL :: LIBeam3dNL(int n, Domain *aDomain) : NLStructuralElement(n, aDomain), tc(3, 3), tempTc(3, 3) //, kappa (3)
 {
@@ -344,7 +343,7 @@ LIBeam3dNL :: computeGaussPoints()
         numberOfIntegrationRules = 1;
         integrationRulesArray = new IntegrationRule * [ 1 ];
         integrationRulesArray [ 0 ] = new GaussIntegrationRule(1, this, 1, 2);
-        this->giveCrossSection()->setupIntegrationPoints( *integrationRulesArray[0], 1, this );
+        this->giveCrossSection()->setupIntegrationPoints(* integrationRulesArray [ 0 ], 1, this);
     }
 }
 
@@ -528,7 +527,7 @@ LIBeam3dNL :: computeEgdeNMatrixAt(FloatMatrix &answer, int iedge, GaussPoint *a
      * without regarding particular side
      */
 
-    this->computeNmatrixAt(*(aGaussPoint->giveLocalCoordinates()), answer);
+    this->computeNmatrixAt(* ( aGaussPoint->giveLocalCoordinates() ), answer);
 }
 
 
@@ -673,9 +672,9 @@ LIBeam3dNL :: computeLoadLEToLRotationMatrix(FloatMatrix &answer, int iEdge, Gau
 void
 LIBeam3dNL :: computeBodyLoadVectorAt(FloatArray &answer, Load *load, TimeStep *tStep, ValueModeType mode)
 {
-  FloatArray lc(1);
-  NLStructuralElement::computeBodyLoadVectorAt(answer, load, tStep, mode);
-  answer.times(this->giveCrossSection()->give(CS_Area, &lc, NULL, this)); 
+    FloatArray lc(1);
+    NLStructuralElement :: computeBodyLoadVectorAt(answer, load, tStep, mode);
+    answer.times( this->giveCrossSection()->give(CS_Area, & lc, NULL, this) );
 }
 
 
@@ -713,7 +712,7 @@ LIBeam3dNL :: computeTempCurv(FloatArray &answer, TimeStep *tStep)
 {
     IntegrationRule *iRule = integrationRulesArray [ giveDefaultIntegrationRule() ];
     GaussPoint *gp = iRule->getIntegrationPoint(0);
-    
+
     FloatArray ui(3), xd(3), curv(3), ac(3), PrevEpsilon;
     FloatMatrix sc(3, 3), tmid(3, 3);
 

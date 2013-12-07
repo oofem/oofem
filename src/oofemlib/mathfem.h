@@ -46,7 +46,6 @@
 #include <cfloat> // For _isnan
 
 namespace oofem {
-
 class FloatArray;
 
 #ifndef HAVE_M_PI
@@ -74,7 +73,7 @@ inline int max(int i, int j)
 
 /// Returns the clamped value of a between upper and lower
 inline double clamp(int a, int lower, int upper)
-{ return ( a <= lower ? lower : ( a >= upper ? upper : a) ); }
+{ return ( a <= lower ? lower : ( a >= upper ? upper : a ) ); }
 
 /// Returns bigger value form two given long decimals
 inline long max(long i, long j)
@@ -86,7 +85,7 @@ inline double max(double i, double j)
 
 /// Returns the clamped value of a between upper and lower
 inline double clamp(double a, double lower, double upper)
-{ return ( a <= lower ? lower : ( a >= upper ? upper : a) ); }
+{ return ( a <= lower ? lower : ( a >= upper ? upper : a ) ); }
 
 /// Returns the signum of given value (if value is < 0 returns -1, otherwise returns 1)
 inline double sgn(double i)
@@ -96,18 +95,18 @@ inline double sgn(double i)
 double signum(double i);
 
 #ifndef HAVE_ISNAN
-#ifdef _MSC_VER
+ #ifdef _MSC_VER
 /// Returns true is x is NaN
 inline bool isnan(double x) { return _isnan(x) != 0; }
-#else
+ #else
 // Last attempt to find a isnan function, rely on C++11
-inline bool isnan(double x) { return std::isnan(x); }
-#endif
+inline bool isnan(double x) { return std :: isnan(x); }
+ #endif
 #endif
 
 #ifndef HAVE_CBRT
 /// Returns the cubic root of x.
-inline double cbrt(double x) { return sgn(x)*pow(fabs(x),1.0/3.0); }
+inline double cbrt(double x) { return sgn(x) * pow(fabs(x), 1.0 / 3.0); }
 #endif
 
 /// Returns the positive part of given float
@@ -352,6 +351,5 @@ template< class T >double brent(double ax, double bx, double cx, const T &f,
  * @param a Computed coefficients.
  */
 void ls2fit(const FloatArray &x, const FloatArray &y, FloatArray &a);
-
 } // end namespace oofem
 #endif // mathfem_h

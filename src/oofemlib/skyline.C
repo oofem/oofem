@@ -52,8 +52,7 @@
 #endif
 
 namespace oofem {
-
-REGISTER_SparseMtrx( Skyline, SMT_Skyline);
+REGISTER_SparseMtrx(Skyline, SMT_Skyline);
 
 Skyline :: Skyline(int n) : SparseMtrx(n, n)
 {
@@ -83,7 +82,7 @@ Skyline :: ~Skyline()
     // Destructor.
     if ( this->giveNumberOfRows() ) {
         free(mtrx);
-        delete(adr);
+        delete( adr );
     }
 }
 
@@ -334,7 +333,7 @@ int Skyline :: setInternalStructure(IntArray *a)
     // allocates and built structure according to given
     // array of maximal column heights
     //
-    adr = new IntArray(*a);
+    adr = new IntArray(* a);
     int n = a->giveSize();
     nwk = adr->at(n); // check
     if ( mtrx ) {
@@ -367,10 +366,12 @@ int Skyline :: buildInternalStructure(EngngModel *eModel, int di, EquationID ut,
         neq = s.giveRequiredNumberOfDomainEquation();
     }
     if ( neq == 0 ) {
-        if ( mtrx )
+        if ( mtrx ) {
             delete mtrx;
-        if ( adr )
+        }
+        if ( adr ) {
             delete adr;
+        }
         mtrx = NULL;
         adr = NULL;
         return true;
@@ -408,16 +409,16 @@ int Skyline :: buildInternalStructure(EngngModel *eModel, int di, EquationID ut,
 
     // loop over active boundary conditions (e.g. relative kinematic constraints)
     int ii, jj, nbc = domain->giveNumberOfBoundaryConditions();
-    std::vector<IntArray> r_locs;
-    std::vector<IntArray> c_locs;
-    
+    std :: vector< IntArray >r_locs;
+    std :: vector< IntArray >c_locs;
+
     for ( int i = 1; i <= nbc; ++i ) {
         ActiveBoundaryCondition *bc = dynamic_cast< ActiveBoundaryCondition * >( domain->giveBc(i) );
         if ( bc != NULL ) {
             bc->giveLocationArrays(r_locs, c_locs, ut, UnknownCharType, s, s);
-            for (std::size_t k = 0; k < r_locs.size(); k++) {
-                IntArray &krloc = r_locs[k];
-                IntArray &kcloc = c_locs[k];
+            for ( std :: size_t k = 0; k < r_locs.size(); k++ ) {
+                IntArray &krloc = r_locs [ k ];
+                IntArray &kcloc = c_locs [ k ];
                 maxle = INT_MAX;
                 for ( int i = 1; i <= krloc.giveSize(); i++ ) {
                     if ( ( ii = krloc.at(i) ) ) {
@@ -621,14 +622,14 @@ void Skyline :: printYourself() const
 }
 
 
-void Skyline :: writeToFile(const char* fname) const
+void Skyline :: writeToFile(const char *fname) const
 {
-    FILE *file = fopen(fname,"w");
+    FILE *file = fopen(fname, "w");
     FloatMatrix copy;
     this->toFloatMatrix(copy);
     for ( int i = 1; i <= nRows; ++i ) {
         for ( int j = 1; j <= nColumns; ++j ) {
-            fprintf(file, "%10.3e  ", copy.at(i, j) );
+            fprintf( file, "%10.3e  ", copy.at(i, j) );
         }
         fprintf(file, "\n");
     }
@@ -698,7 +699,7 @@ void Skyline :: rbmodes(FloatMatrix &r, int &nse, IntArray &se,
     int i, j, k, ii, jj, kk, lj, uj, li, ui, lk, uk, mi, ise, ib, neq = this->giveNumberOfRows();
     IntArray adrb(7);
     double s, g;
-    FloatArray b(6 *neq);
+    FloatArray b(6 * neq);
 
     /**********************/
     /*  rozklad matice A  */

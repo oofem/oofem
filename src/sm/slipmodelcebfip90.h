@@ -41,7 +41,6 @@
 #include "structuralms.h"
 
 namespace oofem {
-
 /**
  * This class implements associated Material Status to IsoInterfaceDamageMaterial.
  */
@@ -129,12 +128,12 @@ public:
                                                TimeStep *tStep);
 
     virtual void giveRealStressVector(FloatArray &answer, GaussPoint *gp,
-                              const FloatArray &reducedStrain, TimeStep *tStep);
+                                      const FloatArray &reducedStrain, TimeStep *tStep);
 
     virtual void  giveStiffnessMatrix(FloatMatrix &answer,
-                                           MatResponseMode mode,
-                                           GaussPoint *gp,
-                                           TimeStep *tStep);
+                                      MatResponseMode mode,
+                                      GaussPoint *gp,
+                                      TimeStep *tStep);
 
     virtual int giveIPValue(FloatArray &answer, GaussPoint *gp, InternalStateType type, TimeStep *tStep);
 

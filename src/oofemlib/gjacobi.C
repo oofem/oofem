@@ -78,8 +78,8 @@ GJacobi :: solve(FloatMatrix *a, FloatMatrix *b, FloatArray *eigv, FloatMatrix *
         OOFEM_ERROR("GJacobi :: solveYourselfAt: unknown Bmatrx");
     }
 
-    if ( ( a->giveNumberOfRows() != b->giveNumberOfRows() ) ||
-        ( !a->isSquare() ) || ( !b->isSquare() ) ) {
+    if ( a->giveNumberOfRows() != b->giveNumberOfRows() ||
+         !a->isSquare() || !b->isSquare() ) {
         OOFEM_ERROR("GJacobi :: solveYourselfAt: A matrix, B mtrix -> size mismatch");
     }
 
@@ -248,7 +248,6 @@ GJacobi :: solve(FloatMatrix *a, FloatMatrix *b, FloatArray *eigv, FloatMatrix *
                     x->at(i, j) = xj + cg * xk;
                     x->at(i, k) = xk + ca * xj;
                 }                        // label 200
-
             }
         }                                // label 210
 
@@ -321,7 +320,6 @@ label280:
             a->at(j, i) = a->at(i, j);
             b->at(j, i) = b->at(i, j);
         }                               // label 260
-
     }
 
     for ( j = 1; j <= n; j++ ) {
@@ -335,5 +333,4 @@ label280:
     delete d;
     return NM_Success;
 }
-
 } // end namespace oofem

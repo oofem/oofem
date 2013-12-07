@@ -362,7 +362,7 @@ IsoInterfaceDamageMaterial_2 :: initializeFrom(InputRecord *ir)
     // Read first line
     if ( is >> nbrOfLinesToRead ) {
         printf("NumberofLinestoRead: %d\n", nbrOfLinesToRead);
-    } else   {
+    } else {
         OOFEM_ERROR("IsoInterfaceDamageMaterial :: initializeFrom: Error reading table file, first line should be "
                     "an integer stating how many strain damage pairs that exist in the file.");
     }

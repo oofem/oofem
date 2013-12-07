@@ -269,8 +269,10 @@ protected:
      * @param kappa Equivalent strain measure.
      * @param gp Integration point.
      */
-    virtual double damageFunctionPrime(double kappa, GaussPoint *gp) { _error("IsotropicDamageMaterial: damageFunctionPrime is not implemented");
-                                                                       return 0; }
+    virtual double damageFunctionPrime(double kappa, GaussPoint *gp) {
+        _error("IsotropicDamageMaterial: damageFunctionPrime is not implemented");
+        return 0;
+    }
 
     virtual void givePlaneStressStiffMtrx(FloatMatrix &answer, MatResponseMode mmode,
                                           GaussPoint *gp,

@@ -261,7 +261,7 @@ Communicator :: unpackAllData( T *ptr, int ( T :: *unpackFunc )( ProcessCommunic
     for  ( i = 0; i < size; i++ ) {
         // receive if receive map is not empty or mode is dynamic
         if ( ( giveProcessCommunicator(i)->giveToRecvMap()->giveSize() ) ||
-            ( this->mode == CommMode_Dynamic ) ) {
+             ( this->mode == CommMode_Dynamic ) ) {
             recvFlag.at(i + 1) = 1;
             num_recv++;
         }
@@ -336,10 +336,10 @@ Communicator :: unpackAllData( T *ptr, int ( T :: *unpackFunc )( ProcessCommunic
  *    if (giveProcessCommunicator(i)->receiveCompleted()) {
  *
  *
- *#ifdef __VERBOSE_PARALLEL
+ ****#ifdef __VERBOSE_PARALLEL
  *     OOFEM_LOG_DEBUG("[process rank %3d]: %-30s: Received data from partition %3d\n",
  *                     rank,"Communicator :: unpackAllData", i);
- *#endif
+ ****#endif
  *
  *    recvFlag.at(i+1) = 0;
  *    result &= giveProcessCommunicator(i)->unpackData (ptr, dest, unpackFunc);
@@ -352,15 +352,15 @@ Communicator :: unpackAllData( T *ptr, int ( T :: *unpackFunc )( ProcessCommunic
  * }
  * }
  *
- *#ifdef __VERBOSE_PARALLEL
+ ****#ifdef __VERBOSE_PARALLEL
  * VERBOSEPARALLEL_PRINT("Communicator :: unpackAllData", "Synchronize barrier started",rank)
- *#endif
+ ****#endif
  *
  * MPI_Barrier (MPI_COMM_WORLD);
  *
- *#ifdef __VERBOSE_PARALLEL
+ ****#ifdef __VERBOSE_PARALLEL
  * VERBOSEPARALLEL_PRINT("Communicator :: unpackAllData", "Synchronize barrier finished",rank)
- *#endif
+ ****#endif
  *
  * return result;
  * }
@@ -376,7 +376,7 @@ Communicator :: unpackAllData( T *ptr, P *dest, int ( T :: *unpackFunc )( P *, P
     for  ( i = 0; i < size; i++ ) {
         // receive if receive map is not empty or mode is dynamic
         if ( ( giveProcessCommunicator(i)->giveToRecvMap()->giveSize() ) ||
-            ( this->mode == CommMode_Dynamic ) ) {
+             ( this->mode == CommMode_Dynamic ) ) {
             recvFlag.at(i + 1) = 1;
             num_recv++;
         }

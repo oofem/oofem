@@ -300,9 +300,9 @@ public:
     virtual bool isCharacteristicMtrxSymmetric(MatResponseMode rMode) { return false; }
 
     virtual void  giveStiffnessMatrix(FloatMatrix &answer,
-                                           MatResponseMode mode,
-                                           GaussPoint *gp,
-                                           TimeStep *atTime);
+                                      MatResponseMode mode,
+                                      GaussPoint *gp,
+                                      TimeStep *atTime);
 
     /**
      * Computes the tangent stiffness.
@@ -367,7 +367,7 @@ public:
     virtual Interface *giveInterface(InterfaceType);
 
 
-    virtual void giveRealStressVector(FloatArray & answer, GaussPoint *,
+    virtual void giveRealStressVector(FloatArray &answer, GaussPoint *,
                                       const FloatArray &, TimeStep *);
 
     /** Reimplemented from RandomMaterialInterface */

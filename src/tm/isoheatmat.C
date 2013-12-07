@@ -38,8 +38,7 @@
 #include "classfactory.h"
 
 namespace oofem {
-
-REGISTER_Material( IsotropicHeatTransferMaterial );
+REGISTER_Material(IsotropicHeatTransferMaterial);
 
 IsotropicHeatTransferMaterial :: IsotropicHeatTransferMaterial(int n, Domain *d) : TransportMaterial(n, d)
 {
@@ -47,7 +46,7 @@ IsotropicHeatTransferMaterial :: IsotropicHeatTransferMaterial(int n, Domain *d)
     maturityT0 = 0.;
 }
 
-IsotropicHeatTransferMaterial :: ~IsotropicHeatTransferMaterial(){
+IsotropicHeatTransferMaterial :: ~IsotropicHeatTransferMaterial() {
     // destructor
 }
 
@@ -63,7 +62,7 @@ IsotropicHeatTransferMaterial :: initializeFrom(InputRecord *ir)
     IR_GIVE_FIELD(ir, conductivity, _IFT_IsotropicHeatTransferMaterial_k);
     IR_GIVE_FIELD(ir, capacity, _IFT_IsotropicHeatTransferMaterial_c);
     IR_GIVE_OPTIONAL_FIELD(ir, maturityT0, _IFT_IsotropicHeatTransferMaterial_maturityT0);
-    
+
     return IRRT_OK;
 }
 
@@ -110,12 +109,12 @@ IsotropicHeatTransferMaterial :: giveCharacteristicMatrix(FloatMatrix &answer,
      */
     MaterialMode mMode = gp->giveMaterialMode();
     double cond = this->giveIsotropicConductivity(gp);
-    
+
     /*if ( !isActivated(atTime) ) //element, which is inactive (activityLTF==0), will never go into this function
-         cond = 0.;
-    }
-    */
-    
+     *   cond = 0.;
+     * }
+     */
+
     switch  ( mMode ) {
     case _1dHeat:
         answer.resize(1, 1);
@@ -132,7 +131,7 @@ IsotropicHeatTransferMaterial :: giveCharacteristicMatrix(FloatMatrix &answer,
         answer.at(2, 2) = cond;
         answer.at(3, 3) = cond;
         return;
-    
+
     default:
         _error2( "giveCharacteristicMatrix : unknown mode (%s)", __MaterialModeToString(mMode) );
     }
@@ -159,11 +158,10 @@ IsotropicHeatTransferMaterial :: giveIPValue(FloatArray &answer, GaussPoint *aGa
 {
     if (  type == IST_HydrationDegree ) {
         answer.resize(1);
-        answer.at(1)=0.;
+        answer.at(1) = 0.;
         return 1;
     }
 
     return TransportMaterial :: giveIPValue(answer, aGaussPoint, type, atTime);
 }
-
 } // end namespace oofem

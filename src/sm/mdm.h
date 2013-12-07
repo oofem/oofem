@@ -323,12 +323,12 @@ protected:
     void transformStiffnessfromPDC(FloatMatrix &de, const FloatMatrix &t);
 
     virtual void givePlaneStressStiffMtrx(FloatMatrix &answer, MatResponseMode mmode,
-                                  GaussPoint *gp,
-                                  TimeStep *tStep);
+                                          GaussPoint *gp,
+                                          TimeStep *tStep);
 
-    virtual void givePlaneStrainStiffMtrx(FloatMatrix & answer,
-                                  MatResponseMode mmode, GaussPoint *gp,
-                                  TimeStep *tStep);
+    virtual void givePlaneStrainStiffMtrx(FloatMatrix &answer,
+                                          MatResponseMode mmode, GaussPoint *gp,
+                                          TimeStep *tStep);
 
     void rotateTensor4(FloatMatrix &Dlocal, const FloatMatrix &t);
     void formTransformationMatrix(FloatMatrix &answer, const FloatMatrix &t, int n);

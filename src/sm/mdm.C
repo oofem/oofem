@@ -74,7 +74,7 @@ MMAClosestIPTransfer MDM :: mapper2;
 MaterialStatus *
 MDM :: CreateStatus(GaussPoint *gp) const
 {
-    if ( dynamic_cast< Microplane * >(gp) ) {
+    if ( dynamic_cast< Microplane * >( gp ) ) {
         return NULL;
     } else {
         return new MDMStatus(1, this->nsd, this->numberOfMicroplanes, MicroplaneMaterial :: giveDomain(), gp);
@@ -1292,9 +1292,9 @@ Interface *
 MDM :: giveInterface(InterfaceType type)
 {
     if ( type == NonlocalMaterialExtensionInterfaceType ) {
-        return static_cast< StructuralNonlocalMaterialExtensionInterface * >(this);
+        return static_cast< StructuralNonlocalMaterialExtensionInterface * >( this );
     } else if ( type == MaterialModelMapperInterfaceType ) {
-        return static_cast< MaterialModelMapperInterface * >(this);
+        return static_cast< MaterialModelMapperInterface * >( this );
     } else {
         return NULL;
     }

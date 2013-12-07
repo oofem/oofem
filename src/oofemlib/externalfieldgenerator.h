@@ -48,8 +48,8 @@
 
 namespace oofem {
 /**
- * This class implements a randomfieldgenerator which reads 
- * an externally generated field interpolates to determine 
+ * This class implements a randomfieldgenerator which reads
+ * an externally generated field interpolates to determine
  * at Gausspoints.
  */
 class OOFEM_EXPORT ExternalFieldGenerator : public RandomFieldGenerator

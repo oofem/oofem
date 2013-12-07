@@ -60,7 +60,7 @@ protected:
     double width, thickness;
     FloatArray gpCoords;
     int couplingFlag, couplingNumber;
-    
+
 public:
     Lattice2d(int n, Domain *d);
     virtual ~Lattice2d();
@@ -97,9 +97,9 @@ public:
     virtual double giveDissipation();
     virtual double giveDeltaDissipation();
 
-    virtual int giveCouplingFlag(){return couplingFlag;}
-    
-    virtual int giveCouplingNumber(){return couplingNumber;}
+    virtual int giveCouplingFlag() { return couplingFlag; }
+
+    virtual int giveCouplingNumber() { return couplingNumber; }
     //
     // definition & identification
     //

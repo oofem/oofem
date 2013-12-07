@@ -89,7 +89,7 @@ class OOFEM_EXPORT NonlocalMaterialStatusExtensionInterface : public Interface
 {
 protected:
     /// List containing localIntegrationRecord values.
-    std::list< localIntegrationRecord >integrationDomainList;
+    std :: list< localIntegrationRecord >integrationDomainList;
     /// Nonlocal volume of corresponding integration point.
     double integrationScale;
 
@@ -107,7 +107,7 @@ public:
      * references to integration points and their weights that influence the nonlocal average in
      * receiver's associated integration point.
      */
-    std::list< localIntegrationRecord > *giveIntegrationDomainList() { return & integrationDomainList; }
+    std :: list< localIntegrationRecord > *giveIntegrationDomainList() { return & integrationDomainList; }
     /// Returns associated integration scale.
     double giveIntegrationScale() { return integrationScale; }
     /// Sets associated integration scale.
@@ -264,7 +264,7 @@ public:
      * receiver's associated integration point.
      * Rebuilds the IP list by calling  buildNonlocalPointTable if not available.
      */
-    std::list< localIntegrationRecord > *giveIPIntegrationList(GaussPoint *gp);
+    std :: list< localIntegrationRecord > *giveIPIntegrationList(GaussPoint *gp);
 
     /**
      * Evaluates the basic nonlocal weight function for a given distance

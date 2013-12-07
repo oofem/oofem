@@ -73,7 +73,7 @@ public:
     virtual ~InternalVariableField();
 
     virtual int evaluateAt(FloatArray &answer, FloatArray &coords, ValueModeType mode, TimeStep *atTime);
-    virtual int evaluateAt(FloatArray &answer, DofManager* dman, ValueModeType mode, TimeStep *atTime);
+    virtual int evaluateAt(FloatArray &answer, DofManager *dman, ValueModeType mode, TimeStep *atTime);
 
     virtual contextIOResultType saveContext(DataStream *stream, ContextMode mode);
     virtual contextIOResultType restoreContext(DataStream *stream, ContextMode mode);

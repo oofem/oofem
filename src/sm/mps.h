@@ -74,7 +74,6 @@
 //@}
 
 namespace oofem {
-
 /**
  * This class implements associated Material Status to MPSMaterial,
  * which corresponds to a model for humidity- and temperature-dependent

@@ -44,4 +44,3 @@ enum CrossSectExtension {
 };
 } // end namespace oofem
 #endif // crosssectextension_h
-

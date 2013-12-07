@@ -42,8 +42,7 @@
 #include "classfactory.h"
 
 namespace oofem {
-
-REGISTER_Element( TrPlaneStrRot3d );
+REGISTER_Element(TrPlaneStrRot3d);
 
 TrPlaneStrRot3d :: TrPlaneStrRot3d(int n, Domain *aDomain) : TrPlaneStrRot(n, aDomain)
 {
@@ -120,19 +119,19 @@ TrPlaneStrRot3d :: computeGtoLRotationMatrix()
         FloatArray e1(3), e2(3), e3(3), help(3);
 
         // compute e1' = [N2-N1]  and  help = [N3-N1]
-        e1.beDifferenceOf(*this->giveNode(2)->giveCoordinates(),  *this->giveNode(1)->giveCoordinates());
-        help.beDifferenceOf(*this->giveNode(3)->giveCoordinates(),  *this->giveNode(1)->giveCoordinates());
+        e1.beDifferenceOf( * this->giveNode(2)->giveCoordinates(),  * this->giveNode(1)->giveCoordinates() );
+        help.beDifferenceOf( * this->giveNode(3)->giveCoordinates(),  * this->giveNode(1)->giveCoordinates() );
 
         // let us normalize e1'
         e1.normalize();
 
         // compute e3' : vector product of e1' x help
-        e3.beVectorProductOf(e1,help);
+        e3.beVectorProductOf(e1, help);
         // let us normalize
         e3.normalize();
 
         // now from e3' x e1' compute e2'
-        e2.beVectorProductOf(e3,e1);
+        e2.beVectorProductOf(e3, e1);
 
         //
         GtoLRotationMatrix = new FloatMatrix(3, 3);
@@ -215,7 +214,7 @@ TrPlaneStrRot3d :: giveCharacteristicTensor(FloatMatrix &answer, CharTensor type
     }
 
     if ( ( type == GlobalForceTensor  ) || ( type == GlobalMomentumTensor  ) ||
-        ( type == GlobalStrainTensor ) || ( type == GlobalCurvatureTensor ) ) {
+         ( type == GlobalStrainTensor ) || ( type == GlobalCurvatureTensor ) ) {
         this->computeGtoLRotationMatrix();
         answer.rotatedWith(* GtoLRotationMatrix);
     }
@@ -246,7 +245,7 @@ TrPlaneStrRot3d :: giveIPValue(FloatArray &answer, GaussPoint *aGaussPoint, Inte
         answer.at(5) = globTensor.at(1, 3); //qxzForce
         answer.at(6) = globTensor.at(1, 2); //qxyForce
         // mutiply stresses by thickness to get forces
-        answer.times(this->giveCrossSection()->give(CS_Thickness, aGaussPoint));
+        answer.times( this->giveCrossSection()->give(CS_Thickness, aGaussPoint) );
 
         if ( type == IST_ShellForceMomentumTensor ) {
             cht = GlobalMomentumTensor;
@@ -344,21 +343,19 @@ TrPlaneStrRot3d :: printOutputAt(FILE *file, TimeStep *tStep)
             this->giveIPValue(v, gp, IST_ShellStrainCurvatureTensor, tStep);
             fprintf(file, "  strains ");
             fprintf( file,
-                    " % .4e % .4e % .4e % .4e % .4e % .4e % .4e % .4e % .4e % .4e % .4e % .4e ",
-                    v.at(1), v.at(2), v.at(3),  2. * v.at(4), 2. * v.at(5), 2. * v.at(6),
-                    v.at(7), v.at(8), v.at(9),  2. * v.at(10), 2. * v.at(11), 2. * v.at(12) );
+                     " % .4e % .4e % .4e % .4e % .4e % .4e % .4e % .4e % .4e % .4e % .4e % .4e ",
+                     v.at(1), v.at(2), v.at(3),  2. * v.at(4), 2. * v.at(5), 2. * v.at(6),
+                     v.at(7), v.at(8), v.at(9),  2. * v.at(10), 2. * v.at(11), 2. * v.at(12) );
 
             this->giveIPValue(v, gp, IST_ShellForceMomentumTensor, tStep);
             fprintf(file, "\n              stresses");
             fprintf( file,
-                    " % .4e % .4e % .4e % .4e % .4e % .4e % .4e % .4e % .4e % .4e % .4e % .4e ",
-                    v.at(1), v.at(2), v.at(3),  v.at(4), v.at(5), v.at(6),
-                    v.at(7), v.at(8), v.at(9),  v.at(10), v.at(11), v.at(12) );
+                     " % .4e % .4e % .4e % .4e % .4e % .4e % .4e % .4e % .4e % .4e % .4e % .4e ",
+                     v.at(1), v.at(2), v.at(3),  v.at(4), v.at(5), v.at(6),
+                     v.at(7), v.at(8), v.at(9),  v.at(10), v.at(11), v.at(12) );
 
             fprintf(file, "\n");
         }
     }
 }
-
-
 } // end namespace oofem

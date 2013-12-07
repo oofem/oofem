@@ -38,8 +38,7 @@
 #include "classfactory.h"
 
 namespace oofem {
-
-REGISTER_Material( HyperElasticMaterial );
+REGISTER_Material(HyperElasticMaterial);
 
 HyperElasticMaterial :: HyperElasticMaterial(int n, Domain *d) : StructuralMaterial(n, d)
 {}
@@ -134,7 +133,7 @@ HyperElasticMaterial :: giveRealStressVector_3d(FloatArray &answer, GaussPoint *
     C.at(2, 3) = C.at(3, 2) = strainVector.at(4);
     invC.beInverseOf(C);
     J2 = C.giveDeterminant();
-    
+
     answer.resize(6);
     double aux = ( K - 2. / 3. * G ) * ( J2 - 1. ) / 2. - G;
     answer.at(1) = aux * invC.at(1, 1) + G;
@@ -147,7 +146,6 @@ HyperElasticMaterial :: giveRealStressVector_3d(FloatArray &answer, GaussPoint *
     // update gp
     status->letTempStrainVectorBe(totalStrain);
     status->letTempStressVectorBe(answer);
-
 }
 
 

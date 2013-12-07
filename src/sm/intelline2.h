@@ -64,7 +64,7 @@ public:
     // definition & identification
     virtual const char *giveInputRecordName() const { return _IFT_IntElLine2_Name; }
     virtual const char *giveClassName() const { return "IntElLine2"; }
-    
+
 protected:
     virtual void computeNmatrixAt(GaussPoint *gp, FloatMatrix &answer);
     virtual void computeGaussPoints();
@@ -73,4 +73,4 @@ protected:
     Element_Geometry_Type giveGeometryType() const { return EGT_quad_21_interface; };
 };
 } // end namespace oofem
-#endif 
+#endif

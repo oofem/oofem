@@ -45,7 +45,6 @@
 #define _IFT_TR_SHELL01_Name "tr_shell01"
 
 namespace oofem {
-
 /**
  * This class implements an triangular three-node shell finite element, composed of
  * cct3d and trplanrot3d elements.
@@ -74,7 +73,7 @@ public:
     virtual ~TR_SHELL01() {
         delete plate;
         delete membrane;
-        if (this->compositeIR) delete this->compositeIR;
+        if ( this->compositeIR ) { delete this->compositeIR; }
     }
 
     virtual FEInterpolation *giveInterpolation() const { return plate->giveInterpolation(); }
@@ -104,8 +103,8 @@ public:
     virtual void drawScalar(oofegGraphicContext &context);
 #endif
     // the membrane and plate irules are same (chacked in initializeFrom)
-    virtual int giveDefaultIntegrationRule() const { return plate->giveDefaultIntegrationRule();}
-    virtual IntegrationRule *giveDefaultIntegrationRulePtr() {return plate->giveDefaultIntegrationRulePtr();}
+    virtual int giveDefaultIntegrationRule() const { return plate->giveDefaultIntegrationRule(); }
+    virtual IntegrationRule *giveDefaultIntegrationRulePtr() { return plate->giveDefaultIntegrationRulePtr(); }
     virtual Element_Geometry_Type giveGeometryType() const { return EGT_triangle_1; }
     virtual integrationDomain giveIntegrationDomain() const { return _Triangle; }
     virtual MaterialMode giveMaterialMode() { return _Unknown; }
@@ -116,14 +115,14 @@ public:
     virtual Element *ZZNodalRecoveryMI_giveElement() { return this; }
 
     virtual void NodalAveragingRecoveryMI_computeNodalValue(FloatArray &answer, int node,
-                                                    InternalStateType type, TimeStep *tStep);
+                                                            InternalStateType type, TimeStep *tStep);
     virtual void NodalAveragingRecoveryMI_computeSideValue(FloatArray &answer, int side,
-                                                   InternalStateType type, TimeStep *tStep);
+                                                           InternalStateType type, TimeStep *tStep);
     // ZZErrorEstimatorInterface
     virtual Element *ZZErrorEstimatorI_giveElement() { return this; }
 
     virtual IntegrationRule *ZZErrorEstimatorI_giveIntegrationRule();
-    virtual void ZZErrorEstimatorI_computeLocalStress(FloatArray& answer, FloatArray& sig);
+    virtual void ZZErrorEstimatorI_computeLocalStress(FloatArray &answer, FloatArray &sig);
 
     // ZZRemeshingCriteriaInterface
     virtual double ZZRemeshingCriteriaI_giveCharacteristicSize();
@@ -137,7 +136,7 @@ public:
 
 
     virtual int computeGlobalCoordinates(FloatArray &answer, const FloatArray &lcoords) {
-        return this->plate->computeGlobalCoordinates (answer, lcoords);
+        return this->plate->computeGlobalCoordinates(answer, lcoords);
     }
 
 protected:

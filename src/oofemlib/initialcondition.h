@@ -50,7 +50,6 @@
 //@}
 
 namespace oofem {
-
 class IntArray;
 
 /**

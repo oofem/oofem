@@ -48,4 +48,3 @@ enum InternalStateValueType {
 };
 } // end namespace oofem
 #endif // internalstatevaluetype_h
-

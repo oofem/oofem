@@ -311,7 +311,7 @@ IDGMaterial :: giveInternalLength(FloatMatrix &answer, MatResponseMode rMode, Ga
                 } else {
                     gamma = beta;
                 }
-            } else  {
+            } else {
                 gamma = 1;
             }
 
@@ -329,7 +329,7 @@ IDGMaterial :: giveInternalLength(FloatMatrix &answer, MatResponseMode rMode, Ga
             answer.at(1, 2) = l1 * l1 * n11 * n21 + l2 * l2 * n12 * n22;
             answer.at(2, 1) = l1 * l1 * n11 * n21 + l2 * l2 * n12 * n22;
             answer.at(2, 2) = l1 * l1 * n21 * n21 + l2 * l2 * n22 * n22;
-        } else  {
+        } else {
             OOFEM_ERROR("IDGMaterial :: giveInternalLengthDerivative - Unknown material mode.");
         }
     }

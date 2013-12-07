@@ -48,72 +48,69 @@
 #include "structuralinterfacematerialstatus.h"
 
 namespace oofem {
-
-MaterialStatusMapperInterface::MaterialStatusMapperInterface()
+MaterialStatusMapperInterface :: MaterialStatusMapperInterface()
 {
-	mpMaterialMapper = new MMAClosestIPTransfer();
+    mpMaterialMapper = new MMAClosestIPTransfer();
 }
 
-MaterialStatusMapperInterface::~MaterialStatusMapperInterface()
+MaterialStatusMapperInterface :: ~MaterialStatusMapperInterface()
 {
-	if(mpMaterialMapper != NULL) {
-		delete mpMaterialMapper;
-		mpMaterialMapper = NULL;
-	}
+    if ( mpMaterialMapper != NULL ) {
+        delete mpMaterialMapper;
+        mpMaterialMapper = NULL;
+    }
 }
 
-int MaterialStatusMapperInterface::MSMI_map(const GaussPoint &iGP, const Domain &iOldDom, const TimeStep &iTStep, MaterialStatus &oStatus)
+int MaterialStatusMapperInterface :: MSMI_map(const GaussPoint &iGP, const Domain &iOldDom, const TimeStep &iTStep, MaterialStatus &oStatus)
 {
-	// Mapping of "regular" Gauss points
-	int result = 1;
+    // Mapping of "regular" Gauss points
+    int result = 1;
 
-	Domain *dold = const_cast<Domain*>(&iOldDom);
-	GaussPoint *gp = const_cast<GaussPoint*>(&iGP);
-	TimeStep *tStep = const_cast<TimeStep*>(&iTStep);
-	IntArray type;
-	mpMaterialMapper->init(dold, type, gp, tStep);
+    Domain *dold = const_cast< Domain * >( & iOldDom );
+    GaussPoint *gp = const_cast< GaussPoint * >( & iGP );
+    TimeStep *tStep = const_cast< TimeStep * >( & iTStep );
+    IntArray type;
+    mpMaterialMapper->init(dold, type, gp, tStep);
 
-	mpMaterialMapper->mapStatus( oStatus );
+    mpMaterialMapper->mapStatus(oStatus);
 
 
-	return result;
+    return result;
 }
 
-int MaterialStatusMapperInterface::MSMI_map(const GaussPoint &iGP, const Domain &iOldDom, const TimeStep &iTStep, StructuralInterfaceMaterialStatus &oStatus)
+int MaterialStatusMapperInterface :: MSMI_map(const GaussPoint &iGP, const Domain &iOldDom, const TimeStep &iTStep, StructuralInterfaceMaterialStatus &oStatus)
 {
-	// Mapping of cohesive zone Gauss points
-	int result = 1;
+    // Mapping of cohesive zone Gauss points
+    int result = 1;
 
-	Domain *dold = const_cast<Domain*>(&iOldDom);
-	GaussPoint *gp = const_cast<GaussPoint*>(&iGP);
-	TimeStep *tStep = const_cast<TimeStep*>(&iTStep);
-	IntArray type;
-	bool gpBelongsToCohesiveZone = true;
-	mpMaterialMapper->init(dold, type, gp, tStep, gpBelongsToCohesiveZone);
+    Domain *dold = const_cast< Domain * >( & iOldDom );
+    GaussPoint *gp = const_cast< GaussPoint * >( & iGP );
+    TimeStep *tStep = const_cast< TimeStep * >( & iTStep );
+    IntArray type;
+    bool gpBelongsToCohesiveZone = true;
+    mpMaterialMapper->init(dold, type, gp, tStep, gpBelongsToCohesiveZone);
 
-	mpMaterialMapper->mapStatus( oStatus );
+    mpMaterialMapper->mapStatus(oStatus);
 
-	return result;
-}
-
-
-int MaterialStatusMapperInterface::MSMI_update(const GaussPoint &iGP, const TimeStep &iTStep)
-{
-	int result = 1;
-
-
-
-	return result;
-}
-
-int MaterialStatusMapperInterface::MSMI_finish(const TimeStep &iTStep)
-{
-	int result = 1;
-
-
-
-	return result;
+    return result;
 }
 
 
+int MaterialStatusMapperInterface :: MSMI_update(const GaussPoint &iGP, const TimeStep &iTStep)
+{
+    int result = 1;
+
+
+
+    return result;
+}
+
+int MaterialStatusMapperInterface :: MSMI_finish(const TimeStep &iTStep)
+{
+    int result = 1;
+
+
+
+    return result;
+}
 } /* namespace oofem */

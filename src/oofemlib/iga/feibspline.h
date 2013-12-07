@@ -50,7 +50,6 @@
 //@}
 
 namespace oofem {
-
 class FloatMatrix;
 class FloatArray;
 class IntArray;
@@ -84,10 +83,7 @@ public:
     virtual ~BSplineInterpolation();
 
     virtual integrationDomain giveIntegrationDomain() const {
-        if ( nsd == 3 ) return _Cube;
-        else if ( nsd == 2 ) return _Square;
-        else if ( nsd == 1 ) return _Line;
-        else return _Unknown_integrationDomain;
+        if ( nsd == 3 ) { return _Cube; } else if ( nsd == 2 ) { return _Square; } else if ( nsd == 1 ) { return _Line; } else { return _Unknown_integrationDomain; }
     }
     virtual Element_Geometry_Type giveGeometryType() const { return EGT_unknown; }
 
@@ -110,16 +106,16 @@ public:
     virtual double boundaryEvalNormal(FloatArray &answer, int boundary, const FloatArray &lcoords, const FEICellGeometry &cellgeo)
     { OOFEM_ERROR("BSplineInterpolation :: boundaryEvalNormal - Not implemented"); return 0.; }
     virtual double boundaryGiveTransformationJacobian(int boundary, const FloatArray &lcoords, const FEICellGeometry &cellgeo)
-    { OOFEM_ERROR("BSplineInterpolation :: boundaryGiveTransformationJacobian - Not implemented"); return 0.;}
+    { OOFEM_ERROR("BSplineInterpolation :: boundaryGiveTransformationJacobian - Not implemented"); return 0.; }
     virtual void boundaryLocal2Global(FloatArray &answer, int boundary, const FloatArray &lcoords, const FEICellGeometry &cellgeo)
     { OOFEM_ERROR("BSplineInterpolation :: boundaryLocal2Global - Not implemented"); }
 
-    
+
     virtual int giveNumberOfKnotSpans(int dim) { return numberOfKnotSpans [ dim - 1 ]; }
     virtual int giveNumberOfControlPoints(int dim) { return numberOfControlPoints [ dim - 1 ]; }
-    virtual const double * const * giveKnotVector() { return this->knotVector; }
-    virtual const IntArray * giveKnotMultiplicity(int dim) { return & this->knotMultiplicity [ dim - 1 ]; }
-    virtual const FloatArray * giveKnotValues(int dim) { return & this->knotValues [ dim - 1 ]; }
+    virtual const double *const *giveKnotVector() { return this->knotVector; }
+    virtual const IntArray *giveKnotMultiplicity(int dim) { return & this->knotMultiplicity [ dim - 1 ]; }
+    virtual const FloatArray *giveKnotValues(int dim) { return & this->knotValues [ dim - 1 ]; }
     virtual void evalN(FloatArray &answer, const FloatArray &lcoords, const FEICellGeometry &cellgeo);
     virtual double evaldNdx(FloatMatrix &answer, const FloatArray &lcoords, const FEICellGeometry &cellgeo);
     virtual void local2global(FloatArray &answer, const FloatArray &lcoords, const FEICellGeometry &cellgeo);

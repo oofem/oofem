@@ -246,7 +246,7 @@ HydrationModel :: dAdksi(double ksi)
     enaksi = exp(-ba * ksi);
 
     return ( aa * ( ca * da * ksinad * ( enaksi - 1 ) / ksi + ba * enaksi * ( ca * ksinad + 1 ) ) /
-            pow(1 + ca * ksinad, 2) );
+             pow(1 + ca * ksinad, 2) );
 }
 
 double
@@ -439,7 +439,7 @@ HydrationModel :: giveHydrationDegree(GaussPoint *gp, TimeStep *atTime, ValueMod
 
 void
 HydrationModel :: updateInternalState(const FloatArray &vec, GaussPoint *gp, TimeStep *atTime)
-/* 
+/*
  * Recalculates the hydration degree according to the given new state vector and time increment, using equilib status
  *  State vector is supposed to contain [1]->temperature, [2]->relative humidity!
  *  caller should ensure that this is called only when state vector is changed
@@ -638,7 +638,7 @@ void
 HydrationModelInterface :: updateInternalState(const FloatArray &vec, GaussPoint *gp, TimeStep *atTime)
 {
     if ( hydrationModel ) {
-        TimeStep *hydraTime = new TimeStep( ( const TimeStep ) *atTime );
+        TimeStep *hydraTime = new TimeStep( ( const TimeStep ) * atTime );
         int notime = 0;
         if ( atTime->giveTargetTime() - atTime->giveTimeIncrement() < castAt ) {
             if ( atTime->giveTargetTime() >= castAt ) {
@@ -665,5 +665,4 @@ HydrationModelInterface :: giveHydrationDegree(GaussPoint *gp, TimeStep *atTime,
         return constantHydrationDegree;
     }
 }
-
 } // end namespace oofem

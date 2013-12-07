@@ -97,7 +97,7 @@ T3DInterface :: createInput(Domain *d, TimeStep *stepN)
             break;
         default:
             OOFEM_ERROR2( "T3DInterface::createInput unknown element type (%s)",
-                         __Element_Geometry_TypeToString( ielem->giveGeometryType() ) );
+                          __Element_Geometry_TypeToString( ielem->giveGeometryType() ) );
         }
     }
 
@@ -150,7 +150,7 @@ T3DInterface :: createInput(Domain *d, TimeStep *stepN)
 
 #ifdef __PARALLEL_MODE
     sprintf( fileName, "%s.%d", BMF_FILENAME, d->giveEngngModel()->
-            giveRank() );
+             giveRank() );
 #else
     sprintf(fileName, "%s", BMF_FILENAME);
 #endif

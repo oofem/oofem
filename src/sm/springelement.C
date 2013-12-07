@@ -43,8 +43,7 @@
 #endif
 
 namespace oofem {
-
-REGISTER_Element( SpringElement );
+REGISTER_Element(SpringElement);
 
 SpringElement :: SpringElement(int n, Domain *aDomain) : StructuralElement(n, aDomain)
 {
@@ -56,14 +55,14 @@ void
 SpringElement :: computeStiffnessMatrix(FloatMatrix &answer, MatResponseMode rMode, TimeStep *tStep)
 {
     /* spring stiffness matrix in local coordinate system (along orientation axis) */
-    answer.resize(2,2);
-    answer.at(1,1)=answer.at(2,2)= this->springConstant;
-    answer.at(1,2)=answer.at(2,1)=-this->springConstant;
+    answer.resize(2, 2);
+    answer.at(1, 1) = answer.at(2, 2) = this->springConstant;
+    answer.at(1, 2) = answer.at(2, 1) = -this->springConstant;
 }
 
 
 void
-SpringElement :: giveInternalForcesVector(FloatArray &answer, TimeStep * atTime, int useUpdatedGpRecord)
+SpringElement :: giveInternalForcesVector(FloatArray &answer, TimeStep *atTime, int useUpdatedGpRecord)
 {
     double f = this->computeSpringInternalForce(atTime);
     answer.resize(2);
@@ -79,23 +78,23 @@ SpringElement :: computeGtoLRotationMatrix(FloatMatrix &answer)
      * Spring is defined as 1D element along orientation axis (or around orientation axis for torsional springs)
      * The transformation from local (1d) to global system typically expand dimensions
      */
-    if ((this->mode == SE_1D_SPRING) || (this->mode == SE_2D_TORSIONALSPRING_XZ)) {
-      answer.resize(2,2);
-      answer.at(1,1)=answer.at(2,2) = 1.0;
-    } else if (this->mode == SE_2D_SPRING_XY) {
-      answer.resize(2,4);
-      answer.at(1,1)=this->dir.at(1);
-      answer.at(1,2)=this->dir.at(2);
-      answer.at(2,3)=this->dir.at(1);
-      answer.at(2,4)=this->dir.at(2);
-    } else if ((this->mode == SE_3D_SPRING) || (this->mode == SE_3D_TORSIONALSPRING)) {
-      answer.resize(2,6);
-      answer.at(1,1)=this->dir.at(1);
-      answer.at(1,2)=this->dir.at(2);
-      answer.at(1,3)=this->dir.at(3);
-      answer.at(2,4)=this->dir.at(1);
-      answer.at(2,5)=this->dir.at(2);
-      answer.at(2,6)=this->dir.at(3);
+    if ( ( this->mode == SE_1D_SPRING ) || ( this->mode == SE_2D_TORSIONALSPRING_XZ ) ) {
+        answer.resize(2, 2);
+        answer.at(1, 1) = answer.at(2, 2) = 1.0;
+    } else if ( this->mode == SE_2D_SPRING_XY ) {
+        answer.resize(2, 4);
+        answer.at(1, 1) = this->dir.at(1);
+        answer.at(1, 2) = this->dir.at(2);
+        answer.at(2, 3) = this->dir.at(1);
+        answer.at(2, 4) = this->dir.at(2);
+    } else if ( ( this->mode == SE_3D_SPRING ) || ( this->mode == SE_3D_TORSIONALSPRING ) ) {
+        answer.resize(2, 6);
+        answer.at(1, 1) = this->dir.at(1);
+        answer.at(1, 2) = this->dir.at(2);
+        answer.at(1, 3) = this->dir.at(3);
+        answer.at(2, 4) = this->dir.at(1);
+        answer.at(2, 5) = this->dir.at(2);
+        answer.at(2, 6) = this->dir.at(3);
     }
     return 1;
 }
@@ -104,15 +103,15 @@ SpringElement :: computeGtoLRotationMatrix(FloatMatrix &answer)
 void
 SpringElement :: giveDofManDofIDMask(int inode, EquationID, IntArray &answer) const
 {
-    if (this->mode == SE_1D_SPRING) {
+    if ( this->mode == SE_1D_SPRING ) {
         answer.setValues(1, D_u);
-    } else if (this->mode == SE_2D_SPRING_XY) {
+    } else if ( this->mode == SE_2D_SPRING_XY ) {
         answer.setValues(2, D_u, D_v);
-    } else if (this->mode == SE_2D_TORSIONALSPRING_XZ) {
+    } else if ( this->mode == SE_2D_TORSIONALSPRING_XZ ) {
         answer.setValues(1, R_v);
-    } else if (this->mode == SE_3D_SPRING) {
+    } else if ( this->mode == SE_3D_SPRING ) {
         answer.setValues(3, D_u, D_v, D_w);
-    } else if (this->mode == SE_3D_TORSIONALSPRING) {
+    } else if ( this->mode == SE_3D_TORSIONALSPRING ) {
         answer.setValues(3, R_u, R_v, R_w);
     }
 }
@@ -122,18 +121,18 @@ SpringElement :: computeSpringInternalForce(TimeStep *stepN)
 {
     FloatArray u;
     this->computeVectorOf(EID_MomentumBalance, VM_Total, stepN, u);
-    return (this->springConstant * (u.at(2)-u.at(1)));
+    return ( this->springConstant * ( u.at(2) - u.at(1) ) );
 }
 
 
 int
 SpringElement :: computeNumberOfGlobalDofs()
 {
-    if ((this->mode == SE_1D_SPRING) || (this->mode == SE_2D_TORSIONALSPRING_XZ)) {
+    if ( ( this->mode == SE_1D_SPRING ) || ( this->mode == SE_2D_TORSIONALSPRING_XZ ) ) {
         return 2;
-    } else if (this->mode == SE_2D_SPRING_XY) {
+    } else if ( this->mode == SE_2D_SPRING_XY ) {
         return 4;
-    } else if ((this->mode == SE_3D_SPRING) || (this->mode == SE_3D_TORSIONALSPRING)) {
+    } else if ( ( this->mode == SE_3D_SPRING ) || ( this->mode == SE_3D_TORSIONALSPRING ) ) {
         return 6;
     }
     return 0;
@@ -153,10 +152,10 @@ SpringElement :: initializeFrom(InputRecord *ir)
     IR_GIVE_FIELD(ir, _mode, _IFT_SpringElement_mode);
     IR_GIVE_FIELD(ir, springConstant, _IFT_SpringElement_springConstant);
 
-    this->mode = (SpringElementType) _mode;
-    if (mode != SE_1D_SPRING) {
-      IR_GIVE_OPTIONAL_FIELD(ir, this->dir, _IFT_SpringElement_orientation);
-      this->dir.normalize();
+    this->mode = ( SpringElementType ) _mode;
+    if ( mode != SE_1D_SPRING ) {
+        IR_GIVE_OPTIONAL_FIELD(ir, this->dir, _IFT_SpringElement_orientation);
+        this->dir.normalize();
     }
     return IRRT_OK;
 }
@@ -164,9 +163,7 @@ SpringElement :: initializeFrom(InputRecord *ir)
 void SpringElement :: printOutputAt(FILE *File, TimeStep *stepN)
 {
     fprintf(File, "spring element %d :\n", number);
-    fprintf(File, "  spring force or moment % .4e", this->computeSpringInternalForce(stepN));
+    fprintf( File, "  spring force or moment % .4e", this->computeSpringInternalForce(stepN) );
     fprintf(File, "\n");
 }
-
-
 } // end namespace oofem

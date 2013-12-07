@@ -51,8 +51,7 @@
 #include "classfactory.h"
 
 namespace oofem {
-
-REGISTER_Element( TrPlaneStrRot );
+REGISTER_Element(TrPlaneStrRot);
 
 TrPlaneStrRot :: TrPlaneStrRot(int n, Domain *aDomain) :
     TrPlaneStress2d(n, aDomain)
@@ -71,10 +70,10 @@ TrPlaneStrRot :: computeGaussPoints()
         numberOfIntegrationRules = 2;
         integrationRulesArray = new IntegrationRule * [ 2 ];
         integrationRulesArray [ 0 ] = new GaussIntegrationRule(1, this, 1, 3);
-        this->giveCrossSection()->setupIntegrationPoints( *integrationRulesArray[0], numberOfGaussPoints, this );
+        this->giveCrossSection()->setupIntegrationPoints(* integrationRulesArray [ 0 ], numberOfGaussPoints, this);
 
         integrationRulesArray [ 1 ] = new GaussIntegrationRule(2, this, 4, 4);
-        this->giveCrossSection()->setupIntegrationPoints( *integrationRulesArray[1], numberOfRotGaussPoints, this );
+        this->giveCrossSection()->setupIntegrationPoints(* integrationRulesArray [ 1 ], numberOfRotGaussPoints, this);
     }
 }
 
@@ -385,7 +384,7 @@ TrPlaneStrRot :: GiveDerivativeUX(GaussPoint *aGaussPoint)
         int j = i + 1 - i / 3 * 3;
         int k = j + 1 - j / 3 * 3;
         nx->at(i) = ( d.at(j) / 2. * ( b.at(k) * shapeFunct.at(i) + shapeFunct.at(k) * b.at(i) ) * sin( angles->at(j) ) -
-                     d.at(k) / 2. * ( b.at(i) * shapeFunct.at(j) + shapeFunct.at(i) * b.at(j) ) * sin( angles->at(k) ) );
+                      d.at(k) / 2. * ( b.at(i) * shapeFunct.at(j) + shapeFunct.at(i) * b.at(j) ) * sin( angles->at(k) ) );
     }
 
     delete angles;
@@ -429,7 +428,7 @@ TrPlaneStrRot :: GiveDerivativeVX(GaussPoint *aGaussPoint)
         int j = i + 1 - i / 3 * 3;
         int k = j + 1 - j / 3 * 3;
         nx->at(i) = ( d.at(j) / 2. * ( b.at(k) * shapeFunct.at(i) + shapeFunct.at(k) * b.at(i) ) * cos( angles->at(j) ) -
-                     d.at(k) / 2. * ( b.at(i) * shapeFunct.at(j) + shapeFunct.at(i) * b.at(j) ) * cos( angles->at(k) ) ) * ( -1.0 );
+                      d.at(k) / 2. * ( b.at(i) * shapeFunct.at(j) + shapeFunct.at(i) * b.at(j) ) * cos( angles->at(k) ) ) * ( -1.0 );
     }
 
     delete angles;
@@ -473,7 +472,7 @@ TrPlaneStrRot :: GiveDerivativeUY(GaussPoint *aGaussPoint)
         int j = i + 1 - i / 3 * 3;
         int k = j + 1 - j / 3 * 3;
         ny->at(i) = ( d.at(j) / 2. * ( c.at(k) * shapeFunct.at(i) + shapeFunct.at(k) * c.at(i) ) * sin( angles->at(j) ) -
-                     d.at(k) / 2. * ( c.at(i) * shapeFunct.at(j) + shapeFunct.at(i) * c.at(j) ) * sin( angles->at(k) ) );
+                      d.at(k) / 2. * ( c.at(i) * shapeFunct.at(j) + shapeFunct.at(i) * c.at(j) ) * sin( angles->at(k) ) );
     }
 
     delete angles;
@@ -517,7 +516,7 @@ TrPlaneStrRot :: GiveDerivativeVY(GaussPoint *aGaussPoint)
         int j = i + 1 - i / 3 * 3;
         int k = j + 1 - j / 3 * 3;
         ny->at(i) = ( d.at(j) / 2. * ( c.at(k) * shapeFunct.at(i) + shapeFunct.at(k) * c.at(i) ) * cos( angles->at(j) ) -
-                     d.at(k) / 2. * ( c.at(i) * shapeFunct.at(j) + shapeFunct.at(i) * c.at(j) ) * cos( angles->at(k) ) ) * ( -1.0 );
+                      d.at(k) / 2. * ( c.at(i) * shapeFunct.at(j) + shapeFunct.at(i) * c.at(j) ) * cos( angles->at(k) ) ) * ( -1.0 );
     }
 
     delete angles;
@@ -533,22 +532,22 @@ TrPlaneStrRot :: initializeFrom(InputRecord *ir)
 
     numberOfGaussPoints = 4;
     result = this->StructuralElement :: initializeFrom(ir);
-	if(result != IRRT_OK) {
-		return result;
-	}
+    if ( result != IRRT_OK ) {
+        return result;
+    }
 
     numberOfRotGaussPoints = 1;
     IR_GIVE_OPTIONAL_FIELD(ir, numberOfRotGaussPoints, _IFT_TrPlaneStrRot_niprot);
 
     if ( !( ( numberOfGaussPoints == 1 ) ||
-           ( numberOfGaussPoints == 4 ) ||
-           ( numberOfGaussPoints == 7 ) ) ) {
+            ( numberOfGaussPoints == 4 ) ||
+            ( numberOfGaussPoints == 7 ) ) ) {
         numberOfGaussPoints = 4;
     }
 
     if ( !( ( numberOfRotGaussPoints == 1 ) ||
-           ( numberOfRotGaussPoints == 4 ) ||
-           ( numberOfRotGaussPoints == 7 ) ) ) {
+            ( numberOfRotGaussPoints == 4 ) ||
+            ( numberOfRotGaussPoints == 7 ) ) ) {
         numberOfRotGaussPoints = 1;
     }
 
@@ -566,7 +565,7 @@ TrPlaneStrRot :: giveInternalForcesVector(FloatArray &answer, TimeStep *tStep, i
     this->computeVectorOf(EID_MomentumBalance, VM_Total, tStep, u);
     // subtract initial displacements, if defined
     if ( initialDisplacements ) {
-        u.subtract(*initialDisplacements);
+        u.subtract(* initialDisplacements);
     }
 
     // zero answer will resize accordingly when adding first contribution
@@ -581,29 +580,29 @@ TrPlaneStrRot :: giveInternalForcesVector(FloatArray &answer, TimeStep *tStep, i
             this->computeBmatrixAt(gp, B);
 
             if ( !this->isActivated(tStep) ) {
-                vStrain.resize( StructuralMaterial :: giveSizeOfVoigtSymVector(gp->giveMaterialMode()) );
+                vStrain.resize( StructuralMaterial :: giveSizeOfVoigtSymVector( gp->giveMaterialMode() ) );
                 vStrain.zero();
             }
             vStrain.beProductOf(B, u);
-#if 1
+ #if 1
             this->computeStressVector(vStress, vStrain, gp, tStep);
-#else
+ #else
             if ( useUpdatedGpRecord == 1 && false ) {
-                ///@todo This is problematic, it only saves the plane stress components. Should we just keep the curvature field completely separate, 
+                ///@todo This is problematic, it only saves the plane stress components. Should we just keep the curvature field completely separate,
                 /// or introduce the membrane+rotation mode directly into the cross-section.
                 vStress = static_cast< StructuralMaterialStatus * >( gp->giveStatus() )->giveStressVector();
-/*
-                // Curvature field:
-                vStress.resizeWithValues(4);
-                //cs->givePlaneStressStiffMtrx(d, TangentStiffness, gp, tStep);
-                this->giveStructuralCrossSection()->giveCharMaterialStiffnessMatrix(d, ElasticStiffness, gp, tStep);
-                vStress.resizeWithValues(4, 0);
-                vStress.at(4) = vStrain.at(4) * d.at(3,3);
-*/
+                /*
+                 *              // Curvature field:
+                 *              vStress.resizeWithValues(4);
+                 *              //cs->givePlaneStressStiffMtrx(d, TangentStiffness, gp, tStep);
+                 *              this->giveStructuralCrossSection()->giveCharMaterialStiffnessMatrix(d, ElasticStiffness, gp, tStep);
+                 *              vStress.resizeWithValues(4, 0);
+                 *              vStress.at(4) = vStrain.at(4) * d.at(3,3);
+                 */
             } else {
                 this->computeStressVector(vStress, vStrain, gp, tStep);
             }
-#endif
+ #endif
         } else if ( nlGeometry == 1 ) {  // First Piola-Kirchhoff stress
             OOFEM_ERROR("TrPlaneStrRot :: giveInternalForcesVector - Only small strain mode is supported");
         }
@@ -730,5 +729,4 @@ TrPlaneStrRot :: computeBodyLoadVectorAt(FloatArray &answer, Load *forLoad, Time
         answer.resize(0);          // nil resultant
     }
 }
-
 } // end namespace oofem

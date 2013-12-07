@@ -78,11 +78,11 @@ MPlasticMaterial2 :: hasMaterialModeCapability(MaterialMode mode)
 //
 {
     return mode == _3dMat ||
-        mode == _1dMat ||
-        //<RESTRICTED_SECTION>
-        mode == _PlaneStress  ||
-        //</RESTRICTED_SECTION>
-        mode == _PlaneStrain;
+           mode == _1dMat ||
+           //<RESTRICTED_SECTION>
+           mode == _PlaneStress  ||
+           //</RESTRICTED_SECTION>
+           mode == _PlaneStrain;
 }
 
 MaterialStatus *
@@ -144,12 +144,12 @@ MPlasticMaterial2 :: giveRealStressVector(FloatArray &answer,
     }
 
     status->letTempStrainVectorBe(totalStrain);
-    StructuralMaterial :: giveReducedSymVectorForm(helpVec, fullStressVector, gp->giveMaterialMode());
+    StructuralMaterial :: giveReducedSymVectorForm( helpVec, fullStressVector, gp->giveMaterialMode() );
 
     //perform isotropic damage on effective stress
     double omega = computeDamage(gp, strainSpaceHardeningVariables, atTime);
     status->letTempDamageBe(omega);
-    helpVec.times(1.-omega);
+    helpVec.times(1. - omega);
     //end of damage part
 
     status->letTempStressVectorBe(helpVec);
@@ -182,12 +182,12 @@ MPlasticMaterial2 :: giveRealStressVector(FloatArray &answer,
 
     status->letTempStateFlagBe(newState);
 
-    StructuralMaterial :: giveReducedSymVectorForm(answer, fullStressVector, gp->giveMaterialMode());
+    StructuralMaterial :: giveReducedSymVectorForm( answer, fullStressVector, gp->giveMaterialMode() );
 }
 
 double
-MPlasticMaterial2 :: computeDamage(GaussPoint *gp, const FloatArray &strainSpaceHardeningVariables, TimeStep *atTime){
-   return 0.;
+MPlasticMaterial2 :: computeDamage(GaussPoint *gp, const FloatArray &strainSpaceHardeningVariables, TimeStep *atTime) {
+    return 0.;
 }
 
 
@@ -826,7 +826,7 @@ huhu: //label for goto
                     continue;
                 } else {
                     _warning4( "GiveRealStressVector: local equlibrium not reached in %d iterations\nElement %d, gp %d, continuing",
-                              PLASTIC_MATERIAL_MAX_ITERATIONS, gp->giveElement()->giveNumber(), gp->giveNumber() );
+                               PLASTIC_MATERIAL_MAX_ITERATIONS, gp->giveElement()->giveNumber(), gp->giveNumber() );
                     answer = fullStressVector;
                     // debug line
                     nIterations = 0;
@@ -1208,7 +1208,7 @@ huhu: //label for goto
                     continue;
                 } else {
                     _warning4( "GiveRealStressVector: local equlibrium not reached in %d iterations\nElement %d, gp %d, continuing",
-                              PLASTIC_MATERIAL_MAX_ITERATIONS, gp->giveElement()->giveNumber(), gp->giveNumber() );
+                               PLASTIC_MATERIAL_MAX_ITERATIONS, gp->giveElement()->giveNumber(), gp->giveNumber() );
                     answer = fullStressVector;
                     // debug line
                     nIterations = 0;
@@ -1234,7 +1234,7 @@ MPlasticMaterial2 :: computeReducedStressGradientVector(FloatArray &answer, func
     this->computeStressGradientVector(stressGradient, ftype, isurf, gp, stressVector,
                                       strainSpaceHardeningVariables);
 
-    StructuralMaterial :: giveReducedSymVectorForm(answer, stressGradient, gp->giveMaterialMode());
+    StructuralMaterial :: giveReducedSymVectorForm( answer, stressGradient, gp->giveMaterialMode() );
 }
 
 void
@@ -1281,7 +1281,7 @@ MPlasticMaterial2 :: computeTrialStressIncrement(FloatArray &answer, GaussPoint 
     this->computeReducedElasticModuli(de, gp, atTime);
     //this->giveLinearElasticMaterial()->giveCharacteristicMatrix(de, TangentStiffness, gp, atTime);
     reducedAnswer.beProductOf(de, elasticStrainVectorR);
-    StructuralMaterial :: giveFullSymVectorForm(answer, reducedAnswer, gp->giveMaterialMode());
+    StructuralMaterial :: giveFullSymVectorForm( answer, reducedAnswer, gp->giveMaterialMode() );
 }
 
 
@@ -1387,7 +1387,7 @@ MPlasticMaterial2 :: giveConsistentStiffnessMatrix(FloatMatrix &answer,
     // check for elastic cases
     //
     if ( ( status->giveTempStateFlag() == MPlasticMaterial2Status :: PM_Elastic ) ||
-        ( status->giveTempStateFlag() == MPlasticMaterial2Status :: PM_Unloading ) ) {
+         ( status->giveTempStateFlag() == MPlasticMaterial2Status :: PM_Unloading ) ) {
         this->giveStiffnessMatrix(answer, ElasticStiffness, gp, atTime);
         return;
     }
@@ -1408,7 +1408,7 @@ MPlasticMaterial2 :: giveConsistentStiffnessMatrix(FloatMatrix &answer,
     strSize = elasticModuliInverse.giveNumberOfRows();
 
     stressVector = status->giveTempStressVector();
-    StructuralMaterial :: giveFullSymVectorForm(fullStressVector, stressVector, gp->giveMaterialMode());
+    StructuralMaterial :: giveFullSymVectorForm( fullStressVector, stressVector, gp->giveMaterialMode() );
     status->giveTempStrainSpaceHardeningVarsVector(strainSpaceHardeningVariables);
 
     //
@@ -1542,7 +1542,7 @@ MPlasticMaterial2 :: giveElastoPlasticStiffnessMatrix(FloatMatrix &answer,
     // check for elastic cases
     //
     if ( ( status->giveTempStateFlag() == MPlasticMaterial2Status :: PM_Elastic ) ||
-        ( status->giveTempStateFlag() == MPlasticMaterial2Status :: PM_Unloading ) ) {
+         ( status->giveTempStateFlag() == MPlasticMaterial2Status :: PM_Unloading ) ) {
         this->giveStiffnessMatrix(answer, ElasticStiffness, gp, atTime);
         return;
     }
@@ -1562,7 +1562,7 @@ MPlasticMaterial2 :: giveElastoPlasticStiffnessMatrix(FloatMatrix &answer,
 
 
     stressVector = status->giveStressVector();
-    StructuralMaterial :: giveFullSymVectorForm(fullStressVector, stressVector, gp->giveMaterialMode());
+    StructuralMaterial :: giveFullSymVectorForm( fullStressVector, stressVector, gp->giveMaterialMode() );
     status->giveStrainSpaceHardeningVars(strainSpaceHardeningVariables);
     strSize = elasticModuli.giveNumberOfRows();
 
@@ -1823,9 +1823,9 @@ MPlasticMaterial2 :: give2dBeamLayerStiffMtrx(FloatMatrix &answer,
 
 void
 MPlasticMaterial2 :: givePlateLayerStiffMtrx(FloatMatrix &answer,
-                                               MatResponseMode mode,
-                                               GaussPoint *gp,
-                                               TimeStep *atTime)
+                                             MatResponseMode mode,
+                                             GaussPoint *gp,
+                                             TimeStep *atTime)
 //
 // returns receiver's 2dPlateLayerMtrx
 // (2dPlaneStres ==> sigma_z = tau_xz = tau_yz = 0.)
@@ -1878,7 +1878,7 @@ MPlasticMaterial2 :: giveIPValue(FloatArray &answer, GaussPoint *aGaussPoint, In
         FloatArray ep;
         status->givePlasticStrainVector(ep);
         ///@todo Fill in correct full form values here! This just adds zeros!
-        StructuralMaterial :: giveFullSymVectorForm(answer, ep, aGaussPoint->giveMaterialMode());
+        StructuralMaterial :: giveFullSymVectorForm( answer, ep, aGaussPoint->giveMaterialMode() );
         return 1;
     } else if ( type == IST_PrincipalPlasticStrainTensor ) {
         FloatArray st(6), s;
@@ -1886,7 +1886,7 @@ MPlasticMaterial2 :: giveIPValue(FloatArray &answer, GaussPoint *aGaussPoint, In
         status->givePlasticStrainVector(s);
 
         ///@todo Fill in correct full form values here! This just adds zeros!
-        StructuralMaterial :: giveFullSymVectorForm(st, s, aGaussPoint->giveMaterialMode());
+        StructuralMaterial :: giveFullSymVectorForm( st, s, aGaussPoint->giveMaterialMode() );
 
         this->computePrincipalValues(answer, st, principal_strain);
         return 1;
@@ -2093,8 +2093,7 @@ MPlasticMaterial2Status :: MPlasticMaterial2Status(int n, Domain *d, GaussPoint 
     tempDamage(0.),
     gamma(),
     tempGamma()
-{
-}
+{}
 
 MPlasticMaterial2Status :: ~MPlasticMaterial2Status()
 { }
@@ -2126,11 +2125,10 @@ MPlasticMaterial2Status :: printOutputAt(FILE *file, TimeStep *tStep)
             }
         }
 
-        fprintf( file, " ActiveConditionMap" );
-        for ( int i = 1; i <= activeConditionMap.giveSize() ; i++ ) {
+        fprintf(file, " ActiveConditionMap");
+        for ( int i = 1; i <= activeConditionMap.giveSize(); i++ ) {
             fprintf( file, " %d", activeConditionMap.at(i) );
         }
-
     }
 
     fprintf(file, "}\n");
@@ -2153,7 +2151,7 @@ void MPlasticMaterial2Status :: initTempStatus()
 
     if ( strainSpaceHardeningVarsVector.giveSize() == 0 ) {
         strainSpaceHardeningVarsVector.resize( static_cast< MPlasticMaterial2 * >( gp->giveMaterial() )->
-                                              giveSizeOfReducedHardeningVarsVector(gp) );
+                                               giveSizeOfReducedHardeningVarsVector(gp) );
         strainSpaceHardeningVarsVector.zero();
     }
 
@@ -2209,7 +2207,7 @@ MPlasticMaterial2Status :: saveContext(DataStream *stream, ContextMode mode, voi
     if ( ( iores = strainSpaceHardeningVarsVector.storeYourself(stream, mode) ) != CIO_OK ) {
         THROW_CIOERR(iores);
     }
-    
+
     if ( !stream->write(& state_flag, 1) ) {
         THROW_CIOERR(CIO_IOERR);
     }

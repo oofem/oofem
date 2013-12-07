@@ -43,12 +43,10 @@
 #include "dynamicinputrecord.h"
 
 namespace oofem {
-
-LoadTimeFunction :: LoadTimeFunction ( int n, Domain* d ) :
-    FEMComponent( n, d ),
-    initialValue( 0.)
-{
-}
+LoadTimeFunction :: LoadTimeFunction(int n, Domain *d) :
+    FEMComponent(n, d),
+    initialValue(0.)
+{}
 
 double
 LoadTimeFunction :: evaluate(TimeStep *atTime, ValueModeType mode)
@@ -93,11 +91,9 @@ LoadTimeFunction :: initializeFrom(InputRecord *ir)
 
 
 void
-LoadTimeFunction :: giveInputRecord(DynamicInputRecord& input)
+LoadTimeFunction :: giveInputRecord(DynamicInputRecord &input)
 {
     FEMComponent :: giveInputRecord(input);
     input.setField(this->initialValue, _IFT_LoadTimeFunction_initialvalue);
 }
-
-
 } // end namespace oofem

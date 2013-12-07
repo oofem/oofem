@@ -46,7 +46,6 @@
 //@}
 
 namespace oofem {
-
 /**
  * Class representing user defined load time function. User input is function expression.
  * Uses Parser class to parse given expression. Slow but useful.
@@ -57,11 +56,11 @@ class OOFEM_EXPORT UserDefinedLoadTimeFunction : public LoadTimeFunction
 {
 private:
     /// Expression for the function value.
-    std::string ftExpression;
+    std :: string ftExpression;
     /// Expression for first time derivative.
-    std::string dfdtExpression;
+    std :: string dfdtExpression;
     /// Expression for second time derivative.
-    std::string d2fdt2Expression;
+    std :: string d2fdt2Expression;
 
 public:
     /**
@@ -72,7 +71,7 @@ public:
     UserDefinedLoadTimeFunction(int n, Domain *d);
     /// Destructor.
     virtual ~UserDefinedLoadTimeFunction() { }
-    
+
     /**
      * Reads the fields
      * - f(t) (required)

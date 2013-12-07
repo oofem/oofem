@@ -19,8 +19,7 @@
 #include "classfactory.h"
 
 namespace oofem {
-
-REGISTER_Element( Q9PlaneStress2d );
+REGISTER_Element(Q9PlaneStress2d);
 
 FEI2dQuadBiQuad Q9PlaneStress2d :: interpolation(1, 2);
 
@@ -28,7 +27,7 @@ Q9PlaneStress2d :: Q9PlaneStress2d(int n, Domain *aDomain) :
     NLStructuralElement(n, aDomain), ZZNodalRecoveryModelInterface(), NodalAveragingRecoveryModelInterface()
     // Constructor.
 {
-//	printf("Entering Q9PlaneStress2d :: Q9PlaneStress2d().\n");
+    //	printf("Entering Q9PlaneStress2d :: Q9PlaneStress2d().\n");
 
     numberOfDofMans  = 9;
     numberOfGaussPoints = 9;
@@ -91,14 +90,14 @@ Q9PlaneStress2d :: initializeFrom(InputRecord *ir)
 {
     numberOfGaussPoints = 4;
     IRResultType result = this->Element :: initializeFrom(ir);
-	if(result != IRRT_OK) {
-		return result;
-	}
+    if ( result != IRRT_OK ) {
+        return result;
+    }
 
     if ( !( ( numberOfGaussPoints == 1 ) ||
-           ( numberOfGaussPoints == 4 ) ||
-           ( numberOfGaussPoints == 9 ) ||
-           ( numberOfGaussPoints == 16 ) ) ) {
+            ( numberOfGaussPoints == 4 ) ||
+            ( numberOfGaussPoints == 9 ) ||
+            ( numberOfGaussPoints == 16 ) ) ) {
         numberOfGaussPoints = 4;
     }
 
@@ -113,7 +112,7 @@ Q9PlaneStress2d :: computeGaussPoints()
         numberOfIntegrationRules = 1;
         integrationRulesArray = new IntegrationRule * [ 1 ];
         integrationRulesArray [ 0 ] = new GaussIntegrationRule(1, this, 1, 3);
-        this->giveCrossSection()->setupIntegrationPoints( *integrationRulesArray[0], numberOfGaussPoints, this );
+        this->giveCrossSection()->setupIntegrationPoints(* integrationRulesArray [ 0 ], numberOfGaussPoints, this);
     }
 }
 
@@ -123,7 +122,7 @@ Q9PlaneStress2d :: computeVolumeAround(GaussPoint *aGaussPoint)
 {
     double determinant, weight, thickness, volume;
     determinant = fabs( this->interpolation.giveTransformationJacobian( * aGaussPoint->giveCoordinates(),
-                                                                       FEIElementGeometryWrapper(this) ) );
+                                                                        FEIElementGeometryWrapper(this) ) );
     weight      = aGaussPoint->giveWeight();
     thickness   = this->giveCrossSection()->give(CS_Thickness, aGaussPoint);
     volume      = determinant * weight * thickness;
@@ -145,7 +144,7 @@ Q9PlaneStress2d :: giveCharacteristicLenght(GaussPoint *gp, const FloatArray &no
     if ( normalToCrackPlane.at(3) < 0.999999 ) { //ensure that characteristic length is in the plane of element
         return this->giveLenghtInDir(normalToCrackPlane) / sqrt( ( double ) gp->giveIntegrationRule()->giveNumberOfIntegrationPoints() );
     } else { //otherwise compute out-of-plane characteristic length from element area
-        return sqrt(this->computeVolumeAreaOrLength() / ( double ) gp->giveIntegrationRule()->giveNumberOfIntegrationPoints());
+        return sqrt( this->computeVolumeAreaOrLength() / ( double ) gp->giveIntegrationRule()->giveNumberOfIntegrationPoints() );
     }
 }
 
@@ -468,7 +467,7 @@ void Q9PlaneStress2d :: drawScalar(oofegGraphicContext &context)
 
 void
 Q9PlaneStress2d :: NodalAveragingRecoveryMI_computeNodalValue(FloatArray &answer, int node,
-                                                             InternalStateType type, TimeStep *tStep)
+                                                              InternalStateType type, TimeStep *tStep)
 {
     if ( numberOfGaussPoints != 4 ) {
         return;
@@ -520,7 +519,7 @@ Q9PlaneStress2d :: NodalAveragingRecoveryMI_computeNodalValue(FloatArray &answer
 
 void
 Q9PlaneStress2d :: NodalAveragingRecoveryMI_computeSideValue(FloatArray &answer, int side,
-                                                            InternalStateType type, TimeStep *tStep)
+                                                             InternalStateType type, TimeStep *tStep)
 {
     answer.resize(0);
 }
@@ -580,8 +579,8 @@ double
 Q9PlaneStress2d ::   computeEdgeVolumeAround(GaussPoint *aGaussPoint, int iEdge)
 {
     double result = this->interpolation.edgeGiveTransformationJacobian( iEdge, * aGaussPoint->giveCoordinates(),
-                                                                       FEIElementGeometryWrapper(this) );
-    return result *aGaussPoint->giveWeight();
+                                                                        FEIElementGeometryWrapper(this) );
+    return result * aGaussPoint->giveWeight();
 }
 
 void

@@ -94,8 +94,8 @@ FreemInterface :: createInput(Domain *d, TimeStep *stepN)
         }
 
         fprintf( outputStrem, "backgroundMeshElem %d  nodes 4 %d %d %d %d\n", i,
-                ielem->giveNode(1)->giveNumber(), ielem->giveNode(2)->giveNumber(),
-                ielem->giveNode(3)->giveNumber(), ielem->giveNode(4)->giveNumber() );
+                 ielem->giveNode(1)->giveNumber(), ielem->giveNode(2)->giveNumber(),
+                 ielem->giveNode(3)->giveNumber(), ielem->giveNode(4)->giveNumber() );
     }
 
     fclose(outputStrem);
@@ -114,13 +114,13 @@ FreemInterface :: smoothNodalDensities(Domain *d,  FloatArray &nodalDensities, T
     FloatArray *neighbourCoords;
     Element *jelem;
     Node *candNode;
-    std::list< int >queue;
-    std::list< int > :: iterator pos;
+    std :: list< int >queue;
+    std :: list< int > :: iterator pos;
 
 
     // loop over nodes
     for ( int i = 1; i <= nnodes; i++ ) {
-        if ( !dynamic_cast< Node* >( d->giveDofManager(i) ) ) {
+        if ( !dynamic_cast< Node * >( d->giveDofManager(i) ) ) {
             continue;
         }
 
@@ -149,7 +149,7 @@ FreemInterface :: smoothNodalDensities(Domain *d,  FloatArray &nodalDensities, T
                     dist = candNode->giveCoordinates()->distance(neighbourCoords);
                     // overshoot criteria
                     if ( ( ( nodalDensities.at(neighbour) / nodalDensities.at(candidate) ) > 1.3 ) &&
-                        ( nodalDensities.at(neighbour) > 1.0 * dist ) ) {
+                         ( nodalDensities.at(neighbour) > 1.0 * dist ) ) {
                         // increase candidate nodal density
                         nodalDensities.at(neighbour) = max( 1.0 * dist, nodalDensities.at(candidate) );
                         // printf ("o");

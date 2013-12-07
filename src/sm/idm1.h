@@ -171,7 +171,7 @@ protected:
 
     /// Parameter used in Griffith's criterion
     double griff_n;
-    
+
     /// Remporary parameter reading type of softening law, used in other isotropic damage material models.
     int damageLaw;
 
@@ -320,4 +320,3 @@ protected:
 };
 } // end namespace oofem
 #endif // idm1_h
-

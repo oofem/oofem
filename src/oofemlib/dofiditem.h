@@ -40,19 +40,18 @@
 #include <string>
 
 namespace oofem {
-
 #define DofIDItem_DEF \
-    ENUM_ITEM_WITH_VALUE(Undef, 0) /* Error value */\
-    ENUM_ITEM_WITH_VALUE(D_u, 1) /* u-displacement (in direction of x-axis) */\
-    ENUM_ITEM_WITH_VALUE(D_v, 2) /* v-displacement (in direction of y-axis) */\
-    ENUM_ITEM_WITH_VALUE(D_w, 3) /* w-displacement (in direction of z-axis) */\
-    ENUM_ITEM_WITH_VALUE(R_u, 4) /* Rotation around x-axis (right hand rule assumed) */\
-    ENUM_ITEM_WITH_VALUE(R_v, 5) /* Rotation around y-axis */\
-    ENUM_ITEM_WITH_VALUE(R_w, 6) /* Rotation around z-axis */\
+    ENUM_ITEM_WITH_VALUE(Undef, 0) /* Error value */ \
+    ENUM_ITEM_WITH_VALUE(D_u, 1) /* u-displacement (in direction of x-axis) */ \
+    ENUM_ITEM_WITH_VALUE(D_v, 2) /* v-displacement (in direction of y-axis) */ \
+    ENUM_ITEM_WITH_VALUE(D_w, 3) /* w-displacement (in direction of z-axis) */ \
+    ENUM_ITEM_WITH_VALUE(R_u, 4) /* Rotation around x-axis (right hand rule assumed) */ \
+    ENUM_ITEM_WITH_VALUE(R_v, 5) /* Rotation around y-axis */ \
+    ENUM_ITEM_WITH_VALUE(R_w, 6) /* Rotation around z-axis */ \
   \
-    ENUM_ITEM_WITH_VALUE(V_u, 7) /* u-velocity (in direction of x-axis) */\
-    ENUM_ITEM_WITH_VALUE(V_v, 8) /* v-velocity (in direction of y-axis) */\
-    ENUM_ITEM_WITH_VALUE(V_w, 9) /* w-velocity (in direction of z-axis) */\
+    ENUM_ITEM_WITH_VALUE(V_u, 7) /* u-velocity (in direction of x-axis) */ \
+    ENUM_ITEM_WITH_VALUE(V_v, 8) /* v-velocity (in direction of y-axis) */ \
+    ENUM_ITEM_WITH_VALUE(V_w, 9) /* w-velocity (in direction of z-axis) */ \
   \
     ENUM_ITEM_WITH_VALUE(T_f, 10) /* Temperature field */ \
     ENUM_ITEM_WITH_VALUE(P_f, 11) /* Pressure field */ \
@@ -63,11 +62,11 @@ namespace oofem {
     ENUM_ITEM_WITH_VALUE(W_v, 16) /* v-component of change in director field (in direction of y-axis) */ \
     ENUM_ITEM_WITH_VALUE(W_w, 17) /* w-component of change in director field (in direction of z-axis) */ \
     ENUM_ITEM_WITH_VALUE(Gamma, 18) /* inhomogenous thickness strain in direction of the directorfield m */ \
-    ENUM_ITEM_WITH_VALUE(D_u_edge_const, 19) /* Constant part of boundary u-displacement used by Treftz element*/\
-    ENUM_ITEM_WITH_VALUE(D_u_edge_lin, 20) /* Linear part of boundary u-displacement used by Treftz element*/\
-    ENUM_ITEM_WITH_VALUE(D_v_edge_const, 21) /* Constant part of boundary v-displacement used by Treftz element*/\
-    ENUM_ITEM_WITH_VALUE(D_v_edge_lin, 22) /* Linear part of boundary v-displacement used by Treftz element*/\
-    
+    ENUM_ITEM_WITH_VALUE(D_u_edge_const, 19) /* Constant part of boundary u-displacement used by Treftz element*/ \
+    ENUM_ITEM_WITH_VALUE(D_u_edge_lin, 20) /* Linear part of boundary u-displacement used by Treftz element*/ \
+    ENUM_ITEM_WITH_VALUE(D_v_edge_const, 21) /* Constant part of boundary v-displacement used by Treftz element*/ \
+    ENUM_ITEM_WITH_VALUE(D_v_edge_lin, 22) /* Linear part of boundary v-displacement used by Treftz element*/ \
+
 /**
  * Type representing particular dof type. Values of this type describe the physical meaning of
  * available DOFs.
@@ -83,7 +82,6 @@ enum DofIDItem {
 #undef ENUM_ITEM_WITH_VALUE
 #undef enumitem_h
 
-std::string __DofIDItemToString(DofIDItem _value);
-
+std :: string __DofIDItemToString(DofIDItem _value);
 } // end namespace oofem
 #endif // dofiditem_h

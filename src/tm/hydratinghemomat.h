@@ -48,7 +48,6 @@
 //@}
 
 namespace oofem {
-
 /**
  * Heat and moisture transport material with hydration.
  */

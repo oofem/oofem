@@ -248,7 +248,7 @@ protected:
     void clear();
     int giveFitSize(MPI_Datatype type, int availableSpace, int arrySize);
 
-    /** 
+    /**
      * Templated low-level array packing method.
      * Templated version used since implementation is similar for different types
      * but type info is needed since implementation is relying on pointer arithmetic.
@@ -276,7 +276,7 @@ protected:
         return _result;
     }
 
-    /** 
+    /**
      * Templated low-level array unpacking method.
      * Templated version used since implementation is similar for different types
      * but type info is needed since implementation is relying on pointer arithmetic.

@@ -38,7 +38,6 @@
 #include "structuralms.h"
 
 namespace oofem {
-
 class GaussPoint;
 class Dictionary;
 class Domain;
@@ -46,7 +45,7 @@ class NonlocalMaterialStatusExtension;
 
 /**
  * This class implements a base lattice material status.
- * In this class services are defined that are used by other 
+ * In this class services are defined that are used by other
  * lattice material statuses.
  */
 class LatticeMaterialStatus : public StructuralMaterialStatus
@@ -61,16 +60,16 @@ public:
     virtual void initTempStatus() { }
 
     virtual void updateYourself(TimeStep *) { }
-    
+
     /// Gives the last equilibrated normal stress
-    virtual double giveNormalStress(){return 0;}
+    virtual double giveNormalStress() { return 0; }
 
     virtual const char *giveClassName() const { return "LatticeMaterialStatus"; }
 
     ///Sets the temp_crack_flag
     virtual void setTempCrackFlag(int val) = 0;
 
-    /** 
+    /**
      * Returns the crack flag
      * @return crack flag
      */
@@ -82,7 +81,7 @@ public:
     virtual double giveCrackWidth() { return 0; }
 
     /**
-     * Returns the energy dissipation computed at the GaussPoint of the element. 
+     * Returns the energy dissipation computed at the GaussPoint of the element.
      * This function is used for the lattice specific vtk export.
      * @return dissipation
      */

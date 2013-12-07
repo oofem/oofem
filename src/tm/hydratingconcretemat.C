@@ -39,8 +39,7 @@
 #include "classfactory.h"
 
 namespace oofem {
-
-REGISTER_Material( HydratingConcreteMat );
+REGISTER_Material(HydratingConcreteMat);
 
 HydratingConcreteMat :: HydratingConcreteMat(int n, Domain *d) : IsotropicHeatTransferMaterial(n, d)
 {
@@ -141,7 +140,7 @@ HydratingConcreteMat :: giveCharacteristicValue(MatResponseMode mode, GaussPoint
         //it suffices to compute derivative of scaling Arrhenius equation with respect to temporary temperature
         double stateVec = ms->giveField().at(1) + 273.15;
         double tempStateVec = ms->giveTempField().at(1) + 273.15;
-        return this->activationEnergy / ( 8.314 * tempStateVec * tempStateVec) * exp(1. / stateVec -  1. / tempStateVec ) ;
+        return this->activationEnergy / ( 8.314 * tempStateVec * tempStateVec ) * exp(1. / stateVec -  1. / tempStateVec);
     } else {
         OOFEM_ERROR2( "giveCharacteristicValue : unknown mode (%s)\n", __MatResponseModeToString(mode) );
     }
@@ -268,7 +267,7 @@ HydratingConcreteMatStatus :: ~HydratingConcreteMatStatus()
 
 double HydratingConcreteMat :: GivePower(TimeStep *atTime, GaussPoint *gp)
 {
-    HydratingConcreteMatStatus *ms = static_cast< HydratingConcreteMatStatus* >( this->giveStatus(gp) );
+    HydratingConcreteMatStatus *ms = static_cast< HydratingConcreteMatStatus * >( this->giveStatus(gp) );
     double castingTime = this->giveCastingTime();
     double intrinsicTime = atTime->giveIntrinsicTime();
     double targTime = atTime->giveTargetTime();
@@ -306,15 +305,15 @@ double HydratingConcreteMat :: GivePower(TimeStep *atTime, GaussPoint *gp)
                 time += timeStep;
             }
             //printf("%f %f %f %f\n", time, affinity, scaleTemperature(), degreeOfHydration);
-            alphaTrialOld = ms->degreeOfHydration + scaleTemperature(gp) * affinity25(ms->degreeOfHydration) * timeStep;//predictor
+            alphaTrialOld = ms->degreeOfHydration + scaleTemperature(gp) * affinity25(ms->degreeOfHydration) * timeStep; //predictor
             //http://en.wikipedia.org/wiki/Predictor%E2%80%93corrector_method
             //corrector - integration through trapezoidal rule
             //3 loops normally suffices
-            for(int i=0; i<4; i++){
-                alphaTrialNew = ms->degreeOfHydration + scaleTemperature(gp)*timeStep/2.*(affinity25(ms->degreeOfHydration)+affinity25(alphaTrialOld) );
+            for ( int i = 0; i < 4; i++ ) {
+                alphaTrialNew = ms->degreeOfHydration + scaleTemperature(gp) * timeStep / 2. * ( affinity25(ms->degreeOfHydration) + affinity25(alphaTrialOld) );
                 alphaTrialOld = alphaTrialNew;
             }
-            ms->degreeOfHydration= alphaTrialNew;
+            ms->degreeOfHydration = alphaTrialNew;
         }
     } else {
         OOFEM_ERROR2("Unknown hydration model type %d", this->hydrationModelType);
@@ -330,21 +329,20 @@ double HydratingConcreteMat :: GivePower(TimeStep *atTime, GaussPoint *gp)
 
 double HydratingConcreteMat :: scaleTemperature(GaussPoint *gp)
 {
-    HydratingConcreteMatStatus *ms = static_cast< HydratingConcreteMatStatus* >( this->giveStatus(gp) );
+    HydratingConcreteMatStatus *ms = static_cast< HydratingConcreteMatStatus * >( this->giveStatus(gp) );
     return exp( this->activationEnergy / 8.314 * ( 1. / ( 273.15 + this->referenceTemperature ) - 1. / ( 273.15 + ms->giveTempField().at(1) ) ) );
 }
 
 double HydratingConcreteMat :: affinity25(double DoH)
 {
-    
     double result =  this->B1 * ( this->B2 / this->DoHInf + DoH ) * ( this->DoHInf - DoH ) * exp(-this->eta * DoH / this->DoHInf);
-    if (result<0.){//numerical instabilities
+    if ( result < 0. ) { //numerical instabilities
         return 0.;
     }
-    
+
     //add slag reaction
-    if (this->P1 != 0. && DoH >= this->DoH1) {
-        result *= 1.+this->P1*(DoH - this->DoH1);
+    if ( this->P1 != 0. && DoH >= this->DoH1 ) {
+        result *= 1. + this->P1 * ( DoH - this->DoH1 );
     }
     return result;
 }
@@ -363,8 +361,8 @@ HydratingConcreteMatStatus :: updateYourself(TimeStep *atTime)
     this->lastEquivalentTime = this->equivalentTime;
     this->lastDegreeOfHydration = this->degreeOfHydration;
     //average from last and current temperatures, in C*hour
-    if(!atTime->isIcApply() && mat->giveCastingTime() < atTime->giveIntrinsicTime() ) {
-        this->maturity += ( (this->giveField().at(1) + this->giveTempField().at(1)) /2. - mat->giveMaturityT0() ) * atTime->giveTimeIncrement()/3600.;
+    if ( !atTime->isIcApply() && mat->giveCastingTime() < atTime->giveIntrinsicTime() ) {
+        this->maturity += ( ( this->giveField().at(1) + this->giveTempField().at(1) ) / 2. - mat->giveMaturityT0() ) * atTime->giveTimeIncrement() / 3600.;
     }
     TransportMaterialStatus :: updateYourself(atTime);
 }
@@ -379,5 +377,4 @@ HydratingConcreteMatStatus :: printOutputAt(FILE *file, TimeStep *atTime)
     fprintf( file, "IntrinsicTime %e  DoH %f HeatPower %f [W/m3 of concrete] conductivity %f  capacity %f  density %f", atTime->giveIntrinsicTime(), this->giveDoHActual(), this->power, mat->giveIsotropicConductivity(this->gp), mat->giveConcreteCapacity(this->gp), mat->giveConcreteDensity(this->gp) );
     fprintf(file, "}\n");
 }
-
 } // end namespace oofem

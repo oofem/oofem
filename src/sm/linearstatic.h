@@ -42,7 +42,6 @@
 #define _IFT_LinearStatic_Name "linearstatic"
 
 namespace oofem {
-
 class SparseMtrx;
 
 /**

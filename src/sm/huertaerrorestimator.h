@@ -269,7 +269,7 @@ protected:
                                       int level, int nodeId, IntArray & localNodeIdArray, IntArray & globalNodeIdArray,
                                       HuertaErrorEstimatorInterface :: SetupMode mode, TimeStep * tStep, int nodes,
                                       FloatArray * * corner, FloatArray * midSide, FloatArray * midFace, FloatArray & midNode,
-                                      int & localNodeId, int & localElemId, int & localBcId,
+                                      int &localNodeId, int &localElemId, int &localBcId,
                                       int hexaSideNode [ 1 ] [ 3 ], int hexaFaceNode [ 1 ] [ 3 ],
                                       IntArray & controlNode, IntArray & controlDof,
                                       HuertaErrorEstimator :: AnalysisMode aMode, const char *hexatype);

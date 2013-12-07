@@ -71,7 +71,7 @@ public:
 
     virtual int computeNumberOfDofs() { return 6; }
     virtual void giveDofManDofIDMask(int inode, EquationID, IntArray &) const;
-    virtual  double computeVolumeAround(GaussPoint *gp);
+    virtual double computeVolumeAround(GaussPoint *gp);
 
     // definition & identification
     virtual const char *giveInputRecordName() const { return _IFT_LIBeam2dNL_Name; }

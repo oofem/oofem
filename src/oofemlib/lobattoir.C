@@ -38,7 +38,6 @@
 #include "mathfem.h"
 
 namespace oofem {
-
 LobattoIntegrationRule :: LobattoIntegrationRule(int n, Element *e,
                                                  int startIndx, int endIndx, bool dynamic) :
     IntegrationRule(n, e, startIndx, endIndx, dynamic) { }
@@ -346,7 +345,7 @@ LobattoIntegrationRule :: giveLineCoordsAndWeights(int nPoints, FloatArray &coor
 
         coords_xi.setValues(2,
                             -1.0,
-                             1.0
+                            1.0
                             );
 
         weights.setValues(2,
@@ -360,8 +359,8 @@ LobattoIntegrationRule :: giveLineCoordsAndWeights(int nPoints, FloatArray &coor
 
         coords_xi.setValues(3,
                             -1.0,
-                             0.0,
-                             1.0
+                            0.0,
+                            1.0
                             );
 
         weights.setValues(3,
@@ -376,8 +375,8 @@ LobattoIntegrationRule :: giveLineCoordsAndWeights(int nPoints, FloatArray &coor
         coords_xi.setValues(4,
                             -1.0,
                             -0.447213595499958,
-                             0.447213595499958,
-                             1.0
+                            0.447213595499958,
+                            1.0
                             );
 
         weights.setValues(4,
@@ -393,10 +392,10 @@ LobattoIntegrationRule :: giveLineCoordsAndWeights(int nPoints, FloatArray &coor
         coords_xi.setValues(5,
                             -1.0,
                             -0.654653670707977,
-                             0.0,
-                             0.654653670707977,
-                             1.0
-                             );
+                            0.0,
+                            0.654653670707977,
+                            1.0
+                            );
 
         weights.setValues(5,
                           0.1,
@@ -413,10 +412,10 @@ LobattoIntegrationRule :: giveLineCoordsAndWeights(int nPoints, FloatArray &coor
                             -1.0,
                             -0.765055323929465,
                             -0.285231516480645,
-                             0.285231516480645,
-                             0.765055323929465,
-                             1.0
-                             );
+                            0.285231516480645,
+                            0.765055323929465,
+                            1.0
+                            );
 
         weights.setValues(6,
                           0.066666666666667,
@@ -432,6 +431,4 @@ LobattoIntegrationRule :: giveLineCoordsAndWeights(int nPoints, FloatArray &coor
         OOFEM_ERROR2("LobattoIntegrationRule :: giveLineCoordsAndWeights - unsupported number of IPs (%d)", nPoints);
     }
 }
-
-
 } // end namespace oofem

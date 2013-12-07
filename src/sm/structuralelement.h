@@ -108,7 +108,7 @@ public:
     /// Destructor.
     virtual ~StructuralElement();
 
-    virtual void giveCharacteristicMatrix(FloatMatrix &answer, CharType, TimeStep *tStep);
+    virtual void giveCharacteristicMatrix(FloatMatrix & answer, CharType, TimeStep * tStep);
     virtual void giveCharacteristicVector(FloatArray &answer, CharType type, ValueModeType mode, TimeStep *tStep);
 
     virtual void giveDefaultDofManDofIDMask(int inode, IntArray &answer) const { this->giveDofManDofIDMask(inode, EID_MomentumBalance, answer); }

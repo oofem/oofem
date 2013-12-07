@@ -48,8 +48,7 @@
 #include <sstream>
 
 namespace oofem {
-
-REGISTER_Material( RVEStokesFlow );
+REGISTER_Material(RVEStokesFlow);
 
 RVEStokesFlowMaterialStatus :: RVEStokesFlowMaterialStatus(int n, Domain *d, GaussPoint *g, EngngModel *rve) :
     TransportMaterialStatus(n, d, g)
@@ -88,10 +87,10 @@ RVEStokesFlowMaterialStatus :: exportFilter(GaussPoint *gp, TimeStep *tStep)
     FloatArray grapP = this->giveTempGradient(), seepageVelocity;
 
     rveEngngModel *rveE;
-    rveE = dynamic_cast< rveEngngModel * >(this->rve);
+    rveE = dynamic_cast< rveEngngModel * >( this->rve );
 
     rveE->rveSetBoundaryConditions(10, grapP);
-    rveE->rveGiveCharacteristicData(1, &grapP, &seepageVelocity, tStep);
+    rveE->rveGiveCharacteristicData(1, & grapP, & seepageVelocity, tStep);
 
     basefilename = this->rve->giveOutputBaseFileName();
 
@@ -149,9 +148,7 @@ RVEStokesFlowMaterialStatus :: restoreContext(DataStream *stream, ContextMode mo
 }
 
 RVEStokesFlow :: RVEStokesFlow(int n, Domain *d) : RVEMaterial(n, d), TransportMaterial(n, d)
-{
-
-}
+{}
 
 IRResultType RVEStokesFlow :: initializeFrom(InputRecord *ir)
 {
@@ -214,7 +211,7 @@ RVEStokesFlow :: giveFluxVector(FloatArray &answer, GaussPoint *gp, const FloatA
         FloatArray X;
         rveEngngModel *rveE;
 
-        rveE = dynamic_cast< rveEngngModel * >(this->rve);
+        rveE = dynamic_cast< rveEngngModel * >( this->rve );
 
         X = grad;
 
@@ -222,17 +219,17 @@ RVEStokesFlow :: giveFluxVector(FloatArray &answer, GaussPoint *gp, const FloatA
 
         // Compute seepage velocity
         rveE->rveSetBoundaryConditions(BCType, grad);
-        rveE->rveGiveCharacteristicData(1, &X, &answer, tStep);
+        rveE->rveGiveCharacteristicData(1, & X, & answer, tStep);
 
         OOFEM_LOG_DEBUG( "Pressure gradient gradP=[%f %f] yields velocity vector [%f %f]\n", X.at(1), X.at(2), answer.at(1), answer.at(2) );
 
-        
+
         status->setTempGradient(X);
         status->setTempFlux(answer);
 
         // Compute tangent
         FloatMatrix K;
-        rveE->rveGiveCharacteristicData(2, &X, &K, tStep);
+        rveE->rveGiveCharacteristicData(2, & X, & K, tStep);
         status->letTempTangentMatrixBe(K);
     }
 
@@ -285,5 +282,4 @@ RVEStokesFlow :: CreateStatus(GaussPoint *gp) const
 {
     return new RVEStokesFlowMaterialStatus(1, this->giveDomain(), gp, this->rve);
 }
-
 }

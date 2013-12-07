@@ -76,7 +76,7 @@ public:
                                            GaussPoint *gp,
                                            TimeStep *atTime);
 
-    virtual double  giveMaturityT0() {return maturityT0; }
+    virtual double  giveMaturityT0() { return maturityT0; }
 
     virtual int giveIPValue(FloatArray &answer, GaussPoint *aGaussPoint, InternalStateType type, TimeStep *atTime);
 

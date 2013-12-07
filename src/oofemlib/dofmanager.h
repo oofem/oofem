@@ -66,7 +66,6 @@
 //@}
 
 namespace oofem {
-
 class DataStream;
 class Dof;
 class Domain;
@@ -81,16 +80,16 @@ class CommunicationBuffer;
 enum dofManagerParallelMode {
     DofManager_local, /**< DofManager is local, there are no contribution from other domains to this DofManager.*/
     DofManager_shared, /**< DofManager is shared by neighboring partitions,
-                            it is necessary to sum contributions from all contributing domains.
-                            Typical for node cut algorithm. */
+                        *   it is necessary to sum contributions from all contributing domains.
+                        *   Typical for node cut algorithm. */
     DofManager_remote, /**< DofManager in active domain is only mirror of some remote DofManager.
-                            It is necessary to copy remote values into local ones.
-                            Typical for element cut.*/
+                        *   It is necessary to copy remote values into local ones.
+                        *   Typical for element cut.*/
     DofManager_null, /**< DofManager in active domain is shared only by remote elements (these are only
-                          introduced for nonlocal constitutive model to allow effective local averaging, so only local material
-                          value to be averaged are transferred for these remote elements). Null nodes are therefore used only
-                          for computing real integration point coordinates of remote elements and there is no reason to maintain
-                          their unknowns (they have no equation number assigned).*/
+                      *   introduced for nonlocal constitutive model to allow effective local averaging, so only local material
+                      *   value to be averaged are transferred for these remote elements). Null nodes are therefore used only
+                      *   for computing real integration point coordinates of remote elements and there is no reason to maintain
+                      *   their unknowns (they have no equation number assigned).*/
 };
 
 #endif
@@ -150,15 +149,15 @@ protected:
 #endif
 
     /// List of additional dof ids to include.
-    IntArray * dofidmask;
+    IntArray *dofidmask;
     /// Map from DofIDItem to dofType.
-    std::map< int, int > *dofTypemap;
+    std :: map< int, int > *dofTypemap;
     /// Map from DofIDItem to master node.
-    std::map< int, int > *dofMastermap;
+    std :: map< int, int > *dofMastermap;
     /// Map from DofIDItem to bc (to be removed).
-    std::map< int, int > *dofBCmap;
+    std :: map< int, int > *dofBCmap;
     /// Map from DofIDItem to ic (to be removed).
-    std::map< int, int > *dofICmap;
+    std :: map< int, int > *dofICmap;
 
     // List of BCs (to enable writing to DynamicInputRecord)
     IntArray mBC;
@@ -235,7 +234,7 @@ public:
      */
     void giveCompleteLocationArray(IntArray &locationArray, const UnknownNumberingScheme &s) const;
     /**
-     * Returns the full dof ID array of receiver. 
+     * Returns the full dof ID array of receiver.
      * Mainly used at EngngModel level to assemble internal norms fronm DofManager contribution (typically load vector).
      * @param dofIDArray Complete dof ID array of receiver.
      */
@@ -413,34 +412,34 @@ public:
 
     /**@name Functions necessary for dof creation. All optional. */
     //@{
-    /** 
+    /**
      * Returns list of specific dofs that should be included in node.
      * @return NULL if no additional dofs are necessary, otherwise a list of DofIDItem's.
      */
     const IntArray *giveForcedDofIDs() { return dofidmask; }
     /**
      * Returns map from DofIDItem to dofType.
-     * @return NULL if no specific dofTypes are required, otherwise a map. 
+     * @return NULL if no specific dofTypes are required, otherwise a map.
      */
-    std::map< int, int > *giveDofTypeMap()  { return dofTypemap; }
+    std :: map< int, int > *giveDofTypeMap()  { return dofTypemap; }
     /**
      * Returns map from DofIDItem to dofType.
-     * @return NULL if no specific BCs are required, otherwise a map. 
+     * @return NULL if no specific BCs are required, otherwise a map.
      * @deprecated This method of applying dirichlet b.c.s is soon to be deprecated.
      */
-    std::map< int, int > *giveMasterMap()  { return dofMastermap; }
+    std :: map< int, int > *giveMasterMap()  { return dofMastermap; }
     /**
      * Returns map from DofIDItem to dofType.
-     * @return NULL if no specific BCs are required, otherwise a map. 
+     * @return NULL if no specific BCs are required, otherwise a map.
      * @deprecated This method of applying dirichlet b.c.s is soon to be deprecated.
      */
-    std::map< int, int > *giveBcMap()  { return dofBCmap; }
+    std :: map< int, int > *giveBcMap()  { return dofBCmap; }
     /**
      * Returns map from DofIDItem to initial condition.
-     * @return NULL if no specific ICs are required, otherwise a map. 
+     * @return NULL if no specific ICs are required, otherwise a map.
      * @deprecated This method of applying i.c.s is soon to be deprecated.
      */
-    std::map< int, int > *giveIcMap() { return dofICmap; }
+    std :: map< int, int > *giveIcMap() { return dofICmap; }
     //@}
 
     virtual void printOutputAt(FILE *file, TimeStep *tStep);
@@ -585,4 +584,3 @@ protected:
 };
 } // end namespace oofem
 #endif // dofmanager_h
-

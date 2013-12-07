@@ -175,7 +175,7 @@ StressVector :: computePrincipalValues(FloatArray &answer) const
              ( s.at(4) * s.at(4) + s.at(5) * s.at(5) + s.at(6) * s.at(6) );
         I3 = s.at(1) * s.at(2) * s.at(3) + 2. * s.at(4) * s.at(5) * s.at(6) -
              ( s.at(1) * s.at(4) * s.at(4) + s.at(2) * s.at(5) * s.at(5) +
-              s.at(3) * s.at(6) * s.at(6) );
+               s.at(3) * s.at(6) * s.at(6) );
 
         /*
          * Call cubic3r to ensure, that all three real eigenvalues will be found, because we have symmetric tensor.
@@ -523,7 +523,7 @@ StressVector :: applyDeviatoricElasticCompliance(StrainVector &strain,
         strain(1) = 1. / ( 2. * GModulus ) * values [ 1 ];
         strain(2) = 1. / ( 2. * GModulus ) * values [ 2 ];
         strain(3) = 1. / GModulus * values [ 3 ];
-        strain(4) = values[4];
+        strain(4) = values [ 4 ];
     } else {
         strain(0) = 1. / ( 2. * GModulus ) * values [ 0 ];
         strain(1) = 1. / ( 2. * GModulus ) * values [ 1 ];
@@ -551,7 +551,7 @@ StressVector :: computeStressNorm() const
         //  plane strain or axisymmetry
         return sqrt(values [ 0 ] * values [ 0 ] + values [ 1 ] * values [ 1 ] + values [ 2 ] * values [ 2 ] +
                     2. * values [ 3 ] * values [ 3 ]);
-    } else if ( myMode == _PlaneStrainGrad) {
+    } else if ( myMode == _PlaneStrainGrad ) {
         //  plane strain or axisymmetry
         return sqrt(values [ 0 ] * values [ 0 ] + values [ 1 ] * values [ 1 ] + values [ 2 ] * values [ 2 ] +
                     2. * values [ 3 ] * values [ 3 ]);

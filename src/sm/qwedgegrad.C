@@ -71,9 +71,9 @@ IRResultType
 QWedgeGrad :: initializeFrom(InputRecord *ir)
 {
     IRResultType result = this->NLStructuralElement :: initializeFrom(ir);
-	if(result != IRRT_OK) {
-		return result;
-	}
+    if ( result != IRRT_OK ) {
+        return result;
+    }
 
     if ( ( numberOfGaussPoints != 2 ) && ( numberOfGaussPoints != 9 ) ) {
         numberOfGaussPoints = 9;

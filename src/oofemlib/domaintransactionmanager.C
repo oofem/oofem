@@ -73,7 +73,7 @@ DomainTransactionManager :: addTransaction(DomainTransactionType dtt, DomainComp
         // local enry exist
         // delete previous record
         if ( ( * rec ) [ label ] ) {
-            delete(* rec) [ label ];
+            delete( * rec ) [ label ];
         }
     }
 

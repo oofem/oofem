@@ -40,7 +40,6 @@
 #include "valuemodetype.h"
 
 namespace oofem {
-
 ///@name Input fields for nodal loads
 //@{
 #define _IFT_NodalLoad_Name "nodalload"

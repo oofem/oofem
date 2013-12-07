@@ -40,8 +40,7 @@
 #include "classfactory.h"
 
 namespace oofem {
-
-REGISTER_SparseLinSolver( SpoolesSolver, ST_Spooles );
+REGISTER_SparseLinSolver(SpoolesSolver, ST_Spooles);
 
 SpoolesSolver :: SpoolesSolver(Domain *d, EngngModel *m) : SparseLinearSystemNM(d, m)
 {
@@ -101,7 +100,7 @@ SpoolesSolver :: initializeFrom(InputRecord *ir)
     IRResultType result;                // Required by IR_GIVE_FIELD macro
 
     int val;
-    std::string msgFileName;
+    std :: string msgFileName;
 
     val = -3;
     IR_GIVE_OPTIONAL_FIELD(ir, val, _IFT_SpoolesSolver_msglvl);
@@ -281,7 +280,7 @@ SpoolesSolver :: solve(SparseMtrx *A, FloatArray *b, FloatArray *x)
             fflush(msgFile);
         }
 
-        Tree_writeToFile(frontETree->tree, (char*)"haggar.treef");
+        Tree_writeToFile(frontETree->tree, ( char * ) "haggar.treef");
         /*--------------------------------------------------------------------*/
         /*
          * ------------------------------------------
@@ -403,5 +402,4 @@ SpoolesSolver :: solve(SparseMtrx *A, FloatArray *b, FloatArray *x)
     /*--------------------------------------------------------------------*/
     return ( 1 );
 }
-
 } // end namespace oofem

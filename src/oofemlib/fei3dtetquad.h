@@ -60,7 +60,7 @@ public:
     virtual int  global2local(FloatArray &answer, const FloatArray &lcoords, const FEICellGeometry &cellgeo);
     virtual double giveTransformationJacobian(const FloatArray &lcoords, const FEICellGeometry &cellgeo);
 
-    virtual void evaldNdxi(FloatMatrix &answer, const FloatArray &lcoords, const FEICellGeometry& cellgeo);
+    virtual void evaldNdxi(FloatMatrix &answer, const FloatArray &lcoords, const FEICellGeometry &cellgeo);
 
     /**
      * Returns a characteristic length of the geometry, typically a diagonal or edge length.
@@ -82,9 +82,9 @@ public:
     // Surface
     virtual void surfaceEvalN(FloatArray &answer, int isurf, const FloatArray &lcoords, const FEICellGeometry &cellgeo);
     virtual void surfaceEvaldNdx(FloatMatrix &answer, int isurf,
-                   const FloatArray &lcoords, const FEICellGeometry &cellgeo);
+                                 const FloatArray &lcoords, const FEICellGeometry &cellgeo);
     virtual double surfaceEvalNormal(FloatArray &answer, int isurf,
-                   const FloatArray &lcoords, const FEICellGeometry &cellgeo);
+                                     const FloatArray &lcoords, const FEICellGeometry &cellgeo);
     virtual void surfaceLocal2global(FloatArray &answer, int isurf,
                                      const FloatArray &lcoords, const FEICellGeometry &cellgeo);
     virtual double surfaceGiveTransformationJacobian(int isurf, const FloatArray &lcoords,

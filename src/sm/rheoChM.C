@@ -68,13 +68,13 @@ RheoChainMaterial :: hasMaterialModeCapability(MaterialMode mode)
 //
 {
     return mode == _3dMat || mode == _PlaneStress ||
-        mode == _PlaneStrain || mode == _1dMat ||
-        mode == _PlateLayer || mode == _2dBeamLayer;
+           mode == _PlaneStrain || mode == _1dMat ||
+           mode == _PlateLayer || mode == _2dBeamLayer;
 }
 
 
 void
-RheoChainMaterial :: giveRealStressVector(FloatArray &answer, 
+RheoChainMaterial :: giveRealStressVector(FloatArray &answer,
                                           GaussPoint *gp,
                                           const FloatArray &totalStrain,
                                           TimeStep *atTime)
@@ -105,7 +105,7 @@ RheoChainMaterial :: giveRealStressVector(FloatArray &answer,
 
     // subtract the initial strain to get the "net" strain increment,
     // which is related to the stress increment
-    strainIncrement.beDifferenceOf(reducedStrain, status->giveStrainVector());
+    strainIncrement.beDifferenceOf( reducedStrain, status->giveStrainVector() );
 
     // get the initial stress, or set it to zero if not available (first step)
     if ( status->giveStressVector().giveSize() ) {
@@ -199,9 +199,9 @@ RheoChainMaterial :: generateLogTimeScale(FloatArray &answer, double from, doubl
     answer.resize(nsteps);
     answer.zero();
 
-    double help = log(to/from) / nsteps;
+    double help = log(to / from) / nsteps;
     for ( int i = 1; i <= nsteps; i++ ) {
-        answer.at(i) = exp( i * help ) * from;
+        answer.at(i) = exp(i * help) * from;
     }
 }
 
@@ -246,7 +246,7 @@ RheoChainMaterial :: giveUnitComplianceMatrix(FloatMatrix &answer,
 {
     FloatMatrix tangent;
     static_cast< StructuralCrossSection * >( gp->giveCrossSection() )->
-        giveCharMaterialStiffnessMatrix(tangent, ElasticStiffness, gp, tStep);
+    giveCharMaterialStiffnessMatrix(tangent, ElasticStiffness, gp, tStep);
     answer.beInverseOf(tangent);
 }
 
@@ -405,7 +405,9 @@ RheoChainMaterial :: give3dMaterialStiffnessMatrix(FloatMatrix &answer,
     // Returns the incremental material stiffness matrix of the receiver
     //
     this->giveLinearElasticMaterial()->give3dMaterialStiffnessMatrix(answer, mode, gp, atTime);
-    if ( mode == ElasticStiffness ) return;
+    if ( mode == ElasticStiffness ) {
+        return;
+    }
     answer.times( this->giveEModulus(gp, atTime) );
 }
 
@@ -420,7 +422,9 @@ RheoChainMaterial :: givePlaneStressStiffMtrx(FloatMatrix &answer,
     // Returns the incremental material stiffness matrix of the receiver
     //
     this->giveLinearElasticMaterial()->givePlaneStressStiffMtrx(answer, mode, gp, atTime);
-    if ( mode == ElasticStiffness ) return;
+    if ( mode == ElasticStiffness ) {
+        return;
+    }
     answer.times( this->giveEModulus(gp, atTime) );
 }
 
@@ -434,7 +438,9 @@ RheoChainMaterial :: givePlaneStrainStiffMtrx(FloatMatrix &answer,
     // Returns the incremental material stiffness matrix of the receiver
     //
     this->giveLinearElasticMaterial()->givePlaneStrainStiffMtrx(answer, mode, gp, atTime);
-    if ( mode == ElasticStiffness ) return;
+    if ( mode == ElasticStiffness ) {
+        return;
+    }
     answer.times( this->giveEModulus(gp, atTime) );
 }
 
@@ -449,7 +455,9 @@ RheoChainMaterial :: give1dStressStiffMtrx(FloatMatrix &answer,
     // Returns the incremental material stiffness matrix of the receiver
     //
     this->giveLinearElasticMaterial()->give1dStressStiffMtrx(answer, mode, gp, atTime);
-    if ( mode == ElasticStiffness ) return;
+    if ( mode == ElasticStiffness ) {
+        return;
+    }
     answer.times( this->giveEModulus(gp, atTime) );
 }
 
@@ -515,7 +523,7 @@ RheoChainMaterial :: giveEndOfTimeOfInterest()
 }
 
 contextIOResultType
-RheoChainMaterial :: saveIPContext(DataStream *stream, ContextMode mode, GaussPoint* gp)
+RheoChainMaterial :: saveIPContext(DataStream *stream, ContextMode mode, GaussPoint *gp)
 //
 // saves full status for this material, also invokes saving
 // for sub-objects of this
@@ -572,8 +580,8 @@ RheoChainMaterialStatus :: RheoChainMaterialStatus(int n, Domain *d,
     hiddenVars.resize(nUnits);
     tempHiddenVars.resize(nUnits);
     for ( int i = 0; i < nUnits; i++ ) {
-        hiddenVars[ i ].resize(0);
-        tempHiddenVars[ i ].resize(0);
+        hiddenVars [ i ].resize(0);
+        tempHiddenVars [ i ].resize(0);
     }
 }
 
@@ -607,7 +615,7 @@ RheoChainMaterialStatus :: printOutputAt(FILE *file, TimeStep *tStep)
 
     fprintf(file, "{hidden variables: ");
     for ( int i = 0; i < nUnits; i++ ) {
-        StructuralMaterial :: giveFullSymVectorForm(helpVec, hiddenVars [ i ], gp->giveMaterialMode()); // JB
+        StructuralMaterial :: giveFullSymVectorForm( helpVec, hiddenVars [ i ], gp->giveMaterialMode() ); // JB
         fprintf(file, "{ ");
         for ( int j = 1; j <= helpVec.giveSize(); j++ ) {
             fprintf( file, "%f ", helpVec.at(j) );
@@ -634,8 +642,8 @@ RheoChainMaterialStatus :: updateYourself(TimeStep *tStep)
 {
     StructuralMaterialStatus :: updateYourself(tStep);
 
-    for ( int i = 0; i < nUnits; i++ ) { 
-        this->hiddenVars[ i ] = this->tempHiddenVars[ i ];
+    for ( int i = 0; i < nUnits; i++ ) {
+        this->hiddenVars [ i ] = this->tempHiddenVars [ i ];
     }
 }
 

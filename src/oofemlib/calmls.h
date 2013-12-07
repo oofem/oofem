@@ -207,10 +207,10 @@ protected:
     FloatArray rtold;
 
 #ifdef __PARALLEL_MODE
-#ifdef __PETSC_MODULE
+ #ifdef __PETSC_MODULE
     /// Parallel context for computing norms, dot products and such.
     PetscContext *parallel_context;
-#endif
+ #endif
 #endif
 
 public:

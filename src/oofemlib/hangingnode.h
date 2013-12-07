@@ -45,7 +45,6 @@
 //@}
 
 namespace oofem {
-
 /**
  * Class implementing hanging node connected to other nodes (masters) using interpolation.
  * Hanging node possess no degrees of freedom - all values are interpolated from corresponding master dofs.
@@ -58,7 +57,7 @@ namespace oofem {
  * they are determined completely from master dof conditions.
  * The local coordinate system in slave is not supported in current implementation, the global cs applies.
  * On the other hand, hanging node can be loaded independently of master.
- * 
+ *
  * If no master element number is supplied (or negative) then it will locate it using the global coordinates.
  * and if no master region number is supplied (or zero), it will look for elements in all regions.
  */

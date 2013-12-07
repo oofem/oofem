@@ -44,7 +44,6 @@
 //@}
 
 namespace oofem {
-
 /**
  * Class implementing spherical particles as special nodes having a certain radius.
  * Such particles are used by the cohesive particle model.

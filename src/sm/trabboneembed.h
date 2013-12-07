@@ -52,7 +52,6 @@
 //@}
 
 namespace oofem {
-
 /**
  * This class implements associated Material Status to TrabBoneEmbed.
  */
@@ -80,7 +79,7 @@ public:
     void setTempPlasDef(FloatArray epsip) { tempPlasDef = epsip; }
     void setSmtrx(FloatMatrix smt) { smtrx = smt; }
 
-    const FloatArray & givePlasDef() const { return plasDef; }
+    const FloatArray &givePlasDef() const { return plasDef; }
 
     // definition
     virtual const char *giveClassName() const { return "TrabBoneEmbedStatus"; }
@@ -120,7 +119,7 @@ public:
                                                TimeStep *tStep);
 
     virtual void giveRealStressVector_3d(FloatArray &answer, GaussPoint *gp,
-                                      const FloatArray &reducedStrain, TimeStep *tStep);
+                                         const FloatArray &reducedStrain, TimeStep *tStep);
 
     virtual int hasMaterialModeCapability(MaterialMode);
 

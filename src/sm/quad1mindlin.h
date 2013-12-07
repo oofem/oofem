@@ -41,16 +41,15 @@
 #define _IFT_Quad1Mindlin_Name "quad1mindlin"
 
 namespace oofem {
-
 /**
  * This class implements an quadrilateral four-node Mindlin plate.
  * Each node has 3 degrees of freedom (out-of-plane displacement, in-plane rotations).
  * This type of element exhibit strong shear locking (thin plates exhibit almost no bending).
  * No reduced integration is used, as it causes numerical problems.
- * 
+ *
  * Loading types supported;
  * - Gravity load
- * 
+ *
  * Reference:
  * Robert Cook, David Malkus, Michael Plesha
  * Concepts and Applications of Finite Element Analysis - Third edition
@@ -67,7 +66,7 @@ public:
     Quad1Mindlin(int n, Domain *d);
     virtual ~Quad1Mindlin() { }
 
-    virtual FEInterpolation *giveInterpolation() const { return &interp_lin; }
+    virtual FEInterpolation *giveInterpolation() const { return & interp_lin; }
     virtual FEInterpolation *giveInterpolation(DofIDItem id) const;
 
     virtual MaterialMode giveMaterialMode()  { return _2dPlate; }

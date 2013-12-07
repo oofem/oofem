@@ -47,21 +47,20 @@
 #endif
 
 namespace oofem {
-
-REGISTER_Element( QTruss1dGrad );
+REGISTER_Element(QTruss1dGrad);
 
 FEI1dLin QTruss1dGrad :: interpolation(1);
 
-QTruss1dGrad :: QTruss1dGrad(int n, Domain *aDomain) : QTruss1d(n, aDomain),GradDpElement()
-// Constructor.
+QTruss1dGrad :: QTruss1dGrad(int n, Domain *aDomain) : QTruss1d(n, aDomain), GradDpElement()
+    // Constructor.
 {
     nPrimNodes = 3;
     nPrimVars = 1;
     nSecNodes = 2;
     nSecVars = 1;
-    totalSize = nPrimVars*nPrimNodes+nSecVars*nSecNodes;
-    locSize   = nPrimVars*nPrimNodes;
-    nlSize    = nSecVars*nSecNodes;
+    totalSize = nPrimVars * nPrimNodes + nSecVars * nSecNodes;
+    locSize   = nPrimVars * nPrimNodes;
+    nlSize    = nSecVars * nSecNodes;
 }
 
 
@@ -70,8 +69,7 @@ QTruss1dGrad :: giveDofManDofIDMask(int inode, EquationID ut, IntArray &answer) 
 {
     if ( inode < 3 ) {
         answer.setValues(2, D_u, G_0);
-    }
-    else {
+    } else   {
         answer.setValues(1, D_u);
     }
 }
@@ -81,9 +79,9 @@ IRResultType
 QTruss1dGrad :: initializeFrom(InputRecord *ir)
 {
     IRResultType result = this->StructuralElement :: initializeFrom(ir);
-	if(result != IRRT_OK) {
-		return result;
-	}
+    if ( result != IRRT_OK ) {
+        return result;
+    }
 
     return IRRT_OK;
 }
@@ -93,16 +91,16 @@ void
 QTruss1dGrad :: computeGaussPoints()
 {
     numberOfIntegrationRules = 1;
-    integrationRulesArray = new IntegrationRule* [numberOfIntegrationRules];
-    integrationRulesArray[0] = new GaussIntegrationRule (1,this,1, 1);
-    this->giveCrossSection()->setupIntegrationPoints( *integrationRulesArray[0], numberOfGaussPoints, this );
+    integrationRulesArray = new IntegrationRule * [ numberOfIntegrationRules ];
+    integrationRulesArray [ 0 ] = new GaussIntegrationRule(1, this, 1, 1);
+    this->giveCrossSection()->setupIntegrationPoints(* integrationRulesArray [ 0 ], numberOfGaussPoints, this);
 }
 
 
 void
 QTruss1dGrad :: computeStiffnessMatrix(FloatMatrix &answer, MatResponseMode rMode, TimeStep *tStep)
 {
-    GradDpElement ::computeStiffnessMatrix(answer, rMode,tStep);
+    GradDpElement :: computeStiffnessMatrix(answer, rMode, tStep);
 }
 
 
@@ -116,7 +114,7 @@ QTruss1dGrad :: giveInternalForcesVector(FloatArray &answer, TimeStep *tStep, in
 void
 QTruss1dGrad :: computeForceLoadVector(FloatArray &answer, TimeStep *tStep, ValueModeType mode)
 {
-    GradDpElement :: computeForceLoadVector(answer, tStep,mode);
+    GradDpElement :: computeForceLoadVector(answer, tStep, mode);
 }
 
 
@@ -124,24 +122,23 @@ void
 QTruss1dGrad :: computeNkappaMatrixAt(GaussPoint *aGaussPoint, FloatMatrix &answer)
 {
     FloatArray n;
-    answer.resize(1,2);
+    answer.resize(1, 2);
     answer.zero();
 
-    this->interpolation.evalN(n, * aGaussPoint->giveCoordinates(), FEIElementGeometryWrapper(this));
-    answer.at(1,1) = n.at(1);
-    answer.at(1,2) = n.at(2);
+    this->interpolation.evalN( n, * aGaussPoint->giveCoordinates(), FEIElementGeometryWrapper(this) );
+    answer.at(1, 1) = n.at(1);
+    answer.at(1, 2) = n.at(2);
 }
 
 
 void
 QTruss1dGrad :: computeBkappaMatrixAt(GaussPoint *aGaussPoint, FloatMatrix &answer)
 {
-    answer.resize(1,2);
+    answer.resize(1, 2);
     answer.zero();
     FloatMatrix b;
-    this->interpolation.evaldNdx(b, * aGaussPoint->giveCoordinates(), FEIElementGeometryWrapper(this));
-    answer.at(1,1) = b.at(1,1);
-    answer.at(1,2) = b.at(2,1);
+    this->interpolation.evaldNdx( b, * aGaussPoint->giveCoordinates(), FEIElementGeometryWrapper(this) );
+    answer.at(1, 1) = b.at(1, 1);
+    answer.at(1, 2) = b.at(2, 1);
 }
-
 }

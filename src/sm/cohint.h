@@ -42,7 +42,6 @@
 #include "cltypes.h"
 
 namespace oofem {
-
 ///@name Input fields for RankineMat
 //@{
 #define _IFT_CohesiveInterfaceMaterial_Name "cohint"
@@ -103,18 +102,18 @@ public:
 
     virtual void give3dMaterialStiffnessMatrix(FloatMatrix & answer,
                                                MatResponseMode,
-                                               GaussPoint *gp,
-                                               TimeStep *atTime);
+                                               GaussPoint * gp,
+                                               TimeStep * atTime);
 
     double computeVolumetricStrain(GaussPoint *gp, TimeStep *atTime);
 
-    virtual void giveRealStressVector(FloatArray & answer, GaussPoint *gp,
-                              const FloatArray &reducedStrain, TimeStep *tStep);
+    virtual void giveRealStressVector(FloatArray &answer, GaussPoint *gp,
+                                      const FloatArray &reducedStrain, TimeStep *tStep);
 
     virtual void  giveStiffnessMatrix(FloatMatrix &answer,
-                                           MatResponseMode mode,
-                                           GaussPoint *gp,
-                                           TimeStep *atTime);
+                                      MatResponseMode mode,
+                                      GaussPoint *gp,
+                                      TimeStep *atTime);
 
     virtual int giveIPValue(FloatArray &answer, GaussPoint *aGaussPoint, InternalStateType type, TimeStep *atTime);
 
@@ -132,4 +131,3 @@ protected:
 };
 } // namespace oofem
 #endif
-

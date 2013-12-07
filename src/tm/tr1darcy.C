@@ -50,8 +50,7 @@
 #include "classfactory.h"
 
 namespace oofem {
-
-REGISTER_Element( Tr1Darcy );
+REGISTER_Element(Tr1Darcy);
 
 FEI2dTrLin Tr1Darcy :: interpolation_lin(1, 2);
 
@@ -60,9 +59,8 @@ Tr1Darcy :: Tr1Darcy(int n, Domain *aDomain) : TransportElement(n, aDomain)
     numberOfDofMans = 3;
 }
 
-Tr1Darcy :: ~Tr1Darcy()   
-{
-}
+Tr1Darcy :: ~Tr1Darcy()
+{}
 
 IRResultType Tr1Darcy :: initializeFrom(InputRecord *ir)
 {
@@ -76,7 +74,7 @@ void Tr1Darcy :: computeGaussPoints()
         numberOfIntegrationRules = 1;
         integrationRulesArray = new IntegrationRule * [ 1 ];
         integrationRulesArray [ 0 ] = new GaussIntegrationRule(1, this, 1, 3);
-        this->giveCrossSection()->setupIntegrationPoints( *integrationRulesArray[0], numberOfGaussPoints, this );
+        this->giveCrossSection()->setupIntegrationPoints(* integrationRulesArray [ 0 ], numberOfGaussPoints, this);
     }
 }
 
@@ -103,12 +101,12 @@ void Tr1Darcy :: computeStiffnessMatrix(FloatMatrix &answer, TimeStep *atTime)
 
         double detJ = this->interpolation_lin.giveTransformationJacobian( * lcoords, FEIElementGeometryWrapper(this) );
         this->interpolation_lin.evaldNdx( BT, * lcoords, FEIElementGeometryWrapper(this) );
-        
+
         mat->giveCharacteristicMatrix(K, TangentStiffness, gp, atTime);
 
         B.beTranspositionOf(BT);
         KB.beProductOf(K, B);
-        answer.plusProductUnsym(B, KB, detJ * gp->giveWeight() ); // Symmetric part is just a single value, not worth it.
+        answer.plusProductUnsym( B, KB, detJ * gp->giveWeight() ); // Symmetric part is just a single value, not worth it.
     }
 }
 
@@ -142,7 +140,7 @@ void Tr1Darcy :: computeInternalForcesVector(FloatArray &answer, TimeStep *atTim
 
         double detJ = this->interpolation_lin.giveTransformationJacobian( * lcoords, FEIElementGeometryWrapper(this) );
         this->interpolation_lin.evaldNdx( BT, * lcoords, FEIElementGeometryWrapper(this) );
-        this->interpolation_lin.evalN( n, *lcoords, FEIElementGeometryWrapper(this) );
+        this->interpolation_lin.evalN( n, * lcoords, FEIElementGeometryWrapper(this) );
         B.beTranspositionOf(BT);
         P.at(1) = n.dotProduct(a); // Evaluates the field at this point.
 
@@ -150,7 +148,7 @@ void Tr1Darcy :: computeInternalForcesVector(FloatArray &answer, TimeStep *atTim
 
         mat->giveFluxVector(w, gp, gradP, P, atTime);
 
-        answer.plusProduct(B, w, - gp->giveWeight() * detJ);
+        answer.plusProduct(B, w, -gp->giveWeight() * detJ);
     }
 }
 
@@ -215,14 +213,14 @@ void Tr1Darcy :: computeEdgeBCSubVectorAt(FloatArray &answer, Load *load, int iE
         for ( int i = 0; i < iRule.giveNumberOfIntegrationPoints(); i++ ) {
             gp = iRule.getIntegrationPoint(i);
             FloatArray *lcoords = gp->giveCoordinates();
-            this->interpolation_lin.edgeEvalN(N, iEdge, *lcoords, FEIElementGeometryWrapper(this));
+            this->interpolation_lin.edgeEvalN( N, iEdge, * lcoords, FEIElementGeometryWrapper(this) );
             double dV = this->computeEdgeVolumeAround(gp, iEdge);
 
             if ( boundaryLoad->giveFormulationType() == Load :: FT_Entity ) {                // Edge load in xi-eta system
-                boundaryLoad->computeValueAt(loadValue, tStep, *lcoords, mode);
+                boundaryLoad->computeValueAt(loadValue, tStep, * lcoords, mode);
             } else {  // Edge load in x-y system
                 FloatArray gcoords;
-                this->interpolation_lin.edgeLocal2global(gcoords, iEdge, *lcoords, FEIElementGeometryWrapper(this));
+                this->interpolation_lin.edgeLocal2global( gcoords, iEdge, * lcoords, FEIElementGeometryWrapper(this) );
                 boundaryLoad->computeValueAt(loadValue, tStep, gcoords, mode);
             }
 
@@ -236,14 +234,14 @@ void Tr1Darcy :: computeEdgeBCSubVectorAt(FloatArray &answer, Load *load, int iE
 
 double Tr1Darcy :: giveThicknessAt(const FloatArray &gcoords)
 {
-  return this->giveCrossSection()->give(CS_Thickness, &gcoords, this, false);
+    return this->giveCrossSection()->give(CS_Thickness, & gcoords, this, false);
 }
 
 
 double Tr1Darcy :: computeEdgeVolumeAround(GaussPoint *gp, int iEdge)
 {
     double thickness = 1;
-    double detJ = fabs( this->interpolation_lin.edgeGiveTransformationJacobian(iEdge, *gp->giveLocalCoordinates(), FEIElementGeometryWrapper(this)) );
+    double detJ = fabs( this->interpolation_lin.edgeGiveTransformationJacobian( iEdge, * gp->giveLocalCoordinates(), FEIElementGeometryWrapper(this) ) );
     return detJ * thickness * gp->giveWeight();
 }
 

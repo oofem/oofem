@@ -45,28 +45,25 @@
 #endif
 
 namespace oofem {
-
-QTrPlaneStrainGrad :: QTrPlaneStrainGrad(int n, Domain *aDomain) : QTrPlaneStrain( n,aDomain),GradDpElement()
-// Constructor.
+QTrPlaneStrainGrad :: QTrPlaneStrainGrad(int n, Domain *aDomain) : QTrPlaneStrain(n, aDomain), GradDpElement()
+    // Constructor.
 {
     nPrimNodes = 6;
     nPrimVars = 2;
     nSecNodes = 3;
     nSecVars = 1;
-    totalSize = nPrimVars*nPrimNodes+nSecVars*nSecNodes;
-    locSize   = nPrimVars*nPrimNodes;
-    nlSize    = nSecVars*nSecNodes;
+    totalSize = nPrimVars * nPrimNodes + nSecVars * nSecNodes;
+    locSize   = nPrimVars * nPrimNodes;
+    nlSize    = nSecVars * nSecNodes;
 }
 
 
 void
 QTrPlaneStrainGrad :: giveDofManDofIDMask(int inode, EquationID ut, IntArray &answer) const
 {
-
-    if ( inode<=nSecNodes ) {
+    if ( inode <= nSecNodes ) {
         answer.setValues(3, D_u, D_v, G_0);
-    }
-    else {
+    } else   {
         answer.setValues(2, D_u, D_v);
     }
 }
@@ -86,12 +83,11 @@ QTrPlaneStrainGrad :: initializeFrom(InputRecord *ir)
 void
 QTrPlaneStrainGrad :: computeGaussPoints()
 {
-
     if ( !integrationRulesArray ) {
         numberOfIntegrationRules = 1;
-        integrationRulesArray = new IntegrationRule* [numberOfIntegrationRules];
+        integrationRulesArray = new IntegrationRule * [ numberOfIntegrationRules ];
         integrationRulesArray [ 0 ] = new GaussIntegrationRule(1, this, 1, 3);
-        this->giveCrossSection()->setupIntegrationPoints( *integrationRulesArray[0], numberOfGaussPoints, this );
+        this->giveCrossSection()->setupIntegrationPoints(* integrationRulesArray [ 0 ], numberOfGaussPoints, this);
     }
 }
 
@@ -148,5 +144,4 @@ QTrPlaneStrainGrad :: computeBkappaMatrixAt(GaussPoint *aGaussPoint, FloatMatrix
 
     answer.times( 1. / ( 2. * area ) );
 }
-
 }

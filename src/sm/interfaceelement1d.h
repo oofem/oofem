@@ -66,7 +66,7 @@ public:
 
     virtual int computeGlobalCoordinates(FloatArray &answer, const FloatArray &lcoords);
     virtual bool computeLocalCoordinates(FloatArray &answer, const FloatArray &gcoords);
-    
+
     virtual int computeNumberOfDofs();
     virtual void giveDofManDofIDMask(int inode, EquationID ut, IntArray &answer) const;
 

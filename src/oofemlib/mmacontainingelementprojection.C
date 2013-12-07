@@ -94,9 +94,8 @@ MMAContainingElementProjection :: __mapVariable(FloatArray &answer, FloatArray &
 int
 MMAContainingElementProjection :: mapStatus(MaterialStatus &oStatus) const
 {
-	OOFEM_ERROR("ERROR: MMAContainingElementProjection :: mapStatus() is not implemented yet.")
+    OOFEM_ERROR("ERROR: MMAContainingElementProjection :: mapStatus() is not implemented yet.")
 
-	return 0;
+    return 0;
 }
-
 } // end namespace oofem

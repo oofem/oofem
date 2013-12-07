@@ -37,11 +37,11 @@
 
 #ifdef __PARALLEL_MODE
 
-#include "communicator.h"
-#include "fetiboundarydofman.h"
-#include "error.h"
+ #include "communicator.h"
+ #include "fetiboundarydofman.h"
+ #include "error.h"
 
-#include <vector>
+ #include <vector>
 
 using namespace std;
 

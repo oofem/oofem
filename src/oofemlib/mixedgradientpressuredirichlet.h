@@ -64,7 +64,7 @@ class SparseLinearSystemNM;
  * @note Can only be prescribed to active dofs, so they must be denoted as such in the in the input file.
  *
  * @see MixedGradientPressureNeumann
- * 
+ *
  * @author Mikael Öhman
  */
 class OOFEM_EXPORT MixedGradientPressureDirichlet : public MixedGradientPressureBC
@@ -165,4 +165,3 @@ public:
 } // end namespace oofem
 
 #endif // mixedgradientpressuredirichlet_h
-

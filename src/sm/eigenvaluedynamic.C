@@ -50,8 +50,7 @@
 #endif
 
 namespace oofem {
-
-REGISTER_EngngModel( EigenValueDynamic );
+REGISTER_EngngModel(EigenValueDynamic);
 
 NumericalMethod *EigenValueDynamic :: giveNumericalMethod(MetaStep *mStep)
 {
@@ -168,13 +167,13 @@ void EigenValueDynamic :: solveYourselfAt(TimeStep *tStep)
         massMatrix->buildInternalStructure( this, 1, EID_MomentumBalance, EModelDefaultEquationNumbering() );
 
         this->assemble( stiffnessMatrix, tStep, EID_MomentumBalance, StiffnessMatrix,
-                       EModelDefaultEquationNumbering(), this->giveDomain(1) );
+                        EModelDefaultEquationNumbering(), this->giveDomain(1) );
         this->assemble( massMatrix, tStep, EID_MomentumBalance, MassMatrix,
-                       EModelDefaultEquationNumbering(), this->giveDomain(1) );
+                        EModelDefaultEquationNumbering(), this->giveDomain(1) );
         //
         // create resulting objects eigVec and eigVal
         //
-        eigVec.resize(this->giveNumberOfDomainEquations(1, EModelDefaultEquationNumbering()), numberOfRequiredEigenValues);
+        eigVec.resize(this->giveNumberOfDomainEquations( 1, EModelDefaultEquationNumbering() ), numberOfRequiredEigenValues);
         eigVec.zero();
         eigVal.resize(numberOfRequiredEigenValues);
         eigVal.zero();
@@ -183,7 +182,7 @@ void EigenValueDynamic :: solveYourselfAt(TimeStep *tStep)
     //
     // set-up numerical model
     //
-    this->giveNumericalMethod(  this->giveMetaStep( tStep->giveMetaStepNumber() ) );
+    this->giveNumericalMethod( this->giveMetaStep( tStep->giveMetaStepNumber() ) );
 
     //
     // call numerical model to solve arised problem
@@ -229,8 +228,8 @@ void EigenValueDynamic :: terminate(TimeStep *stepN)
     for ( i = 1; i <=  numberOfRequiredEigenValues; i++ ) {
         fprintf(outputStream, "\nOutput for eigen value no.  % .3e \n", ( double ) i);
         fprintf( outputStream,
-                "Printing eigen vector no. %d, corresponding eigen value is %15.8e\n\n",
-                i, eigVal.at(i) );
+                 "Printing eigen vector no. %d, corresponding eigen value is %15.8e\n\n",
+                 i, eigVal.at(i) );
         stepN->setTime( ( double ) i ); // we use time as intrinsic eigen value index
 
         if ( this->requiresUnknownsDictionaryUpdate() ) {
@@ -256,7 +255,7 @@ void EigenValueDynamic :: terminate(TimeStep *stepN)
         stepN->setNumber(i);
         exportModuleManager->doOutput(stepN);
     }
-    fflush(this->giveOutputStream());
+    fflush( this->giveOutputStream() );
     this->saveStepContext(stepN);
 }
 
@@ -342,7 +341,6 @@ contextIOResultType EigenValueDynamic :: restoreContext(DataStream *stream, Cont
             delete stream;
             stream = NULL;
         } // ensure consistent records
-
     }
 
     if ( activeVector > numberOfRequiredEigenValues ) {
@@ -399,6 +397,4 @@ EigenValueDynamic :: initPetscContexts()
     }
 }
 #endif
-
-
 } // end namespace oofem

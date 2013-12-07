@@ -108,8 +108,8 @@ NonlocalMaterialExtensionInterface :: buildNonlocalPointTable(GaussPoint *gp)
 
     NonlocalMaterialStatusExtensionInterface *statusExt =
         static_cast< NonlocalMaterialStatusExtensionInterface * >( gp->giveMaterialStatus()->
-        giveInterface(NonlocalMaterialStatusExtensionInterfaceType) );
-    std::list< localIntegrationRecord > *iList;
+                                                                   giveInterface(NonlocalMaterialStatusExtensionInterfaceType) );
+    std :: list< localIntegrationRecord > *iList;
 
     Element *ielem;
     GaussPoint *jGp;
@@ -233,8 +233,8 @@ NonlocalMaterialExtensionInterface :: rebuildNonlocalPointTable(GaussPoint *gp, 
 
     NonlocalMaterialStatusExtensionInterface *statusExt =
         static_cast< NonlocalMaterialStatusExtensionInterface * >( gp->giveMaterialStatus()->
-        giveInterface(NonlocalMaterialStatusExtensionInterfaceType) );
-    std::list< localIntegrationRecord > *iList;
+                                                                   giveInterface(NonlocalMaterialStatusExtensionInterfaceType) );
+    std :: list< localIntegrationRecord > *iList;
 
     Element *ielem;
     GaussPoint *jGp;
@@ -309,7 +309,7 @@ NonlocalMaterialExtensionInterface :: rebuildNonlocalPointTable(GaussPoint *gp, 
         statusExt->setIntegrationScale(integrationVolume); // remember scaling factor
 #ifdef __PARALLEL_MODE
  #ifdef __VERBOSE_PARALLEL
-        std::list< localIntegrationRecord > :: iterator pos;
+        std :: list< localIntegrationRecord > :: iterator pos;
         fprintf( stderr, "%d(%d):", gp->giveElement()->giveGlobalNumber(), gp->giveNumber() );
         for ( pos = iList->begin(); pos != iList->end(); ++pos ) {
             fprintf(stderr, "%d,%d(%e)", pos->nearGp->giveElement()->giveGlobalNumber(), pos->nearGp->giveNumber(), pos->weight);
@@ -322,12 +322,12 @@ NonlocalMaterialExtensionInterface :: rebuildNonlocalPointTable(GaussPoint *gp, 
 }
 
 
-std::list< localIntegrationRecord > *
+std :: list< localIntegrationRecord > *
 NonlocalMaterialExtensionInterface :: giveIPIntegrationList(GaussPoint *gp)
 {
     NonlocalMaterialStatusExtensionInterface *statusExt =
         static_cast< NonlocalMaterialStatusExtensionInterface * >( gp->giveMaterialStatus()->
-        giveInterface(NonlocalMaterialStatusExtensionInterfaceType) );
+                                                                   giveInterface(NonlocalMaterialStatusExtensionInterfaceType) );
 
     if ( !statusExt ) {
         OOFEM_ERROR("NonlocalMaterialExtensionInterface::givIPIntegrationList : local material status encountered");
@@ -345,7 +345,7 @@ NonlocalMaterialExtensionInterface :: endIPNonlocalAverage(GaussPoint *gp)
 {
     NonlocalMaterialStatusExtensionInterface *statusExt =
         static_cast< NonlocalMaterialStatusExtensionInterface * >( gp->giveMaterialStatus()->
-        giveInterface(NonlocalMaterialStatusExtensionInterfaceType) );
+                                                                   giveInterface(NonlocalMaterialStatusExtensionInterfaceType) );
 
     if ( !statusExt ) {
         OOFEM_ERROR("NonlocalMaterialExtensionInterface::givIPIntegrationList : local material status encountered");
@@ -368,7 +368,7 @@ NonlocalMaterialExtensionInterface :: computeWeightFunction(double distance)
     }
 
     double aux = distance / this->cl;
-    double iwf = giveIntegralOfWeightFunction(this->domain->giveNumberOfSpatialDimensions()); 
+    double iwf = giveIntegralOfWeightFunction( this->domain->giveNumberOfSpatialDimensions() );
 
     switch ( weightFun ) {
     case WFT_Bell: // Bell shaped function (quartic spline)
@@ -379,31 +379,30 @@ NonlocalMaterialExtensionInterface :: computeWeightFunction(double distance)
         return exp(-aux * aux) / iwf;
 
     case WFT_Green: // Function corresponding in 1D to Green's function of Helmholtz equation (implicit gradient model)
-      //printf("%14g %14g\n",distance,exp(-aux) / iwf);
+        //printf("%14g %14g\n",distance,exp(-aux) / iwf);
         return exp(-aux) / iwf;
 
     case WFT_Green_21: // Green function reduced from 2D to 1D
-      {
-	/*
-	if (this->domain->giveNumberOfSpatialDimensions() != 1){
-	  OOFEM_ERROR("NonlocalMaterialExtensionInterface :: computeWeightFunction - this type of weight function can be used for a 1D problem only\n");
-	}
-	*/
-	iwf = giveIntegralOfWeightFunction(2); // indeed
-	double x = distance;
-	double y = 0.;
-	double r = sqrt(x*x + y*y);
-	double sum = exp(-r / this->cl);
-	double h = this->cl / 10.; // 10 could later be replaced by an optional parameter
-	do {
-	  y += h;
-	  r = sqrt(x*x + y*y);
-	  sum += 2.*exp(-r / this->cl);
-	}
-	while (r <= suprad);
-	//printf("%14g %14g\n",distance,sum * h / iwf);
+    {
+        /*
+         * if (this->domain->giveNumberOfSpatialDimensions() != 1){
+         * OOFEM_ERROR("NonlocalMaterialExtensionInterface :: computeWeightFunction - this type of weight function can be used for a 1D problem only\n");
+         * }
+         */
+        iwf = giveIntegralOfWeightFunction(2); // indeed
+        double x = distance;
+        double y = 0.;
+        double r = sqrt(x * x + y * y);
+        double sum = exp(-r / this->cl);
+        double h = this->cl / 10.; // 10 could later be replaced by an optional parameter
+        do {
+            y += h;
+            r = sqrt(x * x + y * y);
+            sum += 2. * exp(-r / this->cl);
+        } while ( r <= suprad );
+        //printf("%14g %14g\n",distance,sum * h / iwf);
         return sum * h / iwf;
-      }
+    }
 
     case WFT_Uniform: // uniform function over an interaction distance
         return 1. / iwf;
@@ -477,7 +476,7 @@ NonlocalMaterialExtensionInterface :: giveIntegralOfWeightFunction(const int spa
 double
 NonlocalMaterialExtensionInterface :: maxValueOfWeightFunction()
 {
-    double iwf = giveIntegralOfWeightFunction(this->domain->giveNumberOfSpatialDimensions());
+    double iwf = giveIntegralOfWeightFunction( this->domain->giveNumberOfSpatialDimensions() );
     return 1. / iwf;
 }
 
@@ -531,7 +530,7 @@ NonlocalMaterialExtensionInterface :: initializeFrom(InputRecord *ir)
     // read the type of weight function
     int val = WFT_Bell;
     IR_GIVE_OPTIONAL_FIELD(ir, val, _IFT_NonlocalMaterialExtensionInterface_wft);
-    this->weightFun = (WeightFunctionType)val;
+    this->weightFun = ( WeightFunctionType ) val;
 
     // this is introduced for compatibility of input format with previous versions
     // ("averagingtype 1" in the input means that the weight function
@@ -553,12 +552,12 @@ NonlocalMaterialExtensionInterface :: initializeFrom(InputRecord *ir)
     // read the type of scaling
     val = ST_Standard;
     IR_GIVE_OPTIONAL_FIELD(ir, val, _IFT_NonlocalMaterialExtensionInterface_scalingtype);
-    this->scaling = (ScalingType)val;
+    this->scaling = ( ScalingType ) val;
 
     // read the type of averaged variable
     val = AVT_EqStrain;
     IR_GIVE_OPTIONAL_FIELD(ir, val, _IFT_NonlocalMaterialExtensionInterface_averagedquantity);
-    this->averagedVar = (AveragedVarType)val;
+    this->averagedVar = ( AveragedVarType ) val;
 
     //Read the nonlocal variation type (default is zero)
     cl0 = cl;

@@ -53,7 +53,7 @@
 namespace oofem {
 #define ZERO_REL_MASS  1.E-6
 
-REGISTER_EngngModel( NlDEIDynamic );
+REGISTER_EngngModel(NlDEIDynamic);
 
 NlDEIDynamic :: NlDEIDynamic(int i, EngngModel *_master) : StructuralEngngModel(i, _master), massMatrix(), loadVector(),
     previousIncrementOfDisplacementVector(), displacementVector(),
@@ -71,8 +71,7 @@ NlDEIDynamic :: NlDEIDynamic(int i, EngngModel *_master) : StructuralEngngModel(
 
 
 NlDEIDynamic :: ~NlDEIDynamic()
-{
-}
+{}
 
 NumericalMethod *NlDEIDynamic :: giveNumericalMethod(MetaStep *mStep)
 // Only one has reason for NlDEIDynamic
@@ -176,7 +175,7 @@ TimeStep *NlDEIDynamic :: giveNextStep()
     double totalTime = 0;
     StateCounterType counter = 1;
 
-    if (previousStep != NULL){
+    if ( previousStep != NULL ) {
         delete previousStep;
     }
 
@@ -199,7 +198,7 @@ void NlDEIDynamic :: solveYourself()
 #ifdef __PARALLEL_MODE
  #ifdef __VERBOSE_PARALLEL
     // Force equation numbering before setting up comm maps.
-    int neq = this->giveNumberOfDomainEquations(1, EModelDefaultEquationNumbering());
+    int neq = this->giveNumberOfDomainEquations( 1, EModelDefaultEquationNumbering() );
     OOFEM_LOG_INFO("[process rank %d] neq is %d\n", this->giveRank(), neq);
  #endif
 
@@ -220,7 +219,7 @@ void NlDEIDynamic :: solveYourselfAt(TimeStep *tStep)
     //
 
     Domain *domain = this->giveDomain(1);
-    int neq = this->giveNumberOfDomainEquations(1, EModelDefaultEquationNumbering());
+    int neq = this->giveNumberOfDomainEquations( 1, EModelDefaultEquationNumbering() );
     int nman  = domain->giveNumberOfDofManagers();
 
     DofManager *node;
@@ -329,7 +328,7 @@ void NlDEIDynamic :: solveYourselfAt(TimeStep *tStep)
                 if ( jj ) {
                     displacementVector.at(jj) = iDof->giveUnknown(VM_Total, tStep);
                     velocityVector.at(jj)     = iDof->giveUnknown(VM_Velocity, tStep);
-                    accelerationVector.at(jj) = iDof->giveUnknown(VM_Acceleration, tStep) ;
+                    accelerationVector.at(jj) = iDof->giveUnknown(VM_Acceleration, tStep);
                 }
             }
         }
@@ -369,7 +368,7 @@ void NlDEIDynamic :: solveYourselfAt(TimeStep *tStep)
     tStep->incrementStateCounter();
 
     // Compute internal forces.
-    this->giveInternalForces( internalForces, false, 1, tStep );
+    this->giveInternalForces(internalForces, false, 1, tStep);
 
     if ( !drFlag ) {
         //
@@ -429,7 +428,7 @@ void NlDEIDynamic :: solveYourselfAt(TimeStep *tStep)
             pt += c * ( 1.0 - exp( dumpingCoef * ( tStep->giveTargetTime() - Tau ) ) ) / dumpingCoef / Tau;
         }
 
-        loadVector.resize( this->giveNumberOfDomainEquations(1, EModelDefaultEquationNumbering()) );
+        loadVector.resize( this->giveNumberOfDomainEquations( 1, EModelDefaultEquationNumbering() ) );
         for ( k = 1; k <= neq; k++ ) {
             loadVector.at(k) = pt * loadRefVector.at(k) - internalForces.at(k);
         }
@@ -495,13 +494,13 @@ void NlDEIDynamic :: solveYourselfAt(TimeStep *tStep)
     OOFEM_LOG_RELEVANT( "\n\nSolving [Step number %8d, Time %15e]\n", tStep->giveNumber(), tStep->giveTargetTime() );
 #endif
 
-//     NM_Status s = nMethod->solve(massMatrix, & loadVector, & displacementVector);
-//    if ( !(s & NM_Success) ) {
-//        OOFEM_ERROR("nldeidynamic :: solverYourselfAt - No success in solving system. Ma=f");
-//    }
+    //     NM_Status s = nMethod->solve(massMatrix, & loadVector, & displacementVector);
+    //    if ( !(s & NM_Success) ) {
+    //        OOFEM_ERROR("nldeidynamic :: solverYourselfAt - No success in solving system. Ma=f");
+    //    }
 
 
-     for ( i = 1; i <= neq; i++ ) {
+    for ( i = 1; i <= neq; i++ ) {
         prevIncrOfDisplacement = previousIncrementOfDisplacementVector.at(i);
         incrOfDisplacement = loadVector.at(i) /
                              ( massMatrix.at(i) * ( 1. / ( deltaT * deltaT ) + dumpingCoef / ( 2. * deltaT ) ) );
@@ -527,20 +526,20 @@ void NlDEIDynamic :: updateYourself(TimeStep *stepN)
 void
 NlDEIDynamic :: computeLoadVector(FloatArray &answer, ValueModeType mode, TimeStep *stepN)
 {
-    answer.resize( this->giveNumberOfDomainEquations(1, EModelDefaultEquationNumbering()) );
+    answer.resize( this->giveNumberOfDomainEquations( 1, EModelDefaultEquationNumbering() ) );
     answer.zero();
 
     //
     // Assemble the nodal part of load vector.
     //
     this->assembleVector( answer, stepN, EID_MomentumBalance, ExternalForcesVector, mode,
-                          EModelDefaultEquationNumbering(), this->giveDomain(1));
+                          EModelDefaultEquationNumbering(), this->giveDomain(1) );
 
     //
     // Exchange contributions.
     //
 #ifdef __PARALLEL_MODE
-    this->updateSharedDofManagers( answer, LoadExchangeTag );
+    this->updateSharedDofManagers(answer, LoadExchangeTag);
 #endif
 }
 
@@ -550,7 +549,7 @@ NlDEIDynamic :: computeMassMtrx(FloatArray &massMatrix, double &maxOm, TimeStep 
 {
     Domain *domain = this->giveDomain(1);
     int nelem = domain->giveNumberOfElements();
-    int neq = this->giveNumberOfDomainEquations(1, EModelDefaultEquationNumbering());
+    int neq = this->giveNumberOfDomainEquations( 1, EModelDefaultEquationNumbering() );
     int i, j, jj, n;
     double maxOmi, maxOmEl;
     FloatMatrix charMtrx, charMtrx2;
@@ -636,47 +635,46 @@ NlDEIDynamic :: computeMassMtrx(FloatArray &massMatrix, double &maxOm, TimeStep 
     // If init step - find minimun period of vibration in order to
     // determine maximal admisible time step
     // global variant
-    for (i=1; i<=nelem; i++)
-    {
-        element = domain -> giveElement(i);
+    for ( i = 1; i <= nelem; i++ ) {
+        element = domain->giveElement(i);
         element->giveLocationArray(loc, EID_MomentumBalance, en);
-        element->giveCharacteristicMatrix( charMtrx, StiffnessMatrix, tStep );
-        n = loc.giveSize() ;
-        for (j=1; j<=n; j++) {
+        element->giveCharacteristicMatrix(charMtrx, StiffnessMatrix, tStep);
+        n = loc.giveSize();
+        for ( j = 1; j <= n; j++ ) {
             jj = loc.at(j);
-            if (jj) {
-                diagonalStiffMtrx.at(jj) += charMtrx.at(j,j);
+            if ( jj ) {
+                diagonalStiffMtrx.at(jj) += charMtrx.at(j, j);
             }
         }
     }
 
     // Find find global minimun period of vibration
     double maxElmass = -1.0;
-    for (j=1 ; j<=n; j++) {
-        maxElmass = max(maxElmass,charMtrx.at(j,j));
+    for ( j = 1; j <= n; j++ ) {
+        maxElmass = max( maxElmass, charMtrx.at(j, j) );
     }
 
     if ( maxElmass <= 0.0 ) {
         _error("solveYourselfAt: Element with zero (or negative) lumped mass encountered\n");
     }
 
-    for (j=1; j<= neq; j++) {
-        if (massMatrix.at(j) > maxElmass * ZERO_REL_MASS ) {
+    for ( j = 1; j <= neq; j++ ) {
+        if ( massMatrix.at(j) > maxElmass * ZERO_REL_MASS ) {
             maxOmi =  diagonalStiffMtrx.at(j) / massMatrix.at(j);
-            maxOm  = (maxOm > maxOmi) ? (maxOm) : (maxOmi);
+            maxOm  = ( maxOm > maxOmi ) ? ( maxOm ) : ( maxOmi );
         }
     }
 
     // Set ZERO MASS members in massMatrix to value which corresponds to global maxOm.
-    for (i=1; i<= neq; i++) {
-        if (massMatrix.at(i) <= maxElmass*ZERO_REL_MASS) {
+    for ( i = 1; i <= neq; i++ ) {
+        if ( massMatrix.at(i) <= maxElmass * ZERO_REL_MASS ) {
             massMatrix.at(i) = diagonalStiffMtrx.at(i) / maxOm;
         }
     }
 #endif
 
 #ifdef __PARALLEL_MODE
-    this->updateSharedDofManagers( massMatrix, MassExchangeTag );
+    this->updateSharedDofManagers(massMatrix, MassExchangeTag);
 
     // Determine maxOm over all processes.
  #ifdef __USE_MPI
@@ -698,7 +696,7 @@ NlDEIDynamic :: computeMassMtrx(FloatArray &massMatrix, double &maxOm, TimeStep 
 
     maxOm = globalMaxOm;
  #else
-    WARNING: NOT SUPPORTED MESSAGE PARSING LIBRARY
+WARNING: NOT SUPPORTED MESSAGE PARSING LIBRARY
  #endif
 
 #endif
@@ -868,7 +866,7 @@ NlDEIDynamic :: terminate(TimeStep *tStep)
 {
     StructuralEngngModel :: terminate(tStep);
     this->printReactionForces(tStep, 1);
-    fflush(this->giveOutputStream());
+    fflush( this->giveOutputStream() );
 }
 
 

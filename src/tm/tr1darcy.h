@@ -59,7 +59,7 @@ public:
     virtual ~Tr1Darcy();
     virtual IRResultType initializeFrom(InputRecord *ir);
 
-    virtual FEInterpolation *giveInterpolation() const { return &interpolation_lin; }
+    virtual FEInterpolation *giveInterpolation() const { return & interpolation_lin; }
 
     virtual MaterialMode giveMaterialMode() { return _2dHeat; } ///@todo This isn't actually correct.
 

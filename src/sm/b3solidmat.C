@@ -43,8 +43,7 @@
 #include "b3mat.h" // For the input record keywords.
 
 namespace oofem {
-
-REGISTER_Material( B3SolidMaterial );
+REGISTER_Material(B3SolidMaterial);
 
 IRResultType
 B3SolidMaterial :: initializeFrom(InputRecord *ir)
@@ -324,7 +323,7 @@ B3SolidMaterial :: computeCharTimes()
 
     j = 1;
     //while ( 0.5 * this->endOfTimeOfInterest >= Tau1 * pow10(j-1) ) {
-    while ( 0.5 * this->endOfTimeOfInterest >= Tau1 * pow( 10.0, ( double )(j - 1) ) ) {
+    while ( 0.5 * this->endOfTimeOfInterest >= Tau1 * pow( 10.0, ( double ) ( j - 1 ) ) ) {
         j++;
     }
 
@@ -566,7 +565,7 @@ B3SolidMaterial :: computeTotalAverageShrinkageStrainVector(FloatArray &answer, 
 
     fullAnswer.at(1) = fullAnswer.at(2) = fullAnswer.at(3) = EpsSh * 1.e-6;
 
-    StructuralMaterial :: giveReducedSymVectorForm(answer, fullAnswer, gp->giveMaterialMode());
+    StructuralMaterial :: giveReducedSymVectorForm( answer, fullAnswer, gp->giveMaterialMode() );
 }
 
 
@@ -594,7 +593,7 @@ B3SolidMaterial :: computePointShrinkageStrainVectorMPS(FloatArray &answer, Gaus
     fullAnswer.zero();
     fullAnswer.at(1) = fullAnswer.at(2) = fullAnswer.at(3) = EpsSh;
 
-    StructuralMaterial :: giveReducedSymVectorForm(answer, fullAnswer, gp->giveMaterialMode());
+    StructuralMaterial :: giveReducedSymVectorForm( answer, fullAnswer, gp->giveMaterialMode() );
 }
 
 
@@ -747,7 +746,7 @@ B3SolidMaterial :: computeShrinkageStrainVector(FloatArray &answer, GaussPoint *
         stressVector.zero();
     }
 
-    StructuralMaterial :: giveFullSymVectorForm(fullStressVector, stressVector, gp->giveMaterialMode());
+    StructuralMaterial :: giveFullSymVectorForm( fullStressVector, stressVector, gp->giveMaterialMode() );
     // compute volumetric stress
     sv = 0.0;
     for ( i = 1; i <= 3; i++ ) {
@@ -765,7 +764,7 @@ B3SolidMaterial :: computeShrinkageStrainVector(FloatArray &answer, GaussPoint *
     fullAnswer.at(3) = h1 * ( 1.0 + sn * ( r * fullStressVector.at(3) + rprime * sv ) ) * ( wrate + at * trate );
 
     if ( mode == VM_Incremental ) {
-        StructuralMaterial :: giveReducedSymVectorForm(answer, fullAnswer, gp->giveMaterialMode());
+        StructuralMaterial :: giveReducedSymVectorForm( answer, fullAnswer, gp->giveMaterialMode() );
         return;
     } else { // total values required
         FloatArray ssv, fssv;
@@ -776,11 +775,11 @@ B3SolidMaterial :: computeShrinkageStrainVector(FloatArray &answer, GaussPoint *
             ssv = * status->giveShrinkageStrainVector();
         }
 
-        StructuralMaterial :: giveFullSymVectorForm(fssv, ssv, gp->giveMaterialMode());
+        StructuralMaterial :: giveFullSymVectorForm( fssv, ssv, gp->giveMaterialMode() );
         // add increment to total values
         fullAnswer.add(fssv);
 
-        StructuralMaterial :: giveReducedSymVectorForm(answer, fullAnswer, gp->giveMaterialMode());
+        StructuralMaterial :: giveReducedSymVectorForm( answer, fullAnswer, gp->giveMaterialMode() );
         return;
     }
 }
@@ -990,16 +989,15 @@ B3SolidMaterial :: CreateStatus(GaussPoint *gp) const
 }
 
 
-void 
+void
 B3SolidMaterial :: giveRealStressVector(FloatArray &answer, GaussPoint *gp, const FloatArray &reducedStrain, TimeStep *tStep)
 {
-    KelvinChainMaterial ::giveRealStressVector(answer, gp, reducedStrain, tStep);
+    KelvinChainMaterial :: giveRealStressVector(answer, gp, reducedStrain, tStep);
 
     B3SolidMaterialStatus *status = static_cast< B3SolidMaterialStatus * >( this->giveStatus(gp) );
     if ( this->MicroPrestress == 1 ) {
         status->setMPS( this->computeMicroPrestress(gp, tStep, 1) );
     }
-
 }
 
 

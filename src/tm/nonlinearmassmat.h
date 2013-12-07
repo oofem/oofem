@@ -45,7 +45,6 @@
 //@}
 
 namespace oofem {
-
 /**
  *
  * Class for a nonlinear fictitious transport material. The constitutive equation is given as

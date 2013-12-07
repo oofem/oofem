@@ -46,13 +46,12 @@
 #include <cstring>
 
 namespace oofem {
-
-REGISTER_Material( RCSDEMaterial );
+REGISTER_Material(RCSDEMaterial);
 
 RCSDEMaterial :: RCSDEMaterial(int n, Domain *d) : RCM2Material(n, d)
-//
-// constructor
-//
+    //
+    // constructor
+    //
 {
     linearElasticMaterial = new IsotropicLinearElasticMaterial(n, d);
 }
@@ -94,7 +93,7 @@ RCSDEMaterial :: giveRealStressVector(FloatArray &answer, GaussPoint *gp,
     this->giveStressDependentPartOfStrainVector(reducedStrainVector, gp, totalStrain,
                                                 atTime, VM_Total);
 
-    StructuralMaterial :: giveFullSymVectorForm(strainVector, reducedStrainVector, gp->giveMaterialMode());
+    StructuralMaterial :: giveFullSymVectorForm( strainVector, reducedStrainVector, gp->giveMaterialMode() );
 
     status->giveTempCrackDirs(tempCrackDirs);
     this->computePrincipalValDir(principalStrain, tempCrackDirs,
@@ -110,13 +109,13 @@ RCSDEMaterial :: giveRealStressVector(FloatArray &answer, GaussPoint *gp,
         status->giveTempCrackDirs(tempCrackDirs);
         this->transformStressVectorTo(answer, tempCrackDirs, princStress, 1);
 
-        StructuralMaterial :: giveReducedSymVectorForm(reducedSpaceStressVector, answer, gp->giveMaterialMode());
+        StructuralMaterial :: giveReducedSymVectorForm( reducedSpaceStressVector, answer, gp->giveMaterialMode() );
         status->letTempStressVectorBe(reducedSpaceStressVector);
 
         status->giveCrackStrainVector(crackStrain);
         this->updateCrackStatus(gp, crackStrain);
 
-        StructuralMaterial :: giveReducedSymVectorForm(reducedAnswer, answer, gp->giveMaterialMode());
+        StructuralMaterial :: giveReducedSymVectorForm( reducedAnswer, answer, gp->giveMaterialMode() );
         answer = reducedAnswer;
 
         // test if transition to scalar damage mode take place
@@ -252,7 +251,7 @@ RCSDEMaterial :: computeCurrEquivStrain(GaussPoint *gp, const FloatArray &reduce
 
     linearElasticMaterial->giveStiffnessMatrix(De, TangentStiffness, gp, atTime);
     effStress.beProductOf(De, reducedTotalStrainVector);
-    StructuralMaterial :: giveFullSymVectorForm(fullEffStress, effStress, gp->giveMaterialMode());
+    StructuralMaterial :: giveFullSymVectorForm( fullEffStress, effStress, gp->giveMaterialMode() );
 
     this->computePrincipalValues(princEffStress, fullEffStress, principal_stress);
     for ( int i = 1; i <= 3; i++ ) {
@@ -320,8 +319,7 @@ RCSDEMaterial :: computeStrength(GaussPoint *gp, double charLength)
     Gf = this->give(pscm_Gf, gp);
     Ft = this->give(pscm_Ft, gp);
 
-    if ( this->checkSizeLimit(gp, charLength) ) {
-    } else {
+    if ( this->checkSizeLimit(gp, charLength) ) {} else {
         // we reduce Ft and there is no softening but sudden drop
         Ft = sqrt(2. * Ee * Gf / charLength);
         //
@@ -509,7 +507,7 @@ RCSDEMaterialStatus :: printOutputAt(FILE *file, TimeStep *tStep)
                 }
 
                 fprintf( file, "crack %d {status %s, normal to crackplane { %f %f %f }} ",
-                        i, s, crackDirs.at(1, i), crackDirs.at(2, i), crackDirs.at(3, i) );
+                         i, s, crackDirs.at(1, i), crackDirs.at(2, i), crackDirs.at(3, i) );
             }
         }
     } else {
@@ -639,5 +637,4 @@ RCSDEMaterialStatus :: restoreContext(DataStream *stream, ContextMode mode, void
 
     return CIO_OK; // return succes
 }
-
 } // end namespace oofem

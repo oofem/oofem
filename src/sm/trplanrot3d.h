@@ -40,7 +40,6 @@
 #define _IFT_TrPlaneStrRot3d_Name "trplanestrrot3d"
 
 namespace oofem {
-
 #ifndef __CHARTENSOR
  #define __CHARTENSOR
 enum CharTensor {

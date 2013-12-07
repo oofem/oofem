@@ -42,8 +42,7 @@
 #include "classfactory.h"
 
 namespace oofem {
-
-REGISTER_Material( Masonry02 );
+REGISTER_Material(Masonry02);
 
 Masonry02 :: Masonry02(int n, Domain *d) : MPlasticMaterial2(n, d)
 {
@@ -279,9 +278,9 @@ Masonry02 :: computeReducedHardeningVarsLamGradient(FloatMatrix &answer, GaussPo
 
     double help = this->gfI * this->c0 / ( this->gfII * this->ft0 );
     double k1 = sqrt( dlambda.at(1) * dlambda.at(1) +
-                     ( help * dlambda.at(2) ) * ( help * dlambda.at(2) ) );
+                      ( help * dlambda.at(2) ) * ( help * dlambda.at(2) ) );
     double k2 = sqrt( ( dlambda.at(1) / help ) * ( dlambda.at(1) / help ) +
-                     dlambda.at(2) * dlambda.at(2) );
+                      dlambda.at(2) * dlambda.at(2) );
 
     double p1 = 2.0 *this->Cnn *fullStressVector.at(1) + this->Cn;
     double p2 = 2.0 *this->Css *fullStressVector.at(2);
@@ -445,7 +444,6 @@ Masonry02 :: computeReducedSKGradientMatrix(FloatMatrix &gradientMatrix,  int i,
     gradientMatrix.zero();
 
     if ( i == 2 ) {
-        
 #if 0
         if ( 0 ) {
             // double help = this->gfI*this->c0/(this->gfII*this->ft0);
@@ -496,8 +494,8 @@ Masonry02 :: CreateStatus(GaussPoint *gp) const
 
 void
 Masonry02 :: giveStiffnessMatrix(FloatMatrix &answer,
-                                      MatResponseMode rMode,
-                                      GaussPoint *gp, TimeStep *atTime)
+                                 MatResponseMode rMode,
+                                 GaussPoint *gp, TimeStep *atTime)
 //
 // Returns characteristic material stiffness matrix of the receiver
 //
@@ -551,9 +549,9 @@ Masonry02 :: computeReducedElasticModuli(FloatMatrix &answer,
  * #define smc 0.5
  * #define src 1./7.
  *
- *#define kp 0.09
- *#define km 0.49
- *#define kr 1.e6
+ **#define kp 0.09
+ **#define km 0.49
+ **#define kr 1.e6
  */
 
 double
@@ -614,7 +612,7 @@ Masonry02 :: computeF3HardeningGradient(double k)
         double st = ( computeF3HardeningLaw(k) - src );
         return st / k;
     }
- // Unreachable code - commeted out
+    // Unreachable code - commeted out
 #if 0
     /*
      * if (k==0.) {
@@ -671,7 +669,7 @@ Masonry02 :: computeF3HardeningGradient(double k)
     }
 
     return 0.0;
-#endif
 
+#endif
 }
 } // end namespace oofem

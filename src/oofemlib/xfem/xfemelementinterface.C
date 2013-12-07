@@ -515,7 +515,7 @@ bool XfemElementInterface :: XfemElementInterface_updateIntegrationRule()
                                 delete [] coords;
                             }
                         }
-                    } else   {
+                    } else {
                         allTriCopy.push_back(allTri [ triIndex ]);
                     }
                 }
@@ -998,7 +998,7 @@ void XfemElementInterface :: computeCohesiveForces(FloatArray &answer, TimeStep 
 
                 NTimesT.beTProductOf(NMatrix, T2D);
                 CrossSection *cs  = element->giveCrossSection();
-                double thickness = cs->give(CS_Thickness, &gp);
+                double thickness = cs->give(CS_Thickness, & gp);
                 double dA = thickness * gp.giveWeight();
                 answer.add(dA, NTimesT);
             }
@@ -1184,7 +1184,7 @@ void XfemElementInterface :: computeCohesiveTangent(FloatMatrix &answer, TimeSte
                 tmp2.beTProductOf(NMatrix, tmp);
 
                 CrossSection *cs  = element->giveCrossSection();
-                double thickness = cs->give(CS_Thickness, &gp);
+                double thickness = cs->give(CS_Thickness, & gp);
                 double dA = thickness * gp.giveWeight();
                 answer.add(dA, tmp2);
             }

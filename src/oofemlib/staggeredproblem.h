@@ -102,7 +102,7 @@ protected:
     /// Optional parameter which specify problems to define load time functions
     int timeDefinedByProb;
 
-    /// List of slave models to which this model is coupled    
+    /// List of slave models to which this model is coupled
     IntArray coupledModels;
 
 public:
@@ -165,7 +165,7 @@ public:
     double giveDiscreteTime(int n);
 
     /// Returns list of model number that this model is coupled with. Used for staggered approach.
-    void giveCoupledModels(IntArray& answer) { answer = coupledModels;}
+    void giveCoupledModels(IntArray &answer) { answer = coupledModels; }
 
 #ifdef __OOFEG
     void drawYourself(oofegGraphicContext &context);

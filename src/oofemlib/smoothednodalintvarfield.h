@@ -48,7 +48,7 @@ class OOFEM_EXPORT SmoothedNodalInternalVariableField : public Field
 {
 protected:
     /// Smoother type
-    NodalRecoveryModel::NodalRecoveryModelType stype;
+    NodalRecoveryModel :: NodalRecoveryModelType stype;
     /// Smoother
     NodalRecoveryModel *smoother;
     /// InternalStateType.
@@ -64,11 +64,11 @@ public:
      * @param st Determines the type of nodal recovery model used.
      * @param d Domain which field belongs to.
      */
-    SmoothedNodalInternalVariableField(InternalStateType ist, FieldType b, NodalRecoveryModel::NodalRecoveryModelType st, Domain *d);
+    SmoothedNodalInternalVariableField(InternalStateType ist, FieldType b, NodalRecoveryModel :: NodalRecoveryModelType st, Domain *d);
     virtual ~SmoothedNodalInternalVariableField();
 
     virtual int evaluateAt(FloatArray &answer, FloatArray &coords, ValueModeType mode, TimeStep *atTime);
-    virtual int evaluateAt(FloatArray &answer, DofManager* dman, ValueModeType mode, TimeStep *atTime);
+    virtual int evaluateAt(FloatArray &answer, DofManager *dman, ValueModeType mode, TimeStep *atTime);
 
     InternalStateType giveInternalType() { return istType; }
     virtual contextIOResultType saveContext(DataStream *stream, ContextMode mode);

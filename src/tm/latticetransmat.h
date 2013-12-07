@@ -140,9 +140,9 @@ public:
     virtual void giveFluxVector(FloatArray &answer, GaussPoint *gp, const FloatArray &grad, const FloatArray &field, TimeStep *tStep);
 
     virtual void  giveCharacteristicMatrix(FloatMatrix &answer,
-                                   MatResponseMode mode,
-                                   GaussPoint *gp,
-                                   TimeStep *atTime) {; }
+                                           MatResponseMode mode,
+                                           GaussPoint *gp,
+                                           TimeStep *atTime) {; }
 
     virtual double  giveCharacteristicValue(MatResponseMode mode,
                                             GaussPoint *gp,

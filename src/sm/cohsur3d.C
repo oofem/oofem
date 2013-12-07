@@ -51,8 +51,7 @@
 #endif
 
 namespace oofem {
-
-REGISTER_Element( CohesiveSurface3d );
+REGISTER_Element(CohesiveSurface3d);
 
 CohesiveSurface3d :: CohesiveSurface3d(int n, Domain *aDomain) : StructuralElement(n, aDomain)
     // Constructor.
@@ -211,7 +210,7 @@ void CohesiveSurface3d :: computeGaussPoints()
     numberOfIntegrationRules = 1;
     integrationRulesArray = new IntegrationRule * [ 1 ];
     integrationRulesArray [ 0 ] = new GaussIntegrationRule(1, this);
-    this->giveCrossSection()->setupIntegrationPoints( *integrationRulesArray[0], 1, this );
+    this->giveCrossSection()->setupIntegrationPoints(* integrationRulesArray [ 0 ], 1, this);
 }
 
 

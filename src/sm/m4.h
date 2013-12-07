@@ -102,9 +102,9 @@ public:
     virtual ~M4Material() { }
 
     virtual void giveStiffnessMatrix(FloatMatrix &answer,
-                                          MatResponseMode mode,
-                                          GaussPoint *gp,
-                                          TimeStep *tStep);
+                                     MatResponseMode mode,
+                                     GaussPoint *gp,
+                                     TimeStep *tStep);
 
     virtual void giveThermalDilatationVector(FloatArray &answer, GaussPoint *gp, TimeStep *tStep);
 

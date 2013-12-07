@@ -40,17 +40,16 @@
 #include "contextioerr.h"
 
 namespace oofem {
-
-IntegrationRule :: iterator :: iterator(IntegrationRule* ir, int pos): pos( pos ), ir( ir ) { }
+IntegrationRule :: iterator :: iterator(IntegrationRule *ir, int pos) : pos(pos), ir(ir) { }
 
 bool
-IntegrationRule :: iterator :: operator!=(const IntegrationRule :: iterator& other) const { return pos != other.pos; }
+IntegrationRule :: iterator :: operator!=(const IntegrationRule :: iterator &other) const { return pos != other.pos; }
 
 GaussPoint &
-IntegrationRule :: iterator :: operator*() const { return *(ir->getIntegrationPoint(pos)); }
+IntegrationRule :: iterator :: operator*() const { return * ( ir->getIntegrationPoint(pos) ); }
 
-const IntegrationRule :: iterator&
-IntegrationRule :: iterator :: operator++() { ++pos; return *this; }
+const IntegrationRule :: iterator &
+IntegrationRule :: iterator :: operator++() { ++pos; return * this; }
 
 IntegrationRule :: iterator
 IntegrationRule :: begin() { return iterator(this, 0); }
@@ -346,6 +345,7 @@ IntegrationRule :: setUpIntegrationPoints(integrationDomain mode, int nPoints,
             numberOfIntegrationPoints = this->SetUpPointsOnWedge(3, 3, matMode);
         }
         return numberOfIntegrationPoints;
+
     default:
         OOFEM_ERROR2("IntegrationRule::setUpIntegrationPoints - unknown mode (%d)", mode);
     }
@@ -380,5 +380,4 @@ int IntegrationRule :: SetUpPoint(MaterialMode mode)
     this->intdomain = _Point;
     return this->numberOfIntegrationPoints;
 }
-
 } // end namespace oofem

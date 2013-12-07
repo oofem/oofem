@@ -67,7 +67,7 @@ public:
      * references to integration points and their weights that influence to nonlocal average in
      * receiver's associated integration point.
      */
-    virtual std::list< localIntegrationRecord > *NonlocalMaterialStiffnessInterface_giveIntegrationDomainList(GaussPoint *gp) = 0;
+    virtual std :: list< localIntegrationRecord > *NonlocalMaterialStiffnessInterface_giveIntegrationDomainList(GaussPoint *gp) = 0;
 
 #ifdef __OOFEG
     /**

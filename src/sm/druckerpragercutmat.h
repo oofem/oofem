@@ -119,10 +119,10 @@ public:
     LinearElasticMaterial *giveLinearElasticMaterial() { return linearElasticMaterial; }
 
     virtual int giveSizeOfFullHardeningVarsVector() { return 4; }
-    virtual int giveSizeOfReducedHardeningVarsVector(GaussPoint *) { return 4; }//cummulative strain = one per each surface
+    virtual int giveSizeOfReducedHardeningVarsVector(GaussPoint *) { return 4; } //cummulative strain = one per each surface
 
 protected:
-    virtual int giveMaxNumberOfActiveYieldConds(GaussPoint *gp) { return 3; }//normally one less than number of all conditions
+    virtual int giveMaxNumberOfActiveYieldConds(GaussPoint *gp) { return 3; } //normally one less than number of all conditions
 
     virtual double computeYieldValueAt(GaussPoint *gp, int isurf, const FloatArray &stressVector, const FloatArray &strainSpaceHardeningVariables);
 
@@ -153,6 +153,5 @@ protected:
 
     virtual int giveIPValue(FloatArray &answer, GaussPoint *gp, InternalStateType type, TimeStep *tStep);
 };
-
 } // end namespace oofem
 #endif // druckerpragercatmat_h

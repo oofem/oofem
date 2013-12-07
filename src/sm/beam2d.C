@@ -51,8 +51,7 @@
 #endif
 
 namespace oofem {
-
-REGISTER_Element( Beam2d );
+REGISTER_Element(Beam2d);
 
 // Set up interpolation coordinates
 FEI2dLineLin Beam2d :: interp_geom(1, 3);
@@ -123,7 +122,7 @@ Beam2d :: computeGaussPoints()
         numberOfIntegrationRules = 1;
         integrationRulesArray = new IntegrationRule * [ 1 ];
         integrationRulesArray [ 0 ] = new GaussIntegrationRule(1, this, 1, 3);
-        this->giveCrossSection()->setupIntegrationPoints( *integrationRulesArray[0], 3, this );
+        this->giveCrossSection()->setupIntegrationPoints(* integrationRulesArray [ 0 ], 3, this);
     }
 }
 
@@ -270,7 +269,7 @@ Beam2d :: computeGtoLRotationMatrix(FloatMatrix &answer)
 double
 Beam2d :: computeVolumeAround(GaussPoint *gp)
 {
-  return 0.5 * this->giveLength() * gp->giveWeight();
+    return 0.5 * this->giveLength() * gp->giveWeight();
 }
 
 
@@ -471,7 +470,7 @@ Beam2d :: computeEdgeLoadVectorAt(FloatArray &answer, Load *load, int iedge, Tim
     // evaluates the receivers edge load vector
     // for clamped beam
     //
-    BoundaryLoad *edgeLoad = dynamic_cast< BoundaryLoad * >(load);
+    BoundaryLoad *edgeLoad = dynamic_cast< BoundaryLoad * >( load );
     if ( edgeLoad ) {
         if ( edgeLoad->giveNumberOfDofs() != 3 ) {
             _error("computeEdgeLoadVectorAt: load number of dofs mismatch");
@@ -586,8 +585,8 @@ void
 Beam2d :: computeBodyLoadVectorAt(FloatArray &answer, Load *load, TimeStep *tStep, ValueModeType mode)
 {
     FloatArray lc(1);
-    StructuralElement::computeBodyLoadVectorAt(answer, load, tStep, mode);
-    answer.times(this->giveCrossSection()->give(CS_Area, &lc, NULL, this)); 
+    StructuralElement :: computeBodyLoadVectorAt(answer, load, tStep, mode);
+    answer.times( this->giveCrossSection()->give(CS_Area, & lc, NULL, this) );
 }
 
 
@@ -676,9 +675,9 @@ Beam2d :: computeConsistentMassMatrix(FloatMatrix &answer, TimeStep *tStep, doub
     double kappa2 = kappa * kappa;
 
     double density = this->giveMaterial()->give('d', gp); // constant density assumed
-    if(ipDensity != NULL) {
-    	// Override density if desired
-    	density = *ipDensity;
+    if ( ipDensity != NULL ) {
+        // Override density if desired
+        density = * ipDensity;
     }
 
     double area = this->giveCrossSection()->give(CS_Area, gp); // constant area assumed

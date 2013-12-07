@@ -48,8 +48,6 @@
 //@}
 
 namespace oofem {
-
-
 class GaussPoint;
 
 /**
@@ -77,11 +75,10 @@ class GaussPoint;
  * - Storing/restoring its context to stream.
  * - Returning its material properties.
  *
- * @author Jim Brouzoulis 
+ * @author Jim Brouzoulis
  */
 class StructuralInterfaceMaterial : public Material
 {
-
 public:
     /**
      * Constructor. Creates material with given number, belonging to given domain.
@@ -106,14 +103,14 @@ public:
      * @param tStep Current time step (most models are able to respond only when atTime is current time step).
      */
     virtual void giveFirstPKTraction_1d(FloatArray &answer, GaussPoint *gp, const FloatArray &jump,
-        const FloatArray &reducedF, TimeStep *tStep)
-        { _error("giveFirstPKTraction_1d: not implemented "); }
+                                        const FloatArray &reducedF, TimeStep *tStep)
+    { _error("giveFirstPKTraction_1d: not implemented "); }
     virtual void giveFirstPKTraction_2d(FloatArray &answer, GaussPoint *gp, const FloatArray &jump,
-        const FloatArray &reducedF, TimeStep *tStep) 
-        { _error("giveFirstPKTraction_2d: not implemented "); }
+                                        const FloatArray &reducedF, TimeStep *tStep)
+    { _error("giveFirstPKTraction_2d: not implemented "); }
     virtual void giveFirstPKTraction_3d(FloatArray &answer, GaussPoint *gp, const FloatArray &jump,
-        const FloatMatrix &F, TimeStep *tStep) 
-        { _error("giveFirstPKTraction_3d: not implemented "); }
+                                        const FloatMatrix &F, TimeStep *tStep)
+    { _error("giveFirstPKTraction_3d: not implemented "); }
 
     virtual void giveEngTraction_1d(FloatArray &answer, GaussPoint *gp, const FloatArray &jump, TimeStep *tStep);
     virtual void giveEngTraction_2d(FloatArray &answer, GaussPoint *gp, const FloatArray &jump, TimeStep *tStep);
@@ -128,9 +125,9 @@ public:
      * @param tStep Time step.
      */
     virtual void give1dStiffnessMatrix_dTdj(FloatMatrix &answer, MatResponseMode rMode, GaussPoint *gp, TimeStep *tStep)
-        { _error("give1dStiffnessMatrix_dTdj: not implemented "); }
+    { _error("give1dStiffnessMatrix_dTdj: not implemented "); }
     virtual void give2dStiffnessMatrix_dTdj(FloatMatrix &answer, MatResponseMode rMode, GaussPoint *gp, TimeStep *tStep)
-        { _error("give2dStiffnessMatrix_dTdj: not implemented "); }
+    { _error("give2dStiffnessMatrix_dTdj: not implemented "); }
     virtual void give3dStiffnessMatrix_dTdj(FloatMatrix &answer, MatResponseMode rMode, GaussPoint *gp, TimeStep *tStep);
 
     virtual void give1dStiffnessMatrix_Eng(FloatMatrix &answer,  MatResponseMode mode, GaussPoint *gp, TimeStep *tStep);
@@ -162,14 +159,14 @@ protected:
     /**
      * Transforms traction vector into another coordinate system.
      * @param answer Transformed traction vector
-     * @param base Transformation matrix. The columns in the matrix corresponds to the base vectors of the new 
+     * @param base Transformation matrix. The columns in the matrix corresponds to the base vectors of the new
      * coordinate system to which we do transformation. These vectors must
      * be expressed in the same coordinate system as source strainVector.
      * @param strainVector 3d traction.
      * @param transpose Determines if we transpose matrix before transforming.
      */
     static void transformTractionTo(FloatArray &answer, const FloatMatrix &base,
-                                 const FloatArray &strainVector, bool transpose = false);
+                                    const FloatArray &strainVector, bool transpose = false);
 
     /**
      * Computes jump vector transformation matrix from standard vector transformation matrix.
@@ -179,8 +176,7 @@ protected:
      * @param transpose Determines if we transpose matrix before transforming.
      */
     static void giveJumpTranformationMtrx(FloatMatrix &answer, const FloatMatrix &base,
-                                           bool transpose = false);
-
+                                          bool transpose = false);
 };
 } // end namespace oofem
 #endif // StructuralInterfaceMaterial_h

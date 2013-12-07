@@ -79,7 +79,7 @@ public:
      */
     virtual M *CreateModule(const char *name, int n, EngngModel *emodel) = 0;
     /**
-
+     *
      * Reads receiver description from input stream and creates corresponding modules components accordingly.
      * It scans input file, each line is assumed to be single record describing particular module.
      * The record line is converted to lowercase letters.
@@ -94,7 +94,7 @@ public:
         const char *__proc = "instanciateYourself"; // Required by IR_GIVE_FIELD macro
         IRResultType result;                   // Required by IR_GIVE_FIELD macro
 
-        std::string name;
+        std :: string name;
         M *module;
         InputRecord *mir;
 
@@ -110,7 +110,7 @@ public:
             // read type of module
             module = this->CreateModule(name.c_str(), i, emodel);
             if ( module == NULL ) {
-                OOFEM_ERROR2("InitModuleManager::instanciateYourself: unknown module (%s)", name.c_str());
+                OOFEM_ERROR2( "InitModuleManager::instanciateYourself: unknown module (%s)", name.c_str() );
             }
 
             module->initializeFrom(mir);
@@ -147,7 +147,7 @@ public:
         return elem;
     }
 
-    int giveNumberOfModules() const {return moduleList->giveSize();}
+    int giveNumberOfModules() const { return moduleList->giveSize(); }
 };
 } // end namespace oofem
 #endif // modulemanager_h

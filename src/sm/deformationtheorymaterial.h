@@ -38,7 +38,6 @@
 #include "structuralmaterial.h"
 
 namespace oofem {
-
 /**
  * This class implements an abstract base material, which behaves
  * according to deformation theory.

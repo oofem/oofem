@@ -41,8 +41,7 @@
 #include "classfactory.h"
 
 namespace oofem {
-
-REGISTER_NonlocalBarrier( PolylineNonlocalBarrier )
+REGISTER_NonlocalBarrier(PolylineNonlocalBarrier)
 
 PolylineNonlocalBarrier :: PolylineNonlocalBarrier(int n, Domain *aDomain) :
     NonlocalBarrier(n, aDomain), vertexNodes()

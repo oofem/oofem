@@ -62,7 +62,7 @@ RankineMatNl :: RankineMatNl(int n, Domain *d) : RankineMat(n, d), StructuralNon
 
 void
 RankineMatNl :: giveRealStressVector_PlaneStress(FloatArray &answer, GaussPoint *gp,
-                                     const FloatArray &totalStrain, TimeStep *atTime)
+                                                 const FloatArray &totalStrain, TimeStep *atTime)
 {
     RankineMatNlStatus *nlStatus = static_cast< RankineMatNlStatus * >( this->giveStatus(gp) );
     //mj this->initGpForNewStep(gp);
@@ -87,7 +87,7 @@ RankineMatNl :: giveRealStressVector_PlaneStress(FloatArray &answer, GaussPoint 
 
 void
 RankineMatNl :: giveRealStressVector_1d(FloatArray &answer, GaussPoint *gp,
-                                     const FloatArray &totalStrain, TimeStep *atTime)
+                                        const FloatArray &totalStrain, TimeStep *atTime)
 {
     RankineMatNlStatus *nlStatus = static_cast< RankineMatNlStatus * >( this->giveStatus(gp) );
     //mj this->initGpForNewStep(gp);
@@ -212,9 +212,9 @@ Interface *
 RankineMatNl :: giveInterface(InterfaceType type)
 {
     if ( type == NonlocalMaterialExtensionInterfaceType ) {
-        return static_cast< StructuralNonlocalMaterialExtensionInterface * >(this);
+        return static_cast< StructuralNonlocalMaterialExtensionInterface * >( this );
     } else if ( type == NonlocalMaterialStiffnessInterfaceType ) {
-        return static_cast< NonlocalMaterialStiffnessInterface * >(this);
+        return static_cast< NonlocalMaterialStiffnessInterface * >( this );
     } else {
         return NULL;
     }
@@ -502,7 +502,7 @@ Interface *
 RankineMatNlStatus :: giveInterface(InterfaceType type)
 {
     if ( type == NonlocalMaterialStatusExtensionInterfaceType ) {
-        return static_cast< StructuralNonlocalMaterialStatusExtensionInterface * >(this);
+        return static_cast< StructuralNonlocalMaterialStatusExtensionInterface * >( this );
     } else {
         return RankineMatStatus :: giveInterface(type);
     }

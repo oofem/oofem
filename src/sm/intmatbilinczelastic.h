@@ -50,8 +50,6 @@
 //@}
 
 namespace oofem {
-
-
 /**
  * This class implements associated Material Status for ...
  */
@@ -97,7 +95,7 @@ protected:
     /// Material parameters
     double kn0;
     double ks0;
-    double knc;   // stiffness in compression  
+    double knc;   // stiffness in compression
     double GIc;
     double sigfn;
     double sigfs;
@@ -110,7 +108,7 @@ protected:
 
     virtual int checkConsistency();
     void give3dInterfaceMaterialStiffnessMatrix(FloatMatrix &answer, MatResponseMode rMode,
-                                                                     GaussPoint *gp, TimeStep *atTime);
+                                                GaussPoint *gp, TimeStep *atTime);
 public:
     /// Constructor
     IntMatBilinearCZElastic(int n, Domain *d);
@@ -122,12 +120,12 @@ public:
     virtual int hasMaterialModeCapability(MaterialMode mode);
     virtual const char *giveClassName() const { return "IntMatBilinearCZElastic"; }
     virtual const char *giveInputRecordName() const { return _IFT_IntMatBilinearCZElastic_Name; }
-    
+
 
     //virtual void giveRealStressVector(FloatArray &answer, GaussPoint *gp,
     //                          const FloatArray &reducedStrain, TimeStep *tStep);
     virtual void giveFirstPKTraction_3d(FloatArray &answer, GaussPoint *gp, const FloatArray &jumpVector,
-                                                     const FloatMatrix &F, TimeStep *tStep);
+                                        const FloatMatrix &F, TimeStep *tStep);
 
     //virtual void giveStiffnessMatrix(FloatMatrix &answer,
     //                                      MatResponseMode mode,
@@ -137,13 +135,12 @@ public:
     virtual void give3dStiffnessMatrix_dTdj(FloatMatrix &answer, MatResponseMode rMode, GaussPoint *gp, TimeStep *tStep);
     virtual int giveIPValue(FloatArray &answer, GaussPoint *gp, InternalStateType type, TimeStep *tStep);
     virtual IRResultType initializeFrom(InputRecord *ir);
-    
+
     virtual MaterialStatus *CreateStatus(GaussPoint *gp) const { return new IntMatBilinearCZElasticStatus(1, domain, gp); }
     void printYourself();
-    virtual bool hasAnalyticalTangentStiffness() const {return true;};
+    virtual bool hasAnalyticalTangentStiffness() const { return true; };
 
 protected:
-   
 };
 } // end namespace oofem
 #endif // isointerfacedamage01_h

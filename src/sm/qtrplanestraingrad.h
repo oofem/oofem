@@ -57,14 +57,14 @@ public:
 protected:
     virtual void computeBkappaMatrixAt(GaussPoint *gp, FloatMatrix &answer);
     virtual void computeNkappaMatrixAt(GaussPoint *gp, FloatMatrix &answer);
-    virtual void computeStiffnessMatrix(FloatMatrix &answer, MatResponseMode rMode, TimeStep *tStep){GradDpElement ::computeStiffnessMatrix(answer, rMode,tStep);}
-    virtual void giveInternalForcesVector(FloatArray &answer, TimeStep *tStep, int useUpdatedGpRecord = 0) {GradDpElement :: giveInternalForcesVector(answer, tStep, useUpdatedGpRecord);}
-    virtual void computeForceLoadVector(FloatArray &answer, TimeStep *stepN, ValueModeType mode){GradDpElement :: computeForceLoadVector(answer, stepN,mode);}
+    virtual void computeStiffnessMatrix(FloatMatrix &answer, MatResponseMode rMode, TimeStep *tStep) { GradDpElement :: computeStiffnessMatrix(answer, rMode, tStep); }
+    virtual void giveInternalForcesVector(FloatArray &answer, TimeStep *tStep, int useUpdatedGpRecord = 0) { GradDpElement :: giveInternalForcesVector(answer, tStep, useUpdatedGpRecord); }
+    virtual void computeForceLoadVector(FloatArray &answer, TimeStep *stepN, ValueModeType mode) { GradDpElement :: computeForceLoadVector(answer, stepN, mode); }
     virtual int computeNumberOfDofs() { return 15; }
     virtual void computeGaussPoints();
-    virtual void giveDofManDofIDMask(int inode, EquationID,IntArray &) const;
-    virtual StructuralElement* giveStructuralElement() { return this; }
-    virtual NLStructuralElement* giveNLStructuralElement() { return this; }
+    virtual void giveDofManDofIDMask(int inode, EquationID, IntArray &) const;
+    virtual StructuralElement *giveStructuralElement() { return this; }
+    virtual NLStructuralElement *giveNLStructuralElement() { return this; }
 };
 } // end namespace oofem
 #endif // qtrplanestraingrad_h

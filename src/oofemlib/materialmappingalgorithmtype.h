@@ -38,7 +38,6 @@
 #include "enumitem.h"
 
 namespace oofem {
-
 #define MaterialMappingAlgorithmType_DEF \
     ENUM_ITEM(MMA_ClosestPoint) \
     ENUM_ITEM(MMA_LeastSquareProjection) \

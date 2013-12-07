@@ -68,7 +68,7 @@ public:
     virtual double boundaryEvalNormal(FloatArray &answer, int boundary, const FloatArray &lcoords, const FEICellGeometry &cellgeo);
     virtual double boundaryGiveTransformationJacobian(int boundary, const FloatArray &lcoords, const FEICellGeometry &cellgeo);
     virtual void boundaryLocal2Global(FloatArray &answer, int boundary, const FloatArray &lcoords, const FEICellGeometry &cellgeo);
-    
+
     /**@name Edge interpolation services. */
     //@{
     virtual void computeLocalEdgeMapping(IntArray &edgeNodes, int iedge) = 0;
@@ -126,4 +126,3 @@ public:
 };
 } // end namespace oofem
 #endif // feinterpol2d_h
-

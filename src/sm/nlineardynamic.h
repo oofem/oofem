@@ -144,7 +144,7 @@ public:
     virtual void printDofOutputAt(FILE *stream, Dof *iDof, TimeStep *atTime);
 
     virtual void updateYourself(TimeStep *tStep);
-    virtual void updateComponent(TimeStep *tStep, NumericalCmpn, Domain *d);
+    virtual void updateComponent(TimeStep * tStep, NumericalCmpn, Domain * d);
     virtual void updateAttributes(MetaStep *mStep);
 
     virtual double giveUnknownComponent(ValueModeType type, TimeStep *tStep, Domain *d, Dof *dof);

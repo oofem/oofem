@@ -59,7 +59,7 @@ protected:
         IntArray *regionDofMansConnectivity;
         IntArray *regionNodalNumbers;
         int regionValSize;
-        parallelStruct(FloatArray *a, IntArray *b, IntArray *c, int d):
+        parallelStruct(FloatArray *a, IntArray *b, IntArray *c, int d) :
             lhs(a), regionDofMansConnectivity(b), regionNodalNumbers(c), regionValSize(d) { }
     };
 

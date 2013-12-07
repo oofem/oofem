@@ -132,15 +132,15 @@ public:
     virtual void give2dBeamStiffMtrx(FloatMatrix &answer, MatResponseMode mode, GaussPoint *gp, TimeStep *tStep);
     virtual void give3dBeamStiffMtrx(FloatMatrix &answer, MatResponseMode mode, GaussPoint *gp, TimeStep *tStep);
     virtual void give2dPlateStiffMtrx(FloatMatrix &answer, MatResponseMode mode, GaussPoint *gp, TimeStep *tStep);
-    virtual void give3dShellStiffMtrx(FloatMatrix &answer,MatResponseMode mode, GaussPoint *gp, TimeStep *tStep);
+    virtual void give3dShellStiffMtrx(FloatMatrix &answer, MatResponseMode mode, GaussPoint *gp, TimeStep *tStep);
     virtual void giveMembraneRotStiffMtrx(FloatMatrix &answer, MatResponseMode mode, GaussPoint *gp, TimeStep *tStep);
 
     virtual bool isCharacteristicMtrxSymmetric(MatResponseMode mode);
-    virtual double give(int aProperty, GaussPoint *gp) 
-        {
-            OOFEM_ERROR1("FiberedCrossSection :: give - not implemented yet");
-            return 0.0;
-        };
+    virtual double give(int aProperty, GaussPoint *gp)
+    {
+        OOFEM_ERROR1("FiberedCrossSection :: give - not implemented yet");
+        return 0.0;
+    };
     virtual FloatArray *imposeStressConstrainsOnGradient(GaussPoint *gp, FloatArray *gradientStressVector3d);
     virtual FloatArray *imposeStrainConstrainsOnGradient(GaussPoint *gp, FloatArray *gradientStrainVector3d);
 
@@ -163,7 +163,7 @@ public:
     virtual void computeStressIndependentStrainVector(FloatArray &answer,
                                                       GaussPoint *gp, TimeStep *tStep, ValueModeType mode);
 
-    virtual double give(CrossSectionProperty a, GaussPoint* gp);
+    virtual double give(CrossSectionProperty a, GaussPoint *gp);
 
     // identification and auxiliary functions
     virtual const char *giveInputRecordName() const { return _IFT_FiberedCrossSection_Name; }
@@ -204,13 +204,13 @@ public:
 
 
     virtual void giveFirstPKStresses(FloatArray &answer, GaussPoint *gp, const FloatArray &reducedFIncrement, TimeStep *tStep)
-        { OOFEM_ERROR("giveFirstPKStresses not implemented for fibered cross section"); };
+    { OOFEM_ERROR("giveFirstPKStresses not implemented for fibered cross section"); };
     virtual void giveCauchyStresses(FloatArray &answer, GaussPoint *gp, const FloatArray &reducedFIncrement, TimeStep *tStep)
-        { OOFEM_ERROR("giveCauchyStresses not implemented for fibered cross section"); };
+    { OOFEM_ERROR("giveCauchyStresses not implemented for fibered cross section"); };
     virtual void giveStiffnessMatrix_dPdF(FloatMatrix &answer, MatResponseMode rMode, GaussPoint *gp, TimeStep *tStep)
-        { OOFEM_ERROR("giveStiffnessMatrix_dPdF not implemented for fibered cross section"); };
+    { OOFEM_ERROR("giveStiffnessMatrix_dPdF not implemented for fibered cross section"); };
     virtual void giveStiffnessMatrix_dCde(FloatMatrix &answer, MatResponseMode rMode, GaussPoint *gp, TimeStep *tStep)
-        { OOFEM_ERROR("giveStiffnessMatrix_dCde not implemented for fibered cross section"); };
+    { OOFEM_ERROR("giveStiffnessMatrix_dCde not implemented for fibered cross section"); };
 
 
 protected:

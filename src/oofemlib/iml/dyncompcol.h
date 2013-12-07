@@ -65,7 +65,7 @@ protected:
     FloatArray * * columns_; // data values per column
     IntArray **rowind_;   // row_ind per column
 #else
-    std :: map< int, double > ** columns;
+    std :: map< int, double > **columns;
 #endif
 
     int base_; // index base: offset of first element
@@ -138,4 +138,3 @@ protected:
 };
 } // end namespace oofem
 #endif // dyncompcol_h
-

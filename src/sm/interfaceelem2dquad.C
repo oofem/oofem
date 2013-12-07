@@ -51,8 +51,7 @@
 #endif
 
 namespace oofem {
-
-REGISTER_Element( InterfaceElem2dQuad );
+REGISTER_Element(InterfaceElem2dQuad);
 
 FEI2dLineQuad InterfaceElem2dQuad :: interp(1, 2);
 
@@ -177,7 +176,7 @@ InterfaceElem2dQuad :: computeGtoLRotationMatrix(FloatMatrix &answer)
 FEInterpolation *
 InterfaceElem2dQuad :: giveInterpolation() const
 {
-    return &interp;
+    return & interp;
 }
 
 ///@todo Deprecated? Is so, remove it. / Mikael

@@ -145,9 +145,8 @@ public:
     virtual const char *giveClassName() const { return "StructuralMaterialStatus"; }
 
     /// Functions for MaterialStatusMapperInterface
-	virtual void copyStateVariables(const MaterialStatus &iStatus);
-	virtual void addStateVariables(const MaterialStatus &iStatus);
-
+    virtual void copyStateVariables(const MaterialStatus &iStatus);
+    virtual void addStateVariables(const MaterialStatus &iStatus);
 };
 } // end namespace oofem
 #endif // structuralms_h

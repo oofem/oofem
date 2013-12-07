@@ -92,9 +92,3 @@ public:
 };
 } // end namespace oofem
 #endif // meshqualityerrorestimator_h
-
-
-
-
-
-

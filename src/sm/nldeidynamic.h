@@ -126,8 +126,8 @@ protected:
     double pyEstimate;
     /// Product of p^tM^(-1)p; where p is reference load vector.
     double pMp;
-    
-    SparseMtrx * massMatrixConsistent;
+
+    SparseMtrx *massMatrixConsistent;
     LinSystSolverType solverType;
     SparseMtrxType sparseMtrxType;
     SparseLinearSystemNM *nMethod;

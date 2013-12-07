@@ -39,8 +39,7 @@
 #include "classfactory.h"
 
 namespace oofem {
-
-REGISTER_Material( CebFip78Material );
+REGISTER_Material(CebFip78Material);
 
 IRResultType
 CebFip78Material :: initializeFrom(InputRecord *ir)

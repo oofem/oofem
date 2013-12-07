@@ -41,8 +41,7 @@
 #include <cstdlib>
 
 namespace oofem {
-
-REGISTER_Material( AnisotropicMassTransferMaterial );
+REGISTER_Material(AnisotropicMassTransferMaterial);
 
 IRResultType
 AnisotropicMassTransferMaterial :: initializeFrom(InputRecord *ir)
@@ -69,7 +68,7 @@ AnisotropicMassTransferMaterial :: initializeFrom(InputRecord *ir)
 
 
 void
-AnisotropicMassTransferMaterial :: giveFluxVector(FloatArray& answer, GaussPoint *gp, const FloatArray &grad, const FloatArray &field, TimeStep *tStep)
+AnisotropicMassTransferMaterial :: giveFluxVector(FloatArray &answer, GaussPoint *gp, const FloatArray &grad, const FloatArray &field, TimeStep *tStep)
 {
     TransportMaterialStatus *ms = static_cast< TransportMaterialStatus * >( this->giveStatus(gp) );
 
@@ -106,5 +105,4 @@ AnisotropicMassTransferMaterial :: giveCharacteristicValue(MatResponseMode mode,
 
     return 0.;
 }
-
 } // end namespace oofem

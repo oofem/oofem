@@ -61,7 +61,6 @@
 //@}
 
 namespace oofem {
-
 /**
  * This class implements associated Material Status to TrabBoneMaterial.
  */
@@ -140,7 +139,7 @@ public:
                                        TimeStep *tStep);
 
     virtual void giveRealStressVector_1d(FloatArray &answer, GaussPoint *gp,
-                                      const FloatArray &reducedStrain, TimeStep *tStep);
+                                         const FloatArray &reducedStrain, TimeStep *tStep);
 
     virtual int hasMaterialModeCapability(MaterialMode);
 

@@ -110,12 +110,12 @@ GeneralBoundaryCondition :: giveInputRecord(DynamicInputRecord &input)
     FEMComponent :: giveInputRecord(input);
     input.setField(this->loadTimeFunction, _IFT_GeneralBoundaryCondition_LoadTimeFunct);
 
-    if ( (int) this->giveBCValType() > 0 ) {
-        input.setField(this->giveBCValType(), _IFT_GeneralBoundaryCondition_valType);   
+    if ( ( int ) this->giveBCValType() > 0 ) {
+        input.setField(this->giveBCValType(), _IFT_GeneralBoundaryCondition_valType);
     }
 
     if ( this->giveDofIDs().giveSize() > 0 ) {
-        input.setField(this->giveDofIDs(), _IFT_GeneralBoundaryCondition_dofs);   
+        input.setField(this->giveDofIDs(), _IFT_GeneralBoundaryCondition_dofs);
     }
 
     if ( this->isImposedTimeFunction > 0 ) {
@@ -151,5 +151,4 @@ GeneralBoundaryCondition :: restoreContext(DataStream *stream, ContextMode mode,
 
     return CIO_OK;
 }
-
 } // end namespace oofem

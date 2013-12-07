@@ -38,8 +38,7 @@
 #include "classfactory.h"
 
 namespace oofem {
-
-REGISTER_Material( IsotropicLinMoistureTransferMaterial );
+REGISTER_Material(IsotropicLinMoistureTransferMaterial);
 
 IRResultType
 IsotropicLinMoistureTransferMaterial :: initializeFrom(InputRecord *ir)

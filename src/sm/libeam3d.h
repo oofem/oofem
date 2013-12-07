@@ -78,7 +78,7 @@ public:
 
     // Fibered cross section support functions
     virtual void FiberedCrossSectionInterface_computeStrainVectorInFiber(FloatArray &answer, const FloatArray &masterGpStrain,
-                                                                 GaussPoint *slaveGp, TimeStep *tStep);
+                                                                         GaussPoint *slaveGp, TimeStep *tStep);
 
     virtual Interface *giveInterface(InterfaceType it);
 

@@ -38,8 +38,7 @@
 #include "classfactory.h"
 
 namespace oofem {
-
-REGISTER_CrossSection( SimpleTransportCrossSection );
+REGISTER_CrossSection(SimpleTransportCrossSection);
 
 SimpleTransportCrossSection :: SimpleTransportCrossSection(int n, Domain *d) : TransportCrossSection(n, d) { }
 
@@ -72,7 +71,7 @@ SimpleTransportCrossSection :: giveInputRecord(DynamicInputRecord &input)
 int
 SimpleTransportCrossSection :: checkConsistency()
 {
-    Material *mat = dynamic_cast< TransportMaterial* >( this->domain->giveMaterial(this->matNumber) );
+    Material *mat = dynamic_cast< TransportMaterial * >( this->domain->giveMaterial(this->matNumber) );
     if ( !mat ) {
         return 0;
     }
@@ -83,7 +82,7 @@ SimpleTransportCrossSection :: checkConsistency()
 TransportMaterial *
 SimpleTransportCrossSection :: giveMaterial()
 {
-    return dynamic_cast< TransportMaterial* >( this->domain->giveMaterial(this->matNumber) );
+    return dynamic_cast< TransportMaterial * >( this->domain->giveMaterial(this->matNumber) );
 }
 
 
@@ -99,6 +98,4 @@ SimpleTransportCrossSection :: isCharacteristicMtrxSymmetric(MatResponseMode rMo
 {
     return this->domain->giveMaterial(this->matNumber)->isCharacteristicMtrxSymmetric(rMode);
 }
-
-
 } // end namespace oofem

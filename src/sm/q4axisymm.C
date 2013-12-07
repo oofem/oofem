@@ -292,24 +292,24 @@ Q4Axisymm :: initializeFrom(InputRecord *ir)
     IRResultType result;                // Required by IR_GIVE_FIELD macro
     numberOfGaussPoints          = 4;
     result = this->StructuralElement :: initializeFrom(ir);
-	if(result != IRRT_OK) {
-		return result;
-	}
+    if ( result != IRRT_OK ) {
+        return result;
+    }
 
     numberOfFiAndShGaussPoints   = 1;
     IR_GIVE_OPTIONAL_FIELD(ir, numberOfFiAndShGaussPoints, _IFT_Q4Axisymm_nipfish);
 
     if ( !( ( numberOfGaussPoints == 1 ) ||
-           ( numberOfGaussPoints == 4 ) ||
-           ( numberOfGaussPoints == 9 ) ||
-           ( numberOfGaussPoints == 16 ) ) ) {
+            ( numberOfGaussPoints == 4 ) ||
+            ( numberOfGaussPoints == 9 ) ||
+            ( numberOfGaussPoints == 16 ) ) ) {
         numberOfGaussPoints = 4;
     }
 
     if ( !( ( numberOfFiAndShGaussPoints == 1 ) ||
-           ( numberOfFiAndShGaussPoints == 4 ) ||
-           ( numberOfFiAndShGaussPoints == 9 ) ||
-           ( numberOfFiAndShGaussPoints == 16 ) ) ) {
+            ( numberOfFiAndShGaussPoints == 4 ) ||
+            ( numberOfFiAndShGaussPoints == 9 ) ||
+            ( numberOfFiAndShGaussPoints == 16 ) ) ) {
         numberOfFiAndShGaussPoints = 1;
     }
 

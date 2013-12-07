@@ -80,7 +80,7 @@ class FloatMatrix;
  *
  * The attribute 'propertyDictionary' contains all the properties of a material
  * like its Young modulus, its mass density or Poisson ratio.
-
+ *
  * Its task is to indicate whether there required material mode is valid for receiver
  * (method hasMaterialModeCapability). Note: for some material models and linear materials
  * there need not exist support for assembling material char matrix at material level,
@@ -116,7 +116,7 @@ public:
      * @param n Material number.
      * @param d Domain to which new material will belong.
      */
-    Material(int n, Domain *d) : FEMComponent(n, d), propertyDictionary(new Dictionary()), castingTime(-1.) { }
+    Material(int n, Domain *d) : FEMComponent(n, d), propertyDictionary( new Dictionary() ), castingTime(-1.) { }
     /// Destructor.
     virtual ~Material() { delete propertyDictionary; }
 

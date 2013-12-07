@@ -38,7 +38,6 @@
 #include "dofmanager.h"
 
 namespace oofem {
-
 class Domain;
 class Dof;
 class NodalLoad;
@@ -55,7 +54,7 @@ class Element;
 class OOFEM_EXPORT ElementDofManager : public DofManager
 {
 private:
-    Element* element;
+    Element *element;
 
 public:
     /**
@@ -64,7 +63,7 @@ public:
      * @param aDomain Domain which receiver belongs to.
      * @param elem Element to which receiver belongs.
      */
-    ElementDofManager(int n, Domain *aDomain, Element* elem);
+    ElementDofManager(int n, Domain *aDomain, Element *elem);
     /// Destructor.
     virtual ~ElementDofManager();
 
@@ -77,9 +76,3 @@ public:
 };
 } // end namespace oofem
 #endif // elementdofman_h
-
-
-
-
-
-

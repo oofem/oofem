@@ -41,7 +41,6 @@
 //#include <unistd.h>
 
 namespace oofem {
-
 IRResultType RVEMaterial :: initializeFrom(InputRecord *ir)
 {
     printf("rvematerial initializing...\n");
@@ -53,8 +52,8 @@ IRResultType RVEMaterial :: initializeFrom(InputRecord *ir)
 
     IR_GIVE_FIELD(ir, this->rveFilename, _IFT_RVEMaterial_fileName);
 
-    OOFEM_LOG_INFO("************************** Instanciating microproblem from file %s\n", rveFilename.c_str());
-    OOFEMTXTDataReader drMicro(rveFilename.c_str());
+    OOFEM_LOG_INFO( "************************** Instanciating microproblem from file %s\n", rveFilename.c_str() );
+    OOFEMTXTDataReader drMicro( rveFilename.c_str() );
 
     this->rve = InstanciateProblem(& drMicro, _processor, 0);
     drMicro.finish();
@@ -62,13 +61,13 @@ IRResultType RVEMaterial :: initializeFrom(InputRecord *ir)
     this->rve->setProblemScale(microScale);
     this->rve->setProblemScale(microScale);
     this->rve->checkProblemConsistency();
-    this->rve->initMetaStepAttributes( this->rve->giveMetaStep( 1 ) );
+    this->rve->initMetaStepAttributes( this->rve->giveMetaStep(1) );
     this->rve->giveNextStep();
     this->rve->init();
 
     OOFEM_LOG_INFO("************************** Microproblem at %p instanciated \n", rve);
 
-    SupressRVEoutput=0;
+    SupressRVEoutput = 0;
 
     IR_GIVE_OPTIONAL_FIELD(ir, SupressRVEoutput, _IFT_RVEMaterial_supressoutput);
 
@@ -78,22 +77,21 @@ IRResultType RVEMaterial :: initializeFrom(InputRecord *ir)
 void
 RVEMaterial :: suppressStdout()
 {
-//    if (SupressRVEoutput) {
-//        fgetpos(stdout, &stdoutPos);
-//        stdoutFID=dup(fileno(stdout));
-//        freopen(this->rveLogFilename.c_str(), "a", stdout);
-//    }
+    //    if (SupressRVEoutput) {
+    //        fgetpos(stdout, &stdoutPos);
+    //        stdoutFID=dup(fileno(stdout));
+    //        freopen(this->rveLogFilename.c_str(), "a", stdout);
+    //    }
 }
 
 void RVEMaterial :: enableStdout()
 {
-//    if (SupressRVEoutput) {
-//        fflush(stdout);
-//        dup2(stdoutFID, fileno(stdout));
-//        close (stdoutFID);
-//        clearerr(stdout);
-//        fsetpos(stdout, &stdoutPos);        /* for C9X */
-//    }
+    //    if (SupressRVEoutput) {
+    //        fflush(stdout);
+    //        dup2(stdoutFID, fileno(stdout));
+    //        close (stdoutFID);
+    //        clearerr(stdout);
+    //        fsetpos(stdout, &stdoutPos);        /* for C9X */
+    //    }
 }
-
 }

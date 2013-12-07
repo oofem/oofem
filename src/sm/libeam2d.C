@@ -45,8 +45,7 @@
 #include "classfactory.h"
 
 namespace oofem {
-
-REGISTER_Element( LIBeam2d );
+REGISTER_Element(LIBeam2d);
 
 // Set up interpolation coordinates
 FEI2dLineLin LIBeam2d :: interpolation(1, 3);
@@ -109,7 +108,7 @@ LIBeam2d :: computeGaussPoints()
         numberOfIntegrationRules = 1;
         integrationRulesArray = new IntegrationRule * [ 1 ];
         integrationRulesArray [ 0 ] = new GaussIntegrationRule(1, this, 1, 2);
-        this->giveCrossSection()->setupIntegrationPoints( *integrationRulesArray[0], 1, this );
+        this->giveCrossSection()->setupIntegrationPoints(* integrationRulesArray [ 0 ], 1, this);
     }
 }
 
@@ -322,7 +321,7 @@ LIBeam2d :: computeEgdeNMatrixAt(FloatMatrix &answer, int iedge, GaussPoint *aGa
      * without regarding particular side
      */
 
-    this->computeNmatrixAt(*(aGaussPoint->giveLocalCoordinates()), answer);
+    this->computeNmatrixAt(* ( aGaussPoint->giveLocalCoordinates() ), answer);
 }
 
 
@@ -363,10 +362,9 @@ LIBeam2d :: computeEdgeVolumeAround(GaussPoint *aGaussPoint, int iEdge)
 void
 LIBeam2d :: computeBodyLoadVectorAt(FloatArray &answer, Load *load, TimeStep *tStep, ValueModeType mode)
 {
-  FloatArray lc(1);
-  StructuralElement::computeBodyLoadVectorAt(answer, load, tStep, mode);
-  answer.times(this->giveCrossSection()->give(CS_Area, &lc, NULL, this)); 
- 
+    FloatArray lc(1);
+    StructuralElement :: computeBodyLoadVectorAt(answer, load, tStep, mode);
+    answer.times( this->giveCrossSection()->give(CS_Area, & lc, NULL, this) );
 }
 
 
@@ -387,7 +385,7 @@ LIBeam2d :: computeLoadGToLRotationMtrx(FloatMatrix &answer)
     answer.zero();
 
     sine = sin( this->givePitch() );
-    cosine = cos( pitch );
+    cosine = cos(pitch);
 
     answer.at(1, 1) = cosine;
     answer.at(1, 2) = -sine;

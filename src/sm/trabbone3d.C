@@ -186,9 +186,9 @@ TrabBone3D :: evaluateCurrentYieldStress(const double kappa)
         double damage = this->computeDamageParam(kappa);
         if ( kappa < kappaMax ) {
             return ( yR + ( 1. - yR ) * ( 1 - pow( ( kappaMax - kappa ) / kappaMax, kappaSlope * kappaMax ) ) ) / ( 1. - damage );
-        } else if ( kappa < ( kappaMin + kappaMax ) / 2. )         {
+        } else if ( kappa < ( kappaMin + kappaMax ) / 2. ) {
             return ( yR + ( 1. - yR ) * ( 1 - ( 1 - gMin ) / 2 * pow(2 * ( kappa - kappaMax ) / ( kappaMin - kappaMax ), N) ) ) / ( 1. - damage );
-        } else if ( kappa < kappaMin )   {
+        } else if ( kappa < kappaMin ) {
             return ( yR + ( 1. - yR ) * ( gMin + ( 1 - gMin ) / 2. * pow(2 * ( kappaMin - kappa ) / ( kappaMin - kappaMax ), N) ) ) / ( 1. - damage );
         } else {
             return ( yR + ( 1. - yR ) * gMin ) / ( 1. - damage );
@@ -217,9 +217,9 @@ TrabBone3D :: evaluateCurrentPlasticModulus(const double kappa)
 
         if ( kappa < kappaMax ) {
             gPrime = kappaSlope * pow( ( kappaMax - kappa ) / kappaMax, kappaSlope * kappaMax - 1. );
-        } else if ( kappa < ( ( kappaMin + kappaMax ) / 2. ) )           {
+        } else if ( kappa < ( ( kappaMin + kappaMax ) / 2. ) ) {
             gPrime   = ( ( gMin - 1. ) / ( kappaMin - kappaMax ) * N * pow(2. * ( kappa - kappaMax ) / ( kappaMin - kappaMax ), N - 1.) );
-        } else if ( kappa < kappaMin )   {
+        } else if ( kappa < kappaMin ) {
             gPrime =  ( ( 1. - gMin ) / ( kappaMin - kappaMax ) * N * pow(2. * ( kappaMin - kappa ) / ( kappaMin - kappaMax ), N - 1.) );
         } else {
             gPrime = 0.;
@@ -297,7 +297,7 @@ TrabBone3D :: performPlasticityReturn(GaussPoint *gp, const FloatArray &totalStr
         status->setTempPlasDef(tempPlasDef);
         status->setTempKappa(tempKappa);
         status->setTempEffectiveStress(tempEffectiveStress);
-    } else   {
+    } else {
         //printf("LineSearch \n");
         tempEffectiveStress = trialEffectiveStress;
         tempKappa = status->giveKappa();
@@ -337,7 +337,7 @@ TrabBone3D :: projectOnYieldSurface(double &tempKappa, FloatArray &tempEffective
     if ( plasCriterion < rel_yield_tol ) {
         // trial stress in elastic domain
         convergence = true;
-    } else   {
+    } else {
         // return to the yield surface needed
         // Initial valuesr
         toSolveTensor.resize(6);
@@ -478,7 +478,7 @@ TrabBone3D :: projectOnYieldSurface(double &tempKappa, FloatArray &tempEffective
                         alfa = alfa2;
                     }
                 }
-            } else   {
+            } else {
                 max_num_iter = 100;
                 //////////////////////////////////////////////////////////
                 deltaKappa += incKappa;
@@ -1538,4 +1538,3 @@ MaterialStatus *TrabBone3D :: CreateStatus(GaussPoint *gp) const
     return new TrabBone3DStatus(1, StructuralMaterial :: giveDomain(), gp);
 }
 } //end namespace oofem
-

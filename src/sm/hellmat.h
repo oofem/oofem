@@ -316,11 +316,11 @@ public:
     }
 
     // Plasticity
-    const FloatArray & givePlasticStrainVector() const {
+    const FloatArray &givePlasticStrainVector() const {
         if ( !plastData ) { _error("givePlasticStrainVector: missing plastData."); }
         return plastData->plasticStrainVector;
     }
-    const FloatArray & giveTempPlasticStrainVector() const {
+    const FloatArray &giveTempPlasticStrainVector() const {
         if ( !plastData ) { _error("giveTempPlasticStrainVector: missing plastData."); }
         return plastData->tempPlasticStrainVector;
     }
@@ -375,20 +375,20 @@ public:
     }
 
     // Creep strain vectors
-    const FloatArray & giveViscousStrainVector() const {
+    const FloatArray &giveViscousStrainVector() const {
         if ( !creepData ) { _error("giveViscousStrainVector: missing creepData."); }
 
         return creepData->viscousStrainVector;
     }
-    const FloatArray & giveTempViscousStrainVector() const {
+    const FloatArray &giveTempViscousStrainVector() const {
         if ( !creepData ) { _error("giveTempViscousStrainVector: missing creepData."); }
         return creepData->tempViscousStrainVector;
     }
-    const FloatArray & giveFlowStrainVector() const {
+    const FloatArray &giveFlowStrainVector() const {
         if ( !creepData ) { _error("giveFlowStrainVector: missing creepData."); }
         return creepData->flowStrainVector;
     }
-    const FloatArray & giveTempFlowStrainVector() const {
+    const FloatArray &giveTempFlowStrainVector() const {
         if ( !creepData ) { _error("giveTempFlowStrainVector: missing creepData."); }
         return creepData->tempFlowStrainVector;
     }
@@ -435,8 +435,8 @@ public:
     void setViscosity(double v) { if ( nonisoData ) { nonisoData->viscosity = v; } }
 
     // Plasticity
-    const FloatArray & givePlasticStrainVector() const { return plastData->plasticStrainVector; }
-    const FloatArray & giveTempPlasticStrainVector() const { return plastData->tempPlasticStrainVector; }
+    const FloatArray &givePlasticStrainVector() const { return plastData->plasticStrainVector; }
+    const FloatArray &giveTempPlasticStrainVector() const { return plastData->tempPlasticStrainVector; }
     double giveHardeningVar() { if ( plastData ) { return plastData->hardeningVar; } else { return 0.; } }
     double giveTempHardeningVar() { if ( plastData ) { return plastData->tempHardeningVar; } else { return 0.; } }
     void giveTrialStressVector(FloatArray &answer) const { if ( plastData ) { answer = plastData->trialStressVector; } }
@@ -765,10 +765,10 @@ public:
      * @param mode VM_Incremental:
      * @param kv  returns coefficient for viscous creep (ev)
      * @param gv  returns coefficient for flow creep    (fv)
-     * 
+     *
      * @param gp Integration point.
      * @param atTime Time step.
-     */                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                       //ev        //fv
+     */                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                   //ev        //fv
     void giveKvCoeffs(GaussPoint *gp, TimeStep *atTime, double &kv, double &gv, ValueModeType mode);
     /// Original service for compatibility with non-3D ananlysis, uses gv from giveKvCoeffs.
     double giveKvCoeff(GaussPoint *gp, TimeStep *atTime);
@@ -787,7 +787,7 @@ public:
                                GaussPoint *gp, TimeStep *atTime, ValueModeType mode);
 
     virtual void giveRealStressVector(FloatArray &, GaussPoint *,
-                              const FloatArray &, TimeStep *);
+                                      const FloatArray &, TimeStep *);
 
     virtual void printOutputAt(FILE *file, TimeStep *atTime);
 
@@ -815,7 +815,7 @@ public:
     virtual int hasMaterialModeCapability(MaterialMode mode);
 
     virtual void giveStiffnessMatrix(FloatMatrix &answer,
-                                          MatResponseMode rMode, GaussPoint *gp, TimeStep *atTime);
+                                     MatResponseMode rMode, GaussPoint *gp, TimeStep *atTime);
 
     virtual void computeStressIndependentStrainVector(FloatArray &answer,
                                                       GaussPoint *gp, TimeStep *atTime, ValueModeType mode);
@@ -848,7 +848,7 @@ public:
     virtual ~HellmichMaterial() {}
 
     virtual void giveRealStressVector(FloatArray &answer, GaussPoint *gp,
-                              const FloatArray &strain, TimeStep *tstep) { answer.resize(0); }
+                                      const FloatArray &strain, TimeStep *tstep) { answer.resize(0); }
 
     virtual const char *giveClassName() const { return "HellmichMaterial"; }
 };

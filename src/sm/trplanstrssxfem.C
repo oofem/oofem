@@ -92,13 +92,12 @@ void TrPlaneStress2dXFEM :: computeGaussPoints()
 {
     XfemManager *xMan = this->giveDomain()->giveXfemManager();
 
-    if( xMan->isElementEnriched(this) ) {
-    	if(!this->XfemElementInterface_updateIntegrationRule()) {
-        	TrPlaneStress2d :: computeGaussPoints();
-    	}
-    }
-    else {
-    	TrPlaneStress2d :: computeGaussPoints();
+    if ( xMan->isElementEnriched(this) ) {
+        if ( !this->XfemElementInterface_updateIntegrationRule() ) {
+            TrPlaneStress2d :: computeGaussPoints();
+        }
+    } else   {
+        TrPlaneStress2d :: computeGaussPoints();
     }
 }
 
@@ -123,7 +122,7 @@ TrPlaneStress2dXFEM :: giveDofManDofIDMask(int inode, EquationID ut, IntArray &a
     XfemManager *xMan = this->domain->giveXfemManager();
     if ( xMan != NULL ) {
         this->giveDofManager(inode)->giveCompleteMasterDofIDArray(answer);
-    } else   {
+    } else {
         // Continuous part
         TrPlaneStress2d :: giveDofManDofIDMask(inode, ut, answer);
     }

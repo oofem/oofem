@@ -54,8 +54,7 @@
 #endif
 
 namespace oofem {
-
-REGISTER_Element( PlaneStress2d );
+REGISTER_Element(PlaneStress2d);
 
 FEI2dQuadLin PlaneStress2d :: interpolation(1, 2);
 
@@ -118,7 +117,6 @@ PlaneStress2d :: computeBHmatrixAt(GaussPoint *aGaussPoint, FloatMatrix &answer)
 // evaluated at aGaussPoint.
 // @todo not checked if correct
 {
-
     FloatMatrix dnx;
 #ifdef  PlaneStress2d_reducedShearIntegration
     FloatArray coord;
@@ -153,7 +151,7 @@ PlaneStress2d :: computeGaussPoints()
         numberOfIntegrationRules = 1;
         integrationRulesArray = new IntegrationRule * [ 1 ];
         integrationRulesArray [ 0 ] = new GaussIntegrationRule(1, this, 1, 3);
-        this->giveCrossSection()->setupIntegrationPoints( *integrationRulesArray[0], numberOfGaussPoints, this );
+        this->giveCrossSection()->setupIntegrationPoints(* integrationRulesArray [ 0 ], numberOfGaussPoints, this);
     }
 }
 
@@ -225,8 +223,8 @@ double
 PlaneStress2d :: computeEdgeVolumeAround(GaussPoint *aGaussPoint, int iEdge)
 {
     double result = this->interpolation.edgeGiveTransformationJacobian( iEdge, * aGaussPoint->giveCoordinates(),
-                                                                       FEIElementGeometryWrapper(this) );
-    return result *aGaussPoint->giveWeight();
+                                                                        FEIElementGeometryWrapper(this) );
+    return result * aGaussPoint->giveWeight();
 }
 
 void
@@ -279,7 +277,7 @@ PlaneStress2d :: computeVolumeAround(GaussPoint *aGaussPoint)
 {
     double determinant, weight, thickness, volume;
     determinant = fabs( this->interpolation.giveTransformationJacobian( * aGaussPoint->giveCoordinates(),
-                                                                       FEIElementGeometryWrapper(this) ) );
+                                                                        FEIElementGeometryWrapper(this) ) );
 
 
     weight      = aGaussPoint->giveWeight();
@@ -294,9 +292,9 @@ PlaneStress2d :: initializeFrom(InputRecord *ir)
 {
     numberOfGaussPoints = 4;
     IRResultType result = this->NLStructuralElement :: initializeFrom(ir);
-	if(result != IRRT_OK) {
-		return result;
-	}
+    if ( result != IRRT_OK ) {
+        return result;
+    }
 
     if ( numberOfGaussPoints != 1 && numberOfGaussPoints != 4 && numberOfGaussPoints != 9 && numberOfGaussPoints != 16 ) {
         numberOfGaussPoints = 4;
@@ -346,8 +344,10 @@ PlaneStress2d :: giveCharacteristicSize(GaussPoint *gp, FloatArray &normalToCrac
     int nGP = iRule->giveNumberOfIntegrationPoints();
     for ( int i = 0; i < nGP; i++ ) {
         GaussPoint *gpi = iRule->getIntegrationPoint(i);
-        StructuralMaterialStatus *matstatus = dynamic_cast< StructuralMaterialStatus* >( gpi->giveMaterialStatus() );
-        if (matstatus) sumstrain.add( matstatus->giveTempStrainVector() );
+        StructuralMaterialStatus *matstatus = dynamic_cast< StructuralMaterialStatus * >( gpi->giveMaterialStatus() );
+        if ( matstatus ) {
+            sumstrain.add( matstatus->giveTempStrainVector() );
+        }
     }
 
     StrainVector sumstrainvec(sumstrain, _PlaneStress);
@@ -463,7 +463,7 @@ PlaneStress2d :: HuertaErrorEstimatorI_setupRefinedElementProblem(RefinedElement
     static int sideNode [ 4 ] [ 2 ] = { { 1, 2 }, { 2, 3 }, { 3, 4 }, { 4, 1 } };
 
     if ( sMode == HuertaErrorEstimatorInterface :: NodeMode ||
-        ( sMode == HuertaErrorEstimatorInterface :: BCMode && aMode == HuertaErrorEstimator :: HEE_linear ) ) {
+         ( sMode == HuertaErrorEstimatorInterface :: BCMode && aMode == HuertaErrorEstimator :: HEE_linear ) ) {
         for ( inode = 0; inode < nodes; inode++ ) {
             corner [ inode ] = element->giveNode(inode + 1)->giveCoordinates();
             if ( corner [ inode ]->giveSize() != 3 ) {

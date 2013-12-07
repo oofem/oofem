@@ -40,7 +40,6 @@
 #define _IFT_ConstantFunction_Name "constantfunction"
 
 namespace oofem {
-
 /**
  * Class implementing time function that is constant in time; @f$ f(t) = C @f$.
  */

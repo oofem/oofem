@@ -246,7 +246,7 @@ public:
     /// Prints receiver to stdout. Works only for relatively small matrices.
     virtual void printYourself() const { OOFEM_LOG_INFO("SparseMtrx :: printYourself - Not implemented"); }
     /// Helpful for debugging, writes the matrix to given file.
-    virtual void writeToFile(const char* fname) const { OOFEM_LOG_INFO("SparseMtrx :: writeToFile - Not implemented"); }
+    virtual void writeToFile(const char *fname) const { OOFEM_LOG_INFO("SparseMtrx :: writeToFile - Not implemented"); }
     /// Sparse matrix type identification
     virtual SparseMtrxType giveType() const = 0;
     /// Returns true if asymmetric

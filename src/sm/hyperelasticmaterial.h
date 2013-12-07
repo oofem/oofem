@@ -84,8 +84,8 @@ public:
 
 
     virtual void giveRealStressVector_3d(FloatArray &answer, GaussPoint *gp,
-                                      const FloatArray &reducedStrain, TimeStep *tStep);
-    
+                                         const FloatArray &reducedStrain, TimeStep *tStep);
+
     virtual MaterialStatus *CreateStatus(GaussPoint *gp) const;
 
     virtual int hasMaterialModeCapability(MaterialMode);

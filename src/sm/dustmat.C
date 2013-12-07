@@ -48,8 +48,7 @@
 #include "classfactory.h"
 
 namespace oofem {
-
-REGISTER_Material( DustMaterial );
+REGISTER_Material(DustMaterial);
 
 DustMaterialStatus :: DustMaterialStatus(int n, Domain *d, GaussPoint *gp, double q0) :
     StructuralMaterialStatus(n, d, gp),
@@ -110,7 +109,7 @@ DustMaterialStatus :: printOutputAt(FILE *file, TimeStep *tStep)
     }
 
     // print plastic strain vector
-    const StrainVector & plasticStrain = this->givePlasticStrain();
+    const StrainVector &plasticStrain = this->givePlasticStrain();
 
     fprintf(file, ", plasticStrains ");
     int n = plasticStrain.giveSize();
@@ -581,7 +580,7 @@ DustMaterial :: giveIPValue(FloatArray &answer,
 MaterialStatus *
 DustMaterial :: CreateStatus(GaussPoint *gp) const
 {
-    return new DustMaterialStatus(1, StructuralMaterial :: giveDomain(), gp, this->giveQ0());
+    return new DustMaterialStatus( 1, StructuralMaterial :: giveDomain(), gp, this->giveQ0() );
 }
 
 double
@@ -803,4 +802,3 @@ DustMaterial :: fTempR2(double tempQ, double q, double i1, double rho, double bu
     return a * a + b * b - vfEq * vfEq;
 }
 } // end namespace oofem
-

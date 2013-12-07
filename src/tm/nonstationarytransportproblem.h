@@ -68,7 +68,7 @@ protected:
      * (like those for computing real internal forces or updating the internal state).
      */
     StateCounterType internalVarUpdateStamp;
-    
+
     LinSystSolverType solverType; ///@todo Remove this and use nonlinear methods.
     SparseLinearSystemNM *linSolver; ///@todo Remove this and use nonlinear methods.
 

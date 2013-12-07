@@ -158,7 +158,7 @@ MaxwellChainMaterial :: giveEigenStrainVector(FloatArray &answer,
         for ( mu = 1; mu <= nUnits; mu++ ) {
             deltaYmu = atTime->giveTimeIncrement() / timeFactor / this->giveCharTime(mu);
             deltaYmu = pow( deltaYmu, this->giveCharTimeExponent(mu) );
-            
+
             sigmaMu  = status->giveHiddenVarsVector(mu); // JB
 
             if ( sigmaMu.giveSize() ) {
@@ -179,10 +179,10 @@ MaxwellChainMaterial :: giveEigenStrainVector(FloatArray &answer,
 }
 
 
-void 
+void
 MaxwellChainMaterial :: giveRealStressVector(FloatArray &answer, GaussPoint *gp, const FloatArray &reducedStrain, TimeStep *tStep)
 {
-    RheoChainMaterial ::giveRealStressVector(answer, gp, reducedStrain, tStep);
+    RheoChainMaterial :: giveRealStressVector(answer, gp, reducedStrain, tStep);
 
     // Computes hidden variables and stores them as temporary
     this->computeHiddenVars(gp, tStep);
@@ -232,9 +232,9 @@ MaxwellChainMaterial :: computeHiddenVars(GaussPoint *gp, TimeStep *tNow)
         if ( muthHiddenVarsVector.giveSize() ) {
             muthHiddenVarsVector.times( exp(-deltaYmu) );
             muthHiddenVarsVector.add(help);
-            status->letTempHiddenVarsVectorBe( mu, muthHiddenVarsVector);
+            status->letTempHiddenVarsVectorBe(mu, muthHiddenVarsVector);
         } else {
-            status->letTempHiddenVarsVectorBe( mu, help);
+            status->letTempHiddenVarsVectorBe(mu, help);
         }
     }
 }

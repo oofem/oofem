@@ -82,7 +82,7 @@ public:
 
     virtual Interface *giveInterface(InterfaceType);
 
-    virtual FEInterpolation *giveInterpolation() const { return &interp_geom; }
+    virtual FEInterpolation *giveInterpolation() const { return & interp_geom; }
     virtual FEInterpolation *giveInterpolation(DofIDItem id) const { return NULL; }
 
     virtual int computeNumberOfDofs() { return 6; }
@@ -100,7 +100,7 @@ public:
 #endif
 
     virtual void computeStrainVectorInLayer(FloatArray &answer, const FloatArray &masterGpStrain,
-					    GaussPoint *masterGp, GaussPoint *slaveGp, TimeStep *tStep);
+                                            GaussPoint *masterGp, GaussPoint *slaveGp, TimeStep *tStep);
 
 protected:
     virtual void computeEdgeLoadVectorAt(FloatArray &answer, Load *, int, TimeStep *, ValueModeType mode);

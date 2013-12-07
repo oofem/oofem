@@ -110,8 +110,10 @@ public:
     virtual int computeGlobalCoordinates(FloatArray &answer, const FloatArray &lcoords);
 
     virtual int giveLocalCoordinateSystem(FloatMatrix &answer)
-    { _error("cct3d :: giveLocalCoordinateSystem: calling of this function id not allowed");
-      return 0; }
+    {
+        _error("cct3d :: giveLocalCoordinateSystem: calling of this function id not allowed");
+        return 0;
+    }
 
     virtual void printOutputAt(FILE *file, TimeStep *tStep);
 };

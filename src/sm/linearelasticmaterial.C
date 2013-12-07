@@ -38,7 +38,6 @@
 #include "structuralms.h"
 
 namespace oofem {
-
 void
 LinearElasticMaterial :: giveRealStressVector(FloatArray &answer,
                                               GaussPoint *gp,
@@ -189,5 +188,4 @@ LinearElasticMaterial :: giveRealStressVector_Fiber(FloatArray &answer, GaussPoi
     status->letTempStrainVectorBe(reducedStrain);
     status->letTempStressVectorBe(answer);
 }
-
 } // end namespace oofem

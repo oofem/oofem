@@ -45,12 +45,12 @@ namespace oofem {
 // c l a s s   CohesiveInterfaceMaterial
 //---------------------------------------------------------------------------------------------------
 
-REGISTER_Material( CohesiveInterfaceMaterial );
+REGISTER_Material(CohesiveInterfaceMaterial);
 
 CohesiveInterfaceMaterial :: CohesiveInterfaceMaterial(int n, Domain *d) : StructuralMaterial(n, d)
-//
-// constructor
-//
+    //
+    // constructor
+    //
 {}
 
 void
@@ -82,8 +82,8 @@ CohesiveInterfaceMaterial :: giveRealStressVector(FloatArray &answer, GaussPoint
 
 void
 CohesiveInterfaceMaterial :: giveStiffnessMatrix(FloatMatrix &answer,
-                                                      MatResponseMode rMode,
-                                                      GaussPoint *gp, TimeStep *atTime)
+                                                 MatResponseMode rMode,
+                                                 GaussPoint *gp, TimeStep *atTime)
 //
 // Returns characteristic material stiffness matrix of the receiver
 //
@@ -228,4 +228,3 @@ CohesiveInterfaceMaterialStatus :: restoreContext(DataStream *stream, ContextMod
     return CIO_OK;
 }
 } // namespace oofem
-
