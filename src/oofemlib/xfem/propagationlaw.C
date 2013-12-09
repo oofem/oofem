@@ -40,10 +40,19 @@
 #include "classfactory.h"
 #include "mathfem.h"
 #include "dynamicinputrecord.h"
+#include "spatiallocalizer.h"
+#include "floatmatrix.h"
+#include "gausspoint.h"
+#include "structuralms.h"
+#include "enrichmentitem.h"
+#include "feinterpol.h"
+
+#include "XFEMDebugTools.h"
 
 namespace oofem {
 REGISTER_PropagationLaw(PLDoNothing)
 REGISTER_PropagationLaw(PLCrackPrescribedDir)
+REGISTER_PropagationLaw(PLHoopStressCirc)
 
 PropagationLaw :: PropagationLaw() {}
 
@@ -62,7 +71,7 @@ IRResultType PLCrackPrescribedDir :: initializeFrom(InputRecord *ir) {
     IR_GIVE_FIELD(ir, mAngle, _IFT_PLCrackPrescribedDir_Dir);
     IR_GIVE_FIELD(ir, mIncrementLength, _IFT_PLCrackPrescribedDir_IncLength);
 
-    printf("In PLCrackPrescribedDir :: initializeFrom: mAngle: %e mIncrementLength: %e\n", mAngle, mIncrementLength);
+//    printf("In PLCrackPrescribedDir :: initializeFrom: mAngle: %e mIncrementLength: %e\n", mAngle, mIncrementLength);
 
     return IRRT_OK;
 }
@@ -76,9 +85,7 @@ void PLCrackPrescribedDir :: giveInputRecord(DynamicInputRecord &input)
     input.setField(mIncrementLength, _IFT_PLCrackPrescribedDir_IncLength);
 }
 
-void PLCrackPrescribedDir :: propagateInterfaces(EnrichmentDomain &ioEnrDom) {
-    printf("Entering PLCrackPrescribedDir::propagateInterfaces().\n");
-
+void PLCrackPrescribedDir :: propagateInterfaces(Domain &iDomain, EnrichmentDomain &ioEnrDom) {
     // Fetch crack tip data
     std :: vector< TipInfo >tipInfo;
     ioEnrDom.giveTipInfos(tipInfo);
@@ -99,4 +106,317 @@ void PLCrackPrescribedDir :: propagateInterfaces(EnrichmentDomain &ioEnrDom) {
 
     ioEnrDom.propagateTips(tipPropagations);
 }
+
+
+
+/////////////////////////////////////////////
+IRResultType PLHoopStressCirc :: initializeFrom(InputRecord *ir) {
+    const char *__proc = "initializeFrom";
+    IRResultType result;
+
+    IR_GIVE_FIELD(ir, mRadius, 				_IFT_PLHoopStressCirc_Radius);
+    IR_GIVE_FIELD(ir, mAngleInc, 			_IFT_PLHoopStressCirc_AngleInc);
+    IR_GIVE_FIELD(ir, mIncrementLength, 	_IFT_PLHoopStressCirc_IncLength);
+    IR_GIVE_FIELD(ir, mHoopStressThreshold, _IFT_PLHoopStressCirc_HoopStressThreshold);
+
+    int useRadialBasisFunc = 0;
+    IR_GIVE_OPTIONAL_FIELD(ir, useRadialBasisFunc, _IFT_PLHoopStressCirc_RadialBasisFunc);
+    if(useRadialBasisFunc == 1) {
+    	mUseRadialBasisFunc = true;
+    }
+
+    return IRRT_OK;
+}
+
+void PLHoopStressCirc :: giveInputRecord(DynamicInputRecord &input)
+{
+    int number = 1;
+    input.setRecordKeywordField(this->giveInputRecordName(), number);
+
+    input.setField(mRadius, 				_IFT_PLHoopStressCirc_Radius);
+    input.setField(mAngleInc, 				_IFT_PLHoopStressCirc_AngleInc);
+    input.setField(mIncrementLength, 		_IFT_PLHoopStressCirc_IncLength);
+    input.setField(mHoopStressThreshold,	_IFT_PLHoopStressCirc_HoopStressThreshold);
+
+    if(mUseRadialBasisFunc) {
+        input.setField(1,	_IFT_PLHoopStressCirc_RadialBasisFunc);
+    }
+}
+
+void PLHoopStressCirc :: propagateInterfaces(Domain &iDomain, EnrichmentDomain &ioEnrDom)
+{
+    // Fetch crack tip data
+    std :: vector< TipInfo >tipInfo;
+    ioEnrDom.giveTipInfos(tipInfo);
+
+    SpatialLocalizer *localizer = iDomain.giveSpatialLocalizer();
+
+    for(size_t tipIndex = 0; tipIndex < tipInfo.size(); tipIndex++) {
+
+		// Construct circle points on an arc from -90 to 90 degrees
+		double angle = -90.0 + mAngleInc;
+		std::vector<double> angles;
+		while(angle < (90.0 - mAngleInc) ) {
+			angles.push_back(angle*M_PI/180.0);
+			angle += mAngleInc;
+		}
+
+		const FloatArray &xT 	= tipInfo[tipIndex].mGlobalCoord;
+		const FloatArray &t		= tipInfo[tipIndex].mTangDir;
+		const FloatArray &n		= tipInfo[tipIndex].mNormalDir;
+
+		// It is meaningless to propagate a tip that is not inside any element
+		Element *el = localizer->giveElementContainingPoint(tipInfo[tipIndex].mGlobalCoord);
+		if(el != NULL) {
+
+			std::vector<FloatArray> circPoints;
+
+			for(size_t i = 0; i < angles.size(); i++) {
+
+				FloatArray tangent(2);
+				tangent.zero();
+				tangent.add( cos(angles[i]), t 	);
+				tangent.add( sin(angles[i]), n 	);
+				tangent.normalize();
+
+				FloatArray x(xT);
+				x.add(mRadius, tangent);
+				circPoints.push_back(x);
+			}
+
+
+
+			std::vector<double> sigTTArray, sigRTArray;
+
+			// Loop over circle points
+			for(size_t pointIndex = 0; pointIndex < circPoints.size(); pointIndex++) {
+
+				FloatArray stressVec;
+
+				if(mUseRadialBasisFunc) {
+					// Interpolate stress with radial basis functions
+
+					// Choose a cut-off length l:
+					// take the distance between two nodes in the element containing the
+					// crack tip multiplied by a constant factor.
+					// ( This choice implies that we hope that the element has reasonable
+					// aspect ratio.)
+					const FloatArray &x1 = *(el->giveDofManager(1)->giveCoordinates());
+					const FloatArray &x2 = *(el->giveDofManager(2)->giveCoordinates());
+					const double l = 1.0*x1.distance(x2);
+
+					// Use the octree to get all elements that have
+					// at least one Gauss point in a certain region around the tip.
+					const double searchRadius = 2.0*l;
+					std :: set< int > elIndices;
+					localizer->giveAllElementsWithIpWithinBox(elIndices, circPoints[pointIndex], searchRadius);
+
+
+					// Loop over the elements and Gauss points obtained.
+					// Evaluate the interpolation.
+					FloatArray sumQiWiVi;
+					double sumWiVi = 0.0;
+					for(std :: set< int >::const_iterator elIt = elIndices.begin(); elIt != elIndices.end(); ++elIt) {
+						int elIndex = *elIt;
+						Element *gpEl = iDomain.giveElement(elIndex);
+						IntegrationRule *iRule = gpEl->giveDefaultIntegrationRulePtr();
+
+						int numGP = iRule->giveNumberOfIntegrationPoints();
+						for(int gpIndex = 0; gpIndex < numGP; gpIndex++) {
+							GaussPoint *gp_i = iRule->getIntegrationPoint(gpIndex);
+
+							////////////////////////////////////////
+							// Compute global gp coordinates
+						    FloatArray N;
+						    FEInterpolation *interp = gpEl->giveInterpolation();
+						    interp->evalN( N, *(gp_i->giveCoordinates()), FEIElementGeometryWrapper(gpEl) );
+
+						    const IntArray &elNodes = gpEl->giveDofManArray();
+
+						    // Compute global coordinates of Gauss point
+						    FloatArray globalCoord;
+						    globalCoord.setValues(2, 0.0, 0.0);
+
+						    for ( int i = 1; i <= gpEl->giveNumberOfDofManagers(); i++ ) {
+						        DofManager *dMan = gpEl->giveDofManager(i);
+						        globalCoord.at(1) += N.at(i) * dMan->giveCoordinate(1);
+						        globalCoord.at(2) += N.at(i) * dMan->giveCoordinate(2);
+						    }
+
+
+							////////////////////////////////////////
+							// Compute weight of kernel function
+
+						    FloatArray tipToGP;
+						    tipToGP.beDifferenceOf(globalCoord, xT);
+						    bool inFrontOfCrack = true;
+						    if( tipToGP.dotProduct(t) < 0.0 ) {
+						    	inFrontOfCrack = false;
+						    }
+
+						    double r = circPoints[pointIndex].distance(globalCoord);
+
+						    if(r < l && inFrontOfCrack) {
+
+						    	double w = ( (l-r)/( pow(2.0*M_PI,1.5)*pow(l,3) ) )*exp( -0.5*pow(r,2)/pow(l,2) );
+
+								// Compute gp volume
+						    	double V = gpEl->computeVolumeAround(gp_i);
+
+								// Get stress
+								StructuralMaterialStatus *ms = dynamic_cast<StructuralMaterialStatus*>(gp_i->giveMaterialStatus() );
+								if(ms == NULL) {
+									OOFEM_ERROR("In PLHoopStressCirc :: propagateInterfaces(): failed to fetch MaterialStatus.\n");
+								}
+
+								FloatArray stressVecGP = ms->giveStressVector();
+
+								if(sumQiWiVi.giveSize() != stressVecGP.giveSize()) {
+									sumQiWiVi.resize( stressVecGP.giveSize() );
+									sumQiWiVi.zero();
+								}
+
+								// Add to numerator
+								sumQiWiVi.add(w*V, stressVecGP);
+
+								// Add to denominator
+								sumWiVi += w*V;
+						    }
+
+
+						}
+
+					}
+
+
+					if( fabs(sumWiVi) > 1.0e-12) {
+						stressVec.beScaled(1.0/sumWiVi, sumQiWiVi);
+					}
+					else {
+						OOFEM_ERROR("In PLHoopStressCirc :: propagateInterfaces: sumWiVi is close to zero.");
+					}
+				}
+				else {
+					// Take stress from closest Gauss point
+					int region = 1;
+					bool useCZGP = false;
+					GaussPoint &gp = *(localizer->giveClosestIP(circPoints[pointIndex], region, useCZGP));
+
+
+					// Compute stresses
+					StructuralMaterialStatus *ms = dynamic_cast<StructuralMaterialStatus*>(gp.giveMaterialStatus() );
+					if(ms == NULL) {
+						OOFEM_ERROR("In PLHoopStressCirc :: propagateInterfaces(): failed to fetch MaterialStatus.\n");
+					}
+
+					stressVec = ms->giveStressVector();
+				}
+
+				FloatMatrix stress(2,2);
+
+				int shearPos = stressVec.giveSize();
+
+				stress.at(1,1) = stressVec.at(1);
+				stress.at(1,2) = stressVec.at(shearPos);
+				stress.at(2,1) = stressVec.at(shearPos);
+				stress.at(2,2) = stressVec.at(2);
+
+
+				// Rotation matrix
+				FloatMatrix rot(2,2);
+				rot.at(1,1) =  cos(angles[pointIndex]);
+				rot.at(1,2) = -sin(angles[pointIndex]);
+				rot.at(2,1) =  sin(angles[pointIndex]);
+				rot.at(2,2) =  cos(angles[pointIndex]);
+
+				FloatArray tRot, nRot;
+				tRot.beProductOf(rot, t);
+				nRot.beProductOf(rot, n);
+
+				FloatMatrix rotTot(2,2);
+				rotTot.setColumn(tRot, 1);
+				rotTot.setColumn(nRot, 2);
+
+
+				FloatMatrix tmp, stressRot;
+
+				tmp.beTProductOf(rotTot, stress);
+				stressRot.beProductOf(tmp, rotTot);
+
+
+				const double sigThetaTheta	= 		stressRot.at(2,2);
+				sigTTArray.push_back(sigThetaTheta);
+
+				const double sigRTheta		=		stressRot.at(1,2);
+				sigRTArray.push_back(sigRTheta);
+			}
+
+			//////////////////////////////
+			// Compute propagation angle
+
+			// Find angles that fulfill sigRT = 0
+			const double stressTol = 1.0e-9;
+			double maxSigTT = 0.0, maxAngle = 0.0;
+			bool foundZeroLevel = false;
+			for(size_t segIndex = 0; segIndex < (circPoints.size()-1); segIndex++) {
+
+				// If the shear stress sigRT changes sign over the segment
+				if( sigRTArray[segIndex]*sigRTArray[segIndex+1] < stressTol ) {
+
+
+					// Compute location of zero level
+					double xi = EnrichmentItem::calcXiZeroLevel(sigRTArray[segIndex], sigRTArray[segIndex+1]);
+
+					double theta 			= 0.5*(1.0-xi)*angles[segIndex] 	+ 0.5*(1.0+xi)*angles[segIndex+1];
+					double sigThetaTheta 	= 0.5*(1.0-xi)*sigTTArray[segIndex] + 0.5*(1.0+xi)*sigTTArray[segIndex+1];
+
+//					printf("Found candidate: theta: %e sigThetaTheta: %e\n", theta, sigThetaTheta);
+
+					if(sigThetaTheta > maxSigTT) {
+						foundZeroLevel = true;
+						maxSigTT = sigThetaTheta;
+						maxAngle = theta;
+					}
+				}
+			}
+
+			if(!foundZeroLevel) {
+				printf("No zero level was found.\n");
+			}
+
+			XFEMDebugTools::WriteArrayToMatlab("sigTTvsAngle.m", angles, sigTTArray);
+			XFEMDebugTools::WriteArrayToMatlab("sigRTvsAngle.m", angles, sigRTArray);
+
+			// Compare with threshold
+			if(maxSigTT > mHoopStressThreshold && foundZeroLevel) {
+
+				// Rotation matrix
+				FloatMatrix rot(2,2);
+				rot.at(1,1) =  cos(maxAngle);
+				rot.at(1,2) = -sin(maxAngle);
+				rot.at(2,1) =  sin(maxAngle);
+				rot.at(2,2) =  cos(maxAngle);
+
+				FloatArray dir;
+				dir.beProductOf(rot, tipInfo[tipIndex].mTangDir);
+
+				// Fill up struct
+			    std :: vector< TipPropagation >tipPropagations;
+			    TipPropagation tipProp;
+			    tipProp.mTipIndex = tipIndex;
+			    tipProp.mPropagationDir = dir;
+			    tipProp.mPropagationLength = mIncrementLength;
+			    tipPropagations.push_back(tipProp);
+
+
+				// Propagate
+			    ioEnrDom.propagateTips(tipPropagations);
+			}
+
+		}
+
+
+    }
+}
+
 } // end namespace oofem

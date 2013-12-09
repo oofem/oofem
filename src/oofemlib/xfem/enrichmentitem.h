@@ -194,7 +194,7 @@ public:
     bool giveElementTipCoord(FloatArray &oCoord, double &oArcPos, int iElIndex, const Triangle &iTri) const;
 
     // Help functions
-    double calcXiZeroLevel(const double &iQ1, const double &iQ2) const;
+    static double calcXiZeroLevel(const double &iQ1, const double &iQ2);
     static void calcPolarCoord(double &oR, double &oTheta, const FloatArray &iOrigin, const FloatArray &iPos, const FloatArray &iN, const FloatArray &iT);
 
     PropagationLaw *givePropagationLaw() { return this->mpPropagationLaw; };
@@ -247,7 +247,9 @@ protected:
 
     bool mLevelSetsNeedUpdate;
 
-    const double mLevelSetTol, mLevelSetTol2;
+    static const double mLevelSetTol = 1.0e-12;
+//    static constexpr double mLevelSetTol = 1.0e-12;
+    const double mLevelSetTol2;
 };
 
 inline bool EnrichmentItem :: isDofManEnriched(const DofManager &iDMan) const

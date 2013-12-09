@@ -66,7 +66,7 @@ EnrichmentItem :: EnrichmentItem(int n, XfemManager *xMan, Domain *aDomain) : FE
     mpPropagationLaw(NULL),
     mPropLawIndex(0),
     mLevelSetsNeedUpdate(true),
-    mLevelSetTol(1.0e-12), mLevelSetTol2(1.0e-12)
+    mLevelSetTol2(1.0e-12)
 {
     this->startOfDofIdPool = -1;
     this->endOfDofIdPool = -1;
@@ -187,6 +187,10 @@ int EnrichmentItem :: instanciateYourself(DataReader *dr)
         OOFEM_ERROR2( "EnrichmentItem::instanciateYourself: unknown enrichment domain (%s)", name.c_str() );
     }
 
+    if( giveDomain()->giveXfemManager()->giveVtkDebug() ) {
+    	mpEnrichmentDomain->setVtkDebug(true);
+    }
+
     mpEnrichmentDomain->initializeFrom(mir);
 
 
@@ -301,7 +305,7 @@ void EnrichmentItem :: updateGeometry()
 void EnrichmentItem :: propagateFronts()
 {
     // Propagate interfaces
-    mpPropagationLaw->propagateInterfaces(* mpEnrichmentDomain);
+    mpPropagationLaw->propagateInterfaces( *giveDomain(), * mpEnrichmentDomain);
 
     updateGeometry();
 }
@@ -510,6 +514,18 @@ void EnrichmentItem :: updateNodeEnrMarker(XfemManager &ixFemMan, const Enrichme
                     const double &gammaS = mLevelSetTangDir [ niGlob - 1 ];
                     const double &gammaE = mLevelSetTangDir [ njGlob - 1 ];
                     double gamma = 0.5 * ( 1.0 - xi ) * gammaS + 0.5 * ( 1.0 + xi ) * gammaE;
+//                    double gamma = gammaS  * gammaE;
+
+					// Compute the exact value of the tangential level set
+					// from the discretized geometry instead of interpolating.
+                    double tangDist = 0.0, arcPos = 0.0;
+                    const FloatArray &posI = *(el->giveDofManager(niLoc)->giveCoordinates());
+                    const FloatArray &posJ = *(el->giveDofManager(njLoc)->giveCoordinates());
+                    FloatArray pos;
+                    pos.add(0.5 * ( 1.0 - xi ), posI);
+                    pos.add(0.5 * ( 1.0 + xi ), posJ);
+                    mpEnrichmentDomain->computeTangentialSignDist(tangDist, pos, arcPos);
+                    gamma = tangDist;
 
                     if ( gamma > 0.0 ) {
                         numEdgeIntersec++;
@@ -701,6 +717,19 @@ void EnrichmentItem :: computeIntersectionPoints(std :: vector< FloatArray > &oI
 
                 double xi = calcXiZeroLevel(phiS, phiE);
                 double gamma = 0.5 * ( 1.0 - xi ) * gammaS + 0.5 * ( 1.0 + xi ) * gammaE;
+
+
+				// Compute the exact value of the tangential level set
+				// from the discretized geometry instead of interpolating.
+                double tangDist = 0.0, arcPos = 0.0;
+                const FloatArray &posI = *(element->giveDofManager(nsLoc)->giveCoordinates());
+                const FloatArray &posJ = *(element->giveDofManager(neLoc)->giveCoordinates());
+                FloatArray pos;
+                pos.add(0.5 * ( 1.0 - xi ), posI);
+                pos.add(0.5 * ( 1.0 + xi ), posJ);
+                mpEnrichmentDomain->computeTangentialSignDist(tangDist, pos, arcPos);
+                gamma = tangDist;
+
 
                 // If we are inside in tangential direction
                 if ( gamma > 0.0 ) {
@@ -990,7 +1019,7 @@ bool EnrichmentItem :: giveElementTipCoord(FloatArray &oCoord, double &oArcPos, 
     return false;
 }
 
-double EnrichmentItem :: calcXiZeroLevel(const double &iQ1, const double &iQ2) const
+double EnrichmentItem :: calcXiZeroLevel(const double &iQ1, const double &iQ2)
 {
     double xi = 0.0;
 

@@ -92,8 +92,6 @@ public:
     /// Computes normal signed distance between this object and a point.
     virtual double computeDistanceTo(const FloatArray *point) { return 0; }
 
-    virtual double computeTangentialSignDist(FloatArray *point) { return 0; }
-
     /// Functions for computing signed distance in normal and tangential direction.
     /// Used by XFEM level set functions.
     virtual void computeNormalSignDist(double &oDist, const FloatArray &iPoint) const = 0;
