@@ -381,54 +381,6 @@ Shell7BaseXFEM :: giveInternalForcesVector(FloatArray &answer, TimeStep *tStep, 
 
 }
 
-#if 0
-void
-Shell7BaseXFEM :: discComputeSectionalForces(FloatArray &answer, TimeStep *tStep, FloatArray &solVec, FloatArray &solVecD, Delamination *dei)
-//
-{
-    int ndofs = Shell7Base :: giveNumberOfDofs();
-    int numberOfLayers = this->layeredCS->giveNumberOfLayers(); 
-    FloatArray f(ndofs), genEps, genEpsD, ftemp, lCoords, sectionalForces;
-    FloatMatrix B;
-    f.zero();
-    std :: vector< double > ef;
-
-    for ( int layer = 1; layer <= numberOfLayers; layer++ ) {
-        IntegrationRule *iRuleL = integrationRulesArray [ layer - 1 ];
-        Material *mat = domain->giveMaterial( this->layeredCS->giveLayerMaterial(layer) );
-
-        for ( int j = 1; j <= iRuleL->giveNumberOfIntegrationPoints(); j++ ) {
-            GaussPoint *gp = iRuleL->getIntegrationPoint(j - 1);
-            lCoords = *gp->giveCoordinates();
-            double levelSet = lCoords.at(3) - dei->giveDelamXiCoord();
-            dei->evaluateEnrFuncAt(ef, lCoords, levelSet);  
-            
-            if ( ef[0] > 0.1 ) {  
-                this->computeBmatrixAt(lCoords, B);
-                this->computeGeneralizedStrainVectorNew(genEps,  solVec,  B);
-                this->computeGeneralizedStrainVectorNew(genEpsD, solVecD, B);
-
-                double zeta = giveGlobalZcoord(gp->giveCoordinate(3));
-                this->computeSectionalForcesAt(sectionalForces, gp, mat, tStep, genEps, genEpsD, zeta);
-
-                // Computation of nodal forces: f = B^t*[N M T Ms Ts]^t
-                ftemp.beTProductOf(B,sectionalForces);
-                double dV = this->computeVolumeAroundLayer(gp, layer);
-                f.add(dV*ef[0]*DISC_DOF_SCALE_FAC, ftemp);            
-            }
-
-        }
-    }
-
-    answer.resize(ndofs); answer.zero();
-    const IntArray &ordering_all = this->giveOrdering(All);
-    answer.assemble(f, ordering_all);
-
-}
-
-#endif
-
-// NEW - with through the thickness crack
 void
 Shell7BaseXFEM :: discComputeSectionalForces(FloatArray &answer, TimeStep *tStep, FloatArray &solVec, FloatArray &solVecD, EnrichmentItem *ei)
 //
@@ -1432,6 +1384,104 @@ Shell7BaseXFEM :: computeSurfaceLoadVectorAt(FloatArray &answer, Load *load,
         return;
     }
 }
+
+
+
+// Shifted N and B matrices
+void
+Shell7BaseXFEM :: computeShiftedBmatrixAt(FloatArray &lcoords, FloatMatrix &answer, int li, int ui)
+{
+    // Returns the  matrix {B} of the receiver, evaluated at aGaussPoint. Such that
+    // B*a = [dxbar_dxi, dwdxi, w, dgamdxi, gam]^T, where a is the vector of unknowns
+ 
+    int ndofs = Shell7Base :: giveNumberOfDofs();
+    int ndofs_xm  = this->giveNumberOfFieldDofs(Midplane);
+    answer.resize(18, ndofs);
+    answer.zero();
+    FloatArray N;
+    FloatMatrix dNdxi;
+    this->fei->evalN( N, lcoords, FEIElementGeometryWrapper(this) );
+    this->fei->evaldNdxi( dNdxi, lcoords, FEIElementGeometryWrapper(this) );
+
+    /*    18   18   6
+     * 6 [B_u   0   0
+     * 6   0   B_w  0
+     * 3   0   N_w  0
+     * 2   0    0  B_gam
+     * 1   0    0  N_gam]
+     */
+    int ndofman = this->giveNumberOfDofManagers();
+
+    // First column
+    for ( int i = 1, j = 0; i <= ndofman; i++, j += 3 ) {
+        answer.at(1, 1 + j) = dNdxi.at(i, 1);
+        answer.at(2, 2 + j) = dNdxi.at(i, 1);
+        answer.at(3, 3 + j) = dNdxi.at(i, 1);
+        answer.at(4, 1 + j) = dNdxi.at(i, 2);
+        answer.at(5, 2 + j) = dNdxi.at(i, 2);
+        answer.at(6, 3 + j) = dNdxi.at(i, 2);
+    }
+
+    // Second column
+    for ( int i = 1, j = 0; i <= ndofman; i++, j += 3 ) {
+        answer.at(7, ndofs_xm + 1 + j) = dNdxi.at(i, 1);
+        answer.at(8, ndofs_xm + 2 + j) = dNdxi.at(i, 1);
+        answer.at(9, ndofs_xm + 3 + j) = dNdxi.at(i, 1);
+        answer.at(10, ndofs_xm + 1 + j) = dNdxi.at(i, 2);
+        answer.at(11, ndofs_xm + 2 + j) = dNdxi.at(i, 2);
+        answer.at(12, ndofs_xm + 3 + j) = dNdxi.at(i, 2);
+        answer.at(13, ndofs_xm + 1 + j) = N.at(i);
+        answer.at(14, ndofs_xm + 2 + j) = N.at(i);
+        answer.at(15, ndofs_xm + 3 + j) = N.at(i);
+    }
+
+    // Third column
+    for ( int i = 1, j = 0; i <= ndofman; i++, j += 1 ) {
+        answer.at(16, ndofs_xm * 2 + 1 + j) = dNdxi.at(i, 1);
+        answer.at(17, ndofs_xm * 2 + 1 + j) = dNdxi.at(i, 2);
+        answer.at(18, ndofs_xm * 2 + 1 + j) = N.at(i);
+    }
+}
+
+
+void
+Shell7BaseXFEM :: computeShiftedNmatrixAt(const FloatArray &iLocCoord, FloatMatrix &answer)
+{
+    // Returns the displacement interpolation matrix {N} of the receiver,
+    // evaluated at aGaussPoint.
+
+    int ndofs = Shell7Base :: giveNumberOfDofs();
+    int ndofs_xm  = this->giveNumberOfFieldDofs(Midplane);
+    answer.resize(7, ndofs);
+    answer.zero();
+    FloatArray N;
+    this->fei->evalN( N, iLocCoord, FEIElementGeometryWrapper(this) );
+    //N.printYourself();
+    //lcoords.printYourself();
+    /*   nno*3 nno*3 nno
+     * 3 [N_x   0    0
+     * 3   0   N_m   0
+     * 1   0    0  N_gmm ]
+     */
+    for ( int i = 1, j = 0; i <= this->giveNumberOfDofManagers(); i++, j += 3 ) {
+        answer.at(1, 1 + j) = N.at(i);
+        answer.at(2, 2 + j) = N.at(i);
+        answer.at(3, 3 + j) = N.at(i);
+        answer.at(4, ndofs_xm + 1 + j) = N.at(i);
+        answer.at(5, ndofs_xm + 2 + j) = N.at(i);
+        answer.at(6, ndofs_xm + 3 + j) = N.at(i);
+        answer.at(7, ndofs_xm * 2 + i) = N.at(i);
+    }
+}
+
+
+
+
+
+
+
+
+
 
 
 

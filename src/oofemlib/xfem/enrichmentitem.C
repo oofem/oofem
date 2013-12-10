@@ -493,8 +493,8 @@ void EnrichmentItem :: updateNodeEnrMarker(XfemManager &ixFemMan, const Enrichme
 
         if ( minPhi * maxPhi < mLevelSetTol ) { // If the level set function changes sign within the element.
             // Count the number of element edges intersected by the interface
-            //int numEdges = nElNodes; // TODO: Is this assumption always true?
-            int numEdges = 3; // TODO: Is this assumption always true?
+            int numEdges = nElNodes; // TODO: Is this assumption always true?
+            //int numEdges = 3; //JIM
 
             for ( int edgeIndex = 1; edgeIndex <= numEdges; edgeIndex++ ) {
                 IntArray bNodes;
@@ -503,7 +503,7 @@ void EnrichmentItem :: updateNodeEnrMarker(XfemManager &ixFemMan, const Enrichme
                 int niLoc = bNodes.at(1);
                 int niGlob = el->giveNode(niLoc)->giveGlobalNumber();
                 //int njLoc = bNodes.at( bNodes.giveSize() );
-                int njLoc = bNodes.at( 2 ); // always first and second node?
+                int njLoc = bNodes.at( 2 ); // always first and second node? //JIM
                 int njGlob = el->giveNode(njLoc)->giveGlobalNumber();
 
                 if ( mLevelSetNormalDir [ niGlob - 1 ] * mLevelSetNormalDir [ njGlob - 1 ] < mLevelSetTol ) {
@@ -679,8 +679,8 @@ void EnrichmentItem :: computeIntersectionPoints(std :: vector< FloatArray > &oI
         // node values of the level set functions have different signs
 
         //		int numEdges = element->giveNumberOfBoundarySides();
-        //int numEdges = element->giveNumberOfNodes(); // TODO: Is this assumption always true?
-        int numEdges = 3; // TODO: Is this assumption always true?
+        int numEdges = element->giveNumberOfNodes(); // TODO: Is this assumption always true?
+        //int numEdges = 3; //JIM
 
         for ( int edgeIndex = 1; edgeIndex <= numEdges; edgeIndex++ ) {
             IntArray bNodes;
@@ -689,7 +689,7 @@ void EnrichmentItem :: computeIntersectionPoints(std :: vector< FloatArray > &oI
             int nsLoc = bNodes.at(1);
             int nsGlob = element->giveNode(nsLoc)->giveGlobalNumber();
             //int neLoc = bNodes.at( bNodes.giveSize() );
-            int neLoc = bNodes.at( 2 );
+            int neLoc = bNodes.at( 2 ); //JIM
             int neGlob = element->giveNode(neLoc)->giveGlobalNumber();
 
 

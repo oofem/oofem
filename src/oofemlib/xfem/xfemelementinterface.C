@@ -724,9 +724,9 @@ void XfemElementInterface :: XfemElementInterface_prepareNodesForDelaunay(std ::
         oIntersection = true;
 
 
-        oPointPartitions.resize(0);
-        oIntersection = true;
-        false;
+        //oPointPartitions.resize(0);
+        //oIntersection = true;
+        //false;
         return;
     }
 

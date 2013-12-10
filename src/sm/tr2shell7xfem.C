@@ -166,31 +166,31 @@ bool Tr2Shell7XFEM :: updateIntegrationRule()
         int numEI = xMan->giveNumberOfEnrichmentItems();
         for ( int eiIndex = 1; eiIndex <= numEI; eiIndex++ ) {
             EnrichmentItem *ei = xMan->giveEnrichmentItem(eiIndex);
+            if ( dynamic_cast< Crack*> (ei) ) {
 
+                // Get the points describing each subdivision of the element
+                double startXi, endXi;
+                bool intersection = false;
+                this->XfemElementInterface_prepareNodesForDelaunay(pointPartitions, startXi, endXi, eiIndex, intersection);
 
-            // Get the points describing each subdivision of the element
-            double startXi, endXi;
-            bool intersection = false;
-            this->XfemElementInterface_prepareNodesForDelaunay(pointPartitions, startXi, endXi, eiIndex, intersection);
+                if ( intersection ) {
+                    // Use XfemElementInterface_partitionElement to subdivide the element
+                    for ( int i = 0; i < int( pointPartitions.size() ); i++ ) {
+                        // Triangulate the subdivisions
+                        this->XfemElementInterface_partitionElement(allTri, pointPartitions [ i ]);
+                    }
 
-            if ( intersection ) {
-                // Use XfemElementInterface_partitionElement to subdivide the element
-                for ( int i = 0; i < int( pointPartitions.size() ); i++ ) {
-                    // Triangulate the subdivisions
-                    this->XfemElementInterface_partitionElement(allTri, pointPartitions [ i ]);
+                    partitionSucceeded = true;
                 }
-
-                partitionSucceeded = true;
-            }
             
 
-            // For debugging only
-            EDCrack *edCrack =  dynamic_cast< EDCrack* > ( ei->giveEnrichmentDomain() );
-            PolygonLine *pl = dynamic_cast< PolygonLine * >( edCrack->bg );
-            if ( pl != NULL ) {
-                pl->printVTK();
+                // For debugging only
+                EDCrack *edCrack =  dynamic_cast< EDCrack* > ( ei->giveEnrichmentDomain() );
+                PolygonLine *pl = dynamic_cast< PolygonLine * >( edCrack->bg );
+                if ( pl != NULL ) {
+                    pl->printVTK();
+                }
             }
-
         }
 
         ////////////////////////////////////////
