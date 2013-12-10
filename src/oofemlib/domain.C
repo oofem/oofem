@@ -661,7 +661,7 @@ void Domain :: setLoadTimeFunction(int i, LoadTimeFunction *obj) { loadTimeFunct
 void Domain :: setRandomFieldGenerator(int i, RandomFieldGenerator *obj) { randomFieldGeneratorList->put(i, obj); }
 void Domain :: setSet(int i, Set *obj) { setList->put(i, obj); }
 
-void Domain :: clearBoundaryConditions() { bcList->clear(true); };
+void Domain :: clearBoundaryConditions() { bcList->clear(true); }
 
 int
 Domain :: instanciateYourself(DataReader *dr)
@@ -1063,7 +1063,8 @@ Domain :: instanciateYourself(DataReader *dr)
 
 #  ifdef VERBOSE
     if ( nset ) {
-        VERBOSE_PRINT0("Instanciated sets ", nset)
+        VERBOSE_PRINT0("Instanciated sets ", nset);
+    }
 #  endif
 
     if ( nxfemman ) {
@@ -1552,7 +1553,6 @@ Domain :: createDofs()
     if ( xfemManager ) {
         xfemManager->createEnrichedDofs();
     }
-}
 }
 
 
