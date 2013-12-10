@@ -121,16 +121,19 @@ set (sm_material
     latticematstatus.C
     latticedamage2d.C
     dustmat.C
-    lsmastermat.C
-	lsmastermatgrad.C
+    lsmastermat.C lsmastermatgrad.C
     intmatbilinczfagerstrom.C
 	intmatbilinczjansson.C
     intmatbilinearcz.C
 	intmatbilinczelastic.C
+<<<<<<< HEAD
+    intmatbilinczfagerstromrate.C
+	)
+=======
     coupledfieldselement.C
     phasefieldelement.C
-	intmatbilinczfagerstromrate.C
-	)
+    )
+>>>>>>> origin/master
 
 set (sm_error
     huertaerrorestimator.C
