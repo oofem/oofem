@@ -162,7 +162,7 @@ public:
     virtual void computeStressIndependentStrainVector(FloatArray &answer, GaussPoint *gp, TimeStep *stepN, ValueModeType mode);
 
 
-private:
+protected:
     int materialNumber;   // material number
     int czMaterialNumber; // cohesive zone material number
 };

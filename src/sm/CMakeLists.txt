@@ -52,6 +52,7 @@ set (sm_crosssection
     layeredcrosssection.C
     fiberedcs.C
     structuralinterfacecrosssection.C
+    variablecrosssection.C
     )
 
 set (sm_emodel
