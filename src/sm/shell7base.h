@@ -80,7 +80,7 @@ public:
     virtual Element *ZZNodalRecoveryMI_giveElement() { return this; }
     //void evalInitialCovarBaseVectorsAt(GaussPoint *gp, FloatMatrix &Gcov);
     void evalInitialCovarBaseVectorsAt(FloatArray &lCoords, FloatMatrix &Gcov);
-
+    
 protected:
     virtual Interface *giveInterface(InterfaceType it);
     IntegrationRule **specialIntegrationRulesArray;

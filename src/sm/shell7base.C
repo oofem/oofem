@@ -127,6 +127,10 @@ Shell7Base :: computeGlobalCoordinates(FloatArray &answer, const FloatArray &lco
 {
     // should it return coord in reference or updated config?
     //@todo move VTK method into this
+    int layer = 1;
+    FloatArray localCoords = lcoords;
+    vtkEvalInitialGlobalCoordinateAt(localCoords, layer, answer);
+
     return 1;
 }
 
@@ -2005,7 +2009,6 @@ Shell7Base :: giveUpdatedSolutionVector(FloatArray &answer, TimeStep *tStep)
     IntArray dofIdArray;
     Shell7Base :: giveDofManDofIDMask(dummy, EID_MomentumBalance, dofIdArray);
     this->computeVectorOfDofIDs(dofIdArray, VM_Total, tStep, temp);
-    
     answer.assemble( temp, this->giveOrdering(AllInv) );
 }
 
@@ -2488,7 +2491,7 @@ Shell7Base :: giveCompositeExportData(VTKPiece &vtkPiece, IntArray &primaryVarsT
     for ( int fieldNum = 1; fieldNum <= internalVarsToExport.giveSize(); fieldNum++ ) {
         InternalStateType type = ( InternalStateType ) internalVarsToExport.at(fieldNum);
         nodeNum = 1;
-        this->recoverShearStress(tStep);
+        //this->recoverShearStress(tStep);
         for ( int layer = 1; layer <= numCells; layer++ ) {            
             recoverValuesFromIP(values, layer, type, tStep);        
             for ( int j = 1; j <= numCellNodes; j++ ) {
@@ -2624,10 +2627,6 @@ Shell7Base :: recoverShearStress(TimeStep *tStep)
 
     }
 
-    //printf("Shear force from continuum stress [N/M] \n");
-    //Tcon.printYourself();
-    //printf("Shear force from recovered stress [N/M] \n");
-    //Trec.printYourself();
 }
 
 

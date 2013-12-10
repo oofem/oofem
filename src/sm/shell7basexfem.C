@@ -46,7 +46,9 @@
 
 namespace oofem {
 
-    const double DISC_DOF_SCALE_FAC = 1.0e-3;
+#define _NEW_CODE
+
+    const double DISC_DOF_SCALE_FAC = 1.0e0;
 
 Shell7BaseXFEM :: Shell7BaseXFEM(int n, Domain *aDomain) : Shell7Base(n, aDomain), XfemElementInterface(this) 
 {
@@ -227,6 +229,13 @@ Shell7BaseXFEM :: evalCovarBaseVectorsAt(FloatArray &lCoords, FloatMatrix &gcov,
         EnrichmentItem *ei = this->xMan->giveEnrichmentItem(i);
 
         if ( ei->isElementEnriched(this) ) {
+
+#if 1 // NEW
+            computeDiscGeneralizedStrainVector(dGenEps, lCoords, ei, tStep); 
+            Shell7Base :: evalCovarBaseVectorsAt(lCoords, gcovd, dGenEps);
+            gcov.add(gcovd); 
+            
+#else // OLD
             double levelSet = this->evaluateLevelSet(lCoords, ei);
             ei->evaluateEnrFuncAt(ef, lCoords, levelSet);  
             
@@ -235,6 +244,7 @@ Shell7BaseXFEM :: evalCovarBaseVectorsAt(FloatArray &lCoords, FloatMatrix &gcov,
                 Shell7Base :: evalCovarBaseVectorsAt(lCoords, gcovd, dGenEps);
                 gcov.add(ef[0],gcovd); 
             }
+#endif
         }
     }
 }
@@ -248,7 +258,11 @@ Shell7BaseXFEM :: computeDiscGeneralizedStrainVector(FloatArray &answer, FloatAr
     ei->giveEIDofIdArray(eiDofIdArray); 
     this->giveDisSolutionVector(solVecD, eiDofIdArray, tStep);  
     FloatMatrix B;
-    Shell7Base :: computeBmatrixAt(lCoords, B, 0, 0);
+    #if 1 // NEW
+        this->computeEnrichedBmatrixAt(lCoords, B, ei);
+    #else // OLD
+        Shell7Base :: computeBmatrixAt(lCoords, B, 0, 0);
+    #endif
     Shell7Base :: computeGeneralizedStrainVectorNew(answer, solVecD, B);
 }
 
@@ -378,57 +392,9 @@ Shell7BaseXFEM :: giveInternalForcesVector(FloatArray &answer, TimeStep *tStep, 
             }
         }
     }
-    
-}
-
-#if 0
-void
-Shell7BaseXFEM :: discComputeSectionalForces(FloatArray &answer, TimeStep *tStep, FloatArray &solVec, FloatArray &solVecD, Delamination *dei)
-//
-{
-    int ndofs = Shell7Base :: giveNumberOfDofs();
-    int numberOfLayers = this->layeredCS->giveNumberOfLayers(); 
-    FloatArray f(ndofs), genEps, genEpsD, ftemp, lCoords, sectionalForces;
-    FloatMatrix B;
-    f.zero();
-    std :: vector< double > ef;
-
-    for ( int layer = 1; layer <= numberOfLayers; layer++ ) {
-        IntegrationRule *iRuleL = integrationRulesArray [ layer - 1 ];
-        Material *mat = domain->giveMaterial( this->layeredCS->giveLayerMaterial(layer) );
-
-        for ( int j = 1; j <= iRuleL->giveNumberOfIntegrationPoints(); j++ ) {
-            GaussPoint *gp = iRuleL->getIntegrationPoint(j - 1);
-            lCoords = *gp->giveCoordinates();
-            double levelSet = lCoords.at(3) - dei->giveDelamXiCoord();
-            dei->evaluateEnrFuncAt(ef, lCoords, levelSet);  
-            
-            if ( ef[0] > 0.1 ) {  
-                this->computeBmatrixAt(lCoords, B);
-                this->computeGeneralizedStrainVectorNew(genEps,  solVec,  B);
-                this->computeGeneralizedStrainVectorNew(genEpsD, solVecD, B);
-
-                double zeta = giveGlobalZcoord(gp->giveCoordinate(3));
-                this->computeSectionalForcesAt(sectionalForces, gp, mat, tStep, genEps, genEpsD, zeta);
-
-                // Computation of nodal forces: f = B^t*[N M T Ms Ts]^t
-                ftemp.beTProductOf(B,sectionalForces);
-                double dV = this->computeVolumeAroundLayer(gp, layer);
-                f.add(dV*ef[0]*DISC_DOF_SCALE_FAC, ftemp);            
-            }
-
-        }
-    }
-
-    answer.resize(ndofs); answer.zero();
-    const IntArray &ordering_all = this->giveOrdering(All);
-    answer.assemble(f, ordering_all);
 
 }
 
-#endif
-
-// NEW - with through the thickness crack
 void
 Shell7BaseXFEM :: discComputeSectionalForces(FloatArray &answer, TimeStep *tStep, FloatArray &solVec, FloatArray &solVecD, EnrichmentItem *ei)
 //
@@ -448,8 +414,24 @@ Shell7BaseXFEM :: discComputeSectionalForces(FloatArray &answer, TimeStep *tStep
             lCoords = *gp->giveCoordinates();           
             double levelSet = this->evaluateLevelSet(lCoords, ei);
             ei->evaluateEnrFuncAt(ef, lCoords, levelSet);
-            //printf("ef = %e \n", ef[0]);
 
+#ifdef _NEW_CODE
+            
+            this->computeBmatrixAt(lCoords, B);
+            FloatMatrix BEnr;
+            this->computeEnrichedBmatrixAt(lCoords, BEnr, ei);
+            this->computeGeneralizedStrainVectorNew(genEps,  solVec,  B);
+            this->computeGeneralizedStrainVectorNew(genEpsD, solVecD, BEnr);
+
+            double zeta = giveGlobalZcoord(gp->giveCoordinate(3));
+            this->computeSectionalForcesAt(sectionalForces, gp, mat, tStep, genEps, genEpsD, zeta);
+
+            // Computation of nodal forces: f = B^t*[N M T Ms Ts]^t
+            ftemp.beTProductOf( BEnr, sectionalForces );
+            double dV = this->computeVolumeAroundLayer(gp, layer);
+            f.add( dV, ftemp );            
+            
+#else 
             if ( ef[0] > 0.1 ) {  
                 this->computeBmatrixAt(lCoords, B);
                 this->computeGeneralizedStrainVectorNew(genEps,  solVec,  B);
@@ -463,6 +445,7 @@ Shell7BaseXFEM :: discComputeSectionalForces(FloatArray &answer, TimeStep *tStep
                 double dV = this->computeVolumeAroundLayer(gp, layer);
                 f.add(dV*ef[0]*DISC_DOF_SCALE_FAC, ftemp);            
             }
+#endif
 
         }
     }
@@ -485,6 +468,8 @@ Shell7BaseXFEM :: evaluateLevelSet(const FloatArray &lCoords, EnrichmentItem *ei
         const IntArray &elNodes = this->giveDofManArray();
         this->fei->evalN( N, lCoords, FEIElementGeometryWrapper(this) );
         ei->interpLevelSet(levelSet, N, elNodes);
+    } else {
+        OOFEM_ERROR1("Shell7BaseXFEm error in evaluation of levelset");
     }          
     return levelSet;
 }
@@ -681,7 +666,7 @@ Shell7BaseXFEM :: computeCohesiveTangentAt(FloatMatrix &answer, TimeStep *tStep,
 
 
 //---------------------------------------------
-// Optimized version
+// Old version for delamination only
 void
 Shell7BaseXFEM :: computeStiffnessMatrixOLD(FloatMatrix &answer, MatResponseMode rMode, TimeStep *tStep)
 {
@@ -850,6 +835,174 @@ Shell7BaseXFEM :: computeStiffnessMatrixOLD(FloatMatrix &answer, MatResponseMode
 
 
 
+// for through the thickness crack
+#ifdef _NEW_CODE
+void
+Shell7BaseXFEM :: computeStiffnessMatrix(FloatMatrix &answer, MatResponseMode rMode, TimeStep *tStep)
+{
+
+    int ndofs = this->giveNumberOfDofs();
+    answer.resize(ndofs, ndofs);
+    answer.zero();
+    
+    int numberOfLayers = this->layeredCS->giveNumberOfLayers();     
+    FloatMatrix tempRed, tempRedT;
+    FloatMatrix KCC, KCD, KDD, Bc;
+    IntArray orderingC, activeDofsC;
+    this->computeOrderingArray(orderingC, activeDofsC, NULL); //
+    std::vector<IntArray> orderingArrays;
+    std::vector<IntArray> activeDofsArrays;
+
+    FloatMatrix A [ 3 ] [ 3 ];
+    FloatArray lCoords, N; FloatArray genEpsC, solVecC;
+    this->giveUpdatedSolutionVector(solVecC, tStep);
+    std :: vector< double > efM, efK;
+
+    for ( int layer = 1; layer <= numberOfLayers; layer++ ) {
+        IntegrationRule *iRule = integrationRulesArray [ layer - 1 ];
+        Material *mat = domain->giveMaterial( this->layeredCS->giveLayerMaterial(layer) );
+
+        for ( int i = 0; i < iRule->giveNumberOfIntegrationPoints(); i++ ) {
+            IntegrationPoint *ip = iRule->getIntegrationPoint(i);
+            lCoords = *ip->giveCoordinates();
+            this->computeBmatrixAt(lCoords, Bc);
+            this->computeGeneralizedStrainVectorNew(genEpsC, solVecC , Bc);
+            StructuralMaterial *material = static_cast< StructuralMaterial* >( domain->giveMaterial( this->layeredCS->giveLayerMaterial(layer) ) );
+            Shell7Base :: computeLinearizedStiffness(ip, material, tStep, A, genEpsC);
+
+            //this->discComputeBulkTangentMatrix(KDD, ip, eiM, eiK, layer, A, tStep);
+            
+            
+
+            // Continuous part K_{c,c}
+            this->discComputeBulkTangentMatrix(KCC, ip, NULL, NULL, layer, A, tStep);
+            answer.assemble(KCC, orderingC, orderingC);
+
+            // Discontinuous part
+            int numEI = this->xMan->giveNumberOfEnrichmentItems();
+            for ( int m = 1; m <= numEI; m++ ) { 
+                EnrichmentItem *eiM = this->xMan->giveEnrichmentItem(m);
+                if ( orderingArrays.size() == 0 ) {
+                    orderingArrays.resize(numEI);
+                    activeDofsArrays.resize(numEI);
+                }
+
+                if ( eiM->isElementEnriched(this) ) {
+                    
+                    if( orderingArrays[m-1].giveSize() == 0 ) {
+                        this->computeOrderingArray( orderingArrays[m-1], activeDofsArrays[m-1], eiM); 
+                    }
+
+                    this->discComputeBulkTangentMatrix(KCD, ip, eiM, NULL, layer, A, tStep);
+                    tempRed.beSubMatrixOf(KCD, activeDofsC, activeDofsArrays[m-1]);
+                    answer.assemble(tempRed, orderingC, orderingArrays[m-1]);
+                    tempRedT.beTranspositionOf(tempRed);
+                    answer.assemble(tempRedT, orderingArrays[m-1], orderingC);
+
+                    // K_{dk,dl}
+                    for ( int k = 1; k <= numEI; k++ ) {
+                        EnrichmentItem *eiK = this->xMan->giveEnrichmentItem(k);
+                        
+                        if ( eiK->isElementEnriched(this) ) {
+                            this->discComputeBulkTangentMatrix(KDD, ip, eiM, eiK, layer, A, tStep);
+                            tempRed.beSubMatrixOf(KDD, activeDofsArrays[m-1], activeDofsArrays[k-1]);
+                            answer.assemble(tempRed, orderingArrays[m-1], orderingArrays[k-1]);
+                        }
+
+                    }
+                }
+            }
+
+        }
+    }
+
+
+    // Cohesive zones
+#if 0
+    FloatMatrix Kcoh;
+    //if ( this->hasCohesiveZone() ) {
+        this->computeCohesiveTangent(Kcoh, tStep);
+        Kcoh.times(DISC_DOF_SCALE_FAC*DISC_DOF_SCALE_FAC);
+        answer.add(Kcoh);
+    //}
+#endif
+
+
+    // Add contribution due to pressure load
+#if 0
+
+    int nLoads = this->boundaryLoadArray.giveSize() / 2;
+
+    for ( int k = 1; k <= nLoads; k++ ) {     // For each pressure load that is applied
+        int load_number = this->boundaryLoadArray.at(2 * k - 1);
+        int iSurf = this->boundaryLoadArray.at(2 * k);         // load_id
+        Load *load = this->domain->giveLoad(load_number);
+        std :: vector< double > efM, efK;
+
+        if ( ConstantPressureLoad* pLoad = dynamic_cast< ConstantPressureLoad * >( load ) ) {
+
+            IntegrationRule *iRule = specialIntegrationRulesArray [ 1 ];
+
+            for ( int i = 0; i < iRule->giveNumberOfIntegrationPoints(); i++ ) {
+                IntegrationPoint *ip = iRule->getIntegrationPoint(i);
+                this->computePressureTangentMatrixDis(KCC, KCD, KDD, ip, load, iSurf, tStep);
+                KCD.times(DISC_DOF_SCALE_FAC);
+                KDD.times(DISC_DOF_SCALE_FAC*DISC_DOF_SCALE_FAC);
+
+                // Continuous part
+                answer.assemble(KCC, orderingC, orderingC);
+
+                // Discontinuous part
+                int numEI = this->xMan->giveNumberOfEnrichmentItems();
+                for ( int m = 1; m <= numEI; m++ ) { 
+                    Delamination *deiM = dynamic_cast< Delamination * >( this->xMan->giveEnrichmentItem(m) );
+
+                    if ( deiM !=NULL && deiM->isElementEnriched(this) ) {
+                        double levelSetM = pLoad->giveLoadOffset() - deiM->giveDelamXiCoord();
+                        deiM->evaluateEnrFuncAt(efM, lCoords, levelSetM); 
+                        
+                        IntArray &orderingJ = orderingArrays[m-1];
+                        IntArray &activeDofsJ = activeDofsArrays[m-1];
+
+                        // con-dis & dis-con
+                        if ( efM[0] > 0.1 ) {                            
+                            tempRed.beSubMatrixOf(KCD, activeDofsC, activeDofsJ);
+                            answer.assemble(tempRed, orderingC, orderingJ);
+                            tempRedT.beTranspositionOf(tempRed);
+                            answer.assemble(tempRedT, orderingJ, orderingC);
+                        }
+
+                        // dis-dis
+                        for ( int k = 1; k <= numEI; k++ ) {
+                            Delamination *deiK = dynamic_cast< Delamination * >( this->xMan->giveEnrichmentItem(k) );
+                            if ( deiK != NULL && deiK->isElementEnriched(this) ) {
+                                double levelSetK = pLoad->giveLoadOffset() - deiK->giveDelamXiCoord();
+                                deiK->evaluateEnrFuncAt(efK, lCoords, levelSetK);   
+                                if ( efM[0] > 0.1 && efK[0] > 0.1 ) {
+                                    IntArray &orderingK = orderingArrays[k-1];
+                                    IntArray &activeDofsK = activeDofsArrays[k-1];
+                                    tempRed.beSubMatrixOf(KDD, activeDofsJ, activeDofsK);
+                                    answer.assemble(tempRed, orderingJ, orderingK);
+                                }
+                            }
+                                
+                        }
+                    }
+                    
+                }
+
+            }
+            
+
+
+        }
+    }
+#endif
+    
+
+}
+
+#else
 
 void
 Shell7BaseXFEM :: computeStiffnessMatrix(FloatMatrix &answer, MatResponseMode rMode, TimeStep *tStep)
@@ -867,7 +1020,6 @@ Shell7BaseXFEM :: computeStiffnessMatrix(FloatMatrix &answer, MatResponseMode rM
     std::vector<IntArray> orderingArrays;
     std::vector<IntArray> activeDofsArrays;
     
-    //new
     FloatArray lCoords, N;
     std :: vector< double > efM, efK;
 
@@ -900,18 +1052,10 @@ Shell7BaseXFEM :: computeStiffnessMatrix(FloatMatrix &answer, MatResponseMode rM
                         this->computeOrderingArray( orderingArrays[m-1], activeDofsArrays[m-1], eiM); 
                     }
 
-                    /*double levelSetM = 0.0;
-                    if ( dynamic_cast< Delamination * >( eiM ) ) {
-                        levelSetM = lCoords.at(3) - dynamic_cast< Delamination * >( eiM )->giveDelamXiCoord();                   
-                    } else if ( dynamic_cast< Crack * >( eiM ) ) {
-                        const IntArray &elNodes = this->giveDofManArray();
-                        this->fei->evalN( N, lCoords, FEIElementGeometryWrapper(this) );
-                        eiM->interpLevelSet(levelSetM, N, elNodes);
-                    }   */
                     double levelSetM = this->evaluateLevelSet(lCoords, eiM);
                     eiM->evaluateEnrFuncAt(efM, lCoords, levelSetM);
 
-
+                    
                     // K_{c,dk} & K_{dk,c}                
                     if ( efM[0] > 0.1 ) {               
                         tempRed.beSubMatrixOf(KCD, activeDofsC, activeDofsArrays[m-1]);
@@ -926,14 +1070,6 @@ Shell7BaseXFEM :: computeStiffnessMatrix(FloatMatrix &answer, MatResponseMode rM
 
                         if ( eiK->isElementEnriched(this) ) {
 
-                            /*double levelSetK = 0.0;
-                            if ( dynamic_cast< Delamination * >( eiK ) ) {
-                                levelSetK = lCoords.at(3) - dynamic_cast< Delamination * >( eiK )->giveDelamXiCoord();                   
-                            } else if ( dynamic_cast< Crack * >( eiK ) ) {
-                                const IntArray &elNodes = this->giveDofManArray();
-                                this->fei->evalN( N, lCoords, FEIElementGeometryWrapper(this) );
-                                eiK->interpLevelSet(levelSetK, N, elNodes);
-                            }   */
                             double levelSetK = this->evaluateLevelSet(lCoords, eiK);
                             eiK->evaluateEnrFuncAt(efK, lCoords, levelSetK);   
                             
@@ -1032,13 +1168,66 @@ Shell7BaseXFEM :: computeStiffnessMatrix(FloatMatrix &answer, MatResponseMode rM
     }
 #endif
     
+
 }
 
+#endif
 
 
+//NEW 
+void
+Shell7BaseXFEM :: discComputeBulkTangentMatrix(FloatMatrix &KdIJ, IntegrationPoint *ip, EnrichmentItem *ei1, EnrichmentItem *ei2, int layer, FloatMatrix A [ 3 ] [ 3 ],  TimeStep *tStep)
+{
 
+    FloatMatrix temp, B1, B2;
+    FloatMatrix lambda1 [ 3 ], lambda2 [ 3 ];
 
+    FloatArray lCoords;
+    lCoords = *ip->giveCoordinates();
+    this->computeEnrichedBmatrixAt(lCoords, B1, ei1);
+    this->computeEnrichedBmatrixAt(lCoords, B2, ei2);
 
+    double zeta = giveGlobalZcoord(ip->giveCoordinate(3));
+    if ( ei1 ) {
+        this->computeLambdaGMatricesDis(lambda1, zeta);
+    } else {
+        FloatArray solVecC, genEpsC;
+        this->giveUpdatedSolutionVector(solVecC, tStep);  
+        this->computeGeneralizedStrainVectorNew(genEpsC, solVecC , B1);
+        this->computeLambdaGMatrices(lambda1, genEpsC, zeta);
+    }
+    
+    if ( ei2 ) {
+        this->computeLambdaGMatricesDis(lambda2, zeta);
+    } else {
+        FloatArray solVecC, genEpsC;
+        this->giveUpdatedSolutionVector(solVecC, tStep);  
+        this->computeGeneralizedStrainVectorNew(genEpsC, solVecC , B2);
+        this->computeLambdaGMatrices(lambda2, genEpsC, zeta);
+    }
+
+    double dV = this->computeVolumeAroundLayer(ip, layer);
+
+    FloatMatrix LDAD(18,18); 
+    LDAD.zero();
+    for ( int j = 0; j < 3; j++ ) {
+        for ( int k = 0; k < 3; k++ ) {
+            this->computeTripleProduct(temp, lambda1 [ j ], A [ j ][ k ], lambda2 [ k ] );
+            LDAD.add(dV,temp);
+        }
+    }
+
+    FloatMatrix KDDtemp;
+    this->computeTripleProduct(KDDtemp, B1, LDAD, B2 );    
+    
+    int ndofs = Shell7Base :: giveNumberOfDofs();
+    KdIJ.resize(ndofs,ndofs);
+    
+    const IntArray &ordering = this->giveOrdering(All);
+    
+    KdIJ.assemble(KDDtemp, ordering, ordering);
+
+}
 
 void
 Shell7BaseXFEM :: discComputeBulkTangentMatrix(FloatMatrix &KCC, FloatMatrix &KCD, FloatMatrix &KDD, IntegrationPoint *ip, Material *mat, int layer, TimeStep *tStep)
@@ -1053,7 +1242,6 @@ Shell7BaseXFEM :: discComputeBulkTangentMatrix(FloatMatrix &KCC, FloatMatrix &KC
     lCoords = *ip->giveCoordinates();
     this->computeBmatrixAt(lCoords, B, 0, 0);
     this->computeGeneralizedStrainVectorNew(genEpsC, solVecC , B);
-
     StructuralMaterial *material = static_cast< StructuralMaterial* >( domain->giveMaterial( this->layeredCS->giveLayerMaterial(layer) ) );
     Shell7Base :: computeLinearizedStiffness(ip, material, tStep, A, genEpsC);
             
@@ -1090,6 +1278,7 @@ Shell7BaseXFEM :: discComputeBulkTangentMatrix(FloatMatrix &KCC, FloatMatrix &KC
     KDD.assemble(KDDtemp, ordering, ordering);
 
 }
+
 
 
 void
@@ -1448,6 +1637,169 @@ Shell7BaseXFEM :: computeSurfaceLoadVectorAt(FloatArray &answer, Load *load,
         return;
     }
 }
+
+
+
+// Shifted N and B matrices
+void
+Shell7BaseXFEM :: computeEnrichedBmatrixAt(FloatArray &lcoords, FloatMatrix &answer, EnrichmentItem *ei)
+{
+    // Returns the enriched and shifted {B} matrix of the receiver, evaluated at gp. Such that
+    // B*a = [dxbar_dxi, dwdxi, w, dgamdxi, gam]^T, where a is the vector of unknowns
+ 
+    if ( ei && dynamic_cast< Crack*>(ei) ) { 
+
+        int ndofs = Shell7Base :: giveNumberOfDofs();
+        int ndofs_xm  = this->giveNumberOfFieldDofs(Midplane);
+        answer.resize(18, ndofs);
+        answer.zero();
+        FloatArray N;
+        FloatMatrix dNdxi;
+        this->fei->evalN( N, lcoords, FEIElementGeometryWrapper(this) );
+        this->fei->evaldNdxi( dNdxi, lcoords, FEIElementGeometryWrapper(this) );
+
+        /*    18   18   6
+         * 6 [B_u   0   0
+         * 6   0   B_w  0
+         * 3   0   N_w  0
+         * 2   0    0  B_gam
+         * 1   0    0  N_gam]
+         */
+
+        // Evaluate enrichment function at point given by lcoords
+        std :: vector< double > efGP;
+        double levelSetGP = this->evaluateLevelSet(lcoords, ei);
+        ei->evaluateEnrFuncAt(efGP, lcoords, levelSetGP);
+
+        int ndofman = this->giveNumberOfDofManagers();
+
+        // First column
+        for ( int i = 1, j = 0; i <= ndofman; i++, j += 3 ) {
+            DofManager *dMan = this->giveDofManager(i);
+            int globalNodeInd = dMan->giveGlobalNumber(); // global number in order to pick levelset value in that node
+            double levelSetNode  = 0.0;
+            ei->evalLevelSetNormalInNode( levelSetNode, globalNodeInd );
+            std :: vector< double >efNode;
+            const FloatArray &nodePos = * ( dMan->giveCoordinates() );
+            ei->evaluateEnrFuncAt(efNode, nodePos, levelSetNode, globalNodeInd);
+            double factor = efGP [ 0 ] - efNode [ 0 ];
+
+
+            answer.at(1, 1 + j) = dNdxi.at(i, 1) * factor;
+            answer.at(2, 2 + j) = dNdxi.at(i, 1) * factor;
+            answer.at(3, 3 + j) = dNdxi.at(i, 1) * factor;
+            answer.at(4, 1 + j) = dNdxi.at(i, 2) * factor;
+            answer.at(5, 2 + j) = dNdxi.at(i, 2) * factor;
+            answer.at(6, 3 + j) = dNdxi.at(i, 2) * factor;
+        }
+
+        // Second column
+        for ( int i = 1, j = 0; i <= ndofman; i++, j += 3 ) {
+            DofManager *dMan = this->giveDofManager(i);
+            int globalNodeInd = dMan->giveGlobalNumber(); // global number in order to pick levelset value in that node
+            double levelSetNode  = 0.0;
+            ei->evalLevelSetNormalInNode( levelSetNode, globalNodeInd );
+            std :: vector< double >efNode;
+            const FloatArray &nodePos = * ( dMan->giveCoordinates() );
+            ei->evaluateEnrFuncAt(efNode, nodePos, levelSetNode, globalNodeInd);
+            double factor = efGP [ 0 ] - efNode [ 0 ];
+
+
+            answer.at(7, ndofs_xm + 1 + j) = dNdxi.at(i, 1) * factor;
+            answer.at(8, ndofs_xm + 2 + j) = dNdxi.at(i, 1) * factor;
+            answer.at(9, ndofs_xm + 3 + j) = dNdxi.at(i, 1) * factor;
+            answer.at(10, ndofs_xm + 1 + j) = dNdxi.at(i, 2) * factor;
+            answer.at(11, ndofs_xm + 2 + j) = dNdxi.at(i, 2) * factor;
+            answer.at(12, ndofs_xm + 3 + j) = dNdxi.at(i, 2) * factor;
+            answer.at(13, ndofs_xm + 1 + j) = N.at(i) * factor;
+            answer.at(14, ndofs_xm + 2 + j) = N.at(i) * factor;
+            answer.at(15, ndofs_xm + 3 + j) = N.at(i) * factor;
+        }
+
+        // Third column
+        for ( int i = 1, j = 0; i <= ndofman; i++, j += 1 ) {
+            DofManager *dMan = this->giveDofManager(i);
+            int globalNodeInd = dMan->giveGlobalNumber(); // global number in order to pick levelset value in that node
+            double levelSetNode  = 0.0;
+            ei->evalLevelSetNormalInNode( levelSetNode, globalNodeInd );
+            std :: vector< double >efNode;
+            const FloatArray &nodePos = * ( dMan->giveCoordinates() );
+            ei->evaluateEnrFuncAt(efNode, nodePos, levelSetNode, globalNodeInd);
+            double factor = efGP [ 0 ] - efNode [ 0 ];
+
+
+            answer.at(16, ndofs_xm * 2 + 1 + j) = dNdxi.at(i, 1) * factor;
+            answer.at(17, ndofs_xm * 2 + 1 + j) = dNdxi.at(i, 2) * factor;
+            answer.at(18, ndofs_xm * 2 + 1 + j) = N.at(i) * factor;
+        }
+
+    } else if ( ei && dynamic_cast< Delamination*>(ei) ){
+        Shell7Base :: computeBmatrixAt(lcoords, answer);
+        std :: vector< double > efGP;
+        double levelSetGP = this->evaluateLevelSet(lcoords, ei);
+        ei->evaluateEnrFuncAt(efGP, lcoords, levelSetGP);
+        if ( efGP[0] > 0.1 ) {
+            answer.times( efGP[0] );
+        }
+    } else {
+        Shell7Base :: computeBmatrixAt(lcoords, answer);
+    }
+}
+
+
+void
+Shell7BaseXFEM :: computeEnrichedNmatrixAt(const FloatArray &lcoords, FloatMatrix &answer, EnrichmentItem *ei)
+{
+    // Returns the displacement interpolation matrix {N} of the receiver,
+    // evaluated at aGaussPoint.
+
+    int ndofs = Shell7Base :: giveNumberOfDofs();
+    int ndofs_xm  = this->giveNumberOfFieldDofs(Midplane);
+    answer.resize(7, ndofs);
+    answer.zero();
+    FloatArray N;
+    this->fei->evalN( N, lcoords, FEIElementGeometryWrapper(this) );
+    //N.printYourself();
+    //lcoords.printYourself();
+    /*   nno*3 nno*3 nno
+     * 3 [N_x   0    0
+     * 3   0   N_m   0
+     * 1   0    0  N_gmm ]
+     */
+
+    if ( ei && dynamic_cast< Crack*>(ei) ) { 
+
+        for ( int i = 1, j = 0; i <= this->giveNumberOfDofManagers(); i++, j += 3 ) {
+            answer.at(1, 1 + j) = N.at(i);
+            answer.at(2, 2 + j) = N.at(i);
+            answer.at(3, 3 + j) = N.at(i);
+            answer.at(4, ndofs_xm + 1 + j) = N.at(i);
+            answer.at(5, ndofs_xm + 2 + j) = N.at(i);
+            answer.at(6, ndofs_xm + 3 + j) = N.at(i);
+            answer.at(7, ndofs_xm * 2 + i) = N.at(i);
+        }
+
+    } else if ( ei && dynamic_cast< Delamination*>(ei) ) {
+        Shell7Base :: computeNmatrixAt(lcoords, answer);
+        std :: vector< double > efGP;
+        double levelSetGP = this->evaluateLevelSet(lcoords, ei);
+        ei->evaluateEnrFuncAt(efGP, lcoords, levelSetGP);
+        if ( efGP[0] > 0.1 ) {
+            answer.times( efGP[0] );
+        }
+    } else {
+
+    }
+}
+
+
+
+
+
+
+
+
+
 
 
 
