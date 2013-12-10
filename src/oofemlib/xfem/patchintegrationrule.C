@@ -267,13 +267,20 @@ PatchIntegrationRule :: SetUpPointsOnWedge(int nPointsTri, int nPointsDepth, Mat
                 double oldWeight = weightsTri.at(k) * weightsDepth.at(m);
                 double newWeight = 2.0 * refElArea * oldWeight * triangle.getArea() / parentArea; 
 
-                GaussPoint * &gp = this->gaussPointArray [ pointsPassed ];
-                gp = new GaussPoint(this, count + 1, &local, newWeight, mode);
+
+                FloatArray *coord = new FloatArray(3);
+                coord->at(1) = local.at(1);
+                coord->at(2) = local.at(2);
+                coord->at(3) = local.at(3);
+
+                GaussPoint *gp = new GaussPoint(this, count + 1, coord, newWeight, mode);
+
+                //GaussPoint *gp = new GaussPoint(this, count + 1, &local, newWeight, mode);
                 this->gaussPointArray [ count ] = gp;
                 count++;
 
                 // Store new global gp coord for vtk output
-                this->elem->computeGlobalCoordinates(global, local);
+                this->elem->computeGlobalCoordinates(global, *gp->giveCoordinates() );
                 newGPCoord.push_back(global);
             }
         }

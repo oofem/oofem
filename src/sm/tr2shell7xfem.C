@@ -210,7 +210,7 @@ bool Tr2Shell7XFEM :: updateIntegrationRule()
         }
         
         // Create integrationrule based on a 'wedge patch'
-        int nPointsTri  = 6;   // points in the plane
+        int nPointsTri  = 3;   // points in the plane
         int nPointsEdge = 2;   // edge integration
 
         if ( allTri.size() == 0 ) { // No subdivision, return and create iRule as normal
@@ -223,12 +223,12 @@ bool Tr2Shell7XFEM :: updateIntegrationRule()
 
             integrationRulesArray = new IntegrationRule * [ numberOfLayers ];
             for ( int i = 0; i < numberOfLayers; i++ ) {
-                integrationRulesArray [ i ] = new PatchIntegrationRule(ruleNum, this, allTri);
+                integrationRulesArray [ i ] = new PatchIntegrationRule(i+1, this, allTri);
                 integrationRulesArray [ i ]->SetUpPointsOnWedge(nPointsTri, numPointsThickness, _3dMat);
-                this->layeredCS->setupLayeredIntegrationRule(integrationRulesArray, this, nPointsTri);
-
+                //this->layeredCS->setupLayeredIntegrationRule(integrationRulesArray, this, nPointsTri);
+                this->layeredCS->mapLayerGpCoordsToShellCoords(integrationRulesArray);
             }
-            this->layeredCS->mapLayerGpCoordsToShellCoords(integrationRulesArray);
+            
             
         }
     }
