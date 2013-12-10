@@ -467,7 +467,7 @@ void EnrichmentItem :: updateNodeEnrMarker(XfemManager &ixFemMan, const Enrichme
     for ( int elIndex = 1; elIndex <= nEl; elIndex++ ) {
         Element *el = d->giveElement(elIndex);
         int nElNodes = el->giveNumberOfNodes();
-
+        
         double minSignPhi  = 1, maxSignPhi         = -1;
         double minPhi = std :: numeric_limits< double > :: max();
         double maxPhi = std :: numeric_limits< double > :: min();
@@ -493,8 +493,8 @@ void EnrichmentItem :: updateNodeEnrMarker(XfemManager &ixFemMan, const Enrichme
 
         if ( minPhi * maxPhi < mLevelSetTol ) { // If the level set function changes sign within the element.
             // Count the number of element edges intersected by the interface
-            int numEdges = nElNodes; // TODO: Is this assumption always true?
-            //int numEdges = 3; //JIM
+            //int numEdges = nElNodes; // TODO: Is this assumption always true?
+            int numEdges = el->giveInterpolation()->giveNumberOfEdges(); //JIM
 
             for ( int edgeIndex = 1; edgeIndex <= numEdges; edgeIndex++ ) {
                 IntArray bNodes;
@@ -503,7 +503,7 @@ void EnrichmentItem :: updateNodeEnrMarker(XfemManager &ixFemMan, const Enrichme
                 int niLoc = bNodes.at(1);
                 int niGlob = el->giveNode(niLoc)->giveGlobalNumber();
                 //int njLoc = bNodes.at( bNodes.giveSize() );
-                int njLoc = bNodes.at( 2 ); // always first and second node? //JIM
+                int njLoc = bNodes.at( 2 ); // always first and second node if 'higher order' nodes are placed in between  //JIM
                 int njGlob = el->giveNode(njLoc)->giveGlobalNumber();
 
                 if ( mLevelSetNormalDir [ niGlob - 1 ] * mLevelSetNormalDir [ njGlob - 1 ] < mLevelSetTol ) {
@@ -597,7 +597,7 @@ void EnrichmentItem :: updateNodeEnrMarker(XfemManager &ixFemMan, const DofManLi
     // Set level set fields to zero
     mLevelSetNormalDir.resize(nNodes, 0.0);
     mLevelSetTangDir.resize(nNodes, 0.0);
-    mLevelSetSurfaceNormalDir.resize(nNodes, 0.0); // New /JB
+    mLevelSetSurfaceNormalDir.resize(nNodes, 0.0); // New /JB ... Remove now? /JB
 }
 
 void EnrichmentItem :: updateNodeEnrMarker(XfemManager &ixFemMan, const WholeDomain &iWholeDomain)
@@ -678,9 +678,8 @@ void EnrichmentItem :: computeIntersectionPoints(std :: vector< FloatArray > &oI
         // Loop over element edges; an edge is intersected if the
         // node values of the level set functions have different signs
 
-        //		int numEdges = element->giveNumberOfBoundarySides();
-        int numEdges = element->giveNumberOfNodes(); // TODO: Is this assumption always true?
-        //int numEdges = 3; //JIM
+        //int numEdges = element->giveNumberOfNodes(); // TODO: Is this assumption always true?
+        int numEdges = element->giveInterpolation()->giveNumberOfEdges(); //JIM
 
         for ( int edgeIndex = 1; edgeIndex <= numEdges; edgeIndex++ ) {
             IntArray bNodes;
