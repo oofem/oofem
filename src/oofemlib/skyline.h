@@ -141,7 +141,7 @@ public:
     virtual void toFloatMatrix(FloatMatrix &answer) const;
     /// Prints receiver to stdout.
     virtual void printYourself() const;
-    virtual void writeToFile(const char* fname) const;
+    virtual void writeToFile(const char *fname) const;
     int giveAllocatedSize() { return nwk; }
 
     virtual SparseMtrxType giveType() const { return SMT_Skyline; }

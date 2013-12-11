@@ -52,7 +52,7 @@ MMALeastSquareProjection :: MMALeastSquareProjection() : MaterialMappingAlgorith
 MMALeastSquareProjection :: ~MMALeastSquareProjection() { }
 
 void
-MMALeastSquareProjection :: __init(Domain *dold, IntArray &type, FloatArray &coords, int region, TimeStep *tStep)
+MMALeastSquareProjection :: __init(Domain *dold, IntArray &type, FloatArray &coords, int region, TimeStep *tStep, bool iCohesiveZoneGP)
 //(Domain* dold, IntArray& varTypes, GaussPoint* gp, TimeStep* tStep)
 {
     GaussPoint *sourceIp;
@@ -285,7 +285,7 @@ MMALeastSquareProjection :: __mapVariable(FloatArray &answer, FloatArray &target
     a.zero();
 
     // determine the value from patch
-    std::list< GaussPoint * > :: iterator pos;
+    std :: list< GaussPoint * > :: iterator pos;
     int size = patchGPList.size();
     if ( size == 1 ) {
         pos = patchGPList.begin();
@@ -294,7 +294,7 @@ MMALeastSquareProjection :: __mapVariable(FloatArray &answer, FloatArray &target
     } else if ( size < neq ) {
         OOFEM_ERROR("MMALeastSquareProjection::mapVariable internal error");
     } else {
-        std::list< GaussPoint * > :: iterator pos;
+        std :: list< GaussPoint * > :: iterator pos;
 
         for ( pos = patchGPList.begin(); pos != patchGPList.end(); ++pos ) {
             srcgp  = * pos;
@@ -367,6 +367,13 @@ MMALeastSquareProjection :: __mapVariable(FloatArray &answer, FloatArray &target
     return 1;
 }
 
+int
+MMALeastSquareProjection :: mapStatus(MaterialStatus &oStatus) const
+{
+    OOFEM_ERROR("ERROR: MMALeastSquareProjection :: mapStatus() is not implemented yet.")
+
+    return 0;
+}
 
 void
 MMALeastSquareProjection :: computePolynomialTerms(FloatArray &P, FloatArray &coords, MMALeastSquareProjectionPatchType type)
@@ -438,6 +445,4 @@ void MMALeastSquareProjection :: giveInputRecord(DynamicInputRecord &input)
         input.setField(this->stateFilter, _IFT_MMALeastSquareProjection_regionfilter);
     }
 }
-
-
 } // end namespace oofem

@@ -127,7 +127,6 @@ public:
 
     // definition
     virtual const char *giveClassName() const { return "MPlasticMaterialStatus"; }
-    virtual classType giveClassID() const { return MPlasticMaterialStatusClass; }
 };
 
 /**
@@ -161,7 +160,6 @@ public:
     virtual int hasNonLinearBehaviour() { return 1; }
     virtual int hasMaterialModeCapability(MaterialMode mode);
     virtual const char *giveClassName() const { return "MPlasticMaterial"; }
-    virtual classType giveClassID() const { return MPlasticMaterialClass; }
 
     /// Returns reference to undamaged (bulk) material.
     LinearElasticMaterial *giveLinearElasticMaterial() { return linearElasticMaterial; }
@@ -178,9 +176,9 @@ public:
                                                TimeStep * atTime);
 
 
-    virtual void giveRealStressVector(FloatArray & answer, GaussPoint *,
-                              const FloatArray &, TimeStep *);
-    
+    virtual void giveRealStressVector(FloatArray &answer, GaussPoint *,
+                                      const FloatArray &, TimeStep *);
+
     virtual void giveRealStressVector_3d(FloatArray &answer, GaussPoint *gp, const FloatArray &reducedE, TimeStep *tStep)
     { this->giveRealStressVector(answer, gp, reducedE, tStep); }
     virtual void giveRealStressVector_PlaneStrain(FloatArray &answer, GaussPoint *gp, const FloatArray &reducedE, TimeStep *tStep)

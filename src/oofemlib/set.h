@@ -39,7 +39,6 @@
 #include "intarray.h"
 
 namespace oofem {
-    
 ///@name Input fields for Set
 //@{
 #define _IFT_Set_Name "set"
@@ -51,7 +50,7 @@ namespace oofem {
 #define _IFT_Set_elementBoundaries "elementboundaries" ///< Interleaved array of element index + boundary number
 #define _IFT_Set_elementEdges "elementedges" ///< Interleaved array of element index + edge number
 //@}
-    
+
 class EntityRenumberingFunction;
 
 /**
@@ -74,13 +73,13 @@ public:
      * @param n Set number.
      * @param d Domain to which component belongs to.
      */
-    Set(int n, Domain *d): FEMComponent(n,d) { }
+    Set(int n, Domain *d) : FEMComponent(n, d) { }
     virtual ~Set() {}
 
     virtual IRResultType initializeFrom(InputRecord *ir);
     virtual void giveInputRecord(DynamicInputRecord &input);
     /**
-     * Returns list of elements within set. 
+     * Returns list of elements within set.
      * @return List of element numbers.
      */
     const IntArray &giveElementList();
@@ -107,9 +106,9 @@ public:
      * @note This is useful in for example, remeshing code, and should rarely be used elsewhere.
      * @return List of node numbers.
      */
-    const IntArray &giveSpecifiedNodeList();    
+    const IntArray &giveSpecifiedNodeList();
     /**
-     * Sets list of elements within set. 
+     * Sets list of elements within set.
      */
     void setElementList(const IntArray &newElements);
     /**
@@ -138,20 +137,19 @@ public:
      * Renumbering of nodes (could change due to load balancing).
      */
     void updateLocalElementNumbering(EntityRenumberingFunctor &f);
-    
+
     virtual contextIOResultType saveContext(DataStream *stream, ContextMode mode, void *obj = NULL);
     virtual contextIOResultType restoreContext(DataStream *stream, ContextMode mode, void *obj = NULL);
-    
-    virtual const char* giveClassName() const { return "Set"; }
+
+    virtual const char *giveClassName() const { return "Set"; }
     virtual const char *giveInputRecordName() const { return _IFT_Set_Name; }
-    
+
 protected:
     /**
      * Converts list ranges to list of individual values + individually specified values.
      */
-    void computeIntArray(IntArray &answer, const IntArray &specified, std::list< Range >ranges);
+    void computeIntArray(IntArray &answer, const IntArray &specified, std :: list< Range >ranges);
 };
-
 }
 
 #endif // set_h

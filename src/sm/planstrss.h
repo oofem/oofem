@@ -44,6 +44,7 @@
 #include "directerrorindicatorrc.h"
 #include "eleminterpmapperinterface.h"
 #include "huertaerrorestimator.h"
+#include "gausspoint.h"
 
 #define _IFT_PlaneStress2d_Name "planestress2d"
 
@@ -71,7 +72,7 @@ public:
 
     virtual double giveCharacteristicLenght(GaussPoint *gp, const FloatArray &normalToCrackPlane);
     virtual double giveCharacteristicSize(GaussPoint *gp, FloatArray &normalToCrackPlane, ElementCharSizeMethod method);
-    virtual double giveParentElSize() const {return 4.0;}
+    virtual double giveParentElSize() const { return 4.0; }
 
     virtual int testElementExtension(ElementExtension ext) { return ( ( ext == Element_EdgeLoadSupport ) ? 1 : 0 ); }
     virtual Interface *giveInterface(InterfaceType it);
@@ -101,7 +102,7 @@ public:
     virtual void HuertaErrorEstimatorI_computeLocalCoords(FloatArray &answer, const FloatArray &coords)
     { computeLocalCoordinates(answer, coords); }
     virtual void HuertaErrorEstimatorI_computeNmatrixAt(GaussPoint *aGaussPoint, FloatMatrix &answer)
-    { computeNmatrixAt(aGaussPoint, answer); }
+    { computeNmatrixAt(* ( aGaussPoint->giveLocalCoordinates() ), answer); }
 
     // HuertaRemeshingCriteriaInterface
     virtual double HuertaRemeshingCriteriaI_giveCharacteristicSize() { return DirectErrorIndicatorRCI_giveCharacteristicSize(); }
@@ -115,17 +116,15 @@ public:
     virtual void EIPrimaryUnknownMI_givePrimaryUnknownVectorDofID(IntArray &answer);
 
 #ifdef __OOFEG
-    void drawRawGeometry(oofegGraphicContext &);
-    void drawDeformedGeometry(oofegGraphicContext &, UnknownType);
+    virtual void drawRawGeometry(oofegGraphicContext &);
+    virtual void drawDeformedGeometry(oofegGraphicContext &, UnknownType);
     virtual void drawScalar(oofegGraphicContext &context);
     virtual void drawSpecial(oofegGraphicContext &);
-    //void drawInternalState(oofegGraphicContext &);
 #endif
 
     // definition & identification
     virtual const char *giveInputRecordName() const { return _IFT_PlaneStress2d_Name; }
     virtual const char *giveClassName() const { return "PlaneStress2d"; }
-    virtual classType giveClassID() const { return PlaneStress2dClass; }
     virtual IRResultType initializeFrom(InputRecord *ir);
     virtual MaterialMode giveMaterialMode() { return _PlaneStress; }
 
@@ -138,7 +137,6 @@ protected:
     int computeLoadLEToLRotationMatrix(FloatMatrix &answer, int iEdge, GaussPoint *gp);
 
     virtual void computeBmatrixAt(GaussPoint *gp, FloatMatrix &answer, int = 1, int = ALL_STRAINS);
-    virtual void computeNmatrixAt(GaussPoint *gp, FloatMatrix &answer);
     virtual void computeBHmatrixAt(GaussPoint *aGaussPoint, FloatMatrix &answer);
     virtual void computeGaussPoints();
 

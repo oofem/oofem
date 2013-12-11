@@ -54,7 +54,6 @@
 //@}
 
 namespace oofem {
-
 /**
  * This class implements associated Material Status to RCSDNLMaterial.
  */
@@ -79,7 +78,6 @@ public:
     // definition
     virtual const char *giveInputRecordName() const { return _IFT_RCSDNLMaterial_Name; }
     virtual const char *giveClassName() const { return "RCSDNLMaterialStatus"; }
-    virtual classType giveClassID() const { return RCSDNLMaterialStatusClass; }
 
     virtual void initTempStatus();
     virtual void updateYourself(TimeStep *);
@@ -122,14 +120,13 @@ public:
 
     // identification and auxiliary functions
     virtual const char *giveClassName() const { return "RCSDNLMaterial"; }
-    virtual classType giveClassID() const { return RCSDNLMaterialClass; }
 
     virtual Interface *giveInterface(InterfaceType t);
 
     virtual IRResultType initializeFrom(InputRecord *ir);
 
-    virtual void giveRealStressVector(FloatArray & answer, GaussPoint *,
-                              const FloatArray &, TimeStep *);
+    virtual void giveRealStressVector(FloatArray &answer, GaussPoint *,
+                                      const FloatArray &, TimeStep *);
 
     /**
      * Implements the service updating local variables in given integration points,

@@ -64,7 +64,6 @@ public:
      */
     virtual void computeValueAt(FloatArray &answer, TimeStep *tStep, FloatArray &coords, ValueModeType mode);
 
-    virtual classType giveClassID() const { return StructuralEigenstrainLoadClass; }
     virtual const char *giveInputRecordName() const { return _IFT_StructuralEigenstrainLoad_Name; }
     virtual const char *giveClassName() const { return "StructuralEigenstrainLoad"; }
     virtual bcValType giveBCValType() const { return EigenstrainBVT; }

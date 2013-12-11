@@ -66,7 +66,6 @@ public:
 
     virtual int giveIPValue(FloatArray &answer, GaussPoint *aGaussPoint, InternalStateType type, TimeStep *atTime);
     virtual const char *giveClassName() const { return "IsotropicMoistureTransferMaterial"; }
-    virtual classType giveClassID() const { return IsotropicMoistureTransferMaterialClass; }
 
     virtual IRResultType initializeFrom(InputRecord *ir);
 };

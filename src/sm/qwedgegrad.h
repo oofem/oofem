@@ -66,7 +66,6 @@ public:
     // definition & identification
     virtual const char *giveInputRecordName() const { return _IFT_QWedgeGrad_Name; }
     virtual const char *giveClassName() const { return "QWedgeGrad"; }
-    virtual classType giveClassID() const { return QWedgeClass; }
     virtual int computeNumberOfDofs() { return 51; }
     virtual MaterialMode giveMaterialMode() { return _3dMat; }
 
@@ -86,4 +85,3 @@ protected:
 };
 }
 #endif // end namespace oofem
-

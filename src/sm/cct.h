@@ -47,7 +47,6 @@
 #define _IFT_CCTPlate_Name "cctplate"
 
 namespace oofem {
-
 /**
  * This class implements an triangular three-node plate CCT finite element.
  * Each node has 3 degrees of freedom.
@@ -70,7 +69,7 @@ public:
     CCTPlate(int n, Domain *d);
     virtual ~CCTPlate() { }
 
-    virtual FEInterpolation *giveInterpolation() const { return &interp_lin; }
+    virtual FEInterpolation *giveInterpolation() const { return & interp_lin; }
     virtual FEInterpolation *giveInterpolation(DofIDItem id) const;
 
     virtual MaterialMode giveMaterialMode()  { return _2dPlate; }
@@ -81,7 +80,11 @@ protected:
     virtual void computeGaussPoints();
     virtual void computeBodyLoadVectorAt(FloatArray &answer, Load *load, TimeStep *tStep, ValueModeType mode);
     virtual void computeBmatrixAt(GaussPoint *gp, FloatMatrix &answer, int = 1, int = ALL_STRAINS);
-    virtual void computeNmatrixAt(GaussPoint *gp, FloatMatrix &answer);
+    virtual void computeNmatrixAt(const FloatArray &iLocCoord, FloatMatrix &answer);
+
+    virtual void computeStressVector(FloatArray &answer, const FloatArray &strain, GaussPoint *gp, TimeStep *tStep);
+    virtual void computeConstitutiveMatrixAt(FloatMatrix &answer, MatResponseMode rMode, GaussPoint *gp, TimeStep *tStep);
+
 
     virtual void giveNodeCoordinates(double &x1, double &x2, double &x3,
                                      double &y1, double &y2, double &y3,
@@ -103,7 +106,6 @@ public:
     // definition & identification
     virtual const char *giveClassName() const { return "CCTPlate"; }
     virtual const char *giveInputRecordName() const { return _IFT_CCTPlate_Name; }
-    virtual classType giveClassID() const { return CCTPlateClass; }
     virtual IRResultType initializeFrom(InputRecord *ir);
 
     virtual int computeNumberOfDofs() { return 9; }
@@ -126,9 +128,9 @@ public:
     virtual Element *ZZNodalRecoveryMI_giveElement() { return this; }
 
     virtual void NodalAveragingRecoveryMI_computeNodalValue(FloatArray &answer, int node,
-                                                    InternalStateType type, TimeStep *tStep);
+                                                            InternalStateType type, TimeStep *tStep);
     virtual void NodalAveragingRecoveryMI_computeSideValue(FloatArray &answer, int side,
-                                                   InternalStateType type, TimeStep *tStep);
+                                                           InternalStateType type, TimeStep *tStep);
 
     virtual void SPRNodalRecoveryMI_giveSPRAssemblyPoints(IntArray &pap);
     virtual void SPRNodalRecoveryMI_giveDofMansDeterminedByPatch(IntArray &answer, int pap);
@@ -143,13 +145,12 @@ public:
 
     // layered cross section support functions
     virtual void computeStrainVectorInLayer(FloatArray &answer, const FloatArray &masterGpStrain,
-                                    GaussPoint *slaveGp, TimeStep *tStep);
+                                            GaussPoint *masterGp, GaussPoint *slaveGp, TimeStep *tStep);
 
 #ifdef __OOFEG
-    void drawRawGeometry(oofegGraphicContext &);
-    void drawDeformedGeometry(oofegGraphicContext &, UnknownType type);
+    virtual void drawRawGeometry(oofegGraphicContext &);
+    virtual void drawDeformedGeometry(oofegGraphicContext &, UnknownType type);
     virtual void drawScalar(oofegGraphicContext &context);
-    //void drawInternalState(oofegGraphicContext&);
 #endif
 };
 } // end namespace oofem

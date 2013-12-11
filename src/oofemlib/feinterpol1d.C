@@ -37,7 +37,6 @@
 #include "gaussintegrationrule.h"
 
 namespace oofem {
-
 void FEInterpolation1d :: boundaryEvalN(FloatArray &answer, int boundary, const FloatArray &lcoords, const FEICellGeometry &cellgeo)
 {
     answer.resize(1);
@@ -62,7 +61,7 @@ double FEInterpolation1d :: boundaryGiveTransformationJacobian(int boundary, con
 
 void FEInterpolation1d :: boundaryLocal2Global(FloatArray &answer, int boundary, const FloatArray &lcoords, const FEICellGeometry &cellgeo)
 {
-    answer = *cellgeo.giveVertexCoordinates(boundary);
+    answer = * cellgeo.giveVertexCoordinates(boundary);
 }
 
 IntegrationRule *FEInterpolation1d :: giveIntegrationRule(int order)
@@ -85,5 +84,4 @@ IntegrationRule *FEInterpolation1d :: giveBoundaryEdgeIntegrationRule(int order,
     OOFEM_ERROR("FEInterpolation1d :: giveBoundaryEdgeIntegrationRule - Not supported by ");
     return NULL;
 }
-
 } // end namespace oofem

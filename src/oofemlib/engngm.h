@@ -42,7 +42,6 @@
 #include "fieldmanager.h"
 #include "timer.h"
 #include "chartype.h"
-#include "classtype.h"
 #include "unknowntype.h"
 #include "varscaletype.h"
 #include "equationid.h"
@@ -92,8 +91,7 @@
 //@}
 
 namespace oofem {
-
-template < class T > class AList;
+template< class T >class AList;
 class Domain;
 class TimeStep;
 class Dof;
@@ -133,7 +131,7 @@ protected:
     FieldManager fieldManager;
 
 public:
-    EngngModelContext(): fieldManager() { }
+    EngngModelContext() : fieldManager() { }
     FieldManager *giveFieldManager() { return & ( this->fieldManager ); }
 };
 
@@ -243,9 +241,9 @@ protected:
     EModelDefaultPrescribedEquationNumbering defaultPrescribedNumberingScheme;
 
     /// Path to output stream.
-    std::string dataOutputFileName;
+    std :: string dataOutputFileName;
     /// String with core output file name
-    std::string coreOutputFileName;
+    std :: string coreOutputFileName;
     /// Output stream.
     FILE *outputStream;
     /// Domain context output mode.
@@ -289,10 +287,10 @@ protected:
     char processor_name [ PROCESSOR_NAME_LENGTH ];
     /// Communicator mode. Determines current strategy used.
     ProblemCommunicatorMode commMode;
-#ifdef __USE_MPI
+ #ifdef __USE_MPI
     /// Communication object for this engineering model.
     MPI_Comm comm;
-#endif
+ #endif
 
     /**@name Load balancing attributes */
     //@{
@@ -362,7 +360,7 @@ public:
      * @param i Domain index.
      * @param ptr Pointer to valid domain instance.
      */
-    void setDomain (int i, Domain *ptr);
+    void setDomain(int i, Domain *ptr, bool iDeallocateOld = true);
     /// Returns number of domains in problem.
     int giveNumberOfDomains() { return ndomains; }
 
@@ -381,13 +379,13 @@ public:
      * Returns base output file name
      * to which extensions, like .out .vtu .osf should be added.
      */
-    std::string giveOutputBaseFileName() { return dataOutputFileName; }
+    std :: string giveOutputBaseFileName() { return dataOutputFileName; }
     /**
      * Sets the base output file name.
      * @see giveOutputBaseFileName
      * @param src New output file name.
      */
-    void letOutputBaseFileNameBe(const std::string &src) { dataOutputFileName = src; }
+    void letOutputBaseFileNameBe(const std :: string &src) { dataOutputFileName = src; }
     /**
      * Returns domain context output mode.
      */
@@ -515,7 +513,7 @@ public:
     virtual double giveUnknownComponent(ValueModeType, TimeStep *, Domain *, Dof *) { return 0.0; }
 
     ///Returns the master engnmodel
-    EngngModel* giveMasterEngngModel(){return this->master;}
+    EngngModel *giveMasterEngngModel() { return this->master; }
 
 #ifdef __PARALLEL_MODE
     /// Returns the communication object of reciever.
@@ -600,7 +598,7 @@ public:
     int unpackPrescribedDofManagers(FloatArray *dest, ProcessCommunicator &processComm);
 
     void initializeCommMaps(bool forceInit = false);
-    
+
     ProblemCommunicator *giveProblemCommunicator(EngngModelCommType t) {
         if ( t == PC_default ) { return communicator; } else if ( t == PC_nonlocal ) { return nonlocCommunicator; } else { return NULL; }
     }
@@ -612,13 +610,13 @@ public:
      */
     virtual int instanciateYourself(DataReader *dr, InputRecord *ir, const char *outFileName, const char *desc);
     /**
-     * Initialization of the receiver state (opening the default output stream, empty domain creation, 
+     * Initialization of the receiver state (opening the default output stream, empty domain creation,
      * initialization of PETSc context, etc)
      * before Initialization form DataReader. Called at the beginning of instanciateYourself.
      * @param dataOutputFileName Name of default output stream
-     * @param ndomains number of receiver domains 
+     * @param ndomains number of receiver domains
      */
-    void Instanciate_init (const char *dataOutputFileName, int ndomains);
+    void Instanciate_init(const char *dataOutputFileName, int ndomains);
     /**
      * Initializes receiver according to object description in input reader.
      * InitString can be imagined as data record in component database
@@ -749,7 +747,7 @@ public:
      * @param errLevel Determines the amount of warning messages if errors are encountered, level 0 no warnings reported.
      */
     int giveContextFile(FILE **contextFile, int stepNumber, int stepVersion,
-                                     ContextFileMode cmode, int errLevel = 1);
+                        ContextFileMode cmode, int errLevel = 1);
     /** Returns true if context file for given step and version is available */
     bool testContextFile(int stepNumber, int stepVersion);
     /**
@@ -841,7 +839,7 @@ public:
     /**
      * Returns UnknownNUmberingScheme related to given EquationID
      */
-    virtual UnknownNumberingScheme& giveUnknownNumberingScheme(EquationID type) {
+    virtual UnknownNumberingScheme &giveUnknownNumberingScheme(EquationID type) {
         return this->defaultNumberingScheme;
     }
 
@@ -894,7 +892,7 @@ public:
      * @param domain Source domain.
      */
     virtual void assemble(SparseMtrx *answer, TimeStep *tStep, EquationID eid,
-            CharType type, const UnknownNumberingScheme &s, Domain *domain);
+                          CharType type, const UnknownNumberingScheme &s, Domain *domain);
     /**
      * Assembles characteristic matrix of required type into given sparse matrix.
      * @param answer assembled matrix
@@ -906,7 +904,7 @@ public:
      * @param domain Source domain.
      */
     virtual void assemble(SparseMtrx *answer, TimeStep *tStep, EquationID eid,
-            CharType type, const UnknownNumberingScheme &r_s, const UnknownNumberingScheme &c_s, Domain *domain);
+                          CharType type, const UnknownNumberingScheme &r_s, const UnknownNumberingScheme &c_s, Domain *domain);
     /**
      * Assembles characteristic vector of required type from dofManagers, element, and active boundary conditions, into given vector.
      * This routine is simple a convenient call to all three subroutines, since this is most likely what any engineering model will want to do.
@@ -927,12 +925,12 @@ public:
     /**
      * Assembles characteristic vector of required type from dofManagers into given vector.
      * @param answer Assembled vector.
-     * @param eid Determines type of equation and corresponding element code numbers.
      * @param mode Mode of unknown (total, incremental, rate of change).
      * @param tStep Time step, when answer is assembled.
      * @param type Characteristic components of type type are requested.
      * @param s Determines the equation numbering scheme.
      * @param domain Domain to assemble from.
+     * @param eNorms Norms for each dofid (optional).
      * @return Sum of element norm (squared) of assembled vector.
      */
     void assembleVectorFromDofManagers(FloatArray &answer, TimeStep *tStep, CharType type, ValueModeType mode,
@@ -947,6 +945,7 @@ public:
      * from elements and assembled using prescribed eqn numbers.
      * @param s Determines the equation numbering scheme.
      * @param domain Domain to assemble from.
+     * @param eNorms Norms for each dofid (optional).
      * @return Sum of element norm (squared) of assembled vector.
      */
     void assembleVectorFromElements(FloatArray &answer, TimeStep *tStep, EquationID eid,
@@ -963,6 +962,7 @@ public:
      * from elements and assembled using prescribed eqn numbers.
      * @param s Determines the equation numbering scheme.
      * @param domain Domain to assemble from.
+     * @param eNorms Norms for each dofid (optional).
      */
     void assembleVectorFromBC(FloatArray &answer, TimeStep *tStep, EquationID eid,
                               CharType type, ValueModeType mode,
@@ -1041,11 +1041,7 @@ public:
 
     // identification
     /// Returns class name of the receiver.
-    virtual const char *giveClassName() const { return "EngngModel"; }
-    /// Returns classType id of receiver.
-    virtual classType giveClassID() const { return EngngModelClass; }
-    /// Returns nonzero if receiver does incremental analysis.
-    virtual int isIncremental() { return 0; }
+    virtual const char *giveClassName() const = 0;
     /// Returns nonzero if nonlocal stiffness option activated.
     virtual int useNonlocalStiffnessOption() { return 0; }
     /// Returns true if receiver in parallel mode
@@ -1142,7 +1138,5 @@ public:
     void warning(const char *file, int line, const char *format, ...) const;
     //@}
 };
-
 } // end namespace oofem
 #endif // engngm_h
-

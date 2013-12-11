@@ -56,7 +56,6 @@
 //@}
 
 namespace oofem {
-
 /**
  * Class for maintaining Gauss point values for CompoDamageMat model.
  * Prefix temp* refers to unequilibrated values, e.g. tempOmega[] is a temporal damage array
@@ -114,7 +113,6 @@ public:
     virtual contextIOResultType restoreContext(DataStream *stream, ContextMode mode, void *obj);
 
     virtual const char *giveClassName() const { return "CompoDamageMatStatus"; }
-    virtual classType giveClassID() const { return CompoDamageMatStatusClass; }
 };
 
 
@@ -145,7 +143,6 @@ public:
     virtual ~CompoDamageMat();
 
     virtual const char *giveClassName() const { return "CompositeDamageMaterial"; }
-    virtual classType giveClassID() const { return CompoDamageMatClass; }
     virtual const char *giveInputRecordName() const { return _IFT_CompoDamageMat_Name; }
 
     virtual IRResultType initializeFrom(InputRecord *ir);
@@ -153,13 +150,13 @@ public:
 
     virtual MaterialStatus *CreateStatus(GaussPoint *gp) const { return new CompoDamageMatStatus(1, domain, gp); }
 
-    virtual void give3dMaterialStiffnessMatrix(FloatMatrix & answer,
-                                       MatResponseMode mmode,
-                                       GaussPoint * gp,
-                                       TimeStep * atTime);
+    virtual void give3dMaterialStiffnessMatrix(FloatMatrix &answer,
+                                               MatResponseMode mmode,
+                                               GaussPoint *gp,
+                                               TimeStep *atTime);
 
-    virtual void giveRealStressVector(FloatArray & answer, GaussPoint *gp,
-                              const FloatArray &, TimeStep *tStep);
+    virtual void giveRealStressVector(FloatArray &answer, GaussPoint *gp,
+                                      const FloatArray &, TimeStep *tStep);
 
     virtual void giveRealStressVector_3d(FloatArray &answer, GaussPoint *gp, const FloatArray &reducedE, TimeStep *tStep)
     { this->giveRealStressVector(answer, gp, reducedE, tStep); }

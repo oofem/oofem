@@ -48,13 +48,12 @@
 
 namespace oofem {
 OOFEMTXTInputRecord :: OOFEMTXTInputRecord() : InputRecord(), tokenizer(), record()
-{
-}
+{}
 
 OOFEMTXTInputRecord :: OOFEMTXTInputRecord(const OOFEMTXTInputRecord &src) : InputRecord(src), tokenizer(),
     record(src.record)
 {
-    tokenizer.tokenizeLine(this->record.c_str());
+    tokenizer.tokenizeLine( this->record.c_str() );
     int ntok = tokenizer.giveNumberOfTokens();
     readFlag.resize(ntok);
     for ( int i = 0; i < ntok; i++ ) {
@@ -65,7 +64,7 @@ OOFEMTXTInputRecord :: OOFEMTXTInputRecord(const OOFEMTXTInputRecord &src) : Inp
 OOFEMTXTInputRecord :: OOFEMTXTInputRecord(const char *source) : InputRecord(), tokenizer(),
     record(source)
 {
-    tokenizer.tokenizeLine(this->record.c_str());
+    tokenizer.tokenizeLine( this->record.c_str() );
     int ntok = tokenizer.giveNumberOfTokens();
     readFlag.resize(ntok);
     for ( int i = 0; i < ntok; i++ ) {
@@ -74,10 +73,10 @@ OOFEMTXTInputRecord :: OOFEMTXTInputRecord(const char *source) : InputRecord(), 
 }
 
 OOFEMTXTInputRecord &
-OOFEMTXTInputRecord :: operator = ( const OOFEMTXTInputRecord & src )
+OOFEMTXTInputRecord :: operator=(const OOFEMTXTInputRecord &src)
 {
     this->record = src.record;
-    tokenizer.tokenizeLine(this->record.c_str());
+    tokenizer.tokenizeLine( this->record.c_str() );
     int ntok = tokenizer.giveNumberOfTokens();
     readFlag.resize(ntok);
     for ( int i = 0; i < ntok; i++ ) {
@@ -88,10 +87,10 @@ OOFEMTXTInputRecord :: operator = ( const OOFEMTXTInputRecord & src )
 }
 
 void
-OOFEMTXTInputRecord :: setRecordString(const std::string &newRec)
+OOFEMTXTInputRecord :: setRecordString(const std :: string &newRec)
 {
     this->record = newRec;
-    tokenizer.tokenizeLine(this->record.c_str());
+    tokenizer.tokenizeLine( this->record.c_str() );
     int ntok = tokenizer.giveNumberOfTokens();
     readFlag.resize(ntok);
     for ( int i = 0; i < ntok; i++ ) {
@@ -100,10 +99,10 @@ OOFEMTXTInputRecord :: setRecordString(const std::string &newRec)
 }
 
 IRResultType
-OOFEMTXTInputRecord :: giveRecordKeywordField(std::string &answer, int &value)
+OOFEMTXTInputRecord :: giveRecordKeywordField(std :: string &answer, int &value)
 {
     if ( tokenizer.giveNumberOfTokens() > 0 ) {
-        answer = std::string(tokenizer.giveToken(1));
+        answer = std :: string( tokenizer.giveToken(1) );
         setReadFlag(1);
         if ( scanInteger(tokenizer.giveToken(2), value) == 0 ) {
             return IRRT_BAD_FORMAT;
@@ -117,10 +116,10 @@ OOFEMTXTInputRecord :: giveRecordKeywordField(std::string &answer, int &value)
 }
 
 IRResultType
-OOFEMTXTInputRecord :: giveRecordKeywordField(std::string &answer)
+OOFEMTXTInputRecord :: giveRecordKeywordField(std :: string &answer)
 {
     if ( tokenizer.giveNumberOfTokens() > 0 ) {
-        answer = std::string(tokenizer.giveToken(1));
+        answer = std :: string( tokenizer.giveToken(1) );
         setReadFlag(1);
 
         return IRRT_OK;
@@ -183,7 +182,7 @@ OOFEMTXTInputRecord :: giveField(bool &answer, InputFieldType id)
 }
 
 IRResultType
-OOFEMTXTInputRecord :: giveField(std::string &answer, InputFieldType id)
+OOFEMTXTInputRecord :: giveField(std :: string &answer, InputFieldType id)
 {
     int indx = 0;
     if ( id ) {
@@ -199,7 +198,7 @@ OOFEMTXTInputRecord :: giveField(std::string &answer, InputFieldType id)
 
     const char *_token = tokenizer.giveToken(indx);
     if ( _token ) {
-        answer = std::string(tokenizer.giveToken(indx));
+        answer = std :: string( tokenizer.giveToken(indx) );
         setReadFlag(indx);
         return IRRT_OK;
     } else {
@@ -301,7 +300,7 @@ OOFEMTXTInputRecord :: giveField(FloatMatrix &answer, InputFieldType id)
 
 
 IRResultType
-OOFEMTXTInputRecord :: giveField(std::vector< std::string > &answer, InputFieldType id)
+OOFEMTXTInputRecord :: giveField(std :: vector< std :: string > &answer, InputFieldType id)
 {
     int size;
     int indx = this->giveKeywordIndx(id);
@@ -313,7 +312,7 @@ OOFEMTXTInputRecord :: giveField(std::vector< std::string > &answer, InputFieldT
         answer.reserve(size);
         setReadFlag(indx);
         for ( int i = 1; i <= size; i++ ) {
-            answer.push_back(tokenizer.giveToken(indx + i));
+            answer.push_back( tokenizer.giveToken(indx + i) );
             setReadFlag(indx + i);
         }
 
@@ -358,7 +357,7 @@ OOFEMTXTInputRecord :: giveField(Dictionary &answer, InputFieldType id)
 }
 
 IRResultType
-OOFEMTXTInputRecord :: giveField(std::list< Range > &list, InputFieldType id)
+OOFEMTXTInputRecord :: giveField(std :: list< Range > &list, InputFieldType id)
 {
     int li, hi;
     const char *rec;
@@ -413,7 +412,7 @@ OOFEMTXTInputRecord :: hasField(InputFieldType id)
 void
 OOFEMTXTInputRecord :: printYourself()
 {
-    printf("%s", this->record.c_str());
+    printf( "%s", this->record.c_str() );
 }
 
 
@@ -479,7 +478,7 @@ OOFEMTXTInputRecord :: finish(bool wrn)
         return;
     }
 
-    std::ostringstream buff;
+    std :: ostringstream buff;
     bool pf = true, wf = false;
     int ntokens = tokenizer.giveNumberOfTokens();
     for ( int i = 0; i < ntokens; i++ ) {
@@ -508,7 +507,7 @@ OOFEMTXTInputRecord :: finish(bool wrn)
     }
 
     if ( wf ) {
-        OOFEM_WARNING(buff.str().c_str());
+        OOFEM_WARNING( buff.str().c_str() );
     }
 }
 
@@ -758,10 +757,8 @@ OOFEMTXTInputRecord :: readMatrix(const char *helpSource, int r, int c, FloatMat
 
 void
 OOFEMTXTInputRecord :: report_error(const char *_class, const char *proc, InputFieldType id,
-                            IRResultType result, const char *file, int line)
+                                    IRResultType result, const char *file, int line)
 {
     __OOFEM_ERROR6(file, line, "Input error on line %d: \"%s\", field keyword \"%s\"\n%s::%s", lineNumber, strerror(result), id, _class, proc);
 }
-
-
 } // end namespace oofem

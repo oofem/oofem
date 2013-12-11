@@ -38,7 +38,6 @@
 #include "integrationrule.h"
 
 namespace oofem {
-
 class Element;
 
 /**
@@ -91,8 +90,6 @@ public:
     void giveTetCoordsAndWeights(int nPoints, FloatArray &coords_xi1, FloatArray &coords_xi2, FloatArray &coords_xi3, FloatArray &weights);
     static void giveTriCoordsAndWeights(int nPoints, FloatArray &coords_xi1, FloatArray &coords_xi2, FloatArray &weights);
     static void giveLineCoordsAndWeights(int nPoints, FloatArray &coords_xi, FloatArray &weights);
-
-
 };
 } // end namespace oofem
 #endif // gaussintegrationrule_h

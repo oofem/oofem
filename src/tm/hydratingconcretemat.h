@@ -58,6 +58,8 @@
 #define _IFT_HydratingConcreteMat_B2 "b2"
 #define _IFT_HydratingConcreteMat_eta "eta"
 #define _IFT_HydratingConcreteMat_DoHInf "dohinf"
+#define _IFT_HydratingConcreteMat_DoH1 "doh1"
+#define _IFT_HydratingConcreteMat_P1 "p1"
 #define _IFT_HydratingConcreteMat_qpot "qpot"
 //@}
 
@@ -83,7 +85,6 @@ public:
 
     // identification and auxiliary functions
     virtual const char *giveClassName() const { return "HydratingConcreteMat"; }
-    virtual classType giveClassID() const { return HydratingConcreteMatClass; }
 
     virtual IRResultType initializeFrom(InputRecord *ir);
 
@@ -116,6 +117,8 @@ public:
      * Journal of Engineering Mechanics ASCE, 125(9), 1018-1027, 1999.
      */
     double B1, B2, eta, DoHInf;
+    ///Optional extension to slag-rich, high-blended cements
+    double DoH1, P1;
 
 protected:
     double GivePower(TimeStep *atTime, GaussPoint *gp);

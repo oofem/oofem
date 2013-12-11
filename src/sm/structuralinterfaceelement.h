@@ -47,7 +47,6 @@
 #include "structuralinterfacecrosssection.h"
 
 namespace oofem {
-
 class TimeStep;
 class Node;
 class StructuralInterfaceMaterial;
@@ -97,7 +96,7 @@ public:
     /// Destructor.
     virtual ~StructuralInterfaceElement();
 
-    virtual void giveCharacteristicMatrix(FloatMatrix &answer, CharType, TimeStep *tStep);
+    virtual void giveCharacteristicMatrix(FloatMatrix & answer, CharType, TimeStep * tStep);
     virtual void giveCharacteristicVector(FloatArray &answer, CharType type, ValueModeType mode, TimeStep *tStep);
 
     virtual void giveDefaultDofManDofIDMask(int inode, IntArray &answer) const { this->giveDofManDofIDMask(inode, EID_MomentumBalance, answer); }
@@ -105,9 +104,9 @@ public:
 
     /**
      * Computes the stiffness/tangent matrix of receiver. Default implementation computes element stiffness using
-     * @f$ K=\int_{\Gamma} N^{\mathrm{T}} D N \mathrm{d}V @f$ formulae, where @f$ N @f$ is the element geometric matrix such 
+     * @f$ K=\int_{\Gamma} N^{\mathrm{T}} D N \mathrm{d}V @f$ formulae, where @f$ N @f$ is the element geometric matrix such
      * that @f$ j = N a @f$ and @f$ D @f$ is the stiffness matrix of the interface material.
-     * Numerical integration procedure uses integrationRulesArray for numerical integration. 
+     * Numerical integration procedure uses integrationRulesArray for numerical integration.
      *
      * The geometrical matrix is obtained using computeNmatrixAt service and the constitutive matrix is obtained using
      * computeConstitutiveMatrixAt service.
@@ -152,28 +151,28 @@ public:
     virtual IRResultType initializeFrom(InputRecord *ir);
     virtual void giveInputRecord(DynamicInputRecord &input);
     virtual const char *giveClassName() const { return "StructuralInterfaceElement"; };
-    
+
     StructuralInterfaceCrossSection *giveInterfaceCrossSection();
     virtual double computeAreaAround(GaussPoint *gp) = 0;
 
     virtual Element_Geometry_Type giveGeometryType() const { return EGT_unknown; };
 
     //virtual methods that should be overloaded by the elements
-    virtual void giveEngTraction( FloatArray &answer, GaussPoint *gp, const FloatArray &jump, TimeStep *tStep );
-    virtual void giveFirstPKTraction ( FloatArray &answer, GaussPoint *gp, const FloatArray &jump, const FloatMatrix &F, TimeStep *tStep )
+    virtual void giveEngTraction(FloatArray &answer, GaussPoint *gp, const FloatArray &jump, TimeStep *tStep);
+    virtual void giveFirstPKTraction(FloatArray &answer, GaussPoint *gp, const FloatArray &jump, const FloatMatrix &F, TimeStep *tStep)
     {
-        OOFEM_ERROR1 ( "giveFirstPKTraction not implemented for the current element" );
+        OOFEM_ERROR1("giveFirstPKTraction not implemented for the current element");
     }
 
-    virtual void giveStiffnessMatrix_Eng ( FloatMatrix &answer, MatResponseMode rMode, IntegrationPoint *ip, TimeStep *tStep );
-    virtual void giveStiffnessMatrix_dTdj ( FloatMatrix &answer, MatResponseMode rMode, IntegrationPoint *ip, TimeStep *tStep )
+    virtual void giveStiffnessMatrix_Eng(FloatMatrix &answer, MatResponseMode rMode, IntegrationPoint *ip, TimeStep *tStep);
+    virtual void giveStiffnessMatrix_dTdj(FloatMatrix &answer, MatResponseMode rMode, IntegrationPoint *ip, TimeStep *tStep)
     {
-        OOFEM_ERROR1 ( "giveStiffnessMatrix_dTdj not implemented for the current element" );
+        OOFEM_ERROR1("giveStiffnessMatrix_dTdj not implemented for the current element");
     }
 protected:
 
     /**
-     * Computes modified interpolation matrix (N) for the element which multiplied 
+     * Computes modified interpolation matrix (N) for the element which multiplied
      * with the unknowns vector (u) produces the spatial jump.
      * @param gp Integration point for which answer is assembled.
      * @param answer Interpolation matrix evaluated at gp.

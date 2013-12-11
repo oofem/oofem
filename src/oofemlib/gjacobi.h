@@ -75,12 +75,3 @@ public:
 };
 } // end namespace oofem
 #endif // gjacobi_h
-
-
-
-
-
-
-
-
-

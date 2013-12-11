@@ -42,12 +42,12 @@
 ///@name Input fields for XFEMStatic
 //@{
 #define _IFT_XFEMStatic_Name "xfemstatic"
+#define _IFT_XFEMStatic_ForceRemap "forceremap"
 //@}
 
 //#define USE_FRACTURE_MANAGER
 
 namespace oofem {
-
 /**
  * Solver for XFEM simulations. The class inherits from NonLinearStatic and
  * adds support for evolving XFEM interfaces.
@@ -57,10 +57,11 @@ namespace oofem {
  * @author Erik Svenning
  */
 
-class XFEMStatic : public NonLinearStatic {
+class XFEMStatic : public NonLinearStatic
+{
 public:
-	XFEMStatic(int i, EngngModel *_master = NULL);
-	virtual ~XFEMStatic();
+    XFEMStatic(int i, EngngModel *_master = NULL);
+    virtual ~XFEMStatic();
     virtual int requiresUnknownsDictionaryUpdate() { return updateStructureFlag; }
     virtual bool requiresEquationRenumbering(TimeStep *) { return updateStructureFlag; }
 
@@ -71,13 +72,14 @@ public:
     virtual void updateYourself(TimeStep *tStep);
 
     virtual double giveUnknownComponent(ValueModeType mode, TimeStep *tStep, Domain *d, Dof *dof);
+    virtual IRResultType initializeFrom(InputRecord *ir);
 
     void initializeDofUnknownsDictionary(TimeStep *tStep);
     void setTotalDisplacementFromUnknownsInDictionary(EquationID type, ValueModeType mode, TimeStep *tStep);
     virtual void updateDofUnknownsDictionary(DofManager *inode, TimeStep *tStep);
 
     void setUpdateStructureFlag(bool flag) { updateStructureFlag = flag; }
-    bool needsStructureUpdate() {return updateStructureFlag; };
+    bool needsStructureUpdate() { return updateStructureFlag; };
 
     void buildDofMap();
     void setValsFromDofMap(FloatArray &oArray, const FloatArray &iArray);
@@ -85,14 +87,16 @@ public:
 protected:
     bool updateStructureFlag;
 
+    bool mForceRemap;
+
+    bool mSetValsFromDofMap;
+
     // Map for updating initialLoadVector after resize
     // Maps <domain index, node index, local dof index> to global equation number
-    std::map< std::vector<int>, int > mDofEqnNumMap;
+    std :: map< std :: vector< int >, int >mDofEqnNumMap;
 
     // Jim
     FractureManager *fMan;
-    
 };
-
 } /* namespace oofem */
 #endif /* XFEMSTATIC_H_ */

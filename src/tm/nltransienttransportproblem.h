@@ -81,7 +81,6 @@ public:
     // identification
     virtual const char *giveInputRecordName() const { return _IFT_NLTransientTransportProblem_Name; }
     virtual const char *giveClassName() const { return "NLTransientTransportProblem"; }
-    virtual classType giveClassID() const { return NLTransientTransportProblemClass; }
     virtual fMode giveFormulation() { return nonLinFormulation; }
     virtual int giveUnknownDictHashIndx(ValueModeType mode, TimeStep *stepN);
     virtual void updateDofUnknownsDictionary(DofManager *dman, TimeStep *tStep);

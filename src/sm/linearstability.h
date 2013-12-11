@@ -127,7 +127,6 @@ public:
     // identification
     virtual const char *giveInputRecordName() const { return _IFT_LinearStability_Name; }
     virtual const char *giveClassName() const { return "LinearStability"; }
-    virtual classType giveClassID() const { return LinearStabilityClass; }
     virtual fMode giveFormulation() { return TL; }
 };
 } // end namespace oofem

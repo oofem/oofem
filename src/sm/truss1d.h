@@ -46,6 +46,7 @@
 #include "mmashapefunctprojection.h"
 #include "huertaerrorestimator.h"
 #include "fei1dlin.h"
+#include "gausspoint.h"
 
 #define _IFT_Truss1d_Name "truss1d"
 
@@ -88,15 +89,14 @@ public:
     virtual Interface *giveInterface(InterfaceType it);
 
 #ifdef __OOFEG
-    void drawRawGeometry(oofegGraphicContext &);
-    void drawDeformedGeometry(oofegGraphicContext &, UnknownType);
-    void drawScalar(oofegGraphicContext &context);
+    virtual void drawRawGeometry(oofegGraphicContext &);
+    virtual void drawDeformedGeometry(oofegGraphicContext &, UnknownType);
+    virtual void drawScalar(oofegGraphicContext &context);
 #endif
 
     // definition & identification
     virtual const char *giveInputRecordName() const { return _IFT_Truss1d_Name; }
     virtual const char *giveClassName() const { return "Truss1d"; }
-    virtual classType giveClassID() const { return Truss1dClass; }
     virtual IRResultType initializeFrom(InputRecord *ir);
     virtual MaterialMode giveMaterialMode() { return _1dMat; }
 
@@ -139,7 +139,7 @@ public:
     virtual void HuertaErrorEstimatorI_computeLocalCoords(FloatArray &answer, const FloatArray &coords)
     { computeLocalCoordinates(answer, coords); }
     virtual void HuertaErrorEstimatorI_computeNmatrixAt(GaussPoint *aGaussPoint, FloatMatrix &answer)
-    { computeNmatrixAt(aGaussPoint, answer); }
+    { computeNmatrixAt(* ( aGaussPoint->giveLocalCoordinates() ), answer); }
 
     // ZZRemeshingCriteriaInterface
     virtual double ZZRemeshingCriteriaI_giveCharacteristicSize() { return DirectErrorIndicatorRCI_giveCharacteristicSize(); }
@@ -156,7 +156,7 @@ public:
 protected:
     virtual void computeBmatrixAt(GaussPoint *gp, FloatMatrix &answer, int = 1, int = ALL_STRAINS);
     virtual void computeBHmatrixAt(GaussPoint *gp, FloatMatrix &answer);
-    virtual void computeNmatrixAt(GaussPoint *gp, FloatMatrix &answer);
+    virtual void computeNmatrixAt(const FloatArray &iLocCoord, FloatMatrix &answer);
     virtual void computeGaussPoints();
     virtual int giveApproxOrder() { return 1; }
 };

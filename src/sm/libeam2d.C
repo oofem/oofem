@@ -45,8 +45,7 @@
 #include "classfactory.h"
 
 namespace oofem {
-
-REGISTER_Element( LIBeam2d );
+REGISTER_Element(LIBeam2d);
 
 // Set up interpolation coordinates
 FEI2dLineLin LIBeam2d :: interpolation(1, 3);
@@ -109,7 +108,7 @@ LIBeam2d :: computeGaussPoints()
         numberOfIntegrationRules = 1;
         integrationRulesArray = new IntegrationRule * [ 1 ];
         integrationRulesArray [ 0 ] = new GaussIntegrationRule(1, this, 1, 2);
-        this->giveCrossSection()->setupIntegrationPoints( *integrationRulesArray[0], 1, this );
+        this->giveCrossSection()->setupIntegrationPoints(* integrationRulesArray [ 0 ], 1, this);
     }
 }
 
@@ -152,7 +151,7 @@ LIBeam2d :: computeLumpedMassMatrix(FloatMatrix &answer, TimeStep *tStep)
 {
     GaussPoint *gp = integrationRulesArray [ 0 ]->getIntegrationPoint(0);
     double density = this->giveStructuralCrossSection()->give('d', gp);
-    double halfMass   = density * this->giveCrossSection()->give(CS_Area) * this->giveLength() / 2.;
+    double halfMass   = density * this->giveCrossSection()->give(CS_Area, gp) * this->giveLength() / 2.;
     answer.resize(6, 6);
     answer.zero();
     answer.at(1, 1) = halfMass;
@@ -163,13 +162,13 @@ LIBeam2d :: computeLumpedMassMatrix(FloatMatrix &answer, TimeStep *tStep)
 
 
 void
-LIBeam2d :: computeNmatrixAt(GaussPoint *aGaussPoint, FloatMatrix &answer)
+LIBeam2d :: computeNmatrixAt(const FloatArray &iLocCoord, FloatMatrix &answer)
 // Returns the displacement interpolation matrix {N} of the receiver, eva-
 // luated at aGaussPoint.
 {
     double ksi, n1, n2;
 
-    ksi = aGaussPoint->giveCoordinate(1);
+    ksi = iLocCoord.at(1);
     n1  = ( 1. - ksi ) * 0.5;
     n2  = ( 1. + ksi ) * 0.5;
 
@@ -231,7 +230,7 @@ LIBeam2d :: computeVolumeAround(GaussPoint *aGaussPoint)
 
 
 void
-LIBeam2d :: computeStrainVectorInLayer(FloatArray &answer, const FloatArray &masterGpStrain, GaussPoint *slaveGp, TimeStep *tStep)
+LIBeam2d :: computeStrainVectorInLayer(FloatArray &answer, const FloatArray &masterGpStrain, GaussPoint *masterGp, GaussPoint *slaveGp, TimeStep *tStep)
 //
 // returns full 3d strain vector of given layer (whose z-coordinate from center-line is
 // stored in slaveGp) for given tStep
@@ -239,8 +238,8 @@ LIBeam2d :: computeStrainVectorInLayer(FloatArray &answer, const FloatArray &mas
 {
     double layerZeta, layerZCoord, top, bottom;
 
-    top    = this->giveCrossSection()->give(CS_TopZCoord);
-    bottom = this->giveCrossSection()->give(CS_BottomZCoord);
+    top    = this->giveCrossSection()->give(CS_TopZCoord, masterGp);
+    bottom = this->giveCrossSection()->give(CS_BottomZCoord, masterGp);
     layerZeta = slaveGp->giveCoordinate(3);
     layerZCoord = 0.5 * ( ( 1. - layerZeta ) * bottom + ( 1. + layerZeta ) * top );
 
@@ -322,7 +321,7 @@ LIBeam2d :: computeEgdeNMatrixAt(FloatMatrix &answer, int iedge, GaussPoint *aGa
      * without regarding particular side
      */
 
-    this->computeNmatrixAt(aGaussPoint, answer);
+    this->computeNmatrixAt(* ( aGaussPoint->giveLocalCoordinates() ), answer);
 }
 
 
@@ -363,8 +362,9 @@ LIBeam2d :: computeEdgeVolumeAround(GaussPoint *aGaussPoint, int iEdge)
 void
 LIBeam2d :: computeBodyLoadVectorAt(FloatArray &answer, Load *load, TimeStep *tStep, ValueModeType mode)
 {
-    StructuralElement::computeBodyLoadVectorAt(answer, load, tStep, mode);
-    answer.times(this->giveCrossSection()->give(CS_Area));
+    FloatArray lc(1);
+    StructuralElement :: computeBodyLoadVectorAt(answer, load, tStep, mode);
+    answer.times( this->giveCrossSection()->give(CS_Area, & lc, NULL, this) );
 }
 
 
@@ -385,7 +385,7 @@ LIBeam2d :: computeLoadGToLRotationMtrx(FloatMatrix &answer)
     answer.zero();
 
     sine = sin( this->givePitch() );
-    cosine = cos( pitch );
+    cosine = cos(pitch);
 
     answer.at(1, 1) = cosine;
     answer.at(1, 2) = -sine;

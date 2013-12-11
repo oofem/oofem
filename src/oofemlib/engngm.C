@@ -136,9 +136,9 @@ EngngModel :: EngngModel(int i, EngngModel *_master) : domainNeqs(), domainPresc
     communicator = NULL;
     nonlocCommunicator = NULL;
     commBuff = NULL;
-#ifdef __USE_MPI
+ #ifdef __USE_MPI
     comm = MPI_COMM_SELF;
-#endif
+ #endif
 #endif
 
 #ifdef __PETSC_MODULE
@@ -255,9 +255,15 @@ EngngModel :: ~EngngModel()
         }
     }
 
-    if ( communicator ) delete communicator;
-    if ( nonlocCommunicator ) delete nonlocCommunicator;
-    if ( commBuff ) delete commBuff;
+    if ( communicator ) {
+        delete communicator;
+    }
+    if ( nonlocCommunicator ) {
+        delete nonlocCommunicator;
+    }
+    if ( commBuff ) {
+        delete commBuff;
+    }
 #endif
 }
 
@@ -371,7 +377,7 @@ int EngngModel :: instanciateYourself(DataReader *dr, InputRecord *ir, const cha
         xfemManagerList->put(i, xm);
         xm->initializeFrom(ir);
         xm->instanciateYourself(dr);
-        
+
         int last = xm->computeFictPosition();
         this->setNumberOfEquations(1, last);
         //Jim - removed
@@ -496,7 +502,7 @@ EngngModel :: instanciateDefaultMetaStep(InputRecord *ir)
     // create default meta steps
     this->nMetaSteps = 1;
     metaStepList->growTo(nMetaSteps);
-    mstep =  new MetaStep(1, this, numberOfSteps, *ir);
+    mstep =  new MetaStep(1, this, numberOfSteps, * ir);
     metaStepList->put(1, mstep);
 
     // set meta step bounds
@@ -698,7 +704,7 @@ EngngModel :: initMetaStepAttributes(MetaStep *mStep)
 void
 EngngModel :: updateAttributes(MetaStep *mStep)
 {
-    MetaStep *mStep1 = this->giveMetaStep( mStep->giveNumber() );//this line ensures correct input file in staggered problem
+    MetaStep *mStep1 = this->giveMetaStep( mStep->giveNumber() ); //this line ensures correct input file in staggered problem
     InputRecord *ir = mStep1->giveAttributesRecord();
 
     if ( this->giveNumericalMethod(mStep1) ) {
@@ -738,9 +744,8 @@ EngngModel :: updateYourself(TimeStep *stepN)
         }
 
         // Update xfem manager if it is present
-        if( domain->hasXfemManager() )
-        {
-        	domain->giveXfemManager()->updateYourself();
+        if ( domain->hasXfemManager() ) {
+            domain->giveXfemManager()->updateYourself();
         }
 
 #  ifdef VERBOSE
@@ -766,9 +771,6 @@ EngngModel :: updateYourself(TimeStep *stepN)
 #  ifdef VERBOSE
         VERBOSE_PRINT0("Updated Elements ", nelem)
 #  endif
-
-
-
     }
 
     // if there is an error estimator, it should be updated so that values can be exported.
@@ -832,7 +834,7 @@ EngngModel :: printOutputAt(FILE *File, TimeStep *stepN)
     }
 
     fprintf(File, "\n==============================================================");
-    fprintf(File, "\nOutput for time % .8e ", stepN->giveTargetTime() * this->giveVariableScale(VST_Time) );
+    fprintf( File, "\nOutput for time % .8e ", stepN->giveTargetTime() * this->giveVariableScale(VST_Time) );
     fprintf(File, "\n==============================================================\n");
     for ( int idomain = 1; idomain <= this->ndomains; idomain++ ) {
         domain = this->giveDomain(idomain);
@@ -847,7 +849,7 @@ void EngngModel :: printYourself()
 {
     printf( "\nEngineeringModel: instance %s\n", this->giveClassName() );
     printf( "number of steps: %d\n", this->giveNumberOfSteps() );
-    printf( "number of eq's : %d\n", numberOfEquations );
+    printf("number of eq's : %d\n", numberOfEquations);
 }
 
 void EngngModel :: assemble(SparseMtrx *answer, TimeStep *tStep, EquationID eid,
@@ -989,7 +991,7 @@ void EngngModel :: assembleVector(FloatArray &answer, TimeStep *tStep, EquationI
             maxdofids = val;
         }
 #endif
-        eNorms->resize( maxdofids );
+        eNorms->resize(maxdofids);
         eNorms->zero();
     }
 
@@ -1000,7 +1002,7 @@ void EngngModel :: assembleVector(FloatArray &answer, TimeStep *tStep, EquationI
 #ifdef __PARALLEL_MODE
     if ( this->isParallel() ) {
         if ( eNorms ) {
-            FloatArray localENorms = *eNorms;
+            FloatArray localENorms = * eNorms;
             //this->givePetscContext(domain->giveNumber())->accumulate(localENorms, *eNorms);
             MPI_Allreduce(localENorms.givePointer(), eNorms->givePointer(), eNorms->giveSize(), MPI_DOUBLE, MPI_SUM, this->comm);
         }
@@ -1043,7 +1045,9 @@ void EngngModel :: assembleVectorFromDofManagers(FloatArray &answer, TimeStep *t
 
 #endif
         if ( charVec.isNotEmpty() ) {
-            if ( node->computeM2LTransformation(R, dofIDarry) ) charVec.rotatedWith(R, 't');
+            if ( node->computeM2LTransformation(R, dofIDarry) ) {
+                charVec.rotatedWith(R, 't');
+            }
 
             node->giveCompleteLocationArray(loc, s);
 #ifdef _OPENMP
@@ -1086,28 +1090,32 @@ void EngngModel :: assembleVectorFromBC(FloatArray &answer, TimeStep *tStep, Equ
             BoundaryLoad *bLoad;
             //BoundaryEdgeLoad *eLoad;
             NodalLoad *nLoad;
-            Set *set = domain->giveSet(bc->giveSetNumber());
+            Set *set = domain->giveSet( bc->giveSetNumber() );
 
-            if ( (bodyLoad = dynamic_cast< BodyLoad* >(load)) ) { // Body load:
+            if ( ( bodyLoad = dynamic_cast< BodyLoad * >( load ) ) ) { // Body load:
                 const IntArray &elements = set->giveElementList();
-                for (int ielem = 1; ielem <= elements.giveSize(); ++ielem) {
-                    Element *element = domain->giveElement(elements.at(ielem));
+                for ( int ielem = 1; ielem <= elements.giveSize(); ++ielem ) {
+                    Element *element = domain->giveElement( elements.at(ielem) );
                     element->computeLoadVector(charVec, bodyLoad, type, mode, tStep);
 
                     if ( charVec.isNotEmpty() ) {
-                        if ( element->giveRotationMatrix(R, eid) ) charVec.rotatedWith(R, 't');
+                        if ( element->giveRotationMatrix(R, eid) ) {
+                            charVec.rotatedWith(R, 't');
+                        }
 
-                        element->giveLocationArray(loc, eid, s, &dofids);
+                        element->giveLocationArray(loc, eid, s, & dofids);
                         answer.assemble(charVec, loc);
 
-                        if ( eNorms ) eNorms->assembleSquared(charVec, dofids);
+                        if ( eNorms ) {
+                            eNorms->assembleSquared(charVec, dofids);
+                        }
                     }
                 }
-            } else if ( (bLoad = dynamic_cast< BoundaryLoad* >(load)) ) { // Boundary load:
+            } else if ( ( bLoad = dynamic_cast< BoundaryLoad * >( load ) ) ) { // Boundary load:
                 const IntArray &boundaries = set->giveBoundaryList();
-                for (int ibnd = 1; ibnd <= boundaries.giveSize()/2; ++ibnd) {
-                    Element *element = domain->giveElement(boundaries.at(ibnd*2-1));
-                    int boundary = boundaries.at(ibnd*2);
+                for ( int ibnd = 1; ibnd <= boundaries.giveSize() / 2; ++ibnd ) {
+                    Element *element = domain->giveElement( boundaries.at(ibnd * 2 - 1) );
+                    int boundary = boundaries.at(ibnd * 2);
                     element->computeBoundaryLoadVector(charVec, bLoad, boundary, type, mode, tStep);
 
                     if ( charVec.isNotEmpty() ) {
@@ -1116,17 +1124,19 @@ void EngngModel :: assembleVectorFromBC(FloatArray &answer, TimeStep *tStep, Equ
                             charVec.rotatedWith(R, 't');
                         }
 
-                        element->giveBoundaryLocationArray(loc, bNodes, eid, s, &dofids);
+                        element->giveBoundaryLocationArray(loc, bNodes, eid, s, & dofids);
                         answer.assemble(charVec, loc);
 
-                        if ( eNorms ) eNorms->assembleSquared(charVec, dofids);
+                        if ( eNorms ) {
+                            eNorms->assembleSquared(charVec, dofids);
+                        }
                     }
                 }
                 ///@todo Should we have a seperate entry for edge loads? Just sticking to the general "boundaryload" for now.
                 const IntArray &edgeBoundaries = set->giveEdgeList();
-                for (int ibnd = 1; ibnd <= edgeBoundaries.giveSize()/2; ++ibnd) {
-                    Element *element = domain->giveElement(edgeBoundaries.at(ibnd*2-1));
-                    int boundary = edgeBoundaries.at(ibnd*2);
+                for ( int ibnd = 1; ibnd <= edgeBoundaries.giveSize() / 2; ++ibnd ) {
+                    Element *element = domain->giveElement( edgeBoundaries.at(ibnd * 2 - 1) );
+                    int boundary = edgeBoundaries.at(ibnd * 2);
                     element->computeBoundaryEdgeLoadVector(charVec, bLoad, boundary, type, mode, tStep);
 
                     if ( charVec.isNotEmpty() ) {
@@ -1135,25 +1145,31 @@ void EngngModel :: assembleVectorFromBC(FloatArray &answer, TimeStep *tStep, Equ
                             charVec.rotatedWith(R, 't');
                         }
 
-                        element->giveBoundaryLocationArray(loc, bNodes, eid, s, &dofids);
+                        element->giveBoundaryLocationArray(loc, bNodes, eid, s, & dofids);
                         answer.assemble(charVec, loc);
 
-                        if ( eNorms ) eNorms->assembleSquared(charVec, dofids);
+                        if ( eNorms ) {
+                            eNorms->assembleSquared(charVec, dofids);
+                        }
                     }
                 }
-            } else if ( (nLoad = dynamic_cast< NodalLoad* >(load)) ) { // Nodal load:
+            } else if ( ( nLoad = dynamic_cast< NodalLoad * >( load ) ) ) { // Nodal load:
                 const IntArray &nodes = set->giveNodeList();
-                for (int idman = 1; idman <= nodes.giveSize(); ++idman) {
-                    DofManager *node = domain->giveDofManager(nodes.at(idman));
+                for ( int idman = 1; idman <= nodes.giveSize(); ++idman ) {
+                    DofManager *node = domain->giveDofManager( nodes.at(idman) );
                     node->computeLoadVector(charVec, nLoad, type, tStep, mode);
 
                     if ( charVec.isNotEmpty() ) {
-                        if ( node->computeM2LTransformation(R, dofIDarry) ) charVec.rotatedWith(R, 't');
+                        if ( node->computeM2LTransformation(R, dofIDarry) ) {
+                            charVec.rotatedWith(R, 't');
+                        }
 
                         node->giveCompleteLocationArray(loc, s);
                         answer.assemble(charVec, loc);
 
-                        if ( eNorms ) eNorms->assembleSquared(charVec, dofids);
+                        if ( eNorms ) {
+                            eNorms->assembleSquared(charVec, dofids);
+                        }
                     }
                 }
             }
@@ -1199,15 +1215,19 @@ void EngngModel :: assembleVectorFromElements(FloatArray &answer, TimeStep *tSte
 
         this->giveElementCharacteristicVector(charVec, i, type, mode, tStep, domain);
         if ( charVec.isNotEmpty() ) {
-            if ( element->giveRotationMatrix(R, eid) ) charVec.rotatedWith(R, 't');
-            element->giveLocationArray(loc, eid, s, &dofids);
+            if ( element->giveRotationMatrix(R, eid) ) {
+                charVec.rotatedWith(R, 't');
+            }
+            element->giveLocationArray(loc, eid, s, & dofids);
 
 #ifdef _OPENMP
  #pragma omp critical
 #endif
             {
                 answer.assemble(charVec, loc);
-                if ( eNorms ) eNorms->assembleSquared(charVec, dofids);
+                if ( eNorms ) {
+                    eNorms->assembleSquared(charVec, dofids);
+                }
             }
         }
     }
@@ -1226,7 +1246,7 @@ EngngModel :: assembleExtrapolatedForces(FloatArray &answer, TimeStep *tStep, Eq
     int nelems;
     EModelDefaultEquationNumbering dn;
 
-    answer.resize( this->giveNumberOfDomainEquations(domain->giveNumber(), EModelDefaultEquationNumbering()) );
+    answer.resize( this->giveNumberOfDomainEquations( domain->giveNumber(), EModelDefaultEquationNumbering() ) );
     answer.zero();
 
     nelems = domain->giveNumberOfElements();
@@ -1390,7 +1410,7 @@ contextIOResultType EngngModel :: saveContext(DataStream *stream, ContextMode mo
     }
 
     // store renumber flag
-    if ( !stream->write(& renumberFlag, 1) ) {
+    if ( !stream->write(renumberFlag) ) {
         THROW_CIOERR(CIO_IOERR);
     }
 
@@ -1411,7 +1431,7 @@ contextIOResultType EngngModel :: saveContext(DataStream *stream, ContextMode mo
 
     if ( closeFlag ) {
         fclose(file);
-        delete(stream);
+        delete( stream );
         stream = NULL;
     }                                                         // ensure consistent records
 
@@ -1503,7 +1523,7 @@ contextIOResultType EngngModel :: restoreContext(DataStream *stream, ContextMode
     }
 
     // restore renumber flag
-    if ( !stream->read(& renumberFlag, 1) ) {
+    if ( !stream->read(renumberFlag) ) {
         THROW_CIOERR(CIO_IOERR);
     }
 
@@ -1687,8 +1707,13 @@ EngngModel :: giveDomain(int i)
 }
 
 void
-EngngModel :: setDomain(int i, Domain *ptr)
+EngngModel :: setDomain(int i, Domain *ptr, bool iDeallocateOld)
 {
+    if ( !iDeallocateOld ) {
+        printf("Unlinking old domain.\n");
+        this->domainList->unlink(i);
+    }
+
     if ( ( i > 0 ) && ( i <= this->ndomains ) ) {
         this->domainList->put(i, ptr);
     } else {
@@ -1923,23 +1948,23 @@ EngngModel :: updateSharedDofManagers(FloatArray &answer, int ExchangeTag)
 
 
     if ( isParallel() ) {
-#ifdef __VERBOSE_PARALLEL
+ #ifdef __VERBOSE_PARALLEL
         VERBOSEPARALLEL_PRINT( "EngngModel :: updateSharedDofManagers", "Packing data", this->giveRank() );
-#endif
+ #endif
 
-        result &= communicator->packAllData( this, & answer, & EngngModel :: packDofManagers );
+        result &= communicator->packAllData(this, & answer, & EngngModel :: packDofManagers);
 
-#ifdef __VERBOSE_PARALLEL
+ #ifdef __VERBOSE_PARALLEL
         VERBOSEPARALLEL_PRINT( "EngngModel :: updateSharedDofManagers", "Exchange started", this->giveRank() );
-#endif
+ #endif
 
         result &= communicator->initExchange(ExchangeTag);
 
-#ifdef __VERBOSE_PARALLEL
+ #ifdef __VERBOSE_PARALLEL
         VERBOSEPARALLEL_PRINT( "EngngModel :: updateSharedDofManagers", "Receiving and unpacking", this->giveRank() );
-#endif
+ #endif
 
-        result &= communicator->unpackAllData( this, & answer, & EngngModel :: unpackDofManagers );
+        result &= communicator->unpackAllData(this, & answer, & EngngModel :: unpackDofManagers);
         result &= communicator->finishExchange();
     }
 
@@ -1952,23 +1977,23 @@ EngngModel :: updateSharedPrescribedDofManagers(FloatArray &answer, int Exchange
     int result = 1;
 
     if ( isParallel() ) {
-#ifdef __VERBOSE_PARALLEL
+ #ifdef __VERBOSE_PARALLEL
         VERBOSEPARALLEL_PRINT( "EngngModel :: updateSharedPrescribedDofManagers", "Packing data", this->giveRank() );
-#endif
+ #endif
 
-        result &= communicator->packAllData( this, & answer, & EngngModel :: packPrescribedDofManagers );
+        result &= communicator->packAllData(this, & answer, & EngngModel :: packPrescribedDofManagers);
 
-#ifdef __VERBOSE_PARALLEL
+ #ifdef __VERBOSE_PARALLEL
         VERBOSEPARALLEL_PRINT( "EngngModel :: updateSharedPrescribedDofManagers", "Exchange started", this->giveRank() );
-#endif
+ #endif
 
         result &= communicator->initExchange(ExchangeTag);
 
-#ifdef __VERBOSE_PARALLEL
+ #ifdef __VERBOSE_PARALLEL
         VERBOSEPARALLEL_PRINT( "EngngModel :: updateSharedDofManagers", "Receiving and unpacking", this->giveRank() );
-#endif
+ #endif
 
-        result &= communicator->unpackAllData( this, & answer, & EngngModel :: unpackPrescribedDofManagers );
+        result &= communicator->unpackAllData(this, & answer, & EngngModel :: unpackPrescribedDofManagers);
         result &= communicator->finishExchange();
     }
 
@@ -1997,7 +2022,7 @@ EngngModel :: exchangeRemoteElementData(int ExchangeTag)
         VERBOSEPARALLEL_PRINT( "EngngModel :: exchangeRemoteElementData", "Packing remote element data", this->giveRank() );
  #endif
 
-        result &= nonlocCommunicator->packAllData( this, & EngngModel :: packRemoteElementData );
+        result &= nonlocCommunicator->packAllData(this, & EngngModel :: packRemoteElementData);
 
  #ifdef __VERBOSE_PARALLEL
         VERBOSEPARALLEL_PRINT( "EngngModel :: exchangeRemoteElementData", "Remote element data exchange started", this->giveRank() );
@@ -2009,7 +2034,7 @@ EngngModel :: exchangeRemoteElementData(int ExchangeTag)
         VERBOSEPARALLEL_PRINT( "EngngModel :: exchangeRemoteElementData", "Receiveng and Unpacking remote element data", this->giveRank() );
  #endif
 
-        if ( !( result &= nonlocCommunicator->unpackAllData( this, & EngngModel :: unpackRemoteElementData ) ) ) {
+        if ( !( result &= nonlocCommunicator->unpackAllData(this, & EngngModel :: unpackRemoteElementData) ) ) {
             _error("EngngModel :: exchangeRemoteElementData: Receiveng and Unpacking remote element data");
         }
 

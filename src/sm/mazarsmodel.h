@@ -78,7 +78,6 @@ public:
 
     // definition
     virtual const char *giveClassName() const { return "MazarsMaterialStatus"; }
-    virtual classType giveClassID() const { return IsotropicDamageMaterialStatusClass; }
 
     virtual contextIOResultType saveContext(DataStream *stream, ContextMode mode, void *obj = NULL);
     virtual contextIOResultType restoreContext(DataStream *stream, ContextMode mode, void *obj = NULL);
@@ -117,7 +116,6 @@ public:
     // identification and auxiliary functions
     virtual const char *giveInputRecordName() const { return _IFT_MazarsMaterial_Name; }
     virtual const char *giveClassName() const { return "MazarsMaterial"; }
-    virtual classType giveClassID() const { return MazarsMaterialClass; }
 
     virtual IRResultType initializeFrom(InputRecord *ir);
 

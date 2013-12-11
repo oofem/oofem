@@ -42,8 +42,7 @@
 #include "classfactory.h"
 
 namespace oofem {
-
-REGISTER_Material( J2Mat );
+REGISTER_Material(J2Mat);
 
 J2Mat :: J2Mat(int n, Domain *d) : MPlasticMaterial2(n, d)
 {
@@ -328,7 +327,7 @@ J2Mat :: computeReducedSSGradientMatrix(FloatMatrix &gradientMatrix,  int isurf,
     IntArray mask;
     double f, f32, f12, ax, ay, az;
 
-    StructuralMaterial :: giveInvertedVoigtVectorMask(mask, gp->giveMaterialMode() );
+    StructuralMaterial :: giveInvertedVoigtVectorMask( mask, gp->giveMaterialMode() );
     size = StructuralMaterial :: giveSizeOfVoigtSymVector( gp->giveMaterialMode() );
 
     gradientMatrix.resize(size, size);

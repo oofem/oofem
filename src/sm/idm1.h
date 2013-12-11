@@ -119,7 +119,6 @@ public:
 
     // definition
     virtual const char *giveClassName() const { return "IsotropicDamageMaterial1Status"; }
-    virtual classType giveClassID() const { return IsotropicDamageMaterialStatusClass; }
 
     virtual void initTempStatus();
     virtual void updateYourself(TimeStep *tStep);
@@ -172,7 +171,7 @@ protected:
 
     /// Parameter used in Griffith's criterion
     double griff_n;
-    
+
     /// Remporary parameter reading type of softening law, used in other isotropic damage material models.
     int damageLaw;
 
@@ -223,7 +222,6 @@ public:
 
     // identification and auxiliary functions
     virtual const char *giveClassName() const { return "IsotropicDamageMaterial1"; }
-    virtual classType giveClassID() const { return IsotropicDamageMaterial1Class; }
     virtual const char *giveInputRecordName() const { return _IFT_IsotropicDamageMaterial1_Name; }
     virtual IRResultType initializeFrom(InputRecord *ir);
     virtual void giveInputRecord(DynamicInputRecord &input);
@@ -322,4 +320,3 @@ protected:
 };
 } // end namespace oofem
 #endif // idm1_h
-

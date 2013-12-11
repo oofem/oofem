@@ -66,8 +66,8 @@ protected:
     /// Number of units in the chain.
     int nUnits;
     /// Hidden (internal) variables, the meaning of which depends on the type of chain.
-    std :: vector< FloatArray > hiddenVars; 
-    std :: vector< FloatArray > tempHiddenVars; 
+    std :: vector< FloatArray >hiddenVars;
+    std :: vector< FloatArray >tempHiddenVars;
 
     /**
      * Total shrinkage strain (needed only when the shrinkage evolution
@@ -97,7 +97,6 @@ public:
 
     // definition
     virtual const char *giveClassName() const { return "RheoChainMaterialStatus"; }
-    virtual classType giveClassID() const { return RheoChainMaterialStatusClass; }
 };
 
 
@@ -172,7 +171,6 @@ public:
     virtual int hasNonLinearBehaviour() { return 0; }
     virtual int hasMaterialModeCapability(MaterialMode mode);
     virtual const char *giveClassName() const { return "RheoChainMaterial"; }
-    virtual classType giveClassID() const { return RheoChainMaterialClass; }
     virtual IRResultType initializeFrom(InputRecord *ir);
 
     // store & restore context functions

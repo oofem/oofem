@@ -54,8 +54,7 @@
 #include "contextioerr.h"
 
 namespace oofem {
-
-REGISTER_EngngModel( CBS );
+REGISTER_EngngModel(CBS);
 
 NumericalMethod *CBS :: giveNumericalMethod(MetaStep *mStep)
 {
@@ -122,11 +121,11 @@ CBS :: initializeFrom(InputRecord *ir)
 
 #ifdef FIELDMANAGER_USE_SHARED_PTR
         //std::tr1::shared_ptr<Field> _velocityField = make_shared<MaskedPrimaryField>(FT_Velocity, &this->VelocityField, mask);
-        std::tr1::shared_ptr<Field> _velocityField (new MaskedPrimaryField(FT_Velocity, &this->VelocityField, mask));
-        fm->registerField( _velocityField, FT_Velocity);
+        std :: tr1 :: shared_ptr< Field >_velocityField( new MaskedPrimaryField(FT_Velocity, & this->VelocityField, mask) );
+        fm->registerField(_velocityField, FT_Velocity);
 #else
-        MaskedPrimaryField* _velocityField = new MaskedPrimaryField (FT_Velocity, &this->VelocityField, mask);
-        fm->registerField( _velocityField, FT_Velocity, true);
+        MaskedPrimaryField *_velocityField = new MaskedPrimaryField(FT_Velocity, & this->VelocityField, mask);
+        fm->registerField(_velocityField, FT_Velocity, true);
 #endif
     }
 
@@ -134,6 +133,7 @@ CBS :: initializeFrom(InputRecord *ir)
 
     return IRRT_OK;
 }
+
 
 double
 CBS :: giveUnknownComponent(ValueModeType mode, TimeStep *tStep, Domain *d, Dof *dof)
@@ -143,6 +143,7 @@ CBS :: giveUnknownComponent(ValueModeType mode, TimeStep *tStep, Domain *d, Dof 
     if ( dof->__giveEquationNumber() == 0 ) {
         _error("giveUnknownComponent: invalid equation number");
     }
+
 #endif
 
     if ( dof->giveDofID() == P_f ) { // pressures
@@ -174,6 +175,7 @@ CBS :: giveTractionPressure(Dof *dof)
     } else {
         _error("giveUnknownComponent: prescribed traction pressure requested for dof with no BC");
     }
+
     return 0;
 }
 
@@ -204,7 +206,7 @@ CBS :: giveNextStep()
 
     if ( currentStep == NULL ) {
         // first step -> generate initial step
-        currentStep = new TimeStep( *giveSolutionStepWhenIcApply() );
+        currentStep = new TimeStep( * giveSolutionStepWhenIcApply() );
     } else {
         istep = currentStep->giveNumber() + 1;
         counter = currentStep->giveSolutionStateCounter() + 1;
@@ -260,7 +262,7 @@ CBS :: solveYourselfAt(TimeStep *tStep)
             _error("solveYourselfAt: sparse matrix creation failed");
         }
 
-        lhs->buildInternalStructure( this, 1, EID_MomentumBalance_ConservationEquation, pnum );
+        lhs->buildInternalStructure(this, 1, EID_MomentumBalance_ConservationEquation, pnum);
 
         this->assemble( lhs, stepWhenIcApply, EID_MomentumBalance_ConservationEquation, PressureLhs,
                         pnum, this->giveDomain(1) );
@@ -272,7 +274,7 @@ CBS :: solveYourselfAt(TimeStep *tStep)
                 _error("solveYourselfAt: sparse matrix creation failed");
             }
 
-            mss->buildInternalStructure( this, 1, EID_MomentumBalance_ConservationEquation, vnum );
+            mss->buildInternalStructure(this, 1, EID_MomentumBalance_ConservationEquation, vnum);
             this->assemble( mss, stepWhenIcApply, EID_MomentumBalance_ConservationEquation, MassMatrix,
                             vnum, this->giveDomain(1) );
         } else {
@@ -358,7 +360,7 @@ CBS :: solveYourselfAt(TimeStep *tStep)
     }
 
     // DensityRhsVelocityTerms needs this: Current velocity without correction;
-    *velocityVector = *prevVelocityVector;
+    * velocityVector = * prevVelocityVector;
     velocityVector->add(this->theta1, deltaAuxVelocity);
 
     // Depends on old V + deltaAuxV * theta1:
@@ -372,7 +374,7 @@ CBS :: solveYourselfAt(TimeStep *tStep)
     this->giveNumericalMethod( this->giveCurrentMetaStep() );
     nMethod->solve(lhs, & rhs, pressureVector);
     pressureVector->times(this->theta2);
-    pressureVector->add(*prevPressureVector);
+    pressureVector->add(* prevPressureVector);
 
     /* STEP 3 - velocity correction step */
     rhs.resize(momneq);
@@ -385,7 +387,7 @@ CBS :: solveYourselfAt(TimeStep *tStep)
         //this->assembleVectorFromElements(rhs, tStep, EID_MomentumBalance_ConservationEquation, PrescribedRhsVector, VM_Incremental, vnum, this->giveDomain(1));
         nMethod->solve(mss, & rhs, velocityVector);
         velocityVector->add(deltaAuxVelocity);
-        velocityVector->add(*prevVelocityVector);
+        velocityVector->add(* prevVelocityVector);
     } else {
         for ( int i = 1; i <= momneq; i++ ) {
             velocityVector->at(i) = prevVelocityVector->at(i) + deltaAuxVelocity.at(i) + deltaT *rhs.at(i) / mm.at(i);
@@ -409,7 +411,6 @@ CBS :: solveYourselfAt(TimeStep *tStep)
     }
 
     //</RESTRICTED_SECTION>
-
 }
 
 
@@ -709,7 +710,10 @@ CBS :: giveNewPrescribedEquationNumber(int domain, DofIDItem id)
 
 int CBS :: giveNumberOfDomainEquations(int d, const UnknownNumberingScheme &num)
 {
-    if ( !equationNumberingCompleted ) this->forceEquationNumbering();
+    if ( !equationNumberingCompleted ) {
+        this->forceEquationNumbering();
+    }
+
     return num.giveRequiredNumberOfDomainEquation();
 }
 
@@ -738,24 +742,27 @@ double CBS :: giveVariableScale(VarScaleType varID)
 }
 
 #if 0
-void CBS :: printOutputAt (FILE * File,TimeStep* stepN)
+void CBS :: printOutputAt(FILE *File, TimeStep *stepN)
 {
     //FILE* File = this->giveDomain()->giveOutputStream();
     int domCount = 0;
     // fprintf (File,"\nOutput for time step number %d \n\n",stepN->giveNumber());
-    for ( int idomain = 1; idomain <= this->ndomains; idomain++) {
-        Domain *domain= this->giveDomain(idomain);
-        domCount += domain->giveOutputManager()->testTimeStepOutput (stepN);
+    for ( int idomain = 1; idomain <= this->ndomains; idomain++ ) {
+        Domain *domain = this->giveDomain(idomain);
+        domCount += domain->giveOutputManager()->testTimeStepOutput(stepN);
     }
-    if (domCount == 0) return;  // do not print even Solution step header
-    fprintf (File,"\nOutput for time % .8e \n\n",stepN->giveTime()/this->giveVariableScale (VST_Time));
-    for ( int idomain = 1; idomain <= this->ndomains; idomain++) {
-        domain= this->giveDomain(idomain);
-        fprintf (File,"\nOutput for domain %3d\n",domain->giveNumber());
-        domain->giveOutputManager()->doDofManOutput  (File, stepN);
-        domain->giveOutputManager()->doElementOutput (File, stepN);
+
+    if ( domCount == 0 ) {
+        return;                 // do not print even Solution step header
+    }
+
+    fprintf( File, "\nOutput for time % .8e \n\n", stepN->giveTime() / this->giveVariableScale(VST_Time) );
+    for ( int idomain = 1; idomain <= this->ndomains; idomain++ ) {
+        domain = this->giveDomain(idomain);
+        fprintf( File, "\nOutput for domain %3d\n", domain->giveNumber() );
+        domain->giveOutputManager()->doDofManOutput(File, stepN);
+        domain->giveOutputManager()->doElementOutput(File, stepN);
     }
 }
 #endif
-
 } // end namespace oofem

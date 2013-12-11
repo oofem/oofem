@@ -126,7 +126,7 @@ NLStructuralElement :: giveInternalForcesVector(FloatArray &answer, TimeStep *tS
     this->computeVectorOf(EID_MomentumBalance, VM_Total, tStep, u);
     // subtract initial displacements, if defined
     if ( initialDisplacements ) {
-        u.subtract(*initialDisplacements);
+        u.subtract(* initialDisplacements);
     }
 
     // zero answer will resize accordingly when adding first contribution
@@ -145,7 +145,7 @@ NLStructuralElement :: giveInternalForcesVector(FloatArray &answer, TimeStep *tS
             } else {
                 ///@todo Is this really what we should do for inactive elements?
                 if ( !this->isActivated(tStep) ) {
-                    vStrain.resize( StructuralMaterial :: giveSizeOfVoigtSymVector(gp->giveMaterialMode()) );
+                    vStrain.resize( StructuralMaterial :: giveSizeOfVoigtSymVector( gp->giveMaterialMode() ) );
                     vStrain.zero();
                 }
                 vStrain.beProductOf(B, u);
@@ -235,7 +235,7 @@ NLStructuralElement :: giveInternalForcesVector_withIRulesAsSubcells(FloatArray 
             } else if ( nlGeometry == 1 ) {
                 if ( this->domain->giveEngngModel()->giveFormulation() == AL ) { // Cauchy stress
                     if ( useUpdatedGpRecord == 1 ) {
-                         vStress = matStat->giveCVector();
+                        vStress = matStat->giveCVector();
                     } else {
                         this->computeCauchyStressVector(vStress, gp, tStep);
                     }
@@ -285,12 +285,7 @@ NLStructuralElement :: computeStiffnessMatrix(FloatMatrix &answer,
                                               MatResponseMode rMode, TimeStep *tStep)
 {
     StructuralCrossSection *cs = this->giveStructuralCrossSection();
-    bool matStiffSymmFlag = false; 
-    if ( cs->MAT_GIVEN_BY_CS ) {
-        matStiffSymmFlag = cs->isCharacteristicMtrxSymmetric( rMode );
-    } else {
-        matStiffSymmFlag = this->giveCrossSection()->isCharacteristicMtrxSymmetric( rMode, this->giveMaterial()->giveNumber() );
-    }
+    bool matStiffSymmFlag = cs->isCharacteristicMtrxSymmetric(rMode);
 
     answer.resize(0, 0);
 
@@ -413,12 +408,8 @@ NLStructuralElement :: computeStiffnessMatrix_withIRulesAsSubcells(FloatMatrix &
                                                                    MatResponseMode rMode, TimeStep *tStep)
 {
     StructuralCrossSection *cs = this->giveStructuralCrossSection();
-    bool matStiffSymmFlag = false; 
-    if ( cs->MAT_GIVEN_BY_CS ) {
-        matStiffSymmFlag = cs->isCharacteristicMtrxSymmetric( rMode );
-    } else {
-        matStiffSymmFlag = this->giveCrossSection()->isCharacteristicMtrxSymmetric( rMode, this->giveMaterial()->giveNumber() );
-    }
+    bool matStiffSymmFlag = cs->isCharacteristicMtrxSymmetric(rMode);
+
     answer.resize(0, 0);
     if ( !this->isActivated(tStep) ) {
         return;
@@ -541,9 +532,9 @@ NLStructuralElement :: initializeFrom(InputRecord *ir)
 
 void NLStructuralElement :: giveInputRecord(DynamicInputRecord &input)
 {
-	StructuralElement::giveInputRecord(input);
+    StructuralElement :: giveInputRecord(input);
 
-	input.setField(nlGeometry, _IFT_NLStructuralElement_nlgeoflag);
+    input.setField(nlGeometry, _IFT_NLStructuralElement_nlgeoflag);
 }
 
 int

@@ -45,11 +45,11 @@
 #include "zzerrorestimator.h"
 #include "mmashapefunctprojection.h"
 #include "huertaerrorestimator.h"
+#include "gausspoint.h"
 
 #define _IFT_LTRSpace_Name "ltrspace"
 
 namespace oofem {
-
 class FEI3dTetLin;
 
 /**
@@ -88,16 +88,14 @@ public:
     // definition & identification
     virtual const char *giveInputRecordName() const { return _IFT_LTRSpace_Name; }
     virtual const char *giveClassName() const { return "LTRSpace"; }
-    virtual classType giveClassID() const { return LTRSpaceClass; }
     virtual IRResultType initializeFrom(InputRecord *ir);
     virtual MaterialMode giveMaterialMode();
 
 #ifdef __OOFEG
-    void drawRawGeometry(oofegGraphicContext &);
-    void drawDeformedGeometry(oofegGraphicContext &, UnknownType);
+    virtual void drawRawGeometry(oofegGraphicContext &);
+    virtual void drawDeformedGeometry(oofegGraphicContext &, UnknownType);
     virtual void drawScalar(oofegGraphicContext &context);
     virtual void drawSpecial(oofegGraphicContext &);
-    //void drawInternalState (oofegGraphicContext&);
 #endif
 
 #ifdef __PARALLEL_MODE
@@ -107,9 +105,9 @@ public:
     virtual Element *ZZNodalRecoveryMI_giveElement() { return this; }
 
     virtual void NodalAveragingRecoveryMI_computeNodalValue(FloatArray &answer, int node,
-                                                    InternalStateType type, TimeStep *tStep);
+                                                            InternalStateType type, TimeStep *tStep);
     virtual void NodalAveragingRecoveryMI_computeSideValue(FloatArray &answer, int side,
-                                                   InternalStateType type, TimeStep *tStep);
+                                                           InternalStateType type, TimeStep *tStep);
 
     virtual void SPRNodalRecoveryMI_giveSPRAssemblyPoints(IntArray &pap);
     virtual void SPRNodalRecoveryMI_giveDofMansDeterminedByPatch(IntArray &answer, int pap);
@@ -147,7 +145,7 @@ public:
     virtual void HuertaErrorEstimatorI_computeLocalCoords(FloatArray &answer, const FloatArray &coords)
     { computeLocalCoordinates(answer, coords); }
     virtual void HuertaErrorEstimatorI_computeNmatrixAt(GaussPoint *aGaussPoint, FloatMatrix &answer)
-    { computeNmatrixAt(aGaussPoint, answer); }
+    { computeNmatrixAt(* ( aGaussPoint->giveLocalCoordinates() ), answer); }
 
     // ZZRemeshingCriteriaInterface
     virtual double ZZRemeshingCriteriaI_giveCharacteristicSize() { return DirectErrorIndicatorRCI_giveCharacteristicSize(); }
@@ -159,7 +157,6 @@ public:
 
 protected:
     virtual void computeBmatrixAt(GaussPoint *gp, FloatMatrix &answer, int = 1, int = ALL_STRAINS);
-    virtual void computeNmatrixAt(GaussPoint *gp, FloatMatrix &answer);
     virtual void computeBHmatrixAt(GaussPoint *gp, FloatMatrix &answer);
     virtual void computeGaussPoints();
 

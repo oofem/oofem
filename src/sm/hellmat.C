@@ -21,7 +21,7 @@
 namespace oofem {
 #ifdef __TM_MODULE
 
-REGISTER_Material( HellmichMaterial );
+REGISTER_Material(HellmichMaterial);
 
 // --------- class AgingIsoLEMaterial implementation---------
 AgingIsoLEMaterial :: AgingIsoLEMaterial(int n, Domain *d, double E, double nu) : IsotropicLinearElasticMaterial(n, d, E, nu) { }
@@ -33,7 +33,7 @@ void AgingIsoLEMaterial :: setE(double newE)
 
 // --------- class HellmichMaterial implementation---------
 HellmichMaterial :: HellmichMaterial(int n, Domain *d) : StructuralMaterial(n, d), HydrationModelInterface()
-// Constructor - does nothing, initialization is done in initializeFrom(ir);
+    // Constructor - does nothing, initialization is done in initializeFrom(ir);
 { }
 
 void
@@ -65,7 +65,7 @@ HellmichMaterial :: createMaterialGp()
  * Sets gp number to 0 to let status services know it's the material-level gp.
  */
 {
-    Element *elem = NULL;//new Element( 0, giveDomain() );
+    Element *elem = NULL; //new Element( 0, giveDomain() );
     IntegrationRule *ir = new IntegrationRule(0, elem);
     char eirstr [ 50 ];
     sprintf( eirstr, "mat %d crosssect 1 nodes 0", giveNumber() );
@@ -78,7 +78,7 @@ HellmichMaterial :: createMaterialGp()
     if ( !materialGp ) {
         _error("Could not create the material-level gp.");
     }
-    
+
     static_cast< HellmichMaterialStatus * >( giveStatus(materialGp) )->setInitialTemperature(initialTemperature); // set material temperature in K
  #ifdef VERBOSE_HELLMAT
     // output to check if it worked
@@ -716,14 +716,14 @@ double HellmichMaterial :: rcThreshold(double chi1, double ksi)
         if ( options & moSqrtHardeningLaw ) {
             if ( chi1 >= 0 ) {
                 return ( fcStrength(ksi) *
-                        ( omega + ( 1 - omega ) * sqrt( chi1 * ( 2 * chi1u - chi1 ) ) / chi1u ) );
+                         ( omega + ( 1 - omega ) * sqrt( chi1 * ( 2 * chi1u - chi1 ) ) / chi1u ) );
             } else { // symmetric negative branch needed for stability of return mapping iteration
                 return ( fcStrength(ksi) *
-                        ( omega - ( 1 - omega ) * sqrt( chi1 * ( -2 * chi1u - chi1 ) ) / chi1u ) );
+                         ( omega - ( 1 - omega ) * sqrt( chi1 * ( -2 * chi1u - chi1 ) ) / chi1u ) );
             }
         } else { // quadratic hardening law - original
             return ( fcStrength(ksi) *
-                    ( omega + ( 1 - omega ) * ( 1 - pow( ( chi1 - chi1u ) / chi1u, 2 ) ) ) );
+                     ( omega + ( 1 - omega ) * ( 1 - pow( ( chi1 - chi1u ) / chi1u, 2 ) ) ) );
         }
     } else {
         return ( fcStrength(ksi) );
@@ -1385,9 +1385,9 @@ void HellmichMaterial :: plotReturn(FILE *outputStream, GaussPoint *gp, TimeStep
     fprintf( outputStream, "%d\n", status->giveActiveSurface() );
     fprintf(outputStream, "%.15g\n", alpha);
     fprintf( outputStream, "%.15g\n",
-            auxkdp * rcThreshold(status->giveHardeningVar(), ksi) );
+             auxkdp * rcThreshold(status->giveHardeningVar(), ksi) );
     fprintf( outputStream, "%.15g\n",
-            auxkdp * rcThreshold(status->giveTempHardeningVar(), ksi) );
+             auxkdp * rcThreshold(status->giveTempHardeningVar(), ksi) );
     fprintf( outputStream, "%.15g\n", delta * fcStrength(ksi) );
 
     inv = invariantI1(trialStress);
@@ -1586,7 +1586,7 @@ HellmichMaterial :: initAuxStatus(GaussPoint *gp, TimeStep *atTime)
         // Get temperature from transportProblem via Field Manager
         // Might also get hydration degree, so that it need not be computed twice
         FieldManager *fm = domain->giveEngngModel()->giveContext()->giveFieldManager();
-	FM_FieldPtr tf;
+        FM_FieldPtr tf;
         StructuralElement *elem;
         // == Temperature ==
         if ( ( tf = fm->giveField(FT_Temperature) ) ) {
@@ -1657,7 +1657,6 @@ HellmichMaterial :: initAuxStatus(GaussPoint *gp, TimeStep *atTime)
             printf("\nInitAuxStatus: Moisture field not registered, using saturated conditions.");
  #endif
         } // == end Moisture ==
-
     } // === end non-isothermal ===
 
     status->setTempTemperature(T);
@@ -1701,9 +1700,7 @@ HellmichMaterial :: initAuxStatus(GaussPoint *gp, TimeStep *atTime)
             status->setTempViscousSlip(auxg);
             status->setViscosity( computeViscosity(gp, atTime) );
         } // end creep status update
-
     } // end creep
-
 }
 double
 HellmichMaterial :: giveHydrationDegree(GaussPoint *gp, TimeStep *atTime, ValueModeType mode)
@@ -1980,7 +1977,7 @@ void HellmichMaterial :: giveShrinkageStrainVector(FloatArray &answer, MatRespon
 
         if ( form == ReducedForm ) {
             FloatArray auxvec = answer;
-            StructuralMaterial :: giveReducedSymVectorForm(answer, auxvec, gp->giveMaterialMode());
+            StructuralMaterial :: giveReducedSymVectorForm( answer, auxvec, gp->giveMaterialMode() );
         }
     }
 }
@@ -2014,7 +2011,7 @@ void HellmichMaterial :: givePrestressStrainVector(FloatArray &answer, MatRespon
 
     if ( form == ReducedForm ) {
         FloatArray auxvec = answer;
-        StructuralMaterial :: giveFullSymVectorForm(answer, auxvec, gp->giveMaterialMode());
+        StructuralMaterial :: giveFullSymVectorForm( answer, auxvec, gp->giveMaterialMode() );
     }
 }
 
@@ -2057,7 +2054,7 @@ void HellmichMaterial :: giveEigenStrainVector(FloatArray &answer, MatResponseFo
     if ( dT ) {
         giveThermalDilatationVector(auxvec, gp, atTime); // {tAlpha, tAlpha, tAlpha, 0, 0, 0}
         if ( ( mmode == _2dBeam ) || ( mmode == _3dBeam ) || ( mmode == _3dShell ) || ( mmode == _2dPlate ) ) {
-            double thick = crossSection->give(CS_Thickness);
+            double thick = crossSection->give(CS_Thickness, gp);
             if ( mmode == _2dBeam ) {
                 answer.resize(12);
                 answer.zero();
@@ -2068,7 +2065,7 @@ void HellmichMaterial :: giveEigenStrainVector(FloatArray &answer, MatResponseFo
             } else if ( mmode == _3dBeam ) {
                 answer.resize(12);
                 answer.zero();
-                double width = crossSection->give(CS_Width);
+                double width = crossSection->give(CS_Width, gp);
                 answer.at(1) = auxvec.at(1) * ( dT );
                 if ( et.giveSize() > 1 ) {
                     answer.at(8) = auxvec.at(1) * et.at(2) / thick; // kappa_y
@@ -2155,7 +2152,7 @@ void HellmichMaterial :: giveEigenStrainVector(FloatArray &answer, MatResponseFo
         redvec.subtract(auxvec); // can't use ev, here isn't JvE
 
         // convert to FullForm and add to answer
-        StructuralMaterial :: giveFullSymVectorForm(auxvec, redvec, gp->giveMaterialMode());
+        StructuralMaterial :: giveFullSymVectorForm( auxvec, redvec, gp->giveMaterialMode() );
 
         answer.add(auxvec);
     }
@@ -2174,7 +2171,7 @@ void HellmichMaterial :: giveRealStressVector(FloatArray &answer,
     HellmichMaterialStatus *status = static_cast< HellmichMaterialStatus * >( giveStatus(gp) );
     ValueModeType mode = VM_Incremental;
     MaterialMode mmode = gp->giveMaterialMode();
-    double E=-1.0, dt;
+    double E = -1.0, dt;
     // clear temporary status variables - maybe unnecessary
     initTempStatus(gp);
     // if needed, update auxiliary status values in gp and material
@@ -2218,7 +2215,7 @@ void HellmichMaterial :: giveRealStressVector(FloatArray &answer,
         auxStrain = totalStrain;
         giveStressDependentPartOfStrainVector(elasticStrain, gp, auxStrain, atTime, VM_Total);
         if ( options & moPlasticity ) {
-            elasticStrain.subtract(status->givePlasticStrainVector());
+            elasticStrain.subtract( status->givePlasticStrainVector() );
         }
 
         // trial stress = Ce * eps_n+1; no creep - can use Kv and Gv, but doesn't
@@ -2292,7 +2289,7 @@ void HellmichMaterial :: giveRealStressVector(FloatArray &answer,
         // auxiliary variables for 2D
         // !! CORNER !!
         _error("2D Plane stress plasticity not implemented!");
-#if 0
+ #if 0
         double sigx, sigy, tau, tc, rc, fca, dl, fDP, Itrial, snorm;
         FloatArray depsp(3);
         ActiveSurface as;
@@ -2362,7 +2359,7 @@ void HellmichMaterial :: giveRealStressVector(FloatArray &answer,
         fullStressVector(0) = redStressVector(0);
         fullStressVector(1) = redStressVector(1);
         fullStressVector(5) = redStressVector(2);
-#endif
+ #endif
     }
     // ====== 2D Konec ======
     else {
@@ -2376,7 +2373,7 @@ void HellmichMaterial :: giveRealStressVector(FloatArray &answer,
             }
         } else { // elastic
             redStressVector = trialStressVector;
-            StructuralMaterial :: giveFullSymVectorForm(fullStressVector, redStressVector, gp->giveMaterialMode());
+            StructuralMaterial :: giveFullSymVectorForm( fullStressVector, redStressVector, gp->giveMaterialMode() );
         }
     }
 
@@ -2446,14 +2443,14 @@ HellmichMaterial :: computeStressIndependentStrainVector(FloatArray &answer,
     if ( et.giveSize() ) {
         if ( fullAnswer.giveSize() ) {
             fullAnswer.add(et);
-    } else {
+        } else {
             fullAnswer = et;
         }
     }
 
     // export reduced answer
     if ( fullAnswer.giveSize() ) {
-        StructuralMaterial :: giveReducedSymVectorForm(answer, fullAnswer, gp->giveMaterialMode());
+        StructuralMaterial :: giveReducedSymVectorForm( answer, fullAnswer, gp->giveMaterialMode() );
         return;
     }
 
@@ -2471,7 +2468,7 @@ contextIOResultType HellmichMaterial :: saveIPContext(DataStream *stream, Contex
 
     // save material gp status if necessary
     if ( gp && options & moIsothermal ) {
-        StateCounterType c = gp ->giveElement()->giveDomain()->giveEngngModel()->giveCurrentStep()->giveSolutionStateCounter();
+        StateCounterType c = gp->giveElement()->giveDomain()->giveEngngModel()->giveCurrentStep()->giveSolutionStateCounter();
         if ( materialGpSaveAt != c ) {
             materialGpSaveAt = c;
             if ( ( iores = saveIPContext( stream, mode, giveMaterialGp() ) ) != CIO_OK ) {
@@ -2487,8 +2484,8 @@ contextIOResultType HellmichMaterial :: saveIPContext(DataStream *stream, Contex
 
     // save hydration model data - maybe should check moHydration?
     // needs to save only in case nonisodata is present = moIsothermal option is not set in gp options
-    if ( gp && !( ( ( HellmichMaterialStatus * ) giveStatus( gp ) )->giveMaterialOptions() & moIsothermal ) ) {
-      if ( ( iores = HydrationModelInterface :: saveContext(stream, mode, (void*) gp) ) != CIO_OK ) {
+    if ( gp && !( ( ( HellmichMaterialStatus * ) giveStatus(gp) )->giveMaterialOptions() & moIsothermal ) ) {
+        if ( ( iores = HydrationModelInterface :: saveContext(stream, mode, ( void * ) gp) ) != CIO_OK ) {
             THROW_CIOERR(iores);
         }
     }
@@ -2506,7 +2503,7 @@ contextIOResultType HellmichMaterial :: restoreIPContext(DataStream *stream, Con
 
     // read material gp status if necessary
     if ( gp && options & moIsothermal ) {
-        StateCounterType c = gp ->giveElement()->giveDomain()->giveEngngModel()->giveCurrentStep()->giveSolutionStateCounter();
+        StateCounterType c = gp->giveElement()->giveDomain()->giveEngngModel()->giveCurrentStep()->giveSolutionStateCounter();
         if ( materialGpRestoreAt != c ) {
             materialGpRestoreAt = c;
             if ( ( iores = restoreIPContext( stream, mode, giveMaterialGp() ) ) != CIO_OK ) {
@@ -2521,8 +2518,8 @@ contextIOResultType HellmichMaterial :: restoreIPContext(DataStream *stream, Con
     }
 
     // read hydration model data - maybe should check moHydration?
-    if ( gp && !( ( ( HellmichMaterialStatus * ) giveStatus( gp ) )->giveMaterialOptions() & moIsothermal ) ) {
-      if ( ( iores = HydrationModelInterface :: restoreContext(stream, mode, gp) ) != CIO_OK ) {
+    if ( gp && !( ( ( HellmichMaterialStatus * ) giveStatus(gp) )->giveMaterialOptions() & moIsothermal ) ) {
+        if ( ( iores = HydrationModelInterface :: restoreContext(stream, mode, gp) ) != CIO_OK ) {
             THROW_CIOERR(iores);
         }
     }
@@ -2629,7 +2626,7 @@ HellmichMaterial :: giveStiffnessMatrix(FloatMatrix &answer, MatResponseMode rMo
         HellmichMaterialStatus *status = static_cast< HellmichMaterialStatus * >( giveStatus(gp) );
         if ( mMode == _1dMat ) {
             printf( "Time: %.2f, sig: %.10e, Eep: %.10e\n", giveTime(atTime),
-                   ( status->giveTempStressVector().giveSize() ) ? ( status->giveTempStressVector() )(0) : 0, answer(0, 0) );
+                    ( status->giveTempStressVector().giveSize() ) ? ( status->giveTempStressVector() )(0) : 0, answer(0, 0) );
         } else {
             answer.printYourself();
         }
@@ -2643,7 +2640,7 @@ void HellmichMaterial :: setMixture(MixtureType mix)
     mixture = mix;
     // Set also hydration model to use given mixture
     /* !!! Ensure that hydrationModel is available at time of calling setMixture
-     * - hydrationModel is set up at beginning of initializeFrom if applicable */
+    * - hydrationModel is set up at beginning of initializeFrom if applicable */
     if ( hydrationModel ) {
         hydrationModel->setMixture(mix);
     }
@@ -2673,7 +2670,7 @@ HellmichMaterial :: giveIPValue(FloatArray &answer, GaussPoint *aGaussPoint, Int
     if ( type == IST_PlasticStrainTensor ) {
         if ( options & moPlasticity ) {
             ///@todo Fill in correct full form values here! This just adds zeros!
-            StructuralMaterial :: giveFullSymVectorForm(answer, status->givePlasticStrainVector(), aGaussPoint->giveMaterialMode());
+            StructuralMaterial :: giveFullSymVectorForm( answer, status->givePlasticStrainVector(), aGaussPoint->giveMaterialMode() );
         } else {
             answer.resize(6);
             answer.zero();
@@ -2684,7 +2681,7 @@ HellmichMaterial :: giveIPValue(FloatArray &answer, GaussPoint *aGaussPoint, Int
         if ( options & moPlasticity ) {
             FloatArray st(6);
             ///@todo Fill in correct full form values here! This just adds zeros!
-            StructuralMaterial :: giveFullSymVectorForm(st, status->givePlasticStrainVector(), aGaussPoint->giveMaterialMode());
+            StructuralMaterial :: giveFullSymVectorForm( st, status->givePlasticStrainVector(), aGaussPoint->giveMaterialMode() );
             this->computePrincipalValues(answer, st, principal_strain);
         } else {
             answer.resize(3);
@@ -2726,12 +2723,12 @@ double HellmichMaterial :: give(int aProperty, GaussPoint *gp)
  */
 {
     if ( ( aProperty == 'G' ) || ( aProperty == Gyz ) || ( aProperty == Gxz ) ||
-        ( aProperty == Gxy ) ) {
+         ( aProperty == Gxy ) ) {
         return agingG(1.0);
     }
 
     if ( ( aProperty == 'E' ) || ( aProperty == Ex ) || ( aProperty == Ey ) ||
-        ( aProperty == Ez ) ) {
+         ( aProperty == Ez ) ) {
         return agingE(1.0);
     }
 
@@ -2740,7 +2737,7 @@ double HellmichMaterial :: give(int aProperty, GaussPoint *gp)
     }
 
     if ( ( aProperty == 'n' ) || ( aProperty == NYzx ) || ( aProperty == NYzy ) ||
-        ( aProperty == NYyx ) ) {
+         ( aProperty == NYyx ) ) {
         return ny;
     } else {
         return this->Material :: give(aProperty, gp);
@@ -2990,7 +2987,7 @@ void HellmichMaterialStatus :: printOutputAt(FILE *stream, TimeStep *atTime)
 
             fprintf( stream, " chi1 %.5e eps_pl ", giveHardeningVar() );
             helpVec = this->givePlasticStrainVector();
-            StructuralMaterial :: giveFullSymVectorForm(fullHelpVec, helpVec, gp->giveMaterialMode());
+            StructuralMaterial :: giveFullSymVectorForm( fullHelpVec, helpVec, gp->giveMaterialMode() );
             n = fullHelpVec.giveSize();
             for ( i = 0; i < n; i++ ) {
                 fprintf( stream, " %.4e", fullHelpVec(i) );
@@ -3005,14 +3002,14 @@ void HellmichMaterialStatus :: printOutputAt(FILE *stream, TimeStep *atTime)
         }
 
         fprintf(stream, " eps_visc");
-        StructuralMaterial :: giveFullSymVectorForm(helpVec, creepData->viscousStrainVector, gp->giveMaterialMode());
+        StructuralMaterial :: giveFullSymVectorForm( helpVec, creepData->viscousStrainVector, gp->giveMaterialMode() );
         n = helpVec.giveSize();
         for ( i = 0; i < n; i++ ) {
             fprintf( stream, " %.4e", helpVec(i) );
         }
 
         fprintf(stream, " eps_flow ");
-        StructuralMaterial :: giveFullSymVectorForm(helpVec, creepData->flowStrainVector, gp->giveMaterialMode());
+        StructuralMaterial :: giveFullSymVectorForm( helpVec, creepData->flowStrainVector, gp->giveMaterialMode() );
         for ( i = 0; i < n; i++ ) {
             fprintf( stream, " %.4e", helpVec(i) );
         }

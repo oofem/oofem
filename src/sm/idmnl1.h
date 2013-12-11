@@ -82,7 +82,6 @@ public:
 
     // definition
     virtual const char *giveClassName() const { return "IDNLMaterialStatus"; }
-    virtual classType giveClassID() const { return IsotropicDamageMaterialStatusClass; }
 
     virtual void initTempStatus();
     virtual void updateYourself(TimeStep *tStep);
@@ -128,7 +127,6 @@ public:
 
     // identification and auxiliary functions
     virtual const char *giveClassName() const { return "IDNLMaterial"; }
-    virtual classType giveClassID() const { return IDNLMaterialClass; }
     virtual const char *giveInputRecordName() const { return _IFT_IDNLMaterial_Name; }
 
     virtual IRResultType initializeFrom(InputRecord *ir);
@@ -181,7 +179,7 @@ public:
      * references to integration points and their weights that influence to nonlocal average in
      * receiver's associated integration point.
      */
-    virtual std::list< localIntegrationRecord > *NonlocalMaterialStiffnessInterface_giveIntegrationDomainList(GaussPoint *gp);
+    virtual std :: list< localIntegrationRecord > *NonlocalMaterialStiffnessInterface_giveIntegrationDomainList(GaussPoint *gp);
     /**
      * Computes the "local" part of nonlocal stiffness contribution assembled for given integration point.
      * @param gp Source integration point.

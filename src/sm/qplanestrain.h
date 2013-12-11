@@ -65,7 +65,6 @@ public:
     // definition & identification
     virtual const char *giveInputRecordName() const { return _IFT_QPlaneStrain_Name; }
     virtual const char *giveClassName() const { return "QPlaneStrain"; }
-    virtual classType giveClassID() const { return QPlaneStrainClass; }
     virtual int computeNumberOfDofs() { return 16; }
     virtual MaterialMode giveMaterialMode() { return _PlaneStrain; }
 
@@ -80,16 +79,15 @@ public:
     virtual Element *ZZNodalRecoveryMI_giveElement() { return this; }
 
 #ifdef __OOFEG
-    void drawRawGeometry(oofegGraphicContext &);
-    void drawDeformedGeometry(oofegGraphicContext &, UnknownType);
-    void drawScalar(oofegGraphicContext &context);
-    //void drawInternalState(DrawMode mode);
+    virtual void drawRawGeometry(oofegGraphicContext &);
+    virtual void drawDeformedGeometry(oofegGraphicContext &, UnknownType);
+    virtual void drawScalar(oofegGraphicContext &context);
 #endif
 
 protected:
     void computeBmatrixAt(GaussPoint *gp, FloatMatrix &answer, int = 1, int = ALL_STRAINS);
     void computeBHmatrixAt(GaussPoint *gp, FloatMatrix &answer);
-    void computeNmatrixAt(GaussPoint *gp, FloatMatrix &answer);
+    void computeNmatrixAt(const FloatArray &iLocCoord, FloatMatrix &answer);
     void computeGaussPoints();
 };
 } // end namespace oofem

@@ -45,7 +45,6 @@
 //@}
 
 namespace oofem {
-
 /**
  * This class implements a 3-dimensional Linear Isoparametric
  * Mindlin theory beam element, with reduced integration.
@@ -74,7 +73,7 @@ public:
     virtual ~LIBeam3dNL() { }
 
     virtual void computeLumpedMassMatrix(FloatMatrix &answer, TimeStep *tStep);
-    virtual void computeConsistentMassMatrix(FloatMatrix &answer, TimeStep *tStep, double &mass)
+    virtual void computeConsistentMassMatrix(FloatMatrix &answer, TimeStep *tStep, double &mass, const double *ipDensity = NULL)
     { computeLumpedMassMatrix(answer, tStep); }
     virtual void computeStrainVector(FloatArray &answer, GaussPoint *gp, TimeStep *tStep);
     //int computeGtoLRotationMatrix(FloatMatrix &answer);
@@ -85,16 +84,18 @@ public:
     virtual double computeVolumeAround(GaussPoint *gp);
     virtual int computeGlobalCoordinates(FloatArray &answer, const FloatArray &lcoords);
 
+    virtual void computeStressVector(FloatArray &answer, const FloatArray &strain, GaussPoint *gp, TimeStep *tStep);
+    virtual void computeConstitutiveMatrixAt(FloatMatrix &answer, MatResponseMode rMode, GaussPoint *gp, TimeStep *tStep);
+
     // definition & identification
     virtual const char *giveInputRecordName() const { return _IFT_LIBeam3dNL_Name; }
     virtual const char *giveClassName() const { return "LIBeam3dNL"; }
-    virtual classType giveClassID() const { return LIBeam3dNLClass; }
     virtual IRResultType initializeFrom(InputRecord *ir);
     virtual Element_Geometry_Type giveGeometryType() const { return EGT_line_1; }
 
 #ifdef __OOFEG
-    void drawRawGeometry(oofegGraphicContext &);
-    void drawDeformedGeometry(oofegGraphicContext &, UnknownType);
+    virtual void drawRawGeometry(oofegGraphicContext &);
+    virtual void drawDeformedGeometry(oofegGraphicContext &, UnknownType);
 #endif
 
     virtual void computeStiffnessMatrix(FloatMatrix &answer, MatResponseMode rMode, TimeStep *tStep);
@@ -102,6 +103,7 @@ public:
 
     virtual integrationDomain giveIntegrationDomain() const { return _Line; }
     virtual MaterialMode giveMaterialMode() { return _3dBeam; }
+
 
 protected:
     // edge load support
@@ -120,7 +122,7 @@ protected:
     { _error("computeBmatrixAt: not implemented"); }
     //int computeGtoLRotationMatrix(FloatMatrix& answer);
 
-    virtual void computeNmatrixAt(GaussPoint *gp, FloatMatrix &answer);
+    virtual void computeNmatrixAt(const FloatArray &iLocCoord, FloatMatrix &answer);
     virtual void computeGaussPoints();
     double giveLength();
     //double givePitch();

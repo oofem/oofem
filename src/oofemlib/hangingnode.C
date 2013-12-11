@@ -42,8 +42,7 @@
 #include "classfactory.h"
 
 namespace oofem {
-
-REGISTER_DofManager( HangingNode );
+REGISTER_DofManager(HangingNode);
 
 HangingNode :: HangingNode(int n, Domain *aDomain) : Node(n, aDomain)
 {
@@ -71,7 +70,7 @@ int HangingNode :: checkConsistency()
     int result = Node :: checkConsistency();
 
 #if 0
-#ifdef __PARALLEL_MODE
+ #ifdef __PARALLEL_MODE
     // Check if master is in same mode
     if ( parallel_mode != DofManager_local ) {
         for ( int i = 1; i <= countOfMasterNodes; i++ ) {
@@ -81,12 +80,12 @@ int HangingNode :: checkConsistency()
             }
         }
     }
-#endif
+ #endif
 #endif
 
     // Check local coordinate systems
     for ( int i = 1; i <= e->giveNumberOfNodes(); ++i ) {
-        if ( !this->hasSameLCS(e->giveNode(i)) ) {
+        if ( !this->hasSameLCS( e->giveNode(i) ) ) {
             OOFEM_WARNING("HangingNode :: checkConsistency - Different lcs for master/slave nodes.");
             result = false;
         }
@@ -103,30 +102,32 @@ void HangingNode :: postInitialize()
     FloatArray lcoords, masterContribution;
 
 #ifdef __OOFEG
-    if (initialized) return;
+    if ( initialized ) {
+        return;
+    }
     initialized = true;
 #endif
 
     // First check element and interpolation
-    if (masterElement == -1) { // Then we find it by taking the closest (probably containing element)
+    if ( masterElement == -1 ) { // Then we find it by taking the closest (probably containing element)
         FloatArray closest;
         SpatialLocalizer *sp = this->domain->giveSpatialLocalizer();
         sp->init();
         // Closest point or containing point? It should be contained, but with numerical errors it might be slightly outside
         // so the closest point is more robust.
-        if ( !(e = sp->giveElementClosestToPoint(lcoords, closest, coordinates, this->masterRegion)) ) {
+        if ( !( e = sp->giveElementClosestToPoint(lcoords, closest, coordinates, this->masterRegion) ) ) {
             OOFEM_ERROR("HangingNode :: postInitialize - Couldn't find closest element (automatically).");
         }
         this->masterElement = e->giveNumber();
-    } else if ( !(e = this->giveDomain()->giveElement(this->masterElement)) ) {
+    } else if ( !( e = this->giveDomain()->giveElement(this->masterElement) ) ) {
         OOFEM_ERROR2("HangingNode :: postInitialize - Requested element %d doesn't exist.", this->masterElement);
     }
-    if ( !(fei = e->giveInterpolation()) ) {
+    if ( !( fei = e->giveInterpolation() ) ) {
         OOFEM_ERROR2("HangingNode :: postInitialize - Requested element %d doesn't have a interpolator.", this->masterElement);
     }
 
-    if (lcoords.giveSize() == 0) { // we don't need to do this again if the spatial localizer was used.
-        fei->global2local(lcoords, coordinates, FEIElementGeometryWrapper(e));
+    if ( lcoords.giveSize() == 0 ) { // we don't need to do this again if the spatial localizer was used.
+        fei->global2local( lcoords, coordinates, FEIElementGeometryWrapper(e) );
     }
 
     // Initialize slave dofs (inside check of consistency of receiver and master dof)
@@ -136,33 +137,32 @@ void HangingNode :: postInitialize()
         if ( sdof ) {
             DofIDItem id = sdof->giveDofID();
             fei = e->giveInterpolation(id);
-            if (!fei) {
+            if ( !fei ) {
                 OOFEM_ERROR3("HangingNode :: postInitialize - Requested interpolation for dof id %d doesn't exist in element %d.",
-                        id, this->masterElement);
+                             id, this->masterElement);
             }
-#if 0// This won't work (yet), as it requires some more general FEI classes, or something similar.
-            if (fei->hasMultiField()) {
+#if 0 // This won't work (yet), as it requires some more general FEI classes, or something similar.
+            if ( fei->hasMultiField() ) {
                 FloatMatrix multiContribution;
                 IntArray masterDofIDs, masterNodesDup, dofids;
                 fei->evalMultiN(multiContribution, dofids, lcoords, FEIElementGeometryWrapper(e), 0.0);
                 masterContribution.flatten(multiContribution);
                 masterDofIDs.resize(0);
-                for (int i = 0; i <= multiContribution.giveNumberOfColumns(); ++i) {
+                for ( int i = 0; i <= multiContribution.giveNumberOfColumns(); ++i ) {
                     masterDofIDs.followedBy(dofids);
                     masterNodesDup.followedBy(masterNodes);
                 }
-                sdof->initialize(masterContribution.giveSize(), masterNodesDup, &masterDofIDs, masterContribution);
+                sdof->initialize(masterContribution.giveSize(), masterNodesDup, & masterDofIDs, masterContribution);
             } else { }
 #else
             // Note: There can be more masterNodes than masterContributions, since all the
             // FEI classes are based on that the first nodes correspond to the simpler/linear interpolation.
             // If this assumption is changed in FEIElementGeometryWrapper + friends,
             // masterNode will also need to be modified for each dof accordingly.
-            fei->evalN(masterContribution, lcoords, FEIElementGeometryWrapper(e));
+            fei->evalN( masterContribution, lcoords, FEIElementGeometryWrapper(e) );
             sdof->initialize(masterContribution.giveSize(), masterNodes, NULL, masterContribution);
 #endif
         }
     }
 }
-
 } // end namespace oofem

@@ -39,7 +39,6 @@
 #include "gaussintegrationrule.h"
 
 namespace oofem {
-
 void
 FEI3dWedgeQuad :: evalN(FloatArray &answer, const FloatArray &lcoords, const FEICellGeometry &cellgeo)
 {
@@ -50,21 +49,21 @@ FEI3dWedgeQuad :: evalN(FloatArray &answer, const FloatArray &lcoords, const FEI
     y = lcoords.at(2);
     z = lcoords.at(3);
 
-    answer.at(1) = 0.5 * ((1. - x - y ) * (2. * (1. - x - y) - 1.) * ( 1. - z ) - (1. - x - y) * (1. - z * z));
-    answer.at(2) = 0.5 * (x * (2. * x - 1.) * (1. - z ) - x * (1. - z * z));
-    answer.at(3) = 0.5 * (y * (2. * y - 1.) * (1. - z ) - y * (1. - z * z));
-    answer.at(4) = 0.5 * ((1. - x - y ) * (2. * (1. - x - y) - 1.) * (1. + z) - (1. - x - y) * (1. - z * z));
-    answer.at(5) = 0.5 *  (x * (2. * x - 1.) * (1. + z) - x * (1. - z * z));
-    answer.at(6) = 0.5 *  (y * (2. * y - 1.) * (1. + z) - y * (1. - z * z));
-    answer.at(7) = 2. * (1. - x - y) * x * (1. - z);
-    answer.at(8) = 2. * x * y * (1. - z);
-    answer.at(9) = 2. * y * (1. -x - y) * (1. - z);
-    answer.at(10) = 2.*  x * (1. - x - y) * (1. + z);
-    answer.at(11) = 2. * x * y * (1. + z);
-    answer.at(12) = 2. * y * (1. - x - y) * (1. + z);
-    answer.at(13) = (1. -x - y) * (1. - z * z);
-    answer.at(14) = x * (1. - z * z);
-    answer.at(15) = y * (1. - z * z);
+    answer.at(1) = 0.5 * ( ( 1. - x - y ) * ( 2. * ( 1. - x - y ) - 1. ) * ( 1. - z ) - ( 1. - x - y ) * ( 1. - z * z ) );
+    answer.at(2) = 0.5 * ( x * ( 2. * x - 1. ) * ( 1. - z ) - x * ( 1. - z * z ) );
+    answer.at(3) = 0.5 * ( y * ( 2. * y - 1. ) * ( 1. - z ) - y * ( 1. - z * z ) );
+    answer.at(4) = 0.5 * ( ( 1. - x - y ) * ( 2. * ( 1. - x - y ) - 1. ) * ( 1. + z ) - ( 1. - x - y ) * ( 1. - z * z ) );
+    answer.at(5) = 0.5 *  ( x * ( 2. * x - 1. ) * ( 1. + z ) - x * ( 1. - z * z ) );
+    answer.at(6) = 0.5 *  ( y * ( 2. * y - 1. ) * ( 1. + z ) - y * ( 1. - z * z ) );
+    answer.at(7) = 2. * ( 1. - x - y ) * x * ( 1. - z );
+    answer.at(8) = 2. * x * y * ( 1. - z );
+    answer.at(9) = 2. * y * ( 1. - x - y ) * ( 1. - z );
+    answer.at(10) = 2. *  x * ( 1. - x - y ) * ( 1. + z );
+    answer.at(11) = 2. * x * y * ( 1. + z );
+    answer.at(12) = 2. * y * ( 1. - x - y ) * ( 1. + z );
+    answer.at(13) = ( 1. - x - y ) * ( 1. - z * z );
+    answer.at(14) = x * ( 1. - z * z );
+    answer.at(15) = y * ( 1. - z * z );
 }
 
 double
@@ -74,7 +73,7 @@ FEI3dWedgeQuad :: evaldNdx(FloatMatrix &answer, const FloatArray &lcoords, const
     this->giveLocalDerivative(dNduvw, lcoords);
     coords.resize(3, 15);
     for ( int i = 1; i <= 15; i++ ) {
-        coords.setColumn(*cellgeo.giveVertexCoordinates(i), i);
+        coords.setColumn(* cellgeo.giveVertexCoordinates(i), i);
     }
     jacobianMatrix.beProductOf(coords, dNduvw);
     inv.beInverseOf(jacobianMatrix);
@@ -103,8 +102,8 @@ FEI3dWedgeQuad :: local2global(FloatArray &answer, const FloatArray &lcoords, co
 int
 FEI3dWedgeQuad :: global2local(FloatArray &answer, const FloatArray &coords, const FEICellGeometry &cellgeo)
 {
-     OOFEM_ERROR("FEI3dHexaQuad :: global2local not implemented");
-     return 1;
+    OOFEM_ERROR("FEI3dHexaQuad :: global2local not implemented");
+    return 1;
 }
 
 
@@ -114,7 +113,7 @@ FEI3dWedgeQuad :: giveTransformationJacobian(const FloatArray &lcoords, const FE
     FloatMatrix jacobianMatrix(3, 3);
 
     this->giveJacobianMatrixAt(jacobianMatrix, lcoords, cellgeo);
-    return jacobianMatrix.giveDeterminant()/2.; ///@todo Should this really be a factor 1/2 here?
+    return jacobianMatrix.giveDeterminant() / 2.; ///@todo Should this really be a factor 1/2 here?
 }
 
 
@@ -126,7 +125,7 @@ FEI3dWedgeQuad :: giveJacobianMatrixAt(FloatMatrix &jacobianMatrix, const FloatA
     this->giveLocalDerivative(dNduvw, lcoords);
     coords.resize(3, 15);
     for ( int i = 1; i <= 15; i++ ) {
-        coords.setColumn(*cellgeo.giveVertexCoordinates(i), i);
+        coords.setColumn(* cellgeo.giveVertexCoordinates(i), i);
     }
     jacobianMatrix.beProductOf(coords, dNduvw);
 }
@@ -142,56 +141,55 @@ FEI3dWedgeQuad :: giveLocalDerivative(FloatMatrix &dN, const FloatArray &lcoords
 
     dN.resize(15, 3);
 
-    dN.at(1, 1)  =  1./2. - (z - 1.)*(x + y - 1.) - z*z/2. - ((z - 1.)*(2.*x + 2.*y - 1.))/2.;
-    dN.at(2, 1)  =  z*z/2. - x*(z - 1.) - ((2.*x - 1.)*(z - 1.))/2. - 1/2.;
+    dN.at(1, 1)  =  1. / 2. - ( z - 1. ) * ( x + y - 1. ) - z * z / 2. - ( ( z - 1. ) * ( 2. * x + 2. * y - 1. ) ) / 2.;
+    dN.at(2, 1)  =  z * z / 2. - x * ( z - 1. ) - ( ( 2. * x - 1. ) * ( z - 1. ) ) / 2. - 1 / 2.;
     dN.at(3, 1)  =  0.;
-    dN.at(4, 1)  = ((z + 1.)*(2.*x + 2.*y - 1.))/2. + (z + 1.)*(x + y - 1.) - z*z/2. + 1./2.;
-    dN.at(5, 1)  = ((2.*x - 1.)*(z + 1.))/2. + x*(z + 1.) + z*z/2. - 1./2.;
+    dN.at(4, 1)  = ( ( z + 1. ) * ( 2. * x + 2. * y - 1. ) ) / 2. + ( z + 1. ) * ( x + y - 1. ) - z * z / 2. + 1. / 2.;
+    dN.at(5, 1)  = ( ( 2. * x - 1. ) * ( z + 1. ) ) / 2. + x * ( z + 1. ) + z * z / 2. - 1. / 2.;
     dN.at(6, 1)  =  0.;
-    dN.at(7, 1)  = (z - 1.)*(2.*x + 2.*y - 2.) + 2.*x*(z - 1.);
-    dN.at(8, 1)  = -2.*y*(z - 1.);
-    dN.at(9, 1)  =  2.*y*(z - 1.);
-    dN.at(10, 1) = -2.*(z + 1.)*(x + y - 1.) - 2.*x*(z + 1.);
-    dN.at(11, 1) =  2.*y*(z + 1.);
-    dN.at(12, 1) = -2.*y*(z + 1.);
-    dN.at(13, 1) =  z*z - 1.;
-    dN.at(14, 1) =  1. - z*z;
+    dN.at(7, 1)  = ( z - 1. ) * ( 2. * x + 2. * y - 2. ) + 2. * x * ( z - 1. );
+    dN.at(8, 1)  = -2. * y * ( z - 1. );
+    dN.at(9, 1)  =  2. * y * ( z - 1. );
+    dN.at(10, 1) = -2. * ( z + 1. ) * ( x + y - 1. ) - 2. * x * ( z + 1. );
+    dN.at(11, 1) =  2. * y * ( z + 1. );
+    dN.at(12, 1) = -2. * y * ( z + 1. );
+    dN.at(13, 1) =  z * z - 1.;
+    dN.at(14, 1) =  1. - z * z;
     dN.at(15, 1) =  0.;
 
 
-    dN.at(1, 2) =   1./2. - (z - 1.)*(x + y - 1.) - z*z/2. - ((z - 1.)*(2.*x + 2.*y - 1.))/2.;
+    dN.at(1, 2) =   1. / 2. - ( z - 1. ) * ( x + y - 1. ) - z * z / 2. - ( ( z - 1. ) * ( 2. * x + 2. * y - 1. ) ) / 2.;
     dN.at(2, 2) =   0.;
-    dN.at(3, 2) =   z*z/2. - y*(z - 1.) - ((2.*y - 1.)*(z - 1.))/2. - 1./2.;
-    dN.at(4, 2) = ((z + 1.)*(2.*x + 2.*y - 1.))/2. + (z + 1.)*(x + y - 1.) - z*z/2. + 1./2.;
+    dN.at(3, 2) =   z * z / 2. - y * ( z - 1. ) - ( ( 2. * y - 1. ) * ( z - 1. ) ) / 2. - 1. / 2.;
+    dN.at(4, 2) = ( ( z + 1. ) * ( 2. * x + 2. * y - 1. ) ) / 2. + ( z + 1. ) * ( x + y - 1. ) - z * z / 2. + 1. / 2.;
     dN.at(5, 2) =   0.;
-    dN.at(6, 2) = ((2.*y - 1.)*(z + 1.))/2. + y*(z + 1.) + z*z/2. - 1./2.;
-    dN.at(7, 2) =   2.*x*(z - 1.);
-    dN.at(8, 2) =  -2.*x*(z - 1.);
-    dN.at(9, 2) =   2.*(z - 1.)*(x + y - 1.) + 2.*y*(z - 1.);
-    dN.at(10, 2) = -2.*x*(z + 1.);
-    dN.at(11, 2) =  2.*x*(z + 1.);
-    dN.at(12, 2) = -2.*(z + 1.)*(x + y - 1.) - 2.*y*(z + 1.);
-    dN.at(13, 2) =  z*z - 1.;
+    dN.at(6, 2) = ( ( 2. * y - 1. ) * ( z + 1. ) ) / 2. + y * ( z + 1. ) + z * z / 2. - 1. / 2.;
+    dN.at(7, 2) =   2. * x * ( z - 1. );
+    dN.at(8, 2) =  -2. * x * ( z - 1. );
+    dN.at(9, 2) =   2. * ( z - 1. ) * ( x + y - 1. ) + 2. * y * ( z - 1. );
+    dN.at(10, 2) = -2. * x * ( z + 1. );
+    dN.at(11, 2) =  2. * x * ( z + 1. );
+    dN.at(12, 2) = -2. * ( z + 1. ) * ( x + y - 1. ) - 2. * y * ( z + 1. );
+    dN.at(13, 2) =  z * z - 1.;
     dN.at(14, 2) =  0.;
-    dN.at(15, 2) =  1. - z*z;
+    dN.at(15, 2) =  1. - z * z;
 
 
-    dN.at(1, 3) =  -z*(x + y - 1.) - ((2.*x + 2.*y - 1.)*(x + y - 1.))/2.;
-    dN.at(2, 3) =   x*z - (x*(2.*x - 1.))/2.;
-    dN.at(3, 3) =   y*z - (y*(2*y - 1.))/2.;
-    dN.at(4, 3) =  ((2.*x + 2.*y - 1.)*(x + y - 1.))/2. - z*(x + y - 1.);
-    dN.at(5, 3) =  (x*(2.*x - 1.))/2. + x*z;
-    dN.at(6, 3) =  (y*(2.*y - 1.))/2. + y*z;
-    dN.at(7, 3) =   x*(2.*x + 2.*y - 2.);
-    dN.at(8, 3) =  -2.*x*y;
-    dN.at(9, 3) =   2.*y*(x + y - 1.);
-    dN.at(10, 3) = -2.*x*(x + y - 1.);
-    dN.at(11, 3) =  2.*x*y;
-    dN.at(12, 3) = -2.*y*(x + y - 1.);
-    dN.at(13, 3) =  2.*z*(x + y - 1.);
-    dN.at(14, 3) = -2.*x*z;
-    dN.at(15, 3) = -2.*y*z;
-
+    dN.at(1, 3) =  -z * ( x + y - 1. ) - ( ( 2. * x + 2. * y - 1. ) * ( x + y - 1. ) ) / 2.;
+    dN.at(2, 3) =   x * z - ( x * ( 2. * x - 1. ) ) / 2.;
+    dN.at(3, 3) =   y * z - ( y * ( 2 * y - 1. ) ) / 2.;
+    dN.at(4, 3) =  ( ( 2. * x + 2. * y - 1. ) * ( x + y - 1. ) ) / 2. - z * ( x + y - 1. );
+    dN.at(5, 3) =  ( x * ( 2. * x - 1. ) ) / 2. + x * z;
+    dN.at(6, 3) =  ( y * ( 2. * y - 1. ) ) / 2. + y * z;
+    dN.at(7, 3) =   x * ( 2. * x + 2. * y - 2. );
+    dN.at(8, 3) =  -2. * x * y;
+    dN.at(9, 3) =   2. * y * ( x + y - 1. );
+    dN.at(10, 3) = -2. * x * ( x + y - 1. );
+    dN.at(11, 3) =  2. * x * y;
+    dN.at(12, 3) = -2. * y * ( x + y - 1. );
+    dN.at(13, 3) =  2. * z * ( x + y - 1. );
+    dN.at(14, 3) = -2. * x * z;
+    dN.at(15, 3) = -2. * y * z;
 }
 
 
@@ -199,9 +197,9 @@ void FEI3dWedgeQuad :: edgeEvalN(FloatArray &answer, int iedge, const FloatArray
 {
     double ksi = lcoords.at(1);
     answer.resize(3);
-    answer.at(1) = ksi* ( ksi - 1. ) * 0.5;
-    answer.at(2) = ksi* ( 1. + ksi ) * 0.5;
-    answer.at(3) = (1. - ksi * ksi);
+    answer.at(1) = ksi * ( ksi - 1. ) * 0.5;
+    answer.at(2) = ksi * ( 1. + ksi ) * 0.5;
+    answer.at(3) = ( 1. - ksi * ksi );
 }
 
 
@@ -221,7 +219,7 @@ void FEI3dWedgeQuad :: edgeLocal2global(FloatArray &answer, int iedge, const Flo
 
     answer.resize(0);
     for ( int i = 1; i <= n.giveSize(); ++i ) {
-        answer.add( n.at(i), * cellgeo.giveVertexCoordinates(nodes.at(i)));
+        answer.add( n.at(i), * cellgeo.giveVertexCoordinates( nodes.at(i) ) );
     }
 }
 
@@ -263,17 +261,23 @@ double FEI3dWedgeQuad :: edgeGiveTransformationJacobian(int iedge, const FloatAr
 void
 FEI3dWedgeQuad :: surfaceEvalN(FloatArray &answer, int isurf, const FloatArray &lcoords, const FEICellGeometry &cellgeo)
 {
-    double ksi = lcoords.at(1);
-    double eta = lcoords.at(2);
-
     if ( isurf <= 2 ) {
-        ///@todo Definitely wrong: There should be 6 basis functions!
-        OOFEM_ERROR("FIXME: Code likely buggy here");
-        answer.resize(3);
-        answer.at(1) = ksi;
-        answer.at(2) = eta;
-        answer.at(3) = 1.0 - ksi - eta;
+        double l1, l2, l3;
+        l1 = lcoords.at(1);
+        l2 = lcoords.at(2);
+        l3 = 1.0 - l1 - l2;
+
+        answer.resize(6);
+        answer.at(1) = ( 2. * l1 - 1. ) * l1;
+        answer.at(2) = ( 2. * l2 - 1. ) * l2;
+        answer.at(3) = ( 2. * l3 - 1. ) * l3;
+        answer.at(4) = 4. * l1 * l2;
+        answer.at(5) = 4. * l2 * l3;
+        answer.at(6) = 4. * l3 * l1;
     } else {
+        double ksi = lcoords.at(1);
+        double eta = lcoords.at(2);
+
         answer.resize(8);
         answer.at(1) = ( 1. + ksi ) * ( 1. + eta ) * 0.25 * ( ksi + eta - 1. );
         answer.at(2) = ( 1. - ksi ) * ( 1. + eta ) * 0.25 * ( -ksi + eta - 1. );
@@ -289,7 +293,7 @@ FEI3dWedgeQuad :: surfaceEvalN(FloatArray &answer, int isurf, const FloatArray &
 
 void
 FEI3dWedgeQuad :: surfaceLocal2global(FloatArray &answer, int isurf,
-                                     const FloatArray &lcoords, const FEICellGeometry &cellgeo)
+                                      const FloatArray &lcoords, const FEICellGeometry &cellgeo)
 {
     IntArray nodes;
     FloatArray n;
@@ -299,7 +303,7 @@ FEI3dWedgeQuad :: surfaceLocal2global(FloatArray &answer, int isurf,
 
     answer.resize(0);
     for ( int i = 1; i <= n.giveSize(); ++i ) {
-        answer.add( n.at(i), * cellgeo.giveVertexCoordinates(nodes.at(i)));
+        answer.add( n.at(i), * cellgeo.giveVertexCoordinates( nodes.at(i) ) );
     }
 }
 
@@ -324,10 +328,75 @@ FEI3dWedgeQuad :: computeLocalSurfaceMapping(IntArray &nodes, int isurf)
 
 
 double
+FEI3dWedgeQuad :: surfaceEvalNormal(FloatArray &answer, int isurf, const FloatArray &lcoords, const FEICellGeometry &cellgeo)
+{
+    FloatArray a, b, dNdksi, dNdeta;
+    IntArray snodes;
+
+    this->computeLocalSurfaceMapping(snodes, isurf);
+
+    if ( snodes.giveSize() == 6 ) {
+        double l1, l2, l3;
+        l1 = lcoords.at(1);
+        l2 = lcoords.at(2);
+        l3 = 1.0 - l1 - l2;
+
+        dNdksi.resize(6);
+        dNdksi(0) = 4.0 * l1 - 1.0;
+        dNdksi(1) = 0.0;
+        dNdksi(2) = -1.0 * ( 4.0 * l3 - 1.0 );
+        dNdksi(3) = 4.0 * l2;
+        dNdksi(4) = -4.0 * l2;
+        dNdksi(5) = 4.0 * l3 - 4.0 * l1;
+
+        dNdeta.resize(6);
+        dNdeta(0) = 0.0;
+        dNdeta(1) = 4.0 * l2 - 1.0;
+        dNdeta(2) = -1.0 * ( 4.0 * l3 - 1.0 );
+        dNdeta(3) = 4.0 * l1;
+        dNdeta(4) = 4.0 * l3 - 4.0 * l2;
+        dNdeta(5) = -4.0 * l1;
+    } else {
+        double ksi, eta;
+        ksi = lcoords.at(1);
+        eta = lcoords.at(2);
+
+        dNdksi.resize(8);
+        dNdksi.at(1) =  0.25 * ( 1. + eta ) * ( 2.0 * ksi + eta );
+        dNdksi.at(2) = -0.25 * ( 1. + eta ) * ( -2.0 * ksi + eta );
+        dNdksi.at(3) = -0.25 * ( 1. - eta ) * ( -2.0 * ksi - eta );
+        dNdksi.at(4) =  0.25 * ( 1. - eta ) * ( 2.0 * ksi - eta );
+        dNdksi.at(5) = -ksi * ( 1. + eta );
+        dNdksi.at(6) = -0.5 * ( 1. - eta * eta );
+        dNdksi.at(7) = -ksi * ( 1. - eta );
+        dNdksi.at(8) =  0.5 * ( 1. - eta * eta );
+
+        dNdeta.resize(8);
+        dNdeta.at(1) =  0.25 * ( 1. + ksi ) * ( 2.0 * eta + ksi );
+        dNdeta.at(2) =  0.25 * ( 1. - ksi ) * ( 2.0 * eta - ksi );
+        dNdeta.at(3) = -0.25 * ( 1. - ksi ) * ( -2.0 * eta - ksi );
+        dNdeta.at(4) = -0.25 * ( 1. + ksi ) * ( -2.0 * eta + ksi );
+        dNdeta.at(5) =  0.5 * ( 1. - ksi * ksi );
+        dNdeta.at(6) = -eta * ( 1. - ksi );
+        dNdeta.at(7) = -0.5 * ( 1. - ksi * ksi );
+        dNdeta.at(8) = -eta * ( 1. + ksi );
+    }
+
+    for ( int i = 1; i <= snodes.giveSize(); ++i ) {
+        a.add( dNdksi.at(i), * cellgeo.giveVertexCoordinates( snodes.at(i) ) );
+        b.add( dNdeta.at(i), * cellgeo.giveVertexCoordinates( snodes.at(i) ) );
+    }
+
+    answer.beVectorProductOf(a, b);
+    return answer.normalize();
+}
+
+
+double
 FEI3dWedgeQuad :: surfaceGiveTransformationJacobian(int isurf, const FloatArray &lcoords, const FEICellGeometry &cellgeo)
 {
-    OOFEM_ERROR("FEI3dWedgeQuad :: surfaceGiveTransformationJacobian not implemented");
-    return 0;
+    FloatArray normal;
+    return this->surfaceEvalNormal(normal, isurf, lcoords, cellgeo);
 }
 
 
@@ -358,5 +427,4 @@ FEI3dWedgeQuad :: giveBoundaryIntegrationRule(int order, int boundary)
     }
     return iRule;
 }
-
 } // end namespace oofem

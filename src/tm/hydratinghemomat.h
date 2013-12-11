@@ -48,7 +48,6 @@
 //@}
 
 namespace oofem {
-
 /**
  * Heat and moisture transport material with hydration.
  */
@@ -78,7 +77,6 @@ public:
     // identification and auxiliary functions
     virtual const char *giveInputRecordName() const { return _IFT_HydratingHeMoMaterial_Name; }
     virtual const char *giveClassName() const { return "HydratingHeMoMaterial"; }
-    virtual classType giveClassID() const { return HydratingHeMoMaterialClass; }
 
     virtual IRResultType initializeFrom(InputRecord *ir);
 

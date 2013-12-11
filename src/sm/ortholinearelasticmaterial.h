@@ -127,21 +127,20 @@ public:
     // identification and auxiliary functions
     virtual const char *giveInputRecordName() const { return _IFT_OrthotropicLinearElasticMaterial_Name; }
     virtual const char *giveClassName() const { return "OrthotropicLinearElasticMaterial"; }
-    virtual classType giveClassID() const { return OrthotropicLinearElasticMaterialClass; }
     virtual IRResultType initializeFrom(InputRecord *ir);
     void giveInputRecord(DynamicInputRecord &input);
     virtual double give(int aProperty, GaussPoint *gp);
 
     virtual void give3dMaterialStiffnessMatrix(FloatMatrix &answer,
-                                       MatResponseMode mode, GaussPoint * gp,
-                                       TimeStep *tStep);
+                                               MatResponseMode mode, GaussPoint *gp,
+                                               TimeStep *tStep);
 
     virtual MaterialStatus *CreateStatus(GaussPoint *gp) const;
 
     /// Computes local 3d stiffness matrix of the receiver.
     virtual void give3dLocalMaterialStiffnessMatrix(FloatMatrix &answer,
-                                            MatResponseMode mode, GaussPoint *gp,
-                                            TimeStep *tStep);
+                                                    MatResponseMode mode, GaussPoint *gp,
+                                                    TimeStep *tStep);
 
 protected:
     void giveTensorRotationMatrix(FloatMatrix &answer, GaussPoint *gp);

@@ -47,8 +47,7 @@
 
 
 namespace oofem {
-
-REGISTER_Element( TR_SHELL01 );
+REGISTER_Element(TR_SHELL01);
 
 TR_SHELL01 :: TR_SHELL01(int n, Domain *aDomain) : StructuralElement(n, aDomain)
 {
@@ -67,17 +66,17 @@ TR_SHELL01 :: initializeFrom(InputRecord *ir)
     this->StructuralElement :: initializeFrom(ir);
 
     /*
-    IR_GIVE_OPTIONAL_FIELD(ir, val, _IFT_Element_nip);
-    if ( val != -1 ) {
-        _error("key word NIP is not allowed for element TR_SHELL01");
-    }
-
-
-    IR_GIVE_OPTIONAL_FIELD(ir, val, _IFT_TrPlaneStrRot_niprot, "niprot");
-    if ( val != -1 ) {
-        _error("key word NIProt is not allowed for element TR_SHELL01");
-    }
-    */
+     * IR_GIVE_OPTIONAL_FIELD(ir, val, _IFT_Element_nip);
+     * if ( val != -1 ) {
+     *  _error("key word NIP is not allowed for element TR_SHELL01");
+     * }
+     *
+     *
+     * IR_GIVE_OPTIONAL_FIELD(ir, val, _IFT_TrPlaneStrRot_niprot, "niprot");
+     * if ( val != -1 ) {
+     *  _error("key word NIProt is not allowed for element TR_SHELL01");
+     * }
+     */
 
     //
     plate->initializeFrom(ir);
@@ -87,10 +86,10 @@ TR_SHELL01 :: initializeFrom(InputRecord *ir)
     membrane->computeGaussPoints();
 
     // check the compatibility of irules of plate and membrane
-    if (plate->giveDefaultIntegrationRulePtr()->giveNumberOfIntegrationPoints() != membrane->giveDefaultIntegrationRulePtr()->giveNumberOfIntegrationPoints()) {
-      OOFEM_ERROR ("TR_SHELL01: incompatible integration rules detected");
+    if ( plate->giveDefaultIntegrationRulePtr()->giveNumberOfIntegrationPoints() != membrane->giveDefaultIntegrationRulePtr()->giveNumberOfIntegrationPoints() ) {
+        OOFEM_ERROR("TR_SHELL01: incompatible integration rules detected");
     }
-    
+
     return IRRT_OK;
 }
 
@@ -101,19 +100,19 @@ TR_SHELL01 :: giveCharacteristicVector(FloatArray &answer, CharType mtrx, ValueM
 // returns characteristics vector of receiver accordind to mtrx
 //
 {
-  IntArray loc(9);
-  FloatArray aux;
+    IntArray loc(9);
+    FloatArray aux;
 
-  answer.resize(18);
-  answer.zero();
+    answer.resize(18);
+    answer.zero();
 
-  plate->giveCharacteristicVector(aux, mtrx, mode, tStep);
-  loc.setValues(9, 3,4,5, 9,10,11, 15,16,17);
-  answer.assemble(aux, loc);
+    plate->giveCharacteristicVector(aux, mtrx, mode, tStep);
+    loc.setValues(9, 3, 4, 5, 9, 10, 11, 15, 16, 17);
+    answer.assemble(aux, loc);
 
-  membrane->giveCharacteristicVector(aux, mtrx, mode, tStep);
-  loc.setValues(9, 1,2,6, 7,8,12, 13,14,18);
-  answer.assemble(aux, loc);
+    membrane->giveCharacteristicVector(aux, mtrx, mode, tStep);
+    loc.setValues(9, 1, 2, 6, 7, 8, 12, 13, 14, 18);
+    answer.assemble(aux, loc);
 }
 
 void
@@ -125,15 +124,15 @@ TR_SHELL01 :: giveCharacteristicMatrix(FloatMatrix &answer, CharType mtrx, TimeS
     IntArray loc(9);
     FloatMatrix aux;
 
-    answer.resize(18,18);
+    answer.resize(18, 18);
     answer.zero();
 
     plate->giveCharacteristicMatrix(aux, mtrx, tStep);
-    loc.setValues(9, 3,4,5, 9,10,11, 15,16,17);
+    loc.setValues(9, 3, 4, 5, 9, 10, 11, 15, 16, 17);
     answer.assemble(aux, loc);
 
     membrane->giveCharacteristicMatrix(aux, mtrx, tStep);
-    loc.setValues(9, 1,2,6, 7,8,12, 13,14,18);
+    loc.setValues(9, 1, 2, 6, 7, 8, 12, 13, 14, 18);
     answer.assemble(aux, loc);
 }
 
@@ -142,28 +141,30 @@ TR_SHELL01 :: giveRotationMatrix(FloatMatrix &answer, EquationID eid)
 {
     IntArray loc(9);
     FloatMatrix aux1, aux2;
-    int i,j, ncol;
+    int i, j, ncol;
 
     bool t1 = plate->giveRotationMatrix(aux1, eid);
     bool t2 =  membrane->giveRotationMatrix(aux2, eid);
 
-    if (t1 != t2) OOFEM_ERROR ("Transformation demand mismatch");
-    
-    if (t1) {
+    if ( t1 != t2 ) {
+        OOFEM_ERROR("Transformation demand mismatch");
+    }
+
+    if ( t1 ) {
         ncol = aux1.giveNumberOfColumns();
-        answer.resize(18,ncol);
-        
-        loc.setValues(9, 3,4,5, 9,10,11, 15,16,17);
-        for (i=1; i<=9; i++) { // row index
-            for (j=1; j<=ncol; j++) {
-                answer.at(loc.at(i),j)=aux1.at(i,j);
+        answer.resize(18, ncol);
+
+        loc.setValues(9, 3, 4, 5, 9, 10, 11, 15, 16, 17);
+        for ( i = 1; i <= 9; i++ ) { // row index
+            for ( j = 1; j <= ncol; j++ ) {
+                answer.at(loc.at(i), j) = aux1.at(i, j);
             }
         }
 
-        loc.setValues(9, 1,2,6, 7,8,12, 13,14,18);
-        for (i=1; i<=9; i++) { // row index
-            for (j=1; j<=ncol; j++) {
-                answer.at(loc.at(i),j)=aux2.at(i,j);
+        loc.setValues(9, 1, 2, 6, 7, 8, 12, 13, 14, 18);
+        for ( i = 1; i <= 9; i++ ) { // row index
+            for ( j = 1; j <= ncol; j++ ) {
+                answer.at(loc.at(i), j) = aux2.at(i, j);
             }
         }
     }
@@ -201,7 +202,7 @@ TR_SHELL01 :: giveInterface(InterfaceType interface)
     } else if ( interface == ZZRemeshingCriteriaInterfaceType ) {
         return static_cast< ZZRemeshingCriteriaInterface * >( this );
     } else if ( interface == SpatialLocalizerInterfaceType ) {
-      return static_cast< SpatialLocalizerInterface * >( this );
+        return static_cast< SpatialLocalizerInterface * >( this );
     }
 
 
@@ -209,7 +210,7 @@ TR_SHELL01 :: giveInterface(InterfaceType interface)
 }
 
 double
-TR_SHELL01 :: computeVolumeAround(GaussPoint *gp) 
+TR_SHELL01 :: computeVolumeAround(GaussPoint *gp)
 {
     return plate->computeVolumeAround(gp);
 }
@@ -219,17 +220,17 @@ TR_SHELL01 :: giveIPValue(FloatArray &answer, GaussPoint *gp, InternalStateType 
 {
     if ( type == IST_ShellForceMomentumTensor ) {
         FloatArray aux;
-        GaussPoint *membraneGP = membrane->giveDefaultIntegrationRulePtr()->getIntegrationPoint(gp->giveNumber()-1);
-        GaussPoint *plateGP = plate->giveDefaultIntegrationRulePtr()->getIntegrationPoint(gp->giveNumber()-1);
-        
+        GaussPoint *membraneGP = membrane->giveDefaultIntegrationRulePtr()->getIntegrationPoint(gp->giveNumber() - 1);
+        GaussPoint *plateGP = plate->giveDefaultIntegrationRulePtr()->getIntegrationPoint(gp->giveNumber() - 1);
+
         plate->giveIPValue(answer, plateGP, IST_ShellForceMomentumTensor, atTime);
         membrane->giveIPValue(aux, membraneGP, IST_ShellForceMomentumTensor, atTime);
         answer.add(aux);
         return 1;
     } else if ( type == IST_ShellStrainCurvatureTensor ) {
         FloatArray aux;
-        GaussPoint *membraneGP = membrane->giveDefaultIntegrationRulePtr()->getIntegrationPoint(gp->giveNumber()-1);
-        GaussPoint *plateGP = plate->giveDefaultIntegrationRulePtr()->getIntegrationPoint(gp->giveNumber()-1);
+        GaussPoint *membraneGP = membrane->giveDefaultIntegrationRulePtr()->getIntegrationPoint(gp->giveNumber() - 1);
+        GaussPoint *plateGP = plate->giveDefaultIntegrationRulePtr()->getIntegrationPoint(gp->giveNumber() - 1);
 
         plate->giveIPValue(answer, plateGP, IST_ShellStrainCurvatureTensor, atTime);
         membrane->giveIPValue(aux, membraneGP, IST_ShellStrainCurvatureTensor, atTime);
@@ -237,7 +238,7 @@ TR_SHELL01 :: giveIPValue(FloatArray &answer, GaussPoint *gp, InternalStateType 
 
         return 1;
     } else {
-        return StructuralElement::giveIPValue(answer, gp, type, atTime);
+        return StructuralElement :: giveIPValue(answer, gp, type, atTime);
     }
 }
 
@@ -247,8 +248,8 @@ TR_SHELL01 :: giveIPValue(FloatArray &answer, GaussPoint *gp, InternalStateType 
 //
 
 
-double 
-TR_SHELL01 :: ZZRemeshingCriteriaI_giveCharacteristicSize() 
+double
+TR_SHELL01 :: ZZRemeshingCriteriaI_giveCharacteristicSize()
 {
     return sqrt(plate->computeArea() * 2.0);
 }
@@ -260,7 +261,7 @@ TR_SHELL01 :: ZZRemeshingCriteriaI_giveCharacteristicSize()
 //
 void
 TR_SHELL01 :: NodalAveragingRecoveryMI_computeNodalValue(FloatArray &answer, int node,
-                                                       InternalStateType type, TimeStep *tStep)
+                                                         InternalStateType type, TimeStep *tStep)
 {
     this->giveIPValue(answer, NULL, type, tStep);
 }
@@ -268,7 +269,7 @@ TR_SHELL01 :: NodalAveragingRecoveryMI_computeNodalValue(FloatArray &answer, int
 
 void
 TR_SHELL01 :: NodalAveragingRecoveryMI_computeSideValue(FloatArray &answer, int side,
-                                                      InternalStateType type, TimeStep *tStep)
+                                                        InternalStateType type, TimeStep *tStep)
 {
     answer.resize(0);
 }
@@ -287,32 +288,32 @@ TR_SHELL01 :: printOutputAt(FILE *file, TimeStep *tStep)
     fprintf( file, "element %d (%8d) :\n", this->giveLabel(), this->giveNumber() );
 
     for ( int i = 0; i < iRule->giveNumberOfIntegrationPoints(); i++ ) {
-      gp  = iRule->getIntegrationPoint(i);
-      fprintf(file, "  GP %2d.%-2d :", iRule->giveNumber(), gp->giveNumber());
-      membraneGP = membrane->giveDefaultIntegrationRulePtr()->getIntegrationPoint(gp->giveNumber()-1);
-      // Strain - Curvature
-      plate->giveIPValue(v, gp, IST_ShellStrainCurvatureTensor, tStep);
-      membrane->giveIPValue(aux, membraneGP, IST_ShellStrainCurvatureTensor, tStep);
-      v.add(aux);
+        gp  = iRule->getIntegrationPoint(i);
+        fprintf( file, "  GP %2d.%-2d :", iRule->giveNumber(), gp->giveNumber() );
+        membraneGP = membrane->giveDefaultIntegrationRulePtr()->getIntegrationPoint(gp->giveNumber() - 1);
+        // Strain - Curvature
+        plate->giveIPValue(v, gp, IST_ShellStrainCurvatureTensor, tStep);
+        membrane->giveIPValue(aux, membraneGP, IST_ShellStrainCurvatureTensor, tStep);
+        v.add(aux);
 
-      fprintf(file, "  strains ");
-      fprintf( file,
-            " % .4e % .4e % .4e % .4e % .4e % .4e % .4e % .4e % .4e % .4e % .4e % .4e ",
-            v.at(1), v.at(2), v.at(3),  2. * v.at(4), 2. * v.at(5), 2. * v.at(6),
-            v.at(7), v.at(8), v.at(9),  2. * v.at(10), 2. * v.at(11), 2. * v.at(12) );
-      
-      // Strain - Curvature
-      plate->giveIPValue(v, gp, IST_ShellForceMomentumTensor, tStep);
-      membrane->giveIPValue(aux, membraneGP, IST_ShellForceMomentumTensor, tStep);
-      v.add(aux);
-      
-      fprintf(file, "\n              stresses");
-      fprintf( file,
-            " % .4e % .4e % .4e % .4e % .4e % .4e % .4e % .4e % .4e % .4e % .4e % .4e ",
-            v.at(1), v.at(2), v.at(3),  v.at(4), v.at(5), v.at(6),
-            v.at(7), v.at(8), v.at(9),  v.at(10), v.at(11), v.at(12) );
-      
-      fprintf(file, "\n");
+        fprintf(file, "  strains ");
+        fprintf( file,
+                 " % .4e % .4e % .4e % .4e % .4e % .4e % .4e % .4e % .4e % .4e % .4e % .4e ",
+                 v.at(1), v.at(2), v.at(3),  2. * v.at(4), 2. * v.at(5), 2. * v.at(6),
+                 v.at(7), v.at(8), v.at(9),  2. * v.at(10), 2. * v.at(11), 2. * v.at(12) );
+
+        // Strain - Curvature
+        plate->giveIPValue(v, gp, IST_ShellForceMomentumTensor, tStep);
+        membrane->giveIPValue(aux, membraneGP, IST_ShellForceMomentumTensor, tStep);
+        v.add(aux);
+
+        fprintf(file, "\n              stresses");
+        fprintf( file,
+                 " % .4e % .4e % .4e % .4e % .4e % .4e % .4e % .4e % .4e % .4e % .4e % .4e ",
+                 v.at(1), v.at(2), v.at(3),  v.at(4), v.at(5), v.at(6),
+                 v.at(7), v.at(8), v.at(9),  v.at(10), v.at(11), v.at(12) );
+
+        fprintf(file, "\n");
     }
 }
 
@@ -322,10 +323,10 @@ contextIOResultType
 TR_SHELL01 :: saveContext(DataStream *stream, ContextMode mode, void *obj)
 {
     contextIOResultType iores;
-    if ( ( iores =  StructuralElement::saveContext (stream, mode, obj) ) != CIO_OK ) {
+    if ( ( iores =  StructuralElement :: saveContext(stream, mode, obj) ) != CIO_OK ) {
         THROW_CIOERR(iores);
     }
-    if ( ( iores =  this->plate->saveContext(stream, mode, obj) ) != CIO_OK ) { 
+    if ( ( iores =  this->plate->saveContext(stream, mode, obj) ) != CIO_OK ) {
         THROW_CIOERR(iores);
     }
     if ( ( iores = this->membrane->saveContext(stream, mode, obj) ) != CIO_OK ) {
@@ -338,22 +339,25 @@ contextIOResultType
 TR_SHELL01 :: restoreContext(DataStream *stream, ContextMode mode, void *obj)
 {
     contextIOResultType iores;
-    if ( ( iores =  StructuralElement::restoreContext (stream, mode, obj) ) != CIO_OK ) {;
+    if ( ( iores =  StructuralElement :: restoreContext(stream, mode, obj) ) != CIO_OK ) {
+        ;
         THROW_CIOERR(iores);
     }
-        if ( ( iores =   this->plate->restoreContext(stream, mode, obj) ) != CIO_OK ) {;
+    if ( ( iores =   this->plate->restoreContext(stream, mode, obj) ) != CIO_OK ) {
+        ;
         THROW_CIOERR(iores);
     }
-    if ( ( iores =  this->membrane->restoreContext(stream, mode, obj) ) != CIO_OK ) {;
+    if ( ( iores =  this->membrane->restoreContext(stream, mode, obj) ) != CIO_OK ) {
+        ;
         THROW_CIOERR(iores);
     }
     return iores;
 }
 
-IntegrationRule* 
+IntegrationRule *
 TR_SHELL01 :: ZZErrorEstimatorI_giveIntegrationRule()
 {
-    if (this->compositeIR) {
+    if ( this->compositeIR ) {
         return this->compositeIR;
     } else {
         this->compositeIR = new GaussIntegrationRule(1, this, 1, 12);
@@ -362,34 +366,34 @@ TR_SHELL01 :: ZZErrorEstimatorI_giveIntegrationRule()
     }
 }
 
-void 
-TR_SHELL01 :: ZZErrorEstimatorI_computeLocalStress(FloatArray& answer, FloatArray& sig)  
+void
+TR_SHELL01 :: ZZErrorEstimatorI_computeLocalStress(FloatArray &answer, FloatArray &sig)
 {
     // sig is global ShellForceMomentumTensor
-    FloatMatrix globTensor(3,3);
-    const FloatMatrix* GtoLRotationMatrix = plate->computeGtoLRotationMatrix();
-    FloatMatrix LtoGRotationMatrix ;
+    FloatMatrix globTensor(3, 3);
+    const FloatMatrix *GtoLRotationMatrix = plate->computeGtoLRotationMatrix();
+    FloatMatrix LtoGRotationMatrix;
 
     answer.resize(8); // reduced, local form
-    LtoGRotationMatrix.beTranspositionOf(*GtoLRotationMatrix);
+    LtoGRotationMatrix.beTranspositionOf(* GtoLRotationMatrix);
 
     // Forces
-    globTensor.at(1, 1) = sig.at(1) ; //sxForce
-    globTensor.at(1, 2) = sig.at(6) ; //qxyForce
-    globTensor.at(1, 3) = sig.at(5) ; //qxzForce
+    globTensor.at(1, 1) = sig.at(1);  //sxForce
+    globTensor.at(1, 2) = sig.at(6);  //qxyForce
+    globTensor.at(1, 3) = sig.at(5);  //qxzForce
 
-    globTensor.at(2, 1) = sig.at(6) ; //qxyForce
-    globTensor.at(2, 2) = sig.at(2) ; //syForce
-    globTensor.at(2, 3) = sig.at(4) ; //syzForce
+    globTensor.at(2, 1) = sig.at(6);  //qxyForce
+    globTensor.at(2, 2) = sig.at(2);  //syForce
+    globTensor.at(2, 3) = sig.at(4);  //syzForce
 
-    globTensor.at(3, 1) = sig.at(5) ; //qxzForce
-    globTensor.at(3, 2) = sig.at(4) ; //syzForce
-    globTensor.at(3, 3) = sig.at(3) ; //szForce
+    globTensor.at(3, 1) = sig.at(5);  //qxzForce
+    globTensor.at(3, 2) = sig.at(4);  //syzForce
+    globTensor.at(3, 3) = sig.at(3);  //szForce
 
     globTensor.rotatedWith(LtoGRotationMatrix);
     // Forces: now globTensoris transformed into local c.s
 
-    // answer should be in reduced, local  form 
+    // answer should be in reduced, local  form
     answer.at(1) = globTensor.at(1, 1); //sxForce
     answer.at(2) = globTensor.at(2, 2); //syForce
     answer.at(3) = globTensor.at(1, 2); //qxyForce
@@ -398,27 +402,27 @@ TR_SHELL01 :: ZZErrorEstimatorI_computeLocalStress(FloatArray& answer, FloatArra
 
 
     // Moments:
-    globTensor.at(1, 1) = sig.at(7) ; //mxForce
+    globTensor.at(1, 1) = sig.at(7);  //mxForce
     globTensor.at(1, 2) = sig.at(12); //mxyForce
     globTensor.at(1, 3) = sig.at(11); //mxzForce
 
     globTensor.at(2, 1) = sig.at(12); //mxyForce
-    globTensor.at(2, 2) = sig.at(8) ; //myForce
+    globTensor.at(2, 2) = sig.at(8);  //myForce
     globTensor.at(2, 3) = sig.at(10); //myzForce
 
     globTensor.at(3, 1) = sig.at(11); //mxzForce
     globTensor.at(3, 2) = sig.at(10); //myzForce
-    globTensor.at(3, 3) = sig.at(9) ; //mzForce
+    globTensor.at(3, 3) = sig.at(9);  //mzForce
 
-    globTensor.rotatedWith (LtoGRotationMatrix); 
+    globTensor.rotatedWith(LtoGRotationMatrix);
     // now globTensoris transformed into local c.s
-    
+
     answer.at(4)  = globTensor.at(1, 1); //mxForce
     answer.at(5)  = globTensor.at(2, 2); //myForce
     answer.at(6) = globTensor.at(1, 2); //mxyForce
 }
 
-int 
+int
 TR_SHELL01 :: SpatialLocalizerI_containsPoint(const FloatArray &coords)
 {
     FloatArray lcoords;
@@ -428,46 +432,47 @@ TR_SHELL01 :: SpatialLocalizerI_containsPoint(const FloatArray &coords)
 double
 TR_SHELL01 :: SpatialLocalizerI_giveDistanceFromParametricCenter(const FloatArray &coords)
 {
-    FloatArray c(3); 
+    FloatArray c(3);
     c.zero();
     // evaluate element center
-    for (int i=1; i<=3; i++) {
-        c.add(*plate->giveNode(i)->giveCoordinates());
+    for ( int i = 1; i <= 3; i++ ) {
+        c.add( * plate->giveNode(i)->giveCoordinates() );
     }
-    c.times(1./3.);
+    c.times(1. / 3.);
     return c.distance(coords);
 }
 
 void
 TR_SHELL01 :: SpatialLocalizerI_giveBBox(FloatArray &bb0, FloatArray &bb1)
 {
-
     FloatArray lt3(3), gt3(3); // global vector in the element thickness direction of lenght thickeness/2
-    const FloatMatrix* GtoLRotationMatrix = plate->computeGtoLRotationMatrix();
+    const FloatMatrix *GtoLRotationMatrix = plate->computeGtoLRotationMatrix();
 
     // setup vector in the element local cs. perpendicular to element plane of thickness/2 length
     lt3.at(1) = 0.0;
     lt3.at(2) = 0.0;
     lt3.at(3) = 1.0; //this->giveCrossSection()->give(CS_Thickness)/2.0; // HUHU
     // transform it to globa cs
-    gt3.beTProductOf (*GtoLRotationMatrix, lt3);
-    
+    gt3.beTProductOf(* GtoLRotationMatrix, lt3);
+
     // use gt3 to construct element bounding box respecting true element volume
-    
+
     FloatArray *coordinates, _c(3);
 
     for ( int i = 1; i <= this->giveNumberOfNodes(); ++i ) {
         coordinates = this->giveNode(i)->giveCoordinates();
-        
-        _c = *coordinates; _c.add(gt3);
-        if (i == 1) {
+
+        _c = * coordinates;
+        _c.add(gt3);
+        if ( i == 1 ) {
             bb0 = bb1 = _c;
         } else {
             bb0.beMinOf(bb0, _c);
             bb1.beMaxOf(bb1, _c);
         }
 
-        _c = *coordinates; _c.subtract(gt3);
+        _c = * coordinates;
+        _c.subtract(gt3);
         bb0.beMinOf(bb0, _c);
         bb1.beMaxOf(bb1, _c);
     }
@@ -560,7 +565,7 @@ TR_SHELL01 :: drawScalar(oofegGraphicContext &context)
     if ( !context.testElementGraphicActivity(this) ) {
         return;
     }
-    
+
     if ( !this->giveMaterial()->isActivated(tStep) ) {
         return;
     }
@@ -573,14 +578,14 @@ TR_SHELL01 :: drawScalar(oofegGraphicContext &context)
         int nip = plate->giveDefaultIntegrationRulePtr()->giveNumberOfIntegrationPoints();
         FloatArray a, v(12);
         v.zero();
-        for (int _i=1; _i<= nip; _i++) {
-            this->giveIPValue(a, plate->giveDefaultIntegrationRulePtr()->getIntegrationPoint(_i-1), IST_ShellForceMomentumTensor, tStep);
+        for ( int _i = 1; _i <= nip; _i++ ) {
+            this->giveIPValue(a, plate->giveDefaultIntegrationRulePtr()->getIntegrationPoint(_i - 1), IST_ShellForceMomentumTensor, tStep);
             v += a;
         }
-        v.times(1./nip);
+        v.times(1. / nip);
         v1 = v;
-        v2 =v;
-        v3 =v;
+        v2 = v;
+        v3 = v;
     }
 
     indx = context.giveIntVarIndx();
@@ -610,65 +615,6 @@ TR_SHELL01 :: drawScalar(oofegGraphicContext &context)
         EMAddGraphicsToModel(ESIModel(), tr);
     }
 }
-
-/*
- * void
- * CCTPlate :: drawInternalState (oofegGraphicContext & gc)
- * //
- * // Draws internal state graphics representation
- * //
- * {
- * WCRec p[3];
- * GraphicObj *tr;
- * double v1,v2,v3;
- * DrawMode mode = gc.getDrawMode();
- * TimeStep *tStep = domain->giveEngngModel()->giveCurrentStep();
- * double defScale = gc.getDefScale();
- *
- * if (!gc.testElementGraphicActivity(this)) return;
- *
- * // check for valid DrawMode
- * if (!((mode == mxForce) || (mode == myForce) || (mode == mxyForce) ||
- * (mode == szxForce) || (mode == syzForce))) return;
- *
- *
- *
- * EASValsSetLayer(OOFEG_STRESS_CONTOUR_LAYER);
- * if (gc.getInternalVarsDefGeoFlag()) {
- * // use deformed geometry
- * p[0].x = (FPNum) this->giveNode(1)->giveUpdatedCoordinate(1,tStep,defScale);
- * p[0].y = (FPNum) this->giveNode(1)->giveUpdatedCoordinate(2,tStep,defScale);
- * p[0].z = (FPNum) this->giveNode(1)->giveUpdatedCoordinate(3,tStep,defScale);
- * p[1].x = (FPNum) this->giveNode(2)->giveUpdatedCoordinate(1,tStep,defScale);
- * p[1].y = (FPNum) this->giveNode(2)->giveUpdatedCoordinate(2,tStep,defScale);
- * p[1].z = (FPNum) this->giveNode(2)->giveUpdatedCoordinate(3,tStep,defScale);
- * p[2].x = (FPNum) this->giveNode(3)->giveUpdatedCoordinate(1,tStep,defScale);
- * p[2].y = (FPNum) this->giveNode(3)->giveUpdatedCoordinate(2,tStep,defScale);
- * p[2].z = (FPNum) this->giveNode(3)->giveUpdatedCoordinate(3,tStep,defScale);
- * } else {
- * p[0].x = (FPNum) this->giveNode(1)->giveCoordinate(1);
- * p[0].y = (FPNum) this->giveNode(1)->giveCoordinate(2);
- * p[0].z = (FPNum) this->giveNode(1)->giveCoordinate(3);
- * p[1].x = (FPNum) this->giveNode(2)->giveCoordinate(1);
- * p[1].y = (FPNum) this->giveNode(2)->giveCoordinate(2);
- * p[1].z = (FPNum) this->giveNode(2)->giveCoordinate(3);
- * p[2].x = (FPNum) this->giveNode(3)->giveCoordinate(1);
- * p[2].y = (FPNum) this->giveNode(3)->giveCoordinate(2);
- * p[2].z = (FPNum) this->giveNode(3)->giveCoordinate(3);
- * }
- *
- * int result = 0;
- * result+= this->giveInternalStateAtNode (gc, 1, &v1);
- * result+= this->giveInternalStateAtNode (gc, 2, &v2);
- * result+= this->giveInternalStateAtNode (gc, 3, &v3);
- *
- * if (result == 3) {
- * tr = CreateTriangleWD3D (p,v1,v2,v3);
- * EGWithMaskChangeAttributes(LAYER_MASK, tr);
- * EMAddGraphicsToModel(ESIModel(), tr);
- * }
- * }
- */
 
 #endif
 } // end namespace oofem

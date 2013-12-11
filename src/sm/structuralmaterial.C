@@ -87,7 +87,7 @@ StructuralMaterial :: giveRealStressVector(FloatArray &answer, GaussPoint *gp, c
 void
 StructuralMaterial :: giveRealStressVector_3d(FloatArray &answer, GaussPoint *gp, const FloatArray &reducedStrain, TimeStep *tStep)
 {
-    OOFEM_ERROR2("%s :: giveRealStressVector_3d - 3d mode not supported", this->giveClassName());
+    OOFEM_ERROR2( "%s :: giveRealStressVector_3d - 3d mode not supported", this->giveClassName() );
 }
 
 
@@ -980,9 +980,9 @@ StructuralMaterial :: give1dStressStiffMtrx(FloatMatrix &answer,
 
 void
 StructuralMaterial :: give2dBeamLayerStiffMtrx(FloatMatrix &answer,
-                                             MatResponseMode mode,
-                                             GaussPoint *gp,
-                                             TimeStep *atTime)
+                                               MatResponseMode mode,
+                                               GaussPoint *gp,
+                                               TimeStep *atTime)
 //
 // return material stiffness matrix for2dBeamLayer mode
 //
@@ -1161,12 +1161,12 @@ StructuralMaterial :: computePrincipalValues(FloatArray &answer, const FloatArra
                  ( s.at(4) * s.at(4) + s.at(5) * s.at(5) + s.at(6) * s.at(6) );
             I3 = s.at(1) * s.at(2) * s.at(3) + 2. * s.at(4) * s.at(5) * s.at(6) -
                  ( s.at(1) * s.at(4) * s.at(4) + s.at(2) * s.at(5) * s.at(5) +
-                  s.at(3) * s.at(6) * s.at(6) );
+                   s.at(3) * s.at(6) * s.at(6) );
         } else if ( mode == principal_deviatoricstress ) {
             help = ( s.at(1) + s.at(2) + s.at(3) ) / 3.0;
             I1 = 0.;
             I2 = -( 1. / 6. ) * ( ( s.at(1) - s.at(2) ) * ( s.at(1) - s.at(2) ) + ( s.at(2) - s.at(3) ) * ( s.at(2) - s.at(3) ) +
-                                 ( s.at(3) - s.at(1) ) * ( s.at(3) - s.at(1) ) ) - s.at(4) * s.at(4) - s.at(5) * s.at(5) -
+                                  ( s.at(3) - s.at(1) ) * ( s.at(3) - s.at(1) ) ) - s.at(4) * s.at(4) - s.at(5) * s.at(5) -
                  s.at(6) * s.at(6);
             I3 = ( s.at(1) - help ) * ( s.at(2) - help ) * ( s.at(3) - help ) + 2. * s.at(4) * s.at(5) * s.at(6) -
                  s.at(5) * s.at(5) * ( s.at(2) - help ) - s.at(4) * s.at(4) * ( s.at(1) - help ) -
@@ -1177,7 +1177,7 @@ StructuralMaterial :: computePrincipalValues(FloatArray &answer, const FloatArra
                  0.25 * ( s.at(4) * s.at(4) + s.at(5) * s.at(5) + s.at(6) * s.at(6) );
             I3 = s.at(1) * s.at(2) * s.at(3) +
                  0.25 * ( s.at(4) * s.at(5) * s.at(6) - s.at(1) * s.at(4) * s.at(4) -
-                         s.at(2) * s.at(5) * s.at(5) - s.at(3) * s.at(6) * s.at(6) );
+                          s.at(2) * s.at(5) * s.at(5) - s.at(3) * s.at(6) * s.at(6) );
         } else {
             OOFEM_ERROR("StructuralMaterial :: ComputePrincipalValues: not supported");
         }
@@ -1685,9 +1685,9 @@ StructuralMaterial :: giveIPValue(FloatArray &answer, GaussPoint *aGaussPoint, I
 {
     StructuralMaterialStatus *status = static_cast< StructuralMaterialStatus * >( this->giveStatus(aGaussPoint) );
     if ( type == IST_StressTensor ) {
-        StructuralMaterial :: giveFullSymVectorForm(answer, status->giveStressVector(), aGaussPoint->giveMaterialMode());
+        StructuralMaterial :: giveFullSymVectorForm( answer, status->giveStressVector(), aGaussPoint->giveMaterialMode() );
         return 1;
-    } else if (type == IST_StressTensor_Reduced ) {
+    } else if ( type == IST_StressTensor_Reduced ) {
         answer = status->giveStressVector();
         return 1;
     } else if ( type == IST_vonMisesStress ) {
@@ -1697,7 +1697,14 @@ StructuralMaterial :: giveIPValue(FloatArray &answer, GaussPoint *aGaussPoint, I
         return 1;
     } else if ( type == IST_StrainTensor ) {
         ///@todo Fill in correct full form values here! This just adds zeros!
-        StructuralMaterial :: giveFullSymVectorForm(answer, status->giveStrainVector(), aGaussPoint->giveMaterialMode());
+        StructuralMaterial :: giveFullSymVectorForm( answer, status->giveStrainVector(), aGaussPoint->giveMaterialMode() );
+        if ( aGaussPoint->giveMaterialMode() == _PlaneStress ) {
+            double Nxy = this->give(NYxy, aGaussPoint);
+            double Nxz = this->give(NYxz, aGaussPoint);
+            double Nyz = this->give(NYyz, aGaussPoint);
+            double Nyx = Nxy * this->give(Ey, aGaussPoint) / this->give(Ex, aGaussPoint);
+            answer.at(3) = ( -( Nxz + Nxy * Nyz ) * answer.at(1) - ( Nyz + Nxz * Nyx ) * answer.at(2) ) / ( 1. - Nxy * Nyx );
+        }
         return 1;
     } else if ( type == IST_StrainTensor_Reduced ) {
         ///@todo Fill in correct full form values here! This just adds zeros!
@@ -1705,21 +1712,21 @@ StructuralMaterial :: giveIPValue(FloatArray &answer, GaussPoint *aGaussPoint, I
         return 1;
     } else if ( type == IST_StressTensorTemp ) {
         ///@todo Fill in correct full form values here! This just adds zeros!
-        StructuralMaterial :: giveFullSymVectorForm(answer, status->giveTempStressVector(), aGaussPoint->giveMaterialMode());
+        StructuralMaterial :: giveFullSymVectorForm( answer, status->giveTempStressVector(), aGaussPoint->giveMaterialMode() );
         return 1;
     } else if ( type == IST_StrainTensorTemp ) {
         ///@todo Fill in correct full form values here! This just adds zeros!
-        StructuralMaterial :: giveFullSymVectorForm(answer, status->giveTempStrainVector(), aGaussPoint->giveMaterialMode());
+        StructuralMaterial :: giveFullSymVectorForm( answer, status->giveTempStrainVector(), aGaussPoint->giveMaterialMode() );
         return 1;
     } else if ( type == IST_PrincipalStressTensor || type == IST_PrincipalStressTempTensor ) {
         FloatArray s;
 
         if ( type == IST_PrincipalStressTensor ) {
             ///@todo Fill in correct full form values here! This just adds zeros!
-            StructuralMaterial :: giveFullSymVectorForm(s, status->giveStressVector(), aGaussPoint->giveMaterialMode());
+            StructuralMaterial :: giveFullSymVectorForm( s, status->giveStressVector(), aGaussPoint->giveMaterialMode() );
         } else {
             ///@todo Fill in correct full form values here! This just adds zeros!
-            StructuralMaterial :: giveFullSymVectorForm(s, status->giveTempStressVector(), aGaussPoint->giveMaterialMode());
+            StructuralMaterial :: giveFullSymVectorForm( s, status->giveTempStressVector(), aGaussPoint->giveMaterialMode() );
         }
 
         this->computePrincipalValues(answer, s, principal_stress);
@@ -1729,10 +1736,10 @@ StructuralMaterial :: giveIPValue(FloatArray &answer, GaussPoint *aGaussPoint, I
 
         if ( type == IST_PrincipalStrainTensor ) {
             ///@todo Fill in correct full form values here! This just adds zeros!
-            StructuralMaterial :: giveFullSymVectorForm(s, status->giveStrainVector(), aGaussPoint->giveMaterialMode());
+            StructuralMaterial :: giveFullSymVectorForm( s, status->giveStrainVector(), aGaussPoint->giveMaterialMode() );
         } else {
             ///@todo Fill in correct full form values here! This just adds zeros!
-            StructuralMaterial :: giveFullSymVectorForm(s, status->giveTempStrainVector(), aGaussPoint->giveMaterialMode());
+            StructuralMaterial :: giveFullSymVectorForm( s, status->giveTempStrainVector(), aGaussPoint->giveMaterialMode() );
         }
 
         this->computePrincipalValues(answer, s, principal_strain);
@@ -1861,7 +1868,7 @@ StructuralMaterial :: computeStressIndependentStrainVector(FloatArray &answer,
 
         switch ( matmode ) {
         case _2dBeam:
-            thick = crossSection->give(CS_Thickness);
+            thick = crossSection->give(CS_Thickness, gp);
             answerTemper.resize(3);
             answerTemper.zero();
             answerTemper.at(1) = e0.at(1) * ( et.at(1) - this->giveReferenceTemperature() );
@@ -1871,8 +1878,8 @@ StructuralMaterial :: computeStressIndependentStrainVector(FloatArray &answer,
 
             break;
         case _3dBeam:
-            thick = crossSection->give(CS_Thickness);
-            width = crossSection->give(CS_Width);
+            thick = crossSection->give(CS_Thickness, gp);
+            width = crossSection->give(CS_Width, gp);
             answerTemper.resize(6);
             answerTemper.zero();
             answerTemper.at(1) = e0.at(1) * ( et.at(1) - this->giveReferenceTemperature() );
@@ -1885,7 +1892,7 @@ StructuralMaterial :: computeStressIndependentStrainVector(FloatArray &answer,
 
             break;
         case _2dPlate:
-            thick = crossSection->give(CS_Thickness);
+            thick = crossSection->give(CS_Thickness, gp);
             if ( et.giveSize() > 1 ) {
                 answerTemper.resize(5);
                 answerTemper.zero();
@@ -1898,7 +1905,7 @@ StructuralMaterial :: computeStressIndependentStrainVector(FloatArray &answer,
 
             break;
         case _3dShell:
-            thick = crossSection->give(CS_Thickness);
+            thick = crossSection->give(CS_Thickness, gp);
             answerTemper.resize(8);
             answerTemper.zero();
 

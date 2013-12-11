@@ -47,10 +47,11 @@ void
 FluidDynamicMaterial :: computeDeviatoricStressVector(FloatArray &stress_dev, double &epsp_vol, GaussPoint *gp, const FloatArray &eps, double pressure, TimeStep *tStep)
 {
     if ( gp->giveMaterialMode() == _2dFlow ) {
-        epsp_vol = -(eps.at(1) + eps.at(2));
+        epsp_vol = -( eps.at(1) + eps.at(2) );
     } else {
-        epsp_vol = -(eps.at(1) + eps.at(2) + eps.at(3));
+        epsp_vol = -( eps.at(1) + eps.at(2) + eps.at(3) );
     }
+
     this->computeDeviatoricStressVector(stress_dev, gp, eps, tStep);
 }
 
@@ -58,7 +59,7 @@ FluidDynamicMaterial :: computeDeviatoricStressVector(FloatArray &stress_dev, do
 void
 FluidDynamicMaterial :: giveDeviatoricPressureStiffness(FloatArray &answer, MatResponseMode mode, GaussPoint *gp, TimeStep *tStep)
 {
-    int size = static_cast< FluidDynamicMaterialStatus* >( this->giveStatus(gp) )->giveDeviatoricStressVector().giveSize();
+    int size = static_cast< FluidDynamicMaterialStatus * >( this->giveStatus(gp) )->giveDeviatoricStressVector().giveSize();
     answer.resize(size);
     answer.zero();
 }
@@ -67,7 +68,7 @@ FluidDynamicMaterial :: giveDeviatoricPressureStiffness(FloatArray &answer, MatR
 void
 FluidDynamicMaterial :: giveVolumetricDeviatoricStiffness(FloatArray &answer, MatResponseMode mode, GaussPoint *gp, TimeStep *tStep)
 {
-    int size = static_cast< FluidDynamicMaterialStatus* >( this->giveStatus(gp) )->giveDeviatoricStressVector().giveSize();
+    int size = static_cast< FluidDynamicMaterialStatus * >( this->giveStatus(gp) )->giveDeviatoricStressVector().giveSize();
     answer.resize(size);
     answer.zero();
 }
@@ -118,7 +119,7 @@ FluidDynamicMaterialStatus :: initTempStatus()
 int
 FluidDynamicMaterial :: giveIPValue(FloatArray &answer, GaussPoint *gp, InternalStateType type, TimeStep *atTime)
 {
-    FluidDynamicMaterialStatus *status = static_cast< FluidDynamicMaterialStatus* >( this->giveStatus(gp) );
+    FluidDynamicMaterialStatus *status = static_cast< FluidDynamicMaterialStatus * >( this->giveStatus(gp) );
     if ( type == IST_DeviatoricStress ) {
         MaterialMode mmode = gp->giveMaterialMode();
         const FloatArray &vec = status->giveDeviatoricStressVector();
@@ -126,7 +127,7 @@ FluidDynamicMaterial :: giveIPValue(FloatArray &answer, GaussPoint *gp, Internal
             answer.resize(6);
             answer.at(1) = vec.at(1);
             answer.at(2) = vec.at(2);
-            answer.at(3) = - (vec.at(1) + vec.at(2)); ///@todo Verify that this is correct for for all models.
+            answer.at(3) = -( vec.at(1) + vec.at(2) ); ///@todo Verify that this is correct for for all models.
             answer.at(4) = 0.;
             answer.at(5) = 0.;
             answer.at(6) = vec.at(3);
@@ -144,9 +145,10 @@ FluidDynamicMaterial :: giveIPValue(FloatArray &answer, GaussPoint *gp, Internal
             answer = vec;
             return 1;
         } else {
-            OOFEM_ERROR ("FluidDynamicMaterial :: giveIPValue: material mode not supported");
+            OOFEM_ERROR("FluidDynamicMaterial :: giveIPValue: material mode not supported");
             return 0;
         }
+
         return 1;
     } else if ( type == IST_DeviatoricStrain ) {
         MaterialMode mmode = gp->giveMaterialMode();
@@ -174,9 +176,10 @@ FluidDynamicMaterial :: giveIPValue(FloatArray &answer, GaussPoint *gp, Internal
             answer = vec;
             return 1;
         } else {
-            OOFEM_ERROR ("FluidDynamicMaterial :: giveIPValue: material mode not supported");
+            OOFEM_ERROR("FluidDynamicMaterial :: giveIPValue: material mode not supported");
             return 0;
         }
+
         return 1;
     } else if ( type == IST_Viscosity ) {
         answer.resize(1);
@@ -206,7 +209,7 @@ FluidDynamicMaterialStatus :: saveContext(DataStream *stream, ContextMode mode, 
     if ( ( iores = deviatoricStressVector.storeYourself(stream, mode) ) != CIO_OK ) {
         THROW_CIOERR(iores);
     }
-    
+
     if ( ( iores = deviatoricStrainRateVector.storeYourself(stream, mode) ) != CIO_OK ) {
         THROW_CIOERR(iores);
     }

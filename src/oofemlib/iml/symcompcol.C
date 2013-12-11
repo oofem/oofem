@@ -81,8 +81,7 @@
 #include <set>
 
 namespace oofem {
-
-REGISTER_SparseMtrx( SymCompCol, SMT_SymCompCol);
+REGISTER_SparseMtrx(SymCompCol, SMT_SymCompCol);
 
 SymCompCol :: SymCompCol(void) : CompCol()
 { }
@@ -102,7 +101,7 @@ SymCompCol :: SymCompCol(const SymCompCol &S) : CompCol(S)
 
 SparseMtrx *SymCompCol :: GiveCopy() const
 {
-    SymCompCol *result = new SymCompCol(*this);
+    SymCompCol *result = new SymCompCol(* this);
     return result;
 }
 
@@ -211,29 +210,29 @@ int SymCompCol :: buildInternalStructure(EngngModel *eModel, int di, EquationID 
         }
     }
 
-     // loop over active boundary conditions
+    // loop over active boundary conditions
     int nbc = domain->giveNumberOfBoundaryConditions();
-    std::vector<IntArray> r_locs;
-    std::vector<IntArray> c_locs;
-    
+    std :: vector< IntArray >r_locs;
+    std :: vector< IntArray >c_locs;
+
     for ( int i = 1; i <= nbc; ++i ) {
         ActiveBoundaryCondition *bc = dynamic_cast< ActiveBoundaryCondition * >( domain->giveBc(i) );
         if ( bc != NULL ) {
             bc->giveLocationArrays(r_locs, c_locs, ut, UnknownCharType, s, s);
-	    for (std::size_t k = 0; k < r_locs.size(); k++) {
-	      IntArray &krloc = r_locs[k];
-	      IntArray &kcloc = c_locs[k];
-	      for ( int i = 1; i <= krloc.giveSize(); i++ ) {
-		if ( ( ii = krloc.at(i) ) ) {
-		  for ( int j = 1; j <= kcloc.giveSize(); j++ ) {
-		    if ( ( jj = kcloc.at(j) ) && ( ii >= jj ) ) {
-		      columns [ jj - 1 ].insert(ii - 1);
-		    }
-		  }
-		}
-	      }
-	    }
-	}
+            for ( std :: size_t k = 0; k < r_locs.size(); k++ ) {
+                IntArray &krloc = r_locs [ k ];
+                IntArray &kcloc = c_locs [ k ];
+                for ( int i = 1; i <= krloc.giveSize(); i++ ) {
+                    if ( ( ii = krloc.at(i) ) ) {
+                        for ( int j = 1; j <= kcloc.giveSize(); j++ ) {
+                            if ( ( jj = kcloc.at(j) ) && ( ii >= jj ) ) {
+                                columns [ jj - 1 ].insert(ii - 1);
+                            }
+                        }
+                    }
+                }
+            }
+        }
     }
 
 
@@ -442,7 +441,7 @@ double SymCompCol :: at(int i, int j) const
     }
 }
 
-double SymCompCol :: operator() (int i, int j)  const
+double SymCompCol :: operator()(int i, int j)  const
 {
     int ii = i, jj = j;
     if ( ii < jj ) {
@@ -464,7 +463,7 @@ double SymCompCol :: operator() (int i, int j)  const
     }
 }
 
-double &SymCompCol :: operator() (int i, int j)
+double &SymCompCol :: operator()(int i, int j)
 {
     int ii = i, jj = j;
     if ( ii < jj ) {

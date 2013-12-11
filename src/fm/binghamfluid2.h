@@ -74,7 +74,7 @@ public:
     /// Destructor
     virtual ~BinghamFluidMaterial2Status() { }
 
-    virtual  void printOutputAt(FILE *file, TimeStep *tStep);
+    virtual void printOutputAt(FILE *file, TimeStep *tStep);
 
     virtual void initTempStatus();
     virtual void updateYourself(TimeStep *tStep);
@@ -95,7 +95,6 @@ public:
     void letTempDeviatoricStrainVectorBe(const FloatArray &v) { temp_deviatoricStrainVector = v; }
 
     virtual const char *giveClassName() const { return "BinghamFluidMaterialStatus"; }
-    virtual classType giveClassID() const { return BinghamFluidMaterialStatusClass; }
 };
 
 
@@ -138,7 +137,6 @@ public:
     virtual int hasMaterialModeCapability(MaterialMode mode);
     virtual const char *giveClassName() const { return "BinghamFluidMaterial2"; }
     virtual const char *giveInputRecordName() const { return _IFT_BinghamFluidMaterial2_Name; }
-    virtual classType giveClassID() const { return BinghamFluidMaterial2Class; }
     virtual int checkConsistency();
     virtual MaterialStatus *CreateStatus(GaussPoint *gp) const;
 
@@ -148,7 +146,7 @@ protected:
     double computeDevStressMagnitude(MaterialMode mmode, const FloatArray &sigd);
     void computeDeviatoricStrain(FloatArray &answer, const FloatArray &eps, MaterialMode mmode);
     void computeDeviatoricStress(FloatArray &answer, const FloatArray &deps,
-                                    double _nu, MaterialMode mmode);
+                                 double _nu, MaterialMode mmode);
 
     void __debug(GaussPoint *gp, TimeStep *atTime);
 };

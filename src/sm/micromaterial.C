@@ -59,7 +59,7 @@ namespace oofem {
 //     A.beProductOf(B, displacementVector);
 //     A.printYourself();
 
-REGISTER_Material( MicroMaterial );
+REGISTER_Material(MicroMaterial);
 
 // constructor
 //strainVector, tempStrainVector, stressVector, tempStressVector are defined on StructuralMaterialStatus
@@ -151,8 +151,8 @@ IRResultType MicroMaterial :: initializeFrom(InputRecord *ir)
 
     IR_GIVE_FIELD(ir, this->inputFileNameMicro, _IFT_MicroMaterial_fileName);
 
-    OOFEM_LOG_INFO("** Instanciating microproblem with BC from file %s\n", inputFileNameMicro.c_str());
-    OOFEMTXTDataReader drMicro(inputFileNameMicro.c_str());
+    OOFEM_LOG_INFO( "** Instanciating microproblem with BC from file %s\n", inputFileNameMicro.c_str() );
+    OOFEMTXTDataReader drMicro( inputFileNameMicro.c_str() );
     this->problemMicro = InstanciateProblem(& drMicro, _processor, 0); //0=contextFlag-store/resore
     drMicro.finish();
     OOFEM_LOG_INFO("** Microproblem %p instanciated\n\n", problemMicro);
@@ -169,7 +169,7 @@ void MicroMaterial :: giveRealStressVector(FloatArray &answer, GaussPoint *gp, c
 {
     //perform average over microproblem
     //     int index;
-        //     double dV, VolTot = 0.;
+    //     double dV, VolTot = 0.;
     //     double scale = 1.;
     //     FloatArray VecStrain, VecStress, SumStrain(6), SumStress(6);
     //     GaussPoint *gpL;
@@ -521,7 +521,7 @@ void MicroMaterial :: giveMacroStiffnessMatrix(FloatMatrix &answer, TimeStep *tS
 
     //perform K(24,24) = T^T * K * T
     FloatMatrix A;
-    A.beProductOf( Kbb,  slaveMasterOnBoundary );
+    A.beProductOf(Kbb,  slaveMasterOnBoundary);
     //A.printYourself();
     //slaveMasterOnBoundary.printYourself();
     //answer.resize(24, 24);
@@ -545,7 +545,7 @@ void MicroMaterial :: setMacroProperties(Domain *macroDomain, MacroLSpace *macro
     this->macroLSpaceElement = macroLSpaceElement;
 
     for ( int i = 1; i <= microMasterNodes.giveSize(); i++ ) { //8 nodes
-        this->microMasterCoords [ i - 1 ] = new const FloatArray( *microDomain->giveNode( microMasterNodes.at(i) )->giveCoordinates() );
+        this->microMasterCoords [ i - 1 ] = new const FloatArray( * microDomain->giveNode( microMasterNodes.at(i) )->giveCoordinates() );
         //this->microMasterCoords [ i - 1 ]->printYourself();
     }
 

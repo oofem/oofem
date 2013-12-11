@@ -102,7 +102,7 @@ public:
     // Overloaded methods
     SparseMtrx *GiveCopy() const;
     void times(const FloatArray &x, FloatArray &answer) const;
-    void timesT(const FloatArray &x, FloatArray &answer) const { this->times(x,answer); }
+    void timesT(const FloatArray &x, FloatArray &answer) const { this->times(x, answer); }
     virtual void times(double x);
     int buildInternalStructure(EngngModel *, int, EquationID, const UnknownNumberingScheme &);
     int assemble(const IntArray &loc, const FloatMatrix &mat);

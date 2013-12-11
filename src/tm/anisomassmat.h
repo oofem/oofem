@@ -47,7 +47,6 @@
 //@}
 
 namespace oofem {
-
 /**
  *
  * Class for an anisotropic linear transport material. The constitutive equation is given as
@@ -77,7 +76,6 @@ public:
 
     virtual const char *giveInputRecordName() const { return _IFT_AnisotropicMassTransferMaterial_Name; }
     virtual const char *giveClassName() const { return "AnisotropicMassTransferMaterial"; }
-    virtual classType giveClassID() const { return AnisotropicMassTransferMaterialClass; }
 };
 } // end namespace oofem
 #endif // anisomassmat_h

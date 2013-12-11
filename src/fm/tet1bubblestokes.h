@@ -45,7 +45,6 @@
 #define _IFT_Tet1BubbleStokes_Name "tet1bubblestokes"
 
 namespace oofem {
-
 class FEI3dTetLin;
 
 /**
@@ -53,7 +52,7 @@ class FEI3dTetLin;
  * Linear+Bubble interpolation of velocity, and linear interpolation of pressures.
  * The element is exported as a linear tetrahedron (bubble dofs are not exported).
  * It can deal with nonlinear material models, but it is assumed that the fluid is without memory (which is usually the case).
- * 
+ *
  * @author Mikael Öhman
  */
 class Tet1BubbleStokes : public FMElement,
@@ -93,12 +92,10 @@ public:
     Tet1BubbleStokes(int n, Domain *d);
     virtual ~Tet1BubbleStokes();
 
-    virtual IRResultType initializeFrom(InputRecord *ir);
-
     virtual double computeVolumeAround(GaussPoint *gp);
-    
+
     virtual void computeGaussPoints();
-    
+
     virtual void giveCharacteristicVector(FloatArray &answer, CharType type, ValueModeType mode, TimeStep *tStep);
     virtual void giveCharacteristicMatrix(FloatMatrix &answer, CharType type, TimeStep *tStep);
 
@@ -111,11 +108,10 @@ public:
 
     virtual const char *giveClassName() const { return "Tet1BubbleStokes"; }
     virtual const char *giveInputRecordName() const { return _IFT_Tet1BubbleStokes_Name; }
-    virtual classType giveClassID() const { return Tet1BubbleStokesElementClass; }
     virtual MaterialMode giveMaterialMode() { return _3dFlow; }
 
     virtual int computeNumberOfDofs();
-    
+
     virtual int giveNumberOfInternalDofManagers() const { return 1; }
     virtual DofManager *giveInternalDofManager(int i) const { return bubble; }
     virtual void giveInternalDofManDofIDMask(int i, EquationID eid, IntArray &answer) const;
@@ -136,9 +132,9 @@ public:
 
     // Element interpolation interface:
     virtual int EIPrimaryUnknownMI_computePrimaryUnknownVectorAt(ValueModeType u,
-            TimeStep *stepN, const FloatArray &coords, FloatArray &answer);
+                                                                 TimeStep *stepN, const FloatArray &coords, FloatArray &answer);
     virtual void EIPrimaryUnknownMI_computePrimaryUnknownVectorAtLocal(ValueModeType u,
-            TimeStep *stepN, const FloatArray &coords, FloatArray &answer);
+                                                                       TimeStep *stepN, const FloatArray &coords, FloatArray &answer);
     virtual void EIPrimaryUnknownMI_givePrimaryUnknownVectorDofID(IntArray &answer);
 
     virtual Element *ZZNodalRecoveryMI_giveElement() { return this; }

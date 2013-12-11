@@ -85,7 +85,7 @@ public:
 
     // layered cross section support functions
     virtual void computeStrainVectorInLayer(FloatArray &answer, const FloatArray &masterGpStrain,
-                                                  GaussPoint *slaveGp, TimeStep *tStep);
+                                            GaussPoint *masterGp, GaussPoint *slaveGp, TimeStep *tStep);
 
     virtual Interface *giveInterface(InterfaceType it);
 
@@ -97,9 +97,9 @@ public:
     virtual Element *ZZNodalRecoveryMI_giveElement() { return this; }
 
     virtual void NodalAveragingRecoveryMI_computeNodalValue(FloatArray &answer, int node,
-                                                    InternalStateType type, TimeStep *tStep);
+                                                            InternalStateType type, TimeStep *tStep);
     virtual void NodalAveragingRecoveryMI_computeSideValue(FloatArray &answer, int side,
-                                                   InternalStateType type, TimeStep *tStep);
+                                                           InternalStateType type, TimeStep *tStep);
 
 
     // io routines
@@ -107,13 +107,11 @@ public:
     //void drawRawGeometry(oofegGraphicContext &);
     //void drawDeformedGeometry(oofegGraphicContext &);
     //virtual void drawScalar(oofegGraphicContext &context);
-    //void drawInternalState(oofegGraphicContext &);
 #endif
 
     // definition & identification
     virtual const char *giveInputRecordName() const { return _IFT_RerShell_Name; }
     virtual const char *giveClassName() const { return "RerShell"; }
-    virtual classType giveClassID() const { return RerShellClass; }
 
     virtual IRResultType initializeFrom(InputRecord *ir);
 
@@ -123,7 +121,7 @@ public:
 protected:
     virtual void computeBodyLoadVectorAt(FloatArray &answer, Load *load, TimeStep *tStep, ValueModeType mode);
     virtual void computeBmatrixAt(GaussPoint *gp, FloatMatrix &answer, int = 1, int = ALL_STRAINS);
-    virtual void computeNmatrixAt(GaussPoint *gp, FloatMatrix &answer);
+    virtual void computeNmatrixAt(const FloatArray &iLocCoord, FloatMatrix &answer);
     virtual bool computeGtoLRotationMatrix(FloatMatrix &answer);
     virtual void computeGaussPoints();
     virtual double giveArea();

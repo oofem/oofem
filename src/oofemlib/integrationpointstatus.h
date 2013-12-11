@@ -38,7 +38,6 @@
 #include "femcmpnn.h"
 
 namespace oofem {
-
 class GaussPoint;
 
 /**
@@ -47,8 +46,8 @@ class GaussPoint;
  * To provide opportunity for storing arbitrary data related to each integration point,
  * each integration point can store any data, represented by a class derived from this parent.
  * The history variables associated to a material law are a typical example.
- * 
- * Any object that stores its status in integration point is responsible for its creation, 
+ *
+ * Any object that stores its status in integration point is responsible for its creation,
  * initialization, and serialization.
  */
 class OOFEM_EXPORT IntegrationPointStatus : public FEMComponent
@@ -64,7 +63,7 @@ public:
      * @param d domain to which new status belongs
      * @param g associated integration point
      */
-    IntegrationPointStatus(int n, Domain *d, GaussPoint *g) : FEMComponent (n,d), gp(g) { }
+    IntegrationPointStatus(int n, Domain *d, GaussPoint *g) : FEMComponent(n, d), gp(g) { }
     /// Destructor.
     virtual ~IntegrationPointStatus() { }
     /// Print receiver's output to given stream.
@@ -86,7 +85,6 @@ public:
 
     virtual const char *giveInputRecordName() const { return NULL; }
     virtual const char *giveClassName() const { return "IntegrationPointStatus"; }
-    virtual classType giveClassID() const { return IntegrationPointStatusClass; }
     virtual IRResultType initializeFrom(InputRecord *ir) { return IRRT_OK; }
 };
 } // end namespace oofem

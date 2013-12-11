@@ -46,6 +46,7 @@
 #include "mmashapefunctprojection.h"
 #include "huertaerrorestimator.h"
 #include "fei2dtrlin.h"
+#include "gausspoint.h"
 
 #define _IFT_TrPlaneStrain_Name "trplanestrain"
 
@@ -121,7 +122,7 @@ public:
     virtual void HuertaErrorEstimatorI_computeLocalCoords(FloatArray &answer, const FloatArray &coords)
     { computeLocalCoordinates(answer, coords); }
     virtual void HuertaErrorEstimatorI_computeNmatrixAt(GaussPoint *aGaussPoint, FloatMatrix &answer)
-    { computeNmatrixAt(aGaussPoint, answer); }
+    { computeNmatrixAt(* ( aGaussPoint->giveLocalCoordinates() ), answer); }
 
     // ZZRemeshingCriteriaInterface
     virtual double ZZRemeshingCriteriaI_giveCharacteristicSize() { return DirectErrorIndicatorRCI_giveCharacteristicSize(); }
@@ -136,16 +137,14 @@ public:
                                                                       InternalStateType type, TimeStep *tStep);
 
 #ifdef __OOFEG
-    void drawRawGeometry(oofegGraphicContext &);
-    void drawDeformedGeometry(oofegGraphicContext &, UnknownType);
+    virtual void drawRawGeometry(oofegGraphicContext &);
+    virtual void drawDeformedGeometry(oofegGraphicContext &, UnknownType);
     virtual void drawScalar(oofegGraphicContext &context);
-    //void drawInternalState (oofegGraphicContext&);
 #endif
 
     // definition & identification
     virtual const char *giveInputRecordName() const { return _IFT_TrPlaneStrain_Name; }
     virtual const char *giveClassName() const { return "TrPlaneStrain"; }
-    virtual classType giveClassID() const { return TrPlaneStrainClass; }
     virtual IRResultType initializeFrom(InputRecord *ir);
     virtual MaterialMode giveMaterialMode() { return _PlaneStrain; }
 
@@ -160,7 +159,6 @@ protected:
     virtual void computeBHmatrixAt(GaussPoint *gp, FloatMatrix &);
 
 
-    virtual void computeNmatrixAt(GaussPoint *gp, FloatMatrix &);
     virtual void computeGaussPoints();
 
     virtual int giveApproxOrder() { return 1; }

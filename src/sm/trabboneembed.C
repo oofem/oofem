@@ -40,8 +40,7 @@
 #include "classfactory.h"
 
 namespace oofem {
-
-REGISTER_Material( TrabBoneEmbed );
+REGISTER_Material(TrabBoneEmbed);
 
 TrabBoneEmbed :: TrabBoneEmbed(int n, Domain *d) : StructuralMaterial(n, d)
 {}
@@ -121,8 +120,8 @@ TrabBoneEmbed :: computeDamage(GaussPoint *gp,  TimeStep *atTime)
 
 void
 TrabBoneEmbed :: giveRealStressVector_3d(FloatArray &answer, GaussPoint *gp,
-                                      const FloatArray &totalStrain,
-                                      TimeStep *atTime)
+                                         const FloatArray &totalStrain,
+                                         TimeStep *atTime)
 {
     double tempDam, tempTSED;
     FloatArray newTotalDef, plasDef;
@@ -324,5 +323,4 @@ MaterialStatus *TrabBoneEmbed :: CreateStatus(GaussPoint *gp) const
         new  TrabBoneEmbedStatus(1, StructuralMaterial :: giveDomain(), gp);
     return status;
 }
-
 } // end namespace oofem

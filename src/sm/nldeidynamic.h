@@ -126,8 +126,8 @@ protected:
     double pyEstimate;
     /// Product of p^tM^(-1)p; where p is reference load vector.
     double pMp;
-    
-    SparseMtrx * massMatrixConsistent;
+
+    SparseMtrx *massMatrixConsistent;
     LinSystSolverType solverType;
     SparseMtrxType sparseMtrxType;
     SparseLinearSystemNM *nMethod;
@@ -159,7 +159,6 @@ public:
     // identification
     virtual const char *giveInputRecordName() const { return _IFT_NlDEIDynamic_Name; }
     virtual const char *giveClassName() const { return "NlDEIDynamic"; }
-    virtual classType giveClassID() const { return NlDEIDynamicClass; }
     virtual fMode giveFormulation() { return TL; }
 
     virtual int giveNumberOfFirstStep() { return 0; }

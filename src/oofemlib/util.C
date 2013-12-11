@@ -41,13 +41,12 @@
 #include <cstring>
 
 namespace oofem {
-
 EngngModel *InstanciateProblem(DataReader *dr, problemMode mode, int contextFlag, EngngModel *_master, bool parallelFlag)
 {
     const char *__proc = "InstanciateProblem"; // Required by IR_GIVE_FIELD macro
     IRResultType result;                       // Required by IR_GIVE_FIELD macro
     EngngModel *problem;
-    std::string problemName, dataOutputFileName, desc;
+    std :: string problemName, dataOutputFileName, desc;
 
     dataOutputFileName = dr->giveOutputFileName();
     desc = dr->giveDescription();
@@ -63,8 +62,8 @@ EngngModel *InstanciateProblem(DataReader *dr, problemMode mode, int contextFlag
     }
 
     problem = classFactory.createEngngModel(problemName.c_str(), 1, _master);
-    if (!problem) {
-        OOFEM_ERROR2("EngngModel::InstanciateProblem - Failed to construct engineering model if type \"%s\".\n", problemName.c_str());
+    if ( !problem ) {
+        OOFEM_ERROR2( "EngngModel::InstanciateProblem - Failed to construct engineering model if type \"%s\".\n", problemName.c_str() );
     }
     problem->setProblemMode(mode);
     problem->setParallelMode(parallelFlag);
@@ -73,11 +72,10 @@ EngngModel *InstanciateProblem(DataReader *dr, problemMode mode, int contextFlag
         problem->setContextOutputMode(COM_Always);
     }
 
-    problem->instanciateYourself(dr, emodelir, dataOutputFileName.c_str(), desc.c_str());
+    problem->instanciateYourself( dr, emodelir, dataOutputFileName.c_str(), desc.c_str() );
 
     delete emodelir;
 
     return problem;
 }
-
 } // end namespace oofem

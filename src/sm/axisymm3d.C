@@ -75,27 +75,16 @@ Interface *
 Axisymm3d :: giveInterface(InterfaceType interface)
 {
     if ( interface == ZZNodalRecoveryModelInterfaceType ) {
-        return static_cast< ZZNodalRecoveryModelInterface * >(this);
+        return static_cast< ZZNodalRecoveryModelInterface * >( this );
     } else if ( interface == NodalAveragingRecoveryModelInterfaceType ) {
-        return static_cast< NodalAveragingRecoveryModelInterface * >(this);
+        return static_cast< NodalAveragingRecoveryModelInterface * >( this );
     } else if ( interface == SPRNodalRecoveryModelInterfaceType ) {
-        return static_cast< SPRNodalRecoveryModelInterface * >(this);
+        return static_cast< SPRNodalRecoveryModelInterface * >( this );
     } else if ( interface == SpatialLocalizerInterfaceType ) {
-        return static_cast< SpatialLocalizerInterface * >(this);
+        return static_cast< SpatialLocalizerInterface * >( this );
     }
 
     return NULL;
-}
-
-
-void
-Axisymm3d :: computeNmatrixAt(GaussPoint *aGaussPoint, FloatMatrix &answer)
-// Returns the displacement interpolation matrix {N} of the receiver,
-// evaluated at aGaussPoint.
-{
-    FloatArray n;
-    this->interpolation.evalN( n, * aGaussPoint->giveCoordinates(), FEIElementGeometryWrapper(this) );
-    answer.beNMatrixOf(n, 2);
 }
 
 
@@ -241,7 +230,7 @@ Axisymm3d :: computeVolumeAround(GaussPoint *aGaussPoint)
     }
 
     determinant = fabs( this->interpolation.giveTransformationJacobian( * aGaussPoint->giveCoordinates(),
-                                                                       FEIElementGeometryWrapper(this) ) );
+                                                                        FEIElementGeometryWrapper(this) ) );
 
     weight = aGaussPoint->giveWeight();
     volume = determinant * weight * r;
@@ -271,23 +260,23 @@ Axisymm3d :: initializeFrom(InputRecord *ir)
     IRResultType result;                // Required by IR_GIVE_FIELD macro
 
     numberOfGaussPoints = 1;
-	result = this->StructuralElement :: initializeFrom(ir);
-	if(result != IRRT_OK) {
-		return result;
-	}
+    result = this->StructuralElement :: initializeFrom(ir);
+    if ( result != IRRT_OK ) {
+        return result;
+    }
 
     numberOfFiAndShGaussPoints = 1;
     IR_GIVE_OPTIONAL_FIELD(ir, numberOfFiAndShGaussPoints, _IFT_Axisymm3d_nipfish);
 
     if ( !( ( numberOfGaussPoints == 1 ) ||
-           ( numberOfGaussPoints == 4 ) ||
-           ( numberOfGaussPoints == 7 ) ) ) {
+            ( numberOfGaussPoints == 4 ) ||
+            ( numberOfGaussPoints == 7 ) ) ) {
         numberOfGaussPoints = 1;
     }
 
     if ( !( ( numberOfFiAndShGaussPoints == 1 ) ||
-           ( numberOfFiAndShGaussPoints == 4 ) ||
-           ( numberOfFiAndShGaussPoints == 7 ) ) ) {
+            ( numberOfFiAndShGaussPoints == 4 ) ||
+            ( numberOfFiAndShGaussPoints == 7 ) ) ) {
         numberOfFiAndShGaussPoints = 1;
     }
 
@@ -423,8 +412,8 @@ Axisymm3d :: SPRNodalRecoveryMI_giveDofMansDeterminedByPatch(IntArray &answer, i
 {
     answer.resize(1);
     if ( ( pap == this->giveNode(1)->giveNumber() ) ||
-        ( pap == this->giveNode(2)->giveNumber() ) ||
-        ( pap == this->giveNode(3)->giveNumber() ) ) {
+         ( pap == this->giveNode(2)->giveNumber() ) ||
+         ( pap == this->giveNode(3)->giveNumber() ) ) {
         answer.at(1) = pap;
     } else {
         _error("SPRNodalRecoveryMI_giveDofMansDeterminedByPatch: node unknown");
@@ -512,7 +501,7 @@ Axisymm3d :: computeEdgeVolumeAround(GaussPoint *aGaussPoint, int iEdge)
     FloatArray c(2);
     this->computeEdgeIpGlobalCoords(c, aGaussPoint, iEdge);
     double result = this->interpolation.edgeGiveTransformationJacobian( iEdge, * aGaussPoint->giveCoordinates(),
-                                                                       FEIElementGeometryWrapper(this) );
+                                                                        FEIElementGeometryWrapper(this) );
 
 
     return c.at(1) * result * aGaussPoint->giveWeight();
@@ -764,205 +753,6 @@ Axisymm3d :: drawScalar(oofegGraphicContext &context)
         EMAddGraphicsToModel(ESIModel(), tr);
     }
 }
-
-
-
-/*
- * void Axisymm3d :: drawInternalState (oofegGraphicContext &gc)
- * //
- * // Draws internal state graphics representation
- * //
- * {
- * WCRec p[3],l[2],q[4];
- * GraphicObj *tr;
- * StructuralMaterial *mat = (StructuralMaterial*) this->giveMaterial();
- * GaussPoint* gp;
- * double v1,v2,v3,ratio;
- * int i, nPlastGp;
- * IntegrationRule* iRule = integrationRulesArray[0];
- * TimeStep *tStep = domain->giveEngngModel()->giveCurrentStep();
- * double defScale = gc.getDefScale();
- *
- * if (!gc.testElementGraphicActivity(this)) return;
- *
- * // check for yield mode
- * if (gc.getDrawMode() == yieldState) {
- * // loop over available GPs
- * nPlastGp = 0;
- * for (i=1 ; i<= iRule->giveNumberOfIntegrationPoints() ; i++) {
- *  gp = iRule-> getIntegrationPoint(i) ;
- *  nPlastGp += (mat->giveStatusCharFlag(gp,ms_yield_flag) != 0);
- * }
- * if (nPlastGp == 0) return;
- * // nPlastGp should contain number of yielded gp in element
- * // good way should be select color accordingly
- * ratio = nPlastGp / integrationRulesArray [ 0 ]->giveNumberOfIntegrationPoints();
- * EASValsSetLayer(OOFEG_YIELD_PATTERN_LAYER);
- * if (gc.getInternalVarsDefGeoFlag()) {
- * // use deformed geometry
- * p[0].x = (FPNum) this->giveNode(1)->giveUpdatedCoordinate(1,tStep,defScale);
- * p[0].y = (FPNum) this->giveNode(1)->giveUpdatedCoordinate(2,tStep,defScale);
- * p[0].z = 0.;
- * p[1].x = (FPNum) this->giveNode(2)->giveUpdatedCoordinate(1,tStep,defScale);
- * p[1].y = (FPNum) this->giveNode(2)->giveUpdatedCoordinate(2,tStep,defScale);
- * p[1].z = 0.;
- * p[2].x = (FPNum) this->giveNode(3)->giveUpdatedCoordinate(1,tStep,defScale);
- * p[2].y = (FPNum) this->giveNode(3)->giveUpdatedCoordinate(2,tStep,defScale);
- * p[2].z = 0.;
- *
- * } else {
- * p[0].x = (FPNum) this->giveNode(1)->giveCoordinate(1);
- * p[0].y = (FPNum) this->giveNode(1)->giveCoordinate(2);
- * p[0].z = 0.;
- * p[1].x = (FPNum) this->giveNode(2)->giveCoordinate(1);
- * p[1].y = (FPNum) this->giveNode(2)->giveCoordinate(2);
- * p[1].z = 0.;
- * p[2].x = (FPNum) this->giveNode(3)->giveCoordinate(1);
- * p[2].y = (FPNum) this->giveNode(3)->giveCoordinate(2);
- * p[2].z = 0.;
- * }
- *
- * EASValsSetColor(gc.getYieldPlotColor(ratio));
- * tr =  CreateTriangle3D(p);
- * EGWithMaskChangeAttributes(WIDTH_MASK | COLOR_MASK | FILL_MASK | LAYER_MASK, tr);
- * EMAddGraphicsToModel(ESIModel(), tr);
- *
- * } else if (gc.getDrawMode() == crackedState) {
- * // ask if any active crack exist
- * int crackStatus;
- * double ax,ay,bx,by,norm,xc,yc,length;
- * FloatMatrix crackDir;
- *
- * if (numberOfGaussPoints != 1) return;
- * //   for (igp=1 ; igp<= integrationRulesArray [ 0 ]->giveNumberOfIntegrationPoints() ; igp++) {
- * {
- *  gp = iRule-> getIntegrationPoint(0);
- *
- *  if (mat->giveStatusCharFlag (gp,ms_isCracked_flag) == 0) return;
- *  if (mat->GiveStatusCharMtrx(crackDir, gp,ms_crackDirection_flag)) {
- *  for (i = 1; i <= 3; i++) {
- *   crackStatus = (int) mat->giveStatusCharValue(gp, ms_crackStatus_flag,i);
- *   if ((crackStatus != pscm_NONE) && (crackStatus != pscm_CLOSED)) {
- *    // draw a crack
- *    // this element is 2d element in x-y plane
- *    //
- *    // compute perpendicular line to normal in xy plane
- *    ax = crackDir.at(1,i);
- *    ay = crackDir.at(2,i);
- *    if (fabs(ax) > 1.e-6) {
- *     by = 1.;
- *     bx = -ay*by/ax;
- *     norm = sqrt(bx*bx+by*by);
- *     bx = bx/norm;   // normalize to obtain unit vector
- *     by = by/norm;
- *    } else { by = 0.0; bx = 1.0;}
- *    // obtain gp global coordinates - here only one exists
- *    // it is in centre of gravity.
- *    if (gc.getInternalVarsDefGeoFlag()) {
- *     // use deformed geometry
- *     xc = (this->giveNode(1)->giveUpdatedCoordinate(1,tStep,defScale)+
- *        this->giveNode(2)->giveUpdatedCoordinate(1,tStep,defScale)+
- *        this->giveNode(3)->giveUpdatedCoordinate(1,tStep,defScale)) / 3.0 ;
- *     yc = (this->giveNode(1)->giveUpdatedCoordinate(2,tStep,defScale) +
- *        this->giveNode(2)->giveUpdatedCoordinate(2,tStep,defScale) +
- *        this->giveNode(3)->giveUpdatedCoordinate(2,tStep,defScale)) / 3.0 ;
- *
- *    } else {
- *     xc = (this->giveNode(1)->giveCoordinate(1) +
- *        this->giveNode(2)->giveCoordinate(1) +
- *        this->giveNode(3)->giveCoordinate(1)) / 3.0 ;
- *     yc = (this->giveNode(1)->giveCoordinate(2) +
- *        this->giveNode(2)->giveCoordinate(2) +
- *        this->giveNode(3)->giveCoordinate(2)) / 3.0 ;
- *    }
- *    length = TR_LENGHT_REDUCT * sqrt(2*this->giveArea()) / 2.0;
- *    if (i!=3) {
- *     l[0].x = (FPNum) xc+bx*length;
- *     l[0].y = (FPNum) yc+by*length;
- *     l[0].z = 0.;
- *     l[1].x = (FPNum) xc-bx*length;
- *     l[1].y = (FPNum) yc-by*length;
- *     l[1].z = 0.;
- *     EASValsSetLayer(OOFEG_CRACK_PATTERN_LAYER);
- *     EASValsSetLineWidth(OOFEG_CRACK_PATTERN_WIDTH);
- *     if ((crackStatus == pscm_SOFTENING)||(crackStatus == pscm_OPEN))
- *      EASValsSetColor(gc.getActiveCrackColor());
- *     else
- *      EASValsSetColor(gc.getCrackPatternColor());
- *     tr = CreateLine3D (l);
- *     EGWithMaskChangeAttributes(WIDTH_MASK | COLOR_MASK | LAYER_MASK, tr);
- *     EMAddGraphicsToModel(ESIModel(), tr);
- *    } else {
- *     // special case - crack normal is z axis - draw square
- *     bx=by=1.0;
- *     q[0].x = (FPNum) xc+0.5*bx*length;
- *     q[0].y = (FPNum) yc+0.5*by*length;
- *     q[0].z = 0.;
- *     q[1].x = (FPNum) xc-0.5*bx*length;
- *     q[1].y = (FPNum) yc+0.5*by*length;
- *     q[1].z = 0.;
- *     q[2].x = (FPNum) xc-0.5*bx*length;
- *     q[2].y = (FPNum) yc-0.5*by*length;
- *     q[2].z = 0.;
- *     q[3].x = (FPNum) xc+0.5*bx*length;
- *     q[3].y = (FPNum) yc-0.5*by*length;
- *     q[3].z = 0.;
- *
- *     EASValsSetLayer(OOFEG_CRACK_PATTERN_LAYER);
- *     EASValsSetLineWidth(OOFEG_CRACK_PATTERN_WIDTH);
- *     if ((crackStatus == pscm_SOFTENING)||(crackStatus == pscm_OPEN))
- *      EASValsSetColor(gc.getActiveCrackColor());
- *     else
- *      EASValsSetColor(gc.getCrackPatternColor());
- *     EASValsSetFillStyle (FILL_HOLLOW);
- *     tr = CreateQuad3D (q);
- *     EGWithMaskChangeAttributes(WIDTH_MASK | COLOR_MASK | LAYER_MASK | FILL_MASK, tr);
- *     EMAddGraphicsToModel(ESIModel(), tr);
- *    }
- *   }
- *  }
- *  //delete crackDir;
- * }
- * }
- * }
- * // check for valid stress-strain mode
- * if (!((gc.getDrawMode() == sxForce) || (gc.getDrawMode() == syForce) || (gc.getDrawMode() == szForce) || (gc.getDrawMode() == sxyForce))) return ;
- *
- * EASValsSetLayer(OOFEG_STRESS_CONTOUR_LAYER);
- * if (gc.getInternalVarsDefGeoFlag()) {
- * // use deformed geometry
- * p[0].x = (FPNum) this->giveNode(1)->giveUpdatedCoordinate(1,tStep,defScale);
- * p[0].y = (FPNum) this->giveNode(1)->giveUpdatedCoordinate(2,tStep,defScale);
- * p[0].z = 0.;
- * p[1].x = (FPNum) this->giveNode(2)->giveUpdatedCoordinate(1,tStep,defScale);
- * p[1].y = (FPNum) this->giveNode(2)->giveUpdatedCoordinate(2,tStep,defScale);
- * p[1].z = 0.;                    // delete help;
- * p[2].x = (FPNum) this->giveNode(3)->giveUpdatedCoordinate(1,tStep,defScale);
- * p[2].y = (FPNum) this->giveNode(3)->giveUpdatedCoordinate(2,tStep,defScale);
- * p[2].z = 0.;
- * } else {
- * p[0].x = (FPNum) this->giveNode(1)->giveCoordinate(1);
- * p[0].y = (FPNum) this->giveNode(1)->giveCoordinate(2);
- * p[0].z = 0.;
- * p[1].x = (FPNum) this->giveNode(2)->giveCoordinate(1);
- * p[1].y = (FPNum) this->giveNode(2)->giveCoordinate(2);
- * p[1].z = 0.;
- * p[2].x = (FPNum) this->giveNode(3)->giveCoordinate(1);
- * p[2].y = (FPNum) this->giveNode(3)->giveCoordinate(2);
- * p[2].z = 0.;
- * }
- * int result = 0;
- * result+= this->giveInternalStateAtNode (gc, 1, &v1);
- * result+= this->giveInternalStateAtNode (gc, 2, &v2);
- * result+= this->giveInternalStateAtNode (gc, 3, &v3);
- *
- * if (result == 3) {
- * tr = CreateTriangleWD3D (p,v1,v2,v3);
- * EGWithMaskChangeAttributes(LAYER_MASK, tr);
- * EMAddGraphicsToModel(ESIModel(), tr);
- * }
- * }
- */
 
 #endif
 } // end namespace oofem

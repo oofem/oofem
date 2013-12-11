@@ -64,7 +64,6 @@ public:
 
     virtual const char *giveInputRecordName() const { return _IFT_RankinePlasticMaterial_Name; }
     virtual const char *giveClassName() const { return "RankinePlasticMaterial"; }
-    virtual classType giveClassID() const { return RankinePlasticMaterialClass; }
 
     virtual MaterialStatus *CreateStatus(GaussPoint *gp) const;
 

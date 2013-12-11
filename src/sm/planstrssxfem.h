@@ -42,7 +42,6 @@
 #define _IFT_PlaneStress2dXfem_Name "planestress2dxfem"
 
 namespace oofem {
-
 /**
  * Temporary class for testing
  * in the usual case instead of PlaneStress2dXfem
@@ -64,35 +63,33 @@ public:
 
     virtual const char *giveInputRecordName() const { return _IFT_PlaneStress2dXfem_Name; }
     virtual const char *giveClassName() const { return "PlaneStress2dXfem"; }
-    virtual classType giveClassID() const { return PlaneStress2dXfemClass; }
     virtual int computeNumberOfDofs();
     virtual void computeGaussPoints();
-    virtual void computeNmatrixAt(GaussPoint *gp, FloatMatrix &answer);
+    virtual void computeNmatrixAt(const FloatArray &iLocCoord, FloatMatrix &answer);
     virtual void computeBmatrixAt(GaussPoint *gp, FloatMatrix &answer,
-                          int lowerIndx = 1, int upperIndx = ALL_STRAINS);
+                                  int lowerIndx = 1, int upperIndx = ALL_STRAINS);
     virtual void computeBHmatrixAt(GaussPoint *aGaussPoint, FloatMatrix &answer)
-        { OOFEM_ERROR("PlaneStress2dXfem :: computeBHmatrixAt() not implemented"); }
+    { OOFEM_ERROR("PlaneStress2dXfem :: computeBHmatrixAt() not implemented"); }
     virtual void giveDofManDofIDMask(int inode, EquationID, IntArray & answer) const;
     virtual void computeConstitutiveMatrixAt(FloatMatrix &answer, MatResponseMode rMode, GaussPoint *, TimeStep *tStep);
     virtual void computeStressVector(FloatArray &answer, const FloatArray &strain, GaussPoint *gp, TimeStep *stepN);
     virtual void computeStiffnessMatrix(FloatMatrix &answer, MatResponseMode rMode, TimeStep *tStep);
     virtual void giveInternalForcesVector(FloatArray &answer, TimeStep *tStep, int useUpdatedGpRecord);
 
+    virtual void computeConsistentMassMatrix(FloatMatrix &answer, TimeStep *tStep, double &mass, const double *ipDensity = NULL) { XfemElementInterface :: XfemElementInterface_computeConsistentMassMatrix(answer, tStep, mass, ipDensity); }
+
     virtual Element_Geometry_Type giveGeometryType() const;
-    
+
 #ifdef __OOFEG
-    void drawRawGeometry(oofegGraphicContext &);
+    virtual void drawRawGeometry(oofegGraphicContext &);
     //void drawDeformedGeometry(oofegGraphicContext &, UnknownType);
     virtual void drawScalar(oofegGraphicContext &context);
     //virtual void drawSpecial(oofegGraphicContext &);
-    //void drawInternalState(oofegGraphicContext&);
 #endif
 
     virtual IRResultType initializeFrom(InputRecord *ir);
     virtual MaterialMode giveMaterialMode();
     virtual void giveInputRecord(DynamicInputRecord &input);
-
-
 };
 } // end namespace oofem
 #endif

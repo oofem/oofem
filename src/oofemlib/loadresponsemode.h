@@ -45,4 +45,3 @@ enum LoadResponseMode {
 };
 } // end namespace oofem
 #endif // loadresponsemode_h
-

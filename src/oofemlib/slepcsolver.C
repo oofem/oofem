@@ -75,8 +75,8 @@ SLEPcSolver :: solve(SparseMtrx *a, SparseMtrx *b, FloatArray *_eigv, FloatMatri
     }
 
     if ( a->giveNumberOfRows() != a->giveNumberOfColumns() ||
-        b->giveNumberOfRows() != b->giveNumberOfRows() ||
-        a->giveNumberOfColumns() != b->giveNumberOfColumns() ) {
+         b->giveNumberOfRows() != b->giveNumberOfRows() ||
+         a->giveNumberOfColumns() != b->giveNumberOfColumns() ) {
         OOFEM_ERROR("SLEPcSolver :: solveYourselfAt : matrices size mismatch\n");
     }
 
@@ -108,27 +108,27 @@ SLEPcSolver :: solve(SparseMtrx *a, SparseMtrx *b, FloatArray *_eigv, FloatMatri
 
 
     /* - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-    *             Create the eigensolver and set various options
-    *  - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - */
+     *             Create the eigensolver and set various options
+     *  - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - */
     int nconv, nite;
     EPSConvergedReason reason;
 
- #ifdef TIME_REPORT
+#ifdef TIME_REPORT
     Timer timer;
     timer.startTimer();
- #endif
+#endif
 
     if ( !epsInit ) {
         /*
          * Create eigensolver context
          */
- #ifdef __PARALLEL_MODE
+#ifdef __PARALLEL_MODE
         ierr = EPSCreate(PETSC_COMM_WORLD, & eps);
         CHKERRQ(ierr);
- #else
+#else
         ierr = EPSCreate(PETSC_COMM_SELF, & eps);
         CHKERRQ(ierr);
- #endif
+#endif
         epsInit = true;
     }
 
@@ -161,8 +161,8 @@ SLEPcSolver :: solve(SparseMtrx *a, SparseMtrx *b, FloatArray *_eigv, FloatMatri
     CHKERRQ(ierr);
 
     /* - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-    *                   Solve the eigensystem
-    *  - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - */
+     *                   Solve the eigensystem
+     *  - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - */
 
     ierr = EPSSolve(eps);
     CHKERRQ(ierr);
@@ -185,11 +185,11 @@ SLEPcSolver :: solve(SparseMtrx *a, SparseMtrx *b, FloatArray *_eigv, FloatMatri
         ierr = MatGetVecs(* B->giveMtrx(), PETSC_NULL, & Vr);
         CHKERRQ(ierr);
 
- #ifdef __PARALLEL_MODE
+#ifdef __PARALLEL_MODE
         Vec Vr2;
         ierr = VecCreateSeq(PETSC_COMM_SELF, size, & Vr2);
         CHKERRQ(ierr);
- #endif
+#endif
 
         for ( int i = 0; i < nconv && i < nroot; i++ ) {
             ierr = EPSGetEigenpair(eps, nconv - i - 1, & kr, PETSC_NULL, Vr, PETSC_NULL);
@@ -199,7 +199,7 @@ SLEPcSolver :: solve(SparseMtrx *a, SparseMtrx *b, FloatArray *_eigv, FloatMatri
             _eigv->at(i + 1) = kr;
 
             //Store the eigenvector
- #ifdef __PARALLEL_MODE
+#ifdef __PARALLEL_MODE
             engngModel->givePetscContext( A->giveDomainIndex() )->scatterG2N(Vr, Vr2, INSERT_VALUES);
             ierr = VecGetArray(Vr2, & array);
             CHKERRQ(ierr);
@@ -209,7 +209,7 @@ SLEPcSolver :: solve(SparseMtrx *a, SparseMtrx *b, FloatArray *_eigv, FloatMatri
 
             ierr = VecRestoreArray(Vr2, & array);
             CHKERRQ(ierr);
- #else
+#else
             ierr = VecGetArray(Vr, & array);
             CHKERRQ(ierr);
             for ( int j = 0; j < size; j++ ) {
@@ -219,25 +219,24 @@ SLEPcSolver :: solve(SparseMtrx *a, SparseMtrx *b, FloatArray *_eigv, FloatMatri
             ierr = VecRestoreArray(Vr, & array);
             CHKERRQ(ierr);
 
- #endif
+#endif
         }
 
         ierr = VecDestroy(Vr);
         CHKERRQ(ierr);
- #ifdef __PARALLEL_MODE
+#ifdef __PARALLEL_MODE
         ierr = VecDestroy(Vr2);
         CHKERRQ(ierr);
- #endif
+#endif
     } else {
         OOFEM_ERROR("SLEPcSolver :: solveYourselfAt: No converged eigenpairs\n");
     }
 
- #ifdef TIME_REPORT
+#ifdef TIME_REPORT
     timer.stopTimer();
     OOFEM_LOG_INFO( "SLEPcSolver info: user time consumed by solution: %.2fs\n", timer.getUtime() );
- #endif
+#endif
 
     return NM_Success;
 }
 } // end namespace oofem
-

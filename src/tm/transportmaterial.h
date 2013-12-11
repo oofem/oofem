@@ -43,7 +43,6 @@
 #include "transportelement.h"
 
 namespace oofem {
-
 /**
  * This class implements a transport material status information.
  * When needed, new materials should specialized a derived class from this base.
@@ -84,7 +83,6 @@ public:
     void letTempStateVectorBe(const FloatArray &v) { temp_field = v; }
 
     virtual const char *giveClassName() const { return "TransportMaterialStatus"; }
-    virtual classType giveClassID() const { return TransportMaterialStatusClass; }
 
     /// Set gradient.
     void setTempGradient(const FloatArray &grad);
@@ -108,7 +106,6 @@ public:
     const FloatArray &giveTempFlux() { return temp_flux; }
     /// Returns maturity.
     double giveMaturity() { return maturity; }
-    
 };
 
 
@@ -139,7 +136,7 @@ public:
 
     /**
      * Returns the flux for the field and its gradient.
-     * @todo { Should the field variable just be a scalar? This might change when we rethink the coupled-fields approach. 
+     * @todo { Should the field variable just be a scalar? This might change when we rethink the coupled-fields approach.
      * Now its either just [temperature], or [temperature, concentration] so to cover both cases there is a floatarray. }
      * @param answer The flux.
      * @param gp Gauss point.
@@ -200,9 +197,6 @@ public:
      * Returns positive value of humidity if implemented and enabled in derived material, -1 otherwise.
      */
     virtual double giveHumidity(GaussPoint *gp, ValueModeType mode) { return -1.0; }
-
-    virtual const char *giveClassName() const { return "TransportMaterial"; }
-    virtual classType giveClassID() const { return TransportMaterialClass; }
 
     // post-processing
     virtual int giveIPValue(FloatArray &answer, GaussPoint *aGaussPoint, InternalStateType type, TimeStep *atTime);

@@ -39,80 +39,86 @@
 #include "gaussintegrationrule.h"
 
 namespace oofem {
-
 double
 FEI3dTetQuad :: giveVolume(const FEICellGeometry &cellgeo) const
 {
-	// Use linear approximation.
+    // Use linear approximation.
 
-	double x1, x2, x3, x4; //, x5, x6, x7, x8, x9, x10;
-	double y1, y2, y3, y4; //, y5, y6, y7, y8, y9, y10;
-	double z1, z2, z3, z4; //, z5, z6, z7, z8, z9, z10;
+    double x1, x2, x3, x4;     //, x5, x6, x7, x8, x9, x10;
+    double y1, y2, y3, y4;     //, y5, y6, y7, y8, y9, y10;
+    double z1, z2, z3, z4;     //, z5, z6, z7, z8, z9, z10;
 
-	x1=cellgeo.giveVertexCoordinates(1)->at(1);		y1=cellgeo.giveVertexCoordinates(1)->at(2);		z1=cellgeo.giveVertexCoordinates(1)->at(3);
-	x2=cellgeo.giveVertexCoordinates(2)->at(1);		y2=cellgeo.giveVertexCoordinates(2)->at(2);		z2=cellgeo.giveVertexCoordinates(2)->at(3);
-	x3=cellgeo.giveVertexCoordinates(3)->at(1);		y3=cellgeo.giveVertexCoordinates(3)->at(2);		z3=cellgeo.giveVertexCoordinates(3)->at(3);
-	x4=cellgeo.giveVertexCoordinates(4)->at(1);		y4=cellgeo.giveVertexCoordinates(4)->at(2);		z4=cellgeo.giveVertexCoordinates(4)->at(3);
-//	x5=cellgeo.giveVertexCoordinates(5)->at(1);		y5=cellgeo.giveVertexCoordinates(5)->at(2);		z5=cellgeo.giveVertexCoordinates(5)->at(3);
-//	x6=cellgeo.giveVertexCoordinates(6)->at(1);		y6=cellgeo.giveVertexCoordinates(6)->at(2);		z6=cellgeo.giveVertexCoordinates(6)->at(3);
-//	x7=cellgeo.giveVertexCoordinates(7)->at(1);		y7=cellgeo.giveVertexCoordinates(7)->at(2);		z7=cellgeo.giveVertexCoordinates(7)->at(3);
-//	x8=cellgeo.giveVertexCoordinates(8)->at(1);		y8=cellgeo.giveVertexCoordinates(8)->at(2);		z8=cellgeo.giveVertexCoordinates(8)->at(3);
-//	x9=cellgeo.giveVertexCoordinates(9)->at(1);		y9=cellgeo.giveVertexCoordinates(9)->at(2);		z9=cellgeo.giveVertexCoordinates(9)->at(3);
-//	x10=cellgeo.giveVertexCoordinates(10)->at(1);	y10=cellgeo.giveVertexCoordinates(10)->at(2);	z10=cellgeo.giveVertexCoordinates(10)->at(3);
-/*
-	double area = x1*y3*z2 - x1*y2*z3 + x2*y1*z3 - x2*y3*z1 - x3*y1*z2 + x3*y2*z1 + x1*y2*z4 - x1*y4*z2 - x2*y1*z4 + x2*y4*z1 + x4*y1*z2 - x4*y2*z1 - x1*y3*z4 + x1*y4*z3 
-+ x3*y1*z4 - x3*y4*z1 - x4*y1*z3 + x4*y3*z1 - 2*x1*y2*z6 + 2*x1*y3*z5 - 2*x1*y5*z3 + 2*x1*y6*z2 + 2*x2*y1*z6 + x2*y3*z4 - x2*y4*z3 - 2*x2*y6*z1 - 2*x3*y1*z5 - x3*y2*z4 
-+ x3*y4*z2 + 2*x3*y5*z1 + x4*y2*z3 - x4*y3*z2 + 2*x5*y1*z3 - 2*x5*y3*z1 - 2*x6*y1*z2 + 2*x6*y2*z1 - 2*x1*y2*z7 + 2*x1*y3*z6 - 2*x1*y4*z5 + 2*x1*y5*z4 - 2*x1*y6*z3 + 2*x1*y7*z2 
-+ 2*x2*y1*z7 - 2*x2*y3*z5 + 2*x2*y5*z3 - 2*x2*y7*z1 - 2*x3*y1*z6 + 2*x3*y2*z5 - 2*x3*y5*z2 + 2*x3*y6*z1 + 2*x4*y1*z5 - 2*x4*y5*z1 - 2*x5*y1*z4 - 2*x5*y2*z3 + 2*x5*y3*z2 
-+ 2*x5*y4*z1 + 2*x6*y1*z3 - 2*x6*y3*z1 - 2*x7*y1*z2 + 2*x7*y2*z1 + 2*x1*y2*z8 - 2*x1*y8*z2 - 2*x2*y1*z8 + 2*x2*y4*z5 
-- 2*x2*y5*z4 + 2*x2*y8*z1 - 2*x4*y2*z5 + 2*x4*y5*z2 + 2*x5*y2*z4 - 2*x5*y4*z2 + 2*x8*y1*z2 - 2*x8*y2*z1 + 2*x1*y2*z9 - 2*x1*y3*z8 + 2*x1*y4*z7 - 4*x1*y5*z6 + 4*x1*y6*z5 
-- 2*x1*y7*z4 + 2*x1*y8*z3 - 2*x1*y9*z2 - 2*x2*y1*z9 - 2*x2*y3*z7 - 2*x2*y4*z6 + 2*x2*y6*z4 + 2*x2*y7*z3 + 2*x2*y9*z1 + 2*x3*y1*z8 + 2*x3*y2*z7 - 2*x3*y7*z2 - 2*x3*y8*z1 
-- 2*x4*y1*z7 + 2*x4*y2*z6 - 2*x4*y6*z2 + 2*x4*y7*z1 + 4*x5*y1*z6 - 4*x5*y6*z1 - 4*x6*y1*z5 - 2*x6*y2*z4 + 2*x6*y4*z2 + 4*x6*y5*z1 + 2*x7*y1*z4 - 2*x7*y2*z3 + 2*x7*y3*z2 
-- 2*x7*y4*z1 - 2*x8*y1*z3 + 2*x8*y3*z1 + 2*x9*y1*z2 - 2*x9*y2*z1 - 4*x1*y5*z7 + 4*x1*y7*z5 + 4*x2*y5*z6 - 4*x2*y6*z5 + 2*x3*y4*z6 - 2*x3*y6*z4 - 2*x4*y3*z6 + 2*x4*y6*z3 
-+ 4*x5*y1*z7 - 4*x5*y2*z6 + 4*x5*y6*z2 - 4*x5*y7*z1 + 4*x6*y2*z5 + 2*x6*y3*z4 - 2*x6*y4*z3 - 4*x6*y5*z2 - 4*x7*y1*z5 + 4*x7*y5*z1 - 2*x1*y3*z10 - 2*x1*y4*z9 + 4*x1*y5*z8 
-- 4*x1*y6*z7 + 4*x1*y7*z6 - 4*x1*y8*z5 + 2*x1*y9*z4 + 2*x1*y10*z3 + 2*x2*y3*z9 + 2*x2*y4*z8 + 4*x2*y5*z7 - 4*x2*y7*z5 - 2*x2*y8*z4 - 2*x2*y9*z3 + 2*x3*y1*z10 - 2*x3*y2*z9 
-- 2*x3*y4*z7 - 4*x3*y5*z6 + 4*x3*y6*z5 + 2*x3*y7*z4 + 2*x3*y9*z2 - 2*x3*y10*z1 + 2*x4*y1*z9 
-- 2*x4*y2*z8 + 2*x4*y3*z7 - 2*x4*y7*z3 + 2*x4*y8*z2 - 2*x4*y9*z1 - 4*x5*y1*z8 - 4*x5*y2*z7 + 4*x5*y3*z6 - 4*x5*y6*z3 + 4*x5*y7*z2 + 4*x5*y8*z1 + 4*x6*y1*z7 - 4*x6*y3*z5 
-+ 4*x6*y5*z3 - 4*x6*y7*z1 - 4*x7*y1*z6 + 4*x7*y2*z5 - 2*x7*y3*z4 + 2*x7*y4*z3 - 4*x7*y5*z2 + 4*x7*y6*z1 + 4*x8*y1*z5 + 2*x8*y2*z4 - 2*x8*y4*z2 - 4*x8*y5*z1 - 2*x9*y1*z4 
-+ 2*x9*y2*z3 - 2*x9*y3*z2 + 2*x9*y4*z1 - 2*x10*y1*z3 + 2*x10*y3*z1 + 2*x1*y4*z10 + 4*x1*y5*z9 - 4*x1*y9*z5 - 2*x1*y10*z4 + 2*x2*y3*z10 - 4*x2*y5*z8 - 4*x2*y6*z7 + 4*x2*y7*z6 
-+ 4*x2*y8*z5 - 2*x2*y10*z3 - 2*x3*y2*z10 - 2*x3*y4*z8 + 4*x3*y5*z7 - 4*x3*y7*z5 + 2*x3*y8*z4 + 2*x3*y10*z2 - 2*x4*y1*z10 + 2*x4*y3*z8 + 4*x4*y5*z6 - 4*x4*y6*z5 - 2*x4*y8*z3 
-+ 2*x4*y10*z1 - 4*x5*y1*z9 + 4*x5*y2*z8 - 4*x5*y3*z7 - 4*x5*y4*z6 + 4*x5*y6*z4 + 4*x5*y7*z3 - 4*x5*y8*z2 + 4*x5*y9*z1 + 4*x6*y2*z7 + 4*x6*y4*z5 - 4*x6*y5*z4 - 4*x6*y7*z2 
-- 4*x7*y2*z6 + 4*x7*y3*z5 - 4*x7*y5*z3 + 4*x7*y6*z2 - 4*x8*y2*z5 - 2*x8*y3*z4 + 2*x8*y4*z3 + 4*x8*y5*z2 + 4*x9*y1*z5 - 4*x9*y5*z1 + 2*x10*y1*z4 + 2*x10*y2*z3 - 2*x10*y3*z2 -
- 2*x10*y4*z1 + 4*x1*y6*z9 - 4*x1*y7*z8 + 4*x1*y8*z7 - 4*x1*y9*z6 
-- 2*x2*y4*z10 - 4*x2*y5*z9 + 4*x2*y9*z5 + 2*x2*y10*z4 + 2*x3*y4*z9 + 4*x3*y5*z8 + 4*x3*y6*z7 - 4*x3*y7*z6 - 4*x3*y8*z5 - 2*x3*y9*z4 + 2*x4*y2*z10 - 2*x4*y3*z9 - 4*x4*y5*z7 
-+ 4*x4*y7*z5 + 2*x4*y9*z3 - 2*x4*y10*z2 + 4*x5*y2*z9 - 4*x5*y3*z8 + 4*x5*y4*z7 - 4*x5*y7*z4 + 4*x5*y8*z3 - 4*x5*y9*z2 - 4*x6*y1*z9 - 4*x6*y3*z7 + 4*x6*y7*z3 + 4*x6*y9*z1 
-+ 4*x7*y1*z8 + 4*x7*y3*z6 - 4*x7*y4*z5 + 4*x7*y5*z4 - 4*x7*y6*z3 - 4*x7*y8*z1 - 4*x8*y1*z7 + 4*x8*y3*z5 - 4*x8*y5*z3 + 4*x8*y7*z1 + 4*x9*y1*z6 
-- 4*x9*y2*z5 + 2*x9*y3*z4 - 2*x9*y4*z3 + 4*x9*y5*z2 - 4*x9*y6*z1 - 2*x10*y2*z4 + 2*x10*y4*z2 - 4*x1*y6*z10 + 4*x1*y10*z6 + 4*x2*y6*z9 - 4*x2*y7*z8 + 4*x2*y8*z7 - 4*x2*y9*z6 
-- 4*x3*y5*z9 + 4*x3*y9*z5 - 4*x4*y5*z8 + 4*x4*y6*z7 - 4*x4*y7*z6 + 4*x4*y8*z5 + 4*x5*y3*z9 + 4*x5*y4*z8 - 4*x5*y8*z4 - 4*x5*y9*z3 + 4*x6*y1*z10 - 4*x6*y2*z9 - 4*x6*y4*z7 
-+ 4*x6*y7*z4 + 4*x6*y9*z2 - 4*x6*y10*z1 + 4*x7*y2*z8 + 4*x7*y4*z6 - 4*x7*y6*z4 - 4*x7*y8*z2 - 4*x8*y2*z7 - 4*x8*y4*z5 + 4*x8*y5*z4 + 4*x8*y7*z2 
-+ 4*x9*y2*z6 - 4*x9*y3*z5 + 4*x9*y5*z3 - 4*x9*y6*z2 - 4*x10*y1*z6 + 4*x10*y6*z1 - 4*x1*y7*z10 - 4*x1*y8*z9 + 4*x1*y9*z8 + 4*x1*y10*z7 + 4*x2*y6*z10 - 4*x2*y10*z6 - 4*x3*y6*z9 
-+ 4*x3*y7*z8 - 4*x3*y8*z7 + 4*x3*y9*z6 + 4*x4*y5*z9 - 4*x4*y9*z5 - 4*x5*y4*z9 - 16*x5*y6*z7 + 16*x5*y7*z6 + 4*x5*y9*z4 - 4*x6*y2*z10 + 4*x6*y3*z9 + 16*x6*y5*z7 - 16*x6*y7*z5 
-- 4*x6*y9*z3 + 4*x6*y10*z2 + 4*x7*y1*z10 - 4*x7*y3*z8 - 16*x7*y5*z6 + 16*x7*y6*z5 + 4*x7*y8*z3 - 4*x7*y10*z1 + 4*x8*y1*z9 + 4*x8*y3*z7 - 4*x8*y7*z3 - 4*x8*y9*z1 - 4*x9*y1*z8 
-- 4*x9*y3*z6 + 4*x9*y4*z5 - 4*x9*y5*z4 + 4*x9*y6*z3 + 4*x9*y8*z1 - 4*x10*y1*z7 + 4*x10*y2*z6 - 4*x10*y6*z2 + 4*x10*y7*z1 + 4*x1*y8*z10 - 4*x1*y10*z8 + 4*x2*y7*z10 - 4*x2*y8*z9 
-+ 4*x2*y9*z8 - 4*x2*y10*z7 - 4*x3*y6*z10 + 4*x3*y10*z6 - 4*x4*y6*z9 + 4*x4*y7*z8 - 4*x4*y8*z7 + 4*x4*y9*z6 + 4*x6*y3*z10 + 4*x6*y4*z9 - 4*x6*y9*z4 - 4*x6*y10*z3 - 4*x7*y2*z10 
-- 4*x7*y4*z8 + 4*x7*y8*z4 + 4*x7*y10*z2 - 4*x8*y1*z10 + 4*x8*y2*z9 + 4*x8*y4*z7 - 4*x8*y7*z4 - 4*x8*y9*z2 + 4*x8*y10*z1 - 4*x9*y2*z8 - 4*x9*y4*z6 + 4*x9*y6*z4 + 4*x9*y8*z2 
-+ 4*x10*y1*z8 + 4*x10*y2*z7 - 4*x10*y3*z6 + 4*x10*y6*z3 - 4*x10*y7*z2 - 4*x10*y8*z1 + 4*x1*y9*z10 - 4*x1*y10*z9 - 4*x2*y8*z10 + 4*x2*y10*z8 + 4*x3*y7*z10 + 4*x3*y8*z9 - 4*x3*y9*z8 
-- 4*x3*y10*z7 + 4*x4*y6*z10 - 4*x4*y10*z6 + 16*x5*y6*z9 - 16*x5*y7*z8 + 16*x5*y8*z7 - 16*x5*y9*z6 - 4*x6*y4*z10 - 16*x6*y5*z9 + 16*x6*y9*z5 + 4*x6*y10*z4 - 4*x7*y3*z10 + 16*x7*y5*z8 
-- 16*x7*y8*z5 + 4*x7*y10*z3 + 4*x8*y2*z10 - 4*x8*y3*z9 - 16*x8*y5*z7 + 16*x8*y7*z5 + 4*x8*y9*z3 - 4*x8*y10*z2 - 4*x9*y1*z10 + 4*x9*y3*z8 + 16*x9*y5*z6 - 16*x9*y6*z5 - 4*x9*y8*z3 
-+ 4*x9*y10*z1 + 4*x10*y1*z9 - 4*x10*y2*z8 + 4*x10*y3*z7 + 4*x10*y4*z6 - 4*x10*y6*z4 - 4*x10*y7*z3 + 4*x10*y8*z2 - 4*x10*y9*z1 - 4*x2*y9*z10 + 4*x2*y10*z9 + 4*x3*y8*z10 - 4*x3*y10*z8 
-- 4*x4*y7*z10 + 4*x4*y8*z9 - 4*x4*y9*z8 + 4*x4*y10*z7 + 4*x7*y4*z10 - 4*x7*y10*z4 - 4*x8*y3*z10 - 4*x8*y4*z9 + 4*x8*y9*z4 + 4*x8*y10*z3 + 4*x9*y2*z10 + 4*x9*y4*z8 - 4*x9*y8*z4 
-- 4*x9*y10*z2 - 4*x10*y2*z9 + 4*x10*y3*z8 - 4*x10*y4*z7 + 4*x10*y7*z4 - 4*x10*y8*z3 + 4*x10*y9*z2 - 4*x3*y9*z10 + 4*x3*y10*z9 - 4*x4*y8*z10 + 4*x4*y10*z8 - 16*x5*y8*z9 + 16*x5*y9*z8 
-+ 4*x8*y4*z10 + 16*x8*y5*z9 - 16*x8*y9*z5 - 4*x8*y10*z4 + 4*x9*y3*z10 - 16*x9*y5*z8 + 16*x9*y8*z5 - 4*x9*y10*z3 - 4*x10*y3*z9 - 4*x10*y4*z8 + 4*x10*y8*z4 + 4*x10*y9*z3 + 4*x4*y9*z10 
-- 4*x4*y10*z9 + 16*x6*y7*z10 - 16*x6*y10*z7 - 16*x7*y6*z10 + 16*x7*y10*z6 - 4*x9*y4*z10 + 4*x9*y10*z4 + 4*x10*y4*z9 + 16*x10*y6*z7 - 16*x10*y7*z6 - 4*x10*y9*z4 - 16*x6*y9*z10 
-+ 16*x6*y10*z9 + 16*x7*y8*z10 - 16*x7*y10*z8 - 16*x8*y7*z10 + 16*x8*y10*z7 + 16*x9*y6*z10 - 16*x9*y10*z6 - 16*x10*y6*z9 + 16*x10*y7*z8 - 16*x10*y8*z7 + 16*x10*y9*z6 + 16*x8*y9*z10 
-- 16*x8*y10*z9 - 16*x9*y8*z10 + 16*x9*y10*z8 + 16*x10*y8*z9 - 16*x10*y9*z8;
-*/
-//
-//	printf("Q Area=%f\n", area);
+    x1 = cellgeo.giveVertexCoordinates(1)->at(1);
+    y1 = cellgeo.giveVertexCoordinates(1)->at(2);
+    z1 = cellgeo.giveVertexCoordinates(1)->at(3);
+    x2 = cellgeo.giveVertexCoordinates(2)->at(1);
+    y2 = cellgeo.giveVertexCoordinates(2)->at(2);
+    z2 = cellgeo.giveVertexCoordinates(2)->at(3);
+    x3 = cellgeo.giveVertexCoordinates(3)->at(1);
+    y3 = cellgeo.giveVertexCoordinates(3)->at(2);
+    z3 = cellgeo.giveVertexCoordinates(3)->at(3);
+    x4 = cellgeo.giveVertexCoordinates(4)->at(1);
+    y4 = cellgeo.giveVertexCoordinates(4)->at(2);
+    z4 = cellgeo.giveVertexCoordinates(4)->at(3);
+    //	x5=cellgeo.giveVertexCoordinates(5)->at(1);		y5=cellgeo.giveVertexCoordinates(5)->at(2);		z5=cellgeo.giveVertexCoordinates(5)->at(3);
+    //	x6=cellgeo.giveVertexCoordinates(6)->at(1);		y6=cellgeo.giveVertexCoordinates(6)->at(2);		z6=cellgeo.giveVertexCoordinates(6)->at(3);
+    //	x7=cellgeo.giveVertexCoordinates(7)->at(1);		y7=cellgeo.giveVertexCoordinates(7)->at(2);		z7=cellgeo.giveVertexCoordinates(7)->at(3);
+    //	x8=cellgeo.giveVertexCoordinates(8)->at(1);		y8=cellgeo.giveVertexCoordinates(8)->at(2);		z8=cellgeo.giveVertexCoordinates(8)->at(3);
+    //	x9=cellgeo.giveVertexCoordinates(9)->at(1);		y9=cellgeo.giveVertexCoordinates(9)->at(2);		z9=cellgeo.giveVertexCoordinates(9)->at(3);
+    //	x10=cellgeo.giveVertexCoordinates(10)->at(1);	y10=cellgeo.giveVertexCoordinates(10)->at(2);	z10=cellgeo.giveVertexCoordinates(10)->at(3);
+    /*
+     *      double area = x1*y3*z2 - x1*y2*z3 + x2*y1*z3 - x2*y3*z1 - x3*y1*z2 + x3*y2*z1 + x1*y2*z4 - x1*y4*z2 - x2*y1*z4 + x2*y4*z1 + x4*y1*z2 - x4*y2*z1 - x1*y3*z4 + x1*y4*z3
+     + x3*y1*z4 - x3*y4*z1 - x4*y1*z3 + x4*y3*z1 - 2*x1*y2*z6 + 2*x1*y3*z5 - 2*x1*y5*z3 + 2*x1*y6*z2 + 2*x2*y1*z6 + x2*y3*z4 - x2*y4*z3 - 2*x2*y6*z1 - 2*x3*y1*z5 - x3*y2*z4
+     + x3*y4*z2 + 2*x3*y5*z1 + x4*y2*z3 - x4*y3*z2 + 2*x5*y1*z3 - 2*x5*y3*z1 - 2*x6*y1*z2 + 2*x6*y2*z1 - 2*x1*y2*z7 + 2*x1*y3*z6 - 2*x1*y4*z5 + 2*x1*y5*z4 - 2*x1*y6*z3 + 2*x1*y7*z2
+     + 2*x2*y1*z7 - 2*x2*y3*z5 + 2*x2*y5*z3 - 2*x2*y7*z1 - 2*x3*y1*z6 + 2*x3*y2*z5 - 2*x3*y5*z2 + 2*x3*y6*z1 + 2*x4*y1*z5 - 2*x4*y5*z1 - 2*x5*y1*z4 - 2*x5*y2*z3 + 2*x5*y3*z2
+     + 2*x5*y4*z1 + 2*x6*y1*z3 - 2*x6*y3*z1 - 2*x7*y1*z2 + 2*x7*y2*z1 + 2*x1*y2*z8 - 2*x1*y8*z2 - 2*x2*y1*z8 + 2*x2*y4*z5
+     + - 2*x2*y5*z4 + 2*x2*y8*z1 - 2*x4*y2*z5 + 2*x4*y5*z2 + 2*x5*y2*z4 - 2*x5*y4*z2 + 2*x8*y1*z2 - 2*x8*y2*z1 + 2*x1*y2*z9 - 2*x1*y3*z8 + 2*x1*y4*z7 - 4*x1*y5*z6 + 4*x1*y6*z5
+     + - 2*x1*y7*z4 + 2*x1*y8*z3 - 2*x1*y9*z2 - 2*x2*y1*z9 - 2*x2*y3*z7 - 2*x2*y4*z6 + 2*x2*y6*z4 + 2*x2*y7*z3 + 2*x2*y9*z1 + 2*x3*y1*z8 + 2*x3*y2*z7 - 2*x3*y7*z2 - 2*x3*y8*z1
+     + - 2*x4*y1*z7 + 2*x4*y2*z6 - 2*x4*y6*z2 + 2*x4*y7*z1 + 4*x5*y1*z6 - 4*x5*y6*z1 - 4*x6*y1*z5 - 2*x6*y2*z4 + 2*x6*y4*z2 + 4*x6*y5*z1 + 2*x7*y1*z4 - 2*x7*y2*z3 + 2*x7*y3*z2
+     + - 2*x7*y4*z1 - 2*x8*y1*z3 + 2*x8*y3*z1 + 2*x9*y1*z2 - 2*x9*y2*z1 - 4*x1*y5*z7 + 4*x1*y7*z5 + 4*x2*y5*z6 - 4*x2*y6*z5 + 2*x3*y4*z6 - 2*x3*y6*z4 - 2*x4*y3*z6 + 2*x4*y6*z3
+     + 4*x5*y1*z7 - 4*x5*y2*z6 + 4*x5*y6*z2 - 4*x5*y7*z1 + 4*x6*y2*z5 + 2*x6*y3*z4 - 2*x6*y4*z3 - 4*x6*y5*z2 - 4*x7*y1*z5 + 4*x7*y5*z1 - 2*x1*y3*z10 - 2*x1*y4*z9 + 4*x1*y5*z8
+     + - 4*x1*y6*z7 + 4*x1*y7*z6 - 4*x1*y8*z5 + 2*x1*y9*z4 + 2*x1*y10*z3 + 2*x2*y3*z9 + 2*x2*y4*z8 + 4*x2*y5*z7 - 4*x2*y7*z5 - 2*x2*y8*z4 - 2*x2*y9*z3 + 2*x3*y1*z10 - 2*x3*y2*z9
+     + - 2*x3*y4*z7 - 4*x3*y5*z6 + 4*x3*y6*z5 + 2*x3*y7*z4 + 2*x3*y9*z2 - 2*x3*y10*z1 + 2*x4*y1*z9
+     + - 2*x4*y2*z8 + 2*x4*y3*z7 - 2*x4*y7*z3 + 2*x4*y8*z2 - 2*x4*y9*z1 - 4*x5*y1*z8 - 4*x5*y2*z7 + 4*x5*y3*z6 - 4*x5*y6*z3 + 4*x5*y7*z2 + 4*x5*y8*z1 + 4*x6*y1*z7 - 4*x6*y3*z5
+     + 4*x6*y5*z3 - 4*x6*y7*z1 - 4*x7*y1*z6 + 4*x7*y2*z5 - 2*x7*y3*z4 + 2*x7*y4*z3 - 4*x7*y5*z2 + 4*x7*y6*z1 + 4*x8*y1*z5 + 2*x8*y2*z4 - 2*x8*y4*z2 - 4*x8*y5*z1 - 2*x9*y1*z4
+     + 2*x9*y2*z3 - 2*x9*y3*z2 + 2*x9*y4*z1 - 2*x10*y1*z3 + 2*x10*y3*z1 + 2*x1*y4*z10 + 4*x1*y5*z9 - 4*x1*y9*z5 - 2*x1*y10*z4 + 2*x2*y3*z10 - 4*x2*y5*z8 - 4*x2*y6*z7 + 4*x2*y7*z6
+     + 4*x2*y8*z5 - 2*x2*y10*z3 - 2*x3*y2*z10 - 2*x3*y4*z8 + 4*x3*y5*z7 - 4*x3*y7*z5 + 2*x3*y8*z4 + 2*x3*y10*z2 - 2*x4*y1*z10 + 2*x4*y3*z8 + 4*x4*y5*z6 - 4*x4*y6*z5 - 2*x4*y8*z3
+     + 2*x4*y10*z1 - 4*x5*y1*z9 + 4*x5*y2*z8 - 4*x5*y3*z7 - 4*x5*y4*z6 + 4*x5*y6*z4 + 4*x5*y7*z3 - 4*x5*y8*z2 + 4*x5*y9*z1 + 4*x6*y2*z7 + 4*x6*y4*z5 - 4*x6*y5*z4 - 4*x6*y7*z2
+     + - 4*x7*y2*z6 + 4*x7*y3*z5 - 4*x7*y5*z3 + 4*x7*y6*z2 - 4*x8*y2*z5 - 2*x8*y3*z4 + 2*x8*y4*z3 + 4*x8*y5*z2 + 4*x9*y1*z5 - 4*x9*y5*z1 + 2*x10*y1*z4 + 2*x10*y2*z3 - 2*x10*y3*z2 -
+     + 2*x10*y4*z1 + 4*x1*y6*z9 - 4*x1*y7*z8 + 4*x1*y8*z7 - 4*x1*y9*z6
+     + - 2*x2*y4*z10 - 4*x2*y5*z9 + 4*x2*y9*z5 + 2*x2*y10*z4 + 2*x3*y4*z9 + 4*x3*y5*z8 + 4*x3*y6*z7 - 4*x3*y7*z6 - 4*x3*y8*z5 - 2*x3*y9*z4 + 2*x4*y2*z10 - 2*x4*y3*z9 - 4*x4*y5*z7
+     + 4*x4*y7*z5 + 2*x4*y9*z3 - 2*x4*y10*z2 + 4*x5*y2*z9 - 4*x5*y3*z8 + 4*x5*y4*z7 - 4*x5*y7*z4 + 4*x5*y8*z3 - 4*x5*y9*z2 - 4*x6*y1*z9 - 4*x6*y3*z7 + 4*x6*y7*z3 + 4*x6*y9*z1
+     + 4*x7*y1*z8 + 4*x7*y3*z6 - 4*x7*y4*z5 + 4*x7*y5*z4 - 4*x7*y6*z3 - 4*x7*y8*z1 - 4*x8*y1*z7 + 4*x8*y3*z5 - 4*x8*y5*z3 + 4*x8*y7*z1 + 4*x9*y1*z6
+     + - 4*x9*y2*z5 + 2*x9*y3*z4 - 2*x9*y4*z3 + 4*x9*y5*z2 - 4*x9*y6*z1 - 2*x10*y2*z4 + 2*x10*y4*z2 - 4*x1*y6*z10 + 4*x1*y10*z6 + 4*x2*y6*z9 - 4*x2*y7*z8 + 4*x2*y8*z7 - 4*x2*y9*z6
+     + - 4*x3*y5*z9 + 4*x3*y9*z5 - 4*x4*y5*z8 + 4*x4*y6*z7 - 4*x4*y7*z6 + 4*x4*y8*z5 + 4*x5*y3*z9 + 4*x5*y4*z8 - 4*x5*y8*z4 - 4*x5*y9*z3 + 4*x6*y1*z10 - 4*x6*y2*z9 - 4*x6*y4*z7
+     + 4*x6*y7*z4 + 4*x6*y9*z2 - 4*x6*y10*z1 + 4*x7*y2*z8 + 4*x7*y4*z6 - 4*x7*y6*z4 - 4*x7*y8*z2 - 4*x8*y2*z7 - 4*x8*y4*z5 + 4*x8*y5*z4 + 4*x8*y7*z2
+     + 4*x9*y2*z6 - 4*x9*y3*z5 + 4*x9*y5*z3 - 4*x9*y6*z2 - 4*x10*y1*z6 + 4*x10*y6*z1 - 4*x1*y7*z10 - 4*x1*y8*z9 + 4*x1*y9*z8 + 4*x1*y10*z7 + 4*x2*y6*z10 - 4*x2*y10*z6 - 4*x3*y6*z9
+     + 4*x3*y7*z8 - 4*x3*y8*z7 + 4*x3*y9*z6 + 4*x4*y5*z9 - 4*x4*y9*z5 - 4*x5*y4*z9 - 16*x5*y6*z7 + 16*x5*y7*z6 + 4*x5*y9*z4 - 4*x6*y2*z10 + 4*x6*y3*z9 + 16*x6*y5*z7 - 16*x6*y7*z5
+     + - 4*x6*y9*z3 + 4*x6*y10*z2 + 4*x7*y1*z10 - 4*x7*y3*z8 - 16*x7*y5*z6 + 16*x7*y6*z5 + 4*x7*y8*z3 - 4*x7*y10*z1 + 4*x8*y1*z9 + 4*x8*y3*z7 - 4*x8*y7*z3 - 4*x8*y9*z1 - 4*x9*y1*z8
+     + - 4*x9*y3*z6 + 4*x9*y4*z5 - 4*x9*y5*z4 + 4*x9*y6*z3 + 4*x9*y8*z1 - 4*x10*y1*z7 + 4*x10*y2*z6 - 4*x10*y6*z2 + 4*x10*y7*z1 + 4*x1*y8*z10 - 4*x1*y10*z8 + 4*x2*y7*z10 - 4*x2*y8*z9
+     + 4*x2*y9*z8 - 4*x2*y10*z7 - 4*x3*y6*z10 + 4*x3*y10*z6 - 4*x4*y6*z9 + 4*x4*y7*z8 - 4*x4*y8*z7 + 4*x4*y9*z6 + 4*x6*y3*z10 + 4*x6*y4*z9 - 4*x6*y9*z4 - 4*x6*y10*z3 - 4*x7*y2*z10
+     + - 4*x7*y4*z8 + 4*x7*y8*z4 + 4*x7*y10*z2 - 4*x8*y1*z10 + 4*x8*y2*z9 + 4*x8*y4*z7 - 4*x8*y7*z4 - 4*x8*y9*z2 + 4*x8*y10*z1 - 4*x9*y2*z8 - 4*x9*y4*z6 + 4*x9*y6*z4 + 4*x9*y8*z2
+     + 4*x10*y1*z8 + 4*x10*y2*z7 - 4*x10*y3*z6 + 4*x10*y6*z3 - 4*x10*y7*z2 - 4*x10*y8*z1 + 4*x1*y9*z10 - 4*x1*y10*z9 - 4*x2*y8*z10 + 4*x2*y10*z8 + 4*x3*y7*z10 + 4*x3*y8*z9 - 4*x3*y9*z8
+     + - 4*x3*y10*z7 + 4*x4*y6*z10 - 4*x4*y10*z6 + 16*x5*y6*z9 - 16*x5*y7*z8 + 16*x5*y8*z7 - 16*x5*y9*z6 - 4*x6*y4*z10 - 16*x6*y5*z9 + 16*x6*y9*z5 + 4*x6*y10*z4 - 4*x7*y3*z10 + 16*x7*y5*z8
+     + - 16*x7*y8*z5 + 4*x7*y10*z3 + 4*x8*y2*z10 - 4*x8*y3*z9 - 16*x8*y5*z7 + 16*x8*y7*z5 + 4*x8*y9*z3 - 4*x8*y10*z2 - 4*x9*y1*z10 + 4*x9*y3*z8 + 16*x9*y5*z6 - 16*x9*y6*z5 - 4*x9*y8*z3
+     + 4*x9*y10*z1 + 4*x10*y1*z9 - 4*x10*y2*z8 + 4*x10*y3*z7 + 4*x10*y4*z6 - 4*x10*y6*z4 - 4*x10*y7*z3 + 4*x10*y8*z2 - 4*x10*y9*z1 - 4*x2*y9*z10 + 4*x2*y10*z9 + 4*x3*y8*z10 - 4*x3*y10*z8
+     + - 4*x4*y7*z10 + 4*x4*y8*z9 - 4*x4*y9*z8 + 4*x4*y10*z7 + 4*x7*y4*z10 - 4*x7*y10*z4 - 4*x8*y3*z10 - 4*x8*y4*z9 + 4*x8*y9*z4 + 4*x8*y10*z3 + 4*x9*y2*z10 + 4*x9*y4*z8 - 4*x9*y8*z4
+     + - 4*x9*y10*z2 - 4*x10*y2*z9 + 4*x10*y3*z8 - 4*x10*y4*z7 + 4*x10*y7*z4 - 4*x10*y8*z3 + 4*x10*y9*z2 - 4*x3*y9*z10 + 4*x3*y10*z9 - 4*x4*y8*z10 + 4*x4*y10*z8 - 16*x5*y8*z9 + 16*x5*y9*z8
+     + 4*x8*y4*z10 + 16*x8*y5*z9 - 16*x8*y9*z5 - 4*x8*y10*z4 + 4*x9*y3*z10 - 16*x9*y5*z8 + 16*x9*y8*z5 - 4*x9*y10*z3 - 4*x10*y3*z9 - 4*x10*y4*z8 + 4*x10*y8*z4 + 4*x10*y9*z3 + 4*x4*y9*z10
+     + - 4*x4*y10*z9 + 16*x6*y7*z10 - 16*x6*y10*z7 - 16*x7*y6*z10 + 16*x7*y10*z6 - 4*x9*y4*z10 + 4*x9*y10*z4 + 4*x10*y4*z9 + 16*x10*y6*z7 - 16*x10*y7*z6 - 4*x10*y9*z4 - 16*x6*y9*z10
+     + 16*x6*y10*z9 + 16*x7*y8*z10 - 16*x7*y10*z8 - 16*x8*y7*z10 + 16*x8*y10*z7 + 16*x9*y6*z10 - 16*x9*y10*z6 - 16*x10*y6*z9 + 16*x10*y7*z8 - 16*x10*y8*z7 + 16*x10*y9*z6 + 16*x8*y9*z10
+     + - 16*x8*y10*z9 - 16*x9*y8*z10 + 16*x9*y10*z8 + 16*x10*y8*z9 - 16*x10*y9*z8;
+     */
+    //
+    //	printf("Q Area=%f\n", area);
 
-	double area=x1*y3*z2 - x1*y2*z3 + x2*y1*z3 - x2*y3*z1 - x3*y1*z2 + x3*y2*z1 + x1*y2*z4 - x1*y4*z2 - x2*y1*z4 + x2*y4*z1 + x4*y1*z2 - x4*y2*z1 -
-			x1*y3*z4 + x1*y4*z3 + x3*y1*z4 - x3*y4*z1 - x4*y1*z3 + x4*y3*z1 + x2*y3*z4 - x2*y4*z3 - x3*y2*z4 + x3*y4*z2 + x4*y2*z3 - x4*y3*z2;
+    double area = x1 * y3 * z2 - x1 * y2 * z3 + x2 * y1 * z3 - x2 * y3 * z1 - x3 * y1 * z2 + x3 * y2 * z1 + x1 * y2 * z4 - x1 * y4 * z2 - x2 * y1 * z4 + x2 * y4 * z1 + x4 * y1 * z2 - x4 * y2 * z1 -
+                  x1 * y3 * z4 + x1 * y4 * z3 + x3 * y1 * z4 - x3 * y4 * z1 - x4 * y1 * z3 + x4 * y3 * z1 + x2 * y3 * z4 - x2 * y4 * z3 - x3 * y2 * z4 + x3 * y4 * z2 + x4 * y2 * z3 - x4 * y3 * z2;
 
-//	printf("L Area=%f\n", area);
+    //	printf("L Area=%f\n", area);
 
-	area=area/6.0;
-	return area;
-
+    area = area / 6.0;
+    return area;
 }
 
 void
@@ -124,17 +130,17 @@ FEI3dTetQuad :: evalN(FloatArray &answer, const FloatArray &lcoords, const FEICe
     double x4 = 1.0 - x1 - x2 - x3;
 
     answer.resize(10);
-    answer(0) = x1*(2*x1-1);
-    answer(1) = x2*(2*x2-1);
-    answer(2) = x3*(2*x3-1);
-    answer(3) = x4*(2*x4-1);
+    answer(0) = x1 * ( 2 * x1 - 1 );
+    answer(1) = x2 * ( 2 * x2 - 1 );
+    answer(2) = x3 * ( 2 * x3 - 1 );
+    answer(3) = x4 * ( 2 * x4 - 1 );
 
-    answer(4) = 4*x1*x2;
-    answer(5) = 4*x2*x3;
-    answer(6) = 4*x3*x1;
-    answer(7) = 4*x1*x4;
-    answer(8) = 4*x2*x4;
-    answer(9) = 4*x3*x4;
+    answer(4) = 4 * x1 * x2;
+    answer(5) = 4 * x2 * x3;
+    answer(6) = 4 * x3 * x1;
+    answer(7) = 4 * x1 * x4;
+    answer(8) = 4 * x2 * x4;
+    answer(9) = 4 * x3 * x4;
 }
 
 double
@@ -143,13 +149,13 @@ FEI3dTetQuad :: evaldNdx(FloatMatrix &answer, const FloatArray &lcoords, const F
     FloatMatrix jacobianMatrix;
     FloatMatrix jinv;
     FloatMatrix dNdxi;
-    FloatMatrix coords(10,3);
+    FloatMatrix coords(10, 3);
     this->evaldNdxi(dNdxi, lcoords, cellgeo);
-    for (int i = 1; i <= 10; ++i) {
+    for ( int i = 1; i <= 10; ++i ) {
         const FloatArray *c = cellgeo.giveVertexCoordinates(i);
-        coords.at(i,1) = c->at(1);
-        coords.at(i,2) = c->at(2);
-        coords.at(i,3) = c->at(3);
+        coords.at(i, 1) = c->at(1);
+        coords.at(i, 2) = c->at(2);
+        coords.at(i, 3) = c->at(3);
     }
     jacobianMatrix.beProductOf(dNdxi, coords);
     jinv.beInverseOf(jacobianMatrix);
@@ -165,43 +171,43 @@ FEI3dTetQuad :: evaldNdxi(FloatMatrix &answer, const FloatArray &lcoords, const 
     double x3 = lcoords(2);
     double x4 = 1.0 - x1 - x2 - x3;
 
-    answer.resize(3,10);
+    answer.resize(3, 10);
 
     // dNj/dx1
-    answer(0,0) = 4*x1 - 1;
-    answer(0,1) = 0;
-    answer(0,2) = 0;
-    answer(0,3) = -4*x4 + 1;
-    answer(0,4) = 4*x2;
-    answer(0,5) = 0;
-    answer(0,6) = 4*x3;
-    answer(0,7) = 4*(x4-x1);
-    answer(0,8) = -4*x2;
-    answer(0,9) = -4*x3;
+    answer(0, 0) = 4 * x1 - 1;
+    answer(0, 1) = 0;
+    answer(0, 2) = 0;
+    answer(0, 3) = -4 * x4 + 1;
+    answer(0, 4) = 4 * x2;
+    answer(0, 5) = 0;
+    answer(0, 6) = 4 * x3;
+    answer(0, 7) = 4 * ( x4 - x1 );
+    answer(0, 8) = -4 * x2;
+    answer(0, 9) = -4 * x3;
 
     // dNj/dx2
-    answer(1,0) = 0;
-    answer(1,1) = 4*x2 - 1;
-    answer(1,2) = 0;
-    answer(1,3) = -4*x4 + 1;
-    answer(1,4) = 4*x1;
-    answer(1,5) = 4*x3;
-    answer(1,6) = 0;
-    answer(1,7) = -4*x1;
-    answer(1,8) = 4*(x4-x2);
-    answer(1,9) = -4*x3;
+    answer(1, 0) = 0;
+    answer(1, 1) = 4 * x2 - 1;
+    answer(1, 2) = 0;
+    answer(1, 3) = -4 * x4 + 1;
+    answer(1, 4) = 4 * x1;
+    answer(1, 5) = 4 * x3;
+    answer(1, 6) = 0;
+    answer(1, 7) = -4 * x1;
+    answer(1, 8) = 4 * ( x4 - x2 );
+    answer(1, 9) = -4 * x3;
 
     // dNj/dx3
-    answer(2,0) = 0;
-    answer(2,1) = 0;
-    answer(2,2) = 4*x3 - 1;
-    answer(2,3) = -4*x4 + 1;
-    answer(2,4) = 0;
-    answer(2,5) = 4*x2;
-    answer(2,6) = 4*x1;
-    answer(2,7) = -4*x1;
-    answer(2,8) = -4*x2;
-    answer(2,9) = 4*(x4-x3);
+    answer(2, 0) = 0;
+    answer(2, 1) = 0;
+    answer(2, 2) = 4 * x3 - 1;
+    answer(2, 3) = -4 * x4 + 1;
+    answer(2, 4) = 0;
+    answer(2, 5) = 4 * x2;
+    answer(2, 6) = 4 * x1;
+    answer(2, 7) = -4 * x1;
+    answer(2, 8) = -4 * x2;
+    answer(2, 9) = 4 * ( x4 - x3 );
 }
 
 
@@ -212,7 +218,7 @@ FEI3dTetQuad :: local2global(FloatArray &answer, const FloatArray &lcoords, cons
     this->evalN(N, lcoords, cellgeo);
     answer.resize(0);
     for ( int i = 1; i <= N.giveSize(); i++ ) {
-        answer.add( N.at(i), *cellgeo.giveVertexCoordinates(i));
+        answer.add( N.at(i), * cellgeo.giveVertexCoordinates(i) );
     }
 }
 
@@ -229,11 +235,11 @@ FEI3dTetQuad :: global2local(FloatArray &answer, const FloatArray &gcoords, cons
     convergence_limit = 1e-6 * this->giveCharacteristicLength(cellgeo);
 
     // setup initial guess
-    lcoords_guess.resize(gcoords.giveSize());
+    lcoords_guess.resize( gcoords.giveSize() );
     lcoords_guess.zero();
 
     // apply Newton-Raphson to solve the problem
-    for (int nite = 0; nite < 10; nite++) {
+    for ( int nite = 0; nite < 10; nite++ ) {
         // compute the residual
         this->local2global(guess, lcoords_guess, cellgeo);
         res.beDifferenceOf(gcoords, guess);
@@ -251,8 +257,8 @@ FEI3dTetQuad :: global2local(FloatArray &answer, const FloatArray &gcoords, cons
         // update guess
         lcoords_guess.add(delta);
     }
-    if ( error > convergence_limit) { // Imperfect, could give false negatives.
-    	answer.resize(4);
+    if ( error > convergence_limit ) { // Imperfect, could give false negatives.
+        answer.resize(4);
         answer.zero();
         return false;
     }
@@ -263,7 +269,7 @@ FEI3dTetQuad :: global2local(FloatArray &answer, const FloatArray &gcoords, cons
     answer(2) = lcoords_guess(2);
 
     bool inside = true;
-    for (int  i = 0; i < 3; i++ ) {
+    for ( int i = 0; i < 3; i++ ) {
         if ( answer(i) < ( 0. - POINT_TOL ) ) {
             answer(i) = 0.;
             inside = false;
@@ -272,10 +278,10 @@ FEI3dTetQuad :: global2local(FloatArray &answer, const FloatArray &gcoords, cons
             inside = false;
         }
     }
-    
+
     answer(3) = 1.0 - answer(0) - answer(1) - answer(2); // Do this afterwards, since it might get clamped.
     if ( answer(3) < 0. - POINT_TOL ) {
-    	return false;
+        return false;
     }
     return inside;
 }
@@ -284,7 +290,7 @@ FEI3dTetQuad :: global2local(FloatArray &answer, const FloatArray &gcoords, cons
 double
 FEI3dTetQuad :: giveCharacteristicLength(const FEICellGeometry &cellgeo) const
 {
-    return cellgeo.giveVertexCoordinates(1)->distance(cellgeo.giveVertexCoordinates(2));
+    return cellgeo.giveVertexCoordinates(1)->distance( cellgeo.giveVertexCoordinates(2) );
 }
 
 
@@ -303,13 +309,13 @@ FEI3dTetQuad :: giveJacobianMatrixAt(FloatMatrix &jacobianMatrix, const FloatArr
     FloatMatrix dNdxi;
     FloatMatrix coords;
     this->evaldNdxi(dNdxi, lcoords, cellgeo);
-    jacobianMatrix.resize(3,3);
-    coords.resize(10,3);
-    for (int i = 1; i <= 10; ++i) {
+    jacobianMatrix.resize(3, 3);
+    coords.resize(10, 3);
+    for ( int i = 1; i <= 10; ++i ) {
         const FloatArray *c = cellgeo.giveVertexCoordinates(i);
-        coords.at(i,1) = c->at(1);
-        coords.at(i,2) = c->at(2);
-        coords.at(i,3) = c->at(3);
+        coords.at(i, 1) = c->at(1);
+        coords.at(i, 2) = c->at(2);
+        coords.at(i, 3) = c->at(3);
     }
     jacobianMatrix.beProductOf(dNdxi, coords);
 }
@@ -320,14 +326,14 @@ FEI3dTetQuad :: edgeEvalN(FloatArray &answer, int iedge, const FloatArray &lcoor
 {
     double xi = lcoords.at(1);
     answer.resize(3);
-    answer(0) = 0.5*(xi-1.0)*xi;
-    answer(1) = 0.5*(xi+1.0)*xi;
-    answer(2) = 1.0-xi*xi;
+    answer(0) = 0.5 * ( xi - 1.0 ) * xi;
+    answer(1) = 0.5 * ( xi + 1.0 ) * xi;
+    answer(2) = 1.0 - xi * xi;
 }
 
 void
 FEI3dTetQuad :: edgeEvaldNdx(FloatMatrix &answer, int iedge,
-                           const FloatArray &lcoords, const FEICellGeometry &cellgeo)
+                             const FloatArray &lcoords, const FEICellGeometry &cellgeo)
 {
     IntArray edgeNodes;
     this->computeLocalEdgeMapping(edgeNodes, iedge);
@@ -337,7 +343,7 @@ FEI3dTetQuad :: edgeEvaldNdx(FloatMatrix &answer, int iedge,
 
 void
 FEI3dTetQuad :: edgeLocal2global(FloatArray &answer, int iedge,
-                               const FloatArray &lcoords, const FEICellGeometry &cellgeo)
+                                 const FloatArray &lcoords, const FEICellGeometry &cellgeo)
 {
     IntArray edgeNodes;
     FloatArray N;
@@ -345,8 +351,8 @@ FEI3dTetQuad :: edgeLocal2global(FloatArray &answer, int iedge,
     this->edgeEvalN(N, iedge, lcoords, cellgeo);
 
     answer.resize(0);
-    for (int i = 0; i < N.giveSize(); ++i) {
-        answer.add( N(i), *cellgeo.giveVertexCoordinates( edgeNodes(i)) );
+    for ( int i = 0; i < N.giveSize(); ++i ) {
+        answer.add( N(i), * cellgeo.giveVertexCoordinates( edgeNodes(i) ) );
     }
 }
 
@@ -423,7 +429,7 @@ FEI3dTetQuad :: surfaceEvalN(FloatArray &answer, int isurf, const FloatArray &lc
 
 void
 FEI3dTetQuad :: surfaceLocal2global(FloatArray &answer, int isurf,
-                                  const FloatArray &lcoords, const FEICellGeometry &cellgeo)
+                                    const FloatArray &lcoords, const FEICellGeometry &cellgeo)
 {
     IntArray nodes;
     FloatArray N;
@@ -432,7 +438,7 @@ FEI3dTetQuad :: surfaceLocal2global(FloatArray &answer, int isurf,
 
     answer.resize(0);
     for ( int i = 0; i < N.giveSize(); ++i ) {
-        answer.add( N(i), *cellgeo.giveVertexCoordinates(nodes(i)) );
+        answer.add( N(i), * cellgeo.giveVertexCoordinates( nodes(i) ) );
     }
 }
 
@@ -446,19 +452,19 @@ FEI3dTetQuad :: surfaceEvaldNdx(FloatMatrix &answer, int isurf, const FloatArray
     c = 1.0 - a - b;
     FloatArray lcoords_tet(4);
     lcoords_tet.at(isurf) = 0.0;
-    if (isurf == 1) {
+    if ( isurf == 1 ) {
         lcoords_tet.at(4) = a;
         lcoords_tet.at(3) = b;
         lcoords_tet.at(2) = c;
-    } else if (isurf == 2) {
+    } else if ( isurf == 2 ) {
         lcoords_tet.at(1) = a;
         lcoords_tet.at(3) = b;
         lcoords_tet.at(4) = c;
-    } else if (isurf == 3) {
+    } else if ( isurf == 3 ) {
         lcoords_tet.at(1) = a;
         lcoords_tet.at(4) = b;
         lcoords_tet.at(2) = c;
-    } else if (isurf == 4) {
+    } else if ( isurf == 4 ) {
         lcoords_tet.at(2) = a;
         lcoords_tet.at(3) = b;
         lcoords_tet.at(1) = c;
@@ -470,7 +476,7 @@ double
 FEI3dTetQuad :: surfaceEvalNormal(FloatArray &answer, int isurf, const FloatArray &lcoords, const FEICellGeometry &cellgeo)
 {
     IntArray snodes(3);
-    FloatArray a,b;
+    FloatArray a, b;
     this->computeLocalSurfaceMapping(snodes, isurf);
 
     double l1, l2, l3;
@@ -494,19 +500,17 @@ FEI3dTetQuad :: surfaceEvalNormal(FloatArray &answer, int isurf, const FloatArra
     dNdeta(4) = 4.0 * l3 - 4.0 * l2;
     dNdeta(5) = -4.0 * l1;
 
-    for (int i = 0; i < 6; ++i) {
-        a.add(dNdxi(i),  *cellgeo.giveVertexCoordinates(snodes(i)));
-        b.add(dNdeta(i), *cellgeo.giveVertexCoordinates(snodes(i)));
+    for ( int i = 0; i < 6; ++i ) {
+        a.add( dNdxi(i),  * cellgeo.giveVertexCoordinates( snodes(i) ) );
+        b.add( dNdeta(i), * cellgeo.giveVertexCoordinates( snodes(i) ) );
     }
     answer.beVectorProductOf(a, b);
-    double J = answer.computeNorm();
-    answer.times(1/J);
-    return J;
+    return answer.normalize();
 }
 
 double
 FEI3dTetQuad :: surfaceGiveTransformationJacobian(int isurf, const FloatArray &lcoords,
-                                                const FEICellGeometry &cellgeo)
+                                                  const FEICellGeometry &cellgeo)
 {
     FloatArray normal;
     return this->surfaceEvalNormal(normal, isurf, lcoords, cellgeo);
@@ -563,47 +567,46 @@ double FEI3dTetQuad :: evalNXIntegral(int iEdge, const FEICellGeometry &cellgeo)
     IntArray fNodes;
     this->computeLocalSurfaceMapping(fNodes, iEdge);
 
-    const FloatArray &c1 = *cellgeo.giveVertexCoordinates(fNodes.at(1));
-    const FloatArray &c2 = *cellgeo.giveVertexCoordinates(fNodes.at(2));
-    const FloatArray &c3 = *cellgeo.giveVertexCoordinates(fNodes.at(3));
-    const FloatArray &c4 = *cellgeo.giveVertexCoordinates(fNodes.at(4));
-    const FloatArray &c5 = *cellgeo.giveVertexCoordinates(fNodes.at(5));
-    const FloatArray &c6 = *cellgeo.giveVertexCoordinates(fNodes.at(6));
+    const FloatArray &c1 = * cellgeo.giveVertexCoordinates( fNodes.at(1) );
+    const FloatArray &c2 = * cellgeo.giveVertexCoordinates( fNodes.at(2) );
+    const FloatArray &c3 = * cellgeo.giveVertexCoordinates( fNodes.at(3) );
+    const FloatArray &c4 = * cellgeo.giveVertexCoordinates( fNodes.at(4) );
+    const FloatArray &c5 = * cellgeo.giveVertexCoordinates( fNodes.at(5) );
+    const FloatArray &c6 = * cellgeo.giveVertexCoordinates( fNodes.at(6) );
 
     // Expression derived in Mathematica:
     return (
-        c1(2)*(c2(1)*(                     -  2*c3(0) -  3*c4(0) +  5*c5(0) +  5*c6(0)) + 
-               c3(1)*(             2*c2(0)            -  5*c4(0) -  5*c5(0) +  3*c6(0)) + 
-               c4(1)*(             3*c2(0) +  5*c3(0)            -  4*c5(0) - 24*c6(0)) + 
-               c5(1)*(          -  5*c2(0) +  5*c3(0) +  4*c4(0)            -  4*c6(0)) + 
-               c6(1)*(          -  5*c2(0) -  3*c3(0) + 24*c4(0) +  4*c5(0)           )) + 
-        c2(2)*(c1(1)*(                        2*c3(0) +  3*c4(0) -  5*c5(0) -  5*c6(0)) + 
-               c3(1)*( -2*c1(0)                       +  5*c4(0) -  3*c5(0) +  5*c6(0)) + 
-               c4(1)*( -3*c1(0)            -  5*c3(0)            + 24*c5(0) +  4*c6(0)) + 
-               c5(1)*(  5*c1(0)            +  3*c3(0) - 24*c4(0)            -  4*c6(0)) + 
-               c6(1)*(  5*c1(0)            -  5*c3(0) -  4*c4(0) +  4*c5(0)           )) + 
-        c3(2)*(c1(1)*(          -  2*c2(0)            +  5*c4(0) +  5*c5(0) -  3*c6(0)) + 
-               c2(1)*(  2*c1(0)                       -  5*c4(0) +  3*c5(0) -  5*c6(0)) + 
-               c4(1)*( -5*c1(0) +  5*c2(0)                       -  4*c5(0) +  4*c6(0)) + 
-               c5(1)*( -5*c1(0) -  3*c2(0)            +  4*c4(0)            + 24*c6(0)) + 
-               c6(1)*(  3*c1(0) +  5*c2(0)            -  4*c4(0) - 24*c5(0)           )) + 
-        c4(2)*(c1(1)*(          -  3*c2(0) -  5*c3(0)            +  4*c5(0) + 24*c6(0)) + 
-               c2(1)*(  3*c1(0)            +  5*c3(0)            - 24*c5(0) -  4*c6(0)) + 
-               c3(1)*(  5*c1(0) -  5*c2(0)                       +  4*c5(0) -  4*c6(0)) + 
-               c5(1)*( -4*c1(0) + 24*c2(0) -  4*c3(0)                       - 16*c6(0)) + 
-               c6(1)*(-24*c1(0) +  4*c2(0) +  4*c3(0)            + 16*c5(0)           )) + 
-        c5(2)*(c1(1)*(             5*c2(0) -  5*c3(0) -  4*c4(0)            +  4*c6(0)) + 
-               c2(1)*( -5*c1(0)            -  3*c3(0) + 24*c4(0)            +  4*c6(0)) + 
-               c3(1)*(  5*c1(0) +  3*c2(0)            -  4*c4(0)            - 24*c6(0)) + 
-               c4(1)*(  4*c1(0) - 24*c2(0) +  4*c3(0)                       + 16*c6(0)) + 
-               c6(1)*( -4*c1(0) -  4*c2(0) + 24*c3(0) - 16*c4(0)                      )) + 
-        c6(2)*(c1(1)*(             5*c2(0) +  3*c3(0) - 24*c4(0) -  4*c5(0)           ) + 
-               c2(1)*( -5*c1(0)            +  5*c3(0) +  4*c4(0) -  4*c5(0)           ) + 
-               c3(1)*( -3*c1(0) -  5*c2(0)            +  4*c4(0) + 24*c5(0)           ) + 
-               c4(1)*( 24*c1(0) -  4*c2(0) -  4*c3(0)            - 16*c5(0)           ) + 
-               c5(1)*(  4*c1(0) +  4*c2(0) - 24*c3(0) + 16*c4(0)                      ))
-        ) / 30.;
-
+               c1(2) * ( c2(1) * ( -2 * c3(0) -  3 * c4(0) +  5 * c5(0) +  5 * c6(0) ) +
+                         c3(1) * ( 2 * c2(0)            -  5 * c4(0) -  5 * c5(0) +  3 * c6(0) ) +
+                         c4(1) * ( 3 * c2(0) +  5 * c3(0)            -  4 * c5(0) - 24 * c6(0) ) +
+                         c5(1) * ( -5 * c2(0) +  5 * c3(0) +  4 * c4(0)            -  4 * c6(0) ) +
+                         c6(1) * ( -5 * c2(0) -  3 * c3(0) + 24 * c4(0) +  4 * c5(0) ) ) +
+               c2(2) * ( c1(1) * ( 2 * c3(0) +  3 * c4(0) -  5 * c5(0) -  5 * c6(0) ) +
+                         c3(1) * ( -2 * c1(0)                       +  5 * c4(0) -  3 * c5(0) +  5 * c6(0) ) +
+                         c4(1) * ( -3 * c1(0)            -  5 * c3(0)            + 24 * c5(0) +  4 * c6(0) ) +
+                         c5(1) * ( 5 * c1(0)            +  3 * c3(0) - 24 * c4(0)            -  4 * c6(0) ) +
+                         c6(1) * ( 5 * c1(0)            -  5 * c3(0) -  4 * c4(0) +  4 * c5(0) ) ) +
+               c3(2) * ( c1(1) * ( -2 * c2(0)            +  5 * c4(0) +  5 * c5(0) -  3 * c6(0) ) +
+                         c2(1) * ( 2 * c1(0)                       -  5 * c4(0) +  3 * c5(0) -  5 * c6(0) ) +
+                         c4(1) * ( -5 * c1(0) +  5 * c2(0)                       -  4 * c5(0) +  4 * c6(0) ) +
+                         c5(1) * ( -5 * c1(0) -  3 * c2(0)            +  4 * c4(0)            + 24 * c6(0) ) +
+                         c6(1) * ( 3 * c1(0) +  5 * c2(0)            -  4 * c4(0) - 24 * c5(0) ) ) +
+               c4(2) * ( c1(1) * ( -3 * c2(0) -  5 * c3(0)            +  4 * c5(0) + 24 * c6(0) ) +
+                         c2(1) * ( 3 * c1(0)            +  5 * c3(0)            - 24 * c5(0) -  4 * c6(0) ) +
+                         c3(1) * ( 5 * c1(0) -  5 * c2(0)                       +  4 * c5(0) -  4 * c6(0) ) +
+                         c5(1) * ( -4 * c1(0) + 24 * c2(0) -  4 * c3(0)                       - 16 * c6(0) ) +
+                         c6(1) * ( -24 * c1(0) +  4 * c2(0) +  4 * c3(0)            + 16 * c5(0) ) ) +
+               c5(2) * ( c1(1) * ( 5 * c2(0) -  5 * c3(0) -  4 * c4(0)            +  4 * c6(0) ) +
+                         c2(1) * ( -5 * c1(0)            -  3 * c3(0) + 24 * c4(0)            +  4 * c6(0) ) +
+                         c3(1) * ( 5 * c1(0) +  3 * c2(0)            -  4 * c4(0)            - 24 * c6(0) ) +
+                         c4(1) * ( 4 * c1(0) - 24 * c2(0) +  4 * c3(0)                       + 16 * c6(0) ) +
+                         c6(1) * ( -4 * c1(0) -  4 * c2(0) + 24 * c3(0) - 16 * c4(0) ) ) +
+               c6(2) * ( c1(1) * ( 5 * c2(0) +  3 * c3(0) - 24 * c4(0) -  4 * c5(0) ) +
+                         c2(1) * ( -5 * c1(0)            +  5 * c3(0) +  4 * c4(0) -  4 * c5(0) ) +
+                         c3(1) * ( -3 * c1(0) -  5 * c2(0)            +  4 * c4(0) + 24 * c5(0) ) +
+                         c4(1) * ( 24 * c1(0) -  4 * c2(0) -  4 * c3(0)            - 16 * c5(0) ) +
+                         c5(1) * ( 4 * c1(0) +  4 * c2(0) - 24 * c3(0) + 16 * c4(0) ) )
+               ) / 30.;
 }
 
 IntegrationRule *
@@ -623,5 +626,4 @@ FEI3dTetQuad :: giveBoundaryIntegrationRule(int order, int boundary)
     iRule->SetUpPointsOnTriangle(points, _Unknown);
     return iRule;
 }
-
 } // end namespace oofem

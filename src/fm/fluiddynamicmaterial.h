@@ -43,7 +43,6 @@
 
 
 namespace oofem {
-
 /**
  * This class implements a transport material status information. It is an attribute of
  * a Gauss point. This is only an abstract class, for every instance of material class
@@ -86,9 +85,6 @@ public:
      */
     void letTempDeviatoricStressVectorBe(const FloatArray &v) { deviatoricStressVector = v; }
     void letTempDeviatoricStrainRateVectorBe(const FloatArray &v) { deviatoricStrainRateVector = v; }
-
-    virtual const char *giveClassName() const { return "FluidDynamicMaterialStatus"; }
-    virtual classType giveClassID() const { return FluidDynamicMaterialStatusClass; }
 };
 
 

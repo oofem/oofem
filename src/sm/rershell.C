@@ -54,8 +54,7 @@
 #endif
 
 namespace oofem {
-
-REGISTER_Element( RerShell );
+REGISTER_Element(RerShell);
 
 RerShell :: RerShell(int n, Domain *aDomain) :
     CCTPlate(n, aDomain)
@@ -170,21 +169,21 @@ RerShell :: computeGaussPoints()
         numberOfIntegrationRules = 1;
         integrationRulesArray = new IntegrationRule * [ 1 ];
         integrationRulesArray [ 0 ] = new GaussIntegrationRule(1, this, 1, 8);
-        this->giveCrossSection()->setupIntegrationPoints( *integrationRulesArray[0], numberOfGaussPoints, this );
+        this->giveCrossSection()->setupIntegrationPoints(* integrationRulesArray [ 0 ], numberOfGaussPoints, this);
     }
 }
 
 
 void
-RerShell :: computeNmatrixAt(GaussPoint *aGaussPoint, FloatMatrix &answer)
+RerShell :: computeNmatrixAt(const FloatArray &iLocCoord, FloatMatrix &answer)
 // Returns the displacement interpolation matrix {N} of the receiver,
 // evaluated at aGaussPoint.
 {
     double x1, x2, x3, y1, y2, y3, l1, l2, l3, b1, b2, b3, c1, c2, c3;
     FloatArray nodeCoords;
 
-    l1 = aGaussPoint->giveCoordinate(1);
-    l2 = aGaussPoint->giveCoordinate(2);
+    l1 = iLocCoord.at(1);
+    l2 = iLocCoord.at(2);
     l3 = 1.0 - l1 - l2;
 
     this->giveLocalCoordinates( nodeCoords, * ( this->giveNode(1)->giveCoordinates() ) );
@@ -280,9 +279,9 @@ RerShell :: initializeFrom(InputRecord *ir)
 {
     numberOfGaussPoints = 1;
     IRResultType result = this->StructuralElement :: initializeFrom(ir);
-	if(result != IRRT_OK) {
-		return result;
-	}
+    if ( result != IRRT_OK ) {
+        return result;
+    }
 
     if ( numberOfGaussPoints != 1 ) {
         numberOfGaussPoints = 1;
@@ -304,7 +303,7 @@ RerShell :: computeLumpedMassMatrix(FloatMatrix &answer, TimeStep *tStep)
     gp = integrationRulesArray [ 0 ]->getIntegrationPoint(0);
 
     dV = this->computeVolumeAround(gp);
-    mss1 = dV * this->giveCrossSection()->give(CS_Thickness) * this->giveStructuralCrossSection()->give('d', gp) / 3.;
+    mss1 = dV * this->giveCrossSection()->give(CS_Thickness, gp) * this->giveStructuralCrossSection()->give('d', gp) / 3.;
 
     answer.at(1, 1) = mss1;
     answer.at(2, 2) = mss1;
@@ -338,7 +337,7 @@ RerShell :: computeBodyLoadVectorAt(FloatArray &answer, Load *forLoad, TimeStep 
         return;                                             // nil resultant
     } else {
         dens = this->giveStructuralCrossSection()->give('d', gp);
-        dV = this->computeVolumeAround(gp) * this->giveCrossSection()->give(CS_Thickness);
+        dV = this->computeVolumeAround(gp) * this->giveCrossSection()->give(CS_Thickness, gp);
 
         answer.resize(18);
 
@@ -394,14 +393,14 @@ RerShell :: computeGtoLRotationMatrix()
 
         // compute vector product of e1' x help
 
-        e3.beVectorProductOf(e1,help);
+        e3.beVectorProductOf(e1, help);
 
         // let us normalize e3'
         e3.normalize();
 
         // now from e3' x e1' compute e2'
 
-        e2.beVectorProductOf(e3,e1);
+        e2.beVectorProductOf(e3, e1);
 
         GtoLRotationMatrix = new FloatMatrix(3, 3);
 
@@ -440,7 +439,7 @@ RerShell :: computeLocalCoordinates(FloatArray &answer, const FloatArray &coords
 
     //rotate the input point Coordinate System into the element CS
     FloatArray inputCoords_ElCS;
-    this->giveLocalCoordinates( inputCoords_ElCS, const_cast< FloatArray & >(coords) );
+    this->giveLocalCoordinates( inputCoords_ElCS, const_cast< FloatArray & >( coords ) );
 
     //Nodes are defined in the global CS, so they also need to be rotated into the element CS, therefore get the node points and
     //rotate them into the element CS
@@ -475,10 +474,12 @@ RerShell :: computeLocalCoordinates(FloatArray &answer, const FloatArray &coords
     midplZ = z1 * answer.at(1) + z2 *answer.at(2) + z3 *answer.at(3);
 
     //check that the z is within the element
-    StructuralCrossSection *cs = this->giveStructuralCrossSection();;
+    StructuralCrossSection *cs = this->giveStructuralCrossSection();
+    GaussPoint _gp(NULL, 1, new FloatArray(answer), 1.0, _2dPlate);
+
     double elthick;
 
-    elthick = cs->give(CS_Thickness);
+    elthick = cs->give(CS_Thickness, & _gp);
 
     if ( elthick / 2.0 + midplZ - fabs( inputCoords_ElCS.at(3) ) < -POINT_TOL ) {
         answer.zero();
@@ -615,7 +616,7 @@ RerShell :: giveCharacteristicTensor(FloatMatrix &answer, CharTensor type, Gauss
     }
 
     if ( ( type == GlobalForceTensor ) || ( type == GlobalMomentumTensor ) ||
-        ( type == GlobalStrainTensor ) || ( type == GlobalCurvatureTensor ) ) {
+         ( type == GlobalStrainTensor ) || ( type == GlobalCurvatureTensor ) ) {
         this->computeGtoLRotationMatrix();
         answer.rotatedWith(* GtoLRotationMatrix);
     }
@@ -624,7 +625,7 @@ RerShell :: giveCharacteristicTensor(FloatMatrix &answer, CharTensor type, Gauss
 
 void
 RerShell :: computeStrainVectorInLayer(FloatArray &answer, const FloatArray &masterGpStrain,
-                                       GaussPoint *slaveGp, TimeStep *tStep)
+                                       GaussPoint *masterGp, GaussPoint *slaveGp, TimeStep *tStep)
 //
 // returns full 3d strain vector of given layer (whose z-coordinate from center-line is
 // stored in slaveGp) for given tStep
@@ -632,8 +633,8 @@ RerShell :: computeStrainVectorInLayer(FloatArray &answer, const FloatArray &mas
 {
     double layerZeta, layerZCoord, top, bottom;
 
-    top    = this->giveCrossSection()->give(CS_TopZCoord);
-    bottom = this->giveCrossSection()->give(CS_BottomZCoord);
+    top    = this->giveCrossSection()->give(CS_TopZCoord, masterGp);
+    bottom = this->giveCrossSection()->give(CS_BottomZCoord, masterGp);
     layerZeta = slaveGp->giveCoordinate(3);
     layerZCoord = 0.5 * ( ( 1. - layerZeta ) * bottom + ( 1. + layerZeta ) * top );
 
@@ -658,12 +659,7 @@ RerShell :: printOutputAt(FILE *file, TimeStep *stepN)
 
     for ( int i = 1; i <= integrationRulesArray [ 0 ]->giveNumberOfIntegrationPoints(); i++ ) {
         gp = integrationRulesArray [ 0 ]->getIntegrationPoint(i - 1);
-        if ( !domain->giveEngngModel()->isIncremental() ) {
-            // delete this -> ComputeStrainVector(gp,stepN) ;
-            // delete this -> ComputeStressVector(gp,stepN) ;
-        }
-
-        //gp   -> printOutputAt(file,stepN) ;
+        //gp->printOutputAt(file,stepN);
 
 
         fprintf( file, "  GP %d :", gp->giveNumber() );
@@ -671,19 +667,19 @@ RerShell :: printOutputAt(FILE *file, TimeStep *stepN)
         this->giveCharacteristicTensor(globTensorPlate, GlobalCurvatureTensor, gp, stepN);
         fprintf(file, "  strains ");
         fprintf( file, " % .4e % .4e % .4e % .4e % .4e % .4e % .4e % .4e % .4e % .4e % .4e % .4e ",
-                globTensorMembrane.at(1, 1), globTensorMembrane.at(2, 2), globTensorMembrane.at(3, 3),
-                2. * globTensorMembrane.at(2, 3), 2. * globTensorMembrane.at(3, 1), 2. * globTensorMembrane.at(1, 2),
-                globTensorPlate.at(1, 1), globTensorPlate.at(2, 2), globTensorPlate.at(3, 3),
-                2. * globTensorPlate.at(2, 3), 2. * globTensorPlate.at(1, 3), 2. * globTensorPlate.at(1, 2) );
+                 globTensorMembrane.at(1, 1), globTensorMembrane.at(2, 2), globTensorMembrane.at(3, 3),
+                 2. * globTensorMembrane.at(2, 3), 2. * globTensorMembrane.at(3, 1), 2. * globTensorMembrane.at(1, 2),
+                 globTensorPlate.at(1, 1), globTensorPlate.at(2, 2), globTensorPlate.at(3, 3),
+                 2. * globTensorPlate.at(2, 3), 2. * globTensorPlate.at(1, 3), 2. * globTensorPlate.at(1, 2) );
 
         this->giveCharacteristicTensor(globTensorMembrane, GlobalForceTensor, gp, stepN);
         this->giveCharacteristicTensor(globTensorPlate, GlobalMomentumTensor, gp, stepN);
         fprintf(file, "\n          stresses");
         fprintf( file, " % .4e % .4e % .4e % .4e % .4e % .4e % .4e % .4e % .4e % .4e % .4e % .4e ",
-                globTensorMembrane.at(1, 1), globTensorMembrane.at(2, 2), globTensorMembrane.at(3, 3),
-                globTensorMembrane.at(2, 3), globTensorMembrane.at(3, 1), globTensorMembrane.at(1, 2),
-                globTensorPlate.at(1, 1), globTensorPlate.at(2, 2), globTensorPlate.at(3, 3),
-                globTensorPlate.at(2, 3), globTensorPlate.at(1, 3), globTensorPlate.at(1, 2) );
+                 globTensorMembrane.at(1, 1), globTensorMembrane.at(2, 2), globTensorMembrane.at(3, 3),
+                 globTensorMembrane.at(2, 3), globTensorMembrane.at(3, 1), globTensorMembrane.at(1, 2),
+                 globTensorPlate.at(1, 1), globTensorPlate.at(2, 2), globTensorPlate.at(3, 3),
+                 globTensorPlate.at(2, 3), globTensorPlate.at(1, 3), globTensorPlate.at(1, 2) );
 
         fprintf(file, "\n");
     }
@@ -822,56 +818,6 @@ RerShell :: giveIPValue(FloatArray &answer, GaussPoint *aGaussPoint, InternalSta
 //{}
 
 
-/*
- * void
- * RerShell :: drawInternalState(oofegGraphicContext& gc)
- * //
- * // Draws internal state graphics representation
- * //
- * {
- * int i;
- * WCRec p[3];
- * GraphicObj *tr;
- * double v1,v2,v3;
- * DrawMode mode = gc.getDrawMode();
- * TimeStep *tStep = domain->giveEngngModel()->giveCurrentStep();
- * double defScale = gc.getDefScale();
- *
- * if (!gc.testElementGraphicActivity(this)) return;
- *
- * // check for valid DrawMode
- * if (!((mode == mxForce) || (mode == myForce) || (mode == mxyForce) ||
- * (mode == szxForce) || (mode == syzForce) || (mode == sxForce) ||
- * (mode == syForce) || (mode == sxyForce))) return;
- *
- * EASValsSetLayer(OOFEG_STRESS_CONTOUR_LAYER);
- * for (i=0; i< 3; i++) {
- * if (gc.getInternalVarsDefGeoFlag()) {
- *  // use deformed geometry
- *  p[i].x = (FPNum) this->giveNode(i+1)->giveUpdatedCoordinate(1,tStep,defScale);
- *  p[i].y = (FPNum) this->giveNode(i+1)->giveUpdatedCoordinate(2,tStep,defScale);
- *  p[i].z = (FPNum) this->giveNode(i+1)->giveUpdatedCoordinate(3,tStep,defScale);
- *
- * } else {
- *  p[i].x = (FPNum) this->giveNode(i+1)->giveCoordinate(1);
- *  p[i].y = (FPNum) this->giveNode(i+1)->giveCoordinate(2);
- *  p[i].z = (FPNum) this->giveNode(i+1)->giveCoordinate(3);
- * }
- * }
- *
- * int result = 0;
- * result+= this->giveInternalStateAtNode (gc, 1, &v1);
- * result+= this->giveInternalStateAtNode (gc, 2, &v2);
- * result+= this->giveInternalStateAtNode (gc, 3, &v3);
- *
- * if (result == 3) {
- *
- * tr = CreateTriangleWD3D (p,v1,v2,v3);
- * EGWithMaskChangeAttributes(LAYER_MASK, tr);
- * EMAddGraphicsToModel(ESIModel(), tr);
- * }
- * }
- */
 
 /*
  * int
@@ -892,28 +838,28 @@ RerShell :: giveIPValue(FloatArray &answer, GaussPoint *aGaussPoint, InternalSta
  *                       this->giveDomain()->giveSmoother()->giveElementRegion(this));
  * if (result) {
  * if (mode == sxForce ) {
- **val =  nodval->at(1);
+ ***val =  nodval->at(1);
  * return 1;
  * } else if (mode == syForce) {
- **val =  nodval->at(2);
+ ***val =  nodval->at(2);
  * return 1;
  * } else if (mode == sxyForce) {
- **val =  nodval->at(3);
+ ***val =  nodval->at(3);
  * return 1;
  * } else if (mode == mxForce ) {
- **val =  nodval->at(4);
+ ***val =  nodval->at(4);
  * return 1;
  * } else if (mode == myForce) {
- **val =  nodval->at(5);
+ ***val =  nodval->at(5);
  * return 1;
  * } else if (mode == mxyForce) {
- **val =  nodval->at(6);
+ ***val =  nodval->at(6);
  * return 1;
  * } else if (mode == szxForce ) {
- **val =  nodval->at(7);
+ ***val =  nodval->at(7);
  * return 1;
  * } else if (mode == syzForce) {
- **val =  nodval->at(8);
+ ***val =  nodval->at(8);
  * return 1;
  * } else return 0;
  * }

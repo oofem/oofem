@@ -38,7 +38,6 @@
 #include "dof.h"
 
 namespace oofem {
-
 class ActiveBoundaryCondition;
 
 /**

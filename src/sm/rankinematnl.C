@@ -62,7 +62,7 @@ RankineMatNl :: RankineMatNl(int n, Domain *d) : RankineMat(n, d), StructuralNon
 
 void
 RankineMatNl :: giveRealStressVector_PlaneStress(FloatArray &answer, GaussPoint *gp,
-                                     const FloatArray &totalStrain, TimeStep *atTime)
+                                                 const FloatArray &totalStrain, TimeStep *atTime)
 {
     RankineMatNlStatus *nlStatus = static_cast< RankineMatNlStatus * >( this->giveStatus(gp) );
     //mj this->initGpForNewStep(gp);
@@ -84,6 +84,32 @@ RankineMatNl :: giveRealStressVector_PlaneStress(FloatArray &answer, GaussPoint 
     nlStatus->computeWork_PlaneStress(gp, gf);
 #endif
 }
+
+void
+RankineMatNl :: giveRealStressVector_1d(FloatArray &answer, GaussPoint *gp,
+                                        const FloatArray &totalStrain, TimeStep *atTime)
+{
+    RankineMatNlStatus *nlStatus = static_cast< RankineMatNlStatus * >( this->giveStatus(gp) );
+    //mj this->initGpForNewStep(gp);
+
+    double tempDam;
+    FloatArray tempEffStress, totalStress;
+    //mj performPlasticityReturn(gp, totalStrain, mode);
+    // nonlocal method "computeDamage" performs the plastic return
+    // for all Gauss points when it is called for the first time
+    // in the iteration
+    tempDam = this->computeDamage(gp, atTime);
+    nlStatus->giveTempEffectiveStress(tempEffStress);
+    answer.beScaled(1.0 - tempDam, tempEffStress);
+    nlStatus->setTempDamage(tempDam);
+    nlStatus->letTempStrainVectorBe(totalStrain);
+    nlStatus->letTempStressVectorBe(answer);
+#ifdef keep_track_of_dissipated_energy
+    double gf = sig0 * sig0 / E; // only estimated, but OK for this purpose
+    nlStatus->computeWork_1d(gp, gf);
+#endif
+}
+
 
 void
 RankineMatNl :: givePlaneStressStiffMtrx(FloatMatrix &answer, MatResponseMode mode, GaussPoint *gp, TimeStep *atTime)
@@ -186,9 +212,9 @@ Interface *
 RankineMatNl :: giveInterface(InterfaceType type)
 {
     if ( type == NonlocalMaterialExtensionInterfaceType ) {
-        return static_cast< StructuralNonlocalMaterialExtensionInterface * >(this);
+        return static_cast< StructuralNonlocalMaterialExtensionInterface * >( this );
     } else if ( type == NonlocalMaterialStiffnessInterfaceType ) {
-        return static_cast< NonlocalMaterialStiffnessInterface * >(this);
+        return static_cast< NonlocalMaterialStiffnessInterface * >( this );
     } else {
         return NULL;
     }
@@ -476,7 +502,7 @@ Interface *
 RankineMatNlStatus :: giveInterface(InterfaceType type)
 {
     if ( type == NonlocalMaterialStatusExtensionInterfaceType ) {
-        return static_cast< StructuralNonlocalMaterialStatusExtensionInterface * >(this);
+        return static_cast< StructuralNonlocalMaterialStatusExtensionInterface * >( this );
     } else {
         return RankineMatStatus :: giveInterface(type);
     }

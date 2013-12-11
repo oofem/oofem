@@ -43,13 +43,12 @@
 #include "dynamicinputrecord.h"
 
 namespace oofem {
-
-REGISTER_Material( CebFipSlip90Material );
+REGISTER_Material(CebFipSlip90Material);
 
 CebFipSlip90Material :: CebFipSlip90Material(int n, Domain *d) : StructuralMaterial(n, d)
-//
-// constructor
-//
+    //
+    // constructor
+    //
 { }
 
 
@@ -133,8 +132,8 @@ CebFipSlip90Material :: giveRealStressVector(FloatArray &answer, GaussPoint *gp,
 
 void
 CebFipSlip90Material :: giveStiffnessMatrix(FloatMatrix &answer,
-                                                 MatResponseMode rMode,
-                                                 GaussPoint *gp, TimeStep *atTime)
+                                            MatResponseMode rMode,
+                                            GaussPoint *gp, TimeStep *atTime)
 //
 // Returns characteristic material stiffness matrix of the receiver
 //
@@ -216,7 +215,7 @@ CebFipSlip90Material :: initializeFrom(InputRecord *ir)
 void
 CebFipSlip90Material :: giveInputRecord(DynamicInputRecord &input)
 {
-    StructuralMaterial::giveInputRecord(input);
+    StructuralMaterial :: giveInputRecord(input);
     input.setField(this->tmax, _IFT_CebFipSlip90Material_tmax);
     input.setField(this->tres, _IFT_CebFipSlip90Material_tres);
 

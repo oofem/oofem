@@ -98,7 +98,6 @@ public:
     // definition & identification
     virtual const char *giveClassName() const { return "CCTPlate3d"; }
     virtual const char *giveInputRecordName() const { return _IFT_CCTPlate3d_Name; }
-    virtual classType giveClassID() const { return CCTPlate3dClass; }
 
     virtual int computeNumberOfDofs() { return 9; }
     virtual int computeNumberOfGlobalDofs() { return 18; }
@@ -111,8 +110,10 @@ public:
     virtual int computeGlobalCoordinates(FloatArray &answer, const FloatArray &lcoords);
 
     virtual int giveLocalCoordinateSystem(FloatMatrix &answer)
-    { _error("cct3d :: giveLocalCoordinateSystem: calling of this function id not allowed");
-      return 0; }
+    {
+        _error("cct3d :: giveLocalCoordinateSystem: calling of this function id not allowed");
+        return 0;
+    }
 
     virtual void printOutputAt(FILE *file, TimeStep *tStep);
 };

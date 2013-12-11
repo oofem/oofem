@@ -100,7 +100,7 @@ public:
      * Usually computes interpolation function, which is not needed for the lattice elements.
      * However, structural element requires implementation.
      */
-    virtual void computeNmatrixAt(GaussPoint *gp, FloatMatrix &answer) { return; }
+    virtual void computeNmatrixAt(const FloatArray &iLocCoord, FloatMatrix &answer) { return; }
 
 
     /**

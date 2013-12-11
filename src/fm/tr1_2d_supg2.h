@@ -115,12 +115,12 @@ public:
     // definition
     virtual const char *giveClassName() const { return "TR1_2D_SUPG2"; }
     virtual const char *giveInputRecordName() const { return _IFT_TR1_2D_SUPG2_Name; }
-    virtual classType giveClassID() const { return TR1_2D_SUPG2Class; }
 
     virtual void giveElementDofIDMask(EquationID, IntArray & answer) const;
     virtual void giveDofManDofIDMask(int inode, EquationID ut, IntArray &answer) const;
     virtual int computeNumberOfDofs();
     virtual IRResultType initializeFrom(InputRecord *ir);
+    virtual void giveInputRecord(DynamicInputRecord &input);
     virtual void updateYourself(TimeStep *tStep);
 
     virtual contextIOResultType saveContext(DataStream *stream, ContextMode mode, void *obj = NULL);
@@ -133,8 +133,8 @@ public:
     virtual double SpatialLocalizerI_giveDistanceFromParametricCenter(const FloatArray &coords);
 
     virtual int EIPrimaryFieldI_evaluateFieldVectorAt(FloatArray &answer, PrimaryField &pf,
-                                FloatArray &coords, IntArray &dofId, ValueModeType mode,
-                                TimeStep *atTime);
+                                                      FloatArray &coords, IntArray &dofId, ValueModeType mode,
+                                                      TimeStep *atTime);
 
     virtual double computeLEPLICVolumeFraction(const FloatArray &n, const double p, LEPlic *matInterface, bool updFlag);
     virtual void formMaterialVolumePoly(Polygon &matvolpoly, LEPlic *matInterface,
@@ -150,9 +150,9 @@ public:
     virtual Element *ZZNodalRecoveryMI_giveElement() { return this; }
 
     virtual void NodalAveragingRecoveryMI_computeNodalValue(FloatArray &answer, int node,
-                                                    InternalStateType type, TimeStep *tStep);
+                                                            InternalStateType type, TimeStep *tStep);
     virtual void NodalAveragingRecoveryMI_computeSideValue(FloatArray &answer, int side,
-                                                   InternalStateType type, TimeStep *tStep);
+                                                           InternalStateType type, TimeStep *tStep);
 
     virtual void SPRNodalRecoveryMI_giveSPRAssemblyPoints(IntArray &pap);
     virtual void SPRNodalRecoveryMI_giveDofMansDeterminedByPatch(IntArray &answer, int pap);
@@ -165,7 +165,7 @@ public:
     int giveInternalStateAtNode(FloatArray &answer, InternalStateType type, InternalStateMode mode,
                                 int node, TimeStep *atTime);
     // Graphics output
-    //void drawYourself (oofegGraphicContext&);
+    //virtual void drawYourself(oofegGraphicContext&);
     virtual void drawRawGeometry(oofegGraphicContext &);
     virtual void drawScalar(oofegGraphicContext &context);
     //virtual void drawDeformedGeometry(oofegGraphicContext&, UnknownType) {}
@@ -179,7 +179,7 @@ protected:
     virtual void computeDeviatoricStress(FloatArray &answer, GaussPoint *gp, TimeStep *);
     void computeNVector(FloatArray &answer, GaussPoint *gp);
     virtual void updateVolumePolygons(Polygon &referenceFluidPoly, Polygon &secondFluidPoly, int &rfPoints, int &sfPoints,
-                               const FloatArray &normal, const double p, bool updFlag);
+                                      const FloatArray &normal, const double p, bool updFlag);
     double computeVolumeAroundID(GaussPoint *gp, integrationDomain id, const FloatArray **idpoly);
     void updateIntegrationRules();
     Material *_giveMaterial(int indx) { return domain->giveMaterial(mat [ indx ]); }

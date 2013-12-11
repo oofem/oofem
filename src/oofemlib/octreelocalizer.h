@@ -45,7 +45,7 @@
 #include <list>
 
 namespace oofem {
-template <class T> class AList;
+template< class T >class AList;
 class Domain;
 class Element;
 class TimeStep;
@@ -83,7 +83,7 @@ protected:
     /// Element list, containing all elements having IP in cell.
     std :: set< int > *elementIPList;
     /// Element list of all elements close to the cell.
-    AList < std :: list < int > > elementList;
+    AList< std :: list< int > >elementList;
 
 public:
     enum BoundingBoxStatus { BBS_OutsideCell, BBS_InsideCell, BBS_ContainsCell };
@@ -219,8 +219,9 @@ public:
     virtual Element *giveElementContainingPoint(const FloatArray &coords, const IntArray *regionList = NULL);
     virtual Element *giveElementCloseToPoint(const FloatArray &coords, const IntArray *regionList = NULL);
     virtual Element *giveElementClosestToPoint(FloatArray &lcoords, FloatArray &closest, const FloatArray &gcoords, int region);
-    virtual GaussPoint *giveClosestIP(const FloatArray &coords, int region);
-    virtual void giveAllElementsWithIpWithinBox(elementContainerType &elemSet, const FloatArray &coords, const double radius);
+    virtual GaussPoint *giveClosestIP(const FloatArray &coords, int region, bool iCohesiveZoneGP = false);
+    virtual void giveAllElementsWithIpWithinBox(elementContainerType &elemSet, const FloatArray &coords, const double radius) { giveAllElementsWithIpWithinBox(elemSet, coords, radius, false); }
+    virtual void giveAllElementsWithIpWithinBox(elementContainerType &elemSet, const FloatArray &coords, const double radius, bool iCohesiveZoneGP);
     virtual void giveAllNodesWithinBox(nodeContainerType &nodeList, const FloatArray &coords, const double radius);
 
     virtual const char *giveClassName() const { return "OctreeSpatialLocalizer"; }
@@ -295,7 +296,7 @@ protected:
      * @param radius Radius of bounding sphere.
      */
     void giveElementsWithIPWithinBox(elementContainerType &elemSet, OctantRec *currentCell,
-                                     const FloatArray &coords, const double radius);
+                                     const FloatArray &coords, const double radius, bool iCohesiveZoneGP = false);
     /**
      * Returns container (list) of nodes within given box and given root cell.
      * @param nodeList Answer containing the list of nodes meeting the criteria.
@@ -316,7 +317,7 @@ protected:
      */
     void giveClosestIPWithinOctant(OctantRec *currentCell, //elementContainerType& visitedElems,
                                    const FloatArray &coords,
-                                   int region, double &dist, GaussPoint **answer);
+                                   int region, double &dist, GaussPoint **answer, bool iCohesiveZoneGP);
     /**
      * Returns the element containing given point.
      * The search is done only for given cell and its children, skipping the given child from search
@@ -351,7 +352,7 @@ protected:
      * @param region Region to consider.
      */
     void giveElementClosestToPointWithinOctant(OctantRec *currCell, const FloatArray &gcoords,
-            double &minDist, FloatArray &lcoords, FloatArray &closest, Element *&answer, int region);
+                                               double &minDist, FloatArray &lcoords, FloatArray &closest, Element * &answer, int region);
     /**
      * Determines the max tree depth computed for given tree cell and its children.
      * To obtain total tree depth, root cell should be supplied.

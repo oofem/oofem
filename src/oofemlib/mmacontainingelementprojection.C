@@ -45,7 +45,7 @@ MMAContainingElementProjection :: MMAContainingElementProjection() : MaterialMap
 { }
 
 void
-MMAContainingElementProjection :: __init(Domain *dold, IntArray &type, FloatArray &coords, int region, TimeStep *tStep)
+MMAContainingElementProjection :: __init(Domain *dold, IntArray &type, FloatArray &coords, int region, TimeStep *tStep, bool iCohesiveZoneGP)
 {
     SpatialLocalizer *sl = dold->giveSpatialLocalizer();
     IntArray regionList(1);
@@ -87,6 +87,14 @@ MMAContainingElementProjection :: __mapVariable(FloatArray &answer, FloatArray &
         source->giveMaterial()->giveIPValue(answer, source, type, tStep);
         return 1;
     }
+
+    return 0;
+}
+
+int
+MMAContainingElementProjection :: mapStatus(MaterialStatus &oStatus) const
+{
+    OOFEM_ERROR("ERROR: MMAContainingElementProjection :: mapStatus() is not implemented yet.")
 
     return 0;
 }

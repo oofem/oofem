@@ -42,8 +42,7 @@
 #include "classfactory.h"
 
 namespace oofem {
-
-REGISTER_ExportModule( GPExportModule )
+REGISTER_ExportModule(GPExportModule)
 
 GPExportModule :: GPExportModule(int n, EngngModel *e) : ExportModule(n, e)
 {
@@ -109,7 +108,7 @@ GPExportModule :: doOutput(TimeStep *tStep, bool forcedOutput)
             iRule = elem->giveIntegrationRule(i);
 
             // loop over Gauss points
-        for ( int j = 0; j < iRule->giveNumberOfIntegrationPoints(); j++ ) {
+            for ( int j = 0; j < iRule->giveNumberOfIntegrationPoints(); j++ ) {
                 gp = iRule->getIntegrationPoint(j);
                 // export:
                 // 1) element number
@@ -162,9 +161,10 @@ GPExportModule :: doOutput(TimeStep *tStep, bool forcedOutput)
         // for CST elements write also nodal coordinates
         // (non-standard part, used only exceptionally)
         int nnode = elem->giveNumberOfNodes();
-        if (nnode==3){
-            for (int inod=1; inod<=3; inod++)
-                fprintf (stream, "%f %f ",elem->giveNode(inod)->giveCoordinate(1),elem->giveNode(inod)->giveCoordinate(2));
+        if ( nnode == 3 ) {
+            for ( int inod = 1; inod <= 3; inod++ ) {
+                fprintf( stream, "%f %f ", elem->giveNode(inod)->giveCoordinate(1), elem->giveNode(inod)->giveCoordinate(2) );
+            }
         }
 #endif
     }
@@ -187,9 +187,9 @@ GPExportModule :: giveOutputStream(TimeStep *tStep)
 {
     FILE *answer;
 
-    std::string fileName = this->giveOutputBaseFileName(tStep) + ".gp";
+    std :: string fileName = this->giveOutputBaseFileName(tStep) + ".gp";
     if ( ( answer = fopen(fileName.c_str(), "w") ) == NULL ) {
-        OOFEM_ERROR2("GPExportModule::giveOutputStream: failed to open file %s", fileName.c_str());
+        OOFEM_ERROR2( "GPExportModule::giveOutputStream: failed to open file %s", fileName.c_str() );
     }
 
     return answer;

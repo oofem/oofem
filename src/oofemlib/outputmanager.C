@@ -159,7 +159,7 @@ OutputManager :: _testDofManOutput(int number)
         selected  = 1;
     } else {
         // test for particular dofman selection
-        std::list< Range > :: iterator dofmanOutIter;
+        std :: list< Range > :: iterator dofmanOutIter;
 
         int _label = domain->giveDofManager(number)->giveLabel();
         for ( dofmanOutIter = dofman_out.begin(); dofmanOutIter != dofman_out.end(); ++dofmanOutIter ) {
@@ -176,8 +176,8 @@ OutputManager :: _testDofManOutput(int number)
     }
 
     // if selected check exclude list
-    std::list< Range > *list2 = & ( this->dofman_except );
-    std::list< Range > :: iterator dofmanExceptIter;
+    std :: list< Range > *list2 = & ( this->dofman_except );
+    std :: list< Range > :: iterator dofmanExceptIter;
     int _label = domain->giveDofManager(number)->giveLabel();
 
     for ( dofmanExceptIter = list2->begin(); dofmanExceptIter != list2->end(); ++dofmanExceptIter ) {
@@ -211,7 +211,7 @@ OutputManager :: _testElementOutput(int number)
         selected  = 1;
     } else {
         // test for particular element selection
-        std::list< Range > :: iterator elemOutIter;
+        std :: list< Range > :: iterator elemOutIter;
         int _label = domain->giveElement(number)->giveLabel();
 
         for ( elemOutIter = element_out.begin(); elemOutIter != element_out.end(); ++elemOutIter ) {
@@ -228,7 +228,7 @@ OutputManager :: _testElementOutput(int number)
     }
 
     // if selected check exclude list
-    std::list< Range > :: iterator elemExceptIter;
+    std :: list< Range > :: iterator elemExceptIter;
     int _label = domain->giveElement(number)->giveLabel();
 
     for ( elemExceptIter = element_except.begin(); elemExceptIter != element_except.end(); ++elemExceptIter ) {
@@ -255,7 +255,7 @@ OutputManager :: testTimeStepOutput(TimeStep *tStep)
         }
     }
 
-    std::list< Range > :: iterator tstepsIter;
+    std :: list< Range > :: iterator tstepsIter;
     for ( tstepsIter = tsteps_out.begin(); tstepsIter != tsteps_out.end(); ++tstepsIter ) {
         // test if INCLUDED
         if ( ( * tstepsIter ).test( tStep->giveNumber() ) ) {
@@ -298,5 +298,4 @@ OutputManager :: beCopyOf(OutputManager *om)
     this->dofman_all_out_flag = om->dofman_all_out_flag;
     this->element_all_out_flag = om->element_all_out_flag;
 }
-
 } // end namespace oofem

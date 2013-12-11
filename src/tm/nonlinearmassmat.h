@@ -45,7 +45,6 @@
 //@}
 
 namespace oofem {
-
 /**
  *
  * Class for a nonlinear fictitious transport material. The constitutive equation is given as
@@ -85,7 +84,6 @@ public:
 
     virtual const char *giveInputRecordName() const { return _IFT_NonlinearMassTransferMaterial_Name; }
     virtual const char *giveClassName() const { return "NonlinearMassTransferMaterial"; };
-    virtual classType giveClassID() const { return NonlinearMassTransferMaterialClass; };
 
     virtual IRResultType initializeFrom(InputRecord *ir);
 };

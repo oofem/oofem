@@ -46,8 +46,7 @@
 
 
 namespace oofem {
-
-REGISTER_Element( IntElLine1 );
+REGISTER_Element(IntElLine1);
 
 FEI2dLineLin IntElLine1 :: interp(1, 1);
 
@@ -65,7 +64,7 @@ IntElLine1 :: computeNmatrixAt(GaussPoint *ip, FloatMatrix &answer)
     // Returns the modified N-matrix which multiplied with u give the spatial jump.
 
     FloatArray N;
-    FEInterpolation *interp = this->giveInterpolation(); 
+    FEInterpolation *interp = this->giveInterpolation();
     interp->evalN( N, * ip->giveCoordinates(), FEIElementGeometryWrapper(this) );
 
     answer.resize(2, 8);
@@ -95,19 +94,17 @@ void
 IntElLine1 :: computeCovarBaseVectorAt(IntegrationPoint *ip, FloatArray &G)
 {
     FloatMatrix dNdxi;
-    FEInterpolation *interp = this->giveInterpolation(); 
-    interp->evaldNdxi(dNdxi, * ip->giveCoordinates(), FEIElementGeometryWrapper(this) );
+    FEInterpolation *interp = this->giveInterpolation();
+    interp->evaldNdxi( dNdxi, * ip->giveCoordinates(), FEIElementGeometryWrapper(this) );
     G.resize(2);
     G.zero();
     int numNodes = this->giveNumberOfNodes();
     for ( int i = 1; i <= dNdxi.giveNumberOfRows(); i++ ) {
-        double X1_i = 0.5* ( this->giveNode(i)->giveCoordinate(1) + this->giveNode(i+numNodes/2)->giveCoordinate(1) ); // (mean) point on the fictious mid surface
-        double X2_i = 0.5* ( this->giveNode(i)->giveCoordinate(2) + this->giveNode(i+numNodes/2)->giveCoordinate(2) );
-        G.at(1) += dNdxi.at(i,1) * X1_i;
-        G.at(2) += dNdxi.at(i,1) * X2_i;
+        double X1_i = 0.5 * ( this->giveNode(i)->giveCoordinate(1) + this->giveNode(i + numNodes / 2)->giveCoordinate(1) ); // (mean) point on the fictious mid surface
+        double X2_i = 0.5 * ( this->giveNode(i)->giveCoordinate(2) + this->giveNode(i + numNodes / 2)->giveCoordinate(2) );
+        G.at(1) += dNdxi.at(i, 1) * X1_i;
+        G.at(2) += dNdxi.at(i, 1) * X2_i;
     }
-
-    
 }
 
 double
@@ -119,7 +116,7 @@ IntElLine1 :: computeAreaAround(IntegrationPoint *ip)
     double weight  = ip->giveWeight();
     double ds = sqrt( G.dotProduct(G) ) * weight;
 
-    double thickness  = this->giveCrossSection()->give(CS_Thickness);    
+    double thickness  = this->giveCrossSection()->give(CS_Thickness, ip);
     return ds * thickness;
 }
 
@@ -137,36 +134,34 @@ IntElLine1 :: giveDofManDofIDMask(int inode, EquationID, IntArray &answer) const
     answer.setValues(2, D_u, D_v);
 }
 
-void 
+void
 IntElLine1 :: computeTransformationMatrixAt(GaussPoint *gp, FloatMatrix &answer)
 {
     FloatArray G;
     this->computeCovarBaseVectorAt(gp, G);
     G.normalize();
 
-    answer.resize(2,2);
-    answer.at(1,1) =  G.at(1);
-    answer.at(2,1) =  G.at(2);
-    answer.at(1,2) = -G.at(2);
-    answer.at(2,2) =  G.at(1);
+    answer.resize(2, 2);
+    answer.at(1, 1) =  G.at(1);
+    answer.at(2, 1) =  G.at(2);
+    answer.at(1, 2) = -G.at(2);
+    answer.at(2, 2) =  G.at(1);
 
     /*
-    answer.resize(3,3);
-    answer.at(1,1) =  G.at(1);
-    answer.at(2,1) =  G.at(2);
-    answer.at(3,1) =  0.0;
-    answer.at(1,2) = -G.at(2);
-    answer.at(2,2) =  G.at(1);
-    answer.at(3,2) =  0.0;
-    answer.at(3,3) =  1.0;
-    */
+     * answer.resize(3,3);
+     * answer.at(1,1) =  G.at(1);
+     * answer.at(2,1) =  G.at(2);
+     * answer.at(3,1) =  0.0;
+     * answer.at(1,2) = -G.at(2);
+     * answer.at(2,2) =  G.at(1);
+     * answer.at(3,2) =  0.0;
+     * answer.at(3,3) =  1.0;
+     */
 }
 
 FEInterpolation *
 IntElLine1 :: giveInterpolation() const
 {
-    return &interp;
+    return & interp;
 }
-
-
 } // end namespace oofem

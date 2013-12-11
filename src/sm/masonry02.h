@@ -110,12 +110,11 @@ public:
 
     virtual const char *giveInputRecordName() const { return _IFT_Masonry02_Name; }
     virtual const char *giveClassName() const { return "Masonry02"; }
-    virtual classType giveClassID() const { return Masonry02Class; }
 
     virtual void giveStiffnessMatrix(FloatMatrix &answer,
-                                          MatResponseMode mode,
-                                          GaussPoint *gp,
-                                          TimeStep *tStep);
+                                     MatResponseMode mode,
+                                     GaussPoint *gp,
+                                     TimeStep *tStep);
 
     virtual int giveSizeOfFullHardeningVarsVector() { return 3; }
     virtual int giveSizeOfReducedHardeningVarsVector(GaussPoint *) { return 3; }
@@ -132,10 +131,10 @@ protected:
     //
 
     virtual double computeYieldValueAt(GaussPoint *gp, int isurf, const FloatArray &stressVector,
-                               const FloatArray &stressSpaceHardeningVars);
+                                       const FloatArray &stressSpaceHardeningVars);
 
     virtual void computeStressGradientVector(FloatArray &answer, functType ftype, int isurf, GaussPoint *gp, const FloatArray &stressVector,
-                                     const FloatArray &stressSpaceHardeningVars);
+                                             const FloatArray &stressSpaceHardeningVars);
     virtual void computeStrainHardeningVarsIncrement(FloatArray &answer, GaussPoint *gp,
                                                      const FloatArray &stress, const FloatArray &dlambda,
                                                      const FloatArray &dplasticStrain, const IntArray &activeConditionMap);

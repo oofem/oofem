@@ -90,7 +90,7 @@ public:
      */
     virtual double SpatialLocalizerI_giveDistanceFromParametricCenter(const FloatArray &coords)
     {
-        OOFEM_ERROR2("SpatialLocalizerInterface :: SpatialLocalizerI_giveDistanceFromParametricCenter - Not implemented for %s", this->giveClassName());
+        OOFEM_ERROR2( "SpatialLocalizerInterface :: SpatialLocalizerI_giveDistanceFromParametricCenter - Not implemented for %s", this->giveClassName() );
         return 0.0;
     }
 
@@ -127,7 +127,7 @@ public:
 
     /// Constructor
     SpatialLocalizer(Domain *d) : domain(d) { }
-    
+
     virtual ~SpatialLocalizer() { }
 
     /// Returns the domain that localizer acts on.
@@ -156,9 +156,9 @@ public:
      * @return The element belonging to associated domain, close to given point, NULL otherwise.
      */
     virtual Element *giveElementClosestToPoint(FloatArray &lcoords, FloatArray &closest,
-            const FloatArray &coords, int region = 0)
+                                               const FloatArray &coords, int region = 0)
     {
-        OOFEM_ERROR2("SpatialLocalizer :: giveElementClosestToPoint - Not implemented for %s", this->giveClassName());
+        OOFEM_ERROR2( "SpatialLocalizer :: giveElementClosestToPoint - Not implemented for %s", this->giveClassName() );
         return NULL;
     }
     /**
@@ -172,7 +172,7 @@ public:
      * @return The IP belonging to associated domain (only those provided by elements in default integration rule
      * are taken into account), NULL otherwise
      */
-    virtual GaussPoint *giveClosestIP(const FloatArray &coords, int region) = 0;
+    virtual GaussPoint *giveClosestIP(const FloatArray &coords, int region, bool iCohesiveZoneGP = false) = 0;
 
     /**
      * Returns container (set) of all domain elements having integration point within given box.

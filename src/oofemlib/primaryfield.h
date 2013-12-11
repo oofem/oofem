@@ -74,7 +74,7 @@ public:
      * @return Zero if ok, nonzero when error encountered.
      */
     virtual int EIPrimaryFieldI_evaluateFieldVectorAt(FloatArray &answer, PrimaryField &pf,
-        FloatArray &coords, IntArray &dofId, ValueModeType mode, TimeStep *atTime) = 0;
+                                                      FloatArray &coords, IntArray &dofId, ValueModeType mode, TimeStep *atTime) = 0;
     //@}
 };
 
@@ -155,7 +155,7 @@ public:
      * @param atTime Time step of interest.
      * @return Error code (0-ok, 1-point not found in domain).
      */
-    virtual int evaluateAt(FloatArray &answer, DofManager* dman,
+    virtual int evaluateAt(FloatArray &answer, DofManager *dman,
                            ValueModeType mode, TimeStep *atTime);
     /**
      * Evaluates the field at given DOF manager, allows to select specific
@@ -167,8 +167,8 @@ public:
      * @param dofId Dof mask, id set to NULL, all Dofs evaluated.
      * @return Error code (0=ok, 1=point not found in domain).
      */
-    virtual int __evaluateAt(FloatArray &answer, DofManager* dman,
-                    ValueModeType mode, TimeStep *atTime, IntArray *dofId);
+    virtual int __evaluateAt(FloatArray &answer, DofManager *dman,
+                             ValueModeType mode, TimeStep *atTime, IntArray *dofId);
     /**
      * Evaluates the field at given point, allows to select specific
      * dofs using mask.
@@ -179,8 +179,8 @@ public:
      * @param dofId Dof mask, id set to NULL, all Dofs evaluated.
      * @return Error code (0=ok, 1=point not found in domain)
      */
-    virtual int __evaluateAt(FloatArray &answer, FloatArray& coords,
-                    ValueModeType mode, TimeStep *atTime, IntArray *dofId);
+    virtual int __evaluateAt(FloatArray &answer, FloatArray &coords,
+                             ValueModeType mode, TimeStep *atTime, IntArray *dofId);
     /**
      * @param atTime Time step to take solution for.
      * @return Solution vector for requested time step.
@@ -207,10 +207,11 @@ public:
     /// @return Equation ID coupled to the field.
     EquationID giveEquationID() { return this->ut; }
 
+    virtual const char *giveClassName() const { return "PrimaryField"; }
+
 protected:
     int resolveIndx(TimeStep *atTime, int shift);
     virtual FloatArray *giveSolutionVector(int);
 };
-
 } // end namespace oofem
 #endif // primaryfield_h

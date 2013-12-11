@@ -368,9 +368,9 @@ Interface *
 TrabBoneNL3D :: giveInterface(InterfaceType type)
 {
     if ( type == NonlocalMaterialExtensionInterfaceType ) {
-        return static_cast< StructuralNonlocalMaterialExtensionInterface * >(this);
+        return static_cast< StructuralNonlocalMaterialExtensionInterface * >( this );
     } else if ( type == NonlocalMaterialStiffnessInterfaceType ) {
-        return static_cast< NonlocalMaterialStiffnessInterface * >(this);
+        return static_cast< NonlocalMaterialStiffnessInterface * >( this );
     } else {
         return NULL;
     }

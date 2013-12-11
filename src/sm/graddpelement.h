@@ -62,7 +62,6 @@ public:
 
     // definition & identification
     virtual const char *giveClassName() const { return "GradDpElement"; }
-    virtual classType giveClassID() const { return GradDpElementClass; }
     /***********************Predelat************************************/
     virtual int getNprimNodes() { return 0; }
     virtual int getNprimVars() { return 0; }

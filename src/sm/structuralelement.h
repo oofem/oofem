@@ -108,7 +108,7 @@ public:
     /// Destructor.
     virtual ~StructuralElement();
 
-    virtual void giveCharacteristicMatrix(FloatMatrix &answer, CharType, TimeStep *tStep);
+    virtual void giveCharacteristicMatrix(FloatMatrix & answer, CharType, TimeStep * tStep);
     virtual void giveCharacteristicVector(FloatArray &answer, CharType type, ValueModeType mode, TimeStep *tStep);
 
     virtual void giveDefaultDofManDofIDMask(int inode, IntArray &answer) const { this->giveDofManDofIDMask(inode, EID_MomentumBalance, answer); }
@@ -145,7 +145,7 @@ public:
      * @param tStep Time step.
      * @param mass Total mass of receiver.
      */
-    virtual void computeConsistentMassMatrix(FloatMatrix &answer, TimeStep *tStep, double &mass);
+    virtual void computeConsistentMassMatrix(FloatMatrix &answer, TimeStep *tStep, double &mass, const double *ipDensity = NULL);
     /**
      * Returns mask indicating, which unknowns (their type and ordering is the same as
      * element unknown vector) participate in mass matrix integration.
@@ -305,7 +305,6 @@ public:
     virtual IRResultType initializeFrom(InputRecord *ir);
     virtual void giveInputRecord(DynamicInputRecord &input);
     virtual const char *giveClassName() const { return "StructuralElement"; }
-    virtual classType giveClassID() const { return StructuralElementClass; }
 
 #ifdef __OOFEG
     /**
@@ -346,6 +345,9 @@ public:
                                              TimeStep *tStep);
     /// Helper function which returns the structural cross-section for the element.
     StructuralCrossSection *giveStructuralCrossSection();
+
+    virtual void createMaterialStatus();
+
 protected:
 
 
@@ -439,6 +441,7 @@ protected:
      * The integration point is specified using two-dimensional iso coordinates, or using area coordinates
      * for triangular surface.
      * @param answer Interpolation matrix of surface.
+     * @param iSurf Surface number.
      * @param gp Integration point.
      */
     virtual void computeSurfaceNMatrixAt(FloatMatrix &answer, int iSurf, GaussPoint *gp) { answer.resize(0, 0); }
@@ -554,6 +557,7 @@ protected:
      * Computes the stress vector of receiver at given integration point, at time step stepN.
      * The nature of these stresses depends on the element's type.
      * @param answer Stress vector.
+     * @param strain Strain vector.
      * @param gp Integration point.
      * @param tStep Time step.
      */
@@ -574,14 +578,17 @@ protected:
      */
     virtual void computeBmatrixAt(GaussPoint *gp, FloatMatrix &answer,
                                   int lowerIndx = 1, int upperIndx = ALL_STRAINS) = 0;
+
+public:
     /**
      * Computes interpolation matrix for element unknowns.
      * The order and meaning of unknowns is element dependent.
-     * @param gp Integration point for which answer is assembled.
+     * @param iLocCoord Local coordinates.
      * @param answer Interpolation matrix evaluated at gp.
      */
-    virtual void computeNmatrixAt(GaussPoint *gp, FloatMatrix &answer) = 0;
+    virtual void computeNmatrixAt(const FloatArray &iLocCoord, FloatMatrix &answer);
 
+protected:
     /**
      * Returns maximum approximation order used by receiver.
      * Must be implemented by derived classes

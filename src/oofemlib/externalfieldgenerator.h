@@ -48,8 +48,8 @@
 
 namespace oofem {
 /**
- * This class implements a randomfieldgenerator which reads 
- * an externally generated field interpolates to determine 
+ * This class implements a randomfieldgenerator which reads
+ * an externally generated field interpolates to determine
  * at Gausspoints.
  */
 class OOFEM_EXPORT ExternalFieldGenerator : public RandomFieldGenerator
@@ -69,7 +69,6 @@ public:
     virtual IRResultType initializeFrom(InputRecord *ir);
     virtual const char *giveClassName() const { return "ExternalFieldGenerator"; }
     virtual const char *giveInputRecordName() const { return _IFT_ExternalFieldGenerator_Name; }
-    virtual classType giveClassID() const { return ExternalFieldGeneratorClass; }
 };
 } // end namespace oofem
 

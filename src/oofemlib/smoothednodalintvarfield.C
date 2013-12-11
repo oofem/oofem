@@ -40,13 +40,13 @@
 #include "dofmanager.h"
 
 namespace oofem {
-SmoothedNodalInternalVariableField :: SmoothedNodalInternalVariableField(InternalStateType ist, FieldType ft, NodalRecoveryModel::NodalRecoveryModelType st, Domain *d) : Field(ft)
+SmoothedNodalInternalVariableField :: SmoothedNodalInternalVariableField(InternalStateType ist, FieldType ft, NodalRecoveryModel :: NodalRecoveryModelType st, Domain *d) : Field(ft)
 {
     this->istType = ist;
     this->stype = st;
     this->smoother = classFactory.createNodalRecoveryModel(this->stype, d);
     // setup smoother (whole domain recovery)
-    this->smoother->setRecoveryMode(0, IntArray());
+    this->smoother->setRecoveryMode( 0, IntArray() );
     this->domain = d;
 }
 
@@ -66,20 +66,20 @@ SmoothedNodalInternalVariableField :: evaluateAt(FloatArray &answer, FloatArray 
 
     this->smoother->recoverValues(istType, atTime);
     // request element containing target point
-    Element* elem = this->domain->giveSpatialLocalizer()->giveElementContainingPoint(coords);
-    if (elem) { // ok element containing target point found
-        FEInterpolation* interp = elem->giveInterpolation();
-        if (interp) {
+    Element *elem = this->domain->giveSpatialLocalizer()->giveElementContainingPoint(coords);
+    if ( elem ) { // ok element containing target point found
+        FEInterpolation *interp = elem->giveInterpolation();
+        if ( interp ) {
             // map target point to element local coordinates
-            if (interp->global2local(lc, coords, FEIElementGeometryWrapper(elem))) {
+            if ( interp->global2local( lc, coords, FEIElementGeometryWrapper(elem) ) ) {
                 // evaluate interpolation functions at target point
-                interp->evalN(n, lc, FEIElementGeometryWrapper(elem));
+                interp->evalN( n, lc, FEIElementGeometryWrapper(elem) );
                 // loop over element nodes
-                for (i=1; i<=n.giveSize(); i++) {
+                for ( i = 1; i <= n.giveSize(); i++ ) {
                     // request nodal value
                     this->smoother->giveNodalVector(nodalValue, elem->giveDofManagerNumber(i), region);
                     // multiply nodal value by value of corresponding shape function and add this to answer
-                    answer.add(n.at(i), *nodalValue);
+                    answer.add(n.at(i), * nodalValue);
                 }
             } else { // mapping from global to local coordinates failed
                 result = 1; // failed
@@ -94,15 +94,14 @@ SmoothedNodalInternalVariableField :: evaluateAt(FloatArray &answer, FloatArray 
 }
 
 int
-SmoothedNodalInternalVariableField::evaluateAt(FloatArray &answer, DofManager* dman, ValueModeType mode, TimeStep *atTime)
+SmoothedNodalInternalVariableField :: evaluateAt(FloatArray &answer, DofManager *dman, ValueModeType mode, TimeStep *atTime)
 {
     int region = 1;
-    if (dman->hasCoordinates()) {
-        const FloatArray* val;
+    if ( dman->hasCoordinates() ) {
+        const FloatArray *val;
         int result = this->smoother->giveNodalVector(val, dman->giveNumber(), region);
-        answer=*val;
-        return (result == 1);
-
+        answer = * val;
+        return ( result == 1 );
     } else {
         return 1; // failed -> dman without coordinates
     }

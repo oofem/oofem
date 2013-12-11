@@ -113,13 +113,12 @@ public:
     virtual contextIOResultType restoreContext(DataStream *stream, ContextMode mode, void *obj = NULL);
 
     virtual const char *giveClassName() const { return "DustMaterialStatus"; }
-    virtual classType giveClassID() const { return DustMaterialStatusClass; }
 
     /**
      * Get the full plastic strain vector from the material status.
-     * @param answer Plastic strain.
+     * @return Plastic strain.
      */
-    const StrainVector & givePlasticStrain() const { return plasticStrain; }
+    const StrainVector &givePlasticStrain() const { return plasticStrain; }
     /**
      * Get the full plastic strain vector from the material status.
      * @return Volumetric part of plastic strain.
@@ -138,9 +137,9 @@ public:
 
     /**
      * Get the temp value of the full plastic strain vector from the material status.
-     * @param answer Temp value of plastic strain vector.
+     * @return Temp value of plastic strain vector.
      */
-    const StrainVector & giveTempPlasticStrain() const { return tempPlasticStrain; }
+    const StrainVector &giveTempPlasticStrain() const { return tempPlasticStrain; }
     /**
      * Get the temp value of the hardening variable q from the material status.
      * @return Temp value of hardening variable kappaP.
@@ -273,7 +272,7 @@ protected:
      * @return Fe
      */
     double functionFe(double i1);
-    /** 
+    /**
      * Derivative by i1 of auxiliary equation (7.8)
      * @param i1 Trace of stress tensor
      * @return @f$ \frac{\partial Fe}{\partial i_1 } @f$
@@ -305,7 +304,7 @@ protected:
      * @return @f$ \frac{\partial X }{\partial q} @f$
      */
     double functionXDQ(double q);
-    /** 
+    /**
      * Yield function 1 (shear dominant), equation 7.5
      * @param rho Second Haigh-Westergaard coordinate
      * @param i1 Trace of stress tensor
@@ -459,7 +458,6 @@ public:
 
     virtual const char *giveClassName() const { return "DustMaterial"; }
     virtual const char *giveInputRecordName() const { return _IFT_DustMaterial_Name; }
-    virtual classType giveClassID() const { return DustMaterialClass; }
 
     virtual void giveRealStressVector(FloatArray &answer,
                                       GaussPoint *gp,

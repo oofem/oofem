@@ -73,44 +73,43 @@ namespace oofem {
  */
 class NlIsoMoistureMaterial : public IsotropicMoistureTransferMaterial
 {
-
 protected:
-  enum isothermType {linear, multilinear, Ricken, Kuenzel, Hansen, BSB} Isotherm;
+    enum isothermType { linear, multilinear, Ricken, Kuenzel, Hansen, BSB } Isotherm;
 
-  /// density of the dry solid phase
-  double rhodry;
+    /// density of the dry solid phase
+    double rhodry;
 
-  /// values of the linear isotherm
-  double moistureCapacity;
+    /// values of the linear isotherm
+    double moistureCapacity;
 
-  /// values of the multilinear isotherm
-  FloatArray iso_h;
-  FloatArray iso_wh;
+    /// values of the multilinear isotherm
+    FloatArray iso_h;
+    FloatArray iso_wh;
 
-  /// parameters of the Ricken isotherm
-  double dd; 
+    /// parameters of the Ricken isotherm
+    double dd;
 
- /// parameters of the Kuenzel isotherm
-  double wf, b; 
+    /// parameters of the Kuenzel isotherm
+    double wf, b;
 
-  /// parameters of the isotherm proposed by P. Freiesleben Hansen (Coupled moisture/heat transport in cross sections of structures, Beton og Konstruktionsinstituttet, 1985)
-  double uh, A, nn;  
+    /// parameters of the isotherm proposed by P. Freiesleben Hansen (Coupled moisture/heat transport in cross sections of structures, Beton og Konstruktionsinstituttet, 1985)
+    double uh, A, nn;
 
-  /// parameters of the BSB isotherm
-  double c, k, Vm;
+    /// parameters of the BSB isotherm
+    double c, k, Vm;
 
 
-  enum permeabilityType {multilin, Bazant, Xi} Permeability;
+    enum permeabilityType { multilin, Bazant, Xi } Permeability;
 
-  /// values of the multilinear permeability
-  FloatArray perm_h;
-  FloatArray perm_ch;
+    /// values of the multilinear permeability
+    FloatArray perm_h;
+    FloatArray perm_ch;
 
-  /// "permeability" according to Bazant
-  double C1, n, alpha0, hC;
+    /// "permeability" according to Bazant
+    double C1, n, alpha0, hC;
 
-  /// permeability parameters according to Xi, Bazant & Jennings
-  double alphah, betah, gammah;
+    /// permeability parameters according to Xi, Bazant & Jennings
+    double alphah, betah, gammah;
 
 
 public:
@@ -123,12 +122,10 @@ public:
 
     virtual const char *giveInputRecordName() const { return _IFT_NlIsoMoistureMaterial_Name; }
     virtual const char *giveClassName() const { return "NlIsoMoistureMaterial"; }
-    virtual classType giveClassID() const { return NlIsoMoistureMaterialClass; }
 
     virtual double giveHumidity(GaussPoint *gp, ValueModeType mode);
 
     virtual IRResultType initializeFrom(InputRecord *ir);
-
 };
 } // end namespace oofem
 #endif // nlisomoisturemat_h

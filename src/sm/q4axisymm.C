@@ -253,22 +253,6 @@ Q4Axisymm :: computeBHmatrixAt(GaussPoint *aGaussPoint, FloatMatrix &answer)
     answer.at(3, 15) = n.at(8) / r;
 }
 
-void
-Q4Axisymm :: computeNmatrixAt(GaussPoint *aGaussPoint, FloatMatrix &answer)
-// Returns the displacement interpolation matrix {N} of the receiver,
-// evaluated at aGaussPoint.
-{
-    FloatArray n;
-    this->interp.evalN( n, * aGaussPoint->giveCoordinates(), FEIElementGeometryWrapper(this) );
-
-    answer.resize(2, 16);
-    answer.zero();
-    for ( int i = 1; i <= 8; i++ ) {
-        answer.at(1, 2 * i - 1) = n.at(i);
-        answer.at(2, 2 * i - 0) = n.at(i);
-    }
-}
-
 
 void
 Q4Axisymm :: computeJacobianMatrixAt(FloatMatrix &answer, GaussPoint *aGaussPoint)
@@ -308,24 +292,24 @@ Q4Axisymm :: initializeFrom(InputRecord *ir)
     IRResultType result;                // Required by IR_GIVE_FIELD macro
     numberOfGaussPoints          = 4;
     result = this->StructuralElement :: initializeFrom(ir);
-	if(result != IRRT_OK) {
-		return result;
-	}
+    if ( result != IRRT_OK ) {
+        return result;
+    }
 
     numberOfFiAndShGaussPoints   = 1;
     IR_GIVE_OPTIONAL_FIELD(ir, numberOfFiAndShGaussPoints, _IFT_Q4Axisymm_nipfish);
 
     if ( !( ( numberOfGaussPoints == 1 ) ||
-           ( numberOfGaussPoints == 4 ) ||
-           ( numberOfGaussPoints == 9 ) ||
-           ( numberOfGaussPoints == 16 ) ) ) {
+            ( numberOfGaussPoints == 4 ) ||
+            ( numberOfGaussPoints == 9 ) ||
+            ( numberOfGaussPoints == 16 ) ) ) {
         numberOfGaussPoints = 4;
     }
 
     if ( !( ( numberOfFiAndShGaussPoints == 1 ) ||
-           ( numberOfFiAndShGaussPoints == 4 ) ||
-           ( numberOfFiAndShGaussPoints == 9 ) ||
-           ( numberOfFiAndShGaussPoints == 16 ) ) ) {
+            ( numberOfFiAndShGaussPoints == 4 ) ||
+            ( numberOfFiAndShGaussPoints == 9 ) ||
+            ( numberOfFiAndShGaussPoints == 16 ) ) ) {
         numberOfFiAndShGaussPoints = 1;
     }
 

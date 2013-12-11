@@ -37,7 +37,6 @@
 #include "material.h"
 
 namespace oofem {
-
 //GaussPoint :: GaussPoint(IntegrationRule *ir, int n, FloatArray *a, double w, MaterialMode mode) : statusDict()
 GaussPoint :: GaussPoint(IntegrationRule *ir, int n, FloatArray *a, double w, MaterialMode mode)
 // Constructor. Creates a Gauss point belonging to element e, with number
@@ -72,6 +71,11 @@ GaussPoint :: ~GaussPoint()
     if ( localCoordinates ) {
         delete localCoordinates;
     }
+
+    if ( materialStatus != NULL ) {
+        delete materialStatus;
+        materialStatus = NULL;
+    }
 }
 
 
@@ -79,7 +83,7 @@ void GaussPoint :: printOutputAt(FILE *File, TimeStep *stepN)
 // Prints the strains and stresses on the data file.
 {
     int iruleNumber = 0;
-    
+
     if ( irule ) {
         iruleNumber = irule->giveNumber();
     }
@@ -87,7 +91,7 @@ void GaussPoint :: printOutputAt(FILE *File, TimeStep *stepN)
     fprintf(File, "  GP %2d.%-2d :", iruleNumber, number);
 
     // invoke printOutputAt method for all managed statuses
-    IntegrationPointStatus* status = this->giveMaterialStatus();
+    IntegrationPointStatus *status = this->giveMaterialStatus();
     if ( status ) {
         status->printOutputAt(File, stepN);
     }
@@ -124,9 +128,9 @@ GaussPoint *GaussPoint :: giveSlaveGaussPoint(int index)
 
 void GaussPoint :: updateYourself(TimeStep *tStep)
 // Performs end-of-step updates.
-{ 
+{
     IntegrationPointStatus *status = this->giveMaterialStatus();
-    if ( status ) { 
+    if ( status ) {
         status->updateYourself(tStep);
     }
 

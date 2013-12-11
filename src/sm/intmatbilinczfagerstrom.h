@@ -54,7 +54,6 @@
 //@}
 
 namespace oofem {
-
 /**
  * This class implements associated Material Status for IntMatBilinearCZFagerstrom
  */
@@ -66,7 +65,7 @@ protected:
     FloatArray oldMaterialJump;
     // temporary material jump
     FloatArray tempMaterialJump;
-    
+
     // damage variable
     double damage;
     // temporary damage value
@@ -85,10 +84,10 @@ protected:
 
     // tempArrays for stiffness calculation
     FloatMatrix Iep;
-    FloatArray	alphav;
+    FloatArray alphav;
 
 
-    
+
 public:
     /// Constructor
     IntMatBilinearCZFagerstromStatus(int n, Domain *d, GaussPoint *g);
@@ -99,21 +98,20 @@ public:
 
     // definition
     virtual const char *giveClassName() const { return "IntMatBilinearCZFagerstromStatus"; }
-    virtual classType giveClassID() const { return MaterialStatusClass; }
 
     double giveDamage() { return damage; }
     double giveTempDamage() { return tempDamage; }
 
-    const FloatArray &giveOldMaterialJump() {return oldMaterialJump; }
-    const FloatArray &giveTempMaterialJump() {return tempMaterialJump; }
+    const FloatArray &giveOldMaterialJump() { return oldMaterialJump; }
+    const FloatArray &giveTempMaterialJump() { return tempMaterialJump; }
 
-    const FloatArray &giveEffectiveMandelTraction() { return  QEffective; }
-    const FloatArray &giveTempEffectiveMandelTraction() {return tempQEffective; }
+    const FloatArray &giveEffectiveMandelTraction() { return QEffective; }
+    const FloatArray &giveTempEffectiveMandelTraction() { return tempQEffective; }
 
-    const FloatMatrix &giveTempInverseDefGrad() {return tempFInv; }
-    const FloatMatrix &giveTempRotationMatrix() {return tempRot; }
-    const FloatMatrix &giveTempIep() {return Iep; }
-    const FloatArray &giveTempAlphav() {return alphav; }
+    const FloatMatrix &giveTempInverseDefGrad() { return tempFInv; }
+    const FloatMatrix &giveTempRotationMatrix() { return tempRot; }
+    const FloatMatrix &giveTempIep() { return Iep; }
+    const FloatArray &giveTempAlphav() { return alphav; }
 
 
     void letTempDamageBe(double v) { tempDamage = v; }
@@ -151,9 +149,9 @@ class IntMatBilinearCZFagerstrom : public StructuralInterfaceMaterial
 {
 protected:
     /// Material parameters
-    double kn0;   // initial normal stiffness	
+    double kn0;   // initial normal stiffness
     double ks0;   // initial shear stiffness
-    double knc;   // stiffness in compression  
+    double knc;   // stiffness in compression
     double GIc;   // fracture energy, mode 1
     double GIIc;  // fracture energy, mode 1
     double sigf;  // max stress
@@ -164,7 +162,7 @@ protected:
 
     virtual int checkConsistency();
     void give3dInterfaceMaterialStiffnessMatrix(FloatMatrix &answer, MatResponseMode rMode,
-                                                                     GaussPoint *gp, TimeStep *atTime);
+                                                GaussPoint *gp, TimeStep *atTime);
 
 public:
     /// Constructor
@@ -176,23 +174,22 @@ public:
 
     virtual int hasMaterialModeCapability(MaterialMode mode); // remove
     virtual const char *giveClassName() const { return "IntMatBilinearCZFagerstrom"; }
-    virtual classType giveClassID() const { return MaterialStatusClass; }
     virtual const char *giveInputRecordName() const { return _IFT_IntMatBilinearCZFagerstrom_Name; }
-    
-    
+
+
     virtual void giveFirstPKTraction_3d(FloatArray &answer, GaussPoint *gp, const FloatArray &jump,
-                                         const FloatMatrix &F, TimeStep *tStep);
+                                        const FloatMatrix &F, TimeStep *tStep);
     virtual void give3dStiffnessMatrix_dTdj(FloatMatrix &answer, MatResponseMode rMode, GaussPoint *gp, TimeStep *tStep);
 
-	void give3dStiffnessMatrix_dTdj_num(FloatMatrix &answer, MatResponseMode rMode, GaussPoint *gp, TimeStep *tStep);
+    void give3dStiffnessMatrix_dTdj_num(FloatMatrix &answer, MatResponseMode rMode, GaussPoint *gp, TimeStep *tStep);
 
     /**
      * Tells if the model has implemented analytical tangent stiffness.
      * If not, the tangent must be computed numerically.
      */
-    virtual bool hasAnalyticalTangentStiffness() const {return true;}
+    virtual bool hasAnalyticalTangentStiffness() const { return true; }
 
-    
+
     virtual int giveIPValue(FloatArray &answer, GaussPoint *gp, InternalStateType type, TimeStep *tStep);
     virtual IRResultType initializeFrom(InputRecord *ir);
     virtual void giveInputRecord(DynamicInputRecord &input);
@@ -200,7 +197,6 @@ public:
     virtual MaterialStatus *CreateStatus(GaussPoint *gp) const { return new IntMatBilinearCZFagerstromStatus(1, domain, gp); } //@Martin: Why new?
     void printYourself();
 protected:
-   
 };
 } // end namespace oofem
 #endif // isointerfacedamage01_h

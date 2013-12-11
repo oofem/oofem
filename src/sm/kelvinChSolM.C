@@ -90,7 +90,7 @@ KelvinChainSolidMaterial :: giveEigenStrainVector(FloatArray &answer, GaussPoint
     if ( mode == VM_Incremental ) {
         for ( mu = 1; mu <= nUnits; mu++ ) {
             betaMu = this->computeBetaMu(gp, atTime, mu);
-            sigmaVMu =  &status->giveHiddenVarsVector(mu); // JB
+            sigmaVMu =  & status->giveHiddenVarsVector(mu); // JB
 
             if ( sigmaVMu ) {
                 help.zero();
@@ -156,7 +156,7 @@ KelvinChainSolidMaterial :: computeLambdaMu(GaussPoint *gp, TimeStep *atTime, in
 }
 
 
-void 
+void
 KelvinChainSolidMaterial :: giveRealStressVector(FloatArray &answer, GaussPoint *gp, const FloatArray &reducedStrain, TimeStep *tStep)
 {
     RheoChainMaterial :: giveRealStressVector(answer, gp, reducedStrain, tStep);

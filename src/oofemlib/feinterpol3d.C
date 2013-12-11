@@ -37,8 +37,6 @@
 #include "gaussintegrationrule.h"
 
 namespace oofem {
-
-
 double FEInterpolation3d :: giveVolume(const FEICellGeometry &cellgeo) const
 {
     OOFEM_ERROR("FEInterpolation3d :: giveVolume - Not implemented in subclass.");
@@ -98,7 +96,7 @@ void FEInterpolation3d :: computeEdgeMapping(IntArray &edgeNodes, IntArray &elem
     size = ln.giveSize();
     edgeNodes.resize(size);
     for ( int i = 1; i <= size; i++ ) {
-        edgeNodes.at(i) = elemNodes.at(ln.at(i));
+        edgeNodes.at(i) = elemNodes.at( ln.at(i) );
     }
 }
 
@@ -110,7 +108,7 @@ void FEInterpolation3d :: computeSurfaceMapping(IntArray &surfNodes, IntArray &e
     size = ln.giveSize();
     surfNodes.resize(size);
     for ( int i = 1; i <= size; i++ ) {
-        surfNodes.at(i) = elemNodes.at(ln.at(i));
+        surfNodes.at(i) = elemNodes.at( ln.at(i) );
     }
 }
 
@@ -137,5 +135,4 @@ double FEInterpolation3d :: surfaceEvalNormal(FloatArray &answer, int isurf, con
     OOFEM_ERROR("FEInterpolation3D :: surfaceEvalNormal - Not implemented");
     return -1.0;
 }
-
 } // end namespace oofem

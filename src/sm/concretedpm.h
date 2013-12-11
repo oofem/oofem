@@ -156,7 +156,6 @@ public:
 
     virtual void restoreConsistency();
     virtual const char *giveClassName() const { return "ConcreteDPMStatus"; }
-    virtual classType giveClassID() const { return ConcreteDPMStatusClass; }
 
     /**
      * Get the full plastic strain vector from the material status.
@@ -169,14 +168,14 @@ public:
     }
     /**
      * Get the plastic strain deviator from the material status.
-     * @param answer Plastic strain deviator.
+     * @return Plastic strain deviator.
      */
-    const StrainVector &  givePlasticStrain() const { return plasticStrain; }
+    const StrainVector &givePlasticStrain() const { return plasticStrain; }
 
 
     /**
-     *  Get the deviatoric plastic strain norm from the material status.
-     *  @return Deviatoric plasticStrainNorm.
+     * Get the deviatoric plastic strain norm from the material status.
+     * @return Deviatoric plasticStrainNorm.
      */
     double giveDeviatoricPlasticStrainNorm()
     {
@@ -223,10 +222,10 @@ public:
     double giveEpsLoc() const { return epsloc; }
 
     /**History variable of the modified size-dependent adjustment
-    * Assign the temp value of the damage variable of the damage model.
-    * @param v New temp value of the damage variable.
-    */
-    void letTempEpslocBe ( const double v ) { tempEpsloc = v; }
+     * Assign the temp value of the damage variable of the damage model.
+     * @param v New temp value of the damage variable.
+     */
+    void letTempEpslocBe(const double v) { tempEpsloc = v; }
 
 #endif
 
@@ -245,9 +244,9 @@ public:
 
     /**
      * Get the temp value of the full plastic strain vector from the material status.
-     * @param answer Temp value of plastic strain vector.
+     * @return Temp value of plastic strain vector.
      */
-    const StrainVector & giveTempPlasticStrain() const { return tempPlasticStrain; }
+    const StrainVector &giveTempPlasticStrain() const { return tempPlasticStrain; }
 
     /**
      * Get the temp value of the volumetric plastic strain in plane stress.
@@ -302,20 +301,20 @@ public:
      * Assign the value of deviatoric plastic strain.
      * @param v New temp value of deviatoric plastic strain.
      */
-    void letDeltaLambdaBe(const double v) { deltaLambda = v; }
+    void letDeltaLambdaBe(double v) { deltaLambda = v; }
 
     /**
      *  Assign the temp value of the volumetric
      *  plastic strain in plane stress
      */
-    void  letTempVolumetricPlasticStrainBe(const double v)
+    void letTempVolumetricPlasticStrainBe(double v)
     { tempVolumetricPlasticStrain = v; }
 
     /**
      * Assign the temp value of the hardening variable of the plasticity model.
      * @param v New temp value of the hardening variable
      */
-    void  letTempKappaPBe(const double v)
+    void letTempKappaPBe(double v)
     { tempKappaP = v; }
 
 
@@ -323,25 +322,25 @@ public:
      * Assign the temp value of the hardening variable of the damage model.
      * @param v New temp value of the hardening variable.
      */
-    void letTempKappaDBe(const double v) { tempKappaD = v; }
+    void letTempKappaDBe(double v) { tempKappaD = v; }
 
     /**
      * Assign the temp value of the hardening variable of the damage model.
      * @param v New temp value of the hardening variable.
      */
-    void letTempEquivStrainBe(const double v) { tempEquivStrain = v; }
+    void letTempEquivStrainBe(double v) { tempEquivStrain = v; }
 
     /**
      * Assign the temp value of the damage variable of the damage model.
      * @param v New temp value of the damage variable.
      */
-    void letTempDamageBe(const double v) { tempDamage = v; }
+    void letTempDamageBe(double v) { tempDamage = v; }
 
     /**
      * Assign the temp value of the damage variable of the damage model.
      * @param v New temp value of the damage variable.
      */
-    void letDeltaEquivStrainBe(const double v) { deltaEquivStrain = v; }
+    void letDeltaEquivStrainBe(double v) { deltaEquivStrain = v; }
 
     /**
      * Gives the characteristic length.
@@ -359,9 +358,7 @@ public:
      * @param v New temp value of the state flag (i.e. elastic, unloading, yielding,
      * vertex case yielding).
      */
-    void letTempStateFlagBe(const int v) { temp_state_flag = v; }
-
-
+    void letTempStateFlagBe(int v) { temp_state_flag = v; }
 };
 
 
@@ -478,7 +475,6 @@ public:
 
     virtual const char *giveClassName() const { return "ConcreteDPM"; }
     virtual const char *giveInputRecordName() const { return _IFT_ConcreteDPM_Name; }
-    virtual classType giveClassID() const { return ConcreteDPMClass; }
 
     virtual ConcreteDPMStatus *giveStatus(GaussPoint *gp) const
     { return static_cast< ConcreteDPMStatus * >( this->Material :: giveStatus(gp) ); }

@@ -40,4 +40,3 @@ namespace oofem {
 typedef long StateCounterType;
 } // end namespace oofem
 #endif // statecountertype_h
-

@@ -50,8 +50,7 @@
 #endif
 
 namespace oofem {
-
-REGISTER_Element( InterfaceElem1d );
+REGISTER_Element(InterfaceElem1d);
 
 InterfaceElem1d :: InterfaceElem1d(int n, Domain *aDomain) :
     StructuralElement(n, aDomain)
@@ -218,7 +217,7 @@ InterfaceElem1d :: computeGaussPoints()
         numberOfIntegrationRules = 1;
         integrationRulesArray = new IntegrationRule * [ 1 ];
         integrationRulesArray [ 0 ] = new GaussIntegrationRule(1, this, 1, 2);
-        integrationRulesArray [ 0 ]->setUpIntegrationPoints(_Line, 1, this->giveMaterialMode());
+        integrationRulesArray [ 0 ]->setUpIntegrationPoints( _Line, 1, this->giveMaterialMode() );
     }
 }
 
@@ -247,7 +246,7 @@ InterfaceElem1d :: computeVolumeAround(GaussPoint *aGaussPoint)
 // Returns the length of the receiver. This method is valid only if 1
 // Gauss point is used.
 {
-    return 1.0;//MUST be set to 1.0
+    return 1.0; //MUST be set to 1.0
 }
 
 
@@ -273,15 +272,18 @@ int
 InterfaceElem1d :: computeNumberOfDofs()
 {
     setCoordMode();
-    switch (mode) {
-        case ie1d_1d:
-            return 2;
-        case ie1d_2d:
-            return 4;
-        case ie1d_3d:
-            return 6;
-        default:
-            _error("giveDofManDofIDMask: unsupported mode");
+    switch ( mode ) {
+    case ie1d_1d:
+        return 2;
+
+    case ie1d_2d:
+        return 4;
+
+    case ie1d_3d:
+        return 6;
+
+    default:
+        _error("giveDofManDofIDMask: unsupported mode");
     }
 
     return 0; // to suppress compiler warning
@@ -346,9 +348,9 @@ void InterfaceElem1d :: drawRawGeometry(oofegGraphicContext &gc)
     EASValsSetLayer(OOFEG_RAW_GEOMETRY_LAYER);
     EASValsSetLineWidth(OOFEG_DEFORMED_GEOMETRY_WIDTH);
     EASValsSetColor( gc.getDeformedElementColor() );
-    p [ 0 ].x = ( FPNum )( this->giveNode(1)->giveCoordinate(1) );
-    p [ 0 ].y = ( FPNum )( this->giveNode(1)->giveCoordinate(2) );
-    p [ 0 ].z = ( FPNum )( this->giveNode(1)->giveCoordinate(3) );
+    p [ 0 ].x = ( FPNum ) ( this->giveNode(1)->giveCoordinate(1) );
+    p [ 0 ].y = ( FPNum ) ( this->giveNode(1)->giveCoordinate(2) );
+    p [ 0 ].z = ( FPNum ) ( this->giveNode(1)->giveCoordinate(3) );
 
     EASValsSetMType(CIRCLE_MARKER);
     go = CreateMarker3D(p);
@@ -410,9 +412,9 @@ void InterfaceElem1d :: drawScalar(oofegGraphicContext &context)
         p [ 0 ].z = ( FPNum ) 0.5 * ( this->giveNode(1)->giveUpdatedCoordinate(3, tStep,  defScale) +
                                       this->giveNode(2)->giveUpdatedCoordinate(3, tStep, defScale) );
     } else {
-        p [ 0 ].x = ( FPNum )( this->giveNode(1)->giveCoordinate(1) );
-        p [ 0 ].y = ( FPNum )( this->giveNode(1)->giveCoordinate(2) );
-        p [ 0 ].z = ( FPNum )( this->giveNode(1)->giveCoordinate(3) );
+        p [ 0 ].x = ( FPNum ) ( this->giveNode(1)->giveCoordinate(1) );
+        p [ 0 ].y = ( FPNum ) ( this->giveNode(1)->giveCoordinate(2) );
+        p [ 0 ].z = ( FPNum ) ( this->giveNode(1)->giveCoordinate(3) );
     }
 
     result += giveIPValue(v1, iRule->getIntegrationPoint(0), context.giveIntVarType(), tStep);

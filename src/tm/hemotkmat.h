@@ -116,7 +116,6 @@ public:
     // identification
     virtual const char *giveInputRecordName() const { return _IFT_HeMoTKMaterial_Name; }
     virtual const char *giveClassName() const { return "HeMoTKMaterial"; }
-    virtual classType giveClassID() const { return HeMoTKMaterialClass; }
 
     double sorption_isotherm(double phi);
     double inverse_sorption_isotherm(double w);

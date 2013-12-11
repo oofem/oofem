@@ -39,8 +39,7 @@
 #include "classfactory.h"
 
 namespace oofem {
-
-REGISTER_BoundaryCondition( ConstantSurfaceLoad );
+REGISTER_BoundaryCondition(ConstantSurfaceLoad);
 
 IRResultType
 ConstantSurfaceLoad :: initializeFrom(InputRecord *ir)

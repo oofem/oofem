@@ -106,7 +106,6 @@ public:
 
     // identification and auxiliary functions
     virtual const char *giveClassName() const { return "IsotropicLinearElasticMaterial"; }
-    virtual classType giveClassID() const { return IsotropicLinearElasticMaterialClass; }
     virtual const char *giveInputRecordName() const { return _IFT_IsotropicLinearElasticMaterial_Name; }
     /**
      * Initializes receiver according to object description stored in input record.
@@ -131,21 +130,21 @@ public:
     double giveBulkModulus() { return E / ( 3. * ( 1. - 2. * nu ) ); }
 
     virtual void give3dMaterialStiffnessMatrix(FloatMatrix & answer,
-                                       MatResponseMode,
-                                       GaussPoint * gp,
-                                       TimeStep * atTime);
+                                               MatResponseMode,
+                                               GaussPoint * gp,
+                                               TimeStep * atTime);
 
     virtual void givePlaneStressStiffMtrx(FloatMatrix & answer,
-                                  MatResponseMode, GaussPoint * gp,
-                                  TimeStep * atTime);
+                                          MatResponseMode, GaussPoint * gp,
+                                          TimeStep * atTime);
 
     virtual void givePlaneStrainStiffMtrx(FloatMatrix & answer,
-                                  MatResponseMode, GaussPoint * gp,
-                                  TimeStep * atTime);
+                                          MatResponseMode, GaussPoint * gp,
+                                          TimeStep * atTime);
 
     virtual void give1dStressStiffMtrx(FloatMatrix & answer,
-                               MatResponseMode, GaussPoint * gp,
-                               TimeStep * atTime);
+                                       MatResponseMode, GaussPoint * gp,
+                                       TimeStep * atTime);
     /**
      * Creates new copy of associated status (StructuralMaterialStatus class )
      * and inserts it into given integration point.

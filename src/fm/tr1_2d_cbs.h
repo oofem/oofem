@@ -87,7 +87,7 @@ public:
     TR1_2D_CBS(int n, Domain *aDomain);
     virtual ~TR1_2D_CBS();
 
-    virtual FEInterpolation *giveInterpolation() const { return &interp; }
+    virtual FEInterpolation *giveInterpolation() const { return & interp; }
 
     virtual void computeConsistentMassMtrx(FloatMatrix &answer, TimeStep *);
     virtual void computeDiagonalMassMtrx(FloatArray &answer, TimeStep *);
@@ -104,13 +104,13 @@ public:
     // definition
     virtual const char *giveClassName() const { return "TR1_2D_CBS"; }
     virtual const char *giveInputRecordName() const { return _IFT_TR1_2D_CBS_Name; }
-    virtual classType giveClassID() const { return TR1_2D_CBSClass; }
     virtual MaterialMode giveMaterialMode() { return _2dFlow; }
 
     virtual void giveElementDofIDMask(EquationID, IntArray & answer) const;
     virtual void giveDofManDofIDMask(int inode, EquationID ut, IntArray &answer) const;
     virtual int computeNumberOfDofs();
     virtual IRResultType initializeFrom(InputRecord *ir);
+    virtual void giveInputRecord(DynamicInputRecord &input);
     virtual void updateYourself(TimeStep *tStep);
     /// Used to check consistency and initialize some element geometry data (area,b,c)
     virtual int checkConsistency();
@@ -125,8 +125,8 @@ public:
     virtual double SpatialLocalizerI_giveDistanceFromParametricCenter(const FloatArray &coords);
 
     virtual int EIPrimaryFieldI_evaluateFieldVectorAt(FloatArray &answer, PrimaryField &pf,
-                                FloatArray &coords, IntArray &dofId, ValueModeType mode,
-                                TimeStep *atTime);
+                                                      FloatArray &coords, IntArray &dofId, ValueModeType mode,
+                                                      TimeStep *atTime);
 
     //<RESTRICTED_SECTION>
     virtual double computeLEPLICVolumeFraction(const FloatArray &n, const double p, LEPlic *matInterface, bool updFlag);
@@ -145,9 +145,9 @@ public:
     virtual Element *ZZNodalRecoveryMI_giveElement() { return this; }
 
     virtual void NodalAveragingRecoveryMI_computeNodalValue(FloatArray &answer, int node,
-                                                    InternalStateType type, TimeStep *tStep);
+                                                            InternalStateType type, TimeStep *tStep);
     virtual void NodalAveragingRecoveryMI_computeSideValue(FloatArray &answer, int side,
-                                                   InternalStateType type, TimeStep *tStep);
+                                                           InternalStateType type, TimeStep *tStep);
 
     virtual void SPRNodalRecoveryMI_giveSPRAssemblyPoints(IntArray &pap);
     virtual void SPRNodalRecoveryMI_giveDofMansDeterminedByPatch(IntArray &answer, int pap);
@@ -161,7 +161,7 @@ public:
     int giveInternalStateAtNode(FloatArray &answer, InternalStateType type, InternalStateMode mode,
                                 int node, TimeStep *atTime);
     // Graphics output
-    //void drawYourself (oofegGraphicContext&);
+    //virtual void drawYourself(oofegGraphicContext&);
     virtual void drawRawGeometry(oofegGraphicContext &);
     virtual void drawScalar(oofegGraphicContext &context);
     //virtual void drawDeformedGeometry(oofegGraphicContext&, UnknownType) {}

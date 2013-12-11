@@ -179,7 +179,7 @@ protected:
 
     /// Element activity time function. If defined, nonzero value indicates active receiver, zero value inactive element.
     int activityLtf;
-    
+
     /**
      * In parallel mode, globalNumber contains globally unique DoFManager number.
      * The component number, inherited from FEMComponent class contains
@@ -218,13 +218,13 @@ public:
      * Results are cached at receiver for default scheme in locationArray attribute.
      */
     void giveLocationArray(IntArray & locationArray, EquationID, const UnknownNumberingScheme & s, IntArray * dofIds = NULL) const;
-    void giveLocationArray(IntArray & locationArray, const IntArray &dofIDMask, const UnknownNumberingScheme & s, IntArray * dofIds = NULL) const;
+    void giveLocationArray(IntArray &locationArray, const IntArray &dofIDMask, const UnknownNumberingScheme &s, IntArray *dofIds = NULL) const;
     /**
      * Returns the location array for the boundary of the element.
      * Only takes into account nodes in the bNodes vector.
      */
-    void giveBoundaryLocationArray(IntArray &locationArray, const IntArray &bNodes, EquationID eid, const UnknownNumberingScheme &s, IntArray * dofIds = NULL);
-    void giveBoundaryLocationArray(IntArray &locationArray, const IntArray &bNodes, const IntArray &dofIDMask, const UnknownNumberingScheme &s, IntArray * dofIds = NULL);
+    void giveBoundaryLocationArray(IntArray &locationArray, const IntArray &bNodes, EquationID eid, const UnknownNumberingScheme &s, IntArray *dofIds = NULL);
+    void giveBoundaryLocationArray(IntArray &locationArray, const IntArray &bNodes, const IntArray &dofIDMask, const UnknownNumberingScheme &s, IntArray *dofIds = NULL);
     /**
      * @return Number of DOFs in element.
      */
@@ -309,7 +309,7 @@ public:
      * @note Elements which do not have an contribution should resize the vector to be empty.
      * @param answer Requested contribution of load.
      * @param load Load to compute contribution from.
-     * @param boundary Edge number.
+     * @param edge Edge number.
      * @param type Type of the contribution.
      * @param mode Determines mode of answer.
      * @param tStep Time step when answer is computed.
@@ -372,15 +372,13 @@ public:
     /**
      * Computes or simply returns total number of element's local DOFs.
      * Must be defined by particular element.
-     * @param eid Id of equation that DOFs belong to.
-     * @return Number of DOFs belonging to ut.
+     * @return Number of local DOFs of element.
      */
     virtual int computeNumberOfDofs() { return 0; }
     /**
      * Computes the total number of element's global dofs.
      * The transitions from global c.s. to nodal c.s. should NOT be included.
-     * @param eid Id of equation that DOFs belong to.
-     * @return Total number of DOFs belonging to ut.
+     * @return Total number of global DOFs of element.
      */
     virtual int computeNumberOfGlobalDofs();
     /**
@@ -671,7 +669,7 @@ public:
      * @return True, if receiver is activated for given solution step, otherwise false.
      */
     virtual bool isActivated(TimeStep *tStep);
-    
+
     // time step initialization (required for some non-linear solvers)
     /**
      * Initializes receivers state to new time step. It can be used also if
@@ -739,7 +737,7 @@ public:
     /**@name Methods required by some specialized models */
     //@{
     /**
-     * Returns the integration point corresponding value in reduced form.
+     * Returns the integration point corresponding value in full form.
      * @param answer Contain corresponding integration point value, zero sized if not available.
      * @param gp Integration point to check.
      * @param type Determines the type of internal variable.
@@ -778,7 +776,7 @@ public:
      * Returns the size (length, area or volume depending on element type) of the parent
      * element. E.g. 4.0 for a quadrilateral.
      */
-    virtual double giveParentElSize() const {return 0.0;}
+    virtual double giveParentElSize() const { return 0.0; }
     /**
      * Updates internal element state (in all integration points of receiver)
      * before nonlocal averaging takes place. Used by so nonlocal materials,
@@ -833,6 +831,13 @@ public:
      */
     virtual int adaptiveMap(Domain *oldd, TimeStep *tStep);
     /**
+     * Maps the internal state variables stored in all IPs from the old domain to the new domain.
+     * @param iOldDom Old domain.
+     * @param iTStep Time step.
+     * @return Nonzero if o.k, otherwise zero.
+     */
+    virtual int mapStateVariables(const Domain &iOldDom, const TimeStep &iTStep);
+    /**
      * Updates the internal state variables stored in all IPs according to
      * already mapped state.
      * @param tStep Time step.
@@ -868,7 +873,7 @@ public:
     //
     // Graphics output
     //
-    void         drawYourself(oofegGraphicContext &context);
+    virtual void drawYourself(oofegGraphicContext &context);
     virtual void drawAnnotation(oofegGraphicContext &mode);
     virtual void drawRawGeometry(oofegGraphicContext &mode) { }
     virtual void drawDeformedGeometry(oofegGraphicContext &mode, UnknownType) { }
@@ -878,7 +883,6 @@ public:
     // to determine the max and min local values, when recovery does not takes place
     virtual void giveLocalIntVarMaxMin(oofegGraphicContext &context, TimeStep *, double &emin, double &emax) { emin = emax = 0.0; }
 
-    //virtual void  drawInternalState (oofegGraphicContext& context) {}
     /**
      * Returns internal state variable (like stress,strain) at node of element in Reduced form,
      * the way how is obtained is dependent on InternalValueType.

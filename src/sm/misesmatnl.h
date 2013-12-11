@@ -53,7 +53,6 @@
 //@}
 
 namespace oofem {
-
 /**
  * Mises Nonlocal material status.
  * @author Milan
@@ -79,7 +78,6 @@ public:
 
     // DEFINITION
     virtual const char *giveClassName() const { return "MisesMatNlStatus"; }
-    virtual classType giveClassID() const { return MisesMatClass; }
 
     virtual void initTempStatus();
 
@@ -108,7 +106,6 @@ public:
     virtual ~MisesMatNl();
 
     virtual const char *giveClassName() const { return "MisesMatNl"; }
-    virtual classType giveClassID() const { return MisesMatClass; }
     virtual const char *giveInputRecordName() const { return _IFT_MisesMatNl_Name; }
 
     virtual IRResultType initializeFrom(InputRecord *ir);
@@ -141,7 +138,7 @@ public:
     virtual void NonlocalMaterialStiffnessInterface_addIPContribution(SparseMtrx &dest, const UnknownNumberingScheme &s,
                                                                       GaussPoint *gp, TimeStep *atTime);
 
-    virtual std::list< localIntegrationRecord > *NonlocalMaterialStiffnessInterface_giveIntegrationDomainList(GaussPoint *gp);
+    virtual std :: list< localIntegrationRecord > *NonlocalMaterialStiffnessInterface_giveIntegrationDomainList(GaussPoint *gp);
 
     /**
      * Computes the "local" part of nonlocal stiffness contribution assembled for given integration point.

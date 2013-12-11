@@ -66,7 +66,7 @@ public:
 
     virtual int computeGlobalCoordinates(FloatArray &answer, const FloatArray &lcoords);
     virtual bool computeLocalCoordinates(FloatArray &answer, const FloatArray &gcoords);
-    
+
     virtual int computeNumberOfDofs();
     virtual void giveDofManDofIDMask(int inode, EquationID ut, IntArray &answer) const;
 
@@ -77,15 +77,14 @@ public:
     virtual Interface *giveInterface(InterfaceType it) { return NULL; }
 
 #ifdef __OOFEG
-    void drawRawGeometry(oofegGraphicContext &);
-    void drawDeformedGeometry(oofegGraphicContext &, UnknownType);
-    void drawScalar(oofegGraphicContext &context);
+    virtual void drawRawGeometry(oofegGraphicContext &);
+    virtual void drawDeformedGeometry(oofegGraphicContext &, UnknownType);
+    virtual void drawScalar(oofegGraphicContext &context);
 #endif
 
     // definition & identification
     virtual const char *giveInputRecordName() const { return _IFT_InterfaceElem1d_Name; }
     virtual const char *giveClassName() const { return "InterfaceElem1d"; }
-    virtual classType giveClassID() const { return InterfaceElem1dClass; }
     virtual IRResultType initializeFrom(InputRecord *ir);
     virtual Element_Geometry_Type giveGeometryType() const { return EGT_point; }
     virtual integrationDomain giveIntegrationDomain() const { return _Point; }
@@ -93,7 +92,7 @@ public:
 
 protected:
     virtual void computeBmatrixAt(GaussPoint *gp, FloatMatrix &answer, int = 1, int = ALL_STRAINS);
-    virtual void computeNmatrixAt(GaussPoint *gp, FloatMatrix &answer) { }
+    virtual void computeNmatrixAt(const FloatArray &iLocCoord, FloatMatrix &answer) { }
     virtual void computeGaussPoints();
     void evaluateLocalCoordinateSystem(FloatMatrix &);
 

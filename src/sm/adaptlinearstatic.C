@@ -40,19 +40,17 @@
 #include "contextioerr.h"
 
 namespace oofem {
-
-REGISTER_EngngModel( AdaptiveLinearStatic );
+REGISTER_EngngModel(AdaptiveLinearStatic);
 
 void
-AdaptiveLinearStatic::updateYourself(TimeStep *stepN)
+AdaptiveLinearStatic :: updateYourself(TimeStep *stepN)
 {
-
-   LinearStatic :: updateYourself(stepN);
-   // perform error evaluation
-   // evaluate error of the reached solution
-   this->defaultErrEstimator->estimateError( temporaryEM, stepN );
-   // this->defaultErrEstimator->estimateError (equilibratedEM, this->giveCurrentStep());
-   RemeshingStrategy strategy = this->defaultErrEstimator->giveRemeshingCrit()->giveRemeshingStrategy( stepN );
+    LinearStatic :: updateYourself(stepN);
+    // perform error evaluation
+    // evaluate error of the reached solution
+    this->defaultErrEstimator->estimateError(temporaryEM, stepN);
+    // this->defaultErrEstimator->estimateError (equilibratedEM, this->giveCurrentStep());
+    RemeshingStrategy strategy = this->defaultErrEstimator->giveRemeshingCrit()->giveRemeshingStrategy(stepN);
 
     if ( strategy == NoRemeshing_RS ) {
         return;
@@ -62,7 +60,7 @@ AdaptiveLinearStatic::updateYourself(TimeStep *stepN)
         Domain *newDomain;
 
         MesherInterface :: returnCode result =
-        mesher->createMesh(stepN, 1, this->giveDomain(1)->giveSerialNumber() + 1, & newDomain);
+            mesher->createMesh(stepN, 1, this->giveDomain(1)->giveSerialNumber() + 1, & newDomain);
 
         if ( result == MesherInterface :: MI_OK ) {} else if ( result == MesherInterface :: MI_NEEDS_EXTERNAL_ACTION ) {
             // terminate step
@@ -82,7 +80,7 @@ AdaptiveLinearStatic :: terminate(TimeStep *tStep)
     //
     // print estimated error
     //
-    fprintf(outputStream, "\nRelative error estimate: %5.2f%%\n", this->defaultErrEstimator->giveValue(relativeErrorEstimateEEV, tStep)*100.0);
+    fprintf(outputStream, "\nRelative error estimate: %5.2f%%\n", this->defaultErrEstimator->giveValue(relativeErrorEstimateEEV, tStep) * 100.0);
 }
 
 

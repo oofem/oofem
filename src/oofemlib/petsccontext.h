@@ -67,7 +67,7 @@ protected:
     /// True if vectors are assumed to be natural distribution.
     bool naturalVectors;
 
-#ifdef __PARALLEL_MODE
+ #ifdef __PARALLEL_MODE
     Natural2GlobalOrdering n2g;
     Natural2LocalOrdering n2l;
  #endif
@@ -76,7 +76,6 @@ public:
     /**
      * Creates a context belonging to a system of equations in a given engineering model.
      * @param e Engineering model to work with.
-     * @param eid Equation ID to work with.
      * @param naturalVectors Should be true if shared dofs only contain the local contributions.
      * Some engineering models manually scatter local vectors to their global value, in which case this would be false.
      */

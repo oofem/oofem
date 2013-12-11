@@ -492,8 +492,8 @@ public:
      * @param tStep Time step (most models are able to respond only when atTime is current time step).
      */
     virtual void give2dBeamLayerStiffMtrx(FloatMatrix &answer,
-                                        MatResponseMode mmode, GaussPoint *gp,
-                                        TimeStep *tStep);
+                                          MatResponseMode mmode, GaussPoint *gp,
+                                          TimeStep *tStep);
     /**
      * Method for computing 2d plate layer stiffness matrix of receiver.
      * Default implementation computes 3d stiffness matrix using give3dMaterialStiffnessMatrix and
@@ -507,8 +507,8 @@ public:
      * @param tStep Time step (most models are able to respond only when atTime is current time step).
      */
     virtual void givePlateLayerStiffMtrx(FloatMatrix &answer,
-                                           MatResponseMode mmode, GaussPoint *gp,
-                                           TimeStep *tStep);
+                                         MatResponseMode mmode, GaussPoint *gp,
+                                         TimeStep *tStep);
     /**
      * Method for computing 1d fiber stiffness matrix of receiver.
      * Default implementation computes 3d stiffness matrix using give3dMaterialStiffnessMatrix and

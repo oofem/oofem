@@ -38,7 +38,6 @@
 #include "rheoChM.h"
 
 namespace oofem {
-
 /**
  * This class implements associated Material Status to MaxwellChainMaterial.
  */
@@ -58,7 +57,6 @@ public:
 
     // definition
     virtual const char *giveClassName() const { return "MaxwellChainMaterialStatus"; }
-    virtual classType giveClassID() const { return MaxwellChainMaterialStatusClass; }
 };
 
 
@@ -80,7 +78,6 @@ public:
     // identification and auxiliary functions
     virtual int hasNonLinearBehaviour() { return 0; }
     virtual const char *giveClassName() const { return "MaxwellChainMaterial"; }
-    virtual classType giveClassID() const { return MaxwellChainMaterialClass; }
     virtual IRResultType initializeFrom(InputRecord *ir);
 
     virtual void giveShrinkageStrainVector(FloatArray &answer,
@@ -108,7 +105,6 @@ protected:
      * @f]
      *
      * @param[out] answer Array with coefficients
-     * @param gp Integration point.
      * @param atTime Age of material when load is applied ???
      */
     virtual void computeCharCoefficients(FloatArray &answer, double atTime);

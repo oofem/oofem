@@ -45,7 +45,6 @@
 #define _IFT_Tr21Stokes_Name "tr21stokes"
 
 namespace oofem {
-
 class FEI2dTrLin;
 class FEI2dTrQuad;
 
@@ -88,12 +87,10 @@ public:
     virtual ~Tr21Stokes();
 
     // ** To be removed
-    void giveGradP(FloatMatrix &answer, TimeStep * tStep );
-    void giveIntegratedVelocity(FloatMatrix &answer, TimeStep *tStep );
+    void giveGradP(FloatMatrix &answer, TimeStep *tStep);
+    void giveIntegratedVelocity(FloatMatrix &answer, TimeStep *tStep);
     void giveElementFMatrix(FloatMatrix &answer);
     // **
-
-    virtual IRResultType initializeFrom(InputRecord *ir);
 
     virtual double computeVolumeAround(GaussPoint *gp);
 
@@ -111,7 +108,6 @@ public:
 
     virtual const char *giveClassName() const { return "Tr21Stokes"; }
     virtual const char *giveInputRecordName() const { return _IFT_Tr21Stokes_Name; }
-    virtual classType giveClassID() const { return Tr21StokesElementClass; }
     virtual MaterialMode giveMaterialMode() { return _2dFlow; }
 
     virtual int computeNumberOfDofs();
@@ -139,9 +135,9 @@ public:
 
     // Element interpolation interface:
     virtual int EIPrimaryUnknownMI_computePrimaryUnknownVectorAt(ValueModeType u,
-            TimeStep *stepN, const FloatArray &coords, FloatArray &answer);
+                                                                 TimeStep *stepN, const FloatArray &coords, FloatArray &answer);
     virtual void EIPrimaryUnknownMI_computePrimaryUnknownVectorAtLocal(ValueModeType u,
-            TimeStep *stepN, const FloatArray &coords, FloatArray &answer);
+                                                                       TimeStep *stepN, const FloatArray &coords, FloatArray &answer);
     virtual void EIPrimaryUnknownMI_givePrimaryUnknownVectorDofID(IntArray &answer);
 
     // Nodal averaging interface:

@@ -68,7 +68,6 @@ public:
     virtual IRResultType initializeFrom(InputRecord *ir);
     virtual const char *giveInputRecordName() const { return _IFT_J2Mat_Name; }
     virtual const char *giveClassName() const { return "J2Mat"; }
-    virtual classType giveClassID() const { return J2MatClass; }
 
     virtual int giveSizeOfFullHardeningVarsVector();
     virtual int giveSizeOfReducedHardeningVarsVector(GaussPoint *gp);

@@ -64,11 +64,13 @@ void
 ExportModuleManager :: doOutput(TimeStep *tStep, bool substepFlag)
 {
     for ( int i = 1; i <= numberOfModules; i++ ) {
-      if (substepFlag) {
-	if (this->giveModule(i)->testSubStepOutput()) this->giveModule(i)->doOutput(tStep);
-      } else {
-        this->giveModule(i)->doOutput(tStep);
-      }
+        if ( substepFlag ) {
+            if ( this->giveModule(i)->testSubStepOutput() ) {
+                this->giveModule(i)->doOutput(tStep);
+            }
+        } else {
+            this->giveModule(i)->doOutput(tStep);
+        }
     }
 }
 

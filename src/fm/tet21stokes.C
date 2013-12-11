@@ -47,12 +47,11 @@
 #include "fluiddynamicmaterial.h"
 #include "fei3dtetlin.h"
 #include "fei3dtetquad.h"
-#include "crosssection.h"
+#include "fluidcrosssection.h"
 #include "classfactory.h"
 
 namespace oofem {
-
-REGISTER_Element( Tet21Stokes );
+REGISTER_Element(Tet21Stokes);
 
 // Set up interpolation coordinates
 FEI3dTetLin Tet21Stokes :: interpolation_lin;
@@ -74,19 +73,13 @@ Tet21Stokes :: Tet21Stokes(int n, Domain *aDomain) : FMElement(n, aDomain)
 Tet21Stokes :: ~Tet21Stokes()
 {}
 
-IRResultType Tet21Stokes :: initializeFrom(InputRecord *ir)
-{
-    this->FMElement :: initializeFrom(ir);
-    return IRRT_OK;
-}
-
 void Tet21Stokes :: computeGaussPoints()
 {
     if ( !integrationRulesArray ) {
         numberOfIntegrationRules = 1;
         integrationRulesArray = new IntegrationRule * [ 2 ];
         integrationRulesArray [ 0 ] = new GaussIntegrationRule(1, this, 1, 3);
-        this->giveCrossSection()->setupIntegrationPoints( *integrationRulesArray[0], this->numberOfGaussPoints, this );
+        this->giveCrossSection()->setupIntegrationPoints(* integrationRulesArray [ 0 ], this->numberOfGaussPoints, this);
     }
 }
 
@@ -123,7 +116,7 @@ void Tet21Stokes :: giveDofManDofIDMask(int inode, EquationID ut, IntArray &answ
 }
 
 void Tet21Stokes :: giveCharacteristicVector(FloatArray &answer, CharType mtrx, ValueModeType mode,
-                                            TimeStep *tStep)
+                                             TimeStep *tStep)
 {
     // Compute characteristic vector for this element. I.e the load vector(s)
     if ( mtrx == ExternalForcesVector ) {
@@ -136,7 +129,7 @@ void Tet21Stokes :: giveCharacteristicVector(FloatArray &answer, CharType mtrx, 
 }
 
 void Tet21Stokes :: giveCharacteristicMatrix(FloatMatrix &answer,
-                                            CharType mtrx, TimeStep *tStep)
+                                             CharType mtrx, TimeStep *tStep)
 {
     // Compute characteristic matrix for this element. The only option is the stiffness matrix...
     if ( mtrx == StiffnessMatrix ) {
@@ -149,7 +142,7 @@ void Tet21Stokes :: giveCharacteristicMatrix(FloatMatrix &answer,
 void Tet21Stokes :: computeInternalForcesVector(FloatArray &answer, TimeStep *tStep)
 {
     IntegrationRule *iRule = integrationRulesArray [ 0 ];
-    FluidDynamicMaterial *mat = static_cast<FluidDynamicMaterial * >( this->giveMaterial() );
+    FluidDynamicMaterial *mat = static_cast< FluidCrossSection * >( this->giveCrossSection() )->giveFluidMaterial();
     FloatArray a_pressure, a_velocity, devStress, epsp, Nh, dN_V(30);
     FloatMatrix dN, B(6, 30);
     double r_vol, pressure;
@@ -162,22 +155,23 @@ void Tet21Stokes :: computeInternalForcesVector(FloatArray &answer, TimeStep *tS
         GaussPoint *gp = iRule->getIntegrationPoint(i);
         FloatArray *lcoords = gp->giveCoordinates();
 
-        double detJ = fabs( this->interpolation_quad.evaldNdx(dN, * lcoords, FEIElementGeometryWrapper(this)) );
-        this->interpolation_lin.evalN(Nh, * lcoords, FEIElementGeometryWrapper(this));
+        double detJ = fabs( this->interpolation_quad.evaldNdx( dN, * lcoords, FEIElementGeometryWrapper(this) ) );
+        this->interpolation_lin.evalN( Nh, * lcoords, FEIElementGeometryWrapper(this) );
         double dV = detJ * gp->giveWeight();
 
-        for ( int j = 0, k = 0; j < dN.giveNumberOfColumns(); j++, k+=3 ) {
+        for ( int j = 0, k = 0; j < dN.giveNumberOfColumns(); j++, k += 3 ) {
             dN_V(k + 0) = B(0, k + 0) = B(3, k + 1) = B(4, k + 2) = dN(0, j);
             dN_V(k + 1) = B(1, k + 1) = B(3, k + 0) = B(5, k + 2) = dN(1, j);
             dN_V(k + 2) = B(2, k + 2) = B(4, k + 0) = B(5, k + 1) = dN(2, j);
         }
+
         epsp.beProductOf(B, a_velocity);
         pressure = Nh.dotProduct(a_pressure);
         mat->computeDeviatoricStressVector(devStress, r_vol, gp, epsp, pressure, tStep);
 
         momentum.plusProduct(B, devStress, dV);
-        momentum.add(-pressure*dV, dN_V);
-        conservation.add(r_vol*dV, Nh);
+        momentum.add(-pressure * dV, dN_V);
+        conservation.add(r_vol * dV, Nh);
     }
 
     answer.resize(34);
@@ -203,7 +197,7 @@ void Tet21Stokes :: computeExternalForcesVector(FloatArray &answer, TimeStep *tS
         ltype = load->giveBCGeoType();
 
         if ( ltype == SurfaceLoadBGT ) {
-            this->computeBoundaryLoadVector(vec, static_cast<BoundaryLoad*>(load), load_id, ExternalForcesVector, VM_Total, tStep);
+            this->computeBoundaryLoadVector(vec, static_cast< BoundaryLoad * >( load ), load_id, ExternalForcesVector, VM_Total, tStep);
             answer.add(vec);
         }
     }
@@ -226,6 +220,7 @@ void Tet21Stokes :: computeLoadVector(FloatArray &answer, Load *load, CharType t
         return;
     }
 
+    FluidDynamicMaterial *mat = static_cast< FluidCrossSection * >( this->giveCrossSection() )->giveFluidMaterial();
     IntegrationRule *iRule = this->integrationRulesArray [ 0 ];
     FloatArray N, gVector, temparray(30);
 
@@ -236,11 +231,11 @@ void Tet21Stokes :: computeLoadVector(FloatArray &answer, Load *load, CharType t
             GaussPoint *gp = iRule->getIntegrationPoint(k);
             FloatArray *lcoords = gp->giveCoordinates();
 
-            double rho = this->giveMaterial()->give('d', gp);
-            double detJ = fabs( this->interpolation_quad.giveTransformationJacobian(* lcoords, FEIElementGeometryWrapper(this)) );
+            double rho = mat->give('d', gp);
+            double detJ = fabs( this->interpolation_quad.giveTransformationJacobian( * lcoords, FEIElementGeometryWrapper(this) ) );
             double dA = detJ * gp->giveWeight();
 
-            this->interpolation_quad.evalN(N, * lcoords, FEIElementGeometryWrapper(this));
+            this->interpolation_quad.evalN( N, * lcoords, FEIElementGeometryWrapper(this) );
             for ( int j = 0; j < N.giveSize(); j++ ) {
                 temparray(3 * j + 0) += N(j) * rho * gVector(0) * dA;
                 temparray(3 * j + 1) += N(j) * rho * gVector(1) * dA;
@@ -251,8 +246,7 @@ void Tet21Stokes :: computeLoadVector(FloatArray &answer, Load *load, CharType t
 
     answer.resize(34);
     answer.zero();
-    answer.assemble( temparray, this->momentum_ordering );
-
+    answer.assemble(temparray, this->momentum_ordering);
 }
 
 void Tet21Stokes :: computeBoundaryLoadVector(FloatArray &answer, BoundaryLoad *load, int iSurf, CharType type, ValueModeType mode, TimeStep *tStep)
@@ -281,14 +275,14 @@ void Tet21Stokes :: computeBoundaryLoadVector(FloatArray &answer, BoundaryLoad *
             gp = iRule.getIntegrationPoint(i);
             FloatArray *lcoords = gp->giveCoordinates();
 
-            this->interpolation_quad.surfaceEvalN(N, iSurf, * lcoords, FEIElementGeometryWrapper(this));
-            double dA = gp->giveWeight() * this->interpolation_quad.surfaceGiveTransformationJacobian(iSurf, * lcoords, FEIElementGeometryWrapper(this));
+            this->interpolation_quad.surfaceEvalN( N, iSurf, * lcoords, FEIElementGeometryWrapper(this) );
+            double dA = gp->giveWeight() * this->interpolation_quad.surfaceGiveTransformationJacobian( iSurf, * lcoords, FEIElementGeometryWrapper(this) );
 
             if ( boundaryLoad->giveFormulationType() == Load :: FT_Entity ) { // load in xi-eta system
                 boundaryLoad->computeValueAt(t, tStep, * lcoords, VM_Total);
             } else { // Edge load in x-y system
                 FloatArray gcoords;
-                this->interpolation_quad.surfaceLocal2global(gcoords, iSurf, * lcoords, FEIElementGeometryWrapper(this));
+                this->interpolation_quad.surfaceLocal2global( gcoords, iSurf, * lcoords, FEIElementGeometryWrapper(this) );
                 boundaryLoad->computeValueAt(t, tStep, gcoords, VM_Total);
             }
 
@@ -308,7 +302,7 @@ void Tet21Stokes :: computeBoundaryLoadVector(FloatArray &answer, BoundaryLoad *
 
 void Tet21Stokes :: computeStiffnessMatrix(FloatMatrix &answer, TimeStep *tStep)
 {
-    FluidDynamicMaterial *mat = static_cast< FluidDynamicMaterial * >( this->giveMaterial() );
+    FluidDynamicMaterial *mat = static_cast< FluidCrossSection * >( this->giveCrossSection() )->giveFluidMaterial();
     IntegrationRule *iRule = this->integrationRulesArray [ 0 ];
     FloatMatrix B(6, 30), EdB, K, G, Dp, DvT, C, Ed, dN;
     FloatArray dN_V(30), Nlin, Ep, Cd, tmpA, tmpB;
@@ -321,13 +315,13 @@ void Tet21Stokes :: computeStiffnessMatrix(FloatMatrix &answer, TimeStep *tStep)
         GaussPoint *gp = iRule->getIntegrationPoint(i);
         FloatArray *lcoords = gp->giveCoordinates();
 
-        double detJ = fabs( this->interpolation_quad.evaldNdx(dN, * lcoords, FEIElementGeometryWrapper(this)) );
+        double detJ = fabs( this->interpolation_quad.evaldNdx( dN, * lcoords, FEIElementGeometryWrapper(this) ) );
         double dV = detJ * gp->giveWeight();
-        this->interpolation_lin.evalN(Nlin, * lcoords, FEIElementGeometryWrapper(this));
+        this->interpolation_lin.evalN( Nlin, * lcoords, FEIElementGeometryWrapper(this) );
 
-//        dN.printYourself();
+        //        dN.printYourself();
 
-        for ( int j = 0, k = 0; j < dN.giveNumberOfColumns(); j++, k+=3 ) {
+        for ( int j = 0, k = 0; j < dN.giveNumberOfColumns(); j++, k += 3 ) {
             ///@todo This column-row order of dN is inconsistent with every other interpolator class:
             dN_V(k + 0) = B(0, k + 0) = B(3, k + 1) = B(4, k + 2) = dN(0, j);
             dN_V(k + 1) = B(1, k + 1) = B(3, k + 0) = B(5, k + 2) = dN(1, j);
@@ -340,12 +334,12 @@ void Tet21Stokes :: computeStiffnessMatrix(FloatMatrix &answer, TimeStep *tStep)
         mat->giveVolumetricDeviatoricStiffness(Cd, TangentStiffness, gp, tStep); // deps_vol/deps_dev
         mat->giveVolumetricPressureStiffness(Cp, TangentStiffness, gp, tStep); // deps_vol/dp
 
-//        Ed.printYourself();
-//        B.printYourself();
-        EdB.beProductOf(Ed,B);
+        //        Ed.printYourself();
+        //        B.printYourself();
+        EdB.beProductOf(Ed, B);
         K.plusProductSymmUpper(B, EdB, dV);
         G.plusDyadUnsym(dN_V, Nlin, -dV);
-        C.plusDyadSymmUpper(Nlin, Cp*dV);
+        C.plusDyadSymmUpper(Nlin, Cp * dV);
 
         tmpA.beTProductOf(B, Ep);
         Dp.plusDyadUnsym(tmpA, Nlin, dV);
@@ -353,6 +347,7 @@ void Tet21Stokes :: computeStiffnessMatrix(FloatMatrix &answer, TimeStep *tStep)
         tmpB.beTProductOf(B, Cd);
         DvT.plusDyadUnsym(Nlin, tmpB, dV);
     }
+
     K.symmetrized();
     C.symmetrized();
     FloatMatrix GTDvT, GDp;
@@ -367,20 +362,24 @@ void Tet21Stokes :: computeStiffnessMatrix(FloatMatrix &answer, TimeStep *tStep)
     answer.assemble(GDp, this->momentum_ordering, this->conservation_ordering);
     answer.assemble(GTDvT, this->conservation_ordering, this->momentum_ordering);
     answer.assemble(C, this->conservation_ordering);
-//    K.printYourself();
-//    GDp.printYourself();
-//    GTDvT.printYourself();
-//    C.printYourself();
+    //    K.printYourself();
+    //    GDp.printYourself();
+    //    GTDvT.printYourself();
+    //    C.printYourself();
 }
 
 FEInterpolation *Tet21Stokes :: giveInterpolation() const
 {
-    return &interpolation_quad;
+    return & interpolation_quad;
 }
 
 FEInterpolation *Tet21Stokes :: giveInterpolation(DofIDItem id) const
 {
-    if (id == P_f) return &interpolation_lin; else return &interpolation_quad;
+    if ( id == P_f ) {
+        return & interpolation_lin;
+    } else {
+        return & interpolation_quad;
+    }
 }
 
 void Tet21Stokes :: updateYourself(TimeStep *tStep)
@@ -393,14 +392,17 @@ void Tet21Stokes :: updateYourself(TimeStep *tStep)
 Interface *Tet21Stokes :: giveInterface(InterfaceType it)
 {
     switch ( it ) {
-        case NodalAveragingRecoveryModelInterfaceType:
-            return static_cast< NodalAveragingRecoveryModelInterface * >(this);
-        case SpatialLocalizerInterfaceType:
-            return static_cast< SpatialLocalizerInterface * >(this);
-        case EIPrimaryUnknownMapperInterfaceType:
-            return static_cast< EIPrimaryUnknownMapperInterface * >(this);
-        default:
-            return FMElement :: giveInterface(it);
+    case NodalAveragingRecoveryModelInterfaceType:
+        return static_cast< NodalAveragingRecoveryModelInterface * >( this );
+
+    case SpatialLocalizerInterfaceType:
+        return static_cast< SpatialLocalizerInterface * >( this );
+
+    case EIPrimaryUnknownMapperInterfaceType:
+        return static_cast< EIPrimaryUnknownMapperInterface * >( this );
+
+    default:
+        return FMElement :: giveInterface(it);
     }
 }
 
@@ -411,20 +413,21 @@ int Tet21Stokes :: SpatialLocalizerI_containsPoint(const FloatArray &coords)
 }
 
 void Tet21Stokes :: EIPrimaryUnknownMI_computePrimaryUnknownVectorAtLocal(ValueModeType mode,
-        TimeStep *tStep, const FloatArray &lcoords, FloatArray &answer)
+                                                                          TimeStep *tStep, const FloatArray &lcoords, FloatArray &answer)
 {
     FloatArray n, n_lin;
-    this->interpolation_quad.evalN(n, lcoords, FEIElementGeometryWrapper(this));
-    this->interpolation_lin.evalN(n_lin, lcoords, FEIElementGeometryWrapper(this));
+    this->interpolation_quad.evalN( n, lcoords, FEIElementGeometryWrapper(this) );
+    this->interpolation_lin.evalN( n_lin, lcoords, FEIElementGeometryWrapper(this) );
     answer.resize(4);
     answer.zero();
     for ( int i = 1; i <= n.giveSize(); i++ ) {
-        answer(0) += n.at(i)*this->giveNode(i)->giveDofWithID(V_u)->giveUnknown(mode, tStep);
-        answer(1) += n.at(i)*this->giveNode(i)->giveDofWithID(V_v)->giveUnknown(mode, tStep);
-        answer(2) += n.at(i)*this->giveNode(i)->giveDofWithID(V_w)->giveUnknown(mode, tStep);
+        answer(0) += n.at(i) * this->giveNode(i)->giveDofWithID(V_u)->giveUnknown(mode, tStep);
+        answer(1) += n.at(i) * this->giveNode(i)->giveDofWithID(V_v)->giveUnknown(mode, tStep);
+        answer(2) += n.at(i) * this->giveNode(i)->giveDofWithID(V_w)->giveUnknown(mode, tStep);
     }
+
     for ( int i = 1; i <= n_lin.giveSize(); i++ ) {
-        answer(3) += n_lin.at(i)*this->giveNode(i)->giveDofWithID(P_f)->giveUnknown(mode, tStep);
+        answer(3) += n_lin.at(i) * this->giveNode(i)->giveDofWithID(P_f)->giveUnknown(mode, tStep);
     }
 }
 
@@ -437,6 +440,7 @@ int Tet21Stokes :: EIPrimaryUnknownMI_computePrimaryUnknownVectorAt(ValueModeTyp
     if ( !ok ) {
         return false;
     }
+
     return true;
 }
 
@@ -469,71 +473,68 @@ void Tet21Stokes :: NodalAveragingRecoveryMI_computeNodalValue(FloatArray &answe
             IntArray eNodes;
             this->interpolation_quad.computeLocalEdgeMapping(eNodes, node - 4);
             answer.at(1) = 0.5 * (
-                this->giveNode(eNodes.at(1))->giveDofWithID(P_f)->giveUnknown(VM_Total, tStep) +
-                this->giveNode(eNodes.at(2))->giveDofWithID(P_f)->giveUnknown(VM_Total, tStep) );
+                this->giveNode( eNodes.at(1) )->giveDofWithID(P_f)->giveUnknown(VM_Total, tStep) +
+                this->giveNode( eNodes.at(2) )->giveDofWithID(P_f)->giveUnknown(VM_Total, tStep) );
         }
     } else {
         answer.resize(0);
     }
 }
 
-void Tet21Stokes :: giveIntegratedVelocity(FloatMatrix &answer, TimeStep *tStep )
+void Tet21Stokes :: giveIntegratedVelocity(FloatMatrix &answer, TimeStep *tStep)
 {
     /*
-    * Integrate velocity over element
-    */
+     * Integrate velocity over element
+     */
 
     IntegrationRule *iRule = integrationRulesArray [ 0 ];
     FloatMatrix v, v_gamma, ThisAnswer, Nmatrix;
     FloatArray *lcoords, N;
-    int i, j, k=0;
+    int i, j, k = 0;
     Dof *d;
     GaussPoint *gp;
 
-    v.resize(30,1);
+    v.resize(30, 1);
     v.zero();
 
     FloatArray test;
 
-    for (i=1; i<=this->giveNumberOfDofManagers(); i++) {
-        for (j=1; j<=this->giveDofManager(i)->giveNumberOfDofs(); j++) {
+    for ( i = 1; i <= this->giveNumberOfDofManagers(); i++ ) {
+        for ( j = 1; j <= this->giveDofManager(i)->giveNumberOfDofs(); j++ ) {
             d = this->giveDofManager(i)->giveDof(j);
-            if ((d->giveDofID()==V_u) || (d->giveDofID()==V_v) || (d->giveDofID()==V_w) ) {
-                k=k+1;
-                v.at(k,1)=d->giveUnknown(VM_Total, tStep);
+            if ( ( d->giveDofID() == V_u ) || ( d->giveDofID() == V_v ) || ( d->giveDofID() == V_w ) ) {
+                k = k + 1;
+                v.at(k, 1) = d->giveUnknown(VM_Total, tStep);
             }
         }
     }
 
-    answer.resize(3,1);
+    answer.resize(3, 1);
     answer.zero();
 
-    Nmatrix.resize(3,30);
+    Nmatrix.resize(3, 30);
     Nmatrix.zero();
 
-    for (i=0; i<iRule->giveNumberOfIntegrationPoints(); i++) {
-
+    for ( i = 0; i < iRule->giveNumberOfIntegrationPoints(); i++ ) {
         gp = iRule->getIntegrationPoint(i);
 
         lcoords = gp->giveCoordinates();
 
-        this->interpolation_quad.evalN(N, *lcoords, FEIElementGeometryWrapper(this));
-        double detJ = this->interpolation_quad.giveTransformationJacobian(*lcoords, FEIElementGeometryWrapper(this));
-        double dA = detJ*gp->giveWeight();
+        this->interpolation_quad.evalN( N, * lcoords, FEIElementGeometryWrapper(this) );
+        double detJ = this->interpolation_quad.giveTransformationJacobian( * lcoords, FEIElementGeometryWrapper(this) );
+        double dA = detJ * gp->giveWeight();
 
-        for (j=0; j<N.giveSize();j++) {
-            Nmatrix.at(1,j*3+1)+=N.at(j+1)*dA;
-            Nmatrix.at(2,j*3+2)+=N.at(j+1)*dA;
-            Nmatrix.at(3,j*3+3)+=N.at(j+1)*dA;
+        for ( j = 0; j < N.giveSize(); j++ ) {
+            Nmatrix.at(1, j * 3 + 1) += N.at(j + 1) * dA;
+            Nmatrix.at(2, j * 3 + 2) += N.at(j + 1) * dA;
+            Nmatrix.at(3, j * 3 + 3) += N.at(j + 1) * dA;
         }
 
-//        N.printYourself();
-//        Nmatrix.printYourself();
-
+        //        N.printYourself();
+        //        Nmatrix.printYourself();
     }
-    ThisAnswer.beProductOf(Nmatrix,v);
+
+    ThisAnswer.beProductOf(Nmatrix, v);
     answer.add(ThisAnswer);
-
 }
-
 } // end namespace oofem

@@ -37,7 +37,7 @@ tr21stokes	5	nodes	6	3 4 8 15 16 14	crossSect 1 mat 1
 tr21stokes	6	nodes	6	4 5 8 20 17 16	crossSect 1 mat 1 
 tr21stokes	7	nodes	6	5 6 8 18 24 17	crossSect 1 mat 1 
 tr21stokes	8	nodes	6	5 1 6 21 19 18	crossSect 1 mat 1
-emptycs 1
+fluidcs 1 mat 1 set 7
 newtonianfluid 1 mu 1.000000  d 1.000000
 deadweight 1 components 2 -1.0 -0.0 loadTimeFunction 1 valtype 4 set 7
 BoundaryCondition 2 loadTimeFunction 1 set 5 values 1 0. dofs 1 11
@@ -62,7 +62,7 @@ set 5 nodes 1 5
 # Prescribed velocities
 set 6 nodes 6 6 7 8 22 23 24
 # All elements
-set 7 elements 8 1 2 3 4 5 6 7 8
+set 7 elementranges {(1 8)}
 
 #%BEGIN_CHECK%
 #NODE tStep 0 number 5 dof 1 unknown v value -1.10902370e-01

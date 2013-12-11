@@ -60,14 +60,14 @@ FEI2dQuadConst :: local2global(FloatArray &answer, const FloatArray &lcoords, co
 {
     answer.resize(2);
 
-    answer.at(1) = 0.25*( cellgeo.giveVertexCoordinates(1)->at(xind) +
-                          cellgeo.giveVertexCoordinates(2)->at(xind) +
-                          cellgeo.giveVertexCoordinates(3)->at(xind) +
-                          cellgeo.giveVertexCoordinates(4)->at(xind) );
-    answer.at(2) = 0.25*( cellgeo.giveVertexCoordinates(1)->at(yind) +
-                          cellgeo.giveVertexCoordinates(2)->at(yind) +
-                          cellgeo.giveVertexCoordinates(3)->at(yind) +
-                          cellgeo.giveVertexCoordinates(4)->at(yind) );
+    answer.at(1) = 0.25 * ( cellgeo.giveVertexCoordinates(1)->at(xind) +
+                            cellgeo.giveVertexCoordinates(2)->at(xind) +
+                            cellgeo.giveVertexCoordinates(3)->at(xind) +
+                            cellgeo.giveVertexCoordinates(4)->at(xind) );
+    answer.at(2) = 0.25 * ( cellgeo.giveVertexCoordinates(1)->at(yind) +
+                            cellgeo.giveVertexCoordinates(2)->at(yind) +
+                            cellgeo.giveVertexCoordinates(3)->at(yind) +
+                            cellgeo.giveVertexCoordinates(4)->at(yind) );
 }
 
 
@@ -94,7 +94,7 @@ FEI2dQuadConst :: edgeEvalN(FloatArray &answer, int iedge, const FloatArray &lco
 }
 
 
-double FEI2dQuadConst::edgeEvalNormal(FloatArray& answer, int iedge, const FloatArray& lcoords, const FEICellGeometry& cellgeo)
+double FEI2dQuadConst :: edgeEvalNormal(FloatArray &answer, int iedge, const FloatArray &lcoords, const FEICellGeometry &cellgeo)
 {
     OOFEM_ERROR("FEI2dQuadConst :: edgeEvalNormal: not implemented");
     return 0.;
@@ -102,14 +102,14 @@ double FEI2dQuadConst::edgeEvalNormal(FloatArray& answer, int iedge, const Float
 
 void
 FEI2dQuadConst :: edgeEvaldNds(FloatArray &answer, int iedge,
-                           const FloatArray &lcoords, const FEICellGeometry &cellgeo)
+                               const FloatArray &lcoords, const FEICellGeometry &cellgeo)
 {
     OOFEM_ERROR("FEI2dQuadConst :: edgeEvaldNds: not implemented");
 }
 
 void
 FEI2dQuadConst :: edgeLocal2global(FloatArray &answer, int iedge,
-                               const FloatArray &lcoords, const FEICellGeometry &cellgeo)
+                                   const FloatArray &lcoords, const FEICellGeometry &cellgeo)
 {
     OOFEM_ERROR("FEI2dQuadConst :: edgeLocal2global: not implemented");
 }
@@ -159,5 +159,4 @@ FEI2dQuadConst :: giveIntegrationRule(int order)
     iRule->SetUpPointsOnSquare(points, _Unknown);
     return iRule;
 }
-
 } // end namespace oofem

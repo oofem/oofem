@@ -39,8 +39,7 @@
 #include "classfactory.h"
 
 namespace oofem {
-
-REGISTER_BoundaryCondition( GravityPressure );
+REGISTER_BoundaryCondition(GravityPressure);
 
 IRResultType
 GravityPressure :: initializeFrom(InputRecord *ir)

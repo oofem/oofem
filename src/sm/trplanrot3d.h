@@ -40,7 +40,6 @@
 #define _IFT_TrPlaneStrRot3d_Name "trplanestrrot3d"
 
 namespace oofem {
-
 #ifndef __CHARTENSOR
  #define __CHARTENSOR
 enum CharTensor {
@@ -94,7 +93,6 @@ public:
     // definition & identification
     virtual const char *giveInputRecordName() const { return _IFT_TrPlaneStrRot3d_Name; }
     virtual const char *giveClassName() const { return "TrPlaneStrRot3d"; }
-    virtual classType giveClassID() const { return TrPlaneStrRot3dClass; }
 
     virtual int computeNumberOfDofs() { return 9; }
     virtual int computeNumberOfGlobalDofs() { return 18; }

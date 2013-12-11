@@ -45,7 +45,7 @@ DofManValueField :: DofManValueField(FieldType ft, Domain *d) : Field(ft), dmanv
     int ndofman = d->giveNumberOfDofManagers();
     this->domain = d;
     this->dmanvallist.growTo(ndofman);
-    for ( int i = 1 ; i <= ndofman; i++ ) {
+    for ( int i = 1; i <= ndofman; i++ ) {
         this->dmanvallist.put(i, new FloatArray);
     }
 }
@@ -57,10 +57,10 @@ DofManValueField :: evaluateAt(FloatArray &answer, FloatArray &coords, ValueMode
     FloatArray lc, n;
 
     // request element containing target point
-    Element* elem = this->domain->giveSpatialLocalizer()->giveElementContainingPoint(coords);
-    if (elem) { // ok element containing target point found
-        FEInterpolation* interp = elem->giveInterpolation();
-        if (interp) {
+    Element *elem = this->domain->giveSpatialLocalizer()->giveElementContainingPoint(coords);
+    if ( elem ) { // ok element containing target point found
+        FEInterpolation *interp = elem->giveInterpolation();
+        if ( interp ) {
             // map target point to element local coordinates
             if ( interp->global2local( lc, coords, FEIElementGeometryWrapper(elem) ) ) {
                 // evaluate interpolation functions at target point
@@ -68,7 +68,7 @@ DofManValueField :: evaluateAt(FloatArray &answer, FloatArray &coords, ValueMode
                 // loop over element nodes
                 for ( int i = 1; i <= n.giveSize(); i++ ) {
                     // multiply nodal value by value of corresponding shape function and add this to answer
-                    answer.add(n.at(i), *this->dmanvallist.at(elem->giveDofManagerNumber(i)));
+                    answer.add( n.at(i), * this->dmanvallist.at( elem->giveDofManagerNumber(i) ) );
                 }
             } else { // mapping from global to local coordinates failed
                 result = 1; // failed
@@ -83,16 +83,16 @@ DofManValueField :: evaluateAt(FloatArray &answer, FloatArray &coords, ValueMode
 }
 
 int
-DofManValueField :: evaluateAt(FloatArray &answer, DofManager* dman, ValueModeType mode, TimeStep *atTime)
+DofManValueField :: evaluateAt(FloatArray &answer, DofManager *dman, ValueModeType mode, TimeStep *atTime)
 {
-    answer =* this->dmanvallist.at(dman->giveNumber());
+    answer = * this->dmanvallist.at( dman->giveNumber() );
     return 1;
 }
 
 void
-DofManValueField :: setDofManValue (int dofMan, const FloatArray &value)
+DofManValueField :: setDofManValue(int dofMan, const FloatArray &value)
 {
-    (*this->dmanvallist.at(dofMan)) = value;
+    ( * this->dmanvallist.at(dofMan) ) = value;
 }
 
 contextIOResultType

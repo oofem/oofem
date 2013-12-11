@@ -48,8 +48,7 @@
 #include "classfactory.h"
 
 namespace oofem {
-
-REGISTER_Material( DruckerPragerPlasticitySM );
+REGISTER_Material(DruckerPragerPlasticitySM);
 
 DruckerPragerPlasticitySMStatus :: DruckerPragerPlasticitySMStatus(int n, Domain *d, GaussPoint *gp) :
     StructuralMaterialStatus(n, d, gp),
@@ -459,7 +458,7 @@ DruckerPragerPlasticitySM :: performRegularReturn(double eM, double gM, double k
         //printf("newtonError = %e\n", newtonError) ;
     }
 
-    OOFEM_LOG_DEBUG("IterationCount in regular return = %d\n", iterationCount) ;
+    OOFEM_LOG_DEBUG("IterationCount in regular return = %d\n", iterationCount);
 
     if ( deltaLambda < 0. ) {
         _error("Fatal error in the Newton iteration for regular stress return. deltaLambda is evaluated as negative, but should always be positive. This is most likely due to a softening law with local snapback, which is physically inadmissible.n");
@@ -514,7 +513,7 @@ DruckerPragerPlasticitySM :: performVertexReturn(double eM, double gM, double kM
         tempKappa = kappa + deltaKappa;
         yieldValue = computeYieldValue(volumetricStress, 0., tempKappa, eM);
         newtonError = fabs(yieldValue / eM);
-        OOFEM_LOG_DEBUG("NewtonError in iteration %d in vertex return = %e\n", iterationCount, newtonError) ;
+        OOFEM_LOG_DEBUG("NewtonError in iteration %d in vertex return = %e\n", iterationCount, newtonError);
     }
 
     OOFEM_LOG_DEBUG("Done iteration in vertex return, after %d\n", iterationCount);
@@ -605,7 +604,7 @@ DruckerPragerPlasticitySM :: give3dMaterialStiffnessMatrix(FloatMatrix &answer,
 
     case TangentStiffness:
         switch ( ( static_cast< DruckerPragerPlasticitySMStatus * >( this->giveStatus(gp) ) )
-                ->giveTempStateFlag() ) {
+                 ->giveTempStateFlag() ) {
         case DruckerPragerPlasticitySMStatus :: DP_Elastic:        // elastic stiffness
         case DruckerPragerPlasticitySMStatus :: DP_Unloading:        // elastic stiffness
             LEMaterial->give3dMaterialStiffnessMatrix(answer, mode, gp, atTime);
@@ -645,7 +644,7 @@ DruckerPragerPlasticitySM :: giveRegAlgorithmicStiffMatrix(FloatMatrix &answer,
 
     const FloatArray stressVector = status->giveTempStressVector();
     FloatArray fullStressVector;
-    StructuralMaterial :: giveFullSymVectorForm(fullStressVector, stressVector, gp->giveMaterialMode());
+    StructuralMaterial :: giveFullSymVectorForm( fullStressVector, stressVector, gp->giveMaterialMode() );
     const StressVector stress(fullStressVector, _3dMat);
     StressVector deviatoricStress(_3dMat);
     double volumetricStress;
@@ -669,7 +668,7 @@ DruckerPragerPlasticitySM :: giveRegAlgorithmicStiffMatrix(FloatMatrix &answer,
     double hStar = kFactor * computeYieldStressPrime(tempKappa, eM);
 
     //exclude division by zero
-    if(hStar == 0.){
+    if ( hStar == 0. ) {
         OOFEM_ERROR("DruckerPragerPlasticitySM :: computeYieldStressPrime is zero. This happens mainly due to excessive softening.");
     }
 
@@ -754,20 +753,20 @@ DruckerPragerPlasticitySM :: giveVertexAlgorithmicStiffMatrix(FloatMatrix &answe
 
     // compute elastic trial strain deviator of latest temp-state
     FloatArray fullStrainVector;
-    StructuralMaterial :: giveFullSymVectorForm(fullStrainVector, status->giveTempStrainVector(), gp->giveMaterialMode());
+    StructuralMaterial :: giveFullSymVectorForm( fullStrainVector, status->giveTempStrainVector(), gp->giveMaterialMode() );
     StrainVector strain(fullStrainVector, _3dMat);
     StrainVector strainDeviator(_3dMat);
     double volumetricStrain;
     strain.computeDeviatoricVolumetricSplit(strainDeviator, volumetricStrain);
 
     StrainVector elasticStrainDeviator = strainDeviator;
-    elasticStrainDeviator.subtract(status->givePlasticStrainDeviator());
+    elasticStrainDeviator.subtract( status->givePlasticStrainDeviator() );
 
     double a_const =
         kM * HBar / ( HBar * deltaVolumetricPlasticStrain + 9. / 2. * alpha * kM * deltaKappa );
 
-    if ( ( HBar * deltaVolumetricPlasticStrain + 9. / 2. * alpha * kM * deltaKappa ) == 0.){
-        OOFEM_ERROR2("DruckerPragerPlasticitySM :: giveVertexAlgorithmicStiffMatrix of tangent type is singular, material ID %d\n", this->giveNumber());
+    if ( ( HBar * deltaVolumetricPlasticStrain + 9. / 2. * alpha * kM * deltaKappa ) == 0. ) {
+        OOFEM_ERROR2( "DruckerPragerPlasticitySM :: giveVertexAlgorithmicStiffMatrix of tangent type is singular, material ID %d\n", this->giveNumber() );
     }
     // compute the algorithmic tangent stiffness
 
@@ -821,7 +820,6 @@ DruckerPragerPlasticitySM :: giveIPValue(FloatArray &answer,
 
     default:
         return StructuralMaterial :: giveIPValue(answer, gp, type, atTime);
-
     }
 }
 
@@ -842,7 +840,7 @@ DruckerPragerPlasticitySM :: predictRelativeComputationalCost(GaussPoint *gp)
     const int state_flag = status->giveStateFlag();
 
     if ( ( state_flag == DruckerPragerPlasticitySMStatus :: DP_Vertex ) ||
-        ( state_flag == DruckerPragerPlasticitySMStatus :: DP_Yielding ) ) {
+         ( state_flag == DruckerPragerPlasticitySMStatus :: DP_Yielding ) ) {
         return 20.;
     } else {
         return 1.0;

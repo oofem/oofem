@@ -38,6 +38,7 @@
 #include "intarray.h"
 #include "floatarray.h"
 #include "floatmatrix.h"
+#include "dynamicinputrecord.h"
 
 #ifdef __OOFEG
  #include "oofeggraphiccontext.h"
@@ -58,20 +59,29 @@ CBSElement :: initializeFrom(InputRecord *ir)
     const char *__proc = "initializeFrom"; // Required by IR_GIVE_FIELD macro
     IRResultType result;                   // Required by IR_GIVE_FIELD macro
 
-    FMElement :: initializeFrom(ir);
-
     IR_GIVE_OPTIONAL_FIELD(ir, boundarySides, _IFT_CBSElement_bsides);
     if ( !boundarySides.isEmpty() ) {
         IR_GIVE_FIELD(ir, boundaryCodes, _IFT_CBSElement_bcodes);
     }
 
-    return IRRT_OK;
+    return FMElement :: initializeFrom(ir);
+}
+
+
+void
+CBSElement :: giveInputRecord(DynamicInputRecord &input)
+{
+    FMElement :: giveInputRecord(input);
+    if ( boundarySides.giveSize() > 0 ) {
+        input.setField(this->boundarySides, _IFT_CBSElement_bsides);
+        input.setField(this->boundaryCodes, _IFT_CBSElement_bcodes);
+    }
 }
 
 
 void
 CBSElement :: giveCharacteristicMatrix(FloatMatrix &answer,
-                                        CharType mtrx, TimeStep *tStep)
+                                       CharType mtrx, TimeStep *tStep)
 //
 // returns characteristics matrix of receiver according to mtrx
 //
@@ -88,7 +98,7 @@ CBSElement :: giveCharacteristicMatrix(FloatMatrix &answer,
 
 void
 CBSElement :: giveCharacteristicVector(FloatArray &answer, CharType mtrx, ValueModeType mode,
-                                        TimeStep *tStep)
+                                       TimeStep *tStep)
 //
 // returns characteristics vector of receiver according to requested type
 //
@@ -146,13 +156,13 @@ CBSElement :: computePrescribedTermsI(FloatArray &answer, ValueModeType mode, Ti
 
 #if 0
 void
-CBSElement :: computePrescribedTermsII (FloatArray& answer, ValueModeType mode, TimeStep* tStep)
+CBSElement :: computePrescribedTermsII(FloatArray &answer, ValueModeType mode, TimeStep *tStep)
 {
     FloatMatrix lhs;
     FloatArray usp;
-    this->computePressureLhs (lhs, tStep);
+    this->computePressureLhs(lhs, tStep);
     this->computeVectorOf(EID_ConservationEquation, mode, tStep, usp);
-    answer.beProductOf (lhs, usp);
+    answer.beProductOf(lhs, usp);
     answer.negated();
 }
 #endif
@@ -225,5 +235,4 @@ CBSElement :: giveInternalStateAtNode(FloatArray &answer, InternalStateType type
 }
 
 #endif
-
 } // end namespace oofem

@@ -49,13 +49,13 @@ PerfectlyPlasticMaterial :: hasMaterialModeCapability(MaterialMode mode)
 //
 {
     return mode == _3dMat ||
-        //<RESTRICTED_SECTION>
-        mode == _PlaneStress ||
-        //</RESTRICTED_SECTION>
-        mode == _PlaneStrain ||
-        mode == _1dMat ||
-        mode == _PlateLayer ||
-        mode == _2dBeamLayer;
+           //<RESTRICTED_SECTION>
+           mode == _PlaneStress ||
+           //</RESTRICTED_SECTION>
+           mode == _PlaneStrain ||
+           mode == _1dMat ||
+           mode == _PlateLayer ||
+           mode == _2dBeamLayer;
 }
 
 
@@ -99,12 +99,12 @@ PerfectlyPlasticMaterial :: giveRealStressVector(FloatArray &answer,
     this->giveStressDependentPartOfStrainVector(reducedStrain, gp, totalStrain,
                                                 atTime, VM_Total);
 
-    reducedStrainIncrement.beDifferenceOf(reducedStrain, status->giveStrainVector());
+    reducedStrainIncrement.beDifferenceOf( reducedStrain, status->giveStrainVector() );
 
-    StructuralMaterial :: giveFullSymVectorForm(strainIncrement, reducedStrainIncrement, gp->giveMaterialMode());
+    StructuralMaterial :: giveFullSymVectorForm( strainIncrement, reducedStrainIncrement, gp->giveMaterialMode() );
     status->givePlasticStrainVector(plasticStrainVector);
-    StructuralMaterial :: giveFullSymVectorForm(statusFullPlasticVector, plasticStrainVector, gp->giveMaterialMode());
-    StructuralMaterial :: giveFullSymVectorForm(statusFullStressVector, status->giveStressVector(), gp->giveMaterialMode());
+    StructuralMaterial :: giveFullSymVectorForm( statusFullPlasticVector, plasticStrainVector, gp->giveMaterialMode() );
+    StructuralMaterial :: giveFullSymVectorForm( statusFullStressVector, status->giveStressVector(), gp->giveMaterialMode() );
 
     //
     // Note : formulated in full stress strain space
@@ -236,7 +236,7 @@ PerfectlyPlasticMaterial :: giveRealStressVector(FloatArray &answer,
         //  totalStressIncrement.add (stressVector3d);
         // update gp
         FloatArray helpArry;
-        StructuralMaterial :: giveReducedSymVectorForm(helpArry, stressVector3d, gp->giveMaterialMode());
+        StructuralMaterial :: giveReducedSymVectorForm( helpArry, stressVector3d, gp->giveMaterialMode() );
 
         status->letTempStressVectorBe(helpArry);
         status->letTempStrainVectorBe(totalStrain);
@@ -249,16 +249,16 @@ PerfectlyPlasticMaterial :: giveRealStressVector(FloatArray &answer,
         this->updateIfFailure(gp, & stressVector3d, & PlasticStrainVector3d);
         // update gp
         status->letTempStrainVectorBe(totalStrain);
-        StructuralMaterial :: giveReducedSymVectorForm(helpArray, stressVector3d, gp->giveMaterialMode());
+        StructuralMaterial :: giveReducedSymVectorForm( helpArray, stressVector3d, gp->giveMaterialMode() );
         status->letTempStressVectorBe(helpArray);
     }
 
     // update gp plastic strain
     plasticStrainIncrement3d.beDifferenceOf(PlasticStrainVector3d, statusFullPlasticVector);
-    StructuralMaterial :: giveReducedSymVectorForm(helpArray, plasticStrainIncrement3d, gp->giveMaterialMode());
+    StructuralMaterial :: giveReducedSymVectorForm( helpArray, plasticStrainIncrement3d, gp->giveMaterialMode() );
     status->letPlasticStrainIncrementVectorBe(helpArray);
 
-    StructuralMaterial :: giveReducedSymVectorForm(answer, stressVector3d, gp->giveMaterialMode());
+    StructuralMaterial :: giveReducedSymVectorForm( answer, stressVector3d, gp->giveMaterialMode() );
 }
 
 
@@ -287,7 +287,7 @@ PerfectlyPlasticMaterial :: giveEffectiveMaterialStiffnessMatrix(FloatMatrix &an
     if ( lMat->hasMaterialModeCapability( gp->giveMaterialMode() ) ) {
         FloatMatrix stiff;
         lMat->giveStiffnessMatrix(stiff, mode, gp, atTime);
-        this->giveFullSymMatrixForm(answer, stiff, gp->giveMaterialMode());
+        this->giveFullSymMatrixForm( answer, stiff, gp->giveMaterialMode() );
     } else {
         OOFEM_ERROR("PerfectlyPlasticMaterial :: giveEffectiveMaterialStiffnessMatrix - unsupported material mode");
     }
@@ -338,8 +338,8 @@ PerfectlyPlasticMaterial :: giveMaterialStiffnessMatrix(FloatMatrix &answer, Mat
     }
 
     status->givePlasticStrainVector(plasticStrainVector);
-    StructuralMaterial :: giveFullSymVectorForm(statusFullPlasticVector, plasticStrainVector, gp->giveMaterialMode());
-    StructuralMaterial :: giveFullSymVectorForm(statusFullStressVector, status->giveStressVector(), gp->giveMaterialMode());
+    StructuralMaterial :: giveFullSymVectorForm( statusFullPlasticVector, plasticStrainVector, gp->giveMaterialMode() );
+    StructuralMaterial :: giveFullSymVectorForm( statusFullStressVector, status->giveStressVector(), gp->giveMaterialMode() );
 
     // yield condition satisfied
     FloatMatrix dp;
@@ -413,7 +413,7 @@ PerfectlyPlasticMaterial :: givePlaneStressStiffMtrx(FloatMatrix &answer,
         this->giveLinearElasticMaterial()->giveStiffnessMatrix(answer, mode, gp, atTime);
     } else {
         this->giveMaterialStiffnessMatrix(fullAnswer, mode, gp, atTime);
-        StructuralMaterial :: giveReducedSymMatrixForm( answer, fullAnswer, gp->giveMaterialMode());
+        StructuralMaterial :: giveReducedSymMatrixForm( answer, fullAnswer, gp->giveMaterialMode() );
     }
 }
 
@@ -435,7 +435,7 @@ PerfectlyPlasticMaterial :: givePlaneStrainStiffMtrx(FloatMatrix &answer,
         this->giveLinearElasticMaterial()->giveStiffnessMatrix(answer, mode, gp, atTime);
     } else {
         this->giveMaterialStiffnessMatrix(fullAnswer, mode, gp, atTime);
-        StructuralMaterial :: giveReducedSymMatrixForm( answer, fullAnswer, gp->giveMaterialMode());
+        StructuralMaterial :: giveReducedSymMatrixForm( answer, fullAnswer, gp->giveMaterialMode() );
     }
 }
 
@@ -455,7 +455,7 @@ PerfectlyPlasticMaterial :: give1dStressStiffMtrx(FloatMatrix &answer,
         this->giveLinearElasticMaterial()->giveStiffnessMatrix(answer, mode, gp, atTime);
     } else {
         this->giveMaterialStiffnessMatrix(fullAnswer, mode, gp, atTime);
-        StructuralMaterial :: giveReducedSymMatrixForm( answer, fullAnswer, gp->giveMaterialMode());
+        StructuralMaterial :: giveReducedSymMatrixForm( answer, fullAnswer, gp->giveMaterialMode() );
     }
 }
 
@@ -463,9 +463,9 @@ PerfectlyPlasticMaterial :: give1dStressStiffMtrx(FloatMatrix &answer,
 
 void
 PerfectlyPlasticMaterial :: give2dBeamLayerStiffMtrx(FloatMatrix &answer,
-                                                   MatResponseMode mode,
-                                                   GaussPoint *gp,
-                                                   TimeStep *atTime)
+                                                     MatResponseMode mode,
+                                                     GaussPoint *gp,
+                                                     TimeStep *atTime)
 //
 // returns receiver's 2dBeamLayerStiffMtrx.
 // (2dPlaneStres ==> sigma_z = tau_xz = tau_yz = 0.)
@@ -480,16 +480,16 @@ PerfectlyPlasticMaterial :: give2dBeamLayerStiffMtrx(FloatMatrix &answer,
         this->giveLinearElasticMaterial()->giveStiffnessMatrix(answer, mode, gp, atTime);
     } else {
         this->giveMaterialStiffnessMatrix(fullAnswer, mode, gp, atTime);
-        StructuralMaterial :: giveReducedSymMatrixForm( answer, fullAnswer, gp->giveMaterialMode());
+        StructuralMaterial :: giveReducedSymMatrixForm( answer, fullAnswer, gp->giveMaterialMode() );
     }
 }
 
 
 void
 PerfectlyPlasticMaterial :: givePlateLayerStiffMtrx(FloatMatrix &answer,
-                                                      MatResponseMode mode,
-                                                      GaussPoint *gp,
-                                                      TimeStep *atTime)
+                                                    MatResponseMode mode,
+                                                    GaussPoint *gp,
+                                                    TimeStep *atTime)
 //
 // returns receiver's 2dPlateLayerMtrx
 // (2dPlaneStres ==> sigma_z = tau_xz = tau_yz = 0.)
@@ -503,7 +503,7 @@ PerfectlyPlasticMaterial :: givePlateLayerStiffMtrx(FloatMatrix &answer,
         this->giveLinearElasticMaterial()->giveStiffnessMatrix(answer, mode, gp, atTime);
     } else {
         this->giveMaterialStiffnessMatrix(fullAnswer, mode, gp, atTime);
-        StructuralMaterial :: giveReducedSymMatrixForm( answer, fullAnswer, gp->giveMaterialMode());
+        StructuralMaterial :: giveReducedSymMatrixForm( answer, fullAnswer, gp->giveMaterialMode() );
     }
 }
 
@@ -627,7 +627,7 @@ PerfectlyPlasticMaterial :: GiveStressCorrectionBackToYieldSurface(GaussPoint *g
         help += yeldStressGrad->at(j) * yeldStressGrad->at(j);
     }
 
-    stressCorrection = new FloatArray(*yeldStressGrad);
+    stressCorrection = new FloatArray(* yeldStressGrad);
     stressCorrection->times(-f3 / help);
 
 
@@ -685,14 +685,14 @@ PerfectlyPlasticMaterial :: giveIPValue(FloatArray &answer, GaussPoint *aGaussPo
         FloatArray ep;
         status->givePlasticStrainVector(ep);
         ///@todo Fill in correct full form values here! This just adds zeros!
-        StructuralMaterial :: giveFullSymVectorForm(answer, ep, aGaussPoint->giveMaterialMode());
+        StructuralMaterial :: giveFullSymVectorForm( answer, ep, aGaussPoint->giveMaterialMode() );
         return 1;
     } else if ( type == IST_PrincipalPlasticStrainTensor ) {
         FloatArray st(6), s;
 
         status->givePlasticStrainVector(s);
         ///@todo Fill in correct full form values here! This just adds zeros!
-        StructuralMaterial :: giveFullSymVectorForm(st, s, aGaussPoint->giveMaterialMode());
+        StructuralMaterial :: giveFullSymVectorForm( st, s, aGaussPoint->giveMaterialMode() );
 
         this->computePrincipalValues(answer, st, principal_strain);
         return 1;

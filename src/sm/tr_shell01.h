@@ -45,7 +45,6 @@
 #define _IFT_TR_SHELL01_Name "tr_shell01"
 
 namespace oofem {
-
 /**
  * This class implements an triangular three-node shell finite element, composed of
  * cct3d and trplanrot3d elements.
@@ -74,7 +73,7 @@ public:
     virtual ~TR_SHELL01() {
         delete plate;
         delete membrane;
-        if (this->compositeIR) delete this->compositeIR;
+        if ( this->compositeIR ) { delete this->compositeIR; }
     }
 
     virtual FEInterpolation *giveInterpolation() const { return plate->giveInterpolation(); }
@@ -85,7 +84,6 @@ public:
     // definition & identification
     virtual const char *giveInputRecordName() const { return _IFT_TR_SHELL01_Name; }
     virtual const char *giveClassName() const { return "TR_SHELL01"; }
-    virtual classType giveClassID() const { return TR_SHELL01Class; }
     virtual IRResultType initializeFrom(InputRecord *ir);
 
     virtual void giveCharacteristicVector(FloatArray &answer, CharType mtrx, ValueModeType mode, TimeStep *tStep);
@@ -100,14 +98,13 @@ public:
     virtual contextIOResultType restoreContext(DataStream *stream, ContextMode mode, void *obj = NULL);
 
 #ifdef __OOFEG
-    void drawRawGeometry(oofegGraphicContext &);
-    void drawDeformedGeometry(oofegGraphicContext &, UnknownType type);
+    virtual void drawRawGeometry(oofegGraphicContext &);
+    virtual void drawDeformedGeometry(oofegGraphicContext &, UnknownType type);
     virtual void drawScalar(oofegGraphicContext &context);
-    //void drawInternalState(oofegGraphicContext &);
 #endif
     // the membrane and plate irules are same (chacked in initializeFrom)
-    virtual int giveDefaultIntegrationRule() const { return plate->giveDefaultIntegrationRule();}
-    virtual IntegrationRule *giveDefaultIntegrationRulePtr() {return plate->giveDefaultIntegrationRulePtr();}
+    virtual int giveDefaultIntegrationRule() const { return plate->giveDefaultIntegrationRule(); }
+    virtual IntegrationRule *giveDefaultIntegrationRulePtr() { return plate->giveDefaultIntegrationRulePtr(); }
     virtual Element_Geometry_Type giveGeometryType() const { return EGT_triangle_1; }
     virtual integrationDomain giveIntegrationDomain() const { return _Triangle; }
     virtual MaterialMode giveMaterialMode() { return _Unknown; }
@@ -118,14 +115,14 @@ public:
     virtual Element *ZZNodalRecoveryMI_giveElement() { return this; }
 
     virtual void NodalAveragingRecoveryMI_computeNodalValue(FloatArray &answer, int node,
-                                                    InternalStateType type, TimeStep *tStep);
+                                                            InternalStateType type, TimeStep *tStep);
     virtual void NodalAveragingRecoveryMI_computeSideValue(FloatArray &answer, int side,
-                                                   InternalStateType type, TimeStep *tStep);
+                                                           InternalStateType type, TimeStep *tStep);
     // ZZErrorEstimatorInterface
     virtual Element *ZZErrorEstimatorI_giveElement() { return this; }
 
     virtual IntegrationRule *ZZErrorEstimatorI_giveIntegrationRule();
-    virtual void ZZErrorEstimatorI_computeLocalStress(FloatArray& answer, FloatArray& sig);
+    virtual void ZZErrorEstimatorI_computeLocalStress(FloatArray &answer, FloatArray &sig);
 
     // ZZRemeshingCriteriaInterface
     virtual double ZZRemeshingCriteriaI_giveCharacteristicSize();
@@ -139,13 +136,13 @@ public:
 
 
     virtual int computeGlobalCoordinates(FloatArray &answer, const FloatArray &lcoords) {
-        return this->plate->computeGlobalCoordinates (answer, lcoords);
+        return this->plate->computeGlobalCoordinates(answer, lcoords);
     }
 
 protected:
     virtual void computeBmatrixAt(GaussPoint *, FloatMatrix &, int = 1, int = ALL_STRAINS)
     { _error("TR_SHELL01 :: computeBmatrixAt: calling of this function is not allowed"); }
-    virtual void computeNmatrixAt(GaussPoint *, FloatMatrix &)
+    virtual void computeNmatrixAt(const FloatArray &iLocCoord, FloatMatrix &)
     { _error("TR_SHELL01 :: computeNmatrixAt: calling of this function is not allowed"); }
 
     /// @todo In time delete

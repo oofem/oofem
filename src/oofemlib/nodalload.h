@@ -40,7 +40,6 @@
 #include "valuemodetype.h"
 
 namespace oofem {
-
 ///@name Input fields for nodal loads
 //@{
 #define _IFT_NodalLoad_Name "nodalload"
@@ -92,7 +91,6 @@ public:
     virtual void giveInputRecord(DynamicInputRecord &input);
     virtual const char *giveClassName() const { return "NodalLoad"; }
     virtual bcGeomType giveBCGeoType() const { return NodalLoadBGT; }
-    virtual classType giveClassID() const { return NodalLoadClass; }
 };
 } // end namespace oofem
 #endif // nodalload_h

@@ -75,22 +75,21 @@ public:
     virtual int computeNumberOfDofs() { return 6 * giveNumberOfNodes(); }
     virtual void giveDofManDofIDMask(int inode, EquationID ut, IntArray &answer) const;
     double giveLength();
-    virtual void computeNmatrixAt(GaussPoint *gp, FloatMatrix &answer) {};
+    virtual void computeNmatrixAt(const FloatArray &iLocCoord, FloatMatrix &answer) {};
     virtual int computeGlobalCoordinates(FloatArray &answer, const FloatArray &lcoords);
 
     // definition & identification
     virtual const char *giveClassName() const { return "CohesiveSurface3d"; }
     virtual const char *giveInputRecordName() const { return _IFT_CohesiveSurface3d_Name; }
-    virtual classType giveClassID() const { return CohesiveSurface3dClass; }
 
     // input and output
     virtual IRResultType initializeFrom(InputRecord *ir);
     virtual void printOutputAt(FILE *file, TimeStep *tStep);
 
 #ifdef __OOFEG
-    void drawRawGeometry(oofegGraphicContext &);
-    void drawDeformedGeometry(oofegGraphicContext &, UnknownType);
-    void drawScalar(oofegGraphicContext &context);
+    virtual void drawRawGeometry(oofegGraphicContext &);
+    virtual void drawDeformedGeometry(oofegGraphicContext &, UnknownType);
+    virtual void drawScalar(oofegGraphicContext &context);
 #endif
 
 protected:

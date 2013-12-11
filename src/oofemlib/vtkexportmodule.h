@@ -73,14 +73,13 @@ protected:
     enum modeType {
         wdmode, ///< Whole domain
         rbrmode ///< Region by region.
-
     };
 
     modeType outMode;
     modeType mode;
 
     /// Smoother type.
-    NodalRecoveryModel::NodalRecoveryModelType stype;
+    NodalRecoveryModel :: NodalRecoveryModelType stype;
     /// Smoother.
     NodalRecoveryModel *smoother;
     /// List of regions to skip.
@@ -94,7 +93,7 @@ public:
 
     virtual IRResultType initializeFrom(InputRecord *ir);
 
-    virtual void doOutput(TimeStep *tStep, bool forcedOutput=false);
+    virtual void doOutput(TimeStep *tStep, bool forcedOutput = false);
     virtual void initialize();
     virtual void terminate();
     virtual const char *giveClassName() const { return "VTKExportModule"; }

@@ -90,7 +90,7 @@ IsotropicDamageMaterial :: give3dMaterialStiffnessMatrix(FloatMatrix &answer,
 
     this->giveLinearElasticMaterial()->give3dMaterialStiffnessMatrix(answer, mode, gp, atTime);
     answer.times(1.0 - tempDamage);
-//TODO - correction for tangent mode
+    //TODO - correction for tangent mode
 }
 
 
@@ -228,7 +228,7 @@ void IsotropicDamageMaterial :: givePlaneStrainStiffMtrx(FloatMatrix &answer, Ma
 
     this->giveLinearElasticMaterial()->giveStiffnessMatrix(answer, mode, gp, atTime);
     answer.times(1.0 - tempDamage);
-//TODO - correction for tangent mode
+    //TODO - correction for tangent mode
 }
 
 
@@ -246,7 +246,7 @@ void IsotropicDamageMaterial :: give1dStressStiffMtrx(FloatMatrix &answer, MatRe
 
     this->giveLinearElasticMaterial()->giveStiffnessMatrix(answer, mode, gp, atTime);
     answer.times(1.0 - tempDamage);
-//TODO - correction for tangent mode
+    //TODO - correction for tangent mode
 }
 
 #ifdef __OOFEG
@@ -257,7 +257,12 @@ int
 IsotropicDamageMaterial :: giveIPValue(FloatArray &answer, GaussPoint *aGaussPoint, InternalStateType type, TimeStep *atTime)
 {
     IsotropicDamageMaterialStatus *status = static_cast< IsotropicDamageMaterialStatus * >( this->giveStatus(aGaussPoint) );
-    if ( type == IST_DamageTensor ) {
+    if ( type == IST_DamageScalar ) {
+        answer.resize(1);
+        answer.zero();
+        answer.at(1) = status->giveDamage();
+        return 1;
+    } else if ( type == IST_DamageTensor ) {
         answer.resize(6);
         answer.zero();
         answer.at(1) = answer.at(2) = answer.at(3) = status->giveDamage();
@@ -333,6 +338,10 @@ IsotropicDamageMaterial :: giveThermalDilatationVector(FloatArray &answer,
     answer.at(3) = this->tempDillatCoeff;
 }
 
+double IsotropicDamageMaterial :: give(int aProperty, GaussPoint *gp)
+{
+    return linearElasticMaterial->give(aProperty, gp);
+}
 
 IRResultType
 IsotropicDamageMaterial :: initializeFrom(InputRecord *ir)

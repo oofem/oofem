@@ -32,6 +32,7 @@
  *  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  */
 
+#include "error.h"
 #include "logger.h"
 
 #include <cstdio>
@@ -57,11 +58,11 @@ void oofem_exit(int code)
 /*
  * #ifndef HAVE_MACRO_VA_ARGS
  *
- *#include <cstdarg>
+ ****#include <cstdarg>
  *
  *
  *
- *#define __PROCESS_LOG \
+ ****#define __PROCESS_LOG \
  * char buff[MAX_ERROR_MSG_LENGTH]; \
  * va_list args; \
  * va_start(args, format); \
@@ -121,6 +122,6 @@ void oofem_exit(int code)
  * oofem_errLogger.writeELogMsg(Logger::LOG_LEVEL_WARNING, _file,_line,buff);
  * }
  *
- *#endif
+ ****#endif
  */
 } // end namespace oofem

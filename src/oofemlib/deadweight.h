@@ -69,7 +69,6 @@ public:
 
     void setDeadWeighComponents(const FloatArray &newComponents);
 
-    virtual classType giveClassID() const { return DeadWeightClass; }
     virtual const char *giveClassName() const { return "DeadWeight"; }
     virtual const char *giveInputRecordName() const { return _IFT_DeadWeight_Name; }
 };

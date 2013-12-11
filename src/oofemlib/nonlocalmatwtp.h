@@ -122,5 +122,3 @@ protected:
 } // end namespace oofem
 #endif
 #endif // nonlocalmatwtp_h
-
-

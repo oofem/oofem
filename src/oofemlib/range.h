@@ -41,7 +41,6 @@
 #include "oofemcfg.h"
 
 namespace oofem {
-
 /**
  * Class Range is an abstraction for interval of integer numbers. It is described using its start and end values of interval
  * it represents. The interval is defined to represent all values between start and end values, including start and end values.
@@ -69,7 +68,7 @@ public:
         startIndx = 0;
         endIndx = -1;
     }
-    
+
     /// Returns the start index (inclusive).
     int giveStart() { return startIndx; }
     /// Returns the end index (inclusive).
@@ -78,7 +77,7 @@ public:
     /// Tests if number is in range.
     bool test(int i) { return ( i >= startIndx ) && ( i <= endIndx ); }
 
-    friend std::ostream& operator<< (std::ostream &out, const Range &r) { 
+    friend std :: ostream &operator<<(std :: ostream &out, const Range &r) {
         return out << r.startIndx << " " << r.endIndx;
     }
 };

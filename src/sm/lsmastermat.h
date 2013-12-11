@@ -82,7 +82,6 @@ public:
     virtual int hasNonLinearBehaviour() { return 1; }
     virtual const char *giveInputRecordName() const { return _IFT_LargeStrainMasterMaterial_Name; }
     virtual const char *giveClassName() const { return "LargeStrainMasterMaterial"; }
-    virtual classType giveClassID() const { return LargeStrainMasterMaterialClass; }
 
     LinearElasticMaterial *giveLinearElasticMaterial() { return linearElasticMaterial; }
 
@@ -142,8 +141,6 @@ public:
     virtual contextIOResultType restoreContext(DataStream *stream, ContextMode mode, void *obj = NULL);
 
     virtual const char *giveClassName() const { return "LargeStrainMasterMaterialStatus"; }
-
-    virtual classType giveClassID() const { return LargeStrainMasterMaterialStatusClass; }
 };
 } // end namespace oofem
 #endif // misesmat_h

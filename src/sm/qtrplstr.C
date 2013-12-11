@@ -75,37 +75,18 @@ QTrPlaneStress2d :: giveInterface(InterfaceType interface)
      *    return ( ZZNodalRecoveryModelInterface * ) this;
      */
     if ( interface == SPRNodalRecoveryModelInterfaceType ) {
-        return static_cast< SPRNodalRecoveryModelInterface * >(this);
+        return static_cast< SPRNodalRecoveryModelInterface * >( this );
     } else if ( interface == SpatialLocalizerInterfaceType ) {
-        return static_cast< SpatialLocalizerInterface * >(this);
+        return static_cast< SpatialLocalizerInterface * >( this );
     } else if ( interface == DirectErrorIndicatorRCInterfaceType ) {
-        return static_cast< DirectErrorIndicatorRCInterface * >(this);
+        return static_cast< DirectErrorIndicatorRCInterface * >( this );
     } else if ( interface == EIPrimaryUnknownMapperInterfaceType ) {
-        return static_cast< EIPrimaryUnknownMapperInterface * >(this);
+        return static_cast< EIPrimaryUnknownMapperInterface * >( this );
     }
 
     return NULL;
 }
 
-
-
-void
-QTrPlaneStress2d :: computeNmatrixAt(GaussPoint *aGaussPoint, FloatMatrix &answer)
-// Returns the displacement interpolation matrix {N} of the receiver, eva-
-// luated at aGaussPoint.
-{
-    FloatArray n(6);
-
-    answer.resize(2, 12);
-    answer.zero();
-
-    this->interpolation.evalN( n, * aGaussPoint->giveCoordinates(), FEIElementGeometryWrapper(this) );
-
-    for ( int i = 1; i <= 6; i++ ) {
-        answer.at(1, 2 * i - 1) = n.at(i);
-        answer.at(2, 2 * i - 0) = n.at(i);
-    }
-}
 
 
 double
@@ -124,15 +105,15 @@ QTrPlaneStress2d :: initializeFrom(InputRecord *ir)
 {
     numberOfGaussPoints = 4;
     IRResultType result = this->StructuralElement :: initializeFrom(ir);
-	if(result != IRRT_OK) {
-		return result;
-	}
+    if ( result != IRRT_OK ) {
+        return result;
+    }
 
     if ( !( ( numberOfGaussPoints == 1 ) ||
-           ( numberOfGaussPoints == 3 ) ||
-           ( numberOfGaussPoints == 4 ) ||
-           ( numberOfGaussPoints == 7 ) ||
-           ( numberOfGaussPoints == 13 ) ) ) {
+            ( numberOfGaussPoints == 3 ) ||
+            ( numberOfGaussPoints == 4 ) ||
+            ( numberOfGaussPoints == 7 ) ||
+            ( numberOfGaussPoints == 13 ) ) ) {
         _warning("number of Gauss points in QTrPlaneStress2d changed to 4\n");
         numberOfGaussPoints = 4;
     }
@@ -189,9 +170,9 @@ QTrPlaneStress2d :: computeVolumeAround(GaussPoint *aGaussPoint)
 {
     double determinant, weight, thickness, volume;
     determinant = fabs( this->interpolation.giveTransformationJacobian( * aGaussPoint->giveCoordinates(),
-                                                                       FEIElementGeometryWrapper(this) ) );
+                                                                        FEIElementGeometryWrapper(this) ) );
     weight      = aGaussPoint->giveWeight();
-    thickness   = this->giveCrossSection()->give(CS_Thickness);
+    thickness   = this->giveCrossSection()->give(CS_Thickness, aGaussPoint);
     volume      = determinant * weight * thickness;
 
     return volume;
@@ -567,10 +548,10 @@ QTrPlaneStress2d :: DirectErrorIndicatorRCI_giveCharacteristicSize()
 
     for ( int i = 0; i < iRule->giveNumberOfIntegrationPoints(); i++ ) {
         gp  = iRule->getIntegrationPoint(i);
-        volume += this->computeVolumeAround(gp);
+        volume += this->computeVolumeAround(gp) / this->giveCrossSection()->give(CS_Thickness, gp);
     }
 
-    return sqrt( volume * 2.0 / this->giveCrossSection()->give(CS_Thickness) );
+    return sqrt(volume * 2.0);
 }
 
 
@@ -659,7 +640,7 @@ double
 QTrPlaneStress2d ::   computeEdgeVolumeAround(GaussPoint *aGaussPoint, int iEdge)
 {
     double result = this->interpolation.edgeGiveTransformationJacobian( iEdge, * aGaussPoint->giveCoordinates(),
-                                                                       FEIElementGeometryWrapper(this) );
+                                                                        FEIElementGeometryWrapper(this) );
     return result * aGaussPoint->giveWeight();
 }
 

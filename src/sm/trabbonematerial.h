@@ -61,7 +61,6 @@
 //@}
 
 namespace oofem {
-
 /**
  * This class implements associated Material Status to TrabBoneMaterial.
  */
@@ -104,7 +103,6 @@ public:
 
     // definition
     virtual const char *giveClassName() const { return "TrabBoneMaterialStatus"; }
-    virtual classType giveClassID() const { return TrabBoneMaterialStatusClass; }
 
     virtual void initTempStatus();
     virtual void updateYourself(TimeStep *tStep);
@@ -141,13 +139,12 @@ public:
                                        TimeStep *tStep);
 
     virtual void giveRealStressVector_1d(FloatArray &answer, GaussPoint *gp,
-                                      const FloatArray &reducedStrain, TimeStep *tStep);
+                                         const FloatArray &reducedStrain, TimeStep *tStep);
 
     virtual int hasMaterialModeCapability(MaterialMode);
 
     virtual const char *giveInputRecordName() const { return _IFT_TrabBoneMaterial_Name; }
     virtual const char *giveClassName() const { return "TrabBoneMaterial"; }
-    virtual classType giveClassID() const { return TrabBoneMaterialClass; }
 
     virtual IRResultType initializeFrom(InputRecord *ir);
 

@@ -40,8 +40,7 @@
 #include "classfactory.h"
 
 namespace oofem {
-
-REGISTER_Material( NonlinearMassTransferMaterial );
+REGISTER_Material(NonlinearMassTransferMaterial);
 
 IRResultType
 NonlinearMassTransferMaterial :: initializeFrom(InputRecord *ir)
@@ -96,7 +95,6 @@ NonlinearMassTransferMaterial :: giveCharacteristicMatrix(FloatMatrix &answer,
     answer.beEmptyMtrx();
     answer.add(t1);
     answer.add(1 + C * pow(gradPNorm, alpha), t2);
-
 }
 
 double
@@ -113,7 +111,7 @@ NonlinearMassTransferMaterial :: giveFluxVector(FloatArray &answer, GaussPoint *
     TransportMaterialStatus *ms = static_cast< TransportMaterialStatus * >( this->giveStatus(gp) );
 
     double gradPNorm = grad.computeNorm();
-    answer.beScaled( -(1. + C * pow(gradPNorm, alpha)), grad);
+    answer.beScaled(-( 1. + C * pow(gradPNorm, alpha) ), grad);
 
     ms->setTempGradient(grad);
     ms->setTempField(field);
@@ -124,7 +122,7 @@ int
 NonlinearMassTransferMaterial :: giveIPValue(FloatArray &answer, GaussPoint *aGaussPoint, InternalStateType type, TimeStep *atTime)
 {
     TransportMaterialStatus *ms = static_cast< TransportMaterialStatus * >( this->giveStatus(aGaussPoint) );
- 
+
     switch ( type ) {
     case IST_Velocity:
         answer = ms->giveFlux();
@@ -133,7 +131,7 @@ NonlinearMassTransferMaterial :: giveIPValue(FloatArray &answer, GaussPoint *aGa
         answer = ms->giveGradient();
         break;
     default:
-      return TransportMaterial :: giveIPValue(answer, aGaussPoint, type, atTime);
+        return TransportMaterial :: giveIPValue(answer, aGaussPoint, type, atTime);
     }
     return 1;
 }

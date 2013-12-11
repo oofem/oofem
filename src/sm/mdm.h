@@ -132,7 +132,6 @@ public:
 
     // definition
     virtual const char *giveClassName() const { return "MDMStatus"; }
-    virtual classType giveClassID() const { return MicroplaneDamageMaterialStatusClass; }
 
     virtual void printOutputAt(FILE *file, TimeStep *tStep);
 
@@ -266,7 +265,6 @@ public:
     // identification and auxiliary functions
     virtual const char *giveInputRecordName() const { return _IFT_MDM_Name; }
     virtual const char *giveClassName() const { return "MDM"; }
-    virtual classType giveClassID() const { return MDMClass; }
 
     virtual void giveRealMicroplaneStressVector(FloatArray &answer, Microplane *mplane,
                                                 const FloatArray &strain, TimeStep *tStep) { };
@@ -325,12 +323,12 @@ protected:
     void transformStiffnessfromPDC(FloatMatrix &de, const FloatMatrix &t);
 
     virtual void givePlaneStressStiffMtrx(FloatMatrix &answer, MatResponseMode mmode,
-                                  GaussPoint *gp,
-                                  TimeStep *tStep);
+                                          GaussPoint *gp,
+                                          TimeStep *tStep);
 
-    virtual void givePlaneStrainStiffMtrx(FloatMatrix & answer,
-                                  MatResponseMode mmode, GaussPoint *gp,
-                                  TimeStep *tStep);
+    virtual void givePlaneStrainStiffMtrx(FloatMatrix &answer,
+                                          MatResponseMode mmode, GaussPoint *gp,
+                                          TimeStep *tStep);
 
     void rotateTensor4(FloatMatrix &Dlocal, const FloatMatrix &t);
     void formTransformationMatrix(FloatMatrix &answer, const FloatMatrix &t, int n);

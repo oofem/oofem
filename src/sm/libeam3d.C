@@ -45,8 +45,7 @@
 #include "classfactory.h"
 
 namespace oofem {
-
-REGISTER_Element( LIBeam3d );
+REGISTER_Element(LIBeam3d);
 
 LIBeam3d :: LIBeam3d(int n, Domain *aDomain) : StructuralElement(n, aDomain)
     // Constructor.
@@ -107,7 +106,7 @@ LIBeam3d :: computeGaussPoints()
         numberOfIntegrationRules = 1;
         integrationRulesArray = new IntegrationRule * [ 1 ];
         integrationRulesArray [ 0 ] = new GaussIntegrationRule(1, this, 1, 2);
-        this->giveCrossSection()->setupIntegrationPoints( *integrationRulesArray[0], 1, this );
+        this->giveCrossSection()->setupIntegrationPoints(* integrationRulesArray [ 0 ], 1, this);
     }
 }
 
@@ -133,7 +132,7 @@ LIBeam3d :: computeLumpedMassMatrix(FloatMatrix &answer, TimeStep *tStep)
 {
     GaussPoint *gp = integrationRulesArray [ 0 ]->getIntegrationPoint(0);
     double density = this->giveStructuralCrossSection()->give('d', gp);
-    double halfMass = density * this->giveCrossSection()->give(CS_Area) * this->giveLength() / 2.;
+    double halfMass = density * this->giveCrossSection()->give(CS_Area, gp) * this->giveLength() / 2.;
     answer.resize(12, 12);
     answer.zero();
     answer.at(1, 1) = answer.at(2, 2) = answer.at(3, 3) = halfMass;
@@ -142,13 +141,13 @@ LIBeam3d :: computeLumpedMassMatrix(FloatMatrix &answer, TimeStep *tStep)
 
 
 void
-LIBeam3d :: computeNmatrixAt(GaussPoint *aGaussPoint, FloatMatrix &answer)
+LIBeam3d :: computeNmatrixAt(const FloatArray &iLocCoord, FloatMatrix &answer)
 // Returns the displacement interpolation matrix {N} of the receiver, eva-
 // luated at aGaussPoint.
 {
     double ksi, n1, n2;
 
-    ksi = aGaussPoint->giveCoordinate(1);
+    ksi = iLocCoord.at(1);
     n1  = ( 1. - ksi ) * 0.5;
     n2  = ( 1. + ksi ) * 0.5;
 
@@ -302,7 +301,7 @@ LIBeam3d :: computeEgdeNMatrixAt(FloatMatrix &answer, int iedge, GaussPoint *aGa
      * without regarding particular side
      */
 
-    this->computeNmatrixAt(aGaussPoint, answer);
+    this->computeNmatrixAt(* ( aGaussPoint->giveLocalCoordinates() ), answer);
 }
 
 
@@ -380,8 +379,9 @@ LIBeam3d :: computeLoadLEToLRotationMatrix(FloatMatrix &answer, int iEdge, Gauss
 void
 LIBeam3d :: computeBodyLoadVectorAt(FloatArray &answer, Load *load, TimeStep *tStep, ValueModeType mode)
 {
-    StructuralElement::computeBodyLoadVectorAt(answer, load, tStep, mode);
-    answer.times(this->giveCrossSection()->give(CS_Area));
+    FloatArray lc(1);
+    StructuralElement :: computeBodyLoadVectorAt(answer, load, tStep, mode);
+    answer.times( this->giveCrossSection()->give(CS_Area, & lc, NULL, this) );
 }
 
 int

@@ -39,8 +39,7 @@
 #include "classfactory.h"
 
 namespace oofem {
-
-REGISTER_BoundaryCondition( ConstantPressureLoad );
+REGISTER_BoundaryCondition(ConstantPressureLoad);
 
 ConstantPressureLoad :: ConstantPressureLoad(int i, Domain *d) : BoundaryLoad(i, d) {
     this->loadOffset = 0.0;

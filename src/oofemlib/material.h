@@ -80,7 +80,7 @@ class FloatMatrix;
  *
  * The attribute 'propertyDictionary' contains all the properties of a material
  * like its Young modulus, its mass density or Poisson ratio.
-
+ *
  * Its task is to indicate whether there required material mode is valid for receiver
  * (method hasMaterialModeCapability). Note: for some material models and linear materials
  * there need not exist support for assembling material char matrix at material level,
@@ -116,7 +116,7 @@ public:
      * @param n Material number.
      * @param d Domain to which new material will belong.
      */
-    Material(int n, Domain *d) : FEMComponent(n, d), propertyDictionary(new Dictionary()), castingTime(-1.) { }
+    Material(int n, Domain *d) : FEMComponent(n, d), propertyDictionary( new Dictionary() ), castingTime(-1.) { }
     /// Destructor.
     virtual ~Material() { delete propertyDictionary; }
 
@@ -125,16 +125,6 @@ public:
      * Default implementation returns true.
      */
     virtual bool isCharacteristicMtrxSymmetric(MatResponseMode rMode) { return true; }
-
-    /**
-     * Updates internal state of material in integration point after finishing time step.
-     * Default implementation  extract material status from integration point,
-     * and invokes updateYourself function on it.
-     * @param gp Integration point, where to update state.
-     * @param atTime Time step.
-     */
-    virtual void updateYourself(GaussPoint *gp, TimeStep *atTime);
-
     /**
      * Returns the value of material property 'aProperty'. Property must be identified
      * by unique int id. Integration point also passed to allow for materials with spatially

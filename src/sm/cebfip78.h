@@ -49,7 +49,6 @@
 //@}
 
 namespace oofem {
-
 /**
  * This class implements a CEB-FIP 78 rheologic Maxwell chain model in a finite
  * element problem.
@@ -70,7 +69,6 @@ public:
 
     virtual const char *giveClassName() const { return "CebFip78Material"; }
     virtual const char *giveInputRecordName() const { return _IFT_CebFip78Material_Name; }
-    virtual classType giveClassID() const { return CebFip78MaterialClass; }
     virtual IRResultType initializeFrom(InputRecord *ir);
 
 protected:

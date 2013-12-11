@@ -53,7 +53,6 @@
 //@}
 
 namespace oofem {
-
 /**
  * This class implements a gravity-like load.
  * The attribute 'componentArray' contains the components of an acceleration

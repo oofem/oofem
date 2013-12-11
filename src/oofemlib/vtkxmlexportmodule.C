@@ -195,7 +195,7 @@ VTKXMLExportModule :: giveCellType(Element *elem)
         vtkCellType = 10;
     } else if ( elemGT == EGT_tetra_2 ) {
         vtkCellType = 24;
-    } else if ( elemGT == EGT_quad_1 || EGT_quad_1_interface ) {
+    } else if ( elemGT == EGT_quad_1 || elemGT == EGT_quad_1_interface ) {
         vtkCellType = 9;
     } else if ( elemGT == EGT_quad_21_interface ) {
         vtkCellType = 30;
@@ -274,12 +274,12 @@ VTKXMLExportModule :: giveElementCell(IntArray &answer, Element *elem)
     int nelemNodes;
 
     if ( ( elemGT == EGT_point ) ||
-        ( elemGT == EGT_line_1 ) || ( elemGT == EGT_line_2 ) ||
-        ( elemGT == EGT_triangle_1 ) || ( elemGT == EGT_triangle_2 ) ||
-        ( elemGT == EGT_tetra_1 ) || ( elemGT == EGT_tetra_2 ) ||
-        ( elemGT == EGT_quad_1 ) || ( elemGT == EGT_quad_2 ) ||
-        ( elemGT == EGT_hexa_1 ) ||
-        ( elemGT == EGT_wedge_1 ) ) {
+         ( elemGT == EGT_line_1 ) || ( elemGT == EGT_line_2 ) ||
+         ( elemGT == EGT_triangle_1 ) || ( elemGT == EGT_triangle_2 ) ||
+         ( elemGT == EGT_tetra_1 ) || ( elemGT == EGT_tetra_2 ) ||
+         ( elemGT == EGT_quad_1 ) || ( elemGT == EGT_quad_2 ) ||
+         ( elemGT == EGT_hexa_1 ) ||
+         ( elemGT == EGT_wedge_1 ) ) {
         nelemNodes = elem->giveNumberOfNodes();
         answer.resize(nelemNodes);
         for ( int i = 1; i <= nelemNodes; i++ ) {
@@ -311,26 +311,32 @@ VTKXMLExportModule :: giveElementCell(IntArray &answer, Element *elem)
         answer.resize(nelemNodes);
         for ( int i = 1; i <= nelemNodes; i++ ) {
             answer.at(i) = elem->giveNode(WedgeQuadNodeMapping [ i - 1 ])->giveNumber();
-        } 
+        }
     } else if ( elemGT == EGT_quad9_2 ) {
         nelemNodes = elem->giveNumberOfNodes();
         answer.resize(nelemNodes);
         for ( int i = 1; i <= nelemNodes; i++ ) {
             answer.at(i) = elem->giveNode(i)->giveNumber();
         }
-    } else if ( elemGT == EGT_quad_1_interface ) {int mapping [] = { 1, 2, 4, 3 };
-        nelemNodes = elem->giveNumberOfNodes();    
+    } else if ( elemGT == EGT_quad_1_interface ) {
+        int mapping [] = {
+            1, 2, 4, 3
+        };
+        nelemNodes = elem->giveNumberOfNodes();
         answer.resize(nelemNodes);
         for ( int i = 1; i <= nelemNodes; i++ ) {
-            answer.at(i) = elem->giveNode(mapping [ i - 1 ])->giveNumber() ;
-        }    
-    //} else if ( elemGT == EGT_quad_21_interface ) {int mapping [] = { 1, 2, 5, 4, 3, 6 };
-    } else if ( elemGT == EGT_quad_21_interface ) {int mapping [] = { 1, 3, 2, 5, 6, 4 }; /// this is not the same ordering as defined in the VTK reference (typo?)
-        nelemNodes = elem->giveNumberOfNodes();  
+            answer.at(i) = elem->giveNode(mapping [ i - 1 ])->giveNumber();
+        }
+        //} else if ( elemGT == EGT_quad_21_interface ) {int mapping [] = { 1, 2, 5, 4, 3, 6 };
+    } else if ( elemGT == EGT_quad_21_interface ) {
+        int mapping [] = {
+            1, 3, 2, 5, 6, 4
+        };                                                                                /// this is not the same ordering as defined in the VTK reference (typo?)
+        nelemNodes = elem->giveNumberOfNodes();
         answer.resize(nelemNodes);
         for ( int i = 1; i <= nelemNodes; i++ ) {
-            answer.at(i) = elem->giveNode(mapping [ i - 1 ])->giveNumber() ;
-        }    
+            answer.at(i) = elem->giveNode(mapping [ i - 1 ])->giveNumber();
+        }
     } else {
         OOFEM_ERROR("VTKXMLExportModule: unsupported element geometry type");
     }
@@ -350,12 +356,12 @@ VTKXMLExportModule :: giveNumberOfElementCells(Element *elem)
     Element_Geometry_Type elemGT = elem->giveGeometryType();
 
     if ( ( elemGT == EGT_point ) ||
-        ( elemGT == EGT_line_1 ) || ( elemGT == EGT_line_2 ) ||
-        ( elemGT == EGT_triangle_1 ) || ( elemGT == EGT_triangle_2 ) ||
-        ( elemGT == EGT_tetra_1 ) || ( elemGT == EGT_tetra_2 ) ||
-        ( elemGT == EGT_quad_1 ) || ( elemGT == EGT_quad_2 ) || ( elemGT == EGT_quad9_2 ) ||
-        ( elemGT == EGT_hexa_1 ) || ( elemGT == EGT_hexa_2 ) || ( elemGT == EGT_hexa_27 ) ||
-        ( elemGT == EGT_wedge_1 ) || ( elemGT == EGT_wedge_2 ) ) {
+         ( elemGT == EGT_line_1 ) || ( elemGT == EGT_line_2 ) ||
+         ( elemGT == EGT_triangle_1 ) || ( elemGT == EGT_triangle_2 ) ||
+         ( elemGT == EGT_tetra_1 ) || ( elemGT == EGT_tetra_2 ) ||
+         ( elemGT == EGT_quad_1 ) || ( elemGT == EGT_quad_2 ) || ( elemGT == EGT_quad9_2 ) ||
+         ( elemGT == EGT_hexa_1 ) || ( elemGT == EGT_hexa_2 ) || ( elemGT == EGT_hexa_27 ) ||
+         ( elemGT == EGT_wedge_1 ) || ( elemGT == EGT_wedge_2 ) ) {
         return 1;
     } else {
         OOFEM_ERROR("VTKXMLExportModule: unsupported element geometry type");
@@ -646,8 +652,9 @@ VTKXMLExportModule :: setupVTKPiece(VTKPiece &vtkPiece, TimeStep *tStep, int reg
         vtkPiece.setNumberOfCells(numRegionEl);
 
         int offset = 0;
-        for ( int cellNum = 1; cellNum <= emodel->giveDomain(1)->giveNumberOfElements(); cellNum++ ) {
-            elem = d->giveElement(cellNum);
+        int cellNum = 0;
+        for ( int elNum = 1; elNum <= emodel->giveDomain(1)->giveNumberOfElements(); elNum++ ) {
+            elem = d->giveElement(elNum);
 
             // Skip elements that:
             // are inactivated or of composite type ( these are exported individually later)
@@ -661,6 +668,13 @@ VTKXMLExportModule :: setupVTKPiece(VTKPiece &vtkPiece, TimeStep *tStep, int reg
             }
 
 #endif
+
+            // skip elements not in active region
+            if ( ( region > 0 ) && ( this->smoother->giveElementVirtualRegionNumber(elNum) != region ) ) {
+                continue;
+            }
+
+            cellNum++;
 
             // Set the connectivity
             this->giveElementCell(cellNodes, elem);  // node numbering of the cell with according to the VTK format
@@ -689,7 +703,6 @@ VTKXMLExportModule :: setupVTKPiece(VTKPiece &vtkPiece, TimeStep *tStep, int reg
 
         this->exportCellVars(vtkPiece, numRegionEl, tStep);
     } // end of default piece for simple geometry elements
-
 }
 
 
@@ -799,7 +812,7 @@ VTKXMLExportModule :: writeVTKPiece(VTKPiece &vtkPiece, TimeStep *tStep)
     std :: string pointHeader, cellHeader;
     this->giveDataHeaders(pointHeader, cellHeader);
 
-    fprintf(this->fileStream, "%s", pointHeader.c_str() );
+    fprintf( this->fileStream, "%s", pointHeader.c_str() );
 #endif
 
     this->writePrimaryVars(vtkPiece);       // Variables availablie in the nodes
@@ -811,7 +824,7 @@ VTKXMLExportModule :: writeVTKPiece(VTKPiece &vtkPiece, TimeStep *tStep)
 
 #ifndef __VTK_MODULE
     fprintf(this->fileStream, "</PointData>\n");
-    fprintf(this->fileStream, "%s", cellHeader.c_str() );
+    fprintf( this->fileStream, "%s", cellHeader.c_str() );
 #endif
 
     this->writeCellVars(vtkPiece);          // Single cell variables ( if given in the integration points then an average will be exported)
@@ -1475,7 +1488,7 @@ VTKXMLExportModule :: getNodalVariableFromPrimaryField(FloatArray &answer, DofMa
     InternalStateValueType valType = giveInternalStateValueType(type);
     //rotate back from nodal CS to global CS if applies
     if ( valType == ISVT_VECTOR ) { ///@todo in general, shouldn't this apply for 2nd order tensors as well? /JB
-        Node *node = dynamic_cast< Node * >(dman);
+        Node *node = dynamic_cast< Node * >( dman );
         if ( node && node->hasLocalCS() ) {
             answer.rotatedWith(* node->giveLocalCoordinateTriplet(), 't');
         }
@@ -1568,9 +1581,9 @@ VTKXMLExportModule :: getCellVariableFromIS(FloatArray &answer, Element *el, Int
     valueArray.resize(ncomponents);
 
     switch ( type ) {
-        // Special scalars
+    // Special scalars
     case IST_MaterialNumber:
-        OOFEM_WARNING1 ( "VTKExportModule - Material numbers are deprecated, outputing cross section number instead..." );
+        OOFEM_WARNING1("VTKExportModule - Material numbers are deprecated, outputing cross section number instead...");
     case IST_CrossSectionNumber:
         valueArray.at(1) = ( double ) el->giveCrossSection()->giveNumber();
         break;
@@ -1586,7 +1599,7 @@ VTKXMLExportModule :: getCellVariableFromIS(FloatArray &answer, Element *el, Int
 
         break;
 
-        // Special vectors
+    // Special vectors
     case IST_MaterialOrientation_x:
     case IST_MaterialOrientation_y:
     case IST_MaterialOrientation_z:
@@ -1610,7 +1623,7 @@ VTKXMLExportModule :: getCellVariableFromIS(FloatArray &answer, Element *el, Int
         valueArray.beColumnOf(rotMat, col);
         break;
 
-        // Export cell data as average from ip's as default
+    // Export cell data as average from ip's as default
     default:
 
         // compute cell average from ip values
@@ -1797,7 +1810,7 @@ VTKXMLExportModule :: exportIntVarsInGpAs(IntArray valIDs, TimeStep *tStep)
 {
     Domain *d = emodel->giveDomain(1);
     int nip = 0;
-    int j, k, nc;
+    int j, k, nc = 0;
     int nelem = d->giveNumberOfElements();
     FloatArray *lc, gc, value;
     FILE *stream;
@@ -1898,7 +1911,7 @@ VTKXMLExportModule :: exportIntVarsInGpAs(IntArray valIDs, TimeStep *tStep)
 
         // print collected data summary in header
         fprintf( stream, "<PointData Scalars=\"%s\" Vectors=\"%s\" Tensors=\"%s\" >\n",
-                scalars.c_str(), vectors.c_str(), tensors.c_str() );
+                 scalars.c_str(), vectors.c_str(), tensors.c_str() );
 
         // export actual data, loop over individual IDs to export
         for ( int vi = 1; vi <= valIDs.giveSize(); vi++ ) {
@@ -1937,12 +1950,10 @@ VTKXMLExportModule :: exportIntVarsInGpAs(IntArray valIDs, TimeStep *tStep)
                         fprintf( stream, "%e ", value.at(j) );
                     }
                 } // end loop over IPs
-
             } // end loop over elements
 
             fprintf(stream, "  </DataArray>\n");
         } // end loop over values to be exported
-
     } // end loop over regions
 
     fprintf(stream, "</PointData>\n</Piece>\n");

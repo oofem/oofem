@@ -65,9 +65,9 @@ public:
      * @param n Cross section number.
      * @param d Domain to which new cross section will belong.
      */
-    StructuralInterfaceCrossSection(int n, Domain *d) : CrossSection(n, d) 
-    { 
-        materialNum = 0; 
+    StructuralInterfaceCrossSection(int n, Domain *d) : CrossSection(n, d)
+    {
+        materialNum = 0;
         crossSectionType = CS_StructuralInterfaceCapability;
     }
     /// Destructor.
@@ -94,28 +94,29 @@ public:
     //@{
     // Pass all calls to the material
     void giveFirstPKTraction_1d(FloatArray &answer, GaussPoint *gp, const FloatArray &jump, const FloatArray &reducedF, TimeStep *tStep)
-        { this->giveInterfaceMaterial()->giveFirstPKTraction_1d(answer, gp, jump, reducedF, tStep); }
-    void giveFirstPKTraction_2d(FloatArray &answer, GaussPoint *gp, const FloatArray &jump, const FloatArray &reducedF, TimeStep *tStep) 
-        { this->giveInterfaceMaterial()->giveFirstPKTraction_2d(answer, gp, jump, reducedF, tStep); }
-    void giveFirstPKTraction_3d(FloatArray &answer, GaussPoint *gp, const FloatArray &jump, const FloatMatrix &F, TimeStep *tStep) 
-        { this->giveInterfaceMaterial()->giveFirstPKTraction_3d(answer, gp, jump, F, tStep); }
+    { this->giveInterfaceMaterial()->giveFirstPKTraction_1d(answer, gp, jump, reducedF, tStep); }
+    void giveFirstPKTraction_2d(FloatArray &answer, GaussPoint *gp, const FloatArray &jump, const FloatArray &reducedF, TimeStep *tStep)
+    { this->giveInterfaceMaterial()->giveFirstPKTraction_2d(answer, gp, jump, reducedF, tStep); }
+    void giveFirstPKTraction_3d(FloatArray &answer, GaussPoint *gp, const FloatArray &jump, const FloatMatrix &F, TimeStep *tStep)
+    { this->giveInterfaceMaterial()->giveFirstPKTraction_3d(answer, gp, jump, F, tStep); }
 
 
     void giveEngTraction_1d(FloatArray &answer, GaussPoint *gp, const FloatArray &jump, TimeStep *tStep)
-        { 
-            this->giveInterfaceMaterial()->giveEngTraction_1d(answer, gp, jump, tStep);}
+    {
+        this->giveInterfaceMaterial()->giveEngTraction_1d(answer, gp, jump, tStep);
+    }
     void giveEngTraction_2d(FloatArray &answer, GaussPoint *gp, const FloatArray &jump, TimeStep *tStep)
-        { 
-            FloatArray jump3D, answer3D;
-            jump3D.setValues(3,  jump.at(1), 0.0, jump.at(2) );
-            this->giveInterfaceMaterial()->giveEngTraction_2d(answer3D, gp, jump3D, tStep);
-            answer.setValues(2,  answer3D.at(1), answer3D.at(3) );
-        }
+    {
+        FloatArray jump3D, answer3D;
+        jump3D.setValues( 3,  jump.at(1), 0.0, jump.at(2) );
+        this->giveInterfaceMaterial()->giveEngTraction_2d(answer3D, gp, jump3D, tStep);
+        answer.setValues( 2,  answer3D.at(1), answer3D.at(3) );
+    }
     void giveEngTraction_3d(FloatArray &answer, GaussPoint *gp, const FloatArray &jump, TimeStep *tStep)
-        { 
-            this->giveInterfaceMaterial()->giveEngTraction_3d(answer, gp, jump, tStep); 
-        }
-    
+    {
+        this->giveInterfaceMaterial()->giveEngTraction_3d(answer, gp, jump, tStep);
+    }
+
     void give1dStiffnessMatrix_dTdj(FloatMatrix &answer, MatResponseMode rMode, GaussPoint *gp, TimeStep *tStep);
 
     void give2dStiffnessMatrix_dTdj(FloatMatrix &answer, MatResponseMode rMode, GaussPoint *gp, TimeStep *tStep);
@@ -124,30 +125,28 @@ public:
 
 
     void give1dStiffnessMatrix_Eng(FloatMatrix &answer,  MatResponseMode rMode, GaussPoint *gp, TimeStep *tStep)
-        { this->giveInterfaceMaterial()->give1dStiffnessMatrix_Eng(answer, rMode, gp, tStep); }
+    { this->giveInterfaceMaterial()->give1dStiffnessMatrix_Eng(answer, rMode, gp, tStep); }
     void give2dStiffnessMatrix_Eng(FloatMatrix &answer,  MatResponseMode rMode, GaussPoint *gp, TimeStep *tStep);
 
     void give3dStiffnessMatrix_Eng(FloatMatrix &answer,  MatResponseMode rMode, GaussPoint *gp, TimeStep *tStep)
-        { 
-            this->giveInterfaceMaterial()->give3dStiffnessMatrix_Eng(answer, rMode, gp, tStep); 
-        }
+    {
+        this->giveInterfaceMaterial()->give3dStiffnessMatrix_Eng(answer, rMode, gp, tStep);
+    }
     //@}
-    
-     StructuralInterfaceMaterial *giveInterfaceMaterial();
-     const FloatArray &giveTraction(IntegrationPoint *ip);
 
-     virtual int checkConsistency();
+    StructuralInterfaceMaterial *giveInterfaceMaterial();
+    const FloatArray &giveTraction(IntegrationPoint *ip);
+
+    virtual int checkConsistency();
 
 
     // identification and auxiliary functions
     virtual const char *giveClassName() const { return "StructuralInterfaceCrossSection"; }
     CrossSectExtension crossSectionType;
     /// @return Input record name of the receiver.
-    virtual const char *giveInputRecordName() const { return _IFT_StructuralInterfaceCrossSection_Name; };   
+    virtual const char *giveInputRecordName() const { return _IFT_StructuralInterfaceCrossSection_Name; };
 private:
     int materialNum;
-
 };
 } // end namespace oofem
 #endif // structuralcrosssection_h
-

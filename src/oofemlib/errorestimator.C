@@ -36,12 +36,11 @@
 #include "remeshingcrit.h"
 
 namespace oofem {
-
-ErrorEstimator :: ErrorEstimator ( int n, Domain* d ) : FEMComponent ( n, d )
+ErrorEstimator :: ErrorEstimator(int n, Domain *d) : FEMComponent(n, d)
 {
     rc = NULL;
     skippedNelems = 0;
-    regionSkipMap.resize ( 0 );
+    regionSkipMap.resize(0);
 }
 
 ErrorEstimator :: ~ErrorEstimator()
@@ -67,9 +66,9 @@ ErrorEstimator :: initializeFrom(InputRecord *ir)
     regionSkipMap.resize(0);
     IR_GIVE_OPTIONAL_FIELD(ir, regionSkipMap, _IFT_ErrorEstimator_regionskipmap);
     this->IStype = IST_StressTensor;
-    int val = (int) this->IStype;
+    int val = ( int ) this->IStype;
     IR_GIVE_OPTIONAL_FIELD(ir, val, _IFT_ErrorEstimator_IStype);
-    this->IStype = (InternalStateType) val;
+    this->IStype = ( InternalStateType ) val;
 
     return IRRT_OK;
 }
@@ -79,13 +78,12 @@ void ErrorEstimator :: reinitialize()
     this->rc->reinitialize();
 }
 
-bool ErrorEstimator :: skipRegion ( int reg )
+bool ErrorEstimator :: skipRegion(int reg)
 {
     if ( reg <= regionSkipMap.giveSize() ) {
-        return regionSkipMap.at ( reg ) > 0;
+        return regionSkipMap.at(reg) > 0;
     } else {
         return false;
     }
 }
-
 } // end namespace oofem

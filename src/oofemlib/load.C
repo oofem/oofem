@@ -65,8 +65,8 @@ Load :: computeComponentArrayAt(FloatArray &answer, TimeStep *stepN, ValueModeTy
     factor = this->giveLoadTimeFunction()->evaluate(stepN, mode);
     answer  = this->giveComponentArray();
     answer.times(factor);
-    
-    if ( !isImposed(stepN) ){
+
+    if ( !isImposed(stepN) ) {
         answer.zero();
     }
 }
@@ -102,12 +102,12 @@ Load :: initializeFrom(InputRecord *ir)
 }
 
 
-void Load :: giveInputRecord ( DynamicInputRecord& input )
+void Load :: giveInputRecord(DynamicInputRecord &input)
 {
-    GeneralBoundaryCondition::giveInputRecord ( input );
-    input.setField( this->componentArray, _IFT_Load_components );
+    GeneralBoundaryCondition :: giveInputRecord(input);
+    input.setField(this->componentArray, _IFT_Load_components);
     if ( !this->dofExcludeMask.containsOnlyZeroes() ) {
-        input.setField( this->dofExcludeMask, _IFT_Load_dofexcludemask );
+        input.setField(this->dofExcludeMask, _IFT_Load_dofexcludemask);
     }
 }
 

@@ -65,7 +65,7 @@ public:
     virtual ~DofManExportModule();
 
     virtual IRResultType initializeFrom(InputRecord *ir);
-    virtual void doOutput(TimeStep *tStep, bool forcedOutput=false);
+    virtual void doOutput(TimeStep *tStep, bool forcedOutput = false);
     virtual const char *giveClassName() const { return "DofManExportModuleClass"; }
     virtual const char *giveInputRecordName() const { return _IFT_DofManExportModule_Name; }
 
@@ -74,6 +74,3 @@ protected:
 };
 } // end namespace
 #endif
-
-
-

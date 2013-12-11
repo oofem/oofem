@@ -55,7 +55,6 @@
 #include <string>
 
 namespace oofem {
-
 char cltypesGiveUnknownTypeModeKey(ValueModeType mode)
 {
     switch ( mode ) {
@@ -171,6 +170,7 @@ InternalStateValueType giveInternalStateValueType(InternalStateType type)
     case IST_XFEMNumIntersecPoints:
     case IST_XFEMLevelSetPhi:
     case IST_Maturity:
+    case IST_CrossSectionNumber:
         return ISVT_SCALAR;
 
     default:
@@ -289,9 +289,9 @@ const char *__MatResponseModeToString(MatResponseMode _value) {
     TO_STRING_BODY(MatResponseMode_DEF)
 }
 
-std::string __DofIDItemToString(DofIDItem _value) {
+std :: string __DofIDItemToString(DofIDItem _value) {
     if ( _value >= MaxDofID ) {
-        char tmp[1024];
+        char tmp [ 1024 ];
         sprintf(tmp, "X_%d", _value - MaxDofID + 1);
         return tmp;
     }
@@ -317,6 +317,4 @@ const char *__EquationIDToString(EquationID _value) {
 const char *__XFEMStateTypeToString(XFEMStateType _value) {
     TO_STRING_BODY(XFEMStateType_DEF)
 }
-
-
 } // end namespace oofem

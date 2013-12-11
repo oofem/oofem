@@ -56,8 +56,7 @@
 #endif
 
 namespace oofem {
-
-REGISTER_Element( Quad10_2D_SUPG );
+REGISTER_Element(Quad10_2D_SUPG);
 
 FEI2dQuadLin Quad10_2D_SUPG :: velocityInterpolation(1, 2);
 FEI2dQuadConst Quad10_2D_SUPG :: pressureInterpolation(1, 2);
@@ -81,7 +80,7 @@ Quad10_2D_SUPG :: giveInterpolation() const
 FEInterpolation *
 Quad10_2D_SUPG :: giveInterpolation(DofIDItem id) const
 {
-    if (id == P_f) {
+    if ( id == P_f ) {
         return & this->pressureInterpolation;
     } else {
         return & this->velocityInterpolation;
@@ -140,6 +139,14 @@ Quad10_2D_SUPG :: initializeFrom(InputRecord *ir)
 
 
 void
+Quad10_2D_SUPG :: giveInputRecord(DynamicInputRecord &input)
+{
+    SUPGElement2 :: giveInputRecord(input);
+    this->pressureNode.giveInputRecord(input);
+}
+
+
+void
 Quad10_2D_SUPG :: computeGaussPoints()
 // Sets up the array containing the four Gauss points of the receiver.
 {
@@ -149,14 +156,14 @@ Quad10_2D_SUPG :: computeGaussPoints()
 
 
         integrationRulesArray [ 0 ] = new GaussIntegrationRule(1, this, 1, 3);
-        this->giveCrossSection()->setupIntegrationPoints( *integrationRulesArray[0], 4, this );
+        this->giveCrossSection()->setupIntegrationPoints(* integrationRulesArray [ 0 ], 4, this);
 
         //seven point Gauss integration
         integrationRulesArray [ 1 ] = new GaussIntegrationRule(2, this, 1, 3);
-        this->giveCrossSection()->setupIntegrationPoints( *integrationRulesArray[1], 4, this );
+        this->giveCrossSection()->setupIntegrationPoints(* integrationRulesArray [ 1 ], 4, this);
 
         integrationRulesArray [ 2 ] = new GaussIntegrationRule(3, this, 1, 3);
-        this->giveCrossSection()->setupIntegrationPoints( *integrationRulesArray[3], 4, this );
+        this->giveCrossSection()->setupIntegrationPoints(* integrationRulesArray [ 3 ], 4, this);
     }
 }
 
@@ -166,7 +173,7 @@ Quad10_2D_SUPG :: computeNuMatrix(FloatMatrix &answer, GaussPoint *gp)
 {
     FloatArray n;
 
-    this->velocityInterpolation.evalN(n, * gp->giveCoordinates(), FEIElementGeometryWrapper(this));
+    this->velocityInterpolation.evalN( n, * gp->giveCoordinates(), FEIElementGeometryWrapper(this) );
     answer.resize(2, 8);
     answer.zero();
 
@@ -182,7 +189,7 @@ Quad10_2D_SUPG :: computeUDotGradUMatrix(FloatMatrix &answer, GaussPoint *gp, Ti
 {
     FloatMatrix n, dn;
     FloatArray u, un;
-    this->velocityInterpolation.evaldNdx( dn, * gp->giveCoordinates(), FEIElementGeometryWrapper(this));
+    this->velocityInterpolation.evaldNdx( dn, * gp->giveCoordinates(), FEIElementGeometryWrapper(this) );
     this->computeNuMatrix(n, gp);
     this->computeVectorOf(EID_MomentumBalance, VM_Total, atTime, un);
 
@@ -200,7 +207,7 @@ void
 Quad10_2D_SUPG :: computeBMatrix(FloatMatrix &answer, GaussPoint *gp)
 {
     FloatMatrix dn(4, 2);
-    this->velocityInterpolation.evaldNdx(dn, * gp->giveCoordinates(), FEIElementGeometryWrapper(this));
+    this->velocityInterpolation.evaldNdx( dn, * gp->giveCoordinates(), FEIElementGeometryWrapper(this) );
 
     answer.resize(3, 8);
     answer.zero();
@@ -217,7 +224,7 @@ void
 Quad10_2D_SUPG :: computeDivUMatrix(FloatMatrix &answer, GaussPoint *gp)
 {
     FloatMatrix dn(4, 2);
-    velocityInterpolation.evaldNdx(dn, * gp->giveCoordinates(), FEIElementGeometryWrapper(this));
+    velocityInterpolation.evaldNdx( dn, * gp->giveCoordinates(), FEIElementGeometryWrapper(this) );
 
     answer.resize(1, 8);
     answer.zero();
@@ -232,7 +239,7 @@ void
 Quad10_2D_SUPG :: computeNpMatrix(FloatMatrix &answer, GaussPoint *gp)
 {
     FloatArray n(1);
-    pressureInterpolation.evalN(n, * gp->giveCoordinates(), FEIElementGeometryWrapper(this));
+    pressureInterpolation.evalN( n, * gp->giveCoordinates(), FEIElementGeometryWrapper(this) );
 
     answer.resize(1, 1);
     answer.zero();
@@ -252,7 +259,7 @@ Quad10_2D_SUPG :: computeGradUMatrix(FloatMatrix &answer, GaussPoint *gp, TimeSt
 
     this->computeVectorOf(EID_MomentumBalance, VM_Total, atTime, u);
 
-    velocityInterpolation.evaldNdx(dn, * gp->giveCoordinates(), FEIElementGeometryWrapper(this));
+    velocityInterpolation.evaldNdx( dn, * gp->giveCoordinates(), FEIElementGeometryWrapper(this) );
     for ( int i = 1; i <= 4; i++ ) {
         dnx.at(i) = dn.at(i, 1);
         dny.at(i) = dn.at(i, 2);
@@ -272,7 +279,7 @@ void
 Quad10_2D_SUPG :: computeGradPMatrix(FloatMatrix &answer, GaussPoint *gp)
 {
     FloatMatrix dn(1, 2);
-    pressureInterpolation.evaldNdx(dn, * gp->giveCoordinates(), FEIElementGeometryWrapper(this));
+    pressureInterpolation.evaldNdx( dn, * gp->giveCoordinates(), FEIElementGeometryWrapper(this) );
 
     answer.beTranspositionOf(dn);
 }
@@ -295,10 +302,10 @@ Quad10_2D_SUPG :: updateStabilizationCoeffs(TimeStep *atTime)
 
     IntegrationRule *iRule = integrationRulesArray [ 1 ];
     mu_min = 1;
-    rho = this->giveMaterial()->give('d', integrationRulesArray [ 0 ]->getIntegrationPoint(0));
+    rho = this->giveMaterial()->give( 'd', integrationRulesArray [ 0 ]->getIntegrationPoint(0) );
     for ( int j = 0; j < iRule->giveNumberOfIntegrationPoints(); j++ ) {
         GaussPoint *gp = iRule->getIntegrationPoint(j);
-        mu = static_cast< FluidDynamicMaterial* >(this->giveMaterial())->giveEffectiveViscosity(gp, atTime);
+        mu = static_cast< FluidDynamicMaterial * >( this->giveMaterial() )->giveEffectiveViscosity(gp, atTime);
         if ( mu_min > mu ) {
             mu_min = mu;
         }
@@ -460,7 +467,7 @@ Quad10_2D_SUPG :: computeAdvectionEpsilonTerm(FloatMatrix &answer, TimeStep *atT
     //  to compute t_pspg
     FloatMatrix g, b;
 
-    answer.resize(0,0);
+    answer.resize(0, 0);
 
     IntegrationRule *iRule = this->integrationRulesArray [ 1 ];
 
@@ -519,6 +526,7 @@ Quad10_2D_SUPG :: LS_PCS_computeF(LevelSetPCS *ls, TimeStep *atTime)
 
     answer = ( 1. / 3. ) * ( fix * ( un.at(1) + un.at(3) + un.at(5) ) + fiy * ( un.at(2) + un.at(4) + un.at(6) ) ) / norm;
     return answer;
+
 #endif
     return 0.0;
 }
@@ -550,7 +558,7 @@ Quad10_2D_SUPG :: computeCriticalTimeStep(TimeStep *tStep)
 
 void
 Quad10_2D_SUPG :: NodalAveragingRecoveryMI_computeNodalValue(FloatArray &answer, int node,
-                                                          InternalStateType type, TimeStep *tStep)
+                                                             InternalStateType type, TimeStep *tStep)
 {
     GaussPoint *gp = integrationRulesArray [ 0 ]->getIntegrationPoint(0);
     this->giveIPValue(answer, gp, type, tStep);
@@ -559,7 +567,7 @@ Quad10_2D_SUPG :: NodalAveragingRecoveryMI_computeNodalValue(FloatArray &answer,
 
 void
 Quad10_2D_SUPG :: NodalAveragingRecoveryMI_computeSideValue(FloatArray &answer, int side,
-                                                         InternalStateType type, TimeStep *tStep)
+                                                            InternalStateType type, TimeStep *tStep)
 {
     answer.resize(0);
 }
@@ -644,7 +652,7 @@ Quad10_2D_SUPG :: computeVolumeAround(GaussPoint *aGaussPoint)
 {
     double determinant, weight, volume;
 
-    determinant = fabs( this->velocityInterpolation.giveTransformationJacobian(* aGaussPoint->giveCoordinates(), FEIElementGeometryWrapper(this)) );
+    determinant = fabs( this->velocityInterpolation.giveTransformationJacobian( * aGaussPoint->giveCoordinates(), FEIElementGeometryWrapper(this) ) );
 
 
     weight = aGaussPoint->giveWeight();
@@ -655,7 +663,7 @@ Quad10_2D_SUPG :: computeVolumeAround(GaussPoint *aGaussPoint)
 
 #if 0
 double
-Quad10_2D_SUPG :: computeVolumeAroundPressure(FEInterpolation2d& interpol, GaussPoint *aGaussPoint)
+Quad10_2D_SUPG :: computeVolumeAroundPressure(FEInterpolation2d &interpol, GaussPoint *aGaussPoint)
 // Returns the portion of the receiver which is attached to aGaussPoint.
 {
     double determinant, weight, volume;
@@ -691,7 +699,7 @@ Quad10_2D_SUPG :: printOutputAt(FILE *file, TimeStep *stepN)
 #ifdef __PARALLEL_MODE
     fprintf( file, "element %d [%8d] :\n", this->giveNumber(), this->giveGlobalNumber() );
 #else
-    fprintf( file, "element %d :\n", number );
+    fprintf(file, "element %d :\n", number);
 #endif
     pressureNode.printOutputAt(file, stepN);
 
@@ -723,7 +731,7 @@ Quad10_2D_SUPG :: giveLocalPressureDofMap(IntArray &map)
 #ifdef __OOFEG
 int
 Quad10_2D_SUPG :: giveInternalStateAtNode(FloatArray &answer, InternalStateType type, InternalStateMode mode,
-                                       int node, TimeStep *atTime)
+                                          int node, TimeStep *atTime)
 {
     return SUPGElement :: giveInternalStateAtNode(answer, type, mode, node, atTime);
 }

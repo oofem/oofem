@@ -39,8 +39,7 @@
 #include "classfactory.h"
 
 namespace oofem {
-
-REGISTER_Material( BazantNajjarMoistureTransferMaterial );
+REGISTER_Material(BazantNajjarMoistureTransferMaterial);
 
 IRResultType
 BazantNajjarMoistureTransferMaterial :: initializeFrom(InputRecord *ir)

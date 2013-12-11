@@ -39,8 +39,7 @@
 #include <sstream>
 
 namespace oofem {
-
-REGISTER_LoadTimeFunction( UserDefinedLoadTimeFunction );
+REGISTER_LoadTimeFunction(UserDefinedLoadTimeFunction);
 
 UserDefinedLoadTimeFunction :: UserDefinedLoadTimeFunction(int n, Domain *d) : LoadTimeFunction(n, d) { }
 
@@ -56,14 +55,14 @@ UserDefinedLoadTimeFunction :: initializeFrom(InputRecord *ir)
 
     return LoadTimeFunction :: initializeFrom(ir);
 }
-    
+
 double UserDefinedLoadTimeFunction :: __at(double time)
 {
     Parser myParser;
     int err;
     double result;
 
-    std::ostringstream buff;
+    std :: ostringstream buff;
     buff << "t=" << time << ";" << ftExpression;
     result = myParser.eval(buff.str().c_str(), err);
     if ( err ) {
@@ -84,7 +83,7 @@ double UserDefinedLoadTimeFunction :: __derAt(double time)
         return 0.;
     }
 
-    std::ostringstream buff;
+    std :: ostringstream buff;
     buff << "t=" << time << ";" << dfdtExpression;
     result = myParser.eval(buff.str().c_str(), err);
     if ( err ) {
@@ -106,7 +105,7 @@ double UserDefinedLoadTimeFunction :: __accelAt(double time)
         return 0.;
     }
 
-    std::ostringstream buff;
+    std :: ostringstream buff;
     buff << "t=" << time << ";" << d2fdt2Expression;
     result = myParser.eval(buff.str().c_str(), err);
     if ( err ) {
@@ -115,5 +114,4 @@ double UserDefinedLoadTimeFunction :: __accelAt(double time)
 
     return result;
 }
-
 } // end namespace oofem

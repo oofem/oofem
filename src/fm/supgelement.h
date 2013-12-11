@@ -74,6 +74,7 @@ public:
     virtual ~SUPGElement();
 
     virtual IRResultType initializeFrom(InputRecord *ir);
+    virtual void giveInputRecord(DynamicInputRecord &input);
 
     virtual void giveCharacteristicMatrix(FloatMatrix &answer, CharType type, TimeStep *tStep);
     virtual void giveCharacteristicVector(FloatArray &answer, CharType type, ValueModeType mode, TimeStep *tStep);
@@ -165,31 +166,31 @@ public:
      */
     virtual void computeSlipWithFrictionBCTerm_MB(FloatMatrix &answer, Load *load, int side, TimeStep *atTime) {
         _warning("computeSlipWithFrictionBCTerm_MB not implemented");
-        answer.resize(0,0);
+        answer.resize(0, 0);
     }
     /**
      * Computes Lhs contribution due to applied Penetration bc.
      */
-    virtual void computePenetrationWithResistanceBCTerm_MB(FloatMatrix &answer, Load *load, int side, TimeStep *atTime){
+    virtual void computePenetrationWithResistanceBCTerm_MB(FloatMatrix &answer, Load *load, int side, TimeStep *atTime) {
         _warning("computePenetrationWithResistanceBCTerm_MB not implemented");
-        answer.resize(0,0);
+        answer.resize(0, 0);
     }
     /**
      * Computes Lhs contribution due to outflow BC.
      */
-    virtual void computeOutFlowBCTerm_MB(FloatMatrix &answer, int side, TimeStep *atTime){
+    virtual void computeOutFlowBCTerm_MB(FloatMatrix &answer, int side, TimeStep *atTime) {
         _warning("computeOutFlowBCTerm_MB not implemented");
-        answer.resize(0,0);
+        answer.resize(0, 0);
     }
-    
 
-    virtual void computeHomogenizedReinforceTerm_MB(FloatMatrix &answer,  Load * load, TimeStep *atTime){
+
+    virtual void computeHomogenizedReinforceTerm_MB(FloatMatrix &answer,  Load *load, TimeStep *atTime) {
         _warning("computeHomogenizedReinforceTerm_MB");
-        answer.resize(0,0); 
+        answer.resize(0, 0);
     }
-    virtual void computeHomogenizedReinforceTerm_MC(FloatMatrix &answer,  Load * load, TimeStep *atTime){
+    virtual void computeHomogenizedReinforceTerm_MC(FloatMatrix &answer,  Load *load, TimeStep *atTime) {
         _warning("computeHomogenizedReinforceTerm_MB");
-        answer.resize(0,0); 
+        answer.resize(0, 0);
     }
 
 

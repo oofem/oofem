@@ -55,8 +55,7 @@
 #endif
 
 namespace oofem {
-
-REGISTER_Element( Lattice2d_mt );
+REGISTER_Element(Lattice2d_mt);
 
 Lattice2d_mt :: Lattice2d_mt(int n, Domain *aDomain, ElementMode em) :
     LatticeTransportElement(n, aDomain, em)
@@ -127,9 +126,8 @@ Lattice2d_mt :: giveMass()
     GaussPoint *gp;
     IntegrationRule *iRule = integrationRulesArray [ giveDefaultIntegrationRule() ];
     gp = iRule->getIntegrationPoint(0);
-    Material *mat = this->giveMaterial();
 
-    status = ( LatticeTransportMaterialStatus * ) gp->giveMaterialStatus();
+    status = static_cast< LatticeTransportMaterialStatus * >( gp->giveMaterialStatus() );
     double mass = 0;
     mass = status->giveMass();
     //multiply with volume
@@ -197,7 +195,7 @@ Lattice2d_mt :: updateInternalState(TimeStep *stepN)
         iRule = integrationRulesArray [ i ];
         for ( j = 0; j < iRule->giveNumberOfIntegrationPoints(); j++ ) {
             gp = iRule->getIntegrationPoint(j);
-            this->computeNmatrixAt( n, *gp->giveCoordinates() );
+            this->computeNmatrixAt( n, * gp->giveCoordinates() );
             this->computeVectorOf(EID_ConservationEquation, VM_Total, stepN, r);
             f.beProductOf(n, r);
             mat->updateInternalState(f, gp, stepN);

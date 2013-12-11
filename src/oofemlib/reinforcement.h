@@ -57,10 +57,10 @@ namespace oofem {
  */
 class OOFEM_EXPORT Reinforcement : public BodyLoad
 {
- protected:
-  double porosity;
-  double shapefactor;
-  FloatArray permeability;
+protected:
+    double porosity;
+    double shapefactor;
+    FloatArray permeability;
 
 
 public:
@@ -79,17 +79,15 @@ public:
 
     virtual bcValType giveBCValType() const { return ReinforceBVT; }
     virtual bcGeomType giveBCGeoType() const { return BodyLoadBGT; }
-    
+
     virtual IRResultType initializeFrom(InputRecord *ir);
-    virtual classType giveClassID() const { return ReinforcementClass; }
     virtual const char *giveClassName() const { return "Reinforcement"; }
     virtual const char *giveInputRecordName() const { return _IFT_Reinforcement_Name; }
 
     /// Accessor
     double givePorosity() { return porosity; }
     double giveshapefactor() { return shapefactor; }
-    FloatArray* givePermeability() { return &permeability; }
+    FloatArray *givePermeability() { return & permeability; }
 };
 } // end namespace oofem
 #endif // deadwght_h
-

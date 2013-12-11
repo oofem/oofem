@@ -43,7 +43,6 @@
 #include "structuralms.h"
 
 namespace oofem {
-
 /**
  * This class implements associated Material Status to PerfectlyPlasticMaterial.
  *
@@ -92,7 +91,6 @@ public:
 
     // definition
     virtual const char *giveClassName() const { return "PerfectlyPlasticMaterialStatus"; }
-    virtual classType giveClassID() const { return PerfectlyPlasticMaterialStatusClass; }
 };
 
 /**
@@ -134,7 +132,7 @@ public:
     virtual ~PerfectlyPlasticMaterial() { delete linearElasticMaterial; }
 
     virtual void giveRealStressVector(FloatArray &answer, GaussPoint *gp,
-                              const FloatArray &reducedStrain, TimeStep *tStep);
+                                      const FloatArray &reducedStrain, TimeStep *tStep);
 
     virtual void giveRealStressVector_3d(FloatArray &answer, GaussPoint *gp, const FloatArray &reducedE, TimeStep *tStep)
     { this->giveRealStressVector(answer, gp, reducedE, tStep); }
@@ -158,7 +156,6 @@ public:
     virtual int hasNonLinearBehaviour() { return 1; }
     virtual int hasMaterialModeCapability(MaterialMode mode);
     virtual const char *giveClassName() const { return "PerfectlyPlasticMaterial"; }
-    virtual classType giveClassID() const { return PerfectlyPlasticMaterialClass; }
     virtual IRResultType initializeFrom(InputRecord *ir);
     LinearElasticMaterial *giveLinearElasticMaterial() { return linearElasticMaterial; }
 
@@ -201,9 +198,9 @@ protected:
                                           GaussPoint *gp,
                                           TimeStep *tStep);
     virtual void givePlateLayerStiffMtrx(FloatMatrix &answer,
-                                           MatResponseMode mode,
-                                           GaussPoint *gp,
-                                           TimeStep *tStep);
+                                         MatResponseMode mode,
+                                         GaussPoint *gp,
+                                         TimeStep *tStep);
 
     void computeTrialStressIncrement(FloatArray &answer, GaussPoint *gp,
                                      const FloatArray &strainIncrement, TimeStep *tStep);

@@ -53,7 +53,7 @@ MMAShapeFunctProjection :: ~MMAShapeFunctProjection()
 { }
 
 void
-MMAShapeFunctProjection :: __init(Domain *dold, IntArray &varTypes, FloatArray &coords, int region, TimeStep *tStep)
+MMAShapeFunctProjection :: __init(Domain *dold, IntArray &varTypes, FloatArray &coords, int region, TimeStep *tStep, bool iCohesiveZoneGP)
 //(Domain* dold, IntArray& varTypes, GaussPoint* gp, TimeStep* tStep)
 {
     int nvar = varTypes.giveSize();
@@ -109,7 +109,7 @@ MMAShapeFunctProjection :: mapVariable(FloatArray &answer, GaussPoint *gp, Inter
         for ( int inode = 1; inode <= nnodes; inode++ ) {
             container.put(inode, new FloatArray);
             this->smootherList.at(indx)->giveNodalVector( nvec, elem->giveDofManager(inode)->giveNumber(),
-                                                         elem->giveRegionNumber() );
+                                                          elem->giveRegionNumber() );
             * ( container.at(inode) ) = * nvec;
         }
 
@@ -139,7 +139,7 @@ MMAShapeFunctProjection :: __mapVariable(FloatArray &answer, FloatArray &coords,
     const FloatArray *nvec;
 
     if ( ( interface = static_cast< MMAShapeFunctProjectionInterface * >
-                       ( elem->giveInterface(MMAShapeFunctProjectionInterfaceType) ))  == NULL ) {
+                       ( elem->giveInterface(MMAShapeFunctProjectionInterfaceType) ) )  == NULL ) {
         abort();
     }
 
@@ -148,7 +148,7 @@ MMAShapeFunctProjection :: __mapVariable(FloatArray &answer, FloatArray &coords,
         for ( int inode = 1; inode <= nnodes; inode++ ) {
             container.put(inode, new FloatArray);
             this->smootherList.at(indx)->giveNodalVector( nvec, elem->giveDofManager(inode)->giveNumber(),
-                                                         elem->giveRegionNumber() );
+                                                          elem->giveRegionNumber() );
             * ( container.at(inode) ) = * nvec;
         }
 
@@ -160,5 +160,13 @@ MMAShapeFunctProjection :: __mapVariable(FloatArray &answer, FloatArray &coords,
     }
 
     return 1;
+}
+
+int
+MMAShapeFunctProjection :: mapStatus(MaterialStatus &oStatus) const
+{
+    OOFEM_ERROR("ERROR: MMAShapeFunctProjection :: mapStatus() is not implemented yet.")
+
+    return 0;
 }
 } // end namespace oofem

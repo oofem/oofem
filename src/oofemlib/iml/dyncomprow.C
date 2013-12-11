@@ -51,8 +51,7 @@
 #endif
 
 namespace oofem {
-
-REGISTER_SparseMtrx( DynCompRow, SMT_DynCompRow);
+REGISTER_SparseMtrx(DynCompRow, SMT_DynCompRow);
 
 DynCompRow :: DynCompRow(void) : SparseMtrx(), base_(0)
 {
@@ -80,7 +79,7 @@ DynCompRow :: DynCompRow(const DynCompRow &S) : SparseMtrx(S.nRows, S.nColumns),
     if ( S.rows_ ) {
         this->rows_ = new FloatArray * [ S.nRows ];
         for ( i = 0; i < S.nRows; i++ ) {
-            this->rows_ [ i ] = new FloatArray(*S.rows_ [ i ]);
+            this->rows_ [ i ] = new FloatArray(* S.rows_ [ i ]);
         }
     } else {
         this->rows_ = NULL;
@@ -89,7 +88,7 @@ DynCompRow :: DynCompRow(const DynCompRow &S) : SparseMtrx(S.nRows, S.nColumns),
     if ( S.colind_ ) {
         this->colind_ = new IntArray * [ S.nRows ];
         for ( i = 0; i < S.nRows; i++ ) {
-            this->colind_ [ i ] = new IntArray(*S.colind_ [ i ]);
+            this->colind_ [ i ] = new IntArray(* S.colind_ [ i ]);
         }
     } else {
         this->colind_ = NULL;
@@ -129,7 +128,7 @@ DynCompRow :: ~DynCompRow()
 /* Assignment operator...  */
 /***************************/
 
-DynCompRow &DynCompRow :: operator = ( const DynCompRow & C )
+DynCompRow &DynCompRow :: operator=(const DynCompRow &C)
 {
     base_   = C.base_;
 
@@ -146,7 +145,7 @@ DynCompRow &DynCompRow :: operator = ( const DynCompRow & C )
     if ( C.rows_ ) {
         this->rows_ = new FloatArray * [ C.nRows ];
         for ( i = 0; i < C.nRows; i++ ) {
-            this->rows_ [ i ] = new FloatArray(*C.rows_ [ i ]);
+            this->rows_ [ i ] = new FloatArray(* C.rows_ [ i ]);
         }
     } else {
         this->rows_ = NULL;
@@ -164,7 +163,7 @@ DynCompRow &DynCompRow :: operator = ( const DynCompRow & C )
     if ( C.colind_ ) {
         this->colind_ = new IntArray * [ C.nRows ];
         for ( i = 0; i < C.nRows; i++ ) {
-            this->colind_ [ i ] = new IntArray(*C.colind_ [ i ]);
+            this->colind_ [ i ] = new IntArray(* C.colind_ [ i ]);
         }
     } else {
         this->colind_ = NULL;
@@ -178,7 +177,7 @@ DynCompRow &DynCompRow :: operator = ( const DynCompRow & C )
 
 SparseMtrx *DynCompRow :: GiveCopy() const
 {
-    DynCompRow *result = new DynCompRow(*this);
+    DynCompRow *result = new DynCompRow(* this);
     return result;
 }
 
@@ -356,27 +355,27 @@ int DynCompRow :: buildInternalStructure(EngngModel *eModel, int di, EquationID 
 
     // loop over active boundary conditions
     int nbc = domain->giveNumberOfBoundaryConditions();
-    std::vector<IntArray> r_locs;
-    std::vector<IntArray> c_locs;
-    
+    std :: vector< IntArray >r_locs;
+    std :: vector< IntArray >c_locs;
+
     for ( int i = 1; i <= nbc; ++i ) {
         ActiveBoundaryCondition *bc = dynamic_cast< ActiveBoundaryCondition * >( domain->giveBc(i) );
         if ( bc != NULL ) {
             bc->giveLocationArrays(r_locs, c_locs, ut, UnknownCharType, s, s);
-	    for (std::size_t k = 0; k < r_locs.size(); k++) {
-	      IntArray &krloc = r_locs[k];
-	      IntArray &kcloc = c_locs[k];
-	      for ( int i = 1; i <= krloc.giveSize(); i++ ) {
-		if ( ( ii = krloc.at(i) ) ) {
-		  for ( int j = 1; j <= kcloc.giveSize(); j++ ) {
-		    if ( (jj = kcloc.at(j) ) ) {
-		      this->insertColInRow(ii - 1, jj - 1);
-		    }
-		  }
-		}
-	      }
-	    }
-	}
+            for ( std :: size_t k = 0; k < r_locs.size(); k++ ) {
+                IntArray &krloc = r_locs [ k ];
+                IntArray &kcloc = c_locs [ k ];
+                for ( int i = 1; i <= krloc.giveSize(); i++ ) {
+                    if ( ( ii = krloc.at(i) ) ) {
+                        for ( int j = 1; j <= kcloc.giveSize(); j++ ) {
+                            if ( ( jj = kcloc.at(j) ) ) {
+                                this->insertColInRow(ii - 1, jj - 1);
+                            }
+                        }
+                    }
+                }
+            }
+        }
     }
 
 
@@ -515,7 +514,7 @@ double DynCompRow :: at(int i, int j) const
     }
 }
 
-double DynCompRow :: operator() (int i, int j)  const
+double DynCompRow :: operator()(int i, int j)  const
 {
     int colIndx;
     if ( ( colIndx = this->giveColIndx(i, j) ) ) {
@@ -530,7 +529,7 @@ double DynCompRow :: operator() (int i, int j)  const
     }
 }
 
-double &DynCompRow :: operator() (int i, int j)
+double &DynCompRow :: operator()(int i, int j)
 {
     int colIndx;
 
@@ -752,14 +751,14 @@ DynCompRow :: insertColInRow(int row, int col)
  * IntArray iw (nColumns);
  * diag_rowptr_.resize(nRows);
  *
- *#ifndef DynCompRow_USE_STL_SETS
+ **#ifndef DynCompRow_USE_STL_SETS
  * for (i = 0; i < nRows; i++) // row loop
  *  if ((diag_rowptr_(i) = giveColIndx (i, i)) == 0) { // giveColIndx returns 1-based indexing
  * printf ("DynCompRow:: Zero diagonal member\n");
  * exit(1);
  * }
  *
- *#else
+ **#else
  * std::map<int, double>::iterator pos;
  * for (i = 0; i < nRows; i++) {// row loop
  * pos  = this->rows[i]->find(i);
@@ -770,10 +769,10 @@ DynCompRow :: insertColInRow(int row, int col)
  * exit(1);
  * }
  * }
- *#endif
+ **#endif
  *
  * // FACTOR MATRIX //
- *#ifndef DynCompRow_USE_STL_SETS
+ **#ifndef DynCompRow_USE_STL_SETS
  *
  * for (i=1; i< nRows; i++) { // loop  over rows
  * for (k=0; k < (diag_rowptr_(i)-1); k++) { // loop 1,...,i-1 for (i,k) \in NZ(A)
@@ -792,9 +791,9 @@ DynCompRow :: insertColInRow(int row, int col)
  * }
  * }
  *
- *#else
+ **#else
  * NOT IMPLEMENTED NOW
- *#endif
+ **#endif
  * }
  */
 

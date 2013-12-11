@@ -57,7 +57,6 @@
 //@}
 
 namespace oofem {
-
 /**
  * Class implementing "simple" cross section model in finite element problem.
  * A cross section  is an attribute of a domain. It is usually also attribute of many
@@ -82,22 +81,26 @@ namespace oofem {
 class OOFEM_EXPORT SimpleCrossSection : public StructuralCrossSection
 {
 public:
-    /** 
+    /**
      * Constructor.
      * @param n Cross section number.
      * @param d Associated domain.
      */
     SimpleCrossSection(int n, Domain *d) : StructuralCrossSection(n, d) {
-      materialNumber = 0;
-      czMaterialNumber = 0;
+        materialNumber = 0;
+        czMaterialNumber = 0;
     }
-
-    virtual double give(CrossSectionProperty a);
 
     virtual void giveRealStress_3d(FloatArray &answer, GaussPoint *gp, const FloatArray &reducedStrain, TimeStep *tStep);
     virtual void giveRealStress_PlaneStrain(FloatArray &answer, GaussPoint *gp, const FloatArray &reducedStrain, TimeStep *tStep);
     virtual void giveRealStress_PlaneStress(FloatArray &answer, GaussPoint *gp, const FloatArray &reducedStrain, TimeStep *tStep);
     virtual void giveRealStress_1d(FloatArray &answer, GaussPoint *gp, const FloatArray &reducedStrain, TimeStep *tStep);
+
+    virtual void giveStiffnessMatrix_3d(FloatMatrix &answer, MatResponseMode mode, GaussPoint *gp, TimeStep *tStep);
+    virtual void giveStiffnessMatrix_PlaneStress(FloatMatrix &answer, MatResponseMode mode, GaussPoint *gp, TimeStep *tStep);
+    virtual void giveStiffnessMatrix_PlaneStrain(FloatMatrix &answer, MatResponseMode mode, GaussPoint *gp, TimeStep *tStep);
+    virtual void giveStiffnessMatrix_1d(FloatMatrix &answer, MatResponseMode mode, GaussPoint *gp, TimeStep *tStep);
+
 
     virtual void giveRealStress_Beam2d(FloatArray &answer, GaussPoint *gp, const FloatArray &generalizedStrain, TimeStep *tStep);
     virtual void giveRealStress_Beam3d(FloatArray &answer, GaussPoint *gp, const FloatArray &generalizedStrain, TimeStep *tStep);
@@ -106,15 +109,15 @@ public:
     virtual void giveRealStress_MembraneRot(FloatArray &answer, GaussPoint *gp, const FloatArray &generalizedStrain, TimeStep *tStep);
 
 
-    virtual void giveCharMaterialStiffnessMatrix(FloatMatrix &answer, MatResponseMode rMode, GaussPoint *gp, TimeStep *tStep);
-    virtual bool isCharacteristicMtrxSymmetric(MatResponseMode rMode);
+    virtual void giveCharMaterialStiffnessMatrix(FloatMatrix &answer, MatResponseMode mode, GaussPoint *gp, TimeStep *tStep);
+    virtual bool isCharacteristicMtrxSymmetric(MatResponseMode mode);
 
 
-    virtual void give2dBeamStiffMtrx(FloatMatrix &answer, MatResponseMode rMode, GaussPoint *gp, TimeStep *tStep);
-    virtual void give3dBeamStiffMtrx(FloatMatrix &answer, MatResponseMode rMode, GaussPoint *gp, TimeStep *tStep);
-    virtual void give2dPlateStiffMtrx(FloatMatrix &answer, MatResponseMode rMode, GaussPoint *gp, TimeStep *tStep);
-    virtual void give3dShellStiffMtrx(FloatMatrix &answer,MatResponseMode rMode, GaussPoint *gp, TimeStep *tStep);
-    virtual void giveMembraneRotStiffMtrx(FloatMatrix &answer, MatResponseMode rMode, GaussPoint *gp, TimeStep *tStep);
+    virtual void give2dBeamStiffMtrx(FloatMatrix &answer, MatResponseMode mode, GaussPoint *gp, TimeStep *tStep);
+    virtual void give3dBeamStiffMtrx(FloatMatrix &answer, MatResponseMode mode, GaussPoint *gp, TimeStep *tStep);
+    virtual void give2dPlateStiffMtrx(FloatMatrix &answer, MatResponseMode mode, GaussPoint *gp, TimeStep *tStep);
+    virtual void give3dShellStiffMtrx(FloatMatrix &answer, MatResponseMode mode, GaussPoint *gp, TimeStep *tStep);
+    virtual void giveMembraneRotStiffMtrx(FloatMatrix &answer, MatResponseMode mode, GaussPoint *gp, TimeStep *tStep);
 
     /**
      * Initializes receiver acording to object description stored in input record.
@@ -131,31 +134,35 @@ public:
     virtual IRResultType initializeFrom(InputRecord *ir);
     virtual void giveInputRecord(DynamicInputRecord &input);
 
+    virtual void createMaterialStatus(GaussPoint &iGP); // ES
+
+
     // identification and auxiliary functions
     virtual const char *giveClassName() const { return "SimpleCrossSection"; }
     virtual const char *giveInputRecordName() const { return _IFT_SimpleCrossSection_Name; }
-    virtual classType giveClassID() const { return SimpleCrossSectionClass; }
 
-    virtual double give(int aProperty, GaussPoint *gp); 
-    virtual Material *giveMaterial(IntegrationPoint *ip);    
-    
-    int const giveMaterialNumber() { return this->materialNumber; };
+    virtual double give(int aProperty, GaussPoint *gp);
+    virtual double give(CrossSectionProperty a, GaussPoint *gp) { return CrossSection :: give(a, gp); }
+    virtual double give(CrossSectionProperty a, const FloatArray *coords, Element *elem, bool local) { return CrossSection :: give(a, coords, elem, local); }
+    virtual Material *giveMaterial(IntegrationPoint *ip);
+
+    int giveMaterialNumber() const { return this->materialNumber; };
     void setMaterialNumber(int matNum) { this->materialNumber = matNum; };
     virtual int checkConsistency();
-    virtual Interface *giveInterface(InterfaceType t, IntegrationPoint *ip);
+    virtual Interface *giveMaterialInterface(InterfaceType t, IntegrationPoint *ip);
 
 
 
 
     virtual void giveFirstPKStresses(FloatArray &answer, GaussPoint *gp, const FloatArray &reducedFIncrement, TimeStep *tStep);
     virtual void giveCauchyStresses(FloatArray &answer, GaussPoint *gp, const FloatArray &reducedFIncrement, TimeStep *tStep);
-    virtual void giveStiffnessMatrix_dPdF(FloatMatrix &answer, MatResponseMode rMode, GaussPoint *gp, TimeStep *tStep);
-    virtual void giveStiffnessMatrix_dCde(FloatMatrix &answer, MatResponseMode rMode, GaussPoint *gp, TimeStep *tStep);
+    virtual void giveStiffnessMatrix_dPdF(FloatMatrix &answer, MatResponseMode mode, GaussPoint *gp, TimeStep *tStep);
+    virtual void giveStiffnessMatrix_dCde(FloatMatrix &answer, MatResponseMode mode, GaussPoint *gp, TimeStep *tStep);
 
     virtual void computeStressIndependentStrainVector(FloatArray &answer, GaussPoint *gp, TimeStep *stepN, ValueModeType mode);
 
 
-private:
+protected:
     int materialNumber;   // material number
     int czMaterialNumber; // cohesive zone material number
 };

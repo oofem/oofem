@@ -89,13 +89,6 @@ public:
 
     virtual IRResultType initializeFrom(InputRecord *ir);
     virtual const char *giveClassName() const { return "MeshQualityErrorEstimator"; }
-    virtual classType giveClassID() const { return MeshQualityErrorEstimatorClass; }
 };
 } // end namespace oofem
 #endif // meshqualityerrorestimator_h
-
-
-
-
-
-

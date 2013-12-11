@@ -43,17 +43,16 @@
 #include "mathfem.h"
 
 namespace oofem {
-
-REGISTER_EngngModel( NLTransientTransportProblem );
+REGISTER_EngngModel(NLTransientTransportProblem);
 
 NLTransientTransportProblem :: NLTransientTransportProblem(int i, EngngModel *_master = NULL) : NonStationaryTransportProblem(i, _master)
 {
-//constructor
+    //constructor
 }
 
 NLTransientTransportProblem :: ~NLTransientTransportProblem()
 {
-//destructor
+    //destructor
 }
 
 IRResultType
@@ -90,7 +89,7 @@ void NLTransientTransportProblem :: solveYourselfAt(TimeStep *tStep)
     // Right hand side
     FloatArray rhs;
     double solutionErr, incrementErr;
-    int neq =  this->giveNumberOfDomainEquations(1, EModelDefaultEquationNumbering());
+    int neq =  this->giveNumberOfDomainEquations( 1, EModelDefaultEquationNumbering() );
 
 #ifdef VERBOSE
     OOFEM_LOG_RELEVANT( "Solving [step number %8d, time %15e]\n", tStep->giveNumber(), tStep->giveTargetTime() );
@@ -114,8 +113,8 @@ void NLTransientTransportProblem :: solveYourselfAt(TimeStep *tStep)
 
     //create previous solution from IC or from previous tStep
     if ( tStep->isTheFirstStep() ) {
-        if( stepWhenIcApply == NULL ){
-            stepWhenIcApply = new TimeStep(*tStep->givePreviousStep());
+        if ( stepWhenIcApply == NULL ) {
+            stepWhenIcApply = new TimeStep( * tStep->givePreviousStep() );
         }
         this->applyIC(stepWhenIcApply); //insert solution to hash=1(previous), if changes in equation numbering
     }
@@ -137,7 +136,7 @@ void NLTransientTransportProblem :: solveYourselfAt(TimeStep *tStep)
             copyUnknownsInDictionary( VM_Total, tStep, tStep->givePreviousStep() );
         }
 
-        UnknownsField->initialize(VM_Total, tStep->givePreviousStep(), * solutionVector, EModelDefaultEquationNumbering());
+        UnknownsField->initialize( VM_Total, tStep->givePreviousStep(), * solutionVector, EModelDefaultEquationNumbering() );
     } else {
         //copy previous solution vector to actual
         * solutionVector = * UnknownsField->giveSolutionVector( tStep->givePreviousStep() );
@@ -163,26 +162,26 @@ void NLTransientTransportProblem :: solveYourselfAt(TimeStep *tStep)
             conductivityMatrix->zero();
             //Assembling left hand side - start with conductivity matrix
             this->assemble( conductivityMatrix, & TauStep, EID_ConservationEquation, LHSBCMatrix,
-                           EModelDefaultEquationNumbering(), this->giveDomain(1) );
+                            EModelDefaultEquationNumbering(), this->giveDomain(1) );
             this->assemble( conductivityMatrix, & TauStep, EID_ConservationEquation, IntSourceLHSMatrix,
-                           EModelDefaultEquationNumbering(), this->giveDomain(1) );
+                            EModelDefaultEquationNumbering(), this->giveDomain(1) );
             conductivityMatrix->times(alpha);
             //Add capacity matrix
             this->assemble( conductivityMatrix, & TauStep, EID_ConservationEquation, NSTP_MidpointLhs,
-                           EModelDefaultEquationNumbering(), this->giveDomain(1) );
+                            EModelDefaultEquationNumbering(), this->giveDomain(1) );
         }
 
         rhs.resize(neq);
         rhs.zero();
         //edge or surface load on element
         this->assembleVectorFromElements( rhs, & TauStep, EID_ConservationEquation, ElementBCTransportVector, VM_Total,
-                                         EModelDefaultEquationNumbering(), this->giveDomain(1) );
+                                          EModelDefaultEquationNumbering(), this->giveDomain(1) );
         //add internal source vector on elements
         this->assembleVectorFromElements( rhs, & TauStep, EID_ConservationEquation, ElementInternalSourceVector, VM_Total,
-                                         EModelDefaultEquationNumbering(), this->giveDomain(1) );
+                                          EModelDefaultEquationNumbering(), this->giveDomain(1) );
         //add nodal load
         this->assembleVectorFromDofManagers( rhs, & TauStep, ExternalForcesVector, VM_Total,
-                                            EModelDefaultEquationNumbering(), this->giveDomain(1) );
+                                             EModelDefaultEquationNumbering(), this->giveDomain(1) );
 
         // subtract the rhs part depending on previous solution
         assembleAlgorithmicPartOfRhs(rhs, EID_ConservationEquation, EModelDefaultEquationNumbering(), & TauStep);
@@ -221,7 +220,7 @@ double NLTransientTransportProblem :: giveUnknownComponent(ValueModeType mode, T
 // This function translates this request to numerical method language
 {
     if ( this->requiresUnknownsDictionaryUpdate() ) {
-        if (mode == VM_Incremental) { //get difference between current and previous time variable
+        if ( mode == VM_Incremental ) { //get difference between current and previous time variable
             return dof->giveUnknowns()->at(0) - dof->giveUnknowns()->at(1);
         }
         int hash = this->giveUnknownDictHashIndx(mode, tStep);
@@ -423,7 +422,7 @@ NLTransientTransportProblem :: assembleAlgorithmicPartOfRhs(FloatArray &answer, 
         if ( !element->isActivated(tStep) ) {
             continue;
         }
-        
+
         element->giveLocationArray(loc, ut, ns);
 
         element->giveCharacteristicMatrix(charMtrxCond, ConductivityMatrix, tStep);

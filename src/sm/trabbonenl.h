@@ -53,7 +53,6 @@
 //@}
 
 namespace oofem {
-
 /**
  * Trabecular bone nonlocal material status
  */
@@ -73,7 +72,6 @@ public:
     void setLocalCumPlastStrainForAverage(double ls) { localCumPlastStrainForAverage = ls; }
 
     virtual const char *giveClassName() const { return "TrabBoneNLStatus"; }
-    virtual classType   giveClassID() const { return TrabBoneMaterialStatusClass; }
 
     virtual void initTempStatus();
 
@@ -97,7 +95,6 @@ public:
     virtual ~TrabBoneNL();
 
     virtual const char *giveClassName() const { return "TrabBoneNL"; }
-    virtual classType   giveClassID()   const { return TrabBoneNLClass; }
     virtual const char *giveInputRecordName() const { return _IFT_TrabBoneNL_Name; }
 
     virtual IRResultType initializeFrom(InputRecord *ir);

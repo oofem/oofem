@@ -82,7 +82,6 @@ public:
     virtual bcGeomType giveBCGeoType() const { return EdgeLoadBGT; }
     virtual FormulationType giveFormulationType() { return formulation; }
 
-    virtual classType giveClassID() const { return LinearEdgeLoadClass; }
     virtual const char *giveClassName() const { return "LinearEdgeLoad"; }
     virtual const char *giveInputRecordName() const { return _IFT_LinearEdgeLoad_Name; }
 

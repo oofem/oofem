@@ -68,7 +68,7 @@ public:
     SlaveDof(int n, DofManager *aNode, DofIDItem id = Undef);
     /// Destructor.
     virtual ~SlaveDof(void) { }
-    
+
     virtual dofType giveDofType() { return DT_slave; }
 
     void initialize(int cntOfMstrDfMngr, const IntArray &masterNodes, const IntArray *mstrDofID, const FloatArray &mstrContribution);

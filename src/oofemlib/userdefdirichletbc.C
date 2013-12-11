@@ -45,12 +45,10 @@
 #include <Python.h>
 
 namespace oofem {
-
-REGISTER_BoundaryCondition( UserDefDirichletBC );
+REGISTER_BoundaryCondition(UserDefDirichletBC);
 
 UserDefDirichletBC :: UserDefDirichletBC(int i, Domain *d) : BoundaryCondition(i, d)
-{
-}
+{}
 
 
 UserDefDirichletBC :: ~UserDefDirichletBC()
@@ -70,8 +68,8 @@ UserDefDirichletBC :: give(Dof *dof, ValueModeType mode, TimeStep *stepN)
 
     /*
      * The Python function takes two input arguments:
-     * 	1) An array with node coordinates
-     * 	2) The dof id
+     *  1) An array with node coordinates
+     *  2) The dof id
      */
     int numArgs = 3;
 
@@ -81,16 +79,17 @@ UserDefDirichletBC :: give(Dof *dof, ValueModeType mode, TimeStep *stepN)
 
     PyObject *pArgs = PyTuple_New(numArgs);
 
-    for (int i = 0; i < dim; i++) {
-        PyList_SET_ITEM(pArgArray, i, PyFloat_FromDouble( dMan->giveCoordinate(i+1) ));
+    for ( int i = 0; i < dim; i++ ) {
+        PyList_SET_ITEM( pArgArray, i, PyFloat_FromDouble( dMan->giveCoordinate(i + 1) ) );
     }
+
     // PyTuple_SetItem takes over responsibility for objects passed
     // to it -> no DECREF
     PyTuple_SetItem(pArgs, 0, pArgArray);
 
 
     // Dof number
-    PyObject *pValDofNum = PyLong_FromLong(dof->giveDofID());
+    PyObject *pValDofNum = PyLong_FromLong( dof->giveDofID() );
     PyTuple_SetItem(pArgs, 1, pValDofNum);
 
 
@@ -111,8 +110,7 @@ UserDefDirichletBC :: give(Dof *dof, ValueModeType mode, TimeStep *stepN)
     double retVal = 0.0;
     if ( pRetVal != NULL ) {
         retVal = PyFloat_AsDouble(pRetVal);
-    }
-    else {
+    } else {
         OOFEM_ERROR("UserDefDirichletBC :: give: Failed to fetch Python return value.");
     }
 
@@ -120,7 +118,7 @@ UserDefDirichletBC :: give(Dof *dof, ValueModeType mode, TimeStep *stepN)
     Py_DECREF(pArgs);
     Py_DECREF(pRetVal);
 
-    return retVal*factor;
+    return retVal * factor;
 }
 
 
@@ -138,7 +136,7 @@ UserDefDirichletBC :: initializeFrom(InputRecord *ir)
 
     // Import Python file
     mpName = PyString_FromString( this->mFileName.c_str() );
-    mpModule = PyImport_Import( mpName );
+    mpModule = PyImport_Import(mpName);
 
     if ( mpModule != NULL ) {
         // Load and call Python function
@@ -174,5 +172,4 @@ UserDefDirichletBC :: scale(double s)
 {
     values.times(s);
 }
-
 } // end namespace oofem

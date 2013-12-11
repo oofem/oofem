@@ -122,7 +122,7 @@ TransportElement :: giveCharacteristicMatrix(FloatMatrix &answer,
 
 void
 TransportElement :: giveCharacteristicVector(FloatArray &answer, CharType mtrx, ValueModeType mode,
-                                              TimeStep *tStep)
+                                             TimeStep *tStep)
 //
 // returns characteristics vector of receiver according to requested type
 //
@@ -137,7 +137,7 @@ TransportElement :: giveCharacteristicVector(FloatArray &answer, CharType mtrx, 
         this->computeInternalSourceRhsVectorAt(answer, tStep, mode);
     } else {
         _error2( "giveCharacteristicVector: Unknown Type of characteristic mtrx (%s)",
-                __CharTypeToString(mtrx) );
+                 __CharTypeToString(mtrx) );
     }
 }
 
@@ -262,10 +262,10 @@ void
 TransportElement :: computeEgdeNAt(FloatArray &answer, int iedge, const FloatArray &lcoords)
 {
     FEInterpolation *interp = this->giveInterpolation();
-    if ( dynamic_cast< FEInterpolation2d * >(interp) ) {
-        dynamic_cast< FEInterpolation2d * >(interp)->edgeEvalN( answer, iedge, lcoords, FEIElementGeometryWrapper(this) );
-    } else if ( dynamic_cast< FEInterpolation3d * >(interp) ) {
-        dynamic_cast< FEInterpolation3d * >(interp)->edgeEvalN( answer, iedge, lcoords, FEIElementGeometryWrapper(this) );
+    if ( dynamic_cast< FEInterpolation2d * >( interp ) ) {
+        dynamic_cast< FEInterpolation2d * >( interp )->edgeEvalN( answer, iedge, lcoords, FEIElementGeometryWrapper(this) );
+    } else if ( dynamic_cast< FEInterpolation3d * >( interp ) ) {
+        dynamic_cast< FEInterpolation3d * >( interp )->edgeEvalN( answer, iedge, lcoords, FEIElementGeometryWrapper(this) );
     }
 }
 
@@ -274,10 +274,10 @@ void
 TransportElement :: giveEdgeDofMapping(IntArray &answer, int iEdge)
 {
     FEInterpolation *interp = this->giveInterpolation();
-    if ( dynamic_cast< FEInterpolation2d * >(interp) ) {
-        dynamic_cast< FEInterpolation2d * >(interp)->computeLocalEdgeMapping(answer, iEdge);
-    } else if ( dynamic_cast< FEInterpolation3d * >(interp) ) {
-        dynamic_cast< FEInterpolation3d * >(interp)->computeLocalEdgeMapping(answer, iEdge);
+    if ( dynamic_cast< FEInterpolation2d * >( interp ) ) {
+        dynamic_cast< FEInterpolation2d * >( interp )->computeLocalEdgeMapping(answer, iEdge);
+    } else if ( dynamic_cast< FEInterpolation3d * >( interp ) ) {
+        dynamic_cast< FEInterpolation3d * >( interp )->computeLocalEdgeMapping(answer, iEdge);
     }
 }
 
@@ -286,10 +286,10 @@ void
 TransportElement :: computeEdgeIpGlobalCoords(FloatArray &answer, const FloatArray &lcoords, int iEdge)
 {
     FEInterpolation *interp = this->giveInterpolation();
-    if ( dynamic_cast< FEInterpolation2d * >(interp) ) {
-        dynamic_cast< FEInterpolation2d * >(interp)->edgeLocal2global( answer, iEdge, lcoords, FEIElementGeometryWrapper(this) );
-    } else if ( dynamic_cast< FEInterpolation3d * >(interp) ) {
-        dynamic_cast< FEInterpolation3d * >(interp)->edgeLocal2global( answer, iEdge, lcoords, FEIElementGeometryWrapper(this) );
+    if ( dynamic_cast< FEInterpolation2d * >( interp ) ) {
+        dynamic_cast< FEInterpolation2d * >( interp )->edgeLocal2global( answer, iEdge, lcoords, FEIElementGeometryWrapper(this) );
+    } else if ( dynamic_cast< FEInterpolation3d * >( interp ) ) {
+        dynamic_cast< FEInterpolation3d * >( interp )->edgeLocal2global( answer, iEdge, lcoords, FEIElementGeometryWrapper(this) );
     }
 }
 
@@ -297,8 +297,8 @@ void
 TransportElement :: computeSurfaceNAt(FloatArray &answer, int iSurf, const FloatArray &lcoord)
 {
     FEInterpolation *interp = this->giveInterpolation();
-    if ( dynamic_cast< FEInterpolation3d * >(interp) ) {
-        dynamic_cast< FEInterpolation3d * >(interp)->surfaceEvalN( answer, iSurf, lcoord, FEIElementGeometryWrapper(this) );
+    if ( dynamic_cast< FEInterpolation3d * >( interp ) ) {
+        dynamic_cast< FEInterpolation3d * >( interp )->surfaceEvalN( answer, iSurf, lcoord, FEIElementGeometryWrapper(this) );
     }
 }
 
@@ -306,8 +306,8 @@ void
 TransportElement :: giveSurfaceDofMapping(IntArray &answer, int iSurf)
 {
     FEInterpolation *interp = this->giveInterpolation();
-    if ( dynamic_cast< FEInterpolation3d * >(interp) ) {
-        dynamic_cast< FEInterpolation3d * >(interp)->computeLocalSurfaceMapping(answer, iSurf);
+    if ( dynamic_cast< FEInterpolation3d * >( interp ) ) {
+        dynamic_cast< FEInterpolation3d * >( interp )->computeLocalSurfaceMapping(answer, iSurf);
     }
 }
 
@@ -315,8 +315,8 @@ void
 TransportElement :: computeSurfIpGlobalCoords(FloatArray &answer, const FloatArray &lcoord, int iSurf)
 {
     FEInterpolation *interp = this->giveInterpolation();
-    if ( dynamic_cast< FEInterpolation3d * >(interp) ) {
-        dynamic_cast< FEInterpolation3d * >(interp)->surfaceLocal2global( answer, iSurf, lcoord, FEIElementGeometryWrapper(this) );
+    if ( dynamic_cast< FEInterpolation3d * >( interp ) ) {
+        dynamic_cast< FEInterpolation3d * >( interp )->surfaceLocal2global( answer, iSurf, lcoord, FEIElementGeometryWrapper(this) );
     }
 }
 
@@ -537,7 +537,7 @@ TransportElement :: computeLoadVector(FloatArray &answer, Load *load, CharType t
 {
     answer.resize(0);
 
-    if ( !( load->giveType() == TransmissionBC && type == ExternalForcesVector ) && 
+    if ( !( load->giveType() == TransmissionBC && type == ExternalForcesVector ) &&
          !( load->giveType() == ConvectionBC && type == InternalForcesVector ) ) {
         return;
     }
@@ -548,9 +548,9 @@ TransportElement :: computeLoadVector(FloatArray &answer, Load *load, CharType t
     this->giveDefaultDofManDofIDMask(1, dofid);
 
     ///@todo Deal with coupled fields (I think they should be another class of problems completely).
-    FEInterpolation *fieldInterp = this->giveInterpolation((DofIDItem)dofid.at(1));
+    FEInterpolation *fieldInterp = this->giveInterpolation( ( DofIDItem ) dofid.at(1) );
     FEInterpolation *interp = this->giveInterpolation();
-    IntegrationRule *iRule = interp->giveIntegrationRule(load->giveApproxOrder() + fieldInterp->giveInterpolationOrder());
+    IntegrationRule *iRule = interp->giveIntegrationRule( load->giveApproxOrder() + fieldInterp->giveInterpolationOrder() );
 
     if ( load->giveType() == ConvectionBC ) {
         this->computeVectorOf(EID_ConservationEquation, VM_Total, tStep, unknowns);
@@ -558,11 +558,11 @@ TransportElement :: computeLoadVector(FloatArray &answer, Load *load, CharType t
 
     for ( int i = 0; i < iRule->giveNumberOfIntegrationPoints(); i++ ) {
         GaussPoint *gp = iRule->getIntegrationPoint(i);
-        FloatArray &lcoords = *gp->giveCoordinates();
+        FloatArray &lcoords = * gp->giveCoordinates();
 
-        fieldInterp->evalN(n, lcoords, FEIElementGeometryWrapper(this));
-        double detJ = interp->giveTransformationJacobian(lcoords, FEIElementGeometryWrapper(this));
-        interp->local2global(gcoords, lcoords, FEIElementGeometryWrapper(this));
+        fieldInterp->evalN( n, lcoords, FEIElementGeometryWrapper(this) );
+        double detJ = interp->giveTransformationJacobian( lcoords, FEIElementGeometryWrapper(this) );
+        interp->local2global( gcoords, lcoords, FEIElementGeometryWrapper(this) );
         double dV = this->giveThicknessAt(gcoords) * gp->giveWeight() * detJ;
 
         if ( load->giveType() == TransmissionBC ) {
@@ -582,7 +582,7 @@ TransportElement :: computeLoadVector(FloatArray &answer, Load *load, CharType t
                 load->computeValueAt(val, tStep, gcoords, mode);
             }
             val.at(1) -= field;
-            val.times( -1.0 * load->giveProperty('a'));
+            val.times( -1.0 * load->giveProperty('a') );
         }
 
         answer.add(val.at(1) * dV, n);
@@ -597,7 +597,7 @@ TransportElement :: computeBoundaryLoadVector(FloatArray &answer, BoundaryLoad *
 {
     answer.resize(0);
 
-    if ( !( load->giveType() == TransmissionBC && type == ExternalForcesVector ) && 
+    if ( !( load->giveType() == TransmissionBC && type == ExternalForcesVector ) &&
          !( load->giveType() == ConvectionBC && type == InternalForcesVector ) ) {
         return;
     }
@@ -608,7 +608,7 @@ TransportElement :: computeBoundaryLoadVector(FloatArray &answer, BoundaryLoad *
     this->giveDefaultDofManDofIDMask(1, dofid);
 
     ///@todo Deal with coupled fields (I think they should be another class of problems completely).
-    FEInterpolation *fieldInterp = this->giveInterpolation((DofIDItem)dofid.at(1));
+    FEInterpolation *fieldInterp = this->giveInterpolation( ( DofIDItem ) dofid.at(1) );
     FEInterpolation *interp = this->giveInterpolation();
     IntegrationRule *iRule = interp->giveBoundaryIntegrationRule(load->giveApproxOrder() + 1 + fieldInterp->giveInterpolationOrder(), boundary);
 
@@ -620,11 +620,11 @@ TransportElement :: computeBoundaryLoadVector(FloatArray &answer, BoundaryLoad *
 
     for ( int i = 0; i < iRule->giveNumberOfIntegrationPoints(); i++ ) {
         GaussPoint *gp = iRule->getIntegrationPoint(i);
-        FloatArray &lcoords = *gp->giveCoordinates();
+        FloatArray &lcoords = * gp->giveCoordinates();
 
-        fieldInterp->boundaryEvalN(n, boundary, lcoords, FEIElementGeometryWrapper(this));
-        double detJ = interp->boundaryGiveTransformationJacobian(boundary, lcoords, FEIElementGeometryWrapper(this));
-        interp->boundaryLocal2Global(gcoords, boundary, lcoords, FEIElementGeometryWrapper(this));
+        fieldInterp->boundaryEvalN( n, boundary, lcoords, FEIElementGeometryWrapper(this) );
+        double detJ = interp->boundaryGiveTransformationJacobian( boundary, lcoords, FEIElementGeometryWrapper(this) );
+        interp->boundaryLocal2Global( gcoords, boundary, lcoords, FEIElementGeometryWrapper(this) );
         double dA = this->giveThicknessAt(gcoords) * gp->giveWeight() * detJ;
 
         if ( load->giveType() == TransmissionBC ) {
@@ -642,10 +642,10 @@ TransportElement :: computeBoundaryLoadVector(FloatArray &answer, BoundaryLoad *
                 load->computeValueAt(val, tStep, gcoords, mode);
             }
             val.at(1) -= field;
-            val.times( -1.0 * load->giveProperty('a'));
+            val.times( -1.0 * load->giveProperty('a') );
         }
 
-        answer.add( val.at(1) * dA, n);
+        answer.add(val.at(1) * dA, n);
     }
 
     delete iRule;
@@ -657,7 +657,7 @@ TransportElement :: computeBoundaryEdgeLoadVector(FloatArray &answer, BoundaryLo
 {
     answer.resize(0);
 
-    if ( !( load->giveType() == TransmissionBC && type == ExternalForcesVector ) && 
+    if ( !( load->giveType() == TransmissionBC && type == ExternalForcesVector ) &&
          !( load->giveType() == ConvectionBC && type == InternalForcesVector ) ) {
         return;
     }
@@ -668,7 +668,7 @@ TransportElement :: computeBoundaryEdgeLoadVector(FloatArray &answer, BoundaryLo
     this->giveDefaultDofManDofIDMask(1, dofid);
 
     ///@todo Deal with coupled fields (I think they should be another class of problems completely).
-    FEInterpolation *fieldInterp = this->giveInterpolation((DofIDItem)dofid.at(1));
+    FEInterpolation *fieldInterp = this->giveInterpolation( ( DofIDItem ) dofid.at(1) );
     FEInterpolation *interp = this->giveInterpolation();
     IntegrationRule *iRule = interp->giveBoundaryEdgeIntegrationRule(load->giveApproxOrder() + 1 + fieldInterp->giveInterpolationOrder(), boundary);
 
@@ -680,11 +680,11 @@ TransportElement :: computeBoundaryEdgeLoadVector(FloatArray &answer, BoundaryLo
 
     for ( int i = 0; i < iRule->giveNumberOfIntegrationPoints(); i++ ) {
         GaussPoint *gp = iRule->getIntegrationPoint(i);
-        FloatArray &lcoords = *gp->giveCoordinates();
+        FloatArray &lcoords = * gp->giveCoordinates();
 
-        fieldInterp->boundaryEdgeEvalN(n, boundary, lcoords, FEIElementGeometryWrapper(this));
-        double detJ = interp->boundaryEdgeGiveTransformationJacobian(boundary, lcoords, FEIElementGeometryWrapper(this));
-        interp->boundaryEdgeLocal2Global(gcoords, boundary, lcoords, FEIElementGeometryWrapper(this));
+        fieldInterp->boundaryEdgeEvalN( n, boundary, lcoords, FEIElementGeometryWrapper(this) );
+        double detJ = interp->boundaryEdgeGiveTransformationJacobian( boundary, lcoords, FEIElementGeometryWrapper(this) );
+        interp->boundaryEdgeLocal2Global( gcoords, boundary, lcoords, FEIElementGeometryWrapper(this) );
         double dL = this->giveThicknessAt(gcoords) * gp->giveWeight() * detJ;
 
         if ( load->giveType() == TransmissionBC ) {
@@ -702,10 +702,10 @@ TransportElement :: computeBoundaryEdgeLoadVector(FloatArray &answer, BoundaryLo
                 load->computeValueAt(val, tStep, gcoords, mode);
             }
             val.at(1) -= field;
-            val.times( -1.0 * load->giveProperty('a'));
+            val.times( -1.0 * load->giveProperty('a') );
         }
 
-        answer.add( val.at(1) * dL, n);
+        answer.add(val.at(1) * dL, n);
     }
 
     delete iRule;
@@ -798,7 +798,7 @@ TransportElement :: computeEdgeBCSubVectorAt(FloatArray &answer, Load *load, int
     answer.zero();
 
     if ( ( load->giveType() == TransmissionBC ) || ( load->giveType() == ConvectionBC ) ) {
-        BoundaryLoad *edgeLoad = static_cast< BoundaryLoad * >(load);
+        BoundaryLoad *edgeLoad = static_cast< BoundaryLoad * >( load );
         if ( edgeLoad->isDofExcluded(indx) || !edgeLoad->isImposed(tStep) ) {
             return;
         }
@@ -1159,5 +1159,4 @@ TransportElement :: giveInternalStateAtNode(FloatArray &answer, InternalStateTyp
 }
 
 #endif
-
 } // end namespace oofem

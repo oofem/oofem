@@ -37,7 +37,6 @@
 #include "enumitem.h"
 
 namespace oofem {
-
 //EID_AuxMomentumBalance - Auxiliary equation for characteristic-split based methods
 //EID_MomentumBalance_ConservationEquation - Coupled system
 
@@ -66,4 +65,3 @@ enum EquationID {
 const char *__EquationIDToString(EquationID _value);
 } // end namespace oofem
 #endif // equationid_h
-

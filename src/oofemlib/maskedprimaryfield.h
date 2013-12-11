@@ -44,7 +44,6 @@
 #include "contextmode.h"
 
 namespace oofem {
-
 /**
  * Abstract class representing subset of DOFs (identified by DofId mask) of primary field.
  * As the PrimaryField stores the state directly in solution vectors that are usually directly
@@ -55,19 +54,20 @@ namespace oofem {
 class OOFEM_EXPORT MaskedPrimaryField : public Field
 {
 protected:
-    PrimaryField* master;
+    PrimaryField *master;
     IntArray mask;
 public:
-    MaskedPrimaryField (FieldType b, PrimaryField* m, IntArray& dofIdMask) : Field (b), mask(dofIdMask) { master = m; }
+    MaskedPrimaryField(FieldType b, PrimaryField *m, IntArray &dofIdMask) : Field(b), mask(dofIdMask) { master = m; }
 
     virtual int evaluateAt(FloatArray &answer, FloatArray &coords,
-                    ValueModeType mode, TimeStep *atTime) ;
-    virtual int evaluateAt(FloatArray &answer, DofManager* dman,
-                    ValueModeType mode, TimeStep *atTime) ;
+                           ValueModeType mode, TimeStep *atTime);
+    virtual int evaluateAt(FloatArray &answer, DofManager *dman,
+                           ValueModeType mode, TimeStep *atTime);
 
     virtual contextIOResultType restoreContext(DataStream *stream, ContextMode mode) { return CIO_OK; }
     virtual contextIOResultType saveContext(DataStream *stream, ContextMode mode) { return CIO_OK; }
-};
 
+    virtual const char *giveClassName() const { return "MaskedPrimaryField"; }
+};
 } // end namespace oofem
 #endif // maskedprimaryfield_h

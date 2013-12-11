@@ -48,15 +48,15 @@ namespace oofem {
  * Class implements an triangular three-node  plane-
  * stress elasticity finite element with independentvertex rotations.
  * Each node has 3 degrees of freedom.
- * For reference, see: 
- * Allman, D.J. 
+ * For reference, see:
+ * Allman, D.J.
  * A compatible triangular element including vertex rotations for plane elasticity analysis.
  * Computers & Structures Vol. 19, No. 1-2, pp. 1-8, 1984.
  */
 class TrPlanestressRotAllman : public TrPlaneStress2d
 {
 protected:
-  static FEI2dTrQuad qinterpolation; // quadratic interpolation for constructing shape functons
+    static FEI2dTrQuad qinterpolation; // quadratic interpolation for constructing shape functons
 
 public:
     TrPlanestressRotAllman(int, Domain *);
@@ -65,14 +65,14 @@ public:
 protected:
     virtual void computeGaussPoints();
     virtual void computeBmatrixAt(GaussPoint *gp, FloatMatrix &answer, int = 1, int = ALL_STRAINS);
-    virtual void computeNmatrixAt(GaussPoint *gp, FloatMatrix &answer);
+    virtual void computeNmatrixAt(const FloatArray &iLocCoord, FloatMatrix &answer);
 
     virtual double giveArea();
     virtual int giveApproxOrder() { return 2; }
-    void computeLocalCoordinates(FloatArray lxy[6]);
-    /** 
+    void computeLocalNodalCoordinates(FloatArray lxy [ 6 ]);
+    /**
      * Computes the stiffness matrix stabilization of zero energy mode (equal rotations)
-     * 
+     *
      * @param answer Computed stiffness matrix (symmetric).
      * @param rMode Response mode.
      * @param tStep Time step.
@@ -82,7 +82,6 @@ public:
     // definition & identification
     virtual const char *giveInputRecordName() const { return _IFT_TrPlanestressRotAllman_Name; }
     virtual const char *giveClassName() const { return "TrPlanestressRotAllman"; }
-    virtual classType giveClassID() const { return TrPlanestressRotAllmanClass; }
     virtual IRResultType initializeFrom(InputRecord *ir);
     virtual MaterialMode giveMaterialMode() { return _PlaneStress; }
     virtual integrationDomain giveIntegrationDomain() const { return _Triangle; }
@@ -92,13 +91,12 @@ public:
     virtual int computeNumberOfDofs() { return 9; }
     virtual void giveDofManDofIDMask(int inode, EquationID, IntArray &) const;
 
-    Interface* giveInterface(InterfaceType interface);
+    Interface *giveInterface(InterfaceType interface);
     virtual int ZZRemeshingCriteriaI_givePolynOrder() { return 2; };
-    
+
     void computeEgdeNMatrixAt(FloatMatrix &answer, int iedge, GaussPoint *gp);
     void giveEdgeDofMapping(IntArray &answer, int iEdge) const;
     int SPRNodalRecoveryMI_giveNumberOfIP();
-
 };
 } // end namespace oofem
 #endif //  trplanestressrotallman_h

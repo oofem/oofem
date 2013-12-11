@@ -47,9 +47,9 @@ namespace oofem {
 #define rcm_RESIDUALSTIFFFACTOR 1.e-3
 
 RCM2Material :: RCM2Material(int n, Domain *d) : StructuralMaterial(n, d)
-//
-// constructor
-//
+    //
+    // constructor
+    //
 {
     linearElasticMaterial = NULL;
     Gf = Ft = 0.;
@@ -71,8 +71,8 @@ RCM2Material :: hasMaterialModeCapability(MaterialMode mode)
 //
 {
     return mode == _3dMat || mode == _PlaneStress ||
-        mode == _PlaneStrain || mode == _1dMat ||
-        mode == _PlateLayer || mode == _2dBeamLayer;
+           mode == _PlaneStrain || mode == _1dMat ||
+           mode == _PlateLayer || mode == _2dBeamLayer;
 }
 
 
@@ -138,7 +138,7 @@ RCM2Material :: giveRealStressVector(FloatArray &answer, GaussPoint *gp,
     this->giveStressDependentPartOfStrainVector(reducedTotalStrainVector, gp, totalStrain, atTime, VM_Total);
     //
 
-    StructuralMaterial :: giveFullSymVectorForm(strainVector, reducedTotalStrainVector, gp->giveMaterialMode());
+    StructuralMaterial :: giveFullSymVectorForm( strainVector, reducedTotalStrainVector, gp->giveMaterialMode() );
 
     status->giveTempCrackDirs(tempCrackDirs);
     this->computePrincipalValDir(principalStrain, tempCrackDirs,
@@ -152,21 +152,21 @@ RCM2Material :: giveRealStressVector(FloatArray &answer, GaussPoint *gp,
     this->transformStressVectorTo(answer, tempCrackDirs, princStress, 1);
 
     status->letTempStrainVectorBe(totalStrain);
-    StructuralMaterial :: giveReducedSymVectorForm(reducedStressVector, answer, gp->giveMaterialMode());
+    StructuralMaterial :: giveReducedSymVectorForm( reducedStressVector, answer, gp->giveMaterialMode() );
     status->letTempStressVectorBe(reducedStressVector);
     status->giveCrackStrainVector(crackStrain);
     this->updateCrackStatus(gp, crackStrain);
 
-    StructuralMaterial :: giveReducedSymVectorForm(reducedAnswer, answer, gp->giveMaterialMode());
+    StructuralMaterial :: giveReducedSymVectorForm( reducedAnswer, answer, gp->giveMaterialMode() );
     answer = reducedAnswer;
 }
 
 
 void
 RCM2Material :: giveRealPrincipalStressVector3d(FloatArray &answer, GaussPoint *gp,
-                                                 FloatArray &principalStrain,
-                                                 FloatMatrix &tempCrackDirs,
-                                                 TimeStep *atTime)
+                                                FloatArray &principalStrain,
+                                                FloatMatrix &tempCrackDirs,
+                                                TimeStep *atTime)
 //
 // returns real principal stress vector in 3d stress space of receiver according to
 // previous level of stress and current
@@ -253,7 +253,7 @@ RCM2Material :: giveRealPrincipalStressVector3d(FloatArray &answer, GaussPoint *
             this->giveCrackedStiffnessMatrix(dcr, TangentStiffness, gp, atTime);
             fullDecr = de;
             fullDecr.add(dcr);
-            decr.resize(crackMapping.maximum(), crackMapping.maximum());
+            decr.resize( crackMapping.maximum(), crackMapping.maximum() );
             decr.zero();
             decr.assemble(fullDecr, crackMapping, crackMapping);
 
@@ -317,13 +317,13 @@ RCM2Material :: giveRealPrincipalStressVector3d(FloatArray &answer, GaussPoint *
         fullDSigma.subtract(sigmaCr);
         //fullDSigma.printYourself();
         //crackMapping.printYourself();
-        
+
         dSigma.resize( crackMapping.maximum() );
         dSigma.zero();
         dSigma.assemble(fullDSigma, crackMapping);
         //dSigma.beSubArrayOf(fullDSigma, crackMapping); //@todo fix! used old version of method beSubArrayOf
-        if(dSigma.giveSize()) {
-           // fullDSigma.printYourself();
+        if ( dSigma.giveSize() ) {
+            // fullDSigma.printYourself();
             //crackMapping.printYourself();
             //dSigma.printYourself();
         }
@@ -398,7 +398,7 @@ RCM2Material :: checkForNewActiveCracks(IntArray &answer, GaussPoint *gp,
         // test previous status of each possible crack plane
         upd = 0;
         IntArray indx;
-        StructuralMaterial :: giveVoigtSymVectorMask(indx, gp->giveMaterialMode());
+        StructuralMaterial :: giveVoigtSymVectorMask( indx, gp->giveMaterialMode() );
         if ( crackMap.at(i) == 0 && indx.contains(i) ) {
             if ( status->giveTempMaxCrackStrain(i) > 0. ) {
                 // if (status->giveTempCrackStatus()->at(i) != pscm_NONE) {
@@ -432,7 +432,6 @@ RCM2Material :: checkForNewActiveCracks(IntArray &answer, GaussPoint *gp,
                 }
             }
         } // end of tested crack
-
     } // end of loop over are possible directions
 
     if ( activationFlag ) {
@@ -505,7 +504,7 @@ RCM2Material :: updateCrackStatus(GaussPoint *gp, const FloatArray &crackStrain)
     // local stress is updated according to reached local crack strain
     //
     IntArray indx;
-    StructuralMaterial :: giveVoigtSymVectorMask(indx, gp->giveMaterialMode());
+    StructuralMaterial :: giveVoigtSymVectorMask( indx, gp->giveMaterialMode() );
     for ( int i = 1; i <= 3; i++ ) { // loop over each possible crack plane
         if ( crackMap.at(i) != 0 && indx.contains(i) ) {
             if ( status->giveTempMaxCrackStrain(i) < crackStrain.at(i) ) {
@@ -515,7 +514,7 @@ RCM2Material :: updateCrackStatus(GaussPoint *gp, const FloatArray &crackStrain)
             minCrackStrainsForFullyOpenCrack = this->giveMinCrackStrainsForFullyOpenCrack(gp, i);
             //if ((crackStrain.at(i) >= status->giveMinCrackStrainsForFullyOpenCrack(i)) &&
             if ( ( crackStrain.at(i) >= minCrackStrainsForFullyOpenCrack ) &&
-                ( crackStrain.at(i) >= status->giveTempMaxCrackStrain(i) ) ) {
+                 ( crackStrain.at(i) >= status->giveTempMaxCrackStrain(i) ) ) {
                 //
                 // fully open crack
                 //
@@ -538,9 +537,7 @@ RCM2Material :: updateCrackStatus(GaussPoint *gp, const FloatArray &crackStrain)
                 status->setTempCrackStatus(i, pscm_UNLOADING);
             }
         } // end for possible direction
-
     } // end loop over prin directions
-
 }
 
 
@@ -594,7 +591,7 @@ RCM2Material :: giveNormalElasticStiffnessMatrix(FloatMatrix &answer,
 
     FloatMatrix stiff;
     lMat->giveStiffnessMatrix(stiff, rMode, gp, atTime);
-    this->giveFullSymMatrixForm(de, stiff, gp->giveMaterialMode());
+    this->giveFullSymMatrixForm( de, stiff, gp->giveMaterialMode() );
 
     // copy first 3x3 submatrix to answer
     for ( int i = 1; i <= 3; i++ ) {
@@ -613,7 +610,7 @@ RCM2Material :: giveNormalElasticStiffnessMatrix(FloatMatrix &answer,
         sd = 0;
 
         IntArray indx;
-        StructuralMaterial :: giveVoigtSymVectorMask(indx, gp->giveMaterialMode());
+        StructuralMaterial :: giveVoigtSymVectorMask( indx, gp->giveMaterialMode() );
         for ( int i = 1; i <= 3; i++ ) {
             if ( indx.contains(i) ) {
                 sd++;
@@ -624,13 +621,13 @@ RCM2Material :: giveNormalElasticStiffnessMatrix(FloatMatrix &answer,
         answer.zero();
 
         // copy fullAnswer to reduced one
-        StructuralMaterial :: giveInvertedVoigtVectorMask(mask, gp->giveMaterialMode() );
+        StructuralMaterial :: giveInvertedVoigtVectorMask( mask, gp->giveMaterialMode() );
         for ( int i = 1; i <= sd; i++ ) {
             int iidx = mask.findFirstIndexOf(i);
             for ( int j = 1; j <= sd; j++ ) {
                 int jidx = mask.findFirstIndexOf(j);
                 if ( iidx && jidx ) {
-                    answer.at( i, j ) = fullAnswer.at(iidx, jidx);
+                    answer.at(i, j) = fullAnswer.at(iidx, jidx);
                 }
             }
         }
@@ -668,7 +665,7 @@ RCM2Material :: giveEffectiveMaterialStiffnessMatrix(FloatMatrix &answer,
                                            tempCrackDirs);
     invDe.beInverseOf(de);
     this->giveCrackedStiffnessMatrix(dcr, rMode, gp, atTime);
-    StructuralMaterial :: giveVoigtSymVectorMask( mask, gp->giveMaterialMode());
+    StructuralMaterial :: giveVoigtSymVectorMask( mask, gp->giveMaterialMode() );
     compliance.resize( mask.giveSize(), mask.giveSize() );
 
     // we will set
@@ -676,7 +673,7 @@ RCM2Material :: giveEffectiveMaterialStiffnessMatrix(FloatMatrix &answer,
     // local coordinate system defined by crackplane
     for ( int i = 1; i <= 3; i++ ) {
         IntArray indx;
-        StructuralMaterial :: giveVoigtSymVectorMask(indx, gp->giveMaterialMode());
+        StructuralMaterial :: giveVoigtSymVectorMask( indx, gp->giveMaterialMode() );
         if ( ( indi = indx.findFirstIndexOf(i) ) ) {
             for ( int j = 1; j <= 3; j++ ) {
                 if ( ( indj = indx.findFirstIndexOf(j) ) ) {
@@ -701,7 +698,7 @@ RCM2Material :: giveEffectiveMaterialStiffnessMatrix(FloatMatrix &answer,
     G = this->give(pscm_G, gp);
 
     IntArray indx;
-    StructuralMaterial :: giveVoigtSymVectorMask(indx, gp->giveMaterialMode());
+    StructuralMaterial :: giveVoigtSymVectorMask( indx, gp->giveMaterialMode() );
     for ( int i = 4; i <= 6; i++ ) {
         if ( ( indi = indx.findFirstIndexOf(i) ) ) {
             if ( i == 4 ) {
@@ -735,8 +732,8 @@ RCM2Material :: giveEffectiveMaterialStiffnessMatrix(FloatMatrix &answer,
     //
     // now let d to grow to Full Format
     //
-    StructuralMaterial :: giveVoigtSymVectorMask( mask, gp->giveMaterialMode());
-    df.resize(6,6);
+    StructuralMaterial :: giveVoigtSymVectorMask( mask, gp->giveMaterialMode() );
+    df.resize(6, 6);
     df.zero();
     df.assemble(d, mask);
     //
@@ -747,7 +744,7 @@ RCM2Material :: giveEffectiveMaterialStiffnessMatrix(FloatMatrix &answer,
     tt.beTranspositionOf(t);
     df.rotatedWith(tt);
 
-    StructuralMaterial :: giveReducedSymMatrixForm( answer, df, gp->giveMaterialMode());
+    StructuralMaterial :: giveReducedSymMatrixForm( answer, df, gp->giveMaterialMode() );
 }
 
 
@@ -996,9 +993,9 @@ RCM2Material :: give2dBeamLayerStiffMtrx(FloatMatrix &answer,
 
 void
 RCM2Material :: givePlateLayerStiffMtrx(FloatMatrix &answer,
-                                          MatResponseMode mode,
-                                          GaussPoint *gp,
-                                          TimeStep *atTime)
+                                        MatResponseMode mode,
+                                        GaussPoint *gp,
+                                        TimeStep *atTime)
 //
 // returns receiver's 2dPlateLayerMtrx
 // (2dPlaneStres ==> sigma_z = tau_xz = tau_yz = 0.)
@@ -1082,7 +1079,7 @@ RCM2MaterialStatus :: printOutputAt(FILE *file, TimeStep *tStep)
             }
 
             fprintf( file, "crack %d {status %s, normal to crackplane { %f %f %f }} ",
-                    i, s, crackDirs.at(1, i), crackDirs.at(2, i), crackDirs.at(3, i) );
+                     i, s, crackDirs.at(1, i), crackDirs.at(2, i), crackDirs.at(3, i) );
         }
     }
 

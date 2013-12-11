@@ -73,32 +73,14 @@ Interface *
 L4Axisymm :: giveInterface(InterfaceType interface)
 {
     if ( interface == ZZNodalRecoveryModelInterfaceType ) {
-        return static_cast< ZZNodalRecoveryModelInterface * >(this);
+        return static_cast< ZZNodalRecoveryModelInterface * >( this );
     } else if ( interface == SPRNodalRecoveryModelInterfaceType ) {
-        return static_cast< SPRNodalRecoveryModelInterface * >(this);
+        return static_cast< SPRNodalRecoveryModelInterface * >( this );
     } else if ( interface == SpatialLocalizerInterfaceType ) {
-        return static_cast< SpatialLocalizerInterface * >(this);
+        return static_cast< SpatialLocalizerInterface * >( this );
     }
 
     return NULL;
-}
-
-
-void
-L4Axisymm :: computeNmatrixAt(GaussPoint *aGaussPoint, FloatMatrix &answer)
-// Returns the displacement interpolation matrix {N} of the receiver,
-// evaluated at aGaussPoint.
-{
-    FloatArray n(4);
-
-    answer.resize(2, 8);
-    answer.zero();
-    this->interpolation.evalN( n, * aGaussPoint->giveCoordinates(), FEIElementGeometryWrapper(this) );
-
-    for ( int i = 1; i <= 4; i++ ) {
-        answer.at(1, 2 * i - 1) = n.at(i);
-        answer.at(2, 2 * i - 0) = n.at(i);
-    }
 }
 
 
@@ -250,7 +232,7 @@ L4Axisymm :: computeVolumeAround(GaussPoint *aGaussPoint)
     }
 
     determinant = fabs( this->interpolation.giveTransformationJacobian( * aGaussPoint->giveCoordinates(),
-                                                                       FEIElementGeometryWrapper(this) ) );
+                                                                        FEIElementGeometryWrapper(this) ) );
 
     weight = aGaussPoint->giveWeight();
     volume = determinant * weight * r;
@@ -262,16 +244,16 @@ IRResultType
 L4Axisymm :: initializeFrom(InputRecord *ir)
 {
     numberOfGaussPoints = 4;
-	IRResultType result = this->NLStructuralElement :: initializeFrom(ir);
-	if(result != IRRT_OK) {
-		return result;
-	}
+    IRResultType result = this->NLStructuralElement :: initializeFrom(ir);
+    if ( result != IRRT_OK ) {
+        return result;
+    }
 
 
     if ( !( ( numberOfGaussPoints == 1 ) ||
-           ( numberOfGaussPoints == 4 ) ||
-           ( numberOfGaussPoints == 9 ) ||
-           ( numberOfGaussPoints == 16 ) ) ) {
+            ( numberOfGaussPoints == 4 ) ||
+            ( numberOfGaussPoints == 9 ) ||
+            ( numberOfGaussPoints == 16 ) ) ) {
         numberOfGaussPoints = 4;
     }
 
@@ -492,7 +474,7 @@ L4Axisymm ::   computeEdgeVolumeAround(GaussPoint *aGaussPoint, int iEdge)
     FloatArray c(2);
     this->computeEdgeIpGlobalCoords(c, aGaussPoint, iEdge);
     double result = this->interpolation.edgeGiveTransformationJacobian( iEdge, * aGaussPoint->giveCoordinates(),
-                                                                       FEIElementGeometryWrapper(this) );
+                                                                        FEIElementGeometryWrapper(this) );
 
 
     return c.at(1) * result * aGaussPoint->giveWeight();

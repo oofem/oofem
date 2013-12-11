@@ -56,7 +56,6 @@ public:
 
     virtual const char *giveInputRecordName() const { return _IFT_QPlaneStrainGrad_Name; }
     virtual const char *giveClassName() const { return "QPlaneStrainGrad"; }
-    virtual classType giveClassID() const { return QPlaneStrainGradClass; }
 
     virtual MaterialMode giveMaterialMode() { return _PlaneStrain; }
     virtual int computeNumberOfDofs() { return 20; }

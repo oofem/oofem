@@ -84,7 +84,7 @@ public:
     TR1_2D_SUPG(int n, Domain *d);
     virtual ~TR1_2D_SUPG();
 
-    virtual FEInterpolation *giveInterpolation() const { return &interp; }
+    virtual FEInterpolation *giveInterpolation() const { return & interp; }
 
     virtual void computeAccelerationTerm_MB(FloatMatrix &answer, TimeStep *atTime);
     virtual void computeAdvectionTerm_MB(FloatArray &answer, TimeStep *atTime);
@@ -114,7 +114,7 @@ public:
     virtual void computeOutFlowBCTerm_MB(FloatMatrix &answer, int side, TimeStep *atTime);
 
     virtual void computeHomogenizedReinforceTerm_MB(FloatMatrix &answer, Load *load, TimeStep *atTime);
-     virtual void computeHomogenizedReinforceTerm_MC(FloatMatrix &answer, Load *load, TimeStep *atTime);
+    virtual void computeHomogenizedReinforceTerm_MC(FloatMatrix &answer, Load *load, TimeStep *atTime);
 
     virtual void updateStabilizationCoeffs(TimeStep *tStep);
     virtual double computeCriticalTimeStep(TimeStep *tStep);
@@ -122,13 +122,13 @@ public:
     // definition
     virtual const char *giveClassName() const { return "TR1_2D_SUPG"; }
     virtual const char *giveInputRecordName() const { return _IFT_TR1_2D_SUPG_Name; }
-    virtual classType giveClassID() const { return TR1_2D_SUPGClass; }
     virtual MaterialMode giveMaterialMode() { return _2dFlow; }
 
     virtual void giveElementDofIDMask(EquationID, IntArray & answer) const;
     virtual void giveDofManDofIDMask(int inode, EquationID ut, IntArray &answer) const;
     virtual int computeNumberOfDofs();
     virtual IRResultType initializeFrom(InputRecord *ir);
+    virtual void giveInputRecord(DynamicInputRecord &input);
     virtual void updateYourself(TimeStep *tStep);
     /// Used to check consistency and initialize some element geometry data (area,b,c).
     virtual int checkConsistency();
@@ -162,9 +162,9 @@ public:
     virtual Element *ZZNodalRecoveryMI_giveElement() { return this; }
 
     virtual void NodalAveragingRecoveryMI_computeNodalValue(FloatArray &answer, int node,
-                                                    InternalStateType type, TimeStep *tStep);
+                                                            InternalStateType type, TimeStep *tStep);
     virtual void NodalAveragingRecoveryMI_computeSideValue(FloatArray &answer, int side,
-                                                   InternalStateType type, TimeStep *tStep);
+                                                           InternalStateType type, TimeStep *tStep);
 
     virtual void SPRNodalRecoveryMI_giveSPRAssemblyPoints(IntArray &pap);
     virtual void SPRNodalRecoveryMI_giveDofMansDeterminedByPatch(IntArray &answer, int pap);
@@ -183,7 +183,7 @@ public:
     int giveInternalStateAtNode(FloatArray &answer, InternalStateType type, InternalStateMode mode,
                                 int node, TimeStep *atTime);
     // Graphics output
-    //void drawYourself (oofegGraphicContext&);
+    //virtual void drawYourself(oofegGraphicContext&);
     virtual void drawRawGeometry(oofegGraphicContext &);
     virtual void drawScalar(oofegGraphicContext &context);
     //virtual void drawDeformedGeometry(oofegGraphicContext&, UnknownType) {}

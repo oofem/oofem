@@ -83,7 +83,7 @@ protected:
     /// If set, then only IP in the same region are taken into account.
     int regionFilter;
     /// List of Gp participating in patch.
-    std::list< GaussPoint * >patchGPList;
+    std :: list< GaussPoint * >patchGPList;
     /// Patch domain.
     Domain *patchDomain;
     /// Type of patch.
@@ -94,11 +94,13 @@ public:
     /// Destructor
     virtual ~MMALeastSquareProjection();
 
-    virtual void __init(Domain *dold, IntArray &type, FloatArray &coords, int region, TimeStep *tStep);
+    virtual void __init(Domain *dold, IntArray &type, FloatArray &coords, int region, TimeStep *tStep, bool iCohesiveZoneGP = false);
 
     virtual void finish(TimeStep *tStep);
 
     virtual int __mapVariable(FloatArray &answer, FloatArray &coords, InternalStateType type, TimeStep *tStep);
+
+    virtual int mapStatus(MaterialStatus &oStatus) const;
 
     virtual IRResultType initializeFrom(InputRecord *ir);
     virtual void giveInputRecord(DynamicInputRecord &input);

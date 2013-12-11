@@ -55,7 +55,6 @@
 //@}
 
 namespace oofem {
-
 /**
  * This class implements associated Material Status to SimpleInterfaceMaterial.
  */
@@ -74,7 +73,6 @@ public:
 
     // definition
     virtual const char *giveClassName() const { return "SimpleInterfaceMaterialStatus"; }
-    virtual classType giveClassID() const { return SimpleInterfaceMaterialStatusClass; }
 
     virtual void initTempStatus();
     virtual void updateYourself(TimeStep *tStep);
@@ -113,20 +111,19 @@ public:
     virtual int hasMaterialModeCapability(MaterialMode mode);
     virtual const char *giveInputRecordName() const { return _IFT_SimpleInterfaceMaterial_Name; }
     virtual const char *giveClassName() const { return "SimpleInterfaceMaterial"; }
-    virtual classType giveClassID() const { return SimpleInterfaceMaterialClass; }
 
     virtual void give3dMaterialStiffnessMatrix(FloatMatrix &answer,
                                                MatResponseMode mode,
                                                GaussPoint *gp,
                                                TimeStep *atTime);
 
-    virtual void giveRealStressVector(FloatArray & answer, GaussPoint *,
-                              const FloatArray &, TimeStep *);
+    virtual void giveRealStressVector(FloatArray &answer, GaussPoint *,
+                                      const FloatArray &, TimeStep *);
 
     virtual void  giveStiffnessMatrix(FloatMatrix &answer,
-                                           MatResponseMode mode,
-                                           GaussPoint *gp,
-                                           TimeStep *atTime);
+                                      MatResponseMode mode,
+                                      GaussPoint *gp,
+                                      TimeStep *atTime);
 
     virtual int giveIPValue(FloatArray &answer, GaussPoint *aGaussPoint, InternalStateType type, TimeStep *atTime);
     virtual void giveThermalDilatationVector(FloatArray &answer, GaussPoint *gp, TimeStep *tStep);

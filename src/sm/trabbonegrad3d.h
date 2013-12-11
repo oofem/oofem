@@ -64,7 +64,6 @@ public:
     virtual void printOutputAt(FILE *file, TimeStep *tStep);
 
     virtual const char *giveClassName() const { return "TrabBoneGrad3DStatus"; }
-    virtual classType giveClassID() const { return TrabBoneGrad3DClass; }
 
 
     virtual double giveNonlocalCumulatedStrain() { return nonlocalCumulatedStrain; }
@@ -90,7 +89,6 @@ public:
     virtual ~TrabBoneGrad3D();
 
     virtual const char *giveClassName() const { return "TrabBoneGrad3D"; }
-    virtual classType giveClassID() const { return TrabBoneGrad3DClass; }
     virtual const char *giveInputRecordName() const { return _IFT_TrabBoneGrad3D_Name; }
 
     virtual IRResultType initializeFrom(InputRecord *ir);

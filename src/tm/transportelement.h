@@ -110,8 +110,6 @@ public:
     virtual void printOutputAt(FILE *file, TimeStep *tStep);
     virtual int checkConsistency();
 
-    virtual const char *giveClassName() const { return "TransportElement"; }
-
     virtual void giveElementDofIDMask(EquationID, IntArray & answer) const;
 
     virtual int EIPrimaryFieldI_evaluateFieldVectorAt(FloatArray &answer, PrimaryField &pf,
@@ -122,7 +120,7 @@ public:
     int giveInternalStateAtNode(FloatArray &answer, InternalStateType type, InternalStateMode mode,
                                 int node, TimeStep *atTime);
     // Graphics output
-    //void drawYourself (oofegGraphicContext&);
+    //virtual void drawYourself(oofegGraphicContext&);
     //virtual void drawRawGeometry(oofegGraphicContext&) {}
     //virtual void drawDeformedGeometry(oofegGraphicContext&, UnknownType) {}
 #endif

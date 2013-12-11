@@ -70,47 +70,29 @@ QTrPlaneStrain :: giveInterface(InterfaceType interface)
 {
     //if (interface == NodalAveragingRecoveryModelInterfaceType) return (NodalAveragingRecoveryModelInterface*) this;
     if ( interface == ZZNodalRecoveryModelInterfaceType ) {
-        return static_cast< ZZNodalRecoveryModelInterface * >(this);
+        return static_cast< ZZNodalRecoveryModelInterface * >( this );
     } else if ( interface == SPRNodalRecoveryModelInterfaceType ) {
-        return static_cast< SPRNodalRecoveryModelInterface * >(this);
+        return static_cast< SPRNodalRecoveryModelInterface * >( this );
     } else if ( interface == SpatialLocalizerInterfaceType ) {
-        return static_cast< SpatialLocalizerInterface * >(this);
+        return static_cast< SpatialLocalizerInterface * >( this );
     } else if ( interface == DirectErrorIndicatorRCInterfaceType ) {
-        return static_cast< DirectErrorIndicatorRCInterface * >(this);
+        return static_cast< DirectErrorIndicatorRCInterface * >( this );
     } else if ( interface == EIPrimaryUnknownMapperInterfaceType ) {
-        return static_cast< EIPrimaryUnknownMapperInterface * >(this);
+        return static_cast< EIPrimaryUnknownMapperInterface * >( this );
     }
 
     return NULL;
 }
 
 
-void
-QTrPlaneStrain :: computeNmatrixAt(GaussPoint *aGaussPoint, FloatMatrix &answer)
-// Returns the displacement interpolation matrix {N} of the receiver, eva-
-// luated at aGaussPoint.
-{
-    FloatArray n(6);
-
-    answer.resize(2, 12);
-    answer.zero();
-
-    this->interpolation.evalN( n, * aGaussPoint->giveCoordinates(), FEIElementGeometryWrapper(this) );
-
-    for ( int i = 1; i <= 6; i++ ) {
-        answer.at(1, 2 * i - 1) = n.at(i);
-        answer.at(2, 2 * i - 0) = n.at(i);
-    }
-}
-
 IRResultType
 QTrPlaneStrain :: initializeFrom(InputRecord *ir)
 {
     numberOfGaussPoints = 4;
     IRResultType result = this->StructuralElement :: initializeFrom(ir);
-	if(result != IRRT_OK) {
-		return result;
-	}
+    if ( result != IRRT_OK ) {
+        return result;
+    }
 
     return IRRT_OK;
 }
@@ -164,9 +146,9 @@ QTrPlaneStrain :: computeVolumeAround(GaussPoint *aGaussPoint)
 {
     double determinant, weight, thickness;
     determinant = fabs( this->interpolation.giveTransformationJacobian( * aGaussPoint->giveCoordinates(),
-                                                                       FEIElementGeometryWrapper(this) ) );
+                                                                        FEIElementGeometryWrapper(this) ) );
     weight = aGaussPoint->giveWeight();
-    thickness = this->giveCrossSection()->give(CS_Thickness);
+    thickness = this->giveCrossSection()->give(CS_Thickness, aGaussPoint);
     return determinant * weight * thickness;
 }
 
@@ -463,10 +445,10 @@ QTrPlaneStrain :: DirectErrorIndicatorRCI_giveCharacteristicSize()
 
     for ( int i = 0; i < iRule->giveNumberOfIntegrationPoints(); i++ ) {
         gp  = iRule->getIntegrationPoint(i);
-        volume += this->computeVolumeAround(gp);
+        volume += this->computeVolumeAround(gp) / this->giveCrossSection()->give(CS_Thickness, gp);
     }
 
-    return sqrt( volume * 2.0 / this->giveCrossSection()->give(CS_Thickness) );
+    return sqrt(volume * 2.0);
 }
 
 int

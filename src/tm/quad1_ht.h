@@ -61,9 +61,8 @@ public:
 
     virtual const char *giveInputRecordName() const { return _IFT_Quad1_ht_Name; }
     virtual const char *giveClassName() const { return "Quad1_ht"; }
-    virtual classType giveClassID() const { return Quad1_htClass; }
 
-    //    virtual int computeNumberOfDofs() { return ( emode == HeatTransferEM ) ? 4 : 8; }    
+    //    virtual int computeNumberOfDofs() { return ( emode == HeatTransferEM ) ? 4 : 8; }
     virtual int computeNumberOfDofs() { return 4; }
     virtual IRResultType initializeFrom(InputRecord *ir);
     virtual FEInterpolation *giveInterpolation() const { return & interpolation; }
@@ -80,7 +79,7 @@ public:
 
 #ifdef __OOFEG
     // Graphics output
-    void drawRawGeometry(oofegGraphicContext &);
+    virtual void drawRawGeometry(oofegGraphicContext &);
     virtual void drawScalar(oofegGraphicContext &context);
     //void drawYourself(oofegGraphicContext&);
     //virtual void drawRawGeometry(oofegGraphicContext&) {}
@@ -102,7 +101,6 @@ public:
 
     virtual const char *giveInputRecordName() const { return _IFT_Quad1_hmt_Name; }
     virtual const char *giveClassName() const { return "Quad1_hmt"; }
-    virtual classType giveClassID() const { return Quad1_hmtClass; }
     virtual int computeNumberOfDofs() { return 8; }
     virtual MaterialMode giveMaterialMode() { return _2dHeMo; }
 };
@@ -117,7 +115,6 @@ public:
 
     virtual const char *giveInputRecordName() const { return _IFT_Quad1_mt_Name; }
     virtual const char *giveClassName() const { return "Quad1_mt"; }
-    virtual classType giveClassID() const { return Quad1_mtClass; }
     virtual int computeNumberOfDofs() { return 4; }
     virtual MaterialMode giveMaterialMode() { return _2dHeat; }
 };

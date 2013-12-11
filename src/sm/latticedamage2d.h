@@ -217,7 +217,6 @@ public:
 
     // definition
     virtual const char *giveClassName() const { return "LatticeDamage2dStatus"; }
-    virtual classType giveClassID() const { return LatticeDamage2dStatusClass; }
 
     virtual void initTempStatus();
 
@@ -295,16 +294,15 @@ public:
 
     virtual const char *giveInputRecordName() const { return _IFT_LatticeDamage2d_Name; }
     virtual const char *giveClassName() const { return "LatticeDamage2d"; }
-    virtual classType giveClassID() const { return LatticeDamage2dClass; }
 
     virtual IRResultType initializeFrom(InputRecord *ir);
 
     virtual bool isCharacteristicMtrxSymmetric(MatResponseMode rMode) { return false; }
 
     virtual void  giveStiffnessMatrix(FloatMatrix &answer,
-                                           MatResponseMode mode,
-                                           GaussPoint *gp,
-                                           TimeStep *atTime);
+                                      MatResponseMode mode,
+                                      GaussPoint *gp,
+                                      TimeStep *atTime);
 
     /**
      * Computes the tangent stiffness.
@@ -369,7 +367,7 @@ public:
     virtual Interface *giveInterface(InterfaceType);
 
 
-    virtual void giveRealStressVector(FloatArray & answer, GaussPoint *,
+    virtual void giveRealStressVector(FloatArray &answer, GaussPoint *,
                                       const FloatArray &, TimeStep *);
 
     /** Reimplemented from RandomMaterialInterface */
