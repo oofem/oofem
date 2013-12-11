@@ -161,7 +161,7 @@ bool Tr2Shell7XFEM :: updateIntegrationRule()
         MaterialMode matMode = _3dMat;
 
         std :: vector< std :: vector< FloatArray > >pointPartitions;
-        std :: vector< Triangle >allTri;
+        std :: vector< Triangle > allTri;
 
         int numEI = xMan->giveNumberOfEnrichmentItems();
         for ( int eiIndex = 1; eiIndex <= numEI; eiIndex++ ) {
@@ -177,7 +177,8 @@ bool Tr2Shell7XFEM :: updateIntegrationRule()
                     // Use XfemElementInterface_partitionElement to subdivide the element
                     for ( int i = 0; i < int( pointPartitions.size() ); i++ ) {
                         // Triangulate the subdivisions
-                        this->XfemElementInterface_partitionElement(allTri, pointPartitions [ i ]);
+                        //this->XfemElementInterface_partitionElement(allTri, pointPartitions [ i ]);
+                        this->XfemElementInterface_partitionElement(this->allTri, pointPartitions [ i ]);
                     }
 
                     partitionSucceeded = true;
@@ -207,13 +208,15 @@ bool Tr2Shell7XFEM :: updateIntegrationRule()
             std :: string name3 = str3.str();
 
             XFEMDebugTools :: WriteTrianglesToVTK(name3, allTri);
+            XFEMDebugTools :: WriteTrianglesToVTK(name3, this->allTri);
         }
         
         // Create integrationrule based on a 'wedge patch'
-        int nPointsTri  = 3;   // points in the plane
+        int nPointsTri  = 6;   // points in the plane
         int nPointsEdge = 2;   // edge integration
 
-        if ( allTri.size() == 0 ) { // No subdivision, return and create iRule as normal
+        //if ( allTri.size() == 0 ) { // No subdivision, return and create iRule as normal
+        if ( this->allTri.size() == 0 ) { // No subdivision, return and create iRule as normal
             return partitionSucceeded;
 
         } else { // create iRule according to subdivision
@@ -223,11 +226,12 @@ bool Tr2Shell7XFEM :: updateIntegrationRule()
 
             integrationRulesArray = new IntegrationRule * [ numberOfLayers ];
             for ( int i = 0; i < numberOfLayers; i++ ) {
-                integrationRulesArray [ i ] = new PatchIntegrationRule(i+1, this, allTri);
+                //integrationRulesArray [ i ] = new PatchIntegrationRule(1, this, allTri);
+                integrationRulesArray [ i ] = new PatchIntegrationRule(1, this, this->allTri);
                 integrationRulesArray [ i ]->SetUpPointsOnWedge(nPointsTri, numPointsThickness, _3dMat);
-                //this->layeredCS->setupLayeredIntegrationRule(integrationRulesArray, this, nPointsTri);
-                this->layeredCS->mapLayerGpCoordsToShellCoords(integrationRulesArray);
+                
             }
+            this->layeredCS->mapLayerGpCoordsToShellCoords(integrationRulesArray);
             
             
         }
