@@ -17,25 +17,25 @@
  *       Czech Technical University, Faculty of Civil Engineering,
  *   Department of Structural Mechanics, 166 29 Prague, Czech Republic
  *
- *  This program is free software; you can redistribute it and/or modify
- *  it under the terms of the GNU General Public License as published by
- *  the Free Software Foundation; either version 2 of the License, or
- *  (at your option) any later version.
+ *  This library is free software; you can redistribute it and/or
+ *  modify it under the terms of the GNU Lesser General Public
+ *  License as published by the Free Software Foundation; either
+ *  version 2.1 of the License, or (at your option) any later version.
  *
  *  This program is distributed in the hope that it will be useful,
  *  but WITHOUT ANY WARRANTY; without even the implied warranty of
- *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- *  GNU General Public License for more details.
+ *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+ *  Lesser General Public License for more details.
  *
- *  You should have received a copy of the GNU General Public License
- *  along with this program; if not, write to the Free Software
- *  Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
+ *  You should have received a copy of the GNU Lesser General Public
+ *  License along with this library; if not, write to the Free Software
+ *  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  */
 
 #include "libeam3dnl.h"
 #include "node.h"
 #include "material.h"
-#include "crosssection.h"
+#include "structuralcrosssection.h"
 #include "gausspoint.h"
 #include "gaussintegrationrule.h"
 #include "structuralms.h"
@@ -85,7 +85,7 @@ LIBeam3dNL :: computeSMtrx(FloatMatrix &answer, FloatArray &vec)
 
 
 void
-LIBeam3dNL ::  computeRotMtrx(FloatMatrix &answer, FloatArray &psi)
+LIBeam3dNL :: computeRotMtrx(FloatMatrix &answer, FloatArray &psi)
 {
     FloatMatrix S(3, 3), SS(3, 3);
     double psiSize;
@@ -199,7 +199,6 @@ LIBeam3dNL :: computeXMtrx(FloatMatrix &answer, TimeStep *tStep)
 void
 LIBeam3dNL :: giveInternalForcesVector(FloatArray &answer, TimeStep *tStep, int useUpdatedGpRecord)
 {
-    Material *mat = this->giveMaterial();
     IntegrationRule *iRule = integrationRulesArray [ giveDefaultIntegrationRule() ];
     GaussPoint *gp = iRule->getIntegrationPoint(0);
     FloatArray nm(6), stress, strain;
@@ -210,7 +209,7 @@ LIBeam3dNL :: giveInternalForcesVector(FloatArray &answer, TimeStep *tStep, int 
     this->updateTempTriad(tStep);
 
     if ( useUpdatedGpRecord == 1 ) {
-        stress = static_cast< StructuralMaterialStatus * >( mat->giveStatus(gp) )->giveStressVector();
+        stress = static_cast< StructuralMaterialStatus * >( gp->giveMaterialStatus() )->giveStrainVector();
     } else {
         this->computeStrainVector(strain, gp, tStep);
         this->computeStressVector(stress, strain, gp, tStep);
@@ -259,8 +258,7 @@ LIBeam3dNL :: computeStiffnessMatrix(FloatMatrix &answer, MatResponseMode rMode,
     IntegrationRule *iRule = integrationRulesArray [ giveDefaultIntegrationRule() ];
     GaussPoint *gp = iRule->getIntegrationPoint(0);
 
-    answer.resize( this->computeNumberOfDofs(EID_MomentumBalance), this->computeNumberOfDofs(EID_MomentumBalance) );
-    answer.zero();
+    answer.resize(0, 0);
 
     // linear part
 
@@ -325,14 +323,14 @@ LIBeam3dNL :: computeStiffnessMatrix(FloatMatrix &answer, MatResponseMode rMode,
     for ( int i = 1; i <= 3; i++ ) {
         for ( int j = 1; j <= 3; j++ ) {
             answer.at(i + 3, j)     -= sn.at(i, j);
-            answer.at(i + 3, j + 3)   += y.at(i, j);
-            answer.at(i + 3, j + 6)   += sn.at(i, j);
-            answer.at(i + 3, j + 9)   += y.at(i, j);
+            answer.at(i + 3, j + 3) += y.at(i, j);
+            answer.at(i + 3, j + 6) += sn.at(i, j);
+            answer.at(i + 3, j + 9) += y.at(i, j);
 
             answer.at(i + 9, j)     -= sn.at(i, j);
-            answer.at(i + 9, j + 3)   += y.at(i, j);
-            answer.at(i + 9, j + 6)   += sn.at(i, j);
-            answer.at(i + 9, j + 9)   += y.at(i, j);
+            answer.at(i + 9, j + 3) += y.at(i, j);
+            answer.at(i + 9, j + 6) += sn.at(i, j);
+            answer.at(i + 9, j + 9) += y.at(i, j);
         }
     }
 }
@@ -410,12 +408,9 @@ LIBeam3dNL :: computeLumpedMassMatrix(FloatMatrix &answer, TimeStep *tStep)
 // Returns the lumped mass matrix of the receiver. This expression is
 // valid in both local and global axes.
 {
-    Material *mat;
-    double halfMass;
     GaussPoint *gp = integrationRulesArray [ 0 ]->getIntegrationPoint(0);
-
-    mat        = this->giveMaterial();
-    halfMass   = mat->give('d', gp) * this->giveCrossSection()->give(CS_Area) * this->giveLength() / 2.;
+    double density = this->giveStructuralCrossSection()->give('d', gp);
+    double halfMass   = density * this->giveCrossSection()->give(CS_Area) * this->giveLength() / 2.;
     answer.resize(12, 12);
     answer.zero();
     answer.at(1, 1) = answer.at(2, 2) = answer.at(3, 3) = halfMass;
@@ -425,7 +420,7 @@ LIBeam3dNL :: computeLumpedMassMatrix(FloatMatrix &answer, TimeStep *tStep)
     Ik   = this->giveCrossSection()->give(CS_TorsionMomentX);
     Iy   = this->giveCrossSection()->give(CS_InertiaMomentY);
     Iz   = this->giveCrossSection()->give(CS_InertiaMomentZ);
-    halfMass   = mat->give('d', gp) * this->giveLength() / 2.;
+    halfMass   = density * this->giveLength() / 2.;
     answer.at(4, 4) = answer.at(10, 10) = Ik * halfMass;
     answer.at(5, 5) = answer.at(11, 11) = Iy * halfMass;
     answer.at(6, 6) = answer.at(12, 12) = Iz * halfMass;
@@ -701,10 +696,9 @@ LIBeam3dNL :: initForNewStep()
 void
 LIBeam3dNL :: computeTempCurv(FloatArray &answer, TimeStep *tStep)
 {
-    Material *mat = this->giveMaterial();
     IntegrationRule *iRule = integrationRulesArray [ giveDefaultIntegrationRule() ];
     GaussPoint *gp = iRule->getIntegrationPoint(0);
-    ;
+    
     FloatArray ui(3), xd(3), curv(3), ac(3), PrevEpsilon;
     FloatMatrix sc(3, 3), tmid(3, 3);
 
@@ -735,7 +729,10 @@ LIBeam3dNL :: computeTempCurv(FloatArray &answer, TimeStep *tStep)
     answer.times(1 / this->l0);
 
     // ask for previous kappa
-    PrevEpsilon = static_cast< StructuralMaterialStatus * >( mat->giveStatus(gp) )->giveStrainVector();
+    StructuralMaterialStatus *matStat = static_cast< StructuralMaterialStatus * >( gp->giveMaterialStatus() );
+    if ( matStat ) {
+        PrevEpsilon = matStat->giveStrainVector();
+    }
     if ( PrevEpsilon.giveSize() ) {
         answer.at(1) += PrevEpsilon.at(4);
         answer.at(2) += PrevEpsilon.at(5);

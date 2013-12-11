@@ -17,19 +17,19 @@
  *       Czech Technical University, Faculty of Civil Engineering,
  *   Department of Structural Mechanics, 166 29 Prague, Czech Republic
  *
- *  This program is free software; you can redistribute it and/or modify
- *  it under the terms of the GNU General Public License as published by
- *  the Free Software Foundation; either version 2 of the License, or
- *  (at your option) any later version.
+ *  This library is free software; you can redistribute it and/or
+ *  modify it under the terms of the GNU Lesser General Public
+ *  License as published by the Free Software Foundation; either
+ *  version 2.1 of the License, or (at your option) any later version.
  *
  *  This program is distributed in the hope that it will be useful,
  *  but WITHOUT ANY WARRANTY; without even the implied warranty of
- *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- *  GNU General Public License for more details.
+ *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+ *  Lesser General Public License for more details.
  *
- *  You should have received a copy of the GNU General Public License
- *  along with this program; if not, write to the Free Software
- *  Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
+ *  You should have received a copy of the GNU Lesser General Public
+ *  License along with this library; if not, write to the Free Software
+ *  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  */
 
 #ifndef transportmaterial_h
@@ -62,10 +62,8 @@ protected:
     FloatArray gradient; ///< Vector containing the last equilibrated gradient. It is the spatial gradient of the field.
     FloatArray flux; ///< Vector containing the last equilibrated flux. The physical meaning corresponds to energy flux, mass flow, etc.
 
-    /// Equilibrated state vector in reduced form. The physical meaning corresponds to temperature, concentration etc.
-    FloatArray stateVector;
-    /// Temporary state vector in a reduced form, used mainly in a nonlinear analysis
-    FloatArray tempStateVector;
+    /// A scalar containing maturity (integration of temperature over time)
+    double maturity;
 
 public:
     /// Constructor - creates new TransportMaterialStatus with number n, belonging to domain d and IntegrationPoint g.
@@ -82,12 +80,8 @@ public:
     virtual contextIOResultType restoreContext(DataStream *stream, ContextMode mode, void *obj = NULL);
 
     ///@todo REMOVE THESE:
-    /// Returns the const pointer to receiver's state vector.
-    const FloatArray &giveStateVector() { return stateVector; }
-    /// Returns the const pointer to receiver's temporary state vector.
-    const FloatArray &giveTempStateVector() { return tempStateVector; }
     /// Assigns temporary state vector from a given vector v.
-    void letTempStateVectorBe(const FloatArray &v) { tempStateVector = v; }
+    void letTempStateVectorBe(const FloatArray &v) { temp_field = v; }
 
     virtual const char *giveClassName() const { return "TransportMaterialStatus"; }
     virtual classType giveClassID() const { return TransportMaterialStatusClass; }
@@ -112,6 +106,9 @@ public:
     const FloatArray &giveTempField() { return temp_field; }
     /// Returns last flux.
     const FloatArray &giveTempFlux() { return temp_flux; }
+    /// Returns maturity.
+    double giveMaturity() { return maturity; }
+    
 };
 
 
@@ -209,7 +206,6 @@ public:
 
     // post-processing
     virtual int giveIPValue(FloatArray &answer, GaussPoint *aGaussPoint, InternalStateType type, TimeStep *atTime);
-    virtual InternalStateValueType giveIPValueType(InternalStateType type);
 
     virtual MaterialStatus *CreateStatus(GaussPoint *gp) const { return new TransportMaterialStatus(1, domain, gp); }
 };

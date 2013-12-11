@@ -17,19 +17,19 @@
  *       Czech Technical University, Faculty of Civil Engineering,
  *   Department of Structural Mechanics, 166 29 Prague, Czech Republic
  *
- *  This program is free software; you can redistribute it and/or modify
- *  it under the terms of the GNU General Public License as published by
- *  the Free Software Foundation; either version 2 of the License, or
- *  (at your option) any later version.
+ *  This library is free software; you can redistribute it and/or
+ *  modify it under the terms of the GNU Lesser General Public
+ *  License as published by the Free Software Foundation; either
+ *  version 2.1 of the License, or (at your option) any later version.
  *
  *  This program is distributed in the hope that it will be useful,
  *  but WITHOUT ANY WARRANTY; without even the implied warranty of
- *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- *  GNU General Public License for more details.
+ *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+ *  Lesser General Public License for more details.
  *
- *  You should have received a copy of the GNU General Public License
- *  along with this program; if not, write to the Free Software
- *  Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
+ *  You should have received a copy of the GNU Lesser General Public
+ *  License along with this library; if not, write to the Free Software
+ *  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  */
 /*
  * The original idea for this class comes from
@@ -161,6 +161,53 @@ FloatMatrix :: FloatMatrix(const FloatMatrix &src) :
     values = ALLOC(allocatedSize);
     memcpy(values, src.values, allocatedSize * sizeof(double) );
 }
+
+#if __cplusplus > 199711L
+FloatMatrix :: FloatMatrix(std::initializer_list<std::initializer_list<double> > mat)
+{
+    this->nColumns = mat.size();
+    this->nRows = mat.begin()->size();
+    this->allocatedSize = this->nRows * this->nColumns;
+    if ( this->allocatedSize ) {
+        this->values = ALLOC(this->allocatedSize);
+        double *p = this->values;
+        for (auto col: mat) {
+#if DEBUG
+            if ( this->nRows != col.size() ) {
+                OOFEM_ERROR("FloatMatrix :: FloatMatrix - Initializer list has inconsistent column sizes.");
+            }
+#endif
+            for (auto x: col) {
+                *p = x;
+                p++;
+            }
+        }
+    } else {
+        this->values = NULL;
+    }
+}
+
+
+FloatMatrix &FloatMatrix :: operator=(std::initializer_list<std::initializer_list<double> > mat)
+{
+    RESIZE(mat.begin()->size(), mat.size());
+    double *p = this->values;
+    for (auto col: mat) {
+        for (auto x: col) {
+#if DEBUG
+            if ( this->nRows != col.size() ) {
+                OOFEM_ERROR("FloatMatrix :: FloatMatrix - Initializer list has inconsistent column sizes.");
+            }
+#endif
+            *p = x;
+            p++;
+        }
+    }
+
+    return * this;
+}
+
+#endif
 
 
 FloatMatrix :: ~FloatMatrix()
@@ -637,7 +684,7 @@ void FloatMatrix :: setColumn(const FloatArray &src, int c)
     int nr = src.giveSize();
 #ifdef DEBUG
     if ( this->giveNumberOfRows() != nr || c < 1 || c > this->giveNumberOfColumns()) {
-        OOFEM_ERROR("FloatMatrix  :: setColumn - Size mismatch");
+        OOFEM_ERROR("FloatMatrix :: setColumn - Size mismatch");
     }
 #endif
 
@@ -652,7 +699,7 @@ void FloatMatrix :: copyColumn(FloatArray &dest, int c) const
     int nr = this->giveNumberOfRows();
 #ifdef DEBUG
     if ( c < 1 || c > this->giveNumberOfColumns()) {
-        OOFEM_ERROR2("FloatMatrix  :: copyColumn - Column outside range (%d)", c);
+        OOFEM_ERROR2("FloatMatrix :: copyColumn - Column outside range (%d)", c);
     }
 #endif
 
@@ -1008,6 +1055,10 @@ void FloatMatrix :: add(const FloatMatrix &aMatrix)
 // Adds aMatrix to the receiver. If the receiver has a null size,
 // adjusts its size to that of aMatrix. Returns the modified receiver.
 {
+    if ( aMatrix.nRows == 0 || aMatrix.nColumns == 0 ) {
+        return;
+    }
+
     if ( nRows * nColumns == 0 ) {
         this->operator = ( aMatrix );
         return;
@@ -1040,6 +1091,10 @@ void FloatMatrix :: add(double s, const FloatMatrix &aMatrix)
 // Adds aMatrix to the receiver. If the receiver has a null size,
 // adjusts its size to that of aMatrix. Returns the modified receiver.
 {
+    if ( aMatrix.nRows == 0 || aMatrix.nColumns == 0 ) {
+        return;
+    }
+
     if ( !this->isNotEmpty() ) {
         this->operator = ( aMatrix );
         this->times(s);
@@ -1480,15 +1535,23 @@ void FloatMatrix :: pY() const
 }
 
 
-void FloatMatrix :: rotatedWith(const FloatMatrix &r)
+void FloatMatrix :: rotatedWith(const FloatMatrix &r, char mode)
 // Returns the receiver 'a' rotated according the change-of-base matrix r.
-// The method performs the operation  a = r^T . a . r .
+// The method performs the operation  a = r^T . a . r . or the inverse
 {
     FloatMatrix rta;
 
-    rta.beTProductOf(r, * this);     //  r^T . a
-    this->beProductOf(rta, r);       //  r^T . a . r
+    if ( mode == 'n' ) {
+        rta.beTProductOf(r, * this);     //  r^T . a
+        this->beProductOf(rta, r);       //  r^T . a . r
+    } else if ( mode == 't' ) {
+        rta.beProductOf(r, * this);      //  r . a
+        this->beProductTOf(rta, r);      //  r . a . r^T
+    } else {
+        OOFEM_ERROR("FloatMatrix :: rotatedWith: unsupported mode");
+    }
 }
+
 
 
 void FloatMatrix :: symmetrized()
@@ -1581,6 +1644,33 @@ double FloatMatrix :: computeNorm(char p) const
 #  endif
 }
 
+
+
+void FloatMatrix ::beMatrixForm(const FloatArray &aArray)
+{
+    // Revrites the vector on matrix form (symmetrized matrix used if size is 6), 
+    // order: 11, 22, 33, 23, 13, 12
+    // order: 11, 22, 33, 23, 13, 12, 32, 31, 21
+#  ifdef DEBUG
+    if ( aArray.giveSize() !=6 && aArray.giveSize() !=9 ) {
+        OOFEM_ERROR("FloatArray :: beMatrixForm : matrix dimension is not 3x3");
+    }
+#  endif
+    this->resize(3,3);
+    if ( aArray.giveSize() == 9 ) {
+        this->at(1,1) = aArray.at(1); this->at(2,2) = aArray.at(2); this->at(3,3) = aArray.at(3);
+        this->at(2,3) = aArray.at(4); this->at(1,3) = aArray.at(5); this->at(1,2) = aArray.at(6);
+        this->at(3,2) = aArray.at(7); this->at(3,1) = aArray.at(8); this->at(2,1) = aArray.at(9);
+    }
+    else if ( aArray.giveSize() == 6 ) {
+        this->at(1,1) = aArray.at(1); this->at(2,2) = aArray.at(2); this->at(3,3) = aArray.at(3);
+        this->at(2,3) = aArray.at(4); this->at(1,3) = aArray.at(5); this->at(1,2) = aArray.at(6);
+        this->at(3,2) = aArray.at(4); this->at(3,1) = aArray.at(5); this->at(2,1) = aArray.at(6);
+    }
+}
+
+
+
 double FloatMatrix :: computeReciprocalCondition(char p) const
 {
 #  ifdef DEBUG
@@ -1618,7 +1708,7 @@ double FloatMatrix :: computeReciprocalCondition(char p) const
     return 1.0/(inv.computeNorm(p)*anorm);
 }
 
-void FloatMatrix ::beMatrixForm(const FloatArray &aArray)
+void FloatMatrix ::beMatrixFormOfStress(const FloatArray &aArray)
 {
     // Revrites the  matrix on vector form (symmetrized matrix used), order: 11, 22, 33, 23, 13, 12
 #  ifdef DEBUG

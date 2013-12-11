@@ -17,24 +17,25 @@
  *       Czech Technical University, Faculty of Civil Engineering,
  *   Department of Structural Mechanics, 166 29 Prague, Czech Republic
  *
- *  This program is free software; you can redistribute it and/or modify
- *  it under the terms of the GNU General Public License as published by
- *  the Free Software Foundation; either version 2 of the License, or
- *  (at your option) any later version.
+ *  This library is free software; you can redistribute it and/or
+ *  modify it under the terms of the GNU Lesser General Public
+ *  License as published by the Free Software Foundation; either
+ *  version 2.1 of the License, or (at your option) any later version.
  *
  *  This program is distributed in the hope that it will be useful,
  *  but WITHOUT ANY WARRANTY; without even the implied warranty of
- *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- *  GNU General Public License for more details.
+ *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+ *  Lesser General Public License for more details.
  *
- *  You should have received a copy of the GNU General Public License
- *  along with this program; if not, write to the Free Software
- *  Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
+ *  You should have received a copy of the GNU Lesser General Public
+ *  License along with this library; if not, write to the Free Software
+ *  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  */
 
 #ifndef domain_h
 #define domain_h
 
+#include "oofemcfg.h"
 #include "alist.h"
 #include "domaintype.h"
 #include "statecountertype.h"
@@ -42,6 +43,7 @@
 #include "equationid.h"
 
 #include <map>
+#include <string>
 #ifdef __PARALLEL_MODE
  #include <list>
  #include "entityrenumberingscheme.h"
@@ -67,6 +69,8 @@
 #define _IFT_Domain_topology "topology"
 #define _IFT_Domain_nxfemman "nxfemman" /// [in,optional] Specifies if there is an xfem-manager.
 #define _IFT_Domain_numberOfSpatialDimensions "nsd" ///< [in,optional] Specifies how many spatial dimensions the domain has.
+#define _IFT_Domain_nfracman "nfracman" /// [in,optional] Specifies if there is a fracture manager.
+#define _IFT_Domain_axisymmetric "axisymm" /// [optional] Specifies if the problem is axisymmetric.
 //@}
 
 namespace oofem {
@@ -93,6 +97,7 @@ class XfemManager;
 class TopologyDescription;
 class DataReader;
 class Set;
+class FractureManager;
 
 #ifdef __PARALLEL_MODE
 class ProcessCommunicator;
@@ -112,7 +117,7 @@ class LoadBalancer;
  * - Provides services for accessing its particular components.
  * - Checking yourself.
  */
-class Domain
+class OOFEM_EXPORT Domain
 {
 private:
     /// Element list.
@@ -171,8 +176,11 @@ private:
     int serialNumber;
     /// Number of spatial dimensions
     int nsd;
+    bool axisymm;
     /// nodal recovery object associated to receiver.
     NodalRecoveryModel *smoother;
+
+    std::string mDomainType;
     /**
      * For nonlocal models of integral type
      * it is necessary, mainly due to resulting efficiency, to compute variable(s)
@@ -186,7 +194,10 @@ private:
     StateCounterType nonlocalUpdateStateCounter;
     /// XFEM Manager
     XfemManager *xfemManager;
-     
+
+    /// Fracture Manager
+    FractureManager *fracManager;
+
     /// Topology description
     TopologyDescription *topology;
     
@@ -225,6 +236,10 @@ public:
      * @see giveSerialNumber
      */
     Domain(int n, int serNum, EngngModel *e);
+
+    /// Create a copy of the domain using the dynamic data reader.
+    Domain *Clone();
+
     /// Destructor.
     ~Domain();
 
@@ -356,29 +371,32 @@ public:
     //int giveNumberOfNodes () {return nodeList->giveSize();}
     //int giveNumberOfSides () {return elementSideList->giveSize();}
     /// Returns number of dof managers in domain.
-    int giveNumberOfDofManagers() { return dofManagerList->giveSize(); }
+    int giveNumberOfDofManagers() const { return dofManagerList->giveSize(); }
     /// Returns number of elements in domain.
-    int giveNumberOfElements() { return elementList->giveSize(); }
+    int giveNumberOfElements() const { return elementList->giveSize(); }
     /// Returns number of material models in domain.
-    int giveNumberOfMaterialModels() { return materialList->giveSize(); }
+    int giveNumberOfMaterialModels() const { return materialList->giveSize(); }
     /// Returns number of cross section models in domain.
-    int giveNumberOfCrossSectionModels() { return crossSectionList->giveSize(); }
+    int giveNumberOfCrossSectionModels() const { return crossSectionList->giveSize(); }
     /// Returns number of boundary conditions in domain.
-    int giveNumberOfBoundaryConditions() { return bcList->giveSize(); }
+    int giveNumberOfBoundaryConditions() const { return bcList->giveSize(); }
     /// Returns number of initial conditions in domain.
-    int giveNumberOfInitialConditions() { return icList->giveSize(); }
+    int giveNumberOfInitialConditions() const { return icList->giveSize(); }
     /// Returns number of load time functions in domain.
-    int giveNumberOfLoadTimeFunctions() { return loadTimeFunctionList->giveSize(); }
+    int giveNumberOfLoadTimeFunctions() const { return loadTimeFunctionList->giveSize(); }
     /// Returns number of regions. Currently regions corresponds to cross section models.
-    int giveNumberOfRegions() { return this->giveNumberOfCrossSectionModels(); }
+    int giveNumberOfRegions() const { return this->giveNumberOfCrossSectionModels(); }
     /// Returns number of nonlocal integration barriers
-    int giveNumberOfNonlocalBarriers() { return nonlocalBarierList->giveSize(); }
+    int giveNumberOfNonlocalBarriers() const { return nonlocalBarierList->giveSize(); }
     /// Returns number of random field generators
-    int giveNumberOfRandomFieldGenerators() { return randomFieldGeneratorList->giveSize(); }
-    
-    int giveCorrespondingCoordinateIndex(int);
+    int giveNumberOfRandomFieldGenerators() const { return randomFieldGeneratorList->giveSize(); }
+    /// Returns number of sets
+    int giveNumberOfSets() const { return setList->giveSize(); }    
+
     /// Returns number of spatial dimensions.
     int giveNumberOfSpatialDimensions();
+    /// Returns true of axisymmetry is in effect.
+    bool isAxisymmetric();
     /**
      * @name Advanced domain manipulation methods.
      */
@@ -426,10 +444,14 @@ public:
     void setSet(int i, Set *obj);
     
     /// Temporary function, sets xfemManager.
-    void setXfemManager(XfemManager *xfemManager);
+    void setXfemManager(XfemManager *ipXfemManager) {xfemManager = ipXfemManager;}
 
     XfemManager *giveXfemManager();
     bool hasXfemManager();
+    
+    FractureManager *giveFractureManager(); 
+    bool hasFractureManager();
+
     /// List of Xfemmanagers.
     /**
      * Sets receiver's associated topology description.
@@ -502,6 +524,11 @@ public:
      * @return Total volume.
      */
     double giveVolume();
+    /**
+     * Gives the sum of the volume or area of all elements.
+     * @return Total volume.
+     */
+    double giveSize();
     
     /**
      * Gives the next free dof ID.

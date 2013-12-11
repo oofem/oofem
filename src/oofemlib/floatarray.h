@@ -17,19 +17,19 @@
  *       Czech Technical University, Faculty of Civil Engineering,
  *   Department of Structural Mechanics, 166 29 Prague, Czech Republic
  *
- *  This program is free software; you can redistribute it and/or modify
- *  it under the terms of the GNU General Public License as published by
- *  the Free Software Foundation; either version 2 of the License, or
- *  (at your option) any later version.
+ *  This library is free software; you can redistribute it and/or
+ *  modify it under the terms of the GNU Lesser General Public
+ *  License as published by the Free Software Foundation; either
+ *  version 2.1 of the License, or (at your option) any later version.
  *
  *  This program is distributed in the hope that it will be useful,
  *  but WITHOUT ANY WARRANTY; without even the implied warranty of
- *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- *  GNU General Public License for more details.
+ *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+ *  Lesser General Public License for more details.
  *
- *  You should have received a copy of the GNU General Public License
- *  along with this program; if not, write to the Free Software
- *  Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
+ *  You should have received a copy of the GNU Lesser General Public
+ *  License along with this library; if not, write to the Free Software
+ *  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  */
 
 /*
@@ -41,10 +41,14 @@
 #ifndef floatarray_h
 #define floatarray_h
 
+#include "oofemcfg.h"
 #include "contextioresulttype.h"
 #include "contextmode.h"
 
 #include <iosfwd>
+#if __cplusplus > 199711L
+#include <initializer_list>
+#endif
 
 namespace oofem {
 class IntArray;
@@ -82,7 +86,7 @@ class CommunicationBuffer;
  *   speeding up method 'dot' of class RowColumn and for speeding method
  *   initialize.
  */
-class FloatArray
+class OOFEM_EXPORT FloatArray
 {
 protected:
     /// Size of array.
@@ -107,6 +111,12 @@ public:
      * @param x Array to copy.
      */
     FloatArray(const FloatArray &x);
+#if __cplusplus > 199711L
+    /// Initializer list constructor.
+    FloatArray(std::initializer_list<double> list);
+    /// Assignment operator.
+    FloatArray & operator=(std::initializer_list<double> list);
+#endif
     /// Destructor.
     virtual ~FloatArray();
 
@@ -346,6 +356,14 @@ public:
     double distance(const FloatArray &x) const;
     /// @see distance
     double distance(const FloatArray *x) const { return this->distance(* x); }
+
+    /**
+     * Computes distance between the position represented by the reciever and a line segment represented by it's start
+     * point iP1 and it's end point iP2.
+     * Written by Erik Svenning, August 2013.
+     */
+    double distance(const FloatArray &iP1, const FloatArray &iP2) const;
+
     /**
      * Computes the square of distance between position represented by receiver and position given as parameter.
      * @param x Coordinate to calculate squared distance from.
@@ -424,6 +442,10 @@ public:
     void beSymVectorForm(const FloatMatrix &aMatrix);
     void beSymVectorFormOfStrain(const FloatMatrix &aMatrix);
 
+    /**
+     * Reciever will be set to a given column in a matrix 
+     */
+    void beColumnOf(const FloatMatrix &mat, int col);
 #ifdef __PARALLEL_MODE
     int packToCommBuffer(CommunicationBuffer &buff) const;
     int unpackFromCommBuffer(CommunicationBuffer &buff);

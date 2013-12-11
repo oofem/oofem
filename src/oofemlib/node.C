@@ -17,19 +17,19 @@
  *       Czech Technical University, Faculty of Civil Engineering,
  *   Department of Structural Mechanics, 166 29 Prague, Czech Republic
  *
- *  This program is free software; you can redistribute it and/or modify
- *  it under the terms of the GNU General Public License as published by
- *  the Free Software Foundation; either version 2 of the License, or
- *  (at your option) any later version.
+ *  This library is free software; you can redistribute it and/or
+ *  modify it under the terms of the GNU Lesser General Public
+ *  License as published by the Free Software Foundation; either
+ *  version 2.1 of the License, or (at your option) any later version.
  *
  *  This program is distributed in the hope that it will be useful,
  *  but WITHOUT ANY WARRANTY; without even the implied warranty of
- *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- *  GNU General Public License for more details.
+ *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+ *  Lesser General Public License for more details.
  *
- *  You should have received a copy of the GNU General Public License
- *  along with this program; if not, write to the Free Software
- *  Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
+ *  You should have received a copy of the GNU Lesser General Public
+ *  License along with this library; if not, write to the Free Software
+ *  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  */
 
 /*
@@ -52,6 +52,7 @@
 #include "contextioerr.h"
 #include "mathfem.h"
 #include "classfactory.h"
+#include "dynamicinputrecord.h"
 
 #ifdef __OOFEG
  #include "oofeggraphiccontext.h"
@@ -157,6 +158,19 @@ IRResultType Node :: initializeFrom(InputRecord *ir)
     return IRRT_OK;
 }
 
+void Node :: giveInputRecord(DynamicInputRecord &input)
+{
+	DofManager::giveInputRecord(input);
+
+    input.setField(coordinates, _IFT_Node_coords);
+
+    if(localCoordinateSystem != NULL) {
+        input.setField(*localCoordinateSystem, _IFT_Node_lcs);
+    }
+
+}
+
+
 void
 Node :: computeLoadVector(FloatArray &answer, Load *load, CharType type, TimeStep *stepN, ValueModeType mode)
 {
@@ -176,7 +190,7 @@ Node :: computeLoadVector(FloatArray &answer, Load *load, CharType type, TimeSte
 
     loadN->computeComponentArrayAt(answer, stepN, mode); // can be NULL
     // Transform from Global to Local c.s.
-    if ( loadN->giveCoordSystMode() == NodalLoad :: BL_GlobalMode ) {
+    if ( loadN->giveCoordSystMode() == NodalLoad :: CST_Global ) {
         IntArray dofIDarry(0);
         FloatMatrix L2G;
         if ( this->computeL2GTransformation(L2G, dofIDarry) ) {
@@ -220,15 +234,14 @@ Node :: updateYourself(TimeStep *tStep)
 
     if ( mode == AL ) { // updated Lagrange
         for ( int i = 1; i <= numberOfDofs; i++ ) {
-            int ic = domain->giveCorrespondingCoordinateIndex(i);
-            if ( ic != 0 ) {
-                Dof *d = this->giveDof(i);
-                DofIDItem id = d->giveDofID();
-                if ( id == D_u || id == D_v || id == D_w ) {
-                    coordinates.at(ic) += d->giveUnknown(VM_Incremental, tStep);
-                } else if ( id == V_u || id == V_v || id == V_w ) {
-                    coordinates.at(ic) += d->giveUnknown(VM_Total, tStep) * dt;
-                }
+            Dof *d = this->giveDof(i);
+            DofIDItem id = d->giveDofID();
+            if ( id == D_u || id == D_v || id == D_w ) {
+                int ic = id - D_w + 1;
+                coordinates.at(ic) += d->giveUnknown(VM_Incremental, tStep);
+            } else if ( id == V_u || id == V_v || id == V_w ) {
+                int ic = id - V_w + 1;
+                coordinates.at(ic) += d->giveUnknown(VM_Total, tStep) * dt;
             }
         }
     }
@@ -253,10 +266,10 @@ Node :: giveUpdatedCoordinate(int ic, TimeStep *tStep, double scale)
         if ( !this->hasLocalCS() ) {
             // this has no local cs.
             for ( int i = 1; i <= numberOfDofs; i++ ) {
-                int j = domain->giveCorrespondingCoordinateIndex(i);
-                if ( ( j != 0 ) && ( j == ic ) ) {
-                    coordinate +=
-                        scale * this->giveDof(i)->giveUnknown(VM_Total, tStep);
+                Dof *d = this->giveDof(i);
+                DofIDItem id = d->giveDofID();
+                if  ( id == ic ) {
+                    coordinate += scale * d->giveUnknown(VM_Total, tStep);
                     break;
                 }
             }
@@ -271,10 +284,14 @@ Node :: giveUpdatedCoordinate(int ic, TimeStep *tStep, double scale)
             displacements.zero();
 
             for ( int i = 1; i <= numberOfDofs; i++ ) {
-                int j = domain->giveCorrespondingCoordinateIndex(i);
-                if ( j != 0 ) { // && (this->giveDof(i)->giveUnknownType()==DisplacementVector))
-                    displacements.at(j) = scale * this->giveDof(i)->
-                                          giveUnknown(VM_Total, tStep);
+                Dof *d = this->giveDof(i);
+                DofIDItem id = d->giveDofID();
+                if ( id == D_u || id == D_v || id == D_w ) {
+                    int ic2 = id - D_w + 1;
+                    displacements.at(ic2) = scale * d->giveUnknown(VM_Total, tStep);
+                } else if ( id == V_u || id == V_v || id == V_w ) {
+                    int ic2 = id - V_w + 1;
+                    displacements.at(ic2) = scale * d->giveUnknown(VM_Total, tStep);
                 }
             }
 
@@ -646,7 +663,7 @@ Node :: drawYourself(oofegGraphicContext &gc)
         if ( this->giveDomain()->hasXfemManager() ) {
             XfemManager *xf = this->giveDomain()->giveXfemManager();
             for ( int i = 1; i <= xf->giveNumberOfEnrichmentItems(); i++ ) {
-                if ( xf->giveEnrichmentItem(i)->isDofManEnriched(this) ) {
+                if ( xf->giveEnrichmentItem(i)->isDofManEnriched( *this ) ) {
                     EASValsSetMType(SQUARE_MARKER);
                 }
             }

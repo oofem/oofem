@@ -17,19 +17,19 @@
  *       Czech Technical University, Faculty of Civil Engineering,
  *   Department of Structural Mechanics, 166 29 Prague, Czech Republic
  *
- *  This program is free software; you can redistribute it and/or modify
- *  it under the terms of the GNU General Public License as published by
- *  the Free Software Foundation; either version 2 of the License, or
- *  (at your option) any later version.
+ *  This library is free software; you can redistribute it and/or
+ *  modify it under the terms of the GNU Lesser General Public
+ *  License as published by the Free Software Foundation; either
+ *  version 2.1 of the License, or (at your option) any later version.
  *
  *  This program is distributed in the hope that it will be useful,
  *  but WITHOUT ANY WARRANTY; without even the implied warranty of
- *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- *  GNU General Public License for more details.
+ *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+ *  Lesser General Public License for more details.
  *
- *  You should have received a copy of the GNU General Public License
- *  along with this program; if not, write to the Free Software
- *  Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
+ *  You should have received a copy of the GNU Lesser General Public
+ *  License along with this library; if not, write to the Free Software
+ *  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  */
 
 #include "fe2fluidmaterial.h"
@@ -99,6 +99,7 @@ void FE2FluidMaterial :: computeDeviatoricStressVector(FloatArray &stress_dev, d
 
     bc->computeFields(stress_dev, r_vol, EID_MomentumBalance_ConservationEquation, tStep);
     ms->letTempDeviatoricStressVectorBe(stress_dev);
+    ms->letTempDeviatoricStrainRateVectorBe(eps);
 
     ms->markOldTangents(); // Mark this so that tangents are reevaluated if they are needed.
     // One could also just compute them here, but you don't actually need them if the problem has converged, so this method saves on that iteration.
@@ -276,15 +277,6 @@ int FE2FluidMaterial :: giveIPValue(FloatArray &answer, GaussPoint *gp, Internal
     }
 }
 
-InternalStateValueType FE2FluidMaterial :: giveIPValueType(InternalStateType type)
-{
-    if ( type == IST_VOFFraction ) {
-        return ISVT_SCALAR;
-    } else {
-        return FluidDynamicMaterial :: giveIPValueType(type);
-    }
-}
-
 void FE2FluidMaterial :: giveInputRecord(DynamicInputRecord &input)
 {
     FluidDynamicMaterial :: giveInputRecord(input);
@@ -361,7 +353,7 @@ void FE2FluidMaterialStatus :: printOutputAt(FILE *file, TimeStep *tStep)
 
 void FE2FluidMaterialStatus :: updateYourself(TimeStep *tStep)
 {
-    double fluid_area = this->rve->giveDomain(1)->giveArea();
+    double fluid_area = this->rve->giveDomain(1)->giveSize();
     double total_area = this->bc->domainSize();
     this->voffraction = fluid_area/total_area;
     FluidDynamicMaterialStatus::updateYourself(tStep);
@@ -397,7 +389,10 @@ void FE2FluidMaterialStatus :: markOldTangents() { this->oldTangents = true; }
 
 void FE2FluidMaterialStatus :: computeTangents(TimeStep *tStep)
 {
-    if ( this->oldTangents ) { ///@todo Consider tStep
+    if ( !tStep->isTheCurrentTimeStep() ) {
+        OOFEM_ERROR("FE2FluidMaterialStatus :: computeTangents - Only current timestep supported.\n");
+    }
+    if ( this->oldTangents ) {
         bc->computeTangents(this->giveDeviatoricTangent(),
                     this->giveDeviatoricPressureTangent(),
                     this->giveVolumetricDeviatoricTangent(),
@@ -415,16 +410,16 @@ double FE2FluidMaterial :: giveEffectiveViscosity(GaussPoint *gp, TimeStep *tSte
     // Project against the normalized I_dev
     double v;
     if ( gp->giveMaterialMode() == _3dFlow ) {
-        v = (t.at(1,1)*2. + t.at(1,2) + t.at(1,3))/3. + 
-            (t.at(2,1) + t.at(2,2)*2. + t.at(2,3))/3. + 
-            (t.at(3,1) + t.at(3,2) + t.at(2,3)*2.)/3. + 
-            t.at(4,4) + t.at(5,5) + t.at(6,6);
-        v /= 5.;
+        v = ( t.at(1,1)*2. - t.at(1,2)    - t.at(1,3))/3. + 
+            (-t.at(2,1)    + t.at(2,2)*2. - t.at(2,3))/3. + 
+            (-t.at(3,1)    - t.at(3,2)    + t.at(3,3)*2.)/3. + 
+            4.* (t.at(4,4) + t.at(5,5) + t.at(6,6));
+        v /= 16.;
     } else {
-        v = (t.at(1,1)*2. + t.at(1,2))/3. + 
-            (t.at(2,1) + t.at(2,2)*2.)/3. + 
-            t.at(3,3);
-        v *= 19./9.;
+        v = ( t.at(1,1)*2. - t.at(1,2))/3. + 
+            (-t.at(2,1)    + t.at(2,2)*2.)/3. + 
+            4.* t.at(3,3);
+        v *= 9. / 56.;
     }
     return v;
 }

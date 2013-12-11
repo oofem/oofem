@@ -17,19 +17,19 @@
  *       Czech Technical University, Faculty of Civil Engineering,
  *   Department of Structural Mechanics, 166 29 Prague, Czech Republic
  *
- *  This program is free software; you can redistribute it and/or modify
- *  it under the terms of the GNU General Public License as published by
- *  the Free Software Foundation; either version 2 of the License, or
- *  (at your option) any later version.
+ *  This library is free software; you can redistribute it and/or
+ *  modify it under the terms of the GNU Lesser General Public
+ *  License as published by the Free Software Foundation; either
+ *  version 2.1 of the License, or (at your option) any later version.
  *
  *  This program is distributed in the hope that it will be useful,
  *  but WITHOUT ANY WARRANTY; without even the implied warranty of
- *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- *  GNU General Public License for more details.
+ *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+ *  Lesser General Public License for more details.
  *
- *  You should have received a copy of the GNU General Public License
- *  along with this program; if not, write to the Free Software
- *  Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
+ *  You should have received a copy of the GNU Lesser General Public
+ *  License along with this library; if not, write to the Free Software
+ *  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  */
 
 /*
@@ -41,10 +41,14 @@
 #ifndef flotmtrx_h
 #define flotmtrx_h
 
+#include "oofemcfg.h"
 #include "contextioresulttype.h"
 #include "contextmode.h"
 
 #include <iosfwd>
+#if __cplusplus > 199711L
+#include <initializer_list>
+#endif
 
 #ifdef BOOST_PYTHON
 namespace boost { namespace python { namespace api {
@@ -82,7 +86,7 @@ class CommunicationBuffer;
  *   If further request for growing then is necessary memory reallocation.
  *   This process is controlled in resize member function.
  */
-class FloatMatrix
+class OOFEM_EXPORT FloatMatrix
 {
 protected:
     /// Number of rows.
@@ -114,6 +118,12 @@ public:
     FloatMatrix(const FloatArray *vector, bool transpose = false);
     /// Copy constructor.
     FloatMatrix(const FloatMatrix &);
+#if __cplusplus > 199711L
+    /// Initializer list constructor.
+    FloatMatrix(std::initializer_list<std::initializer_list<double> > mat);
+    /// Assignment operator.
+    FloatMatrix & operator=(std::initializer_list<std::initializer_list<double> > mat);
+#endif
     /// Destructor.
     ~FloatMatrix();
     /// Assignment operator, adjusts size of the receiver if necessary.
@@ -452,7 +462,7 @@ public:
      * The method performs the operation  @f$ a = r^{\mathrm{T}} \cdot a \cdot r@f$ .
      * @param r Transformation matrix.
      */
-    void rotatedWith(const FloatMatrix &r);
+    void rotatedWith(const FloatMatrix &r, char mode='n');
     /**
      * Checks size of receiver towards requested bounds.
      * If dimension mismatch, size is adjusted accordingly.
@@ -501,6 +511,7 @@ public:
      * If size(aArray) = 6, a symmetric matrix will be created.
      * @param aArray Array to transform.
      */
+    void beMatrixFormOfStress(const FloatArray &aArray);
     void beMatrixForm(const FloatArray &aArray);
 
     // Overloaded methods:

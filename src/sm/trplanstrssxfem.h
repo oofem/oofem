@@ -17,19 +17,19 @@
  *       Czech Technical University, Faculty of Civil Engineering,
  *   Department of Structural Mechanics, 166 29 Prague, Czech Republic
  *
- *  This program is free software; you can redistribute it and/or modify
- *  it under the terms of the GNU General Public License as published by
- *  the Free Software Foundation; either version 2 of the License, or
- *  (at your option) any later version.
+ *  This library is free software; you can redistribute it and/or
+ *  modify it under the terms of the GNU Lesser General Public
+ *  License as published by the Free Software Foundation; either
+ *  version 2.1 of the License, or (at your option) any later version.
  *
  *  This program is distributed in the hope that it will be useful,
  *  but WITHOUT ANY WARRANTY; without even the implied warranty of
- *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- *  GNU General Public License for more details.
+ *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+ *  Lesser General Public License for more details.
  *
- *  You should have received a copy of the GNU General Public License
- *  along with this program; if not, write to the Free Software
- *  Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
+ *  You should have received a copy of the GNU Lesser General Public
+ *  License along with this library; if not, write to the Free Software
+ *  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  */
 
 #ifndef TRPLANSTRSSXFEM_H_
@@ -50,12 +50,17 @@ namespace oofem {
  *
  *      Class: TrPlaneStress2dXFEM
  *      Description: 3-node triangle with XFEM kinematics
- *      Author: Erik Svenning, June 2013
+ * 		@author Erik Svenning
  *
  */
 
 class TrPlaneStress2dXFEM : public TrPlaneStress2d, public XfemElementInterface, public VTKXMLExportModuleElementInterface
 {
+protected:
+    virtual void updateYourself(TimeStep *tStep);
+    virtual void postInitialize();
+
+
 public:
 
 	TrPlaneStress2dXFEM(int n, Domain *d) : TrPlaneStress2d(n, d), XfemElementInterface(this), VTKXMLExportModuleElementInterface() { }
@@ -65,14 +70,15 @@ public:
 
 	virtual int checkConsistency();
 
+#if 0
 	// Overloaded functions from XfemElementInterface
     /// Partitions the element into patches by a triangulation.
-    virtual void XfemElementInterface_partitionElement(AList< Triangle > *answer, AList< FloatArray > *together);
+    virtual void XfemElementInterface_partitionElement(AList< Triangle > *answer, std :: vector< FloatArray > &together);
     /// Updates integration rule based on the triangulation.
     virtual void XfemElementInterface_updateIntegrationRule();
     /// Helpful routine to put the nodes for triangulation together, should be in protected members probably.
-    virtual void XfemElementInterface_prepareNodesForDelaunay(AList< FloatArray > *answer1, AList< FloatArray > *answer2);
-
+    virtual void XfemElementInterface_prepareNodesForDelaunay(std::vector< std::vector< FloatArray > > &oPointPartitions);
+#endif
 
     virtual int testElementExtension(ElementExtension ext) { return ( ( ext == Element_EdgeLoadSupport ) ? 1 : 0 ); }
 
@@ -82,7 +88,7 @@ public:
     virtual const char *giveClassName() const { return "TrPlaneStress2dXFEM"; }
     virtual classType giveClassID() const { return TrPlaneStress2dXFEMClass; }
 
-    virtual int computeNumberOfDofs(EquationID ut);
+    virtual int computeNumberOfDofs();
     virtual void computeGaussPoints();
     virtual void computeNmatrixAt(GaussPoint *gp, FloatMatrix &answer);
     virtual void computeBmatrixAt(GaussPoint *gp, FloatMatrix &answer,
@@ -92,7 +98,7 @@ public:
 //    virtual void computeStressVector(FloatArray &answer, GaussPoint *gp, TimeStep *stepN);
     virtual void computeStiffnessMatrix(FloatMatrix &answer, MatResponseMode rMode, TimeStep *tStep);
     virtual void giveInternalForcesVector(FloatArray &answer, TimeStep *tStep, int useUpdatedGpRecord);
-/*
+
 //    virtual Element_Geometry_Type giveGeometryType() const;
 
 #ifdef __OOFEG
@@ -103,7 +109,18 @@ public:
     //virtual void drawSpecial(oofegGraphicContext &);
     //void drawInternalState(oofegGraphicContext&);
 #endif
-*/
+
+    virtual IRResultType initializeFrom(InputRecord *ir);
+    virtual MaterialMode giveMaterialMode();
+    virtual void giveInputRecord(DynamicInputRecord &input);
+
+    // For mapping of primary unknowns
+    virtual int EIPrimaryUnknownMI_computePrimaryUnknownVectorAt(ValueModeType u,
+                                                                 TimeStep *stepN, const FloatArray &coords,
+                                                                 FloatArray &answer);
+    virtual void EIPrimaryUnknownMI_givePrimaryUnknownVectorDofID(IntArray &answer);
+
+
 };
 
 } /* namespace oofem */

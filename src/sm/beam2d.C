@@ -17,19 +17,19 @@
  *       Czech Technical University, Faculty of Civil Engineering,
  *   Department of Structural Mechanics, 166 29 Prague, Czech Republic
  *
- *  This program is free software; you can redistribute it and/or modify
- *  it under the terms of the GNU General Public License as published by
- *  the Free Software Foundation; either version 2 of the License, or
- *  (at your option) any later version.
+ *  This library is free software; you can redistribute it and/or
+ *  modify it under the terms of the GNU Lesser General Public
+ *  License as published by the Free Software Foundation; either
+ *  version 2.1 of the License, or (at your option) any later version.
  *
  *  This program is distributed in the hope that it will be useful,
  *  but WITHOUT ANY WARRANTY; without even the implied warranty of
- *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- *  GNU General Public License for more details.
+ *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+ *  Lesser General Public License for more details.
  *
- *  You should have received a copy of the GNU General Public License
- *  along with this program; if not, write to the Free Software
- *  Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
+ *  You should have received a copy of the GNU Lesser General Public
+ *  License along with this library; if not, write to the Free Software
+ *  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  */
 
 #include "beam2d.h"
@@ -270,8 +270,7 @@ Beam2d :: computeGtoLRotationMatrix(FloatMatrix &answer)
 double
 Beam2d :: computeVolumeAround(GaussPoint *gp)
 {
-    double weight  = gp->giveWeight();
-    return weight * 0.5 * this->giveLength();
+    return 0.5 * this->giveLength() * gp->giveWeight();
 }
 
 
@@ -490,7 +489,7 @@ Beam2d :: computeEdgeLoadVectorAt(FloatArray &answer, Load *load, int iedge, Tim
         switch ( edgeLoad->giveApproxOrder() ) {
         case 0:
             coords.resize(1);
-            if ( edgeLoad->giveFormulationType() == BoundaryLoad :: BL_EntityFormulation ) {
+            if ( edgeLoad->giveFormulationType() == Load :: FT_Entity ) {
                 coords.at(1) = 0.0;
             } else {
                 coords = * ( this->giveNode(1)->giveCoordinates() );
@@ -498,7 +497,7 @@ Beam2d :: computeEdgeLoadVectorAt(FloatArray &answer, Load *load, int iedge, Tim
 
             edgeLoad->computeValueAt(components, tStep, coords, mode);
 
-            if ( edgeLoad->giveCoordSystMode() == BoundaryLoad :: BL_GlobalMode ) {
+            if ( edgeLoad->giveCoordSystMode() == Load :: CST_Global ) {
                 fx = cosine * components.at(1) + sine *components.at(2);
                 fz = -sine *components.at(1) + cosine *components.at(2);
                 fm = components.at(3);
@@ -519,7 +518,7 @@ Beam2d :: computeEdgeLoadVectorAt(FloatArray &answer, Load *load, int iedge, Tim
         case 1:
             components.resize(6);
 
-            if ( edgeLoad->giveFormulationType() == BoundaryLoad :: BL_EntityFormulation ) {
+            if ( edgeLoad->giveFormulationType() == Load :: FT_Entity ) {
                 coords.resize(1);
                 coords.at(1) = -1.0;
                 edgeLoad->computeValueAt(help, tStep, coords, mode);
@@ -547,7 +546,7 @@ Beam2d :: computeEdgeLoadVectorAt(FloatArray &answer, Load *load, int iedge, Tim
             }
 
 
-            if ( edgeLoad->giveCoordSystMode() == BoundaryLoad :: BL_GlobalMode ) {
+            if ( edgeLoad->giveCoordSystMode() == Load :: CST_Global ) {
                 fx = cosine * components.at(1) + sine *components.at(2);
                 fz = -sine *components.at(1) + cosine *components.at(2);
                 fm = components.at(3);
@@ -674,7 +673,7 @@ Beam2d :: computeConsistentMassMatrix(FloatMatrix &answer, TimeStep *tStep, doub
     double l = this->giveLength();
     double kappa = this->giveKappaCoeff();
     double kappa2 = kappa * kappa;
-    double density = this->giveMaterial()->give('d', gp);
+    double density = this->giveStructuralCrossSection()->give('d', gp);
     double area = this->giveCrossSection()->give(CS_Area);
     double c2 = ( area * density ) / ( ( 1. + 2. * kappa ) * ( 1. + 2. * kappa ) );
     double c1 = ( area * density );

@@ -17,19 +17,19 @@
  *       Czech Technical University, Faculty of Civil Engineering,
  *   Department of Structural Mechanics, 166 29 Prague, Czech Republic
  *
- *  This program is free software; you can redistribute it and/or modify
- *  it under the terms of the GNU General Public License as published by
- *  the Free Software Foundation; either version 2 of the License, or
- *  (at your option) any later version.
+ *  This library is free software; you can redistribute it and/or
+ *  modify it under the terms of the GNU Lesser General Public
+ *  License as published by the Free Software Foundation; either
+ *  version 2.1 of the License, or (at your option) any later version.
  *
  *  This program is distributed in the hope that it will be useful,
  *  but WITHOUT ANY WARRANTY; without even the implied warranty of
- *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- *  GNU General Public License for more details.
+ *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+ *  Lesser General Public License for more details.
  *
- *  You should have received a copy of the GNU General Public License
- *  along with this program; if not, write to the Free Software
- *  Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
+ *  You should have received a copy of the GNU Lesser General Public
+ *  License along with this library; if not, write to the Free Software
+ *  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  */
 
 /* COMPONENTS in TENSORS like stress or strain
@@ -58,6 +58,7 @@
 #include "element.h"
 #include "material.h"
 #include "classfactory.h"
+#include "crosssection.h"
 
 #include <vector>
 
@@ -579,8 +580,9 @@ VTKExportModule :: exportCellVars(FILE *stream, int elemToProcess, TimeStep *tSt
                     continue;
                 }
 #endif
-                if ( type == IST_MaterialNumber ) {
-                    fprintf( stream, "%d\n", elem->giveMaterial()->giveNumber() );
+                if (type == IST_MaterialNumber || type == IST_CrossSectionNumber) {
+                    OOFEM_WARNING1 ( "VTKExportModule - Material numbers are deprecated, outputing cross section number instead..." );
+                    fprintf( stream, "%d\n", elem->giveCrossSection()->giveNumber() );
                 } else if ( type == IST_ElementNumber ) {
                     fprintf( stream, "%d\n", elem->giveNumber() );
                 } else {
@@ -635,7 +637,7 @@ VTKExportModule :: exportCellVars(FILE *stream, int elemToProcess, TimeStep *tSt
                     vec.resize(0);
                     for (int i = 0; i < elem->giveDefaultIntegrationRulePtr()->giveNumberOfIntegrationPoints(); ++i) {
                         gp = elem->giveDefaultIntegrationRulePtr()->getIntegrationPoint(i);
-                        elem->giveMaterial()->giveIPValue(temp, gp, type, tStep);
+                        elem->giveIPValue(temp, gp, type, tStep);
                         gptot += gp->giveWeight();
                         vec.add(gp->giveWeight(), temp);
                     }
@@ -653,7 +655,7 @@ VTKExportModule :: exportCellVars(FILE *stream, int elemToProcess, TimeStep *tSt
 
                     for ( ielem = 1; ielem <= nelem; ielem++ ) {
                         elem = d->giveElement(ielem);
-                        elem->giveMaterial()->giveIPValue(vec, elem->giveDefaultIntegrationRulePtr()->getIntegrationPoint(1), type, tStep);
+                        elem->giveIPValue(vec, elem->giveDefaultIntegrationRulePtr()->getIntegrationPoint(1), type, tStep);
                         fprintf( stream, "%e ", vec.at(indx) );
                     }
                 }
@@ -838,10 +840,7 @@ VTKExportModule :: exportIntVarAs(InternalStateType valID, InternalStateValueTyp
 
     this->giveSmoother();
 
-    int nindx = 1;
-    if ( type == ISVT_TENSOR_G ) {
-        nindx = this->smoother->giveRegionRecordSize(1, valID);
-    }
+    int nindx = giveInternalStateTypeSize( type );
 
     for ( int indx = 1; indx <= nindx; indx++ ) {
         // print header
@@ -869,12 +868,12 @@ VTKExportModule :: exportIntVarAs(InternalStateType valID, InternalStateValueTyp
             IntArray regionNodalNumbers(nnodes);
             int regionDofMans = 0, offset = 0;
             ireg = -1;
-            int defaultSize;
+            int defaultSize = 0;
 
             this->initRegionNodeNumbering(regionNodalNumbers, regionDofMans, offset, d, ireg, 1);
             if ( !( ( valID == IST_DisplacementVector ) || ( valID == IST_MaterialInterfaceVal ) ) ) {
                 // assemble local->global map
-                defaultSize = this->smoother->giveRegionRecordSize(ireg, valID);
+                defaultSize = giveInternalStateTypeSize( type );
             } else {
                 regionDofMans = nnodes;
             }

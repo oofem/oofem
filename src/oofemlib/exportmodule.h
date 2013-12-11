@@ -17,26 +17,28 @@
  *       Czech Technical University, Faculty of Civil Engineering,
  *   Department of Structural Mechanics, 166 29 Prague, Czech Republic
  *
- *  This program is free software; you can redistribute it and/or modify
- *  it under the terms of the GNU General Public License as published by
- *  the Free Software Foundation; either version 2 of the License, or
- *  (at your option) any later version.
+ *  This library is free software; you can redistribute it and/or
+ *  modify it under the terms of the GNU Lesser General Public
+ *  License as published by the Free Software Foundation; either
+ *  version 2.1 of the License, or (at your option) any later version.
  *
  *  This program is distributed in the hope that it will be useful,
  *  but WITHOUT ANY WARRANTY; without even the implied warranty of
- *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- *  GNU General Public License for more details.
+ *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+ *  Lesser General Public License for more details.
  *
- *  You should have received a copy of the GNU General Public License
- *  along with this program; if not, write to the Free Software
- *  Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
+ *  You should have received a copy of the GNU Lesser General Public
+ *  License along with this library; if not, write to the Free Software
+ *  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  */
 
 #ifndef exportmodule_h
 #define exportmodule_h
 
+#include "oofemcfg.h"
 #include "intarray.h"
 #include "inputrecord.h"
+#include "range.h"
 
 #include <list>
 
@@ -45,6 +47,7 @@
 #define _IFT_ExportModule_tstepall "tstep_all"
 #define _IFT_ExportModule_tstepstep "tstep_step"
 #define _IFT_ExportModule_tstepsout "tsteps_out"
+#define _IFT_ExportModule_subtstepsout "subtsteps_out"
 #define _IFT_ExportModule_domainall "domain_all"
 #define _IFT_ExportModule_domainmask "domain_mask"
 //@}
@@ -52,7 +55,6 @@
 namespace oofem {
 class EngngModel;
 class TimeStep;
-class Range;
 
 /**
  * Represents export output module - a base class for all output modules. ExportModule is an abstraction
@@ -63,7 +65,7 @@ class Range;
  * The output for given time step is done only if this step is selected by one of above
  * described method.
  */
-class ExportModule
+class OOFEM_EXPORT ExportModule
 {
 protected:
     /// Component number.
@@ -76,6 +78,13 @@ protected:
     int tstep_step_out;
     /// List of user selected step numbers.
     std::list< Range >tsteps_out;
+    /**
+     * Flag turning output in solution step substeps/itarations. Allows to visualize the 
+     * varibles during equilibrium iterations, etc. Usefull for debugging.
+     * In this case the export module output name will contain timeStep substep number.
+     *  This tStep substep must be set/managed by corresponding engineering model.
+     */
+    bool tstep_substeps_out_flag;
 
     /// Indicates all domains.
     bool domain_all_flag;
@@ -106,6 +115,10 @@ public:
      * Initializes receiver.
      * The init file messages should be printed.
      */
+    /**
+     * Returns true if module is configured to export indvidual substep/iterations.
+     */
+    bool testSubStepOutput() {return this->tstep_substeps_out_flag;}
 
     virtual void initialize() { }
     /**

@@ -17,19 +17,19 @@
  *       Czech Technical University, Faculty of Civil Engineering,
  *   Department of Structural Mechanics, 166 29 Prague, Czech Republic
  *
- *  This program is free software; you can redistribute it and/or modify
- *  it under the terms of the GNU General Public License as published by
- *  the Free Software Foundation; either version 2 of the License, or
- *  (at your option) any later version.
+ *  This library is free software; you can redistribute it and/or
+ *  modify it under the terms of the GNU Lesser General Public
+ *  License as published by the Free Software Foundation; either
+ *  version 2.1 of the License, or (at your option) any later version.
  *
  *  This program is distributed in the hope that it will be useful,
  *  but WITHOUT ANY WARRANTY; without even the implied warranty of
- *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- *  GNU General Public License for more details.
+ *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+ *  Lesser General Public License for more details.
  *
- *  You should have received a copy of the GNU General Public License
- *  along with this program; if not, write to the Free Software
- *  Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
+ *  You should have received a copy of the GNU Lesser General Public
+ *  License along with this library; if not, write to the Free Software
+ *  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  */
 
 /*
@@ -50,7 +50,31 @@
  #include "combuff.h"
 #endif
 
+#define ALLOC(size) (int*)malloc(sizeof(int) * (size));
+
+#define RESIZE(n) \
+    { \
+        size = n; \
+        if ( n > allocatedSize ) { \
+            allocatedSize = n; \
+            if ( values ) free(values); \
+            values = ALLOC(size); \
+        } \
+    }
+
 namespace oofem {
+
+IntArray :: iterator :: iterator(const IntArray* vec, int pos): pos( pos ), vec( vec ) { }
+
+bool IntArray :: iterator :: operator!=(const IntArray :: iterator& other) const { return pos != other.pos; }
+
+int IntArray :: iterator :: operator*() const { return (*vec)(pos); }
+
+const IntArray :: iterator & IntArray :: iterator :: operator++() { ++pos; return *this; }
+
+IntArray :: iterator IntArray :: begin() { return iterator(this, 0); }
+IntArray :: iterator IntArray :: end() { return iterator(this, this->size); }
+
 
 IntArray :: IntArray() :
     size(0),
@@ -79,12 +103,43 @@ IntArray :: IntArray(const IntArray &src) :
 // copy constructor
 {
     if ( size ) {
-        values = (int*)malloc(size * sizeof(int));
+        values = ALLOC(this->size);
         memcpy(values, src.values, size * sizeof(int));
     } else {
         values = NULL;
     }
 }
+
+
+#if __cplusplus > 199711L
+IntArray :: IntArray(std::initializer_list<int> list)
+{
+    this->size = this->allocatedSize = list.size();
+    if ( this->size ) {
+        this->values = ALLOC(this->size);
+        int *p = this->values;
+        for (int x: list) {
+            *p = x;
+            p++;
+        }
+    } else {
+        this->values = NULL;
+    }
+}
+
+
+IntArray &IntArray :: operator=(std::initializer_list<int> list)
+{
+    RESIZE((int)list.size());
+    int *p = this->values;
+    for (int x: list) {
+        *p = x;
+        p++;
+    }
+    return * this;
+}
+
+#endif
 
 
 IntArray :: ~IntArray()
@@ -104,7 +159,7 @@ IntArray &IntArray :: operator = ( const IntArray & src )
 
     allocatedSize = size = src.size;
     if ( size ) {
-        values = (int*)malloc(size * sizeof(int));
+        values = ALLOC(this->size);
         memcpy(values, src.values, size * sizeof(int));
     } else {
         values = NULL;
@@ -158,6 +213,19 @@ const int &IntArray :: operator()(int i) const
     this->checkBounds(i);
     return values [ i ];
 }
+
+int &IntArray :: operator[](int i)
+{
+    this->checkBounds(i);
+    return values [ i ];
+}
+
+const int &IntArray :: operator[](int i) const
+{
+    this->checkBounds(i);
+    return values [ i ];
+}
+
 #endif
 
 
@@ -180,7 +248,7 @@ void IntArray :: resizeWithValues(int n, int allocChunk)
 {
 #ifdef DEBUG
     if ( allocChunk < 0 ) {
-        OOFEM_FATAL2("FloatArray :: resize - allocChunk must be non-negative; %d", allocChunk);
+        OOFEM_FATAL2("IntArray :: resize - allocChunk must be non-negative; %d", allocChunk);
     }
 
 #endif
@@ -192,10 +260,10 @@ void IntArray :: resizeWithValues(int n, int allocChunk)
     allocatedSize = n + allocChunk;
 
     // For the typical small sizes we have, realloc doesn't seem to be worth it, better with just malloc.
-    int *newValues = (int*)malloc(allocatedSize * sizeof(int));
+    int *newValues = ALLOC(allocatedSize);
 #ifdef DEBUG
     if ( !newValues ) {
-        OOFEM_FATAL2("FloatArray :: resizeWithValues - Failed in allocating %d doubles", allocatedSize);
+        OOFEM_FATAL2("IntArray :: resizeWithValues - Failed in allocating %d doubles", allocatedSize);
     }
 #endif
     memcpy(newValues, values, size * sizeof(int) );
@@ -208,14 +276,6 @@ void IntArray :: resizeWithValues(int n, int allocChunk)
 
 void IntArray :: resize(int n)
 {
-#if 0
-    // TO BE REMOVED:
-    this->resizeWithValues(n);
-    return;
-#endif
-    if ( n != 0 ) { 
-        //printf("oh");
-    }
     size = n;
     if ( n <= allocatedSize ) {
         memset(values, 0, size * sizeof(int) );
@@ -227,7 +287,7 @@ void IntArray :: resize(int n)
     values = (int*)calloc(allocatedSize, sizeof(int));
 #ifdef DEBUG
     if ( !values ) {
-        OOFEM_FATAL2("FloatArray :: resize - Failed in allocating %d doubles", allocatedSize);
+        OOFEM_FATAL2("IntArray :: resize - Failed in allocating %d doubles", allocatedSize);
     }
 #endif
 }
@@ -240,10 +300,10 @@ void IntArray :: preallocate(int futureSize)
     }
     allocatedSize = futureSize;
     
-    int *newValues = (int*)malloc(allocatedSize * sizeof(int));
+    int *newValues = ALLOC(allocatedSize);
 #ifdef DEBUG
     if ( !newValues ) {
-        OOFEM_FATAL2("FloatArray :: preallocate - Failed in allocating %d doubles", allocatedSize);
+        OOFEM_FATAL2("IntArray :: preallocate - Failed in allocating %d doubles", allocatedSize);
     }
 #endif
     memcpy(newValues, values, size * sizeof(int) );
@@ -276,7 +336,7 @@ void IntArray :: followedBy(const IntArray &b, int allocChunk)
     }
 
     if ( newSize > allocatedSize ) {
-        int *newValues = (int*)malloc((newSize + allocChunk) * sizeof(int));
+        int *newValues = ALLOC(newSize + allocChunk);
 
         memcpy(newValues, values, size * sizeof(int));
         memcpy(newValues + size, b.values, b.size * sizeof(int));
@@ -300,7 +360,6 @@ void IntArray :: followedBy(int b, int allocChunk)
     int newSize = size + 1;
 
     if ( newSize > allocatedSize ) {
-        ///@todo use malloc + memcpy/memset.
         int *newValues = (int*)calloc(newSize + allocChunk, sizeof(int));
 
         memcpy(newValues, values, size * sizeof(int));
@@ -449,7 +508,7 @@ contextIOResultType IntArray :: restoreYourself(DataStream *stream, ContextMode 
     }
 
     if ( size ) {
-        values = (int*)malloc(size*sizeof(int));
+        values = ALLOC(size);
         allocatedSize = size;
     } else {
         values = NULL;
@@ -563,12 +622,47 @@ int IntArray :: insertSorted(int _val, int allocChunk)
 
 int IntArray :: insertSortedOnce(int _val, int allocChunk)
 {
-    int res;
-    if ( ( res = findSorted(_val) ) ) {
-        return res;                          // value already present
-    }
+    int first = 0;
+    int last = size - 1;
 
-    return insertSorted(_val, allocChunk);
+    if ( size == 0 || values[first] > _val ) {
+        // first = 0 is correct already
+    } else if ( values[last] < _val ) {
+        first = size;
+    } else {
+        while ( first <= last ) { //while we haven't reached the end of
+            int mid = ( first + last ) / 2; //rule out half of the data by spliting the array
+            if ( values [ mid ] == _val ) { //if we have found the target
+                return mid + 1;
+            } else if ( values [ mid ] > _val ) {
+                last = mid - 1; //the desired value is in the lower part of the array
+            } else {
+                first = mid + 1; //the desired value is in the upper part of the array
+            }
+        }
+    }
+    // After this loop, "first" is the new position to fill in
+
+    int newSize = size + 1;
+    if ( newSize > allocatedSize ) {
+        int *newValues = ALLOC(newSize + allocChunk);
+        if ( values ) {
+            memcpy(newValues, values, sizeof(int)*first); // Copy over the values before _val
+            memcpy(&newValues[first+1], &values[first], sizeof(int)*(size - first)); // Copy over the values after _val, leaving a gap
+            // Replace the old data:
+            free(values);
+        }
+        values = newValues;
+        allocatedSize = newSize + allocChunk;
+        size = newSize;
+    } else {
+        memmove(&values[first + 1], &values[ first ], sizeof(int)*(size - first));
+        size = newSize;
+    }
+    // Finally we can insert the new value:
+    values[ first ] = _val;
+
+    return first;
 }
 
 

@@ -17,19 +17,19 @@
  *       Czech Technical University, Faculty of Civil Engineering,
  *   Department of Structural Mechanics, 166 29 Prague, Czech Republic
  *
- *  This program is free software; you can redistribute it and/or modify
- *  it under the terms of the GNU General Public License as published by
- *  the Free Software Foundation; either version 2 of the License, or
- *  (at your option) any later version.
+ *  This library is free software; you can redistribute it and/or
+ *  modify it under the terms of the GNU Lesser General Public
+ *  License as published by the Free Software Foundation; either
+ *  version 2.1 of the License, or (at your option) any later version.
  *
  *  This program is distributed in the hope that it will be useful,
  *  but WITHOUT ANY WARRANTY; without even the implied warranty of
- *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- *  GNU General Public License for more details.
+ *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+ *  Lesser General Public License for more details.
  *
- *  You should have received a copy of the GNU General Public License
- *  along with this program; if not, write to the Free Software
- *  Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
+ *  You should have received a copy of the GNU Lesser General Public
+ *  License along with this library; if not, write to the Free Software
+ *  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  */
 //last edit: 07/02/2013 by Jan Novak
 
@@ -62,7 +62,7 @@ HTSelement :: HTSelement(int n, Domain *aDomain) : StructuralElement(n, aDomain)
 
 
 void
-HTSelement ::   giveDofManDofIDMask(int inode, EquationID ut, IntArray &answer) const
+HTSelement :: giveDofManDofIDMask(int inode, EquationID ut, IntArray &answer) const
 
 {
     if(inode <= numberOfEdges)
@@ -135,7 +135,7 @@ HTSelement :: computeCenterOfGravity()
 }
 
 Node*
-HTSelement ::  giveSideNode(int elementSideNumber, int nodeNumber)
+HTSelement :: giveSideNode(int elementSideNumber, int nodeNumber)
 {
     int firstNodeNumber = elementSideNumber;
     int secondNodeNumber = elementSideNumber + 1;
@@ -153,7 +153,7 @@ HTSelement ::  giveSideNode(int elementSideNumber, int nodeNumber)
 
 
 double
-HTSelement :: computeVolumeAround(GaussPoint *gp, int elemSideNumber)
+HTSelement :: computeVolumeAroundSide(GaussPoint *gp, int elemSideNumber)
 // Returns the length of the receiver. This method is valid only if 1
 // Gauss point is used.
 {
@@ -196,7 +196,7 @@ HTSelement :: computeStiffnessMatrix(FloatMatrix &answer, MatResponseMode rMode,
         this->computeOutwardNormalMatrix(N,i+1);
         for(int j = 0; j < iRule->giveNumberOfIntegrationPoints(); j++ ) {
             gp = iRule->getIntegrationPoint(j);
-            dV = this->computeVolumeAround(gp,i+1);
+            dV = this->computeVolumeAroundSide(gp,i+1);
             this->computeFMatrixAt(Fedge,N,gp,i+1);
             Fedge.times(dV); 
             this->computeAMatrixAt(Aedge,N,gp,i+1);
@@ -278,7 +278,7 @@ HTSelement :: computePrescribedDisplacementLoadVectorAt(FloatArray &answer, Time
         iRule =  this->giveIntegrationRule(i);
         for(int j = 0; j < iRule->giveNumberOfIntegrationPoints(); j++ ) {
             gp = iRule->getIntegrationPoint(j);
-            dV = this->computeVolumeAround(gp,i+1);
+            dV = this->computeVolumeAroundSide(gp,i+1);
             this -> computePuVectorAt(PuEdge,N,u,gp,i+1);  
             PuEdge.times(dV); 
             answer.add(PuEdge);
@@ -305,7 +305,7 @@ HTSelement :: computeEdgeLoadVectorAt(FloatArray &answer, Load *load,
         for ( int j = 0; j < iRule->giveNumberOfIntegrationPoints(); j++ ) {
             gp = iRule->getIntegrationPoint(j);
             edgeLoad->computeValueAt(force, tStep, * ( gp->giveCoordinates() ), mode);
-            dV = this->computeVolumeAround(gp,i+1);
+            dV = this->computeVolumeAroundSide(gp,i+1);
             this->computePsVectorAt(PsEdge,force,gp);  
             PsEdge.times(dV); 
             Ps.add(PsEdge);

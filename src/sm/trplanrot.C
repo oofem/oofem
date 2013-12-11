@@ -17,19 +17,19 @@
  *       Czech Technical University, Faculty of Civil Engineering,
  *   Department of Structural Mechanics, 166 29 Prague, Czech Republic
  *
- *  This program is free software; you can redistribute it and/or modify
- *  it under the terms of the GNU General Public License as published by
- *  the Free Software Foundation; either version 2 of the License, or
- *  (at your option) any later version.
+ *  This library is free software; you can redistribute it and/or
+ *  modify it under the terms of the GNU Lesser General Public
+ *  License as published by the Free Software Foundation; either
+ *  version 2.1 of the License, or (at your option) any later version.
  *
  *  This program is distributed in the hope that it will be useful,
  *  but WITHOUT ANY WARRANTY; without even the implied warranty of
- *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- *  GNU General Public License for more details.
+ *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+ *  Lesser General Public License for more details.
  *
- *  You should have received a copy of the GNU General Public License
- *  along with this program; if not, write to the Free Software
- *  Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
+ *  You should have received a copy of the GNU Lesser General Public
+ *  License along with this library; if not, write to the Free Software
+ *  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  */
 
 #include "trplanrot.h"
@@ -531,9 +531,11 @@ TrPlaneStrRot :: initializeFrom(InputRecord *ir)
     const char *__proc = "initializeFrom"; // Required by IR_GIVE_FIELD macro
     IRResultType result;              // Required by IR_GIVE_FIELD macro
 
-    this->StructuralElement :: initializeFrom(ir);
     numberOfGaussPoints = 4;
-    IR_GIVE_OPTIONAL_FIELD(ir, numberOfGaussPoints, _IFT_Element_nip);
+    result = this->StructuralElement :: initializeFrom(ir);
+	if(result != IRRT_OK) {
+		return result;
+	}
 
     numberOfRotGaussPoints = 1;
     IR_GIVE_OPTIONAL_FIELD(ir, numberOfRotGaussPoints, _IFT_TrPlaneStrRot_niprot);
@@ -567,8 +569,6 @@ TrPlaneStrRot :: giveInternalForcesVector(FloatArray &answer, TimeStep *tStep, i
         u.subtract(*initialDisplacements);
     }
 
-    // do not resize answer to computeNumberOfDofs(EID_MomentumBalance)
-    // as this is valid only if receiver has no nodes with slaves
     // zero answer will resize accordingly when adding first contribution
     answer.resize(0);
 
@@ -707,7 +707,7 @@ TrPlaneStrRot :: computeBodyLoadVectorAt(FloatArray &answer, Load *forLoad, Time
     if ( force.giveSize() ) {
         GaussPoint *gp = integrationRulesArray [ 0 ]->getIntegrationPoint(0);
 
-        dens = this->giveMaterial()->give('d', gp);
+        dens = this->giveStructuralCrossSection()->give('d', gp);
         dV   = this->computeVolumeAround(gp) * this->giveCrossSection()->give(CS_Thickness);
 
         answer.resize(9);

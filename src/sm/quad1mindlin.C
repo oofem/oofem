@@ -17,19 +17,19 @@
  *       Czech Technical University, Faculty of Civil Engineering,
  *   Department of Structural Mechanics, 166 29 Prague, Czech Republic
  *
- *  This program is free software; you can redistribute it and/or modify
- *  it under the terms of the GNU General Public License as published by
- *  the Free Software Foundation; either version 2 of the License, or
- *  (at your option) any later version.
+ *  This library is free software; you can redistribute it and/or
+ *  modify it under the terms of the GNU Lesser General Public
+ *  License as published by the Free Software Foundation; either
+ *  version 2.1 of the License, or (at your option) any later version.
  *
  *  This program is distributed in the hope that it will be useful,
  *  but WITHOUT ANY WARRANTY; without even the implied warranty of
- *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- *  GNU General Public License for more details.
+ *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+ *  Lesser General Public License for more details.
  *
- *  You should have received a copy of the GNU General Public License
- *  along with this program; if not, write to the Free Software
- *  Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
+ *  You should have received a copy of the GNU Lesser General Public
+ *  License along with this library; if not, write to the Free Software
+ *  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  */
 
 #include "quad1mindlin.h"
@@ -54,9 +54,9 @@ REGISTER_Element( Quad1Mindlin );
 FEI2dQuadLin Quad1Mindlin :: interp_lin(1, 2);
 
 Quad1Mindlin :: Quad1Mindlin(int n, Domain *aDomain) :
-    NLStructuralElement(n, aDomain),
-    numberOfGaussPoints(4)
+    NLStructuralElement(n, aDomain)
 {
+	numberOfGaussPoints = 4;
     numberOfDofMans = 4;
 }
 
@@ -104,7 +104,7 @@ Quad1Mindlin :: computeBodyLoadVectorAt(FloatArray &answer, Load *forLoad, TimeS
 
             this->interp_lin.evalN(n, *gp->giveCoordinates(), FEIElementGeometryWrapper(this));
             dV = this->computeVolumeAround(gp) * this->giveCrossSection()->give(CS_Thickness);
-            load = this->giveMaterial()->give('d', gp) * gravity.at(3) * dV;
+            load = this->giveStructuralCrossSection()->give('d', gp) * gravity.at(3) * dV;
 
             force.add(load, n);
         }
@@ -166,11 +166,7 @@ Quad1Mindlin :: computeNmatrixAt(GaussPoint *gp, FloatMatrix &answer)
 IRResultType
 Quad1Mindlin :: initializeFrom(InputRecord *ir)
 {
-    const char *__proc = "initializeFrom"; // Required by IR_GIVE_FIELD macro
-    IRResultType result;                 // Required by IR_GIVE_FIELD macro
-
     this->numberOfGaussPoints = 4;
-    IR_GIVE_OPTIONAL_FIELD(ir, numberOfGaussPoints, _IFT_Element_nip);
     return this->NLStructuralElement :: initializeFrom(ir);
 }
 
@@ -224,7 +220,7 @@ Quad1Mindlin :: computeLumpedMassMatrix(FloatMatrix &answer, TimeStep *tStep)
         gp = ir->getIntegrationPoint(i);
 
         dV = this->computeVolumeAround(gp);
-        mass += dV * this->giveMaterial()->give('d', gp);
+        mass += dV * this->giveStructuralCrossSection()->give('d', gp);
     }
 
     answer.resize(12, 12);
@@ -240,10 +236,10 @@ int
 Quad1Mindlin :: giveIPValue(FloatArray &answer, GaussPoint *gp, InternalStateType type, TimeStep *atTime)
 {
     if ( type == IST_ShellForceMomentumTensor ) {
-        answer = static_cast< StructuralMaterialStatus * >( this->giveMaterial()->giveStatus(gp) )->giveStressVector();
+        answer = static_cast< StructuralMaterialStatus * >( gp->giveMaterialStatus() )->giveStressVector();
         return 1;
     } else if ( type == IST_ShellStrainCurvatureTensor ) {
-        answer = static_cast< StructuralMaterialStatus * >( this->giveMaterial()->giveStatus(gp) )->giveStrainVector();
+        answer = static_cast< StructuralMaterialStatus * >( gp->giveMaterialStatus() )->giveStrainVector();
         return 1;
     } else {
         return NLStructuralElement::giveIPValue(answer, gp, type, atTime);

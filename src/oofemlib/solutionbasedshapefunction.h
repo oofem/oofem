@@ -17,19 +17,19 @@
  *       Czech Technical University, Faculty of Civil Engineering,
  *   Department of Structural Mechanics, 166 29 Prague, Czech Republic
  *
- *  This program is free software; you can redistribute it and/or modify
- *  it under the terms of the GNU General Public License as published by
- *  the Free Software Foundation; either version 2 of the License, or
- *  (at your option) any later version.
+ *  This library is free software; you can redistribute it and/or
+ *  modify it under the terms of the GNU Lesser General Public
+ *  License as published by the Free Software Foundation; either
+ *  version 2.1 of the License, or (at your option) any later version.
  *
  *  This program is distributed in the hope that it will be useful,
  *  but WITHOUT ANY WARRANTY; without even the implied warranty of
- *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- *  GNU General Public License for more details.
+ *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+ *  Lesser General Public License for more details.
  *
- *  You should have received a copy of the GNU General Public License
- *  along with this program; if not, write to the Free Software
- *  Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
+ *  You should have received a copy of the GNU Lesser General Public
+ *  License along with this library; if not, write to the Free Software
+ *  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  */
 
 #ifndef SOLUTIONBASEDSHAPEFUNCTION_H_
@@ -41,34 +41,86 @@
 #define _IFT_SolutionbasedShapeFunction_Name "solutionbasedshapefunction"
 #define _IFT_SolutionbasedShapeFunction_Set "set"
 #define _IFT_SolutionbasedShapeFunction_ShapeFunctionFile "shapefunctionfile"
-
+#define _IFT_SolutionbasedShapeFunction_Externalset "externalset"
 
 namespace oofem {
-class SolutionbasedShapeFunction : public ActiveBoundaryCondition {
-private:
-	Node *myNode;
-	int set;
-	std::string filename;
-	bool useConstantBase;
-	bool isLoaded;
+
+struct SurfaceDataStruct {
+    bool isPlus;
+    bool isMinus;
+    bool isZeroBoundary;
+    bool isFree;
+    DofIDItem DofID;
+    DofManager *DofMan;
+    double value;
+};
+
+struct modeStruct {
+    double am, ap;
     EngngModel *myEngngModel;
+    std::vector<SurfaceDataStruct *> SurfaceData;
+};
+
+class OOFEM_EXPORT SolutionbasedShapeFunction : public ActiveBoundaryCondition {
+private:
+    Node *myNode;
+    int set;
+    int externalSet;
+    int order;
+    double TOL;
+    std::string filename;
+    bool useConstantBase;
+    bool isLoaded;
+
+    double bigNorm;
+    int worstIndex;
+
+    bool isCoeff(ActiveDof *dof);
+
+    std::vector< modeStruct *> modes;
+
+    void updateModelWithFactors(modeStruct *m);
     TimeStep *thisTimestep;
 
     FloatArray maxCoord, minCoord;
 
-	double computeBaseFunctionValueAt(FloatArray *coords, Dof *dof);
+    void setBoundaryConditionOnDof(Dof *d, double value);
 
-	void setLoads();
-	void loadProblem();
-	void init();
+
+    void setLoads(EngngModel *myEngngModel, int d);
+    void loadProblem();
+    void init();
+
+    void computeCorrectionFactors(modeStruct &myMode, IntArray *Dofs, double *am, double *ap);
+
+    /**
+     * @brief giveValueAtPoint
+     * @param answer        Values as point corresponding to the coordinate and dofID
+     * @param coords        Coordinated at which evaluation takes place
+     * @param dofID         Specifies DofIDs to evaluate
+     * @param myEngngModel  EngngModel
+     */
+    void giveValueAtPoint(FloatArray &answer, const FloatArray &coords, IntArray &dofID, EngngModel &myEngngModel);
+
+    void giveCorrectedValueAtPoint(FloatArray &answer, const FloatArray &coords, IntArray &dofID, EngngModel &myEngngModel);
+
+    void splitBoundaryNodeIDs(modeStruct &mode, Element &e, IntArray &boundary, IntArray &pList, IntArray &mList, IntArray &zList, FloatMatrix &nodeValues);
+
+    void computeBaseFunctionValueAt(FloatArray &answer, FloatArray &coords, IntArray &dofIDs, EngngModel &myEngngModel);
+
+    void initializeSurfaceData(modeStruct *mode);
+
+    void copyDofManagersToSurfaceData(modeStruct *mode, IntArray nodeList, bool isPlus, bool isMinus, bool isZero);
+
+    void whichBoundary(FloatArray &coord, bool &isPlus, bool &isMinus, bool &isZero);
 
 public:
-	SolutionbasedShapeFunction(int n, Domain *d);
-	virtual ~SolutionbasedShapeFunction();
+    SolutionbasedShapeFunction(int n, Domain *d);
+    virtual ~SolutionbasedShapeFunction();
 
-	IRResultType initializeFrom(InputRecord *ir);
+    IRResultType initializeFrom(InputRecord *ir);
 
-	virtual bool requiresActiveDofs() {return true;};
+    virtual bool requiresActiveDofs() { return true; }
     virtual int giveNumberOfInternalDofManagers() { return 1; }
     virtual DofManager *giveInternalDofManager(int i) { return myNode; }
 
@@ -77,18 +129,17 @@ public:
 
     virtual bool hasBc(ActiveDof *dof, TimeStep *tStep) { return false; }
 
-    virtual bool isPrimaryDof(ActiveDof *dof) { return false; };
+    virtual bool isPrimaryDof(ActiveDof *dof) { return false; }
 
     virtual void computeDofTransformation(ActiveDof *dof, FloatArray &masterContribs);
 
-    virtual void giveLocationArrays(std::vector<IntArray> &rows, std::vector<IntArray> &cols, EquationID eid, CharType type,
-                                    const UnknownNumberingScheme &r_s, const UnknownNumberingScheme &c_s);
-
-    virtual int giveNumberOfMasterDofs(ActiveDof *dof) {return 1; };
+    virtual int giveNumberOfMasterDofs(ActiveDof *dof) {return this->giveDomain()->giveNumberOfSpatialDimensions(); }
     virtual Dof *giveMasterDof(ActiveDof *dof, int mdof);
 
     virtual const char *giveClassName() const { return "SolutionbasedShapeFunction"; }
     virtual const char *giveInputRecordName() const { return _IFT_SolutionbasedShapeFunction_Name; }
+
+    double checkIncompressibility(EngngModel &myEngngModel);
 };
 }
 

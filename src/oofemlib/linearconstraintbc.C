@@ -17,19 +17,19 @@
  *       Czech Technical University, Faculty of Civil Engineering,
  *   Department of Structural Mechanics, 166 29 Prague, Czech Republic
  *
- *  This program is free software; you can redistribute it and/or modify
- *  it under the terms of the GNU General Public License as published by
- *  the Free Software Foundation; either version 2 of the License, or
- *  (at your option) any later version.
+ *  This library is free software; you can redistribute it and/or
+ *  modify it under the terms of the GNU Lesser General Public
+ *  License as published by the Free Software Foundation; either
+ *  version 2.1 of the License, or (at your option) any later version.
  *
  *  This program is distributed in the hope that it will be useful,
  *  but WITHOUT ANY WARRANTY; without even the implied warranty of
- *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- *  GNU General Public License for more details.
+ *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+ *  Lesser General Public License for more details.
  *
- *  You should have received a copy of the GNU General Public License
- *  along with this program; if not, write to the Free Software
- *  Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
+ *  You should have received a copy of the GNU Lesser General Public
+ *  License along with this library; if not, write to the Free Software
+ *  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  */
 
 #include "linearconstraintbc.h"
@@ -42,6 +42,7 @@
 #include "timestep.h"
 #include "datastream.h"
 #include "contextioerr.h"
+#include "node.h"
 
 namespace oofem {
 REGISTER_BoundaryCondition(LinearConstraintBC);
@@ -50,7 +51,8 @@ REGISTER_BoundaryCondition(LinearConstraintBC);
 LinearConstraintBC :: LinearConstraintBC(int n, Domain *d) : ActiveBoundaryCondition(n, d)
 {
     this->md = new Node(0, domain);
-    // this is internal lagrange multiplier uses to enforce the receiver constrain
+    // this is internal lagrange multiplier used to enforce the receiver constrain
+    // this allocates a new equation related to this constraint
     this->md->appendDof( new MasterDof( 0, this->md, ( DofIDItem ) ( d->giveNextFreeDofID() ) ) );
     this->lhsType.resize(0); 
     this->rhsType.resize(0); 
@@ -62,7 +64,7 @@ IRResultType LinearConstraintBC :: initializeFrom(InputRecord *ir)
     ActiveBoundaryCondition :: initializeFrom(ir);
     const char *__proc = "initializeFrom";
     IRResultType result;
-    rhsLtf = 0.;
+    rhsLtf = 0;
     
     IR_GIVE_FIELD(ir, weights, _IFT_LinearConstraintBC_weights);
     IR_GIVE_FIELD(ir, rhs, _IFT_LinearConstraintBC_rhs);
@@ -109,20 +111,29 @@ void LinearConstraintBC :: assemble(SparseMtrx *answer, TimeStep *tStep, Equatio
     IntArray locr(size), locc(size);
 
     if (!this->lhsType.contains((int) type)) return ;
+    this->giveLocArray(r_s, locr, lambdaeq.at(1));
 
+    if (this->isImposed(tStep)) {
 
-    for ( int _i = 1; _i <= size; _i++ ) { // loop over dofs
+      for ( int _i = 1; _i <= size; _i++ ) { // loop over dofs
         double factor=1.;
         if(weightsLtf.giveSize()){
             factor = domain->giveLoadTimeFunction(weightsLtf.at(_i))->__at(tStep->giveIntrinsicTime());
         }
         contrib.at(_i, 1) = this->weights.at(_i)*factor;
-    }
-    contribt.beTranspositionOf(contrib);
+      }
+      contribt.beTranspositionOf(contrib);
 
-    this->giveLocArray(r_s, locr, lambdaeq.at(1));
-    answer->assemble(lambdaeq, locr, contribt);
-    answer->assemble(locr, lambdaeq, contrib);
+      answer->assemble(lambdaeq, locr, contribt);
+      answer->assemble(locr, lambdaeq, contrib);
+    } else {
+      // the bc is not imposed at specific time step, however in order to make the equation system regular
+      // we initialize the allocated equation to the following form 1*labmda = 0, forcing lagrange multiplier 
+      // of inactive condition to be zero.
+      FloatMatrix help(1,1);
+      help.at(1,1) = 1.0;
+      answer->assemble(lambdaeq, lambdaeq, help);
+    }
 }
 
 void LinearConstraintBC :: assembleVector(FloatArray &answer, TimeStep *tStep, EquationID eid,
@@ -134,6 +145,8 @@ void LinearConstraintBC :: assembleVector(FloatArray &answer, TimeStep *tStep, E
   double factor=1.;
 
   if (!this->rhsType.contains((int) type)) return ;
+  if (!this->isImposed(tStep)) return;
+
   if (type == InternalForcesVector) {
     // compute true residual
     int size = this->weights.giveSize();
@@ -146,8 +159,12 @@ void LinearConstraintBC :: assembleVector(FloatArray &answer, TimeStep *tStep, E
             factor = domain->giveLoadTimeFunction(weightsLtf.at(_i))->__at(tStep->giveIntrinsicTime());
         }
         idof = this->domain->giveDofManager( this->dofmans.at(_i) )->giveDof( this->dofs.at(_i) );
-	answer.at(s.giveDofEquationNumber(idof)) += md->giveDof(1)->giveUnknown(mode, tStep) * this->weights.at(_i)*factor;
-	answer.at(s.giveDofEquationNumber( md->giveDof(1) )) += idof->giveUnknown(mode, tStep) * this->weights.at(_i)*factor;
+        if(s.giveDofEquationNumber(idof)){
+            answer.at(s.giveDofEquationNumber(idof)) += md->giveDof(1)->giveUnknown(mode, tStep) * this->weights.at(_i)*factor;
+        }
+        if (s.giveDofEquationNumber( md->giveDof(1) )){
+            answer.at(s.giveDofEquationNumber( md->giveDof(1) )) += idof->giveUnknown(mode, tStep) * this->weights.at(_i)*factor;
+        }
     }
 
   } else {

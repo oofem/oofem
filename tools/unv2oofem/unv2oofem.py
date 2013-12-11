@@ -23,13 +23,14 @@ Job description record
 Analysis record
 Domain record
 Output manager record
-ncrosssect # nmat # nbc # nic # nltf #
+ncrosssect # nmat # nbc # nic # nltf # nset # nxfemman #
 cross section records
 material records
 boundary condition records
 initial condition records
 load time function records
 extractor records
+set records
 
 Assignment of properties to nodes and elements is based on association with some unv group. The same mechanism
 is valid for assignment of boundary conditions (edge, surface) load. The syntax is following:
@@ -53,13 +54,13 @@ UNV2OOFEM: Converts UNV file from Salome to OOFEM native file format
         unvfile=sys.argv[1]
         ctrlfile=sys.argv[2]
         oofemfile=sys.argv[3]
-        of=open(oofemfile,'w') 
-        # read UNV file in FEM object structure
-        fileExtension = unvfile.partition('.')
-        
-        if (fileExtension[2]=='unv'):
+        of=open(oofemfile,'w')
+         
+        # read file in FEM object structure
+        fileExtension = unvfile.split('.')
+        if (fileExtension[-1].lower()=='unv'): # Salome output file
             Parser=UNVParser(unvfile)
-        elif (fileExtension[2]=='inp'):
+        elif (fileExtension[-1].lower()=='inp'): # Abaqus output file
             Parser=AbaqusParser(unvfile)
         
         print 'Parsing mesh file %s' % sys.argv[1],
@@ -160,31 +161,31 @@ UNV2OOFEM: Converts UNV file from Salome to OOFEM native file format
                                     for bel in belem.oofem_groups:
                                         #print "%d '%s' '%s'" % (len(belem.oofem_groups), bel.name.rstrip(), bel.oofem_groupNameForLoads)
                                         if (bel.name.rstrip() != bel.oofem_groupNameForLoads):
-                                            continue
-                                    #build a new int list, which reflects load numbers and edges/faces
-                                    if (len(bel.oofem_boundaryLoadsNum) > 0):
-                                        loadNum = bel.oofem_boundaryLoadsNum
-                                        newList=[-1]*(2*len(loadNum))
-                                        for j in range(len(loadNum)):
-                                            newList[2*j] = loadNum[j]
-                                            newList[2*j+1] = i+1
-                                        #print newList
-                                        elem.oofem_bLoads+=newList
-                                        print "Boundary load \"%s\" found for element %d " % (bel.name.rstrip('\n'), elem.id)
-                                        #print bel.name, elem.id, elem.oofem_bLoads
-                                        
-                                    if (bel.oofem_sets):
-                                        print "Set \"%s\" found for element %d " % (bel.name.rstrip('\n'), elem.id)
-                                        setNum = bel.oofem_sets;
-                                        # setID, element id, element side
-                                        for thisSet in setNum:
-                                            boundarySets.append([thisSet, elem.id, i+1])
-                                        
+                                            #continue
+                                            #build a new int list, which reflects load numbers and edges/faces
+                                            if (len(bel.oofem_boundaryLoadsNum) > 0):
+                                                loadNum = bel.oofem_boundaryLoadsNum
+                                                newList=[-1]*(2*len(loadNum))
+                                                for j in range(len(loadNum)):
+                                                    newList[2*j] = loadNum[j]
+                                                    newList[2*j+1] = i+1
+                                                #print newList
+                                                elem.oofem_bLoads+=newList
+                                                print "Boundary load \"%s\" found for element %d " % (bel.name.rstrip('\n'), elem.id)
+                                                #print bel.name, elem.id, elem.oofem_bLoads
+                                                
+                                            if (bel.oofem_sets):
+                                                print "Set \"%s\" found for element %d " % (bel.name.rstrip('\n'), elem.id)
+                                                setNum = bel.oofem_sets;
+                                                # setID, element id, element side
+                                                for thisSet in setNum:
+                                                    boundarySets.append([thisSet, elem.id, i+1])
+                                                
                             if(success==0):
                                 print "Can not assign edge/face load \"%s\" to unv element %d" % (bel.name, elem.id)
 
         #write component record
-        of.write('ndofman %d nelem %d ncrosssect %d nmat %d nbc %d nic %d nltf %d nset %d\n' % (FEM.nnodes, len(elemNotBoundary), CTRL.ncrosssect, CTRL.nmat, CTRL.nbc, CTRL.nic, CTRL.nltf, CTRL.nset))
+        of.write('ndofman %d nelem %d ncrosssect %d nmat %d nbc %d nic %d nltf %d nset %d nxfemman %d\n' % (FEM.nnodes, len(elemNotBoundary), CTRL.ncrosssect, CTRL.nmat, CTRL.nbc, CTRL.nic, CTRL.nltf, CTRL.nset, CTRL.nxfemman))
         #write nodes
         for node in FEM.nodes:
             #resolve nodal properties

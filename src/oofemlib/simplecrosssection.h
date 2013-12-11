@@ -17,19 +17,19 @@
  *       Czech Technical University, Faculty of Civil Engineering,
  *   Department of Structural Mechanics, 166 29 Prague, Czech Republic
  *
- *  This program is free software; you can redistribute it and/or modify
- *  it under the terms of the GNU General Public License as published by
- *  the Free Software Foundation; either version 2 of the License, or
- *  (at your option) any later version.
+ *  This library is free software; you can redistribute it and/or
+ *  modify it under the terms of the GNU Lesser General Public
+ *  License as published by the Free Software Foundation; either
+ *  version 2.1 of the License, or (at your option) any later version.
  *
  *  This program is distributed in the hope that it will be useful,
  *  but WITHOUT ANY WARRANTY; without even the implied warranty of
- *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- *  GNU General Public License for more details.
+ *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+ *  Lesser General Public License for more details.
  *
- *  You should have received a copy of the GNU General Public License
- *  along with this program; if not, write to the Free Software
- *  Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
+ *  You should have received a copy of the GNU Lesser General Public
+ *  License along with this library; if not, write to the Free Software
+ *  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  */
 
 #ifndef simplecrosssection_h
@@ -53,6 +53,7 @@
 #define _IFT_SimpleCrossSection_shearareay "shearareay" ///< Shear area y direction
 #define _IFT_SimpleCrossSection_shearareaz "shearareaz" ///< Shear area z direction
 #define _IFT_SimpleCrossSection_drillStiffness "drillstiffness" ///< Penalty term for drilling stiffness.
+#define _IFT_SimpleCrossSection_MaterialNumber "material" ///< Material number for the bulk material
 //@}
 
 namespace oofem {
@@ -78,7 +79,7 @@ namespace oofem {
  * which are requested by particular material models. These parameters can be requested using get service and
  * include those defined by CrossSectionProperty.
  */
-class SimpleCrossSection : public StructuralCrossSection
+class OOFEM_EXPORT SimpleCrossSection : public StructuralCrossSection
 {
 public:
     /** 
@@ -86,7 +87,10 @@ public:
      * @param n Cross section number.
      * @param d Associated domain.
      */
-    SimpleCrossSection(int n, Domain *d) : StructuralCrossSection(n, d) { }
+    SimpleCrossSection(int n, Domain *d) : StructuralCrossSection(n, d) {
+      materialNumber = 0;
+      czMaterialNumber = 0;
+    }
 
     virtual double give(CrossSectionProperty a);
 
@@ -103,7 +107,7 @@ public:
 
 
     virtual void giveCharMaterialStiffnessMatrix(FloatMatrix &answer, MatResponseMode rMode, GaussPoint *gp, TimeStep *tStep);
-    virtual bool isCharacteristicMtrxSymmetric(MatResponseMode rMode, int mat);
+    virtual bool isCharacteristicMtrxSymmetric(MatResponseMode rMode);
 
 
     virtual void give2dBeamStiffMtrx(FloatMatrix &answer, MatResponseMode rMode, GaussPoint *gp, TimeStep *tStep);
@@ -131,6 +135,29 @@ public:
     virtual const char *giveClassName() const { return "SimpleCrossSection"; }
     virtual const char *giveInputRecordName() const { return _IFT_SimpleCrossSection_Name; }
     virtual classType giveClassID() const { return SimpleCrossSectionClass; }
+
+    virtual double give(int aProperty, GaussPoint *gp); 
+    virtual Material *giveMaterial(IntegrationPoint *ip);    
+    
+    int const giveMaterialNumber() { return this->materialNumber; };
+    void setMaterialNumber(int matNum) { this->materialNumber = matNum; };
+    virtual int checkConsistency();
+    virtual Interface *giveInterface(InterfaceType t, IntegrationPoint *ip);
+
+
+
+
+    virtual void giveFirstPKStresses(FloatArray &answer, GaussPoint *gp, const FloatArray &reducedFIncrement, TimeStep *tStep);
+    virtual void giveCauchyStresses(FloatArray &answer, GaussPoint *gp, const FloatArray &reducedFIncrement, TimeStep *tStep);
+    virtual void giveStiffnessMatrix_dPdF(FloatMatrix &answer, MatResponseMode rMode, GaussPoint *gp, TimeStep *tStep);
+    virtual void giveStiffnessMatrix_dCde(FloatMatrix &answer, MatResponseMode rMode, GaussPoint *gp, TimeStep *tStep);
+
+    virtual void computeStressIndependentStrainVector(FloatArray &answer, GaussPoint *gp, TimeStep *stepN, ValueModeType mode);
+
+
+private:
+    int materialNumber;   // material number
+    int czMaterialNumber; // cohesive zone material number
 };
 } // end namespace oofem
 #endif // simplecrosssection_h

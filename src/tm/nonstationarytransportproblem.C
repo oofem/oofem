@@ -17,19 +17,19 @@
  *       Czech Technical University, Faculty of Civil Engineering,
  *   Department of Structural Mechanics, 166 29 Prague, Czech Republic
  *
- *  This program is free software; you can redistribute it and/or modify
- *  it under the terms of the GNU General Public License as published by
- *  the Free Software Foundation; either version 2 of the License, or
- *  (at your option) any later version.
+ *  This library is free software; you can redistribute it and/or
+ *  modify it under the terms of the GNU Lesser General Public
+ *  License as published by the Free Software Foundation; either
+ *  version 2.1 of the License, or (at your option) any later version.
  *
  *  This program is distributed in the hope that it will be useful,
  *  but WITHOUT ANY WARRANTY; without even the implied warranty of
- *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- *  GNU General Public License for more details.
+ *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+ *  Lesser General Public License for more details.
  *
- *  You should have received a copy of the GNU General Public License
- *  along with this program; if not, write to the Free Software
- *  Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
+ *  You should have received a copy of the GNU Lesser General Public
+ *  License along with this library; if not, write to the Free Software
+ *  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  */
 
 #include "nonstationarytransportproblem.h"
@@ -70,7 +70,9 @@ NonStationaryTransportProblem :: NonStationaryTransportProblem(int i, EngngModel
 }
 
 NonStationaryTransportProblem :: ~NonStationaryTransportProblem()
-{}
+{
+    delete linSolver;
+}
 
 
 NumericalMethod *NonStationaryTransportProblem :: giveNumericalMethod(MetaStep *mStep)
@@ -278,7 +280,7 @@ void NonStationaryTransportProblem :: solveYourselfAt(TimeStep *tStep)
         this->assembleVectorFromElements( bcRhs, stepWhenIcApply, EID_ConservationEquation, ElementInternalSourceVector,
                                          VM_Total, EModelDefaultEquationNumbering(), this->giveDomain(1) );
         //add nodal load
-        this->assembleVectorFromDofManagers( bcRhs, stepWhenIcApply, EID_ConservationEquation, ExternalForcesVector,
+        this->assembleVectorFromDofManagers( bcRhs, stepWhenIcApply, ExternalForcesVector,
                                             VM_Total, EModelDefaultEquationNumbering(), this->giveDomain(1) );
     }
 
@@ -333,7 +335,7 @@ void NonStationaryTransportProblem :: solveYourselfAt(TimeStep *tStep)
                                      VM_Total, EModelDefaultEquationNumbering(), this->giveDomain(1) );
 
     // assembling load from nodes
-    this->assembleVectorFromDofManagers( bcRhs, tStep, EID_ConservationEquation, InternalForcesVector, VM_Total,
+    this->assembleVectorFromDofManagers( bcRhs, tStep, InternalForcesVector, VM_Total,
                                         EModelDefaultEquationNumbering(), this->giveDomain(1) );
     for ( int i = 1; i <= neq; i++ ) {
         rhs.at(i) += bcRhs.at(i) * alpha;
@@ -426,7 +428,7 @@ NonStationaryTransportProblem :: saveContext(DataStream *stream, ContextMode mod
 {
     contextIOResultType iores;
     int closeFlag = 0;
-    FILE *file;
+    FILE *file = NULL;
 
     if ( stream == NULL ) {
         if ( !this->giveContextFile(& file, this->giveCurrentStep()->giveNumber(),
@@ -468,7 +470,7 @@ NonStationaryTransportProblem :: restoreContext(DataStream *stream, ContextMode 
     contextIOResultType iores;
     int closeFlag = 0;
     int istep, iversion;
-    FILE *file;
+    FILE *file = NULL;
 
     this->resolveCorrespondingStepNumber(istep, iversion, obj);
 
@@ -702,7 +704,7 @@ NonStationaryTransportProblem :: applyIC(TimeStep *stepWhenIcApply)
         CemhydMat *cem = dynamic_cast< CemhydMat * >( element->giveMaterial() );
         //assign status to each integration point on each element
         if ( cem ) {
-            element->giveMaterial()->initMaterial(element); //create microstructures and statuses on specific GPs
+            cem->initMaterial(element); //create microstructures and statuses on specific GPs
             element->updateInternalState(stepWhenIcApply);   //store temporary unequilibrated temperature
             element->updateYourself(stepWhenIcApply);   //store equilibrated temperature
             cem->clearWeightTemperatureProductVolume(element);

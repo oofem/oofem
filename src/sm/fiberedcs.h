@@ -17,19 +17,19 @@
  *       Czech Technical University, Faculty of Civil Engineering,
  *   Department of Structural Mechanics, 166 29 Prague, Czech Republic
  *
- *  This program is free software; you can redistribute it and/or modify
- *  it under the terms of the GNU General Public License as published by
- *  the Free Software Foundation; either version 2 of the License, or
- *  (at your option) any later version.
+ *  This library is free software; you can redistribute it and/or
+ *  modify it under the terms of the GNU Lesser General Public
+ *  License as published by the Free Software Foundation; either
+ *  version 2.1 of the License, or (at your option) any later version.
  *
  *  This program is distributed in the hope that it will be useful,
  *  but WITHOUT ANY WARRANTY; without even the implied warranty of
- *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- *  GNU General Public License for more details.
+ *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+ *  Lesser General Public License for more details.
  *
- *  You should have received a copy of the GNU General Public License
- *  along with this program; if not, write to the Free Software
- *  Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
+ *  You should have received a copy of the GNU Lesser General Public
+ *  License along with this library; if not, write to the Free Software
+ *  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  */
 
 #ifndef fiberedcs_h
@@ -106,6 +106,7 @@ public:
         thick = 0.;
         width = 0.;
         area = -1.0;
+        MAT_GIVEN_BY_CS = true;
     }
 
     virtual ~FiberedCrossSection()  { }
@@ -129,8 +130,12 @@ public:
     virtual void give3dShellStiffMtrx(FloatMatrix &answer,MatResponseMode mode, GaussPoint *gp, TimeStep *tStep);
     virtual void giveMembraneRotStiffMtrx(FloatMatrix &answer, MatResponseMode rMode, GaussPoint *gp, TimeStep *tStep);
 
-    virtual bool isCharacteristicMtrxSymmetric(MatResponseMode rMode, int mat);
-
+    virtual bool isCharacteristicMtrxSymmetric(MatResponseMode rMode);
+    virtual double give(int aProperty, GaussPoint *gp) 
+        {
+            OOFEM_ERROR1("FiberedCrossSection :: give - not implemented yet");
+            return 0.0;
+        };
     virtual FloatArray *imposeStressConstrainsOnGradient(GaussPoint *gp, FloatArray *gradientStressVector3d);
     virtual FloatArray *imposeStrainConstrainsOnGradient(GaussPoint *gp, FloatArray *gradientStrainVector3d);
 
@@ -168,6 +173,8 @@ public:
     virtual contextIOResultType saveIPContext(DataStream *stream, ContextMode mode, GaussPoint *gp);
     virtual contextIOResultType restoreIPContext(DataStream *stream, ContextMode mode, GaussPoint *gp);
 
+    virtual int checkConsistency();
+
 #ifdef __PARALLEL_MODE
     int packUnknowns(CommunicationBuffer &buff, TimeStep *stepN, GaussPoint *ip)
     {
@@ -187,6 +194,17 @@ public:
         return 0;
     }
 #endif
+
+
+    virtual void giveFirstPKStresses(FloatArray &answer, GaussPoint *gp, const FloatArray &reducedFIncrement, TimeStep *tStep)
+        { OOFEM_ERROR("giveFirstPKStresses not implemented for fibered cross section"); };
+    virtual void giveCauchyStresses(FloatArray &answer, GaussPoint *gp, const FloatArray &reducedFIncrement, TimeStep *tStep)
+        { OOFEM_ERROR("giveCauchyStresses not implemented for fibered cross section"); };
+    virtual void giveStiffnessMatrix_dPdF(FloatMatrix &answer, MatResponseMode rMode, GaussPoint *gp, TimeStep *tStep)
+        { OOFEM_ERROR("giveStiffnessMatrix_dPdF not implemented for fibered cross section"); };
+    virtual void giveStiffnessMatrix_dCde(FloatMatrix &answer, MatResponseMode rMode, GaussPoint *gp, TimeStep *tStep)
+        { OOFEM_ERROR("giveStiffnessMatrix_dCde not implemented for fibered cross section"); };
+
 
 protected:
     double giveArea();

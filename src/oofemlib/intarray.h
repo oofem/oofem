@@ -17,19 +17,19 @@
  *       Czech Technical University, Faculty of Civil Engineering,
  *   Department of Structural Mechanics, 166 29 Prague, Czech Republic
  *
- *  This program is free software; you can redistribute it and/or modify
- *  it under the terms of the GNU General Public License as published by
- *  the Free Software Foundation; either version 2 of the License, or
- *  (at your option) any later version.
+ *  This library is free software; you can redistribute it and/or
+ *  modify it under the terms of the GNU Lesser General Public
+ *  License as published by the Free Software Foundation; either
+ *  version 2.1 of the License, or (at your option) any later version.
  *
  *  This program is distributed in the hope that it will be useful,
  *  but WITHOUT ANY WARRANTY; without even the implied warranty of
- *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- *  GNU General Public License for more details.
+ *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+ *  Lesser General Public License for more details.
  *
- *  You should have received a copy of the GNU General Public License
- *  along with this program; if not, write to the Free Software
- *  Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
+ *  You should have received a copy of the GNU Lesser General Public
+ *  License along with this library; if not, write to the Free Software
+ *  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  */
 
 /*
@@ -41,10 +41,14 @@
 #ifndef intarray_h
 #define intarray_h
 
+#include "oofemcfg.h"
 #include "contextioresulttype.h"
 #include "contextmode.h"
 
 #include <iosfwd>
+#if __cplusplus > 199711L
+#include <initializer_list>
+#endif
 
 namespace oofem {
 class DataStream;
@@ -69,7 +73,7 @@ class CommunicationBuffer;
  * if further request for growing then is necessary memory reallocation.
  * This process is controlled in resize member function.
  */
-class IntArray
+class OOFEM_EXPORT IntArray
 {
 private:
     /// Size of array.
@@ -80,12 +84,39 @@ private:
     int *values;
 
 public:
+    /// @name Iterator for for-each loops:
+    //@{
+    class iterator {
+    private:
+        int pos;
+        const IntArray *vec;
+
+    public:
+        iterator(const IntArray* vec, int pos);
+
+        bool operator!=(const IntArray :: iterator& other) const;
+
+        int operator*() const;
+
+        const IntArray :: iterator& operator++();
+    };
+
+    IntArray :: iterator begin();
+    IntArray :: iterator end();
+    //@}
+
     /// Constructor for zero sized array
     IntArray();
     /// Constructor for sized array. Data is zeroed.
     IntArray(int n);
     /// Copy constructor. Creates the array from another array.
     IntArray(const IntArray &);
+#if __cplusplus > 199711L
+    /// Initializer list constructor.
+    IntArray(std::initializer_list<int> list);
+    /// Assignment operator.
+    IntArray & operator=(std::initializer_list<int> list);
+#endif
     /// Destructor.
     ~IntArray();
 
@@ -135,6 +166,18 @@ public:
     const int &operator()(int i) const;
 #else
     inline const int &operator()(int i) const { return values [ i ]; }
+#endif
+
+#ifdef DEBUG
+    int &operator[](int i);
+#else
+    inline int &operator[](int i) { return values [ i ]; }
+#endif
+
+#ifdef DEBUG
+    const int &operator[](int i) const;
+#else
+    inline const int &operator[](int i) const { return values [ i ]; }
 #endif
 
 #ifdef DEBUG

@@ -17,19 +17,19 @@
  *       Czech Technical University, Faculty of Civil Engineering,
  *   Department of Structural Mechanics, 166 29 Prague, Czech Republic
  *
- *  This program is free software; you can redistribute it and/or modify
- *  it under the terms of the GNU General Public License as published by
- *  the Free Software Foundation; either version 2 of the License, or
- *  (at your option) any later version.
+ *  This library is free software; you can redistribute it and/or
+ *  modify it under the terms of the GNU Lesser General Public
+ *  License as published by the Free Software Foundation; either
+ *  version 2.1 of the License, or (at your option) any later version.
  *
  *  This program is distributed in the hope that it will be useful,
  *  but WITHOUT ANY WARRANTY; without even the implied warranty of
- *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- *  GNU General Public License for more details.
+ *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+ *  Lesser General Public License for more details.
  *
- *  You should have received a copy of the GNU General Public License
- *  along with this program; if not, write to the Free Software
- *  Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
+ *  You should have received a copy of the GNU Lesser General Public
+ *  License along with this library; if not, write to the Free Software
+ *  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  */
 
 #include "incrementallinearstatic.h"
@@ -41,6 +41,8 @@
 #include "classfactory.h"
 #include "datastream.h"
 #include "contextioerr.h"
+#include "dofmanager.h"
+#include "activebc.h"
 
 namespace oofem {
 
@@ -149,6 +151,9 @@ TimeStep *IncrementalLinearStatic :: giveNextStep()
     }
 
     previousStep = currentStep;
+    if (previousStep == NULL) {
+        previousStep = new TimeStep(giveNumberOfTimeStepWhenIcApply(), this, 0, -dt, dt, 0);
+    }
     currentStep = new TimeStep(istep, this, mstepNum, this->giveDiscreteTime(istep), dt, counter);
     return currentStep;
 }
@@ -169,10 +174,25 @@ void IncrementalLinearStatic :: solveYourselfAt(TimeStep *tStep)
         for ( int i = 1; i <= d->giveNumberOfDofManagers(); i++ ) {
             DofManager *dofman = d->giveDofManager(i);
             for ( int j = 1; j <= dofman->giveNumberOfDofs(); j++ ) {
-                dofman->giveDof(j)->updateUnknownsDictionary(tStep, VM_Total_Old, 0.);
+                dofman->giveDof(j)->updateUnknownsDictionary(tStep->givePreviousStep(), VM_Total, 0.);
                 dofman->giveDof(j)->updateUnknownsDictionary(tStep, VM_Total, 0.);
-                // This is actually redundant now;
-                //dofman->giveDof(j)->updateUnknownsDictionary(tStep, VM_Incremental, 0.);
+            }
+        }
+
+        int nbc = d->giveNumberOfBoundaryConditions();
+        for ( int ibc = 1; ibc <= nbc; ++ibc ) {
+            GeneralBoundaryCondition *bc = d->giveBc(ibc);
+            ActiveBoundaryCondition *abc;
+
+            if ( ( abc = dynamic_cast< ActiveBoundaryCondition * >( bc ) ) ) {
+                int ndman = abc->giveNumberOfInternalDofManagers();
+                for ( int i = 1; i <= ndman; i++ ) {
+                    DofManager *dofman = abc->giveInternalDofManager(i);
+                    for ( int j = 1; j <= dofman->giveNumberOfDofs(); j++ ) {
+                        dofman->giveDof(j)->updateUnknownsDictionary(tStep->givePreviousStep(), VM_Total, 0.);
+                        dofman->giveDof(j)->updateUnknownsDictionary(tStep, VM_Total, 0.);
+                    }
+                }
             }
         }
     }
@@ -182,13 +202,13 @@ void IncrementalLinearStatic :: solveYourselfAt(TimeStep *tStep)
     for ( int i = 1; i <= d->giveNumberOfDofManagers(); i++ ) {
         DofManager *dofman = d->giveDofManager(i);
         for ( int j = 1; j <= dofman->giveNumberOfDofs(); j++ ) {
-            Dof *d = dofman->giveDof(j);
-            double tot = d->giveUnknown(VM_Total_Old, tStep);
-            if ( d->hasBc(tStep) ) {
-                tot += d->giveBcValue(VM_Incremental, tStep);
+            Dof *dof = dofman->giveDof(j);
+            double tot = dof->giveUnknown(VM_Total, tStep->givePreviousStep());
+            if ( dof->hasBc(tStep) ) {
+                tot += dof->giveBcValue(VM_Incremental, tStep);
             }
 
-            d->updateUnknownsDictionary(tStep, VM_Total, tot);
+            dof->updateUnknownsDictionary(tStep, VM_Total, tot);
         }
     }
 
@@ -267,6 +287,11 @@ double IncrementalLinearStatic :: giveUnknownComponent(ValueModeType mode, TimeS
 }
 
 
+int IncrementalLinearStatic :: giveUnknownDictHashIndx(ValueModeType mode, TimeStep* stepN)
+{
+    return (int) stepN->giveNumber() % 2;
+}
+
 
 void IncrementalLinearStatic :: updateDofUnknownsDictionary(DofManager *inode, TimeStep *tStep)
 {
@@ -289,7 +314,7 @@ void IncrementalLinearStatic :: updateDofUnknownsDictionary(DofManager *inode, T
             val += this->incrementOfDisplacementVector.at( iDof->__giveEquationNumber() );
         }
 
-        iDof->updateUnknownsDictionary(tStep, VM_Total_Old, val);
+        iDof->updateUnknownsDictionary(tStep->givePreviousStep(), VM_Total, val);
         iDof->updateUnknownsDictionary(tStep, VM_Total, val);
     }
 }
@@ -366,4 +391,5 @@ contextIOResultType IncrementalLinearStatic :: restoreContext(DataStream *stream
 
     return CIO_OK;
 }
+
 } // end namespace oofem

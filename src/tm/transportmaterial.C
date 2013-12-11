@@ -17,19 +17,19 @@
  *       Czech Technical University, Faculty of Civil Engineering,
  *   Department of Structural Mechanics, 166 29 Prague, Czech Republic
  *
- *  This program is free software; you can redistribute it and/or modify
- *  it under the terms of the GNU General Public License as published by
- *  the Free Software Foundation; either version 2 of the License, or
- *  (at your option) any later version.
+ *  This library is free software; you can redistribute it and/or
+ *  modify it under the terms of the GNU Lesser General Public
+ *  License as published by the Free Software Foundation; either
+ *  version 2.1 of the License, or (at your option) any later version.
  *
  *  This program is distributed in the hope that it will be useful,
  *  but WITHOUT ANY WARRANTY; without even the implied warranty of
- *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- *  GNU General Public License for more details.
+ *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+ *  Lesser General Public License for more details.
  *
- *  You should have received a copy of the GNU General Public License
- *  along with this program; if not, write to the Free Software
- *  Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
+ *  You should have received a copy of the GNU Lesser General Public
+ *  License along with this library; if not, write to the Free Software
+ *  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  */
 
 #include "transportmaterial.h"
@@ -67,8 +67,9 @@ TransportMaterial :: updateInternalState(const FloatArray &stateVec, GaussPoint 
 
 
 TransportMaterialStatus :: TransportMaterialStatus(int n, Domain *d, GaussPoint *g) :
-    MaterialStatus(n, d, g), stateVector(), tempStateVector()
-{ }
+    MaterialStatus(n, d, g), temp_field(), temp_gradient(), temp_flux(), field(), gradient(), flux(), maturity(0.)
+{
+}
 
 void TransportMaterialStatus :: printOutputAt(FILE *File, TimeStep *tNow)
 // Print the state variable and the flow vector on the data file.
@@ -80,8 +81,8 @@ void TransportMaterialStatus :: printOutputAt(FILE *File, TimeStep *tNow)
 
     fprintf(File, "  state");
 
-    for ( int i = 1; i <= stateVector.giveSize(); i++ ) {
-        fprintf( File, " % .4e", stateVector.at(i) );
+    for ( int i = 1; i <= field.giveSize(); i++ ) {
+        fprintf( File, " % .4e", field.at(i) );
     }
 
     transpElem->computeFlow(flowVec, gp, tNow);
@@ -103,7 +104,6 @@ TransportMaterialStatus :: updateYourself(TimeStep *tStep)
     gradient = temp_gradient;
     field = temp_field;
     flux = temp_flux;
-    stateVector = tempStateVector;
 }
 
 
@@ -117,7 +117,6 @@ TransportMaterialStatus :: initTempStatus()
     temp_gradient = gradient;
     temp_field = field;
     temp_flux = flux;
-    tempStateVector = stateVector;
 }
 
 
@@ -145,10 +144,6 @@ TransportMaterialStatus :: saveContext(DataStream *stream, ContextMode mode, voi
     }
 
     if ( ( iores = flux.storeYourself(stream, mode) ) != CIO_OK ) {
-        THROW_CIOERR(iores);
-    }
-
-    if ( ( iores = stateVector.storeYourself(stream, mode) ) != CIO_OK ) {
         THROW_CIOERR(iores);
     }
 
@@ -181,9 +176,6 @@ TransportMaterialStatus :: restoreContext(DataStream *stream, ContextMode mode, 
     if ( ( iores = flux.restoreYourself(stream, mode) ) != CIO_OK ) {
         THROW_CIOERR(iores);
     }
-    if ( ( iores = stateVector.restoreYourself(stream, mode) ) != CIO_OK ) {
-        THROW_CIOERR(iores);
-    }
 
     return CIO_OK;
 }
@@ -195,7 +187,7 @@ TransportMaterial :: giveIPValue(FloatArray &answer, GaussPoint *aGaussPoint, In
 {
     TransportMaterialStatus *ms = static_cast< TransportMaterialStatus * >( this->giveStatus(aGaussPoint) );
     if ( type == IST_Temperature || type == IST_MassConcentration_1 || type == IST_Humidity ) {
-        FloatArray vec = ms->giveStateVector();
+        FloatArray vec = ms->giveField();
         answer.resize(1);
         answer.at(1) = vec.at( ( type == IST_Temperature ) ? 1 : 2 );
         return 1;
@@ -223,22 +215,12 @@ TransportMaterial :: giveIPValue(FloatArray &answer, GaussPoint *aGaussPoint, In
         answer.resize(1);
         answer.at(1) = this->give('k', aGaussPoint);
         return 1;
+    } else if ( type == IST_Maturity ) {
+        answer.resize(1);
+        answer.at(1) = ms->giveMaturity();
+        return 1;
     }
     return Material :: giveIPValue(answer, aGaussPoint, type, atTime);
 }
-
-
-InternalStateValueType
-TransportMaterial :: giveIPValueType(InternalStateType type)
-{
-    if ( type == IST_Temperature || type == IST_Pressure || type == IST_MassConcentration_1 || type == IST_Humidity ) {
-        return ISVT_SCALAR;
-    } else if ( type == IST_Velocity || IST_PressureGradient ) {
-        return ISVT_VECTOR;
-    } else {
-        return Material :: giveIPValueType(type);
-    }
-}
-
 
 } // end namespace oofem

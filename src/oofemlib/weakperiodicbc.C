@@ -17,19 +17,19 @@
  *       Czech Technical University, Faculty of Civil Engineering,
  *   Department of Structural Mechanics, 166 29 Prague, Czech Republic
  *
- *  This program is free software; you can redistribute it and/or modify
- *  it under the terms of the GNU General Public License as published by
- *  the Free Software Foundation; either version 2 of the License, or
- *  (at your option) any later version.
+ *  This library is free software; you can redistribute it and/or
+ *  modify it under the terms of the GNU Lesser General Public
+ *  License as published by the Free Software Foundation; either
+ *  version 2.1 of the License, or (at your option) any later version.
  *
  *  This program is distributed in the hope that it will be useful,
  *  but WITHOUT ANY WARRANTY; without even the implied warranty of
- *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- *  GNU General Public License for more details.
+ *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+ *  Lesser General Public License for more details.
  *
- *  You should have received a copy of the GNU General Public License
- *  along with this program; if not, write to the Free Software
- *  Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
+ *  You should have received a copy of the GNU Lesser General Public
+ *  License along with this library; if not, write to the Free Software
+ *  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  */
 
 #include <cstdio>
@@ -58,7 +58,7 @@ REGISTER_BoundaryCondition( WeakPeriodicBoundaryCondition );
 
 WeakPeriodicBoundaryCondition :: WeakPeriodicBoundaryCondition(int n, Domain *d) : ActiveBoundaryCondition(n, d)
 {
-	useBasisType = trigonometric;
+    useBasisType = monomial;
 	doUpdateSminmax = true;
 }
 
@@ -73,7 +73,7 @@ WeakPeriodicBoundaryCondition :: initializeFrom(InputRecord *ir)
 	orderOfPolygon = 2;
 	IR_GIVE_OPTIONAL_FIELD(ir, orderOfPolygon, _IFT_WeakPeriodicBoundaryCondition_order);
 
-	int t = ( int ) trigonometric;
+    int t = ( int ) monomial;
 	IR_GIVE_OPTIONAL_FIELD(ir, t, _IFT_WeakPeriodicBoundaryCondition_descritizationType);
 	useBasisType = ( basisType ) t;  // Fourierseries by default
 
@@ -122,7 +122,99 @@ WeakPeriodicBoundaryCondition :: initializeFrom(InputRecord *ir)
 		gammaDman->appendDof( new MasterDof( i, gammaDman, (DofIDItem)this->domain->giveNextFreeDofID() ) );
 	}
 
+	//	computeOrthogonalBasis();
+
 	return IRRT_OK;
+}
+
+void WeakPeriodicBoundaryCondition :: computeOrthogonalBasis()
+{
+	/* gsMatrix contains the coefficients for the orthogonal basis. The row represents the basis and the column the coefficients. */
+	gsMatrix.resize(ndof, ndof);
+	gsMatrix.zero();
+	gsMatrix.at(1, 1) = 1;
+
+    for (int i=2; i<=ndof; i++) { // Need ndof base functions. i indicates the row of gsMatrix, ie which polynomial is the current.
+		gsMatrix.at(i, i)=1; // Copy from V
+
+        // remove projection of v_i on all previous base functions
+		for (int j=1; j<i; j++) {
+			FloatArray uTemp;
+			uTemp.resize(ndof);
+
+			for (int k=1; k<=ndof; uTemp.at(k)=gsMatrix.at(j,k), k++);
+
+			double thisValue = computeProjectionCoefficient(i, j);
+			uTemp.times(-thisValue);
+            //printf("Subtract from u_%u:\n", i);
+            //uTemp.pY();
+
+			for (int k=1; k<=ndof; gsMatrix.at(i,k) = gsMatrix.at(i,k)+uTemp.at(k), k++);
+
+            //gsMatrix.printYourself();
+		}
+	}
+
+}
+
+double WeakPeriodicBoundaryCondition :: computeProjectionCoefficient(int vIndex, int uIndex)
+{
+
+	/* Computes <v, u>/<u, u> where vIndex is the term in the polynomial and uIndex is the number of the base v being projected on. */
+	int thisSide = 0;
+
+	double value=0.0, nom=0.0, denom=0.0;
+
+	int A, B, thisOrder;
+	getExponents(vIndex, A, B);
+	thisOrder=A+B;
+	getExponents(uIndex, A, B);
+	thisOrder=thisOrder+A+B;
+
+	// Loop over all elements
+	for ( size_t ielement = 0; ielement < element [ thisSide ].size(); ielement++ ) {
+        // Compute <v, u_i>/<u_i, u_i> on this element and store in nom/denom
+
+		Element *thisElement = this->domain->giveElement( element [ thisSide ].at(ielement) );
+		FEInterpolation *geoInterpolation = thisElement->giveInterpolation();
+
+		GaussIntegrationRule iRule(1, thisElement);
+
+        int n = iRule.getRequiredNumberOfIntegrationPoints(sideGeom, thisOrder);
+
+        iRule.setUpIntegrationPoints(sideGeom, n, _Unknown);
+
+		for ( int i = 0; i < iRule.giveNumberOfIntegrationPoints(); i++ ) {
+			GaussPoint *gp = iRule.getIntegrationPoint(i);
+
+			FloatArray *lcoords = gp->giveCoordinates();
+			FloatArray gcoords;
+
+			geoInterpolation->boundaryLocal2Global( gcoords, side [ thisSide ].at(ielement), * lcoords, FEIElementGeometryWrapper(thisElement) );
+			double detJ = fabs( geoInterpolation->boundaryGiveTransformationJacobian( side [ thisSide ].at(ielement), * lcoords, FEIElementGeometryWrapper(thisElement) ) );
+
+			int a, b;
+			getExponents(vIndex, a, b);
+			double vVal=pow(gcoords.at(surfaceIndexes.at(1)), a)*pow(gcoords.at(surfaceIndexes.at(2)), b);
+
+//            printf("vValue x^%u*y^%u at (%f, %f) is %f\n", a, b, gcoords.at(surfaceIndexes.at(1)), gcoords.at(surfaceIndexes.at(2)), vVal);
+
+            double uValue=0.0;
+            for ( int k=1; k<ndof; k++) {
+                int c, d;
+                getExponents(k, c, d);
+                uValue=uValue + gsMatrix.at(uIndex,k)*pow(gcoords.at(surfaceIndexes.at(1)), c)*pow(gcoords.at(surfaceIndexes.at(2)), d);
+            }
+
+            nom=nom+vVal*uValue*detJ*gp->giveWeight();
+            denom=denom+uValue*uValue*detJ*gp->giveWeight();
+
+		}
+	}
+
+	value=nom/denom;
+
+	return value;
 }
 
 void WeakPeriodicBoundaryCondition :: giveEdgeNormal(FloatArray &answer, int element, int side)
@@ -248,6 +340,10 @@ void WeakPeriodicBoundaryCondition :: updateSminmax()
 
 		}
 		doUpdateSminmax = false;
+
+        if (this->useBasisType == legendre)
+            computeOrthogonalBasis();
+
 	}
 }
 
@@ -265,7 +361,7 @@ void WeakPeriodicBoundaryCondition :: addElementSide(int newElement, int newSide
 		//normalNew.printYourself();
 		giveEdgeNormal( normal0, element [ 0 ].at(0), side [ 0 ].at(0) );
 		double d = sqrt( pow(normalNew.at(1) - normal0.at(1), 2) + pow(normalNew.at(2) - normal0.at(2), 2) );
-		if ( abs(d) < 0.001 ) {
+		if ( fabs(d) < 0.001 ) {
 			addToList = 0;
 		} else {
 			addToList = 1;
@@ -273,7 +369,7 @@ void WeakPeriodicBoundaryCondition :: addElementSide(int newElement, int newSide
 	} else {
 		// Otherwise, check the normal in order to decide upon which direction the parameter runs (x or y)
 		giveEdgeNormal(normalNew, newElement, newSide);
-		if ( abs(abs( normalNew.at(1) ) - 1) < 0.0001 ) {               // Normal point in x direction, thus set direction to y
+		if ( fabs(fabs( normalNew.at(1) ) - 1.) < 0.0001 ) {               // Normal point in x direction, thus set direction to y
 			direction = 2;
 		} else {
 			direction = 1;
@@ -323,11 +419,13 @@ void WeakPeriodicBoundaryCondition :: computeElementTangent(FloatMatrix &B, Elem
 			double fVal;
 
 			if (this->domain->giveNumberOfSpatialDimensions()==2 )
-				fVal = computeBaseFunctionValue(j, s);
-			else {
-				int a, b;
-				getExponents(j+1, a, b);
-				fVal=pow(gcoords.at(surfaceIndexes.at(1)), a)*pow(gcoords.at(surfaceIndexes.at(2)), b);
+                fVal = computeBaseFunctionValue1D(j, s);
+            else {
+                FloatArray coord;
+                coord.resize(2);
+                coord.at(1) = gcoords.at(surfaceIndexes.at(1));
+                coord.at(2) = gcoords.at(surfaceIndexes.at(2));
+                fVal = computeBaseFunctionValue2D(j+1, coord);
 			}
 
 			for ( int k = 0; k < B.giveNumberOfRows(); k++ ) {
@@ -364,10 +462,6 @@ void WeakPeriodicBoundaryCondition :: assemble(SparseMtrx *answer, TimeStep *tSt
 			// Find dofs for this element side
 			IntArray r_sideLoc, c_sideLoc;
 
-			///@todo See todo on assembleVector
-			//thisElement->giveBoundaryLocationArray(r_sideLoc, side [ thisSide ].at(ielement), dofids, eid, r_s);
-			//thisElement->giveBoundaryLocationArray(c_sideLoc, side [ thisSide ].at(ielement), dofids, eid, c_s);
-
 			// Find dofs for this element which should be periodic
 			IntArray bNodes, nodeDofIDMask, periodicDofIDMask, nodalArray;
 			periodicDofIDMask.resize(1);
@@ -375,6 +469,11 @@ void WeakPeriodicBoundaryCondition :: assemble(SparseMtrx *answer, TimeStep *tSt
 
 			FEInterpolation *interpolation = thisElement->giveInterpolation( (DofIDItem)dofid );
 			interpolation->boundaryGiveNodes( bNodes, side [ thisSide ].at(ielement) );
+
+			///@todo See todo on assembleVector
+			//thisElement->giveBoundaryLocationArray(r_sideLoc, bNodes, dofids, eid, r_s);
+			//thisElement->giveBoundaryLocationArray(c_sideLoc, bNodes, dofids, eid, c_s);
+
 			r_sideLoc.resize(0);
 			c_sideLoc.resize(0);
 			dofCountOnBoundary = 0;
@@ -405,7 +504,28 @@ void WeakPeriodicBoundaryCondition :: assemble(SparseMtrx *answer, TimeStep *tSt
 
 }
 
-double WeakPeriodicBoundaryCondition :: computeBaseFunctionValue(int baseID, double coordinate)
+double WeakPeriodicBoundaryCondition :: computeBaseFunctionValue2D(int baseID, FloatArray coordinate)
+{
+
+    double fVal=0.0;
+
+    if (useBasisType == monomial) {
+        int a, b;
+        getExponents(baseID, a, b);
+        fVal=pow(coordinate.at(1), a)*pow(coordinate.at(2), b);
+    } else if (useBasisType == legendre) {
+        for (int i=1; i<=ndof; i++) {
+            int a, b;
+            getExponents(i, a, b);
+            fVal=fVal + gsMatrix.at(baseID, i)*pow(coordinate.at(1), a)*pow(coordinate.at(2), b);
+        }
+    }
+    // printf("Value for u_%u att coordinate %f, %f is %f\n", baseID, coordinate.at(1), coordinate.at(2), fVal);
+    return fVal;
+
+}
+
+double WeakPeriodicBoundaryCondition :: computeBaseFunctionValue1D(int baseID, double coordinate)
 {
 	double fVal=0.0;
 	FloatArray sideLength;
@@ -471,9 +591,6 @@ void WeakPeriodicBoundaryCondition :: assembleVector(FloatArray &answer, TimeSte
 
 			Element *thisElement = this->domain->giveElement( element [ thisSide ].at(ielement) );
 
-			///@todo Support explicitly asking specifying dofids instead of equation ids (Jim needed this feature as well, and it makes sense to have it)
-			//thisElement->giveBoundaryLocationArray(sideLocation, side [ thisSide ].at(ielement), &dofids, eid, s, &masterDofIDs);
-
 			// Find dofs for this element which should be periodic
 			IntArray bNodes, nodeDofIDMask, periodicDofIDMask, nodalArray;
 			periodicDofIDMask.resize(1);
@@ -481,6 +598,11 @@ void WeakPeriodicBoundaryCondition :: assembleVector(FloatArray &answer, TimeSte
 
 			FEInterpolation *interpolation = thisElement->giveInterpolation( (DofIDItem)dofid );
 			interpolation->boundaryGiveNodes( bNodes, side [ thisSide ].at(ielement) );
+
+			///@todo Carl, change to this:
+			//thisElement->giveBoundaryLocationArray(sideLocation, bNodes, &dofids, eid, s, &masterDofIDs);
+			//thisElement->computeBoundaryVectorOf(bNodes, eid, VM_Total, tStep, a);
+
 			sideLocation.resize(0);
 			masterDofIDs.resize(0);
 			a.resize(0);

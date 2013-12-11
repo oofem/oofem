@@ -17,19 +17,19 @@
  *       Czech Technical University, Faculty of Civil Engineering,
  *   Department of Structural Mechanics, 166 29 Prague, Czech Republic
  *
- *  This program is free software; you can redistribute it and/or modify
- *  it under the terms of the GNU General Public License as published by
- *  the Free Software Foundation; either version 2 of the License, or
- *  (at your option) any later version.
+ *  This library is free software; you can redistribute it and/or
+ *  modify it under the terms of the GNU Lesser General Public
+ *  License as published by the Free Software Foundation; either
+ *  version 2.1 of the License, or (at your option) any later version.
  *
  *  This program is distributed in the hope that it will be useful,
  *  but WITHOUT ANY WARRANTY; without even the implied warranty of
- *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- *  GNU General Public License for more details.
+ *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+ *  Lesser General Public License for more details.
  *
- *  You should have received a copy of the GNU General Public License
- *  along with this program; if not, write to the Free Software
- *  Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
+ *  You should have received a copy of the GNU Lesser General Public
+ *  License along with this library; if not, write to the Free Software
+ *  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  */
 
 /*
@@ -41,6 +41,7 @@
 #ifndef gausspoint_h
 #define gausspoint_h
 
+#include "oofemcfg.h"
 #include "integrationrule.h"
 #include "integrationpointstatus.h"
 #include "element.h"
@@ -89,7 +90,7 @@ class IntegrationRule;
  * to compute its jacobian, for example. These coordinates are stored in localCoordinates attribute.
  *
  */
-class GaussPoint
+class OOFEM_EXPORT GaussPoint
 {
 private:
     /// Number.
@@ -112,7 +113,8 @@ protected:
     /// List of slave integration points.
     GaussPoint **gaussPointArray;
     //Disctionary of managed MaterialStatuses
-    TDictionary<int,IntegrationPointStatus> statusDict;
+    //TDictionary<int,IntegrationPointStatus> statusDict;
+    IntegrationPointStatus *materialStatus;
 
 public:
     /**
@@ -148,36 +150,47 @@ public:
     IntegrationRule *giveIntegrationRule() { return irule; }
     /// Returns corresponding element to receiver.
     Element *giveElement() { return irule->giveElement(); }
-    /// Sets element of gp.
-    //void setElement(Element* e) { element=e;}
+
     /// Returns corresponding material mode of receiver.
     MaterialMode giveMaterialMode() { return this->materialMode; }
     /// Sets material mode of receiver.
     void setMaterialMode(MaterialMode newMode) { this->materialMode = newMode; }
     ///@todo giveMaterial routine most be removed from gauss-points, it doesn't fit with different types of cross-sections.
+    
     /// Returns reference to material associated to related element of receiver.
     Material *giveMaterial() { return giveElement()->giveMaterial(); }
+
     /// Returns reference to cross section associated to related element of receiver.
     CrossSection *giveCrossSection() { return giveElement()->giveCrossSection(); }
+    
     /**
      * Returns reference to associated material status (NULL if not defined).
-     * @param n Material number
      */
-    IntegrationPointStatus *giveMaterialStatus(int n) { 
-        return statusDict.at(n); 
-    }
+    IntegrationPointStatus *giveMaterialStatus() { return this->materialStatus; }; 
+    
     /**
      * Sets Material status managed by receiver.
      * @param ptr Pointer to new status of receiver.
      * @param i classID of class storing status
      * @return Pointer to new status.
+     * @deprecated should be removed since only one mat stat is saved in the integration point 
      */
     IntegrationPointStatus *setMaterialStatus(IntegrationPointStatus *ptr, int n)
     {
-        if (this->statusDict.includes(n)) {
-            OOFEM_ERROR (" MaterialStatus::setMaterialStatus status already exist");
+        return this->setMaterialStatus(ptr);
+    }
+
+    /**
+     * Sets Material status managed by receiver.
+     * @param ptr Pointer to new status of receiver.
+     * @return Pointer to new status.
+     */
+    IntegrationPointStatus *setMaterialStatus(IntegrationPointStatus *ptr)
+    {
+        if ( this->materialStatus != NULL ) {
+            OOFEM_ERROR (" MaterialStatus :: setMaterialStatus status already exist");
         }
-        this->statusDict.add(n, ptr);
+        this->materialStatus = ptr;
         return ptr;
     }
     /**

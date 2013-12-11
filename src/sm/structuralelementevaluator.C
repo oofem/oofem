@@ -17,19 +17,19 @@
  *       Czech Technical University, Faculty of Civil Engineering,
  *   Department of Structural Mechanics, 166 29 Prague, Czech Republic
  *
- *  This program is free software; you can redistribute it and/or modify
- *  it under the terms of the GNU General Public License as published by
- *  the Free Software Foundation; either version 2 of the License, or
- *  (at your option) any later version.
+ *  This library is free software; you can redistribute it and/or
+ *  modify it under the terms of the GNU Lesser General Public
+ *  License as published by the Free Software Foundation; either
+ *  version 2.1 of the License, or (at your option) any later version.
  *
  *  This program is distributed in the hope that it will be useful,
  *  but WITHOUT ANY WARRANTY; without even the implied warranty of
- *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- *  GNU General Public License for more details.
+ *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+ *  Lesser General Public License for more details.
  *
- *  You should have received a copy of the GNU General Public License
- *  along with this program; if not, write to the Free Software
- *  Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
+ *  You should have received a copy of the GNU Lesser General Public
+ *  License along with this library; if not, write to the Free Software
+ *  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  */
 
 #include "structuralelementevaluator.h"
@@ -37,11 +37,11 @@
 #include "floatmatrix.h"
 #include "domain.h"
 #include "node.h"
-#include "element.h"
+#include "structuralelement.h"
 #include "gausspoint.h"
 #include "gaussintegrationrule.h"
 #include "matresponsemode.h"
-#include "crosssection.h"
+#include "structuralcrosssection.h"
 #include "structuralcrosssection.h"
 #include "structuralmaterial.h"
 #include "structuralms.h"
@@ -156,7 +156,7 @@ void StructuralElementEvaluator :: computeLumpedMassMatrix(FloatMatrix &answer, 
     double summ;
 
     if ( !this->isActivated(tStep) ) {
-        int ndofs = elem->computeNumberOfDofs(EID_MomentumBalance);
+        int ndofs = elem->computeNumberOfDofs();
         answer.resize(ndofs, ndofs);
         answer.zero();
         return;
@@ -207,11 +207,10 @@ void StructuralElementEvaluator :: computeLumpedMassMatrix(FloatMatrix &answer, 
 void StructuralElementEvaluator :: computeConsistentMassMatrix(FloatMatrix &answer, TimeStep *tStep, double &mass)
 // Computes numerically the consistent (full) mass matrix of the receiver.
 {
-    Element *elem = this->giveElement();
-    int ndofs = elem->computeNumberOfDofs(EID_MomentumBalance);
-    double density, dV;
+    //Element *elem = this->giveElement();
+    StructuralElement *elem = static_cast < StructuralElement *> ( this->giveElement() );
+    int ndofs = elem->computeNumberOfDofs();
     FloatMatrix n;
-    GaussPoint *gp;
     IntegrationRule *iRule;
     IntArray mask;
 
@@ -230,20 +229,18 @@ void StructuralElementEvaluator :: computeConsistentMassMatrix(FloatMatrix &answ
     mass = 0.;
 
     for ( int ip = 0; ip < iRule->giveNumberOfIntegrationPoints(); ip++ ) {
-        gp      = iRule->getIntegrationPoint(ip);
-        density = elem->giveMaterial()->give('d', gp);
-        dV      = this->computeVolumeAround(gp);
+        GaussPoint *gp = iRule->getIntegrationPoint(ip);
+        double density = elem->giveStructuralCrossSection()->give('d', gp);
+        double dV      = this->computeVolumeAround(gp);
         mass   += density * dV;
         this->computeNMatrixAt(n, gp);
 
         if ( mask.isEmpty() ) {
             answer.plusProductSymmUpper(n, n, density * dV);
         } else {
-            double summ;
-
             for ( int i = 1; i <= ndofs; i++ ) {
                 for ( int j = i; j <= ndofs; j++ ) {
-                    summ = 0.;
+                    double summ = 0.;
                     for ( int k = 1; k <= n.giveNumberOfRows(); k++ ) {
                         if ( mask.at(k) == 0 ) {
                             continue;
@@ -265,9 +262,7 @@ void StructuralElementEvaluator :: computeConsistentMassMatrix(FloatMatrix &answ
 void StructuralElementEvaluator :: giveInternalForcesVector(FloatArray &answer, TimeStep *tStep, bool useUpdatedGpRecord)
 {
     Element *elem = this->giveElement();
-    StructuralCrossSection *cs = static_cast< StructuralCrossSection * >( elem->giveCrossSection() );
-    Material *mat = elem->giveMaterial();
-    int ndofs = elem->computeNumberOfDofs(EID_MomentumBalance);
+    int ndofs = elem->computeNumberOfDofs();
     FloatMatrix b;
     FloatArray strain, stress, u, temp;
     IntArray irlocnum;
@@ -290,11 +285,10 @@ void StructuralElementEvaluator :: giveInternalForcesVector(FloatArray &answer, 
             GaussPoint *gp = iRule->getIntegrationPoint(i);
             this->computeBMatrixAt(b, gp);
             if ( useUpdatedGpRecord ) {
-                stress = static_cast< StructuralMaterialStatus * >( mat->giveStatus(gp) )->giveStressVector();
+                stress = static_cast< StructuralMaterialStatus * >( gp->giveMaterialStatus() )->giveStressVector();
             } else {
                 this->computeStrainVector(strain, gp, tStep, u); ///@todo This part computes the B matrix again; Inefficient.
                 this->computeStressVector(stress, strain, gp, tStep);
-                cs->giveRealStresses(stress, gp, strain, tStep);
             }
 
             if ( stress.giveSize() == 0 ) {
@@ -315,12 +309,6 @@ void StructuralElementEvaluator :: giveInternalForcesVector(FloatArray &answer, 
     if ( !this->isActivated(tStep) ) {
         answer.zero();
     }
-}
-
-
-void StructuralElementEvaluator :: computeStressVector(FloatArray &answer, const FloatArray &strain, GaussPoint *gp, TimeStep *tStep)
-{
-    static_cast< StructuralCrossSection * >( this->giveElement()->giveCrossSection() )->giveRealStresses(answer, gp, strain, tStep);
 }
 
 
@@ -403,16 +391,23 @@ void StructuralElementEvaluator :: updateInternalState(TimeStep *tStep)
 
 void StructuralElementEvaluator :: computeStiffnessMatrix(FloatMatrix &answer, MatResponseMode rMode, TimeStep *tStep)
 {
-    int ir, j, numberOfIntegrationRules;
+    int numberOfIntegrationRules;
     FloatMatrix temp, bj, d, dbj;
-    IntegrationRule *iRule;
-    GaussPoint *gp;
     Element *elem = this->giveElement();
     StructuralCrossSection *cs = static_cast< StructuralCrossSection * >( elem->giveCrossSection() );
-    int ndofs = elem->computeNumberOfDofs(EID_MomentumBalance);
-    bool matStiffSymmFlag = elem->giveCrossSection()->isCharacteristicMtrxSymmetric( rMode, elem->giveMaterial()->giveNumber() );
+    int ndofs = elem->computeNumberOfDofs();
+    bool matStiffSymmFlag = false;
+    printf(" computeStiffnessMatrix start \n");
+    printf(" material number %i \n", elem->giveMaterial()->giveNumber());
+    if ( cs->MAT_GIVEN_BY_CS > 0 ) {
+        matStiffSymmFlag = cs->isCharacteristicMtrxSymmetric(rMode);
+    } else {
+        printf(" a \n");
+        matStiffSymmFlag = elem->giveCrossSection()->isCharacteristicMtrxSymmetric( rMode, elem->giveMaterial()->giveNumber() );
+        printf(" b \n");
+    }
+    printf(" computeStiffnessMatrix end \n");
     IntArray irlocnum;
-    double dV;
 
     answer.resize(ndofs, ndofs);
     answer.zero();
@@ -424,22 +419,22 @@ void StructuralElementEvaluator :: computeStiffnessMatrix(FloatMatrix &answer, M
 
     numberOfIntegrationRules = elem->giveNumberOfIntegrationRules();
     // loop over individual integration rules
-    for ( ir = 0; ir < numberOfIntegrationRules; ir++ ) {
+    for ( int ir = 0; ir < numberOfIntegrationRules; ir++ ) {
 
 #ifdef __PARALLEL_MODE
         if (this->giveElement()->giveKnotSpanParallelMode(ir) == Element_remote) continue;
         //fprintf (stderr, "[%d] Computing element.knotspan %d.%d\n", elem->giveDomain()->giveEngngModel()->giveRank(), elem->giveNumber(), ir);
 #endif
         m->resize(0, 0);
-        iRule = elem->giveIntegrationRule(ir);
+        IntegrationRule *iRule = elem->giveIntegrationRule(ir);
         // loop over individual integration points
-        for ( j = 0; j < iRule->giveNumberOfIntegrationPoints(); j++ ) {
-            gp = iRule->getIntegrationPoint(j);
+        for ( int j = 0; j < iRule->giveNumberOfIntegrationPoints(); j++ ) {
+            GaussPoint *gp = iRule->getIntegrationPoint(j);
+            double dV = this->computeVolumeAround(gp);
             this->computeBMatrixAt(bj, gp);
             //elem->computeConstitutiveMatrixAt(d, rMode, gp, tStep);
             cs->giveCharMaterialStiffnessMatrix(d, rMode, gp, tStep);
 
-            dV = this->computeVolumeAround(gp);
             dbj.beProductOf(d, bj);
             if ( matStiffSymmFlag ) {
                 m->plusProductSymmUpper(bj, dbj, dV);

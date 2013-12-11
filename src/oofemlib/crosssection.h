@@ -17,19 +17,19 @@
  *       Czech Technical University, Faculty of Civil Engineering,
  *   Department of Structural Mechanics, 166 29 Prague, Czech Republic
  *
- *  This program is free software; you can redistribute it and/or modify
- *  it under the terms of the GNU General Public License as published by
- *  the Free Software Foundation; either version 2 of the License, or
- *  (at your option) any later version.
+ *  This library is free software; you can redistribute it and/or
+ *  modify it under the terms of the GNU Lesser General Public
+ *  License as published by the Free Software Foundation; either
+ *  version 2.1 of the License, or (at your option) any later version.
  *
  *  This program is distributed in the hope that it will be useful,
  *  but WITHOUT ANY WARRANTY; without even the implied warranty of
- *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- *  GNU General Public License for more details.
+ *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+ *  Lesser General Public License for more details.
  *
- *  You should have received a copy of the GNU General Public License
- *  along with this program; if not, write to the Free Software
- *  Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
+ *  You should have received a copy of the GNU Lesser General Public
+ *  License along with this library; if not, write to the Free Software
+ *  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  */
 
 #ifndef crosssection_h
@@ -43,6 +43,11 @@
 #include "internalstatetype.h"
 #include "internalstatevaluetype.h"
 #include "crosssectextension.h"
+
+///@name Input fields for CrossSection
+//@{
+#define _CrossSection_SetNumber "set"
+//@}
 
 namespace oofem {
 
@@ -91,7 +96,7 @@ enum CrossSectionProperty {
  * slave as parameter and integrates results.
  * @see GaussPoint class for more detail.
  */
-class CrossSection : public FEMComponent
+class OOFEM_EXPORT CrossSection : public FEMComponent
 {
 protected:
     /**
@@ -101,6 +106,8 @@ protected:
      */
     Dictionary *propertyDictionary;
 
+    int setNumber;        // el set number the cross section is applied to
+
 public:
     /**
      * Constructor. Creates cross section with number n belonging to domain d.
@@ -108,9 +115,16 @@ public:
      * @param d Domain.
      */
     CrossSection(int n, Domain *d) : FEMComponent(n, d)
-    { propertyDictionary = new Dictionary(); }
+    { propertyDictionary = new Dictionary(); 
+      setNumber = 0;
+      MAT_GIVEN_BY_CS = false; // Temporary var will be removed later 
+    }
     /// Destructor.
     virtual ~CrossSection() { delete propertyDictionary; }
+
+    int const giveSetNumber() { return this->setNumber; };
+
+    bool MAT_GIVEN_BY_CS;
 
     /**
      * Returns the value of cross section property.
@@ -118,6 +132,15 @@ public:
      * @return Property value.
      */
     virtual double give(CrossSectionProperty a);
+
+    /**
+     * Returns the value of cross section property.
+     * @param a Id of requested property.
+     * @param gp Integration point.
+     * @return Property value.
+     */
+    virtual double give(int aProperty, GaussPoint *gp){ return 0.0; };
+
     /**
      * Check for symmetry of stiffness matrix.
      * Default implementation returns true.
@@ -125,9 +148,18 @@ public:
      * @param rMode Response mode of material.
      * @param mat Material index.
      * @return True if stiffness matrix of receiver is symmetric.
+     * @deprected will be removed in the future when cross sections stores the material 
      */
     virtual bool isCharacteristicMtrxSymmetric(MatResponseMode rMode, int mat);
-
+    
+    /**
+     * Check for symmetry of stiffness matrix.
+     * Default implementation returns true.
+     * It can be moved to base Cross section class in the future.
+     * @param rMode Response mode of material.
+     * @return True if stiffness matrix of receiver is symmetric.
+     */
+    virtual bool isCharacteristicMtrxSymmetric(MatResponseMode rMode) { return false; }; 
     virtual void printYourself();
 
     /**
@@ -159,14 +191,7 @@ public:
      */
     virtual int giveIPValue(FloatArray &answer, GaussPoint *ip, InternalStateType type, TimeStep *atTime)
     { return ip->giveMaterial()->giveIPValue(answer, ip, type, atTime); }
-    /**
-     * Returns the type of internal variable (scalar, vector, tensor,...).
-     * @param type Determines the type of internal variable.
-     * @param mat Material to check.
-     * @return Type of internal variable.
-     */
-    virtual InternalStateValueType giveIPValueType(InternalStateType type, Material *mat)
-    { return mat->giveIPValueType(type); }
+
 
 #ifdef __PARALLEL_MODE
     /**
@@ -249,6 +274,7 @@ public:
      * @exception throws an ContextIOERR exception if error encountered.
      */
     virtual contextIOResultType restoreIPContext(DataStream *stream, ContextMode mode, GaussPoint *gp);
+
 };
 } // end namespace oofem
 #endif // crosssection_h

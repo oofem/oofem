@@ -17,19 +17,19 @@
  *       Czech Technical University, Faculty of Civil Engineering,
  *   Department of Structural Mechanics, 166 29 Prague, Czech Republic
  *
- *  This program is free software; you can redistribute it and/or modify
- *  it under the terms of the GNU General Public License as published by
- *  the Free Software Foundation; either version 2 of the License, or
- *  (at your option) any later version.
+ *  This library is free software; you can redistribute it and/or
+ *  modify it under the terms of the GNU Lesser General Public
+ *  License as published by the Free Software Foundation; either
+ *  version 2.1 of the License, or (at your option) any later version.
  *
  *  This program is distributed in the hope that it will be useful,
  *  but WITHOUT ANY WARRANTY; without even the implied warranty of
- *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- *  GNU General Public License for more details.
+ *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+ *  Lesser General Public License for more details.
  *
- *  You should have received a copy of the GNU General Public License
- *  along with this program; if not, write to the Free Software
- *  Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
+ *  You should have received a copy of the GNU Lesser General Public
+ *  License along with this library; if not, write to the Free Software
+ *  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  */
 
 #include "quad1mindlinshell3d.h"
@@ -59,9 +59,9 @@ IntArray Quad1MindlinShell3D :: drillOrdering(4);
 bool Quad1MindlinShell3D :: __initialized = Quad1MindlinShell3D :: initOrdering();
 
 Quad1MindlinShell3D :: Quad1MindlinShell3D(int n, Domain *aDomain) :
-    NLStructuralElement(n, aDomain),
-    numberOfGaussPoints(4)
+    NLStructuralElement(n, aDomain)
 {
+	numberOfGaussPoints = 4;
     this->numberOfDofMans = 4;
     this->lnodes[0] = new FloatArray();
     this->lnodes[1] = new FloatArray();
@@ -132,7 +132,7 @@ Quad1MindlinShell3D :: computeBodyLoadVectorAt(FloatArray &answer, Load *forLoad
 
             this->interp.evalN(n, *gp->giveCoordinates(), FEIVoidCellGeometry());
             dV = this->computeVolumeAround(gp) * this->giveCrossSection()->give(CS_Thickness);
-            density = this->giveMaterial()->give('d', gp);
+            density = this->giveStructuralCrossSection()->give('d', gp);
 
             forceX.add(density * gravity.at(1) * dV, n);
             forceY.add(density * gravity.at(2) * dV, n);
@@ -282,7 +282,7 @@ Quad1MindlinShell3D :: giveInternalForcesVector(FloatArray &answer, TimeStep *tS
         double dV = this->computeVolumeAround(gp);
 
         if ( useUpdatedGpRecord ) {
-            stress = static_cast< StructuralMaterialStatus * >( this->giveMaterial()->giveStatus(gp) )->giveStressVector();
+            stress = static_cast< StructuralMaterialStatus * >( gp->giveMaterialStatus() )->giveStressVector();
         } else {
             strain.beProductOf(b, shellUnknowns);
             cs->giveRealStress_Shell(stress, gp, strain, tStep);
@@ -421,7 +421,7 @@ Quad1MindlinShell3D :: computeLumpedMassMatrix(FloatMatrix &answer, TimeStep *tS
     IntegrationRule *ir = integrationRulesArray [ 0 ];
     for ( int i = 0; i < ir->giveNumberOfIntegrationPoints(); ++i) {
         GaussPoint *gp = ir->getIntegrationPoint(i);
-        mass += this->computeVolumeAround(gp) * this->giveMaterial()->give('d', gp);
+        mass += this->computeVolumeAround(gp) * this->giveStructuralCrossSection()->give('d', gp);
     }
 
     answer.resize(12, 12);
@@ -438,10 +438,10 @@ int
 Quad1MindlinShell3D :: giveIPValue(FloatArray &answer, GaussPoint *gp, InternalStateType type, TimeStep *atTime)
 {
     if ( type == IST_ShellForceMomentumTensor ) {
-        answer = static_cast< StructuralMaterialStatus * >( this->giveMaterial()->giveStatus(gp) )->giveStressVector();
+        answer = static_cast< StructuralMaterialStatus * >( gp->giveMaterialStatus() )->giveStressVector();
         return 1;
     } else if ( type == IST_ShellStrainCurvatureTensor ) {
-        answer = static_cast< StructuralMaterialStatus * >( this->giveMaterial()->giveStatus(gp) )->giveStrainVector();
+        answer = static_cast< StructuralMaterialStatus * >( gp->giveMaterialStatus() )->giveStrainVector();
         return 1;
     } else {
       return NLStructuralElement::giveIPValue(answer, gp, type, atTime);

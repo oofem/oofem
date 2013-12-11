@@ -17,19 +17,19 @@
  *       Czech Technical University, Faculty of Civil Engineering,
  *   Department of Structural Mechanics, 166 29 Prague, Czech Republic
  *
- *  This program is free software; you can redistribute it and/or modify
- *  it under the terms of the GNU General Public License as published by
- *  the Free Software Foundation; either version 2 of the License, or
- *  (at your option) any later version.
+ *  This library is free software; you can redistribute it and/or
+ *  modify it under the terms of the GNU Lesser General Public
+ *  License as published by the Free Software Foundation; either
+ *  version 2.1 of the License, or (at your option) any later version.
  *
  *  This program is distributed in the hope that it will be useful,
  *  but WITHOUT ANY WARRANTY; without even the implied warranty of
- *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- *  GNU General Public License for more details.
+ *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+ *  Lesser General Public License for more details.
  *
- *  You should have received a copy of the GNU General Public License
- *  along with this program; if not, write to the Free Software
- *  Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
+ *  You should have received a copy of the GNU Lesser General Public
+ *  License along with this library; if not, write to the Free Software
+ *  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  */
 
 #include "hemotkmat.h"
@@ -96,13 +96,8 @@ HeMoTKMaterial :: giveFluxVector(FloatArray &answer, GaussPoint *gp, const Float
 {
     TransportMaterialStatus *ms = static_cast< TransportMaterialStatus * >( this->giveStatus(gp) );
 
-    FloatArray s;
-    s = ms->giveTempStateVector();
-    if ( s.isEmpty() ) {
-        _error("matcond1d: undefined state vector");
-    }
-    double w = s.at(2);
-    double t = s.at(1);
+    double w = field.at(2);
+    double t = field.at(1);
 
     FloatArray ans_w, ans_t;
     FloatArray grad_w, grad_t;
@@ -188,7 +183,7 @@ HeMoTKMaterial :: matcond1d(FloatMatrix &d, GaussPoint *gp, MatResponseMode mode
 
     //  w = Tm->ip[ipp].av[0];
     //  t = Tm->ip[ipp].av[1];
-    s = status->giveTempStateVector();
+    s = status->giveTempField();
     if ( s.isEmpty() ) {
         _error("matcond1d: undefined state vector");
     }
@@ -227,7 +222,7 @@ HeMoTKMaterial :: matcond2d(FloatMatrix &d, GaussPoint *gp, MatResponseMode mode
 
     //  w = Tm->ip[ipp].av[0];
     //  t = Tm->ip[ipp].av[1];
-    s = status->giveTempStateVector();
+    s = status->giveTempField();
     if ( s.isEmpty() ) {
         _error("matcond2d: undefined state vector");
     }
@@ -269,7 +264,7 @@ HeMoTKMaterial :: matcond3d(FloatMatrix &d, GaussPoint *gp, MatResponseMode mode
 
     //  w = Tm->ip[ipp].av[0];
     //  t = Tm->ip[ipp].av[1];
-    s = status->giveTempStateVector();
+    s = status->giveTempField();
     if ( s.isEmpty() ) {
         _error("matcond3d: undefined state vector");
     }
@@ -313,7 +308,7 @@ double HeMoTKMaterial :: computeCapacityCoeff(MatResponseMode mode, GaussPoint *
         FloatArray s;
         double w, t;
 
-        s = status->giveTempStateVector();
+        s = status->giveTempField();
         if ( s.isEmpty() ) {
             _error("computeCapacityCoeff: undefined state vector");
         }
@@ -326,7 +321,7 @@ double HeMoTKMaterial :: computeCapacityCoeff(MatResponseMode mode, GaussPoint *
         FloatArray s;
         double w, t;
 
-        s = status->giveTempStateVector();
+        s = status->giveTempField();
         if ( s.isEmpty() ) {
             _error("computeCapacityCoeff: undefined state vector");
         }
@@ -346,12 +341,12 @@ double
 HeMoTKMaterial :: giveHumidity(GaussPoint *gp, ValueModeType mode)
 {
     TransportMaterialStatus *ms = static_cast< TransportMaterialStatus * >( this->giveStatus(gp) );
-    const FloatArray &tempState = ms->giveTempStateVector();
+    const FloatArray &tempState = ms->giveTempField();
     if ( tempState.giveSize() < 2 ) {
         _error("giveHumidity: undefined moisture status!");
     }
 
-    FloatArray state = ms->giveStateVector();
+    FloatArray state = ms->giveField();
 
     if ( mode == VM_Total ) {
         return inverse_sorption_isotherm( tempState.at(2) );

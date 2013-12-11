@@ -17,25 +17,26 @@
  *       Czech Technical University, Faculty of Civil Engineering,
  *   Department of Structural Mechanics, 166 29 Prague, Czech Republic
  *
- *  This program is free software; you can redistribute it and/or modify
- *  it under the terms of the GNU General Public License as published by
- *  the Free Software Foundation; either version 2 of the License, or
- *  (at your option) any later version.
+ *  This library is free software; you can redistribute it and/or
+ *  modify it under the terms of the GNU Lesser General Public
+ *  License as published by the Free Software Foundation; either
+ *  version 2.1 of the License, or (at your option) any later version.
  *
  *  This program is distributed in the hope that it will be useful,
  *  but WITHOUT ANY WARRANTY; without even the implied warranty of
- *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- *  GNU General Public License for more details.
+ *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+ *  Lesser General Public License for more details.
  *
- *  You should have received a copy of the GNU General Public License
- *  along with this program; if not, write to the Free Software
- *  Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
+ *  You should have received a copy of the GNU Lesser General Public
+ *  License along with this library; if not, write to the Free Software
+ *  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  */
 
 #include "fei2dtrlin.h"
 #include "mathfem.h"
 #include "floatmatrix.h"
 #include "floatarray.h"
+#include "gaussintegrationrule.h"
 
 namespace oofem {
 void
@@ -237,7 +238,8 @@ FEI2dTrLin :: edgeComputeLength(IntArray &edgeNodes, const FEICellGeometry &cell
     return sqrt(dx * dx + dy * dy);
 }
 
-double FEI2dTrLin :: giveArea(const FEICellGeometry &cellgeo) const
+double
+FEI2dTrLin :: giveArea(const FEICellGeometry &cellgeo) const
 {
     const FloatArray *p;
     double x1, x2, x3, y1, y2, y3;
@@ -255,7 +257,8 @@ double FEI2dTrLin :: giveArea(const FEICellGeometry &cellgeo) const
     return 0.5 * ( x1*(y2-y3) + x2*(-y1+y3) + x3*(y1-y2) ); ///@todo Absolute value or not?
 }
 
-double FEI2dTrLin :: evalNXIntegral(int iEdge, const FEICellGeometry& cellgeo)
+double
+FEI2dTrLin :: evalNXIntegral(int iEdge, const FEICellGeometry& cellgeo)
 {
     IntArray eNodes;
     const FloatArray *node;
@@ -273,4 +276,14 @@ double FEI2dTrLin :: evalNXIntegral(int iEdge, const FEICellGeometry& cellgeo)
 
     return -( x2 * y1 - x1 * y2 );
 }
+
+IntegrationRule *
+FEI2dTrLin :: giveIntegrationRule(int order)
+{
+    IntegrationRule *iRule = new GaussIntegrationRule(1, NULL);
+    int points = iRule->getRequiredNumberOfIntegrationPoints(_Triangle, order + 0);
+    iRule->SetUpPointsOnTriangle(points, _Unknown);
+    return iRule;
+}
+
 } // end namespace oofem

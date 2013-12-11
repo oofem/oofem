@@ -12,6 +12,7 @@ rt_dof      = 9997
 rt_elem     = 9996
 rt_reaction = 9995
 rt_loadlevel= 9994
+rt_errorestimate = 9993
 
 global rectime, recnumber, recdofnum, recvalue
 global firstTimeStepFlag, debug
@@ -30,6 +31,7 @@ global error_on_missing_record
 #('rr', solution_step, node_id, dof_id, value) - reaction
 #('llr',solution_step, value) - load level record
 #('time') - time, only extractor mode
+#('ee', solution_step, value) - error estimate
 #('include', result) - inclusion and processing of another file
 
 #set default tolerance
@@ -107,6 +109,13 @@ gp_re = re.compile(r"""
         \s*:.*          # eat some chars
         """,re.X)
 
+errorestimate_re = re.compile(r"""
+        ^               # begining of line
+        Relative\ error\ estimate:\s*   # ee id string
+        ([-+ ]\d+\.\d+(e[+-]\d+)*) # value
+        """, re.X)
+
+
 gpstress_re = re.compile (r"""[ ]stresses\s*([\s+-e\d]+)""",re.X)
 gpstrain_re = re.compile (r"""[ ]strains\s*([\s+-e\d]+)""",re.X)
 gpstatus_re = re.compile (r"""status\s.*""", re.X)
@@ -161,8 +170,8 @@ def getKeywordValue (infilename, record, kwd, optional = None):
     else:
         #issue an error if argument compulsory
         if optional == None:
-            print "\nChecker.py:%55s   "%os.path.basename(infilename)
-            print "\nMissing keyword \"", kwd, "\" in\n", record
+            print ( "\nChecker.py:%55s   "%os.path.basename(infilename) )
+            print ( "\nMissing keyword \"", kwd, "\" in\n", record )
             exit (1)
         else:
             return optional
@@ -180,7 +189,7 @@ def parse_input_rec (context, recline):
             return ('nr', tstep, number, dof, type, value)
 
         except ValueError:
-            print "Input error on\n",recline
+            print ( "Input error on\n",recline )
             return None
     elif re.search('^#ELEMENT', recline):
         if (mode == 'c'): tstep = float(getKeywordValue(context.infilename, recline, 'tStep'))
@@ -196,7 +205,7 @@ def parse_input_rec (context, recline):
             return ('er', tstep, number, irule, gp, kwd, cmpn, value)
 
         except ValueError:
-            print "Input error on\n",recline
+            print ( "Input error on\n",recline )
             return None
 
     elif re.search('^#BEAM_ELEMENT', recline):
@@ -210,7 +219,7 @@ def parse_input_rec (context, recline):
             value = float(getKeywordValue(context.infilename, recline, 'value', 0.0))
             return ('ber', tstep, number, kwd, cmpn, value)
         except ValueError:
-            print "Input error on\n",recline
+            print ( "Input error on\n",recline )
             return None
 
     elif re.search('^#REACTION',recline):
@@ -222,7 +231,7 @@ def parse_input_rec (context, recline):
             value = float(getKeywordValue(context.infilename, recline, 'value', 0.0))
             return ('rr', tstep, number, dof, value)
         except ValueError:
-            print "Input error on\n",recline
+            print ( "Input error on\n",recline )
             return None
 
     elif re.search('^#LOADLEVEL',recline):
@@ -232,8 +241,18 @@ def parse_input_rec (context, recline):
             value = float(getKeywordValue(context.infilename, recline, 'value', 0.0))
             return ('llr', tstep, value)
         except ValueError:
-            print "Input error on\n",recline
+            print ( "Input error on\n",recline ) 
             return None
+    elif re.search('^#ERRORESTIMATE', recline):
+        if (mode == 'c'): tstep = float(getKeywordValue(context.infilename, recline, 'tStep'))
+        else: tstep = 0
+        try:
+            value = float(getKeywordValue(context.infilename, recline, 'value', 0.0))
+            return ('ee', tstep, value)
+        except ValueError:
+            print ( "Input error on\n",recline )
+            return None
+        
     elif (mode == 'e') and re.search('^#TIME',recline):
         return ('time', 0.0, 0.0)
 
@@ -260,12 +279,12 @@ def check_element_rec (context, kwd, line):
 
         if ((rec[0]=='er') and timeflag and (context.recnumber == rec[2]) and
             (context.recirule==rec[3]) and (context.recgpnum == rec[4])):
-#               print "Found er: looking for ",rec[5],"in ", line
+#               print ( "Found er: looking for ",rec[5],"in ", line )
             match=re.search(rec[5]+'\s*((([-]*\d+(\.\d+)?(e[+-]\d+)?)\s*)+)', line)
             if match:
-                # print "match: ",match.group(1)
+                # print ( "match: ",match.group(1) )
                 context.recVal[irec]=re.split('\s+',match.group(1))[rec[6]-1]
-                # print "found: ",recVal[irec]
+                # print ( "found: ",recVal[irec] )
 
 
 #extract element record
@@ -275,11 +294,11 @@ def check_beam_rec (context, kwd, line):
         else: timeflag = (rec[1] == context.rectime)
 
         if ((rec[0]=='ber') and timeflag and (context.recnumber == rec[2])):
-#            print "Found ber: looking for ",rec[3],"in ", line
+#            print ( "Found ber: looking for ",rec[3],"in ", line )
             match=re.search(rec[3]+'\s*(([-]*\d+(\.\d+)?(e[+-]\d+)?)\s*)+', line)
             if match:
                 context.recVal[irec]=re.split('\s+',match.group(0))[rec[4]]
-#                print "found\n"
+#                print ( "found\n" )
 
 #extract reaction record
 def check_reaction_rec (context):
@@ -307,7 +326,15 @@ def check_time_rec (context):
         if (mode == 'e') and (rec[0] == 'time'):
             context.recVal[irec]=context.rectime
 
+#check errorestimate rec
+def check_errorestimate_rec (context):
+    for irec,rec in enumerate(context.userrec):
+        if (mode == 'e'): timeflag = 1
+        else: timeflag = (rec[1] == context.rectime)
 
+        if ((rec[0] == 'ee') and timeflag):
+            context.recVal[irec]=context.recvalue
+    
 
 def match_primary_rec (context, line):
     global mode, debug
@@ -316,7 +343,7 @@ def match_primary_rec (context, line):
     if match:
         context.rectype = rt_timestep
         context.rectime=float(match.group(1))
-        if debug: print "found time ", context.rectime
+        if debug: print ( "found time ", context.rectime )
         if context.firstTimeStepFlag:
             context.firstTimeStepFlag = 0
         # print parsed record values from previous step
@@ -327,7 +354,7 @@ def match_primary_rec (context, line):
     if match:
         context.rectype = rt_loadlevel
         context.recvalue= float(match.group(1))
-        if debug: print "found load level ", context.recvalue
+        if debug: print ( "found load level ", context.recvalue )
         check_loadlevel_rec (context)
         return None
 
@@ -336,7 +363,7 @@ def match_primary_rec (context, line):
     if match:
         context.rectype = rt_dofman
         context.recnumber= int(match.group(1))
-        if debug: print "found  node", context.recnumber
+        if debug: print ( "found  node", context.recnumber )
         nline = match_dofrec(context)
         return nline
 
@@ -344,7 +371,7 @@ def match_primary_rec (context, line):
     if match:
         context.rectype = rt_elem
         context.recnumber = int(match.group(1))
-        if debug: print "found element", context.recnumber
+        if debug: print ( "found element", context.recnumber )
         nline = match_gprec(context)
         return nline
 
@@ -352,19 +379,28 @@ def match_primary_rec (context, line):
     if match:
         context.rectype = rt_elem
         context.recnumber = int(match.group(2))
-        if debug: print "found element", context.recnumber
+        if debug: print ( "found element", context.recnumber )
         nline = match_beamrec(context)
         return nline
 
     match=reaction_re.search(line)
     if match:
-        if debug: print "Rea: ", line
+        if debug: print ( "Rea: ", line )
         context.rectype = rt_reaction
         context.recnumber = int(match.group(2))
         context.recdofnum = int(match.group(3))
         context.recvalue  = float(match.group(4))
         check_reaction_rec (context)
         return None
+
+    match = errorestimate_re.search(line)
+    if match:
+        if debug: print ( "ee:", line )
+        context.rectype = rt_errorestimate
+        context.recvalue  = float(match.group(1))
+        check_errorestimate_rec (context)
+        return None
+
 
 def match_dofrec (context):
     global debug
@@ -380,7 +416,7 @@ def match_dofrec (context):
             #rectype  = match.group(2)
             #recvalue = float(match.group(3))
             check_node_rec (context);
-            if debug: print "     dof", context.recdofnum
+            if debug: print ( "     dof", context.recdofnum )
             continue
         else:
             return line
@@ -391,46 +427,46 @@ def match_gpsubrec (context, aline):
     pmatch=gpstress_re.search(aline)
     if pmatch:
         check_element_rec (context, 'stresses', aline)
-        if debug: print "     stress rec %s" % aline
+        if debug: print ( "     stress rec %s" % aline )
         return 1
     ppmatch = gpstrain_re.search(aline)
     if ppmatch:
         check_element_rec (context, 'strains', aline)
-        if debug: print "     strain rec %s" % aline
+        if debug: print ( "     strain rec %s" % aline )
         return 1
     ppmatch = gpstatus_re.search(aline)
     if ppmatch:
         check_element_rec (context, 'status', aline)
-        if debug: print "     status rec %s" % aline
+        if debug: print ( "     status rec %s" % aline )
         return 1
     #get omega (damage)
     ppmatch = gpDamage_re.search(aline)
     if ppmatch:
         check_element_rec (context, 'damage', aline)
-        if debug: print "     damage rec %s" % aline
+        if debug: print ( "     damage rec %s" % aline )
         return 1
     #state variables in transport problems
     ppmatch = gpstate_re.search(aline)
     if ppmatch:
         check_element_rec (context, 'state', aline)
-        if debug: print "     state rec %s" % aline
+        if debug: print ( "     state rec %s" % aline )
         return 1
     #flow vector in transport problems
     ppmatch = gpflow_re.search(aline)
     if ppmatch:
         check_element_rec (context, 'flow', aline)
-        if debug: print "     flow rec %s" % aline
+        if debug: print ( "     flow rec %s" % aline )
         return 1
     #Degree of hydration in cement hydration models
     ppmatch = gpDoH_re.search(aline)
     if ppmatch:
         check_element_rec (context, 'DoH', aline)
-        if debug: print "     DoH rec %s" % aline
+        if debug: print ( "     DoH rec %s" % aline )
         return 1
     ppmatch = gpHeatPower_re.search(aline)
     if ppmatch:
         check_element_rec (context, 'HeatPower', aline)
-        if debug: print "     HeatPower rec %s" % aline
+        if debug: print ( "     HeatPower rec %s" % aline )
         return 1
     return 0
 
@@ -440,7 +476,7 @@ def match_singlegprec (context, line):
     if match:
         context.recirule=int(match.group(1))
         context.recgpnum=int(match.group(2))
-        if debug: print "  gp", context.recgpnum
+        if debug: print ( "  gp", context.recgpnum )
         match_gpsubrec (context, line)
         for line in context.infile:
             match=gp_re.search(line)
@@ -468,17 +504,17 @@ def match_beamrec (context):
         pmatch=beamdispl_re.search(line)
         if pmatch:
             check_beam_rec (context, 'displacements', line)
-            if debug: print "     local displacements rec"
+            if debug: print ( "     local displacements rec" )
             continue
         ppmatch = beamforces_re.search(line)
         if ppmatch:
             check_beam_rec (context, 'forces', line)
-            if debug: print "     local forces rec"
+            if debug: print ( "     local forces rec" )
             continue
         ppmatch = springforces_re.search(line)
         if ppmatch:
             check_beam_rec (context, 'huhu', line)
-            if debug: print "     spring rec"
+            if debug: print ( "     spring rec" )
             continue
 
         return line
@@ -500,12 +536,12 @@ def check_results (context, tolerance):
             continue
         elif (context.recVal[irec] == '--'):
             if error_on_missing_record:
-                if (success): print header # print header before reporting error for the first time
-                print "\tError when checking rule ",irec,": not found"
+                if (success): print ( header ) # print header before reporting error for the first time
+                print ( "\tError when checking rule ",irec,": not found" ) 
                 success = 0
                 continue
             else:
-                print "\tWarning when checking rule ",irec,": not found"
+                print ( "\tWarning when checking rule ",irec,": not found" )
                 continue
 
         try:
@@ -513,17 +549,17 @@ def check_results (context, tolerance):
         except ValueError:
             err = float(rec[-1])
         if (abs(err) > float(tolerance)):
-            if (success): print header # print header before reporting error for the first time
-            print "\tError when checking rule %d: err = %g, value is %g and correct value is %g" % (irec, err, float(context.recVal[irec]), float(rec[-1]))
-            # print rec, recVal
+            if (success): print ( header ) # print header before reporting error for the first time
+            print ( "\tError when checking rule %d: err = %g, value is %g and correct value is %g" % (irec, err, float(context.recVal[irec]), float(rec[-1])) )
+            # print ( rec, recVal )
             success = 0
 
 
     if success:
-        print header+"[  OK  ]"
+        print ( header+"[  OK  ]" )
         return 0
     else:
-        print header+"[FAILED]"
+        print ( header+"[FAILED]" )
         return 1
 
 
@@ -532,16 +568,16 @@ def print_step_results (context):
     for ival in sorted(context.recVal.keys()):
         try:
             value = float(context.recVal[ival])
-            print "%15e"%value,
-        except ValueError:
-            print "%15s"%'---',
-        context.recVal[ival]='--'
-    print
+            print ( "%15e"%value, ) 
+        except ValueError: 
+            print ( "%15s"%'---', )
+        context.recVal[ival]='--' 
+    print ()
 
 
 def usage():
 # prints usage
-    print """
+    print ( """
 Checker (c) 2009 Borek Patzak
 
 Usage: extractor.py -f input_file.in [-c]
@@ -589,7 +625,7 @@ patch100.out
 #ELEMENT tStep 1 number 1 gp 1 component 1 keyword "strains"  value -5.2083e-01
 #DOFMAN  tStep 1 number 4 dof 1 type d value -1.5625
 #%END_CHECK%
-"""
+""" )
 
 def process_file (infilename, parentfilename):
     #parentfilename name of master file name, none otherwise
@@ -600,7 +636,7 @@ def process_file (infilename, parentfilename):
 
 
     # open oofem input file
-    if debug: print "Opening oofem input file:", sys.argv[1]
+    if debug: print ("Opening oofem input file:", sys.argv[1] )
     context.infile=open(infilename)
     context.infilename=infilename
     context.parentfilename=parentfilename
@@ -621,7 +657,7 @@ def process_file (infilename, parentfilename):
                 match=re.search("tolerance\s+(\d+\.\d*(e[+-]\d+)*)", line)
                 if match:
                     tolerance = match.group(1)
-                    if debug: print "Tolerance = ", tolerance
+                    if debug: print ( "Tolerance = ", tolerance )
                 match=re.search("error_when_missing\s+(\d+)", line)
                 if match:
                     val = int(match.group(1))
@@ -630,7 +666,7 @@ def process_file (infilename, parentfilename):
                 break
 
     if begin==0:
-        print "No extrator records found"
+        print ( "No extrator records found" )
         return 2
 
     end=0
@@ -639,14 +675,14 @@ def process_file (infilename, parentfilename):
         match = include_re.search(line)
         if match:
             # include directive detected, parse given file recursively
-            #print "Processing include ", match.group(2)
+            #print ( "Processing include ", match.group(2) )
             recursion_level = recursion_level+1
             if (recursion_level < 2):
                 result=result+process_file (match.group(2), context.infilename)
                 context.userrec.append (('include',result)) #remember result
                 recursion_level = recursion_level-1
             else:
-                print "Allowed recursion level reached, file:",match.group(2)
+                print ( "Allowed recursion level reached, file:",match.group(2) )
                 return 2
 
         match = parse_input_rec (context, line)
@@ -659,14 +695,14 @@ def process_file (infilename, parentfilename):
             break
 
     if not end:
-        print "No end record found"
+        print ( "No end record found" )
         return 2
 
-    if debug: print userrec
+    if debug: print ( context.userrec )
     context.infile.close()
 
     #process oofem output file
-    if debug: print "Opening oofem output file:", oofemoutfilename.rstrip('\r\n')
+    if debug: print ( "Opening oofem output file:", oofemoutfilename.rstrip('\r\n') )
     context.infile = open(oofemoutfilename.rstrip('\r\n'))
 
     for i in range(len(context.userrec)):
@@ -700,8 +736,8 @@ def main():
     try:
         # options expecting value followed by ':', see also Unix getopt
         opts, args = getopt.getopt (sys.argv[1:],'cpf:')
-    except getopt.GetoptError, err:
-        print str(err)
+    except getopt.GetoptError as err:
+        print ( str(err) )
         usage()
         exit(1)
 

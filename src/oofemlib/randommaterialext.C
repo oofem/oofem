@@ -17,19 +17,19 @@
  *       Czech Technical University, Faculty of Civil Engineering,
  *   Department of Structural Mechanics, 166 29 Prague, Czech Republic
  *
- *  This program is free software; you can redistribute it and/or modify
- *  it under the terms of the GNU General Public License as published by
- *  the Free Software Foundation; either version 2 of the License, or
- *  (at your option) any later version.
+ *  This library is free software; you can redistribute it and/or
+ *  modify it under the terms of the GNU Lesser General Public
+ *  License as published by the Free Software Foundation; either
+ *  version 2.1 of the License, or (at your option) any later version.
  *
  *  This program is distributed in the hope that it will be useful,
  *  but WITHOUT ANY WARRANTY; without even the implied warranty of
- *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- *  GNU General Public License for more details.
+ *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+ *  Lesser General Public License for more details.
  *
- *  You should have received a copy of the GNU General Public License
- *  along with this program; if not, write to the Free Software
- *  Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
+ *  You should have received a copy of the GNU Lesser General Public
+ *  License along with this library; if not, write to the Free Software
+ *  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  */
 
 #include "gausspoint.h"
@@ -89,7 +89,7 @@ RandomMaterialExtensionInterface :: giveInputRecord(DynamicInputRecord &ir)
 bool
 RandomMaterialExtensionInterface :: give(int key, GaussPoint *gp, double &value)
 {
-    MaterialStatus *status = gp->giveMaterial()->giveStatus(gp);
+    MaterialStatus *status = static_cast < MaterialStatus * > ( gp->giveMaterialStatus() );
     RandomMaterialStatusExtensionInterface *interface = static_cast< RandomMaterialStatusExtensionInterface * >
                                                         ( status->giveInterface(RandomMaterialStatusExtensionInterfaceType) );
     return interface->_giveProperty(key, value);
@@ -100,8 +100,9 @@ RandomMaterialExtensionInterface :: _generateStatusVariables(GaussPoint *gp) con
 {
     int size = randVariables.giveSize();
     double value;
+    MaterialStatus *matStat = static_cast < MaterialStatus * > ( gp->giveMaterialStatus() );
     RandomMaterialStatusExtensionInterface *status = static_cast< RandomMaterialStatusExtensionInterface * >
-                                                     ( gp->giveMaterial()->giveStatus(gp)->giveInterface(RandomMaterialStatusExtensionInterfaceType) );
+                                                     ( matStat->giveInterface(RandomMaterialStatusExtensionInterfaceType) );
 
     for ( int i = 1; i <= size; i++ ) {
         gp->giveElement()->giveDomain()->

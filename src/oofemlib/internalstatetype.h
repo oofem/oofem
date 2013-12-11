@@ -17,19 +17,19 @@
  *       Czech Technical University, Faculty of Civil Engineering,
  *   Department of Structural Mechanics, 166 29 Prague, Czech Republic
  *
- *  This program is free software; you can redistribute it and/or modify
- *  it under the terms of the GNU General Public License as published by
- *  the Free Software Foundation; either version 2 of the License, or
- *  (at your option) any later version.
+ *  This library is free software; you can redistribute it and/or
+ *  modify it under the terms of the GNU Lesser General Public
+ *  License as published by the Free Software Foundation; either
+ *  version 2.1 of the License, or (at your option) any later version.
  *
  *  This program is distributed in the hope that it will be useful,
  *  but WITHOUT ANY WARRANTY; without even the implied warranty of
- *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- *  GNU General Public License for more details.
+ *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+ *  Lesser General Public License for more details.
  *
- *  You should have received a copy of the GNU General Public License
- *  along with this program; if not, write to the Free Software
- *  Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
+ *  You should have received a copy of the GNU Lesser General Public
+ *  License along with this library; if not, write to the Free Software
+ *  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  */
 
 #ifndef internalstatetype_h
@@ -140,9 +140,16 @@ namespace oofem {
     ENUM_ITEM_WITH_VALUE(IST_DeformationGradientTensor, 90) \
     ENUM_ITEM_WITH_VALUE(IST_FirstPKStressTensor, 91) \
     ENUM_ITEM_WITH_VALUE(IST_XFEMEnrichment, 92) \
-	ENUM_ITEM_WITH_VALUE(IST_XFEMNumIntersecPoints, 93) \
-	ENUM_ITEM_WITH_VALUE(IST_XFEMLevelSetPhi, 94)
-
+    ENUM_ITEM_WITH_VALUE(IST_XFEMNumIntersecPoints, 93) \
+    ENUM_ITEM_WITH_VALUE(IST_XFEMLevelSetPhi, 94) \
+    ENUM_ITEM_WITH_VALUE(IST_Maturity, 95) \
+    ENUM_ITEM_WITH_VALUE(IST_CauchyStressTensor, 96) \
+    ENUM_ITEM_WITH_VALUE(IST_InterfaceJump, 97) \
+    ENUM_ITEM_WITH_VALUE(IST_InterfaceTraction, 98) \
+    ENUM_ITEM_WITH_VALUE(IST_InterfaceFirstPKTraction, 99) \
+    ENUM_ITEM_WITH_VALUE(IST_StressTensor_Reduced, 100) \
+    ENUM_ITEM_WITH_VALUE(IST_StrainTensor_Reduced, 101) \
+    ENUM_ITEM_WITH_VALUE(IST_CrossSectionNumber, 102 )
 /**
  * Type  representing the physical meaning of element or constitutive model internal variable.
  * Values of this type are used, when these internal variables are requested.

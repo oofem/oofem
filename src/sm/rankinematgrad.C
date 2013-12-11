@@ -17,19 +17,19 @@
  *       Czech Technical University, Faculty of Civil Engineering,
  *   Department of Structural Mechanics, 166 29 Prague, Czech Republic
  *
- *  This program is free software; you can redistribute it and/or modify
- *  it under the terms of the GNU General Public License as published by
- *  the Free Software Foundation; either version 2 of the License, or
- *  (at your option) any later version.
+ *  This library is free software; you can redistribute it and/or
+ *  modify it under the terms of the GNU Lesser General Public
+ *  License as published by the Free Software Foundation; either
+ *  version 2.1 of the License, or (at your option) any later version.
  *
  *  This program is distributed in the hope that it will be useful,
  *  but WITHOUT ANY WARRANTY; without even the implied warranty of
- *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- *  GNU General Public License for more details.
+ *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+ *  Lesser General Public License for more details.
  *
- *  You should have received a copy of the GNU General Public License
- *  along with this program; if not, write to the Free Software
- *  Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
+ *  You should have received a copy of the GNU Lesser General Public
+ *  License along with this library; if not, write to the Free Software
+ *  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  */
 
 #include "rankinematgrad.h"
@@ -265,7 +265,7 @@ RankineMatGrad :: giveRealStressVectorGrad(FloatArray &answer1, double &answer2,
 
     double tempDamage;
     FloatArray tempEffStress, totalStress, locTotalStrain;
-    RankineMat ::  performPlasticityReturn(gp, totalStrain);
+    RankineMat :: performPlasticityReturn(gp, totalStrain);
 
     tempDamage = computeDamage(gp, atTime);
     status->giveTempEffectiveStress(tempEffStress);
@@ -342,18 +342,6 @@ RankineMatGrad :: giveIPValue(FloatArray &answer, GaussPoint *aGaussPoint, Inter
         return RankineMat :: giveIPValue(answer, aGaussPoint, type, atTime);
     }
 }
-
-
-InternalStateValueType
-RankineMatGrad :: giveIPValueType(InternalStateType type)
-{
-    if ( type == IST_CumPlasticStrain_2 || type == IST_MaxEquivalentStrainLevel ) {
-        return ISVT_SCALAR;
-    } else {
-        return RankineMat :: giveIPValueType(type);
-    }
-}
-
 
 //=============================================================================
 // GRADIENT RANKINE MATERIAL STATUS

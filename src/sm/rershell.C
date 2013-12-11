@@ -17,19 +17,19 @@
  *       Czech Technical University, Faculty of Civil Engineering,
  *   Department of Structural Mechanics, 166 29 Prague, Czech Republic
  *
- *  This program is free software; you can redistribute it and/or modify
- *  it under the terms of the GNU General Public License as published by
- *  the Free Software Foundation; either version 2 of the License, or
- *  (at your option) any later version.
+ *  This library is free software; you can redistribute it and/or
+ *  modify it under the terms of the GNU Lesser General Public
+ *  License as published by the Free Software Foundation; either
+ *  version 2.1 of the License, or (at your option) any later version.
  *
  *  This program is distributed in the hope that it will be useful,
  *  but WITHOUT ANY WARRANTY; without even the implied warranty of
- *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- *  GNU General Public License for more details.
+ *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+ *  Lesser General Public License for more details.
  *
- *  You should have received a copy of the GNU General Public License
- *  along with this program; if not, write to the Free Software
- *  Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
+ *  You should have received a copy of the GNU Lesser General Public
+ *  License along with this library; if not, write to the Free Software
+ *  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  */
 
 #include "rershell.h"
@@ -278,12 +278,12 @@ RerShell :: giveArea()
 IRResultType
 RerShell :: initializeFrom(InputRecord *ir)
 {
-    const char *__proc = "initializeFrom"; // Required by IR_GIVE_FIELD macro
-    IRResultType result;                // Required by IR_GIVE_FIELD macro
-
-    this->StructuralElement :: initializeFrom(ir);
     numberOfGaussPoints = 1;
-    IR_GIVE_OPTIONAL_FIELD(ir, numberOfGaussPoints, _IFT_Element_nip);
+    IRResultType result = this->StructuralElement :: initializeFrom(ir);
+	if(result != IRRT_OK) {
+		return result;
+	}
+
     if ( numberOfGaussPoints != 1 ) {
         numberOfGaussPoints = 1;
     }
@@ -304,7 +304,7 @@ RerShell :: computeLumpedMassMatrix(FloatMatrix &answer, TimeStep *tStep)
     gp = integrationRulesArray [ 0 ]->getIntegrationPoint(0);
 
     dV = this->computeVolumeAround(gp);
-    mss1 = dV * this->giveCrossSection()->give(CS_Thickness) * this->giveMaterial()->give('d', gp) / 3.;
+    mss1 = dV * this->giveCrossSection()->give(CS_Thickness) * this->giveStructuralCrossSection()->give('d', gp) / 3.;
 
     answer.at(1, 1) = mss1;
     answer.at(2, 2) = mss1;
@@ -332,13 +332,12 @@ RerShell :: computeBodyLoadVectorAt(FloatArray &answer, Load *forLoad, TimeStep 
 
 
     forLoad->computeComponentArrayAt(f, stepN, mode);
-    //f.times( this->giveMaterial()->give('d') );
 
     if ( f.giveSize() == 0 ) {
         answer.resize(0);
         return;                                             // nil resultant
     } else {
-        dens = this->giveMaterial()->give('d', gp);
+        dens = this->giveStructuralCrossSection()->give('d', gp);
         dV = this->computeVolumeAround(gp) * this->giveCrossSection()->give(CS_Thickness);
 
         answer.resize(18);
@@ -433,7 +432,7 @@ RerShell :: giveLocalCoordinateSystem(FloatMatrix &answer)
 //converts global coordinates to local planar area coordinates, does not return a coordinate in the thickness direction, but
 //does check that the point is in the element thickness
 #define POINT_TOL 1.e-3
-int
+bool
 RerShell :: computeLocalCoordinates(FloatArray &answer, const FloatArray &coords)
 {
     //set size of return value to 3 area coordinates
@@ -483,21 +482,21 @@ RerShell :: computeLocalCoordinates(FloatArray &answer, const FloatArray &coords
 
     if ( elthick / 2.0 + midplZ - fabs( inputCoords_ElCS.at(3) ) < -POINT_TOL ) {
         answer.zero();
-        return 0;
+        return false;
     }
 
     //check that the point is in the element and set flag
     for ( int i = 1; i <= 3; i++ ) {
         if ( answer.at(i) < ( 0. - POINT_TOL ) ) {
-            return 0;
+            return false;
         }
 
         if ( answer.at(i) > ( 1. + POINT_TOL ) ) {
-            return 0;
+            return false;
         }
     }
 
-    return 1;
+    return true;
 }
 
 
@@ -766,7 +765,7 @@ RerShell :: giveIPValue(FloatArray &answer, GaussPoint *aGaussPoint, InternalSta
 #ifdef __OOFEG
 /*
  * void
- * CCTPlate  :: drawRawGeometry ()
+ * CCTPlate :: drawRawGeometry ()
  * {
  * WCRec p[3];
  * GraphicObj *go;
@@ -791,7 +790,7 @@ RerShell :: giveIPValue(FloatArray &answer, GaussPoint *aGaussPoint, InternalSta
  * }
  *
  * void
- * CCTPlate  :: drawDeformedGeometry (UnknownType defMode)
+ * CCTPlate :: drawDeformedGeometry (UnknownType defMode)
  * {
  * WCRec p[3];
  * GraphicObj *go;
@@ -819,13 +818,13 @@ RerShell :: giveIPValue(FloatArray &answer, GaussPoint *aGaussPoint, InternalSta
 
 
 //void
-//RerShell  :: drawScalar   (oofegGraphicContext& context)
+//RerShell :: drawScalar(oofegGraphicContext& context)
 //{}
 
 
 /*
  * void
- * RerShell  :: drawInternalState (oofegGraphicContext& gc)
+ * RerShell :: drawInternalState(oofegGraphicContext& gc)
  * //
  * // Draws internal state graphics representation
  * //

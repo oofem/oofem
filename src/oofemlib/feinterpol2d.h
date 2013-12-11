@@ -17,25 +17,23 @@
  *       Czech Technical University, Faculty of Civil Engineering,
  *   Department of Structural Mechanics, 166 29 Prague, Czech Republic
  *
- *  This program is free software; you can redistribute it and/or modify
- *  it under the terms of the GNU General Public License as published by
- *  the Free Software Foundation; either version 2 of the License, or
- *  (at your option) any later version.
+ *  This library is free software; you can redistribute it and/or
+ *  modify it under the terms of the GNU Lesser General Public
+ *  License as published by the Free Software Foundation; either
+ *  version 2.1 of the License, or (at your option) any later version.
  *
  *  This program is distributed in the hope that it will be useful,
  *  but WITHOUT ANY WARRANTY; without even the implied warranty of
- *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- *  GNU General Public License for more details.
+ *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+ *  Lesser General Public License for more details.
  *
- *  You should have received a copy of the GNU General Public License
- *  along with this program; if not, write to the Free Software
- *  Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
+ *  You should have received a copy of the GNU Lesser General Public
+ *  License along with this library; if not, write to the Free Software
+ *  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  */
 
 #ifndef feinterpol2d_h
 #define feinterpol2d_h
-
-#include "floatarray.h"
 
 #include "feinterpol.h"
 
@@ -43,10 +41,13 @@ namespace oofem {
 /**
  * Class representing a general abstraction for surface finite element interpolation class.
  */
-class FEInterpolation2d : public FEInterpolation
+class OOFEM_EXPORT FEInterpolation2d : public FEInterpolation
 {
+protected:
+    int xind, yind;
+
 public:
-    FEInterpolation2d(int o) : FEInterpolation(o) { }
+    FEInterpolation2d(int o, int ind1, int ind2) : FEInterpolation(o), xind(ind1), yind(ind2) { }
 
     virtual int giveNsd() { return 2; }
 
@@ -55,27 +56,23 @@ public:
      * @param cellgeo Cell geometry for the element.
      * @return Area of geometry.
      */
-    virtual double giveArea(const FEICellGeometry &cellgeo) const
-    { OOFEM_ERROR("FEInterpolation2d :: giveArea - Not implemented in subclass."); return 0; }
+    virtual double giveArea(const FEICellGeometry &cellgeo) const;
 
+    virtual void boundaryEdgeGiveNodes(IntArray &answer, int boundary);
+    virtual void boundaryEdgeEvalN(FloatArray &answer, int boundary, const FloatArray &lcoords, const FEICellGeometry &cellgeo);
+    virtual double boundaryEdgeGiveTransformationJacobian(int boundary, const FloatArray &lcoords, const FEICellGeometry &cellgeo);
+    virtual void boundaryEdgeLocal2Global(FloatArray &answer, int boundary, const FloatArray &lcoords, const FEICellGeometry &cellgeo);
 
-    virtual void boundaryGiveNodes(IntArray &answer, int boundary) { this->computeLocalEdgeMapping(answer, boundary); }
-    virtual void boundaryEvalN(FloatArray &answer, int boundary, const FloatArray &lcoords, const FEICellGeometry &cellgeo) { this->edgeEvalN(answer, boundary, lcoords, cellgeo); }
-    virtual double boundaryEvalNormal(FloatArray &answer, int boundary, const FloatArray &lcoords, const FEICellGeometry &cellgeo) { return this->edgeEvalNormal(answer, boundary, lcoords, cellgeo); }
-    virtual double boundaryGiveTransformationJacobian(int boundary, const FloatArray &lcoords, const FEICellGeometry &cellgeo) { return this->edgeGiveTransformationJacobian(boundary, lcoords, cellgeo); }
-    virtual void boundaryLocal2Global(FloatArray &answer, int boundary, const FloatArray &lcoords, const FEICellGeometry &cellgeo) { return this->edgeLocal2global(answer, boundary, lcoords, cellgeo); }
+    virtual void boundaryGiveNodes(IntArray &answer, int boundary);
+    virtual void boundaryEvalN(FloatArray &answer, int boundary, const FloatArray &lcoords, const FEICellGeometry &cellgeo);
+    virtual double boundaryEvalNormal(FloatArray &answer, int boundary, const FloatArray &lcoords, const FEICellGeometry &cellgeo);
+    virtual double boundaryGiveTransformationJacobian(int boundary, const FloatArray &lcoords, const FEICellGeometry &cellgeo);
+    virtual void boundaryLocal2Global(FloatArray &answer, int boundary, const FloatArray &lcoords, const FEICellGeometry &cellgeo);
     
     /**@name Edge interpolation services. */
     //@{
     virtual void computeLocalEdgeMapping(IntArray &edgeNodes, int iedge) = 0;
-    void computeEdgeMapping(IntArray &edgeNodes, IntArray &elemNodes, int iedge) {
-        int i, size;
-        IntArray ln;
-        this->computeLocalEdgeMapping(ln, iedge);
-        size = ln.giveSize();
-        edgeNodes.resize(size);
-        for ( i = 1; i <= size; i++ ) { edgeNodes.at(i) = elemNodes.at( ln.at(i) ); }
-    }
+    void computeEdgeMapping(IntArray &edgeNodes, IntArray &elemNodes, int iedge);
     /**
      * Evaluates the array of edge interpolation functions (shape functions) at given point.
      * @param answer Contains resulting array of evaluated interpolation functions.
@@ -121,17 +118,12 @@ public:
      * @return Determinant of the mapping on the given edge.
      */
     virtual double edgeGiveTransformationJacobian(int iedge, const FloatArray &lcoords,
-                                                  const FEICellGeometry &cellgeo) {
-        FloatArray normal;
-        return this->edgeEvalNormal(normal, iedge, lcoords, cellgeo);
-    }
+                                                  const FEICellGeometry &cellgeo);
     //@}
+
+    virtual IntegrationRule *giveBoundaryIntegrationRule(int order, int boundary);
+    virtual IntegrationRule *giveBoundaryEdgeIntegrationRule(int order, int boundary);
 };
 } // end namespace oofem
 #endif // feinterpol2d_h
-
-
-
-
-
 

@@ -17,19 +17,19 @@
  *       Czech Technical University, Faculty of Civil Engineering,
  *   Department of Structural Mechanics, 166 29 Prague, Czech Republic
  *
- *  This program is free software; you can redistribute it and/or modify
- *  it under the terms of the GNU General Public License as published by
- *  the Free Software Foundation; either version 2 of the License, or
- *  (at your option) any later version.
+ *  This library is free software; you can redistribute it and/or
+ *  modify it under the terms of the GNU Lesser General Public
+ *  License as published by the Free Software Foundation; either
+ *  version 2.1 of the License, or (at your option) any later version.
  *
  *  This program is distributed in the hope that it will be useful,
  *  but WITHOUT ANY WARRANTY; without even the implied warranty of
- *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- *  GNU General Public License for more details.
+ *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+ *  Lesser General Public License for more details.
  *
- *  You should have received a copy of the GNU General Public License
- *  along with this program; if not, write to the Free Software
- *  Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
+ *  You should have received a copy of the GNU Lesser General Public
+ *  License along with this library; if not, write to the Free Software
+ *  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  */
 
 #include "mathfem.h"
@@ -144,7 +144,9 @@ MaxwellChainMaterial :: giveEigenStrainVector(FloatArray &answer,
     int mu;
     double E;
     double deltaYmu;
-    FloatArray *sigmaMu, help, reducedAnswer;
+    FloatArray help, reducedAnswer;
+    //FloatArray *sigmaMu;
+    FloatArray sigmaMu;
     FloatMatrix B;
     MaxwellChainMaterialStatus *status = static_cast< MaxwellChainMaterialStatus * >( this->giveStatus(gp) );
 
@@ -156,9 +158,11 @@ MaxwellChainMaterial :: giveEigenStrainVector(FloatArray &answer,
         for ( mu = 1; mu <= nUnits; mu++ ) {
             deltaYmu = atTime->giveTimeIncrement() / timeFactor / this->giveCharTime(mu);
             deltaYmu = pow( deltaYmu, this->giveCharTimeExponent(mu) );
-            sigmaMu  = status->giveHiddenVarsVector(mu);
-            if ( sigmaMu ) {
-                help.beProductOf(B, * sigmaMu); // B can be moved before sum !!!
+            
+            sigmaMu  = status->giveHiddenVarsVector(mu); // JB
+
+            if ( sigmaMu.giveSize() ) {
+                help.beProductOf(B, sigmaMu); // B can be moved before sum !!!
                 help.times( 1.0 - exp(-deltaYmu) );
                 reducedAnswer.add(help);
             }
@@ -175,19 +179,27 @@ MaxwellChainMaterial :: giveEigenStrainVector(FloatArray &answer,
 }
 
 
+void 
+MaxwellChainMaterial :: giveRealStressVector(FloatArray &answer, GaussPoint *gp, const FloatArray &reducedStrain, TimeStep *tStep)
+{
+    RheoChainMaterial ::giveRealStressVector(answer, gp, reducedStrain, tStep);
 
-
+    // Computes hidden variables and stores them as temporary
+    this->computeHiddenVars(gp, tStep);
+}
 
 
 void
-MaxwellChainMaterial :: updateYourself(GaussPoint *gp, TimeStep *tNow)
+MaxwellChainMaterial :: computeHiddenVars(GaussPoint *gp, TimeStep *tNow)
 {
     /*
      * Updates hidden variables used to effectively trace the load history
      */
 
     double deltaYmu, Emu, lambdaMu;
-    FloatArray help, *muthHiddenVarsVector, deltaEps0, help1;
+    FloatArray help, deltaEps0, help1;
+    FloatArray muthHiddenVarsVector;
+
     FloatMatrix Binv;
     MaxwellChainMaterialStatus *status =
         static_cast< MaxwellChainMaterialStatus * >( this->giveStatus(gp) );
@@ -217,18 +229,15 @@ MaxwellChainMaterial :: updateYourself(GaussPoint *gp, TimeStep *tNow)
         muthHiddenVarsVector = status->giveHiddenVarsVector(mu);
         help = help1;
         help.times(lambdaMu * Emu);
-        if ( muthHiddenVarsVector ) {
-            muthHiddenVarsVector->times( exp(-deltaYmu) );
-            muthHiddenVarsVector->add(help);
+        if ( muthHiddenVarsVector.giveSize() ) {
+            muthHiddenVarsVector.times( exp(-deltaYmu) );
+            muthHiddenVarsVector.add(help);
+            status->letTempHiddenVarsVectorBe( mu, muthHiddenVarsVector);
         } else {
-            status->letHiddenVarsVectorBe( mu, (new FloatArray(help)) );
+            status->letTempHiddenVarsVectorBe( mu, help);
         }
     }
-
-    // now we call MaxwellChainMaterialStatus->updateYourself()
-    status->updateYourself(tNow);
 }
-
 
 
 MaterialStatus *

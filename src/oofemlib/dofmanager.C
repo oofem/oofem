@@ -17,19 +17,19 @@
  *       Czech Technical University, Faculty of Civil Engineering,
  *   Department of Structural Mechanics, 166 29 Prague, Czech Republic
  *
- *  This program is free software; you can redistribute it and/or modify
- *  it under the terms of the GNU General Public License as published by
- *  the Free Software Foundation; either version 2 of the License, or
- *  (at your option) any later version.
+ *  This library is free software; you can redistribute it and/or
+ *  modify it under the terms of the GNU Lesser General Public
+ *  License as published by the Free Software Foundation; either
+ *  version 2.1 of the License, or (at your option) any later version.
  *
  *  This program is distributed in the hope that it will be useful,
  *  but WITHOUT ANY WARRANTY; without even the implied warranty of
- *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- *  GNU General Public License for more details.
+ *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+ *  Lesser General Public License for more details.
  *
- *  You should have received a copy of the GNU General Public License
- *  along with this program; if not, write to the Free Software
- *  Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
+ *  You should have received a copy of the GNU Lesser General Public
+ *  License along with this library; if not, write to the Free Software
+ *  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  */
 
 #include "dofmanager.h"
@@ -245,7 +245,7 @@ void DofManager :: giveLocationArray(const IntArray &dofIDArry, IntArray &locati
         locationArray.resize(size);
         for ( int i = 1; i <= size; i++ ) {
             if ( ( indx = this->findDofWithDofId( ( DofIDItem ) dofIDArry.at(i) ) ) == 0 ) {
-                _error("giveLocationArray: incompatible dof requested");
+                _error2("giveLocationArray: incompatible dof (%d) requested", dofIDArry.at(i));
             }
 
             locationArray.at(i) = s.giveDofEquationNumber( this->giveDof(indx) );
@@ -435,7 +435,8 @@ DofManager :: initializeFrom(InputRecord *ir)
     delete dofICmap; dofICmap = NULL;
 
     IntArray dofIDArry;
-    IntArray bc, ic, masterMask, dofTypeMask;
+    IntArray ic, masterMask, dofTypeMask;
+    mBC.resize(0);
 
     loadArray.resize(0);
     IR_GIVE_OPTIONAL_FIELD(ir, loadArray, _IFT_DofManager_load);
@@ -451,8 +452,8 @@ DofManager :: initializeFrom(InputRecord *ir)
         dofIDArry = domain->giveDefaultNodeDofIDArry();
     }
 
-    bc.resize(0);
-    IR_GIVE_OPTIONAL_FIELD(ir, bc, _IFT_DofManager_bc);
+    mBC.resize(0);
+    IR_GIVE_OPTIONAL_FIELD(ir, mBC, _IFT_DofManager_bc);
 
     ic.resize(0);
     IR_GIVE_OPTIONAL_FIELD(ir, ic, _IFT_DofManager_ic);
@@ -491,7 +492,7 @@ DofManager :: initializeFrom(InputRecord *ir)
 
 
     bool hasIc = !( ic.giveSize() == 0 );
-    bool hasBc = !( bc.giveSize() == 0 );
+    bool hasBc = !( mBC.giveSize() == 0 );
     bool hasTypeinfo = !( dofTypeMask.giveSize() == 0 );
 
     ///@todo This should eventually be removed, still here to preserve backwards compatibility:
@@ -499,13 +500,13 @@ DofManager :: initializeFrom(InputRecord *ir)
 
     // check sizes
     if ( hasBc ) {
-        if ( bc.giveSize() != dofIDArry.giveSize() ) {
-            _error3( "initializeFrom: bc size mismatch. Size is %d and need %d", bc.giveSize(), dofIDArry.giveSize() );
+        if ( mBC.giveSize() != dofIDArry.giveSize() ) {
+            _error3( "initializeFrom: bc size mismatch. Size is %d and need %d", mBC.giveSize(), dofIDArry.giveSize() );
         }
         this->dofBCmap = new std::map< int, int >();
-        for (int i = 1; i <= bc.giveSize(); ++i) {
-            if ( bc.at(i) > 0 ) {
-                (*this->dofBCmap)[dofIDArry.at(i)] = bc.at(i);
+        for (int i = 1; i <= mBC.giveSize(); ++i) {
+            if ( mBC.at(i) > 0 ) {
+                (*this->dofBCmap)[dofIDArry.at(i)] = mBC.at(i);
             }
         }
     }
@@ -555,12 +556,18 @@ void DofManager :: giveInputRecord(DynamicInputRecord &input)
 {
     FEMComponent :: giveInputRecord(input);
     if ( this->dofidmask ) input.setField(*this->dofidmask, _IFT_DofManager_dofidmask);
+
+    if( mBC.giveSize() > 0 ) {
+    	input.setField(mBC, _IFT_DofManager_bc);
+    }
+
     if ( this->dofTypemap ) {
         IntArray typeMask( this->dofidmask->giveSize() );
         for ( int i = 1; i <= dofidmask->giveSize(); ++i )
             typeMask.at(i) = (*this->dofTypemap)[dofidmask->at(i)];
         input.setField(typeMask, _IFT_DofManager_doftypemask);
     }
+
     if ( this->dofMastermap ) {
         IntArray masterMask( this->dofidmask->giveSize() );
         for ( int i = 1; i <= dofidmask->giveSize(); ++i )
@@ -657,13 +664,11 @@ contextIOResultType DofManager :: saveContext(DataStream *stream, ContextMode mo
             THROW_CIOERR(iores);
         }
 
-        _val = ( int ) isBoundaryFlag;
-        if ( !stream->write(& _val, 1) ) {
+        if ( !stream->write(& isBoundaryFlag, 1) ) {
             THROW_CIOERR(CIO_IOERR);
         }
 
-        _val = ( int ) hasSlaveDofs;
-        if ( !stream->write(& _val, 1) ) {
+        if ( !stream->write(& hasSlaveDofs, 1) ) {
             THROW_CIOERR(CIO_IOERR);
         }
 
@@ -701,7 +706,6 @@ contextIOResultType DofManager :: restoreContext(DataStream *stream, ContextMode
 //
 {
     contextIOResultType iores;
-    int _val;
 
     if ( ( iores = FEMComponent :: restoreContext(stream, mode, obj) ) != CIO_OK ) {
         THROW_CIOERR(iores);
@@ -757,16 +761,14 @@ contextIOResultType DofManager :: restoreContext(DataStream *stream, ContextMode
             THROW_CIOERR(iores);
         }
 
-        if ( !stream->read(& _val, 1) ) {
+        if ( !stream->read(& isBoundaryFlag, 1) ) {
             THROW_CIOERR(CIO_IOERR);
         }
 
-        isBoundaryFlag = ( bool ) _val;
-        if ( !stream->read(& _val, 1) ) {
+        if ( !stream->read(& hasSlaveDofs, 1) ) {
             THROW_CIOERR(CIO_IOERR);
         }
 
-        hasSlaveDofs = ( bool ) _val;
 #ifdef __PARALLEL_MODE
         if ( !stream->read(& globalNumber, 1) ) {
             THROW_CIOERR(CIO_IOERR);
@@ -919,15 +921,15 @@ void DofManager :: giveUnknownVectorOfType(FloatArray &answer, UnknownType ut, V
 }
 
 
-int DofManager :: hasAnySlaveDofs()
+bool DofManager :: hasAnySlaveDofs()
 {
     for ( int i = 1; i <= numberOfDofs; i++ ) {
         if ( !this->giveDof(i)->isPrimaryDof() ) {
-            return 1;
+            return true;
         }
     }
 
-    return 0;
+    return false;
 }
 
 
@@ -1034,6 +1036,13 @@ bool DofManager :: requiresTransformation()
 
 void DofManager :: updateLocalNumbering(EntityRenumberingFunctor &f)
 {
+  //update masterNode numbering
+	if (this->dofMastermap) {
+		std::map<int,int>::iterator it = this->dofMastermap->begin();
+		for (; it != this->dofMastermap->end(); it++) {
+				(*it).second = f((*it).second, ERS_DofManager);
+		}
+	}
     for ( int i = 1; i <= numberOfDofs; i++ ) {
         this->giveDof(i)->updateLocalNumbering(f);
     }

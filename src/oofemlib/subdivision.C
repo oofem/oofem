@@ -17,19 +17,19 @@
  *       Czech Technical University, Faculty of Civil Engineering,
  *   Department of Structural Mechanics, 166 29 Prague, Czech Republic
  *
- *  This program is free software; you can redistribute it and/or modify
- *  it under the terms of the GNU General Public License as published by
- *  the Free Software Foundation; either version 2 of the License, or
- *  (at your option) any later version.
+ *  This library is free software; you can redistribute it and/or
+ *  modify it under the terms of the GNU Lesser General Public
+ *  License as published by the Free Software Foundation; either
+ *  version 2.1 of the License, or (at your option) any later version.
  *
  *  This program is distributed in the hope that it will be useful,
  *  but WITHOUT ANY WARRANTY; without even the implied warranty of
- *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- *  GNU General Public License for more details.
+ *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+ *  Lesser General Public License for more details.
  *
- *  You should have received a copy of the GNU General Public License
- *  along with this program; if not, write to the Free Software
- *  Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
+ *  You should have received a copy of the GNU Lesser General Public
+ *  License along with this library; if not, write to the Free Software
+ *  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  */
 
 #include "subdivision.h"
@@ -57,7 +57,6 @@
 
 #ifdef __OOFEG
  #include "oofeggraphiccontext.h"
- #include "util.h"
 #endif
 
 #ifdef __PARALLEL_MODE
@@ -3552,7 +3551,7 @@ Subdivision :: createMesh(TimeStep *stepN, int domainNumber, int domainSerNum, D
 
     Dof *idofPtr, *dof;
     DofManager *parentNodePtr, *node;
-    Element *parentElementPtr, *elem;
+    Element *elem;
     CrossSection *crossSection;
     Material *mat;
     NonlocalBarrier *barrier;
@@ -3814,18 +3813,19 @@ Subdivision :: createMesh(TimeStep *stepN, int domainNumber, int domainSerNum, D
         parentElemMap.at(eNum) = parent;
 #endif
         if ( parent ) {
-            parentElementPtr = domain->giveElement(parent);
-            elem = classFactory.createElement(parentElementPtr->giveClassName(), eNum, * dNew);
-            ( * dNew )->setElement(eNum, elem);
-            elem->setDofManagers( * mesh->giveElement(ielem)->giveNodes() );
-            elem->setMaterial( parentElementPtr->giveMaterial()->giveNumber() );
-            elem->setCrossSection( parentElementPtr->giveCrossSection()->giveNumber() );
+            DynamicInputRecord ir;
+            domain->giveElement(parent)->giveInputRecord(ir);
+            ir.setField(* mesh->giveElement(ielem)->giveNodes(), _IFT_Element_nodes);
+            ir.giveRecordKeywordField(name);
+            elem = classFactory.createElement(name.c_str(), eNum, * dNew);
+            elem->initializeFrom(&ir);
 #ifdef __PARALLEL_MODE
             elem->setParallelMode(Element_local);
             // not subdivided elements inherit globNum, subdivided give -1
             elem->setGlobalNumber( mesh->giveElement(ielem)->giveGlobalNumber() );
             // local elements have array partitions empty !
 #endif
+            ( * dNew )->setElement(eNum, elem);
             elem->postInitialize();
         } else {
             OOFEM_ERROR("Subdivision :: createMesh: parent element missing");

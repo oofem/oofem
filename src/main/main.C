@@ -17,19 +17,19 @@
  *       Czech Technical University, Faculty of Civil Engineering,
  *   Department of Structural Mechanics, 166 29 Prague, Czech Republic
  *
- *  This program is free software; you can redistribute it and/or modify
- *  it under the terms of the GNU General Public License as published by
- *  the Free Software Foundation; either version 2 of the License, or
- *  (at your option) any later version.
+ *  This library is free software; you can redistribute it and/or
+ *  modify it under the terms of the GNU Lesser General Public
+ *  License as published by the Free Software Foundation; either
+ *  version 2.1 of the License, or (at your option) any later version.
  *
  *  This program is distributed in the hope that it will be useful,
  *  but WITHOUT ANY WARRANTY; without even the implied warranty of
- *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- *  GNU General Public License for more details.
+ *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+ *  Lesser General Public License for more details.
  *
- *  You should have received a copy of the GNU General Public License
- *  along with this program; if not, write to the Free Software
- *  Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
+ *  You should have received a copy of the GNU Lesser General Public
+ *  License along with this library; if not, write to the Free Software
+ *  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  */
 
 //  MAIN
@@ -56,6 +56,10 @@
 
 #ifdef __SLEPC_MODULE
  #include <slepceps.h>
+#endif
+
+#ifdef __PYTHON_MODULE
+ #include <Python.h>
 #endif
 
 #include <cstdio>
@@ -85,9 +89,6 @@ void oofem_print_epilog();
 
 // Finalize PETSc, SLEPc and MPI
 void oofem_finalize_modules();
-
-/* Global class factory */
-//ClassFactory oofem :: classFactory;
 
 int main(int argc, char *argv[])
 {
@@ -220,6 +221,13 @@ int main(int argc, char *argv[])
     SlepcInitialize(& modulesArgc, & modulesArgv, PETSC_NULL, PETSC_NULL);
 #endif
 
+#ifdef __PYTHON_MODULE
+    Py_Initialize();
+    // Adding . to the system path allows us to run Python functions stored in the working directory.
+    PyRun_SimpleString("import sys");
+    PyRun_SimpleString("sys.path.append(\".\")");
+#endif
+
 #ifdef __PARALLEL_MODE
     if ( parallelFlag ) {
         inputFileName << "." << rank;
@@ -337,6 +345,10 @@ void oofem_finalize_modules()
 
 #ifdef __USE_MPI
     MPI_Finalize();
+#endif
+
+#ifdef __PYTHON_MODULE
+    Py_Finalize();
 #endif
 }
 

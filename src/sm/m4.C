@@ -17,19 +17,19 @@
  *       Czech Technical University, Faculty of Civil Engineering,
  *   Department of Structural Mechanics, 166 29 Prague, Czech Republic
  *
- *  This program is free software; you can redistribute it and/or modify
- *  it under the terms of the GNU General Public License as published by
- *  the Free Software Foundation; either version 2 of the License, or
- *  (at your option) any later version.
+ *  This library is free software; you can redistribute it and/or
+ *  modify it under the terms of the GNU Lesser General Public
+ *  License as published by the Free Software Foundation; either
+ *  version 2.1 of the License, or (at your option) any later version.
  *
  *  This program is distributed in the hope that it will be useful,
  *  but WITHOUT ANY WARRANTY; without even the implied warranty of
- *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- *  GNU General Public License for more details.
+ *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+ *  Lesser General Public License for more details.
  *
- *  You should have received a copy of the GNU General Public License
- *  along with this program; if not, write to the Free Software
- *  Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
+ *  You should have received a copy of the GNU Lesser General Public
+ *  License along with this library; if not, write to the Free Software
+ *  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  */
 
 #include "m4.h"
@@ -49,7 +49,7 @@ M4Material :: M4Material(int n, Domain *d) :
 
 
 inline double
-M4Material  :: macbra(double x) /* Macauley bracket = positive part of x */
+M4Material :: macbra(double x) /* Macauley bracket = positive part of x */
 {
     return ( max(x, 0.0) );
 }
@@ -80,7 +80,7 @@ M4Material :: FDminus(double ed, double k1, double c7, double c8, double c9,
 }
 
 inline double
-M4Material  :: FDplus(double ed, double k1, double c5, double c6, double c7, double c20,
+M4Material :: FDplus(double ed, double k1, double c5, double c6, double c7, double c20,
                       double E)
 /*positive deviatoric bondary */
 {
@@ -98,7 +98,7 @@ M4Material :: FN(double en, double sv, double k1, double c1, double c2, double c
 }
 
 inline double
-M4Material ::  FT(double sn, double ev, double k1, double k2, double c10,
+M4Material :: FT(double sn, double ev, double k1, double k2, double c10,
                   double c11, double c12, double Et)
 /*shear boundary */
 {

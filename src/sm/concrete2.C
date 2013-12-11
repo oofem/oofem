@@ -17,19 +17,19 @@
  *       Czech Technical University, Faculty of Civil Engineering,
  *   Department of Structural Mechanics, 166 29 Prague, Czech Republic
  *
- *  This program is free software; you can redistribute it and/or modify
- *  it under the terms of the GNU General Public License as published by
- *  the Free Software Foundation; either version 2 of the License, or
- *  (at your option) any later version.
+ *  This library is free software; you can redistribute it and/or
+ *  modify it under the terms of the GNU Lesser General Public
+ *  License as published by the Free Software Foundation; either
+ *  version 2.1 of the License, or (at your option) any later version.
  *
  *  This program is distributed in the hope that it will be useful,
  *  but WITHOUT ANY WARRANTY; without even the implied warranty of
- *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- *  GNU General Public License for more details.
+ *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+ *  Lesser General Public License for more details.
  *
- *  You should have received a copy of the GNU General Public License
- *  along with this program; if not, write to the Free Software
- *  Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
+ *  You should have received a copy of the GNU Lesser General Public
+ *  License along with this library; if not, write to the Free Software
+ *  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  */
 
 #include "concrete2.h"
@@ -178,7 +178,6 @@ Concrete2 :: giveRealStressVector(FloatArray &answer, GaussPoint *gp,
 //
 {
     MaterialMode mode = gp->giveMaterialMode();
-    //Concrete2MaterialStatus *status = (Concrete2MaterialStatus*) gp->giveMaterial()->giveStatus(gp);
 
     switch ( mode ) {
     case _PlateLayer:
@@ -191,7 +190,7 @@ Concrete2 :: giveRealStressVector(FloatArray &answer, GaussPoint *gp,
 
 
 void
-Concrete2 ::  giveRealStresses3dShellLayer(FloatArray &answer,
+Concrete2 :: giveRealStresses3dShellLayer(FloatArray &answer,
                                            GaussPoint *gp,
                                            const FloatArray &totalStrain,
                                            TimeStep *atTime)
@@ -1428,14 +1427,12 @@ Concrete2MaterialStatus :: initTempStatus()
     tempSEZ  = SEZ;
 
     if ( plasticStrainVector.giveSize() == 0 ) {
-        plasticStrainVector.resize( static_cast< StructuralMaterial * >( gp->giveMaterial() )->
-                                   StructuralMaterial :: giveSizeOfVoigtSymVector( gp->giveMaterialMode() ) );
+        plasticStrainVector.resize( StructuralMaterial :: giveSizeOfVoigtSymVector( gp->giveMaterialMode() ) );
         plasticStrainVector.zero();
     }
 
     if ( plasticStrainIncrementVector.giveSize() == 0 ) {
-        plasticStrainIncrementVector.resize( static_cast< StructuralMaterial * >( gp->giveMaterial() )->
-                                            StructuralMaterial :: giveSizeOfVoigtSymVector( gp->giveMaterialMode() ) );
+        plasticStrainIncrementVector.resize( StructuralMaterial :: giveSizeOfVoigtSymVector( gp->giveMaterialMode() ) );
         plasticStrainIncrementVector.zero();
     } else {
         plasticStrainIncrementVector.zero();

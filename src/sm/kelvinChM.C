@@ -16,19 +16,19 @@
  *       Czech Technical University, Faculty of Civil Engineering,
  *   Department of Structural Mechanics, 166 29 Prague, Czech Republic
  *
- *  This program is free software; you can redistribute it and/or modify
- *  it under the terms of the GNU General Public License as published by
- *  the Free Software Foundation; either version 2 of the License, or
- *  (at your option) any later version.
+ *  This library is free software; you can redistribute it and/or
+ *  modify it under the terms of the GNU Lesser General Public
+ *  License as published by the Free Software Foundation; either
+ *  version 2.1 of the License, or (at your option) any later version.
  *
  *  This program is distributed in the hope that it will be useful,
  *  but WITHOUT ANY WARRANTY; without even the implied warranty of
- *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- *  GNU General Public License for more details.
+ *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+ *  Lesser General Public License for more details.
  *
- *  You should have received a copy of the GNU General Public License
- *  along with this program; if not, write to the Free Software
- *  Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
+ *  You should have received a copy of the GNU Lesser General Public
+ *  License along with this library; if not, write to the Free Software
+ *  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  */
 
 #include "mathfem.h"
@@ -170,7 +170,7 @@ KelvinChainMaterial :: giveEigenStrainVector(FloatArray &answer, GaussPoint *gp,
                 beta = exp( -( atTime->giveTimeIncrement() / timeFactor ) / ( this->giveCharTime(mu) ) );
             }
 
-            gamma = status->giveHiddenVarsVector(mu);
+            gamma = &status->giveHiddenVarsVector(mu); // JB
             if ( gamma ) {
                 help.zero();
                 help.add(* gamma);
@@ -187,8 +187,16 @@ KelvinChainMaterial :: giveEigenStrainVector(FloatArray &answer, GaussPoint *gp,
 }
 
 
+void 
+KelvinChainMaterial :: giveRealStressVector(FloatArray &answer, GaussPoint *gp, const FloatArray &reducedStrain, TimeStep *tStep)
+{
+    RheoChainMaterial ::giveRealStressVector(answer, gp, reducedStrain, tStep);
+
+    this->computeHiddenVars(gp, tStep);
+}
+
 void
-KelvinChainMaterial :: updateYourself(GaussPoint *gp, TimeStep *tNow)
+KelvinChainMaterial :: computeHiddenVars(GaussPoint *gp, TimeStep *tNow)
 {
     /*
      * Updates hidden variables used to effectively trace the load history
@@ -200,7 +208,9 @@ KelvinChainMaterial :: updateYourself(GaussPoint *gp, TimeStep *tNow)
     double deltaT;
     double tauMu;
 
-    FloatArray help, *muthHiddenVarsVector, deltaEps0, delta_sigma;
+    FloatArray help, deltaEps0, delta_sigma;
+    //FloatArray *muthHiddenVarsVector;
+    FloatArray muthHiddenVarsVector;
     KelvinChainMaterialStatus *status = static_cast< KelvinChainMaterialStatus * >( this->giveStatus(gp) );
 
     delta_sigma = status->giveTempStrainVector(); // gives updated strain vector (at the end of time-step)
@@ -235,18 +245,16 @@ KelvinChainMaterial :: updateYourself(GaussPoint *gp, TimeStep *tNow)
 
         help.times( lambdaMu / ( this->giveEparModulus(mu) ) );
 
-        if ( muthHiddenVarsVector ) {
-            muthHiddenVarsVector->times(betaMu);
-            muthHiddenVarsVector->add(help);
+        if ( muthHiddenVarsVector.giveSize() ) {
+            muthHiddenVarsVector.times(betaMu);
+            muthHiddenVarsVector.add(help);
+            status->letTempHiddenVarsVectorBe( mu, muthHiddenVarsVector);
         } else {
-            status->letHiddenVarsVectorBe( mu, (new FloatArray(help)) );
+            //status->letHiddenVarsVectorBe( mu, (new FloatArray(help)) );
+            status->letTempHiddenVarsVectorBe( mu, help);
         }
     }
-
-    // now we call KelvinChainMaterialStatus->updateYourself()
-    status->updateYourself(tNow);
 }
-
 
 
 MaterialStatus *

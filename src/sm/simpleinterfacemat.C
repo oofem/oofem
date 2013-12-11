@@ -17,19 +17,19 @@
  *       Czech Technical University, Faculty of Civil Engineering,
  *   Department of Structural Mechanics, 166 29 Prague, Czech Republic
  *
- *  This program is free software; you can redistribute it and/or modify
- *  it under the terms of the GNU General Public License as published by
- *  the Free Software Foundation; either version 2 of the License, or
- *  (at your option) any later version.
+ *  This library is free software; you can redistribute it and/or
+ *  modify it under the terms of the GNU Lesser General Public
+ *  License as published by the Free Software Foundation; either
+ *  version 2.1 of the License, or (at your option) any later version.
  *
  *  This program is distributed in the hope that it will be useful,
  *  but WITHOUT ANY WARRANTY; without even the implied warranty of
- *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- *  GNU General Public License for more details.
+ *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+ *  Lesser General Public License for more details.
  *
- *  You should have received a copy of the GNU General Public License
- *  along with this program; if not, write to the Free Software
- *  Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
+ *  You should have received a copy of the GNU Lesser General Public
+ *  License along with this library; if not, write to the Free Software
+ *  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  */
 
 #include "simpleinterfacemat.h"
@@ -85,7 +85,8 @@ SimpleInterfaceMaterial :: give3dMaterialStiffnessMatrix(FloatMatrix &answer,
 
 void
 SimpleInterfaceMaterial :: giveRealStressVector(FloatArray &answer, GaussPoint *gp,
-                                                const FloatArray &totalStrain,
+                                                //const FloatArray &totalStrain,// @todo temporary -should not be here /JB
+                                                const FloatArray &strainVector,
                                                 TimeStep *atTime)
 //
 // returns real stress vector in 3d stress space of receiver according to
@@ -95,9 +96,10 @@ SimpleInterfaceMaterial :: giveRealStressVector(FloatArray &answer, GaussPoint *
 {
     SimpleInterfaceMaterialStatus *status = static_cast< SimpleInterfaceMaterialStatus * >( this->giveStatus(gp) );
     this->initGpForNewStep(gp);
-    FloatArray shearStrain(2), shearStress, strainVector;
+    FloatArray shearStrain(2), shearStress;//, strainVector;
     StructuralElement *el = static_cast< StructuralElement * >( gp->giveElement() );
-    el->computeStrainVector(strainVector, gp, atTime);
+    //el->computeStrainVector(strainVector, gp, atTime); 
+
     FloatArray tempShearStressShift = status->giveTempShearStressShift();
     const double normalStrain = strainVector.at(1);
     double normalStress, maxShearStress, dp;
@@ -133,6 +135,7 @@ SimpleInterfaceMaterial :: giveRealStressVector(FloatArray &answer, GaussPoint *
         answer.at(2) = shearStress.at(1);
         break;
     case _3dInterface:
+    case _3dMat: //JB 
         answer.resize(3);
         shearStrain.at(1) = strainVector.at(2);
         shearStrain.at(2) = strainVector.at(3);
@@ -245,13 +248,6 @@ int
 SimpleInterfaceMaterial :: giveIPValue(FloatArray &answer, GaussPoint *aGaussPoint, InternalStateType type, TimeStep *atTime)
 {
     return StructuralMaterial :: giveIPValue(answer, aGaussPoint, type, atTime);
-}
-
-
-InternalStateValueType
-SimpleInterfaceMaterial :: giveIPValueType(InternalStateType type)
-{
-    return StructuralMaterial :: giveIPValueType(type);
 }
 
 

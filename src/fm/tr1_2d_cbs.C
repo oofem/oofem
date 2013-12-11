@@ -17,19 +17,19 @@
  *       Czech Technical University, Faculty of Civil Engineering,
  *   Department of Structural Mechanics, 166 29 Prague, Czech Republic
  *
- *  This program is free software; you can redistribute it and/or modify
- *  it under the terms of the GNU General Public License as published by
- *  the Free Software Foundation; either version 2 of the License, or
- *  (at your option) any later version.
+ *  This library is free software; you can redistribute it and/or
+ *  modify it under the terms of the GNU Lesser General Public
+ *  License as published by the Free Software Foundation; either
+ *  version 2.1 of the License, or (at your option) any later version.
  *
  *  This program is distributed in the hope that it will be useful,
  *  but WITHOUT ANY WARRANTY; without even the implied warranty of
- *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- *  GNU General Public License for more details.
+ *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+ *  Lesser General Public License for more details.
  *
- *  You should have received a copy of the GNU General Public License
- *  along with this program; if not, write to the Free Software
- *  Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
+ *  You should have received a copy of the GNU Lesser General Public
+ *  License along with this library; if not, write to the Free Software
+ *  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  */
 
 #include "tr1_2d_cbs.h"
@@ -82,17 +82,9 @@ TR1_2D_CBS :: ~TR1_2D_CBS()
 
 
 int
-TR1_2D_CBS :: computeNumberOfDofs(EquationID ut)
+TR1_2D_CBS :: computeNumberOfDofs()
 {
-    if ( ut == EID_MomentumBalance ) {
-        return 6;
-    } else if ( ut == EID_ConservationEquation ) {
-        return 3;
-    } else {
-        _error("computeNumberOfDofs: Unknown equation id encountered");
-    }
-
-    return 0;
+    return 9;
 }
 
 void
@@ -294,7 +286,7 @@ TR1_2D_CBS :: computeDiffusionTermsI(FloatArray &answer, TimeStep *tStep)
     FloatArray gVector;
     double ar3 = area / 3.0;
 
-    stress = static_cast< FluidDynamicMaterialStatus * >( mat->giveStatus(gp) )->giveDeviatoricStressVector();
+    stress = static_cast< FluidDynamicMaterialStatus * >( gp->giveMaterialStatus() )->giveDeviatoricStressVector();
     stress.times(1. / Re);
 
     // \int dNu/dxj \Tau_ij
@@ -1102,18 +1094,6 @@ TR1_2D_CBS :: giveIPValue(FloatArray &answer, GaussPoint *aGaussPoint, InternalS
         return CBSElement :: giveIPValue(answer, aGaussPoint, type, atTime);
     }
 }
-
-
-InternalStateValueType
-TR1_2D_CBS :: giveIPValueType(InternalStateType type)
-{
-    if ( type == IST_VOFFraction ) {
-        return ISVT_SCALAR;
-    } else {
-        return CBSElement :: giveIPValueType(type);
-    }
-}
-
 
 void
 TR1_2D_CBS :: NodalAveragingRecoveryMI_computeNodalValue(FloatArray &answer, int node,

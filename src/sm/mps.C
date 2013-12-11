@@ -17,19 +17,19 @@
  *       Czech Technical University, Faculty of Civil Engineering,
  *   Department of Structural Mechanics, 166 29 Prague, Czech Republic
  *
- *  This program is free software; you can redistribute it and/or modify
- *  it under the terms of the GNU General Public License as published by
- *  the Free Software Foundation; either version 2 of the License, or
- *  (at your option) any later version.
+ *  This library is free software; you can redistribute it and/or
+ *  modify it under the terms of the GNU Lesser General Public
+ *  License as published by the Free Software Foundation; either
+ *  version 2.1 of the License, or (at your option) any later version.
  *
  *  This program is distributed in the hope that it will be useful,
  *  but WITHOUT ANY WARRANTY; without even the implied warranty of
- *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- *  GNU General Public License for more details.
+ *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+ *  Lesser General Public License for more details.
  *
- *  You should have received a copy of the GNU General Public License
- *  along with this program; if not, write to the Free Software
- *  Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
+ *  You should have received a copy of the GNU Lesser General Public
+ *  License along with this library; if not, write to the Free Software
+ *  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  */
 
 #include "mps.h"
@@ -219,6 +219,26 @@ MPSMaterial :: initializeFrom(InputRecord *ir)
     return IRRT_OK;
 }
 
+
+void 
+MPSMaterial :: giveRealStressVector(FloatArray &answer, GaussPoint *gp, const FloatArray &reducedStrain, TimeStep *tStep)
+{
+    KelvinChainSolidMaterial :: giveRealStressVector(answer, gp, reducedStrain, tStep);
+
+    MPSMaterialStatus *status = static_cast< MPSMaterialStatus * >( this->giveStatus(gp) );
+
+    if ( this->CoupledAnalysis == MPS ) {
+        status->setEquivalentTime( this->computeEquivalentTime(gp, tStep, 1) );
+        // set humidity and temperature to zero
+        status->setHum(-1.);
+        status->setHumIncrement(-1.);
+        status->setT(-1.);
+        status->setTIncrement(-1.);
+    }
+
+}
+
+#if 0
 void
 MPSMaterial :: updateYourself(GaussPoint *gp, TimeStep *atTime)
 {
@@ -237,6 +257,8 @@ MPSMaterial :: updateYourself(GaussPoint *gp, TimeStep *atTime)
     // at the end of updating it will call material status to be updated.
     KelvinChainSolidMaterial :: updateYourself(gp, atTime);
 }
+#endif
+
 
 void
 MPSMaterial :: giveThermalDilatationVector(FloatArray &answer,

@@ -17,19 +17,19 @@
  *       Czech Technical University, Faculty of Civil Engineering,
  *   Department of Structural Mechanics, 166 29 Prague, Czech Republic
  *
- *  This program is free software; you can redistribute it and/or modify
- *  it under the terms of the GNU General Public License as published by
- *  the Free Software Foundation; either version 2 of the License, or
- *  (at your option) any later version.
+ *  This library is free software; you can redistribute it and/or
+ *  modify it under the terms of the GNU Lesser General Public
+ *  License as published by the Free Software Foundation; either
+ *  version 2.1 of the License, or (at your option) any later version.
  *
  *  This program is distributed in the hope that it will be useful,
  *  but WITHOUT ANY WARRANTY; without even the implied warranty of
- *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- *  GNU General Public License for more details.
+ *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+ *  Lesser General Public License for more details.
  *
- *  You should have received a copy of the GNU General Public License
- *  along with this program; if not, write to the Free Software
- *  Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
+ *  You should have received a copy of the GNU Lesser General Public
+ *  License along with this library; if not, write to the Free Software
+ *  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  */
 
 #include "calmls.h"
@@ -44,10 +44,10 @@
 #include "node.h"
 #include "dof.h"
 #include "contextioerr.h"
+#include "exportmodulemanager.h"
 
 namespace oofem {
 #define CALM_RESET_STEP_REDUCE 0.25
-#define CALM_MAX_RESTARTS 4
 #define CALM_TANGENT_STIFF_TRESHOLD 0.1
 #define CALM_DEFAULT_NRM_TICKS 2
 #define CALM_MAX_REL_ERROR_BOUND 1.e10
@@ -94,6 +94,9 @@ CylindricalALM :: CylindricalALM(Domain *d, EngngModel *m) :
     minIterations = 0;
 
     calm_hpc_init = 0;
+    
+    // Maximum number of restarts when convergence not reached during maxiter
+    maxRestarts = 4;
 
 #ifdef __PARALLEL_MODE
 #ifdef __PETSC_MODULE
@@ -104,7 +107,7 @@ CylindricalALM :: CylindricalALM(Domain *d, EngngModel *m) :
 }
 
 
-CylindricalALM ::  ~CylindricalALM()
+CylindricalALM :: ~CylindricalALM()
 {
     //
     // destructor
@@ -283,6 +286,8 @@ restart:
 
     do {
         nite++;
+	tNow->incrementSubstepNumber();
+	
         dXm1 = * dX;
         DeltaLambdam1 = DeltaLambda;
 
@@ -324,7 +329,7 @@ restart:
         //
         if ( this->computeDeltaLambda(deltaLambda, * dX, deltaXt, deltaX_, * R, RR, eta, deltaL, DeltaLambda, neq) ) {
             irest++;
-            if ( irest <= CALM_MAX_RESTARTS ) {
+            if ( irest <= maxRestarts ) {
                 // convergence problems
                 // there must be step restart followed by decrease of step length
                 // status |= NM_ForceRestart;
@@ -406,7 +411,7 @@ restart:
                                            internalForcesEBENorm, nite, errorOutOfRangeFlag);
         if ( ( nite >= nsmax ) || errorOutOfRangeFlag ) {
             irest++;
-            if ( irest <= CALM_MAX_RESTARTS ) {
+            if ( irest <= maxRestarts ) {
                 // convergence problems
                 // there must be step restart followed by decrease of step length
                 // status |= NM_ForceRestart;
@@ -437,6 +442,10 @@ restart:
                 break;
             }
         }
+
+	// output of per iteration data 
+	engngModel->giveExportModuleManager()->doOutput(tNow, true);
+
     } while ( !converged || ( nite < minIterations ) );
 
     //
@@ -770,6 +779,8 @@ CylindricalALM :: initializeFrom(InputRecord *ir)
         nsmax = 30;
     }
 
+    IR_GIVE_OPTIONAL_FIELD(ir, maxRestarts, _IFT_CylindricalALM_maxrestarts);
+    
     minStepLength = 0.;
     IR_GIVE_OPTIONAL_FIELD(ir, minStepLength, _IFT_CylindricalALM_minsteplength);
 
@@ -953,13 +964,13 @@ CylindricalALM :: initializeFrom(InputRecord *ir)
         rtold.at(1) = _rtol;
     }
 
-
+	this->giveLinearSolver()->initializeFrom(ir);
     //refLoadInputMode = (calm_referenceLoadInputModeType) readInteger  (initString, "refloadmode");
     return IRRT_OK;
 }
 
 
-void CylindricalALM  :: convertHPCMap()
+void CylindricalALM :: convertHPCMap()
 //
 // converts HPC map from user input map to HPC indirect Map
 //
@@ -1014,7 +1025,7 @@ void CylindricalALM  :: convertHPCMap()
 
  #ifndef __PARALLEL_MODE
     if ( count != size ) {
-        OOFEM_WARNING("CylindricalALM  :: convertHPCMap: some dofmans/Dofs in HPCarray not recognized");
+        OOFEM_WARNING("CylindricalALM :: convertHPCMap: some dofmans/Dofs in HPCarray not recognized");
     }
 
  #endif

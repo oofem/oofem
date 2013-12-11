@@ -17,19 +17,19 @@
  *       Czech Technical University, Faculty of Civil Engineering,
  *   Department of Structural Mechanics, 166 29 Prague, Czech Republic
  *
- *  This program is free software; you can redistribute it and/or modify
- *  it under the terms of the GNU General Public License as published by
- *  the Free Software Foundation; either version 2 of the License, or
- *  (at your option) any later version.
+ *  This library is free software; you can redistribute it and/or
+ *  modify it under the terms of the GNU Lesser General Public
+ *  License as published by the Free Software Foundation; either
+ *  version 2.1 of the License, or (at your option) any later version.
  *
  *  This program is distributed in the hope that it will be useful,
  *  but WITHOUT ANY WARRANTY; without even the implied warranty of
- *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- *  GNU General Public License for more details.
+ *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+ *  Lesser General Public License for more details.
  *
- *  You should have received a copy of the GNU General Public License
- *  along with this program; if not, write to the Free Software
- *  Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
+ *  You should have received a copy of the GNU Lesser General Public
+ *  License along with this library; if not, write to the Free Software
+ *  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  */
 
 // Milan ?????????????????
@@ -737,6 +737,12 @@ EngngModel :: updateYourself(TimeStep *stepN)
             domain->giveDofManager(j)->updateYourself(stepN);
         }
 
+        // Update xfem manager if it is present
+        if( domain->hasXfemManager() )
+        {
+        	domain->giveXfemManager()->updateYourself();
+        }
+
 #  ifdef VERBOSE
         VERBOSE_PRINT0("Updated nodes ", nnodes)
 #  endif
@@ -762,11 +768,6 @@ EngngModel :: updateYourself(TimeStep *stepN)
 #  endif
 
 
-        // Update xfem manager if it is present
-        if( domain->hasXfemManager() )
-        {
-        	domain->giveXfemManager()->updateYourself();
-        }
 
     }
 
@@ -857,7 +858,6 @@ void EngngModel :: assemble(SparseMtrx *answer, TimeStep *tStep, EquationID eid,
 {
     IntArray loc;
     FloatMatrix mat, R;
-    Element *element;
 
     if ( answer == NULL ) {
         _error("assemble: NULL pointer encountered.");
@@ -866,10 +866,10 @@ void EngngModel :: assemble(SparseMtrx *answer, TimeStep *tStep, EquationID eid,
     this->timer.resumeTimer(EngngModelTimer :: EMTT_NetComputationalStepTimer);
     int nelem = domain->giveNumberOfElements();
 #ifdef _OPENMP
- #pragma omp parallel for private(element, mat, R, loc)
+ #pragma omp parallel for shared(answer) private(mat, R, loc)
 #endif
     for ( int ielem = 1; ielem <= nelem; ielem++ ) {
-        element = domain->giveElement(ielem);
+        Element *element = domain->giveElement(ielem);
 #ifdef __PARALLEL_MODE
         // skip remote elements (these are used as mirrors of remote elements on other domains
         // when nonlocal constitutive models are used. They introduction is necessary to
@@ -914,84 +914,14 @@ void EngngModel :: assemble(SparseMtrx *answer, TimeStep *tStep, EquationID eid,
     answer->assembleEnd();
 }
 
-void EngngModel :: assemble(SparseMtrx *answer, TimeStep *tStep, EquationID r_id, EquationID c_id,
-                            CharType type, const UnknownNumberingScheme &ns,
-                            Domain *domain)
-//
-// assembles matrix
-//
-{
-    IntArray r_loc, c_loc;
-    FloatMatrix mat, Rr, Rc;
-    Element *element;
-
-    if ( answer == NULL ) {
-        _error("assemble: NULL pointer encountered.");
-    }
-
-    this->timer.resumeTimer(EngngModelTimer :: EMTT_NetComputationalStepTimer);
-    int nelem = domain->giveNumberOfElements();
-#ifdef _OPENMP
- #pragma omp parallel for private(element, mat, Rr, Rc, r_loc, c_loc)
-#endif
-    for ( int ielem = 1; ielem <= nelem; ielem++ ) {
-        element = domain->giveElement(ielem);
-#ifdef __PARALLEL_MODE
-        // skip remote elements (these are used as mirrors of remote elements on other domains
-        // when nonlocal constitutive models are used. They introduction is necessary to
-        // allow local averaging on domains without fine grain communication between domains).
-        if ( element->giveParallelMode() == Element_remote ) {
-            continue;
-        }
-
-#endif
-        if ( !element->isActivated(tStep) ) {
-            continue;
-        }
-
-        this->giveElementCharacteristicMatrix(mat, ielem, type, tStep, domain);
-
-        if ( mat.isNotEmpty() ) {
-            element->giveLocationArray(r_loc, r_id, ns);
-            element->giveLocationArray(c_loc, c_id, ns);
-            // Rotate it
-            if ( element->giveRotationMatrix(Rr, r_id) ) {
-                FloatMatrix tmpMat;
-                tmpMat.beTProductOf(Rr, mat); ///@todo Check transpose here
-                mat = tmpMat;
-            }
-
-            if ( element->giveRotationMatrix(Rc, c_id) ) {
-                FloatMatrix tmpMat;
-                tmpMat.beProductOf(mat, Rc); ///@todo Check transpose here
-                mat = tmpMat;
-            }
-
-#ifdef _OPENMP
- #pragma omp critical
-#endif
-            if ( answer->assemble(r_loc, c_loc, mat) == 0 ) {
-                _error("assemble: sparse matrix assemble error");
-            }
-        }
-    }
-
-    ///@todo This function is rarely called. Do we need the active bc to assemble here as well?
-
-    this->timer.pauseTimer(EngngModelTimer :: EMTT_NetComputationalStepTimer);
-
-    answer->assembleBegin();
-    answer->assembleEnd();
-}
 
 void EngngModel :: assemble(SparseMtrx *answer, TimeStep *tStep, EquationID eid,
                             CharType type, const UnknownNumberingScheme &rs, const UnknownNumberingScheme &cs,
                             Domain *domain)
 // Same as assemble, but with different numbering for rows and columns
 {
-    IntArray r_loc, c_loc;
+    IntArray r_loc, c_loc, dofids(0);
     FloatMatrix mat, R;
-    Element *element;
     if ( answer == NULL ) {
         OOFEM_ERROR("EngngModel :: assemble: NULL pointer encountered.");
     }
@@ -999,10 +929,10 @@ void EngngModel :: assemble(SparseMtrx *answer, TimeStep *tStep, EquationID eid,
     this->timer.resumeTimer(EngngModelTimer :: EMTT_NetComputationalStepTimer);
     int nelem = domain->giveNumberOfElements();
 #ifdef _OPENMP
- #pragma omp parallel for private(element, mat, R, r_loc, c_loc)
+ #pragma omp parallel for shared(answer) private(mat, R, r_loc, c_loc)
 #endif
     for ( int ielem = 1; ielem <= nelem; ielem++ ) {
-        element = domain->giveElement(ielem);
+        Element *element = domain->giveElement(ielem);
 #ifdef __PARALLEL_MODE
         if ( element->giveParallelMode() == Element_remote ) {
             continue;
@@ -1046,9 +976,9 @@ void EngngModel :: assemble(SparseMtrx *answer, TimeStep *tStep, EquationID eid,
 }
 
 
-double EngngModel :: assembleVector(FloatArray &answer, TimeStep *tStep, EquationID eid,
-                                    CharType type, ValueModeType mode,
-                                    const UnknownNumberingScheme &s, Domain *domain, FloatArray *eNorms)
+void EngngModel :: assembleVector(FloatArray &answer, TimeStep *tStep, EquationID eid,
+                                  CharType type, ValueModeType mode,
+                                  const UnknownNumberingScheme &s, Domain *domain, FloatArray *eNorms)
 {
     if ( eNorms ) {
         int maxdofids = domain->giveMaxDofID();
@@ -1063,7 +993,7 @@ double EngngModel :: assembleVector(FloatArray &answer, TimeStep *tStep, Equatio
         eNorms->zero();
     }
 
-    this->assembleVectorFromDofManagers(answer, tStep, eid, type, mode, s, domain, eNorms);
+    this->assembleVectorFromDofManagers(answer, tStep, type, mode, s, domain, eNorms);
     this->assembleVectorFromElements(answer, tStep, eid, type, mode, s, domain, eNorms);
     this->assembleVectorFromBC(answer, tStep, eid, type, mode, s, domain, eNorms);
 
@@ -1076,12 +1006,10 @@ double EngngModel :: assembleVector(FloatArray &answer, TimeStep *tStep, Equatio
         }
     }
 #endif
-    return eNorms ? eNorms->sum() : 0.;
 }
 
 
-void EngngModel :: assembleVectorFromDofManagers(FloatArray &answer, TimeStep *tStep, EquationID eid,
-                                                 CharType type, ValueModeType mode,
+void EngngModel :: assembleVectorFromDofManagers(FloatArray &answer, TimeStep *tStep, CharType type, ValueModeType mode,
                                                  const UnknownNumberingScheme &s, Domain *domain, FloatArray *eNorms)
 //
 // assembles matrix answer by  calling
@@ -1103,7 +1031,7 @@ void EngngModel :: assembleVectorFromDofManagers(FloatArray &answer, TimeStep *t
     this->timer.resumeTimer(EngngModelTimer :: EMTT_NetComputationalStepTimer);
     // Note! For normal master dofs, loc is unique to each node, but there can be slave dofs, so we must keep it shared, unfortunately.
 #ifdef _OPENMP
- #pragma omp parallel for shared(answer, eNorms) private(node, R, charVec, loc, dofids)
+ #pragma omp parallel for shared(answer, eNorms) private(R, charVec, loc, dofids)
 #endif
     for ( int i = 1; i <= nnode; i++ ) {
         DofManager *node = domain->giveDofManager(i);
@@ -1118,11 +1046,15 @@ void EngngModel :: assembleVectorFromDofManagers(FloatArray &answer, TimeStep *t
             if ( node->computeM2LTransformation(R, dofIDarry) ) charVec.rotatedWith(R, 't');
 
             node->giveCompleteLocationArray(loc, s);
-            answer.assemble(charVec, loc);
-
-            if ( eNorms ) {
-                node->giveCompleteMasterDofIDArray(dofids);
-                eNorms->assembleSquared(charVec, dofids);
+#ifdef _OPENMP
+ #pragma omp critical
+#endif
+            {
+                answer.assemble(charVec, loc);
+                if ( eNorms ) {
+                    node->giveCompleteMasterDofIDArray(dofids);
+                    eNorms->assembleSquared(charVec, dofids);
+                }
             }
         }
     }
@@ -1152,6 +1084,7 @@ void EngngModel :: assembleVectorFromBC(FloatArray &answer, TimeStep *tStep, Equ
             FloatMatrix R;
             BodyLoad *bodyLoad;
             BoundaryLoad *bLoad;
+            //BoundaryEdgeLoad *eLoad;
             NodalLoad *nLoad;
             Set *set = domain->giveSet(bc->giveSetNumber());
 
@@ -1178,14 +1111,31 @@ void EngngModel :: assembleVectorFromBC(FloatArray &answer, TimeStep *tStep, Equ
                     element->computeBoundaryLoadVector(charVec, bLoad, boundary, type, mode, tStep);
 
                     if ( charVec.isNotEmpty() ) {
-                        ///@todo Should be have a similar interface for rotation or should elements expect to work in global c.s. for loads?
-                        /// Right now it's the latter, just the global->real dof transformation is performed here.
                         element->giveInterpolation()->boundaryGiveNodes(bNodes, boundary);
-                        if ( element->computeDofTransformationMatrix(R, bNodes, eid) ) {
+                        if ( element->computeDofTransformationMatrix(R, bNodes, false, eid) ) {
                             charVec.rotatedWith(R, 't');
                         }
 
-                        element->giveBoundaryLocationArray(loc, boundary, eid, s, &dofids);
+                        element->giveBoundaryLocationArray(loc, bNodes, eid, s, &dofids);
+                        answer.assemble(charVec, loc);
+
+                        if ( eNorms ) eNorms->assembleSquared(charVec, dofids);
+                    }
+                }
+                ///@todo Should we have a seperate entry for edge loads? Just sticking to the general "boundaryload" for now.
+                const IntArray &edgeBoundaries = set->giveEdgeList();
+                for (int ibnd = 1; ibnd <= edgeBoundaries.giveSize()/2; ++ibnd) {
+                    Element *element = domain->giveElement(edgeBoundaries.at(ibnd*2-1));
+                    int boundary = edgeBoundaries.at(ibnd*2);
+                    element->computeBoundaryEdgeLoadVector(charVec, bLoad, boundary, type, mode, tStep);
+
+                    if ( charVec.isNotEmpty() ) {
+                        element->giveInterpolation()->boundaryEdgeGiveNodes(bNodes, boundary);
+                        if ( element->computeDofTransformationMatrix(R, bNodes, false, eid) ) {
+                            charVec.rotatedWith(R, 't');
+                        }
+
+                        element->giveBoundaryLocationArray(loc, bNodes, eid, s, &dofids);
                         answer.assemble(charVec, loc);
 
                         if ( eNorms ) eNorms->assembleSquared(charVec, dofids);
@@ -1230,7 +1180,7 @@ void EngngModel :: assembleVectorFromElements(FloatArray &answer, TimeStep *tSte
     this->timer.resumeTimer(EngngModelTimer :: EMTT_NetComputationalStepTimer);
     ///@todo Consider using private answer variables and sum them up at the end, but it just might be slower then a shared variable.
 #ifdef _OPENMP
- #pragma omp parallel for shared(answer, eNorms) private(element, R, charVec, loc, dofids) reduction(+:norm)
+ #pragma omp parallel for shared(answer, eNorms) private(R, charVec, loc, dofids)
 #endif
     for ( int i = 1; i <= nelem; i++ ) {
         Element *element = domain->giveElement(i);
@@ -1250,11 +1200,15 @@ void EngngModel :: assembleVectorFromElements(FloatArray &answer, TimeStep *tSte
         this->giveElementCharacteristicVector(charVec, i, type, mode, tStep, domain);
         if ( charVec.isNotEmpty() ) {
             if ( element->giveRotationMatrix(R, eid) ) charVec.rotatedWith(R, 't');
-
             element->giveLocationArray(loc, eid, s, &dofids);
-            answer.assemble(charVec, loc);
 
-            if ( eNorms ) eNorms->assembleSquared(charVec, dofids);
+#ifdef _OPENMP
+ #pragma omp critical
+#endif
+            {
+                answer.assemble(charVec, loc);
+                if ( eNorms ) eNorms->assembleSquared(charVec, dofids);
+            }
         }
     }
 
@@ -1326,7 +1280,7 @@ EngngModel :: giveElementCharacteristicVector(FloatArray &answer, int num, CharT
 
 
 void
-EngngModel ::  updateComponent(TimeStep *tStep, NumericalCmpn cmpn, Domain *d)
+EngngModel :: updateComponent(TimeStep *tStep, NumericalCmpn cmpn, Domain *d)
 //
 // updates some component, which is used by numerical method
 // to newly reached state
@@ -1398,7 +1352,7 @@ contextIOResultType EngngModel :: saveContext(DataStream *stream, ContextMode mo
 {
     contextIOResultType iores;
     int closeFlag = 0;
-    FILE *file;
+    FILE *file = NULL;
 
 
     OOFEM_LOG_INFO("Storing context\n");
@@ -1491,7 +1445,7 @@ contextIOResultType EngngModel :: restoreContext(DataStream *stream, ContextMode
     contextIOResultType iores;
     int closeFlag = 0, istep, iversion;
     Domain *domain;
-    FILE *file;
+    FILE *file = NULL;
 
     this->resolveCorrespondingStepNumber(istep, iversion, obj);
     OOFEM_LOG_RELEVANT("Restoring context for time step %d.%d\n", istep, iversion);

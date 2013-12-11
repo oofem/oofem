@@ -17,19 +17,19 @@
  *       Czech Technical University, Faculty of Civil Engineering,
  *   Department of Structural Mechanics, 166 29 Prague, Czech Republic
  *
- *  This program is free software; you can redistribute it and/or modify
- *  it under the terms of the GNU General Public License as published by
- *  the Free Software Foundation; either version 2 of the License, or
- *  (at your option) any later version.
+ *  This library is free software; you can redistribute it and/or
+ *  modify it under the terms of the GNU Lesser General Public
+ *  License as published by the Free Software Foundation; either
+ *  version 2.1 of the License, or (at your option) any later version.
  *
  *  This program is distributed in the hope that it will be useful,
  *  but WITHOUT ANY WARRANTY; without even the implied warranty of
- *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- *  GNU General Public License for more details.
+ *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+ *  Lesser General Public License for more details.
  *
- *  You should have received a copy of the GNU General Public License
- *  along with this program; if not, write to the Free Software
- *  Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
+ *  You should have received a copy of the GNU Lesser General Public
+ *  License along with this library; if not, write to the Free Software
+ *  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  */
 
 #include "tr1bubblestokes.h"
@@ -91,16 +91,9 @@ void Tr1BubbleStokes :: computeGaussPoints()
     }
 }
 
-int Tr1BubbleStokes :: computeNumberOfDofs(EquationID ut)
+int Tr1BubbleStokes :: computeNumberOfDofs()
 {
-    if ( ut == EID_MomentumBalance_ConservationEquation ) {
-        return 11;
-    } else if ( ut == EID_MomentumBalance ) {
-        return 8;
-    } else if ( ut == EID_ConservationEquation ) {
-        return 3;
-    }
-    return 0;
+    return 11;
 }
 
 void Tr1BubbleStokes :: giveDofManDofIDMask(int inode, EquationID ut, IntArray &answer) const
@@ -166,9 +159,7 @@ void Tr1BubbleStokes :: computeInternalForcesVector(FloatArray &answer, TimeStep
     this->computeVectorOf(EID_MomentumBalance, VM_Total, tStep, a_velocity);
     this->computeVectorOf(EID_ConservationEquation, VM_Total, tStep, a_pressure);
 
-    FloatArray momentum(8), conservation(3);
-    momentum.zero();
-    conservation.zero();
+    FloatArray momentum, conservation;
 
     for ( int i = 0; i < iRule->giveNumberOfIntegrationPoints(); i++ ) {
         GaussPoint *gp = iRule->getIntegrationPoint(i);
@@ -296,14 +287,14 @@ void Tr1BubbleStokes :: computeBoundaryLoadVector(FloatArray &answer, BoundaryLo
             FloatArray *lcoords = gp->giveCoordinates();
 
             this->interp.edgeEvalN(N, iEdge, * lcoords, FEIElementGeometryWrapper(this));
-            double detJ = fabs(this->interp.edgeGiveTransformationJacobian(iEdge, * lcoords, FEIElementGeometryWrapper(this)));
+            double detJ = fabs(this->interp.boundaryGiveTransformationJacobian(iEdge, * lcoords, FEIElementGeometryWrapper(this)));
             double dS = gp->giveWeight() * detJ;
 
-            if ( boundaryLoad->giveFormulationType() == BoundaryLoad :: BL_EntityFormulation ) { // Edge load in xi-eta system
+            if ( boundaryLoad->giveFormulationType() == Load :: FT_Entity ) { // Edge load in xi-eta system
                 boundaryLoad->computeValueAt(t, tStep, * lcoords, VM_Total);
             } else { // Edge load in x-y system
                 FloatArray gcoords;
-                this->interp.edgeLocal2global(gcoords, iEdge, * lcoords, FEIElementGeometryWrapper(this));
+                this->interp.boundaryLocal2Global(gcoords, iEdge, * lcoords, FEIElementGeometryWrapper(this));
                 boundaryLoad->computeValueAt(t, tStep, gcoords, VM_Total);
             }
 
@@ -327,12 +318,9 @@ void Tr1BubbleStokes :: computeStiffnessMatrix(FloatMatrix &answer, TimeStep *tS
     // Note: Working with the components; [K, G+Dp; G^T+Dv^T, C] . [v,p]
     FluidDynamicMaterial *mat = static_cast< FluidDynamicMaterial * >( this->giveMaterial() );
     IntegrationRule *iRule = this->integrationRulesArray [ 0 ];
-    FloatMatrix B(3, 8), EdB, K(8,8), G, Dp, DvT, C, Ed, dN;
+    FloatMatrix B(3, 8), EdB, K, G, Dp, DvT, C, Ed, dN;
     FloatArray dNv(8), N, Ep, Cd, tmpA, tmpB;
     double Cp;
-
-    K.zero();
-    G.zero();
     B.zero();
 
     for ( int i = 0; i < iRule->giveNumberOfIntegrationPoints(); i++ ) {

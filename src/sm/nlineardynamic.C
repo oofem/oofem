@@ -17,19 +17,19 @@
  *       Czech Technical University, Faculty of Civil Engineering,
  *   Department of Structural Mechanics, 166 29 Prague, Czech Republic
  *
- *  This program is free software; you can redistribute it and/or modify
- *  it under the terms of the GNU General Public License as published by
- *  the Free Software Foundation; either version 2 of the License, or
- *  (at your option) any later version.
+ *  This library is free software; you can redistribute it and/or
+ *  modify it under the terms of the GNU Lesser General Public
+ *  License as published by the Free Software Foundation; either
+ *  version 2.1 of the License, or (at your option) any later version.
  *
  *  This program is distributed in the hope that it will be useful,
  *  but WITHOUT ANY WARRANTY; without even the implied warranty of
- *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- *  GNU General Public License for more details.
+ *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+ *  Lesser General Public License for more details.
  *
- *  You should have received a copy of the GNU General Public License
- *  along with this program; if not, write to the Free Software
- *  Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
+ *  You should have received a copy of the GNU Lesser General Public
+ *  License along with this library; if not, write to the Free Software
+ *  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  */
 //----------------------------------------------------------------------
 #include <iostream>
@@ -204,7 +204,7 @@ NonLinearDynamic :: initializeFrom(InputRecord *ir)
 }
 
 
-double NonLinearDynamic ::  giveUnknownComponent(ValueModeType mode, TimeStep *tStep, Domain *d, Dof *dof)
+double NonLinearDynamic :: giveUnknownComponent(ValueModeType mode, TimeStep *tStep, Domain *d, Dof *dof)
 {
     int eq = dof->__giveEquationNumber();
 #ifdef DEBUG
@@ -614,7 +614,7 @@ void NonLinearDynamic :: updateYourself(TimeStep *stepN)
     StructuralEngngModel :: updateYourself(stepN);
 }
 
-void NonLinearDynamic ::  updateComponent(TimeStep *tStep, NumericalCmpn cmpn, Domain *d)
+void NonLinearDynamic :: updateComponent(TimeStep *tStep, NumericalCmpn cmpn, Domain *d)
 //
 // Updates some component, which is used by numerical method
 // to newly reached state. used mainly by numerical method
@@ -691,10 +691,6 @@ void NonLinearDynamic ::  updateComponent(TimeStep *tStep, NumericalCmpn cmpn, D
             OOFEM_LOG_DEBUG("User time consumed by updating internal RHS: %.2fs\n", timer.getUtime() );
 #endif
         }
-        break;
-    case NonLinearRhs_Incremental:
-        this->assembleIncrementalReferenceLoadVectors(incrementalLoadVector, incrementalLoadVectorOfPrescribed,
-                                                      refLoadInputMode, d, EID_MomentumBalance, tStep);
         break;
     default:
         _error("updateComponent: Unknown Type of component.");

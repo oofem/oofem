@@ -17,35 +17,38 @@
  *       Czech Technical University, Faculty of Civil Engineering,
  *   Department of Structural Mechanics, 166 29 Prague, Czech Republic
  *
- *  This program is free software; you can redistribute it and/or modify
- *  it under the terms of the GNU General Public License as published by
- *  the Free Software Foundation; either version 2 of the License, or
- *  (at your option) any later version.
+ *  This library is free software; you can redistribute it and/or
+ *  modify it under the terms of the GNU Lesser General Public
+ *  License as published by the Free Software Foundation; either
+ *  version 2.1 of the License, or (at your option) any later version.
  *
  *  This program is distributed in the hope that it will be useful,
  *  but WITHOUT ANY WARRANTY; without even the implied warranty of
- *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- *  GNU General Public License for more details.
+ *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+ *  Lesser General Public License for more details.
  *
- *  You should have received a copy of the GNU General Public License
- *  along with this program; if not, write to the Free Software
- *  Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
+ *  You should have received a copy of the GNU Lesser General Public
+ *  License along with this library; if not, write to the Free Software
+ *  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  */
 
 #ifndef feinterpol_h
 #define feinterpol_h
 
+#include "oofemcfg.h"
 #include "error.h"
 #include "inputrecord.h"
 #include "intarray.h"
 #include "integrationdomain.h"
 #include "elementgeometrytype.h"
+#include "materialmode.h"
 
 namespace oofem {
 class Element;
 class FloatArray;
 class FloatMatrix;
 class IntArray;
+class IntegrationRule;
 
 /**
  * Class representing a general abstraction for cell geometry.
@@ -54,7 +57,7 @@ class IntArray;
  * elements describe its geometry using nodes, which are independent objects, some cells may be
  * directly specified using vertices, etc.
  */
-class FEICellGeometry
+class OOFEM_EXPORT FEICellGeometry
 {
 public:
     FEICellGeometry() {}
@@ -68,7 +71,7 @@ public:
  * Void cell geometry wrapper.
  * Allows to use some interpolation services not needing the reference to cell geometry.
  */
-class FEIVoidCellGeometry : public FEICellGeometry
+class OOFEM_EXPORT FEIVoidCellGeometry : public FEICellGeometry
 {
 public:
     FEIVoidCellGeometry() : FEICellGeometry() {}
@@ -84,7 +87,7 @@ public:
 /**
  * Wrapper around element definition to provide FEICellGeometry interface.
  */
-class FEIElementGeometryWrapper : public FEICellGeometry
+class OOFEM_EXPORT FEIElementGeometryWrapper : public FEICellGeometry
 {
 protected:
     const Element *elem;
@@ -99,7 +102,7 @@ public:
 /**
  * Wrapper around cell with vertex coordinates stored in FloatArray**.
  */
-class FEIVertexListGeometryWrapper : public FEICellGeometry
+class OOFEM_EXPORT FEIVertexListGeometryWrapper : public FEICellGeometry
 {
 protected:
     const FloatArray **coords;
@@ -115,8 +118,10 @@ public:
 
 /**
  * Class representing a general abstraction for finite element interpolation class.
+ * The boundary functions denote the (numbered) region that is 1 spatial dimension less (i.e. edges for 2D interpolators, surfaces for 3D).
+ * The boundaryEdge functions denote the (numbered) regions that is 2 spatial dimensions less (i.e. corners for 2D interpolators, edges for 3D).
  */
-class FEInterpolation
+class OOFEM_EXPORT FEInterpolation
 {
 protected:
     int order;
@@ -201,8 +206,11 @@ public:
 
     /// Initializes receiver according to object description stored in input record.
     virtual IRResultType initializeFrom(InputRecord *ir) { return IRRT_OK; }
-    
-    /**@name General boundary functions */
+
+    /** @name Edge boundary functions.
+     * Boundary edges are defined as corners for 2D geometries and surfaces for 3D geometries.
+     * This is the 
+     */
     //@{
     /**
      * Gives the boundary nodes for requested boundary number.
@@ -210,8 +218,7 @@ public:
      * @param answer Array to be filled with the boundary nodes.
      * @param boundary Boundary number.
      */
-    virtual void boundaryGiveNodes(IntArray &answer, int boundary) = 0;
-    
+    virtual void boundaryEdgeGiveNodes(IntArray &answer, int boundary) = 0;
     /**
      * Evaluates the basis functions on the requested boundary.
      * Only basis functions that are nonzero anywhere on the boundary are given. Ordering can be obtained from giveBoundaryNodes.
@@ -220,7 +227,48 @@ public:
      * @param boundary Boundary number.
      * @param lcoords The local coordinates (on the boundary local coordinate system).
      * @param cellgeo Underlying cell geometry.
-     * @todo Support boundary number.
+     * @todo
+     */
+    virtual void boundaryEdgeEvalN(FloatArray &answer, int boundary, const FloatArray &lcoords, const FEICellGeometry &cellgeo) = 0;
+    /**
+     * Evaluates the determinant of the transformation Jacobian on the requested boundary.
+     * Boundaries are defined as the corner nodes for 1D geometries, edges for 2D geometries and surfaces for 3D geometries.
+     * @param boundary Boundary number.
+     * @param lcoords The local coordinates (on the boundary local coordinate system).
+     * @param cellgeo Underlying cell geometry.
+     * @return The determinant of the boundary transformation Jacobian.
+     */
+    virtual double boundaryEdgeGiveTransformationJacobian(int boundary, const FloatArray &lcoords, const FEICellGeometry &cellgeo) = 0;
+    /**
+     * Maps the local boundary coordinates to global.
+     * Boundaries are defined as the corner nodes for 1D geometries, edges for 2D geometries and surfaces for 3D geometries.
+     * @param answer Global coordinates.
+     * @param boundary Boundary number.
+     * @param lcoords The local coordinates (on the boundary local coordinate system).
+     * @param cellgeo Underlying cell geometry.
+     */
+    virtual void boundaryEdgeLocal2Global(FloatArray &answer, int boundary, const FloatArray &lcoords, const FEICellGeometry &cellgeo) = 0;
+    //@}
+
+    /** @name General boundary functions.
+     * Boundaries are corner nodes for 1D geometries, edges for 2D geometries and surfaces for 3D geometries.
+     */
+    //@{
+    /**
+     * Gives the boundary nodes for requested boundary number.
+     * Boundaries are defined as the corner nodes for 1D geometries, edges for 2D geometries and surfaces for 3D geometries.
+     * @param answer Array to be filled with the boundary nodes.
+     * @param boundary Boundary number.
+     */
+    virtual void boundaryGiveNodes(IntArray &answer, int boundary) = 0;
+    /**
+     * Evaluates the basis functions on the requested boundary.
+     * Only basis functions that are nonzero anywhere on the boundary are given. Ordering can be obtained from giveBoundaryNodes.
+     * Boundaries are defined as the corner nodes for 1D geometries, edges for 2D geometries and surfaces for 3D geometries.
+     * @param answer Basis functions Array to be filled with the boundary nodes.
+     * @param boundary Boundary number.
+     * @param lcoords The local coordinates (on the boundary local coordinate system).
+     * @param cellgeo Underlying cell geometry.
      */
     virtual void boundaryEvalN(FloatArray &answer, int boundary, const FloatArray &lcoords, const FEICellGeometry &cellgeo) = 0;
     /**
@@ -302,10 +350,6 @@ public:
     virtual int giveNsd() = 0;
     //@}
 
-    // Needs the jacobian matrix to determine the condition number.
-    friend class MeshQualityErrorEstimator;
-
-protected:
     /**
      * Gives the jacobian matrix at the local coordinates.
      * @param jacobianMatrix The requested matrix.
@@ -314,6 +358,29 @@ protected:
      */
     virtual void giveJacobianMatrixAt(FloatMatrix &jacobianMatrix, const FloatArray &lcoords, const FEICellGeometry &cellgeo)
     { OOFEM_ERROR("FEInterpolation::giveJacobianMatrixAt : Not overloaded."); }
+
+    /**
+     * Sets up a suitable integration rule for numerical integrating over volume.
+     * The required polynomial order for the determinant of the jacobian is added automatically.
+     * @param order Polynomial order of integrand (should NOT including determinant of jacobian).
+     * @param boundary Boundary number.
+     * @param mode Material mode which is used in all the constructed GaussPoints.
+     */
+    virtual IntegrationRule *giveIntegrationRule(int order) = 0;
+    /**
+     * Sets up a suitable integration rule for integrating over the requested boundary.
+     * The required polynomial order for the determinant of the jacobian is added automatically.
+     * @param order Polynomial order of the integrand (should NOT including determinant of jacobian).
+     * @param boundary Boundary number.
+     */
+    virtual IntegrationRule *giveBoundaryIntegrationRule(int order, int boundary) = 0;
+    /**
+     * Sets up a suitable integration rule for integrating over the requested boundary.
+     * The required polynomial order for the determinant of the jacobian is added automatically.
+     * @param order Polynomial order of the integrand (should NOT including determinant of jacobian).
+     * @param boundary Boundary number.
+     */
+    virtual IntegrationRule *giveBoundaryEdgeIntegrationRule(int order, int boundary) = 0;
 };
 } // end namespace oofem
 #endif // feinterpol_h

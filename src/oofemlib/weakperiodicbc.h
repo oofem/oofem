@@ -17,19 +17,19 @@
  *       Czech Technical University, Faculty of Civil Engineering,
  *   Department of Structural Mechanics, 166 29 Prague, Czech Republic
  *
- *  This program is free software; you can redistribute it and/or modify
- *  it under the terms of the GNU General Public License as published by
- *  the Free Software Foundation; either version 2 of the License, or
- *  (at your option) any later version.
+ *  This library is free software; you can redistribute it and/or
+ *  modify it under the terms of the GNU Lesser General Public
+ *  License as published by the Free Software Foundation; either
+ *  version 2.1 of the License, or (at your option) any later version.
  *
  *  This program is distributed in the hope that it will be useful,
  *  but WITHOUT ANY WARRANTY; without even the implied warranty of
- *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- *  GNU General Public License for more details.
+ *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+ *  Lesser General Public License for more details.
  *
- *  You should have received a copy of the GNU General Public License
- *  along with this program; if not, write to the Free Software
- *  Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
+ *  You should have received a copy of the GNU Lesser General Public
+ *  License along with this library; if not, write to the Free Software
+ *  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  */
 
 #ifndef WEAKPERIODICBC_H_
@@ -41,6 +41,7 @@
 #include "activebc.h"
 #include "inputrecord.h"
 #include "gaussintegrationrule.h"
+#include "floatmatrix.h"
 
 ///@name Input fields for WeakPeriodicBoundaryCondition
 //@{
@@ -62,7 +63,7 @@ enum basisType { monomial=0, trigonometric=1, legendre=2 };
  *
  * @author Carl Sandström
  */
-class WeakPeriodicBoundaryCondition : public ActiveBoundaryCondition
+class OOFEM_EXPORT WeakPeriodicBoundaryCondition : public ActiveBoundaryCondition
 {
 private:
 
@@ -82,7 +83,7 @@ private:
     /** Number of Gausspoints used when integrating along the element edges */
     int ngp;
 
-    /** Number of degrees of freedom */
+    /** Number of degrees of freedom (number of terms) */
     int ndof;
 
     /** Set containing positive side */
@@ -112,7 +113,9 @@ private:
 
     void updateDirection();
 
-    double computeBaseFunctionValue(int baseID, double coordinate);
+    double computeBaseFunctionValue1D(int baseID, double coordinate);
+
+    double computeBaseFunctionValue2D(int baseID, FloatArray coordinate);
 
     Node *gammaDman;
 
@@ -120,14 +123,23 @@ private:
 
     double binomial(double n , int k);
 
+    /** Compute exponent for term n. Exponents i and j are x^i*y^j */
     void getExponents(int n, int &i, int &j);
+
+    /** Compute orthogonal polynomial basis using Gram-Smidth process */
+    void computeOrthogonalBasis();
+
+    double computeProjectionCoefficient(int vIndex, int uIndex);
+
+    /** gsMatrix contains coefficients for the Gram-Schmidt polynomials*/
+    FloatMatrix gsMatrix;
 public:
     WeakPeriodicBoundaryCondition(int n, Domain *d);
-    virtual ~WeakPeriodicBoundaryCondition() { };
+    virtual ~WeakPeriodicBoundaryCondition() { }
 
     virtual IRResultType initializeFrom(InputRecord *ir);
 
-    basisType giveBasisType() {return useBasisType; };
+    basisType giveBasisType() {return useBasisType; }
 
     virtual void assemble(SparseMtrx *answer, TimeStep *tStep, EquationID eid, CharType type, 
                           const UnknownNumberingScheme &r_s, const UnknownNumberingScheme &c_s);

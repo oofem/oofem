@@ -17,19 +17,19 @@
  *       Czech Technical University, Faculty of Civil Engineering,
  *   Department of Structural Mechanics, 166 29 Prague, Czech Republic
  *
- *  This program is free software; you can redistribute it and/or modify
- *  it under the terms of the GNU General Public License as published by
- *  the Free Software Foundation; either version 2 of the License, or
- *  (at your option) any later version.
+ *  This library is free software; you can redistribute it and/or
+ *  modify it under the terms of the GNU Lesser General Public
+ *  License as published by the Free Software Foundation; either
+ *  version 2.1 of the License, or (at your option) any later version.
  *
  *  This program is distributed in the hope that it will be useful,
  *  but WITHOUT ANY WARRANTY; without even the implied warranty of
- *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- *  GNU General Public License for more details.
+ *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+ *  Lesser General Public License for more details.
  *
- *  You should have received a copy of the GNU General Public License
- *  along with this program; if not, write to the Free Software
- *  Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
+ *  You should have received a copy of the GNU Lesser General Public
+ *  License along with this library; if not, write to the Free Software
+ *  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  */
 
 #include "mathfem.h"
@@ -491,7 +491,7 @@ RheoChainMaterial :: initializeFrom(InputRecord *ir)
 }
 
 LinearElasticMaterial *
-RheoChainMaterial ::  giveLinearElasticMaterial()
+RheoChainMaterial :: giveLinearElasticMaterial()
 {
     if ( linearElasticMaterial == NULL ) {
         linearElasticMaterial = new IsotropicLinearElasticMaterial(this->giveNumber(),
@@ -569,9 +569,11 @@ RheoChainMaterialStatus :: RheoChainMaterialStatus(int n, Domain *d,
     // constructor
     nUnits = nunits;
 
-    hiddenVars = new FloatArray * [ nUnits ];
+    hiddenVars.resize(nUnits);
+    tempHiddenVars.resize(nUnits);
     for ( int i = 0; i < nUnits; i++ ) {
-        hiddenVars [ i ] = NULL;
+        hiddenVars[ i ].resize(0);
+        tempHiddenVars[ i ].resize(0);
     }
 }
 
@@ -579,37 +581,20 @@ RheoChainMaterialStatus :: RheoChainMaterialStatus(int n, Domain *d,
 RheoChainMaterialStatus :: ~RheoChainMaterialStatus()
 {
     // destructor
-
-    if ( hiddenVars ) {
-        for ( int i = 0; i < nUnits; i++ ) {
-            delete hiddenVars [ i ];
-        }
-
-        delete [] hiddenVars;
-    }
 }
 
-FloatArray *
-RheoChainMaterialStatus :: letHiddenVarsVectorBe(int i, FloatArray *newVector)
+
+void
+RheoChainMaterialStatus :: letTempHiddenVarsVectorBe(int i, FloatArray &valueArray)
 {
-    /*
-     * sets i-th  hidden variables vector to newVector
-     * deletes the previous one, if defined
-     */
+    // Sets the i:th hidden variables vector to valueArray.
+#if DEBUG
     if ( i > nUnits ) {
-        OOFEM_ERROR("RheoChainMaterialStatus :: letHiddenVarsVectorBe - unit number exceeds the specified limit");
+        OOFEM_ERROR("RheoChainMaterialStatus :: letTempHiddenVarsVectorBe - unit number exceeds the specified limit");
     }
-
-    if ( hiddenVars [ i - 1 ] ) {
-        delete hiddenVars [ i - 1 ];
-    }
-
-    hiddenVars [ i - 1 ] = newVector;
-
-    return newVector;
+#endif
+    this->tempHiddenVars [ i - 1 ] = valueArray;
 }
-
-
 
 void
 RheoChainMaterialStatus :: printOutputAt(FILE *file, TimeStep *tStep)
@@ -622,7 +607,7 @@ RheoChainMaterialStatus :: printOutputAt(FILE *file, TimeStep *tStep)
 
     fprintf(file, "{hidden variables: ");
     for ( int i = 0; i < nUnits; i++ ) {
-        StructuralMaterial :: giveFullSymVectorForm(helpVec, * ( hiddenVars [ i ] ), gp->giveMaterialMode());
+        StructuralMaterial :: giveFullSymVectorForm(helpVec, hiddenVars [ i ], gp->giveMaterialMode()); // JB
         fprintf(file, "{ ");
         for ( int j = 1; j <= helpVec.giveSize(); j++ ) {
             fprintf( file, "%f ", helpVec.at(j) );
@@ -648,6 +633,10 @@ void
 RheoChainMaterialStatus :: updateYourself(TimeStep *tStep)
 {
     StructuralMaterialStatus :: updateYourself(tStep);
+
+    for ( int i = 0; i < nUnits; i++ ) { 
+        this->hiddenVars[ i ] = this->tempHiddenVars[ i ];
+    }
 }
 
 void
@@ -674,11 +663,7 @@ RheoChainMaterialStatus :: saveContext(DataStream *stream, ContextMode mode, voi
 
     // write raw data
     for ( int i = 0; i < nUnits; i++ ) {
-        if ( hiddenVars [ i ] == NULL ) {
-            hiddenVars [ i ] = new FloatArray(0);
-        }
-
-        if ( ( iores = hiddenVars [ i ]->storeYourself(stream, mode) ) != CIO_OK ) {
+        if ( ( iores = hiddenVars [ i ].storeYourself(stream, mode) ) != CIO_OK ) {
             THROW_CIOERR(iores);
         }
     }
@@ -705,11 +690,7 @@ RheoChainMaterialStatus :: restoreContext(DataStream *stream, ContextMode mode, 
 
     // read raw data
     for ( int i = 0; i < nUnits; i++ ) {
-        if ( hiddenVars [ i ] == NULL ) {
-            hiddenVars [ i ] = new FloatArray(0);
-        }
-
-        if ( ( iores = hiddenVars [ i ]->restoreYourself(stream, mode) ) != CIO_OK ) {
+        if ( ( iores = hiddenVars [ i ].restoreYourself(stream, mode) ) != CIO_OK ) {
             THROW_CIOERR(iores);
         }
     }

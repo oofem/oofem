@@ -62,3 +62,4 @@ ____________________________________________________\n"
 /* Define if __VA_ARGS__ macro is supported by preprocessor */
 #cmakedefine HAVE_MACRO_VA_ARGS 1
 
+@OOFEM_EXPORT_HEADER@

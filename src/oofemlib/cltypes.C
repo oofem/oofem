@@ -17,19 +17,19 @@
  *       Czech Technical University, Faculty of Civil Engineering,
  *   Department of Structural Mechanics, 166 29 Prague, Czech Republic
  *
- *  This program is free software; you can redistribute it and/or modify
- *  it under the terms of the GNU General Public License as published by
- *  the Free Software Foundation; either version 2 of the License, or
- *  (at your option) any later version.
+ *  This library is free software; you can redistribute it and/or
+ *  modify it under the terms of the GNU Lesser General Public
+ *  License as published by the Free Software Foundation; either
+ *  version 2.1 of the License, or (at your option) any later version.
  *
  *  This program is distributed in the hope that it will be useful,
  *  but WITHOUT ANY WARRANTY; without even the implied warranty of
- *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- *  GNU General Public License for more details.
+ *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+ *  Lesser General Public License for more details.
  *
- *  You should have received a copy of the GNU General Public License
- *  along with this program; if not, write to the Free Software
- *  Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
+ *  You should have received a copy of the GNU Lesser General Public
+ *  License along with this library; if not, write to the Free Software
+ *  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  */
 
 #include "error.h"
@@ -49,6 +49,7 @@
 #include "contextioerr.h"
 #include "field.h"
 #include "equationid.h"
+#include "xfemmanager.h"
 
 #include <cstring>
 #include <string>
@@ -95,6 +96,7 @@ InternalStateValueType giveInternalStateValueType(InternalStateType type)
     case IST_CylindricalStrainTensor:
     case IST_DeviatoricStrain:
     case IST_DeviatoricStress:
+    case IST_CauchyStressTensor:
         return ISVT_TENSOR_S3;
 
     case IST_BeamForceMomentumTensor:
@@ -168,6 +170,7 @@ InternalStateValueType giveInternalStateValueType(InternalStateType type)
     case IST_XFEMEnrichment:
     case IST_XFEMNumIntersecPoints:
     case IST_XFEMLevelSetPhi:
+    case IST_Maturity:
         return ISVT_SCALAR;
 
     default:
@@ -175,6 +178,38 @@ InternalStateValueType giveInternalStateValueType(InternalStateType type)
     }
 }
 
+
+int giveInternalStateTypeSize(InternalStateValueType valType)
+{
+    switch ( valType ) {
+    case ISVT_TENSOR_S3:
+    case ISVT_TENSOR_S3E:
+    case ISVT_TENSOR_G:
+        return 9;
+
+    case ISVT_VECTOR:
+        return 3;
+
+    case ISVT_SCALAR:
+        return 1;
+
+    default:
+        return 0;
+    }
+}
+
+
+InternalStateValueType giveInternalStateValueType(UnknownType type)
+{
+    if ( ( type == DisplacementVector ) || ( type == EigenVector ) || ( type == VelocityVector ) || ( type == DirectorField ) ) {
+        return ISVT_VECTOR;
+    } else if ( ( type == FluxVector ) || ( type == PressureVector ) || ( type == Temperature ) ) {
+        return ISVT_SCALAR;
+    } else {
+        OOFEM_ERROR2( "giveInternalStateValueType: unsupported UnknownType %s", __UnknownTypeToString(type) );
+        return ISVT_SCALAR; // To make compiler happy.
+    }
+}
 
 
 ContextIOERR :: ContextIOERR(contextIOResultType e, const char *file, int line)
@@ -278,5 +313,10 @@ const char *__MeshPackageTypeToString(MeshPackageType _value) {
 const char *__EquationIDToString(EquationID _value) {
     TO_STRING_BODY(EquationID_DEF)
 }
+
+const char *__XFEMStateTypeToString(XFEMStateType _value) {
+    TO_STRING_BODY(XFEMStateType_DEF)
+}
+
 
 } // end namespace oofem

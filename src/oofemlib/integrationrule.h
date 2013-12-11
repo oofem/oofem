@@ -17,24 +17,25 @@
  *       Czech Technical University, Faculty of Civil Engineering,
  *   Department of Structural Mechanics, 166 29 Prague, Czech Republic
  *
- *  This program is free software; you can redistribute it and/or modify
- *  it under the terms of the GNU General Public License as published by
- *  the Free Software Foundation; either version 2 of the License, or
- *  (at your option) any later version.
+ *  This library is free software; you can redistribute it and/or
+ *  modify it under the terms of the GNU Lesser General Public
+ *  License as published by the Free Software Foundation; either
+ *  version 2.1 of the License, or (at your option) any later version.
  *
  *  This program is distributed in the hope that it will be useful,
  *  but WITHOUT ANY WARRANTY; without even the implied warranty of
- *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- *  GNU General Public License for more details.
+ *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+ *  Lesser General Public License for more details.
  *
- *  You should have received a copy of the GNU General Public License
- *  along with this program; if not, write to the Free Software
- *  Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
+ *  You should have received a copy of the GNU Lesser General Public
+ *  License along with this library; if not, write to the Free Software
+ *  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  */
 
 #ifndef integrationrule_h
 #define integrationrule_h
 
+#include "oofemcfg.h"
 #include "materialmode.h"
 #include "integrationdomain.h"
 #include "contextioresulttype.h"
@@ -90,10 +91,9 @@ enum IntegrationRuleType {
  * - initializing for new time step
  * - saving & restoring context
  */
-class IntegrationRule
+class OOFEM_EXPORT IntegrationRule
 {
 protected:
-
     /// Number.
     int number;
     /// Element which integration rule is coupled to.
@@ -118,6 +118,27 @@ protected:
     bool isDynamic;
 
 public:
+    /// @name Iterator for for-each loops:
+    //@{
+    class iterator {
+    private:
+        int pos;
+        IntegrationRule *ir;
+
+    public:
+        iterator(IntegrationRule* ir, int pos);
+
+        bool operator!=(const IntegrationRule :: iterator& other) const;
+
+        GaussPoint & operator*() const;
+
+        const IntegrationRule :: iterator& operator++();
+    };
+
+    IntegrationRule :: iterator begin();
+    IntegrationRule :: iterator end();
+    //@}
+
     /**
      * Constructor.
      * @param n Number associated with receiver.
@@ -239,7 +260,10 @@ public:
     virtual IntegrationRuleType giveIntegrationRuleType() const { return IRT_None; }
     virtual IRResultType initializeFrom(InputRecord *ir) { return IRRT_OK; }
 
-
+    /**
+     * Trivial implementation, only creates a single point.
+     */
+    int SetUpPoint(MaterialMode mode);
     /**
      * Sets up receiver's integration points on unit line integration domain.
      * Default implementation does not sets up any integration points and returns 0.

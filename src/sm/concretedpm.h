@@ -17,19 +17,19 @@
  *       Czech Technical University, Faculty of Civil Engineering,
  *   Department of Structural Mechanics, 166 29 Prague, Czech Republic
  *
- *  This program is free software; you can redistribute it and/or modify
- *  it under the terms of the GNU General Public License as published by
- *  the Free Software Foundation; either version 2 of the License, or
- *  (at your option) any later version.
+ *  This library is free software; you can redistribute it and/or
+ *  modify it under the terms of the GNU Lesser General Public
+ *  License as published by the Free Software Foundation; either
+ *  version 2.1 of the License, or (at your option) any later version.
  *
  *  This program is distributed in the hope that it will be useful,
  *  but WITHOUT ANY WARRANTY; without even the implied warranty of
- *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- *  GNU General Public License for more details.
+ *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+ *  Lesser General Public License for more details.
  *
- *  You should have received a copy of the GNU General Public License
- *  along with this program; if not, write to the Free Software
- *  Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
+ *  You should have received a copy of the GNU Lesser General Public
+ *  License along with this library; if not, write to the Free Software
+ *  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  */
 
 #ifndef ConcreteDPM_h
@@ -135,6 +135,7 @@ protected:
     ///  @name History variable of the modified size-dependent adjustment
     /// (indicating value of omega*ft/E+kappaD at the onset of localization)
     double epsloc;
+    double tempEpsloc;
 #endif
 
 public:
@@ -220,6 +221,13 @@ public:
      * @returns Variable epsloc.
      */
     double giveEpsLoc() const { return epsloc; }
+
+    /**History variable of the modified size-dependent adjustment
+    * Assign the temp value of the damage variable of the damage model.
+    * @param v New temp value of the damage variable.
+    */
+    void letTempEpslocBe ( const double v ) { tempEpsloc = v; }
+
 #endif
 
     /**
@@ -352,6 +360,8 @@ public:
      * vertex case yielding).
      */
     void letTempStateFlagBe(const int v) { temp_state_flag = v; }
+
+
 };
 
 
@@ -499,7 +509,7 @@ public:
      * @param tempKappa The hardening variable.
      */
 
-    bool checkForVertexCase(double answer,
+    bool checkForVertexCase(double &answer,
                             const double sig,
                             const double tempKappa);
 
@@ -743,8 +753,6 @@ public:
                             GaussPoint *gp,
                             InternalStateType type,
                             TimeStep *tStep);
-
-    virtual InternalStateValueType giveIPValueType(InternalStateType type);
 
 protected:
     virtual MaterialStatus *CreateStatus(GaussPoint *gp) const;

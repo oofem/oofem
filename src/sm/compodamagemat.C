@@ -17,19 +17,19 @@
  *       Czech Technical University, Faculty of Civil Engineering,
  *   Department of Structural Mechanics, 166 29 Prague, Czech Republic
  *
- *  This program is free software; you can redistribute it and/or modify
- *  it under the terms of the GNU General Public License as published by
- *  the Free Software Foundation; either version 2 of the License, or
- *  (at your option) any later version.
+ *  This library is free software; you can redistribute it and/or
+ *  modify it under the terms of the GNU Lesser General Public
+ *  License as published by the Free Software Foundation; either
+ *  version 2.1 of the License, or (at your option) any later version.
  *
  *  This program is distributed in the hope that it will be useful,
  *  but WITHOUT ANY WARRANTY; without even the implied warranty of
- *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- *  GNU General Public License for more details.
+ *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+ *  Lesser General Public License for more details.
  *
- *  You should have received a copy of the GNU General Public License
- *  along with this program; if not, write to the Free Software
- *  Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
+ *  You should have received a copy of the GNU Lesser General Public
+ *  License along with this library; if not, write to the Free Software
+ *  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  */
 
 #include "compodamagemat.h"
@@ -41,6 +41,7 @@
 #include "mathfem.h"
 #include "classfactory.h"
 #include "contextioerr.h"
+#include "crosssection.h"
 
 namespace oofem {
 
@@ -369,16 +370,6 @@ int CompoDamageMat :: giveIPValue(FloatArray &answer, GaussPoint *aGaussPoint, I
     return 1;
 }
 
-InternalStateValueType CompoDamageMat :: giveIPValueType(InternalStateType type)
-{
-    if ( type == IST_DamageTensor ) {
-        return ISVT_TENSOR_S3;
-    } else {
-        return StructuralMaterial :: giveIPValueType(type);
-    }
-}
-
-
 void CompoDamageMat :: giveUnrotated3dMaterialStiffnessMatrix(FloatMatrix &answer, MatResponseMode mode, GaussPoint *gp)
 {
     double denom;
@@ -609,7 +600,7 @@ CompoDamageMatStatus :: ~CompoDamageMatStatus()
 
 void CompoDamageMatStatus :: printOutputAt(FILE *file, TimeStep *tStep)
 {
-    int i, j, maxComponents=0;
+    int maxComponents = 0;
     StructuralMaterialStatus :: printOutputAt(file, tStep);
     fprintf(file, "status {");
     switch ( gp->giveMaterialMode() ) {
@@ -627,24 +618,24 @@ void CompoDamageMatStatus :: printOutputAt(FILE *file, TimeStep *tStep)
 
     if ( !this->omega.containsOnlyZeroes() ) {
         fprintf(file, " omega ");
-        for ( i = 1; i <= maxComponents; i++ ) {
+        for ( int i = 1; i <= maxComponents; i++ ) {
             fprintf( file, "%.4f ", this->omega.at(i) );
         }
     }
 
     fprintf(file, " Local_stress ");
-    for ( i = 1; i <= maxComponents; i++ ) {
+    for ( int i = 1; i <= maxComponents; i++ ) {
         fprintf( file, "%.2e ", this->tempStressMLCS.at(i) );
     }
 
     fprintf(file, " kappa "); //print pairs tension-compression
-    for ( i = 1; i <= maxComponents; i++ ) {
-        for ( j = 0; j < 2; j++ ) {
+    for ( int i = 1; i <= maxComponents; i++ ) {
+        for ( int j = 0; j < 2; j++ ) {
             fprintf( file, "%.2e ", this->kappa.at(6 * j + i) );
         }
     }
-
-    fprintf( file, " MatNum %d", gp->giveMaterial()->giveNumber() );
+    ///todo should we simply not allow a gp to ask for the material? Output cross section number for now. /JB
+    fprintf( file, " Cross section num %d", gp->giveElement()->giveCrossSection()->giveNumber() );
 
     fprintf(file, "}\n");
 }

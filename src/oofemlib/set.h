@@ -17,19 +17,19 @@
  *       Czech Technical University, Faculty of Civil Engineering,
  *   Department of Structural Mechanics, 166 29 Prague, Czech Republic
  *
- *  This program is free software; you can redistribute it and/or modify
- *  it under the terms of the GNU General Public License as published by
- *  the Free Software Foundation; either version 2 of the License, or
- *  (at your option) any later version.
+ *  This library is free software; you can redistribute it and/or
+ *  modify it under the terms of the GNU Lesser General Public
+ *  License as published by the Free Software Foundation; either
+ *  version 2.1 of the License, or (at your option) any later version.
  *
  *  This program is distributed in the hope that it will be useful,
  *  but WITHOUT ANY WARRANTY; without even the implied warranty of
- *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- *  GNU General Public License for more details.
+ *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+ *  Lesser General Public License for more details.
  *
- *  You should have received a copy of the GNU General Public License
- *  along with this program; if not, write to the Free Software
- *  Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
+ *  You should have received a copy of the GNU Lesser General Public
+ *  License along with this library; if not, write to the Free Software
+ *  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  */
 
 #ifndef set_h
@@ -46,6 +46,7 @@ namespace oofem {
 #define _IFT_Set_nodes "nodes" ///< List of specific node indices.
 #define _IFT_Set_nodeRanges "noderanges" ///< List of node index ranges.
 #define _IFT_Set_elements "elements" ///< List of specific element indices.
+#define _IFT_Set_allElements "allelements" ///< Will generate a list of att the elements in the domain)
 #define _IFT_Set_elementRanges "elementranges" ///< List of element index ranges.
 #define _IFT_Set_elementBoundaries "elementboundaries" ///< Interleaved array of element index + boundary number
 #define _IFT_Set_elementEdges "elementedges" ///< Interleaved array of element index + edge number
@@ -58,7 +59,7 @@ class EntityRenumberingFunction;
  * Describes a collection of components which are given easy access to for example boundary conditions.
  * @author Mikael Öhman
  */
-class Set : public FEMComponent
+class OOFEM_EXPORT Set : public FEMComponent
 {
 protected:
     IntArray elements; ///< Element numbers.
@@ -77,7 +78,7 @@ public:
     virtual ~Set() {}
 
     virtual IRResultType initializeFrom(InputRecord *ir);
-
+    virtual void giveInputRecord(DynamicInputRecord &input);
     /**
      * Returns list of elements within set. 
      * @return List of element numbers.
@@ -100,7 +101,13 @@ public:
      * @return List of node numbers.
      */
     const IntArray &giveNodeList();
-    
+    /**
+     * Returns list of all directly specified nodes (excluding those generated from elements).
+     * This list is exactly the list given in the input.
+     * @note This is useful in for example, remeshing code, and should rarely be used elsewhere.
+     * @return List of node numbers.
+     */
+    const IntArray &giveSpecifiedNodeList();    
     /**
      * Sets list of elements within set. 
      */

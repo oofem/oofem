@@ -17,19 +17,19 @@
  *       Czech Technical University, Faculty of Civil Engineering,
  *   Department of Structural Mechanics, 166 29 Prague, Czech Republic
  *
- *  This program is free software; you can redistribute it and/or modify
- *  it under the terms of the GNU General Public License as published by
- *  the Free Software Foundation; either version 2 of the License, or
- *  (at your option) any later version.
+ *  This library is free software; you can redistribute it and/or
+ *  modify it under the terms of the GNU Lesser General Public
+ *  License as published by the Free Software Foundation; either
+ *  version 2.1 of the License, or (at your option) any later version.
  *
  *  This program is distributed in the hope that it will be useful,
  *  but WITHOUT ANY WARRANTY; without even the implied warranty of
- *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- *  GNU General Public License for more details.
+ *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+ *  Lesser General Public License for more details.
  *
- *  You should have received a copy of the GNU General Public License
- *  along with this program; if not, write to the Free Software
- *  Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
+ *  You should have received a copy of the GNU Lesser General Public
+ *  License along with this library; if not, write to the Free Software
+ *  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  */
 
 #ifndef boundaryload_h
@@ -104,10 +104,12 @@ class TimeStep;
  *   (number of DOFs is also size of load component array attribute and should correspond to number of DOFs on loaded
  *   entity).
  */
-class BoundaryLoad : public Load
+class OOFEM_EXPORT BoundaryLoad : public Load
 {
-public:
-    /**
+       
+public:    
+    CoordSystType CST_UpdatedGlobal;
+     /**
      * Load coordinate system type. Variable of this type can have following values BL_GlobalMode
      * (indicates that load given in global coordinate system) or BL_LocalMode
      * (entity dependent local coordinate system will be  used).
@@ -115,14 +117,7 @@ public:
     enum BL_CoordSystType {
         BL_GlobalMode, ///< Global mode i.e. load is specified in global c.s.
         BL_LocalMode, ///< Local entity (edge or surface) coordinate system.
-    };
-
-    /**
-     * Type determining the type of formulation (entity local or global one).
-     */
-    enum BL_FormulationType {
-        BL_EntityFormulation,
-        BL_GlobalFormulation,
+        BL_UpdatedGlobalMode, ///< Load is specified in global c.s. and follows the deformation (only supported on el. level)
     };
 
 protected:
@@ -131,7 +126,7 @@ protected:
     /// Load type (its physical meaning).
     bcType lType;
     /// Load coordinate system.
-    BL_CoordSystType coordSystemType;
+    CoordSystType coordSystemType;
     /// Additional b.c properties.
     Dictionary propertyDictionary;
 
@@ -141,7 +136,7 @@ public:
      * @param i Load number.
      * @param d Domain to which new object will belongs.
      */
-    BoundaryLoad(int i, Domain *d) : Load(i, d), nDofs(0), coordSystemType(BL_GlobalMode) { }
+    BoundaryLoad(int i, Domain *d) : Load(i, d), nDofs(0), coordSystemType(CST_Global) { }
 
     virtual void computeValueAt(FloatArray &answer, TimeStep *tStep, FloatArray &coords, ValueModeType mode);
     /**
@@ -152,14 +147,8 @@ public:
      * @return Receiver's number of "DOFs". Should correspond to number of DOFs on loaded entity.
      */
     int giveNumberOfDofs() { return nDofs; }
-    /**
-     * @return Receiver's coordinate system.
-     */
-    BL_CoordSystType giveCoordSystMode() { return coordSystemType; }
-    /**
-     * @return Formulation type.
-     */
-    virtual BL_FormulationType giveFormulationType() { return BL_EntityFormulation; }
+
+    virtual CoordSystType giveCoordSystMode() { return coordSystemType; }
     /**
      * Initializes receiver according to object description stored in input record.
      * Reads number of dofs into nDofs attribute (i.e. the number of dofs, which are on loaded entity),
@@ -175,12 +164,6 @@ public:
      * See cltypes.h file for details.
      */
     virtual bcType giveType() const { return lType; }
-    /**
-     * Returns the value of a property 'aProperty'. Property must be identified
-     * by unique integer id.
-     * @param aProperty id of property requested
-     * @return property value
-     */
     virtual double giveProperty(int aProperty);
 
 protected:

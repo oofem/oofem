@@ -17,19 +17,19 @@
  *       Czech Technical University, Faculty of Civil Engineering,
  *   Department of Structural Mechanics, 166 29 Prague, Czech Republic
  *
- *  This program is free software; you can redistribute it and/or modify
- *  it under the terms of the GNU General Public License as published by
- *  the Free Software Foundation; either version 2 of the License, or
- *  (at your option) any later version.
+ *  This library is free software; you can redistribute it and/or
+ *  modify it under the terms of the GNU Lesser General Public
+ *  License as published by the Free Software Foundation; either
+ *  version 2.1 of the License, or (at your option) any later version.
  *
  *  This program is distributed in the hope that it will be useful,
  *  but WITHOUT ANY WARRANTY; without even the implied warranty of
- *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- *  GNU General Public License for more details.
+ *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+ *  Lesser General Public License for more details.
  *
- *  You should have received a copy of the GNU General Public License
- *  along with this program; if not, write to the Free Software
- *  Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
+ *  You should have received a copy of the GNU Lesser General Public
+ *  License along with this library; if not, write to the Free Software
+ *  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  */
 
 #include "prescribedgradient.h"
@@ -46,6 +46,7 @@
 #include "element.h"
 #include "classfactory.h"
 #include "dynamicinputrecord.h"
+#include "feinterpol.h"
 
 #include "sparsemtrx.h"
 #include "sparselinsystemnm.h"
@@ -126,15 +127,6 @@ void PrescribedGradient :: updateCoefficientMatrix(FloatMatrix &C)
 {
     Domain *domain = this->giveDomain();
     int nNodes = domain->giveNumberOfDofManagers();
-    IntArray dofType;
-    domainType d = domain->giveDomainType();
-    if ( d == _2dIncompressibleFlow || d == _3dIncompressibleFlow ) {
-        dofType.setValues(3, V_u, V_v, V_w);
-    } else if ( d == _3dMode || d == _2dPlaneStressMode || d == _PlaneStrainMode || d == _2dTrussMode ) {
-        dofType.setValues(3, D_u, D_v, D_w);
-    } else {
-        OOFEM_ERROR("PrescribedGradient :: updateCoefficientMatrix - Unsupported domain type to construct C matrix");
-    }
 
     int nsd = domain->giveNumberOfSpatialDimensions();
     int npeq = domain->giveEngngModel()->giveNumberOfDomainEquations(domain->giveNumber(), EModelDefaultPrescribedEquationNumbering() );
@@ -150,8 +142,8 @@ void PrescribedGradient :: updateCoefficientMatrix(FloatMatrix &C)
     for ( int i = 1; i <= nNodes; i++ ) {
         Node *n = domain->giveNode(i);
         FloatArray *coords = n->giveCoordinates();
-        Dof *d1 = n->giveDofWithID(dofType(0));
-        Dof *d2 = n->giveDofWithID(dofType(1));
+        Dof *d1 = n->giveDofWithID(this->dofs(0));
+        Dof *d2 = n->giveDofWithID(this->dofs(1));
         int k1 = d1->__givePrescribedEquationNumber();
         int k2 = d2->__givePrescribedEquationNumber();
         if ( nsd == 2 ) {
@@ -166,7 +158,7 @@ void PrescribedGradient :: updateCoefficientMatrix(FloatMatrix &C)
             }
         } else { // nsd == 3
             OOFEM_ERROR("PrescribedGradient :: updateCoefficientMatrix - 3D Not tested yet!");
-            Dof *d3 = n->giveDofWithID(dofType(2));
+            Dof *d3 = n->giveDofWithID(this->dofs(2));
             int k3 = d3->__givePrescribedEquationNumber();
 
             if ( k1 ) {
@@ -256,14 +248,14 @@ void PrescribedGradient :: computeTangent(FloatMatrix &tangent, EquationID eid, 
     if ( !Kff ) {
         OOFEM_ERROR2("MixedGradientPressureBC :: computeTangents - Couldn't create sparse matrix of type %d\n", stype);
     }
-    Kff->buildInternalStructure( rve, 1, eid, fnum, fnum );
+    Kff->buildInternalStructure( rve, 1, eid, fnum );
     Kfp->buildInternalStructure( rve, 1, eid, fnum, pnum );
     Kpf->buildInternalStructure( rve, 1, eid, pnum, fnum );
-    Kpp->buildInternalStructure( rve, 1, eid, pnum, pnum );
-    rve->assemble(Kff, tStep, eid, StiffnessMatrix, fnum, fnum, this->domain );
+    Kpp->buildInternalStructure( rve, 1, eid, pnum );
+    rve->assemble(Kff, tStep, eid, StiffnessMatrix, fnum, this->domain );
     rve->assemble(Kfp, tStep, eid, StiffnessMatrix, fnum, pnum, this->domain );
     rve->assemble(Kpf, tStep, eid, StiffnessMatrix, pnum, fnum, this->domain );
-    rve->assemble(Kpp, tStep, eid, StiffnessMatrix, pnum, pnum, this->domain );
+    rve->assemble(Kpp, tStep, eid, StiffnessMatrix, pnum, this->domain );
 
     FloatMatrix C, X, Kpfa, KfpC, a;
     

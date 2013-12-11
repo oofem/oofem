@@ -17,19 +17,19 @@
  *       Czech Technical University, Faculty of Civil Engineering,
  *   Department of Structural Mechanics, 166 29 Prague, Czech Republic
  *
- *  This program is free software; you can redistribute it and/or modify
- *  it under the terms of the GNU General Public License as published by
- *  the Free Software Foundation; either version 2 of the License, or
- *  (at your option) any later version.
+ *  This library is free software; you can redistribute it and/or
+ *  modify it under the terms of the GNU Lesser General Public
+ *  License as published by the Free Software Foundation; either
+ *  version 2.1 of the License, or (at your option) any later version.
  *
  *  This program is distributed in the hope that it will be useful,
  *  but WITHOUT ANY WARRANTY; without even the implied warranty of
- *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- *  GNU General Public License for more details.
+ *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+ *  Lesser General Public License for more details.
  *
- *  You should have received a copy of the GNU General Public License
- *  along with this program; if not, write to the Free Software
- *  Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
+ *  You should have received a copy of the GNU Lesser General Public
+ *  License along with this library; if not, write to the Free Software
+ *  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  */
 
 #ifndef rheochm_h
@@ -66,7 +66,9 @@ protected:
     /// Number of units in the chain.
     int nUnits;
     /// Hidden (internal) variables, the meaning of which depends on the type of chain.
-    FloatArray **hiddenVars;
+    std :: vector< FloatArray > hiddenVars; 
+    std :: vector< FloatArray > tempHiddenVars; 
+
     /**
      * Total shrinkage strain (needed only when the shrinkage evolution
      * is described in the incremental form).
@@ -79,8 +81,10 @@ public:
 
     virtual void printOutputAt(FILE *file, TimeStep *tStep);
 
-    FloatArray *giveHiddenVarsVector(int i) { return hiddenVars [ i - 1 ]; }
+    FloatArray &giveHiddenVarsVector(int i) { return hiddenVars [ i - 1 ]; }
+    FloatArray &giveTempHiddenVarsVector(int i) { return tempHiddenVars [ i - 1 ]; }
     FloatArray *letHiddenVarsVectorBe(int i, FloatArray *);
+    void letTempHiddenVarsVectorBe(int i, FloatArray &valueArray);
 
     FloatArray *giveShrinkageStrainVector() { return & shrinkageStrain; }
     void setShrinkageStrainVector(const FloatArray &src) { shrinkageStrain = src; }
@@ -163,9 +167,6 @@ public:
 
     /// Evaluation of the moduli of individual units.
     virtual void computeCharCoefficients(FloatArray &answer, double atTime) = 0;
-
-    /// Update of MatStatus to the newly reached (equilibrium) state.
-    virtual void updateYourself(GaussPoint *gp, TimeStep *tStep) = 0;
 
     // identification and auxiliary functions
     virtual int hasNonLinearBehaviour() { return 0; }

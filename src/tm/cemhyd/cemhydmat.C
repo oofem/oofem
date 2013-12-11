@@ -17,19 +17,19 @@
  *       Czech Technical University, Faculty of Civil Engineering,
  *   Department of Structural Mechanics, 166 29 Prague, Czech Republic
  *
- *  This program is free software; you can redistribute it and/or modify
- *  it under the terms of the GNU General Public License as published by
- *  the Free Software Foundation; either version 2 of the License, or
- *  (at your option) any later version.
+ *  This library is free software; you can redistribute it and/or
+ *  modify it under the terms of the GNU Lesser General Public
+ *  License as published by the Free Software Foundation; either
+ *  version 2.1 of the License, or (at your option) any later version.
  *
  *  This program is distributed in the hope that it will be useful,
  *  but WITHOUT ANY WARRANTY; without even the implied warranty of
- *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- *  GNU General Public License for more details.
+ *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+ *  Lesser General Public License for more details.
  *
- *  You should have received a copy of the GNU General Public License
- *  along with this program; if not, write to the Free Software
- *  Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
+ *  You should have received a copy of the GNU Lesser General Public
+ *  License along with this library; if not, write to the Free Software
+ *  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  */
 
 /* Majority of this file was developed at the National Institute of
@@ -130,13 +130,6 @@ CemhydMat :: computeInternalSourceVector(FloatArray &val, GaussPoint *gp, TimeSt
     }
 
     //val.at(1) = 1500;//constant source
-}
-
-void
-CemhydMat :: updateInternalState(const FloatArray &vec, GaussPoint *gp, TimeStep *atTime)
-{
-    CemhydMatStatus *ms = ( CemhydMatStatus * ) this->giveStatus(gp);
-    ms->letTempStateVectorBe(vec);
 }
 
 
@@ -270,9 +263,10 @@ CemhydMat :: giveCharacteristicValue(MatResponseMode mode, GaussPoint *gp, TimeS
     if ( mode == Capacity ) {
         return ( giveConcreteCapacity(gp) * giveConcreteDensity(gp) );
     } else if ( mode == IntSource ) { //for nonlinear solver, return dHeat/dTemperature
+        TransportMaterialStatus *status = static_cast< TransportMaterialStatus * >( this->giveStatus(gp) );
         //it suffices to compute derivative of Arrhenius equation
-        //double actualTemperature = ((TransportMaterialStatus *) giveStatus(gp))->giveTempStateVector().at(1);
-        double lastEquilibratedTemperature = ( ( TransportMaterialStatus * ) giveStatus(gp) )->giveStateVector().at(1);
+        //double actualTemperature = status->giveTempField().at(1);
+        double lastEquilibratedTemperature = status->giveField().at(1);
         //double dt = atTime->giveTimeIncrement();
         double krate, EaOverR, val;
         CemhydMatStatus *ms = ( CemhydMatStatus * ) this->giveStatus(gp);
@@ -356,14 +350,6 @@ CemhydMat :: giveIPValue(FloatArray &answer, GaussPoint *aGaussPoint, InternalSt
         return TransportMaterial :: giveIPValue(answer, aGaussPoint, type, atTime);
     }
 }
-
-
-InternalStateValueType
-CemhydMat :: giveIPValueType(InternalStateType type)
-{
-    return TransportMaterial :: giveIPValueType(type);
-}
-
 
 int
 CemhydMat :: initMaterial(Element *element)
@@ -14388,7 +14374,8 @@ CemhydMatStatus :: updateYourself(TimeStep *atTime)
     TransportMaterialStatus :: updateYourself(atTime);
 };
 
-double CemhydMatStatus :: giveAverageTemperature() {
+double CemhydMatStatus :: giveAverageTemperature()
+{
     CemhydMat *cemhydmat = ( CemhydMat * ) this->gp->giveMaterial();
     CemhydMatStatus *ms = ( CemhydMatStatus * ) cemhydmat->giveStatus(gp);
     double ret;
@@ -14396,7 +14383,7 @@ double CemhydMatStatus :: giveAverageTemperature() {
     if ( !cemhydmat->eachGP ) {
         ret = cemhydmat->MasterCemhydMatStatus->averageTemperature;
     } else {
-        ret = ms->giveStateVector().at(1);
+        ret = ms->giveField().at(1);
     }
 
     return ret;

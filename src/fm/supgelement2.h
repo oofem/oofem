@@ -17,19 +17,19 @@
  *       Czech Technical University, Faculty of Civil Engineering,
  *   Department of Structural Mechanics, 166 29 Prague, Czech Republic
  *
- *  This program is free software; you can redistribute it and/or modify
- *  it under the terms of the GNU General Public License as published by
- *  the Free Software Foundation; either version 2 of the License, or
- *  (at your option) any later version.
+ *  This library is free software; you can redistribute it and/or
+ *  modify it under the terms of the GNU Lesser General Public
+ *  License as published by the Free Software Foundation; either
+ *  version 2.1 of the License, or (at your option) any later version.
  *
  *  This program is distributed in the hope that it will be useful,
  *  but WITHOUT ANY WARRANTY; without even the implied warranty of
- *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- *  GNU General Public License for more details.
+ *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+ *  Lesser General Public License for more details.
  *
- *  You should have received a copy of the GNU General Public License
- *  along with this program; if not, write to the Free Software
- *  Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
+ *  You should have received a copy of the GNU Lesser General Public
+ *  License along with this library; if not, write to the Free Software
+ *  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  */
 
 #ifndef supgelement2_h
@@ -108,11 +108,6 @@ public:
 #endif
 
 protected:
-    /**
-     * Returns index of integration rule used to evaluate given characteristic term.
-     */
-    virtual int giveTermIntergationRuleIndex(CharType termType) = 0;
-
     virtual void computeDeviatoricStrain(FloatArray &answer, GaussPoint *gp, TimeStep *atTime);
     virtual void computeDeviatoricStress(FloatArray &answer, GaussPoint *gp, TimeStep *atTime);
     virtual void computeNuMatrix(FloatMatrix &answer, GaussPoint *gp) = 0;
@@ -126,10 +121,10 @@ protected:
     virtual int giveNumberOfSpatialDimensions() = 0;
 
     //virtual void computeEdgeNuMatrix (FloatMatrix& answer, GaussPoint* gp) = 0;
-    //virtual double computeEdgeVolumeAround (GaussPoint*, int iedge) = 0;
+    //virtual double computeSurfaceVolumeAround (GaussPoint*, int iedge) = 0;
     //virtual void computeEdgeIpGlobalCoords (FloatArray& answer, GaussPoint* gp, int iedge) = 0;
     //virtual int computeLoadGToLRotationMtrx (FloatMatrix& answer) = 0;
-    //virtual int computeLoadLEToLRotationMatrix (FloatMatrix& answer, int iedge, GaussPoint* gp) = 0;
+    //virtual int computeLoadLBToLRotationMatrix (FloatMatrix& answer, int iedge, GaussPoint* gp) = 0;
     //virtual void giveEdgeUDofMapping (IntArray& answer, int iedge) = 0;
     //virtual int giveUApproxOrder () = 0;
     virtual void computeEdgeLoadVector_MB(FloatArray &answer, Load *load, int id, TimeStep *atTime);

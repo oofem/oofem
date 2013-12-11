@@ -17,19 +17,19 @@
  *       Czech Technical University, Faculty of Civil Engineering,
  *   Department of Structural Mechanics, 166 29 Prague, Czech Republic
  *
- *  This program is free software; you can redistribute it and/or modify
- *  it under the terms of the GNU General Public License as published by
- *  the Free Software Foundation; either version 2 of the License, or
- *  (at your option) any later version.
+ *  This library is free software; you can redistribute it and/or
+ *  modify it under the terms of the GNU Lesser General Public
+ *  License as published by the Free Software Foundation; either
+ *  version 2.1 of the License, or (at your option) any later version.
  *
  *  This program is distributed in the hope that it will be useful,
  *  but WITHOUT ANY WARRANTY; without even the implied warranty of
- *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- *  GNU General Public License for more details.
+ *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+ *  Lesser General Public License for more details.
  *
- *  You should have received a copy of the GNU General Public License
- *  along with this program; if not, write to the Free Software
- *  Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
+ *  You should have received a copy of the GNU Lesser General Public
+ *  License along with this library; if not, write to the Free Software
+ *  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  */
 
 #include "supg.h"
@@ -50,9 +50,7 @@
 #include "datastream.h"
 #include "loadtimefunction.h"
 #include "contextioerr.h"
-#ifdef TIME_REPORT
- #include "timer.h"
-#endif
+#include "timer.h"
 
 namespace oofem {
 /* define if implicit interface update required */
@@ -117,7 +115,7 @@ SUPG :: initializeFrom(InputRecord *ir)
 
     val = 0;
     IR_GIVE_OPTIONAL_FIELD(ir, val, _IFT_SUPG_scaleflag);
-    equationScalingFlag = val;
+    equationScalingFlag = val > 0;
     if ( equationScalingFlag ) {
         IR_GIVE_FIELD(ir, lscale, _IFT_SUPG_lscale);
         IR_GIVE_FIELD(ir, uscale, _IFT_SUPG_uscale);
@@ -285,7 +283,7 @@ SUPG :: solveYourselfAt(TimeStep *tStep)
     int neq =  this->giveNumberOfDomainEquations(1, EModelDefaultEquationNumbering());
     double _absErrResid, err, avn = 0.0, aivn = 0.0, rnorm;
     FloatArray *solutionVector = NULL, *prevSolutionVector = NULL;
-    FloatArray rhs(neq);
+    FloatArray rhs(neq), externalForces(neq), internalForces(neq);
     int jj,ndofs, nnodes = this->giveDomain(1)->giveNumberOfDofManagers();
     double val,rnorm_mb, rnorm_mc;
     DofManager* inode;
@@ -386,15 +384,14 @@ SUPG :: solveYourselfAt(TimeStep *tStep)
     //
     // assemble rhs (residual)
     //
-    rhs.zero();
-    this->assembleVectorFromElements( rhs, tStep, EID_MomentumBalance_ConservationEquation, ExternalForcesVector, VM_Total,
+    externalForces.zero();
+    this->assembleVectorFromElements( externalForces, tStep, EID_MomentumBalance_ConservationEquation, ExternalForcesVector, VM_Total,
                                      EModelDefaultEquationNumbering(), this->giveDomain(1) );
     // algoritmic rhs part (assembled by e-model (in giveCharComponent service) from various element contribs)
-    this->assembleVectorFromElements( rhs, tStep, EID_MomentumBalance, AlgorithmicRhsTerm_MB, VM_Total,
-                                     EModelDefaultEquationNumbering(), this->giveDomain(1) );
-    this->assembleVectorFromElements( rhs, tStep, EID_ConservationEquation, AlgorithmicRhsTerm_MC, VM_Total,
-                                     EModelDefaultEquationNumbering(), this->giveDomain(1) );
-
+    internalForces.zero();
+    this->assembleVectorFromElements( internalForces, tStep, EID_MomentumBalance_ConservationEquation, InternalForcesVector, VM_Total,
+                                      EModelDefaultEquationNumbering(), this->giveDomain(1) );
+    rhs.beDifferenceOf(externalForces, internalForces);
     //
     // corrector
     //
@@ -409,39 +406,14 @@ SUPG :: solveYourselfAt(TimeStep *tStep)
         {
             // momentum balance part
             lhs->zero();
-            this->assemble( lhs, tStep, EID_MomentumBalance, AccelerationTerm_MB,
-                           EModelDefaultEquationNumbering(), this->giveDomain(1) );
-            this->assemble( lhs, tStep, EID_MomentumBalance, AdvectionDerivativeTerm_MB,
-                           EModelDefaultEquationNumbering(), this->giveDomain(1) );
             if ( 1 ) { //if ((nite > 5)) // && (rnorm < 1.e4))
-                this->assemble( lhs, tStep, EID_MomentumBalance, TangentDiffusionDerivativeTerm_MB,
-                               EModelDefaultEquationNumbering(), this->giveDomain(1) );
+                this->assemble( lhs, tStep, EID_MomentumBalance_ConservationEquation, TangentStiffnessMatrix,
+                                EModelDefaultEquationNumbering(), this->giveDomain(1) );
             } else {
-                this->assemble( lhs, tStep, EID_MomentumBalance, SecantDiffusionDerivativeTerm_MB,
-                               EModelDefaultEquationNumbering(), this->giveDomain(1) );
+                this->assemble( lhs, tStep, EID_MomentumBalance_ConservationEquation, SecantStiffnessMatrix,
+                                EModelDefaultEquationNumbering(), this->giveDomain(1) );
             }
 
-            this->assemble( lhs, tStep, EID_MomentumBalance, EID_ConservationEquation, PressureTerm_MB,
-                           EModelDefaultEquationNumbering(), this->giveDomain(1) );
-            this->assemble( lhs, tStep, EID_MomentumBalance, LSICStabilizationTerm_MB,
-                           EModelDefaultEquationNumbering(), this->giveDomain(1) );
-            this->assemble( lhs, tStep, EID_MomentumBalance, BCLhsTerm_MB,
-                           EModelDefaultEquationNumbering(), this->giveDomain(1) );
-            this->assemble( lhs, tStep, EID_MomentumBalance, EID_ConservationEquation, BCLhsPressureTerm_MB,
-                           EModelDefaultEquationNumbering(), this->giveDomain(1) );
-            // conservation eq part
-            this->assemble( lhs, tStep, EID_ConservationEquation, EID_MomentumBalance, LinearAdvectionTerm_MC,
-                           EModelDefaultEquationNumbering(), this->giveDomain(1) );
-            this->assemble( lhs, tStep, EID_ConservationEquation, EID_MomentumBalance, AdvectionDerivativeTerm_MC,
-                           EModelDefaultEquationNumbering(), this->giveDomain(1) );
-            this->assemble( lhs, tStep, EID_ConservationEquation, EID_MomentumBalance, AccelerationTerm_MC,
-                           EModelDefaultEquationNumbering(), this->giveDomain(1) );
-            this->assemble( lhs, tStep, EID_ConservationEquation, EID_MomentumBalance, BCLhsPressureTerm_MC,
-                           EModelDefaultEquationNumbering(), this->giveDomain(1) );
-            this->assemble( lhs, tStep, EID_ConservationEquation, EID_MomentumBalance, DiffusionDerivativeTerm_MC,
-                           EModelDefaultEquationNumbering(), this->giveDomain(1) );
-            this->assemble( lhs, tStep, EID_ConservationEquation, EID_ConservationEquation, PressureTerm_MC,
-                           EModelDefaultEquationNumbering(), this->giveDomain(1) );
         }
         //if (this->fsflag) this->imposeAmbientPressureInOuterNodes(lhs,&rhs,tStep);
 
@@ -519,14 +491,10 @@ SUPG :: solveYourselfAt(TimeStep *tStep)
         //
         // assemble rhs (residual)
         //
-        rhs.zero();
-        this->assembleVectorFromElements( rhs, tStep, EID_MomentumBalance_ConservationEquation, ExternalForcesVector, VM_Total,
-                                         EModelDefaultEquationNumbering(), this->giveDomain(1) );
-        // algorithmic rhs part (assembled by e-model (in giveCharComponent service) from various element contribs)
-        this->assembleVectorFromElements( rhs, tStep, EID_MomentumBalance, AlgorithmicRhsTerm_MB, VM_Total,
-                                         EModelDefaultEquationNumbering(), this->giveDomain(1) );
-        this->assembleVectorFromElements( rhs, tStep, EID_ConservationEquation, AlgorithmicRhsTerm_MC, VM_Total,
-                                         EModelDefaultEquationNumbering(), this->giveDomain(1) );
+        internalForces.zero();
+        this->assembleVectorFromElements( internalForces, tStep, EID_MomentumBalance_ConservationEquation, InternalForcesVector, VM_Total,
+                                        EModelDefaultEquationNumbering(), this->giveDomain(1) );
+        rhs.beDifferenceOf(externalForces, internalForces);
 
         // check convergence and repeat iteration if desired
         rnorm_mb = rnorm_mc = 0.0;
@@ -568,14 +536,10 @@ SUPG :: solveYourselfAt(TimeStep *tStep)
             //
             // assemble rhs (residual)
             //
-            rhs.zero();
-            this->assembleVectorFromElements( rhs, tStep, EID_MomentumBalance_ConservationEquation, ExternalForcesVector, VM_Total,
-                                             EModelDefaultEquationNumbering(), this->giveDomain(1) );
-            // algoritmic rhs part (assembled by e-model (in giveCharComponent service) from various element contribs)
-            this->assembleVectorFromElements( rhs, tStep, EID_MomentumBalance, AlgorithmicRhsTerm_MB, VM_Total,
-                            EModelDefaultEquationNumbering(), this->giveDomain(1) );
-            this->assembleVectorFromElements( rhs, tStep, EID_ConservationEquation, AlgorithmicRhsTerm_MC, VM_Total,
-                            EModelDefaultEquationNumbering(), this->giveDomain(1) );
+            internalForces.zero();
+            this->assembleVectorFromElements( internalForces, tStep, EID_MomentumBalance_ConservationEquation, InternalForcesVector, VM_Total,
+                                            EModelDefaultEquationNumbering(), this->giveDomain(1) );
+            rhs.beDifferenceOf(externalForces, internalForces);
         }
 
     } while ( ( rnorm > rtolv ) && ( _absErrResid > atolv ) && ( nite <= maxiter ) );
@@ -654,7 +618,7 @@ SUPG :: saveContext(DataStream *stream, ContextMode mode, void *obj)
 {
     contextIOResultType iores;
     int closeFlag = 0;
-    FILE *file;
+    FILE *file = NULL;
 
     if ( stream == NULL ) {
         if ( !this->giveContextFile(& file, this->giveCurrentStep()->giveNumber(),
@@ -703,7 +667,7 @@ SUPG :: restoreContext(DataStream *stream, ContextMode mode, void *obj)
     contextIOResultType iores;
     int closeFlag = 0;
     int istep, iversion;
-    FILE *file;
+    FILE *file = NULL;
 
     this->resolveCorrespondingStepNumber(istep, iversion, obj);
 
@@ -950,24 +914,57 @@ SUPG :: updateElementsForNewInterfacePosition(TimeStep *atTime)
 void
 SUPG :: giveElementCharacteristicMatrix(FloatMatrix &answer, int num, CharType type, TimeStep *tStep, Domain *domain)
 {
-    EngngModel :: giveElementCharacteristicMatrix(answer, num, type, tStep, domain);
-    if ( ( type == AdvectionDerivativeTerm_MB ) ||
-        ( type == DiffusionDerivativeTerm_MB ) ||
-        ( type == TangentDiffusionDerivativeTerm_MB ) ||
-        ( type == SecantDiffusionDerivativeTerm_MB ) ||
-        ( type == InitialDiffusionDerivativeTerm_MB ) ||
-        (type == BCLhsTerm_MB )) {
-        answer.times( alpha * tStep->giveTimeIncrement() );
-    } else if ( type == LSICStabilizationTerm_MB ) {
-        double coeff = lscale / ( dscale * uscale * uscale );
-        answer.times(alpha * tStep->giveTimeIncrement() * coeff);
-    } else if ( ( type == AdvectionDerivativeTerm_MC ) ||
-               ( type == DiffusionDerivativeTerm_MC ) ) {
-        answer.times( alpha * tStep->giveTimeIncrement() );
-    } else if ( type == LinearAdvectionTerm_MC ) {
-        //double coeff = uscale/lscale;
-        double coeff = 1 / ( dscale * uscale );
-        answer.times(alpha * tStep->giveTimeIncrement() * coeff);
+    ///@todo Either we do this logic here, or we move it to the element and lets the element ask for "alpha" and the scaling variables.
+    if ( type == TangentStiffnessMatrix || type == SecantStiffnessMatrix || type == ElasticStiffnessMatrix ) {
+        SUPGElement *element = static_cast< SUPGElement* >( domain->giveElement(num) );
+        IntArray vloc, ploc;
+        FloatMatrix h;
+        int size = element->computeNumberOfDofs();
+        element->giveLocalVelocityDofMap(vloc);
+        element->giveLocalPressureDofMap(ploc);
+        answer.resize(size,size);
+        answer.zero();
+
+        element->computeAccelerationTerm_MB(h, tStep); answer.assemble(h, vloc);
+        element->computeAdvectionDerivativeTerm_MB(h, tStep);
+        h.times( alpha * tStep->giveTimeIncrement() );
+        answer.assemble(h, vloc);
+        if ( type == TangentStiffnessMatrix ) {
+            element->computeDiffusionDerivativeTerm_MB(h, TangentStiffness, tStep);
+        } else if ( type == ElasticStiffnessMatrix ) {
+            element->computeDiffusionDerivativeTerm_MB(h, ElasticStiffness, tStep);
+        } else if ( type == SecantStiffnessMatrix ) {
+            element->computeDiffusionDerivativeTerm_MB(h, SecantStiffness, tStep);
+        } else {
+            OOFEM_ERROR("SUPG :: giveElementCharacteristicMatrx - CharType not supported\n");
+        }
+        h.times( alpha * tStep->giveTimeIncrement() );
+        answer.assemble(h, vloc);
+        element->computePressureTerm_MB(h, tStep); answer.assemble(h, vloc, ploc);
+        element->computeLSICStabilizationTerm_MB(h, tStep);
+        h.times( alpha * tStep->giveTimeIncrement() * lscale / ( dscale * uscale * uscale ) );
+        answer.assemble(h, vloc);
+        element->computeBCLhsTerm_MB(h, tStep);
+        if ( h.isNotEmpty() ) {
+            h.times( alpha * tStep->giveTimeIncrement() );
+            answer.assemble(h, vloc);
+        }
+        element->computeBCLhsPressureTerm_MB(h, tStep); if ( h.isNotEmpty() ) answer.assemble(h, vloc, ploc);
+        // conservation eq part
+        element->computeLinearAdvectionTerm_MC(h, tStep);
+        h.times( alpha * tStep->giveTimeIncrement() * 1.0 / ( dscale * uscale ) );
+        answer.assemble(h, ploc, vloc);
+        element->computeAdvectionDerivativeTerm_MC(h, tStep);
+        h.times( alpha * tStep->giveTimeIncrement() );
+        answer.assemble(h, ploc, vloc);
+        element->computeAccelerationTerm_MC(h, tStep); answer.assemble(h, ploc, vloc);
+        element->computeBCLhsPressureTerm_MC(h, tStep); if ( h.isNotEmpty() ) answer.assemble(h, ploc, vloc);
+        element->computeDiffusionDerivativeTerm_MC(h, tStep);
+        h.times( alpha * tStep->giveTimeIncrement() );
+        answer.assemble(h, ploc, vloc);
+        element->computePressureTerm_MC(h, tStep); answer.assemble(h, ploc);
+    } else {
+        EngngModel :: giveElementCharacteristicMatrix(answer, num, type, tStep, domain);
     }
 }
 
@@ -975,80 +972,89 @@ SUPG :: giveElementCharacteristicMatrix(FloatMatrix &answer, int num, CharType t
 void
 SUPG :: giveElementCharacteristicVector(FloatArray &answer, int num, CharType type, ValueModeType mode, TimeStep *tStep, Domain *domain)
 {
-    if ( type == AlgorithmicRhsTerm_MB ) {
-        Element *eptr = domain->giveElement(num);
+    if ( type == InternalForcesVector ) {
+        SUPGElement *eptr = static_cast< SUPGElement *>( domain->giveElement(num) );
         FloatMatrix m1;
-        FloatArray h, v, vp;
-        answer.resize(6);
+        FloatArray vacc, vtot, ptot, h;
+        IntArray vloc, ploc;
+
+        int size = eptr->computeNumberOfDofs();
+        eptr->giveLocalVelocityDofMap(vloc);
+        eptr->giveLocalPressureDofMap(ploc);
+        answer.resize(size); answer.zero();
+
+        eptr->computeVectorOf(EID_MomentumBalance, VM_Acceleration, tStep, vacc);
+        eptr->computeVectorOf(EID_MomentumBalance, VM_Total, tStep, vtot);
+        eptr->computeVectorOf(EID_ConservationEquation, VM_Total, tStep, ptot);
+
+        // MB contributions:
         // add (M+M_delta)*a
-        eptr->giveCharacteristicMatrix(m1, AccelerationTerm_MB, tStep);
-        eptr->computeVectorOf(EID_MomentumBalance, VM_Acceleration, tStep, v);
-        answer.beProductOf(m1, v);
+        eptr->computeAccelerationTerm_MB(m1, tStep);
+        h.beProductOf(m1, vacc);
+        answer.assemble(h, vloc);
         // add advection terms N+N_delta
-        eptr->giveCharacteristicVector(v, AdvectionTerm_MB, VM_Total, tStep);
-        answer.add(v);
-        // add diffusion terms (K+K_delta)v
-        eptr->giveCharacteristicVector(v, DiffusionTerm_MB, VM_Total, tStep);
-        answer.add(v);
+        eptr->computeAdvectionTerm_MB(h, tStep);
+        answer.assemble(h, vloc);
+        // add diffusion terms (K+K_delta)h
+        eptr->computeDiffusionTerm_MB(h, tStep);
+        answer.assemble(h, vloc);
         // add lsic stabilization term
-        eptr->giveCharacteristicMatrix(m1, LSICStabilizationTerm_MB, tStep);
+        eptr->computeLSICStabilizationTerm_MB(m1, tStep);
         m1.times( lscale / ( dscale * uscale * uscale ) );
-        eptr->computeVectorOf(EID_MomentumBalance, VM_Total, tStep, v);
-        h.beProductOf(m1, v);
-        answer.add(h);
-        eptr->giveCharacteristicMatrix(m1, BCLhsTerm_MB, tStep);
-        h.beProductOf(m1, v);
-        answer.add(h);
+        h.beProductOf(m1, vtot);
+        answer.assemble(h, vloc);
+        eptr->computeBCLhsTerm_MB(m1, tStep);
+        if ( m1.isNotEmpty() ) {
+            h.beProductOf(m1, vtot);
+            answer.assemble(h, vloc);
+        }
         // add pressure term
-        eptr->giveCharacteristicMatrix(m1, PressureTerm_MB, tStep);
-        eptr->computeVectorOf(EID_ConservationEquation, VM_Total, tStep, v);
-        h.beProductOf(m1, v);
+        eptr->computePressureTerm_MB(m1, tStep);
+        h.beProductOf(m1, ptot);
         //eptr->computeVectorOfPrescribed (EID_ConservationEquation, VM_Total, tStep, vp);
         //h.beProductOf(m1,vp); // term due to prescribed pressure
-        answer.add(h);
-        eptr->giveCharacteristicMatrix(m1, BCLhsPressureTerm_MB, tStep);
-        h.beProductOf(m1, v);
-        answer.add(h);
-        answer.negated();
-    } else if ( type == AlgorithmicRhsTerm_MC ) {
-        Element *eptr = domain->giveElement(num);
-        FloatMatrix m1, m2;
-        FloatArray h, v, vp;
-        answer.resize(3);
+        answer.assemble(h, vloc);
+        eptr->computeBCLhsPressureTerm_MB(m1, tStep);
+        if ( m1.isNotEmpty() ) {
+            h.beProductOf(m1, ptot);
+            answer.assemble(h, vloc);
+        }
+
+        // MC contributions:
         // G^T term - linear advection term
-        eptr->giveCharacteristicMatrix(m1, LinearAdvectionTerm_MC, tStep);
+        eptr->computeLinearAdvectionTerm_MC(m1, tStep);
         //m1.times(uscale/lscale);
         m1.times( 1. / ( dscale * uscale ) );
-        eptr->computeVectorOf(EID_MomentumBalance, VM_Total, tStep, v);
+        eptr->computeVectorOf(EID_MomentumBalance, VM_Total, tStep, vtot);
         //eptr->computeVectorOfPrescribed (EID_MomentumBalance, VM_Velocity, tStep, vp);
-        answer.beProductOf(m1, v);
+        h.beProductOf(m1, vtot);
+        answer.assemble(h, ploc);
         //h.beProductOf(m1,vp); // term due to prescribed velocity
-        //answer.add(h);
+        //answer.assemble(h, ploc);
         // Diffusion term
-        eptr->giveCharacteristicVector(v, DiffusionTerm_MC, VM_Total, tStep);
-        answer.add(v);
+        eptr->computeDiffusionTerm_MC(h, tStep);
+        answer.assemble(h, ploc);
         //h.beProductOf(m1,vp);// term due to prescribed velocity
-        //answer.add(h);
+        //answer.assemble(h, ploc);
         // AccelerationTerm
-        eptr->giveCharacteristicMatrix(m1, AccelerationTerm_MC, tStep);
-        eptr->computeVectorOf(EID_MomentumBalance, VM_Acceleration, tStep, v);
-        h.beProductOf(m1, v);
-        answer.add(h);
-        eptr->giveCharacteristicMatrix(m1, BCLhsPressureTerm_MC, tStep);
-        h.beProductOf(m1, v);
-        answer.add(h);
+        eptr->computeAccelerationTerm_MC(m1, tStep);
+        h.beProductOf(m1, vacc);
+        answer.assemble(h, ploc);
+        eptr->computeBCLhsPressureTerm_MC(m1, tStep);
+        if ( m1.isNotEmpty() ) {
+            h.beProductOf(m1, vacc);
+            answer.assemble(h, ploc);
+        }
         // advection N term (nonlinear)
-        eptr->giveCharacteristicVector(v, AdvectionTerm_MC, VM_Total, tStep);
-        answer.add(v);
+        eptr->computeAdvectionTerm_MC(h, tStep);
+        answer.assemble(h, ploc);
         // pressure term
-        eptr->giveCharacteristicMatrix(m1, PressureTerm_MC, tStep);
-        eptr->computeVectorOf(EID_ConservationEquation, VM_Total, tStep, v);
+        eptr->computePressureTerm_MC(m1, tStep);
         //eptr->computeVectorOfPrescribed (EID_ConservationEquation, VM_Total, tStep, vp);
-        h.beProductOf(m1, v);
-        answer.add(h);
+        h.beProductOf(m1, ptot);
+        answer.assemble(h, ploc);
         //h.beProductOf(m1,vp); // term due to prescribed pressure
-        //answer.add(h);
-        answer.negated();
+        //answer.assemble(h, ploc);
     } else {
         EngngModel :: giveElementCharacteristicVector(answer, num, type, mode, tStep, domain);
     }

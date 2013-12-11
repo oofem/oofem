@@ -17,19 +17,19 @@
  *       Czech Technical University, Faculty of Civil Engineering,
  *   Department of Structural Mechanics, 166 29 Prague, Czech Republic
  *
- *  This program is free software; you can redistribute it and/or modify
- *  it under the terms of the GNU General Public License as published by
- *  the Free Software Foundation; either version 2 of the License, or
- *  (at your option) any later version.
+ *  This library is free software; you can redistribute it and/or
+ *  modify it under the terms of the GNU Lesser General Public
+ *  License as published by the Free Software Foundation; either
+ *  version 2.1 of the License, or (at your option) any later version.
  *
  *  This program is distributed in the hope that it will be useful,
  *  but WITHOUT ANY WARRANTY; without even the implied warranty of
- *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- *  GNU General Public License for more details.
+ *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+ *  Lesser General Public License for more details.
  *
- *  You should have received a copy of the GNU General Public License
- *  along with this program; if not, write to the Free Software
- *  Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
+ *  You should have received a copy of the GNU Lesser General Public
+ *  License along with this library; if not, write to the Free Software
+ *  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  */
 
 #include "dustmat.h"
@@ -51,12 +51,12 @@ namespace oofem {
 
 REGISTER_Material( DustMaterial );
 
-DustMaterialStatus :: DustMaterialStatus(int n, Domain *d, GaussPoint *gp) :
+DustMaterialStatus :: DustMaterialStatus(int n, Domain *d, GaussPoint *gp, double q0) :
     StructuralMaterialStatus(n, d, gp),
     plasticStrain( gp->giveMaterialMode() ),
     tempPlasticStrain( gp->giveMaterialMode() )
 {
-    q = static_cast< DustMaterial * >( gp->giveMaterial() )->giveQ0();
+    q = q0;
 }
 
 DustMaterialStatus :: ~DustMaterialStatus()
@@ -578,27 +578,10 @@ DustMaterial :: giveIPValue(FloatArray &answer,
     return 0;
 }
 
-
-InternalStateValueType
-DustMaterial :: giveIPValueType(InternalStateType type)
-{
-    if ( type == IST_PlasticStrainTensor ) {
-        return ISVT_TENSOR_S3E;
-    } else if ( type == IST_PrincipalPlasticStrainTensor ) {
-        return ISVT_VECTOR;
-    } else if ( type == IST_StressCapPos || type == IST_VolumetricPlasticStrain ) {
-        return ISVT_SCALAR;
-    } else {
-        return StructuralMaterial :: giveIPValueType(type);
-    }
-}
-
 MaterialStatus *
 DustMaterial :: CreateStatus(GaussPoint *gp) const
 {
-    DustMaterialStatus *status =
-        new  DustMaterialStatus(1, StructuralMaterial :: giveDomain(), gp);
-    return status;
+    return new DustMaterialStatus(1, StructuralMaterial :: giveDomain(), gp, this->giveQ0());
 }
 
 double

@@ -17,19 +17,19 @@
  *       Czech Technical University, Faculty of Civil Engineering,
  *   Department of Structural Mechanics, 166 29 Prague, Czech Republic
  *
- *  This program is free software; you can redistribute it and/or modify
- *  it under the terms of the GNU General Public License as published by
- *  the Free Software Foundation; either version 2 of the License, or
- *  (at your option) any later version.
+ *  This library is free software; you can redistribute it and/or
+ *  modify it under the terms of the GNU Lesser General Public
+ *  License as published by the Free Software Foundation; either
+ *  version 2.1 of the License, or (at your option) any later version.
  *
  *  This program is distributed in the hope that it will be useful,
  *  but WITHOUT ANY WARRANTY; without even the implied warranty of
- *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- *  GNU General Public License for more details.
+ *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+ *  Lesser General Public License for more details.
  *
- *  You should have received a copy of the GNU General Public License
- *  along with this program; if not, write to the Free Software
- *  Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
+ *  You should have received a copy of the GNU Lesser General Public
+ *  License along with this library; if not, write to the Free Software
+ *  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  */
 
 #include "idmnl1.h"
@@ -375,7 +375,7 @@ IDNLMaterial :: computeEquivalentStrain(double &kappa, const FloatArray &strain,
     //Loop over all Gauss points which are in gp's integration domain
     for ( pos = list->begin(); pos != list->end(); ++pos ) {
         GaussPoint *neargp = pos->nearGp;
-        nonlocStatus = static_cast< IDNLMaterialStatus * >( neargp->giveMaterialStatus( neargp->giveMaterial()->giveNumber() ) );
+        nonlocStatus = static_cast< IDNLMaterialStatus * >( neargp->giveMaterialStatus() );
         nonlocalContribution = nonlocStatus->giveLocalEquivalentStrainForAverage();
         if ( this->nlvar == NLVT_StressBased && flag == 1 ) { //Check if Stress Based Averaging is requested and calculate nonlocal contribution
             double stressBasedWeight = computeStressBasedWeight(eigenVectorAngle, sigmaRatio, gp, neargp, pos->weight); //Compute new weight

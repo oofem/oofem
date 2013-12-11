@@ -17,19 +17,19 @@
  *       Czech Technical University, Faculty of Civil Engineering,
  *   Department of Structural Mechanics, 166 29 Prague, Czech Republic
  *
- *  This program is free software; you can redistribute it and/or modify
- *  it under the terms of the GNU General Public License as published by
- *  the Free Software Foundation; either version 2 of the License, or
- *  (at your option) any later version.
+ *  This library is free software; you can redistribute it and/or
+ *  modify it under the terms of the GNU Lesser General Public
+ *  License as published by the Free Software Foundation; either
+ *  version 2.1 of the License, or (at your option) any later version.
  *
  *  This program is distributed in the hope that it will be useful,
  *  but WITHOUT ANY WARRANTY; without even the implied warranty of
- *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- *  GNU General Public License for more details.
+ *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+ *  Lesser General Public License for more details.
  *
- *  You should have received a copy of the GNU General Public License
- *  along with this program; if not, write to the Free Software
- *  Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
+ *  You should have received a copy of the GNU Lesser General Public
+ *  License along with this library; if not, write to the Free Software
+ *  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  */
 
 #include "supgelement2.h"
@@ -70,47 +70,18 @@ SUPGElement2 :: initializeFrom(InputRecord *ir)
 
 
 void
-SUPGElement2 ::  giveCharacteristicMatrix(FloatMatrix &answer,
+SUPGElement2 :: giveCharacteristicMatrix(FloatMatrix &answer,
                                           CharType mtrx, TimeStep *tStep)
 //
 // returns characteristics matrix of receiver according to mtrx
 //
 {
-    if ( mtrx == AccelerationTerm_MB ) {
-        this->computeAccelerationTerm_MB(answer, tStep);
-    } else if ( mtrx == AdvectionDerivativeTerm_MB ) {
-        this->computeAdvectionDerivativeTerm_MB(answer, tStep);
-    } else if ( mtrx == DiffusionDerivativeTerm_MB ) {
-        this->computeDiffusionDerivativeTerm_MB(answer, TangentStiffness, tStep);
-    } else if ( mtrx == SecantDiffusionDerivativeTerm_MB ) {
-        this->computeDiffusionDerivativeTerm_MB(answer, SecantStiffness, tStep);
-    } else if ( mtrx == TangentDiffusionDerivativeTerm_MB ) {
-        this->computeDiffusionDerivativeTerm_MB(answer, TangentStiffness, tStep);
-    } else if ( mtrx == InitialDiffusionDerivativeTerm_MB ) {
-        this->computeDiffusionDerivativeTerm_MB(answer, ElasticStiffness, tStep);
-    } else if ( mtrx == PressureTerm_MB ) {
-        this->computePressureTerm_MB(answer, tStep);
-    } else if ( mtrx == LinearAdvectionTerm_MC ) {
-        this->computeLinearAdvectionTerm_MC(answer, tStep);
-    } else if ( mtrx == AdvectionDerivativeTerm_MC ) {
-        this->computeAdvectionDerivativeTerm_MC(answer, tStep);
-    } else if ( mtrx == DiffusionDerivativeTerm_MC ) {
-        this->computeDiffusionDerivativeTerm_MC(answer, tStep);
-    } else if ( mtrx == AccelerationTerm_MC ) {
-        this->computeAccelerationTerm_MC(answer, tStep);
-    } else if ( mtrx == PressureTerm_MC ) {
-        this->computePressureTerm_MC(answer, tStep);
-    } else if ( mtrx == BCLhsTerm_MB ) {
-      this->computeBCLhsTerm_MB(answer, tStep);
-    } else if ( mtrx == BCLhsPressureTerm_MB ) {
-      this->computeBCLhsPressureTerm_MB(answer, tStep);
-    } else if ( mtrx == LSICStabilizationTerm_MB ) {
-        this->computeLSICStabilizationTerm_MB(answer, tStep);
-    } else if ( mtrx == StiffnessMatrix ) {
+#if 0
+    if ( mtrx == StiffnessMatrix ) {
         // support for stokes solver
         IntArray vloc, ploc;
         FloatMatrix h;
-        int size = this->computeNumberOfDofs(EID_MomentumBalance_ConservationEquation);
+        int size = this->computeNumberOfDofs();
         this->giveLocalVelocityDofMap(vloc);
         this->giveLocalPressureDofMap(ploc);
         answer.resize(size, size);
@@ -131,36 +102,26 @@ SUPGElement2 ::  giveCharacteristicMatrix(FloatMatrix &answer,
         answer.assemble(h, ploc);
         this->computeLSICStabilizationTerm_MB(h, tStep);
         answer.assemble(h, vloc);
-    } else {
+    } else
+#endif
+    {
         _error("giveCharacteristicMatrix: Unknown Type of characteristic mtrx.");
     }
 }
 
 
 void
-SUPGElement2 ::  giveCharacteristicVector(FloatArray &answer, CharType mtrx, ValueModeType mode,
+SUPGElement2 :: giveCharacteristicVector(FloatArray &answer, CharType mtrx, ValueModeType mode,
                                           TimeStep *tStep)
 //
 // returns characteristics vector of receiver according to requested type
 //
 {
-    if ( mtrx == AdvectionTerm_MB ) {
-        this->computeAdvectionTerm_MB(answer, tStep);
-    } else if ( mtrx == DiffusionTerm_MB ) {
-        this->computeDiffusionTerm_MB(answer, tStep);
-    } else if ( mtrx == AdvectionTerm_MC ) {
-        this->computeAdvectionTerm_MC(answer, tStep);
-    } else if ( mtrx == BCRhsTerm_MB ) {
-        this->computeBCRhsTerm_MB(answer, tStep);
-    } else if ( mtrx == BCRhsTerm_MC ) {
-        this->computeBCRhsTerm_MC(answer, tStep);
-    } else if ( mtrx == DiffusionTerm_MC ) {
-        this->computeDiffusionTerm_MC(answer, tStep);
-    } else if ( mtrx == ExternalForcesVector ) {
+    if ( mtrx == ExternalForcesVector ) {
         // stokes flow
         IntArray vloc, ploc;
         FloatArray h;
-        int size = this->computeNumberOfDofs(EID_MomentumBalance_ConservationEquation);
+        int size = this->computeNumberOfDofs();
         this->giveLocalVelocityDofMap(vloc);
         this->giveLocalPressureDofMap(ploc);
         answer.resize(size);
@@ -169,11 +130,13 @@ SUPGElement2 ::  giveCharacteristicVector(FloatArray &answer, CharType mtrx, Val
         answer.assemble(h, vloc);
         this->computeBCRhsTerm_MC(h, tStep);
         answer.assemble(h, ploc);
-    } else if ( mtrx == InternalForcesVector ) {
+    } else
+#if 0
+        if ( mtrx == InternalForcesVector ) {
         // stokes flow
         IntArray vloc, ploc;
         FloatArray h;
-        int size = this->computeNumberOfDofs(EID_MomentumBalance_ConservationEquation);
+        int size = this->computeNumberOfDofs();
         this->giveLocalVelocityDofMap(vloc);
         this->giveLocalPressureDofMap(ploc);
         answer.resize(size);
@@ -212,7 +175,9 @@ SUPGElement2 ::  giveCharacteristicVector(FloatArray &answer, CharType mtrx, Val
         this->computeVectorOf(EID_ConservationEquation, VM_Total, tStep, v);
         h.beProductOf(m1, v);
         answer.assemble(h, ploc);
-    } else {
+    } else
+#endif
+    {
         _error("giveCharacteristicVector: Unknown Type of characteristic mtrx.");
     }
 }
@@ -326,22 +291,18 @@ void
 SUPGElement2 :: computeAccelerationTerm_MB(FloatMatrix &answer, TimeStep *atTime)
 {
     FloatMatrix n, b;
-    double dV, rho;
-    int k, undofs = this->computeNumberOfDofs(EID_MomentumBalance);
-    GaussPoint *gp;
 
-    answer.resize(undofs, undofs);
-    answer.zero();
+    answer.resize(0,0);
 
-    int rule = this->giveTermIntergationRuleIndex(AccelerationTerm_MB);
+    int rule = 2;
     IntegrationRule *iRule = this->integrationRulesArray [ rule ];
     /* consistent part + supg stabilization term */
-    for ( k = 0; k < iRule->giveNumberOfIntegrationPoints(); k++ ) {
-        gp = iRule->getIntegrationPoint(k);
+    for ( int k = 0; k < iRule->giveNumberOfIntegrationPoints(); k++ ) {
+        GaussPoint *gp = iRule->getIntegrationPoint(k);
         this->computeNuMatrix(n, gp);
         this->computeUDotGradUMatrix( b, gp, atTime->givePreviousStep() );
-        dV  = this->computeVolumeAround(gp);
-        rho = this->giveMaterial()->give('d', gp);
+        double dV = this->computeVolumeAround(gp);
+        double rho = this->giveMaterial()->give('d', gp);
         /* consistent part */
         answer.plusProductUnsym(n, n, rho * dV);
         /* supg stabilization */
@@ -354,46 +315,27 @@ SUPGElement2 :: computeAdvectionTerm_MB(FloatArray &answer, TimeStep *atTime)
 {
     FloatMatrix n, b, bn;
     FloatArray u, v(3);
-    double dV, rho, coeff, sum;
-    int i, k, undofs = this->computeNumberOfDofs(EID_MomentumBalance);
-    int isd, nsd = this->giveNumberOfSpatialDimensions();
-    GaussPoint *gp;
 
-    answer.resize(undofs);
-    answer.zero();
+    answer.resize(0);
 
     this->computeVectorOf(EID_MomentumBalance, VM_Total, atTime, u);
 
-    int rule = this->giveTermIntergationRuleIndex(AdvectionTerm_MB);
+    int rule = 2;
     IntegrationRule *iRule = this->integrationRulesArray [ rule ];
     /* consistent part + supg stabilization term */
-    for ( k = 0; k < iRule->giveNumberOfIntegrationPoints(); k++ ) {
-        gp = iRule->getIntegrationPoint(k);
+    for ( int k = 0; k < iRule->giveNumberOfIntegrationPoints(); k++ ) {
+        GaussPoint *gp = iRule->getIntegrationPoint(k);
         this->computeNuMatrix(n, gp);
         this->computeUDotGradUMatrix( bn, gp, atTime->givePreviousStep() );
         this->computeUDotGradUMatrix(b, gp, atTime);
         v.beProductOf(b, u);
-        dV  = this->computeVolumeAround(gp);
-        rho = this->giveMaterial()->give('d', gp);
+        double dV = this->computeVolumeAround(gp);
+        double rho = this->giveMaterial()->give('d', gp);
         /* consistent part */
-        coeff = rho * dV;
-        for ( i = 1; i <= undofs; i++ ) {
-            for ( sum = 0.0, isd = 1; isd <= nsd; isd++ ) {
-                sum += n.at(isd, i) * v.at(isd);
-            }
-
-            answer.at(i) += coeff * sum;
-        }
+        answer.plusProduct(n, v, rho * dV);
 
         /* supg stabilization */
-        coeff = t_supg * rho * dV;
-        for ( i = 1; i <= undofs; i++ ) {
-            for ( sum = 0, isd = 1; isd <= nsd; isd++ ) {
-                sum += bn.at(isd, i) * v.at(isd);
-            }
-
-            answer.at(i) += coeff * sum;
-        }
+        answer.plusProduct(bn, v, t_supg * rho * dV);
     }
 }
 
@@ -401,26 +343,21 @@ void
 SUPGElement2 :: computeAdvectionDerivativeTerm_MB(FloatMatrix &answer, TimeStep *atTime)
 {
     FloatMatrix n, b, bn, grad_u, grad_uN, N;
-    double dV, rho;
-    int k, undofs = this->computeNumberOfDofs(EID_MomentumBalance);
-    GaussPoint *gp;
 
-    answer.resize(undofs, undofs);
-    answer.zero();
+    answer.resize(0, 0);
 
-    int rule = this->giveTermIntergationRuleIndex(AdvectionDerivativeTerm_MB);
+    int rule = 2;
     IntegrationRule *iRule = this->integrationRulesArray [ rule ];
     /* consistent part + supg stabilization term */
-    for ( k = 0; k < iRule->giveNumberOfIntegrationPoints(); k++ ) {
-        gp = iRule->getIntegrationPoint(k);
+    for ( int k = 0; k < iRule->giveNumberOfIntegrationPoints(); k++ ) {
+        GaussPoint *gp = iRule->getIntegrationPoint(k);
         this->computeNuMatrix(n, gp);
         this->computeUDotGradUMatrix( bn, gp, atTime->givePreviousStep() );
         this->computeUDotGradUMatrix(b, gp, atTime);
-        dV  = this->computeVolumeAround(gp);
-        rho = this->giveMaterial()->give('d', gp);
+        double dV  = this->computeVolumeAround(gp);
+        double rho = this->giveMaterial()->give('d', gp);
 
         this->computeGradUMatrix(grad_u, gp, atTime);
-
 
         /* consistent part */
         answer.plusProductUnsym(n, b, rho * dV);
@@ -436,24 +373,19 @@ SUPGElement2 :: computeAdvectionDerivativeTerm_MB(FloatMatrix &answer, TimeStep 
 void
 SUPGElement2 :: computeDiffusionTerm_MB(FloatArray &answer, TimeStep *atTime)
 {
-    int undofs = this->computeNumberOfDofs(EID_MomentumBalance);
     FloatArray u, eps, stress, bs, dDB_u;
     FloatMatrix b, un_gu, dDB;
-    GaussPoint *gp;
-    double coeff, sum, dV, Re = static_cast<FluidModel*>(domain->giveEngngModel())->giveReynoldsNumber();
-    int isd, nsd;
+    double Re = static_cast<FluidModel*>(domain->giveEngngModel())->giveReynoldsNumber();
 
-    answer.resize(undofs);
-    answer.zero();
+    answer.resize(0);
 
-    nsd = this->giveNumberOfSpatialDimensions();
     this->computeVectorOf(EID_MomentumBalance, VM_Total, atTime, u);
 
-    int rule = this->giveTermIntergationRuleIndex(DiffusionTerm_MB);
+    int rule = 1;
     IntegrationRule *iRule = this->integrationRulesArray [ rule ];
     for ( int k = 0; k < iRule->giveNumberOfIntegrationPoints(); k++ ) {
-        gp = iRule->getIntegrationPoint(k);
-        dV  = this->computeVolumeAround(gp);
+        GaussPoint *gp = iRule->getIntegrationPoint(k);
+        double dV = this->computeVolumeAround(gp);
         this->computeBMatrix(b, gp);
         this->computeDivTauMatrix(dDB, gp, atTime);
         this->computeUDotGradUMatrix( un_gu, gp, atTime->givePreviousStep() );
@@ -464,36 +396,24 @@ SUPGElement2 :: computeDiffusionTerm_MB(FloatArray &answer, TimeStep *atTime)
         answer.plusProduct(b, stress, dV / Re);
 
         /* SUPG term */
-        //answer.plusProductUnsym(un_gu,dDB_u, t_supg * dV * (-1.0) * (1./Re));
-
-        coeff = ( -1.0 ) * t_supg * dV;
-        for ( int i = 1; i <= undofs; i++ ) {
-            for ( sum = 0, isd = 1; isd <= nsd; isd++ ) {
-                sum += un_gu.at(isd, i) * dDB_u.at(isd);
-            }
-
-            answer.at(i) += coeff * sum;
-        }
+        answer.plusProduct(un_gu, dDB_u, ( -1.0 ) * t_supg * dV);
     }
 }
 
 void
 SUPGElement2 :: computeDiffusionDerivativeTerm_MB(FloatMatrix &answer, MatResponseMode mode, TimeStep *atTime)
 {
-    int undofs = this->computeNumberOfDofs(EID_MomentumBalance);
-
-    answer.resize(undofs, undofs);
-    answer.zero();
     FloatMatrix _db, _d, _b, dDB, un_gu;
-    double dV, Re = static_cast<FluidModel*>(domain->giveEngngModel())->giveReynoldsNumber();
-    GaussPoint *gp;
+    double Re = static_cast<FluidModel*>(domain->giveEngngModel())->giveReynoldsNumber();
     FloatArray dDB_u;
 
-    int rule = this->giveTermIntergationRuleIndex(DiffusionDerivativeTerm_MB);
+    answer.resize(0, 0);
+
+    int rule = 1;
     IntegrationRule *iRule = this->integrationRulesArray [ rule ];
     for ( int k = 0; k < iRule->giveNumberOfIntegrationPoints(); k++ ) {
-        gp = iRule->getIntegrationPoint(k);
-        dV  = this->computeVolumeAround(gp);
+        GaussPoint *gp = iRule->getIntegrationPoint(k);
+        double dV = this->computeVolumeAround(gp);
         this->computeBMatrix(_b, gp);
         static_cast< FluidDynamicMaterial * >( this->giveMaterial() )->giveDeviatoricStiffnessMatrix(_d, mode, gp, atTime);
 
@@ -504,7 +424,6 @@ SUPGElement2 :: computeDiffusionDerivativeTerm_MB(FloatMatrix &answer, MatRespon
         answer.plusProductUnsym(_b, _db, dV / Re); //answer.plusProduct (_b,_db,area);
 
         /* SUPG term */
-
         answer.plusProductUnsym( un_gu, dDB, t_supg * dV * ( -1.0 ) * ( 1. / Re ) );
     }
 }
@@ -513,20 +432,15 @@ SUPGElement2 :: computeDiffusionDerivativeTerm_MB(FloatMatrix &answer, MatRespon
 void
 SUPGElement2 :: computePressureTerm_MB(FloatMatrix &answer, TimeStep *atTime)
 {
-    double dV;
-    GaussPoint *gp;
     FloatMatrix gu, np, b;
-    int undofs = this->computeNumberOfDofs(EID_MomentumBalance);
-    int pndofs = this->computeNumberOfDofs(EID_ConservationEquation);
 
-    answer.resize(undofs, pndofs);
-    answer.zero();
+    answer.resize(0, 0);
 
-    int rule = this->giveTermIntergationRuleIndex(PressureTerm_MB);
+    int rule = 1;
     IntegrationRule *iRule = this->integrationRulesArray [ rule ];
     for ( int k = 0; k < iRule->giveNumberOfIntegrationPoints(); k++ ) {
-        gp = iRule->getIntegrationPoint(k);
-        dV  = this->computeVolumeAround(gp);
+        GaussPoint *gp = iRule->getIntegrationPoint(k);
+        double dV = this->computeVolumeAround(gp);
         this->computeDivUMatrix(gu, gp);
         this->computeNpMatrix(np, gp);
 
@@ -535,15 +449,13 @@ SUPGElement2 :: computePressureTerm_MB(FloatMatrix &answer, TimeStep *atTime)
         //this->computeGradPMatrix(np, gp);
 
         /* standard term */
-
-
         answer.plusProductUnsym(gu, np, ( -1.0 ) * dV);
     }
 
     iRule = this->integrationRulesArray [ 1 ];
     for ( int k = 0; k < iRule->giveNumberOfIntegrationPoints(); k++ ) {
-        gp = iRule->getIntegrationPoint(k);
-        dV  = this->computeVolumeAround(gp);
+        GaussPoint *gp = iRule->getIntegrationPoint(k);
+        double dV = this->computeVolumeAround(gp);
         this->computeUDotGradUMatrix( b, gp, atTime->givePreviousStep() );
         this->computeGradPMatrix(np, gp);
 
@@ -554,20 +466,16 @@ SUPGElement2 :: computePressureTerm_MB(FloatMatrix &answer, TimeStep *atTime)
 void
 SUPGElement2 :: computeLSICStabilizationTerm_MB(FloatMatrix &answer, TimeStep *atTime)
 {
-    int undofs = this->computeNumberOfDofs(EID_MomentumBalance);
-    double dV, rho;
-    GaussPoint *gp;
     FloatMatrix b;
 
-    answer.resize(undofs, undofs);
-    answer.zero();
+    answer.resize(0, 0);
 
-    int rule = this->giveTermIntergationRuleIndex(LSICStabilizationTerm_MB);
+    int rule = 0;
     IntegrationRule *iRule = this->integrationRulesArray [ rule ];
     for ( int k = 0; k < iRule->giveNumberOfIntegrationPoints(); k++ ) {
-        gp = iRule->getIntegrationPoint(k);
-        dV  = this->computeVolumeAround(gp);
-        rho = this->giveMaterial()->give('d', gp);
+        GaussPoint *gp = iRule->getIntegrationPoint(k);
+        double dV = this->computeVolumeAround(gp);
+        double rho = this->giveMaterial()->give('d', gp);
         this->computeDivUMatrix(b, gp);
 
         answer.plusProductSymmUpper(b, b, dV * rho * t_lsic);
@@ -579,25 +487,19 @@ SUPGElement2 :: computeLSICStabilizationTerm_MB(FloatMatrix &answer, TimeStep *a
 void
 SUPGElement2 :: computeLinearAdvectionTerm_MC(FloatMatrix &answer, TimeStep *atTime)
 {
-    double dV;
-    GaussPoint *gp;
     FloatMatrix gu, np;
-    int undofs = this->computeNumberOfDofs(EID_MomentumBalance);
-    int pndofs = this->computeNumberOfDofs(EID_ConservationEquation);
 
-    answer.resize(pndofs, undofs);
-    answer.zero();
+    answer.resize(0, 0);
 
-    int rule = this->giveTermIntergationRuleIndex(LinearAdvectionTerm_MC);
+    int rule = 0;
     IntegrationRule *iRule = this->integrationRulesArray [ rule ];
     for ( int k = 0; k < iRule->giveNumberOfIntegrationPoints(); k++ ) {
-        gp = iRule->getIntegrationPoint(k);
-        dV  = this->computeVolumeAround(gp);
+        GaussPoint *gp = iRule->getIntegrationPoint(k);
+        double dV = this->computeVolumeAround(gp);
         this->computeDivUMatrix(gu, gp);
         this->computeNpMatrix(np, gp);
 
         /* standard term */
-
         answer.plusProductUnsym(np, gu, dV);
     }
 }
@@ -608,33 +510,21 @@ SUPGElement2 :: computeAdvectionTerm_MC(FloatArray &answer, TimeStep *atTime)
     // N_epsilon (due to PSPG stabilization)
     FloatMatrix g, b;
     FloatArray u, v;
-    GaussPoint *gp;
-    double dV, coeff, sum;
-    int pndofs = this->computeNumberOfDofs(EID_ConservationEquation);
-    int isd, nsd = this->giveNumberOfSpatialDimensions();
 
-    answer.resize(pndofs);
-    answer.zero();
+    answer.resize(0);
 
-    int rule = this->giveTermIntergationRuleIndex(AdvectionTerm_MC);
+    int rule = 1;
     IntegrationRule *iRule = this->integrationRulesArray [ rule ];
     this->computeVectorOf(EID_MomentumBalance, VM_Total, atTime, u);
 
     /* pspg stabilization term */
     for ( int k = 0; k < iRule->giveNumberOfIntegrationPoints(); k++ ) {
-        gp = iRule->getIntegrationPoint(k);
+        GaussPoint *gp = iRule->getIntegrationPoint(k);
         this->computeGradPMatrix(g, gp);
         this->computeUDotGradUMatrix(b, gp, atTime);
         v.beProductOf(b, u);
-        dV  = this->computeVolumeAround(gp);
-        coeff = dV * t_pspg;
-        for ( int i = 1; i <= pndofs; i++ ) {
-            for ( sum = 0.0, isd = 1; isd <= nsd; isd++ ) {
-                sum += g.at(isd, i) * v.at(isd);
-            }
-
-            answer.at(i) += coeff * sum;
-        }
+        double dV = this->computeVolumeAround(gp);
+        answer.plusProduct(g, v, t_pspg * dV);
     }
 }
 
@@ -642,65 +532,52 @@ SUPGElement2 :: computeAdvectionTerm_MC(FloatArray &answer, TimeStep *atTime)
 void
 SUPGElement2 :: computeAdvectionDerivativeTerm_MC(FloatMatrix &answer, TimeStep *atTime)
 {
-    int pndofs = this->computeNumberOfDofs(EID_ConservationEquation);
-    int undofs = this->computeNumberOfDofs(EID_MomentumBalance);
-    GaussPoint *gp;
     FloatMatrix g, b;
-    double dV, coeff;
 
-    answer.resize(pndofs, undofs);
-    answer.zero();
+    answer.resize(0, 0);
 
-    int rule = this->giveTermIntergationRuleIndex(AdvectionDerivativeTerm_MC);
+    int rule = 1;
     IntegrationRule *iRule = this->integrationRulesArray [ rule ];
     /* pspg stabilization term */
     for ( int k = 0; k < iRule->giveNumberOfIntegrationPoints(); k++ ) {
-        gp = iRule->getIntegrationPoint(k);
+        GaussPoint *gp = iRule->getIntegrationPoint(k);
         this->computeGradPMatrix(g, gp);
         this->computeUDotGradUMatrix(b, gp, atTime);
-        dV  = this->computeVolumeAround(gp);
-        coeff = dV * t_pspg;
-        answer.plusProductUnsym(g, b, coeff);
+        double dV = this->computeVolumeAround(gp);
+        answer.plusProductUnsym(g, b, dV * t_pspg);
     }
 }
 
 void
 SUPGElement2 :: computeDiffusionDerivativeTerm_MC(FloatMatrix &answer, TimeStep *atTime)
 {
-    int pndofs = this->computeNumberOfDofs(EID_ConservationEquation);
-    int undofs = this->computeNumberOfDofs(EID_MomentumBalance);
-
-    answer.resize(pndofs, undofs);
     FloatMatrix dDB, _d, g;
-    double dV, coeff, rho;
-    GaussPoint *gp;
 
-    int rule = this->giveTermIntergationRuleIndex(DiffusionDerivativeTerm_MC);
+    answer.resize(0, 0);
+
+    int rule = 1;
     IntegrationRule *iRule = this->integrationRulesArray [ rule ];
 
     for ( int k = 0; k < iRule->giveNumberOfIntegrationPoints(); k++ ) {
-        gp = iRule->getIntegrationPoint(k);
-        dV  = this->computeVolumeAround(gp);
-        rho = this->giveMaterial()->give('d', gp);
+        GaussPoint *gp = iRule->getIntegrationPoint(k);
+        double dV = this->computeVolumeAround(gp);
+        double rho = this->giveMaterial()->give('d', gp);
 
-        coeff = ( -1.0 ) * dV * t_pspg / rho;
         //( ( FluidDynamicMaterial * ) this->giveMaterial() )->giveDeviatoricStiffnessMatrix(_d, TangentStiffness,gp, atTime);
 
         this->computeDivTauMatrix(dDB, gp, atTime);
         this->computeGradPMatrix(g, gp);
 
-        answer.plusProductUnsym(g, dDB, coeff);
+        answer.plusProductUnsym(g, dDB, ( -1.0 ) * dV * t_pspg / rho);
     }
 
-
-    answer.zero();
+    answer.zero(); ///@todo Is this really correct? It makes the whole loop meaningless. If it is, please describe why with a comment.
 }
 
 void
 SUPGElement2 :: computeDiffusionTerm_MC(FloatArray &answer, TimeStep *atTime)
 {
-    int pndofs = this->computeNumberOfDofs(EID_ConservationEquation);
-    answer.resize(pndofs);
+    answer.resize(0);
 
     /*
      * FloatMatrix dDB, _d, g;
@@ -736,58 +613,46 @@ SUPGElement2 :: computeDiffusionTerm_MC(FloatArray &answer, TimeStep *atTime)
      *
      * }
      */
-
-    answer.zero();
 }
 
 
 void
 SUPGElement2 :: computeAccelerationTerm_MC(FloatMatrix &answer, TimeStep *atTime)
 {
-    int pndofs = this->computeNumberOfDofs(EID_ConservationEquation);
-    int undofs = this->computeNumberOfDofs(EID_MomentumBalance);
-    double dV, coeff;
     FloatMatrix g, n;
-    GaussPoint *gp;
 
-    answer.resize(pndofs, undofs);
-    answer.zero();
+    answer.resize(0, 0);
     // pspg stabilization term: M_\epsilon term
 
 
-    int rule = this->giveTermIntergationRuleIndex(AccelerationTerm_MC);
+    int rule = 0;
     IntegrationRule *iRule = this->integrationRulesArray [ rule ];
 
     for ( int k = 0; k < iRule->giveNumberOfIntegrationPoints(); k++ ) {
-        gp = iRule->getIntegrationPoint(k);
+        GaussPoint *gp = iRule->getIntegrationPoint(k);
         this->computeGradPMatrix(g, gp);
         this->computeNuMatrix(n, gp);
-        dV  = this->computeVolumeAround(gp);
-        coeff = dV * t_pspg;
-        answer.plusProductUnsym(g, n, coeff);
+        double dV = this->computeVolumeAround(gp);
+        answer.plusProductUnsym(g, n, dV * t_pspg);
     }
 }
 
 void
 SUPGElement2 :: computePressureTerm_MC(FloatMatrix &answer, TimeStep *atTime)
 {
-    int pndofs = this->computeNumberOfDofs(EID_ConservationEquation);
-    double dV, rho, coeff;
-    GaussPoint *gp;
     FloatMatrix g;
 
-    answer.resize(pndofs, pndofs);
-    answer.zero();
-    int rule = this->giveTermIntergationRuleIndex(PressureTerm_MC);
+    answer.resize(0, 0);
+
+    int rule = 0;
     IntegrationRule *iRule = this->integrationRulesArray [ rule ];
 
     for ( int k = 0; k < iRule->giveNumberOfIntegrationPoints(); k++ ) {
-        gp = iRule->getIntegrationPoint(k);
+        GaussPoint *gp = iRule->getIntegrationPoint(k);
         this->computeGradPMatrix(g, gp);
-        dV  = this->computeVolumeAround(gp);
-        rho = this->giveMaterial()->give('d', gp);
-        coeff = dV * t_pspg / rho;
-        answer.plusProductSymmUpper(g, g, coeff);
+        double dV  = this->computeVolumeAround(gp);
+        double rho = this->giveMaterial()->give('d', gp);
+        answer.plusProductSymmUpper(g, g, dV * t_pspg / rho);
     }
 
     answer.symmetrized();
@@ -797,36 +662,30 @@ SUPGElement2 :: computePressureTerm_MC(FloatMatrix &answer, TimeStep *atTime)
 void
 SUPGElement2 :: computeBCRhsTerm_MB(FloatArray &answer, TimeStep *atTime)
 {
-    int undofs = this->computeNumberOfDofs(EID_MomentumBalance);
 
-    answer.resize(undofs);
-    answer.zero();
+    int nLoads;
 
-    int id, n, nLoads;
-    double dV, rho;
-    Load *load;
-    bcGeomType ltype;
+    answer.resize(0);
 
-    int rule = this->giveTermIntergationRuleIndex(BCRhsTerm_MB);
+    int rule = 0;
     IntegrationRule *iRule = this->integrationRulesArray [ rule ];
-    GaussPoint *gp;
     FloatArray un, gVector, s, helpLoadVector;
     FloatMatrix b, nu;
 
     // add body load (gravity) termms
     nLoads = this->giveBodyLoadArray()->giveSize();
     for ( int i = 1; i <= nLoads; i++ ) {
-        load  = domain->giveLoad( bodyLoadArray.at(i) );
-        ltype = load->giveBCGeoType();
+        Load *load = domain->giveLoad( bodyLoadArray.at(i) );
+        bcGeomType ltype = load->giveBCGeoType();
         if ( ( ltype == BodyLoadBGT ) && ( load->giveBCValType() == ForceLoadBVT ) ) {
             load->computeComponentArrayAt(gVector, atTime, VM_Total);
             if ( gVector.giveSize() ) {
                 for ( int k = 0; k < iRule->giveNumberOfIntegrationPoints(); k++ ) {
-                    gp = iRule->getIntegrationPoint(k);
+                    GaussPoint *gp = iRule->getIntegrationPoint(k);
                     this->computeUDotGradUMatrix( b, gp, atTime->givePreviousStep() );
                     this->computeNuMatrix(nu, gp);
-                    dV  = this->computeVolumeAround(gp);
-                    rho = this->giveMaterial()->give('d', gp);
+                    double dV  = this->computeVolumeAround(gp);
+                    double rho = this->giveMaterial()->give('d', gp);
                     answer.plusProduct(b, gVector, t_supg * rho * dV);
                     answer.plusProduct(nu, gVector, rho * dV);
                 }
@@ -841,10 +700,10 @@ SUPGElement2 :: computeBCRhsTerm_MB(FloatArray &answer, TimeStep *atTime)
     // loop over boundary load array
     nLoads = this->giveBoundaryLoadArray()->giveSize() / 2;
     for ( int i = 1; i <= nLoads; i++ ) {
-        n = boundaryLoadArray.at(1 + ( i - 1 ) * 2);
-        id = boundaryLoadArray.at(i * 2);
-        load  = domain->giveLoad(n);
-        ltype = load->giveBCGeoType();
+        int n = boundaryLoadArray.at(1 + ( i - 1 ) * 2);
+        int id = boundaryLoadArray.at(i * 2);
+        Load *load  = domain->giveLoad(n);
+        bcGeomType ltype = load->giveBCGeoType();
         if ( ltype == EdgeLoadBGT ) {
             this->computeEdgeLoadVector_MB(helpLoadVector, load, id, atTime);
             if ( helpLoadVector.giveSize() ) {
@@ -867,30 +726,25 @@ void
 SUPGElement2 :: computeBCRhsTerm_MC(FloatArray &answer, TimeStep *atTime)
 {
     int nLoads;
-    double dV;
-    Load *load;
-    bcGeomType ltype;
     FloatArray s, gVector, helpLoadVector;
     FloatMatrix g;
-    int pndofs = this->computeNumberOfDofs(EID_ConservationEquation);
 
-    int rule = this->giveTermIntergationRuleIndex(BCRhsTerm_MC);
+    int rule = 1;
     IntegrationRule *iRule = this->integrationRulesArray [ rule ];
-    GaussPoint *gp;
 
-    answer.resize(pndofs);
-    answer.zero();
+    answer.resize(0);
+
     nLoads = this->giveBodyLoadArray()->giveSize();
     for ( int i = 1; i <= nLoads; i++ ) {
-        load  = domain->giveLoad( bodyLoadArray.at(i) );
-        ltype = load->giveBCGeoType();
+        Load *load  = domain->giveLoad( bodyLoadArray.at(i) );
+        bcGeomType ltype = load->giveBCGeoType();
         if ( ( ltype == BodyLoadBGT ) && ( load->giveBCValType() == ForceLoadBVT ) ) {
             load->computeComponentArrayAt(gVector, atTime, VM_Total);
             if ( gVector.giveSize() ) {
                 for ( int k = 0; k < iRule->giveNumberOfIntegrationPoints(); k++ ) {
-                    gp = iRule->getIntegrationPoint(k);
+                    GaussPoint *gp = iRule->getIntegrationPoint(k);
                     this->computeGradPMatrix(g, gp);
-                    dV  = this->computeVolumeAround(gp);
+                    double dV = this->computeVolumeAround(gp);
                     answer.plusProduct(g, gVector, t_pspg * dV);
                 }
             }
@@ -906,8 +760,8 @@ SUPGElement2 :: computeBCRhsTerm_MC(FloatArray &answer, TimeStep *atTime)
     for ( int i = 1; i <= nLoads; i++ ) {
         int n = boundaryLoadArray.at(1 + ( i - 1 ) * 2);
         int id = boundaryLoadArray.at(i * 2);
-        load = domain->giveLoad(n);
-        ltype = load->giveBCGeoType();
+        Load *load = domain->giveLoad(n);
+        bcGeomType ltype = load->giveBCGeoType();
         if ( ltype == EdgeLoadBGT ) {
             this->computeEdgeLoadVector_MC(helpLoadVector, load, id, atTime);
             if ( helpLoadVector.giveSize() ) {

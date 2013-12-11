@@ -4,6 +4,8 @@ include (CheckCXXSymbolExists)
 include (CheckIncludeFiles)
 include (CheckIncludeFileCXX)
 include (CheckCXXSourceCompiles)
+include (GenerateExportHeader)
+include (UsePkgConfig)
 
 project (oofem)
 set (oofem_VERSION_MAJOR 2)
@@ -22,14 +24,13 @@ endif ()
 if (MSVC)
     add_definitions (-D_USE_MATH_DEFINES)
     set (CMAKE_REQUIRED_DEFINITIONS "-D_USE_MATH_DEFINES")
-    set (CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -W4 -wd4786 -wd4100 -wd4996 -wd4706 -wd4512")
+    set (CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -W4 -wd4786 -wd4100 -wd4996 -wd4706 -wd4512 -wd4251")
 else ()
     set (CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall -fPIC")
 endif ()
 
 set (CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} -DDEBUG")
 set (CMAKE_CXX_FLAGS_PROFILING "${CMAKE_CXX_FLAGS_PROFILING} -O2 -pg")
-
 
 #######################################################################
 ######################## Custom paths #################################
@@ -46,23 +47,27 @@ set (IML_DIR CACHE PATH "Manual IML++ directory")
 set (SPOOLES_DIR CACHE PATH "Manual SPOOLES directory")
 set (ELIXIR_DIR CACHE PATH "Manual Elixir directory (OOFEG only)")
 set (CKIT_DIR CACHE PATH "Manual CKit directory (OOFEG only)")
+set (METIS_DIR CACHE PATH "Manual Metis directory")
 set (PARMETIS_DIR CACHE PATH "Manual ParMetis directory")
-set (BOOST_DIR CACHE PATH "Manual Boost directory")
+#set (BOOST_DIR CACHE PATH "Manual Boost directory")
 
 #######################################################################
 ######################## Options ######################################
 #######################################################################
 option (USE_OOFEG "Enable OOFEG" OFF)
-option (USE_PYTHON_BINDINGS "Enable Python bidings" OFF)
 if (${CMAKE_VERSION} VERSION_GREATER "2.8.7") # Compability with older version of cmake
     if (WIN32) # Shared libraries aren't working on windows.
         option (USE_SHARED_LIB "Build shared library" OFF)
     else ()
         option (USE_SHARED_LIB "Build shared library" ON)
     endif ()
+else ()
+    set (USE_SHARED_LIB OFF)
 endif ()
+
 # Parallel stuff
 option (USE_PARALLEL "Enable parallel support" OFF)
+option (USE_METIS "Enable metis support" OFF)
 option (USE_PARMETIS "Enable Parmetis support" OFF)
 option (USE_OPENMP "Compile with OpenMP support (for parallel assembly)" OFF)
 # Solvers and such
@@ -81,7 +86,9 @@ option (USE_SM "Enable structural mechanics module" ON)
 option (USE_FM "Enable fluid mechanics module" ON)
 option (USE_TM "Enable heat/mass transfer module" ON)
 option (USE_CEMHYD "Enable CemHyd support" OFF)
-option (USE_BOOST "Enable Boost" OFF)
+#option (USE_BOOST "Enable Boost" OFF)
+option (USE_PYTHON_BINDINGS "Enable Python bidings (OOFEM usable from Python). Implies USE_PYTHON." OFF)
+option (USE_PYTHON "Enable Python to be used inside OOFEM (e.g. userdef Dirichlet BCs)" OFF)
 
 if (USE_PARALLEL)
     add_definitions (-D__PARALLEL_MODE)
@@ -100,20 +107,20 @@ include_directories ("${oofem_BINARY_DIR}")
 
 # Is there really any reason not to compile all of them? Some has cross dependencies.
 if (${CMAKE_VERSION} VERSION_LESS "2.8.8")
-    set (LIBS ${LIBS} core)
+    list (APPEND LIBS core)
 else ()
-    set (LIBS ${LIBS} $<TARGET_OBJECTS:core>)
+    list (APPEND LIBS $<TARGET_OBJECTS:core>)
 endif ()
 
 if (USE_FM)
     include_directories ("${oofem_SOURCE_DIR}/src/fm")
     add_definitions (-D__FM_MODULE)
     if (${CMAKE_VERSION} VERSION_LESS "2.8.8")
-        set (LIBS ${LIBS} fm)
+        list (APPEND LIBS fm)
     else ()
-        set (LIBS ${LIBS} $<TARGET_OBJECTS:fm>)
+        list (APPEND LIBS $<TARGET_OBJECTS:fm>)
     endif ()
-    set (MODULE_LIST ${MODULE_LIST} "fm")
+    list (APPEND MODULE_LIST "fm")
 endif ()
 
 if (USE_TM)
@@ -121,11 +128,11 @@ if (USE_TM)
     include_directories ("${oofem_SOURCE_DIR}/src/tm/cemhyd")
     add_definitions (-D__TM_MODULE)
     if (${CMAKE_VERSION} VERSION_LESS "2.8.8")
-        set (LIBS ${LIBS} tm)
+        list (APPEND LIBS tm)
     else ()
-        set (LIBS ${LIBS} $<TARGET_OBJECTS:tm>)
+        list (APPEND LIBS $<TARGET_OBJECTS:tm>)
     endif ()
-    set (MODULE_LIST ${MODULE_LIST} "tm")
+    list (APPEND MODULE_LIST "tm")
     if (USE_CEMHYD)
         add_definitions (-D__CEMHYD_MODULE)
         set (USE_TINYXML ON)
@@ -136,20 +143,20 @@ if (USE_SM)
     include_directories ("${oofem_SOURCE_DIR}/src/sm")
     add_definitions (-D__SM_MODULE)
     if (${CMAKE_VERSION} VERSION_LESS "2.8.8")
-        set (LIBS ${LIBS} sm)
+        list (APPEND LIBS sm)
     else ()
-        set (LIBS ${LIBS} $<TARGET_OBJECTS:sm>)
+        list (APPEND LIBS $<TARGET_OBJECTS:sm>)
     endif ()
-    set (MODULE_LIST ${MODULE_LIST} "sm")
+    list (APPEND MODULE_LIST "sm")
 
     if (NOT MSVC AND NOT MINGW)
         find_library (DL_LIB dl) 
-        set (EXT_LIBS ${EXT_LIBS} ${DL_LIB})
+        list (APPEND EXT_LIBS ${DL_LIB})
     endif ()
     
 #     if (MINGW)
 #         find_library (DL_LIB ltdl HINTS "C:/MinGW/lib/" ) 
-#         set (EXT_LIBS ${EXT_LIBS} ${DL_LIB})
+#         list (APPEND EXT_LIBS ${DL_LIB})
 #     endif ()
     
 endif ()
@@ -157,11 +164,11 @@ endif ()
 if (USE_DSS)
     include_directories ("${oofem_SOURCE_DIR}/src/dss")
     if (${CMAKE_VERSION} VERSION_LESS "2.8.8")
-        set (LIBS ${LIBS} dss)
+        list (APPEND LIBS dss)
     else ()
-        set (LIBS ${LIBS} $<TARGET_OBJECTS:dss>)
+        list (APPEND LIBS $<TARGET_OBJECTS:dss>)
     endif ()
-    set (MODULE_LIST ${MODULE_LIST} "dss")
+    list (APPEND MODULE_LIST "dss")
 endif ()
 
 if (USE_OPENMP)
@@ -170,7 +177,7 @@ if (USE_OPENMP)
         set (CMAKE_C_FLAGS "${CMAKE_C_FLAGS} ${OpenMP_C_FLAGS}")
         set (CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${OpenMP_CXX_FLAGS}")
         set (CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} ${OpenMP_EXE_LINKER_FLAGS}")
-        set (MODULE_LIST ${MODULE_LIST} "openmp")
+        list (APPEND MODULE_LIST "openmp")
     endif ()
 endif ()
 
@@ -179,7 +186,7 @@ if (USE_OOFEG)
 
     # Necessary X11 stuff;
     if (X11_DIR)
-        set (CMAKE_LIBRARY_DIR ${CMAKE_LIBRARY_DIR} ${X11_DIR})
+        set (CMAKE_LIBRARY_DIR ${X11_DIR})
         find_package (X11 REQUIRED PATHS ${X11_DIR})
         find_library (XAW_LIB Xaw PATHS ${X11_DIR})
     else ()
@@ -200,60 +207,75 @@ if (USE_OOFEG)
     include_directories ("${ELIXIR_DIR}/include")
     include_directories ("${CKIT_DIR}/include")
 
-    set (EXT_LIBS ${EXT_LIBS} ${ESI_LIB} ${ELIXIR_LIB} ${CKIT_LIB} ${X11_LIBRARIES} ${X11_Xmu_LIB} ${X11_Xt_LIB} ${XAW_LIB})
-    set (MODULE_LIST ${MODULE_LIST} "oofeg")
+    list (APPEND EXT_LIBS ${ESI_LIB} ${ELIXIR_LIB} ${CKIT_LIB} ${X11_LIBRARIES} ${X11_Xmu_LIB} ${X11_Xt_LIB} ${XAW_LIB})
+    list (APPEND MODULE_LIST "oofeg")
 endif ()
 
 #######################################################################
-######################## External libaries ############################
+######################## External libraries ###########################
 #######################################################################
 
-if (USE_BOOST) 
-#    set (CMAKE_LIBRARY_DIR ${CMAKE_LIBRARY_DIR} ${BOOST_DIR})
+#if (USE_BOOST) 
+#    set (CMAKE_LIBRARY_DIR ${BOOST_DIR})
 #    find_package (BOOST REQUIRED)
-#    set (EXT_LIBS ${EXT_LIBS} ${BOOST_LIBRARIES})
-    if (BOOST_DIR)
-    	include_directories ("${BOOST_DIR}")
-    	set (MODULE_LIST ${MODULE_LIST} "BOOST")
-     endif ()
- 
-    add_definitions (-D__BOOST_MODULE)
-endif ()
+#    list (APPEND EXT_LIBS ${BOOST_LIBRARIES})
+#    if (BOOST_DIR)
+#    	include_directories ("${BOOST_DIR}")
+#    	list (APPEND MODULE_LIST "BOOST")
+#     endif ()
+# 
+#    add_definitions (-D__BOOST_MODULE)
+#endif ()
 
 if (USE_LAPACK)
-    set (CMAKE_LIBRARY_DIR ${CMAKE_LIBRARY_DIR} ${LAPACK_DIR})
+    set (CMAKE_LIBRARY_DIR ${LAPACK_DIR})
     find_package (LAPACK REQUIRED)
-    set (EXT_LIBS ${EXT_LIBS} ${LAPACK_LIBRARIES})
-    set (MODULE_LIST ${MODULE_LIST} "LAPACK")
+    list (APPEND EXT_LIBS ${LAPACK_LIBRARIES})
+    list (APPEND MODULE_LIST "LAPACK")
     add_definitions (-D__LAPACK_MODULE)
 endif ()
 
 if (USE_VTK)
-    set (CMAKE_LIBRARY_DIR ${CMAKE_LIBRARY_DIR} ${VTK_DIR})
-    find_package (VTK REQUIRED)
+    set (CMAKE_LIBRARY_DIR ${VTK_DIR})
+    find_package (VTK REQUIRED NO_MODULE)
     include (${VTK_USE_FILE}) # Sets necessary includes_directories
     add_definitions (-D__VTK_MODULE)
-    set (EXT_LIBS ${EXT_LIBS} ${VTK_LIBRARIES})
-    set (MODULE_LIST ${MODULE_LIST} "VTK")
+    list (APPEND EXT_LIBS ${VTK_LIBRARIES})
+    list (APPEND MODULE_LIST "VTK")
 endif ()
 
 if (USE_PARMETIS)
     if (PARMETIS_DIR)
         find_library (PARMETIS_LIB parmetis PATH "${PARMETIS_DIR}")
-        find_library (METIS_LIB metis PATH "${PARMETIS_DIR}")
-        include_directories ("${PARMETIS_DIR}")
+        include_directories ("${PARMETIS_DIR}/include")
     else ()
         find_library (PARMETIS_LIB parmetis)
-        find_library (METIS_LIB metis)
     endif ()
     if (${PARMETIS_LIB} STREQUAL "PARMETIS_LIB-NOTFOUND")
         message (FATAL_ERROR "Parmetis library not found")
     endif ()
-    set (EXT_LIBS ${EXT_LIBS} ${PARMETIS_LIB} ${METIS_LIB})
-    set (MODULE_LIST ${MODULE_LIST} "parmetis")
+    list (APPEND EXT_LIBS ${PARMETIS_LIB})
+    list (APPEND MODULE_LIST "parmetis")
     set (USE_MPI ON)
+    set (USE_METIS ON)
     add_definitions (-D__PARMETIS_MODULE)
 endif ()
+
+if (USE_METIS)
+    if (METIS_DIR)
+        find_library (METIS_LIB metis PATH "${METIS_DIR}")
+        include_directories ("${METIS_DIR}/include")
+    else ()
+        find_library (METIS_LIB metis)
+    endif ()
+    if (${METIS_LIB} STREQUAL "METIS_LIB-NOTFOUND")
+        message (FATAL_ERROR "Metis library not found")
+    endif ()
+    list (APPEND EXT_LIBS ${METIS_LIB})
+    list (APPEND MODULE_LIST "metis")
+    add_definitions (-D__METIS_MODULE)
+endif ()
+
 
 if (USE_SLEPC)
     if (SLEPC_DIR)
@@ -265,21 +287,45 @@ if (USE_SLEPC)
     if (${SLEPC_LIBS} STREQUAL "SLEPC_LIBS-NOTFOUND")
         message (FATAL_ERROR "SLEPc library not found")
     endif ()
-    set (EXT_LIBS ${EXT_LIBS} ${SLEPC_LIBS})
-    set (MODULE_LIST ${MODULE_LIST} "slepc")
+    list (APPEND EXT_LIBS ${SLEPC_LIBS})
+    list (APPEND MODULE_LIST "slepc")
     set (USE_PETSC ON)
     add_definitions (-D__SLEPC_MODULE)
 endif ()
 
 if (USE_PETSC)
-    find_package (PETSc REQUIRED HINTS "${MY_PETSC_DIR}/${MY_PETSC_ARCH}/conf")
-    include_directories ("${MY_PETSC_DIR}/include" "${MY_PETSC_DIR}/${MY_PETSC_ARCH}/include" ${PETSC_INCLUDE_PATH})
-    find_library (PETSC_LIB petsc PATH "${MY_PETSC_DIR}/${MY_PETSC_ARCH}/lib/") 
-    if (${PETSC_LIB} STREQUAL "PETSC_LIB-NOTFOUND")
-        message (FATAL_ERROR "PETSc library not found")
-    endif ()
-    set (EXT_LIBS ${EXT_LIBS} ${PETSC_LIB} ${PETSC_PACKAGE_LIBS})
-    set (MODULE_LIST ${MODULE_LIST} "PETSc")
+    # A real PETScConfig.cmake file would have been nice to use:
+    #find_package (PETSc 3.3 HINTS "${MY_PETSC_DIR}/${MY_PETSC_ARCH}")
+
+    # Have to use pkgconfig information
+    find_package (PkgConfig REQUIRED)
+    
+    set (ENV{PKG_CONFIG_PATH} ${MY_PETSC_DIR}/${MY_PETSC_ARCH}/lib/pkgconfig)
+    pkg_check_modules (PC_PETSC REQUIRED PETSc)
+    include_directories (${PC_PETSC_INCLUDE_DIRS})
+
+    # Find the actual libraries:
+    foreach (f ${PC_PETSC_LIBRARIES})
+        find_library (${f}_LIBRARY NAMES ${f} lib${f}
+            HINTS
+            ${PC_PETSC_LIBRARY_DIRS}
+        )
+        list (APPEND EXT_LIBS ${${f}_LIBRARY})
+    endforeach ()
+    # Currently unused flags:
+    #   PC_PETSC_LDFLAGS        ... all required linker flags
+    #   PC_PETSC_LDFLAGS_OTHER  ... all other linker flags
+    #   PC_PETSC_CFLAGS         ... all required cflags
+    #   PC_PETSC_CFLAGS_OTHER   ... the other compiler flags
+
+    #find_package (PETSc REQUIRED HINTS "${MY_PETSC_DIR}/${MY_PETSC_ARCH}/conf")
+    #include_directories ("${MY_PETSC_DIR}/include" "${MY_PETSC_DIR}/${MY_PETSC_ARCH}/include" ${PETSC_INCLUDE_PATH})
+    #find_library (PETSC_LIB petsc PATH "${MY_PETSC_DIR}/${MY_PETSC_ARCH}/lib/") 
+    #if (${PETSC_LIB} STREQUAL "PETSC_LIB-NOTFOUND")
+    #    message (FATAL_ERROR "PETSc library not found")
+    #endif ()
+    #list (APPEND EXT_LIBS ${PETSC_LIB} ${PETSC_PACKAGE_LIBS})
+    list (APPEND MODULE_LIST "PETSc")
     set (USE_MPI ON)
     add_definitions (-D__PETSC_MODULE)
 endif ()
@@ -289,10 +335,10 @@ if (USE_MPI)
         include_directories ("${MPI_DIR}/include")
         link_directories ("${MPI_DIR}/lib")
         find_library (MPI_LIBRARY NAMES mpi PATHS ${MPI_DIR}/lib)
-        set (EXT_LIBS ${EXT_LIBS} ${MPI_LIBRARY})
+        list (APPEND EXT_LIBS ${MPI_LIBRARY})
         find_library (MPI_CXX_LIBRARY NAMES mpi_cxx PATHS ${MPI_DIR}/lib)
         if (MPI_CXX_LIBRARY)
-            set (EXT_LIBS ${EXT_LIBS} ${MPI_CXX_LIBRARY})
+            list (APPEND EXT_LIBS ${MPI_CXX_LIBRARY})
         endif ()
     else ()
         include (FindMPI)
@@ -301,9 +347,9 @@ if (USE_MPI)
         set (CMAKE_CXX_LINK_FLAGS ${CMAKE_CXX_LINK_FLAGS} ${MPI_LINK_FLAGS})
         add_definitions (-DMPICH_IGNORE_CXX_SEEK)
         include_directories (${MPI_INCLUDE_PATH})
-        set (EXT_LIBS ${EXT_LIBS} ${MPI_LIBRARIES})
+        list (APPEND EXT_LIBS ${MPI_LIBRARIES})
     endif (MPI_DIR)
-    set (MODULE_LIST ${MODULE_LIST} "MPI")
+    list (APPEND MODULE_LIST "MPI")
     # Compile and link flags?
 endif ()
 
@@ -313,8 +359,8 @@ if (USE_TRIANGLE)
         message (FATAL_ERROR "Triangle library not found")
     endif ()
     add_definitions (-D__TRIANGLE_MODULE)
-    set (EXT_LIBS ${EXT_LIBS} ${TRIANGLE_LIB})
-    set (MODULE_LIST ${MODULE_LIST} "Triangle")
+    list (APPEND EXT_LIBS ${TRIANGLE_LIB})
+    list (APPEND MODULE_LIST "Triangle")
 endif ()
 
 if (USE_TINYXML)
@@ -327,8 +373,8 @@ if (USE_TINYXML)
     if (${TINYXML2_LIB} STREQUAL "TINYXML2_LIB-NOTFOUND")
         message (FATAL_ERROR "TinyXML2 library not found")
     endif ()
-    set (EXT_LIBS ${EXT_LIBS} ${TINYXML2_LIB})
-    set (MODULE_LIST ${MODULE_LIST} "TinyXML-2")
+    list (APPEND EXT_LIBS ${TINYXML2_LIB})
+    list (APPEND MODULE_LIST "TinyXML-2")
 endif ()
 
 if (USE_IML)
@@ -344,7 +390,7 @@ if (USE_IML)
     if ((NOT HAVE_IML_CG_H) OR (NOT HAVE_IML_GMRES_H))
         message (FATAL_ERROR "Necessary IML++ headers not found")
     endif ()
-    set (MODULE_LIST ${MODULE_LIST} "IML++")
+    list (APPEND MODULE_LIST "IML++")
 endif ()
 
 if (USE_SPOOLES)
@@ -357,20 +403,29 @@ if (USE_SPOOLES)
     if (${SPOOLES_LIB} STREQUAL "SPOOLES_LIB-NOTFOUND")
         message (FATAL_ERROR "SPOOLES not found")
     endif ()
-    set (EXT_LIBS ${EXT_LIBS} ${SPOOLES_LIB})
-    set (MODULE_LIST ${MODULE_LIST} "SPOOLES")
+    list (APPEND EXT_LIBS ${SPOOLES_LIB})
+    list (APPEND MODULE_LIST "SPOOLES")
 endif ()
 
-if (USE_PYTHON_BINDINGS)
+# We need the interpreter for the test suite.
+find_package(PythonInterp "2.7")
+
+if (USE_PYTHON_BINDINGS OR USE_PYTHON)
     # PythonLibs in cmake is bugged, have to try and rely on PythonInterp to get the suitable major and minor versions.
-    find_package(PythonInterp REQUIRED)
-    find_package(PythonLibs ${PYTHON_VERSION_STRING} EXACT REQUIRED)
-    find_package(Boost COMPONENTS "python-py${PYTHON_VERSION_MAJOR}${PYTHON_VERSION_MINOR}" REQUIRED)
+    set (CMAKE_LIBRARY_DIR ${PYTHON_DIR})
+    find_package(PythonInterp "2.7" REQUIRED)
+    find_package(PythonLibs "${PYTHON_VERSION_MAJOR}.${PYTHON_VERSION_MINOR}" REQUIRED)
     include_directories (${PYTHON_INCLUDE_DIRS})
-    include_directories (${Boost_INCLUDE_DIRS})
-    set (EXT_LIBS ${EXT_LIBS} ${PYTHON_LIBRARIES} ${Boost_LIBRARIES})
-    set (MODULE_LIST ${MODULE_LIST} "Python")
-    add_definitions(-DBOOST_PYTHON)
+    list (APPEND EXT_LIBS ${PYTHON_LIBRARIES})
+    list (APPEND MODULE_LIST "Python")
+    add_definitions(-D__PYTHON_MODULE)
+
+    if (USE_PYTHON_BINDINGS)
+        find_package(Boost COMPONENTS "python-py${PYTHON_VERSION_MAJOR}${PYTHON_VERSION_MINOR}" REQUIRED)
+        include_directories (${Boost_INCLUDE_DIRS})
+        list (APPEND EXT_LIBS ${Boost_LIBRARIES})
+        add_definitions(-DBOOST_PYTHON)
+    endif ()
 endif ()
 
 
@@ -399,12 +454,17 @@ check_cxx_source_compiles ("
 #include <stdio.h>
 #define LOG_FATAL(file,...) fprintf (file, __VA_ARGS__)
 int main(void) { return 0; }" HAVE_MACRO_VA_ARGS)
-
+if (USE_SHARED_LIB)
+    set (OOFEM_EXPORT_HEADER "#include \"oofem_export.h\"")
+    # For consistant library on linux and windows platforms.
+    #add_compiler_export_flags ()
+else ()
+    set (OOFEM_EXPORT_HEADER "#define OOFEM_EXPORT\n#define OOFEM_NO_EXPORT")
+endif ()
 configure_file (
   "${oofem_SOURCE_DIR}/src/oofemcfg.h.in"
   "${oofem_BINARY_DIR}/oofemcfg.h"
   )
-
 
 #######################################################################
 ######################## Targets ######################################
@@ -435,9 +495,6 @@ if (USE_PYTHON_BINDINGS)
 endif ()
 
 # Main targets
-if (${CMAKE_VERSION} VERSION_LESS "2.8.8")
-    set (USE_SHARED_LIB OFF)
-endif ()
 if (USE_SHARED_LIB)
     add_library (liboofem
         SHARED
@@ -447,6 +504,16 @@ if (USE_SHARED_LIB)
     target_link_libraries (liboofem ${EXT_LIBS})
     set_target_properties (liboofem PROPERTIES OUTPUT_NAME oofem)
     install (TARGETS liboofem DESTINATION lib)
+
+    # This should be set automatically, but I think TARGET:objs confuses cmake:
+    set_target_properties (core PROPERTIES COMPILE_DEFINITIONS "liboofem_EXPORTS")
+    set_target_properties (fm PROPERTIES COMPILE_DEFINITIONS "liboofem_EXPORTS")
+    set_target_properties (sm PROPERTIES COMPILE_DEFINITIONS "liboofem_EXPORTS")
+    set_target_properties (tm PROPERTIES COMPILE_DEFINITIONS "liboofem_EXPORTS")
+
+    generate_export_header (liboofem
+        BASE_NAME OOFEM
+        )
 endif ()
 
 # OOFEM target
@@ -477,6 +544,7 @@ if (USE_OOFEG)
     install(TARGETS oofeg DESTINATION bin)
 endif ()
 
+
 # CppCheck target (not built by default)
 add_custom_target(cppcheck)
 set_target_properties(cppcheck PROPERTIES EXCLUDE_FROM_ALL TRUE)
@@ -497,6 +565,7 @@ add_custom_command(TARGET cppcheck
     "cppcheck.xml"
     COMMENT "Running cppcheck on entire source"
     )
+
 
 #######################################################################
 ######################## Documentation ################################
@@ -542,7 +611,6 @@ add_custom_target (
 # This isn't perfect/elegant, partly due to the how tests work.
 # TODO: Would like to run oofem from the binary dir (avoids creating *.out files in the source dir)
 # unfortunately, that doesn't work for some tests that require sub-files using relative paths.
-find_package(PythonInterp)
 enable_testing ()
 #set (MEMORYCHECK_COMMAND "${CMAKE_CURRENT_BINARY_DIR}/memcheckhelper.py")
 include (CTest)
@@ -588,6 +656,8 @@ if (USE_PARALLEL)
         #set_tests_properties ("parextr_${case}" PROPERTIES DEPENDS "partest_${case}")
         #list (APPEND CTEST_CUSTOM_MEMCHECK_IGNORE "parextr_${case}")
     endforeach (case)
+    # partest_brazil_2d_nl7 requires more time on testing server than default 1500
+    set_tests_properties(partest_brazil_2d_nl7 PROPERTIES TIMEOUT 2500)
 endif ()
 # Sequential test cases
 file (GLOB sm_tests RELATIVE "${oofem_TEST_DIR}/sm" "${oofem_TEST_DIR}/sm/*.in")
@@ -626,14 +696,29 @@ endforeach (case)
 #add_test (test-${case}-check "python" "${oofem_SOURCE_DIR}/tools/extractor.py" "-f" ${case} "-c")
 
 # Custom targets for test and benchmarks (which can conveniently be accessed from IDEs)
-add_custom_target (tests
-    COMMAND ${CMAKE_CTEST_COMMAND} "-j" "2" "-R" "test"
-    WORKING_DIRECTORY ${oofem_BINARY_DIR}
-    )
-add_custom_target (benchmarks
-    COMMAND ${CMAKE_CTEST_COMMAND} "-j" "2" "-R" "benchmark"
-    WORKING_DIRECTORY ${oofem_BINARY_DIR}
-    )
+
+if (MSVC)
+    add_custom_target (tests
+        COMMAND ${CMAKE_CTEST_COMMAND} "-j" "2" "-R" "test" "-C" "Debug"
+        WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}
+        )
+    add_custom_target (benchmarks
+        COMMAND ${CMAKE_CTEST_COMMAND} "-j" "2" "-R" "benchmark" "-C" "Debug"
+        WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}
+        )
+else ()
+    add_custom_target (tests
+        #COMMAND ${CMAKE_CTEST_COMMAND} "-j" "2" "-R" "test"
+        COMMAND ${CMAKE_CTEST_COMMAND} "-R" "test"
+        WORKING_DIRECTORY ${oofem_BINARY_DIR}
+        )
+    add_custom_target (benchmarks
+        COMMAND ${CMAKE_CTEST_COMMAND} "-j" "2" "-R" "benchmark"
+        WORKING_DIRECTORY ${oofem_BINARY_DIR}
+        )
+endif ()
+    
+
 
 #######################################################################
 ######################## Packing ######################################
@@ -650,7 +735,7 @@ set (CPACK_PACKAGE_VENDOR "OOFEM development team")
 set (CPACK_PACKAGE_DESCRIPTION_SUMMARY "Object Oriented Finite Element")
 #set (CPACK_PACKAGE_DESCRIPTION_FILE "${CMAKE_SOURCE_DIR}/README")
 set (CPACK_RESOURCE_FILE_README "${CMAKE_SOURCE_DIR}/README")
-set (CPACK_RESOURCE_FILE_LICENSE "${CMAKE_SOURCE_DIR}/gpl.txt")
+set (CPACK_RESOURCE_FILE_LICENSE "${CMAKE_SOURCE_DIR}/COPYING.LGPLv2.1")
 set (CPACK_PACKAGE_INSTALL_DIRECTORY ${CPACK_PACKAGE_NAME})
 set (CPACK_PACKAGE_EXECUTABLES "oofem")
 set (CPACK_PACKAGE_FILE_NAME ${CPACK_PACKAGE_NAME}_${CPACK_PACKAGE_VERSION}_${CMAKE_SYSTEM_PROCESSOR})

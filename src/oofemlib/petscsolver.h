@@ -17,19 +17,19 @@
  *       Czech Technical University, Faculty of Civil Engineering,
  *   Department of Structural Mechanics, 166 29 Prague, Czech Republic
  *
- *  This program is free software; you can redistribute it and/or modify
- *  it under the terms of the GNU General Public License as published by
- *  the Free Software Foundation; either version 2 of the License, or
- *  (at your option) any later version.
+ *  This library is free software; you can redistribute it and/or
+ *  modify it under the terms of the GNU Lesser General Public
+ *  License as published by the Free Software Foundation; either
+ *  version 2.1 of the License, or (at your option) any later version.
  *
  *  This program is distributed in the hope that it will be useful,
  *  but WITHOUT ANY WARRANTY; without even the implied warranty of
- *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- *  GNU General Public License for more details.
+ *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+ *  Lesser General Public License for more details.
  *
- *  You should have received a copy of the GNU General Public License
- *  along with this program; if not, write to the Free Software
- *  Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
+ *  You should have received a copy of the GNU Lesser General Public
+ *  License along with this library; if not, write to the Free Software
+ *  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  */
 #ifndef petscsolver_h
 #define petscsolver_h
@@ -46,7 +46,7 @@ class FloatMatrix;
  * Implements the solution of linear system of equation in the form @f$A\cdot x=b@f$ using solvers
  * from PETSc library. Only works with the PETSc sparse matrix implementation.
  */
-class PetscSolver : public SparseLinearSystemNM
+class OOFEM_EXPORT PetscSolver : public SparseLinearSystemNM
 {
 public:
     /**
@@ -60,7 +60,6 @@ public:
 
     virtual NM_Status solve(SparseMtrx *A, FloatArray *b, FloatArray *x);
 
-#ifdef __PETSC_MODULE
     /**
      * Solves the given linear system.
      * @param A Coefficient matrix.
@@ -69,7 +68,7 @@ public:
      * @return NM_Status value.
      */
     NM_Status petsc_solve(PetscSparseMtrx *A, Vec b, Vec x);
-#endif
+
     virtual const char *giveClassName() const { return "PetscSolver"; }
     virtual LinSystSolverType giveLinSystSolverType() const { return ST_Petsc; }
 };

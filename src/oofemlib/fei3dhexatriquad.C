@@ -17,25 +17,26 @@
  *       Czech Technical University, Faculty of Civil Engineering,
  *   Department of Structural Mechanics, 166 29 Prague, Czech Republic
  *
- *  This program is free software; you can redistribute it and/or modify
- *  it under the terms of the GNU General Public License as published by
- *  the Free Software Foundation; either version 2 of the License, or
- *  (at your option) any later version.
+ *  This library is free software; you can redistribute it and/or
+ *  modify it under the terms of the GNU Lesser General Public
+ *  License as published by the Free Software Foundation; either
+ *  version 2.1 of the License, or (at your option) any later version.
  *
  *  This program is distributed in the hope that it will be useful,
  *  but WITHOUT ANY WARRANTY; without even the implied warranty of
- *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- *  GNU General Public License for more details.
+ *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+ *  Lesser General Public License for more details.
  *
- *  You should have received a copy of the GNU General Public License
- *  along with this program; if not, write to the Free Software
- *  Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
+ *  You should have received a copy of the GNU Lesser General Public
+ *  License along with this library; if not, write to the Free Software
+ *  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  */
 
 #include "fei3dhexatriquad.h"
 #include "intarray.h"
 #include "floatarray.h"
 #include "floatmatrix.h"
+#include "gaussintegrationrule.h"
 
 namespace oofem {
 void
@@ -427,6 +428,26 @@ FEI3dHexaTriQuad :: evalNXIntegral(int iSurf, const FEICellGeometry &cellgeo)
             c7(1)*(16*c1(0) - 16*c2(0) + 144*c3(0) - 144*c4(0) + 192*c6(0) - 192*c8(0)) + 
             c8(1)*(-144*c1(0) + 16*c2(0) - 16*c3(0) + 144*c4(0) - 192*c5(0) + 192*c7(0)))
         ) / 300.0;
+}
+
+IntegrationRule *
+FEI3dHexaTriQuad :: giveIntegrationRule(int order)
+{
+    IntegrationRule *iRule = new GaussIntegrationRule(1, NULL);
+    ///@todo Verify: Is +15 correct for dealing with "detJ"? If it is, perhaps we shouldn't go for exact integration since it is likely overkill.
+    int points = iRule->getRequiredNumberOfIntegrationPoints(_Cube, order + 15);
+    iRule->SetUpPointsOnCube(points, _Unknown);
+    return iRule;
+}
+
+IntegrationRule *
+FEI3dHexaTriQuad :: giveBoundaryIntegrationRule(int order, int boundary)
+{
+    IntegrationRule *iRule = new GaussIntegrationRule(1, NULL);
+    ///@todo Verify: Is +6 correct for dealing with "detJ" on this surface?
+    int points = iRule->getRequiredNumberOfIntegrationPoints(_Square, order + 6);
+    iRule->SetUpPointsOnSquare(points, _Unknown);
+    return iRule;
 }
 
 } // end namespace oofem
