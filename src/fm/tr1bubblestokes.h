@@ -128,9 +128,9 @@ public:
 
     // Element interpolation interface:
     virtual int EIPrimaryUnknownMI_computePrimaryUnknownVectorAt(ValueModeType u,
-                                                                 TimeStep *stepN, const FloatArray &coords, FloatArray &answer);
+                                                                 TimeStep *tStep, const FloatArray &coords, FloatArray &answer);
     virtual void EIPrimaryUnknownMI_computePrimaryUnknownVectorAtLocal(ValueModeType u,
-                                                                       TimeStep *stepN, const FloatArray &coords, FloatArray &answer);
+                                                                       TimeStep *tStep, const FloatArray &coords, FloatArray &answer);
     virtual void EIPrimaryUnknownMI_givePrimaryUnknownVectorDofID(IntArray &answer);
 
     virtual Element *ZZNodalRecoveryMI_giveElement() { return this; }

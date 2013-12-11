@@ -54,7 +54,7 @@ TrabBoneMaterial :: hasMaterialModeCapability(MaterialMode mode)
 }
 
 
-void TrabBoneMaterial :: computeCumPlastStrain(double &alpha, GaussPoint *gp, TimeStep *atTime)
+void TrabBoneMaterial :: computeCumPlastStrain(double &alpha, GaussPoint *gp, TimeStep *tStep)
 {
     TrabBoneMaterialStatus *status = static_cast< TrabBoneMaterialStatus * >( this->giveStatus(gp) );
     alpha = status->giveTempAlpha();
@@ -64,7 +64,7 @@ void TrabBoneMaterial :: computeCumPlastStrain(double &alpha, GaussPoint *gp, Ti
 void
 TrabBoneMaterial :: give1dStressStiffMtrx(FloatMatrix &answer,
                                           MatResponseMode mode, GaussPoint *gp,
-                                          TimeStep *atTime)
+                                          TimeStep *tStep)
 {
     TrabBoneMaterialStatus *status = static_cast< TrabBoneMaterialStatus * >( this->giveStatus(gp) );
 
@@ -199,11 +199,11 @@ TrabBoneMaterial :: computeDamageParam(double alpha, GaussPoint *gp)
 
 
 double
-TrabBoneMaterial :: computeDamage(GaussPoint *gp,  TimeStep *atTime)
+TrabBoneMaterial :: computeDamage(GaussPoint *gp,  TimeStep *tStep)
 {
     double alpha;
 
-    computeCumPlastStrain(alpha, gp, atTime);
+    computeCumPlastStrain(alpha, gp, tStep);
 
     double dam = computeDamageParam(alpha, gp);
 
@@ -214,7 +214,7 @@ TrabBoneMaterial :: computeDamage(GaussPoint *gp,  TimeStep *atTime)
 void
 TrabBoneMaterial :: giveRealStressVector_1d(FloatArray &answer, GaussPoint *gp,
                                             const FloatArray &totalStrain,
-                                            TimeStep *atTime)
+                                            TimeStep *tStep)
 {
     double epsnew, epsp;
     double dam;
@@ -230,7 +230,7 @@ TrabBoneMaterial :: giveRealStressVector_1d(FloatArray &answer, GaussPoint *gp,
 
     computeDensification(gp, totalStrain);
 
-    dam = computeDamage(gp, atTime);
+    dam = computeDamage(gp, tStep);
 
     epsp = status->giveTempPlasStrainVector().at(1);
     sigc = status->giveSigC();
@@ -384,9 +384,9 @@ TrabBoneMaterialStatus :: initTempStatus()
 
 
 void
-TrabBoneMaterialStatus :: updateYourself(TimeStep *atTime)
+TrabBoneMaterialStatus :: updateYourself(TimeStep *tStep)
 {
-    StructuralMaterialStatus :: updateYourself(atTime);
+    StructuralMaterialStatus :: updateYourself(tStep);
     this->alpha = this->tempAlpha;
     this->dam = this->tempDam;
     this->epsp = this->tempEpsp;

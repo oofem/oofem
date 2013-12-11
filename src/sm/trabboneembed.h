@@ -107,9 +107,9 @@ public:
 
     double computeDamageParam(double alpha, GaussPoint *gp);
 
-    double computeDamage(GaussPoint *gp, TimeStep *atTime);
+    double computeDamage(GaussPoint *gp, TimeStep *tStep);
 
-    virtual void computeCumPlastStrain(double &alpha, GaussPoint *gp, TimeStep *atTime);
+    virtual void computeCumPlastStrain(double &alpha, GaussPoint *gp, TimeStep *tStep);
 
     /// Constructs the anisotropic compliance tensor.
     void constructIsoComplTensor(FloatMatrix &answer, const double eps0, const double nu0);

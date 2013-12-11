@@ -135,9 +135,9 @@ TrPlaneStress2dXFEM :: computeConstitutiveMatrixAt(FloatMatrix &answer, MatRespo
 }
 
 void
-TrPlaneStress2dXFEM :: computeStressVector(FloatArray &answer, const FloatArray &strain, GaussPoint *gp, TimeStep *stepN)
+TrPlaneStress2dXFEM :: computeStressVector(FloatArray &answer, const FloatArray &strain, GaussPoint *gp, TimeStep *tStep)
 {
-    XfemElementInterface :: XfemElementInterface_computeStressVector(answer, strain, gp, stepN);
+    XfemElementInterface :: XfemElementInterface_computeStressVector(answer, strain, gp, tStep);
 }
 
 void TrPlaneStress2dXFEM :: computeStiffnessMatrix(FloatMatrix &answer, MatResponseMode rMode, TimeStep *tStep)
@@ -256,7 +256,7 @@ void TrPlaneStress2dXFEM :: giveInputRecord(DynamicInputRecord &input)
 
 int
 TrPlaneStress2dXFEM :: EIPrimaryUnknownMI_computePrimaryUnknownVectorAt(ValueModeType mode,
-                                                                        TimeStep *stepN, const FloatArray &coords,
+                                                                        TimeStep *tStep, const FloatArray &coords,
                                                                         FloatArray &answer)
 {
     // TODO: Validate implementation.
@@ -269,7 +269,7 @@ TrPlaneStress2dXFEM :: EIPrimaryUnknownMI_computePrimaryUnknownVectorAt(ValueMod
 
     XfemElementInterface_createEnrNmatrixAt(n, lcoords, * this);
 
-    this->computeVectorOf(EID_MomentumBalance, mode, stepN, u);
+    this->computeVectorOf(EID_MomentumBalance, mode, tStep, u);
     answer.beProductOf(n, u);
 
     return result;

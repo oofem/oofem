@@ -56,7 +56,7 @@ CohesiveInterfaceMaterial :: CohesiveInterfaceMaterial(int n, Domain *d) : Struc
 void
 CohesiveInterfaceMaterial :: giveRealStressVector(FloatArray &answer, GaussPoint *gp,
                                                   const FloatArray &totalStrain,
-                                                  TimeStep *atTime)
+                                                  TimeStep *tStep)
 //
 // returns real stress vector in 3d stress space of receiver according to
 // the previous level of stress and current strain increment
@@ -83,7 +83,7 @@ CohesiveInterfaceMaterial :: giveRealStressVector(FloatArray &answer, GaussPoint
 void
 CohesiveInterfaceMaterial :: giveStiffnessMatrix(FloatMatrix &answer,
                                                  MatResponseMode rMode,
-                                                 GaussPoint *gp, TimeStep *atTime)
+                                                 GaussPoint *gp, TimeStep *tStep)
 //
 // Returns characteristic material stiffness matrix of the receiver
 //
@@ -91,10 +91,10 @@ CohesiveInterfaceMaterial :: giveStiffnessMatrix(FloatMatrix &answer,
     MaterialMode mMode = gp->giveMaterialMode();
     switch ( mMode ) {
     case _3dInterface:
-        give3dInterfaceMaterialStiffnessMatrix(answer, rMode, gp, atTime);
+        give3dInterfaceMaterialStiffnessMatrix(answer, rMode, gp, tStep);
         break;
     default:
-        StructuralMaterial :: giveStiffnessMatrix(answer, rMode, gp, atTime);
+        StructuralMaterial :: giveStiffnessMatrix(answer, rMode, gp, tStep);
     }
 }
 
@@ -103,7 +103,7 @@ void
 CohesiveInterfaceMaterial :: give3dMaterialStiffnessMatrix(FloatMatrix &answer,
                                                            MatResponseMode mode,
                                                            GaussPoint *gp,
-                                                           TimeStep *atTime)
+                                                           TimeStep *tStep)
 //
 // computes full constitutive matrix for case of gp stress-strain state.
 //
@@ -114,7 +114,7 @@ CohesiveInterfaceMaterial :: give3dMaterialStiffnessMatrix(FloatMatrix &answer,
 
 void
 CohesiveInterfaceMaterial :: give3dInterfaceMaterialStiffnessMatrix(FloatMatrix &answer, MatResponseMode rMode,
-                                                                    GaussPoint *gp, TimeStep *atTime)
+                                                                    GaussPoint *gp, TimeStep *tStep)
 {
     // assemble elastic stiffness
     answer.resize(3, 3);
@@ -124,9 +124,9 @@ CohesiveInterfaceMaterial :: give3dInterfaceMaterialStiffnessMatrix(FloatMatrix 
 }
 
 int
-CohesiveInterfaceMaterial :: giveIPValue(FloatArray &answer, GaussPoint *aGaussPoint, InternalStateType type, TimeStep *atTime)
+CohesiveInterfaceMaterial :: giveIPValue(FloatArray &answer, GaussPoint *gp, InternalStateType type, TimeStep *tStep)
 {
-    return StructuralMaterial :: giveIPValue(answer, aGaussPoint, type, atTime);
+    return StructuralMaterial :: giveIPValue(answer, gp, type, tStep);
 }
 
 void
@@ -197,9 +197,9 @@ CohesiveInterfaceMaterialStatus :: initTempStatus()
 }
 
 void
-CohesiveInterfaceMaterialStatus :: updateYourself(TimeStep *atTime)
+CohesiveInterfaceMaterialStatus :: updateYourself(TimeStep *tStep)
 {
-    StructuralMaterialStatus :: updateYourself(atTime);
+    StructuralMaterialStatus :: updateYourself(tStep);
 }
 
 contextIOResultType

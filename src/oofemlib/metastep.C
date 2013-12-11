@@ -72,9 +72,9 @@ MetaStep :: initializeFrom(InputRecord *ir)
 }
 
 int
-MetaStep :: setStepBounds(int startStepNumber)
+MetaStep :: setStepBounds(int starttStepumber)
 {
-    sindex = startStepNumber;
+    sindex = starttStepumber;
 
     return sindex + numberOfSteps;
 }
@@ -86,10 +86,10 @@ MetaStep :: setNumberOfSteps(int numberOfSteps)
 }
 
 int
-MetaStep :: isStepValid(int solStepNumber)
+MetaStep :: isStepValid(int soltStepumber)
 {
-    if ( ( solStepNumber >= sindex ) &&
-         ( solStepNumber < ( sindex + numberOfSteps ) ) ) {
+    if ( ( soltStepumber >= sindex ) &&
+         ( soltStepumber < ( sindex + numberOfSteps ) ) ) {
         return 1;
     }
 

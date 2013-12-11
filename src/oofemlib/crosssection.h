@@ -183,11 +183,11 @@ public:
      * @param answer contain corresponding ip value, zero sized if not available
      * @param ip Integration point.
      * @param type Determines the type of internal variable.
-     * @param atTime Time step.
+     * @param tStep Time step.
      * @return Nonzero if o.k, zero otherwise.
      */
-    virtual int giveIPValue(FloatArray &answer, GaussPoint *ip, InternalStateType type, TimeStep *atTime)
-    { return ip->giveMaterial()->giveIPValue(answer, ip, type, atTime); }
+    virtual int giveIPValue(FloatArray &answer, GaussPoint *ip, InternalStateType type, TimeStep *tStep)
+    { return ip->giveMaterial()->giveIPValue(answer, ip, type, tStep); }
 
 
 #ifdef __PARALLEL_MODE
@@ -199,23 +199,23 @@ public:
      * no data are exchanged. For "nonlocal" constitutive models the send/receive of local values which
      * undergo averaging is performed between local and corresponding remote elements.
      * @param buff Communication buffer.
-     * @param stepN Solution step.
+     * @param tStep Solution step.
      * @param ip Integration point.
      * @return Nonzero if successful.
      */
-    virtual int packUnknowns(CommunicationBuffer &buff, TimeStep *stepN, GaussPoint *ip)
-    { return ip->giveMaterial()->packUnknowns(buff, stepN, ip); }
+    virtual int packUnknowns(CommunicationBuffer &buff, TimeStep *tStep, GaussPoint *ip)
+    { return ip->giveMaterial()->packUnknowns(buff, tStep, ip); }
     /**
      * Unpack and updates all necessary data of given integration point (according to element parallel_mode)
      * into given communication buffer.
      * @see packUnknowns service.
      * @param buff Communication buffer.
-     * @param stepN Solution step.
+     * @param tStep Solution step.
      * @param ip Integration point.
      * @return Nonzero if successful.
      */
-    virtual int unpackAndUpdateUnknowns(CommunicationBuffer &buff, TimeStep *stepN, GaussPoint *ip)
-    { return ip->giveMaterial()->unpackAndUpdateUnknowns(buff, stepN, ip); }
+    virtual int unpackAndUpdateUnknowns(CommunicationBuffer &buff, TimeStep *tStep, GaussPoint *ip)
+    { return ip->giveMaterial()->unpackAndUpdateUnknowns(buff, tStep, ip); }
     /**
      * Estimates the necessary pack size to hold all packed data of receiver.
      * The corresponding material model  service is invoked. The

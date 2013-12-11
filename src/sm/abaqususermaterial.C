@@ -487,7 +487,7 @@ void AbaqusUserMaterialStatus :: updateYourself(TimeStep *tStep)
     stateVector = tempStateVector;
 }
 
-int AbaqusUserMaterial :: giveIPValue(FloatArray &answer, GaussPoint *gp, InternalStateType type, TimeStep *atTime)
+int AbaqusUserMaterial :: giveIPValue(FloatArray &answer, GaussPoint *gp, InternalStateType type, TimeStep *tStep)
 {
     AbaqusUserMaterialStatus *ms = static_cast< AbaqusUserMaterialStatus * >( this->giveStatus(gp) );
     if ( type == IST_Undefined ) {
@@ -495,7 +495,7 @@ int AbaqusUserMaterial :: giveIPValue(FloatArray &answer, GaussPoint *gp, Intern
         answer = ms->giveStateVector();
         return 1;
     } else {
-        return StructuralMaterial :: giveIPValue(answer, gp, type, atTime);
+        return StructuralMaterial :: giveIPValue(answer, gp, type, tStep);
     }
 }
 } // end namespace oofem

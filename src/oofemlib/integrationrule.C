@@ -117,11 +117,11 @@ IntegrationRule :: getIntegrationPoint(int i)
 }
 
 void
-IntegrationRule :: printOutputAt(FILE *file, TimeStep *stepN)
+IntegrationRule :: printOutputAt(FILE *file, TimeStep *tStep)
 // Performs end-of-step operations.
 {
     for ( int i = 0; i < numberOfIntegrationPoints; i++ ) {
-        gaussPointArray [ i ]->printOutputAt(file, stepN);
+        gaussPointArray [ i ]->printOutputAt(file, tStep);
     }
 }
 

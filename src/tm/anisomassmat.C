@@ -82,7 +82,7 @@ AnisotropicMassTransferMaterial :: giveFluxVector(FloatArray &answer, GaussPoint
 
 
 void
-AnisotropicMassTransferMaterial :: giveCharacteristicMatrix(FloatMatrix &answer, MatResponseMode mode, GaussPoint *gp, TimeStep *atTime)
+AnisotropicMassTransferMaterial :: giveCharacteristicMatrix(FloatMatrix &answer, MatResponseMode mode, GaussPoint *gp, TimeStep *tStep)
 {
     MaterialMode mMode = gp->giveMaterialMode();
     switch  ( mMode ) {
@@ -99,7 +99,7 @@ AnisotropicMassTransferMaterial :: giveCharacteristicMatrix(FloatMatrix &answer,
 
 
 double
-AnisotropicMassTransferMaterial :: giveCharacteristicValue(MatResponseMode mode, GaussPoint *gp, TimeStep *atTime)
+AnisotropicMassTransferMaterial :: giveCharacteristicValue(MatResponseMode mode, GaussPoint *gp, TimeStep *tStep)
 {
     _error2( "giveCharacteristicValue : unknown mode (%s)", __MatResponseModeToString(mode) );
 

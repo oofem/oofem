@@ -60,7 +60,7 @@ GravityPressure :: initializeFrom(InputRecord *ir)
 }
 
 void
-GravityPressure :: computeValueAt(FloatArray &answer, TimeStep *atTime, FloatArray &coords, ValueModeType mode)
+GravityPressure :: computeValueAt(FloatArray &answer, TimeStep *tStep, FloatArray &coords, ValueModeType mode)
 {
     //Need to include the information on the fluid
     //This assumes that the z-direction represents gravity.
@@ -101,7 +101,7 @@ GravityPressure :: computeValueAt(FloatArray &answer, TimeStep *atTime, FloatArr
 
     //Subtract zero level. Assume that pressure is positive.
     double pressureHead = coordsLocal.at(1);
-    computeComponentArrayAt(answer, atTime, mode);
+    computeComponentArrayAt(answer, tStep, mode);
     answer.times(pressureHead);
 }
 } // end namespace oofem

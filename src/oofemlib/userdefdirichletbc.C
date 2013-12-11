@@ -60,9 +60,9 @@ UserDefDirichletBC :: ~UserDefDirichletBC()
 
 
 double
-UserDefDirichletBC :: give(Dof *dof, ValueModeType mode, TimeStep *stepN)
+UserDefDirichletBC :: give(Dof *dof, ValueModeType mode, TimeStep *tStep)
 {
-    double factor = this->giveLoadTimeFunction()->evaluate(stepN, mode);
+    double factor = this->giveLoadTimeFunction()->evaluate(tStep, mode);
     DofManager *dMan = dof->giveDofManager();
 
 
@@ -94,7 +94,7 @@ UserDefDirichletBC :: give(Dof *dof, ValueModeType mode, TimeStep *stepN)
 
 
     // Time
-    PyObject *pTargetTime = PyFloat_FromDouble( stepN->giveTargetTime() );
+    PyObject *pTargetTime = PyFloat_FromDouble( tStep->giveTargetTime() );
     PyTuple_SetItem(pArgs, 2, pTargetTime);
 
     // Value returned from the Python function

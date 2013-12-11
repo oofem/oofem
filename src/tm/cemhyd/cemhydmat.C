@@ -102,7 +102,7 @@ CemhydMat :: ~CemhydMat()
 
 //returns hydration power [W/m3 of concrete]
 void
-CemhydMat :: computeInternalSourceVector(FloatArray &val, GaussPoint *gp, TimeStep *atTime, ValueModeType mode)
+CemhydMat :: computeInternalSourceVector(FloatArray &val, GaussPoint *gp, TimeStep *tStep, ValueModeType mode)
 {
     double averageTemperature;
     CemhydMatStatus *ms = ( CemhydMatStatus * ) this->giveStatus(gp);
@@ -112,8 +112,8 @@ CemhydMat :: computeInternalSourceVector(FloatArray &val, GaussPoint *gp, TimeSt
         averageTemperature = ms->giveAverageTemperature();
         if ( mode == VM_Total ) {
             //for nonlinear solver, return the last value even no time has elapsed
-            if ( atTime->giveTargetTime() != ms->LastCallTime ) {
-                val.at(1) = ms->GivePower( averageTemperature, atTime->giveTargetTime() );
+            if ( tStep->giveTargetTime() != ms->LastCallTime ) {
+                val.at(1) = ms->GivePower( averageTemperature, tStep->giveTargetTime() );
             } else {
                 val.at(1) = ms->PartHeat;
             }
@@ -257,7 +257,7 @@ double CemhydMat :: giveConcreteDensity(GaussPoint *gp)
 }
 
 double
-CemhydMat :: giveCharacteristicValue(MatResponseMode mode, GaussPoint *gp, TimeStep *atTime)
+CemhydMat :: giveCharacteristicValue(MatResponseMode mode, GaussPoint *gp, TimeStep *tStep)
 {
     if ( mode == Capacity ) {
         return ( giveConcreteCapacity(gp) * giveConcreteDensity(gp) );
@@ -266,7 +266,7 @@ CemhydMat :: giveCharacteristicValue(MatResponseMode mode, GaussPoint *gp, TimeS
         //it suffices to compute derivative of Arrhenius equation
         //double actualTemperature = status->giveTempField().at(1);
         double lastEquilibratedTemperature = status->giveField().at(1);
-        //double dt = atTime->giveTimeIncrement();
+        //double dt = tStep->giveTimeIncrement();
         double krate, EaOverR, val;
         CemhydMatStatus *ms = ( CemhydMatStatus * ) this->giveStatus(gp);
         if ( MasterCemhydMatStatus ) {
@@ -300,30 +300,30 @@ CemhydMat :: giveCharacteristicValue(MatResponseMode mode, GaussPoint *gp, TimeS
 
 
 int
-CemhydMat :: giveIPValue(FloatArray &answer, GaussPoint *aGaussPoint, InternalStateType type, TimeStep *atTime)
+CemhydMat :: giveIPValue(FloatArray &answer, GaussPoint *gp, InternalStateType type, TimeStep *tStep)
 {
     CemhydMatStatus *ms;
     if ( MasterCemhydMatStatus ) {
         ms = MasterCemhydMatStatus;
     } else {
-        ms = ( CemhydMatStatus * ) this->giveStatus(aGaussPoint);
+        ms = ( CemhydMatStatus * ) this->giveStatus(gp);
     }
 
     if ( type == IST_HydrationDegree ) {
         answer.resize(1);
-        answer.at(1) = this->giveDoHActual(aGaussPoint);
+        answer.at(1) = this->giveDoHActual(gp);
         return 1;
     } else if ( type == IST_Density ) {
         answer.resize(1);
-        answer.at(1) = this->giveConcreteDensity(aGaussPoint);
+        answer.at(1) = this->giveConcreteDensity(gp);
         return 1;
     } else if ( type == IST_ThermalConductivityIsotropic ) {
         answer.resize(1);
-        answer.at(1) = this->giveIsotropicConductivity(aGaussPoint);
+        answer.at(1) = this->giveIsotropicConductivity(gp);
         return 1;
     } else if ( type == IST_HeatCapacity ) {
         answer.resize(1);
-        answer.at(1) = this->giveConcreteCapacity(aGaussPoint);
+        answer.at(1) = this->giveConcreteCapacity(gp);
         return 1;
     } else if ( type == IST_AverageTemperature ) {
         answer.resize(1);
@@ -346,7 +346,7 @@ CemhydMat :: giveIPValue(FloatArray &answer, GaussPoint *aGaussPoint, InternalSt
         answer.at(1) = ms->last_values [ 5 ];
         return 1;
     } else {
-        return TransportMaterial :: giveIPValue(answer, aGaussPoint, type, atTime);
+        return TransportMaterial :: giveIPValue(answer, gp, type, tStep);
     }
 }
 
@@ -14384,9 +14384,9 @@ void CemhydMatStatus :: GetInitClinkerPhases(double &c3s, double &c2s, double &c
 
 #ifdef __TM_MODULE  //transport module for OOFEM
 void
-CemhydMatStatus :: updateYourself(TimeStep *atTime)
+CemhydMatStatus :: updateYourself(TimeStep *tStep)
 {
-    TransportMaterialStatus :: updateYourself(atTime);
+    TransportMaterialStatus :: updateYourself(tStep);
 };
 
 double CemhydMatStatus :: giveAverageTemperature()
@@ -14406,7 +14406,7 @@ double CemhydMatStatus :: giveAverageTemperature()
 
 
 void
-CemhydMatStatus :: printOutputAt(FILE *file, TimeStep *atTime)
+CemhydMatStatus :: printOutputAt(FILE *file, TimeStep *tStep)
 {
     CemhydMat *cemhydmat = ( CemhydMat * ) this->gp->giveMaterial();
     CemhydMatStatus *ms = this;
@@ -14414,7 +14414,7 @@ CemhydMatStatus :: printOutputAt(FILE *file, TimeStep *atTime)
         ms = cemhydmat->MasterCemhydMatStatus;
     }
 
-    TransportMaterialStatus :: printOutputAt(file, atTime);
+    TransportMaterialStatus :: printOutputAt(file, tStep);
     fprintf(file, "   status {");
     fprintf( file, "cyc %d  time %e  DoH %f  conductivity %f  capacity %f  density %f", cemhydmat->giveCycleNumber(this->gp), 3600 * cemhydmat->giveTimeOfCycle(this->gp), cemhydmat->giveDoHActual(this->gp), cemhydmat->giveIsotropicConductivity(this->gp), cemhydmat->giveConcreteCapacity(this->gp), cemhydmat->giveConcreteDensity(this->gp) );
     if ( ms->Calculate_elastic_homogenization ) {

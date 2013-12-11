@@ -99,12 +99,12 @@ QSpaceGrad :: computeGaussPoints()
 
 
 void
-QSpaceGrad :: computeNkappaMatrixAt(GaussPoint *aGaussPoint, FloatMatrix &answer)
+QSpaceGrad :: computeNkappaMatrixAt(GaussPoint *gp, FloatMatrix &answer)
 // Returns the displacement interpolation matrix {N} of the receiver, eva-
-// luated at aGaussPoint.
+// luated at gp.
 {
     FloatArray n(8);
-    this->interpolation.evalN( n, * aGaussPoint->giveCoordinates(), FEIElementGeometryWrapper(this) );
+    this->interpolation.evalN( n, * gp->giveCoordinates(), FEIElementGeometryWrapper(this) );
     answer.resize(1, 8);
     answer.zero();
 
@@ -114,7 +114,7 @@ QSpaceGrad :: computeNkappaMatrixAt(GaussPoint *aGaussPoint, FloatMatrix &answer
 }
 
 void
-QSpaceGrad :: computeBkappaMatrixAt(GaussPoint *aGaussPoint, FloatMatrix &answer)
+QSpaceGrad :: computeBkappaMatrixAt(GaussPoint *gp, FloatMatrix &answer)
 {
     FloatMatrix dnx;
     IntArray a(8);
@@ -125,7 +125,7 @@ QSpaceGrad :: computeBkappaMatrixAt(GaussPoint *aGaussPoint, FloatMatrix &answer
     answer.resize(3, 8);
     answer.zero();
 
-    this->interpolation.evaldNdx( dnx, * aGaussPoint->giveCoordinates(), FEIElementGeometryWrapper(this) );
+    this->interpolation.evaldNdx( dnx, * gp->giveCoordinates(), FEIElementGeometryWrapper(this) );
     for ( int i = 1; i <= 8; i++ ) {
         answer.at(1, i) = dnx.at(i, 1);
         answer.at(2, i) = dnx.at(i, 2);
@@ -135,15 +135,15 @@ QSpaceGrad :: computeBkappaMatrixAt(GaussPoint *aGaussPoint, FloatMatrix &answer
 
 
 void
-QSpaceGrad :: computeNLBMatrixAt(FloatMatrix &answer, GaussPoint *aGaussPoint, int i)
+QSpaceGrad :: computeNLBMatrixAt(FloatMatrix &answer, GaussPoint *gp, int i)
 // Returns the [60x60] nonlinear part of strain-displacement matrix {B} of the receiver,
-// evaluated at aGaussPoint
+// evaluated at gp
 
 {
     FloatMatrix dnx;
 
     // compute the derivatives of shape functions
-    this->interpolation.evaldNdx( dnx, * aGaussPoint->giveCoordinates(), FEIElementGeometryWrapper(this) );
+    this->interpolation.evaldNdx( dnx, * gp->giveCoordinates(), FEIElementGeometryWrapper(this) );
 
     answer.resize(60, 60);
     answer.zero();

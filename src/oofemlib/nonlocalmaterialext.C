@@ -83,22 +83,22 @@ NonlocalMaterialExtensionInterface :: NonlocalMaterialExtensionInterface(Domain 
 }
 
 void
-NonlocalMaterialExtensionInterface :: updateDomainBeforeNonlocAverage(TimeStep *atTime)
+NonlocalMaterialExtensionInterface :: updateDomainBeforeNonlocAverage(TimeStep *tStep)
 {
     int nelem, i;
     Domain *d = this->giveDomain();
     nelem = d->giveNumberOfElements();
 
-    if ( d->giveNonlocalUpdateStateCounter() == atTime->giveSolutionStateCounter() ) {
+    if ( d->giveNonlocalUpdateStateCounter() == tStep->giveSolutionStateCounter() ) {
         return; // already updated
     }
 
     for ( i = 1; i <= nelem; i++ ) {
-        d->giveElement(i)->updateBeforeNonlocalAverage(atTime);
+        d->giveElement(i)->updateBeforeNonlocalAverage(tStep);
     }
 
     // mark last update counter to prevent multiple updates
-    d->setNonlocalUpdateStateCounter( atTime->giveSolutionStateCounter() );
+    d->setNonlocalUpdateStateCounter( tStep->giveSolutionStateCounter() );
 }
 
 void

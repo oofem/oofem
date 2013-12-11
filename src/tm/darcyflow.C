@@ -181,11 +181,11 @@ void DarcyFlow :: DumpMatricesToFile(FloatMatrix *LHS, FloatArray *RHS, FloatArr
     }
     fclose(SolutionFile);
 }
-void DarcyFlow :: printDofOutputAt(FILE *stream, Dof *iDof, TimeStep *atTime)
+void DarcyFlow :: printDofOutputAt(FILE *stream, Dof *iDof, TimeStep *tStep)
 {
     DofIDItem type = iDof->giveDofID();
     if ( type == P_f ) {
-        iDof->printSingleOutputAt(stream, atTime, 'p', VM_Total, 1);
+        iDof->printSingleOutputAt(stream, tStep, 'p', VM_Total, 1);
     } else {
         _error("printDofOutputAt: unsupported dof type");
     }

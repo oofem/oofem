@@ -91,10 +91,10 @@ public:
     virtual ~MisesMat();
 
     void performPlasticityReturn(GaussPoint *gp, const FloatArray &totalStrain);
-    double computeDamage(GaussPoint *gp, TimeStep *atTime);
+    double computeDamage(GaussPoint *gp, TimeStep *tStep);
     double computeDamageParam(double tempKappa);
     double computeDamageParamPrime(double tempKappa);
-    virtual void computeCumPlastStrain(double &kappa, GaussPoint *gp, TimeStep *atTime);
+    virtual void computeCumPlastStrain(double &kappa, GaussPoint *gp, TimeStep *tStep);
 
     virtual int hasMaterialModeCapability(MaterialMode mode);
 

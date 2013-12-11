@@ -102,11 +102,11 @@ QTRSpace :: giveDofManDofIDMask(int inode, EquationID ut, IntArray &answer) cons
 
 
 double
-QTRSpace :: computeVolumeAround(GaussPoint *aGaussPoint)
-// Returns the portion of the receiver which is attached to aGaussPoint.
+QTRSpace :: computeVolumeAround(GaussPoint *gp)
+// Returns the portion of the receiver which is attached to gp.
 {
-    double determinant = fabs( ( this->interpolation.giveTransformationJacobian( * aGaussPoint->giveCoordinates(), FEIElementGeometryWrapper(this) ) ) );
-    double weight = aGaussPoint->giveWeight();
+    double determinant = fabs( ( this->interpolation.giveTransformationJacobian( * gp->giveCoordinates(), FEIElementGeometryWrapper(this) ) ) );
+    double weight = gp->giveWeight();
     return ( determinant * weight );
 }
 
@@ -130,14 +130,14 @@ QTRSpace :: giveMaterialMode()
 
 
 void
-QTRSpace :: computeBmatrixAt(GaussPoint *aGaussPoint, FloatMatrix &answer, int li, int ui)
+QTRSpace :: computeBmatrixAt(GaussPoint *gp, FloatMatrix &answer, int li, int ui)
 // Returns the [6x30] strain-displacement matrix {B} of the receiver, eva-
-// luated at aGaussPoint.
+// luated at gp.
 // B matrix  -  6 rows : epsilon-X, epsilon-Y, epsilon-Z, gamma-YZ, gamma-ZX, gamma-XY  :
 {
     FloatMatrix dnx;
 
-    this->interpolation.evaldNdx( dnx, * aGaussPoint->giveCoordinates(), FEIElementGeometryWrapper(this) );
+    this->interpolation.evaldNdx( dnx, * gp->giveCoordinates(), FEIElementGeometryWrapper(this) );
 
     answer.resize(6, 30);
     answer.zero();
@@ -160,11 +160,11 @@ QTRSpace :: computeBmatrixAt(GaussPoint *aGaussPoint, FloatMatrix &answer, int l
 
 
 void
-QTRSpace :: computeBHmatrixAt(GaussPoint *aGaussPoint, FloatMatrix &answer)
+QTRSpace :: computeBHmatrixAt(GaussPoint *gp, FloatMatrix &answer)
 {
     FloatMatrix dnx;
 
-    this->interpolation.evaldNdx( dnx, * aGaussPoint->giveCoordinates(), FEIElementGeometryWrapper(this) );
+    this->interpolation.evaldNdx( dnx, * gp->giveCoordinates(), FEIElementGeometryWrapper(this) );
 
     answer.resize(9, 30);
     answer.zero();

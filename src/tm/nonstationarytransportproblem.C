@@ -359,10 +359,10 @@ void NonStationaryTransportProblem :: solveYourselfAt(TimeStep *tStep)
 }
 
 void
-NonStationaryTransportProblem :: updateYourself(TimeStep *stepN)
+NonStationaryTransportProblem :: updateYourself(TimeStep *tStep)
 {
-    this->updateInternalState(stepN);
-    EngngModel :: updateYourself(stepN);
+    this->updateInternalState(tStep);
+    EngngModel :: updateYourself(tStep);
 
     ///@todo Find a cleaner way to do these cemhyd hacks
 #ifdef __CEMHYD_MODULE
@@ -374,7 +374,7 @@ NonStationaryTransportProblem :: updateYourself(TimeStep *stepN)
             CemhydMat *cem = dynamic_cast< CemhydMat * >( elem->giveMaterial() );
             if ( cem ) {
                 cem->clearWeightTemperatureProductVolume(elem);
-                cem->storeWeightTemperatureProductVolume(elem, stepN);
+                cem->storeWeightTemperatureProductVolume(elem, tStep);
             }
         }
         //perform averaging on each material instance
@@ -393,7 +393,7 @@ NonStationaryTransportProblem :: updateYourself(TimeStep *stepN)
 
 
 void
-NonStationaryTransportProblem :: updateInternalState(TimeStep *stepN)
+NonStationaryTransportProblem :: updateInternalState(TimeStep *tStep)
 {
     int nelem;
     Domain *domain;
@@ -403,18 +403,18 @@ NonStationaryTransportProblem :: updateInternalState(TimeStep *stepN)
 
         if ( requiresUnknownsDictionaryUpdate() ) {
             //update temperature vector
-            UnknownsField->update( VM_Total, stepN, * ( this->UnknownsField->giveSolutionVector(stepN) ) );
+            UnknownsField->update( VM_Total, tStep, * ( this->UnknownsField->giveSolutionVector(tStep) ) );
             //update Rhs vector
-            UnknownsField->update(VM_RhsTotal, stepN, bcRhs);
+            UnknownsField->update(VM_RhsTotal, tStep, bcRhs);
         }
 
-        if ( internalVarUpdateStamp != stepN->giveSolutionStateCounter() ) {
+        if ( internalVarUpdateStamp != tStep->giveSolutionStateCounter() ) {
             nelem = domain->giveNumberOfElements();
             for ( int j = 1; j <= nelem; j++ ) {
-                domain->giveElement(j)->updateInternalState(stepN);
+                domain->giveElement(j)->updateInternalState(tStep);
             }
 
-            internalVarUpdateStamp = stepN->giveSolutionStateCounter();
+            internalVarUpdateStamp = tStep->giveSolutionStateCounter();
         }
     }
 }
@@ -471,7 +471,7 @@ NonStationaryTransportProblem :: restoreContext(DataStream *stream, ContextMode 
     int istep, iversion;
     FILE *file = NULL;
 
-    this->resolveCorrespondingStepNumber(istep, iversion, obj);
+    this->resolveCorrespondingtStepumber(istep, iversion, obj);
 
     if ( stream == NULL ) {
         if ( !this->giveContextFile(& file, istep, iversion, contextMode_read) ) {
@@ -538,7 +538,7 @@ NonStationaryTransportProblem :: updateDomainLinks()
 }
 
 int
-NonStationaryTransportProblem :: giveUnknownDictHashIndx(ValueModeType mode, TimeStep *stepN)
+NonStationaryTransportProblem :: giveUnknownDictHashIndx(ValueModeType mode, TimeStep *tStep)
 {
     if ( mode == VM_Total ) { //Nodal temperature
         return 0;
@@ -638,9 +638,9 @@ NonStationaryTransportProblem :: assembleAlgorithmicPartOfRhs(FloatArray &answer
 
 
 void
-NonStationaryTransportProblem :: printDofOutputAt(FILE *stream, Dof *iDof, TimeStep *atTime)
+NonStationaryTransportProblem :: printDofOutputAt(FILE *stream, Dof *iDof, TimeStep *tStep)
 {
-    iDof->printSingleOutputAt(stream, atTime, 'f', VM_Total);
+    iDof->printSingleOutputAt(stream, tStep, 'f', VM_Total);
 }
 
 void

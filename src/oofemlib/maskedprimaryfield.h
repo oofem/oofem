@@ -60,9 +60,9 @@ public:
     MaskedPrimaryField(FieldType b, PrimaryField *m, IntArray &dofIdMask) : Field(b), mask(dofIdMask) { master = m; }
 
     virtual int evaluateAt(FloatArray &answer, FloatArray &coords,
-                           ValueModeType mode, TimeStep *atTime);
+                           ValueModeType mode, TimeStep *tStep);
     virtual int evaluateAt(FloatArray &answer, DofManager *dman,
-                           ValueModeType mode, TimeStep *atTime);
+                           ValueModeType mode, TimeStep *tStep);
 
     virtual contextIOResultType restoreContext(DataStream *stream, ContextMode mode) { return CIO_OK; }
     virtual contextIOResultType saveContext(DataStream *stream, ContextMode mode) { return CIO_OK; }

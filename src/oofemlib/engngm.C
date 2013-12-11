@@ -647,7 +647,7 @@ EngngModel :: solveYourself()
     this->timer.startTimer(EngngModelTimer :: EMTT_AnalysisTimer);
 
     if ( this->currentStep ) {
-        smstep = this->currentStep->giveMetaStepNumber();
+        smstep = this->currentStep->giveMetatStepumber();
         sjstep = this->giveMetaStep(smstep)->giveStepRelativeNumber( this->currentStep->giveNumber() ) + 1;
     }
 
@@ -725,7 +725,7 @@ EngngModel :: updateAttributes(MetaStep *mStep)
 
 
 void
-EngngModel :: updateYourself(TimeStep *stepN)
+EngngModel :: updateYourself(TimeStep *tStep)
 {
     int ndomains = this->giveNumberOfDomains();
     int nnodes;
@@ -740,7 +740,7 @@ EngngModel :: updateYourself(TimeStep *stepN)
 
         nnodes = domain->giveNumberOfDofManagers();
         for ( int j = 1; j <= nnodes; j++ ) {
-            domain->giveDofManager(j)->updateYourself(stepN);
+            domain->giveDofManager(j)->updateYourself(tStep);
         }
 
         // Update xfem manager if it is present
@@ -765,7 +765,7 @@ EngngModel :: updateYourself(TimeStep *stepN)
             }
 
 #endif
-            elem->updateYourself(stepN);
+            elem->updateYourself(tStep);
         }
 
 #  ifdef VERBOSE
@@ -775,32 +775,32 @@ EngngModel :: updateYourself(TimeStep *stepN)
 
     // if there is an error estimator, it should be updated so that values can be exported.
     if ( this->defaultErrEstimator ) {
-        this->defaultErrEstimator->estimateError(equilibratedEM, stepN);
+        this->defaultErrEstimator->estimateError(equilibratedEM, tStep);
     }
 }
 
 void
-EngngModel :: terminate(TimeStep *stepN)
+EngngModel :: terminate(TimeStep *tStep)
 {
-    this->doStepOutput(stepN);
+    this->doStepOutput(tStep);
     fflush( this->giveOutputStream() );
-    this->saveStepContext(stepN);
+    this->saveStepContext(tStep);
 }
 
 
 void
-EngngModel :: doStepOutput(TimeStep *stepN)
+EngngModel :: doStepOutput(TimeStep *tStep)
 {
     FILE *File = this->giveOutputStream();
 
     // print output
-    this->printOutputAt(File, stepN);
+    this->printOutputAt(File, tStep);
     // export using export manager
-    exportModuleManager->doOutput(stepN);
+    exportModuleManager->doOutput(tStep);
 }
 
 void
-EngngModel :: saveStepContext(TimeStep *stepN)
+EngngModel :: saveStepContext(TimeStep *tStep)
 {
     // save context if required
     // default - save only if ALWAYS is set ( see cltypes.h )
@@ -809,7 +809,7 @@ EngngModel :: saveStepContext(TimeStep *stepN)
          ( this->giveContextOutputMode() == COM_Required ) ) {
         this->saveContext(NULL, CM_State);
     } else if ( this->giveContextOutputMode() == COM_UserDefined ) {
-        if ( stepN->giveNumber() % this->giveContextOutputStep() == 0 ) {
+        if ( tStep->giveNumber() % this->giveContextOutputStep() == 0 ) {
             this->saveContext(NULL, CM_State);
         }
     }
@@ -817,16 +817,16 @@ EngngModel :: saveStepContext(TimeStep *stepN)
 
 
 void
-EngngModel :: printOutputAt(FILE *File, TimeStep *stepN)
+EngngModel :: printOutputAt(FILE *File, TimeStep *tStep)
 {
     //FILE* File = this -> giveDomain() -> giveOutputStream() ;
     int domCount = 0;
     Domain *domain;
 
-    // fprintf (File,"\nOutput for time step number %d \n\n",stepN->giveNumber());
+    // fprintf (File,"\nOutput for time step number %d \n\n",tStep->giveNumber());
     for ( int idomain = 1; idomain <= this->ndomains; idomain++ ) {
         domain = this->giveDomain(idomain);
-        domCount += domain->giveOutputManager()->testTimeStepOutput(stepN);
+        domCount += domain->giveOutputManager()->testTimeStepOutput(tStep);
     }
 
     if ( domCount == 0 ) {
@@ -834,14 +834,14 @@ EngngModel :: printOutputAt(FILE *File, TimeStep *stepN)
     }
 
     fprintf(File, "\n==============================================================");
-    fprintf( File, "\nOutput for time % .8e ", stepN->giveTargetTime() * this->giveVariableScale(VST_Time) );
+    fprintf( File, "\nOutput for time % .8e ", tStep->giveTargetTime() * this->giveVariableScale(VST_Time) );
     fprintf(File, "\n==============================================================\n");
     for ( int idomain = 1; idomain <= this->ndomains; idomain++ ) {
         domain = this->giveDomain(idomain);
         fprintf( File, "Output for domain %3d\n", domain->giveNumber() );
 
-        domain->giveOutputManager()->doDofManOutput(File, stepN);
-        domain->giveOutputManager()->doElementOutput(File, stepN);
+        domain->giveOutputManager()->doDofManOutput(File, tStep);
+        domain->giveOutputManager()->doElementOutput(File, tStep);
     }
 }
 
@@ -1421,7 +1421,7 @@ contextIOResultType EngngModel :: saveContext(DataStream *stream, ContextMode mo
 
 
     // store nMethod
-    NumericalMethod *nmethod = this->giveNumericalMethod( this->giveMetaStep( giveCurrentStep()->giveMetaStepNumber() ) );
+    NumericalMethod *nmethod = this->giveNumericalMethod( this->giveMetaStep( giveCurrentStep()->giveMetatStepumber() ) );
     if ( nmethod ) {
         if ( ( iores = nmethod->saveContext(stream, mode) ) != CIO_OK ) {
             THROW_CIOERR(iores);
@@ -1467,7 +1467,7 @@ contextIOResultType EngngModel :: restoreContext(DataStream *stream, ContextMode
     Domain *domain;
     FILE *file = NULL;
 
-    this->resolveCorrespondingStepNumber(istep, iversion, obj);
+    this->resolveCorrespondingtStepumber(istep, iversion, obj);
     OOFEM_LOG_RELEVANT("Restoring context for time step %d.%d\n", istep, iversion);
 
     if ( stream == NULL ) {
@@ -1490,7 +1490,7 @@ contextIOResultType EngngModel :: restoreContext(DataStream *stream, ContextMode
 
     // this->updateAttributes (currentStep);
 
-    int pmstep = currentStep->giveMetaStepNumber();
+    int pmstep = currentStep->giveMetatStepumber();
     if ( nMetaSteps ) {
         if ( !this->giveMetaStep(pmstep)->isStepValid(istep - 1) ) {
             pmstep--;
@@ -1555,7 +1555,7 @@ contextIOResultType EngngModel :: restoreContext(DataStream *stream, ContextMode
 
 
 void
-EngngModel :: resolveCorrespondingStepNumber(int &istep, int &iversion, void *obj)
+EngngModel :: resolveCorrespondingtStepumber(int &istep, int &iversion, void *obj)
 {
     //
     // returns corresponding step number
@@ -1582,12 +1582,12 @@ EngngModel :: resolveCorrespondingStepNumber(int &istep, int &iversion, void *ob
 MetaStep *
 EngngModel :: giveCurrentMetaStep()
 {
-    return this->giveMetaStep( this->giveCurrentStep()->giveMetaStepNumber() );
+    return this->giveMetaStep( this->giveCurrentStep()->giveMetatStepumber() );
 }
 
 
 int
-EngngModel :: giveContextFile(FILE **contextFile, int stepNumber, int stepVersion, ContextFileMode cmode, int errLevel)
+EngngModel :: giveContextFile(FILE **contextFile, int tStepumber, int stepVersion, ContextFileMode cmode, int errLevel)
 //
 //
 // assigns context file of given step number to stream
@@ -1596,7 +1596,7 @@ EngngModel :: giveContextFile(FILE **contextFile, int stepNumber, int stepVersio
 {
     std :: string fname = this->coreOutputFileName;
     char fext [ 100 ];
-    sprintf(fext, ".%d.%d.osf", stepNumber, stepVersion);
+    sprintf(fext, ".%d.%d.osf", tStepumber, stepVersion);
     fname += fext;
 
     if ( cmode ==  contextMode_read ) {
@@ -1617,11 +1617,11 @@ EngngModel :: giveContextFile(FILE **contextFile, int stepNumber, int stepVersio
 }
 
 bool
-EngngModel :: testContextFile(int stepNumber, int stepVersion)
+EngngModel :: testContextFile(int tStepumber, int stepVersion)
 {
     std :: string fname = this->coreOutputFileName;
     char fext [ 100 ];
-    sprintf(fext, ".%d.%d.osf", stepNumber, stepVersion);
+    sprintf(fext, ".%d.%d.osf", tStepumber, stepVersion);
     fname.append(fext);
 
 #ifdef HAVE_ACCESS
@@ -1885,7 +1885,7 @@ void EngngModel :: drawNodes(oofegGraphicContext &context) {
 
 #ifdef __PARALLEL_MODE
 void
-EngngModel :: balanceLoad(TimeStep *atTime)
+EngngModel :: balanceLoad(TimeStep *tStep)
 {
     LoadBalancerMonitor :: LoadBalancerDecisionType _d;
     this->giveLoadBalancerMonitor();
@@ -1895,16 +1895,16 @@ EngngModel :: balanceLoad(TimeStep *atTime)
     //print statistics for current step
     lb->printStatistics();
 
-    if ( atTime->isNotTheLastStep() ) {
-        _d = lbm->decide(atTime);
+    if ( tStep->isNotTheLastStep() ) {
+        _d = lbm->decide(tStep);
         if ( ( _d == LoadBalancerMonitor :: LBD_RECOVER ) ||
-             ( ( atTime->isTheFirstStep() ) && force_load_rebalance_in_first_step ) ) {
+             ( ( tStep->isTheFirstStep() ) && force_load_rebalance_in_first_step ) ) {
             this->timer.startTimer(EngngModelTimer :: EMTT_LoadBalancingTimer);
 
             // determine nwe partitioning
             lb->calculateLoadTransfer();
             // pack e-model solution data into dof dictionaries
-            this->packMigratingData(atTime);
+            this->packMigratingData(tStep);
             // migrate data
             lb->migrateLoad( this->giveDomain(1) );
             // renumber itself
@@ -1930,7 +1930,7 @@ EngngModel :: balanceLoad(TimeStep *atTime)
 
  #endif
             // unpack (restore) e-model solution data from dof dictionaries
-            this->unpackMigratingData(atTime);
+            this->unpackMigratingData(tStep);
 
             this->timer.stopTimer(EngngModelTimer :: EMTT_LoadBalancingTimer);
             double _steptime = this->timer.getUtime(EngngModelTimer :: EMTT_LoadBalancingTimer);

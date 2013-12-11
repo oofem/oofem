@@ -105,28 +105,28 @@ SlaveDof :: giveNumberOfPrimaryMasterDofs()
 }
 
 void
-SlaveDof :: giveUnknowns(FloatArray &masterUnknowns, ValueModeType mode, TimeStep *stepN)
+SlaveDof :: giveUnknowns(FloatArray &masterUnknowns, ValueModeType mode, TimeStep *tStep)
 {
     FloatArray mstrUnknwns;
 
     masterUnknowns.resize( this->giveNumberOfPrimaryMasterDofs() );
 
     for ( int k = 1, i = 1; i <= countOfMasterDofs; i++ ) {
-        this->giveMasterDof(i)->giveUnknowns(mstrUnknwns, mode, stepN);
+        this->giveMasterDof(i)->giveUnknowns(mstrUnknwns, mode, tStep);
         masterUnknowns.copySubVector(mstrUnknwns, k);
         k += mstrUnknwns.giveSize();
     }
 }
 
 void
-SlaveDof :: giveUnknowns(FloatArray &masterUnknowns, PrimaryField &field, ValueModeType mode, TimeStep *stepN)
+SlaveDof :: giveUnknowns(FloatArray &masterUnknowns, PrimaryField &field, ValueModeType mode, TimeStep *tStep)
 {
     FloatArray mstrUnknwns;
 
     masterUnknowns.resize( this->giveNumberOfPrimaryMasterDofs() );
 
     for ( int k = 1, i = 1; i <= countOfMasterDofs; i++ ) {
-        this->giveMasterDof(i)->giveUnknowns(mstrUnknwns, field, mode, stepN);
+        this->giveMasterDof(i)->giveUnknowns(mstrUnknwns, field, mode, tStep);
         masterUnknowns.copySubVector(mstrUnknwns, k);
         k += mstrUnknwns.giveSize();
     }
@@ -179,21 +179,21 @@ SlaveDof :: giveDofIDs(IntArray &masterDofIDs)
 }
 
 
-double SlaveDof :: giveUnknown(ValueModeType mode, TimeStep *stepN)
+double SlaveDof :: giveUnknown(ValueModeType mode, TimeStep *tStep)
 {
     FloatArray masterUnknowns, t;
 
-    this->giveUnknowns(masterUnknowns, mode, stepN);
+    this->giveUnknowns(masterUnknowns, mode, tStep);
     this->computeDofTransformation(t);
 
     return masterUnknowns.dotProduct(t);
 }
 
-double SlaveDof :: giveUnknown(PrimaryField &field, ValueModeType mode, TimeStep *stepN)
+double SlaveDof :: giveUnknown(PrimaryField &field, ValueModeType mode, TimeStep *tStep)
 {
     FloatArray masterUnknowns, t;
 
-    giveUnknowns(masterUnknowns, field, mode, stepN);
+    giveUnknowns(masterUnknowns, field, mode, tStep);
     computeDofTransformation(t);
 
     return masterUnknowns.dotProduct(t);

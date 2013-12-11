@@ -80,26 +80,26 @@ int
 Dof :: giveDofManGlobalNumber() const { return this->dofManager->giveGlobalNumber(); }
 #endif
 
-void Dof :: printSingleOutputAt(FILE *File, TimeStep *stepN, char ch, ValueModeType mode, double scale)
+void Dof :: printSingleOutputAt(FILE *File, TimeStep *tStep, char ch, ValueModeType mode, double scale)
 // Prints in the data file the unknown 'u' (for example, the displacement
-// 'd') of the receiver, at stepN.
+// 'd') of the receiver, at tStep.
 {
-    double x = scale * this->giveUnknown(mode, stepN);
+    double x = scale * this->giveUnknown(mode, tStep);
     fprintf(File, "  dof %d   %c % .8e\n", number, ch, x);
 }
 
 
 
-void Dof :: printMultipleOutputAt(FILE *File, TimeStep *stepN, char *ch,
+void Dof :: printMultipleOutputAt(FILE *File, TimeStep *tStep, char *ch,
                                   ValueModeType *mode, int nite)
 // Prints in the data file the unknown 'u' (for example, the displacement
-// 'd') of the receiver, at stepN.
+// 'd') of the receiver, at tStep.
 {
     double x;
 
     fprintf(File, "  dof %d", number);
     for ( int i = 1; i <= nite; i++ ) {
-        x = this->giveUnknown(mode [ i - 1 ], stepN);
+        x = this->giveUnknown(mode [ i - 1 ], tStep);
         fprintf(File, "   %c % .8e", ch [ i - 1 ], x);
     }
 
@@ -231,17 +231,17 @@ Dof :: restoreContext(DataStream *stream, ContextMode mode, void *obj)
 }
 
 void
-Dof :: giveUnknowns(FloatArray &masterUnknowns, ValueModeType mode, TimeStep *stepN)
+Dof :: giveUnknowns(FloatArray &masterUnknowns, ValueModeType mode, TimeStep *tStep)
 {
     masterUnknowns.resize(1);
-    masterUnknowns.at(1) = this->giveUnknown(mode, stepN);
+    masterUnknowns.at(1) = this->giveUnknown(mode, tStep);
 }
 
 void
-Dof :: giveUnknowns(FloatArray &masterUnknowns, PrimaryField &field, ValueModeType mode, TimeStep *stepN)
+Dof :: giveUnknowns(FloatArray &masterUnknowns, PrimaryField &field, ValueModeType mode, TimeStep *tStep)
 {
     masterUnknowns.resize(1);
-    masterUnknowns.at(1) = this->giveUnknown(field, mode, stepN);
+    masterUnknowns.at(1) = this->giveUnknown(field, mode, tStep);
 }
 
 void

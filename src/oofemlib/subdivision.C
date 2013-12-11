@@ -3389,7 +3389,7 @@ Subdivision :: RS_Tetra :: drawGeometry()
 
 
 MesherInterface :: returnCode
-Subdivision :: createMesh(TimeStep *stepN, int domainNumber, int domainSerNum, Domain **dNew)
+Subdivision :: createMesh(TimeStep *tStep, int domainNumber, int domainSerNum, Domain **dNew)
 {
     // import data from old domain
     int parent, nnodes = domain->giveNumberOfDofManagers(), nelems = domain->giveNumberOfElements();
@@ -3411,7 +3411,7 @@ Subdivision :: createMesh(TimeStep *stepN, int domainNumber, int domainSerNum, D
     // node number (in the mesh) and its parent number (in the domain) because the domain is used to import connectivities
     for ( int i = 1; i <= nnodes; i++ ) {
         _node = new Subdivision :: RS_Node( i, mesh, i, * ( domain->giveNode(i)->giveCoordinates() ),
-                                            domain->giveErrorEstimator()->giveRemeshingCrit()->giveRequiredDofManDensity(i, stepN),
+                                            domain->giveErrorEstimator()->giveRemeshingCrit()->giveRequiredDofManDensity(i, tStep),
                                             domain->giveNode(i)->isBoundary() );
 #ifdef __PARALLEL_MODE
         _node->setGlobalNumber( domain->giveNode(i)->giveGlobalNumber() );

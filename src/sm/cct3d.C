@@ -279,7 +279,7 @@ CCTPlate3d :: giveCharacteristicTensor(FloatMatrix &answer, CharTensor type, Gau
 
 
 int
-CCTPlate3d :: giveIPValue(FloatArray &answer, GaussPoint *aGaussPoint, InternalStateType type, TimeStep *tStep)
+CCTPlate3d :: giveIPValue(FloatArray &answer, GaussPoint *gp, InternalStateType type, TimeStep *tStep)
 {
     FloatMatrix globTensor;
     CharTensor cht;
@@ -293,7 +293,7 @@ CCTPlate3d :: giveIPValue(FloatArray &answer, GaussPoint *aGaussPoint, InternalS
             cht = GlobalStrainTensor;
         }
 
-        this->giveCharacteristicTensor(globTensor, cht, aGaussPoint, tStep);
+        this->giveCharacteristicTensor(globTensor, cht, gp, tStep);
 
         answer.at(1) = globTensor.at(1, 1); //sxForce
         answer.at(2) = globTensor.at(2, 2); //syForce
@@ -308,7 +308,7 @@ CCTPlate3d :: giveIPValue(FloatArray &answer, GaussPoint *aGaussPoint, InternalS
             cht = GlobalCurvatureTensor;
         }
 
-        this->giveCharacteristicTensor(globTensor, cht, aGaussPoint, tStep);
+        this->giveCharacteristicTensor(globTensor, cht, gp, tStep);
 
         answer.at(7)  = globTensor.at(1, 1); //mxForce
         answer.at(8)  = globTensor.at(2, 2); //myForce
@@ -326,8 +326,8 @@ CCTPlate3d :: giveIPValue(FloatArray &answer, GaussPoint *aGaussPoint, InternalS
 
 
 void
-CCTPlate3d :: computeBodyLoadVectorAt(FloatArray &answer, Load *forLoad, TimeStep *stepN, ValueModeType mode)
-// Computes numerically the load vector of the receiver due to the body loads, at stepN.
+CCTPlate3d :: computeBodyLoadVectorAt(FloatArray &answer, Load *forLoad, TimeStep *tStep, ValueModeType mode)
+// Computes numerically the load vector of the receiver due to the body loads, at tStep.
 // load is assumed to be in global cs.
 // load vector is then transformed to coordinate system in each node.
 // (should be global coordinate system, but there may be defined
@@ -346,7 +346,7 @@ CCTPlate3d :: computeBodyLoadVectorAt(FloatArray &answer, Load *forLoad, TimeSte
     irule.SetUpPointsOnTriangle(1, _2dPlate);
 
     // note: force is assumed to be in global coordinate system.
-    forLoad->computeComponentArrayAt(force, stepN, mode);
+    forLoad->computeComponentArrayAt(force, tStep, mode);
 
     if ( force.giveSize() ) {
         gp = irule.getIntegrationPoint(0);
@@ -396,7 +396,7 @@ CCTPlate3d :: printOutputAt(FILE *file, TimeStep *tStep)
         for ( j = 0; j < integrationRulesArray [ i ]->giveNumberOfIntegrationPoints(); j++ ) {
             gp = integrationRulesArray [ i ]->getIntegrationPoint(j);
 
-            // gp   -> printOutputAt(file,stepN) ;
+            // gp   -> printOutputAt(file,tStep) ;
 
             fprintf( file, "  GP %2d.%-2d :", i + 1, gp->giveNumber() );
 

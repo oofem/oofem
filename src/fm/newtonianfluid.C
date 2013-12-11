@@ -146,7 +146,7 @@ NewtonianFluidMaterial :: computeDeviatoricStressVector(FloatArray &answer, Gaus
 
 void
 NewtonianFluidMaterial :: giveDeviatoricStiffnessMatrix(FloatMatrix &answer, MatResponseMode mode, GaussPoint *gp,
-                                                        TimeStep *atTime)
+                                                        TimeStep *tStep)
 {
     if ( ( gp->giveMaterialMode() == _2dFlow ) ) {
         answer.resize(3, 3);

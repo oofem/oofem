@@ -43,14 +43,14 @@ namespace oofem {
 REGISTER_EngngModel(AdaptiveLinearStatic);
 
 void
-AdaptiveLinearStatic :: updateYourself(TimeStep *stepN)
+AdaptiveLinearStatic :: updateYourself(TimeStep *tStep)
 {
-    LinearStatic :: updateYourself(stepN);
+    LinearStatic :: updateYourself(tStep);
     // perform error evaluation
     // evaluate error of the reached solution
-    this->defaultErrEstimator->estimateError(temporaryEM, stepN);
+    this->defaultErrEstimator->estimateError(temporaryEM, tStep);
     // this->defaultErrEstimator->estimateError (equilibratedEM, this->giveCurrentStep());
-    RemeshingStrategy strategy = this->defaultErrEstimator->giveRemeshingCrit()->giveRemeshingStrategy(stepN);
+    RemeshingStrategy strategy = this->defaultErrEstimator->giveRemeshingCrit()->giveRemeshingStrategy(tStep);
 
     if ( strategy == NoRemeshing_RS ) {
         return;
@@ -60,11 +60,11 @@ AdaptiveLinearStatic :: updateYourself(TimeStep *stepN)
         Domain *newDomain;
 
         MesherInterface :: returnCode result =
-            mesher->createMesh(stepN, 1, this->giveDomain(1)->giveSerialNumber() + 1, & newDomain);
+            mesher->createMesh(tStep, 1, this->giveDomain(1)->giveSerialNumber() + 1, & newDomain);
 
         if ( result == MesherInterface :: MI_OK ) {} else if ( result == MesherInterface :: MI_NEEDS_EXTERNAL_ACTION ) {
             // terminate step
-            //this->terminate( stepN );
+            //this->terminate( tStep );
             //this->terminateAnalysis();
             //exit(1);
         } else {
@@ -87,7 +87,7 @@ AdaptiveLinearStatic :: terminate(TimeStep *tStep)
 
 
 int
-AdaptiveLinearStatic :: initializeAdaptive(int stepNumber)
+AdaptiveLinearStatic :: initializeAdaptive(int tStepumber)
 {
     /*
      * Due to linear character of the problem,
@@ -99,7 +99,7 @@ AdaptiveLinearStatic :: initializeAdaptive(int stepNumber)
     /*
      * this -> initStepIncrements();
      *
-     * int sernum = stepNumber + 1;
+     * int sernum = tStepumber + 1;
      * printf ("\nrestoring domain %d.%d\n", 1, sernum);
      * Domain* dNew = new Domain (1, sernum, this);
      * FILE* domainInputFile;
@@ -115,7 +115,7 @@ AdaptiveLinearStatic :: initializeAdaptive(int stepNumber)
      * this->forceEquationNumbering();
      *
      * // set time step
-     * this->giveCurrentStep()->setTime(stepNumber+1);
+     * this->giveCurrentStep()->setTime(tStepumber+1);
      *
      * // init equation numbering
      * // this->forceEquationNumbering();

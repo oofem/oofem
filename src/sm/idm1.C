@@ -307,7 +307,7 @@ IsotropicDamageMaterial1 :: giveInputRecord(DynamicInputRecord &input)
 
 
 void
-IsotropicDamageMaterial1 :: computeEquivalentStrain(double &kappa, const FloatArray &strain, GaussPoint *gp, TimeStep *atTime)
+IsotropicDamageMaterial1 :: computeEquivalentStrain(double &kappa, const FloatArray &strain, GaussPoint *gp, TimeStep *tStep)
 {
     LinearElasticMaterial *lmat = this->giveLinearElasticMaterial();
     FloatArray fullStrain;
@@ -347,7 +347,7 @@ IsotropicDamageMaterial1 :: computeEquivalentStrain(double &kappa, const FloatAr
         FloatArray stress, fullStress, principalStress;
         FloatMatrix de;
 
-        lmat->giveStiffnessMatrix(de, SecantStiffness, gp, atTime);
+        lmat->giveStiffnessMatrix(de, SecantStiffness, gp, tStep);
         stress.beProductOf(de, strain);
         StructuralMaterial :: giveFullSymVectorForm( fullStress, stress, gp->giveMaterialMode() );
         this->computePrincipalValues(principalStress, fullStress, principal_stress);
@@ -374,7 +374,7 @@ IsotropicDamageMaterial1 :: computeEquivalentStrain(double &kappa, const FloatAr
         FloatArray stress;
         double sum;
 
-        lmat->giveStiffnessMatrix(de, SecantStiffness, gp, atTime);
+        lmat->giveStiffnessMatrix(de, SecantStiffness, gp, tStep);
         if ( this->equivStrainType == EST_ElasticEnergy ) {
             // standard elastic energy
             stress.beProductOf(de, strain);
@@ -411,7 +411,7 @@ IsotropicDamageMaterial1 :: computeEquivalentStrain(double &kappa, const FloatAr
         kappa = 0.0;
         FloatArray stress, fullStress, principalStress;
         FloatMatrix de;
-        lmat->giveStiffnessMatrix(de, SecantStiffness, gp, atTime);
+        lmat->giveStiffnessMatrix(de, SecantStiffness, gp, tStep);
         stress.beProductOf(de, strain);
         StructuralMaterial :: giveFullSymVectorForm( fullStress, stress, gp->giveMaterialMode() );
         this->computePrincipalValues(principalStress, fullStress, principal_stress);
@@ -469,7 +469,7 @@ IsotropicDamageMaterial1 :: computeEquivalentStrain(double &kappa, const FloatAr
 
 //Computes derivative of the equivalent strain with regards to strain, used in tangent formulation
 void
-IsotropicDamageMaterial1 :: computeEta(FloatArray &answer, const FloatArray &strain, GaussPoint *gp, TimeStep *atTime)
+IsotropicDamageMaterial1 :: computeEta(FloatArray &answer, const FloatArray &strain, GaussPoint *gp, TimeStep *tStep)
 {
     LinearElasticMaterial *lmat = this->giveLinearElasticMaterial();
 
@@ -571,7 +571,7 @@ IsotropicDamageMaterial1 :: computeEta(FloatArray &answer, const FloatArray &str
         FloatArray stress, principalStress, eta;
         FloatMatrix de, N, m, Eta;
 
-        lmat->giveStiffnessMatrix(de, SecantStiffness, gp, atTime);
+        lmat->giveStiffnessMatrix(de, SecantStiffness, gp, tStep);
         stress.beProductOf(de, strain);
 
         if ( gp->giveMaterialMode() == _1dMat ) {
@@ -675,7 +675,7 @@ IsotropicDamageMaterial1 :: computeEta(FloatArray &answer, const FloatArray &str
         FloatArray stress;
         double sum;
 
-        lmat->giveStiffnessMatrix(de, SecantStiffness, gp, atTime);
+        lmat->giveStiffnessMatrix(de, SecantStiffness, gp, tStep);
         // standard elastic energy
         stress.beProductOf(de, strain);
         sum = strain.dotProduct(stress);
@@ -1266,14 +1266,14 @@ IsotropicDamageMaterial1Status :: initTempStatus()
 
 
 void
-IsotropicDamageMaterial1Status :: updateYourself(TimeStep *atTime)
+IsotropicDamageMaterial1Status :: updateYourself(TimeStep *tStep)
 //
 // updates variables (nonTemp variables describing situation at previous equilibrium state)
 // after a new equilibrium state has been reached
 // temporary variables are having values corresponding to newly reched equilibrium.
 //
 {
-    IsotropicDamageMaterialStatus :: updateYourself(atTime);
+    IsotropicDamageMaterialStatus :: updateYourself(tStep);
 }
 
 Interface *

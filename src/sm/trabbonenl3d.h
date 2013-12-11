@@ -127,7 +127,7 @@ public:
 #endif
 
     virtual void NonlocalMaterialStiffnessInterface_addIPContribution(SparseMtrx &dest, const UnknownNumberingScheme &s,
-                                                                      GaussPoint *gp, TimeStep *atTime);
+                                                                      GaussPoint *gp, TimeStep *tStep);
 
     virtual std :: list< localIntegrationRecord > *NonlocalMaterialStiffnessInterface_giveIntegrationDomainList(GaussPoint *gp);
 

@@ -208,7 +208,7 @@ BinghamFluidMaterial2 :: computeDeviatoricStressVector(FloatArray &answer, Gauss
 
 void
 BinghamFluidMaterial2 :: giveDeviatoricStiffnessMatrix(FloatMatrix &answer, MatResponseMode mode, GaussPoint *gp,
-                                                       TimeStep *atTime)
+                                                       TimeStep *tStep)
 {
     BinghamFluidMaterial2Status *status = static_cast< BinghamFluidMaterial2Status * >( this->giveStatus(gp) );
     MaterialMode mmode = gp->giveMaterialMode();
@@ -673,15 +673,15 @@ BinghamFluidMaterial2Status :: restoreContext(DataStream *stream, ContextMode mo
 
 #if 0
 void
-BinghamFluidMaterial2 :: __debug(GaussPoint *gp, TimeStep *atTime)
+BinghamFluidMaterial2 :: __debug(GaussPoint *gp, TimeStep *tStep)
 {
     BinghamFluidMaterial2Status *status = static_cast< BinghamFluidMaterial2Status * >( this->giveStatus(gp) );
     const FloatArray &epsd = status->giveTempDeviatoricStrainVector();
     const FloatArray &sigd = status->giveTempDeviatoricStrainVector()
                              for ( int i = 1; i <= nincr; i++ ) {
         eps.add(eps_i);
-        computeDeviatoricStressVector(tau, gp, eps, atTime);
-        giveDeviatoricStiffnessMatrix(d, TangentStiffness, gp, atTime);
+        computeDeviatoricStressVector(tau, gp, eps, tStep);
+        giveDeviatoricStiffnessMatrix(d, TangentStiffness, gp, tStep);
         tau_t.beProductOf(d, eps_i);
         tau_t.add(tau_p);
         //tau.printYourself();

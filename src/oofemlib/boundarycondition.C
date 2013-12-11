@@ -42,11 +42,11 @@
 namespace oofem {
 REGISTER_BoundaryCondition(BoundaryCondition);
 
-double BoundaryCondition :: give(Dof *dof, ValueModeType mode, TimeStep *stepN)
-// Returns the value at stepN of the prescribed value of the kinematic
+double BoundaryCondition :: give(Dof *dof, ValueModeType mode, TimeStep *tStep)
+// Returns the value at tStep of the prescribed value of the kinematic
 // unknown 'u'. Returns 0 if 'u' has no prescribed value.
 {
-    double factor = this->giveLoadTimeFunction()->evaluate(stepN, mode);
+    double factor = this->giveLoadTimeFunction()->evaluate(tStep, mode);
     int index = this->dofs.findFirstIndexOf( dof->giveDofID() );
     if ( !index ) {
         index = 1;

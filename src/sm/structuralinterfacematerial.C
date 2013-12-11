@@ -45,7 +45,7 @@ StructuralInterfaceMaterial :: StructuralInterfaceMaterial(int n, Domain *d) : M
 
 
 int
-StructuralInterfaceMaterial :: giveIPValue(FloatArray &answer, GaussPoint *gp, InternalStateType type, TimeStep *atTime)
+StructuralInterfaceMaterial :: giveIPValue(FloatArray &answer, GaussPoint *gp, InternalStateType type, TimeStep *tStep)
 {
     StructuralInterfaceMaterialStatus *status = static_cast< StructuralInterfaceMaterialStatus * >( this->giveStatus(gp) );
     if ( type == IST_InterfaceJump ) {
@@ -61,7 +61,7 @@ StructuralInterfaceMaterial :: giveIPValue(FloatArray &answer, GaussPoint *gp, I
         answer.beVectorForm( status->giveF() );
         return 1;
     } else {
-        return Material :: giveIPValue(answer, gp, type, atTime);
+        return Material :: giveIPValue(answer, gp, type, tStep);
     }
 }
 

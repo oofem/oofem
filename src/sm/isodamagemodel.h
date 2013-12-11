@@ -211,7 +211,7 @@ public:
     virtual void giveRealStressVector_1d(FloatArray &answer, GaussPoint *gp, const FloatArray &reducedE, TimeStep *tStep)
     { this->giveRealStressVector(answer, gp, reducedE, tStep); }
 
-    virtual int giveIPValue(FloatArray &answer, GaussPoint *aGaussPoint, InternalStateType type, TimeStep *atTime);
+    virtual int giveIPValue(FloatArray &answer, GaussPoint *gp, InternalStateType type, TimeStep *tStep);
 
     virtual void giveThermalDilatationVector(FloatArray &answer, GaussPoint *, TimeStep *);
     /**
@@ -235,9 +235,9 @@ public:
      * @param[out] answer Contains the resulting derivative.
      * @param strain Strain vector.
      * @param gp Integration point.
-     * @param atTime Time step.
+     * @param tStep Time step.
      */
-    virtual void computeEta(FloatArray &answer, const FloatArray &strain, GaussPoint *gp, TimeStep *atTime) { _error("IsotropicDamageMaterial: computeEta is not implemented"); }
+    virtual void computeEta(FloatArray &answer, const FloatArray &strain, GaussPoint *gp, TimeStep *tStep) { _error("IsotropicDamageMaterial: computeEta is not implemented"); }
     /**
      * Computes the value of damage parameter omega, based on given value of equivalent strain.
      * @param[out] omega Contains result.

@@ -459,7 +459,7 @@ SimpleCrossSection :: createMaterialStatus(GaussPoint &iGP)
 #if 0
 void
 SimpleCrossSection :: computeStressIndependentStrainVector(FloatArray &answer,
-                                                           GaussPoint *gp, TimeStep *stepN, ValueModeType mode)
+                                                           GaussPoint *gp, TimeStep *tStep, ValueModeType mode)
 //
 // returns initial strain vector induced by stress independent effects
 // like temperatue or shrinkage.
@@ -473,7 +473,7 @@ SimpleCrossSection :: computeStressIndependentStrainVector(FloatArray &answer,
 
     if ( ( matmode == _2dBeam ) || ( matmode == _3dBeam ) || ( matmode == _3dShell ) || ( matmode == _2dPlate ) ) {
         StructuralElement *elem = ( StructuralElement * ) gp->giveElement();
-        elem->computeResultingIPTemperatureAt(et, stepN, gp, mode);
+        elem->computeResultingIPTemperatureAt(et, tStep, gp, mode);
         FloatArray redAnswer;
 
         if ( et.giveSize() == 0 ) {
@@ -484,7 +484,7 @@ SimpleCrossSection :: computeStressIndependentStrainVector(FloatArray &answer,
             _error("computeStressIndependentStrainVector - Bad format of TemperatureLoad");
             exit(1);
         }
-        mat->giveThermalDilatationVector(e0, gp, stepN);
+        mat->giveThermalDilatationVector(e0, gp, tStep);
 
         if ( matmode == _2dBeam ) {
             answer.resize(3);
@@ -533,7 +533,7 @@ SimpleCrossSection :: computeStressIndependentStrainVector(FloatArray &answer,
             _error("Unsupported material mode");
         }
     } else {
-        mat->computeStressIndependentStrainVector(answer, gp, stepN, mode);
+        mat->computeStressIndependentStrainVector(answer, gp, tStep, mode);
     }
 }
 #endif
@@ -706,7 +706,7 @@ SimpleCrossSection :: giveStiffnessMatrix_dCde(FloatMatrix &answer,
 
 void
 SimpleCrossSection :: computeStressIndependentStrainVector(FloatArray &answer,
-                                                           GaussPoint *gp, TimeStep *stepN, ValueModeType mode)
+                                                           GaussPoint *gp, TimeStep *tStep, ValueModeType mode)
 //
 // returns initial strain vector induced by stress independent effects
 // like temperatue or shrinkage.
@@ -715,6 +715,6 @@ SimpleCrossSection :: computeStressIndependentStrainVector(FloatArray &answer,
 {
     StructuralMaterial *mat = dynamic_cast< StructuralMaterial * >( this->giveMaterial(gp) );
     // add parts caused by  material
-    mat->computeStressIndependentStrainVector(answer, gp, stepN, mode);
+    mat->computeStressIndependentStrainVector(answer, gp, tStep, mode);
 }
 } // end namespace oofem

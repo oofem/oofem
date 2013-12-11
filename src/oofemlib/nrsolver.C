@@ -305,7 +305,7 @@ NRSolver :: solve(SparseMtrx *k, FloatArray *R, FloatArray *R0,
         X->add(ddX);
         dX->add(ddX);
         tNow->incrementStateCounter(); // update solution state counter
-        tNow->incrementSubstepNumber();
+        tNow->incrementSubtStepumber();
         nite++; // iteration increment
 
         engngModel->giveExportModuleManager()->doOutput(tNow, true);
@@ -520,14 +520,14 @@ NRSolver :: applyConstraintsToStiffness(SparseMtrx *k)
 
 void
 NRSolver :: applyConstraintsToLoadIncrement(int nite, const SparseMtrx *k, FloatArray &R,
-                                            referenceLoadInputModeType rlm, TimeStep *atTime)
+                                            referenceLoadInputModeType rlm, TimeStep *tStep)
 {
-    double factor = engngModel->giveDomain(1)->giveLoadTimeFunction(prescribedDisplacementLTF)->__at( atTime->giveTargetTime() );
-    if ( ( rlm == rlm_total ) && ( !atTime->isTheFirstStep() ) ) {
+    double factor = engngModel->giveDomain(1)->giveLoadTimeFunction(prescribedDisplacementLTF)->__at( tStep->giveTargetTime() );
+    if ( ( rlm == rlm_total ) && ( !tStep->isTheFirstStep() ) ) {
         //factor -= engngModel->giveDomain(1)->giveLoadTimeFunction(prescribedDisplacementLTF)->
-        // at(atTime->givePreviousStep()->giveTime()) ;
+        // at(tStep->givePreviousStep()->giveTime()) ;
         factor -= engngModel->giveDomain(1)->giveLoadTimeFunction(prescribedDisplacementLTF)->
-                  __at( atTime->giveTargetTime() - atTime->giveTimeIncrement() );
+                  __at( tStep->giveTargetTime() - tStep->giveTimeIncrement() );
     }
 
     if ( nite == 0 ) {

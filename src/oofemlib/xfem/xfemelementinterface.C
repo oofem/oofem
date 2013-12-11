@@ -923,14 +923,14 @@ void XfemElementInterface :: XfemElementInterface_computeConstitutiveMatrixAt(Fl
     structEl.StructuralElement :: computeConstitutiveMatrixAt(answer, rMode, gp, tStep);
 }
 
-void XfemElementInterface :: XfemElementInterface_computeStressVector(FloatArray &answer, const FloatArray &strain, GaussPoint *gp, TimeStep *stepN)
+void XfemElementInterface :: XfemElementInterface_computeStressVector(FloatArray &answer, const FloatArray &strain, GaussPoint *gp, TimeStep *tStep)
 {
     StructuralCrossSection *cs = dynamic_cast< StructuralCrossSection * >( element->giveCrossSection() );
     if ( cs == NULL ) {
         OOFEM_ERROR("In XfemElementInterface :: XfemElementInterface_computeStressVector: cs == NULL.\n");
     }
 
-    cs->giveRealStresses(answer, gp, strain, stepN);
+    cs->giveRealStresses(answer, gp, strain, tStep);
 
 
     XfemManager *xMan = element->giveDomain()->giveXfemManager();
@@ -944,7 +944,7 @@ void XfemElementInterface :: XfemElementInterface_computeStressVector(FloatArray
             StructuralCrossSection *structCSInclusion = dynamic_cast< StructuralCrossSection * >( csInclusion );
 
             if ( structCSInclusion != NULL ) {
-                structCSInclusion->giveRealStresses(answer, gp, strain, stepN);
+                structCSInclusion->giveRealStresses(answer, gp, strain, tStep);
                 return;
             } else {
                 OOFEM_ERROR("PlaneStress2dXfem :: computeStressVector: failed to fetch StructuralCrossSection\n");

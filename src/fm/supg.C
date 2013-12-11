@@ -574,12 +574,12 @@ SUPG :: solveYourselfAt(TimeStep *tStep)
 
 
 void
-SUPG :: updateYourself(TimeStep *stepN)
+SUPG :: updateYourself(TimeStep *tStep)
 {
-    this->updateInternalState(stepN);
-    EngngModel :: updateYourself(stepN);
+    this->updateInternalState(tStep);
+    EngngModel :: updateYourself(tStep);
     if ( materialInterface ) {
-        materialInterface->updateYourself(stepN);
+        materialInterface->updateYourself(tStep);
     }
 
     //previousSolutionVector = solutionVector;
@@ -588,7 +588,7 @@ SUPG :: updateYourself(TimeStep *stepN)
 
 
 void
-SUPG :: updateInternalState(TimeStep *stepN)
+SUPG :: updateInternalState(TimeStep *tStep)
 {
     for ( int idomain = 1; idomain <= this->giveNumberOfDomains(); idomain++ ) {
         Domain *domain = this->giveDomain(idomain);
@@ -596,13 +596,13 @@ SUPG :: updateInternalState(TimeStep *stepN)
         int nnodes = domain->giveNumberOfDofManagers();
         if ( requiresUnknownsDictionaryUpdate() ) {
             for ( int j = 1; j <= nnodes; j++ ) {
-                this->updateDofUnknownsDictionary(domain->giveDofManager(j), stepN);
+                this->updateDofUnknownsDictionary(domain->giveDofManager(j), tStep);
             }
         }
 
         int nelem = domain->giveNumberOfElements();
         for ( int j = 1; j <= nelem; j++ ) {
-            domain->giveElement(j)->updateInternalState(stepN);
+            domain->giveElement(j)->updateInternalState(tStep);
         }
     }
 }
@@ -667,7 +667,7 @@ SUPG :: restoreContext(DataStream *stream, ContextMode mode, void *obj)
     int istep, iversion;
     FILE *file = NULL;
 
-    this->resolveCorrespondingStepNumber(istep, iversion, obj);
+    this->resolveCorrespondingtStepumber(istep, iversion, obj);
 
     if ( stream == NULL ) {
         if ( !this->giveContextFile(& file, istep, iversion, contextMode_read) ) {
@@ -775,15 +775,15 @@ SUPG :: updateDomainLinks()
 }
 
 void
-SUPG :: printDofOutputAt(FILE *stream, Dof *iDof, TimeStep *atTime)
+SUPG :: printDofOutputAt(FILE *stream, Dof *iDof, TimeStep *tStep)
 {
     double pscale = ( dscale * uscale * uscale );
 
     DofIDItem type = iDof->giveDofID();
     if ( ( type == V_u ) || ( type == V_v ) || ( type == V_w ) ) {
-        iDof->printSingleOutputAt(stream, atTime, 'v', VM_Total, uscale);
+        iDof->printSingleOutputAt(stream, tStep, 'v', VM_Total, uscale);
     } else if ( type == P_f ) {
-        iDof->printSingleOutputAt(stream, atTime, 'p', VM_Total, pscale);
+        iDof->printSingleOutputAt(stream, tStep, 'p', VM_Total, pscale);
     } else {
         _error("printDofOutputAt: unsupported dof type");
     }
@@ -880,7 +880,7 @@ SUPG :: giveVariableScale(VarScaleType varID)
 }
 
 void
-SUPG :: evaluateElementStabilizationCoeffs(TimeStep *atTime)
+SUPG :: evaluateElementStabilizationCoeffs(TimeStep *tStep)
 {
     Domain *domain = this->giveDomain(1);
     int nelem = domain->giveNumberOfElements();
@@ -888,12 +888,12 @@ SUPG :: evaluateElementStabilizationCoeffs(TimeStep *atTime)
 
     for ( int i = 1; i <= nelem; i++ ) {
         ePtr = static_cast< SUPGElement * >( domain->giveElement(i) );
-        ePtr->updateStabilizationCoeffs(atTime);
+        ePtr->updateStabilizationCoeffs(tStep);
     }
 }
 
 void
-SUPG :: updateElementsForNewInterfacePosition(TimeStep *atTime)
+SUPG :: updateElementsForNewInterfacePosition(TimeStep *tStep)
 {
     Domain *domain = this->giveDomain(1);
     int nelem = domain->giveNumberOfElements();
@@ -904,7 +904,7 @@ SUPG :: updateElementsForNewInterfacePosition(TimeStep *atTime)
 
     for ( int i = 1; i <= nelem; i++ ) {
         ePtr = static_cast< SUPGElement * >( domain->giveElement(i) );
-        ePtr->updateElementForNewInterfacePosition(atTime);
+        ePtr->updateElementForNewInterfacePosition(tStep);
     }
 }
 
@@ -1166,10 +1166,10 @@ SUPG :: updateDofUnknownsDictionary_corrector(TimeStep *tStep)
 }
 
 int
-SUPG :: giveUnknownDictHashIndx(ValueModeType mode, TimeStep *stepN)
+SUPG :: giveUnknownDictHashIndx(ValueModeType mode, TimeStep *tStep)
 {
-    if ( ( stepN == this->giveCurrentStep() ) || ( stepN == this->givePreviousStep() ) ) {
-        return ( stepN->giveNumber() % 2 ) * 100 + mode;
+    if ( ( tStep == this->giveCurrentStep() ) || ( tStep == this->givePreviousStep() ) ) {
+        return ( tStep->giveNumber() % 2 ) * 100 + mode;
     } else {
         _error("giveUnknownDictHashIndx: unsupported solution step");
     }
@@ -1433,7 +1433,7 @@ SUPG :: initPetscContexts()
  * }
  *
  * void
- * SUPG::imposeAmbientPressureInOuterNodes(SparseMtrx* lhs, FloatArray* rhs, TimeStep* stepN)
+ * SUPG::imposeAmbientPressureInOuterNodes(SparseMtrx* lhs, FloatArray* rhs, TimeStep* tStep)
  * {
  * Domain* domain = this->giveDomain(1);
  * int nnodes = domain->giveNumberOfDofManagers();
@@ -1460,7 +1460,7 @@ SUPG :: initPetscContexts()
  * }
  *
  * void
- * SUPG::__debug (TimeStep* atTime)
+ * SUPG::__debug (TimeStep* tStep)
  * {
  * int i, in, id, nincr = 1000;
  * int neq =  this -> giveNumberOfDomainEquations (EID_MomentumBalance_ConservationEquation);
@@ -1473,8 +1473,8 @@ SUPG :: initPetscContexts()
  * vincr.at(2) = 1.e-7;
  * vincr.at(3) = 2.e-2;
  * element -> giveLocationArray (loc, EID_MomentumBalance);
- * VelocityPressureField->advanceSolution(atTime);
- * solutionVector = VelocityPressureField->giveSolutionVector(atTime);
+ * VelocityPressureField->advanceSolution(tStep);
+ * solutionVector = VelocityPressureField->giveSolutionVector(tStep);
  * solutionVector->resize(neq);
  * // restrict vincr
  * for (i=1; i<=6; i++)
@@ -1485,12 +1485,12 @@ SUPG :: initPetscContexts()
  *  for (i=1; i<=6; i++)
  *    if ((id = loc.at(i))) solutionVector->at(id) += vincr.at(i);
  *  // compute F from derivative
- *  EngngModel::giveElementCharacteristicMatrix(d, 1, TangentDiffusionDerivativeTerm_MB, atTime, giveDomain(1));
+ *  EngngModel::giveElementCharacteristicMatrix(d, 1, TangentDiffusionDerivativeTerm_MB, tStep, giveDomain(1));
  *  fi.beProductOf (d, vincr);
  *  fapprox = fprev;
  *  fapprox.add(fi);
  *  // compute true F
- *  this->giveElementCharacteristicVector(F, 1, DiffusionTerm_MB, VM_Total, atTime, giveDomain(1));
+ *  this->giveElementCharacteristicVector(F, 1, DiffusionTerm_MB, VM_Total, tStep, giveDomain(1));
  *  // print
  *  printf ("%d  %e %e %e %e %e %e   %e %e %e %e %e %e\n", in, F.at(1), F.at(2), F.at(3), F.at(4), F.at(5), F.at(6),
  *          fapprox.at(1), fapprox.at(2), fapprox.at(3), fapprox.at(4), fapprox.at(5), fapprox.at(6));

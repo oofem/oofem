@@ -137,7 +137,7 @@ public:
      */
     virtual void giveInternalForcesVector(FloatArray &answer, TimeStep *tStep, int useUpdatedGpRecord = 0);
     virtual void computeTraction(FloatArray &traction, IntegrationPoint *ip, FloatArray &jump, TimeStep *tStep);
-    virtual void computeSpatialJump(FloatArray &answer, GaussPoint *gp, TimeStep *stepN);
+    virtual void computeSpatialJump(FloatArray &answer, GaussPoint *gp, TimeStep *tStep);
     virtual int giveIPValue(FloatArray &answer, GaussPoint *gp, InternalStateType type, TimeStep *tStep);
 
     virtual Interface *giveInterface(InterfaceType) { return NULL; };

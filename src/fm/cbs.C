@@ -415,13 +415,13 @@ CBS :: solveYourselfAt(TimeStep *tStep)
 
 
 void
-CBS :: updateYourself(TimeStep *stepN)
+CBS :: updateYourself(TimeStep *tStep)
 {
-    this->updateInternalState(stepN);
-    EngngModel :: updateYourself(stepN);
+    this->updateInternalState(tStep);
+    EngngModel :: updateYourself(tStep);
     //<RESTRICTED_SECTION>
     if ( materialInterface ) {
-        materialInterface->updateYourself(stepN);
+        materialInterface->updateYourself(tStep);
     }
 
     //</RESTRICTED_SECTION>
@@ -430,7 +430,7 @@ CBS :: updateYourself(TimeStep *stepN)
 
 
 void
-CBS :: updateInternalState(TimeStep *stepN)
+CBS :: updateInternalState(TimeStep *tStep)
 {
     for ( int idomain = 1; idomain <= this->giveNumberOfDomains(); idomain++ ) {
         Domain *domain = this->giveDomain(idomain);
@@ -438,13 +438,13 @@ CBS :: updateInternalState(TimeStep *stepN)
         int nnodes = domain->giveNumberOfDofManagers();
         if ( requiresUnknownsDictionaryUpdate() ) {
             for ( int j = 1; j <= nnodes; j++ ) {
-                this->updateDofUnknownsDictionary(domain->giveDofManager(j), stepN);
+                this->updateDofUnknownsDictionary(domain->giveDofManager(j), tStep);
             }
         }
 
         int nelem = domain->giveNumberOfElements();
         for ( int j = 1; j <= nelem; j++ ) {
-            domain->giveElement(j)->updateInternalState(stepN);
+            domain->giveElement(j)->updateInternalState(tStep);
         }
     }
 }
@@ -508,7 +508,7 @@ CBS :: restoreContext(DataStream *stream, ContextMode mode, void *obj)
     int istep, iversion;
     FILE *file = NULL;
 
-    this->resolveCorrespondingStepNumber(istep, iversion, obj);
+    this->resolveCorrespondingtStepumber(istep, iversion, obj);
 
     if ( stream == NULL ) {
         if ( !this->giveContextFile(& file, istep, iversion, contextMode_read) ) {
@@ -606,15 +606,15 @@ CBS :: updateDomainLinks()
 
 
 void
-CBS :: printDofOutputAt(FILE *stream, Dof *iDof, TimeStep *atTime)
+CBS :: printDofOutputAt(FILE *stream, Dof *iDof, TimeStep *tStep)
 {
     double pscale = ( dscale * uscale * uscale );
 
     DofIDItem type = iDof->giveDofID();
     if ( ( type == V_u ) || ( type == V_v ) || ( type == V_w ) ) {
-        iDof->printSingleOutputAt(stream, atTime, 'v', VM_Total, uscale);
+        iDof->printSingleOutputAt(stream, tStep, 'v', VM_Total, uscale);
     } else if ( type == P_f ) {
-        iDof->printSingleOutputAt(stream, atTime, 'p', VM_Total, pscale);
+        iDof->printSingleOutputAt(stream, tStep, 'p', VM_Total, pscale);
     } else {
         _error("printDofOutputAt: unsupported dof type");
     }
@@ -742,26 +742,26 @@ double CBS :: giveVariableScale(VarScaleType varID)
 }
 
 #if 0
-void CBS :: printOutputAt(FILE *File, TimeStep *stepN)
+void CBS :: printOutputAt(FILE *File, TimeStep *tStep)
 {
     //FILE* File = this->giveDomain()->giveOutputStream();
     int domCount = 0;
-    // fprintf (File,"\nOutput for time step number %d \n\n",stepN->giveNumber());
+    // fprintf (File,"\nOutput for time step number %d \n\n",tStep->giveNumber());
     for ( int idomain = 1; idomain <= this->ndomains; idomain++ ) {
         Domain *domain = this->giveDomain(idomain);
-        domCount += domain->giveOutputManager()->testTimeStepOutput(stepN);
+        domCount += domain->giveOutputManager()->testTimeStepOutput(tStep);
     }
 
     if ( domCount == 0 ) {
         return;                 // do not print even Solution step header
     }
 
-    fprintf( File, "\nOutput for time % .8e \n\n", stepN->giveTime() / this->giveVariableScale(VST_Time) );
+    fprintf( File, "\nOutput for time % .8e \n\n", tStep->giveTime() / this->giveVariableScale(VST_Time) );
     for ( int idomain = 1; idomain <= this->ndomains; idomain++ ) {
         domain = this->giveDomain(idomain);
         fprintf( File, "\nOutput for domain %3d\n", domain->giveNumber() );
-        domain->giveOutputManager()->doDofManOutput(File, stepN);
-        domain->giveOutputManager()->doElementOutput(File, stepN);
+        domain->giveOutputManager()->doDofManOutput(File, tStep);
+        domain->giveOutputManager()->doElementOutput(File, tStep);
     }
 }
 #endif

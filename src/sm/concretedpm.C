@@ -87,7 +87,7 @@ ConcreteDPMStatus :: initTempStatus()
 }
 
 void
-ConcreteDPMStatus :: updateYourself(TimeStep *atTime)
+ConcreteDPMStatus :: updateYourself(TimeStep *tStep)
 {
 #if 0
  #ifdef SOPHISTICATED_SIZEDEPENDENT_ADJUSTMENT
@@ -112,7 +112,7 @@ ConcreteDPMStatus :: updateYourself(TimeStep *atTime)
 #endif
     // Call corresponding function of the parent class to update
     // variables defined there.
-    StructuralMaterialStatus :: updateYourself(atTime);
+    StructuralMaterialStatus :: updateYourself(tStep);
 
     // update variables defined in ConcreteDPMStatus
     plasticStrain = tempPlasticStrain;
@@ -456,7 +456,7 @@ void
 ConcreteDPM :: giveRealStressVector(FloatArray &answer,
                                     GaussPoint *gp,
                                     const FloatArray &strainVector,
-                                    TimeStep *atTime)
+                                    TimeStep *tStep)
 {
     FloatArray reducedTotalStrainVector;
     MaterialMode matMode = gp->giveMaterialMode();
@@ -478,14 +478,14 @@ ConcreteDPM :: giveRealStressVector(FloatArray &answer,
 
     // subtract stress-independent part of strain
     // (due to temperature changes, shrinkage, etc.)
-    this->giveStressDependentPartOfStrainVector(reducedTotalStrainVector, gp, strainVector, atTime, VM_Total);
+    this->giveStressDependentPartOfStrainVector(reducedTotalStrainVector, gp, strainVector, tStep, VM_Total);
     StrainVector strain( reducedTotalStrainVector, gp->giveMaterialMode() );
 
     // perform plasticity return
     performPlasticityReturn(gp, strain);
 
     // compute damage
-    tempDamage = computeDamage(strain, gp, atTime);
+    tempDamage = computeDamage(strain, gp, tStep);
 
     // compute elastic strains and effective stress
     StrainVector elasticStrain = strain;
@@ -535,11 +535,11 @@ ConcreteDPM :: giveRealStressVector(FloatArray &answer,
 }
 
 
-double ConcreteDPM :: computeDamage(const StrainVector &strain, GaussPoint *gp, TimeStep *atTime)
+double ConcreteDPM :: computeDamage(const StrainVector &strain, GaussPoint *gp, TimeStep *tStep)
 {
     ConcreteDPMStatus *status = giveStatus(gp);
     double equivStrain;
-    computeEquivalentStrain(equivStrain, strain, gp, atTime);
+    computeEquivalentStrain(equivStrain, strain, gp, tStep);
     double f = equivStrain - status->giveKappaD();
     if ( f <= 0.0 ) {
         // damage does not grow
@@ -564,7 +564,7 @@ double ConcreteDPM :: computeDamage(const StrainVector &strain, GaussPoint *gp, 
 }
 
 void
-ConcreteDPM :: computeEquivalentStrain(double &tempEquivStrain, const StrainVector &strain, GaussPoint *gp, TimeStep *atTime)
+ConcreteDPM :: computeEquivalentStrain(double &tempEquivStrain, const StrainVector &strain, GaussPoint *gp, TimeStep *tStep)
 {
     //The equivalent  strain is based on the volumetric plastic strain
     ConcreteDPMStatus *status = giveStatus(gp);
@@ -1688,20 +1688,20 @@ void
 ConcreteDPM :: give3dMaterialStiffnessMatrix(FloatMatrix &answer,
                                              MatResponseMode mode,
                                              GaussPoint *gp,
-                                             TimeStep *atTime)
+                                             TimeStep *tStep)
 {
     if ( gp->giveMaterialMode() == _3dMat || gp->giveMaterialMode() ==  _PlaneStrain ) {
         double omega = 0.;
         ConcreteDPMStatus *status = giveStatus(gp);
         if ( mode == ElasticStiffness ) {
-            this->giveLinearElasticMaterial()->give3dMaterialStiffnessMatrix(answer, mode, gp, atTime);
+            this->giveLinearElasticMaterial()->give3dMaterialStiffnessMatrix(answer, mode, gp, tStep);
         } else if ( mode == SecantStiffness || mode == TangentStiffness ) {
             omega = status->giveTempDamage();
             if ( omega > 0.9999 ) {
                 omega = 0.9999;
             }
 
-            this->giveLinearElasticMaterial()->give3dMaterialStiffnessMatrix(answer, mode, gp, atTime);
+            this->giveLinearElasticMaterial()->give3dMaterialStiffnessMatrix(answer, mode, gp, tStep);
             answer.times(1. - omega);
         }
     } else {
@@ -1927,7 +1927,7 @@ ConcreteDPM :: setIPValue(const FloatArray &value, GaussPoint *gp, InternalState
 }
 
 int
-ConcreteDPM :: giveIPValue(FloatArray &answer, GaussPoint *gp, InternalStateType type, TimeStep *atTime)
+ConcreteDPM :: giveIPValue(FloatArray &answer, GaussPoint *gp, InternalStateType type, TimeStep *tStep)
 {
     const ConcreteDPMStatus *status = giveStatus(gp);
     //int state_flag = status->giveStateFlag();
@@ -1970,7 +1970,7 @@ ConcreteDPM :: giveIPValue(FloatArray &answer, GaussPoint *gp, InternalStateType
         return 1;
     }
 
-    return StructuralMaterial :: giveIPValue(answer, gp, type, atTime);
+    return StructuralMaterial :: giveIPValue(answer, gp, type, tStep);
 }
 
 MaterialStatus *

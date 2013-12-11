@@ -55,16 +55,16 @@ public:
     virtual void giveCharacteristicMatrix(FloatMatrix &answer,
                                           MatResponseMode mode,
                                           GaussPoint *gp,
-                                          TimeStep *atTime);
+                                          TimeStep *tStep);
 
     virtual double giveCharacteristicValue(MatResponseMode mode,
                                            GaussPoint *gp,
-                                           TimeStep *atTime);
+                                           TimeStep *tStep);
 
-    virtual double givePermeability(GaussPoint *gp, TimeStep *atTime) = 0;
-    virtual double giveMoistureCapacity(GaussPoint *gp, TimeStep *atTime) = 0;
+    virtual double givePermeability(GaussPoint *gp, TimeStep *tStep) = 0;
+    virtual double giveMoistureCapacity(GaussPoint *gp, TimeStep *tStep) = 0;
 
-    virtual int giveIPValue(FloatArray &answer, GaussPoint *aGaussPoint, InternalStateType type, TimeStep *atTime);
+    virtual int giveIPValue(FloatArray &answer, GaussPoint *gp, InternalStateType type, TimeStep *tStep);
     virtual const char *giveClassName() const { return "IsotropicMoistureTransferMaterial"; }
 
     virtual IRResultType initializeFrom(InputRecord *ir);

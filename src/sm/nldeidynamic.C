@@ -512,19 +512,19 @@ void NlDEIDynamic :: solveYourselfAt(TimeStep *tStep)
 }
 
 
-void NlDEIDynamic :: updateYourself(TimeStep *stepN)
+void NlDEIDynamic :: updateYourself(TimeStep *tStep)
 {
     // Updates internal state to reached one
     // all internal variables are directly updated by
     // numerical method - void function here
 
-    // this->updateInternalState(stepN);
-    StructuralEngngModel :: updateYourself(stepN);
+    // this->updateInternalState(tStep);
+    StructuralEngngModel :: updateYourself(tStep);
 }
 
 
 void
-NlDEIDynamic :: computeLoadVector(FloatArray &answer, ValueModeType mode, TimeStep *stepN)
+NlDEIDynamic :: computeLoadVector(FloatArray &answer, ValueModeType mode, TimeStep *tStep)
 {
     answer.resize( this->giveNumberOfDomainEquations( 1, EModelDefaultEquationNumbering() ) );
     answer.zero();
@@ -532,7 +532,7 @@ NlDEIDynamic :: computeLoadVector(FloatArray &answer, ValueModeType mode, TimeSt
     //
     // Assemble the nodal part of load vector.
     //
-    this->assembleVector( answer, stepN, EID_MomentumBalance, ExternalForcesVector, mode,
+    this->assembleVector( answer, tStep, EID_MomentumBalance, ExternalForcesVector, mode,
                           EModelDefaultEquationNumbering(), this->giveDomain(1) );
 
     //
@@ -804,7 +804,7 @@ contextIOResultType NlDEIDynamic :: restoreContext(DataStream *stream, ContextMo
     int istep, iversion;
     FILE *file = NULL;
 
-    this->resolveCorrespondingStepNumber(istep, iversion, obj);
+    this->resolveCorrespondingtStepumber(istep, iversion, obj);
 
     if ( stream == NULL ) {
         if ( !this->giveContextFile(& file, istep, iversion, contextMode_read) ) {
@@ -851,14 +851,14 @@ contextIOResultType NlDEIDynamic :: restoreContext(DataStream *stream, ContextMo
 
 
 void
-NlDEIDynamic :: printDofOutputAt(FILE *stream, Dof *iDof, TimeStep *atTime)
+NlDEIDynamic :: printDofOutputAt(FILE *stream, Dof *iDof, TimeStep *tStep)
 {
     static char dofchar[] = "dva";
     static ValueModeType dofmodes[] = {
         VM_Total, VM_Velocity, VM_Acceleration
     };
 
-    iDof->printMultipleOutputAt(stream, atTime, dofchar, dofmodes, 3);
+    iDof->printMultipleOutputAt(stream, tStep, dofchar, dofmodes, 3);
 }
 
 void
@@ -871,18 +871,18 @@ NlDEIDynamic :: terminate(TimeStep *tStep)
 
 
 void
-NlDEIDynamic :: printOutputAt(FILE *File, TimeStep *stepN)
+NlDEIDynamic :: printOutputAt(FILE *File, TimeStep *tStep)
 {
-    if ( !this->giveDomain(1)->giveOutputManager()->testTimeStepOutput(stepN) ) {
+    if ( !this->giveDomain(1)->giveOutputManager()->testTimeStepOutput(tStep) ) {
         return;                                                                      // do not print even Solution step header
     }
 
-    fprintf( File, "\n\nOutput for time % .3e, solution step number %d\n", stepN->giveTargetTime(), stepN->giveNumber() );
+    fprintf( File, "\n\nOutput for time % .3e, solution step number %d\n", tStep->giveTargetTime(), tStep->giveNumber() );
     if ( drFlag ) {
         fprintf(File, "Reached load level : %e\n\n", this->pt);
     }
 
-    this->giveDomain(1)->giveOutputManager()->doDofManOutput(File, stepN);
-    this->giveDomain(1)->giveOutputManager()->doElementOutput(File, stepN);
+    this->giveDomain(1)->giveOutputManager()->doDofManOutput(File, tStep);
+    this->giveDomain(1)->giveOutputManager()->doElementOutput(File, tStep);
 }
 } // end namespace oofem

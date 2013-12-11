@@ -49,21 +49,21 @@ LoadTimeFunction :: LoadTimeFunction(int n, Domain *d) :
 {}
 
 double
-LoadTimeFunction :: evaluate(TimeStep *atTime, ValueModeType mode)
+LoadTimeFunction :: evaluate(TimeStep *tStep, ValueModeType mode)
 {
     if ( mode == VM_Total ) {
-        return this->__at( atTime->giveIntrinsicTime() );
+        return this->__at( tStep->giveIntrinsicTime() );
     } else if ( mode == VM_Velocity ) {
-        return this->__derAt( atTime->giveIntrinsicTime() );
+        return this->__derAt( tStep->giveIntrinsicTime() );
     } else if ( mode == VM_Acceleration ) {
-        return this->__accelAt( atTime->giveIntrinsicTime() );
+        return this->__accelAt( tStep->giveIntrinsicTime() );
     } else if ( mode == VM_Incremental ) {
-        //return this->__at( atTime->giveTime() ) - this->__at( atTime->giveTime() - atTime->giveTimeIncrement() );
+        //return this->__at( tStep->giveTime() ) - this->__at( tStep->giveTime() - tStep->giveTimeIncrement() );
 
-        if ( atTime->isTheFirstStep() ) {
-            return this->__at(atTime->giveIntrinsicTime() - this->initialValue);
+        if ( tStep->isTheFirstStep() ) {
+            return this->__at(tStep->giveIntrinsicTime() - this->initialValue);
         } else {
-            return this->__at( atTime->giveIntrinsicTime() ) - this->__at( atTime->giveIntrinsicTime() - atTime->giveTimeIncrement() );
+            return this->__at( tStep->giveIntrinsicTime() ) - this->__at( tStep->giveIntrinsicTime() - tStep->giveTimeIncrement() );
         }
     } else {
         _error2("LoadTimeFunction:: evaluate: unsupported mode(%d)", mode);

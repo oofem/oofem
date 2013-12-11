@@ -53,22 +53,22 @@ InternalVariableField :: ~InternalVariableField()
 }
 
 int
-InternalVariableField :: evaluateAt(FloatArray &answer, FloatArray &coords, ValueModeType mode, TimeStep *atTime)
+InternalVariableField :: evaluateAt(FloatArray &answer, FloatArray &coords, ValueModeType mode, TimeStep *tStep)
 {
     IntArray types(1);
     types.at(1) = this->type;
     /// Use MaterialMappingAlgorithm classes to do the job
-    this->mma->__init(domain, types, coords, -1, atTime);
-    this->mma->__mapVariable(answer, coords, this->type, atTime);
+    this->mma->__init(domain, types, coords, -1, tStep);
+    this->mma->__mapVariable(answer, coords, this->type, tStep);
 
     return 0; // ok
 }
 
 int
-InternalVariableField :: evaluateAt(FloatArray &answer, DofManager *dman, ValueModeType mode, TimeStep *atTime)
+InternalVariableField :: evaluateAt(FloatArray &answer, DofManager *dman, ValueModeType mode, TimeStep *tStep)
 {
     if ( dman->hasCoordinates() ) {
-        return this->evaluateAt(answer, * ( dman->giveCoordinates() ), mode, atTime);
+        return this->evaluateAt(answer, * ( dman->giveCoordinates() ), mode, tStep);
     } else {
         return 1; // failed -> dman without coordinates
     }

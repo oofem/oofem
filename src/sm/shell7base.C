@@ -822,8 +822,8 @@ Shell7Base :: computeE(FloatMatrix &answer, FloatMatrix &F)
 }
 
 void
-Shell7Base :: computeStrainVectorF(FloatArray &answer, GaussPoint *gp, TimeStep *stepN, FloatArray &genEps)
-//Shell7Base :: computeStrainVectorFrom(FloatArray &answer, GaussPoint *gp, TimeStep *stepN, FloatArray &genEps)
+Shell7Base :: computeStrainVectorF(FloatArray &answer, GaussPoint *gp, TimeStep *tStep, FloatArray &genEps)
+//Shell7Base :: computeStrainVectorFrom(FloatArray &answer, GaussPoint *gp, TimeStep *tStep, FloatArray &genEps)
 {
     // Computes the Green-Lagrange strain tensor: E=0.5(C-I)
     FloatMatrix F, E;
@@ -835,12 +835,12 @@ Shell7Base :: computeStrainVectorF(FloatArray &answer, GaussPoint *gp, TimeStep 
 }
 
 void
-Shell7Base :: computeStressMatrix(FloatArray &answer, FloatArray &genEps, GaussPoint *gp, Material *mat, TimeStep *stepN)
-//computeStrainVector(FloatArray &answer, GaussPoint *gp, TimeStep *stepN)
+Shell7Base :: computeStressMatrix(FloatArray &answer, FloatArray &genEps, GaussPoint *gp, Material *mat, TimeStep *tStep)
+//computeStrainVector(FloatArray &answer, GaussPoint *gp, TimeStep *tStep)
 {
     FloatArray vE;
-    this->computeStrainVectorF(vE, gp, stepN, genEps);     // Green-Lagrange strain vector in Voigt form
-    static_cast< StructuralMaterial * >( mat )->giveRealStressVector(answer, gp, vE, stepN);
+    this->computeStrainVectorF(vE, gp, tStep, genEps);     // Green-Lagrange strain vector in Voigt form
+    static_cast< StructuralMaterial * >( mat )->giveRealStressVector(answer, gp, vE, tStep);
 }
 
 
@@ -1607,7 +1607,7 @@ Shell7Base :: computeTractionForce(FloatArray &answer, const int iEdge, Boundary
 
 
 void
-Shell7Base :: computeBodyLoadVectorAt(FloatArray &answer, Load *forLoad, TimeStep *stepN, ValueModeType mode)
+Shell7Base :: computeBodyLoadVectorAt(FloatArray &answer, Load *forLoad, TimeStep *tStep, ValueModeType mode)
 {
     OOFEM_ERROR("Shell7Base :: computeBodyLoadVectorAt - currently not implemented");
 }
@@ -1949,7 +1949,7 @@ Shell7Base :: giveSolutionVector(FloatArray &answer, const IntArray &dofIdArray,
 
 
 void
-Shell7Base :: computeVectorOfDofIDs(const IntArray &dofIdArray, ValueModeType u, TimeStep *stepN, FloatArray &answer)
+Shell7Base :: computeVectorOfDofIDs(const IntArray &dofIdArray, ValueModeType u, TimeStep *tStep, FloatArray &answer)
 {
     // Routine to extract the solution vector for an element given an dofid array.
     // Size will be numberOfDofs and if a certain dofId does not exist a zero is used as value.
@@ -1966,7 +1966,7 @@ Shell7Base :: computeVectorOfDofIDs(const IntArray &dofIdArray, ValueModeType u,
                 Dof *d = dMan->giveDofWithID( dofIdArray.at(j) );
                 /// @todo: will fail if any other dof then gamma is excluded from enrichment
                 /// since I only add "j". Instead I should skip certain dof numbers when incrementing
-                answer.at(k + j) = d->giveUnknown(VM_Total, stepN);
+                answer.at(k + j) = d->giveUnknown(VM_Total, tStep);
             }
         }
         k += 7;
@@ -1974,7 +1974,7 @@ Shell7Base :: computeVectorOfDofIDs(const IntArray &dofIdArray, ValueModeType u,
 }
 
 void
-Shell7Base :: temp_computeBoundaryVectorOf(IntArray &dofIdArray, int boundary, ValueModeType u, TimeStep *stepN, FloatArray &answer)
+Shell7Base :: temp_computeBoundaryVectorOf(IntArray &dofIdArray, int boundary, ValueModeType u, TimeStep *tStep, FloatArray &answer)
 {
     ///@todo: NOT CHECKED!!!
     // Routine to extract vector given an array of dofid items
@@ -1992,7 +1992,7 @@ Shell7Base :: temp_computeBoundaryVectorOf(IntArray &dofIdArray, int boundary, V
             Dof *d = dMan->giveDof(j);
             k++;
             if ( dMan->hasDofID( ( DofIDItem ) dofIdArray.at(j) ) ) {
-                answer.at(k) = d->giveUnknown(VM_Total, stepN);
+                answer.at(k) = d->giveUnknown(VM_Total, tStep);
             }
         }
     }
@@ -2218,7 +2218,7 @@ Shell7Base :: edgeComputeNmatrixAt(FloatArray &lcoords, FloatMatrix &answer)
 void
 Shell7Base :: edgeComputeBmatrixAt(FloatArray &lcoords, FloatMatrix &answer, int li, int ui)
 {
-    /* Returns the  matrix {B} of the receiver, evaluated at aGaussPoint. Such that
+    /* Returns the  matrix {B} of the receiver, evaluated at gp. Such that
      * B*a = [dxbar_dxi, dwdxi, w, dgamdxi, gam]^T, where a is the vector of unknowns
      */
 
@@ -2267,7 +2267,7 @@ Shell7Base :: edgeComputeBmatrixAt(FloatArray &lcoords, FloatMatrix &answer, int
 void
 Shell7Base :: computeBmatrixAt(FloatArray &lcoords, FloatMatrix &answer, int li, int ui)
 {
-    // Returns the  matrix {B} of the receiver, evaluated at aGaussPoint. Such that
+    // Returns the  matrix {B} of the receiver, evaluated at gp. Such that
     // B*a = [dxbar_dxi, dwdxi, w, dgamdxi, gam]^T, where a is the vector of unknowns
 
     int ndofs = Shell7Base :: giveNumberOfDofs();
@@ -2324,7 +2324,7 @@ void
 Shell7Base :: computeNmatrixAt(const FloatArray &iLocCoord, FloatMatrix &answer)
 {
     // Returns the displacement interpolation matrix {N} of the receiver,
-    // evaluated at aGaussPoint.
+    // evaluated at gp.
 
     int ndofs = Shell7Base :: giveNumberOfDofs();
     int ndofs_xm  = this->giveNumberOfFieldDofs(Midplane);
@@ -2762,7 +2762,7 @@ Shell7Base :: recoverShearStress(TimeStep *tStep)
 void
 Shell7Base :: computeBmatrixForStressRecAt(FloatArray &lcoords, FloatMatrix &answer, int layer)
 {
-    // Returns the  special matrix {B} of the receiver, evaluated at aGaussPoint. Such that
+    // Returns the  special matrix {B} of the receiver, evaluated at gp. Such that
     // B*a = [dS_xx/dx + dS_xy/dy, dS_yx/dx + dS_yy/dy ]^T, where a is the vector of in plane
     // stresses [S_xx, S_yy, S_xy]
 

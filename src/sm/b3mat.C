@@ -205,10 +205,10 @@ B3Material :: predictParametersFrom(double fc, double c, double wc, double ac,
 
 
 double
-B3Material :: computeCreepFunction(double atTime, double ofAge)
+B3Material :: computeCreepFunction(double tStep, double ofAge)
 {
     // computes the value of creep function at time ofAge
-    // when load is acting from atTime
+    // when load is acting from tStep
 
     double Qf, Z, r, Q, C0, TauSh, St1, St2, H1, H2, Cd;
     double n, m;
@@ -219,19 +219,19 @@ B3Material :: computeCreepFunction(double atTime, double ofAge)
     // basic creep
 
     Qf = 1. / ( 0.086 * pow(ofAge, 2. / 9.) + 1.21 * pow(ofAge, 4. / 9.) );
-    Z  = pow(ofAge, -m) * log( 1. + pow(atTime - ofAge, n) );
+    Z  = pow(ofAge, -m) * log( 1. + pow(tStep - ofAge, n) );
     r  = 1.7 * pow(ofAge, 0.12) + 8.0;
     Q  = Qf * pow( ( 1. + pow( ( Qf / Z ), r ) ), -1. / r );
 
-    C0 = q2 * Q + q3 *log( 1. + pow(atTime - ofAge, n) ) + q4 *log(atTime / ofAge);
+    C0 = q2 * Q + q3 *log( 1. + pow(tStep - ofAge, n) ) + q4 *log(tStep / ofAge);
 
 
     if ( this->shMode == B3_AverageShrinkage ) {
         // Aditional creep due to drying
 
         TauSh = kt * pow(ks * 2.0 * vs, 2.);
-        if ( ( atTime - t0 ) >= 0 ) {
-            St1  = tanh( pow( ( atTime - t0 ) / TauSh, 1. / 2. ) );
+        if ( ( tStep - t0 ) >= 0 ) {
+            St1  = tanh( pow( ( tStep - t0 ) / TauSh, 1. / 2. ) );
         } else {
             St1 = 0.0;
         }
@@ -257,7 +257,7 @@ B3Material :: computeCreepFunction(double atTime, double ofAge)
 void
 B3Material :: giveShrinkageStrainVector(FloatArray &answer,
                                         GaussPoint *gp,
-                                        TimeStep *atTime,
+                                        TimeStep *tStep,
                                         ValueModeType mode)
 {
     FloatArray prevAnswer;
@@ -273,25 +273,25 @@ B3Material :: giveShrinkageStrainVector(FloatArray &answer,
     }
 
     if ( this->shMode == B3_AverageShrinkage ) {
-        this->computeTotalAverageShrinkageStrainVector(answer, gp, atTime);
+        this->computeTotalAverageShrinkageStrainVector(answer, gp, tStep);
 
-        if ( ( mode == VM_Incremental ) && ( !atTime->isTheFirstStep() ) ) {
-            this->computeTotalAverageShrinkageStrainVector( prevAnswer, gp, atTime->givePreviousStep() );
+        if ( ( mode == VM_Incremental ) && ( !tStep->isTheFirstStep() ) ) {
+            this->computeTotalAverageShrinkageStrainVector( prevAnswer, gp, tStep->givePreviousStep() );
             answer.subtract(prevAnswer);
         }
     } else {
-        this->computeShrinkageStrainVector(answer, gp, atTime, mode);
+        this->computeShrinkageStrainVector(answer, gp, tStep, mode);
     }
 }
 
 void
-B3Material :: computeTotalAverageShrinkageStrainVector(FloatArray &answer, GaussPoint *gp, TimeStep *atTime)
+B3Material :: computeTotalAverageShrinkageStrainVector(FloatArray &answer, GaussPoint *gp, TimeStep *tStep)
 {
     /*
      * returns average shrinkage strain vector of cross-section at drying
      */
     double TauSh, St, kh, help, E607, Et0Tau, EpsShInf, EpsSh;
-    double time = relMatAge + atTime->giveTargetTime() / timeFactor;
+    double time = relMatAge + tStep->giveTargetTime() / timeFactor;
     int size = 6;
     FloatArray fullAnswer;
     MaterialMode mode = gp->giveMaterialMode();
@@ -333,7 +333,7 @@ B3Material :: computeTotalAverageShrinkageStrainVector(FloatArray &answer, Gauss
 }
 
 void
-B3Material :: computeShrinkageStrainVector(FloatArray &answer, GaussPoint *gp, TimeStep *atTime, ValueModeType mode)
+B3Material :: computeShrinkageStrainVector(FloatArray &answer, GaussPoint *gp, TimeStep *tStep, ValueModeType mode)
 {
     // additional material parameters required:
     //  es0     - final shrinkage at material point
@@ -341,7 +341,7 @@ B3Material :: computeShrinkageStrainVector(FloatArray &answer, GaussPoint *gp, T
     //  rprime  - coefficient
     //  at      - coeff relating stress-induced thermal strain and shrinkage
     double sv, sn, et0, et, wrate = 0.0, trate = 0.0, h1;
-    double time = relMatAge + atTime->giveTargetTime() / timeFactor;
+    double time = relMatAge + tStep->giveTargetTime() / timeFactor;
     int err, tflag = 0, wflag = 0;
     MaxwellChainMaterialStatus *status = static_cast< MaxwellChainMaterialStatus * >( this->giveStatus(gp) );
     int size = 6;
@@ -366,7 +366,7 @@ B3Material :: computeShrinkageStrainVector(FloatArray &answer, GaussPoint *gp, T
     if ( ( tf = fm->giveField(FT_Temperature) ) ) {
         // temperature field registered
         gp->giveElement()->computeGlobalCoordinates( gcoords, * gp->giveCoordinates() );
-        if ( ( err = tf->evaluateAt(et2, gcoords, VM_Incremental, atTime) ) ) {
+        if ( ( err = tf->evaluateAt(et2, gcoords, VM_Incremental, tStep) ) ) {
             _error2("computeShrinkageStrainVector: tf->evaluateAt failed, error value %d", err);
         }
 
@@ -377,11 +377,11 @@ B3Material :: computeShrinkageStrainVector(FloatArray &answer, GaussPoint *gp, T
     if ( ( tf = fm->giveField(FT_HumidityConcentration) ) ) {
         // temperature field registered
         gp->giveElement()->computeGlobalCoordinates( gcoords, * gp->giveCoordinates() );
-        if ( ( err = tf->evaluateAt(et2, gcoords, VM_Total, atTime) ) ) {
+        if ( ( err = tf->evaluateAt(et2, gcoords, VM_Total, tStep) ) ) {
             _error2("computeShrinkageStrainVector: tf->evaluateAt failed, error value %d", err);
         }
 
-        if ( ( err = tf->evaluateAt(ei2, gcoords, VM_Incremental, atTime) ) ) {
+        if ( ( err = tf->evaluateAt(ei2, gcoords, VM_Incremental, tStep) ) ) {
             _error2("computeShrinkageStrainVector: tf->evaluateAt failed, error value %d", err);
         }
 

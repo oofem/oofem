@@ -73,7 +73,7 @@ protected:
     virtual double giveArea();
     virtual void giveNodeCoordinates(FloatArray &x, FloatArray &y);
 
-    virtual void computeBodyLoadVectorAt(FloatArray &answer, Load *forLoad, TimeStep *stepN, ValueModeType mode);
+    virtual void computeBodyLoadVectorAt(FloatArray &answer, Load *forLoad, TimeStep *tStep, ValueModeType mode);
 
 public:
     // definition & identification

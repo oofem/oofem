@@ -73,7 +73,7 @@ IntMatBilinearCZElastic :: hasMaterialModeCapability(MaterialMode mode)
 //void
 //IntMatBilinearCZElastic :: giveRealStressVector(FloatArray &answer, GaussPoint *gp,
 //                                                   const FloatArray &jumpVector,
-//                                                   TimeStep *atTime)
+//                                                   TimeStep *tStep)
 void
 IntMatBilinearCZElastic :: giveFirstPKTraction_3d(FloatArray &answer, GaussPoint *gp, const FloatArray &jumpVector,
                                                   const FloatMatrix &F, TimeStep *tStep)
@@ -129,7 +129,7 @@ IntMatBilinearCZElastic :: giveFirstPKTraction_3d(FloatArray &answer, GaussPoint
 //IntMatBilinearCZElastic :: giveStiffnessMatrix(FloatMatrix &answer,
 //                                               MatResponseMode rMode,
 //                                               GaussPoint *gp,
-//                                               TimeStep *atTime)
+//                                               TimeStep *tStep)
 ////
 //// Returns characteristic material stiffness matrix of the receiver
 ////
@@ -138,18 +138,18 @@ IntMatBilinearCZElastic :: giveFirstPKTraction_3d(FloatArray &answer, GaussPoint
 //    switch ( mMode ) {
 //    case _3dInterface:
 //    case _3dMat:
-//        give3dInterfaceMaterialStiffnessMatrix(answer, rMode, gp, atTime);
+//        give3dInterfaceMaterialStiffnessMatrix(answer, rMode, gp, tStep);
 //        break;
 //    default:
-//        //StructuralMaterial :: giveCharacteristicMatrix(answer, rMode, gp, atTime);
-//        StructuralMaterial ::give3dMaterialStiffnessMatrix(answer, rMode, gp, atTime);
+//        //StructuralMaterial :: giveCharacteristicMatrix(answer, rMode, gp, tStep);
+//        StructuralMaterial ::give3dMaterialStiffnessMatrix(answer, rMode, gp, tStep);
 //    }
 //}
 
 
 //void
 //IntMatBilinearCZElastic :: give3dInterfaceMaterialStiffnessMatrix(FloatMatrix &answer, MatResponseMode rMode,
-//                                                                     GaussPoint *gp, TimeStep *atTime)
+//                                                                     GaussPoint *gp, TimeStep *tStep)
 void
 IntMatBilinearCZElastic :: give3dStiffnessMatrix_dTdj(FloatMatrix &answer, MatResponseMode rMode, GaussPoint *gp, TimeStep *tStep)
 {
@@ -198,15 +198,15 @@ IntMatBilinearCZElastic :: give3dStiffnessMatrix_dTdj(FloatMatrix &answer, MatRe
 
 
 int
-IntMatBilinearCZElastic :: giveIPValue(FloatArray &answer, GaussPoint *aGaussPoint, InternalStateType type, TimeStep *atTime)
+IntMatBilinearCZElastic :: giveIPValue(FloatArray &answer, GaussPoint *gp, InternalStateType type, TimeStep *tStep)
 {
-    //IntMatBilinearCZElasticStatus *status = static_cast< IntMatBilinearCZElasticStatus * >( this->giveStatus(aGaussPoint) );
+    //IntMatBilinearCZElasticStatus *status = static_cast< IntMatBilinearCZElasticStatus * >( this->giveStatus(gp) );
     if ( type == IST_DamageScalar ) {
         answer.resize(1);
         answer.at(1) = 0.0; // no damage
         return 1;
     } else {
-        return StructuralInterfaceMaterial :: giveIPValue(answer, aGaussPoint, type, atTime);
+        return StructuralInterfaceMaterial :: giveIPValue(answer, gp, type, tStep);
     }
 }
 
@@ -310,9 +310,9 @@ IntMatBilinearCZElasticStatus :: initTempStatus()
 }
 
 void
-IntMatBilinearCZElasticStatus :: updateYourself(TimeStep *atTime)
+IntMatBilinearCZElasticStatus :: updateYourself(TimeStep *tStep)
 {
-    StructuralInterfaceMaterialStatus :: updateYourself(atTime);
+    StructuralInterfaceMaterialStatus :: updateYourself(tStep);
 }
 
 #if 0

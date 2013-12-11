@@ -72,7 +72,7 @@ ExpCZMaterial :: hasMaterialModeCapability(MaterialMode mode)
 void
 ExpCZMaterial :: giveRealStressVector(FloatArray &answer, MatResponseForm form, GaussPoint *gp,
                                       const FloatArray &jumpVector,
-                                      TimeStep *atTime)
+                                      TimeStep *tStep)
 //
 // returns real stress vector in 3d stress space of receiver according to
 // previous level of stress and current
@@ -111,7 +111,7 @@ ExpCZMaterial :: giveRealStressVector(FloatArray &answer, MatResponseForm form, 
 void
 ExpCZMaterial :: giveCharacteristicMatrix(FloatMatrix &answer,
                                           MatResponseForm form, MatResponseMode rMode,
-                                          GaussPoint *gp, TimeStep *atTime)
+                                          GaussPoint *gp, TimeStep *tStep)
 //
 // Returns characteristic material stiffness matrix of the receiver
 //
@@ -120,17 +120,17 @@ ExpCZMaterial :: giveCharacteristicMatrix(FloatMatrix &answer,
     switch ( mMode ) {
     case _3dInterface:
     case _3dMat:
-        give3dInterfaceMaterialStiffnessMatrix(answer, form, rMode, gp, atTime);
+        give3dInterfaceMaterialStiffnessMatrix(answer, form, rMode, gp, tStep);
         break;
     default:
-        StructuralMaterial :: giveCharacteristicMatrix(answer, form, rMode, gp, atTime);
+        StructuralMaterial :: giveCharacteristicMatrix(answer, form, rMode, gp, tStep);
     }
 }
 
 
 void
 ExpCZMaterial :: give3dInterfaceMaterialStiffnessMatrix(FloatMatrix &answer, MatResponseForm form, MatResponseMode rMode,
-                                                        GaussPoint *gp, TimeStep *atTime)
+                                                        GaussPoint *gp, TimeStep *tStep)
 {
     ExpCZMaterialStatus *status = static_cast< ExpCZMaterialStatus * >( this->giveStatus(gp) );
 
@@ -283,7 +283,7 @@ ExpCZMaterial :: giveFullCharacteristicVector(FloatArray &answer,
 
 void
 ExpCZMaterial :: give2dInterfaceMaterialStiffnessMatrix(FloatMatrix &answer, MatResponseForm form, MatResponseMode rMode,
-                                                        GaussPoint *gp, TimeStep *atTime)
+                                                        GaussPoint *gp, TimeStep *tStep)
 {
     double om, un;
     IsoInterfaceDamageMaterialStatus *status = static_cast< IsoInterfaceDamageMaterialStatus * >( this->giveStatus(gp) );
@@ -342,7 +342,7 @@ ExpCZMaterial :: give2dInterfaceMaterialStiffnessMatrix(FloatMatrix &answer, Mat
 
 void
 ExpCZMaterial :: give3dInterfaceMaterialStiffnessMatrix(FloatMatrix &answer, MatResponseForm form, MatResponseMode rMode,
-                                                        GaussPoint *gp, TimeStep *atTime)
+                                                        GaussPoint *gp, TimeStep *tStep)
 {
     double om, un;
     IsoInterfaceDamageMaterialStatus *status = static_cast< IsoInterfaceDamageMaterialStatus * >( this->giveStatus(gp) );
@@ -402,10 +402,10 @@ ExpCZMaterial :: give3dInterfaceMaterialStiffnessMatrix(FloatMatrix &answer, Mat
 #endif
 
 int
-ExpCZMaterial :: giveIPValue(FloatArray &answer, GaussPoint *aGaussPoint, InternalStateType type, TimeStep *atTime)
+ExpCZMaterial :: giveIPValue(FloatArray &answer, GaussPoint *gp, InternalStateType type, TimeStep *tStep)
 {
-    ExpCZMaterialStatus *status = static_cast< ExpCZMaterialStatus * >( this->giveStatus(aGaussPoint) );
-    return StructuralMaterial :: giveIPValue(answer, aGaussPoint, type, atTime);
+    ExpCZMaterialStatus *status = static_cast< ExpCZMaterialStatus * >( this->giveStatus(gp) );
+    return StructuralMaterial :: giveIPValue(answer, gp, type, tStep);
 }
 
 int
@@ -416,9 +416,9 @@ ExpCZMaterial :: giveIntVarCompFullIndx(IntArray &answer, InternalStateType type
 
 
 int
-ExpCZMaterial :: giveIPValueSize(InternalStateType type, GaussPoint *aGaussPoint)
+ExpCZMaterial :: giveIPValueSize(InternalStateType type, GaussPoint *gp)
 {
-    return StructuralMaterial :: giveIPValueSize(type, aGaussPoint);
+    return StructuralMaterial :: giveIPValueSize(type, gp);
 }
 
 
@@ -510,9 +510,9 @@ ExpCZMaterialStatus :: initTempStatus()
 }
 
 void
-ExpCZMaterialStatus :: updateYourself(TimeStep *atTime)
+ExpCZMaterialStatus :: updateYourself(TimeStep *tStep)
 {
-    StructuralMaterialStatus :: updateYourself(atTime);
+    StructuralMaterialStatus :: updateYourself(tStep);
 }
 
 #if 0

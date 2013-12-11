@@ -272,7 +272,7 @@ void LinearStatic :: solveYourselfAt(TimeStep *tStep)
     //
     // set-up numerical model
     //
-    this->giveNumericalMethod( this->giveMetaStep( tStep->giveMetaStepNumber() ) );
+    this->giveNumericalMethod( this->giveMetaStep( tStep->giveMetatStepumber() ) );
 
     //
     // call numerical model to solve arose problem
@@ -336,7 +336,7 @@ contextIOResultType LinearStatic :: restoreContext(DataStream *stream, ContextMo
     int istep, iversion;
     FILE *file = NULL;
 
-    this->resolveCorrespondingStepNumber(istep, iversion, obj);
+    this->resolveCorrespondingtStepumber(istep, iversion, obj);
 
     if ( stream == NULL ) {
         if ( !this->giveContextFile(& file, istep, iversion, contextMode_read) ) {
@@ -385,9 +385,9 @@ LinearStatic :: updateDomainLinks()
 
 
 void
-LinearStatic :: printDofOutputAt(FILE *stream, Dof *iDof, TimeStep *atTime)
+LinearStatic :: printDofOutputAt(FILE *stream, Dof *iDof, TimeStep *tStep)
 {
-    iDof->printSingleOutputAt(stream, atTime, 'd', VM_Total);
+    iDof->printSingleOutputAt(stream, tStep, 'd', VM_Total);
 }
 
 

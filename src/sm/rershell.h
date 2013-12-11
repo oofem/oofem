@@ -92,7 +92,7 @@ public:
     virtual int computeNumberOfDofs() { return 18; }
     virtual void giveDofManDofIDMask(int inode, EquationID, IntArray &) const;
 
-    virtual int giveIPValue(FloatArray &answer, GaussPoint *aGaussPoint, InternalStateType type, TimeStep *atTime);
+    virtual int giveIPValue(FloatArray &answer, GaussPoint *gp, InternalStateType type, TimeStep *tStep);
 
     virtual Element *ZZNodalRecoveryMI_giveElement() { return this; }
 

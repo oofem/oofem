@@ -62,14 +62,14 @@ public:
     AdaptiveLinearStatic(int i, EngngModel *_master = NULL) : LinearStatic(i, _master) { }
     virtual ~AdaptiveLinearStatic() { }
 
-    virtual void updateYourself(TimeStep *stepN);
+    virtual void updateYourself(TimeStep *tStep);
 
     /**
      * Initializes the newly generated discretization state according to previous solution.
      * This process should typically include restoring old solution, instanciating newly
      * generated domain(s) and by mapping procedure.
      */
-    virtual int initializeAdaptive(int stepNumber);
+    virtual int initializeAdaptive(int tStepumber);
     virtual void terminate(TimeStep *tStep);
 
     virtual contextIOResultType restoreContext(DataStream *stream, ContextMode mode, void *obj = NULL);

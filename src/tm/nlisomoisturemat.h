@@ -117,8 +117,8 @@ public:
     virtual ~NlIsoMoistureMaterial() { }
 
     /// evaluates slope of the sorption isotherm
-    virtual double giveMoistureCapacity(GaussPoint *gp, TimeStep *atTime);
-    virtual double givePermeability(GaussPoint *gp, TimeStep *atTime);
+    virtual double giveMoistureCapacity(GaussPoint *gp, TimeStep *tStep);
+    virtual double givePermeability(GaussPoint *gp, TimeStep *tStep);
 
     virtual const char *giveInputRecordName() const { return _IFT_NlIsoMoistureMaterial_Name; }
     virtual const char *giveClassName() const { return "NlIsoMoistureMaterial"; }

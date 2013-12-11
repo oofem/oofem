@@ -76,7 +76,7 @@ MazarsNLMaterial :: giveInterface(InterfaceType type)
 
 
 void
-MazarsNLMaterial :: updateBeforeNonlocAverage(const FloatArray &strainVector, GaussPoint *gp, TimeStep *atTime)
+MazarsNLMaterial :: updateBeforeNonlocAverage(const FloatArray &strainVector, GaussPoint *gp, TimeStep *tStep)
 {
     /*  Implements the service updating local variables in given integration points,
      * which take part in nonlocal average process. Actually, no update is necessary,
@@ -94,10 +94,10 @@ MazarsNLMaterial :: updateBeforeNonlocAverage(const FloatArray &strainVector, Ga
     // subtract stress independent part
     // note: eigenStrains (temperature) is not contained in mechanical strain stored in gp
     // therefore it is necessary to subtract always the total eigen strain value
-    this->giveStressDependentPartOfStrainVector(SDstrainVector, gp, strainVector, atTime, VM_Total);
+    this->giveStressDependentPartOfStrainVector(SDstrainVector, gp, strainVector, tStep, VM_Total);
 
     // compute equivalent strain
-    this->computeLocalEquivalentStrain(equivStrain, SDstrainVector, gp, atTime);
+    this->computeLocalEquivalentStrain(equivStrain, SDstrainVector, gp, tStep);
 
     nlstatus->setLocalEquivalentStrainForAverage(equivStrain);
 }
@@ -105,13 +105,13 @@ MazarsNLMaterial :: updateBeforeNonlocAverage(const FloatArray &strainVector, Ga
 
 
 void
-MazarsNLMaterial :: computeEquivalentStrain(double &kappa, const FloatArray &strain, GaussPoint *gp, TimeStep *atTime)
+MazarsNLMaterial :: computeEquivalentStrain(double &kappa, const FloatArray &strain, GaussPoint *gp, TimeStep *tStep)
 {
     double nonlocalContribution, nonlocalEquivalentStrain = 0.0;
     MazarsNLMaterialStatus *nonlocStatus, *status = static_cast< MazarsNLMaterialStatus * >( this->giveStatus(gp) );
 
     this->buildNonlocalPointTable(gp);
-    this->updateDomainBeforeNonlocAverage(atTime);
+    this->updateDomainBeforeNonlocAverage(tStep);
 
     // compute nonlocal strain increment first
     std :: list< localIntegrationRecord > *list = this->giveIPIntegrationList(gp); // !
@@ -218,14 +218,14 @@ MazarsNLMaterialStatus :: initTempStatus()
 
 
 void
-MazarsNLMaterialStatus :: updateYourself(TimeStep *atTime)
+MazarsNLMaterialStatus :: updateYourself(TimeStep *tStep)
 //
 // updates variables (nonTemp variables describing situation at previous equilibrium state)
 // after a new equilibrium state has been reached
 // temporary variables are having values corresponding to newly reched equilibrium.
 //
 {
-    MazarsMaterialStatus :: updateYourself(atTime);
+    MazarsMaterialStatus :: updateYourself(tStep);
 }
 
 
@@ -278,18 +278,18 @@ MazarsNLMaterialStatus :: giveInterface(InterfaceType type)
 
 #ifdef __PARALLEL_MODE
 int
-MazarsNLMaterial :: packUnknowns(CommunicationBuffer &buff, TimeStep *stepN, GaussPoint *ip)
+MazarsNLMaterial :: packUnknowns(CommunicationBuffer &buff, TimeStep *tStep, GaussPoint *ip)
 {
     MazarsNLMaterialStatus *status = static_cast< MazarsNLMaterialStatus * >( this->giveStatus(ip) );
 
     this->buildNonlocalPointTable(ip);
-    this->updateDomainBeforeNonlocAverage(stepN);
+    this->updateDomainBeforeNonlocAverage(tStep);
 
     return buff.packDouble( status->giveLocalEquivalentStrainForAverage() );
 }
 
 int
-MazarsNLMaterial :: unpackAndUpdateUnknowns(CommunicationBuffer &buff, TimeStep *stepN, GaussPoint *ip)
+MazarsNLMaterial :: unpackAndUpdateUnknowns(CommunicationBuffer &buff, TimeStep *tStep, GaussPoint *ip)
 {
     int result;
     MazarsNLMaterialStatus *status = static_cast< MazarsNLMaterialStatus * >( this->giveStatus(ip) );

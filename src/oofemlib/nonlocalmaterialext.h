@@ -237,7 +237,7 @@ public:
      * last modification time mark is kept.
      * @see Element::updateBeforeNonlocalAverage
      */
-    void updateDomainBeforeNonlocAverage(TimeStep *atTime);
+    void updateDomainBeforeNonlocAverage(TimeStep *tStep);
 
     /**
      * Builds list of integration points which take part in nonlocal average in given integration point.

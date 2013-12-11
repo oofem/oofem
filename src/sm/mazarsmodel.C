@@ -126,7 +126,7 @@ MazarsMaterial :: initializeFrom(InputRecord *ir)
 
 
 void
-MazarsMaterial :: computeEquivalentStrain(double &kappa, const FloatArray &strain, GaussPoint *gp, TimeStep *atTime)
+MazarsMaterial :: computeEquivalentStrain(double &kappa, const FloatArray &strain, GaussPoint *gp, TimeStep *tStep)
 {
     double posNorm = 0.0;
     FloatArray principalStrains, strainb;
@@ -179,7 +179,7 @@ MazarsMaterial :: computeEquivalentStrain(double &kappa, const FloatArray &strai
  * void
  * MazarsMaterial :: giveNormalElasticStiffnessMatrix(FloatMatrix &answer,
  *                                                 MatResponseMode rMode,
- *                                                 GaussPoint *gp, TimeStep *atTime)
+ *                                                 GaussPoint *gp, TimeStep *tStep)
  * {
  *  //
  *  // return Elastic Stiffness matrix for normal Stresses
@@ -188,7 +188,7 @@ MazarsMaterial :: computeEquivalentStrain(double &kappa, const FloatArray &strai
  *  int i, j;
  *
  *  answer.resize(3, 3);
- *  lMat->give3dMaterialStiffnessMatrix(de, rMode, gp, atTime);
+ *  lMat->give3dMaterialStiffnessMatrix(de, rMode, gp, tStep);
  *  // copy first 3x3 submatrix to answer
  *  for ( i = 1; i <= 3; i++ ) {
  *      for ( j = 1; j <= 3; j++ ) {

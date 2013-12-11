@@ -63,13 +63,13 @@ BazantNajjarMoistureTransferMaterial :: initializeFrom(InputRecord *ir)
 
 
 double
-BazantNajjarMoistureTransferMaterial :: giveMoistureCapacity(GaussPoint *gp, TimeStep *atTime)
+BazantNajjarMoistureTransferMaterial :: giveMoistureCapacity(GaussPoint *gp, TimeStep *tStep)
 {
     return this->moistureCapacity;
 }
 
 double
-BazantNajjarMoistureTransferMaterial :: givePermeability(GaussPoint *gp, TimeStep *atTime)
+BazantNajjarMoistureTransferMaterial :: givePermeability(GaussPoint *gp, TimeStep *tStep)
 {
     double permeability;
     double humidity = this->giveHumidity(gp, VM_Total);

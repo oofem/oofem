@@ -88,23 +88,23 @@ protected:
     void computeStiffnessMatrix_kk(FloatMatrix &, MatResponseMode, TimeStep *);
     void computeStiffnessMatrix_ku(FloatMatrix &, MatResponseMode, TimeStep *);
 
-    void computeDisplacementDegreesOfFreedom(FloatArray &answer, TimeStep *stepN);
-    void computeNonlocalDegreesOfFreedom(FloatArray &answer, TimeStep *stepN);
-    void computeNonlocalGradient(FloatArray &answer, GaussPoint *gp, TimeStep *stepN);
+    void computeDisplacementDegreesOfFreedom(FloatArray &answer, TimeStep *tStep);
+    void computeNonlocalDegreesOfFreedom(FloatArray &answer, TimeStep *tStep);
+    void computeNonlocalGradient(FloatArray &answer, GaussPoint *gp, TimeStep *tStep);
 
-    void computeLocalStrainVector(FloatArray &answer, GaussPoint *gp, TimeStep *stepN);
-    void computeDeformationGradientVector(FloatArray &answer, GaussPoint *gp, TimeStep *stepN);
-    void computeNonlocalCumulatedStrain(double &answer, GaussPoint *gp, TimeStep *stepN);
+    void computeLocalStrainVector(FloatArray &answer, GaussPoint *gp, TimeStep *tStep);
+    void computeDeformationGradientVector(FloatArray &answer, GaussPoint *gp, TimeStep *tStep);
+    void computeNonlocalCumulatedStrain(double &answer, GaussPoint *gp, TimeStep *tStep);
 
     void giveInternalForcesVector(FloatArray &answer, TimeStep *tStep, int useUpdatedGpRecord);
     void giveLocalInternalForcesVector(FloatArray &answer, TimeStep *tStep, int useUpdatedGpRecord);
     void giveNonlocalInternalForcesVector(FloatArray &answer, TimeStep *tStep, int useUpdatedGpRecord);
 
-    void computeStressVectorAndLocalCumulatedStrain(FloatArray &answer, double localCumulatedPlasticStrain, GaussPoint *gp, TimeStep *stepN);
-    void computeForceLoadVector(FloatArray &answer, TimeStep *stepN, ValueModeType mode);
-    void computeLocForceLoadVector(FloatArray &answer, TimeStep *stepN, ValueModeType mode);
-    void computeLocNonForceLoadVector(FloatArray &answer, TimeStep *stepN, ValueModeType mode);
-    void computeNonForceLoadVector(FloatArray &answer, TimeStep *stepN, ValueModeType mode);
+    void computeStressVectorAndLocalCumulatedStrain(FloatArray &answer, double localCumulatedPlasticStrain, GaussPoint *gp, TimeStep *tStep);
+    void computeForceLoadVector(FloatArray &answer, TimeStep *tStep, ValueModeType mode);
+    void computeLocForceLoadVector(FloatArray &answer, TimeStep *tStep, ValueModeType mode);
+    void computeLocNonForceLoadVector(FloatArray &answer, TimeStep *tStep, ValueModeType mode);
+    void computeNonForceLoadVector(FloatArray &answer, TimeStep *tStep, ValueModeType mode);
     void computeDistanceToBoundary();
 
     //@todo this method has been removed from NLStructuralElement and has simply been put here to

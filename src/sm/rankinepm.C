@@ -105,7 +105,7 @@ void
 RankinePlasticMaterial :: computeHardeningReducedModuli(FloatMatrix &answer,
                                                         GaussPoint *gp,
                                                         const FloatArray &strainSpaceHardeningVariables,
-                                                        TimeStep *atTime)
+                                                        TimeStep *tStep)
 {
     answer.resize(0, 0);
 }

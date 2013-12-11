@@ -61,8 +61,8 @@ public:
     IsotropicLinMoistureTransferMaterial(int n, Domain *d) : IsotropicMoistureTransferMaterial(n, d) { }
     virtual ~IsotropicLinMoistureTransferMaterial() { }
 
-    virtual double givePermeability(GaussPoint *gp, TimeStep *atTime);
-    virtual double giveMoistureCapacity(GaussPoint *gp, TimeStep *atTime);
+    virtual double givePermeability(GaussPoint *gp, TimeStep *tStep);
+    virtual double giveMoistureCapacity(GaussPoint *gp, TimeStep *tStep);
 
     virtual const char *giveInputRecordName() const { return _IFT_IsotropicLinMoistureTransferMaterial_Name; }
     virtual const char *giveClassName() const { return "IsotropicLinMoistureTransferMaterial"; }

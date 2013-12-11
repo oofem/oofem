@@ -110,12 +110,12 @@ QTRSpaceGrad :: computeGaussPoints()
 
 
 void
-QTRSpaceGrad :: computeNkappaMatrixAt(GaussPoint *aGaussPoint, FloatMatrix &answer)
+QTRSpaceGrad :: computeNkappaMatrixAt(GaussPoint *gp, FloatMatrix &answer)
 // Returns the displacement interpolation matrix {N} of the receiver, eva-
-// luated at aGaussPoint.
+// luated at gp.
 {
     FloatArray n(4);
-    this->interpolation.evalN( n, * aGaussPoint->giveCoordinates(), FEIElementGeometryWrapper(this) );
+    this->interpolation.evalN( n, * gp->giveCoordinates(), FEIElementGeometryWrapper(this) );
     answer.resize(1, 4);
     answer.zero();
 
@@ -125,13 +125,13 @@ QTRSpaceGrad :: computeNkappaMatrixAt(GaussPoint *aGaussPoint, FloatMatrix &answ
 }
 
 void
-QTRSpaceGrad :: computeBkappaMatrixAt(GaussPoint *aGaussPoint, FloatMatrix &answer)
+QTRSpaceGrad :: computeBkappaMatrixAt(GaussPoint *gp, FloatMatrix &answer)
 {
     FloatMatrix dnx;
     answer.resize(3, 4);
     answer.zero();
 
-    this->interpolation.evaldNdx( dnx, * aGaussPoint->giveCoordinates(), FEIElementGeometryWrapper(this) );
+    this->interpolation.evaldNdx( dnx, * gp->giveCoordinates(), FEIElementGeometryWrapper(this) );
     for ( int i = 1; i <= 4; i++ ) {
         answer.at(1, i) = dnx.at(i, 1);
         answer.at(2, i) = dnx.at(i, 2);
@@ -142,15 +142,15 @@ QTRSpaceGrad :: computeBkappaMatrixAt(GaussPoint *aGaussPoint, FloatMatrix &answ
 
 
 void
-QTRSpaceGrad :: computeNLBMatrixAt(FloatMatrix &answer, GaussPoint *aGaussPoint, int i)
+QTRSpaceGrad :: computeNLBMatrixAt(FloatMatrix &answer, GaussPoint *gp, int i)
 // Returns the [45x45] nonlinear part of strain-displacement matrix {B} of the receiver,
-// evaluated at aGaussPoint
+// evaluated at gp
 
 {
     FloatMatrix dnx;
 
     // compute the derivatives of shape functions
-    this->interpolation.evaldNdx( dnx, * aGaussPoint->giveCoordinates(), FEIElementGeometryWrapper(this) );
+    this->interpolation.evaldNdx( dnx, * gp->giveCoordinates(), FEIElementGeometryWrapper(this) );
 
     answer.resize(30, 30);
     answer.zero();

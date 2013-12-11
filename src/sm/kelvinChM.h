@@ -93,9 +93,9 @@ public:
 protected:
     virtual int hasIncrementalShrinkageFormulation() { return 0; }
 
-    virtual void computeCharCoefficients(FloatArray &answer, double atTime);
+    virtual void computeCharCoefficients(FloatArray &answer, double tStep);
 
-    virtual double giveEModulus(GaussPoint *gp, TimeStep *atTime);
+    virtual double giveEModulus(GaussPoint *gp, TimeStep *tStep);
 
     LinearElasticMaterial *giveLinearElasticMaterial();
 };

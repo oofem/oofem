@@ -167,7 +167,7 @@ RankineMat :: CreateStatus(GaussPoint *gp) const
 
 // computes the stress vector corresponding to given (final) strain
 void
-RankineMat :: giveRealStressVector_1d(FloatArray &answer, GaussPoint *gp, const FloatArray &totalStrain, TimeStep *atTime)
+RankineMat :: giveRealStressVector_1d(FloatArray &answer, GaussPoint *gp, const FloatArray &totalStrain, TimeStep *tStep)
 {
     FloatArray strainVector;
     FloatMatrix d;
@@ -181,7 +181,7 @@ RankineMat :: giveRealStressVector_1d(FloatArray &answer, GaussPoint *gp, const 
     this->performPlasticityReturn(gp, totalStrain);
 
     // damage
-    double omega = computeDamage(gp, atTime);
+    double omega = computeDamage(gp, tStep);
     status->giveTempEffectiveStress(answer);
     answer.times(1. - omega);
 
@@ -200,7 +200,7 @@ void
 RankineMat :: giveRealStressVector_PlaneStress(FloatArray &answer,
                                                GaussPoint *gp,
                                                const FloatArray &totalStrain,
-                                               TimeStep *atTime)
+                                               TimeStep *tStep)
 {
     RankineMatStatus *status = static_cast< RankineMatStatus * >( this->giveStatus(gp) );
 
@@ -212,7 +212,7 @@ RankineMat :: giveRealStressVector_PlaneStress(FloatArray &answer,
     this->performPlasticityReturn(gp, totalStrain);
 
     // damage
-    double omega = computeDamage(gp, atTime);
+    double omega = computeDamage(gp, tStep);
     status->giveTempEffectiveStress(answer);
     answer.times(1. - omega);
 
@@ -469,12 +469,12 @@ RankineMat :: computeDamageParamPrime(double tempKappa)
 }
 
 double
-RankineMat :: computeDamage(GaussPoint *gp,  TimeStep *atTime)
+RankineMat :: computeDamage(GaussPoint *gp,  TimeStep *tStep)
 {
     double tempKappa, dam;
     RankineMatStatus *status = static_cast< RankineMatStatus * >( this->giveStatus(gp) );
     dam = status->giveDamage();
-    computeCumPlastStrain(tempKappa, gp, atTime);
+    computeCumPlastStrain(tempKappa, gp, tStep);
     double tempDam = computeDamageParam(tempKappa);
     if ( dam > tempDam ) {
         tempDam = dam;
@@ -483,7 +483,7 @@ RankineMat :: computeDamage(GaussPoint *gp,  TimeStep *atTime)
     return tempDam;
 }
 
-void RankineMat :: computeCumPlastStrain(double &tempKappa, GaussPoint *gp, TimeStep *atTime)
+void RankineMat :: computeCumPlastStrain(double &tempKappa, GaussPoint *gp, TimeStep *tStep)
 {
     RankineMatStatus *status = static_cast< RankineMatStatus * >( this->giveStatus(gp) );
     tempKappa = status->giveTempCumulativePlasticStrain();
@@ -494,12 +494,12 @@ void
 RankineMat :: givePlaneStressStiffMtrx(FloatMatrix &answer,
                                        MatResponseMode mode,
                                        GaussPoint *gp,
-                                       TimeStep *atTime)
+                                       TimeStep *tStep)
 {
     RankineMatStatus *status = static_cast< RankineMatStatus * >( this->giveStatus(gp) );
     double tempKappa = status->giveTempCumulativePlasticStrain();
     double gprime = computeDamageParamPrime(tempKappa);
-    evaluatePlaneStressStiffMtrx(answer, mode, gp, atTime, gprime);
+    evaluatePlaneStressStiffMtrx(answer, mode, gp, tStep, gprime);
 }
 
 void
@@ -527,12 +527,12 @@ void
 RankineMat :: evaluatePlaneStressStiffMtrx(FloatMatrix &answer,
                                            MatResponseMode mode,
                                            GaussPoint *gp,
-                                           TimeStep *atTime, double gprime)
+                                           TimeStep *tStep, double gprime)
 {
     RankineMatStatus *status = static_cast< RankineMatStatus * >( this->giveStatus(gp) );
     if ( mode == ElasticStiffness || mode == SecantStiffness ) {
         // start from the elastic stiffness
-        this->giveLinearElasticMaterial()->giveStiffnessMatrix(answer, mode, gp, atTime);
+        this->giveLinearElasticMaterial()->giveStiffnessMatrix(answer, mode, gp, tStep);
         if ( mode == SecantStiffness ) {
             // transform to secant stiffness
             double damage = status->giveTempDamage();
@@ -546,7 +546,7 @@ RankineMat :: evaluatePlaneStressStiffMtrx(FloatMatrix &answer,
     double kappa = status->giveCumulativePlasticStrain();
     double tempKappa = status->giveTempCumulativePlasticStrain();
     if ( tempKappa <= kappa ) { // tangent matrix requested, but unloading takes place - use secant
-        this->giveLinearElasticMaterial()->giveStiffnessMatrix(answer, mode, gp, atTime);
+        this->giveLinearElasticMaterial()->giveStiffnessMatrix(answer, mode, gp, tStep);
         double damage = status->giveTempDamage();
         answer.times(1. - damage);
         return;
@@ -656,9 +656,9 @@ RankineMat :: computeEta(FloatArray &answer, RankineMatStatus *status)
 }
 
 int
-RankineMat :: giveIPValue(FloatArray &answer, GaussPoint *aGaussPoint, InternalStateType type, TimeStep *atTime)
+RankineMat :: giveIPValue(FloatArray &answer, GaussPoint *gp, InternalStateType type, TimeStep *tStep)
 {
-    RankineMatStatus *status = static_cast< RankineMatStatus * >( this->giveStatus(aGaussPoint) );
+    RankineMatStatus *status = static_cast< RankineMatStatus * >( this->giveStatus(gp) );
     if ( type == IST_PlasticStrainTensor ) {
         const FloatArray ep = status->givePlasDef();
         answer.resize(6);
@@ -699,7 +699,7 @@ RankineMat :: giveIPValue(FloatArray &answer, GaussPoint *aGaussPoint, InternalS
 
 #endif
     } else {
-        return StructuralMaterial :: giveIPValue(answer, aGaussPoint, type, atTime);
+        return StructuralMaterial :: giveIPValue(answer, gp, type, tStep);
     }
 }
 
@@ -783,9 +783,9 @@ void RankineMatStatus :: initTempStatus()
 
 // updates internal variables when equilibrium is reached
 void
-RankineMatStatus :: updateYourself(TimeStep *atTime)
+RankineMatStatus :: updateYourself(TimeStep *tStep)
 {
-    StructuralMaterialStatus :: updateYourself(atTime);
+    StructuralMaterialStatus :: updateYourself(tStep);
 
     plasticStrain = tempPlasticStrain;
     kappa = tempKappa;

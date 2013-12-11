@@ -249,10 +249,10 @@ DruckerPragerCutMat :: computeReducedSSGradientMatrix(FloatMatrix &gradientMatri
 void
 DruckerPragerCutMat :: computeReducedElasticModuli(FloatMatrix &answer,
                                                    GaussPoint *gp,
-                                                   TimeStep *atTime)
+                                                   TimeStep *tStep)
 {  /* Returns elastic moduli in reduced stress-strain space*/
    //MaterialMode mode = gp->giveMaterialMode();
-    this->giveLinearElasticMaterial()->giveStiffnessMatrix(answer, ElasticStiffness, gp, atTime);
+    this->giveLinearElasticMaterial()->giveStiffnessMatrix(answer, ElasticStiffness, gp, tStep);
 }
 
 //answer is dkappa (cumulative plastic strain), flow rule
@@ -310,9 +310,9 @@ void DruckerPragerCutMat :: computeReducedHardeningVarsLamGradient(FloatMatrix &
 
 
 int
-DruckerPragerCutMat :: giveIPValue(FloatArray &answer, GaussPoint *aGaussPoint, InternalStateType type, TimeStep *atTime)
+DruckerPragerCutMat :: giveIPValue(FloatArray &answer, GaussPoint *gp, InternalStateType type, TimeStep *tStep)
 {
-    //MaterialStatus *status = this->giveStatus(aGaussPoint);
+    //MaterialStatus *status = this->giveStatus(gp);
     if ( type == IST_DamageScalar ) {
         answer.resize(1);
         answer.zero();
@@ -325,7 +325,7 @@ DruckerPragerCutMat :: giveIPValue(FloatArray &answer, GaussPoint *aGaussPoint, 
         //answer.at(1) = answer.at(2) = answer.at(3) = status->giveDamage();
         return 1;
     } else {
-        return MPlasticMaterial2 :: giveIPValue(answer, aGaussPoint, type, atTime);
+        return MPlasticMaterial2 :: giveIPValue(answer, gp, type, tStep);
     }
 }
 } // end namespace oofem

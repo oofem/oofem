@@ -80,14 +80,14 @@ RCM2Material :: hasMaterialModeCapability(MaterialMode mode)
  * void
  * RCM2Material :: computeTrialStressIncrement (FloatArray& answer, GaussPoint *gp,
  *                     const FloatArray &strainIncrement,
- *                          TimeStep* atTime)
+ *                          TimeStep* tStep)
  * //
  * // returns trial stress according to strainIncrement
  * //
  * {
  * FloatMatrix def;
  *
- * this -> giveEffectiveMaterialStiffnessMatrix (def, TangentStiffness,gp,atTime);
+ * this -> giveEffectiveMaterialStiffnessMatrix (def, TangentStiffness,gp,tStep);
  * answer.beProductOf (def, strainIncrement);
  * }
  */
@@ -97,7 +97,7 @@ void
 RCM2Material :: giveMaterialStiffnessMatrix(FloatMatrix &answer,
                                             MatResponseMode mode,
                                             GaussPoint *gp,
-                                            TimeStep *atTime)
+                                            TimeStep *tStep)
 //
 // computes full constitutive matrix for case of gp stress-strain state.
 //
@@ -109,7 +109,7 @@ RCM2Material :: giveMaterialStiffnessMatrix(FloatMatrix &answer,
      *
      * CrossSection *crossSection = gp -> giveElement()->giveCrossSection();
      */
-    this->giveEffectiveMaterialStiffnessMatrix(answer, mode, gp, atTime);
+    this->giveEffectiveMaterialStiffnessMatrix(answer, mode, gp, tStep);
     // def is full matrix for current gp stress strain mode.
 }
 
@@ -117,7 +117,7 @@ RCM2Material :: giveMaterialStiffnessMatrix(FloatMatrix &answer,
 void
 RCM2Material :: giveRealStressVector(FloatArray &answer, GaussPoint *gp,
                                      const FloatArray &totalStrain,
-                                     TimeStep *atTime)
+                                     TimeStep *tStep)
 //
 // returns real stress vector in 3d stress space of receiver according to
 // previous level of stress and current
@@ -135,7 +135,7 @@ RCM2Material :: giveRealStressVector(FloatArray &answer, GaussPoint *gp,
     // subtract stress independent part
     // note: eigenStrains (temperature) is not contained in mechanical strain stored in gp
     // therefore it is necessary to subtract always the total eigen strain value
-    this->giveStressDependentPartOfStrainVector(reducedTotalStrainVector, gp, totalStrain, atTime, VM_Total);
+    this->giveStressDependentPartOfStrainVector(reducedTotalStrainVector, gp, totalStrain, tStep, VM_Total);
     //
 
     StructuralMaterial :: giveFullSymVectorForm( strainVector, reducedTotalStrainVector, gp->giveMaterialMode() );
@@ -145,7 +145,7 @@ RCM2Material :: giveRealStressVector(FloatArray &answer, GaussPoint *gp,
                                  strainVector,
                                  principal_strain);
 
-    this->giveRealPrincipalStressVector3d(princStress, gp, principalStrain, tempCrackDirs, atTime);
+    this->giveRealPrincipalStressVector3d(princStress, gp, principalStrain, tempCrackDirs, tStep);
     princStress.resizeWithValues(6);
 
     status->giveTempCrackDirs(tempCrackDirs);
@@ -166,7 +166,7 @@ void
 RCM2Material :: giveRealPrincipalStressVector3d(FloatArray &answer, GaussPoint *gp,
                                                 FloatArray &principalStrain,
                                                 FloatMatrix &tempCrackDirs,
-                                                TimeStep *atTime)
+                                                TimeStep *tStep)
 //
 // returns real principal stress vector in 3d stress space of receiver according to
 // previous level of stress and current
@@ -232,7 +232,7 @@ RCM2Material :: giveRealPrincipalStressVector3d(FloatArray &answer, GaussPoint *
     status->letPrincipalStrainVectorBe(principalStrain);
 
     this->giveNormalElasticStiffnessMatrix(de, false, TangentStiffness,
-                                           gp, atTime, tempCrackDirs);
+                                           gp, tStep, tempCrackDirs);
     //
     // construct mapping matrix of active cracks
     // this mapping will dynamically change as
@@ -250,7 +250,7 @@ RCM2Material :: giveRealPrincipalStressVector3d(FloatArray &answer, GaussPoint *
         //
         if ( status->giveNumberOfTempActiveCracks() ) {
             // active crack exist
-            this->giveCrackedStiffnessMatrix(dcr, TangentStiffness, gp, atTime);
+            this->giveCrackedStiffnessMatrix(dcr, TangentStiffness, gp, tStep);
             fullDecr = de;
             fullDecr.add(dcr);
             decr.resize( crackMapping.maximum(), crackMapping.maximum() );
@@ -576,7 +576,7 @@ RCM2Material :: checkIfClosedCracks(GaussPoint *gp, FloatArray &crackStrainVecto
 void
 RCM2Material :: giveNormalElasticStiffnessMatrix(FloatMatrix &answer,
                                                  bool reduce, MatResponseMode rMode,
-                                                 GaussPoint *gp, TimeStep *atTime,
+                                                 GaussPoint *gp, TimeStep *tStep,
                                                  const FloatMatrix &dir)
 //
 // return Elastic Stiffness matrix for normal Stresses
@@ -590,7 +590,7 @@ RCM2Material :: giveNormalElasticStiffnessMatrix(FloatMatrix &answer,
     int sd;
 
     FloatMatrix stiff;
-    lMat->giveStiffnessMatrix(stiff, rMode, gp, atTime);
+    lMat->giveStiffnessMatrix(stiff, rMode, gp, tStep);
     this->giveFullSymMatrixForm( de, stiff, gp->giveMaterialMode() );
 
     // copy first 3x3 submatrix to answer
@@ -638,7 +638,7 @@ RCM2Material :: giveNormalElasticStiffnessMatrix(FloatMatrix &answer,
 void
 RCM2Material :: giveEffectiveMaterialStiffnessMatrix(FloatMatrix &answer,
                                                      MatResponseMode rMode, GaussPoint *gp,
-                                                     TimeStep *atTime)
+                                                     TimeStep *tStep)
 //
 // returns effective material stiffness matrix in full form
 // for gp stress strain mode
@@ -654,17 +654,17 @@ RCM2Material :: giveEffectiveMaterialStiffnessMatrix(FloatMatrix &answer,
     IntArray mask;
 
     if ( ( rMode == ElasticStiffness ) || ( numberOfActiveCracks == 0 ) ) {
-        lMat->giveStiffnessMatrix(answer, rMode, gp, atTime);
+        lMat->giveStiffnessMatrix(answer, rMode, gp, tStep);
         return;
     }
 
     // this->updateActiveCrackMap(gp) must be done after restart.
     this->updateActiveCrackMap(gp);
     status->giveTempCrackDirs(tempCrackDirs);
-    this->giveNormalElasticStiffnessMatrix(de, true, rMode, gp, atTime,
+    this->giveNormalElasticStiffnessMatrix(de, true, rMode, gp, tStep,
                                            tempCrackDirs);
     invDe.beInverseOf(de);
-    this->giveCrackedStiffnessMatrix(dcr, rMode, gp, atTime);
+    this->giveCrackedStiffnessMatrix(dcr, rMode, gp, tStep);
     StructuralMaterial :: giveVoigtSymVectorMask( mask, gp->giveMaterialMode() );
     compliance.resize( mask.giveSize(), mask.giveSize() );
 
@@ -752,7 +752,7 @@ void
 RCM2Material :: giveCrackedStiffnessMatrix(FloatMatrix &answer,
                                            MatResponseMode rMode,
                                            GaussPoint *gp,
-                                           TimeStep *atTime)
+                                           TimeStep *tStep)
 //
 //
 // Returns material incremental stiffness matrix for cracked concrete.
@@ -881,9 +881,9 @@ RCM2Material :: give(int aProperty, GaussPoint *gp)
 
 
 int
-RCM2Material :: giveIPValue(FloatArray &answer, GaussPoint *aGaussPoint, InternalStateType type, TimeStep *atTime)
+RCM2Material :: giveIPValue(FloatArray &answer, GaussPoint *gp, InternalStateType type, TimeStep *tStep)
 {
-    RCM2MaterialStatus *status = static_cast< RCM2MaterialStatus * >( this->giveStatus(aGaussPoint) );
+    RCM2MaterialStatus *status = static_cast< RCM2MaterialStatus * >( this->giveStatus(gp) );
     if ( type == IST_CrackedFlag ) {
         answer.resize(1);
         answer.at(1) =  status->giveAlreadyCrack();
@@ -909,7 +909,7 @@ RCM2Material :: giveIPValue(FloatArray &answer, GaussPoint *aGaussPoint, Interna
 
         return 1;
     } else {
-        return StructuralMaterial :: giveIPValue(answer, aGaussPoint, type, atTime);
+        return StructuralMaterial :: giveIPValue(answer, gp, type, tStep);
     }
 }
 
@@ -917,12 +917,12 @@ void
 RCM2Material :: give3dMaterialStiffnessMatrix(FloatMatrix &answer,
                                               MatResponseMode mode,
                                               GaussPoint *gp,
-                                              TimeStep *atTime)
+                                              TimeStep *tStep)
 {
     //
     // returns receiver 3d material matrix
     //
-    this->giveMaterialStiffnessMatrix(answer, mode, gp, atTime);
+    this->giveMaterialStiffnessMatrix(answer, mode, gp, tStep);
 }
 
 
@@ -930,7 +930,7 @@ void
 RCM2Material :: givePlaneStressStiffMtrx(FloatMatrix &answer,
                                          MatResponseMode mode,
                                          GaussPoint *gp,
-                                         TimeStep *atTime)
+                                         TimeStep *tStep)
 
 //
 // returns receiver's 2dPlaneStressMtrx
@@ -940,7 +940,7 @@ RCM2Material :: givePlaneStressStiffMtrx(FloatMatrix &answer,
 // the reduction from 3d case will not work
 // this implementation should be faster.
 {
-    this->giveMaterialStiffnessMatrix(answer, mode, gp, atTime);
+    this->giveMaterialStiffnessMatrix(answer, mode, gp, tStep);
 }
 
 
@@ -948,7 +948,7 @@ void
 RCM2Material :: givePlaneStrainStiffMtrx(FloatMatrix &answer,
                                          MatResponseMode mode,
                                          GaussPoint *gp,
-                                         TimeStep *atTime)
+                                         TimeStep *tStep)
 
 //
 // return receiver's 2dPlaneStrainMtrx constructed from
@@ -956,7 +956,7 @@ RCM2Material :: givePlaneStrainStiffMtrx(FloatMatrix &answer,
 // (2dPlaneStrain ==> eps_z = gamma_xz = gamma_yz = 0.)
 //
 {
-    this->giveMaterialStiffnessMatrix(answer, mode, gp, atTime);
+    this->giveMaterialStiffnessMatrix(answer, mode, gp, tStep);
 }
 
 
@@ -964,13 +964,13 @@ void
 RCM2Material :: give1dStressStiffMtrx(FloatMatrix &answer,
                                       MatResponseMode mode,
                                       GaussPoint *gp,
-                                      TimeStep *atTime)
+                                      TimeStep *tStep)
 
 //
 // returns receiver's 1dMaterialStiffnessMAtrix
 // (1d case ==> sigma_y = sigma_z = tau_yz = tau_zx = tau_xy  = 0.)
 {
-    this->giveMaterialStiffnessMatrix(answer, mode, gp, atTime);
+    this->giveMaterialStiffnessMatrix(answer, mode, gp, tStep);
 }
 
 
@@ -978,7 +978,7 @@ void
 RCM2Material :: give2dBeamLayerStiffMtrx(FloatMatrix &answer,
                                          MatResponseMode mode,
                                          GaussPoint *gp,
-                                         TimeStep *atTime)
+                                         TimeStep *tStep)
 //
 // returns receiver's 2dBeamLayerStiffMtrx.
 // (2dPlaneStres ==> sigma_z = tau_xz = tau_yz = 0.)
@@ -987,7 +987,7 @@ RCM2Material :: give2dBeamLayerStiffMtrx(FloatMatrix &answer,
 // the reduction from 3d case will not work
 // this implementation should be faster.
 {
-    this->giveMaterialStiffnessMatrix(answer, mode, gp, atTime);
+    this->giveMaterialStiffnessMatrix(answer, mode, gp, tStep);
 }
 
 
@@ -995,7 +995,7 @@ void
 RCM2Material :: givePlateLayerStiffMtrx(FloatMatrix &answer,
                                         MatResponseMode mode,
                                         GaussPoint *gp,
-                                        TimeStep *atTime)
+                                        TimeStep *tStep)
 //
 // returns receiver's 2dPlateLayerMtrx
 // (2dPlaneStres ==> sigma_z = tau_xz = tau_yz = 0.)
@@ -1004,7 +1004,7 @@ RCM2Material :: givePlateLayerStiffMtrx(FloatMatrix &answer,
 // the reduction from 3d case will not work
 // this implementation should be faster.
 {
-    this->giveMaterialStiffnessMatrix(answer, mode, gp, atTime);
+    this->giveMaterialStiffnessMatrix(answer, mode, gp, tStep);
 }
 
 
@@ -1148,14 +1148,14 @@ RCM2MaterialStatus :: initTempStatus()
 
 
 void
-RCM2MaterialStatus :: updateYourself(TimeStep *atTime)
+RCM2MaterialStatus :: updateYourself(TimeStep *tStep)
 //
 // updates variables (nonTemp variables describing situation at previous equilibrium state)
 // after a new equilibrium state has been reached
 // temporary variables are having values corresponding to newly reched equilibrium.
 //
 {
-    StructuralMaterialStatus :: updateYourself(atTime);
+    StructuralMaterialStatus :: updateYourself(tStep);
 
     crackStatuses = tempCrackStatuses;
     maxCrackStrains = tempMaxCrackStrains;

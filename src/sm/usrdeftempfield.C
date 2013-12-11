@@ -42,7 +42,7 @@ namespace oofem {
 REGISTER_BoundaryCondition(UserDefinedTemperatureField);
 
 void
-UserDefinedTemperatureField :: computeValueAt(FloatArray &answer, TimeStep *stepN, FloatArray &coords, ValueModeType mode)
+UserDefinedTemperatureField :: computeValueAt(FloatArray &answer, TimeStep *tStep, FloatArray &coords, ValueModeType mode)
 // Returns the value of the receiver at time and given position respecting the mode.
 {
     int err;
@@ -56,7 +56,7 @@ UserDefinedTemperatureField :: computeValueAt(FloatArray &answer, TimeStep *step
     std :: ostringstream buff;
     for ( int i = 1; i <= size; i++ ) {
         buff << "x=" << coords.at(1) << ";y=" << coords.at(2) << ";z=" << coords.at(3) <<
-        ";t=" << stepN->giveTargetTime() << ";" << ftExpression [ i - 1 ];
+        ";t=" << tStep->giveTargetTime() << ";" << ftExpression [ i - 1 ];
         result = myParser.eval(buff.str().c_str(), err);
         if ( err ) {
             _error("computeValueAt: parser syntax error");
@@ -64,9 +64,9 @@ UserDefinedTemperatureField :: computeValueAt(FloatArray &answer, TimeStep *step
 
         answer.at(i) = result;
 
-        if ( ( mode == VM_Incremental ) && ( !stepN->isTheFirstStep() ) ) {
+        if ( ( mode == VM_Incremental ) && ( !tStep->isTheFirstStep() ) ) {
             buff << "x=" << coords.at(1) << ";y=" << coords.at(2) << ";z=" << coords.at(3) <<
-            ";t=" << ( stepN->giveTargetTime() - stepN->giveTimeIncrement() ) << ";" << ftExpression [ i - 1 ];
+            ";t=" << ( tStep->giveTargetTime() - tStep->giveTimeIncrement() ) << ";" << ftExpression [ i - 1 ];
             result = myParser.eval(buff.str().c_str(), err);
             if ( err ) {
                 _error("computeValueAt: parser syntax error");

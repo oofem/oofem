@@ -85,9 +85,9 @@ RerShell :: giveInterface(InterfaceType interface)
 
 
 void
-RerShell :: computeBmatrixAt(GaussPoint *aGaussPoint, FloatMatrix &answer, int li, int ui)
+RerShell :: computeBmatrixAt(GaussPoint *gp, FloatMatrix &answer, int li, int ui)
 // Returns the [8x18] strain-displacement matrix {B} of the receiver,
-// evaluated at aGaussPoint.
+// evaluated at gp.
 {
     int i, j, k, ii, ki;
     FloatArray b(3), c(3), nodeCoords;
@@ -177,7 +177,7 @@ RerShell :: computeGaussPoints()
 void
 RerShell :: computeNmatrixAt(const FloatArray &iLocCoord, FloatMatrix &answer)
 // Returns the displacement interpolation matrix {N} of the receiver,
-// evaluated at aGaussPoint.
+// evaluated at gp.
 {
     double x1, x2, x3, y1, y2, y3, l1, l2, l3, b1, b2, b3, c1, c2, c3;
     FloatArray nodeCoords;
@@ -320,9 +320,9 @@ RerShell :: computeLumpedMassMatrix(FloatMatrix &answer, TimeStep *tStep)
 
 
 void
-RerShell :: computeBodyLoadVectorAt(FloatArray &answer, Load *forLoad, TimeStep *stepN, ValueModeType mode)
+RerShell :: computeBodyLoadVectorAt(FloatArray &answer, Load *forLoad, TimeStep *tStep, ValueModeType mode)
 // Computes numerically the load vector of the receiver due to the body
-// loads, at stepN. - no support for momentum bodyload
+// loads, at tStep. - no support for momentum bodyload
 {
     double dens, dV, load;
     GaussPoint *gp = integrationRulesArray [ 0 ]->getIntegrationPoint(0);
@@ -330,7 +330,7 @@ RerShell :: computeBodyLoadVectorAt(FloatArray &answer, Load *forLoad, TimeStep 
     FloatMatrix T;
 
 
-    forLoad->computeComponentArrayAt(f, stepN, mode);
+    forLoad->computeComponentArrayAt(f, tStep, mode);
 
     if ( f.giveSize() == 0 ) {
         answer.resize(0);
@@ -649,7 +649,7 @@ RerShell :: computeStrainVectorInLayer(FloatArray &answer, const FloatArray &mas
 
 
 void
-RerShell :: printOutputAt(FILE *file, TimeStep *stepN)
+RerShell :: printOutputAt(FILE *file, TimeStep *tStep)
 // Performs end-of-step operations.
 {
     GaussPoint *gp;
@@ -659,12 +659,12 @@ RerShell :: printOutputAt(FILE *file, TimeStep *stepN)
 
     for ( int i = 1; i <= integrationRulesArray [ 0 ]->giveNumberOfIntegrationPoints(); i++ ) {
         gp = integrationRulesArray [ 0 ]->getIntegrationPoint(i - 1);
-        //gp->printOutputAt(file,stepN);
+        //gp->printOutputAt(file,tStep);
 
 
         fprintf( file, "  GP %d :", gp->giveNumber() );
-        this->giveCharacteristicTensor(globTensorMembrane, GlobalStrainTensor, gp, stepN);
-        this->giveCharacteristicTensor(globTensorPlate, GlobalCurvatureTensor, gp, stepN);
+        this->giveCharacteristicTensor(globTensorMembrane, GlobalStrainTensor, gp, tStep);
+        this->giveCharacteristicTensor(globTensorPlate, GlobalCurvatureTensor, gp, tStep);
         fprintf(file, "  strains ");
         fprintf( file, " % .4e % .4e % .4e % .4e % .4e % .4e % .4e % .4e % .4e % .4e % .4e % .4e ",
                  globTensorMembrane.at(1, 1), globTensorMembrane.at(2, 2), globTensorMembrane.at(3, 3),
@@ -672,8 +672,8 @@ RerShell :: printOutputAt(FILE *file, TimeStep *stepN)
                  globTensorPlate.at(1, 1), globTensorPlate.at(2, 2), globTensorPlate.at(3, 3),
                  2. * globTensorPlate.at(2, 3), 2. * globTensorPlate.at(1, 3), 2. * globTensorPlate.at(1, 2) );
 
-        this->giveCharacteristicTensor(globTensorMembrane, GlobalForceTensor, gp, stepN);
-        this->giveCharacteristicTensor(globTensorPlate, GlobalMomentumTensor, gp, stepN);
+        this->giveCharacteristicTensor(globTensorMembrane, GlobalForceTensor, gp, tStep);
+        this->giveCharacteristicTensor(globTensorPlate, GlobalMomentumTensor, gp, tStep);
         fprintf(file, "\n          stresses");
         fprintf( file, " % .4e % .4e % .4e % .4e % .4e % .4e % .4e % .4e % .4e % .4e % .4e % .4e ",
                  globTensorMembrane.at(1, 1), globTensorMembrane.at(2, 2), globTensorMembrane.at(3, 3),
@@ -710,9 +710,8 @@ RerShell :: NodalAveragingRecoveryMI_computeSideValue(FloatArray &answer, int si
 
 
 int
-RerShell :: giveIPValue(FloatArray &answer, GaussPoint *aGaussPoint, InternalStateType type, TimeStep *atTime)
+RerShell :: giveIPValue(FloatArray &answer, GaussPoint *gp, InternalStateType type, TimeStep *tStep)
 {
-    TimeStep *tStep = domain->giveEngngModel()->giveCurrentStep();
     FloatMatrix globTensor;
     CharTensor cht;
 
@@ -725,7 +724,7 @@ RerShell :: giveIPValue(FloatArray &answer, GaussPoint *aGaussPoint, InternalSta
             cht = GlobalStrainTensor;
         }
 
-        this->giveCharacteristicTensor(globTensor, cht, aGaussPoint, tStep);
+        this->giveCharacteristicTensor(globTensor, cht, gp, tStep);
 
         answer.at(1) = globTensor.at(1, 1);  //sxForce
         answer.at(2) = globTensor.at(2, 2);  //syForce
@@ -741,7 +740,7 @@ RerShell :: giveIPValue(FloatArray &answer, GaussPoint *aGaussPoint, InternalSta
         }
 
 
-        this->giveCharacteristicTensor(globTensor, cht, aGaussPoint, tStep);
+        this->giveCharacteristicTensor(globTensor, cht, gp, tStep);
 
         answer.at(7)  = globTensor.at(1, 1);  //mxForce
         answer.at(8)  = globTensor.at(2, 2);  //myForce
@@ -821,7 +820,7 @@ RerShell :: giveIPValue(FloatArray &answer, GaussPoint *aGaussPoint, InternalSta
 
 /*
  * int
- * RerShell :: giveInternalStateAtNode (FloatArray& answer, InternalValueRequest& r, int node, TimeStep* atTime)
+ * RerShell :: giveInternalStateAtNode (FloatArray& answer, InternalValueRequest& r, int node, TimeStep* tStep)
  *
  * //
  * // see eleemnt.h for description

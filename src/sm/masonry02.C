@@ -495,7 +495,7 @@ Masonry02 :: CreateStatus(GaussPoint *gp) const
 void
 Masonry02 :: giveStiffnessMatrix(FloatMatrix &answer,
                                  MatResponseMode rMode,
-                                 GaussPoint *gp, TimeStep *atTime)
+                                 GaussPoint *gp, TimeStep *tStep)
 //
 // Returns characteristic material stiffness matrix of the receiver
 //
@@ -503,26 +503,26 @@ Masonry02 :: giveStiffnessMatrix(FloatMatrix &answer,
     MaterialMode mMode = gp->giveMaterialMode();
     switch ( mMode ) {
     case _2dInterface:
-        give2dInterfaceMaterialStiffnessMatrix(answer, rMode, gp, atTime);
+        give2dInterfaceMaterialStiffnessMatrix(answer, rMode, gp, tStep);
         break;
     default:
-        MPlasticMaterial2 :: giveStiffnessMatrix(answer, rMode, gp, atTime);
+        MPlasticMaterial2 :: giveStiffnessMatrix(answer, rMode, gp, tStep);
     }
 }
 
 
 void
 Masonry02 :: give2dInterfaceMaterialStiffnessMatrix(FloatMatrix &answer, MatResponseMode mode,
-                                                    GaussPoint *gp, TimeStep *atTime)
+                                                    GaussPoint *gp, TimeStep *tStep)
 {
     if ( mode == TangentStiffness ) {
         if ( rmType == mpm_ClosestPoint ) {
-            this->giveConsistentStiffnessMatrix(answer, mode, gp, atTime);
+            this->giveConsistentStiffnessMatrix(answer, mode, gp, tStep);
         } else {
-            this->giveElastoPlasticStiffnessMatrix(answer, mode, gp, atTime);
+            this->giveElastoPlasticStiffnessMatrix(answer, mode, gp, tStep);
         }
     } else {
-        this->computeReducedElasticModuli(answer, gp, atTime);
+        this->computeReducedElasticModuli(answer, gp, tStep);
     }
 }
 
@@ -530,7 +530,7 @@ Masonry02 :: give2dInterfaceMaterialStiffnessMatrix(FloatMatrix &answer, MatResp
 void
 Masonry02 :: computeReducedElasticModuli(FloatMatrix &answer,
                                          GaussPoint *gp,
-                                         TimeStep *atTime)
+                                         TimeStep *tStep)
 {  /* Returns elastic moduli in reduced stress-strain space*/
     MaterialMode mode = gp->giveMaterialMode();
     if ( mode == _2dInterface ) {
@@ -539,7 +539,7 @@ Masonry02 :: computeReducedElasticModuli(FloatMatrix &answer,
         answer.at(2, 2) = ks;
         answer.at(1, 2) = answer.at(2, 1) = 0.0;
     } else {
-        this->giveLinearElasticMaterial()->giveStiffnessMatrix(answer, ElasticStiffness, gp, atTime);
+        this->giveLinearElasticMaterial()->giveStiffnessMatrix(answer, ElasticStiffness, gp, tStep);
     }
 }
 

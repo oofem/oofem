@@ -71,7 +71,7 @@ IntMatBilinearCZStatus :: ~IntMatBilinearCZStatus()
 void IntMatBilinearCZStatus :: initTempStatus()
 {}
 
-void IntMatBilinearCZStatus :: updateYourself(TimeStep *atTime)
+void IntMatBilinearCZStatus :: updateYourself(TimeStep *tStep)
 {
     mTractionOld    = mTractionNew;
     mJumpOld                = mJumpNew;

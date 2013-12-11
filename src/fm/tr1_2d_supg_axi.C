@@ -80,7 +80,7 @@ TR1_2D_SUPG_AXI :: computeGaussPoints()
 
 
 void
-TR1_2D_SUPG_AXI :: computeAccelerationTerm_MB(FloatMatrix &answer, TimeStep *atTime)
+TR1_2D_SUPG_AXI :: computeAccelerationTerm_MB(FloatMatrix &answer, TimeStep *tStep)
 {
     answer.resize(6, 6);
     answer.zero();
@@ -88,7 +88,7 @@ TR1_2D_SUPG_AXI :: computeAccelerationTerm_MB(FloatMatrix &answer, TimeStep *atT
     FloatArray n(3);
     double _val, u, v, dV, rho;
     GaussPoint *gp;
-    this->computeVectorOf(EID_MomentumBalance, VM_Total, atTime->givePreviousStep(), un);
+    this->computeVectorOf(EID_MomentumBalance, VM_Total, tStep->givePreviousStep(), un);
 
     for ( int ip = 0; ip < integrationRulesArray [ 0 ]->giveNumberOfIntegrationPoints(); ip++ ) {
         gp = integrationRulesArray [ 0 ]->getIntegrationPoint(ip);
@@ -114,7 +114,7 @@ TR1_2D_SUPG_AXI :: computeAccelerationTerm_MB(FloatMatrix &answer, TimeStep *atT
 }
 
 void
-TR1_2D_SUPG_AXI :: computeAdvectionTerm_MB(FloatArray &answer, TimeStep *atTime)
+TR1_2D_SUPG_AXI :: computeAdvectionTerm_MB(FloatArray &answer, TimeStep *tStep)
 {
     answer.resize(6);
     answer.zero();
@@ -124,8 +124,8 @@ TR1_2D_SUPG_AXI :: computeAdvectionTerm_MB(FloatArray &answer, TimeStep *atTime)
     GaussPoint *gp;
     FloatArray u, un, n(3);
 
-    this->computeVectorOf(EID_MomentumBalance, VM_Total, atTime->givePreviousStep(), un);
-    this->computeVectorOf(EID_MomentumBalance, VM_Total, atTime, u);
+    this->computeVectorOf(EID_MomentumBalance, VM_Total, tStep->givePreviousStep(), un);
+    this->computeVectorOf(EID_MomentumBalance, VM_Total, tStep, u);
 
     dudx = b [ 0 ] * u.at(1) + b [ 1 ] * u.at(3) + b [ 2 ] * u.at(5);
     dudy = c [ 0 ] * u.at(1) + c [ 1 ] * u.at(3) + c [ 2 ] * u.at(5);
@@ -156,14 +156,14 @@ TR1_2D_SUPG_AXI :: computeAdvectionTerm_MB(FloatArray &answer, TimeStep *atTime)
 }
 
 void
-TR1_2D_SUPG_AXI :: computeAdvectionDerivativeTerm_MB(FloatMatrix &answer, TimeStep *atTime)
+TR1_2D_SUPG_AXI :: computeAdvectionDerivativeTerm_MB(FloatMatrix &answer, TimeStep *tStep)
 {
     answer.resize(6, 6);
     answer.zero();
 
     FloatArray u, un, n(3);
-    this->computeVectorOf(EID_MomentumBalance, VM_Total, atTime, u);
-    this->computeVectorOf(EID_MomentumBalance, VM_Total, atTime->givePreviousStep(), un);
+    this->computeVectorOf(EID_MomentumBalance, VM_Total, tStep, u);
+    this->computeVectorOf(EID_MomentumBalance, VM_Total, tStep->givePreviousStep(), un);
     double dudx [ 2 ] [ 2 ];
     int w_dof_addr, u_dof_addr, d1j, d2j, dij;
     double _u, _v, dV, rho;
@@ -221,13 +221,13 @@ TR1_2D_SUPG_AXI :: computeAdvectionDerivativeTerm_MB(FloatMatrix &answer, TimeSt
 
 
 void
-TR1_2D_SUPG_AXI :: computeDiffusionTerm_MB(FloatArray &answer, TimeStep *atTime)
+TR1_2D_SUPG_AXI :: computeDiffusionTerm_MB(FloatArray &answer, TimeStep *tStep)
 {
     answer.resize(6);
     answer.zero();
     FloatArray u, eps, stress;
     double Re = static_cast< FluidModel * >( domain->giveEngngModel() )->giveReynoldsNumber();
-    this->computeVectorOf(EID_MomentumBalance, VM_Total, atTime, u);
+    this->computeVectorOf(EID_MomentumBalance, VM_Total, tStep, u);
     FluidDynamicMaterial *mat = static_cast< FluidDynamicMaterial * >( this->giveMaterial() );
     FloatMatrix _b(4, 6);
 
@@ -238,7 +238,7 @@ TR1_2D_SUPG_AXI :: computeDiffusionTerm_MB(FloatArray &answer, TimeStep *atTime)
     // stabilization term K_delta
     FloatArray un(6), n(3);
     double _u, _v, _r;
-    this->computeVectorOf(EID_MomentumBalance, VM_Total, atTime->givePreviousStep(), un);
+    this->computeVectorOf(EID_MomentumBalance, VM_Total, tStep->givePreviousStep(), un);
     // end k_delta declaration
 
     for ( int ip = 0; ip < integrationRulesArray [ 0 ]->giveNumberOfIntegrationPoints(); ip++ ) {
@@ -246,7 +246,7 @@ TR1_2D_SUPG_AXI :: computeDiffusionTerm_MB(FloatArray &answer, TimeStep *atTime)
         dV = this->computeVolumeAround(gp);
         this->computeBMtrx(_b, gp);
         eps.beProductOf(_b, u);
-        mat->computeDeviatoricStressVector(stress, gp, eps, atTime);
+        mat->computeDeviatoricStressVector(stress, gp, eps, tStep);
         answer.plusProduct(_b, stress, dV / Re);
 
 #if 1
@@ -267,7 +267,7 @@ TR1_2D_SUPG_AXI :: computeDiffusionTerm_MB(FloatArray &answer, TimeStep *atTime)
 
 
 void
-TR1_2D_SUPG_AXI :: computeDiffusionDerivativeTerm_MB(FloatMatrix &answer, MatResponseMode mode, TimeStep *atTime)
+TR1_2D_SUPG_AXI :: computeDiffusionDerivativeTerm_MB(FloatMatrix &answer, MatResponseMode mode, TimeStep *tStep)
 {
     answer.resize(6, 6);
     answer.zero();
@@ -280,15 +280,15 @@ TR1_2D_SUPG_AXI :: computeDiffusionDerivativeTerm_MB(FloatMatrix &answer, MatRes
     // stabilization term K_delta
     FloatArray un(6), u(6), n(3), eps, stress;
     double _u, _v, _r;
-    this->computeVectorOf(EID_MomentumBalance, VM_Total, atTime->givePreviousStep(), un);
-    this->computeVectorOf(EID_MomentumBalance, VM_Total, atTime, u);
+    this->computeVectorOf(EID_MomentumBalance, VM_Total, tStep->givePreviousStep(), un);
+    this->computeVectorOf(EID_MomentumBalance, VM_Total, tStep, u);
 
 
     for ( int ip = 0; ip < integrationRulesArray [ 0 ]->giveNumberOfIntegrationPoints(); ip++ ) {
         gp = integrationRulesArray [ 0 ]->getIntegrationPoint(ip);
         dV = this->computeVolumeAround(gp);
         this->computeBMtrx(_b, gp);
-        mat->giveDeviatoricStiffnessMatrix(_d, mode, gp, atTime);
+        mat->giveDeviatoricStiffnessMatrix(_d, mode, gp, tStep);
         _db.beProductOf(_d, _b);
         answer.plusProductUnsym(_b, _db, dV);
         //answer.plusProductSymmUpper (_bs,_db,dV*t_supg);
@@ -298,8 +298,8 @@ TR1_2D_SUPG_AXI :: computeDiffusionDerivativeTerm_MB(FloatMatrix &answer, MatRes
         _r = this->computeRadiusAt(gp);
         this->computeNVector(n, gp);
         eps.beProductOf(_b, u);
-        mat->computeDeviatoricStressVector(stress, gp, eps, atTime);
-        //_mu = this->giveMaterial()->giveCharacteristicValue(MRM_Viscosity, gp, atTime);
+        mat->computeDeviatoricStressVector(stress, gp, eps, tStep);
+        //_mu = this->giveMaterial()->giveCharacteristicValue(MRM_Viscosity, gp, tStep);
 
         _u = n.at(1) * un.at(1) + n.at(2) * un.at(3) + n.at(3) * un.at(5);
         _v = n.at(1) * un.at(2) + n.at(2) * un.at(4) + n.at(3) * un.at(6);
@@ -324,14 +324,14 @@ TR1_2D_SUPG_AXI :: computeDiffusionDerivativeTerm_MB(FloatMatrix &answer, MatRes
 
 
 void
-TR1_2D_SUPG_AXI :: computePressureTerm_MB(FloatMatrix &answer, TimeStep *atTime)
+TR1_2D_SUPG_AXI :: computePressureTerm_MB(FloatMatrix &answer, TimeStep *tStep)
 {
     answer.resize(6, 3);
     answer.zero();
     FloatArray un, n(3);
     double _u, _v;
 
-    this->computeVectorOf(EID_MomentumBalance, VM_Total, atTime->givePreviousStep(), un);
+    this->computeVectorOf(EID_MomentumBalance, VM_Total, tStep->givePreviousStep(), un);
     double dV, _r;
     GaussPoint *gp;
     for ( int ip = 0; ip < integrationRulesArray [ 0 ]->giveNumberOfIntegrationPoints(); ip++ ) {
@@ -362,7 +362,7 @@ TR1_2D_SUPG_AXI :: computePressureTerm_MB(FloatMatrix &answer, TimeStep *atTime)
 }
 
 void
-TR1_2D_SUPG_AXI :: computeLSICStabilizationTerm_MB(FloatMatrix &answer, TimeStep *atTime)
+TR1_2D_SUPG_AXI :: computeLSICStabilizationTerm_MB(FloatMatrix &answer, TimeStep *tStep)
 {
     answer.resize(6, 6);
     answer.zero();
@@ -388,7 +388,7 @@ TR1_2D_SUPG_AXI :: computeLSICStabilizationTerm_MB(FloatMatrix &answer, TimeStep
 
 
 void
-TR1_2D_SUPG_AXI :: computeLinearAdvectionTerm_MC(FloatMatrix &answer, TimeStep *atTime)
+TR1_2D_SUPG_AXI :: computeLinearAdvectionTerm_MC(FloatMatrix &answer, TimeStep *tStep)
 {
     answer.resize(3, 6);
     answer.zero();
@@ -415,7 +415,7 @@ TR1_2D_SUPG_AXI :: computeLinearAdvectionTerm_MC(FloatMatrix &answer, TimeStep *
 }
 
 void
-TR1_2D_SUPG_AXI :: computeAdvectionTerm_MC(FloatArray &answer, TimeStep *atTime)
+TR1_2D_SUPG_AXI :: computeAdvectionTerm_MC(FloatArray &answer, TimeStep *tStep)
 {
     // N_epsilon (due to PSPG stabilization)
     double dudx, dudy, dvdx, dvdy, _u, _v;
@@ -426,8 +426,8 @@ TR1_2D_SUPG_AXI :: computeAdvectionTerm_MC(FloatArray &answer, TimeStep *atTime)
     answer.resize(3);
     answer.zero();
 
-    this->computeVectorOf(EID_MomentumBalance, VM_Total, atTime->givePreviousStep(), un);
-    this->computeVectorOf(EID_MomentumBalance, VM_Total, atTime, u);
+    this->computeVectorOf(EID_MomentumBalance, VM_Total, tStep->givePreviousStep(), un);
+    this->computeVectorOf(EID_MomentumBalance, VM_Total, tStep, u);
     dudx = b [ 0 ] * u.at(1) + b [ 1 ] * u.at(3) + b [ 2 ] * u.at(5);
     dudy = c [ 0 ] * u.at(1) + c [ 1 ] * u.at(3) + c [ 2 ] * u.at(5);
     dvdx = b [ 0 ] * u.at(2) + b [ 1 ] * u.at(4) + b [ 2 ] * u.at(6);
@@ -449,7 +449,7 @@ TR1_2D_SUPG_AXI :: computeAdvectionTerm_MC(FloatArray &answer, TimeStep *atTime)
 
 
 void
-TR1_2D_SUPG_AXI :: computeAdvectionDerivativeTerm_MC(FloatMatrix &answer, TimeStep *atTime)
+TR1_2D_SUPG_AXI :: computeAdvectionDerivativeTerm_MC(FloatMatrix &answer, TimeStep *tStep)
 {
     answer.resize(3, 6);
     answer.zero();
@@ -458,8 +458,8 @@ TR1_2D_SUPG_AXI :: computeAdvectionDerivativeTerm_MC(FloatMatrix &answer, TimeSt
     double dV, _u, _v;
     GaussPoint *gp;
 
-    this->computeVectorOf(EID_MomentumBalance, VM_Total, atTime, u);
-    this->computeVectorOf(EID_MomentumBalance, VM_Total, atTime->givePreviousStep(), un);
+    this->computeVectorOf(EID_MomentumBalance, VM_Total, tStep, u);
+    this->computeVectorOf(EID_MomentumBalance, VM_Total, tStep->givePreviousStep(), un);
 
     for ( int ip = 0; ip < integrationRulesArray [ 0 ]->giveNumberOfIntegrationPoints(); ip++ ) {
         gp = integrationRulesArray [ 0 ]->getIntegrationPoint(ip);
@@ -485,7 +485,7 @@ TR1_2D_SUPG_AXI :: computeAdvectionDerivativeTerm_MC(FloatMatrix &answer, TimeSt
     }
 }
 
-void TR1_2D_SUPG_AXI :: computeDiffusionTerm_MC(FloatArray &answer, TimeStep *atTime)
+void TR1_2D_SUPG_AXI :: computeDiffusionTerm_MC(FloatArray &answer, TimeStep *tStep)
 {
     answer.resize(3);
     answer.zero();
@@ -499,7 +499,7 @@ void TR1_2D_SUPG_AXI :: computeDiffusionTerm_MC(FloatArray &answer, TimeStep *at
     FluidDynamicMaterial *mat = static_cast< FluidDynamicMaterial * >( this->giveMaterial() );
 
     // stabilization term K_eps
-    this->computeVectorOf(EID_MomentumBalance, VM_Total, atTime, u);
+    this->computeVectorOf(EID_MomentumBalance, VM_Total, tStep, u);
 
     for ( int ip = 0; ip < integrationRulesArray [ 0 ]->giveNumberOfIntegrationPoints(); ip++ ) {
         gp = integrationRulesArray [ 0 ]->getIntegrationPoint(ip);
@@ -508,7 +508,7 @@ void TR1_2D_SUPG_AXI :: computeDiffusionTerm_MC(FloatArray &answer, TimeStep *at
         _r = this->computeRadiusAt(gp);
         this->computeBMtrx(_b, gp);
         eps.beProductOf(_b, u);
-        mat->computeDeviatoricStressVector(stress, gp, eps, atTime);
+        mat->computeDeviatoricStressVector(stress, gp, eps, tStep);
         stress.times(1. / Re);
         for ( int i = 1; i <= 3; i++ ) {
             answer.at(i) -= t_pspg * ( b [ i - 1 ] * stress.at(1) + c [ i - 1 ] * stress.at(4) ) * dV / rho / _r;
@@ -518,7 +518,7 @@ void TR1_2D_SUPG_AXI :: computeDiffusionTerm_MC(FloatArray &answer, TimeStep *at
 #endif
 }
 
-void TR1_2D_SUPG_AXI :: computeDiffusionDerivativeTerm_MC(FloatMatrix &answer, TimeStep *atTime)
+void TR1_2D_SUPG_AXI :: computeDiffusionDerivativeTerm_MC(FloatMatrix &answer, TimeStep *tStep)
 {
     answer.resize(3, 6);
     answer.zero();
@@ -532,17 +532,17 @@ void TR1_2D_SUPG_AXI :: computeDiffusionDerivativeTerm_MC(FloatMatrix &answer, T
     //FloatArray eps, stress,u;
 
     // stabilization term K_eps
-    //this -> computeVectorOf(EID_MomentumBalance,VM_Total,atTime, u) ;
+    //this -> computeVectorOf(EID_MomentumBalance,VM_Total,tStep, u) ;
     for ( int ip = 0; ip < integrationRulesArray [ 0 ]->giveNumberOfIntegrationPoints(); ip++ ) {
         gp = integrationRulesArray [ 0 ]->getIntegrationPoint(ip);
         dV = this->computeVolumeAround(gp);
         rho = mat->give('d', gp);
         _r = this->computeRadiusAt(gp);
         this->computeBMtrx(_b, gp);
-        mat->giveDeviatoricStiffnessMatrix(_d, TangentStiffness, gp, atTime);
+        mat->giveDeviatoricStiffnessMatrix(_d, TangentStiffness, gp, tStep);
         _db.beProductOf(_d, _b);
         //eps.beProductOf (_b, u);
-        //((FluidDynamicMaterial*) this->giveMaterial())->computeDeviatoricStressVector (stress,gp,eps,atTime);
+        //((FluidDynamicMaterial*) this->giveMaterial())->computeDeviatoricStressVector (stress,gp,eps,tStep);
 
         for ( int i = 1; i <= 3; i++ ) {
             for ( int j = 1; j <= 6; j++ ) {
@@ -557,7 +557,7 @@ void TR1_2D_SUPG_AXI :: computeDiffusionDerivativeTerm_MC(FloatMatrix &answer, T
 
 
 void
-TR1_2D_SUPG_AXI :: computeAccelerationTerm_MC(FloatMatrix &answer, TimeStep *atTime)
+TR1_2D_SUPG_AXI :: computeAccelerationTerm_MC(FloatMatrix &answer, TimeStep *tStep)
 {
     answer.resize(3, 6);
     answer.zero();
@@ -582,7 +582,7 @@ TR1_2D_SUPG_AXI :: computeAccelerationTerm_MC(FloatMatrix &answer, TimeStep *atT
 
 
 void
-TR1_2D_SUPG_AXI :: computePressureTerm_MC(FloatMatrix &answer, TimeStep *atTime)
+TR1_2D_SUPG_AXI :: computePressureTerm_MC(FloatMatrix &answer, TimeStep *tStep)
 {
     double coeff, dV, rho;
     GaussPoint *gp;
@@ -632,7 +632,7 @@ TR1_2D_SUPG_AXI :: computeDeviatoricStress(FloatArray &answer, GaussPoint *gp, T
 
 
 void
-TR1_2D_SUPG_AXI :: computeBCRhsTerm_MB(FloatArray &answer, TimeStep *atTime)
+TR1_2D_SUPG_AXI :: computeBCRhsTerm_MB(FloatArray &answer, TimeStep *tStep)
 {
     answer.resize(6);
     answer.zero();
@@ -646,13 +646,13 @@ TR1_2D_SUPG_AXI :: computeBCRhsTerm_MB(FloatArray &answer, TimeStep *atTime)
     double dV, coeff, u, v, rho;
 
     // add body load (gravity) termms
-    this->computeVectorOf(EID_MomentumBalance, VM_Total, atTime->givePreviousStep(), un);
+    this->computeVectorOf(EID_MomentumBalance, VM_Total, tStep->givePreviousStep(), un);
     nLoads = this->giveBodyLoadArray()->giveSize();
     for ( int i = 1; i <= nLoads; i++ ) {
         load = domain->giveLoad( bodyLoadArray.at(i) );
         ltype = load->giveBCGeoType();
         if ( ( ltype == BodyLoadBGT ) && ( load->giveBCValType() == ForceLoadBVT ) ) {
-            load->computeComponentArrayAt(gVector, atTime, VM_Total);
+            load->computeComponentArrayAt(gVector, tStep, VM_Total);
             if ( gVector.giveSize() ) {
                 for ( int ip = 0; ip < integrationRulesArray [ 0 ]->giveNumberOfIntegrationPoints(); ip++ ) {
                     gp = integrationRulesArray [ 0 ]->getIntegrationPoint(ip);
@@ -711,7 +711,7 @@ TR1_2D_SUPG_AXI :: computeBCRhsTerm_MB(FloatArray &answer, TimeStep *atTime)
 
                 load = dynamic_cast< BoundaryLoad * >( domain->giveLoad(n) );
                 if ( load ) {
-                    load->computeValueAt(t, atTime, coords, VM_Total);
+                    load->computeValueAt(t, tStep, coords, VM_Total);
 
                     // here it is assumed constant traction, one point integration only
                     // n1 (u,v)
@@ -731,7 +731,7 @@ TR1_2D_SUPG_AXI :: computeBCRhsTerm_MB(FloatArray &answer, TimeStep *atTime)
 
 
 void
-TR1_2D_SUPG_AXI :: computeBCRhsTerm_MC(FloatArray &answer, TimeStep *atTime)
+TR1_2D_SUPG_AXI :: computeBCRhsTerm_MC(FloatArray &answer, TimeStep *tStep)
 {
     int nLoads;
     Load *load;
@@ -747,7 +747,7 @@ TR1_2D_SUPG_AXI :: computeBCRhsTerm_MC(FloatArray &answer, TimeStep *atTime)
         load  = domain->giveLoad( bodyLoadArray.at(i) );
         ltype = load->giveBCGeoType();
         if ( ( ltype == BodyLoadBGT ) && ( load->giveBCValType() == ForceLoadBVT ) ) {
-            load->computeComponentArrayAt(gVector, atTime, VM_Total);
+            load->computeComponentArrayAt(gVector, tStep, VM_Total);
             if ( gVector.giveSize() ) {
                 for ( int ip = 0; ip < integrationRulesArray [ 0 ]->giveNumberOfIntegrationPoints(); ip++ ) {
                     gp = integrationRulesArray [ 0 ]->getIntegrationPoint(ip);
@@ -765,7 +765,7 @@ TR1_2D_SUPG_AXI :: computeBCRhsTerm_MC(FloatArray &answer, TimeStep *atTime)
 
 
 void
-TR1_2D_SUPG_AXI :: computeBCLhsTerm_MB(FloatMatrix &answer, TimeStep *atTime)
+TR1_2D_SUPG_AXI :: computeBCLhsTerm_MB(FloatMatrix &answer, TimeStep *tStep)
 {
     bcType boundarytype;
     int n, side;
@@ -788,9 +788,9 @@ TR1_2D_SUPG_AXI :: computeBCLhsTerm_MB(FloatMatrix &answer, TimeStep *atTime)
         load = domain->giveLoad(n);
         boundarytype = load->giveType();
         if ( boundarytype == SlipWithFriction ) {
-            this->computeSlipWithFrictionBCTerm_MB(helpMatrix, load, side, atTime);
+            this->computeSlipWithFrictionBCTerm_MB(helpMatrix, load, side, tStep);
         } else if ( boundarytype == PenetrationWithResistance ) {
-            this->computePenetrationWithResistanceBCTerm_MB(helpMatrix, load, side, atTime);
+            this->computePenetrationWithResistanceBCTerm_MB(helpMatrix, load, side, tStep);
         } else {
             answer.resize(6, 6);
             answer.zero();
@@ -803,7 +803,7 @@ TR1_2D_SUPG_AXI :: computeBCLhsTerm_MB(FloatMatrix &answer, TimeStep *atTime)
 
 
 void
-TR1_2D_SUPG_AXI :: computeSlipWithFrictionBCTerm_MB(FloatMatrix &answer, Load *load, int side, TimeStep *atTime)
+TR1_2D_SUPG_AXI :: computeSlipWithFrictionBCTerm_MB(FloatMatrix &answer, Load *load, int side, TimeStep *tStep)
 {
     //answer.resize(6, 6);
     //answer.zero();
@@ -851,7 +851,7 @@ TR1_2D_SUPG_AXI :: computeSlipWithFrictionBCTerm_MB(FloatMatrix &answer, Load *l
 }
 
 void
-TR1_2D_SUPG_AXI :: computePenetrationWithResistanceBCTerm_MB(FloatMatrix &answer, Load *load, int side, TimeStep *atTime)
+TR1_2D_SUPG_AXI :: computePenetrationWithResistanceBCTerm_MB(FloatMatrix &answer, Load *load, int side, TimeStep *tStep)
 {
     //answer.resize(6, 6);
     //answer.zero();
@@ -904,7 +904,7 @@ TR1_2D_SUPG_AXI :: computePenetrationWithResistanceBCTerm_MB(FloatMatrix &answer
 }
 
 void
-TR1_2D_SUPG_AXI :: computeOutFlowBCTerm_MB(FloatMatrix &answer, int side, TimeStep *atTime)
+TR1_2D_SUPG_AXI :: computeOutFlowBCTerm_MB(FloatMatrix &answer, int side, TimeStep *tStep)
 {
     int node1, node2;
     double l, n1, n2, t1, t2, dV;
@@ -952,7 +952,7 @@ TR1_2D_SUPG_AXI :: computeOutFlowBCTerm_MB(FloatMatrix &answer, int side, TimeSt
 
 
 void
-TR1_2D_SUPG_AXI :: computeBCLhsPressureTerm_MB(FloatMatrix &answer, TimeStep *atTime)
+TR1_2D_SUPG_AXI :: computeBCLhsPressureTerm_MB(FloatMatrix &answer, TimeStep *tStep)
 {
     bcType boundarytype;
     int n, side;
@@ -975,7 +975,7 @@ TR1_2D_SUPG_AXI :: computeBCLhsPressureTerm_MB(FloatMatrix &answer, TimeStep *at
         load = domain->giveLoad(n);
         boundarytype = load->giveType();
         if ( boundarytype == OutFlowBC ) {
-            this->computeOutFlowBCTerm_MB(helpMatrix, side, atTime);
+            this->computeOutFlowBCTerm_MB(helpMatrix, side, tStep);
         } else {
             answer.resize(6, 3);
             answer.zero();
@@ -1076,7 +1076,7 @@ TR1_2D_SUPG_AXI :: initGeometry()
 
 
 void
-TR1_2D_SUPG_AXI :: updateStabilizationCoeffs(TimeStep *atTime)
+TR1_2D_SUPG_AXI :: updateStabilizationCoeffs(TimeStep *tStep)
 {
     /* UGN-Based Stabilization */
     double h_ugn, sum = 0.0, vnorm, t_sugn1, t_sugn2, t_sugn3, u_1, u_2;
@@ -1090,7 +1090,7 @@ TR1_2D_SUPG_AXI :: updateStabilizationCoeffs(TimeStep *atTime)
     tscale = domain->giveEngngModel()->giveVariableScale(VST_Time);
     dscale = domain->giveEngngModel()->giveVariableScale(VST_Density);
 
-    this->computeVectorOf(EID_MomentumBalance, VM_Total, atTime->givePreviousStep(), u);
+    this->computeVectorOf(EID_MomentumBalance, VM_Total, tStep->givePreviousStep(), u);
     u.times(uscale);
     double nu;
 
@@ -1102,10 +1102,10 @@ TR1_2D_SUPG_AXI :: updateStabilizationCoeffs(TimeStep *atTime)
         gp = integrationRulesArray [ 1 ]->getIntegrationPoint(0);
     }
 
-    nu = static_cast< FluidDynamicMaterial * >( this->giveMaterial() )->giveEffectiveViscosity( gp, atTime->givePreviousStep() );
+    nu = static_cast< FluidDynamicMaterial * >( this->giveMaterial() )->giveEffectiveViscosity( gp, tStep->givePreviousStep() );
     nu *= domain->giveEngngModel()->giveVariableScale(VST_Viscosity);
 
-    dt = atTime->giveTimeIncrement() * tscale;
+    dt = tStep->giveTimeIncrement() * tscale;
 
     for ( int i = 1; i <= 3; i++ ) {
         im1 = i - 1;

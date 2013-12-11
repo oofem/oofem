@@ -70,14 +70,14 @@ Beam3d :: ~Beam3d()
 
 
 void
-Beam3d :: computeBmatrixAt(GaussPoint *aGaussPoint, FloatMatrix &answer, int li, int ui)
+Beam3d :: computeBmatrixAt(GaussPoint *gp, FloatMatrix &answer, int li, int ui)
 // Returns the strain matrix of the receiver.
 // eeps = {\eps_x, \gamma_xz, \gamma_xy, \der{phi_x}{x}, \kappa_y, \kappa_z}^T
 {
     double l, ksi, kappay, kappaz;
 
     l     = this->giveLength();
-    ksi   = 0.5 + 0.5 * aGaussPoint->giveCoordinate(1);
+    ksi   = 0.5 + 0.5 * gp->giveCoordinate(1);
     kappay = this->giveKappayCoeff();
     kappaz = this->giveKappazCoeff();
 
@@ -124,7 +124,7 @@ void Beam3d :: computeGaussPoints()
 void
 Beam3d :: computeNmatrixAt(const FloatArray &iLocCoord, FloatMatrix &answer)
 // Returns the displacement interpolation matrix {N} of the receiver, eva-
-// luated at aGaussPoint. Used for numerical calculation of consistent mass
+// luated at gp. Used for numerical calculation of consistent mass
 // matrix. Must contain only interpolation for displacement terms,
 // not for any rotations. (Inertia forces do not work on rotations).
 // r = {u1,v1,w1,fi_x1,fi_y1,fi_z1,u2,v2,w2,fi_x2,fi_y2,fi_21}^T
@@ -293,9 +293,9 @@ Beam3d :: computeGtoLRotationMatrix(FloatMatrix &answer)
 
 
 double
-Beam3d :: computeVolumeAround(GaussPoint *aGaussPoint)
+Beam3d :: computeVolumeAround(GaussPoint *gp)
 {
-    double weight  = aGaussPoint->giveWeight();
+    double weight  = gp->giveWeight();
     return weight * 0.5 * this->giveLength();
 }
 
@@ -651,7 +651,7 @@ Beam3d :: computeEdgeLoadVectorAt(FloatArray &answer, Load *load, int iedge, Tim
 
 
 void
-Beam3d :: printOutputAt(FILE *File, TimeStep *stepN)
+Beam3d :: printOutputAt(FILE *File, TimeStep *tStep)
 {
     // Performs end-of-step operations.
 
@@ -662,9 +662,9 @@ Beam3d :: printOutputAt(FILE *File, TimeStep *stepN)
     fprintf(File, "beam element %d :\n", number);
 
     // ask for global element displacement vector
-    this->computeVectorOf(EID_MomentumBalance, VM_Total, stepN, rl);
+    this->computeVectorOf(EID_MomentumBalance, VM_Total, tStep, rl);
     // ask for global element end forces vector
-    this->giveEndForcesVector(Fl, stepN);
+    this->giveEndForcesVector(Fl, tStep);
 
     fprintf(File, "  local displacements ");
     n = rl.giveSize();
@@ -683,17 +683,17 @@ Beam3d :: printOutputAt(FILE *File, TimeStep *stepN)
 
 
 void
-Beam3d :: computeLocalForceLoadVector(FloatArray &answer, TimeStep *stepN, ValueModeType mode)
-// Computes the load vector of the receiver, at stepN.
+Beam3d :: computeLocalForceLoadVector(FloatArray &answer, TimeStep *tStep, ValueModeType mode)
+// Computes the load vector of the receiver, at tStep.
 {
     FloatMatrix stiff;
 
-    StructuralElement :: computeLocalForceLoadVector(answer, stepN, mode); // in global c.s
+    StructuralElement :: computeLocalForceLoadVector(answer, tStep, mode); // in global c.s
 
     if ( answer.giveSize() && dofsToCondense ) {
         // condense requested dofs
         if ( answer.giveSize() != 0 ) {
-            this->computeClampedStiffnessMatrix(stiff, TangentStiffness, stepN);
+            this->computeClampedStiffnessMatrix(stiff, TangentStiffness, tStep);
             this->condense(& stiff, NULL, & answer, dofsToCondense);
         }
     }
@@ -711,17 +711,17 @@ Beam3d :: computeBodyLoadVectorAt(FloatArray &answer, Load *load, TimeStep *tSte
 
 /*
  * void
- * Beam3d :: computeForceLoadVector (FloatArray& answer, TimeStep* stepN, ValueModeType mode)
- * // Computes the load vector of the receiver, at stepN.
+ * Beam3d :: computeForceLoadVector (FloatArray& answer, TimeStep* tStep, ValueModeType mode)
+ * // Computes the load vector of the receiver, at tStep.
  * {
  * FloatMatrix stiff, *T;
  *
- * StructuralElement::computeForceLoadVector(answer, stepN, mode); // in global c.s
+ * StructuralElement::computeForceLoadVector(answer, tStep, mode); // in global c.s
  *
  * if (answer.giveSize() && dofsToCondense) {
  * // condense requested dofs
  * if (answer.giveSize() != 0) {
- * this->computeClampedStiffnessMatrix (stiff, TangentStiffness, stepN) ;
+ * this->computeClampedStiffnessMatrix (stiff, TangentStiffness, tStep) ;
  * this->condense (&stiff, NULL, &answer, dofsToCondense);
  * }
  *
@@ -731,16 +731,16 @@ Beam3d :: computeBodyLoadVectorAt(FloatArray &answer, Load *load, TimeStep *tSte
 
 
 void
-Beam3d :: computePrescribedStrainLocalLoadVectorAt(FloatArray &answer, TimeStep *stepN, ValueModeType mode)
-// Computes the load vector of the receiver, at stepN.
+Beam3d :: computePrescribedStrainLocalLoadVectorAt(FloatArray &answer, TimeStep *tStep, ValueModeType mode)
+// Computes the load vector of the receiver, at tStep.
 {
-    StructuralElement :: computePrescribedStrainLocalLoadVectorAt(answer, stepN, mode); // ig g.c.s
+    StructuralElement :: computePrescribedStrainLocalLoadVectorAt(answer, tStep, mode); // ig g.c.s
     FloatMatrix stiff;
 
     if ( answer.giveSize() && dofsToCondense ) {
         // condense requested dofs
         if ( answer.giveSize() != 0 ) {
-            this->computeClampedStiffnessMatrix(stiff, TangentStiffness, stepN);
+            this->computeClampedStiffnessMatrix(stiff, TangentStiffness, tStep);
             this->condense(& stiff, NULL, & answer, dofsToCondense);
         }
     }

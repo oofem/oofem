@@ -77,9 +77,9 @@ FluidCrossSection :: checkConsistency()
 
 
 int
-FluidCrossSection :: giveIPValue(FloatArray &answer, GaussPoint *ip, InternalStateType type, TimeStep *atTime)
+FluidCrossSection :: giveIPValue(FloatArray &answer, GaussPoint *ip, InternalStateType type, TimeStep *tStep)
 {
-    return this->domain->giveMaterial(this->matNumber)->giveIPValue(answer, ip, type, atTime);
+    return this->domain->giveMaterial(this->matNumber)->giveIPValue(answer, ip, type, tStep);
 }
 
 

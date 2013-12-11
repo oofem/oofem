@@ -144,7 +144,7 @@ public:
     virtual FloatArray *imposeStressConstrainsOnGradient(GaussPoint *gp, FloatArray *gradientStressVector3d);
     virtual FloatArray *imposeStrainConstrainsOnGradient(GaussPoint *gp, FloatArray *gradientStrainVector3d);
 
-    virtual int giveIPValue(FloatArray &answer, GaussPoint *aGaussPoint, InternalStateType type, TimeStep *atTime);
+    virtual int giveIPValue(FloatArray &answer, GaussPoint *gp, InternalStateType type, TimeStep *tStep);
 
     /**
      * Method for computing 1d fiber stiffness matrix of receiver.
@@ -156,7 +156,7 @@ public:
      * @param fiberMatrix Stiffness matrix.
      * @param mode Material response mode.
      * @param layerGp Integration point.
-     * @param tStep Time step (most models are able to respond only when atTime is current time step).
+     * @param tStep Time step (most models are able to respond only when tStep is current time step).
      */
     void giveFiberMaterialStiffnessMatrix(FloatMatrix &fiberMatrix, MatResponseMode mode, GaussPoint *layerGp, TimeStep *tStep);
 
@@ -183,13 +183,13 @@ public:
     virtual int checkConsistency();
 
 #ifdef __PARALLEL_MODE
-    int packUnknowns(CommunicationBuffer &buff, TimeStep *stepN, GaussPoint *ip)
+    int packUnknowns(CommunicationBuffer &buff, TimeStep *tStep, GaussPoint *ip)
     {
         _error("packUnknowns: not implemented");
         return 0;
     }
 
-    int unpackAndUpdateUnknowns(CommunicationBuffer &buff, TimeStep *stepN, GaussPoint *ip)
+    int unpackAndUpdateUnknowns(CommunicationBuffer &buff, TimeStep *tStep, GaussPoint *ip)
     {
         _error("unpackAndUpdateUnknowns: not implemented");
         return 0;

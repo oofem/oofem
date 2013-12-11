@@ -105,7 +105,7 @@ void DofManager :: setLoadArray(IntArray &la)
 }
 
 
-void DofManager :: computeLoadVectorAt(FloatArray &answer, TimeStep *stepN, ValueModeType mode)
+void DofManager :: computeLoadVectorAt(FloatArray &answer, TimeStep *tStep, ValueModeType mode)
 // Computes the vector of the nodal loads of the receiver.
 {
     FloatArray contribution;
@@ -119,19 +119,19 @@ void DofManager :: computeLoadVectorAt(FloatArray &answer, TimeStep *stepN, Valu
         for ( int i = 1; i <= nLoads; i++ ) {   // to more than one load
             int n = loadArray.at(i);
             Load *loadN = domain->giveLoad(n);
-            computeLoadVector(contribution, loadN, ExternalForcesVector, stepN, mode);
+            computeLoadVector(contribution, loadN, ExternalForcesVector, tStep, mode);
             answer.add(contribution);
         }
     }
 }
 
 
-void DofManager :: computeLoadVector(FloatArray &answer, Load *load, CharType type, TimeStep *stepN, ValueModeType mode)
+void DofManager :: computeLoadVector(FloatArray &answer, Load *load, CharType type, TimeStep *tStep, ValueModeType mode)
 {
     if ( load->giveBCGeoType() != NodalLoadBGT ) {
         _error("computeLoadVector: incompatible load type applied");
     }
-    load->computeComponentArrayAt(answer, stepN, mode);
+    load->computeComponentArrayAt(answer, tStep, mode);
 }
 
 
@@ -606,13 +606,13 @@ void DofManager :: giveInputRecord(DynamicInputRecord &input)
 }
 
 
-void DofManager :: printOutputAt(FILE *stream, TimeStep *stepN)
+void DofManager :: printOutputAt(FILE *stream, TimeStep *tStep)
 {
     EngngModel *emodel = this->giveDomain()->giveEngngModel();
 
     fprintf( stream, "%-8s%8d (%8d):\n", this->giveClassName(), this->giveLabel(), this->giveNumber() );
     for ( int i = 1; i <= numberOfDofs; i++ ) {
-        emodel->printDofOutputAt(stream, this->giveDof(i), stepN);
+        emodel->printDofOutputAt(stream, this->giveDof(i), tStep);
     }
 }
 
@@ -807,7 +807,7 @@ contextIOResultType DofManager :: restoreContext(DataStream *stream, ContextMode
 }
 
 
-void DofManager :: giveUnknownVector(FloatArray &answer, const IntArray &dofIDArry, ValueModeType mode, TimeStep *stepN)
+void DofManager :: giveUnknownVector(FloatArray &answer, const IntArray &dofIDArry, ValueModeType mode, TimeStep *tStep)
 {
     int size;
     IntArray dofArray;
@@ -821,7 +821,7 @@ void DofManager :: giveUnknownVector(FloatArray &answer, const IntArray &dofIDAr
             OOFEM_ERROR2( "DofManager :: giveUnknownVector - Couldn't find dof with Dof ID %d", dofIDArry.at(i) );
         }
 #endif
-        answer.at(i) = this->giveDof(pos)->giveUnknown(mode, stepN);
+        answer.at(i) = this->giveDof(pos)->giveUnknown(mode, tStep);
     }
 
     // Transform to global c.s.
@@ -833,7 +833,7 @@ void DofManager :: giveUnknownVector(FloatArray &answer, const IntArray &dofIDAr
 
 
 void DofManager :: giveUnknownVector(FloatArray &answer, const IntArray &dofIDArry,
-                                     PrimaryField &field, ValueModeType mode, TimeStep *stepN)
+                                     PrimaryField &field, ValueModeType mode, TimeStep *tStep)
 {
     int size;
     IntArray dofArray;
@@ -847,7 +847,7 @@ void DofManager :: giveUnknownVector(FloatArray &answer, const IntArray &dofIDAr
             OOFEM_ERROR2( "DofManager :: giveUnknownVector - Couldn't find dof with Dof ID %d", dofIDArry.at(i) );
         }
 #endif
-        answer.at(i) = this->giveDof(pos)->giveUnknown(field, mode, stepN);
+        answer.at(i) = this->giveDof(pos)->giveUnknown(field, mode, tStep);
     }
 
     // Transform to global c.s.
@@ -858,17 +858,17 @@ void DofManager :: giveUnknownVector(FloatArray &answer, const IntArray &dofIDAr
 }
 
 
-void DofManager :: giveCompleteUnknownVector(FloatArray &answer, ValueModeType mode, TimeStep *stepN)
+void DofManager :: giveCompleteUnknownVector(FloatArray &answer, ValueModeType mode, TimeStep *tStep)
 {
     answer.resize(this->numberOfDofs);
     for ( int i = 1; i <= this->numberOfDofs; i++ ) {
-        answer.at(i) = this->giveDof(i)->giveUnknown(mode, stepN);
+        answer.at(i) = this->giveDof(i)->giveUnknown(mode, tStep);
     }
 }
 
 
 void DofManager :: givePrescribedUnknownVector(FloatArray &answer, const IntArray &dofIDArry,
-                                               ValueModeType mode, TimeStep *stepN)
+                                               ValueModeType mode, TimeStep *tStep)
 {
     int size;
     IntArray dofArray;
@@ -877,7 +877,7 @@ void DofManager :: givePrescribedUnknownVector(FloatArray &answer, const IntArra
     this->giveDofArray(dofIDArry, dofArray);
 
     for ( int j = 1; j <= size; j++ ) {
-        answer.at(j) = this->giveDof( dofArray.at(j) )->giveBcValue(mode, stepN);
+        answer.at(j) = this->giveDof( dofArray.at(j) )->giveBcValue(mode, tStep);
     }
 
     // Transform to global c.s.
@@ -1094,11 +1094,11 @@ void DofManager :: mergePartitionList(IntArray &_p)
 
 int
 DofManager :: packDOFsUnknowns(CommunicationBuffer &buff,
-                               ValueModeType mode, TimeStep *stepN)
+                               ValueModeType mode, TimeStep *tStep)
 {
     int result = 1;
     for ( int i = 1; i <= numberOfDofs; i++ ) {
-        result &= this->giveDof(i)->packUnknowns(buff, mode, stepN);
+        result &= this->giveDof(i)->packUnknowns(buff, mode, tStep);
     }
 
     return result;

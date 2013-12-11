@@ -42,7 +42,7 @@ void
 LinearElasticMaterial :: giveRealStressVector(FloatArray &answer,
                                               GaussPoint *gp,
                                               const FloatArray &reducedStrain,
-                                              TimeStep *atTime)
+                                              TimeStep *tStep)
 {
     FloatArray strainVector;
     FloatMatrix d;
@@ -53,9 +53,9 @@ LinearElasticMaterial :: giveRealStressVector(FloatArray &answer,
     // therefore it is necessary to subtract always the total eigen strain value
     this->giveStressDependentPartOfStrainVector(strainVector, gp,
                                                 reducedStrain,
-                                                atTime, VM_Total);
+                                                tStep, VM_Total);
 
-    this->giveStiffnessMatrix(d, TangentStiffness, gp, atTime);
+    this->giveStiffnessMatrix(d, TangentStiffness, gp, tStep);
     answer.beProductOf(d, strainVector);
 
     // update gp

@@ -170,7 +170,7 @@ void Node :: giveInputRecord(DynamicInputRecord &input)
 
 
 void
-Node :: computeLoadVector(FloatArray &answer, Load *load, CharType type, TimeStep *stepN, ValueModeType mode)
+Node :: computeLoadVector(FloatArray &answer, Load *load, CharType type, TimeStep *tStep, ValueModeType mode)
 {
     if ( type != ExternalForcesVector ) {
         answer.resize(0);
@@ -186,7 +186,7 @@ Node :: computeLoadVector(FloatArray &answer, Load *load, CharType type, TimeSte
         _error("computeLoadVectorAt: incompatible load type applied");
     }
 
-    loadN->computeComponentArrayAt(answer, stepN, mode); // can be NULL
+    loadN->computeComponentArrayAt(answer, tStep, mode); // can be NULL
     // Transform from Global to Local c.s.
     if ( loadN->giveCoordSystMode() == NodalLoad :: CST_Global ) {
         IntArray dofIDarry(0);

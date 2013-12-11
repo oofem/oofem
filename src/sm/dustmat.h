@@ -462,7 +462,7 @@ public:
     virtual void giveRealStressVector(FloatArray &answer,
                                       GaussPoint *gp,
                                       const FloatArray &strainVector,
-                                      TimeStep *atTime);
+                                      TimeStep *tStep);
 
     virtual void giveRealStressVector_3d(FloatArray &answer, GaussPoint *gp, const FloatArray &reducedE, TimeStep *tStep)
     { this->giveRealStressVector(answer, gp, reducedE, tStep); }
@@ -478,13 +478,13 @@ public:
     virtual int giveIPValue(FloatArray &answer,
                             GaussPoint *gp,
                             InternalStateType type,
-                            TimeStep *atTime);
+                            TimeStep *tStep);
 
     virtual bool isCharacteristicMtrxSymmetric(MatResponseMode rMode) { return false; }
 
-    virtual void giveThermalDilatationVector(FloatArray &answer, GaussPoint *gp, TimeStep *atTime)
+    virtual void giveThermalDilatationVector(FloatArray &answer, GaussPoint *gp, TimeStep *tStep)
     {
-        LEMaterial->giveThermalDilatationVector(answer, gp, atTime);
+        LEMaterial->giveThermalDilatationVector(answer, gp, tStep);
     }
 
     virtual MaterialStatus *CreateStatus(GaussPoint *gp) const;

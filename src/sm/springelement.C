@@ -62,9 +62,9 @@ SpringElement :: computeStiffnessMatrix(FloatMatrix &answer, MatResponseMode rMo
 
 
 void
-SpringElement :: giveInternalForcesVector(FloatArray &answer, TimeStep *atTime, int useUpdatedGpRecord)
+SpringElement :: giveInternalForcesVector(FloatArray &answer, TimeStep *tStep, int useUpdatedGpRecord)
 {
-    double f = this->computeSpringInternalForce(atTime);
+    double f = this->computeSpringInternalForce(tStep);
     answer.resize(2);
     answer.at(1) = -f;
     answer.at(2) = f;
@@ -117,10 +117,10 @@ SpringElement :: giveDofManDofIDMask(int inode, EquationID, IntArray &answer) co
 }
 
 double
-SpringElement :: computeSpringInternalForce(TimeStep *stepN)
+SpringElement :: computeSpringInternalForce(TimeStep *tStep)
 {
     FloatArray u;
-    this->computeVectorOf(EID_MomentumBalance, VM_Total, stepN, u);
+    this->computeVectorOf(EID_MomentumBalance, VM_Total, tStep, u);
     return ( this->springConstant * ( u.at(2) - u.at(1) ) );
 }
 
@@ -160,10 +160,10 @@ SpringElement :: initializeFrom(InputRecord *ir)
     return IRRT_OK;
 }
 
-void SpringElement :: printOutputAt(FILE *File, TimeStep *stepN)
+void SpringElement :: printOutputAt(FILE *File, TimeStep *tStep)
 {
     fprintf(File, "spring element %d :\n", number);
-    fprintf( File, "  spring force or moment % .4e", this->computeSpringInternalForce(stepN) );
+    fprintf( File, "  spring force or moment % .4e", this->computeSpringInternalForce(tStep) );
     fprintf(File, "\n");
 }
 } // end namespace oofem

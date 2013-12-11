@@ -112,11 +112,11 @@ public:
     void computeQuadraticFunct(FloatArray &answer, FloatArray line);
     //@{
 
-    virtual int giveIPValue(FloatArray &answer, GaussPoint *aGaussPoint, InternalStateType type, TimeStep *atTime);
+    virtual int giveIPValue(FloatArray &answer, GaussPoint *gp, InternalStateType type, TimeStep *tStep);
 
 #ifdef __OOFEG
     int giveInternalStateAtNode(FloatArray &answer, InternalStateType type, InternalStateMode mode,
-                                int node, TimeStep *atTime);
+                                int node, TimeStep *tStep);
     // Graphics output
     //void drawYourself(oofegGraphicContext&);
     virtual void drawRawGeometry(oofegGraphicContext &);
@@ -127,10 +127,10 @@ public:
     virtual double computeCriticalTimeStep(TimeStep *tStep);
 
     // three terms for computing their norms due to computing t_supg
-    virtual void computeAdvectionTerm(FloatMatrix &answer, TimeStep *atTime);
-    virtual void computeAdvectionDeltaTerm(FloatMatrix &answer, TimeStep *atTime);
-    virtual void computeMassDeltaTerm(FloatMatrix &answer, TimeStep *atTime);
-    virtual void computeLSICTerm(FloatMatrix &answer, TimeStep *atTime);
+    virtual void computeAdvectionTerm(FloatMatrix &answer, TimeStep *tStep);
+    virtual void computeAdvectionDeltaTerm(FloatMatrix &answer, TimeStep *tStep);
+    virtual void computeMassDeltaTerm(FloatMatrix &answer, TimeStep *tStep);
+    virtual void computeLSICTerm(FloatMatrix &answer, TimeStep *tStep);
 
     virtual Interface *giveInterface(InterfaceType);
 
@@ -140,15 +140,15 @@ protected:
 
     virtual void computeGaussPoints();
     virtual void computeNuMatrix(FloatMatrix &answer, GaussPoint *gp);
-    virtual void computeUDotGradUMatrix(FloatMatrix &answer, GaussPoint *gp, TimeStep *atTime);
+    virtual void computeUDotGradUMatrix(FloatMatrix &answer, GaussPoint *gp, TimeStep *tStep);
     virtual void computeBMatrix(FloatMatrix &anwer, GaussPoint *gp);
     virtual void computeDivUMatrix(FloatMatrix &answer, GaussPoint *gp);
     virtual void computeNpMatrix(FloatMatrix &answer, GaussPoint *gp);
     virtual void computeGradPMatrix(FloatMatrix &answer, GaussPoint *gp);
-    virtual void computeDivTauMatrix(FloatMatrix &answer, GaussPoint *gp, TimeStep *atTime);
-    virtual void computeGradUMatrix(FloatMatrix &answer, GaussPoint *gp, TimeStep *atTime);
+    virtual void computeDivTauMatrix(FloatMatrix &answer, GaussPoint *gp, TimeStep *tStep);
+    virtual void computeGradUMatrix(FloatMatrix &answer, GaussPoint *gp, TimeStep *tStep);
     virtual int  giveNumberOfSpatialDimensions();
-    virtual double computeVolumeAround(GaussPoint *aGaussPoint);
+    virtual double computeVolumeAround(GaussPoint *gp);
     virtual void initGeometry();
 
     virtual void updateStabilizationCoeffs(TimeStep *tStep);

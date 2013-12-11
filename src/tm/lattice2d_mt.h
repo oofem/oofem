@@ -96,7 +96,7 @@ public:
     virtual void giveDofManDofIDMask(int inode, EquationID, IntArray &) const;
     virtual IRResultType initializeFrom(InputRecord *ir);
 
-    virtual void updateInternalState(TimeStep *stepN);
+    virtual void updateInternalState(TimeStep *tStep);
 
 #ifdef __OOFEG
     //

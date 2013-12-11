@@ -126,13 +126,13 @@ TrPlaneStrain :: computeBmatrixAt(GaussPoint *gp, FloatMatrix &answer,
 }
 
 void
-TrPlaneStrain :: computeBHmatrixAt(GaussPoint *aGaussPoint, FloatMatrix &answer)
+TrPlaneStrain :: computeBHmatrixAt(GaussPoint *gp, FloatMatrix &answer)
 // Returns the [5x6] displacement gradient matrix {BH} of the receiver,
-// evaluated at aGaussPoint.
+// evaluated at gp.
 // @todo not checked if correct
 {
     FloatMatrix dnx;
-    this->interp.evaldNdx( dnx, * aGaussPoint->giveCoordinates(), FEIElementGeometryWrapper(this) );
+    this->interp.evaldNdx( dnx, * gp->giveCoordinates(), FEIElementGeometryWrapper(this) );
 
     answer.resize(5, 6);
     answer.zero();
@@ -407,7 +407,7 @@ TrPlaneStrain :: DirectErrorIndicatorRCI_giveCharacteristicSize()
 
 int
 TrPlaneStrain :: EIPrimaryUnknownMI_computePrimaryUnknownVectorAt(ValueModeType mode,
-                                                                  TimeStep *stepN, const FloatArray &coords,
+                                                                  TimeStep *tStep, const FloatArray &coords,
                                                                   FloatArray &answer)
 {
     FloatArray lcoords, u, nv;
@@ -424,7 +424,7 @@ TrPlaneStrain :: EIPrimaryUnknownMI_computePrimaryUnknownVectorAt(ValueModeType 
     n.at(1, 3) = n.at(2, 4) = nv.at(2);
     n.at(1, 5) = n.at(2, 6) = nv.at(3);
 
-    this->computeVectorOf(EID_MomentumBalance, mode, stepN, u);
+    this->computeVectorOf(EID_MomentumBalance, mode, tStep, u);
 
     answer.beProductOf(n, u);
 

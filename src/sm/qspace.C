@@ -96,7 +96,7 @@ QSpace :: giveMaterialMode()
 
 
 void
-QSpace :: computeStressVector(FloatArray &answer, const FloatArray &e, GaussPoint *gp, TimeStep *stepN)
+QSpace :: computeStressVector(FloatArray &answer, const FloatArray &e, GaussPoint *gp, TimeStep *tStep)
 {
     ///@todo This whole function should be placed in the "Space3dStructuralElementEvaluator".
     if ( this->matRotation ) {
@@ -124,7 +124,7 @@ QSpace :: computeStressVector(FloatArray &answer, const FloatArray &e, GaussPoin
         rotStrain.at(5) = 2 * e(0) * x(0) * z(0) + e(4) * x(2) * z(0) + 2 * e(1) * x(1) * z(1) + e(3) * x(2) * z(1) + e(5) * ( x(1) * z(0) + x(0) * z(1) ) + ( e(4) * x(0) + e(3) * x(1) + 2 * e(2) * x(2) ) * z(2);
         rotStrain.at(6) = 2 * e(0) * x(0) * y(0) + e(4) * x(2) * y(0) + 2 * e(1) * x(1) * y(1) + e(3) * x(2) * y(1) + e(5) * ( x(1) * y(0) + x(0) * y(1) ) + ( e(4) * x(0) + e(3) * x(1) + 2 * e(2) * x(2) ) * y(2);
 #endif
-        this->giveStructuralCrossSection()->giveRealStress_3d(s, gp, rotStrain, stepN);
+        this->giveStructuralCrossSection()->giveRealStress_3d(s, gp, rotStrain, tStep);
 #if 0
         answer = {
             s(0) * x(0) * x(0) + 2 * s(5) * x(0) * y(0) + s(1) * y(0) * y(0) + 2 * ( s(4) * x(0) + s(3) * y(0) ) * z(0) + s(2) * z(0) * z(0),
@@ -144,7 +144,7 @@ QSpace :: computeStressVector(FloatArray &answer, const FloatArray &e, GaussPoin
         answer.at(6) = y(1) * ( s(5) * x(0) + s(1) * y(0) + s(3) * z(0) ) + x(1) * ( s(0) * x(0) + s(5) * y(0) + s(4) * z(0) ) + ( s(4) * x(0) + s(3) * y(0) + s(2) * z(0) ) * z(1);
 #endif
     } else {
-        this->giveStructuralCrossSection()->giveRealStress_3d(answer, gp, e, stepN);
+        this->giveStructuralCrossSection()->giveRealStress_3d(answer, gp, e, tStep);
     }
 }
 
@@ -222,11 +222,11 @@ QSpace :: computeConstitutiveMatrixAt(FloatMatrix &answer, MatResponseMode rMode
 
 
 double
-QSpace :: computeVolumeAround(GaussPoint *aGaussPoint)
-// Returns the portion of the receiver which is attached to aGaussPoint.
+QSpace :: computeVolumeAround(GaussPoint *gp)
+// Returns the portion of the receiver which is attached to gp.
 {
-    double determinant = fabs( this->interpolation.giveTransformationJacobian( * aGaussPoint->giveCoordinates(), FEIElementGeometryWrapper(this) ) );
-    double weight      = aGaussPoint->giveWeight();
+    double determinant = fabs( this->interpolation.giveTransformationJacobian( * gp->giveCoordinates(), FEIElementGeometryWrapper(this) ) );
+    double weight      = gp->giveWeight();
 
     return ( determinant * weight );
 }
@@ -254,14 +254,14 @@ QSpace :: computeGaussPoints()
 
 
 void
-QSpace :: computeBmatrixAt(GaussPoint *aGaussPoint, FloatMatrix &answer, int li, int ui)
+QSpace :: computeBmatrixAt(GaussPoint *gp, FloatMatrix &answer, int li, int ui)
 // Returns the [6x60] strain-displacement matrix {B} of the receiver, eva-
-// luated at aGaussPoint.
+// luated at gp.
 // B matrix  -  6 rows : epsilon-X, epsilon-Y, epsilon-Z, gamma-YZ, gamma-ZX, gamma-XY  :
 {
     FloatMatrix dnx;
 
-    this->interpolation.evaldNdx( dnx, * aGaussPoint->giveCoordinates(), FEIElementGeometryWrapper(this) );
+    this->interpolation.evaldNdx( dnx, * gp->giveCoordinates(), FEIElementGeometryWrapper(this) );
 
     answer.resize(6, 60);
     answer.zero();
@@ -284,11 +284,11 @@ QSpace :: computeBmatrixAt(GaussPoint *aGaussPoint, FloatMatrix &answer, int li,
 
 
 void
-QSpace :: computeBHmatrixAt(GaussPoint *aGaussPoint, FloatMatrix &answer)
+QSpace :: computeBHmatrixAt(GaussPoint *gp, FloatMatrix &answer)
 {
     FloatMatrix dnx;
 
-    this->interpolation.evaldNdx( dnx, * aGaussPoint->giveCoordinates(), FEIElementGeometryWrapper(this) );
+    this->interpolation.evaldNdx( dnx, * gp->giveCoordinates(), FEIElementGeometryWrapper(this) );
 
     answer.resize(9, 60);
     answer.zero();

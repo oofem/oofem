@@ -103,14 +103,14 @@ InitialCondition *SimpleSlaveDof :: giveIc()
 }
 
 
-double SimpleSlaveDof :: giveUnknown(ValueModeType mode, TimeStep *stepN)
+double SimpleSlaveDof :: giveUnknown(ValueModeType mode, TimeStep *tStep)
 {
-    return this->giveMasterDof()->giveUnknown(mode, stepN);
+    return this->giveMasterDof()->giveUnknown(mode, tStep);
 }
 
-double SimpleSlaveDof :: giveUnknown(PrimaryField &field, ValueModeType mode, TimeStep *stepN)
+double SimpleSlaveDof :: giveUnknown(PrimaryField &field, ValueModeType mode, TimeStep *tStep)
 {
-    return this->giveMasterDof()->giveUnknown(field, mode, stepN);
+    return this->giveMasterDof()->giveUnknown(field, mode, tStep);
 }
 
 

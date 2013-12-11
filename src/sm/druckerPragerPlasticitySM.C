@@ -76,10 +76,10 @@ DruckerPragerPlasticitySMStatus :: initTempStatus()
 }
 
 void
-DruckerPragerPlasticitySMStatus :: updateYourself(TimeStep *atTime)
+DruckerPragerPlasticitySMStatus :: updateYourself(TimeStep *tStep)
 {
     // Call corresponding function of the parent class to update variables defined there.
-    StructuralMaterialStatus :: updateYourself(atTime);
+    StructuralMaterialStatus :: updateYourself(tStep);
 
     // update variables defined in DruckerPragerPlasticitySMStatus
     plasticStrainDeviator = tempPlasticStrainDeviator;
@@ -274,7 +274,7 @@ void
 DruckerPragerPlasticitySM :: giveRealStressVector(FloatArray &answer,
                                                   GaussPoint *gp,
                                                   const FloatArray &totalStrain,
-                                                  TimeStep *atTime)
+                                                  TimeStep *tStep)
 {
     FloatArray strainVectorR;
 
@@ -292,7 +292,7 @@ DruckerPragerPlasticitySM :: giveRealStressVector(FloatArray &answer,
     // note: eigenStrains (temperature) is not contained in mechanical strain stored in gp
     // therefore it is necessary to subtract always the total eigen strain value
     this->giveStressDependentPartOfStrainVector(strainVectorR, gp, totalStrain,
-                                                atTime, VM_Total);
+                                                tStep, VM_Total);
 
     // perform the local stress return and update the history variables
     StrainVector strain( strainVectorR, gp->giveMaterialMode() );
@@ -590,15 +590,15 @@ void
 DruckerPragerPlasticitySM :: give3dMaterialStiffnessMatrix(FloatMatrix &answer,
                                                            MatResponseMode mode,
                                                            GaussPoint *gp,
-                                                           TimeStep *atTime)
+                                                           TimeStep *tStep)
 {
     switch ( mode ) {
     case ElasticStiffness:
-        LEMaterial->give3dMaterialStiffnessMatrix(answer, mode, gp, atTime);
+        LEMaterial->give3dMaterialStiffnessMatrix(answer, mode, gp, tStep);
         break;
 
     case SecantStiffness:
-        LEMaterial->give3dMaterialStiffnessMatrix(answer,  mode, gp, atTime);
+        LEMaterial->give3dMaterialStiffnessMatrix(answer,  mode, gp, tStep);
         break;
 
 
@@ -607,17 +607,17 @@ DruckerPragerPlasticitySM :: give3dMaterialStiffnessMatrix(FloatMatrix &answer,
                  ->giveTempStateFlag() ) {
         case DruckerPragerPlasticitySMStatus :: DP_Elastic:        // elastic stiffness
         case DruckerPragerPlasticitySMStatus :: DP_Unloading:        // elastic stiffness
-            LEMaterial->give3dMaterialStiffnessMatrix(answer, mode, gp, atTime);
+            LEMaterial->give3dMaterialStiffnessMatrix(answer, mode, gp, tStep);
             break;
         case DruckerPragerPlasticitySMStatus :: DP_Yielding:
             // elasto-plastic stiffness for regular case
             //printf("\nAssembling regular algorithmic stiffness matrix.") ;
-            giveRegAlgorithmicStiffMatrix(answer, mode, gp, atTime);
+            giveRegAlgorithmicStiffMatrix(answer, mode, gp, tStep);
             break;
         case DruckerPragerPlasticitySMStatus :: DP_Vertex:
             // elasto-plastic stiffness for vertex case
             //printf("\nAssembling vertex case algorithmic stiffness matrix.") ;
-            giveVertexAlgorithmicStiffMatrix(answer, mode, gp, atTime);
+            giveVertexAlgorithmicStiffMatrix(answer, mode, gp, tStep);
             break;
         default:
             _error("Case did not match.\n");
@@ -636,7 +636,7 @@ void
 DruckerPragerPlasticitySM :: giveRegAlgorithmicStiffMatrix(FloatMatrix &answer,
                                                            MatResponseMode mode,
                                                            GaussPoint *gp,
-                                                           TimeStep *atTime)
+                                                           TimeStep *tStep)
 {
     int i, j;
     DruckerPragerPlasticitySMStatus *status =
@@ -718,7 +718,7 @@ DruckerPragerPlasticitySM :: giveRegAlgorithmicStiffMatrix(FloatMatrix &answer,
     }
 
     FloatMatrix De;
-    LEMaterial->give3dMaterialStiffnessMatrix(De, mode, gp, atTime);
+    LEMaterial->give3dMaterialStiffnessMatrix(De, mode, gp, tStep);
 
     // answer is A_Matrix^-1 * De
     A_Matrix.solveForRhs(De, answer);
@@ -728,7 +728,7 @@ void
 DruckerPragerPlasticitySM :: giveVertexAlgorithmicStiffMatrix(FloatMatrix &answer,
                                                               MatResponseMode mode,
                                                               GaussPoint *gp,
-                                                              TimeStep *atTime)
+                                                              TimeStep *tStep)
 {
     DruckerPragerPlasticitySMStatus *status =
         static_cast< DruckerPragerPlasticitySMStatus * >( this->giveStatus(gp) );
@@ -744,7 +744,7 @@ DruckerPragerPlasticitySM :: giveVertexAlgorithmicStiffMatrix(FloatMatrix &answe
     if ( deltaKappa <= 0. ) {
         // This case occurs in the first iteration of a step.
         // printf("deltaKappa<=0. for vertex case algorithmic stiffness, i.e. continuum tangent stiffness. Since the continuum tangent stiffness does not exist at the vertex, elastic stiffness is used instead. This will cause the loss of quadratic convergence.\n") ;
-        LEMaterial->give3dMaterialStiffnessMatrix(answer, mode, gp, atTime);
+        LEMaterial->give3dMaterialStiffnessMatrix(answer, mode, gp, tStep);
     }
 
     double deltaVolumetricPlasticStrain =
@@ -795,7 +795,7 @@ int
 DruckerPragerPlasticitySM :: giveIPValue(FloatArray &answer,
                                          GaussPoint *gp,
                                          InternalStateType type,
-                                         TimeStep *atTime)
+                                         TimeStep *tStep)
 {
     const DruckerPragerPlasticitySMStatus *status =
         static_cast< DruckerPragerPlasticitySMStatus * >( giveStatus(gp) );
@@ -819,7 +819,7 @@ DruckerPragerPlasticitySM :: giveIPValue(FloatArray &answer,
         return 1;
 
     default:
-        return StructuralMaterial :: giveIPValue(answer, gp, type, atTime);
+        return StructuralMaterial :: giveIPValue(answer, gp, type, tStep);
     }
 }
 

@@ -41,7 +41,7 @@ namespace oofem {
 REGISTER_BoundaryCondition(TF1);
 
 void
-TF1 :: computeValueAt(FloatArray &answer, TimeStep *stepN, FloatArray &coords, ValueModeType mode)
+TF1 :: computeValueAt(FloatArray &answer, TimeStep *tStep, FloatArray &coords, ValueModeType mode)
 // Returns the value of the receiver at time and given position respecting the mode.
 {
     FloatArray cd(3);
@@ -53,15 +53,15 @@ TF1 :: computeValueAt(FloatArray &answer, TimeStep *stepN, FloatArray &coords, V
     h = 200.0;
 
 
-    t = stepN->giveTargetTime();
+    t = tStep->giveTargetTime();
     for ( int i = 1; i <= coords.giveSize(); i++ ) {
         cd.at(i) = coords.at(i);
     }
 
     result = -1.e-5 - k *macbra( atan(c * t + cd.at(2) - h) );
 
-    if ( ( mode == VM_Incremental ) && ( !stepN->isTheFirstStep() ) ) {
-        t = stepN->giveTargetTime() - stepN->giveTimeIncrement();
+    if ( ( mode == VM_Incremental ) && ( !tStep->isTheFirstStep() ) ) {
+        t = tStep->giveTargetTime() - tStep->giveTimeIncrement();
         result -= -1.e-5 - k *macbra( atan(c * t + cd.at(2) - h) );
     }
 

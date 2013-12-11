@@ -282,14 +282,14 @@ void
 OrthotropicLinearElasticMaterial :: give3dMaterialStiffnessMatrix(FloatMatrix &answer,
                                                                   MatResponseMode mode,
                                                                   GaussPoint *gp,
-                                                                  TimeStep *atTime)
+                                                                  TimeStep *tStep)
 //
 // forceElasticResponse ignored - always elastic
 //
 {
     FloatMatrix rotationMatrix;
 
-    this->give3dLocalMaterialStiffnessMatrix(answer, mode, gp, atTime);
+    this->give3dLocalMaterialStiffnessMatrix(answer, mode, gp, tStep);
 
     this->giveRotationMatrix(rotationMatrix, gp);
     answer.rotatedWith(rotationMatrix);
@@ -300,7 +300,7 @@ void
 OrthotropicLinearElasticMaterial :: give3dLocalMaterialStiffnessMatrix(FloatMatrix &answer,
                                                                        MatResponseMode mode,
                                                                        GaussPoint *gp,
-                                                                       TimeStep *atTime)
+                                                                       TimeStep *tStep)
 {
     double eksi, nxz, nyz, nxy, nzx, nzy, nyx;
     int i, j;

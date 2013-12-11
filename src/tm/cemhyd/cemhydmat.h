@@ -101,7 +101,7 @@ public:
     virtual const char *giveClassName() const { return "CemhydMat"; }
 
     virtual int hasInternalSource() { return 1; }
-    virtual void computeInternalSourceVector(FloatArray &val, GaussPoint *gp, TimeStep *atTime, ValueModeType mode);
+    virtual void computeInternalSourceVector(FloatArray &val, GaussPoint *gp, TimeStep *tStep, ValueModeType mode);
     /// Returns cycle number at the closest cycle after the target time
     virtual int giveCycleNumber(GaussPoint *gp);
     /// Returns time of the CEMHYD3D at the first cycle after the target time
@@ -116,9 +116,9 @@ public:
     virtual double giveConcreteDensity(GaussPoint *gp);
 
     /// Compute heat thermal capacity per volume.
-    virtual double giveCharacteristicValue(MatResponseMode mode, GaussPoint *gp, TimeStep *atTime);
+    virtual double giveCharacteristicValue(MatResponseMode mode, GaussPoint *gp, TimeStep *tStep);
 
-    virtual int giveIPValue(FloatArray &answer, GaussPoint *aGaussPoint, InternalStateType type, TimeStep *atTime);
+    virtual int giveIPValue(FloatArray &answer, GaussPoint *gp, InternalStateType type, TimeStep *tStep);
     virtual int initMaterial(Element *element);
     /// Clear temperatures multiplied with volume around GPs - need before temperature averaging.
     virtual void clearWeightTemperatureProductVolume(Element *element);
@@ -167,8 +167,8 @@ public:
     virtual ~CemhydMatStatus();
     //virtual Interface *giveInterface(InterfaceType);
     virtual const char *giveClassName() const { return "CemhydMatStatus"; }
-    virtual void updateYourself(TimeStep *atTime);
-    virtual void printOutputAt(FILE *file, TimeStep *atTime);
+    virtual void updateYourself(TimeStep *tStep);
+    virtual void printOutputAt(FILE *file, TimeStep *tStep);
 #elif CEMPY
  #define OUTFILES
  #define IMAGEFILES

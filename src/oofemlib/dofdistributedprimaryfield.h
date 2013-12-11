@@ -63,15 +63,15 @@ public:
     DofDistributedPrimaryField(EngngModel *a, int idomain, FieldType ft, EquationID ut, int nHist);
     virtual ~DofDistributedPrimaryField();
 
-    virtual void initialize(ValueModeType mode, TimeStep *atTime, FloatArray &answer, const UnknownNumberingScheme &s);
+    virtual void initialize(ValueModeType mode, TimeStep *tStep, FloatArray &answer, const UnknownNumberingScheme &s);
 
-    virtual double giveUnknownValue(Dof *dof, ValueModeType mode, TimeStep *atTime);
+    virtual double giveUnknownValue(Dof *dof, ValueModeType mode, TimeStep *tStep);
 
-    virtual void update(ValueModeType mode, TimeStep *atTime, FloatArray &vectorToStore);
+    virtual void update(ValueModeType mode, TimeStep *tStep, FloatArray &vectorToStore);
 
-    virtual FloatArray *giveSolutionVector(TimeStep *atTime);
+    virtual FloatArray *giveSolutionVector(TimeStep *tStep);
 
-    virtual void advanceSolution(TimeStep *atTime);
+    virtual void advanceSolution(TimeStep *tStep);
 
     virtual contextIOResultType saveContext(DataStream *stream, ContextMode mode);
     virtual contextIOResultType restoreContext(DataStream *stream, ContextMode mode);

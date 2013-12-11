@@ -93,8 +93,8 @@ CCTPlate :: computeGaussPoints()
 
 
 void
-CCTPlate :: computeBodyLoadVectorAt(FloatArray &answer, Load *forLoad, TimeStep *stepN, ValueModeType mode)
-// Computes numerically the load vector of the receiver due to the body loads, at stepN.
+CCTPlate :: computeBodyLoadVectorAt(FloatArray &answer, Load *forLoad, TimeStep *tStep, ValueModeType mode)
+// Computes numerically the load vector of the receiver due to the body loads, at tStep.
 // load is assumed to be in global cs.
 // load vector is then transformed to coordinate system in each node.
 // (should be global coordinate system, but there may be defined
@@ -112,7 +112,7 @@ CCTPlate :: computeBodyLoadVectorAt(FloatArray &answer, Load *forLoad, TimeStep 
     irule.SetUpPointsOnTriangle(1, _2dPlate);
 
     // note: force is assumed to be in global coordinate system.
-    forLoad->computeComponentArrayAt(force, stepN, mode);
+    forLoad->computeComponentArrayAt(force, tStep, mode);
 
     if ( force.giveSize() ) {
         gp = irule.getIntegrationPoint(0);
@@ -255,9 +255,9 @@ CCTPlate :: computeNmatrixAt(const FloatArray &iLocCoord, FloatMatrix &answer)
 
 
 void
-CCTPlate :: computeStressVector(FloatArray &answer, const FloatArray &strain, GaussPoint *gp, TimeStep *stepN)
+CCTPlate :: computeStressVector(FloatArray &answer, const FloatArray &strain, GaussPoint *gp, TimeStep *tStep)
 {
-    this->giveStructuralCrossSection()->giveRealStress_Plate(answer, gp, strain, stepN);
+    this->giveStructuralCrossSection()->giveRealStress_Plate(answer, gp, strain, tStep);
 }
 
 
@@ -430,7 +430,7 @@ CCTPlate :: computeLocalCoordinates(FloatArray &answer, const FloatArray &coords
 
 
 int
-CCTPlate :: giveIPValue(FloatArray &answer, GaussPoint *gp, InternalStateType type, TimeStep *atTime)
+CCTPlate :: giveIPValue(FloatArray &answer, GaussPoint *gp, InternalStateType type, TimeStep *tStep)
 {
     if ( type == IST_ShellForceMomentumTensor ) {
         answer = static_cast< StructuralMaterialStatus * >( gp->giveMaterialStatus() )->giveStressVector();
@@ -439,7 +439,7 @@ CCTPlate :: giveIPValue(FloatArray &answer, GaussPoint *gp, InternalStateType ty
         answer = static_cast< StructuralMaterialStatus * >( gp->giveMaterialStatus() )->giveStrainVector();
         return 1;
     } else {
-        return NLStructuralElement :: giveIPValue(answer, gp, type, atTime);
+        return NLStructuralElement :: giveIPValue(answer, gp, type, tStep);
     }
 }
 

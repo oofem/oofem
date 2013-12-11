@@ -119,11 +119,11 @@ ConcreteDPM2Status :: initTempStatus()
 }
 
 void
-ConcreteDPM2Status :: updateYourself(TimeStep *atTime)
+ConcreteDPM2Status :: updateYourself(TimeStep *tStep)
 {
     // Call corresponding function of the parent class to update
     // variables defined there.
-    StructuralMaterialStatus :: updateYourself(atTime);
+    StructuralMaterialStatus :: updateYourself(tStep);
 
     // update variables defined in ConcreteDPM2Status
 
@@ -547,7 +547,7 @@ void
 ConcreteDPM2 :: giveRealStressVector(FloatArray &answer,
                                      GaussPoint *gp,
                                      const FloatArray &strainVector,
-                                     TimeStep *atTime)
+                                     TimeStep *tStep)
 {
     if ( matMode == _Unknown ) {
         matMode = gp->giveMaterialMode();
@@ -573,16 +573,16 @@ ConcreteDPM2 :: giveRealStressVector(FloatArray &answer,
     //Time step
     double deltaTime = 1.;
     if ( strainRateFlag == 1 ) {
-        if ( atTime->giveTimeIncrement() == 0 ) { //Problem with the first step. For some reason the time increment is zero
+        if ( tStep->giveTimeIncrement() == 0 ) { //Problem with the first step. For some reason the time increment is zero
             deltaTime = this->timeFactor;
         } else {
-            deltaTime = atTime->giveTimeIncrement() * this->timeFactor;
+            deltaTime = tStep->giveTimeIncrement() * this->timeFactor;
         }
     } else {
-        if ( atTime->giveTimeIncrement() == 0 ) {
+        if ( tStep->giveTimeIncrement() == 0 ) {
             deltaTime = 1.;
         } else {
-            deltaTime = atTime->giveTimeIncrement();
+            deltaTime = tStep->giveTimeIncrement();
         }
     }
 
@@ -607,7 +607,7 @@ ConcreteDPM2 :: giveRealStressVector(FloatArray &answer,
 
     FloatArray damages(2);
     damages.zero();
-    computeDamage(damages, strain, deltaTime, gp, atTime, alpha);
+    computeDamage(damages, strain, deltaTime, gp, tStep, alpha);
 
     //Split damage in a tension and compression part
 
@@ -634,7 +634,7 @@ ConcreteDPM2 :: computeDamage(FloatArray &answer,
                               const StrainVector &strain,
                               const double deltaTime,
                               GaussPoint *gp,
-                              TimeStep *atTime,
+                              TimeStep *tStep,
                               const double tempAlpha)
 {
     ConcreteDPM2Status *status = static_cast< ConcreteDPM2Status * >( this->giveStatus(gp) );
@@ -650,10 +650,10 @@ ConcreteDPM2 :: computeDamage(FloatArray &answer,
 
     double rateFactor;
 
-    computeEquivalentStrain(tempEquivStrain, strain, gp, atTime);
+    computeEquivalentStrain(tempEquivStrain, strain, gp, tStep);
 
     if ( ( status->giveDamageTension() == 0. ) && ( status->giveDamageCompression() == 0. ) ) {
-        rateFactor = computeRateFactor(tempAlpha, deltaTime, gp, atTime);
+        rateFactor = computeRateFactor(tempAlpha, deltaTime, gp, tStep);
     } else {
         rateFactor = status->giveRateFactor();
     }
@@ -790,7 +790,7 @@ double
 ConcreteDPM2 :: computeRateFactor(const double alpha,
                                   const double deltaTime,
                                   GaussPoint *gp,
-                                  TimeStep *atTime)
+                                  TimeStep *tStep)
 {
     if ( strainRateFlag == 0 ) {
         return 1;
@@ -959,7 +959,7 @@ void
 ConcreteDPM2 :: computeEquivalentStrain(double &tempEquivStrain,
                                         const StrainVector &strain,
                                         GaussPoint *gp,
-                                        TimeStep *atTime)
+                                        TimeStep *tStep)
 {
     //compute the elastic strain based one
     ConcreteDPM2Status *status = static_cast< ConcreteDPM2Status * >( this->giveStatus(gp) );
@@ -2292,14 +2292,14 @@ void
 ConcreteDPM2 :: give3dMaterialStiffnessMatrix(FloatMatrix &answer,
                                               MatResponseMode mode,
                                               GaussPoint *gp,
-                                              TimeStep *atTime)
+                                              TimeStep *tStep)
 {
     if ( gp->giveMaterialMode() == _3dMat ||
          gp->giveMaterialMode() ==  _PlaneStrain  ) {
         if ( mode == ElasticStiffness ) {
-            this->giveLinearElasticMaterial()->give3dMaterialStiffnessMatrix(answer, mode, gp, atTime);
+            this->giveLinearElasticMaterial()->give3dMaterialStiffnessMatrix(answer, mode, gp, tStep);
         } else if ( mode == SecantStiffness ) {
-            computeSecantStiffness(answer, mode, gp, atTime);
+            computeSecantStiffness(answer, mode, gp, tStep);
         } else if ( mode == TangentStiffness ) {
             _error("Tangent stiffness not implemented. Use either elastic or secant stiffness.\n");
         }
@@ -2310,7 +2310,7 @@ void
 ConcreteDPM2 :: computeSecantStiffness(FloatMatrix &answer,
                                        MatResponseMode mode,
                                        GaussPoint *gp,
-                                       TimeStep *atTime)
+                                       TimeStep *tStep)
 {
     this->matMode = gp->giveMaterialMode();
     ConcreteDPM2Status *status = static_cast< ConcreteDPM2Status * >( giveStatus(gp) );
@@ -2323,7 +2323,7 @@ ConcreteDPM2 :: computeSecantStiffness(FloatMatrix &answer,
         omegaTension = 0.999999;
     }
     FloatMatrix stiff;
-    this->giveLinearElasticMaterial()->giveStiffnessMatrix(stiff, mode, gp, atTime);
+    this->giveLinearElasticMaterial()->giveStiffnessMatrix(stiff, mode, gp, tStep);
     this->giveFullSymMatrixForm( answer, stiff, gp->giveMaterialMode() );
 
     if ( isotropicFlag == 1 ) {
@@ -2512,7 +2512,7 @@ int
 ConcreteDPM2 :: giveIPValue(FloatArray &answer,
                             GaussPoint *gp,
                             InternalStateType type,
-                            TimeStep *atTime)
+                            TimeStep *tStep)
 {
     ConcreteDPM2Status *status = static_cast< ConcreteDPM2Status * >( this->giveStatus(gp) );
 
@@ -2533,7 +2533,7 @@ ConcreteDPM2 :: giveIPValue(FloatArray &answer,
         return 1;
 
     default:
-        return StructuralMaterial :: giveIPValue(answer, gp, type, atTime);
+        return StructuralMaterial :: giveIPValue(answer, gp, type, tStep);
     }
 }
 

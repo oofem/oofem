@@ -373,10 +373,10 @@ FiberedCrossSection :: imposeStrainConstrainsOnGradient(GaussPoint *gp,
 
 
 int
-FiberedCrossSection :: giveIPValue(FloatArray &answer, GaussPoint *aGaussPoint, InternalStateType type, TimeStep *atTime)
+FiberedCrossSection :: giveIPValue(FloatArray &answer, GaussPoint *gp, InternalStateType type, TimeStep *tStep)
 {
     Material *mat = this->giveDomain()->giveMaterial( fiberMaterials.at(1) ); ///@todo For now, create material status according to the first fiber material
-    StructuralMaterialStatus *status = static_cast< StructuralMaterialStatus * >( mat->giveStatus(aGaussPoint) );
+    StructuralMaterialStatus *status = static_cast< StructuralMaterialStatus * >( mat->giveStatus(gp) );
 
     if ( type == IST_BeamForceMomentumTensor ) {
         answer = status->giveStressVector();
@@ -611,12 +611,12 @@ FiberedCrossSection :: giveFiberMaterialStiffnessMatrix(FloatMatrix &fiberMatrix
 
 
 void
-FiberedCrossSection :: computeStressIndependentStrainVector(FloatArray &answer, GaussPoint *gp, TimeStep *stepN, ValueModeType mode)
+FiberedCrossSection :: computeStressIndependentStrainVector(FloatArray &answer, GaussPoint *gp, TimeStep *tStep, ValueModeType mode)
 {
     StructuralElement *elem = static_cast< StructuralElement * >( gp->giveElement() );
     FloatArray et;
 
-    elem->computeResultingIPTemperatureAt(et, stepN, gp, mode);
+    elem->computeResultingIPTemperatureAt(et, tStep, gp, mode);
 
     if ( et.isNotEmpty() ) {
         _error("computeStressIndependentStrainVector: temperature loading not supported");

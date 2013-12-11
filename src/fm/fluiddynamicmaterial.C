@@ -117,7 +117,7 @@ FluidDynamicMaterialStatus :: initTempStatus()
 
 
 int
-FluidDynamicMaterial :: giveIPValue(FloatArray &answer, GaussPoint *gp, InternalStateType type, TimeStep *atTime)
+FluidDynamicMaterial :: giveIPValue(FloatArray &answer, GaussPoint *gp, InternalStateType type, TimeStep *tStep)
 {
     FluidDynamicMaterialStatus *status = static_cast< FluidDynamicMaterialStatus * >( this->giveStatus(gp) );
     if ( type == IST_DeviatoricStress ) {
@@ -183,14 +183,14 @@ FluidDynamicMaterial :: giveIPValue(FloatArray &answer, GaussPoint *gp, Internal
         return 1;
     } else if ( type == IST_Viscosity ) {
         answer.resize(1);
-        answer.at(1) = this->giveEffectiveViscosity(gp, atTime);
+        answer.at(1) = this->giveEffectiveViscosity(gp, tStep);
         return 1;
     } else if ( type == IST_Density ) {
         answer.resize(1);
         answer.at(1) = this->give('d', gp);
         return 1;
     } else {
-        return Material :: giveIPValue(answer, gp, type, atTime);
+        return Material :: giveIPValue(answer, gp, type, tStep);
     }
 }
 

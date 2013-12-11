@@ -162,7 +162,7 @@ TR1_2D_CBS :: computeGaussPoints()
 }
 
 void
-TR1_2D_CBS :: computeConsistentMassMtrx(FloatMatrix &answer, TimeStep *atTime)
+TR1_2D_CBS :: computeConsistentMassMtrx(FloatMatrix &answer, TimeStep *tStep)
 {
     answer.resize(9, 9);
     answer.zero();
@@ -186,7 +186,7 @@ TR1_2D_CBS :: computeConsistentMassMtrx(FloatMatrix &answer, TimeStep *atTime)
 
 
 void
-TR1_2D_CBS :: computeDiagonalMassMtrx(FloatArray &answer, TimeStep *atTime)
+TR1_2D_CBS :: computeDiagonalMassMtrx(FloatArray &answer, TimeStep *tStep)
 {
     answer.resize(9);
     answer.zero();
@@ -200,7 +200,7 @@ TR1_2D_CBS :: computeDiagonalMassMtrx(FloatArray &answer, TimeStep *atTime)
 }
 
 void
-TR1_2D_CBS :: computeConvectionTermsI(FloatArray &answer, TimeStep *stepN)
+TR1_2D_CBS :: computeConvectionTermsI(FloatArray &answer, TimeStep *tStep)
 {
     // calculates advection component for (*) velocities
 
@@ -208,7 +208,7 @@ TR1_2D_CBS :: computeConvectionTermsI(FloatArray &answer, TimeStep *stepN)
     double usum, vsum;
     double adu11, adu21, adu31, adv11, adv21, adv31;
     double adu12, adu22, adu32, adv12, adv22, adv32;
-    double dt = stepN->giveTimeIncrement();
+    double dt = tStep->giveTimeIncrement();
     //double rho = this->giveMaterial()->give('d');
     double rho = this->giveMaterial()->give( 'd', integrationRulesArray [ 0 ]->getIntegrationPoint(0) );
     int nLoads;
@@ -221,7 +221,7 @@ TR1_2D_CBS :: computeConvectionTermsI(FloatArray &answer, TimeStep *stepN)
     ar12 = area / 12.;
     ar3 = area / 3.0;
 
-    this->computeVectorOf(EID_MomentumBalance, VM_Total, stepN->givePreviousStep(), u);
+    this->computeVectorOf(EID_MomentumBalance, VM_Total, tStep->givePreviousStep(), u);
 
     dudx = b [ 0 ] * u.at(1) + b [ 1 ] * u.at(3) + b [ 2 ] * u.at(5);
     dudy = c [ 0 ] * u.at(1) + c [ 1 ] * u.at(3) + c [ 2 ] * u.at(5);
@@ -270,7 +270,7 @@ TR1_2D_CBS :: computeConvectionTermsI(FloatArray &answer, TimeStep *stepN)
         load  = domain->giveLoad( bodyLoadArray.at(i) );
         ltype = load->giveBCGeoType();
         if ( ( ltype == BodyLoadBGT ) && ( load->giveBCValType() == ForceLoadBVT ) ) {
-            load->computeComponentArrayAt(gVector, stepN, VM_Total);
+            load->computeComponentArrayAt(gVector, tStep, VM_Total);
             if ( gVector.giveSize() ) {
                 answer.at(1) -= dt * 0.5 * ar3 * ( b [ 0 ] * usum + c [ 0 ] * vsum ) * gVector.at(1);
                 answer.at(2) -= dt * 0.5 * ar3 * ( b [ 0 ] * usum + c [ 0 ] * vsum ) * gVector.at(2);
@@ -1048,7 +1048,7 @@ TR1_2D_CBS :: giveElementCenter(LEPlic *mat_interface, FloatArray &center, bool 
 int
 TR1_2D_CBS :: EIPrimaryFieldI_evaluateFieldVectorAt(FloatArray &answer, PrimaryField &pf,
                                                     FloatArray &coords, IntArray &dofId, ValueModeType mode,
-                                                    TimeStep *atTime)
+                                                    TimeStep *tStep)
 {
     int indx, es;
     double sum;
@@ -1059,7 +1059,7 @@ TR1_2D_CBS :: EIPrimaryFieldI_evaluateFieldVectorAt(FloatArray &answer, PrimaryF
     this->giveElementDofIDMask(pf.giveEquationID(), elemdofs);
     es = elemdofs.giveSize();
     // first evaluate element unknown vector
-    this->computeVectorOf(pf, mode, atTime, elemvector);
+    this->computeVectorOf(pf, mode, tStep, elemvector);
     // determine corresponding local coordinates
     if ( this->computeLocalCoordinates(lc, coords) ) {
         // compute interpolation matrix
@@ -1098,14 +1098,14 @@ TR1_2D_CBS :: updateYourself(TimeStep *tStep)
 }
 
 int
-TR1_2D_CBS :: giveIPValue(FloatArray &answer, GaussPoint *aGaussPoint, InternalStateType type, TimeStep *atTime)
+TR1_2D_CBS :: giveIPValue(FloatArray &answer, GaussPoint *gp, InternalStateType type, TimeStep *tStep)
 {
     if ( type == IST_VOFFraction ) {
         answer.resize(1);
         answer.at(1) = this->giveTempVolumeFraction();
         return 1;
     } else {
-        return CBSElement :: giveIPValue(answer, aGaussPoint, type, atTime);
+        return CBSElement :: giveIPValue(answer, gp, type, tStep);
     }
 }
 
@@ -1161,10 +1161,10 @@ TR1_2D_CBS :: SPRNodalRecoveryMI_givePatchType()
 
 
 void
-TR1_2D_CBS :: printOutputAt(FILE *file, TimeStep *stepN)
+TR1_2D_CBS :: printOutputAt(FILE *file, TimeStep *tStep)
 // Performs end-of-step operations.
 {
-    CBSElement :: printOutputAt(file, stepN);
+    CBSElement :: printOutputAt(file, tStep);
     //<RESTRICTED_SECTION>
     double rho = this->giveMaterial()->give( 'd', integrationRulesArray [ 0 ]->getIntegrationPoint(0) );
     fprintf(file, "VOF %e, density %e\n\n", this->giveVolumeFraction(), rho);
@@ -1224,7 +1224,7 @@ contextIOResultType TR1_2D_CBS :: restoreContext(DataStream *stream, ContextMode
 #ifdef __OOFEG
 int
 TR1_2D_CBS :: giveInternalStateAtNode(FloatArray &answer, InternalStateType type, InternalStateMode mode,
-                                      int node, TimeStep *atTime)
+                                      int node, TimeStep *tStep)
 {
     //<RESTRICTED_SECTION>
     if ( type == IST_VOFFraction ) {
@@ -1238,7 +1238,7 @@ TR1_2D_CBS :: giveInternalStateAtNode(FloatArray &answer, InternalStateType type
         answer.at(1) = this->giveMaterial()->give( 'd', integrationRulesArray [ 0 ]->getIntegrationPoint(0) );
         return 1;
     } else {
-        return CBSElement :: giveInternalStateAtNode(answer, type, mode, node, atTime);
+        return CBSElement :: giveInternalStateAtNode(answer, type, mode, node, tStep);
     }
 }
 

@@ -82,7 +82,7 @@ TrabBoneNL :: ~TrabBoneNL()
 // update local values of accumulated pastic strain
 
 void
-TrabBoneNL :: updateBeforeNonlocAverage(const FloatArray &strainVector, GaussPoint *gp, TimeStep *atTime)
+TrabBoneNL :: updateBeforeNonlocAverage(const FloatArray &strainVector, GaussPoint *gp, TimeStep *tStep)
 {
     FloatArray SDstrainVector, fullSDStrainVector;
     double cumPlastStrain;
@@ -90,14 +90,14 @@ TrabBoneNL :: updateBeforeNonlocAverage(const FloatArray &strainVector, GaussPoi
 
     this->initTempStatus(gp);
     this->initGpForNewStep(gp);
-    this->giveStressDependentPartOfStrainVector(SDstrainVector, gp, strainVector, atTime, VM_Total);
+    this->giveStressDependentPartOfStrainVector(SDstrainVector, gp, strainVector, tStep, VM_Total);
 
     nlstatus->letTempStrainVectorBe(strainVector);
 
     StrainVector strain( strainVector, gp->giveMaterialMode() );
 
     this->performPlasticityReturn(gp, strain);
-    this->computeLocalCumPlastStrain(cumPlastStrain, strain, gp, atTime);
+    this->computeLocalCumPlastStrain(cumPlastStrain, strain, gp, tStep);
     nlstatus->setLocalCumPlastStrainForAverage(cumPlastStrain);
 }
 
@@ -114,11 +114,11 @@ void
 TrabBoneNL :: giveRealStressVector(FloatArray &answer,
                                    GaussPoint *gp,
                                    const FloatArray &strainVector,
-                                   TimeStep *atTime)
+                                   TimeStep *tStep)
 {
     TrabBoneNLStatus *nlStatus = static_cast< TrabBoneNLStatus * >( this->giveStatus(gp) );
 
-    double tempDamage = computeDamage(gp, atTime);
+    double tempDamage = computeDamage(gp, tStep);
     double plasStrain = nlStatus->giveTempPlasStrainVector().at(1);
     double elasStrain = strainVector.at(1) - plasStrain;
     double effStress = E0 * elasStrain;
@@ -142,13 +142,13 @@ TrabBoneNL :: giveRealStressVector(FloatArray &answer,
 //
 
 void
-TrabBoneNL :: computeCumPlastStrain(double &alpha, GaussPoint *gp, TimeStep *atTime)
+TrabBoneNL :: computeCumPlastStrain(double &alpha, GaussPoint *gp, TimeStep *tStep)
 {
     double nonlocalContribution, nonlocalCumPlastStrain = 0.0;
     TrabBoneNLStatus *nonlocStatus, *status = static_cast< TrabBoneNLStatus * >( this->giveStatus(gp) );
 
     this->buildNonlocalPointTable(gp);
-    this->updateDomainBeforeNonlocAverage(atTime);
+    this->updateDomainBeforeNonlocAverage(tStep);
 
     std :: list< localIntegrationRecord > *list = status->giveIntegrationDomainList();
     std :: list< localIntegrationRecord > :: iterator pos;
@@ -337,9 +337,9 @@ TrabBoneNLStatus :: initTempStatus()
 // Called when equlibrium reached, set equilibriated vars according to temporary (working) ones.
 
 void
-TrabBoneNLStatus :: updateYourself(TimeStep *atTime)
+TrabBoneNLStatus :: updateYourself(TimeStep *tStep)
 {
-    TrabBoneMaterialStatus :: updateYourself(atTime);
+    TrabBoneMaterialStatus :: updateYourself(tStep);
 }
 
 //

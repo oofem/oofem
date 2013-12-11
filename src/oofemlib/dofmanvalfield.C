@@ -51,7 +51,7 @@ DofManValueField :: DofManValueField(FieldType ft, Domain *d) : Field(ft), dmanv
 }
 
 int
-DofManValueField :: evaluateAt(FloatArray &answer, FloatArray &coords, ValueModeType mode, TimeStep *atTime)
+DofManValueField :: evaluateAt(FloatArray &answer, FloatArray &coords, ValueModeType mode, TimeStep *tStep)
 {
     int result = 0; // assume ok
     FloatArray lc, n;
@@ -83,7 +83,7 @@ DofManValueField :: evaluateAt(FloatArray &answer, FloatArray &coords, ValueMode
 }
 
 int
-DofManValueField :: evaluateAt(FloatArray &answer, DofManager *dman, ValueModeType mode, TimeStep *atTime)
+DofManValueField :: evaluateAt(FloatArray &answer, DofManager *dman, ValueModeType mode, TimeStep *tStep)
 {
     answer = * this->dmanvallist.at( dman->giveNumber() );
     return 1;

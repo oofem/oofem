@@ -127,13 +127,13 @@ void
 HeMoTKMaterial :: giveCharacteristicMatrix(FloatMatrix &answer,
                                            MatResponseMode mode,
                                            GaussPoint *gp,
-                                           TimeStep *atTime)
+                                           TimeStep *tStep)
 {
     /*
      * returns constitutive matrix of receiver
      */
     if ( ( mode == Conductivity_ww ) || ( mode == Conductivity_hh ) || ( mode == Conductivity_hw ) || ( mode == Conductivity_wh ) ) {
-        this->computeConductivityMtrx(answer, mode, gp, atTime);
+        this->computeConductivityMtrx(answer, mode, gp, tStep);
     } else {
         _error2( "giveCharacteristicMatrix : unknown mode (%s)", __MatResponseModeToString(mode) );
     }
@@ -143,22 +143,22 @@ HeMoTKMaterial :: giveCharacteristicMatrix(FloatMatrix &answer,
 double
 HeMoTKMaterial :: giveCharacteristicValue(MatResponseMode mode,
                                           GaussPoint *gp,
-                                          TimeStep *atTime)
+                                          TimeStep *tStep)
 {
-    return this->computeCapacityCoeff(mode, gp, atTime);
+    return this->computeCapacityCoeff(mode, gp, tStep);
 }
 
 
-void HeMoTKMaterial :: computeConductivityMtrx(FloatMatrix &answer, MatResponseMode mode, GaussPoint *gp, TimeStep *atTime)
+void HeMoTKMaterial :: computeConductivityMtrx(FloatMatrix &answer, MatResponseMode mode, GaussPoint *gp, TimeStep *tStep)
 {
     MaterialMode mmode = gp->giveMaterialMode();
     switch ( mmode ) {
     case _2dHeMo:
-        this->matcond2d(answer, gp, mode, atTime);
+        this->matcond2d(answer, gp, mode, tStep);
         return;
 
     case _3dHeMo:
-        this->matcond3d(answer, gp, mode, atTime);
+        this->matcond3d(answer, gp, mode, tStep);
         return;
 
     default:
@@ -168,7 +168,7 @@ void HeMoTKMaterial :: computeConductivityMtrx(FloatMatrix &answer, MatResponseM
 
 
 void
-HeMoTKMaterial :: matcond1d(FloatMatrix &d, GaussPoint *gp, MatResponseMode mode, TimeStep *atTime)
+HeMoTKMaterial :: matcond1d(FloatMatrix &d, GaussPoint *gp, MatResponseMode mode, TimeStep *tStep)
 //  function creates conductivity matrix of the
 //  isotropic heat material for 1D problems
 //
@@ -207,7 +207,7 @@ HeMoTKMaterial :: matcond1d(FloatMatrix &d, GaussPoint *gp, MatResponseMode mode
 }
 
 void
-HeMoTKMaterial :: matcond2d(FloatMatrix &d, GaussPoint *gp, MatResponseMode mode, TimeStep *atTime)
+HeMoTKMaterial :: matcond2d(FloatMatrix &d, GaussPoint *gp, MatResponseMode mode, TimeStep *tStep)
 //  function creates conductivity matrix of the
 //  isotropic heat material for 2D problems
 //
@@ -249,7 +249,7 @@ HeMoTKMaterial :: matcond2d(FloatMatrix &d, GaussPoint *gp, MatResponseMode mode
 }
 
 void
-HeMoTKMaterial :: matcond3d(FloatMatrix &d, GaussPoint *gp, MatResponseMode mode, TimeStep *atTime)
+HeMoTKMaterial :: matcond3d(FloatMatrix &d, GaussPoint *gp, MatResponseMode mode, TimeStep *tStep)
 //  function creates conductivity matrix of the
 //  isotropic heat material for 3D problems
 //
@@ -296,7 +296,7 @@ HeMoTKMaterial :: matcond3d(FloatMatrix &d, GaussPoint *gp, MatResponseMode mode
 }
 
 
-double HeMoTKMaterial :: computeCapacityCoeff(MatResponseMode mode, GaussPoint *gp, TimeStep *atTime)
+double HeMoTKMaterial :: computeCapacityCoeff(MatResponseMode mode, GaussPoint *gp, TimeStep *tStep)
 {
     if ( mode == Capacity_ww ) {
         return 1.0 * rho;
@@ -602,15 +602,15 @@ HeMoTKMaterial :: isCharacteristicMtrxSymmetric(MatResponseMode mode)
 }
 
 int
-HeMoTKMaterial :: giveIPValue(FloatArray &answer, GaussPoint *aGaussPoint, InternalStateType type, TimeStep *atTime)
+HeMoTKMaterial :: giveIPValue(FloatArray &answer, GaussPoint *gp, InternalStateType type, TimeStep *tStep)
 // IST_Humidity overriden to use inverse_sorption_isotherm
 {
     if ( type == IST_Humidity ) {
         answer.resize(1);
-        answer.at(1) = giveHumidity(aGaussPoint, VM_Velocity); // VM_Previous = equilibrated value of humidity
+        answer.at(1) = giveHumidity(gp, VM_Velocity); // VM_Previous = equilibrated value of humidity
         return 1;
     } else {
-        return TransportMaterial :: giveIPValue(answer, aGaussPoint, type, atTime);
+        return TransportMaterial :: giveIPValue(answer, gp, type, tStep);
     }
 }
 } // end namespace oofem
