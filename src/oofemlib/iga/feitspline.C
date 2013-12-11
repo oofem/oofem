@@ -195,14 +195,8 @@ double TSplineInterpolation :: evaldNdx(FloatMatrix &answer, const FloatArray &l
     IntArray mask;
     double Jacob = 0., product, w, xw, yw, weight;
     int count, i, k;
-#ifdef HAVE_VARIABLE_ARRAY_SIZE
-    FloatArray tmp_ders [ nsd ];
-    FloatMatrix ders [ nsd ];
-#else
-    FloatArray *tmp_ders = new FloatArray [ nsd ];
-    FloatMatrix *ders = new FloatMatrix [ nsd ];
-#endif
-
+    std :: vector< FloatArray > tmp_ders(nsd);
+    std :: vector< FloatMatrix > ders(nsd);
 
     /*
      * IntArray Bin(2,2);      // binomial coefficients from 0 to d=1
@@ -319,11 +313,6 @@ double TSplineInterpolation :: evaldNdx(FloatMatrix &answer, const FloatArray &l
         }
     }
 
-#ifndef HAVE_VARIABLE_ARRAY_SIZE
-    delete [] tmp_ders;
-    delete [] ders;
-#endif
-
     return Jacob;
 }
 
@@ -393,11 +382,8 @@ double TSplineInterpolation :: giveTransformationJacobian(const FloatArray &lcoo
     IntArray mask;
     double Jacob, w, xw, yw, product, weight;
     int i, k, count;
-#ifdef HAVE_VARIABLE_ARRAY_SIZE
-    FloatArray ders [ nsd ];
-#else
-    FloatArray *ders = new FloatArray [ nsd ];
-#endif
+    std :: vector< FloatArray > ders(nsd);
+
     /*
      * IntArray Bin(2,2);      // binomial coefficients from 0 to d=1
      *                // Bin(n,k)=(n above k)=n!/k!(n-k)! for n>=k>=0
@@ -494,11 +480,6 @@ double TSplineInterpolation :: giveTransformationJacobian(const FloatArray &lcoo
     if ( fabs(Jacob) < 1.0e-10 ) {
         OOFEM_ERROR("giveTransformationJacobianMatrix - zero Jacobian");
     }
-
-#ifndef HAVE_VARIABLE_ARRAY_SIZE
-    delete [] ders;
-#endif
-
 
     return Jacob;
 }
