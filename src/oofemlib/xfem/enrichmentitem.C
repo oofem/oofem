@@ -187,8 +187,8 @@ int EnrichmentItem :: instanciateYourself(DataReader *dr)
         OOFEM_ERROR2( "EnrichmentItem::instanciateYourself: unknown enrichment domain (%s)", name.c_str() );
     }
 
-    if( giveDomain()->giveXfemManager()->giveVtkDebug() ) {
-    	mpEnrichmentDomain->setVtkDebug(true);
+    if ( giveDomain()->giveXfemManager()->giveVtkDebug() ) {
+        mpEnrichmentDomain->setVtkDebug(true);
     }
 
     mpEnrichmentDomain->initializeFrom(mir);
@@ -305,7 +305,7 @@ void EnrichmentItem :: updateGeometry()
 void EnrichmentItem :: propagateFronts()
 {
     // Propagate interfaces
-    mpPropagationLaw->propagateInterfaces( *giveDomain(), * mpEnrichmentDomain);
+    mpPropagationLaw->propagateInterfaces(* giveDomain(), * mpEnrichmentDomain);
 
     updateGeometry();
 }
@@ -514,13 +514,13 @@ void EnrichmentItem :: updateNodeEnrMarker(XfemManager &ixFemMan, const Enrichme
                     const double &gammaS = mLevelSetTangDir [ niGlob - 1 ];
                     const double &gammaE = mLevelSetTangDir [ njGlob - 1 ];
                     double gamma = 0.5 * ( 1.0 - xi ) * gammaS + 0.5 * ( 1.0 + xi ) * gammaE;
-//                    double gamma = gammaS  * gammaE;
+                    //                    double gamma = gammaS  * gammaE;
 
-					// Compute the exact value of the tangential level set
-					// from the discretized geometry instead of interpolating.
+                    // Compute the exact value of the tangential level set
+                    // from the discretized geometry instead of interpolating.
                     double tangDist = 0.0, arcPos = 0.0;
-                    const FloatArray &posI = *(el->giveDofManager(niLoc)->giveCoordinates());
-                    const FloatArray &posJ = *(el->giveDofManager(njLoc)->giveCoordinates());
+                    const FloatArray &posI = * ( el->giveDofManager(niLoc)->giveCoordinates() );
+                    const FloatArray &posJ = * ( el->giveDofManager(njLoc)->giveCoordinates() );
                     FloatArray pos;
                     pos.add(0.5 * ( 1.0 - xi ), posI);
                     pos.add(0.5 * ( 1.0 + xi ), posJ);
@@ -719,11 +719,11 @@ void EnrichmentItem :: computeIntersectionPoints(std :: vector< FloatArray > &oI
                 double gamma = 0.5 * ( 1.0 - xi ) * gammaS + 0.5 * ( 1.0 + xi ) * gammaE;
 
 
-				// Compute the exact value of the tangential level set
-				// from the discretized geometry instead of interpolating.
+                // Compute the exact value of the tangential level set
+                // from the discretized geometry instead of interpolating.
                 double tangDist = 0.0, arcPos = 0.0;
-                const FloatArray &posI = *(element->giveDofManager(nsLoc)->giveCoordinates());
-                const FloatArray &posJ = *(element->giveDofManager(neLoc)->giveCoordinates());
+                const FloatArray &posI = * ( element->giveDofManager(nsLoc)->giveCoordinates() );
+                const FloatArray &posJ = * ( element->giveDofManager(neLoc)->giveCoordinates() );
                 FloatArray pos;
                 pos.add(0.5 * ( 1.0 - xi ), posI);
                 pos.add(0.5 * ( 1.0 + xi ), posJ);

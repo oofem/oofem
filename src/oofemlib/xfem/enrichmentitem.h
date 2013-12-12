@@ -248,7 +248,7 @@ protected:
     bool mLevelSetsNeedUpdate;
 
     static const double mLevelSetTol = 1.0e-12;
-//    static constexpr double mLevelSetTol = 1.0e-12;
+    //    static constexpr double mLevelSetTol = 1.0e-12;
     const double mLevelSetTol2;
 };
 

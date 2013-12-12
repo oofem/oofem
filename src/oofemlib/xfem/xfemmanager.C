@@ -278,22 +278,21 @@ void XfemManager :: propagateFronts()
     for ( int i = 1; i <= enrichmentItemList->giveSize(); i++ ) {
         enrichmentItemList->at(i)->propagateFronts();
 
-        if( giveVtkDebug() ) {
-        	std::vector<FloatArray> points;
-        	enrichmentItemList->at(i)->giveSubPolygon(points, -0.1, 1.1);
+        if ( giveVtkDebug() ) {
+            std :: vector< FloatArray >points;
+            enrichmentItemList->at(i)->giveSubPolygon(points, -0.1, 1.1);
 
-        	std::vector<double> x,y;
-        	for(size_t j = 0; j < points.size(); j++) {
-        		x.push_back(points[j].at(1));
-        		y.push_back(points[j].at(2));
-        	}
+            std :: vector< double >x, y;
+            for ( size_t j = 0; j < points.size(); j++ ) {
+                x.push_back( points [ j ].at(1) );
+                y.push_back( points [ j ].at(2) );
+            }
 
 
-        	char fileName[200];
-        	sprintf(fileName, "crack%d.dat", i);
-			XFEMDebugTools::WriteArrayToGnuplot(fileName, x, y);
+            char fileName [ 200 ];
+            sprintf(fileName, "crack%d.dat", i);
+            XFEMDebugTools :: WriteArrayToGnuplot(fileName, x, y);
         }
-
     }
 }
 

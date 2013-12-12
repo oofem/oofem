@@ -149,7 +149,7 @@ protected:
 class OOFEM_EXPORT PLHoopStressCirc : public PropagationLaw
 {
 public:
-	PLHoopStressCirc() : mRadius(0.0), mAngleInc(0.0), mIncrementLength(0.0), mHoopStressThreshold(0.0), mUseRadialBasisFunc(false) {};
+    PLHoopStressCirc() : mRadius(0.0), mAngleInc(0.0), mIncrementLength(0.0), mHoopStressThreshold(0.0), mUseRadialBasisFunc(false) {};
     virtual ~PLHoopStressCirc() {};
 
     virtual const char *giveClassName() const { return "PLHoopStressCirc"; }
@@ -164,7 +164,6 @@ protected:
     double mRadius, mAngleInc, mIncrementLength, mHoopStressThreshold;
     bool mUseRadialBasisFunc;
 };
-
 } // end namespace oofem
 
 #endif /* PROPAGATIONLAW_H_ */

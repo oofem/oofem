@@ -95,11 +95,10 @@ public:
     /// Propagate tips
     virtual bool propagateTips(const std :: vector< TipPropagation > &iTipProp) { return false; }
 
-    void setVtkDebug(bool iDebugVTK) {mDebugVTK = iDebugVTK;}
+    void setVtkDebug(bool iDebugVTK) { mDebugVTK = iDebugVTK; }
 
 protected:
     bool mDebugVTK;
-
 };
 
 

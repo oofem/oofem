@@ -56,8 +56,8 @@ REGISTER_EnrichmentDomain(EDBGCircle)
 REGISTER_EnrichmentDomain(EDCrack)
 
 
-EnrichmentDomain :: EnrichmentDomain()
-: mDebugVTK(false)
+EnrichmentDomain :: EnrichmentDomain() :
+    mDebugVTK(false)
 {}
 
 void EnrichmentDomain_BG :: giveInputRecord(DynamicInputRecord &input)
@@ -74,7 +74,7 @@ void EnrichmentDomain_BG :: CallNodeEnrMarkerUpdate(EnrichmentItem &iEnrItem, Xf
 
 IRResultType EDCrack :: initializeFrom(InputRecord *ir)
 {
-	IRResultType result = bg->initializeFrom(ir);
+    IRResultType result = bg->initializeFrom(ir);
 
 
     // For debugging only
