@@ -46,6 +46,7 @@
 #include "structuralms.h"
 #include "enrichmentitem.h"
 #include "feinterpol.h"
+#include "xfemmanager.h"
 
 #include "XFEMDebugTools.h"
 
@@ -231,7 +232,6 @@ void PLHoopStressCirc :: propagateInterfaces(Domain &iDomain, EnrichmentDomain &
 						    FEInterpolation *interp = gpEl->giveInterpolation();
 						    interp->evalN( N, *(gp_i->giveCoordinates()), FEIElementGeometryWrapper(gpEl) );
 
-						    const IntArray &elNodes = gpEl->giveDofManArray();
 
 						    // Compute global coordinates of Gauss point
 						    FloatArray globalCoord;
@@ -293,7 +293,19 @@ void PLHoopStressCirc :: propagateInterfaces(Domain &iDomain, EnrichmentDomain &
 						stressVec.beScaled(1.0/sumWiVi, sumQiWiVi);
 					}
 					else {
-						OOFEM_ERROR("In PLHoopStressCirc :: propagateInterfaces: sumWiVi is close to zero.");
+						// Take stress from closest Gauss point
+						int region = 1;
+						bool useCZGP = false;
+						GaussPoint &gp = *(localizer->giveClosestIP(circPoints[pointIndex], region, useCZGP));
+
+
+						// Compute stresses
+						StructuralMaterialStatus *ms = dynamic_cast<StructuralMaterialStatus*>(gp.giveMaterialStatus() );
+						if(ms == NULL) {
+							OOFEM_ERROR("In PLHoopStressCirc :: propagateInterfaces(): failed to fetch MaterialStatus.\n");
+						}
+
+						stressVec = ms->giveStressVector();
 					}
 				}
 				else {
@@ -384,8 +396,13 @@ void PLHoopStressCirc :: propagateInterfaces(Domain &iDomain, EnrichmentDomain &
 				printf("No zero level was found.\n");
 			}
 
-			XFEMDebugTools::WriteArrayToMatlab("sigTTvsAngle.m", angles, sigTTArray);
-			XFEMDebugTools::WriteArrayToMatlab("sigRTvsAngle.m", angles, sigRTArray);
+			if(iDomain.giveXfemManager()->giveVtkDebug()) {
+				XFEMDebugTools::WriteArrayToMatlab("sigTTvsAngle.m", angles, sigTTArray);
+				XFEMDebugTools::WriteArrayToMatlab("sigRTvsAngle.m", angles, sigRTArray);
+
+				XFEMDebugTools::WriteArrayToGnuplot("sigTTvsAngle.dat", angles, sigTTArray);
+				XFEMDebugTools::WriteArrayToGnuplot("sigRTvsAngle.dat", angles, sigRTArray);
+			}
 
 			// Compare with threshold
 			if(maxSigTT > mHoopStressThreshold && foundZeroLevel) {
