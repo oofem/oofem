@@ -63,7 +63,7 @@ CommunicatorBuff :: ~CommunicatorBuff()
 {
     for ( int i = 0; i < size; i++ ) {
         if ( processCommBuffs [ i ] ) {
-            delete(processCommBuffs [ i ]);
+            delete( processCommBuffs [ i ] );
         }
     }
 
@@ -96,7 +96,7 @@ Communicator :: ~Communicator()
 
     if ( size ) {
         while ( i-- ) {
-            delete(processComms [ i ]);
+            delete( processComms [ i ] );
         }
 
         delete[]  processComms;

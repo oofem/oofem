@@ -43,4 +43,3 @@ enum InternalStateMode {
 };
 } // end namespace oofem
 #endif // internalstatemode_h
-

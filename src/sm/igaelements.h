@@ -52,7 +52,6 @@
 #define _IFT_NURBSSpace3dElement_Name "nurbs3delement"
 
 namespace oofem {
-
 class BsplinePlaneStressElement : public IGAElement, public PlaneStressStructuralElementEvaluator
 {
 protected:
@@ -70,7 +69,7 @@ public:
         PlaneStressStructuralElementEvaluator :: giveCharacteristicVector(answer, type, mode, t);
     }
 
-    virtual FEInterpolation *giveInterpolation() const { return const_cast< BSplineInterpolation* >(& this->interpolation); }
+    virtual FEInterpolation *giveInterpolation() const { return const_cast< BSplineInterpolation * >( & this->interpolation ); }
     virtual Element *giveElement() { return this; }
     virtual void giveDefaultDofManDofIDMask(int inode, IntArray &answer) const { this->giveDofManDofIDMask(inode, EID_MomentumBalance, answer); }
     virtual void giveDefaultInternalDofManDofIDMask(int inode, IntArray &answer) const { this->giveInternalDofManDofIDMask(inode, EID_MomentumBalance, answer); }
@@ -115,7 +114,7 @@ public:
         PlaneStressStructuralElementEvaluator :: giveCharacteristicVector(answer, type, mode, t);
     }
 
-    virtual FEInterpolation *giveInterpolation() const { return const_cast< NURBSInterpolation* >(& this->interpolation); }
+    virtual FEInterpolation *giveInterpolation() const { return const_cast< NURBSInterpolation * >( & this->interpolation ); }
     virtual Element *giveElement() { return this; }
     virtual void giveDefaultDofManDofIDMask(int inode, IntArray &answer) const { this->giveDofManDofIDMask(inode, EID_MomentumBalance, answer); }
     virtual void giveDefaultInternalDofManDofIDMask(int inode, IntArray &answer) const { this->giveInternalDofManDofIDMask(inode, EID_MomentumBalance, answer); }
@@ -165,7 +164,7 @@ public:
         PlaneStressStructuralElementEvaluator :: giveCharacteristicVector(answer, type, mode, t);
     }
 
-    virtual FEInterpolation *giveInterpolation() const { return const_cast< TSplineInterpolation* >(& this->interpolation); }
+    virtual FEInterpolation *giveInterpolation() const { return const_cast< TSplineInterpolation * >( & this->interpolation ); }
     virtual Element *giveElement() { return this; }
     virtual void giveDefaultDofManDofIDMask(int inode, IntArray &answer) const { this->giveDofManDofIDMask(inode, EID_MomentumBalance, answer); }
     virtual void giveDefaultInternalDofManDofIDMask(int inode, IntArray &answer) const { this->giveInternalDofManDofIDMask(inode, EID_MomentumBalance, answer); }
@@ -204,7 +203,7 @@ public:
         Space3dStructuralElementEvaluator :: giveCharacteristicVector(answer, type, mode, t);
     }
 
-    virtual FEInterpolation *giveInterpolation() const { return const_cast< NURBSInterpolation* >(& this->interpolation); }
+    virtual FEInterpolation *giveInterpolation() const { return const_cast< NURBSInterpolation * >( & this->interpolation ); }
     virtual Element *giveElement() { return this; }
 
     virtual void giveDefaultDofManDofIDMask(int inode, IntArray &answer) const { this->giveDofManDofIDMask(inode, EID_MomentumBalance, answer); }

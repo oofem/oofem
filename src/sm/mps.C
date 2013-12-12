@@ -42,8 +42,7 @@
 #include "classfactory.h"
 
 namespace oofem {
-
-REGISTER_Material( MPSMaterial );
+REGISTER_Material(MPSMaterial);
 
 /****************************************************************************************/
 /**************     MPSMaterialStatus     ***********************************************/
@@ -161,7 +160,6 @@ MPSMaterial :: initializeFrom(InputRecord *ir)
         IR_GIVE_OPTIONAL_FIELD(ir, stiffnessFactor, _IFT_MPSMaterial_stiffnessfactor); // ratio (by weight) of aggregate to cement
 
         this->predictParametersFrom(fc, c, wc, ac, stiffnessFactor);
-
     } else { // read model parameters for creep
         IR_GIVE_FIELD(ir, q1, _IFT_MPSMaterial_q1);
         IR_GIVE_FIELD(ir, q2, _IFT_MPSMaterial_q2);
@@ -220,7 +218,7 @@ MPSMaterial :: initializeFrom(InputRecord *ir)
 }
 
 
-void 
+void
 MPSMaterial :: giveRealStressVector(FloatArray &answer, GaussPoint *gp, const FloatArray &reducedStrain, TimeStep *tStep)
 {
     KelvinChainSolidMaterial :: giveRealStressVector(answer, gp, reducedStrain, tStep);
@@ -235,7 +233,6 @@ MPSMaterial :: giveRealStressVector(FloatArray &answer, GaussPoint *gp, const Fl
         status->setT(-1.);
         status->setTIncrement(-1.);
     }
-
 }
 
 #if 0
@@ -372,7 +369,7 @@ MPSMaterial :: computeCharTimes()
     this->endOfTimeOfInterest = RheoChainMaterial :: giveEndOfTimeOfInterest();
 
     j = 1;
-    while ( 0.5 * this->endOfTimeOfInterest >= Tau1 * pow( 10.0, ( double )(j - 1) ) ) {
+    while ( 0.5 * this->endOfTimeOfInterest >= Tau1 * pow( 10.0, ( double ) ( j - 1 ) ) ) {
         j++;
     }
 
@@ -398,14 +395,14 @@ MPSMaterial :: computeCharCoefficients(FloatArray &answer, double atTime)
     // (aging elastic spring with retardation time = 0)
     double lambda0ToPowN = pow(lambda0, 0.1);
     tau0 = pow(2 * this->giveCharTime(1) / sqrt(10.0), 0.1);
-    EspringVal = 1. / ( q2 * log(1.0 + tau0 / lambda0ToPowN) - q2 * tau0 / ( 10.0 * lambda0ToPowN + 10.0 * tau0) );
+    EspringVal = 1. / ( q2 * log(1.0 + tau0 / lambda0ToPowN) - q2 * tau0 / ( 10.0 * lambda0ToPowN + 10.0 * tau0 ) );
 
     // evaluation of moduli of elasticity for the remaining units
     // (Solidifying kelvin units with retardation times tauMu)
     answer.resize(nUnits);
     for ( mu = 1; mu <= this->nUnits; mu++ ) {
         tauMu = pow(2 * this->giveCharTime(mu), 0.1);
-        answer.at(mu) = 10. * pow(1 + tauMu / lambda0ToPowN, 2) / ( log(10.0) * q2 * ( tauMu / lambda0ToPowN ) * ( 0.9 + tauMu / lambda0ToPowN) );
+        answer.at(mu) = 10. * pow(1 + tauMu / lambda0ToPowN, 2) / ( log(10.0) * q2 * ( tauMu / lambda0ToPowN ) * ( 0.9 + tauMu / lambda0ToPowN ) );
         this->charTimes.at(mu) *= 1.35;
     }
 
@@ -555,7 +552,7 @@ MPSMaterial :: computeLambdaMu(GaussPoint *gp, TimeStep *atTime, int Mu)
 double
 MPSMaterial :: computeFlowTermViscosity(GaussPoint *gp, TimeStep *atTime)
 {
-    double eta=0.0, tHalfStep;
+    double eta = 0.0, tHalfStep;
 
     double prevEta, PsiS, A, B, e, dt;
     double T_new, T_old, H_new, H_old;
@@ -598,10 +595,10 @@ MPSMaterial :: computeFlowTermViscosity(GaussPoint *gp, TimeStep *atTime)
                 status->setTmax(T_new);
                 reductFactor = 1.;
             } else {
-                reductFactor = exp( - this->ct * fabs (T_new - status->giveTmax() ) );
+                reductFactor = exp( -this->ct * fabs( T_new - status->giveTmax() ) );
             }
 
-            A = sqrt( muS * ( kappaT * reductFactor * fabs(T_new - T_old) + 0.5*(T_new + T_old) * fabs(log(H_new) - log(H_old)) ) / ( dt * this->roomTemperature ) );
+            A = sqrt( muS * ( kappaT * reductFactor * fabs(T_new - T_old) + 0.5 * ( T_new + T_old ) * fabs( log(H_new) - log(H_old) ) ) / ( dt * this->roomTemperature ) );
             B = sqrt(PsiS / this->q4);
 
             if ( ( A * B * dt ) > 1.e-6 ) {
@@ -729,7 +726,7 @@ MPSMaterial :: computePointShrinkageStrainVector(FloatArray &answer, GaussPoint 
     fullAnswer.zero();
     fullAnswer.at(1) = fullAnswer.at(2) = fullAnswer.at(3) = EpsSh;
 
-    StructuralMaterial :: giveReducedSymVectorForm(answer, fullAnswer, gp->giveMaterialMode());
+    StructuralMaterial :: giveReducedSymVectorForm( answer, fullAnswer, gp->giveMaterialMode() );
 }
 
 double
@@ -757,7 +754,7 @@ MPSMaterial :: inverse_sorption_isotherm(double w)
 double
 MPSMaterial :: giveHumidity(GaussPoint *gp, TimeStep *atTime, int option)
 {
-    double H_tot=0.0, H_inc=0.0;
+    double H_tot = 0.0, H_inc = 0.0;
 
     MPSMaterialStatus *status = static_cast< MPSMaterialStatus * >( this->giveStatus(gp) );
 
@@ -815,7 +812,7 @@ MPSMaterial :: giveHumidity(GaussPoint *gp, TimeStep *atTime, int option)
 double
 MPSMaterial :: giveTemperature(GaussPoint *gp, TimeStep *atTime, int option)
 {
-    double T_tot=0.0, T_inc=0.0;
+    double T_tot = 0.0, T_inc = 0.0;
     MPSMaterialStatus *status = static_cast< MPSMaterialStatus * >( this->giveStatus(gp) );
 
     // compute humidity and its increment if the step is first or humidity has not been yet computed
@@ -921,7 +918,7 @@ MPSMaterial :: computeEquivalentTime(GaussPoint *gp, TimeStep *atTime, int optio
         if ( option == 0 ) { // gives time in the middle of the timestep
             return relMatAge - atTime->giveTimeIncrement() + PsiE * ( 0.5 * atTime->giveTimeIncrement() );
         } else if ( option == 1 ) { // gives time in the middle of the timestep - for UPDATING
-            return relMatAge - atTime->giveTimeIncrement() + PsiE * atTime->giveTimeIncrement();
+            return relMatAge - atTime->giveTimeIncrement() + PsiE *atTime->giveTimeIncrement();
         } else {
             _error("computeEquivalentTime - mode is not supported")
         }
@@ -932,7 +929,7 @@ MPSMaterial :: computeEquivalentTime(GaussPoint *gp, TimeStep *atTime, int optio
         if ( option == 0 ) { // gives time in the middle of the timestep
             tEquiv = tEquiv + PsiE *  0.5 * atTime->giveTimeIncrement();
         } else if ( option == 1 ) { // gives time in the middle of the timestep - for UPDATING
-            tEquiv = tEquiv + PsiE * atTime->giveTimeIncrement();
+            tEquiv = tEquiv + PsiE *atTime->giveTimeIncrement();
         } else {
             _error("computeEquivalentTime - mode is not supported")
         }

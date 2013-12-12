@@ -41,7 +41,6 @@
 #include <set>
 
 namespace oofem {
-
 /**
  * Class representing the a dynamic Input Record.
  * The input record is represented as a list of fields.
@@ -51,21 +50,21 @@ namespace oofem {
 class OOFEM_EXPORT DynamicInputRecord : public InputRecord
 {
 protected:
-    std::string recordKeyword;
+    std :: string recordKeyword;
     int recordNumber;
 
     // Record representation.
-    std::set<std::string> emptyRecord; ///< Fields without values
-    std::map<std::string, int>  intRecord;
-    std::map<std::string, double> doubleRecord;
-    std::map<std::string, bool>  boolRecord;
-    std::map<std::string, std::string> stringRecord;
-    std::map<std::string, FloatArray> floatArrayRecord;
-    std::map<std::string, IntArray> intArrayRecord;
-    std::map<std::string, FloatMatrix> matrixRecord;
-    std::map<std::string, std::vector< std::string> > stringListRecord;
-    std::map<std::string, Dictionary> dictionaryRecord;
-    std::map<std::string, std::list< Range > > rangeRecord;
+    std :: set< std :: string >emptyRecord; ///< Fields without values
+    std :: map< std :: string, int >intRecord;
+    std :: map< std :: string, double >doubleRecord;
+    std :: map< std :: string, bool >boolRecord;
+    std :: map< std :: string, std :: string >stringRecord;
+    std :: map< std :: string, FloatArray >floatArrayRecord;
+    std :: map< std :: string, IntArray >intArrayRecord;
+    std :: map< std :: string, FloatMatrix >matrixRecord;
+    std :: map< std :: string, std :: vector< std :: string > >stringListRecord;
+    std :: map< std :: string, Dictionary >dictionaryRecord;
+    std :: map< std :: string, std :: list< Range > >rangeRecord;
 
 public:
     /// Constructor. Creates an empty input record.
@@ -75,39 +74,39 @@ public:
     /// Destructor.
     virtual ~DynamicInputRecord();
     /// Assignment operator.
-    DynamicInputRecord & operator=(const DynamicInputRecord &);
+    DynamicInputRecord &operator=(const DynamicInputRecord &);
 
     virtual InputRecord *GiveCopy() { return new DynamicInputRecord(* this); }
     virtual void finish(bool wrn = true);
 
-    virtual IRResultType giveRecordKeywordField(std::string &answer, int &value);
-    virtual IRResultType giveRecordKeywordField(std::string &answer);
+    virtual IRResultType giveRecordKeywordField(std :: string &answer, int &value);
+    virtual IRResultType giveRecordKeywordField(std :: string &answer);
     virtual IRResultType giveField(int &answer, InputFieldType id);
     virtual IRResultType giveField(double &answer, InputFieldType id);
     virtual IRResultType giveField(bool &answer, InputFieldType id);
-    virtual IRResultType giveField(std::string &answer, InputFieldType id);
+    virtual IRResultType giveField(std :: string &answer, InputFieldType id);
     virtual IRResultType giveField(FloatArray &answer, InputFieldType id);
     virtual IRResultType giveField(IntArray &answer, InputFieldType id);
     virtual IRResultType giveField(FloatMatrix &answer, InputFieldType id);
-    virtual IRResultType giveField(std::vector< std::string > &answer, InputFieldType id);
+    virtual IRResultType giveField(std :: vector< std :: string > &answer, InputFieldType id);
     virtual IRResultType giveField(Dictionary &answer, InputFieldType id);
-    virtual IRResultType giveField(std::list< Range > &answer, InputFieldType id);
+    virtual IRResultType giveField(std :: list< Range > &answer, InputFieldType id);
 
     virtual bool hasField(InputFieldType id);
     virtual void printYourself();
     // Setters, unique for the dynamic input record
-    virtual void setRecordKeywordField(const std::string &keyword, int number);
+    virtual void setRecordKeywordField(const std :: string &keyword, int number);
     virtual void setRecordKeywordNumber(int number);
     virtual void setField(int item, InputFieldType id);
     virtual void setField(double item, InputFieldType id);
     virtual void setField(bool item, InputFieldType id);
-    virtual void setField(const std::string &item, InputFieldType id);
+    virtual void setField(const std :: string &item, InputFieldType id);
     virtual void setField(const FloatArray &item, InputFieldType id);
     virtual void setField(const IntArray &item, InputFieldType id);
     virtual void setField(const FloatMatrix &item, InputFieldType id);
-    virtual void setField(const std::vector< std::string > &item, InputFieldType id);
+    virtual void setField(const std :: vector< std :: string > &item, InputFieldType id);
     virtual void setField(const Dictionary &item, InputFieldType id);
-    virtual void setField(const std::list< Range > &item, InputFieldType id);
+    virtual void setField(const std :: list< Range > &item, InputFieldType id);
     /// Sets an empty field with given id.
     virtual void setField(InputFieldType id);
     /// Removes given field from record.
@@ -117,7 +116,7 @@ public:
                               IRResultType result, const char *file, int line);
 
     /// Returns record as string.
-    std::string giveRecordAsString() const;
+    std :: string giveRecordAsString() const;
 };
 } // end namespace oofem
 #endif // dynamicinputrecord_h

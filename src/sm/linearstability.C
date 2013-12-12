@@ -52,8 +52,7 @@
 #endif
 
 namespace oofem {
-
-REGISTER_EngngModel( LinearStability );
+REGISTER_EngngModel(LinearStability);
 
 NumericalMethod *LinearStability :: giveNumericalMethod(MetaStep *mStep)
 {
@@ -147,7 +146,7 @@ TimeStep *LinearStability :: giveNextStep()
     int istep = giveNumberOfFirstStep();
     StateCounterType counter = 1;
 
-    if (previousStep != NULL){
+    if ( previousStep != NULL ) {
         delete previousStep;
     }
 
@@ -179,7 +178,7 @@ void LinearStability :: solveYourselfAt(TimeStep *tStep)
     //
     // creates system of governing eq's and solves them at given time step
     //
-    this->giveNumericalMethod(  this->giveMetaStep( tStep->giveMetaStepNumber() ) );
+    this->giveNumericalMethod( this->giveMetaStep( tStep->giveMetaStepNumber() ) );
     this->giveNumericalMethodForLinStaticProblem(tStep);
 
     // first assemble problem at current time step
@@ -194,11 +193,11 @@ void LinearStability :: solveYourselfAt(TimeStep *tStep)
         //
         // allocate space for displacement Vector
         //
-        displacementVector.resize( this->giveNumberOfDomainEquations(1, EModelDefaultEquationNumbering()) );
+        displacementVector.resize( this->giveNumberOfDomainEquations( 1, EModelDefaultEquationNumbering() ) );
         //
         // allocate space for load vector
         //
-        loadVector.resize( this->giveNumberOfDomainEquations(1, EModelDefaultEquationNumbering()) );
+        loadVector.resize( this->giveNumberOfDomainEquations( 1, EModelDefaultEquationNumbering() ) );
     }
 
 #ifndef LIN_STAB_COMPATIBILITY_MODE
@@ -207,7 +206,7 @@ void LinearStability :: solveYourselfAt(TimeStep *tStep)
  #endif
     stiffnessMatrix->zero();
     this->assemble( stiffnessMatrix, tStep, EID_MomentumBalance, StiffnessMatrix,
-                   EModelDefaultEquationNumbering(), this->giveDomain(1) );
+                    EModelDefaultEquationNumbering(), this->giveDomain(1) );
 #endif
 
 
@@ -251,12 +250,12 @@ void LinearStability :: solveYourselfAt(TimeStep *tStep)
     OOFEM_LOG_INFO("Assembling stiffness  matrix\n");
 #endif
     this->assemble( stiffnessMatrix, tStep, EID_MomentumBalance, StiffnessMatrix,
-                   EModelDefaultEquationNumbering(), this->giveDomain(1) );
+                    EModelDefaultEquationNumbering(), this->giveDomain(1) );
 #ifdef VERBOSE
     OOFEM_LOG_INFO("Assembling  initial stress matrix\n");
 #endif
     this->assemble( initialStressMatrix, tStep, EID_MomentumBalance, InitialStressMatrix,
-                   EModelDefaultEquationNumbering(), this->giveDomain(1) );
+                    EModelDefaultEquationNumbering(), this->giveDomain(1) );
     initialStressMatrix->times(-1.0);
 
     //  stiffnessMatrix->printYourself();
@@ -265,7 +264,7 @@ void LinearStability :: solveYourselfAt(TimeStep *tStep)
     //
     // create resulting objects eigVec and eigVal
     //
-    eigVec.resize(this->giveNumberOfDomainEquations(1, EModelDefaultEquationNumbering()), numberOfRequiredEigenValues);
+    eigVec.resize(this->giveNumberOfDomainEquations( 1, EModelDefaultEquationNumbering() ), numberOfRequiredEigenValues);
     eigVal.resize(numberOfRequiredEigenValues);
     eigVec.zero();
     eigVal.zero();
@@ -295,7 +294,7 @@ LinearStability :: terminateLinStatic(TimeStep *stepN)
     File = this->giveOutputStream();
     stepN->setTime(0.);
 
-    fprintf(File, "\nOutput for time % .3e \n\n", stepN->giveTargetTime() );
+    fprintf( File, "\nOutput for time % .3e \n\n", stepN->giveTargetTime() );
     fprintf(File, "Linear static:\n\n");
 
     int nnodes = domain->giveNumberOfDofManagers();
@@ -374,8 +373,8 @@ void LinearStability :: terminate(TimeStep *stepN)
     for ( i = 1; i <=  numberOfRequiredEigenValues; i++ ) {
         fprintf(outputStream, "\nOutput for eigen value no.  % .3e \n", ( double ) i);
         fprintf( outputStream,
-                "Printing eigen vector no. %d, corresponding eigen value is %15.8e\n\n",
-                i, eigVal.at(i) );
+                 "Printing eigen vector no. %d, corresponding eigen value is %15.8e\n\n",
+                 i, eigVal.at(i) );
         stepN->setTime( ( double ) i );
 
         if ( this->requiresUnknownsDictionaryUpdate() ) {
@@ -389,15 +388,15 @@ void LinearStability :: terminate(TimeStep *stepN)
             domain->giveDofManager(j)->updateYourself(stepN);
             domain->giveDofManager(j)->printOutputAt(outputStream, stepN);
         }
-    
-        stepN->setNumber( i );
+
+        stepN->setNumber(i);
         exportModuleManager->doOutput(stepN);
     }
 
 #  ifdef VERBOSE
     VERBOSE_PRINT0("Updated nodes & sides ", nnodes)
 #  endif
-    fflush(this->giveOutputStream());
+    fflush( this->giveOutputStream() );
     // save context if required
     this->saveStepContext(stepN);
 }
@@ -493,7 +492,6 @@ contextIOResultType LinearStability :: restoreContext(DataStream *stream, Contex
             delete stream;
             stream = NULL;
         }                                                    // ensure consistent records
-
     }
 
     //  if (istep > numberOfRequiredEigenValues) istep = numberOfRequiredEigenValues ;
@@ -505,7 +503,7 @@ contextIOResultType LinearStability :: restoreContext(DataStream *stream, Contex
     }
 
     OOFEM_LOG_INFO( "Restoring - corresponding index is %d, EigenValue is %f\n",
-                   activeVector, eigVal.at(activeVector) );
+                    activeVector, eigVal.at(activeVector) );
     this->giveCurrentStep()->setTime( ( double ) activeVector );
 
     return CIO_OK;

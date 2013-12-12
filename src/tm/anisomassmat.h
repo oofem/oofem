@@ -47,7 +47,6 @@
 //@}
 
 namespace oofem {
-
 /**
  *
  * Class for an anisotropic linear transport material. The constitutive equation is given as

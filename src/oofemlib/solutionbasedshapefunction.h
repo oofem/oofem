@@ -44,7 +44,6 @@
 #define _IFT_SolutionbasedShapeFunction_Externalset "externalset"
 
 namespace oofem {
-
 struct SurfaceDataStruct {
     bool isPlus;
     bool isMinus;
@@ -58,17 +57,18 @@ struct SurfaceDataStruct {
 struct modeStruct {
     double am, ap;
     EngngModel *myEngngModel;
-    std::vector<SurfaceDataStruct *> SurfaceData;
+    std :: vector< SurfaceDataStruct * >SurfaceData;
 };
 
-class OOFEM_EXPORT SolutionbasedShapeFunction : public ActiveBoundaryCondition {
+class OOFEM_EXPORT SolutionbasedShapeFunction : public ActiveBoundaryCondition
+{
 private:
     Node *myNode;
     int set;
     int externalSet;
     int order;
     double TOL;
-    std::string filename;
+    std :: string filename;
     bool useConstantBase;
     bool isLoaded;
 
@@ -77,7 +77,7 @@ private:
 
     bool isCoeff(ActiveDof *dof);
 
-    std::vector< modeStruct *> modes;
+    std :: vector< modeStruct * >modes;
 
     void updateModelWithFactors(modeStruct *m);
     TimeStep *thisTimestep;
@@ -133,7 +133,7 @@ public:
 
     virtual void computeDofTransformation(ActiveDof *dof, FloatArray &masterContribs);
 
-    virtual int giveNumberOfMasterDofs(ActiveDof *dof) {return this->giveDomain()->giveNumberOfSpatialDimensions(); }
+    virtual int giveNumberOfMasterDofs(ActiveDof *dof) { return this->giveDomain()->giveNumberOfSpatialDimensions(); }
     virtual Dof *giveMasterDof(ActiveDof *dof, int mdof);
 
     virtual const char *giveClassName() const { return "SolutionbasedShapeFunction"; }

@@ -83,7 +83,7 @@ KelvinChainMaterial :: computeCharCoefficients(FloatArray &answer, double atTime
         for ( int j = 1; j <= this->nUnits; j++ ) {
             tauj = this->giveCharTime(j);
             double sum = 0.;
-            for ( int  r = 1; r <= rSize; r++ ) {
+            for ( int r = 1; r <= rSize; r++ ) {
                 tti = rTimes.at(r) / taui;
                 ttj = rTimes.at(r) / tauj;
                 sum += ( 1. - exp(-tti) ) * ( 1. - exp(-ttj) );
@@ -170,7 +170,7 @@ KelvinChainMaterial :: giveEigenStrainVector(FloatArray &answer, GaussPoint *gp,
                 beta = exp( -( atTime->giveTimeIncrement() / timeFactor ) / ( this->giveCharTime(mu) ) );
             }
 
-            gamma = &status->giveHiddenVarsVector(mu); // JB
+            gamma = & status->giveHiddenVarsVector(mu); // JB
             if ( gamma ) {
                 help.zero();
                 help.add(* gamma);
@@ -187,10 +187,10 @@ KelvinChainMaterial :: giveEigenStrainVector(FloatArray &answer, GaussPoint *gp,
 }
 
 
-void 
+void
 KelvinChainMaterial :: giveRealStressVector(FloatArray &answer, GaussPoint *gp, const FloatArray &reducedStrain, TimeStep *tStep)
 {
-    RheoChainMaterial ::giveRealStressVector(answer, gp, reducedStrain, tStep);
+    RheoChainMaterial :: giveRealStressVector(answer, gp, reducedStrain, tStep);
 
     this->computeHiddenVars(gp, tStep);
 }
@@ -248,10 +248,10 @@ KelvinChainMaterial :: computeHiddenVars(GaussPoint *gp, TimeStep *tNow)
         if ( muthHiddenVarsVector.giveSize() ) {
             muthHiddenVarsVector.times(betaMu);
             muthHiddenVarsVector.add(help);
-            status->letTempHiddenVarsVectorBe( mu, muthHiddenVarsVector);
+            status->letTempHiddenVarsVectorBe(mu, muthHiddenVarsVector);
         } else {
             //status->letHiddenVarsVectorBe( mu, (new FloatArray(help)) );
-            status->letTempHiddenVarsVectorBe( mu, help);
+            status->letTempHiddenVarsVectorBe(mu, help);
         }
     }
 }

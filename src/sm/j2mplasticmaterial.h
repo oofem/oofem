@@ -78,7 +78,7 @@ protected:
                                        const FloatArray &stressSpaceHardeningVars);
     virtual void computeHardeningReducedModuli(FloatMatrix &answer, GaussPoint *gp,
                                                const FloatArray &strainSpaceHardeningVariables,
-                                                 TimeStep *atTime);
+                                               TimeStep *atTime);
     virtual void computeStressGradientVector(FloatArray &answer, functType ftype, int isurf, GaussPoint *gp, const FloatArray &stressVector,
                                              const FloatArray &stressSpaceHardeningVars);
     virtual void computeStressSpaceHardeningVarsReducedGradient(FloatArray &answer, functType ftype, int isurf, GaussPoint *gp,

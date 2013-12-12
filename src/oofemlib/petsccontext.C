@@ -52,7 +52,7 @@ PetscContext :: PetscContext(EngngModel *e, bool naturalVectors)
 PetscContext :: ~PetscContext()
 {
     if ( n2gvecscat ) {
-        VecScatterDestroy(&n2gvecscat);
+        VecScatterDestroy(& n2gvecscat);
     }
 }
 
@@ -64,8 +64,8 @@ PetscContext :: init(int di)
 #ifdef __PARALLEL_MODE
     if ( emodel->isParallel() ) {
         ///@todo This shouldn't be hardcoded to just the default numbering schemes. In fact, this shouldn't even have "prescribed" and "free", just use the given numbering.
-        n2g.init(emodel, di, EModelDefaultEquationNumbering());
-        n2l.init(emodel, di, EModelDefaultEquationNumbering());
+        n2g.init( emodel, di, EModelDefaultEquationNumbering() );
+        n2l.init( emodel, di, EModelDefaultEquationNumbering() );
 
  #ifdef  PetscContext_debug_print
         fprintf( stderr, "[%d] Petsccontext::init leq:%d, neq:%d, geq:%d\n", emodel->giveRank(), giveNumberOfLocalEqs(), giveNumberOfNaturalEqs(), giveNumberOfGlobalEqs() );
@@ -74,7 +74,7 @@ PetscContext :: init(int di)
 
 #endif
     if ( n2gvecscat ) {
-        VecScatterDestroy(&n2gvecscat);
+        VecScatterDestroy(& n2gvecscat);
         n2gvecscat = NULL;
     }
 }
@@ -89,7 +89,7 @@ PetscContext :: giveNumberOfLocalEqs()
         return n2g.giveNumberOfLocalEqs();
     } else {
 #endif
-    return emodel->giveNumberOfDomainEquations(di, EModelDefaultEquationNumbering());
+    return emodel->giveNumberOfDomainEquations( di, EModelDefaultEquationNumbering() );
 
 #ifdef __PARALLEL_MODE
 }
@@ -105,7 +105,7 @@ PetscContext :: giveNumberOfGlobalEqs()
         return n2g.giveNumberOfGlobalEqs();
     } else {
 #endif
-    return emodel->giveNumberOfDomainEquations(di, EModelDefaultEquationNumbering());
+    return emodel->giveNumberOfDomainEquations( di, EModelDefaultEquationNumbering() );
 
 #ifdef __PARALLEL_MODE
 }
@@ -115,7 +115,7 @@ PetscContext :: giveNumberOfGlobalEqs()
 int
 PetscContext :: giveNumberOfNaturalEqs()
 {
-    return emodel->giveNumberOfDomainEquations(di, EModelDefaultEquationNumbering());
+    return emodel->giveNumberOfDomainEquations( di, EModelDefaultEquationNumbering() );
 }
 
 
@@ -143,8 +143,8 @@ PetscContext :: scatterG2N(Vec src, Vec dest, InsertMode mode)
             ISCreateGeneral(this->emodel->giveParallelComm(), neqs, this->giveN2Gmap()->giveN2Gmap()->givePointer(), PETSC_USE_POINTER, & globalIS);
             ISCreateStride(this->emodel->giveParallelComm(), neqs, 0, 1, & naturalIS);
             VecScatterCreate(dest, naturalIS, src, globalIS, & n2gvecscat);
-            ISDestroy( & naturalIS );
-            ISDestroy( & globalIS );
+            ISDestroy(& naturalIS);
+            ISDestroy(& globalIS);
         }
 
         VecScatterBegin(n2gvecscat, src, dest, mode, SCATTER_REVERSE); //
@@ -179,7 +179,7 @@ PetscContext :: scatterG2N(Vec src, FloatArray *dest, InsertMode mode)
         }
 
         VecRestoreArray(natVec, & ptr);
-        VecDestroy(&natVec);
+        VecDestroy(& natVec);
     } else {
 #endif
     int neqs = giveNumberOfNaturalEqs();
@@ -208,8 +208,8 @@ PetscContext :: scatterN2G(Vec src, Vec dest, InsertMode mode)
             ISCreateGeneral(this->emodel->giveParallelComm(), neqs, this->giveN2Gmap()->giveN2Gmap()->givePointer(), PETSC_USE_POINTER, & globalIS);
             ISCreateStride(this->emodel->giveParallelComm(), neqs, 0, 1, & naturalIS);
             VecScatterCreate(src, naturalIS, dest, globalIS, & n2gvecscat);
-            ISDestroy( & naturalIS );
-            ISDestroy( & globalIS );
+            ISDestroy(& naturalIS);
+            ISDestroy(& globalIS);
         }
 
         VecScatterBegin(n2gvecscat, src, dest, mode, SCATTER_FORWARD); //
@@ -231,17 +231,17 @@ PetscContext :: scatterN2G(const FloatArray *src, Vec dest, InsertMode mode)
     if ( emodel->isParallel() ) {
         Vec natVec;
         VecCreateSeq(PETSC_COMM_SELF, giveNumberOfNaturalEqs(), & natVec);
-        VecPlaceArray(natVec, src->givePointer());
+        VecPlaceArray( natVec, src->givePointer() );
         this->scatterN2G(natVec, dest, mode);
         VecResetArray(natVec);
-        VecDestroy(&natVec);
+        VecDestroy(& natVec);
     } else {
 #endif
     int size = src->giveSize();
     PetscScalar *ptr = src->givePointer();
     for ( int i = 0; i < size; i++ ) {
         //VecSetValues(dest, 1, & i, ptr + i, mode);
-        VecSetValue(dest, i, ptr[i], mode);
+        VecSetValue(dest, i, ptr [ i ], mode);
     }
 
     VecAssemblyBegin(dest);
@@ -282,7 +282,7 @@ PetscContext :: scatterL2G(const FloatArray *src, Vec dest, InsertMode mode)
     ptr = src->givePointer();
     for ( int i = 0; i < size; i++ ) {
         //VecSetValues(dest, 1, & i, ptr + i, mode);
-        VecSetValue(dest, i, ptr[i], mode);
+        VecSetValue(dest, i, ptr [ i ], mode);
     }
 
     VecAssemblyBegin(dest);
@@ -303,6 +303,7 @@ PetscContext :: isLocal(DofManager *dman)
     }
 #else
     return true;
+
 #endif
 }
 
@@ -328,10 +329,10 @@ PetscContext :: localNorm(const FloatArray &src)
         Natural2LocalOrdering *n2l = this->giveN2Lmap();
         for ( int i = 0; i < size; i++ ) {
             if ( n2l->giveNewEq(i + 1) ) {
-                norm2 += src(i)*src(i);
+                norm2 += src(i) * src(i);
             }
         }
-        MPI_Allreduce(&norm2, &norm2_tot, 1, MPI_DOUBLE, MPI_SUM, this->emodel->giveParallelComm());
+        MPI_Allreduce( & norm2, & norm2_tot, 1, MPI_DOUBLE, MPI_SUM, this->emodel->giveParallelComm() );
         return sqrt(norm2_tot);
     }
 #endif
@@ -349,10 +350,10 @@ PetscContext :: localDotProduct(const FloatArray &a, const FloatArray &b)
         Natural2LocalOrdering *n2l = this->giveN2Lmap();
         for ( int i = 0; i < size; i++ ) {
             if ( n2l->giveNewEq(i + 1) ) {
-                val += a(i)*b(i);
+                val += a(i) * b(i);
             }
         }
-        MPI_Allreduce(&val, &val_tot, 1, MPI_DOUBLE, MPI_SUM, this->emodel->giveParallelComm());
+        MPI_Allreduce( & val, & val_tot, 1, MPI_DOUBLE, MPI_SUM, this->emodel->giveParallelComm() );
         return val_tot;
     }
 #endif
@@ -367,9 +368,9 @@ PetscContext :: naturalNorm(const FloatArray &src)
     if ( emodel->isParallel() ) {
         double norm = 0.0;
         Vec temp;
-        createVecGlobal(&temp);
-        this->scatterN2G(&src, temp, ADD_VALUES);
-        VecNorm(temp, NORM_2, &norm);
+        createVecGlobal(& temp);
+        this->scatterN2G(& src, temp, ADD_VALUES);
+        VecNorm(temp, NORM_2, & norm);
         return norm;
     }
 #endif
@@ -394,12 +395,12 @@ PetscContext :: naturalDotProduct(const FloatArray &a, const FloatArray &b)
 #ifdef __PARALLEL_MODE
     if ( emodel->isParallel() ) {
         Vec A, B;
-        createVecGlobal(&A);
-        createVecGlobal(&B);
-        this->scatterN2G(&a, A, ADD_VALUES);
-        this->scatterN2G(&a, B, ADD_VALUES);
+        createVecGlobal(& A);
+        createVecGlobal(& B);
+        this->scatterN2G(& a, A, ADD_VALUES);
+        this->scatterN2G(& a, B, ADD_VALUES);
         double val = 0.0;
-        VecDot(A, B, &val);
+        VecDot(A, B, & val);
         return val;
     }
 #endif
@@ -413,7 +414,7 @@ PetscContext :: accumulate(double local)
 #ifdef __PARALLEL_MODE
     if ( emodel->isParallel() ) {
         double global;
-        MPI_Allreduce(&local, &global, 1, MPI_DOUBLE, MPI_SUM, this->emodel->giveParallelComm());
+        MPI_Allreduce( & local, & global, 1, MPI_DOUBLE, MPI_SUM, this->emodel->giveParallelComm() );
         return global;
     }
 #endif
@@ -429,13 +430,12 @@ PetscContext :: accumulate(const FloatArray &local, FloatArray &global)
     if ( emodel->isParallel() ) {
         int size = local.giveSize();
         global.resize(size);
-        MPI_Allreduce(local.givePointer(), global.givePointer(), size, MPI_DOUBLE, MPI_SUM, this->emodel->giveParallelComm());
-    }
-    else {
+        MPI_Allreduce( local.givePointer(), global.givePointer(), size, MPI_DOUBLE, MPI_SUM, this->emodel->giveParallelComm() );
+    } else {
 #endif
-        global = local;
+    global = local;
 #ifdef __PARALLEL_MODE
-    }
+}
 #endif
 }
 
@@ -452,7 +452,7 @@ PetscContext :: createVecGlobal(Vec *answer)
 #endif
     VecCreateSeq(PETSC_COMM_SELF, giveNumberOfNaturalEqs(), answer);
 #ifdef __PARALLEL_MODE
-    }
+}
 #endif
 }
 } // end namespace oofem

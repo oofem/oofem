@@ -49,7 +49,6 @@
 //@}
 
 namespace oofem {
-
 /**
  * This class implements a CEB-FIP 78 rheologic Maxwell chain model in a finite
  * element problem.

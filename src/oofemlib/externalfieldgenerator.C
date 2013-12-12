@@ -40,12 +40,10 @@
 #include <fstream>
 
 namespace oofem {
-    
-REGISTER_RandomFieldGenerator( ExternalFieldGenerator );
+REGISTER_RandomFieldGenerator(ExternalFieldGenerator);
 
 ExternalFieldGenerator :: ExternalFieldGenerator(int num, Domain *d) : RandomFieldGenerator(num, d)
-{
-}
+{}
 
 ExternalFieldGenerator :: ~ExternalFieldGenerator()
 {}
@@ -113,7 +111,7 @@ void ExternalFieldGenerator :: generateRandomValue(double &value, FloatArray *gl
             randomVariable =
                 ( 1. - helpX ) * ( 1. - helpY ) * field(3 * ( countXDown * numberReal(1) + countYDown ) + 2) +
                 helpX * ( 1. - helpY ) * field(3 * ( countXUp * numberReal(1) + countYDown ) + 2) +
-                helpX *helpY *field(3 *( countXUp * numberReal(1) + countYUp ) + 2) +
+                helpX *helpY *field(3 * ( countXUp * numberReal(1) + countYUp ) + 2) +
                 ( 1. - helpX ) * helpY * field(3 * ( countXDown * numberReal(1) + countYUp ) + 2);
         }
     }
@@ -140,7 +138,7 @@ ExternalFieldGenerator :: initializeFrom(InputRecord *ir)
     std :: ifstream inputField( name.c_str() );
 
     if ( !inputField.is_open() ) {
-        OOFEM_ERROR2("ExternalFieldGenerator :: initializeFrom - Unable to open file %s", name.c_str());
+        OOFEM_ERROR2( "ExternalFieldGenerator :: initializeFrom - Unable to open file %s", name.c_str() );
     }
 
     double deltaX, deltaY;

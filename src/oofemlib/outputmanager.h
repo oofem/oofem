@@ -58,7 +58,6 @@
 //@}
 
 namespace oofem {
-
 /**
  * Represents output manager. It controls and manages the time step output.
  * Allows to filter output to certain time steps, dof managers and elements.
@@ -87,21 +86,21 @@ protected:
     /// User timeStep Output step. Indicates every tstep_step_out-th step selected.
     int tstep_step_out;
     /// List of user selected step numbers.
-    std::list< Range >tsteps_out;
+    std :: list< Range >tsteps_out;
 
     /// Indicates all dofmanagers are selected.
     int dofman_all_out_flag;
     /// List of dofmanager numbers or their ranges being selected.
-    std::list< Range >dofman_out;
+    std :: list< Range >dofman_out;
     /// List of dofmanager numbers or their ranges being excluded.
-    std::list< Range >dofman_except;
+    std :: list< Range >dofman_except;
 
     /// Indicates all elements are selected.
     int element_all_out_flag;
     /// List of element numbers or their ranges being selected.
-    std::list< Range >element_out;
+    std :: list< Range >element_out;
     /// List of element numbers or their ranges being excluded.
-    std::list< Range >element_except;
+    std :: list< Range >element_except;
 
 public:
 

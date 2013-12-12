@@ -152,7 +152,7 @@ public:
     /// Inequality comparison operator.
     bool operator!=(const dynaListIterator< T > &x) const { return node != x.node; }
     /// Value access operator. Returns the element of the actual position.
-    T & operator*() const { return ( * node ).data; }
+    T &operator*() const { return ( * node ).data; }
 
     /// Lets the iterator step forward to the next element.
     dynaListIterator< T > &operator++() {

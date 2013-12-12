@@ -43,7 +43,6 @@
 #include "transportelement.h"
 
 namespace oofem {
-
 /**
  * This class implements a transport material status information.
  * When needed, new materials should specialized a derived class from this base.
@@ -107,7 +106,6 @@ public:
     const FloatArray &giveTempFlux() { return temp_flux; }
     /// Returns maturity.
     double giveMaturity() { return maturity; }
-    
 };
 
 
@@ -138,7 +136,7 @@ public:
 
     /**
      * Returns the flux for the field and its gradient.
-     * @todo { Should the field variable just be a scalar? This might change when we rethink the coupled-fields approach. 
+     * @todo { Should the field variable just be a scalar? This might change when we rethink the coupled-fields approach.
      * Now its either just [temperature], or [temperature, concentration] so to cover both cases there is a floatarray. }
      * @param answer The flux.
      * @param gp Gauss point.

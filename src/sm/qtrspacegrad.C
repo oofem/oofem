@@ -51,73 +51,72 @@
 #include <cstdio>
 
 namespace oofem {
-
-REGISTER_Element( QTRSpaceGrad );
+REGISTER_Element(QTRSpaceGrad);
 
 FEI3dTetLin QTRSpaceGrad :: interpolation;
 
-QTRSpaceGrad :: QTRSpaceGrad (int n, Domain* aDomain) :  QTRSpace(n, aDomain),GradDpElement()
-// Constructor.
+QTRSpaceGrad :: QTRSpaceGrad(int n, Domain *aDomain) :  QTRSpace(n, aDomain), GradDpElement()
+    // Constructor.
 {
-    nPrimNodes = 10; 
+    nPrimNodes = 10;
     nPrimVars = 3;
     nSecNodes = 4;
     nSecVars = 1;
-    totalSize = nPrimVars*nPrimNodes+nSecVars*nSecNodes;
-    locSize   = nPrimVars*nPrimNodes;
-    nlSize    = nSecVars*nSecNodes;
+    totalSize = nPrimVars * nPrimNodes + nSecVars * nSecNodes;
+    locSize   = nPrimVars * nPrimNodes;
+    nlSize    = nSecVars * nSecNodes;
 }
 
 
 IRResultType
-QTRSpaceGrad :: initializeFrom (InputRecord* ir)
+QTRSpaceGrad :: initializeFrom(InputRecord *ir)
 {
-	numberOfGaussPoints = 4;
-    IRResultType result = this->NLStructuralElement :: initializeFrom (ir);
-	if(result != IRRT_OK) {
-		return result;
-	}
+    numberOfGaussPoints = 4;
+    IRResultType result = this->NLStructuralElement :: initializeFrom(ir);
+    if ( result != IRRT_OK ) {
+        return result;
+    }
 
     return IRRT_OK;
 }
 
 
 void
-QTRSpaceGrad :: giveDofManDofIDMask (int inode, EquationID ut, IntArray& answer) const
+QTRSpaceGrad :: giveDofManDofIDMask(int inode, EquationID ut, IntArray &answer) const
 {
     if ( inode <= nSecNodes ) {
-        answer.resize (4);
+        answer.resize(4);
         answer.at(1) = D_u;
         answer.at(2) = D_v;
-        answer.at(3) = D_w; 
+        answer.at(3) = D_w;
         answer.at(4) = G_0;
     } else {
-        answer.resize (3);
+        answer.resize(3);
         answer.at(1) = D_u;
         answer.at(2) = D_v;
-        answer.at(3) = D_w; 
+        answer.at(3) = D_w;
     }
 }
 
 void
-QTRSpaceGrad :: computeGaussPoints ()
-  // Sets up the array containing the four Gauss points of the receiver.
+QTRSpaceGrad :: computeGaussPoints()
+// Sets up the array containing the four Gauss points of the receiver.
 {
     numberOfIntegrationRules = 1;
-    integrationRulesArray = new IntegrationRule* [numberOfIntegrationRules];
-    integrationRulesArray[0] = new GaussIntegrationRule (1,this,1, 7);
-    this->giveCrossSection()->setupIntegrationPoints( *integrationRulesArray[0], numberOfGaussPoints, this );
+    integrationRulesArray = new IntegrationRule * [ numberOfIntegrationRules ];
+    integrationRulesArray [ 0 ] = new GaussIntegrationRule(1, this, 1, 7);
+    this->giveCrossSection()->setupIntegrationPoints(* integrationRulesArray [ 0 ], numberOfGaussPoints, this);
 }
 
 
 void
-QTRSpaceGrad :: computeNkappaMatrixAt (GaussPoint* aGaussPoint,FloatMatrix& answer)
-  // Returns the displacement interpolation matrix {N} of the receiver, eva-
-  // luated at aGaussPoint.
+QTRSpaceGrad :: computeNkappaMatrixAt(GaussPoint *aGaussPoint, FloatMatrix &answer)
+// Returns the displacement interpolation matrix {N} of the receiver, eva-
+// luated at aGaussPoint.
 {
     FloatArray n(4);
-    this->interpolation.evalN (n, *aGaussPoint->giveCoordinates(),FEIElementGeometryWrapper(this));
-    answer.resize(1,4);
+    this->interpolation.evalN( n, * aGaussPoint->giveCoordinates(), FEIElementGeometryWrapper(this) );
+    answer.resize(1, 4);
     answer.zero();
 
     for ( int i = 1; i <= 4; i++ ) {
@@ -126,24 +125,24 @@ QTRSpaceGrad :: computeNkappaMatrixAt (GaussPoint* aGaussPoint,FloatMatrix& answ
 }
 
 void
-QTRSpaceGrad :: computeBkappaMatrixAt(GaussPoint *aGaussPoint, FloatMatrix& answer)
+QTRSpaceGrad :: computeBkappaMatrixAt(GaussPoint *aGaussPoint, FloatMatrix &answer)
 {
     FloatMatrix dnx;
-    answer.resize(3,4);
+    answer.resize(3, 4);
     answer.zero();
 
-    this->interpolation.evaldNdx (dnx, *aGaussPoint->giveCoordinates(),FEIElementGeometryWrapper(this));
+    this->interpolation.evaldNdx( dnx, * aGaussPoint->giveCoordinates(), FEIElementGeometryWrapper(this) );
     for ( int i = 1; i <= 4; i++ ) {
-        answer.at(1, i) = dnx.at(i,1);
-        answer.at(2, i) = dnx.at(i,2);
-        answer.at(3, i) = dnx.at(i,3);
+        answer.at(1, i) = dnx.at(i, 1);
+        answer.at(2, i) = dnx.at(i, 2);
+        answer.at(3, i) = dnx.at(i, 3);
     }
 }
 
 
 
 void
-QTRSpaceGrad :: computeNLBMatrixAt(FloatMatrix &answer, GaussPoint *aGaussPoint, int i) 
+QTRSpaceGrad :: computeNLBMatrixAt(FloatMatrix &answer, GaussPoint *aGaussPoint, int i)
 // Returns the [45x45] nonlinear part of strain-displacement matrix {B} of the receiver,
 // evaluated at aGaussPoint
 
@@ -151,7 +150,7 @@ QTRSpaceGrad :: computeNLBMatrixAt(FloatMatrix &answer, GaussPoint *aGaussPoint,
     FloatMatrix dnx;
 
     // compute the derivatives of shape functions
-    this->interpolation.evaldNdx(dnx, * aGaussPoint->giveCoordinates(), FEIElementGeometryWrapper(this));
+    this->interpolation.evaldNdx( dnx, * aGaussPoint->giveCoordinates(), FEIElementGeometryWrapper(this) );
 
     answer.resize(30, 30);
     answer.zero();
@@ -162,7 +161,7 @@ QTRSpaceGrad :: computeNLBMatrixAt(FloatMatrix &answer, GaussPoint *aGaussPoint,
         for ( int k = 0; k < 10; k++ ) {
             for ( int l = 0; l < 3; l++ ) {
                 for ( int j = 1; j <= 30; j += 3 ) {
-                    answer.at(k * 3 + l + 1, l + j) = dnx.at(i, k + 1) * dnx.at( i, ( j - 1 ) / 3 + 1 );
+                    answer.at(k * 3 + l + 1, l + j) = dnx.at(i, k + 1) * dnx.at(i, ( j - 1 ) / 3 + 1);
                 }
             }
         }
@@ -170,7 +169,7 @@ QTRSpaceGrad :: computeNLBMatrixAt(FloatMatrix &answer, GaussPoint *aGaussPoint,
         for ( int k = 0; k < 10; k++ ) {
             for ( int l = 0; l < 3; l++ ) {
                 for ( int j = 1; j <= 30; j += 3 ) {
-                    answer.at(k * 3 + l + 1, l + j) = dnx.at(2, k + 1) * dnx.at( 3, ( j - 1 ) / 3 + 1 ) + dnx.at(3, k + 1) * dnx.at( 2, ( j - 1 ) / 3 + 1 );
+                    answer.at(k * 3 + l + 1, l + j) = dnx.at(2, k + 1) * dnx.at(3, ( j - 1 ) / 3 + 1) + dnx.at(3, k + 1) * dnx.at(2, ( j - 1 ) / 3 + 1);
                 }
             }
         }
@@ -178,7 +177,7 @@ QTRSpaceGrad :: computeNLBMatrixAt(FloatMatrix &answer, GaussPoint *aGaussPoint,
         for ( int k = 0; k < 10; k++ ) {
             for ( int l = 0; l < 3; l++ ) {
                 for ( int j = 1; j <= 30; j += 3 ) {
-                    answer.at(k * 3 + l + 1, l + j) = dnx.at(1, k + 1) * dnx.at(3, ( j - 1 ) / 3 + 1 ) + dnx.at(3, k + 1) * dnx.at(1, ( j - 1 ) / 3 + 1 );
+                    answer.at(k * 3 + l + 1, l + j) = dnx.at(1, k + 1) * dnx.at(3, ( j - 1 ) / 3 + 1) + dnx.at(3, k + 1) * dnx.at(1, ( j - 1 ) / 3 + 1);
                 }
             }
         }
@@ -186,13 +185,10 @@ QTRSpaceGrad :: computeNLBMatrixAt(FloatMatrix &answer, GaussPoint *aGaussPoint,
         for ( int k = 0; k < 10; k++ ) {
             for ( int l = 0; l < 3; l++ ) {
                 for ( int j = 1; j <= 30; j += 3 ) {
-                    answer.at(k * 3 + l + 1, l + j) = dnx.at(1, k + 1) * dnx.at(2, ( j - 1 ) / 3 + 1 ) + dnx.at(2, k + 1) * dnx.at(1, ( j - 1 ) / 3 + 1 );
+                    answer.at(k * 3 + l + 1, l + j) = dnx.at(1, k + 1) * dnx.at(2, ( j - 1 ) / 3 + 1) + dnx.at(2, k + 1) * dnx.at(1, ( j - 1 ) / 3 + 1);
                 }
             }
         }
     }
-
 }
-
-
 }

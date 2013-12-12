@@ -44,9 +44,8 @@
 #include "contextioerr.h"
 
 namespace oofem {
-
 TimeStep :: TimeStep(int n, EngngModel *e, int mn, double tt, double dt, StateCounterType counter, TimeDiscretizationType td) :
-    eModel(e), targetTime(tt), intrinsicTime(tt), deltaT(dt), solutionStateCounter(counter), 
+    eModel(e), targetTime(tt), intrinsicTime(tt), deltaT(dt), solutionStateCounter(counter),
     number(n), version(0), substepNumber(0), mstepNumber(mn), timeDiscretization(td)
 {
     // Target time and intrinsic time is the same in the constructor.
@@ -79,7 +78,7 @@ TimeStep :: TimeStep(const TimeStep &src)
 }
 
 TimeStep &
-TimeStep :: operator = ( const TimeStep & src )
+TimeStep :: operator=(const TimeStep &src)
 {
     eModel = src.eModel;
     targetTime = src.targetTime;
@@ -179,8 +178,8 @@ TimeStep :: saveContext(DataStream *stream, ContextMode mode, void *obj)
     }
 
     // write timeDiscretization
-    int tDiscretization = (int) timeDiscretization;
-    if ( !stream->write(&tDiscretization, 1) ) {
+    int tDiscretization = ( int ) timeDiscretization;
+    if ( !stream->write(& tDiscretization, 1) ) {
         THROW_CIOERR(CIO_IOERR);
     }
 

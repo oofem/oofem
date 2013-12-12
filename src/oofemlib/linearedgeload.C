@@ -39,8 +39,7 @@
 #include "dynamicinputrecord.h"
 
 namespace oofem {
-
-REGISTER_BoundaryCondition( LinearEdgeLoad );
+REGISTER_BoundaryCondition(LinearEdgeLoad);
 
 IRResultType
 LinearEdgeLoad :: initializeFrom(InputRecord *ir)
@@ -71,9 +70,9 @@ LinearEdgeLoad :: initializeFrom(InputRecord *ir)
 }
 
 
-void LinearEdgeLoad :: giveInputRecord(DynamicInputRecord& input)
+void LinearEdgeLoad :: giveInputRecord(DynamicInputRecord &input)
 {
-    BoundaryLoad :: giveInputRecord ( input );
+    BoundaryLoad :: giveInputRecord(input);
     input.setField(this->formulation, _IFT_LinearEdgeLoad_formulation);
     if ( this->formulation == FT_Global ) {
         input.setField(this->startCoords, _IFT_LinearEdgeLoad_startcoord);

@@ -51,8 +51,7 @@
 #endif
 
 namespace oofem {
-
-REGISTER_Element( Beam2d );
+REGISTER_Element(Beam2d);
 
 // Set up interpolation coordinates
 FEI2dLineLin Beam2d :: interp_geom(1, 3);
@@ -123,7 +122,7 @@ Beam2d :: computeGaussPoints()
         numberOfIntegrationRules = 1;
         integrationRulesArray = new IntegrationRule * [ 1 ];
         integrationRulesArray [ 0 ] = new GaussIntegrationRule(1, this, 1, 3);
-        this->giveCrossSection()->setupIntegrationPoints( *integrationRulesArray[0], 3, this );
+        this->giveCrossSection()->setupIntegrationPoints(* integrationRulesArray [ 0 ], 3, this);
     }
 }
 
@@ -275,7 +274,7 @@ Beam2d :: computeVolumeAround(GaussPoint *gp)
 
 
 void
-Beam2d :: computeStrainVectorInLayer(FloatArray &answer, const FloatArray &masterGpStrain, GaussPoint *slaveGp, TimeStep *tStep)
+Beam2d :: computeStrainVectorInLayer(FloatArray &answer, const FloatArray &masterGpStrain, GaussPoint *masterGp, GaussPoint *slaveGp, TimeStep *tStep)
 //
 // returns full 3d strain vector of given layer (whose z-coordinate from center-line is
 // stored in slaveGp) for given tStep
@@ -283,8 +282,8 @@ Beam2d :: computeStrainVectorInLayer(FloatArray &answer, const FloatArray &maste
 {
     double layerZeta, layerZCoord, top, bottom;
 
-    top    = this->giveCrossSection()->give(CS_TopZCoord);
-    bottom = this->giveCrossSection()->give(CS_BottomZCoord);
+    top    = this->giveCrossSection()->give(CS_TopZCoord, masterGp);
+    bottom = this->giveCrossSection()->give(CS_BottomZCoord, masterGp);
     layerZeta = slaveGp->giveCoordinate(3);
     layerZCoord = 0.5 * ( ( 1. - layerZeta ) * bottom + ( 1. + layerZeta ) * top );
 
@@ -471,7 +470,7 @@ Beam2d :: computeEdgeLoadVectorAt(FloatArray &answer, Load *load, int iedge, Tim
     // evaluates the receivers edge load vector
     // for clamped beam
     //
-    BoundaryLoad *edgeLoad = dynamic_cast< BoundaryLoad * >(load);
+    BoundaryLoad *edgeLoad = dynamic_cast< BoundaryLoad * >( load );
     if ( edgeLoad ) {
         if ( edgeLoad->giveNumberOfDofs() != 3 ) {
             _error("computeEdgeLoadVectorAt: load number of dofs mismatch");
@@ -585,8 +584,9 @@ Beam2d :: computeEdgeLoadVectorAt(FloatArray &answer, Load *load, int iedge, Tim
 void
 Beam2d :: computeBodyLoadVectorAt(FloatArray &answer, Load *load, TimeStep *tStep, ValueModeType mode)
 {
-    StructuralElement::computeBodyLoadVectorAt(answer, load, tStep, mode);
-    answer.times(this->giveCrossSection()->give(CS_Area));
+    FloatArray lc(1);
+    StructuralElement :: computeBodyLoadVectorAt(answer, load, tStep, mode);
+    answer.times( this->giveCrossSection()->give(CS_Area, & lc, NULL, this) );
 }
 
 
@@ -674,13 +674,13 @@ Beam2d :: computeConsistentMassMatrix(FloatMatrix &answer, TimeStep *tStep, doub
     double kappa = this->giveKappaCoeff();
     double kappa2 = kappa * kappa;
 
-    double density = this->giveMaterial()->give('d', gp);
-    if(ipDensity != NULL) {
-    	// Override density if desired
-    	density = *ipDensity;
+    double density = this->giveMaterial()->give('d', gp); // constant density assumed
+    if ( ipDensity != NULL ) {
+        // Override density if desired
+        density = * ipDensity;
     }
 
-    double area = this->giveCrossSection()->give(CS_Area);
+    double area = this->giveCrossSection()->give(CS_Area, gp); // constant area assumed
     double c2 = ( area * density ) / ( ( 1. + 2. * kappa ) * ( 1. + 2. * kappa ) );
     double c1 = ( area * density );
 

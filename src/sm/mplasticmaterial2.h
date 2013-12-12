@@ -73,10 +73,10 @@ protected:
     FloatArray plasticStrainVector;
     FloatArray tempPlasticStrainVector;
 
-    /** 
-    * Strain space hardening variables, e.g. cumulative plastic strain which can be used
-    * in yield stress evaluation or damage.
-    */
+    /**
+     * Strain space hardening variables, e.g. cumulative plastic strain which can be used
+     * in yield stress evaluation or damage.
+     */
     FloatArray strainSpaceHardeningVarsVector;
     FloatArray tempStrainSpaceHardeningVarsVector;
 
@@ -117,11 +117,11 @@ public:
     void letTempPlasticStrainVectorBe(const FloatArray &v) { tempPlasticStrainVector = v; }
     void letTempStrainSpaceHardeningVarsVectorBe(const FloatArray &v) { tempStrainSpaceHardeningVarsVector = v; }
     void letStrainSpaceHardeningVarsVectorBe(const FloatArray &v) { strainSpaceHardeningVarsVector = v; }
-    
+
     void letTempDamageBe(double v) { tempDamage = v; }
     double giveDamage() { return damage; }
     double giveTempDamage() { return tempDamage; }
-    
+
     int giveStateFlag() { return state_flag; }
     int giveTempStateFlag() { return temp_state_flag; }
     void letTempStateFlagBe(int v) { temp_state_flag = v; }
@@ -208,8 +208,8 @@ public:
                                                TimeStep * atTime);
 
 
-    virtual void giveRealStressVector(FloatArray & answer, GaussPoint *,
-                              const FloatArray &, TimeStep *);
+    virtual void giveRealStressVector(FloatArray &answer, GaussPoint *,
+                                      const FloatArray &, TimeStep *);
 
     virtual void giveRealStressVector_3d(FloatArray &answer, GaussPoint *gp, const FloatArray &reducedE, TimeStep *tStep)
     { this->giveRealStressVector(answer, gp, reducedE, tStep); }
@@ -357,9 +357,9 @@ protected:
                                           GaussPoint * gp,
                                           TimeStep * atTime);
     virtual void givePlateLayerStiffMtrx(FloatMatrix & answer,
-                                           MatResponseMode,
-                                           GaussPoint * gp,
-                                           TimeStep * atTime);
+                                         MatResponseMode,
+                                         GaussPoint * gp,
+                                         TimeStep * atTime);
 
     virtual void give1dFiberStiffMtrx(FloatMatrix & answer,
                                       MatResponseMode, GaussPoint * gp,

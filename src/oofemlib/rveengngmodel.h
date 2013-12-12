@@ -40,7 +40,6 @@
 #include "timestep.h"
 
 namespace oofem {
-
 /**
  * The rveEngngModel is an abstract class introducing functions for setting boundary conditions on an RVE and computing characteristic data.
  * This class is used when creating an engineering model with RVE capabilities
@@ -51,8 +50,8 @@ class OOFEM_EXPORT rveEngngModel
 {
 public:
 
-	rveEngngModel() {}
-	virtual ~rveEngngModel() {}
+    rveEngngModel() {}
+    virtual ~rveEngngModel() {}
 
     /**
      * Abstract method for setting boundary condition on RVE.
@@ -69,7 +68,6 @@ public:
      */
     virtual void rveGiveCharacteristicData(int type, void *value, void *answer, TimeStep *atTime) = 0;
 };
-
 }
 
 #endif // rveengngmodel_h

@@ -57,7 +57,6 @@
 #endif
 
 namespace oofem {
-
 class DataStream;
 class Domain;
 class Interface;
@@ -90,7 +89,7 @@ public:
      * node number in particular domain.
      * @param d Domain to which component belongs to.
      */
-    FEMComponent(int n, Domain *d): number(n), domain(d) { }
+    FEMComponent(int n, Domain *d) : number(n), domain(d) { }
     /// Virtual destructor.
     virtual ~FEMComponent() { }
 
@@ -206,11 +205,3 @@ public:
 };
 } // end namespace oofem
 #endif // femcmpnn_h
-
-
-
-
-
-
-
-

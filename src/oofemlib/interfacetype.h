@@ -66,7 +66,7 @@ enum InterfaceType {
 
     NonlocalMaterialStatusExtensionInterfaceType,
     GradDpMaterialExtensionInterfaceType,
-	GradDpMaterialStatusExtensionInterfaceType,
+    GradDpMaterialStatusExtensionInterfaceType,
 
     NonlocalMaterialExtensionInterfaceType,
     NonlocalMaterialStiffnessInterfaceType,
@@ -82,7 +82,6 @@ enum InterfaceType {
     XfemElementInterfaceType,
     VTKXMLExportModuleElementInterfaceType,
     FailureModuleElementInterfaceType
-
 };
 } // end namespace oofem
 #endif // interfacetype_h

@@ -258,5 +258,4 @@ Material :: initMaterial(Element *element)
 {
     return 0;
 }
-
 } // end namespace oofem

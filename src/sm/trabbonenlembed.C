@@ -49,7 +49,7 @@ namespace oofem {
 ////////////TRABECULAR BONE NONLOCAL MATERIAL////////////////////
 /////////////////////////////////////////////////////////////////
 
-REGISTER_Material( TrabBoneNLEmbed );
+REGISTER_Material(TrabBoneNLEmbed);
 
 TrabBoneNLEmbed :: TrabBoneNLEmbed(int n, Domain *d) : TrabBoneEmbed(n, d), StructuralNonlocalMaterialExtensionInterface(d)
 {
@@ -121,11 +121,11 @@ TrabBoneNLEmbed :: computeCumPlastStrain(double &alpha, GaussPoint *gp, TimeStep
     this->buildNonlocalPointTable(gp);
     this->updateDomainBeforeNonlocAverage(atTime);
 
-    std::list< localIntegrationRecord > *list = status->giveIntegrationDomainList();
-    std::list< localIntegrationRecord > :: iterator pos;
+    std :: list< localIntegrationRecord > *list = status->giveIntegrationDomainList();
+    std :: list< localIntegrationRecord > :: iterator pos;
 
     for ( pos = list->begin(); pos != list->end(); ++pos ) {
-        nonlocStatus = static_cast< TrabBoneNLEmbedStatus * >( this->giveStatus( pos->nearGp ) );
+        nonlocStatus = static_cast< TrabBoneNLEmbedStatus * >( this->giveStatus(pos->nearGp) );
         nonlocalContribution = nonlocStatus->giveLocalCumPlastStrainForAverage();
         nonlocalContribution *= pos->weight;
         nonlocalCumPlastStrain += nonlocalContribution;
@@ -254,6 +254,4 @@ TrabBoneNLEmbedStatus :: giveInterface(InterfaceType type)
         return NULL;
     }
 }
-
-
 } // end namespace oofem

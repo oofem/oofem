@@ -66,8 +66,8 @@ protected:
     /// Number of units in the chain.
     int nUnits;
     /// Hidden (internal) variables, the meaning of which depends on the type of chain.
-    std :: vector< FloatArray > hiddenVars; 
-    std :: vector< FloatArray > tempHiddenVars; 
+    std :: vector< FloatArray >hiddenVars;
+    std :: vector< FloatArray >tempHiddenVars;
 
     /**
      * Total shrinkage strain (needed only when the shrinkage evolution

@@ -63,9 +63,9 @@ IRResultType
 QTruss1d :: initializeFrom(InputRecord *ir)
 {
     IRResultType result = this->StructuralElement :: initializeFrom(ir);
-	if(result != IRRT_OK) {
-		return result;
-	}
+    if ( result != IRRT_OK ) {
+        return result;
+    }
 
     return IRRT_OK;
 }
@@ -91,7 +91,7 @@ QTruss1d :: computeVolumeAround(GaussPoint *gp)
 {
     double detJ = fabs( this->interpolation.giveTransformationJacobian( * gp->giveCoordinates(), FEIElementGeometryWrapper(this) ) );
     double weight  = gp->giveWeight();
-    return detJ * weight * this->giveCrossSection()->give(CS_Area);
+    return detJ * weight * this->giveCrossSection()->give(CS_Area, gp);
 }
 
 

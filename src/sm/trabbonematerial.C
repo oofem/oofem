@@ -41,8 +41,7 @@
 #include "classfactory.h"
 
 namespace oofem {
-
-REGISTER_Material( TrabBoneMaterial );
+REGISTER_Material(TrabBoneMaterial);
 
 TrabBoneMaterial :: TrabBoneMaterial(int n, Domain *d) : StructuralMaterial(n, d)
 {}
@@ -140,7 +139,7 @@ TrabBoneMaterial :: performPlasticityReturn(GaussPoint *gp, const FloatArray &to
             gNewton = sigp / fabs(sigp) * ( E0 * epsnew - ( E0 + Ek ) * ( epsp + depsp ) ) - ( sigY + Eil * ( alpha +
                                                                                                               sigp / fabs(sigp) * depsp ) + Eie * ( 1 - exp( -kie * ( alpha + sigp / fabs(sigp) * depsp ) ) ) );
             dgNewton = -sigp / fabs(sigp) * ( ( E0 + Ek ) + Eil +
-                                             Eie * kie * exp( -kie * ( alpha + sigp / fabs(sigp) * depsp ) ) );
+                                              Eie * kie * exp( -kie * ( alpha + sigp / fabs(sigp) * depsp ) ) );
             depsp += -gNewton / dgNewton;
         }
 
@@ -214,8 +213,8 @@ TrabBoneMaterial :: computeDamage(GaussPoint *gp,  TimeStep *atTime)
 
 void
 TrabBoneMaterial :: giveRealStressVector_1d(FloatArray &answer, GaussPoint *gp,
-                                         const FloatArray &totalStrain,
-                                         TimeStep *atTime)
+                                            const FloatArray &totalStrain,
+                                            TimeStep *atTime)
 {
     double epsnew, epsp;
     double dam;
@@ -436,5 +435,4 @@ MaterialStatus *TrabBoneMaterial :: CreateStatus(GaussPoint *gp) const
         new  TrabBoneMaterialStatus(1, StructuralMaterial :: giveDomain(), gp);
     return status;
 }
-
 } // end namespace oofem

@@ -42,7 +42,6 @@
 #include "structuralinterfacematerial.h"
 
 namespace oofem {
-
 MMAClosestIPTransfer :: MMAClosestIPTransfer() : MaterialMappingAlgorithm()
 { }
 
@@ -52,17 +51,16 @@ MMAClosestIPTransfer :: __init(Domain *dold, IntArray &type, FloatArray &coords,
     SpatialLocalizer *sl = dold->giveSpatialLocalizer();
     this->source = sl->giveClosestIP(coords, region, iCohesiveZoneGP);
 
-    if(iCohesiveZoneGP) {
-    	XfemElementInterface *xFemEl = dynamic_cast<XfemElementInterface*>(source->giveElement());
+    if ( iCohesiveZoneGP ) {
+        XfemElementInterface *xFemEl = dynamic_cast< XfemElementInterface * >( source->giveElement() );
 
-    	if(xFemEl == NULL) {
-    		OOFEM_ERROR("In MMAClosestIPTransfer :: __init: xFemEl == NULL.\n");
-    	}
+        if ( xFemEl == NULL ) {
+            OOFEM_ERROR("In MMAClosestIPTransfer :: __init: xFemEl == NULL.\n");
+        }
 
-    	mpMaterialStatus = xFemEl->mpCZMat->giveStatus(source);
-    }
-    else {
-    	mpMaterialStatus = source->giveMaterial()->giveStatus(source);
+        mpMaterialStatus = xFemEl->mpCZMat->giveStatus(source);
+    } else {
+        mpMaterialStatus = source->giveMaterial()->giveStatus(source);
     }
 
     if ( !source ) {
@@ -85,19 +83,15 @@ MMAClosestIPTransfer :: __mapVariable(FloatArray &answer, FloatArray &coords,
 int
 MMAClosestIPTransfer :: mapStatus(MaterialStatus &oStatus) const
 {
-
     if ( mpMaterialStatus != NULL ) {
+        MaterialStatusMapperInterface &interface = dynamic_cast< MaterialStatusMapperInterface & >( oStatus );
+        interface.copyStateVariables(* mpMaterialStatus);
 
-    	MaterialStatusMapperInterface &interface = dynamic_cast<MaterialStatusMapperInterface&>(oStatus);
-    	interface.copyStateVariables(*mpMaterialStatus);
-
-    	return 1;
-    }
-    else {
-    	OOFEM_ERROR("Error in MMAClosestIPTransfer :: mapStatus(): source not set.\n");
+        return 1;
+    } else {
+        OOFEM_ERROR("Error in MMAClosestIPTransfer :: mapStatus(): source not set.\n");
     }
 
-	return 0;
+    return 0;
 }
-
 } // end namespace oofem

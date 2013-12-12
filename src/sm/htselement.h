@@ -47,7 +47,7 @@ protected:
     int numberOfEdges;
     //debug
     double lambda, mu;
-    double cgX,cgY;
+    double cgX, cgY;
     int numberOfStressDofs;
     int numberOfDofs;
 
@@ -61,37 +61,37 @@ public:
     virtual const char *giveClassName() const { return "HTSelement"; }
 
 protected:
-    virtual void computeBmatrixAt(GaussPoint *gp, FloatMatrix &answer,int, int){;}
-    virtual void computeNmatrixAt(const FloatArray &iLocCoord, FloatMatrix &answer){;}
+    virtual void computeBmatrixAt(GaussPoint *gp, FloatMatrix &answer, int, int) {; }
+    virtual void computeNmatrixAt(const FloatArray &iLocCoord, FloatMatrix &answer) {; }
     virtual void computeStiffnessMatrix(FloatMatrix &answer, MatResponseMode rMode, TimeStep *tStep);
-    double computeVolumeAroundSide(GaussPoint *gp, int elemSideNumber);    
-    Node* giveSideNode(int elementSideNumber, int nodeNumber);
+    double computeVolumeAroundSide(GaussPoint *gp, int elemSideNumber);
+    Node *giveSideNode(int elementSideNumber, int nodeNumber);
     double  giveSideLength(int sideNumber);
-    virtual int computeNumberOfDofs() { return 4*numberOfEdges; }
+    virtual int computeNumberOfDofs() { return 4 * numberOfEdges; }
     virtual void computeGaussPoints();
-    virtual void giveDofManDofIDMask(int inode, EquationID,IntArray &) const;
-    virtual StructuralElement* giveStructuralElement() { return this; }
+    virtual void giveDofManDofIDMask(int inode, EquationID, IntArray &) const;
+    virtual StructuralElement *giveStructuralElement() { return this; }
     //jak se pocita deformace???
     virtual void computeStrainVector(FloatArray &answer, GaussPoint *gp, TimeStep *stepN) { answer.resize(numberOfStressDofs); }
     //dodelat vypocet napeti!!!
     virtual void computeStressVector(FloatArray &answer, const FloatArray &strain, GaussPoint *gp, TimeStep *stepN) { answer.resize(numberOfStressDofs); }
     //dodelat internal forces, budou potreba pro nelinearni vypocet
-    virtual void giveInternalForcesVector(FloatArray &answer,TimeStep *tStep, int useUpdatedGpRecord){answer.resize(numberOfDofs);}
+    virtual void giveInternalForcesVector(FloatArray &answer, TimeStep *tStep, int useUpdatedGpRecord) { answer.resize(numberOfDofs); }
     virtual void computeForceLoadVector(FloatArray &answer, TimeStep *stepN, ValueModeType mode);
 
-    void computePuVectorAt(FloatArray &answer, FloatMatrix N, FloatArray u, GaussPoint *gp,int sideNumber);
+    void computePuVectorAt(FloatArray &answer, FloatMatrix N, FloatArray u, GaussPoint *gp, int sideNumber);
     void computePsVectorAt(FloatArray &answer, FloatArray t, GaussPoint *gp);
     void computePrescribedDisplacementLoadVectorAt(FloatArray &answer, TimeStep *stepN, ValueModeType mode);
-    virtual void computeEdgeLoadVectorAt(FloatArray &answer, Load *load,int iEdge, TimeStep *tStep, ValueModeType mode);
+    virtual void computeEdgeLoadVectorAt(FloatArray &answer, Load *load, int iEdge, TimeStep *tStep, ValueModeType mode);
     virtual int testElementExtension(ElementExtension ext) { return ( ext == Element_EdgeLoadSupport ); }
 
 
-    void computeFMatrixAt(FloatMatrix &answer,FloatMatrix N, GaussPoint *gp, int sideNumber);
-    void computeAMatrixAt(FloatMatrix &answer, FloatMatrix N,GaussPoint *gp, int sideNumber);
-    void computeUvMatrixAt(FloatMatrix &answer, GaussPoint* gp, int sideNubmer);
-    void computeSvMatrixAt(FloatMatrix &answer, GaussPoint* gp, int sideNumber);
-    void computeUgammaMatrixAt(FloatMatrix &answer, GaussPoint* gp);
-    void computeOutwardNormalMatrix(FloatMatrix &answer, int sideNumber);  
+    void computeFMatrixAt(FloatMatrix &answer, FloatMatrix N, GaussPoint *gp, int sideNumber);
+    void computeAMatrixAt(FloatMatrix &answer, FloatMatrix N, GaussPoint *gp, int sideNumber);
+    void computeUvMatrixAt(FloatMatrix &answer, GaussPoint *gp, int sideNubmer);
+    void computeSvMatrixAt(FloatMatrix &answer, GaussPoint *gp, int sideNumber);
+    void computeUgammaMatrixAt(FloatMatrix &answer, GaussPoint *gp);
+    void computeOutwardNormalMatrix(FloatMatrix &answer, int sideNumber);
 
 
     void computeCenterOfGravity();
@@ -99,38 +99,36 @@ protected:
     //uv functions
     void uv1(FloatArray &answer, double x, double y);
     void uv2(FloatArray &answer, double x, double y);
-    void uv3(FloatArray &answer,double x, double y);
-    void uv4(FloatArray &answer,double x, double y);
-    void uv5(FloatArray &answer,double x, double y);
-    void uv6(FloatArray &answer,double x, double y);
-    void uv7(FloatArray &answer,double x, double y);
-    void uv8(FloatArray &answer,double x, double y);
-    void uv9(FloatArray &answer,double x, double y);
-    void uv10(FloatArray &answer,double x, double y);
-    void uv11(FloatArray &answer,double x, double y);
-    void uv12(FloatArray &answer,double x, double y);
-    void uv25_4(FloatArray &answer,double x, double y);
+    void uv3(FloatArray &answer, double x, double y);
+    void uv4(FloatArray &answer, double x, double y);
+    void uv5(FloatArray &answer, double x, double y);
+    void uv6(FloatArray &answer, double x, double y);
+    void uv7(FloatArray &answer, double x, double y);
+    void uv8(FloatArray &answer, double x, double y);
+    void uv9(FloatArray &answer, double x, double y);
+    void uv10(FloatArray &answer, double x, double y);
+    void uv11(FloatArray &answer, double x, double y);
+    void uv12(FloatArray &answer, double x, double y);
+    void uv25_4(FloatArray &answer, double x, double y);
 
     //sv functions
-    void sv1(FloatArray &answer,double x, double y);
-    void sv2(FloatArray &answer,double x, double y);
-    void sv3(FloatArray &answer,double x, double y);
-    void sv4(FloatArray &answer,double x, double y);
-    void sv5(FloatArray &answer,double x, double y);
-    void sv6(FloatArray &answer,double x, double y);
-    void sv7(FloatArray &answer,double x, double y);
-    void sv8(FloatArray &answer,double x, double y);
-    void sv9(FloatArray &answer,double x, double y);
-    void sv10(FloatArray &answer,double x, double y);
-    void sv11(FloatArray &answer,double x, double y);
-    void sv12(FloatArray &answer,double x, double y);
-    void sv25_4(FloatArray &answer,double x, double y);
+    void sv1(FloatArray &answer, double x, double y);
+    void sv2(FloatArray &answer, double x, double y);
+    void sv3(FloatArray &answer, double x, double y);
+    void sv4(FloatArray &answer, double x, double y);
+    void sv5(FloatArray &answer, double x, double y);
+    void sv6(FloatArray &answer, double x, double y);
+    void sv7(FloatArray &answer, double x, double y);
+    void sv8(FloatArray &answer, double x, double y);
+    void sv9(FloatArray &answer, double x, double y);
+    void sv10(FloatArray &answer, double x, double y);
+    void sv11(FloatArray &answer, double x, double y);
+    void sv12(FloatArray &answer, double x, double y);
+    void sv25_4(FloatArray &answer, double x, double y);
 
     //u_gamma functions
     double u_gammaConst(GaussPoint *gp);
     double u_gammaLin(GaussPoint *gp);
-
-
 };
 } // end namespace oofem
 #endif // htselement_h

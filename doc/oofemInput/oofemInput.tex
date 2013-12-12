@@ -565,7 +565,7 @@ following format:
   \recentry{}{\PoptFieldnotype{nonlocalext}}
   \recentry{}{\PoptFieldnotype{loadbalancing}}
 \end{record}
-This record is immediately followed by metastep records with the format described bellow.
+This record is immediately followed by metastep records with the format described below.
 The analysis parameters have following meaning
 \begin{itemize}
 \item \param{nmsteps} - determines the number of
@@ -645,13 +645,13 @@ fixed, however, the new reference loading vector will be assembled for
 the new metastep.
 \end{itemize}
 
-The direct solver corresponds to \param{controlmode}=1 and the Newton-Raphson solver is used.
+The direct control corresponds to \param{controlmode}=1 and the Newton-Raphson solver is used.
 Under the direct control, the total load
 vector assembled for specific solution step represents the load level,
 where equilibrium is searched. The implementation supports also
 displacement control -  it is possible to prescribe one or more
 displacements by applying ``quasi prescribed'' boundary
-condition(s)\footnote{Hovewer, the problem does not supports the
+condition(s)\footnote{Hovewer, the problem does not support the
 changes of static system. But it is possible to apply direct
 displacement control without requiring BC applied (see nrsolver
 documentation). Therefore it is possible to combine
@@ -670,6 +670,7 @@ load-control are:\\
   \recentry{}{\optField{lsearchmaxeta}{rn} \optField{lsearchtol}{rn}}
   \recentry{}{\optional{\field{nccdg}{in} \field{ccdg1}{ia} ... \field{ccdgN}{ia}  }}
   \recentry{}{\field{rtolv}{rn} \optField{rtolf}{rn} \optField{rtold}{tn}}
+  \recentry{}{\optField{initialGuess}{rn}}
 \end{record}
 where
 \begin{itemize}
@@ -708,6 +709,7 @@ iterative change vector and for residual unbalanced force vector). Optionally, t
 independent relative convergence crteria for unbalanced forces and displacement
 iterative change. If the default convergence criteria is used,
 the parameters \param{rtolv},\param{rtolf}, and \param{rtold} are real values. If the convergence criteria DOF groups are used (see bellow the description of \param{nccdg} parameter) then they should be specified as real valued arrays of \param{nccdg} size, and individual values define relative convergence criteria for each individual dof group.
+\item \param{initialGuess} is an optional parameter with default vaue 0, for which the first iteration of each step starts from the previously converged state and applies the prescribed displacement increments. This can lead to very high strains in elements connected to the nodes with changing prescribed displacements and the state can be far from equilibrium, which may results into slow convergence and strain localization near the boundary. If \param{initialGuess} is set to 1, the contribution of the prescribed displacement increments to the internal nodal forces is linearized and moved to the right-hand side, which often results into an initial solution closer to equilibrium. For instance, if the step is actually elastic, equilibrium is fully restored after the second iteration, while the default method may require more iterations.  
 \end{itemize}
 
 The indirect solver corresponds to \param{controlmode}=0 and the CALM
@@ -2147,7 +2149,8 @@ The numbering should start from one and should end at n, where n is the number o
 
 The crossSectType keyword can be one from following possibilities
 \begin{itemize}
-\item
+\item 
+Integral cross section with constant properties\\
 \begin{record}[0.9\textwidth]
   \recentry{\entKeywordInst{SimpleCS}}{\optField{thick}{rn} \optField{width}{rn} \optField{area}{rn}}
   \recentry{}{\optField{iy}{rn} \optField{iz}{rn} \optField{ik}{rn}}
@@ -2157,13 +2160,25 @@ Represents integral type of cross section model. In current
 implementation, such cross section is described using cross section
 thick (\param{thickVal}) and width (\param{widthVal}). For some
 problems (for example 3d), the corresponding volume and cross section dimensions are
-determined using element geometry, and then you can omit \param{thickVal} and \param{widthVal}
-parameters. Parameter \param{area} allows to set cross section area, parameters \param{iz}, \param{iz}, and \param{ik} represent 
+determined using element geometry, and then you can omit some (or all) parameters (refer to documentation of individual elements for required cross section properties). Parameter \param{area} allows to set cross section area, parameters \param{iz}, \param{iz}, and \param{ik} represent 
 inertia moment along y and z axis and torsion inertia moment. Parameter \param{beamshearcoeff} allows to set shear correction factor, or equivalent 
 shear areas (\param{shearareay} and \param{shearareaz} parameters) can be provided. 
 These cross section properties are assumed to be defined in local coordinate system of element.\\
 
 \item
+Integral cross section with variable properties\\
+\begin{record}[0.9\textwidth]
+  \recentry{\entKeywordInst{VariableCS}}{\optField{thick}{expr} \optField{width}{expr} \optField{area}{expr}}
+  \recentry{}{\optField{iy}{expr} \optField{iz}{expr} \optField{ik}{expr}}
+  \recentry{}{\optField{shearareay}{expr} \optField{shearareaz}{expr} }
+\end{record}
+Represents integral type of cross section model, where individual cross section parameters can be expressed as an arbitrary function of global coordinates x,y,z. Similar to SimpleCS, for some problems (for example 3d), the corresponding volume and cross section dimensions are
+determined using element geometry, then you can omit many (or some) parameters (refer to documentation of individual elements for required cross section properties). 
+Parameter \param{area} allows to set cross section area, parameters \param{iz}, \param{iz}, and \param{ik} represent 
+inertia moment along y and z axis and torsion inertia moment. Parameters (\param{shearareay} and \param{shearareaz} determine shear area, which is required by beam and plate elements. All cross section properties are assumed to be defined in local coordinate system of element.\\
+
+\item
+Layered cross section \\
 \begin{record}[0.9\textwidth]
   \recentry{\entKeywordInst{LayeredCS}}{\field{nLayers}{in}}
   \recentry{}{\field{LayerMaterials}{ia}}
@@ -2185,6 +2200,7 @@ momentum forces are then computed with regard to it's position).
 Elements using this cross section model must implement layered cross
 section extension. For information see element library manual.
 \item
+Fibered cross section\\
 \begin{record}[0.9\textwidth]
   \recentry{\entKeywordInst{FiberedCS}}{\field{nfibers}{in} \field{fibermaterials}{ia}}
   \recentry{}{\field{thicks}{ra} \field{widths}{ra} \field{thick}{rn} \field{width}{rn}}

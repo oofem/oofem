@@ -85,7 +85,7 @@ public:
 
     // layered cross section support functions
     virtual void computeStrainVectorInLayer(FloatArray &answer, const FloatArray &masterGpStrain,
-                                                  GaussPoint *slaveGp, TimeStep *tStep);
+                                            GaussPoint *masterGp, GaussPoint *slaveGp, TimeStep *tStep);
 
     virtual Interface *giveInterface(InterfaceType it);
 
@@ -97,9 +97,9 @@ public:
     virtual Element *ZZNodalRecoveryMI_giveElement() { return this; }
 
     virtual void NodalAveragingRecoveryMI_computeNodalValue(FloatArray &answer, int node,
-                                                    InternalStateType type, TimeStep *tStep);
+                                                            InternalStateType type, TimeStep *tStep);
     virtual void NodalAveragingRecoveryMI_computeSideValue(FloatArray &answer, int side,
-                                                   InternalStateType type, TimeStep *tStep);
+                                                           InternalStateType type, TimeStep *tStep);
 
 
     // io routines

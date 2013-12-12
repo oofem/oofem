@@ -41,14 +41,12 @@
 #include "contextioerr.h"
 
 namespace oofem {
-
 const double tolerance = 1.0e-12; // small number
 ExpCZMaterial :: ExpCZMaterial(int n, Domain *d) : StructuralMaterial(n, d)
-//
-// constructor
-//
-{
-}
+    //
+    // constructor
+    //
+{}
 
 
 ExpCZMaterial :: ~ExpCZMaterial()
@@ -73,8 +71,8 @@ ExpCZMaterial :: hasMaterialModeCapability(MaterialMode mode)
 
 void
 ExpCZMaterial :: giveRealStressVector(FloatArray &answer, MatResponseForm form, GaussPoint *gp,
-                                                   const FloatArray &jumpVector,
-                                                   TimeStep *atTime)
+                                      const FloatArray &jumpVector,
+                                      TimeStep *atTime)
 //
 // returns real stress vector in 3d stress space of receiver according to
 // previous level of stress and current
@@ -82,7 +80,7 @@ ExpCZMaterial :: giveRealStressVector(FloatArray &answer, MatResponseForm form, 
 //
 {
     ExpCZMaterialStatus *status = static_cast< ExpCZMaterialStatus * >( this->giveStatus(gp) );
-    
+
     this->initGpForNewStep(gp);
 
 
@@ -94,11 +92,11 @@ ExpCZMaterial :: giveRealStressVector(FloatArray &answer, MatResponseForm form, 
     double gn  = jumpVector.at(3);
     double gs1 = jumpVector.at(1);
     double gs2 = jumpVector.at(2);
-    double gs  = sqrt(gs1*gs1 +gs2*gs2);
+    double gs  = sqrt(gs1 * gs1 + gs2 * gs2);
 
-    double xin  = gn / (gn0 + tolerance);
-    double xit  = gs / (gs0 + tolerance); 
-    double tn   = GIc/gn0 * exp(-xin) * ( xin*exp(-xit*xit) + (1.0-q)/(r-1.0)*(1.0 - exp(-xit*xit))*(r-xin)  );
+    double xin  = gn / ( gn0 + tolerance );
+    double xit  = gs / ( gs0 + tolerance );
+    double tn   = GIc / gn0 *exp(-xin) * ( xin * exp(-xit * xit) + ( 1.0 - q ) / ( r - 1.0 ) * ( 1.0 - exp(-xit * xit) ) * ( r - xin ) );
 
     answer.at(1) = 0.0;
     answer.at(2) = 0.0;
@@ -108,13 +106,12 @@ ExpCZMaterial :: giveRealStressVector(FloatArray &answer, MatResponseForm form, 
     // update gp
     status->letTempStrainVectorBe(jumpVector);
     status->letTempStressVectorBe(answer);
-    
 }
 
 void
 ExpCZMaterial :: giveCharacteristicMatrix(FloatMatrix &answer,
-                                                       MatResponseForm form, MatResponseMode rMode,
-                                                       GaussPoint *gp, TimeStep *atTime)
+                                          MatResponseForm form, MatResponseMode rMode,
+                                          GaussPoint *gp, TimeStep *atTime)
 //
 // Returns characteristic material stiffness matrix of the receiver
 //
@@ -133,7 +130,7 @@ ExpCZMaterial :: giveCharacteristicMatrix(FloatMatrix &answer,
 
 void
 ExpCZMaterial :: give3dInterfaceMaterialStiffnessMatrix(FloatMatrix &answer, MatResponseForm form, MatResponseMode rMode,
-                                                                     GaussPoint *gp, TimeStep *atTime)
+                                                        GaussPoint *gp, TimeStep *atTime)
 {
     ExpCZMaterialStatus *status = static_cast< ExpCZMaterialStatus * >( this->giveStatus(gp) );
 
@@ -144,24 +141,21 @@ ExpCZMaterial :: give3dInterfaceMaterialStiffnessMatrix(FloatMatrix &answer, Mat
     double gn  = jumpVector.at(3);
     double gs1 = jumpVector.at(1);
     double gs2 = jumpVector.at(2);
-    double gs  = sqrt(gs1*gs1 +gs2*gs2);
+    double gs  = sqrt(gs1 * gs1 + gs2 * gs2);
 
-    if ( rMode == TangentStiffness ) {    
+    if ( rMode == TangentStiffness ) {
         answer.resize(3, 3);
         answer.zero();
 
-        double xin  = gn / (gn0 + tolerance) ;
-        double xit  = gs / (gs0 + tolerance); 
-        double dtndgn = GIc/gn0/gn0 * exp(-xin) * 
-            ( (1.0-xin)*exp(-xit*xit) + (1.0-q)/(r-1.0)*(1.0-exp(-xit*xit))*(-r+xin-1.0) );
-        
-        answer.at(3,3) = dtndgn;
-        
-    
+        double xin  = gn / ( gn0 + tolerance );
+        double xit  = gs / ( gs0 + tolerance );
+        double dtndgn = GIc / gn0 / gn0 *exp(-xin) *
+                        ( ( 1.0 - xin ) * exp(-xit * xit) + ( 1.0 - q ) / ( r - 1.0 ) * ( 1.0 - exp(-xit * xit) ) * ( -r + xin - 1.0 ) );
+
+        answer.at(3, 3) = dtndgn;
     }  else {
         _error("give2dInterfaceMaterialStiffnessMatrix: unknown MatResponseMode");
     }
-    
 }
 
 
@@ -207,7 +201,7 @@ ExpCZMaterial :: giveStressStrainComponentIndOf(MatResponseForm form, MaterialMo
 
 void
 ExpCZMaterial :: giveStressStrainMask(IntArray &answer, MatResponseForm form,
-                                                   MaterialMode mmode) const
+                                      MaterialMode mmode) const
 //
 // this function returns mask of reduced(if form == ReducedForm)
 // or Full(if form==FullForm) stressStrain vector in full or
@@ -244,7 +238,7 @@ ExpCZMaterial :: giveStressStrainMask(IntArray &answer, MatResponseForm form,
 
 void
 ExpCZMaterial :: giveReducedCharacteristicVector(FloatArray &answer, GaussPoint *gp,
-                                                              const FloatArray &charVector3d)
+                                                 const FloatArray &charVector3d)
 //
 // returns reduced stressVector or strainVector from full 3d vector reduced
 // to vector required by gp->giveStressStrainMode()
@@ -263,8 +257,8 @@ ExpCZMaterial :: giveReducedCharacteristicVector(FloatArray &answer, GaussPoint 
 
 void
 ExpCZMaterial :: giveFullCharacteristicVector(FloatArray &answer,
-                                                           GaussPoint *gp,
-                                                           const FloatArray &strainVector)
+                                              GaussPoint *gp,
+                                              const FloatArray &strainVector)
 //
 // returns full 3d general strain vector from strainVector in reducedMode
 // based on StressStrainMode in gp. Included are strains which
@@ -289,7 +283,7 @@ ExpCZMaterial :: giveFullCharacteristicVector(FloatArray &answer,
 
 void
 ExpCZMaterial :: give2dInterfaceMaterialStiffnessMatrix(FloatMatrix &answer, MatResponseForm form, MatResponseMode rMode,
-                                                                     GaussPoint *gp, TimeStep *atTime)
+                                                        GaussPoint *gp, TimeStep *atTime)
 {
     double om, un;
     IsoInterfaceDamageMaterialStatus *status = static_cast< IsoInterfaceDamageMaterialStatus * >( this->giveStatus(gp) );
@@ -332,12 +326,12 @@ ExpCZMaterial :: give2dInterfaceMaterialStiffnessMatrix(FloatMatrix &answer, Mat
                 return;
 
                 /* Unreachable code - commented out to supress compiler warnings
-                double dom = -( -e0 / un / un * exp( -( ft / gf ) * ( un - e0 ) ) + e0 / un * exp( -( ft / gf ) * ( un - e0 ) ) * ( -( ft / gf ) ) );
-                if ( ( om > 0. ) && ( status->giveTempKappa() > status->giveKappa() ) ) {
-                    answer.at(1, 1) -= se.at(1) * dom;
-                    answer.at(2, 1) -= se.at(2) * dom;
-                }
-                */
+                 * double dom = -( -e0 / un / un * exp( -( ft / gf ) * ( un - e0 ) ) + e0 / un * exp( -( ft / gf ) * ( un - e0 ) ) * ( -( ft / gf ) ) );
+                 * if ( ( om > 0. ) && ( status->giveTempKappa() > status->giveKappa() ) ) {
+                 *  answer.at(1, 1) -= se.at(1) * dom;
+                 *  answer.at(2, 1) -= se.at(2) * dom;
+                 * }
+                 */
             }
         }
     }  else {
@@ -348,7 +342,7 @@ ExpCZMaterial :: give2dInterfaceMaterialStiffnessMatrix(FloatMatrix &answer, Mat
 
 void
 ExpCZMaterial :: give3dInterfaceMaterialStiffnessMatrix(FloatMatrix &answer, MatResponseForm form, MatResponseMode rMode,
-                                                                     GaussPoint *gp, TimeStep *atTime)
+                                                        GaussPoint *gp, TimeStep *atTime)
 {
     double om, un;
     IsoInterfaceDamageMaterialStatus *status = static_cast< IsoInterfaceDamageMaterialStatus * >( this->giveStatus(gp) );
@@ -391,12 +385,12 @@ ExpCZMaterial :: give3dInterfaceMaterialStiffnessMatrix(FloatMatrix &answer, Mat
                 answer.times(1.0 - om);
                 return;
                 /* Unreachable code - commented out to supress compiler warnings
-                double dom = -( -e0 / un / un * exp( -( ft / gf ) * ( un - e0 ) ) + e0 / un * exp( -( ft / gf ) * ( un - e0 ) ) * ( -( ft / gf ) ) );
-                if ( ( om > 0. ) && ( status->giveTempKappa() > status->giveKappa() ) ) {
-                    answer.at(1, 1) -= se.at(1) * dom;
-                    answer.at(2, 1) -= se.at(2) * dom;
-                }
-                */
+                 * double dom = -( -e0 / un / un * exp( -( ft / gf ) * ( un - e0 ) ) + e0 / un * exp( -( ft / gf ) * ( un - e0 ) ) * ( -( ft / gf ) ) );
+                 * if ( ( om > 0. ) && ( status->giveTempKappa() > status->giveKappa() ) ) {
+                 *  answer.at(1, 1) -= se.at(1) * dom;
+                 *  answer.at(2, 1) -= se.at(2) * dom;
+                 * }
+                 */
             }
         }
     }  else {
@@ -412,13 +406,12 @@ ExpCZMaterial :: giveIPValue(FloatArray &answer, GaussPoint *aGaussPoint, Intern
 {
     ExpCZMaterialStatus *status = static_cast< ExpCZMaterialStatus * >( this->giveStatus(aGaussPoint) );
     return StructuralMaterial :: giveIPValue(answer, aGaussPoint, type, atTime);
-    
 }
 
 int
 ExpCZMaterial :: giveIntVarCompFullIndx(IntArray &answer, InternalStateType type, MaterialMode mmode)
 {
-        return StructuralMaterial :: giveIntVarCompFullIndx(answer, type, mmode);
+    return StructuralMaterial :: giveIntVarCompFullIndx(answer, type, mmode);
 }
 
 
@@ -439,16 +432,16 @@ ExpCZMaterial :: initializeFrom(InputRecord *ir)
 
     IR_GIVE_FIELD(ir, this->GIc, _IFT_ExpCZMaterial_g1c);
 
-    this->sigfs = 0.0; 
+    this->sigfs = 0.0;
     IR_GIVE_FIELD(ir, this->sigfn, _IFT_ExpCZMaterial_sigfn);
 
     GIIc = 0.0;
-    
-    this->gn0 = GIc  / (this->sigfn * exp(1.0) + tolerance);                // normal jump at max stress
-    this->gs0 = GIIc / ( sqrt(0.5*exp(1.0)) *this->sigfs + tolerance);      // shear jump at max stress
-    
-    
-    this->q = GIIc/GIc;
+
+    this->gn0 = GIc  / ( this->sigfn * exp(1.0) + tolerance );                // normal jump at max stress
+    this->gs0 = GIIc / ( sqrt( 0.5 * exp(1.0) ) * this->sigfs + tolerance );      // shear jump at max stress
+
+
+    this->q = GIIc / GIc;
     this->r = 0.0; // fix
 
     //this->checkConsistency();                                // check validity of the material paramters
@@ -483,12 +476,10 @@ ExpCZMaterial :: printYourself()
     printf("-other parameters \n");
     printf("  q     = %e \n", this->q);
     printf("  r     = %e \n", this->r);
-
 }
 
 ExpCZMaterialStatus :: ExpCZMaterialStatus(int n, Domain *d, GaussPoint *g) : StructuralMaterialStatus(n, d, g)
-{
-}
+{}
 
 
 ExpCZMaterialStatus :: ~ExpCZMaterialStatus()
@@ -500,13 +491,13 @@ ExpCZMaterialStatus :: printOutputAt(FILE *file, TimeStep *tStep)
 {
     StructuralMaterialStatus :: printOutputAt(file, tStep);
     /*
-    fprintf(file, "status { ");
-    if ( this->damage > 0.0 ) {
-        fprintf(file, "kappa %f, damage %f ", this->kappa, this->damage);
-    }
-
-    fprintf(file, "}\n");
-    */
+     * fprintf(file, "status { ");
+     * if ( this->damage > 0.0 ) {
+     *  fprintf(file, "kappa %f, damage %f ", this->kappa, this->damage);
+     * }
+     *
+     * fprintf(file, "}\n");
+     */
 }
 
 
@@ -569,5 +560,4 @@ ExpCZMaterialStatus :: restoreContext(DataStream *stream, ContextMode mode, void
     return CIO_OK;
 }
 #endif
-
 } // end namespace oofem

@@ -40,15 +40,14 @@
 #include "classfactory.h"
 
 namespace oofem {
-
-REGISTER_BoundaryCondition( BoundaryCondition );
+REGISTER_BoundaryCondition(BoundaryCondition);
 
 double BoundaryCondition :: give(Dof *dof, ValueModeType mode, TimeStep *stepN)
 // Returns the value at stepN of the prescribed value of the kinematic
 // unknown 'u'. Returns 0 if 'u' has no prescribed value.
 {
     double factor = this->giveLoadTimeFunction()->evaluate(stepN, mode);
-    int index = this->dofs.findFirstIndexOf(dof->giveDofID());
+    int index = this->dofs.findFirstIndexOf( dof->giveDofID() );
     if ( !index ) {
         index = 1;
     }
@@ -78,7 +77,7 @@ BoundaryCondition :: initializeFrom(InputRecord *ir)
         }
         // Backwards compatibility with old input method:
         if ( this->dofs.giveSize() ) {
-            values.resize(this->dofs.giveSize());
+            values.resize( this->dofs.giveSize() );
         } else {
             values.resize(1);
         }
@@ -111,5 +110,4 @@ BoundaryCondition :: scale(double s)
 {
     values.times(s);
 }
-
 } // end namespace oofem

@@ -40,7 +40,6 @@
 #define _IFT_IntElLine1_Name "intelline1"
 
 namespace oofem {
-
 class FEI2dLineLin;
 
 /**
@@ -76,14 +75,14 @@ public:
     virtual const char *giveClassName() const { return "IntElLine1"; }
     virtual IRResultType initializeFrom(InputRecord *ir);
 
-    virtual void giveEngTraction ( FloatArray &answer, GaussPoint *gp, const FloatArray &jump, TimeStep *tStep )
+    virtual void giveEngTraction(FloatArray &answer, GaussPoint *gp, const FloatArray &jump, TimeStep *tStep)
     {
-        this->giveInterfaceCrossSection()->giveEngTraction_2d ( answer, gp, jump, tStep );
+        this->giveInterfaceCrossSection()->giveEngTraction_2d(answer, gp, jump, tStep);
     }
 
-    virtual void giveStiffnessMatrix_Eng ( FloatMatrix &answer, MatResponseMode rMode, IntegrationPoint *ip, TimeStep *tStep )
+    virtual void giveStiffnessMatrix_Eng(FloatMatrix &answer, MatResponseMode rMode, IntegrationPoint *ip, TimeStep *tStep)
     {
-        this->giveInterfaceCrossSection()->give2dStiffnessMatrix_Eng ( answer, rMode, ip, tStep );
+        this->giveInterfaceCrossSection()->give2dStiffnessMatrix_Eng(answer, rMode, ip, tStep);
     }
 
 protected:
@@ -94,4 +93,4 @@ protected:
     Element_Geometry_Type giveGeometryType() const { return EGT_quad_1_interface; };
 };
 } // end namespace oofem
-#endif 
+#endif

@@ -44,7 +44,6 @@
 //@}
 
 namespace oofem {
-
 /**
  * This class implements a two-node truss bar element for two-dimensional
  * analysis.

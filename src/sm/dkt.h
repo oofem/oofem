@@ -47,7 +47,6 @@
 #define _IFT_DKTPlate_Name "dktplate"
 
 namespace oofem {
-
 /**
  * This class implements an triangular Discrete Kirchhoff Theory (DKT) element.
  * This element is a plate element suitable for thin plates, as the traswerse shear strain energy is neglected.
@@ -55,7 +54,7 @@ namespace oofem {
  * The derivation starts by assuming quadratic variations of rotation field (fi_x, fi_y)
  * The Kirchhoff hypothesis is imposed at vertices and in side mid nodes
  * The cubic variation of transwerse displacement is assumed along the edges, there is no need to define interpolation for w on the element.
- * As w varies cubically along the edges, its derivative along the edge varies quadratically as the normal rotation along the edge. This allows to satisfy the Kirchhoff hypothesis along the edge. The rotation along the edge is assumed to vary linearly. 
+ * As w varies cubically along the edges, its derivative along the edge varies quadratically as the normal rotation along the edge. This allows to satisfy the Kirchhoff hypothesis along the edge. The rotation along the edge is assumed to vary linearly.
  * This allows to express midside rotations (along and normal to the each edge) as a linear combination of nodal rotations and displacements.
  *
  * Tasks:
@@ -67,7 +66,7 @@ class DKTPlate : public NLStructuralElement,
     public ZZErrorEstimatorInterface, public ZZRemeshingCriteriaInterface
 {
 protected:
-  /// Element geometry approximation
+    /// Element geometry approximation
     static FEI2dTrLin interp_lin;
     double area;
 
@@ -75,7 +74,7 @@ public:
     DKTPlate(int n, Domain *d);
     virtual ~DKTPlate() { }
 
-    virtual FEInterpolation *giveInterpolation() const { return &interp_lin; }
+    virtual FEInterpolation *giveInterpolation() const { return & interp_lin; }
     virtual FEInterpolation *giveInterpolation(DofIDItem id) const;
 
     virtual MaterialMode giveMaterialMode()  { return _2dPlate; }
@@ -134,9 +133,9 @@ public:
     virtual Element *ZZNodalRecoveryMI_giveElement() { return this; }
 
     virtual void NodalAveragingRecoveryMI_computeNodalValue(FloatArray &answer, int node,
-                                                    InternalStateType type, TimeStep *tStep);
+                                                            InternalStateType type, TimeStep *tStep);
     virtual void NodalAveragingRecoveryMI_computeSideValue(FloatArray &answer, int side,
-                                                   InternalStateType type, TimeStep *tStep);
+                                                           InternalStateType type, TimeStep *tStep);
 
     virtual void SPRNodalRecoveryMI_giveSPRAssemblyPoints(IntArray &pap);
     virtual void SPRNodalRecoveryMI_giveDofMansDeterminedByPatch(IntArray &answer, int pap);
@@ -151,7 +150,7 @@ public:
 
     // layered cross section support functions
     virtual void computeStrainVectorInLayer(FloatArray &answer, const FloatArray &masterGpStrain,
-                                    GaussPoint *slaveGp, TimeStep *tStep);
+                                            GaussPoint *masterGp, GaussPoint *slaveGp, TimeStep *tStep);
 
 #ifdef __OOFEG
     virtual void drawRawGeometry(oofegGraphicContext &);

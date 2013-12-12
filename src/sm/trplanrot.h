@@ -48,8 +48,8 @@ namespace oofem {
  * Class implements an triangular three-node  plane-
  * stress elasticity finite element with independent rotation field.
  * Each node has 3 degrees of freedom.
- * 
- * This element is based on the following paper: 
+ *
+ * This element is based on the following paper:
  *   Ibrahimbegovic, A., Taylor, R.L., Wilson, E. L.: A robust quadrilateral membrane finite element with drilling degrees of freedom
  *   Int. J. Num. Meth. Engng., 30, 445-457, 1990.
  */
@@ -95,7 +95,6 @@ public:
     virtual void computeStrainVector(FloatArray &answer, GaussPoint *gp, TimeStep *tStep);
 
     virtual int testElementExtension(ElementExtension ext) { return 0; }
-
 };
 } // end namespace oofem
 #endif //  trplanrot_h

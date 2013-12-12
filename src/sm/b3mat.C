@@ -40,8 +40,7 @@
 #include "classfactory.h"
 
 namespace oofem {
-
-REGISTER_Material( B3Material );
+REGISTER_Material(B3Material);
 
 IRResultType
 B3Material :: initializeFrom(InputRecord *ir)
@@ -330,7 +329,7 @@ B3Material :: computeTotalAverageShrinkageStrainVector(FloatArray &answer, Gauss
 
     fullAnswer.at(1) = fullAnswer.at(2) = fullAnswer.at(3) = EpsSh * 1.e-6;
 
-    StructuralMaterial :: giveReducedSymVectorForm(answer, fullAnswer, gp->giveMaterialMode());
+    StructuralMaterial :: giveReducedSymVectorForm( answer, fullAnswer, gp->giveMaterialMode() );
 }
 
 void
@@ -402,7 +401,7 @@ B3Material :: computeShrinkageStrainVector(FloatArray &answer, GaussPoint *gp, T
         stressVector.zero();
     }
 
-    StructuralMaterial :: giveFullSymVectorForm(fullStressVector, stressVector, gp->giveMaterialMode());
+    StructuralMaterial :: giveFullSymVectorForm( fullStressVector, stressVector, gp->giveMaterialMode() );
     // compute volumetric stress
     sv = 0.0;
     for ( int i = 1; i <= 3; i++ ) {
@@ -424,7 +423,7 @@ B3Material :: computeShrinkageStrainVector(FloatArray &answer, GaussPoint *gp, T
     //fullAnswer.at(6) = h1*(sn*(r* fullStressVector.at(6)))*(wrate+at*trate);
 
     if ( mode == VM_Incremental ) {
-        StructuralMaterial :: giveReducedSymVectorForm(answer, fullAnswer, gp->giveMaterialMode());
+        StructuralMaterial :: giveReducedSymVectorForm( answer, fullAnswer, gp->giveMaterialMode() );
         return;
     } else { // total values required
         FloatArray ssv, fssv;
@@ -435,11 +434,11 @@ B3Material :: computeShrinkageStrainVector(FloatArray &answer, GaussPoint *gp, T
             ssv = * status->giveShrinkageStrainVector();
         }
 
-        StructuralMaterial :: giveFullSymVectorForm(fssv, ssv, gp->giveMaterialMode());
+        StructuralMaterial :: giveFullSymVectorForm( fssv, ssv, gp->giveMaterialMode() );
         // add increment to total values
         fullAnswer.add(fssv);
 
-        StructuralMaterial :: giveReducedSymVectorForm(answer, fullAnswer, gp->giveMaterialMode());
+        StructuralMaterial :: giveReducedSymVectorForm( answer, fullAnswer, gp->giveMaterialMode() );
         return;
     }
 }

@@ -57,7 +57,7 @@ namespace oofem {
 class OOFEM_EXPORT FEI2dQuadBiQuad : public FEI2dQuadQuad
 {
 public:
-    FEI2dQuadBiQuad(int ind1, int ind2) : FEI2dQuadQuad(ind1,ind2) { }
+    FEI2dQuadBiQuad(int ind1, int ind2) : FEI2dQuadQuad(ind1, ind2) { }
 
     // Bulk
     virtual void evalN(FloatArray &answer, const FloatArray &lcoords, const FEICellGeometry &cellgeo);
@@ -69,9 +69,3 @@ protected:
 };
 } // end namespace oofem
 #endif // fei2dquadbiquad_h
-
-
-
-
-
-

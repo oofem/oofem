@@ -38,7 +38,6 @@
 #include "rheoChM.h"
 
 namespace oofem {
-
 /**
  * This class implements associated Material Status to MaxwellChainMaterial.
  */

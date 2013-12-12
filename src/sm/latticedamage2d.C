@@ -45,12 +45,11 @@
 #include "staggeredproblem.h"
 #include "classfactory.h"
 #ifdef __TM_MODULE
-#include "latticetransportelement.h"
+ #include "latticetransportelement.h"
 #endif
 
 namespace oofem {
-
-REGISTER_Material( LatticeDamage2d );
+REGISTER_Material(LatticeDamage2d);
 
 LatticeDamage2d :: LatticeDamage2d(int n, Domain *d) : StructuralMaterial(n, d), RandomMaterialExtensionInterface()
 {}
@@ -296,7 +295,7 @@ LatticeDamage2d :: initDamaged(double kappa, FloatArray &strainVector, GaussPoin
     //get the random variable from the status
     const double e0 = this->give(e0_ID, gp) * this->e0Mean;
 
-    StructuralMaterial :: giveFullSymVectorForm(fullstrain, strainVector, gp->giveMaterialMode());
+    StructuralMaterial :: giveFullSymVectorForm( fullstrain, strainVector, gp->giveMaterialMode() );
 
     if ( ( kappa > e0 ) && ( status->giveDamage() == 0. ) ) {
         this->computePrincipalValDir(principalStrains, principalDir, fullstrain, principal_strain);
@@ -413,8 +412,8 @@ LatticeDamage2d :: giveRealStressVector(FloatArray &answer,
     double waterPressure = 0.;
 
 #ifdef __TM_MODULE
-    if (domain->giveEngngModel()->giveMasterEngngModel() ) {
-      (static_cast< StaggeredProblem *>(domain->giveEngngModel()->giveMasterEngngModel()))->giveCoupledModels(coupledModels);
+    if ( domain->giveEngngModel()->giveMasterEngngModel() ) {
+        ( static_cast< StaggeredProblem * >( domain->giveEngngModel()->giveMasterEngngModel() ) )->giveCoupledModels(coupledModels);
         int couplingFlag = ( static_cast< LatticeStructuralElement * >( gp->giveElement() ) )->giveCouplingFlag();
 
         if ( couplingFlag == 1 && coupledModels.at(2) != 0 && !atTime->isTheFirstStep() ) {
@@ -571,8 +570,8 @@ LatticeDamage2d :: giveInterface(InterfaceType type)
 
 void
 LatticeDamage2d :: giveStiffnessMatrix(FloatMatrix &answer,
-                                            MatResponseMode rMode,
-                                            GaussPoint *gp, TimeStep *atTime)
+                                       MatResponseMode rMode,
+                                       GaussPoint *gp, TimeStep *atTime)
 {
     MaterialMode mMode = gp->giveMaterialMode();
     switch ( mMode ) {
@@ -770,7 +769,7 @@ Interface *
 LatticeDamage2dStatus :: giveInterface(InterfaceType type)
 {
     if ( type == RandomMaterialStatusExtensionInterfaceType ) {
-        return static_cast< RandomMaterialStatusExtensionInterface * >(this);
+        return static_cast< RandomMaterialStatusExtensionInterface * >( this );
     } else {
         return NULL;
     }

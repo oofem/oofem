@@ -63,7 +63,7 @@ namespace oofem {
  *   |/   L ksi        |/                    |/                |/
  *   +--------+--------+                     +-----------------+
  *  8         15        7
- * 
+ *
  * @author Ladislav Svoboda
  * @author Mikael Öhman
  */

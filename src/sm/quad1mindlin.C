@@ -48,8 +48,7 @@
 #include "classfactory.h"
 
 namespace oofem {
-
-REGISTER_Element( Quad1Mindlin );
+REGISTER_Element(Quad1Mindlin);
 
 FEI2dQuadLin Quad1Mindlin :: interp_lin(1, 2);
 
@@ -76,7 +75,7 @@ Quad1Mindlin :: computeGaussPoints()
         numberOfIntegrationRules = 1;
         integrationRulesArray = new IntegrationRule * [ numberOfIntegrationRules ];
         integrationRulesArray [ 0 ] = new GaussIntegrationRule(1, this, 1, 5);
-        this->giveCrossSection()->setupIntegrationPoints( *integrationRulesArray[0], numberOfGaussPoints, this );
+        this->giveCrossSection()->setupIntegrationPoints(* integrationRulesArray [ 0 ], numberOfGaussPoints, this);
     }
 }
 
@@ -99,11 +98,11 @@ Quad1Mindlin :: computeBodyLoadVectorAt(FloatArray &answer, Load *forLoad, TimeS
     force.resize(0);
     if ( gravity.giveSize() ) {
         IntegrationRule *ir = integrationRulesArray [ 0 ]; ///@todo Other/higher integration for lumped mass matrices perhaps?
-        for ( int i = 0; i < ir->giveNumberOfIntegrationPoints(); ++i) {
+        for ( int i = 0; i < ir->giveNumberOfIntegrationPoints(); ++i ) {
             gp = ir->getIntegrationPoint(i);
 
-            this->interp_lin.evalN(n, *gp->giveCoordinates(), FEIElementGeometryWrapper(this));
-            dV = this->computeVolumeAround(gp) * this->giveCrossSection()->give(CS_Thickness);
+            this->interp_lin.evalN( n, * gp->giveCoordinates(), FEIElementGeometryWrapper(this) );
+            dV = this->computeVolumeAround(gp) * this->giveCrossSection()->give(CS_Thickness, gp);
             load = this->giveStructuralCrossSection()->give('d', gp) * gravity.at(3) * dV;
 
             force.add(load, n);
@@ -116,7 +115,6 @@ Quad1Mindlin :: computeBodyLoadVectorAt(FloatArray &answer, Load *forLoad, TimeS
         answer.at(4)  = force.at(2);
         answer.at(7)  = force.at(3);
         answer.at(10) = force.at(4);
-
     } else {
         answer.resize(0);
     }
@@ -131,23 +129,23 @@ Quad1Mindlin :: computeBmatrixAt(GaussPoint *gp, FloatMatrix &answer, int li, in
     FloatArray n;
     FloatMatrix dn;
 
-    this->interp_lin.evaldNdx(dn, *gp->giveCoordinates(),  FEIElementGeometryWrapper(this));
-    this->interp_lin.evalN(n, *gp->giveCoordinates(),  FEIElementGeometryWrapper(this));
+    this->interp_lin.evaldNdx( dn, * gp->giveCoordinates(),  FEIElementGeometryWrapper(this) );
+    this->interp_lin.evalN( n, * gp->giveCoordinates(),  FEIElementGeometryWrapper(this) );
 
     answer.resize(5, 12);
     answer.zero();
 
     ///@todo Check sign here
-    for (int i = 0; i < 4; ++i) {
-        answer(0, 1 + i*3) = dn(i,0);
-        answer(1, 2 + i*3) = dn(i,1);
-        answer(2, 1 + i*3) = dn(i,1);
-        answer(2, 2 + i*3) = dn(i,0);
+    for ( int i = 0; i < 4; ++i ) {
+        answer(0, 1 + i * 3) = dn(i, 0);
+        answer(1, 2 + i * 3) = dn(i, 1);
+        answer(2, 1 + i * 3) = dn(i, 1);
+        answer(2, 2 + i * 3) = dn(i, 0);
 
-        answer(3, 0 + i*3) = -dn(i,1);
-        answer(3, 2 + i*3) = n(i);
-        answer(4, 0 + i*3) = -dn(i,0);
-        answer(4, 1 + i*3) = n(i);
+        answer(3, 0 + i * 3) = -dn(i, 1);
+        answer(3, 2 + i * 3) = n(i);
+        answer(4, 0 + i * 3) = -dn(i, 0);
+        answer(4, 1 + i * 3) = n(i);
     }
 }
 
@@ -219,7 +217,7 @@ Quad1Mindlin :: computeLumpedMassMatrix(FloatMatrix &answer, TimeStep *tStep)
     double dV, mass = 0.;
 
     IntegrationRule *ir = integrationRulesArray [ 0 ]; ///@todo Other/higher integration for lumped mass matrices perhaps?
-    for ( int i = 0; i < ir->giveNumberOfIntegrationPoints(); ++i) {
+    for ( int i = 0; i < ir->giveNumberOfIntegrationPoints(); ++i ) {
         gp = ir->getIntegrationPoint(i);
 
         dV = this->computeVolumeAround(gp);
@@ -228,10 +226,10 @@ Quad1Mindlin :: computeLumpedMassMatrix(FloatMatrix &answer, TimeStep *tStep)
 
     answer.resize(12, 12);
     answer.zero();
-    answer.at(1, 1) = mass*0.25;
-    answer.at(4, 4) = mass*0.25;
-    answer.at(7, 7) = mass*0.25;
-    answer.at(10, 10) = mass*0.25;
+    answer.at(1, 1) = mass * 0.25;
+    answer.at(4, 4) = mass * 0.25;
+    answer.at(7, 7) = mass * 0.25;
+    answer.at(10, 10) = mass * 0.25;
 }
 
 
@@ -245,7 +243,7 @@ Quad1Mindlin :: giveIPValue(FloatArray &answer, GaussPoint *gp, InternalStateTyp
         answer = static_cast< StructuralMaterialStatus * >( gp->giveMaterialStatus() )->giveStrainVector();
         return 1;
     } else {
-        return NLStructuralElement::giveIPValue(answer, gp, type, atTime);
+        return NLStructuralElement :: giveIPValue(answer, gp, type, atTime);
     }
 }
 
@@ -267,13 +265,13 @@ void
 Quad1Mindlin :: giveEdgeDofMapping(IntArray &answer, int iEdge) const
 {
     if ( iEdge == 1 ) { // edge between nodes 1 2
-        answer.setValues(6, 1,2,3,4,5,6);
+        answer.setValues(6, 1, 2, 3, 4, 5, 6);
     } else if ( iEdge == 2 ) { // edge between nodes 2 3
-        answer.setValues(6, 4,5,6,7,8,9);
+        answer.setValues(6, 4, 5, 6, 7, 8, 9);
     } else if ( iEdge == 3 ) { // edge between nodes 3 4
-        answer.setValues(6, 7,8,9,10,11,12);
+        answer.setValues(6, 7, 8, 9, 10, 11, 12);
     } else if ( iEdge == 4 ) { // edge between nodes 4 1
-        answer.setValues(6, 10,11,12,1,2,3);
+        answer.setValues(6, 10, 11, 12, 1, 2, 3);
     } else {
         _error("giveEdgeDofMapping: wrong edge number");
     }
@@ -284,7 +282,7 @@ double
 Quad1Mindlin :: computeEdgeVolumeAround(GaussPoint *gp, int iEdge)
 {
     double detJ = this->interp_lin.edgeGiveTransformationJacobian( iEdge, * gp->giveCoordinates(), FEIElementGeometryWrapper(this) );
-    return detJ *gp->giveWeight();
+    return detJ * gp->giveWeight();
 }
 
 
@@ -307,8 +305,8 @@ Quad1Mindlin :: computeLoadLEToLRotationMatrix(FloatMatrix &answer, int iEdge, G
 
     this->interp_lin.computeLocalEdgeMapping(edgeNodes, iEdge);
 
-    nodeA = this->giveNode(edgeNodes.at(1));
-    nodeB = this->giveNode(edgeNodes.at(2));
+    nodeA = this->giveNode( edgeNodes.at(1) );
+    nodeB = this->giveNode( edgeNodes.at(2) );
 
     dx = nodeB->giveCoordinate(1) - nodeA->giveCoordinate(1);
     dy = nodeB->giveCoordinate(2) - nodeA->giveCoordinate(2);
@@ -322,5 +320,4 @@ Quad1Mindlin :: computeLoadLEToLRotationMatrix(FloatMatrix &answer, int iEdge, G
 
     return 1;
 }
-
 } // end namespace oofem

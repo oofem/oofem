@@ -80,8 +80,8 @@ MisesMat :: initializeFrom(InputRecord *ir)
 
     StructuralMaterial :: initializeFrom(ir);
     linearElasticMaterial->initializeFrom(ir); // takes care of elastic constants
-    G = static_cast< IsotropicLinearElasticMaterial * >(linearElasticMaterial)->giveShearModulus();
-    K = static_cast< IsotropicLinearElasticMaterial * >(linearElasticMaterial)->giveBulkModulus();
+    G = static_cast< IsotropicLinearElasticMaterial * >( linearElasticMaterial )->giveShearModulus();
+    K = static_cast< IsotropicLinearElasticMaterial * >( linearElasticMaterial )->giveBulkModulus();
 
     IR_GIVE_FIELD(ir, sig0, _IFT_MisesMat_sig0); // uniaxial yield stress
 
@@ -126,7 +126,6 @@ MisesMat :: giveRealStressVector(FloatArray &answer,
     status->setTempDamage(omega);
     status->letTempStrainVectorBe(totalStrain);
     status->letTempStressVectorBe(answer);
-
 }
 
 
@@ -775,7 +774,7 @@ MisesMat :: giveIPValue(FloatArray &answer, GaussPoint *aGaussPoint, InternalSta
     if ( type == IST_PlasticStrainTensor ) {
         const FloatArray &ep = status->givePlasDef();
         ///@todo Fix this so that it doesn't just fill in zeros for plane stress:
-        StructuralMaterial :: giveFullSymVectorForm(answer, ep, aGaussPoint->giveMaterialMode());
+        StructuralMaterial :: giveFullSymVectorForm( answer, ep, aGaussPoint->giveMaterialMode() );
         return 1;
     } else if ( type == IST_MaxEquivalentStrainLevel ) {
         answer.resize(1);

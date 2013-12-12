@@ -48,8 +48,7 @@
 #include <list>
 
 namespace oofem {
-
-IRResultType Set :: initializeFrom(InputRecord* ir)
+IRResultType Set :: initializeFrom(InputRecord *ir)
 {
     const char *__proc = "initializeFrom";
     IRResultType result;
@@ -57,31 +56,31 @@ IRResultType Set :: initializeFrom(InputRecord* ir)
     FEMComponent :: initializeFrom(ir);
 
     IntArray inputNodes;
-    std::list< Range > inputNodeRanges;
+    std :: list< Range >inputNodeRanges;
     IR_GIVE_OPTIONAL_FIELD(ir, inputNodes, _IFT_Set_nodes);
     IR_GIVE_OPTIONAL_FIELD(ir, inputNodeRanges, _IFT_Set_nodeRanges);
     this->computeIntArray(this->nodes, inputNodes, inputNodeRanges);
 
 
-    if (ir->hasField(_IFT_Set_allElements)) { // generate a list with all the el numbers
+    if ( ir->hasField(_IFT_Set_allElements) ) { // generate a list with all the el numbers
         int numEl = this->giveDomain()->giveNumberOfElements();
         this->elements.resize(numEl);
-        for (int i = 1; i <= numEl; i++){
+        for ( int i = 1; i <= numEl; i++ ) {
             this->elements.at(i) = i;
         }
     } else {
         IntArray inputElements;
-        std::list< Range > inputElementRanges;
+        std :: list< Range >inputElementRanges;
         IR_GIVE_OPTIONAL_FIELD(ir, inputElements, _IFT_Set_elements);
-        IR_GIVE_OPTIONAL_FIELD(ir, inputElementRanges, _IFT_Set_elementRanges);    
+        IR_GIVE_OPTIONAL_FIELD(ir, inputElementRanges, _IFT_Set_elementRanges);
         this->computeIntArray(this->elements, inputElements, inputElementRanges);
     }
-    
+
 
 
     this->elementBoundaries.resize(0);
     IR_GIVE_OPTIONAL_FIELD(ir, this->elementBoundaries, _IFT_Set_elementBoundaries);
-    
+
     this->elementEdges.resize(0);
     IR_GIVE_OPTIONAL_FIELD(ir, this->elementEdges, _IFT_Set_elementEdges);
 
@@ -91,7 +90,7 @@ IRResultType Set :: initializeFrom(InputRecord* ir)
 
 void Set :: giveInputRecord(DynamicInputRecord &input)
 {
-    input.setRecordKeywordField(_IFT_Set_Name, this->giveNumber());
+    input.setRecordKeywordField( _IFT_Set_Name, this->giveNumber() );
 
     if ( this->giveNodeList().giveSize() ) {
         input.setField(this->nodes, _IFT_Set_nodes);
@@ -108,22 +107,24 @@ void Set :: giveInputRecord(DynamicInputRecord &input)
 }
 
 
-void Set :: computeIntArray(IntArray& answer, const IntArray& specified, std::list< Range > ranges)
+void Set :: computeIntArray(IntArray &answer, const IntArray &specified, std :: list< Range >ranges)
 {
     // Find the max value;
     int maxIndex = specified.giveSize() == 0 ? 0 : specified.maximum();
-    for (std::list< Range >::iterator it = ranges.begin(); it != ranges.end(); ++it) {
-        if ( it->giveEnd() > maxIndex ) maxIndex = it->giveEnd();
+    for ( std :: list< Range > :: iterator it = ranges.begin(); it != ranges.end(); ++it ) {
+        if ( it->giveEnd() > maxIndex ) {
+            maxIndex = it->giveEnd();
+        }
     }
     IntArray afflictedNodes(maxIndex);
     afflictedNodes.zero();
 
-    for (int i = 1; i <= specified.giveSize(); ++i) {
-        afflictedNodes.at(specified.at(i)) = 1;
+    for ( int i = 1; i <= specified.giveSize(); ++i ) {
+        afflictedNodes.at( specified.at(i) ) = 1;
     }
-    
-    for (std::list< Range >::iterator it = ranges.begin(); it != ranges.end(); ++it) {
-        for (int i = it->giveStart(); i <= it->giveEnd(); ++i) {
+
+    for ( std :: list< Range > :: iterator it = ranges.begin(); it != ranges.end(); ++it ) {
+        for ( int i = it->giveStart(); i <= it->giveEnd(); ++i ) {
             afflictedNodes.at(i) = 1;
         }
     }
@@ -131,48 +132,48 @@ void Set :: computeIntArray(IntArray& answer, const IntArray& specified, std::li
 }
 
 
-const IntArray& Set :: giveElementList() { return elements; }
+const IntArray &Set :: giveElementList() { return elements; }
 
-const IntArray& Set :: giveBoundaryList() { return elementBoundaries; }
+const IntArray &Set :: giveBoundaryList() { return elementBoundaries; }
 
-const IntArray& Set :: giveEdgeList() { return elementEdges; }
+const IntArray &Set :: giveEdgeList() { return elementEdges; }
 
-const IntArray& Set :: giveNodeList()
+const IntArray &Set :: giveNodeList()
 {
     // Lazy evaluation, we compute the unique set of nodes if needed (and store it).
     if ( this->totalNodes.giveSize() == 0 ) {
-        IntArray afflictedNodes(this->domain->giveNumberOfDofManagers());
+        IntArray afflictedNodes( this->domain->giveNumberOfDofManagers() );
         afflictedNodes.zero();
-        for (int ielem = 1; ielem <= this->elements.giveSize(); ++ielem) {
-            Element *e = this->domain->giveElement(this->elements.at(ielem));
-            for (int inode = 1; inode <= e->giveNumberOfNodes(); ++inode) {
-                afflictedNodes.at(e->giveNode(inode)->giveNumber()) = 1;
+        for ( int ielem = 1; ielem <= this->elements.giveSize(); ++ielem ) {
+            Element *e = this->domain->giveElement( this->elements.at(ielem) );
+            for ( int inode = 1; inode <= e->giveNumberOfNodes(); ++inode ) {
+                afflictedNodes.at( e->giveNode(inode)->giveNumber() ) = 1;
             }
         }
 
         IntArray bNodes;
-        for (int ibnd = 1; ibnd <= this->elementBoundaries.giveSize()/2; ++ibnd) {
-            Element *e = this->domain->giveElement( this->elementBoundaries.at(ibnd*2-1) );
-            int boundary = this->elementBoundaries.at(ibnd*2);
+        for ( int ibnd = 1; ibnd <= this->elementBoundaries.giveSize() / 2; ++ibnd ) {
+            Element *e = this->domain->giveElement( this->elementBoundaries.at(ibnd * 2 - 1) );
+            int boundary = this->elementBoundaries.at(ibnd * 2);
             FEInterpolation *fei = e->giveInterpolation();
             fei->boundaryGiveNodes(bNodes, boundary);
-            for (int inode = 1; inode <= bNodes.giveSize(); ++inode) {
-                afflictedNodes.at(e->giveNode(bNodes.at(inode))->giveNumber()) = 1;
+            for ( int inode = 1; inode <= bNodes.giveSize(); ++inode ) {
+                afflictedNodes.at( e->giveNode( bNodes.at(inode) )->giveNumber() ) = 1;
             }
         }
 
         IntArray eNodes;
-        for (int iedge = 1; iedge <= this->elementEdges.giveSize()/2; ++iedge) {
-            Element *e = this->domain->giveElement( this->elementEdges.at(iedge*2-1) );
-            int edge = this->elementEdges.at(iedge*2);
-            FEInterpolation3d *fei = static_cast< FEInterpolation3d* >( e->giveInterpolation() );
+        for ( int iedge = 1; iedge <= this->elementEdges.giveSize() / 2; ++iedge ) {
+            Element *e = this->domain->giveElement( this->elementEdges.at(iedge * 2 - 1) );
+            int edge = this->elementEdges.at(iedge * 2);
+            FEInterpolation3d *fei = static_cast< FEInterpolation3d * >( e->giveInterpolation() );
             fei->computeLocalEdgeMapping(eNodes, edge);
-            for (int inode = 1; inode <= eNodes.giveSize(); ++inode) {
-                afflictedNodes.at(e->giveNode(eNodes.at(inode))->giveNumber()) = 1;
+            for ( int inode = 1; inode <= eNodes.giveSize(); ++inode ) {
+                afflictedNodes.at( e->giveNode( eNodes.at(inode) )->giveNumber() ) = 1;
             }
         }
 
-        for (int inode = 1; inode <= this->nodes.giveSize(); ++inode) {
+        for ( int inode = 1; inode <= this->nodes.giveSize(); ++inode ) {
             afflictedNodes.at( this->nodes.at(inode) ) = 1;
         }
         totalNodes.findNonzeros(afflictedNodes);
@@ -180,15 +181,15 @@ const IntArray& Set :: giveNodeList()
     return this->totalNodes;
 }
 
-const IntArray & Set :: giveSpecifiedNodeList() { return this->nodes; }
+const IntArray &Set :: giveSpecifiedNodeList() { return this->nodes; }
 
-void Set :: setElementList(const IntArray& newElements) { this->elements = newElements; }
+void Set :: setElementList(const IntArray &newElements) { this->elements = newElements; }
 
-void Set :: setBoundaryList(const IntArray& newBoundaries) { this->elementBoundaries = newBoundaries; }
+void Set :: setBoundaryList(const IntArray &newBoundaries) { this->elementBoundaries = newBoundaries; }
 
-void Set :: setEdgeList(const IntArray& newEdges) { this->elementEdges = newEdges; }
+void Set :: setEdgeList(const IntArray &newEdges) { this->elementEdges = newEdges; }
 
-void Set :: setNodeList(const IntArray& newNodes) { this->nodes = newNodes; }
+void Set :: setNodeList(const IntArray &newNodes) { this->nodes = newNodes; }
 
 void Set :: clear()
 {
@@ -199,66 +200,85 @@ void Set :: clear()
     this->totalNodes.resize(0);
 }
 
-void Set :: updateLocalNumbering(EntityRenumberingFunctor& f)
+void Set :: updateLocalNumbering(EntityRenumberingFunctor &f)
 {
     this->updateLocalNodeNumbering(f);
     this->updateLocalElementNumbering(f);
 }
 
-void Set :: updateLocalNodeNumbering(EntityRenumberingFunctor& f)
+void Set :: updateLocalNodeNumbering(EntityRenumberingFunctor &f)
 {
-    for (int i = 1; i <= nodes.giveSize(); i++ ) {
+    for ( int i = 1; i <= nodes.giveSize(); i++ ) {
         nodes.at(i) = f(nodes.at(i), ERS_DofManager);
     }
 }
 
-void Set :: updateLocalElementNumbering(EntityRenumberingFunctor& f)
+void Set :: updateLocalElementNumbering(EntityRenumberingFunctor &f)
 {
-    for (int i = 1; i <= elements.giveSize(); i++ ) {
+    for ( int i = 1; i <= elements.giveSize(); i++ ) {
         elements.at(i) = f(elements.at(i), ERS_Element);
     }
     ///@todo Check order of element number and boundary number (same for edges)
-    for (int i = 1; i <= elementBoundaries.giveSize(); i+=2 ) {
+    for ( int i = 1; i <= elementBoundaries.giveSize(); i += 2 ) {
         elementBoundaries.at(i) = f(elementBoundaries.at(i), ERS_Element);
     }
-    for (int i = 1; i <= elementEdges.giveSize(); i+=2 ) {
+    for ( int i = 1; i <= elementEdges.giveSize(); i += 2 ) {
         elementEdges.at(i) = f(elementEdges.at(i), ERS_Element);
     }
 }
 
 
-contextIOResultType Set :: saveContext(DataStream* stream, ContextMode mode, void* obj)
+contextIOResultType Set :: saveContext(DataStream *stream, ContextMode mode, void *obj)
 {
     contextIOResultType iores;
 
-    if ( ( iores = FEMComponent :: saveContext(stream, mode, obj) ) != CIO_OK ) { THROW_CIOERR(iores); }
+    if ( ( iores = FEMComponent :: saveContext(stream, mode, obj) ) != CIO_OK ) {
+        THROW_CIOERR(iores);
+    }
 
     if ( ( mode & CM_Definition ) ) {
-        if ( ( iores = elements.storeYourself(stream, mode) ) != CIO_OK ) { THROW_CIOERR(iores); }
-        if ( ( iores = elementBoundaries.storeYourself(stream, mode) ) != CIO_OK ) { THROW_CIOERR(iores); }
-        if ( ( iores = elementEdges.storeYourself(stream, mode) ) != CIO_OK ) { THROW_CIOERR(iores); }
-        if ( ( iores = nodes.storeYourself(stream, mode) ) != CIO_OK ) { THROW_CIOERR(iores); }
+        if ( ( iores = elements.storeYourself(stream, mode) ) != CIO_OK ) {
+            THROW_CIOERR(iores);
+        }
+        if ( ( iores = elementBoundaries.storeYourself(stream, mode) ) != CIO_OK ) {
+            THROW_CIOERR(iores);
+        }
+        if ( ( iores = elementEdges.storeYourself(stream, mode) ) != CIO_OK ) {
+            THROW_CIOERR(iores);
+        }
+        if ( ( iores = nodes.storeYourself(stream, mode) ) != CIO_OK ) {
+            THROW_CIOERR(iores);
+        }
     }
 
     return CIO_OK;
 }
 
-contextIOResultType Set :: restoreContext(DataStream* stream, ContextMode mode, void* obj)
+contextIOResultType Set :: restoreContext(DataStream *stream, ContextMode mode, void *obj)
 {
     contextIOResultType iores;
 
-    if ( ( iores = FEMComponent :: restoreContext(stream, mode, obj) ) != CIO_OK ) { THROW_CIOERR(iores); }
+    if ( ( iores = FEMComponent :: restoreContext(stream, mode, obj) ) != CIO_OK ) {
+        THROW_CIOERR(iores);
+    }
 
     if ( mode & CM_Definition ) {
-        if ( ( iores = elements.restoreYourself(stream, mode) ) != CIO_OK ) { THROW_CIOERR(iores); }
-        if ( ( iores = elementBoundaries.restoreYourself(stream, mode) ) != CIO_OK ) { THROW_CIOERR(iores); }
-        if ( ( iores = elementEdges.restoreYourself(stream, mode) ) != CIO_OK ) { THROW_CIOERR(iores); }
-        if ( ( iores = nodes.restoreYourself(stream, mode) ) != CIO_OK ) { THROW_CIOERR(iores); }
+        if ( ( iores = elements.restoreYourself(stream, mode) ) != CIO_OK ) {
+            THROW_CIOERR(iores);
+        }
+        if ( ( iores = elementBoundaries.restoreYourself(stream, mode) ) != CIO_OK ) {
+            THROW_CIOERR(iores);
+        }
+        if ( ( iores = elementEdges.restoreYourself(stream, mode) ) != CIO_OK ) {
+            THROW_CIOERR(iores);
+        }
+        if ( ( iores = nodes.restoreYourself(stream, mode) ) != CIO_OK ) {
+            THROW_CIOERR(iores);
+        }
     }
 
     this->totalNodes.resize(0);
 
     return CIO_OK;
 }
-
 }

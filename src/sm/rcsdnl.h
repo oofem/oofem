@@ -54,7 +54,6 @@
 //@}
 
 namespace oofem {
-
 /**
  * This class implements associated Material Status to RCSDNLMaterial.
  */
@@ -126,8 +125,8 @@ public:
 
     virtual IRResultType initializeFrom(InputRecord *ir);
 
-    virtual void giveRealStressVector(FloatArray & answer, GaussPoint *,
-                              const FloatArray &, TimeStep *);
+    virtual void giveRealStressVector(FloatArray &answer, GaussPoint *,
+                                      const FloatArray &, TimeStep *);
 
     /**
      * Implements the service updating local variables in given integration points,

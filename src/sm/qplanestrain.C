@@ -58,7 +58,7 @@ Interface *
 QPlaneStrain :: giveInterface(InterfaceType interface)
 {
     if ( interface == ZZNodalRecoveryModelInterfaceType ) {
-        return static_cast< ZZNodalRecoveryModelInterface * >(this);
+        return static_cast< ZZNodalRecoveryModelInterface * >( this );
     }
 
     return NULL;
@@ -130,14 +130,14 @@ QPlaneStrain :: initializeFrom(InputRecord *ir)
 {
     numberOfGaussPoints = 4;
     IRResultType result = this->Element :: initializeFrom(ir);
-	if(result != IRRT_OK) {
-		return result;
-	}
+    if ( result != IRRT_OK ) {
+        return result;
+    }
 
     if ( !( ( numberOfGaussPoints == 1 ) ||
-           ( numberOfGaussPoints == 4 ) ||
-           ( numberOfGaussPoints == 9 ) ||
-           ( numberOfGaussPoints == 16 ) ) ) {
+            ( numberOfGaussPoints == 4 ) ||
+            ( numberOfGaussPoints == 9 ) ||
+            ( numberOfGaussPoints == 16 ) ) ) {
         numberOfGaussPoints = 4;
     }
 
@@ -162,9 +162,9 @@ QPlaneStrain :: computeVolumeAround(GaussPoint *aGaussPoint)
 {
     double determinant, weight, thickness, volume;
     determinant = fabs( this->interpolation.giveTransformationJacobian( * aGaussPoint->giveCoordinates(),
-                                                                       FEIElementGeometryWrapper(this) ) );
+                                                                        FEIElementGeometryWrapper(this) ) );
     weight      = aGaussPoint->giveWeight();
-    thickness   = this->giveCrossSection()->give(CS_Thickness);
+    thickness   = this->giveCrossSection()->give(CS_Thickness, aGaussPoint);
     volume      = determinant * weight * thickness;
 
     return volume;

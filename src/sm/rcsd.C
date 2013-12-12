@@ -46,13 +46,12 @@
 #include <cstring>
 
 namespace oofem {
-
-REGISTER_Material( RCSDMaterial );
+REGISTER_Material(RCSDMaterial);
 
 RCSDMaterial :: RCSDMaterial(int n, Domain *d) : RCM2Material(n, d)
-//
-// constructor
-//
+    //
+    // constructor
+    //
 {
     linearElasticMaterial = new IsotropicLinearElasticMaterial(n, d);
 }
@@ -94,7 +93,7 @@ RCSDMaterial :: giveRealStressVector(FloatArray &answer, GaussPoint *gp,
     this->giveStressDependentPartOfStrainVector(reducedStrainVector, gp, totalStrain,
                                                 atTime, VM_Total);
 
-    StructuralMaterial :: giveFullSymVectorForm(strainVector, reducedStrainVector, gp->giveMaterialMode());
+    StructuralMaterial :: giveFullSymVectorForm( strainVector, reducedStrainVector, gp->giveMaterialMode() );
 
     status->giveTempCrackDirs(tempCrackDirs);
     this->computePrincipalValDir(principalStrain, tempCrackDirs,
@@ -110,13 +109,13 @@ RCSDMaterial :: giveRealStressVector(FloatArray &answer, GaussPoint *gp,
         status->giveTempCrackDirs(tempCrackDirs);
         this->transformStressVectorTo(answer, tempCrackDirs, princStress, 1);
 
-        StructuralMaterial :: giveReducedSymVectorForm(reducedSpaceStressVector, answer, gp->giveMaterialMode());
+        StructuralMaterial :: giveReducedSymVectorForm( reducedSpaceStressVector, answer, gp->giveMaterialMode() );
         status->letTempStressVectorBe(reducedSpaceStressVector);
 
         status->giveCrackStrainVector(crackStrain);
         this->updateCrackStatus(gp, crackStrain);
 
-        StructuralMaterial :: giveReducedSymVectorForm(reducedAnswer, answer, gp->giveMaterialMode());
+        StructuralMaterial :: giveReducedSymVectorForm( reducedAnswer, answer, gp->giveMaterialMode() );
         answer = reducedAnswer;
 
         // test if transition to scalar damage mode take place
@@ -246,7 +245,7 @@ RCSDMaterial :: computeCurrEquivStrain(GaussPoint *gp, const FloatArray &reduced
 
     linearElasticMaterial->giveStiffnessMatrix(De, TangentStiffness, gp, atTime);
     effStress.beProductOf(De, reducedTotalStrainVector);
-    StructuralMaterial :: giveFullSymVectorForm(fullEffStress, effStress, gp->giveMaterialMode());
+    StructuralMaterial :: giveFullSymVectorForm( fullEffStress, effStress, gp->giveMaterialMode() );
 
     this->computePrincipalValues(princEffStress, fullEffStress, principal_stress);
     for ( int i = 1; i <= 3; i++ ) {
@@ -399,7 +398,7 @@ RCSDMaterial :: giveCrackingModulus(MatResponseMode rMode, GaussPoint *gp,
     if ( rMode == TangentStiffness ) {
         if ( this->checkSizeLimit(gp, Le) ) {
             if ( ( crackStrain >= minEffStrainForFullyOpenCrack ) ||
-                ( status->giveTempMaxCrackStrain(i) >= minEffStrainForFullyOpenCrack ) ) {
+                 ( status->giveTempMaxCrackStrain(i) >= minEffStrainForFullyOpenCrack ) ) {
                 // fully open crack - no stiffness
                 Cf = 0.;
             } else if ( crackStrain >= status->giveTempMaxCrackStrain(i) ) {
@@ -416,7 +415,7 @@ RCSDMaterial :: giveCrackingModulus(MatResponseMode rMode, GaussPoint *gp,
     } else {
         if ( this->checkSizeLimit(gp, Le) ) {
             if ( ( crackStrain >= minEffStrainForFullyOpenCrack ) ||
-                ( status->giveTempMaxCrackStrain(i) >= minEffStrainForFullyOpenCrack ) ) {
+                 ( status->giveTempMaxCrackStrain(i) >= minEffStrainForFullyOpenCrack ) ) {
                 // fully open crack - no stiffness
                 Cf = 0.;
             } else {
@@ -450,7 +449,7 @@ RCSDMaterial :: giveNormalCrackingStress(GaussPoint *gp, double crackStrain, int
 
     if ( this->checkSizeLimit(gp, Le) ) {
         if ( ( crackStrain >= minEffStrainForFullyOpenCrack ) ||
-            ( status->giveTempMaxCrackStrain(i) >= minEffStrainForFullyOpenCrack ) ) {
+             ( status->giveTempMaxCrackStrain(i) >= minEffStrainForFullyOpenCrack ) ) {
             // fully open crack - no stiffness
             answer = 0.;
         } else if ( crackStrain >= status->giveTempMaxCrackStrain(i) ) {
@@ -525,7 +524,7 @@ RCSDMaterialStatus :: printOutputAt(FILE *file, TimeStep *tStep)
                 }
 
                 fprintf( file, "crack %d {status %s, normal to crackplane { %f %f %f }} ",
-                        i, s, crackDirs.at(1, i), crackDirs.at(2, i), crackDirs.at(3, i) );
+                         i, s, crackDirs.at(1, i), crackDirs.at(2, i), crackDirs.at(3, i) );
             }
         }
     } else {
@@ -635,5 +634,4 @@ RCSDMaterialStatus :: restoreContext(DataStream *stream, ContextMode mode, void 
 
     return CIO_OK; // return succes
 }
-
 } // end namespace oofem

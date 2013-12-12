@@ -55,8 +55,7 @@
 #endif
 
 namespace oofem {
-
-REGISTER_Element( LIBeam3d2 );
+REGISTER_Element(LIBeam3d2);
 
 LIBeam3d2 :: LIBeam3d2(int n, Domain *aDomain) : NLStructuralElement(n, aDomain), tc(), tempTc()
 {
@@ -122,7 +121,7 @@ LIBeam3d2 :: computeGaussPoints()
         numberOfIntegrationRules = 1;
         integrationRulesArray = new IntegrationRule * [ 1 ];
         integrationRulesArray [ 0 ] = new GaussIntegrationRule(1, this, 1, 2);
-        this->giveCrossSection()->setupIntegrationPoints( *integrationRulesArray[0], 1, this );
+        this->giveCrossSection()->setupIntegrationPoints(* integrationRulesArray [ 0 ], 1, this);
     }
 }
 
@@ -135,7 +134,7 @@ LIBeam3d2 :: computeLumpedMassMatrix(FloatMatrix &answer, TimeStep *tStep)
 {
     GaussPoint *gp = integrationRulesArray [ 0 ]->getIntegrationPoint(0);
     double density = this->giveStructuralCrossSection()->give('d', gp);
-    double halfMass   = density * this->giveCrossSection()->give(CS_Area) * this->giveLength() / 2.;
+    double halfMass   = density * this->giveCrossSection()->give(CS_Area, gp) * this->giveLength() / 2.;
     answer.resize(12, 12);
     answer.zero();
     answer.at(1, 1) = answer.at(2, 2) = answer.at(3, 3) = halfMass;
@@ -340,7 +339,7 @@ LIBeam3d2 :: computeEgdeNMatrixAt(FloatMatrix &answer, int iedge, GaussPoint *aG
      * without regarding particular side
      */
 
-    this->computeNmatrixAt(*(aGaussPoint->giveLocalCoordinates()), answer);
+    this->computeNmatrixAt(* ( aGaussPoint->giveLocalCoordinates() ), answer);
 }
 
 
@@ -406,8 +405,9 @@ LIBeam3d2 :: computeLoadGToLRotationMtrx(FloatMatrix &answer)
 void
 LIBeam3d2 :: computeBodyLoadVectorAt(FloatArray &answer, Load *load, TimeStep *tStep, ValueModeType mode)
 {
+    FloatArray lc(1);
     NLStructuralElement :: computeBodyLoadVectorAt(answer, load, tStep, mode);
-    answer.times( this->giveCrossSection()->give(CS_Area) );
+    answer.times( this->giveCrossSection()->give(CS_Area, & lc, NULL, this) );
 }
 
 
@@ -753,7 +753,7 @@ LIBeam3d2 :: drawDeformedGeometry(oofegGraphicContext &gc, UnknownType type)
         p [ 1 ].y = p [ 0 ].y + coeff *tc.at(2, i);
         p [ 1 ].z = p [ 0 ].z + coeff *tc.at(3, i);
 
-        EASValsSetColor( ColorGetPixelFromString(const_cast< char * >(colors [ i - 1 ]), & succ) );
+        EASValsSetColor( ColorGetPixelFromString(const_cast< char * >( colors [ i - 1 ] ), & succ) );
 
         go = CreateLine3D(p);
         EGWithMaskChangeAttributes(WIDTH_MASK | COLOR_MASK | LAYER_MASK, go);

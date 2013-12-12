@@ -50,8 +50,7 @@
 #endif
 
 namespace oofem {
-
-REGISTER_Element( Truss2d );
+REGISTER_Element(Truss2d);
 
 Truss2d :: Truss2d(int n, Domain *aDomain) :
     NLStructuralElement(n, aDomain)
@@ -71,7 +70,7 @@ Truss2d :: computeBmatrixAt(GaussPoint *aGaussPoint, FloatMatrix &answer, int li
 //
 {
     // eps = B*a = [-cos -sin cos sin]/l *[u1 v1 u2 v2]^t
-    // cos = (x2 - x1) / l 
+    // cos = (x2 - x1) / l
     // sin = (z2 - z1) / l
 
     double l, x1, x2, z1, z2;
@@ -92,7 +91,7 @@ Truss2d :: computeBmatrixAt(GaussPoint *aGaussPoint, FloatMatrix &answer, int li
     answer.at(1, 4) = z2 - z1;
 
     l = this->computeLength();
-    answer.times( 1.0 / l / l );
+    answer.times(1.0 / l / l);
 }
 
 
@@ -112,7 +111,7 @@ void Truss2d :: computeGaussPoints()
         numberOfIntegrationRules = 1;
         integrationRulesArray = new IntegrationRule * [ 1 ];
         integrationRulesArray [ 0 ] = new GaussIntegrationRule(1, this, 1, 2);
-        this->giveCrossSection()->setupIntegrationPoints( *integrationRulesArray[0], 1, this );
+        this->giveCrossSection()->setupIntegrationPoints(* integrationRulesArray [ 0 ], 1, this);
     }
 }
 
@@ -130,7 +129,7 @@ Truss2d :: computeLumpedMassMatrix(FloatMatrix &answer, TimeStep *tStep)
 
     GaussPoint *gp = integrationRulesArray [ 0 ]->getIntegrationPoint(0);
     double density = this->giveStructuralCrossSection()->give('d', gp);
-    double halfMass = density * this->giveCrossSection()->give(CS_Area) * this->computeLength() * 0.5;
+    double halfMass = density * this->giveCrossSection()->give(CS_Area, gp) * this->computeLength() * 0.5;
     answer.at(1, 1) = halfMass;
     answer.at(2, 2) = halfMass;
     answer.at(3, 3) = halfMass;
@@ -185,7 +184,7 @@ double Truss2d :: computeVolumeAround(GaussPoint *aGaussPoint)
 // Gauss point is used.
 {
     double weight  = aGaussPoint->giveWeight();
-    return 0.5 * this->computeLength() * weight * this->giveCrossSection()->give(CS_Area);
+    return 0.5 * this->computeLength() * weight * this->giveCrossSection()->give(CS_Area, aGaussPoint);
 }
 
 
@@ -332,7 +331,7 @@ Truss2d :: computeEgdeNMatrixAt(FloatMatrix &answer, int iedge, GaussPoint *aGau
      * without regarding particular side
      */
 
-    this->computeNmatrixAt( *(aGaussPoint->giveLocalCoordinates()) , answer);
+    this->computeNmatrixAt(* ( aGaussPoint->giveLocalCoordinates() ), answer);
 }
 
 

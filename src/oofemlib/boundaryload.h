@@ -106,10 +106,9 @@ class TimeStep;
  */
 class OOFEM_EXPORT BoundaryLoad : public Load
 {
-       
-public:    
+public:
     CoordSystType CST_UpdatedGlobal;
-     /**
+    /**
      * Load coordinate system type. Variable of this type can have following values BL_GlobalMode
      * (indicates that load given in global coordinate system) or BL_LocalMode
      * (entity dependent local coordinate system will be  used).
@@ -185,9 +184,3 @@ protected:
 };
 } // end namespace oofem
 #endif // boundaryload_h
-
-
-
-
-
-

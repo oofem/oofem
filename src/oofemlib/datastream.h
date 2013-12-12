@@ -1,4 +1,4 @@
- /*
+/*
  *
  *                 #####    #####   ######  ######  ###   ###
  *               ##   ##  ##   ##  ##      ##      ## ### ##
@@ -41,7 +41,6 @@
 #include <cstdio>
 
 namespace oofem {
-
 class CommunicationBuffer;
 class ProcessCommunicatorBuff;
 
@@ -77,7 +76,7 @@ public:
     /// Reads a bool value from data.
     virtual int read(bool &data) = 0;
     /// Reads a string (stored as an int for the length followed by char*).
-    int read(std::string &data);
+    int read(std :: string &data);
     //@}
 
     /**
@@ -99,7 +98,7 @@ public:
     /// Writes a bool value.
     virtual int write(bool data) = 0;
     /// Reads a string (stored as an int for the length followed by char*).
-    int write(const std::string &data);
+    int write(const std :: string &data);
     //@}
 };
 
@@ -121,19 +120,19 @@ public:
     /// Destructor (will not close stream!)
     virtual ~FileDataStream() { }
 
-    virtual int read ( int *data, unsigned int count );
-    virtual int read ( unsigned long *data, unsigned int count );
-    virtual int read ( long *data, unsigned int count );
-    virtual int read ( double *data, unsigned int count );
-    virtual int read ( char *data, unsigned int count );
-    virtual int read ( bool &data );
+    virtual int read(int *data, unsigned int count);
+    virtual int read(unsigned long *data, unsigned int count);
+    virtual int read(long *data, unsigned int count);
+    virtual int read(double *data, unsigned int count);
+    virtual int read(char *data, unsigned int count);
+    virtual int read(bool &data);
 
-    virtual int write ( const int *data, unsigned int count );
-    virtual int write ( const unsigned long *data, unsigned int count );
-    virtual int write ( const long *data, unsigned int count );
-    virtual int write ( const double *data, unsigned int count );
-    virtual int write ( const char *data, unsigned int count );
-    virtual int write ( bool data );
+    virtual int write(const int *data, unsigned int count);
+    virtual int write(const unsigned long *data, unsigned int count);
+    virtual int write(const long *data, unsigned int count);
+    virtual int write(const double *data, unsigned int count);
+    virtual int write(const char *data, unsigned int count);
+    virtual int write(bool data);
 };
 
 #ifdef __PARALLEL_MODE

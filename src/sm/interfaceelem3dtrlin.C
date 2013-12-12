@@ -51,8 +51,7 @@
 #endif
 
 namespace oofem {
-
-REGISTER_Element( InterfaceElement3dTrLin );
+REGISTER_Element(InterfaceElement3dTrLin);
 
 FEI2dTrLin InterfaceElement3dTrLin :: interpolation(1, 2);
 
@@ -71,7 +70,7 @@ InterfaceElement3dTrLin :: computeBmatrixAt(GaussPoint *aGaussPoint, FloatMatrix
 //
 {
     FloatArray n(3);
-    this->interpolation.evalN(n, * aGaussPoint->giveCoordinates(), FEIElementGeometryWrapper(this));
+    this->interpolation.evalN( n, * aGaussPoint->giveCoordinates(), FEIElementGeometryWrapper(this) );
 
     answer.resize(3, 18);
     answer.zero();
@@ -107,7 +106,7 @@ InterfaceElement3dTrLin :: computeGlobalCoordinates(FloatArray &answer, const Fl
 {
     FloatArray n(6);
 
-    this->interpolation.evalN(n, lcoords, FEIElementGeometryWrapper(this));
+    this->interpolation.evalN( n, lcoords, FEIElementGeometryWrapper(this) );
 
     answer.resize(3);
     answer.zero();
@@ -149,9 +148,9 @@ InterfaceElement3dTrLin :: computeVolumeAround(GaussPoint *aGaussPoint)
         lncp [ i - 1 ] = & lnc [ i - 1 ];
     }
 
-    determinant = fabs( this->interpolation.giveTransformationJacobian(* aGaussPoint->giveCoordinates(), FEIVertexListGeometryWrapper(3, lncp)) );
+    determinant = fabs( this->interpolation.giveTransformationJacobian( * aGaussPoint->giveCoordinates(), FEIVertexListGeometryWrapper(3, lncp) ) );
     weight      = aGaussPoint->giveWeight();
-    thickness   = this->giveCrossSection()->give(CS_Thickness);
+    thickness   = this->giveCrossSection()->give(CS_Thickness, aGaussPoint);
     volume      = determinant * weight * thickness;
 
     return volume;

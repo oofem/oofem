@@ -48,7 +48,6 @@
 //@}
 
 namespace oofem {
-
 /**
  * This class implements a piecewise linear function.
  * The function is defined by 'numberOfPoints' points. 'dates' and 'values'

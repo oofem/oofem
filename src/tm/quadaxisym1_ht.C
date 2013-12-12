@@ -45,10 +45,9 @@
 #endif
 
 namespace oofem {
-
-REGISTER_Element( QuadAxisym1_ht );
-REGISTER_Element( QuadAxisym1_hmt );
-REGISTER_Element( QuadAxisym1_mt );
+REGISTER_Element(QuadAxisym1_ht);
+REGISTER_Element(QuadAxisym1_hmt);
+REGISTER_Element(QuadAxisym1_mt);
 
 QuadAxisym1_ht :: QuadAxisym1_ht(int n, Domain *aDomain) : Quad1_ht(n, aDomain)
 { }
@@ -73,7 +72,7 @@ QuadAxisym1_ht :: computeVolumeAround(GaussPoint *aGaussPoint)
 {
     double determinant, weight, volume;
     determinant = fabs( this->interpolation.giveTransformationJacobian( * aGaussPoint->giveCoordinates(),
-                                                                       FEIElementGeometryWrapper(this) ) );
+                                                                        FEIElementGeometryWrapper(this) ) );
 
     weight = aGaussPoint->giveWeight();
     volume = determinant * weight * this->computeRadiusAt(aGaussPoint);
@@ -96,7 +95,7 @@ QuadAxisym1_ht :: computeEdgeVolumeAround(GaussPoint *gp, int iEdge)
     radius = gcoords.at(1);
 
     double detJ = fabs( this->interpolation.edgeGiveTransformationJacobian( iEdge, * gp->giveCoordinates(),
-                                                                           FEIElementGeometryWrapper(this) ) );
+                                                                            FEIElementGeometryWrapper(this) ) );
     return detJ * gp->giveWeight() * radius;
 }
 

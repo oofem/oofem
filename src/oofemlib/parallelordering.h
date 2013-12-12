@@ -44,7 +44,6 @@
  #include <map>
 
 namespace oofem {
-
 class EngngModel;
 class IntArray;
 class UnknownNumberingScheme;

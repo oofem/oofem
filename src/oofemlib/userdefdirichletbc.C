@@ -111,7 +111,7 @@ UserDefDirichletBC :: give(Dof *dof, ValueModeType mode, TimeStep *stepN)
     double retVal = 0.0;
     if ( pRetVal != NULL ) {
         retVal = PyFloat_AsDouble(pRetVal);
-    } else   {
+    } else {
         OOFEM_ERROR("UserDefDirichletBC :: give: Failed to fetch Python return value.");
     }
 

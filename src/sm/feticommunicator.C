@@ -246,6 +246,5 @@ FETICommunicator :: setUpCommunicationMaps(EngngModel *pm)
     VERBOSEPARALLEL_PRINT("FETICommunicator::setUpCommunicationMaps", "communication maps setup finished", rank);
 #endif
 }
-
 } // end namespace oofem
 #endif

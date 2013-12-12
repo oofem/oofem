@@ -67,7 +67,6 @@ public:
 
     virtual const char *giveInputRecordName() const { return _IFT_TF1_Name; }
     virtual const char *giveClassName() const { return "TF1"; }
-
 };
 } // end namespace oofem
 #endif // tf1_h

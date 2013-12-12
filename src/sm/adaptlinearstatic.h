@@ -45,7 +45,6 @@
 //@}
 
 namespace oofem {
-
 /**
  * This class implements an adaptive linear static engineering problem.
  * Multiple loading cases are not supported.

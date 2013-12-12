@@ -39,8 +39,7 @@
 #include "classfactory.h"
 
 namespace oofem {
-
-REGISTER_BoundaryCondition( ConstantEdgeLoad );
+REGISTER_BoundaryCondition(ConstantEdgeLoad);
 
 IRResultType
 ConstantEdgeLoad :: initializeFrom(InputRecord *ir)
@@ -75,8 +74,8 @@ ConstantEdgeLoad :: computeValueAt(FloatArray &answer, TimeStep *stepN, FloatArr
     factor = this->giveLoadTimeFunction()->evaluate(stepN, mode);
     answer = componentArray;
     answer.times(factor);
-    
-    if ( !isImposed(stepN) ){
+
+    if ( !isImposed(stepN) ) {
         answer.zero();
     }
 }

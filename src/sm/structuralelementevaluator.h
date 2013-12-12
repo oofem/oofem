@@ -69,7 +69,7 @@ protected:
      * Returns the integration rule for mass matrices, if relevant.
      * @return Number of integration points for mass matrix.
      */
-    virtual IntegrationRule* giveMassMtrxIntegrationRule() { return NULL; }
+    virtual IntegrationRule *giveMassMtrxIntegrationRule() { return NULL; }
     /**
      * Returns mask indicating, which unknowns (their type and ordering is the same as
      * element unknown vector) participate in mass matrix integration.
@@ -172,7 +172,7 @@ protected:
 #ifdef __OOFEG
     friend void drawIGAPatchDeformedGeometry(Element * elem, StructuralElementEvaluator * se, oofegGraphicContext & gc, UnknownType);
 #endif
-    public:
+public:
     void elem(int arg1, EquationID arg2, IntArray arg3);
 };
 } // end namespace oofem

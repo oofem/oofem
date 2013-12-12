@@ -43,13 +43,12 @@
 #include "dynamicinputrecord.h"
 
 namespace oofem {
-
-REGISTER_Material( IsoInterfaceDamageMaterial );
+REGISTER_Material(IsoInterfaceDamageMaterial);
 
 IsoInterfaceDamageMaterial :: IsoInterfaceDamageMaterial(int n, Domain *d) : StructuralMaterial(n, d)
-//
-// constructor
-//
+    //
+    // constructor
+    //
 {
     maxOmega = 0.999999;
 }
@@ -142,8 +141,8 @@ IsoInterfaceDamageMaterial :: giveRealStressVector(FloatArray &answer, GaussPoin
 
 void
 IsoInterfaceDamageMaterial :: giveStiffnessMatrix(FloatMatrix &answer,
-                                                       MatResponseMode rMode,
-                                                       GaussPoint *gp, TimeStep *atTime)
+                                                  MatResponseMode rMode,
+                                                  GaussPoint *gp, TimeStep *atTime)
 //
 // Returns characteristic material stiffness matrix of the receiver
 //
@@ -207,12 +206,12 @@ IsoInterfaceDamageMaterial :: give2dInterfaceMaterialStiffnessMatrix(FloatMatrix
                 return;
 
                 /* Unreachable code - commented out to supress compiler warnings
-                double dom = -( -e0 / un / un * exp( -( ft / gf ) * ( un - e0 ) ) + e0 / un * exp( -( ft / gf ) * ( un - e0 ) ) * ( -( ft / gf ) ) );
-                if ( ( om > 0. ) && ( status->giveTempKappa() > status->giveKappa() ) ) {
-                    answer.at(1, 1) -= se.at(1) * dom;
-                    answer.at(2, 1) -= se.at(2) * dom;
-                }
-                */
+                 * double dom = -( -e0 / un / un * exp( -( ft / gf ) * ( un - e0 ) ) + e0 / un * exp( -( ft / gf ) * ( un - e0 ) ) * ( -( ft / gf ) ) );
+                 * if ( ( om > 0. ) && ( status->giveTempKappa() > status->giveKappa() ) ) {
+                 *  answer.at(1, 1) -= se.at(1) * dom;
+                 *  answer.at(2, 1) -= se.at(2) * dom;
+                 * }
+                 */
             }
         }
     }  else {
@@ -266,12 +265,12 @@ IsoInterfaceDamageMaterial :: give3dInterfaceMaterialStiffnessMatrix(FloatMatrix
                 answer.times(1.0 - om);
                 return;
                 /* Unreachable code - commented out to supress compiler warnings
-                double dom = -( -e0 / un / un * exp( -( ft / gf ) * ( un - e0 ) ) + e0 / un * exp( -( ft / gf ) * ( un - e0 ) ) * ( -( ft / gf ) ) );
-                if ( ( om > 0. ) && ( status->giveTempKappa() > status->giveKappa() ) ) {
-                    answer.at(1, 1) -= se.at(1) * dom;
-                    answer.at(2, 1) -= se.at(2) * dom;
-                }
-                */
+                 * double dom = -( -e0 / un / un * exp( -( ft / gf ) * ( un - e0 ) ) + e0 / un * exp( -( ft / gf ) * ( un - e0 ) ) * ( -( ft / gf ) ) );
+                 * if ( ( om > 0. ) && ( status->giveTempKappa() > status->giveKappa() ) ) {
+                 *  answer.at(1, 1) -= se.at(1) * dom;
+                 *  answer.at(2, 1) -= se.at(2) * dom;
+                 * }
+                 */
             }
         }
     }  else {
@@ -371,7 +370,7 @@ IsoInterfaceDamageMaterial :: giveInputRecord(DynamicInputRecord &input)
 void
 IsoInterfaceDamageMaterial :: computeEquivalentStrain(double &kappa, const FloatArray &strain, GaussPoint *gp, TimeStep *atTime)
 {
-    kappa = macbra(strain.at(1));
+    kappa = macbra( strain.at(1) );
 }
 
 void

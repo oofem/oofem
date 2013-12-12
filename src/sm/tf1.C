@@ -38,8 +38,7 @@
 #include "classfactory.h"
 
 namespace oofem {
-
-REGISTER_BoundaryCondition( TF1 );
+REGISTER_BoundaryCondition(TF1);
 
 void
 TF1 :: computeValueAt(FloatArray &answer, TimeStep *stepN, FloatArray &coords, ValueModeType mode)

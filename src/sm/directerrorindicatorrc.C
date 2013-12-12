@@ -329,7 +329,6 @@ DirectErrorIndicatorRC :: exchangeDofManDensities()
 
         this->dofManDensityExchangeFlag = false;
     } // if (this->dofManDensityExchangeFlag)
-
 }
 
 int

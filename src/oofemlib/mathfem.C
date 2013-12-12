@@ -56,7 +56,7 @@ void cubic(double a, double b, double c, double d, double *r1, double *r2, doubl
     double aa, p, q, D, u, v, phi;
     double help;
 
-    double norm = 1e-6*(fabs(a) + fabs(b) + fabs(c)) + CUBIC_ZERO;
+    double norm = 1e-6 * ( fabs(a) + fabs(b) + fabs(c) ) + CUBIC_ZERO;
 
     if ( fabs(a) <= norm ) {
         if ( fabs(b) <= norm ) {
@@ -102,14 +102,14 @@ void cubic(double a, double b, double c, double d, double *r1, double *r2, doubl
         }
     } else {
         aa = a;
-        a = b / (aa * 3.0);
+        a = b / ( aa * 3.0 );
         b = c / aa;
         c = d / aa;
         p = b - a * a * 3.0;
         q = 2.0 * a * a * a - a * b + c;
         D = q * q / 4.0 + p * p * p / 27.0;
         if ( fabs(D) < CUBIC_ZERO ) {
-            if ( fabs(p*q) < CUBIC_ZERO ) {
+            if ( fabs(p * q) < CUBIC_ZERO ) {
                 * r1 = 0.0 - a;
                 * r2 = * r1;
                 * r3 = * r1;
@@ -136,10 +136,10 @@ void cubic(double a, double b, double c, double d, double *r1, double *r2, doubl
 
                 phi = acos(help) / 3.0;
                 double cp = cos(phi);
-                double sp = sqrt(3.0)*sin(phi);
+                double sp = sqrt(3.0) * sin(phi);
                 * r1 = 2 * p * cp - a;
-                * r2 = - p * (cp + sp) - a;
-                * r3 = - p * (cp - sp) - a;
+                * r2 = -p * ( cp + sp ) - a;
+                * r3 = -p * ( cp - sp ) - a;
 
                 // I'm getting some pretty bad accuracy, a single iteration like this would help alot
                 //* r1 -= (d + c*(*r1) + b*(*r1)*(*r1) + a*(*r1)*(*r1)*(*r1))/(c + 2*b*(*r1) + 3*a*(*r1)*(*r1));
@@ -238,8 +238,8 @@ void cubic3r(double a, double b, double c, double d, double *r1, double *r2, dou
          * else
          * B = 0.0;
          *
-         **r1 = (A+B) - a/3.0;
-         **num = 1;
+         *****r1 = (A+B) - a/3.0;
+         *****num = 1;
          * }
          */
         return;
@@ -263,20 +263,20 @@ void ls2fit(const FloatArray &x, const FloatArray &y, FloatArray &a)
 {
     int n = x.giveSize();
     a.resize(3);
-    if (n > 2) {
+    if ( n > 2 ) {
         // Least square fitting.
         double f1 = 0, f2 = 0, f3 = 0;
         double sx = 0, sx2 = 0, sx3 = 0, sx4 = 0;
         double detCi, Ci11, Ci12, Ci13, Ci22, Ci23, Ci33;
 
         double yi, xi, xi2, xi3, xi4;
-        for (int i = 0; i < n; ++i ) {
+        for ( int i = 0; i < n; ++i ) {
             // Calculate foot points in local coord.sys.
             xi = x(i);
             yi = y(i);
-            xi2 = xi*xi;
-            xi3 = xi*xi2;
-            xi4 = xi*xi3;
+            xi2 = xi * xi;
+            xi3 = xi * xi2;
+            xi4 = xi * xi3;
 
             // Construct the coefficient matrix.
             sx += xi;
@@ -286,26 +286,26 @@ void ls2fit(const FloatArray &x, const FloatArray &y, FloatArray &a)
 
             // And the RHS.
             f1 += yi;
-            f2 += xi*yi;
-            f3 += xi2*yi;
+            f2 += xi * yi;
+            f3 += xi2 * yi;
         }
 
         // Explicit inverse (avoids numerical problems)
-        Ci11 = sx2*sx4 - sx3*sx3;
-        Ci12 = sx2*sx3 - sx *sx4;
-        Ci13 = sx *sx3 - sx2*sx2;
-        Ci22 = n*sx4 - sx2*sx2;
-        Ci23 = sx*sx2 - n*sx3;
-        Ci33 = n*sx2 - sx*sx;
-        detCi = 1/(n*Ci11 + sx*Ci12 + sx2*Ci13);
-        a(0) = (Ci11*f1 + Ci12*f2 + Ci13*f3)*detCi;
-        a(1) = (Ci12*f1 + Ci22*f2 + Ci23*f3)*detCi;
-        a(2) = (Ci13*f1 + Ci23*f2 + Ci33*f3)*detCi;
-    } else if (n == 2) {
+        Ci11 = sx2 * sx4 - sx3 * sx3;
+        Ci12 = sx2 * sx3 - sx * sx4;
+        Ci13 = sx * sx3 - sx2 * sx2;
+        Ci22 = n * sx4 - sx2 * sx2;
+        Ci23 = sx * sx2 - n * sx3;
+        Ci33 = n * sx2 - sx * sx;
+        detCi = 1 / ( n * Ci11 + sx * Ci12 + sx2 * Ci13 );
+        a(0) = ( Ci11 * f1 + Ci12 * f2 + Ci13 * f3 ) * detCi;
+        a(1) = ( Ci12 * f1 + Ci22 * f2 + Ci23 * f3 ) * detCi;
+        a(2) = ( Ci13 * f1 + Ci23 * f2 + Ci33 * f3 ) * detCi;
+    } else if ( n == 2 ) {
         a(2) = 0;
-        a(1) = (y(1)-y(0))/(x(1)-x(0));
-        a(0) = y(0) - a(1)*x(0);
-    } else if (n == 1) {
+        a(1) = ( y(1) - y(0) ) / ( x(1) - x(0) );
+        a(0) = y(0) - a(1) * x(0);
+    } else if ( n == 1 ) {
         a(0) = y(0);
         a(1) = 0;
         a(2) = 0;
@@ -323,6 +323,4 @@ double signum(double i) {
         return 0;
     }
 }
-
-
 } // end namespace oofem

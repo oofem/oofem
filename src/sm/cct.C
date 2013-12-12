@@ -52,8 +52,7 @@
 #endif
 
 namespace oofem {
-
-REGISTER_Element( CCTPlate );
+REGISTER_Element(CCTPlate);
 
 FEI2dTrLin CCTPlate :: interp_lin(1, 2);
 //FEI2dTrRot CCTPlate :: interp_rot(1, 2);
@@ -88,7 +87,7 @@ CCTPlate :: computeGaussPoints()
         numberOfIntegrationRules = 1;
         integrationRulesArray = new IntegrationRule * [ 1 ];
         integrationRulesArray [ 0 ] = new GaussIntegrationRule(1, this, 1, 5);
-        this->giveCrossSection()->setupIntegrationPoints( *integrationRulesArray[0], numberOfGaussPoints, this );
+        this->giveCrossSection()->setupIntegrationPoints(* integrationRulesArray [ 0 ], numberOfGaussPoints, this);
     }
 }
 
@@ -117,8 +116,9 @@ CCTPlate :: computeBodyLoadVectorAt(FloatArray &answer, Load *forLoad, TimeStep 
 
     if ( force.giveSize() ) {
         gp = irule.getIntegrationPoint(0);
+        // constant density and thickness assumed
         double dens = this->giveStructuralCrossSection()->give('d', gp);
-        double dV   = this->computeVolumeAround(gp) * this->giveCrossSection()->give(CS_Thickness);
+        double dV   = this->computeVolumeAround(gp) * this->giveCrossSection()->give(CS_Thickness, gp);
 
         answer.resize(9);
         answer.zero();
@@ -298,7 +298,7 @@ IRResultType
 CCTPlate :: initializeFrom(InputRecord *ir)
 {
     numberOfGaussPoints = 1;
-	return this->NLStructuralElement :: initializeFrom(ir);
+    return this->NLStructuralElement :: initializeFrom(ir);
 }
 
 
@@ -353,8 +353,9 @@ CCTPlate :: computeLumpedMassMatrix(FloatMatrix &answer, TimeStep *tStep)
     GaussPoint *gp = integrationRulesArray [ 0 ]->getIntegrationPoint(0);
 
     double dV = this->computeVolumeAround(gp);
+    // constant thickness and density assumed
     double density = this->giveStructuralCrossSection()->give('d', gp);
-    double mss1 = dV * this->giveCrossSection()->give(CS_Thickness) * density / 3.;
+    double mss1 = dV * this->giveCrossSection()->give(CS_Thickness, gp) * density / 3.;
 
     answer.at(1, 1) = mss1;
     answer.at(4, 4) = mss1;
@@ -404,8 +405,9 @@ CCTPlate :: computeLocalCoordinates(FloatArray &answer, const FloatArray &coords
     midplZ = z [ 0 ] * answer.at(1) + z [ 1 ] * answer.at(2) + z [ 2 ] * answer.at(3);
 
     //check that the z is within the element
+    GaussPoint _gp(NULL, 1, new FloatArray(answer), 1.0, _2dPlate);
     StructuralCrossSection *cs = this->giveStructuralCrossSection();
-    double elthick = cs->give(CS_Thickness);
+    double elthick = cs->give(CS_Thickness, & _gp);
 
     if ( elthick / 2.0 + midplZ - fabs( coords.at(3) ) < -POINT_TOL ) {
         answer.zero();
@@ -437,13 +439,13 @@ CCTPlate :: giveIPValue(FloatArray &answer, GaussPoint *gp, InternalStateType ty
         answer = static_cast< StructuralMaterialStatus * >( gp->giveMaterialStatus() )->giveStrainVector();
         return 1;
     } else {
-      return NLStructuralElement::giveIPValue(answer, gp, type, atTime);
+        return NLStructuralElement :: giveIPValue(answer, gp, type, atTime);
     }
 }
 
 
-double 
-CCTPlate :: ZZRemeshingCriteriaI_giveCharacteristicSize() 
+double
+CCTPlate :: ZZRemeshingCriteriaI_giveCharacteristicSize()
 {
     return sqrt(this->computeArea() * 2.0);
 }
@@ -496,8 +498,8 @@ CCTPlate :: SPRNodalRecoveryMI_giveDofMansDeterminedByPatch(IntArray &answer, in
 {
     answer.resize(1);
     if ( ( pap == this->giveNode(1)->giveNumber() ) ||
-        ( pap == this->giveNode(2)->giveNumber() ) ||
-        ( pap == this->giveNode(3)->giveNumber() ) ) {
+         ( pap == this->giveNode(2)->giveNumber() ) ||
+         ( pap == this->giveNode(3)->giveNumber() ) ) {
         answer.at(1) = pap;
     } else {
         _error("SPRNodalRecoveryMI_giveDofMansDeterminedByPatch: node unknown");
@@ -516,15 +518,15 @@ CCTPlate :: SPRNodalRecoveryMI_givePatchType()
 // layered cross section support functions
 //
 void
-CCTPlate :: computeStrainVectorInLayer(FloatArray &answer, const FloatArray &masterGpStrain, 
-                                       GaussPoint *slaveGp, TimeStep *tStep)
+CCTPlate :: computeStrainVectorInLayer(FloatArray &answer, const FloatArray &masterGpStrain,
+                                       GaussPoint *masterGp, GaussPoint *slaveGp, TimeStep *tStep)
 // returns full 3d strain vector of given layer (whose z-coordinate from center-line is
 // stored in slaveGp) for given tStep
 {
     double layerZeta, layerZCoord, top, bottom;
 
-    top    = this->giveCrossSection()->give(CS_TopZCoord);
-    bottom = this->giveCrossSection()->give(CS_BottomZCoord);
+    top    = this->giveCrossSection()->give(CS_TopZCoord, masterGp);
+    bottom = this->giveCrossSection()->give(CS_BottomZCoord, masterGp);
     layerZeta = slaveGp->giveCoordinate(3);
     layerZCoord = 0.5 * ( ( 1. - layerZeta ) * bottom + ( 1. + layerZeta ) * top );
 
@@ -543,14 +545,14 @@ CCTPlate :: computeEgdeNMatrixAt(FloatMatrix &answer, int iedge, GaussPoint *gp)
 {
     IntArray edgeNodes;
     FloatArray n;
-    double b,c, n12;
+    double b, c, n12;
 
     this->interp_lin.edgeEvalN( n, iedge, * gp->giveCoordinates(), FEIElementGeometryWrapper(this) );
     this->interp_lin.computeLocalEdgeMapping(edgeNodes, iedge);
 
-    n12 = 0.5 * n.at(1)*n.at(2);
-    b = this->giveNode(edgeNodes.at(1))->giveCoordinate(2) - this->giveNode(edgeNodes.at(2))->giveCoordinate(2);
-    c = this->giveNode(edgeNodes.at(2))->giveCoordinate(1) - this->giveNode(edgeNodes.at(1))->giveCoordinate(1);
+    n12 = 0.5 * n.at(1) * n.at(2);
+    b = this->giveNode( edgeNodes.at(1) )->giveCoordinate(2) - this->giveNode( edgeNodes.at(2) )->giveCoordinate(2);
+    c = this->giveNode( edgeNodes.at(2) )->giveCoordinate(1) - this->giveNode( edgeNodes.at(1) )->giveCoordinate(1);
 
 
     answer.resize(3, 6);
@@ -558,9 +560,9 @@ CCTPlate :: computeEgdeNMatrixAt(FloatMatrix &answer, int iedge, GaussPoint *gp)
     answer.at(1, 2) = n12 * b;
     answer.at(1, 3) = n12 * c;
     answer.at(1, 4)  = n.at(2);
-    answer.at(1, 5) = - n12 * b;
-    answer.at(1, 6) = - n12 * c;
-    // 
+    answer.at(1, 5) = -n12 * b;
+    answer.at(1, 6) = -n12 * c;
+    //
     answer.at(2, 2) = answer.at(3, 3) = n.at(1);
     answer.at(2, 5) = answer.at(3, 6) = n.at(2);
 }
@@ -604,7 +606,7 @@ double
 CCTPlate :: computeEdgeVolumeAround(GaussPoint *gp, int iEdge)
 {
     double detJ = this->interp_lin.edgeGiveTransformationJacobian( iEdge, * gp->giveCoordinates(), FEIElementGeometryWrapper(this) );
-    return detJ *gp->giveWeight();
+    return detJ * gp->giveWeight();
 }
 
 
@@ -634,8 +636,8 @@ CCTPlate :: computeLoadLEToLRotationMatrix(FloatMatrix &answer, int iEdge, Gauss
 
     this->interp_lin.computeLocalEdgeMapping(edgeNodes, iEdge);
 
-    nodeA = this->giveNode(edgeNodes.at(1));
-    nodeB = this->giveNode(edgeNodes.at(2));
+    nodeA = this->giveNode( edgeNodes.at(1) );
+    nodeB = this->giveNode( edgeNodes.at(2) );
 
     dx = nodeB->giveCoordinate(1) - nodeA->giveCoordinate(1);
     dy = nodeB->giveCoordinate(2) - nodeA->giveCoordinate(2);

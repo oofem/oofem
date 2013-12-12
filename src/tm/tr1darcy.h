@@ -47,6 +47,7 @@ namespace oofem {
 /**
  * Element class for the DarcyFlow engineering model. Linear description of seepage
  * @author Carl Sandström
+ * @author Mikael Öhman
  */
 class Tr1Darcy : public TransportElement, public NodalAveragingRecoveryModelInterface
 {
@@ -58,7 +59,7 @@ public:
     virtual ~Tr1Darcy();
     virtual IRResultType initializeFrom(InputRecord *ir);
 
-    virtual FEInterpolation *giveInterpolation() const { return &interpolation_lin; }
+    virtual FEInterpolation *giveInterpolation() const { return & interpolation_lin; }
 
     virtual MaterialMode giveMaterialMode() { return _2dHeat; } ///@todo This isn't actually correct.
 
@@ -66,11 +67,12 @@ public:
     virtual void giveCharacteristicVector(FloatArray &answer, CharType mtrx, ValueModeType mode, TimeStep *tStep);
     virtual void giveCharacteristicMatrix(FloatMatrix &answer, CharType mtrx, TimeStep *tStep);
     virtual void computeStiffnessMatrix(FloatMatrix &answer, TimeStep *atTime);
-    virtual void computeLoadVector(FloatArray &answer, TimeStep *atTime);
+
     virtual void computeGaussPoints();
     virtual int computeNumberOfDofs();
 
-    void computeEdgeBCSubVectorAt(FloatArray &answer, Load *load, int iEdge, TimeStep *tStep);
+    void computeExternalForcesVector(FloatArray &answer, TimeStep *atTime, ValueModeType mode);
+    void computeEdgeBCSubVectorAt(FloatArray &answer, Load *load, int iEdge, TimeStep *tStep, ValueModeType mode, int indx);
     void computeInternalForcesVector(FloatArray &answer, TimeStep *atTime);
 
     virtual double computeEdgeVolumeAround(GaussPoint *gp, int iEdge);
@@ -78,7 +80,7 @@ public:
 
     // From NodalAveragingRecoveryModelInterface
     virtual const char *giveInputRecordName() const { return _IFT_Tr1Darcy_Name; }
-    virtual const char *giveClassName() const { return "Tr1Darcy"; };
+    virtual const char *giveClassName() const { return "Tr1Darcy"; }
     virtual void NodalAveragingRecoveryMI_computeNodalValue(FloatArray &answer, int node, InternalStateType type, TimeStep *tStep);
     virtual void NodalAveragingRecoveryMI_computeSideValue(FloatArray &answer, int side, InternalStateType type, TimeStep *tStep);
     virtual Interface *giveInterface(InterfaceType interface);

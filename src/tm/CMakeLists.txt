@@ -35,6 +35,10 @@ set (tm_boundary
     gravitypressure.C
     )
 
+set (tm_cs
+    simpletransportcrosssection.C
+    )
+
 set (tm_status
     transportmaterial.C
     latticetransmat.C
@@ -59,6 +63,7 @@ set (tm
     ${tm_emodel}
     ${tm_element}
     ${tm_material}
+    ${tm_cs}
     ${tm_status}
     ${tm_new}
     ${tm_cemhyd}

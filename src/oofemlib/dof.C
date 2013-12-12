@@ -69,7 +69,7 @@ void Dof :: giveEquationNumbers(IntArray &masterEqNumbers, const UnknownNumberin
 
 void Dof :: giveDofIDs(IntArray &masterDofIDs)
 {
-    masterDofIDs.setValues(1, this->giveDofID());
+    masterDofIDs.setValues( 1, this->giveDofID() );
 }
 
 int
@@ -98,7 +98,7 @@ void Dof :: printMultipleOutputAt(FILE *File, TimeStep *stepN, char *ch,
     double x;
 
     fprintf(File, "  dof %d", number);
-    for (int i = 1; i <= nite; i++ ) {
+    for ( int i = 1; i <= nite; i++ ) {
         x = this->giveUnknown(mode [ i - 1 ], stepN);
         fprintf(File, "   %c % .8e", ch [ i - 1 ], x);
     }
@@ -231,31 +231,30 @@ Dof :: restoreContext(DataStream *stream, ContextMode mode, void *obj)
 }
 
 void
-Dof::giveUnknowns ( FloatArray& masterUnknowns, ValueModeType mode, TimeStep* stepN )
+Dof :: giveUnknowns(FloatArray &masterUnknowns, ValueModeType mode, TimeStep *stepN)
 {
-    masterUnknowns.resize ( 1 );
-    masterUnknowns.at ( 1 ) = this->giveUnknown ( mode, stepN );
+    masterUnknowns.resize(1);
+    masterUnknowns.at(1) = this->giveUnknown(mode, stepN);
 }
 
 void
-Dof::giveUnknowns ( FloatArray& masterUnknowns, PrimaryField& field, ValueModeType mode, TimeStep* stepN )
+Dof :: giveUnknowns(FloatArray &masterUnknowns, PrimaryField &field, ValueModeType mode, TimeStep *stepN)
 {
-    masterUnknowns.resize ( 1 );
-    masterUnknowns.at ( 1 ) = this->giveUnknown ( field, mode, stepN );
+    masterUnknowns.resize(1);
+    masterUnknowns.at(1) = this->giveUnknown(field, mode, stepN);
 }
 
 void
-Dof::computeDofTransformation ( FloatArray& masterContribs )
+Dof :: computeDofTransformation(FloatArray &masterContribs)
 {
-    masterContribs.resize ( 1 );
-    masterContribs.at ( 1 ) = 1.0;
+    masterContribs.resize(1);
+    masterContribs.at(1) = 1.0;
 }
 
 void
-Dof::giveMasterDofManArray ( IntArray& answer )
+Dof :: giveMasterDofManArray(IntArray &answer)
 {
-    answer.resize ( 1 );
-    answer.at ( 1 ) = this->giveDofManNumber();
+    answer.resize(1);
+    answer.at(1) = this->giveDofManNumber();
 }
-
 } // end namespace oofem

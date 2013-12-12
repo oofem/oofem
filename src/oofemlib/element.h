@@ -179,7 +179,7 @@ protected:
 
     /// Element activity time function. If defined, nonzero value indicates active receiver, zero value inactive element.
     int activityLtf;
-    
+
     /**
      * In parallel mode, globalNumber contains globally unique DoFManager number.
      * The component number, inherited from FEMComponent class contains
@@ -218,13 +218,13 @@ public:
      * Results are cached at receiver for default scheme in locationArray attribute.
      */
     void giveLocationArray(IntArray & locationArray, EquationID, const UnknownNumberingScheme & s, IntArray * dofIds = NULL) const;
-    void giveLocationArray(IntArray & locationArray, const IntArray &dofIDMask, const UnknownNumberingScheme & s, IntArray * dofIds = NULL) const;
+    void giveLocationArray(IntArray &locationArray, const IntArray &dofIDMask, const UnknownNumberingScheme &s, IntArray *dofIds = NULL) const;
     /**
      * Returns the location array for the boundary of the element.
      * Only takes into account nodes in the bNodes vector.
      */
-    void giveBoundaryLocationArray(IntArray &locationArray, const IntArray &bNodes, EquationID eid, const UnknownNumberingScheme &s, IntArray * dofIds = NULL);
-    void giveBoundaryLocationArray(IntArray &locationArray, const IntArray &bNodes, const IntArray &dofIDMask, const UnknownNumberingScheme &s, IntArray * dofIds = NULL);
+    void giveBoundaryLocationArray(IntArray &locationArray, const IntArray &bNodes, EquationID eid, const UnknownNumberingScheme &s, IntArray *dofIds = NULL);
+    void giveBoundaryLocationArray(IntArray &locationArray, const IntArray &bNodes, const IntArray &dofIDMask, const UnknownNumberingScheme &s, IntArray *dofIds = NULL);
     /**
      * @return Number of DOFs in element.
      */
@@ -669,7 +669,7 @@ public:
      * @return True, if receiver is activated for given solution step, otherwise false.
      */
     virtual bool isActivated(TimeStep *tStep);
-    
+
     // time step initialization (required for some non-linear solvers)
     /**
      * Initializes receivers state to new time step. It can be used also if
@@ -776,7 +776,7 @@ public:
      * Returns the size (length, area or volume depending on element type) of the parent
      * element. E.g. 4.0 for a quadrilateral.
      */
-    virtual double giveParentElSize() const {return 0.0;}
+    virtual double giveParentElSize() const { return 0.0; }
     /**
      * Updates internal element state (in all integration points of receiver)
      * before nonlocal averaging takes place. Used by so nonlocal materials,

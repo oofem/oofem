@@ -196,7 +196,7 @@ double MasterDof :: giveUnknown(ValueModeType mode, TimeStep *stepN)
     }
 
     return ( dofManager->giveDomain()->giveEngngModel()->
-            giveUnknownComponent(mode, stepN, dofManager->giveDomain(), this) );
+             giveUnknownComponent(mode, stepN, dofManager->giveDomain(), this) );
 }
 
 double MasterDof :: giveUnknown(PrimaryField &field, ValueModeType mode, TimeStep *stepN)
@@ -324,7 +324,7 @@ void MasterDof :: giveUnknownsDictionaryValue(TimeStep *tStep, ValueModeType mod
 void MasterDof :: printYourself()
 // Prints the receiver on screen.
 {
-    printf("dof %d  of %s %d :\n", number, dofManager->giveClassName(), dofManager->giveNumber() );
+    printf( "dof %d  of %s %d :\n", number, dofManager->giveClassName(), dofManager->giveNumber() );
     printf("equation %d    bc %d \n", equationNumber, bc);
 
     // printOutputAt (node->giveDomain()->giveEngngModel()->giveCurrentStep());
@@ -410,5 +410,4 @@ contextIOResultType MasterDof :: restoreContext(DataStream *stream, ContextMode 
 
     return CIO_OK;
 }
-
 } // end namespace oofem

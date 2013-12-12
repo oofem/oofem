@@ -73,7 +73,7 @@ public:
     virtual void times(const FloatMatrix &B, FloatMatrix &answer) const;
     virtual void timesT(const FloatMatrix &B, FloatMatrix &answer) const;
     virtual void times(double x);
-    virtual int buildInternalStructure(EngngModel *eModel, int di, EquationID, const UnknownNumberingScheme & s);
+    virtual int buildInternalStructure(EngngModel * eModel, int di, EquationID, const UnknownNumberingScheme & s);
     virtual int buildInternalStructure(EngngModel *eModel, int di, EquationID eid, const UnknownNumberingScheme &r_s, const UnknownNumberingScheme &c_s);
     virtual int assemble(const IntArray &loc, const FloatMatrix &mat);
     virtual int assemble(const IntArray &rloc, const IntArray &cloc, const FloatMatrix &mat);
@@ -93,7 +93,7 @@ public:
     virtual SparseMtrxType  giveType() const;
     virtual bool isAsymmetric() const;
 
-    virtual void writeToFile(const char* fname) const;
+    virtual void writeToFile(const char *fname) const;
 
     // Internals (should be documented)
     Mat *giveMtrx();

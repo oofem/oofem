@@ -38,7 +38,6 @@
 #include "contextioerr.h"
 #include "nlstructuralelement.h"
 namespace oofem {
-
 StructuralMaterialStatus :: StructuralMaterialStatus(int n, Domain *d, GaussPoint *g) :
     MaterialStatus(n, d, g), strainVector(), stressVector(),
     tempStressVector(), tempStrainVector(), FVector(), tempFVector()
@@ -51,7 +50,7 @@ StructuralMaterialStatus :: StructuralMaterialStatus(int n, Domain *d, GaussPoin
     tempStressVector = stressVector;
     tempStrainVector = strainVector;
 
-    if ( NLStructuralElement *el = dynamic_cast< NLStructuralElement * > ( gp->giveElement() ) ) {
+    if ( NLStructuralElement * el = dynamic_cast< NLStructuralElement * >( gp->giveElement() ) ) {
         if ( el->giveGeometryMode() == 1  ) { // if large def, initialize F and P
             PVector.resize(9);
             PVector.zero();
@@ -77,14 +76,14 @@ void StructuralMaterialStatus :: printOutputAt(FILE *File, TimeStep *tNow)
     MaterialStatus :: printOutputAt(File, tNow);
 
     fprintf(File, "  strains ");
-    StructuralMaterial :: giveFullSymVectorForm(helpVec, strainVector, gp->giveMaterialMode());
+    StructuralMaterial :: giveFullSymVectorForm( helpVec, strainVector, gp->giveMaterialMode() );
     n = helpVec.giveSize();
     for ( int i = 1; i <= n; i++ ) {
         fprintf( File, " % .4e", helpVec.at(i) );
     }
 
     fprintf(File, "\n              stresses");
-    StructuralMaterial :: giveFullSymVectorForm(helpVec, stressVector, gp->giveMaterialMode());
+    StructuralMaterial :: giveFullSymVectorForm( helpVec, stressVector, gp->giveMaterialMode() );
 
     n = helpVec.giveSize();
     for ( int i = 1; i <= n; i++ ) {
@@ -186,26 +185,24 @@ StructuralMaterialStatus :: restoreContext(DataStream *stream, ContextMode mode,
 
 void StructuralMaterialStatus :: copyStateVariables(const MaterialStatus &iStatus)
 {
-	MaterialStatus &tmpStat = const_cast<MaterialStatus&>(iStatus);
-	const StructuralMaterialStatus &structStatus = dynamic_cast<StructuralMaterialStatus&>(tmpStat);
+    MaterialStatus &tmpStat = const_cast< MaterialStatus & >( iStatus );
+    const StructuralMaterialStatus &structStatus = dynamic_cast< StructuralMaterialStatus & >( tmpStat );
 
-	strainVector = structStatus.giveStrainVector();
-	stressVector = structStatus.giveStressVector();
-	tempStressVector = structStatus.giveTempStressVector();
-	tempStrainVector = structStatus.giveTempStrainVector();
+    strainVector = structStatus.giveStrainVector();
+    stressVector = structStatus.giveStressVector();
+    tempStressVector = structStatus.giveTempStressVector();
+    tempStrainVector = structStatus.giveTempStrainVector();
 
-	PVector = structStatus.givePVector();
-	tempPVector = structStatus.giveTempPVector();
-	CVector = structStatus.giveCVector();
-	tempCVector = structStatus.giveTempCVector();
-	FVector = structStatus.giveFVector();
-	tempFVector = structStatus.giveTempFVector();
-
+    PVector = structStatus.givePVector();
+    tempPVector = structStatus.giveTempPVector();
+    CVector = structStatus.giveCVector();
+    tempCVector = structStatus.giveTempCVector();
+    FVector = structStatus.giveFVector();
+    tempFVector = structStatus.giveTempFVector();
 }
 
 void StructuralMaterialStatus :: addStateVariables(const MaterialStatus &iStatus)
 {
-	printf("Entering StructuralMaterialStatus :: addStateVariables().\n");
+    printf("Entering StructuralMaterialStatus :: addStateVariables().\n");
 }
-
 } // end namespace oofem

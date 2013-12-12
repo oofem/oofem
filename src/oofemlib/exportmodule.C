@@ -79,31 +79,28 @@ ExportModule :: initializeFrom(InputRecord *ir)
     return IRRT_OK;
 }
 
-std::string
+std :: string
 ExportModule :: giveOutputBaseFileName(TimeStep *tStep)
 {
-    char fext[100];
+    char fext [ 100 ];
 
-    if (this->testSubStepOutput()) {
-      // include tStep version in output file name
+    if ( this->testSubStepOutput() ) {
+        // include tStep version in output file name
 #ifdef __PARALLEL_MODE
-      if (this->emodel->isParallel() && this->emodel->giveNumberOfProcesses() > 1)
-        sprintf( fext, "_%03d.m%d.%d.%d", emodel->giveRank(), this->number, tStep->giveNumber(), tStep->giveSubstepNumber() );
-      else
+        if ( this->emodel->isParallel() && this->emodel->giveNumberOfProcesses() > 1 ) {
+            sprintf( fext, "_%03d.m%d.%d.%d", emodel->giveRank(), this->number, tStep->giveNumber(), tStep->giveSubstepNumber() );
+        } else
 #endif
-	sprintf( fext, ".m%d.%d.%d", this->number, tStep->giveNumber(), tStep->giveSubstepNumber());
-      return this->emodel->giveOutputBaseFileName() + fext;
-
-
+        sprintf( fext, ".m%d.%d.%d", this->number, tStep->giveNumber(), tStep->giveSubstepNumber() );
+        return this->emodel->giveOutputBaseFileName() + fext;
     } else {
-
 #ifdef __PARALLEL_MODE
-      if (this->emodel->isParallel() && this->emodel->giveNumberOfProcesses() > 1)
-        sprintf( fext, "_%03d.m%d.%d", emodel->giveRank(), this->number, tStep->giveNumber() );
-      else
+        if ( this->emodel->isParallel() && this->emodel->giveNumberOfProcesses() > 1 ) {
+            sprintf( fext, "_%03d.m%d.%d", emodel->giveRank(), this->number, tStep->giveNumber() );
+        } else
 #endif
-	sprintf( fext, ".m%d.%d", this->number, tStep->giveNumber() );
-      return this->emodel->giveOutputBaseFileName() + fext;
+        sprintf( fext, ".m%d.%d", this->number, tStep->giveNumber() );
+        return this->emodel->giveOutputBaseFileName() + fext;
     }
 }
 
@@ -121,7 +118,7 @@ ExportModule :: testTimeStepOutput(TimeStep *tStep)
         }
     }
 
-    std::list< Range > :: iterator tstepsIter;
+    std :: list< Range > :: iterator tstepsIter;
     for ( tstepsIter = tsteps_out.begin(); tstepsIter != tsteps_out.end(); ++tstepsIter ) {
         // test if INCLUDED
         if ( ( * tstepsIter ).test( tStep->giveNumber() ) ) {

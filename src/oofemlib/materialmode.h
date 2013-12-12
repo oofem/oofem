@@ -38,7 +38,6 @@
 #include "enumitem.h"
 
 namespace oofem {
-
 #define MaterialMode_DEF \
     ENUM_ITEM(_Unknown)   \
     ENUM_ITEM(_3dMat) \
@@ -56,7 +55,7 @@ namespace oofem {
   \
     ENUM_ITEM(_PlateLayer) \
     ENUM_ITEM(_2dBeamLayer) \
-    ENUM_ITEM(_PlaneStressRot) /* Plane stress with rotation around z */\
+    ENUM_ITEM(_PlaneStressRot) /* Plane stress with rotation around z */ \
   \
     ENUM_ITEM(_Fiber) \
     ENUM_ITEM(_3dMicroplane) \
@@ -76,9 +75,9 @@ namespace oofem {
     ENUM_ITEM(_3dFlow) \
 \
     ENUM_ITEM(_2dLattice) \
-/**
- * Type representing material mode of integration point.
- */
+    /**
+     * Type representing material mode of integration point.
+     */
 enum MaterialMode {
     MaterialMode_DEF
 };

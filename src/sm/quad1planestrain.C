@@ -51,8 +51,7 @@
 #endif
 
 namespace oofem {
-
-REGISTER_Element( Quad1PlaneStrain );
+REGISTER_Element(Quad1PlaneStrain);
 
 FEI2dQuadLin Quad1PlaneStrain :: interp(1, 2);
 
@@ -120,7 +119,7 @@ Quad1PlaneStrain :: computeGaussPoints()
         numberOfIntegrationRules = 1;
         integrationRulesArray = new IntegrationRule * [ 1 ];
         integrationRulesArray [ 0 ] = new GaussIntegrationRule(1, this, 1, 3);
-        this->giveCrossSection()->setupIntegrationPoints( *integrationRulesArray[0], numberOfGaussPoints, this );
+        this->giveCrossSection()->setupIntegrationPoints(* integrationRulesArray [ 0 ], numberOfGaussPoints, this);
     }
 }
 
@@ -209,7 +208,7 @@ double
 Quad1PlaneStrain :: computeEdgeVolumeAround(GaussPoint *gp, int iEdge)
 {
     double detJ = this->interp.edgeGiveTransformationJacobian( iEdge, * gp->giveCoordinates(), FEIElementGeometryWrapper(this) );
-    return detJ *gp->giveWeight();
+    return detJ * gp->giveWeight();
 }
 
 
@@ -277,7 +276,7 @@ Quad1PlaneStrain :: computeVolumeAround(GaussPoint *gp)
 
     detJ = fabs( this->interp.giveTransformationJacobian( * gp->giveCoordinates(), FEIElementGeometryWrapper(this) ) );
     weight = gp->giveWeight();
-    thickness = this->giveCrossSection()->give(CS_Thickness);
+    thickness = this->giveCrossSection()->give(CS_Thickness, gp);
     return detJ * weight * thickness;
 }
 
@@ -287,13 +286,13 @@ Quad1PlaneStrain :: initializeFrom(InputRecord *ir)
 {
     numberOfGaussPoints = 4;
     IRResultType result = this->StructuralElement :: initializeFrom(ir);
-	if(result != IRRT_OK) {
-		return result;
-	}
+    if ( result != IRRT_OK ) {
+        return result;
+    }
 
     if ( !( ( numberOfGaussPoints == 4 ) ||
-           ( numberOfGaussPoints == 9 ) ||
-           ( numberOfGaussPoints == 16 ) ) ) {
+            ( numberOfGaussPoints == 9 ) ||
+            ( numberOfGaussPoints == 16 ) ) ) {
         numberOfGaussPoints = 4;
     }
 
@@ -358,7 +357,7 @@ Quad1PlaneStrain :: HuertaErrorEstimatorI_setupRefinedElementProblem(RefinedElem
     static int sideNode [ 4 ] [ 2 ] = { { 1, 2 }, { 2, 3 }, { 3, 4 }, { 4, 1 } };
 
     if ( sMode == HuertaErrorEstimatorInterface :: NodeMode ||
-        ( sMode == HuertaErrorEstimatorInterface :: BCMode && aMode == HuertaErrorEstimator :: HEE_linear ) ) {
+         ( sMode == HuertaErrorEstimatorInterface :: BCMode && aMode == HuertaErrorEstimator :: HEE_linear ) ) {
         for ( inode = 0; inode < nodes; inode++ ) {
             corner [ inode ] = element->giveNode(inode + 1)->giveCoordinates();
             if ( corner [ inode ]->giveSize() != 3 ) {
@@ -729,7 +728,7 @@ Quad1PlaneStrain :: drawSpecial(oofegGraphicContext &gc)
 
                         xc = gpglobalcoords.at(1);
                         yc = gpglobalcoords.at(2);
-                        length = sqrt( computeVolumeAround(gp) / this->giveCrossSection()->give(CS_Thickness) ) / 2.;
+                        length = sqrt( computeVolumeAround(gp) / this->giveCrossSection()->give(CS_Thickness, gp) ) / 2.;
                         l [ 0 ].x = ( FPNum ) xc + bx * length;
                         l [ 0 ].y = ( FPNum ) yc + by * length;
                         l [ 0 ].z = 0.;
@@ -850,10 +849,8 @@ Quad1PlaneStrain :: DirectErrorIndicatorRCI_giveCharacteristicSize()
     iRule = integrationRulesArray [ giveDefaultIntegrationRule() ];
     for ( i = 0; i < iRule->giveNumberOfIntegrationPoints(); i++ ) {
         gp  = iRule->getIntegrationPoint(i);
-        volume += this->computeVolumeAround(gp);
+        volume += this->computeVolumeAround(gp) / this->giveCrossSection()->give(CS_Thickness, gp);
     }
-
-    volume /= this->giveCrossSection()->give(CS_Thickness);
 
     return sqrt(volume);
 }

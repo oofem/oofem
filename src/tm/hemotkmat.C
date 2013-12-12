@@ -39,8 +39,7 @@
 #include "classfactory.h"
 
 namespace oofem {
-
-REGISTER_Material( HeMoTKMaterial );
+REGISTER_Material(HeMoTKMaterial);
 
 int
 HeMoTKMaterial :: hasMaterialModeCapability(MaterialMode mode)
@@ -102,10 +101,10 @@ HeMoTKMaterial :: giveFluxVector(FloatArray &answer, GaussPoint *gp, const Float
     FloatArray ans_w, ans_t;
     FloatArray grad_w, grad_t;
     int size = grad.giveSize() / 2;
-    for (int i = 1; i <= size; ++i) {
+    for ( int i = 1; i <= size; ++i ) {
         grad_w.at(i) = grad.at(i);
     }
-    for (int i = size+1; i <= size*2; ++i) {
+    for ( int i = size + 1; i <= size * 2; ++i ) {
         grad_t.at(i) = grad.at(i);
     }
     ans_w.beScaled(perm_ww(w, t), grad_w);
@@ -116,7 +115,7 @@ HeMoTKMaterial :: giveFluxVector(FloatArray &answer, GaussPoint *gp, const Float
     answer.resize(size * 2);
     answer.zero();
     answer.addSubVector(ans_w, 1);
-    answer.addSubVector(ans_t, size+1);
+    answer.addSubVector(ans_t, size + 1);
 
     ms->setTempField(field);
     ms->setTempGradient(grad);

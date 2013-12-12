@@ -70,7 +70,7 @@ public:
     virtual int computeNumberOfDofs() { return 8; }
     virtual void giveDofManDofIDMask(int inode, EquationID, IntArray &) const;
 
-    virtual FEInterpolation *giveInterpolation() const { return &interp; }
+    virtual FEInterpolation *giveInterpolation() const { return & interp; }
 
     virtual double giveCharacteristicLenght(GaussPoint *gp, const FloatArray &normalToCrackPlane);
 
@@ -110,7 +110,7 @@ public:
     virtual void HuertaErrorEstimatorI_computeLocalCoords(FloatArray &answer, const FloatArray &coords)
     { computeLocalCoordinates(answer, coords); }
     virtual void HuertaErrorEstimatorI_computeNmatrixAt(GaussPoint *aGaussPoint, FloatMatrix &answer)
-    { computeNmatrixAt(*(aGaussPoint->giveLocalCoordinates()), answer); }
+    { computeNmatrixAt(* ( aGaussPoint->giveLocalCoordinates() ), answer); }
 
     // HuertaRemeshingCriteriaInterface
     virtual double HuertaRemeshingCriteriaI_giveCharacteristicSize() { return DirectErrorIndicatorRCI_giveCharacteristicSize(); };

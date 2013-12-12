@@ -78,9 +78,3 @@ protected:
 };
 } // end namespace oofem
 #endif // fei2dquadlin_h
-
-
-
-
-
-

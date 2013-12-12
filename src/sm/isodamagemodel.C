@@ -90,7 +90,7 @@ IsotropicDamageMaterial :: give3dMaterialStiffnessMatrix(FloatMatrix &answer,
 
     this->giveLinearElasticMaterial()->give3dMaterialStiffnessMatrix(answer, mode, gp, atTime);
     answer.times(1.0 - tempDamage);
-//TODO - correction for tangent mode
+    //TODO - correction for tangent mode
 }
 
 
@@ -228,7 +228,7 @@ void IsotropicDamageMaterial :: givePlaneStrainStiffMtrx(FloatMatrix &answer, Ma
 
     this->giveLinearElasticMaterial()->giveStiffnessMatrix(answer, mode, gp, atTime);
     answer.times(1.0 - tempDamage);
-//TODO - correction for tangent mode
+    //TODO - correction for tangent mode
 }
 
 
@@ -246,7 +246,7 @@ void IsotropicDamageMaterial :: give1dStressStiffMtrx(FloatMatrix &answer, MatRe
 
     this->giveLinearElasticMaterial()->giveStiffnessMatrix(answer, mode, gp, atTime);
     answer.times(1.0 - tempDamage);
-//TODO - correction for tangent mode
+    //TODO - correction for tangent mode
 }
 
 #ifdef __OOFEG
@@ -340,7 +340,7 @@ IsotropicDamageMaterial :: giveThermalDilatationVector(FloatArray &answer,
 
 double IsotropicDamageMaterial :: give(int aProperty, GaussPoint *gp)
 {
-    return linearElasticMaterial->give(aProperty,gp);
+    return linearElasticMaterial->give(aProperty, gp);
 }
 
 IRResultType

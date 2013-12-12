@@ -77,7 +77,7 @@ public:
     virtual int SpatialLocalizerI_containsPoint(const FloatArray &coords);
     virtual double SpatialLocalizerI_giveDistanceFromParametricCenter(const FloatArray &coords);
 
-    virtual FEInterpolation *giveInterpolation() const { return &this->interp; }
+    virtual FEInterpolation *giveInterpolation() const { return & this->interp; }
 
 #ifdef __OOFEG
     // Graphics output
@@ -94,7 +94,7 @@ protected:
 /**
  * Class for heat and mass transfer.
  */
-class Tr1_hmt: public Tr1_ht
+class Tr1_hmt : public Tr1_ht
 {
 public:
     Tr1_hmt(int n, Domain *d);
@@ -103,6 +103,5 @@ public:
     virtual const char *giveClassName() const { return "Tr1_hmt"; }
     virtual MaterialMode giveMaterialMode() { return _2dHeMo; }
 };
-
 } // end namespace oofem
 #endif // tr1_ht_h

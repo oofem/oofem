@@ -44,8 +44,7 @@
 #include "crosssection.h"
 
 namespace oofem {
-
-REGISTER_Material( CompoDamageMat );
+REGISTER_Material(CompoDamageMat);
 
 CompoDamageMat :: CompoDamageMat(int n, Domain *d) : StructuralMaterial(n, d)
 {
@@ -146,7 +145,7 @@ void CompoDamageMat :: give3dMaterialStiffnessMatrix(FloatMatrix &answer, MatRes
 void CompoDamageMat :: giveRealStressVector(FloatArray &answer, GaussPoint *gp, const FloatArray &totalStrain, TimeStep *atTime)
 {
     int i_max, s;
-    double delta, sigma, charLen, tmp=0., Gf_tmp;
+    double delta, sigma, charLen, tmp = 0., Gf_tmp;
     CompoDamageMatStatus *st = static_cast< CompoDamageMatStatus * >( this->giveStatus(gp) );
     Element *element = gp->giveElement();
     FloatArray strainVectorL(6), stressVectorL(6), tempStressVectorL(6), reducedTotalStrainVector(6), ans, equilStressVectorL(6), equilStrainVectorL(6), charLenModes(6);

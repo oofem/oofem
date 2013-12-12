@@ -75,13 +75,13 @@ Interface *
 Axisymm3d :: giveInterface(InterfaceType interface)
 {
     if ( interface == ZZNodalRecoveryModelInterfaceType ) {
-        return static_cast< ZZNodalRecoveryModelInterface * >(this);
+        return static_cast< ZZNodalRecoveryModelInterface * >( this );
     } else if ( interface == NodalAveragingRecoveryModelInterfaceType ) {
-        return static_cast< NodalAveragingRecoveryModelInterface * >(this);
+        return static_cast< NodalAveragingRecoveryModelInterface * >( this );
     } else if ( interface == SPRNodalRecoveryModelInterfaceType ) {
-        return static_cast< SPRNodalRecoveryModelInterface * >(this);
+        return static_cast< SPRNodalRecoveryModelInterface * >( this );
     } else if ( interface == SpatialLocalizerInterfaceType ) {
-        return static_cast< SpatialLocalizerInterface * >(this);
+        return static_cast< SpatialLocalizerInterface * >( this );
     }
 
     return NULL;
@@ -230,7 +230,7 @@ Axisymm3d :: computeVolumeAround(GaussPoint *aGaussPoint)
     }
 
     determinant = fabs( this->interpolation.giveTransformationJacobian( * aGaussPoint->giveCoordinates(),
-                                                                       FEIElementGeometryWrapper(this) ) );
+                                                                        FEIElementGeometryWrapper(this) ) );
 
     weight = aGaussPoint->giveWeight();
     volume = determinant * weight * r;
@@ -260,23 +260,23 @@ Axisymm3d :: initializeFrom(InputRecord *ir)
     IRResultType result;                // Required by IR_GIVE_FIELD macro
 
     numberOfGaussPoints = 1;
-	result = this->StructuralElement :: initializeFrom(ir);
-	if(result != IRRT_OK) {
-		return result;
-	}
+    result = this->StructuralElement :: initializeFrom(ir);
+    if ( result != IRRT_OK ) {
+        return result;
+    }
 
     numberOfFiAndShGaussPoints = 1;
     IR_GIVE_OPTIONAL_FIELD(ir, numberOfFiAndShGaussPoints, _IFT_Axisymm3d_nipfish);
 
     if ( !( ( numberOfGaussPoints == 1 ) ||
-           ( numberOfGaussPoints == 4 ) ||
-           ( numberOfGaussPoints == 7 ) ) ) {
+            ( numberOfGaussPoints == 4 ) ||
+            ( numberOfGaussPoints == 7 ) ) ) {
         numberOfGaussPoints = 1;
     }
 
     if ( !( ( numberOfFiAndShGaussPoints == 1 ) ||
-           ( numberOfFiAndShGaussPoints == 4 ) ||
-           ( numberOfFiAndShGaussPoints == 7 ) ) ) {
+            ( numberOfFiAndShGaussPoints == 4 ) ||
+            ( numberOfFiAndShGaussPoints == 7 ) ) ) {
         numberOfFiAndShGaussPoints = 1;
     }
 
@@ -412,8 +412,8 @@ Axisymm3d :: SPRNodalRecoveryMI_giveDofMansDeterminedByPatch(IntArray &answer, i
 {
     answer.resize(1);
     if ( ( pap == this->giveNode(1)->giveNumber() ) ||
-        ( pap == this->giveNode(2)->giveNumber() ) ||
-        ( pap == this->giveNode(3)->giveNumber() ) ) {
+         ( pap == this->giveNode(2)->giveNumber() ) ||
+         ( pap == this->giveNode(3)->giveNumber() ) ) {
         answer.at(1) = pap;
     } else {
         _error("SPRNodalRecoveryMI_giveDofMansDeterminedByPatch: node unknown");
@@ -501,7 +501,7 @@ Axisymm3d :: computeEdgeVolumeAround(GaussPoint *aGaussPoint, int iEdge)
     FloatArray c(2);
     this->computeEdgeIpGlobalCoords(c, aGaussPoint, iEdge);
     double result = this->interpolation.edgeGiveTransformationJacobian( iEdge, * aGaussPoint->giveCoordinates(),
-                                                                       FEIElementGeometryWrapper(this) );
+                                                                        FEIElementGeometryWrapper(this) );
 
 
     return c.at(1) * result * aGaussPoint->giveWeight();

@@ -45,13 +45,12 @@
 #define _IFT_QTRSpace_Name "qtrspace"
 
 namespace oofem {
-
 class FEI3dTetQuad;
 
 /**
  * This class implements an Quadratic 3d  10 - node
  * elasticity finite element.
- * 
+ *
  * Each node has 3 degrees of freedom.
  * One single additional attribute is needed for Gauss integration purpose :
  * 'jacobianMatrix'. This 3x3 matrix contains polynomials.
@@ -99,11 +98,10 @@ public:
 
 protected:
     virtual void computeGaussPoints();
-    
+
     virtual void computeBmatrixAt(GaussPoint *, FloatMatrix &, int = 1, int = ALL_STRAINS);
     //virtual void computeBFmatrixAt(GaussPoint *, FloatMatrix &);
     virtual void computeBHmatrixAt(GaussPoint *, FloatMatrix &);
-
 };
 } // end namespace oofem
 #endif

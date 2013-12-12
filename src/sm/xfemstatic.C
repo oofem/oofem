@@ -54,26 +54,20 @@
 #include "structuralinterfacematerialstatus.h"
 
 namespace oofem {
+REGISTER_EngngModel(XFEMStatic);
 
-REGISTER_EngngModel( XFEMStatic );
+XFEMStatic :: XFEMStatic(int i, EngngModel *_master) :
+    NonLinearStatic(i, _master),
+    updateStructureFlag(false),
+    mForceRemap(false),
+    mSetValsFromDofMap(true)
+{}
 
-XFEMStatic::XFEMStatic(int i, EngngModel *_master):
-NonLinearStatic(i, _master),
-updateStructureFlag(false),
-mForceRemap(false),
-mSetValsFromDofMap(true)
-{
-
-}
-
-XFEMStatic::~XFEMStatic() {
-
-}
+XFEMStatic :: ~XFEMStatic() {}
 
 void
 XFEMStatic :: solveYourselfAt(TimeStep *tStep)
 {
-
     // Initiates the total displacement to zero in the UnknownsDictionary at the first time step.
     // this must be done in order to support a dynamic equation system
     if ( tStep->isTheFirstStep() ) {
@@ -82,77 +76,66 @@ XFEMStatic :: solveYourselfAt(TimeStep *tStep)
     }
 
     // Initialization
-    int neq = this->giveNumberOfDomainEquations(1, EModelDefaultEquationNumbering()); // 1 stands for domain?
+    int neq = this->giveNumberOfDomainEquations( 1, EModelDefaultEquationNumbering() ); // 1 stands for domain?
     if ( this->needsStructureUpdate() ) {
-
-//    	printf("Increasing size of displacement array.\n");
+        //      printf("Increasing size of displacement array.\n");
 
         if ( totalDisplacement.giveSize() != neq ) {
-
-        	if(mSetValsFromDofMap) {
-				FloatArray totalDisplacementNew;
-				setValsFromDofMap(totalDisplacementNew, totalDisplacement);
-				totalDisplacement = totalDisplacementNew;
-        	}
-        	else {
-        		totalDisplacement.resize(neq);
-        		totalDisplacement.zero();
-        	}
+            if ( mSetValsFromDofMap ) {
+                FloatArray totalDisplacementNew;
+                setValsFromDofMap(totalDisplacementNew, totalDisplacement);
+                totalDisplacement = totalDisplacementNew;
+            } else   {
+                totalDisplacement.resize(neq);
+                totalDisplacement.zero();
+            }
         }
 
 
         if ( incrementOfDisplacement.giveSize() != neq ) {
-
-        	if(mSetValsFromDofMap) {
-				FloatArray incrementOfDisplacementNew;
-				setValsFromDofMap(incrementOfDisplacementNew, incrementOfDisplacement);
-				incrementOfDisplacement = incrementOfDisplacementNew;
-        	}
-        	else {
-        		incrementOfDisplacement.resize(neq);
-        		incrementOfDisplacement.zero();
-        	}
+            if ( mSetValsFromDofMap ) {
+                FloatArray incrementOfDisplacementNew;
+                setValsFromDofMap(incrementOfDisplacementNew, incrementOfDisplacement);
+                incrementOfDisplacement = incrementOfDisplacementNew;
+            } else   {
+                incrementOfDisplacement.resize(neq);
+                incrementOfDisplacement.zero();
+            }
         }
 
-    	if(mSetValsFromDofMap) {
-    		this->setTotalDisplacementFromUnknownsInDictionary(EID_MomentumBalance, VM_Total, tStep);
-    	}
+        if ( mSetValsFromDofMap ) {
+            this->setTotalDisplacementFromUnknownsInDictionary(EID_MomentumBalance, VM_Total, tStep);
+        }
 
         if ( incrementalLoadVector.giveSize() != neq ) {
-
-        	if(mSetValsFromDofMap) {
-				FloatArray incrementalLoadVectorNew;
-				incrementalLoadVector.zero(); // temp JB - load vector needs to be recomputed if xfem dofs are introduced
-				setValsFromDofMap(incrementalLoadVectorNew, incrementalLoadVector);
-				incrementalLoadVector = incrementalLoadVectorNew;
-        	}
-        	else {
-        		incrementalLoadVector.resize(neq);
-        		incrementalLoadVector.zero();
-        	}
+            if ( mSetValsFromDofMap ) {
+                FloatArray incrementalLoadVectorNew;
+                incrementalLoadVector.zero();                 // temp JB - load vector needs to be recomputed if xfem dofs are introduced
+                setValsFromDofMap(incrementalLoadVectorNew, incrementalLoadVector);
+                incrementalLoadVector = incrementalLoadVectorNew;
+            } else   {
+                incrementalLoadVector.resize(neq);
+                incrementalLoadVector.zero();
+            }
         }
 
         ///////////////////////////////////////////////////////////////////
         // Map values in the old initialLoadVector to the new initialLoadVector
         if ( initialLoadVector.giveSize() != neq ) {
-
-        	if(mSetValsFromDofMap) {
-				FloatArray initialLoadVectorNew;
-				initialLoadVector.zero(); // temp JB - load vector needs to be recomputed if xfem dofs are introduced
-				setValsFromDofMap(initialLoadVectorNew, initialLoadVector);
-				initialLoadVector = initialLoadVectorNew;
-        	}
-        	else {
-        		initialLoadVector.resize(neq);
-        		initialLoadVector.zero();
-        	}
+            if ( mSetValsFromDofMap ) {
+                FloatArray initialLoadVectorNew;
+                initialLoadVector.zero();                 // temp JB - load vector needs to be recomputed if xfem dofs are introduced
+                setValsFromDofMap(initialLoadVectorNew, initialLoadVector);
+                initialLoadVector = initialLoadVectorNew;
+            } else   {
+                initialLoadVector.resize(neq);
+                initialLoadVector.zero();
+            }
         }
-
     }
 
     this->setUpdateStructureFlag(false);
     NonLinearStatic :: solveYourselfAt(tStep);
-
 }
 
 void
@@ -161,142 +144,129 @@ XFEMStatic :: terminate(TimeStep *tStep)
     this->doStepOutput(tStep);
     this->printReactionForces(tStep, 1);
     // update load vectors before storing context
-    fflush(this->giveOutputStream());
+    fflush( this->giveOutputStream() );
     this->updateLoadVectors(tStep);
     this->saveStepContext(tStep);
 
     // Propagate fronts
     int numDom = this->giveNumberOfDomains();
-    for( int i = 1; i <= numDom; i++ ) {
-    	Domain *domain = this->giveDomain(i);
-    	XfemManager *xMan = domain->giveXfemManager();
-    	xMan->propagateFronts();
+    for ( int i = 1; i <= numDom; i++ ) {
+        Domain *domain = this->giveDomain(i);
+        XfemManager *xMan = domain->giveXfemManager();
+        xMan->propagateFronts();
     }
 
     // Update element subdivisions if necessary
     // (e.g. if a crack has moved and cut a new element)
-    for( int domInd = 1; domInd <= this->giveNumberOfDomains(); domInd++ ) {
-    	Domain *domain = this->giveDomain(domInd);
+    for ( int domInd = 1; domInd <= this->giveNumberOfDomains(); domInd++ ) {
+        Domain *domain = this->giveDomain(domInd);
 
-    	if( domain->giveXfemManager()->hasPropagatingFronts() || mForceRemap ) {
+        if ( domain->giveXfemManager()->hasPropagatingFronts() || mForceRemap ) {
+            // If domain cloning is performed, there is no need to
+            // set values from the dof map.
+            mSetValsFromDofMap = false;
 
-    		// If domain cloning is performed, there is no need to
-    		// set values from the dof map.
-    		mSetValsFromDofMap = false;
+            // Take copy of the domain to allow mapping of state variables
+            // to the new Gauss points.
+            Domain *dNew = domain->Clone();
 
-			// Take copy of the domain to allow mapping of state variables
-			// to the new Gauss points.
-			Domain *dNew = domain->Clone();
+            bool deallocateOld = false;
+            setDomain(1, dNew, deallocateOld);
+            forceEquationNumbering();
 
-			bool deallocateOld = false;
-			setDomain(1, dNew, deallocateOld);
-			forceEquationNumbering();
-
-			// Map primary variables
-			LSPrimaryVariableMapper primMapper;
-			FloatArray u;
-			primMapper.mapPrimaryVariables(u, *domain, *dNew, VM_Total, *tStep);
-
-
-			if(totalDisplacement.giveSize() == u.giveSize()) {
-				FloatArray diff;
-				diff.beDifferenceOf(totalDisplacement, u);
-
-				printf("diff norm: %e\n", diff.computeNorm() );
-			}
-
-			totalDisplacement = u;
+            // Map primary variables
+            LSPrimaryVariableMapper primMapper;
+            FloatArray u;
+            primMapper.mapPrimaryVariables(u, * domain, * dNew, VM_Total, * tStep);
 
 
-			primMapper.mapPrimaryVariables(incrementOfDisplacement, *domain, *dNew, VM_Incremental, *tStep);
+            if ( totalDisplacement.giveSize() == u.giveSize() ) {
+                FloatArray diff;
+                diff.beDifferenceOf(totalDisplacement, u);
+
+                printf( "diff norm: %e\n", diff.computeNorm() );
+            }
+
+            totalDisplacement = u;
 
 
-			int numEl = dNew->giveNumberOfElements();
-
-			for(int i = 1; i <= numEl; i++) {
-
-				////////////////////////////////////////////////////////
-				// Map state variables for regular Gauss points
-				StructuralElement *el = dynamic_cast<StructuralElement*>( dNew->giveElement(i) );
-				el->createMaterialStatus();
-				el->mapStateVariables(*domain, *tStep);
+            primMapper.mapPrimaryVariables(incrementOfDisplacement, * domain, * dNew, VM_Incremental, * tStep);
 
 
-				////////////////////////////////////////////////////////
-				// Map state variables for cohesive zone if applicable
-				XfemElementInterface *xFemEl = dynamic_cast<XfemElementInterface*>(el);
-				if(xFemEl != NULL) {
+            int numEl = dNew->giveNumberOfElements();
 
-					if(xFemEl->mpCZMat != NULL) {
-
-						size_t numCzRules = xFemEl->mpCZIntegrationRules.size();
-
-						for(size_t czIndex = 0; czIndex < numCzRules; czIndex++) {
-							if(xFemEl->mpCZIntegrationRules[czIndex] != NULL) {
-
-								for ( int j = 0; j < xFemEl->mpCZIntegrationRules[czIndex]->giveNumberOfIntegrationPoints(); j++ ) {
+            for ( int i = 1; i <= numEl; i++ ) {
+                ////////////////////////////////////////////////////////
+                // Map state variables for regular Gauss points
+                StructuralElement *el = dynamic_cast< StructuralElement * >( dNew->giveElement(i) );
+                el->createMaterialStatus();
+                el->mapStateVariables(* domain, * tStep);
 
 
-									GaussPoint &gp = *(xFemEl->mpCZIntegrationRules[czIndex]->getIntegrationPoint(j));
+                ////////////////////////////////////////////////////////
+                // Map state variables for cohesive zone if applicable
+                XfemElementInterface *xFemEl = dynamic_cast< XfemElementInterface * >( el );
+                if ( xFemEl != NULL ) {
+                    if ( xFemEl->mpCZMat != NULL ) {
+                        size_t numCzRules = xFemEl->mpCZIntegrationRules.size();
 
-									MaterialStatus *ms = xFemEl->mpCZMat->giveStatus(&gp);
-									if(ms == NULL) {
-										OOFEM_ERROR("In Element :: mapStateVariables(): Failed to fetch material status.\n");
-									}
+                        for ( size_t czIndex = 0; czIndex < numCzRules; czIndex++ ) {
+                            if ( xFemEl->mpCZIntegrationRules [ czIndex ] != NULL ) {
+                                for ( int j = 0; j < xFemEl->mpCZIntegrationRules [ czIndex ]->giveNumberOfIntegrationPoints(); j++ ) {
+                                    GaussPoint &gp = * ( xFemEl->mpCZIntegrationRules [ czIndex ]->getIntegrationPoint(j) );
 
-									MaterialStatusMapperInterface *interface = dynamic_cast< MaterialStatusMapperInterface * >
-																			  ( xFemEl->mpCZMat->giveStatus(&gp) );
+                                    MaterialStatus *ms = xFemEl->mpCZMat->giveStatus(& gp);
+                                    if ( ms == NULL ) {
+                                        OOFEM_ERROR("In Element :: mapStateVariables(): Failed to fetch material status.\n");
+                                    }
 
-									if ( interface == NULL ) {
-										OOFEM_ERROR("In XFEMStatic :: mapStateVariables(): Failed to fetch MaterialStatusMapperInterface.\n");
-									}
+                                    MaterialStatusMapperInterface *interface = dynamic_cast< MaterialStatusMapperInterface * >
+                                                                               ( xFemEl->mpCZMat->giveStatus(& gp) );
 
-
-									MaterialStatus *matStat = dynamic_cast<MaterialStatus*>(xFemEl->mpCZMat->giveStatus(&gp));
-									StructuralInterfaceMaterialStatus *siMatStat = dynamic_cast<StructuralInterfaceMaterialStatus*>( matStat );
-									if(siMatStat == NULL) {
-										OOFEM_ERROR("In XFEMStatic :: terminate: Failed to cast to StructuralInterfaceMaterialStatus.\n");
-									}
-									interface->MSMI_map(gp, *domain, *tStep, *siMatStat);
-
-								}
-							}
-
-						}
-
-					}
-				}
-
-			}
+                                    if ( interface == NULL ) {
+                                        OOFEM_ERROR("In XFEMStatic :: mapStateVariables(): Failed to fetch MaterialStatusMapperInterface.\n");
+                                    }
 
 
-			delete domain;
-			domain = this->giveDomain(1);
-
-			// Set domain pointer to various components ...
-			this->nMethod->setDomain(domain);
-
-			int numExpModules = this->exportModuleManager->giveNumberOfModules();
-			for(int i = 1; i <= numExpModules; i++) {
-
-				//  ... by diving deep into the hierarchies ... :-/
-				VTKXMLExportModule *vtkxmlMod = dynamic_cast<VTKXMLExportModule*> (this->exportModuleManager->giveModule(i) );
-				if(vtkxmlMod != NULL) {
-					vtkxmlMod->giveSmoother()->setDomain(domain);
-					vtkxmlMod->givePrimVarSmoother()->setDomain(domain);
-				}
-
-			}
+                                    MaterialStatus *matStat = dynamic_cast< MaterialStatus * >( xFemEl->mpCZMat->giveStatus(& gp) );
+                                    StructuralInterfaceMaterialStatus *siMatStat = dynamic_cast< StructuralInterfaceMaterialStatus * >( matStat );
+                                    if ( siMatStat == NULL ) {
+                                        OOFEM_ERROR("In XFEMStatic :: terminate: Failed to cast to StructuralInterfaceMaterialStatus.\n");
+                                    }
+                                    interface->MSMI_map(gp, * domain, * tStep, * siMatStat);
+                                }
+                            }
+                        }
+                    }
+                }
+            }
 
 
-			this->setUpdateStructureFlag(true);
-    	} // if( domain->giveXfemManager()->hasPropagatingFronts() )
+            delete domain;
+            domain = this->giveDomain(1);
 
-//#endif
+            // Set domain pointer to various components ...
+            this->nMethod->setDomain(domain);
+
+            int numExpModules = this->exportModuleManager->giveNumberOfModules();
+            for ( int i = 1; i <= numExpModules; i++ ) {
+                //  ... by diving deep into the hierarchies ... :-/
+                VTKXMLExportModule *vtkxmlMod = dynamic_cast< VTKXMLExportModule * >( this->exportModuleManager->giveModule(i) );
+                if ( vtkxmlMod != NULL ) {
+                    vtkxmlMod->giveSmoother()->setDomain(domain);
+                    vtkxmlMod->givePrimVarSmoother()->setDomain(domain);
+                }
+            }
+
+
+            this->setUpdateStructureFlag(true);
+        } // if( domain->giveXfemManager()->hasPropagatingFronts() )
+
+        //#endif
     }
-    
-    // Fracture/failure mechanics evaluation    
-    for( int i = 1; i <= numDom; i++ ) {
+
+    // Fracture/failure mechanics evaluation
+    for ( int i = 1; i <= numDom; i++ ) {
         if ( this->giveDomain(i)->hasFractureManager() ) { // Will most likely fail if numDom > 1
             FractureManager *fracMan  = this->giveDomain(i)->giveFractureManager();
             fracMan->evaluateYourself(tStep);
@@ -305,8 +275,6 @@ XFEMStatic :: terminate(TimeStep *tStep)
             this->setUpdateStructureFlag( fracMan->giveUpdateFlag() ); // if the internal structure need to be updated
         }
     }
-
-
 }
 
 void
@@ -345,44 +313,44 @@ XFEMStatic :: updateLoadVectors(TimeStep *tStep)
         //(here the loading is not proportional)
 
         /*if ( initialLoadVector.isEmpty() ) {
-            initialLoadVector.resize( incrementalLoadVector.giveSize() );
-        }
-        */
+         *  initialLoadVector.resize( incrementalLoadVector.giveSize() );
+         * }
+         */
         OOFEM_LOG_DEBUG("Fixed load level\n");
 
-        int neq = this->giveNumberOfDomainEquations(1, EModelDefaultEquationNumbering()); // 1 stands for domain?
+        int neq = this->giveNumberOfDomainEquations( 1, EModelDefaultEquationNumbering() ); // 1 stands for domain?
 
-//        printf("Before: ");
-//        incrementalLoadVector.printYourself();
+        //        printf("Before: ");
+        //        incrementalLoadVector.printYourself();
         if ( incrementalLoadVector.giveSize() != neq ) {
             //initialLoadVector.resize( incrementalLoadVector.giveSize() );
-//        	initialLoadVector.printYourself();
-//            initialLoadVector.resize( 0 );
+            //          initialLoadVector.printYourself();
+            //            initialLoadVector.resize( 0 );
 
-        	FloatArray incrementalLoadVectorNew;
+            FloatArray incrementalLoadVectorNew;
             setValsFromDofMap(incrementalLoadVectorNew, incrementalLoadVector);
             incrementalLoadVector = incrementalLoadVectorNew;
         }
-//        printf("After: ");
-//        incrementalLoadVector.printYourself();
+        //        printf("After: ");
+        //        incrementalLoadVector.printYourself();
 
         incrementalLoadVector.times(loadLevel);
 
         ///////////////////////////////////////////////////////////////////
         // Map values in the old initialLoadVector to the new initialLoadVector
-//        printf("Before: ");
-//        initialLoadVector.printYourself();
+        //        printf("Before: ");
+        //        initialLoadVector.printYourself();
         if ( initialLoadVector.giveSize() != neq ) {
             //initialLoadVector.resize( incrementalLoadVector.giveSize() );
-//        	initialLoadVector.printYourself();
-//            initialLoadVector.resize( 0 );
+            //          initialLoadVector.printYourself();
+            //            initialLoadVector.resize( 0 );
 
-        	FloatArray initialLoadVectorNew;
+            FloatArray initialLoadVectorNew;
             setValsFromDofMap(initialLoadVectorNew, initialLoadVector);
             initialLoadVector = initialLoadVectorNew;
         }
-//        printf("After: ");
-//        initialLoadVector.printYourself();
+        //        printf("After: ");
+        //        initialLoadVector.printYourself();
 
         ///////////////////////////////////////////////////////////////////
 
@@ -419,7 +387,7 @@ XFEMStatic :: updateYourself(TimeStep *tStep)
     NonLinearStatic :: updateYourself(tStep);
 
     // TODO: Check if update is actually needed
-    this->setUpdateStructureFlag( true );
+    this->setUpdateStructureFlag(true);
 
     // Update the UnknownsDictionary if needed
     if ( this->needsStructureUpdate() ) {
@@ -435,9 +403,6 @@ XFEMStatic :: updateYourself(TimeStep *tStep)
             }
         }
     }
-
-
-
 }
 
 double
@@ -450,14 +415,13 @@ XFEMStatic ::  giveUnknownComponent(ValueModeType mode, TimeStep *tStep, Domain 
             return dof->giveUnknowns()->at(hash);
         } else { // Value is not initiated in UnknownsDictionary
             return 0.0; ///@todo: how should one treat newly created dofs?
-            			// If we are not happy with setting them to zero,
-            			// I suggest that we use the primary variable mapper. /ES
+            // If we are not happy with setting them to zero,
+            // I suggest that we use the primary variable mapper. /ES
             //OOFEM_ERROR2( "giveUnknown:  Dof unknowns dictionary does not contain unknown of value mode (%s)", __ValueModeTypeToString(mode) );
         }
     } else {
         return NonLinearStatic ::  giveUnknownComponent(mode, tStep, d, dof);
     }
-
 }
 
 IRResultType XFEMStatic :: initializeFrom(InputRecord *ir)
@@ -465,14 +429,14 @@ IRResultType XFEMStatic :: initializeFrom(InputRecord *ir)
     const char *__proc = "initializeFrom"; // Required by IR_GIVE_FIELD macro
     IRResultType result;                // Required by IR_GIVE_FIELD macro
 
-	NonLinearStatic::initializeFrom(ir);
+    NonLinearStatic :: initializeFrom(ir);
 
-	int remapFlag = 0;
+    int remapFlag = 0;
     IR_GIVE_OPTIONAL_FIELD(ir, remapFlag, _IFT_XFEMStatic_ForceRemap);
 
-    if(remapFlag == 1) {
-    	printf("Forcing remapping.\n");
-    	mForceRemap = true;
+    if ( remapFlag == 1 ) {
+        printf("Forcing remapping.\n");
+        mForceRemap = true;
     }
 
     return IRRT_OK;
@@ -505,7 +469,7 @@ XFEMStatic :: initializeDofUnknownsDictionary(TimeStep *tStep)
 void
 XFEMStatic :: setTotalDisplacementFromUnknownsInDictionary(EquationID type, ValueModeType mode, TimeStep *tStep)
 {
-	printf("Entering XFEMStatic :: setTotalDisplacementFromUnknownsInDictionary().\n");
+    printf("Entering XFEMStatic :: setTotalDisplacementFromUnknownsInDictionary().\n");
 
     // Sets the values in the displacement vector based on stored values in the unknowns dictionaries.
     // Used in the beginning of each time step.
@@ -527,13 +491,11 @@ XFEMStatic :: setTotalDisplacementFromUnknownsInDictionary(EquationID type, Valu
             }
         }
     }
-
 }
 
 void
 XFEMStatic :: updateDofUnknownsDictionary(DofManager *inode, TimeStep *tStep)
 {
-
     // update DoF unknowns dictionary.
     Dof *iDof;
     double val;
@@ -555,86 +517,72 @@ XFEMStatic :: updateDofUnknownsDictionary(DofManager *inode, TimeStep *tStep)
 }
 
 void XFEMStatic :: buildDofMap() {
-
-	printf("Building dof map.\n");
-	mDofEqnNumMap.clear();
+    printf("Building dof map.\n");
+    mDofEqnNumMap.clear();
 
     for ( int domainIndex = 1; domainIndex <= this->giveNumberOfDomains(); domainIndex++ ) {
-    	Domain *domain = this->giveDomain(domainIndex);
+        Domain *domain = this->giveDomain(domainIndex);
 
         for ( int dManIndex = 1; dManIndex <= domain->giveNumberOfDofManagers(); dManIndex++ ) {
-        	DofManager *dMan = domain->giveDofManager(dManIndex);
+            DofManager *dMan = domain->giveDofManager(dManIndex);
 
             for ( int k = 1; k <= dMan->giveNumberOfDofs(); k++ ) {
-
-            	Dof *dof = dMan->giveDof(k);
-            	int eqNum = dof->giveEqn();
+                Dof *dof = dMan->giveDof(k);
+                int eqNum = dof->giveEqn();
 
                 if ( eqNum > 0 ) {
+                    std :: vector< int >key(3);
+                    key [ 0 ] = domainIndex;
+                    key [ 1 ] = dManIndex;
+                    key [ 2 ] = k;
 
-                	std::vector<int> key(3);
-                	key[0] = domainIndex;
-                	key[1] = dManIndex;
-                	key[2] = k;
-
-                	mDofEqnNumMap[ key ] = eqNum;
+                    mDofEqnNumMap [ key ] = eqNum;
                 }
-
             }
         }
     }
-
 }
 
 void XFEMStatic :: setValsFromDofMap(FloatArray &oArray, const FloatArray &iArray) {
-
-
     int neq = 0;
     for ( int domainIndex = 1; domainIndex <= this->giveNumberOfDomains(); domainIndex++ ) {
-    	neq += this->giveNumberOfDomainEquations(domainIndex, EModelDefaultEquationNumbering());
+        neq += this->giveNumberOfDomainEquations( domainIndex, EModelDefaultEquationNumbering() );
     }
 
-	int numEqOld = iArray.giveSize();
-	printf("Setting values from dof map. neq: %d numEqOld: %d\n", neq, numEqOld);
+    int numEqOld = iArray.giveSize();
+    printf("Setting values from dof map. neq: %d numEqOld: %d\n", neq, numEqOld);
 
 
-	oArray.resize( neq );
-	oArray.zero();
+    oArray.resize(neq);
+    oArray.zero();
 
     for ( int domainIndex = 1; domainIndex <= this->giveNumberOfDomains(); domainIndex++ ) {
-    	Domain *domain = this->giveDomain(domainIndex);
+        Domain *domain = this->giveDomain(domainIndex);
 
         for ( int dManIndex = 1; dManIndex <= domain->giveNumberOfDofManagers(); dManIndex++ ) {
-        	DofManager *dMan = domain->giveDofManager(dManIndex);
+            DofManager *dMan = domain->giveDofManager(dManIndex);
 
             for ( int k = 1; k <= dMan->giveNumberOfDofs(); k++ ) {
-
-            	Dof *dof = dMan->giveDof(k);
-            	int eqNumNew = dof->giveEqn();
+                Dof *dof = dMan->giveDof(k);
+                int eqNumNew = dof->giveEqn();
 
                 if ( eqNumNew > 0 ) {
+                    std :: vector< int >key(3);
+                    key [ 0 ] = domainIndex;
+                    key [ 1 ] = dManIndex;
+                    key [ 2 ] = k;
 
-                	std::vector<int> key(3);
-                	key[0] = domainIndex;
-                	key[1] = dManIndex;
-                	key[2] = k;
+                    if ( mDofEqnNumMap.find(key) != mDofEqnNumMap.end() ) {
+                        int eqNumOld = mDofEqnNumMap [ key ];
+                        //                      printf("eqNumNew: %d eqNumOld: %d\n", eqNumNew, eqNumOld);
 
-                	if( mDofEqnNumMap.find(key) != mDofEqnNumMap.end() ){
-                		int eqNumOld = mDofEqnNumMap[ key ];
-//                		printf("eqNumNew: %d eqNumOld: %d\n", eqNumNew, eqNumOld);
-
-                		if( eqNumOld > 0 && eqNumOld <= numEqOld  ) {
-                			oArray.at(eqNumNew) = iArray.at(eqNumOld);
-                		}
-                	}
+                        if ( eqNumOld > 0 && eqNumOld <= numEqOld  ) {
+                            oArray.at(eqNumNew) = iArray.at(eqNumOld);
+                        }
+                    }
                 }
-
             }
         }
     }
-
-
 }
-
-
 } /* namespace oofem */

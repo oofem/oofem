@@ -38,8 +38,7 @@
 #include "gausspoint.h"
 
 namespace oofem {
-
-StructuralInterfaceMaterial::StructuralInterfaceMaterial(int n, Domain *d): Material(n, d)
+StructuralInterfaceMaterial :: StructuralInterfaceMaterial(int n, Domain *d) : Material(n, d)
 {
     this->useNumericalTangent = false;
 }
@@ -52,19 +51,15 @@ StructuralInterfaceMaterial :: giveIPValue(FloatArray &answer, GaussPoint *gp, I
     if ( type == IST_InterfaceJump ) {
         answer = status->giveJump();
         return 1;
-
     } else if ( type == IST_InterfaceTraction ) {
         answer = status->giveTraction();
         return 1;
-
     } else if ( type == IST_InterfaceFirstPKTraction ) {
         answer = status->giveFirstPKTraction();
         return 1;
-
     } else if ( type == IST_DeformationGradientTensor ) {
         answer.beVectorForm( status->giveF() );
         return 1;
-
     } else {
         return Material :: giveIPValue(answer, gp, type, atTime);
     }
@@ -74,7 +69,6 @@ StructuralInterfaceMaterial :: giveIPValue(FloatArray &answer, GaussPoint *gp, I
 IRResultType
 StructuralInterfaceMaterial :: initializeFrom(InputRecord *ir)
 {
-
     const char *__proc = "initializeFrom";  // Required by IR_GIVE_FIELD macro
     IRResultType result;                    // Required by IR_GIVE_FIELD macro
 
@@ -95,46 +89,43 @@ StructuralInterfaceMaterial :: giveInputRecord(DynamicInputRecord &input)
 void
 StructuralInterfaceMaterial :: giveStiffnessMatrix_dTdj_Num(FloatMatrix &answer, MatResponseMode rMode, GaussPoint *gp, TimeStep *tStep)
 {
-
     // Numerical tangent
     // Computes the material stiffness using a central difference method
-	
+
     StructuralInterfaceMaterialStatus *status = static_cast< StructuralInterfaceMaterialStatus * >( this->giveStatus(gp) );
     if ( status ) {
         FloatMatrix F;
         F = status->giveTempF();
         int dim = F.giveNumberOfRows();
-        answer.resize(dim,dim);
+        answer.resize(dim, dim);
         answer.zero();
         const double eps = 1.0e-9;
         FloatArray T, TPlus, TMinus;
-        
-        
+
+
         FloatArray jump, jumpPlus, jumpMinus, Kcolumn;
         jump = status->giveTempJump();
 
         for ( int i = 1; i <= dim; i++ ) {
             jumpPlus = jumpMinus = jump;
-            jumpPlus.at(i)  += eps; 
+            jumpPlus.at(i)  += eps;
             jumpMinus.at(i) -= eps;
             this->giveFirstPKTraction_3d(TPlus, gp, jumpPlus, F, tStep);
             this->giveFirstPKTraction_3d(TMinus, gp, jumpMinus, F, tStep);
 
-            Kcolumn = (TPlus - TMinus);
+            Kcolumn = ( TPlus - TMinus );
             answer.setColumn(Kcolumn, i);
         }
-        answer.times( 1.0/(2*eps) );
+        answer.times( 1.0 / ( 2 * eps ) );
 
         this->giveFirstPKTraction_3d(T, gp, jump, F, tStep); // reset temp values by recomputing the stress
-
     }
-
 }
 #endif
 
 
 void
-StructuralInterfaceMaterial::give2dStiffnessMatrix_Eng(FloatMatrix &answer, MatResponseMode mode, GaussPoint *gp, TimeStep *tStep)
+StructuralInterfaceMaterial :: give2dStiffnessMatrix_Eng(FloatMatrix &answer, MatResponseMode mode, GaussPoint *gp, TimeStep *tStep)
 {
     FloatMatrix answer3D;
     give3dStiffnessMatrix_Eng(answer3D, mode, gp, tStep);
@@ -157,46 +148,45 @@ StructuralInterfaceMaterial::give2dStiffnessMatrix_Eng(FloatMatrix &answer, MatR
     comp.subtract(answerNum);
     printf("difference in numerical tangent to mat method \n");
     comp.printYourself();
-
 }
 
 void
-StructuralInterfaceMaterial::give3dStiffnessMatrix_Eng(FloatMatrix &answer, MatResponseMode mode, GaussPoint *gp, TimeStep *tStep)
+StructuralInterfaceMaterial :: give3dStiffnessMatrix_Eng(FloatMatrix &answer, MatResponseMode mode, GaussPoint *gp, TimeStep *tStep)
 {
     //_error("give3dStiffnessMatrix_Eng: not implemented ");
     give3dStiffnessMatrix_dTdj(answer, mode, gp, tStep);
 }
 
 void
-StructuralInterfaceMaterial::give3dStiffnessMatrix_dTdj(FloatMatrix &answer, MatResponseMode rMode, GaussPoint *gp, TimeStep *tStep)
+StructuralInterfaceMaterial :: give3dStiffnessMatrix_dTdj(FloatMatrix &answer, MatResponseMode rMode, GaussPoint *gp, TimeStep *tStep)
 {
     _error("give3dStiffnessMatrix_dTdj: not implemented ")
 }
 
 void
-StructuralInterfaceMaterial::give1dStiffnessMatrix_Eng(FloatMatrix & answer, MatResponseMode mode, GaussPoint * gp, TimeStep * tStep)
+StructuralInterfaceMaterial :: give1dStiffnessMatrix_Eng(FloatMatrix &answer, MatResponseMode mode, GaussPoint *gp, TimeStep *tStep)
 {
     give3dStiffnessMatrix_Eng(answer, mode, gp, tStep);
 }
 
 void
-StructuralInterfaceMaterial::giveEngTraction_1d(FloatArray & answer, GaussPoint * gp, const FloatArray & jump, TimeStep * tStep)
+StructuralInterfaceMaterial :: giveEngTraction_1d(FloatArray &answer, GaussPoint *gp, const FloatArray &jump, TimeStep *tStep)
 {
     FloatArray modifiedJump(3);
-    modifiedJump.setValues(3, 0.0, 0.0, jump.at(3));
+    modifiedJump.setValues( 3, 0.0, 0.0, jump.at(3) );
     this->giveEngTraction_3d(answer, gp, modifiedJump, tStep);
 }
 
 void
-StructuralInterfaceMaterial::giveEngTraction_2d(FloatArray & answer, GaussPoint * gp, const FloatArray & jump, TimeStep * tStep)
+StructuralInterfaceMaterial :: giveEngTraction_2d(FloatArray &answer, GaussPoint *gp, const FloatArray &jump, TimeStep *tStep)
 {
     FloatArray modifiedJump(3);
-    modifiedJump.setValues(3, jump.at(1), 0.0, jump.at(3));
+    modifiedJump.setValues( 3, jump.at(1), 0.0, jump.at(3) );
     this->giveEngTraction_3d(answer, gp, modifiedJump, tStep);
 }
 
 void
-StructuralInterfaceMaterial::giveEngTraction_3d(FloatArray & answer, GaussPoint * gp, const FloatArray & jump, TimeStep * tStep)
+StructuralInterfaceMaterial :: giveEngTraction_3d(FloatArray &answer, GaussPoint *gp, const FloatArray &jump, TimeStep *tStep)
 {
     //_error("giveEngTraction_3d: not implemented ");
     FloatMatrix F(3, 3);

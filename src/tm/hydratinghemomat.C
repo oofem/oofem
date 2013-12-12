@@ -42,7 +42,7 @@
 namespace oofem {
 #define PRECAST_CAPACITY_COEFF 1e-2 // coefficient for obtaining capacity before cast of the material : 1e-4, tried 1e-2 for jete (no convergency with 1e-4)
 
-REGISTER_Material( HydratingHeMoMaterial );
+REGISTER_Material(HydratingHeMoMaterial);
 
 IRResultType
 HydratingHeMoMaterial :: initializeFrom(InputRecord *ir)
@@ -194,8 +194,8 @@ HydratingHeMoMaterial :: updateInternalState(const FloatArray &vec, GaussPoint *
 
                 aux.times( 1. / give('d', gp) );
                 fprintf( vyst, "Elem %.3d krok %.2d: t= %.0f, dt=%.0f, %ld. it, ksi= %.12f, T= %.8f, heat=%.8f\n", gp->giveElement()->giveNumber(), atTime->giveNumber(),
-                        atTime->giveTargetTime(), atTime->giveTimeIncrement(), atTime->giveSolutionStateCounter(),
-                        giveHydrationDegree(gp, atTime, VM_Total), vec.at(1), aux.at(1) * atTime->giveTimeIncrement() );
+                         atTime->giveTargetTime(), atTime->giveTimeIncrement(), atTime->giveSolutionStateCounter(),
+                         giveHydrationDegree(gp, atTime, VM_Total), vec.at(1), aux.at(1) * atTime->giveTimeIncrement() );
                 fclose(vyst);
             }
         }

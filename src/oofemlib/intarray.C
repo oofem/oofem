@@ -50,27 +50,26 @@
  #include "combuff.h"
 #endif
 
-#define ALLOC(size) (int*)malloc(sizeof(int) * (size));
+#define ALLOC(size) ( int * ) malloc( sizeof( int ) * ( size ) );
 
 #define RESIZE(n) \
     { \
         size = n; \
         if ( n > allocatedSize ) { \
             allocatedSize = n; \
-            if ( values ) free(values); \
+            if ( values ) { free(values); } \
             values = ALLOC(size); \
         } \
     }
 
 namespace oofem {
+IntArray :: iterator :: iterator(const IntArray *vec, int pos) : pos(pos), vec(vec) { }
 
-IntArray :: iterator :: iterator(const IntArray* vec, int pos): pos( pos ), vec( vec ) { }
+bool IntArray :: iterator :: operator!=(const IntArray :: iterator &other) const { return pos != other.pos; }
 
-bool IntArray :: iterator :: operator!=(const IntArray :: iterator& other) const { return pos != other.pos; }
+int IntArray :: iterator :: operator*() const { return ( * vec )( pos ); }
 
-int IntArray :: iterator :: operator*() const { return (*vec)(pos); }
-
-const IntArray :: iterator & IntArray :: iterator :: operator++() { ++pos; return *this; }
+const IntArray :: iterator &IntArray :: iterator :: operator++() { ++pos; return * this; }
 
 IntArray :: iterator IntArray :: begin() { return iterator(this, 0); }
 IntArray :: iterator IntArray :: end() { return iterator(this, this->size); }
@@ -80,17 +79,16 @@ IntArray :: IntArray() :
     size(0),
     allocatedSize(0),
     values(NULL)
-{
-}
+{}
 
 
 IntArray :: IntArray(int n) :
     size(n),
     allocatedSize(n)
-// Constructor : creates an array of size n (filled with garbage).
+    // Constructor : creates an array of size n (filled with garbage).
 {
     if ( size ) {
-        values = (int*)calloc(size, sizeof(int));
+        values = ( int * ) calloc( size, sizeof( int ) );
     } else {
         values = NULL;
     }
@@ -98,13 +96,13 @@ IntArray :: IntArray(int n) :
 
 
 IntArray :: IntArray(const IntArray &src) :
-     size(src.size),
-     allocatedSize(src.size)
-// copy constructor
+    size(src.size),
+    allocatedSize(src.size)
+    // copy constructor
 {
     if ( size ) {
         values = ALLOC(this->size);
-        memcpy(values, src.values, size * sizeof(int));
+        memcpy( values, src.values, size * sizeof( int ) );
     } else {
         values = NULL;
     }
@@ -112,14 +110,14 @@ IntArray :: IntArray(const IntArray &src) :
 
 
 #if __cplusplus > 199711L
-IntArray :: IntArray(std::initializer_list<int> list)
+IntArray :: IntArray(std :: initializer_list< int >list)
 {
     this->size = this->allocatedSize = list.size();
     if ( this->size ) {
         this->values = ALLOC(this->size);
         int *p = this->values;
-        for (int x: list) {
-            *p = x;
+        for ( int x : list ) {
+            * p = x;
             p++;
         }
     } else {
@@ -128,12 +126,12 @@ IntArray :: IntArray(std::initializer_list<int> list)
 }
 
 
-IntArray &IntArray :: operator=(std::initializer_list<int> list)
+IntArray &IntArray :: operator=(std :: initializer_list< int >list)
 {
-    RESIZE((int)list.size());
+    RESIZE( ( int ) list.size() );
     int *p = this->values;
-    for (int x: list) {
-        *p = x;
+    for ( int x : list ) {
+        * p = x;
         p++;
     }
     return * this;
@@ -150,7 +148,7 @@ IntArray :: ~IntArray()
 }
 
 
-IntArray &IntArray :: operator = ( const IntArray & src )
+IntArray &IntArray :: operator=(const IntArray &src)
 {
     // assignment: cleanup and copy
     if ( values ) {
@@ -160,7 +158,7 @@ IntArray &IntArray :: operator = ( const IntArray & src )
     allocatedSize = size = src.size;
     if ( size ) {
         values = ALLOC(this->size);
-        memcpy(values, src.values, size * sizeof(int));
+        memcpy( values, src.values, size * sizeof( int ) );
     } else {
         values = NULL;
     }
@@ -171,7 +169,7 @@ IntArray &IntArray :: operator = ( const IntArray & src )
 
 void IntArray :: zero()
 {
-    memset(values, 0, size * sizeof(int));
+    memset( values, 0, size * sizeof( int ) );
 }
 
 
@@ -266,10 +264,12 @@ void IntArray :: resizeWithValues(int n, int allocChunk)
         OOFEM_FATAL2("IntArray :: resizeWithValues - Failed in allocating %d doubles", allocatedSize);
     }
 #endif
-    memcpy(newValues, values, size * sizeof(int) );
-    memset(&newValues[size], 0, (allocatedSize - size) * sizeof(int) );
+    memcpy( newValues, values, size * sizeof( int ) );
+    memset( & newValues [ size ], 0, ( allocatedSize - size ) * sizeof( int ) );
 
-    if ( values ) free(values);
+    if ( values ) {
+        free(values);
+    }
     values = newValues;
     size = n;
 }
@@ -278,13 +278,15 @@ void IntArray :: resize(int n)
 {
     size = n;
     if ( n <= allocatedSize ) {
-        memset(values, 0, size * sizeof(int) );
+        memset( values, 0, size * sizeof( int ) );
         return;
     }
     allocatedSize = n;
 
-    if ( values ) free(values);
-    values = (int*)calloc(allocatedSize, sizeof(int));
+    if ( values ) {
+        free(values);
+    }
+    values = ( int * ) calloc( allocatedSize, sizeof( int ) );
 #ifdef DEBUG
     if ( !values ) {
         OOFEM_FATAL2("IntArray :: resize - Failed in allocating %d doubles", allocatedSize);
@@ -299,17 +301,19 @@ void IntArray :: preallocate(int futureSize)
         return;
     }
     allocatedSize = futureSize;
-    
+
     int *newValues = ALLOC(allocatedSize);
 #ifdef DEBUG
     if ( !newValues ) {
         OOFEM_FATAL2("IntArray :: preallocate - Failed in allocating %d doubles", allocatedSize);
     }
 #endif
-    memcpy(newValues, values, size * sizeof(int) );
-    memset(&newValues[size], 0, (allocatedSize - size) * sizeof(int) );
+    memcpy( newValues, values, size * sizeof( int ) );
+    memset( & newValues [ size ], 0, ( allocatedSize - size ) * sizeof( int ) );
 
-    if ( values ) free(values);
+    if ( values ) {
+        free(values);
+    }
     values = newValues;
 }
 
@@ -338,17 +342,19 @@ void IntArray :: followedBy(const IntArray &b, int allocChunk)
     if ( newSize > allocatedSize ) {
         int *newValues = ALLOC(newSize + allocChunk);
 
-        memcpy(newValues, values, size * sizeof(int));
-        memcpy(newValues + size, b.values, b.size * sizeof(int));
+        memcpy( newValues, values, size * sizeof( int ) );
+        memcpy( newValues + size, b.values, b.size * sizeof( int ) );
         ///@todo Do we zero or just leave the last part uninitialized?
-        memset(newValues + newSize, 0, allocChunk * sizeof(int));
+        memset( newValues + newSize, 0, allocChunk * sizeof( int ) );
 
-        if ( values ) free(values);
+        if ( values ) {
+            free(values);
+        }
         values = newValues;
         allocatedSize = newSize + allocChunk;
         size = newSize;
     } else {
-        memcpy(values + size, b.values, b.size * sizeof(int));
+        memcpy( values + size, b.values, b.size * sizeof( int ) );
         size = newSize;
     }
 }
@@ -360,12 +366,14 @@ void IntArray :: followedBy(int b, int allocChunk)
     int newSize = size + 1;
 
     if ( newSize > allocatedSize ) {
-        int *newValues = (int*)calloc(newSize + allocChunk, sizeof(int));
+        int *newValues = ( int * ) calloc( newSize + allocChunk, sizeof( int ) );
 
-        memcpy(newValues, values, size * sizeof(int));
-        newValues[size] = b;
+        memcpy( newValues, values, size * sizeof( int ) );
+        newValues [ size ] = b;
 
-        if ( values ) free(values);
+        if ( values ) {
+            free(values);
+        }
 
         values = newValues;
         allocatedSize = newSize + allocChunk;
@@ -409,14 +417,14 @@ bool IntArray :: containsOnlyZeroes() const
 int IntArray :: minimum() const
 {
 #ifdef DEBUG
-    if (size == 0) {
+    if ( size == 0 ) {
         OOFEM_ERROR("IntArray :: minimum - Empty array.");
     }
 #endif
-    int x = values[0];
+    int x = values [ 0 ];
     for ( int i = 1; i < size; ++i ) {
-        if (values[i] < x) {
-            x = values[i];
+        if ( values [ i ] < x ) {
+            x = values [ i ];
         }
     }
     return x;
@@ -426,31 +434,35 @@ int IntArray :: minimum() const
 int IntArray :: maximum() const
 {
 #ifdef DEBUG
-    if (size == 0) {
+    if ( size == 0 ) {
         OOFEM_ERROR("IntArray :: maximum - Empty array.");
     }
 #endif
-    int x = values[0];
+    int x = values [ 0 ];
     for ( int i = 1; i < size; ++i ) {
-        if (values[i] > x) {
-            x = values[i];
+        if ( values [ i ] > x ) {
+            x = values [ i ];
         }
     }
     return x;
 }
 
 
-void IntArray::findNonzeros(const IntArray &logical)
+void IntArray :: findNonzeros(const IntArray &logical)
 {
     int newsize = 0;
-    for (int i = 1; i <= logical.size; ++i) {
-        if ( logical.at(i) ) ++newsize;
+    for ( int i = 1; i <= logical.size; ++i ) {
+        if ( logical.at(i) ) {
+            ++newsize;
+        }
     }
     this->resize(newsize);
-    
+
     int pos = 1;
-    for (int i = 1; i <= logical.size; ++i) {
-        if ( logical.at(i) ) this->at(pos++) = i;
+    for ( int i = 1; i <= logical.size; ++i ) {
+        if ( logical.at(i) ) {
+            this->at(pos++) = i;
+        }
     }
 }
 
@@ -543,9 +555,9 @@ int IntArray :: findFirstIndexOf(int value)   const
 void IntArray :: setValues(int n, ...)
 {
     va_list vl;
-    va_start(vl,n);
+    va_start(vl, n);
     this->resize(n);
-    for (int i = 0; i < n; i++ ) {
+    for ( int i = 0; i < n; i++ ) {
         this->values [ i ] = va_arg(vl, int);
     }
     va_end(vl);
@@ -580,7 +592,7 @@ int IntArray :: insertSorted(int _val, int allocChunk)
     int *newValues = NULL, *p1, *p2;
 
     if ( newSize > allocatedSize ) { // realocate if needed
-        newValues = (int*)calloc(newSize + allocChunk, sizeof(int));
+        newValues = ( int * ) calloc( newSize + allocChunk, sizeof( int ) );
 
         p1 = values;
         p2 = newValues;
@@ -625,9 +637,9 @@ int IntArray :: insertSortedOnce(int _val, int allocChunk)
     int first = 0;
     int last = size - 1;
 
-    if ( size == 0 || values[first] > _val ) {
+    if ( size == 0 || values [ first ] > _val ) {
         // first = 0 is correct already
-    } else if ( values[last] < _val ) {
+    } else if ( values [ last ] < _val ) {
         first = size;
     } else {
         while ( first <= last ) { //while we haven't reached the end of
@@ -647,8 +659,8 @@ int IntArray :: insertSortedOnce(int _val, int allocChunk)
     if ( newSize > allocatedSize ) {
         int *newValues = ALLOC(newSize + allocChunk);
         if ( values ) {
-            memcpy(newValues, values, sizeof(int)*first); // Copy over the values before _val
-            memcpy(&newValues[first+1], &values[first], sizeof(int)*(size - first)); // Copy over the values after _val, leaving a gap
+            memcpy(newValues, values, sizeof( int ) * first); // Copy over the values before _val
+            memcpy( & newValues [ first + 1 ], & values [ first ], sizeof( int ) * ( size - first ) ); // Copy over the values after _val, leaving a gap
             // Replace the old data:
             free(values);
         }
@@ -656,11 +668,11 @@ int IntArray :: insertSortedOnce(int _val, int allocChunk)
         allocatedSize = newSize + allocChunk;
         size = newSize;
     } else {
-        memmove(&values[first + 1], &values[ first ], sizeof(int)*(size - first));
+        memmove( & values [ first + 1 ], & values [ first ], sizeof( int ) * ( size - first ) );
         size = newSize;
     }
     // Finally we can insert the new value:
-    values[ first ] = _val;
+    values [ first ] = _val;
 
     return first;
 }
@@ -748,7 +760,7 @@ int IntArray :: givePackSize(CommunicationBuffer &buff)
 }
 #endif
 
-std::ostream& operator<< (std::ostream &out, const IntArray &x)
+std :: ostream &operator<<(std :: ostream &out, const IntArray &x)
 {
     out << x.size;
     for ( int i = 0; i < x.size; ++i ) {
@@ -756,5 +768,4 @@ std::ostream& operator<< (std::ostream &out, const IntArray &x)
     }
     return out;
 }
-
 } // end namespace oofem

@@ -49,7 +49,6 @@
 //@}
 
 namespace oofem {
-
 /**
  * Class representing user defined temperature field. User input is function expression,
  * as a function of global x,y and z coordinates and time t.
@@ -66,7 +65,7 @@ class UserDefinedTemperatureField : public StructuralTemperatureLoad
 private:
     Parser myParser;
     int size;
-    std::string ftExpression [ 3 ];
+    std :: string ftExpression [ 3 ];
 
 public:
     /**

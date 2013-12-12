@@ -47,13 +47,17 @@
 
 #include <iosfwd>
 #if __cplusplus > 199711L
-#include <initializer_list>
+ #include <initializer_list>
 #endif
 
 #ifdef BOOST_PYTHON
-namespace boost { namespace python { namespace api {
+namespace boost {
+namespace python {
+namespace api {
 class object;
-}; }; };
+};
+};
+};
 #endif
 
 namespace oofem {
@@ -120,14 +124,14 @@ public:
     FloatMatrix(const FloatMatrix &);
 #if __cplusplus > 199711L
     /// Initializer list constructor.
-    FloatMatrix(std::initializer_list<std::initializer_list<double> > mat);
+    FloatMatrix(std :: initializer_list< std :: initializer_list< double > >mat);
     /// Assignment operator.
-    FloatMatrix & operator=(std::initializer_list<std::initializer_list<double> > mat);
+    FloatMatrix &operator=(std :: initializer_list< std :: initializer_list< double > >mat);
 #endif
     /// Destructor.
     ~FloatMatrix();
     /// Assignment operator, adjusts size of the receiver if necessary.
-    FloatMatrix & operator=(const FloatMatrix &);
+    FloatMatrix &operator=(const FloatMatrix &);
 
     /**
      * Checks size of receiver towards requested bounds.
@@ -463,7 +467,7 @@ public:
      * @param r Transformation matrix.
      * @param mode If set to 't' then the transpose of the rotation matrix is used instead.
      */
-    void rotatedWith(const FloatMatrix &r, char mode='n');
+    void rotatedWith(const FloatMatrix &r, char mode = 'n');
     /**
      * Checks size of receiver towards requested bounds.
      * If dimension mismatch, size is adjusted accordingly.
@@ -508,7 +512,7 @@ public:
 
     /**
      * Reciever will be a 3x3 matrix formed from a vector with either 9 or 6 components.
-     * Order of matrix components in vector: 11, 22, 33, 23, 13, 12, 32, 31, 21 
+     * Order of matrix components in vector: 11, 22, 33, 23, 13, 12, 32, 31, 21
      * If size(aArray) = 6, a symmetric matrix will be created.
      * @param aArray Array to transform.
      */
@@ -519,7 +523,7 @@ public:
     contextIOResultType storeYourself(DataStream *stream, ContextMode mode);
     contextIOResultType restoreYourself(DataStream *stream, ContextMode mode);
 
-    friend std::ostream& operator<< (std::ostream &out, const FloatMatrix &r);
+    friend std :: ostream &operator<<(std :: ostream &out, const FloatMatrix &r);
 
 #ifdef __PARALLEL_MODE
     int packToCommBuffer(CommunicationBuffer &buff) const;
@@ -528,11 +532,10 @@ public:
 #endif
 
 #ifdef BOOST_PYTHON
-    void __setitem__ (boost::python::api::object t, double val);
-    double __getitem__ (boost::python::api::object t);
+    void __setitem__(boost :: python :: api :: object t, double val);
+    double __getitem__(boost :: python :: api :: object t);
     void beCopyOf(const FloatMatrix &src) { this->operator=(src); }
 #endif
 };
 } // end namespace oofem
 #endif // flotmtrx_h
-

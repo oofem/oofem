@@ -173,6 +173,5 @@ protected:
     /// Computes relative humidity increment at given time step and GP
     double giveHumidityIncrement(GaussPoint *gp, TimeStep *tStep);
 };
-
 } // end namespace oofem
 #endif // b3solidmat_h

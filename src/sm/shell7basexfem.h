@@ -46,13 +46,12 @@
 
 
 namespace oofem {
-
 class FEI3dTrQuad;
 class BoundaryLoad;
 class EnrichmentItem;
 
 /**
- * This class represent a 7 parameter shell element. 
+ * This class represent a 7 parameter shell element.
  * Each node has 7 degrees of freedom (displ. vec., director vec., inhomogeneous thickness strain ).
  * Add ref. to paper!
  * @author Jim Brouzoulis
@@ -69,7 +68,7 @@ protected:
 
     virtual void updateYourself(TimeStep *tStep);
     virtual void postInitialize();
-    void computeOrderingArray( IntArray &orderingArray, IntArray &activeDofsArray,  EnrichmentItem *ei);
+    void computeOrderingArray(IntArray &orderingArray, IntArray &activeDofsArray,  EnrichmentItem *ei);
 
     virtual void evalCovarBaseVectorsAt(FloatArray &lCoords, FloatMatrix &gcon, FloatArray &solVec);
     void discGiveInitialSolutionVector(FloatArray &answer, IntArray &eiDofIdArray); // should be replaced with general function
@@ -95,10 +94,10 @@ protected:
     // External loads
     virtual void computeEdgeLoadVectorAt(FloatArray &answer, Load *load, int iEdge, TimeStep *tStep, ValueModeType mode);
     virtual void computeSurfaceLoadVectorAt(FloatArray &answer, Load *load,
-                                         int iSurf, TimeStep *tStep, ValueModeType mode);
+                                            int iSurf, TimeStep *tStep, ValueModeType mode);
 
     // Mass matrices
-    void computeMassMatrixNum(FloatMatrix &answer, TimeStep *tStep); 
+    void computeMassMatrixNum(FloatMatrix &answer, TimeStep *tStep);
 
     // VTK
     virtual void vtkEvalUpdatedGlobalCoordinateAt(FloatArray &localCoords, int layer, FloatArray &globalCoords, TimeStep *tStep);
@@ -107,24 +106,21 @@ protected:
     void computeFailureCriteriaQuantities(FailureCriteriaStatus *fc, TimeStep *tStep);
 
 public:
-    Shell7BaseXFEM(int n, Domain *d);   
-    virtual ~Shell7BaseXFEM() {};		
+    Shell7BaseXFEM(int n, Domain *d);
+    virtual ~Shell7BaseXFEM() {};
     virtual int checkConsistency();
-    
+
     void giveMaxCZDamages(FloatArray &answer, TimeStep *tStep);
     virtual const char *giveClassName()  const { return "Shell7BaseXFEM"; }
     virtual Interface *giveInterface(InterfaceType it);
-    
+
     virtual IRResultType initializeFrom(InputRecord *ir);
     virtual void giveDofManDofIDMask(int inode, EquationID ut, IntArray &answer) const;
     virtual int giveNumberOfDofs();
 
     bool hasCohesiveZone(int interfaceNum);
     IntegrationRule **czIntegrationRulesArray;
-    IntegrationRule giveCZIntegrationRulesArray() { return **czIntegrationRulesArray; };
+    IntegrationRule giveCZIntegrationRulesArray() { return * * czIntegrationRulesArray; };
 };
-
-
-
 } // end namespace oofem
-#endif 
+#endif

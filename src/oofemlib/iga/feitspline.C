@@ -323,7 +323,7 @@ double TSplineInterpolation :: evaldNdx(FloatMatrix &answer, const FloatArray &l
     delete [] tmp_ders;
     delete [] ders;
 #endif
-    
+
     return Jacob;
 }
 
@@ -534,7 +534,7 @@ int TSplineInterpolation :: giveKnotSpanBasisFuncMask(const IntArray &knotSpan, 
         nonzero = 1;
         for ( j = 0; j < nsd; j++ ) {
             if ( ( knotEnd(j) <= knotValues [ j ].at(localIndexKnotVector [ i ] [ j ] [ 0 ]) ) ||
-                ( knotStart(j) >= knotValues [ j ].at(localIndexKnotVector [ i ] [ j ] [ degree [ j ] + 1 ]) ) ) {
+                 ( knotStart(j) >= knotValues [ j ].at(localIndexKnotVector [ i ] [ j ] [ degree [ j ] + 1 ]) ) ) {
                 nonzero = 0;
                 break;
             }
@@ -571,7 +571,7 @@ int TSplineInterpolation :: giveNumberOfKnotSpanBasisFunctions(const IntArray &k
         // whether local knot vector overlaps the given knot span
         for ( j = 0; j < nsd; j++ ) {
             if ( ( knotEnd(j) <= knotValues [ j ].at(localIndexKnotVector [ i ] [ j ] [ 0 ]) ) ||
-                ( knotStart(j) >= knotValues [ j ].at(localIndexKnotVector [ i ] [ j ] [ degree [ j ] + 1 ]) ) ) {
+                 ( knotStart(j) >= knotValues [ j ].at(localIndexKnotVector [ i ] [ j ] [ degree [ j ] + 1 ]) ) ) {
                 answer--;
                 break;
             }
@@ -613,7 +613,7 @@ int TSplineInterpolation :: giveKnotSpanBasisFuncMask(const IntArray &startKnotS
         nonzero = 1;
         for ( j = 0; j < nsd; j++ ) {
             if ( ( knotEnd(j) <= knotValues [ j ].at(localIndexKnotVector [ i ] [ j ] [ 0 ]) ) ||
-                ( knotStart(j) >= knotValues [ j ].at(localIndexKnotVector [ i ] [ j ] [ degree [ j ] + 1 ]) ) ) {
+                 ( knotStart(j) >= knotValues [ j ].at(localIndexKnotVector [ i ] [ j ] [ degree [ j ] + 1 ]) ) ) {
                 nonzero = 0;
                 break;
             }
@@ -650,7 +650,7 @@ int TSplineInterpolation :: giveNumberOfKnotSpanBasisFunctions(const IntArray &s
         // whether local knot vector overlaps at least partially the knot span interval
         for ( j = 0; j < nsd; j++ ) {
             if ( ( knotEnd(j) <= knotValues [ j ].at(localIndexKnotVector [ i ] [ j ] [ 0 ]) ) ||
-                ( knotStart(j) >= knotValues [ j ].at(localIndexKnotVector [ i ] [ j ] [ degree [ j ] + 1 ]) ) ) {
+                 ( knotStart(j) >= knotValues [ j ].at(localIndexKnotVector [ i ] [ j ] [ degree [ j ] + 1 ]) ) ) {
                 answer--;
                 break;
             }

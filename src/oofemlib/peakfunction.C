@@ -37,8 +37,7 @@
 #include "classfactory.h"
 
 namespace oofem {
-
-REGISTER_LoadTimeFunction( PeakFunction );
+REGISTER_LoadTimeFunction(PeakFunction);
 
 double PeakFunction :: __at(double time)
 // Returns the value of the receiver at time 'time'.

@@ -37,9 +37,9 @@
 
 namespace oofem {
 OOFEMTXTDataReader :: OOFEMTXTDataReader(const char *inputfilename) : DataReader(),
-    ir(), inputStream(), dataSourceName( inputfilename )
+    ir(), inputStream(), dataSourceName(inputfilename)
 {
-    inputStream.open( inputfilename );
+    inputStream.open(inputfilename);
     if ( !inputStream.is_open() ) {
         OOFEM_ERROR2("OOFEMTXTDataReader::OOFEMTXTDataReader: Can't open input stream (%s)", inputfilename);
     }
@@ -51,11 +51,11 @@ OOFEMTXTDataReader :: OOFEMTXTDataReader(const char *inputfilename) : DataReader
 }
 
 OOFEMTXTDataReader :: OOFEMTXTDataReader(const OOFEMTXTDataReader &x) : DataReader(),
-    ir(), inputStream(), dataSourceName( x.dataSourceName )
+    ir(), inputStream(), dataSourceName(x.dataSourceName)
 {
     inputStream.open( dataSourceName.c_str() );
     if ( !inputStream.is_open() ) {
-        OOFEM_ERROR2("OOFEMTXTDataReader::OOFEMTXTDataReader: Can't copy open input stream (%s)", dataSourceName.c_str());
+        OOFEM_ERROR2( "OOFEMTXTDataReader::OOFEMTXTDataReader: Can't copy open input stream (%s)", dataSourceName.c_str() );
     }
     lineNumber = 0;
 
@@ -71,7 +71,7 @@ OOFEMTXTDataReader :: ~OOFEMTXTDataReader()
 InputRecord *
 OOFEMTXTDataReader :: giveInputRecord(InputRecordType typeId, int recordId)
 {
-    std::string line;
+    std :: string line;
     this->giveLineFromInput(line);
 
     ir.setRecordString(line);
@@ -80,7 +80,7 @@ OOFEMTXTDataReader :: giveInputRecord(InputRecordType typeId, int recordId)
 }
 
 
-std::string
+std :: string
 OOFEMTXTDataReader :: giveLine()
 {
     return ir.giveRecordAsString();
@@ -89,12 +89,13 @@ OOFEMTXTDataReader :: giveLine()
 void
 OOFEMTXTDataReader :: finish()
 {
-    if ( inputStream.is_open() )
+    if ( inputStream.is_open() ) {
         inputStream.close();
+    }
 }
 
 void
-OOFEMTXTDataReader :: giveLineFromInput(std::string &line)
+OOFEMTXTDataReader :: giveLineFromInput(std :: string &line)
 {
     // reads one line from inputStream
     // if " detected, start/stop changing to lower case characters
@@ -102,27 +103,26 @@ OOFEMTXTDataReader :: giveLineFromInput(std::string &line)
 
     this->giveRawLineFromInput(line);
 
-    for ( std::size_t i = 0; i < line.size(); i++ ) {
-        if ( line[i] == '"' ) { //do not change to lowercase inside quotation marks
+    for ( std :: size_t i = 0; i < line.size(); i++ ) {
+        if ( line [ i ] == '"' ) { //do not change to lowercase inside quotation marks
             flag = !flag; // switch flag
         }
 
         if ( !flag ) {
-            line[i] = tolower(line[i]); // convert line to lowercase
+            line [ i ] = tolower(line [ i ]); // convert line to lowercase
         }
     }
 }
 
 void
-OOFEMTXTDataReader :: giveRawLineFromInput(std::string &line)
+OOFEMTXTDataReader :: giveRawLineFromInput(std :: string &line)
 {
     //
     // reads one line from inputStream - for private use only.
     //
     do {
         this->lineNumber++;
-        std::getline(this->inputStream, line);
-    } while ( line[0] == '#' ); // skip comments
-
+        std :: getline(this->inputStream, line);
+    } while ( line [ 0 ] == '#' ); // skip comments
 }
 } // end namespace oofem

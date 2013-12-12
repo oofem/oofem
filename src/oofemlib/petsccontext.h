@@ -67,7 +67,7 @@ protected:
     /// True if vectors are assumed to be natural distribution.
     bool naturalVectors;
 
-#ifdef __PARALLEL_MODE
+ #ifdef __PARALLEL_MODE
     Natural2GlobalOrdering n2g;
     Natural2LocalOrdering n2l;
  #endif

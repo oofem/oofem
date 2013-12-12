@@ -215,7 +215,7 @@ LargeStrainMasterMaterialGrad :: giveFirstPKStressVectorGrad(FloatArray &answer1
         Material *mat;
         StructuralMaterial *sMat;
         mat = domain->giveMaterial(slaveMat);
-        sMat = dynamic_cast< StructuralMaterial * >(mat);
+        sMat = dynamic_cast< StructuralMaterial * >( mat );
         if ( sMat == NULL ) {
             _warning2("checkConsistency: material %d has no Structural support", slaveMat);
             return;
@@ -246,7 +246,7 @@ LargeStrainMasterMaterialGrad :: giveFirstPKStressVectorGrad(FloatArray &answer1
             E1 = 1. / 2. * log(lambda1);
             E2 = 1. / 2. * log(lambda2);
             E3 = 1. / 2. * log(lambda3);
-        } else   {
+        } else {
             E1 = 1. / ( 2. * m ) * ( pow(lambda1, m) - 1. );
             E2 = 1. / ( 2. * m ) * ( pow(lambda2, m) - 1. );
             E3 = 1. / ( 2. * m ) * ( pow(lambda3, m) - 1. );

@@ -45,7 +45,6 @@
 //@}
 
 namespace oofem {
-
 /**
  * This class implements a 3-dimensional Linear Isoparametric
  * Mindlin theory beam element, with reduced integration.

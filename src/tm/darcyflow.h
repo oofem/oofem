@@ -18,7 +18,6 @@
 #define _IFT_DarcyFlow_Name "darcyflow"
 
 namespace oofem {
-
 class CommunicatorBuff;
 class ProblemCommunicator;
 
@@ -72,7 +71,7 @@ public:
     void DumpMatricesToFile(FloatMatrix *LHS, FloatArray *RHS, FloatArray *SolutionVector);
 
     virtual NumericalMethod *giveNumericalMethod(MetaStep *mStep);
-    virtual TimeStep * giveNextStep();
+    virtual TimeStep *giveNextStep();
 
     virtual int forceEquationNumbering(int id);
 
@@ -87,9 +86,7 @@ public:
 #ifdef __PETSC_MODULE
     virtual void initPetscContexts();
 #endif
-
 };
-
 }
 
 #endif // darcyflow_h

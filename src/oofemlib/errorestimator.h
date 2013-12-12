@@ -155,9 +155,3 @@ public:
 };
 } // end namespace oofem
 #endif // errorestimator_h
-
-
-
-
-
-

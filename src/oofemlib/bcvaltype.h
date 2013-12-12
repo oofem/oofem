@@ -50,4 +50,3 @@ enum bcValType {
 };
 } // end namespace oofem
 #endif // bcvaltype_h
-

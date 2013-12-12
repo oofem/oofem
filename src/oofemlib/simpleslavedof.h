@@ -122,8 +122,10 @@ public:
 
     /// Returns Master Dof Manager Number.
     int giveMasterDofManagerNum() const { return masterDofMngr; }
-    virtual void giveMasterDofManArray(IntArray &answer) { answer.resize(1);
-                                                           answer.at(1) = masterDofMngr; }
+    virtual void giveMasterDofManArray(IntArray &answer) {
+        answer.resize(1);
+        answer.at(1) = masterDofMngr;
+    }
     /// Sets master dof manager
     void setMasterDofManagerNum(int i) { masterDofMngr = i; }
     /// Returns number of master dof in master dofManager.

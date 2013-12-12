@@ -53,8 +53,8 @@ class OOFEM_EXPORT OOFEMTXTDataReader : public DataReader
 {
 protected:
     OOFEMTXTInputRecord ir;
-    std::ifstream inputStream;
-    std::string dataSourceName;
+    std :: ifstream inputStream;
+    std :: string dataSourceName;
 
     /// Keep track of read line from stream. Used for error repors.
     int lineNumber;
@@ -69,13 +69,13 @@ public:
     int giveLineNumber() { return lineNumber; }
 
     virtual InputRecord *giveInputRecord(InputRecordType, int recordId);
-    virtual std::string giveLine();
+    virtual std :: string giveLine();
     virtual void finish();
     virtual const char *giveDataSourceName() const { return dataSourceName.c_str(); }
 
 protected:
-    void giveLineFromInput(std::string &line);
-    void giveRawLineFromInput(std::string &line);
+    void giveLineFromInput(std :: string &line);
+    void giveRawLineFromInput(std :: string &line);
 };
 } // end namespace oofem
 #endif // oofemtxtdatareader_h

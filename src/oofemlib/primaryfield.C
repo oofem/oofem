@@ -76,7 +76,7 @@ PrimaryField :: initialize(ValueModeType mode, TimeStep *atTime, FloatArray &ans
     } else if ( mode == VM_Incremental ) {
         int indxm1 = this->resolveIndx(atTime, -1);
         answer = * ( this->giveSolutionVector(atTime) );
-        answer.subtract( *this->giveSolutionVector(indxm1) );
+        answer.subtract( * this->giveSolutionVector(indxm1) );
     } else {
         _error2( "giveUnknownValue: unsupported mode %s", __ValueModeTypeToString(mode) );
     }
@@ -86,7 +86,7 @@ PrimaryField :: initialize(ValueModeType mode, TimeStep *atTime, FloatArray &ans
 double
 PrimaryField :: giveUnknownValue(Dof *dof, ValueModeType mode, TimeStep *atTime)
 {
-    int eq = dof->giveEquationNumber(emodel->giveUnknownNumberingScheme(this->ut));
+    int eq = dof->giveEquationNumber( emodel->giveUnknownNumberingScheme(this->ut) );
     if ( eq == 0 ) {
         _error("giveUnknownValue: invalid equation number");
     }
@@ -104,32 +104,32 @@ PrimaryField :: giveUnknownValue(Dof *dof, ValueModeType mode, TimeStep *atTime)
 }
 
 int
-PrimaryField :: __evaluateAt(FloatArray &answer, DofManager* dman,
-                    ValueModeType mode, TimeStep *atTime,
-                    IntArray *dofId)
+PrimaryField :: __evaluateAt(FloatArray &answer, DofManager *dman,
+                             ValueModeType mode, TimeStep *atTime,
+                             IntArray *dofId)
 {
-    if (dman->giveDomain() == this->emodel->giveDomain(domainIndx)) {
-        if (dofId) {
-            dman->giveUnknownVector(answer, *dofId, *this, mode, atTime);
+    if ( dman->giveDomain() == this->emodel->giveDomain(domainIndx) ) {
+        if ( dofId ) {
+            dman->giveUnknownVector(answer, * dofId, * this, mode, atTime);
             return 0; // ok
         } else { // all dofs requested
             int size = dman->giveNumberOfDofs();
             for ( int i = 1; i <= size; i++ ) {
-                answer.at(i)=dman->giveDof(i)->giveUnknown(*this, mode, atTime);
+                answer.at(i) = dman->giveDof(i)->giveUnknown(* this, mode, atTime);
             }
             return 0; // ok
         }
     } else {
-        return this->__evaluateAt(answer, *dman->giveCoordinates(),
-                    mode, atTime, dofId);
+        return this->__evaluateAt(answer, * dman->giveCoordinates(),
+                                  mode, atTime, dofId);
     }
 }
 
 
 int
-PrimaryField :: __evaluateAt(FloatArray &answer, FloatArray& coords,
-                    ValueModeType mode, TimeStep *atTime,
-                    IntArray *dofId)
+PrimaryField :: __evaluateAt(FloatArray &answer, FloatArray &coords,
+                             ValueModeType mode, TimeStep *atTime,
+                             IntArray *dofId)
 {
     Element *bgelem;
     Domain *domain = emodel->giveDomain(domainIndx);
@@ -142,8 +142,8 @@ PrimaryField :: __evaluateAt(FloatArray &answer, FloatArray& coords,
 
     EIPrimaryFieldInterface *interface = static_cast< EIPrimaryFieldInterface * >( bgelem->giveInterface(EIPrimaryFieldInterfaceType) );
     if ( interface ) {
-        if (dofId) {
-            return interface->EIPrimaryFieldI_evaluateFieldVectorAt(answer, * this, coords, *dofId, mode, atTime);
+        if ( dofId ) {
+            return interface->EIPrimaryFieldI_evaluateFieldVectorAt(answer, * this, coords, * dofId, mode, atTime);
         } else { // use element default dof id mask
             IntArray elemDofId;
             bgelem->giveElementDofIDMask(this->giveEquationID(), elemDofId);
@@ -157,15 +157,15 @@ PrimaryField :: __evaluateAt(FloatArray &answer, FloatArray& coords,
 
 int
 PrimaryField :: evaluateAt(FloatArray &answer, FloatArray &coords,
-                    ValueModeType mode, TimeStep *atTime)
+                           ValueModeType mode, TimeStep *atTime)
 {
     return this->__evaluateAt(answer, coords, mode, atTime, NULL);
 }
 
 
 int
-PrimaryField::evaluateAt(FloatArray &answer, DofManager* dman,
-                ValueModeType mode, TimeStep *atTime)
+PrimaryField :: evaluateAt(FloatArray &answer, DofManager *dman,
+                           ValueModeType mode, TimeStep *atTime)
 {
     return this->__evaluateAt(answer, dman, mode, atTime, NULL);
 }

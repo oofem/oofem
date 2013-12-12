@@ -39,7 +39,6 @@
 #include "gaussintegrationrule.h"
 
 namespace oofem {
-
 double
 FEI2dQuadLin :: giveArea(const FEICellGeometry &cellgeo) const
 {
@@ -81,10 +80,10 @@ FEI2dQuadLin :: evaldNdx(FloatMatrix &answer, const FloatArray &lcoords, const F
         double x = cellgeo.giveVertexCoordinates(i)->at(xind);
         double y = cellgeo.giveVertexCoordinates(i)->at(yind);
 
-        jacobianMatrix.at(1, 1) += dn.at(i,1) * x;
-        jacobianMatrix.at(1, 2) += dn.at(i,1) * y;
-        jacobianMatrix.at(2, 1) += dn.at(i,2) * x;
-        jacobianMatrix.at(2, 2) += dn.at(i,2) * y;
+        jacobianMatrix.at(1, 1) += dn.at(i, 1) * x;
+        jacobianMatrix.at(1, 2) += dn.at(i, 1) * y;
+        jacobianMatrix.at(2, 1) += dn.at(i, 2) * x;
+        jacobianMatrix.at(2, 2) += dn.at(i, 2) * y;
     }
     inv.beInverseOf(jacobianMatrix);
 
@@ -107,9 +106,9 @@ FEI2dQuadLin :: local2global(FloatArray &answer, const FloatArray &lcoords, cons
 
     answer.resize(2);
     answer.at(1) = n1 * cellgeo.giveVertexCoordinates(1)->at(xind) + n2 *cellgeo.giveVertexCoordinates(2)->at(xind) +
-                   n3 * cellgeo.giveVertexCoordinates(3)->at(xind) + n4 *cellgeo.giveVertexCoordinates(4)->at(xind);
+                   n3 *cellgeo.giveVertexCoordinates(3)->at(xind) + n4 *cellgeo.giveVertexCoordinates(4)->at(xind);
     answer.at(2) = n1 * cellgeo.giveVertexCoordinates(1)->at(yind) + n2 *cellgeo.giveVertexCoordinates(2)->at(yind) +
-                   n3 * cellgeo.giveVertexCoordinates(3)->at(yind) + n4 *cellgeo.giveVertexCoordinates(4)->at(yind);
+                   n3 *cellgeo.giveVertexCoordinates(3)->at(yind) + n4 *cellgeo.giveVertexCoordinates(4)->at(yind);
 }
 
 #define POINT_TOL 1.e-6
@@ -269,8 +268,8 @@ FEI2dQuadLin :: edgeEvalNormal(FloatArray &answer, int iedge, const FloatArray &
 
     answer.resize(2);
     answer.at(1) = cellgeo.giveVertexCoordinates(nodeB)->at(xind) - cellgeo.giveVertexCoordinates(nodeA)->at(xind);
-    answer.at(2) = -(cellgeo.giveVertexCoordinates(nodeB)->at(yind) - cellgeo.giveVertexCoordinates(nodeA)->at(yind));
-    return answer.normalize()*0.5;
+    answer.at(2) = -( cellgeo.giveVertexCoordinates(nodeB)->at(yind) - cellgeo.giveVertexCoordinates(nodeA)->at(yind) );
+    return answer.normalize() * 0.5;
 }
 
 void
@@ -359,10 +358,10 @@ FEI2dQuadLin :: giveJacobianMatrixAt(FloatMatrix &jacobianMatrix, const FloatArr
         x = cellgeo.giveVertexCoordinates(i)->at(xind);
         y = cellgeo.giveVertexCoordinates(i)->at(yind);
 
-        jacobianMatrix.at(1, 1) += dn.at(i,1) * x;
-        jacobianMatrix.at(1, 2) += dn.at(i,1) * y;
-        jacobianMatrix.at(2, 1) += dn.at(i,2) * x;
-        jacobianMatrix.at(2, 2) += dn.at(i,2) * y;
+        jacobianMatrix.at(1, 1) += dn.at(i, 1) * x;
+        jacobianMatrix.at(1, 2) += dn.at(i, 1) * y;
+        jacobianMatrix.at(2, 1) += dn.at(i, 2) * x;
+        jacobianMatrix.at(2, 2) += dn.at(i, 2) * y;
     }
 }
 
@@ -373,7 +372,7 @@ FEI2dQuadLin :: giveDerivatives(FloatMatrix &dn, const FloatArray &lc)
     ksi = lc.at(1);
     eta = lc.at(2);
     dn.resize(4, 2);
-    
+
     // dn/dxi
     dn.at(1, 1) =  0.25 * ( 1. + eta );
     dn.at(2, 1) = -0.25 * ( 1. + eta );
@@ -387,7 +386,7 @@ FEI2dQuadLin :: giveDerivatives(FloatMatrix &dn, const FloatArray &lc)
     dn.at(4, 2) = -0.25 * ( 1. + ksi );
 }
 
-double FEI2dQuadLin :: evalNXIntegral(int iEdge, const FEICellGeometry& cellgeo)
+double FEI2dQuadLin :: evalNXIntegral(int iEdge, const FEICellGeometry &cellgeo)
 {
     IntArray eNodes;
     const FloatArray *node;
@@ -395,13 +394,13 @@ double FEI2dQuadLin :: evalNXIntegral(int iEdge, const FEICellGeometry& cellgeo)
 
     this->computeLocalEdgeMapping(eNodes, iEdge);
 
-    node = cellgeo.giveVertexCoordinates(eNodes.at(1));
-    x1 = node->at ( xind );
-    y1 = node->at ( yind );
+    node = cellgeo.giveVertexCoordinates( eNodes.at(1) );
+    x1 = node->at(xind);
+    y1 = node->at(yind);
 
-    node = cellgeo.giveVertexCoordinates(eNodes.at(2));
-    x2 = node->at ( xind );
-    y2 = node->at ( yind );
+    node = cellgeo.giveVertexCoordinates( eNodes.at(2) );
+    x2 = node->at(xind);
+    y2 = node->at(yind);
 
     return -( x2 * y1 - x1 * y2 );
 }
@@ -414,5 +413,4 @@ FEI2dQuadLin :: giveIntegrationRule(int order)
     iRule->SetUpPointsOnSquare(points, _Unknown);
     return iRule;
 }
-
 } // end namespace oofem

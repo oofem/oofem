@@ -53,7 +53,6 @@
 //@}
 
 namespace oofem {
-
 /**
  * Trabecular bone nonlocal material status
  */

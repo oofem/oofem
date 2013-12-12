@@ -45,8 +45,7 @@
 
 
 namespace oofem {
-
-REGISTER_Material( MazarsNLMaterial );
+REGISTER_Material(MazarsNLMaterial);
 
 MazarsNLMaterial :: MazarsNLMaterial(int n, Domain *d) : MazarsMaterial(n, d), StructuralNonlocalMaterialExtensionInterface(d)
     //
@@ -115,11 +114,11 @@ MazarsNLMaterial :: computeEquivalentStrain(double &kappa, const FloatArray &str
     this->updateDomainBeforeNonlocAverage(atTime);
 
     // compute nonlocal strain increment first
-    std::list< localIntegrationRecord > *list = this->giveIPIntegrationList(gp); // !
-    std::list< localIntegrationRecord > :: iterator pos;
+    std :: list< localIntegrationRecord > *list = this->giveIPIntegrationList(gp); // !
+    std :: list< localIntegrationRecord > :: iterator pos;
 
     for ( pos = list->begin(); pos != list->end(); ++pos ) {
-        nonlocStatus = static_cast< MazarsNLMaterialStatus * >( this->giveStatus( pos->nearGp ) );
+        nonlocStatus = static_cast< MazarsNLMaterialStatus * >( this->giveStatus(pos->nearGp) );
         nonlocalContribution = nonlocStatus->giveLocalEquivalentStrainForAverage();
         nonlocalContribution *= pos->weight;
 

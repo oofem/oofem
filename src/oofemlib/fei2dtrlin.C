@@ -63,7 +63,7 @@ FEI2dTrLin :: evaldNdx(FloatMatrix &answer, const FloatArray &lcoords, const FEI
     y2 = cellgeo.giveVertexCoordinates(2)->at(yind);
     y3 = cellgeo.giveVertexCoordinates(3)->at(yind);
 
-    detJ = x1*(y2 - y3) + x2*(-y1 + y3) + x3*(y1 - y2);
+    detJ = x1 * ( y2 - y3 ) + x2 * ( -y1 + y3 ) + x3 * ( y1 - y2 );
 
     answer.at(1, 1) = ( y2 - y3 ) / detJ;
     answer.at(1, 2) = ( x3 - x2 ) / detJ;
@@ -111,7 +111,7 @@ FEI2dTrLin :: global2local(FloatArray &answer, const FloatArray &coords, const F
     y2 = cellgeo.giveVertexCoordinates(2)->at(yind);
     y3 = cellgeo.giveVertexCoordinates(3)->at(yind);
 
-    detJ = x1*(y2 - y3) + x2*(-y1 + y3) + x3*(y1 - y2);
+    detJ = x1 * ( y2 - y3 ) + x2 * ( -y1 + y3 ) + x3 * ( y1 - y2 );
 
     answer.at(1) = ( ( x2 * y3 - x3 * y2 ) + ( y2 - y3 ) * coords.at(xind) + ( x3 - x2 ) * coords.at(yind) ) / detJ;
     answer.at(2) = ( ( x3 * y1 - x1 * y3 ) + ( y3 - y1 ) * coords.at(xind) + ( x1 - x3 ) * coords.at(yind) ) / detJ;
@@ -128,7 +128,7 @@ FEI2dTrLin :: global2local(FloatArray &answer, const FloatArray &coords, const F
             inside = false;
         }
     }
-    
+
     return inside;
 }
 
@@ -146,7 +146,7 @@ FEI2dTrLin :: giveTransformationJacobian(const FloatArray &lcoords, const FEICel
     y2 = cellgeo.giveVertexCoordinates(2)->at(yind);
     y3 = cellgeo.giveVertexCoordinates(3)->at(yind);
 
-    return ( x1*(y2 - y3) + x2*(-y1 + y3) + x3*(y1 - y2) );
+    return ( x1 * ( y2 - y3 ) + x2 * ( -y1 + y3 ) + x3 * ( y1 - y2 ) );
 }
 
 
@@ -179,9 +179,9 @@ double FEI2dTrLin :: edgeEvalNormal(FloatArray &normal, int iedge, const FloatAr
     IntArray edgeNodes;
     this->computeLocalEdgeMapping(edgeNodes, iedge);
     normal.resize(2);
-    normal.at(1) = cellgeo.giveVertexCoordinates(edgeNodes.at(2))->at(yind) - cellgeo.giveVertexCoordinates(edgeNodes.at(1))->at(yind);
-    normal.at(2) = -(cellgeo.giveVertexCoordinates(edgeNodes.at(2))->at(xind) - cellgeo.giveVertexCoordinates(edgeNodes.at(1))->at(xind));
-    return normal.normalize()*0.5;
+    normal.at(1) = cellgeo.giveVertexCoordinates( edgeNodes.at(2) )->at(yind) - cellgeo.giveVertexCoordinates( edgeNodes.at(1) )->at(yind);
+    normal.at(2) = -( cellgeo.giveVertexCoordinates( edgeNodes.at(2) )->at(xind) - cellgeo.giveVertexCoordinates( edgeNodes.at(1) )->at(xind) );
+    return normal.normalize() * 0.5;
 }
 
 void
@@ -254,11 +254,11 @@ FEI2dTrLin :: giveArea(const FEICellGeometry &cellgeo) const
     x3 = p->at(1);
     y3 = p->at(2);
 
-    return 0.5 * ( x1*(y2-y3) + x2*(-y1+y3) + x3*(y1-y2) ); ///@todo Absolute value or not?
+    return 0.5 * ( x1 * ( y2 - y3 ) + x2 * ( -y1 + y3 ) + x3 * ( y1 - y2 ) ); ///@todo Absolute value or not?
 }
 
 double
-FEI2dTrLin :: evalNXIntegral(int iEdge, const FEICellGeometry& cellgeo)
+FEI2dTrLin :: evalNXIntegral(int iEdge, const FEICellGeometry &cellgeo)
 {
     IntArray eNodes;
     const FloatArray *node;
@@ -266,13 +266,13 @@ FEI2dTrLin :: evalNXIntegral(int iEdge, const FEICellGeometry& cellgeo)
 
     this->computeLocalEdgeMapping(eNodes, iEdge);
 
-    node = cellgeo.giveVertexCoordinates(eNodes.at(1));
-    x1 = node->at ( xind );
-    y1 = node->at ( yind );
+    node = cellgeo.giveVertexCoordinates( eNodes.at(1) );
+    x1 = node->at(xind);
+    y1 = node->at(yind);
 
-    node = cellgeo.giveVertexCoordinates(eNodes.at(2));
-    x2 = node->at ( xind );
-    y2 = node->at ( yind );
+    node = cellgeo.giveVertexCoordinates( eNodes.at(2) );
+    x2 = node->at(xind);
+    y2 = node->at(yind);
 
     return -( x2 * y1 - x1 * y2 );
 }
@@ -285,5 +285,4 @@ FEI2dTrLin :: giveIntegrationRule(int order)
     iRule->SetUpPointsOnTriangle(points, _Unknown);
     return iRule;
 }
-
 } // end namespace oofem

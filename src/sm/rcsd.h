@@ -133,8 +133,8 @@ public:
 
     virtual double give(int aProperty, GaussPoint *gp);
 
-    virtual void giveRealStressVector(FloatArray & answer, GaussPoint *,
-                              const FloatArray &, TimeStep *);
+    virtual void giveRealStressVector(FloatArray &answer, GaussPoint *,
+                                      const FloatArray &, TimeStep *);
 
 #ifdef __OOFEG
 #endif

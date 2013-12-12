@@ -51,8 +51,7 @@
 #endif
 
 namespace oofem {
-
-REGISTER_Element( Beam3d );
+REGISTER_Element(Beam3d);
 
 Beam3d :: Beam3d(int n, Domain *aDomain) : StructuralElement(n, aDomain)
 {
@@ -117,7 +116,7 @@ void Beam3d :: computeGaussPoints()
         numberOfIntegrationRules = 1;
         integrationRulesArray = new IntegrationRule * [ 1 ];
         integrationRulesArray [ 0 ] = new GaussIntegrationRule(1, this, 1, 2);
-        this->giveCrossSection()->setupIntegrationPoints( *integrationRulesArray[0], 3, this );
+        this->giveCrossSection()->setupIntegrationPoints(* integrationRulesArray [ 0 ], 3, this);
     }
 }
 
@@ -341,13 +340,13 @@ Beam3d :: computeKappaCoeffs()
 
     //  kappay = 6. * d.at(5, 5) / ( d.at(3, 3) * l * l );
     //  kappaz = 6. * d.at(6, 6) / ( d.at(2, 2) * l * l );
-    if (d.at(3, 3) != 0.) {
-        kappay = 6. * d.at(5, 5) / (d.at(3, 3) * l * l);
+    if ( d.at(3, 3) != 0. ) {
+        kappay = 6. * d.at(5, 5) / ( d.at(3, 3) * l * l );
     } else {
         kappay = 0.;
     }
-    if (d.at(2, 2) != 0.) {
-        kappaz = 6. * d.at(6, 6) / (d.at(2, 2) * l * l);
+    if ( d.at(2, 2) != 0. ) {
+        kappaz = 6. * d.at(6, 6) / ( d.at(2, 2) * l * l );
     } else {
         kappaz = 0.;
     }
@@ -507,7 +506,7 @@ Beam3d :: computeEdgeLoadVectorAt(FloatArray &answer, Load *load, int iedge, Tim
     // evaluates the receivers edge load vector
     // for clamped beam
     //
-    BoundaryLoad *edgeLoad = dynamic_cast< BoundaryLoad * >(load);
+    BoundaryLoad *edgeLoad = dynamic_cast< BoundaryLoad * >( load );
     if ( edgeLoad ) {
         if ( edgeLoad->giveNumberOfDofs() != 6 ) {
             _error("computeEdgeLoadVectorAt: load number of dofs mismatch");
@@ -704,8 +703,9 @@ Beam3d :: computeLocalForceLoadVector(FloatArray &answer, TimeStep *stepN, Value
 void
 Beam3d :: computeBodyLoadVectorAt(FloatArray &answer, Load *load, TimeStep *tStep, ValueModeType mode)
 {
-    StructuralElement::computeBodyLoadVectorAt(answer, load, tStep, mode);
-    answer.times(this->giveCrossSection()->give(CS_Area));
+    FloatArray lc(1);
+    StructuralElement :: computeBodyLoadVectorAt(answer, load, tStep, mode);
+    answer.times( this->giveCrossSection()->give(CS_Area, & lc, NULL, this) );
 }
 
 
@@ -765,13 +765,13 @@ Beam3d :: computeConsistentMassMatrix(FloatMatrix &answer, TimeStep *tStep, doub
     double kappay2 = kappay * kappay;
     double kappaz2 = kappaz * kappaz;
 
-    double density = this->giveMaterial()->give('d', gp);
-    if(ipDensity != NULL) {
-    	// Override density if desired
-    	density = *ipDensity;
+    double density = this->giveMaterial()->give('d', gp); // constant density assumed
+    if ( ipDensity != NULL ) {
+        // Override density if desired
+        density = * ipDensity;
     }
 
-    double area = this->giveCrossSection()->give(CS_Area);
+    double area = this->giveCrossSection()->give(CS_Area, gp); // constant area assumed
     double c2y = ( area * density ) / ( ( 1. + 2. * kappay ) * ( 1. + 2. * kappay ) );
     double c2z = ( area * density ) / ( ( 1. + 2. * kappaz ) * ( 1. + 2. * kappaz ) );
     double c1 = ( area * density );

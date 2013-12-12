@@ -168,5 +168,3 @@ private:
 };
 } // end namespace oofem
 #endif // homogenize_h
-
-

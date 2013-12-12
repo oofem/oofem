@@ -71,7 +71,7 @@ private:
     /// Node priority.
     int Priority;
     /// List of neighbouring nodes (represent graph edges).
-    std::list< int >neighborList;
+    std :: list< int >neighborList;
 
 public:
     /// Creates node belonging to given graph with given old number.
@@ -99,7 +99,7 @@ public:
     /// Returns priority of receiver.
     int givePriority() { return Priority; }
     /// Returns the neighbor list of receiver.
-    std::list< int > *giveNeighborList()  { return & neighborList; }
+    std :: list< int > *giveNeighborList()  { return & neighborList; }
     /// sets new number equal to old one.
     void assignOldNumber() { NumberNew = NumberOld; }
 

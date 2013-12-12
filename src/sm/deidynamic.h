@@ -45,7 +45,6 @@
 //@}
 
 namespace oofem {
-
 /**
  * This class implements Linear (- may be changed) solution of dynamic
  * problems using Direct Explicit Integration scheme - Central Difference

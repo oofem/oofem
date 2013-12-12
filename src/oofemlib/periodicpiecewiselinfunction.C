@@ -38,8 +38,7 @@
 #include "dynamicinputrecord.h"
 
 namespace oofem {
-
-REGISTER_LoadTimeFunction( PeriodicPiecewiseLinFunction );
+REGISTER_LoadTimeFunction(PeriodicPiecewiseLinFunction);
 
 double PeriodicPiecewiseLinFunction :: __at(double time)
 // Returns the value of the receiver at time 'time'. 'time' should be
@@ -63,7 +62,7 @@ double PeriodicPiecewiseLinFunction :: __at(double time)
     }
 
     // periodicity
-    last = dates.at(this->dates.giveSize()); // time of last date
+    last = dates.at( this->dates.giveSize() ); // time of last date
     if ( ( period >= 0.0 ) && ( time > last ) ) {
         double d = ( time - last ) / period; // periods after last
         time = last + ( d - floor(d) - 1. ) * period;
@@ -95,7 +94,7 @@ double PeriodicPiecewiseLinFunction :: __derAt(double time)
     }
 
     // periodicity
-    last = dates.at(this->dates.giveSize()); // time of last date
+    last = dates.at( this->dates.giveSize() ); // time of last date
     if ( ( period >= 0.0 ) && ( time > last ) ) {
         double d = ( time - last ) / period; // periods after last
         time = last + ( d - floor(d) - 1. ) * period;
@@ -127,5 +126,4 @@ void PeriodicPiecewiseLinFunction :: giveInputRecord(DynamicInputRecord &input)
     input.setField(this->period, _IFT_PeriodicPiecewiseLinFunction_period);
     input.setField(this->addTF, _IFT_PeriodicPiecewiseLinFunction_addtf);
 }
-
 } // end namespace oofem

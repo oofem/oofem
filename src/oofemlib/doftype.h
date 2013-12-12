@@ -38,7 +38,6 @@
 #include "enumitem.h"
 
 namespace oofem {
-
 #define dofType_DEF \
     ENUM_ITEM_WITH_VALUE(DT_master, 0) \
     ENUM_ITEM_WITH_VALUE(DT_simpleSlave, 1) \

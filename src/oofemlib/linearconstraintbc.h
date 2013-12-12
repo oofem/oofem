@@ -63,11 +63,11 @@ namespace oofem {
  * Class implementing linear constraint on selected DOFs in the form @f$ \sum_i w_i r_i = c @f$,
  * where @f$ r_i @f$ is i-th degree of freedom entering contraint, w_i is corresponding weight,
  * and @f$ c @f$ is given value. The weights and constant can have associated loadtime function,
- * so they can evolve in time. By default, the loadtimefunction value for all weights and 
- * constant is set to 1.0. 
- * This boundary condition is introduced as additional stationary condition in energy 
- * functional using Lagrange multiplier, which is an additional degree of freedom introduced 
- * by this boundary condition. 
+ * so they can evolve in time. By default, the loadtimefunction value for all weights and
+ * constant is set to 1.0.
+ * This boundary condition is introduced as additional stationary condition in energy
+ * functional using Lagrange multiplier, which is an additional degree of freedom introduced
+ * by this boundary condition.
  */
 class OOFEM_EXPORT LinearConstraintBC : public ActiveBoundaryCondition
 {
@@ -79,9 +79,9 @@ protected:
     IntArray dofmans;
     IntArray dofs;
     DofManager *md;
-    
 
-    // characteristicType of LHS and RHS contributions (this makes this bc trully general, as one can customize, to which 
+
+    // characteristicType of LHS and RHS contributions (this makes this bc trully general, as one can customize, to which
     // characteristic component the contibution will be assembled)
     IntArray lhsType;
     IntArray rhsType;
@@ -99,9 +99,9 @@ public:
                                 CharType type, ValueModeType mode,
                                 const UnknownNumberingScheme &s, FloatArray *eNorms = NULL);
 
-    virtual void giveLocationArrays(std :: vector< IntArray > &rows, std :: vector< IntArray > &cols, 
-				    EquationID eid, CharType type, const UnknownNumberingScheme &r_s, 
-				    const UnknownNumberingScheme &c_s);
+    virtual void giveLocationArrays(std :: vector< IntArray > &rows, std :: vector< IntArray > &cols,
+                                    EquationID eid, CharType type, const UnknownNumberingScheme &r_s,
+                                    const UnknownNumberingScheme &c_s);
 
     /// Gives the number of internal dof managers.
     virtual int giveNumberOfInternalDofManagers() { return 1; }
@@ -114,7 +114,7 @@ public:
     virtual const char *giveClassName() const { return "LinearConstraintBC"; }
 
 protected:
-    void giveLocArray(const UnknownNumberingScheme &r_s,  IntArray &locr, int& lambdaeq);
+    void giveLocArray(const UnknownNumberingScheme &r_s,  IntArray &locr, int &lambdaeq);
 };
 } //end of oofem namespace
 #endif // LinearConstraintBC_h

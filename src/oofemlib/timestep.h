@@ -96,7 +96,7 @@ protected:
      * the restarted step is equilibrated on new domain.
      */
     int version;
-    /** 
+    /**
      * Receiver's substep (iteration) number.
      */
     int substepNumber;
@@ -130,7 +130,7 @@ public:
     /// Returns receiver's meta step number.
     int giveMetaStepNumber() { return mstepNumber; }
     /// Returns receiver's substep number.
-    int giveSubstepNumber() {return substepNumber;}
+    int giveSubstepNumber() { return substepNumber; }
     /**
      * Returns class name of receiver.
      * @return Pointer to s parameter filled with name.
@@ -184,7 +184,7 @@ public:
     /// Increments receiver's version.
     void incrementVersion() { version++; }
     /// Increments receiver's substep number.
-    void incrementSubstepNumber() {substepNumber++;}
+    void incrementSubstepNumber() { substepNumber++; }
     /// Returns time discretization.
     TimeDiscretizationType giveTimeDiscretization() { return timeDiscretization; }
 
