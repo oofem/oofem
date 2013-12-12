@@ -142,7 +142,7 @@ FEI3dWedgeLin :: giveLocalDerivative(FloatMatrix &dN, const FloatArray &lcoords)
     dN.at(1, 2) = -0.5 * ( 1. - w );
     dN.at(2, 2) =  0.;
     dN.at(3, 2) =  0.5 * ( 1. - w );
-    dN.at(4, 2) =  0.5 * ( 1. + w );
+    dN.at(4, 2) = -0.5 * ( 1. + w );
     dN.at(5, 2) =  0.;
     dN.at(6, 2) =  0.5 * ( 1. + w );
 
