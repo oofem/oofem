@@ -115,8 +115,8 @@ void StructuralElement :: computeLoadVector(FloatArray &answer, Load *load, Char
 
 void StructuralElement :: computeBoundaryLoadVector(FloatArray &answer, BoundaryLoad *load, int boundary, CharType type, ValueModeType mode, TimeStep *tStep)
 {
+    answer.resize(0);
     if ( type != ExternalForcesVector ) {
-        answer.resize(0);
         return;
     }
 
