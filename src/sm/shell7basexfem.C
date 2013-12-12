@@ -1940,29 +1940,6 @@ Shell7BaseXFEM :: vtkEvalUpdatedGlobalCoordinateAt(FloatArray &localCoords, int 
         EnrichmentItem *ei = this->xMan->giveEnrichmentItem(i);
 
         if ( ei->isElementEnriched(this) ) {
-            //double levelSet = 0.0;
-            //if ( dynamic_cast< Delamination * >( ei ) ) {
-            //    double zeta0 = giveGlobalZcoord( dynamic_cast< Delamination * >( ei )->giveDelamXiCoord() );
-            //    levelSet = zeta - zeta0;
-            //} else if ( dynamic_cast< Crack * >( ei ) ) {
-            //    const IntArray &elNodes = this->giveDofManArray();
-            //    
-            //    this->fei->evalN( N, localCoords, FEIElementGeometryWrapper(this) );
-            //    ei->interpLevelSet(levelSet, N, elNodes);
-            //}
-            ////double levelSet = this->evaluateLevelSet(localCoords, ei);
-            //ei->evaluateEnrFuncAt(ef, localCoords, levelSet); 
-            //if ( ef[0] > 0.1 ) {
-            //    IntArray eiDofIdArray;
-            //    ei->giveEIDofIdArray(eiDofIdArray); 
-            //    this->giveDisSolutionVector(solVecD, eiDofIdArray, tStep); 
-            //    this->giveUnknownsAt(localCoords, solVecD, xd, md, gamd, tStep);
-            //    double fac = ( zeta + 0.5 * gamd * zeta * zeta );
-            //    xtemp = xd;
-            //    xtemp.add(fac,md);
-            //    globalCoords.add(ef[0]*xtemp); 
-            //}
-
             IntArray eiDofIdArray;
             ei->giveEIDofIdArray(eiDofIdArray); 
             this->giveDisSolutionVector(solVecD, eiDofIdArray, tStep); 
@@ -2008,7 +1985,11 @@ Shell7BaseXFEM :: giveCompositeExportData(VTKPiece &vtkPiece, IntArray &primaryV
     //Shell7Base ::giveCompositeExportData(vtkPiece, primaryVarsToExport, internalVarsToExport, cellVarsToExport, tStep );
 
     //int numCells = this->layeredCS->giveNumberOfLayers();
-    int numSubCells = this->allTri.size();
+    int numSubCells = 1;
+    if ( this->allTri.size() ) {
+        numSubCells = this->allTri.size();
+    }
+    
     int numLayers = this->layeredCS->giveNumberOfLayers();
     int numCells = numLayers * numSubCells;
     
@@ -2031,7 +2012,11 @@ Shell7BaseXFEM :: giveCompositeExportData(VTKPiece &vtkPiece, IntArray &primaryV
         for ( int subCell = 1; subCell <= numSubCells; subCell++ ) {
 
             // Node coordinates
-            this->giveFictiousNodeCoordsForExport(nodeCoords, layer, subCell);       
+            if ( numSubCells == 1 ) {
+                Shell7Base :: giveFictiousNodeCoordsForExport(nodeCoords, layer); 
+            } else {
+                this->giveFictiousNodeCoordsForExport(nodeCoords, layer, subCell);       
+            }
         
             for ( int node = 1; node <= numCellNodes; node++ ) {    
                 vtkPiece.setNodeCoords(nodeNum, nodeCoords[node-1] );
@@ -2076,8 +2061,13 @@ Shell7BaseXFEM :: giveCompositeExportData(VTKPiece &vtkPiece, IntArray &primaryV
             for ( int subCell = 1; subCell <= numSubCells; subCell++ ) {
 
                 if ( type == DisplacementVector ) { // compute displacement as u = x - X
-                    this->giveFictiousNodeCoordsForExport(nodeCoords, layer, subCell);
-                    this->giveFictiousUpdatedNodeCoordsForExport(updatedNodeCoords, layer, tStep, subCell);
+                    if ( numSubCells == 1 ) {
+                        Shell7Base :: giveFictiousNodeCoordsForExport(nodeCoords, layer);
+                        this->giveFictiousUpdatedNodeCoordsForExport(updatedNodeCoords, layer, tStep, 0);
+                    } else {
+                        this->giveFictiousNodeCoordsForExport(nodeCoords, layer, subCell);
+                        this->giveFictiousUpdatedNodeCoordsForExport(updatedNodeCoords, layer, tStep, subCell);
+                    }
                     for ( int j = 1; j <= numCellNodes; j++ ) {
                         u = updatedNodeCoords[j-1];
                         u.subtract(nodeCoords[j-1]);
@@ -2193,6 +2183,7 @@ Shell7BaseXFEM :: giveCompositeExportData(VTKPiece &vtkPiece, IntArray &primaryV
 void 
 Shell7BaseXFEM :: giveFictiousNodeCoordsForExport(std::vector<FloatArray> &nodes, int layer, int subCell)
 {
+
     // compute fictious node coords
     FloatArray nodeLocalXi1Coords, nodeLocalXi2Coords, nodeLocalXi3Coords;
 
@@ -2220,7 +2211,11 @@ Shell7BaseXFEM :: giveFictiousUpdatedNodeCoordsForExport(std::vector<FloatArray>
 {
     // compute fictious node coords
     FloatArray nodeLocalXi1Coords, nodeLocalXi2Coords, nodeLocalXi3Coords;
-    giveLocalNodeCoordsForExport(nodeLocalXi1Coords, nodeLocalXi2Coords, nodeLocalXi3Coords, subCell);
+    if ( subCell == 0) { 
+        giveLocalNodeCoordsForExport(nodeLocalXi1Coords, nodeLocalXi2Coords, nodeLocalXi3Coords);
+    } else {
+        giveLocalNodeCoordsForExport(nodeLocalXi1Coords, nodeLocalXi2Coords, nodeLocalXi3Coords, subCell);
+    }
     nodes.resize(15);
     for ( int i = 1; i <= 15; i++ ){
         FloatArray coords, localCoords(3);
@@ -2234,6 +2229,15 @@ Shell7BaseXFEM :: giveFictiousUpdatedNodeCoordsForExport(std::vector<FloatArray>
     }
 }
 
+
+void
+Shell7BaseXFEM :: giveLocalNodeCoordsForExport(FloatArray &nodeLocalXi1Coords, FloatArray &nodeLocalXi2Coords, FloatArray &nodeLocalXi3Coords) {
+    // Local coords for a quadratic wedge element (VTK cell type 26)
+    double z = 0.999;
+    nodeLocalXi1Coords.setValues(15, 1., 0., 0., 1., 0., 0., .5, 0., .5, .5, 0., .5, 1., 0., 0.);      
+    nodeLocalXi2Coords.setValues(15, 0., 1., 0., 0., 1., 0., .5, .5, 0., .5, .5, 0., 0., 1., 0.);
+    nodeLocalXi3Coords.setValues(15, -z, -z, -z,  z,  z,  z, -z, -z, -z,  z,  z,  z, 0., 0., 0.);
+}
 
 
 void
@@ -2250,7 +2254,7 @@ Shell7BaseXFEM :: giveLocalNodeCoordsForExport(FloatArray &nodeLocalXi1Coords, F
     g3 = this->allTri[subCell-1].giveVertex(3);
 
     FloatArray gs1, gs2, gs3;
-    double scale = 0.99;
+    double scale = 0.999;
     double alpha1 = scale; double alpha2 = (1.0-alpha1)*0.5; double alpha3 = alpha2;
     gs1 = alpha1*g1 + alpha2*g2 + alpha3*g3;
     gs2 = alpha2*g1 + alpha1*g2 + alpha3*g3;

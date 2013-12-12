@@ -468,7 +468,7 @@ void EnrichmentItem :: updateNodeEnrMarker(XfemManager &ixFemMan, const Enrichme
         Element *el = d->giveElement(elIndex);
         int nElNodes = el->giveNumberOfNodes();
         
-        double minSignPhi  = 1, maxSignPhi         = -1;
+        double minSignPhi = 1, maxSignPhi = -1;
         double minPhi = std :: numeric_limits< double > :: max();
         double maxPhi = std :: numeric_limits< double > :: min();
 
@@ -493,8 +493,7 @@ void EnrichmentItem :: updateNodeEnrMarker(XfemManager &ixFemMan, const Enrichme
 
         if ( minPhi * maxPhi < mLevelSetTol ) { // If the level set function changes sign within the element.
             // Count the number of element edges intersected by the interface
-            //int numEdges = nElNodes; // TODO: Is this assumption always true?
-            int numEdges = el->giveInterpolation()->giveNumberOfEdges(); //JIM
+            int numEdges = el->giveInterpolation()->giveNumberOfEdges(); 
 
             for ( int edgeIndex = 1; edgeIndex <= numEdges; edgeIndex++ ) {
                 IntArray bNodes;
@@ -502,7 +501,7 @@ void EnrichmentItem :: updateNodeEnrMarker(XfemManager &ixFemMan, const Enrichme
 
                 int niLoc = bNodes.at(1);
                 int niGlob = el->giveNode(niLoc)->giveGlobalNumber();
-                //int njLoc = bNodes.at( bNodes.giveSize() );
+                ///@todo Is this assumption always true?
                 int njLoc = bNodes.at( 2 ); // always first and second node if 'higher order' nodes are placed in between  //JIM
                 int njGlob = el->giveNode(njLoc)->giveGlobalNumber();
 
@@ -511,6 +510,7 @@ void EnrichmentItem :: updateNodeEnrMarker(XfemManager &ixFemMan, const Enrichme
 
                     const double &gammaS = mLevelSetTangDir [ niGlob - 1 ];
                     const double &gammaE = mLevelSetTangDir [ njGlob - 1 ];
+                    // Linear interpolation of gamma level set
                     double gamma = 0.5 * ( 1.0 - xi ) * gammaS + 0.5 * ( 1.0 + xi ) * gammaE;
 
                     if ( gamma > 0.0 ) {
@@ -678,8 +678,7 @@ void EnrichmentItem :: computeIntersectionPoints(std :: vector< FloatArray > &oI
         // Loop over element edges; an edge is intersected if the
         // node values of the level set functions have different signs
 
-        //int numEdges = element->giveNumberOfNodes(); // TODO: Is this assumption always true?
-        int numEdges = element->giveInterpolation()->giveNumberOfEdges(); //JIM
+        int numEdges = element->giveInterpolation()->giveNumberOfEdges();
 
         for ( int edgeIndex = 1; edgeIndex <= numEdges; edgeIndex++ ) {
             IntArray bNodes;
@@ -687,8 +686,7 @@ void EnrichmentItem :: computeIntersectionPoints(std :: vector< FloatArray > &oI
 
             int nsLoc = bNodes.at(1);
             int nsGlob = element->giveNode(nsLoc)->giveGlobalNumber();
-            //int neLoc = bNodes.at( bNodes.giveSize() );
-            int neLoc = bNodes.at( 2 ); //JIM
+            int neLoc = bNodes.at( 2 ); ///@todo Is this assumption always true?
             int neGlob = element->giveNode(neLoc)->giveGlobalNumber();
 
 
@@ -813,13 +811,14 @@ void EnrichmentItem :: computeIntersectionPoints(std :: vector< FloatArray > &oI
 
     // Loop over element edges; an edge is intersected if the
     // node values of the level set functions have different signs
+    // Indices S - start, E - end
 
-    const int numEdges = 3;
+    const int numEdges = 3; ///@todo generalize- ask interpolator
 
     for ( int edgeIndex = 1; edgeIndex <= numEdges; edgeIndex++ ) {
-        FloatArray xS, xE;
 
         // Global coordinates of vertices
+        FloatArray xS, xE;
         switch ( edgeIndex ) {
         case 1:
             xS = iTri.giveVertex(1);
@@ -854,7 +853,7 @@ void EnrichmentItem :: computeIntersectionPoints(std :: vector< FloatArray > &oI
 
         double phiS         = 0.0, phiE     = 0.0;
         double gammaS       = 0.0, gammaE   = 0.0;
-
+        // Evaluate the level set functions in the two edge nodes
         for ( int i = 1; i <= Ns.giveSize(); i++ ) {
             phiS += Ns.at(i) * mLevelSetNormalDir [ elNodes [ i - 1 ] - 1 ];
             gammaS += Ns.at(i) * mLevelSetTangDir [ elNodes [ i - 1 ] - 1 ];

@@ -715,6 +715,15 @@ void XfemElementInterface :: XfemElementInterface_prepareNodesForDelaunay(std ::
                 oPointPartitions [ 0 ].push_back(nodeCoord);
             }
 
+            // test Jim
+            // Add first intersection point
+            oPointPartitions [ 0 ].push_back( intersecPoints [ 0 ] );
+
+            // want to add the extrapolated intersection point
+            //FloatArray test;
+            //test.setValues(2, 0.0, 0.4);
+            //oPointPartitions [ 0 ].push_back( test );
+
             // Export start and end points of
             // the intersection line.
             oCrackStartXi   = minDistArcPos [ 0 ];

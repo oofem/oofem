@@ -127,6 +127,7 @@ protected:
     void giveFictiousNodeCoordsForExport(std::vector<FloatArray> &nodes, int layer, int subCell);
     void giveFictiousUpdatedNodeCoordsForExport(std::vector<FloatArray> &nodes, int layer, TimeStep *tStep, int subCell);
     void giveLocalNodeCoordsForExport(FloatArray &nodeLocalXi1Coords, FloatArray &nodeLocalXi2Coords, FloatArray &nodeLocalXi3Coords, int subCell);
+    void giveLocalNodeCoordsForExport(FloatArray &nodeLocalXi1Coords, FloatArray &nodeLocalXi2Coords, FloatArray &nodeLocalXi3Coords);
 
 public:
     Shell7BaseXFEM(int n, Domain *d);   
