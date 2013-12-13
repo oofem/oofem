@@ -64,14 +64,14 @@ LWedge :: LWedge(int n, Domain *aDomain) : NLStructuralElement(n, aDomain)
 IRResultType
 LWedge :: initializeFrom(InputRecord *ir)
 {
-    numberOfGaussPoints = 2;
+    numberOfGaussPoints = 6;
     IRResultType result = this->NLStructuralElement :: initializeFrom(ir);
     if ( result != IRRT_OK ) {
         return result;
     }
 
-    if ( ( numberOfGaussPoints != 2 ) && ( numberOfGaussPoints != 9 ) ) {
-        numberOfGaussPoints = 2;
+    if ( ( numberOfGaussPoints != 6 ) && ( numberOfGaussPoints != 9 ) ) {
+        numberOfGaussPoints = 6;
     }
 
     return IRRT_OK;
