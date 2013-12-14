@@ -67,9 +67,10 @@ UserDefDirichletBC :: give(Dof *dof, ValueModeType mode, TimeStep *tStep)
 
 
     /*
-     * The Python function takes two input arguments:
+     * The Python function takes three input arguments:
      *  1) An array with node coordinates
      *  2) The dof id
+     *  3) The current time
      */
     int numArgs = 3;
 

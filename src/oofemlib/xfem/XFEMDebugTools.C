@@ -108,4 +108,48 @@ void XFEMDebugTools :: WritePointsToVTK(const std :: string &iName, const std ::
 
     file.close();
 }
+
+void XFEMDebugTools :: WriteArrayToMatlab(const std :: string &iName, const std :: vector< double > &iX, const std :: vector< double > &iY)
+{
+    std :: ofstream file;
+    file.open( iName.data() );
+
+    file << "x = [";
+
+    for ( size_t i = 0; i < iX.size(); i++ ) {
+        file << iX [ i ] << "\n";
+    }
+
+    file << "];\n\n";
+
+
+
+    file << "y = [";
+
+    for ( size_t i = 0; i < iY.size(); i++ ) {
+        file << iY [ i ] << "\n";
+    }
+
+    file << "];\n\n";
+
+    file.close();
+}
+
+void XFEMDebugTools :: WriteArrayToGnuplot(const std :: string &iName, const std :: vector< double > &iX, const std :: vector< double > &iY)
+{
+    if ( iX.size() != iY.size() ) {
+        OOFEM_ERROR("Error in XFEMDebugTools :: WriteArrayToGnuplot(): iX.size() != iY.size().")
+    }
+
+    std :: ofstream file;
+    file.open( iName.data() );
+
+    file << "# x y\n";
+
+    for ( size_t i = 0; i < iX.size(); i++ ) {
+        file << iX [ i ] << " " << iY [ i ] << "\n";
+    }
+
+    file.close();
+}
 } /* namespace oofem */
