@@ -196,7 +196,7 @@ public:
     virtual bool giveBCEnforcementFlag(PrimaryField &field) { return true; }
 
 
-    virtual int giveUnknownDictHashIndx(ValueModeType mode, TimeStep *stepN) { return ( int ) mode; }
+    virtual int giveUnknownDictHashIndx(ValueModeType mode, TimeStep *stepN);// { return ( int ) mode; }
     virtual void updateDofUnknownsDictionary(DofManager *inode, TimeStep *tStep);
 
     /// Writes pressures into the dof unknown dictionaries

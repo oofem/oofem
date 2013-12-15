@@ -125,9 +125,11 @@ void DelaunayTriangulator :: generateMesh()
     VERBOSE_PRINT0("Number of generated elements", size);
     triangleOctree.giveReport();
 
-    computeAlphaComplex();
-
-    giveAlphaShape();
+    if (alphaValue > 0.001)
+	{
+		computeAlphaComplex();
+		giveAlphaShape();
+	}
 
     cleanUpTriangleList();
 
@@ -155,42 +157,45 @@ void DelaunayTriangulator :: writeMesh()
         num++;
     }
 
-    // first reset all pressure boundary conditions and alphaShapeProperty
-    for ( int i = 1; i <= domain->giveNumberOfDofManagers(); i++ ) {
-        Dof *jDof = domain->giveDofManager(i)->giveDofWithID(P_f);
-        jDof->setBcId(0);
+	if (alphaValue > 0.001)
+	{
+		// first reset all pressure boundary conditions and alphaShapeProperty
+		for ( int i = 1; i <= domain->giveNumberOfDofManagers(); i++ ) {
+			Dof *jDof = domain->giveDofManager(i)->giveDofWithID(P_f);
+			jDof->setBcId(0);
 
-		dynamic_cast<PFEMParticle*>(domain->giveDofManager(i))->setOnAlphaShape(false);
-    }
-
-    // and then prescribe zero pressure on the free surface
-    for ( elIT = alphaShapeEdgeList.begin(); elIT != alphaShapeEdgeList.end(); elIT++ ) {
-		bool oneIsFree = false;
-        for ( int i = 1; i <= 2; i++ ) {
-            hasNoBcOnItself = true;
-            dman = domain->giveDofManager( ( * elIT )->giveNode(i) );
-            for ( int j = 1; j <= dman->giveNumberOfDofs(); j++ ) {
-                jDof  =  dman->giveDof(j);
-                type  =  jDof->giveDofID();
-                if ( ( type == V_u ) || ( type == V_v ) || ( type == V_w ) ) {
-                    if ( jDof->giveBcId() ) {
-                        hasNoBcOnItself = false;
-                    }
-                }
-            }
-
-            if ( hasNoBcOnItself ) {
-				oneIsFree = true;
-                //dman->giveDofWithID(P_f)->setBcId(2);
-            }
-			dynamic_cast<PFEMParticle*>(dman)->setOnAlphaShape();
-        }
-		if (oneIsFree)
-		{
-			domain->giveDofManager( ( * elIT )->giveNode(1) )->giveDofWithID(P_f)->setBcId(2);
-			domain->giveDofManager( ( * elIT )->giveNode(2) )->giveDofWithID(P_f)->setBcId(2);
+			dynamic_cast<PFEMParticle*>(domain->giveDofManager(i))->setOnAlphaShape(false);
 		}
-    }
+
+		// and then prescribe zero pressure on the free surface
+		for ( elIT = alphaShapeEdgeList.begin(); elIT != alphaShapeEdgeList.end(); elIT++ ) {
+			bool oneIsFree = false;
+			for ( int i = 1; i <= 2; i++ ) {
+				hasNoBcOnItself = true;
+				dman = domain->giveDofManager( ( * elIT )->giveNode(i) );
+				for ( int j = 1; j <= dman->giveNumberOfDofs(); j++ ) {
+					jDof  =  dman->giveDof(j);
+					type  =  jDof->giveDofID();
+					if ( ( type == V_u ) || ( type == V_v ) || ( type == V_w ) ) {
+						if ( jDof->giveBcId() ) {
+							hasNoBcOnItself = false;
+						}
+					}
+				}
+
+				if ( hasNoBcOnItself ) {
+					oneIsFree = true;
+					//dman->giveDofWithID(P_f)->setBcId(2);
+				}
+				dynamic_cast<PFEMParticle*>(dman)->setOnAlphaShape();
+			}
+			if (oneIsFree)
+			{
+				domain->giveDofManager( ( * elIT )->giveNode(1) )->giveDofWithID(P_f)->setBcId(2);
+				domain->giveDofManager( ( * elIT )->giveNode(2) )->giveDofWithID(P_f)->setBcId(2);
+			}
+		}
+	}
 }
 
 //////////////////////////////////////////////////////////////////////////

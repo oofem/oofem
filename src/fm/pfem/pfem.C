@@ -389,7 +389,6 @@ PFEM :: solveYourselfAt(TimeStep *tStep)
     PressureField.advanceSolution(tStep);
 
     FloatArray *velocityVector = VelocityField.giveSolutionVector(tStep);
-    FloatArray *prevVelocityVector = VelocityField.giveSolutionVector( tStep->givePreviousStep() );
     FloatArray *pressureVector = PressureField.giveSolutionVector(tStep);
 
     FloatArray velocityVectorThisStep(*velocityVector);
@@ -487,10 +486,10 @@ PFEM :: solveYourselfAt(TimeStep *tStep)
 
         nMethod->solve(vLhs, & rhs, velocityVector);
 
-        /*for (int i = 1; i <= this->giveDomain(1)->giveNumberOfDofManagers(); i++)
-         * {
-         * this->updateDofUnknownsDictionaryVelocities(this->giveDomain(1)->giveDofManager(i), tStep);
-         * }*/
+        for (int i = 1; i <= this->giveDomain(1)->giveNumberOfDofManagers(); i++)
+        {
+			this->updateDofUnknownsDictionaryVelocities(this->giveDomain(1)->giveDofManager(i), tStep);
+        }
 
         velocityVectorThisStep = * velocityVector;
         pressureVectorThisStep = * pressureVector;
@@ -505,9 +504,13 @@ PFEM :: solveYourselfAt(TimeStep *tStep)
 
             FloatArray diffPressure = pressureVectorThisStep;
             diffPressure.subtract(pressureVectorLastStep);
-            d_pnorm = diffPressure.computeNorm() / pressureVectorLastStep.computeNorm();
+			double normDiffPressure = diffPressure.computeNorm();
+			if (normDiffPressure < 1.e-9)
+				d_pnorm = 0.0;
+			else
+				d_pnorm = normDiffPressure / pressureVectorLastStep.computeNorm();
         }
-    } while ( ( d_vnorm > 1.e-1 || d_pnorm > 1.e-1 ) && iteration < 50 );
+    } while ( ( d_vnorm > 1.e-2 || d_pnorm > 1.e-2 ) && iteration < 50 );
 
     if ( iteration > 49 ) {
         OOFEM_ERROR("Maximal iteration count exceded");
@@ -525,12 +528,12 @@ PFEM :: solveYourselfAt(TimeStep *tStep)
                 if ( ( type == V_u ) || ( type == V_v ) || ( type == V_w ) ) {
                     int eqnum = dof->giveEquationNumber(vns);
                     if ( eqnum ) {
-                        double newVelocity = prevVelocityVector->at(eqnum);
+						double previousValue = dof->giveUnknown(VM_Total, tStep->givePreviousStep());
                         Load *load = d->giveLoad(3);
                         FloatArray gVector;
                         load->computeComponentArrayAt(gVector, tStep, VM_Total);
-                        newVelocity += gVector.at(j) * deltaT;
-                        velocityVector->at(eqnum) = newVelocity;
+                        previousValue += gVector.at(j) * deltaT;
+                        velocityVector->at(eqnum) = previousValue;
                     }
                 }
             }
@@ -576,7 +579,17 @@ PFEM :: updateInternalState(TimeStep *stepN)
     }
 }
 
+int
+PFEM :: giveUnknownDictHashIndx(ValueModeType mode, TimeStep *stepN)
+{
+    if ( ( stepN == this->giveCurrentStep() ) || ( stepN == this->givePreviousStep() ) ) {
+        return ( stepN->giveNumber() % 2 ) * 100 + mode;
+    } else {
+        _error("giveUnknownDictHashIndx: unsupported solution step");
+    }
 
+    return 0;
+}
 
 void
 PFEM :: updateDofUnknownsDictionary(DofManager *inode, TimeStep *tStep)
@@ -613,12 +626,16 @@ void
 PFEM :: updateDofUnknownsDictionaryPressure(DofManager *inode, TimeStep *tStep)
 {
     Dof *iDof = inode->giveDofWithID(P_f);
-    if ( iDof->hasBc(tStep) == false ) {            // boundary condition
+	double val = 0;
+    if ( iDof->hasBc(tStep)) {
+		val = iDof->giveBcValue(VM_Total, tStep);
+	} else {
         int eqNum = pns.giveDofEquationNumber(iDof);
         FloatArray *vect = PressureField.giveSolutionVector(tStep);
-        double val = vect->at(eqNum);
-        iDof->updateUnknownsDictionary(tStep, VM_Total, val);
+        val = vect->at(eqNum);
+        //iDof->updateUnknownsDictionary(tStep, VM_Total, val);
     }
+	iDof->updateUnknownsDictionary(tStep, VM_Total, val);
 }
 
 void
