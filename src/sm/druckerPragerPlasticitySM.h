@@ -117,7 +117,7 @@ public:
      * Get the plastic strain deviator from the material status.
      * @return Plastic strain deviator.
      */
-    const StrainVector & givePlasticStrainDeviator() const { return plasticStrainDeviator; }
+    const StrainVector &givePlasticStrainDeviator() const { return plasticStrainDeviator; }
     /**
      * Get the volumetric plastic strain from the material status.
      * @return Volumetric plastic strain.
@@ -251,9 +251,9 @@ public:
     virtual const char *giveInputRecordName() const { return _IFT_DruckerPragerPlasticitySM_Name; }
 
     virtual void giveRealStressVector(FloatArray &answer,
-                              GaussPoint *gp,
-                              const FloatArray &strainVector,
-                              TimeStep *atTime);
+                                      GaussPoint *gp,
+                                      const FloatArray &strainVector,
+                                      TimeStep *tStep);
 
     virtual void giveRealStressVector_3d(FloatArray &answer, GaussPoint *gp, const FloatArray &reducedE, TimeStep *tStep)
     { this->giveRealStressVector(answer, gp, reducedE, tStep); }
@@ -261,7 +261,7 @@ public:
     { this->giveRealStressVector(answer, gp, reducedE, tStep); }
 
     virtual void give3dMaterialStiffnessMatrix(FloatMatrix &answer,
-                                       MatResponseMode mmode, GaussPoint *gp, TimeStep *tStep);
+                                               MatResponseMode mmode, GaussPoint *gp, TimeStep *tStep);
 
     /**
      * Perform a standard local stress return using the function computeYieldValue at the specified Gauss point.
@@ -345,15 +345,15 @@ public:
                                           TimeStep *tStep);
 
     virtual int giveIPValue(FloatArray &answer,
-                    GaussPoint *gp,
-                    InternalStateType type,
-                    TimeStep *atTime);
+                            GaussPoint *gp,
+                            InternalStateType type,
+                            TimeStep *tStep);
 
     virtual bool isCharacteristicMtrxSymmetric(MatResponseMode rMode) { return false; }
 
-    virtual void giveThermalDilatationVector(FloatArray &answer, GaussPoint *gp, TimeStep *atTime)
+    virtual void giveThermalDilatationVector(FloatArray &answer, GaussPoint *gp, TimeStep *tStep)
     {
-        LEMaterial->giveThermalDilatationVector(answer, gp, atTime);
+        LEMaterial->giveThermalDilatationVector(answer, gp, tStep);
     }
 
     virtual MaterialStatus *CreateStatus(GaussPoint *gp) const;

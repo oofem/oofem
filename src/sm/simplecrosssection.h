@@ -57,7 +57,6 @@
 //@}
 
 namespace oofem {
-
 /**
  * Class implementing "simple" cross section model in finite element problem.
  * A cross section  is an attribute of a domain. It is usually also attribute of many
@@ -82,14 +81,14 @@ namespace oofem {
 class OOFEM_EXPORT SimpleCrossSection : public StructuralCrossSection
 {
 public:
-    /** 
+    /**
      * Constructor.
      * @param n Cross section number.
      * @param d Associated domain.
      */
     SimpleCrossSection(int n, Domain *d) : StructuralCrossSection(n, d) {
-      materialNumber = 0;
-      czMaterialNumber = 0;
+        materialNumber = 0;
+        czMaterialNumber = 0;
     }
 
     virtual void giveRealStress_3d(FloatArray &answer, GaussPoint *gp, const FloatArray &reducedStrain, TimeStep *tStep);
@@ -117,7 +116,7 @@ public:
     virtual void give2dBeamStiffMtrx(FloatMatrix &answer, MatResponseMode mode, GaussPoint *gp, TimeStep *tStep);
     virtual void give3dBeamStiffMtrx(FloatMatrix &answer, MatResponseMode mode, GaussPoint *gp, TimeStep *tStep);
     virtual void give2dPlateStiffMtrx(FloatMatrix &answer, MatResponseMode mode, GaussPoint *gp, TimeStep *tStep);
-    virtual void give3dShellStiffMtrx(FloatMatrix &answer,MatResponseMode mode, GaussPoint *gp, TimeStep *tStep);
+    virtual void give3dShellStiffMtrx(FloatMatrix &answer, MatResponseMode mode, GaussPoint *gp, TimeStep *tStep);
     virtual void giveMembraneRotStiffMtrx(FloatMatrix &answer, MatResponseMode mode, GaussPoint *gp, TimeStep *tStep);
 
     /**
@@ -143,10 +142,10 @@ public:
     virtual const char *giveInputRecordName() const { return _IFT_SimpleCrossSection_Name; }
 
     virtual double give(int aProperty, GaussPoint *gp);
-    virtual double give(CrossSectionProperty a, GaussPoint *gp) {return CrossSection::give(a,gp);}
-    virtual double give(CrossSectionProperty a, const FloatArray* coords, Element* elem, bool local) {return CrossSection::give(a,coords,elem,local);}
+    virtual double give(CrossSectionProperty a, GaussPoint *gp) { return CrossSection :: give(a, gp); }
+    virtual double give(CrossSectionProperty a, const FloatArray *coords, Element *elem, bool local) { return CrossSection :: give(a, coords, elem, local); }
     virtual Material *giveMaterial(IntegrationPoint *ip);
-    
+
     int giveMaterialNumber() const { return this->materialNumber; };
     void setMaterialNumber(int matNum) { this->materialNumber = matNum; };
     virtual int checkConsistency();
@@ -160,10 +159,10 @@ public:
     virtual void giveStiffnessMatrix_dPdF(FloatMatrix &answer, MatResponseMode mode, GaussPoint *gp, TimeStep *tStep);
     virtual void giveStiffnessMatrix_dCde(FloatMatrix &answer, MatResponseMode mode, GaussPoint *gp, TimeStep *tStep);
 
-    virtual void computeStressIndependentStrainVector(FloatArray &answer, GaussPoint *gp, TimeStep *stepN, ValueModeType mode);
+    virtual void computeStressIndependentStrainVector(FloatArray &answer, GaussPoint *gp, TimeStep *tStep, ValueModeType mode);
 
 
-private:
+protected:
     int materialNumber;   // material number
     int czMaterialNumber; // cohesive zone material number
 };

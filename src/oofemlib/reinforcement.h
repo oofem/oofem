@@ -57,10 +57,10 @@ namespace oofem {
  */
 class OOFEM_EXPORT Reinforcement : public BodyLoad
 {
- protected:
-  double porosity;
-  double shapefactor;
-  FloatArray permeability;
+protected:
+    double porosity;
+    double shapefactor;
+    FloatArray permeability;
 
 
 public:
@@ -70,16 +70,16 @@ public:
      * Computes components values of deadweight field at given point (coordinates given in Global c.s.).
      * taking into account corresponding load time function value while respecting load response mode.
      * @param answer Component values at given point and time.
-     * @param atTime Time step.
+     * @param tStep Time step.
      * @param coords Global coordinates, which are used to evaluate components values.
      * @param mode Determines response mode-
      */
-    virtual void computeValueAt(FloatArray &answer, TimeStep *atTime, FloatArray &coords, ValueModeType mode)
-    { computeComponentArrayAt(answer, atTime, mode); }
+    virtual void computeValueAt(FloatArray &answer, TimeStep *tStep, FloatArray &coords, ValueModeType mode)
+    { computeComponentArrayAt(answer, tStep, mode); }
 
     virtual bcValType giveBCValType() const { return ReinforceBVT; }
     virtual bcGeomType giveBCGeoType() const { return BodyLoadBGT; }
-    
+
     virtual IRResultType initializeFrom(InputRecord *ir);
     virtual const char *giveClassName() const { return "Reinforcement"; }
     virtual const char *giveInputRecordName() const { return _IFT_Reinforcement_Name; }
@@ -87,8 +87,7 @@ public:
     /// Accessor
     double givePorosity() { return porosity; }
     double giveshapefactor() { return shapefactor; }
-    FloatArray* givePermeability() { return &permeability; }
+    FloatArray *givePermeability() { return & permeability; }
 };
 } // end namespace oofem
 #endif // deadwght_h
-

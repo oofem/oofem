@@ -60,11 +60,11 @@ public:
     virtual Interface *giveInterface(InterfaceType t);
     virtual const char *giveClassName() const { return "HydratingTransportMaterialStatus"; }
 
-    virtual void updateYourself(TimeStep *atTime) {
-        HydrationModelStatusInterface :: updateYourself(atTime);
-        TransportMaterialStatus :: updateYourself(atTime);
+    virtual void updateYourself(TimeStep *tStep) {
+        HydrationModelStatusInterface :: updateYourself(tStep);
+        TransportMaterialStatus :: updateYourself(tStep);
     }
-    virtual void printOutputAt(FILE *file, TimeStep *atTime);
+    virtual void printOutputAt(FILE *file, TimeStep *tStep);
 };
 
 /**
@@ -85,12 +85,12 @@ public:
 
     /// Return true if hydration heat source is present.
     virtual int hasInternalSource();
-    virtual void computeInternalSourceVector(FloatArray &val, GaussPoint *gp, TimeStep *atTime, ValueModeType mode);
+    virtual void computeInternalSourceVector(FloatArray &val, GaussPoint *gp, TimeStep *tStep, ValueModeType mode);
     virtual void updateInternalState(const FloatArray &state, GaussPoint *gp, TimeStep *tStep);
 
     virtual double giveCharacteristicValue(MatResponseMode mode,
                                            GaussPoint *gp,
-                                           TimeStep *atTime);
+                                           TimeStep *tStep);
 
     virtual contextIOResultType saveIPContext(DataStream *stream, ContextMode mode, GaussPoint *gp);
     virtual contextIOResultType restoreIPContext(DataStream *stream, ContextMode mode, GaussPoint *gp);
@@ -102,7 +102,7 @@ public:
     virtual IRResultType initializeFrom(InputRecord *ir);
 
     // post-processing
-    virtual int giveIPValue(FloatArray &answer, GaussPoint *aGaussPoint, InternalStateType type, TimeStep *atTime);
+    virtual int giveIPValue(FloatArray &answer, GaussPoint *gp, InternalStateType type, TimeStep *tStep);
 
 protected:
     virtual MaterialStatus *CreateStatus(GaussPoint *gp) const;

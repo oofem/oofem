@@ -79,14 +79,14 @@ void
 IsotropicMoistureTransferMaterial :: giveCharacteristicMatrix(FloatMatrix &answer,
                                                               MatResponseMode mode,
                                                               GaussPoint *gp,
-                                                              TimeStep *atTime)
+                                                              TimeStep *tStep)
 {
     /*
      * returns constitutive (conductivity) matrix of receiver
      */
 
     double permeability;
-    permeability = this->givePermeability(gp, atTime);
+    permeability = this->givePermeability(gp, tStep);
 
     MaterialMode mMode = gp->giveMaterialMode();
     switch  ( mMode ) {
@@ -117,10 +117,10 @@ IsotropicMoistureTransferMaterial :: giveCharacteristicMatrix(FloatMatrix &answe
 double
 IsotropicMoistureTransferMaterial :: giveCharacteristicValue(MatResponseMode mode,
                                                              GaussPoint *gp,
-                                                             TimeStep *atTime)
+                                                             TimeStep *tStep)
 {
     if ( mode == Capacity ) {
-        return ( this->giveMoistureCapacity(gp, atTime) );
+        return ( this->giveMoistureCapacity(gp, tStep) );
     } else {
         _error2( "giveCharacteristicValue : unknown mode (%s)", __MatResponseModeToString(mode) );
     }
@@ -130,7 +130,7 @@ IsotropicMoistureTransferMaterial :: giveCharacteristicValue(MatResponseMode mod
 
 
 int
-IsotropicMoistureTransferMaterial :: giveIPValue(FloatArray &answer, GaussPoint *aGaussPoint, InternalStateType type, TimeStep *atTime)
+IsotropicMoistureTransferMaterial :: giveIPValue(FloatArray &answer, GaussPoint *gp, InternalStateType type, TimeStep *tStep)
 {
     if (  type == IST_HydrationDegree ) {
         answer.resize(1);
@@ -139,7 +139,7 @@ IsotropicMoistureTransferMaterial :: giveIPValue(FloatArray &answer, GaussPoint 
     }
 
     /* else if (  type == IST_Humidity ) {
-     * FloatArray state = ( ( TransportMaterialStatus * ) giveStatus(aGaussPoint) )->giveStateVector();
+     * FloatArray state = ( ( TransportMaterialStatus * ) giveStatus(gp) )->giveStateVector();
      * if ( state.giveSize() < 1 ) {
      *  _error("computeWaterChange: undefined moisture status!");
      * }
@@ -149,6 +149,6 @@ IsotropicMoistureTransferMaterial :: giveIPValue(FloatArray &answer, GaussPoint 
      * return 1;
      * }*/
 
-    return TransportMaterial :: giveIPValue(answer, aGaussPoint, type, atTime);
+    return TransportMaterial :: giveIPValue(answer, gp, type, tStep);
 }
 } // end namespace oofem

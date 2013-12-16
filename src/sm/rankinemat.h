@@ -115,26 +115,26 @@ protected:
     /// Total strain at peak stress sig0--Used only if plasthardtype=2
     double ep;
 
-   /// Exponent in hardening law--Used only if plasthardtype=2
+    /// Exponent in hardening law--Used only if plasthardtype=2
     double md;
 
     /// type of damage law (0=exponential, 1=exponential and  damage starts after peak stress sig0)
-    int  damlaw;
+    int damlaw;
 
     /// coefficient required when damlaw=1 or 2
-    double     param1;
+    double param1;
 
     /// coefficient required when  damlaw=1 or 2
-    double     param2;
+    double param2;
 
     /// coefficient required when damlaw=2
-    double     param3;
+    double param3;
 
     /// coefficient required when damlaw=2
-    double     param4;
+    double param4;
 
     /// coefficient required when damlaw=2
-    double     param5;
+    double param5;
 
 
 public:
@@ -145,10 +145,10 @@ public:
     double evalYieldStress(const double kappa);
     double evalPlasticModulus(const double kappa);
     void performPlasticityReturn(GaussPoint *gp, const FloatArray &totalStrain);
-    double computeDamage(GaussPoint *gp, TimeStep *atTime);
+    double computeDamage(GaussPoint *gp, TimeStep *tStep);
     double computeDamageParam(double tempKappa);
     double computeDamageParamPrime(double tempKappa);
-    virtual void computeCumPlastStrain(double &kappa, GaussPoint *gp, TimeStep *atTime);
+    virtual void computeCumPlastStrain(double &kappa, GaussPoint *gp, TimeStep *tStep);
 
     virtual int hasMaterialModeCapability(MaterialMode mode);
 
@@ -167,10 +167,10 @@ public:
     virtual MaterialStatus *CreateStatus(GaussPoint *gp) const;
 
     virtual void giveRealStressVector_PlaneStress(FloatArray &answer, GaussPoint *gp,
-                                      const FloatArray &reducesStrain, TimeStep *tStep);
+                                                  const FloatArray &reducesStrain, TimeStep *tStep);
     virtual void  giveRealStressVector_1d(FloatArray &answer, GaussPoint *gp, const FloatArray &totalStrain, TimeStep *tStep);
 protected:
-    virtual void give1dStressStiffMtrx(FloatMatrix &answer, MatResponseMode mode,GaussPoint *gp, TimeStep *tStep);
+    virtual void give1dStressStiffMtrx(FloatMatrix &answer, MatResponseMode mode, GaussPoint *gp, TimeStep *tStep);
     virtual void givePlaneStressStiffMtrx(FloatMatrix &answer,
                                           MatResponseMode mode,
                                           GaussPoint *gp,

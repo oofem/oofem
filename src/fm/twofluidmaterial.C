@@ -144,13 +144,13 @@ TwoFluidMaterial :: computeDeviatoricStressVector(FloatArray &answer, GaussPoint
 
 void
 TwoFluidMaterial :: giveDeviatoricStiffnessMatrix(FloatMatrix &answer, MatResponseMode mode, GaussPoint *gp,
-                                                  TimeStep *atTime)
+                                                  TimeStep *tStep)
 {
     FloatMatrix a0, a1;
     double vof = this->giveTempVOF(gp);
 
-    this->giveMaterial(0)->giveDeviatoricStiffnessMatrix(a0, mode, gp, atTime);
-    this->giveMaterial(1)->giveDeviatoricStiffnessMatrix(a1, mode, gp, atTime);
+    this->giveMaterial(0)->giveDeviatoricStiffnessMatrix(a0, mode, gp, tStep);
+    this->giveMaterial(1)->giveDeviatoricStiffnessMatrix(a1, mode, gp, tStep);
 
     answer.beEmptyMtrx();
     answer.add(1.0 - vof, a0);

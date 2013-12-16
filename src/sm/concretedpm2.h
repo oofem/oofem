@@ -84,15 +84,17 @@ class ConcreteDPM2Status : public StructuralMaterialStatus
 {
 public:
     /// Values of history variable state_flag.
-    enum state_flag_values { ConcreteDPM2_Elastic, 
-                             ConcreteDPM2_Unloading,
-                             ConcreteDPM2_Plastic,
-                             ConcreteDPM2_Damage,
-                             ConcreteDPM2_PlasticDamage,
-                             ConcreteDPM2_VertexCompression,
-                             ConcreteDPM2_VertexTension,
-                             ConcreteDPM2_VertexCompressionDamage,
-                             ConcreteDPM2_VertexTensionDamage };
+    enum state_flag_values {
+        ConcreteDPM2_Elastic,
+        ConcreteDPM2_Unloading,
+        ConcreteDPM2_Plastic,
+        ConcreteDPM2_Damage,
+        ConcreteDPM2_PlasticDamage,
+        ConcreteDPM2_VertexCompression,
+        ConcreteDPM2_VertexTension,
+        ConcreteDPM2_VertexCompressionDamage,
+        ConcreteDPM2_VertexTensionDamage
+    };
 protected:
     /// @name History variables of the plasticity model
     //@{
@@ -196,7 +198,7 @@ public:
      * Get the plastic strain deviator from the material status.
      * @return Plastic strain deviator.
      */
-    const StrainVector & givePlasticStrain() const { return plasticStrain; }
+    const StrainVector &givePlasticStrain() const { return plasticStrain; }
 
 
     /**
@@ -332,7 +334,7 @@ public:
      * Get the temp value of the full plastic strain vector from the material status.
      * @return Temp value of plastic strain vector.
      */
-    const StrainVector & giveTempPlasticStrain() const { return tempPlasticStrain; }
+    const StrainVector &giveTempPlasticStrain() const { return tempPlasticStrain; }
 
     /**
      *  Get the temp value of the volumetric plastic strain in plane stress
@@ -691,14 +693,14 @@ public:
     virtual void giveRealStressVector(FloatArray &answer,
                                       GaussPoint *gp,
                                       const FloatArray &strainVector,
-                                      TimeStep *atTime);
+                                      TimeStep *tStep);
 
     virtual void giveRealStressVector_3d(FloatArray &answer, GaussPoint *gp, const FloatArray &reducedE, TimeStep *tStep)
     { this->giveRealStressVector(answer, gp, reducedE, tStep); }
     virtual void giveRealStressVector_PlaneStrain(FloatArray &answer, GaussPoint *gp, const FloatArray &reducedE, TimeStep *tStep)
     { this->giveRealStressVector(answer, gp, reducedE, tStep); }
 
-    /** 
+    /**
      * Perform stress return of the plasticity model and compute history variables.
      * @param gp Gauss point.
      * @param strain Strain vector of this Gauss point.
@@ -830,7 +832,7 @@ public:
                                       const double rho,
                                       const double tempKappa);
 
-    /** 
+    /**
      * Here, the first derivative of the plastic potential with respect
      * to the invariants sig and rho are computed
      */
@@ -913,7 +915,7 @@ public:
     /**
      * Perform stress return for the damage model, i.e. if the trial stress state does not violate the plasticity surface.
      */
-    void  computeDamage(FloatArray &answer, const StrainVector &strain, const double timeFactor, GaussPoint *gp, TimeStep *atTime, const double alpha);
+    void  computeDamage(FloatArray &answer, const StrainVector &strain, const double timeFactor, GaussPoint *gp, TimeStep *tStep, const double alpha);
 
 
     double computeAlpha(StressVector &effectiveStressTension, StressVector &effectiveStressCompression, StressVector &effectiveStress);
@@ -928,7 +930,7 @@ public:
 
     double computeDeltaPlasticStrainNormCompression(const double tempAlpha, double tempKappaD, double kappaD, GaussPoint *gp);
 
-    virtual void computeEquivalentStrain(double &kappaD, const StrainVector &strain, GaussPoint *gp, TimeStep *atTime);
+    virtual void computeEquivalentStrain(double &kappaD, const StrainVector &strain, GaussPoint *gp, TimeStep *tStep);
 
     /// Compute the ductility measure for the damage model.
     double computeDuctilityMeasureDamage(const StrainVector &strain, GaussPoint *gp);
@@ -979,7 +981,7 @@ public:
     virtual int giveIPValue(FloatArray &answer,
                             GaussPoint *gp,
                             InternalStateType type,
-                            TimeStep *atTime);
+                            TimeStep *tStep);
 
 protected:
     MaterialStatus *CreateStatus(GaussPoint *gp) const;

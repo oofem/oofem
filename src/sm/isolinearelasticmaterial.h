@@ -100,7 +100,7 @@ public:
      * of each material principal (local) axis.
      * @param answer Vector of thermal dilatation coefficients.
      * @param gp Integration point.
-     * @param tStep Time step (most models are able to respond only when atTime is current time step).
+     * @param tStep Time step (most models are able to respond only when tStep is current time step).
      */
     virtual void giveThermalDilatationVector(FloatArray &answer, GaussPoint *gp, TimeStep *tStep);
 
@@ -130,21 +130,21 @@ public:
     double giveBulkModulus() { return E / ( 3. * ( 1. - 2. * nu ) ); }
 
     virtual void give3dMaterialStiffnessMatrix(FloatMatrix & answer,
-                                       MatResponseMode,
-                                       GaussPoint * gp,
-                                       TimeStep * atTime);
+                                               MatResponseMode,
+                                               GaussPoint * gp,
+                                               TimeStep * tStep);
 
     virtual void givePlaneStressStiffMtrx(FloatMatrix & answer,
-                                  MatResponseMode, GaussPoint * gp,
-                                  TimeStep * atTime);
+                                          MatResponseMode, GaussPoint * gp,
+                                          TimeStep * tStep);
 
     virtual void givePlaneStrainStiffMtrx(FloatMatrix & answer,
-                                  MatResponseMode, GaussPoint * gp,
-                                  TimeStep * atTime);
+                                          MatResponseMode, GaussPoint * gp,
+                                          TimeStep * tStep);
 
     virtual void give1dStressStiffMtrx(FloatMatrix & answer,
-                               MatResponseMode, GaussPoint * gp,
-                               TimeStep * atTime);
+                                       MatResponseMode, GaussPoint * gp,
+                                       TimeStep * tStep);
     /**
      * Creates new copy of associated status (StructuralMaterialStatus class )
      * and inserts it into given integration point.

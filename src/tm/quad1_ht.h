@@ -62,7 +62,7 @@ public:
     virtual const char *giveInputRecordName() const { return _IFT_Quad1_ht_Name; }
     virtual const char *giveClassName() const { return "Quad1_ht"; }
 
-    //    virtual int computeNumberOfDofs() { return ( emode == HeatTransferEM ) ? 4 : 8; }    
+    //    virtual int computeNumberOfDofs() { return ( emode == HeatTransferEM ) ? 4 : 8; }
     virtual int computeNumberOfDofs() { return 4; }
     virtual IRResultType initializeFrom(InputRecord *ir);
     virtual FEInterpolation *giveInterpolation() const { return & interpolation; }

@@ -205,5 +205,4 @@ InverseIteration :: solve(SparseMtrx *a, SparseMtrx *b, FloatArray *_eigv, Float
 
     return NM_Success;
 }
-
 } // end namespace oofem

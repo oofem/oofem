@@ -52,7 +52,7 @@ ParallelOrdering :: isLocal(DofManager *dman)
     if ( dman->giveParallelMode() == DofManager_shared ) {
         // determine if problem is the lowest one sharing the dofman; if yes the receiver is responsible to
         // deliver number
-        return  myrank <= dman->givePartitionList()->minimum();
+        return myrank <= dman->givePartitionList()->minimum();
     }
 
     return false;
@@ -92,29 +92,35 @@ Natural2GlobalOrdering :: init(EngngModel *emodel, int di, const UnknownNumberin
     for ( int i = 1; i <= ndofman; i++ ) {
         dman = d->giveDofManager(i);
 #if 0
-           if (dman->giveParallelMode() == DofManager_local) { // count all dofman eqs
-             ndofs = dman->giveNumberOfDofs ();
-             for (j=1; j<=ndofs; j++) {
-               if (dman->giveDof(j)->isPrimaryDof()) {
-                 if (dman->giveDof(j)->giveEquationNumber()) l_neqs++;
-               }
-             }
-           } else if (dman->giveParallelMode() == DofManager_shared) {
-             // determine if problem is the lowest one sharing the dofman; if yes the receiver is responsible to
-             // deliver number
-             IntArray *plist = dman->givePartitionList();
-             int n = plist->giveSize();
-             int minrank = myrank;
-             for (j=1; j<=n; j++) minrank = min (minrank, plist->at(j));
-             if (minrank == myrank) { // count eqs
-               ndofs = dman->giveNumberOfDofs ();
-               for (j=1; j<=ndofs; j++) {
-                 if (dman->giveDof(j)->isPrimaryDof()) {
-                   if (dman->giveDof(j)->giveEquationNumber()) l_neqs++;
-                 }
-               }
-             }
-          } // end shared dman
+        if ( dman->giveParallelMode() == DofManager_local ) {  // count all dofman eqs
+            ndofs = dman->giveNumberOfDofs();
+            for ( j = 1; j <= ndofs; j++ ) {
+                if ( dman->giveDof(j)->isPrimaryDof() ) {
+                    if ( dman->giveDof(j)->giveEquationNumber() ) {
+                        l_neqs++;
+                    }
+                }
+            }
+        } else if ( dman->giveParallelMode() == DofManager_shared ) {
+            // determine if problem is the lowest one sharing the dofman; if yes the receiver is responsible to
+            // deliver number
+            IntArray *plist = dman->givePartitionList();
+            int n = plist->giveSize();
+            int minrank = myrank;
+            for ( j = 1; j <= n; j++ ) {
+                minrank = min( minrank, plist->at(j) );
+            }
+            if ( minrank == myrank ) { // count eqs
+                ndofs = dman->giveNumberOfDofs();
+                for ( j = 1; j <= ndofs; j++ ) {
+                    if ( dman->giveDof(j)->isPrimaryDof() ) {
+                        if ( dman->giveDof(j)->giveEquationNumber() ) {
+                            l_neqs++;
+                        }
+                    }
+                }
+            }
+        }   // end shared dman
 #endif
         if ( isLocal(dman) ) {
             ndofs = dman->giveNumberOfDofs();
@@ -246,7 +252,7 @@ Natural2GlobalOrdering :: init(EngngModel *emodel, int di, const UnknownNumberin
 
 #if 0
         OOFEM_LOG_INFO( "[%d]PetscN2G:: init: Send buffer[%d] size %d\n",
-                       myrank, p, sizeToSend(p) );
+                        myrank, p, sizeToSend(p) );
 #endif
     }
 
@@ -300,28 +306,32 @@ Natural2GlobalOrdering :: init(EngngModel *emodel, int di, const UnknownNumberin
 
 #if 0
     for ( int p = 0; p < nproc; p++ ) {
-        if (p == myrank) continue;
-        for ( int i = 1;  i <= ndofman; i++ ) {
+        if ( p == myrank ) {
+            continue;
+        }
+        for ( int i = 1; i <= ndofman; i++ ) {
             //if (domain->giveDofManager(i)->giveParallelMode() == DofManager_shared) {
-            if (isShared(d->giveDofManager(i))) {
+            if ( isShared( d->giveDofManager(i) ) ) {
                 dman = d->giveDofManager(i);
                 plist = dman->givePartitionList();
                 psize = plist->giveSize();
                 int minrank = myrank;
-                for (j=1; j<=psize; j++) minrank = min (minrank, plist->at(j));
-                if (minrank == myrank) { // do send
-                    buffs[p]->packInt(dman->giveGlobalNumber());
-                    ndofs = dman->giveNumberOfDofs ();
-                    for (j=1; j<=ndofs; j++) {
-                        if (dman->giveDof(j)->isPrimaryDof()) {
-                            buffs[p]->packInt(locGlobMap.at(dman->giveDof(j)->giveEquationNumber()));
+                for ( j = 1; j <= psize; j++ ) {
+                    minrank = min( minrank, plist->at(j) );
+                }
+                if ( minrank == myrank ) { // do send
+                    buffs [ p ]->packInt( dman->giveGlobalNumber() );
+                    ndofs = dman->giveNumberOfDofs();
+                    for ( j = 1; j <= ndofs; j++ ) {
+                        if ( dman->giveDof(j)->isPrimaryDof() ) {
+                            buffs [ p ]->packInt( locGlobMap.at( dman->giveDof(j)->giveEquationNumber() ) );
                         }
                     }
                 }
             }
         }
         // send buffer
-        buffs[p]->iSend(p, 999);
+        buffs [ p ]->iSend(p, 999);
     }
 #endif
 
@@ -332,7 +342,7 @@ Natural2GlobalOrdering :: init(EngngModel *emodel, int di, const UnknownNumberin
         rbuffs [ p ]->resize( rbuffs [ p ]->givePackSize(MPI_INT, 1) * sizeToRecv(p) );
 #if 0
         OOFEM_LOG_INFO( "[%d]PetscN2G:: init: Receive buffer[%d] size %d\n",
-                       myrank, p, sizeToRecv(p) );
+                        myrank, p, sizeToRecv(p) );
 #endif
     }
 

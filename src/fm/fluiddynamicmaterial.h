@@ -183,7 +183,7 @@ public:
      */
     virtual void updateInternalState(const FloatArray &vec, GaussPoint *gp, TimeStep *tStep);
 
-    virtual int giveIPValue(FloatArray &answer, GaussPoint *aGaussPoint, InternalStateType type, TimeStep *atTime);
+    virtual int giveIPValue(FloatArray &answer, GaussPoint *gp, InternalStateType type, TimeStep *tStep);
 };
 } // end namespace oofem
 #endif // fluiddynamicmaterial_h

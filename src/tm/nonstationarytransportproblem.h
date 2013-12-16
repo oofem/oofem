@@ -68,7 +68,7 @@ protected:
      * (like those for computing real internal forces or updating the internal state).
      */
     StateCounterType internalVarUpdateStamp;
-    
+
     LinSystSolverType solverType; ///@todo Remove this and use nonlinear methods.
     SparseLinearSystemNM *linSolver; ///@todo Remove this and use nonlinear methods.
 
@@ -125,12 +125,12 @@ public:
     //Store solution vector to involved DoFs
     //virtual void updateDofUnknownsDictionary(DofManager *dman, TimeStep *tStep);
 
-    virtual int giveUnknownDictHashIndx(ValueModeType mode, TimeStep *stepN);
+    virtual int giveUnknownDictHashIndx(ValueModeType mode, TimeStep *tStep);
 
     virtual void giveElementCharacteristicMatrix(FloatMatrix &answer, int num,
                                                  CharType type, TimeStep *tStep, Domain *domain);
 
-    virtual void printDofOutputAt(FILE *stream, Dof *iDof, TimeStep *atTime);
+    virtual void printDofOutputAt(FILE *stream, Dof *iDof, TimeStep *tStep);
 
     /**
      * Returns time function for time step increment.
@@ -179,9 +179,9 @@ protected:
 
     /**
      * Updates IP values on elements.
-     * @param stepN Solution step.
+     * @param tStep Solution step.
      */
-    virtual void updateInternalState(TimeStep *stepN);
+    virtual void updateInternalState(TimeStep *tStep);
 };
 } // end namespace oofem
 #endif // nonstationarytransportproblem_h

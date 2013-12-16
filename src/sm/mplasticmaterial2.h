@@ -73,10 +73,10 @@ protected:
     FloatArray plasticStrainVector;
     FloatArray tempPlasticStrainVector;
 
-    /** 
-    * Strain space hardening variables, e.g. cumulative plastic strain which can be used
-    * in yield stress evaluation or damage.
-    */
+    /**
+     * Strain space hardening variables, e.g. cumulative plastic strain which can be used
+     * in yield stress evaluation or damage.
+     */
     FloatArray strainSpaceHardeningVarsVector;
     FloatArray tempStrainSpaceHardeningVarsVector;
 
@@ -117,11 +117,11 @@ public:
     void letTempPlasticStrainVectorBe(const FloatArray &v) { tempPlasticStrainVector = v; }
     void letTempStrainSpaceHardeningVarsVectorBe(const FloatArray &v) { tempStrainSpaceHardeningVarsVector = v; }
     void letStrainSpaceHardeningVarsVectorBe(const FloatArray &v) { strainSpaceHardeningVarsVector = v; }
-    
+
     void letTempDamageBe(double v) { tempDamage = v; }
     double giveDamage() { return damage; }
     double giveTempDamage() { return tempDamage; }
-    
+
     int giveStateFlag() { return state_flag; }
     int giveTempStateFlag() { return temp_state_flag; }
     void letTempStateFlagBe(int v) { temp_state_flag = v; }
@@ -205,11 +205,11 @@ public:
     virtual void give3dMaterialStiffnessMatrix(FloatMatrix & answer,
                                                MatResponseMode,
                                                GaussPoint * gp,
-                                               TimeStep * atTime);
+                                               TimeStep * tStep);
 
 
-    virtual void giveRealStressVector(FloatArray & answer, GaussPoint *,
-                              const FloatArray &, TimeStep *);
+    virtual void giveRealStressVector(FloatArray &answer, GaussPoint *,
+                                      const FloatArray &, TimeStep *);
 
     virtual void giveRealStressVector_3d(FloatArray &answer, GaussPoint *gp, const FloatArray &reducedE, TimeStep *tStep)
     { this->giveRealStressVector(answer, gp, reducedE, tStep); }
@@ -220,9 +220,9 @@ public:
     virtual void giveRealStressVector_1d(FloatArray &answer, GaussPoint *gp, const FloatArray &reducedE, TimeStep *tStep)
     { this->giveRealStressVector(answer, gp, reducedE, tStep); }
 
-    virtual double computeDamage(GaussPoint *gp, const FloatArray &strainSpaceHardeningVariables, TimeStep *atTime);
+    virtual double computeDamage(GaussPoint *gp, const FloatArray &strainSpaceHardeningVariables, TimeStep *tStep);
 
-    virtual int giveIPValue(FloatArray &answer, GaussPoint *aGaussPoint, InternalStateType type, TimeStep *atTime);
+    virtual int giveIPValue(FloatArray &answer, GaussPoint *gp, InternalStateType type, TimeStep *tStep);
 
     // auxiliary functions
     virtual int giveSizeOfFullHardeningVarsVector()  { return 0; }
@@ -236,12 +236,12 @@ protected:
     void closestPointReturn(FloatArray &answer, IntArray &activeConditionMap, FloatArray &gamma,
                             GaussPoint *gp,
                             const FloatArray &totalStrain, FloatArray &plasticStrainR,
-                            FloatArray &strainSpaceHardeningVariables, TimeStep *atTime);
+                            FloatArray &strainSpaceHardeningVariables, TimeStep *tStep);
 
     void cuttingPlaneReturn(FloatArray &answer, IntArray &activeConditionMap, FloatArray &gamma,
                             GaussPoint *gp,
                             const FloatArray &totalStrain, FloatArray &plasticStrainR,
-                            FloatArray &strainSpaceHardeningVariables, TimeStep *atTime);
+                            FloatArray &strainSpaceHardeningVariables, TimeStep *tStep);
 
     // add here some auxiliary functions if needed
     /* void  computeGradientVector (FloatArray& answer, functType ftype, int isurf, GaussPoint* gp, const FloatArray& fullStressVector,
@@ -252,12 +252,12 @@ protected:
     virtual void giveConsistentStiffnessMatrix(FloatMatrix & answer,
                                                MatResponseMode,
                                                GaussPoint * gp,
-                                               TimeStep * atTime);
+                                               TimeStep * tStep);
 
     virtual void giveElastoPlasticStiffnessMatrix(FloatMatrix &answer,
                                                   MatResponseMode mode,
                                                   GaussPoint *gp,
-                                                  TimeStep *atTime);
+                                                  TimeStep *tStep);
 
     void computeAlgorithmicModuli(FloatMatrix &answer,
                                   GaussPoint *gp, const FloatMatrix &elasticModuliInverse,
@@ -330,40 +330,40 @@ protected:
      * @param answer Contains result in full space.
      * @param gp Integration point.
      * @param strainIncrement Strain increment vector.
-     * @param atTime Solution step.
+     * @param tStep Solution step.
      */
     virtual void computeTrialStressIncrement(FloatArray &answer, GaussPoint *gp,
-                                             const FloatArray &strainIncrement, TimeStep *atTime);
+                                             const FloatArray &strainIncrement, TimeStep *tStep);
     virtual void computeReducedElasticModuli(FloatMatrix &answer, GaussPoint *gp,
-                                             TimeStep *atTime);
+                                             TimeStep *tStep);
     //virtual void compute3dElasticModuli(FloatMatrix& answer, GaussPoint *gp,
-    //                                    TimeStep *atTime) = 0;
+    //                                    TimeStep *tStep) = 0;
 
     // next functions overloaded rom structural material level
     virtual void givePlaneStressStiffMtrx(FloatMatrix & answer,
                                           MatResponseMode,
                                           GaussPoint * gp,
-                                          TimeStep * atTime);
+                                          TimeStep * tStep);
     virtual void givePlaneStrainStiffMtrx(FloatMatrix & answer,
                                           MatResponseMode,
                                           GaussPoint * gp,
-                                          TimeStep * atTime);
+                                          TimeStep * tStep);
     virtual void give1dStressStiffMtrx(FloatMatrix & answer,
                                        MatResponseMode,
                                        GaussPoint * gp,
-                                       TimeStep * atTime);
+                                       TimeStep * tStep);
     virtual void give2dBeamLayerStiffMtrx(FloatMatrix & answer,
                                           MatResponseMode,
                                           GaussPoint * gp,
-                                          TimeStep * atTime);
+                                          TimeStep * tStep);
     virtual void givePlateLayerStiffMtrx(FloatMatrix & answer,
-                                           MatResponseMode,
-                                           GaussPoint * gp,
-                                           TimeStep * atTime);
+                                         MatResponseMode,
+                                         GaussPoint * gp,
+                                         TimeStep * tStep);
 
     virtual void give1dFiberStiffMtrx(FloatMatrix & answer,
                                       MatResponseMode, GaussPoint * gp,
-                                      TimeStep * atTime);
+                                      TimeStep * tStep);
 
 protected:
     long getPopulationSignature(IntArray &mask);

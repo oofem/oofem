@@ -44,12 +44,11 @@
 #include <string>
 
 namespace oofem {
-
 ///@todo FieldType and UnknownType basically determine the same thing. Should be possible to stick to one. Combinations of fields should be possible with logical bitfields.
 #define FieldType_DEF \
     ENUM_ITEM_WITH_VALUE(FT_Unknown, 0) \
     ENUM_ITEM_WITH_VALUE(FT_Velocity, 1) \
-    ENUM_ITEM_WITH_VALUE(FT_Displacements,2 ) \
+    ENUM_ITEM_WITH_VALUE(FT_Displacements, 2) \
     ENUM_ITEM_WITH_VALUE(FT_VelocityPressure, 3) \
     ENUM_ITEM_WITH_VALUE(FT_Pressure, 4) \
     ENUM_ITEM_WITH_VALUE(FT_Temperature, 5) \
@@ -81,18 +80,18 @@ public:
     /**
      * Constructor. Creates a field of given type associated to given domain.
      */
-    Field(FieldType b): type(b) { }
+    Field(FieldType b) : type(b) { }
     virtual ~Field() { }
     /**
      * Evaluates the field at given point.
      * @param coords Coordinates of the point of interest
      * @param answer Field evaluated at coordinate.
-     * @param atTime Time step to evaluate for.
+     * @param tStep Time step to evaluate for.
      * @param mode Mode of value (total, velocity,...).
      * @return Zero if ok, otherwise nonzero.
      */
     virtual int evaluateAt(FloatArray &answer, FloatArray &coords,
-                           ValueModeType mode, TimeStep *atTime) = 0;
+                           ValueModeType mode, TimeStep *tStep) = 0;
 
     /**
      * Evaluates the field at given DofManager. This potentially can be resolved quickly, as
@@ -105,11 +104,11 @@ public:
      * @param[out] answer Evaluated field for dman.
      * @param dman Reference to dofManager.
      * @param mode Mode of value (total, velocity,...).
-     * @param atTime Time step to evaluate for.
+     * @param tStep Time step to evaluate for.
      * @return Zero if ok, nonzero Error code (0-ok, 1-failed)
      */
-    virtual int evaluateAt(FloatArray &answer, DofManager* dman,
-                           ValueModeType mode, TimeStep *atTime) = 0;
+    virtual int evaluateAt(FloatArray &answer, DofManager *dman,
+                           ValueModeType mode, TimeStep *tStep) = 0;
 
     /// Returns the type of receiver
     FieldType giveType() { return type; }

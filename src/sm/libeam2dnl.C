@@ -50,8 +50,7 @@
 #endif
 
 namespace oofem {
-
-REGISTER_Element( LIBeam2dNL );
+REGISTER_Element(LIBeam2dNL);
 
 LIBeam2dNL :: LIBeam2dNL(int n, Domain *aDomain) : NLStructuralElement(n, aDomain), LayeredCrossSectionInterface()
 {
@@ -72,13 +71,13 @@ LIBeam2dNL :: giveInterface(InterfaceType interface)
 
 
 void
-LIBeam2dNL :: computeBmatrixAt(GaussPoint *aGaussPoint, FloatMatrix &answer, int li, int ui)
+LIBeam2dNL :: computeBmatrixAt(GaussPoint *gp, FloatMatrix &answer, int li, int ui)
 // Returns the strain matrix of the receiver.
 {
     double l, ksi, n1, n2, n1x, n2x, n3x;
 
     l    = this->giveLength();
-    ksi  = aGaussPoint->giveCoordinate(1);
+    ksi  = gp->giveCoordinate(1);
 
     n1    = 0.5 * ( 1.0 - ksi );
     n2    = 0.5 * ( 1.0 + ksi );
@@ -104,7 +103,7 @@ LIBeam2dNL :: computeBmatrixAt(GaussPoint *aGaussPoint, FloatMatrix &answer, int
 
 
 void
-LIBeam2dNL :: computeNLBMatrixAt(FloatMatrix &answer, GaussPoint *aGaussPoint, int i)
+LIBeam2dNL :: computeNLBMatrixAt(FloatMatrix &answer, GaussPoint *gp, int i)
 {
     //
     // Returns nonlinear part of geometrical equations of the receiver at gp.
@@ -113,7 +112,7 @@ LIBeam2dNL :: computeNLBMatrixAt(FloatMatrix &answer, GaussPoint *aGaussPoint, i
     double l, l8, ll88, ksi, n1x, n2x, n3x;
 
     l    = this->giveLength();
-    ksi  = aGaussPoint->giveCoordinate(1);
+    ksi  = gp->giveCoordinate(1);
 
     //n1    = 0.5*(1.0 - ksi);
     //n2    = 0.5*(1.0 + ksi);
@@ -292,7 +291,7 @@ void LIBeam2dNL :: computeGaussPoints()
         numberOfIntegrationRules = 1;
         integrationRulesArray = new IntegrationRule * [ 1 ];
         integrationRulesArray [ 0 ] = new GaussIntegrationRule(1, this, 1, 2);
-        this->giveCrossSection()->setupIntegrationPoints( *integrationRulesArray[0], 1, this );
+        this->giveCrossSection()->setupIntegrationPoints(* integrationRulesArray [ 0 ], 1, this);
     }
 }
 
@@ -317,7 +316,7 @@ LIBeam2dNL :: computeLumpedMassMatrix(FloatMatrix &answer, TimeStep *tStep)
 void
 LIBeam2dNL :: computeNmatrixAt(const FloatArray &iLocCoord, FloatMatrix &answer)
 // Returns the displacement interpolation matrix {N} of the receiver, eva-
-// luated at aGaussPoint.
+// luated at gp.
 {
     double ksi, n1, n2, n3;
     double l = this->giveLength();
@@ -370,11 +369,11 @@ LIBeam2dNL :: computeGtoLRotationMatrix(FloatMatrix &answer)
 }
 
 
-double LIBeam2dNL :: computeVolumeAround(GaussPoint *aGaussPoint)
+double LIBeam2dNL :: computeVolumeAround(GaussPoint *gp)
 // Returns the length of the receiver. This method is valid only if 1
 // Gauss point is used.
 {
-    double weight  = aGaussPoint->giveWeight();
+    double weight  = gp->giveWeight();
     return weight * 0.5 * this->giveLength();
 }
 
@@ -470,7 +469,7 @@ LIBeam2dNL :: initializeFrom(InputRecord *ir)
 
 
 void
-LIBeam2dNL :: computeEgdeNMatrixAt(FloatMatrix &answer, int iedge, GaussPoint *aGaussPoint)
+LIBeam2dNL :: computeEgdeNMatrixAt(FloatMatrix &answer, int iedge, GaussPoint *gp)
 {
     /*
      *
@@ -486,7 +485,7 @@ LIBeam2dNL :: computeEgdeNMatrixAt(FloatMatrix &answer, int iedge, GaussPoint *a
      * without regarding particular side
      */
 
-    this->computeNmatrixAt(*(aGaussPoint->giveLocalCoordinates()), answer);
+    this->computeNmatrixAt(* ( gp->giveLocalCoordinates() ), answer);
 }
 
 
@@ -513,13 +512,13 @@ LIBeam2dNL :: giveEdgeDofMapping(IntArray &answer, int iEdge) const
 }
 
 double
-LIBeam2dNL ::   computeEdgeVolumeAround(GaussPoint *aGaussPoint, int iEdge)
+LIBeam2dNL ::   computeEdgeVolumeAround(GaussPoint *gp, int iEdge)
 {
     if ( iEdge != 1 ) { // edge between nodes 1 2
         _error("computeEdgeVolumeAround: wrong egde number");
     }
 
-    double weight  = aGaussPoint->giveWeight();
+    double weight  = gp->giveWeight();
     return 0.5 * this->giveLength() * weight;
 }
 
@@ -568,9 +567,9 @@ LIBeam2dNL :: computeLoadLEToLRotationMatrix(FloatMatrix &answer, int iEdge, Gau
 void
 LIBeam2dNL :: computeBodyLoadVectorAt(FloatArray &answer, Load *load, TimeStep *tStep, ValueModeType mode)
 {
-  FloatArray lc(1);
-  StructuralElement::computeBodyLoadVectorAt(answer, load, tStep, mode);
-  answer.times(this->giveCrossSection()->give(CS_Area, &lc, NULL, this)); 
+    FloatArray lc(1);
+    StructuralElement :: computeBodyLoadVectorAt(answer, load, tStep, mode);
+    answer.times( this->giveCrossSection()->give(CS_Area, & lc, NULL, this) );
 }
 
 

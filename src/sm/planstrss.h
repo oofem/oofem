@@ -72,7 +72,7 @@ public:
 
     virtual double giveCharacteristicLenght(GaussPoint *gp, const FloatArray &normalToCrackPlane);
     virtual double giveCharacteristicSize(GaussPoint *gp, FloatArray &normalToCrackPlane, ElementCharSizeMethod method);
-    virtual double giveParentElSize() const {return 4.0;}
+    virtual double giveParentElSize() const { return 4.0; }
 
     virtual int testElementExtension(ElementExtension ext) { return ( ( ext == Element_EdgeLoadSupport ) ? 1 : 0 ); }
     virtual Interface *giveInterface(InterfaceType it);
@@ -101,8 +101,8 @@ public:
                                                                   HuertaErrorEstimator :: AnalysisMode aMode);
     virtual void HuertaErrorEstimatorI_computeLocalCoords(FloatArray &answer, const FloatArray &coords)
     { computeLocalCoordinates(answer, coords); }
-    virtual void HuertaErrorEstimatorI_computeNmatrixAt(GaussPoint *aGaussPoint, FloatMatrix &answer)
-    { computeNmatrixAt(*(aGaussPoint->giveLocalCoordinates()), answer); }
+    virtual void HuertaErrorEstimatorI_computeNmatrixAt(GaussPoint *gp, FloatMatrix &answer)
+    { computeNmatrixAt(* ( gp->giveLocalCoordinates() ), answer); }
 
     // HuertaRemeshingCriteriaInterface
     virtual double HuertaRemeshingCriteriaI_giveCharacteristicSize() { return DirectErrorIndicatorRCI_giveCharacteristicSize(); }
@@ -111,7 +111,7 @@ public:
     virtual double DirectErrorIndicatorRCI_giveCharacteristicSize();
 
     virtual int EIPrimaryUnknownMI_computePrimaryUnknownVectorAt(ValueModeType u,
-                                                                 TimeStep *stepN, const FloatArray &coords,
+                                                                 TimeStep *tStep, const FloatArray &coords,
                                                                  FloatArray &answer);
     virtual void EIPrimaryUnknownMI_givePrimaryUnknownVectorDofID(IntArray &answer);
 
@@ -137,7 +137,7 @@ protected:
     int computeLoadLEToLRotationMatrix(FloatMatrix &answer, int iEdge, GaussPoint *gp);
 
     virtual void computeBmatrixAt(GaussPoint *gp, FloatMatrix &answer, int = 1, int = ALL_STRAINS);
-    virtual void computeBHmatrixAt(GaussPoint *aGaussPoint, FloatMatrix &answer);
+    virtual void computeBHmatrixAt(GaussPoint *gp, FloatMatrix &answer);
     virtual void computeGaussPoints();
 
     int giveApproxOrder() { return 1; }

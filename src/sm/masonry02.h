@@ -112,9 +112,9 @@ public:
     virtual const char *giveClassName() const { return "Masonry02"; }
 
     virtual void giveStiffnessMatrix(FloatMatrix &answer,
-                                          MatResponseMode mode,
-                                          GaussPoint *gp,
-                                          TimeStep *tStep);
+                                     MatResponseMode mode,
+                                     GaussPoint *gp,
+                                     TimeStep *tStep);
 
     virtual int giveSizeOfFullHardeningVarsVector() { return 3; }
     virtual int giveSizeOfReducedHardeningVarsVector(GaussPoint *) { return 3; }
@@ -131,10 +131,10 @@ protected:
     //
 
     virtual double computeYieldValueAt(GaussPoint *gp, int isurf, const FloatArray &stressVector,
-                               const FloatArray &stressSpaceHardeningVars);
+                                       const FloatArray &stressSpaceHardeningVars);
 
     virtual void computeStressGradientVector(FloatArray &answer, functType ftype, int isurf, GaussPoint *gp, const FloatArray &stressVector,
-                                     const FloatArray &stressSpaceHardeningVars);
+                                             const FloatArray &stressSpaceHardeningVars);
     virtual void computeStrainHardeningVarsIncrement(FloatArray &answer, GaussPoint *gp,
                                                      const FloatArray &stress, const FloatArray &dlambda,
                                                      const FloatArray &dplasticStrain, const IntArray &activeConditionMap);
@@ -159,10 +159,10 @@ protected:
 
 
     void give2dInterfaceMaterialStiffnessMatrix(FloatMatrix &answer, MatResponseMode rMode,
-                                                GaussPoint *gp, TimeStep *atTime);
+                                                GaussPoint *gp, TimeStep *tStep);
 
     virtual void computeReducedElasticModuli(FloatMatrix &answer, GaussPoint *gp,
-                                             TimeStep *atTime);
+                                             TimeStep *tStep);
 
 
     /// Cap mode related functions.

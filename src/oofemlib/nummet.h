@@ -97,7 +97,7 @@ public:
 
     /// @return Engineering model receiver is connected to.
     EngngModel *giveEngngModel() { return engngModel; }
-    
+
     virtual IRResultType initializeFrom(InputRecord *ir)  { return IRRT_OK; }
 
     /**
@@ -110,7 +110,7 @@ public:
      * This method clears receiver cached data dependent on topology, when it changes.
      */
     virtual void reinitialize() { }
-    
+
     virtual void setDomain(Domain *d) { domain = d; }
 
     virtual contextIOResultType saveContext(DataStream *stream, ContextMode mode, void *obj = NULL) { return CIO_OK; }

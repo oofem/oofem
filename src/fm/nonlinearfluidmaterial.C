@@ -132,7 +132,7 @@ NonlinearFluidMaterial :: computeDeviatoricStressVector(FloatArray &answer, Gaus
 
 void
 NonlinearFluidMaterial :: giveDeviatoricStiffnessMatrix(FloatMatrix &answer, MatResponseMode mode, GaussPoint *gp,
-                                                        TimeStep *atTime)
+                                                        TimeStep *tStep)
 {
     FloatArray eps;
     double normeps = 0;

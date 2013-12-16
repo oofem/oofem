@@ -40,7 +40,6 @@
 #define _IFT_ConstantEdgeLoad_Name "constantedgeload"
 
 namespace oofem {
-
 /**
  * This class implements a boundary load (force, moment,...) that acts
  * directly on a boundary of some finite element (on side, face, ..).
@@ -78,9 +77,3 @@ private:
 };
 } // end namespace oofem
 #endif // constantedgeload_h
-
-
-
-
-
-

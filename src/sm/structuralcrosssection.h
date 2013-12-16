@@ -110,7 +110,7 @@ public:
      * @param answer Stiffness matrix.
      * @param mode Material response mode.
      * @param gp Integration point, which load history is used.
-     * @param tStep Time step (most models are able to respond only when atTime is current time step).
+     * @param tStep Time step (most models are able to respond only when tStep is current time step).
      */
     //@{
     virtual void giveStiffnessMatrix_3d(FloatMatrix &answer, MatResponseMode mode, GaussPoint *gp, TimeStep *tStep) = 0;
@@ -149,7 +149,7 @@ public:
      * @param tStep Current time step (most models are able to respond only when tStep is current time step).
      */
     virtual void giveFirstPKStresses(FloatArray &answer, GaussPoint *gp, const FloatArray &reducedFIncrement, TimeStep *tStep) = 0;
-        
+
 
     /**
      * Computes the Cauchy stress vector for a given increment of deformation gradient and given integration point.
@@ -180,7 +180,7 @@ public:
      * @param tStep Time step (most models are able to respond only when tStep is current time step).
      */
     virtual void giveStiffnessMatrix_dPdF(FloatMatrix &answer, MatResponseMode mode, GaussPoint *gp, TimeStep *tStep) = 0;
-        
+
     /**
      * Computes the material stiffness matrix dCde of receiver in a given integration point, respecting its history.
      * The algorithm should use temporary or equilibrium  history variables stored in integration point status
@@ -232,7 +232,7 @@ public:
      * @param answer Stiffness matrix.
      * @param mode Material response mode.
      * @param gp Integration point, which load history is used.
-     * @param tStep Time step (most models are able to respond only when atTime is current time step).
+     * @param tStep Time step (most models are able to respond only when tStep is current time step).
      */
     virtual void give2dPlateStiffMtrx(FloatMatrix &answer, MatResponseMode mode, GaussPoint *gp, TimeStep *tStep) = 0;
     /**
@@ -240,15 +240,15 @@ public:
      * @param answer Stiffness matrix.
      * @param mode Material response mode.
      * @param gp Integration point, which load history is used.
-     * @param tStep Time step (most models are able to respond only when atTime is current time step).
+     * @param tStep Time step (most models are able to respond only when tStep is current time step).
      */
-    virtual void give3dShellStiffMtrx(FloatMatrix &answer,MatResponseMode mode, GaussPoint *gp, TimeStep *tStep) = 0;
+    virtual void give3dShellStiffMtrx(FloatMatrix &answer, MatResponseMode mode, GaussPoint *gp, TimeStep *tStep) = 0;
     /**
      * Method for computing membrane stiffness matrix with added drilling stiffness.
      * @param answer Stiffness matrix.
      * @param mode Material response mode.
      * @param gp Integration point, which load history is used.
-     * @param tStep Time step (most models are able to respond only when atTime is current time step).
+     * @param tStep Time step (most models are able to respond only when tStep is current time step).
      */
     virtual void giveMembraneRotStiffMtrx(FloatMatrix &answer, MatResponseMode mode, GaussPoint *gp, TimeStep *tStep) = 0;
     /**
@@ -264,7 +264,7 @@ public:
      * @param mode Determines the response mode.
      */
     virtual void computeStressIndependentStrainVector(FloatArray &answer, GaussPoint *gp, TimeStep *tStep, ValueModeType mode)
-        { OOFEM_ERROR("computeStressIndependentStrainVector not implemented for this cross section type"); };
+    { OOFEM_ERROR("computeStressIndependentStrainVector not implemented for this cross section type"); };
     /**
      * Returns modified gradient of stress vector, which is used to
      * bring stresses back to yield surface.
@@ -294,8 +294,8 @@ public:
 
     virtual int testCrossSectionExtension(CrossSectExtension ext) { return ( ( ext == CS_StructuralCapability ) ? 1 : 0 ); }
 
-    
-    
+
+
     IRResultType  initializeFrom(InputRecord *ir);
 
     int hasMaterialModeCapability(MaterialMode mode); // JB
@@ -305,8 +305,6 @@ public:
     virtual int checkConsistency() = 0;
     virtual Interface *giveMaterialInterface(InterfaceType t, IntegrationPoint *ip) { return NULL; }
     virtual bool isCharacteristicMtrxSymmetric(MatResponseMode mode) = 0;
-
 };
 } // end namespace oofem
 #endif // structuralcrosssection_h
-

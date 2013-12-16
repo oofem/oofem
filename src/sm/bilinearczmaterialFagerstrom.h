@@ -54,7 +54,6 @@
 //@}
 
 namespace oofem {
-
 /**
  * This class implements associated Material Status for ...
  */
@@ -66,7 +65,7 @@ protected:
     FloatArray oldMaterialJump;
     // temporary material jump
     FloatArray tempMaterialJump;
-    
+
     // damage variable
     double damage;
     // temporary damage value
@@ -85,9 +84,9 @@ protected:
 
     // tempArrays for stiffness calculation
     FloatMatrix Iep;
-    FloatArray	alphav;
+    FloatArray alphav;
 
-    
+
 public:
     /// Constructor
     BilinearCZMaterialFagerstromStatus(int n, Domain *d, GaussPoint *g);
@@ -102,16 +101,16 @@ public:
     double giveDamage() { return damage; }
     double giveTempDamage() { return tempDamage; }
 
-    const FloatArray &giveOldMaterialJump() {return oldMaterialJump; }
-    const FloatArray &giveTempMaterialJump() {return tempMaterialJump; }
+    const FloatArray &giveOldMaterialJump() { return oldMaterialJump; }
+    const FloatArray &giveTempMaterialJump() { return tempMaterialJump; }
 
-    const FloatArray &giveEffectiveMandelTraction() { return  QEffective; }
-    const FloatArray &giveTempEffectiveMandelTraction() {return tempQEffective; }
+    const FloatArray &giveEffectiveMandelTraction() { return QEffective; }
+    const FloatArray &giveTempEffectiveMandelTraction() { return tempQEffective; }
 
-    const FloatMatrix &giveTempInverseDefGrad() {return tempFInv; }
-    const FloatMatrix &giveTempRotationMatrix() {return tempRot; }
-    const FloatMatrix &giveTempIep() {return Iep; }
-    const FloatArray &giveTempAlphav() {return alphav; }
+    const FloatMatrix &giveTempInverseDefGrad() { return tempFInv; }
+    const FloatMatrix &giveTempRotationMatrix() { return tempRot; }
+    const FloatMatrix &giveTempIep() { return Iep; }
+    const FloatArray &giveTempAlphav() { return alphav; }
 
 
     void letTempDamageBe(double v) { tempDamage = v; }
@@ -149,9 +148,9 @@ class BilinearCZMaterialFagerstrom : public StructuralMaterial
 {
 protected:
     /// Material parameters
-    double kn0;   // initial normal stiffness	
+    double kn0;   // initial normal stiffness
     double ks0;   // initial shear stiffness
-    double knc;   // stiffness in compression  
+    double knc;   // stiffness in compression
     double GIc;   // fracture energy, mode 1
     double GIIc;   // fracture energy, mode 1
     double sigf;  // max stress
@@ -162,7 +161,7 @@ protected:
 
     virtual int checkConsistency();
     void give3dInterfaceMaterialStiffnessMatrix(FloatMatrix &answer, MatResponseMode rMode,
-                                                                     GaussPoint *gp, TimeStep *atTime);
+                                                GaussPoint *gp, TimeStep *tStep);
 public:
     /// Constructor
     BilinearCZMaterialFagerstrom(int n, Domain *d);
@@ -174,16 +173,16 @@ public:
     virtual int hasMaterialModeCapability(MaterialMode mode);
     virtual const char *giveClassName() const { return "BilinearCZMaterialFagerstrom"; }
     virtual const char *giveInputRecordName() const { return _IFT_BilinearCZMaterialFagerstrom_Name; }
-    
+
 
     virtual void giveRealStressVector(FloatArray &answer, GaussPoint *gp,
-                              const FloatArray &reducedStrain, TimeStep *tStep);
+                                      const FloatArray &reducedStrain, TimeStep *tStep);
 
     virtual void giveStiffnessMatrix(FloatMatrix &answer,
-                                          MatResponseMode mode,
-                                          GaussPoint *gp,
-                                          TimeStep *tStep);
-    
+                                     MatResponseMode mode,
+                                     GaussPoint *gp,
+                                     TimeStep *tStep);
+
     virtual int giveIPValue(FloatArray &answer, GaussPoint *gp, InternalStateType type, TimeStep *tStep);
     virtual int giveIntVarCompFullIndx(IntArray &answer, InternalStateType type, MaterialMode mmode);
     virtual int giveIPValueSize(InternalStateType type, GaussPoint *gp);
@@ -191,11 +190,10 @@ public:
 
 
     virtual IRResultType initializeFrom(InputRecord *ir);
-    
+
     virtual MaterialStatus *CreateStatus(GaussPoint *gp) const { return new BilinearCZMaterialFagerstromStatus(1, domain, gp); }
     void printYourself();
 protected:
-   
 };
 } // end namespace oofem
 #endif // isointerfacedamage01_h

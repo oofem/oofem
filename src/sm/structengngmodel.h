@@ -143,7 +143,7 @@ public:
     /**
      * Shows the sparse structure of required matrix, type == 1 stiffness.
      */
-    void showSparseMtrxStructure(int type, oofegGraphicContext &context, TimeStep *atTime);
+    void showSparseMtrxStructure(int type, oofegGraphicContext &context, TimeStep *tStep);
 #endif
 };
 } // end namespace oofem

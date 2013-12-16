@@ -159,7 +159,7 @@ void StokesFlow :: solveYourselfAt(TimeStep *tStep)
                           EModelDefaultEquationNumbering(), this->giveDomain(1) );
 
     if ( this->giveProblemScale() == macroScale ) {
-        OOFEM_LOG_INFO("StokesFlow :: solveYourselfAt - Solving step %d, metastep %d, (neq = %d)\n", tStep->giveNumber(), tStep->giveMetaStepNumber(), neq);
+        OOFEM_LOG_INFO("StokesFlow :: solveYourselfAt - Solving step %d, metastep %d, (neq = %d)\n", tStep->giveNumber(), tStep->giveMetatStepumber(), neq);
     }
 
     this->giveNumericalMethod( this->giveCurrentMetaStep() );
@@ -288,14 +288,14 @@ int StokesFlow :: checkConsistency()
     return EngngModel :: checkConsistency();
 }
 
-void StokesFlow :: printDofOutputAt(FILE *stream, Dof *iDof, TimeStep *atTime)
+void StokesFlow :: printDofOutputAt(FILE *stream, Dof *iDof, TimeStep *tStep)
 {
     DofIDItem type = iDof->giveDofID();
     ///@todo This won't work with slave dofs, xfem etc.
     if ( ( type == V_u ) || ( type == V_v ) || ( type == V_w ) ) {
-        iDof->printSingleOutputAt(stream, atTime, 'v', VM_Total, 1);
+        iDof->printSingleOutputAt(stream, tStep, 'v', VM_Total, 1);
     } else if ( type == P_f ) {
-        iDof->printSingleOutputAt(stream, atTime, 'p', VM_Total, 1);
+        iDof->printSingleOutputAt(stream, tStep, 'p', VM_Total, 1);
     } else {
         OOFEM_ERROR("printDofOutputAt: unsupported dof type");
     }

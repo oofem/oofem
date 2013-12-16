@@ -131,11 +131,11 @@ namespace oofem {
     ENUM_ITEM_WITH_VALUE(IST_vonMisesStress, 81) \
     ENUM_ITEM_WITH_VALUE(IST_CrackVector, 82) \
     ENUM_ITEM_WITH_VALUE(IST_PressureGradient, 83) \
-    ENUM_ITEM_WITH_VALUE(IST_DissWork, 84)\
-    ENUM_ITEM_WITH_VALUE(IST_DeltaDissWork, 85)\
-    ENUM_ITEM_WITH_VALUE(IST_StressCapPos, 86)\
-    ENUM_ITEM_WITH_VALUE(IST_TangentNorm, 87)\
-    ENUM_ITEM_WITH_VALUE(IST_Tangent, 88)\
+    ENUM_ITEM_WITH_VALUE(IST_DissWork, 84) \
+    ENUM_ITEM_WITH_VALUE(IST_DeltaDissWork, 85) \
+    ENUM_ITEM_WITH_VALUE(IST_StressCapPos, 86) \
+    ENUM_ITEM_WITH_VALUE(IST_TangentNorm, 87) \
+    ENUM_ITEM_WITH_VALUE(IST_Tangent, 88) \
     ENUM_ITEM_WITH_VALUE(IST_DirectorField, 89) \
     ENUM_ITEM_WITH_VALUE(IST_DeformationGradientTensor, 90) \
     ENUM_ITEM_WITH_VALUE(IST_FirstPKStressTensor, 91) \
@@ -149,7 +149,7 @@ namespace oofem {
     ENUM_ITEM_WITH_VALUE(IST_InterfaceFirstPKTraction, 99) \
     ENUM_ITEM_WITH_VALUE(IST_StressTensor_Reduced, 100) \
     ENUM_ITEM_WITH_VALUE(IST_StrainTensor_Reduced, 101) \
-    ENUM_ITEM_WITH_VALUE(IST_CrossSectionNumber, 102 )
+    ENUM_ITEM_WITH_VALUE(IST_CrossSectionNumber, 102)
 /**
  * Type  representing the physical meaning of element or constitutive model internal variable.
  * Values of this type are used, when these internal variables are requested.
@@ -176,4 +176,3 @@ enum ElementCharSizeMethod {
 const char *__InternalStateTypeToString(InternalStateType _value);
 } // end namespace oofem
 #endif // internalstatetype_h
-

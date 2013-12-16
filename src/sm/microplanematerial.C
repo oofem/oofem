@@ -100,7 +100,7 @@ MicroplaneMaterial :: giveMicroplaneStatus(GaussPoint *gp)
         // don't include it. specific instance
         // does not have status.
         if ( status != NULL ) {
-            gp->setMaterialStatus(status, this->giveNumber());
+            gp->setMaterialStatus( status, this->giveNumber() );
         }
     }
 
@@ -120,7 +120,7 @@ MicroplaneMaterial :: initTempStatus(GaussPoint *gp)
     // init master microplanes
     for ( mPlaneIndex = 0; mPlaneIndex < numberOfMicroplanes; mPlaneIndex++ ) {
         mPlane = this->giveMicroplane(mPlaneIndex, gp);
-        status = dynamic_cast<MaterialStatus*>(this->giveMicroplaneStatus(mPlane));
+        status = dynamic_cast< MaterialStatus * >( this->giveMicroplaneStatus(mPlane) );
         if ( status ) {
             status->initTempStatus();
         }
@@ -128,7 +128,7 @@ MicroplaneMaterial :: initTempStatus(GaussPoint *gp)
 }
 
 contextIOResultType
-MicroplaneMaterial :: saveIPContext(DataStream *stream, ContextMode mode, GaussPoint* gp)
+MicroplaneMaterial :: saveIPContext(DataStream *stream, ContextMode mode, GaussPoint *gp)
 {
     contextIOResultType iores;
     int mPlaneIndex;

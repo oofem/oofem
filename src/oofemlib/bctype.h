@@ -48,4 +48,3 @@ enum bcType {
 };
 } // end namespace oofem
 #endif // bctype_h
-

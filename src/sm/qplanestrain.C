@@ -58,7 +58,7 @@ Interface *
 QPlaneStrain :: giveInterface(InterfaceType interface)
 {
     if ( interface == ZZNodalRecoveryModelInterfaceType ) {
-        return static_cast< ZZNodalRecoveryModelInterface * >(this);
+        return static_cast< ZZNodalRecoveryModelInterface * >( this );
     }
 
     return NULL;
@@ -66,13 +66,13 @@ QPlaneStrain :: giveInterface(InterfaceType interface)
 
 
 void
-QPlaneStrain :: computeBmatrixAt(GaussPoint *aGaussPoint, FloatMatrix &answer, int li, int ui)
+QPlaneStrain :: computeBmatrixAt(GaussPoint *gp, FloatMatrix &answer, int li, int ui)
 // Returns the [4x16] strain-displacement matrix {B} of the receiver,
-// evaluated at aGaussPoint.
+// evaluated at gp.
 {
     FloatMatrix dnx;
 
-    this->interpolation.evaldNdx( dnx, * aGaussPoint->giveCoordinates(), FEIElementGeometryWrapper(this) );
+    this->interpolation.evaldNdx( dnx, * gp->giveCoordinates(), FEIElementGeometryWrapper(this) );
 
     answer.resize(4, 16);
     answer.zero();
@@ -89,7 +89,7 @@ QPlaneStrain :: computeBmatrixAt(GaussPoint *aGaussPoint, FloatMatrix &answer, i
 void
 QPlaneStrain :: computeBHmatrixAt(GaussPoint *gp, FloatMatrix &answer)
 // Returns the [5x16] displacement gradient matrix {BH} of the receiver,
-// evaluated at aGaussPoint.
+// evaluated at gp.
 // @todo not checked if correct
 {
     FloatMatrix dnx;
@@ -110,7 +110,7 @@ QPlaneStrain :: computeBHmatrixAt(GaussPoint *gp, FloatMatrix &answer)
 void
 QPlaneStrain :: computeNmatrixAt(const FloatArray &iLocCoord, FloatMatrix &answer)
 // Returns the displacement interpolation matrix {N} of the receiver,
-// evaluated at aGaussPoint.
+// evaluated at gp.
 {
     FloatArray n(8);
 
@@ -130,14 +130,14 @@ QPlaneStrain :: initializeFrom(InputRecord *ir)
 {
     numberOfGaussPoints = 4;
     IRResultType result = this->Element :: initializeFrom(ir);
-	if(result != IRRT_OK) {
-		return result;
-	}
+    if ( result != IRRT_OK ) {
+        return result;
+    }
 
     if ( !( ( numberOfGaussPoints == 1 ) ||
-           ( numberOfGaussPoints == 4 ) ||
-           ( numberOfGaussPoints == 9 ) ||
-           ( numberOfGaussPoints == 16 ) ) ) {
+            ( numberOfGaussPoints == 4 ) ||
+            ( numberOfGaussPoints == 9 ) ||
+            ( numberOfGaussPoints == 16 ) ) ) {
         numberOfGaussPoints = 4;
     }
 
@@ -157,14 +157,14 @@ QPlaneStrain :: computeGaussPoints()
 }
 
 double
-QPlaneStrain :: computeVolumeAround(GaussPoint *aGaussPoint)
-// Returns the portion of the receiver which is attached to aGaussPoint.
+QPlaneStrain :: computeVolumeAround(GaussPoint *gp)
+// Returns the portion of the receiver which is attached to gp.
 {
     double determinant, weight, thickness, volume;
-    determinant = fabs( this->interpolation.giveTransformationJacobian( * aGaussPoint->giveCoordinates(),
-                                                                       FEIElementGeometryWrapper(this) ) );
-    weight      = aGaussPoint->giveWeight();
-    thickness   = this->giveCrossSection()->give(CS_Thickness, aGaussPoint);
+    determinant = fabs( this->interpolation.giveTransformationJacobian( * gp->giveCoordinates(),
+                                                                        FEIElementGeometryWrapper(this) ) );
+    weight      = gp->giveWeight();
+    thickness   = this->giveCrossSection()->give(CS_Thickness, gp);
     volume      = determinant * weight * thickness;
 
     return volume;

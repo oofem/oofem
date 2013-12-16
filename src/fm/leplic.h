@@ -161,7 +161,7 @@ public:
      */
     LEPlic(int n, Domain *d) : MaterialInterface(n, d) { orig_reference_fluid_volume = 0.0; }
 
-    virtual void updatePosition(TimeStep *atTime);
+    virtual void updatePosition(TimeStep *tStep);
     virtual void updateYourself(TimeStep *tStep) { }
     virtual void giveMaterialMixtureAt(FloatArray &answer, FloatArray &position);
     virtual void giveElementMaterialMixture(FloatArray &answer, int ielem);
@@ -187,9 +187,9 @@ public:
     virtual const char *giveClassName() const { return "LEPlic"; }
 
 protected:
-    void doLagrangianPhase(TimeStep *atTime);
-    void doInterfaceReconstruction(TimeStep *atTime, bool coord_upd, bool temp_vof);
-    void doInterfaceRemapping(TimeStep *atTime);
+    void doLagrangianPhase(TimeStep *tStep);
+    void doInterfaceReconstruction(TimeStep *tStep, bool coord_upd, bool temp_vof);
+    void doInterfaceRemapping(TimeStep *tStep);
     void doCellDLS(FloatArray &fvgrad, int ie, bool coord_upd, bool temp_vof_flag);
     void findCellLineConstant(double &p, FloatArray &fvgrad, int ie, bool coord_upd, bool temp_vof_flag);
 

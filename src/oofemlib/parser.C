@@ -96,8 +96,9 @@ double Parser :: term(bool get) // multiply and divide
             }
             error("divide by 0");
             return 1;
+
         case POW:
-            left = pow(left,prim(true));
+            left = pow( left, prim(true) );
             break;
         default:
             return left;
@@ -185,12 +186,12 @@ double Parser :: prim(bool get) // handle primaries
         double e = agr(true);
         return exp(e);
     }
-    case HEAVISIDE_FUNC://Heaviside function
+    case HEAVISIDE_FUNC: //Heaviside function
     {
         double time = look("t")->value;
         double e = agr(true);
 
-        return time<e?0:1;
+        return time < e ? 0 : 1;
     }
 
     default:

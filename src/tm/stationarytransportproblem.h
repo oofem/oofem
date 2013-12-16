@@ -91,7 +91,7 @@ public:
 
     virtual int checkConsistency();
 
-    virtual void printDofOutputAt(FILE *stream, Dof *iDof, TimeStep *atTime);
+    virtual void printDofOutputAt(FILE *stream, Dof *iDof, TimeStep *tStep);
 
     // identification
     virtual const char *giveInputRecordName() const { return _IFT_StationaryTransportProblem_Name; }
@@ -105,9 +105,9 @@ public:
 protected:
     /**
      * Updates IP values on elements
-     * @param stepN Solution step.
+     * @param tStep Solution step.
      */
-    virtual void updateInternalState(TimeStep *stepN);
+    virtual void updateInternalState(TimeStep *tStep);
 };
 } // end namespace oofem
 #endif // stationarytransportproblem_h

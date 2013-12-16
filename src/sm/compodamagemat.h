@@ -56,7 +56,6 @@
 //@}
 
 namespace oofem {
-
 /**
  * Class for maintaining Gauss point values for CompoDamageMat model.
  * Prefix temp* refers to unequilibrated values, e.g. tempOmega[] is a temporal damage array
@@ -151,20 +150,20 @@ public:
 
     virtual MaterialStatus *CreateStatus(GaussPoint *gp) const { return new CompoDamageMatStatus(1, domain, gp); }
 
-    virtual void give3dMaterialStiffnessMatrix(FloatMatrix & answer,
-                                       MatResponseMode mmode,
-                                       GaussPoint * gp,
-                                       TimeStep * atTime);
+    virtual void give3dMaterialStiffnessMatrix(FloatMatrix &answer,
+                                               MatResponseMode mmode,
+                                               GaussPoint *gp,
+                                               TimeStep *tStep);
 
-    virtual void giveRealStressVector(FloatArray & answer, GaussPoint *gp,
-                              const FloatArray &, TimeStep *tStep);
+    virtual void giveRealStressVector(FloatArray &answer, GaussPoint *gp,
+                                      const FloatArray &, TimeStep *tStep);
 
     virtual void giveRealStressVector_3d(FloatArray &answer, GaussPoint *gp, const FloatArray &reducedE, TimeStep *tStep)
     { this->giveRealStressVector(answer, gp, reducedE, tStep); }
     virtual void giveRealStressVector_1d(FloatArray &answer, GaussPoint *gp, const FloatArray &reducedE, TimeStep *tStep)
     { this->giveRealStressVector(answer, gp, reducedE, tStep); }
 
-    virtual int giveIPValue(FloatArray &answer, GaussPoint *aGaussPoint, InternalStateType type, TimeStep *atTime);
+    virtual int giveIPValue(FloatArray &answer, GaussPoint *gp, InternalStateType type, TimeStep *tStep);
 
     /**
      * Optional parameter determining after how many iterations within the time step the damage is calculated.

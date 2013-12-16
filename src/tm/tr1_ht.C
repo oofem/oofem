@@ -45,9 +45,8 @@
 
 
 namespace oofem {
-
-REGISTER_Element( Tr1_ht );
-REGISTER_Element( Tr1_hmt );
+REGISTER_Element(Tr1_ht);
+REGISTER_Element(Tr1_hmt);
 
 FEI2dTrLin Tr1_ht :: interp(1, 2);
 
@@ -77,7 +76,7 @@ Tr1_ht :: computeGaussPoints()
         numberOfIntegrationRules = 1;
         integrationRulesArray = new IntegrationRule * [ 1 ];
         integrationRulesArray [ 0 ] = new GaussIntegrationRule(1, this, 1, 3);
-        this->giveCrossSection()->setupIntegrationPoints( *integrationRulesArray[0], numberOfGaussPoints, this );
+        this->giveCrossSection()->setupIntegrationPoints(* integrationRulesArray [ 0 ], numberOfGaussPoints, this);
     }
 }
 
@@ -103,7 +102,7 @@ Tr1_ht :: computeVolumeAround(GaussPoint *gp)
 // Returns the portion of the receiver which is attached to gp.
 {
     double determinant, weight, volume;
-    determinant = fabs( this->interp.giveTransformationJacobian(* gp->giveCoordinates(), FEIElementGeometryWrapper(this)) );
+    determinant = fabs( this->interp.giveTransformationJacobian( * gp->giveCoordinates(), FEIElementGeometryWrapper(this) ) );
     weight = gp->giveWeight();
     volume = determinant * weight * this->giveCrossSection()->give(CS_Thickness, gp);
 
@@ -114,17 +113,17 @@ Tr1_ht :: computeVolumeAround(GaussPoint *gp)
 double
 Tr1_ht :: giveThicknessAt(const FloatArray &gcoords)
 {
-  return this->giveCrossSection()->give(CS_Thickness, &gcoords, this, false);
+    return this->giveCrossSection()->give(CS_Thickness, & gcoords, this, false);
 }
 
 
 double
 Tr1_ht :: computeEdgeVolumeAround(GaussPoint *gp, int iEdge)
 {
-    double determinant = fabs( this->interp.edgeGiveTransformationJacobian(iEdge, *gp->giveCoordinates(), FEIElementGeometryWrapper(this)) );
+    double determinant = fabs( this->interp.edgeGiveTransformationJacobian( iEdge, * gp->giveCoordinates(), FEIElementGeometryWrapper(this) ) );
     FloatArray gc;
     double thick = this->giveCrossSection()->give(CS_Thickness, gp->giveCoordinates(), NULL, this); // 't'
-    return determinant *thick *gp->giveWeight();
+    return determinant * thick * gp->giveWeight();
 }
 
 
@@ -158,5 +157,4 @@ Tr1_ht :: SpatialLocalizerI_giveDistanceFromParametricCenter(const FloatArray &c
     this->computeGlobalCoordinates(gcoords, lcoords);
     return gcoords.distance(coords);
 }
-
 } // end namespace oofem

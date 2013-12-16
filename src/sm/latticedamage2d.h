@@ -300,49 +300,49 @@ public:
     virtual bool isCharacteristicMtrxSymmetric(MatResponseMode rMode) { return false; }
 
     virtual void  giveStiffnessMatrix(FloatMatrix &answer,
-                                           MatResponseMode mode,
-                                           GaussPoint *gp,
-                                           TimeStep *atTime);
+                                      MatResponseMode mode,
+                                      GaussPoint *gp,
+                                      TimeStep *tStep);
 
     /**
      * Computes the tangent stiffness.
      * @param answer Return parameter, containing the stiffness.
      * @param gp Integration point.
-     * @param atTime Time step.
+     * @param tStep Time step.
      */
 
     void giveTangentStiffnessMatrix(FloatMatrix &answer,
                                     GaussPoint *gp,
-                                    TimeStep *atTime);
+                                    TimeStep *tStep);
 
 
     virtual void computeStressIndependentStrainVector(FloatArray &answer,
                                                       GaussPoint *gp,
-                                                      TimeStep *stepN,
+                                                      TimeStep *tStep,
                                                       ValueModeType mode);
 
     /**
      * Computes the secant stiffness.
      * @param answer Return parameter, containing the stiffness.
      * @param gp Integration point.
-     * @param atTime Time step.
+     * @param tStep Time step.
      */
 
     void giveSecantStiffnessMatrix(FloatMatrix &answer,
                                    GaussPoint *gp,
-                                   TimeStep *atTime);
+                                   TimeStep *tStep);
 
 
     /**
      * Computes the elastic stiffness.
      * @param answer Return parameter, containing the stiffness.
      * @param gp Integration point.
-     * @param atTime Time step.
+     * @param tStep Time step.
      */
 
     void giveElasticStiffnessMatrix(FloatMatrix &answer,
                                     GaussPoint *gp,
-                                    TimeStep *atTime);
+                                    TimeStep *tStep);
 
     virtual int hasMaterialModeCapability(MaterialMode mode);
 
@@ -351,9 +351,9 @@ public:
      * @param kappa Return parameter, containing the corresponding equivalent strain.
      * @param strain Total strain vector in full form.
      * @param gp Integration point.
-     * @param atTime Time step.
+     * @param tStep Time step.
      */
-    virtual void computeEquivalentStrain(double &kappa, const FloatArray &strain, GaussPoint *gp, TimeStep *atTime);
+    virtual void computeEquivalentStrain(double &kappa, const FloatArray &strain, GaussPoint *gp, TimeStep *tStep);
 
     /**
      * Computes the value of damage parameter omega, based on given value of equivalent strain.
@@ -367,7 +367,7 @@ public:
     virtual Interface *giveInterface(InterfaceType);
 
 
-    virtual void giveRealStressVector(FloatArray & answer, GaussPoint *,
+    virtual void giveRealStressVector(FloatArray &answer, GaussPoint *,
                                       const FloatArray &, TimeStep *);
 
     /** Reimplemented from RandomMaterialInterface */
@@ -375,7 +375,7 @@ public:
 
 
     ///Compute increment of dissipation for post-processing reasons
-    double computeDeltaDissipation(double omega, FloatArray &reducedStrain, GaussPoint *gp, TimeStep *atTime);
+    double computeDeltaDissipation(double omega, FloatArray &reducedStrain, GaussPoint *gp, TimeStep *tStep);
 
     virtual void giveThermalDilatationVector(FloatArray &answer, GaussPoint *gp,  TimeStep *tStep);
 
@@ -405,7 +405,7 @@ protected:
     virtual int giveIPValue(FloatArray &answer,
                             GaussPoint *gp,
                             InternalStateType type,
-                            TimeStep *atTime);
+                            TimeStep *tStep);
 };
 } // end namespace oofem
 #define latticedamage2d_h

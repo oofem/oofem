@@ -83,13 +83,13 @@ public:
 protected:
     virtual void computeGaussPoints();
     virtual void computeNuMatrix(FloatMatrix &answer, GaussPoint *gp);
-    virtual void computeUDotGradUMatrix(FloatMatrix &answer, GaussPoint *gp, TimeStep *atTime);
+    virtual void computeUDotGradUMatrix(FloatMatrix &answer, GaussPoint *gp, TimeStep *tStep);
     virtual void computeBMatrix(FloatMatrix &anwer, GaussPoint *gp);
     virtual void computeDivUMatrix(FloatMatrix &answer, GaussPoint *gp);
     virtual void computeNpMatrix(FloatMatrix &answer, GaussPoint *gp);
     virtual void computeGradPMatrix(FloatMatrix &answer, GaussPoint *gp);
-    virtual void computeDivTauMatrix(FloatMatrix &answer, GaussPoint *gp, TimeStep *atTime);
-    virtual void computeGradUMatrix(FloatMatrix &answer, GaussPoint *gp, TimeStep *atTime);
+    virtual void computeDivTauMatrix(FloatMatrix &answer, GaussPoint *gp, TimeStep *tStep);
+    virtual void computeGradUMatrix(FloatMatrix &answer, GaussPoint *gp, TimeStep *tStep);
     virtual int  giveNumberOfSpatialDimensions();
 };
 } // end namespace oofem

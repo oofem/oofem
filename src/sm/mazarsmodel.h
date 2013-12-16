@@ -144,7 +144,7 @@ protected:
     /*
      * void giveNormalElasticStiffnessMatrix(FloatMatrix &answer,
      *                                    MatResponseMode rMode,
-     *                                    GaussPoint *gp, TimeStep *atTime);
+     *                                    GaussPoint *gp, TimeStep *tStep);
      */
 
     int giveNumberOfSpatialDimensions(GaussPoint *gp);

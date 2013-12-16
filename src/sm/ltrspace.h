@@ -50,7 +50,6 @@
 #define _IFT_LTRSpace_Name "ltrspace"
 
 namespace oofem {
-
 class FEI3dTetLin;
 
 /**
@@ -106,9 +105,9 @@ public:
     virtual Element *ZZNodalRecoveryMI_giveElement() { return this; }
 
     virtual void NodalAveragingRecoveryMI_computeNodalValue(FloatArray &answer, int node,
-                                                    InternalStateType type, TimeStep *tStep);
+                                                            InternalStateType type, TimeStep *tStep);
     virtual void NodalAveragingRecoveryMI_computeSideValue(FloatArray &answer, int side,
-                                                   InternalStateType type, TimeStep *tStep);
+                                                           InternalStateType type, TimeStep *tStep);
 
     virtual void SPRNodalRecoveryMI_giveSPRAssemblyPoints(IntArray &pap);
     virtual void SPRNodalRecoveryMI_giveDofMansDeterminedByPatch(IntArray &answer, int pap);
@@ -122,7 +121,7 @@ public:
     virtual double DirectErrorIndicatorRCI_giveCharacteristicSize();
 
     virtual int EIPrimaryUnknownMI_computePrimaryUnknownVectorAt(ValueModeType u,
-                                                                 TimeStep *stepN, const FloatArray &coords,
+                                                                 TimeStep *tStep, const FloatArray &coords,
                                                                  FloatArray &answer);
     virtual void EIPrimaryUnknownMI_givePrimaryUnknownVectorDofID(IntArray &answer);
 
@@ -145,8 +144,8 @@ public:
                                                                   HuertaErrorEstimator :: AnalysisMode aMode);
     virtual void HuertaErrorEstimatorI_computeLocalCoords(FloatArray &answer, const FloatArray &coords)
     { computeLocalCoordinates(answer, coords); }
-    virtual void HuertaErrorEstimatorI_computeNmatrixAt(GaussPoint *aGaussPoint, FloatMatrix &answer)
-    { computeNmatrixAt( *(aGaussPoint->giveLocalCoordinates()), answer); }
+    virtual void HuertaErrorEstimatorI_computeNmatrixAt(GaussPoint *gp, FloatMatrix &answer)
+    { computeNmatrixAt(* ( gp->giveLocalCoordinates() ), answer); }
 
     // ZZRemeshingCriteriaInterface
     virtual double ZZRemeshingCriteriaI_giveCharacteristicSize() { return DirectErrorIndicatorRCI_giveCharacteristicSize(); }

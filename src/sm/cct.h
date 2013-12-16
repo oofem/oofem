@@ -47,7 +47,6 @@
 #define _IFT_CCTPlate_Name "cctplate"
 
 namespace oofem {
-
 /**
  * This class implements an triangular three-node plate CCT finite element.
  * Each node has 3 degrees of freedom.
@@ -70,7 +69,7 @@ public:
     CCTPlate(int n, Domain *d);
     virtual ~CCTPlate() { }
 
-    virtual FEInterpolation *giveInterpolation() const { return &interp_lin; }
+    virtual FEInterpolation *giveInterpolation() const { return & interp_lin; }
     virtual FEInterpolation *giveInterpolation(DofIDItem id) const;
 
     virtual MaterialMode giveMaterialMode()  { return _2dPlate; }
@@ -124,14 +123,14 @@ public:
     virtual Interface *giveInterface(InterfaceType it);
 
     virtual bool computeLocalCoordinates(FloatArray &answer, const FloatArray &gcoords);
-    virtual int giveIPValue(FloatArray &answer, GaussPoint *aGaussPoint, InternalStateType type, TimeStep *atTime);
+    virtual int giveIPValue(FloatArray &answer, GaussPoint *gp, InternalStateType type, TimeStep *tStep);
 
     virtual Element *ZZNodalRecoveryMI_giveElement() { return this; }
 
     virtual void NodalAveragingRecoveryMI_computeNodalValue(FloatArray &answer, int node,
-                                                    InternalStateType type, TimeStep *tStep);
+                                                            InternalStateType type, TimeStep *tStep);
     virtual void NodalAveragingRecoveryMI_computeSideValue(FloatArray &answer, int side,
-                                                   InternalStateType type, TimeStep *tStep);
+                                                           InternalStateType type, TimeStep *tStep);
 
     virtual void SPRNodalRecoveryMI_giveSPRAssemblyPoints(IntArray &pap);
     virtual void SPRNodalRecoveryMI_giveDofMansDeterminedByPatch(IntArray &answer, int pap);
@@ -146,7 +145,7 @@ public:
 
     // layered cross section support functions
     virtual void computeStrainVectorInLayer(FloatArray &answer, const FloatArray &masterGpStrain,
-					    GaussPoint *masterGp, GaussPoint *slaveGp, TimeStep *tStep);
+                                            GaussPoint *masterGp, GaussPoint *slaveGp, TimeStep *tStep);
 
 #ifdef __OOFEG
     virtual void drawRawGeometry(oofegGraphicContext &);

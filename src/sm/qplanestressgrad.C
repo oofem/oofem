@@ -42,13 +42,12 @@
 #include "classfactory.h"
 
 namespace oofem {
-
-REGISTER_Element( QPlaneStressGrad );
+REGISTER_Element(QPlaneStressGrad);
 
 FEI2dQuadLin QPlaneStressGrad :: interpolation(1, 2);
 
 QPlaneStressGrad :: QPlaneStressGrad(int n, Domain *aDomain) : QPlaneStress2d(n, aDomain), GradDpElement()
-// Constructor.
+    // Constructor.
 {
     nPrimNodes = 8;
     nPrimVars = 2;
@@ -76,14 +75,14 @@ QPlaneStressGrad :: initializeFrom(InputRecord *ir)
 {
     numberOfGaussPoints = 4;
     IRResultType result = this->StructuralElement :: initializeFrom(ir);
-	if(result != IRRT_OK) {
-		return result;
-	}
+    if ( result != IRRT_OK ) {
+        return result;
+    }
 
     if ( !( ( numberOfGaussPoints == 1 ) ||
-           ( numberOfGaussPoints == 4 ) ||
-           ( numberOfGaussPoints == 9 ) ||
-           ( numberOfGaussPoints == 16 ) ) ) {
+            ( numberOfGaussPoints == 4 ) ||
+            ( numberOfGaussPoints == 9 ) ||
+            ( numberOfGaussPoints == 16 ) ) ) {
         numberOfGaussPoints = 4;
     }
 
@@ -98,20 +97,20 @@ QPlaneStressGrad :: computeGaussPoints()
         numberOfIntegrationRules = 1;
         integrationRulesArray = new IntegrationRule * [ numberOfIntegrationRules ];
         integrationRulesArray [ 0 ] = new GaussIntegrationRule(1, this, 1, 3);
-        this->giveCrossSection()->setupIntegrationPoints( *integrationRulesArray[0], numberOfGaussPoints, this );
+        this->giveCrossSection()->setupIntegrationPoints(* integrationRulesArray [ 0 ], numberOfGaussPoints, this);
     }
 }
 
 void
-QPlaneStressGrad :: computeNkappaMatrixAt(GaussPoint *aGaussPoint, FloatMatrix &answer)
+QPlaneStressGrad :: computeNkappaMatrixAt(GaussPoint *gp, FloatMatrix &answer)
 // Returns the displacement interpolation matrix {N} of the receiver, eva-
-// luated at aGaussPoint.
+// luated at gp.
 {
     FloatArray n(4);
 
     answer.resize(1, 4);
     answer.zero();
-    this->interpolation.evalN(n, * aGaussPoint->giveCoordinates(), FEIElementGeometryWrapper(this));
+    this->interpolation.evalN( n, * gp->giveCoordinates(), FEIElementGeometryWrapper(this) );
 
     for ( int i = 1; i <= 4; i++ ) {
         answer.at(1, i) = n.at(i);
@@ -119,11 +118,11 @@ QPlaneStressGrad :: computeNkappaMatrixAt(GaussPoint *aGaussPoint, FloatMatrix &
 }
 
 void
-QPlaneStressGrad :: computeBkappaMatrixAt(GaussPoint *aGaussPoint, FloatMatrix &answer)
+QPlaneStressGrad :: computeBkappaMatrixAt(GaussPoint *gp, FloatMatrix &answer)
 {
     FloatMatrix dnx;
 
-    this->interpolation.evaldNdx(dnx, * aGaussPoint->giveCoordinates(), FEIElementGeometryWrapper(this));
+    this->interpolation.evaldNdx( dnx, * gp->giveCoordinates(), FEIElementGeometryWrapper(this) );
 
     answer.resize(2, 4);
     answer.zero();

@@ -39,8 +39,7 @@
 #include "classfactory.h"
 
 namespace oofem {
-
-REGISTER_DofManager( RigidArmNode );
+REGISTER_DofManager(RigidArmNode);
 
 RigidArmNode :: RigidArmNode(int n, Domain *aDomain) : Node(n, aDomain)
 { }
@@ -102,15 +101,15 @@ void
 RigidArmNode :: postInitialize()
 {
     Node :: postInitialize();
-    
+
     // allocate auxiliary arrays
     allocAuxArrays();
-    
+
     this->masterNode = dynamic_cast< Node * >( this->domain->giveDofManager(masterDofMngr) );
     if ( !masterNode ) {
         OOFEM_WARNING("RigidArmNode :: postInitialize: master dofManager is not a node");
     }
-    
+
     int masterNdofs = masterNode->giveNumberOfDofs();
 
     IntArray masterNodes(masterNdofs);
@@ -130,27 +129,26 @@ RigidArmNode :: postInitialize()
 
     // initialize slave dofs (inside check of consistency of receiver and master dof)
     for ( int i = 1; i <= numberOfDofs; i++ ) {
-        SlaveDof *sdof = dynamic_cast< SlaveDof* >( dofArray [ i - 1 ] );
+        SlaveDof *sdof = dynamic_cast< SlaveDof * >( dofArray [ i - 1 ] );
         if ( sdof ) {
-            sdof->initialize(countOfMasterDofs->at(i), masterNodes, masterDofID [ i - 1 ], *masterContribution [ i - 1 ]);
+            sdof->initialize(countOfMasterDofs->at(i), masterNodes, masterDofID [ i - 1 ], * masterContribution [ i - 1 ]);
         }
     }
 
 #if 0
-#ifdef __PARALLEL_MODE
+ #ifdef __PARALLEL_MODE
     // check if master in same mode
     if ( parallel_mode != DofManager_local ) {
         if ( ( * masterNode )->giveParallelMode() != parallel_mode ) {
-        _warning2("checkConsistency: mismatch in parallel mode of RigidArmNode and master", 1);
-        result = 0;
+            _warning2("checkConsistency: mismatch in parallel mode of RigidArmNode and master", 1);
+            result = 0;
         }
     }
-#endif
+ #endif
 #endif
 
     // deallocate auxiliary arrays
     deallocAuxArrays();
-
 }
 
 
@@ -239,7 +237,7 @@ RigidArmNode :: computeMasterContribution()
             _error("computeMasterContribution: unknown value in masterMask");
         }
 
-        k = ++ this->countOfMasterDofs->at(i);
+        k = ++this->countOfMasterDofs->at(i);
         this->masterDofID [ i - 1 ]->at(k) = ( int ) id;
         this->masterContribution [ i - 1 ]->at(k) = 1.0;
 
@@ -247,7 +245,7 @@ RigidArmNode :: computeMasterContribution()
             if ( R_uvw.at(j) != 0 ) {
                 sign = R_uvw.at(j) < 0 ? -1 : 1;
 
-                k = ++ this->countOfMasterDofs->at(i);
+                k = ++this->countOfMasterDofs->at(i);
                 this->masterDofID [ i - 1 ]->at(k) = sign * R_uvw.at(j);
                 this->masterContribution [ i - 1 ]->at(k) = sign * xyz.at(j);
             }

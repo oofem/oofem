@@ -54,7 +54,6 @@
 #include <vector>
 
 namespace oofem {
-
 REGISTER_ErrorEstimator(ZZErrorEstimator, EET_ZZEE);
 
 #ifdef EXPERIMENT
@@ -92,7 +91,7 @@ ZZErrorEstimator :: estimateError(EE_ErrorMode mode, TimeStep *tStep)
     this->domain->setSmoother(rm, 0); // do not delete old one
 
     // set recovery mode
-    rm->setRecoveryMode(-1, IntArray());
+    rm->setRecoveryMode( -1, IntArray() );
     // recover nodal values
     rm->recoverValues(type, tStep);
 
@@ -198,7 +197,7 @@ ZZErrorEstimator :: giveValue(EE_ValueType type, TimeStep *tStep)
         return this->globalENorm;
     } else if ( type == globalNormEEV ) {
         return this->globalSNorm;
-    } else if ( type == relativeErrorEstimateEEV) {
+    } else if ( type == relativeErrorEstimateEEV ) {
         return this->globalErrorEstimate;
     } else {
         return 0.0;
@@ -261,18 +260,18 @@ ZZErrorEstimatorInterface :: ZZErrorEstimatorI_computeElementContributions(doubl
     // assemble nodal recovered stresses
     for ( int i = 1; i <= elem->giveNumberOfNodes(); i++ ) {
         elem->giveDomain()->giveSmoother()->giveNodalVector( recoveredStress, elem->giveDofManager(i)->giveNumber(),
-                                                            elem->giveRegionNumber() );
+                                                             elem->giveRegionNumber() );
         if ( i == 1 ) {
-            nodalRecoveredStreses.resize(nDofMans, recoveredStress->giveSize());
+            nodalRecoveredStreses.resize( nDofMans, recoveredStress->giveSize() );
         }
         for ( int j = 1; j <= recoveredStress->giveSize(); j++ ) {
             nodalRecoveredStreses.at(i, j) = recoveredStress->at(j);
         }
     }
     /* Note: The recovered stresses should be in global coordinate system. This is important for shells, for example, to make
-       sure that forces and moments in the same directions are averaged. For elements where local and global coordina systems
-       are the same this does not matter.
-    */
+     * sure that forces and moments in the same directions are averaged. For elements where local and global coordina systems
+     * are the same this does not matter.
+     */
 
     eNorm = sNorm = 0.0;
 
@@ -281,7 +280,7 @@ ZZErrorEstimatorInterface :: ZZErrorEstimatorI_computeElementContributions(doubl
         for ( int i = 0; i < iRule->giveNumberOfIntegrationPoints(); i++ ) {
             GaussPoint *gp = iRule->getIntegrationPoint(i);
             double dV = elem->computeVolumeAround(gp);
-            interpol->evalN( n, *gp->giveCoordinates(), FEIElementGeometryWrapper(elem));
+            interpol->evalN( n, * gp->giveCoordinates(), FEIElementGeometryWrapper(elem) );
 
             diff.beTProductOf(nodalRecoveredStreses, n);
 
@@ -300,7 +299,7 @@ ZZErrorEstimatorInterface :: ZZErrorEstimatorI_computeElementContributions(doubl
         for ( int i = 0; i < iRule->giveNumberOfIntegrationPoints(); i++ ) {
             GaussPoint *gp = iRule->getIntegrationPoint(i);
             double dV = elem->computeVolumeAround(gp);
-            interpol->evalN( n, *gp->giveCoordinates(), FEIElementGeometryWrapper(elem));
+            interpol->evalN( n, * gp->giveCoordinates(), FEIElementGeometryWrapper(elem) );
             selem->computeConstitutiveMatrixAt(D, TangentStiffness, gp, tStep);
             DInv.beInverseOf(D);
 
@@ -311,12 +310,12 @@ ZZErrorEstimatorInterface :: ZZErrorEstimatorI_computeElementContributions(doubl
             /* the internal stress difference is in global coordinate system */
             /* needs to be transformed into local system to compute associated energy */
             this->ZZErrorEstimatorI_computeLocalStress(ldiff, diff);
-            StructuralMaterial :: giveReducedSymVectorForm(ldiff_reduced, ldiff, gp->giveMaterialMode());
+            StructuralMaterial :: giveReducedSymVectorForm( ldiff_reduced, ldiff, gp->giveMaterialMode() );
 
             help.beProductOf(DInv, ldiff_reduced);
             eNorm += ldiff_reduced.dotProduct(help) * dV;
             this->ZZErrorEstimatorI_computeLocalStress(lsig, sig);
-            StructuralMaterial :: giveReducedSymVectorForm(lsig_reduced, lsig, gp->giveMaterialMode());
+            StructuralMaterial :: giveReducedSymVectorForm( lsig_reduced, lsig, gp->giveMaterialMode() );
             help.beProductOf(DInv, lsig_reduced);
             sNorm += lsig_reduced.dotProduct(help) * dV;
         }
@@ -342,16 +341,16 @@ ZZRemeshingCriteria :: giveRequiredDofManDensity(int num, TimeStep *tStep, int r
 
     this->estimateMeshDensities(tStep);
     size = this->nodalDensities.at(num);
-    if (size >= 0) {
-      size = max(minElemSize, size);
-      if ( relative ) {
-        return size / this->giveDofManDensity(num);
-      } else {
-        return size;
-      }
+    if ( size >= 0 ) {
+        size = max(minElemSize, size);
+        if ( relative ) {
+            return size / this->giveDofManDensity(num);
+        } else {
+            return size;
+        }
     } else {
-      // size negative -> marks undetermined size
-      return size;
+        // size negative -> marks undetermined size
+        return size;
     }
 }
 
@@ -522,11 +521,11 @@ ZZRemeshingCriteria :: giveDofManDensity(int num)
             density += interface->ZZRemeshingCriteriaI_giveCharacteristicSize();
         }
     }
-    if (init) {
-      density /= isize;
+    if ( init ) {
+        density /= isize;
     } else {
-      // the nodal mesh density could not be determined
-      density = -1;
+        // the nodal mesh density could not be determined
+        density = -1;
     }
 
     return density;

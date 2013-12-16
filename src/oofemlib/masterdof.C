@@ -138,11 +138,11 @@ InitialCondition *MasterDof :: giveIc()
 }
 
 
-double MasterDof :: giveUnknown(ValueModeType mode, TimeStep *stepN)
+double MasterDof :: giveUnknown(ValueModeType mode, TimeStep *tStep)
 // The key method of class Dof. Returns the value of the unknown 'u'
-// (e.g., the displacement) of the receiver, at stepN. This value may,
+// (e.g., the displacement) of the receiver, at tStep. This value may,
 // or may not be already available. It may depend on a boundary (if it
-// is not a predicted unknown) or initial condition. stepN is not the
+// is not a predicted unknown) or initial condition. tStep is not the
 // current time step n, it is assumed to be the previous one (n-1).
 {
     double value;
@@ -160,11 +160,11 @@ double MasterDof :: giveUnknown(ValueModeType mode, TimeStep *stepN)
 #endif
 
     // first try if IC apply
-    if ( stepN->giveNumber() == dofManager->giveDomain()->giveEngngModel()->giveNumberOfTimeStepWhenIcApply() ) { // step when Ic apply
+    if ( tStep->giveNumber() == dofManager->giveDomain()->giveEngngModel()->giveNumberOfTimeStepWhenIcApply() ) { // step when Ic apply
         if ( this->hasIcOn(mode) ) {
             value = this->giveIc()->give(mode);
-        } else if ( this->hasBc(stepN) ) {
-            value = this->giveBcValue(mode, stepN);
+        } else if ( this->hasBc(tStep) ) {
+            value = this->giveBcValue(mode, tStep);
         } else {
             value = 0.;
         }
@@ -180,9 +180,9 @@ double MasterDof :: giveUnknown(ValueModeType mode, TimeStep *stepN)
     // directly since dictionaries keep the history.
 
     //    return ( dofManager->giveDomain()->giveEngngModel()->
-    //         giveUnknownComponent(mode, stepN, dofManager->giveDomain(), this) );
+    //         giveUnknownComponent(mode, tStep, dofManager->giveDomain(), this) );
 
-    //         int hash = dofManager->giveDomain()->giveEngngModel()->giveUnknownDictHashIndx(mode, stepN);
+    //         int hash = dofManager->giveDomain()->giveEngngModel()->giveUnknownDictHashIndx(mode, tStep);
     //         if ( unknowns->includes(hash) ) {
     //             return unknowns->at(hash);
     //         } else {
@@ -190,18 +190,18 @@ double MasterDof :: giveUnknown(ValueModeType mode, TimeStep *stepN)
     //         }
     //  }
 
-    if ( !dofManager->giveDomain()->giveEngngModel()->requiresUnknownsDictionaryUpdate() && this->hasBc(stepN) ) {
-        value = this->giveBcValue(mode, stepN);
+    if ( !dofManager->giveDomain()->giveEngngModel()->requiresUnknownsDictionaryUpdate() && this->hasBc(tStep) ) {
+        value = this->giveBcValue(mode, tStep);
         return value;
     }
 
     return ( dofManager->giveDomain()->giveEngngModel()->
-            giveUnknownComponent(mode, stepN, dofManager->giveDomain(), this) );
+             giveUnknownComponent(mode, tStep, dofManager->giveDomain(), this) );
 }
 
-double MasterDof :: giveUnknown(PrimaryField &field, ValueModeType mode, TimeStep *stepN)
+double MasterDof :: giveUnknown(PrimaryField &field, ValueModeType mode, TimeStep *tStep)
 // The key method of class Dof. Returns the value of the unknown field
-// (e.g., the displacement) associated to the receiver, at stepN.
+// (e.g., the displacement) associated to the receiver, at tStep.
 {
     double value;
 
@@ -216,7 +216,7 @@ double MasterDof :: giveUnknown(PrimaryField &field, ValueModeType mode, TimeSte
 #endif
 
     // first try if IC apply
-    if ( stepN->giveNumber() == dofManager->giveDomain()->giveEngngModel()->giveNumberOfTimeStepWhenIcApply() ) { // step when Ic apply
+    if ( tStep->giveNumber() == dofManager->giveDomain()->giveEngngModel()->giveNumberOfTimeStepWhenIcApply() ) { // step when Ic apply
         if ( this->hasIcOn(mode) ) {
             value = this->giveIc()->give(mode);
         } else {
@@ -227,14 +227,14 @@ double MasterDof :: giveUnknown(PrimaryField &field, ValueModeType mode, TimeSte
     }
 
     // then ask bor BC
-    if ( this->hasBc(stepN) ) {    // bound . cond.
-        //value = this -> giveBcValue(giveUnknownType(),mode,stepN) ;
-        value = this->giveBcValue(mode, stepN);
+    if ( this->hasBc(tStep) ) {    // bound . cond.
+        //value = this -> giveBcValue(giveUnknownType(),mode,tStep) ;
+        value = this->giveBcValue(mode, tStep);
         return value;
     }
 
     // try ask field for unknown
-    return ( field.giveUnknownValue(this, mode, stepN) );
+    return ( field.giveUnknownValue(this, mode, tStep) );
 }
 
 
@@ -324,7 +324,7 @@ void MasterDof :: giveUnknownsDictionaryValue(TimeStep *tStep, ValueModeType mod
 void MasterDof :: printYourself()
 // Prints the receiver on screen.
 {
-    printf("dof %d  of %s %d :\n", number, dofManager->giveClassName(), dofManager->giveNumber() );
+    printf( "dof %d  of %s %d :\n", number, dofManager->giveClassName(), dofManager->giveNumber() );
     printf("equation %d    bc %d \n", equationNumber, bc);
 
     // printOutputAt (node->giveDomain()->giveEngngModel()->giveCurrentStep());
@@ -410,5 +410,4 @@ contextIOResultType MasterDof :: restoreContext(DataStream *stream, ContextMode 
 
     return CIO_OK;
 }
-
 } // end namespace oofem

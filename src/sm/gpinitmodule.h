@@ -60,6 +60,5 @@ public:
     virtual void doInit();
     virtual const char *giveClassName() const { return "GPInitModule"; }
 };
-
 } // namespace oofem
 #endif

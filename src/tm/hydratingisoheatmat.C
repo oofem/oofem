@@ -39,8 +39,7 @@
 #include "classfactory.h"
 
 namespace oofem {
-
-REGISTER_Material( HydratingIsoHeatMaterial );
+REGISTER_Material(HydratingIsoHeatMaterial);
 
 IRResultType
 HydratingIsoHeatMaterial :: initializeFrom(InputRecord *ir)
@@ -118,7 +117,7 @@ HydratingIsoHeatMaterial :: hasInternalSource()
 }
 
 void
-HydratingIsoHeatMaterial :: computeInternalSourceVector(FloatArray &val, GaussPoint *gp, TimeStep *atTime, ValueModeType mode)
+HydratingIsoHeatMaterial :: computeInternalSourceVector(FloatArray &val, GaussPoint *gp, TimeStep *tStep, ValueModeType mode)
 // returns in val the hydration heat computed by the hydration model for given hydration degree increment
 // current hydration model returns heat in (k)J/m3.
 // maybe??? element expects J/kg -> would have to divide by density here
@@ -126,15 +125,15 @@ HydratingIsoHeatMaterial :: computeInternalSourceVector(FloatArray &val, GaussPo
 {
     if ( hydrationHeat ) {
         if ( hydrationModel ) { ///@todo better via HydrationModelInterface
-            hydrationModel->computeInternalSourceVector(val, gp, atTime, VM_Incremental); ///@todo mode is VM_Total for nltransientstatic
-            val.times( 1. / atTime->giveTimeIncrement() ); // /give('d');
+            hydrationModel->computeInternalSourceVector(val, gp, tStep, VM_Incremental); ///@todo mode is VM_Total for nltransientstatic
+            val.times( 1. / tStep->giveTimeIncrement() ); // /give('d');
         } else {
             val.zero();
         }
 
         /*
          * printf("HIsoHeatMat: Ksi %.4f, dksi %.4f, heat %g\n",
-         * giveHydrationDegree(gp, atTime, VM_Total), giveHydrationDegree(gp, atTime, VM_Incremental), (val.giveSize())?val.at(1):0);
+         * giveHydrationDegree(gp, tStep, VM_Total), giveHydrationDegree(gp, tStep, VM_Incremental), (val.giveSize())?val.at(1):0);
          */
     } else {
         val.resize(0);
@@ -142,7 +141,7 @@ HydratingIsoHeatMaterial :: computeInternalSourceVector(FloatArray &val, GaussPo
 }
 
 void
-HydratingIsoHeatMaterial :: updateInternalState(const FloatArray &vec, GaussPoint *gp, TimeStep *atTime)
+HydratingIsoHeatMaterial :: updateInternalState(const FloatArray &vec, GaussPoint *gp, TimeStep *tStep)
 {
     TransportMaterialStatus *ms = static_cast< TransportMaterialStatus * >( this->giveStatus(gp) );
     FloatArray aux;
@@ -154,27 +153,27 @@ HydratingIsoHeatMaterial :: updateInternalState(const FloatArray &vec, GaussPoin
              * if (vec.isEmpty()) _error("updateInternalState: empty new state vector");
              * aux.resize(2);
              * aux.at(1) = vec.at(1);
-             * if (s.isEmpty()||(atTime->giveTime()<=0)) aux.at(2) = initialHydrationDegree; // apply initial conditions
+             * if (s.isEmpty()||(tStep->giveTime()<=0)) aux.at(2) = initialHydrationDegree; // apply initial conditions
              * else {
              *  aux.at(2) = s.at(2);
-             *  if (!castAt || (atTime->giveTime()>=castAt)) aux.at(2) += hydrationModel->dksi (s.at(2), vec.at(1), atTime->giveTimeIncrement()); // compute hydration degree increment
+             *  if (!castAt || (tStep->giveTime()>=castAt)) aux.at(2) += hydrationModel->dksi (s.at(2), vec.at(1), tStep->giveTimeIncrement()); // compute hydration degree increment
              * }
              */
-            HydrationModelInterface :: updateInternalState(vec, gp, atTime);
+            HydrationModelInterface :: updateInternalState(vec, gp, tStep);
 
             // additional file output !!!
             if ( ( gp->giveNumber() == 1 ) && giveStatus(gp) ) {
                 FILE *vyst = fopen("teplota.out", "a");
-                computeInternalSourceVector(aux, gp, atTime, VM_Incremental);
+                computeInternalSourceVector(aux, gp, tStep, VM_Incremental);
                 if ( aux.isEmpty() ) {
                     aux.resize(1);
                     aux.zero();
                 }
 
                 aux.times( 1. / give('d', gp) );
-                fprintf( vyst, "Elem %.3d krok %.2d: t= %.0f, dt=%.0f, %ld. it, ksi= %.12f, T= %.8f, heat=%.8f\n", gp->giveElement()->giveNumber(), atTime->giveNumber(),
-                        atTime->giveTargetTime(), atTime->giveTimeIncrement(), atTime->giveSolutionStateCounter(),
-                        giveHydrationDegree(gp, atTime, VM_Total), vec.at(1), aux.at(1) * atTime->giveTimeIncrement() );
+                fprintf( vyst, "Elem %.3d krok %.2d: t= %.0f, dt=%.0f, %ld. it, ksi= %.12f, T= %.8f, heat=%.8f\n", gp->giveElement()->giveNumber(), tStep->giveNumber(),
+                         tStep->giveTargetTime(), tStep->giveTimeIncrement(), tStep->giveSolutionStateCounter(),
+                         giveHydrationDegree(gp, tStep, VM_Total), vec.at(1), aux.at(1) * tStep->giveTimeIncrement() );
                 fclose(vyst);
             }
         }
@@ -182,13 +181,13 @@ HydratingIsoHeatMaterial :: updateInternalState(const FloatArray &vec, GaussPoin
 }
 
 double
-HydratingIsoHeatMaterial :: giveCharacteristicValue(MatResponseMode rmode, GaussPoint *gp, TimeStep *atTime)
+HydratingIsoHeatMaterial :: giveCharacteristicValue(MatResponseMode rmode, GaussPoint *gp, TimeStep *tStep)
 {
     double answer = 0;
     FloatArray vec;
 
     if ( rmode == Capacity ) {
-        if ( castAt && ( atTime->giveTargetTime() < castAt ) ) {
+        if ( castAt && ( tStep->giveTargetTime() < castAt ) ) {
             answer = capacity * this->give('d', gp) / 1000;                            // Zero capacity before cast
         } else {
             answer = capacity * this->give('d', gp);
@@ -202,8 +201,8 @@ HydratingIsoHeatMaterial :: giveCharacteristicValue(MatResponseMode rmode, Gauss
             vec.at(2) = 1.; // saturated if undefined
         }
 
-        answer = hydrationModel->giveCharacteristicValue(vec, rmode, gp, atTime)
-                 / atTime->giveTimeIncrement();
+        answer = hydrationModel->giveCharacteristicValue(vec, rmode, gp, tStep)
+                 / tStep->giveTimeIncrement();
     } else {
         _error2( "giveCharacteristicValue: unknown MatResponseMode (%s)", __MatResponseModeToString(rmode) );
     }
@@ -251,18 +250,18 @@ HydratingIsoHeatMaterial :: restoreIPContext(DataStream *stream, ContextMode mod
 }
 
 int
-HydratingIsoHeatMaterial :: giveIPValue(FloatArray &answer, GaussPoint *aGaussPoint, InternalStateType type, TimeStep *atTime)
+HydratingIsoHeatMaterial :: giveIPValue(FloatArray &answer, GaussPoint *gp, InternalStateType type, TimeStep *tStep)
 {
     // printf ("IP %d::giveIPValue, IST %d", giveNumber(), type);
     if ( type == IST_HydrationDegree ) {
-        //TransportMaterialStatus* status = (TransportMaterialStatus*) this -> giveStatus (aGaussPoint);
+        //TransportMaterialStatus* status = (TransportMaterialStatus*) this -> giveStatus (gp);
         answer.resize(1);
         //if (hydration)
-        answer.at(1) = giveHydrationDegree(aGaussPoint, atTime, VM_Total);
+        answer.at(1) = giveHydrationDegree(gp, tStep, VM_Total);
         //else answer.at(1) = 0;
         return 1;
     } else {
-        return TransportMaterial :: giveIPValue(answer, aGaussPoint, type, atTime);
+        return TransportMaterial :: giveIPValue(answer, gp, type, tStep);
     }
 }
 
@@ -274,11 +273,11 @@ HydratingIsoHeatMaterial :: CreateStatus(GaussPoint *gp) const
 
 
 void
-HydratingTransportMaterialStatus :: printOutputAt(FILE *file, TimeStep *atTime)
+HydratingTransportMaterialStatus :: printOutputAt(FILE *file, TimeStep *tStep)
 {
     fprintf(file, " status ");
-    HydrationModelStatusInterface :: printOutputAt(file, atTime);
-    TransportMaterialStatus :: printOutputAt(file, atTime);
+    HydrationModelStatusInterface :: printOutputAt(file, tStep);
+    TransportMaterialStatus :: printOutputAt(file, tStep);
 }
 
 // necessary for proper cast to interface, can't be done from outside

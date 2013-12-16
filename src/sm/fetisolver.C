@@ -44,7 +44,6 @@
 #include "classfactory.h"
 
 namespace oofem {
-
 REGISTER_SparseLinSolver(FETISolver, ST_Feti);
 
 FETISolver :: FETISolver(Domain *d, EngngModel *m) : SparseLinearSystemNM(d, m), pcbuff(CBT_static), processCommunicator(& pcbuff, 0)
@@ -1302,7 +1301,7 @@ FETISolver :: solve(SparseMtrx *A, FloatArray *partitionLoad, FloatArray *partit
                     rank, "FETISolver :: solveYourselfAt");
 #endif
 
-    dd.subtract(*partitionLoad);
+    dd.subtract(* partitionLoad);
     partitionStiffness->ldl_feti_sky(pp, dd, nse, limit, se);
 
     if ( rank == 0 ) {

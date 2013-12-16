@@ -66,8 +66,8 @@ protected:
     /// Number of units in the chain.
     int nUnits;
     /// Hidden (internal) variables, the meaning of which depends on the type of chain.
-    std :: vector< FloatArray > hiddenVars; 
-    std :: vector< FloatArray > tempHiddenVars; 
+    std :: vector< FloatArray >hiddenVars;
+    std :: vector< FloatArray >tempHiddenVars;
 
     /**
      * Total shrinkage strain (needed only when the shrinkage evolution
@@ -162,10 +162,10 @@ public:
     { answer.resize(0); }
 
     /// Evaluation of the incremental modulus.
-    virtual double giveEModulus(GaussPoint *gp, TimeStep *atTime) = 0;
+    virtual double giveEModulus(GaussPoint *gp, TimeStep *tStep) = 0;
 
     /// Evaluation of the moduli of individual units.
-    virtual void computeCharCoefficients(FloatArray &answer, double atTime) = 0;
+    virtual void computeCharCoefficients(FloatArray &answer, double tStep) = 0;
 
     // identification and auxiliary functions
     virtual int hasNonLinearBehaviour() { return 0; }
@@ -245,7 +245,7 @@ protected:
     static void generateLogTimeScale(FloatArray &answer, double from, double to, int nsteps);
     const FloatArray &giveDiscreteTimes();
     /// Evaluation of the creep compliance function.
-    virtual double computeCreepFunction(double ofAge, double atTime) = 0;
+    virtual double computeCreepFunction(double ofAge, double tStep) = 0;
 
     /**
      * Evaluation of the relaxation function at given times.
@@ -259,10 +259,10 @@ protected:
      * @param[out] answer Array with evaluated relaxation function.
      * @param t0 Age of material when load is applied.
      * @param tr Age of material when relaxation has begun ???
-     * @param atTimes At which times the relaxation function will be evaluated.
-     * @warning atTimes should be uniformly distributed in log time scale and relatively dense (100 intervals) in order to achieve a reasonable accuracy.
+     * @param tSteps At which times the relaxation function will be evaluated.
+     * @warning tSteps should be uniformly distributed in log time scale and relatively dense (100 intervals) in order to achieve a reasonable accuracy.
      */
-    void computeDiscreteRelaxationFunction(FloatArray &answer, const FloatArray &atTimes, double t0, double tr);
+    void computeDiscreteRelaxationFunction(FloatArray &answer, const FloatArray &tSteps, double t0, double tr);
 
     /// Evaluation of elastic compliance matrix for unit Young's modulus.
     void giveUnitComplianceMatrix(FloatMatrix &answer, GaussPoint *gp, TimeStep *tStep);
@@ -270,7 +270,7 @@ protected:
     void giveUnitStiffnessMatrix(FloatMatrix &answer, GaussPoint *gp, TimeStep *tStep);
 
     /// Update of partial moduli of individual chain units
-    void updateEparModuli(double atTime);
+    void updateEparModuli(double tStep);
 
     /// Access to partial modulus of a given unit
     double giveEparModulus(int iChain);

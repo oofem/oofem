@@ -38,7 +38,6 @@
 #include "rheoChM.h"
 
 namespace oofem {
-
 /**
  * This class implements associated Material Status to MaxwellChainMaterial.
  */
@@ -100,17 +99,17 @@ protected:
      * approximation of the actual relaxation function.
      *
      * The optimal moduli are obtained using the least-square method,
-     * i.e. by minimizing the following functional (atTime = t_0):
+     * i.e. by minimizing the following functional (tStep = t_0):
      * @f[
      * F=\sum^{k}_{r=1} \left[ \sum^{N}_{\mu=1} E_m(t_0) \exp^{-(t_r-t_0)/\tau_{\mu} - \bar{R}(t_r, t_0)} \right]^2 = min
      * @f]
      *
      * @param[out] answer Array with coefficients
-     * @param atTime Age of material when load is applied ???
+     * @param tStep Age of material when load is applied ???
      */
-    virtual void computeCharCoefficients(FloatArray &answer, double atTime);
+    virtual void computeCharCoefficients(FloatArray &answer, double tStep);
 
-    virtual double giveEModulus(GaussPoint *gp, TimeStep *atTime);
+    virtual double giveEModulus(GaussPoint *gp, TimeStep *tStep);
     LinearElasticMaterial *giveLinearElasticMaterial();
 };
 } // end namespace oofem

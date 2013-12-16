@@ -59,21 +59,21 @@ public:
     virtual ~Tr1Darcy();
     virtual IRResultType initializeFrom(InputRecord *ir);
 
-    virtual FEInterpolation *giveInterpolation() const { return &interpolation_lin; }
+    virtual FEInterpolation *giveInterpolation() const { return & interpolation_lin; }
 
     virtual MaterialMode giveMaterialMode() { return _2dHeat; } ///@todo This isn't actually correct.
 
     virtual void giveDofManDofIDMask(int inode, EquationID ut, IntArray &answer) const;
     virtual void giveCharacteristicVector(FloatArray &answer, CharType mtrx, ValueModeType mode, TimeStep *tStep);
     virtual void giveCharacteristicMatrix(FloatMatrix &answer, CharType mtrx, TimeStep *tStep);
-    virtual void computeStiffnessMatrix(FloatMatrix &answer, TimeStep *atTime);
+    virtual void computeStiffnessMatrix(FloatMatrix &answer, TimeStep *tStep);
 
     virtual void computeGaussPoints();
     virtual int computeNumberOfDofs();
 
-    void computeExternalForcesVector(FloatArray &answer, TimeStep *atTime, ValueModeType mode);
+    void computeExternalForcesVector(FloatArray &answer, TimeStep *tStep, ValueModeType mode);
     void computeEdgeBCSubVectorAt(FloatArray &answer, Load *load, int iEdge, TimeStep *tStep, ValueModeType mode, int indx);
-    void computeInternalForcesVector(FloatArray &answer, TimeStep *atTime);
+    void computeInternalForcesVector(FloatArray &answer, TimeStep *tStep);
 
     virtual double computeEdgeVolumeAround(GaussPoint *gp, int iEdge);
     virtual double giveThicknessAt(const FloatArray &gcoords);

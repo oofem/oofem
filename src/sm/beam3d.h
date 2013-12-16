@@ -71,7 +71,7 @@ public:
     virtual void computeInitialStressMatrix(FloatMatrix &answer, TimeStep *tStep);
     virtual void computeStiffnessMatrix(FloatMatrix &answer, MatResponseMode rMode, TimeStep *tStep);
     virtual int giveLocalCoordinateSystem(FloatMatrix &answer);
-    virtual void computeLocalForceLoadVector(FloatArray &answer, TimeStep *stepN, ValueModeType mode);
+    virtual void computeLocalForceLoadVector(FloatArray &answer, TimeStep *tStep, ValueModeType mode);
     virtual void giveInternalForcesVector(FloatArray &answer, TimeStep *, int useUpdatedGpRecord = 0);
     void giveEndForcesVector(FloatArray &answer, TimeStep *tStep);
 
@@ -93,7 +93,7 @@ public:
     // fibered cross section support functions
     //
     virtual void FiberedCrossSectionInterface_computeStrainVectorInFiber(FloatArray &answer, const FloatArray &masterGpStrain,
-                                                                 GaussPoint *slaveGp, TimeStep *tStep);
+                                                                         GaussPoint *slaveGp, TimeStep *tStep);
 
     virtual Interface *giveInterface(InterfaceType it);
 

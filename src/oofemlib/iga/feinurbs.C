@@ -51,11 +51,7 @@ void NURBSInterpolation :: evalN(FloatArray &answer, const FloatArray &lcoords, 
     IntArray span(nsd);
     double sum = 0.0, val;
     int count, c = 1, i, l, k, m, ind, indx, uind, vind, tind;
-#ifdef HAVE_VARIABLE_ARRAY_SIZE
-    FloatArray N [ nsd ];
-#else
-    FloatArray *N = new FloatArray [ nsd ];
-#endif
+    std :: vector< FloatArray > N;
 
     if ( gw->knotSpan ) {
         span = * gw->knotSpan;
@@ -116,10 +112,6 @@ void NURBSInterpolation :: evalN(FloatArray &answer, const FloatArray &lcoords, 
     while ( count ) {
         answer.at(count--) /= sum;
     }
-
-#ifndef HAVE_VARIABLE_ARRAY_SIZE
-    delete [] N;
-#endif
 }
 
 
@@ -132,11 +124,8 @@ double NURBSInterpolation :: evaldNdx(FloatMatrix &answer, const FloatArray &lco
     IntArray span(nsd);
     double Jacob = 0., product, w, weight;
     int count, cnt, i, l, k, m, ind, indx, uind, vind, tind;
-#ifdef HAVE_VARIABLE_ARRAY_SIZE
-    FloatMatrix ders [ nsd ];
-#else
-    FloatMatrix *ders = new FloatMatrix [ nsd ];
-#endif
+    std :: vector< FloatArray > N(nsd);
+    std :: vector< FloatMatrix > ders(nsd);
 
     if ( gw->knotSpan ) {
         span = * gw->knotSpan;
@@ -312,11 +301,7 @@ double NURBSInterpolation :: evaldNdx(FloatMatrix &answer, const FloatArray &lco
     }
 
 #else
- #ifdef HAVE_VARIABLE_ARRAY_SIZE
-    FloatArray Aders [ nsd ];  // 0th and 1st derivatives in each coordinate direction on BSpline
- #else
-    FloatArray *Aders = new FloatArray [ nsd ];
- #endif
+    std :: vector< FloatArray > Aders(nsd);
     FloatArray wders;          // 0th and 1st derivatives in w direction on BSpline
 
     for ( i = 0; i < nsd; i++ ) {
@@ -536,14 +521,14 @@ double NURBSInterpolation :: evaldNdx(FloatMatrix &answer, const FloatArray &lco
                     tmp1(2) = ders [ 0 ](0, k) * ders [ 1 ](0, l) * ders [ 2 ](1, m) * w * weight - ders [ 0 ](0, k) * ders [ 1 ](0, l) * ders [ 2 ](0, m) * w * wders(3);
 
                     answer(cnt, 0) = ( ( jacobian(1, 1) * jacobian(2, 2) - jacobian(1, 2) * jacobian(2, 1) ) * tmp1(0) +
-                                      ( jacobian(0, 2) * jacobian(2, 1) - jacobian(0, 1) * jacobian(2, 2) ) * tmp1(1) +
-                                      ( jacobian(0, 1) * jacobian(1, 2) - jacobian(0, 2) * jacobian(1, 1) ) * tmp1(2) ) / product;                                                      // dN/dx
+                                       ( jacobian(0, 2) * jacobian(2, 1) - jacobian(0, 1) * jacobian(2, 2) ) * tmp1(1) +
+                                       ( jacobian(0, 1) * jacobian(1, 2) - jacobian(0, 2) * jacobian(1, 1) ) * tmp1(2) ) / product;                                                     // dN/dx
                     answer(cnt, 1) = ( ( jacobian(1, 2) * jacobian(2, 0) - jacobian(1, 0) * jacobian(2, 2) ) * tmp1(0) +
-                                      ( jacobian(0, 0) * jacobian(2, 2) - jacobian(0, 2) * jacobian(2, 0) ) * tmp1(1) +
-                                      ( jacobian(0, 2) * jacobian(1, 0) - jacobian(0, 0) * jacobian(1, 2) ) * tmp1(2) ) / product;                                                      // dN/dy
+                                       ( jacobian(0, 0) * jacobian(2, 2) - jacobian(0, 2) * jacobian(2, 0) ) * tmp1(1) +
+                                       ( jacobian(0, 2) * jacobian(1, 0) - jacobian(0, 0) * jacobian(1, 2) ) * tmp1(2) ) / product;                                                     // dN/dy
                     answer(cnt, 2) = ( ( jacobian(1, 0) * jacobian(2, 1) - jacobian(1, 1) * jacobian(2, 0) ) * tmp1(0) +
-                                      ( jacobian(0, 1) * jacobian(2, 0) - jacobian(0, 0) * jacobian(2, 1) ) * tmp1(1) +
-                                      ( jacobian(0, 0) * jacobian(1, 1) - jacobian(0, 1) * jacobian(1, 0) ) * tmp1(2) ) / product;                                                      // dN/dz
+                                       ( jacobian(0, 1) * jacobian(2, 0) - jacobian(0, 0) * jacobian(2, 1) ) * tmp1(1) +
+                                       ( jacobian(0, 0) * jacobian(1, 1) - jacobian(0, 1) * jacobian(1, 0) ) * tmp1(2) ) / product;                                                     // dN/dz
                     cnt++;
                 }
 
@@ -556,14 +541,8 @@ double NURBSInterpolation :: evaldNdx(FloatMatrix &answer, const FloatArray &lco
         OOFEM_ERROR2("evaldNdx not implemented for nsd = %d", nsd);
     }
 
- #ifndef HAVE_VARIABLE_ARRAY_SIZE
-    delete [] Aders;
- #endif
 #endif
 
-#ifndef HAVE_VARIABLE_ARRAY_SIZE
-    delete [] ders;
-#endif
     return Jacob;
 }
 
@@ -576,11 +555,7 @@ void NURBSInterpolation :: local2global(FloatArray &answer, const FloatArray &lc
     IntArray span(nsd);
     double w, weight = 0.0;
     int i, l, k, m, ind, indx, uind, vind, tind;
-#ifdef HAVE_VARIABLE_ARRAY_SIZE
-    FloatArray N [ nsd ];
-#else
-    FloatArray *N = new FloatArray [ nsd ];
-#endif
+    std :: vector< FloatArray > N(nsd);
 
     if ( gw->knotSpan ) {
         span = * gw->knotSpan;
@@ -668,10 +643,6 @@ void NURBSInterpolation :: local2global(FloatArray &answer, const FloatArray &lc
     }
 
     answer.times(1.0 / weight);
-
-#ifndef HAVE_VARIABLE_ARRAY_SIZE
-    delete [] N;
-#endif
 }
 
 
@@ -686,11 +657,7 @@ double NURBSInterpolation :: giveTransformationJacobian(const FloatArray &lcoord
     IntArray span(nsd);
     double Jacob, w, weight;
     int i, l, k, m, ind, indx, uind, vind, tind;
-#ifdef HAVE_VARIABLE_ARRAY_SIZE
-    FloatMatrix ders [ nsd ];
-#else
-    FloatMatrix *ders = new FloatMatrix [ nsd ];
-#endif
+    std :: vector< FloatMatrix > ders(nsd);
 
     if ( gw->knotSpan ) {
         span = * gw->knotSpan;
@@ -841,11 +808,7 @@ double NURBSInterpolation :: giveTransformationJacobian(const FloatArray &lcoord
     }
 
 #else
- #ifdef HAVE_VARIABLE_ARRAY_SIZE
-    FloatArray Aders [ nsd ];  // 0th and 1st derivatives in each coordinate direction on BSpline
- #else
-    FloatArray *Aders = new FloatArray [ nsd ];
- #endif
+    std :: vector< FloatArray > Aders(nsd);
     FloatArray wders;          // 0th and 1st derivatives in w direction on BSpline
 
     for ( i = 0; i < nsd; i++ ) {
@@ -1014,11 +977,6 @@ double NURBSInterpolation :: giveTransformationJacobian(const FloatArray &lcoord
         OOFEM_ERROR2("giveTransformationJacobianMatrix not implemented for nsd = %d", nsd);
     }
 
- #ifndef HAVE_VARIABLE_ARRAY_SIZE
-    delete [] Aders;
- #endif
-
-
 #endif
 
     Jacob = jacobian.giveDeterminant();
@@ -1026,11 +984,6 @@ double NURBSInterpolation :: giveTransformationJacobian(const FloatArray &lcoord
     if ( fabs(Jacob) < 1.0e-10 ) {
         OOFEM_ERROR("giveTransformationJacobianMatrix - zero Jacobian");
     }
-
-#ifndef HAVE_VARIABLE_ARRAY_SIZE
-    delete [] ders;
-#endif
-
 
     return Jacob;
 }

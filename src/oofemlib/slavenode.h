@@ -45,7 +45,6 @@
 //@}
 
 namespace oofem {
-
 /**
  * Class implementing slave node connected to other nodes (masters) using predetermined weights.
  * Hanging node possess no degrees of freedom - all values are interpolated from corresponding master dofs.

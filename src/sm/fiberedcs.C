@@ -44,8 +44,7 @@
 #include "classfactory.h"
 
 namespace oofem {
-
-REGISTER_CrossSection( FiberedCrossSection );
+REGISTER_CrossSection(FiberedCrossSection);
 
 void
 FiberedCrossSection :: giveRealStress_3d(FloatArray &answer, GaussPoint *gp, const FloatArray &strain, TimeStep *tStep)
@@ -158,7 +157,7 @@ FiberedCrossSection :: giveRealStress_Beam3d(FloatArray &answer, GaussPoint *gp,
 
     // now we must update master gp ///@ todo simply chosen the first fiber material as master material /JB
     StructuralMaterialStatus *status = static_cast< StructuralMaterialStatus * >
-        ( domain->giveMaterial( fiberMaterials.at(1) )->giveStatus(gp) );
+                                       ( domain->giveMaterial( fiberMaterials.at(1) )->giveStatus(gp) );
     status->letTempStrainVectorBe(strain);
     status->letTempStressVectorBe(answer);
 }
@@ -374,10 +373,10 @@ FiberedCrossSection :: imposeStrainConstrainsOnGradient(GaussPoint *gp,
 
 
 int
-FiberedCrossSection :: giveIPValue(FloatArray &answer, GaussPoint *aGaussPoint, InternalStateType type, TimeStep *atTime)
+FiberedCrossSection :: giveIPValue(FloatArray &answer, GaussPoint *gp, InternalStateType type, TimeStep *tStep)
 {
     Material *mat = this->giveDomain()->giveMaterial( fiberMaterials.at(1) ); ///@todo For now, create material status according to the first fiber material
-    StructuralMaterialStatus *status = static_cast< StructuralMaterialStatus * >( mat->giveStatus(aGaussPoint) ); 
+    StructuralMaterialStatus *status = static_cast< StructuralMaterialStatus * >( mat->giveStatus(gp) );
 
     if ( type == IST_BeamForceMomentumTensor ) {
         answer = status->giveStressVector();
@@ -417,10 +416,10 @@ FiberedCrossSection :: initializeFrom(InputRecord *ir)
     IR_GIVE_FIELD(ir, width, _IFT_FiberedCrossSection_width);
 
     if ( ( numberOfFibers != fiberMaterials.giveSize() ) ||
-        ( numberOfFibers != fiberThicks.giveSize() )     ||
-        ( numberOfFibers != fiberWidths.giveSize() )     ||
-        ( numberOfFibers != fiberYcoords.giveSize() )    ||
-        ( numberOfFibers != fiberZcoords.giveSize() ) ) {
+         ( numberOfFibers != fiberThicks.giveSize() )     ||
+         ( numberOfFibers != fiberWidths.giveSize() )     ||
+         ( numberOfFibers != fiberYcoords.giveSize() )    ||
+         ( numberOfFibers != fiberZcoords.giveSize() ) ) {
         _error("instanciateFrom : Array size mismatch ");
     }
 
@@ -434,10 +433,10 @@ FiberedCrossSection :: initializeFrom(InputRecord *ir)
 void FiberedCrossSection :: createMaterialStatus(GaussPoint &iGP)
 {
     for ( int i = 1; i <= numberOfFibers; i++ ) {
-        GaussPoint *fiberGp = this->giveSlaveGaussPoint(&iGP, i - 1);
+        GaussPoint *fiberGp = this->giveSlaveGaussPoint(& iGP, i - 1);
         StructuralMaterial *mat = static_cast< StructuralMaterial * >( domain->giveMaterial( fiberMaterials.at(i) ) );
-    	MaterialStatus *matStat = mat->CreateStatus(fiberGp);
-    	iGP.setMaterialStatus(matStat);
+        MaterialStatus *matStat = mat->CreateStatus(fiberGp);
+        iGP.setMaterialStatus(matStat);
     }
 }
 
@@ -573,7 +572,7 @@ FiberedCrossSection :: giveCorrespondingSlaveMaterialMode(MaterialMode masterMod
 
 
 double
-FiberedCrossSection :: give(CrossSectionProperty aProperty, GaussPoint* gp)
+FiberedCrossSection :: give(CrossSectionProperty aProperty, GaussPoint *gp)
 {
     if ( aProperty == CS_Thickness ) {
         return this->thick;
@@ -612,12 +611,12 @@ FiberedCrossSection :: giveFiberMaterialStiffnessMatrix(FloatMatrix &fiberMatrix
 
 
 void
-FiberedCrossSection :: computeStressIndependentStrainVector(FloatArray &answer, GaussPoint *gp, TimeStep *stepN, ValueModeType mode)
+FiberedCrossSection :: computeStressIndependentStrainVector(FloatArray &answer, GaussPoint *gp, TimeStep *tStep, ValueModeType mode)
 {
     StructuralElement *elem = static_cast< StructuralElement * >( gp->giveElement() );
     FloatArray et;
 
-    elem->computeResultingIPTemperatureAt(et, stepN, gp, mode);
+    elem->computeResultingIPTemperatureAt(et, tStep, gp, mode);
 
     if ( et.isNotEmpty() ) {
         _error("computeStressIndependentStrainVector: temperature loading not supported");
@@ -629,7 +628,7 @@ bool FiberedCrossSection :: isCharacteristicMtrxSymmetric(MatResponseMode rMode)
     ///@todo As far as I can see, it only uses diagonal components for the 3dbeam, but there is no way to check here.
 
     for ( int i = 1; i <= this->numberOfFibers; i++ ) {
-        if ( !this->domain->giveMaterial(this->fiberMaterials.at(i))->isCharacteristicMtrxSymmetric(rMode) ) {
+        if ( !this->domain->giveMaterial( this->fiberMaterials.at(i) )->isCharacteristicMtrxSymmetric(rMode) ) {
             return false;
         }
     }
@@ -649,13 +648,11 @@ FiberedCrossSection :: checkConsistency()
     for ( int i = 1; this->fiberMaterials.giveSize(); i++ ) {
         Material *mat = this->giveDomain()->giveMaterial( this->fiberMaterials.at(i) );
         if ( !dynamic_cast< StructuralMaterial * >( mat ) ) {
-            _warning2("checkConsistency : material %s without structural support", mat->giveClassName());
+            _warning2( "checkConsistency : material %s without structural support", mat->giveClassName() );
             result = 0;
             continue;
         }
     }
     return result;
 }
-
-
 } // end namespace oofem

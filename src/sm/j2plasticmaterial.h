@@ -93,7 +93,7 @@ protected:
     virtual int hasHardening();
     virtual void computeReducedGradientMatrix(FloatMatrix &answer, GaussPoint *gp,
                                               const FloatArray &stressVector,
-                                               const FloatArray &stressSpaceHardeningVars);
+                                              const FloatArray &stressSpaceHardeningVars);
     virtual void computeTrialStressIncrement(FloatArray &answer, GaussPoint *gp,
                                              const FloatArray &strainIncrement, TimeStep *tStep);
     virtual void compute3dElasticModuli(FloatMatrix &answer, GaussPoint *gp,

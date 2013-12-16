@@ -134,23 +134,23 @@ LEPlicElementInterface :: restoreContext(DataStream *stream, ContextMode mode, v
 
 
 void
-LEPlic :: updatePosition(TimeStep *atTime)
+LEPlic :: updatePosition(TimeStep *tStep)
 {
     ///@todo Can't have OOFEG stuff here, it will crash when running OOFEM normally.
 #ifdef __OOFEG
     //deleteLayerGraphics(OOFEG_DEBUG_LAYER);
     EVFastRedraw(myview);
 #endif
-    this->doLagrangianPhase(atTime);
-    this->doInterfaceReconstruction(atTime, true, false);
+    this->doLagrangianPhase(tStep);
+    this->doInterfaceReconstruction(tStep, true, false);
 #ifdef __OOFEG
     //ESIEventLoop (YES, "doInterfaceReconstruction Finished; Press Ctrl-p to continue");
     deleteLayerGraphics(OOFEG_DEBUG_LAYER);
 #endif
-    this->doInterfaceRemapping(atTime);
+    this->doInterfaceRemapping(tStep);
     // here the new VOF values are determined, now we call doInterfaceReconstruction
     // to reconstruct interface (normal, constant) on original grid
-    this->doInterfaceReconstruction(atTime, false, true);
+    this->doInterfaceReconstruction(tStep, false, true);
 #ifdef __OOFEG
     ESIEventLoop( NO, const_cast< char * >( "doInterfaceReconstruction Finished; Press Ctrl-p to continue" ) );
     //ESIEventLoop (YES, "doInterfaceReconstruction Finished; Press Ctrl-p to continue");
@@ -158,12 +158,12 @@ LEPlic :: updatePosition(TimeStep *atTime)
 }
 
 void
-LEPlic :: doLagrangianPhase(TimeStep *atTime)
+LEPlic :: doLagrangianPhase(TimeStep *tStep)
 {
     //Maps element nodes along trajectories using basic Runge-Kutta method (midpoint rule)
     int i, ci, ndofman = domain->giveNumberOfDofManagers();
     int nsd = 2;
-    double dt = atTime->giveTimeIncrement();
+    double dt = tStep->giveTimeIncrement();
     DofManager *dman;
     Node *inode;
     IntArray velocityMask;
@@ -193,9 +193,9 @@ LEPlic :: doLagrangianPhase(TimeStep *atTime)
 
 #if 1
         /* Original version */
-        dman->giveUnknownVector( v_t, velocityMask, VM_Total, atTime->givePreviousStep() );
+        dman->giveUnknownVector( v_t, velocityMask, VM_Total, tStep->givePreviousStep() );
         /* Modified version */
-        //dman->giveUnknownVector(v_t, velocityMask, VM_Total, atTime);
+        //dman->giveUnknownVector(v_t, velocityMask, VM_Total, tStep);
 
         // Original version
         // compute updated position x(tn)+0.5*dt*v(tn,x(tn))
@@ -211,7 +211,7 @@ LEPlic :: doLagrangianPhase(TimeStep *atTime)
             _error("doLagrangianPhase: Velocity field not available");
         }
 
-        err = vfield->evaluateAt(v_tn1, x2, VM_Total, atTime);
+        err = vfield->evaluateAt(v_tn1, x2, VM_Total, tStep);
         if ( err == 1 ) {
             // point outside domain -> be explicit
             v_tn1 = v_t;
@@ -226,7 +226,7 @@ LEPlic :: doLagrangianPhase(TimeStep *atTime)
 
 #else
         // pure explicit version
-        dman->giveUnknownVector(v_t, velocityMask, VM_Total, atTime);
+        dman->giveUnknownVector(v_t, velocityMask, VM_Total, tStep);
 
         for ( ci = 1; ci <= nsd; ci++ ) {
             x2.at(ci) = x.at(ci) + dt *v_t.at(ci);
@@ -240,7 +240,7 @@ LEPlic :: doLagrangianPhase(TimeStep *atTime)
 }
 
 void
-LEPlic :: doInterfaceReconstruction(TimeStep *atTime, bool coord_upd, bool temp_vof)
+LEPlic :: doInterfaceReconstruction(TimeStep *tStep, bool coord_upd, bool temp_vof)
 {
     /* Here volume materials are reconstructed on the new Lagrangian grid */
 
@@ -267,7 +267,7 @@ LEPlic :: doInterfaceReconstruction(TimeStep *atTime, bool coord_upd, bool temp_
 
 
 void
-LEPlic :: doInterfaceRemapping(TimeStep *atTime)
+LEPlic :: doInterfaceRemapping(TimeStep *tStep)
 {
     /*
      * Final step: deposition of volume materials truncated on Lagrangian (updated)
@@ -342,7 +342,7 @@ LEPlic :: doInterfaceRemapping(TimeStep *atTime)
 #endif
                 double err = fabs(matVol - matVolSum) / matVol;
                 if ( ( err > 1.e-12 ) && ( fabs(matVol - matVolSum) > 1.e-4 ) && ( matVol > 1.e-6 ) ) {
-                    OOFEM_WARNING4("LEPlic::doInterfaceRemapping:  volume inconsistency %5.2f%%\n\ttstep %d, element %d\n", err * 100, atTime->giveNumber(), ie);
+                    OOFEM_WARNING4("LEPlic::doInterfaceRemapping:  volume inconsistency %5.2f%%\n\ttstep %d, element %d\n", err * 100, tStep->giveNumber(), ie);
                 }
 
 #if 0

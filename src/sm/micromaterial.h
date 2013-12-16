@@ -57,7 +57,6 @@
 //@}
 
 namespace oofem {
-
 class UnknownNumberingScheme;
 class MicroMaterial;
 class MacroLSpace;
@@ -97,14 +96,14 @@ public:
     /// Destructor
     virtual ~MicroMaterial();
 
-    std::string inputFileNameMicro;
+    std :: string inputFileNameMicro;
 
     virtual IRResultType initializeFrom(InputRecord *ir);
 
     virtual const char *giveInputRecordName() const { return _IFT_MicroMaterial_Name; }
     virtual const char *giveClassName() const { return "MicroMaterial"; }
 
-    virtual void giveRealStressVector(FloatArray & answer, GaussPoint *, const FloatArray &, TimeStep *);
+    virtual void giveRealStressVector(FloatArray &answer, GaussPoint *, const FloatArray &, TimeStep *);
 
     virtual MaterialStatus *CreateStatus(GaussPoint *gp) const;
 

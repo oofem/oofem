@@ -46,7 +46,6 @@
 //@}
 
 namespace oofem {
-
 /**
  * This class implements a simple spring element. Its purpose is to introduce
  * a longitudinal or torsional spring between two nodes. The spring element is defined
@@ -113,7 +112,7 @@ public:
 
 protected:
     virtual void computeBmatrixAt(GaussPoint *gp, FloatMatrix &answer,
-                          int lowerIndx = 1, int upperIndx = ALL_STRAINS)
+                                  int lowerIndx = 1, int upperIndx = ALL_STRAINS)
     {}
     virtual void computeNmatrixAt(const FloatArray &iLocCoord, FloatMatrix &answer) {}
     virtual bool computeGtoLRotationMatrix(FloatMatrix &answer);

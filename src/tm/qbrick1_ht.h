@@ -58,7 +58,7 @@ protected:
 
 public:
     QBrick1_ht(int n, Domain *d);
-    virtual ~ QBrick1_ht();
+    virtual ~QBrick1_ht();
 
     virtual double computeVolumeAround(GaussPoint *gp);
     virtual FEInterpolation *giveInterpolation() const { return & interpolation; }
@@ -79,7 +79,7 @@ public:
     virtual void SPRNodalRecoveryMI_giveDofMansDeterminedByPatch(IntArray &answer, int pap);
     virtual int SPRNodalRecoveryMI_giveNumberOfIP();
     virtual SPRPatchType SPRNodalRecoveryMI_givePatchType();
-    
+
     virtual Element *SpatialLocalizerI_giveElement() { return this; }
     virtual int SpatialLocalizerI_containsPoint(const FloatArray &coords);
     virtual double SpatialLocalizerI_giveDistanceFromParametricCenter(const FloatArray &coords);
@@ -100,6 +100,5 @@ public:
     virtual const char *giveInputRecordName() const { return _IFT_QBrick1_hmt_Name; }
     virtual const char *giveClassName() const { return "QBrick1_hmt"; }
 };
-
 } // end namespace oofem
 #endif // qbrick1_ht_h

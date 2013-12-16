@@ -51,8 +51,7 @@
 #endif
 
 namespace oofem {
-
-REGISTER_Element( Beam2d );
+REGISTER_Element(Beam2d);
 
 // Set up interpolation coordinates
 FEI2dLineLin Beam2d :: interp_geom(1, 3);
@@ -123,7 +122,7 @@ Beam2d :: computeGaussPoints()
         numberOfIntegrationRules = 1;
         integrationRulesArray = new IntegrationRule * [ 1 ];
         integrationRulesArray [ 0 ] = new GaussIntegrationRule(1, this, 1, 3);
-        this->giveCrossSection()->setupIntegrationPoints( *integrationRulesArray[0], 3, this );
+        this->giveCrossSection()->setupIntegrationPoints(* integrationRulesArray [ 0 ], 3, this);
     }
 }
 
@@ -270,7 +269,7 @@ Beam2d :: computeGtoLRotationMatrix(FloatMatrix &answer)
 double
 Beam2d :: computeVolumeAround(GaussPoint *gp)
 {
-  return 0.5 * this->giveLength() * gp->giveWeight();
+    return 0.5 * this->giveLength() * gp->giveWeight();
 }
 
 
@@ -471,7 +470,7 @@ Beam2d :: computeEdgeLoadVectorAt(FloatArray &answer, Load *load, int iedge, Tim
     // evaluates the receivers edge load vector
     // for clamped beam
     //
-    BoundaryLoad *edgeLoad = dynamic_cast< BoundaryLoad * >(load);
+    BoundaryLoad *edgeLoad = dynamic_cast< BoundaryLoad * >( load );
     if ( edgeLoad ) {
         if ( edgeLoad->giveNumberOfDofs() != 3 ) {
             _error("computeEdgeLoadVectorAt: load number of dofs mismatch");
@@ -586,13 +585,13 @@ void
 Beam2d :: computeBodyLoadVectorAt(FloatArray &answer, Load *load, TimeStep *tStep, ValueModeType mode)
 {
     FloatArray lc(1);
-    StructuralElement::computeBodyLoadVectorAt(answer, load, tStep, mode);
-    answer.times(this->giveCrossSection()->give(CS_Area, &lc, NULL, this)); 
+    StructuralElement :: computeBodyLoadVectorAt(answer, load, tStep, mode);
+    answer.times( this->giveCrossSection()->give(CS_Area, & lc, NULL, this) );
 }
 
 
 void
-Beam2d :: printOutputAt(FILE *File, TimeStep *stepN)
+Beam2d :: printOutputAt(FILE *File, TimeStep *tStep)
 {
     // Performs end-of-step operations.
 
@@ -603,10 +602,10 @@ Beam2d :: printOutputAt(FILE *File, TimeStep *stepN)
     fprintf(File, "beam element %d :\n", number);
 
     // ask for global element displacement vector
-    this->computeVectorOf(EID_MomentumBalance, VM_Total, stepN, rl);
+    this->computeVectorOf(EID_MomentumBalance, VM_Total, tStep, rl);
 
     // ask for global element end forces vector
-    this->giveEndForcesVector(Fl, stepN);
+    this->giveEndForcesVector(Fl, tStep);
 
     fprintf(File, "  local displacements ");
     n = rl.giveSize();
@@ -625,17 +624,17 @@ Beam2d :: printOutputAt(FILE *File, TimeStep *stepN)
 
 
 void
-Beam2d :: computeLocalForceLoadVector(FloatArray &answer, TimeStep *stepN, ValueModeType mode)
-// Computes the load vector of the receiver, at stepN.
+Beam2d :: computeLocalForceLoadVector(FloatArray &answer, TimeStep *tStep, ValueModeType mode)
+// Computes the load vector of the receiver, at tStep.
 {
     FloatMatrix stiff;
 
-    StructuralElement :: computeLocalForceLoadVector(answer, stepN, mode);
+    StructuralElement :: computeLocalForceLoadVector(answer, tStep, mode);
 
     // condense requested dofs in local c.s
     if ( answer.giveSize() && dofsToCondense ) {
         if ( answer.giveSize() != 0 ) {
-            this->computeClampedStiffnessMatrix(stiff, TangentStiffness, stepN);
+            this->computeClampedStiffnessMatrix(stiff, TangentStiffness, tStep);
             this->condense(& stiff, NULL, & answer, dofsToCondense);
         }
     }
@@ -643,16 +642,16 @@ Beam2d :: computeLocalForceLoadVector(FloatArray &answer, TimeStep *stepN, Value
 
 
 void
-Beam2d :: computePrescribedStrainLocalLoadVectorAt(FloatArray &answer, TimeStep *stepN, ValueModeType mode)
-// Computes the load vector of the receiver, at stepN.
+Beam2d :: computePrescribedStrainLocalLoadVectorAt(FloatArray &answer, TimeStep *tStep, ValueModeType mode)
+// Computes the load vector of the receiver, at tStep.
 {
-    StructuralElement :: computePrescribedStrainLocalLoadVectorAt(answer, stepN, mode);
+    StructuralElement :: computePrescribedStrainLocalLoadVectorAt(answer, tStep, mode);
     FloatMatrix stiff;
 
     // condense requested dofs
     if ( answer.giveSize() && dofsToCondense ) {
         if ( answer.giveSize() != 0 ) {
-            this->computeClampedStiffnessMatrix(stiff, TangentStiffness, stepN);
+            this->computeClampedStiffnessMatrix(stiff, TangentStiffness, tStep);
             this->condense(& stiff, NULL, & answer, dofsToCondense);
         }
     }
@@ -676,9 +675,9 @@ Beam2d :: computeConsistentMassMatrix(FloatMatrix &answer, TimeStep *tStep, doub
     double kappa2 = kappa * kappa;
 
     double density = this->giveMaterial()->give('d', gp); // constant density assumed
-    if(ipDensity != NULL) {
-    	// Override density if desired
-    	density = *ipDensity;
+    if ( ipDensity != NULL ) {
+        // Override density if desired
+        density = * ipDensity;
     }
 
     double area = this->giveCrossSection()->give(CS_Area, gp); // constant area assumed

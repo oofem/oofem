@@ -106,7 +106,7 @@ public:
     virtual void computeDeviatoricStressVector(FloatArray &answer, GaussPoint *gp, const FloatArray &eps, TimeStep *tStep);
 
     virtual void giveDeviatoricStiffnessMatrix(FloatMatrix & answer, MatResponseMode, GaussPoint * gp,
-                                               TimeStep * atTime);
+                                               TimeStep * tStep);
 
     virtual double giveEffectiveViscosity(GaussPoint *gp, TimeStep *tStep);
     virtual double give(int aProperty, GaussPoint *);

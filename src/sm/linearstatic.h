@@ -42,7 +42,6 @@
 #define _IFT_LinearStatic_Name "linearstatic"
 
 namespace oofem {
-
 class SparseMtrx;
 
 /**
@@ -93,7 +92,7 @@ public:
 
     virtual IRResultType initializeFrom(InputRecord *ir);
 
-    virtual void printDofOutputAt(FILE *stream, Dof *iDof, TimeStep *atTime);
+    virtual void printDofOutputAt(FILE *stream, Dof *iDof, TimeStep *tStep);
 
     // identification
     virtual const char *giveInputRecordName() const { return _IFT_LinearStatic_Name; }

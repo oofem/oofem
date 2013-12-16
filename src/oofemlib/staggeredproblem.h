@@ -102,7 +102,7 @@ protected:
     /// Optional parameter which specify problems to define load time functions
     int timeDefinedByProb;
 
-    /// List of slave models to which this model is coupled    
+    /// List of slave models to which this model is coupled
     IntArray coupledModels;
 
 public:
@@ -121,9 +121,9 @@ public:
     virtual void solveYourself();
     virtual void solveYourselfAt(TimeStep *tStep);
     virtual int forceEquationNumbering();
-    virtual void updateYourself(TimeStep *stepN);
+    virtual void updateYourself(TimeStep *tStep);
     virtual void initializeYourself(TimeStep *tStep) { }
-    virtual int initializeAdaptive(int stepNumber) { return 0; }
+    virtual int initializeAdaptive(int tStepumber) { return 0; }
     virtual void terminate(TimeStep *tStep);
     virtual void doStepOutput(TimeStep *tStep);
 
@@ -137,7 +137,7 @@ public:
 
     void printYourself();
     virtual void printOutputAt(FILE *file, TimeStep *tStep);
-    virtual void printDofOutputAt(FILE *stream, Dof *iDof, TimeStep *atTime) { }
+    virtual void printDofOutputAt(FILE *stream, Dof *iDof, TimeStep *tStep) { }
     virtual TimeStep *giveNextStep();
     virtual TimeStep *giveSolutionStepWhenIcApply();
 
@@ -165,7 +165,7 @@ public:
     double giveDiscreteTime(int n);
 
     /// Returns list of model number that this model is coupled with. Used for staggered approach.
-    void giveCoupledModels(IntArray& answer) { answer = coupledModels;}
+    void giveCoupledModels(IntArray &answer) { answer = coupledModels; }
 
 #ifdef __OOFEG
     void drawYourself(oofegGraphicContext &context);
@@ -174,7 +174,7 @@ public:
     /**
      * Shows the sparse structure of required matrix, type == 1 stiffness.
      */
-    virtual void showSparseMtrxStructure(int type, oofegGraphicContext &context, TimeStep *atTime) { }
+    virtual void showSparseMtrxStructure(int type, oofegGraphicContext &context, TimeStep *tStep) { }
 #endif
 
     virtual int checkProblemConsistency();

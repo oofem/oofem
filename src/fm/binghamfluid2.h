@@ -148,7 +148,7 @@ protected:
     void computeDeviatoricStress(FloatArray &answer, const FloatArray &deps,
                                  double _nu, MaterialMode mmode);
 
-    void __debug(GaussPoint *gp, TimeStep *atTime);
+    void __debug(GaussPoint *gp, TimeStep *tStep);
 };
 } // end namespace oofem
 #endif // binghamfluid2_h

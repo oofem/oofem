@@ -44,8 +44,7 @@
 
 
 namespace oofem {
-
-REGISTER_Element( IntElLine2 );
+REGISTER_Element(IntElLine2);
 
 FEI2dLineQuad IntElLine2 :: interp(2, 2);
 
@@ -91,7 +90,6 @@ IntElLine2 :: computeGaussPoints()
 FEInterpolation *
 IntElLine2 :: giveInterpolation() const
 {
-    return &interp;
+    return & interp;
 }
-
 } // end namespace oofem

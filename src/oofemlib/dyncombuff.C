@@ -488,7 +488,7 @@ void
 CommunicationPacketPool :: pushPacket(CommunicationPacket *p)
 {
 #ifdef DEBUG
-    std :: list< CommunicationPacket * > :: iterator it = std::find(leased_packets.begin(), leased_packets.end(), p);
+    std :: list< CommunicationPacket * > :: iterator it = std :: find(leased_packets.begin(), leased_packets.end(), p);
     if ( it != leased_packets.end() ) {
         // found previosly leased one
         leased_packets.erase(it);
@@ -515,7 +515,7 @@ CommunicationPacketPool :: clear()
     std :: list< CommunicationPacket * > :: iterator it;
     for ( it = available_packets.begin(); it != available_packets.end(); ++it ) {
         if ( * it ) {
-            delete *it;
+            delete * it;
         }
     }
 

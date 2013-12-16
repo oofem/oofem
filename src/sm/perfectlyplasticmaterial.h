@@ -43,7 +43,6 @@
 #include "structuralms.h"
 
 namespace oofem {
-
 /**
  * This class implements associated Material Status to PerfectlyPlasticMaterial.
  *
@@ -133,7 +132,7 @@ public:
     virtual ~PerfectlyPlasticMaterial() { delete linearElasticMaterial; }
 
     virtual void giveRealStressVector(FloatArray &answer, GaussPoint *gp,
-                              const FloatArray &reducedStrain, TimeStep *tStep);
+                                      const FloatArray &reducedStrain, TimeStep *tStep);
 
     virtual void giveRealStressVector_3d(FloatArray &answer, GaussPoint *gp, const FloatArray &reducedE, TimeStep *tStep)
     { this->giveRealStressVector(answer, gp, reducedE, tStep); }
@@ -167,7 +166,7 @@ public:
                                                GaussPoint *gp,
                                                TimeStep *tStep);
 
-    virtual int giveIPValue(FloatArray &answer, GaussPoint *gp, InternalStateType type, TimeStep *atTime);
+    virtual int giveIPValue(FloatArray &answer, GaussPoint *gp, InternalStateType type, TimeStep *tStep);
     virtual MaterialStatus *CreateStatus(GaussPoint *gp) const;
 
 protected:
@@ -199,9 +198,9 @@ protected:
                                           GaussPoint *gp,
                                           TimeStep *tStep);
     virtual void givePlateLayerStiffMtrx(FloatMatrix &answer,
-                                           MatResponseMode mode,
-                                           GaussPoint *gp,
-                                           TimeStep *tStep);
+                                         MatResponseMode mode,
+                                         GaussPoint *gp,
+                                         TimeStep *tStep);
 
     void computeTrialStressIncrement(FloatArray &answer, GaussPoint *gp,
                                      const FloatArray &strainIncrement, TimeStep *tStep);

@@ -48,7 +48,6 @@
 //@}
 
 namespace oofem {
-
 /**
  * Heat and moisture transport material with hydration.
  */
@@ -64,12 +63,12 @@ public:
     void setMixture(MixtureType mix);
 
     virtual int hasInternalSource(); // return true if hydration heat source is present
-    virtual void computeInternalSourceVector(FloatArray &val, GaussPoint *gp, TimeStep *atTime, ValueModeType mode);
+    virtual void computeInternalSourceVector(FloatArray &val, GaussPoint *gp, TimeStep *tStep, ValueModeType mode);
     virtual void updateInternalState(const FloatArray &state, GaussPoint *gp, TimeStep *tStep);
 
     virtual double giveCharacteristicValue(MatResponseMode mode,
                                            GaussPoint *gp,
-                                           TimeStep *atTime);
+                                           TimeStep *tStep);
 
     // saves current context(state) into stream
     virtual contextIOResultType saveIPContext(DataStream *stream, ContextMode mode, GaussPoint *gp);
@@ -82,7 +81,7 @@ public:
     virtual IRResultType initializeFrom(InputRecord *ir);
 
     // post-processing
-    virtual int giveIPValue(FloatArray &answer, GaussPoint *aGaussPoint, InternalStateType type, TimeStep *atTime);
+    virtual int giveIPValue(FloatArray &answer, GaussPoint *gp, InternalStateType type, TimeStep *tStep);
 
 protected:
     virtual MaterialStatus *CreateStatus(GaussPoint *gp) const;

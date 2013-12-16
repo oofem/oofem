@@ -97,7 +97,7 @@ public:
     virtual double DirectErrorIndicatorRCI_giveCharacteristicSize();
 
     virtual int EIPrimaryUnknownMI_computePrimaryUnknownVectorAt(ValueModeType u,
-                                                                 TimeStep *stepN, const FloatArray &coords,
+                                                                 TimeStep *tStep, const FloatArray &coords,
                                                                  FloatArray &answer);
     virtual void EIPrimaryUnknownMI_givePrimaryUnknownVectorDofID(IntArray &answer);
 

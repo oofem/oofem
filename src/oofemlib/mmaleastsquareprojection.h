@@ -83,7 +83,7 @@ protected:
     /// If set, then only IP in the same region are taken into account.
     int regionFilter;
     /// List of Gp participating in patch.
-    std::list< GaussPoint * >patchGPList;
+    std :: list< GaussPoint * >patchGPList;
     /// Patch domain.
     Domain *patchDomain;
     /// Type of patch.

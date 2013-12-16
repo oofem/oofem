@@ -131,13 +131,13 @@ public:
                                                GaussPoint *gp,
                                                TimeStep *tStep);
 
-    virtual void giveRealStressVector(FloatArray & answer, GaussPoint *gp,
-                              const FloatArray &reducedStrain, TimeStep *tStep);
+    virtual void giveRealStressVector(FloatArray &answer, GaussPoint *gp,
+                                      const FloatArray &reducedStrain, TimeStep *tStep);
 
     virtual void  giveStiffnessMatrix(FloatMatrix &answer,
-                                           MatResponseMode mode,
-                                           GaussPoint *gp,
-                                           TimeStep *tStep);
+                                      MatResponseMode mode,
+                                      GaussPoint *gp,
+                                      TimeStep *tStep);
 
     virtual int giveIPValue(FloatArray &answer, GaussPoint *gp, InternalStateType type, TimeStep *tStep);
     virtual void giveThermalDilatationVector(FloatArray &answer, GaussPoint *gp, TimeStep *tStep);

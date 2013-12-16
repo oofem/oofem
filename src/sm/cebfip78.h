@@ -49,7 +49,6 @@
 //@}
 
 namespace oofem {
-
 /**
  * This class implements a CEB-FIP 78 rheologic Maxwell chain model in a finite
  * element problem.
@@ -73,7 +72,7 @@ public:
     virtual IRResultType initializeFrom(InputRecord *ir);
 
 protected:
-    virtual double computeCreepFunction(double atTime, double ofAge);
+    virtual double computeCreepFunction(double tStep, double ofAge);
 };
 } // end namespace oofem
 #endif // cebfip78_h

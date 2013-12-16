@@ -37,8 +37,7 @@
 #include "classfactory.h"
 
 namespace oofem {
-
-REGISTER_LoadTimeFunction( HeavisideLTF );
+REGISTER_LoadTimeFunction(HeavisideLTF);
 
 double
 HeavisideLTF :: __at(double time)
@@ -72,11 +71,10 @@ HeavisideLTF :: initializeFrom(InputRecord *ir)
 }
 
 
-void HeavisideLTF :: giveInputRecord(DynamicInputRecord& input)
+void HeavisideLTF :: giveInputRecord(DynamicInputRecord &input)
 {
-    LoadTimeFunction :: giveInputRecord ( input );
+    LoadTimeFunction :: giveInputRecord(input);
     input.setField(this->origin, _IFT_HeavisideLTF_origin);
     input.setField(this->value, _IFT_HeavisideLTF_value);
 }
-
 } // end namespace oofem

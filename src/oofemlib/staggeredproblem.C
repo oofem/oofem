@@ -51,8 +51,7 @@
 #endif
 
 namespace oofem {
-
-REGISTER_EngngModel( StaggeredProblem );
+REGISTER_EngngModel(StaggeredProblem);
 
 StaggeredProblem :: StaggeredProblem(int i, EngngModel *_master) : EngngModel(i, _master)
 {
@@ -87,15 +86,15 @@ StaggeredProblem :: instanciateYourself(DataReader *dr, InputRecord *ir, const c
 int
 StaggeredProblem :: instanciateDefaultMetaStep(InputRecord *ir)
 {
-  if ( timeDefinedByProb ) {
-    /* just set a nonzero number of steps; 
-       needed for instanciateDefaultMetaStep to pass; overall has no effect as time stepping is deteremined by slave
-    */
-    this->numberOfSteps = 1; 
-  }
-  EngngModel :: instanciateDefaultMetaStep(ir);
-  //there are no slave problems initiated so far, the overall metaStep will defined in a slave problem instantiation
-  return 1;
+    if ( timeDefinedByProb ) {
+        /* just set a nonzero number of steps;
+         * needed for instanciateDefaultMetaStep to pass; overall has no effect as time stepping is deteremined by slave
+         */
+        this->numberOfSteps = 1;
+    }
+    EngngModel :: instanciateDefaultMetaStep(ir);
+    //there are no slave problems initiated so far, the overall metaStep will defined in a slave problem instantiation
+    return 1;
 }
 
 int
@@ -273,7 +272,7 @@ StaggeredProblem :: giveNextStep()
         TimeStep *newStep;
         // first step -> generate initial step
         newStep = giveSolutionStepWhenIcApply();
-        currentStep = new TimeStep(*newStep);
+        currentStep = new TimeStep(* newStep);
     }
 
     previousStep = currentStep;
@@ -299,7 +298,7 @@ StaggeredProblem :: solveYourself()
         EngngModel *sp = this->giveSlaveProblem(timeDefinedByProb);
 
         if ( sp->giveCurrentStep() ) {
-            smstep = sp->giveCurrentStep()->giveMetaStepNumber();
+            smstep = sp->giveCurrentStep()->giveMetatStepumber();
             sjstep = sp->giveMetaStep(smstep)->giveStepRelativeNumber( sp->giveCurrentStep()->giveNumber() ) + 1;
         } else {
             nMetaSteps = sp->giveNumberOfMetaSteps();
@@ -345,17 +344,17 @@ StaggeredProblem :: solveYourself()
 }
 
 void
-StaggeredProblem :: solveYourselfAt(TimeStep *stepN)
+StaggeredProblem :: solveYourselfAt(TimeStep *tStep)
 {
 #ifdef VERBOSE
-    OOFEM_LOG_RELEVANT( "Solving [step number %5d, time %e]\n", stepN->giveNumber(), stepN->giveTargetTime() );
+    OOFEM_LOG_RELEVANT( "Solving [step number %5d, time %e]\n", tStep->giveNumber(), tStep->giveTargetTime() );
 #endif
     for ( int i = 1; i <= nModels; i++ ) {
         EngngModel *emodel = this->giveSlaveProblem(i);
-        emodel->solveYourselfAt(stepN);
+        emodel->solveYourselfAt(tStep);
     }
 
-    stepN->incrementStateCounter();
+    tStep->incrementStateCounter();
 }
 
 int
@@ -374,13 +373,13 @@ StaggeredProblem :: forceEquationNumbering()
 }
 
 void
-StaggeredProblem :: updateYourself(TimeStep *stepN)
+StaggeredProblem :: updateYourself(TimeStep *tStep)
 {
     for ( int i = 1; i <= nModels; i++ ) {
-        this->giveSlaveProblem(i)->updateYourself(stepN);
+        this->giveSlaveProblem(i)->updateYourself(tStep);
     }
 
-    EngngModel :: updateYourself(stepN);
+    EngngModel :: updateYourself(tStep);
 }
 
 void
@@ -394,26 +393,26 @@ StaggeredProblem :: terminate(TimeStep *tStep)
 }
 
 void
-StaggeredProblem :: doStepOutput(TimeStep *stepN)
+StaggeredProblem :: doStepOutput(TimeStep *tStep)
 {
     FILE *File = this->giveOutputStream();
 
     // print output
-    this->printOutputAt(File, stepN);
+    this->printOutputAt(File, tStep);
     // export using export manager
     for ( int i = 1; i <= nModels; i++ ) {
-        this->giveSlaveProblem(i)->giveExportModuleManager()->doOutput(stepN);
+        this->giveSlaveProblem(i)->giveExportModuleManager()->doOutput(tStep);
     }
 }
 
 
 void
-StaggeredProblem :: printOutputAt(FILE *File, TimeStep *stepN)
+StaggeredProblem :: printOutputAt(FILE *File, TimeStep *tStep)
 {
     FILE *slaveFile;
     for ( int i = 1; i <= nModels; i++ ) {
         slaveFile = this->giveSlaveProblem(i)->giveOutputStream();
-        this->giveSlaveProblem(i)->printOutputAt(slaveFile, stepN);
+        this->giveSlaveProblem(i)->printOutputAt(slaveFile, tStep);
     }
 }
 

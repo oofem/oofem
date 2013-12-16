@@ -50,8 +50,7 @@
 #endif
 
 namespace oofem {
-
-REGISTER_Element( Truss2d );
+REGISTER_Element(Truss2d);
 
 Truss2d :: Truss2d(int n, Domain *aDomain) :
     NLStructuralElement(n, aDomain)
@@ -64,14 +63,14 @@ Truss2d :: Truss2d(int n, Domain *aDomain) :
 
 
 void
-Truss2d :: computeBmatrixAt(GaussPoint *aGaussPoint, FloatMatrix &answer, int li, int ui)
+Truss2d :: computeBmatrixAt(GaussPoint *gp, FloatMatrix &answer, int li, int ui)
 //
 // Returns linear part of geometrical equations of the receiver at gp.
 // Returns the linear part of the B matrix
 //
 {
     // eps = B*a = [-cos -sin cos sin]/l *[u1 v1 u2 v2]^t
-    // cos = (x2 - x1) / l 
+    // cos = (x2 - x1) / l
     // sin = (z2 - z1) / l
 
     double l, x1, x2, z1, z2;
@@ -92,15 +91,15 @@ Truss2d :: computeBmatrixAt(GaussPoint *aGaussPoint, FloatMatrix &answer, int li
     answer.at(1, 4) = z2 - z1;
 
     l = this->computeLength();
-    answer.times( 1.0 / l / l );
+    answer.times(1.0 / l / l);
 }
 
 
 void
-Truss2d :: computeBHmatrixAt(GaussPoint *aGaussPoint, FloatMatrix &answer)
+Truss2d :: computeBHmatrixAt(GaussPoint *gp, FloatMatrix &answer)
 {
     // Will be the same as the regular B-matrix
-    this->computeBmatrixAt(aGaussPoint, answer);
+    this->computeBmatrixAt(gp, answer);
 }
 
 
@@ -112,7 +111,7 @@ void Truss2d :: computeGaussPoints()
         numberOfIntegrationRules = 1;
         integrationRulesArray = new IntegrationRule * [ 1 ];
         integrationRulesArray [ 0 ] = new GaussIntegrationRule(1, this, 1, 2);
-        this->giveCrossSection()->setupIntegrationPoints( *integrationRulesArray[0], 1, this );
+        this->giveCrossSection()->setupIntegrationPoints(* integrationRulesArray [ 0 ], 1, this);
     }
 }
 
@@ -141,7 +140,7 @@ Truss2d :: computeLumpedMassMatrix(FloatMatrix &answer, TimeStep *tStep)
 void
 Truss2d :: computeNmatrixAt(const FloatArray &iLocCoord, FloatMatrix &answer)
 // Returns the displacement interpolation matrix {N} of the receiver, eva-
-// luated at aGaussPoint.
+// luated at gp.
 {
     double ksi, n1, n2;
 
@@ -180,12 +179,12 @@ Truss2d :: computeGlobalCoordinates(FloatArray &answer, const FloatArray &lcoord
 }
 
 
-double Truss2d :: computeVolumeAround(GaussPoint *aGaussPoint)
+double Truss2d :: computeVolumeAround(GaussPoint *gp)
 // Returns the length of the receiver. This method is valid only if 1
 // Gauss point is used.
 {
-    double weight  = aGaussPoint->giveWeight();
-    return 0.5 * this->computeLength() * weight * this->giveCrossSection()->give(CS_Area, aGaussPoint);
+    double weight  = gp->giveWeight();
+    return 0.5 * this->computeLength() * weight * this->giveCrossSection()->give(CS_Area, gp);
 }
 
 
@@ -316,7 +315,7 @@ Truss2d :: computeEdgeIpGlobalCoords(FloatArray &answer, GaussPoint *gp, int iEd
 }
 
 void
-Truss2d :: computeEgdeNMatrixAt(FloatMatrix &answer, int iedge, GaussPoint *aGaussPoint)
+Truss2d :: computeEgdeNMatrixAt(FloatMatrix &answer, int iedge, GaussPoint *gp)
 {
     /*
      *
@@ -332,7 +331,7 @@ Truss2d :: computeEgdeNMatrixAt(FloatMatrix &answer, int iedge, GaussPoint *aGau
      * without regarding particular side
      */
 
-    this->computeNmatrixAt( *(aGaussPoint->giveLocalCoordinates()) , answer);
+    this->computeNmatrixAt(* ( gp->giveLocalCoordinates() ), answer);
 }
 
 
@@ -357,13 +356,13 @@ Truss2d :: giveEdgeDofMapping(IntArray &answer, int iEdge) const
 }
 
 double
-Truss2d ::   computeEdgeVolumeAround(GaussPoint *aGaussPoint, int iEdge)
+Truss2d ::   computeEdgeVolumeAround(GaussPoint *gp, int iEdge)
 {
     if ( iEdge != 1 ) { // edge between nodes 1 2
         _error("computeEdgeVolumeAround: wrong egde number");
     }
 
-    double weight  = aGaussPoint->giveWeight();
+    double weight  = gp->giveWeight();
     return 0.5 * this->computeLength() * weight;
 }
 

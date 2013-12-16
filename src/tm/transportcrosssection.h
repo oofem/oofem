@@ -43,12 +43,11 @@
 #define _IFT_SimpleTransportCrossSection_material "mat"
 
 namespace oofem {
-
 class TransportMaterial;
 
 /**
  * Transort cross-section. It's functionality is to be a wrapper around the material behavior.
- * 
+ *
  * @author Mikael Öhman
  */
 class OOFEM_EXPORT TransportCrossSection : public CrossSection
@@ -69,4 +68,3 @@ public:
 };
 } // end namespace oofem
 #endif // transportcrosssection_h
-

@@ -120,7 +120,7 @@ public:
 
 #ifdef __OOFEG
     int giveInternalStateAtNode(FloatArray &answer, InternalStateType type, InternalStateMode mode,
-                                int node, TimeStep *atTime);
+                                int node, TimeStep *tStep);
     // Graphics output
     //virtual void drawYourself(oofegGraphicContext&);
     virtual void drawRawGeometry(oofegGraphicContext &);
@@ -132,12 +132,12 @@ public:
     virtual double computeCriticalTimeStep(TimeStep *tStep);
 
     // three terms for computing their norms due to computing t_supg
-    virtual void computeAdvectionTerm(FloatMatrix &answer, TimeStep *atTime);
-    virtual void computeAdvectionDeltaTerm(FloatMatrix &answer, TimeStep *atTime);
-    virtual void computeMassDeltaTerm(FloatMatrix &answer, TimeStep *atTime);
-    virtual void computeLSICTerm(FloatMatrix &answer, TimeStep *atTime);
-    virtual void computeAdvectionEpsilonTerm(FloatMatrix &answer, TimeStep *atTime);
-    virtual void computeMassEpsilonTerm(FloatMatrix &answer, TimeStep *atTime);
+    virtual void computeAdvectionTerm(FloatMatrix &answer, TimeStep *tStep);
+    virtual void computeAdvectionDeltaTerm(FloatMatrix &answer, TimeStep *tStep);
+    virtual void computeMassDeltaTerm(FloatMatrix &answer, TimeStep *tStep);
+    virtual void computeLSICTerm(FloatMatrix &answer, TimeStep *tStep);
+    virtual void computeAdvectionEpsilonTerm(FloatMatrix &answer, TimeStep *tStep);
+    virtual void computeMassEpsilonTerm(FloatMatrix &answer, TimeStep *tStep);
 
     //virtual int giveNumberOfDofs() { return 1; }
     virtual int giveNumberOfInternalDofManagers() const { return 1; }
@@ -149,13 +149,13 @@ protected:
 
     virtual void computeGaussPoints();
     virtual void computeNuMatrix(FloatMatrix &answer, GaussPoint *gp);
-    virtual void computeUDotGradUMatrix(FloatMatrix &answer, GaussPoint *gp, TimeStep *atTime);
+    virtual void computeUDotGradUMatrix(FloatMatrix &answer, GaussPoint *gp, TimeStep *tStep);
     virtual void computeBMatrix(FloatMatrix &anwer, GaussPoint *gp);
     virtual void computeDivUMatrix(FloatMatrix &answer, GaussPoint *gp);
     virtual void computeNpMatrix(FloatMatrix &answer, GaussPoint *gp);
     virtual void computeGradPMatrix(FloatMatrix &answer, GaussPoint *gp);
-    virtual void computeDivTauMatrix(FloatMatrix &answer, GaussPoint *gp, TimeStep *atTime);
-    virtual void computeGradUMatrix(FloatMatrix &answer, GaussPoint *gp, TimeStep *atTime);
+    virtual void computeDivTauMatrix(FloatMatrix &answer, GaussPoint *gp, TimeStep *tStep);
+    virtual void computeGradUMatrix(FloatMatrix &answer, GaussPoint *gp, TimeStep *tStep);
     virtual int giveNumberOfSpatialDimensions();
     virtual double computeVolumeAround(GaussPoint *gp);
 

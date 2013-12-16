@@ -255,7 +255,7 @@ public:
                                                TimeStep *tStep);
 
 
-    virtual int giveIPValue(FloatArray &answer, GaussPoint *aGaussPoint, InternalStateType type, TimeStep *tStep);
+    virtual int giveIPValue(FloatArray &answer, GaussPoint *gp, InternalStateType type, TimeStep *tStep);
 
     virtual void giveThermalDilatationVector(FloatArray &answer, GaussPoint *gp, TimeStep *tStep);
 
@@ -288,8 +288,8 @@ public:
     virtual int MMI_finish(TimeStep *tStep);
 
 #ifdef __PARALLEL_MODE
-    int packUnknowns(CommunicationBuffer &buff, TimeStep *stepN, GaussPoint *ip);
-    int unpackAndUpdateUnknowns(CommunicationBuffer &buff, TimeStep *stepN, GaussPoint *ip);
+    int packUnknowns(CommunicationBuffer &buff, TimeStep *tStep, GaussPoint *ip);
+    int unpackAndUpdateUnknowns(CommunicationBuffer &buff, TimeStep *tStep, GaussPoint *ip);
     int estimatePackSize(CommunicationBuffer &buff, GaussPoint *ip);
     virtual double predictRelativeComputationalCost(GaussPoint *gp);
     virtual double predictRelativeRedistributionCost(GaussPoint *gp) { return 1.0; }
@@ -323,12 +323,12 @@ protected:
     void transformStiffnessfromPDC(FloatMatrix &de, const FloatMatrix &t);
 
     virtual void givePlaneStressStiffMtrx(FloatMatrix &answer, MatResponseMode mmode,
-                                  GaussPoint *gp,
-                                  TimeStep *tStep);
+                                          GaussPoint *gp,
+                                          TimeStep *tStep);
 
-    virtual void givePlaneStrainStiffMtrx(FloatMatrix & answer,
-                                  MatResponseMode mmode, GaussPoint *gp,
-                                  TimeStep *tStep);
+    virtual void givePlaneStrainStiffMtrx(FloatMatrix &answer,
+                                          MatResponseMode mmode, GaussPoint *gp,
+                                          TimeStep *tStep);
 
     void rotateTensor4(FloatMatrix &Dlocal, const FloatMatrix &t);
     void formTransformationMatrix(FloatMatrix &answer, const FloatMatrix &t, int n);

@@ -64,4 +64,3 @@ public:
 };
 } // end namespace oofem
 #endif // emptycs_h
-

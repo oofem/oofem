@@ -63,9 +63,9 @@ IRResultType
 QTruss1d :: initializeFrom(InputRecord *ir)
 {
     IRResultType result = this->StructuralElement :: initializeFrom(ir);
-	if(result != IRRT_OK) {
-		return result;
-	}
+    if ( result != IRRT_OK ) {
+        return result;
+    }
 
     return IRRT_OK;
 }
@@ -123,7 +123,7 @@ void
 QTruss1d :: computeBHmatrixAt(GaussPoint *gp, FloatMatrix &answer)
 //
 // Returns the [1x3] displacement gradient matrix {BH} of the receiver,
-// evaluated at aGaussPoint.
+// evaluated at gp.
 // @todo not checked if correct
 {
     this->computeBmatrixAt(gp, answer);

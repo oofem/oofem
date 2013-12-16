@@ -170,7 +170,7 @@ public:
      * Get the plastic strain deviator from the material status.
      * @return Plastic strain deviator.
      */
-    const StrainVector &  givePlasticStrain() const { return plasticStrain; }
+    const StrainVector &givePlasticStrain() const { return plasticStrain; }
 
 
     /**
@@ -222,10 +222,10 @@ public:
     double giveEpsLoc() const { return epsloc; }
 
     /**History variable of the modified size-dependent adjustment
-    * Assign the temp value of the damage variable of the damage model.
-    * @param v New temp value of the damage variable.
-    */
-    void letTempEpslocBe ( const double v ) { tempEpsloc = v; }
+     * Assign the temp value of the damage variable of the damage model.
+     * @param v New temp value of the damage variable.
+     */
+    void letTempEpslocBe(const double v) { tempEpsloc = v; }
 
 #endif
 
@@ -246,7 +246,7 @@ public:
      * Get the temp value of the full plastic strain vector from the material status.
      * @return Temp value of plastic strain vector.
      */
-    const StrainVector & giveTempPlasticStrain() const { return tempPlasticStrain; }
+    const StrainVector &giveTempPlasticStrain() const { return tempPlasticStrain; }
 
     /**
      * Get the temp value of the volumetric plastic strain in plane stress.
@@ -359,8 +359,6 @@ public:
      * vertex case yielding).
      */
     void letTempStateFlagBe(int v) { temp_state_flag = v; }
-
-
 };
 
 
@@ -745,7 +743,7 @@ public:
 
     virtual bool isCharacteristicMtrxSymmetric(MatResponseMode rMode) { return false; }
 
-    virtual int setIPValue(const FloatArray &value, GaussPoint *aGaussPoint, InternalStateType type);
+    virtual int setIPValue(const FloatArray &value, GaussPoint *gp, InternalStateType type);
 
     virtual int giveIPValue(FloatArray &answer,
                             GaussPoint *gp,

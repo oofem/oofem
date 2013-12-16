@@ -54,8 +54,7 @@
 #endif
 
 namespace oofem {
-
-REGISTER_Element( PlaneStress2d );
+REGISTER_Element(PlaneStress2d);
 
 FEI2dQuadLin PlaneStress2d :: interpolation(1, 2);
 
@@ -75,10 +74,10 @@ PlaneStress2d :: ~PlaneStress2d()
 { }
 
 void
-PlaneStress2d :: computeBmatrixAt(GaussPoint *aGaussPoint, FloatMatrix &answer, int li, int ui)
+PlaneStress2d :: computeBmatrixAt(GaussPoint *gp, FloatMatrix &answer, int li, int ui)
 //
 // Returns the [3x8] strain-displacement matrix {B} of the receiver,
-// evaluated at aGaussPoint.
+// evaluated at gp.
 // (epsilon_x,epsilon_y,gamma_xy) = B . r
 // r = ( u1,v1,u2,v2,u3,v3,u4,v4)
 {
@@ -88,7 +87,7 @@ PlaneStress2d :: computeBmatrixAt(GaussPoint *aGaussPoint, FloatMatrix &answer, 
     FloatArray coord;
 #endif
 
-    this->interpolation.evaldNdx( dnx, * aGaussPoint->giveCoordinates(), FEIElementGeometryWrapper(this) );
+    this->interpolation.evaldNdx( dnx, * gp->giveCoordinates(), FEIElementGeometryWrapper(this) );
 
     answer.resize(3, 8);
     answer.zero();
@@ -112,19 +111,18 @@ PlaneStress2d :: computeBmatrixAt(GaussPoint *aGaussPoint, FloatMatrix &answer, 
 
 
 void
-PlaneStress2d :: computeBHmatrixAt(GaussPoint *aGaussPoint, FloatMatrix &answer)
+PlaneStress2d :: computeBHmatrixAt(GaussPoint *gp, FloatMatrix &answer)
 //
 // Returns the [4x8] displacement gradient matrix {BH} of the receiver,
-// evaluated at aGaussPoint.
+// evaluated at gp.
 // @todo not checked if correct
 {
-
     FloatMatrix dnx;
 #ifdef  PlaneStress2d_reducedShearIntegration
     FloatArray coord;
 #endif
 
-    this->interpolation.evaldNdx( dnx, * aGaussPoint->giveCoordinates(), FEIElementGeometryWrapper(this) );
+    this->interpolation.evaldNdx( dnx, * gp->giveCoordinates(), FEIElementGeometryWrapper(this) );
 
     answer.resize(4, 8);
 
@@ -153,12 +151,12 @@ PlaneStress2d :: computeGaussPoints()
         numberOfIntegrationRules = 1;
         integrationRulesArray = new IntegrationRule * [ 1 ];
         integrationRulesArray [ 0 ] = new GaussIntegrationRule(1, this, 1, 3);
-        this->giveCrossSection()->setupIntegrationPoints( *integrationRulesArray[0], numberOfGaussPoints, this );
+        this->giveCrossSection()->setupIntegrationPoints(* integrationRulesArray [ 0 ], numberOfGaussPoints, this);
     }
 }
 
 void
-PlaneStress2d :: computeEgdeNMatrixAt(FloatMatrix &answer, int iedge, GaussPoint *aGaussPoint)
+PlaneStress2d :: computeEgdeNMatrixAt(FloatMatrix &answer, int iedge, GaussPoint *gp)
 {
     /*
      *
@@ -175,7 +173,7 @@ PlaneStress2d :: computeEgdeNMatrixAt(FloatMatrix &answer, int iedge, GaussPoint
      */
 
     FloatArray n(2);
-    this->interpolation.edgeEvalN( n, iedge, * aGaussPoint->giveCoordinates(), FEIElementGeometryWrapper(this) );
+    this->interpolation.edgeEvalN( n, iedge, * gp->giveCoordinates(), FEIElementGeometryWrapper(this) );
 
     answer.resize(2, 4);
     answer.zero();
@@ -222,11 +220,11 @@ PlaneStress2d :: giveEdgeDofMapping(IntArray &answer, int iEdge) const
 }
 
 double
-PlaneStress2d :: computeEdgeVolumeAround(GaussPoint *aGaussPoint, int iEdge)
+PlaneStress2d :: computeEdgeVolumeAround(GaussPoint *gp, int iEdge)
 {
-    double result = this->interpolation.edgeGiveTransformationJacobian( iEdge, * aGaussPoint->giveCoordinates(),
-                                                                       FEIElementGeometryWrapper(this) );
-    return result *aGaussPoint->giveWeight();
+    double result = this->interpolation.edgeGiveTransformationJacobian( iEdge, * gp->giveCoordinates(),
+                                                                        FEIElementGeometryWrapper(this) );
+    return result * gp->giveWeight();
 }
 
 void
@@ -274,16 +272,16 @@ PlaneStress2d :: computeLoadLEToLRotationMatrix(FloatMatrix &answer, int iEdge, 
 
 
 double
-PlaneStress2d :: computeVolumeAround(GaussPoint *aGaussPoint)
-// Returns the portion of the receiver which is attached to aGaussPoint.
+PlaneStress2d :: computeVolumeAround(GaussPoint *gp)
+// Returns the portion of the receiver which is attached to gp.
 {
     double determinant, weight, thickness, volume;
-    determinant = fabs( this->interpolation.giveTransformationJacobian( * aGaussPoint->giveCoordinates(),
-                                                                       FEIElementGeometryWrapper(this) ) );
+    determinant = fabs( this->interpolation.giveTransformationJacobian( * gp->giveCoordinates(),
+                                                                        FEIElementGeometryWrapper(this) ) );
 
 
-    weight      = aGaussPoint->giveWeight();
-    thickness   = this->giveCrossSection()->give(CS_Thickness, aGaussPoint);
+    weight      = gp->giveWeight();
+    thickness   = this->giveCrossSection()->give(CS_Thickness, gp);
     volume      = determinant * weight * thickness;
 
     return volume;
@@ -294,9 +292,9 @@ PlaneStress2d :: initializeFrom(InputRecord *ir)
 {
     numberOfGaussPoints = 4;
     IRResultType result = this->NLStructuralElement :: initializeFrom(ir);
-	if(result != IRRT_OK) {
-		return result;
-	}
+    if ( result != IRRT_OK ) {
+        return result;
+    }
 
     if ( numberOfGaussPoints != 1 && numberOfGaussPoints != 4 && numberOfGaussPoints != 9 && numberOfGaussPoints != 16 ) {
         numberOfGaussPoints = 4;
@@ -346,8 +344,10 @@ PlaneStress2d :: giveCharacteristicSize(GaussPoint *gp, FloatArray &normalToCrac
     int nGP = iRule->giveNumberOfIntegrationPoints();
     for ( int i = 0; i < nGP; i++ ) {
         GaussPoint *gpi = iRule->getIntegrationPoint(i);
-        StructuralMaterialStatus *matstatus = dynamic_cast< StructuralMaterialStatus* >( gpi->giveMaterialStatus() );
-        if (matstatus) sumstrain.add( matstatus->giveTempStrainVector() );
+        StructuralMaterialStatus *matstatus = dynamic_cast< StructuralMaterialStatus * >( gpi->giveMaterialStatus() );
+        if ( matstatus ) {
+            sumstrain.add( matstatus->giveTempStrainVector() );
+        }
     }
 
     StrainVector sumstrainvec(sumstrain, _PlaneStress);
@@ -463,7 +463,7 @@ PlaneStress2d :: HuertaErrorEstimatorI_setupRefinedElementProblem(RefinedElement
     static int sideNode [ 4 ] [ 2 ] = { { 1, 2 }, { 2, 3 }, { 3, 4 }, { 4, 1 } };
 
     if ( sMode == HuertaErrorEstimatorInterface :: NodeMode ||
-        ( sMode == HuertaErrorEstimatorInterface :: BCMode && aMode == HuertaErrorEstimator :: HEE_linear ) ) {
+         ( sMode == HuertaErrorEstimatorInterface :: BCMode && aMode == HuertaErrorEstimator :: HEE_linear ) ) {
         for ( inode = 0; inode < nodes; inode++ ) {
             corner [ inode ] = element->giveNode(inode + 1)->giveCoordinates();
             if ( corner [ inode ]->giveSize() != 3 ) {
@@ -984,7 +984,7 @@ PlaneStress2d :: DirectErrorIndicatorRCI_giveCharacteristicSize()
 
 int
 PlaneStress2d :: EIPrimaryUnknownMI_computePrimaryUnknownVectorAt(ValueModeType mode,
-                                                                  TimeStep *stepN, const FloatArray &coords,
+                                                                  TimeStep *tStep, const FloatArray &coords,
                                                                   FloatArray &answer)
 {
     FloatArray lcoords, u;
@@ -1004,7 +1004,7 @@ PlaneStress2d :: EIPrimaryUnknownMI_computePrimaryUnknownVectorAt(ValueModeType 
     n.at(1, 5) = n.at(2, 6) = ni.at(3);
     n.at(1, 7) = n.at(2, 8) = ni.at(4);
 
-    this->computeVectorOf(EID_MomentumBalance, mode, stepN, u);
+    this->computeVectorOf(EID_MomentumBalance, mode, tStep, u);
     answer.beProductOf(n, u);
 
     return result;

@@ -55,8 +55,7 @@
 #endif
 
 namespace oofem {
-
-REGISTER_Element( LIBeam3d2 );
+REGISTER_Element(LIBeam3d2);
 
 LIBeam3d2 :: LIBeam3d2(int n, Domain *aDomain) : NLStructuralElement(n, aDomain), tc(), tempTc()
 {
@@ -69,7 +68,7 @@ LIBeam3d2 :: LIBeam3d2(int n, Domain *aDomain) : NLStructuralElement(n, aDomain)
 
 
 void
-LIBeam3d2 :: computeBmatrixAt(GaussPoint *aGaussPoint, FloatMatrix &answer, int li, int ui)
+LIBeam3d2 :: computeBmatrixAt(GaussPoint *gp, FloatMatrix &answer, int li, int ui)
 // Returns the strain matrix of the receiver.
 // eeps = {\eps_x, \gamma_xz, \gamma_xy, \der{phi_x}{x}, \kappa_y, \kappa_z}^T
 {
@@ -81,7 +80,7 @@ LIBeam3d2 :: computeBmatrixAt(GaussPoint *aGaussPoint, FloatMatrix &answer, int 
         l = this->giveLength();
     }
 
-    ksi   = aGaussPoint->giveCoordinate(1);
+    ksi   = gp->giveCoordinate(1);
 
     answer.resize(6, 12);
     answer.zero();
@@ -122,7 +121,7 @@ LIBeam3d2 :: computeGaussPoints()
         numberOfIntegrationRules = 1;
         integrationRulesArray = new IntegrationRule * [ 1 ];
         integrationRulesArray [ 0 ] = new GaussIntegrationRule(1, this, 1, 2);
-        this->giveCrossSection()->setupIntegrationPoints( *integrationRulesArray[0], 1, this );
+        this->giveCrossSection()->setupIntegrationPoints(* integrationRulesArray [ 0 ], 1, this);
     }
 }
 
@@ -146,7 +145,7 @@ LIBeam3d2 :: computeLumpedMassMatrix(FloatMatrix &answer, TimeStep *tStep)
 void
 LIBeam3d2 :: computeNmatrixAt(const FloatArray &iLocCoord, FloatMatrix &answer)
 // Returns the displacement interpolation matrix {N} of the receiver, eva-
-// luated at aGaussPoint.
+// luated at gp.
 {
     double ksi, n1, n2;
 
@@ -218,11 +217,11 @@ LIBeam3d2 :: computeGtoLRotationMatrix(FloatMatrix &answer)
 
 
 double
-LIBeam3d2 :: computeVolumeAround(GaussPoint *aGaussPoint)
+LIBeam3d2 :: computeVolumeAround(GaussPoint *gp)
 // Returns the length of the receiver. This method is valid only if 1
 // Gauss point is used.
 {
-    double weight  = aGaussPoint->giveWeight();
+    double weight  = gp->giveWeight();
     return weight * 0.5 * this->giveLength();
 }
 
@@ -324,7 +323,7 @@ LIBeam3d2 :: initializeFrom(InputRecord *ir)
 
 
 void
-LIBeam3d2 :: computeEgdeNMatrixAt(FloatMatrix &answer, int iedge, GaussPoint *aGaussPoint)
+LIBeam3d2 :: computeEgdeNMatrixAt(FloatMatrix &answer, int iedge, GaussPoint *gp)
 {
     /*
      *
@@ -340,7 +339,7 @@ LIBeam3d2 :: computeEgdeNMatrixAt(FloatMatrix &answer, int iedge, GaussPoint *aG
      * without regarding particular side
      */
 
-    this->computeNmatrixAt(*(aGaussPoint->giveLocalCoordinates()), answer);
+    this->computeNmatrixAt(* ( gp->giveLocalCoordinates() ), answer);
 }
 
 
@@ -364,13 +363,13 @@ LIBeam3d2 :: giveEdgeDofMapping(IntArray &answer, int iEdge) const
 
 
 double
-LIBeam3d2 :: computeEdgeVolumeAround(GaussPoint *aGaussPoint, int iEdge)
+LIBeam3d2 :: computeEdgeVolumeAround(GaussPoint *gp, int iEdge)
 {
     if ( iEdge != 1 ) { // edge between nodes 1 2
         _error("computeEdgeVolumeAround: wrong egde number");
     }
 
-    double weight  = aGaussPoint->giveWeight();
+    double weight  = gp->giveWeight();
     return 0.5 * this->giveLength() * weight;
 }
 
@@ -406,9 +405,9 @@ LIBeam3d2 :: computeLoadGToLRotationMtrx(FloatMatrix &answer)
 void
 LIBeam3d2 :: computeBodyLoadVectorAt(FloatArray &answer, Load *load, TimeStep *tStep, ValueModeType mode)
 {
-  FloatArray lc(1);
-  NLStructuralElement :: computeBodyLoadVectorAt(answer, load, tStep, mode);
-  answer.times(this->giveCrossSection()->give(CS_Area, &lc, NULL, this)); 
+    FloatArray lc(1);
+    NLStructuralElement :: computeBodyLoadVectorAt(answer, load, tStep, mode);
+    answer.times( this->giveCrossSection()->give(CS_Area, & lc, NULL, this) );
 }
 
 
@@ -754,7 +753,7 @@ LIBeam3d2 :: drawDeformedGeometry(oofegGraphicContext &gc, UnknownType type)
         p [ 1 ].y = p [ 0 ].y + coeff *tc.at(2, i);
         p [ 1 ].z = p [ 0 ].z + coeff *tc.at(3, i);
 
-        EASValsSetColor( ColorGetPixelFromString(const_cast< char * >(colors [ i - 1 ]), & succ) );
+        EASValsSetColor( ColorGetPixelFromString(const_cast< char * >( colors [ i - 1 ] ), & succ) );
 
         go = CreateLine3D(p);
         EGWithMaskChangeAttributes(WIDTH_MASK | COLOR_MASK | LAYER_MASK, go);

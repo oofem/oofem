@@ -47,7 +47,6 @@
 //@}
 
 namespace oofem {
-
 /**
  *
  * Class for an anisotropic linear transport material. The constitutive equation is given as
@@ -71,9 +70,9 @@ public:
 
     virtual void giveFluxVector(FloatArray &answer, GaussPoint *gp, const FloatArray &grad, const FloatArray &field, TimeStep *tStep);
 
-    virtual void giveCharacteristicMatrix(FloatMatrix &answer, MatResponseMode mode, GaussPoint *gp, TimeStep *atTime);
+    virtual void giveCharacteristicMatrix(FloatMatrix &answer, MatResponseMode mode, GaussPoint *gp, TimeStep *tStep);
 
-    virtual double giveCharacteristicValue(MatResponseMode mode, GaussPoint *gp, TimeStep *atTime);
+    virtual double giveCharacteristicValue(MatResponseMode mode, GaussPoint *gp, TimeStep *tStep);
 
     virtual const char *giveInputRecordName() const { return _IFT_AnisotropicMassTransferMaterial_Name; }
     virtual const char *giveClassName() const { return "AnisotropicMassTransferMaterial"; }

@@ -37,7 +37,6 @@
 #include "contextioerr.h"
 
 namespace oofem {
-
 void
 TransportMaterialStatus :: setTempGradient(const FloatArray &grad)
 {
@@ -68,8 +67,7 @@ TransportMaterial :: updateInternalState(const FloatArray &stateVec, GaussPoint 
 
 TransportMaterialStatus :: TransportMaterialStatus(int n, Domain *d, GaussPoint *g) :
     MaterialStatus(n, d, g), temp_field(), temp_gradient(), temp_flux(), field(), gradient(), flux(), maturity(0.)
-{
-}
+{}
 
 void TransportMaterialStatus :: printOutputAt(FILE *File, TimeStep *tNow)
 // Print the state variable and the flow vector on the data file.
@@ -182,18 +180,18 @@ TransportMaterialStatus :: restoreContext(DataStream *stream, ContextMode mode, 
 
 
 int
-TransportMaterial :: giveIPValue(FloatArray &answer, GaussPoint *aGaussPoint, InternalStateType type, TimeStep *atTime)
+TransportMaterial :: giveIPValue(FloatArray &answer, GaussPoint *gp, InternalStateType type, TimeStep *tStep)
 // IST_Humidity must be overriden!
 {
-    TransportMaterialStatus *ms = static_cast< TransportMaterialStatus * >( this->giveStatus(aGaussPoint) );
+    TransportMaterialStatus *ms = static_cast< TransportMaterialStatus * >( this->giveStatus(gp) );
     if ( type == IST_Temperature || type == IST_MassConcentration_1 || type == IST_Humidity ) {
         FloatArray vec = ms->giveField();
         answer.resize(1);
         answer.at(1) = vec.at( ( type == IST_Temperature ) ? 1 : 2 );
         return 1;
     } else if ( type == IST_TemperatureFlow ) {
-        TransportElement *transpElem = static_cast< TransportElement * >( aGaussPoint->giveElement() );
-        transpElem->computeFlow(answer, aGaussPoint, atTime);
+        TransportElement *transpElem = static_cast< TransportElement * >( gp->giveElement() );
+        transpElem->computeFlow(answer, gp, tStep);
         return 1;
     } else if ( type == IST_Velocity ) { ///@todo Shouldn't be named velocity.. instead, "MassFlow" or something suitable like that.
         answer = ms->giveFlux();
@@ -205,22 +203,21 @@ TransportMaterial :: giveIPValue(FloatArray &answer, GaussPoint *aGaussPoint, In
         return 1;
     } else if ( type == IST_Density ) {
         answer.resize(1);
-        answer.at(1) = this->give('d', aGaussPoint);
+        answer.at(1) = this->give('d', gp);
         return 1;
     } else if ( type == IST_HeatCapacity ) {
         answer.resize(1);
-        answer.at(1) = this->give('c', aGaussPoint);
+        answer.at(1) = this->give('c', gp);
         return 1;
     } else if ( type == IST_ThermalConductivityIsotropic ) {
         answer.resize(1);
-        answer.at(1) = this->give('k', aGaussPoint);
+        answer.at(1) = this->give('k', gp);
         return 1;
     } else if ( type == IST_Maturity ) {
         answer.resize(1);
         answer.at(1) = ms->giveMaturity();
         return 1;
     }
-    return Material :: giveIPValue(answer, aGaussPoint, type, atTime);
+    return Material :: giveIPValue(answer, gp, type, tStep);
 }
-
 } // end namespace oofem

@@ -80,8 +80,8 @@ public:
         IRResultType result;
         IntArray tempA, tempB, tempC;
         IR_GIVE_OPTIONAL_FIELD(ir, tempB, _IFT_ActiveBoundaryCondition_elementSides);
-        for (int i = 0; i < tempB.giveSize()/2; ++i) {
-            this->addElementSide(tempB(i*2),tempB(i*2+1));
+        for ( int i = 0; i < tempB.giveSize() / 2; ++i ) {
+            this->addElementSide( tempB(i * 2), tempB(i * 2 + 1) );
         }
 
         return IRRT_OK;
@@ -94,7 +94,7 @@ public:
      * @param elem Element number.
      * @param side Side number.
      */
-    virtual void addElementSide(int elem, int side) { OOFEM_ERROR2("%s :: addElement - Not supported", giveClassName()); }
+    virtual void addElementSide(int elem, int side) { OOFEM_ERROR2( "%s :: addElement - Not supported", giveClassName() ); }
     //@}
 
     /**
@@ -122,8 +122,8 @@ public:
      * @return Equivalent of the sum of the element norm (squared) of assembled vector.
      */
     virtual void assembleVector(FloatArray &answer, TimeStep *tStep, EquationID eid,
-                                  CharType type, ValueModeType mode,
-                                  const UnknownNumberingScheme &s, FloatArray *eNorms = NULL) {}
+                                CharType type, ValueModeType mode,
+                                const UnknownNumberingScheme &s, FloatArray *eNorms = NULL) {}
 
     /**
      * Gives a list of location arrays that will be assembled.
@@ -138,7 +138,7 @@ public:
      * @param r_s Row numbering scheme.
      * @param c_s Column numbering scheme.
      */
-    virtual void giveLocationArrays(std::vector<IntArray> &rows, std::vector<IntArray> &cols, EquationID eid, CharType type,
+    virtual void giveLocationArrays(std :: vector< IntArray > &rows, std :: vector< IntArray > &cols, EquationID eid, CharType type,
                                     const UnknownNumberingScheme &r_s, const UnknownNumberingScheme &c_s) {}
 
 
@@ -174,7 +174,7 @@ public:
      */
     virtual int giveNumberOfMasterDofs(ActiveDof *dof)
     {
-        OOFEM_ERROR2("%s :: giveNumberOfPrimaryMasterDofs - Not supported by bc.", giveClassName());
+        OOFEM_ERROR2( "%s :: giveNumberOfPrimaryMasterDofs - Not supported by bc.", giveClassName() );
         return 0;
     }
     /**
@@ -185,12 +185,12 @@ public:
      */
     virtual Dof *giveMasterDof(ActiveDof *dof, int mdof)
     {
-        OOFEM_ERROR2("%s :: giveMasterDof - Not supported by bc.", giveClassName());
+        OOFEM_ERROR2( "%s :: giveMasterDof - Not supported by bc.", giveClassName() );
         return NULL;
     }
     virtual void computeDofTransformation(ActiveDof *dof, FloatArray &masterContribs)
     {
-        OOFEM_ERROR2("%s :: computeDofTransformation - Not supported by bc.", giveClassName());
+        OOFEM_ERROR2( "%s :: computeDofTransformation - Not supported by bc.", giveClassName() );
     }
     /**
      * Computes the value of the dof.
@@ -202,7 +202,7 @@ public:
      */
     virtual double giveUnknown(PrimaryField &field, ValueModeType mode, TimeStep *tStep, ActiveDof *dof)
     {
-        OOFEM_ERROR2("%s :: giveUnknown - Not supported by bc.", giveClassName());
+        OOFEM_ERROR2( "%s :: giveUnknown - Not supported by bc.", giveClassName() );
         return 0.0;
     }
     /**
@@ -214,11 +214,10 @@ public:
      */
     virtual double giveUnknown(ValueModeType mode, TimeStep *tStep, ActiveDof *dof)
     {
-        OOFEM_ERROR2("%s :: giveUnknown - Not supported by bc.", giveClassName());
+        OOFEM_ERROR2( "%s :: giveUnknown - Not supported by bc.", giveClassName() );
         return 0.0;
     }
     //@}
 };
 } // end namespace oofem
 #endif // activebc_h
-

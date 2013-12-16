@@ -86,35 +86,35 @@ public:
 
     virtual FEInterpolation *giveInterpolation() const { return & interp; }
 
-    virtual void computeAccelerationTerm_MB(FloatMatrix &answer, TimeStep *atTime);
-    virtual void computeAdvectionTerm_MB(FloatArray &answer, TimeStep *atTime);
-    virtual void computeAdvectionDerivativeTerm_MB(FloatMatrix &answer, TimeStep *atTime);
-    virtual void computeDiffusionTerm_MB(FloatArray &answer, TimeStep *atTime);
-    virtual void computeDiffusionDerivativeTerm_MB(FloatMatrix &answer, MatResponseMode mode, TimeStep *atTime);
-    virtual void computePressureTerm_MB(FloatMatrix &answer, TimeStep *atTime);
-    virtual void computeLSICStabilizationTerm_MB(FloatMatrix &answer, TimeStep *atTime);
-    virtual void computeLinearAdvectionTerm_MC(FloatMatrix &answer, TimeStep *atTime);
-    virtual void computeAdvectionTerm_MC(FloatArray &answer, TimeStep *atTime);
-    virtual void computeAdvectionDerivativeTerm_MC(FloatMatrix &answer, TimeStep *atTime);
-    virtual void computeDiffusionDerivativeTerm_MC(FloatMatrix &answer, TimeStep *atTime) {
+    virtual void computeAccelerationTerm_MB(FloatMatrix &answer, TimeStep *tStep);
+    virtual void computeAdvectionTerm_MB(FloatArray &answer, TimeStep *tStep);
+    virtual void computeAdvectionDerivativeTerm_MB(FloatMatrix &answer, TimeStep *tStep);
+    virtual void computeDiffusionTerm_MB(FloatArray &answer, TimeStep *tStep);
+    virtual void computeDiffusionDerivativeTerm_MB(FloatMatrix &answer, MatResponseMode mode, TimeStep *tStep);
+    virtual void computePressureTerm_MB(FloatMatrix &answer, TimeStep *tStep);
+    virtual void computeLSICStabilizationTerm_MB(FloatMatrix &answer, TimeStep *tStep);
+    virtual void computeLinearAdvectionTerm_MC(FloatMatrix &answer, TimeStep *tStep);
+    virtual void computeAdvectionTerm_MC(FloatArray &answer, TimeStep *tStep);
+    virtual void computeAdvectionDerivativeTerm_MC(FloatMatrix &answer, TimeStep *tStep);
+    virtual void computeDiffusionDerivativeTerm_MC(FloatMatrix &answer, TimeStep *tStep) {
         answer.resize(3, 6);
         answer.zero();
     }
-    virtual void computeDiffusionTerm_MC(FloatArray &answer, TimeStep *atTime) {
+    virtual void computeDiffusionTerm_MC(FloatArray &answer, TimeStep *tStep) {
         answer.resize(3);
         answer.zero();
     }
-    virtual void computeAccelerationTerm_MC(FloatMatrix &answer, TimeStep *atTime);
-    virtual void computePressureTerm_MC(FloatMatrix &answer, TimeStep *atTime);
-    virtual void computeBCRhsTerm_MB(FloatArray &answer, TimeStep *atTime);
-    virtual void computeBCRhsTerm_MC(FloatArray &answer, TimeStep *atTime);
+    virtual void computeAccelerationTerm_MC(FloatMatrix &answer, TimeStep *tStep);
+    virtual void computePressureTerm_MC(FloatMatrix &answer, TimeStep *tStep);
+    virtual void computeBCRhsTerm_MB(FloatArray &answer, TimeStep *tStep);
+    virtual void computeBCRhsTerm_MC(FloatArray &answer, TimeStep *tStep);
 
-    virtual void computeSlipWithFrictionBCTerm_MB(FloatMatrix &answer, Load *load, int side, TimeStep *atTime);
-    virtual void computePenetrationWithResistanceBCTerm_MB(FloatMatrix &answer, Load *load, int side, TimeStep *atTime);
-    virtual void computeOutFlowBCTerm_MB(FloatMatrix &answer, int side, TimeStep *atTime);
+    virtual void computeSlipWithFrictionBCTerm_MB(FloatMatrix &answer, Load *load, int side, TimeStep *tStep);
+    virtual void computePenetrationWithResistanceBCTerm_MB(FloatMatrix &answer, Load *load, int side, TimeStep *tStep);
+    virtual void computeOutFlowBCTerm_MB(FloatMatrix &answer, int side, TimeStep *tStep);
 
-    virtual void computeHomogenizedReinforceTerm_MB(FloatMatrix &answer, Load *load, TimeStep *atTime);
-    virtual void computeHomogenizedReinforceTerm_MC(FloatMatrix &answer, Load *load, TimeStep *atTime);
+    virtual void computeHomogenizedReinforceTerm_MB(FloatMatrix &answer, Load *load, TimeStep *tStep);
+    virtual void computeHomogenizedReinforceTerm_MC(FloatMatrix &answer, Load *load, TimeStep *tStep);
 
     virtual void updateStabilizationCoeffs(TimeStep *tStep);
     virtual double computeCriticalTimeStep(TimeStep *tStep);
@@ -144,7 +144,7 @@ public:
 
     virtual int  EIPrimaryFieldI_evaluateFieldVectorAt(FloatArray &answer, PrimaryField &pf,
                                                        FloatArray &coords, IntArray &dofId, ValueModeType mode,
-                                                       TimeStep *atTime);
+                                                       TimeStep *tStep);
 
     virtual double computeLEPLICVolumeFraction(const FloatArray &n, const double p, LEPlic *matInterface, bool updFlag);
     virtual void formMaterialVolumePoly(Polygon &matvolpoly, LEPlic *matInterface,
@@ -156,7 +156,7 @@ public:
     virtual void formMyVolumePoly(Polygon &myPoly, LEPlic *mat_interface, bool updFlag);
     virtual Element *giveElement() { return this; }
     virtual double computeMyVolume(LEPlic *matInterface, bool updFlag);
-    virtual double computeVolumeAround(GaussPoint *aGaussPoint);
+    virtual double computeVolumeAround(GaussPoint *gp);
     virtual double computeCriticalLEPlicTimeStep(TimeStep *tStep);
 
     virtual Element *ZZNodalRecoveryMI_giveElement() { return this; }
@@ -181,7 +181,7 @@ public:
 
 #ifdef __OOFEG
     int giveInternalStateAtNode(FloatArray &answer, InternalStateType type, InternalStateMode mode,
-                                int node, TimeStep *atTime);
+                                int node, TimeStep *tStep);
     // Graphics output
     //virtual void drawYourself(oofegGraphicContext&);
     virtual void drawRawGeometry(oofegGraphicContext &);

@@ -70,11 +70,11 @@ public:
      * @param coords Coordinate.
      * @param dofId IDs of DOFs to evaluate.
      * @param mode Mode of field.
-     * @param atTime Time step to evaluate at.
+     * @param tStep Time step to evaluate at.
      * @return Zero if ok, nonzero when error encountered.
      */
     virtual int EIPrimaryFieldI_evaluateFieldVectorAt(FloatArray &answer, PrimaryField &pf,
-        FloatArray &coords, IntArray &dofId, ValueModeType mode, TimeStep *atTime) = 0;
+                                                      FloatArray &coords, IntArray &dofId, ValueModeType mode, TimeStep *tStep) = 0;
     //@}
 };
 
@@ -98,7 +98,7 @@ public:
 class OOFEM_EXPORT PrimaryField : public Field
 {
 protected:
-    int actualStepNumber;
+    int actualtStepumber;
     int actualStepIndx;
     int nHistVectors;
     AList< FloatArray >solutionVectors;
@@ -125,81 +125,81 @@ public:
     /**
      * Copy unknowns from previous solution or DOF's dictionary to the solution vector
      * @param mode what the unknown describes (increment, total value etc.).
-     * @param atTime Time of interest.
+     * @param tStep Time of interest.
      * @param answer Resulting vector.
      */
-    virtual void initialize(ValueModeType mode, TimeStep *atTime, FloatArray &answer, const UnknownNumberingScheme &s);
+    virtual void initialize(ValueModeType mode, TimeStep *tStep, FloatArray &answer, const UnknownNumberingScheme &s);
 
     /**
      * @param dof Pointer to DOF.
      * @param mode What the unknown describes (increment, total value etc.).
-     * @param atTime Time step of interest.
+     * @param tStep Time step of interest.
      * @return Value of interest at given DOF.
      */
-    virtual double giveUnknownValue(Dof *dof, ValueModeType mode, TimeStep *atTime);
+    virtual double giveUnknownValue(Dof *dof, ValueModeType mode, TimeStep *tStep);
     /**
      * Evaluates the field at given point
      * @param answer Evaluated field at point.
      * @param coords Coordinates of the point of interest.
      * @param mode Mode of evaluated unknowns.
-     * @param atTime Time step of interest.
+     * @param tStep Time step of interest.
      * @return Error code (0-ok, 1-point not found in domain).
      */
     virtual int evaluateAt(FloatArray &answer, FloatArray &coords,
-                           ValueModeType mode, TimeStep *atTime);
+                           ValueModeType mode, TimeStep *tStep);
     /**
      * Evaluates the field at given DofManager
      * @param answer Evaluated field at dman.
      * @param dman DOF manager to evaluate at.
      * @param mode Mode of evaluated unknowns.
-     * @param atTime Time step of interest.
+     * @param tStep Time step of interest.
      * @return Error code (0-ok, 1-point not found in domain).
      */
-    virtual int evaluateAt(FloatArray &answer, DofManager* dman,
-                           ValueModeType mode, TimeStep *atTime);
+    virtual int evaluateAt(FloatArray &answer, DofManager *dman,
+                           ValueModeType mode, TimeStep *tStep);
     /**
      * Evaluates the field at given DOF manager, allows to select specific
      * dofs using mask
      * @param answer Evaluated field at dman.
      * @param dman DOF manager of interest.
      * @param mode Mode of evaluated unknowns.
-     * @param atTime Time step of interest.
+     * @param tStep Time step of interest.
      * @param dofId Dof mask, id set to NULL, all Dofs evaluated.
      * @return Error code (0=ok, 1=point not found in domain).
      */
-    virtual int __evaluateAt(FloatArray &answer, DofManager* dman,
-                    ValueModeType mode, TimeStep *atTime, IntArray *dofId);
+    virtual int __evaluateAt(FloatArray &answer, DofManager *dman,
+                             ValueModeType mode, TimeStep *tStep, IntArray *dofId);
     /**
      * Evaluates the field at given point, allows to select specific
      * dofs using mask.
      * @param answer Evaluated field at coords.
      * @param coords Coordinates of the point of interest.
      * @param mode Mode of evaluated unknowns.
-     * @param atTime Time step of interest.
+     * @param tStep Time step of interest.
      * @param dofId Dof mask, id set to NULL, all Dofs evaluated.
      * @return Error code (0=ok, 1=point not found in domain)
      */
-    virtual int __evaluateAt(FloatArray &answer, FloatArray& coords,
-                    ValueModeType mode, TimeStep *atTime, IntArray *dofId);
+    virtual int __evaluateAt(FloatArray &answer, FloatArray &coords,
+                             ValueModeType mode, TimeStep *tStep, IntArray *dofId);
     /**
-     * @param atTime Time step to take solution for.
+     * @param tStep Time step to take solution for.
      * @return Solution vector for requested time step.
      */
-    virtual FloatArray *giveSolutionVector(TimeStep *atTime);
+    virtual FloatArray *giveSolutionVector(TimeStep *tStep);
 
     /**
      * Project vectorToStore back to DOF's dictionary
      * @param vectorToStore Vector with the size of number of equations.
      * @param mode Mode of the unknown (increment, total value etc.)
-     * @param atTime Time step unknowns belong to.
+     * @param tStep Time step unknowns belong to.
      */
-    virtual void update(ValueModeType mode, TimeStep *atTime, FloatArray &vectorToStore) { };
+    virtual void update(ValueModeType mode, TimeStep *tStep, FloatArray &vectorToStore) { };
 
     /**
      * Brings up a new solution vector for given time step.
-     * @param atTime Time step for new solution vector.
+     * @param tStep Time step for new solution vector.
      */
-    virtual void advanceSolution(TimeStep *atTime);
+    virtual void advanceSolution(TimeStep *tStep);
 
     virtual contextIOResultType saveContext(DataStream *stream, ContextMode mode);
     virtual contextIOResultType restoreContext(DataStream *stream, ContextMode mode);
@@ -210,9 +210,8 @@ public:
     virtual const char *giveClassName() const { return "PrimaryField"; }
 
 protected:
-    int resolveIndx(TimeStep *atTime, int shift);
+    int resolveIndx(TimeStep *tStep, int shift);
     virtual FloatArray *giveSolutionVector(int);
 };
-
 } // end namespace oofem
 #endif // primaryfield_h

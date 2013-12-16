@@ -65,7 +65,7 @@ public:
     /**
      * Updates the position of interface according to state reached in given solution step.
      */
-    virtual void updatePosition(TimeStep *atTime) = 0;
+    virtual void updatePosition(TimeStep *tStep) = 0;
     /**
      * Updates element state after equilibrium in time step has been reached.
      * All temporary history variables,

@@ -60,16 +60,17 @@ UserDefDirichletBC :: ~UserDefDirichletBC()
 
 
 double
-UserDefDirichletBC :: give(Dof *dof, ValueModeType mode, TimeStep *stepN)
+UserDefDirichletBC :: give(Dof *dof, ValueModeType mode, TimeStep *tStep)
 {
-    double factor = this->giveLoadTimeFunction()->evaluate(stepN, mode);
+    double factor = this->giveLoadTimeFunction()->evaluate(tStep, mode);
     DofManager *dMan = dof->giveDofManager();
 
 
     /*
-     * The Python function takes two input arguments:
+     * The Python function takes three input arguments:
      *  1) An array with node coordinates
      *  2) The dof id
+     *  3) The current time
      */
     int numArgs = 3;
 
@@ -94,7 +95,7 @@ UserDefDirichletBC :: give(Dof *dof, ValueModeType mode, TimeStep *stepN)
 
 
     // Time
-    PyObject *pTargetTime = PyFloat_FromDouble( stepN->giveTargetTime() );
+    PyObject *pTargetTime = PyFloat_FromDouble( tStep->giveTargetTime() );
     PyTuple_SetItem(pArgs, 2, pTargetTime);
 
     // Value returned from the Python function
@@ -110,7 +111,7 @@ UserDefDirichletBC :: give(Dof *dof, ValueModeType mode, TimeStep *stepN)
     double retVal = 0.0;
     if ( pRetVal != NULL ) {
         retVal = PyFloat_AsDouble(pRetVal);
-    } else   {
+    } else {
         OOFEM_ERROR("UserDefDirichletBC :: give: Failed to fetch Python return value.");
     }
 

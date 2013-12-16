@@ -85,10 +85,10 @@ protected:
     bcValType valType;
     /// Dofs that b.c. is applied to (relevant for Dirichlet type b.c.s).
     IntArray dofs;
-    /** 
+    /**
      * Zero by default - the BC is than always imposed. Otherwise the number of associated
-    * load time function. If the load time function returns aero value, the BC is inactive.
-    */
+     * load time function. If the load time function returns aero value, the BC is inactive.
+     */
     int isImposedTimeFunction;
     /// Set number for boundary condition to be applied to.
     int set;
@@ -138,7 +138,7 @@ public:
      * Array with default dofs which b.c. acts on (only Dirichlet type b.c.s are afflicted).
      * @return Array with dof IDs.
      */
-    virtual const IntArray& giveDofIDs() const { return dofs; }
+    virtual const IntArray &giveDofIDs() const { return dofs; }
     /**
      * @return Type of boundary condition. It allows to distinguish BC according its
      * mathematical meaning, ie. like Dirichlet, Neumann, or Newton type.
@@ -168,4 +168,3 @@ public:
 };
 } // end namespace oofem
 #endif // generalbc_h
-

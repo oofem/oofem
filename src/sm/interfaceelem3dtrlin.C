@@ -51,8 +51,7 @@
 #endif
 
 namespace oofem {
-
-REGISTER_Element( InterfaceElement3dTrLin );
+REGISTER_Element(InterfaceElement3dTrLin);
 
 FEI2dTrLin InterfaceElement3dTrLin :: interpolation(1, 2);
 
@@ -64,14 +63,14 @@ InterfaceElement3dTrLin :: InterfaceElement3dTrLin(int n, Domain *aDomain) :
 
 
 void
-InterfaceElement3dTrLin :: computeBmatrixAt(GaussPoint *aGaussPoint, FloatMatrix &answer, int li, int ui)
+InterfaceElement3dTrLin :: computeBmatrixAt(GaussPoint *gp, FloatMatrix &answer, int li, int ui)
 //
 // Returns linear part of geometrical equations of the receiver at gp.
 // Returns the linear part of the B matrix
 //
 {
     FloatArray n(3);
-    this->interpolation.evalN(n, * aGaussPoint->giveCoordinates(), FEIElementGeometryWrapper(this));
+    this->interpolation.evalN( n, * gp->giveCoordinates(), FEIElementGeometryWrapper(this) );
 
     answer.resize(3, 18);
     answer.zero();
@@ -107,7 +106,7 @@ InterfaceElement3dTrLin :: computeGlobalCoordinates(FloatArray &answer, const Fl
 {
     FloatArray n(6);
 
-    this->interpolation.evalN(n, lcoords, FEIElementGeometryWrapper(this));
+    this->interpolation.evalN( n, lcoords, FEIElementGeometryWrapper(this) );
 
     answer.resize(3);
     answer.zero();
@@ -130,7 +129,7 @@ InterfaceElement3dTrLin :: computeLocalCoordinates(FloatArray &answer, const Flo
 
 
 double
-InterfaceElement3dTrLin :: computeVolumeAround(GaussPoint *aGaussPoint)
+InterfaceElement3dTrLin :: computeVolumeAround(GaussPoint *gp)
 // Returns the length of the receiver. This method is valid only if 1
 // Gauss point is used.
 {
@@ -149,9 +148,9 @@ InterfaceElement3dTrLin :: computeVolumeAround(GaussPoint *aGaussPoint)
         lncp [ i - 1 ] = & lnc [ i - 1 ];
     }
 
-    determinant = fabs( this->interpolation.giveTransformationJacobian(* aGaussPoint->giveCoordinates(), FEIVertexListGeometryWrapper(3, lncp)) );
-    weight      = aGaussPoint->giveWeight();
-    thickness   = this->giveCrossSection()->give(CS_Thickness, aGaussPoint);
+    determinant = fabs( this->interpolation.giveTransformationJacobian( * gp->giveCoordinates(), FEIVertexListGeometryWrapper(3, lncp) ) );
+    weight      = gp->giveWeight();
+    thickness   = this->giveCrossSection()->give(CS_Thickness, gp);
     volume      = determinant * weight * thickness;
 
     return volume;

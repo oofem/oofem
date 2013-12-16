@@ -108,7 +108,7 @@ public:
     /// Destructor.
     virtual ~StructuralElement();
 
-    virtual void giveCharacteristicMatrix(FloatMatrix &answer, CharType, TimeStep *tStep);
+    virtual void giveCharacteristicMatrix(FloatMatrix & answer, CharType, TimeStep * tStep);
     virtual void giveCharacteristicVector(FloatArray &answer, CharType type, ValueModeType mode, TimeStep *tStep);
 
     virtual void giveDefaultDofManDofIDMask(int inode, IntArray &answer) const { this->giveDofManDofIDMask(inode, EID_MomentumBalance, answer); }
@@ -249,7 +249,7 @@ public:
 
     virtual int giveIPValue(FloatArray &answer, GaussPoint *gp, InternalStateType type, TimeStep *tStep);
     /**
-     * Computes at given time (stepN) the the resulting temperature component array.
+     * Computes at given time (tStep) the the resulting temperature component array.
      * This is summation of all temperature load  components of  receiver.
      * @param answer Resulting temperature components of receiver.
      * @param tStep Time step.
@@ -294,7 +294,7 @@ public:
      * Adds the "nonlocal" contribution to stiffness matrix, to account for nonlocality of
      * material model. Typically, this contribution is obtained by summing up mutual IP contributions.
      */
-    virtual void addNonlocalStiffnessContributions(SparseMtrx &dest, const UnknownNumberingScheme &s, TimeStep *atTime);
+    virtual void addNonlocalStiffnessContributions(SparseMtrx &dest, const UnknownNumberingScheme &s, TimeStep *tStep);
     //@}
 
     // Overloaded methods.
@@ -316,15 +316,15 @@ public:
      * @param type Determines the internal variable requested (physical meaning).
      * @param mode Determines the mode of variable (recovered, local, ...).
      * @param node Node number, for which variable is required.
-     * @param atTime Time step.
+     * @param tStep Time step.
      * @return Nonzero if o.k, zero otherwise.
      */
     virtual int giveInternalStateAtNode(FloatArray &answer, InternalStateType type, InternalStateMode mode,
-                                        int node, TimeStep *atTime);
+                                        int node, TimeStep *tStep);
     /// Shows sparse structure
-    void showSparseMtrxStructure(CharType mtrx, oofegGraphicContext &gc, TimeStep *atTime);
+    void showSparseMtrxStructure(CharType mtrx, oofegGraphicContext &gc, TimeStep *tStep);
     /// Shows extended sparse structure (for example, due to nonlocal interactions for tangent stiffness)
-    virtual void showExtendedSparseMtrxStructure(CharType mtrx, oofegGraphicContext &gc, TimeStep *atTime);
+    virtual void showExtendedSparseMtrxStructure(CharType mtrx, oofegGraphicContext &gc, TimeStep *tStep);
 
 #endif
 
@@ -554,7 +554,7 @@ protected:
     virtual void computePrescribedStrainLocalLoadVectorAt(FloatArray &answer, TimeStep *tStep, ValueModeType mode);
 
     /**
-     * Computes the stress vector of receiver at given integration point, at time step stepN.
+     * Computes the stress vector of receiver at given integration point, at time step tStep.
      * The nature of these stresses depends on the element's type.
      * @param answer Stress vector.
      * @param strain Strain vector.

@@ -48,19 +48,19 @@ DofDistributedPrimaryField :: ~DofDistributedPrimaryField()
 { }
 
 double
-DofDistributedPrimaryField :: giveUnknownValue(Dof *dof, ValueModeType mode, TimeStep *atTime)
+DofDistributedPrimaryField :: giveUnknownValue(Dof *dof, ValueModeType mode, TimeStep *tStep)
 {
-    return dof->giveUnknown(mode, atTime);
+    return dof->giveUnknown(mode, tStep);
 }
 
 FloatArray *
-DofDistributedPrimaryField :: giveSolutionVector(TimeStep *atTime)
+DofDistributedPrimaryField :: giveSolutionVector(TimeStep *tStep)
 {
-    return PrimaryField :: giveSolutionVector(atTime);
+    return PrimaryField :: giveSolutionVector(tStep);
 }
 
 void
-DofDistributedPrimaryField :: initialize(ValueModeType mode, TimeStep *atTime, FloatArray &answer, const UnknownNumberingScheme &s)
+DofDistributedPrimaryField :: initialize(ValueModeType mode, TimeStep *tStep, FloatArray &answer, const UnknownNumberingScheme &s)
 {
     Domain *domain = emodel->giveDomain(domainIndx);
     int neq =  emodel->giveNumberOfDomainEquations(domainIndx, s);
@@ -77,9 +77,9 @@ DofDistributedPrimaryField :: initialize(ValueModeType mode, TimeStep *atTime, F
             int eqNum = iDof->__giveEquationNumber();
             double val;
             if ( eqNum ) {
-                iDof->giveUnknownsDictionaryValue(atTime, mode, val);
+                iDof->giveUnknownsDictionaryValue(tStep, mode, val);
                 answer.at(eqNum) = val;
-                //answer.at(eqNum) = iDof->giveUnknown( mode, atTime);
+                //answer.at(eqNum) = iDof->giveUnknown( mode, tStep);
             }
         }
     }
@@ -87,7 +87,7 @@ DofDistributedPrimaryField :: initialize(ValueModeType mode, TimeStep *atTime, F
 
 // project solutionVector to DoF unknowns dictionary
 void
-DofDistributedPrimaryField :: update(ValueModeType mode, TimeStep *atTime, FloatArray &vectorToStore)
+DofDistributedPrimaryField :: update(ValueModeType mode, TimeStep *tStep, FloatArray &vectorToStore)
 {
     Domain *domain = emodel->giveDomain(domainIndx);
     int nnodes = domain->giveNumberOfDofManagers();
@@ -100,8 +100,8 @@ DofDistributedPrimaryField :: update(ValueModeType mode, TimeStep *atTime, Float
             int eqNum = iDof->__giveEquationNumber();
             double val;
             if ( mode == VM_Total ) {
-                if ( iDof->hasBc(atTime) ) { // boundary condition
-                    val = iDof->giveBcValue(VM_Total, atTime);
+                if ( iDof->hasBc(tStep) ) { // boundary condition
+                    val = iDof->giveBcValue(VM_Total, tStep);
                 } else {
                     //vect = this->UnknownsField->giveSolutionVector(tStep);
                     val = vectorToStore.at(eqNum);
@@ -114,7 +114,7 @@ DofDistributedPrimaryField :: update(ValueModeType mode, TimeStep *atTime, Float
                 }
             }
 
-            iDof->updateUnknownsDictionary(atTime, mode, val);
+            iDof->updateUnknownsDictionary(tStep, mode, val);
         }
     }
 }
@@ -122,9 +122,9 @@ DofDistributedPrimaryField :: update(ValueModeType mode, TimeStep *atTime, Float
 
 
 void
-DofDistributedPrimaryField :: advanceSolution(TimeStep *atTime)
+DofDistributedPrimaryField :: advanceSolution(TimeStep *tStep)
 {
-    PrimaryField :: advanceSolution(atTime);
+    PrimaryField :: advanceSolution(tStep);
 }
 
 

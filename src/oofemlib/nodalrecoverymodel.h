@@ -70,7 +70,7 @@ public:
     enum NodalRecoveryModelType { NRM_NodalAveraging = 0, NRM_ZienkiewiczZhu = 1,  NRM_SPR = 2 };
 
 protected:
-    typedef TDictionary< int, FloatArray > vectorDictType;
+    typedef TDictionary< int, FloatArray >vectorDictType;
     /**
      * Array of nodal dictionaries, containing nodal values for each region.
      * The region id is dictionary key to corresponding values.
@@ -116,7 +116,7 @@ public:
     /// Destructor
     virtual ~NodalRecoveryModel();
 
-    void setDomain(Domain *ipDomain) {domain = ipDomain;}
+    void setDomain(Domain *ipDomain) { domain = ipDomain; }
 
     /**
      * Recovers the nodal values for all regions.

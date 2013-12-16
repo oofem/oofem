@@ -72,7 +72,7 @@ public:
     /// reset receiver to an initial state (will force table update, when needed next time)
     void reset();
 
-    void setDomain(Domain *ipDomain) {domain = ipDomain;}
+    void setDomain(Domain *ipDomain) { domain = ipDomain; }
 
     /**
      * Builds connectivity table. This table contains for each dofManager the list of

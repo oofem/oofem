@@ -36,8 +36,7 @@
 #include "classfactory.h"
 
 namespace oofem {
-
-REGISTER_DofManager( Particle );
+REGISTER_DofManager(Particle);
 
 
 Particle :: Particle(int n, Domain *aDomain) : Node(n, aDomain)

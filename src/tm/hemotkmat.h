@@ -99,11 +99,11 @@ public:
     virtual void giveCharacteristicMatrix(FloatMatrix &answer,
                                           MatResponseMode mode,
                                           GaussPoint *gp,
-                                          TimeStep *atTime);
+                                          TimeStep *tStep);
 
     virtual double giveCharacteristicValue(MatResponseMode mode,
                                            GaussPoint *gp,
-                                           TimeStep *atTime);
+                                           TimeStep *tStep);
 
     virtual bool isCharacteristicMtrxSymmetric(MatResponseMode rMode);
 
@@ -122,12 +122,12 @@ public:
     double give_dphi_dw(double w);
 
 protected:
-    void computeConductivityMtrx(FloatMatrix &answer, MatResponseMode mode, GaussPoint *gp, TimeStep *atTime);
-    void matcond1d(FloatMatrix &d, GaussPoint *gp, MatResponseMode mode, TimeStep *atTime);
-    void matcond2d(FloatMatrix &d, GaussPoint *gp, MatResponseMode mode, TimeStep *atTime);
-    void matcond3d(FloatMatrix &d, GaussPoint *gp, MatResponseMode mode, TimeStep *atTime);
+    void computeConductivityMtrx(FloatMatrix &answer, MatResponseMode mode, GaussPoint *gp, TimeStep *tStep);
+    void matcond1d(FloatMatrix &d, GaussPoint *gp, MatResponseMode mode, TimeStep *tStep);
+    void matcond2d(FloatMatrix &d, GaussPoint *gp, MatResponseMode mode, TimeStep *tStep);
+    void matcond3d(FloatMatrix &d, GaussPoint *gp, MatResponseMode mode, TimeStep *tStep);
 
-    double computeCapacityCoeff(MatResponseMode mode, GaussPoint *gp, TimeStep *atTime);
+    double computeCapacityCoeff(MatResponseMode mode, GaussPoint *gp, TimeStep *tStep);
     /**
      * Returns positive value of humidity, use VM_Velocity for previous (equilibrated) value
      */
@@ -147,7 +147,7 @@ protected:
     double give_p_gws(double t);
 
     // post-processing, poi export
-    virtual int giveIPValue(FloatArray &answer, GaussPoint *aGaussPoint, InternalStateType type, TimeStep *atTime);
+    virtual int giveIPValue(FloatArray &answer, GaussPoint *gp, InternalStateType type, TimeStep *tStep);
 };
 } // end namespace oofem
 #endif // hemotkmat_h

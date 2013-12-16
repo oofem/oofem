@@ -114,7 +114,7 @@ public:
      * This process should typically include restoring old solution, instanciating newly
      * generated domain(s) and by mapping procedure.
      */
-    virtual int initializeAdaptive(int stepNumber);
+    virtual int initializeAdaptive(int tStepumber);
     /**
      * Initializes the receiver state according to state of given source problem.
      * This process should typically include mapping of source solution, internal variable mapping procedures and
@@ -143,9 +143,9 @@ public:
 
 protected:
     void assembleInitialLoadVector(FloatArray &loadVector, FloatArray &loadVectorOfPrescribed,
-                                   AdaptiveNonLinearStatic *sourceProblem, int domainIndx, TimeStep *atTime);
+                                   AdaptiveNonLinearStatic *sourceProblem, int domainIndx, TimeStep *tStep);
     //void assembleCurrentTotalLoadVector (FloatArray& loadVector, FloatArray& loadVectorOfPrescribed,
-    //            AdaptiveNonLinearStatic* sourceProblem, int domainIndx, TimeStep* atTime);
+    //            AdaptiveNonLinearStatic* sourceProblem, int domainIndx, TimeStep* tStep);
 };
 } // end namespace oofem
 #endif // adaptnlinearstatic_h

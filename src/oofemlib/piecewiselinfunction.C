@@ -44,11 +44,10 @@
 namespace oofem {
 #define PiecewiseLinFunction_PRECISION 1.e-12
 
-REGISTER_LoadTimeFunction( PiecewiseLinFunction );
+REGISTER_LoadTimeFunction(PiecewiseLinFunction);
 
-PiecewiseLinFunction :: PiecewiseLinFunction ( int i, Domain* d ) : LoadTimeFunction ( i, d ), dates(), values()
-{
-}
+PiecewiseLinFunction :: PiecewiseLinFunction(int i, Domain *d) : LoadTimeFunction(i, d), dates(), values()
+{}
 
 double PiecewiseLinFunction :: __at(double time)
 // Returns the value of the receiver at time 'time'. 'time' should be
@@ -67,7 +66,7 @@ double PiecewiseLinFunction :: __at(double time)
             return this->values.at(i);
         } else if ( this->dates.at(i) > time ) {
             if ( i == 1 ) {
-                OOFEM_WARNING3("PiecewiseLinFunction :: __at: computational time %f is out of given time %f, extrapolating value(s)", time, dates.at(i) );
+                OOFEM_WARNING3( "PiecewiseLinFunction :: __at: computational time %f is out of given time %f, extrapolating value(s)", time, dates.at(i) );
                 return 0.;
             }
 
@@ -128,19 +127,21 @@ PiecewiseLinFunction :: initializeFrom(InputRecord *ir)
     LoadTimeFunction :: initializeFrom(ir);
 
     // Optional means, read data from external file (useful for very large sets of data)
-    if ( ir->hasField( _IFT_PiecewiseLinFunction_dataFile) ) {
-        std::list< double > t, ft;
+    if ( ir->hasField(_IFT_PiecewiseLinFunction_dataFile) ) {
+        std :: list< double >t, ft;
         // Open the file;
-        std::string fname;
+        std :: string fname;
         IR_GIVE_FIELD(ir, fname, _IFT_PiecewiseLinFunction_dataFile);
-        std::ifstream file (fname.c_str(), std::ios::in);
-        if ( !file.is_open() ) OOFEM_ERROR2("PieceWiseLinFunction :: initializeFrom - Failed to open data file: %s\n", fname.c_str());
+        std :: ifstream file(fname.c_str(), std :: ios :: in);
+        if ( !file.is_open() ) {
+            OOFEM_ERROR2( "PieceWiseLinFunction :: initializeFrom - Failed to open data file: %s\n", fname.c_str() );
+        }
         // Data should be stored in two columns (or just interleaved)
         double temp_t, temp_ft;
         std :: string sLine = "";
-        while ( !file.eof() ){
+        while ( !file.eof() ) {
             getline(file, sLine);
-            if(sLine[0]=='#'){
+            if ( sLine [ 0 ] == '#' ) {
                 continue;
             }
             std :: stringstream ss1(sLine);
@@ -148,14 +149,14 @@ PiecewiseLinFunction :: initializeFrom(InputRecord *ir)
             t.push_back(temp_t);
             ft.push_back(temp_ft);
         }
-        
+
         // Copy data over the float arrays
-        dates.resize(t.size());
-        values.resize(ft.size());
-        std::list< double >::iterator it_t = t.begin(), it_ft = ft.begin();
-        for ( int i = 1; i <= (int)t.size(); ++i, ++it_t, ++it_ft ) {
-            dates.at(i) = *it_t;
-            values.at(i) = *it_ft;
+        dates.resize( t.size() );
+        values.resize( ft.size() );
+        std :: list< double > :: iterator it_t = t.begin(), it_ft = ft.begin();
+        for ( int i = 1; i <= ( int ) t.size(); ++i, ++it_t, ++it_ft ) {
+            dates.at(i) = * it_t;
+            values.at(i) = * it_ft;
         }
     } else {
         int numberOfPoints;
@@ -200,5 +201,4 @@ PiecewiseLinFunction :: restoreContext(DataStream *stream, ContextMode mode, voi
 
     return CIO_OK;
 }
-
 } // end namespace oofem
