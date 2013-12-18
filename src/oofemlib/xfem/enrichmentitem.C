@@ -459,6 +459,7 @@ void EnrichmentItem :: updateNodeEnrMarker(XfemManager &ixFemMan, const Enrichme
     Domain *d = ixFemMan.giveDomain();
     int nEl = d->giveNumberOfElements();
     int nNodes = d->giveNumberOfDofManagers();
+    IntArray edgeIntersecArray;
 
     mNodeEnrMarker.assign(nNodes, 0);
     std :: vector< TipInfo >tipInfoArray;
@@ -495,6 +496,7 @@ void EnrichmentItem :: updateNodeEnrMarker(XfemManager &ixFemMan, const Enrichme
             // Count the number of element edges intersected by the interface
             int numEdges = el->giveInterpolation()->giveNumberOfEdges(); 
 
+            edgeIntersecArray.resize(0);
             for ( int edgeIndex = 1; edgeIndex <= numEdges; edgeIndex++ ) {
                 IntArray bNodes;
                 el->giveInterpolation()->boundaryGiveNodes(bNodes, edgeIndex);
@@ -515,6 +517,7 @@ void EnrichmentItem :: updateNodeEnrMarker(XfemManager &ixFemMan, const Enrichme
 
                     if ( gamma > 0.0 ) {
                         numEdgeIntersec++;
+                        edgeIntersecArray.followedBy(edgeIndex);
                     }
                 }
             }
@@ -533,6 +536,7 @@ void EnrichmentItem :: updateNodeEnrMarker(XfemManager &ixFemMan, const Enrichme
                 // Store indices of elements containing an interface tip.
                 if ( numEdgeIntersec == 1 ) {
                     TipInfo tipInfo;
+                    tipInfo.mEdgeIndex = edgeIntersecArray.at(1); // store which edge the tip segment cuts through
                     if ( mpEnrichmentDomain->giveClosestTipInfo(elCenter, tipInfo) ) {
                         // Prevent storage of duplicates
                         const double tol2 = 1.0e-20;
@@ -813,7 +817,7 @@ void EnrichmentItem :: computeIntersectionPoints(std :: vector< FloatArray > &oI
     // node values of the level set functions have different signs
     // Indices S - start, E - end
 
-    const int numEdges = 3; ///@todo generalize- ask interpolator
+    const int numEdges = 3; 
 
     for ( int edgeIndex = 1; edgeIndex <= numEdges; edgeIndex++ ) {
 
@@ -1235,6 +1239,7 @@ IRResultType Crack :: initializeFrom(InputRecord *ir)
 REGISTER_EnrichmentFront(EnrFrontDoNothing)
 REGISTER_EnrichmentFront(EnrFrontExtend)
 REGISTER_EnrichmentFront(EnrFrontLinearBranchFuncRadius)
+REGISTER_EnrichmentFront(EnrFrontElEdge)
 
 bool EnrichmentFront :: giveElementTipCoord(FloatArray &oCoord, double &oArcPos, int iElIndex) const
 {
@@ -1498,4 +1503,39 @@ void EnrFrontLinearBranchFuncRadius :: giveInputRecord(DynamicInputRecord &input
 
     input.setField(mEnrichmentRadius, _IFT_EnrFrontLinearBranchFuncRadius_Radius);
 }
+
+
+
+
+void EnrFrontElEdge :: MarkNodesAsFront(std :: vector< int > &ioNodeEnrMarker, XfemManager &ixFemMan, const std :: vector< double > &iLevelSetNormalDir, const std :: vector< double > &iLevelSetTangDir, const std :: vector< TipInfo > &iTipInfo)
+{
+    // Removes the enrichment from the nodes of an edge cut by a crack such that the crack tip will be at the element edge. 
+    Domain &d = * ( ixFemMan.giveDomain() );
+
+    // Loop over the crack tips
+    for ( int tip = 1; tip <= iTipInfo.size(); tip++ ) {
+
+        // Node numbers of the edge cut by the crack tip segment
+        IntArray bNodes;
+        Element *el = d.giveElement( iTipInfo[tip-1].mElIndex );
+        el->giveInterpolation()->boundaryGiveNodes(bNodes, iTipInfo[tip-1].mEdgeIndex);
+        
+        for ( int i = 1; i <= bNodes.giveSize(); i++ ) {
+
+            int globalNodeNum = el->giveDofManager( bNodes.at(i) )->giveGlobalNumber();
+                
+            // reset the marker
+            ioNodeEnrMarker.at( globalNodeNum - 1) = 0;
+        }
+
+    }
+}
+
+void EnrFrontElEdge :: giveInputRecord(DynamicInputRecord &input)
+{
+    int number = 1;
+    input.setRecordKeywordField(this->giveInputRecordName(), number);
+}
+
+
 } // end namespace oofem

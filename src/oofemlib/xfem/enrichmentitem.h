@@ -72,6 +72,7 @@
 #define _IFT_EnrFrontExtend_Name "enrfrontextend"
 #define _IFT_EnrFrontLinearBranchFuncRadius_Name "enrfrontlinearbranchfuncradius"
 #define _IFT_EnrFrontLinearBranchFuncRadius_Radius "radius"
+#define _IFT_EnrFrontElEdge_Name "enrfronteledge"
 
 
 namespace oofem {
@@ -513,6 +514,35 @@ private:
     double mEnrichmentRadius;
     LinElBranchFunction *mpBranchFunc;
 };
+
+
+
+class OOFEM_EXPORT EnrFrontElEdge : public EnrichmentFront
+{
+public:
+    EnrFrontElEdge() {};
+    virtual ~EnrFrontElEdge() {};
+
+    virtual void MarkNodesAsFront(std :: vector< int > &ioNodeEnrMarker, XfemManager &ixFemMan, const std :: vector< double > &iLevelSetNormalDir, const std :: vector< double > &iLevelSetTangDir, const std :: vector< TipInfo > &iTipInfo);
+
+    // No special tip enrichments are applied with this model.
+    virtual int  giveNumEnrichments(const DofManager &iDMan) const { return 0; }
+    virtual int  giveMaxNumEnrichments() const { return 0; }
+
+    // Evaluate the enrichment function and its derivative in front nodes.
+    virtual void evaluateEnrFuncAt(std :: vector< double > &oEnrFunc, const FloatArray &iPos, const double &iLevelSet, int iNodeInd) const {};
+    virtual void evaluateEnrFuncDerivAt(std :: vector< FloatArray > &oEnrFuncDeriv, const FloatArray &iPos, const double &iLevelSet, const FloatArray &iGradLevelSet, int iNodeInd) const {};
+    virtual void evaluateEnrFuncJumps(std :: vector< double > &oEnrFuncJumps) const {};
+
+    virtual const char *giveClassName() const { return "EnrFrontElEdge"; }
+    virtual const char *giveInputRecordName() const { return _IFT_EnrFrontElEdge_Name; }
+
+    virtual IRResultType initializeFrom(InputRecord *ir) { return IRRT_OK; }
+    virtual void giveInputRecord(DynamicInputRecord &input);
+};
+
+
+
 } // end namespace oofem
 
 

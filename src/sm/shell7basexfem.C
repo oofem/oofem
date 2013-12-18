@@ -2122,13 +2122,18 @@ Shell7BaseXFEM :: giveCompositeExportData(VTKPiece &vtkPiece, IntArray &primaryV
 
     }
 
+#endif 
+
+
+#if 0
+
 
     // Export of XFEM related quantities
 
 
-    int numCells = this->layeredCS->giveNumberOfLayers();
-    const int numCellNodes  = 15; // quadratic wedge
-    int numTotalNodes = numCellNodes*numCells;
+    //int numCells = this->layeredCS->giveNumberOfLayers();
+    //const int numCellNodes  = 15; // quadratic wedge
+    //int numTotalNodes = numCellNodes*numCells;
 
     XfemManager *xFemMan =  this->xMan;
     int nEnrIt = xFemMan->giveNumberOfEnrichmentItems();
@@ -2147,29 +2152,33 @@ Shell7BaseXFEM :: giveCompositeExportData(VTKPiece &vtkPiece, IntArray &primaryV
             int nodeNum = 1;
             for ( int layer = 1; layer <= numCells; layer++ ) {
 
-                for ( int nodeIndx = 1; nodeIndx <= numCellNodes; nodeIndx++ ) {
 
-                    Node *node = this->giveNode( wedgeToTriMap.at(nodeIndx) );
-                    FloatArray valueArray;
-                    const FloatArray *val = NULL;
-                    if ( xfemstype == XFEMST_LevelSetPhi ) {
-                        valueArray.resize(1);
-                        val = & valueArray;
-                        ei->evalLevelSetNormalInNode( valueArray.at(1), node->giveNumber() );
-                    } else if ( xfemstype == XFEMST_LevelSetGamma ) {
-                        valueArray.resize(1);
-                        val = & valueArray;
-                        ei->evalLevelSetTangInNode( valueArray.at(1), node->giveNumber() );
-                    } else if ( xfemstype == XFEMST_NodeEnrMarker ) {
-                        valueArray.resize(1);
-                        val = & valueArray;
-                        ei->evalNodeEnrMarkerInNode( valueArray.at(1), node->giveNumber() );
-                    } else {
-                        //OOFEM_WARNING2("VTKXMLExportModule::getNodalVariableFromXFEMST: invalid data in node %d", inode);
+                for ( int subCell = 1; subCell <= numSubCells; subCell++ ) {
+
+                    for ( int nodeIndx = 1; nodeIndx <= numCellNodes; nodeIndx++ ) {
+
+                        Node *node = this->giveNode( wedgeToTriMap.at(nodeIndx) );
+                        FloatArray valueArray;
+                        const FloatArray *val = NULL;
+                        if ( xfemstype == XFEMST_LevelSetPhi ) {
+                            valueArray.resize(1);
+                            val = & valueArray;
+                            ei->evalLevelSetNormalInNode( valueArray.at(1), node->giveNumber() );
+                        } else if ( xfemstype == XFEMST_LevelSetGamma ) {
+                            valueArray.resize(1);
+                            val = & valueArray;
+                            ei->evalLevelSetTangInNode( valueArray.at(1), node->giveNumber() );
+                        } else if ( xfemstype == XFEMST_NodeEnrMarker ) {
+                            valueArray.resize(1);
+                            val = & valueArray;
+                            ei->evalNodeEnrMarkerInNode( valueArray.at(1), node->giveNumber() );
+                        } else {
+                            //OOFEM_WARNING2("VTKXMLExportModule::getNodalVariableFromXFEMST: invalid data in node %d", inode);
+                        }
+
+                        vtkPiece.setInternalXFEMVarInNode(field, enrItIndex, nodeNum, valueArray);
+                        nodeNum += 1;
                     }
-
-                    vtkPiece.setInternalXFEMVarInNode(field, enrItIndex, nodeNum, valueArray);
-                    nodeNum += 1;
                 }
             }
         }
@@ -2233,7 +2242,7 @@ Shell7BaseXFEM :: giveFictiousUpdatedNodeCoordsForExport(std::vector<FloatArray>
 void
 Shell7BaseXFEM :: giveLocalNodeCoordsForExport(FloatArray &nodeLocalXi1Coords, FloatArray &nodeLocalXi2Coords, FloatArray &nodeLocalXi3Coords) {
     // Local coords for a quadratic wedge element (VTK cell type 26)
-    double z = 0.999;
+    double z = 0.9999;
     nodeLocalXi1Coords.setValues(15, 1., 0., 0., 1., 0., 0., .5, 0., .5, .5, 0., .5, 1., 0., 0.);      
     nodeLocalXi2Coords.setValues(15, 0., 1., 0., 0., 1., 0., .5, .5, 0., .5, .5, 0., 0., 1., 0.);
     nodeLocalXi3Coords.setValues(15, -z, -z, -z,  z,  z,  z, -z, -z, -z,  z,  z,  z, 0., 0., 0.);
@@ -2243,7 +2252,8 @@ Shell7BaseXFEM :: giveLocalNodeCoordsForExport(FloatArray &nodeLocalXi1Coords, F
 void
 Shell7BaseXFEM :: giveLocalNodeCoordsForExport(FloatArray &nodeLocalXi1Coords, FloatArray &nodeLocalXi2Coords, FloatArray &nodeLocalXi3Coords, int subCell) {
     // Local coords for a quadratic wedge element (VTK cell type 26)
-    double z = 0.999;
+    double scale = 0.99999;
+    double z = 1.0*scale;
     //nodeLocalXi1Coords.setValues(15, 1., 0., 0., 1., 0., 0., .5, 0., .5, .5, 0., .5, 1., 0., 0.);      
     //nodeLocalXi2Coords.setValues(15, 0., 1., 0., 0., 1., 0., .5, .5, 0., .5, .5, 0., 0., 1., 0.);
     //nodeLocalXi3Coords.setValues(15, -z, -z, -z,  z,  z,  z, -z, -z, -z,  z,  z,  z, 0., 0., 0.);
@@ -2254,7 +2264,7 @@ Shell7BaseXFEM :: giveLocalNodeCoordsForExport(FloatArray &nodeLocalXi1Coords, F
     g3 = this->allTri[subCell-1].giveVertex(3);
 
     FloatArray gs1, gs2, gs3;
-    double scale = 0.999;
+    
     double alpha1 = scale; double alpha2 = (1.0-alpha1)*0.5; double alpha3 = alpha2;
     gs1 = alpha1*g1 + alpha2*g2 + alpha3*g3;
     gs2 = alpha2*g1 + alpha1*g2 + alpha3*g3;
