@@ -255,9 +255,9 @@ PFEM :: giveNextStep()
 
     nnodes = domain->giveNumberOfDofManagers();
     for ( i = 1; i <= nnodes; i++ ) {
-        PFEMParticle *particle = dynamic_cast< PFEMParticle * >( domain->giveDofManager(i) );
-        particle->setFree();
-        //particle->storeCoordinatesTimeStepBegin();
+        PFEMParticle* particle = dynamic_cast< PFEMParticle * >( domain->giveDofManager(i) );
+		particle->setFree();
+		//particle->storeCoordinatesTimeStepBegin();
     }
 
     nelem = domain->giveNumberOfElements();
@@ -359,7 +359,6 @@ PFEM :: solveYourselfAt(TimeStep *tStep)
     // ??? stepWhenIcApply
     this->assemble( avLhs, tStep, EID_AuxMomentumBalance, LumpedMassMatrix, avns, this->giveDomain(1) );
 
-    //	double ulala = avLhs->at(444,444);
     if ( pLhs ) {
         delete pLhs;
     }
@@ -497,12 +496,13 @@ PFEM :: solveYourselfAt(TimeStep *tStep)
 
         nMethod->solve(vLhs, & rhs, velocityVector);
 
-        for ( int i = 1; i <= this->giveDomain(1)->giveNumberOfDofManagers(); i++ ) {
-            PFEMParticle *particle = dynamic_cast< PFEMParticle * >( this->giveDomain(1)->giveDofManager(i) );
-            this->updateDofUnknownsDictionaryVelocities(particle, tStep);
+        for (int i = 1; i <= this->giveDomain(1)->giveNumberOfDofManagers(); i++)
+        {
+			PFEMParticle* particle = dynamic_cast<PFEMParticle*>(this->giveDomain(1)->giveDofManager(i));
+			this->updateDofUnknownsDictionaryVelocities(particle, tStep);
 
-            //particle->resetNodalCoordinates();
-            //particle->updateNodalCoordinates(tStep);
+			//particle->resetNodalCoordinates();
+			//particle->updateNodalCoordinates(tStep);
         }
 
         velocityVectorThisStep = * velocityVector;
@@ -555,6 +555,7 @@ PFEM :: solveYourselfAt(TimeStep *tStep)
         }
     } while ( ( d_vnorm > 1.e-8 || d_pnorm > 1.e-8 ) && iteration < 50 );
 
+
     if ( iteration > 49 ) {
         OOFEM_ERROR("Maximal iteration count exceded");
     } else {
@@ -564,11 +565,11 @@ PFEM :: solveYourselfAt(TimeStep *tStep)
     Domain *d = this->giveDomain(1);
     for ( int i = 1; i <= this->giveDomain(1)->giveNumberOfDofManagers(); i++ ) {
         PFEMParticle *particle = dynamic_cast< PFEMParticle * >( d->giveDofManager(i) );
-
-        //resetting coordinates of all particles to avoid doing it again in updateYourself()
+		
+		//resetting coordinates of all particles to avoid doing it again in updateYourself()
         //particle->resetNodalCoordinates();
 
-        if ( particle->isFree() ) {
+		if ( particle->isFree() ) {
             for ( int j = 1; j <= particle->giveNumberOfDofs(); j++ ) {
                 Dof *dof = particle->giveDof(j);
                 DofIDItem type  =  dof->giveDofID();
@@ -589,7 +590,7 @@ PFEM :: solveYourselfAt(TimeStep *tStep)
 
 
     tStep->incrementStateCounter();
-    this->updateYourself( this->giveCurrentStep() );
+	this->updateYourself( this->giveCurrentStep() );
 }
 
 
