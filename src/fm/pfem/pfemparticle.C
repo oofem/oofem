@@ -49,7 +49,7 @@ REGISTER_DofManager(PFEMParticle);
 /**
  * Constructor. Creates a particle with number n, belonging to aDomain.
  */
-PFEMParticle :: PFEMParticle(int n, Domain *aDomain) : Node(n, aDomain), free(true), alphaShapeFlag(false)
+PFEMParticle :: PFEMParticle(int n, Domain *aDomain) : Node(n, aDomain), free(true), alphaShapeFlag(false), coordinatesAtTimeStepBegin()
 { }
 //from hanging node
 
@@ -85,6 +85,37 @@ PFEMParticle :: updateYourself(TimeStep *tStep)
     Node :: updateYourself(tStep);
 }
 
+
+void 
+PFEMParticle :: storeCoordinatesTimeStepBegin()
+{
+	coordinatesAtTimeStepBegin = this->coordinates;
+}
+
+void
+PFEMParticle :: resetNodalCoordinates()
+{
+	this->coordinates = coordinatesAtTimeStepBegin;
+}
+
+void PFEMParticle :: updateNodalCoordinates(TimeStep* tStep)
+{
+	fMode mode = domain->giveEngngModel()->giveFormulation();
+
+    if ( mode == AL ) { // updated Lagrange
+        for ( int i = 1; i <= numberOfDofs; i++ ) {
+            Dof *d = this->giveDof(i);
+            DofIDItem id = d->giveDofID();
+            if ( id == D_u || id == D_v || id == D_w ) {
+                int ic = id - D_u + 1;
+                this->coordinates.at(ic) += d->giveUnknown(VM_Incremental, tStep);
+            } else if ( id == V_u || id == V_v || id == V_w ) {
+                int ic = id - V_u + 1;
+                this->coordinates.at(ic) += d->giveUnknown(VM_Total, tStep) * tStep->giveTimeIncrement();
+            }
+        }
+    }
+}
 void
 PFEMParticle :: printOutputAt(FILE *stream, TimeStep *stepN)
 {

@@ -63,6 +63,9 @@ private:
 
 	/// the particle is a part of alpha-shape
 	bool alphaShapeFlag;
+	
+	
+	FloatArray coordinatesAtTimeStepBegin;
 
 public:
     /**
@@ -97,6 +100,13 @@ public:
 	bool isOnAlphaShape() { return alphaShapeFlag; }
 	/// Sets the alphaShapeFlag
 	virtual void setOnAlphaShape(bool newFlag = true) { alphaShapeFlag = newFlag; }
+
+	void storeCoordinatesTimeStepBegin();
+	
+	void updateNodalCoordinates(TimeStep* tStep);
+	
+	void resetNodalCoordinates();
+
 
     virtual void printOutputAt(FILE *stream, TimeStep *stepN);
 
