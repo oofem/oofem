@@ -53,6 +53,9 @@
 #include <limits>
 
 namespace oofem {
+
+const double EnrichmentItem :: mLevelSetTol = 1.0e-12;
+
 REGISTER_EnrichmentItem(Inclusion)
 REGISTER_EnrichmentItem(Delamination)
 
