@@ -49,7 +49,7 @@
 namespace oofem {
 
 
-const double DISC_DOF_SCALE_FAC = 1.0e-0;
+const double DISC_DOF_SCALE_FAC = 1.0e-3;
 
 Shell7BaseXFEM :: Shell7BaseXFEM(int n, Domain *aDomain) : Shell7Base(n, aDomain), XfemElementInterface(this) 
 {
@@ -239,6 +239,8 @@ Shell7BaseXFEM :: computeDiscGeneralizedStrainVector(FloatArray &answer, FloatAr
     FloatMatrix B;
     this->computeEnrichedBmatrixAt(lCoords, B, ei);
     Shell7Base :: computeGeneralizedStrainVectorNew(answer, solVecD, B);
+
+    //answer.times(DISC_DOF_SCALE_FAC);
 }
 
 
@@ -269,7 +271,7 @@ Shell7BaseXFEM :: giveDisSolutionVector(FloatArray &answer, const IntArray &dofI
 {
     // Scales the discontinuous dofs with a factor
     Shell7Base :: giveSolutionVector(answer, dofIdArray, tStep);
-    answer.times(DISC_DOF_SCALE_FAC);
+    //answer.times(DISC_DOF_SCALE_FAC);
 }
 
 void
@@ -388,7 +390,7 @@ Shell7BaseXFEM :: discComputeSectionalForces(FloatArray &answer, TimeStep *tStep
     int ndofs = Shell7Base :: giveNumberOfDofs();
     int numberOfLayers = this->layeredCS->giveNumberOfLayers(); 
     FloatArray f(ndofs), genEps, genEpsD, ftemp, lCoords, sectionalForces, N;
-    FloatMatrix B;
+    FloatMatrix B, BEnr;
     f.zero();
 
     for ( int layer = 1; layer <= numberOfLayers; layer++ ) {
@@ -400,7 +402,6 @@ Shell7BaseXFEM :: discComputeSectionalForces(FloatArray &answer, TimeStep *tStep
             lCoords = *gp->giveCoordinates();           
 
             this->computeEnrichedBmatrixAt(lCoords, B, NULL);
-            FloatMatrix BEnr;
             this->computeEnrichedBmatrixAt(lCoords, BEnr, ei);
             this->computeGeneralizedStrainVectorNew(genEps,  solVec,  B);
             this->computeGeneralizedStrainVectorNew(genEpsD, solVecD, BEnr);
@@ -435,6 +436,25 @@ Shell7BaseXFEM :: evaluateLevelSet(const FloatArray &lCoords, EnrichmentItem *ei
         FloatArray N;
         const IntArray &elNodes = this->giveDofManArray();
         this->fei->evalN( N, lCoords, FEIElementGeometryWrapper(this) );
+        ei->interpLevelSet(levelSet, N, elNodes);
+    } else {
+        OOFEM_ERROR1("Shell7BaseXFEm error in evaluation of levelset");
+    }          
+    return levelSet;
+}
+
+double 
+Shell7BaseXFEM :: edgeEvaluateLevelSet(const FloatArray &lCoords, EnrichmentItem *ei)
+{
+    // Evaluates the corresponding level set depending on the type of enrichment
+    double levelSet = 0.0;
+    if ( dynamic_cast< Delamination * >( ei ) ) {
+        double xiLoad = 0.0; ///@todo need info about load position
+        levelSet = xiLoad - dynamic_cast< Delamination * >( ei )->giveDelamXiCoord();                   
+    } else if ( dynamic_cast< Crack * >( ei ) ) {
+        FloatArray N;
+        const IntArray &elNodes = this->giveDofManArray();
+        this->fei->edgeEvalN( N, 1, lCoords, FEIElementGeometryWrapper(this) );
         ei->interpLevelSet(levelSet, N, elNodes);
     } else {
         OOFEM_ERROR1("Shell7BaseXFEm error in evaluation of levelset");
@@ -683,7 +703,6 @@ Shell7BaseXFEM :: computeStiffnessMatrix(FloatMatrix &answer, MatResponseMode rM
                         this->computeOrderingArray( orderingArrays[m-1], activeDofsArrays[m-1], eiM); 
                     }
 
-                    //this->discComputeBulkTangentMatrix(KCD, ip, eiM, NULL, layer, A, tStep);
                     this->discComputeBulkTangentMatrix(KCD, ip, NULL, eiM, layer, A, tStep);
                     tempRed.beSubMatrixOf(KCD, activeDofsC, activeDofsArrays[m-1]);
                     answer.assemble(tempRed, orderingC, orderingArrays[m-1]);
@@ -858,7 +877,7 @@ void
 Shell7BaseXFEM :: discComputeBulkTangentMatrix(FloatMatrix &KCC, FloatMatrix &KCD, FloatMatrix &KDD, IntegrationPoint *ip, Material *mat, int layer, TimeStep *tStep)
 {
 // old remove
-
+    OOFEM_ERROR1("discComputeBulkTangentMatrix should not be used!!")
 }
 
 
@@ -1514,14 +1533,14 @@ Shell7BaseXFEM :: edgeComputeEnrichedNmatrixAt(FloatArray &lcoords, FloatMatrix 
             answer.at(4, ndofs_xm + 1 + j) = N.at(i) * factor;
             answer.at(5, ndofs_xm + 2 + j) = N.at(i) * factor;
             answer.at(6, ndofs_xm + 3 + j) = N.at(i) * factor;
-            answer.at(7, ndofs_xm * 2 + i)  = N.at(i) * factor;
+            answer.at(7, ndofs_xm * 2 + i) = N.at(i) * factor;
         }
         answer.times(DISC_DOF_SCALE_FAC);
 
     } else if ( ei && dynamic_cast< Delamination*>(ei) ) {
         Shell7Base :: edgeComputeNmatrixAt(lcoords, answer);
         std :: vector< double > efGP;
-        double levelSetGP = this->evaluateLevelSet(lcoords, ei);
+        double levelSetGP = this->edgeEvaluateLevelSet(lcoords, ei);
         ei->evaluateEnrFuncAt(efGP, lcoords, levelSetGP);
         if ( efGP[0] > 0.1 ) {
             answer.times( efGP[0] * DISC_DOF_SCALE_FAC );
