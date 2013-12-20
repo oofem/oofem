@@ -156,7 +156,7 @@ void PLHoopStressCirc :: propagateInterfaces(Domain &iDomain, EnrichmentDomain &
         // Construct circle points on an arc from -90 to 90 degrees
         double angle = -90.0 + mAngleInc;
         std :: vector< double >angles;
-        while ( angle < ( 90.0 - mAngleInc ) ) {
+        while ( angle <= ( 90.0 - mAngleInc ) ) {
             angles.push_back(angle * M_PI / 180.0);
             angle += mAngleInc;
         }
@@ -204,7 +204,7 @@ void PLHoopStressCirc :: propagateInterfaces(Domain &iDomain, EnrichmentDomain &
 
                     // Use the octree to get all elements that have
                     // at least one Gauss point in a certain region around the tip.
-                    const double searchRadius = 2.0 * l;
+                    const double searchRadius = 3.0 * l;
                     std :: set< int >elIndices;
                     localizer->giveAllElementsWithIpWithinBox(elIndices, circPoints [ pointIndex ], searchRadius);
 
