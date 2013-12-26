@@ -499,7 +499,7 @@ LoadBalancer :: printStatistics() const
 
 
 LoadBalancerMonitor :: LoadBalancerDecisionType
-WallClockLoadBalancerMonitor :: decide(TimeStep *atTime)
+WallClockLoadBalancerMonitor :: decide(TimeStep *tStep)
 {
     int nproc = emodel->giveNumberOfProcesses();
     int myrank = emodel->giveRank();
@@ -534,7 +534,7 @@ WallClockLoadBalancerMonitor :: decide(TimeStep *atTime)
     bool perturb = false;
     std :: list< Range > :: iterator perturbedStepsIter;
     for ( perturbedStepsIter = perturbedSteps.begin(); perturbedStepsIter != perturbedSteps.end(); ++perturbedStepsIter ) {
-        if ( ( * perturbedStepsIter ).test( atTime->giveNumber() ) ) {
+        if ( ( * perturbedStepsIter ).test( tStep->giveNumber() ) ) {
             perturb  = true;
             break;
         }
@@ -633,7 +633,7 @@ WallClockLoadBalancerMonitor :: decide(TimeStep *atTime)
     if ( recoveredSteps.giveSize() ) {
         // recover lb if requested
         int pos;
-        if ( ( pos = recoveredSteps.findFirstIndexOf( atTime->giveNumber() ) ) ) {
+        if ( ( pos = recoveredSteps.findFirstIndexOf( tStep->giveNumber() ) ) ) {
             double procWeight, sumWeight = 0.0, *procWeights = new double [ nproc ];
 
             // assign prescribed processing weight
@@ -664,7 +664,7 @@ WallClockLoadBalancerMonitor :: decide(TimeStep *atTime)
 #endif
 
     // decide
-    if ( ( atTime->giveNumber() % this->lbstep == 0 ) &&
+    if ( ( tStep->giveNumber() % this->lbstep == 0 ) &&
          ( ( absWallClockImbalance > this->absWallClockImbalanceTreshold ) ||
            ( ( relWallClockImbalance > this->relWallClockImbalanceTreshold ) && ( absWallClockImbalance > this->minAbsWallClockImbalanceTreshold ) ) ) ) {
         OOFEM_LOG_RELEVANT("[%d] LoadBalancer: wall clock imbalance rel=%.2f\%,abs=%.2fs, recovering load\n", myrank, 100 * relWallClockImbalance, absWallClockImbalance);

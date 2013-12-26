@@ -317,9 +317,9 @@ StructuralInterfaceElement :: checkConsistency()
 
 
 int
-StructuralInterfaceElement :: giveIPValue(FloatArray &answer, IntegrationPoint *aIntegrationPoint, InternalStateType type, TimeStep *atTime)
+StructuralInterfaceElement :: giveIPValue(FloatArray &answer, IntegrationPoint *aIntegrationPoint, InternalStateType type, TimeStep *tStep)
 {
-    return Element :: giveIPValue(answer, aIntegrationPoint, type, atTime);
+    return Element :: giveIPValue(answer, aIntegrationPoint, type, tStep);
 }
 
 

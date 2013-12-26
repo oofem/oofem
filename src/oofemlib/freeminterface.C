@@ -45,10 +45,10 @@
 
 namespace oofem {
 MesherInterface :: returnCode
-FreemInterface :: createMesh(TimeStep *stepN, int domainNumber, int domainSerNum, Domain **dNew)
+FreemInterface :: createMesh(TimeStep *tStep, int domainNumber, int domainSerNum, Domain **dNew)
 {
     * dNew = NULL;
-    if ( this->createInput(this->domain, stepN) ) {
+    if ( this->createInput(this->domain, tStep) ) {
         return MI_NEEDS_EXTERNAL_ACTION;
     } else {
         return MI_FAILED;
@@ -56,7 +56,7 @@ FreemInterface :: createMesh(TimeStep *stepN, int domainNumber, int domainSerNum
 }
 
 int
-FreemInterface :: createInput(Domain *d, TimeStep *stepN)
+FreemInterface :: createInput(Domain *d, TimeStep *tStep)
 {
     int nnodes = d->giveNumberOfDofManagers(), nelem = d->giveNumberOfElements();
     double density;
@@ -72,15 +72,15 @@ FreemInterface :: createInput(Domain *d, TimeStep *stepN)
     // query nodal absolute densities
     FloatArray nodalDensities(nnodes);
     for ( int i = 1; i <= nnodes; i++ ) {
-        nodalDensities.at(i) = d->giveErrorEstimator()->giveRemeshingCrit()->giveRequiredDofManDensity(i, stepN);
+        nodalDensities.at(i) = d->giveErrorEstimator()->giveRemeshingCrit()->giveRequiredDofManDensity(i, tStep);
     }
 
-    this->smoothNodalDensities(d,  nodalDensities, stepN);
+    this->smoothNodalDensities(d,  nodalDensities, tStep);
     /* end of smoothing */
 
     // loop over nodes
     for ( int i = 1; i <= nnodes; i++ ) {
-        //density = d->giveErrorEstimator ()->giveRemeshingCrit()->giveRequiredDofManDensity (i, stepN, 1);
+        //density = d->giveErrorEstimator ()->giveRemeshingCrit()->giveRequiredDofManDensity (i, tStep, 1);
         //density = d->giveErrorEstimator ()->giveRemeshingCrit()->giveDofManDensity (i) / nodalDensities.at(i);
         density = nodalDensities.at(i);
         inode = d->giveNode(i);
@@ -105,7 +105,7 @@ FreemInterface :: createInput(Domain *d, TimeStep *stepN)
 }
 
 void
-FreemInterface :: smoothNodalDensities(Domain *d,  FloatArray &nodalDensities, TimeStep *stepN)
+FreemInterface :: smoothNodalDensities(Domain *d,  FloatArray &nodalDensities, TimeStep *tStep)
 {
     int neighbour, candidate, found, jelemNodes;
     int nnodes = d->giveNumberOfDofManagers();

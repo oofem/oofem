@@ -130,7 +130,7 @@ void CompoDamageMat :: giveInputRecord(DynamicInputRecord &input)
 
 
 //called at the beginning of each time increment (not iteration), no influence of parameter
-void CompoDamageMat :: give3dMaterialStiffnessMatrix(FloatMatrix &answer, MatResponseMode mode, GaussPoint *gp, TimeStep *atTime)
+void CompoDamageMat :: give3dMaterialStiffnessMatrix(FloatMatrix &answer, MatResponseMode mode, GaussPoint *gp, TimeStep *tStep)
 {
     FloatMatrix rotationMatrix;
 
@@ -142,7 +142,7 @@ void CompoDamageMat :: give3dMaterialStiffnessMatrix(FloatMatrix &answer, MatRes
 }
 
 //called in each iteration, support for 3D and 1D material mode
-void CompoDamageMat :: giveRealStressVector(FloatArray &answer, GaussPoint *gp, const FloatArray &totalStrain, TimeStep *atTime)
+void CompoDamageMat :: giveRealStressVector(FloatArray &answer, GaussPoint *gp, const FloatArray &totalStrain, TimeStep *tStep)
 {
     int i_max, s;
     double delta, sigma, charLen, tmp = 0., Gf_tmp;
@@ -156,7 +156,7 @@ void CompoDamageMat :: giveRealStressVector(FloatArray &answer, GaussPoint *gp, 
     st->Iteration++; //increase the call number at IP
 
     //subtract strain independent part - temperature, creep ..., in global c.s.
-    this->giveStressDependentPartOfStrainVector(reducedTotalStrainVector, gp, totalStrain, atTime, VM_Total);
+    this->giveStressDependentPartOfStrainVector(reducedTotalStrainVector, gp, totalStrain, tStep, VM_Total);
     //reducedTotalStrainVector.printYourself();
 
     switch ( mMode ) {
@@ -357,13 +357,13 @@ void CompoDamageMat :: giveRealStressVector(FloatArray &answer, GaussPoint *gp, 
 }
 
 //used for output in *.hom a *.out
-int CompoDamageMat :: giveIPValue(FloatArray &answer, GaussPoint *aGaussPoint, InternalStateType type, TimeStep *atTime)
+int CompoDamageMat :: giveIPValue(FloatArray &answer, GaussPoint *gp, InternalStateType type, TimeStep *tStep)
 {
-    CompoDamageMatStatus *status = static_cast< CompoDamageMatStatus * >( this->giveStatus(aGaussPoint) );
+    CompoDamageMatStatus *status = static_cast< CompoDamageMatStatus * >( this->giveStatus(gp) );
     if ( type == IST_DamageTensor ) {
         answer = status->omega;
     } else {
-        StructuralMaterial :: giveIPValue(answer, aGaussPoint, type, atTime);
+        StructuralMaterial :: giveIPValue(answer, gp, type, tStep);
     }
 
     return 1;
@@ -648,10 +648,10 @@ void CompoDamageMatStatus :: initTempStatus()
 // updates variables (nonTemp variables describing situation at previous equilibrium state)
 // after a new equilibrium state has been reached
 // temporary variables are having values corresponding to newly reached equilibrium
-void CompoDamageMatStatus :: updateYourself(TimeStep *atTime)
+void CompoDamageMatStatus :: updateYourself(TimeStep *tStep)
 {
     //here stressVector = tempStressVector; strainVector = tempStrainVector;
-    StructuralMaterialStatus :: updateYourself(atTime); //MaterialStatus::updateYourself, i.e. stressVector = tempStressVector; strainVector = tempStrainVector;
+    StructuralMaterialStatus :: updateYourself(tStep); //MaterialStatus::updateYourself, i.e. stressVector = tempStressVector; strainVector = tempStrainVector;
     this->kappa = this->tempKappa;
     this->omega = this->tempOmega;
     this->Iteration = 0;

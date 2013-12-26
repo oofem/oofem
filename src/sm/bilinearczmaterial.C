@@ -73,7 +73,7 @@ BilinearCZMaterial :: hasMaterialModeCapability(MaterialMode mode)
 void
 BilinearCZMaterial :: giveRealStressVector(FloatArray &answer, GaussPoint *gp,
                                            const FloatArray &jumpVector,
-                                           TimeStep *atTime)
+                                           TimeStep *tStep)
 //
 // returns real stress vector in 3d stress space of receiver according to
 // previous level of stress and current
@@ -124,7 +124,7 @@ void
 BilinearCZMaterial :: giveStiffnessMatrix(FloatMatrix &answer,
                                           MatResponseMode rMode,
                                           GaussPoint *gp,
-                                          TimeStep *atTime)
+                                          TimeStep *tStep)
 //
 // Returns characteristic material stiffness matrix of the receiver
 //
@@ -133,18 +133,18 @@ BilinearCZMaterial :: giveStiffnessMatrix(FloatMatrix &answer,
     switch ( mMode ) {
     case _3dInterface:
     case _3dMat:
-        give3dInterfaceMaterialStiffnessMatrix(answer, rMode, gp, atTime);
+        give3dInterfaceMaterialStiffnessMatrix(answer, rMode, gp, tStep);
         break;
     default:
-        //StructuralMaterial :: giveCharacteristicMatrix(answer, rMode, gp, atTime);
-        StructuralMaterial :: give3dMaterialStiffnessMatrix(answer, rMode, gp, atTime);
+        //StructuralMaterial :: giveCharacteristicMatrix(answer, rMode, gp, tStep);
+        StructuralMaterial :: give3dMaterialStiffnessMatrix(answer, rMode, gp, tStep);
     }
 }
 
 
 void
 BilinearCZMaterial :: give3dInterfaceMaterialStiffnessMatrix(FloatMatrix &answer, MatResponseMode rMode,
-                                                             GaussPoint *gp, TimeStep *atTime)
+                                                             GaussPoint *gp, TimeStep *tStep)
 {
     BilinearCZMaterialStatus *status = static_cast< BilinearCZMaterialStatus * >( this->giveStatus(gp) );
 
@@ -190,15 +190,15 @@ BilinearCZMaterial :: give3dInterfaceMaterialStiffnessMatrix(FloatMatrix &answer
 
 
 int
-BilinearCZMaterial :: giveIPValue(FloatArray &answer, GaussPoint *aGaussPoint, InternalStateType type, TimeStep *atTime)
+BilinearCZMaterial :: giveIPValue(FloatArray &answer, GaussPoint *gp, InternalStateType type, TimeStep *tStep)
 {
-    //BilinearCZMaterialStatus *status = static_cast< BilinearCZMaterialStatus * >( this->giveStatus(aGaussPoint) );
+    //BilinearCZMaterialStatus *status = static_cast< BilinearCZMaterialStatus * >( this->giveStatus(gp) );
     if ( type == IST_DamageScalar ) {
         answer.resize(1);
         answer.at(1) = 0.0; // no damage
         return 1;
     } else {
-        return StructuralMaterial :: giveIPValue(answer, aGaussPoint, type, atTime);
+        return StructuralMaterial :: giveIPValue(answer, gp, type, tStep);
     }
 }
 
@@ -302,9 +302,9 @@ BilinearCZMaterialStatus :: initTempStatus()
 }
 
 void
-BilinearCZMaterialStatus :: updateYourself(TimeStep *atTime)
+BilinearCZMaterialStatus :: updateYourself(TimeStep *tStep)
 {
-    StructuralMaterialStatus :: updateYourself(atTime);
+    StructuralMaterialStatus :: updateYourself(tStep);
 }
 
 #if 0

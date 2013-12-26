@@ -90,14 +90,14 @@ LSpace :: giveInterface(InterfaceType interface)
 
 
 void
-LSpace :: computeBmatrixAt(GaussPoint *aGaussPoint, FloatMatrix &answer, int li, int ui)
+LSpace :: computeBmatrixAt(GaussPoint *gp, FloatMatrix &answer, int li, int ui)
 // Returns the [6x24] strain-displacement matrix {B} of the receiver, eva-
-// luated at aGaussPoint.
+// luated at gp.
 // B matrix  -  6 rows : epsilon-X, epsilon-Y, epsilon-Z, gamma-YZ, gamma-ZX, gamma-XY  :
 {
     FloatMatrix dnx;
 
-    this->interpolation.evaldNdx( dnx, * aGaussPoint->giveCoordinates(), FEIElementGeometryWrapper(this) );
+    this->interpolation.evaldNdx( dnx, * gp->giveCoordinates(), FEIElementGeometryWrapper(this) );
 
     answer.resize(6, 24);
     answer.zero();
@@ -114,14 +114,14 @@ LSpace :: computeBmatrixAt(GaussPoint *aGaussPoint, FloatMatrix &answer, int li,
 }
 
 void
-LSpace :: computeBHmatrixAt(GaussPoint *aGaussPoint, FloatMatrix &answer)
+LSpace :: computeBHmatrixAt(GaussPoint *gp, FloatMatrix &answer)
 // Returns the [9x24] displacement gradient matrix {BH} of the receiver,
-// evaluated at aGaussPoint.
+// evaluated at gp.
 // BH matrix  -  9 rows : du/dx, dv/dy, dw/dz, dv/dz, du/dz, du/dy, dw/dy, dw/dx, dv/dx
 {
     FloatMatrix dnx;
 
-    this->interpolation.evaldNdx( dnx, * aGaussPoint->giveCoordinates(), FEIElementGeometryWrapper(this) );
+    this->interpolation.evaldNdx( dnx, * gp->giveCoordinates(), FEIElementGeometryWrapper(this) );
 
     answer.resize(9, 24);
     answer.zero();
@@ -144,7 +144,7 @@ LSpace :: computeBHmatrixAt(GaussPoint *aGaussPoint, FloatMatrix &answer)
     H.resize(6, 9);
     H.at(1, 1) = H.at(2, 2) = H.at(3, 3) = H.at(4, 4) = H.at(4, 7) = H.at(5, 5) = H.at(5, 8) = H.at(6, 6) = H.at(6, 9) = 1.0;
     Btest.beProductOf(H, answer);
-    computeBmatrixAt(aGaussPoint, Bsym);
+    computeBmatrixAt(gp, Bsym);
     Btest.printYourself();
     Bsym.printYourself();
 #endif
@@ -172,7 +172,7 @@ void LSpace :: computeGaussPoints()
 void
 LSpace :: computeNmatrixAt(const FloatArray &iLocCoord, FloatMatrix &answer)
 // Returns the displacement interpolation matrix {N} of the receiver, eva-
-// luated at aGaussPoint.
+// luated at gp.
 {
     FloatArray n(8);
 
@@ -188,15 +188,15 @@ LSpace :: computeNmatrixAt(const FloatArray &iLocCoord, FloatMatrix &answer)
 }
 
 
-double LSpace :: computeVolumeAround(GaussPoint *aGaussPoint)
-// Returns the portion of the receiver which is attached to aGaussPoint.
+double LSpace :: computeVolumeAround(GaussPoint *gp)
+// Returns the portion of the receiver which is attached to gp.
 {
     double determinant, weight, volume;
-    determinant = fabs( this->interpolation.giveTransformationJacobian( * aGaussPoint->giveCoordinates(),
+    determinant = fabs( this->interpolation.giveTransformationJacobian( * gp->giveCoordinates(),
                                                                         FEIElementGeometryWrapper(this) ) );
 
 
-    weight = aGaussPoint->giveWeight();
+    weight = gp->giveWeight();
     volume = determinant * weight;
 
     return volume;
@@ -449,7 +449,7 @@ LSpace :: SpatialLocalizerI_giveDistanceFromParametricCenter(const FloatArray &c
 
 int
 LSpace :: EIPrimaryUnknownMI_computePrimaryUnknownVectorAt(ValueModeType mode,
-                                                           TimeStep *stepN, const FloatArray &coords,
+                                                           TimeStep *tStep, const FloatArray &coords,
                                                            FloatArray &answer)
 {
     FloatArray lcoords, u;
@@ -473,7 +473,7 @@ LSpace :: EIPrimaryUnknownMI_computePrimaryUnknownVectorAt(ValueModeType mode,
     n.at(1, 19) = n.at(2, 20) = n.at(3, 21) = ni.at(7);
     n.at(1, 22) = n.at(2, 23) = n.at(3, 24) = ni.at(8);
 
-    this->computeVectorOf(EID_MomentumBalance, mode, stepN, u);
+    this->computeVectorOf(EID_MomentumBalance, mode, tStep, u);
     answer.beProductOf(n, u);
 
     return result;
@@ -905,7 +905,7 @@ LSpace :: drawSpecial(oofegGraphicContext &gc)
 
 
 void
-LSpace :: computeEgdeNMatrixAt(FloatMatrix &answer, int iedge, GaussPoint *aGaussPoint)
+LSpace :: computeEgdeNMatrixAt(FloatMatrix &answer, int iedge, GaussPoint *gp)
 {
     /*
      *
@@ -922,7 +922,7 @@ LSpace :: computeEgdeNMatrixAt(FloatMatrix &answer, int iedge, GaussPoint *aGaus
      */
 
     FloatArray n(2);
-    this->interpolation.edgeEvalN( n, iedge, * aGaussPoint->giveCoordinates(), FEIElementGeometryWrapper(this) );
+    this->interpolation.edgeEvalN( n, iedge, * gp->giveCoordinates(), FEIElementGeometryWrapper(this) );
 
     answer.resize(3, 6);
     answer.zero();
@@ -1035,11 +1035,11 @@ LSpace :: giveEdgeDofMapping(IntArray &answer, int iEdge) const
 
 
 double
-LSpace :: computeEdgeVolumeAround(GaussPoint *aGaussPoint, int iEdge)
+LSpace :: computeEdgeVolumeAround(GaussPoint *gp, int iEdge)
 {
-    double result = this->interpolation.edgeGiveTransformationJacobian( iEdge, * aGaussPoint->giveCoordinates(),
+    double result = this->interpolation.edgeGiveTransformationJacobian( iEdge, * gp->giveCoordinates(),
                                                                         FEIElementGeometryWrapper(this) );
-    return result * aGaussPoint->giveWeight();
+    return result * gp->giveWeight();
 }
 
 

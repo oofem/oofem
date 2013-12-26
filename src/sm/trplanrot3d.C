@@ -222,7 +222,7 @@ TrPlaneStrRot3d :: giveCharacteristicTensor(FloatMatrix &answer, CharTensor type
 
 
 int
-TrPlaneStrRot3d :: giveIPValue(FloatArray &answer, GaussPoint *aGaussPoint, InternalStateType type, TimeStep *tStep)
+TrPlaneStrRot3d :: giveIPValue(FloatArray &answer, GaussPoint *gp, InternalStateType type, TimeStep *tStep)
 {
     FloatMatrix globTensor;
     CharTensor cht;
@@ -236,7 +236,7 @@ TrPlaneStrRot3d :: giveIPValue(FloatArray &answer, GaussPoint *aGaussPoint, Inte
             cht = GlobalStrainTensor;
         }
 
-        this->giveCharacteristicTensor(globTensor, cht, aGaussPoint, tStep);
+        this->giveCharacteristicTensor(globTensor, cht, gp, tStep);
 
         answer.at(1) = globTensor.at(1, 1); //sxForce
         answer.at(2) = globTensor.at(2, 2); //syForce
@@ -245,7 +245,7 @@ TrPlaneStrRot3d :: giveIPValue(FloatArray &answer, GaussPoint *aGaussPoint, Inte
         answer.at(5) = globTensor.at(1, 3); //qxzForce
         answer.at(6) = globTensor.at(1, 2); //qxyForce
         // mutiply stresses by thickness to get forces
-        answer.times( this->giveCrossSection()->give(CS_Thickness, aGaussPoint) );
+        answer.times( this->giveCrossSection()->give(CS_Thickness, gp) );
 
         if ( type == IST_ShellForceMomentumTensor ) {
             cht = GlobalMomentumTensor;
@@ -253,7 +253,7 @@ TrPlaneStrRot3d :: giveIPValue(FloatArray &answer, GaussPoint *aGaussPoint, Inte
             cht = GlobalCurvatureTensor;
         }
 
-        this->giveCharacteristicTensor(globTensor, cht, aGaussPoint, tStep);
+        this->giveCharacteristicTensor(globTensor, cht, gp, tStep);
 
         answer.at(7)  = globTensor.at(1, 1); //mxForce
         answer.at(8)  = globTensor.at(2, 2); //myForce
@@ -271,8 +271,8 @@ TrPlaneStrRot3d :: giveIPValue(FloatArray &answer, GaussPoint *aGaussPoint, Inte
 
 
 void
-TrPlaneStrRot3d :: computeBodyLoadVectorAt(FloatArray &answer, Load *forLoad, TimeStep *stepN, ValueModeType mode)
-// Computes numerically the load vector of the receiver due to the body loads, at stepN.
+TrPlaneStrRot3d :: computeBodyLoadVectorAt(FloatArray &answer, Load *forLoad, TimeStep *tStep, ValueModeType mode)
+// Computes numerically the load vector of the receiver due to the body loads, at tStep.
 // load is assumed to be in global cs.
 // load vector is then transformed to coordinate system in each node.
 // (should be global coordinate system, but there may be defined
@@ -288,7 +288,7 @@ TrPlaneStrRot3d :: computeBodyLoadVectorAt(FloatArray &answer, Load *forLoad, Ti
     }
 
     // note: force is assumed to be in global coordinate system.
-    forLoad->computeComponentArrayAt(force, stepN, mode);
+    forLoad->computeComponentArrayAt(force, tStep, mode);
 
     if ( force.giveSize() ) {
         gp = integrationRulesArray [ 0 ]->getIntegrationPoint(0);
@@ -336,7 +336,7 @@ TrPlaneStrRot3d :: printOutputAt(FILE *file, TimeStep *tStep)
         for ( int j = 0; j < integrationRulesArray [ i ]->giveNumberOfIntegrationPoints(); j++ ) {
             GaussPoint *gp = integrationRulesArray [ i ]->getIntegrationPoint(j);
 
-            // gp   -> printOutputAt(file,stepN) ;
+            // gp   -> printOutputAt(file,tStep) ;
 
             fprintf( file, "  GP %2d.%-2d :", i + 1, gp->giveNumber() );
 

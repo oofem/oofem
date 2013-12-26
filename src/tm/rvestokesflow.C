@@ -159,10 +159,10 @@ IRResultType RVEStokesFlow :: initializeFrom(InputRecord *ir)
 }
 
 int
-RVEStokesFlow :: giveIPValue(FloatArray &answer, GaussPoint *aGaussPoint, InternalStateType type, TimeStep *atTime)
+RVEStokesFlow :: giveIPValue(FloatArray &answer, GaussPoint *gp, InternalStateType type, TimeStep *tStep)
 {
     RVEStokesFlowMaterialStatus *thisMaterialStatus;
-    thisMaterialStatus = static_cast< RVEStokesFlowMaterialStatus * >( this->giveStatus(aGaussPoint) );
+    thisMaterialStatus = static_cast< RVEStokesFlowMaterialStatus * >( this->giveStatus(gp) );
     FloatMatrix temp;
     answer.resize(3);
     answer.zero();
@@ -188,7 +188,7 @@ RVEStokesFlow :: giveIPValue(FloatArray &answer, GaussPoint *aGaussPoint, Intern
         answer.at(4) = temp.at(2, 2);
         break;
     default:
-        return TransportMaterial :: giveIPValue(answer, aGaussPoint, type, atTime);
+        return TransportMaterial :: giveIPValue(answer, gp, type, tStep);
     }
 
     return 1;
@@ -261,7 +261,7 @@ RVEStokesFlow :: exportFilter(EngngModel *E, GaussPoint *gp, TimeStep *tStep)
 }
 
 void
-RVEStokesFlow :: giveCharacteristicMatrix(FloatMatrix &answer, MatResponseMode, GaussPoint *gp, TimeStep *atTime)
+RVEStokesFlow :: giveCharacteristicMatrix(FloatMatrix &answer, MatResponseMode, GaussPoint *gp, TimeStep *tStep)
 {
     this->suppressStdout();
 

@@ -107,7 +107,7 @@ protected:
 
     virtual int checkConsistency();
     void give3dInterfaceMaterialStiffnessMatrix(FloatMatrix &answer, MatResponseForm form, MatResponseMode rMode,
-                                                GaussPoint *gp, TimeStep *atTime);
+                                                GaussPoint *gp, TimeStep *tStep);
 public:
     /// Constructor
     ExpCZMaterial(int n, Domain *d);

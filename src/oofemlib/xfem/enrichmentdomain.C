@@ -56,7 +56,8 @@ REGISTER_EnrichmentDomain(EDBGCircle)
 REGISTER_EnrichmentDomain(EDCrack)
 
 
-EnrichmentDomain :: EnrichmentDomain()
+EnrichmentDomain :: EnrichmentDomain() :
+    mDebugVTK(false)
 {}
 
 void EnrichmentDomain_BG :: giveInputRecord(DynamicInputRecord &input)
@@ -69,6 +70,22 @@ void EnrichmentDomain_BG :: giveInputRecord(DynamicInputRecord &input)
 void EnrichmentDomain_BG :: CallNodeEnrMarkerUpdate(EnrichmentItem &iEnrItem, XfemManager &ixFemMan) const
 {
     iEnrItem.updateNodeEnrMarker(ixFemMan, * this);
+}
+
+IRResultType EDCrack :: initializeFrom(InputRecord *ir)
+{
+    IRResultType result = bg->initializeFrom(ir);
+
+
+    // For debugging only
+    if ( mDebugVTK ) {
+        PolygonLine *pl = dynamic_cast< PolygonLine * >( bg );
+        if ( pl != NULL ) {
+            pl->printVTK();
+        }
+    }
+
+    return result;
 }
 
 bool EDCrack :: giveClosestTipInfo(const FloatArray &iCoords, TipInfo &oInfo) const
@@ -137,16 +154,6 @@ DofManList :: addDofManagers(IntArray &dofManNumbers)
 
     std :: sort( dofManList.begin(), this->dofManList.end() );
 }
-
-// remove?
-void
-DofManList :: updateEnrichmentDomain(IntArray &dofManNumbers)
-{
-    this->addDofManagers(dofManNumbers);
-}
-
-
-
 
 bool EDCrack :: giveTipInfos(std :: vector< TipInfo > &oInfo) const
 {

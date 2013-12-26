@@ -743,7 +743,7 @@ public:
 
     virtual bool isCharacteristicMtrxSymmetric(MatResponseMode rMode) { return false; }
 
-    virtual int setIPValue(const FloatArray &value, GaussPoint *aGaussPoint, InternalStateType type);
+    virtual int setIPValue(const FloatArray &value, GaussPoint *gp, InternalStateType type);
 
     virtual int giveIPValue(FloatArray &answer,
                             GaussPoint *gp,

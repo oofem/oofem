@@ -591,7 +591,7 @@ Beam2d :: computeBodyLoadVectorAt(FloatArray &answer, Load *load, TimeStep *tSte
 
 
 void
-Beam2d :: printOutputAt(FILE *File, TimeStep *stepN)
+Beam2d :: printOutputAt(FILE *File, TimeStep *tStep)
 {
     // Performs end-of-step operations.
 
@@ -602,10 +602,10 @@ Beam2d :: printOutputAt(FILE *File, TimeStep *stepN)
     fprintf(File, "beam element %d :\n", number);
 
     // ask for global element displacement vector
-    this->computeVectorOf(EID_MomentumBalance, VM_Total, stepN, rl);
+    this->computeVectorOf(EID_MomentumBalance, VM_Total, tStep, rl);
 
     // ask for global element end forces vector
-    this->giveEndForcesVector(Fl, stepN);
+    this->giveEndForcesVector(Fl, tStep);
 
     fprintf(File, "  local displacements ");
     n = rl.giveSize();
@@ -624,17 +624,17 @@ Beam2d :: printOutputAt(FILE *File, TimeStep *stepN)
 
 
 void
-Beam2d :: computeLocalForceLoadVector(FloatArray &answer, TimeStep *stepN, ValueModeType mode)
-// Computes the load vector of the receiver, at stepN.
+Beam2d :: computeLocalForceLoadVector(FloatArray &answer, TimeStep *tStep, ValueModeType mode)
+// Computes the load vector of the receiver, at tStep.
 {
     FloatMatrix stiff;
 
-    StructuralElement :: computeLocalForceLoadVector(answer, stepN, mode);
+    StructuralElement :: computeLocalForceLoadVector(answer, tStep, mode);
 
     // condense requested dofs in local c.s
     if ( answer.giveSize() && dofsToCondense ) {
         if ( answer.giveSize() != 0 ) {
-            this->computeClampedStiffnessMatrix(stiff, TangentStiffness, stepN);
+            this->computeClampedStiffnessMatrix(stiff, TangentStiffness, tStep);
             this->condense(& stiff, NULL, & answer, dofsToCondense);
         }
     }
@@ -642,16 +642,16 @@ Beam2d :: computeLocalForceLoadVector(FloatArray &answer, TimeStep *stepN, Value
 
 
 void
-Beam2d :: computePrescribedStrainLocalLoadVectorAt(FloatArray &answer, TimeStep *stepN, ValueModeType mode)
-// Computes the load vector of the receiver, at stepN.
+Beam2d :: computePrescribedStrainLocalLoadVectorAt(FloatArray &answer, TimeStep *tStep, ValueModeType mode)
+// Computes the load vector of the receiver, at tStep.
 {
-    StructuralElement :: computePrescribedStrainLocalLoadVectorAt(answer, stepN, mode);
+    StructuralElement :: computePrescribedStrainLocalLoadVectorAt(answer, tStep, mode);
     FloatMatrix stiff;
 
     // condense requested dofs
     if ( answer.giveSize() && dofsToCondense ) {
         if ( answer.giveSize() != 0 ) {
-            this->computeClampedStiffnessMatrix(stiff, TangentStiffness, stepN);
+            this->computeClampedStiffnessMatrix(stiff, TangentStiffness, tStep);
             this->condense(& stiff, NULL, & answer, dofsToCondense);
         }
     }

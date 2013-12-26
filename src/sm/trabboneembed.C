@@ -53,7 +53,7 @@ TrabBoneEmbed :: hasMaterialModeCapability(MaterialMode mode)
 }
 
 
-void TrabBoneEmbed :: computeCumPlastStrain(double &tempAlpha, GaussPoint *gp, TimeStep *atTime)
+void TrabBoneEmbed :: computeCumPlastStrain(double &tempAlpha, GaussPoint *gp, TimeStep *tStep)
 {
     tempAlpha = 0.;
 }
@@ -62,7 +62,7 @@ void TrabBoneEmbed :: computeCumPlastStrain(double &tempAlpha, GaussPoint *gp, T
 void
 TrabBoneEmbed :: give3dMaterialStiffnessMatrix(FloatMatrix &answer,
                                                MatResponseMode mode, GaussPoint *gp,
-                                               TimeStep *atTime)
+                                               TimeStep *tStep)
 {
     TrabBoneEmbedStatus *status = static_cast< TrabBoneEmbedStatus * >( this->giveStatus(gp) );
 
@@ -104,11 +104,11 @@ TrabBoneEmbed :: computeDamageParam(double alpha, GaussPoint *gp)
 
 
 double
-TrabBoneEmbed :: computeDamage(GaussPoint *gp,  TimeStep *atTime)
+TrabBoneEmbed :: computeDamage(GaussPoint *gp,  TimeStep *tStep)
 {
     double tempAlpha;
 
-    computeCumPlastStrain(tempAlpha, gp, atTime);
+    computeCumPlastStrain(tempAlpha, gp, tStep);
 
     double tempDam = computeDamageParam(tempAlpha, gp);
 
@@ -121,7 +121,7 @@ TrabBoneEmbed :: computeDamage(GaussPoint *gp,  TimeStep *atTime)
 void
 TrabBoneEmbed :: giveRealStressVector_3d(FloatArray &answer, GaussPoint *gp,
                                          const FloatArray &totalStrain,
-                                         TimeStep *atTime)
+                                         TimeStep *tStep)
 {
     double tempDam, tempTSED;
     FloatArray newTotalDef, plasDef;
@@ -137,7 +137,7 @@ TrabBoneEmbed :: giveRealStressVector_3d(FloatArray &answer, GaussPoint *gp,
 
     performPlasticityReturn(gp, totalStrain);
 
-    tempDam = computeDamage(gp, atTime);
+    tempDam = computeDamage(gp, tStep);
 
     plasDef.resize(6);
 
@@ -183,9 +183,9 @@ TrabBoneEmbed :: initializeFrom(InputRecord *ir)
 
 
 int
-TrabBoneEmbed :: giveIPValue(FloatArray &answer, GaussPoint *aGaussPoint, InternalStateType type, TimeStep *atTime)
+TrabBoneEmbed :: giveIPValue(FloatArray &answer, GaussPoint *gp, InternalStateType type, TimeStep *tStep)
 {
-    TrabBoneEmbedStatus *status = static_cast< TrabBoneEmbedStatus * >( this->giveStatus(aGaussPoint) );
+    TrabBoneEmbedStatus *status = static_cast< TrabBoneEmbedStatus * >( this->giveStatus(gp) );
     if ( type == IST_DamageScalar ) {
         answer.resize(1);
         answer.at(1) = 0.;
@@ -216,7 +216,7 @@ TrabBoneEmbed :: giveIPValue(FloatArray &answer, GaussPoint *aGaussPoint, Intern
         answer.at(1) = status->giveTempTSED();
         return 1;
     } else {
-        return StructuralMaterial :: giveIPValue(answer, aGaussPoint, type, atTime);
+        return StructuralMaterial :: giveIPValue(answer, gp, type, tStep);
     }
 }
 
@@ -271,9 +271,9 @@ TrabBoneEmbedStatus :: initTempStatus()
 
 
 void
-TrabBoneEmbedStatus :: updateYourself(TimeStep *atTime)
+TrabBoneEmbedStatus :: updateYourself(TimeStep *tStep)
 {
-    StructuralMaterialStatus :: updateYourself(atTime);
+    StructuralMaterialStatus :: updateYourself(tStep);
     this->alpha = this->tempAlpha;
     this->dam = this->tempDam;
     this->tsed = this->tempTSED;

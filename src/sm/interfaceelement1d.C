@@ -110,7 +110,7 @@ InterfaceElem1d :: computeLumpedMassMatrix(FloatMatrix &answer, TimeStep *tStep)
 
 
 void
-InterfaceElem1d :: computeBmatrixAt(GaussPoint *aGaussPoint, FloatMatrix &answer, int li, int ui)
+InterfaceElem1d :: computeBmatrixAt(GaussPoint *gp, FloatMatrix &answer, int li, int ui)
 //
 // Returns linear part of geometrical equations of the receiver at gp.
 // Returns the linear part of the B matrix
@@ -242,7 +242,7 @@ InterfaceElem1d :: computeLocalCoordinates(FloatArray &answer, const FloatArray 
 }
 
 double
-InterfaceElem1d :: computeVolumeAround(GaussPoint *aGaussPoint)
+InterfaceElem1d :: computeVolumeAround(GaussPoint *gp)
 // Returns the length of the receiver. This method is valid only if 1
 // Gauss point is used.
 {

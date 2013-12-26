@@ -195,27 +195,27 @@ public:
     bool isCharacteristicMtrxSymmetric(MatResponseMode rMode) { return false; }
     double evaluateCurrentYieldStress(const double kappa);
     double evaluateCurrentPlasticModulus(const double kappa);
-    double evaluateCurrentViscousStress(const double deltaKappa, TimeStep *atTime);
-    double evaluateCurrentViscousModulus(const double deltaKappa, TimeStep *atTime);
+    double evaluateCurrentViscousStress(const double deltaKappa, TimeStep *tStep);
+    double evaluateCurrentViscousModulus(const double deltaKappa, TimeStep *tStep);
 
-    bool projectOnYieldSurface(double &tempKappa, FloatArray &tempEffectiveStress, FloatArray &tempPlasDef, const FloatArray &trialEffectiveStress, const FloatMatrix &elasticity, const FloatMatrix &compliance, TrabBone3DStatus *status, TimeStep *atTime, GaussPoint *gp, int lineSearchFlag);
+    bool projectOnYieldSurface(double &tempKappa, FloatArray &tempEffectiveStress, FloatArray &tempPlasDef, const FloatArray &trialEffectiveStress, const FloatMatrix &elasticity, const FloatMatrix &compliance, TrabBone3DStatus *status, TimeStep *tStep, GaussPoint *gp, int lineSearchFlag);
 
-    void performPlasticityReturn(GaussPoint *gp, const FloatArray &totalStrain, TimeStep *atTime);
+    void performPlasticityReturn(GaussPoint *gp, const FloatArray &totalStrain, TimeStep *tStep);
 
     void  constructPlasFlowDirec(FloatArray &answer, double &norm, FloatMatrix &fabric, FloatArray &F, FloatArray &S);
     void  constructDerivativeOfPlasFlowDirec(FloatMatrix &answer, FloatMatrix &fabric, FloatArray &F, FloatArray &S);
-    double evaluatePlasCriterion(FloatMatrix &fabric, FloatArray &F, FloatArray &stress, double kappa, double deltaKappa, TimeStep *atTime);
+    double evaluatePlasCriterion(FloatMatrix &fabric, FloatArray &F, FloatArray &stress, double kappa, double deltaKappa, TimeStep *tStep);
 
     double computeDamageParam(double kappa);
     double computeDamageParamPrime(double kappa);
 
-    double computeDamage(GaussPoint *gp, TimeStep *atTime);
+    double computeDamage(GaussPoint *gp, TimeStep *tStep);
 
-    virtual void computeCumPlastStrain(double &kappa, GaussPoint *gp, TimeStep *atTime);
+    virtual void computeCumPlastStrain(double &kappa, GaussPoint *gp, TimeStep *tStep);
 
     void computePlasStrainEnerDensity(GaussPoint *gp, const FloatArray &totalStrain, const FloatArray &totalStress);
 
-    void computeDensificationStress(FloatArray &answer, GaussPoint *gp, const FloatArray &totalStrain, TimeStep *atTime);
+    void computeDensificationStress(FloatArray &answer, GaussPoint *gp, const FloatArray &totalStrain, TimeStep *tStep);
 
     /// Construct anisotropic compliance tensor.
     void constructAnisoComplTensor(FloatMatrix &answer);
@@ -234,7 +234,7 @@ public:
 
     virtual void give3dMaterialStiffnessMatrix(FloatMatrix & answer,
                                                MatResponseMode, GaussPoint * gp,
-                                               TimeStep * atTime);
+                                               TimeStep * tStep);
 
     virtual void giveRealStressVector(FloatArray &answer, GaussPoint *,
                                       const FloatArray &, TimeStep *);
@@ -248,7 +248,7 @@ public:
 
     virtual MaterialStatus *CreateStatus(GaussPoint *gp) const;
 
-    virtual int giveIPValue(FloatArray &answer, GaussPoint *aGaussPoint, InternalStateType type, TimeStep *atTime);
+    virtual int giveIPValue(FloatArray &answer, GaussPoint *gp, InternalStateType type, TimeStep *tStep);
 
 #ifdef __PARALLEL_MODE
     virtual double predictRelativeComputationalCost(GaussPoint *gp);

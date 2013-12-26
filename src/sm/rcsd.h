@@ -149,7 +149,7 @@ protected:
 
     virtual void giveEffectiveMaterialStiffnessMatrix(FloatMatrix &answer,
                                                       MatResponseMode rMode,
-                                                      GaussPoint *gp, TimeStep *atTime);
+                                                      GaussPoint *gp, TimeStep *tStep);
 
     double computeDamageCoeff(double, double, double, double);
     virtual double giveCrackingModulus(MatResponseMode rMode, GaussPoint *gp,

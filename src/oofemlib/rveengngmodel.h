@@ -64,9 +64,9 @@ public:
      * @param type Specifies the data requested. The type is defined in classes which inherit rveEngngModel
      * @param value The value pertinent to the boundary condition
      * @param answer The response produced by the specified boundary conditions
-     * @param atTime Pertinent timestep
+     * @param tStep Pertinent timestep
      */
-    virtual void rveGiveCharacteristicData(int type, void *value, void *answer, TimeStep *atTime) = 0;
+    virtual void rveGiveCharacteristicData(int type, void *value, void *answer, TimeStep *tStep) = 0;
 };
 }
 

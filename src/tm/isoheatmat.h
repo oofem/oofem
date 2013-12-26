@@ -68,17 +68,17 @@ public:
     virtual void giveCharacteristicMatrix(FloatMatrix &answer,
                                           MatResponseMode mode,
                                           GaussPoint *gp,
-                                          TimeStep *atTime);
+                                          TimeStep *tStep);
 
     virtual double giveIsotropicConductivity(GaussPoint *gp) { return conductivity; }
 
     virtual double giveCharacteristicValue(MatResponseMode mode,
                                            GaussPoint *gp,
-                                           TimeStep *atTime);
+                                           TimeStep *tStep);
 
     virtual double  giveMaturityT0() { return maturityT0; }
 
-    virtual int giveIPValue(FloatArray &answer, GaussPoint *aGaussPoint, InternalStateType type, TimeStep *atTime);
+    virtual int giveIPValue(FloatArray &answer, GaussPoint *gp, InternalStateType type, TimeStep *tStep);
 
     virtual const char *giveInputRecordName() const { return _IFT_IsotropicHeatTransferMaterial_Name; }
     virtual const char *giveClassName() const { return "IsotropicHeatTransferMaterial"; }

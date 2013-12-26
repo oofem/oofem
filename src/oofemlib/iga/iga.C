@@ -1019,7 +1019,7 @@ void drawIGAPatchDeformedGeometry(Element *elem, StructuralElementEvaluator *se,
     FloatArray ur, d;
     IntArray lc;
     FEInterpolation *interp = elem->giveInterpolation();
-    TimeStep *stepN = elem->giveDomain()->giveEngngModel()->giveCurrentStep();
+    TimeStep *tStep = elem->giveDomain()->giveEngngModel()->giveCurrentStep();
     double defScale = gc.getDefScale();
 
     if ( !gc.testElementGraphicActivity(elem) ) {
@@ -1048,7 +1048,7 @@ void drawIGAPatchDeformedGeometry(Element *elem, StructuralElementEvaluator *se,
     IntegrationRule *iRule;
     int ir, nsd = interp->giveNsd();
 
-    se->computeVectorOf(EID_MomentumBalance, VM_Total, stepN, u);
+    se->computeVectorOf(EID_MomentumBalance, VM_Total, tStep, u);
 
     if ( nsd == 1 ) {
         FloatArray c [ 2 ], cg [ 2 ];

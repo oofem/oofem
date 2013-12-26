@@ -132,7 +132,7 @@ public:
 
     double computeDamage(GaussPoint *gp, TimeStep *tStep);
 
-    virtual void computeCumPlastStrain(double &alpha, GaussPoint *gp, TimeStep *atTime);
+    virtual void computeCumPlastStrain(double &alpha, GaussPoint *gp, TimeStep *tStep);
 
     virtual void give1dStressStiffMtrx(FloatMatrix &answer,
                                        MatResponseMode mode, GaussPoint *gp,

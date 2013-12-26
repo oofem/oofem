@@ -192,7 +192,7 @@ void
 J2plasticMaterial :: computeHardeningReducedModuli(FloatMatrix &answer,
                                                    GaussPoint *gp,
                                                    FloatArray *strainSpaceHardeningVariables,
-                                                   TimeStep *atTime)
+                                                   TimeStep *tStep)
 {
     /* computes hardening moduli in reduced stress strain space (for kinematic back-stress)*/
     int size = this->giveSizeOfReducedHardeningVarsVector(gp);
@@ -422,14 +422,14 @@ J2plasticMaterial :: computeReducedGradientMatrix(FloatMatrix &answer,
 void
 J2plasticMaterial :: computeTrialStressIncrement(FloatArray &answer, GaussPoint *gp,
                                                  const FloatArray &strainIncrement,
-                                                 TimeStep *atTime)
+                                                 TimeStep *tStep)
 {
     /* Computes the full trial elastic stress vector */
     FloatArray reducedAnswer;
     FloatMatrix reducedModuli;
 
     this->giveLinearElasticMaterial()->giveStiffnessMatrix(reducedModuli, ElasticStiffness,
-                                                           gp, atTime);
+                                                           gp, tStep);
 
     reducedAnswer.beProductOf(reducedModuli, strainIncrement);
     StructuralMaterial :: giveFullSymVectorForm( answer, reducedAnswer, gp->giveMaterialMode() );
@@ -439,10 +439,10 @@ J2plasticMaterial :: computeTrialStressIncrement(FloatArray &answer, GaussPoint 
 void
 J2plasticMaterial :: compute3dElasticModuli(FloatMatrix &answer,
                                             GaussPoint *gp,
-                                            TimeStep *atTime)
+                                            TimeStep *tStep)
 {
     /* Returns 3d elastic moduli */
-    this->giveLinearElasticMaterial()->give3dMaterialStiffnessMatrix(answer, ElasticStiffness, gp, atTime);
+    this->giveLinearElasticMaterial()->give3dMaterialStiffnessMatrix(answer, ElasticStiffness, gp, tStep);
 }
 
 

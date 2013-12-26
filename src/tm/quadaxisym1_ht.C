@@ -67,15 +67,15 @@ QuadAxisym1_ht :: ~QuadAxisym1_ht()
 { }
 
 double
-QuadAxisym1_ht :: computeVolumeAround(GaussPoint *aGaussPoint)
-// Returns the portion of the receiver which is attached to aGaussPoint.
+QuadAxisym1_ht :: computeVolumeAround(GaussPoint *gp)
+// Returns the portion of the receiver which is attached to gp.
 {
     double determinant, weight, volume;
-    determinant = fabs( this->interpolation.giveTransformationJacobian( * aGaussPoint->giveCoordinates(),
+    determinant = fabs( this->interpolation.giveTransformationJacobian( * gp->giveCoordinates(),
                                                                         FEIElementGeometryWrapper(this) ) );
 
-    weight = aGaussPoint->giveWeight();
-    volume = determinant * weight * this->computeRadiusAt(aGaussPoint);
+    weight = gp->giveWeight();
+    volume = determinant * weight * this->computeRadiusAt(gp);
 
     return volume;
 }

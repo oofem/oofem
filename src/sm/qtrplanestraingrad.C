@@ -92,14 +92,14 @@ QTrPlaneStrainGrad :: computeGaussPoints()
 }
 
 void
-QTrPlaneStrainGrad :: computeNkappaMatrixAt(GaussPoint *aGaussPoint, FloatMatrix &answer)
+QTrPlaneStrainGrad :: computeNkappaMatrixAt(GaussPoint *gp, FloatMatrix &answer)
 // Returns the displacement interpolation matrix {N} of the receiver, eva-
-// luated at aGaussPoint.
+// luated at gp.
 {
     double l1, l2, l3;
 
-    l1 = aGaussPoint->giveCoordinate(1);
-    l2 = aGaussPoint->giveCoordinate(2);
+    l1 = gp->giveCoordinate(1);
+    l2 = gp->giveCoordinate(2);
     l3 = 1.0 - l1 - l2;
 
     answer.resize(1, 3);
@@ -111,9 +111,9 @@ QTrPlaneStrainGrad :: computeNkappaMatrixAt(GaussPoint *aGaussPoint, FloatMatrix
 }
 
 void
-QTrPlaneStrainGrad :: computeBkappaMatrixAt(GaussPoint *aGaussPoint, FloatMatrix &answer)
+QTrPlaneStrainGrad :: computeBkappaMatrixAt(GaussPoint *gp, FloatMatrix &answer)
 // Returns the [2x6] strain-displacement matrix {B} of the receiver, eva-
-// luated at aGaussPoint.
+// luated at gp.
 {
     Node *node1, *node2, *node3;
     double x1, x2, x3, y1, y2, y3, area;

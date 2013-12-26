@@ -107,16 +107,16 @@ QPlaneStrainGrad :: computeGaussPoints()
 }
 
 void
-QPlaneStrainGrad :: computeNkappaMatrixAt(GaussPoint *aGaussPoint, FloatMatrix &answer)
+QPlaneStrainGrad :: computeNkappaMatrixAt(GaussPoint *gp, FloatMatrix &answer)
 // Returns the displacement interpolation matrix {N} of the receiver, eva-
-// luated at aGaussPoint.
+// luated at gp.
 {
     int i;
     FloatArray n(4);
 
     answer.resize(1, 4);
     answer.zero();
-    this->interpolation.evalN( n, * aGaussPoint->giveCoordinates(), FEIElementGeometryWrapper(this) );
+    this->interpolation.evalN( n, * gp->giveCoordinates(), FEIElementGeometryWrapper(this) );
 
     for ( i = 1; i <= 4; i++ ) {
         answer.at(1, i) = n.at(i);
@@ -124,14 +124,14 @@ QPlaneStrainGrad :: computeNkappaMatrixAt(GaussPoint *aGaussPoint, FloatMatrix &
 }
 
 void
-QPlaneStrainGrad :: computeBkappaMatrixAt(GaussPoint *aGaussPoint, FloatMatrix &answer)
+QPlaneStrainGrad :: computeBkappaMatrixAt(GaussPoint *gp, FloatMatrix &answer)
 // Returns the [1x8] strain-displacement matrix {B} of the receiver, eva-
-// luated at aGaussPoint.
+// luated at gp.
 {
     int i;
     FloatMatrix dnx;
 
-    this->interpolation.evaldNdx( dnx, * aGaussPoint->giveCoordinates(), FEIElementGeometryWrapper(this) );
+    this->interpolation.evaldNdx( dnx, * gp->giveCoordinates(), FEIElementGeometryWrapper(this) );
 
     answer.resize(2, 4);
     answer.zero();

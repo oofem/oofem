@@ -72,10 +72,10 @@ DustMaterialStatus :: initTempStatus()
 }
 
 void
-DustMaterialStatus :: updateYourself(TimeStep *atTime)
+DustMaterialStatus :: updateYourself(TimeStep *tStep)
 {
     // Call the corresponding function of the parent class to update variables defined there.
-    StructuralMaterialStatus :: updateYourself(atTime);
+    StructuralMaterialStatus :: updateYourself(tStep);
     plasticStrain = tempPlasticStrain;
     q = tempQ;
     stateFlag = tempStateFlag;
@@ -255,7 +255,7 @@ void
 DustMaterial :: giveRealStressVector(FloatArray &answer,
                                      GaussPoint *gp,
                                      const FloatArray &totalStrain,
-                                     TimeStep *atTime)
+                                     TimeStep *tStep)
 {
     FloatArray strainVectorR;
 
@@ -265,7 +265,7 @@ DustMaterial :: giveRealStressVector(FloatArray &answer,
     this->initTempStatus(gp);
 
     // subtract stress-independent part of strain
-    this->giveStressDependentPartOfStrainVector(strainVectorR, gp, totalStrain, atTime, VM_Total);
+    this->giveStressDependentPartOfStrainVector(strainVectorR, gp, totalStrain, tStep, VM_Total);
 
     // perform the local stress return and update the history variables
     StrainVector strain( strainVectorR, gp->giveMaterialMode() );
@@ -502,17 +502,17 @@ void
 DustMaterial :: give3dMaterialStiffnessMatrix(FloatMatrix &answer,
                                               MatResponseMode mode,
                                               GaussPoint *gp,
-                                              TimeStep *atTime)
+                                              TimeStep *tStep)
 {
     DustMaterialStatus *status = static_cast< DustMaterialStatus * >( giveStatus(gp) );
     double ym0 = LEMaterial->giveYoungsModulus();
     double ym = status->giveYoungsModulus();
     double coeff = status->giveVolumetricPlasticStrain() < 0 ? ym / ym0 : 1.0;
     if ( mode == ElasticStiffness ) {
-        LEMaterial->give3dMaterialStiffnessMatrix(answer, mode, gp, atTime);
+        LEMaterial->give3dMaterialStiffnessMatrix(answer, mode, gp, tStep);
         answer.times(coeff);
     } else if ( mode == SecantStiffness || mode == TangentStiffness ) {
-        LEMaterial->give3dMaterialStiffnessMatrix(answer, mode, gp, atTime);
+        LEMaterial->give3dMaterialStiffnessMatrix(answer, mode, gp, tStep);
         answer.times(coeff);
     } else {
         _error("Unsupported MatResponseMode\n");
@@ -539,7 +539,7 @@ int
 DustMaterial :: giveIPValue(FloatArray &answer,
                             GaussPoint *gp,
                             InternalStateType type,
-                            TimeStep *atTime)
+                            TimeStep *tStep)
 {
     const DustMaterialStatus *status = static_cast< DustMaterialStatus * >( giveStatus(gp) );
     if ( type == IST_PlasticStrainTensor ||
@@ -571,7 +571,7 @@ DustMaterial :: giveIPValue(FloatArray &answer,
         answer.at(1) = status->giveQ();
         return 1;
     } else {
-        return StructuralMaterial :: giveIPValue(answer, gp, type, atTime);
+        return StructuralMaterial :: giveIPValue(answer, gp, type, tStep);
     }
 
     return 0;

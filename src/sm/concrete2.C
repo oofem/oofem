@@ -168,7 +168,7 @@ Concrete2 :: give(int aProperty, GaussPoint *gp)
 void
 Concrete2 :: giveRealStressVector(FloatArray &answer, GaussPoint *gp,
                                   const FloatArray &strain,
-                                  TimeStep *atTime)
+                                  TimeStep *tStep)
 //
 // returns stress vector (in full or reduced form - form parameter)
 // of receiver according to previous level
@@ -180,7 +180,7 @@ Concrete2 :: giveRealStressVector(FloatArray &answer, GaussPoint *gp,
 
     switch ( mode ) {
     case _PlateLayer:
-        giveRealStresses3dShellLayer(answer, gp, strain, atTime);
+        giveRealStresses3dShellLayer(answer, gp, strain, tStep);
         break;
     default:
         _error("giveRealStresses : unsupported stressMode\n");
@@ -192,7 +192,7 @@ void
 Concrete2 :: giveRealStresses3dShellLayer(FloatArray &answer,
                                           GaussPoint *gp,
                                           const FloatArray &totalStrain,
-                                          TimeStep *atTime)
+                                          TimeStep *tStep)
 //
 // returns total stress vector of receiver according to
 // previous level of stress and current
@@ -260,7 +260,7 @@ Concrete2 :: giveRealStresses3dShellLayer(FloatArray &answer,
     // note: eigenStrains (temperature) is not contained in mechanical strain stored in gp
     // therefore it is necessary to subtract always the total eigen strain value
     this->giveStressDependentPartOfStrainVector(reducedStrain, gp,
-                                                totalStrain, atTime, VM_Total);
+                                                totalStrain, tStep, VM_Total);
 
     StructuralMaterial :: giveFullSymVectorForm( currentStrain, reducedStrain, gp->giveMaterialMode() );
     StructuralMaterial :: giveFullSymVectorForm( currentStress, status->giveStressVector(), gp->giveMaterialMode() );
@@ -1272,7 +1272,7 @@ void
 Concrete2 :: give3dMaterialStiffnessMatrix(FloatMatrix &answer,
                                            MatResponseMode rMode,
                                            GaussPoint *gp,
-                                           TimeStep *atTime)
+                                           TimeStep *tStep)
 //
 // This material is currently unable compute material stiffness
 // so it uses slave material (linearElasticMaterial ) to perform this work
@@ -1281,7 +1281,7 @@ Concrete2 :: give3dMaterialStiffnessMatrix(FloatMatrix &answer,
 //
 {
     // error ("Give3dMaterialStiffnessMatrix: unable to compute");
-    linearElasticMaterial->give3dMaterialStiffnessMatrix(answer, rMode, gp, atTime);
+    linearElasticMaterial->give3dMaterialStiffnessMatrix(answer, rMode, gp, tStep);
 }
 
 
@@ -1441,14 +1441,14 @@ Concrete2MaterialStatus :: initTempStatus()
 
 
 void
-Concrete2MaterialStatus :: updateYourself(TimeStep *atTime)
+Concrete2MaterialStatus :: updateYourself(TimeStep *tStep)
 //
 // updates variables (nonTemp variables describing situation at previous equilibrium state)
 // after a new equilibrium state has been reached
 // temporary variables are having values corresponding to newly reched equilibrium.
 //
 {
-    StructuralMaterialStatus :: updateYourself(atTime);
+    StructuralMaterialStatus :: updateYourself(tStep);
 
     SCCM = tempSCCM;
     EPM  = tempEPM;

@@ -122,7 +122,7 @@ void NLTransientTransportProblem :: solveYourselfAt(TimeStep *tStep)
     double dTTau = tStep->giveTimeIncrement();
     double Tau = tStep->giveTargetTime() - ( 1. - alpha ) * tStep->giveTimeIncrement();
     //Time step in which material laws are taken into account
-    TimeStep TauStep(tStep->giveNumber(), this, tStep->giveMetaStepNumber(), Tau, dTTau, tStep->giveSolutionStateCounter() + 1);
+    TimeStep TauStep(tStep->giveNumber(), this, tStep->giveMetatStepumber(), Tau, dTTau, tStep->giveSolutionStateCounter() + 1);
 
     //Predictor
     FloatArray *solutionVector;
@@ -305,22 +305,22 @@ NLTransientTransportProblem :: createPreviousSolutionInDofUnknownsDictionary(Tim
 
 
 void
-NLTransientTransportProblem :: updateYourself(TimeStep *stepN)
+NLTransientTransportProblem :: updateYourself(TimeStep *tStep)
 {
-    //this->updateInternalState(stepN);
-    NonStationaryTransportProblem :: updateYourself(stepN);
+    //this->updateInternalState(tStep);
+    NonStationaryTransportProblem :: updateYourself(tStep);
 }
 
 int
-NLTransientTransportProblem :: giveUnknownDictHashIndx(ValueModeType mode, TimeStep *stepN)
+NLTransientTransportProblem :: giveUnknownDictHashIndx(ValueModeType mode, TimeStep *tStep)
 {
     if ( mode == VM_Total ) { //Nodal temperature
-        if ( stepN->giveNumber() == this->giveCurrentStep()->giveNumber() ) { //current time
+        if ( tStep->giveNumber() == this->giveCurrentStep()->giveNumber() ) { //current time
             return 0;
-        } else if ( stepN->giveNumber() == this->giveCurrentStep()->giveNumber() - 1 ) { //previous time
+        } else if ( tStep->giveNumber() == this->giveCurrentStep()->giveNumber() - 1 ) { //previous time
             return 1;
         } else {
-            _error5( "No history available at TimeStep %d = %f, called from TimeStep %d = %f", stepN->giveNumber(), stepN->giveTargetTime(), this->giveCurrentStep()->giveNumber(), this->giveCurrentStep()->giveTargetTime() );
+            _error5( "No history available at TimeStep %d = %f, called from TimeStep %d = %f", tStep->giveNumber(), tStep->giveTargetTime(), this->giveCurrentStep()->giveNumber(), this->giveCurrentStep()->giveTargetTime() );
         }
     } else {
         _error2( "ValueModeType %s undefined", __ValueModeTypeToString(mode) );
@@ -371,7 +371,7 @@ NLTransientTransportProblem :: copyUnknownsInDictionary(ValueModeType mode, Time
 
 
 void
-NLTransientTransportProblem :: updateInternalState(TimeStep *stepN)
+NLTransientTransportProblem :: updateInternalState(TimeStep *tStep)
 {
     for ( int idomain = 1; idomain <= this->giveNumberOfDomains(); idomain++ ) {
         Domain *domain = this->giveDomain(idomain);
@@ -379,13 +379,13 @@ NLTransientTransportProblem :: updateInternalState(TimeStep *stepN)
         if ( requiresUnknownsDictionaryUpdate() ) {
             for ( int j = 1; j <= nnodes; j++ ) {
                 //update dictionary entry or add a new pair if the position is missing
-                this->updateDofUnknownsDictionary(domain->giveDofManager(j), stepN);
+                this->updateDofUnknownsDictionary(domain->giveDofManager(j), tStep);
             }
         }
 
         int nelem = domain->giveNumberOfElements();
         for ( int j = 1; j <= nelem; j++ ) {
-            domain->giveElement(j)->updateInternalState(stepN);
+            domain->giveElement(j)->updateInternalState(tStep);
         }
     }
 }

@@ -115,8 +115,8 @@ void StructuralElement :: computeLoadVector(FloatArray &answer, Load *load, Char
 
 void StructuralElement :: computeBoundaryLoadVector(FloatArray &answer, BoundaryLoad *load, int boundary, CharType type, ValueModeType mode, TimeStep *tStep)
 {
+    answer.resize(0);
     if ( type != ExternalForcesVector ) {
-        answer.resize(0);
         return;
     }
 
@@ -175,9 +175,9 @@ void StructuralElement :: computeBoundaryLoadVector(FloatArray &answer, Boundary
 
 
 void
-StructuralElement :: computeBodyLoadVectorAt(FloatArray &answer, Load *forLoad, TimeStep *stepN, ValueModeType mode)
+StructuralElement :: computeBodyLoadVectorAt(FloatArray &answer, Load *forLoad, TimeStep *tStep, ValueModeType mode)
 // Computes numerically the load vector of the receiver due to the body
-// loads, at stepN.
+// loads, at tStep.
 // load is assumed to be in global cs.
 // load vector is then transformed to coordinate system in each node.
 // (should be global coordinate system, but there may be defined
@@ -194,7 +194,7 @@ StructuralElement :: computeBodyLoadVectorAt(FloatArray &answer, Load *forLoad, 
     }
 
     // note: force is assumed to be in global coordinate system.
-    forLoad->computeComponentArrayAt(force, stepN, mode);
+    forLoad->computeComponentArrayAt(force, tStep, mode);
     // transform from global to element local c.s
     if ( this->computeLoadGToLRotationMtrx(T) ) {
         force.rotatedWith(T, 'n');
@@ -512,7 +512,7 @@ StructuralElement :: computeConsistentMassMatrix(FloatMatrix &answer, TimeStep *
 
 
 void
-StructuralElement :: computeLocalForceLoadVector(FloatArray &answer, TimeStep *stepN, ValueModeType mode)
+StructuralElement :: computeLocalForceLoadVector(FloatArray &answer, TimeStep *tStep, ValueModeType mode)
 // computes the part of load vector, which is imposed by force loads acting
 // on element volume (surface).
 // Why is this function taken separately ?
@@ -530,7 +530,7 @@ StructuralElement :: computeLocalForceLoadVector(FloatArray &answer, TimeStep *s
         Load *load = domain->giveLoad(id);
         bcGeomType ltype = load->giveBCGeoType();
         if ( ( ltype == BodyLoadBGT ) && ( load->giveBCValType() == ForceLoadBVT ) ) {
-            this->computeBodyLoadVectorAt(helpLoadVector, load, stepN, mode);
+            this->computeBodyLoadVectorAt(helpLoadVector, load, tStep, mode);
             if ( helpLoadVector.giveSize() ) {
                 answer.add(helpLoadVector);
             }
@@ -550,18 +550,18 @@ StructuralElement :: computeLocalForceLoadVector(FloatArray &answer, TimeStep *s
         Load *load = domain->giveLoad(n);
         bcGeomType ltype = load->giveBCGeoType();
         if ( ltype == EdgeLoadBGT ) {
-            this->computeEdgeLoadVectorAt(helpLoadVector, load, id, stepN, mode);
+            this->computeEdgeLoadVectorAt(helpLoadVector, load, id, tStep, mode);
             if ( helpLoadVector.giveSize() ) {
                 answer.add(helpLoadVector);
             }
         } else if ( ltype == SurfaceLoadBGT ) {
-            this->computeSurfaceLoadVectorAt(helpLoadVector, load, id, stepN, mode);
+            this->computeSurfaceLoadVectorAt(helpLoadVector, load, id, tStep, mode);
             if ( helpLoadVector.giveSize() ) {
                 answer.add(helpLoadVector);
             }
         } else if ( ltype == PointLoadBGT ) {
             // id not used
-            this->computePointLoadVectorAt(helpLoadVector, load, stepN, mode);
+            this->computePointLoadVectorAt(helpLoadVector, load, tStep, mode);
             if ( helpLoadVector.giveSize() ) {
                 answer.add(helpLoadVector);
             }
@@ -573,7 +573,7 @@ StructuralElement :: computeLocalForceLoadVector(FloatArray &answer, TimeStep *s
 
 
 void
-StructuralElement :: computeForceLoadVector(FloatArray &answer, TimeStep *stepN, ValueModeType mode)
+StructuralElement :: computeForceLoadVector(FloatArray &answer, TimeStep *tStep, ValueModeType mode)
 // computes the part of load vector, which is imposed by force loads acting
 // on element volume (surface).
 // Why is this function taken separately ?
@@ -581,7 +581,7 @@ StructuralElement :: computeForceLoadVector(FloatArray &answer, TimeStep *stepN,
 // in this vector a real forces are stored (temperature part is subtracted).
 // so we need further sobstract part corresponding to non-nodeal loading.
 {
-    this->computeLocalForceLoadVector(answer, stepN, mode);
+    this->computeLocalForceLoadVector(answer, tStep, mode);
 }
 
 
@@ -656,8 +656,8 @@ StructuralElement :: computeLumpedMassMatrix(FloatMatrix &answer, TimeStep *tSte
 
 
 void
-StructuralElement :: computeResultingIPTemperatureAt(FloatArray &answer, TimeStep *stepN, GaussPoint *gp, ValueModeType mode)
-// Computes at stepN the resulting force due to all temperature loads that act
+StructuralElement :: computeResultingIPTemperatureAt(FloatArray &answer, TimeStep *tStep, GaussPoint *gp, ValueModeType mode)
+// Computes at tStep the resulting force due to all temperature loads that act
 // on the receiver. This force is used by the element for computing its
 // body load vector.
 {
@@ -675,15 +675,15 @@ StructuralElement :: computeResultingIPTemperatureAt(FloatArray &answer, TimeSte
         n = bodyLoadArray.at(i);
         load = domain->giveLoad(n);
         if ( load->giveBCValType() == TemperatureBVT ) {
-            static_cast< StructuralTemperatureLoad * >( load )->computeValueAt(temperature, stepN, gCoords, mode);
+            static_cast< StructuralTemperatureLoad * >( load )->computeValueAt(temperature, tStep, gCoords, mode);
             answer.add(temperature);
         }
     }
 }
 
 void
-StructuralElement :: computeResultingIPEigenstrainAt(FloatArray &answer, TimeStep *stepN, GaussPoint *gp, ValueModeType mode)
-// Computes at stepN all eigenstrains that act on the receiver. Eigenstrains are used by the element for computing its body load vector.
+StructuralElement :: computeResultingIPEigenstrainAt(FloatArray &answer, TimeStep *tStep, GaussPoint *gp, ValueModeType mode)
+// Computes at tStep all eigenstrains that act on the receiver. Eigenstrains are used by the element for computing its body load vector.
 {
     int n, nLoads;
     Load *load;
@@ -699,7 +699,7 @@ StructuralElement :: computeResultingIPEigenstrainAt(FloatArray &answer, TimeSte
         n = bodyLoadArray.at(i);
         load = domain->giveLoad(n);
         if ( load->giveBCValType() == EigenstrainBVT ) {
-            static_cast< StructuralEigenstrainLoad * >( load )->computeValueAt(eigenstrain, stepN, gCoords, mode);
+            static_cast< StructuralEigenstrainLoad * >( load )->computeValueAt(eigenstrain, tStep, gCoords, mode);
             answer.add(eigenstrain);
         }
     }
@@ -831,22 +831,22 @@ void StructuralElement :: computeStiffnessMatrix_withIRulesAsSubcells(FloatMatri
 
 
 void
-StructuralElement :: computeStrainVector(FloatArray &answer, GaussPoint *gp, TimeStep *stepN)
+StructuralElement :: computeStrainVector(FloatArray &answer, GaussPoint *gp, TimeStep *tStep)
 // Computes the vector containing the strains at the Gauss point gp of
-// the receiver, at time step stepN. The nature of these strains depends
+// the receiver, at time step tStep. The nature of these strains depends
 // on the element's type.
 {
     FloatMatrix b;
     FloatArray u;
 
-    if ( !this->isActivated(stepN) ) {
+    if ( !this->isActivated(tStep) ) {
         answer.resize( StructuralMaterial :: giveSizeOfVoigtSymVector( gp->giveMaterialMode() ) );
         answer.zero();
         return;
     }
 
     this->computeBmatrixAt(gp, b);
-    this->computeVectorOf(EID_MomentumBalance, VM_Total, stepN, u);
+    this->computeVectorOf(EID_MomentumBalance, VM_Total, tStep, u);
 
     // subtract initial displacements, if defined
     if ( initialDisplacements ) {
@@ -857,13 +857,13 @@ StructuralElement :: computeStrainVector(FloatArray &answer, GaussPoint *gp, Tim
 
 
 void
-StructuralElement :: computeStressVector(FloatArray &answer, const FloatArray &strain, GaussPoint *gp, TimeStep *stepN)
+StructuralElement :: computeStressVector(FloatArray &answer, const FloatArray &strain, GaussPoint *gp, TimeStep *tStep)
 // Computes the vector containing the stresses at the Gauss point gp of
-// the receiver, at time step stepN. The nature of these stresses depends
+// the receiver, at time step tStep. The nature of these stresses depends
 // on the element's type.
 // this version assumes TOTAL LAGRANGE APPROACH
 {
-    this->giveStructuralCrossSection()->giveRealStresses(answer, gp, strain, stepN);
+    this->giveStructuralCrossSection()->giveRealStresses(answer, gp, strain, tStep);
 }
 
 
@@ -1097,7 +1097,7 @@ StructuralElement :: updateInternalState(TimeStep *tStep)
 }
 
 void
-StructuralElement :: updateBeforeNonlocalAverage(TimeStep *atTime)
+StructuralElement :: updateBeforeNonlocalAverage(TimeStep *tStep)
 // Updates the local material quantities before nonlocal averaging
 {
     /*
@@ -1121,7 +1121,7 @@ StructuralElement :: updateBeforeNonlocalAverage(TimeStep *atTime)
         iRule = integrationRulesArray [ i ];
         for ( int j = 0; j < iRule->giveNumberOfIntegrationPoints(); j++ ) {
             IntegrationPoint *ip = iRule->getIntegrationPoint(j);
-            this->computeStrainVector(epsilon, ip, atTime);
+            this->computeStrainVector(epsilon, ip, tStep);
             // provide material local strain increment - as is provided to computeRealStresVector
             // allows to update internal vars to be averaged to new state
 
@@ -1133,7 +1133,7 @@ StructuralElement :: updateBeforeNonlocalAverage(TimeStep *atTime)
             if ( !materialExt ) {
                 return;             //_error ("updateBeforeNonlocalAverage: material with no StructuralNonlocalMaterial support");
             }
-            materialExt->updateBeforeNonlocAverage(epsilon, iRule->getIntegrationPoint(j), atTime);
+            materialExt->updateBeforeNonlocAverage(epsilon, iRule->getIntegrationPoint(j), tStep);
         }
     }
 }
@@ -1271,17 +1271,17 @@ StructuralElement :: condense(FloatMatrix *stiff, FloatMatrix *mass, FloatArray 
 
 
 int
-StructuralElement :: giveIPValue(FloatArray &answer, GaussPoint *aGaussPoint, InternalStateType type, TimeStep *atTime)
+StructuralElement :: giveIPValue(FloatArray &answer, GaussPoint *gp, InternalStateType type, TimeStep *tStep)
 {
     if ( type == IST_DisplacementVector ) {
         FloatArray u;
         FloatMatrix N;
-        this->computeVectorOf(EID_MomentumBalance, VM_Total, atTime, u);
-        this->computeNmatrixAt(* ( aGaussPoint->giveLocalCoordinates() ), N);
+        this->computeVectorOf(EID_MomentumBalance, VM_Total, tStep, u);
+        this->computeNmatrixAt(* ( gp->giveLocalCoordinates() ), N);
         answer.beProductOf(N, u);
         return 1;
     }
-    return Element :: giveIPValue(answer, aGaussPoint, type, atTime);
+    return Element :: giveIPValue(answer, gp, type, tStep);
 }
 
 
@@ -1324,12 +1324,12 @@ StructuralElement :: giveNonlocalLocationArray(IntArray &locationArray, const Un
 
 
 void
-StructuralElement :: addNonlocalStiffnessContributions(SparseMtrx &dest, const UnknownNumberingScheme &s, TimeStep *atTime)
+StructuralElement :: addNonlocalStiffnessContributions(SparseMtrx &dest, const UnknownNumberingScheme &s, TimeStep *tStep)
 {
     ///@todo Take into account cross section model (slaves)
     NonlocalMaterialStiffnessInterface *interface;
 
-    if ( !this->isActivated(atTime) ) {
+    if ( !this->isActivated(tStep) ) {
         return;
     }
 
@@ -1343,7 +1343,7 @@ StructuralElement :: addNonlocalStiffnessContributions(SparseMtrx &dest, const U
             return;
         }
 
-        interface->NonlocalMaterialStiffnessInterface_addIPContribution(dest, s, iRule->getIntegrationPoint(i), atTime);
+        interface->NonlocalMaterialStiffnessInterface_addIPContribution(dest, s, iRule->getIntegrationPoint(i), tStep);
     }
 }
 
@@ -1410,24 +1410,24 @@ void StructuralElement :: createMaterialStatus()
 
 //
 int
-StructuralElement :: giveInternalStateAtNode(FloatArray &answer, InternalStateType type, InternalStateMode mode, int node, TimeStep *atTime)
+StructuralElement :: giveInternalStateAtNode(FloatArray &answer, InternalStateType type, InternalStateMode mode, int node, TimeStep *tStep)
 {
     if ( type == IST_DisplacementVector ) {
         Node *n = this->giveNode(node);
         answer.resize(3);
-        answer.at(1) = n->giveUpdatedCoordinate(1, atTime) - n->giveCoordinate(1);
-        answer.at(2) = n->giveUpdatedCoordinate(2, atTime) - n->giveCoordinate(2);
-        answer.at(3) = n->giveUpdatedCoordinate(3, atTime) - n->giveCoordinate(3);
+        answer.at(1) = n->giveUpdatedCoordinate(1, tStep) - n->giveCoordinate(1);
+        answer.at(2) = n->giveUpdatedCoordinate(2, tStep) - n->giveCoordinate(2);
+        answer.at(3) = n->giveUpdatedCoordinate(3, tStep) - n->giveCoordinate(3);
         return 1;
     } else {
-        return Element :: giveInternalStateAtNode(answer, type, mode, node, atTime);
+        return Element :: giveInternalStateAtNode(answer, type, mode, node, tStep);
     }
 }
 
 
 
 void
-StructuralElement :: showSparseMtrxStructure(CharType mtrx, oofegGraphicContext &gc, TimeStep *atTime)
+StructuralElement :: showSparseMtrxStructure(CharType mtrx, oofegGraphicContext &gc, TimeStep *tStep)
 {
     if ( ( mtrx == StiffnessMatrix ) || ( mtrx == TangentStiffnessMatrix ) ||
          ( mtrx == SecantStiffnessMatrix ) || ( mtrx == ElasticStiffnessMatrix ) ) {
@@ -1511,7 +1511,7 @@ StructuralElement :: showSparseMtrxStructure(CharType mtrx, oofegGraphicContext 
 }
 
 void
-StructuralElement :: showExtendedSparseMtrxStructure(CharType mtrx, oofegGraphicContext &gc, TimeStep *atTime)
+StructuralElement :: showExtendedSparseMtrxStructure(CharType mtrx, oofegGraphicContext &gc, TimeStep *tStep)
 {
     NonlocalMaterialStiffnessInterface *interface;
     int i;
@@ -1532,7 +1532,7 @@ StructuralElement :: showExtendedSparseMtrxStructure(CharType mtrx, oofegGraphic
             if ( interface == NULL ) {
                 return;
             }
-            interface->NonlocalMaterialStiffnessInterface_showSparseMtrxStructure(iRule->getIntegrationPoint(i), gc, atTime);
+            interface->NonlocalMaterialStiffnessInterface_showSparseMtrxStructure(iRule->getIntegrationPoint(i), gc, tStep);
         }
     }
 }

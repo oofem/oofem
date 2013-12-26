@@ -64,14 +64,14 @@ LWedge :: LWedge(int n, Domain *aDomain) : NLStructuralElement(n, aDomain)
 IRResultType
 LWedge :: initializeFrom(InputRecord *ir)
 {
-    numberOfGaussPoints = 2;
+    numberOfGaussPoints = 6;
     IRResultType result = this->NLStructuralElement :: initializeFrom(ir);
     if ( result != IRRT_OK ) {
         return result;
     }
 
-    if ( ( numberOfGaussPoints != 2 ) && ( numberOfGaussPoints != 9 ) ) {
-        numberOfGaussPoints = 2;
+    if ( ( numberOfGaussPoints != 6 ) && ( numberOfGaussPoints != 9 ) ) {
+        numberOfGaussPoints = 6;
     }
 
     return IRRT_OK;
@@ -94,11 +94,11 @@ LWedge :: giveDofManDofIDMask(int inode, EquationID ut, IntArray &answer) const
 
 
 double
-LWedge :: computeVolumeAround(GaussPoint *aGaussPoint)
-// Returns the portion of the receiver which is attached to aGaussPoint.
+LWedge :: computeVolumeAround(GaussPoint *gp)
+// Returns the portion of the receiver which is attached to gp.
 {
-    double determinant = this->interpolation.giveTransformationJacobian( * aGaussPoint->giveCoordinates(), FEIElementGeometryWrapper(this) );
-    double weight      = aGaussPoint->giveWeight();
+    double determinant = this->interpolation.giveTransformationJacobian( * gp->giveCoordinates(), FEIElementGeometryWrapper(this) );
+    double weight      = gp->giveWeight();
 
     return ( determinant * weight );
 }
@@ -118,7 +118,7 @@ LWedge :: computeGaussPoints()
 void
 LWedge :: computeNmatrixAt(const FloatArray &iLocCoord, FloatMatrix &answer)
 // Returns the displacement interpolation matrix {N} of the receiver, eva-
-// luated at aGaussPoint.
+// luated at gp.
 {
     FloatArray n(6);
 
@@ -142,14 +142,14 @@ LWedge :: giveMaterialMode()
 }
 
 void
-LWedge :: computeBmatrixAt(GaussPoint *aGaussPoint, FloatMatrix &answer, int li, int ui)
+LWedge :: computeBmatrixAt(GaussPoint *gp, FloatMatrix &answer, int li, int ui)
 // Returns the [6 x 18] strain-displacement matrix {B} of the receiver, eva-
-// luated at aGaussPoint.
+// luated at gp.
 // B matrix  -  6 rows : epsilon-X, epsilon-Y, epsilon-Z, gamma-YZ, gamma-ZX, gamma-XY  :
 {
     FloatMatrix dnx;
 
-    this->interpolation.evaldNdx( dnx, * aGaussPoint->giveCoordinates(), FEIElementGeometryWrapper(this) );
+    this->interpolation.evaldNdx( dnx, * gp->giveCoordinates(), FEIElementGeometryWrapper(this) );
 
     answer.resize(6, 18);
     answer.zero();
@@ -172,11 +172,11 @@ LWedge :: computeBmatrixAt(GaussPoint *aGaussPoint, FloatMatrix &answer, int li,
 
 
 void
-LWedge :: computeBHmatrixAt(GaussPoint *aGaussPoint, FloatMatrix &answer)
+LWedge :: computeBHmatrixAt(GaussPoint *gp, FloatMatrix &answer)
 {
     FloatMatrix dnx;
 
-    this->interpolation.evaldNdx( dnx, * aGaussPoint->giveCoordinates(), FEIElementGeometryWrapper(this) );
+    this->interpolation.evaldNdx( dnx, * gp->giveCoordinates(), FEIElementGeometryWrapper(this) );
 
     answer.resize(6, 18);
     answer.zero();

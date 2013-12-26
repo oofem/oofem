@@ -204,7 +204,7 @@ public:
 
     void setupLayeredIntegrationRule(IntegrationRule ** &layerIntegrationRulesArray, Element *el, int numInPlanePoints);
 
-    virtual int giveIPValue(FloatArray &answer, GaussPoint *ip, InternalStateType type, TimeStep *atTime);
+    virtual int giveIPValue(FloatArray &answer, GaussPoint *ip, InternalStateType type, TimeStep *tStep);
     virtual double give(int aProperty, GaussPoint *gp)
     {
         OOFEM_ERROR1("LayeredCrossSection :: give - not implemented yet");
@@ -212,13 +212,13 @@ public:
     };
 
 #ifdef __PARALLEL_MODE
-    int packUnknowns(CommunicationBuffer &buff, TimeStep *stepN, GaussPoint *ip)
+    int packUnknowns(CommunicationBuffer &buff, TimeStep *tStep, GaussPoint *ip)
     {
         _error("packUnknowns: not implemented");
         return 0;
     }
 
-    int unpackAndUpdateUnknowns(CommunicationBuffer &buff, TimeStep *stepN, GaussPoint *ip)
+    int unpackAndUpdateUnknowns(CommunicationBuffer &buff, TimeStep *tStep, GaussPoint *ip)
     {
         _error("unpackAndUpdateUnknowns: not implemented");
         return 0;

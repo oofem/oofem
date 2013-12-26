@@ -86,12 +86,12 @@ public:
      * Evaluates the field at given point.
      * @param coords Coordinates of the point of interest
      * @param answer Field evaluated at coordinate.
-     * @param atTime Time step to evaluate for.
+     * @param tStep Time step to evaluate for.
      * @param mode Mode of value (total, velocity,...).
      * @return Zero if ok, otherwise nonzero.
      */
     virtual int evaluateAt(FloatArray &answer, FloatArray &coords,
-                           ValueModeType mode, TimeStep *atTime) = 0;
+                           ValueModeType mode, TimeStep *tStep) = 0;
 
     /**
      * Evaluates the field at given DofManager. This potentially can be resolved quickly, as
@@ -104,11 +104,11 @@ public:
      * @param[out] answer Evaluated field for dman.
      * @param dman Reference to dofManager.
      * @param mode Mode of value (total, velocity,...).
-     * @param atTime Time step to evaluate for.
+     * @param tStep Time step to evaluate for.
      * @return Zero if ok, nonzero Error code (0-ok, 1-failed)
      */
     virtual int evaluateAt(FloatArray &answer, DofManager *dman,
-                           ValueModeType mode, TimeStep *atTime) = 0;
+                           ValueModeType mode, TimeStep *tStep) = 0;
 
     /// Returns the type of receiver
     FieldType giveType() { return type; }

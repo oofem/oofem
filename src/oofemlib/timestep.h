@@ -99,9 +99,9 @@ protected:
     /**
      * Receiver's substep (iteration) number.
      */
-    int substepNumber;
+    int subtStepumber;
     /// Corresponding meta step number.
-    int mstepNumber;
+    int mtStepumber;
     /// Time discretization.
     TimeDiscretizationType timeDiscretization;
 
@@ -128,9 +128,9 @@ public:
     /// Returns receiver's version.
     int giveVersion() { return version; }
     /// Returns receiver's meta step number.
-    int giveMetaStepNumber() { return mstepNumber; }
+    int giveMetatStepumber() { return mtStepumber; }
     /// Returns receiver's substep number.
-    int giveSubstepNumber() { return substepNumber; }
+    int giveSubtStepumber() { return subtStepumber; }
     /**
      * Returns class name of receiver.
      * @return Pointer to s parameter filled with name.
@@ -184,7 +184,7 @@ public:
     /// Increments receiver's version.
     void incrementVersion() { version++; }
     /// Increments receiver's substep number.
-    void incrementSubstepNumber() { substepNumber++; }
+    void incrementSubtStepumber() { subtStepumber++; }
     /// Returns time discretization.
     TimeDiscretizationType giveTimeDiscretization() { return timeDiscretization; }
 

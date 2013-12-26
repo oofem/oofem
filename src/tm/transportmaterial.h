@@ -153,12 +153,12 @@ public:
      * @param answer Contains result.
      * @param mode Material response mode.
      * @param gp Integration point.
-     * @param atTime Time step (most models are able to respond only when atTime is current time step).
+     * @param tStep Time step (most models are able to respond only when tStep is current time step).
      */
     virtual void giveCharacteristicMatrix(FloatMatrix &answer,
                                           MatResponseMode mode,
                                           GaussPoint *gp,
-                                          TimeStep *atTime) = 0;
+                                          TimeStep *tStep) = 0;
 
     /**
      * Computes the characteristic value of receiver in given integration point, respecting its history.
@@ -166,11 +166,11 @@ public:
      * to compute and return required result.
      * @param mode Material response mode.
      * @param gp Integration point.
-     * @param atTime Time step (most models are able to respond only when atTime is current time step).
+     * @param tStep Time step (most models are able to respond only when tStep is current time step).
      */
     virtual double giveCharacteristicValue(MatResponseMode mode,
                                            GaussPoint *gp,
-                                           TimeStep *atTime) = 0;
+                                           TimeStep *tStep) = 0;
 
     /**
      * Updates internal state of material according to new state vector.
@@ -188,10 +188,10 @@ public:
      * Computes the internal source vector of receiver.
      * @param val Contains response.
      * @param gp Integration point.
-     * @param atTime Solution step.
+     * @param tStep Solution step.
      * @param mode Determines response mode.
      */
-    virtual void computeInternalSourceVector(FloatArray &val, GaussPoint *gp, TimeStep *atTime, ValueModeType mode)
+    virtual void computeInternalSourceVector(FloatArray &val, GaussPoint *gp, TimeStep *tStep, ValueModeType mode)
     { val.resize(0); }
     /**
      * Returns positive value of humidity if implemented and enabled in derived material, -1 otherwise.
@@ -199,7 +199,7 @@ public:
     virtual double giveHumidity(GaussPoint *gp, ValueModeType mode) { return -1.0; }
 
     // post-processing
-    virtual int giveIPValue(FloatArray &answer, GaussPoint *aGaussPoint, InternalStateType type, TimeStep *atTime);
+    virtual int giveIPValue(FloatArray &answer, GaussPoint *gp, InternalStateType type, TimeStep *tStep);
 
     virtual MaterialStatus *CreateStatus(GaussPoint *gp) const { return new TransportMaterialStatus(1, domain, gp); }
 };

@@ -60,7 +60,7 @@ ConstantPressureLoad :: initializeFrom(InputRecord *ir)
 }
 
 void
-ConstantPressureLoad :: computeValueAt(FloatArray &answer, TimeStep *stepN, FloatArray &coords, ValueModeType mode)
+ConstantPressureLoad :: computeValueAt(FloatArray &answer, TimeStep *tStep, FloatArray &coords, ValueModeType mode)
 {
     // we overload general implementation on the boundary load level due
     // to implementation efficiency
@@ -74,12 +74,12 @@ ConstantPressureLoad :: computeValueAt(FloatArray &answer, TimeStep *stepN, Floa
     // ask time distribution
 
     /*
-     * factor = this -> giveLoadTimeFunction() -> at(stepN->giveTime()) ;
-     * if ((mode==VM_Incremental) && (!stepN->isTheFirstStep()))
-     * //factor -= this->giveLoadTimeFunction()->at(stepN->givePreviousStep()->giveTime()) ;
-     * factor -= this->giveLoadTimeFunction()->at(stepN->giveTime()-stepN->giveTimeIncrement()) ;
+     * factor = this -> giveLoadTimeFunction() -> at(tStep->giveTime()) ;
+     * if ((mode==VM_Incremental) && (!tStep->isTheFirstStep()))
+     * //factor -= this->giveLoadTimeFunction()->at(tStep->givePreviousStep()->giveTime()) ;
+     * factor -= this->giveLoadTimeFunction()->at(tStep->giveTime()-tStep->giveTimeIncrement()) ;
      */
-    factor = this->giveLoadTimeFunction()->evaluate(stepN, mode);
+    factor = this->giveLoadTimeFunction()->evaluate(tStep, mode);
     answer = componentArray;
     answer.times(factor);
 }

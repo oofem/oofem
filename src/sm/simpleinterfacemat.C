@@ -73,7 +73,7 @@ void
 SimpleInterfaceMaterial :: give3dMaterialStiffnessMatrix(FloatMatrix &answer,
                                                          MatResponseMode mode,
                                                          GaussPoint *gp,
-                                                         TimeStep *atTime)
+                                                         TimeStep *tStep)
 //
 // computes full constitutive matrix for case of gp stress-strain state.
 //
@@ -86,7 +86,7 @@ void
 SimpleInterfaceMaterial :: giveRealStressVector(FloatArray &answer, GaussPoint *gp,
                                                 //const FloatArray &totalStrain,// @todo temporary -should not be here /JB
                                                 const FloatArray &strainVector,
-                                                TimeStep *atTime)
+                                                TimeStep *tStep)
 //
 // returns real stress vector in 3d stress space of receiver according to
 // previous level of stress and current
@@ -97,7 +97,7 @@ SimpleInterfaceMaterial :: giveRealStressVector(FloatArray &answer, GaussPoint *
     this->initGpForNewStep(gp);
     FloatArray shearStrain(2), shearStress; //, strainVector;
     StructuralElement *el = static_cast< StructuralElement * >( gp->giveElement() );
-    //el->computeStrainVector(strainVector, gp, atTime);
+    //el->computeStrainVector(strainVector, gp, tStep);
 
     FloatArray tempShearStressShift = status->giveTempShearStressShift();
     const double normalStrain = strainVector.at(1);
@@ -168,7 +168,7 @@ SimpleInterfaceMaterial :: giveRealStressVector(FloatArray &answer, GaussPoint *
 void
 SimpleInterfaceMaterial :: giveStiffnessMatrix(FloatMatrix &answer,
                                                MatResponseMode rMode,
-                                               GaussPoint *gp, TimeStep *atTime)
+                                               GaussPoint *gp, TimeStep *tStep)
 //
 // Returns characteristic material stiffness matrix of the receiver
 //
@@ -179,7 +179,7 @@ SimpleInterfaceMaterial :: giveStiffnessMatrix(FloatMatrix &answer,
     StructuralElement *el = static_cast< StructuralElement * >( gp->giveElement() );
     double normalStrain;
 
-    el->computeStrainVector(strainVector, gp, atTime);
+    el->computeStrainVector(strainVector, gp, tStep);
     normalStrain = strainVector.at(1);
     answer.zero();
     switch ( mMode ) {
@@ -238,15 +238,15 @@ SimpleInterfaceMaterial :: giveStiffnessMatrix(FloatMatrix &answer,
         return;
 
     default:
-        StructuralMaterial :: giveStiffnessMatrix(answer, rMode, gp, atTime);
+        StructuralMaterial :: giveStiffnessMatrix(answer, rMode, gp, tStep);
     }
 }
 
 
 int
-SimpleInterfaceMaterial :: giveIPValue(FloatArray &answer, GaussPoint *aGaussPoint, InternalStateType type, TimeStep *atTime)
+SimpleInterfaceMaterial :: giveIPValue(FloatArray &answer, GaussPoint *gp, InternalStateType type, TimeStep *tStep)
 {
-    return StructuralMaterial :: giveIPValue(answer, aGaussPoint, type, atTime);
+    return StructuralMaterial :: giveIPValue(answer, gp, type, tStep);
 }
 
 
@@ -326,9 +326,9 @@ SimpleInterfaceMaterialStatus :: initTempStatus()
 
 
 void
-SimpleInterfaceMaterialStatus :: updateYourself(TimeStep *atTime)
+SimpleInterfaceMaterialStatus :: updateYourself(TimeStep *tStep)
 {
-    StructuralMaterialStatus :: updateYourself(atTime);
+    StructuralMaterialStatus :: updateYourself(tStep);
     shearStressShift = tempShearStressShift;
 }
 

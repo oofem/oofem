@@ -93,7 +93,7 @@ protected:
     virtual int hasIncrementalShrinkageFormulation() { return 0; }
 
     /// Evaluation of the creep compliance function - function useless here
-    virtual double computeCreepFunction(double ofAge, double atTime);
+    virtual double computeCreepFunction(double ofAge, double tStep);
 
     virtual double giveEModulus(GaussPoint *gp, TimeStep *tStep);
 

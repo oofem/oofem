@@ -246,7 +246,7 @@ public:
                                                                   HuertaErrorEstimator :: AnalysisMode aMode) = 0;
 
     virtual void HuertaErrorEstimatorI_computeLocalCoords(FloatArray &answer, const FloatArray &coords) = 0;
-    virtual void HuertaErrorEstimatorI_computeNmatrixAt(GaussPoint *aGaussPoint, FloatMatrix &answer) = 0;
+    virtual void HuertaErrorEstimatorI_computeNmatrixAt(GaussPoint *gp, FloatMatrix &answer) = 0;
 
 protected:
     void setupRefinedElementProblem1D(Element *element, RefinedElement *refinedElement,

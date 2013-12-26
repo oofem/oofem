@@ -113,7 +113,7 @@ void
 M4Material :: giveStiffnessMatrix(FloatMatrix &answer,
                                   MatResponseMode mode,
                                   GaussPoint *gp,
-                                  TimeStep *atTime)
+                                  TimeStep *tStep)
 {
     answer.resize(6, 6);
     answer.zero();

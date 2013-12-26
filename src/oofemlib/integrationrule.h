@@ -200,7 +200,7 @@ public:
      * Prints receiver's output to given stream.
      * Invokes printOutputAt service on all receiver's integration points.
      */
-    virtual void printOutputAt(FILE *file, TimeStep *stepN);
+    virtual void printOutputAt(FILE *file, TimeStep *tStep);
     /**
      * Updates receiver state.
      * Calls updateYourself service of all receiver's integration points.

@@ -103,9 +103,9 @@ public:
     virtual void give3dMaterialStiffnessMatrix(FloatMatrix & answer,
                                                MatResponseMode,
                                                GaussPoint * gp,
-                                               TimeStep * atTime);
+                                               TimeStep * tStep);
 
-    double computeVolumetricStrain(GaussPoint *gp, TimeStep *atTime);
+    double computeVolumetricStrain(GaussPoint *gp, TimeStep *tStep);
 
     virtual void giveRealStressVector(FloatArray &answer, GaussPoint *gp,
                                       const FloatArray &reducedStrain, TimeStep *tStep);
@@ -113,9 +113,9 @@ public:
     virtual void  giveStiffnessMatrix(FloatMatrix &answer,
                                       MatResponseMode mode,
                                       GaussPoint *gp,
-                                      TimeStep *atTime);
+                                      TimeStep *tStep);
 
-    virtual int giveIPValue(FloatArray &answer, GaussPoint *aGaussPoint, InternalStateType type, TimeStep *atTime);
+    virtual int giveIPValue(FloatArray &answer, GaussPoint *gp, InternalStateType type, TimeStep *tStep);
 
     virtual void giveThermalDilatationVector(FloatArray &answer, GaussPoint *gp, TimeStep *tStep);
 
@@ -127,7 +127,7 @@ public:
 protected:
     // Overloaded to use specialized versions of these services possibly implemented by linearElastic member
     void give3dInterfaceMaterialStiffnessMatrix(FloatMatrix &answer, MatResponseMode rMode,
-                                                GaussPoint *gp, TimeStep *atTime);
+                                                GaussPoint *gp, TimeStep *tStep);
 };
 } // namespace oofem
 #endif

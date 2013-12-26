@@ -60,11 +60,11 @@
 // Concrete hydration model - Hellmich
 // Material extension, derived from Material to use MateriaStatus services
 
-// material->computeInternalSourceVector(val, gp, atTime, mode)
+// material->computeInternalSourceVector(val, gp, tStep, mode)
 //                                       answer,     chartypemode - total, velocity, acceleration, incremental
 // = le*dksi
 
-// capacity ... material->giveCharacteristicValue(rmode, gp, atTime)
+// capacity ... material->giveCharacteristicValue(rmode, gp, tStep)
 //              rmode: material responsemode = capacity
 // = rc - le*dksidT
 
@@ -133,7 +133,7 @@ public:
     virtual void initTempStatus();
     virtual void updateYourself(TimeStep *tStep);
 
-    virtual void printOutputAt(FILE *file, TimeStep *atTime);
+    virtual void printOutputAt(FILE *file, TimeStep *tStep);
     virtual contextIOResultType saveContext(DataStream *stream, ContextMode mode, void *obj = NULL);
     virtual contextIOResultType restoreContext(DataStream *stream, ContextMode mode, void *obj = NULL);
 
@@ -193,10 +193,10 @@ protected:
     double dksidh(double ksi, double T, double h, double dt);
 
     /// Computes and returns the derivatives of the material-generated Internal Source with respect to the tm state vector.
-    double computeIntSource(const FloatArray &vec, GaussPoint *gp, TimeStep *atTime, MatResponseMode rmode);
+    double computeIntSource(const FloatArray &vec, GaussPoint *gp, TimeStep *tStep, MatResponseMode rmode);
     /**
      * Computes and returns hydration degree increment for given ksi, T [K], dt [s].
-     * Called by updateInternalState(val, gp, atTime)
+     * Called by updateInternalState(val, gp, tStep)
      * @note Formerly dksi, maybe should be changed to use gp & timestep.
      */
     double computeHydrationDegreeIncrement(double ksi, double T, double h, double dt);
@@ -226,14 +226,14 @@ public:
     virtual IRResultType initializeFrom(InputRecord *ir);
 
     /**
-     * Returns the hydration degree at end of TimeStep atTime in given integraion point.
+     * Returns the hydration degree at end of TimeStep tStep in given integraion point.
      * The value is obtained from hydration status, in integration point, on material level, or ... interpolated from several statuses
      * @param gp integration point
-     * @param atTime solution step
+     * @param tStep solution step
      * @param mode value mode VM_Incremental or VM_Total
      * @return hydration degree or increment in given gp
      */
-    double giveHydrationDegree(GaussPoint *gp, TimeStep *atTime, ValueModeType mode);
+    double giveHydrationDegree(GaussPoint *gp, TimeStep *tStep, ValueModeType mode);
 
     // how to determine whether hydration degree is uptodate?
     // - in tm, this can be ensured by calling computeHydrationDegreeIncrement when updateInternalState is used
@@ -242,12 +242,12 @@ public:
     //   => implement updateInternalState here, that is called from master material updateInternalState/updateAuxState
     // use giveTempStateVector in HellmichMaterial
     /**
-     * Updates internal state of material according to new state vector - computes the hydration degree for time atTime.
+     * Updates internal state of material according to new state vector - computes the hydration degree for time tStep.
      * @param vec new state vector
      * @param gp integration point
-     * @param atTime solution step
+     * @param tStep solution step
      */
-    virtual void updateInternalState(const FloatArray &vec, GaussPoint *gp, TimeStep *atTime);
+    virtual void updateInternalState(const FloatArray &vec, GaussPoint *gp, TimeStep *tStep);
 
     /**
      * Returns material status of receiver in given integration point.
@@ -260,10 +260,10 @@ public:
     virtual MaterialStatus *giveStatus(GaussPoint *gp) const;
 
     /// Returns generated heat for given gp [kJ/m3], eventually water consumption
-    void computeInternalSourceVector(FloatArray &val, GaussPoint *gp, TimeStep *atTime, ValueModeType mode);
+    void computeInternalSourceVector(FloatArray &val, GaussPoint *gp, TimeStep *tStep, ValueModeType mode);
     // } end new 5.1.2004
     /// Returns coefficients for LHS contribution from internal sources (dHeat/dT, dWaterSource/dw) for given temp state vector.
-    virtual double giveCharacteristicValue(const FloatArray &vec, MatResponseMode rmode, GaussPoint *gp, TimeStep *atTime);
+    virtual double giveCharacteristicValue(const FloatArray &vec, MatResponseMode rmode, GaussPoint *gp, TimeStep *tStep);
     // --- identification and auxiliary functions ---
     virtual const char *giveInputRecordName() const { return _IFT_HydrationModel_Name; }
     virtual const char *giveClassName() const { return "HydrationModel"; }
@@ -291,9 +291,9 @@ public:
     void setHydrationModelStatus(HydrationModelStatus *s) { hydrationModelStatus = s; }
 
     /// Updates the equilibrium variables to temporary values.
-    void updateYourself(TimeStep *atTime);
+    void updateYourself(TimeStep *tStep);
     /// Outputs the status variables
-    void printOutputAt(FILE *file, TimeStep *atTime);
+    void printOutputAt(FILE *file, TimeStep *tStep);
 };
 
 class HydrationModelInterface : public Interface
@@ -336,18 +336,18 @@ public:
      * In case the cast time lies within the span of current timestep, the timestep increment is set to (time-castAt).
      * @param vec New state vector.
      * @param gp Integration point.
-     * @param atTime Time step.
+     * @param tStep Time step.
      */
-    virtual void updateInternalState(const FloatArray &vec, GaussPoint *gp, TimeStep *atTime);
+    virtual void updateInternalState(const FloatArray &vec, GaussPoint *gp, TimeStep *tStep);
     /**
-     * Returns the hydration degree at end of TimeStep atTime in given integration point.
+     * Returns the hydration degree at end of TimeStep tStep in given integration point.
      * The value is obtained from gp hydration status via the hydration model or the constantHydrationDegree value is returned.
      * @param gp Integration point.
-     * @param atTime Solution step.
+     * @param tStep Solution step.
      * @param mode Value mode VM_Incremental or VM_Total.
      * @return Hydration degree or increment in given gp.
      */
-    double giveHydrationDegree(GaussPoint *gp, TimeStep *atTime, ValueModeType mode);
+    double giveHydrationDegree(GaussPoint *gp, TimeStep *tStep, ValueModeType mode);
 };
 } // end namespace oofem
 #endif // hydram_h

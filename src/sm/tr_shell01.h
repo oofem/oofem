@@ -110,7 +110,7 @@ public:
     virtual MaterialMode giveMaterialMode() { return _Unknown; }
 
     virtual Interface *giveInterface(InterfaceType it);
-    virtual int giveIPValue(FloatArray &answer, GaussPoint *aGaussPoint, InternalStateType type, TimeStep *atTime);
+    virtual int giveIPValue(FloatArray &answer, GaussPoint *gp, InternalStateType type, TimeStep *tStep);
 
     virtual Element *ZZNodalRecoveryMI_giveElement() { return this; }
 
@@ -149,11 +149,11 @@ protected:
 protected:
     virtual void computeGaussPoints()
     { this->membrane->computeGaussPoints(); this->plate->computeGaussPoints(); }
-    virtual void computeStressVector(FloatArray &answer, const FloatArray &strain, GaussPoint *gp, TimeStep *stepN)
+    virtual void computeStressVector(FloatArray &answer, const FloatArray &strain, GaussPoint *gp, TimeStep *tStep)
     { _error("TR_SHELL01 :: computeStressVector: calling of this function is not allowed"); }
-    virtual void computeBodyLoadVectorAt(FloatArray &answer, Load *forLoad, TimeStep *stepN, ValueModeType mode)
+    virtual void computeBodyLoadVectorAt(FloatArray &answer, Load *forLoad, TimeStep *tStep, ValueModeType mode)
     { _error("TR_SHELL01 :: ...: calling of this function is not allowed"); }
-    virtual void computeForceLoadVector(FloatArray &answer, TimeStep *stepN, ValueModeType mode)
+    virtual void computeForceLoadVector(FloatArray &answer, TimeStep *tStep, ValueModeType mode)
     { _error("TR_SHELL01 :: ...: calling of this function is not allowed"); }
 
 public:

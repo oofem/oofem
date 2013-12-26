@@ -61,7 +61,7 @@ public:
 
     /// Computes and adds IP contributions to destination matrix.
     virtual void NonlocalMaterialStiffnessInterface_addIPContribution(SparseMtrx &dest, const UnknownNumberingScheme &s,
-                                                                      GaussPoint *gp, TimeStep *atTime) = 0;
+                                                                      GaussPoint *gp, TimeStep *tStep) = 0;
     /**
      * Returns integration list of receiver. Contains localIntegrationRecord structures, containing
      * references to integration points and their weights that influence to nonlocal average in

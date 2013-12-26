@@ -126,8 +126,8 @@ public:
 
     virtual int askNewEquationNumber(TimeStep *tStep);
 
-    virtual double giveUnknown(ValueModeType mode, TimeStep *stepN);
-    virtual double giveUnknown(PrimaryField & field, ValueModeType, TimeStep * stepN);
+    virtual double giveUnknown(ValueModeType mode, TimeStep *tStep);
+    virtual double giveUnknown(PrimaryField & field, ValueModeType, TimeStep * tStep);
 
     virtual bool hasBc(TimeStep *tStep);
     virtual bool hasIc();

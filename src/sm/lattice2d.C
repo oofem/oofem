@@ -130,7 +130,7 @@ Lattice2d :: giveDeltaDissipation()
 }
 
 void
-Lattice2d :: computeBmatrixAt(GaussPoint *aGaussPoint, FloatMatrix &answer, int li, int ui)
+Lattice2d :: computeBmatrixAt(GaussPoint *gp, FloatMatrix &answer, int li, int ui)
 // Returns the strain matrix of the receiver.
 {
     double l = this->giveLength();
@@ -232,10 +232,10 @@ Lattice2d :: computeGtoLRotationMatrix(FloatMatrix &answer)
 
 
 double
-Lattice2d :: computeVolumeAround(GaussPoint *aGaussPoint)
+Lattice2d :: computeVolumeAround(GaussPoint *gp)
 {
     double area = this->width * this->thickness;
-    double weight  = aGaussPoint->giveWeight();
+    double weight  = gp->giveWeight();
     return weight * 0.5 * this->giveLength() * area;
 }
 

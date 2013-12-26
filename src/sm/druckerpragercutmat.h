@@ -131,7 +131,7 @@ protected:
     /// Computes second derivative of yield/loading function with respect to stress
     virtual void computeReducedSSGradientMatrix(FloatMatrix &gradientMatrix,  int isurf, GaussPoint *gp, const FloatArray &fullStressVector, const FloatArray &strainSpaceHardeningVariables);
 
-    virtual void computeReducedElasticModuli(FloatMatrix &answer, GaussPoint *gp, TimeStep *atTime);
+    virtual void computeReducedElasticModuli(FloatMatrix &answer, GaussPoint *gp, TimeStep *tStep);
 
     /// Functions related to hardening
     virtual int hasHardening() { return 1; }

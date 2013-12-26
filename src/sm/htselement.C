@@ -247,7 +247,7 @@ HTSelement :: computePsVectorAt(FloatArray &answer, FloatArray t, GaussPoint *gp
 } //end of computePsVectorAt
 
 void
-HTSelement :: computePrescribedDisplacementLoadVectorAt(FloatArray &answer, TimeStep *stepN, ValueModeType mode)
+HTSelement :: computePrescribedDisplacementLoadVectorAt(FloatArray &answer, TimeStep *tStep, ValueModeType mode)
 {
     //double dV;
 
@@ -259,11 +259,11 @@ HTSelement :: computePrescribedDisplacementLoadVectorAt(FloatArray &answer, Time
     FloatArray u;
     FloatMatrix K;
 
-    this->computeVectorOf(EID_MomentumBalance, mode, stepN, u);
+    this->computeVectorOf(EID_MomentumBalance, mode, tStep, u);
     if ( u.containsOnlyZeroes() ) {
         answer.resize(0);
     } else {
-        this->computeStiffnessMatrix(K, TangentStiffness, stepN);
+        this->computeStiffnessMatrix(K, TangentStiffness, tStep);
         answer.beProductOf(K, u);
         answer.negated();
     }
@@ -316,7 +316,7 @@ HTSelement :: computeEdgeLoadVectorAt(FloatArray &answer, Load *load,
 
 
 void
-HTSelement :: computeForceLoadVector(FloatArray &answer, TimeStep *stepN, ValueModeType mode)
+HTSelement :: computeForceLoadVector(FloatArray &answer, TimeStep *tStep, ValueModeType mode)
 {
     int nLoads;
     bcGeomType ltype;
@@ -333,7 +333,7 @@ HTSelement :: computeForceLoadVector(FloatArray &answer, TimeStep *stepN, ValueM
         load = domain->giveLoad(n);
         ltype = load->giveBCGeoType();
         if ( ltype == EdgeLoadBGT ) {
-            this->computeEdgeLoadVectorAt(helpLoadVector, load, id, stepN, mode);
+            this->computeEdgeLoadVectorAt(helpLoadVector, load, id, tStep, mode);
             if ( helpLoadVector.giveSize() ) {
                 answer.add(helpLoadVector);
             }
@@ -341,7 +341,7 @@ HTSelement :: computeForceLoadVector(FloatArray &answer, TimeStep *stepN, ValueM
             OOFEM_ERROR3("HTSelement :: computeLocalForceLoadVector - boundary load %d is of unsupported type (%d)", id, ltype);
         }
     }
-    this->computePrescribedDisplacementLoadVectorAt(helpLoadVector, stepN, mode);
+    this->computePrescribedDisplacementLoadVectorAt(helpLoadVector, tStep, mode);
     answer.add(helpLoadVector);
 }
 /*Public functions*/

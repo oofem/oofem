@@ -858,7 +858,7 @@ Quad1PlaneStrain :: DirectErrorIndicatorRCI_giveCharacteristicSize()
 
 int
 Quad1PlaneStrain :: EIPrimaryUnknownMI_computePrimaryUnknownVectorAt(ValueModeType mode,
-                                                                     TimeStep *stepN, const FloatArray &coords,
+                                                                     TimeStep *tStep, const FloatArray &coords,
                                                                      FloatArray &answer)
 {
     FloatArray lcoords, u, nv;
@@ -877,7 +877,7 @@ Quad1PlaneStrain :: EIPrimaryUnknownMI_computePrimaryUnknownVectorAt(ValueModeTy
     n.at(1, 5) = n.at(2, 6) = nv.at(3);
     n.at(1, 7) = n.at(2, 8) = nv.at(4);
 
-    this->computeVectorOf(EID_MomentumBalance, mode, stepN, u);
+    this->computeVectorOf(EID_MomentumBalance, mode, tStep, u);
     answer.beProductOf(n, u);
 
     return result;

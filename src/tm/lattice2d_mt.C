@@ -164,7 +164,7 @@ Lattice2d_mt :: computeNmatrixAt(FloatMatrix &answer, const FloatArray &coords)
 
 
 void
-Lattice2d_mt :: computeGradientMatrixAt(FloatMatrix &answer, GaussPoint *aGaussPoint)
+Lattice2d_mt :: computeGradientMatrixAt(FloatMatrix &answer, GaussPoint *gp)
 {
     double l = this->giveLength();
 
@@ -180,7 +180,7 @@ Lattice2d_mt :: computeGradientMatrixAt(FloatMatrix &answer, GaussPoint *aGaussP
 }
 
 void
-Lattice2d_mt :: updateInternalState(TimeStep *stepN)
+Lattice2d_mt :: updateInternalState(TimeStep *tStep)
 // Updates the receiver at end of step.
 {
     int i, j;
@@ -196,9 +196,9 @@ Lattice2d_mt :: updateInternalState(TimeStep *stepN)
         for ( j = 0; j < iRule->giveNumberOfIntegrationPoints(); j++ ) {
             gp = iRule->getIntegrationPoint(j);
             this->computeNmatrixAt( n, * gp->giveCoordinates() );
-            this->computeVectorOf(EID_ConservationEquation, VM_Total, stepN, r);
+            this->computeVectorOf(EID_ConservationEquation, VM_Total, tStep, r);
             f.beProductOf(n, r);
-            mat->updateInternalState(f, gp, stepN);
+            mat->updateInternalState(f, gp, tStep);
         }
     }
 }
@@ -258,8 +258,8 @@ Lattice2d_mt :: initializeFrom(InputRecord *ir)
 }
 
 double
-Lattice2d_mt :: computeVolumeAround(GaussPoint *aGaussPoint)
-// Returns the portion of the receiver which is attached to aGaussPoint.
+Lattice2d_mt :: computeVolumeAround(GaussPoint *gp)
+// Returns the portion of the receiver which is attached to gp.
 {
     return this->width * this->thickness * this->giveLength();
 }
@@ -312,7 +312,7 @@ Lattice2d_mt :: computeCapacityMatrix(FloatMatrix &answer, TimeStep *tStep)
 
 
 void
-Lattice2d_mt :: computeInternalSourceRhsVectorAt(FloatArray &answer, TimeStep *atTime, ValueModeType mode)
+Lattice2d_mt :: computeInternalSourceRhsVectorAt(FloatArray &answer, TimeStep *tStep, ValueModeType mode)
 {
     int i, j, n, nLoads;
     double dV;
@@ -352,9 +352,9 @@ Lattice2d_mt :: computeInternalSourceRhsVectorAt(FloatArray &answer, TimeStep *a
             gravityHelp.at(2) = -1.;
 
             dV  = this->computeVolumeAround(gp);
-            load->computeValueAt(val, atTime, deltaX, mode);
+            load->computeValueAt(val, tStep, deltaX, mode);
 
-            k = static_cast< TransportMaterial * >( this->giveMaterial() )->giveCharacteristicValue(Conductivity_hh, gp, atTime);
+            k = static_cast< TransportMaterial * >( this->giveMaterial() )->giveCharacteristicValue(Conductivity_hh, gp, tStep);
 
             double helpFactor = val.at(1) * k * dV;
 

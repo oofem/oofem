@@ -75,7 +75,7 @@ BilinearCZMaterialFagerstrom :: hasMaterialModeCapability(MaterialMode mode)
 void
 BilinearCZMaterialFagerstrom :: giveRealStressVector(FloatArray &answer, GaussPoint *gp,
                                                      const FloatArray &jumpVector,
-                                                     TimeStep *atTime)
+                                                     TimeStep *tStep)
 //
 // returns real stress vector in 3d stress space of receiver according to
 // previous level of stress and current
@@ -336,7 +336,7 @@ void
 BilinearCZMaterialFagerstrom :: giveStiffnessMatrix(FloatMatrix &answer,
                                                     MatResponseMode rMode,
                                                     GaussPoint *gp,
-                                                    TimeStep *atTime)
+                                                    TimeStep *tStep)
 //
 // Returns characteristic material stiffness matrix of the receiver
 //
@@ -345,18 +345,18 @@ BilinearCZMaterialFagerstrom :: giveStiffnessMatrix(FloatMatrix &answer,
     switch ( mMode ) {
     case _3dInterface:
     case _3dMat:
-        give3dInterfaceMaterialStiffnessMatrix(answer, rMode, gp, atTime);
+        give3dInterfaceMaterialStiffnessMatrix(answer, rMode, gp, tStep);
         break;
     default:
-        //StructuralMaterial :: giveCharacteristicMatrix(answer, rMode, gp, atTime);
-        StructuralMaterial :: give3dMaterialStiffnessMatrix(answer, rMode, gp, atTime);
+        //StructuralMaterial :: giveCharacteristicMatrix(answer, rMode, gp, tStep);
+        StructuralMaterial :: give3dMaterialStiffnessMatrix(answer, rMode, gp, tStep);
     }
 }
 
 
 void
 BilinearCZMaterialFagerstrom :: give3dInterfaceMaterialStiffnessMatrix(FloatMatrix &answer, MatResponseMode rMode,
-                                                                       GaussPoint *gp, TimeStep *atTime)
+                                                                       GaussPoint *gp, TimeStep *tStep)
 {
     BilinearCZMaterialFagerstromStatus *status = static_cast< BilinearCZMaterialFagerstromStatus * >( this->giveStatus(gp) );
 
@@ -421,15 +421,15 @@ BilinearCZMaterialFagerstrom :: give3dInterfaceMaterialStiffnessMatrix(FloatMatr
 
 
 int
-BilinearCZMaterialFagerstrom :: giveIPValue(FloatArray &answer, GaussPoint *aGaussPoint, InternalStateType type, TimeStep *atTime)
+BilinearCZMaterialFagerstrom :: giveIPValue(FloatArray &answer, GaussPoint *gp, InternalStateType type, TimeStep *tStep)
 {
     if ( type == IST_DamageScalar ) {
-        BilinearCZMaterialFagerstromStatus *status = static_cast< BilinearCZMaterialFagerstromStatus * >( this->giveStatus(aGaussPoint) );
+        BilinearCZMaterialFagerstromStatus *status = static_cast< BilinearCZMaterialFagerstromStatus * >( this->giveStatus(gp) );
         answer.resize(1);
         answer.at(1) = status->giveTempDamage();
         return 1;
     } else {
-        return StructuralMaterial :: giveIPValue(answer, aGaussPoint, type, atTime);
+        return StructuralMaterial :: giveIPValue(answer, gp, type, tStep);
     }
 }
 
@@ -443,10 +443,10 @@ BilinearCZMaterialFagerstrom :: giveIntVarCompFullIndx(IntArray &answer, Interna
 
 
 int
-BilinearCZMaterialFagerstrom :: giveIPValueSize(InternalStateType type, GaussPoint *aGaussPoint)
+BilinearCZMaterialFagerstrom :: giveIPValueSize(InternalStateType type, GaussPoint *gp)
 {
     //@todoMartin Insert code for returning size of internal state
-    return StructuralMaterial :: giveIPValueSize(type, aGaussPoint);
+    return StructuralMaterial :: giveIPValueSize(type, gp);
 }
 
 
@@ -613,10 +613,10 @@ BilinearCZMaterialFagerstromStatus :: initTempStatus()
 }
 
 void
-BilinearCZMaterialFagerstromStatus :: updateYourself(TimeStep *atTime)
+BilinearCZMaterialFagerstromStatus :: updateYourself(TimeStep *tStep)
 {
     //@todo Martin: kolla behovet av denna
-    StructuralMaterialStatus :: updateYourself(atTime);
+    StructuralMaterialStatus :: updateYourself(tStep);
     damage = tempDamage;
     oldMaterialJump = tempMaterialJump;
     QEffective = tempQEffective;

@@ -85,28 +85,28 @@ public:
     TR1_2D_SUPG2(int n, Domain *d);
     virtual ~TR1_2D_SUPG2();
 
-    virtual void computeAccelerationTerm_MB(FloatMatrix &answer, TimeStep *atTime);
-    virtual void computeAdvectionTerm_MB(FloatArray &answer, TimeStep *atTime);
-    virtual void computeAdvectionDerivativeTerm_MB(FloatMatrix &answer, TimeStep *atTime);
-    virtual void computeDiffusionTerm_MB(FloatArray &answer, TimeStep *atTime);
-    virtual void computeDiffusionDerivativeTerm_MB(FloatMatrix &answer, MatResponseMode mode, TimeStep *atTime);
-    virtual void computePressureTerm_MB(FloatMatrix &answer, TimeStep *atTime);
-    virtual void computeLSICStabilizationTerm_MB(FloatMatrix &answer, TimeStep *atTime);
-    virtual void computeLinearAdvectionTerm_MC(FloatMatrix &answer, TimeStep *atTime);
-    virtual void computeAdvectionTerm_MC(FloatArray &answer, TimeStep *atTime);
-    virtual void computeAdvectionDerivativeTerm_MC(FloatMatrix &answer, TimeStep *atTime);
-    virtual void computeDiffusionDerivativeTerm_MC(FloatMatrix &answer, TimeStep *atTime) {
+    virtual void computeAccelerationTerm_MB(FloatMatrix &answer, TimeStep *tStep);
+    virtual void computeAdvectionTerm_MB(FloatArray &answer, TimeStep *tStep);
+    virtual void computeAdvectionDerivativeTerm_MB(FloatMatrix &answer, TimeStep *tStep);
+    virtual void computeDiffusionTerm_MB(FloatArray &answer, TimeStep *tStep);
+    virtual void computeDiffusionDerivativeTerm_MB(FloatMatrix &answer, MatResponseMode mode, TimeStep *tStep);
+    virtual void computePressureTerm_MB(FloatMatrix &answer, TimeStep *tStep);
+    virtual void computeLSICStabilizationTerm_MB(FloatMatrix &answer, TimeStep *tStep);
+    virtual void computeLinearAdvectionTerm_MC(FloatMatrix &answer, TimeStep *tStep);
+    virtual void computeAdvectionTerm_MC(FloatArray &answer, TimeStep *tStep);
+    virtual void computeAdvectionDerivativeTerm_MC(FloatMatrix &answer, TimeStep *tStep);
+    virtual void computeDiffusionDerivativeTerm_MC(FloatMatrix &answer, TimeStep *tStep) {
         answer.resize(3, 6);
         answer.zero();
     }
-    virtual void computeDiffusionTerm_MC(FloatArray &answer, TimeStep *atTime) {
+    virtual void computeDiffusionTerm_MC(FloatArray &answer, TimeStep *tStep) {
         answer.resize(3);
         answer.zero();
     }
-    virtual void computeAccelerationTerm_MC(FloatMatrix &answer, TimeStep *atTime);
-    virtual void computePressureTerm_MC(FloatMatrix &answer, TimeStep *atTime);
-    virtual void computeBCRhsTerm_MB(FloatArray &answer, TimeStep *atTime);
-    virtual void computeBCRhsTerm_MC(FloatArray &answer, TimeStep *atTime);
+    virtual void computeAccelerationTerm_MC(FloatMatrix &answer, TimeStep *tStep);
+    virtual void computePressureTerm_MC(FloatMatrix &answer, TimeStep *tStep);
+    virtual void computeBCRhsTerm_MB(FloatArray &answer, TimeStep *tStep);
+    virtual void computeBCRhsTerm_MC(FloatArray &answer, TimeStep *tStep);
 
     virtual void updateStabilizationCoeffs(TimeStep *tStep);
     virtual void updateElementForNewInterfacePosition(TimeStep *tStep) { this->updateIntegrationRules(); }
@@ -134,7 +134,7 @@ public:
 
     virtual int EIPrimaryFieldI_evaluateFieldVectorAt(FloatArray &answer, PrimaryField &pf,
                                                       FloatArray &coords, IntArray &dofId, ValueModeType mode,
-                                                      TimeStep *atTime);
+                                                      TimeStep *tStep);
 
     virtual double computeLEPLICVolumeFraction(const FloatArray &n, const double p, LEPlic *matInterface, bool updFlag);
     virtual void formMaterialVolumePoly(Polygon &matvolpoly, LEPlic *matInterface,
@@ -163,7 +163,7 @@ public:
 
 #ifdef __OOFEG
     int giveInternalStateAtNode(FloatArray &answer, InternalStateType type, InternalStateMode mode,
-                                int node, TimeStep *atTime);
+                                int node, TimeStep *tStep);
     // Graphics output
     //virtual void drawYourself(oofegGraphicContext&);
     virtual void drawRawGeometry(oofegGraphicContext &);

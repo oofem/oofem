@@ -108,7 +108,7 @@ Quad1MindlinShell3D :: computeGaussPoints()
 
 
 void
-Quad1MindlinShell3D :: computeBodyLoadVectorAt(FloatArray &answer, Load *forLoad, TimeStep *stepN, ValueModeType mode)
+Quad1MindlinShell3D :: computeBodyLoadVectorAt(FloatArray &answer, Load *forLoad, TimeStep *tStep, ValueModeType mode)
 {
     // Only gravity load
     double dV, density;
@@ -120,7 +120,7 @@ Quad1MindlinShell3D :: computeBodyLoadVectorAt(FloatArray &answer, Load *forLoad
     }
 
     // note: force is assumed to be in global coordinate system.
-    forLoad->computeComponentArrayAt(glob_gravity, stepN, mode);
+    forLoad->computeComponentArrayAt(glob_gravity, tStep, mode);
     // Transform the load into the local c.s.
     gravity.beProductOf(this->lcsMatrix, glob_gravity); ///@todo Check potential transpose here.
 
@@ -237,9 +237,9 @@ Quad1MindlinShell3D :: computeBmatrixAt(GaussPoint *gp, FloatMatrix &answer, int
 
 
 void
-Quad1MindlinShell3D :: computeStressVector(FloatArray &answer, const FloatArray &strain, GaussPoint *gp, TimeStep *stepN)
+Quad1MindlinShell3D :: computeStressVector(FloatArray &answer, const FloatArray &strain, GaussPoint *gp, TimeStep *tStep)
 {
-    this->giveStructuralCrossSection()->giveRealStress_Shell(answer, gp, strain, stepN);
+    this->giveStructuralCrossSection()->giveRealStress_Shell(answer, gp, strain, tStep);
 }
 
 
@@ -433,7 +433,7 @@ Quad1MindlinShell3D :: computeLumpedMassMatrix(FloatMatrix &answer, TimeStep *tS
 
 
 int
-Quad1MindlinShell3D :: giveIPValue(FloatArray &answer, GaussPoint *gp, InternalStateType type, TimeStep *atTime)
+Quad1MindlinShell3D :: giveIPValue(FloatArray &answer, GaussPoint *gp, InternalStateType type, TimeStep *tStep)
 {
     if ( type == IST_ShellForceMomentumTensor ) {
         answer = static_cast< StructuralMaterialStatus * >( gp->giveMaterialStatus() )->giveStressVector();
@@ -442,7 +442,7 @@ Quad1MindlinShell3D :: giveIPValue(FloatArray &answer, GaussPoint *gp, InternalS
         answer = static_cast< StructuralMaterialStatus * >( gp->giveMaterialStatus() )->giveStrainVector();
         return 1;
     } else {
-        return NLStructuralElement :: giveIPValue(answer, gp, type, atTime);
+        return NLStructuralElement :: giveIPValue(answer, gp, type, tStep);
     }
 }
 

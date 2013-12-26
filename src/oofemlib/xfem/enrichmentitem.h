@@ -72,6 +72,8 @@
 #define _IFT_EnrFrontExtend_Name "enrfrontextend"
 #define _IFT_EnrFrontLinearBranchFuncRadius_Name "enrfrontlinearbranchfuncradius"
 #define _IFT_EnrFrontLinearBranchFuncRadius_Radius "radius"
+#define _IFT_EnrFrontReduceFront_Name "enrfrontreducefront"
+#define _IFT_EnrFrontLinearBranchFuncOneEl_Name "enrfrontlinearbranchfunconeel"
 
 
 namespace oofem {
@@ -194,7 +196,7 @@ public:
     bool giveElementTipCoord(FloatArray &oCoord, double &oArcPos, int iElIndex, const Triangle &iTri) const;
 
     // Help functions
-    double calcXiZeroLevel(const double &iQ1, const double &iQ2) const;
+    static double calcXiZeroLevel(const double &iQ1, const double &iQ2);
     static void calcPolarCoord(double &oR, double &oTheta, const FloatArray &iOrigin, const FloatArray &iPos, const FloatArray &iN, const FloatArray &iT);
 
     PropagationLaw *givePropagationLaw() { return this->mpPropagationLaw; };
@@ -247,7 +249,9 @@ protected:
 
     bool mLevelSetsNeedUpdate;
 
-    const double mLevelSetTol, mLevelSetTol2;
+    static const double mLevelSetTol;
+    //    static constexpr double mLevelSetTol = 1.0e-12;
+    const double mLevelSetTol2;
 };
 
 inline bool EnrichmentItem :: isDofManEnriched(const DofManager &iDMan) const
@@ -485,6 +489,32 @@ public:
     virtual void giveInputRecord(DynamicInputRecord &input);
 };
 
+class OOFEM_EXPORT EnrFrontReduceFront : public EnrichmentFront
+{
+public:
+	EnrFrontReduceFront() {};
+    virtual ~EnrFrontReduceFront() {};
+
+    virtual void MarkNodesAsFront(std :: vector< int > &ioNodeEnrMarker, XfemManager &ixFemMan, const std :: vector< double > &iLevelSetNormalDir, const std :: vector< double > &iLevelSetTangDir, const std :: vector< TipInfo > &iTipInfo);
+
+    // No special tip enrichments are applied with this model,
+    // it only modifies the set of nodes subject to bulk enrichment.
+    virtual int  giveNumEnrichments(const DofManager &iDMan) const { return 0; }
+    virtual int  giveMaxNumEnrichments() const { return 0; }
+
+    // Evaluate the enrichment function and its derivative in front nodes.
+    virtual void evaluateEnrFuncAt(std :: vector< double > &oEnrFunc, const FloatArray &iPos, const double &iLevelSet, int iNodeInd) const {};
+    virtual void evaluateEnrFuncDerivAt(std :: vector< FloatArray > &oEnrFuncDeriv, const FloatArray &iPos, const double &iLevelSet, const FloatArray &iGradLevelSet, int iNodeInd) const {};
+    virtual void evaluateEnrFuncJumps(std :: vector< double > &oEnrFuncJumps) const {};
+
+
+    virtual const char *giveClassName() const { return "EnrFrontReduceFront"; }
+    virtual const char *giveInputRecordName() const { return _IFT_EnrFrontReduceFront_Name; }
+
+    virtual IRResultType initializeFrom(InputRecord *ir) { return IRRT_OK; }
+    virtual void giveInputRecord(DynamicInputRecord &input);
+};
+
 class OOFEM_EXPORT EnrFrontLinearBranchFuncRadius : public EnrichmentFront
 {
 public:
@@ -511,6 +541,33 @@ private:
     double mEnrichmentRadius;
     LinElBranchFunction *mpBranchFunc;
 };
+
+class OOFEM_EXPORT EnrFrontLinearBranchFuncOneEl : public EnrichmentFront
+{
+public:
+	EnrFrontLinearBranchFuncOneEl();
+    virtual ~EnrFrontLinearBranchFuncOneEl();
+
+    virtual void MarkNodesAsFront(std :: vector< int > &ioNodeEnrMarker, XfemManager &ixFemMan, const std :: vector< double > &iLevelSetNormalDir, const std :: vector< double > &iLevelSetTangDir, const std :: vector< TipInfo > &iTipInfo);
+
+    virtual int  giveNumEnrichments(const DofManager &iDMan) const;
+    virtual int  giveMaxNumEnrichments() const { return 4; }
+
+    // Evaluate the enrichment function and its derivative in front nodes.
+    virtual void evaluateEnrFuncAt(std :: vector< double > &oEnrFunc, const FloatArray &iPos, const double &iLevelSet, int iNodeInd) const;
+    virtual void evaluateEnrFuncDerivAt(std :: vector< FloatArray > &oEnrFuncDeriv, const FloatArray &iPos, const double &iLevelSet, const FloatArray &iGradLevelSet, int iNodeInd) const;
+    virtual void evaluateEnrFuncJumps(std :: vector< double > &oEnrFuncJumps) const;
+
+    virtual const char *giveClassName() const { return "EnrFrontLinearBranchFuncOneEl"; }
+    virtual const char *giveInputRecordName() const { return _IFT_EnrFrontLinearBranchFuncOneEl_Name; }
+
+    virtual IRResultType initializeFrom(InputRecord *ir);
+    virtual void giveInputRecord(DynamicInputRecord &input);
+
+private:
+    LinElBranchFunction *mpBranchFunc;
+};
+
 } // end namespace oofem
 
 

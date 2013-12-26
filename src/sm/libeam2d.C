@@ -70,13 +70,13 @@ LIBeam2d :: giveInterface(InterfaceType interface)
 
 
 void
-LIBeam2d :: computeBmatrixAt(GaussPoint *aGaussPoint, FloatMatrix &answer, int li, int ui)
+LIBeam2d :: computeBmatrixAt(GaussPoint *gp, FloatMatrix &answer, int li, int ui)
 // Returns the strain matrix of the receiver.
 {
     double l, ksi, n1x, n4x, n3xx, n6xx, n2xxx, n3xxx, n5xxx, n6xxx;
 
     l    = this->giveLength();
-    ksi  = aGaussPoint->giveCoordinate(1);
+    ksi  = gp->giveCoordinate(1);
     n1x   = -1.0 / l;
     n4x   =  1.0 / l;
     n3xx  = -1.0 / l;
@@ -164,7 +164,7 @@ LIBeam2d :: computeLumpedMassMatrix(FloatMatrix &answer, TimeStep *tStep)
 void
 LIBeam2d :: computeNmatrixAt(const FloatArray &iLocCoord, FloatMatrix &answer)
 // Returns the displacement interpolation matrix {N} of the receiver, eva-
-// luated at aGaussPoint.
+// luated at gp.
 {
     double ksi, n1, n2;
 
@@ -220,11 +220,11 @@ LIBeam2d :: computeGtoLRotationMatrix(FloatMatrix &answer)
 
 
 double
-LIBeam2d :: computeVolumeAround(GaussPoint *aGaussPoint)
+LIBeam2d :: computeVolumeAround(GaussPoint *gp)
 // Returns the length of the receiver. This method is valid only if 1
 // Gauss point is used.
 {
-    double weight  = aGaussPoint->giveWeight();
+    double weight  = gp->giveWeight();
     return weight * 0.5 * this->giveLength();
 }
 
@@ -305,7 +305,7 @@ LIBeam2d :: initializeFrom(InputRecord *ir)
 
 
 void
-LIBeam2d :: computeEgdeNMatrixAt(FloatMatrix &answer, int iedge, GaussPoint *aGaussPoint)
+LIBeam2d :: computeEgdeNMatrixAt(FloatMatrix &answer, int iedge, GaussPoint *gp)
 {
     /*
      *
@@ -321,7 +321,7 @@ LIBeam2d :: computeEgdeNMatrixAt(FloatMatrix &answer, int iedge, GaussPoint *aGa
      * without regarding particular side
      */
 
-    this->computeNmatrixAt(* ( aGaussPoint->giveLocalCoordinates() ), answer);
+    this->computeNmatrixAt(* ( gp->giveLocalCoordinates() ), answer);
 }
 
 
@@ -348,13 +348,13 @@ LIBeam2d :: giveEdgeDofMapping(IntArray &answer, int iEdge) const
 
 
 double
-LIBeam2d :: computeEdgeVolumeAround(GaussPoint *aGaussPoint, int iEdge)
+LIBeam2d :: computeEdgeVolumeAround(GaussPoint *gp, int iEdge)
 {
     if ( iEdge != 1 ) { // edge between nodes 1 2
         _error("computeEdgeVolumeAround: wrong egde number");
     }
 
-    double weight  = aGaussPoint->giveWeight();
+    double weight  = gp->giveWeight();
     return 0.5 * this->giveLength() * weight;
 }
 

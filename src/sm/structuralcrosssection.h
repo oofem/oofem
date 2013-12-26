@@ -110,7 +110,7 @@ public:
      * @param answer Stiffness matrix.
      * @param mode Material response mode.
      * @param gp Integration point, which load history is used.
-     * @param tStep Time step (most models are able to respond only when atTime is current time step).
+     * @param tStep Time step (most models are able to respond only when tStep is current time step).
      */
     //@{
     virtual void giveStiffnessMatrix_3d(FloatMatrix &answer, MatResponseMode mode, GaussPoint *gp, TimeStep *tStep) = 0;
@@ -232,7 +232,7 @@ public:
      * @param answer Stiffness matrix.
      * @param mode Material response mode.
      * @param gp Integration point, which load history is used.
-     * @param tStep Time step (most models are able to respond only when atTime is current time step).
+     * @param tStep Time step (most models are able to respond only when tStep is current time step).
      */
     virtual void give2dPlateStiffMtrx(FloatMatrix &answer, MatResponseMode mode, GaussPoint *gp, TimeStep *tStep) = 0;
     /**
@@ -240,7 +240,7 @@ public:
      * @param answer Stiffness matrix.
      * @param mode Material response mode.
      * @param gp Integration point, which load history is used.
-     * @param tStep Time step (most models are able to respond only when atTime is current time step).
+     * @param tStep Time step (most models are able to respond only when tStep is current time step).
      */
     virtual void give3dShellStiffMtrx(FloatMatrix &answer, MatResponseMode mode, GaussPoint *gp, TimeStep *tStep) = 0;
     /**
@@ -248,7 +248,7 @@ public:
      * @param answer Stiffness matrix.
      * @param mode Material response mode.
      * @param gp Integration point, which load history is used.
-     * @param tStep Time step (most models are able to respond only when atTime is current time step).
+     * @param tStep Time step (most models are able to respond only when tStep is current time step).
      */
     virtual void giveMembraneRotStiffMtrx(FloatMatrix &answer, MatResponseMode mode, GaussPoint *gp, TimeStep *tStep) = 0;
     /**

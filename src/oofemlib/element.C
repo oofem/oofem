@@ -85,7 +85,7 @@ Element :: ~Element()
 
 #if 0
 void
-Element :: computeVectorOf(const IntArray &dofIDMask, ValueModeType u, TimeStep *stepN, FloatArray &answer)
+Element :: computeVectorOf(const IntArray &dofIDMask, ValueModeType u, TimeStep *tStep, FloatArray &answer)
 {
     int k, nDofs;
     FloatMatrix G2L;
@@ -94,7 +94,7 @@ Element :: computeVectorOf(const IntArray &dofIDMask, ValueModeType u, TimeStep 
 
     k = 0;
     for ( int i = 1; i <= numberOfDofMans; i++ ) {
-        this->giveDofManager(i)->giveUnknownVector(vec, dofIDMask, u, stepN);
+        this->giveDofManager(i)->giveUnknownVector(vec, dofIDMask, u, tStep);
         nDofs = vec.giveSize();
         for ( int j = 1; j <= nDofs; j++ ) {
             answer.at(++k) = vec.at(j);
@@ -102,7 +102,7 @@ Element :: computeVectorOf(const IntArray &dofIDMask, ValueModeType u, TimeStep 
     }
 
     for ( int i = 1; i <= giveNumberOfInternalDofManagers(); i++ ) {
-        this->giveInternalDofManager(i)->giveUnknownVector(vec, dofIDMask, u, stepN);
+        this->giveInternalDofManager(i)->giveUnknownVector(vec, dofIDMask, u, tStep);
         nDofs = vec.giveSize();
         for ( int j = 1; j <= nDofs; j++ ) {
             answer.at(++k) = vec.at(j);
@@ -116,7 +116,7 @@ Element :: computeVectorOf(const IntArray &dofIDMask, ValueModeType u, TimeStep 
 #endif
 
 void
-Element :: computeVectorOf(EquationID type, ValueModeType u, TimeStep *stepN, FloatArray &answer)
+Element :: computeVectorOf(EquationID type, ValueModeType u, TimeStep *tStep, FloatArray &answer)
 // Forms the vector containing the values of the unknown 'u' (e.g., the
 // Total value) of the dofs of the callers local cs.
 {
@@ -129,7 +129,7 @@ Element :: computeVectorOf(EquationID type, ValueModeType u, TimeStep *stepN, Fl
     k = 0;
     for ( int i = 1; i <= numberOfDofMans; i++ ) {
         this->giveDofManDofIDMask(i, type, dofIDMask);
-        this->giveDofManager(i)->giveUnknownVector(vec, dofIDMask, u, stepN);
+        this->giveDofManager(i)->giveUnknownVector(vec, dofIDMask, u, tStep);
         nDofs = vec.giveSize();
         for ( int j = 1; j <= nDofs; j++ ) {
             answer.at(++k) = vec.at(j);
@@ -138,7 +138,7 @@ Element :: computeVectorOf(EquationID type, ValueModeType u, TimeStep *stepN, Fl
 
     for ( int i = 1; i <= giveNumberOfInternalDofManagers(); i++ ) {
         this->giveInternalDofManDofIDMask(i, type, dofIDMask);
-        this->giveInternalDofManager(i)->giveUnknownVector(vec, dofIDMask, u, stepN);
+        this->giveInternalDofManager(i)->giveUnknownVector(vec, dofIDMask, u, tStep);
         nDofs = vec.giveSize();
         for ( int j = 1; j <= nDofs; j++ ) {
             answer.at(++k) = vec.at(j);
@@ -153,7 +153,7 @@ Element :: computeVectorOf(EquationID type, ValueModeType u, TimeStep *stepN, Fl
 
 
 void
-Element :: computeBoundaryVectorOf(const IntArray &bNodes, EquationID type, ValueModeType u, TimeStep *stepN, FloatArray &answer)
+Element :: computeBoundaryVectorOf(const IntArray &bNodes, EquationID type, ValueModeType u, TimeStep *tStep, FloatArray &answer)
 // Forms the vector containing the values of the unknown 'u' (e.g., the
 // Total value) of the dofs of the callers local cs.
 {
@@ -172,7 +172,7 @@ Element :: computeBoundaryVectorOf(const IntArray &bNodes, EquationID type, Valu
     k = 0;
     for ( int i = 1; i <= bNodes.giveSize(); i++ ) {
         this->giveDofManDofIDMask(bNodes.at(i), type, dofIDMask);
-        this->giveDofManager( bNodes.at(i) )->giveUnknownVector(vec, dofIDMask, u, stepN);
+        this->giveDofManager( bNodes.at(i) )->giveUnknownVector(vec, dofIDMask, u, tStep);
         for ( int j = 1; j <= vec.giveSize(); j++ ) {
             answer.at(++k) = vec.at(j);
         }
@@ -185,7 +185,7 @@ Element :: computeBoundaryVectorOf(const IntArray &bNodes, EquationID type, Valu
 
 
 void
-Element :: computeVectorOf(PrimaryField &field, ValueModeType u, TimeStep *stepN, FloatArray &answer)
+Element :: computeVectorOf(PrimaryField &field, ValueModeType u, TimeStep *tStep, FloatArray &answer)
 // Forms the vector containing the values of the unknown 'u' (e.g., the
 // Total value) of the dofs of the receiver's nodes (in nodal cs).
 // Dofs containing expected unknowns (of expected type) are determined
@@ -200,7 +200,7 @@ Element :: computeVectorOf(PrimaryField &field, ValueModeType u, TimeStep *stepN
     k = 0;
     for ( int i = 1; i <= numberOfDofMans; i++ ) {
         this->giveDofManDofIDMask(i, field.giveEquationID(), dofIDMask);
-        this->giveDofManager(i)->giveUnknownVector(vec, dofIDMask, field, u, stepN);
+        this->giveDofManager(i)->giveUnknownVector(vec, dofIDMask, field, u, tStep);
         nDofs = vec.giveSize();
         for ( int j = 1; j <= nDofs; j++ ) {
             answer.at(++k) = vec.at(j);
@@ -209,7 +209,7 @@ Element :: computeVectorOf(PrimaryField &field, ValueModeType u, TimeStep *stepN
 
     for ( int i = 1; i <= giveNumberOfInternalDofManagers(); i++ ) {
         this->giveInternalDofManDofIDMask(i, field.giveEquationID(), dofIDMask);
-        this->giveInternalDofManager(i)->giveUnknownVector(vec, dofIDMask, field, u, stepN);
+        this->giveInternalDofManager(i)->giveUnknownVector(vec, dofIDMask, field, u, tStep);
         nDofs = vec.giveSize();
         for ( int j = 1; j <= nDofs; j++ ) {
             answer.at(++k) = vec.at(j);
@@ -224,7 +224,7 @@ Element :: computeVectorOf(PrimaryField &field, ValueModeType u, TimeStep *stepN
 
 
 void
-Element :: computeVectorOfPrescribed(EquationID ut, ValueModeType mode, TimeStep *stepN, FloatArray &answer)
+Element :: computeVectorOfPrescribed(EquationID ut, ValueModeType mode, TimeStep *tStep, FloatArray &answer)
 // Forms the vector containing the prescribed values of the unknown 'u'
 // (e.g., the prescribed displacement) of the dofs of the receiver's
 // nodes. Puts 0 at each free dof.
@@ -239,7 +239,7 @@ Element :: computeVectorOfPrescribed(EquationID ut, ValueModeType mode, TimeStep
     k = 0;
     for ( int i = 1; i <= numberOfDofMans; i++ ) {
         this->giveDofManDofIDMask(i, ut, dofIDMask);
-        this->giveDofManager(i)->givePrescribedUnknownVector(vec, dofIDMask, mode, stepN);
+        this->giveDofManager(i)->givePrescribedUnknownVector(vec, dofIDMask, mode, tStep);
         nDofs = vec.giveSize();
         for ( int j = 1; j <= nDofs; j++ ) {
             answer.at(++k) = vec.at(j);
@@ -248,7 +248,7 @@ Element :: computeVectorOfPrescribed(EquationID ut, ValueModeType mode, TimeStep
 
     for ( int i = 1; i <= giveNumberOfInternalDofManagers(); i++ ) {
         this->giveInternalDofManDofIDMask(i, ut, dofIDMask);
-        this->giveInternalDofManager(i)->givePrescribedUnknownVector(vec, dofIDMask, mode, stepN);
+        this->giveInternalDofManager(i)->givePrescribedUnknownVector(vec, dofIDMask, mode, tStep);
         nDofs = vec.giveSize();
         for ( int j = 1; j <= nDofs; j++ ) {
             answer.at(++k) = vec.at(j);
@@ -808,13 +808,13 @@ Element :: postInitialize()
 
 
 void
-Element :: printOutputAt(FILE *file, TimeStep *stepN)
+Element :: printOutputAt(FILE *file, TimeStep *tStep)
 // Performs end-of-step operations.
 {
     fprintf( file, "element %d (%8d) :\n", this->giveLabel(), this->giveNumber() );
 
     for ( int i = 0; i < numberOfIntegrationRules; i++ ) {
-        integrationRulesArray [ i ]->printOutputAt(file, stepN);
+        integrationRulesArray [ i ]->printOutputAt(file, tStep);
     }
 }
 
@@ -1234,13 +1234,13 @@ Element :: computeMidPlaneNormal(FloatArray &answer, const GaussPoint *)
 
 
 int
-Element :: giveIPValue(FloatArray &answer, GaussPoint *aGaussPoint, InternalStateType type, TimeStep *atTime)
+Element :: giveIPValue(FloatArray &answer, GaussPoint *gp, InternalStateType type, TimeStep *tStep)
 {
     if ( type == IST_ErrorIndicatorLevel ) {
         ErrorEstimator *ee = this->giveDomain()->giveErrorEstimator();
         if ( ee ) {
             answer.resize(1);
-            answer.at(1) = ee->giveElementError(indicatorET, this, atTime);
+            answer.at(1) = ee->giveElementError(indicatorET, this, tStep);
         } else {
             answer.resize(0);
             return 0;
@@ -1251,7 +1251,7 @@ Element :: giveIPValue(FloatArray &answer, GaussPoint *aGaussPoint, InternalStat
         ErrorEstimator *ee = this->giveDomain()->giveErrorEstimator();
         if ( ee ) {
             answer.resize(1);
-            answer.at(1) = ee->giveElementError(internalStressET, this, atTime);
+            answer.at(1) = ee->giveElementError(internalStressET, this, tStep);
         } else {
             answer.resize(0);
             return 0;
@@ -1262,7 +1262,7 @@ Element :: giveIPValue(FloatArray &answer, GaussPoint *aGaussPoint, InternalStat
         ErrorEstimator *ee = this->giveDomain()->giveErrorEstimator();
         if ( ee ) {
             answer.resize(1);
-            answer.at(1) = ee->giveElementError(primaryUnknownET, this, atTime);
+            answer.at(1) = ee->giveElementError(primaryUnknownET, this, tStep);
         } else {
             answer.resize(0);
             return 0;
@@ -1270,7 +1270,7 @@ Element :: giveIPValue(FloatArray &answer, GaussPoint *aGaussPoint, InternalStat
 
         return 1;
     } else {
-        return this->giveCrossSection()->giveIPValue(answer, aGaussPoint, type, atTime);
+        return this->giveCrossSection()->giveIPValue(answer, gp, type, tStep);
     }
 }
 
@@ -1469,7 +1469,7 @@ Element :: computeGtoLRotationMatrix(FloatMatrix &answer)
 
 #ifdef __PARALLEL_MODE
 int
-Element :: packUnknowns(CommunicationBuffer &buff, TimeStep *stepN)
+Element :: packUnknowns(CommunicationBuffer &buff, TimeStep *tStep)
 {
     int result = 1;
     IntegrationRule *iRule;
@@ -1477,7 +1477,7 @@ Element :: packUnknowns(CommunicationBuffer &buff, TimeStep *stepN)
     for ( int i = 0; i < numberOfIntegrationRules; i++ ) {
         iRule = integrationRulesArray [ i ];
         for ( int j = 0; j < iRule->giveNumberOfIntegrationPoints(); j++ ) {
-            result &= this->giveCrossSection()->packUnknowns( buff, stepN, iRule->getIntegrationPoint(j) );
+            result &= this->giveCrossSection()->packUnknowns( buff, tStep, iRule->getIntegrationPoint(j) );
         }
     }
 
@@ -1486,7 +1486,7 @@ Element :: packUnknowns(CommunicationBuffer &buff, TimeStep *stepN)
 
 
 int
-Element :: unpackAndUpdateUnknowns(CommunicationBuffer &buff, TimeStep *stepN)
+Element :: unpackAndUpdateUnknowns(CommunicationBuffer &buff, TimeStep *tStep)
 {
     int result = 1;
     IntegrationRule *iRule;
@@ -1494,7 +1494,7 @@ Element :: unpackAndUpdateUnknowns(CommunicationBuffer &buff, TimeStep *stepN)
     for ( int i = 0; i < numberOfIntegrationRules; i++ ) {
         iRule = integrationRulesArray [ i ];
         for ( int j = 0; j < iRule->giveNumberOfIntegrationPoints(); j++ ) {
-            result &= this->giveCrossSection()->unpackAndUpdateUnknowns( buff, stepN, iRule->getIntegrationPoint(j) );
+            result &= this->giveCrossSection()->unpackAndUpdateUnknowns( buff, tStep, iRule->getIntegrationPoint(j) );
         }
     }
 
@@ -1598,14 +1598,14 @@ Element :: drawAnnotation(oofegGraphicContext &gc)
 
 int
 Element :: giveInternalStateAtNode(FloatArray &answer, InternalStateType type, InternalStateMode mode,
-                                   int node, TimeStep *atTime)
+                                   int node, TimeStep *tStep)
 {
     if ( type == IST_RelMeshDensity ) {
         ErrorEstimator *ee = this->giveDomain()->giveErrorEstimator();
         if ( ee ) {
             answer.resize(1);
             answer.at(1) = this->giveDomain()->giveErrorEstimator()->giveRemeshingCrit()->
-                           giveRequiredDofManDensity(this->giveNode(node)->giveNumber(), atTime, 1);
+                           giveRequiredDofManDensity(this->giveNode(node)->giveNumber(), tStep, 1);
             return 1;
         } else {
             answer.resize(0);

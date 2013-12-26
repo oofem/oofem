@@ -102,7 +102,7 @@ void
 IsotropicHeatTransferMaterial :: giveCharacteristicMatrix(FloatMatrix &answer,
                                                           MatResponseMode mode,
                                                           GaussPoint *gp,
-                                                          TimeStep *atTime)
+                                                          TimeStep *tStep)
 {
     /*
      * returns constitutive (conductivity) matrix of receiver
@@ -110,7 +110,7 @@ IsotropicHeatTransferMaterial :: giveCharacteristicMatrix(FloatMatrix &answer,
     MaterialMode mMode = gp->giveMaterialMode();
     double cond = this->giveIsotropicConductivity(gp);
 
-    /*if ( !isActivated(atTime) ) //element, which is inactive (activityLTF==0), will never go into this function
+    /*if ( !isActivated(tStep) ) //element, which is inactive (activityLTF==0), will never go into this function
      *   cond = 0.;
      * }
      */
@@ -141,7 +141,7 @@ IsotropicHeatTransferMaterial :: giveCharacteristicMatrix(FloatMatrix &answer,
 double
 IsotropicHeatTransferMaterial :: giveCharacteristicValue(MatResponseMode mode,
                                                          GaussPoint *gp,
-                                                         TimeStep *atTime)
+                                                         TimeStep *tStep)
 {
     if ( mode == Capacity ) {
         return ( capacity * this->give('d', gp) );
@@ -154,7 +154,7 @@ IsotropicHeatTransferMaterial :: giveCharacteristicValue(MatResponseMode mode,
 
 
 int
-IsotropicHeatTransferMaterial :: giveIPValue(FloatArray &answer, GaussPoint *aGaussPoint, InternalStateType type, TimeStep *atTime)
+IsotropicHeatTransferMaterial :: giveIPValue(FloatArray &answer, GaussPoint *gp, InternalStateType type, TimeStep *tStep)
 {
     if (  type == IST_HydrationDegree ) {
         answer.resize(1);
@@ -162,6 +162,6 @@ IsotropicHeatTransferMaterial :: giveIPValue(FloatArray &answer, GaussPoint *aGa
         return 1;
     }
 
-    return TransportMaterial :: giveIPValue(answer, aGaussPoint, type, atTime);
+    return TransportMaterial :: giveIPValue(answer, gp, type, tStep);
 }
 } // end namespace oofem

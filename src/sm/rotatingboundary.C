@@ -43,8 +43,8 @@
 namespace oofem {
 REGISTER_BoundaryCondition(RotatingBoundary);
 
-double RotatingBoundary :: give(Dof *dof, ValueModeType mode, TimeStep *stepN)
-// Returns the value at stepN of the prescribed value of the kinematic
+double RotatingBoundary :: give(Dof *dof, ValueModeType mode, TimeStep *tStep)
+// Returns the value at tStep of the prescribed value of the kinematic
 // unknown 'u'. Returns 0 if 'u' has no prescribed value.
 {
     DofIDItem id = dof->giveDofID();
@@ -52,7 +52,7 @@ double RotatingBoundary :: give(Dof *dof, ValueModeType mode, TimeStep *stepN)
     FloatArray answer, newcoords;
     double theta;
 
-    theta = this->giveLoadTimeFunction()->evaluate(stepN, mode);
+    theta = this->giveLoadTimeFunction()->evaluate(tStep, mode);
 
     if ( axis.giveSize() != 3 ) {
         OOFEM_ERROR("RotatingBoundary :: give - Size of rotation axis != 3.");

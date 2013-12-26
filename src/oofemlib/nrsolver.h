@@ -181,7 +181,7 @@ protected:
     void initPrescribedEqs();
     void applyConstraintsToStiffness(SparseMtrx *k);
     void applyConstraintsToLoadIncrement(int nite, const SparseMtrx *k, FloatArray &R,
-                                         referenceLoadInputModeType rlm, TimeStep *atTime);
+                                         referenceLoadInputModeType rlm, TimeStep *tStep);
 
     /**
      * Determines whether or not the solution has reached convergence.

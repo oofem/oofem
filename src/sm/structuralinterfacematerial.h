@@ -100,7 +100,7 @@ public:
      * @param answer Contains result.
      * @param gp Integration point.
      * @param reducedF Deformation gradient in in reduced form.
-     * @param tStep Current time step (most models are able to respond only when atTime is current time step).
+     * @param tStep Current time step (most models are able to respond only when tStep is current time step).
      */
     virtual void giveFirstPKTraction_1d(FloatArray &answer, GaussPoint *gp, const FloatArray &jump,
                                         const FloatArray &reducedF, TimeStep *tStep)

@@ -78,7 +78,7 @@ void Tr1Darcy :: computeGaussPoints()
     }
 }
 
-void Tr1Darcy :: computeStiffnessMatrix(FloatMatrix &answer, TimeStep *atTime)
+void Tr1Darcy :: computeStiffnessMatrix(FloatMatrix &answer, TimeStep *tStep)
 {
     /*
      * Return Ke = integrate(B^T K B)
@@ -102,7 +102,7 @@ void Tr1Darcy :: computeStiffnessMatrix(FloatMatrix &answer, TimeStep *atTime)
         double detJ = this->interpolation_lin.giveTransformationJacobian( * lcoords, FEIElementGeometryWrapper(this) );
         this->interpolation_lin.evaldNdx( BT, * lcoords, FEIElementGeometryWrapper(this) );
 
-        mat->giveCharacteristicMatrix(K, TangentStiffness, gp, atTime);
+        mat->giveCharacteristicMatrix(K, TangentStiffness, gp, tStep);
 
         B.beTranspositionOf(BT);
         KB.beProductOf(K, B);
@@ -121,7 +121,7 @@ void Tr1Darcy :: giveCharacteristicVector(FloatArray &answer, CharType mtrx, Val
     }
 }
 
-void Tr1Darcy :: computeInternalForcesVector(FloatArray &answer, TimeStep *atTime)
+void Tr1Darcy :: computeInternalForcesVector(FloatArray &answer, TimeStep *tStep)
 {
     FloatArray w, a, gradP, P(1), n;
     FloatMatrix B, BT;
@@ -129,7 +129,7 @@ void Tr1Darcy :: computeInternalForcesVector(FloatArray &answer, TimeStep *atTim
     TransportMaterial *mat = static_cast< TransportMaterial * >( this->giveMaterial() );
     IntegrationRule *iRule = integrationRulesArray [ 0 ];
 
-    this->computeVectorOf(EID_ConservationEquation, VM_Total, atTime, a);
+    this->computeVectorOf(EID_ConservationEquation, VM_Total, tStep, a);
 
     answer.resize(3);
     answer.zero();
@@ -146,13 +146,13 @@ void Tr1Darcy :: computeInternalForcesVector(FloatArray &answer, TimeStep *atTim
 
         gradP.beProductOf(B, a);
 
-        mat->giveFluxVector(w, gp, gradP, P, atTime);
+        mat->giveFluxVector(w, gp, gradP, P, tStep);
 
         answer.plusProduct(B, w, -gp->giveWeight() * detJ);
     }
 }
 
-void Tr1Darcy :: computeExternalForcesVector(FloatArray &answer, TimeStep *atTime, ValueModeType mode)
+void Tr1Darcy :: computeExternalForcesVector(FloatArray &answer, TimeStep *tStep, ValueModeType mode)
 {
     // TODO: Implement support for body forces
 
@@ -175,7 +175,7 @@ void Tr1Darcy :: computeExternalForcesVector(FloatArray &answer, TimeStep *atTim
         ltype = load->giveBCGeoType();
 
         if ( ltype == EdgeLoadBGT ) {
-            this->computeEdgeBCSubVectorAt(vec, load, load_id, atTime, mode, 0);
+            this->computeEdgeBCSubVectorAt(vec, load, load_id, tStep, mode, 0);
         }
 
         answer.add(vec);

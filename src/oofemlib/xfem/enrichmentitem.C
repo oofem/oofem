@@ -53,6 +53,9 @@
 #include <limits>
 
 namespace oofem {
+
+const double EnrichmentItem :: mLevelSetTol = 1.0e-12;
+
 REGISTER_EnrichmentItem(Inclusion)
 REGISTER_EnrichmentItem(Delamination)
 
@@ -66,7 +69,7 @@ EnrichmentItem :: EnrichmentItem(int n, XfemManager *xMan, Domain *aDomain) : FE
     mpPropagationLaw(NULL),
     mPropLawIndex(0),
     mLevelSetsNeedUpdate(true),
-    mLevelSetTol(1.0e-12), mLevelSetTol2(1.0e-12)
+    mLevelSetTol2(1.0e-12)
 {
     this->startOfDofIdPool = -1;
     this->endOfDofIdPool = -1;
@@ -187,6 +190,10 @@ int EnrichmentItem :: instanciateYourself(DataReader *dr)
         OOFEM_ERROR2( "EnrichmentItem::instanciateYourself: unknown enrichment domain (%s)", name.c_str() );
     }
 
+    if ( giveDomain()->giveXfemManager()->giveVtkDebug() ) {
+        mpEnrichmentDomain->setVtkDebug(true);
+    }
+
     mpEnrichmentDomain->initializeFrom(mir);
 
 
@@ -301,7 +308,7 @@ void EnrichmentItem :: updateGeometry()
 void EnrichmentItem :: propagateFronts()
 {
     // Propagate interfaces
-    mpPropagationLaw->propagateInterfaces(* mpEnrichmentDomain);
+    mpPropagationLaw->propagateInterfaces(* giveDomain(), * mpEnrichmentDomain);
 
     updateGeometry();
 }
@@ -510,6 +517,18 @@ void EnrichmentItem :: updateNodeEnrMarker(XfemManager &ixFemMan, const Enrichme
                     const double &gammaS = mLevelSetTangDir [ niGlob - 1 ];
                     const double &gammaE = mLevelSetTangDir [ njGlob - 1 ];
                     double gamma = 0.5 * ( 1.0 - xi ) * gammaS + 0.5 * ( 1.0 + xi ) * gammaE;
+                    //                    double gamma = gammaS  * gammaE;
+
+                    // Compute the exact value of the tangential level set
+                    // from the discretized geometry instead of interpolating.
+                    double tangDist = 0.0, arcPos = 0.0;
+                    const FloatArray &posI = * ( el->giveDofManager(niLoc)->giveCoordinates() );
+                    const FloatArray &posJ = * ( el->giveDofManager(njLoc)->giveCoordinates() );
+                    FloatArray pos;
+                    pos.add(0.5 * ( 1.0 - xi ), posI);
+                    pos.add(0.5 * ( 1.0 + xi ), posJ);
+                    mpEnrichmentDomain->computeTangentialSignDist(tangDist, pos, arcPos);
+                    gamma = tangDist;
 
                     if ( gamma > 0.0 ) {
                         numEdgeIntersec++;
@@ -701,6 +720,19 @@ void EnrichmentItem :: computeIntersectionPoints(std :: vector< FloatArray > &oI
 
                 double xi = calcXiZeroLevel(phiS, phiE);
                 double gamma = 0.5 * ( 1.0 - xi ) * gammaS + 0.5 * ( 1.0 + xi ) * gammaE;
+
+
+                // Compute the exact value of the tangential level set
+                // from the discretized geometry instead of interpolating.
+                double tangDist = 0.0, arcPos = 0.0;
+                const FloatArray &posI = * ( element->giveDofManager(nsLoc)->giveCoordinates() );
+                const FloatArray &posJ = * ( element->giveDofManager(neLoc)->giveCoordinates() );
+                FloatArray pos;
+                pos.add(0.5 * ( 1.0 - xi ), posI);
+                pos.add(0.5 * ( 1.0 + xi ), posJ);
+                mpEnrichmentDomain->computeTangentialSignDist(tangDist, pos, arcPos);
+                gamma = tangDist;
+
 
                 // If we are inside in tangential direction
                 if ( gamma > 0.0 ) {
@@ -990,7 +1022,7 @@ bool EnrichmentItem :: giveElementTipCoord(FloatArray &oCoord, double &oArcPos, 
     return false;
 }
 
-double EnrichmentItem :: calcXiZeroLevel(const double &iQ1, const double &iQ2) const
+double EnrichmentItem :: calcXiZeroLevel(const double &iQ1, const double &iQ2)
 {
     double xi = 0.0;
 
@@ -1224,6 +1256,8 @@ IRResultType Crack :: initializeFrom(InputRecord *ir)
 REGISTER_EnrichmentFront(EnrFrontDoNothing)
 REGISTER_EnrichmentFront(EnrFrontExtend)
 REGISTER_EnrichmentFront(EnrFrontLinearBranchFuncRadius)
+REGISTER_EnrichmentFront(EnrFrontReduceFront)
+REGISTER_EnrichmentFront(EnrFrontLinearBranchFuncOneEl)
 
 bool EnrichmentFront :: giveElementTipCoord(FloatArray &oCoord, double &oArcPos, int iElIndex) const
 {
@@ -1345,6 +1379,32 @@ void EnrFrontExtend :: giveInputRecord(DynamicInputRecord &input)
     int number = 1;
     input.setRecordKeywordField(this->giveInputRecordName(), number);
 }
+
+
+void EnrFrontReduceFront :: MarkNodesAsFront(std :: vector< int > &ioNodeEnrMarker, XfemManager &ixFemMan, const std :: vector< double > &iLevelSetNormalDir, const std :: vector< double > &iLevelSetTangDir, const std :: vector< TipInfo > &iTipInfo)
+{
+	// Remove nodes touched by the crack tip
+    Domain &d = * ( ixFemMan.giveDomain() );
+
+    for(size_t tipInd = 0; tipInd < iTipInfo.size(); tipInd++) {
+//    	printf("iTipInfo[tipInd].mElIndex: %d\n", iTipInfo[tipInd].mElIndex );
+
+    	Element *el = d.giveElement(iTipInfo[tipInd].mElIndex);
+
+    	const IntArray & elNodes = el->giveDofManArray();
+
+    	for(int i = 1; i <= elNodes.giveSize(); i++) {
+    		ioNodeEnrMarker[ elNodes.at(i)-1 ] = 0;
+    	}
+    }
+}
+
+void EnrFrontReduceFront :: giveInputRecord(DynamicInputRecord &input)
+{
+    int number = 1;
+    input.setRecordKeywordField(this->giveInputRecordName(), number);
+}
+
 
 EnrFrontLinearBranchFuncRadius :: EnrFrontLinearBranchFuncRadius() :
     mEnrichmentRadius(0.0)
@@ -1487,4 +1547,129 @@ void EnrFrontLinearBranchFuncRadius :: giveInputRecord(DynamicInputRecord &input
 
     input.setField(mEnrichmentRadius, _IFT_EnrFrontLinearBranchFuncRadius_Radius);
 }
+
+EnrFrontLinearBranchFuncOneEl :: EnrFrontLinearBranchFuncOneEl()
+{
+    mpBranchFunc = new LinElBranchFunction();
+}
+
+EnrFrontLinearBranchFuncOneEl :: ~EnrFrontLinearBranchFuncOneEl()
+{
+    if ( mpBranchFunc != NULL ) {
+        delete mpBranchFunc;
+        mpBranchFunc = NULL;
+    }
+}
+
+
+void EnrFrontLinearBranchFuncOneEl :: MarkNodesAsFront(std :: vector< int > &ioNodeEnrMarker, XfemManager &ixFemMan, const std :: vector< double > &iLevelSetNormalDir, const std :: vector< double > &iLevelSetTangDir, const std :: vector< TipInfo > &iTipInfo)
+{
+    mTipInfo = iTipInfo;
+    mNodeTipIndices.clear();
+
+    Domain &d = * ( ixFemMan.giveDomain() );
+
+    for(size_t tipInd = 0; tipInd < iTipInfo.size(); tipInd++) {
+
+    	Element *el = d.giveElement(iTipInfo[tipInd].mElIndex);
+
+    	const IntArray & elNodes = el->giveDofManArray();
+
+    	for(int i = 1; i <= elNodes.giveSize(); i++) {
+    		ioNodeEnrMarker[ elNodes.at(i)-1 ] = 2;
+            addTipIndexToNode(elNodes.at(i), tipInd);
+    	}
+    }
+}
+
+int EnrFrontLinearBranchFuncOneEl :: giveNumEnrichments(const DofManager &iDMan) const
+{
+    std :: vector< int >tipIndices;
+    int nodeInd = iDMan.giveGlobalNumber();
+    giveNodeTipIndices(nodeInd, tipIndices);
+
+    return 4 * tipIndices.size();
+}
+
+void EnrFrontLinearBranchFuncOneEl :: evaluateEnrFuncAt(std :: vector< double > &oEnrFunc, const FloatArray &iPos, const double &iLevelSet, int iNodeInd) const
+{
+    oEnrFunc.clear();
+
+    std :: vector< int >tipIndices;
+    giveNodeTipIndices(iNodeInd, tipIndices);
+
+    for ( size_t i = 0; i < tipIndices.size(); i++ ) {
+        FloatArray xTip;
+        int tipInd = tipIndices [ i ];
+        xTip.setValues( 2, mTipInfo [ tipInd ].mGlobalCoord.at(1), mTipInfo [ tipInd ].mGlobalCoord.at(2) );
+
+        FloatArray pos;
+        pos.setValues( 2, iPos.at(1), iPos.at(2) );
+
+        // Crack tip tangent and normal
+        const FloatArray &t = mTipInfo [ tipInd ].mTangDir;
+        const FloatArray &n = mTipInfo [ tipInd ].mNormalDir;
+
+        double r = 0.0, theta = 0.0;
+        EnrichmentItem :: calcPolarCoord(r, theta, xTip, pos, n, t);
+
+        mpBranchFunc->evaluateEnrFuncAt(oEnrFunc, r, theta);
+    }
+}
+
+void EnrFrontLinearBranchFuncOneEl :: evaluateEnrFuncDerivAt(std :: vector< FloatArray > &oEnrFuncDeriv, const FloatArray &iPos, const double &iLevelSet, const FloatArray &iGradLevelSet, int iNodeInd) const
+{
+    oEnrFuncDeriv.clear();
+
+    std :: vector< int >tipIndices;
+    giveNodeTipIndices(iNodeInd, tipIndices);
+
+    for ( size_t i = 0; i < tipIndices.size(); i++ ) {
+        int tipInd = tipIndices [ i ];
+        const FloatArray &xTip = mTipInfo [ tipInd ].mGlobalCoord;
+
+        // Crack tip tangent and normal
+        const FloatArray &t = mTipInfo [ tipInd ].mTangDir;
+        const FloatArray &n = mTipInfo [ tipInd ].mNormalDir;
+
+        double r = 0.0, theta = 0.0;
+        EnrichmentItem :: calcPolarCoord(r, theta, xTip, iPos, n, t);
+
+
+        size_t sizeStart = oEnrFuncDeriv.size();
+        mpBranchFunc->evaluateEnrFuncDerivAt(oEnrFuncDeriv, r, theta);
+
+        /**
+         * Transform to global coordinates.
+         */
+        FloatMatrix E;
+        E.resize(2, 2);
+        E.setColumn(t, 1);
+        E.setColumn(n, 2);
+
+
+        for ( size_t j = sizeStart; j < oEnrFuncDeriv.size(); j++ ) {
+            FloatArray enrFuncDerivGlob;
+            enrFuncDerivGlob.beProductOf(E, oEnrFuncDeriv [ j ]);
+            oEnrFuncDeriv [ j ] = enrFuncDerivGlob;
+        }
+    }
+}
+
+void EnrFrontLinearBranchFuncOneEl :: evaluateEnrFuncJumps(std :: vector< double > &oEnrFuncJumps) const
+{
+    mpBranchFunc->giveJump(oEnrFuncJumps);
+}
+
+IRResultType EnrFrontLinearBranchFuncOneEl :: initializeFrom(InputRecord *ir)
+{
+    return IRRT_OK;
+}
+
+void EnrFrontLinearBranchFuncOneEl :: giveInputRecord(DynamicInputRecord &input)
+{
+    int number = 1;
+    input.setRecordKeywordField(this->giveInputRecordName(), number);
+}
+
 } // end namespace oofem

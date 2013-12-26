@@ -112,7 +112,7 @@ void
 Truss1d :: computeBHmatrixAt(GaussPoint *gp, FloatMatrix &answer)
 //
 // Returns the [1x2] displacement gradient matrix {BH} of the receiver,
-// evaluated at aGaussPoint.
+// evaluated at gp.
 // @todo not checked if correct
 {
     this->computeBmatrixAt(gp, answer);
@@ -457,7 +457,7 @@ Truss1d :: DirectErrorIndicatorRCI_giveCharacteristicSize()
 
 int
 Truss1d :: EIPrimaryUnknownMI_computePrimaryUnknownVectorAt(ValueModeType mode,
-                                                            TimeStep *stepN, const FloatArray &coords,
+                                                            TimeStep *tStep, const FloatArray &coords,
                                                             FloatArray &answer)
 {
     FloatArray n, u, ksi;
@@ -465,7 +465,7 @@ Truss1d :: EIPrimaryUnknownMI_computePrimaryUnknownVectorAt(ValueModeType mode,
 
     result = this->computeLocalCoordinates(ksi, coords);
     this->interp.evalN( n, ksi, FEIElementGeometryWrapper(this) );
-    this->computeVectorOf(EID_MomentumBalance, mode, stepN, u);
+    this->computeVectorOf(EID_MomentumBalance, mode, tStep, u);
     answer.setValues( 1, n.dotProduct(u) );
     return result;
 }

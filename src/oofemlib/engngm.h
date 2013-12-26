@@ -490,7 +490,7 @@ public:
      * This process should typically include restoring old solution, instanciating newly
      * generated domain(s) and by mapping procedure.
      */
-    virtual int initializeAdaptive(int stepNumber) { return 0; }
+    virtual int initializeAdaptive(int tStepumber) { return 0; }
 
     /**
      * Returns number of equations for given domain in active (current time step) time step.
@@ -690,7 +690,7 @@ public:
      * like error estimators, solvers, etc, having domains as attributes.
      */
     virtual void updateDomainLinks();
-    void resolveCorrespondingStepNumber(int &, int &, void *obj);
+    void resolveCorrespondingtStepumber(int &, int &, void *obj);
     /// Returns current meta step.
     MetaStep *giveCurrentMetaStep();
     /// Returns current time step.
@@ -741,15 +741,15 @@ public:
      * Assigns context file-descriptor for given step number to stream.
      * Returns nonzero on success.
      * @param contextFile Assigned file descriptor.
-     * @param stepNumber Solution step number to store/restore.
+     * @param tStepumber Solution step number to store/restore.
      * @param stepVersion Version of step.
      * @param cmode Determines the i/o mode of context file.
      * @param errLevel Determines the amount of warning messages if errors are encountered, level 0 no warnings reported.
      */
-    int giveContextFile(FILE **contextFile, int stepNumber, int stepVersion,
+    int giveContextFile(FILE **contextFile, int tStepumber, int stepVersion,
                         ContextFileMode cmode, int errLevel = 1);
     /** Returns true if context file for given step and version is available */
-    bool testContextFile(int stepNumber, int stepVersion);
+    bool testContextFile(int tStepumber, int stepVersion);
     /**
      * Creates new DataReader for given domain.
      * Returns nonzero on success.
@@ -835,7 +835,7 @@ public:
      * Usually the hash algorithm should produce index that depend on time step relatively to
      * actual one to avoid storage of complete history.
      */
-    virtual int giveUnknownDictHashIndx(ValueModeType mode, TimeStep *stepN) { return 0; }
+    virtual int giveUnknownDictHashIndx(ValueModeType mode, TimeStep *tStep) { return 0; }
     /**
      * Returns UnknownNUmberingScheme related to given EquationID
      */
@@ -1034,9 +1034,9 @@ public:
      * for what will be printed at DOF level.
      * @param stream output stream
      * @param iDof dof to be processed
-     * @param atTime solution step
+     * @param tStep solution step
      */
-    virtual void printDofOutputAt(FILE *stream, Dof *iDof, TimeStep *atTime) = 0;
+    virtual void printDofOutputAt(FILE *stream, Dof *iDof, TimeStep *tStep) = 0;
 
 
     // identification
@@ -1117,7 +1117,7 @@ public:
     /**
      * Shows the sparse structure of required matrix, type == 1 stiffness.
      */
-    virtual void showSparseMtrxStructure(int type, oofegGraphicContext &context, TimeStep *atTime) { }
+    virtual void showSparseMtrxStructure(int type, oofegGraphicContext &context, TimeStep *tStep) { }
 #endif
 
     /**@name Error and warning reporting methods.

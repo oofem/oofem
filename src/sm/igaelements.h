@@ -77,7 +77,7 @@ public:
         PlaneStressStructuralElementEvaluator :: giveDofManDofIDMask(inode, u, answer);
     }
     virtual int computeNumberOfDofs() { return numberOfDofMans * 2; }
-    virtual void updateInternalState(TimeStep *stepN) { PlaneStressStructuralElementEvaluator :: updateInternalState(stepN); }
+    virtual void updateInternalState(TimeStep *tStep) { PlaneStressStructuralElementEvaluator :: updateInternalState(tStep); }
     // definition & identification
     virtual const char *giveInputRecordName() const { return _IFT_BsplinePlaneStressElement_Name; }
     virtual const char *giveClassName() const { return "BsplinePlaneStressElement"; }
@@ -122,7 +122,7 @@ public:
         PlaneStressStructuralElementEvaluator :: giveDofManDofIDMask(inode, u, answer);
     }
     virtual int computeNumberOfDofs() { return numberOfDofMans * 2; }
-    virtual void updateInternalState(TimeStep *stepN) { PlaneStressStructuralElementEvaluator :: updateInternalState(stepN); }
+    virtual void updateInternalState(TimeStep *tStep) { PlaneStressStructuralElementEvaluator :: updateInternalState(tStep); }
     // definition & identification
     virtual const char *giveInputRecordName() const { return _IFT_NURBSPlaneStressElement_Name; }
     virtual const char *giveClassName() const { return "NURBSPlaneStressElement"; }
@@ -172,7 +172,7 @@ public:
         PlaneStressStructuralElementEvaluator :: giveDofManDofIDMask(inode, u, answer);
     }
     virtual int computeNumberOfDofs() { return numberOfDofMans * 2; }
-    virtual void updateInternalState(TimeStep *stepN) { PlaneStressStructuralElementEvaluator :: updateInternalState(stepN); }
+    virtual void updateInternalState(TimeStep *tStep) { PlaneStressStructuralElementEvaluator :: updateInternalState(tStep); }
     // definition & identification
     virtual const char *giveInputRecordName() const { return _IFT_TSplinePlaneStressElement_Name; }
     virtual const char *giveClassName() const { return "TSplinePlaneStressElement"; }
@@ -212,7 +212,7 @@ public:
         Space3dStructuralElementEvaluator :: giveDofManDofIDMask(inode, u, answer);
     }
     virtual int computeNumberOfDofs() { return numberOfDofMans * 3; }
-    virtual void updateInternalState(TimeStep *stepN) { Space3dStructuralElementEvaluator :: updateInternalState(stepN); }
+    virtual void updateInternalState(TimeStep *tStep) { Space3dStructuralElementEvaluator :: updateInternalState(tStep); }
     // definition & identification
     virtual const char *giveInputRecordName() const { return _IFT_NURBSSpace3dElement_Name; }
     virtual const char *giveClassName() const { return "NURBSSpace3dElement"; }

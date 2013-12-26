@@ -470,14 +470,14 @@ void DIIDynamic :: updateYourself(TimeStep *tStep)
 
 
 void
-DIIDynamic :: printDofOutputAt(FILE *stream, Dof *iDof, TimeStep *atTime)
+DIIDynamic :: printDofOutputAt(FILE *stream, Dof *iDof, TimeStep *tStep)
 {
     static char dofchar[] = "dva";
     static ValueModeType dofmodes[] = {
         VM_Total, VM_Velocity, VM_Acceleration
     };
 
-    iDof->printMultipleOutputAt(stream, atTime, dofchar, dofmodes, 3);
+    iDof->printMultipleOutputAt(stream, tStep, dofchar, dofmodes, 3);
 }
 
 
@@ -668,7 +668,7 @@ contextIOResultType DIIDynamic :: restoreContext(DataStream *stream, ContextMode
     contextIOResultType iores;
     FILE *file = NULL;
 
-    this->resolveCorrespondingStepNumber(istep, iversion, obj);
+    this->resolveCorrespondingtStepumber(istep, iversion, obj);
     if ( stream == NULL ) {
         if ( !this->giveContextFile(& file, istep, iversion, contextMode_read) ) {
             THROW_CIOERR(CIO_IOERR); // Override.

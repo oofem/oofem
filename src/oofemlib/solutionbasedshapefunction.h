@@ -42,6 +42,8 @@
 #define _IFT_SolutionbasedShapeFunction_Set "set"
 #define _IFT_SolutionbasedShapeFunction_ShapeFunctionFile "shapefunctionfile"
 #define _IFT_SolutionbasedShapeFunction_Externalset "externalset"
+#define _IFT_SolutionbasedShapeFunction_UseCorrectionFactors "usecorrectionfactors"
+#define _IFT_SolutionbasedShapeFunction_DumpSnapshots "dumpsnapshots"
 
 namespace oofem {
 struct SurfaceDataStruct {
@@ -71,6 +73,7 @@ private:
     std :: string filename;
     bool useConstantBase;
     bool isLoaded;
+    bool useCorrectionFactors;
 
     double bigNorm;
     int worstIndex;
@@ -85,7 +88,6 @@ private:
     FloatArray maxCoord, minCoord;
 
     void setBoundaryConditionOnDof(Dof *d, double value);
-
 
     void setLoads(EngngModel *myEngngModel, int d);
     void loadProblem();

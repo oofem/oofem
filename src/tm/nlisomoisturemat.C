@@ -128,7 +128,7 @@ NlIsoMoistureMaterial :: initializeFrom(InputRecord *ir)
 }
 
 double
-NlIsoMoistureMaterial :: giveMoistureCapacity(GaussPoint *gp, TimeStep *atTime)
+NlIsoMoistureMaterial :: giveMoistureCapacity(GaussPoint *gp, TimeStep *tStep)
 {
     double humidity = this->giveHumidity(gp, VM_Total);
 
@@ -160,7 +160,7 @@ NlIsoMoistureMaterial :: giveMoistureCapacity(GaussPoint *gp, TimeStep *atTime)
 }
 
 double
-NlIsoMoistureMaterial :: givePermeability(GaussPoint *gp, TimeStep *atTime)
+NlIsoMoistureMaterial :: givePermeability(GaussPoint *gp, TimeStep *tStep)
 {
     double permeability = 0.;
     double humidity = this->giveHumidity(gp, VM_Total);

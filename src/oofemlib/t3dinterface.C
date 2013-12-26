@@ -42,10 +42,10 @@
 
 namespace oofem {
 MesherInterface :: returnCode
-T3DInterface :: createMesh(TimeStep *stepN, int domainNumber, int domainSerNum, Domain **dNew)
+T3DInterface :: createMesh(TimeStep *tStep, int domainNumber, int domainSerNum, Domain **dNew)
 {
     * dNew = NULL;
-    if ( this->createInput(this->domain, stepN) ) {
+    if ( this->createInput(this->domain, tStep) ) {
         return MI_NEEDS_EXTERNAL_ACTION;
     } else {
         return MI_FAILED;
@@ -53,7 +53,7 @@ T3DInterface :: createMesh(TimeStep *stepN, int domainNumber, int domainSerNum, 
 }
 
 int
-T3DInterface :: createInput(Domain *d, TimeStep *stepN)
+T3DInterface :: createInput(Domain *d, TimeStep *tStep)
 {
     int nnodes = d->giveNumberOfDofManagers(), nelem = d->giveNumberOfElements();
     double density;
@@ -166,7 +166,7 @@ T3DInterface :: createInput(Domain *d, TimeStep *stepN)
 
     // loop over nodes
     for ( int i = 1; i <= nnodes; i++ ) {
-        density = d->giveErrorEstimator()->giveRemeshingCrit()->giveRequiredDofManDensity(i, stepN);
+        density = d->giveErrorEstimator()->giveRemeshingCrit()->giveRequiredDofManDensity(i, tStep);
         inode = d->giveNode(i);
         fprintf(outputStrem, "%d %e %e %e  %e\n", i, inode->giveCoordinate(1), inode->giveCoordinate(2), inode->giveCoordinate(3), density);
     }

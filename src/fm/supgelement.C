@@ -185,7 +185,7 @@ SUPGElement :: computeDeviatoricStress(FloatArray &answer, GaussPoint *gp, TimeS
 
 
 void
-SUPGElement :: computeBCLhsTerm_MB(FloatMatrix &answer, TimeStep *atTime)
+SUPGElement :: computeBCLhsTerm_MB(FloatMatrix &answer, TimeStep *tStep)
 {
     bcType boundarytype;
     int nLoads = 0;
@@ -203,10 +203,10 @@ SUPGElement :: computeBCLhsTerm_MB(FloatMatrix &answer, TimeStep *atTime)
             Load *load = domain->giveLoad(n);
             boundarytype = load->giveType();
             if ( boundarytype == SlipWithFriction ) {
-                this->computeSlipWithFrictionBCTerm_MB(helpMatrix, load, side, atTime);
+                this->computeSlipWithFrictionBCTerm_MB(helpMatrix, load, side, tStep);
                 answer.add(helpMatrix);
             } else if ( boundarytype == PenetrationWithResistance ) {
-                this->computePenetrationWithResistanceBCTerm_MB(helpMatrix, load, side, atTime);
+                this->computePenetrationWithResistanceBCTerm_MB(helpMatrix, load, side, tStep);
                 answer.add(helpMatrix);
             } else {
                 // _error("computeForceLoadVector : unsupported load type class");
@@ -222,7 +222,7 @@ SUPGElement :: computeBCLhsTerm_MB(FloatMatrix &answer, TimeStep *atTime)
             Load *load = domain->giveLoad( bodyLoadArray.at(i) );
             ltype = load->giveBCGeoType();
             if ( ( ltype == BodyLoadBGT ) && ( load->giveBCValType() == ReinforceBVT ) ) {
-                this->computeHomogenizedReinforceTerm_MB(helpMatrix, load, atTime);
+                this->computeHomogenizedReinforceTerm_MB(helpMatrix, load, tStep);
                 answer.add(helpMatrix);
             }
         }
@@ -230,7 +230,7 @@ SUPGElement :: computeBCLhsTerm_MB(FloatMatrix &answer, TimeStep *atTime)
 }
 
 void
-SUPGElement :: computeBCLhsPressureTerm_MB(FloatMatrix &answer, TimeStep *atTime)
+SUPGElement :: computeBCLhsPressureTerm_MB(FloatMatrix &answer, TimeStep *tStep)
 {
     bcType boundarytype;
     int nLoads = 0;
@@ -248,7 +248,7 @@ SUPGElement :: computeBCLhsPressureTerm_MB(FloatMatrix &answer, TimeStep *atTime
             Load *load = domain->giveLoad(n);
             boundarytype = load->giveType();
             if ( boundarytype == OutFlowBC ) {
-                this->computeOutFlowBCTerm_MB(helpMatrix, side, atTime);
+                this->computeOutFlowBCTerm_MB(helpMatrix, side, tStep);
                 answer.add(helpMatrix);
             } else {
                 //_warning("computeForceLoadVector : unsupported load type class");
@@ -258,7 +258,7 @@ SUPGElement :: computeBCLhsPressureTerm_MB(FloatMatrix &answer, TimeStep *atTime
 }
 
 void
-SUPGElement :: computeBCLhsPressureTerm_MC(FloatMatrix &answer, TimeStep *atTime)
+SUPGElement :: computeBCLhsPressureTerm_MC(FloatMatrix &answer, TimeStep *tStep)
 {
     int nLoads = 0;
     //bcType loadtype;
@@ -272,7 +272,7 @@ SUPGElement :: computeBCLhsPressureTerm_MC(FloatMatrix &answer, TimeStep *atTime
             Load *load  = domain->giveLoad( bodyLoadArray.at(i) );
             ltype = load->giveBCGeoType();
             if ( ( ltype == BodyLoadBGT ) && ( load->giveBCValType() == ReinforceBVT ) ) {
-                this->computeHomogenizedReinforceTerm_MC(helpMatrix, load, atTime);
+                this->computeHomogenizedReinforceTerm_MC(helpMatrix, load, tStep);
                 answer.add(helpMatrix);
             }
         }
@@ -313,7 +313,7 @@ SUPGElement :: checkConsistency()
 }
 
 void
-SUPGElement :: updateInternalState(TimeStep *stepN)
+SUPGElement :: updateInternalState(TimeStep *tStep)
 {
     IntegrationRule *iRule;
     FloatArray stress;
@@ -322,13 +322,13 @@ SUPGElement :: updateInternalState(TimeStep *stepN)
     for ( int i = 0; i < numberOfIntegrationRules; i++ ) {
         iRule = integrationRulesArray [ i ];
         for ( int j = 0; j < iRule->giveNumberOfIntegrationPoints(); j++ ) {
-            computeDeviatoricStress(stress, iRule->getIntegrationPoint(j), stepN);
+            computeDeviatoricStress(stress, iRule->getIntegrationPoint(j), tStep);
         }
     }
 }
 
 void
-SUPGElement :: printOutputAt(FILE *file, TimeStep *stepN)
+SUPGElement :: printOutputAt(FILE *file, TimeStep *tStep)
 // Performs end-of-step operations.
 {
 #ifdef __PARALLEL_MODE
@@ -338,7 +338,7 @@ SUPGElement :: printOutputAt(FILE *file, TimeStep *stepN)
 #endif
 
     for ( int i = 0; i < numberOfIntegrationRules; i++ ) {
-        integrationRulesArray [ i ]->printOutputAt(file, stepN);
+        integrationRulesArray [ i ]->printOutputAt(file, tStep);
     }
 }
 
@@ -346,7 +346,7 @@ SUPGElement :: printOutputAt(FILE *file, TimeStep *stepN)
 #ifdef __OOFEG
 int
 SUPGElement :: giveInternalStateAtNode(FloatArray &answer, InternalStateType type, InternalStateMode mode,
-                                       int node, TimeStep *atTime)
+                                       int node, TimeStep *tStep)
 {
     int indx = 1;
     Node *n = this->giveNode(node);
@@ -355,11 +355,11 @@ SUPGElement :: giveInternalStateAtNode(FloatArray &answer, InternalStateType typ
         answer.resize( this->giveSpatialDimension() );
         int dofindx;
         if ( ( dofindx = n->findDofWithDofId(V_u) ) ) {
-            answer.at(indx++) = n->giveDof(dofindx)->giveUnknown(VM_Total, atTime);
+            answer.at(indx++) = n->giveDof(dofindx)->giveUnknown(VM_Total, tStep);
         } else if ( ( dofindx = n->findDofWithDofId(V_v) ) ) {
-            answer.at(indx++) = n->giveDof(dofindx)->giveUnknown(VM_Total, atTime);
+            answer.at(indx++) = n->giveDof(dofindx)->giveUnknown(VM_Total, tStep);
         } else if ( ( dofindx = n->findDofWithDofId(V_w) ) ) {
-            answer.at(indx++) = n->giveDof(dofindx)->giveUnknown(VM_Total, atTime);
+            answer.at(indx++) = n->giveDof(dofindx)->giveUnknown(VM_Total, tStep);
         }
 
         return 1;
@@ -367,13 +367,13 @@ SUPGElement :: giveInternalStateAtNode(FloatArray &answer, InternalStateType typ
         int dofindx;
         if ( ( dofindx = n->findDofWithDofId(P_f) ) ) {
             answer.resize(1);
-            answer.at(1) = n->giveDof(dofindx)->giveUnknown(VM_Total, atTime);
+            answer.at(1) = n->giveDof(dofindx)->giveUnknown(VM_Total, tStep);
             return 1;
         } else {
             return 0;
         }
     } else {
-        return Element :: giveInternalStateAtNode(answer, type, mode, node, atTime);
+        return Element :: giveInternalStateAtNode(answer, type, mode, node, tStep);
     }
 }
 
@@ -382,10 +382,10 @@ SUPGElement :: giveInternalStateAtNode(FloatArray &answer, InternalStateType typ
 
 #if 0
 void
-SUPGElement :: computeVectorOfPrescribed(EquationID ut, ValueModeType type, TimeStep *stepN, FloatArray &answer)
+SUPGElement :: computeVectorOfPrescribed(EquationID ut, ValueModeType type, TimeStep *tStep, FloatArray &answer)
 {
     double scale;
-    Element :: computeVectorOfPrescribed(ut, type, stepN, answer);
+    Element :: computeVectorOfPrescribed(ut, type, tStep, answer);
     if ( domain->giveEngngModel()->giveEquationScalingFlag() ) {
         if ( ut == EID_MomentumBalance ) {
             scale = domain->giveEngngModel()->giveVariableScale(VST_Velocity);

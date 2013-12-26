@@ -94,7 +94,7 @@ TrPlanestressRotAllman :: computeLocalNodalCoordinates(FloatArray lxy [ 6 ])
 void
 TrPlanestressRotAllman :: computeNmatrixAt(const FloatArray &iLocCoord, FloatMatrix &answer)
 // Returns the displacement interpolation matrix {N} of the receiver, eva-
-// luated at aGaussPoint.
+// luated at gp.
 {
     FloatArray L(3), n(6), lxy [ 6 ];
     const FloatArray *lxyptr[] = {
@@ -124,9 +124,9 @@ TrPlanestressRotAllman :: computeNmatrixAt(const FloatArray &iLocCoord, FloatMat
 }
 
 void
-TrPlanestressRotAllman :: computeBmatrixAt(GaussPoint *aGaussPoint, FloatMatrix &answer, int li, int ui)
+TrPlanestressRotAllman :: computeBmatrixAt(GaussPoint *gp, FloatMatrix &answer, int li, int ui)
 // Returns the [3x12] strain-displacement matrix {B} of the receiver, eva-
-// luated at aGaussPoint.
+// luated at gp.
 {
     FloatMatrix dnx;
     FloatArray lxy [ 6 ];
@@ -135,7 +135,7 @@ TrPlanestressRotAllman :: computeBmatrixAt(GaussPoint *aGaussPoint, FloatMatrix 
     };
 
     this->computeLocalNodalCoordinates(lxy); // get ready for tranformation into 3d
-    this->qinterpolation.evaldNdx( dnx, * aGaussPoint->giveCoordinates(), FEIVertexListGeometryWrapper(6, lxyptr) );
+    this->qinterpolation.evaldNdx( dnx, * gp->giveCoordinates(), FEIVertexListGeometryWrapper(6, lxyptr) );
 
     answer.resize(3, 9);
     answer.zero();

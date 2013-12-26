@@ -178,11 +178,7 @@ void BSplineInterpolation :: evalN(FloatArray &answer, const FloatArray &lcoords
     FEIIGAElementGeometryWrapper *gw = ( FEIIGAElementGeometryWrapper * ) & cellgeo;
     IntArray span(nsd);
     int i, l, k, m, c = 1, count;
-#ifdef HAVE_VARIABLE_ARRAY_SIZE
-    FloatArray N [ nsd ];
-#else
-    FloatArray *N = new FloatArray [ nsd ];
-#endif
+    std :: vector< FloatArray > N(nsd);
 
 
     if ( gw->knotSpan ) {
@@ -221,10 +217,6 @@ void BSplineInterpolation :: evalN(FloatArray &answer, const FloatArray &lcoords
     } else {
         OOFEM_ERROR2("evalN not implemented for nsd = %d", nsd);
     }
-
-#ifndef HAVE_VARIABLE_ARRAY_SIZE
-    delete [] N;
-#endif
 }
 
 
@@ -236,11 +228,7 @@ double BSplineInterpolation :: evaldNdx(FloatMatrix &answer, const FloatArray &l
     IntArray span(nsd);
     double Jacob = 0.;
     int count, cnt, i, l, k, m, ind, indx, uind, vind, tind;
-#ifdef HAVE_VARIABLE_ARRAY_SIZE
-    FloatMatrix ders [ nsd ];
-#else
-    FloatMatrix *ders = new FloatMatrix [ nsd ];
-#endif
+    std :: vector< FloatMatrix > ders(nsd);
 
 
 
@@ -411,9 +399,6 @@ double BSplineInterpolation :: evaldNdx(FloatMatrix &answer, const FloatArray &l
         OOFEM_ERROR2("evaldNdx not implemented for nsd = %d", nsd);
     }
 
-#ifndef HAVE_VARIABLE_ARRAY_SIZE
-    delete [] ders;
-#endif
     return Jacob;
 }
 
@@ -425,11 +410,7 @@ void BSplineInterpolation :: local2global(FloatArray &answer, const FloatArray &
     const FloatArray *vertexCoordsPtr;
     IntArray span(nsd);
     int i, l, k, m, ind, indx, uind, vind, tind;
-#ifdef HAVE_VARIABLE_ARRAY_SIZE
-    FloatArray N [ nsd ];
-#else
-    FloatArray *N = new FloatArray [ nsd ];
-#endif
+    std :: vector< FloatArray > N(nsd);
 
 
     if ( gw->knotSpan ) {
@@ -510,9 +491,6 @@ void BSplineInterpolation :: local2global(FloatArray &answer, const FloatArray &
         OOFEM_ERROR2("local2global not implemented for nsd = %d", nsd);
     }
 
-#ifndef HAVE_VARIABLE_ARRAY_SIZE
-    delete [] N;
-#endif
 }
 
 
@@ -524,11 +502,7 @@ double BSplineInterpolation :: giveTransformationJacobian(const FloatArray &lcoo
     IntArray span(nsd);
     double Jacob;
     int i, l, k, m, indx, ind, uind, vind, tind;
-#ifdef HAVE_VARIABLE_ARRAY_SIZE
-    FloatMatrix ders [ nsd ];
-#else
-    FloatMatrix *ders = new FloatMatrix [ nsd ];
-#endif
+    std :: vector< FloatMatrix > ders(nsd);
 
 
     if ( gw->knotSpan ) {
@@ -646,9 +620,6 @@ double BSplineInterpolation :: giveTransformationJacobian(const FloatArray &lcoo
         OOFEM_ERROR("giveTransformationJacobian - zero Jacobian");
     }
 
-#ifndef HAVE_VARIABLE_ARRAY_SIZE
-    delete [] ders;
-#endif
     return Jacob;
 }
 
@@ -696,6 +667,7 @@ int BSplineInterpolation :: giveNumberOfKnotSpanBasisFunctions(const IntArray &k
 {
     int i, answer = 1;
     // there are always degree+1 nonzero basis functions on each knot span
+    ///@todo This loop seems meaningless. It just returns degree[nsd-1]+1 in the end ?
     for ( i = 0; i < nsd; i++ ) {
         answer *= ( degree [ i ] + 1 );
     }

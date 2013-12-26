@@ -263,12 +263,12 @@ public:
      * required values. If dof with requested physical meaning does not exist in receiver,
      * an error is generated and execution exits.
      * @param mode Mode of unknown (e.g, total value, velocity or acceleration of unknown).
-     * @param stepN Time step when unknown requested. See documentation of particular EngngModel
-     * class for valid stepN values (most implementation can return only values for current
+     * @param tStep Time step when unknown requested. See documentation of particular EngngModel
+     * class for valid tStep values (most implementation can return only values for current
      * and possibly for previous time step).
      * @see Dof::giveUnknown
      */
-    virtual void giveUnknownVector(FloatArray &answer, const IntArray &dofMask, ValueModeType mode, TimeStep *stepN);
+    virtual void giveUnknownVector(FloatArray &answer, const IntArray &dofMask, ValueModeType mode, TimeStep *tStep);
     /**
      * Assembles the vector of unknowns of given filed in global c.s for given dofs of receiver.
      * @param answer Result (in nodal cs.)
@@ -278,20 +278,20 @@ public:
      * an error is generated and execution exits.
      * @param field Primary field.
      * @param mode Mode of unknown (e.g, total value, velocity or acceleration of unknown).
-     * @param stepN Time step when unknown is requested. See documentation of particular EngngModel
-     * class for valid stepN values (most implementation can return only values for current
+     * @param tStep Time step when unknown is requested. See documentation of particular EngngModel
+     * class for valid tStep values (most implementation can return only values for current
      * and possibly for previous time step).
      * @see Dof::giveUnknown
      */
     virtual void giveUnknownVector(FloatArray &answer, const IntArray &dofMask,
-                                   PrimaryField &field, ValueModeType mode, TimeStep *stepN);
+                                   PrimaryField &field, ValueModeType mode, TimeStep *tStep);
     /**
      * Assembles the complete unknown vector in node. Does not transform and local->global coordinate systems.
      * @param answer Complete vector of all dof values in receiver.
      * @param mode Mode of unknowns.
-     * @param stepN Time step when unknown is requested.
+     * @param tStep Time step when unknown is requested.
      */
-    void giveCompleteUnknownVector(FloatArray &answer, ValueModeType mode, TimeStep *stepN);
+    void giveCompleteUnknownVector(FloatArray &answer, ValueModeType mode, TimeStep *tStep);
     /**
      * Constructs the requested vector by assembling e.g. [D_u, D_v, D_w] or [V_u, V_v, V_w].
      * If for example D_v or V_w doesn't exist, then zero value is inserted.
@@ -313,15 +313,15 @@ public:
      * required values. If dof with requested physical meaning does not exist in receiver,
      * an error is generated and execution exits.
      * @param mode Mode of unknown (e.g, total value, velocity or acceleration of unknown).
-     * @param stepN Time step when unknown requested. See documentation of particular EngngModel
-     * class for valid StepN values (most implementation can return only values for current
+     * @param tStep Time step when unknown requested. See documentation of particular EngngModel
+     * class for valid tStep values (most implementation can return only values for current
      * and possibly for previous time step).
      * @see Dof::giveBcValue
      * @see Dof::hasBc
      * @todo Remove all usage of this. Just ask for the unknown vector instead, they are the same.
      */
     virtual void givePrescribedUnknownVector(FloatArray &answer, const IntArray &dofMask,
-                                             ValueModeType mode, TimeStep *stepN);
+                                             ValueModeType mode, TimeStep *tStep);
     //@}
 
     /**@name Transformation functions
@@ -376,19 +376,19 @@ public:
     /**
      * Computes the load vector of receiver in given time.
      * @param answer Load vector.
-     * @param stepN Time step when answer is computed.
+     * @param tStep Time step when answer is computed.
      * @param mode Determines response mode.
      */
-    virtual void computeLoadVectorAt(FloatArray &answer, TimeStep *stepN, ValueModeType mode);
+    virtual void computeLoadVectorAt(FloatArray &answer, TimeStep *tStep, ValueModeType mode);
     /**
      * Computes the load vector for given load.
      * @param answer Load vector for given load.
      * @param load Given load.
      * @param type Characteristic type of the vector.
-     * @param stepN Time step when answer is computed.
+     * @param tStep Time step when answer is computed.
      * @param mode Determines response mode.
      */
-    virtual void computeLoadVector(FloatArray &answer, Load *load, CharType type, TimeStep *stepN, ValueModeType mode);
+    virtual void computeLoadVector(FloatArray &answer, Load *load, CharType type, TimeStep *tStep, ValueModeType mode);
     /**
      * Returns the array containing applied loadings of the receiver
      * @return Array with indices to the applied loads.
@@ -546,13 +546,13 @@ public:
      * Packs specific  DOF Manager's dofs unknowns into communication buffer.
      * @param buff Communication buffer to pack data.
      * @param mode Mode of unknown (e.g, total value, velocity or acceleration of unknown).
-     * @param stepN Time step when unknown requested. See documentation of particular EngngModel
-     * class for valid stepN values (most implementation can return only values for current
+     * @param tStep Time step when unknown requested. See documentation of particular EngngModel
+     * class for valid tStep values (most implementation can return only values for current
      * and possibly for previous time step).
      * @return Nonzero if successful
      * @todo Remove this? Is this function ever used? It looks like leftovers that could be removed. / Mikael
      */
-    int packDOFsUnknowns(CommunicationBuffer &buff, ValueModeType mode, TimeStep *stepN);
+    int packDOFsUnknowns(CommunicationBuffer &buff, ValueModeType mode, TimeStep *tStep);
     /**
      * Returns partition list of receiver.
      * @return Partition array.

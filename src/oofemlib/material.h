@@ -153,10 +153,10 @@ public:
      */
     double giveCastingTime() { return this->castingTime; }
     /**
-     * @param atTime Time step to check activity for.
+     * @param tStep Time step to check activity for.
      * @return True if material is activated for given solution step.
      */
-    bool isActivated(TimeStep *atTime) { if ( atTime ) { return ( atTime->giveIntrinsicTime() >= this->castingTime ); } else { return true; } }
+    bool isActivated(TimeStep *tStep) { if ( tStep ) { return ( tStep->giveIntrinsicTime() >= this->castingTime ); } else { return true; } }
 
     // identification and auxiliary functions
     /**
@@ -176,22 +176,22 @@ public:
     /**
      * Sets the value of a certain variable at a given integration point to the given value.
      * @param value Contains the value(s) to be set (in reduced form).
-     * @param aGaussPoint Integration point.
+     * @param gp Integration point.
      * @param type Determines the type of internal variable.
      * @param type Determines the type of internal variable.
      * @returns Nonzero if ok, zero if var not supported.
      */
-    virtual int setIPValue(const FloatArray &value, GaussPoint *aGaussPoint, InternalStateType type)
+    virtual int setIPValue(const FloatArray &value, GaussPoint *gp, InternalStateType type)
     { return 0; }
     /**
      * Returns the integration point corresponding value in Reduced form.
      * @param answer Contain corresponding ip value, zero sized if not available.
-     * @param aGaussPoint Integration point to which the value refers.
+     * @param gp Integration point to which the value refers.
      * @param type Determines the type of internal variable.
-     * @param atTime Determines the time step.
+     * @param tStep Determines the time step.
      * @returns Nonzero if the assignment can be done, zero if this type of variable is not supported.
      */
-    virtual int giveIPValue(FloatArray &answer, GaussPoint *aGaussPoint, InternalStateType type, TimeStep *atTime);
+    virtual int giveIPValue(FloatArray &answer, GaussPoint *gp, InternalStateType type, TimeStep *tStep);
     //@}
 
     virtual IRResultType initializeFrom(InputRecord *ir);
@@ -261,20 +261,20 @@ public:
      * no data are exchanged. For "nonlocal" constitutive models the send/receive of local values which
      * undergo averaging is performed between local and corresponding remote elements.
      * @param buff Communication buffer.
-     * @param stepN Solution step.
+     * @param tStep Solution step.
      * @param ip Integration point.
      */
-    virtual int packUnknowns(CommunicationBuffer &buff, TimeStep *stepN, GaussPoint *ip)
+    virtual int packUnknowns(CommunicationBuffer &buff, TimeStep *tStep, GaussPoint *ip)
     { return 1; }
     /**
      * Unpack and updates all necessary data of given integration point (according to element parallel_mode)
      * into given communication buffer.
      * @see packUnknowns service.
      * @param buff Communication buffer.
-     * @param stepN Solution step.
+     * @param tStep Solution step.
      * @param ip Integration point.
      */
-    virtual int unpackAndUpdateUnknowns(CommunicationBuffer &buff, TimeStep *stepN, GaussPoint *ip)
+    virtual int unpackAndUpdateUnknowns(CommunicationBuffer &buff, TimeStep *tStep, GaussPoint *ip)
     { return 1; }
     /**
      * Estimates the necessary pack size to hold all packed data of receiver.

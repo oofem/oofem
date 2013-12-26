@@ -81,7 +81,7 @@ Quad1Mindlin :: computeGaussPoints()
 
 
 void
-Quad1Mindlin :: computeBodyLoadVectorAt(FloatArray &answer, Load *forLoad, TimeStep *stepN, ValueModeType mode)
+Quad1Mindlin :: computeBodyLoadVectorAt(FloatArray &answer, Load *forLoad, TimeStep *tStep, ValueModeType mode)
 {
     // Only gravity load
     double dV, load;
@@ -93,7 +93,7 @@ Quad1Mindlin :: computeBodyLoadVectorAt(FloatArray &answer, Load *forLoad, TimeS
     }
 
     // note: force is assumed to be in global coordinate system.
-    forLoad->computeComponentArrayAt(gravity, stepN, mode);
+    forLoad->computeComponentArrayAt(gravity, tStep, mode);
 
     force.resize(0);
     if ( gravity.giveSize() ) {
@@ -151,9 +151,9 @@ Quad1Mindlin :: computeBmatrixAt(GaussPoint *gp, FloatMatrix &answer, int li, in
 
 
 void
-Quad1Mindlin :: computeStressVector(FloatArray &answer, const FloatArray &strain, GaussPoint *gp, TimeStep *stepN)
+Quad1Mindlin :: computeStressVector(FloatArray &answer, const FloatArray &strain, GaussPoint *gp, TimeStep *tStep)
 {
-    this->giveStructuralCrossSection()->giveRealStress_Plate(answer, gp, strain, stepN);
+    this->giveStructuralCrossSection()->giveRealStress_Plate(answer, gp, strain, tStep);
 }
 
 
@@ -234,7 +234,7 @@ Quad1Mindlin :: computeLumpedMassMatrix(FloatMatrix &answer, TimeStep *tStep)
 
 
 int
-Quad1Mindlin :: giveIPValue(FloatArray &answer, GaussPoint *gp, InternalStateType type, TimeStep *atTime)
+Quad1Mindlin :: giveIPValue(FloatArray &answer, GaussPoint *gp, InternalStateType type, TimeStep *tStep)
 {
     if ( type == IST_ShellForceMomentumTensor ) {
         answer = static_cast< StructuralMaterialStatus * >( gp->giveMaterialStatus() )->giveStressVector();
@@ -243,7 +243,7 @@ Quad1Mindlin :: giveIPValue(FloatArray &answer, GaussPoint *gp, InternalStateTyp
         answer = static_cast< StructuralMaterialStatus * >( gp->giveMaterialStatus() )->giveStrainVector();
         return 1;
     } else {
-        return NLStructuralElement :: giveIPValue(answer, gp, type, atTime);
+        return NLStructuralElement :: giveIPValue(answer, gp, type, tStep);
     }
 }
 

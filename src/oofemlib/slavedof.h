@@ -74,8 +74,8 @@ public:
     void initialize(int cntOfMstrDfMngr, const IntArray &masterNodes, const IntArray *mstrDofID, const FloatArray &mstrContribution);
     virtual int giveNumberOfPrimaryMasterDofs();
     virtual void giveMasterDofManArray(IntArray &answer);
-    virtual void giveUnknowns(FloatArray &masterUnknowns, ValueModeType mode, TimeStep *stepN);
-    virtual void giveUnknowns(FloatArray &masterUnknowns, PrimaryField &field, ValueModeType mode, TimeStep *stepN);
+    virtual void giveUnknowns(FloatArray &masterUnknowns, ValueModeType mode, TimeStep *tStep);
+    virtual void giveUnknowns(FloatArray &masterUnknowns, PrimaryField &field, ValueModeType mode, TimeStep *tStep);
     virtual void computeDofTransformation(FloatArray &primaryMasterContribs);
     virtual void giveEquationNumbers(IntArray &masterEqNumbers, const UnknownNumberingScheme &s);
     virtual void giveDofIDs(IntArray &masterDofIDs);
@@ -91,8 +91,8 @@ public:
      * standard method for unknown query returns the corresponding master DOF value.
      * @see MasterDof::giveUnknown
      */
-    virtual double giveUnknown(ValueModeType mode, TimeStep *stepN);
-    virtual double giveUnknown(PrimaryField &field, ValueModeType mode, TimeStep *stepN);
+    virtual double giveUnknown(ValueModeType mode, TimeStep *tStep);
+    virtual double giveUnknown(PrimaryField &field, ValueModeType mode, TimeStep *tStep);
 
     /**
      * Returns equation number corresponding to receiver.

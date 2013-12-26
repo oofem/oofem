@@ -373,7 +373,7 @@ LargeStrainMasterMaterial :: constructL1L2TransformationMatrices(FloatMatrix &an
 }
 
 void
-LargeStrainMasterMaterial :: give3dMaterialStiffnessMatrix(FloatMatrix &answer, MatResponseMode mode, GaussPoint *gp, TimeStep *atTime)
+LargeStrainMasterMaterial :: give3dMaterialStiffnessMatrix(FloatMatrix &answer, MatResponseMode mode, GaussPoint *gp, TimeStep *tStep)
 {
     LargeStrainMasterMaterialStatus *status = static_cast< LargeStrainMasterMaterialStatus * >( this->giveStatus(gp) );
     Material *mat;
@@ -390,7 +390,7 @@ LargeStrainMasterMaterial :: give3dMaterialStiffnessMatrix(FloatMatrix &answer, 
             return;
         }
 
-        sMat->give3dMaterialStiffnessMatrix(answer, mode, gp, atTime);
+        sMat->give3dMaterialStiffnessMatrix(answer, mode, gp, tStep);
     } else {
         mat = domain->giveMaterial(slaveMat);
         sMat = dynamic_cast< StructuralMaterial * >( mat );
@@ -399,7 +399,7 @@ LargeStrainMasterMaterial :: give3dMaterialStiffnessMatrix(FloatMatrix &answer, 
             return;
         }
 
-        sMat->give3dMaterialStiffnessMatrix(stiffness, mode, gp, atTime);
+        sMat->give3dMaterialStiffnessMatrix(stiffness, mode, gp, tStep);
         FloatMatrix P, TL, F, junk;
         FloatArray stress;
         stress =   status->giveTempStressVector();
@@ -450,9 +450,9 @@ LargeStrainMasterMaterial :: give3dMaterialStiffnessMatrix(FloatMatrix &answer, 
 
 
 int
-LargeStrainMasterMaterial :: giveIPValue(FloatArray &answer, GaussPoint *aGaussPoint, InternalStateType type, TimeStep *atTime)
+LargeStrainMasterMaterial :: giveIPValue(FloatArray &answer, GaussPoint *gp, InternalStateType type, TimeStep *tStep)
 {
-    LargeStrainMasterMaterialStatus *status = static_cast< LargeStrainMasterMaterialStatus * >( this->giveStatus(aGaussPoint) );
+    LargeStrainMasterMaterialStatus *status = static_cast< LargeStrainMasterMaterialStatus * >( this->giveStatus(gp) );
 
     if ( type == IST_StressTensor ) {
         answer = status->giveStressVector();
@@ -470,7 +470,7 @@ LargeStrainMasterMaterial :: giveIPValue(FloatArray &answer, GaussPoint *aGaussP
             return 0;
         }
 
-        int result = sMat->giveIPValue(answer, aGaussPoint, type, atTime);
+        int result = sMat->giveIPValue(answer, gp, type, tStep);
         return result;
     }
 }
@@ -521,15 +521,15 @@ void LargeStrainMasterMaterialStatus :: initTempStatus()
 
 // updates internal variables when equilibrium is reached
 void
-LargeStrainMasterMaterialStatus :: updateYourself(TimeStep *atTime)
+LargeStrainMasterMaterialStatus :: updateYourself(TimeStep *tStep)
 {
     Material *mat;
     StructuralMaterial *sMat;
     mat = domain->giveMaterial(slaveMat);
     sMat = static_cast< StructuralMaterial * >( mat );
     MaterialStatus *mS = sMat->giveStatus(gp);
-    mS->updateYourself(atTime);
-    //  StructuralMaterialStatus :: updateYourself(atTime);
+    mS->updateYourself(tStep);
+    //  StructuralMaterialStatus :: updateYourself(tStep);
 }
 
 

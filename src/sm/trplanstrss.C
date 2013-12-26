@@ -189,7 +189,7 @@ TrPlaneStress2d :: computeBmatrixAt(GaussPoint *gp, FloatMatrix &answer,
 void
 TrPlaneStress2d :: computeBHmatrixAt(GaussPoint *gp, FloatMatrix &answer)
 // Returns the [4x6] displacement gradient matrix {BH} of the receiver,
-// evaluated at aGaussPoint.
+// evaluated at gp.
 // @todo not checked if correct
 {
     FloatMatrix dnx;
@@ -856,7 +856,7 @@ TrPlaneStress2d :: DirectErrorIndicatorRCI_giveCharacteristicSize()
 
 int
 TrPlaneStress2d :: EIPrimaryUnknownMI_computePrimaryUnknownVectorAt(ValueModeType mode,
-                                                                    TimeStep *stepN, const FloatArray &coords,
+                                                                    TimeStep *tStep, const FloatArray &coords,
                                                                     FloatArray &answer)
 {
     FloatArray lcoords, u;
@@ -876,7 +876,7 @@ TrPlaneStress2d :: EIPrimaryUnknownMI_computePrimaryUnknownVectorAt(ValueModeTyp
     n.at(2, 4) = lcoords.at(2);
     n.at(2, 6) = lcoords.at(3);
 
-    this->computeVectorOf(EID_MomentumBalance, mode, stepN, u);
+    this->computeVectorOf(EID_MomentumBalance, mode, tStep, u);
     answer.beProductOf(n, u);
 
     return result;

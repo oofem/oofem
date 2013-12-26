@@ -117,11 +117,11 @@ IntegrationRule :: getIntegrationPoint(int i)
 }
 
 void
-IntegrationRule :: printOutputAt(FILE *file, TimeStep *stepN)
+IntegrationRule :: printOutputAt(FILE *file, TimeStep *tStep)
 // Performs end-of-step operations.
 {
     for ( int i = 0; i < numberOfIntegrationPoints; i++ ) {
-        gaussPointArray [ i ]->printOutputAt(file, stepN);
+        gaussPointArray [ i ]->printOutputAt(file, tStep);
     }
 }
 
@@ -339,8 +339,8 @@ IntegrationRule :: setUpIntegrationPoints(integrationDomain mode, int nPoints,
 
     case _Wedge:
         // Limited wrapper for now;
-        if ( nPoints == 2 ) {
-            numberOfIntegrationPoints = this->SetUpPointsOnWedge(1, 2, matMode);
+        if ( nPoints == 6 ) {
+            numberOfIntegrationPoints = this->SetUpPointsOnWedge(3, 2, matMode);
         } else {
             numberOfIntegrationPoints = this->SetUpPointsOnWedge(3, 3, matMode);
         }

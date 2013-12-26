@@ -75,7 +75,7 @@ MisesMatNl :: ~MisesMatNl()
 
 void
 MisesMatNl :: giveRealStressVector(FloatArray &answer, GaussPoint *gp,
-                                   const FloatArray &totalStrain, TimeStep *atTime)
+                                   const FloatArray &totalStrain, TimeStep *tStep)
 {
     MisesMatNlStatus *nlStatus = static_cast< MisesMatNlStatus * >( this->giveStatus(gp) );
     this->initGpForNewStep(gp);
@@ -83,7 +83,7 @@ MisesMatNl :: giveRealStressVector(FloatArray &answer, GaussPoint *gp,
     double tempDam;
     FloatArray tempEffStress, totalStress;
     performPlasticityReturn(gp, totalStrain);
-    tempDam = this->computeDamage(gp, atTime);
+    tempDam = this->computeDamage(gp, tStep);
     nlStatus->giveTempEffectiveStress(tempEffStress);
     answer.beScaled(1.0 - tempDam, tempEffStress);
     nlStatus->setTempDamage(tempDam);
@@ -93,7 +93,7 @@ MisesMatNl :: giveRealStressVector(FloatArray &answer, GaussPoint *gp,
 
 
 void
-MisesMatNl :: give1dStressStiffMtrx(FloatMatrix &answer, MatResponseMode mode, GaussPoint *gp, TimeStep *atTime)
+MisesMatNl :: give1dStressStiffMtrx(FloatMatrix &answer, MatResponseMode mode, GaussPoint *gp, TimeStep *tStep)
 {
     answer.resize(1, 1);
     answer.zero();
@@ -120,14 +120,14 @@ MisesMatNl :: give1dStressStiffMtrx(FloatMatrix &answer, MatResponseMode mode, G
     double stress = stressVector.at(1);
     answer.at(1, 1) = ( 1. - tempDamage ) * E * H / ( E + H );
     if ( tempDamage > damage ) {
-        this->computeCumPlasticStrain(nlKappa, gp, atTime);
+        this->computeCumPlasticStrain(nlKappa, gp, tStep);
         answer.at(1, 1) = answer.at(1, 1) - ( 1 - mm ) * computeDamageParamPrime(nlKappa) * E / ( E + H ) * stress * sgn(stress);
     }
 }
 
 
 void
-MisesMatNl :: updateBeforeNonlocAverage(const FloatArray &strainVector, GaussPoint *gp, TimeStep *atTime)
+MisesMatNl :: updateBeforeNonlocAverage(const FloatArray &strainVector, GaussPoint *gp, TimeStep *tStep)
 {
     /* Implements the service updating local variables in given integration points,
      * which take part in nonlocal average process. Actually, no update is necessary,
@@ -142,7 +142,7 @@ MisesMatNl :: updateBeforeNonlocAverage(const FloatArray &strainVector, GaussPoi
     this->initTempStatus(gp);
     this->initGpForNewStep(gp);
     this->performPlasticityReturn(gp, strainVector);
-    this->computeLocalCumPlasticStrain(cumPlasticStrain, gp, atTime);
+    this->computeLocalCumPlasticStrain(cumPlasticStrain, gp, tStep);
     // standard formulation based on averaging of equivalent strain
     nlstatus->setLocalCumPlasticStrainForAverage(cumPlasticStrain);
 
@@ -252,13 +252,13 @@ MisesMatNl :: computeDistanceModifier(double damage)
 }
 
 void
-MisesMatNl :: computeCumPlasticStrain(double &kappa, GaussPoint *gp, TimeStep *atTime)
+MisesMatNl :: computeCumPlasticStrain(double &kappa, GaussPoint *gp, TimeStep *tStep)
 {
     double nonlocalContribution, nonlocalCumPlasticStrain = 0.0;
     MisesMatNlStatus *nonlocStatus, *status = static_cast< MisesMatNlStatus * >( this->giveStatus(gp) );
 
     this->buildNonlocalPointTable(gp);
-    this->updateDomainBeforeNonlocAverage(atTime);
+    this->updateDomainBeforeNonlocAverage(tStep);
     double localCumPlasticStrain = status->giveLocalCumPlasticStrainForAverage();
     // compute nonlocal cumulative plastic strain
     std :: list< localIntegrationRecord > *list = this->giveIPIntegrationList(gp);
@@ -351,11 +351,11 @@ MisesMatNl :: giveInputRecord(DynamicInputRecord &input)
 
 
 double
-MisesMatNl :: computeDamage(GaussPoint *gp, TimeStep *atTime)
+MisesMatNl :: computeDamage(GaussPoint *gp, TimeStep *tStep)
 {
     MisesMatNlStatus *nlStatus = static_cast< MisesMatNlStatus * >( this->giveStatus(gp) );
     double nlKappa;
-    this->computeCumPlasticStrain(nlKappa, gp, atTime);
+    this->computeCumPlasticStrain(nlKappa, gp, tStep);
     double dam, tempDam;
     dam = nlStatus->giveDamage();
     tempDam = this->computeDamageParam(nlKappa);
@@ -369,7 +369,7 @@ MisesMatNl :: computeDamage(GaussPoint *gp, TimeStep *atTime)
 
 void
 MisesMatNl :: NonlocalMaterialStiffnessInterface_addIPContribution(SparseMtrx &dest, const UnknownNumberingScheme &s,
-                                                                   GaussPoint *gp, TimeStep *atTime)
+                                                                   GaussPoint *gp, TimeStep *tStep)
 {
     double coeff;
     MisesMatNlStatus *status = static_cast< MisesMatNlStatus * >( this->giveStatus(gp) );
@@ -381,14 +381,14 @@ MisesMatNl :: NonlocalMaterialStiffnessInterface_addIPContribution(SparseMtrx &d
 
     FloatMatrix contrib;
 
-    if ( this->giveLocalNonlocalStiffnessContribution(gp, loc, s, lcontrib, atTime) == 0 ) {
+    if ( this->giveLocalNonlocalStiffnessContribution(gp, loc, s, lcontrib, tStep) == 0 ) {
         return;
     }
 
     for ( pos = list->begin(); pos != list->end(); ++pos ) {
         rmat = dynamic_cast< MisesMatNl * >( pos->nearGp->giveMaterial() );
         if ( rmat ) {
-            rmat->giveRemoteNonlocalStiffnessContribution(pos->nearGp, rloc, s, rcontrib, atTime);
+            rmat->giveRemoteNonlocalStiffnessContribution(pos->nearGp, rloc, s, rcontrib, tStep);
             coeff = gp->giveElement()->computeVolumeAround(gp) * pos->weight / status->giveIntegrationScale();
 
             int i, j, dim1 = loc.giveSize(), dim2 = rloc.giveSize();
@@ -416,7 +416,7 @@ MisesMatNl :: NonlocalMaterialStiffnessInterface_giveIntegrationDomainList(Gauss
 
 int
 MisesMatNl :: giveLocalNonlocalStiffnessContribution(GaussPoint *gp, IntArray &loc, const UnknownNumberingScheme &s,
-                                                     FloatArray &lcontrib, TimeStep *atTime)
+                                                     FloatArray &lcontrib, TimeStep *tStep)
 {
     int nrows, nsize, i, j;
     double sum, nlKappa, damage, tempDamage, dDamF;
@@ -425,7 +425,7 @@ MisesMatNl :: giveLocalNonlocalStiffnessContribution(GaussPoint *gp, IntArray &l
     FloatMatrix b;
     FloatArray stress;
 
-    this->computeCumPlasticStrain(nlKappa, gp, atTime);
+    this->computeCumPlasticStrain(nlKappa, gp, tStep);
     damage = status->giveDamage();
     tempDamage = status->giveTempDamage();
     if ( ( tempDamage - damage ) > 0 ) {
@@ -453,7 +453,7 @@ MisesMatNl :: giveLocalNonlocalStiffnessContribution(GaussPoint *gp, IntArray &l
 
 void
 MisesMatNl :: giveRemoteNonlocalStiffnessContribution(GaussPoint *gp, IntArray &rloc, const UnknownNumberingScheme &s,
-                                                      FloatArray &rcontrib, TimeStep *atTime)
+                                                      FloatArray &rcontrib, TimeStep *tStep)
 {
     int ncols, nsize, i, j;
     double sum, kappa, tempKappa;
@@ -526,14 +526,14 @@ MisesMatNlStatus :: initTempStatus()
 
 
 void
-MisesMatNlStatus :: updateYourself(TimeStep *atTime)
+MisesMatNlStatus :: updateYourself(TimeStep *tStep)
 //
 // updates variables (nonTemp variables describing situation at previous equilibrium state)
 // after a new equilibrium state has been reached
 // temporary variables are having values corresponding to newly reched equilibrium.
 //
 {
-    MisesMatStatus :: updateYourself(atTime);
+    MisesMatStatus :: updateYourself(tStep);
 }
 
 
@@ -587,19 +587,19 @@ MisesMatNlStatus :: giveInterface(InterfaceType type)
 
 #ifdef __PARALLEL_MODE
 int
-MisesMatNl :: packUnknowns(CommunicationBuffer &buff, TimeStep *stepN, GaussPoint *ip)
+MisesMatNl :: packUnknowns(CommunicationBuffer &buff, TimeStep *tStep, GaussPoint *ip)
 {
     MisesMatNlStatus *nlStatus = static_cast< MisesMatNlStatus * >( this->giveStatus(ip) );
 
     this->buildNonlocalPointTable(ip);
-    this->updateDomainBeforeNonlocAverage(stepN);
+    this->updateDomainBeforeNonlocAverage(tStep);
 
     return buff.packDouble( nlStatus->giveLocalCumPlasticStrainForAverage() );
 }
 
 
 int
-MisesMatNl :: unpackAndUpdateUnknowns(CommunicationBuffer &buff, TimeStep *stepN, GaussPoint *ip)
+MisesMatNl :: unpackAndUpdateUnknowns(CommunicationBuffer &buff, TimeStep *tStep, GaussPoint *ip)
 {
     int result;
     MisesMatNlStatus *nlStatus = static_cast< MisesMatNlStatus * >( this->giveStatus(ip) );

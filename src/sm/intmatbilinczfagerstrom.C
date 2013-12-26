@@ -512,15 +512,15 @@ IntMatBilinearCZFagerstrom :: give3dStiffnessMatrix_dTdj_num(FloatMatrix &answer
 
 
 int
-IntMatBilinearCZFagerstrom :: giveIPValue(FloatArray &answer, GaussPoint *aGaussPoint, InternalStateType type, TimeStep *atTime)
+IntMatBilinearCZFagerstrom :: giveIPValue(FloatArray &answer, GaussPoint *gp, InternalStateType type, TimeStep *tStep)
 {
-    IntMatBilinearCZFagerstromStatus *status = static_cast< IntMatBilinearCZFagerstromStatus * >( this->giveStatus(aGaussPoint) );
+    IntMatBilinearCZFagerstromStatus *status = static_cast< IntMatBilinearCZFagerstromStatus * >( this->giveStatus(gp) );
     if ( type == IST_DamageScalar ) {
         answer.resize(1);
         answer.at(1) = status->giveTempDamage();
         return 1;
     } else {
-        return StructuralInterfaceMaterial :: giveIPValue(answer, aGaussPoint, type, atTime);
+        return StructuralInterfaceMaterial :: giveIPValue(answer, gp, type, tStep);
     }
 }
 
@@ -705,10 +705,10 @@ IntMatBilinearCZFagerstromStatus :: initTempStatus()
 }
 
 void
-IntMatBilinearCZFagerstromStatus :: updateYourself(TimeStep *atTime)
+IntMatBilinearCZFagerstromStatus :: updateYourself(TimeStep *tStep)
 {
     ///@todo Martin: kolla behovet av denna
-    StructuralInterfaceMaterialStatus :: updateYourself(atTime);
+    StructuralInterfaceMaterialStatus :: updateYourself(tStep);
     damage = tempDamage;
     oldMaterialJump = tempMaterialJump;
     QEffective = tempQEffective;

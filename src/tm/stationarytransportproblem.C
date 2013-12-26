@@ -223,10 +223,10 @@ void StationaryTransportProblem :: solveYourselfAt(TimeStep *tStep)
 }
 
 void
-StationaryTransportProblem :: updateYourself(TimeStep *stepN)
+StationaryTransportProblem :: updateYourself(TimeStep *tStep)
 {
-    this->updateInternalState(stepN);
-    EngngModel :: updateYourself(stepN);
+    this->updateInternalState(tStep);
+    EngngModel :: updateYourself(tStep);
 }
 
 void
@@ -305,7 +305,7 @@ StationaryTransportProblem :: restoreContext(DataStream *stream, ContextMode mod
     int istep, iversion;
     FILE *file;
 
-    this->resolveCorrespondingStepNumber(istep, iversion, obj);
+    this->resolveCorrespondingtStepumber(istep, iversion, obj);
 
     if ( stream == NULL ) {
         if ( !this->giveContextFile(& file, istep, iversion, contextMode_read) ) {
@@ -365,21 +365,21 @@ StationaryTransportProblem :: updateDomainLinks()
 
 
 void
-StationaryTransportProblem :: printDofOutputAt(FILE *stream, Dof *iDof, TimeStep *atTime)
+StationaryTransportProblem :: printDofOutputAt(FILE *stream, Dof *iDof, TimeStep *tStep)
 {
-    iDof->printSingleOutputAt(stream, atTime, 'f', VM_Total);
+    iDof->printSingleOutputAt(stream, tStep, 'f', VM_Total);
 }
 
 
 void
-StationaryTransportProblem :: updateInternalState(TimeStep *stepN)
+StationaryTransportProblem :: updateInternalState(TimeStep *tStep)
 {
     ///@todo Remove this, unnecessary with solving as a nonlinear problem (left for now, since nonstationary problems might still need it)
     for ( int idomain = 1; idomain <= this->giveNumberOfDomains(); idomain++ ) {
         Domain *domain = this->giveDomain(idomain);
         int nelem = domain->giveNumberOfElements();
         for ( int j = 1; j <= nelem; j++ ) {
-            domain->giveElement(j)->updateInternalState(stepN);
+            domain->giveElement(j)->updateInternalState(tStep);
         }
     }
 }

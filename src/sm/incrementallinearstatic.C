@@ -135,7 +135,7 @@ double IncrementalLinearStatic :: giveDiscreteTime(int iStep)
 TimeStep *IncrementalLinearStatic :: giveNextStep()
 {
     int istep = this->giveNumberOfFirstStep();
-    int mstepNum = 1;
+    int mtStepum = 1;
     double dt = this->giveDiscreteTime(istep);
     StateCounterType counter = 1;
 
@@ -153,7 +153,7 @@ TimeStep *IncrementalLinearStatic :: giveNextStep()
     if ( previousStep == NULL ) {
         previousStep = new TimeStep(giveNumberOfTimeStepWhenIcApply(), this, 0, -dt, dt, 0);
     }
-    currentStep = new TimeStep(istep, this, mstepNum, this->giveDiscreteTime(istep), dt, counter);
+    currentStep = new TimeStep(istep, this, mtStepum, this->giveDiscreteTime(istep), dt, counter);
     return currentStep;
 }
 
@@ -286,9 +286,9 @@ double IncrementalLinearStatic :: giveUnknownComponent(ValueModeType mode, TimeS
 }
 
 
-int IncrementalLinearStatic :: giveUnknownDictHashIndx(ValueModeType mode, TimeStep *stepN)
+int IncrementalLinearStatic :: giveUnknownDictHashIndx(ValueModeType mode, TimeStep *tStep)
 {
-    return ( int ) stepN->giveNumber() % 2;
+    return ( int ) tStep->giveNumber() % 2;
 }
 
 
@@ -321,9 +321,9 @@ void IncrementalLinearStatic :: updateDofUnknownsDictionary(DofManager *inode, T
 }
 
 
-void IncrementalLinearStatic :: printDofOutputAt(FILE *stream, Dof *iDof, TimeStep *atTime)
+void IncrementalLinearStatic :: printDofOutputAt(FILE *stream, Dof *iDof, TimeStep *tStep)
 {
-    iDof->printSingleOutputAt(stream, atTime, 'd', VM_Total);
+    iDof->printSingleOutputAt(stream, tStep, 'd', VM_Total);
 }
 
 
@@ -370,7 +370,7 @@ contextIOResultType IncrementalLinearStatic :: restoreContext(DataStream *stream
     int closeFlag = 0, istep, iversion;
     contextIOResultType iores;
     FILE *file = NULL;
-    this->resolveCorrespondingStepNumber(istep, iversion, obj);
+    this->resolveCorrespondingtStepumber(istep, iversion, obj);
     if ( stream == NULL ) {
         if ( !this->giveContextFile(& file, istep, iversion, contextMode_read) ) {
             THROW_CIOERR(CIO_IOERR);

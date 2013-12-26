@@ -142,19 +142,19 @@ public:
     virtual void  giveCharacteristicMatrix(FloatMatrix &answer,
                                            MatResponseMode mode,
                                            GaussPoint *gp,
-                                           TimeStep *atTime) {; }
+                                           TimeStep *tStep) {; }
 
     virtual double  giveCharacteristicValue(MatResponseMode mode,
                                             GaussPoint *gp,
-                                            TimeStep *atTime);
+                                            TimeStep *tStep);
 
     /**
      * Computes the conductivity.
      * @param suction Capillary stress
      * @param gp Integration point.
-     * @param stepN Time step.
+     * @param tStep Time step.
      */
-    double computeConductivity(double suction, GaussPoint *gp, TimeStep *stepN);
+    double computeConductivity(double suction, GaussPoint *gp, TimeStep *tStep);
 
     /**
      * Computes the capacity.

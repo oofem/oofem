@@ -72,9 +72,9 @@ void MicroMaterialStatus :: initTempStatus()
     StructuralMaterialStatus :: initTempStatus();
 }
 
-void MicroMaterialStatus :: updateYourself(TimeStep *atTime)
+void MicroMaterialStatus :: updateYourself(TimeStep *tStep)
 {
-    StructuralMaterialStatus :: updateYourself(atTime);
+    StructuralMaterialStatus :: updateYourself(tStep);
 }
 
 void MicroMaterialStatus :: printOutputAt(FILE *file, TimeStep *tStep)
@@ -165,7 +165,7 @@ IRResultType MicroMaterial :: initializeFrom(InputRecord *ir)
 
 //original pure virtual function has to be declared here
 //this function should not be used, internal forces are calculated based on reactions not stresses in GPs
-void MicroMaterial :: giveRealStressVector(FloatArray &answer, GaussPoint *gp, const FloatArray &totalStrain, TimeStep *atTime)
+void MicroMaterial :: giveRealStressVector(FloatArray &answer, GaussPoint *gp, const FloatArray &totalStrain, TimeStep *tStep)
 {
     //perform average over microproblem
     //     int index;
@@ -187,7 +187,7 @@ void MicroMaterial :: giveRealStressVector(FloatArray &answer, GaussPoint *gp, c
     //     //need to update stress so change boundary conditions and recalculate
     //     OOFEM_LOG_INFO( "\n*** giveRealStress microproblem %p on macroElement %d GP %d, step %d, time %f\n", this, this->macroLSpaceElement->giveNumber(), gp->giveNumber(), microEngngModel->giveCurrentStep()->giveNumber(), microEngngModel->giveCurrentStep()->giveTime() );
     //
-    //     this->macroLSpaceElement->changeMicroBoundaryConditions(atTime);
+    //     this->macroLSpaceElement->changeMicroBoundaryConditions(tStep);
     //     microEngngModel->solveYourselfAt( microEngngModel->giveCurrentStep() );
     //     microEngngModel->terminate( microEngngModel->giveCurrentStep() );
     //     OOFEM_LOG_INFO("\n*** giveRealStress microproblem %p done\n", this);
@@ -203,8 +203,8 @@ void MicroMaterial :: giveRealStressVector(FloatArray &answer, GaussPoint *gp, c
     //             //OOFEM_LOG_INFO("Element %d GP %d Vol %f\n", elem->giveNumber(), gp->giveNumber(), dV);
     //             //fprintf(this->stream, "Element %d GP %d stress %f\n", elem->giveNumber(), gp->giveNumber(), 0.0);
     //             //((StructuralCrossSection*) gp->giveCrossSection())->giveFullCharacteristicVector(helpVec, gp, strainVector);
-    //             elem->giveIPValue(VecStrain, gpL, IST_StrainTensor, atTime);
-    //             elem->giveIPValue(VecStress, gpL, IST_StressTensor, atTime);
+    //             elem->giveIPValue(VecStrain, gpL, IST_StrainTensor, tStep);
+    //             elem->giveIPValue(VecStress, gpL, IST_StressTensor, tStep);
     //             elem->giveIntVarCompFullIndx(Mask, IST_StrainTensor);
     //
     //             VecStrain.times(dV);

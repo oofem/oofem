@@ -79,7 +79,7 @@ GaussPoint :: ~GaussPoint()
 }
 
 
-void GaussPoint :: printOutputAt(FILE *File, TimeStep *stepN)
+void GaussPoint :: printOutputAt(FILE *File, TimeStep *tStep)
 // Prints the strains and stresses on the data file.
 {
     int iruleNumber = 0;
@@ -93,13 +93,13 @@ void GaussPoint :: printOutputAt(FILE *File, TimeStep *stepN)
     // invoke printOutputAt method for all managed statuses
     IntegrationPointStatus *status = this->giveMaterialStatus();
     if ( status ) {
-        status->printOutputAt(File, stepN);
+        status->printOutputAt(File, tStep);
     }
 
     if ( numberOfGp != 0 ) { // layered material
         fprintf(File, "Layers report \n{\n");
         for ( int i = 0; i < numberOfGp; i++ ) {
-            gaussPointArray [ i ]->printOutputAt(File, stepN);
+            gaussPointArray [ i ]->printOutputAt(File, tStep);
         }
 
         fprintf(File, "} end layers report\n");

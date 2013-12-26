@@ -1220,12 +1220,12 @@ LayeredCrossSection :: giveArea()
 
 void
 LayeredCrossSection :: computeStressIndependentStrainVector(FloatArray &answer,
-                                                            GaussPoint *gp, TimeStep *stepN, ValueModeType mode)
+                                                            GaussPoint *gp, TimeStep *tStep, ValueModeType mode)
 {
     StructuralElement *elem = static_cast< StructuralElement * >( gp->giveElement() );
     FloatArray et;
 
-    elem->computeResultingIPTemperatureAt(et, stepN, gp, mode);
+    elem->computeResultingIPTemperatureAt(et, tStep, gp, mode);
 
     if ( et.isNotEmpty() ) {
         _error("computeStressIndependentStrainVector: temperature loading not supported");
@@ -1392,7 +1392,7 @@ LayeredCrossSection :: checkConsistency()
 
 
 int
-LayeredCrossSection :: giveIPValue(FloatArray &answer, GaussPoint *gp, InternalStateType type, TimeStep *atTime)
+LayeredCrossSection :: giveIPValue(FloatArray &answer, GaussPoint *gp, InternalStateType type, TimeStep *tStep)
 {
     if ( gp->giveIntegrationRule()->giveIntegrationDomain() == _Cube || gp->giveIntegrationRule()->giveIntegrationDomain() == _Wedge ) {
         // Determine which layer the gp belongs to. This code assumes that the gauss point are created consistently (through CrossSection::setupIntegrationPoints)
@@ -1408,7 +1408,7 @@ LayeredCrossSection :: giveIPValue(FloatArray &answer, GaussPoint *gp, InternalS
             double c = cos(rot * M_PI / 180.);
             double s = sin(rot * M_PI / 180.);
 
-            int ret = layerMat->giveIPValue(rotVal, gp, type, atTime);
+            int ret = layerMat->giveIPValue(rotVal, gp, type, tStep);
             if ( ret == 0 ) {
                 return 0;
             }
@@ -1470,12 +1470,12 @@ LayeredCrossSection :: giveIPValue(FloatArray &answer, GaussPoint *gp, InternalS
             }
             return 1;
         } else {
-            return layerMat->giveIPValue(answer, gp, type, atTime);
+            return layerMat->giveIPValue(answer, gp, type, tStep);
         }
     } else {
         ///@todo so far this only works for el where each layer has its own integration rule
         int layer = gp->giveIntegrationRule()->giveNumber();
-        return this->giveDomain()->giveMaterial( this->giveLayerMaterial(layer) )->giveIPValue(answer, gp, type, atTime);
+        return this->giveDomain()->giveMaterial( this->giveLayerMaterial(layer) )->giveIPValue(answer, gp, type, tStep);
     }
 }
 } // end namespace oofem

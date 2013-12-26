@@ -46,7 +46,7 @@ void
 MicroplaneMaterial_Bazant :: giveRealStressVector(FloatArray &answer,
                                                   GaussPoint *gp,
                                                   const FloatArray &totalStrain,
-                                                  TimeStep *atTime)
+                                                  TimeStep *tStep)
 {
     int i, mPlaneIndex, mPlaneIndex1;
     double SvDash, SvSum = 0.;
@@ -72,7 +72,7 @@ MicroplaneMaterial_Bazant :: giveRealStressVector(FloatArray &answer,
         // compute strain projections on mPlaneIndex-th microplane
         computeStrainVectorComponents(mPlaneStrainCmpns, mPlane, totalStrain);
         // compute real stresses on this microplane
-        giveRealMicroplaneStressVector(mPlaneStressCmpns, mPlane, mPlaneStrainCmpns, atTime);
+        giveRealMicroplaneStressVector(mPlaneStressCmpns, mPlane, mPlaneStrainCmpns, tStep);
 
         mPlaneNormalStress.at(mPlaneIndex1) = mPlaneStressCmpns.at(2);
         mPlaneShear_L_Stress.at(mPlaneIndex1) = mPlaneStressCmpns.at(3);

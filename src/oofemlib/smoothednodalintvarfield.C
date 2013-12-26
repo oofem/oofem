@@ -58,13 +58,13 @@ SmoothedNodalInternalVariableField :: ~SmoothedNodalInternalVariableField()
 }
 
 int
-SmoothedNodalInternalVariableField :: evaluateAt(FloatArray &answer, FloatArray &coords, ValueModeType mode, TimeStep *atTime)
+SmoothedNodalInternalVariableField :: evaluateAt(FloatArray &answer, FloatArray &coords, ValueModeType mode, TimeStep *tStep)
 {
     int i, region = 1, result = 0; // assume ok
     FloatArray lc, n;
     const FloatArray *nodalValue;
 
-    this->smoother->recoverValues(istType, atTime);
+    this->smoother->recoverValues(istType, tStep);
     // request element containing target point
     Element *elem = this->domain->giveSpatialLocalizer()->giveElementContainingPoint(coords);
     if ( elem ) { // ok element containing target point found
@@ -94,7 +94,7 @@ SmoothedNodalInternalVariableField :: evaluateAt(FloatArray &answer, FloatArray 
 }
 
 int
-SmoothedNodalInternalVariableField :: evaluateAt(FloatArray &answer, DofManager *dman, ValueModeType mode, TimeStep *atTime)
+SmoothedNodalInternalVariableField :: evaluateAt(FloatArray &answer, DofManager *dman, ValueModeType mode, TimeStep *tStep)
 {
     int region = 1;
     if ( dman->hasCoordinates() ) {

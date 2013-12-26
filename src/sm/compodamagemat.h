@@ -153,7 +153,7 @@ public:
     virtual void give3dMaterialStiffnessMatrix(FloatMatrix &answer,
                                                MatResponseMode mmode,
                                                GaussPoint *gp,
-                                               TimeStep *atTime);
+                                               TimeStep *tStep);
 
     virtual void giveRealStressVector(FloatArray &answer, GaussPoint *gp,
                                       const FloatArray &, TimeStep *tStep);
@@ -163,7 +163,7 @@ public:
     virtual void giveRealStressVector_1d(FloatArray &answer, GaussPoint *gp, const FloatArray &reducedE, TimeStep *tStep)
     { this->giveRealStressVector(answer, gp, reducedE, tStep); }
 
-    virtual int giveIPValue(FloatArray &answer, GaussPoint *aGaussPoint, InternalStateType type, TimeStep *atTime);
+    virtual int giveIPValue(FloatArray &answer, GaussPoint *gp, InternalStateType type, TimeStep *tStep);
 
     /**
      * Optional parameter determining after how many iterations within the time step the damage is calculated.

@@ -162,7 +162,7 @@ protected:
 
     virtual int checkConsistency();
     void give3dInterfaceMaterialStiffnessMatrix(FloatMatrix &answer, MatResponseMode rMode,
-                                                GaussPoint *gp, TimeStep *atTime);
+                                                GaussPoint *gp, TimeStep *tStep);
 
 public:
     /// Constructor

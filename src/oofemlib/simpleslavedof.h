@@ -109,7 +109,7 @@ public:
      */
     virtual int askNewEquationNumber(TimeStep *tStep) { return 1; }
     virtual double giveUnknown(ValueModeType, TimeStep *);
-    virtual double giveUnknown(PrimaryField & field, ValueModeType, TimeStep * stepN);
+    virtual double giveUnknown(PrimaryField & field, ValueModeType, TimeStep * tStep);
     virtual bool hasBc(TimeStep *tStep);
     virtual bool hasIc();
     virtual bool hasIcOn(ValueModeType);

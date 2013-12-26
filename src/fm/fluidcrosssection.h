@@ -73,7 +73,7 @@ public:
     virtual int checkConsistency();
 
     virtual bool isCharacteristicMtrxSymmetric(MatResponseMode rMode);
-    virtual int giveIPValue(FloatArray &answer, GaussPoint *ip, InternalStateType type, TimeStep *atTime);
+    virtual int giveIPValue(FloatArray &answer, GaussPoint *ip, InternalStateType type, TimeStep *tStep);
 
     FluidDynamicMaterial *giveFluidMaterial();
 

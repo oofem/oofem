@@ -262,7 +262,7 @@ B3SolidMaterial :: giveThermalDilatationVector(FloatArray &answer,
 }
 
 double
-B3SolidMaterial :: giveEModulus(GaussPoint *gp, TimeStep *atTime)
+B3SolidMaterial :: giveEModulus(GaussPoint *gp, TimeStep *tStep)
 {
     /*
      * This function returns the incremental modulus for the given time increment.
@@ -278,22 +278,22 @@ B3SolidMaterial :: giveEModulus(GaussPoint *gp, TimeStep *atTime)
     double v, eta;
     double sum = 0.0;
 
-    v = computeSolidifiedVolume(atTime);
-    eta = this->computeFlowTermViscosity(gp, atTime);     //evaluated in the middle of the time-step
+    v = computeSolidifiedVolume(tStep);
+    eta = this->computeFlowTermViscosity(gp, tStep);     //evaluated in the middle of the time-step
 
     ///@warning THREAD UNSAFE!
-    this->updateEparModuli(relMatAge + ( atTime->giveTargetTime() - 0.5 * atTime->giveTimeIncrement() ) / timeFactor);
+    this->updateEparModuli(relMatAge + ( tStep->giveTargetTime() - 0.5 * tStep->giveTimeIncrement() ) / timeFactor);
 
     if ( this->EmoduliMode == 0 ) { //retardation spectrum used
         // first Kelvin units of the Kelvin chain will be computed
-        sum = KelvinChainMaterial :: giveEModulus(gp, atTime);
+        sum = KelvinChainMaterial :: giveEModulus(gp, tStep);
         // the first aging elastic spring must be added
         sum += 1 / EspringVal;
     } else {   //least-squares method used
-        sum = KelvinChainMaterial :: giveEModulus(gp, atTime);
+        sum = KelvinChainMaterial :: giveEModulus(gp, tStep);
     }
 
-    return 1. / ( q1 * 1.e-6 + sum / v  + 0.5 * ( atTime->giveTimeIncrement() / timeFactor ) / eta );
+    return 1. / ( q1 * 1.e-6 + sum / v  + 0.5 * ( tStep->giveTimeIncrement() / timeFactor ) / eta );
 }
 
 void
@@ -339,7 +339,7 @@ B3SolidMaterial :: computeCharTimes()
 
 
 void
-B3SolidMaterial :: computeCharCoefficients(FloatArray &answer, double atTime)
+B3SolidMaterial :: computeCharCoefficients(FloatArray &answer, double tStep)
 {
     /*
      * If EmoduliMode == 0 then analysis of continuous retardation spectrum is used for
@@ -438,9 +438,9 @@ B3SolidMaterial :: computeNonAgingCreepFunction(double loadDuration)
 
 //original function from B3Material - useless here
 double
-B3SolidMaterial :: computeCreepFunction(double atTime, double ofAge)
+B3SolidMaterial :: computeCreepFunction(double tStep, double ofAge)
 {
-    // computes the value of creep function at time atTime
+    // computes the value of creep function at time tStep
     // when load is acting from ofAge
     // WARNING: area returned by crossSection is assumed to be in [m^2].
 
@@ -453,11 +453,11 @@ B3SolidMaterial :: computeCreepFunction(double atTime, double ofAge)
 
     // basic creep - approximation of the exact B3 model by closed-form functions
     Qf = 1. / ( 0.086 * pow(ofAge, 2. / 9.) + 1.21 * pow(ofAge, 4. / 9.) );
-    Z  = pow(ofAge, -m) * log( 1. + pow(atTime - ofAge, n) );
+    Z  = pow(ofAge, -m) * log( 1. + pow(tStep - ofAge, n) );
     r  = 1.7 * pow(ofAge, 0.12) + 8.0;
     Q  = Qf * pow( ( 1. + pow( ( Qf / Z ), r ) ), -1. / r );
 
-    C0 = q2 * Q + q3 *log( 1. + pow(atTime - ofAge, n) ) + q4 *log(atTime / ofAge);
+    C0 = q2 * Q + q3 *log( 1. + pow(tStep - ofAge, n) ) + q4 *log(tStep / ofAge);
 
 
     Cd = 0.0;
@@ -465,8 +465,8 @@ B3SolidMaterial :: computeCreepFunction(double atTime, double ofAge)
         // additional creep due to drying
 
         TauSh = kt * pow(ks * 2.0 * vs, 2.);
-        if ( ( atTime - t0 ) >= 0 ) {
-            St1  = tanh( pow( ( atTime - t0 ) / TauSh, 1. / 2. ) );
+        if ( ( tStep - t0 ) >= 0 ) {
+            St1  = tanh( pow( ( tStep - t0 ) / TauSh, 1. / 2. ) );
         } else {
             St1 = 0.0;
         }
@@ -489,7 +489,7 @@ B3SolidMaterial :: computeCreepFunction(double atTime, double ofAge)
 void
 B3SolidMaterial :: giveShrinkageStrainVector(FloatArray &answer,
                                              GaussPoint *gp,
-                                             TimeStep *atTime,
+                                             TimeStep *tStep,
                                              ValueModeType mode)
 {
     FloatArray prevAnswer;
@@ -505,28 +505,28 @@ B3SolidMaterial :: giveShrinkageStrainVector(FloatArray &answer,
     }
 
     if ( this->shMode == B3_AverageShrinkage ) {
-        this->computeTotalAverageShrinkageStrainVector(answer, gp, atTime);
+        this->computeTotalAverageShrinkageStrainVector(answer, gp, tStep);
 
-        if ( ( mode == VM_Incremental ) && ( !atTime->isTheFirstStep() ) ) {
-            this->computeTotalAverageShrinkageStrainVector( prevAnswer, gp, atTime->givePreviousStep() );
+        if ( ( mode == VM_Incremental ) && ( !tStep->isTheFirstStep() ) ) {
+            this->computeTotalAverageShrinkageStrainVector( prevAnswer, gp, tStep->givePreviousStep() );
             answer.subtract(prevAnswer);
         }
     } else if ( this->shMode == B3_PointShrinkageMPS ) {
-        this->computePointShrinkageStrainVectorMPS(answer, gp, atTime);
+        this->computePointShrinkageStrainVectorMPS(answer, gp, tStep);
     } else {
-        this->computeShrinkageStrainVector(answer, gp, atTime, mode);
+        this->computeShrinkageStrainVector(answer, gp, tStep, mode);
     }
 }
 
 void
-B3SolidMaterial :: computeTotalAverageShrinkageStrainVector(FloatArray &answer, GaussPoint *gp, TimeStep *atTime)
+B3SolidMaterial :: computeTotalAverageShrinkageStrainVector(FloatArray &answer, GaussPoint *gp, TimeStep *tStep)
 {
     /*
      * returns average shrinkage strain vector of cross section at drying
      */
 
     double TauSh, St, kh, help, E607, Et0Tau, EpsShInf, EpsSh;
-    double time = relMatAge + atTime->giveTargetTime() / timeFactor;
+    double time = relMatAge + tStep->giveTargetTime() / timeFactor;
     int size = 6;
     FloatArray fullAnswer;
     MaterialMode mode = gp->giveMaterialMode();
@@ -570,7 +570,7 @@ B3SolidMaterial :: computeTotalAverageShrinkageStrainVector(FloatArray &answer, 
 
 
 void
-B3SolidMaterial :: computePointShrinkageStrainVectorMPS(FloatArray &answer, GaussPoint *gp, TimeStep *atTime)
+B3SolidMaterial :: computePointShrinkageStrainVectorMPS(FloatArray &answer, GaussPoint *gp, TimeStep *tStep)
 {
     /* dEpsSh/dt = kSh * dh/dt   (h = humidity)
      * ->> EpsSh = kSh * h_difference
@@ -586,7 +586,7 @@ B3SolidMaterial :: computePointShrinkageStrainVectorMPS(FloatArray &answer, Gaus
         size = 6;
     }
 
-    humDiff = this->giveHumidityIncrement(gp, atTime);
+    humDiff = this->giveHumidityIncrement(gp, tStep);
     EpsSh = humDiff * kSh;
 
     fullAnswer.resize(size);
@@ -598,7 +598,7 @@ B3SolidMaterial :: computePointShrinkageStrainVectorMPS(FloatArray &answer, Gaus
 
 
 double
-B3SolidMaterial :: computeSolidifiedVolume(TimeStep *atTime)
+B3SolidMaterial :: computeSolidifiedVolume(TimeStep *tStep)
 // compute the relative volume of the solidified material at given age (in days)
 {
     double m, lambda0, alpha;
@@ -610,7 +610,7 @@ B3SolidMaterial :: computeSolidifiedVolume(TimeStep *atTime)
     lambda0 = 1;     //[day]
     alpha = q3 / q2;
 
-    atAge = relMatAge + ( atTime->giveTargetTime() - 0.5 * atTime->giveTimeIncrement() ) / timeFactor;
+    atAge = relMatAge + ( tStep->giveTargetTime() - 0.5 * tStep->giveTimeIncrement() ) / timeFactor;
     v = 1 / ( alpha + pow(lambda0 / atAge, m) );
 
     return v;
@@ -618,17 +618,17 @@ B3SolidMaterial :: computeSolidifiedVolume(TimeStep *atTime)
 
 
 double
-B3SolidMaterial :: computeFlowTermViscosity(GaussPoint *gp, TimeStep *atTime)
+B3SolidMaterial :: computeFlowTermViscosity(GaussPoint *gp, TimeStep *tStep)
 //used for evaluation of the flow term viscosity (term containing q4)
 {
     double eta, S, tHalfStep;
 
     if ( this->MicroPrestress == 1 ) {
-        S = this->computeMicroPrestress(gp, atTime, 0); //microprestress in the middle of the time-step
+        S = this->computeMicroPrestress(gp, tStep, 0); //microprestress in the middle of the time-step
         eta = 1.e6 / ( q4 * c0 * S );
         //static_cast< B3SolidMaterialStatus* >( gp->giveMaterialStatus() )->setMPS(S);
     } else if ( this->MicroPrestress == 0 ) {
-        tHalfStep = relMatAge + ( atTime->giveTargetTime() - 0.5 * atTime->giveTimeIncrement() ) / timeFactor;
+        tHalfStep = relMatAge + ( tStep->giveTargetTime() - 0.5 * tStep->giveTimeIncrement() ) / timeFactor;
         eta = 1.e6 * tHalfStep / q4;
     } else {
         _error("computeFlowTermViscosity - mode is not supported");
@@ -640,7 +640,7 @@ B3SolidMaterial :: computeFlowTermViscosity(GaussPoint *gp, TimeStep *atTime)
 
 
 void
-B3SolidMaterial :: giveEigenStrainVector(FloatArray &answer, GaussPoint *gp, TimeStep *atTime, ValueModeType mode)
+B3SolidMaterial :: giveEigenStrainVector(FloatArray &answer, GaussPoint *gp, TimeStep *tStep, ValueModeType mode)
 //
 // computes the strain due to creep at constant stress during the increment
 // (in fact, the INCREMENT of creep strain is computed for mode == VM_Incremental)
@@ -653,18 +653,18 @@ B3SolidMaterial :: giveEigenStrainVector(FloatArray &answer, GaussPoint *gp, Tim
 
     // !!! chartime exponents are assumed to be equal to 1 !!!
     if ( mode == VM_Incremental ) {
-        v = computeSolidifiedVolume(atTime);
-        eta = this->computeFlowTermViscosity(gp, atTime);         //evaluated too in the middle of the time-step
+        v = computeSolidifiedVolume(tStep);
+        eta = this->computeFlowTermViscosity(gp, tStep);         //evaluated too in the middle of the time-step
 
         sigma = status->giveStressVector();         //stress vector at the beginning of time-step
-        this->giveUnitComplianceMatrix(C, gp, atTime);
+        this->giveUnitComplianceMatrix(C, gp, tStep);
         reducedAnswer.resize( C.giveNumberOfRows() );
 
         reducedAnswer.beProductOf(C, sigma);
-        reducedAnswer.times( atTime->giveTimeIncrement() / ( timeFactor * eta ) );
+        reducedAnswer.times( tStep->giveTimeIncrement() / ( timeFactor * eta ) );
 
         //computes non-aging creep component of the Kelvin Chain
-        KelvinChainMaterial :: giveEigenStrainVector(help, gp, atTime, mode);
+        KelvinChainMaterial :: giveEigenStrainVector(help, gp, tStep, mode);
 
         help.times(1 / v);
         reducedAnswer.add(help);
@@ -678,7 +678,7 @@ B3SolidMaterial :: giveEigenStrainVector(FloatArray &answer, GaussPoint *gp, Tim
 
 
 void
-B3SolidMaterial :: computeShrinkageStrainVector(FloatArray &answer, GaussPoint *gp, TimeStep *atTime, ValueModeType mode)
+B3SolidMaterial :: computeShrinkageStrainVector(FloatArray &answer, GaussPoint *gp, TimeStep *tStep, ValueModeType mode)
 {
     // free shrinkage at material point, requires staggered analaysis
     // additional material parameters required:
@@ -687,7 +687,7 @@ B3SolidMaterial :: computeShrinkageStrainVector(FloatArray &answer, GaussPoint *
     //  rprime  - coefficient
     //  at      - coeff relating stress-induced thermal strain and shrinkage
     double sv, sn, et0, et, wrate = 0.0, trate = 0.0, h1;
-    double time = relMatAge + atTime->giveTargetTime() / timeFactor;
+    double time = relMatAge + tStep->giveTargetTime() / timeFactor;
     int i, err, tflag = 0, wflag = 0;
     KelvinChainMaterialStatus *status = static_cast< KelvinChainMaterialStatus * >( this->giveStatus(gp) );
     int size = 6;
@@ -711,7 +711,7 @@ B3SolidMaterial :: computeShrinkageStrainVector(FloatArray &answer, GaussPoint *
     if ( ( tf = fm->giveField(FT_Temperature) ) ) {
         // temperature field registered
         gp->giveElement()->computeGlobalCoordinates( gcoords, * gp->giveCoordinates() );
-        if ( ( err = tf->evaluateAt(et2, gcoords, VM_Incremental, atTime) ) ) {
+        if ( ( err = tf->evaluateAt(et2, gcoords, VM_Incremental, tStep) ) ) {
             _error2("computeShrinkageStrainVector: tf->evaluateAt failed, error value %d", err);
         }
 
@@ -722,11 +722,11 @@ B3SolidMaterial :: computeShrinkageStrainVector(FloatArray &answer, GaussPoint *
     if ( ( tf = fm->giveField(FT_HumidityConcentration) ) ) {
         // temperature field registered
         gp->giveElement()->computeGlobalCoordinates( gcoords, * gp->giveCoordinates() );
-        if ( ( err = tf->evaluateAt(et2, gcoords, VM_Total, atTime) ) ) {
+        if ( ( err = tf->evaluateAt(et2, gcoords, VM_Total, tStep) ) ) {
             _error2("computeShrinkageStrainVector: tf->evaluateAt failed, error value %d", err);
         }
 
-        if ( ( err = tf->evaluateAt(ei2, gcoords, VM_Incremental, atTime) ) ) {
+        if ( ( err = tf->evaluateAt(ei2, gcoords, VM_Incremental, tStep) ) ) {
             _error2("computeShrinkageStrainVector: tf->evaluateAt failed, error value %d", err);
         }
 
@@ -811,7 +811,7 @@ B3SolidMaterial :: inverse_sorption_isotherm(double w)
 
 
 double
-B3SolidMaterial :: computeMicroPrestress(GaussPoint *gp, TimeStep *atTime, int option)
+B3SolidMaterial :: computeMicroPrestress(GaussPoint *gp, TimeStep *tStep, int option)
 {
     //return 1.;//!!!!!!!!!!!!!!!!!!!!!!!!!!
     /* numerically solves non-linear differential equation in form:
@@ -832,9 +832,9 @@ B3SolidMaterial :: computeMicroPrestress(GaussPoint *gp, TimeStep *atTime, int o
      *
      * double alpha = 0.5; // 0 for forward Euler method, 1 for backward, 0.5 for trapezoidal rule
      * double deltaT;
-     * deltaT = atTime->giveTimeIncrement()/timeFactor;
+     * deltaT = tStep->giveTimeIncrement()/timeFactor;
      *
-     * if(atTime->isTheFirstStep()){
+     * if(tStep->isTheFirstStep()){
      *      // if the time step is the first one, ask for an initial microprestress
      *      S = this->giveInitMicroPrestress();
      * } else {
@@ -842,13 +842,13 @@ B3SolidMaterial :: computeMicroPrestress(GaussPoint *gp, TimeStep *atTime, int o
      *      S = status->giveMPS();
      * }
      *
-     * humOld = this->giveHumidity(gp, atTime) - this->giveHumidityIncrement(gp, atTime);
+     * humOld = this->giveHumidity(gp, tStep) - this->giveHumidityIncrement(gp, tStep);
      *
      * if (option == 1) {
-     *      humNew = this->giveHumidity(gp, atTime);
+     *      humNew = this->giveHumidity(gp, tStep);
      * } else if (option == 0) {
      *      deltaT /= 2;
-     *      humNew = humOld + 0.5*(this->giveHumidityIncrement(gp, atTime)); //linearly approximated
+     *      humNew = humOld + 0.5*(this->giveHumidityIncrement(gp, tStep)); //linearly approximated
      * } else {
      *      _error("computeMicroPrestress: invalid option parameter");
      * }
@@ -870,8 +870,8 @@ B3SolidMaterial :: computeMicroPrestress(GaussPoint *gp, TimeStep *atTime, int o
     double dHdt;     // first time difference of the humidity
     double deltaT;     // length of the time step
 
-    deltaT = atTime->giveTimeIncrement() / timeFactor;
-    if ( atTime->isTheFirstStep() ) {
+    deltaT = tStep->giveTimeIncrement() / timeFactor;
+    if ( tStep->isTheFirstStep() ) {
         // if the time step is the first one, ask for an initial microprestress
         S = this->giveInitMicroPrestress();
     } else {
@@ -879,12 +879,12 @@ B3SolidMaterial :: computeMicroPrestress(GaussPoint *gp, TimeStep *atTime, int o
         S = status->giveMPS();
     }
 
-    humOld = this->giveHumidity(gp, atTime) - this->giveHumidityIncrement(gp, atTime);
+    humOld = this->giveHumidity(gp, tStep) - this->giveHumidityIncrement(gp, tStep);
     if ( option == 1 ) {  // hum in the end of the time step
-        humNew = this->giveHumidity(gp, atTime);
+        humNew = this->giveHumidity(gp, tStep);
     } else if ( option == 0 ) {  // hum in the middle of the time step
         deltaT /= 2;
-        humNew = humOld + 0.5 * ( this->giveHumidityIncrement(gp, atTime) );       //linearly approximated
+        humNew = humOld + 0.5 * ( this->giveHumidityIncrement(gp, tStep) );       //linearly approximated
     } else {
         _error("computeMicroPrestress: invalid option parameter");
         humNew = 0.;
@@ -914,7 +914,7 @@ B3SolidMaterial :: giveInitMicroPrestress()
 
 
 double
-B3SolidMaterial :: giveHumidity(GaussPoint *gp, TimeStep *atTime) //computes humidity at given TimeStep
+B3SolidMaterial :: giveHumidity(GaussPoint *gp, TimeStep *tStep) //computes humidity at given TimeStep
 {
     double humidity = 0.;
     int err, wflag = 0;
@@ -927,7 +927,7 @@ B3SolidMaterial :: giveHumidity(GaussPoint *gp, TimeStep *atTime) //computes hum
     if ( ( tf = fm->giveField(FT_HumidityConcentration) ) ) {
         // humidity field registered
         gp->giveElement()->computeGlobalCoordinates( gcoords, * gp->giveCoordinates() );
-        if ( ( err = tf->evaluateAt(et2, gcoords, VM_Total, atTime) ) ) {
+        if ( ( err = tf->evaluateAt(et2, gcoords, VM_Total, tStep) ) ) {
             _error2("giveHumidity: tf->evaluateAt failed, error value %d", err);
         }
 
@@ -945,7 +945,7 @@ B3SolidMaterial :: giveHumidity(GaussPoint *gp, TimeStep *atTime) //computes hum
 
 
 double
-B3SolidMaterial :: giveHumidityIncrement(GaussPoint *gp, TimeStep *atTime) //computes humidity increment at given TimeStep
+B3SolidMaterial :: giveHumidityIncrement(GaussPoint *gp, TimeStep *tStep) //computes humidity increment at given TimeStep
 {
     double humIncrement = 0.;
     int err, wflag = 0;
@@ -958,11 +958,11 @@ B3SolidMaterial :: giveHumidityIncrement(GaussPoint *gp, TimeStep *atTime) //com
     if ( ( tf = fm->giveField(FT_HumidityConcentration) ) ) {
         // humidity field registered
         gp->giveElement()->computeGlobalCoordinates( gcoords, * gp->giveCoordinates() );
-        if ( ( err = tf->evaluateAt(et2, gcoords, VM_Total, atTime) ) ) {
+        if ( ( err = tf->evaluateAt(et2, gcoords, VM_Total, tStep) ) ) {
             _error2("giveHumidityIncrement: tf->evaluateAt failed, error value %d", err);
         }
 
-        if ( ( err = tf->evaluateAt(ei2, gcoords, VM_Incremental, atTime) ) ) {
+        if ( ( err = tf->evaluateAt(ei2, gcoords, VM_Incremental, tStep) ) ) {
             _error2("giveHumidityIncrement: tf->evaluateAt failed, error value %d", err);
         }
 

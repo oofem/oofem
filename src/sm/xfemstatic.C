@@ -280,11 +280,11 @@ XFEMStatic :: terminate(TimeStep *tStep)
 void
 XFEMStatic :: updateLoadVectors(TimeStep *tStep)
 {
-    MetaStep *mstep = this->giveMetaStep( tStep->giveMetaStepNumber() );
-    bool isLastMetaStep = ( tStep->giveNumber() == mstep->giveLastStepNumber() );
+    MetaStep *mstep = this->giveMetaStep( tStep->giveMetatStepumber() );
+    bool isLastMetaStep = ( tStep->giveNumber() == mstep->giveLasttStepumber() );
 
     if ( controlMode == nls_indirectControl ) { //todo@: not checked
-        //if ((tStep->giveNumber() == mstep->giveLastStepNumber()) && ir->hasField("fixload")) {
+        //if ((tStep->giveNumber() == mstep->giveLasttStepumber()) && ir->hasField("fixload")) {
         if ( isLastMetaStep ) {
             if ( !mstep->giveAttributesRecord()->hasField(_IFT_NonLinearStatic_donotfixload) ) {
                 OOFEM_LOG_INFO("Fixed load level\n");

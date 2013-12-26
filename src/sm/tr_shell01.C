@@ -173,11 +173,11 @@ TR_SHELL01 :: giveRotationMatrix(FloatMatrix &answer, EquationID eid)
 }
 
 void
-TR_SHELL01 :: updateInternalState(TimeStep *stepN)
+TR_SHELL01 :: updateInternalState(TimeStep *tStep)
 // Updates the receiver at end of step.
 {
-    plate->updateInternalState(stepN);
-    membrane->updateInternalState(stepN);
+    plate->updateInternalState(tStep);
+    membrane->updateInternalState(tStep);
 }
 
 void
@@ -216,15 +216,15 @@ TR_SHELL01 :: computeVolumeAround(GaussPoint *gp)
 }
 
 int
-TR_SHELL01 :: giveIPValue(FloatArray &answer, GaussPoint *gp, InternalStateType type, TimeStep *atTime)
+TR_SHELL01 :: giveIPValue(FloatArray &answer, GaussPoint *gp, InternalStateType type, TimeStep *tStep)
 {
     if ( type == IST_ShellForceMomentumTensor ) {
         FloatArray aux;
         GaussPoint *membraneGP = membrane->giveDefaultIntegrationRulePtr()->getIntegrationPoint(gp->giveNumber() - 1);
         GaussPoint *plateGP = plate->giveDefaultIntegrationRulePtr()->getIntegrationPoint(gp->giveNumber() - 1);
 
-        plate->giveIPValue(answer, plateGP, IST_ShellForceMomentumTensor, atTime);
-        membrane->giveIPValue(aux, membraneGP, IST_ShellForceMomentumTensor, atTime);
+        plate->giveIPValue(answer, plateGP, IST_ShellForceMomentumTensor, tStep);
+        membrane->giveIPValue(aux, membraneGP, IST_ShellForceMomentumTensor, tStep);
         answer.add(aux);
         return 1;
     } else if ( type == IST_ShellStrainCurvatureTensor ) {
@@ -232,13 +232,13 @@ TR_SHELL01 :: giveIPValue(FloatArray &answer, GaussPoint *gp, InternalStateType 
         GaussPoint *membraneGP = membrane->giveDefaultIntegrationRulePtr()->getIntegrationPoint(gp->giveNumber() - 1);
         GaussPoint *plateGP = plate->giveDefaultIntegrationRulePtr()->getIntegrationPoint(gp->giveNumber() - 1);
 
-        plate->giveIPValue(answer, plateGP, IST_ShellStrainCurvatureTensor, atTime);
-        membrane->giveIPValue(aux, membraneGP, IST_ShellStrainCurvatureTensor, atTime);
+        plate->giveIPValue(answer, plateGP, IST_ShellStrainCurvatureTensor, tStep);
+        membrane->giveIPValue(aux, membraneGP, IST_ShellStrainCurvatureTensor, tStep);
         answer.add(aux);
 
         return 1;
     } else {
-        return StructuralElement :: giveIPValue(answer, gp, type, atTime);
+        return StructuralElement :: giveIPValue(answer, gp, type, tStep);
     }
 }
 

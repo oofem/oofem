@@ -87,26 +87,26 @@ GradDpElement :: setNonlocalLocationArray(IntArray &answer, int nPrimNodes, int 
 
 
 void
-GradDpElement :: computeDisplacementDegreesOfFreedom(FloatArray &answer, TimeStep *stepN)
+GradDpElement :: computeDisplacementDegreesOfFreedom(FloatArray &answer, TimeStep *tStep)
 {
     StructuralElement *elem = this->giveStructuralElement();
     FloatArray u;
     answer.resize(locSize);
 
-    elem->computeVectorOf(EID_MomentumBalance, VM_Total, stepN, u);
+    elem->computeVectorOf(EID_MomentumBalance, VM_Total, tStep, u);
     u.resizeWithValues(totalSize);
     for ( int i = 1; i <= locSize; i++ ) {
         answer.at(i) = u.at( locU.at(i) );
     }
 }
 
-void GradDpElement :: computeNonlocalDegreesOfFreedom(FloatArray &answer, TimeStep *stepN)
+void GradDpElement :: computeNonlocalDegreesOfFreedom(FloatArray &answer, TimeStep *tStep)
 {
     StructuralElement *elem = this->giveStructuralElement();
     FloatArray u;
     answer.resize(nlSize);
 
-    elem->computeVectorOf(EID_MomentumBalance, VM_Total, stepN, u);
+    elem->computeVectorOf(EID_MomentumBalance, VM_Total, tStep, u);
     u.resizeWithValues(totalSize);
     for  ( int i = 1; i <= nlSize; i++ ) {
         answer.at(i) = u.at( locK.at(i) );
@@ -114,7 +114,7 @@ void GradDpElement :: computeNonlocalDegreesOfFreedom(FloatArray &answer, TimeSt
 }
 
 void
-GradDpElement :: computeStressVectorAndLocalCumulatedStrain(FloatArray &answer, double localCumulatedStrain, GaussPoint *gp, TimeStep *stepN)
+GradDpElement :: computeStressVectorAndLocalCumulatedStrain(FloatArray &answer, double localCumulatedStrain, GaussPoint *gp, TimeStep *tStep)
 {
     NLStructuralElement *elem = this->giveNLStructuralElement();
 
@@ -129,12 +129,12 @@ GradDpElement :: computeStressVectorAndLocalCumulatedStrain(FloatArray &answer, 
         OOFEM_ERROR("GradDpElement :: computeStiffnessMatrix_uu - Material doesn't implement the required DpGrad interface!");
     }
 
-    this->computeNonlocalCumulatedStrain(nlCumulatedStrain, gp, stepN);
+    this->computeNonlocalCumulatedStrain(nlCumulatedStrain, gp, tStep);
     if ( nlGeo == 0 ) {
         FloatArray Epsilon;
-        this->computeLocalStrainVector(Epsilon, gp, stepN);
+        this->computeLocalStrainVector(Epsilon, gp, tStep);
         if ( cs->hasMaterialModeCapability( gp->giveMaterialMode() ) ) {
-            dpmat->giveRealStressVectorGrad(answer, localCumulatedStrain, gp, Epsilon, nlCumulatedStrain, stepN);
+            dpmat->giveRealStressVectorGrad(answer, localCumulatedStrain, gp, Epsilon, nlCumulatedStrain, tStep);
             return;
         } else {
             OOFEM_ERROR("giveRealStresses : unsupported mode");
@@ -142,18 +142,18 @@ GradDpElement :: computeStressVectorAndLocalCumulatedStrain(FloatArray &answer, 
     } else if ( nlGeo == 1 ) {
         if ( elem->giveDomain()->giveEngngModel()->giveFormulation() == TL ) {
             FloatArray vF;
-            this->computeDeformationGradientVector(vF, gp, stepN);
+            this->computeDeformationGradientVector(vF, gp, tStep);
             if ( cs->hasMaterialModeCapability( gp->giveMaterialMode() ) ) {
-                dpmat->giveFirstPKStressVectorGrad(answer, localCumulatedStrain, gp, vF, nlCumulatedStrain, stepN);
+                dpmat->giveFirstPKStressVectorGrad(answer, localCumulatedStrain, gp, vF, nlCumulatedStrain, tStep);
                 return;
             } else {
                 OOFEM_ERROR("giveRealStresses : unsupported mode");
             }
         } else {
             FloatArray vF;
-            this->computeDeformationGradientVector(vF, gp, stepN);
+            this->computeDeformationGradientVector(vF, gp, tStep);
             if ( cs->hasMaterialModeCapability( gp->giveMaterialMode() ) ) {
-                dpmat->giveCauchyStressVectorGrad(answer, localCumulatedStrain, gp, vF, nlCumulatedStrain, stepN);
+                dpmat->giveCauchyStressVectorGrad(answer, localCumulatedStrain, gp, vF, nlCumulatedStrain, tStep);
                 return;
             } else {
                 OOFEM_ERROR("giveRealStresses : unsupported mode");
@@ -164,20 +164,20 @@ GradDpElement :: computeStressVectorAndLocalCumulatedStrain(FloatArray &answer, 
 
 
 void
-GradDpElement :: computeLocalStrainVector(FloatArray &answer, GaussPoint *gp, TimeStep *stepN)
+GradDpElement :: computeLocalStrainVector(FloatArray &answer, GaussPoint *gp, TimeStep *tStep)
 {
     FloatArray u;
     FloatMatrix b;
     NLStructuralElement *elem = this->giveNLStructuralElement();
     nlGeo = elem->giveGeometryMode();
 
-    this->computeDisplacementDegreesOfFreedom(u, stepN);
+    this->computeDisplacementDegreesOfFreedom(u, tStep);
     elem->computeBmatrixAt(gp, b);
     answer.beProductOf(b, u);
 }
 
 void
-GradDpElement :: computeDeformationGradientVector(FloatArray &answer, GaussPoint *gp, TimeStep *stepN)
+GradDpElement :: computeDeformationGradientVector(FloatArray &answer, GaussPoint *gp, TimeStep *tStep)
 {
     // Computes the deformation gradient in the Voigt format at the Gauss point gp of
     // the receiver at time step tStep.
@@ -188,7 +188,7 @@ GradDpElement :: computeDeformationGradientVector(FloatArray &answer, GaussPoint
     FloatMatrix B;
     NLStructuralElement *elem = this->giveNLStructuralElement();
 
-    this->computeDisplacementDegreesOfFreedom(u, stepN);
+    this->computeDisplacementDegreesOfFreedom(u, tStep);
     // Displacement gradient H = du/dX
     elem->computeBHmatrixAt(gp, B);
     answer.beProductOf(B, u);
@@ -210,28 +210,28 @@ GradDpElement :: computeDeformationGradientVector(FloatArray &answer, GaussPoint
 }
 
 void
-GradDpElement :: computeNonlocalCumulatedStrain(double &answer, GaussPoint *gp, TimeStep *stepN)
+GradDpElement :: computeNonlocalCumulatedStrain(double &answer, GaussPoint *gp, TimeStep *tStep)
 {
     FloatMatrix Nk;
     FloatArray u;
     FloatArray aux;
 
     this->computeNkappaMatrixAt(gp, Nk);
-    this->computeNonlocalDegreesOfFreedom(u, stepN);
+    this->computeNonlocalDegreesOfFreedom(u, tStep);
     aux.beProductOf(Nk, u);
     answer = aux.at(1);
 }
 
 
 void
-GradDpElement :: computeNonlocalGradient(FloatArray &answer, GaussPoint *gp, TimeStep *stepN)
+GradDpElement :: computeNonlocalGradient(FloatArray &answer, GaussPoint *gp, TimeStep *tStep)
 {
     FloatMatrix Bk;
     FloatArray u;
     FloatArray aux;
 
     this->computeBkappaMatrixAt(gp, Bk);
-    this->computeNonlocalDegreesOfFreedom(u, stepN);
+    this->computeNonlocalDegreesOfFreedom(u, tStep);
     answer.beProductOf(Bk, u);
 }
 
@@ -324,7 +324,7 @@ GradDpElement :: giveInternalForcesVector(FloatArray &answer, TimeStep *tStep, i
 }
 
 void
-GradDpElement :: computeForceLoadVector(FloatArray &answer, TimeStep *stepN, ValueModeType mode)
+GradDpElement :: computeForceLoadVector(FloatArray &answer, TimeStep *tStep, ValueModeType mode)
 {
     //set displacement and nonlocal location array
     this->setDisplacementLocationArray(locU, nPrimNodes, nPrimVars, nSecNodes, nSecVars);
@@ -335,14 +335,14 @@ GradDpElement :: computeForceLoadVector(FloatArray &answer, TimeStep *stepN, Val
     FloatArray nlForces(nlSize);
     answer.resize(totalSize);
 
-    this->computeLocForceLoadVector(localForces, stepN, mode);
+    this->computeLocForceLoadVector(localForces, tStep, mode);
 
     answer.assemble(localForces, locU);
     answer.assemble(nlForces, locK);
 }
 
 void
-GradDpElement :: computeNonForceLoadVector(FloatArray &answer, TimeStep *stepN, ValueModeType mode)
+GradDpElement :: computeNonForceLoadVector(FloatArray &answer, TimeStep *tStep, ValueModeType mode)
 {
     //set displacement and nonlocal location array
     this->setDisplacementLocationArray(locU, nPrimNodes, nPrimVars, nSecNodes, nSecVars);
@@ -353,13 +353,13 @@ GradDpElement :: computeNonForceLoadVector(FloatArray &answer, TimeStep *stepN, 
     answer.resize(totalSize);
     answer.zero();
 
-    this->computeLocNonForceLoadVector(answer, stepN, mode);
+    this->computeLocNonForceLoadVector(answer, tStep, mode);
 }
 
 
 /************************************************************************/
 void
-GradDpElement :: computeLocForceLoadVector(FloatArray &answer, TimeStep *stepN, ValueModeType mode)
+GradDpElement :: computeLocForceLoadVector(FloatArray &answer, TimeStep *tStep, ValueModeType mode)
 // computes the part of load vector, which is imposed by force loads acting
 // on element volume (surface).
 // When reactions forces are computed, they are computed from element::GiveRealStressVector
@@ -368,7 +368,7 @@ GradDpElement :: computeLocForceLoadVector(FloatArray &answer, TimeStep *stepN, 
 {
     FloatMatrix T;
     NLStructuralElement *elem = this->giveNLStructuralElement();
-    elem->computeLocalForceLoadVector(answer, stepN, mode);
+    elem->computeLocalForceLoadVector(answer, tStep, mode);
 
     // transform result from global cs to nodal cs. if necessary
     if ( answer.isNotEmpty() ) {
@@ -384,14 +384,14 @@ GradDpElement :: computeLocForceLoadVector(FloatArray &answer, TimeStep *stepN, 
 
 
 void
-GradDpElement :: computeLocNonForceLoadVector(FloatArray &answer, TimeStep *stepN, ValueModeType mode)
-// Computes the load vector of the receiver, at stepN.
+GradDpElement :: computeLocNonForceLoadVector(FloatArray &answer, TimeStep *tStep, ValueModeType mode)
+// Computes the load vector of the receiver, at tStep.
 {
     FloatArray helpLoadVector;
     StructuralElement *elem = this->giveStructuralElement();
     answer.resize(0);
 
-    elem->computePrescribedStrainLoadVectorAt(helpLoadVector, stepN, mode);
+    elem->computePrescribedStrainLoadVectorAt(helpLoadVector, tStep, mode);
     if ( helpLoadVector.giveSize() ) {
         answer.add(helpLoadVector);
     }

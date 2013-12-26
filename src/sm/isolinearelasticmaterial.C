@@ -126,7 +126,7 @@ void
 IsotropicLinearElasticMaterial :: give3dMaterialStiffnessMatrix(FloatMatrix &answer,
                                                                 MatResponseMode mode,
                                                                 GaussPoint *gp,
-                                                                TimeStep *atTime)
+                                                                TimeStep *tStep)
 //
 // forceElasticResponse ignored - always elastic
 //
@@ -162,7 +162,7 @@ void
 IsotropicLinearElasticMaterial :: givePlaneStressStiffMtrx(FloatMatrix &answer,
                                                            MatResponseMode mode,
                                                            GaussPoint *gp,
-                                                           TimeStep *atTime)
+                                                           TimeStep *tStep)
 {
     double e, nu, ee, shear;
 
@@ -186,7 +186,7 @@ void
 IsotropicLinearElasticMaterial :: givePlaneStrainStiffMtrx(FloatMatrix &answer,
                                                            MatResponseMode mode,
                                                            GaussPoint *gp,
-                                                           TimeStep *atTime)
+                                                           TimeStep *tStep)
 {
     double e, nu, ee, shear;
 
@@ -215,7 +215,7 @@ void
 IsotropicLinearElasticMaterial :: give1dStressStiffMtrx(FloatMatrix &answer,
                                                         MatResponseMode mode,
                                                         GaussPoint *gp,
-                                                        TimeStep *atTime)
+                                                        TimeStep *tStep)
 {
     answer.resize(1, 1);
     answer.at(1, 1) = this->E;

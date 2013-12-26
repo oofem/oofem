@@ -355,13 +355,13 @@ void DEIDynamic :: solveYourselfAt(TimeStep *tStep)
 }
 
 
-void DEIDynamic :: printDofOutputAt(FILE *stream, Dof *iDof, TimeStep *atTime)
+void DEIDynamic :: printDofOutputAt(FILE *stream, Dof *iDof, TimeStep *tStep)
 {
     static char dofchar[] = "dva";
     static ValueModeType dofmodes[] = {
         VM_Total, VM_Velocity, VM_Acceleration
     };
 
-    iDof->printMultipleOutputAt(stream, atTime, dofchar, dofmodes, 3);
+    iDof->printMultipleOutputAt(stream, tStep, dofchar, dofmodes, 3);
 }
 } // end namespace oofem

@@ -72,8 +72,8 @@ public:
     InternalVariableField(InternalStateType ist, FieldType b, MaterialMappingAlgorithmType mma_type, Domain *d);
     virtual ~InternalVariableField();
 
-    virtual int evaluateAt(FloatArray &answer, FloatArray &coords, ValueModeType mode, TimeStep *atTime);
-    virtual int evaluateAt(FloatArray &answer, DofManager *dman, ValueModeType mode, TimeStep *atTime);
+    virtual int evaluateAt(FloatArray &answer, FloatArray &coords, ValueModeType mode, TimeStep *tStep);
+    virtual int evaluateAt(FloatArray &answer, DofManager *dman, ValueModeType mode, TimeStep *tStep);
 
     virtual contextIOResultType saveContext(DataStream *stream, ContextMode mode);
     virtual contextIOResultType restoreContext(DataStream *stream, ContextMode mode);

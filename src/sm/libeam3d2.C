@@ -68,7 +68,7 @@ LIBeam3d2 :: LIBeam3d2(int n, Domain *aDomain) : NLStructuralElement(n, aDomain)
 
 
 void
-LIBeam3d2 :: computeBmatrixAt(GaussPoint *aGaussPoint, FloatMatrix &answer, int li, int ui)
+LIBeam3d2 :: computeBmatrixAt(GaussPoint *gp, FloatMatrix &answer, int li, int ui)
 // Returns the strain matrix of the receiver.
 // eeps = {\eps_x, \gamma_xz, \gamma_xy, \der{phi_x}{x}, \kappa_y, \kappa_z}^T
 {
@@ -80,7 +80,7 @@ LIBeam3d2 :: computeBmatrixAt(GaussPoint *aGaussPoint, FloatMatrix &answer, int 
         l = this->giveLength();
     }
 
-    ksi   = aGaussPoint->giveCoordinate(1);
+    ksi   = gp->giveCoordinate(1);
 
     answer.resize(6, 12);
     answer.zero();
@@ -145,7 +145,7 @@ LIBeam3d2 :: computeLumpedMassMatrix(FloatMatrix &answer, TimeStep *tStep)
 void
 LIBeam3d2 :: computeNmatrixAt(const FloatArray &iLocCoord, FloatMatrix &answer)
 // Returns the displacement interpolation matrix {N} of the receiver, eva-
-// luated at aGaussPoint.
+// luated at gp.
 {
     double ksi, n1, n2;
 
@@ -217,11 +217,11 @@ LIBeam3d2 :: computeGtoLRotationMatrix(FloatMatrix &answer)
 
 
 double
-LIBeam3d2 :: computeVolumeAround(GaussPoint *aGaussPoint)
+LIBeam3d2 :: computeVolumeAround(GaussPoint *gp)
 // Returns the length of the receiver. This method is valid only if 1
 // Gauss point is used.
 {
-    double weight  = aGaussPoint->giveWeight();
+    double weight  = gp->giveWeight();
     return weight * 0.5 * this->giveLength();
 }
 
@@ -323,7 +323,7 @@ LIBeam3d2 :: initializeFrom(InputRecord *ir)
 
 
 void
-LIBeam3d2 :: computeEgdeNMatrixAt(FloatMatrix &answer, int iedge, GaussPoint *aGaussPoint)
+LIBeam3d2 :: computeEgdeNMatrixAt(FloatMatrix &answer, int iedge, GaussPoint *gp)
 {
     /*
      *
@@ -339,7 +339,7 @@ LIBeam3d2 :: computeEgdeNMatrixAt(FloatMatrix &answer, int iedge, GaussPoint *aG
      * without regarding particular side
      */
 
-    this->computeNmatrixAt(* ( aGaussPoint->giveLocalCoordinates() ), answer);
+    this->computeNmatrixAt(* ( gp->giveLocalCoordinates() ), answer);
 }
 
 
@@ -363,13 +363,13 @@ LIBeam3d2 :: giveEdgeDofMapping(IntArray &answer, int iEdge) const
 
 
 double
-LIBeam3d2 :: computeEdgeVolumeAround(GaussPoint *aGaussPoint, int iEdge)
+LIBeam3d2 :: computeEdgeVolumeAround(GaussPoint *gp, int iEdge)
 {
     if ( iEdge != 1 ) { // edge between nodes 1 2
         _error("computeEdgeVolumeAround: wrong egde number");
     }
 
-    double weight  = aGaussPoint->giveWeight();
+    double weight  = gp->giveWeight();
     return 0.5 * this->giveLength() * weight;
 }
 

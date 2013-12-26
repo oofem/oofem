@@ -60,9 +60,9 @@ public:
 
 protected:
     /// Creates the mesher input, containing the required mesh density information.
-    int createInput(Domain *d, TimeStep *stepN);
+    int createInput(Domain *d, TimeStep *tStep);
     /// Service for smoothing the densities for freem.
-    void smoothNodalDensities(Domain *d, FloatArray &nodalDensities, TimeStep *stepN);
+    void smoothNodalDensities(Domain *d, FloatArray &nodalDensities, TimeStep *tStep);
 };
 } // end namespace oofem
 #endif // freeminterface_h

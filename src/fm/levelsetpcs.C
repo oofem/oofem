@@ -131,7 +131,7 @@ LevelSetPCS :: giveInputRecord(DynamicInputRecord &input)
 
 
 void
-LevelSetPCS :: updatePosition(TimeStep *atTime)
+LevelSetPCS :: updatePosition(TimeStep *tStep)
 {
     int i, j, l, inodes, inode;
     int ndofman = domain->giveNumberOfDofManagers();
@@ -151,12 +151,12 @@ LevelSetPCS :: updatePosition(TimeStep *atTime)
     int __step = 0, __nstep = 10;
 
     levelSetValues = previousLevelSetValues;
-    dt = atTime->giveTimeIncrement() / __nstep;
+    dt = tStep->giveTimeIncrement() / __nstep;
 
     do {
         ls_n = levelSetValues;
 
-        this->pcs_stage1(levelSetValues, fs, w, atTime, PCS_levelSetUpdate);
+        this->pcs_stage1(levelSetValues, fs, w, tStep, PCS_levelSetUpdate);
 
         // update level set values
         for ( inode = 1; inode <= ndofman; inode++ ) {
@@ -177,7 +177,7 @@ LevelSetPCS :: updatePosition(TimeStep *atTime)
                     mask.setValues(3, V_u, V_v, V_w);
                 }
 
-                domain->giveDofManager(inode)->giveUnknownVector( un, mask, VM_Total, atTime->givePreviousStep() );
+                domain->giveDofManager(inode)->giveUnknownVector( un, mask, VM_Total, tStep->givePreviousStep() );
                 elems = contable->giveDofManConnectivityArray(inode);
                 // loop over shared elements
                 volume = 0.0;
@@ -216,7 +216,7 @@ LevelSetPCS :: updatePosition(TimeStep *atTime)
         } // end loop over nodes
 
         if ( twostage ) {
-            //this->pcs_stage1(levelSetValues, fs, w, atTime, PCS_levelSetUpdate); // ?
+            //this->pcs_stage1(levelSetValues, fs, w, tStep, PCS_levelSetUpdate); // ?
 
             for ( inode = 1; inode <= ndofman; inode++ ) {
                 if ( w.at(inode) > 0.0 ) {
@@ -240,7 +240,7 @@ LevelSetPCS :: updatePosition(TimeStep *atTime)
      * }
      */
     // redistance
-    this->reinitialization(atTime);
+    this->reinitialization(tStep);
 
     levelSetVersion++;
 }
@@ -333,12 +333,12 @@ LevelSetPCS :: giveElementMaterialMixture(FloatArray &answer, int ie)
 }
 
 void
-LevelSetPCS :: reinitialization(TimeStep *atTime)
+LevelSetPCS :: reinitialization(TimeStep *tStep)
 {
     if ( reinit_alg == 0 ) {
         return;
     } else if ( reinit_alg == 1 ) {
-        this->redistance(atTime);
+        this->redistance(tStep);
     } else if ( reinit_alg == 2 ) {
         FloatArray ls1;
         this->FMMReinitialization(ls1);
@@ -350,7 +350,7 @@ LevelSetPCS :: reinitialization(TimeStep *atTime)
 
 
 void
-LevelSetPCS :: redistance(TimeStep *atTime)
+LevelSetPCS :: redistance(TimeStep *tStep)
 {
     int nite = 0, inode, i, inodes;
     int ndofman = domain->giveNumberOfDofManagers();
@@ -370,7 +370,7 @@ LevelSetPCS :: redistance(TimeStep *atTime)
     if ( this->reinit_dt_flag ) {
         dt = this->reinit_dt;
     } else {
-        dt = atTime->giveTimeIncrement();
+        dt = tStep->giveTimeIncrement();
     }
 
     IntArray _boundary(ndofman);
@@ -403,7 +403,7 @@ LevelSetPCS :: redistance(TimeStep *atTime)
     do {
         d_old = d;
         //levelSetValues = d;     // updated sign funtion
-        pcs_stage1(levelSetValues, fs, w, atTime, PCS_levelSetRedistance);
+        pcs_stage1(levelSetValues, fs, w, tStep, PCS_levelSetRedistance);
 
         // update level set values
         // single stage integration
@@ -423,7 +423,7 @@ LevelSetPCS :: redistance(TimeStep *atTime)
         }
 
         if ( twostage ) {
-            // this->pcs_stage1(d, fs, w, atTime, PCS_levelSetRedistance); //?
+            // this->pcs_stage1(d, fs, w, tStep, PCS_levelSetRedistance); //?
             cm = 0.0;
             for ( inode = 1; inode <= ndofman; inode++ ) {
                 if ( _boundary.at(inode) ) {
@@ -449,7 +449,7 @@ LevelSetPCS :: redistance(TimeStep *atTime)
 
 
 void
-LevelSetPCS :: pcs_stage1(FloatArray &ls, FloatArray &fs, FloatArray &w, TimeStep *atTime, PCSEqType t)
+LevelSetPCS :: pcs_stage1(FloatArray &ls, FloatArray &fs, FloatArray &w, TimeStep *tStep, PCSEqType t)
 {
     int i, j, l, _ig, inodes;
     int ie, ndofman = domain->giveNumberOfDofManagers(), nelem = domain->giveNumberOfElements();
@@ -472,8 +472,8 @@ LevelSetPCS :: pcs_stage1(FloatArray &ls, FloatArray &fs, FloatArray &w, TimeSte
                     ( ielem->giveInterface(LevelSetPCSElementInterfaceType) );
 
         if ( interface ) {
-            F = this->evalElemFContribution(t, ie, atTime);
-            f = this->evalElemfContribution(t, ie, atTime);
+            F = this->evalElemFContribution(t, ie, tStep);
+            f = this->evalElemfContribution(t, ie, tStep);
 
             interface->LS_PCS_computedN(dN);
             volume = interface->LS_PCS_computeVolume();
@@ -546,14 +546,14 @@ LevelSetPCS :: pcs_stage1(FloatArray &ls, FloatArray &fs, FloatArray &w, TimeSte
 
 
 double
-LevelSetPCS :: evalElemFContribution(PCSEqType t, int ie, TimeStep *atTime)
+LevelSetPCS :: evalElemFContribution(PCSEqType t, int ie, TimeStep *tStep)
 {
     LevelSetPCSElementInterface *interface = static_cast< LevelSetPCSElementInterface * >
                                              ( domain->giveElement(ie)->giveInterface(LevelSetPCSElementInterfaceType) );
     if ( t == PCS_levelSetUpdate ) {
-        return interface->LS_PCS_computeF(this, atTime);
+        return interface->LS_PCS_computeF(this, tStep);
     } else if ( t == PCS_levelSetRedistance ) {
-        return interface->LS_PCS_computeS(this, atTime);
+        return interface->LS_PCS_computeS(this, tStep);
     }
 
     return 0.0;
@@ -561,14 +561,14 @@ LevelSetPCS :: evalElemFContribution(PCSEqType t, int ie, TimeStep *atTime)
 
 
 double
-LevelSetPCS :: evalElemfContribution(PCSEqType t, int ie, TimeStep *atTime)
+LevelSetPCS :: evalElemfContribution(PCSEqType t, int ie, TimeStep *tStep)
 {
     LevelSetPCSElementInterface *interface = static_cast< LevelSetPCSElementInterface * >
                                              ( domain->giveElement(ie)->giveInterface(LevelSetPCSElementInterfaceType) );
     if ( t == PCS_levelSetUpdate ) {
         return 0.0;
     } else if ( t == PCS_levelSetRedistance ) {
-        return interface->LS_PCS_computeS(this, atTime);
+        return interface->LS_PCS_computeS(this, tStep);
     }
 
     return 0.0;

@@ -522,7 +522,7 @@ LIBeam3dNL2 :: computeLumpedMassMatrix(FloatMatrix &answer, TimeStep *tStep)
 void
 LIBeam3dNL2 :: computeNmatrixAt(const FloatArray &iLocCoord, FloatMatrix &answer)
 // Returns the displacement interpolation matrix {N} of the receiver, eva-
-// luated at aGaussPoint.
+// luated at gp.
 {
     double ksi, n1, n2;
 
@@ -555,11 +555,11 @@ LIBeam3dNL2 :: computeNmatrixAt(const FloatArray &iLocCoord, FloatMatrix &answer
 
 
 double
-LIBeam3dNL2 :: computeVolumeAround(GaussPoint *aGaussPoint)
+LIBeam3dNL2 :: computeVolumeAround(GaussPoint *gp)
 // Returns the length of the receiver. This method is valid only if 1
 // Gauss point is used.
 {
-    double weight  = aGaussPoint->giveWeight();
+    double weight  = gp->giveWeight();
     return weight * 0.5 * this->giveLength();
 }
 
@@ -589,7 +589,7 @@ LIBeam3dNL2 :: computeGlobalCoordinates(FloatArray &answer, const FloatArray &lc
 
 
 void
-LIBeam3dNL2 :: computeEgdeNMatrixAt(FloatMatrix &answer, int iedge, GaussPoint *aGaussPoint)
+LIBeam3dNL2 :: computeEgdeNMatrixAt(FloatMatrix &answer, int iedge, GaussPoint *gp)
 {
     /*
      *
@@ -605,7 +605,7 @@ LIBeam3dNL2 :: computeEgdeNMatrixAt(FloatMatrix &answer, int iedge, GaussPoint *
      * without regarding particular side
      */
 
-    this->computeNmatrixAt(* ( aGaussPoint->giveLocalCoordinates() ), answer);
+    this->computeNmatrixAt(* ( gp->giveLocalCoordinates() ), answer);
 }
 
 
@@ -628,13 +628,13 @@ LIBeam3dNL2 :: giveEdgeDofMapping(IntArray &answer, int iEdge) const
 
 
 double
-LIBeam3dNL2 :: computeEdgeVolumeAround(GaussPoint *aGaussPoint, int iEdge)
+LIBeam3dNL2 :: computeEdgeVolumeAround(GaussPoint *gp, int iEdge)
 {
     if ( iEdge != 1 ) { // edge between nodes 1 2
         _error("computeEdgeVolumeAround: wrong egde number");
     }
 
-    double weight  = aGaussPoint->giveWeight();
+    double weight  = gp->giveWeight();
     return 0.5 * this->giveLength() * weight;
 }
 

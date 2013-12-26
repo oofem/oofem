@@ -79,11 +79,11 @@ TrPlaneStrRot :: computeGaussPoints()
 
 
 void
-TrPlaneStrRot :: computeBmatrixAt(GaussPoint *aGaussPoint, FloatMatrix &answer, int li, int ui)
+TrPlaneStrRot :: computeBmatrixAt(GaussPoint *gp, FloatMatrix &answer, int li, int ui)
 // Returns part of strain-displacement matrix {B} of the receiver,
 // (epsilon_x,epsilon_y,gamma_xy) = B . r
 // type of this part is [3,9]  r=(u1,w1,fi1,u2,w2,fi2,u3,w3,fi3)
-// evaluated at aGaussPoint.
+// evaluated at gp.
 {
     // get node coordinates
     FloatArray x(3), y(3);
@@ -123,8 +123,8 @@ TrPlaneStrRot :: computeBmatrixAt(GaussPoint *aGaussPoint, FloatMatrix &answer, 
     answer.resize(size, 9);
 
     if ( ( li <= 2 ) ) {
-        nx = this->GiveDerivativeUX(aGaussPoint);
-        ny = this->GiveDerivativeVY(aGaussPoint);
+        nx = this->GiveDerivativeUX(gp);
+        ny = this->GiveDerivativeVY(gp);
 
         if ( ( li <= 1 ) && ( ui >= 1 ) ) {
             for ( int i = 1; i <= 3; i++ ) {
@@ -169,11 +169,11 @@ TrPlaneStrRot :: computeBmatrixAt(GaussPoint *aGaussPoint, FloatMatrix &answer, 
     if ( ( li <= 4 ) && ( ui >= 4 ) ) {
         FloatArray shapeFunct(3);
 
-        nx = this->GiveDerivativeVX(aGaussPoint);
-        ny = this->GiveDerivativeUY(aGaussPoint);
+        nx = this->GiveDerivativeVX(gp);
+        ny = this->GiveDerivativeUY(gp);
 
-        shapeFunct.at(1) = aGaussPoint->giveCoordinate(1);
-        shapeFunct.at(2) = aGaussPoint->giveCoordinate(2);
+        shapeFunct.at(1) = gp->giveCoordinate(1);
+        shapeFunct.at(2) = gp->giveCoordinate(2);
         shapeFunct.at(3) = 1.0 - shapeFunct.at(1) - shapeFunct.at(2);
 
         for ( int i = 1; i <= 3; i++ ) {
@@ -191,7 +191,7 @@ TrPlaneStrRot :: computeBmatrixAt(GaussPoint *aGaussPoint, FloatMatrix &answer, 
 void
 TrPlaneStrRot :: computeNmatrixAt(const FloatArray &iLocCoord, FloatMatrix &answer)
 // Returns the displacement interpolation matrix {N} of the receiver
-// evaluated at aGaussPoint.
+// evaluated at gp.
 {
     // get node coordinates
     FloatArray x(3), y(3);
@@ -349,7 +349,7 @@ TrPlaneStrRot :: GivePitch()
 
 
 FloatArray *
-TrPlaneStrRot :: GiveDerivativeUX(GaussPoint *aGaussPoint)
+TrPlaneStrRot :: GiveDerivativeUX(GaussPoint *gp)
 {
     // get node coordinates
     FloatArray x(3), y(3);
@@ -372,8 +372,8 @@ TrPlaneStrRot :: GiveDerivativeUX(GaussPoint *aGaussPoint)
 
     //
     FloatArray shapeFunct(3);
-    shapeFunct.at(1) = aGaussPoint->giveCoordinate(1);
-    shapeFunct.at(2) = aGaussPoint->giveCoordinate(2);
+    shapeFunct.at(1) = gp->giveCoordinate(1);
+    shapeFunct.at(2) = gp->giveCoordinate(2);
     shapeFunct.at(3) = 1.0 - shapeFunct.at(1) - shapeFunct.at(2);
 
     //
@@ -393,7 +393,7 @@ TrPlaneStrRot :: GiveDerivativeUX(GaussPoint *aGaussPoint)
 
 
 FloatArray *
-TrPlaneStrRot :: GiveDerivativeVX(GaussPoint *aGaussPoint)
+TrPlaneStrRot :: GiveDerivativeVX(GaussPoint *gp)
 {
     // get node coordinates
     FloatArray x(3), y(3);
@@ -416,8 +416,8 @@ TrPlaneStrRot :: GiveDerivativeVX(GaussPoint *aGaussPoint)
 
     //
     FloatArray shapeFunct(3);
-    shapeFunct.at(1) = aGaussPoint->giveCoordinate(1);
-    shapeFunct.at(2) = aGaussPoint->giveCoordinate(2);
+    shapeFunct.at(1) = gp->giveCoordinate(1);
+    shapeFunct.at(2) = gp->giveCoordinate(2);
     shapeFunct.at(3) = 1.0 - shapeFunct.at(1) - shapeFunct.at(2);
 
     //
@@ -437,7 +437,7 @@ TrPlaneStrRot :: GiveDerivativeVX(GaussPoint *aGaussPoint)
 
 
 FloatArray *
-TrPlaneStrRot :: GiveDerivativeUY(GaussPoint *aGaussPoint)
+TrPlaneStrRot :: GiveDerivativeUY(GaussPoint *gp)
 {
     // get node coordinates
     FloatArray x(3), y(3);
@@ -460,8 +460,8 @@ TrPlaneStrRot :: GiveDerivativeUY(GaussPoint *aGaussPoint)
 
     //
     FloatArray shapeFunct(3);
-    shapeFunct.at(1) = aGaussPoint->giveCoordinate(1);
-    shapeFunct.at(2) = aGaussPoint->giveCoordinate(2);
+    shapeFunct.at(1) = gp->giveCoordinate(1);
+    shapeFunct.at(2) = gp->giveCoordinate(2);
     shapeFunct.at(3) = 1.0 - shapeFunct.at(1) - shapeFunct.at(2);
 
     //
@@ -481,7 +481,7 @@ TrPlaneStrRot :: GiveDerivativeUY(GaussPoint *aGaussPoint)
 
 
 FloatArray *
-TrPlaneStrRot :: GiveDerivativeVY(GaussPoint *aGaussPoint)
+TrPlaneStrRot :: GiveDerivativeVY(GaussPoint *gp)
 {
     // get node coordinates
     FloatArray x(3), y(3);
@@ -504,8 +504,8 @@ TrPlaneStrRot :: GiveDerivativeVY(GaussPoint *aGaussPoint)
 
     //
     FloatArray shapeFunct(3);
-    shapeFunct.at(1) = aGaussPoint->giveCoordinate(1);
-    shapeFunct.at(2) = aGaussPoint->giveCoordinate(2);
+    shapeFunct.at(1) = gp->giveCoordinate(1);
+    shapeFunct.at(2) = gp->giveCoordinate(2);
     shapeFunct.at(3) = 1.0 - shapeFunct.at(1) - shapeFunct.at(2);
 
     //
@@ -622,15 +622,15 @@ TrPlaneStrRot :: giveInternalForcesVector(FloatArray &answer, TimeStep *tStep, i
 
 
 void
-TrPlaneStrRot :: computeStrainVector(FloatArray &answer, GaussPoint *gp, TimeStep *stepN)
+TrPlaneStrRot :: computeStrainVector(FloatArray &answer, GaussPoint *gp, TimeStep *tStep)
 // Computes the vector containing the strains at the Gauss point gp of
-// the receiver, at time step stepN. The nature of these strains depends
+// the receiver, at time step tStep. The nature of these strains depends
 // on the element's type.
 {
     FloatMatrix b;
     FloatArray u, Epsilon;
 
-    this->computeVectorOf(EID_MomentumBalance, VM_Total, stepN, u);
+    this->computeVectorOf(EID_MomentumBalance, VM_Total, tStep, u);
 
     answer.resize(4);
     answer.zero();
@@ -684,8 +684,8 @@ TrPlaneStrRot :: giveDofManDofIDMask(int inode, EquationID, IntArray &answer) co
 
 
 void
-TrPlaneStrRot :: computeBodyLoadVectorAt(FloatArray &answer, Load *forLoad, TimeStep *stepN, ValueModeType mode)
-// Computes numerically the load vector of the receiver due to the body loads, at stepN.
+TrPlaneStrRot :: computeBodyLoadVectorAt(FloatArray &answer, Load *forLoad, TimeStep *tStep, ValueModeType mode)
+// Computes numerically the load vector of the receiver due to the body loads, at tStep.
 // load is assumed to be in global cs.
 // load vector is then transformed to coordinate system in each node.
 // (should be global coordinate system, but there may be defined
@@ -700,7 +700,7 @@ TrPlaneStrRot :: computeBodyLoadVectorAt(FloatArray &answer, Load *forLoad, Time
     }
 
     // note: force is assumed to be in global coordinate system.
-    forLoad->computeComponentArrayAt(force, stepN, mode);
+    forLoad->computeComponentArrayAt(force, tStep, mode);
 
     if ( force.giveSize() ) {
         GaussPoint *gp = integrationRulesArray [ 0 ]->getIntegrationPoint(0);

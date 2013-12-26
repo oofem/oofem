@@ -398,9 +398,10 @@ void AbaqusUserMaterial :: giveFirstPKStressVector_3d(FloatArray &answer, GaussP
     int noel = gp->giveElement()->giveNumber(); // Element number.
     int npt = 0; // Integration point number.
 
+    // We intentionally ignore the layer number since that is handled by the layered cross-section in OOFEM.
     int layer = 0; // Layer number (for composite shells and layered solids)..
     int kspt = 0; // Section point number within the current layer.
-    int kstep = 0; // Step number.
+    int kstep = tStep->giveMetatStepumber(); // Step number.
     int kinc = 0; // Increment number.
 
     ///@todo No idea about these parameters
@@ -487,7 +488,7 @@ void AbaqusUserMaterialStatus :: updateYourself(TimeStep *tStep)
     stateVector = tempStateVector;
 }
 
-int AbaqusUserMaterial :: giveIPValue(FloatArray &answer, GaussPoint *gp, InternalStateType type, TimeStep *atTime)
+int AbaqusUserMaterial :: giveIPValue(FloatArray &answer, GaussPoint *gp, InternalStateType type, TimeStep *tStep)
 {
     AbaqusUserMaterialStatus *ms = static_cast< AbaqusUserMaterialStatus * >( this->giveStatus(gp) );
     if ( type == IST_Undefined ) {
@@ -495,7 +496,7 @@ int AbaqusUserMaterial :: giveIPValue(FloatArray &answer, GaussPoint *gp, Intern
         answer = ms->giveStateVector();
         return 1;
     } else {
-        return StructuralMaterial :: giveIPValue(answer, gp, type, atTime);
+        return StructuralMaterial :: giveIPValue(answer, gp, type, tStep);
     }
 }
 } // end namespace oofem
