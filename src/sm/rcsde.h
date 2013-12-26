@@ -98,7 +98,6 @@ public:
     __rcsdModeType giveMode() { return rcsdMode; }
     // definition
     virtual const char *giveClassName() const { return "RCSDEMaterialStatus"; }
-    virtual classType giveClassID() const { return RCSDEMaterialStatusClass; }
 
     virtual void initTempStatus();
     virtual void updateYourself(TimeStep *tStep);
@@ -128,14 +127,13 @@ public:
     // identification and auxiliary functions
     virtual const char *giveInputRecordName() const { return _IFT_RCSDEMaterial_Name; }
     virtual const char *giveClassName() const { return "RCSDEMaterial"; }
-    virtual classType giveClassID() const { return RCSDEMaterialClass; }
 
     virtual IRResultType initializeFrom(InputRecord *ir);
 
     virtual double give(int aProperty, GaussPoint *gp);
 
-    virtual void giveRealStressVector(FloatArray & answer, GaussPoint *,
-                              const FloatArray &, TimeStep *);
+    virtual void giveRealStressVector(FloatArray &answer, GaussPoint *,
+                                      const FloatArray &, TimeStep *);
 
 #ifdef __OOFEG
 #endif
@@ -150,7 +148,7 @@ protected:
 
     virtual void giveEffectiveMaterialStiffnessMatrix(FloatMatrix &answer,
                                                       MatResponseMode rMode,
-                                                      GaussPoint *gp, TimeStep *atTime);
+                                                      GaussPoint *gp, TimeStep *tStep);
 
     double computeDamageCoeff(double, double, double);
     virtual double giveCrackingModulus(MatResponseMode rMode, GaussPoint *gp,

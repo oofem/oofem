@@ -45,8 +45,7 @@
 #include "classfactory.h"
 
 namespace oofem {
-
-REGISTER_SparseMtrx( DynCompCol, SMT_DynCompCol);
+REGISTER_SparseMtrx(DynCompCol, SMT_DynCompCol);
 
 DynCompCol :: DynCompCol(void) : SparseMtrx(), base_(0)
 {
@@ -83,7 +82,7 @@ DynCompCol :: DynCompCol(const DynCompCol &S) : SparseMtrx(S.nRows, S.nColumns),
     if ( S.columns_ ) {
         this->columns_ = new FloatArray * [ S.nColumns ];
         for ( i = 0; i < S.nColumns; i++ ) {
-            this->columns_ [ i ] = new FloatArray(*S.columns_ [ i ]);
+            this->columns_ [ i ] = new FloatArray(* S.columns_ [ i ]);
         }
     } else {
         this->columns_ = NULL;
@@ -92,7 +91,7 @@ DynCompCol :: DynCompCol(const DynCompCol &S) : SparseMtrx(S.nRows, S.nColumns),
     if ( S.rowind_ ) {
         this->rowind_ = new IntArray * [ S.nColumns ];
         for ( i = 0; i < S.nColumns; i++ ) {
-            this->rowind_ [ i ] = new IntArray(*S.rowind_ [ i ]);
+            this->rowind_ [ i ] = new IntArray(* S.rowind_ [ i ]);
         }
     } else {
         this->rowind_ = NULL;
@@ -103,7 +102,7 @@ DynCompCol :: DynCompCol(const DynCompCol &S) : SparseMtrx(S.nRows, S.nColumns),
     if ( S.columns ) {
         this->columns = new std :: map< int, double > * [ S.nColumns ];
         for ( i = 0; i < S.nColumns; i++ ) {
-            this->columns [ i ] = new std :: map< int, double >(*S.columns [ i ]);
+            this->columns [ i ] = new std :: map< int, double >(* S.columns [ i ]);
         }
     } else {
         this->columns = NULL;
@@ -159,7 +158,7 @@ DynCompCol :: ~DynCompCol()
 /* Assignment operator...  */
 /***************************/
 
-DynCompCol &DynCompCol :: operator = ( const DynCompCol & C )
+DynCompCol &DynCompCol :: operator=(const DynCompCol &C)
 {
     base_   = C.base_;
 
@@ -177,7 +176,7 @@ DynCompCol &DynCompCol :: operator = ( const DynCompCol & C )
     if ( C.columns_ ) {
         this->columns_ = new FloatArray * [ C.nColumns ];
         for ( i = 0; i < C.nColumns; i++ ) {
-            this->columns_ [ i ] = new FloatArray(*C.columns_ [ i ]);
+            this->columns_ [ i ] = new FloatArray(* C.columns_ [ i ]);
         }
     } else {
         this->columns_ = NULL;
@@ -195,7 +194,7 @@ DynCompCol &DynCompCol :: operator = ( const DynCompCol & C )
     if ( C.rowind_ ) {
         this->rowind_ = new IntArray * [ C.nColumns ];
         for ( i = 0; i < C.nColumns; i++ ) {
-            this->rowind_ [ i ] = new IntArray(*C.rowind_ [ i ]);
+            this->rowind_ [ i ] = new IntArray(* C.rowind_ [ i ]);
         }
     } else {
         this->rowind_ = NULL;
@@ -221,7 +220,7 @@ DynCompCol &DynCompCol :: operator = ( const DynCompCol & C )
 
 SparseMtrx *DynCompCol :: GiveCopy() const
 {
-    DynCompCol *result = new DynCompCol(*this);
+    DynCompCol *result = new DynCompCol(* this);
     return result;
 }
 
@@ -289,7 +288,7 @@ int DynCompCol :: buildInternalStructure(EngngModel *eModel, int di, EquationID 
     /*
      * int neq = eModel -> giveNumberOfDomainEquations (di);
      *
-     *#ifndef DynCompCol_USE_STL_SETS
+     **#ifndef DynCompCol_USE_STL_SETS
      * IntArray  loc;
      * Domain* domain = eModel->giveDomain(di);
      * int nelem = domain -> giveNumberOfElements() ;
@@ -358,7 +357,7 @@ int DynCompCol :: buildInternalStructure(EngngModel *eModel, int di, EquationID 
      * }
      *
      * printf ("\nDynCompCol info: neq is %d, nelem is %d\n",neq,nz_);
-     *#else
+     **#else
      * int i,j;
      * if (columns) {
      * for (i=0; i< nColumns; i++) delete this->columns[i];
@@ -369,7 +368,7 @@ int DynCompCol :: buildInternalStructure(EngngModel *eModel, int di, EquationID 
      * columns[j] = new std::map<int, double>;
      * }
      *
-     *#endif
+     **#endif
      *
      * nColumns = nRows = neq;
      * // increment version
@@ -432,27 +431,27 @@ int DynCompCol :: buildInternalStructure(EngngModel *eModel, int di, EquationID 
 
     // loop over active boundary conditions
     int nbc = domain->giveNumberOfBoundaryConditions();
-    std::vector<IntArray> r_locs;
-    std::vector<IntArray> c_locs;
-    
+    std :: vector< IntArray >r_locs;
+    std :: vector< IntArray >c_locs;
+
     for ( int i = 1; i <= nbc; ++i ) {
         ActiveBoundaryCondition *bc = dynamic_cast< ActiveBoundaryCondition * >( domain->giveBc(i) );
         if ( bc != NULL ) {
             bc->giveLocationArrays(r_locs, c_locs, ut, UnknownCharType, s, s);
-	    for (std::size_t k = 0; k < r_locs.size(); k++) {
-	      IntArray &krloc = r_locs[k];
-	      IntArray &kcloc = c_locs[k];
-	      for ( int i = 1; i <= krloc.giveSize(); i++ ) {
-		if ( ( ii = krloc.at(i) ) ) {
-		  for ( int j = 1; j <= kcloc.giveSize(); j++ ) {
-		    if ( (jj = kcloc.at(j) ) ) {
-		      this->insertRowInColumn(jj - 1, ii - 1);
-		    }
-		  }
-		}
-	      }
-	    }
-	}
+            for ( std :: size_t k = 0; k < r_locs.size(); k++ ) {
+                IntArray &krloc = r_locs [ k ];
+                IntArray &kcloc = c_locs [ k ];
+                for ( int i = 1; i <= krloc.giveSize(); i++ ) {
+                    if ( ( ii = krloc.at(i) ) ) {
+                        for ( int j = 1; j <= kcloc.giveSize(); j++ ) {
+                            if ( ( jj = kcloc.at(j) ) ) {
+                                this->insertRowInColumn(jj - 1, ii - 1);
+                            }
+                        }
+                    }
+                }
+            }
+        }
     }
 
     int nz_ = 0;
@@ -719,7 +718,7 @@ double DynCompCol :: at(int i, int j) const
 #endif
 }
 
-double DynCompCol :: operator() (int i, int j)  const
+double DynCompCol :: operator()(int i, int j)  const
 {
 #ifndef DynCompCol_USE_STL_SETS
     /*
@@ -758,7 +757,7 @@ double DynCompCol :: operator() (int i, int j)  const
 #endif
 }
 
-double &DynCompCol :: operator() (int i, int j)
+double &DynCompCol :: operator()(int i, int j)
 {
     // increment version
     this->version++;

@@ -39,8 +39,7 @@
 #include "classfactory.h"
 
 namespace oofem {
-
-REGISTER_Material( CebFip78Material );
+REGISTER_Material(CebFip78Material);
 
 IRResultType
 CebFip78Material :: initializeFrom(InputRecord *ir)
@@ -63,17 +62,17 @@ CebFip78Material :: initializeFrom(InputRecord *ir)
 
 
 double
-CebFip78Material :: computeCreepFunction(double atTime, double ofAge)
+CebFip78Material :: computeCreepFunction(double tStep, double ofAge)
 {
     // computes the value of creep function at time ofAge
-    // when load is acting from atTime
+    // when load is acting from tStep
 
     double e0;
     double fi, fi0, firv, fiir, hd, alpha, beta;
     double t, t0;
 
     t0 = this->kap_tt * this->kap_c * ofAge;
-    t  = this->kap_tt * this->kap_c * atTime;
+    t  = this->kap_tt * this->kap_c * tStep;
 
     e0 = E28 * sqrt( 1.36 * t0 / ( t0 + 10. ) );
 

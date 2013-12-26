@@ -52,12 +52,12 @@ SpatialLocalizerInterface :: SpatialLocalizerI_giveBBox(FloatArray &bb0, FloatAr
     FloatArray *coordinates;
 
     coordinates = element->giveNode(1)->giveCoordinates();
-    bb1 = bb0 = *element->giveNode(1)->giveCoordinates();
+    bb1 = bb0 = * element->giveNode(1)->giveCoordinates();
 
     for ( int i = 2; i <= element->giveNumberOfNodes(); ++i ) {
         coordinates = element->giveNode(i)->giveCoordinates();
-        bb0.beMinOf(bb0, *coordinates);
-        bb1.beMaxOf(bb1, *coordinates);
+        bb0.beMinOf(bb0, * coordinates);
+        bb1.beMaxOf(bb1, * coordinates);
     }
 }
 
@@ -67,9 +67,9 @@ SpatialLocalizerInterface :: SpatialLocalizerI_giveClosestPoint(FloatArray &lcoo
 {
     Element *e = this->SpatialLocalizerI_giveElement();
     FEInterpolation *interp = e->giveInterpolation();
-    
-    if ( !interp->global2local(lcoords, gcoords, FEIElementGeometryWrapper(e)) ) { // Outside element
-        interp->local2global(closest, lcoords, FEIElementGeometryWrapper(e));
+
+    if ( !interp->global2local( lcoords, gcoords, FEIElementGeometryWrapper(e) ) ) { // Outside element
+        interp->local2global( closest, lcoords, FEIElementGeometryWrapper(e) );
         return closest.distance(gcoords);
     } else {
         closest = gcoords;
@@ -81,16 +81,16 @@ SpatialLocalizerInterface :: SpatialLocalizerI_giveClosestPoint(FloatArray &lcoo
 int
 SpatialLocalizerInterface :: SpatialLocalizerI_BBoxContainsPoint(const FloatArray &coords)
 {
-  FloatArray coordMin, coordMax;
-  this->SpatialLocalizerI_giveBBox(coordMin, coordMax);
+    FloatArray coordMin, coordMax;
+    this->SpatialLocalizerI_giveBBox(coordMin, coordMax);
 
-   int size = min( coordMin.giveSize(), coords.giveSize() );
+    int size = min( coordMin.giveSize(), coords.giveSize() );
     for ( int j = 1; j <= size; j++ ) {
-      if ( coords.at(j) < coordMin.at(j) - POINT_TOL ) {
+        if ( coords.at(j) < coordMin.at(j) - POINT_TOL ) {
             return 0;
         }
 
-      if ( coords.at(j) > coordMax.at(j) + POINT_TOL ) {
+        if ( coords.at(j) > coordMax.at(j) + POINT_TOL ) {
             return 0;
         }
     }

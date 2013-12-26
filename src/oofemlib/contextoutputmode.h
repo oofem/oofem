@@ -44,4 +44,3 @@ enum ContextOutputMode {
 };
 } // end namespace oofem
 #endif // contextoutputmode_h
-

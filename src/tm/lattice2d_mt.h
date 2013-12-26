@@ -89,7 +89,6 @@ public:
 
     virtual const char *giveInputRecordName() const { return _IFT_Lattice2d_mt_Name; }
     virtual const char *giveClassName() const { return "Lattice2d_mtElement"; }
-    virtual classType giveClassID() const { return Lattice2d_mtClass; }
 
     virtual Element_Geometry_Type giveGeometryType() const { return EGT_line_1; }
 
@@ -97,7 +96,7 @@ public:
     virtual void giveDofManDofIDMask(int inode, EquationID, IntArray &) const;
     virtual IRResultType initializeFrom(InputRecord *ir);
 
-    virtual void updateInternalState(TimeStep *stepN);
+    virtual void updateInternalState(TimeStep *tStep);
 
 #ifdef __OOFEG
     //

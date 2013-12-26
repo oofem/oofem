@@ -33,6 +33,4 @@
 
 #include "rveengngmodel.h"
 
-namespace oofem {
-
-}
+namespace oofem {}

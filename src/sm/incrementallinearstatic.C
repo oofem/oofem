@@ -45,8 +45,7 @@
 #include "activebc.h"
 
 namespace oofem {
-
-REGISTER_EngngModel( IncrementalLinearStatic );
+REGISTER_EngngModel(IncrementalLinearStatic);
 
 IncrementalLinearStatic :: IncrementalLinearStatic(int i, EngngModel *_master) : StructuralEngngModel(i, _master),
     loadVector(), internalLoadVector(), incrementOfDisplacementVector(), discreteTimes()
@@ -94,13 +93,13 @@ IRResultType IncrementalLinearStatic :: initializeFrom(InputRecord *ir)
     IR_GIVE_OPTIONAL_FIELD(ir, discreteTimes, _IFT_IncrementalLinearStatic_prescribedtimes);
     if ( discreteTimes.giveSize() > 0 ) {
         numberOfSteps = discreteTimes.giveSize();
-        endOfTimeOfInterest = discreteTimes.at(discreteTimes.giveSize());
+        endOfTimeOfInterest = discreteTimes.at( discreteTimes.giveSize() );
         fixedSteps = false;
     } else {
         deltaT = 1.0;
         IR_GIVE_OPTIONAL_FIELD(ir, deltaT, _IFT_IncrementalLinearStatic_deltat);
         IR_GIVE_FIELD(ir, numberOfSteps, _IFT_EngngModel_nsteps);
-        endOfTimeOfInterest = deltaT*numberOfSteps;
+        endOfTimeOfInterest = deltaT * numberOfSteps;
         fixedSteps = true;
     }
     IR_GIVE_OPTIONAL_FIELD(ir, endOfTimeOfInterest, _IFT_IncrementalLinearStatic_endoftimeofinterest);
@@ -120,8 +119,8 @@ IRResultType IncrementalLinearStatic :: initializeFrom(InputRecord *ir)
 
 double IncrementalLinearStatic :: giveDiscreteTime(int iStep)
 {
-    if (this->fixedSteps) {
-       return this->deltaT*iStep;
+    if ( this->fixedSteps ) {
+        return this->deltaT * iStep;
     } else {
         if ( ( iStep > 0 ) && ( iStep <= discreteTimes.giveSize() ) ) {
             return ( discreteTimes.at(iStep) );
@@ -136,7 +135,7 @@ double IncrementalLinearStatic :: giveDiscreteTime(int iStep)
 TimeStep *IncrementalLinearStatic :: giveNextStep()
 {
     int istep = this->giveNumberOfFirstStep();
-    int mstepNum = 1;
+    int mtStepum = 1;
     double dt = this->giveDiscreteTime(istep);
     StateCounterType counter = 1;
 
@@ -146,15 +145,15 @@ TimeStep *IncrementalLinearStatic :: giveNextStep()
         counter = currentStep->giveSolutionStateCounter() + 1;
     }
 
-    if (previousStep != NULL){
+    if ( previousStep != NULL ) {
         delete previousStep;
     }
 
     previousStep = currentStep;
-    if (previousStep == NULL) {
+    if ( previousStep == NULL ) {
         previousStep = new TimeStep(giveNumberOfTimeStepWhenIcApply(), this, 0, -dt, dt, 0);
     }
-    currentStep = new TimeStep(istep, this, mstepNum, this->giveDiscreteTime(istep), dt, counter);
+    currentStep = new TimeStep(istep, this, mtStepum, this->giveDiscreteTime(istep), dt, counter);
     return currentStep;
 }
 
@@ -203,7 +202,7 @@ void IncrementalLinearStatic :: solveYourselfAt(TimeStep *tStep)
         DofManager *dofman = d->giveDofManager(i);
         for ( int j = 1; j <= dofman->giveNumberOfDofs(); j++ ) {
             Dof *dof = dofman->giveDof(j);
-            double tot = dof->giveUnknown(VM_Total, tStep->givePreviousStep());
+            double tot = dof->giveUnknown( VM_Total, tStep->givePreviousStep() );
             if ( dof->hasBc(tStep) ) {
                 tot += dof->giveBcValue(VM_Incremental, tStep);
             }
@@ -217,9 +216,9 @@ void IncrementalLinearStatic :: solveYourselfAt(TimeStep *tStep)
     OOFEM_LOG_RELEVANT( "Solving [step number %8d, time %15e]\n", tStep->giveNumber(), tStep->giveTargetTime() );
 #endif
 
-    int neq = this->giveNumberOfDomainEquations(1, EModelDefaultEquationNumbering());
+    int neq = this->giveNumberOfDomainEquations( 1, EModelDefaultEquationNumbering() );
 
-    if (neq == 0) { // Allows for fully prescribed/empty problems.
+    if ( neq == 0 ) { // Allows for fully prescribed/empty problems.
         return;
     }
 
@@ -257,14 +256,14 @@ void IncrementalLinearStatic :: solveYourselfAt(TimeStep *tStep)
     stiffnessMatrix->buildInternalStructure( this, 1, EID_MomentumBalance, EModelDefaultEquationNumbering() );
     stiffnessMatrix->zero();
     this->assemble( stiffnessMatrix, tStep, EID_MomentumBalance, StiffnessMatrix,
-                   EModelDefaultEquationNumbering(), this->giveDomain(1) );
+                    EModelDefaultEquationNumbering(), this->giveDomain(1) );
 
 #ifdef VERBOSE
     OOFEM_LOG_INFO("Solving ...\n");
 #endif
     this->giveNumericalMethod( this->giveCurrentMetaStep() );
     NM_Status s = nMethod->solve(stiffnessMatrix, & loadVector, & incrementOfDisplacementVector);
-    if ( !(s & NM_Success) ) {
+    if ( !( s & NM_Success ) ) {
         OOFEM_ERROR("IncrementalLinearStatic :: solverYourselfAt - No success in solving system.");
     }
 }
@@ -287,9 +286,9 @@ double IncrementalLinearStatic :: giveUnknownComponent(ValueModeType mode, TimeS
 }
 
 
-int IncrementalLinearStatic :: giveUnknownDictHashIndx(ValueModeType mode, TimeStep* stepN)
+int IncrementalLinearStatic :: giveUnknownDictHashIndx(ValueModeType mode, TimeStep *tStep)
 {
-    return (int) stepN->giveNumber() % 2;
+    return ( int ) tStep->giveNumber() % 2;
 }
 
 
@@ -308,7 +307,9 @@ void IncrementalLinearStatic :: updateDofUnknownsDictionary(DofManager *inode, T
     for ( int i = 1; i <= ndofs; i++ ) {
         iDof = inode->giveDof(i);
         // skip slave DOFs (only master (primary) DOFs have to be updated).
-        if (!iDof->isPrimaryDof()) continue;
+        if ( !iDof->isPrimaryDof() ) {
+            continue;
+        }
         val = iDof->giveUnknown(VM_Total, tStep);
         if ( !iDof->hasBc(tStep) ) {
             val += this->incrementOfDisplacementVector.at( iDof->__giveEquationNumber() );
@@ -320,9 +321,9 @@ void IncrementalLinearStatic :: updateDofUnknownsDictionary(DofManager *inode, T
 }
 
 
-void IncrementalLinearStatic :: printDofOutputAt(FILE *stream, Dof *iDof, TimeStep *atTime)
+void IncrementalLinearStatic :: printDofOutputAt(FILE *stream, Dof *iDof, TimeStep *tStep)
 {
-    iDof->printSingleOutputAt(stream, atTime, 'd', VM_Total);
+    iDof->printSingleOutputAt(stream, tStep, 'd', VM_Total);
 }
 
 
@@ -330,7 +331,7 @@ void IncrementalLinearStatic :: terminate(TimeStep *tStep)
 {
     StructuralEngngModel :: terminate(tStep);
     this->printReactionForces(tStep, 1);
-    fflush(this->giveOutputStream());
+    fflush( this->giveOutputStream() );
 }
 
 
@@ -369,7 +370,7 @@ contextIOResultType IncrementalLinearStatic :: restoreContext(DataStream *stream
     int closeFlag = 0, istep, iversion;
     contextIOResultType iores;
     FILE *file = NULL;
-    this->resolveCorrespondingStepNumber(istep, iversion, obj);
+    this->resolveCorrespondingtStepumber(istep, iversion, obj);
     if ( stream == NULL ) {
         if ( !this->giveContextFile(& file, istep, iversion, contextMode_read) ) {
             THROW_CIOERR(CIO_IOERR);
@@ -391,5 +392,4 @@ contextIOResultType IncrementalLinearStatic :: restoreContext(DataStream *stream
 
     return CIO_OK;
 }
-
 } // end namespace oofem

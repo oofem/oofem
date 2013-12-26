@@ -38,8 +38,7 @@
 #include "classfactory.h"
 
 namespace oofem {
-
-REGISTER_Material( HyperElasticMaterial );
+REGISTER_Material(HyperElasticMaterial);
 
 HyperElasticMaterial :: HyperElasticMaterial(int n, Domain *d) : StructuralMaterial(n, d)
 {}
@@ -53,7 +52,7 @@ HyperElasticMaterial :: hasMaterialModeCapability(MaterialMode mode)
 
 
 void
-HyperElasticMaterial :: give3dMaterialStiffnessMatrix(FloatMatrix &answer, MatResponseMode, GaussPoint *gp, TimeStep *atTime)
+HyperElasticMaterial :: give3dMaterialStiffnessMatrix(FloatMatrix &answer, MatResponseMode, GaussPoint *gp, TimeStep *tStep)
 
 // returns the 6x6 tangent stiffness matrix - dS/dE
 
@@ -111,7 +110,7 @@ HyperElasticMaterial :: give3dMaterialStiffnessMatrix(FloatMatrix &answer, MatRe
 
 
 void
-HyperElasticMaterial :: giveRealStressVector_3d(FloatArray &answer, GaussPoint *gp, const FloatArray &totalStrain, TimeStep *atTime)
+HyperElasticMaterial :: giveRealStressVector_3d(FloatArray &answer, GaussPoint *gp, const FloatArray &totalStrain, TimeStep *tStep)
 
 // returns 6 components of the stress corresponding to the given total strain
 
@@ -124,7 +123,7 @@ HyperElasticMaterial :: giveRealStressVector_3d(FloatArray &answer, GaussPoint *
     HyperElasticMaterialStatus *status = static_cast< HyperElasticMaterialStatus * >( this->giveStatus(gp) );
     this->giveStressDependentPartOfStrainVector(strainVector, gp,
                                                 totalStrain,
-                                                atTime, VM_Total);
+                                                tStep, VM_Total);
 
     C.at(1, 1) = 1. + 2. * strainVector.at(1);
     C.at(2, 2) = 1. + 2. * strainVector.at(2);
@@ -134,7 +133,7 @@ HyperElasticMaterial :: giveRealStressVector_3d(FloatArray &answer, GaussPoint *
     C.at(2, 3) = C.at(3, 2) = strainVector.at(4);
     invC.beInverseOf(C);
     J2 = C.giveDeterminant();
-    
+
     answer.resize(6);
     double aux = ( K - 2. / 3. * G ) * ( J2 - 1. ) / 2. - G;
     answer.at(1) = aux * invC.at(1, 1) + G;
@@ -147,7 +146,6 @@ HyperElasticMaterial :: giveRealStressVector_3d(FloatArray &answer, GaussPoint *
     // update gp
     status->letTempStrainVectorBe(totalStrain);
     status->letTempStressVectorBe(answer);
-
 }
 
 
@@ -209,8 +207,8 @@ HyperElasticMaterialStatus :: initTempStatus()
 
 // Called when equilibrium reached, set equilibrated vars according to temporary (working) ones.
 void
-HyperElasticMaterialStatus :: updateYourself(TimeStep *atTime)
+HyperElasticMaterialStatus :: updateYourself(TimeStep *tStep)
 {
-    StructuralMaterialStatus :: updateYourself(atTime);
+    StructuralMaterialStatus :: updateYourself(tStep);
 }
 } // end namespace oofem

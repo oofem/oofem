@@ -46,7 +46,7 @@ KelvinChainMaterial :: KelvinChainMaterial(int n, Domain *d) : RheoChainMaterial
 {}
 
 void
-KelvinChainMaterial :: computeCharCoefficients(FloatArray &answer, double atTime)
+KelvinChainMaterial :: computeCharCoefficients(FloatArray &answer, double tStep)
 {
     /*
      * This function computes the moduli of individual Kelvin units
@@ -56,7 +56,7 @@ KelvinChainMaterial :: computeCharCoefficients(FloatArray &answer, double atTime
      * The optimal moduli are obtained using the least-square method.
      *
      * INPUTS:
-     * atTime = age of material when load is applied
+     * tStep = age of material when load is applied
      */
 
     int rSize;
@@ -72,7 +72,7 @@ KelvinChainMaterial :: computeCharCoefficients(FloatArray &answer, double atTime
     // (can be done directly, since the compliance function is available)
 
     for ( int i = 1; i <= rSize; i++ ) {
-        discreteComplianceFunctionVal.at(i) = this->computeCreepFunction(atTime + rTimes.at(i), atTime);
+        discreteComplianceFunctionVal.at(i) = this->computeCreepFunction(tStep + rTimes.at(i), tStep);
     }
 
     // assemble the matrix of the set of linear equations
@@ -83,7 +83,7 @@ KelvinChainMaterial :: computeCharCoefficients(FloatArray &answer, double atTime
         for ( int j = 1; j <= this->nUnits; j++ ) {
             tauj = this->giveCharTime(j);
             double sum = 0.;
-            for ( int  r = 1; r <= rSize; r++ ) {
+            for ( int r = 1; r <= rSize; r++ ) {
                 tti = rTimes.at(r) / taui;
                 ttj = rTimes.at(r) / tauj;
                 sum += ( 1. - exp(-tti) ) * ( 1. - exp(-ttj) );
@@ -113,7 +113,7 @@ KelvinChainMaterial :: computeCharCoefficients(FloatArray &answer, double atTime
 }
 
 double
-KelvinChainMaterial :: giveEModulus(GaussPoint *gp, TimeStep *atTime)
+KelvinChainMaterial :: giveEModulus(GaussPoint *gp, TimeStep *tStep)
 {
     /*
      * This function returns the incremental modulus for the given time increment.
@@ -127,9 +127,9 @@ KelvinChainMaterial :: giveEModulus(GaussPoint *gp, TimeStep *atTime)
     double sum = 0.0; // return value
 
     ///@warning THREAD UNSAFE!
-    this->updateEparModuli(relMatAge + ( atTime->giveTargetTime() - 0.5 * atTime->giveTimeIncrement() ) / timeFactor);
+    this->updateEparModuli(relMatAge + ( tStep->giveTargetTime() - 0.5 * tStep->giveTimeIncrement() ) / timeFactor);
 
-    deltaT = atTime->giveTimeIncrement() / timeFactor;
+    deltaT = tStep->giveTimeIncrement() / timeFactor;
 
     // EparVal values were determined using the least-square method
     for ( int mu = 1; mu <= nUnits; mu++ ) {
@@ -150,7 +150,7 @@ KelvinChainMaterial :: giveEModulus(GaussPoint *gp, TimeStep *atTime)
 }
 
 void
-KelvinChainMaterial :: giveEigenStrainVector(FloatArray &answer, GaussPoint *gp, TimeStep *atTime, ValueModeType mode)
+KelvinChainMaterial :: giveEigenStrainVector(FloatArray &answer, GaussPoint *gp, TimeStep *tStep, ValueModeType mode)
 //
 // computes the strain due to creep at constant stress during the increment
 // (in fact, the INCREMENT of creep strain is computed for mode == VM_Incremental)
@@ -164,13 +164,13 @@ KelvinChainMaterial :: giveEigenStrainVector(FloatArray &answer, GaussPoint *gp,
 
     if ( mode == VM_Incremental ) {
         for ( int mu = 1; mu <= nUnits; mu++ ) {
-            if ( ( atTime->giveTimeIncrement() / timeFactor ) / this->giveCharTime(mu) > 30 ) {
+            if ( ( tStep->giveTimeIncrement() / timeFactor ) / this->giveCharTime(mu) > 30 ) {
                 beta = 0;
             } else {
-                beta = exp( -( atTime->giveTimeIncrement() / timeFactor ) / ( this->giveCharTime(mu) ) );
+                beta = exp( -( tStep->giveTimeIncrement() / timeFactor ) / ( this->giveCharTime(mu) ) );
             }
 
-            gamma = &status->giveHiddenVarsVector(mu); // JB
+            gamma = & status->giveHiddenVarsVector(mu); // JB
             if ( gamma ) {
                 help.zero();
                 help.add(* gamma);
@@ -187,10 +187,10 @@ KelvinChainMaterial :: giveEigenStrainVector(FloatArray &answer, GaussPoint *gp,
 }
 
 
-void 
+void
 KelvinChainMaterial :: giveRealStressVector(FloatArray &answer, GaussPoint *gp, const FloatArray &reducedStrain, TimeStep *tStep)
 {
-    RheoChainMaterial ::giveRealStressVector(answer, gp, reducedStrain, tStep);
+    RheoChainMaterial :: giveRealStressVector(answer, gp, reducedStrain, tStep);
 
     this->computeHiddenVars(gp, tStep);
 }
@@ -248,10 +248,10 @@ KelvinChainMaterial :: computeHiddenVars(GaussPoint *gp, TimeStep *tNow)
         if ( muthHiddenVarsVector.giveSize() ) {
             muthHiddenVarsVector.times(betaMu);
             muthHiddenVarsVector.add(help);
-            status->letTempHiddenVarsVectorBe( mu, muthHiddenVarsVector);
+            status->letTempHiddenVarsVectorBe(mu, muthHiddenVarsVector);
         } else {
             //status->letHiddenVarsVectorBe( mu, (new FloatArray(help)) );
-            status->letTempHiddenVarsVectorBe( mu, help);
+            status->letTempHiddenVarsVectorBe(mu, help);
         }
     }
 }

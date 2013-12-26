@@ -84,15 +84,17 @@ class ConcreteDPM2Status : public StructuralMaterialStatus
 {
 public:
     /// Values of history variable state_flag.
-    enum state_flag_values { ConcreteDPM2_Elastic, 
-                             ConcreteDPM2_Unloading,
-                             ConcreteDPM2_Plastic,
-                             ConcreteDPM2_Damage,
-                             ConcreteDPM2_PlasticDamage,
-                             ConcreteDPM2_VertexCompression,
-                             ConcreteDPM2_VertexTension,
-                             ConcreteDPM2_VertexCompressionDamage,
-                             ConcreteDPM2_VertexTensionDamage };
+    enum state_flag_values {
+        ConcreteDPM2_Elastic,
+        ConcreteDPM2_Unloading,
+        ConcreteDPM2_Plastic,
+        ConcreteDPM2_Damage,
+        ConcreteDPM2_PlasticDamage,
+        ConcreteDPM2_VertexCompression,
+        ConcreteDPM2_VertexTension,
+        ConcreteDPM2_VertexCompressionDamage,
+        ConcreteDPM2_VertexTensionDamage
+    };
 protected:
     /// @name History variables of the plasticity model
     //@{
@@ -179,7 +181,6 @@ public:
     virtual contextIOResultType saveContext(DataStream *, ContextMode mode, void *obj = NULL);
     virtual contextIOResultType restoreContext(DataStream *, ContextMode mode, void *obj = NULL);
     virtual const char *giveClassName() const { return "ConcreteDPM2Status"; }
-    virtual classType giveClassID() const { return ConcreteDPM2StatusClass; }
 
     // Inline functions for access to state variables
     // give:
@@ -195,9 +196,9 @@ public:
     }
     /**
      * Get the plastic strain deviator from the material status.
-     * @param answer Plastic strain deviator.
+     * @return Plastic strain deviator.
      */
-    const StrainVector & givePlasticStrain() const { return plasticStrain; }
+    const StrainVector &givePlasticStrain() const { return plasticStrain; }
 
 
     /**
@@ -312,10 +313,10 @@ public:
     double giveRateStrain() const
     { return rateStrain; }
 
-    void letTempRateStrainBe(const double v)
+    void letTempRateStrainBe(double v)
     { tempRateStrain = v; }
 
-    void letTempAlphaBe(const double v)
+    void letTempAlphaBe(double v)
     { tempAlpha = v; }
 
     /**
@@ -331,9 +332,9 @@ public:
     // Functions used to access the temp variables.
     /**
      * Get the temp value of the full plastic strain vector from the material status.
-     * @param answer Temp value of plastic strain vector.
+     * @return Temp value of plastic strain vector.
      */
-    const StrainVector & giveTempPlasticStrain() const { return tempPlasticStrain; }
+    const StrainVector &giveTempPlasticStrain() const { return tempPlasticStrain; }
 
     /**
      *  Get the temp value of the volumetric plastic strain in plane stress
@@ -430,98 +431,98 @@ public:
      * Assign the temp value of the rate factor of the damage model.
      * @param v New temp value of the damage variable
      */
-    void letDeltaLambdaBe(const double v)
+    void letDeltaLambdaBe(double v)
     { deltaLambda = v; }
 
     /**
      * Assign the temp value of the hardening variable of the plasticity model.
      * @param v New temp value of the hardening variable
      */
-    void letTempKappaPBe(const double v)
+    void letTempKappaPBe(double v)
     { tempKappaP = v; }
 
     /**
      * Assign the temp value of the rate factor of the damage model.
      * @param v New temp value of the damage variable
      */
-    void letTempKappaDTensionBe(const double v)
+    void letTempKappaDTensionBe(double v)
     { tempKappaDTension = v; }
 
     /**
      * Assign the temp value of the rate factor of the damage model.
      * @param v New temp value of the damage variable
      */
-    void letTempKappaDCompressionBe(const double v)
+    void letTempKappaDCompressionBe(double v)
     { tempKappaDCompression = v; }
 
     /**
      * Assign the temp value of the hardening variable of the damage model.
      * @param v New temp value of the hardening variable
      */
-    void letTempKappaDTensionOneBe(const double v)
+    void letTempKappaDTensionOneBe(double v)
     { tempKappaDTensionOne = v; }
 
     /**
      * Assign the temp value of the hardening variable of the damage model.
      * @param v New temp value of the hardening variable
      */
-    void letTempKappaDCompressionOneBe(const double v)
+    void letTempKappaDCompressionOneBe(double v)
     { tempKappaDCompressionOne = v; }
 
     /**
      * Assign the temp value of the second tension hardening variable of the damage model.
      * @param v New temp value of the second tension hardening variable
      */
-    void letTempKappaDTensionTwoBe(const double v)
+    void letTempKappaDTensionTwoBe(double v)
     { tempKappaDTensionTwo = v; }
 
     /**
      * Assign the temp value of the second compression hardening variable of the damage model.
      * @param v New temp value of the second compression hardening variable
      */
-    void letTempKappaDCompressionTwoBe(const double v)
+    void letTempKappaDCompressionTwoBe(double v)
     { tempKappaDCompressionTwo = v; }
 
     /**
      * Assign the temp value of the tensile damage variable of the damage model.
      * @param v New temp value of the tensile damage variable
      */
-    void letTempDamageTensionBe(const double v)
+    void letTempDamageTensionBe(double v)
     { tempDamageTension = v; }
 
     /**
      * Assign the temp value of the compressive damage variable of the damage model.
      * @param v New temp value of the compressive damage variable
      */
-    void letTempDamageCompressionBe(const double v)
+    void letTempDamageCompressionBe(double v)
     { tempDamageCompression = v; }
 
     /**
      * Assign the temp value of the rate factor of the damage model.
      * @param v New temp value of the damage variable
      */
-    void letTempRateFactorBe(const double v)
+    void letTempRateFactorBe(double v)
     { tempRateFactor = v; }
 
     /**
      * Assign the temp value of the rate factor of the damage model.
      * @param v New temp value of the damage variable
      */
-    void letTempEquivStrainBe(const double v)
+    void letTempEquivStrainBe(double v)
     { tempEquivStrain = v; }
 
     /**
      * Assign the temp value of the rate factor of the damage model.
      * @param v New temp value of the damage variable
      */
-    void letTempEquivStrainTensionBe(const double v)
+    void letTempEquivStrainTensionBe(double v)
     { tempEquivStrainTension = v; }
 
     /**
      * Assign the temp value of the rate factor of the damage model.
      * @param v New temp value of the damage variable
      */
-    void letTempEquivStrainCompressionBe(const double v)
+    void letTempEquivStrainCompressionBe(double v)
     { tempEquivStrainCompression = v; }
 
 
@@ -679,7 +680,6 @@ public:
 
     virtual const char *giveClassName() const { return "ConcreteDPM2"; }
     virtual const char *giveInputRecordName() const { return _IFT_ConcreteDPM2_Name; }
-    virtual classType giveClassID() const { return ConcreteDPM2Class; }
 
     LinearElasticMaterial *giveLinearElasticMaterial()
     { return linearElasticMaterial; }
@@ -693,14 +693,14 @@ public:
     virtual void giveRealStressVector(FloatArray &answer,
                                       GaussPoint *gp,
                                       const FloatArray &strainVector,
-                                      TimeStep *atTime);
+                                      TimeStep *tStep);
 
     virtual void giveRealStressVector_3d(FloatArray &answer, GaussPoint *gp, const FloatArray &reducedE, TimeStep *tStep)
     { this->giveRealStressVector(answer, gp, reducedE, tStep); }
     virtual void giveRealStressVector_PlaneStrain(FloatArray &answer, GaussPoint *gp, const FloatArray &reducedE, TimeStep *tStep)
     { this->giveRealStressVector(answer, gp, reducedE, tStep); }
 
-    /** 
+    /**
      * Perform stress return of the plasticity model and compute history variables.
      * @param gp Gauss point.
      * @param strain Strain vector of this Gauss point.
@@ -832,7 +832,7 @@ public:
                                       const double rho,
                                       const double tempKappa);
 
-    /** 
+    /**
      * Here, the first derivative of the plastic potential with respect
      * to the invariants sig and rho are computed
      */
@@ -915,7 +915,7 @@ public:
     /**
      * Perform stress return for the damage model, i.e. if the trial stress state does not violate the plasticity surface.
      */
-    void  computeDamage(FloatArray &answer, const StrainVector &strain, const double timeFactor, GaussPoint *gp, TimeStep *atTime, const double alpha);
+    void  computeDamage(FloatArray &answer, const StrainVector &strain, const double timeFactor, GaussPoint *gp, TimeStep *tStep, const double alpha);
 
 
     double computeAlpha(StressVector &effectiveStressTension, StressVector &effectiveStressCompression, StressVector &effectiveStress);
@@ -930,7 +930,7 @@ public:
 
     double computeDeltaPlasticStrainNormCompression(const double tempAlpha, double tempKappaD, double kappaD, GaussPoint *gp);
 
-    virtual void computeEquivalentStrain(double &kappaD, const StrainVector &strain, GaussPoint *gp, TimeStep *atTime);
+    virtual void computeEquivalentStrain(double &kappaD, const StrainVector &strain, GaussPoint *gp, TimeStep *tStep);
 
     /// Compute the ductility measure for the damage model.
     double computeDuctilityMeasureDamage(const StrainVector &strain, GaussPoint *gp);
@@ -981,7 +981,7 @@ public:
     virtual int giveIPValue(FloatArray &answer,
                             GaussPoint *gp,
                             InternalStateType type,
-                            TimeStep *atTime);
+                            TimeStep *tStep);
 
 protected:
     MaterialStatus *CreateStatus(GaussPoint *gp) const;

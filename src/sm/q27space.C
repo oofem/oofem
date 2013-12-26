@@ -46,14 +46,13 @@
 #include "fei3dhexatriquad.h"
 
 namespace oofem {
-
-REGISTER_Element( Q27Space );
+REGISTER_Element(Q27Space);
 
 FEI3dHexaTriQuad Q27Space :: interpolation;
 
-FEInterpolation* Q27Space :: giveInterpolation() const
+FEInterpolation *Q27Space :: giveInterpolation() const
 {
-    return &interpolation;
+    return & interpolation;
 }
 
 Q27Space :: Q27Space(int n, Domain *aDomain) : NLStructuralElement(n, aDomain)
@@ -67,9 +66,9 @@ Q27Space :: initializeFrom(InputRecord *ir)
 {
     numberOfGaussPoints = 27;
     IRResultType result = this->StructuralElement :: initializeFrom(ir);
-	if(result != IRRT_OK) {
-		return result;
-	}
+    if ( result != IRRT_OK ) {
+        return result;
+    }
 
     return IRRT_OK;
 }
@@ -89,11 +88,11 @@ Q27Space :: giveMaterialMode()
 
 
 double
-Q27Space :: computeVolumeAround(GaussPoint *aGaussPoint)
-// Returns the portion of the receiver which is attached to aGaussPoint.
+Q27Space :: computeVolumeAround(GaussPoint *gp)
+// Returns the portion of the receiver which is attached to gp.
 {
-    double determinant = fabs( this->interpolation.giveTransformationJacobian(* aGaussPoint->giveCoordinates(), FEIElementGeometryWrapper(this)) );
-    double weight      = aGaussPoint->giveWeight();
+    double determinant = fabs( this->interpolation.giveTransformationJacobian( * gp->giveCoordinates(), FEIElementGeometryWrapper(this) ) );
+    double weight      = gp->giveWeight();
 
     return ( determinant * weight );
 }
@@ -115,32 +114,20 @@ Q27Space :: computeGaussPoints()
         numberOfIntegrationRules = 1;
         integrationRulesArray = new IntegrationRule * [ numberOfIntegrationRules ];
         integrationRulesArray [ 0 ] = new GaussIntegrationRule(1, this, 1, 6);
-        this->giveCrossSection()->setupIntegrationPoints(*integrationRulesArray[0], numberOfGaussPoints, this);
+        this->giveCrossSection()->setupIntegrationPoints(* integrationRulesArray [ 0 ], numberOfGaussPoints, this);
     }
 }
 
 
 void
-Q27Space :: computeNmatrixAt(GaussPoint *aGaussPoint, FloatMatrix &answer)
-// Returns the displacement interpolation matrix {N} of the receiver, eva-
-// luated at aGaussPoint.
-{
-    FloatArray n;
-    this->interpolation.evalN(n, * aGaussPoint->giveCoordinates(), FEIElementGeometryWrapper(this));
-    answer.beNMatrixOf(n, 3);
-}
-
-
-
-void
-Q27Space :: computeBmatrixAt(GaussPoint *aGaussPoint, FloatMatrix &answer, int li, int ui)
+Q27Space :: computeBmatrixAt(GaussPoint *gp, FloatMatrix &answer, int li, int ui)
 // Returns the [6x60] strain-displacement matrix {B} of the receiver, eva-
-// luated at aGaussPoint.
+// luated at gp.
 // B matrix  -  6 rows : epsilon-X, epsilon-Y, epsilon-Z, gamma-YZ, gamma-ZX, gamma-XY  :
 {
     FloatMatrix dnx;
 
-    this->interpolation.evaldNdx(dnx, * aGaussPoint->giveCoordinates(), FEIElementGeometryWrapper(this));
+    this->interpolation.evaldNdx( dnx, * gp->giveCoordinates(), FEIElementGeometryWrapper(this) );
 
     answer.resize(6, 81);
     answer.zero();
@@ -163,12 +150,11 @@ Q27Space :: computeBmatrixAt(GaussPoint *aGaussPoint, FloatMatrix &answer, int l
 
 
 void
-Q27Space :: computeBHmatrixAt(GaussPoint *aGaussPoint, FloatMatrix &answer) 
+Q27Space :: computeBHmatrixAt(GaussPoint *gp, FloatMatrix &answer)
 {
-    
     FloatMatrix dnx;
 
-    this->interpolation.evaldNdx(dnx, * aGaussPoint->giveCoordinates(), FEIElementGeometryWrapper(this));
+    this->interpolation.evaldNdx( dnx, * gp->giveCoordinates(), FEIElementGeometryWrapper(this) );
 
     answer.resize(6, 81);
     answer.zero();
@@ -177,11 +163,11 @@ Q27Space :: computeBHmatrixAt(GaussPoint *aGaussPoint, FloatMatrix &answer)
         answer.at(1, 3 * i - 2) = dnx.at(i, 1);     // du/dx
         answer.at(2, 3 * i - 1) = dnx.at(i, 2);     // dv/dy
         answer.at(3, 3 * i - 0) = dnx.at(i, 3);     // dw/dz
-        answer.at(4, 3 * i - 1) = dnx.at(i, 3);     // dv/dz 
+        answer.at(4, 3 * i - 1) = dnx.at(i, 3);     // dv/dz
         answer.at(7, 3 * i - 0) = dnx.at(i, 2);     // dw/dy
-        answer.at(5, 3 * i - 2) = dnx.at(i, 3);     // du/dz 
+        answer.at(5, 3 * i - 2) = dnx.at(i, 3);     // du/dz
         answer.at(8, 3 * i - 0) = dnx.at(i, 1);     // dw/dx
-        answer.at(6, 3 * i - 2) = dnx.at(i, 2);     // du/dy 
+        answer.at(6, 3 * i - 2) = dnx.at(i, 2);     // du/dy
         answer.at(9, 3 * i - 1) = dnx.at(i, 1);     // dv/dx
     }
 }
@@ -204,7 +190,7 @@ void
 Q27Space :: computeSurfaceNMatrixAt(FloatMatrix &answer, int iSurf, GaussPoint *sgp)
 {
     FloatArray n;
-    interpolation.surfaceEvalN(n, iSurf, * sgp->giveCoordinates(), FEIElementGeometryWrapper(this));
+    interpolation.surfaceEvalN( n, iSurf, * sgp->giveCoordinates(), FEIElementGeometryWrapper(this) );
     answer.beNMatrixOf(n, 3);
 }
 
@@ -228,7 +214,7 @@ double
 Q27Space :: computeSurfaceVolumeAround(GaussPoint *gp, int iSurf)
 {
     double determinant, weight, volume;
-    determinant = fabs( interpolation.surfaceGiveTransformationJacobian(iSurf, * gp->giveCoordinates(), FEIElementGeometryWrapper(this)) );
+    determinant = fabs( interpolation.surfaceGiveTransformationJacobian( iSurf, * gp->giveCoordinates(), FEIElementGeometryWrapper(this) ) );
 
     weight = gp->giveWeight();
     volume = determinant * weight;
@@ -239,7 +225,7 @@ Q27Space :: computeSurfaceVolumeAround(GaussPoint *gp, int iSurf)
 void
 Q27Space :: computeSurfIpGlobalCoords(FloatArray &answer, GaussPoint *gp, int iSurf)
 {
-    interpolation.surfaceLocal2global(answer, iSurf, * gp->giveCoordinates(), FEIElementGeometryWrapper(this));
+    interpolation.surfaceLocal2global( answer, iSurf, * gp->giveCoordinates(), FEIElementGeometryWrapper(this) );
 }
 
 int
@@ -387,5 +373,4 @@ Q27Space :: NodalAveragingRecoveryMI_computeSideValue(FloatArray &answer, int si
 {
     answer.resize(0);
 }
-
 } // end namespace oofem

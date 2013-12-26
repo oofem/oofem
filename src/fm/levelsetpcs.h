@@ -153,11 +153,12 @@ public:
     }
 
     virtual void initialize();
-    virtual void updatePosition(TimeStep *atTime);
+    virtual void updatePosition(TimeStep *tStep);
     virtual void updateYourself(TimeStep *tStep) { previousLevelSetValues = levelSetValues; }
     virtual double computeCriticalTimeStep(TimeStep *tStep);
     virtual IRResultType initializeFrom(InputRecord *ir);
-    virtual void reinitialization(TimeStep *atTime);
+    virtual void giveInputRecord(DynamicInputRecord &input);
+    virtual void reinitialization(TimeStep *tStep);
 
     virtual void giveMaterialMixtureAt(FloatArray &answer, FloatArray &position);
     virtual void giveElementMaterialMixture(FloatArray &answer, int ielem);
@@ -168,21 +169,20 @@ public:
 
     // identification
     virtual const char *giveClassName() const { return "LevelSetPCS"; }
-    virtual classType giveClassID() const { return LevelSetPCSClass; }
 
     virtual contextIOResultType saveContext(DataStream *stream, ContextMode mode, void *obj = NULL);
     virtual contextIOResultType restoreContext(DataStream *stream, ContextMode mode, void *obj = NULL);
 
 protected:
-    void pcs_stage1(FloatArray &ls, FloatArray &fs, FloatArray &w, TimeStep *atTime, PCSEqType t);
-    double evalElemFContribution(PCSEqType t, int ie, TimeStep *atTime);
-    double evalElemfContribution(PCSEqType t, int ie, TimeStep *atTime);
+    void pcs_stage1(FloatArray &ls, FloatArray &fs, FloatArray &w, TimeStep *tStep, PCSEqType t);
+    double evalElemFContribution(PCSEqType t, int ie, TimeStep *tStep);
+    double evalElemfContribution(PCSEqType t, int ie, TimeStep *tStep);
 
     /**
      * Reinitializes the level set representation by solving
      * @f$ d_{\tau} = S(\phi)(1-|\nabla d|) @f$ to steady state.
      */
-    void redistance(TimeStep *atTime);
+    void redistance(TimeStep *tStep);
 
     /** @name Fast marching related services */
     //@{

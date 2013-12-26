@@ -48,8 +48,8 @@ namespace oofem {
  * Class implements an triangular three-node  plane-
  * stress elasticity finite element with independent rotation field.
  * Each node has 3 degrees of freedom.
- * 
- * This element is based on the following paper: 
+ *
+ * This element is based on the following paper:
  *   Ibrahimbegovic, A., Taylor, R.L., Wilson, E. L.: A robust quadrilateral membrane finite element with drilling degrees of freedom
  *   Int. J. Num. Meth. Engng., 30, 445-457, 1990.
  */
@@ -65,7 +65,7 @@ public:
 protected:
     virtual void computeGaussPoints();
     virtual void computeBmatrixAt(GaussPoint *gp, FloatMatrix &answer, int = 1, int = ALL_STRAINS);
-    virtual void computeNmatrixAt(GaussPoint *gp, FloatMatrix &answer);
+    virtual void computeNmatrixAt(const FloatArray &iLocCoord, FloatMatrix &answer);
 
     virtual void computeConstitutiveMatrixAt(FloatMatrix &answer, MatResponseMode rMode, GaussPoint *gp, TimeStep *tStep);
     virtual void computeStressVector(FloatArray &answer, const FloatArray &strain, GaussPoint *gp, TimeStep *tStep);
@@ -73,13 +73,12 @@ protected:
     virtual double giveArea();
     virtual void giveNodeCoordinates(FloatArray &x, FloatArray &y);
 
-    virtual void computeBodyLoadVectorAt(FloatArray &answer, Load *forLoad, TimeStep *stepN, ValueModeType mode);
+    virtual void computeBodyLoadVectorAt(FloatArray &answer, Load *forLoad, TimeStep *tStep, ValueModeType mode);
 
 public:
     // definition & identification
     virtual const char *giveInputRecordName() const { return _IFT_TrPlaneStrRot_Name; }
     virtual const char *giveClassName() const { return "TrPlaneStrRot"; }
-    virtual classType giveClassID() const { return TrPlaneStrRotClass; }
     virtual IRResultType initializeFrom(InputRecord *ir);
     virtual MaterialMode giveMaterialMode() { return _PlaneStressRot; }
 
@@ -96,7 +95,6 @@ public:
     virtual void computeStrainVector(FloatArray &answer, GaussPoint *gp, TimeStep *tStep);
 
     virtual int testElementExtension(ElementExtension ext) { return 0; }
-
 };
 } // end namespace oofem
 #endif //  trplanrot_h

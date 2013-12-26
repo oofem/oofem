@@ -52,8 +52,7 @@
 #endif
 
 namespace oofem {
-
-REGISTER_Element( Lattice2d );
+REGISTER_Element(Lattice2d);
 
 Lattice2d :: Lattice2d(int n, Domain *aDomain) : LatticeStructuralElement(n, aDomain)
     // Constructor.
@@ -131,7 +130,7 @@ Lattice2d :: giveDeltaDissipation()
 }
 
 void
-Lattice2d :: computeBmatrixAt(GaussPoint *aGaussPoint, FloatMatrix &answer, int li, int ui)
+Lattice2d :: computeBmatrixAt(GaussPoint *gp, FloatMatrix &answer, int li, int ui)
 // Returns the strain matrix of the receiver.
 {
     double l = this->giveLength();
@@ -171,10 +170,10 @@ Lattice2d :: computeBmatrixAt(GaussPoint *aGaussPoint, FloatMatrix &answer, int 
 
     answer.at(3, 1) = 0.;
     answer.at(3, 2) = 0.;
-    answer.at(3, 3) = -this->width/sqrt(12.);
+    answer.at(3, 3) = -this->width / sqrt(12.);
     answer.at(3, 4) = 0.;
     answer.at(3, 5) = 0.;
-    answer.at(3, 6) = this->width/sqrt(12.);
+    answer.at(3, 6) = this->width / sqrt(12.);
 
     answer.times(1. / l);
 }
@@ -233,10 +232,10 @@ Lattice2d :: computeGtoLRotationMatrix(FloatMatrix &answer)
 
 
 double
-Lattice2d :: computeVolumeAround(GaussPoint *aGaussPoint)
+Lattice2d :: computeVolumeAround(GaussPoint *gp)
 {
     double area = this->width * this->thickness;
-    double weight  = aGaussPoint->giveWeight();
+    double weight  = gp->giveWeight();
     return weight * 0.5 * this->giveLength() * area;
 }
 
@@ -288,17 +287,16 @@ double Lattice2d :: givePitch()
 double
 Lattice2d :: giveNormalStress()
 {
-  LatticeMaterialStatus* status;
+    LatticeMaterialStatus *status;
 
-  GaussPoint* gp;
-  IntegrationRule* iRule = integrationRulesArray[giveDefaultIntegrationRule()];
-  gp = iRule->getIntegrationPoint(0);
-  status = static_cast< LatticeMaterialStatus * >( gp->giveMaterialStatus() );
-  double normalStress =0;
-  normalStress = status->giveNormalStress();
-  
-  return normalStress;
+    GaussPoint *gp;
+    IntegrationRule *iRule = integrationRulesArray [ giveDefaultIntegrationRule() ];
+    gp = iRule->getIntegrationPoint(0);
+    status = static_cast< LatticeMaterialStatus * >( gp->giveMaterialStatus() );
+    double normalStress = 0;
+    normalStress = status->giveNormalStress();
 
+    return normalStress;
 }
 
 
@@ -340,13 +338,13 @@ Lattice2d :: initializeFrom(InputRecord *ir)
 
     IR_GIVE_OPTIONAL_FIELD(ir, gpCoords, _IFT_Lattice2d_gpcoords);
 
-    couplingFlag=0;
-    IR_GIVE_OPTIONAL_FIELD (ir, couplingFlag, _IFT_Lattice2d_couplingflag);
-    
-    if(couplingFlag == 1){
-      IR_GIVE_OPTIONAL_FIELD (ir, couplingNumber, _IFT_Lattice2d_couplingnumber);
+    couplingFlag = 0;
+    IR_GIVE_OPTIONAL_FIELD(ir, couplingFlag, _IFT_Lattice2d_couplingflag);
+
+    if ( couplingFlag == 1 ) {
+        IR_GIVE_OPTIONAL_FIELD(ir, couplingNumber, _IFT_Lattice2d_couplingnumber);
     }
-    
+
     return IRRT_OK;
 }
 
@@ -457,7 +455,6 @@ Lattice2d :: drawSpecial(oofegGraphicContext &gc)
 {
     WCRec l [ 2 ];
     GraphicObj *tr;
-    Material *mat = static_cast< StructuralMaterial * >( this->giveMaterial() );
     GaussPoint *gp;
     TimeStep *tStep = domain->giveEngngModel()->giveCurrentStep();
     FloatArray crackStatuses, cf;
@@ -468,7 +465,7 @@ Lattice2d :: drawSpecial(oofegGraphicContext &gc)
 
     if ( gc.giveIntVarType() == IST_CrackState ) {
         gp = integrationRulesArray [ 0 ]->getIntegrationPoint(0);
-        mat->giveIPValue(crackStatuses, gp, IST_CrackStatuses, tStep);
+        this->giveIPValue(crackStatuses, gp, IST_CrackStatuses, tStep);
         if ( crackStatuses(0) == 1. || crackStatuses(0) == 2. || crackStatuses(0) == 3 || crackStatuses(0) == 4 ) {
             double x1, y1, x2, y2;
             x1 = this->giveNode(1)->giveCoordinate(1);

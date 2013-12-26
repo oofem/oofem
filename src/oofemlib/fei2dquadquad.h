@@ -81,7 +81,7 @@ public:
     virtual void edgeLocal2global(FloatArray &answer, int iedge,
                                   const FloatArray &lcoords, const FEICellGeometry &cellgeo);
     virtual double edgeEvalNormal(FloatArray &normal, int iedge, const FloatArray &lcoords, const FEICellGeometry &cellgeo);
-    virtual double evalNXIntegral(int iEdge, const FEICellGeometry& cellgeo);
+    virtual double evalNXIntegral(int iEdge, const FEICellGeometry &cellgeo);
 
     virtual IntegrationRule *giveIntegrationRule(int order);
 
@@ -90,9 +90,3 @@ protected:
 };
 } // end namespace oofem
 #endif // fei2dquadquad_h
-
-
-
-
-
-

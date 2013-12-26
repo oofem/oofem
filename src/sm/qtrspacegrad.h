@@ -46,49 +46,44 @@
 #define _IFT_QTRSpaceGrad_Name "qtrspacegrad"
 
 namespace oofem {
-
 class FEI3dTetLin;
 
 /**
  * Quadratic 3D element
  * @author L. Svoboda
  */
-class QTRSpaceGrad : public QTRSpace,public GradDpElement
+class QTRSpaceGrad : public QTRSpace, public GradDpElement
 {
 protected:
     ///@todo FIXME: Is this really supposed to be the linear interpolator used here?!
     static FEI3dTetLin interpolation;
 
 public:
-    QTRSpaceGrad(int,Domain*);
+    QTRSpaceGrad(int, Domain *);
     virtual ~QTRSpaceGrad() {}
 
-    virtual IRResultType initializeFrom(InputRecord* ir);
-    virtual void giveDofManDofIDMask(int inode, EquationID ut, IntArray& answer) const;
+    virtual IRResultType initializeFrom(InputRecord *ir);
+    virtual void giveDofManDofIDMask(int inode, EquationID ut, IntArray &answer) const;
 
     // definition & identification
     virtual const char *giveInputRecordName() const { return _IFT_QTRSpaceGrad_Name; }
-    virtual const char* giveClassName() const { return "QTRSpaceGrad"; }
-    virtual classType giveClassID() const { return QTRSpaceClass; }
+    virtual const char *giveClassName() const { return "QTRSpaceGrad"; }
     virtual int computeNumberOfDofs() { return 34; }
-  
+
 protected:
     ///////////////////////////////////////////////////////////////////////////////
     void computeGaussPoints();
-    void computeNkappaMatrixAt(GaussPoint*, FloatMatrix&);
-    void computeBkappaMatrixAt(GaussPoint*, FloatMatrix&);
+    void computeNkappaMatrixAt(GaussPoint *, FloatMatrix &);
+    void computeBkappaMatrixAt(GaussPoint *, FloatMatrix &);
     virtual void computeNLBMatrixAt(FloatMatrix &, GaussPoint *, int i);
-    StructuralElement* giveStructuralElement() { return this; }
-    NLStructuralElement* giveNLStructuralElement() { return this; }
+    StructuralElement *giveStructuralElement() { return this; }
+    NLStructuralElement *giveNLStructuralElement() { return this; }
 
     virtual void giveInternalForcesVector(FloatArray &answer, TimeStep *tStep, int useUpdatedGpRecord = 0) { GradDpElement :: giveInternalForcesVector(answer, tStep, useUpdatedGpRecord); }
     virtual void computeStiffnessMatrix(FloatMatrix &answer, MatResponseMode rMode, TimeStep *tStep) { GradDpElement :: computeStiffnessMatrix(answer, rMode, tStep); }
-    virtual void computeForceLoadVector(FloatArray &answer, TimeStep *stepN, ValueModeType mode) { GradDpElement :: computeForceLoadVector(answer, stepN, mode); }
-    //virtual void computeNonForceLoadVector(FloatArray &answer, TimeStep *stepN, ValueModeType mode) { GradDpElement :: computeNonForceLoadVector(answer, stepN, mode); }
-    virtual void computeNonForceLoadVector(FloatArray &answer, TimeStep *stepN, ValueModeType mode) { ; }
-
+    virtual void computeForceLoadVector(FloatArray &answer, TimeStep *tStep, ValueModeType mode) { GradDpElement :: computeForceLoadVector(answer, tStep, mode); }
+    //virtual void computeNonForceLoadVector(FloatArray &answer, TimeStep *tStep, ValueModeType mode) { GradDpElement :: computeNonForceLoadVector(answer, tStep, mode); }
+    virtual void computeNonForceLoadVector(FloatArray &answer, TimeStep *tStep, ValueModeType mode) {; }
 };
- 
 }
 #endif // end namespace oofem
-

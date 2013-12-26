@@ -44,7 +44,6 @@
 //@}
 
 namespace oofem {
-
 /**
  * This class implements a two-node truss bar element for two-dimensional
  * analysis.
@@ -80,21 +79,20 @@ public:
     virtual void giveDofManDofIDMask(int inode, EquationID eid, IntArray &answer) const;
 
     virtual double giveCharacteristicLenght(GaussPoint *gp, const FloatArray &)
-    { return this->giveLength(); }
+    { return this->computeLength(); }
 
     virtual double computeVolumeAround(GaussPoint *gp);
 
     virtual int testElementExtension(ElementExtension ext) { return ( ( ext == Element_EdgeLoadSupport ) ? 1 : 0 ); }
 
 #ifdef __OOFEG
-    void drawRawGeometry(oofegGraphicContext &);
-    void drawDeformedGeometry(oofegGraphicContext &, UnknownType);
+    virtual void drawRawGeometry(oofegGraphicContext &);
+    virtual void drawDeformedGeometry(oofegGraphicContext &, UnknownType);
 #endif
 
     // definition & identification
     virtual const char *giveInputRecordName() const { return _IFT_Truss2d_Name; }
     virtual const char *giveClassName() const { return "Truss2d"; }
-    virtual classType giveClassID() const { return Truss2dClass; }
     virtual IRResultType initializeFrom(InputRecord *ir);
     ///@todo Introduce interpolator and remove these:
     virtual Element_Geometry_Type giveGeometryType() const { return EGT_line_1; }
@@ -111,10 +109,10 @@ protected:
     virtual int computeLoadLEToLRotationMatrix(FloatMatrix &, int, GaussPoint *gp);
     virtual void computeBmatrixAt(GaussPoint *gp, FloatMatrix &, int = 1, int = ALL_STRAINS);
     virtual void computeBHmatrixAt(GaussPoint *gp, FloatMatrix &);
-    virtual void computeNmatrixAt(GaussPoint *gp, FloatMatrix &);
+    virtual void computeNmatrixAt(const FloatArray &iLocCoord, FloatMatrix &);
     virtual void computeGaussPoints();
 
-    double giveLength();
+    virtual double computeLength();
     double givePitch();
     virtual int giveApproxOrder() { return 1; }
 };

@@ -51,12 +51,11 @@ class InputRecord;
 class OOFEM_EXPORT DummyMaterial : public Material
 {
 public:
-    DummyMaterial (int n, Domain* d) : Material(n,d) {};
-    virtual int hasMaterialModeCapability(MaterialMode mode) { return 0;}
+    DummyMaterial(int n, Domain *d) : Material(n, d) {};
+    virtual int hasMaterialModeCapability(MaterialMode mode) { return 0; }
 
     virtual const char *giveClassName() const { return "DummyMaterial"; }
     virtual const char *giveInputRecordName() const { return _IFT_DummyMaterial_Name; }
-    virtual classType giveClassID() const { return DummyMaterialClass; }
     virtual IRResultType initializeFrom(InputRecord *ir) { return IRRT_OK; }
 };
 } // end namespace oofem

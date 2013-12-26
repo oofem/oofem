@@ -113,7 +113,7 @@ public:
  * element surfaces. The generalized strain vector contains two relative displacements
  * (in normal and shear direction). The generalized stress vector contains corresponding
  * tractions in normal and tangent direction
- * 
+ *
  * The behaviour of the model is elastic, described by normal and shear stiffness components.
  * Isotropic damage is initiated  when the stress reaches the tensile strength. Damage evolution
  * is governed by normal component of generalized strain vector (normal relative displacement)
@@ -140,7 +140,7 @@ protected:
     /// Maximum limit on omega. The purpose is elimination of a too compliant material which may cause convergency problems. Set to something like 0.99 if needed.
     double maxOmega;
     /// Name of table file
-    std::string tablename;
+    std :: string tablename;
     /// Damages read from the second column in the table file
     FloatArray damages;
     /// Strains read from the first column in the table file

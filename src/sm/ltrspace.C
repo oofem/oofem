@@ -55,8 +55,7 @@
 #endif
 
 namespace oofem {
-
-REGISTER_Element( LTRSpace );
+REGISTER_Element(LTRSpace);
 
 FEI3dTetLin LTRSpace :: interpolation;
 
@@ -106,17 +105,17 @@ LTRSpace :: giveInterface(InterfaceType interface)
 FEInterpolation *
 LTRSpace :: giveInterpolation() const
 {
-    return &interpolation;
+    return & interpolation;
 }
 
 
 void
-LTRSpace :: computeBmatrixAt(GaussPoint *aGaussPoint, FloatMatrix &answer, int li, int ui)
+LTRSpace :: computeBmatrixAt(GaussPoint *gp, FloatMatrix &answer, int li, int ui)
 // Returns the [6x12] strain-displacement matrix {B} of the receiver, eva-
-// luated at aGaussPoint.
+// luated at gp.
 {
     FloatMatrix dn(4, 3);
-    interpolation.evaldNdx( dn, * aGaussPoint->giveCoordinates(), FEIElementGeometryWrapper(this) );
+    interpolation.evaldNdx( dn, * gp->giveCoordinates(), FEIElementGeometryWrapper(this) );
 
     answer.resize(6, 12);
     answer.zero();
@@ -138,75 +137,52 @@ LTRSpace :: computeBmatrixAt(GaussPoint *aGaussPoint, FloatMatrix &answer, int l
 }
 
 
-
-
 void
-LTRSpace :: computeNmatrixAt(GaussPoint *aGaussPoint, FloatMatrix &answer)
-// Returns the displacement interpolation matrix {N} of the receiver, eva-
-// luated at aGaussPoint.
-{
-    FloatArray n(4);
-
-    this->interpolation.evalN( n, * aGaussPoint->giveCoordinates(), FEIElementGeometryWrapper(this) );
-
-    answer.resize(3, 12);
-    answer.zero();
-
-    for ( int i = 1; i <= 4; i++ ) {
-        answer.at(1, 3 * i - 2)  = n.at(i);
-        answer.at(2, 3 * i - 1)  = n.at(i);
-        answer.at(3, 3 * i - 0)  = n.at(i);
-    }
-}
-
-
-void
-LTRSpace :: computeBHmatrixAt(GaussPoint *aGaussPoint, FloatMatrix &answer)
+LTRSpace :: computeBHmatrixAt(GaussPoint *gp, FloatMatrix &answer)
 // Returns the [9x24] displacement gradient matrix {BH} of the receiver,
-// evaluated at aGaussPoint.
+// evaluated at gp.
 // BH matrix  -  9 rows : du/dx, dv/dy, dw/dz, dv/dz, du/dz, du/dy, dw/dy, dw/dx, dv/dx
 //@todo unchecked
 {
     FloatMatrix dnx;
 
-    this->interpolation.evaldNdx( dnx, * aGaussPoint->giveCoordinates(), FEIElementGeometryWrapper(this) );
+    this->interpolation.evaldNdx( dnx, * gp->giveCoordinates(), FEIElementGeometryWrapper(this) );
 
     answer.resize(9, 12);
     answer.zero();
-   
+
     for ( int i = 1; i <= 4; i++ ) {
         answer.at(1, 3 * i - 2) = dnx.at(i, 1);     // du/dx
         answer.at(2, 3 * i - 1) = dnx.at(i, 2);     // dv/dy
         answer.at(3, 3 * i - 0) = dnx.at(i, 3);     // dw/dz
-        answer.at(4, 3 * i - 1) = dnx.at(i, 3);     // dv/dz 
+        answer.at(4, 3 * i - 1) = dnx.at(i, 3);     // dv/dz
         answer.at(7, 3 * i - 0) = dnx.at(i, 2);     // dw/dy
-        answer.at(5, 3 * i - 2) = dnx.at(i, 3);     // du/dz 
+        answer.at(5, 3 * i - 2) = dnx.at(i, 3);     // du/dz
         answer.at(8, 3 * i - 0) = dnx.at(i, 1);     // dw/dx
-        answer.at(6, 3 * i - 2) = dnx.at(i, 2);     // du/dy 
+        answer.at(6, 3 * i - 2) = dnx.at(i, 2);     // du/dy
         answer.at(9, 3 * i - 1) = dnx.at(i, 1);     // dv/dx
     }
 
 #if 0
     // test if sym(BH) = H*BH == Bsym
     FloatMatrix H, Bsym, Btest;
-    H.resize(6,9);
-    H.at(1,1) = H.at(2,2) = H.at(3,3) = H.at(4,4) = H.at(4,7) = H.at(5,5) = H.at(5,8) = H.at(6,6) = H.at(6,9) = 1.0;
-    Btest.beProductOf(H,answer);
-    computeBmatrixAt(aGaussPoint, Bsym);
+    H.resize(6, 9);
+    H.at(1, 1) = H.at(2, 2) = H.at(3, 3) = H.at(4, 4) = H.at(4, 7) = H.at(5, 5) = H.at(5, 8) = H.at(6, 6) = H.at(6, 9) = 1.0;
+    Btest.beProductOf(H, answer);
+    computeBmatrixAt(gp, Bsym);
     Btest.printYourself();
     Bsym.printYourself();
 #endif
-
 }
 
 
-double LTRSpace :: computeVolumeAround(GaussPoint *aGaussPoint)
-// Returns the portion of the receiver which is attached to aGaussPoint.
+double LTRSpace :: computeVolumeAround(GaussPoint *gp)
+// Returns the portion of the receiver which is attached to gp.
 {
     double determinant, weight, volume;
-    determinant = fabs( this->interpolation.giveTransformationJacobian( * aGaussPoint->giveCoordinates(),
-                                                                       FEIElementGeometryWrapper(this) ) );
-    weight = aGaussPoint->giveWeight();
+    determinant = fabs( this->interpolation.giveTransformationJacobian( * gp->giveCoordinates(),
+                                                                        FEIElementGeometryWrapper(this) ) );
+    weight = gp->giveWeight();
     volume = determinant * weight;
     return volume;
 }
@@ -237,7 +213,7 @@ void LTRSpace :: computeGaussPoints()
         numberOfIntegrationRules = 1;
         integrationRulesArray = new IntegrationRule * [ 1 ];
         integrationRulesArray [ 0 ] = new GaussIntegrationRule(1, this, 1, 6);
-        this->giveCrossSection()->setupIntegrationPoints( *integrationRulesArray[0], numberOfGaussPoints, this );
+        this->giveCrossSection()->setupIntegrationPoints(* integrationRulesArray [ 0 ], numberOfGaussPoints, this);
     }
 }
 
@@ -367,7 +343,7 @@ LTRSpace :: HuertaErrorEstimatorI_setupRefinedElementProblem(RefinedElement *ref
     int hexaFaceNode [ 4 ] [ 3 ] = { { 1, 2, 4 }, { 1, 3, 2 }, { 1, 4, 3 }, { 4, 2, 3 } };
 
     if ( sMode == HuertaErrorEstimatorInterface :: NodeMode ||
-        ( sMode == HuertaErrorEstimatorInterface :: BCMode && aMode == HuertaErrorEstimator :: HEE_linear ) ) {
+         ( sMode == HuertaErrorEstimatorInterface :: BCMode && aMode == HuertaErrorEstimator :: HEE_linear ) ) {
         for ( inode = 0; inode < nodes; inode++ ) {
             corner [ inode ] = element->giveNode(inode + 1)->giveCoordinates();
 
@@ -551,7 +527,6 @@ LTRSpace :: drawSpecial(oofegGraphicContext &gc)
     int i, j, k;
     WCRec q [ 4 ];
     GraphicObj *tr;
-    StructuralMaterial *mat = static_cast< StructuralMaterial * >( this->giveMaterial() );
     IntegrationRule *iRule = integrationRulesArray [ 0 ];
     GaussPoint *gp;
     TimeStep *tStep = domain->giveEngngModel()->giveCurrentStep();
@@ -574,7 +549,7 @@ LTRSpace :: drawSpecial(oofegGraphicContext &gc)
         //   for (igp=1 ; igp<= integrationRulesArray [ 0 ]->giveNumberOfIntegrationPoints() ; igp++) {
         {
             gp = iRule->getIntegrationPoint(0);
-            if ( mat->giveIPValue(cf, gp, IST_CrackedFlag, tStep) == 0 ) {
+            if ( this->giveIPValue(cf, gp, IST_CrackedFlag, tStep) == 0 ) {
                 return;
             }
 
@@ -603,8 +578,8 @@ LTRSpace :: drawSpecial(oofegGraphicContext &gc)
             yc = yc / 4.;
             zc = zc / 4.;
             length = TR_LENGHT_REDUCT * pow(this->computeVolumeAround(gp), 1. / 3.) / 2.0;
-            if ( mat->giveIPValue(crackDir, gp, IST_CrackDirs, tStep) ) {
-                mat->giveIPValue(crackStatuses, gp, IST_CrackStatuses, tStep);
+            if ( this->giveIPValue(crackDir, gp, IST_CrackDirs, tStep) ) {
+                this->giveIPValue(crackStatuses, gp, IST_CrackStatuses, tStep);
 
 
                 for ( i = 1; i <= 3; i++ ) {
@@ -704,7 +679,7 @@ LTRSpace :: DirectErrorIndicatorRCI_giveCharacteristicSize()
 
 int
 LTRSpace :: EIPrimaryUnknownMI_computePrimaryUnknownVectorAt(ValueModeType mode,
-                                                             TimeStep *stepN, const FloatArray &coords,
+                                                             TimeStep *tStep, const FloatArray &coords,
                                                              FloatArray &answer)
 {
     FloatArray lcoords, u;
@@ -731,7 +706,7 @@ LTRSpace :: EIPrimaryUnknownMI_computePrimaryUnknownVectorAt(ValueModeType mode,
     n.at(3, 9)  = lcoords.at(3);
     n.at(3, 12) = lcoords.at(4);
 
-    this->computeVectorOf(EID_MomentumBalance, mode, stepN, u);
+    this->computeVectorOf(EID_MomentumBalance, mode, tStep, u);
     answer.beProductOf(n, u);
 
     return result;
@@ -771,7 +746,7 @@ LTRSpace :: MMAShapeFunctProjectionInterface_interpolateIntVarAt(FloatArray &ans
 
 
 void
-LTRSpace :: computeEgdeNMatrixAt(FloatMatrix &answer, int iedge, GaussPoint *aGaussPoint)
+LTRSpace :: computeEgdeNMatrixAt(FloatMatrix &answer, int iedge, GaussPoint *gp)
 {
     /*
      *
@@ -788,7 +763,7 @@ LTRSpace :: computeEgdeNMatrixAt(FloatMatrix &answer, int iedge, GaussPoint *aGa
      */
 
     FloatArray n(2);
-    this->interpolation.edgeEvalN( n, iedge, * aGaussPoint->giveCoordinates(), FEIElementGeometryWrapper(this) );
+    this->interpolation.edgeEvalN( n, iedge, * gp->giveCoordinates(), FEIElementGeometryWrapper(this) );
 
     answer.resize(3, 6);
     answer.zero();
@@ -859,11 +834,11 @@ LTRSpace :: giveEdgeDofMapping(IntArray &answer, int iEdge) const
 
 
 double
-LTRSpace :: computeEdgeVolumeAround(GaussPoint *aGaussPoint, int iEdge)
+LTRSpace :: computeEdgeVolumeAround(GaussPoint *gp, int iEdge)
 {
-    double result = this->interpolation.edgeGiveTransformationJacobian( iEdge, * aGaussPoint->giveCoordinates(),
-                                                                       FEIElementGeometryWrapper(this) );
-    return result *aGaussPoint->giveWeight();
+    double result = this->interpolation.edgeGiveTransformationJacobian( iEdge, * gp->giveCoordinates(),
+                                                                        FEIElementGeometryWrapper(this) );
+    return result * gp->giveWeight();
 }
 
 

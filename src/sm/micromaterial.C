@@ -59,7 +59,7 @@ namespace oofem {
 //     A.beProductOf(B, displacementVector);
 //     A.printYourself();
 
-REGISTER_Material( MicroMaterial );
+REGISTER_Material(MicroMaterial);
 
 // constructor
 //strainVector, tempStrainVector, stressVector, tempStressVector are defined on StructuralMaterialStatus
@@ -72,9 +72,9 @@ void MicroMaterialStatus :: initTempStatus()
     StructuralMaterialStatus :: initTempStatus();
 }
 
-void MicroMaterialStatus :: updateYourself(TimeStep *atTime)
+void MicroMaterialStatus :: updateYourself(TimeStep *tStep)
 {
-    StructuralMaterialStatus :: updateYourself(atTime);
+    StructuralMaterialStatus :: updateYourself(tStep);
 }
 
 void MicroMaterialStatus :: printOutputAt(FILE *file, TimeStep *tStep)
@@ -151,8 +151,8 @@ IRResultType MicroMaterial :: initializeFrom(InputRecord *ir)
 
     IR_GIVE_FIELD(ir, this->inputFileNameMicro, _IFT_MicroMaterial_fileName);
 
-    OOFEM_LOG_INFO("** Instanciating microproblem with BC from file %s\n", inputFileNameMicro.c_str());
-    OOFEMTXTDataReader drMicro(inputFileNameMicro.c_str());
+    OOFEM_LOG_INFO( "** Instanciating microproblem with BC from file %s\n", inputFileNameMicro.c_str() );
+    OOFEMTXTDataReader drMicro( inputFileNameMicro.c_str() );
     this->problemMicro = InstanciateProblem(& drMicro, _processor, 0); //0=contextFlag-store/resore
     drMicro.finish();
     OOFEM_LOG_INFO("** Microproblem %p instanciated\n\n", problemMicro);
@@ -165,11 +165,11 @@ IRResultType MicroMaterial :: initializeFrom(InputRecord *ir)
 
 //original pure virtual function has to be declared here
 //this function should not be used, internal forces are calculated based on reactions not stresses in GPs
-void MicroMaterial :: giveRealStressVector(FloatArray &answer, GaussPoint *gp, const FloatArray &totalStrain, TimeStep *atTime)
+void MicroMaterial :: giveRealStressVector(FloatArray &answer, GaussPoint *gp, const FloatArray &totalStrain, TimeStep *tStep)
 {
     //perform average over microproblem
     //     int index;
-        //     double dV, VolTot = 0.;
+    //     double dV, VolTot = 0.;
     //     double scale = 1.;
     //     FloatArray VecStrain, VecStress, SumStrain(6), SumStress(6);
     //     GaussPoint *gpL;
@@ -187,7 +187,7 @@ void MicroMaterial :: giveRealStressVector(FloatArray &answer, GaussPoint *gp, c
     //     //need to update stress so change boundary conditions and recalculate
     //     OOFEM_LOG_INFO( "\n*** giveRealStress microproblem %p on macroElement %d GP %d, step %d, time %f\n", this, this->macroLSpaceElement->giveNumber(), gp->giveNumber(), microEngngModel->giveCurrentStep()->giveNumber(), microEngngModel->giveCurrentStep()->giveTime() );
     //
-    //     this->macroLSpaceElement->changeMicroBoundaryConditions(atTime);
+    //     this->macroLSpaceElement->changeMicroBoundaryConditions(tStep);
     //     microEngngModel->solveYourselfAt( microEngngModel->giveCurrentStep() );
     //     microEngngModel->terminate( microEngngModel->giveCurrentStep() );
     //     OOFEM_LOG_INFO("\n*** giveRealStress microproblem %p done\n", this);
@@ -203,8 +203,8 @@ void MicroMaterial :: giveRealStressVector(FloatArray &answer, GaussPoint *gp, c
     //             //OOFEM_LOG_INFO("Element %d GP %d Vol %f\n", elem->giveNumber(), gp->giveNumber(), dV);
     //             //fprintf(this->stream, "Element %d GP %d stress %f\n", elem->giveNumber(), gp->giveNumber(), 0.0);
     //             //((StructuralCrossSection*) gp->giveCrossSection())->giveFullCharacteristicVector(helpVec, gp, strainVector);
-    //             elem->giveIPValue(VecStrain, gpL, IST_StrainTensor, atTime);
-    //             elem->giveIPValue(VecStress, gpL, IST_StressTensor, atTime);
+    //             elem->giveIPValue(VecStrain, gpL, IST_StrainTensor, tStep);
+    //             elem->giveIPValue(VecStress, gpL, IST_StressTensor, tStep);
     //             elem->giveIntVarCompFullIndx(Mask, IST_StrainTensor);
     //
     //             VecStrain.times(dV);
@@ -521,7 +521,7 @@ void MicroMaterial :: giveMacroStiffnessMatrix(FloatMatrix &answer, TimeStep *tS
 
     //perform K(24,24) = T^T * K * T
     FloatMatrix A;
-    A.beProductOf( Kbb,  slaveMasterOnBoundary );
+    A.beProductOf(Kbb,  slaveMasterOnBoundary);
     //A.printYourself();
     //slaveMasterOnBoundary.printYourself();
     //answer.resize(24, 24);
@@ -545,7 +545,7 @@ void MicroMaterial :: setMacroProperties(Domain *macroDomain, MacroLSpace *macro
     this->macroLSpaceElement = macroLSpaceElement;
 
     for ( int i = 1; i <= microMasterNodes.giveSize(); i++ ) { //8 nodes
-        this->microMasterCoords [ i - 1 ] = new const FloatArray( *microDomain->giveNode( microMasterNodes.at(i) )->giveCoordinates() );
+        this->microMasterCoords [ i - 1 ] = new const FloatArray( * microDomain->giveNode( microMasterNodes.at(i) )->giveCoordinates() );
         //this->microMasterCoords [ i - 1 ]->printYourself();
     }
 

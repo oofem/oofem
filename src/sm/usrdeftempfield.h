@@ -49,7 +49,6 @@
 //@}
 
 namespace oofem {
-
 /**
  * Class representing user defined temperature field. User input is function expression,
  * as a function of global x,y and z coordinates and time t.
@@ -66,7 +65,7 @@ class UserDefinedTemperatureField : public StructuralTemperatureLoad
 private:
     Parser myParser;
     int size;
-    std::string ftExpression [ 3 ];
+    std :: string ftExpression [ 3 ];
 
 public:
     /**
@@ -88,7 +87,6 @@ public:
      */
     virtual void computeValueAt(FloatArray &answer, TimeStep *tStep, FloatArray &coords, ValueModeType mode);
 
-    virtual classType giveClassID() const { return UserDefinedTemperatureFieldClass; }
     virtual const char *giveInputRecordName() const { return _IFT_UserDefinedTemperatureField_Name; }
     virtual const char *giveClassName() const { return "UserDefinedTemperatureField"; }
 

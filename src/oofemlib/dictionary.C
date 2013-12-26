@@ -254,12 +254,12 @@ contextIOResultType Dictionary :: restoreContext(DataStream *stream, ContextMode
 }
 
 
-std::ostream& operator<< (std::ostream &out, const Dictionary &r)
+std :: ostream &operator<<(std :: ostream &out, const Dictionary &r)
 {
     int count = 0;
     Pair *next = r.first;
     while ( next ) {
-        count ++;
+        count++;
         next = next->giveNext();
     }
 
@@ -271,5 +271,4 @@ std::ostream& operator<< (std::ostream &out, const Dictionary &r)
     }
     return out;
 }
-
 } // end namespace oofem

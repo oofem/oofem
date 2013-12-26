@@ -41,16 +41,15 @@
 #define _IFT_Quad1Mindlin_Name "quad1mindlin"
 
 namespace oofem {
-
 /**
  * This class implements an quadrilateral four-node Mindlin plate.
  * Each node has 3 degrees of freedom (out-of-plane displacement, in-plane rotations).
  * This type of element exhibit strong shear locking (thin plates exhibit almost no bending).
  * No reduced integration is used, as it causes numerical problems.
- * 
+ *
  * Loading types supported;
  * - Gravity load
- * 
+ *
  * Reference:
  * Robert Cook, David Malkus, Michael Plesha
  * Concepts and Applications of Finite Element Analysis - Third edition
@@ -67,7 +66,7 @@ public:
     Quad1Mindlin(int n, Domain *d);
     virtual ~Quad1Mindlin() { }
 
-    virtual FEInterpolation *giveInterpolation() const { return &interp_lin; }
+    virtual FEInterpolation *giveInterpolation() const { return & interp_lin; }
     virtual FEInterpolation *giveInterpolation(DofIDItem id) const;
 
     virtual MaterialMode giveMaterialMode()  { return _2dPlate; }
@@ -77,7 +76,6 @@ public:
     // definition & identification
     virtual const char *giveInputRecordName() const { return _IFT_Quad1Mindlin_Name; }
     virtual const char *giveClassName() const { return "Quad1Mindlin"; }
-    virtual classType giveClassID() const { return Quad1MindlinClass; }
     virtual IRResultType initializeFrom(InputRecord *ir);
 
     virtual int computeNumberOfDofs() { return 12; }
@@ -92,13 +90,15 @@ public:
     virtual void computeMassMatrix(FloatMatrix &answer, TimeStep *tStep)
     { computeLumpedMassMatrix(answer, tStep); }
 
-    virtual int giveIPValue(FloatArray &answer, GaussPoint *aGaussPoint, InternalStateType type, TimeStep *atTime);
+    virtual int giveIPValue(FloatArray &answer, GaussPoint *gp, InternalStateType type, TimeStep *tStep);
 
 protected:
     virtual void computeGaussPoints();
     virtual void computeBodyLoadVectorAt(FloatArray &answer, Load *load, TimeStep *tStep, ValueModeType mode);
     virtual void computeBmatrixAt(GaussPoint *gp, FloatMatrix &answer, int = 1, int = ALL_STRAINS);
-    virtual void computeNmatrixAt(GaussPoint *gp, FloatMatrix &answer);
+
+    virtual void computeStressVector(FloatArray &answer, const FloatArray &strain, GaussPoint *gp, TimeStep *tStep);
+    virtual void computeConstitutiveMatrixAt(FloatMatrix &answer, MatResponseMode rMode, GaussPoint *gp, TimeStep *tStep);
 
     virtual void computeEgdeNMatrixAt(FloatMatrix &answer, int iedge, GaussPoint *gp);
     virtual void giveEdgeDofMapping(IntArray &answer, int iEdge) const;

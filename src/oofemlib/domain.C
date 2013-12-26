@@ -74,9 +74,6 @@
 #include "enrichmentdomain.h"
 #include "propagationlaw.h"
 
-#include "structengngmodel.h"; // temporary should be removed
-
- // For automatic dof creation, (should try to do without this) (move that stuff into DofManager class)
 #include "boundarycondition.h"
 #include "activebc.h"
 #include "simpleslavedof.h"
@@ -137,7 +134,7 @@ Domain :: Domain(int n, int serNum, EngngModel *e) : defaultNodeDofIDArry()
 }
 
 
-Domain* Domain :: Clone()
+Domain *Domain :: Clone()
 {
     /////////////////////////////////////////////////////////
     // Create a copy of the domain using
@@ -147,7 +144,7 @@ Domain* Domain :: Clone()
 
     int domNum = this->giveNumber();
     int serNum = this->giveSerialNumber();
-    Domain *dNew = new Domain( domNum, serNum, eModel );
+    Domain *dNew = new Domain(domNum, serNum, eModel);
 
 
     DynamicDataReader dataReader;
@@ -157,7 +154,7 @@ Domain* Domain :: Clone()
     //Domain
     inputRec = new DynamicInputRecord();
     inputRec->setField(mDomainType, _IFT_Domain_type);
-    dataReader.insertInputRecord(DataReader::IR_domainRec, inputRec);
+    dataReader.insertInputRecord(DataReader :: IR_domainRec, inputRec);
 
 
     //Output
@@ -166,18 +163,18 @@ Domain* Domain :: Clone()
     inputRec->setField(_IFT_OutputManager_tstepall);
     inputRec->setField(_IFT_OutputManager_dofmanall);
     inputRec->setField(_IFT_OutputManager_elementall);
-    dataReader.insertInputRecord(DataReader::IR_outManRec, inputRec);
+    dataReader.insertInputRecord(DataReader :: IR_outManRec, inputRec);
 
     //Components size record
     inputRec = new DynamicInputRecord();
-    inputRec->setField(this->giveNumberOfDofManagers(), 		_IFT_Domain_ndofman);
-    inputRec->setField(this->giveNumberOfElements(), 			_IFT_Domain_nelem);
-    inputRec->setField(this->giveNumberOfCrossSectionModels(), 	_IFT_Domain_ncrosssect);
-    inputRec->setField(this->giveNumberOfMaterialModels(), 		_IFT_Domain_nmat);
-    inputRec->setField(this->giveNumberOfBoundaryConditions(), 	_IFT_Domain_nbc);
-    inputRec->setField(this->giveNumberOfInitialConditions(), 	_IFT_Domain_nic);
-    inputRec->setField(this->giveNumberOfLoadTimeFunctions(), 	_IFT_Domain_nloadtimefunct);
-    inputRec->setField(this->giveNumberOfSets(),            	_IFT_Domain_nset);
+    inputRec->setField(this->giveNumberOfDofManagers(),                 _IFT_Domain_ndofman);
+    inputRec->setField(this->giveNumberOfElements(),                    _IFT_Domain_nelem);
+    inputRec->setField(this->giveNumberOfCrossSectionModels(),  _IFT_Domain_ncrosssect);
+    inputRec->setField(this->giveNumberOfMaterialModels(),              _IFT_Domain_nmat);
+    inputRec->setField(this->giveNumberOfBoundaryConditions(),  _IFT_Domain_nbc);
+    inputRec->setField(this->giveNumberOfInitialConditions(),   _IFT_Domain_nic);
+    inputRec->setField(this->giveNumberOfLoadTimeFunctions(),   _IFT_Domain_nloadtimefunct);
+    inputRec->setField(this->giveNumberOfSets(),                _IFT_Domain_nset);
     inputRec->setField(this->giveNumberOfSpatialDimensions(),   _IFT_Domain_numberOfSpatialDimensions);
     if ( this->isAxisymmetric() ) {
         inputRec->setField(_IFT_Domain_axisymmetric);
@@ -192,131 +189,122 @@ Domain* Domain :: Clone()
 
 
     bool nxfemMan = 0;
-    if(this->hasXfemManager()) {
+    if ( this->hasXfemManager() ) {
         nxfemMan = 1;
     }
     inputRec->setField(nxfemMan, _IFT_Domain_nxfemman);
 
 
-    dataReader.insertInputRecord(DataReader::IR_domainCompRec, inputRec);
+    dataReader.insertInputRecord(DataReader :: IR_domainCompRec, inputRec);
 
 
     //Nodes
     int nDofMan = this->giveNumberOfDofManagers();
-    for(int i = 1; i <= nDofMan; i++) {
-
+    for ( int i = 1; i <= nDofMan; i++ ) {
         DofManager *dMan = this->giveDofManager(i);
 
-        DynamicInputRecord* nodeRec = new DynamicInputRecord();
-        dMan->giveInputRecord(*nodeRec);
+        DynamicInputRecord *nodeRec = new DynamicInputRecord();
+        dMan->giveInputRecord(* nodeRec);
 
-        dataReader.insertInputRecord(DataReader::IR_dofmanRec, nodeRec);
+        dataReader.insertInputRecord(DataReader :: IR_dofmanRec, nodeRec);
     }
 
     //Elements
     int nEl = this->giveNumberOfElements();
-    for(int i = 1; i <= nEl; i++) {
-
+    for ( int i = 1; i <= nEl; i++ ) {
         Element *el = this->giveElement(i);
 
-        DynamicInputRecord* elRec = new DynamicInputRecord();
-        el->giveInputRecord(*elRec);
+        DynamicInputRecord *elRec = new DynamicInputRecord();
+        el->giveInputRecord(* elRec);
 
-        dataReader.insertInputRecord(DataReader::IR_elemRec, elRec);
+        dataReader.insertInputRecord(DataReader :: IR_elemRec, elRec);
     }
 
 
     //CrossSection
     int nCS = this->giveNumberOfCrossSectionModels();
-    for(int i = 1; i <= nCS; i++) {
-
+    for ( int i = 1; i <= nCS; i++ ) {
         CrossSection *cs = this->giveCrossSection(i);
 
-        DynamicInputRecord* csRec = new DynamicInputRecord();
-        cs->giveInputRecord(*csRec);
+        DynamicInputRecord *csRec = new DynamicInputRecord();
+        cs->giveInputRecord(* csRec);
 
-        dataReader.insertInputRecord(DataReader::IR_crosssectRec, csRec);
+        dataReader.insertInputRecord(DataReader :: IR_crosssectRec, csRec);
     }
 
 
     //Material
     int nMat = this->giveNumberOfMaterialModels();
-    for(int i = 1; i <= nMat; i++) {
-
+    for ( int i = 1; i <= nMat; i++ ) {
         Material *mat = this->giveMaterial(i);
 
-        DynamicInputRecord* matRec = new DynamicInputRecord();
-        mat->giveInputRecord(*matRec);
+        DynamicInputRecord *matRec = new DynamicInputRecord();
+        mat->giveInputRecord(* matRec);
 
-        dataReader.insertInputRecord(DataReader::IR_matRec, matRec);
+        dataReader.insertInputRecord(DataReader :: IR_matRec, matRec);
     }
 
     //Boundary Conditions
     int nBC = this->giveNumberOfBoundaryConditions();
-    for(int i = 1; i <= nBC; i++) {
-
+    for ( int i = 1; i <= nBC; i++ ) {
         GeneralBoundaryCondition *bc = this->giveBc(i);
 
-        DynamicInputRecord* bcRec = new DynamicInputRecord();
-        bc->giveInputRecord(*bcRec);
+        DynamicInputRecord *bcRec = new DynamicInputRecord();
+        bc->giveInputRecord(* bcRec);
 
-        dataReader.insertInputRecord(DataReader::IR_bcRec, bcRec);
+        dataReader.insertInputRecord(DataReader :: IR_bcRec, bcRec);
     }
 
     //Initial Conditions
     int nIC = this->giveNumberOfInitialConditions();
-    for(int i = 1; i <= nIC; i++) {
-
+    for ( int i = 1; i <= nIC; i++ ) {
         InitialCondition *ic = this->giveIc(i);
 
-        DynamicInputRecord* icRec = new DynamicInputRecord();
-        ic->giveInputRecord(*icRec);
+        DynamicInputRecord *icRec = new DynamicInputRecord();
+        ic->giveInputRecord(* icRec);
 
-        dataReader.insertInputRecord(DataReader::IR_icRec, icRec);
+        dataReader.insertInputRecord(DataReader :: IR_icRec, icRec);
     }
 
     //Load-time functions
     int nLoads = this->giveNumberOfLoadTimeFunctions();
-    for(int i = 1; i <= nLoads; i++) {
-
+    for ( int i = 1; i <= nLoads; i++ ) {
         LoadTimeFunction *ltf = this->giveLoadTimeFunction(i);
 
-        DynamicInputRecord* ltfRec = new DynamicInputRecord();
-        ltf->giveInputRecord(*ltfRec);
+        DynamicInputRecord *ltfRec = new DynamicInputRecord();
+        ltf->giveInputRecord(* ltfRec);
 
-        dataReader.insertInputRecord(DataReader::IR_ltfRec, ltfRec);
+        dataReader.insertInputRecord(DataReader :: IR_ltfRec, ltfRec);
     }
 
 
     //Sets
     int nSets = this->giveNumberOfSets();
-    for(int i = 1; i <= nSets; i++) {
-
+    for ( int i = 1; i <= nSets; i++ ) {
         Set *set = this->giveSet(i);
 
-        DynamicInputRecord* ltfRec = new DynamicInputRecord();
-        set->giveInputRecord(*ltfRec);
+        DynamicInputRecord *ltfRec = new DynamicInputRecord();
+        set->giveInputRecord(* ltfRec);
 
-        dataReader.insertInputRecord(DataReader::IR_ltfRec, ltfRec);
+        dataReader.insertInputRecord(DataReader :: IR_ltfRec, ltfRec);
     }
 
     //XFEM manager
-    if(this->xfemManager != NULL) {
-        DynamicInputRecord* xmanRec = new DynamicInputRecord();
-        xfemManager->giveInputRecord(*xmanRec);
-        dataReader.insertInputRecord(DataReader::IR_xfemManRec, xmanRec);
+    if ( this->xfemManager != NULL ) {
+        DynamicInputRecord *xmanRec = new DynamicInputRecord();
+        xfemManager->giveInputRecord(* xmanRec);
+        dataReader.insertInputRecord(DataReader :: IR_xfemManRec, xmanRec);
 
 
         // Enrichment items
         int nEI = xfemManager->giveNumberOfEnrichmentItems();
-        for(int i = 1; i <= nEI; i++) {
-
+        for ( int i = 1; i <= nEI; i++ ) {
             EnrichmentItem *ei = xfemManager->giveEnrichmentItem(i);
-            ei->giveInputRecord(dataReader);
+            ei->appendInputRecords(dataReader);
         }
     }
 
-    dNew->instanciateYourself(&dataReader);
+    dNew->instanciateYourself(& dataReader);
     dNew->postInitialize();
 
     return dNew;
@@ -402,7 +390,7 @@ Element *
 Domain :: giveGlobalElement(int n)
 // Returns the global element with id n. Generates error if it is not defined yet.
 {
-    for (int i = 1; i <= elementList->giveSize(); i++ ) {
+    for ( int i = 1; i <= elementList->giveSize(); i++ ) {
         if ( elementList->at(i)->giveGlobalNumber() == n ) {
             return elementList->at(i);
         }
@@ -429,6 +417,7 @@ Domain :: giveLoad(int n)
     }
 #else
     return static_cast< Load * >( bcList->at(n) );
+
 #endif
 }
 
@@ -522,15 +511,15 @@ Domain :: giveSide(int n)
         _error2("giveSide: undefined dofManager (%d)", n);
     }
 
-    ElementSide *side = dynamic_cast< ElementSide* >( dofManagerList->at(n) );
+    ElementSide *side = dynamic_cast< ElementSide * >( dofManagerList->at(n) );
     if ( !side ) {
         _error2("giveSide: incompatible type of dofManager %d, can not convert", n);
     }
     return side;
-    
+
 #else
-    return static_cast< ElementSide* >( dofManagerList->at(n) );
-    
+    return static_cast< ElementSide * >( dofManagerList->at(n) );
+
 #endif
 }
 
@@ -672,7 +661,7 @@ void Domain :: setLoadTimeFunction(int i, LoadTimeFunction *obj) { loadTimeFunct
 void Domain :: setRandomFieldGenerator(int i, RandomFieldGenerator *obj) { randomFieldGeneratorList->put(i, obj); }
 void Domain :: setSet(int i, Set *obj) { setList->put(i, obj); }
 
-void Domain :: clearBoundaryConditions() { bcList->clear(true); };
+void Domain :: clearBoundaryConditions() { bcList->clear(true); }
 
 int
 Domain :: instanciateYourself(DataReader *dr)
@@ -683,7 +672,7 @@ Domain :: instanciateYourself(DataReader *dr)
 
     int num;
     std :: string name, topologytype;
-    int nnode, nelem, nmat, nload, nic, nloadtimefunc, ncrossSections, nbarrier, nrfg, nset=0;
+    int nnode, nelem, nmat, nload, nic, nloadtimefunc, ncrossSections, nbarrier, nrfg, nset = 0;
     bool nxfemman = false;
     bool nfracman = false;
     RandomFieldGenerator *rfg;
@@ -707,10 +696,10 @@ Domain :: instanciateYourself(DataReader *dr)
 
     resolveDomainDofsDefaults( name.c_str() );
     fprintf( outputStream, "Domain type: %s, default ndofs per node is %d\n\n\n",
-            name.c_str(), giveDefaultNodeDofIDArry().giveSize() );
+             name.c_str(), giveDefaultNodeDofIDArry().giveSize() );
 
     // read output manager record
-    std::string tmp;
+    std :: string tmp;
     ir = dr->giveInputRecord(DataReader :: IR_outManRec, 1);
     ir->giveRecordKeywordField(tmp);
     outputManager->initializeFrom(ir);
@@ -732,7 +721,7 @@ Domain :: instanciateYourself(DataReader *dr)
     IR_GIVE_OPTIONAL_FIELD(ir, this->nsd, _IFT_Domain_numberOfSpatialDimensions);
     this->axisymm = ir->hasField(_IFT_Domain_axisymmetric);
     IR_GIVE_OPTIONAL_FIELD(ir, nfracman, _IFT_Domain_nfracman);
-    
+
     ///@todo Eventually remove this backwards compatibility:
     //_HeatTransferMode _HeatMass1Mode // Are these deprecated?
     if ( dType == _1dTrussMode ) {
@@ -988,7 +977,7 @@ Domain :: instanciateYourself(DataReader *dr)
         // read type of load
         IR_GIVE_RECORD_KEYWORD_FIELD(ir, name, num);
 
-        if ( ( ic = new InitialCondition(num, this) ) == NULL ){
+        if ( ( ic = new InitialCondition(num, this) ) == NULL ) {
             _error2("instanciateYourself: Creation of IC no. %d failed", num);
         }
 
@@ -1039,11 +1028,11 @@ Domain :: instanciateYourself(DataReader *dr)
 
         ir->finish();
     }
-    
+
 #  ifdef VERBOSE
     VERBOSE_PRINT0("Instanciated load-time fncts ", nloadtimefunc)
 #  endif
-    
+
     // read load time functions
     setList->growTo(nset);
     for ( int i = 1; i <= nset; i++ ) {
@@ -1053,8 +1042,8 @@ Domain :: instanciateYourself(DataReader *dr)
         // Only one set for now (i don't see any need to ever introduce any other version)
         Set *set = new Set(num, this);
         /*if ( ( set = classFactory.createSet(name.c_str(), num, this) ) == NULL ) {
-            OOFEM_ERROR2( "Domain :: instanciateYourself - Couldn't create set: %s", name.c_str() );
-        }*/
+         *  OOFEM_ERROR2( "Domain :: instanciateYourself - Couldn't create set: %s", name.c_str() );
+         * }*/
 
         set->initializeFrom(ir);
 
@@ -1071,9 +1060,11 @@ Domain :: instanciateYourself(DataReader *dr)
 
         ir->finish();
     }
-    
+
 #  ifdef VERBOSE
-    if ( nset ) VERBOSE_PRINT0("Instanciated sets ", nset)
+    if ( nset ) {
+        VERBOSE_PRINT0("Instanciated sets ", nset);
+    }
 #  endif
 
     if ( nxfemman ) {
@@ -1083,7 +1074,9 @@ Domain :: instanciateYourself(DataReader *dr)
         xfemManager->instanciateYourself(dr);
     }
 #  ifdef VERBOSE
-    if ( nxfemman ) VERBOSE_PRINT0("Instanciated xfem ", nxfemman);
+    if ( nxfemman ) {
+        VERBOSE_PRINT0("Instanciated xfem ", nxfemman);
+    }
 #  endif
 
     this->topology = NULL;
@@ -1096,18 +1089,22 @@ Domain :: instanciateYourself(DataReader *dr)
         return this->topology->instanciateYourself(dr);
     }
 #  ifdef VERBOSE
-    if ( topologytype.length() > 0 ) VERBOSE_PRINT0("Instanciated topologies ", topologytype.length());
+    if ( topologytype.length() > 0 ) {
+        VERBOSE_PRINT0( "Instanciated topologies ", topologytype.length() );
+    }
 #  endif
 
 
     if ( nfracman ) {
         fracManager = new FractureManager(this);
-        ir = dr->giveInputRecord(DataReader ::IR_fracManRec, 1);
+        ir = dr->giveInputRecord(DataReader :: IR_fracManRec, 1);
         fracManager->initializeFrom(ir);
         fracManager->instanciateYourself(dr);
     }
 #  ifdef VERBOSE
-    if ( nfracman ) VERBOSE_PRINT0("Instanciated fracture manager ", nxfemman);
+    if ( nfracman ) {
+        VERBOSE_PRINT0("Instanciated fracture manager ", nxfemman);
+    }
 #  endif
 
     // change internal component references from labels to assigned local numbers
@@ -1139,24 +1136,20 @@ Domain :: postInitialize()
     }
 
     // New  - in development /JB
-    // set element cross sections based on element set definition and set the corresponding 
+    // set element cross sections based on element set definition and set the corresponding
     // material based on the cs
-    for (int i = 1; i <= this->giveNumberOfCrossSectionModels(); i++) {
-
+    for ( int i = 1; i <= this->giveNumberOfCrossSectionModels(); i++ ) {
         if ( int setNum = this->giveCrossSection(i)->giveSetNumber() ) {
-
             Set *set = this->giveSet(setNum);
             const IntArray &elements = set->giveElementList();
-            for (int ielem = 1; ielem <= elements.giveSize(); ++ielem) {
-                Element *element = this->giveElement(elements.at(ielem));
-                element->setCrossSection(i);           
+            for ( int ielem = 1; ielem <= elements.giveSize(); ++ielem ) {
+                Element *element = this->giveElement( elements.at(ielem) );
+                element->setCrossSection(i);
             }
-            this->giveCrossSection( i )->MAT_GIVEN_BY_CS = true;
         }
-
     }
-    
- 
+
+
     //----
 
     for ( int i = 1; i <= this->elementList->giveSize(); i++ ) {
@@ -1239,7 +1232,7 @@ Domain :: giveDefaultNodeDofIDArry()
         defaultNodeDofIDArry.setValues(4, V_u, V_v, V_w, P_f);
     }  else if ( dType == _3dDirShellMode ) {
         defaultNodeDofIDArry.setValues(7, D_u, D_v, D_w, W_u, W_v, W_w, Gamma);
-    }  else if ( dType == _2dLatticeMassTransportMode) {
+    }  else if ( dType == _2dLatticeMassTransportMode ) {
         defaultNodeDofIDArry.setValues(1, P_f);
     } else {
         _error2( "giveDefaultNodeDofIDArry : unknown domainType (%s)", __domainTypeToString(dType) );
@@ -1303,7 +1296,7 @@ Domain :: resolveDomainDofsDefaults(const char *typeName)
     } else if  ( !strncasecmp(typeName, "3ddirshell", 10) ) {
         dType = _3dDirShellMode;
     } else if  ( !strncasecmp(typeName, "2dmasslatticetransport", 22) ) {
-      dType = _2dLatticeMassTransportMode;
+        dType = _2dLatticeMassTransportMode;
     } else if  ( !strncasecmp(typeName, "3d", 2) ) {
         dType = _3dMode;
     } else {
@@ -1323,7 +1316,7 @@ Domain :: drawYourself(oofegGraphicContext &context)
 {
     OGC_PlotModeType plotMode = context.giveIntVarPlotMode();
     if ( ( plotMode == OGC_nodeAnnotation ) || ( plotMode == OGC_nodeGeometry ) || ( plotMode == OGC_essentialBC ) ||
-        ( plotMode == OGC_naturalBC ) || ( plotMode == OGC_nodeScalarPlot ) || ( plotMode == OGC_nodeVectorPlot ) ) {
+         ( plotMode == OGC_naturalBC ) || ( plotMode == OGC_nodeScalarPlot ) || ( plotMode == OGC_nodeVectorPlot ) ) {
         this->drawNodes(context);
     } else {
         this->drawElements(context);
@@ -1423,24 +1416,24 @@ Domain :: createDofs()
 
     ///////////////////////////////////////////////////////////////////////////////////////////////
     /////////////////// Step 1. Scan all required nodal dofs.
-    std::vector< std::set< int > > node_dofs( this->giveNumberOfDofManagers() );
-    for (int i = 1; i <= this->giveNumberOfElements(); ++i) {
+    std :: vector< std :: set< int > >node_dofs( this->giveNumberOfDofManagers() );
+    for ( int i = 1; i <= this->giveNumberOfElements(); ++i ) {
         // Scan for all dofs needed by element.
         Element *element = this->giveElement(i);
-        for (int j = 1; j <= element->giveNumberOfNodes(); ++j) {
+        for ( int j = 1; j <= element->giveNumberOfNodes(); ++j ) {
             element->giveDefaultDofManDofIDMask(j, dofids);
-            for (int k = 1; k <= dofids.giveSize(); k++) {
-                node_dofs[element->giveNode(j)->giveNumber()-1].insert(dofids.at(k));
+            for ( int k = 1; k <= dofids.giveSize(); k++ ) {
+                node_dofs [ element->giveNode(j)->giveNumber() - 1 ].insert( dofids.at(k) );
             }
         }
     }
-    for (int i = 1; i <= this->giveNumberOfDofManagers(); ++i) {
+    for ( int i = 1; i <= this->giveNumberOfDofManagers(); ++i ) {
         // Nodes can also contain their own list of dofs (typical usecase: RigidArmNode )
         DofManager *dman = this->giveDofManager(i);
         const IntArray *dofids = dman->giveForcedDofIDs();
         if ( dofids ) {
-            for (int k = 1; k <= dofids->giveSize(); ++k) {
-                node_dofs[i-1].insert(dofids->at(k));
+            for ( int k = 1; k <= dofids->giveSize(); ++k ) {
+                node_dofs [ i - 1 ].insert( dofids->at(k) );
             }
         }
     }
@@ -1449,20 +1442,20 @@ Domain :: createDofs()
     // Step 2. Scan all Dirichlet b.c.s (or active dofs). For every node we store a map from the dofid to it's b.c. number.
     // This loop won't check for slave dofs or so, and will give a bc id for every single relevant dof.
     // This must be a separate step since we store the inverse mapping (bc->dof instead of dof->bc) so we want to loop over all b.c.s to invert this.
-    std::vector< std::map< int, int > > dof_bc( this->giveNumberOfDofManagers() );
-    for (int i = 1; i <= this->giveNumberOfBoundaryConditions(); ++i) {
+    std :: vector< std :: map< int, int > >dof_bc( this->giveNumberOfDofManagers() );
+    for ( int i = 1; i <= this->giveNumberOfBoundaryConditions(); ++i ) {
         GeneralBoundaryCondition *gbc = this->giveBc(i);
         if ( gbc->giveSetNumber() > 0 ) { ///@todo This will eventually not be optional.
             // Loop over nodes in set and store the bc number in each dof.
             Set *set = this->giveSet( gbc->giveSetNumber() );
-            ActiveBoundaryCondition *active_bc = dynamic_cast< ActiveBoundaryCondition* >(gbc);
-            BoundaryCondition *bc = dynamic_cast< BoundaryCondition* >(gbc);
+            ActiveBoundaryCondition *active_bc = dynamic_cast< ActiveBoundaryCondition * >( gbc );
+            BoundaryCondition *bc = dynamic_cast< BoundaryCondition * >( gbc );
             if ( bc || ( active_bc && active_bc->requiresActiveDofs() ) ) {
                 const IntArray &appliedDofs = gbc->giveDofIDs();
                 const IntArray &nodes = set->giveNodeList();
-                for (int inode = 1; inode <= nodes.giveSize(); ++inode) {
-                    for (int idof = 1; idof <= appliedDofs.giveSize(); ++idof) {
-                        dof_bc[nodes.at(inode)-1][appliedDofs.at(idof)] = i;
+                for ( int inode = 1; inode <= nodes.giveSize(); ++inode ) {
+                    for ( int idof = 1; idof <= appliedDofs.giveSize(); ++idof ) {
+                        dof_bc [ nodes.at(inode) - 1 ] [ appliedDofs.at(idof) ] = i;
                     }
                 }
             }
@@ -1470,57 +1463,61 @@ Domain :: createDofs()
     }
     // Step 2b. This step asks nodes for their bc-vector, which is the old approach to dirichlet b.c.s (i.e. this is for backwards compatibility)
     ///@todo Remove this input method whenever we decide on deprecating the old approach.
-    for (int i = 1; i <= this->giveNumberOfDofManagers(); ++i) {
+    for ( int i = 1; i <= this->giveNumberOfDofManagers(); ++i ) {
         DofManager *dman = this->giveDofManager(i);
-        const std::map< int, int > *dmanBcs = dman->giveBcMap();
-        if ( dmanBcs ) dof_bc[i-1].insert(dmanBcs->begin(), dmanBcs->end()); // This will ignore duplicated dofiditems. 
+        const std :: map< int, int > *dmanBcs = dman->giveBcMap();
+        if ( dmanBcs ) {
+            dof_bc [ i - 1 ].insert( dmanBcs->begin(), dmanBcs->end() );     // This will ignore duplicated dofiditems.
+        }
     }
 
     ///////////////////////////////////////////////////////////////////////////////////////////////
     // Step 3. Same for initial conditions as for boundary conditions in step 2.
-    std::vector< std::map< int, int > > dof_ic( this->giveNumberOfDofManagers() );
-    for (int i = 1; i <= this->giveNumberOfInitialConditions(); ++i) {
+    std :: vector< std :: map< int, int > >dof_ic( this->giveNumberOfDofManagers() );
+    for ( int i = 1; i <= this->giveNumberOfInitialConditions(); ++i ) {
         InitialCondition *ic = this->giveIc(i);
         if ( ic->giveSetNumber() > 0 ) { ///@todo This will eventually not be optional.
             // Loop over nodes in set and store the bc number in each dof.
             Set *set = this->giveSet( ic->giveSetNumber() );
             const IntArray &appliedDofs = ic->giveDofIDs();
             const IntArray &nodes = set->giveNodeList();
-            for (int inode = 1; inode <= nodes.giveSize(); ++inode) {
-                for (int idof = 1; idof <= appliedDofs.giveSize(); ++idof) {
-                    dof_ic[nodes.at(inode)-1][appliedDofs.at(idof)] = i;
+            for ( int inode = 1; inode <= nodes.giveSize(); ++inode ) {
+                for ( int idof = 1; idof <= appliedDofs.giveSize(); ++idof ) {
+                    dof_ic [ nodes.at(inode) - 1 ] [ appliedDofs.at(idof) ] = i;
                 }
             }
         }
     }
     // Step 3b. This step asks nodes for their bc-vector, which is the old approach to dirichlet b.c.s (i.e. this is for backwards compatibility)
     ///@todo Remove this input method whenever we decide on deprecating the old approach.
-    for (int i = 1; i <= this->giveNumberOfDofManagers(); ++i) {
+    for ( int i = 1; i <= this->giveNumberOfDofManagers(); ++i ) {
         DofManager *dman = this->giveDofManager(i);
-        const std::map< int, int > *dmanIcs = dman->giveIcMap();
-        if ( dmanIcs ) dof_ic[i-1].insert(dmanIcs->begin(), dmanIcs->end()); // This will ignore duplicated dofiditems. 
+        const std :: map< int, int > *dmanIcs = dman->giveIcMap();
+        if ( dmanIcs ) {
+            dof_ic [ i - 1 ].insert( dmanIcs->begin(), dmanIcs->end() );     // This will ignore duplicated dofiditems.
+        }
     }
 
     ///////////////////////////////////////////////////////////////////////////////////////////////
     // Step 3. Create the dofs. This involves obtaining the correct
-    for (int i = 1; i <= this->giveNumberOfDofManagers(); ++i) {
+    for ( int i = 1; i <= this->giveNumberOfDofManagers(); ++i ) {
         DofManager *dman = this->giveDofManager(i);
         int c = 0;
         //printf("Dofs in node %d (of %d) = %d\n", i, this->giveNumberOfDofManagers(), node_dofs[i-1].size());
-        dman->setNumberOfDofs(node_dofs[i-1].size());
-        for (std::set<int>::iterator it = node_dofs[i-1].begin(); it != node_dofs[i-1].end(); ++it) {
-            DofIDItem id = (DofIDItem)*it;
+        dman->setNumberOfDofs( node_dofs [ i - 1 ].size() );
+        for ( std :: set< int > :: iterator it = node_dofs [ i - 1 ].begin(); it != node_dofs [ i - 1 ].end(); ++it ) {
+            DofIDItem id = ( DofIDItem ) * it;
             // Find bc and ic if there are any, otherwise zero.
-            int bcid = dof_bc[i-1].find(id) != dof_bc[i-1].end() ? dof_bc[i-1][id] : 0;
-            int icid = dof_ic[i-1].find(id) != dof_ic[i-1].end() ? dof_ic[i-1][id] : 0;
+            int bcid = dof_bc [ i - 1 ].find(id) != dof_bc [ i - 1 ].end() ? dof_bc [ i - 1 ] [ id ] : 0;
+            int icid = dof_ic [ i - 1 ].find(id) != dof_ic [ i - 1 ].end() ? dof_ic [ i - 1 ] [ id ] : 0;
 
             // Determine the doftype:
             dofType dtype = DT_master;
-            const std::map< int, int > *dmanTypes = dman->giveDofTypeMap();
+            const std :: map< int, int > *dmanTypes = dman->giveDofTypeMap();
             if ( dmanTypes ) {
-                std::map< int, int >::const_iterator it = dmanTypes->find(id);
+                std :: map< int, int > :: const_iterator it = dmanTypes->find(id);
                 if ( it != dmanTypes->end() ) {
-                    dtype = (dofType)it->second;
+                    dtype = ( dofType ) it->second;
                 }
             }
             // Check if active dofs are needed:
@@ -1528,7 +1525,7 @@ Domain :: createDofs()
                 // What should take precedence here if there is a slave node?
                 // Right now the active b.c. overrides anything set prior, if necessary.
                 // This seems like the most suitable choice, but it could possibly be changed.
-                ActiveBoundaryCondition *active_bc = dynamic_cast< ActiveBoundaryCondition* >(this->giveBc(bcid));
+                ActiveBoundaryCondition *active_bc = dynamic_cast< ActiveBoundaryCondition * >( this->giveBc(bcid) );
                 if ( active_bc && active_bc->requiresActiveDofs() ) {
                     dtype = DT_active;
                 }
@@ -1546,14 +1543,16 @@ Domain :: createDofs()
             dof->setIcId(icid);
             // Slave dofs obtain their weights post-initialization, simple slave dofs must have their master node specified.
             if ( dtype == DT_simpleSlave ) {
-                ((SimpleSlaveDof*)dof)->setMasterDofManagerNum( (*dman->giveMasterMap())[id] );
+                ( ( SimpleSlaveDof * ) dof )->setMasterDofManagerNum( ( * dman->giveMasterMap() ) [ id ] );
             }
             dman->setDof(c, dof);
         }
     }
 
     // XFEM manager create additional dofs themselves:
-    if ( xfemManager ) xfemManager->createEnrichedDofs();
+    if ( xfemManager ) {
+        xfemManager->createEnrichedDofs();
+    }
 }
 
 
@@ -1629,7 +1628,7 @@ Domain :: giveNextFreeDofID(int increment)
         OOFEM_ERROR("Additional dof id's not implemented/tested for parallel problems");
     }
 #endif
-    int freeID = this->freeDofID; 
+    int freeID = this->freeDofID;
     this->freeDofID += increment;
     return freeID;
 }
@@ -1652,7 +1651,7 @@ Domain :: giveErrorEstimator()
         for ( int i = 1; i <= size; i++ ) {         \
             type *obj = giveMethod(i);              \
             if ( ( mode & CM_Definition ) ) {       \
-                if ( !stream->write(obj->giveInputRecordName()) ) { \
+                if ( !stream->write( obj->giveInputRecordName() ) ) { \
                     THROW_CIOERR(CIO_IOERR);        \
                 }                                   \
             }                                       \
@@ -1670,7 +1669,7 @@ Domain :: giveErrorEstimator()
         for ( int i = 1; i <= size; i++ ) {     \
             type *obj;                          \
             if ( mode & CM_Definition ) {       \
-                std::string name;               \
+                std :: string name;               \
                 if ( !stream->read(name) ) {    \
                     THROW_CIOERR(CIO_IOERR);    \
                 }                               \
@@ -1908,7 +1907,6 @@ int Domain :: commitTransactions(DomainTransactionManager *tm)
                 dmanMap [ it->first ] = ( DofManager * ) it->second;
             }
         } // end loop over DofmanTransactions
-
     }
 
     this->initGlobalElementMap();
@@ -2068,8 +2066,8 @@ Domain :: renumberDofManData(DomainTransactionManager *tm)
 {
     std :: map< int, DofManager * > :: iterator it;
 
-    SpecificEntityRenumberingFunctor< Domain >domainGToLFunctor(this, &Domain :: LB_giveUpdatedGlobalNumber);
-    SpecificEntityRenumberingFunctor< Domain >domainLToLFunctor(this, &Domain :: LB_giveUpdatedLocalNumber);
+    SpecificEntityRenumberingFunctor< Domain >domainGToLFunctor(this, & Domain :: LB_giveUpdatedGlobalNumber);
+    SpecificEntityRenumberingFunctor< Domain >domainLToLFunctor(this, & Domain :: LB_giveUpdatedLocalNumber);
 
 
     for ( it = dmanMap.begin(); it != dmanMap.end(); it++ ) {
@@ -2089,8 +2087,8 @@ Domain :: renumberElementData(DomainTransactionManager *tm)
 {
     std :: map< int, Element * > :: iterator it;
 
-    SpecificEntityRenumberingFunctor< Domain >domainGToLFunctor(this, &Domain :: LB_giveUpdatedGlobalNumber);
-    SpecificEntityRenumberingFunctor< Domain >domainLToLFunctor(this, &Domain :: LB_giveUpdatedLocalNumber);
+    SpecificEntityRenumberingFunctor< Domain >domainGToLFunctor(this, & Domain :: LB_giveUpdatedGlobalNumber);
+    SpecificEntityRenumberingFunctor< Domain >domainLToLFunctor(this, & Domain :: LB_giveUpdatedLocalNumber);
 
 
     for ( it = elementMap.begin(); it != elementMap.end(); it++ ) {

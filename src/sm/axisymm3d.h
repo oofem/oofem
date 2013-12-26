@@ -84,10 +84,9 @@ public:
     virtual FEInterpolation *giveInterpolation() const { return & interpolation; }
 
 #ifdef __OOFEG
-    void drawRawGeometry(oofegGraphicContext &);
-    void drawDeformedGeometry(oofegGraphicContext &, UnknownType type);
+    virtual void drawRawGeometry(oofegGraphicContext &);
+    virtual void drawDeformedGeometry(oofegGraphicContext &, UnknownType type);
     virtual void drawScalar(oofegGraphicContext &context);
-    //void drawInternalState(oofegGraphicContext&);
 #endif
 
     virtual Element *ZZNodalRecoveryMI_giveElement() { return this; }
@@ -109,7 +108,6 @@ public:
 
     virtual const char *giveClassName() const { return "Axisymm3d"; }
     virtual const char *giveInputRecordName() const { return _IFT_Axisymm3d_Name; }
-    virtual classType giveClassID() const { return Axisymm3dClass; }
     virtual int testElementExtension(ElementExtension ext) { return ( ( ext == Element_EdgeLoadSupport ) ? 1 : 0 ); }
     virtual IRResultType initializeFrom(InputRecord *ir);
 
@@ -118,7 +116,6 @@ public:
 protected:
     virtual void computeBmatrixAt(GaussPoint *gp, FloatMatrix &answer, int = 1, int = ALL_STRAINS);
     virtual void computeBHmatrixAt(GaussPoint *gp, FloatMatrix &answer);
-    virtual void computeNmatrixAt(GaussPoint *gp, FloatMatrix &answer);
     virtual void computeGaussPoints();
 
     // edge load support

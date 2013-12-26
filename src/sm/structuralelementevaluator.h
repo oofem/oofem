@@ -69,7 +69,7 @@ protected:
      * Returns the integration rule for mass matrices, if relevant.
      * @return Number of integration points for mass matrix.
      */
-    virtual IntegrationRule* giveMassMtrxIntegrationRule() { return NULL; }
+    virtual IntegrationRule *giveMassMtrxIntegrationRule() { return NULL; }
     /**
      * Returns mask indicating, which unknowns (their type and ordering is the same as
      * element unknown vector) participate in mass matrix integration.
@@ -116,17 +116,31 @@ protected:
     virtual double computeVolumeAround(GaussPoint *gp) { return 0.; }
     virtual void giveInternalForcesVector(FloatArray &answer, TimeStep *tStep, bool useUpdatedGpRecord = false);
     void computeVectorOf(EquationID type, ValueModeType u,
-                         TimeStep *stepN, FloatArray &answer) {
-        this->giveElement()->computeVectorOf(type, u, stepN, answer);
+                         TimeStep *tStep, FloatArray &answer) {
+        this->giveElement()->computeVectorOf(type, u, tStep, answer);
     }
-    void computeVectorOf(PrimaryField &field, ValueModeType u, TimeStep *stepN, FloatArray &answer) {
-        this->giveElement()->computeVectorOf(field, u, stepN, answer);
+    void computeVectorOf(PrimaryField &field, ValueModeType u, TimeStep *tStep, FloatArray &answer) {
+        this->giveElement()->computeVectorOf(field, u, tStep, answer);
     }
-    bool isActivated(TimeStep *atTime) { return true; }
-    void updateInternalState(TimeStep *stepN);
+    bool isActivated(TimeStep *tStep) { return true; }
+    void updateInternalState(TimeStep *tStep);
 
+    /**
+     * Computes the stress vector.
+     * @param answer Stress vector.
+     * @param strain Strain vector.
+     * @param gp Integration point for which stress is computed.
+     * @param tStep Time step.
+     */
     virtual void computeStressVector(FloatArray &answer, const FloatArray &strain, GaussPoint *gp, TimeStep *tStep) = 0;
-
+    /**
+     * Computes constitutive matrix of receiver.
+     * @param answer Constitutive matrix.
+     * @param rMode Material response mode of answer.
+     * @param gp Integration point for which constitutive matrix is computed.
+     * @param tStep Time step.
+     */
+    virtual void computeConstitutiveMatrixAt(FloatMatrix &answer, MatResponseMode rMode, GaussPoint *gp, TimeStep *tStep) = 0;
     /**
      * Optimized version, allowing to pass element displacements as parameter.
      * Standard version has a huge performance leak; in typical IGA element the element vector is VERY large
@@ -134,7 +148,7 @@ protected:
      * integration point. This optimized version allows to assemble displacement vector only once (for all IP)
      * and pass this vector as parameter
      */
-    void computeStrainVector(FloatArray &answer, GaussPoint *gp, TimeStep *stepN, FloatArray &u);
+    void computeStrainVector(FloatArray &answer, GaussPoint *gp, TimeStep *tStep, FloatArray &u);
 
     /*
      * Assembles the code numbers of given integration element (sub-patch)
@@ -158,7 +172,7 @@ protected:
 #ifdef __OOFEG
     friend void drawIGAPatchDeformedGeometry(Element * elem, StructuralElementEvaluator * se, oofegGraphicContext & gc, UnknownType);
 #endif
-    public:
+public:
     void elem(int arg1, EquationID arg2, IntArray arg3);
 };
 } // end namespace oofem

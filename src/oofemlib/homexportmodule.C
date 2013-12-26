@@ -41,21 +41,20 @@
 #include "classfactory.h"
 
 #ifdef __SM_MODULE
-    #include "structuralelement.h"
-    #include "structuralmaterial.h"
-    #include "truss3d.h"
-    #include "stressvector.h"
-    #include "strainvector.h"
+ #include "structuralelement.h"
+ #include "structuralmaterial.h"
+ #include "truss3d.h"
+ #include "stressvector.h"
+ #include "strainvector.h"
 #endif
 
 #ifdef __TM_MODULE
-    #include "transportmaterial.h"
+ #include "transportmaterial.h"
 #endif
 
 
 namespace oofem {
-
-REGISTER_ExportModule( HOMExportModule )
+REGISTER_ExportModule(HOMExportModule)
 
 //inherit LinearElasticMaterial for accessing stress/strain transformation functions
 HOMExportModule :: HOMExportModule(int n, EngngModel *e) : ExportModule(n, e)
@@ -89,7 +88,7 @@ void
 HOMExportModule :: doOutput(TimeStep *tStep, bool forcedOutput)
 {
     Element *elem;
-    if ( !(testTimeStepOutput(tStep) || forcedOutput) ) {
+    if ( !( testTimeStepOutput(tStep) || forcedOutput ) ) {
         return;
     }
 
@@ -129,8 +128,8 @@ HOMExportModule :: doOutput(TimeStep *tStep, bool forcedOutput)
         fprintf(this->stream, "%e  % e       ", tStep->giveTargetTime(), sumState);
         sumFlow.times(1. / VolTot * this->scale);
         fprintf( this->stream, "% e  % e  % e\n", sumFlow.at(1), sumFlow.at(2), sumFlow.at(3) );
-    } else {//structural analysis
-        #ifdef __SM_MODULE
+    } else { //structural analysis
+#ifdef __SM_MODULE
         StructuralElement *structElem;
         //int nnodes = d->giveNumberOfDofManagers();
         FloatArray VecStrain, VecStress, VecEigStrain, tempStrain(6), tempStress(6), tempEigStrain(6), SumStrain(6), SumStress(6), SumEigStrain(6), tempFloatAr, damage;
@@ -144,7 +143,7 @@ HOMExportModule :: doOutput(TimeStep *tStep, bool forcedOutput)
             tempStrain.zero();
             tempStress.zero();
             tempEigStrain.zero();
-            
+
             elem = d->giveElement(ielem);
             if ( this->matnum.giveSize() == 0 || this->matnum.contains( elem->giveMaterial()->giveNumber() ) ) {
                 iRule = elem->giveDefaultIntegrationRulePtr();
@@ -163,21 +162,21 @@ HOMExportModule :: doOutput(TimeStep *tStep, bool forcedOutput)
                         MaterialMode mmode = _3dMat;
                         tempStress.at(1) = VecStress.at(1);
                         tempStrain.at(1) = VecStrain.at(1);
-                        if (VecEigStrain.giveSize () ){
+                        if ( VecEigStrain.giveSize() ) {
                             tempEigStrain.at(1) = VecEigStrain.at(1);
                         }
-                        StressVector stressVector1(tempStress, mmode);//convert from array
+                        StressVector stressVector1(tempStress, mmode); //convert from array
                         StressVector stressVector2(mmode);
-                        StrainVector strainVector1(tempStrain, mmode);//convert from array
+                        StrainVector strainVector1(tempStrain, mmode); //convert from array
                         StrainVector strainVector2(mmode);
-                        StrainVector strainEigVector1(tempEigStrain, mmode);//convert from array
+                        StrainVector strainEigVector1(tempEigStrain, mmode); //convert from array
                         StrainVector strainEigVector2(mmode);
                         elem->giveLocalCoordinateSystem(baseGCS);
-                        
+
                         stressVector1.transformTo(stressVector2, baseGCS, 0);
                         strainVector1.transformTo(strainVector2, baseGCS, 0);
                         strainEigVector1.transformTo(strainEigVector2, baseGCS, 0);
-                        
+
                         stressVector2.convertToFullForm(VecStress);
                         strainVector2.convertToFullForm(VecStrain);
                         strainEigVector2.convertToFullForm(VecEigStrain);
@@ -188,9 +187,9 @@ HOMExportModule :: doOutput(TimeStep *tStep, bool forcedOutput)
                     VecStress.times(dV);
                     VecEigStrain.times(dV);
                     if ( damage.giveSize() ) { //only for models with damage
-                        sumDamage += damage.at(1)*dV;
+                        sumDamage += damage.at(1) * dV;
                     }
-                    
+
                     for ( int j = 1; j <= 6; j++ ) {
                         SumStrain.at(j) += VecStrain.at(j);
                         if ( VecEigStrain.giveSize() ) {
@@ -211,7 +210,7 @@ HOMExportModule :: doOutput(TimeStep *tStep, bool forcedOutput)
         SumStrain.times(1. / VolTot * this->scale);
         SumEigStrain.times(1. / VolTot * this->scale);
         SumStress.times(1. / VolTot * this->scale);
-        sumDamage *= (1. / VolTot);
+        sumDamage *= ( 1. / VolTot );
         //SumStrain.printYourself();
         //SumEigStrain.printYourself();
         //SumStress.printYourself();
@@ -233,8 +232,8 @@ HOMExportModule :: doOutput(TimeStep *tStep, bool forcedOutput)
         fprintf(this->stream, "Vol %06.5e ", VolTot);
         fprintf(this->stream, "AvrDamage %06.5e ", sumDamage);
         fprintf(this->stream, "\n");
-    
-    #endif
+
+#endif
     }
     fflush(this->stream);
 }
@@ -245,9 +244,9 @@ HOMExportModule :: initialize()
     Domain *d  = emodel->giveDomain(1);
     domainType domType = d->giveDomainType();
 
-    std::string fileName = emodel->giveOutputBaseFileName() + ".hom";
+    std :: string fileName = emodel->giveOutputBaseFileName() + ".hom";
     if ( ( this->stream = fopen(fileName.c_str(), "w") ) == NULL ) {
-        OOFEM_ERROR2("HOMExportModule::giveOutputStream: failed to open file %s", fileName.c_str());
+        OOFEM_ERROR2( "HOMExportModule::giveOutputStream: failed to open file %s", fileName.c_str() );
     }
 
     if ( domType == _HeatTransferMode || domType == _HeatMass1Mode ) {

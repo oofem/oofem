@@ -51,6 +51,7 @@
 #include "geotoolbox.h"
 #include "crosssection.h"
 #include "contextioerr.h"
+#include "dynamicinputrecord.h"
 #include "classfactory.h"
 
 #ifdef __OOFEG
@@ -61,9 +62,9 @@
 namespace oofem {
 #define TRSUPG_ZERO_VOF 1.e-8
 
-REGISTER_Element( TR1_2D_CBS );
+REGISTER_Element(TR1_2D_CBS);
 
-FEI2dTrLin TR1_2D_CBS :: interp(1,2);
+FEI2dTrLin TR1_2D_CBS :: interp(1, 2);
 
 TR1_2D_CBS :: TR1_2D_CBS(int n, Domain *aDomain) :
     CBSElement(n, aDomain)
@@ -116,7 +117,7 @@ TR1_2D_CBS :: initializeFrom(InputRecord *ir)
     IRResultType result;                // Required by IR_GIVE_FIELD macro
     //</RESTRICTED_SECTION>
 
-    this->CBSElement :: initializeFrom(ir);
+    CBSElement :: initializeFrom(ir);
 
     //<RESTRICTED_SECTION>
     this->vof = 0.0;
@@ -135,6 +136,19 @@ TR1_2D_CBS :: initializeFrom(InputRecord *ir)
     return IRRT_OK;
 }
 
+
+void
+TR1_2D_CBS :: giveInputRecord(DynamicInputRecord &input)
+{
+    CBSElement :: giveInputRecord(input);
+    if ( this->permanentVofFlag ) {
+        input.setField(this->vof, _IFT_Tr1CBS_pvof);
+    } else {
+        input.setField(this->vof, _IFT_Tr1CBS_vof);
+    }
+}
+
+
 void
 TR1_2D_CBS :: computeGaussPoints()
 // Sets up the array containing the four Gauss points of the receiver.
@@ -143,16 +157,16 @@ TR1_2D_CBS :: computeGaussPoints()
         numberOfIntegrationRules = 1;
         integrationRulesArray = new IntegrationRule * [ 1 ];
         integrationRulesArray [ 0 ] = new GaussIntegrationRule(1, this, 1, 3);
-        this->giveCrossSection()->setupIntegrationPoints( *integrationRulesArray[0], 1, this );
+        this->giveCrossSection()->setupIntegrationPoints(* integrationRulesArray [ 0 ], 1, this);
     }
 }
 
 void
-TR1_2D_CBS :: computeConsistentMassMtrx(FloatMatrix &answer, TimeStep *atTime)
+TR1_2D_CBS :: computeConsistentMassMtrx(FloatMatrix &answer, TimeStep *tStep)
 {
     answer.resize(9, 9);
     answer.zero();
-    double rho = this->giveMaterial()->give('d', integrationRulesArray [ 0 ]->getIntegrationPoint(0));
+    double rho = this->giveMaterial()->give( 'd', integrationRulesArray [ 0 ]->getIntegrationPoint(0) );
 
     double ar6 = rho * area / 6.0;
     double ar12 = rho * area / 12.0;
@@ -172,12 +186,12 @@ TR1_2D_CBS :: computeConsistentMassMtrx(FloatMatrix &answer, TimeStep *atTime)
 
 
 void
-TR1_2D_CBS :: computeDiagonalMassMtrx(FloatArray &answer, TimeStep *atTime)
+TR1_2D_CBS :: computeDiagonalMassMtrx(FloatArray &answer, TimeStep *tStep)
 {
     answer.resize(9);
     answer.zero();
 
-    double rho = this->giveMaterial()->give('d', integrationRulesArray [ 0 ]->getIntegrationPoint(0));
+    double rho = this->giveMaterial()->give( 'd', integrationRulesArray [ 0 ]->getIntegrationPoint(0) );
     double mm = rho * this->area / 3.0;
     for ( int i = 0; i < 3; i++ ) {
         answer.at(i * 3 + 1) = mm;
@@ -186,7 +200,7 @@ TR1_2D_CBS :: computeDiagonalMassMtrx(FloatArray &answer, TimeStep *atTime)
 }
 
 void
-TR1_2D_CBS :: computeConvectionTermsI(FloatArray &answer, TimeStep *stepN)
+TR1_2D_CBS :: computeConvectionTermsI(FloatArray &answer, TimeStep *tStep)
 {
     // calculates advection component for (*) velocities
 
@@ -194,9 +208,9 @@ TR1_2D_CBS :: computeConvectionTermsI(FloatArray &answer, TimeStep *stepN)
     double usum, vsum;
     double adu11, adu21, adu31, adv11, adv21, adv31;
     double adu12, adu22, adu32, adv12, adv22, adv32;
-    double dt = stepN->giveTimeIncrement();
+    double dt = tStep->giveTimeIncrement();
     //double rho = this->giveMaterial()->give('d');
-    double rho = this->giveMaterial()->give('d', integrationRulesArray [ 0 ]->getIntegrationPoint(0));
+    double rho = this->giveMaterial()->give( 'd', integrationRulesArray [ 0 ]->getIntegrationPoint(0) );
     int nLoads;
     bcGeomType ltype;
     Load *load;
@@ -207,7 +221,7 @@ TR1_2D_CBS :: computeConvectionTermsI(FloatArray &answer, TimeStep *stepN)
     ar12 = area / 12.;
     ar3 = area / 3.0;
 
-    this->computeVectorOf(EID_MomentumBalance, VM_Total, stepN->givePreviousStep(), u);
+    this->computeVectorOf(EID_MomentumBalance, VM_Total, tStep->givePreviousStep(), u);
 
     dudx = b [ 0 ] * u.at(1) + b [ 1 ] * u.at(3) + b [ 2 ] * u.at(5);
     dudy = c [ 0 ] * u.at(1) + c [ 1 ] * u.at(3) + c [ 2 ] * u.at(5);
@@ -256,7 +270,7 @@ TR1_2D_CBS :: computeConvectionTermsI(FloatArray &answer, TimeStep *stepN)
         load  = domain->giveLoad( bodyLoadArray.at(i) );
         ltype = load->giveBCGeoType();
         if ( ( ltype == BodyLoadBGT ) && ( load->giveBCValType() == ForceLoadBVT ) ) {
-            load->computeComponentArrayAt(gVector, stepN, VM_Total);
+            load->computeComponentArrayAt(gVector, tStep, VM_Total);
             if ( gVector.giveSize() ) {
                 answer.at(1) -= dt * 0.5 * ar3 * ( b [ 0 ] * usum + c [ 0 ] * vsum ) * gVector.at(1);
                 answer.at(2) -= dt * 0.5 * ar3 * ( b [ 0 ] * usum + c [ 0 ] * vsum ) * gVector.at(2);
@@ -278,8 +292,8 @@ TR1_2D_CBS :: computeDiffusionTermsI(FloatArray &answer, TimeStep *tStep)
     FloatArray stress;
     int nLoads;
     FluidDynamicMaterial *mat = static_cast< FluidDynamicMaterial * >( this->giveMaterial() );
-    double Re = static_cast<FluidModel*>(domain->giveEngngModel())->giveReynoldsNumber();
-    double coeff, rho = mat->give('d', integrationRulesArray [ 0 ]->getIntegrationPoint(0));
+    double Re = static_cast< FluidModel * >( domain->giveEngngModel() )->giveReynoldsNumber();
+    double coeff, rho = mat->give( 'd', integrationRulesArray [ 0 ]->getIntegrationPoint(0) );
     GaussPoint *gp = integrationRulesArray [ 0 ]->getIntegrationPoint(0);
     bcGeomType ltype;
     Load *load;
@@ -293,8 +307,8 @@ TR1_2D_CBS :: computeDiffusionTermsI(FloatArray &answer, TimeStep *tStep)
     answer.resize(9);
     answer.zero();
     for ( int i = 0; i < 3; i++ ) {
-        answer.at( i * 3 + 1 ) = -area * ( stress.at(1) * b [ i ] + stress.at(3) * c [ i ] );
-        answer.at( i * 3 + 2 ) = -area * ( stress.at(3) * b [ i ] + stress.at(2) * c [ i ] );
+        answer.at(i * 3 + 1) = -area * ( stress.at(1) * b [ i ] + stress.at(3) * c [ i ] );
+        answer.at(i * 3 + 2) = -area * ( stress.at(3) * b [ i ] + stress.at(2) * c [ i ] );
     }
 
     // add boundary termms
@@ -388,8 +402,8 @@ TR1_2D_CBS :: computeDensityRhsVelocityTerms(FloatArray &answer, TimeStep *tStep
     // computes velocity terms on RHS for density equation
     double velu = 0.0, velv = 0.0; // dudx=0.0, dvdy=0.0;
     //double rho = this->giveMaterial()->give('d');
-    double theta1 = static_cast< CBS * >(domain->giveEngngModel())->giveTheta1();
-    double rho = this->giveMaterial()->give('d', integrationRulesArray [ 0 ]->getIntegrationPoint(0));
+    double theta1 = static_cast< CBS * >( domain->giveEngngModel() )->giveTheta1();
+    double rho = this->giveMaterial()->give( 'd', integrationRulesArray [ 0 ]->getIntegrationPoint(0) );
     FloatArray u(6), ustar(6);
 
     answer.resize(9);
@@ -407,13 +421,13 @@ TR1_2D_CBS :: computeDensityRhsVelocityTerms(FloatArray &answer, TimeStep *tStep
 
     //this->computeVectorOf(EID_MomentumBalance, VM_Incremental, tStep, ustar);
     //u.add((theta1-1, ustar);
-/*
-    printf("u_new = "); u.printYourself();
-    this->computeVectorOf(EID_MomentumBalance, VM_Total, tStep->givePreviousStep(), u);
-    this->computeVectorOf(EID_AuxMomentumBalance, VM_Incremental, tStep, ustar);
-    u.add(theta1, ustar);
-    printf("u_corr = "); u.printYourself();
-*/
+    /*
+     *  printf("u_new = "); u.printYourself();
+     *  this->computeVectorOf(EID_MomentumBalance, VM_Total, tStep->givePreviousStep(), u);
+     *  this->computeVectorOf(EID_AuxMomentumBalance, VM_Incremental, tStep, ustar);
+     *  u.add(theta1, ustar);
+     *  printf("u_corr = "); u.printYourself();
+     */
 
     for ( int i = 0; i < 3; i++ ) {
         velu += u.at(i * 2 + 1);
@@ -421,7 +435,7 @@ TR1_2D_CBS :: computeDensityRhsVelocityTerms(FloatArray &answer, TimeStep *tStep
     }
 
     for ( int i = 0; i < 3; i++ ) {
-        answer.at((i + 1) * 3) = area * ( ( b [ i ] * velu + c [ i ] * velv ) ) / 3.0;
+        answer.at( ( i + 1 ) * 3 ) = area * ( ( b [ i ] * velu + c [ i ] * velv ) ) / 3.0;
     }
 
     /* account for normal prescribed velocity on boundary*/
@@ -475,7 +489,7 @@ TR1_2D_CBS :: computePrescribedTractionPressure(FloatArray &answer, TimeStep *tS
      * this pressure is enforced as dirichlet bc in density/pressure equation
      */
     FloatArray stress;
-    double Re = static_cast<FluidModel*>(domain->giveEngngModel())->giveReynoldsNumber();
+    double Re = static_cast< FluidModel * >( domain->giveEngngModel() )->giveReynoldsNumber();
     GaussPoint *gp = integrationRulesArray [ 0 ]->getIntegrationPoint(0);
     stress = static_cast< FluidDynamicMaterialStatus * >( this->giveMaterial()->giveStatus(gp) )->giveDeviatoricStressVector();
     stress.times(1. / Re);
@@ -573,7 +587,7 @@ TR1_2D_CBS :: computeDensityRhsPressureTerms(FloatArray &answer, TimeStep *tStep
 {
     // computes pressure terms on RHS for density equation
     FloatArray p(3);
-    double theta1 = static_cast< CBS * >(domain->giveEngngModel())->giveTheta1();
+    double theta1 = static_cast< CBS * >( domain->giveEngngModel() )->giveTheta1();
 
     this->computeVectorOf(EID_ConservationEquation, VM_Total, tStep->givePreviousStep(), p);
     answer.resize(9);
@@ -586,7 +600,7 @@ TR1_2D_CBS :: computeDensityRhsPressureTerms(FloatArray &answer, TimeStep *tStep
     }
 
     for ( int i = 0; i < 3; i++ ) {
-        answer.at((i + 1) * 3) = -theta1 *tStep->giveTimeIncrement() * area * ( b [ i ] * dpdx + c [ i ] * dpdy );
+        answer.at( ( i + 1 ) * 3 ) = -theta1 *tStep->giveTimeIncrement() * area * ( b [ i ] * dpdx + c [ i ] * dpdy );
     }
 }
 
@@ -765,7 +779,7 @@ TR1_2D_CBS :: computeCriticalTimeStep(TimeStep *tStep)
 {
     FloatArray u;
     double dt1, dt2, dt;
-    double Re = static_cast<FluidModel*>(domain->giveEngngModel())->giveReynoldsNumber();
+    double Re = static_cast< FluidModel * >( domain->giveEngngModel() )->giveReynoldsNumber();
 
     this->computeVectorOf(EID_MomentumBalance, VM_Total, tStep, u);
 
@@ -890,10 +904,10 @@ TR1_2D_CBS :: formVolumeInterfacePoly(Polygon &matvolpoly, LEPlic *matInterface,
             if ( nodeIn [ i - 1 ] ) {
                 if ( updFlag ) {
                     v.setCoords( matInterface->giveUpdatedXCoordinate( this->giveNode(i)->giveNumber() ),
-                                matInterface->giveUpdatedYCoordinate( this->giveNode(i)->giveNumber() ) );
+                                 matInterface->giveUpdatedYCoordinate( this->giveNode(i)->giveNumber() ) );
                 } else {
                     v.setCoords( this->giveNode(i)->giveCoordinate(1),
-                                this->giveNode(i)->giveCoordinate(2) );
+                                 this->giveNode(i)->giveCoordinate(2) );
                 }
 
                 matvolpoly.addVertex(v);
@@ -923,7 +937,7 @@ TR1_2D_CBS :: formVolumeInterfacePoly(Polygon &matvolpoly, LEPlic *matInterface,
                     if ( nodeIn [ i - 1 ] ) {
                         if ( updFlag ) {
                             v.setCoords( matInterface->giveUpdatedXCoordinate( this->giveNode(next)->giveNumber() ),
-                                        matInterface->giveUpdatedYCoordinate( this->giveNode(next)->giveNumber() ) );
+                                         matInterface->giveUpdatedYCoordinate( this->giveNode(next)->giveNumber() ) );
                         } else {
                             v.setCoords( this->giveNode(next)->giveCoordinate(1), this->giveNode(next)->giveCoordinate(2) );
                         }
@@ -934,7 +948,7 @@ TR1_2D_CBS :: formVolumeInterfacePoly(Polygon &matvolpoly, LEPlic *matInterface,
                         matvolpoly.addVertex(v);
                         if ( updFlag ) {
                             v.setCoords( matInterface->giveUpdatedXCoordinate( this->giveNode(next)->giveNumber() ),
-                                        matInterface->giveUpdatedYCoordinate( this->giveNode(next)->giveNumber() ) );
+                                         matInterface->giveUpdatedYCoordinate( this->giveNode(next)->giveNumber() ) );
                         } else {
                             v.setCoords( this->giveNode(next)->giveCoordinate(1), this->giveNode(next)->giveCoordinate(2) );
                         }
@@ -944,7 +958,6 @@ TR1_2D_CBS :: formVolumeInterfacePoly(Polygon &matvolpoly, LEPlic *matInterface,
                 }
             }
         } // end loop over elem nodes
-
     }
 }
 
@@ -1035,7 +1048,7 @@ TR1_2D_CBS :: giveElementCenter(LEPlic *mat_interface, FloatArray &center, bool 
 int
 TR1_2D_CBS :: EIPrimaryFieldI_evaluateFieldVectorAt(FloatArray &answer, PrimaryField &pf,
                                                     FloatArray &coords, IntArray &dofId, ValueModeType mode,
-                                                    TimeStep *atTime)
+                                                    TimeStep *tStep)
 {
     int indx, es;
     double sum;
@@ -1046,7 +1059,7 @@ TR1_2D_CBS :: EIPrimaryFieldI_evaluateFieldVectorAt(FloatArray &answer, PrimaryF
     this->giveElementDofIDMask(pf.giveEquationID(), elemdofs);
     es = elemdofs.giveSize();
     // first evaluate element unknown vector
-    this->computeVectorOf(pf, mode, atTime, elemvector);
+    this->computeVectorOf(pf, mode, tStep, elemvector);
     // determine corresponding local coordinates
     if ( this->computeLocalCoordinates(lc, coords) ) {
         // compute interpolation matrix
@@ -1066,6 +1079,7 @@ TR1_2D_CBS :: EIPrimaryFieldI_evaluateFieldVectorAt(FloatArray &answer, PrimaryF
                 answer.at(i) = 0.0;
             }
         }
+
         return 0; // ok
     } else {
         _error("EIPrimaryFieldI_evaluateFieldVectorAt: target point not in receiver volume");
@@ -1084,14 +1098,14 @@ TR1_2D_CBS :: updateYourself(TimeStep *tStep)
 }
 
 int
-TR1_2D_CBS :: giveIPValue(FloatArray &answer, GaussPoint *aGaussPoint, InternalStateType type, TimeStep *atTime)
+TR1_2D_CBS :: giveIPValue(FloatArray &answer, GaussPoint *gp, InternalStateType type, TimeStep *tStep)
 {
     if ( type == IST_VOFFraction ) {
         answer.resize(1);
         answer.at(1) = this->giveTempVolumeFraction();
         return 1;
     } else {
-        return CBSElement :: giveIPValue(answer, aGaussPoint, type, atTime);
+        return CBSElement :: giveIPValue(answer, gp, type, tStep);
     }
 }
 
@@ -1125,8 +1139,8 @@ TR1_2D_CBS :: SPRNodalRecoveryMI_giveDofMansDeterminedByPatch(IntArray &answer, 
 {
     answer.resize(1);
     if ( ( pap == this->giveNode(1)->giveNumber() ) ||
-        ( pap == this->giveNode(2)->giveNumber() ) ||
-        ( pap == this->giveNode(3)->giveNumber() ) ) {
+         ( pap == this->giveNode(2)->giveNumber() ) ||
+         ( pap == this->giveNode(3)->giveNumber() ) ) {
         answer.at(1) = pap;
     } else {
         _error("SPRNodalRecoveryMI_giveDofMansDeterminedByPatch: node unknown");
@@ -1147,12 +1161,12 @@ TR1_2D_CBS :: SPRNodalRecoveryMI_givePatchType()
 
 
 void
-TR1_2D_CBS :: printOutputAt(FILE *file, TimeStep *stepN)
+TR1_2D_CBS :: printOutputAt(FILE *file, TimeStep *tStep)
 // Performs end-of-step operations.
 {
-    CBSElement :: printOutputAt(file, stepN);
+    CBSElement :: printOutputAt(file, tStep);
     //<RESTRICTED_SECTION>
-    double rho = this->giveMaterial()->give('d', integrationRulesArray [ 0 ]->getIntegrationPoint(0));
+    double rho = this->giveMaterial()->give( 'd', integrationRulesArray [ 0 ]->getIntegrationPoint(0) );
     fprintf(file, "VOF %e, density %e\n\n", this->giveVolumeFraction(), rho);
     //</RESTRICTED_SECTION>
 }
@@ -1210,7 +1224,7 @@ contextIOResultType TR1_2D_CBS :: restoreContext(DataStream *stream, ContextMode
 #ifdef __OOFEG
 int
 TR1_2D_CBS :: giveInternalStateAtNode(FloatArray &answer, InternalStateType type, InternalStateMode mode,
-                                      int node, TimeStep *atTime)
+                                      int node, TimeStep *tStep)
 {
     //<RESTRICTED_SECTION>
     if ( type == IST_VOFFraction ) {
@@ -1221,10 +1235,10 @@ TR1_2D_CBS :: giveInternalStateAtNode(FloatArray &answer, InternalStateType type
     //</RESTRICTED_SECTION>
     if ( type == IST_Density ) {
         answer.resize(1);
-        answer.at(1) = this->giveMaterial()->give('d', integrationRulesArray [ 0 ]->getIntegrationPoint(0));
+        answer.at(1) = this->giveMaterial()->give( 'd', integrationRulesArray [ 0 ]->getIntegrationPoint(0) );
         return 1;
     } else {
-        return CBSElement :: giveInternalStateAtNode(answer, type, mode, node, atTime);
+        return CBSElement :: giveInternalStateAtNode(answer, type, mode, node, tStep);
     }
 }
 

@@ -151,4 +151,3 @@ FETIBoundaryDofManager :: giveCompleteLocationArray(int rank, IntArray &location
 }
 } // end namespace oofem
 #endif
-

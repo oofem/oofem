@@ -211,37 +211,35 @@ public:
      * at given time step. Unknown is characterized by its physical meaning (i.g., displacement)
      * an by its mode (e.g., value of displacement, velocity of displacement or acceleration of
      * displacement). UnknownType of requested unknown must be same as UnknownType of Dof.
-     * @param type Physical meaning of  unknown.
      * @param mode Mode of unknown (e.g, total value, velocity or acceleration of unknown).
-     * @param stepN Time step when unknown is requested. See documentation of particular EngngModel
-     * class for valid stepN values (most implementation can return only values for current
+     * @param tStep Time step when unknown is requested. See documentation of particular EngngModel
+     * class for valid tStep values (most implementation can return only values for current
      * and possibly for previous time step).
-     * @return Value of unknown. If activeBC exist then returns value prescribed by BC. If stepN is time step
+     * @return Value of unknown. If activeBC exist then returns value prescribed by BC. If tStep is time step
      * when IC apply, returns value given by this IC.
      */
-    virtual double giveUnknown(ValueModeType mode, TimeStep *stepN) = 0;
+    virtual double giveUnknown(ValueModeType mode, TimeStep *tStep) = 0;
     /**
      * The key method of class Dof. Returns the value of the unknown of the receiver
      * at given time step associated to given field.
      * @param field Field used to provide values.
      * @param mode Mode of unknown.
-     * @param stepN Time step when unknown is requested. See documentation of particular EngngModel
-     * class for valid stepN values (most implementation can return only values for current
+     * @param tStep Time step when unknown is requested. See documentation of particular EngngModel
+     * class for valid tStep values (most implementation can return only values for current
      * and possibly for previous time step).
-     * @return Value of unknown. If activeBC exist then returns value prescribed by BC. If stepN is time step
+     * @return Value of unknown. If activeBC exist then returns value prescribed by BC. If tStep is time step
      * when IC apply, returns value given by this IC.
      */
-    virtual double giveUnknown(PrimaryField &field, ValueModeType mode, TimeStep *stepN) = 0;
+    virtual double giveUnknown(PrimaryField &field, ValueModeType mode, TimeStep *tStep) = 0;
     /**
      * The key method of class Dof. Returns the value of the unknown of the receiver
      * at given time step associated to given field. For primary dof it returns is associated unknown value,
      * for slave dofs it returns an array of master values (in recursive way).
      * @param masterUnknowns Values of master unknowns for receiver.
-     * @param eid Equation ID for unknowns.
      * @param mode Value mode for unknowns.
-     * @param stepN Time step for when unknowns are requested.
+     * @param tStep Time step for when unknowns are requested.
      */
-    virtual void giveUnknowns(FloatArray &masterUnknowns, ValueModeType mode, TimeStep *stepN);
+    virtual void giveUnknowns(FloatArray &masterUnknowns, ValueModeType mode, TimeStep *tStep);
     /**
      * The key method of class Dof. Returns the value of the unknown of the receiver
      * at given time step associated to given field. For primary dof it returns is associated unknown value,
@@ -249,9 +247,9 @@ public:
      * @param masterUnknowns
      * @param field The field to pick unknowns from.
      * @param mode Value mode for unknowns.
-     * @param stepN Time step for when unknowns are requested.
+     * @param tStep Time step for when unknowns are requested.
      */
-    virtual void giveUnknowns(FloatArray &masterUnknowns, PrimaryField &field, ValueModeType mode, TimeStep *stepN);
+    virtual void giveUnknowns(FloatArray &masterUnknowns, PrimaryField &field, ValueModeType mode, TimeStep *tStep);
 
     /**
      * Computes dof transformation array, which describes the dependence of receiver value on values of master dofs.
@@ -340,13 +338,13 @@ public:
      * The format of output depends on analysis type.
      * Called from corresponding e-model.
      */
-    virtual void printSingleOutputAt(FILE *file, TimeStep *stepN, char ch, ValueModeType mode, double scale = 1.0);
+    virtual void printSingleOutputAt(FILE *file, TimeStep *tStep, char ch, ValueModeType mode, double scale = 1.0);
     /**
      * Prints Dof output (it prints value of unknown related to dof at given timeStep).
      * The format of output depends on analysis type.
      * Called from corresponding e-model.
      */
-    virtual void printMultipleOutputAt(FILE *File, TimeStep *stepN, char *ch, ValueModeType *mode, int nite);
+    virtual void printMultipleOutputAt(FILE *File, TimeStep *tStep, char *ch, ValueModeType *mode, int nite);
 
     /// Prints the receiver state on stdout.
     virtual void printYourself();
@@ -377,13 +375,9 @@ public:
      * In fact on EngngModel level only incremental solution is stored, but total values are
      * always stored in dofs dictionaries.
      * Implementation is not provided, only interface declared. Children must implement this method.
-     * @param tStep time step when unknowns are updated. In current version it is unused parameter.
+     * @param tStep Time step when unknowns are updated. In current version it is unused parameter.
      * It is EngngModel responsibility to update values, and values stored in dictionary
      * are always related to timeStep when they were lastly updated.
-     * @param type identifies type of unknown. It is not possible to store values of different
-     * UnknownType types then  UnknownType type of receiver.
-     * @param tStep Time step.
-     * @param type Type of equation that value belongs to.
      * @param mode Mode of stored unknown.
      * @param dofValue Value of unknown. Old value will generally be lost.
      * @see EngngModel::requiresUnknownsDictionaryUpdate
@@ -392,7 +386,6 @@ public:
     /**
      * Access dictionary value, if not present zero is returned.
      * @param tStep Time step.
-     * @param type Type of equation that value belongs to.
      * @param mode Mode of value.
      * @param dofValue Value of the dof.
      */
@@ -439,13 +432,13 @@ public:
      * be available at same partition as slave.
      * @param buff Communication buffer to pack data.
      * @param mode Mode of unknown (e.g, total value, velocity or acceleration of unknown).
-     * @param stepN Time step when unknown requested. See documentation of particular EngngModel
-     * class for valid stepN values (most implementations can return only values for current
+     * @param tStep Time step when unknown requested. See documentation of particular EngngModel
+     * class for valid tStep values (most implementations can return only values for current
      * and possibly for previous time step).
      * @return Nonzero if successful.
      * @todo Remove this? It is not inherited by MasterDof. Is this leftovers? / Mikael
      */
-    virtual int packUnknowns(CommunicationBuffer &buff, ValueModeType mode, TimeStep *stepN)
+    virtual int packUnknowns(CommunicationBuffer &buff, ValueModeType mode, TimeStep *tStep)
     { return 1; }
     /**
      * Unpacks DOF unknown from communication buffer and updates unknown if necessary.
@@ -458,14 +451,14 @@ public:
      * available on same partition.
      * @param buff Buffer containing packed message.
      * @param mode Mode of unknown (e.g, total value, velocity or acceleration of unknown).
-     * @param stepN Time step when unknown requested. See documentation of particular EngngModel
-     * class for valid stepN values (most implementations can return only values for current
+     * @param tStep Time step when unknown requested. See documentation of particular EngngModel
+     * class for valid tStep values (most implementations can return only values for current
      * and possibly for previous time step).
      * @return Nonzero if successful.
      * @todo Remove this? It is not inherited by MasterDof. Is this leftovers? / Mikael
      */
     virtual int unpackAndUpdateUnknown(CommunicationBuffer &buff,
-                                       ValueModeType mode, TimeStep *stepN) { return 1; }
+                                       ValueModeType mode, TimeStep *tStep) { return 1; }
 #endif
 
 protected:

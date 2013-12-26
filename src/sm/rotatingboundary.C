@@ -41,11 +41,10 @@
 #include "dynamicinputrecord.h"
 
 namespace oofem {
+REGISTER_BoundaryCondition(RotatingBoundary);
 
-REGISTER_BoundaryCondition( RotatingBoundary );
-
-double RotatingBoundary :: give(Dof *dof, ValueModeType mode, TimeStep *stepN)
-// Returns the value at stepN of the prescribed value of the kinematic
+double RotatingBoundary :: give(Dof *dof, ValueModeType mode, TimeStep *tStep)
+// Returns the value at tStep of the prescribed value of the kinematic
 // unknown 'u'. Returns 0 if 'u' has no prescribed value.
 {
     DofIDItem id = dof->giveDofID();
@@ -53,7 +52,7 @@ double RotatingBoundary :: give(Dof *dof, ValueModeType mode, TimeStep *stepN)
     FloatArray answer, newcoords;
     double theta;
 
-    theta = this->giveLoadTimeFunction()->evaluate(stepN, mode);
+    theta = this->giveLoadTimeFunction()->evaluate(tStep, mode);
 
     if ( axis.giveSize() != 3 ) {
         OOFEM_ERROR("RotatingBoundary :: give - Size of rotation axis != 3.");
@@ -74,45 +73,48 @@ double RotatingBoundary :: give(Dof *dof, ValueModeType mode, TimeStep *stepN)
 
     if ( coords->giveSize() == 1 ) {
         R.resize(1, 1);
-        R.at(1, 1) = cos( theta ) + nx * nx * ( 1 - cos( theta ) );
+        R.at(1, 1) = cos(theta) + nx * nx * ( 1 - cos(theta) );
     }
     if ( coords->giveSize() == 2 ) {
         R.resize(2, 2);
-        R.at(1, 1) = cos( theta ) + nx * nx * ( 1 - cos( theta ) );
-        R.at(1, 2) = nx * ny * ( 1 - cos( theta ) ) - nz * sin( theta );
-        R.at(2, 1) = ny * nx * ( 1 - cos( theta ) ) + nz * sin( theta );
-        R.at(2, 2) = cos( theta ) + ny * ny * ( 1 - cos( theta ) );
+        R.at(1, 1) = cos(theta) + nx * nx * ( 1 - cos(theta) );
+        R.at(1, 2) = nx * ny * ( 1 - cos(theta) ) - nz *sin(theta);
+        R.at(2, 1) = ny * nx * ( 1 - cos(theta) ) + nz *sin(theta);
+        R.at(2, 2) = cos(theta) + ny * ny * ( 1 - cos(theta) );
     } else if ( coords->giveSize() == 3  ) {
         R.resize(3, 3);
 
-        R.at(1, 1) = cos( theta ) + nx * nx * ( 1 - cos( theta ) );
-        R.at(1, 2) = nx * ny * ( 1 - cos( theta ) ) - nz * sin( theta );
-        R.at(1, 3) = nx * nz * ( 1 - cos( theta ) ) + ny * sin( theta );
+        R.at(1, 1) = cos(theta) + nx * nx * ( 1 - cos(theta) );
+        R.at(1, 2) = nx * ny * ( 1 - cos(theta) ) - nz *sin(theta);
+        R.at(1, 3) = nx * nz * ( 1 - cos(theta) ) + ny *sin(theta);
 
-        R.at(2, 1) = ny * nx * ( 1 - cos( theta ) ) + nz * sin( theta );
-        R.at(2, 2) = cos( theta ) + ny * ny * ( 1 - cos( theta ) );
-        R.at(2, 3) = ny * nz * ( 1 - cos( theta ) ) - nx * sin( theta );
+        R.at(2, 1) = ny * nx * ( 1 - cos(theta) ) + nz *sin(theta);
+        R.at(2, 2) = cos(theta) + ny * ny * ( 1 - cos(theta) );
+        R.at(2, 3) = ny * nz * ( 1 - cos(theta) ) - nx *sin(theta);
 
-        R.at(3, 1) = nz * nx * ( 1 - cos( theta ) ) - ny * sin( theta );
-        R.at(3, 2) = nz * ny * ( 1 - cos( theta ) ) + nx * sin( theta );
-        R.at(3, 3) = cos( theta ) + nz * nz * ( 1 - cos( theta ) );
+        R.at(3, 1) = nz * nx * ( 1 - cos(theta) ) - ny *sin(theta);
+        R.at(3, 2) = nz * ny * ( 1 - cos(theta) ) + nx *sin(theta);
+        R.at(3, 3) = cos(theta) + nz * nz * ( 1 - cos(theta) );
     } else {
         OOFEM_ERROR("RotatingBoundary :: give - Size of coordinate system has to be 1, 2 or 3.");
     }
 
-    newcoords.subtract( center );
-    newcoords.add( *coords );
-    answer.beProductOf(R, newcoords );
-    answer.add( center );
-    answer.subtract( *coords );
+    newcoords.subtract(center);
+    newcoords.add(* coords);
+    answer.beProductOf(R, newcoords);
+    answer.add(center);
+    answer.subtract(* coords);
 
     switch ( id ) {
     case D_u:
         return answer.at(1);
+
     case D_v:
         return answer.at(2);
+
     case D_w:
         return answer.at(3);
+
     default:
         return 0.0;
     }
@@ -143,5 +145,4 @@ RotatingBoundary :: giveInputRecord(DynamicInputRecord &input)
     input.setField(this->axis, _IFT_RotatingBoundary_axis);
     input.setField(this->center, _IFT_RotatingBoundary_center);
 }
-
 } // end namespace oofem

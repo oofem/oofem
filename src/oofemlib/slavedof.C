@@ -72,7 +72,7 @@ SlaveDof :: initialize(int cntOfMstrDfMngr, const IntArray &masterNodes, const I
     masterDofMans.resize(countOfMasterDofs);
     dofIDs.resize(countOfMasterDofs);
 
-    for (int i = 1; i <= countOfMasterDofs; i++ ) {
+    for ( int i = 1; i <= countOfMasterDofs; i++ ) {
         if ( idSame ) {
             id = this->dofID;
         } else {
@@ -105,28 +105,28 @@ SlaveDof :: giveNumberOfPrimaryMasterDofs()
 }
 
 void
-SlaveDof :: giveUnknowns(FloatArray &masterUnknowns, ValueModeType mode, TimeStep *stepN)
+SlaveDof :: giveUnknowns(FloatArray &masterUnknowns, ValueModeType mode, TimeStep *tStep)
 {
     FloatArray mstrUnknwns;
 
     masterUnknowns.resize( this->giveNumberOfPrimaryMasterDofs() );
 
-    for (int k = 1, i = 1; i <= countOfMasterDofs; i++ ) {
-        this->giveMasterDof(i)->giveUnknowns(mstrUnknwns, mode, stepN);
+    for ( int k = 1, i = 1; i <= countOfMasterDofs; i++ ) {
+        this->giveMasterDof(i)->giveUnknowns(mstrUnknwns, mode, tStep);
         masterUnknowns.copySubVector(mstrUnknwns, k);
         k += mstrUnknwns.giveSize();
     }
 }
 
 void
-SlaveDof :: giveUnknowns(FloatArray &masterUnknowns, PrimaryField &field, ValueModeType mode, TimeStep *stepN)
+SlaveDof :: giveUnknowns(FloatArray &masterUnknowns, PrimaryField &field, ValueModeType mode, TimeStep *tStep)
 {
     FloatArray mstrUnknwns;
 
     masterUnknowns.resize( this->giveNumberOfPrimaryMasterDofs() );
 
-    for (int k = 1, i = 1; i <= countOfMasterDofs; i++ ) {
-        this->giveMasterDof(i)->giveUnknowns(mstrUnknwns, field, mode, stepN);
+    for ( int k = 1, i = 1; i <= countOfMasterDofs; i++ ) {
+        this->giveMasterDof(i)->giveUnknowns(mstrUnknwns, field, mode, tStep);
         masterUnknowns.copySubVector(mstrUnknwns, k);
         k += mstrUnknwns.giveSize();
     }
@@ -139,7 +139,7 @@ SlaveDof :: computeDofTransformation(FloatArray &primaryMasterContribs)
 
     primaryMasterContribs.resize( this->giveNumberOfPrimaryMasterDofs() );
 
-    for (int k = 1, i = 1; i <= countOfMasterDofs; i++ ) {
+    for ( int k = 1, i = 1; i <= countOfMasterDofs; i++ ) {
         this->giveMasterDof(i)->computeDofTransformation(subPrimaryMasterContribs);
         subPrimaryMasterContribs.times( masterContribution.at(i) );
         primaryMasterContribs.copySubVector(subPrimaryMasterContribs, k);
@@ -153,10 +153,10 @@ SlaveDof :: giveEquationNumbers(IntArray &masterEqNumbers, const UnknownNumberin
     IntArray mstrEqNmbrs;
 
     int masterDofs = this->giveNumberOfPrimaryMasterDofs();
-    masterEqNumbers.preallocate( masterDofs );
-    masterEqNumbers.resize( 0 );
+    masterEqNumbers.preallocate(masterDofs);
+    masterEqNumbers.resize(0);
 
-    for (int i = 1; i <= countOfMasterDofs; i++ ) {
+    for ( int i = 1; i <= countOfMasterDofs; i++ ) {
         this->giveMasterDof(i)->giveEquationNumbers(mstrEqNmbrs, s);
         masterEqNumbers.followedBy(mstrEqNmbrs);
     }
@@ -169,32 +169,31 @@ SlaveDof :: giveDofIDs(IntArray &masterDofIDs)
     IntArray temp;
 
     int masterDofs = this->giveNumberOfPrimaryMasterDofs();
-    masterDofIDs.preallocate( masterDofs );
-    masterDofIDs.resize( 0 );
+    masterDofIDs.preallocate(masterDofs);
+    masterDofIDs.resize(0);
 
-    for (int i = 1; i <= countOfMasterDofs; i++ ) {
+    for ( int i = 1; i <= countOfMasterDofs; i++ ) {
         this->giveMasterDof(i)->giveDofIDs(temp);
         masterDofIDs.followedBy(temp);
     }
-
 }
 
 
-double SlaveDof :: giveUnknown(ValueModeType mode, TimeStep *stepN)
+double SlaveDof :: giveUnknown(ValueModeType mode, TimeStep *tStep)
 {
     FloatArray masterUnknowns, t;
 
-    this->giveUnknowns(masterUnknowns, mode, stepN);
+    this->giveUnknowns(masterUnknowns, mode, tStep);
     this->computeDofTransformation(t);
 
     return masterUnknowns.dotProduct(t);
 }
 
-double SlaveDof :: giveUnknown(PrimaryField &field, ValueModeType mode, TimeStep *stepN)
+double SlaveDof :: giveUnknown(PrimaryField &field, ValueModeType mode, TimeStep *tStep)
 {
     FloatArray masterUnknowns, t;
 
-    giveUnknowns(masterUnknowns, field, mode, stepN);
+    giveUnknowns(masterUnknowns, field, mode, tStep);
     computeDofTransformation(t);
 
     return masterUnknowns.dotProduct(t);
@@ -308,7 +307,7 @@ SlaveDof :: giveMasterDof(int i)
 void
 SlaveDof :: updateLocalNumbering(EntityRenumberingFunctor &f)
 {
-    for (int i = 1; i <= countOfMasterDofs; i++ ) {
+    for ( int i = 1; i <= countOfMasterDofs; i++ ) {
         masterDofMans.at(i) = f(masterDofMans.at(i), ERS_DofManager);
     }
 }
@@ -320,10 +319,10 @@ SlaveDof :: giveMasterDofManArray(IntArray &answer)
     IntArray mstrDofManArry;
 
     int masterDofs = this->giveNumberOfPrimaryMasterDofs();
-    answer.preallocate( masterDofs );
-    answer.resize( 0 );
+    answer.preallocate(masterDofs);
+    answer.resize(0);
 
-    for (int i = 1; i <= countOfMasterDofs; i++ ) {
+    for ( int i = 1; i <= countOfMasterDofs; i++ ) {
         this->giveMasterDof(i)->giveMasterDofManArray(mstrDofManArry);
         answer.followedBy(mstrDofManArry);
     }

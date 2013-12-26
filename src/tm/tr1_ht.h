@@ -63,7 +63,6 @@ public:
     // definition
     virtual const char *giveInputRecordName() const { return _IFT_Tr1_ht_Name; }
     virtual const char *giveClassName() const { return "Tr1_htElement"; }
-    virtual classType giveClassID() const { return Tr1_htClass; }
 
     virtual int computeNumberOfDofs() { return ( emode == HeatTransferEM ) ? 3 : 6; }
     virtual IRResultType initializeFrom(InputRecord *ir);
@@ -78,7 +77,7 @@ public:
     virtual int SpatialLocalizerI_containsPoint(const FloatArray &coords);
     virtual double SpatialLocalizerI_giveDistanceFromParametricCenter(const FloatArray &coords);
 
-    virtual FEInterpolation *giveInterpolation() const { return &this->interp; }
+    virtual FEInterpolation *giveInterpolation() const { return & this->interp; }
 
 #ifdef __OOFEG
     // Graphics output
@@ -95,16 +94,14 @@ protected:
 /**
  * Class for heat and mass transfer.
  */
-class Tr1_hmt: public Tr1_ht
+class Tr1_hmt : public Tr1_ht
 {
 public:
     Tr1_hmt(int n, Domain *d);
 
     virtual const char *giveInputRecordName() const { return _IFT_Tr1_hmt_Name; }
     virtual const char *giveClassName() const { return "Tr1_hmt"; }
-    virtual classType giveClassID() const { return Tr1_hmtClass; }
     virtual MaterialMode giveMaterialMode() { return _2dHeMo; }
 };
-
 } // end namespace oofem
 #endif // tr1_ht_h

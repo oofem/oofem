@@ -73,8 +73,8 @@ protected:
     std :: string functionname;
 
     FILE *giveOutputStream(TimeStep *);
-    std :: vector <double> smax;
-    std :: vector <double> smin;
+    std :: vector< double >smax;
+    std :: vector< double >smin;
 
     double Area, Volume;
     int ndim;
@@ -96,7 +96,7 @@ public:
     MatlabExportModule(int n, EngngModel *e);
     virtual ~MatlabExportModule();
     virtual IRResultType initializeFrom(InputRecord *ir);
-    virtual void doOutput(TimeStep *tStep, bool forcedOutput=false);
+    virtual void doOutput(TimeStep *tStep, bool forcedOutput = false);
     virtual void initialize();
     virtual void terminate();
 
@@ -108,8 +108,6 @@ public:
 
     virtual const char *giveClassName() const { return "MatlabExportModule"; };
     virtual const char *giveInputRecordName() const { return _IFT_MatlabExportModule_Name; }
-
-
 };
 } // end namespace oofem
 #endif // matlabexportmodule_h_

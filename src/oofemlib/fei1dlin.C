@@ -38,7 +38,6 @@
 #include "floatarray.h"
 
 namespace oofem {
-
 double
 FEI1dLin :: giveLength(const FEICellGeometry &cellgeo) const
 {
@@ -96,5 +95,4 @@ FEI1dLin :: giveTransformationJacobian(const FloatArray &lcoords, const FEICellG
 {
     return 0.5 * ( cellgeo.giveVertexCoordinates(2)->at(cindx) - cellgeo.giveVertexCoordinates(1)->at(cindx) );
 }
-
 } // end namespace oofem

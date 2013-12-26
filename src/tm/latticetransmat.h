@@ -88,7 +88,6 @@ public:
     virtual void initTempStatus();
 
     virtual const char *giveClassName() const { return "LatticeTransportMaterialStatus"; }
-    virtual classType giveClassID() const { return LatticeTransportMaterialStatusClass; }
 };
 
 /**
@@ -141,21 +140,21 @@ public:
     virtual void giveFluxVector(FloatArray &answer, GaussPoint *gp, const FloatArray &grad, const FloatArray &field, TimeStep *tStep);
 
     virtual void  giveCharacteristicMatrix(FloatMatrix &answer,
-                                   MatResponseMode mode,
-                                   GaussPoint *gp,
-                                   TimeStep *atTime) {; }
+                                           MatResponseMode mode,
+                                           GaussPoint *gp,
+                                           TimeStep *tStep) {; }
 
     virtual double  giveCharacteristicValue(MatResponseMode mode,
                                             GaussPoint *gp,
-                                            TimeStep *atTime);
+                                            TimeStep *tStep);
 
     /**
      * Computes the conductivity.
      * @param suction Capillary stress
      * @param gp Integration point.
-     * @param stepN Time step.
+     * @param tStep Time step.
      */
-    double computeConductivity(double suction, GaussPoint *gp, TimeStep *stepN);
+    double computeConductivity(double suction, GaussPoint *gp, TimeStep *tStep);
 
     /**
      * Computes the capacity.
@@ -174,7 +173,6 @@ public:
 
     virtual const char *giveInputRecordName() const { return _IFT_LatticeTransportMaterial_Name; }
     virtual const char *giveClassName() const { return "LatticeTransportMaterial"; }
-    virtual classType giveClassID() const { return LatticeTransportMaterialClass; }
 
     virtual IRResultType initializeFrom(InputRecord *ir);
 

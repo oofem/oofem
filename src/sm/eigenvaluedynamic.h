@@ -104,7 +104,7 @@ public:
     virtual TimeStep *giveNextStep();
     virtual NumericalMethod *giveNumericalMethod(MetaStep *mStep);
     virtual void setActiveVector(int i) { activeVector = i; }
-    virtual int resolveCorrespondingEigenStepNumber(void *obj);
+    virtual int resolveCorrespondingEigentStepumber(void *obj);
 
 #ifdef __SLEPC_MODULE
     virtual void initPetscContexts();
@@ -116,13 +116,12 @@ public:
      * for what will be printed at DOF level.
      * @param stream Output stream.
      * @param iDof Dof to be processed.
-     * @param atTime Solution step.
+     * @param tStep Solution step.
      */
-    virtual void printDofOutputAt(FILE *stream, Dof *iDof, TimeStep *atTime);
+    virtual void printDofOutputAt(FILE *stream, Dof *iDof, TimeStep *tStep);
 
     // identification
     virtual const char *giveClassName() const { return "EigenValueDynamic"; }
-    virtual classType giveClassID() const { return EigenValueDynamicClass; }
 };
 } // end namespace oofem
 #endif // eigenvaluedynamic_h

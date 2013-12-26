@@ -38,7 +38,6 @@
 #include "enumitem.h"
 
 namespace oofem {
-
 #define UnknownType_DEF \
     ENUM_ITEM_WITH_VALUE(DisplacementVector, 1) \
     ENUM_ITEM_WITH_VALUE(GeneralizedDisplacementVector, 2) \

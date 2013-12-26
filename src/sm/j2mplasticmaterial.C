@@ -187,7 +187,7 @@ J2MPlasticMaterial :: computeYieldValueAt(GaussPoint *gp, int isurf, const Float
 void
 J2MPlasticMaterial :: computeHardeningReducedModuli(FloatMatrix &answer, GaussPoint *gp,
                                                     const FloatArray &strainSpaceHardeningVariables,
-                                                    TimeStep *atTime)
+                                                    TimeStep *tStep)
 {
     /* computes hardening moduli in reduced stress strain space (for kinematic back-stress)*/
 
@@ -412,10 +412,10 @@ J2MPlasticMaterial :: computeReducedGradientMatrix(FloatMatrix &answer, int isur
 void
 J2MPlasticMaterial :: compute3dElasticModuli(FloatMatrix &answer,
                                              GaussPoint *gp,
-                                             TimeStep *atTime)
+                                             TimeStep *tStep)
 {
     /* Returns 3d elastic moduli */
-    this->giveLinearElasticMaterial()->give3dMaterialStiffnessMatrix(answer, ElasticStiffness, gp, atTime);
+    this->giveLinearElasticMaterial()->give3dMaterialStiffnessMatrix(answer, ElasticStiffness, gp, tStep);
 }
 
 

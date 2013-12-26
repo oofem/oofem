@@ -46,9 +46,20 @@
 #define _IFT_PLCrackPrescribedDir_IncLength "incrementlength" // Increment per time step
 
 
+#define _IFT_PLHoopStressCirc_Name "propagationlawhoopstresscirc"
+// Radius of circle used for stress sampling points
+#define _IFT_PLHoopStressCirc_Radius "radius"
+// Angle between sampling points on the circle
+#define _IFT_PLHoopStressCirc_AngleInc "angleinc"
+// Increment length per time step
+#define _IFT_PLHoopStressCirc_IncLength "incrementlength"
+// Threshold for crack propagation
+#define _IFT_PLHoopStressCirc_HoopStressThreshold "hoopstressthreshold"
+// If radial basis functions should be used for stress interpolation
+#define _IFT_PLHoopStressCirc_RadialBasisFunc "useradialbasisfunc"
 
 namespace oofem {
-
+class Domain;
 class EnrichmentDomain;
 class DynamicInputRecord;
 
@@ -69,10 +80,14 @@ public:
     virtual IRResultType initializeFrom(InputRecord *ir) = 0;
     virtual void giveInputRecord(DynamicInputRecord &input) = 0;
 
-    virtual void propagateInterfaces(EnrichmentDomain &iEnrDom) = 0;
+    virtual void propagateInterfaces(Domain &iDomain, EnrichmentDomain &iEnrDom) = 0;
 };
 
-class OOFEM_EXPORT PLDoNothing: public PropagationLaw
+/**
+ * Dummy propagation law that does nothing.
+ * @author Erik Svenning
+ */
+class OOFEM_EXPORT PLDoNothing : public PropagationLaw
 {
 public:
     PLDoNothing() {};
@@ -81,16 +96,20 @@ public:
     virtual const char *giveClassName() const { return "PLDoNothing"; }
     virtual const char *giveInputRecordName() const { return _IFT_PLDoNothing_Name; }
 
-    virtual IRResultType initializeFrom(InputRecord *ir) {return IRRT_OK;}
+    virtual IRResultType initializeFrom(InputRecord *ir) { return IRRT_OK; }
     virtual void giveInputRecord(DynamicInputRecord &input);
 
-    virtual void propagateInterfaces(EnrichmentDomain &ioEnrDom) {};
+    virtual void propagateInterfaces(Domain &iDomain, EnrichmentDomain &ioEnrDom) {};
 };
 
-class OOFEM_EXPORT PLCrackPrescribedDir: public PropagationLaw
+/**
+ * Propagation law that propagates the crack in a predefined direction.
+ * @author Erik Svenning
+ */
+class OOFEM_EXPORT PLCrackPrescribedDir : public PropagationLaw
 {
 public:
-    PLCrackPrescribedDir():mAngle(0.0), mIncrementLength(0.0) {};
+    PLCrackPrescribedDir() : mAngle(0.0), mIncrementLength(0.0) {};
     virtual ~PLCrackPrescribedDir() {};
 
     virtual const char *giveClassName() const { return "PLCrackPrescribedDir"; }
@@ -99,12 +118,52 @@ public:
     virtual IRResultType initializeFrom(InputRecord *ir);
     virtual void giveInputRecord(DynamicInputRecord &input);
 
-    virtual void propagateInterfaces(EnrichmentDomain &ioEnrDom);
+    virtual void propagateInterfaces(Domain &iDomain, EnrichmentDomain &ioEnrDom);
 
 protected:
     double mAngle, mIncrementLength;
 };
 
+/**
+ * Propagation law that propagates the crack in the direction
+ * that gives \sigma_{r\theta} = 0.
+ * Based on
+ * T.P. Fries and M. Baydoun:
+ * "Crack propagation with the extended finite element method
+ * and a hybrid explicit-implicit crack description",
+ * Internat. J. Numer. Methods Engrg 89,
+ * pp. 1527--1558 (2012)
+ *
+ * The stress is evaluated in several points on a circle
+ * surrounding the crack tip.
+ *
+ * Compared to the paper above, the implementation has been extended
+ * with a criterion for crack propagation instead of always
+ * propagating a predefined increment length. Two options are
+ * currently available for stress interpolation:
+ * 1) Take stress of closest Gauss point
+ * 2) Interpolate with radial basis functions
+ *
+ * @author Erik Svenning
+ */
+class OOFEM_EXPORT PLHoopStressCirc : public PropagationLaw
+{
+public:
+    PLHoopStressCirc() : mRadius(0.0), mAngleInc(0.0), mIncrementLength(0.0), mHoopStressThreshold(0.0), mUseRadialBasisFunc(false) {};
+    virtual ~PLHoopStressCirc() {};
+
+    virtual const char *giveClassName() const { return "PLHoopStressCirc"; }
+    virtual const char *giveInputRecordName() const { return _IFT_PLHoopStressCirc_Name; }
+
+    virtual IRResultType initializeFrom(InputRecord *ir);
+    virtual void giveInputRecord(DynamicInputRecord &input);
+
+    virtual void propagateInterfaces(Domain &iDomain, EnrichmentDomain &ioEnrDom);
+
+protected:
+    double mRadius, mAngleInc, mIncrementLength, mHoopStressThreshold;
+    bool mUseRadialBasisFunc;
+};
 } // end namespace oofem
 
 #endif /* PROPAGATIONLAW_H_ */

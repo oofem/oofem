@@ -48,7 +48,6 @@
 #include "interfacetype.h"
 #include "inputrecord.h"
 #include "datareader.h"
-#include "classtype.h"
 #include "entityrenumberingscheme.h"
 #include "contextioresulttype.h"
 #include "contextmode.h"
@@ -58,7 +57,6 @@
 #endif
 
 namespace oofem {
-
 class DataStream;
 class Domain;
 class Interface;
@@ -91,17 +89,10 @@ public:
      * node number in particular domain.
      * @param d Domain to which component belongs to.
      */
-    FEMComponent(int n, Domain *d): number(n), domain(d) { }
+    FEMComponent(int n, Domain *d) : number(n), domain(d) { }
     /// Virtual destructor.
     virtual ~FEMComponent() { }
 
-    /**
-     * Returns classType id of receiver. Intended for run time
-     * type checking. Every derived class have to overload this method.
-     * @see classType.
-     * @return Class type of receiver.
-     */
-    virtual classType giveClassID() const { return FEMComponentClass; }
     /// @return Class name of the receiver.
     virtual const char *giveClassName() const = 0;
     /// @return Input record name of the receiver.
@@ -214,11 +205,3 @@ public:
 };
 } // end namespace oofem
 #endif // femcmpnn_h
-
-
-
-
-
-
-
-

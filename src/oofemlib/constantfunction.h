@@ -40,7 +40,6 @@
 #define _IFT_ConstantFunction_Name "constantfunction"
 
 namespace oofem {
-
 /**
  * Class implementing time function that is constant in time; @f$ f(t) = C @f$.
  */
@@ -68,7 +67,6 @@ public:
     virtual IRResultType initializeFrom(InputRecord *ir);
     virtual void giveInputRecord(DynamicInputRecord &input);
 
-    virtual classType giveClassID() const { return ConstantFunctionClass; }
     virtual const char *giveClassName() const { return "ConstantFunction"; }
     virtual const char *giveInputRecordName() const { return _IFT_ConstantFunction_Name; }
 };

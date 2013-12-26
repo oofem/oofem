@@ -67,7 +67,7 @@ ZZNodalRecoveryModel :: recoverValues(InternalStateType type, TimeStep *tStep)
     int nnodes = domain->giveNumberOfDofManagers();
     IntArray regionNodalNumbers(nnodes);
     // following variable is for better error reporting only
-    std::set<int> unresolvedDofMans;
+    std :: set< int >unresolvedDofMans;
     // IntArray loc;
     FloatArray lhs, nn, sol;
     FloatMatrix rhs, nsig;
@@ -78,8 +78,9 @@ ZZNodalRecoveryModel :: recoverValues(InternalStateType type, TimeStep *tStep)
     }
 
 #ifdef __PARALLEL_MODE
-    if ( this->domain->giveEngngModel()->isParallel() )
+    if ( this->domain->giveEngngModel()->isParallel() ) {
         this->initCommMaps();
+    }
 #endif
 
     // clear nodal table
@@ -154,8 +155,9 @@ ZZNodalRecoveryModel :: recoverValues(InternalStateType type, TimeStep *tStep)
         } // end assemble element contributions
 
 #ifdef __PARALLEL_MODE
-        if ( this->domain->giveEngngModel()->isParallel() )
+        if ( this->domain->giveEngngModel()->isParallel() ) {
             this->exchangeDofManValues(ireg, lhs, rhs, regionNodalNumbers);
+        }
 #endif
 
         sol.resize(regionDofMans * regionValSize);
@@ -172,7 +174,7 @@ ZZNodalRecoveryModel :: recoverValues(InternalStateType type, TimeStep *tStep)
                     sol.at(eq + j) = rhs.at(i, j) / lhs.at(i);
                 } else {
                     missingDofManContribution = true;
-                    unresolvedDofMans.insert(regionNodalNumbers.at(i));
+                    unresolvedDofMans.insert( regionNodalNumbers.at(i) );
                     sol.at(eq + j) = 0.0;
                 }
             }
@@ -182,14 +184,18 @@ ZZNodalRecoveryModel :: recoverValues(InternalStateType type, TimeStep *tStep)
         this->updateRegionRecoveredValues(ireg, regionNodalNumbers, regionValSize, sol);
 
         if ( missingDofManContribution ) {
-            std::ostringstream msg;
+            std :: ostringstream msg;
             int i = 0;
-            for ( std::set<int>::const_iterator sit = unresolvedDofMans.begin(); sit != unresolvedDofMans.end(); ++sit ) {
-                msg << *sit << ' ';
-                if (++i > 20) break;
+            for ( std :: set< int > :: const_iterator sit = unresolvedDofMans.begin(); sit != unresolvedDofMans.end(); ++sit ) {
+                msg << * sit << ' ';
+                if ( ++i > 20 ) {
+                    break;
+                }
             }
-            if (i > 20)  msg << "...";
-            OOFEM_WARNING3("ZZNodalRecoveryModel::recoverValues: region %d: values of some dofmanagers undetermined\n[%s]", ireg, msg.str().c_str());
+            if ( i > 20 ) {
+                msg << "...";
+            }
+            OOFEM_WARNING3( "ZZNodalRecoveryModel::recoverValues: region %d: values of some dofmanagers undetermined\n[%s]", ireg, msg.str().c_str() );
         }
     } // end loop over regions
 
@@ -214,12 +220,12 @@ ZZNodalRecoveryModelInterface :: ZZNodalRecoveryMI_computeNValProduct(FloatMatri
     for ( int i = 0; i < iRule->giveNumberOfIntegrationPoints(); i++ ) {
         GaussPoint *gp = iRule->getIntegrationPoint(i);
         double dV = elem->computeVolumeAround(gp);
-        //this-> computeStressVector(stressVector, gp, stepN);
+        //this-> computeStressVector(stressVector, gp, tStep);
         if ( !elem->giveIPValue(stressVector, gp, type, tStep) ) {
             continue;
         }
 
-        interpol->evalN( n, *gp->giveCoordinates(), FEIElementGeometryWrapper(elem));
+        interpol->evalN( n, * gp->giveCoordinates(), FEIElementGeometryWrapper(elem) );
         answer.plusDyadUnsym(n, stressVector, dV);
 
         //  help.beTProductOf(n,stressVector);
@@ -241,7 +247,7 @@ ZZNodalRecoveryModelInterface :: ZZNodalRecoveryMI_computeNNMatrix(FloatArray &a
     Element *elem  = this->ZZNodalRecoveryMI_giveElement();
     FEInterpolation *interpol = elem->giveInterpolation();
     IntegrationRule *iRule = elem->giveDefaultIntegrationRulePtr();
-    
+
     if ( !interpol ) {
         OOFEM_ERROR2( "ZZNodalRecoveryMI_computeNNMatrix: Element %d not providing interpolation", elem->giveNumber() );
     }
@@ -254,7 +260,7 @@ ZZNodalRecoveryModelInterface :: ZZNodalRecoveryMI_computeNNMatrix(FloatArray &a
     for ( int i = 0; i < iRule->giveNumberOfIntegrationPoints(); i++ ) {
         GaussPoint *gp = iRule->getIntegrationPoint(i);
         double dV = elem->computeVolumeAround(gp);
-        interpol->evalN( n, *gp->giveCoordinates(), FEIElementGeometryWrapper(elem));
+        interpol->evalN( n, * gp->giveCoordinates(), FEIElementGeometryWrapper(elem) );
         fullAnswer.plusDyadSymmUpper(n, dV);
         pok += ( n.at(1) * dV ); ///@todo What is this? Completely unused.
         volume += dV;
@@ -306,7 +312,7 @@ ZZNodalRecoveryModel :: exchangeDofManValues(int ireg, FloatArray &lhs, FloatMat
     ProblemCommunicatorMode commMode = emodel->giveProblemCommMode();
 
     if ( commMode == ProblemCommMode__NODE_CUT ) {
-        parallelStruct ls( &lhs, &rhs, &rn);
+        parallelStruct ls(& lhs, & rhs, & rn);
 
         // exchange data for shared nodes
         communicator->packAllData(this, & ls, & ZZNodalRecoveryModel :: packSharedDofManData);

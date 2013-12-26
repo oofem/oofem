@@ -18,7 +18,6 @@
 #define _IFT_DarcyFlow_Name "darcyflow"
 
 namespace oofem {
-
 class CommunicatorBuff;
 class ProblemCommunicator;
 
@@ -68,17 +67,16 @@ public:
     virtual double giveUnknownComponent(ValueModeType, TimeStep *, Domain *, Dof *);
 
     virtual IRResultType initializeFrom(InputRecord *ir);
-    virtual void printDofOutputAt(FILE *stream, Dof *iDof, TimeStep *atTime);
+    virtual void printDofOutputAt(FILE *stream, Dof *iDof, TimeStep *tStep);
     void DumpMatricesToFile(FloatMatrix *LHS, FloatArray *RHS, FloatArray *SolutionVector);
 
     virtual NumericalMethod *giveNumericalMethod(MetaStep *mStep);
-    virtual TimeStep * giveNextStep();
+    virtual TimeStep *giveNextStep();
 
     virtual int forceEquationNumbering(int id);
 
     virtual const char *giveInputRecordName() const { return _IFT_DarcyFlow_Name; }
     virtual const char *giveClassName() const { return "DarcyFlow"; }
-    virtual classType giveClassID() const { return DarcyFlowClass; }
 
 #ifdef __PARALLEL_MODE
     CommunicatorBuff *commBuff; //new CommunicatorBuff(this->giveNumberOfProcesses(), CBT_static);
@@ -88,9 +86,7 @@ public:
 #ifdef __PETSC_MODULE
     virtual void initPetscContexts();
 #endif
-
 };
-
 }
 
 #endif // darcyflow_h

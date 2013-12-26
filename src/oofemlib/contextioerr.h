@@ -62,4 +62,3 @@ public:
 #define THROW_CIOERRM(e, m) throw ContextIOERR(e, m, __FILE__, __LINE__);
 } // end namespace oofem
 #endif // contextioerr_h
-

@@ -73,8 +73,8 @@ SloanLevelStructure :: formYourself(int limitWidth)
     nodalStatuses.at(Root) = 1;
 
     IntArray *PrevLevel;
-    std::list< int > *Neighbor;
-    std::list< int > :: iterator pos2;
+    std :: list< int > *Neighbor;
+    std :: list< int > :: iterator pos2;
     SloanGraphNode *Node;
     int i, PrevLevelWidth, CurrLevelWidth;
 

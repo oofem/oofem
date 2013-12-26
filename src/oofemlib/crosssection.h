@@ -46,11 +46,10 @@
 
 ///@name Input fields for CrossSection
 //@{
-#define _CrossSection_SetNumber "set"
+#define _IFT_CrossSection_SetNumber "set"
 //@}
 
 namespace oofem {
-
 /// List of properties possibly stored in a cross section.
 enum CrossSectionProperty {
     CS_Thickness=400,  ///< Thickness
@@ -115,62 +114,60 @@ public:
      * @param d Domain.
      */
     CrossSection(int n, Domain *d) : FEMComponent(n, d)
-    { propertyDictionary = new Dictionary(); 
-      setNumber = 0;
-      MAT_GIVEN_BY_CS = false; // Temporary var will be removed later 
+    {
+        propertyDictionary = new Dictionary();
+        setNumber = 0;
     }
     /// Destructor.
     virtual ~CrossSection() { delete propertyDictionary; }
 
-    int const giveSetNumber() { return this->setNumber; };
-
-    bool MAT_GIVEN_BY_CS;
+    int giveSetNumber() const { return this->setNumber; };
 
     /**
-     * Returns the value of cross section property.
+     * Returns the value of cross section property at given point.
+     * The default implementation assumes constant properties stored in propertyDictionary.
      * @param a Id of requested property.
+     * @param gp Integration point
      * @return Property value.
      */
-    virtual double give(CrossSectionProperty a);
+    virtual double give(CrossSectionProperty a, GaussPoint *gp);
+    /**
+     * Returns the value of cross section property at given point (belonging to given element).
+     * the point coordinates can be specified using its local element coordinates or
+     * global coordinates (one of these two can be set to NULL)
+     * The default implementation assumes constant properties stored in propertyDictionary.
+     * @param a Id of requested property.
+     * @param coords local or global coordinates (determined by local parameter) of point of interest
+     * @param elem reference to underlying element containing given point
+     * @param gp Integration point
+     * @return Property value.
+     */
+    virtual double give(CrossSectionProperty a, const FloatArray *coords, Element *elem, bool local = true);
 
     /**
      * Returns the value of cross section property.
-     * @param a Id of requested property.
+     * @param aProperty Id of requested property.
      * @param gp Integration point.
      * @return Property value.
      */
-    virtual double give(int aProperty, GaussPoint *gp){ return 0.0; };
+    virtual double give(int aProperty, GaussPoint *gp) { return 0.0; };
 
     /**
      * Check for symmetry of stiffness matrix.
      * Default implementation returns true.
      * It can be moved to base Cross section class in the future.
      * @param rMode Response mode of material.
-     * @param mat Material index.
-     * @return True if stiffness matrix of receiver is symmetric.
-     * @deprected will be removed in the future when cross sections stores the material 
-     */
-    virtual bool isCharacteristicMtrxSymmetric(MatResponseMode rMode, int mat);
-    
-    /**
-     * Check for symmetry of stiffness matrix.
-     * Default implementation returns true.
-     * It can be moved to base Cross section class in the future.
-     * @param rMode Response mode of material.
      * @return True if stiffness matrix of receiver is symmetric.
      */
-    virtual bool isCharacteristicMtrxSymmetric(MatResponseMode rMode) { return false; }; 
+    virtual bool isCharacteristicMtrxSymmetric(MatResponseMode rMode) { return false; };
     virtual void printYourself();
 
     /**
      * Sets up integration rule for the given element.
      * Default behavior is just to call the Gauss integration rule, but for example the layered and fibered crosssections need to do their own thing.
      * @param irule Integration rule to set up.
-     * @param intd Integration domain of element.
-     * @param element Element which the integration rule belongs to.
      * @param npoints Number of integration points.
-     * @param lu Lower index of the "strain" components (or equivalent).
-     * @param li Upper index of the "strain" components (or equivalent).
+     * @param element Element which the integration rule belongs to.
      * @return Number of integration points.
      */
     virtual int setupIntegrationPoints(IntegrationRule &irule, int npoints, Element *element);
@@ -186,11 +183,11 @@ public:
      * @param answer contain corresponding ip value, zero sized if not available
      * @param ip Integration point.
      * @param type Determines the type of internal variable.
-     * @param atTime Time step.
+     * @param tStep Time step.
      * @return Nonzero if o.k, zero otherwise.
      */
-    virtual int giveIPValue(FloatArray &answer, GaussPoint *ip, InternalStateType type, TimeStep *atTime)
-    { return ip->giveMaterial()->giveIPValue(answer, ip, type, atTime); }
+    virtual int giveIPValue(FloatArray &answer, GaussPoint *ip, InternalStateType type, TimeStep *tStep)
+    { return ip->giveMaterial()->giveIPValue(answer, ip, type, tStep); }
 
 
 #ifdef __PARALLEL_MODE
@@ -202,23 +199,23 @@ public:
      * no data are exchanged. For "nonlocal" constitutive models the send/receive of local values which
      * undergo averaging is performed between local and corresponding remote elements.
      * @param buff Communication buffer.
-     * @param stepN Solution step.
+     * @param tStep Solution step.
      * @param ip Integration point.
      * @return Nonzero if successful.
      */
-    virtual int packUnknowns(CommunicationBuffer &buff, TimeStep *stepN, GaussPoint *ip)
-    { return ip->giveMaterial()->packUnknowns(buff, stepN, ip); }
+    virtual int packUnknowns(CommunicationBuffer &buff, TimeStep *tStep, GaussPoint *ip)
+    { return ip->giveMaterial()->packUnknowns(buff, tStep, ip); }
     /**
      * Unpack and updates all necessary data of given integration point (according to element parallel_mode)
      * into given communication buffer.
      * @see packUnknowns service.
      * @param buff Communication buffer.
-     * @param stepN Solution step.
+     * @param tStep Solution step.
      * @param ip Integration point.
      * @return Nonzero if successful.
      */
-    virtual int unpackAndUpdateUnknowns(CommunicationBuffer &buff, TimeStep *stepN, GaussPoint *ip)
-    { return ip->giveMaterial()->unpackAndUpdateUnknowns(buff, stepN, ip); }
+    virtual int unpackAndUpdateUnknowns(CommunicationBuffer &buff, TimeStep *tStep, GaussPoint *ip)
+    { return ip->giveMaterial()->unpackAndUpdateUnknowns(buff, tStep, ip); }
     /**
      * Estimates the necessary pack size to hold all packed data of receiver.
      * The corresponding material model  service is invoked. The
@@ -274,8 +271,6 @@ public:
      * @exception throws an ContextIOERR exception if error encountered.
      */
     virtual contextIOResultType restoreIPContext(DataStream *stream, ContextMode mode, GaussPoint *gp);
-
 };
 } // end namespace oofem
 #endif // crosssection_h
-

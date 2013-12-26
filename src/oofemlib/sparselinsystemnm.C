@@ -49,20 +49,19 @@ NM_Status SparseLinearSystemNM :: solve(SparseMtrx *A, FloatMatrix &B, FloatMatr
     NM_Status status = NM_None;
     int ncol = A->giveNumberOfRows();
     int nrhs = B.giveNumberOfColumns();
-    if (A->giveNumberOfRows() != B.giveNumberOfRows()) {
+    if ( A->giveNumberOfRows() != B.giveNumberOfRows() ) {
         OOFEM_ERROR("SparseLinearSystemNM :: solve - A and B matrix mismatch");
     }
     FloatArray bi(ncol), xi(ncol);
-    X.resize(ncol,nrhs);
-    for (int i = 1; i <= nrhs; ++i ) {
+    X.resize(ncol, nrhs);
+    for ( int i = 1; i <= nrhs; ++i ) {
         B.copyColumn(bi, i);
-        status &= this->solve(A, &bi, &xi);
-        if (status & NM_NoSuccess) {
+        status &= this->solve(A, & bi, & xi);
+        if ( status & NM_NoSuccess ) {
             return NM_NoSuccess;
         }
         X.setColumn(xi, i);
     }
     return status;
 }
-
 } // end namespace oofem

@@ -24,12 +24,12 @@ set (fm_element
     hexa21stokes.C
     tr1bubblestokes.C
     tet1bubblestokes.C
-    hexa1bubblestokes.C
     line2boundaryelement.C
     fluidmaterialevaluator.C
     )
 
 set (fm_material
+    fluidcrosssection.C
     newtonianfluid.C
     fe2fluidmaterial.C
     nonlinearfluidmaterial.C

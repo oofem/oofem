@@ -39,8 +39,7 @@
 #include <ctime>
 
 namespace oofem {
-
-REGISTER_RandomFieldGenerator( LocalGaussianRandomGenerator );
+REGISTER_RandomFieldGenerator(LocalGaussianRandomGenerator);
 
 LocalGaussianRandomGenerator :: LocalGaussianRandomGenerator(int num, Domain *d) : RandomFieldGenerator(num, d)
 {}

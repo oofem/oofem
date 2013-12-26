@@ -71,27 +71,27 @@ Interface *
 TrPlaneStrain :: giveInterface(InterfaceType interface)
 {
     if ( interface == ZZNodalRecoveryModelInterfaceType ) {
-        return static_cast< ZZNodalRecoveryModelInterface * >(this);
+        return static_cast< ZZNodalRecoveryModelInterface * >( this );
     } else if ( interface == NodalAveragingRecoveryModelInterfaceType ) {
-        return static_cast< NodalAveragingRecoveryModelInterface * >(this);
+        return static_cast< NodalAveragingRecoveryModelInterface * >( this );
     } else if ( interface == SPRNodalRecoveryModelInterfaceType ) {
-        return static_cast< SPRNodalRecoveryModelInterface * >(this);
+        return static_cast< SPRNodalRecoveryModelInterface * >( this );
     } else if ( interface == SpatialLocalizerInterfaceType ) {
-        return static_cast< SpatialLocalizerInterface * >(this);
+        return static_cast< SpatialLocalizerInterface * >( this );
     } else if ( interface == DirectErrorIndicatorRCInterfaceType ) {
-        return static_cast< DirectErrorIndicatorRCInterface * >(this);
+        return static_cast< DirectErrorIndicatorRCInterface * >( this );
     } else if ( interface == EIPrimaryUnknownMapperInterfaceType ) {
-        return static_cast< EIPrimaryUnknownMapperInterface * >(this);
+        return static_cast< EIPrimaryUnknownMapperInterface * >( this );
     } else if ( interface == ZZErrorEstimatorInterfaceType ) {
-        return static_cast< ZZErrorEstimatorInterface * >(this);
+        return static_cast< ZZErrorEstimatorInterface * >( this );
     } else if ( interface == ZZRemeshingCriteriaInterfaceType ) {
-        return static_cast< ZZRemeshingCriteriaInterface * >(this);
+        return static_cast< ZZRemeshingCriteriaInterface * >( this );
     } else if ( interface == MMAShapeFunctProjectionInterfaceType ) {
-        return static_cast< MMAShapeFunctProjectionInterface * >(this);
+        return static_cast< MMAShapeFunctProjectionInterface * >( this );
     } else if ( interface == HuertaErrorEstimatorInterfaceType ) {
-        return static_cast< HuertaErrorEstimatorInterface * >(this);
+        return static_cast< HuertaErrorEstimatorInterface * >( this );
     } else if ( interface == HuertaRemeshingCriteriaInterfaceType ) {
-        return static_cast< HuertaRemeshingCriteriaInterface * >(this);
+        return static_cast< HuertaRemeshingCriteriaInterface * >( this );
     }
 
     return NULL;
@@ -126,13 +126,13 @@ TrPlaneStrain :: computeBmatrixAt(GaussPoint *gp, FloatMatrix &answer,
 }
 
 void
-TrPlaneStrain :: computeBHmatrixAt(GaussPoint *aGaussPoint, FloatMatrix &answer)
+TrPlaneStrain :: computeBHmatrixAt(GaussPoint *gp, FloatMatrix &answer)
 // Returns the [5x6] displacement gradient matrix {BH} of the receiver,
-// evaluated at aGaussPoint.
+// evaluated at gp.
 // @todo not checked if correct
 {
     FloatMatrix dnx;
-    this->interp.evaldNdx( dnx, * aGaussPoint->giveCoordinates(), FEIElementGeometryWrapper(this) );
+    this->interp.evaldNdx( dnx, * gp->giveCoordinates(), FEIElementGeometryWrapper(this) );
 
     answer.resize(5, 6);
     answer.zero();
@@ -154,22 +154,6 @@ void TrPlaneStrain :: computeGaussPoints()
         integrationRulesArray [ 0 ] = new GaussIntegrationRule(1, this, 1, 3);
         this->giveCrossSection()->setupIntegrationPoints(* integrationRulesArray [ 0 ], numberOfGaussPoints, this);
     }
-}
-
-
-void
-TrPlaneStrain :: computeNmatrixAt(GaussPoint *gp, FloatMatrix &answer)
-// Returns the displacement interpolation matrix {N} of the receiver, eva-
-// luated at gp.
-{
-    FloatArray n;
-    this->interp.evalN( n, * gp->giveCoordinates(), FEIElementGeometryWrapper(this) );
-
-    answer.resize(2, 6);
-    answer.zero();
-    answer.at(1, 1) = answer.at(2, 2) = n.at(1);
-    answer.at(1, 3) = answer.at(2, 4) = n.at(2);
-    answer.at(1, 5) = answer.at(2, 6) = n.at(3);
 }
 
 
@@ -285,7 +269,7 @@ double TrPlaneStrain :: computeVolumeAround(GaussPoint *gp)
     weight = gp->giveWeight();
     detJ = fabs( this->interp.giveTransformationJacobian( * gp->giveCoordinates(), FEIElementGeometryWrapper(this) ) );
 
-    return detJ * weight * this->giveCrossSection()->give(CS_Thickness);
+    return detJ * weight * this->giveCrossSection()->give(CS_Thickness, gp);
 }
 
 IRResultType
@@ -293,9 +277,9 @@ TrPlaneStrain :: initializeFrom(InputRecord *ir)
 {
     numberOfGaussPoints = 1;
     IRResultType result = this->StructuralElement :: initializeFrom(ir);
-	if(result != IRRT_OK) {
-		return result;
-	}
+    if ( result != IRRT_OK ) {
+        return result;
+    }
 
     if ( numberOfGaussPoints != 1 ) {
         numberOfGaussPoints = 1;
@@ -356,8 +340,8 @@ TrPlaneStrain :: SPRNodalRecoveryMI_giveDofMansDeterminedByPatch(IntArray &answe
 {
     answer.resize(1);
     if ( ( pap == this->giveNode(1)->giveNumber() ) ||
-        ( pap == this->giveNode(2)->giveNumber() ) ||
-        ( pap == this->giveNode(3)->giveNumber() ) ) {
+         ( pap == this->giveNode(2)->giveNumber() ) ||
+         ( pap == this->giveNode(3)->giveNumber() ) ) {
         answer.at(1) = pap;
     } else {
         _error("SPRNodalRecoveryMI_giveDofMansDeterminedByPatch: node unknown");
@@ -423,7 +407,7 @@ TrPlaneStrain :: DirectErrorIndicatorRCI_giveCharacteristicSize()
 
 int
 TrPlaneStrain :: EIPrimaryUnknownMI_computePrimaryUnknownVectorAt(ValueModeType mode,
-                                                                  TimeStep *stepN, const FloatArray &coords,
+                                                                  TimeStep *tStep, const FloatArray &coords,
                                                                   FloatArray &answer)
 {
     FloatArray lcoords, u, nv;
@@ -440,7 +424,7 @@ TrPlaneStrain :: EIPrimaryUnknownMI_computePrimaryUnknownVectorAt(ValueModeType 
     n.at(1, 3) = n.at(2, 4) = nv.at(2);
     n.at(1, 5) = n.at(2, 6) = nv.at(3);
 
-    this->computeVectorOf(EID_MomentumBalance, mode, stepN, u);
+    this->computeVectorOf(EID_MomentumBalance, mode, tStep, u);
 
     answer.beProductOf(n, u);
 
@@ -496,7 +480,7 @@ TrPlaneStrain :: HuertaErrorEstimatorI_setupRefinedElementProblem(RefinedElement
     static int sideNode [ 3 ] [ 2 ] = { { 1, 2 }, { 2, 3 }, { 3, 1 } };
 
     if ( sMode == HuertaErrorEstimatorInterface :: NodeMode ||
-        ( sMode == HuertaErrorEstimatorInterface :: BCMode && aMode == HuertaErrorEstimator :: HEE_linear ) ) {
+         ( sMode == HuertaErrorEstimatorInterface :: BCMode && aMode == HuertaErrorEstimator :: HEE_linear ) ) {
         for ( inode = 0; inode < nodes; inode++ ) {
             corner [ inode ] = element->giveNode(inode + 1)->giveCoordinates();
             if ( corner [ inode ]->giveSize() != 3 ) {
@@ -694,151 +678,6 @@ void TrPlaneStrain :: drawScalar(oofegGraphicContext &context)
         EMAddGraphicsToModel(ESIModel(), tr);
     }
 }
-
-/*
- * void TrPlaneStrain :: drawInternalState (oofegGraphicContext& gc)
- * //
- * // Draws internal state graphics representation
- * //
- * {
- * WCRec p[3],l[2];
- * GraphicObj *tr;
- * StructuralMaterial *mat = (StructuralMaterial*) this->giveMaterial();
- * GaussPoint* gp;
- * double v1,v2,v3,ratio;
- * int i, nPlastGp;
- * DrawMode mode = gc.getDrawMode();
- * TimeStep *tStep = domain->giveEngngModel()->giveCurrentStep();
- * double defScale = gc.getDefScale();
- *
- * if (!gc.testElementGraphicActivity(this)) return;
- *
- * // check for yield mode
- * if (mode == yieldState) {
- * // loop over available GPs
- * nPlastGp = 0;
- * for (i=1 ; i<= integrationRulesArray [ 0 ]->giveNumberOfIntegrationPoints() ; i++) {
- *  gp = integrationRulesArray[0]-> getIntegrationPoint(i-1) ;
- *  nPlastGp += (mat->giveStatusCharFlag(gp,ms_yield_flag) != 0);
- * }
- * if (nPlastGp == 0) return;
- * // nPlastGp should contain number of yielded gp in element
- * // good way should be select color accordingly
- * ratio = nPlastGp / integrationRulesArray [ 0 ]->giveNumberOfIntegrationPoints();
- * EASValsSetLayer(OOFEG_YIELD_PATTERN_LAYER);
- * for (i=0; i< 3; i++) {
- * if (gc.getInternalVarsDefGeoFlag()) {
- *  // use deformed geometry
- *  p[i].x = (FPNum) this->giveNode(i+1)->giveUpdatedCoordinate(1,tStep,defScale);
- *  p[i].y = (FPNum) this->giveNode(i+1)->giveUpdatedCoordinate(2,tStep,defScale);
- *  p[i].z = 0.;
- *
- * } else {
- *  p[i].x = (FPNum) this->giveNode(i+1)->giveCoordinate(1);
- *  p[i].y = (FPNum) this->giveNode(i+1)->giveCoordinate(2);
- *  p[i].z = 0.;
- * }
- * }
- *
- * EASValsSetColor(gc.getYieldPlotColor(ratio));
- * tr =  CreateTriangle3D(p);
- * EGWithMaskChangeAttributes(WIDTH_MASK | COLOR_MASK | FILL_MASK | LAYER_MASK, tr);
- * EMAddGraphicsToModel(ESIModel(), tr);
- *
- * } else if (mode == crackedState) {
- * // ask if any active crack exist
- * int crackStatus;
- * double ax,ay,bx,by,norm,xc,yc,length;
- * FloatMatrix crackDir;
- *
- * for (i=1 ; i<= integrationRulesArray [ 0 ]->giveNumberOfIntegrationPoints() ; i++) {
- *  gp = integrationRulesArray[0]-> getIntegrationPoint(i-1);
- *
- *  if (mat->giveStatusCharFlag (gp,ms_isCracked_flag) == 0) return;
- *  if (mat->GiveStatusCharMtrx(crackDir, gp,ms_crackDirection_flag)) {
- *  for (i = 1; i <= 3; i++) {
- *   crackStatus = (int) mat->giveStatusCharValue(gp, ms_crackStatus_flag,i);
- *   if ((crackStatus != pscm_NONE) && (crackStatus != pscm_CLOSED)) {
- *    // draw a crack
- *    // this element is 2d element in x-y plane
- *    //
- *    // compute perpendicular line to normal in xy plane
- *    ax = crackDir.at(1,i);
- *    ay = crackDir.at(2,i);
- *    if (fabs(ax) > 1.e-6) {
- *     by = 1.;
- *     bx = -ay*by/ax;
- *     norm = sqrt(bx*bx+by*by);
- *     bx = bx/norm;   // normalize to obtain unit vector
- *     by = by/norm;
- *    } else { by = 0.0; bx = 1.0;}
- *    // obtain gp global coordinates - here only one exists
- *    // it is in centre of gravity.
- *    xc = yc = 0.;
- *    for (i=0; i< 3; i++) {
- *     if (gc.getInternalVarsDefGeoFlag()) {
- *      // use deformed geometry
- *      xc += (FPNum) this->giveNode(i+1)->giveUpdatedCoordinate(1,tStep,defScale);
- *      yc += (FPNum) this->giveNode(i+1)->giveUpdatedCoordinate(2,tStep,defScale);
- *     } else {
- *      xc += (FPNum) this->giveNode(i+1)->giveCoordinate(1);
- *      yc += (FPNum) this->giveNode(i+1)->giveCoordinate(2);
- *     }
- *    }
- *    xc = xc / 3.; yc = yc/3.;
- *    length = TR_LENGHT_REDUCT * sqrt(2*this->giveArea()) / 2.0;
- *    l[0].x = (FPNum) xc+bx*length;
- *    l[0].y = (FPNum) yc+by*length;
- *    l[0].z = 0.;
- *    l[1].x = (FPNum) xc-bx*length;
- *    l[1].y = (FPNum) yc-by*length;
- *    l[1].z = 0.;
- *    EASValsSetLayer(OOFEG_CRACK_PATTERN_LAYER);
- *    EASValsSetLineWidth(OOFEG_CRACK_PATTERN_WIDTH);
- *    if ((crackStatus == pscm_SOFTENING)||(crackStatus == pscm_OPEN))
- *     EASValsSetColor(gc.getActiveCrackColor());
- *    else
- *     EASValsSetColor(gc.getCrackPatternColor());
- *    tr = CreateLine3D (l);
- *    EGWithMaskChangeAttributes(WIDTH_MASK | COLOR_MASK | LAYER_MASK, tr);
- *    EMAddGraphicsToModel(ESIModel(), tr);
- *   }
- *  }
- *  //delete crackDir;
- * }
- * }
- * }
- * // check for valid stress-strain mode
- * if (!((mode == sxForce) || (mode == syForce) || (mode == szForce) || (mode == sxyForce))) return ;
- *
- * EASValsSetLayer(OOFEG_STRESS_CONTOUR_LAYER);
- *
- * for (i=0; i< 3; i++) {
- * if (gc.getInternalVarsDefGeoFlag()) {
- *  // use deformed geometry
- *  p[i].x = (FPNum) this->giveNode(i+1)->giveUpdatedCoordinate(1,tStep,defScale);
- *  p[i].y = (FPNum) this->giveNode(i+1)->giveUpdatedCoordinate(2,tStep,defScale);
- *  p[i].z = 0.;
- *
- * } else {
- *  p[i].x = (FPNum) this->giveNode(i+1)->giveCoordinate(1);
- *  p[i].y = (FPNum) this->giveNode(i+1)->giveCoordinate(2);
- *  p[i].z = 0.;
- * }
- * }
- *
- * int result = 0;
- * result+= this->giveInternalStateAtNode (gc, 1, &v1);
- * result+= this->giveInternalStateAtNode (gc, 2, &v2);
- * result+= this->giveInternalStateAtNode (gc, 3, &v3);
- *
- * if (result == 3) {
- * tr = CreateTriangleWD3D (p,v1,v2,v3);
- * EGWithMaskChangeAttributes(LAYER_MASK, tr);
- * EMAddGraphicsToModel(ESIModel(), tr);
- * }
- * }
- */
 
 #endif
 } // end namespace oofem

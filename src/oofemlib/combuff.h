@@ -403,7 +403,7 @@ public:
 
 
 
-class OOFEM_EXPORT StaticCommunicationBuffer : public CommunicationBuffer , public MPIBuffer
+class OOFEM_EXPORT StaticCommunicationBuffer : public CommunicationBuffer, public MPIBuffer
 {
 public:
     StaticCommunicationBuffer(MPI_Comm comm, int size, bool dynamic = 0) : CommunicationBuffer(comm, size, dynamic),
@@ -459,5 +459,3 @@ public:
 } // end namespace oofem
 #endif
 #endif // combuff_h
-
-

@@ -52,9 +52,9 @@
 #define _IFT_HuertaErrorEstimator_skipsteps "skipsteps"
 #define _IFT_HuertaErrorEstimator_initialskipsteps "initialskipsteps"
 #define _IFT_HuertaErrorEstimator_werror "werror"
-#define _IFT_HuertaErrorEstimator_permat "permat"
-#define _IFT_HuertaErrorEstimator_impmat "impmat"
-#define _IFT_HuertaErrorEstimator_imppos "imppos"
+#define _IFT_HuertaErrorEstimator_perfectCSect "perCSect"
+#define _IFT_HuertaErrorEstimator_impCSect "impCSect"
+#define _IFT_HuertaErrorEstimator_impPos "imppos"
 #define _IFT_HuertaErrorEstimator_exact "exact"
 //@}
 
@@ -166,7 +166,6 @@ public:
 
     virtual const char *giveInputRecordName() const { return NULL; }
     virtual const char *giveClassName() const { return "HuertaErrorEstimator"; }
-    virtual classType giveClassID() const { return HuertaErrorEstimatorClass; }
 
     AnalysisMode giveAnalysisMode() { return mode; }
 
@@ -247,7 +246,7 @@ public:
                                                                   HuertaErrorEstimator :: AnalysisMode aMode) = 0;
 
     virtual void HuertaErrorEstimatorI_computeLocalCoords(FloatArray &answer, const FloatArray &coords) = 0;
-    virtual void HuertaErrorEstimatorI_computeNmatrixAt(GaussPoint *aGaussPoint, FloatMatrix &answer) = 0;
+    virtual void HuertaErrorEstimatorI_computeNmatrixAt(GaussPoint *gp, FloatMatrix &answer) = 0;
 
 protected:
     void setupRefinedElementProblem1D(Element *element, RefinedElement *refinedElement,
@@ -270,7 +269,7 @@ protected:
                                       int level, int nodeId, IntArray & localNodeIdArray, IntArray & globalNodeIdArray,
                                       HuertaErrorEstimatorInterface :: SetupMode mode, TimeStep * tStep, int nodes,
                                       FloatArray * * corner, FloatArray * midSide, FloatArray * midFace, FloatArray & midNode,
-                                      int & localNodeId, int & localElemId, int & localBcId,
+                                      int &localNodeId, int &localElemId, int &localBcId,
                                       int hexaSideNode [ 1 ] [ 3 ], int hexaFaceNode [ 1 ] [ 3 ],
                                       IntArray & controlNode, IntArray & controlDof,
                                       HuertaErrorEstimator :: AnalysisMode aMode, const char *hexatype);
@@ -325,7 +324,6 @@ public:
 
     virtual const char *giveInputRecordName() const { return NULL; }
     virtual const char *giveClassName() const { return "HuertaErrorEstimator"; }
-    virtual classType giveClassID() const { return HuertaRemeshingCriteriaClass; }
 };
 
 

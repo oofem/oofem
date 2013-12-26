@@ -51,8 +51,7 @@
 #endif
 
 namespace oofem {
-
-REGISTER_Element( InterfaceElem2dQuad );
+REGISTER_Element(InterfaceElem2dQuad);
 
 FEI2dLineQuad InterfaceElem2dQuad :: interp(1, 2);
 
@@ -65,7 +64,7 @@ InterfaceElem2dQuad :: InterfaceElem2dQuad(int n, Domain *aDomain) :
 
 
 void
-InterfaceElem2dQuad :: computeBmatrixAt(GaussPoint *aGaussPoint, FloatMatrix &answer, int li, int ui)
+InterfaceElem2dQuad :: computeBmatrixAt(GaussPoint *gp, FloatMatrix &answer, int li, int ui)
 //
 // Returns linear part of geometrical equations of the receiver at gp.
 // Returns the linear part of the B matrix
@@ -74,7 +73,7 @@ InterfaceElem2dQuad :: computeBmatrixAt(GaussPoint *aGaussPoint, FloatMatrix &an
     ///@todo Use the interpolator everywhere in this file:
     double ksi, n1, n2, n3;
 
-    ksi = aGaussPoint->giveCoordinate(1);
+    ksi = gp->giveCoordinate(1);
     n3  = 1. - ksi * ksi;
     n1  = ( 1. - ksi ) * 0.5 - 0.5 * n3;
     n2  = ( 1. + ksi ) * 0.5 - 0.5 * n3;
@@ -107,12 +106,12 @@ InterfaceElem2dQuad :: computeGaussPoints()
 
 
 double
-InterfaceElem2dQuad :: computeVolumeAround(GaussPoint *aGaussPoint)
+InterfaceElem2dQuad :: computeVolumeAround(GaussPoint *gp)
 // Returns the length of the receiver. This method is valid only if 1
 // Gauss point is used.
 {
-    double weight  = aGaussPoint->giveWeight();
-    double ksi = aGaussPoint->giveCoordinate(1);
+    double weight  = gp->giveWeight();
+    double ksi = gp->giveCoordinate(1);
     double dn1 = ksi - 0.5;
     double dn2 = ksi + 0.5;
     double dn3 = -2.0 * ksi;
@@ -127,7 +126,7 @@ InterfaceElem2dQuad :: computeVolumeAround(GaussPoint *aGaussPoint)
 
     double dx = ( dn1 * x1 ) + ( dn2 * x2 ) + ( dn3 * x3 );
     double dy = ( dn1 * y1 ) + ( dn2 * y2 ) + ( dn3 * y3 );
-    double thickness   = this->giveCrossSection()->give(CS_Thickness);
+    double thickness   = this->giveCrossSection()->give(CS_Thickness, gp);
     return sqrt(dx * dx + dy * dy) * weight * thickness;
 }
 
@@ -177,7 +176,7 @@ InterfaceElem2dQuad :: computeGtoLRotationMatrix(FloatMatrix &answer)
 FEInterpolation *
 InterfaceElem2dQuad :: giveInterpolation() const
 {
-    return &interp;
+    return & interp;
 }
 
 ///@todo Deprecated? Is so, remove it. / Mikael

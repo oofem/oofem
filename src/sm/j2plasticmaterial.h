@@ -66,9 +66,9 @@ public:
     virtual ~J2plasticMaterial();
 
     virtual IRResultType initializeFrom(InputRecord *ir);
+    virtual void giveInputRecord(DynamicInputRecord &input);
     virtual const char *giveInputRecordName() const { return _IFT_J2plasticMaterial_Name; }
     virtual const char *giveClassName() const { return "J2plasticMaterial"; }
-    virtual classType giveClassID() const { return J2plasticMaterialClass; }
 
     virtual MaterialStatus *CreateStatus(GaussPoint *gp) const;
 
@@ -93,7 +93,7 @@ protected:
     virtual int hasHardening();
     virtual void computeReducedGradientMatrix(FloatMatrix &answer, GaussPoint *gp,
                                               const FloatArray &stressVector,
-                                               const FloatArray &stressSpaceHardeningVars);
+                                              const FloatArray &stressSpaceHardeningVars);
     virtual void computeTrialStressIncrement(FloatArray &answer, GaussPoint *gp,
                                              const FloatArray &strainIncrement, TimeStep *tStep);
     virtual void compute3dElasticModuli(FloatMatrix &answer, GaussPoint *gp,

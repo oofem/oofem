@@ -46,7 +46,6 @@
 #define _IFT_Truss3d_Name "truss3d"
 
 namespace oofem {
-
 /**
  * This class implements a two-node truss bar element for three-dimensional
  * analysis.
@@ -63,7 +62,7 @@ public:
     Truss3d(int n, Domain *d);
     virtual ~Truss3d() { }
 
-    virtual FEInterpolation *giveInterpolation() const { return &interp; }
+    virtual FEInterpolation *giveInterpolation() const { return & interp; }
 
     virtual double computeLength();
 
@@ -92,14 +91,13 @@ public:
     virtual double DirectErrorIndicatorRCI_giveCharacteristicSize() { return this->computeLength(); }
 
 #ifdef __OOFEG
-    void drawRawGeometry(oofegGraphicContext &);
-    void drawDeformedGeometry(oofegGraphicContext &, UnknownType);
+    virtual void drawRawGeometry(oofegGraphicContext &);
+    virtual void drawDeformedGeometry(oofegGraphicContext &, UnknownType);
 #endif
 
     // definition & identification
     virtual const char *giveInputRecordName() const { return _IFT_Truss3d_Name; }
     virtual const char *giveClassName() const { return "Truss3d"; }
-    virtual classType giveClassID() const { return Truss3dClass; }
     virtual IRResultType initializeFrom(InputRecord *ir);
     virtual MaterialMode giveMaterialMode() { return _1dMat; }
 
@@ -112,7 +110,7 @@ protected:
     { computeGlobalCoordinates( answer, * ( gp->giveCoordinates() ) ); }
     virtual int computeLoadLEToLRotationMatrix(FloatMatrix &answer, int, GaussPoint *gp);
     virtual void computeBmatrixAt(GaussPoint *gp, FloatMatrix &answer, int = 1, int = ALL_STRAINS);
-    virtual void computeNmatrixAt(GaussPoint *gp, FloatMatrix &answer);
+    virtual void computeNmatrixAt(const FloatArray &iLocCoord, FloatMatrix &answer);
     virtual void computeGaussPoints();
 
     virtual int giveApproxOrder() { return 1; }

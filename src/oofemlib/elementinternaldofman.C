@@ -38,8 +38,7 @@
 #include "verbose.h"
 
 namespace oofem {
-
-ElementDofManager :: ElementDofManager(int n, Domain *aDomain, Element* elem) :
+ElementDofManager :: ElementDofManager(int n, Domain *aDomain, Element *elem) :
     DofManager(n, aDomain)
 {
     this->element = elem;
@@ -78,5 +77,4 @@ void ElementDofManager :: printYourself()
     loadArray.printYourself();
     printf("\n");
 }
-
 } // end namespace oofem

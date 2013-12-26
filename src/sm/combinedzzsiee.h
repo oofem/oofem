@@ -71,7 +71,6 @@ public:
     virtual IRResultType initializeFrom(InputRecord *ir);
     virtual const char *giveInputRecordName() const { return NULL; }
     virtual const char *giveClassName() const { return "CombinedZZSIErrorEstimator"; }
-    virtual classType giveClassID() const { return CombinedZZSIErrorEstimatorClass; }
     virtual void setDomain(Domain *d);
 };
 
@@ -107,7 +106,6 @@ public:
     virtual IRResultType initializeFrom(InputRecord *ir);
     virtual const char *giveInputRecordName() const { return NULL; }
     virtual const char *giveClassName() const { return "CombinedZZSIRemeshingCriteria"; }
-    virtual classType giveClassID() const { return CombinedZZSIRemeshingCriteriaClass; }
     virtual void setDomain(Domain *d);
 };
 } // end namespace oofem

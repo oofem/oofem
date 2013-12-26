@@ -40,8 +40,7 @@
 #include "classfactory.h"
 
 namespace oofem {
-
-REGISTER_Material( M4Material );
+REGISTER_Material(M4Material);
 
 M4Material :: M4Material(int n, Domain *d) :
     MicroplaneMaterial_Bazant(n, d)
@@ -81,7 +80,7 @@ M4Material :: FDminus(double ed, double k1, double c7, double c8, double c9,
 
 inline double
 M4Material :: FDplus(double ed, double k1, double c5, double c6, double c7, double c20,
-                      double E)
+                     double E)
 /*positive deviatoric bondary */
 {
     double a;
@@ -99,7 +98,7 @@ M4Material :: FN(double en, double sv, double k1, double c1, double c2, double c
 
 inline double
 M4Material :: FT(double sn, double ev, double k1, double k2, double c10,
-                  double c11, double c12, double Et)
+                 double c11, double c12, double Et)
 /*shear boundary */
 {
     double a, sn0;
@@ -112,9 +111,9 @@ M4Material :: FT(double sn, double ev, double k1, double k2, double c10,
 
 void
 M4Material :: giveStiffnessMatrix(FloatMatrix &answer,
-                                       MatResponseMode mode,
-                                       GaussPoint *gp,
-                                       TimeStep *atTime)
+                                  MatResponseMode mode,
+                                  GaussPoint *gp,
+                                  TimeStep *tStep)
 {
     answer.resize(6, 6);
     answer.zero();
@@ -149,7 +148,7 @@ M4Material :: giveRealMicroplaneStressVector(FloatArray &answer,
     // ask status for tempVH parameter
     previousStress = status->giveStressVector();
     previousStrain = status->giveStrainVector();
-    strainIncrement.beDifferenceOf(strain, status->giveStrainVector() );
+    strainIncrement.beDifferenceOf( strain, status->giveStrainVector() );
     if ( !previousStress.isNotEmpty() ) {
         previousStress.resize(4);
         previousStress.zero();
@@ -195,7 +194,7 @@ M4Material :: giveRealMicroplaneStressVector(FloatArray &answer,
 
     SED = previousStress.at(2) - previousStress.at(1) + CD * DEpsD;
     SD = min( max( SED, this->FDminus(EpsD, k1, c7, c8, c9, E) ),
-             this->FDplus(EpsD, k1, c5, c6, c7, c20, E) );
+              this->FDplus(EpsD, k1, c5, c6, c7, c20, E) );
 
     SNdash = SVdash + SD;
     answer.at(2) = min( SNdash, this->FN(EpsN, previousStress.at(1), k1, c1, c2, c3, c4, E, EV) );

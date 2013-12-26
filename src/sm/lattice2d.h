@@ -60,7 +60,7 @@ protected:
     double width, thickness;
     FloatArray gpCoords;
     int couplingFlag, couplingNumber;
-    
+
 public:
     Lattice2d(int n, Domain *d);
     virtual ~Lattice2d();
@@ -97,15 +97,14 @@ public:
     virtual double giveDissipation();
     virtual double giveDeltaDissipation();
 
-    virtual int giveCouplingFlag(){return couplingFlag;}
-    
-    virtual int giveCouplingNumber(){return couplingNumber;}
+    virtual int giveCouplingFlag() { return couplingFlag; }
+
+    virtual int giveCouplingNumber() { return couplingNumber; }
     //
     // definition & identification
     //
     virtual const char *giveInputRecordName() const { return _IFT_Lattice2d_Name; }
     virtual const char *giveClassName() const { return "Lattice2d"; }
-    virtual classType giveClassID() const { return Lattice2dClass; }
     virtual IRResultType initializeFrom(InputRecord *ir);
     virtual Element_Geometry_Type giveGeometryType() const { return EGT_line_1; }
 

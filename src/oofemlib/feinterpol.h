@@ -76,8 +76,10 @@ class OOFEM_EXPORT FEIVoidCellGeometry : public FEICellGeometry
 public:
     FEIVoidCellGeometry() : FEICellGeometry() {}
     virtual ~FEIVoidCellGeometry() {}
-    int giveNumberOfVertices() const { OOFEM_ERROR("FEIVoidCellGeometry: no reference geometry");
-                                       return 0; }
+    int giveNumberOfVertices() const {
+        OOFEM_ERROR("FEIVoidCellGeometry: no reference geometry");
+        return 0;
+    }
     const FloatArray *giveVertexCoordinates(int i) const {
         OOFEM_ERROR("FEIVoidCellGeometry: no reference geometry");
         return NULL;
@@ -109,8 +111,10 @@ protected:
     int nvertices;
 public:
     FEIVertexListGeometryWrapper(int nvertices, const FloatArray **coords) : FEICellGeometry()
-    { this->nvertices = nvertices;
-      this->coords = coords; }
+    {
+        this->nvertices = nvertices;
+        this->coords = coords;
+    }
     virtual ~FEIVertexListGeometryWrapper() {}
     int giveNumberOfVertices() const { return this->nvertices; }
     const FloatArray *giveVertexCoordinates(int i) const { return this->coords [ i - 1 ]; }
@@ -188,7 +192,7 @@ public:
     virtual void local2global(FloatArray &answer, const FloatArray &lcoords, const FEICellGeometry &cellgeo) = 0;
     /**
      * Evaluates local coordinates from given global ones.
-     * If local coordinates cannot be found (generate elements, or point far outside geometry, 
+     * If local coordinates cannot be found (generate elements, or point far outside geometry,
      * then the center coordinate will be used as a last resort, and the return value will be zero.
      * @param answer Contains evaluated local coordinates.
      * @param gcoords Array containing global coordinates.
@@ -209,7 +213,7 @@ public:
 
     /** @name Edge boundary functions.
      * Boundary edges are defined as corners for 2D geometries and surfaces for 3D geometries.
-     * This is the 
+     * This is the
      */
     //@{
     /**
@@ -331,7 +335,7 @@ public:
     /**
      * Returns the subdivision of patch parametric space
      */
-    virtual const double * const * giveKnotVector() { return NULL; }
+    virtual const double *const *giveKnotVector() { return NULL; }
     /**
      * Returns the number of knot spans of the receiver.
      */
@@ -339,11 +343,11 @@ public:
     /**
      * Returns the knot values of the receiver.
      */
-    virtual const FloatArray * giveKnotValues(int dim) { return NULL; }
+    virtual const FloatArray *giveKnotValues(int dim) { return NULL; }
     /**
      * Returns the knot multiplicity of the receiver.
      */
-    virtual const IntArray * giveKnotMultiplicity(int dim) { return NULL; }
+    virtual const IntArray *giveKnotMultiplicity(int dim) { return NULL; }
     /**
      * Returns number of spatial dimensions.
      */
@@ -363,8 +367,6 @@ public:
      * Sets up a suitable integration rule for numerical integrating over volume.
      * The required polynomial order for the determinant of the jacobian is added automatically.
      * @param order Polynomial order of integrand (should NOT including determinant of jacobian).
-     * @param boundary Boundary number.
-     * @param mode Material mode which is used in all the constructed GaussPoints.
      */
     virtual IntegrationRule *giveIntegrationRule(int order) = 0;
     /**
@@ -384,4 +386,3 @@ public:
 };
 } // end namespace oofem
 #endif // feinterpol_h
-

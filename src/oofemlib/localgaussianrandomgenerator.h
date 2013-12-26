@@ -73,7 +73,6 @@ public:
     virtual IRResultType initializeFrom(InputRecord *ir);
     virtual const char *giveClassName() const { return "LocalGaussianRandomGenerator"; }
     virtual const char *giveInputRecordName() const { return _IFT_LocalGaussianRandomGenerator_Name; }
-    virtual classType giveClassID() const { return LocalGaussianRandomGeneratorClass; }
 
 protected:
     /**
@@ -103,4 +102,3 @@ protected:
 };
 } // end namespace oofem
 #endif
-

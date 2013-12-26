@@ -68,8 +68,8 @@ public:
         coords(0) = c [ 0 ];
         coords(1) = c [ 1 ];
     }
-    Vertex(const Vertex &src): coords(src.coords) { }
-    Vertex & operator=(const Vertex &src) {
+    Vertex(const Vertex &src) : coords(src.coords) { }
+    Vertex &operator=(const Vertex &src) {
         coords = src.coords;
         return * this;
     }
@@ -195,7 +195,7 @@ protected:
 
     node *s, *c;
 public:
-    Graph(): s(NULL), c(NULL) { }
+    Graph() : s(NULL), c(NULL) { }
     ~Graph();
 
     void clip(Polygon &result, const Polygon &a, const Polygon &b);
@@ -236,8 +236,8 @@ class OOFEM_EXPORT GT_Exception
     int line;
 
 public:
-    GT_Exception(const char *file, int line): msg(NULL), file(file), line(line) { }
-    GT_Exception(const char *msg, const char *file, int line): msg(msg), file(file), line(line) { }
+    GT_Exception(const char *file, int line) : msg(NULL), file(file), line(line) { }
+    GT_Exception(const char *msg, const char *file, int line) : msg(msg), file(file), line(line) { }
     ~GT_Exception() { }
 
     void print();

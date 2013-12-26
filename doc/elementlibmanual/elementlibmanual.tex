@@ -607,6 +607,33 @@ The node numbering is anti-clockwise. The element features are summarized in Tab
 %-----------------------------------------------------------------------------------------------
 \clearpage
 \subsection{Plate\&Shell Elements}
+
+
+\subsubsection {DKT Element}
+\label{cct}
+Implementation of Discrete Kirchhoff Triangle (DKT) plate element.
+This element is suitable for thin plates, as the traswerse shear strain energy is neglected.
+The structure should be defined in x,y plane, nodes should be numbered anti-clockwise (positive rotation around
+z-axis). The element features are summarized in Table~\ref{dktplatesummary}.
+
+
+\begin{elementsummary}{dktplate}{2D Discrete Kirchhoff Triangular plate element}{-}{dktplate element summary}{dktplatesummary}
+%\elementParam{\param{NIP}: allows to set the number of integration points for integration of membrane terms.}
+\elementDescription{Unknowns}{Three dofs (w-displacement, u and v - rotations) are required in each node.}
+\elementDescription{Approximation}{Quadratic approximation of rotations, cubic approximation of displacement along the edges. Note: there is no need to define interpolation for displacement on the element.}
+\elementDescription{Integration}{Default integration of all terms using three point formula.}
+\elementDescription{Features}{Layered cross section support.}
+\elementDescription{CS properties}{Cross section thickness is required.}
+\elementDescription{Loads}{Body loads are supported. Boundary load support is beta.}
+\elementDescription{Output}{On output, the generalized strains are printed in a vector with 8 components, with the following meaning:
+$$e=\{\varepsilon_x, \varepsilon_y, \gamma_{xy}, \kappa_x, \kappa_y, \kappa_{xy}, \gamma_{zx}, \gamma_{zy}\},$$ where $\varepsilon_x, \varepsilon_y, \varepsilon_z$ are membrane normal deformations, $\gamma_{zy}, \gamma_{zx}, \gamma_{xy}$ are (out of plane and in plane) shear componets, and $\kappa_x, \kappa_y, \kappa_{xy}$ are curvatures.
+The generalized stress vector contains corresponding integral forces/moments:
+$$s=\{n_x, n_y, n_{xy}, m_x, m_y, m_{xy}, v_x, v_y\}.$$ Please note, for example, that bending moment $m_x$ is defined as $m_x=\int \sigma_x z\ dz$, so it acts along the y-axis and positive value causes tension in bottom layer.}
+\elementDescription{Nlgeo}{0.}
+\elementDescription{Status}{Reliable}
+\end{elementsummary}
+
+
 \subsubsection {CCT Element}
 \label{cct}
 Implementation of constant curvature triangular element for plate
@@ -618,13 +645,13 @@ z-axis). The element features are summarized in Table~\ref{cctplatesummary}.
 \begin{elementsummary}{cctplate}{2D constant curvature triangular plate element}{-}{cctplate element summary}{cctplatesummary}
 %\elementParam{\param{NIP}: allows to set the number of integration points for integration of membrane terms.}
 \elementDescription{Unknowns}{Three dofs (w-displacement, u and v - rotations) are required in each node.}
-\elementDescription{Approximation}{Linear approximation of ratations, quadratic approximation of displacement.}
+\elementDescription{Approximation}{Linear approximation of rotations, quadratic approximation of displacement.}
 \elementDescription{Integration}{Integration of all terms using one point formula.}
 \elementDescription{Features}{Layered cross section support.}
 \elementDescription{CS properties}{Cross section thickness is required.}
 \elementDescription{Loads}{Body loads are supported. Boundary loads are not supported now.}
 \elementDescription{Output}{On output, the generalized strains are printed in a vector with 12 components, with the following meaning:
-$$e=\{\varepsilon_x, \varepsilon_y, \varepsilon_z, \gamma_{yz}, \gamma_{zx}, \gamma_{xy}, \kappa_x, \kappa_y, \kappa_z, \kappa_{yz}, \kappa_{xz}, \kappa_{xy}\},$$where $\varepsilon_x, \varepsilon_y, \varepsilon_z$ are membrane normal deformations, $\gamma_{yz}, \gamma_{zx}, \gamma_{xy}$ are shear componets, and $\kappa_x, \kappa_y, \kappa_z, \kappa_{yz}, \kappa_{xz}, \kappa_{xy}$ are curvatures.
+$$e=\{\varepsilon_x, \varepsilon_y, \varepsilon_z, \gamma_{yz}, \gamma_{zx}, \gamma_{xy}, \kappa_x, \kappa_y, \kappa_z, \kappa_{yz}, \kappa_{xz}, \kappa_{xy}\},$$ where $\varepsilon_x, \varepsilon_y, \varepsilon_z$ are membrane normal deformations, $\gamma_{yz}, \gamma_{zx}, \gamma_{xy}$ are shear componets, and $\kappa_x, \kappa_y, \kappa_z, \kappa_{yz}, \kappa_{xz}, \kappa_{xy}$ are curvatures.
 The generalized stress vector contains corresponding integral forces/moments:
 $$s=\{n_x, n_y, n_y, v_{yz}, v_{zx}, v_{xy}, m_x, m_y, m_z, m_{yz}, m_{xz}, m_{xy}\}.$$ Please note, for example, that bending moment $m_x$ is defined as $m_x=\int \sigma_x z\ dz$, so it acts along the y-axis and positive value causes tension in bottom layer.}
 \elementDescription{Nlgeo}{0.}
@@ -1088,8 +1115,72 @@ approximation of displacement field. Can be used to glue together two elements w
 \elementDescription{Note}{Element requires material model with \_3dInterface support.}
 \end{elementsummary}
 
+
 %-----------------------------------------------------------------------------------------------
 \clearpage
+\subsection{XFEM elements}
+XFEM elements allow simulations where the unknown fields are enriched through
+the partition of unity concept. Two elements are currently available for 2D XFEM
+simulations: \textit{TrPlaneStress2dXFEM} (subclass of \textit{TrPlaneStress2d})
+and \textit{PlaneStress2dXfem} (subclass of PlaneStress2d).
+
+\subsubsection{TrPlaneStress2dXFEM element}
+
+\begin{elementsummary}{TrPlaneStress2dXFEM}{Two dimensional 3-node triangular
+XFEM element}{\optField{czmaterial}{in}
+\optField{nipcz}{in}\optField{useplanestrain}{in}}{TrPlaneStress2dXFEM element
+summary}{TrPlaneStress2dXFEMsummary} \elementParam{\param{czmaterial}: Interface material for the cohesive zone.
+(If no material is specified, traction free crack surfaces are assumed.)}
+\elementParam{\param{nipcz}: Number of integration points used on each segment
+of the cohesive zone.}
+\elementParam{\param{useplanestrain}: If plane strain or plane stress should
+be assumed. 0 implies plane stress and 1 implies plane strain.}
+
+\elementDescription{Unknowns}{Two continuous (standard) DOFs (u-displacement,
+v-displacement) and a variable number of enriched DOFs (can be continuous or
+discontinuous).}
+\elementDescription{Approximation}{-}
+\elementDescription{Integration}{Elements cut by an XFEM interface are divided
+into subtriangles.}
+\elementDescription{Features}{-}
+\elementDescription{CS properties}{-}
+\elementDescription{Loads}{-}
+\elementDescription{Nlgeo}{-}
+\elementDescription{Status}{-}
+\elementDescription{Note}{Test case: sm/xFemCrackVal.in}
+\end{elementsummary}
+
+
+\subsubsection{PlaneStress2dXfem element}
+
+\begin{elementsummary}{PlaneStress2dXfem}{Two dimensional 4-node quad
+XFEM element}{\optField{czmaterial}{in}
+\optField{nipcz}{in}\optField{useplanestrain}{in}}{PlaneStress2dXfem element
+summary}{PlaneStress2dXfemsummary} \elementParam{\param{czmaterial}: Interface material for the cohesive zone.
+(If no material is specified, traction free crack surfaces are assumed.)}
+\elementParam{\param{nipcz}: Number of integration points used on each segment
+of the cohesive zone.}
+\elementParam{\param{useplanestrain}: If plane strain or plane stress should
+be assumed. 0 implies plane stress and 1 implies plane strain.}
+
+\elementDescription{Unknowns}{Two continuous (standard) DOFs (u-displacement,
+v-displacement) and a variable number of enriched DOFs (can be continuous or
+discontinuous).}
+\elementDescription{Approximation}{-}
+\elementDescription{Integration}{Elements cut by an XFEM interface are divided
+into subtriangles.}
+\elementDescription{Features}{-}
+\elementDescription{CS properties}{-}
+\elementDescription{Loads}{-}
+\elementDescription{Nlgeo}{-}
+\elementDescription{Status}{-}
+\elementDescription{Note}{Test cases: sm/xFemCrackValBranch.in,
+sm/xfemCohesiveZone1.in, benchmark/xfem01.in}
+\end{elementsummary}
+
+%-----------------------------------------------------------------------------------------------
+\clearpage
+
 \subsection{Iso Geometric Analysis based (IGA) elements}
 The following record describes the common part of IGA element record:
  

@@ -48,8 +48,7 @@
 #include "tr2shell7.h"
 
 namespace oofem {
-
-REGISTER_Element( Tr2Shell7XFEM );
+REGISTER_Element(Tr2Shell7XFEM);
 
 FEI3dTrQuad Tr2Shell7XFEM :: interpolation;
 
@@ -72,24 +71,24 @@ Tr2Shell7XFEM :: giveOrdering(SolutionField fieldType) const
         return this->ordering_all;
     } else if ( fieldType == AllInv ) {
         return this->ordering_gr;
-    } else /*if ( fieldType == EdgeInv  )*/ {
+    } else { /*if ( fieldType == EdgeInv  )*/
         return this->ordering_gr_edge;
     }
 }
 
 
-void 
+void
 Tr2Shell7XFEM :: giveLocalNodeCoords(FloatArray &nodeLocalXiCoords, FloatArray &nodeLocalEtaCoords)
 {
-    nodeLocalXiCoords.setValues( 6, 1., 0., 0., .5, 0., .5); // corner nodes then midnodes, uncertain of node numbering
+    nodeLocalXiCoords.setValues(6, 1., 0., 0., .5, 0., .5);  // corner nodes then midnodes, uncertain of node numbering
     nodeLocalEtaCoords.setValues(6, 0., 1., 0., .5, .5, 0.);
 }
 
 
-FEInterpolation* Tr2Shell7XFEM :: giveInterpolation() const { return &interpolation; }
+FEInterpolation *Tr2Shell7XFEM :: giveInterpolation() const { return & interpolation; }
 
 
-void 
+void
 Tr2Shell7XFEM :: computeGaussPoints()
 {
     if ( !integrationRulesArray ) {
@@ -98,10 +97,10 @@ Tr2Shell7XFEM :: computeGaussPoints()
 
         // need to check if interface has failed but also need to update the integration rule later
         XfemManager *xMan = this->giveDomain()->giveXfemManager();
-        for ( int i = 1; i <= xMan->giveNumberOfEnrichmentItems(); i++ ) { 
-            Delamination *dei =  dynamic_cast< Delamination * >( xMan->giveEnrichmentItem(i) ); 
-            if (dei) {
-                int numberOfInterfaces = this->layeredCS->giveNumberOfLayers()-1;
+        for ( int i = 1; i <= xMan->giveNumberOfEnrichmentItems(); i++ ) {
+            Delamination *dei =  dynamic_cast< Delamination * >( xMan->giveEnrichmentItem(i) );
+            if ( dei ) {
+                int numberOfInterfaces = this->layeredCS->giveNumberOfLayers() - 1;
                 czIntegrationRulesArray = new IntegrationRule * [ numberOfInterfaces ];
                 for ( int i = 0; i < numberOfInterfaces; i++ ) {
                     czIntegrationRulesArray [ i ] = new GaussIntegrationRule(1, this);
@@ -109,32 +108,27 @@ Tr2Shell7XFEM :: computeGaussPoints()
                 }
             }
         }
-        
+
 
         specialIntegrationRulesArray = new IntegrationRule * [ 3 ];
 
         // Midplane (Mass matrix integrated analytically through the thickness)
         specialIntegrationRulesArray [ 1 ] = new GaussIntegrationRule(1, this);
-        specialIntegrationRulesArray [ 1 ]->SetUpPointsOnTriangle(nPointsTri, _3dMat); 
+        specialIntegrationRulesArray [ 1 ]->SetUpPointsOnTriangle(nPointsTri, _3dMat);
 
         // Edge
         specialIntegrationRulesArray [ 2 ] = new GaussIntegrationRule(1, this);
         specialIntegrationRulesArray [ 2 ]->SetUpPointsOnLine(nPointsEdge, _3dMat);
-        
+
         // Layered cross section for bulk integration
         this->numberOfIntegrationRules = this->layeredCS->giveNumberOfLayers();
-        this->numberOfGaussPoints = this->layeredCS->giveNumberOfLayers()*nPointsTri*this->layeredCS->giveNumIntegrationPointsInLayer();
+        this->numberOfGaussPoints = this->layeredCS->giveNumberOfLayers() * nPointsTri * this->layeredCS->giveNumIntegrationPointsInLayer();
         this->layeredCS->setupLayeredIntegrationRule(integrationRulesArray, this, nPointsTri);
 
         // Thickness integration for stress recovery
         specialIntegrationRulesArray [ 0 ] = new GaussIntegrationRule(1, this);
         specialIntegrationRulesArray [ 0 ]->SetUpPointsOnLine(this->layeredCS->giveNumIntegrationPointsInLayer(), _3dMat);
-
-
-
-
     }
-
 }
 
 
@@ -146,12 +140,10 @@ Tr2Shell7XFEM :: giveEdgeDofMapping(IntArray &answer, int iEdge) const
      * to global element dofs
      */
 
-    if ( iEdge == 1 )        { // edge between nodes 1-4-2
+    if ( iEdge == 1 ) {        // edge between nodes 1-4-2
         answer.setValues(21, 1, 2, 3, 8, 9, 10, 22, 23, 24,  4, 5, 6, 11, 12, 13, 25, 26, 27,   7, 14, 28);
-
     } else if ( iEdge == 2 ) { // edge between nodes 2-5-3
-        answer.setValues(21,   8, 9, 10, 15, 16, 17, 29, 30, 31,   11, 12, 13, 18, 19, 20, 32, 33, 34,   14, 21, 35 );
-
+        answer.setValues(21,   8, 9, 10, 15, 16, 17, 29, 30, 31,   11, 12, 13, 18, 19, 20, 32, 33, 34,   14, 21, 35);
     } else if ( iEdge == 3 ) { // edge between nodes 3-6-1
         answer.setValues(21,   15, 16, 17, 1, 2, 3, 36, 37, 38,   18, 19, 20, 4, 5, 6, 39, 40, 41,   21, 7, 42);
     } else {
@@ -160,11 +152,11 @@ Tr2Shell7XFEM :: giveEdgeDofMapping(IntArray &answer, int iEdge) const
 }
 
 
-void 
+void
 Tr2Shell7XFEM :: giveSurfaceDofMapping(IntArray &answer, int iSurf) const
 {
     answer.resize(42);
-    for( int i = 1; i <= 42; i++){    
+    for ( int i = 1; i <= 42; i++ ) {
         answer.at(i) = i;
     }
 }
@@ -172,7 +164,7 @@ Tr2Shell7XFEM :: giveSurfaceDofMapping(IntArray &answer, int iSurf) const
 
 // Integration
 
-double 
+double
 Tr2Shell7XFEM :: computeAreaAround(GaussPoint *gp, double xi)
 {
     FloatArray G1, G2, temp;
@@ -182,27 +174,23 @@ Tr2Shell7XFEM :: computeAreaAround(GaussPoint *gp, double xi)
     lCoords.at(2) = gp->giveCoordinate(2);
     lCoords.at(3) = xi;
     this->evalInitialCovarBaseVectorsAt(lCoords, Gcov);
-    G1.beColumnOf(Gcov,1);
-    G2.beColumnOf(Gcov,2);
+    G1.beColumnOf(Gcov, 1);
+    G2.beColumnOf(Gcov, 2);
     temp.beVectorProductOf(G1, G2);
     double detJ = temp.computeNorm();
-    return detJ * gp->giveWeight() ;
+    return detJ * gp->giveWeight();
 }
 
 
-double 
+double
 Tr2Shell7XFEM :: computeVolumeAroundLayer(GaussPoint *gp, int layer)
 {
     double detJ;
     FloatMatrix Gcov;
     FloatArray lcoords;
-    lcoords = *gp->giveCoordinates();
+    lcoords = * gp->giveCoordinates();
     this->evalInitialCovarBaseVectorsAt(lcoords, Gcov);
     detJ = Gcov.giveDeterminant() * 0.5 * this->layeredCS->giveLayerThickness(layer);
     return detJ * gp->giveWeight();
 }
-
-
-
 } // end namespace oofem
-

@@ -53,28 +53,23 @@ class Element;
 class XfemManager;
 class StructuralInterfaceMaterial;
 
-//#define XFEM_DEBUG_VTK 1
-
 /**
  * Provides Xfem interface for an element.
  * @author Erik Svenning
  */
 class OOFEM_EXPORT XfemElementInterface : public Interface
 {
-protected:
+public:
     Element *element;
 
     // Cohesive Zone variables
     StructuralInterfaceMaterial *mpCZMat;
     int mCZMaterialNum;
     int mCSNumGaussPoints;
-    IntegrationRule *mpCZIntegrationRule;
+    std :: vector< IntegrationRule * >mpCZIntegrationRules;
 
-    /// Length of the crack segment in the element
-    double mCrackLength;
-
-    /// Index of enrichment item associated with cohesive zone
-    int mCZEnrItemIndex;
+    /// Index of enrichment items associated with cohesive zones
+    std :: vector< int >mCZEnrItemIndices; // TODO: Not nice. /ES
 
     /// Flag that tells if plane stress or plane strain is assumed
     bool mUsePlaneStrain;
@@ -92,28 +87,38 @@ public:
     void XfemElementInterface_createEnrNmatrixAt(FloatMatrix &oAnswer, const FloatArray &iLocCoord, Element &iEl);
 
     /// Partitions the element into patches by a triangulation.
-    virtual void XfemElementInterface_partitionElement(std::vector< Triangle > &oTriangles, const std :: vector< FloatArray > &iPoints);
+    virtual void XfemElementInterface_partitionElement(std :: vector< Triangle > &oTriangles, const std :: vector< FloatArray > &iPoints);
     /// Updates integration rule based on the triangulation.
-    virtual void XfemElementInterface_updateIntegrationRule();
+    virtual bool XfemElementInterface_updateIntegrationRule();
 
-    /// Helpful routine to put the nodes for triangulation together, should be in protected members probably.
     /// Returns an array of array of points. Each array of points defines the points of a subregion of the element.
-    virtual void XfemElementInterface_prepareNodesForDelaunay(std :: vector< std :: vector< FloatArray > > &oPointPartitions, FloatArray &oCrackStartPoint, FloatArray &oCrackEndPoint, int &oEnrItemIndex);
+    virtual void XfemElementInterface_prepareNodesForDelaunay(std :: vector< std :: vector< FloatArray > > &oPointPartitions, double &oCrackStartXi, double &oCrackEndXi, int iEnrItemIndex, bool &oIntersection);
+    virtual void XfemElementInterface_prepareNodesForDelaunay(std :: vector< std :: vector< FloatArray > > &oPointPartitions, double &oCrackStartXi, double &oCrackEndXi, const Triangle &iTri, int iEnrItemIndex, bool &oIntersection);
+
+    // Help functions for partitioning
+    void putPointsInCorrectPartition(std :: vector< std :: vector< FloatArray > > &oPointPartitions, const std :: vector< FloatArray > &iIntersecPoints, const std :: vector< const FloatArray * > &iNodeCoord) const;
 
     /**
-     * If the enrichment evolves in time, the element subdivision
-     * need to be updated. That is done by recomputeGaussPoints.
+     * XfemElementInterface_computeConstitutiveMatrixAt.
+     * The reason for having a special implementation of this function is
+     * that the enrichment item may have a different material than
+     * the bulk material inside.
      */
-    virtual void recomputeGaussPoints();
+    virtual void XfemElementInterface_computeConstitutiveMatrixAt(FloatMatrix &answer, MatResponseMode rMode, GaussPoint *, TimeStep *tStep);
+    virtual void XfemElementInterface_computeStressVector(FloatArray &answer, const FloatArray &strain, GaussPoint *gp, TimeStep *tStep);
 
-    // Cohesive Zone functions
-    bool hasCohesiveZone() const {return (mpCZMat != NULL && mpCZIntegrationRule);}
+    /**
+     * Cohesive Zone functions
+     */
+    bool hasCohesiveZone() const { return ( mpCZMat != NULL && mpCZIntegrationRules.size() > 0 ); }
 
     void computeCohesiveForces(FloatArray &answer, TimeStep *tStep);
     void computeGlobalCohesiveTractionVector(FloatArray &oT, const FloatArray &iJump, const FloatArray &iCrackNormal, const FloatMatrix &iNMatrix, GaussPoint &iGP, TimeStep *tStep);
 
     void computeCohesiveTangent(FloatMatrix &answer, TimeStep *tStep);
     void computeCohesiveTangentAt(FloatMatrix &answer, TimeStep *tStep);
+
+    void XfemElementInterface_computeConsistentMassMatrix(FloatMatrix &answer, TimeStep *tStep, double &mass, const double *ipDensity = NULL);
 
     virtual IRResultType initializeCZFrom(InputRecord *ir);
     MaterialMode giveMaterialMode();
@@ -128,12 +133,7 @@ public:
     /**
      * Compute N-matrix for cohesive zone.
      */
-    void computeNCohesive(FloatMatrix &oN, GaussPoint &iGP);
-
-    /**
-     * Compute the crack normal in a point.
-     */
-    bool computeNormalInPoint(const FloatArray &iGlobalCoord, FloatArray &oNormal);
+    void computeNCohesive(FloatMatrix &oN, GaussPoint &iGP, int iEnrItemIndex);
 };
 } // end namespace oofem
 #endif // xfemelementinterface_h

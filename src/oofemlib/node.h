@@ -134,7 +134,6 @@ public:
      * Local coordinate system is taken into account and the answer is given in global coordinates.
      * @param answer Updated coordinate.
      * @param tStep Time step for the displacement.
-     * @param type Equation ID for displacement of node.
      * @param scale Scaling of displacement.
      */
     virtual void giveUpdatedCoordinates(FloatArray &answer, TimeStep *tStep, double scale = 1.);
@@ -155,7 +154,7 @@ public:
 
     virtual bool computeL2GTransformation(FloatMatrix &answer, const IntArray &dofIDArry);
     virtual bool requiresTransformation() { return ( this->hasLocalCS() || hasSlaveDofs ); }
-    virtual void computeLoadVector(FloatArray &answer, Load *load, CharType type, TimeStep *stepN, ValueModeType mode);
+    virtual void computeLoadVector(FloatArray &answer, Load *load, CharType type, TimeStep *tStep, ValueModeType mode);
 
     /**
      * Updates receiver at end of time step (i.e. after equilibrium has been reached).
@@ -169,7 +168,6 @@ public:
     // miscellaneous
     virtual const char *giveClassName() const { return "Node"; }
     virtual const char *giveInputRecordName() const { return _IFT_Node_Name; }
-    virtual classType giveClassID() const { return NodeClass; }
     virtual IRResultType initializeFrom(InputRecord *ir);
     virtual void giveInputRecord(DynamicInputRecord &input);
     virtual void printYourself();
@@ -180,7 +178,7 @@ public:
     virtual contextIOResultType restoreContext(DataStream *stream, ContextMode mode, void *obj = NULL);
 
 #ifdef __OOFEG
-    void drawYourself(oofegGraphicContext &);
+    virtual void drawYourself(oofegGraphicContext &);
 #endif
 };
 } // end namespace oofem

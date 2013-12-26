@@ -51,7 +51,7 @@ class IntArray;
 class OOFEM_EXPORT DummySpatialLocalizer : public SpatialLocalizer
 {
 protected:
-    std::vector<IntArray> region_elements;
+    std :: vector< IntArray >region_elements;
     bool initialized;
 
 public:

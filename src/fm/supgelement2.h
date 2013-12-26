@@ -67,29 +67,30 @@ public:
     virtual ~SUPGElement2();
 
     virtual IRResultType initializeFrom(InputRecord *ir);
+    virtual void giveInputRecord(DynamicInputRecord &input);
 
     // characteristic  matrix
-    virtual void giveCharacteristicMatrix(FloatMatrix & answer, CharType, TimeStep *tStep);
-    virtual void giveCharacteristicVector(FloatArray & answer, CharType, ValueModeType, TimeStep *tStep);
-    virtual double giveCharacteristicValue(CharType, TimeStep *tStep);
+    virtual void giveCharacteristicMatrix(FloatMatrix & answer, CharType, TimeStep * tStep);
+    virtual void giveCharacteristicVector(FloatArray & answer, CharType, ValueModeType, TimeStep * tStep);
+    virtual double giveCharacteristicValue(CharType, TimeStep * tStep);
     virtual void updateElementForNewInterfacePosition(TimeStep *tStep) { }
 
-    virtual void computeAccelerationTerm_MB(FloatMatrix &answer, TimeStep *atTime);
-    virtual void computeAdvectionTerm_MB(FloatArray &answer, TimeStep *atTime);
-    virtual void computeAdvectionDerivativeTerm_MB(FloatMatrix &answer, TimeStep *atTime);
-    virtual void computeDiffusionTerm_MB(FloatArray &answer, TimeStep *atTime);
-    virtual void computeDiffusionDerivativeTerm_MB(FloatMatrix &answer, MatResponseMode mode, TimeStep *atTime);
-    virtual void computePressureTerm_MB(FloatMatrix &answer, TimeStep *atTime);
-    virtual void computeLSICStabilizationTerm_MB(FloatMatrix &answer, TimeStep *atTime);
-    virtual void computeLinearAdvectionTerm_MC(FloatMatrix &answer, TimeStep *atTime);
-    virtual void computeAdvectionTerm_MC(FloatArray &answer, TimeStep *atTime);
-    virtual void computeAdvectionDerivativeTerm_MC(FloatMatrix &answer, TimeStep *atTime);
-    virtual void computeDiffusionDerivativeTerm_MC(FloatMatrix &answer, TimeStep *atTime);
-    virtual void computeDiffusionTerm_MC(FloatArray &answer, TimeStep *atTime);
-    virtual void computeAccelerationTerm_MC(FloatMatrix &answer, TimeStep *atTime);
-    virtual void computePressureTerm_MC(FloatMatrix &answer, TimeStep *atTime);
-    virtual void computeBCRhsTerm_MB(FloatArray &answer, TimeStep *atTime);
-    virtual void computeBCRhsTerm_MC(FloatArray &answer, TimeStep *atTime);
+    virtual void computeAccelerationTerm_MB(FloatMatrix &answer, TimeStep *tStep);
+    virtual void computeAdvectionTerm_MB(FloatArray &answer, TimeStep *tStep);
+    virtual void computeAdvectionDerivativeTerm_MB(FloatMatrix &answer, TimeStep *tStep);
+    virtual void computeDiffusionTerm_MB(FloatArray &answer, TimeStep *tStep);
+    virtual void computeDiffusionDerivativeTerm_MB(FloatMatrix &answer, MatResponseMode mode, TimeStep *tStep);
+    virtual void computePressureTerm_MB(FloatMatrix &answer, TimeStep *tStep);
+    virtual void computeLSICStabilizationTerm_MB(FloatMatrix &answer, TimeStep *tStep);
+    virtual void computeLinearAdvectionTerm_MC(FloatMatrix &answer, TimeStep *tStep);
+    virtual void computeAdvectionTerm_MC(FloatArray &answer, TimeStep *tStep);
+    virtual void computeAdvectionDerivativeTerm_MC(FloatMatrix &answer, TimeStep *tStep);
+    virtual void computeDiffusionDerivativeTerm_MC(FloatMatrix &answer, TimeStep *tStep);
+    virtual void computeDiffusionTerm_MC(FloatArray &answer, TimeStep *tStep);
+    virtual void computeAccelerationTerm_MC(FloatMatrix &answer, TimeStep *tStep);
+    virtual void computePressureTerm_MC(FloatMatrix &answer, TimeStep *tStep);
+    virtual void computeBCRhsTerm_MB(FloatArray &answer, TimeStep *tStep);
+    virtual void computeBCRhsTerm_MC(FloatArray &answer, TimeStep *tStep);
 
     virtual double computeCriticalTimeStep(TimeStep *tStep) = 0;
 
@@ -100,7 +101,7 @@ public:
 
 #ifdef __OOFEG
     int giveInternalStateAtNode(FloatArray &answer, InternalStateType type, InternalStateMode mode,
-                                int node, TimeStep *atTime);
+                                int node, TimeStep *tStep);
     // Graphics output
     //void drawYourself(oofegGraphicContext&);
     //virtual void drawRawGeometry(oofegGraphicContext&) {}
@@ -108,16 +109,16 @@ public:
 #endif
 
 protected:
-    virtual void computeDeviatoricStrain(FloatArray &answer, GaussPoint *gp, TimeStep *atTime);
-    virtual void computeDeviatoricStress(FloatArray &answer, GaussPoint *gp, TimeStep *atTime);
+    virtual void computeDeviatoricStrain(FloatArray &answer, GaussPoint *gp, TimeStep *tStep);
+    virtual void computeDeviatoricStress(FloatArray &answer, GaussPoint *gp, TimeStep *tStep);
     virtual void computeNuMatrix(FloatMatrix &answer, GaussPoint *gp) = 0;
-    virtual void computeUDotGradUMatrix(FloatMatrix &answer, GaussPoint *gp, TimeStep *atTime) = 0;
+    virtual void computeUDotGradUMatrix(FloatMatrix &answer, GaussPoint *gp, TimeStep *tStep) = 0;
     virtual void computeBMatrix(FloatMatrix &anwer, GaussPoint *gp) = 0;
     virtual void computeDivUMatrix(FloatMatrix &answer, GaussPoint *gp) = 0;
     virtual void computeNpMatrix(FloatMatrix &answer, GaussPoint *gp) = 0;
     virtual void computeGradPMatrix(FloatMatrix &answer, GaussPoint *gp) = 0;
-    virtual void computeDivTauMatrix(FloatMatrix &answer, GaussPoint *gp, TimeStep *atTime) = 0;
-    virtual void computeGradUMatrix(FloatMatrix &answer, GaussPoint *gp, TimeStep *atTime) = 0;
+    virtual void computeDivTauMatrix(FloatMatrix &answer, GaussPoint *gp, TimeStep *tStep) = 0;
+    virtual void computeGradUMatrix(FloatMatrix &answer, GaussPoint *gp, TimeStep *tStep) = 0;
     virtual int giveNumberOfSpatialDimensions() = 0;
 
     //virtual void computeEdgeNuMatrix (FloatMatrix& answer, GaussPoint* gp) = 0;
@@ -127,10 +128,10 @@ protected:
     //virtual int computeLoadLBToLRotationMatrix (FloatMatrix& answer, int iedge, GaussPoint* gp) = 0;
     //virtual void giveEdgeUDofMapping (IntArray& answer, int iedge) = 0;
     //virtual int giveUApproxOrder () = 0;
-    virtual void computeEdgeLoadVector_MB(FloatArray &answer, Load *load, int id, TimeStep *atTime);
-    virtual void computeSurfaceLoadVector_MB(FloatArray &answer, Load *load, int id, TimeStep *atTime);
-    virtual void computeEdgeLoadVector_MC(FloatArray &answer, Load *load, int id, TimeStep *atTime);
-    virtual void computeSurfaceLoadVector_MC(FloatArray &answer, Load *load, int id, TimeStep *atTime);
+    virtual void computeEdgeLoadVector_MB(FloatArray &answer, Load *load, int id, TimeStep *tStep);
+    virtual void computeSurfaceLoadVector_MB(FloatArray &answer, Load *load, int id, TimeStep *tStep);
+    virtual void computeEdgeLoadVector_MC(FloatArray &answer, Load *load, int id, TimeStep *tStep);
+    virtual void computeSurfaceLoadVector_MC(FloatArray &answer, Load *load, int id, TimeStep *tStep);
 };
 } // end namespace oofem
 #endif // supgelement2_h

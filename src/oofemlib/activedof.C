@@ -41,8 +41,7 @@
 
 namespace oofem {
 ActiveDof :: ActiveDof(int n, DofManager *aNode, int bc, DofIDItem id) : Dof(n, aNode, id), equationNumber(0), bc(bc), activeBC(NULL)
-{
-}
+{}
 
 void ActiveDof :: initialize(int cntOfMstrDfMngr, const IntArray &masterNodes, const IntArray *mstrDofID, const FloatArray &mstrContribution)
 {
@@ -51,9 +50,9 @@ void ActiveDof :: initialize(int cntOfMstrDfMngr, const IntArray &masterNodes, c
 
 ActiveBoundaryCondition *ActiveDof :: giveActiveBoundaryCondition()
 {
-    if (!activeBC) {
-        activeBC = dynamic_cast<ActiveBoundaryCondition*>(this->dofManager->giveDomain()->giveBc(bc));
-        if (!activeBC) {
+    if ( !activeBC ) {
+        activeBC = dynamic_cast< ActiveBoundaryCondition * >( this->dofManager->giveDomain()->giveBc(bc) );
+        if ( !activeBC ) {
             OOFEM_ERROR2("ActiveBoundaryCondition :: giveActiveBoundaryCondition - No active bc at %d\n", bc);
         }
     }
@@ -62,12 +61,13 @@ ActiveBoundaryCondition *ActiveDof :: giveActiveBoundaryCondition()
 
 int ActiveDof :: giveNumberOfPrimaryMasterDofs()
 {
-    if (this->isPrimaryDof())
+    if ( this->isPrimaryDof() ) {
         return 1;
+    }
 
     int countOfMasterDofs = this->giveActiveBoundaryCondition()->giveNumberOfMasterDofs(this);
     int k = 0;
-    for (int i = 1; i <= countOfMasterDofs; i++ ) {
+    for ( int i = 1; i <= countOfMasterDofs; i++ ) {
         k += this->giveMasterDof(i)->giveNumberOfPrimaryMasterDofs();
     }
     return k;
@@ -86,7 +86,7 @@ int ActiveDof :: giveNumberOfMasterDofs()
 
 void ActiveDof :: giveEquationNumbers(IntArray &masterEqNumbers, const UnknownNumberingScheme &s)
 {
-    if (this->isPrimaryDof()) {
+    if ( this->isPrimaryDof() ) {
         masterEqNumbers.resize(1);
         masterEqNumbers.at(1) = this->giveEquationNumber(s);
         return;
@@ -95,9 +95,9 @@ void ActiveDof :: giveEquationNumbers(IntArray &masterEqNumbers, const UnknownNu
     IntArray mstrEqNmbrs;
 
     int countOfMasterDofs = this->giveNumberOfMasterDofs();
-    masterEqNumbers.preallocate( countOfMasterDofs );
-    masterEqNumbers.resize( 0 );
-    for (int i = 1; i <= countOfMasterDofs; i++ ) {
+    masterEqNumbers.preallocate(countOfMasterDofs);
+    masterEqNumbers.resize(0);
+    for ( int i = 1; i <= countOfMasterDofs; i++ ) {
         this->giveMasterDof(i)->giveEquationNumbers(mstrEqNmbrs, s);
         masterEqNumbers.followedBy(mstrEqNmbrs);
     }
@@ -105,7 +105,7 @@ void ActiveDof :: giveEquationNumbers(IntArray &masterEqNumbers, const UnknownNu
 
 void ActiveDof :: giveDofIDs(IntArray &masterDofIDs)
 {
-    if (this->isPrimaryDof()) {
+    if ( this->isPrimaryDof() ) {
         masterDofIDs.resize(1);
         masterDofIDs.at(1) = this->giveDofID();
         return;
@@ -114,9 +114,9 @@ void ActiveDof :: giveDofIDs(IntArray &masterDofIDs)
     IntArray mstrDofIDs;
 
     int countOfMasterDofs = this->giveNumberOfMasterDofs();
-    masterDofIDs.preallocate( countOfMasterDofs );
-    masterDofIDs.resize( 0 );
-    for (int i = 1; i <= countOfMasterDofs; i++ ) {
+    masterDofIDs.preallocate(countOfMasterDofs);
+    masterDofIDs.resize(0);
+    for ( int i = 1; i <= countOfMasterDofs; i++ ) {
         this->giveMasterDof(i)->giveDofIDs(mstrDofIDs);
         masterDofIDs.followedBy(mstrDofIDs);
     }
@@ -124,7 +124,7 @@ void ActiveDof :: giveDofIDs(IntArray &masterDofIDs)
 
 void ActiveDof :: giveMasterDofManArray(IntArray &answer)
 {
-    if (this->isPrimaryDof()) {
+    if ( this->isPrimaryDof() ) {
         answer.resize(1);
         answer.at(1) = this->giveDofManNumber();
         return;
@@ -147,7 +147,7 @@ void ActiveDof :: giveUnknowns(FloatArray &masterUnknowns, ValueModeType mode, T
 
     masterUnknowns.resize( this->giveNumberOfPrimaryMasterDofs() );
     int countOfMasterDofs = this->giveNumberOfMasterDofs();
-    for (int k = 1, i = 1; i <= countOfMasterDofs; i++ ) {
+    for ( int k = 1, i = 1; i <= countOfMasterDofs; i++ ) {
         this->giveMasterDof(i)->giveUnknowns(mstrUnknwns, mode, tStep);
         masterUnknowns.copySubVector(mstrUnknwns, k);
         k += mstrUnknwns.giveSize();
@@ -160,7 +160,7 @@ void ActiveDof :: giveUnknowns(FloatArray &masterUnknowns, PrimaryField &field, 
 
     masterUnknowns.resize( this->giveNumberOfPrimaryMasterDofs() );
     int countOfMasterDofs = this->giveNumberOfMasterDofs();
-    for (int k = 1, i = 1; i <= countOfMasterDofs; i++ ) {
+    for ( int k = 1, i = 1; i <= countOfMasterDofs; i++ ) {
         this->giveMasterDof(i)->giveUnknowns(mstrUnknwns, field, mode, tStep);
         masterUnknowns.copySubVector(mstrUnknwns, k);
         k += mstrUnknwns.giveSize();
@@ -169,7 +169,7 @@ void ActiveDof :: giveUnknowns(FloatArray &masterUnknowns, PrimaryField &field, 
 
 void ActiveDof :: computeDofTransformation(FloatArray &primaryMasterContribs)
 {
-    if (this->isPrimaryDof()) {
+    if ( this->isPrimaryDof() ) {
         primaryMasterContribs.resize(1);
         primaryMasterContribs.at(1) = 1.0;
         return;
@@ -180,7 +180,7 @@ void ActiveDof :: computeDofTransformation(FloatArray &primaryMasterContribs)
 
     primaryMasterContribs.resize( this->giveNumberOfPrimaryMasterDofs() );
     int countOfMasterDofs = this->giveNumberOfMasterDofs();
-    for (int k = 1, i = 1; i <= countOfMasterDofs; i++ ) {
+    for ( int k = 1, i = 1; i <= countOfMasterDofs; i++ ) {
         this->giveMasterDof(i)->computeDofTransformation(subPrimaryMasterContribs);
         subPrimaryMasterContribs.times( masterContribution.at(i) );
         primaryMasterContribs.copySubVector(subPrimaryMasterContribs, k);
@@ -190,7 +190,7 @@ void ActiveDof :: computeDofTransformation(FloatArray &primaryMasterContribs)
 
 double ActiveDof :: giveUnknown(ValueModeType mode, TimeStep *tStep)
 {
-    if (this->hasBc(tStep)) {
+    if ( this->hasBc(tStep) ) {
         return this->giveBcValue(mode, tStep);
     }
     return this->giveActiveBoundaryCondition()->giveUnknown(mode, tStep, this);
@@ -198,7 +198,7 @@ double ActiveDof :: giveUnknown(ValueModeType mode, TimeStep *tStep)
 
 double ActiveDof :: giveUnknown(PrimaryField &field, ValueModeType mode, TimeStep *tStep)
 {
-    if (this->hasBc(tStep)) {
+    if ( this->hasBc(tStep) ) {
         return this->giveBcValue(mode, tStep);
     }
     return this->giveActiveBoundaryCondition()->giveUnknown(field, mode, tStep, this);
@@ -217,7 +217,7 @@ int ActiveDof :: __givePrescribedEquationNumber()
 
 int ActiveDof :: askNewEquationNumber(TimeStep *tStep)
 {
-    if (!this->isPrimaryDof()) {
+    if ( !this->isPrimaryDof() ) {
         return 0;
     }
 
@@ -249,7 +249,7 @@ int ActiveDof :: giveBcId()
     return this->bc;
 }
 
-void ActiveDof :: setBcId( int bcId )
+void ActiveDof :: setBcId(int bcId)
 {
     bc = bcId;
     activeBC = NULL;
@@ -289,6 +289,4 @@ void ActiveDof :: updateLocalNumbering(EntityRenumberingFunctor &f)
 {
     // No numbering is stored.
 }
-
-
 } // end namespace oofem

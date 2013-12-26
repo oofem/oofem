@@ -40,7 +40,6 @@
 #define _IFT_ConstantEdgeLoad_Name "constantedgeload"
 
 namespace oofem {
-
 /**
  * This class implements a boundary load (force, moment,...) that acts
  * directly on a boundary of some finite element (on side, face, ..).
@@ -70,7 +69,6 @@ public:
     virtual IRResultType initializeFrom(InputRecord *ir);
     virtual bcGeomType giveBCGeoType() const { return EdgeLoadBGT; }
 
-    virtual classType giveClassID() const { return ConstantEdgeLoadClass; }
     virtual const char *giveClassName() const { return "ConstantEdgeLoad"; }
     virtual const char *giveInputRecordName() const { return _IFT_ConstantEdgeLoad_Name; }
 
@@ -79,9 +77,3 @@ private:
 };
 } // end namespace oofem
 #endif // constantedgeload_h
-
-
-
-
-
-

@@ -54,8 +54,7 @@
 #endif
 
 namespace oofem {
-
-REGISTER_Element( PlaneStress2d );
+REGISTER_Element(PlaneStress2d);
 
 FEI2dQuadLin PlaneStress2d :: interpolation(1, 2);
 
@@ -75,10 +74,10 @@ PlaneStress2d :: ~PlaneStress2d()
 { }
 
 void
-PlaneStress2d :: computeBmatrixAt(GaussPoint *aGaussPoint, FloatMatrix &answer, int li, int ui)
+PlaneStress2d :: computeBmatrixAt(GaussPoint *gp, FloatMatrix &answer, int li, int ui)
 //
 // Returns the [3x8] strain-displacement matrix {B} of the receiver,
-// evaluated at aGaussPoint.
+// evaluated at gp.
 // (epsilon_x,epsilon_y,gamma_xy) = B . r
 // r = ( u1,v1,u2,v2,u3,v3,u4,v4)
 {
@@ -88,7 +87,7 @@ PlaneStress2d :: computeBmatrixAt(GaussPoint *aGaussPoint, FloatMatrix &answer, 
     FloatArray coord;
 #endif
 
-    this->interpolation.evaldNdx( dnx, * aGaussPoint->giveCoordinates(), FEIElementGeometryWrapper(this) );
+    this->interpolation.evaldNdx( dnx, * gp->giveCoordinates(), FEIElementGeometryWrapper(this) );
 
     answer.resize(3, 8);
     answer.zero();
@@ -112,19 +111,18 @@ PlaneStress2d :: computeBmatrixAt(GaussPoint *aGaussPoint, FloatMatrix &answer, 
 
 
 void
-PlaneStress2d :: computeBHmatrixAt(GaussPoint *aGaussPoint, FloatMatrix &answer)
+PlaneStress2d :: computeBHmatrixAt(GaussPoint *gp, FloatMatrix &answer)
 //
 // Returns the [4x8] displacement gradient matrix {BH} of the receiver,
-// evaluated at aGaussPoint.
+// evaluated at gp.
 // @todo not checked if correct
 {
-
     FloatMatrix dnx;
 #ifdef  PlaneStress2d_reducedShearIntegration
     FloatArray coord;
 #endif
 
-    this->interpolation.evaldNdx( dnx, * aGaussPoint->giveCoordinates(), FEIElementGeometryWrapper(this) );
+    this->interpolation.evaldNdx( dnx, * gp->giveCoordinates(), FEIElementGeometryWrapper(this) );
 
     answer.resize(4, 8);
 
@@ -153,31 +151,12 @@ PlaneStress2d :: computeGaussPoints()
         numberOfIntegrationRules = 1;
         integrationRulesArray = new IntegrationRule * [ 1 ];
         integrationRulesArray [ 0 ] = new GaussIntegrationRule(1, this, 1, 3);
-        this->giveCrossSection()->setupIntegrationPoints( *integrationRulesArray[0], numberOfGaussPoints, this );
+        this->giveCrossSection()->setupIntegrationPoints(* integrationRulesArray [ 0 ], numberOfGaussPoints, this);
     }
 }
 
 void
-PlaneStress2d :: computeNmatrixAt(GaussPoint *aGaussPoint, FloatMatrix &answer)
-// Returns the displacement interpolation matrix {N} of the receiver,
-// evaluated at aGaussPoint.
-{
-    FloatArray n(4);
-
-    answer.resize(2, 8);
-    answer.zero();
-    this->interpolation.evalN( n, * aGaussPoint->giveCoordinates(), FEIElementGeometryWrapper(this) );
-
-    for ( int i = 1; i <= 4; i++ ) {
-        answer.at(1, 2 * i - 1) = n.at(i);
-        answer.at(2, 2 * i - 0) = n.at(i);
-    }
-}
-
-
-
-void
-PlaneStress2d :: computeEgdeNMatrixAt(FloatMatrix &answer, int iedge, GaussPoint *aGaussPoint)
+PlaneStress2d :: computeEgdeNMatrixAt(FloatMatrix &answer, int iedge, GaussPoint *gp)
 {
     /*
      *
@@ -194,7 +173,7 @@ PlaneStress2d :: computeEgdeNMatrixAt(FloatMatrix &answer, int iedge, GaussPoint
      */
 
     FloatArray n(2);
-    this->interpolation.edgeEvalN( n, iedge, * aGaussPoint->giveCoordinates(), FEIElementGeometryWrapper(this) );
+    this->interpolation.edgeEvalN( n, iedge, * gp->giveCoordinates(), FEIElementGeometryWrapper(this) );
 
     answer.resize(2, 4);
     answer.zero();
@@ -241,11 +220,11 @@ PlaneStress2d :: giveEdgeDofMapping(IntArray &answer, int iEdge) const
 }
 
 double
-PlaneStress2d :: computeEdgeVolumeAround(GaussPoint *aGaussPoint, int iEdge)
+PlaneStress2d :: computeEdgeVolumeAround(GaussPoint *gp, int iEdge)
 {
-    double result = this->interpolation.edgeGiveTransformationJacobian( iEdge, * aGaussPoint->giveCoordinates(),
-                                                                       FEIElementGeometryWrapper(this) );
-    return result *aGaussPoint->giveWeight();
+    double result = this->interpolation.edgeGiveTransformationJacobian( iEdge, * gp->giveCoordinates(),
+                                                                        FEIElementGeometryWrapper(this) );
+    return result * gp->giveWeight();
 }
 
 void
@@ -293,16 +272,16 @@ PlaneStress2d :: computeLoadLEToLRotationMatrix(FloatMatrix &answer, int iEdge, 
 
 
 double
-PlaneStress2d :: computeVolumeAround(GaussPoint *aGaussPoint)
-// Returns the portion of the receiver which is attached to aGaussPoint.
+PlaneStress2d :: computeVolumeAround(GaussPoint *gp)
+// Returns the portion of the receiver which is attached to gp.
 {
     double determinant, weight, thickness, volume;
-    determinant = fabs( this->interpolation.giveTransformationJacobian( * aGaussPoint->giveCoordinates(),
-                                                                       FEIElementGeometryWrapper(this) ) );
+    determinant = fabs( this->interpolation.giveTransformationJacobian( * gp->giveCoordinates(),
+                                                                        FEIElementGeometryWrapper(this) ) );
 
 
-    weight      = aGaussPoint->giveWeight();
-    thickness   = this->giveCrossSection()->give(CS_Thickness);
+    weight      = gp->giveWeight();
+    thickness   = this->giveCrossSection()->give(CS_Thickness, gp);
     volume      = determinant * weight * thickness;
 
     return volume;
@@ -313,9 +292,9 @@ PlaneStress2d :: initializeFrom(InputRecord *ir)
 {
     numberOfGaussPoints = 4;
     IRResultType result = this->NLStructuralElement :: initializeFrom(ir);
-	if(result != IRRT_OK) {
-		return result;
-	}
+    if ( result != IRRT_OK ) {
+        return result;
+    }
 
     if ( numberOfGaussPoints != 1 && numberOfGaussPoints != 4 && numberOfGaussPoints != 9 && numberOfGaussPoints != 16 ) {
         numberOfGaussPoints = 4;
@@ -365,8 +344,10 @@ PlaneStress2d :: giveCharacteristicSize(GaussPoint *gp, FloatArray &normalToCrac
     int nGP = iRule->giveNumberOfIntegrationPoints();
     for ( int i = 0; i < nGP; i++ ) {
         GaussPoint *gpi = iRule->getIntegrationPoint(i);
-        StructuralMaterialStatus *matstatus = dynamic_cast< StructuralMaterialStatus* >( gpi->giveMaterialStatus() );
-        if (matstatus) sumstrain.add( matstatus->giveTempStrainVector() );
+        StructuralMaterialStatus *matstatus = dynamic_cast< StructuralMaterialStatus * >( gpi->giveMaterialStatus() );
+        if ( matstatus ) {
+            sumstrain.add( matstatus->giveTempStrainVector() );
+        }
     }
 
     StrainVector sumstrainvec(sumstrain, _PlaneStress);
@@ -482,7 +463,7 @@ PlaneStress2d :: HuertaErrorEstimatorI_setupRefinedElementProblem(RefinedElement
     static int sideNode [ 4 ] [ 2 ] = { { 1, 2 }, { 2, 3 }, { 3, 4 }, { 4, 1 } };
 
     if ( sMode == HuertaErrorEstimatorInterface :: NodeMode ||
-        ( sMode == HuertaErrorEstimatorInterface :: BCMode && aMode == HuertaErrorEstimator :: HEE_linear ) ) {
+         ( sMode == HuertaErrorEstimatorInterface :: BCMode && aMode == HuertaErrorEstimator :: HEE_linear ) ) {
         for ( inode = 0; inode < nodes; inode++ ) {
             corner [ inode ] = element->giveNode(inode + 1)->giveCoordinates();
             if ( corner [ inode ]->giveSize() != 3 ) {
@@ -803,7 +784,6 @@ PlaneStress2d :: drawSpecial(oofegGraphicContext &gc)
     int i;
     WCRec l [ 2 ];
     GraphicObj *tr;
-    StructuralMaterial *mat = static_cast< StructuralMaterial * >( this->giveMaterial() );
     GaussPoint *gp;
     TimeStep *tStep = domain->giveEngngModel()->giveCurrentStep();
     double defScale = gc.getDefScale();
@@ -823,7 +803,7 @@ PlaneStress2d :: drawSpecial(oofegGraphicContext &gc)
         for ( igp = 1; igp <= integrationRulesArray [ 0 ]->giveNumberOfIntegrationPoints(); igp++ ) {
             gp = integrationRulesArray [ 0 ]->getIntegrationPoint(igp - 1);
 
-            if ( mat->giveIPValue(cf, gp, IST_CrackedFlag, tStep) == 0 ) {
+            if ( this->giveIPValue(cf, gp, IST_CrackedFlag, tStep) == 0 ) {
                 return;
             }
 
@@ -831,8 +811,8 @@ PlaneStress2d :: drawSpecial(oofegGraphicContext &gc)
                 return;
             }
 
-            if ( mat->giveIPValue(crackDir, gp, IST_CrackDirs, tStep) ) {
-                mat->giveIPValue(crackStatuses, gp, IST_CrackStatuses, tStep);
+            if ( this->giveIPValue(crackDir, gp, IST_CrackDirs, tStep) ) {
+                this->giveIPValue(crackStatuses, gp, IST_CrackStatuses, tStep);
                 for ( i = 1; i <= 3; i++ ) {
                     crackStatus = ( int ) crackStatuses.at(i);
                     if ( ( crackStatus != pscm_NONE ) && ( crackStatus != pscm_CLOSED ) ) {
@@ -880,7 +860,7 @@ PlaneStress2d :: drawSpecial(oofegGraphicContext &gc)
 
                         xc = gpglobalcoords.at(1);
                         yc = gpglobalcoords.at(2);
-                        length = sqrt( computeVolumeAround(gp) / this->giveCrossSection()->give(CS_Thickness) ) / 2.;
+                        length = sqrt( computeVolumeAround(gp) / this->giveCrossSection()->give(CS_Thickness, gp) ) / 2.;
                         l [ 0 ].x = ( FPNum ) xc + bx * length;
                         l [ 0 ].y = ( FPNum ) yc + by * length;
                         l [ 0 ].z = 0.;
@@ -904,206 +884,6 @@ PlaneStress2d :: drawSpecial(oofegGraphicContext &gc)
         }
     }
 }
-
-/*
- * void PlaneStress2d :: drawInternalState (oofegGraphicContext &gc)
- * //
- * // Draws internal state graphics representation
- * //
- * {
- * WCRec p[4],l[2];
- * GraphicObj *tr;
- * StructuralMaterial *mat = (StructuralMaterial*) this->giveMaterial();
- * TimeStep *tStep = domain->giveEngngModel()->giveCurrentStep();
- * GaussPoint* gp;
- * double v1,v2,v3,v4, ratio;
- * int i, nPlastGp;
- * DrawMode mode = gc.getDrawMode();
- * double defScale = gc.getDefScale();
- *
- * if (!gc.testElementGraphicActivity(this)) return;
- *
- * // check for yield mode
- * if (mode == yieldState) {
- * // loop over available GPs
- * nPlastGp = 0;
- * for (i=1 ; i<= integrationRulesArray [ 0 ]->giveNumberOfIntegrationPoints() ; i++) {
- *  gp = integrationRulesArray[0]-> getIntegrationPoint(i-1) ;
- *  nPlastGp += (mat->giveStatusCharFlag(gp,ms_yield_flag) != 0);
- * }
- * if (nPlastGp == 0) return;
- * // nPlastGp should contain number of yielded gp in element
- * // good way should be select color accordingly
- * ratio = nPlastGp / integrationRulesArray [ 0 ]->giveNumberOfIntegrationPoints();
- * EASValsSetLayer(OOFEG_YIELD_PATTERN_LAYER);
- * for (i=0; i< 4; i++) {
- * if (gc.getInternalVarsDefGeoFlag()) {
- *  // use deformed geometry
- *  p[i].x = (FPNum) this->giveNode(i+1)->giveUpdatedCoordinate(1,tStep,defScale);
- *  p[i].y = (FPNum) this->giveNode(i+1)->giveUpdatedCoordinate(2,tStep,defScale);
- *  p[i].z = 0.;
- *
- * } else {
- *  p[i].x = (FPNum) this->giveNode(i+1)->giveCoordinate(1);
- *  p[i].y = (FPNum) this->giveNode(i+1)->giveCoordinate(2);
- *  p[i].z = 0.;
- * }
- * }
- *
- * EASValsSetColor(gc.getYieldPlotColor(ratio));
- * tr =  CreateQuad3D(p);
- * EGWithMaskChangeAttributes(WIDTH_MASK | COLOR_MASK | FILL_MASK | LAYER_MASK, tr);
- * EMAddGraphicsToModel(ESIModel(), tr);
- *
- * } else if (mode == crackedState) {
- * // ask if any active crack exist
- * int igp, crackStatus;
- * double ax,ay,bx,by,norm,xc,yc,length;
- * FloatMatrix crackDir;
- * FloatArray gpglobalcoords;
- *
- * for (igp=1 ; igp<= integrationRulesArray [ 0 ]->giveNumberOfIntegrationPoints() ; igp++) {
- *  gp = integrationRulesArray[0]-> getIntegrationPoint(igp-1);
- *
- *  if (mat->giveStatusCharFlag (gp,ms_isCracked_flag) == 0) return;
- *  if (mat->GiveStatusCharMtrx(crackDir, gp,ms_crackDirection_flag)) {
- *  for (i = 1; i <= 3; i++) {
- *   crackStatus = (int) mat->giveStatusCharValue(gp, ms_crackStatus_flag,i);
- *   if ((crackStatus != pscm_NONE) && (crackStatus != pscm_CLOSED)) {
- *    // draw a crack
- *    // this element is 2d element in x-y plane
- *    //
- *    // compute perpendicular line to normal in xy plane
- *    ax = crackDir.at(1,i);
- *    ay = crackDir.at(2,i);
- *    if (fabs(ax) > 1.e-6) {
- *     by = 1.;
- *     bx = -ay*by/ax;
- *     norm = sqrt(bx*bx+by*by);
- *     bx = bx/norm;   // normalize to obtain unit vector
- *     by = by/norm;
- *    } else { by = 0.0; bx = 1.0;}
- *    // obtain gp global coordinates
- *    if (gc.getInternalVarsDefGeoFlag()) {
- *     double ksi, eta, n1, n2, n3, n4;
- *     ksi = gp->giveCoordinate(1);
- *     eta = gp->giveCoordinate(2);
- *
- *     n1 = (1. + ksi) * (1. + eta) * 0.25 ;
- *     n2 = (1. - ksi) * (1. + eta) * 0.25 ;
- *     n3 = (1. - ksi) * (1. - eta) * 0.25 ;
- *     n4 = (1. + ksi) * (1. - eta) * 0.25 ;
- *
- *     gpglobalcoords.resize (2);
- *
- *     gpglobalcoords.at(1) = (n1 * this->giveNode(1)->giveUpdatedCoordinate(1,tStep,defScale) +
- *                 n2 * this->giveNode(2)->giveUpdatedCoordinate(1,tStep,defScale) +
- *                 n3 * this->giveNode(3)->giveUpdatedCoordinate(1,tStep,defScale) +
- *                 n4 * this->giveNode(4)->giveUpdatedCoordinate(1,tStep,defScale));
- *     gpglobalcoords.at(2) = (n1*this->giveNode(1)->giveUpdatedCoordinate(2,tStep,defScale) +
- *                 n2*this->giveNode(2)->giveUpdatedCoordinate(2,tStep,defScale) +
- *                 n3 * this->giveNode(3)->giveUpdatedCoordinate(2,tStep,defScale)+
- *                 n4 * this->giveNode(4)->giveUpdatedCoordinate(2,tStep,defScale));
- *    } else {
- *     computeGlobalCoordinates (gpglobalcoords, *(gp->giveCoordinates()));
- *    }
- *    xc = gpglobalcoords.at(1);
- *    yc = gpglobalcoords.at(2);
- *    length = sqrt(computeVolumeAround(gp)/this->giveCrossSection()->give('t'))/2.;
- *    l[0].x = (FPNum) xc+bx*length;
- *    l[0].y = (FPNum) yc+by*length;
- *    l[0].z = 0.;
- *    l[1].x = (FPNum) xc-bx*length;
- *    l[1].y = (FPNum) yc-by*length;
- *    l[1].z = 0.;
- *    EASValsSetLayer(OOFEG_CRACK_PATTERN_LAYER);
- *    EASValsSetLineWidth(OOFEG_CRACK_PATTERN_WIDTH);
- *    if ((crackStatus == pscm_SOFTENING)||(crackStatus == pscm_OPEN))
- *     EASValsSetColor(gc.getActiveCrackColor());
- *    else
- *     EASValsSetColor(gc.getCrackPatternColor());
- *    tr = CreateLine3D (l);
- *    EGWithMaskChangeAttributes(WIDTH_MASK | COLOR_MASK | LAYER_MASK, tr);
- *    EMAddGraphicsToModel(ESIModel(), tr);
- *   }
- *  }
- *  //delete crackDir;
- * }
- * }
- * } else if (mode == damageLevel) {
- * double damage= 0.0;
- * for (i=1 ; i<= integrationRulesArray [ 0 ]->giveNumberOfIntegrationPoints() ; i++) {
- *  gp = integrationRulesArray[0]-> getIntegrationPoint(i-1) ;
- *  damage += mat->giveStatusCharValue(gp,ms_damage_flag);
- * }
- * damage /= integrationRulesArray [ 0 ]->giveNumberOfIntegrationPoints();
- * EASValsSetLayer(OOFEG_YIELD_PATTERN_LAYER);
- * for (i=0; i< 4; i++) {
- * if (gc.getInternalVarsDefGeoFlag()) {
- *  // use deformed geometry
- *  p[i].x = (FPNum) this->giveNode(i+1)->giveUpdatedCoordinate(1,tStep,defScale);
- *  p[i].y = (FPNum) this->giveNode(i+1)->giveUpdatedCoordinate(2,tStep,defScale);
- *  p[i].z = 0.;
- *
- * } else {
- *  p[i].x = (FPNum) this->giveNode(i+1)->giveCoordinate(1);
- *  p[i].y = (FPNum) this->giveNode(i+1)->giveCoordinate(2);
- *  p[i].z = 0.;
- * }
- * }
- *
- * //EASValsSetColor(gc.getYieldPlotColor(ratio));
- * tr =  CreateQuadWD3D(p, damage, damage, damage, damage);
- * EGWithMaskChangeAttributes(LAYER_MASK, tr);
- * EMAddGraphicsToModel(ESIModel(), tr);
- *
- *
- * }
- * // check for valid stress-strain mode
- * if (!((mode == sxForce) || (mode == syForce) || (mode == sxyForce))) return ;
- *
- * EASValsSetLayer(OOFEG_STRESS_CONTOUR_LAYER);
- * for (i=0; i< 4; i++) {
- * if (gc.getInternalVarsDefGeoFlag()) {
- * // use deformed geometry
- * p[i].x = (FPNum) this->giveNode(i+1)->giveUpdatedCoordinate(1,tStep,defScale);
- * p[i].y = (FPNum) this->giveNode(i+1)->giveUpdatedCoordinate(2,tStep,defScale);
- * p[i].z = 0.;
- *
- * } else {
- * p[i].x = (FPNum) this->giveNode(i+1)->giveCoordinate(1);
- * p[i].y = (FPNum) this->giveNode(i+1)->giveCoordinate(2);
- * p[i].z = 0.;
- * }
- * }
- * int indx, result;
- * FloatArray *val1, *val2, *val3, *val4;
- *
- * if (mode == sxForce) indx = 1;
- * else if (mode == syForce) indx = 2;
- * else indx = 3;
- *
- * result = this->giveDomain()->giveSmoother()->giveNodalVector(val1, this->giveNode(1)->giveNumber(),
- *                     this->giveDomain()->giveSmoother()->giveElementRegion(this));
- * result +=this->giveDomain()->giveSmoother()->giveNodalVector(val2, this->giveNode(2)->giveNumber(),
- *                     this->giveDomain()->giveSmoother()->giveElementRegion(this));
- * result +=this->giveDomain()->giveSmoother()->giveNodalVector(val3,this->giveNode(3)->giveNumber(),
- *                     this->giveDomain()->giveSmoother()->giveElementRegion(this));
- * result +=this->giveDomain()->giveSmoother()->giveNodalVector(val4,this->giveNode(4)->giveNumber(),
- *                     this->giveDomain()->giveSmoother()->giveElementRegion(this));
- *
- * if (result == 4) {
- * v1 = val1->at(indx);
- * v2 = val2->at(indx);
- * v3 = val3->at(indx);
- * v4 = val4->at(indx);
- *
- * tr = CreateQuadWD3D (p,v1,v2,v3, v4);
- * EGWithMaskChangeAttributes(LAYER_MASK, tr);
- * EMAddGraphicsToModel(ESIModel(), tr);
- * }
- * }
- */
 
 #endif
 
@@ -1195,10 +975,8 @@ PlaneStress2d :: DirectErrorIndicatorRCI_giveCharacteristicSize()
     iRule = integrationRulesArray [ giveDefaultIntegrationRule() ];
     for ( int i = 0; i < iRule->giveNumberOfIntegrationPoints(); i++ ) {
         gp  = iRule->getIntegrationPoint(i);
-        volume += this->computeVolumeAround(gp);
+        volume += this->computeVolumeAround(gp) / this->giveCrossSection()->give(CS_Thickness, gp);
     }
-
-    volume /= this->giveCrossSection()->give(CS_Thickness);
 
     return sqrt(volume);
 }
@@ -1206,7 +984,7 @@ PlaneStress2d :: DirectErrorIndicatorRCI_giveCharacteristicSize()
 
 int
 PlaneStress2d :: EIPrimaryUnknownMI_computePrimaryUnknownVectorAt(ValueModeType mode,
-                                                                  TimeStep *stepN, const FloatArray &coords,
+                                                                  TimeStep *tStep, const FloatArray &coords,
                                                                   FloatArray &answer)
 {
     FloatArray lcoords, u;
@@ -1226,7 +1004,7 @@ PlaneStress2d :: EIPrimaryUnknownMI_computePrimaryUnknownVectorAt(ValueModeType 
     n.at(1, 5) = n.at(2, 6) = ni.at(3);
     n.at(1, 7) = n.at(2, 8) = ni.at(4);
 
-    this->computeVectorOf(EID_MomentumBalance, mode, stepN, u);
+    this->computeVectorOf(EID_MomentumBalance, mode, tStep, u);
     answer.beProductOf(n, u);
 
     return result;

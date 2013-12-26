@@ -67,15 +67,14 @@ public:
     virtual Interface *giveInterface(InterfaceType) { return NULL; }
 
 #ifdef __OOFEG
-    void drawRawGeometry(oofegGraphicContext &);
-    void drawDeformedGeometry(oofegGraphicContext &, UnknownType);
-    void drawScalar(oofegGraphicContext &context);
+    virtual void drawRawGeometry(oofegGraphicContext &);
+    virtual void drawDeformedGeometry(oofegGraphicContext &, UnknownType);
+    virtual void drawScalar(oofegGraphicContext &context);
 #endif
 
     // definition & identification
     virtual const char *giveInputRecordName() const { return _IFT_InterfaceElement3dTrLin_Name; }
     virtual const char *giveClassName() const { return "InterfaceElement3dTrLin"; }
-    virtual classType giveClassID() const { return InterfaceElement3dTrLinClass; }
     virtual IRResultType initializeFrom(InputRecord *ir);
     virtual Element_Geometry_Type giveGeometryType() const { return EGT_wedge_1; }
     virtual integrationDomain giveIntegrationDomain() const { return _Triangle; }
@@ -83,7 +82,7 @@ public:
 
 protected:
     virtual void computeBmatrixAt(GaussPoint *gp, FloatMatrix &answer, int = 1, int = ALL_STRAINS);
-    virtual void computeNmatrixAt(GaussPoint *gp, FloatMatrix &answer) { }
+    virtual void computeNmatrixAt(const FloatArray &iLocCoord, FloatMatrix &answer) { }
     virtual void computeGaussPoints();
 
     virtual int giveApproxOrder() { return 1; }

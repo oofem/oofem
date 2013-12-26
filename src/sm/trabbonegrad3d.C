@@ -60,7 +60,7 @@ TrabBoneGrad3D :: hasMaterialModeCapability(MaterialMode mode)
 }
 void
 TrabBoneGrad3D :: giveStiffnessMatrix(FloatMatrix &answer,
-                                      MatResponseMode rMode, GaussPoint *gp, TimeStep *atTime)
+                                      MatResponseMode rMode, GaussPoint *gp, TimeStep *tStep)
 //
 // Returns characteristic material stiffness matrix of the receiver
 //
@@ -132,7 +132,7 @@ TrabBoneGrad3D :: givePDGradMatrix_LD(FloatMatrix &answer, MatResponseMode mode,
 
 
 void
-TrabBoneGrad3D :: give3dMaterialStiffnessMatrix(FloatMatrix &answer, MatResponseMode mode, GaussPoint *gp, TimeStep *atTime)
+TrabBoneGrad3D :: give3dMaterialStiffnessMatrix(FloatMatrix &answer, MatResponseMode mode, GaussPoint *gp, TimeStep *tStep)
 {
     double tempDam, beta, tempKappa, kappa;
     FloatArray tempEffectiveStress, tempTensor2, prodTensor, plasFlowDirec;
@@ -216,7 +216,7 @@ TrabBoneGrad3D :: give3dMaterialStiffnessMatrix(FloatMatrix &answer, MatResponse
 
 
 void
-TrabBoneGrad3D :: give3dKappaMatrix(FloatMatrix &answer, MatResponseMode mode, GaussPoint *gp, TimeStep *atTime)
+TrabBoneGrad3D :: give3dKappaMatrix(FloatMatrix &answer, MatResponseMode mode, GaussPoint *gp, TimeStep *tStep)
 {
     answer.resize(1, 6);
     answer.zero();
@@ -247,7 +247,7 @@ TrabBoneGrad3D :: give3dKappaMatrix(FloatMatrix &answer, MatResponseMode mode, G
 
 
 void
-TrabBoneGrad3D :: give3dGprime(FloatMatrix &answer, MatResponseMode mode, GaussPoint *gp, TimeStep *atTime)
+TrabBoneGrad3D :: give3dGprime(FloatMatrix &answer, MatResponseMode mode, GaussPoint *gp, TimeStep *tStep)
 {
     answer.resize(6, 1);
     answer.zero();
@@ -278,22 +278,22 @@ TrabBoneGrad3D :: give3dGprime(FloatMatrix &answer, MatResponseMode mode, GaussP
 }
 
 void
-TrabBoneGrad3D :: giveInternalLength(FloatMatrix &answer, MatResponseMode mode, GaussPoint *gp, TimeStep *atTime)
+TrabBoneGrad3D :: giveInternalLength(FloatMatrix &answer, MatResponseMode mode, GaussPoint *gp, TimeStep *tStep)
 {
     answer.resize(1, 1);
     answer.at(1, 1) = L;
 }
 
 void
-TrabBoneGrad3D :: giveRealStressVectorGrad(FloatArray &answer1, double &answer2, GaussPoint *gp, const FloatArray &totalStrain, double nonlocalCumulatedStrain, TimeStep *atTime)
+TrabBoneGrad3D :: giveRealStressVectorGrad(FloatArray &answer1, double &answer2, GaussPoint *gp, const FloatArray &totalStrain, double nonlocalCumulatedStrain, TimeStep *tStep)
 {
     TrabBoneGrad3DStatus *status = static_cast< TrabBoneGrad3DStatus * >( this->giveStatus(gp) );
     this->initGpForNewStep(gp);
     this->initTempStatus(gp);
 
-    TrabBone3D :: performPlasticityReturn(gp, totalStrain, atTime);
+    TrabBone3D :: performPlasticityReturn(gp, totalStrain, tStep);
 
-    double tempDamage = computeDamage(gp, atTime);
+    double tempDamage = computeDamage(gp, tStep);
     FloatArray tempEffStress = status->giveTempEffectiveStress();
     answer1.beScaled(1 - tempDamage, tempEffStress);
     answer2 = status->giveTempKappa();
@@ -301,7 +301,7 @@ TrabBoneGrad3D :: giveRealStressVectorGrad(FloatArray &answer1, double &answer2,
 
     if ( densCrit != 0 ) {
         FloatArray densStress;
-        computeDensificationStress(densStress, gp, totalStrain, atTime);
+        computeDensificationStress(densStress, gp, totalStrain, tStep);
         answer1.add(densStress);
     }
 
@@ -316,7 +316,7 @@ TrabBoneGrad3D :: giveRealStressVectorGrad(FloatArray &answer1, double &answer2,
 
 
 void
-TrabBoneGrad3D :: computeCumPlastStrain(double &kappa, GaussPoint *gp, TimeStep *atTime)
+TrabBoneGrad3D :: computeCumPlastStrain(double &kappa, GaussPoint *gp, TimeStep *tStep)
 {
     TrabBoneGrad3DStatus *status = static_cast< TrabBoneGrad3DStatus * >( this->giveStatus(gp) );
     double localCumPlastStrain = status->giveTempKappa();
@@ -371,14 +371,14 @@ TrabBoneGrad3DStatus :: initTempStatus()
 
 
 void
-TrabBoneGrad3DStatus :: updateYourself(TimeStep *atTime)
+TrabBoneGrad3DStatus :: updateYourself(TimeStep *tStep)
 {
-    StructuralMaterialStatus :: updateYourself(atTime);
+    StructuralMaterialStatus :: updateYourself(tStep);
     this->kappa = this->tempKappa;
     this->dam = this->tempDam;
     this->tsed = this->tempTSED;
     this->plasDef = this->tempPlasDef;
     nss = 1;
-    //TrabBone3DStatus :: updateYourself(atTime);
+    //TrabBone3DStatus :: updateYourself(tStep);
 }
 } // end namespace oofem

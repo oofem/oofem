@@ -54,7 +54,7 @@ void Space3dStructuralElementEvaluator :: computeNMatrixAt(FloatMatrix &answer, 
     Element *element = this->giveElement();
     FEInterpolation *interp = element->giveInterpolation();
 
-    interp->evalN(N, * gp->giveCoordinates(), FEIIGAElementGeometryWrapper( element, gp->giveIntegrationRule()->giveKnotSpan() ));
+    interp->evalN( N, * gp->giveCoordinates(), FEIIGAElementGeometryWrapper( element, gp->giveIntegrationRule()->giveKnotSpan() ) );
 
     answer.beNMatrixOf(N, 3);
 }
@@ -65,7 +65,7 @@ void Space3dStructuralElementEvaluator :: computeBMatrixAt(FloatMatrix &answer, 
     Element *element = this->giveElement();
     FEInterpolation *interp = element->giveInterpolation();
     // this uses FEInterpolation::nodes2coords - quite inefficient in this case (large num of dofmans)
-    interp->evaldNdx(d, * gp->giveCoordinates(), FEIIGAElementGeometryWrapper( element, gp->giveIntegrationRule()->giveKnotSpan() ));
+    interp->evaldNdx( d, * gp->giveCoordinates(), FEIIGAElementGeometryWrapper( element, gp->giveIntegrationRule()->giveKnotSpan() ) );
 
 
     answer.resize(6, d.giveNumberOfRows() * 3);
@@ -90,9 +90,9 @@ void Space3dStructuralElementEvaluator :: computeBMatrixAt(FloatMatrix &answer, 
 double Space3dStructuralElementEvaluator :: computeVolumeAround(GaussPoint *gp)
 {
     double determinant = fabs( this->giveElement()->giveInterpolation()
-                            ->giveTransformationJacobian(* gp->giveCoordinates(),
-                                                    FEIIGAElementGeometryWrapper( this->giveElement(),
-                                                                                 gp->giveIntegrationRule()->giveKnotSpan() )) );
+                               ->giveTransformationJacobian( * gp->giveCoordinates(),
+                                                             FEIIGAElementGeometryWrapper( this->giveElement(),
+                                                                                           gp->giveIntegrationRule()->giveKnotSpan() ) ) );
     return determinant * gp->giveWeight();
 }
 
@@ -102,4 +102,9 @@ void Space3dStructuralElementEvaluator :: computeStressVector(FloatArray &answer
     static_cast< StructuralCrossSection * >( this->giveElement()->giveCrossSection() )->giveRealStress_3d(answer, gp, strain, tStep);
 }
 
+
+void Space3dStructuralElementEvaluator :: computeConstitutiveMatrixAt(FloatMatrix &answer, MatResponseMode rMode, GaussPoint *gp, TimeStep *tStep)
+{
+    static_cast< StructuralCrossSection * >( this->giveElement()->giveCrossSection() )->giveStiffnessMatrix_3d(answer, rMode, gp, tStep);
+}
 } // end namespace oofem

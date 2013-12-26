@@ -41,12 +41,11 @@
 #include "contextioerr.h"
 
 namespace oofem {
-
 double
 Material :: give(int aProperty, GaussPoint *gp)
 // Returns the value of the property aProperty (e.g. the Young's modulus
 // 'E') of the receiver.
-// atTime allows time dependent behavior to be taken into account
+// tStep allows time dependent behavior to be taken into account
 {
     double value = 0.0;
 
@@ -102,7 +101,7 @@ Material :: initializeFrom(InputRecord *ir)
 
 
 void
-Material :: giveInputRecord(DynamicInputRecord& input)
+Material :: giveInputRecord(DynamicInputRecord &input)
 {
     FEMComponent :: giveInputRecord(input);
     input.setField(this->propertyDictionary->at('d'), _IFT_Material_density);
@@ -121,7 +120,7 @@ Material :: hasMaterialModeCapability(MaterialMode mode)
 
 
 int
-Material :: giveIPValue(FloatArray &answer, GaussPoint *aGaussPoint, InternalStateType type, TimeStep *atTime)
+Material :: giveIPValue(FloatArray &answer, GaussPoint *gp, InternalStateType type, TimeStep *tStep)
 {
     answer.resize(0);
     return 0;
@@ -218,7 +217,7 @@ Material :: giveStatus(GaussPoint *gp) const
         // dont include it. specific instance
         // does not have status.
         if ( status != NULL ) {
-            gp->setMaterialStatus(status, this->giveNumber());
+            gp->setMaterialStatus( status, this->giveNumber() );
         }
     }
 
@@ -258,14 +257,5 @@ int
 Material :: initMaterial(Element *element)
 {
     return 0;
-}
-
-void
-Material :: updateYourself(GaussPoint *gp, TimeStep *atTime)
-//
-// We call MaterialStatus->updateYourself()
-//
-{
-    this->giveStatus(gp)->updateYourself(atTime);
 }
 } // end namespace oofem

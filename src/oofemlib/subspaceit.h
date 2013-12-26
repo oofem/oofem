@@ -64,7 +64,7 @@ class EngngModel;
  * Variable description  :
  *
  *      - - - INPUT  DATA - - -
- * 
+ *
  *      A(NWK)  -  STIFFNESS MATRIX
  *      B(NWM)  -  MASS MARTRIX
  *      NN  -      SIZE OF PROBLEM
@@ -74,15 +74,15 @@ class EngngModel;
  *      NC  -  POCET VEKTORU SIMULTANNI ITERACE, DOPORUCUJE SE VOLIT
  *      NC = MIN (2*NROOT , NROOT+8 )
  *      NITEM  -  MAXIMALNI POCET ITERACI (OBYC. 16)
- * 
+ *
  *      - - - PRACOVNI POLE - - -
- * 
+ *
  *      TT(NN),W(NN),D(NC),RTOLV(NC),BUP(NC),BLO(NC),BUPC(NC)
  *      AR(NC,NC)  -  PRACOVNI MATICE - PROJEKCE MATICE  A
  *      BR(NC,NC)  -  PROJEKCE MATICE  B
- * 
+ *
  *      - - - VYSTUPNI DATA - - -
- * 
+ *
  *      EIGV(NROOT)  -  VLASTNI CISLA
  *      R(NN,NROOT)  -  VLASTNI VEKTORY
  */

@@ -134,7 +134,7 @@ IsotropicDamageMaterial1 :: initializeFrom(InputRecord *ir)
 
     // specify the type of formula for damage evolution law
     IR_GIVE_OPTIONAL_FIELD(ir, damageLaw, _IFT_IsotropicDamageMaterial1_damageLaw);
-    if ( damageLaw != 6 ) {
+    if ( ( damageLaw != 6 ) && ( damageLaw != 7 ) ) {
         IR_GIVE_FIELD(ir, e0, _IFT_IsotropicDamageMaterial1_e0);
     }
 
@@ -307,11 +307,11 @@ IsotropicDamageMaterial1 :: giveInputRecord(DynamicInputRecord &input)
 
 
 void
-IsotropicDamageMaterial1 :: computeEquivalentStrain(double &kappa, const FloatArray &strain, GaussPoint *gp, TimeStep *atTime)
+IsotropicDamageMaterial1 :: computeEquivalentStrain(double &kappa, const FloatArray &strain, GaussPoint *gp, TimeStep *tStep)
 {
     LinearElasticMaterial *lmat = this->giveLinearElasticMaterial();
     FloatArray fullStrain;
-    
+
     if ( strain.isEmpty() ) {
         kappa = 0.;
         return;
@@ -327,7 +327,7 @@ IsotropicDamageMaterial1 :: computeEquivalentStrain(double &kappa, const FloatAr
         fullStrain.at(2) = -nu *fullStrain.at(1);
         fullStrain.at(3) = -nu *fullStrain.at(1);
     }
-    
+
     if ( this->equivStrainType == EST_Mazars ) {
         double posNorm = 0.0;
         FloatArray principalStrains;
@@ -347,7 +347,7 @@ IsotropicDamageMaterial1 :: computeEquivalentStrain(double &kappa, const FloatAr
         FloatArray stress, fullStress, principalStress;
         FloatMatrix de;
 
-        lmat->giveStiffnessMatrix(de, SecantStiffness, gp, atTime);
+        lmat->giveStiffnessMatrix(de, SecantStiffness, gp, tStep);
         stress.beProductOf(de, strain);
         StructuralMaterial :: giveFullSymVectorForm( fullStress, stress, gp->giveMaterialMode() );
         this->computePrincipalValues(principalStress, fullStress, principal_stress);
@@ -374,7 +374,7 @@ IsotropicDamageMaterial1 :: computeEquivalentStrain(double &kappa, const FloatAr
         FloatArray stress;
         double sum;
 
-        lmat->giveStiffnessMatrix(de, SecantStiffness, gp, atTime);
+        lmat->giveStiffnessMatrix(de, SecantStiffness, gp, tStep);
         if ( this->equivStrainType == EST_ElasticEnergy ) {
             // standard elastic energy
             stress.beProductOf(de, strain);
@@ -398,7 +398,7 @@ IsotropicDamageMaterial1 :: computeEquivalentStrain(double &kappa, const FloatAr
     } else if ( this->equivStrainType == EST_Mises ) {
         double nu = lmat->give(NYxz, NULL);
         FloatArray principalStrains;
-        
+
         this->computePrincipalValues(principalStrains, fullStrain, principal_strain);
         double I1e, J2e;
         this->computeStrainInvariants(principalStrains, I1e, J2e);
@@ -408,36 +408,68 @@ IsotropicDamageMaterial1 :: computeEquivalentStrain(double &kappa, const FloatAr
         c = 12 * k * J2e / ( ( 1 + nu ) * ( 1 + nu ) );
         kappa = a + 1 / ( 2 * k ) * sqrt(b + c);
     } else if ( this->equivStrainType == EST_Griffith ) {
-        double sum = 0.;
+        kappa = 0.0;
         FloatArray stress, fullStress, principalStress;
         FloatMatrix de;
-        
-        lmat->giveStiffnessMatrix(de, SecantStiffness, gp, atTime);
+        lmat->giveStiffnessMatrix(de, SecantStiffness, gp, tStep);
         stress.beProductOf(de, strain);
         StructuralMaterial :: giveFullSymVectorForm( fullStress, stress, gp->giveMaterialMode() );
         this->computePrincipalValues(principalStress, fullStress, principal_stress);
-        //Rankine - may cause convergence problems when coupled with Griffith
-        for ( int i = 1; i <= 3; i++ ) {
-            if ( principalStress.at(i) > 0.0 && sum < principalStress.at(i) ) {
-                 sum = principalStress.at(i);
-            }
+        // Try Griffith's criterion first
+        if ( principalStress.at(1) / principalStress.at(3) >= -0.33333 && fabs( principalStress.at(1) + principalStress.at(3) ) > 1.e-8 ) {
+            kappa = -( principalStress.at(1) - principalStress.at(3) ) * ( principalStress.at(1) - principalStress.at(3) ) / this->griff_n / ( principalStress.at(1) + principalStress.at(3) ) / lmat->give('E', gp);
+        }
+        // Mohr-Coulomb
+        double phi = 52.4 * M_PI / 180.;
+        double c0 = 260.;
+        double f = ( 1. + sin(phi) ) / 2. * principalStress.at(1) - ( 1. - sin(phi) ) / 2. * principalStress.at(3) - c0 *cos(phi);
+        if ( f > 0 ) {
+            //             kappa = f/lmat->give('E', gp);
+            //              kappa = -(principalStress.at(1) - principalStress.at(3))*(principalStress.at(1) - principalStress.at(3)) / this->griff_n / ( principalStress.at(1) + principalStress.at(3) ) / lmat->give('E', gp);
+            //             double sum = 0.;
+            //             FloatArray principalStrains;
+            //             this->computePrincipalValues(principalStrains, fullStrain, principal_strain);
+            //             for ( int i = 1; i <= 3; i++ ) {
+            //                     if ( principalStrains.at(i) > 0.0 ) {
+            //                         sum += principalStrains.at(i) * principalStrains.at(i);
+            //                 }
+            //             }
+            //             kappa = sqrt(sum);
+
+            //             for ( int i = 1; i <= 3; i++ ) {
+            //                 if ( principalStress.at(i) > 0.0 && sum < principalStress.at(i) ) {
+            //                     sum = principalStress.at(i);
+            //                     sum = 10000.0;
+            //                     printf("B ");
+            //                 }
+            //             }
+            //             kappa = sum / lmat->give('E', gp);
         }
 
-        // Use Griffith's criterion if Rankine not applied
-         if ( sum == 0. && principalStress.at(1)/principalStress.at(3) >= -0.33333 ) {
-            sum = -(principalStress.at(1) - principalStress.at(3))*(principalStress.at(1) - principalStress.at(3)) / this->griff_n / ( principalStress.at(1) + principalStress.at(3) );
-        }
-
-        sum = max(sum, 0.0);
-        kappa = sum / lmat->give('E', gp);
+        kappa = max(kappa, 0.0);
+        //         kappa = 0.;
+        //      Try Rankine if Griffith does not apply. Do not use Rankine equivalent strain measure, which causes a slow convergence. Use Mazars' equivalent strain instead.
+        //         if ( kappa == 0.) {
+        //             double sum = 0.;
+        //             FloatArray principalStrains;
+        //             if ( principalStress.at(1) > 0.0 || principalStress.at(2) > 0.0 || principalStress.at(3) > 0.0 ) {
+        //                 this->computePrincipalValues(principalStrains, fullStrain, principal_strain);
+        //                 for ( int i = 1; i <= 3; i++ ) {
+        //                     if ( principalStrains.at(i) > 0.0 ) {
+        //                         sum += principalStrains.at(i) * principalStrains.at(i);
+        //                     }
+        //                 }
+        //             kappa = sqrt(sum);
+        //             }
+        //         }
     } else {
         _error("computeEquivalentStrain: unknown EquivStrainType");
     }
 }
 
-//Computes derivative of the equivalent strain with regards to strain
+//Computes derivative of the equivalent strain with regards to strain, used in tangent formulation
 void
-IsotropicDamageMaterial1 :: computeEta(FloatArray &answer, const FloatArray &strain, GaussPoint *gp, TimeStep *atTime)
+IsotropicDamageMaterial1 :: computeEta(FloatArray &answer, const FloatArray &strain, GaussPoint *gp, TimeStep *tStep)
 {
     LinearElasticMaterial *lmat = this->giveLinearElasticMaterial();
 
@@ -455,20 +487,20 @@ IsotropicDamageMaterial1 :: computeEta(FloatArray &answer, const FloatArray &str
 
         if ( gp->giveMaterialMode() == _1dMat ) {
             dim = 1;
-            StrainVector  fullStrain(strain, _1dMat);
+            StrainVector fullStrain(strain, _1dMat);
             fullStrain.computePrincipalValDir(principalStrains, N);
             principalStrains.resizeWithValues(3);
             principalStrains.at(2) = -nu *principalStrains.at(1);
             principalStrains.at(3) = -nu *principalStrains.at(1);
         } else if ( gp->giveMaterialMode() == _PlaneStress ) {
             dim = 2;
-            StrainVector  fullStrain(strain, _PlaneStress);
+            StrainVector fullStrain(strain, _PlaneStress);
             fullStrain.computePrincipalValDir(principalStrains, N);
             principalStrains.resizeWithValues(3);
             principalStrains.at(3) = -nu * ( principalStrains.at(1) + principalStrains.at(2) ) / ( 1. - nu );
         } else if ( gp->giveMaterialMode() == _PlaneStrain ) {
             dim = 3;
-            StrainVector  fullStrain(strain, _PlaneStrain);
+            StrainVector fullStrain(strain, _PlaneStrain);
             fullStrain.computePrincipalValDir(principalStrains, N);
         } else if ( gp->giveMaterialMode() == _3dMat ) {
             dim = 3;
@@ -539,11 +571,11 @@ IsotropicDamageMaterial1 :: computeEta(FloatArray &answer, const FloatArray &str
         FloatArray stress, principalStress, eta;
         FloatMatrix de, N, m, Eta;
 
-        lmat->giveStiffnessMatrix(de, SecantStiffness, gp, atTime);
+        lmat->giveStiffnessMatrix(de, SecantStiffness, gp, tStep);
         stress.beProductOf(de, strain);
 
         if ( gp->giveMaterialMode() == _1dMat ) {
-            StressVector  fullStress(stress, _1dMat);
+            StressVector fullStress(stress, _1dMat);
             fullStress.computePrincipalValDir(principalStress, N);
             principalStress.resizeWithValues(3);
             dim = 1;
@@ -643,7 +675,7 @@ IsotropicDamageMaterial1 :: computeEta(FloatArray &answer, const FloatArray &str
         FloatArray stress;
         double sum;
 
-        lmat->giveStiffnessMatrix(de, SecantStiffness, gp, atTime);
+        lmat->giveStiffnessMatrix(de, SecantStiffness, gp, tStep);
         // standard elastic energy
         stress.beProductOf(de, strain);
         sum = strain.dotProduct(stress);
@@ -764,8 +796,8 @@ IsotropicDamageMaterial1 :: computeDamageParamForCohesiveCrack(double &omega, do
             do {
                 nite++;
                 help = omega * kappa / ef;
-                R = ( 1. - omega ) * kappa - e0 *exp(-help);//residuum
-                Lhs = kappa - e0 *exp(-help) * kappa / ef;//- dR / (d omega)
+                R = ( 1. - omega ) * kappa - e0 *exp(-help); //residuum
+                Lhs = kappa - e0 *exp(-help) * kappa / ef; //- dR / (d omega)
                 omega += R / Lhs;
                 if ( nite > 40 ) {
                     _error("computeDamageParamForCohesiveCrack: algorithm not converging");
@@ -819,7 +851,7 @@ IsotropicDamageMaterial1 :: damageFunction(double kappa, GaussPoint *gp)
         }
 
     case ST_Mazars:
-        return 1.0 - ( 1.0 - At ) * e0 / kappa - At *exp( -Bt *( kappa - e0 ) );
+        return 1.0 - ( 1.0 - At ) * e0 / kappa - At *exp( -Bt * ( kappa - e0 ) );
 
     case ST_Smooth:
         return 1.0 - exp( -pow(kappa / e0, md) );
@@ -873,7 +905,7 @@ IsotropicDamageMaterial1 :: damageFunctionPrime(double kappa, GaussPoint *gp)
     } break;
     case ST_Mazars:
     {
-        return ( 1.0 - At ) * e0 / kappa / kappa - At *Bt *exp( -Bt *( kappa - e0 ) );
+        return ( 1.0 - At ) * e0 / kappa / kappa - At *Bt *exp( -Bt * ( kappa - e0 ) );
     } break;
     case ST_Smooth:
     {
@@ -908,9 +940,9 @@ IsotropicDamageMaterial1 :: damageFunctionPrime(double kappa, GaussPoint *gp)
         if ( kappa > e0 ) {
             double ef = gf / E / e0 / Le;
             double omega = status->giveTempDamage();
-            double help = exp(omega*kappa/ef);
-            double ret = -((omega*ef-ef)*help-omega*e0)/(ef*kappa*help-e0*kappa);
-            if(isnan(ret)){
+            double help = exp(omega * kappa / ef);
+            double ret = -( ( omega * ef - ef ) * help - omega * e0 ) / ( ef * kappa * help - e0 * kappa );
+            if ( isnan(ret) ) {
                 return 0.;
             }
             return ret;
@@ -994,7 +1026,6 @@ IsotropicDamageMaterial1 :: initDamaged(double kappa, FloatArray &strainVector, 
             stress.beProductOf(de, strainVector);
             StructuralMaterial :: giveFullSymVectorForm( fullStress, stress, gp->giveMaterialMode() );
             this->computePrincipalValDir(principalStress, principalDir, fullStress, principal_stress);
-            //             this->computePrincipalValDir(principalStrains, principalDir, fullStrain, principal_strain);
             if (  principalStress.at(1) <= 1.e-10 && principalStress.at(2) <= 1.e-10 && principalStress.at(3) <= 1.e-10 ) {
                 int indexMax = principalStress.giveIndexMaxElem();
                 int indexMin = principalStress.giveIndexMinElem();
@@ -1118,7 +1149,7 @@ Interface *
 IsotropicDamageMaterial1 :: giveInterface(InterfaceType type)
 {
     if ( type == MaterialModelMapperInterfaceType ) {
-        return static_cast< MaterialModelMapperInterface * >(this);
+        return static_cast< MaterialModelMapperInterface * >( this );
     } else {
         return NULL;
     }
@@ -1203,7 +1234,7 @@ IsotropicDamageMaterial1 :: MMI_update(GaussPoint *gp,  TimeStep *tStep, FloatAr
 #else
     this->giveRealStressVector(intVal, gp, * estrain, tStep);
 #endif
-    this->updateYourself(gp, tStep);
+    gp->updateYourself(tStep);
     return result;
 }
 
@@ -1235,21 +1266,21 @@ IsotropicDamageMaterial1Status :: initTempStatus()
 
 
 void
-IsotropicDamageMaterial1Status :: updateYourself(TimeStep *atTime)
+IsotropicDamageMaterial1Status :: updateYourself(TimeStep *tStep)
 //
 // updates variables (nonTemp variables describing situation at previous equilibrium state)
 // after a new equilibrium state has been reached
 // temporary variables are having values corresponding to newly reched equilibrium.
 //
 {
-    IsotropicDamageMaterialStatus :: updateYourself(atTime);
+    IsotropicDamageMaterialStatus :: updateYourself(tStep);
 }
 
 Interface *
 IsotropicDamageMaterial1Status :: giveInterface(InterfaceType type)
 {
     if ( type == RandomMaterialStatusExtensionInterfaceType ) {
-        return static_cast< RandomMaterialStatusExtensionInterface * >(this);
+        return static_cast< RandomMaterialStatusExtensionInterface * >( this );
     } else {
         return NULL;
     }

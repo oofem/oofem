@@ -38,8 +38,7 @@
 #include "classfactory.h"
 
 namespace oofem {
-
-REGISTER_SparseMtrx( SpoolesSparseMtrx, SMT_SpoolesMtrx);
+REGISTER_SparseMtrx(SpoolesSparseMtrx, SMT_SpoolesMtrx);
 
 SparseMtrx *
 SpoolesSparseMtrx :: GiveCopy() const
@@ -78,7 +77,7 @@ SpoolesSparseMtrx :: timesT(const FloatArray &x, FloatArray &answer) const
 {
     double alpha = 1.0, beta = 0.0;
     int result;
-    answer.resize(this->giveNumberOfRows());
+    answer.resize( this->giveNumberOfRows() );
     answer.zero();
 
     if ( sflag == SPOOLES_SYMMETRIC ) {
@@ -196,5 +195,4 @@ SpoolesSparseMtrx :: printYourself() const
 {
     InpMtx_writeForHumanEye(this->mtrx, stdout);
 }
-
 } // end namespace oofem

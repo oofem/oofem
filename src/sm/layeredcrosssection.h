@@ -47,6 +47,7 @@
 #define _IFT_LayeredCrossSection_nlayers "nlayers"
 #define _IFT_LayeredCrossSection_layermaterials "layermaterials"
 #define _IFT_LayeredCrossSection_interfacematerials "interfacematerials"
+#define _IFT_LayeredCrossSection_layerRotations "rotations"
 #define _IFT_LayeredCrossSection_thicks "thicks"
 #define _IFT_LayeredCrossSection_widths "widths"
 #define _IFT_LayeredCrossSection_midsurf "midsurf"
@@ -90,6 +91,7 @@ protected:
     FloatArray layerThicks; ///< Thickness for each layer.
     FloatArray layerWidths; ///< Width for each layer.
     FloatArray layerMidZ;   ///< z-coord of the mid plane for each layer
+    FloatArray layerRots;   ///< Rotation of the material in each layer.
     int numberOfLayers;
     int numberOfIntegrationPoints; ///< num integration points per layer
     double midSurfaceZcoordFromBottom;
@@ -103,7 +105,6 @@ public:
         numberOfLayers = 0;
         totalThick = 0.;
         area = -1.0;
-        MAT_GIVEN_BY_CS = true;
     }
 
     virtual ~LayeredCrossSection() { }
@@ -111,12 +112,20 @@ public:
     virtual IRResultType initializeFrom(InputRecord *ir);
     virtual void giveInputRecord(DynamicInputRecord &input);
 
+    virtual void createMaterialStatus(GaussPoint &iGP); // ES
+
     virtual int setupIntegrationPoints(IntegrationRule &irule, int npoints, Element *element);
 
     virtual void giveRealStress_3d(FloatArray &answer, GaussPoint *gp, const FloatArray &reducedStrain, TimeStep *tStep);
     virtual void giveRealStress_PlaneStrain(FloatArray &answer, GaussPoint *gp, const FloatArray &reducedStrain, TimeStep *tStep);
     virtual void giveRealStress_PlaneStress(FloatArray &answer, GaussPoint *gp, const FloatArray &reducedStrain, TimeStep *tStep);
     virtual void giveRealStress_1d(FloatArray &answer, GaussPoint *gp, const FloatArray &reducedStrain, TimeStep *tStep);
+
+    virtual void giveStiffnessMatrix_3d(FloatMatrix &answer, MatResponseMode mode, GaussPoint *gp, TimeStep *tStep);
+    virtual void giveStiffnessMatrix_PlaneStress(FloatMatrix &answer, MatResponseMode mode, GaussPoint *gp, TimeStep *tStep);
+    virtual void giveStiffnessMatrix_PlaneStrain(FloatMatrix &answer, MatResponseMode mode, GaussPoint *gp, TimeStep *tStep);
+    virtual void giveStiffnessMatrix_1d(FloatMatrix &answer, MatResponseMode mode, GaussPoint *gp, TimeStep *tStep);
+
 
     virtual void giveRealStress_Beam2d(FloatArray &answer, GaussPoint *gp, const FloatArray &generalizedStrain, TimeStep *tStep);
     virtual void giveRealStress_Beam3d(FloatArray &answer, GaussPoint *gp, const FloatArray &generalizedStrain, TimeStep *tStep);
@@ -126,49 +135,50 @@ public:
 
     virtual void giveCharMaterialStiffnessMatrix(FloatMatrix &answer, MatResponseMode mode, GaussPoint *gp, TimeStep *tStep);
 
-    virtual bool isCharacteristicMtrxSymmetric(MatResponseMode rMode);
+    virtual bool isCharacteristicMtrxSymmetric(MatResponseMode mode);
 
-    virtual void give2dBeamStiffMtrx(FloatMatrix &answer, MatResponseMode rMode, GaussPoint *gp, TimeStep *tStep);
-    virtual void give3dBeamStiffMtrx(FloatMatrix &answer, MatResponseMode rMode, GaussPoint *gp, TimeStep *tStep);
+    virtual void give2dBeamStiffMtrx(FloatMatrix &answer, MatResponseMode mode, GaussPoint *gp, TimeStep *tStep);
+    virtual void give3dBeamStiffMtrx(FloatMatrix &answer, MatResponseMode mode, GaussPoint *gp, TimeStep *tStep);
     virtual void give2dPlateStiffMtrx(FloatMatrix &answer, MatResponseMode mode, GaussPoint *gp, TimeStep *tStep);
-    virtual void give3dShellStiffMtrx(FloatMatrix &answer,MatResponseMode mode, GaussPoint *gp, TimeStep *tStep);
-    virtual void giveMembraneRotStiffMtrx(FloatMatrix &answer, MatResponseMode rMode, GaussPoint *gp, TimeStep *tStep);
+    virtual void give3dShellStiffMtrx(FloatMatrix &answer, MatResponseMode mode, GaussPoint *gp, TimeStep *tStep);
+    virtual void giveMembraneRotStiffMtrx(FloatMatrix &answer, MatResponseMode mode, GaussPoint *gp, TimeStep *tStep);
 
     virtual FloatArray *imposeStressConstrainsOnGradient(GaussPoint *gp, FloatArray *);
     virtual FloatArray *imposeStrainConstrainsOnGradient(GaussPoint *gp, FloatArray *);
 
     virtual void computeStressIndependentStrainVector(FloatArray &answer, GaussPoint *gp, TimeStep *tStep, ValueModeType mode);
 
-    virtual double give(CrossSectionProperty a);
+    virtual double give(CrossSectionProperty a, GaussPoint *gp);
+    virtual double give(CrossSectionProperty a, const FloatArray *coords, Element *elem, bool local);
     int giveNumberOfLayers();
 
     /// Returns the total thickness of all layers.
     double computeIntegralThick();
     void setupLayerMidPlanes();
 
-    int giveLayerMaterial(int layer) { 
-        return this->layerMaterials.at(layer); 
+    int giveLayerMaterial(int layer) {
+        return this->layerMaterials.at(layer);
     }
 
-    int giveInterfaceMaterialNum(int interface) { 
-        return this->interfacerMaterials.at(interface); 
+    int giveInterfaceMaterialNum(int interface) {
+        return this->interfacerMaterials.at(interface);
     }
 
-    Material *giveInterfaceMaterial(int interface) { 
-        return this->giveDomain()->giveMaterial(this->interfacerMaterials.at(interface)); 
+    Material *giveInterfaceMaterial(int interface) {
+        return this->giveDomain()->giveMaterial( this->interfacerMaterials.at(interface) );
     }
 
     virtual int checkConsistency();
 
-    double giveLayerMidZ(int layer) { 
+    double giveLayerMidZ(int layer) {
         // Gives the z-coord measured from the geometric midplane of the (total) cross section.
-        return this->layerMidZ.at(layer); 
+        return this->layerMidZ.at(layer);
     }
-    double giveLayerThickness(int layer) { 
-        return this->layerThicks.at(layer); 
+    double giveLayerThickness(int layer) {
+        return this->layerThicks.at(layer);
     }
-    int giveNumIntegrationPointsInLayer() { 
-        return this->numberOfIntegrationPoints; 
+    int giveNumIntegrationPointsInLayer() {
+        return this->numberOfIntegrationPoints;
     }
     double giveMidSurfaceZcoordFromBottom() {
         return this->midSurfaceZcoordFromBottom;
@@ -181,35 +191,34 @@ public:
     // identification and auxiliary functions
     virtual const char *giveInputRecordName() const { return _IFT_LayeredCrossSection_Name; }
     virtual const char *giveClassName() const { return "LayeredCrossSection"; }
-    virtual classType giveClassID() const { return LayeredCrossSectionClass; }
     virtual void printYourself();
 
-    MaterialMode giveCorrespondingSlaveMaterialMode(MaterialMode);
+    MaterialMode giveCorrespondingSlaveMaterialMode(MaterialMode mode);
     GaussPoint *giveSlaveGaussPoint(GaussPoint *gp, int slaveIndex);
 
     virtual contextIOResultType saveIPContext(DataStream *stream, ContextMode mode, GaussPoint *gp);
     virtual contextIOResultType restoreIPContext(DataStream *stream, ContextMode mode, GaussPoint *gp);
 
 
-    void mapLayerGpCoordsToShellCoords(IntegrationRule **&layerIntegrationRulesArray);
+    void mapLayerGpCoordsToShellCoords(IntegrationRule ** &layerIntegrationRulesArray);
 
-    void setupLayeredIntegrationRule(IntegrationRule **&layerIntegrationRulesArray, Element *el, int numInPlanePoints);
-    
-    virtual int giveIPValue(FloatArray &answer, GaussPoint *ip, InternalStateType type, TimeStep *atTime);
-    virtual double give(int aProperty, GaussPoint *gp) 
-        {
-            OOFEM_ERROR1("LayeredCrossSection :: give - not implemented yet");
-            return 0.0;
-        };
+    void setupLayeredIntegrationRule(IntegrationRule ** &layerIntegrationRulesArray, Element *el, int numInPlanePoints);
+
+    virtual int giveIPValue(FloatArray &answer, GaussPoint *ip, InternalStateType type, TimeStep *tStep);
+    virtual double give(int aProperty, GaussPoint *gp)
+    {
+        OOFEM_ERROR1("LayeredCrossSection :: give - not implemented yet");
+        return 0.0;
+    };
 
 #ifdef __PARALLEL_MODE
-    int packUnknowns(CommunicationBuffer &buff, TimeStep *stepN, GaussPoint *ip)
+    int packUnknowns(CommunicationBuffer &buff, TimeStep *tStep, GaussPoint *ip)
     {
         _error("packUnknowns: not implemented");
         return 0;
     }
 
-    int unpackAndUpdateUnknowns(CommunicationBuffer &buff, TimeStep *stepN, GaussPoint *ip)
+    int unpackAndUpdateUnknowns(CommunicationBuffer &buff, TimeStep *tStep, GaussPoint *ip)
     {
         _error("unpackAndUpdateUnknowns: not implemented");
         return 0;
@@ -224,13 +233,13 @@ public:
 
 
     virtual void giveFirstPKStresses(FloatArray &answer, GaussPoint *gp, const FloatArray &reducedFIncrement, TimeStep *tStep)
-        { OOFEM_ERROR("giveFirstPKStresses not implemented for layered cross section"); };
+    { OOFEM_ERROR("giveFirstPKStresses not implemented for layered cross section"); };
     virtual void giveCauchyStresses(FloatArray &answer, GaussPoint *gp, const FloatArray &reducedFIncrement, TimeStep *tStep)
-        { OOFEM_ERROR("giveCauchyStresses not implemented for layered cross section"); };
+    { OOFEM_ERROR("giveCauchyStresses not implemented for layered cross section"); };
     virtual void giveStiffnessMatrix_dPdF(FloatMatrix &answer, MatResponseMode rMode, GaussPoint *gp, TimeStep *tStep)
-        { OOFEM_ERROR("giveStiffnessMatrix_dPdF not implemented for layered cross section"); };
+    { OOFEM_ERROR("giveStiffnessMatrix_dPdF not implemented for layered cross section"); };
     virtual void giveStiffnessMatrix_dCde(FloatMatrix &answer, MatResponseMode rMode, GaussPoint *gp, TimeStep *tStep)
-        { OOFEM_ERROR("giveStiffnessMatrix_dCde not implemented for layered cross section"); };
+    { OOFEM_ERROR("giveStiffnessMatrix_dCde not implemented for layered cross section"); };
 
 
 protected:
@@ -249,21 +258,21 @@ public:
      * Computes full 3D strain vector in element layer.
      * This function is necessary if layered cross section is specified..
      * @param answer Full layer strain vector.
+     * @param masterGpStrain Generalized strain at maters gauss point.
      * @param masterGp Element integration point.
      * @param slaveGp Slave integration point representing particular layer.
      * @param tStep Time step.
      */
-    virtual void computeStrainVectorInLayer(FloatArray &answer, const FloatArray &masterGpStrain, GaussPoint *slaveGp, TimeStep *tStep) = 0;
+    virtual void computeStrainVectorInLayer(FloatArray &answer, const FloatArray &masterGpStrain, GaussPoint *masterGp, GaussPoint *slaveGp, TimeStep *tStep) = 0;
 };
 
 class LayeredIntegrationRule : public IntegrationRule
 {
-    public:
+public:
     LayeredIntegrationRule(int n, Element *e, int startIndx, int endIndx, bool dynamic = false);
     LayeredIntegrationRule(int n, Element *e);
     virtual ~LayeredIntegrationRule();
 
-    //virtual classType giveClassID() const { return LayeredIntegrationRuleClass; }
     virtual const char *giveClassName() const { return "LayeredIntegrationRule"; }
     virtual IRResultType initializeFrom(InputRecord *ir) { return IRRT_OK; }
 
@@ -277,7 +286,5 @@ class LayeredIntegrationRule : public IntegrationRule
     //virtual int SetUpPointsOnCube(int, MaterialMode mode); // could be used for plates/shells/solids
     virtual int SetUpPointsOnWedge(int nPointsTri, int nPointsDepth, MaterialMode mode);
 };
-
-
 } // end namespace oofem
 #endif // layeredcrosssection_h

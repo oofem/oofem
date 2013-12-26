@@ -62,7 +62,7 @@ RankineMatGrad :: hasMaterialModeCapability(MaterialMode mode)
 }
 
 void
-RankineMatGrad :: giveStiffnessMatrix(FloatMatrix &answer, MatResponseMode rMode, GaussPoint *gp, TimeStep *atTime)
+RankineMatGrad :: giveStiffnessMatrix(FloatMatrix &answer, MatResponseMode rMode, GaussPoint *gp, TimeStep *tStep)
 //
 // Returns characteristic material matrix of the receiver
 //
@@ -135,7 +135,7 @@ RankineMatGrad :: givePDGradMatrix_LD(FloatMatrix &answer, MatResponseMode mode,
 }
 
 void
-RankineMatGrad :: givePlaneStressStiffMtrx(FloatMatrix &answer, MatResponseMode mode, GaussPoint *gp, TimeStep *atTime)
+RankineMatGrad :: givePlaneStressStiffMtrx(FloatMatrix &answer, MatResponseMode mode, GaussPoint *gp, TimeStep *tStep)
 {
     RankineMatGradStatus *status = static_cast< RankineMatGradStatus * >( this->giveStatus(gp) );
     double tempDamage = status->giveTempDamage();
@@ -160,12 +160,12 @@ RankineMatGrad :: givePlaneStressStiffMtrx(FloatMatrix &answer, MatResponseMode 
         gprime *= ( 1. - mParam );
     }
 
-    evaluatePlaneStressStiffMtrx(answer, mode, gp, atTime, gprime);
+    evaluatePlaneStressStiffMtrx(answer, mode, gp, tStep, gprime);
 }
 
 // derivative of kappa (result of stress return) wrt final strain
 void
-RankineMatGrad :: givePlaneStressKappaMatrix(FloatMatrix &answer, MatResponseMode mode, GaussPoint *gp, TimeStep *atTime)
+RankineMatGrad :: givePlaneStressKappaMatrix(FloatMatrix &answer, MatResponseMode mode, GaussPoint *gp, TimeStep *tStep)
 {
     RankineMatGradStatus *status = static_cast< RankineMatGradStatus * >( this->giveStatus(gp) );
     answer.resize(1, 3);
@@ -222,7 +222,7 @@ RankineMatGrad :: givePlaneStressKappaMatrix(FloatMatrix &answer, MatResponseMod
 
 // minus derivative of total stress wrt nonlocal kappa
 void
-RankineMatGrad :: givePlaneStressGprime(FloatMatrix &answer, MatResponseMode mode, GaussPoint *gp, TimeStep *atTime)
+RankineMatGrad :: givePlaneStressGprime(FloatMatrix &answer, MatResponseMode mode, GaussPoint *gp, TimeStep *tStep)
 {
     answer.resize(3, 1);
     answer.zero();
@@ -250,14 +250,14 @@ RankineMatGrad :: givePlaneStressGprime(FloatMatrix &answer, MatResponseMode mod
 }
 
 void
-RankineMatGrad :: giveInternalLength(FloatMatrix &answer, MatResponseMode mode, GaussPoint *gp, TimeStep *atTime)
+RankineMatGrad :: giveInternalLength(FloatMatrix &answer, MatResponseMode mode, GaussPoint *gp, TimeStep *tStep)
 {
     answer.resize(1, 1);
     answer.at(1, 1) = L;
 }
 
 void
-RankineMatGrad :: giveRealStressVectorGrad(FloatArray &answer1, double &answer2, GaussPoint *gp, const FloatArray &totalStrain, double nonlocalCumulatedStrain, TimeStep *atTime)
+RankineMatGrad :: giveRealStressVectorGrad(FloatArray &answer1, double &answer2, GaussPoint *gp, const FloatArray &totalStrain, double nonlocalCumulatedStrain, TimeStep *tStep)
 {
     RankineMatGradStatus *status = static_cast< RankineMatGradStatus * >( this->giveStatus(gp) );
     this->initGpForNewStep(gp);
@@ -267,7 +267,7 @@ RankineMatGrad :: giveRealStressVectorGrad(FloatArray &answer1, double &answer2,
     FloatArray tempEffStress, totalStress, locTotalStrain;
     RankineMat :: performPlasticityReturn(gp, totalStrain);
 
-    tempDamage = computeDamage(gp, atTime);
+    tempDamage = computeDamage(gp, tStep);
     status->giveTempEffectiveStress(tempEffStress);
     answer1.beScaled(1.0 - tempDamage, tempEffStress);
     answer2 = status->giveTempCumulativePlasticStrain();
@@ -289,7 +289,7 @@ RankineMatGrad :: giveRealStressVectorGrad(FloatArray &answer1, double &answer2,
 
 
 void
-RankineMatGrad :: computeCumPlastStrain(double &kappa, GaussPoint *gp, TimeStep *atTime)
+RankineMatGrad :: computeCumPlastStrain(double &kappa, GaussPoint *gp, TimeStep *tStep)
 {
     RankineMatGradStatus *status = static_cast< RankineMatGradStatus * >( this->giveStatus(gp) );
     double localCumPlastStrain = status->giveTempCumulativePlasticStrain();
@@ -328,18 +328,18 @@ RankineMatGrad :: initializeFrom(InputRecord *ir)
 
 
 int
-RankineMatGrad :: giveIPValue(FloatArray &answer, GaussPoint *aGaussPoint, InternalStateType type, TimeStep *atTime)
+RankineMatGrad :: giveIPValue(FloatArray &answer, GaussPoint *gp, InternalStateType type, TimeStep *tStep)
 {
     if ( type == IST_CumPlasticStrain_2 ) {
         answer.resize(1);
-        answer.at(1) = giveNonlocalCumPlasticStrain(aGaussPoint);
+        answer.at(1) = giveNonlocalCumPlasticStrain(gp);
         return 1;
     } else if ( type == IST_MaxEquivalentStrainLevel ) {
         answer.resize(1);
-        computeCumPlastStrain(answer.at(1), aGaussPoint, atTime);
+        computeCumPlastStrain(answer.at(1), gp, tStep);
         return 1;
     } else {
-        return RankineMat :: giveIPValue(answer, aGaussPoint, type, atTime);
+        return RankineMat :: giveIPValue(answer, gp, type, tStep);
     }
 }
 
@@ -394,8 +394,8 @@ RankineMatGradStatus :: initTempStatus()
 
 
 void
-RankineMatGradStatus :: updateYourself(TimeStep *atTime)
+RankineMatGradStatus :: updateYourself(TimeStep *tStep)
 {
-    RankineMatStatus :: updateYourself(atTime);
+    RankineMatStatus :: updateYourself(tStep);
 }
 } // end namespace oofem

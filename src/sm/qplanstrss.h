@@ -62,7 +62,6 @@ public:
     // definition & identification
     virtual const char *giveInputRecordName() const { return _IFT_QPlaneStress2d_Name; }
     virtual const char *giveClassName() const { return "QPlaneStress2d"; }
-    virtual classType giveClassID() const { return QPlaneStress2dClass; }
     virtual FEInterpolation *giveInterpolation() const { return & interpolation; }
     virtual MaterialMode giveMaterialMode() { return _PlaneStress; }
 
@@ -83,16 +82,14 @@ public:
                                                            InternalStateType type, TimeStep *tStep);
 
 #ifdef __OOFEG
-    void drawRawGeometry(oofegGraphicContext &);
-    void drawDeformedGeometry(oofegGraphicContext &, UnknownType);
-    void drawScalar(oofegGraphicContext &context);
-    //void drawInternalState(DrawMode mode);
+    virtual void drawRawGeometry(oofegGraphicContext &);
+    virtual void drawDeformedGeometry(oofegGraphicContext &, UnknownType);
+    virtual void drawScalar(oofegGraphicContext &context);
 #endif
 
 protected:
     virtual void computeBmatrixAt(GaussPoint *gp, FloatMatrix &answer, int = 1, int = ALL_STRAINS);
     virtual void computeBHmatrixAt(GaussPoint *gp, FloatMatrix &answer);
-    virtual void computeNmatrixAt(GaussPoint *gp, FloatMatrix &answer);
     virtual void computeGaussPoints();
 
     // edge load support

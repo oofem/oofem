@@ -49,8 +49,7 @@
 #include <ios>
 
 namespace oofem {
-
-REGISTER_ExportModule( POIExportModule )
+REGISTER_ExportModule(POIExportModule)
 
 POIExportModule :: POIExportModule(int n, EngngModel *e) : ExportModule(n, e), internalVarsToExport(), primaryVarsToExport(), POIList()
 {
@@ -81,7 +80,7 @@ POIExportModule :: initializeFrom(InputRecord *ir)
     IR_GIVE_OPTIONAL_FIELD(ir, val, _IFT_POIExportModule_mtype);
     mtype = ( POIEM_MapperType ) val;
 
-    std::string poiFileName;
+    std :: string poiFileName;
     IR_GIVE_OPTIONAL_FIELD(ir, poiFileName, _IFT_POIExportModule_poifilename);
     this->readPOIFile(poiFileName); // parse poi file
 
@@ -89,13 +88,15 @@ POIExportModule :: initializeFrom(InputRecord *ir)
 }
 
 void
-POIExportModule :: readPOIFile(const std::string &poiFileName)
+POIExportModule :: readPOIFile(const std :: string &poiFileName)
 {
     POI_dataType poi;
     int nPOI;
     // Open the file;
-    std::ifstream file( poiFileName.c_str(), std::ios::in);
-    if ( !file.is_open() ) OOFEM_ERROR2("POIExportModule :: readPOIFile - Failed to open time data file: %s\n", poiFileName.c_str());
+    std :: ifstream file(poiFileName.c_str(), std :: ios :: in);
+    if ( !file.is_open() ) {
+        OOFEM_ERROR2( "POIExportModule :: readPOIFile - Failed to open time data file: %s\n", poiFileName.c_str() );
+    }
 
     file >> nPOI; // Not actually needed.
 
@@ -108,14 +109,14 @@ POIExportModule :: readPOIFile(const std::string &poiFileName)
 void
 POIExportModule :: doOutput(TimeStep *tStep, bool forcedOutput)
 {
-    if ( !(testTimeStepOutput(tStep) || forcedOutput) ) {
+    if ( !( testTimeStepOutput(tStep) || forcedOutput ) ) {
         return;
     }
 
     FILE *stream = this->giveOutputStream(tStep);
 
     fprintf(stream, "# POI DataFile\n");
-    fprintf(stream, "Output for time %f\n", tStep->giveTargetTime() );
+    fprintf( stream, "Output for time %f\n", tStep->giveTargetTime() );
 
     this->exportPrimaryVars(stream, tStep);
     this->exportIntVars(stream, tStep);
@@ -137,10 +138,10 @@ FILE *
 POIExportModule :: giveOutputStream(TimeStep *tStep)
 {
     FILE *answer;
-    std::string fileName = this->giveOutputBaseFileName(tStep) + ".poi";
+    std :: string fileName = this->giveOutputBaseFileName(tStep) + ".poi";
 
     if ( ( answer = fopen(fileName.c_str(), "w") ) == NULL ) {
-        OOFEM_ERROR2("POIExportModule::giveOutputStream: failed to open file %s", fileName.c_str());
+        OOFEM_ERROR2( "POIExportModule::giveOutputStream: failed to open file %s", fileName.c_str() );
     }
 
     return answer;
@@ -159,7 +160,7 @@ POIExportModule :: exportIntVars(FILE *stream, TimeStep *tStep)
     }
 
     // loop over POIs
-    std::list< POI_dataType > :: iterator PoiIter = POIList.begin();
+    std :: list< POI_dataType > :: iterator PoiIter = POIList.begin();
     poiCoords.at(1) = ( * PoiIter ).x;
     poiCoords.at(2) = ( * PoiIter ).y;
     poiCoords.at(3) = ( * PoiIter ).z;
@@ -189,7 +190,7 @@ POIExportModule :: exportIntVarAs(InternalStateType valID, FILE *stream, TimeSte
     toMap.at(1) = ( int ) valID;
 
     // loop over POIs
-    std::list< POI_dataType > :: iterator PoiIter;
+    std :: list< POI_dataType > :: iterator PoiIter;
     for ( PoiIter = POIList.begin(); PoiIter != POIList.end(); ++PoiIter ) {
         poiCoords.at(1) = ( * PoiIter ).x;
         poiCoords.at(2) = ( * PoiIter ).y;
@@ -282,7 +283,7 @@ POIExportModule :: exportPrimVarAs(UnknownType valID, FILE *stream, TimeStep *tS
 
     SpatialLocalizer *sl = d->giveSpatialLocalizer();
     // loop over POIs
-    std::list< POI_dataType > :: iterator PoiIter;
+    std :: list< POI_dataType > :: iterator PoiIter;
     for ( PoiIter = POIList.begin(); PoiIter != POIList.end(); ++PoiIter ) {
         coords.at(1) = ( * PoiIter ).x;
         coords.at(2) = ( * PoiIter ).y;
@@ -299,7 +300,7 @@ POIExportModule :: exportPrimVarAs(UnknownType valID, FILE *stream, TimeStep *tS
             } else {
                 pv.resize(0);
                 OOFEM_WARNING2( "POIExportModule::exportPrimVarAs: element %d with no EIPrimaryUnknownMapperInterface support",
-                               source->giveNumber() );
+                                source->giveNumber() );
             }
 
             fprintf(stream, "%10d ", ( * PoiIter ).id);
@@ -312,7 +313,7 @@ POIExportModule :: exportPrimVarAs(UnknownType valID, FILE *stream, TimeStep *tS
             fprintf(stream, "\n");
         } else {
             OOFEM_ERROR4( "POIExportModule::exportPrimVarAs: no element containing POI(%e,%e,%e) found",
-                         coords.at(1), coords.at(2), coords.at(3) );
+                          coords.at(1), coords.at(2), coords.at(3) );
         }
     }
 }

@@ -51,7 +51,6 @@
 //@}
 
 namespace oofem {
-
 /**
  * @author Carl Sandström
  */
@@ -63,8 +62,8 @@ private:
 
 protected:
     /// Name of .in file containing the RVE
-    std::string rveFilename;
-    std::string rveLogFilename;
+    std :: string rveFilename;
+    std :: string rveLogFilename;
     /// Type of boundary condition.
     int BCType;
 
@@ -72,10 +71,10 @@ public:
     EngngModel *rve;
 
     // Constructor
-    RVEMaterial(int n, Domain *d) { };// : Material(n, d) { };
+    RVEMaterial(int n, Domain *d) { }; // : Material(n, d) { };
 
     // Destructor
-    ~RVEMaterial() { free (rve); };
+    ~RVEMaterial() { free(rve); };
 
     int SupressRVEoutput;
 
@@ -86,7 +85,6 @@ public:
 
     const char *giveClassName() const { return "RVEMaterial"; };
 };
-
 }
 
 #endif // rvematerial_h

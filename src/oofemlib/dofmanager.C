@@ -105,7 +105,7 @@ void DofManager :: setLoadArray(IntArray &la)
 }
 
 
-void DofManager :: computeLoadVectorAt(FloatArray &answer, TimeStep *stepN, ValueModeType mode)
+void DofManager :: computeLoadVectorAt(FloatArray &answer, TimeStep *tStep, ValueModeType mode)
 // Computes the vector of the nodal loads of the receiver.
 {
     FloatArray contribution;
@@ -119,19 +119,19 @@ void DofManager :: computeLoadVectorAt(FloatArray &answer, TimeStep *stepN, Valu
         for ( int i = 1; i <= nLoads; i++ ) {   // to more than one load
             int n = loadArray.at(i);
             Load *loadN = domain->giveLoad(n);
-            computeLoadVector(contribution, loadN, ExternalForcesVector, stepN, mode);
+            computeLoadVector(contribution, loadN, ExternalForcesVector, tStep, mode);
             answer.add(contribution);
         }
     }
 }
 
 
-void DofManager :: computeLoadVector(FloatArray &answer, Load *load, CharType type, TimeStep *stepN, ValueModeType mode)
+void DofManager :: computeLoadVector(FloatArray &answer, Load *load, CharType type, TimeStep *tStep, ValueModeType mode)
 {
     if ( load->giveBCGeoType() != NodalLoadBGT ) {
         _error("computeLoadVector: incompatible load type applied");
     }
-    load->computeComponentArrayAt(answer, stepN, mode);
+    load->computeComponentArrayAt(answer, tStep, mode);
 }
 
 
@@ -185,16 +185,16 @@ void DofManager :: appendDof(Dof *dof)
 {
 #ifdef DEBUG
     // check if dofID of DOF to be added not already present
-    if (this->findDofWithDofId(dof->giveDofID()) != 0) {
+    if ( this->findDofWithDofId( dof->giveDofID() ) != 0 ) {
         _error3("DofManager::addDof: DOF with dofID %d already present (dofman %d)", dof->giveDofID(), this->number);
     }
 #endif
 
     Dof **dofArray_new = new Dof * [ numberOfDofs + 1 ];
     for ( int j = 0; j < numberOfDofs; j++ ) {
-        dofArray_new[j] = dofArray[j];
+        dofArray_new [ j ] = dofArray [ j ];
     }
-    dofArray_new[numberOfDofs] = dof;
+    dofArray_new [ numberOfDofs ] = dof;
     delete [] dofArray;
     this->dofArray = dofArray_new;
     numberOfDofs++;
@@ -204,17 +204,17 @@ void DofManager :: appendDof(Dof *dof)
 void DofManager :: removeDof(DofIDItem id)
 {
     int position = this->findDofWithDofId(id);
-    if (position) { // dof id found
+    if ( position ) { // dof id found
         Dof **dofArray_new = new Dof * [ numberOfDofs - 1 ];
-        for ( int j = 0; j < position-1; j++ ) {
-            dofArray_new[j] = dofArray[j];
+        for ( int j = 0; j < position - 1; j++ ) {
+            dofArray_new [ j ] = dofArray [ j ];
         }
 
         for ( int j = position; j < numberOfDofs; j++ ) {
-            dofArray_new[j-1] = dofArray[j];
+            dofArray_new [ j - 1 ] = dofArray [ j ];
         }
         // delete dof
-        delete dofArray[position-1];
+        delete dofArray [ position - 1 ];
         delete []dofArray;
         dofArray = dofArray_new;
         numberOfDofs--;
@@ -245,12 +245,11 @@ void DofManager :: giveLocationArray(const IntArray &dofIDArry, IntArray &locati
         locationArray.resize(size);
         for ( int i = 1; i <= size; i++ ) {
             if ( ( indx = this->findDofWithDofId( ( DofIDItem ) dofIDArry.at(i) ) ) == 0 ) {
-                _error2("giveLocationArray: incompatible dof (%d) requested", dofIDArry.at(i));
+                _error2( "giveLocationArray: incompatible dof (%d) requested", dofIDArry.at(i) );
             }
 
             locationArray.at(i) = s.giveDofEquationNumber( this->giveDof(indx) );
         }
-
     } else {
         IntArray dofArray, mstrEqNmbrs;
         this->giveDofArray(dofIDArry, dofArray);
@@ -259,7 +258,7 @@ void DofManager :: giveLocationArray(const IntArray &dofIDArry, IntArray &locati
         locationArray.resize(0);
 
         for ( int i = 1; i <= dofArray.giveSize(); i++ ) {
-            this->giveDof(dofArray.at(i))->giveEquationNumbers(mstrEqNmbrs, s);
+            this->giveDof( dofArray.at(i) )->giveEquationNumbers(mstrEqNmbrs, s);
             locationArray.followedBy(mstrEqNmbrs);
         }
     }
@@ -428,11 +427,16 @@ DofManager :: initializeFrom(InputRecord *ir)
     const char *__proc = "initializeFrom"; // Required by IR_GIVE_FIELD macro
     IRResultType result;                 // Required by IR_GIVE_FIELD macro
 
-    delete dofidmask; dofidmask = NULL;
-    delete dofTypemap; dofTypemap = NULL;
-    delete dofMastermap; dofMastermap = NULL;
-    delete dofBCmap; dofBCmap = NULL;
-    delete dofICmap; dofICmap = NULL;
+    delete dofidmask;
+    dofidmask = NULL;
+    delete dofTypemap;
+    dofTypemap = NULL;
+    delete dofMastermap;
+    dofMastermap = NULL;
+    delete dofBCmap;
+    dofBCmap = NULL;
+    delete dofICmap;
+    dofICmap = NULL;
 
     IntArray dofIDArry;
     IntArray ic, masterMask, dofTypeMask;
@@ -444,7 +448,7 @@ DofManager :: initializeFrom(InputRecord *ir)
     ///@todo This is unnecessary, we should just check if user has supplied a dofidmask field or not and just drop "numberOfDofs"). It is left for now because it will give lots of warnings otherwise, but it is effectively ignored.
     int dummy;
     IR_GIVE_OPTIONAL_FIELD(ir, dummy, _IFT_DofManager_ndofs);
-    
+
     if ( ir->hasField(_IFT_DofManager_dofidmask) ) {
         IR_GIVE_FIELD(ir, dofIDArry, _IFT_DofManager_dofidmask);
         this->dofidmask = new IntArray(dofIDArry);
@@ -496,17 +500,19 @@ DofManager :: initializeFrom(InputRecord *ir)
     bool hasTypeinfo = !( dofTypeMask.giveSize() == 0 );
 
     ///@todo This should eventually be removed, still here to preserve backwards compatibility:
-    if ( ( hasIc || hasBc || hasTypeinfo ) && !this->dofidmask )  this->dofidmask = new IntArray(dofIDArry);
+    if ( ( hasIc || hasBc || hasTypeinfo ) && !this->dofidmask ) {
+        this->dofidmask = new IntArray(dofIDArry);
+    }
 
     // check sizes
     if ( hasBc ) {
         if ( mBC.giveSize() != dofIDArry.giveSize() ) {
             _error3( "initializeFrom: bc size mismatch. Size is %d and need %d", mBC.giveSize(), dofIDArry.giveSize() );
         }
-        this->dofBCmap = new std::map< int, int >();
-        for (int i = 1; i <= mBC.giveSize(); ++i) {
+        this->dofBCmap = new std :: map< int, int >();
+        for ( int i = 1; i <= mBC.giveSize(); ++i ) {
             if ( mBC.at(i) > 0 ) {
-                (*this->dofBCmap)[dofIDArry.at(i)] = mBC.at(i);
+                ( * this->dofBCmap ) [ dofIDArry.at(i) ] = mBC.at(i);
             }
         }
     }
@@ -515,10 +521,10 @@ DofManager :: initializeFrom(InputRecord *ir)
         if ( ic.giveSize() != dofIDArry.giveSize() ) {
             _error3( "initializeFrom: ic size mismatch. Size is %d and need %d", ic.giveSize(), dofIDArry.giveSize() );
         }
-        this->dofICmap = new std::map< int, int >();
-        for (int i = 1; i <= ic.giveSize(); ++i) {
+        this->dofICmap = new std :: map< int, int >();
+        for ( int i = 1; i <= ic.giveSize(); ++i ) {
             if ( ic.at(i) > 0 ) {
-                (*this->dofICmap)[dofIDArry.at(i)] = ic.at(i);
+                ( * this->dofICmap ) [ dofIDArry.at(i) ] = ic.at(i);
             }
         }
     }
@@ -527,10 +533,10 @@ DofManager :: initializeFrom(InputRecord *ir)
         if ( dofTypeMask.giveSize() != dofIDArry.giveSize() ) {
             _error3( "initializeFrom: dofTypeMask size mismatch. Size is %d and need %d", dofTypeMask.giveSize(), dofIDArry.giveSize() );
         }
-        this->dofTypemap = new std::map< int, int >();
-        for (int i = 1; i <= dofTypeMask.giveSize(); ++i) {
+        this->dofTypemap = new std :: map< int, int >();
+        for ( int i = 1; i <= dofTypeMask.giveSize(); ++i ) {
             if ( dofTypeMask.at(i) != DT_master ) {
-                (*this->dofTypemap)[dofIDArry.at(i)] = dofTypeMask.at(i);
+                ( * this->dofTypemap ) [ dofIDArry.at(i) ] = dofTypeMask.at(i);
             }
         }
         // For simple slave dofs:
@@ -539,10 +545,10 @@ DofManager :: initializeFrom(InputRecord *ir)
             if ( masterMask.giveSize() != dofIDArry.giveSize() ) {
                 _error("initializeFrom: mastermask size mismatch");
             }
-            this->dofMastermap = new std::map< int, int >();
-            for (int i = 1; i <= masterMask.giveSize(); ++i) {
+            this->dofMastermap = new std :: map< int, int >();
+            for ( int i = 1; i <= masterMask.giveSize(); ++i ) {
                 if ( masterMask.at(i) > 0 ) {
-                    (*this->dofMastermap)[dofIDArry.at(i)] = masterMask.at(i);
+                    ( * this->dofMastermap ) [ dofIDArry.at(i) ] = masterMask.at(i);
                 }
             }
         }
@@ -555,28 +561,32 @@ DofManager :: initializeFrom(InputRecord *ir)
 void DofManager :: giveInputRecord(DynamicInputRecord &input)
 {
     FEMComponent :: giveInputRecord(input);
-    if ( this->dofidmask ) input.setField(*this->dofidmask, _IFT_DofManager_dofidmask);
+    if ( this->dofidmask ) {
+        input.setField(* this->dofidmask, _IFT_DofManager_dofidmask);
+    }
 
-    if( mBC.giveSize() > 0 ) {
-    	input.setField(mBC, _IFT_DofManager_bc);
+    if ( mBC.giveSize() > 0 ) {
+        input.setField(mBC, _IFT_DofManager_bc);
     }
 
     if ( this->dofTypemap ) {
         IntArray typeMask( this->dofidmask->giveSize() );
-        for ( int i = 1; i <= dofidmask->giveSize(); ++i )
-            typeMask.at(i) = (*this->dofTypemap)[dofidmask->at(i)];
+        for ( int i = 1; i <= dofidmask->giveSize(); ++i ) {
+            typeMask.at(i) = ( * this->dofTypemap ) [ dofidmask->at(i) ];
+        }
         input.setField(typeMask, _IFT_DofManager_doftypemask);
     }
 
     if ( this->dofMastermap ) {
         IntArray masterMask( this->dofidmask->giveSize() );
-        for ( int i = 1; i <= dofidmask->giveSize(); ++i )
-            masterMask.at(i) = (*this->dofMastermap)[dofidmask->at(i)];
+        for ( int i = 1; i <= dofidmask->giveSize(); ++i ) {
+            masterMask.at(i) = ( * this->dofMastermap ) [ dofidmask->at(i) ];
+        }
         input.setField(masterMask, _IFT_DofManager_mastermask);
     }
 
     if ( isBoundaryFlag ) {
-        input.setField( _IFT_DofManager_boundaryflag );
+        input.setField(_IFT_DofManager_boundaryflag);
     }
 
 
@@ -596,13 +606,13 @@ void DofManager :: giveInputRecord(DynamicInputRecord &input)
 }
 
 
-void DofManager :: printOutputAt(FILE *stream, TimeStep *stepN)
+void DofManager :: printOutputAt(FILE *stream, TimeStep *tStep)
 {
     EngngModel *emodel = this->giveDomain()->giveEngngModel();
 
     fprintf( stream, "%-8s%8d (%8d):\n", this->giveClassName(), this->giveLabel(), this->giveNumber() );
     for ( int i = 1; i <= numberOfDofs; i++ ) {
-        emodel->printDofOutputAt(stream, this->giveDof(i), stepN);
+        emodel->printDofOutputAt(stream, this->giveDof(i), tStep);
     }
 }
 
@@ -664,11 +674,11 @@ contextIOResultType DofManager :: saveContext(DataStream *stream, ContextMode mo
             THROW_CIOERR(iores);
         }
 
-        if ( !stream->write(& isBoundaryFlag, 1) ) {
+        if ( !stream->write(isBoundaryFlag) ) {
             THROW_CIOERR(CIO_IOERR);
         }
 
-        if ( !stream->write(& hasSlaveDofs, 1) ) {
+        if ( !stream->write(hasSlaveDofs) ) {
             THROW_CIOERR(CIO_IOERR);
         }
 
@@ -761,11 +771,11 @@ contextIOResultType DofManager :: restoreContext(DataStream *stream, ContextMode
             THROW_CIOERR(iores);
         }
 
-        if ( !stream->read(& isBoundaryFlag, 1) ) {
+        if ( !stream->read(isBoundaryFlag) ) {
             THROW_CIOERR(CIO_IOERR);
         }
 
-        if ( !stream->read(& hasSlaveDofs, 1) ) {
+        if ( !stream->read(hasSlaveDofs) ) {
             THROW_CIOERR(CIO_IOERR);
         }
 
@@ -774,6 +784,7 @@ contextIOResultType DofManager :: restoreContext(DataStream *stream, ContextMode
             THROW_CIOERR(CIO_IOERR);
         }
 
+        int _val;
         if ( !stream->read(& _val, 1) ) {
             THROW_CIOERR(CIO_IOERR);
         }
@@ -796,7 +807,7 @@ contextIOResultType DofManager :: restoreContext(DataStream *stream, ContextMode
 }
 
 
-void DofManager :: giveUnknownVector(FloatArray &answer, const IntArray &dofIDArry, ValueModeType mode, TimeStep *stepN)
+void DofManager :: giveUnknownVector(FloatArray &answer, const IntArray &dofIDArry, ValueModeType mode, TimeStep *tStep)
 {
     int size;
     IntArray dofArray;
@@ -807,22 +818,22 @@ void DofManager :: giveUnknownVector(FloatArray &answer, const IntArray &dofIDAr
         int pos = this->findDofWithDofId( ( DofIDItem ) dofIDArry.at(i) );
 #ifdef DEBUG
         if ( pos == 0 ) {
-            OOFEM_ERROR2("DofManager :: giveUnknownVector - Couldn't find dof with Dof ID %d", dofIDArry.at(i));
+            OOFEM_ERROR2( "DofManager :: giveUnknownVector - Couldn't find dof with Dof ID %d", dofIDArry.at(i) );
         }
 #endif
-        answer.at(i) = this->giveDof(pos)->giveUnknown(mode, stepN);
+        answer.at(i) = this->giveDof(pos)->giveUnknown(mode, tStep);
     }
 
     // Transform to global c.s.
     FloatMatrix L2G;
-    if (this->computeL2GTransformation(L2G, dofIDArry)) {
+    if ( this->computeL2GTransformation(L2G, dofIDArry) ) {
         answer.rotatedWith(L2G, 'n');
     }
 }
 
 
 void DofManager :: giveUnknownVector(FloatArray &answer, const IntArray &dofIDArry,
-                                PrimaryField &field, ValueModeType mode, TimeStep *stepN)
+                                     PrimaryField &field, ValueModeType mode, TimeStep *tStep)
 {
     int size;
     IntArray dofArray;
@@ -833,31 +844,31 @@ void DofManager :: giveUnknownVector(FloatArray &answer, const IntArray &dofIDAr
         int pos = this->findDofWithDofId( ( DofIDItem ) dofIDArry.at(i) );
 #ifdef DEBUG
         if ( pos == 0 ) {
-            OOFEM_ERROR2("DofManager :: giveUnknownVector - Couldn't find dof with Dof ID %d", dofIDArry.at(i));
+            OOFEM_ERROR2( "DofManager :: giveUnknownVector - Couldn't find dof with Dof ID %d", dofIDArry.at(i) );
         }
 #endif
-        answer.at(i) = this->giveDof(pos)->giveUnknown(field, mode, stepN);
+        answer.at(i) = this->giveDof(pos)->giveUnknown(field, mode, tStep);
     }
 
     // Transform to global c.s.
     FloatMatrix L2G;
-    if (this->computeL2GTransformation(L2G, dofIDArry)) {
+    if ( this->computeL2GTransformation(L2G, dofIDArry) ) {
         answer.rotatedWith(L2G, 'n');
     }
 }
 
 
-void DofManager :: giveCompleteUnknownVector(FloatArray &answer, ValueModeType mode, TimeStep *stepN)
+void DofManager :: giveCompleteUnknownVector(FloatArray &answer, ValueModeType mode, TimeStep *tStep)
 {
-    answer.resize( this->numberOfDofs );
+    answer.resize(this->numberOfDofs);
     for ( int i = 1; i <= this->numberOfDofs; i++ ) {
-        answer.at(i) = this->giveDof(i)->giveUnknown(mode, stepN);
+        answer.at(i) = this->giveDof(i)->giveUnknown(mode, tStep);
     }
 }
 
 
 void DofManager :: givePrescribedUnknownVector(FloatArray &answer, const IntArray &dofIDArry,
-                                          ValueModeType mode, TimeStep *stepN)
+                                               ValueModeType mode, TimeStep *tStep)
 {
     int size;
     IntArray dofArray;
@@ -866,12 +877,12 @@ void DofManager :: givePrescribedUnknownVector(FloatArray &answer, const IntArra
     this->giveDofArray(dofIDArry, dofArray);
 
     for ( int j = 1; j <= size; j++ ) {
-        answer.at(j) = this->giveDof( dofArray.at(j) )->giveBcValue(mode, stepN);
+        answer.at(j) = this->giveDof( dofArray.at(j) )->giveBcValue(mode, tStep);
     }
 
     // Transform to global c.s.
     FloatMatrix L2G;
-    if (this->computeL2GTransformation(L2G, dofIDArry)) {
+    if ( this->computeL2GTransformation(L2G, dofIDArry) ) {
         answer.rotatedWith(L2G, 'n');
     }
 }
@@ -888,21 +899,41 @@ void DofManager :: giveUnknownVectorOfType(FloatArray &answer, UnknownType ut, V
     for ( int i = 1; i <= this->numberOfDofs; i++ ) {
         Dof *d = this->giveDof(i);
         double val = d->giveUnknown(mode, tStep);
-        if (ut == DisplacementVector || ut == EigenVector) { // Just treat eigenvectors as displacement vectors (they are redundant)
-            if      (d->giveDofID() == D_u) { dofIDArry.at(k) = D_u; localVector.at(k) = val; k++; }
-            else if (d->giveDofID() == D_v) { dofIDArry.at(k) = D_v; localVector.at(k) = val; k++; }
-            else if (d->giveDofID() == D_w) { dofIDArry.at(k) = D_w; localVector.at(k) = val; k++; }
-        } else if (ut == VelocityVector) {
-            if      (d->giveDofID() == V_u) { dofIDArry.at(k) = V_u; localVector.at(k) = val; k++; }
-            else if (d->giveDofID() == V_v) { dofIDArry.at(k) = V_v; localVector.at(k) = val; k++; }
-            else if (d->giveDofID() == V_w) { dofIDArry.at(k) = V_w; localVector.at(k) = val; k++; }
+        if ( ut == DisplacementVector || ut == EigenVector ) { // Just treat eigenvectors as displacement vectors (they are redundant)
+            if      ( d->giveDofID() == D_u ) {
+                dofIDArry.at(k) = D_u;
+                localVector.at(k) = val;
+                k++;
+            } else if ( d->giveDofID() == D_v ) {
+                dofIDArry.at(k) = D_v;
+                localVector.at(k) = val;
+                k++;
+            } else if ( d->giveDofID() == D_w ) {
+                dofIDArry.at(k) = D_w;
+                localVector.at(k) = val;
+                k++;
+            }
+        } else if ( ut == VelocityVector ) {
+            if      ( d->giveDofID() == V_u ) {
+                dofIDArry.at(k) = V_u;
+                localVector.at(k) = val;
+                k++;
+            } else if ( d->giveDofID() == V_v ) {
+                dofIDArry.at(k) = V_v;
+                localVector.at(k) = val;
+                k++;
+            } else if ( d->giveDofID() == V_w ) {
+                dofIDArry.at(k) = V_w;
+                localVector.at(k) = val;
+                k++;
+            }
         } else {
             OOFEM_ERROR2("DofManager :: giveUnknownVectorOfType - Can't produce vector for unknown type: %d", ut);
         }
     }
 
     FloatMatrix L2G;
-    if (this->computeL2GTransformation(L2G, dofIDArry)) {
+    if ( this->computeL2GTransformation(L2G, dofIDArry) ) {
         // Transform to global c.s.
         answer.beProductOf(L2G, localVector);
     } else {
@@ -910,12 +941,13 @@ void DofManager :: giveUnknownVectorOfType(FloatArray &answer, UnknownType ut, V
         answer.resize(3);
         answer.zero();
         for ( int i = 1; i <= k; i++ ) {
-            if ( dofIDArry.at(i) == D_u || dofIDArry.at(i) == V_u )
+            if ( dofIDArry.at(i) == D_u || dofIDArry.at(i) == V_u ) {
                 answer.at(1) = localVector.at(i);
-            else if ( dofIDArry.at(i) == D_v || dofIDArry.at(i) == V_v )
+            } else if ( dofIDArry.at(i) == D_v || dofIDArry.at(i) == V_v ) {
                 answer.at(2) = localVector.at(i);
-            else if ( dofIDArry.at(i) == D_w || dofIDArry.at(i) == V_w )
+            } else if ( dofIDArry.at(i) == D_w || dofIDArry.at(i) == V_w ) {
                 answer.at(3) = localVector.at(i);
+            }
         }
     }
 }
@@ -976,12 +1008,12 @@ bool DofManager :: computeM2GTransformation(FloatMatrix &answer, const IntArray 
     bool hasL2G = computeL2GTransformation(L2G, dofMask);
     bool hasM2L = computeM2LTransformation(M2L, dofMask);
 
-    if (!hasL2G && !hasM2L) {
+    if ( !hasL2G && !hasM2L ) {
         answer.beEmptyMtrx();
         return false;
-    } else if (hasL2G && hasM2L) {
+    } else if ( hasL2G && hasM2L ) {
         answer.beProductOf(L2G, M2L);
-    } else if (hasL2G) {
+    } else if ( hasL2G ) {
         answer = L2G;
     } else {
         answer = M2L;
@@ -998,7 +1030,7 @@ bool DofManager :: computeL2GTransformation(FloatMatrix &answer, const IntArray 
 
 bool DofManager :: computeM2LTransformation(FloatMatrix &answer, const IntArray &dofIDArry)
 {
-    if (!this->hasAnySlaveDofs()) {
+    if ( !this->hasAnySlaveDofs() ) {
         return false;
     }
 
@@ -1011,7 +1043,7 @@ bool DofManager :: computeM2LTransformation(FloatMatrix &answer, const IntArray 
             dofArray.at(i) = i;
         }
     } else {
-        this->giveDofArray( dofIDArry, dofArray);
+        this->giveDofArray(dofIDArry, dofArray);
     }
 
     answer.resize( dofArray.giveSize(), giveNumberOfPrimaryMasterDofs(dofArray) );
@@ -1036,13 +1068,13 @@ bool DofManager :: requiresTransformation()
 
 void DofManager :: updateLocalNumbering(EntityRenumberingFunctor &f)
 {
-  //update masterNode numbering
-	if (this->dofMastermap) {
-		std::map<int,int>::iterator it = this->dofMastermap->begin();
-		for (; it != this->dofMastermap->end(); it++) {
-				(*it).second = f((*it).second, ERS_DofManager);
-		}
-	}
+    //update masterNode numbering
+    if ( this->dofMastermap ) {
+        std :: map< int, int > :: iterator it = this->dofMastermap->begin();
+        for ( ; it != this->dofMastermap->end(); it++ ) {
+            ( * it ).second = f( ( * it ).second, ERS_DofManager );
+        }
+    }
     for ( int i = 1; i <= numberOfDofs; i++ ) {
         this->giveDof(i)->updateLocalNumbering(f);
     }
@@ -1062,11 +1094,11 @@ void DofManager :: mergePartitionList(IntArray &_p)
 
 int
 DofManager :: packDOFsUnknowns(CommunicationBuffer &buff,
-                               ValueModeType mode, TimeStep *stepN)
+                               ValueModeType mode, TimeStep *tStep)
 {
     int result = 1;
     for ( int i = 1; i <= numberOfDofs; i++ ) {
-        result &= this->giveDof(i)->packUnknowns(buff, mode, stepN);
+        result &= this->giveDof(i)->packUnknowns(buff, mode, tStep);
     }
 
     return result;

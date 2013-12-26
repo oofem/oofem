@@ -45,12 +45,10 @@
 #include <Python.h>
 
 namespace oofem {
-
-REGISTER_BoundaryCondition( UserDefDirichletBC );
+REGISTER_BoundaryCondition(UserDefDirichletBC);
 
 UserDefDirichletBC :: UserDefDirichletBC(int i, Domain *d) : BoundaryCondition(i, d)
-{
-}
+{}
 
 
 UserDefDirichletBC :: ~UserDefDirichletBC()
@@ -62,16 +60,17 @@ UserDefDirichletBC :: ~UserDefDirichletBC()
 
 
 double
-UserDefDirichletBC :: give(Dof *dof, ValueModeType mode, TimeStep *stepN)
+UserDefDirichletBC :: give(Dof *dof, ValueModeType mode, TimeStep *tStep)
 {
-    double factor = this->giveLoadTimeFunction()->evaluate(stepN, mode);
+    double factor = this->giveLoadTimeFunction()->evaluate(tStep, mode);
     DofManager *dMan = dof->giveDofManager();
 
 
     /*
-     * The Python function takes two input arguments:
-     * 	1) An array with node coordinates
-     * 	2) The dof id
+     * The Python function takes three input arguments:
+     *  1) An array with node coordinates
+     *  2) The dof id
+     *  3) The current time
      */
     int numArgs = 3;
 
@@ -81,21 +80,22 @@ UserDefDirichletBC :: give(Dof *dof, ValueModeType mode, TimeStep *stepN)
 
     PyObject *pArgs = PyTuple_New(numArgs);
 
-    for (int i = 0; i < dim; i++) {
-        PyList_SET_ITEM(pArgArray, i, PyFloat_FromDouble( dMan->giveCoordinate(i+1) ));
+    for ( int i = 0; i < dim; i++ ) {
+        PyList_SET_ITEM( pArgArray, i, PyFloat_FromDouble( dMan->giveCoordinate(i + 1) ) );
     }
+
     // PyTuple_SetItem takes over responsibility for objects passed
     // to it -> no DECREF
     PyTuple_SetItem(pArgs, 0, pArgArray);
 
 
     // Dof number
-    PyObject *pValDofNum = PyLong_FromLong(dof->giveDofID());
+    PyObject *pValDofNum = PyLong_FromLong( dof->giveDofID() );
     PyTuple_SetItem(pArgs, 1, pValDofNum);
 
 
     // Time
-    PyObject *pTargetTime = PyFloat_FromDouble( stepN->giveTargetTime() );
+    PyObject *pTargetTime = PyFloat_FromDouble( tStep->giveTargetTime() );
     PyTuple_SetItem(pArgs, 2, pTargetTime);
 
     // Value returned from the Python function
@@ -111,8 +111,7 @@ UserDefDirichletBC :: give(Dof *dof, ValueModeType mode, TimeStep *stepN)
     double retVal = 0.0;
     if ( pRetVal != NULL ) {
         retVal = PyFloat_AsDouble(pRetVal);
-    }
-    else {
+    } else {
         OOFEM_ERROR("UserDefDirichletBC :: give: Failed to fetch Python return value.");
     }
 
@@ -120,7 +119,7 @@ UserDefDirichletBC :: give(Dof *dof, ValueModeType mode, TimeStep *stepN)
     Py_DECREF(pArgs);
     Py_DECREF(pRetVal);
 
-    return retVal*factor;
+    return retVal * factor;
 }
 
 
@@ -138,7 +137,7 @@ UserDefDirichletBC :: initializeFrom(InputRecord *ir)
 
     // Import Python file
     mpName = PyString_FromString( this->mFileName.c_str() );
-    mpModule = PyImport_Import( mpName );
+    mpModule = PyImport_Import(mpName);
 
     if ( mpModule != NULL ) {
         // Load and call Python function
@@ -174,5 +173,4 @@ UserDefDirichletBC :: scale(double s)
 {
     values.times(s);
 }
-
 } // end namespace oofem

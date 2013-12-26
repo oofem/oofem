@@ -53,7 +53,6 @@
 //@}
 
 namespace oofem {
-
 /**
  * This class implements a gravity-like load.
  * The attribute 'componentArray' contains the components of an acceleration
@@ -72,7 +71,7 @@ public:
     GravityPressure(int i, Domain *d) : BodyLoad(i, d) { }
 
     virtual bcGeomType giveBCGeoType() const { return GravityPressureBGT; }
-    virtual void computeValueAt(FloatArray &answer, TimeStep *atTime, FloatArray &coords, ValueModeType mode);
+    virtual void computeValueAt(FloatArray &answer, TimeStep *tStep, FloatArray &coords, ValueModeType mode);
 
     virtual IRResultType initializeFrom(InputRecord *ir);
 

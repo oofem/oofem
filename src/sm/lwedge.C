@@ -50,8 +50,7 @@
 #include <cstdio>
 
 namespace oofem {
-
-REGISTER_Element( LWedge );
+REGISTER_Element(LWedge);
 
 FEI3dWedgeLin LWedge :: interpolation;
 
@@ -65,14 +64,14 @@ LWedge :: LWedge(int n, Domain *aDomain) : NLStructuralElement(n, aDomain)
 IRResultType
 LWedge :: initializeFrom(InputRecord *ir)
 {
-    numberOfGaussPoints = 2;
+    numberOfGaussPoints = 6;
     IRResultType result = this->NLStructuralElement :: initializeFrom(ir);
-	if(result != IRRT_OK) {
-		return result;
-	}
+    if ( result != IRRT_OK ) {
+        return result;
+    }
 
-    if ( ( numberOfGaussPoints != 2 ) && ( numberOfGaussPoints != 9 ) ) {
-        numberOfGaussPoints = 2;
+    if ( ( numberOfGaussPoints != 6 ) && ( numberOfGaussPoints != 9 ) ) {
+        numberOfGaussPoints = 6;
     }
 
     return IRRT_OK;
@@ -95,11 +94,11 @@ LWedge :: giveDofManDofIDMask(int inode, EquationID ut, IntArray &answer) const
 
 
 double
-LWedge :: computeVolumeAround(GaussPoint *aGaussPoint)
-// Returns the portion of the receiver which is attached to aGaussPoint.
+LWedge :: computeVolumeAround(GaussPoint *gp)
+// Returns the portion of the receiver which is attached to gp.
 {
-    double determinant = this->interpolation.giveTransformationJacobian(* aGaussPoint->giveCoordinates(), FEIElementGeometryWrapper(this));
-    double weight      = aGaussPoint->giveWeight();
+    double determinant = this->interpolation.giveTransformationJacobian( * gp->giveCoordinates(), FEIElementGeometryWrapper(this) );
+    double weight      = gp->giveWeight();
 
     return ( determinant * weight );
 }
@@ -112,21 +111,21 @@ LWedge :: computeGaussPoints()
     numberOfIntegrationRules = 1;
     integrationRulesArray = new IntegrationRule * [ numberOfIntegrationRules ];
     integrationRulesArray [ 0 ] = new GaussIntegrationRule(1, this, 1, 6);
-    this->giveCrossSection()->setupIntegrationPoints(*integrationRulesArray[0], numberOfGaussPoints, this);
+    this->giveCrossSection()->setupIntegrationPoints(* integrationRulesArray [ 0 ], numberOfGaussPoints, this);
 }
 
 
 void
-LWedge :: computeNmatrixAt(GaussPoint *aGaussPoint, FloatMatrix &answer)
+LWedge :: computeNmatrixAt(const FloatArray &iLocCoord, FloatMatrix &answer)
 // Returns the displacement interpolation matrix {N} of the receiver, eva-
-// luated at aGaussPoint.
+// luated at gp.
 {
     FloatArray n(6);
 
     answer.resize(3, 18);
     answer.zero();
 
-    this->interpolation.evalN(n, * aGaussPoint->giveCoordinates(), FEIElementGeometryWrapper(this));
+    this->interpolation.evalN( n, iLocCoord, FEIElementGeometryWrapper(this) );
 
     for ( int i = 1; i <= 6; i++ ) {
         answer.at(1, 3 * i - 2) = n.at(i);
@@ -143,14 +142,14 @@ LWedge :: giveMaterialMode()
 }
 
 void
-LWedge :: computeBmatrixAt(GaussPoint *aGaussPoint, FloatMatrix &answer, int li, int ui)
+LWedge :: computeBmatrixAt(GaussPoint *gp, FloatMatrix &answer, int li, int ui)
 // Returns the [6 x 18] strain-displacement matrix {B} of the receiver, eva-
-// luated at aGaussPoint.
+// luated at gp.
 // B matrix  -  6 rows : epsilon-X, epsilon-Y, epsilon-Z, gamma-YZ, gamma-ZX, gamma-XY  :
 {
     FloatMatrix dnx;
 
-    this->interpolation.evaldNdx(dnx, * aGaussPoint->giveCoordinates(), FEIElementGeometryWrapper(this));
+    this->interpolation.evaldNdx( dnx, * gp->giveCoordinates(), FEIElementGeometryWrapper(this) );
 
     answer.resize(6, 18);
     answer.zero();
@@ -173,11 +172,11 @@ LWedge :: computeBmatrixAt(GaussPoint *aGaussPoint, FloatMatrix &answer, int li,
 
 
 void
-LWedge :: computeBHmatrixAt(GaussPoint *aGaussPoint, FloatMatrix &answer)
+LWedge :: computeBHmatrixAt(GaussPoint *gp, FloatMatrix &answer)
 {
     FloatMatrix dnx;
 
-    this->interpolation.evaldNdx(dnx, * aGaussPoint->giveCoordinates(), FEIElementGeometryWrapper(this));
+    this->interpolation.evaldNdx( dnx, * gp->giveCoordinates(), FEIElementGeometryWrapper(this) );
 
     answer.resize(6, 18);
     answer.zero();
@@ -186,11 +185,11 @@ LWedge :: computeBHmatrixAt(GaussPoint *aGaussPoint, FloatMatrix &answer)
         answer.at(1, 3 * i - 2) = dnx.at(i, 1);     // du/dx
         answer.at(2, 3 * i - 1) = dnx.at(i, 2);     // dv/dy
         answer.at(3, 3 * i - 0) = dnx.at(i, 3);     // dw/dz
-        answer.at(4, 3 * i - 1) = dnx.at(i, 3);     // dv/dz 
+        answer.at(4, 3 * i - 1) = dnx.at(i, 3);     // dv/dz
         answer.at(7, 3 * i - 0) = dnx.at(i, 2);     // dw/dy
-        answer.at(5, 3 * i - 2) = dnx.at(i, 3);     // du/dz 
+        answer.at(5, 3 * i - 2) = dnx.at(i, 3);     // du/dz
         answer.at(8, 3 * i - 0) = dnx.at(i, 1);     // dw/dx
-        answer.at(6, 3 * i - 2) = dnx.at(i, 2);     // du/dy 
+        answer.at(6, 3 * i - 2) = dnx.at(i, 2);     // du/dy
         answer.at(9, 3 * i - 1) = dnx.at(i, 1);     // dv/dx
     }
 }

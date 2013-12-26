@@ -52,8 +52,7 @@
 #endif
 
 namespace oofem {
-
-REGISTER_Element( CCTPlate );
+REGISTER_Element(CCTPlate);
 
 FEI2dTrLin CCTPlate :: interp_lin(1, 2);
 //FEI2dTrRot CCTPlate :: interp_rot(1, 2);
@@ -88,14 +87,14 @@ CCTPlate :: computeGaussPoints()
         numberOfIntegrationRules = 1;
         integrationRulesArray = new IntegrationRule * [ 1 ];
         integrationRulesArray [ 0 ] = new GaussIntegrationRule(1, this, 1, 5);
-        this->giveCrossSection()->setupIntegrationPoints( *integrationRulesArray[0], numberOfGaussPoints, this );
+        this->giveCrossSection()->setupIntegrationPoints(* integrationRulesArray [ 0 ], numberOfGaussPoints, this);
     }
 }
 
 
 void
-CCTPlate :: computeBodyLoadVectorAt(FloatArray &answer, Load *forLoad, TimeStep *stepN, ValueModeType mode)
-// Computes numerically the load vector of the receiver due to the body loads, at stepN.
+CCTPlate :: computeBodyLoadVectorAt(FloatArray &answer, Load *forLoad, TimeStep *tStep, ValueModeType mode)
+// Computes numerically the load vector of the receiver due to the body loads, at tStep.
 // load is assumed to be in global cs.
 // load vector is then transformed to coordinate system in each node.
 // (should be global coordinate system, but there may be defined
@@ -113,12 +112,13 @@ CCTPlate :: computeBodyLoadVectorAt(FloatArray &answer, Load *forLoad, TimeStep 
     irule.SetUpPointsOnTriangle(1, _2dPlate);
 
     // note: force is assumed to be in global coordinate system.
-    forLoad->computeComponentArrayAt(force, stepN, mode);
+    forLoad->computeComponentArrayAt(force, tStep, mode);
 
     if ( force.giveSize() ) {
         gp = irule.getIntegrationPoint(0);
+        // constant density and thickness assumed
         double dens = this->giveStructuralCrossSection()->give('d', gp);
-        double dV   = this->computeVolumeAround(gp) * this->giveCrossSection()->give(CS_Thickness);
+        double dV   = this->computeVolumeAround(gp) * this->giveCrossSection()->give(CS_Thickness, gp);
 
         answer.resize(9);
         answer.zero();
@@ -207,7 +207,7 @@ CCTPlate :: computeBmatrixAt(GaussPoint *gp, FloatMatrix &answer, int li, int ui
 
 
 void
-CCTPlate :: computeNmatrixAt(GaussPoint *gp, FloatMatrix &answer)
+CCTPlate :: computeNmatrixAt(const FloatArray &iLocCoord, FloatMatrix &answer)
 // Returns the [3x9] displacement interpolation matrix {N} of the receiver,
 // evaluated at gp.
 {
@@ -226,8 +226,8 @@ CCTPlate :: computeNmatrixAt(GaussPoint *gp, FloatMatrix &answer)
     c2 = x1 - x3;
     c3 = x2 - x1;
 
-    l1 = gp->giveCoordinate(1);
-    l2 = gp->giveCoordinate(2);
+    l1 = iLocCoord.at(1);
+    l2 = iLocCoord.at(2);
     l3 = 1.0 - l1 - l2;
 
     //
@@ -251,6 +251,20 @@ CCTPlate :: computeNmatrixAt(GaussPoint *gp, FloatMatrix &answer)
     answer.at(3, 3) = l1;
     answer.at(3, 6) = l2;
     answer.at(3, 9) = l3;
+}
+
+
+void
+CCTPlate :: computeStressVector(FloatArray &answer, const FloatArray &strain, GaussPoint *gp, TimeStep *tStep)
+{
+    this->giveStructuralCrossSection()->giveRealStress_Plate(answer, gp, strain, tStep);
+}
+
+
+void
+CCTPlate :: computeConstitutiveMatrixAt(FloatMatrix &answer, MatResponseMode rMode, GaussPoint *gp, TimeStep *tStep)
+{
+    this->giveStructuralCrossSection()->give2dPlateStiffMtrx(answer, rMode, gp, tStep);
 }
 
 
@@ -284,7 +298,7 @@ IRResultType
 CCTPlate :: initializeFrom(InputRecord *ir)
 {
     numberOfGaussPoints = 1;
-	return this->NLStructuralElement :: initializeFrom(ir);
+    return this->NLStructuralElement :: initializeFrom(ir);
 }
 
 
@@ -339,8 +353,9 @@ CCTPlate :: computeLumpedMassMatrix(FloatMatrix &answer, TimeStep *tStep)
     GaussPoint *gp = integrationRulesArray [ 0 ]->getIntegrationPoint(0);
 
     double dV = this->computeVolumeAround(gp);
+    // constant thickness and density assumed
     double density = this->giveStructuralCrossSection()->give('d', gp);
-    double mss1 = dV * this->giveCrossSection()->give(CS_Thickness) * density / 3.;
+    double mss1 = dV * this->giveCrossSection()->give(CS_Thickness, gp) * density / 3.;
 
     answer.at(1, 1) = mss1;
     answer.at(4, 4) = mss1;
@@ -390,8 +405,9 @@ CCTPlate :: computeLocalCoordinates(FloatArray &answer, const FloatArray &coords
     midplZ = z [ 0 ] * answer.at(1) + z [ 1 ] * answer.at(2) + z [ 2 ] * answer.at(3);
 
     //check that the z is within the element
+    GaussPoint _gp(NULL, 1, new FloatArray(answer), 1.0, _2dPlate);
     StructuralCrossSection *cs = this->giveStructuralCrossSection();
-    double elthick = cs->give(CS_Thickness);
+    double elthick = cs->give(CS_Thickness, & _gp);
 
     if ( elthick / 2.0 + midplZ - fabs( coords.at(3) ) < -POINT_TOL ) {
         answer.zero();
@@ -414,7 +430,7 @@ CCTPlate :: computeLocalCoordinates(FloatArray &answer, const FloatArray &coords
 
 
 int
-CCTPlate :: giveIPValue(FloatArray &answer, GaussPoint *gp, InternalStateType type, TimeStep *atTime)
+CCTPlate :: giveIPValue(FloatArray &answer, GaussPoint *gp, InternalStateType type, TimeStep *tStep)
 {
     if ( type == IST_ShellForceMomentumTensor ) {
         answer = static_cast< StructuralMaterialStatus * >( gp->giveMaterialStatus() )->giveStressVector();
@@ -423,13 +439,13 @@ CCTPlate :: giveIPValue(FloatArray &answer, GaussPoint *gp, InternalStateType ty
         answer = static_cast< StructuralMaterialStatus * >( gp->giveMaterialStatus() )->giveStrainVector();
         return 1;
     } else {
-      return NLStructuralElement::giveIPValue(answer, gp, type, atTime);
+        return NLStructuralElement :: giveIPValue(answer, gp, type, tStep);
     }
 }
 
 
-double 
-CCTPlate :: ZZRemeshingCriteriaI_giveCharacteristicSize() 
+double
+CCTPlate :: ZZRemeshingCriteriaI_giveCharacteristicSize()
 {
     return sqrt(this->computeArea() * 2.0);
 }
@@ -482,8 +498,8 @@ CCTPlate :: SPRNodalRecoveryMI_giveDofMansDeterminedByPatch(IntArray &answer, in
 {
     answer.resize(1);
     if ( ( pap == this->giveNode(1)->giveNumber() ) ||
-        ( pap == this->giveNode(2)->giveNumber() ) ||
-        ( pap == this->giveNode(3)->giveNumber() ) ) {
+         ( pap == this->giveNode(2)->giveNumber() ) ||
+         ( pap == this->giveNode(3)->giveNumber() ) ) {
         answer.at(1) = pap;
     } else {
         _error("SPRNodalRecoveryMI_giveDofMansDeterminedByPatch: node unknown");
@@ -502,15 +518,15 @@ CCTPlate :: SPRNodalRecoveryMI_givePatchType()
 // layered cross section support functions
 //
 void
-CCTPlate :: computeStrainVectorInLayer(FloatArray &answer, const FloatArray &masterGpStrain, 
-                                       GaussPoint *slaveGp, TimeStep *tStep)
+CCTPlate :: computeStrainVectorInLayer(FloatArray &answer, const FloatArray &masterGpStrain,
+                                       GaussPoint *masterGp, GaussPoint *slaveGp, TimeStep *tStep)
 // returns full 3d strain vector of given layer (whose z-coordinate from center-line is
 // stored in slaveGp) for given tStep
 {
     double layerZeta, layerZCoord, top, bottom;
 
-    top    = this->giveCrossSection()->give(CS_TopZCoord);
-    bottom = this->giveCrossSection()->give(CS_BottomZCoord);
+    top    = this->giveCrossSection()->give(CS_TopZCoord, masterGp);
+    bottom = this->giveCrossSection()->give(CS_BottomZCoord, masterGp);
     layerZeta = slaveGp->giveCoordinate(3);
     layerZCoord = 0.5 * ( ( 1. - layerZeta ) * bottom + ( 1. + layerZeta ) * top );
 
@@ -529,14 +545,14 @@ CCTPlate :: computeEgdeNMatrixAt(FloatMatrix &answer, int iedge, GaussPoint *gp)
 {
     IntArray edgeNodes;
     FloatArray n;
-    double b,c, n12;
+    double b, c, n12;
 
     this->interp_lin.edgeEvalN( n, iedge, * gp->giveCoordinates(), FEIElementGeometryWrapper(this) );
     this->interp_lin.computeLocalEdgeMapping(edgeNodes, iedge);
 
-    n12 = 0.5 * n.at(1)*n.at(2);
-    b = this->giveNode(edgeNodes.at(1))->giveCoordinate(2) - this->giveNode(edgeNodes.at(2))->giveCoordinate(2);
-    c = this->giveNode(edgeNodes.at(2))->giveCoordinate(1) - this->giveNode(edgeNodes.at(1))->giveCoordinate(1);
+    n12 = 0.5 * n.at(1) * n.at(2);
+    b = this->giveNode( edgeNodes.at(1) )->giveCoordinate(2) - this->giveNode( edgeNodes.at(2) )->giveCoordinate(2);
+    c = this->giveNode( edgeNodes.at(2) )->giveCoordinate(1) - this->giveNode( edgeNodes.at(1) )->giveCoordinate(1);
 
 
     answer.resize(3, 6);
@@ -544,9 +560,9 @@ CCTPlate :: computeEgdeNMatrixAt(FloatMatrix &answer, int iedge, GaussPoint *gp)
     answer.at(1, 2) = n12 * b;
     answer.at(1, 3) = n12 * c;
     answer.at(1, 4)  = n.at(2);
-    answer.at(1, 5) = - n12 * b;
-    answer.at(1, 6) = - n12 * c;
-    // 
+    answer.at(1, 5) = -n12 * b;
+    answer.at(1, 6) = -n12 * c;
+    //
     answer.at(2, 2) = answer.at(3, 3) = n.at(1);
     answer.at(2, 5) = answer.at(3, 6) = n.at(2);
 }
@@ -590,7 +606,7 @@ double
 CCTPlate :: computeEdgeVolumeAround(GaussPoint *gp, int iEdge)
 {
     double detJ = this->interp_lin.edgeGiveTransformationJacobian( iEdge, * gp->giveCoordinates(), FEIElementGeometryWrapper(this) );
-    return detJ *gp->giveWeight();
+    return detJ * gp->giveWeight();
 }
 
 
@@ -620,8 +636,8 @@ CCTPlate :: computeLoadLEToLRotationMatrix(FloatMatrix &answer, int iEdge, Gauss
 
     this->interp_lin.computeLocalEdgeMapping(edgeNodes, iEdge);
 
-    nodeA = this->giveNode(edgeNodes.at(1));
-    nodeB = this->giveNode(edgeNodes.at(2));
+    nodeA = this->giveNode( edgeNodes.at(1) );
+    nodeB = this->giveNode( edgeNodes.at(2) );
 
     dx = nodeB->giveCoordinate(1) - nodeA->giveCoordinate(1);
     dy = nodeB->giveCoordinate(2) - nodeA->giveCoordinate(2);
@@ -777,65 +793,6 @@ CCTPlate :: drawScalar(oofegGraphicContext &context)
         EMAddGraphicsToModel(ESIModel(), tr);
     }
 }
-
-/*
- * void
- * CCTPlate :: drawInternalState (oofegGraphicContext & gc)
- * //
- * // Draws internal state graphics representation
- * //
- * {
- * WCRec p[3];
- * GraphicObj *tr;
- * double v1,v2,v3;
- * DrawMode mode = gc.getDrawMode();
- * TimeStep *tStep = domain->giveEngngModel()->giveCurrentStep();
- * double defScale = gc.getDefScale();
- *
- * if (!gc.testElementGraphicActivity(this)) return;
- *
- * // check for valid DrawMode
- * if (!((mode == mxForce) || (mode == myForce) || (mode == mxyForce) ||
- * (mode == szxForce) || (mode == syzForce))) return;
- *
- *
- *
- * EASValsSetLayer(OOFEG_STRESS_CONTOUR_LAYER);
- * if (gc.getInternalVarsDefGeoFlag()) {
- * // use deformed geometry
- * p[0].x = (FPNum) this->giveNode(1)->giveUpdatedCoordinate(1,tStep,defScale);
- * p[0].y = (FPNum) this->giveNode(1)->giveUpdatedCoordinate(2,tStep,defScale);
- * p[0].z = (FPNum) this->giveNode(1)->giveUpdatedCoordinate(3,tStep,defScale);
- * p[1].x = (FPNum) this->giveNode(2)->giveUpdatedCoordinate(1,tStep,defScale);
- * p[1].y = (FPNum) this->giveNode(2)->giveUpdatedCoordinate(2,tStep,defScale);
- * p[1].z = (FPNum) this->giveNode(2)->giveUpdatedCoordinate(3,tStep,defScale);
- * p[2].x = (FPNum) this->giveNode(3)->giveUpdatedCoordinate(1,tStep,defScale);
- * p[2].y = (FPNum) this->giveNode(3)->giveUpdatedCoordinate(2,tStep,defScale);
- * p[2].z = (FPNum) this->giveNode(3)->giveUpdatedCoordinate(3,tStep,defScale);
- * } else {
- * p[0].x = (FPNum) this->giveNode(1)->giveCoordinate(1);
- * p[0].y = (FPNum) this->giveNode(1)->giveCoordinate(2);
- * p[0].z = (FPNum) this->giveNode(1)->giveCoordinate(3);
- * p[1].x = (FPNum) this->giveNode(2)->giveCoordinate(1);
- * p[1].y = (FPNum) this->giveNode(2)->giveCoordinate(2);
- * p[1].z = (FPNum) this->giveNode(2)->giveCoordinate(3);
- * p[2].x = (FPNum) this->giveNode(3)->giveCoordinate(1);
- * p[2].y = (FPNum) this->giveNode(3)->giveCoordinate(2);
- * p[2].z = (FPNum) this->giveNode(3)->giveCoordinate(3);
- * }
- *
- * int result = 0;
- * result+= this->giveInternalStateAtNode (gc, 1, &v1);
- * result+= this->giveInternalStateAtNode (gc, 2, &v2);
- * result+= this->giveInternalStateAtNode (gc, 3, &v3);
- *
- * if (result == 3) {
- * tr = CreateTriangleWD3D (p,v1,v2,v3);
- * EGWithMaskChangeAttributes(LAYER_MASK, tr);
- * EMAddGraphicsToModel(ESIModel(), tr);
- * }
- * }
- */
 
 #endif
 } // end namespace oofem

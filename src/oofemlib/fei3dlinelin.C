@@ -39,11 +39,10 @@
 #include "gaussintegrationrule.h"
 
 namespace oofem {
-
 double
 FEI3dLineLin :: giveLength(const FEICellGeometry &cellgeo) const
 {
-    return cellgeo.giveVertexCoordinates(2)->distance(*cellgeo.giveVertexCoordinates(1));
+    return cellgeo.giveVertexCoordinates(2)->distance( * cellgeo.giveVertexCoordinates(1) );
 }
 
 void
@@ -61,18 +60,18 @@ FEI3dLineLin :: evaldNdx(FloatMatrix &answer, const FloatArray &lcoords, const F
 {
     ///@todo Not clear what this function should return. Just dNds would make sense if the caller defines a local coordinate system.
     FloatArray vec;
-    vec.beDifferenceOf(*cellgeo.giveVertexCoordinates(2), *cellgeo.giveVertexCoordinates(1));
+    vec.beDifferenceOf( * cellgeo.giveVertexCoordinates(2), * cellgeo.giveVertexCoordinates(1) );
 
     double detJ = vec.computeSquaredNorm() * 0.5;
     double l2_inv = 0.5 / detJ;
     answer.resize(2, 3);
 
-    answer.at(1, 1) = -vec.at(1)*l2_inv;
-    answer.at(2, 1) =  vec.at(1)*l2_inv;
-    answer.at(1, 2) = -vec.at(2)*l2_inv;
-    answer.at(2, 2) =  vec.at(2)*l2_inv;
-    answer.at(1, 3) = -vec.at(3)*l2_inv;
-    answer.at(2, 3) =  vec.at(3)*l2_inv;
+    answer.at(1, 1) = -vec.at(1) * l2_inv;
+    answer.at(2, 1) =  vec.at(1) * l2_inv;
+    answer.at(1, 2) = -vec.at(2) * l2_inv;
+    answer.at(2, 2) =  vec.at(2) * l2_inv;
+    answer.at(1, 3) = -vec.at(3) * l2_inv;
+    answer.at(2, 3) =  vec.at(3) * l2_inv;
 
     return detJ;
 }
@@ -80,7 +79,7 @@ FEI3dLineLin :: evaldNdx(FloatMatrix &answer, const FloatArray &lcoords, const F
 void
 FEI3dLineLin :: evald2Ndx2(FloatMatrix &answer, const FloatArray &lcoords, const FEICellGeometry &cellgeo)
 {
-    answer.resize(2,3); ///@todo Check this part
+    answer.resize(2, 3); ///@todo Check this part
     answer.zero();
 }
 
@@ -91,8 +90,8 @@ FEI3dLineLin :: local2global(FloatArray &answer, const FloatArray &lcoords, cons
     FloatArray n(2);
     ksi = lcoords.at(1);
 
-    answer.beScaled( ( 1. - ksi ) * 0.5, *cellgeo.giveVertexCoordinates(1) );
-    answer.add( ( 1. + ksi ) * 0.5, *cellgeo.giveVertexCoordinates(2) );
+    answer.beScaled( ( 1. - ksi ) * 0.5, * cellgeo.giveVertexCoordinates(1) );
+    answer.add( ( 1. + ksi ) * 0.5, * cellgeo.giveVertexCoordinates(2) );
 }
 
 
@@ -100,8 +99,8 @@ int
 FEI3dLineLin :: global2local(FloatArray &answer, const FloatArray &coords, const FEICellGeometry &cellgeo)
 {
     FloatArray vec, x;
-    vec.beDifferenceOf(*cellgeo.giveVertexCoordinates(2), *cellgeo.giveVertexCoordinates(1));
-    x.beDifferenceOf(coords, *cellgeo.giveVertexCoordinates(1));
+    vec.beDifferenceOf( * cellgeo.giveVertexCoordinates(2), * cellgeo.giveVertexCoordinates(1) );
+    x.beDifferenceOf( coords, * cellgeo.giveVertexCoordinates(1) );
     double l2 = vec.computeSquaredNorm();
     double xvec = x.dotProduct(vec);
 
@@ -131,7 +130,7 @@ FEI3dLineLin :: edgeEvaldNdx(FloatMatrix &answer, int iedge,
     double l_inv = 1.0 / this->giveLength(cellgeo);
 
     answer.resize(2, 1);
-    answer.at(1, 1) = - l_inv;
+    answer.at(1, 1) = -l_inv;
     answer.at(2, 1) =   l_inv;
 }
 
@@ -199,8 +198,8 @@ FEI3dLineLin :: giveJacobianMatrixAt(FloatMatrix &jacobianMatrix, const FloatArr
 // Returns the jacobian matrix  J (x,y,z)/(ksi,eta,dzeta)  of the receiver.
 {
     ///@todo Not sure about this matrix
-    jacobianMatrix.resize(1,1);
-    jacobianMatrix.at(1,1) = 1.0;
+    jacobianMatrix.resize(1, 1);
+    jacobianMatrix.at(1, 1) = 1.0;
 }
 
 IntegrationRule *
@@ -219,5 +218,4 @@ FEI3dLineLin :: giveBoundaryIntegrationRule(int order, int boundary)
     OOFEM_ERROR("FEI3dLineLin :: giveBoundaryIntegrationRule - Not supported");
     return NULL;
 }
-
 } // end namespace oofem

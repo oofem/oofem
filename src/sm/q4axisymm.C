@@ -111,13 +111,13 @@ Q4Axisymm :: GiveDerivativeEta(double ksi, double eta)
 
 
 void
-Q4Axisymm :: computeBmatrixAt(GaussPoint *aGaussPoint, FloatMatrix &answer, int li, int ui)
+Q4Axisymm :: computeBmatrixAt(GaussPoint *gp, FloatMatrix &answer, int li, int ui)
 // Returns the [6x16] strain-displacement matrix {B} of the receiver,
-// evaluated at aGaussPoint.
+// evaluated at gp.
 {
     ///@todo Not sure how to deal with li and lu. This should be changed, in which case "GiveDerivatice***" and "computeJacobianMatrixAt" will be deprecated.
     //FloatMatrix dN;
-    //this->interp.evaldNdx(dN, *aGaussPoint->giveCoordinates(), FEIElementGeometryWrapper(this));
+    //this->interp.evaldNdx(dN, *gp->giveCoordinates(), FEIElementGeometryWrapper(this));
 
     int i;
     FloatMatrix jacMtrx, inv;
@@ -125,13 +125,13 @@ Q4Axisymm :: computeBmatrixAt(GaussPoint *aGaussPoint, FloatMatrix &answer, int 
     double ksi, eta, r, x;
     int size, ind = 1;
 
-    ksi = aGaussPoint->giveCoordinate(1);
-    eta = aGaussPoint->giveCoordinate(2);
+    ksi = gp->giveCoordinate(1);
+    eta = gp->giveCoordinate(2);
 
     nx = GiveDerivativeKsi(ksi, eta);
     ny = GiveDerivativeEta(ksi, eta);
 
-    this->computeJacobianMatrixAt(jacMtrx, aGaussPoint);
+    this->computeJacobianMatrixAt(jacMtrx, gp);
     inv.beInverseOf(jacMtrx);
 
     if ( ui == ALL_STRAINS ) {
@@ -214,16 +214,16 @@ Q4Axisymm :: computeBmatrixAt(GaussPoint *aGaussPoint, FloatMatrix &answer, int 
 
 
 void
-Q4Axisymm :: computeBHmatrixAt(GaussPoint *aGaussPoint, FloatMatrix &answer)
+Q4Axisymm :: computeBHmatrixAt(GaussPoint *gp, FloatMatrix &answer)
 // Returns the [9x16] displacement gradient matrix {BH} of the receiver,
-// evaluated at aGaussPoint.
+// evaluated at gp.
 // BH matrix  -  9 rows : du/dx, dv/dy, dw/dz = u/r, 0, 0, du/dy,  0, 0, dv/dx
 // @todo not checked if correct
 {
     FloatArray n;
     FloatMatrix dnx;
 
-    this->interp.evaldNdx( dnx, * aGaussPoint->giveCoordinates(), FEIElementGeometryWrapper(this) );
+    this->interp.evaldNdx( dnx, * gp->giveCoordinates(), FEIElementGeometryWrapper(this) );
 
     answer.resize(9, 16);
     answer.zero();
@@ -253,25 +253,9 @@ Q4Axisymm :: computeBHmatrixAt(GaussPoint *aGaussPoint, FloatMatrix &answer)
     answer.at(3, 15) = n.at(8) / r;
 }
 
-void
-Q4Axisymm :: computeNmatrixAt(GaussPoint *aGaussPoint, FloatMatrix &answer)
-// Returns the displacement interpolation matrix {N} of the receiver,
-// evaluated at aGaussPoint.
-{
-    FloatArray n;
-    this->interp.evalN( n, * aGaussPoint->giveCoordinates(), FEIElementGeometryWrapper(this) );
-
-    answer.resize(2, 16);
-    answer.zero();
-    for ( int i = 1; i <= 8; i++ ) {
-        answer.at(1, 2 * i - 1) = n.at(i);
-        answer.at(2, 2 * i - 0) = n.at(i);
-    }
-}
-
 
 void
-Q4Axisymm :: computeJacobianMatrixAt(FloatMatrix &answer, GaussPoint *aGaussPoint)
+Q4Axisymm :: computeJacobianMatrixAt(FloatMatrix &answer, GaussPoint *gp)
 // Returns the jacobian matrix  J (x,y)/(ksi,eta)  of the receiver.
 {
     double ksi, eta, x, y;
@@ -280,8 +264,8 @@ Q4Axisymm :: computeJacobianMatrixAt(FloatMatrix &answer, GaussPoint *aGaussPoin
     answer.resize(2, 2);
     answer.zero();
 
-    ksi = aGaussPoint->giveCoordinate(1);
-    eta = aGaussPoint->giveCoordinate(2);
+    ksi = gp->giveCoordinate(1);
+    eta = gp->giveCoordinate(2);
 
     nx = this->GiveDerivativeKsi(ksi, eta);
     ny = this->GiveDerivativeEta(ksi, eta);
@@ -308,24 +292,24 @@ Q4Axisymm :: initializeFrom(InputRecord *ir)
     IRResultType result;                // Required by IR_GIVE_FIELD macro
     numberOfGaussPoints          = 4;
     result = this->StructuralElement :: initializeFrom(ir);
-	if(result != IRRT_OK) {
-		return result;
-	}
+    if ( result != IRRT_OK ) {
+        return result;
+    }
 
     numberOfFiAndShGaussPoints   = 1;
     IR_GIVE_OPTIONAL_FIELD(ir, numberOfFiAndShGaussPoints, _IFT_Q4Axisymm_nipfish);
 
     if ( !( ( numberOfGaussPoints == 1 ) ||
-           ( numberOfGaussPoints == 4 ) ||
-           ( numberOfGaussPoints == 9 ) ||
-           ( numberOfGaussPoints == 16 ) ) ) {
+            ( numberOfGaussPoints == 4 ) ||
+            ( numberOfGaussPoints == 9 ) ||
+            ( numberOfGaussPoints == 16 ) ) ) {
         numberOfGaussPoints = 4;
     }
 
     if ( !( ( numberOfFiAndShGaussPoints == 1 ) ||
-           ( numberOfFiAndShGaussPoints == 4 ) ||
-           ( numberOfFiAndShGaussPoints == 9 ) ||
-           ( numberOfFiAndShGaussPoints == 16 ) ) ) {
+            ( numberOfFiAndShGaussPoints == 4 ) ||
+            ( numberOfFiAndShGaussPoints == 9 ) ||
+            ( numberOfFiAndShGaussPoints == 16 ) ) ) {
         numberOfFiAndShGaussPoints = 1;
     }
 
@@ -351,28 +335,28 @@ Q4Axisymm :: computeGaussPoints()
 
 
 double
-Q4Axisymm :: computeVolumeAround(GaussPoint *aGaussPoint)
-// Returns the portion of the receiver which is attached to aGaussPoint.
+Q4Axisymm :: computeVolumeAround(GaussPoint *gp)
+// Returns the portion of the receiver which is attached to gp.
 {
     FloatArray n;
     double determinant, r;
 
-    this->interp.evalN( n, * aGaussPoint->giveCoordinates(), FEIElementGeometryWrapper(this) );
+    this->interp.evalN( n, * gp->giveCoordinates(), FEIElementGeometryWrapper(this) );
 
     r = 0;
     for ( int i = 1; i <= 8; i++ ) {
         r += this->giveNode(i)->giveCoordinate(1) * n.at(i);
     }
 
-    determinant = fabs( this->interp.giveTransformationJacobian( * aGaussPoint->giveCoordinates(), FEIElementGeometryWrapper(this) ) );
-    return determinant * aGaussPoint->giveWeight() * r;
+    determinant = fabs( this->interp.giveTransformationJacobian( * gp->giveCoordinates(), FEIElementGeometryWrapper(this) ) );
+    return determinant * gp->giveWeight() * r;
 }
 
 
 void
-Q4Axisymm :: computeStrainVector(FloatArray &answer, GaussPoint *gp, TimeStep *stepN)
+Q4Axisymm :: computeStrainVector(FloatArray &answer, GaussPoint *gp, TimeStep *tStep)
 // Computes the vector containing the strains at the Gauss point gp of
-// the receiver, at time step stepN. The nature of these strains depends
+// the receiver, at time step tStep. The nature of these strains depends
 // on the element's type.
 {
     FloatMatrix b, A;
@@ -382,7 +366,7 @@ Q4Axisymm :: computeStrainVector(FloatArray &answer, GaussPoint *gp, TimeStep *s
     answer.resize(6);
     answer.zero();
     if ( mode == TL ) { // Total Lagrange formulation
-        this->computeVectorOf(EID_MomentumBalance, VM_Total, stepN, u);
+        this->computeVectorOf(EID_MomentumBalance, VM_Total, tStep, u);
 
         // linear part of strain tensor (in vector form)
 

@@ -105,10 +105,6 @@ public:
 
     virtual int checkConsistency();
 
-    // identification
-    virtual const char *giveClassName() const { return "StructuralEngngModel"; }
-    virtual classType giveClassID() const { return StructuralEngngModelClass; }
-
     /**
      * Computes reaction forces. The implementation assumes, that real
      * stresses corresponding to reached state are already computed (uses giveInternalForcesVector
@@ -147,7 +143,7 @@ public:
     /**
      * Shows the sparse structure of required matrix, type == 1 stiffness.
      */
-    void showSparseMtrxStructure(int type, oofegGraphicContext &context, TimeStep *atTime);
+    void showSparseMtrxStructure(int type, oofegGraphicContext &context, TimeStep *tStep);
 #endif
 };
 } // end namespace oofem

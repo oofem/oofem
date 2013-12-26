@@ -42,6 +42,3 @@ int strncasecmp(const char *s1, const char *s2, int count) {
     return _strnicmp(s1, s2, count);
 }
 #endif
-
-
-

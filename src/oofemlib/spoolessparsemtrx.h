@@ -35,13 +35,13 @@
 #ifndef spoolessparsemtrx_h
 #define spoolessparsemtrx_h
 
- #include "sparsemtrx.h"
+#include "sparsemtrx.h"
 
- extern "C" {
-  #include <spooles/misc.h>
-  #include <spooles/FrontMtx.h>
-  #include <spooles/SymbFac.h>
- };
+extern "C" {
+#include <spooles/misc.h>
+#include <spooles/FrontMtx.h>
+#include <spooles/SymbFac.h>
+};
 
 namespace oofem {
 /**
@@ -94,7 +94,6 @@ public:
     InpMtx *giveInpMtrx() { return this->mtrx; }
     int giveValueType() const { return type; }
     int giveSymmetryFlag() const { return sflag; }
-
 };
 } // end namespace oofem
 #endif

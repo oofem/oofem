@@ -91,7 +91,7 @@ void TrabBone3D :: computePlasStrainEnerDensity(GaussPoint *gp, const FloatArray
 void
 TrabBone3D :: give3dMaterialStiffnessMatrix(FloatMatrix &answer,
                                             MatResponseMode mode, GaussPoint *gp,
-                                            TimeStep *atTime)
+                                            TimeStep *tStep)
 {
     double tempDam, beta, tempKappa, kappa;
     FloatArray tempEffectiveStress, tempTensor2, prodTensor, plasFlowDirec;
@@ -186,9 +186,9 @@ TrabBone3D :: evaluateCurrentYieldStress(const double kappa)
         double damage = this->computeDamageParam(kappa);
         if ( kappa < kappaMax ) {
             return ( yR + ( 1. - yR ) * ( 1 - pow( ( kappaMax - kappa ) / kappaMax, kappaSlope * kappaMax ) ) ) / ( 1. - damage );
-        } else if ( kappa < ( kappaMin + kappaMax ) / 2. )         {
+        } else if ( kappa < ( kappaMin + kappaMax ) / 2. ) {
             return ( yR + ( 1. - yR ) * ( 1 - ( 1 - gMin ) / 2 * pow(2 * ( kappa - kappaMax ) / ( kappaMin - kappaMax ), N) ) ) / ( 1. - damage );
-        } else if ( kappa < kappaMin )   {
+        } else if ( kappa < kappaMin ) {
             return ( yR + ( 1. - yR ) * ( gMin + ( 1 - gMin ) / 2. * pow(2 * ( kappaMin - kappa ) / ( kappaMin - kappaMax ), N) ) ) / ( 1. - damage );
         } else {
             return ( yR + ( 1. - yR ) * gMin ) / ( 1. - damage );
@@ -217,9 +217,9 @@ TrabBone3D :: evaluateCurrentPlasticModulus(const double kappa)
 
         if ( kappa < kappaMax ) {
             gPrime = kappaSlope * pow( ( kappaMax - kappa ) / kappaMax, kappaSlope * kappaMax - 1. );
-        } else if ( kappa < ( ( kappaMin + kappaMax ) / 2. ) )           {
+        } else if ( kappa < ( ( kappaMin + kappaMax ) / 2. ) ) {
             gPrime   = ( ( gMin - 1. ) / ( kappaMin - kappaMax ) * N * pow(2. * ( kappa - kappaMax ) / ( kappaMin - kappaMax ), N - 1.) );
-        } else if ( kappa < kappaMin )   {
+        } else if ( kappa < kappaMin ) {
             gPrime =  ( ( 1. - gMin ) / ( kappaMin - kappaMax ) * N * pow(2. * ( kappaMin - kappa ) / ( kappaMin - kappaMax ), N - 1.) );
         } else {
             gPrime = 0.;
@@ -236,10 +236,10 @@ TrabBone3D :: evaluateCurrentPlasticModulus(const double kappa)
 
 
 double
-TrabBone3D :: evaluateCurrentViscousStress(const double deltaKappa, TimeStep *atTime)
+TrabBone3D :: evaluateCurrentViscousStress(const double deltaKappa, TimeStep *tStep)
 {
     //  double deltaT = 0.01;
-    double deltaT =  atTime->giveTimeIncrement();
+    double deltaT =  tStep->giveTimeIncrement();
     double answer;
     //return answer;
     if ( deltaT == 0 ) {
@@ -252,9 +252,9 @@ TrabBone3D :: evaluateCurrentViscousStress(const double deltaKappa, TimeStep *at
 }
 
 double
-TrabBone3D :: evaluateCurrentViscousModulus(const double deltaKappa, TimeStep *atTime)
+TrabBone3D :: evaluateCurrentViscousModulus(const double deltaKappa, TimeStep *tStep)
 {
-    double deltaT = atTime->giveTimeIncrement();
+    double deltaT = tStep->giveTimeIncrement();
     double answer = -viscosity / deltaT;
 
     return answer;
@@ -262,7 +262,7 @@ TrabBone3D :: evaluateCurrentViscousModulus(const double deltaKappa, TimeStep *a
 
 
 void
-TrabBone3D :: performPlasticityReturn(GaussPoint *gp, const FloatArray &totalStrain, TimeStep *atTime)
+TrabBone3D :: performPlasticityReturn(GaussPoint *gp, const FloatArray &totalStrain, TimeStep *tStep)
 {
     bool convergence;
     double tempKappa;
@@ -292,17 +292,17 @@ TrabBone3D :: performPlasticityReturn(GaussPoint *gp, const FloatArray &totalStr
     // tempKappa ... cumulative plastic strain at the end of the substep
     // tempEffectiveStress ... effective stress at the end of the substep
     // tempPlasDef ... plastic strain at the end of the substep
-    convergence = projectOnYieldSurface(tempKappa, tempEffectiveStress, tempPlasDef, trialEffectiveStress, elasticity, compliance, status, atTime, gp, 0);
+    convergence = projectOnYieldSurface(tempKappa, tempEffectiveStress, tempPlasDef, trialEffectiveStress, elasticity, compliance, status, tStep, gp, 0);
     if ( convergence ) {
         status->setTempPlasDef(tempPlasDef);
         status->setTempKappa(tempKappa);
         status->setTempEffectiveStress(tempEffectiveStress);
-    } else   {
+    } else {
         //printf("LineSearch \n");
         tempEffectiveStress = trialEffectiveStress;
         tempKappa = status->giveKappa();
         tempPlasDef = status->givePlasDef();
-        convergence = projectOnYieldSurface(tempKappa, tempEffectiveStress, tempPlasDef, trialEffectiveStress, elasticity, compliance, status, atTime, gp, 1);
+        convergence = projectOnYieldSurface(tempKappa, tempEffectiveStress, tempPlasDef, trialEffectiveStress, elasticity, compliance, status, tStep, gp, 1);
         if ( !convergence ) {
             //printf("No convergence %d",gp->giveNumber());
             //_error("No convergence of the stress return algorithm in TrabBone3D :: performPlasticityReturn\n");
@@ -316,7 +316,7 @@ TrabBone3D :: performPlasticityReturn(GaussPoint *gp, const FloatArray &totalStr
 
 
 bool
-TrabBone3D :: projectOnYieldSurface(double &tempKappa, FloatArray &tempEffectiveStress, FloatArray &tempPlasDef, const FloatArray &trialEffectiveStress, const FloatMatrix &elasticity, const FloatMatrix &compliance, TrabBone3DStatus *status, TimeStep *atTime, GaussPoint *gp, int lineSearchFlag)
+TrabBone3D :: projectOnYieldSurface(double &tempKappa, FloatArray &tempEffectiveStress, FloatArray &tempPlasDef, const FloatArray &trialEffectiveStress, const FloatMatrix &elasticity, const FloatMatrix &compliance, TrabBone3DStatus *status, TimeStep *tStep, GaussPoint *gp, int lineSearchFlag)
 {
     bool convergence;
     int flagLoop;
@@ -337,7 +337,7 @@ TrabBone3D :: projectOnYieldSurface(double &tempKappa, FloatArray &tempEffective
     if ( plasCriterion < rel_yield_tol ) {
         // trial stress in elastic domain
         convergence = true;
-    } else   {
+    } else {
         // return to the yield surface needed
         // Initial valuesr
         toSolveTensor.resize(6);
@@ -375,7 +375,7 @@ TrabBone3D :: projectOnYieldSurface(double &tempKappa, FloatArray &tempEffective
                 stress = trialEffectiveStress;
                 stress.times(alfa);
                 k = k + ( 1 - alfa ) * norm;
-                f =  evaluatePlasCriterion(fabric, F, stress, k, ( 1 - alfa ) * norm, atTime);
+                f =  evaluatePlasCriterion(fabric, F, stress, k, ( 1 - alfa ) * norm, tStep);
             }
 
             tempEffectiveStress  = stress;
@@ -405,7 +405,7 @@ TrabBone3D :: projectOnYieldSurface(double &tempKappa, FloatArray &tempEffective
         flagLoop = 1;
         do {
             plasModulus = evaluateCurrentPlasticModulus(tempKappa + deltaKappa);
-            viscoModulus = evaluateCurrentViscousModulus(deltaKappa, atTime);
+            viscoModulus = evaluateCurrentViscousModulus(deltaKappa, tStep);
             //*************************************
             //Evaluation of the Recursive Equations
             //*************************************
@@ -455,7 +455,7 @@ TrabBone3D :: projectOnYieldSurface(double &tempKappa, FloatArray &tempEffective
                     // Evaluation of f
                     tempTensor2.beProductOf(fabric, tempStress);
                     SFS = sqrt( tempStress.dotProduct(tempTensor2) );
-                    toSolveScalar = evaluatePlasCriterion(fabric, F, tempStress, tempKappa + newDeltaKappa, newDeltaKappa, atTime);
+                    toSolveScalar = evaluatePlasCriterion(fabric, F, tempStress, tempKappa + newDeltaKappa, newDeltaKappa, tStep);
                     //*************************************
                     // Evaluation of the error
                     //*************************************
@@ -478,7 +478,7 @@ TrabBone3D :: projectOnYieldSurface(double &tempKappa, FloatArray &tempEffective
                         alfa = alfa2;
                     }
                 }
-            } else   {
+            } else {
                 max_num_iter = 100;
                 //////////////////////////////////////////////////////////
                 deltaKappa += incKappa;
@@ -500,7 +500,7 @@ TrabBone3D :: projectOnYieldSurface(double &tempKappa, FloatArray &tempEffective
                 // Evaluation of f
                 tempTensor2.beProductOf(fabric, tempEffectiveStress);
                 SFS = sqrt( tempEffectiveStress.dotProduct(tempTensor2) );
-                toSolveScalar = evaluatePlasCriterion(fabric, F, tempEffectiveStress, tempKappa + deltaKappa, deltaKappa, atTime);
+                toSolveScalar = evaluatePlasCriterion(fabric, F, tempEffectiveStress, tempKappa + deltaKappa, deltaKappa, tStep);
                 //*************************************
                 // Evaluation of the error
                 //*************************************
@@ -519,7 +519,7 @@ TrabBone3D :: projectOnYieldSurface(double &tempKappa, FloatArray &tempEffective
 
         if ( convergence ) {
             plasModulus = evaluateCurrentPlasticModulus(tempKappa + deltaKappa);
-            viscoModulus = evaluateCurrentViscousModulus(deltaKappa, atTime);
+            viscoModulus = evaluateCurrentViscousModulus(deltaKappa, tStep);
             tempTensor2.beProductOf(SSaTensor, plasFlowDirec);
             beta = plasFlowDirec.dotProduct(tempTensor2);
             beta += ( plasModulus - viscoModulus ) / norm;
@@ -638,14 +638,14 @@ TrabBone3D :: constructDerivativeOfPlasFlowDirec(FloatMatrix &answer, FloatMatri
 }
 
 double
-TrabBone3D :: evaluatePlasCriterion(FloatMatrix &fabric, FloatArray &F, FloatArray &stress, double kappa, double deltaKappa, TimeStep *atTime)
+TrabBone3D :: evaluatePlasCriterion(FloatMatrix &fabric, FloatArray &F, FloatArray &stress, double kappa, double deltaKappa, TimeStep *tStep)
 {
     FloatArray FFS;
     double FS, SFS;
     FFS.beProductOf(fabric, stress);
     FS = F.dotProduct(stress);
     SFS =  sqrt( stress.dotProduct(FFS) );
-    return SFS + FS - evaluateCurrentYieldStress(kappa) + this->evaluateCurrentViscousStress(deltaKappa, atTime);
+    return SFS + FS - evaluateCurrentYieldStress(kappa) + this->evaluateCurrentViscousStress(deltaKappa, tStep);
 }
 
 double
@@ -679,11 +679,11 @@ TrabBone3D :: computeDamageParamPrime(double tempKappa)
 //
 
 double
-TrabBone3D :: computeDamage(GaussPoint *gp,  TimeStep *atTime)
+TrabBone3D :: computeDamage(GaussPoint *gp,  TimeStep *tStep)
 {
     double tempKappa;
 
-    computeCumPlastStrain(tempKappa, gp, atTime);
+    computeCumPlastStrain(tempKappa, gp, tStep);
 
     double tempDam = computeDamageParam(tempKappa);
     if ( tempDam < 0 ) {
@@ -694,7 +694,7 @@ TrabBone3D :: computeDamage(GaussPoint *gp,  TimeStep *atTime)
 }
 
 
-void TrabBone3D :: computeCumPlastStrain(double &tempKappa, GaussPoint *gp, TimeStep *atTime)
+void TrabBone3D :: computeCumPlastStrain(double &tempKappa, GaussPoint *gp, TimeStep *tStep)
 {
     TrabBone3DStatus *status = static_cast< TrabBone3DStatus * >( this->giveStatus(gp) );
     tempKappa = status->giveTempKappa();
@@ -702,7 +702,7 @@ void TrabBone3D :: computeCumPlastStrain(double &tempKappa, GaussPoint *gp, Time
 
 
 
-void TrabBone3D :: computeDensificationStress(FloatArray &answer, GaussPoint *gp, const FloatArray &totalStrain, TimeStep *atTime)
+void TrabBone3D :: computeDensificationStress(FloatArray &answer, GaussPoint *gp, const FloatArray &totalStrain, TimeStep *tStep)
 {
     TrabBone3DStatus *status = static_cast< TrabBone3DStatus * >( this->giveStatus(gp) );
     answer.resize(6);
@@ -720,18 +720,18 @@ void TrabBone3D :: computeDensificationStress(FloatArray &answer, GaussPoint *gp
 
 void
 TrabBone3D :: giveRealStressVector(FloatArray &answer, GaussPoint *gp,
-                                   const FloatArray &totalStrain, TimeStep *atTime)
+                                   const FloatArray &totalStrain, TimeStep *tStep)
 {
     double tempDam;
     FloatArray effStress, densStress;
     TrabBone3DStatus *status = static_cast< TrabBone3DStatus * >( this->giveStatus(gp) );
     this->initGpForNewStep(gp);
     // compute effective stress using the plasticity model
-    performPlasticityReturn(gp, totalStrain, atTime);
+    performPlasticityReturn(gp, totalStrain, tStep);
     effStress =  status->giveTempEffectiveStress();
 
     // evaluate damage variable
-    tempDam = computeDamage(gp, atTime);
+    tempDam = computeDamage(gp, tStep);
 
     // transform effective stress into nominal stress
     answer = ( 1 - tempDam ) * effStress;
@@ -740,7 +740,7 @@ TrabBone3D :: giveRealStressVector(FloatArray &answer, GaussPoint *gp,
 
     // add densification stress, if the densificator is activated
     if ( densCrit != 0 ) {
-        computeDensificationStress(densStress, gp, totalStrain, atTime);
+        computeDensificationStress(densStress, gp, totalStrain, tStep);
         answer.add(densStress);
     }
 
@@ -1222,9 +1222,9 @@ TrabBone3D :: initializeFrom(InputRecord *ir)
 
 
 int
-TrabBone3D :: giveIPValue(FloatArray &answer, GaussPoint *aGaussPoint, InternalStateType type, TimeStep *atTime)
+TrabBone3D :: giveIPValue(FloatArray &answer, GaussPoint *gp, InternalStateType type, TimeStep *tStep)
 {
-    TrabBone3DStatus *status = static_cast< TrabBone3DStatus * >( this->giveStatus(aGaussPoint) );
+    TrabBone3DStatus *status = static_cast< TrabBone3DStatus * >( this->giveStatus(gp) );
     if ( type == IST_DamageScalar ) {
         answer.resize(1);
         answer.at(1) = status->giveTempDam();
@@ -1253,7 +1253,7 @@ TrabBone3D :: giveIPValue(FloatArray &answer, GaussPoint *aGaussPoint, InternalS
         answer.at(1) = status->giveTempTSED();
         return 1;
     } else {
-        return StructuralMaterial :: giveIPValue(answer, aGaussPoint, type, atTime);
+        return StructuralMaterial :: giveIPValue(answer, gp, type, tStep);
     }
 }
 
@@ -1410,9 +1410,9 @@ TrabBone3DStatus :: initTempStatus()
 
 
 void
-TrabBone3DStatus :: updateYourself(TimeStep *atTime)
+TrabBone3DStatus :: updateYourself(TimeStep *tStep)
 {
-    StructuralMaterialStatus :: updateYourself(atTime);
+    StructuralMaterialStatus :: updateYourself(tStep);
     this->kappa = this->tempKappa;
     this->dam = this->tempDam;
     this->tsed = this->tempTSED;
@@ -1538,4 +1538,3 @@ MaterialStatus *TrabBone3D :: CreateStatus(GaussPoint *gp) const
     return new TrabBone3DStatus(1, StructuralMaterial :: giveDomain(), gp);
 }
 } //end namespace oofem
-

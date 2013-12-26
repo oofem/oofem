@@ -36,9 +36,8 @@
 #include "classfactory.h"
 
 namespace oofem {
-
 REGISTER_SparseLinSolver(LDLTFactorization, ST_Direct)
-    
+
 LDLTFactorization :: LDLTFactorization(Domain *d, EngngModel *m) :
     SparseLinearSystemNM(d, m)
 {
@@ -92,5 +91,4 @@ LDLTFactorization :: solve(SparseMtrx *A, FloatArray *b, FloatArray *x)
 
     return NM_Success;
 }
-
 } // end namespace oofem

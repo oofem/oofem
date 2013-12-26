@@ -40,7 +40,6 @@
 #include "structuralinterfacematerialstatus.h"
 #include "gausspoint.h"
 namespace oofem {
-
 StructuralInterfaceMaterialStatus :: StructuralInterfaceMaterialStatus(int n, Domain *d, GaussPoint *g) :
     MaterialStatus(n, d, g), jump(), traction(), tempTraction(), tempJump(), firstPKTraction(), tempFirstPKTraction(), F(), tempF()
 {
@@ -49,7 +48,7 @@ StructuralInterfaceMaterialStatus :: StructuralInterfaceMaterialStatus(int n, Do
     this->jump.resize(size);
     this->traction.resize(size);
     this->firstPKTraction.resize(size);
-    this->F.resize(size,size);
+    this->F.resize(size, size);
     this->F.beUnitMatrix();
 
     // reset temp vars.
@@ -57,7 +56,6 @@ StructuralInterfaceMaterialStatus :: StructuralInterfaceMaterialStatus(int n, Do
     this->tempTraction        = this->traction;
     this->tempFirstPKTraction = this->firstPKTraction;
     this->tempF               = this->F;
-
 }
 
 
@@ -96,8 +94,8 @@ void StructuralInterfaceMaterialStatus :: updateYourself(TimeStep *tStep)
     MaterialStatus :: updateYourself(tStep);
 
     this->jump            = this->tempJump;
-    this->traction        = this->tempTraction; 
-    this->firstPKTraction = this->tempFirstPKTraction; 
+    this->traction        = this->tempTraction;
+    this->firstPKTraction = this->tempFirstPKTraction;
     this->F               = this->tempF;
 }
 
@@ -182,5 +180,27 @@ StructuralInterfaceMaterialStatus :: restoreContext(DataStream *stream, ContextM
     //}
 
     return CIO_OK;
+}
+
+void StructuralInterfaceMaterialStatus :: copyStateVariables(const MaterialStatus &iStatus)
+{
+    MaterialStatus &tmpStat = const_cast< MaterialStatus & >( iStatus );
+    const StructuralInterfaceMaterialStatus &structStatus = dynamic_cast< StructuralInterfaceMaterialStatus & >( tmpStat );
+
+    jump                            = structStatus.giveJump();
+    traction                        = structStatus.giveTraction();
+    tempTraction            = structStatus.giveTempTraction();
+    tempJump                        = structStatus.giveTempJump();
+    firstPKTraction         = structStatus.giveFirstPKTraction();
+    tempFirstPKTraction     = structStatus.giveTempFirstPKTraction();
+    F                                       = structStatus.giveF();
+    tempF                           = structStatus.giveTempF();
+    mNormalDir                      = structStatus.giveNormal();
+}
+
+
+void StructuralInterfaceMaterialStatus :: addStateVariables(const MaterialStatus &iStatus)
+{
+    OOFEM_ERROR("Error: StructuralInterfaceMaterialStatus :: addStateVariables is not implemented.\n");
 }
 } // end namespace oofem

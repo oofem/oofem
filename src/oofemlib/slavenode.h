@@ -45,7 +45,6 @@
 //@}
 
 namespace oofem {
-
 /**
  * Class implementing slave node connected to other nodes (masters) using predetermined weights.
  * Hanging node possess no degrees of freedom - all values are interpolated from corresponding master dofs.
@@ -80,7 +79,6 @@ public:
 
     virtual const char *giveClassName() const { return "SlaveNode"; }
     virtual const char *giveInputRecordName() const { return _IFT_SlaveNode_Name; }
-    virtual classType giveClassID() const { return SlaveNodeClass; }
 };
 } // end namespace oofem
 #endif // slavenode_h

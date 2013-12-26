@@ -156,24 +156,23 @@ public:
     /// Sets material mode of receiver.
     void setMaterialMode(MaterialMode newMode) { this->materialMode = newMode; }
     ///@todo giveMaterial routine most be removed from gauss-points, it doesn't fit with different types of cross-sections.
-    
+
     /// Returns reference to material associated to related element of receiver.
     Material *giveMaterial() { return giveElement()->giveMaterial(); }
 
     /// Returns reference to cross section associated to related element of receiver.
     CrossSection *giveCrossSection() { return giveElement()->giveCrossSection(); }
-    
+
     /**
      * Returns reference to associated material status (NULL if not defined).
      */
-    IntegrationPointStatus *giveMaterialStatus() { return this->materialStatus; }; 
-    
+    IntegrationPointStatus *giveMaterialStatus() { return this->materialStatus; };
+
     /**
      * Sets Material status managed by receiver.
      * @param ptr Pointer to new status of receiver.
-     * @param i classID of class storing status
      * @return Pointer to new status.
-     * @deprecated should be removed since only one mat stat is saved in the integration point 
+     * @deprecated should be removed since only one mat stat is saved in the integration point
      */
     IntegrationPointStatus *setMaterialStatus(IntegrationPointStatus *ptr, int n)
     {
@@ -188,7 +187,7 @@ public:
     IntegrationPointStatus *setMaterialStatus(IntegrationPointStatus *ptr)
     {
         if ( this->materialStatus != NULL ) {
-            OOFEM_ERROR (" MaterialStatus :: setMaterialStatus status already exist");
+            OOFEM_ERROR(" MaterialStatus :: setMaterialStatus status already exist");
         }
         this->materialStatus = ptr;
         return ptr;
@@ -241,8 +240,6 @@ public:
      */
     //contextIOResultType restoreContext(FILE* stream, void *obj = NULL);
 
-    /// Returns classType id of receiver.
-    virtual classType giveClassID() const { return GaussPointClass; }
     /// Returns class name of the receiver.
     virtual const char *giveClassName() const { return "GaussPoint"; }
     /// Initializes receiver according to object description stored in input record.

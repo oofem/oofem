@@ -89,7 +89,7 @@ class OOFEM_EXPORT NonlocalMaterialStatusExtensionInterface : public Interface
 {
 protected:
     /// List containing localIntegrationRecord values.
-    std::list< localIntegrationRecord >integrationDomainList;
+    std :: list< localIntegrationRecord >integrationDomainList;
     /// Nonlocal volume of corresponding integration point.
     double integrationScale;
 
@@ -107,7 +107,7 @@ public:
      * references to integration points and their weights that influence the nonlocal average in
      * receiver's associated integration point.
      */
-    std::list< localIntegrationRecord > *giveIntegrationDomainList() { return & integrationDomainList; }
+    std :: list< localIntegrationRecord > *giveIntegrationDomainList() { return & integrationDomainList; }
     /// Returns associated integration scale.
     double giveIntegrationScale() { return integrationScale; }
     /// Sets associated integration scale.
@@ -160,7 +160,7 @@ protected:
     bool permanentNonlocTableFlag;
 
     /// Type characterizing the nonlocal weight function.
-    enum WeightFunctionType { WFT_Unknown, WFT_Bell, WFT_Gauss, WFT_Green, WFT_Uniform, WFT_UniformOverElement };
+    enum WeightFunctionType { WFT_Unknown, WFT_Bell, WFT_Gauss, WFT_Green, WFT_Uniform, WFT_UniformOverElement, WFT_Green_21 };
     /// Parameter specifying the type of nonlocal weight function.
     WeightFunctionType weightFun;
 
@@ -237,7 +237,7 @@ public:
      * last modification time mark is kept.
      * @see Element::updateBeforeNonlocalAverage
      */
-    void updateDomainBeforeNonlocAverage(TimeStep *atTime);
+    void updateDomainBeforeNonlocAverage(TimeStep *tStep);
 
     /**
      * Builds list of integration points which take part in nonlocal average in given integration point.
@@ -264,7 +264,7 @@ public:
      * receiver's associated integration point.
      * Rebuilds the IP list by calling  buildNonlocalPointTable if not available.
      */
-    std::list< localIntegrationRecord > *giveIPIntegrationList(GaussPoint *gp);
+    std :: list< localIntegrationRecord > *giveIPIntegrationList(GaussPoint *gp);
 
     /**
      * Evaluates the basic nonlocal weight function for a given distance

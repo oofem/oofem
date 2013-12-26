@@ -39,11 +39,10 @@
 #include "dof.h"
 #include "classfactory.h"
 
-#include "structengngmodel.h"// JB
+#include "structengngmodel.h" // JB
 
 namespace oofem {
-
-REGISTER_ExportModule( DofManExportModule )
+REGISTER_ExportModule(DofManExportModule)
 
 DofManExportModule :: DofManExportModule(int n, EngngModel *e) : ExportModule(n, e)
 {
@@ -63,7 +62,7 @@ DofManExportModule :: initializeFrom(InputRecord *ir)
 
     // Read in dofMan's to export - defaults to all
     IR_GIVE_OPTIONAL_FIELD(ir, this->dofManList, _IFT_DofManExportModule_dmlist);
-    
+
     ExportModule :: initializeFrom(ir);
     return IRRT_OK;
 }
@@ -72,7 +71,7 @@ DofManExportModule :: initializeFrom(InputRecord *ir)
 void
 DofManExportModule :: doOutput(TimeStep *tStep, bool forcedOutput)
 {
-    if ( !(testTimeStepOutput(tStep) || forcedOutput) ) {
+    if ( !( testTimeStepOutput(tStep) || forcedOutput ) ) {
         return;
     }
 
@@ -86,22 +85,22 @@ DofManExportModule :: doOutput(TimeStep *tStep, bool forcedOutput)
     int domainIndex = 1;
     Domain *d  = emodel->giveDomain(domainIndex);
     FloatArray reactions;
-    
-    
+
+
     IntArray dofManMap, dofMap, eqnMap;
-    StructuralEngngModel *strEngMod = dynamic_cast<StructuralEngngModel*>(emodel); 
+    StructuralEngngModel *strEngMod = dynamic_cast< StructuralEngngModel * >( emodel );
     if ( strEngMod ) {
         strEngMod->buildReactionTable(dofManMap, dofMap, eqnMap, tStep, domainIndex);
         strEngMod->computeReaction(reactions, tStep, 1);
     }
 
-    
+
 
     int nTotaldm = d->giveNumberOfDofManagers();
     int ndmInList = this->dofManList.giveSize();
-    
-    int ndm = (ndmInList > 0) ? ndmInList : nTotaldm;
-    
+
+    int ndm = ( ndmInList > 0 ) ? ndmInList : nTotaldm;
+
     fprintf(stream, "%% Primary fields \n");
     for ( int idm = 1; idm <= ndm; idm++ ) {
         if ( ndm < nTotaldm ) {
@@ -126,21 +125,21 @@ DofManExportModule :: doOutput(TimeStep *tStep, bool forcedOutput)
     fprintf(stream, "%% Reaction forces \n");
     for ( int idm = 1; idm <= ndm; idm++ ) {
         int dManNum = this->dofManList.at(idm);
-        dm = d->giveDofManager( dManNum );
+        dm = d->giveDofManager(dManNum);
         fprintf(stream, "%d", dManNum);
 
         for ( int i = 1; i <= numRestrDofs; i++ ) {
             if ( dofManMap.at(i) == dManNum ) { // dofman has reaction
-                //double reaction =  reactions.at( eqnMap.at(i) ); 
-                double reaction =  reactions.at( i ); 
+                //double reaction =  reactions.at( eqnMap.at(i) );
+                double reaction =  reactions.at(i);
                 fprintf(stream, " %g", reaction);
             }
         }
         fprintf(stream, "\n");
     }
 
-    for ( int i = 1; i <= numRestrDofs; i++ ) {   
-        double reaction =  reactions.at( i ); 
+    for ( int i = 1; i <= numRestrDofs; i++ ) {
+        double reaction =  reactions.at(i);
         fprintf(stream, " %g", reaction);
     }
 #endif
@@ -152,9 +151,9 @@ DofManExportModule :: giveOutputStream(TimeStep *tStep)
 {
     FILE *answer;
 
-    std::string fileName = this->giveOutputBaseFileName(tStep) + ".dm";
+    std :: string fileName = this->giveOutputBaseFileName(tStep) + ".dm";
     if ( ( answer = fopen(fileName.c_str(), "w") ) == NULL ) {
-        OOFEM_ERROR2("DofManExportModule::giveOutputStream: failed to open file %s", fileName.c_str());
+        OOFEM_ERROR2( "DofManExportModule::giveOutputStream: failed to open file %s", fileName.c_str() );
     }
 
     return answer;

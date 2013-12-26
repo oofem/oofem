@@ -40,6 +40,7 @@
 #include "floatarray.h"
 #include "floatmatrix.h"
 #include "fluiddynamicmaterial.h"
+#include "dynamicinputrecord.h"
 
 #ifdef __OOFEG
  #include "oofeggraphiccontext.h"
@@ -73,10 +74,20 @@ SUPGElement :: initializeFrom(InputRecord *ir)
 }
 
 
+void
+SUPGElement :: giveInputRecord(DynamicInputRecord &input)
+{
+    FMElement :: giveInputRecord(input);
+    if ( !boundarySides.isEmpty() ) {
+        input.setField(this->boundarySides, _IFT_SUPGElement_bsides);
+        input.setField(this->boundaryCodes, _IFT_SUPGElement_bcodes);
+    }
+}
+
 
 void
 SUPGElement :: giveCharacteristicMatrix(FloatMatrix &answer,
-                                         CharType mtrx, TimeStep *tStep)
+                                        CharType mtrx, TimeStep *tStep)
 //
 // returns characteristics matrix of receiver according to mtrx
 //
@@ -87,12 +98,12 @@ SUPGElement :: giveCharacteristicMatrix(FloatMatrix &answer,
 
 void
 SUPGElement :: giveCharacteristicVector(FloatArray &answer, CharType mtrx, ValueModeType mode,
-                                         TimeStep *tStep)
+                                        TimeStep *tStep)
 //
 // returns characteristics vector of receiver according to requested type
 //
 {
-    if ( mtrx == ExternalForcesVector) {
+    if ( mtrx == ExternalForcesVector ) {
         // stokes flow
         IntArray vloc, ploc;
         FloatArray h;
@@ -101,25 +112,32 @@ SUPGElement :: giveCharacteristicVector(FloatArray &answer, CharType mtrx, Value
         this->giveLocalPressureDofMap(ploc);
         answer.resize(size);
         answer.zero();
-        this->computeBCRhsTerm_MB(h, tStep); answer.assemble(h, vloc);
-        this->computeBCRhsTerm_MC(h, tStep); answer.assemble(h, ploc);
+        this->computeBCRhsTerm_MB(h, tStep);
+        answer.assemble(h, vloc);
+        this->computeBCRhsTerm_MC(h, tStep);
+        answer.assemble(h, ploc);
     }
-#if 0 
-    else if ( mtrx == InternalForcesVector) {
+
+#if 0
+    else if ( mtrx == InternalForcesVector ) {
         // stokes flow
         IntArray vloc, ploc;
         FloatArray h;
         int size = this->computeNumberOfDofs();
         this->giveLocalVelocityDofMap(vloc);
         this->giveLocalPressureDofMap(ploc);
-        answer.resize(size); answer.zero();
+        answer.resize(size);
+        answer.zero();
         //this->computeAdvectionTerm_MB(h, tStep); answer.assemble(h, vloc);
-        this->computeAdvectionTerm_MC(h, tStep); answer.assemble(h, ploc);
-        this->computeDiffusionTerm_MB(h, tStep); answer.assemble(h, vloc);
-        this->computeDiffusionTerm_MC(h, tStep); answer.assemble(h, ploc);
+        this->computeAdvectionTerm_MC(h, tStep);
+        answer.assemble(h, ploc);
+        this->computeDiffusionTerm_MB(h, tStep);
+        answer.assemble(h, vloc);
+        this->computeDiffusionTerm_MC(h, tStep);
+        answer.assemble(h, ploc);
 
         FloatMatrix m1;
-        FloatArray v,p;
+        FloatArray v, p;
         // add lsic stabilization term
         //this->giveCharacteristicMatrix(m1, LSICStabilizationTerm_MB, tStep);
         //m1.times( lscale / ( dscale * uscale * uscale ) );
@@ -129,7 +147,7 @@ SUPGElement :: giveCharacteristicVector(FloatArray &answer, CharType mtrx, Value
         this->giveCharacteristicMatrix(m1, LinearAdvectionTerm_MC, tStep);
         //m1.times( 1. / ( dscale * uscale ) );
         h.beProductOf(m1, v);
-        answer.assemble(h,ploc);
+        answer.assemble(h, ploc);
 
         // add pressure term
         this->giveCharacteristicMatrix(m1, PressureTerm_MB, tStep);
@@ -142,8 +160,7 @@ SUPGElement :: giveCharacteristicVector(FloatArray &answer, CharType mtrx, Value
         this->computeVectorOf(EID_ConservationEquation, VM_Total, tStep, v);
         h.beProductOf(m1, v);
         answer.assemble(h, ploc);
-
-    } 
+    }
 #endif
     else {
         _error("giveCharacteristicVector: Unknown Type of characteristic mtrx.");
@@ -168,7 +185,7 @@ SUPGElement :: computeDeviatoricStress(FloatArray &answer, GaussPoint *gp, TimeS
 
 
 void
-SUPGElement :: computeBCLhsTerm_MB(FloatMatrix &answer, TimeStep *atTime)
+SUPGElement :: computeBCLhsTerm_MB(FloatMatrix &answer, TimeStep *tStep)
 {
     bcType boundarytype;
     int nLoads = 0;
@@ -186,25 +203,26 @@ SUPGElement :: computeBCLhsTerm_MB(FloatMatrix &answer, TimeStep *atTime)
             Load *load = domain->giveLoad(n);
             boundarytype = load->giveType();
             if ( boundarytype == SlipWithFriction ) {
-                this->computeSlipWithFrictionBCTerm_MB(helpMatrix, load, side, atTime);
+                this->computeSlipWithFrictionBCTerm_MB(helpMatrix, load, side, tStep);
                 answer.add(helpMatrix);
             } else if ( boundarytype == PenetrationWithResistance ) {
-                this->computePenetrationWithResistanceBCTerm_MB(helpMatrix, load, side, atTime);
+                this->computePenetrationWithResistanceBCTerm_MB(helpMatrix, load, side, tStep);
                 answer.add(helpMatrix);
             } else {
                 // _error("computeForceLoadVector : unsupported load type class");
             }
         }
     }
+
     nLoads = this->giveBodyLoadArray()->giveSize();
 
-    if ( nLoads ) { 
+    if ( nLoads ) {
         bcGeomType ltype;
         for ( int i = 1; i <= nLoads; i++ ) {
             Load *load = domain->giveLoad( bodyLoadArray.at(i) );
             ltype = load->giveBCGeoType();
             if ( ( ltype == BodyLoadBGT ) && ( load->giveBCValType() == ReinforceBVT ) ) {
-                this->computeHomogenizedReinforceTerm_MB(helpMatrix, load, atTime);
+                this->computeHomogenizedReinforceTerm_MB(helpMatrix, load, tStep);
                 answer.add(helpMatrix);
             }
         }
@@ -212,7 +230,7 @@ SUPGElement :: computeBCLhsTerm_MB(FloatMatrix &answer, TimeStep *atTime)
 }
 
 void
-SUPGElement :: computeBCLhsPressureTerm_MB(FloatMatrix &answer, TimeStep *atTime)
+SUPGElement :: computeBCLhsPressureTerm_MB(FloatMatrix &answer, TimeStep *tStep)
 {
     bcType boundarytype;
     int nLoads = 0;
@@ -230,7 +248,7 @@ SUPGElement :: computeBCLhsPressureTerm_MB(FloatMatrix &answer, TimeStep *atTime
             Load *load = domain->giveLoad(n);
             boundarytype = load->giveType();
             if ( boundarytype == OutFlowBC ) {
-                this->computeOutFlowBCTerm_MB(helpMatrix, side, atTime);
+                this->computeOutFlowBCTerm_MB(helpMatrix, side, tStep);
                 answer.add(helpMatrix);
             } else {
                 //_warning("computeForceLoadVector : unsupported load type class");
@@ -240,7 +258,7 @@ SUPGElement :: computeBCLhsPressureTerm_MB(FloatMatrix &answer, TimeStep *atTime
 }
 
 void
-SUPGElement :: computeBCLhsPressureTerm_MC(FloatMatrix &answer, TimeStep *atTime)
+SUPGElement :: computeBCLhsPressureTerm_MC(FloatMatrix &answer, TimeStep *tStep)
 {
     int nLoads = 0;
     //bcType loadtype;
@@ -248,13 +266,13 @@ SUPGElement :: computeBCLhsPressureTerm_MC(FloatMatrix &answer, TimeStep *atTime
 
     nLoads = this->giveBodyLoadArray()->giveSize();
     answer.resize(0, 0);
-    if ( nLoads ) { 
+    if ( nLoads ) {
         bcGeomType ltype;
         for ( int i = 1; i <= nLoads; i++ ) {
             Load *load  = domain->giveLoad( bodyLoadArray.at(i) );
             ltype = load->giveBCGeoType();
             if ( ( ltype == BodyLoadBGT ) && ( load->giveBCValType() == ReinforceBVT ) ) {
-                this->computeHomogenizedReinforceTerm_MC(helpMatrix, load, atTime);
+                this->computeHomogenizedReinforceTerm_MC(helpMatrix, load, tStep);
                 answer.add(helpMatrix);
             }
         }
@@ -295,7 +313,7 @@ SUPGElement :: checkConsistency()
 }
 
 void
-SUPGElement :: updateInternalState(TimeStep *stepN)
+SUPGElement :: updateInternalState(TimeStep *tStep)
 {
     IntegrationRule *iRule;
     FloatArray stress;
@@ -304,13 +322,13 @@ SUPGElement :: updateInternalState(TimeStep *stepN)
     for ( int i = 0; i < numberOfIntegrationRules; i++ ) {
         iRule = integrationRulesArray [ i ];
         for ( int j = 0; j < iRule->giveNumberOfIntegrationPoints(); j++ ) {
-            computeDeviatoricStress(stress, iRule->getIntegrationPoint(j), stepN);
+            computeDeviatoricStress(stress, iRule->getIntegrationPoint(j), tStep);
         }
     }
 }
 
 void
-SUPGElement :: printOutputAt(FILE *file, TimeStep *stepN)
+SUPGElement :: printOutputAt(FILE *file, TimeStep *tStep)
 // Performs end-of-step operations.
 {
 #ifdef __PARALLEL_MODE
@@ -320,7 +338,7 @@ SUPGElement :: printOutputAt(FILE *file, TimeStep *stepN)
 #endif
 
     for ( int i = 0; i < numberOfIntegrationRules; i++ ) {
-        integrationRulesArray [ i ]->printOutputAt(file, stepN);
+        integrationRulesArray [ i ]->printOutputAt(file, tStep);
     }
 }
 
@@ -328,7 +346,7 @@ SUPGElement :: printOutputAt(FILE *file, TimeStep *stepN)
 #ifdef __OOFEG
 int
 SUPGElement :: giveInternalStateAtNode(FloatArray &answer, InternalStateType type, InternalStateMode mode,
-                                       int node, TimeStep *atTime)
+                                       int node, TimeStep *tStep)
 {
     int indx = 1;
     Node *n = this->giveNode(node);
@@ -337,11 +355,11 @@ SUPGElement :: giveInternalStateAtNode(FloatArray &answer, InternalStateType typ
         answer.resize( this->giveSpatialDimension() );
         int dofindx;
         if ( ( dofindx = n->findDofWithDofId(V_u) ) ) {
-            answer.at(indx++) = n->giveDof(dofindx)->giveUnknown(VM_Total, atTime);
+            answer.at(indx++) = n->giveDof(dofindx)->giveUnknown(VM_Total, tStep);
         } else if ( ( dofindx = n->findDofWithDofId(V_v) ) ) {
-            answer.at(indx++) = n->giveDof(dofindx)->giveUnknown(VM_Total, atTime);
+            answer.at(indx++) = n->giveDof(dofindx)->giveUnknown(VM_Total, tStep);
         } else if ( ( dofindx = n->findDofWithDofId(V_w) ) ) {
-            answer.at(indx++) = n->giveDof(dofindx)->giveUnknown(VM_Total, atTime);
+            answer.at(indx++) = n->giveDof(dofindx)->giveUnknown(VM_Total, tStep);
         }
 
         return 1;
@@ -349,13 +367,13 @@ SUPGElement :: giveInternalStateAtNode(FloatArray &answer, InternalStateType typ
         int dofindx;
         if ( ( dofindx = n->findDofWithDofId(P_f) ) ) {
             answer.resize(1);
-            answer.at(1) = n->giveDof(dofindx)->giveUnknown(VM_Total, atTime);
+            answer.at(1) = n->giveDof(dofindx)->giveUnknown(VM_Total, tStep);
             return 1;
         } else {
             return 0;
         }
     } else {
-        return Element :: giveInternalStateAtNode(answer, type, mode, node, atTime);
+        return Element :: giveInternalStateAtNode(answer, type, mode, node, tStep);
     }
 }
 
@@ -364,17 +382,20 @@ SUPGElement :: giveInternalStateAtNode(FloatArray &answer, InternalStateType typ
 
 #if 0
 void
-SUPGElement::computeVectorOfPrescribed (EquationID ut, ValueModeType type, TimeStep* stepN, FloatArray& answer)
+SUPGElement :: computeVectorOfPrescribed(EquationID ut, ValueModeType type, TimeStep *tStep, FloatArray &answer)
 {
     double scale;
-    Element::computeVectorOfPrescribed (ut, type, stepN, answer);
-    if (domain->giveEngngModel()->giveEquationScalingFlag()) {
-    if (ut == EID_MomentumBalance) {
-        scale = domain->giveEngngModel()->giveVariableScale(VST_Velocity);
-    } else if (ut == EID_ConservationEquation) {
-        scale = domain->giveEngngModel()->giveVariableScale(VST_Pressure);
-    } else scale = 1.0;
-        answer.times (1.0/scale);
+    Element :: computeVectorOfPrescribed(ut, type, tStep, answer);
+    if ( domain->giveEngngModel()->giveEquationScalingFlag() ) {
+        if ( ut == EID_MomentumBalance ) {
+            scale = domain->giveEngngModel()->giveVariableScale(VST_Velocity);
+        } else if ( ut == EID_ConservationEquation ) {
+            scale = domain->giveEngngModel()->giveVariableScale(VST_Pressure);
+        } else {
+            scale = 1.0;
+        }
+
+        answer.times(1.0 / scale);
     }
 }
 #endif

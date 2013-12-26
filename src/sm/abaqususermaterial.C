@@ -45,8 +45,7 @@
 #include <cstring>
 
 namespace oofem {
-
-REGISTER_Material( AbaqusUserMaterial );
+REGISTER_Material(AbaqusUserMaterial);
 
 int AbaqusUserMaterial :: n = 1;
 
@@ -87,14 +86,14 @@ IRResultType AbaqusUserMaterial :: initializeFrom(InputRecord *ir)
         OOFEM_ERROR2( "AbaqusUserMaterial :: initializeFrom - couldn't load \"%s\",\ndlerror: %s", umatfile.c_str() );
     }
 
-//     * ( void ** )( & this->umat ) = GetProcAddress( ( HMODULE ) this->umatobj, "umat_" );
-    *(FARPROC *)( & this->umat ) = GetProcAddress( ( HMODULE ) this->umatobj, "umat_" );//works for MinGW 32bit
+    //     * ( void ** )( & this->umat ) = GetProcAddress( ( HMODULE ) this->umatobj, "umat_" );
+    * ( FARPROC * ) ( & this->umat ) = GetProcAddress( ( HMODULE ) this->umatobj, "umat_" ); //works for MinGW 32bit
     if ( !this->umat ) {
-//         char *dlresult = GetLastError();
-        DWORD dlresult = GetLastError();//works for MinGW 32bit
+        //         char *dlresult = GetLastError();
+        DWORD dlresult = GetLastError(); //works for MinGW 32bit
         OOFEM_ERROR2("AbaqusUserMaterial :: initializeFrom - couldn't load symbol umat,\nerror: %s\n", dlresult);
     }
-    
+
 #else
     this->umatobj = dlopen(umatfile.c_str(), RTLD_NOW);
     if ( !this->umatobj ) {
@@ -118,7 +117,7 @@ MaterialStatus *AbaqusUserMaterial :: CreateStatus(GaussPoint *gp) const
 
 
 void AbaqusUserMaterial :: give3dMaterialStiffnessMatrix(FloatMatrix &answer,
-                                                    MatResponseMode mode, GaussPoint *gp, TimeStep *tStep)
+                                                         MatResponseMode mode, GaussPoint *gp, TimeStep *tStep)
 {
     AbaqusUserMaterialStatus *ms = dynamic_cast< AbaqusUserMaterialStatus * >( this->giveStatus(gp) );
     if ( !ms->hasTangent() ) { ///@todo Make this hack fit more nicely into OOFEM in general;
@@ -154,7 +153,7 @@ void AbaqusUserMaterial :: give3dMaterialStiffnessMatrix(FloatMatrix &answer,
 
 
 void AbaqusUserMaterial :: give3dMaterialStiffnessMatrix_dPdF(FloatMatrix &answer,
-                                                    MatResponseMode mode, GaussPoint *gp, TimeStep *tStep)
+                                                              MatResponseMode mode, GaussPoint *gp, TimeStep *tStep)
 {
     AbaqusUserMaterialStatus *ms = dynamic_cast< AbaqusUserMaterialStatus * >( this->giveStatus(gp) );
     if ( !ms->hasTangent() ) { ///@todo Make this hack fit more nicely into OOFEM in general;
@@ -166,11 +165,10 @@ void AbaqusUserMaterial :: give3dMaterialStiffnessMatrix_dPdF(FloatMatrix &answe
     FloatMatrix dSdE; // is this what Abaqus returns, why the extra D? (DDSDDE)
     dSdE = ms->giveTempTangent();
     this->give_dPdF_from(dSdE, answer, gp);
-    
 }
 
 void AbaqusUserMaterial :: giveRealStressVector_3d(FloatArray &answer, GaussPoint *gp,
-                                                const FloatArray &reducedStrain, TimeStep *tStep)
+                                                   const FloatArray &reducedStrain, TimeStep *tStep)
 {
     AbaqusUserMaterialStatus *ms = static_cast< AbaqusUserMaterialStatus * >( this->giveStatus(gp) );
     /* User-defined material name, left justified. Some internal material models are given names starting with
@@ -218,7 +216,7 @@ void AbaqusUserMaterial :: giveRealStressVector_3d(FloatArray &answer, GaussPoin
      * nonlinearity is accounted for during the step (see “Procedures: overview,” Section 6.1.1); otherwise,
      * the array contains the original coordinates of the point */
     FloatArray coords;
-    gp->giveElement()->computeGlobalCoordinates( coords, * gp->giveCoordinates() ); ///@todo Large deformations?
+    gp->giveElement()->computeGlobalCoordinates( coords, * gp->giveCoordinates() );
 
     /* Rotation increment matrix. This matrix represents the increment of rigid body rotation of the basis
      * system in which the components of stress (STRESS) and strain (STRAN) are stored. It is provided so
@@ -308,7 +306,7 @@ void AbaqusUserMaterial :: giveRealStressVector_3d(FloatArray &answer, GaussPoin
 
 
 void AbaqusUserMaterial :: giveFirstPKStressVector_3d(FloatArray &answer, GaussPoint *gp,
-                                                const FloatArray &vF, TimeStep *tStep)
+                                                      const FloatArray &vF, TimeStep *tStep)
 {
     AbaqusUserMaterialStatus *ms = static_cast< AbaqusUserMaterialStatus * >( this->giveStatus(gp) );
     /* User-defined material name, left justified. Some internal material models are given names starting with
@@ -335,7 +333,7 @@ void AbaqusUserMaterial :: giveFirstPKStressVector_3d(FloatArray &answer, GaussP
     E.at(2, 2) -= 1.0;
     E.at(3, 3) -= 1.0;
     E.times(0.5);
-    reducedStrain.beSymVectorFormOfStrain(E); 
+    reducedStrain.beSymVectorFormOfStrain(E);
 
     strainIncrement.beDifferenceOf(reducedStrain, strain);
     FloatArray state = ms->giveStateVector();
@@ -400,9 +398,10 @@ void AbaqusUserMaterial :: giveFirstPKStressVector_3d(FloatArray &answer, GaussP
     int noel = gp->giveElement()->giveNumber(); // Element number.
     int npt = 0; // Integration point number.
 
+    // We intentionally ignore the layer number since that is handled by the layered cross-section in OOFEM.
     int layer = 0; // Layer number (for composite shells and layered solids)..
     int kspt = 0; // Section point number within the current layer.
-    int kstep = 0; // Step number.
+    int kstep = tStep->giveMetatStepumber(); // Step number.
     int kinc = 0; // Increment number.
 
     ///@todo No idea about these parameters
@@ -489,7 +488,7 @@ void AbaqusUserMaterialStatus :: updateYourself(TimeStep *tStep)
     stateVector = tempStateVector;
 }
 
-int AbaqusUserMaterial :: giveIPValue(FloatArray& answer, GaussPoint *gp, InternalStateType type, TimeStep *atTime)
+int AbaqusUserMaterial :: giveIPValue(FloatArray &answer, GaussPoint *gp, InternalStateType type, TimeStep *tStep)
 {
     AbaqusUserMaterialStatus *ms = static_cast< AbaqusUserMaterialStatus * >( this->giveStatus(gp) );
     if ( type == IST_Undefined ) {
@@ -497,8 +496,7 @@ int AbaqusUserMaterial :: giveIPValue(FloatArray& answer, GaussPoint *gp, Intern
         answer = ms->giveStateVector();
         return 1;
     } else {
-        return StructuralMaterial :: giveIPValue(answer, gp, type, atTime);
+        return StructuralMaterial :: giveIPValue(answer, gp, type, tStep);
     }
 }
-
 } // end namespace oofem

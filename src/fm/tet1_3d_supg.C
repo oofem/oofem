@@ -53,14 +53,13 @@
 #endif
 
 namespace oofem {
-
-REGISTER_Element( Tet1_3D_SUPG );
+REGISTER_Element(Tet1_3D_SUPG);
 
 FEI3dTetLin Tet1_3D_SUPG :: interpolation;
 
 Tet1_3D_SUPG :: Tet1_3D_SUPG(int n, Domain *aDomain) :
     SUPGElement2(n, aDomain)
-// Constructor.
+    // Constructor.
 {
     numberOfDofMans  = 4;
 }
@@ -96,14 +95,6 @@ Tet1_3D_SUPG :: giveElementDofIDMask(EquationID ut, IntArray &answer) const
 }
 
 
-IRResultType
-Tet1_3D_SUPG :: initializeFrom(InputRecord *ir)
-{
-    //const char*__proc = "initializeFrom"; // Required by IR_GIVE_FIELD macro
-    //IRResultType result;                  // Required by IR_GIVE_FIELD macro
-    return SUPGElement2 :: initializeFrom(ir);
-}
-
 void
 Tet1_3D_SUPG :: computeGaussPoints()
 // Sets up the array containing the integration points of the receiver.
@@ -112,13 +103,13 @@ Tet1_3D_SUPG :: computeGaussPoints()
         numberOfIntegrationRules = 3;
         integrationRulesArray = new IntegrationRule * [ numberOfIntegrationRules ];
         integrationRulesArray [ 0 ] = new GaussIntegrationRule(1, this, 1, 3);
-        this->giveCrossSection()->setupIntegrationPoints( *integrationRulesArray[0], 1, this );
+        this->giveCrossSection()->setupIntegrationPoints(* integrationRulesArray [ 0 ], 1, this);
 
         integrationRulesArray [ 1 ] = new GaussIntegrationRule(2, this, 1, 3);
-        this->giveCrossSection()->setupIntegrationPoints( *integrationRulesArray[1], 4, this );
+        this->giveCrossSection()->setupIntegrationPoints(* integrationRulesArray [ 1 ], 4, this);
 
         integrationRulesArray [ 2 ] = new GaussIntegrationRule(3, this, 1, 3);
-        this->giveCrossSection()->setupIntegrationPoints( *integrationRulesArray[2], 4, this );
+        this->giveCrossSection()->setupIntegrationPoints(* integrationRulesArray [ 2 ], 4, this);
     }
 }
 
@@ -138,7 +129,7 @@ void
 Tet1_3D_SUPG :: computeNuMatrix(FloatMatrix &answer, GaussPoint *gp)
 {
     FloatArray n(4);
-    this->interpolation.evalN(n, * gp->giveCoordinates(), FEIElementGeometryWrapper(this));
+    this->interpolation.evalN( n, * gp->giveCoordinates(), FEIElementGeometryWrapper(this) );
 
     answer.resize(3, 12);
     answer.zero();
@@ -151,13 +142,13 @@ Tet1_3D_SUPG :: computeNuMatrix(FloatMatrix &answer, GaussPoint *gp)
 }
 
 void
-Tet1_3D_SUPG :: computeUDotGradUMatrix(FloatMatrix &answer, GaussPoint *gp, TimeStep *atTime)
+Tet1_3D_SUPG :: computeUDotGradUMatrix(FloatMatrix &answer, GaussPoint *gp, TimeStep *tStep)
 {
     FloatMatrix n, dn(4, 3);
     FloatArray u, un;
-    interpolation.evaldNdx(dn, * gp->giveCoordinates(), FEIElementGeometryWrapper(this));
+    interpolation.evaldNdx( dn, * gp->giveCoordinates(), FEIElementGeometryWrapper(this) );
     this->computeNuMatrix(n, gp);
-    this->computeVectorOf(EID_MomentumBalance, VM_Total, atTime, un);
+    this->computeVectorOf(EID_MomentumBalance, VM_Total, tStep, un);
 
     u.beProductOf(n, un);
 
@@ -171,7 +162,7 @@ Tet1_3D_SUPG :: computeUDotGradUMatrix(FloatMatrix &answer, GaussPoint *gp, Time
 }
 
 void
-Tet1_3D_SUPG :: computeDivTauMatrix(FloatMatrix &answer, GaussPoint *gp, TimeStep *atTime)
+Tet1_3D_SUPG :: computeDivTauMatrix(FloatMatrix &answer, GaussPoint *gp, TimeStep *tStep)
 {
     answer.resize(3, 12);
     answer.zero();
@@ -179,14 +170,14 @@ Tet1_3D_SUPG :: computeDivTauMatrix(FloatMatrix &answer, GaussPoint *gp, TimeSte
 
 
 void
-Tet1_3D_SUPG :: computeGradUMatrix(FloatMatrix &answer, GaussPoint *gp, TimeStep *atTime)
+Tet1_3D_SUPG :: computeGradUMatrix(FloatMatrix &answer, GaussPoint *gp, TimeStep *tStep)
 {
     FloatArray u;
     FloatMatrix dn, um(3, 4);
 
-    this->computeVectorOf(EID_MomentumBalance, VM_Total, atTime, u);
+    this->computeVectorOf(EID_MomentumBalance, VM_Total, tStep, u);
 
-    interpolation.evaldNdx(dn, * gp->giveCoordinates(), FEIElementGeometryWrapper(this));
+    interpolation.evaldNdx( dn, * gp->giveCoordinates(), FEIElementGeometryWrapper(this) );
     for ( int i = 1; i <= 4; i++ ) {
         um.at(1, i) = u.at(3 * i - 2);
         um.at(2, i) = u.at(3 * i - 1);
@@ -201,7 +192,7 @@ void
 Tet1_3D_SUPG :: computeBMatrix(FloatMatrix &answer, GaussPoint *gp)
 {
     FloatMatrix dn(4, 3);
-    interpolation.evaldNdx(dn, * gp->giveCoordinates(), FEIElementGeometryWrapper(this));
+    interpolation.evaldNdx( dn, * gp->giveCoordinates(), FEIElementGeometryWrapper(this) );
 
     answer.resize(6, 12);
     answer.zero();
@@ -226,7 +217,7 @@ void
 Tet1_3D_SUPG :: computeDivUMatrix(FloatMatrix &answer, GaussPoint *gp)
 {
     FloatMatrix dn(4, 3);
-    interpolation.evaldNdx(dn, * gp->giveCoordinates(), FEIElementGeometryWrapper(this));
+    interpolation.evaldNdx( dn, * gp->giveCoordinates(), FEIElementGeometryWrapper(this) );
 
     answer.resize(1, 12);
     answer.zero();
@@ -242,7 +233,7 @@ void
 Tet1_3D_SUPG :: computeNpMatrix(FloatMatrix &answer, GaussPoint *gp)
 {
     FloatArray n(4);
-    this->interpolation.evalN(n, * gp->giveCoordinates(), FEIElementGeometryWrapper(this));
+    this->interpolation.evalN( n, * gp->giveCoordinates(), FEIElementGeometryWrapper(this) );
 
     answer.resize(1, 4);
     answer.zero();
@@ -258,7 +249,7 @@ void
 Tet1_3D_SUPG :: computeGradPMatrix(FloatMatrix &answer, GaussPoint *gp)
 {
     FloatMatrix dn(4, 3);
-    interpolation.evaldNdx(dn, * gp->giveCoordinates(), FEIElementGeometryWrapper(this));
+    interpolation.evaldNdx( dn, * gp->giveCoordinates(), FEIElementGeometryWrapper(this) );
 
     answer.beTranspositionOf(dn);
 }
@@ -266,9 +257,9 @@ Tet1_3D_SUPG :: computeGradPMatrix(FloatMatrix &answer, GaussPoint *gp)
 
 
 void
-Tet1_3D_SUPG :: updateStabilizationCoeffs(TimeStep *atTime)
+Tet1_3D_SUPG :: updateStabilizationCoeffs(TimeStep *tStep)
 {
-    //TR1_2D_SUPG :: updateStabilizationCoeffs (atTime);
+    //TR1_2D_SUPG :: updateStabilizationCoeffs (tStep);
     /* UGN-Based Stabilization */
     double h_ugn, sum = 0.0, vnorm, t_sugn1, t_sugn2, t_sugn3, u_1, u_2, u_3, z, Re_ugn;
     double dscale, uscale, lscale, tscale, dt;
@@ -282,7 +273,7 @@ Tet1_3D_SUPG :: updateStabilizationCoeffs(TimeStep *atTime)
     tscale = domain->giveEngngModel()->giveVariableScale(VST_Time);
     dscale = domain->giveEngngModel()->giveVariableScale(VST_Density);
 
-    this->computeVectorOf(EID_MomentumBalance, VM_Total, atTime->givePreviousStep(), u);
+    this->computeVectorOf(EID_MomentumBalance, VM_Total, tStep->givePreviousStep(), u);
 
     u.times(uscale);
     double nu;
@@ -290,11 +281,11 @@ Tet1_3D_SUPG :: updateStabilizationCoeffs(TimeStep *atTime)
     // compute averaged viscosity based on rule of mixture
     GaussPoint *gp;
 
-    dt = atTime->giveTimeIncrement() * tscale;
+    dt = tStep->giveTimeIncrement() * tscale;
 
     IntegrationRule *iRule = this->integrationRulesArray [ 1 ];
     gp = iRule->getIntegrationPoint(0);
-    nu = static_cast< FluidDynamicMaterial* >(this->giveMaterial())->giveEffectiveViscosity(gp, atTime->givePreviousStep());
+    nu = static_cast< FluidDynamicMaterial * >( this->giveMaterial() )->giveEffectiveViscosity( gp, tStep->givePreviousStep() );
     nu *= domain->giveEngngModel()->giveVariableScale(VST_Viscosity);
 
     for ( int k = 0; k < iRule->giveNumberOfIntegrationPoints(); k++ ) {
@@ -373,7 +364,7 @@ double
 Tet1_3D_SUPG :: computeCriticalTimeStep(TimeStep *tStep)
 {
     FloatArray u;
-    double Re = static_cast<FluidModel*>(domain->giveEngngModel())->giveReynoldsNumber();
+    double Re = static_cast< FluidModel * >( domain->giveEngngModel() )->giveReynoldsNumber();
 
     this->computeVectorOf(EID_MomentumBalance, VM_Total, tStep, u);
 
@@ -423,14 +414,14 @@ Tet1_3D_SUPG :: computeCriticalTimeStep(TimeStep *tStep)
 
 
 double
-Tet1_3D_SUPG :: computeVolumeAround(GaussPoint *aGaussPoint)
-// Returns the portion of the receiver which is attached to aGaussPoint.
+Tet1_3D_SUPG :: computeVolumeAround(GaussPoint *gp)
+// Returns the portion of the receiver which is attached to gp.
 {
     double determinant, weight, volume;
-    determinant = fabs( this->interpolation.giveTransformationJacobian(* aGaussPoint->giveCoordinates(),
-                                                                       FEIElementGeometryWrapper(this)) );
+    determinant = fabs( this->interpolation.giveTransformationJacobian( * gp->giveCoordinates(),
+                                                                        FEIElementGeometryWrapper(this) ) );
 
-    weight = aGaussPoint->giveWeight();
+    weight = gp->giveWeight();
     volume = determinant * weight;
 
     return volume;
@@ -438,14 +429,14 @@ Tet1_3D_SUPG :: computeVolumeAround(GaussPoint *aGaussPoint)
 
 
 double
-Tet1_3D_SUPG :: LS_PCS_computeF(LevelSetPCS *ls, TimeStep *atTime)
+Tet1_3D_SUPG :: LS_PCS_computeF(LevelSetPCS *ls, TimeStep *tStep)
 {
     double answer = 0.0, norm, dV, vol = 0.0;
     FloatMatrix n(3, 4), dn(4, 3);
     FloatArray fi(4), u, un, gfi;
     GaussPoint *gp;
 
-    this->computeVectorOf(EID_MomentumBalance, VM_Total, atTime, un);
+    this->computeVectorOf(EID_MomentumBalance, VM_Total, tStep, un);
 
     for ( int i = 1; i <= 4; i++ ) {
         fi.at(i) = ls->giveLevelSetDofManValue( dofManArray.at(i) );
@@ -455,7 +446,7 @@ Tet1_3D_SUPG :: LS_PCS_computeF(LevelSetPCS *ls, TimeStep *atTime)
     for ( int k = 0; k < iRule->giveNumberOfIntegrationPoints(); k++ ) {
         gp = iRule->getIntegrationPoint(k);
         dV  = this->computeVolumeAround(gp);
-        interpolation.evaldNdx(dn, * gp->giveCoordinates(), FEIElementGeometryWrapper(this));
+        interpolation.evaldNdx( dn, * gp->giveCoordinates(), FEIElementGeometryWrapper(this) );
         this->computeNuMatrix(n, gp);
         u.beProductOf(n, un);
         gfi.beTProductOf(dn, fi);
@@ -473,7 +464,7 @@ Tet1_3D_SUPG :: LS_PCS_computedN(FloatMatrix &answer)
 {
     IntegrationRule *iRule = this->integrationRulesArray [ 0 ];
     GaussPoint *gp = iRule->getIntegrationPoint(0);
-    interpolation.evaldNdx(answer, * gp->giveCoordinates(), FEIElementGeometryWrapper(this));
+    interpolation.evaldNdx( answer, * gp->giveCoordinates(), FEIElementGeometryWrapper(this) );
 }
 
 
@@ -494,7 +485,7 @@ Tet1_3D_SUPG :: LS_PCS_computeVolume()
 }
 
 double
-Tet1_3D_SUPG :: LS_PCS_computeS(LevelSetPCS *ls, TimeStep *atTime)
+Tet1_3D_SUPG :: LS_PCS_computeS(LevelSetPCS *ls, TimeStep *tStep)
 {
     int i;
     FloatArray voff(2), fi(4);
@@ -579,8 +570,8 @@ Tet1_3D_SUPG :: LS_PCS_computeVOFFractions(FloatArray &answer, FloatArray &fi)
 
                 // compute volume of this pyramid (si, xi[0], xi[1], xi[2])
                 double __vol = fabs( ( 1. / 6. ) * ( ( x1 - xi [ 0 ] ) * ( ( yi [ 1 ] - yi [ 0 ] ) * ( zi [ 2 ] - zi [ 0 ] ) - ( zi [ 1 ] - zi [ 0 ] ) * ( yi [ 2 ] - yi [ 0 ] ) ) +
-                                                    ( y1 - yi [ 0 ] ) * ( ( zi [ 1 ] - zi [ 0 ] ) * ( xi [ 2 ] - xi [ 0 ] ) - ( xi [ 1 ] - xi [ 0 ] ) * ( zi [ 2 ] - zi [ 0 ] ) ) +
-                                                    ( z1 - zi [ 0 ] ) * ( ( xi [ 1 ] - xi [ 0 ] ) * ( yi [ 2 ] - yi [ 0 ] ) - ( yi [ 1 ] - yi [ 0 ] ) * ( xi [ 2 ] - xi [ 0 ] ) ) ) );
+                                                     ( y1 - yi [ 0 ] ) * ( ( zi [ 1 ] - zi [ 0 ] ) * ( xi [ 2 ] - xi [ 0 ] ) - ( xi [ 1 ] - xi [ 0 ] ) * ( zi [ 2 ] - zi [ 0 ] ) ) +
+                                                     ( z1 - zi [ 0 ] ) * ( ( xi [ 1 ] - xi [ 0 ] ) * ( yi [ 2 ] - yi [ 0 ] ) - ( yi [ 1 ] - yi [ 0 ] ) * ( xi [ 2 ] - xi [ 0 ] ) ) ) );
 
 
                 double vol = LS_PCS_computeVolume();
@@ -655,25 +646,25 @@ Tet1_3D_SUPG :: LS_PCS_computeVOFFractions(FloatArray &answer, FloatArray &fi)
                 // compute volume of this wedge as a sum of volumes of three
                 // pyramids
                 double __v1 = ( ( p2i_x [ 0 ] - p1i_x [ 0 ] ) * ( p1i_y [ 1 ] - p1i_y [ 0 ] ) * ( p1i_z [ 2 ] - p1i_z [ 0 ] ) -
-                               ( p2i_x [ 0 ] - p1i_x [ 0 ] ) * ( p1i_y [ 2 ] - p1i_y [ 0 ] ) * ( p1i_z [ 1 ] - p1i_z [ 0 ] ) +
-                               ( p1i_x [ 2 ] - p1i_x [ 0 ] ) * ( p2i_y [ 0 ] - p1i_y [ 0 ] ) * ( p1i_z [ 1 ] - p1i_z [ 0 ] ) -
-                               ( p1i_x [ 1 ] - p1i_x [ 0 ] ) * ( p2i_y [ 0 ] - p1i_y [ 0 ] ) * ( p1i_z [ 2 ] - p1i_z [ 0 ] ) +
-                               ( p1i_x [ 1 ] - p1i_x [ 0 ] ) * ( p1i_y [ 2 ] - p1i_y [ 0 ] ) * ( p2i_z [ 0 ] - p1i_z [ 0 ] ) -
-                               ( p1i_x [ 2 ] - p1i_x [ 0 ] ) * ( p1i_y [ 1 ] - p1i_y [ 0 ] ) * ( p2i_z [ 0 ] - p1i_z [ 0 ] ) ) / 6.0;
+                                ( p2i_x [ 0 ] - p1i_x [ 0 ] ) * ( p1i_y [ 2 ] - p1i_y [ 0 ] ) * ( p1i_z [ 1 ] - p1i_z [ 0 ] ) +
+                                ( p1i_x [ 2 ] - p1i_x [ 0 ] ) * ( p2i_y [ 0 ] - p1i_y [ 0 ] ) * ( p1i_z [ 1 ] - p1i_z [ 0 ] ) -
+                                ( p1i_x [ 1 ] - p1i_x [ 0 ] ) * ( p2i_y [ 0 ] - p1i_y [ 0 ] ) * ( p1i_z [ 2 ] - p1i_z [ 0 ] ) +
+                                ( p1i_x [ 1 ] - p1i_x [ 0 ] ) * ( p1i_y [ 2 ] - p1i_y [ 0 ] ) * ( p2i_z [ 0 ] - p1i_z [ 0 ] ) -
+                                ( p1i_x [ 2 ] - p1i_x [ 0 ] ) * ( p1i_y [ 1 ] - p1i_y [ 0 ] ) * ( p2i_z [ 0 ] - p1i_z [ 0 ] ) ) / 6.0;
 
                 double __v2 = ( ( p2i_x [ 0 ] - p1i_x [ 1 ] ) * ( p1i_y [ 2 ] - p1i_y [ 1 ] ) * ( p2i_z [ 1 ] - p1i_z [ 1 ] ) -
-                               ( p2i_x [ 0 ] - p1i_x [ 1 ] ) * ( p2i_y [ 1 ] - p1i_y [ 1 ] ) * ( p1i_z [ 2 ] - p1i_z [ 1 ] ) +
-                               ( p2i_x [ 1 ] - p1i_x [ 1 ] ) * ( p2i_y [ 0 ] - p1i_y [ 1 ] ) * ( p1i_z [ 2 ] - p1i_z [ 1 ] ) -
-                               ( p1i_x [ 2 ] - p1i_x [ 1 ] ) * ( p2i_y [ 0 ] - p1i_y [ 1 ] ) * ( p2i_z [ 1 ] - p1i_z [ 1 ] ) +
-                               ( p1i_x [ 2 ] - p1i_x [ 1 ] ) * ( p2i_y [ 1 ] - p1i_y [ 1 ] ) * ( p2i_z [ 0 ] - p1i_z [ 1 ] ) -
-                               ( p2i_x [ 1 ] - p1i_x [ 1 ] ) * ( p1i_y [ 2 ] - p1i_y [ 1 ] ) * ( p2i_z [ 0 ] - p1i_z [ 1 ] ) ) / 6.0;
+                                ( p2i_x [ 0 ] - p1i_x [ 1 ] ) * ( p2i_y [ 1 ] - p1i_y [ 1 ] ) * ( p1i_z [ 2 ] - p1i_z [ 1 ] ) +
+                                ( p2i_x [ 1 ] - p1i_x [ 1 ] ) * ( p2i_y [ 0 ] - p1i_y [ 1 ] ) * ( p1i_z [ 2 ] - p1i_z [ 1 ] ) -
+                                ( p1i_x [ 2 ] - p1i_x [ 1 ] ) * ( p2i_y [ 0 ] - p1i_y [ 1 ] ) * ( p2i_z [ 1 ] - p1i_z [ 1 ] ) +
+                                ( p1i_x [ 2 ] - p1i_x [ 1 ] ) * ( p2i_y [ 1 ] - p1i_y [ 1 ] ) * ( p2i_z [ 0 ] - p1i_z [ 1 ] ) -
+                                ( p2i_x [ 1 ] - p1i_x [ 1 ] ) * ( p1i_y [ 2 ] - p1i_y [ 1 ] ) * ( p2i_z [ 0 ] - p1i_z [ 1 ] ) ) / 6.0;
 
                 double __v3 = ( ( p1i_x [ 2 ] - p2i_x [ 0 ] ) * ( p2i_y [ 1 ] - p2i_y [ 0 ] ) * ( p2i_z [ 2 ] - p2i_z [ 0 ] ) -
-                               ( p1i_x [ 2 ] - p2i_x [ 0 ] ) * ( p2i_y [ 2 ] - p2i_y [ 0 ] ) * ( p2i_z [ 1 ] - p2i_z [ 0 ] ) +
-                               ( p2i_x [ 2 ] - p2i_x [ 0 ] ) * ( p1i_y [ 2 ] - p2i_y [ 0 ] ) * ( p2i_z [ 1 ] - p2i_z [ 0 ] ) -
-                               ( p2i_x [ 1 ] - p2i_x [ 0 ] ) * ( p1i_y [ 2 ] - p2i_y [ 0 ] ) * ( p2i_z [ 2 ] - p2i_z [ 0 ] ) +
-                               ( p2i_x [ 1 ] - p2i_x [ 0 ] ) * ( p2i_y [ 2 ] - p2i_y [ 0 ] ) * ( p1i_z [ 2 ] - p2i_z [ 0 ] ) -
-                               ( p2i_x [ 2 ] - p2i_x [ 0 ] ) * ( p2i_y [ 1 ] - p2i_y [ 0 ] ) * ( p1i_z [ 2 ] - p2i_z [ 0 ] ) ) / 6.0;
+                                ( p1i_x [ 2 ] - p2i_x [ 0 ] ) * ( p2i_y [ 2 ] - p2i_y [ 0 ] ) * ( p2i_z [ 1 ] - p2i_z [ 0 ] ) +
+                                ( p2i_x [ 2 ] - p2i_x [ 0 ] ) * ( p1i_y [ 2 ] - p2i_y [ 0 ] ) * ( p2i_z [ 1 ] - p2i_z [ 0 ] ) -
+                                ( p2i_x [ 1 ] - p2i_x [ 0 ] ) * ( p1i_y [ 2 ] - p2i_y [ 0 ] ) * ( p2i_z [ 2 ] - p2i_z [ 0 ] ) +
+                                ( p2i_x [ 1 ] - p2i_x [ 0 ] ) * ( p2i_y [ 2 ] - p2i_y [ 0 ] ) * ( p1i_z [ 2 ] - p2i_z [ 0 ] ) -
+                                ( p2i_x [ 2 ] - p2i_x [ 0 ] ) * ( p2i_y [ 1 ] - p2i_y [ 0 ] ) * ( p1i_z [ 2 ] - p2i_z [ 0 ] ) ) / 6.0;
 
                 double __vol = fabs(__v1) + fabs(__v2) + fabs(__v3);
                 double vol = LS_PCS_computeVolume();
@@ -682,7 +673,7 @@ Tet1_3D_SUPG :: LS_PCS_computeVOFFractions(FloatArray &answer, FloatArray &fi)
                     OOFEM_ERROR("Tet1_3D_SUPG::LS_PCS_computeVOFFractions: internal consistency error");
                 }
 
-                answer.at(1) = min (fabs(__vol) / vol, 1.0);
+                answer.at(1) = min(fabs(__vol) / vol, 1.0);
                 answer.at(2) = 1.0 - answer.at(1);
             } else {
                 OOFEM_ERROR("Tet1_3D_SUPG::LS_PCS_computeVOFFractions: internal consistency error");

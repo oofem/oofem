@@ -109,7 +109,7 @@ public:
      */
     virtual int askNewEquationNumber(TimeStep *tStep) { return 1; }
     virtual double giveUnknown(ValueModeType, TimeStep *);
-    virtual double giveUnknown(PrimaryField & field, ValueModeType, TimeStep * stepN);
+    virtual double giveUnknown(PrimaryField & field, ValueModeType, TimeStep * tStep);
     virtual bool hasBc(TimeStep *tStep);
     virtual bool hasIc();
     virtual bool hasIcOn(ValueModeType);
@@ -122,8 +122,10 @@ public:
 
     /// Returns Master Dof Manager Number.
     int giveMasterDofManagerNum() const { return masterDofMngr; }
-    virtual void giveMasterDofManArray(IntArray &answer) { answer.resize(1);
-                                                           answer.at(1) = masterDofMngr; }
+    virtual void giveMasterDofManArray(IntArray &answer) {
+        answer.resize(1);
+        answer.at(1) = masterDofMngr;
+    }
     /// Sets master dof manager
     void setMasterDofManagerNum(int i) { masterDofMngr = i; }
     /// Returns number of master dof in master dofManager.

@@ -41,10 +41,10 @@
 
 namespace oofem {
 MesherInterface :: returnCode
-Targe2Interface :: createMesh(TimeStep *stepN, int domainNumber, int domainSerNum, Domain **dNew)
+Targe2Interface :: createMesh(TimeStep *tStep, int domainNumber, int domainSerNum, Domain **dNew)
 {
     * dNew = NULL;
-    if ( this->createInput(this->domain, stepN) ) {
+    if ( this->createInput(this->domain, tStep) ) {
         return MI_NEEDS_EXTERNAL_ACTION;
     } else {
         return MI_FAILED;
@@ -52,7 +52,7 @@ Targe2Interface :: createMesh(TimeStep *stepN, int domainNumber, int domainSerNu
 }
 
 int
-Targe2Interface :: createInput(Domain *d, TimeStep *stepN)
+Targe2Interface :: createInput(Domain *d, TimeStep *tStep)
 {
     int nelem = d->giveNumberOfElements();
     FILE *outputStrem;
@@ -65,12 +65,12 @@ Targe2Interface :: createInput(Domain *d, TimeStep *stepN)
     for ( int i = 1; i <= nelem; i++ ) {
         ielem = d->giveElement(i);
         fprintf( outputStrem, "MC-T %e %e %e %e %e %e   %e %e %e\n",
-                ielem->giveNode(1)->giveCoordinate(1), ielem->giveNode(1)->giveCoordinate(2),
-                ielem->giveNode(2)->giveCoordinate(1), ielem->giveNode(2)->giveCoordinate(2),
-                ielem->giveNode(3)->giveCoordinate(1), ielem->giveNode(3)->giveCoordinate(2),
-                rc->giveRequiredDofManDensity(ielem->giveNode(1)->giveNumber(), stepN),
-                rc->giveRequiredDofManDensity(ielem->giveNode(2)->giveNumber(), stepN),
-                rc->giveRequiredDofManDensity(ielem->giveNode(3)->giveNumber(), stepN) );
+                 ielem->giveNode(1)->giveCoordinate(1), ielem->giveNode(1)->giveCoordinate(2),
+                 ielem->giveNode(2)->giveCoordinate(1), ielem->giveNode(2)->giveCoordinate(2),
+                 ielem->giveNode(3)->giveCoordinate(1), ielem->giveNode(3)->giveCoordinate(2),
+                 rc->giveRequiredDofManDensity(ielem->giveNode(1)->giveNumber(), tStep),
+                 rc->giveRequiredDofManDensity(ielem->giveNode(2)->giveNumber(), tStep),
+                 rc->giveRequiredDofManDensity(ielem->giveNode(3)->giveNumber(), tStep) );
     }
 
     fclose(outputStrem);

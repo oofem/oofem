@@ -68,7 +68,6 @@ public:
 
     // definition
     virtual const char *giveClassName() const { return "ExpCZMaterialStatus"; }
-    virtual classType giveClassID() const { return MaterialStatusClass; }
 
     virtual void initTempStatus();
     virtual void updateYourself(TimeStep *tStep);
@@ -108,7 +107,7 @@ protected:
 
     virtual int checkConsistency();
     void give3dInterfaceMaterialStiffnessMatrix(FloatMatrix &answer, MatResponseForm form, MatResponseMode rMode,
-                                                                     GaussPoint *gp, TimeStep *atTime);
+                                                GaussPoint *gp, TimeStep *tStep);
 public:
     /// Constructor
     ExpCZMaterial(int n, Domain *d);
@@ -119,19 +118,16 @@ public:
 
     virtual int hasMaterialModeCapability(MaterialMode mode);
     virtual const char *giveClassName() const { return "ExpCZMaterial"; }
-    virtual classType giveClassID() const { return ExpCZMaterialClass; }
-
-    
 
     virtual void giveRealStressVector(FloatArray &answer, MatResponseForm form, GaussPoint *gp,
-                              const FloatArray &reducedStrain, TimeStep *tStep);
+                                      const FloatArray &reducedStrain, TimeStep *tStep);
 
     virtual void giveCharacteristicMatrix(FloatMatrix &answer,
                                           MatResponseForm form,
                                           MatResponseMode mode,
                                           GaussPoint *gp,
                                           TimeStep *tStep);
-    
+
     virtual int giveIPValue(FloatArray &answer, GaussPoint *gp, InternalStateType type, TimeStep *tStep);
     virtual int giveIntVarCompFullIndx(IntArray &answer, InternalStateType type, MaterialMode mmode);
     virtual int giveIPValueSize(InternalStateType type, GaussPoint *gp);
@@ -139,11 +135,9 @@ public:
 
 
     virtual IRResultType initializeFrom(InputRecord *ir);
-    
+
     virtual MaterialStatus *CreateStatus(GaussPoint *gp) const { return new ExpCZMaterialStatus(1, domain, gp); }
     void printYourself();
-protected:
-   
 };
 } // end namespace oofem
 #endif // isointerfacedamage01_h

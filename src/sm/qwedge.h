@@ -44,18 +44,14 @@
 #include "sprnodalrecoverymodel.h"
 
 #define _IFT_QWedge_Name "qwedge"
+#define _IFT_QWedge_materialCoordinateSystem "matcs" ///< [optional] Experimental support for material directions
 
 namespace oofem {
-
 /**
- * This class implements an Quadratic 3d  15 - node
- * elasticity finite element. Each node has 3 degrees of freedom.
- * 
- * One single additional attribute is needed for Gauss integration purpose :
- * 'jacobianMatrix'. This 3x3 matrix contains polynomials.
- * TASKS :
- * - calculating its Gauss points ;
- * - calculating its B,D,N matrices and dV.
+ * This class implements an Quadratic 3d  15 - node structural finite element.
+ * Each node has 3 degrees of freedom.
+ *
+ * @author Mikael Öhman (among others)
  */
 class QWedge : public NLStructuralElement, public SPRNodalRecoveryModelInterface, public ZZNodalRecoveryModelInterface, public NodalAveragingRecoveryModelInterface
 
@@ -63,11 +59,13 @@ class QWedge : public NLStructuralElement, public SPRNodalRecoveryModelInterface
 protected:
     static FEI3dWedgeQuad interpolation;
 
+    bool matRotation;
+
 public:
     QWedge(int, Domain *);
     virtual ~QWedge() {}
 
-    virtual FEInterpolation *giveInterpolation() const { return &interpolation; }
+    virtual FEInterpolation *giveInterpolation() const { return & interpolation; }
 
     virtual IRResultType initializeFrom(InputRecord *ir);
     virtual void giveDofManDofIDMask(int inode, EquationID ut, IntArray &answer) const;
@@ -77,6 +75,18 @@ public:
 
     virtual Interface *giveInterface(InterfaceType);
     virtual int testElementExtension(ElementExtension ext) { return ( ( ext == Element_SurfaceLoadSupport ) ? 1 : 0 ); }
+
+    /**
+     * Function determines the 3 basis vectors for the local coordinate system that should be used by materials.
+     * @param x First base vector of the local c.s.
+     * @param y Second base vector
+     * @param z Third base vector
+     * @param lcoords Local coordinates to evaluate the local c.s. for.
+     */
+    void giveMaterialOrientationAt(FloatArray &x, FloatArray &y, FloatArray &z, const FloatArray &lcoords);
+
+    virtual void computeStressVector(FloatArray &answer, const FloatArray &strain, GaussPoint *gp, TimeStep *tStep);
+    virtual void computeConstitutiveMatrixAt(FloatMatrix &answer, MatResponseMode rMode, GaussPoint *gp, TimeStep *tStep);
 
     virtual Element *ZZNodalRecoveryMI_giveElement() { return this; }
 
@@ -92,18 +102,15 @@ public:
     // definition & identification
     virtual const char *giveInputRecordName() const { return _IFT_QWedge_Name; }
     virtual const char *giveClassName() const { return "QWedge"; }
-    virtual classType giveClassID() const { return QWedgeClass; }
     virtual int computeNumberOfDofs() { return 45; }
     virtual MaterialMode giveMaterialMode();
 
 protected:
     virtual void computeGaussPoints();
-    virtual void computeNmatrixAt(GaussPoint *, FloatMatrix &);
-    
+
     virtual void computeBmatrixAt(GaussPoint *, FloatMatrix &, int = 1, int = ALL_STRAINS);
     //virtual void computeBFmatrixAt(GaussPoint *, FloatMatrix &);
     virtual void computeBHmatrixAt(GaussPoint *, FloatMatrix &);
-
 };
 } // end namespace oofem
 #endif

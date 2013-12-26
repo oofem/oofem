@@ -108,7 +108,7 @@ public:
     /// Destructor.
     virtual ~StructuralElement();
 
-    virtual void giveCharacteristicMatrix(FloatMatrix &answer, CharType, TimeStep *tStep);
+    virtual void giveCharacteristicMatrix(FloatMatrix & answer, CharType, TimeStep * tStep);
     virtual void giveCharacteristicVector(FloatArray &answer, CharType type, ValueModeType mode, TimeStep *tStep);
 
     virtual void giveDefaultDofManDofIDMask(int inode, IntArray &answer) const { this->giveDofManDofIDMask(inode, EID_MomentumBalance, answer); }
@@ -145,7 +145,7 @@ public:
      * @param tStep Time step.
      * @param mass Total mass of receiver.
      */
-    virtual void computeConsistentMassMatrix(FloatMatrix &answer, TimeStep *tStep, double &mass);
+    virtual void computeConsistentMassMatrix(FloatMatrix &answer, TimeStep *tStep, double &mass, const double *ipDensity = NULL);
     /**
      * Returns mask indicating, which unknowns (their type and ordering is the same as
      * element unknown vector) participate in mass matrix integration.
@@ -249,7 +249,7 @@ public:
 
     virtual int giveIPValue(FloatArray &answer, GaussPoint *gp, InternalStateType type, TimeStep *tStep);
     /**
-     * Computes at given time (stepN) the the resulting temperature component array.
+     * Computes at given time (tStep) the the resulting temperature component array.
      * This is summation of all temperature load  components of  receiver.
      * @param answer Resulting temperature components of receiver.
      * @param tStep Time step.
@@ -294,7 +294,7 @@ public:
      * Adds the "nonlocal" contribution to stiffness matrix, to account for nonlocality of
      * material model. Typically, this contribution is obtained by summing up mutual IP contributions.
      */
-    virtual void addNonlocalStiffnessContributions(SparseMtrx &dest, const UnknownNumberingScheme &s, TimeStep *atTime);
+    virtual void addNonlocalStiffnessContributions(SparseMtrx &dest, const UnknownNumberingScheme &s, TimeStep *tStep);
     //@}
 
     // Overloaded methods.
@@ -305,7 +305,6 @@ public:
     virtual IRResultType initializeFrom(InputRecord *ir);
     virtual void giveInputRecord(DynamicInputRecord &input);
     virtual const char *giveClassName() const { return "StructuralElement"; }
-    virtual classType giveClassID() const { return StructuralElementClass; }
 
 #ifdef __OOFEG
     /**
@@ -317,15 +316,15 @@ public:
      * @param type Determines the internal variable requested (physical meaning).
      * @param mode Determines the mode of variable (recovered, local, ...).
      * @param node Node number, for which variable is required.
-     * @param atTime Time step.
+     * @param tStep Time step.
      * @return Nonzero if o.k, zero otherwise.
      */
     virtual int giveInternalStateAtNode(FloatArray &answer, InternalStateType type, InternalStateMode mode,
-                                        int node, TimeStep *atTime);
+                                        int node, TimeStep *tStep);
     /// Shows sparse structure
-    void showSparseMtrxStructure(CharType mtrx, oofegGraphicContext &gc, TimeStep *atTime);
+    void showSparseMtrxStructure(CharType mtrx, oofegGraphicContext &gc, TimeStep *tStep);
     /// Shows extended sparse structure (for example, due to nonlocal interactions for tangent stiffness)
-    virtual void showExtendedSparseMtrxStructure(CharType mtrx, oofegGraphicContext &gc, TimeStep *atTime);
+    virtual void showExtendedSparseMtrxStructure(CharType mtrx, oofegGraphicContext &gc, TimeStep *tStep);
 
 #endif
 
@@ -346,6 +345,9 @@ public:
                                              TimeStep *tStep);
     /// Helper function which returns the structural cross-section for the element.
     StructuralCrossSection *giveStructuralCrossSection();
+
+    virtual void createMaterialStatus();
+
 protected:
 
 
@@ -439,6 +441,7 @@ protected:
      * The integration point is specified using two-dimensional iso coordinates, or using area coordinates
      * for triangular surface.
      * @param answer Interpolation matrix of surface.
+     * @param iSurf Surface number.
      * @param gp Integration point.
      */
     virtual void computeSurfaceNMatrixAt(FloatMatrix &answer, int iSurf, GaussPoint *gp) { answer.resize(0, 0); }
@@ -551,9 +554,10 @@ protected:
     virtual void computePrescribedStrainLocalLoadVectorAt(FloatArray &answer, TimeStep *tStep, ValueModeType mode);
 
     /**
-     * Computes the stress vector of receiver at given integration point, at time step stepN.
+     * Computes the stress vector of receiver at given integration point, at time step tStep.
      * The nature of these stresses depends on the element's type.
      * @param answer Stress vector.
+     * @param strain Strain vector.
      * @param gp Integration point.
      * @param tStep Time step.
      */
@@ -574,14 +578,17 @@ protected:
      */
     virtual void computeBmatrixAt(GaussPoint *gp, FloatMatrix &answer,
                                   int lowerIndx = 1, int upperIndx = ALL_STRAINS) = 0;
+
+public:
     /**
      * Computes interpolation matrix for element unknowns.
      * The order and meaning of unknowns is element dependent.
-     * @param gp Integration point for which answer is assembled.
+     * @param iLocCoord Local coordinates.
      * @param answer Interpolation matrix evaluated at gp.
      */
-    virtual void computeNmatrixAt(GaussPoint *gp, FloatMatrix &answer) = 0;
+    virtual void computeNmatrixAt(const FloatArray &iLocCoord, FloatMatrix &answer);
 
+protected:
     /**
      * Returns maximum approximation order used by receiver.
      * Must be implemented by derived classes

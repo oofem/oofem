@@ -42,5 +42,4 @@ FMElement :: FMElement(int n, Domain *aDomain) :
 
 FMElement :: ~FMElement()
 { }
-
 } // end namespace oofem

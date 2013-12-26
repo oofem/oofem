@@ -40,7 +40,6 @@
 #define _IFT_InterfaceElem2dQuad_Name "interface2dquad"
 
 namespace oofem {
-
 class FEI2dLineQuad;
 
 /**
@@ -71,21 +70,20 @@ public:
     virtual Interface *giveInterface(InterfaceType) { return NULL; }
 
 #ifdef __OOFEG
-    void drawRawGeometry(oofegGraphicContext &);
-    void drawDeformedGeometry(oofegGraphicContext &, UnknownType);
-    void drawScalar(oofegGraphicContext &context);
+    virtual void drawRawGeometry(oofegGraphicContext &);
+    virtual void drawDeformedGeometry(oofegGraphicContext &, UnknownType);
+    virtual void drawScalar(oofegGraphicContext &context);
 #endif
 
     // definition & identification
     virtual const char *giveInputRecordName() const { return _IFT_InterfaceElem2dQuad_Name; }
     virtual const char *giveClassName() const { return "InterfaceElem2dQuad"; }
-    virtual classType giveClassID() const { return InterfaceElem2dQuadClass; }
     virtual IRResultType initializeFrom(InputRecord *ir);
     virtual MaterialMode giveMaterialMode() { return _2dInterface; }
 
 protected:
     virtual void computeBmatrixAt(GaussPoint *gp, FloatMatrix &answer, int = 1, int = ALL_STRAINS);
-    virtual void computeNmatrixAt(GaussPoint *gp, FloatMatrix &answer) { }
+    virtual void computeNmatrixAt(const FloatArray &iLocCoord, FloatMatrix &answer) { }
     virtual void computeGaussPoints();
 
     virtual int giveApproxOrder() { return 1; }

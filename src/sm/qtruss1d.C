@@ -63,9 +63,9 @@ IRResultType
 QTruss1d :: initializeFrom(InputRecord *ir)
 {
     IRResultType result = this->StructuralElement :: initializeFrom(ir);
-	if(result != IRRT_OK) {
-		return result;
-	}
+    if ( result != IRRT_OK ) {
+        return result;
+    }
 
     return IRRT_OK;
 }
@@ -91,7 +91,7 @@ QTruss1d :: computeVolumeAround(GaussPoint *gp)
 {
     double detJ = fabs( this->interpolation.giveTransformationJacobian( * gp->giveCoordinates(), FEIElementGeometryWrapper(this) ) );
     double weight  = gp->giveWeight();
-    return detJ * weight * this->giveCrossSection()->give(CS_Area);
+    return detJ * weight * this->giveCrossSection()->give(CS_Area, gp);
 }
 
 
@@ -105,22 +105,6 @@ void QTruss1d :: computeGaussPoints()
         this->giveCrossSection()->setupIntegrationPoints(* integrationRulesArray [ 0 ], numberOfGaussPoints, this);
     }
 }
-
-void
-QTruss1d :: computeNmatrixAt(GaussPoint *gp, FloatMatrix &answer)
-// Returns the displacement interpolation matrix {N} of the receiver, eva-
-// luated at gp.
-{
-    FloatArray n;
-    answer.resize(1, 3);
-    answer.zero();
-
-    this->interpolation.evalN( n, * gp->giveCoordinates(), FEIElementGeometryWrapper(this) );
-    answer.at(1, 1) = n.at(1);
-    answer.at(1, 2) = n.at(2);
-    answer.at(1, 3) = n.at(3);
-}
-
 
 void
 QTruss1d :: computeBmatrixAt(GaussPoint *gp, FloatMatrix &answer, int li, int ui)
@@ -139,7 +123,7 @@ void
 QTruss1d :: computeBHmatrixAt(GaussPoint *gp, FloatMatrix &answer)
 //
 // Returns the [1x3] displacement gradient matrix {BH} of the receiver,
-// evaluated at aGaussPoint.
+// evaluated at gp.
 // @todo not checked if correct
 {
     this->computeBmatrixAt(gp, answer);

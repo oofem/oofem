@@ -58,18 +58,17 @@ public:
      * Computes components values of deadweight field at given point (coordinates given in Global c.s.).
      * taking into account corresponding load time function value while respecting load response mode.
      * @param answer Component values at given point and time.
-     * @param atTime Time step.
+     * @param tStep Time step.
      * @param coords Global coordinates, which are used to evaluate components values.
      * @param mode Determines response mode-
      */
-    virtual void computeValueAt(FloatArray &answer, TimeStep *atTime, FloatArray &coords, ValueModeType mode);
+    virtual void computeValueAt(FloatArray &answer, TimeStep *tStep, FloatArray &coords, ValueModeType mode);
 
     virtual bcValType giveBCValType() const { return ForceLoadBVT; }
     virtual bcGeomType giveBCGeoType() const { return BodyLoadBGT; }
 
     void setDeadWeighComponents(const FloatArray &newComponents);
 
-    virtual classType giveClassID() const { return DeadWeightClass; }
     virtual const char *giveClassName() const { return "DeadWeight"; }
     virtual const char *giveInputRecordName() const { return _IFT_DeadWeight_Name; }
 };

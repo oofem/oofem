@@ -63,8 +63,7 @@
 #include <vector>
 
 namespace oofem {
-
-REGISTER_ExportModule( VTKExportModule )
+REGISTER_ExportModule(VTKExportModule)
 
 VTKExportModule :: VTKExportModule(int n, EngngModel *e) : ExportModule(n, e), internalVarsToExport(), primaryVarsToExport()
 {
@@ -95,9 +94,9 @@ VTKExportModule :: initializeFrom(InputRecord *ir)
     IR_GIVE_OPTIONAL_FIELD(ir, internalVarsToExport, _IFT_VTKExportModule_vars);
     IR_GIVE_OPTIONAL_FIELD(ir, primaryVarsToExport, _IFT_VTKExportModule_primvars);
 
-    val = NodalRecoveryModel::NRM_ZienkiewiczZhu;
+    val = NodalRecoveryModel :: NRM_ZienkiewiczZhu;
     IR_GIVE_OPTIONAL_FIELD(ir, val, _IFT_VTKExportModule_stype);
-    stype = ( NodalRecoveryModel::NodalRecoveryModelType ) val;
+    stype = ( NodalRecoveryModel :: NodalRecoveryModelType ) val;
 
     regionsToSkip.resize(0);
     IR_GIVE_OPTIONAL_FIELD(ir, regionsToSkip, _IFT_VTKExportModule_regionstoskip);
@@ -109,7 +108,7 @@ VTKExportModule :: initializeFrom(InputRecord *ir)
 void
 VTKExportModule :: doOutput(TimeStep *tStep, bool forcedOutput)
 {
-    if ( !(testTimeStepOutput(tStep) || forcedOutput) ) {
+    if ( !( testTimeStepOutput(tStep) || forcedOutput ) ) {
         return;
     }
 
@@ -201,7 +200,7 @@ VTKExportModule :: doOutput(TimeStep *tStep, bool forcedOutput)
     int ielem, nelem = d->giveNumberOfElements(), elemToProcess = 0;
     int ncells, celllistsize = 0;
     for ( ielem = 1; ielem <= nelem; ielem++ ) {
-      if ( ( this->mode == rbrmode ) && ( this->regionsToSkip.contains( smoother->giveElementVirtualRegionNumber(ielem) ) ) ) {
+        if ( ( this->mode == rbrmode ) && ( this->regionsToSkip.contains( smoother->giveElementVirtualRegionNumber(ielem) ) ) ) {
             continue;
         }
 
@@ -246,7 +245,7 @@ VTKExportModule :: doOutput(TimeStep *tStep, bool forcedOutput)
             this->giveElementCell(cellNodes, elem, 0);
             fprintf(stream, "%d ", nelemNodes);
             for ( i = 1; i <= nelemNodes; i++ ) {
-                fprintf( stream, "%d ", regionNodalNumbers.at( cellNodes.at(i) ) - 1);
+                fprintf(stream, "%d ", regionNodalNumbers.at( cellNodes.at(i) ) - 1);
             }
 
             fprintf(stream, "\n");
@@ -271,7 +270,6 @@ VTKExportModule :: doOutput(TimeStep *tStep, bool forcedOutput)
         if ( cellVarsToExport.giveSize() ) {
             exportCellVars(stream, elemToProcess, tStep);
         }
-
     } else { // rbr mode
         IntArray regionNodalNumbers(nnodes);
         int regionDofMans = 0, offset = 0;
@@ -304,7 +302,7 @@ VTKExportModule :: doOutput(TimeStep *tStep, bool forcedOutput)
 
                 fprintf(stream, "%d ", nelemNodes);
                 for ( i = 1; i <= nelemNodes; i++ ) {
-                    fprintf( stream, "%d ", regionNodalNumbers.at( cellNodes.at(i) ) - 1 );
+                    fprintf(stream, "%d ", regionNodalNumbers.at( cellNodes.at(i) ) - 1);
                 }
 
                 fprintf(stream, "\n");
@@ -370,11 +368,11 @@ VTKExportModule :: terminate()
 FILE *
 VTKExportModule :: giveOutputStream(TimeStep *tStep)
 {
-    std::string fileName;
+    std :: string fileName;
     FILE *answer;
     fileName = this->giveOutputBaseFileName(tStep) + ".vtk";
     if ( ( answer = fopen(fileName.c_str(), "w") ) == NULL ) {
-        OOFEM_ERROR2("VTKExportModule::giveOutputStream: failed to open file %s", fileName.c_str());
+        OOFEM_ERROR2( "VTKExportModule::giveOutputStream: failed to open file %s", fileName.c_str() );
     }
     return answer;
 }
@@ -467,11 +465,11 @@ VTKExportModule :: giveElementCell(IntArray &answer, Element *elem, int cell)
     int i, nelemNodes;
 
     if ( ( elemGT == EGT_point ) ||
-        ( elemGT == EGT_line_1 ) || ( elemGT == EGT_line_2 ) ||
-        ( elemGT == EGT_triangle_1 ) || ( elemGT == EGT_triangle_2 ) ||
-        ( elemGT == EGT_tetra_1 ) || ( elemGT == EGT_tetra_2 ) ||
-        ( elemGT == EGT_quad_1 ) || ( elemGT == EGT_quad_2 ) ||
-        ( elemGT == EGT_hexa_1 ) || (elemGT == EGT_wedge_1)) {
+         ( elemGT == EGT_line_1 ) || ( elemGT == EGT_line_2 ) ||
+         ( elemGT == EGT_triangle_1 ) || ( elemGT == EGT_triangle_2 ) ||
+         ( elemGT == EGT_tetra_1 ) || ( elemGT == EGT_tetra_2 ) ||
+         ( elemGT == EGT_quad_1 ) || ( elemGT == EGT_quad_2 ) ||
+         ( elemGT == EGT_hexa_1 ) || ( elemGT == EGT_wedge_1 ) ) {
         nelemNodes = elem->giveNumberOfNodes();
         answer.resize(nelemNodes);
         for ( i = 1; i <= nelemNodes; i++ ) {
@@ -486,13 +484,16 @@ VTKExportModule :: giveElementCell(IntArray &answer, Element *elem, int cell)
         for ( i = 1; i <= nelemNodes; i++ ) {
             answer.at(i) = elem->giveNode(HexaQuadNodeMapping [ i - 1 ])->giveNumber();
         }
-    } else if ( elemGT == EGT_wedge_2 ) {int WedgeQuadNodeMapping [] = { 4, 6, 5, 1, 3, 2, 12, 11, 10, 9, 8, 7, 13, 15,14 };
+    } else if ( elemGT == EGT_wedge_2 ) {
+        int WedgeQuadNodeMapping [] = {
+            4, 6, 5, 1, 3, 2, 12, 11, 10, 9, 8, 7, 13, 15, 14
+        };
         nelemNodes = elem->giveNumberOfNodes();
         answer.resize(nelemNodes);
         for ( i = 1; i <= nelemNodes; i++ ) {
-            answer.at(i) = elem->giveNode(WedgeQuadNodeMapping [ i - 1 ])->giveNumber() ;
+            answer.at(i) = elem->giveNode(WedgeQuadNodeMapping [ i - 1 ])->giveNumber();
         }
-    }else {
+    } else {
         OOFEM_ERROR("VTKExportModule: unsupported element geometry type");
     }
 }
@@ -504,12 +505,12 @@ VTKExportModule :: giveNumberOfElementCells(Element *elem)
     Element_Geometry_Type elemGT = elem->giveGeometryType();
 
     if ( ( elemGT == EGT_point ) ||
-        ( elemGT == EGT_line_1 ) || ( elemGT == EGT_line_2 ) ||
-        ( elemGT == EGT_triangle_1 ) || ( elemGT == EGT_triangle_2 ) ||
-        ( elemGT == EGT_tetra_1 ) || ( elemGT == EGT_tetra_2 ) ||
-        ( elemGT == EGT_quad_1 ) || ( elemGT == EGT_quad_2 ) ||
-        ( elemGT == EGT_hexa_1 ) || ( elemGT == EGT_hexa_2 ) ||
-        ( elemGT == EGT_wedge_1 )||( elemGT == EGT_wedge_2 )) {
+         ( elemGT == EGT_line_1 ) || ( elemGT == EGT_line_2 ) ||
+         ( elemGT == EGT_triangle_1 ) || ( elemGT == EGT_triangle_2 ) ||
+         ( elemGT == EGT_tetra_1 ) || ( elemGT == EGT_tetra_2 ) ||
+         ( elemGT == EGT_quad_1 ) || ( elemGT == EGT_quad_2 ) ||
+         ( elemGT == EGT_hexa_1 ) || ( elemGT == EGT_hexa_2 ) ||
+         ( elemGT == EGT_wedge_1 ) || ( elemGT == EGT_wedge_2 ) ) {
         return 1;
     } else {
         OOFEM_ERROR("VTKExportModule: unsupported element geometry type");
@@ -541,9 +542,9 @@ VTKExportModule :: exportIntVars(FILE *stream, TimeStep *tStep)
      * fprintf(stream,"\n\nPOINT_DATA %d\n", nnodes);
      * else
      * fprintf(stream,"\n\nPOINT_DATA %d\n", this->giveTotalRBRNumberOfNodes(d));
-     *#else
+     ****#else
      * fprintf(stream,"\n\nPOINT_DATA %d\n", nnodes);
-     *#endif
+     ****#endif
      */
 
     for ( i = 1; i <= n; i++ ) {
@@ -580,8 +581,8 @@ VTKExportModule :: exportCellVars(FILE *stream, int elemToProcess, TimeStep *tSt
                     continue;
                 }
 #endif
-                if (type == IST_MaterialNumber || type == IST_CrossSectionNumber) {
-                    OOFEM_WARNING1 ( "VTKExportModule - Material numbers are deprecated, outputing cross section number instead..." );
+                if ( type == IST_MaterialNumber || type == IST_CrossSectionNumber ) {
+                    OOFEM_WARNING1("VTKExportModule - Material numbers are deprecated, outputing cross section number instead...");
                     fprintf( stream, "%d\n", elem->giveCrossSection()->giveNumber() );
                 } else if ( type == IST_ElementNumber ) {
                     fprintf( stream, "%d\n", elem->giveNumber() );
@@ -621,7 +622,7 @@ VTKExportModule :: exportCellVars(FILE *stream, int elemToProcess, TimeStep *tSt
             case ISVT_TENSOR_S3E:
             case ISVT_VECTOR:
             case ISVT_SCALAR:
-                if (vt == ISVT_SCALAR) {
+                if ( vt == ISVT_SCALAR ) {
                     fprintf( stream, "SCALARS %s double\nLOOKUP_TABLE default\n", __InternalStateTypeToString(type) );
                 } else {
                     fprintf( stream, "VECTORS %s double\nLOOKUP_TABLE default\n", __InternalStateTypeToString(type) );
@@ -635,22 +636,22 @@ VTKExportModule :: exportCellVars(FILE *stream, int elemToProcess, TimeStep *tSt
 #endif
                     gptot = 0;
                     vec.resize(0);
-                    for (int i = 0; i < elem->giveDefaultIntegrationRulePtr()->giveNumberOfIntegrationPoints(); ++i) {
+                    for ( int i = 0; i < elem->giveDefaultIntegrationRulePtr()->giveNumberOfIntegrationPoints(); ++i ) {
                         gp = elem->giveDefaultIntegrationRulePtr()->getIntegrationPoint(i);
                         elem->giveIPValue(temp, gp, type, tStep);
                         gptot += gp->giveWeight();
                         vec.add(gp->giveWeight(), temp);
                     }
-                    vec.times(1/gptot);
-                    for (int i = 1; i <= vec.giveSize(); ++i) {
+                    vec.times(1 / gptot);
+                    for ( int i = 1; i <= vec.giveSize(); ++i ) {
                         fprintf( stream, "%e ", vec.at(i) );
                     }
-                    fprintf( stream, "\n" );
+                    fprintf(stream, "\n");
                 }
                 break;
 #if 0 // Hardly even worth the effort...
             case ISVT_TENSOR_G:
-                for (int indx = 1; indx < 9; ++indx) {
+                for ( int indx = 1; indx < 9; ++indx ) {
                     fprintf(stream, "SCALARS %s_%d double 1\n", __InternalStateTypeToString(valID), indx);
 
                     for ( ielem = 1; ielem <= nelem; ielem++ ) {
@@ -661,7 +662,7 @@ VTKExportModule :: exportCellVars(FILE *stream, int elemToProcess, TimeStep *tSt
                 }
 #endif
             default:
-                OOFEM_ERROR2("Quantity %s not handled yet.", __InternalStateTypeToString(type) );
+                OOFEM_ERROR2( "Quantity %s not handled yet.", __InternalStateTypeToString(type) );
             }
         }
 
@@ -840,7 +841,7 @@ VTKExportModule :: exportIntVarAs(InternalStateType valID, InternalStateValueTyp
 
     this->giveSmoother();
 
-    int nindx = giveInternalStateTypeSize( type );
+    int nindx = giveInternalStateTypeSize(type);
 
     for ( int indx = 1; indx <= nindx; indx++ ) {
         // print header
@@ -853,7 +854,7 @@ VTKExportModule :: exportIntVarAs(InternalStateType valID, InternalStateValueTyp
         } else if ( type == ISVT_TENSOR_G ) {
             fprintf(stream, "SCALARS %s_%d double 1\n", __InternalStateTypeToString(valID), indx);
         } else {
-            fprintf(stderr, "VTKExportModule :: exportIntVarAs: unsupported variable type %s\n", __InternalStateTypeToString(valID));
+            fprintf( stderr, "VTKExportModule :: exportIntVarAs: unsupported variable type %s\n", __InternalStateTypeToString(valID) );
         }
 
         if ( ( type == ISVT_SCALAR ) || ( type == ISVT_TENSOR_G ) ) {
@@ -873,7 +874,7 @@ VTKExportModule :: exportIntVarAs(InternalStateType valID, InternalStateValueTyp
             this->initRegionNodeNumbering(regionNodalNumbers, regionDofMans, offset, d, ireg, 1);
             if ( !( ( valID == IST_DisplacementVector ) || ( valID == IST_MaterialInterfaceVal ) ) ) {
                 // assemble local->global map
-                defaultSize = giveInternalStateTypeSize( type );
+                defaultSize = giveInternalStateTypeSize(type);
             } else {
                 regionDofMans = nnodes;
             }
@@ -902,7 +903,7 @@ VTKExportModule :: exportIntVarAs(InternalStateType valID, InternalStateValueTyp
                     }
 
                     if ( val == NULL ) {
-                        iVal.resize( defaultSize );
+                        iVal.resize(defaultSize);
                         iVal.zero();
                         val = & iVal;
                         //OOFEM_ERROR ("VTKExportModule::exportIntVars: internal error: invalid dofman data");
@@ -928,22 +929,21 @@ VTKExportModule :: exportIntVarAs(InternalStateType valID, InternalStateValueTyp
                 } else if ( type == ISVT_TENSOR_S3 ) {
                     t.zero();
                     for ( int ii = 1; ii <= 6; ii++ ) {
-
                         if ( ii == 1 ) {
                             t.at(1, 1) = val->at(ii);
                         } else if ( ii == 2 ) {
-                            t.at(2, 2) = val->at( ii );
+                            t.at(2, 2) = val->at(ii);
                         } else if ( ii == 3 ) {
-                            t.at(3, 3) = val->at( ii );
+                            t.at(3, 3) = val->at(ii);
                         } else if ( ii == 4 ) {
-                            t.at(2, 3) = val->at( ii );
-                            t.at(3, 2) = val->at( ii );
+                            t.at(2, 3) = val->at(ii);
+                            t.at(3, 2) = val->at(ii);
                         } else if ( ii == 5 ) {
-                            t.at(1, 3) = val->at( ii );
-                            t.at(3, 1) = val->at( ii );
+                            t.at(1, 3) = val->at(ii);
+                            t.at(3, 1) = val->at(ii);
                         } else if ( ii == 6 ) {
-                            t.at(1, 2) = val->at( ii );
-                            t.at(2, 1) = val->at( ii );
+                            t.at(1, 2) = val->at(ii);
+                            t.at(2, 1) = val->at(ii);
                         }
                     }
 
@@ -1014,22 +1014,21 @@ VTKExportModule :: exportIntVarAs(InternalStateType valID, InternalStateValueTyp
                     } else if ( type == ISVT_TENSOR_S3 ) {
                         t.zero();
                         for ( int ii = 1; ii <= 6; ii++ ) {
-
                             if ( ii == 1 ) {
-                                t.at(1, 1) = val->at( ii );
+                                t.at(1, 1) = val->at(ii);
                             } else if ( ii == 2 ) {
-                                t.at(2, 2) = val->at( ii );
+                                t.at(2, 2) = val->at(ii);
                             } else if ( ii == 3 ) {
-                                t.at(3, 3) = val->at( ii );
+                                t.at(3, 3) = val->at(ii);
                             } else if ( ii == 4 ) {
-                                t.at(2, 3) = val->at( ii );
-                                t.at(3, 2) = val->at( ii );
+                                t.at(2, 3) = val->at(ii);
+                                t.at(3, 2) = val->at(ii);
                             } else if ( ii == 5 ) {
-                                t.at(1, 3) = val->at( ii );
-                                t.at(3, 1) = val->at( ii );
+                                t.at(1, 3) = val->at(ii);
+                                t.at(3, 1) = val->at(ii);
                             } else if ( ii == 6 ) {
-                                t.at(1, 2) = val->at( ii );
-                                t.at(2, 1) = val->at( ii );
+                                t.at(1, 2) = val->at(ii);
+                                t.at(2, 1) = val->at(ii);
                             }
                         }
 
@@ -1063,10 +1062,10 @@ VTKExportModule :: giveSmoother()
         this->smoother = classFactory.createNodalRecoveryModel(this->stype, d);
         IntArray vrmap;
 
-        if (this->mode == wdmode) {
-            this->smoother-> setRecoveryMode (0, vrmap);
+        if ( this->mode == wdmode ) {
+            this->smoother->setRecoveryMode(0, vrmap);
         } else { // this->mode == rbrmode
-            this->smoother-> setRecoveryMode ((-1)*d->giveNumberOfRegions(), vrmap);
+            this->smoother->setRecoveryMode( ( -1 ) * d->giveNumberOfRegions(), vrmap );
         }
     }
 
@@ -1339,7 +1338,7 @@ VTKExportModule :: getDofManPrimaryVariable(FloatArray &answer, DofManager *dman
     answer.zero();
 
     for ( j = 1; j <= size; j++ ) {
-        if ( ( indx = dman->findDofWithDofId( (DofIDItem)dofIDMask.at(j) ) ) ) {
+        if ( ( indx = dman->findDofWithDofId( ( DofIDItem ) dofIDMask.at(j) ) ) ) {
             // primary variable available directly in dof manager
             answer.at(j) = dman->giveDof(indx)->giveUnknown(VM_Total, tStep);
         } else if ( iType != IST_Undefined ) {

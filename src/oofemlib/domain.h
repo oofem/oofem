@@ -180,7 +180,7 @@ private:
     /// nodal recovery object associated to receiver.
     NodalRecoveryModel *smoother;
 
-    std::string mDomainType;
+    std :: string mDomainType;
     /**
      * For nonlocal models of integral type
      * it is necessary, mainly due to resulting efficiency, to compute variable(s)
@@ -200,7 +200,7 @@ private:
 
     /// Topology description
     TopologyDescription *topology;
-    
+
     /// Keeps track of next free dof ID (for special Lagrange multipliers, XFEM and such)
     int freeDofID;
 
@@ -391,7 +391,7 @@ public:
     /// Returns number of random field generators
     int giveNumberOfRandomFieldGenerators() const { return randomFieldGeneratorList->giveSize(); }
     /// Returns number of sets
-    int giveNumberOfSets() const { return setList->giveSize(); }    
+    int giveNumberOfSets() const { return setList->giveSize(); }
 
     /// Returns number of spatial dimensions.
     int giveNumberOfSpatialDimensions();
@@ -442,14 +442,14 @@ public:
     void setRandomFieldGenerator(int i, RandomFieldGenerator *obj);
     /// Sets i-th component. The component will be further managed and maintained by domain object.
     void setSet(int i, Set *obj);
-    
+
     /// Temporary function, sets xfemManager.
-    void setXfemManager(XfemManager *ipXfemManager) {xfemManager = ipXfemManager;}
+    void setXfemManager(XfemManager *ipXfemManager) { xfemManager = ipXfemManager; }
 
     XfemManager *giveXfemManager();
     bool hasXfemManager();
-    
-    FractureManager *giveFractureManager(); 
+
+    FractureManager *giveFractureManager();
     bool hasFractureManager();
 
     /// List of Xfemmanagers.
@@ -529,7 +529,7 @@ public:
      * @return Total volume.
      */
     double giveSize();
-    
+
     /**
      * Gives the next free dof ID.
      * Useful for XFEM and other boundary conditions that introduce other unique Lagrange multipliers.
@@ -649,4 +649,3 @@ private:
 };
 } // end namespace oofem
 #endif // domain_h
-

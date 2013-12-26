@@ -38,6 +38,7 @@
 #include "intarray.h"
 #include "floatarray.h"
 #include "floatmatrix.h"
+#include "dynamicinputrecord.h"
 
 #ifdef __OOFEG
  #include "oofeggraphiccontext.h"
@@ -58,20 +59,29 @@ CBSElement :: initializeFrom(InputRecord *ir)
     const char *__proc = "initializeFrom"; // Required by IR_GIVE_FIELD macro
     IRResultType result;                   // Required by IR_GIVE_FIELD macro
 
-    FMElement :: initializeFrom(ir);
-
     IR_GIVE_OPTIONAL_FIELD(ir, boundarySides, _IFT_CBSElement_bsides);
     if ( !boundarySides.isEmpty() ) {
         IR_GIVE_FIELD(ir, boundaryCodes, _IFT_CBSElement_bcodes);
     }
 
-    return IRRT_OK;
+    return FMElement :: initializeFrom(ir);
+}
+
+
+void
+CBSElement :: giveInputRecord(DynamicInputRecord &input)
+{
+    FMElement :: giveInputRecord(input);
+    if ( boundarySides.giveSize() > 0 ) {
+        input.setField(this->boundarySides, _IFT_CBSElement_bsides);
+        input.setField(this->boundaryCodes, _IFT_CBSElement_bcodes);
+    }
 }
 
 
 void
 CBSElement :: giveCharacteristicMatrix(FloatMatrix &answer,
-                                        CharType mtrx, TimeStep *tStep)
+                                       CharType mtrx, TimeStep *tStep)
 //
 // returns characteristics matrix of receiver according to mtrx
 //
@@ -88,7 +98,7 @@ CBSElement :: giveCharacteristicMatrix(FloatMatrix &answer,
 
 void
 CBSElement :: giveCharacteristicVector(FloatArray &answer, CharType mtrx, ValueModeType mode,
-                                        TimeStep *tStep)
+                                       TimeStep *tStep)
 //
 // returns characteristics vector of receiver according to requested type
 //
@@ -146,13 +156,13 @@ CBSElement :: computePrescribedTermsI(FloatArray &answer, ValueModeType mode, Ti
 
 #if 0
 void
-CBSElement :: computePrescribedTermsII (FloatArray& answer, ValueModeType mode, TimeStep* tStep)
+CBSElement :: computePrescribedTermsII(FloatArray &answer, ValueModeType mode, TimeStep *tStep)
 {
     FloatMatrix lhs;
     FloatArray usp;
-    this->computePressureLhs (lhs, tStep);
+    this->computePressureLhs(lhs, tStep);
     this->computeVectorOf(EID_ConservationEquation, mode, tStep, usp);
-    answer.beProductOf (lhs, usp);
+    answer.beProductOf(lhs, usp);
     answer.negated();
 }
 #endif
@@ -171,7 +181,7 @@ CBSElement :: checkConsistency()
 
 
 void
-CBSElement :: updateInternalState(TimeStep *stepN)
+CBSElement :: updateInternalState(TimeStep *tStep)
 {
     IntegrationRule *iRule;
     FloatArray stress;
@@ -180,7 +190,7 @@ CBSElement :: updateInternalState(TimeStep *stepN)
     for ( int i = 0; i < numberOfIntegrationRules; i++ ) {
         iRule = integrationRulesArray [ i ];
         for ( int j = 0; j < iRule->giveNumberOfIntegrationPoints(); j++ ) {
-            computeDeviatoricStress(stress, iRule->getIntegrationPoint(j), stepN);
+            computeDeviatoricStress(stress, iRule->getIntegrationPoint(j), tStep);
         }
     }
 }
@@ -189,7 +199,7 @@ CBSElement :: updateInternalState(TimeStep *stepN)
 #ifdef __OOFEG
 int
 CBSElement :: giveInternalStateAtNode(FloatArray &answer, InternalStateType type, InternalStateMode mode,
-                                      int node, TimeStep *atTime)
+                                      int node, TimeStep *tStep)
 {
     int indx = 1;
     Node *n = this->giveNode(node);
@@ -198,15 +208,15 @@ CBSElement :: giveInternalStateAtNode(FloatArray &answer, InternalStateType type
         answer.resize( this->giveSpatialDimension() );
         int dofindx;
         if ( ( dofindx = n->findDofWithDofId(V_u) ) ) {
-            answer.at(indx++) = n->giveDof(dofindx)->giveUnknown(VM_Total, atTime);
+            answer.at(indx++) = n->giveDof(dofindx)->giveUnknown(VM_Total, tStep);
         }
 
         if ( ( dofindx = n->findDofWithDofId(V_v) ) ) {
-            answer.at(indx++) = n->giveDof(dofindx)->giveUnknown(VM_Total, atTime);
+            answer.at(indx++) = n->giveDof(dofindx)->giveUnknown(VM_Total, tStep);
         }
 
         if ( ( dofindx = n->findDofWithDofId(V_w) ) ) {
-            answer.at(indx++) = n->giveDof(dofindx)->giveUnknown(VM_Total, atTime);
+            answer.at(indx++) = n->giveDof(dofindx)->giveUnknown(VM_Total, tStep);
         }
 
         return 1;
@@ -214,16 +224,15 @@ CBSElement :: giveInternalStateAtNode(FloatArray &answer, InternalStateType type
         int dofindx;
         if ( ( dofindx = n->findDofWithDofId(P_f) ) ) {
             answer.resize(1);
-            answer.at(1) = n->giveDof(dofindx)->giveUnknown(VM_Total, atTime);
+            answer.at(1) = n->giveDof(dofindx)->giveUnknown(VM_Total, tStep);
             return 1;
         } else {
             return 0;
         }
     } else {
-        return Element :: giveInternalStateAtNode(answer, type, mode, node, atTime);
+        return Element :: giveInternalStateAtNode(answer, type, mode, node, tStep);
     }
 }
 
 #endif
-
 } // end namespace oofem

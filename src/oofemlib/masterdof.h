@@ -54,7 +54,7 @@ class InitialCondition;
  * its related unknown and corresponding equation number.
  *
  * This class implements a nodal degree of freedom. A dof is usually attribute of one node.
-
+ *
  * 'number' and 'node' are used for reading/writing data in the data file.
  * 'equationNumber' keeps the number of the associated equation in the linear
  * system (value>0) or the associated prescribed equation number if the dof
@@ -120,14 +120,14 @@ public:
     virtual dofType giveDofType() { return DT_master; }
     virtual const char *giveClassName() const { return "MasterDof"; }
 
-    virtual int __giveEquationNumber() const ;
+    virtual int __giveEquationNumber() const;
 
     virtual int __givePrescribedEquationNumber();
 
     virtual int askNewEquationNumber(TimeStep *tStep);
 
-    virtual double giveUnknown(ValueModeType mode, TimeStep *stepN);
-    virtual double giveUnknown(PrimaryField & field, ValueModeType, TimeStep *stepN);
+    virtual double giveUnknown(ValueModeType mode, TimeStep *tStep);
+    virtual double giveUnknown(PrimaryField & field, ValueModeType, TimeStep * tStep);
 
     virtual bool hasBc(TimeStep *tStep);
     virtual bool hasIc();

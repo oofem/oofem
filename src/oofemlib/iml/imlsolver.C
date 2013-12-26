@@ -53,7 +53,6 @@
 #endif
 
 namespace oofem {
-
 REGISTER_SparseLinSolver(IMLSolver, ST_IML)
 
 IMLSolver :: IMLSolver(Domain *d, EngngModel *m) : SparseLinearSystemNM(d, m)
@@ -154,10 +153,10 @@ IMLSolver :: solve(SparseMtrx *A, FloatArray *b, FloatArray *x)
     Lhs = A;
     this->lhsVersion = A->giveVersion();
 
- #ifdef TIME_REPORT
+#ifdef TIME_REPORT
     Timer timer;
     timer.startTimer();
- #endif
+#endif
 
 
     if ( solverType == IML_ST_CG ) {
@@ -175,10 +174,10 @@ IMLSolver :: solve(SparseMtrx *A, FloatArray *b, FloatArray *x)
         OOFEM_ERROR("IMLSolver :: solve: unknown lsover type");
     }
 
- #ifdef TIME_REPORT
+#ifdef TIME_REPORT
     timer.stopTimer();
     OOFEM_LOG_INFO( "IMLSolver info: user time consumed by solution: %.2fs\n", timer.getUtime() );
- #endif
+#endif
 
 
     //solved = 1;

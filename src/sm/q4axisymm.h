@@ -72,14 +72,12 @@ public:
     virtual Interface *giveInterface(InterfaceType) { return NULL; }
     virtual const char *giveInputRecordName() const { return _IFT_Q4Axisymm_Name; }
     virtual const char *giveClassName() const { return "Q4axisymm"; }
-    virtual classType giveClassID() const { return Q4AxisymmClass; }
     virtual IRResultType initializeFrom(InputRecord *ir);
     virtual MaterialMode giveMaterialMode() { return _3dMat; }
 
 protected:
     virtual void computeBmatrixAt(GaussPoint *gp, FloatMatrix &answer, int = 1, int = ALL_STRAINS);
     virtual void computeBHmatrixAt(GaussPoint *gp, FloatMatrix &answer);
-    virtual void computeNmatrixAt(GaussPoint *gp, FloatMatrix &answer);
 
     virtual void computeGaussPoints();
 
@@ -94,4 +92,3 @@ protected:
 };
 } // end namespace oofem
 #endif // q4axisymm_h
-

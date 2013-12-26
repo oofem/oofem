@@ -51,9 +51,9 @@
 #include "contextioerr.h"
 #include "dynamicinputrecord.h"
 #include "internalstatevaluetype.h"
+#include "XFEMDebugTools.h"
 
 namespace oofem {
-
 XfemManager :: XfemManager(Domain *domain)
 {
     this->domain = domain;
@@ -61,6 +61,7 @@ XfemManager :: XfemManager(Domain *domain)
     numberOfEnrichmentItems = -1;
     mNumGpPerTri = 12;
     doVTKExport = false;
+    mDebugVTK = false;
     vtkExportFields.resize(0);
 }
 
@@ -69,15 +70,8 @@ XfemManager :: ~XfemManager()
     delete enrichmentItemList;
 }
 
-void
-XfemManager :: clear()
-{
-    delete enrichmentItemList;
-    enrichmentItemList = NULL;
-    numberOfEnrichmentItems = -1;
-}
 
-InternalStateValueType 
+InternalStateValueType
 XfemManager :: giveXFEMStateValueType(XFEMStateType type)
 {
     switch ( type ) {
@@ -87,9 +81,9 @@ XfemManager :: giveXFEMStateValueType(XFEMStateType type)
     case XFEMST_NumIntersecPoints:
     case XFEMST_NodeEnrMarker:
         return ISVT_SCALAR;
+
     default:
         return ISVT_UNDEFINED;
-
     }
 }
 
@@ -129,20 +123,7 @@ XfemManager :: createEnrichedDofs()
         EnrichmentItem *ei = this->giveEnrichmentItem(j);
         ei->createEnrichedDofs();
     }
-
 }
-
-
-void 
-XfemManager :: addEnrichedDofsTo( DofManager *dMan, IntArray &dofIdArray )
-{
-    int nDofs = dMan->giveNumberOfDofs();
-    for ( int j = 1; j <= dofIdArray.giveSize(); j++ ) {                      
-            dMan->appendDof( new MasterDof( nDofs + j, dMan, ( DofIDItem ) ( dofIdArray.at(j) ) ) );   
-    }
-
-}
-
 
 IRResultType XfemManager :: initializeFrom(InputRecord *ir)
 {
@@ -159,6 +140,12 @@ IRResultType XfemManager :: initializeFrom(InputRecord *ir)
         IR_GIVE_FIELD(ir, this->vtkExportFields, _IFT_XfemManager_VTKExportFields);
     }
 
+    int vtkDebug = 0;
+    IR_GIVE_OPTIONAL_FIELD(ir, vtkDebug, _IFT_XfemManager_debugVTK);
+    if ( vtkDebug == 1 ) {
+        mDebugVTK = true;
+    }
+
     return IRRT_OK;
 }
 
@@ -171,6 +158,9 @@ void XfemManager :: giveInputRecord(DynamicInputRecord &input)
     input.setField(doVTKExport, _IFT_XfemManager_VTKExport);
     input.setField(vtkExportFields, _IFT_XfemManager_VTKExportFields);
 
+    if ( mDebugVTK ) {
+        input.setField(1, _IFT_XfemManager_debugVTK);
+    }
 }
 
 int XfemManager :: instanciateYourself(DataReader *dr)
@@ -207,10 +197,9 @@ void XfemManager :: setDomain(Domain *ipDomain)
 
     int numEI = enrichmentItemList->giveSize();
 
-    for(int i = 1; i <= numEI; i++) {
+    for ( int i = 1; i <= numEI; i++ ) {
         enrichmentItemList->at(i)->setDomain(ipDomain);
     }
-
 }
 
 contextIOResultType XfemManager :: saveContext(DataStream *stream, ContextMode mode, void *obj)
@@ -288,18 +277,33 @@ void XfemManager :: propagateFronts()
 {
     for ( int i = 1; i <= enrichmentItemList->giveSize(); i++ ) {
         enrichmentItemList->at(i)->propagateFronts();
+
+        if ( giveVtkDebug() ) {
+            std :: vector< FloatArray >points;
+            enrichmentItemList->at(i)->giveSubPolygon(points, -0.1, 1.1);
+
+            std :: vector< double >x, y;
+            for ( size_t j = 0; j < points.size(); j++ ) {
+                x.push_back( points [ j ].at(1) );
+                y.push_back( points [ j ].at(2) );
+            }
+
+
+            char fileName [ 200 ];
+            sprintf(fileName, "crack%d.dat", i);
+            XFEMDebugTools :: WriteArrayToGnuplot(fileName, x, y);
+        }
     }
 }
 
 bool XfemManager :: hasPropagatingFronts()
 {
     for ( int i = 1; i <= enrichmentItemList->giveSize(); i++ ) {
-    	if( enrichmentItemList->at(i)->hasPropagatingFronts() ) {
-    		return true;
-    	}
+        if ( enrichmentItemList->at(i)->hasPropagatingFronts() ) {
+            return true;
+        }
     }
 
-	return false;
+    return false;
 }
-
 } // end namespace oofem

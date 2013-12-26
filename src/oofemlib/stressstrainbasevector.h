@@ -72,7 +72,7 @@ public:
      *  the FloatArray assignment operator is used, where the operand is converted to FloatArray (mode is lost).
      *  The assignment from FloatArray to StressStrainBaseVector is not defined (needs material mode).
      */
-    StressStrainBaseVector & operator=(const StressStrainBaseVector &);
+    StressStrainBaseVector &operator=(const StressStrainBaseVector &);
 
     /// Returns the material mode of receiver.
     MaterialMode giveStressStrainMode() const { return ( MaterialMode ) mode; }
@@ -121,7 +121,7 @@ public:
     contextIOResultType storeYourself(DataStream *stream, ContextMode mode);
     contextIOResultType restoreYourself(DataStream *stream, ContextMode mode);
 
-     /// Returns the volumetric part of the vector.
+    /// Returns the volumetric part of the vector.
     double computeVolumetricPart() const;
 
 protected:

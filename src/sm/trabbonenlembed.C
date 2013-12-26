@@ -49,7 +49,7 @@ namespace oofem {
 ////////////TRABECULAR BONE NONLOCAL MATERIAL////////////////////
 /////////////////////////////////////////////////////////////////
 
-REGISTER_Material( TrabBoneNLEmbed );
+REGISTER_Material(TrabBoneNLEmbed);
 
 TrabBoneNLEmbed :: TrabBoneNLEmbed(int n, Domain *d) : TrabBoneEmbed(n, d), StructuralNonlocalMaterialExtensionInterface(d)
 {
@@ -60,7 +60,7 @@ TrabBoneNLEmbed :: ~TrabBoneNLEmbed()
 {}
 
 void
-TrabBoneNLEmbed :: updateBeforeNonlocAverage(const FloatArray &strainVector, GaussPoint *gp, TimeStep *atTime)
+TrabBoneNLEmbed :: updateBeforeNonlocAverage(const FloatArray &strainVector, GaussPoint *gp, TimeStep *tStep)
 {
     FloatArray SDstrainVector, fullSDStrainVector;
     double cumPlastStrain;
@@ -68,14 +68,14 @@ TrabBoneNLEmbed :: updateBeforeNonlocAverage(const FloatArray &strainVector, Gau
 
     this->initTempStatus(gp);
     this->initGpForNewStep(gp);
-    this->giveStressDependentPartOfStrainVector(SDstrainVector, gp, strainVector, atTime, VM_Total);
+    this->giveStressDependentPartOfStrainVector(SDstrainVector, gp, strainVector, tStep, VM_Total);
 
     nlstatus->letTempStrainVectorBe(strainVector);
 
     StrainVector strain( strainVector, gp->giveMaterialMode() );
 
     this->performPlasticityReturn(gp, strain);
-    this->computeLocalCumPlastStrain(cumPlastStrain, strain, gp, atTime);
+    this->computeLocalCumPlastStrain(cumPlastStrain, strain, gp, tStep);
 
     nlstatus->setLocalCumPlastStrainForAverage(cumPlastStrain);
 }
@@ -84,7 +84,7 @@ void
 TrabBoneNLEmbed :: giveRealStressVector(FloatArray &answer,
                                         GaussPoint *gp,
                                         const FloatArray &strainVector,
-                                        TimeStep *atTime)
+                                        TimeStep *tStep)
 {
     TrabBoneNLEmbedStatus *nlStatus = static_cast< TrabBoneNLEmbedStatus * >( this->giveStatus(gp) );
 
@@ -113,19 +113,19 @@ TrabBoneNLEmbed :: giveRealStressVector(FloatArray &answer,
 }
 
 void
-TrabBoneNLEmbed :: computeCumPlastStrain(double &alpha, GaussPoint *gp, TimeStep *atTime)
+TrabBoneNLEmbed :: computeCumPlastStrain(double &alpha, GaussPoint *gp, TimeStep *tStep)
 {
     double nonlocalContribution, nonlocalCumPlastStrain = 0.0;
     TrabBoneNLEmbedStatus *nonlocStatus, *status = static_cast< TrabBoneNLEmbedStatus * >( this->giveStatus(gp) );
 
     this->buildNonlocalPointTable(gp);
-    this->updateDomainBeforeNonlocAverage(atTime);
+    this->updateDomainBeforeNonlocAverage(tStep);
 
-    std::list< localIntegrationRecord > *list = status->giveIntegrationDomainList();
-    std::list< localIntegrationRecord > :: iterator pos;
+    std :: list< localIntegrationRecord > *list = status->giveIntegrationDomainList();
+    std :: list< localIntegrationRecord > :: iterator pos;
 
     for ( pos = list->begin(); pos != list->end(); ++pos ) {
-        nonlocStatus = static_cast< TrabBoneNLEmbedStatus * >( this->giveStatus( pos->nearGp ) );
+        nonlocStatus = static_cast< TrabBoneNLEmbedStatus * >( this->giveStatus(pos->nearGp) );
         nonlocalContribution = nonlocStatus->giveLocalCumPlastStrainForAverage();
         nonlocalContribution *= pos->weight;
         nonlocalCumPlastStrain += nonlocalContribution;
@@ -227,9 +227,9 @@ TrabBoneNLEmbedStatus :: initTempStatus()
 }
 
 void
-TrabBoneNLEmbedStatus :: updateYourself(TimeStep *atTime)
+TrabBoneNLEmbedStatus :: updateYourself(TimeStep *tStep)
 {
-    TrabBoneEmbedStatus :: updateYourself(atTime);
+    TrabBoneEmbedStatus :: updateYourself(tStep);
 }
 
 contextIOResultType
@@ -254,6 +254,4 @@ TrabBoneNLEmbedStatus :: giveInterface(InterfaceType type)
         return NULL;
     }
 }
-
-
 } // end namespace oofem

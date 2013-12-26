@@ -37,8 +37,7 @@
 #include "classfactory.h"
 
 namespace oofem {
-
-REGISTER_LoadTimeFunction( ConstantFunction );
+REGISTER_LoadTimeFunction(ConstantFunction);
 
 IRResultType
 ConstantFunction :: initializeFrom(InputRecord *ir)
@@ -62,5 +61,4 @@ ConstantFunction :: giveInputRecord(DynamicInputRecord &input)
     LoadTimeFunction :: giveInputRecord(input);
     input.setField(this->value, _IFT_LoadTimeFunction_ft);
 }
-
 } // end namespace oofem

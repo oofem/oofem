@@ -38,9 +38,9 @@
 #include "sparsemtrx.h"
 #include "floatarray.h"
 extern "C" {
- #include <spooles/misc.h>
- #include <spooles/FrontMtx.h>
- #include <spooles/SymbFac.h>
+#include <spooles/misc.h>
+#include <spooles/FrontMtx.h>
+#include <spooles/SymbFac.h>
 };
 
 
@@ -80,7 +80,6 @@ private:
 public:
     /**
      * Constructor.
-     * @param i Solver index.
      * @param d Domain which solver belongs to.
      * @param m Engineering model which solver belongs to.
      */

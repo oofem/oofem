@@ -124,7 +124,6 @@ public:
 
     virtual IRResultType initializeFrom(InputRecord *ir);
     virtual const char *giveClassName() const { return "ZZErrorEstimator"; }
-    virtual classType giveClassID() const { return ZZErrorEstimatorClass; }
 };
 
 
@@ -152,20 +151,19 @@ public:
                                                                InternalStateType type, TimeStep *tStep);
     /**
      * Returns element integration rule used to evaluate error.
-     * Default implementation returns element default rule. 
+     * Default implementation returns element default rule.
      */
     virtual IntegrationRule *ZZErrorEstimatorI_giveIntegrationRule() {
-      return this->ZZErrorEstimatorI_giveElement()->giveDefaultIntegrationRulePtr();
+        return this->ZZErrorEstimatorI_giveElement()->giveDefaultIntegrationRulePtr();
     }
-    
-    /** 
+
+    /**
      * Returns stress vector in global c.s. transformed into element local c.s.
      * Default is no transformation (global and element local c.s. coincide.
      */
-    virtual void ZZErrorEstimatorI_computeLocalStress(FloatArray& answer, FloatArray& sig) {
-      answer = sig;
+    virtual void ZZErrorEstimatorI_computeLocalStress(FloatArray &answer, FloatArray &sig) {
+        answer = sig;
     }
-
 };
 
 
@@ -214,7 +212,6 @@ public:
 
     virtual const char *giveInputRecordName() const { return NULL; }
     virtual const char *giveClassName() const { return "ZZErrorEstimator"; }
-    virtual classType giveClassID() const { return ZZRemeshingCriteriaClass; }
 };
 
 /**

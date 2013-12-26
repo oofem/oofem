@@ -39,8 +39,7 @@
 #include "dynamicinputrecord.h"
 
 namespace oofem {
-
-REGISTER_BoundaryCondition( PointLoad );
+REGISTER_BoundaryCondition(PointLoad);
 
 void
 PointLoad :: computeValueAt(FloatArray &answer, TimeStep *tStep, FloatArray &coords, ValueModeType mode)
@@ -86,5 +85,4 @@ PointLoad :: giveInputRecord(DynamicInputRecord &input)
     input.setField(this->coordSystemType, _IFT_PointLoad_cstype);
     input.setField(this->coords, _IFT_PointLoad_coords);
 }
-
 } // end namespace oofem
