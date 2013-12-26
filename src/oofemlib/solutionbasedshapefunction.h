@@ -73,7 +73,9 @@ private:
     std :: string filename;
     bool useConstantBase;
     bool isLoaded;
+
     bool useCorrectionFactors;
+    bool dumpSnapshot;
 
     double bigNorm;
     int worstIndex;

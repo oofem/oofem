@@ -348,24 +348,14 @@ SolutionbasedShapeFunction :: computeDofTransformation(ActiveDof *dof, FloatArra
             OOFEM_ERROR("Node not found");
         }
 
-<<<<<<< HEAD
         //giveValueAtPoint(values2, *dof->giveDofManager()->giveCoordinates(), dofIDs, *modes.at(i-1)->myEngngModel);
-=======
-        giveValueAtPoint(values2, * dof->giveDofManager()->giveCoordinates(), dofIDs, * modes.at(i - 1)->myEngngModel);
->>>>>>> 1c64637d12d5ff855ffba9cf129d16c37b10967e
-
         //printf ("Mode %u, DofManager: %u, DofIDItem %u, value %10.10f\n", i, dof->giveDofManager()->giveNumber(), dof->giveDofID(), values.at(1));
 
         factor = isPlus  ? modes.at(i - 1)->ap : factor;
         factor = isMinus ? modes.at(i - 1)->am : factor;
         factor = isZero  ? 1.0 : factor;
 
-<<<<<<< HEAD
         masterContribs.at(i) = factor * values.at(1);
-
-=======
-        masterContribs.at(i) = factor * values2.at(1);
->>>>>>> 1c64637d12d5ff855ffba9cf129d16c37b10967e
     }
 }
 
