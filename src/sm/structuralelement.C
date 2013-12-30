@@ -919,7 +919,19 @@ StructuralElement :: giveInternalForcesVector(FloatArray &answer,
         // now every gauss point has real stress vector
         // compute nodal representation of internal forces using f = B^T*Sigma dV
         double dV = this->computeVolumeAround(gp);
-        answer.plusProduct(b, stress, dV);
+        if(stress.giveSize() == 6) {
+        	// It may happen that e.g. plane strain is computed
+        	// using the default 3D implementation. If so,
+        	// the stress needs to be reduced.
+        	// (Note that no reduction will take place if
+        	//  the simulation is actually 3D.)
+        	FloatArray stressTemp;
+        	StructuralMaterial::giveReducedSymVectorForm(stressTemp, stress, gp->giveMaterialMode());
+        	answer.plusProduct(b, stressTemp, dV);
+        }
+        else {
+        	answer.plusProduct(b, stress, dV);
+        }
     }
 
     // if inactive update state, but no contribution to global system

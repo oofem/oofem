@@ -178,7 +178,19 @@ NLStructuralElement :: giveInternalForcesVector(FloatArray &answer, TimeStep *tS
 
         // Compute nodal internal forces at nodes as f = B^T*Stress dV
         double dV  = this->computeVolumeAround(gp);
-        answer.plusProduct(B, vStress, dV);
+        if(vStress.giveSize() == 6) {
+        	// It may happen that e.g. plane strain is computed
+        	// using the default 3D implementation. If so,
+        	// the stress needs to be reduced.
+        	// (Note that no reduction will take place if
+        	//  the simulation is actually 3D.)
+        	FloatArray stressTemp;
+        	StructuralMaterial::giveReducedSymVectorForm(stressTemp, vStress, gp->giveMaterialMode());
+        	answer.plusProduct(B, stressTemp, dV);
+        }
+        else {
+        	answer.plusProduct(B, vStress, dV);
+        }
     }
 
     // If inactive: update fields but do not give any contribution to the internal forces

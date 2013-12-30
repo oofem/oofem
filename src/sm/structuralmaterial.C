@@ -1970,10 +1970,16 @@ StructuralMaterial :: computeStressIndependentStrainVector(FloatArray &answer,
 void
 StructuralMaterial :: giveFullSymVectorForm(FloatArray &answer, const FloatArray &vec, MaterialMode matMode)
 {
-    IntArray indx;
-    answer.resize( StructuralMaterial :: giveVoigtSymVectorMask(indx, matMode) );
-    answer.zero();
-    answer.assemble(vec, indx);
+	if(vec.giveSize() == 6) {
+		// If we use default 3D implementation to treat e.g. plane strain.
+		answer = vec;
+	}
+	else {
+		IntArray indx;
+		answer.resize( StructuralMaterial :: giveVoigtSymVectorMask(indx, matMode) );
+		answer.zero();
+		answer.assemble(vec, indx);
+	}
 }
 
 
