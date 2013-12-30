@@ -310,6 +310,21 @@ void EnrichmentItem :: propagateFronts()
     // Propagate interfaces
     mpPropagationLaw->propagateInterfaces(* giveDomain(), * mpEnrichmentDomain);
 
+    // For debugging only
+    if ( mpEnrichmentDomain->getVtkDebug() ) {
+
+    	int tStepInd = this->domain->giveEngngModel()->giveCurrentStep()->giveNumber();
+
+    	EnrichmentDomain_BG *enrDomBG = dynamic_cast<EnrichmentDomain_BG*> (mpEnrichmentDomain);
+
+    	if(enrDomBG != NULL) {
+			PolygonLine *pl = dynamic_cast< PolygonLine * >( enrDomBG->bg );
+			if ( pl != NULL ) {
+				pl->printVTK(tStepInd, number);
+			}
+    	}
+    }
+
     updateGeometry();
 }
 

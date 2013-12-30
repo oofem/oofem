@@ -608,14 +608,8 @@ void Circle :: printYourself()
     printf("\n");
 }
 
-
-
-
-int PolygonLine :: nextLineIdNumber = 0;
-
 PolygonLine :: PolygonLine() : BasicGeometry()
 {
-    stepInd = 0;
     mDebugVtk = false;
 #ifdef __BOOST_MODULE
     LC.x(0.0);
@@ -624,9 +618,6 @@ PolygonLine :: PolygonLine() : BasicGeometry()
     UC.x(0.0);
     UC.y(0.0);
 #endif
-
-    lineIdNumber = nextLineIdNumber;
-    nextLineIdNumber++;
 }
 
 void PolygonLine :: computeNormalSignDist(double &oDist, const FloatArray &iPoint) const
@@ -922,10 +913,6 @@ IRResultType PolygonLine :: initializeFrom(InputRecord *ir)
 
     delete points;
 
-    if ( mDebugVtk ) {
-        printVTK();
-    }
-
     return IRRT_OK;
 }
 
@@ -1201,7 +1188,7 @@ void PolygonLine :: printYourself()
     printf("\n");
 }
 
-void PolygonLine :: printVTK()
+void PolygonLine :: printVTK(int iTStepIndex, int iLineIndex)
 {
     // Debugging function: write crack geometry to vtk.
 
@@ -1209,13 +1196,13 @@ void PolygonLine :: printVTK()
     std :: string vtkFileName;
     vtkFileName.append("crack");
     char lineIdNumberString [ 100 ];
-    sprintf(lineIdNumberString, "%d", lineIdNumber);
+    sprintf(lineIdNumberString, "%d", iLineIndex);
     vtkFileName.append(lineIdNumberString);
 
     vtkFileName.append("Step");
     char stepString [ 100 ];
 
-    sprintf(stepString, "%d", stepInd);
+    sprintf(stepString, "%d", iTStepIndex);
     vtkFileName.append(stepString);
 
     vtkFileName.append(".vtk");
@@ -1261,8 +1248,6 @@ void PolygonLine :: printVTK()
     }
 
     file.close();
-
-    stepInd++;
 }
 
 

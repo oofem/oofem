@@ -76,15 +76,6 @@ IRResultType EDCrack :: initializeFrom(InputRecord *ir)
 {
     IRResultType result = bg->initializeFrom(ir);
 
-
-    // For debugging only
-    if ( mDebugVTK ) {
-        PolygonLine *pl = dynamic_cast< PolygonLine * >( bg );
-        if ( pl != NULL ) {
-            pl->printVTK();
-        }
-    }
-
     return result;
 }
 
@@ -219,15 +210,6 @@ bool EDCrack :: propagateTips(const std :: vector< TipPropagation > &iTipProp) {
             bg->insertVertexBack(pos);
         }
     }
-
-    // For debugging only
-    if ( mDebugVTK ) {
-        PolygonLine *pl = dynamic_cast< PolygonLine * >( bg );
-        if ( pl != NULL ) {
-            pl->printVTK();
-        }
-    }
-
     return true;
 }
 
