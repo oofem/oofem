@@ -65,6 +65,7 @@ protected:
     std :: map< std :: string, std :: vector< std :: string > >stringListRecord;
     std :: map< std :: string, Dictionary >dictionaryRecord;
     std :: map< std :: string, std :: list< Range > >rangeRecord;
+    std :: map< std :: string, ScalarFunction >scalarFunctionRecord;
 
 public:
     /// Constructor. Creates an empty input record.
@@ -91,6 +92,7 @@ public:
     virtual IRResultType giveField(std :: vector< std :: string > &answer, InputFieldType id);
     virtual IRResultType giveField(Dictionary &answer, InputFieldType id);
     virtual IRResultType giveField(std :: list< Range > &answer, InputFieldType id);
+    virtual IRResultType giveField(ScalarFunction& function, InputFieldType id); 
 
     virtual bool hasField(InputFieldType id);
     virtual void printYourself();
@@ -107,6 +109,7 @@ public:
     virtual void setField(const std :: vector< std :: string > &item, InputFieldType id);
     virtual void setField(const Dictionary &item, InputFieldType id);
     virtual void setField(const std :: list< Range > &item, InputFieldType id);
+    virtual void setField(const ScalarFunction& function, InputFieldType id); 
     /// Sets an empty field with given id.
     virtual void setField(InputFieldType id);
     /// Removes given field from record.

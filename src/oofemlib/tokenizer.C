@@ -71,6 +71,25 @@ Tokenizer :: readStructToken(std :: size_t &pos, const std :: string &line)
     return x + '}'; // structs are left with surrounding brackets, unlike strings ""
 }
 
+std :: string
+Tokenizer :: readSimpleExpressionToken(std :: size_t &pos, const std :: string &line)
+{
+    pos++;
+    std :: string x = this->readToken(pos, line, '$'); // read everything up to terminating '$' (or to the end of the string)
+    if ( line [ pos ] == '$' ) {
+        pos++;            // check if terminating '"' was found
+    } else {
+        OOFEM_WARNING("Tokenizer::readSimpleExpressionToken : Missing closing separator (\"$\") inserted at end of line");
+    }
+    return '$' + x + '$'; // simple expressions are left with surrounding '$";
+}
+
+std :: string
+Tokenizer :: readReferenceToken(std :: size_t &pos, const std :: string &line)
+{
+    std :: string x = this->readToken(pos, line); 
+    return x;
+}
 
 std :: string
 Tokenizer :: readToken(std :: size_t &pos, const std :: string &line, char sep)
@@ -107,6 +126,10 @@ void Tokenizer :: tokenizeLine(const std :: string &currentLine)
             sList.push_back( this->readStringToken(bpos, currentLine) );
         } else if ( c == '{' ) {
             sList.push_back( this->readStructToken(bpos, currentLine) );
+	} else if (c == '$' ) {
+            sList.push_back( this->readSimpleExpressionToken(bpos, currentLine) );
+	} else if (c == '@' ) {
+	    sList.push_back( this->readReferenceToken(bpos, currentLine) );
         } else {
             sList.push_back( this->readToken(bpos, currentLine, 0) );
         }

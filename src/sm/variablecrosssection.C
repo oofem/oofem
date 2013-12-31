@@ -61,42 +61,38 @@ VariableCrossSection :: initializeFrom(InputRecord *ir)
     // NOTE: do not call SimpleCrossSection here (as the parameter names are same, but different type is used here!!!!)
     this->CrossSection :: initializeFrom(ir);
 
-    this->thicknessExpr="0.0";
     if ( ir->hasField(_IFT_SimpleCrossSection_thick)) {
         IR_GIVE_OPTIONAL_FIELD(ir, thicknessExpr, _IFT_SimpleCrossSection_thick);
     }
 
-    this->widthExpr="0.0";
     if ( ir->hasField(_IFT_SimpleCrossSection_width)) {
         IR_GIVE_OPTIONAL_FIELD(ir, widthExpr, _IFT_SimpleCrossSection_width);
     }
 
-    this->areaExpr="0.0";
     if ( ir->hasField(_IFT_SimpleCrossSection_area)) {
         IR_GIVE_OPTIONAL_FIELD(ir, areaExpr, _IFT_SimpleCrossSection_area);
     }
 
-    this->iyExpr="0.0";
     if ( ir->hasField(_IFT_SimpleCrossSection_iy)) {
         IR_GIVE_OPTIONAL_FIELD(ir, iyExpr, _IFT_SimpleCrossSection_iy);
     }
-    this->izExpr="0.0";
+
     if ( ir->hasField(_IFT_SimpleCrossSection_iy)) {
         IR_GIVE_OPTIONAL_FIELD(ir, izExpr, _IFT_SimpleCrossSection_iz);
     }
-    this->ixExpr="0.0";
+
     if ( ir->hasField(_IFT_SimpleCrossSection_ik)) {
         IR_GIVE_OPTIONAL_FIELD(ir, ixExpr, _IFT_SimpleCrossSection_ik);
     }
-    this->shearAreayExpr="0.0";
+
     if ( ir->hasField(_IFT_SimpleCrossSection_shearareay)) {
         IR_GIVE_OPTIONAL_FIELD(ir, shearAreayExpr, _IFT_SimpleCrossSection_shearareay);
     }
-    this->shearAreazExpr="0.0";
+
     if ( ir->hasField(_IFT_SimpleCrossSection_shearareaz)) {
         IR_GIVE_OPTIONAL_FIELD(ir, shearAreazExpr, _IFT_SimpleCrossSection_shearareaz);
     }
-    this->drillingStiffnessExpr="0.0";
+
     if ( ir->hasField(_IFT_SimpleCrossSection_drillStiffness)) {
         IR_GIVE_OPTIONAL_FIELD(ir, drillingStiffnessExpr, _IFT_SimpleCrossSection_drillStiffness);
     }
@@ -123,30 +119,29 @@ void VariableCrossSection :: giveInputRecord(DynamicInputRecord &input)
     input.setField(this->materialNumber, _IFT_SimpleCrossSection_MaterialNumber);
 }
 
-std::string
-VariableCrossSection::giveExpression (CrossSectionProperty aProperty)
+void
+VariableCrossSection::giveExpression (const ScalarFunction** expr, CrossSectionProperty aProperty) const
 {
   if (aProperty == CS_Thickness) {
-    return this->thicknessExpr;
+    *expr = &thicknessExpr;
   } else if (aProperty ==  CS_Width) {
-    return this->widthExpr;
+    *expr = &widthExpr;
   } else if (aProperty == CS_Area) {
-    return this->areaExpr;
+    *expr = &areaExpr;
   } else if (aProperty == CS_TorsionMomentX) {
-    return this->ixExpr;
+    *expr = &ixExpr;
   } else if (aProperty == CS_InertiaMomentY) {
-    return this->iyExpr;
+    *expr = &iyExpr;
   } else if (aProperty == CS_InertiaMomentZ) {
-    return this->izExpr;
+    *expr = &izExpr;
   } else if (aProperty == CS_ShearAreaY) {
-    return this->shearAreayExpr;
+    *expr = &shearAreayExpr;
   } else if (aProperty == CS_ShearAreaZ) {
-    return this->shearAreazExpr;
+    *expr = &shearAreazExpr;
   } else if (aProperty == CS_DrillingStiffness) {
-    return this->drillingStiffnessExpr;
+    *expr = &drillingStiffnessExpr;
   } else {
     OOFEM_ERROR3("VariableCrossSection(%d)::give called with unknown ID %d", this->giveNumber(), aProperty);
-    return std::string();
   }
 }
 
@@ -163,12 +158,12 @@ double
 VariableCrossSection :: give(CrossSectionProperty aProperty, const FloatArray* coords, Element* elem, bool local)
 {
     double value = 0.0;
-    std::string expr;
+    const ScalarFunction* expr;
 
     if ( propertyDictionary->includes(aProperty) ) {
         value = propertyDictionary->at(aProperty);
     } else {
-      expr = this->giveExpression(aProperty);
+      this->giveExpression(&expr, aProperty);
 
       FloatArray c;
       if (this->localFormulationFlag) {
@@ -190,20 +185,14 @@ VariableCrossSection :: give(CrossSectionProperty aProperty, const FloatArray* c
 	  c = *coords;
 	}
       }
-
-      // construct parser expression
-      std::ostringstream buff;
-      int err, nsd = c.giveSize();
-      const char code[] = "xyz";
-      for (int i=0; i<nsd; i++) {
-	buff << code[i] << "=" << c(i) << ";";
-      } 
-      buff << expr;
+      std::map<std::string, double> m;
+      // construct parser parameter map
+      int nsd = c.giveSize();
+      if (nsd > 0) m["x"]=c(0);
+      if (nsd > 1) m["y"]=c(1);
+      if (nsd > 2) m["z"]=c(2);
       // evaluate the expression
-      value = this->exprParser.eval(buff.str().c_str(), err);
-      if (err) {
-	OOFEM_ERROR2("VariableCrossSection::give: parser syntax error (expr=\"%s\")", buff.str().c_str());
-      }
+      value = expr->eval (m, this->giveDomain());
     }
 
     return value;

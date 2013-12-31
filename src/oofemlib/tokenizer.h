@@ -45,7 +45,7 @@ namespace oofem {
  * This class splits given record (represented as string) to particular tokens, which are
  * separated by white spaces.
  * Tokenizer recognizes "quoted strings" and structured tokens that are
- * bounded by '{' '}' pairs, can be nested and represent single token.
+ * bounded by '{}, $$' pairs, can be nested and represent single token.
  */
 class OOFEM_EXPORT Tokenizer
 {
@@ -84,6 +84,18 @@ protected:
      * @param line Record from which token is parsed.
      */
     std :: string readStringToken(std :: size_t &pos, const std :: string &line);
+    /**
+     * Reads next simple expression token (section identified by starting with '$' and finishing with '$').
+     * @param pos Position (index) in token buffer.
+     * @param line Record from which token is parsed.
+     */
+    std :: string readSimpleExpressionToken(std :: size_t &pos, const std :: string &line);
+    /**
+     * Reads next reference token (reference format: @val, where val is integer).
+     * @param pos Position (index) in token buffer.
+     * @param line Record from which token is parsed.
+     */
+    std :: string readReferenceToken(std :: size_t &pos, const std :: string &line);
 };
 } // end namespace oofem
 #endif // tokenizer_h
