@@ -66,12 +66,18 @@ public:
 
 protected:
     /**
+     * Reads next simple token (stops when whitespace character is reached)
+     * @param pos Starting position.
+     * @param line Record from which token is parsed.
+     */
+    std :: string readSimpleToken(std :: size_t &pos, const std :: string &line);
+    /**
      * Reads next token (stops when separator is reached)
      * @param pos Starting position.
      * @param line Record from which token is parsed.
      * @param sep Separator.
      */
-    std :: string readToken(std :: size_t &pos, const std :: string &line, char sep = 0);
+    std :: string readToken(std :: size_t &pos, const std :: string &line, char sep);
     /**
      * Reads next structured token (bounded by '{' '}' pairs, possibly nested).
      * @param pos Starting position (should point to a '{').
@@ -90,12 +96,6 @@ protected:
      * @param line Record from which token is parsed.
      */
     std :: string readSimpleExpressionToken(std :: size_t &pos, const std :: string &line);
-    /**
-     * Reads next reference token (reference format: @val, where val is integer).
-     * @param pos Position (index) in token buffer.
-     * @param line Record from which token is parsed.
-     */
-    std :: string readReferenceToken(std :: size_t &pos, const std :: string &line);
 };
 } // end namespace oofem
 #endif // tokenizer_h
