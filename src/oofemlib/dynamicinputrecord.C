@@ -214,6 +214,16 @@ IRResultType DynamicInputRecord :: giveField(std :: list< Range > &answer, Input
     return IRRT_OK;
 }
 
+IRResultType DynamicInputRecord :: giveField(ScalarFunction &answer, InputFieldType id)
+{
+    std :: map< std :: string, ScalarFunction > :: iterator it = this->scalarFunctionRecord.find(id);
+    if ( it == this->scalarFunctionRecord.end() ) {
+        return IRRT_NOTFOUND;
+    }
+    answer = it->second;
+    return IRRT_OK;
+}
+
 bool DynamicInputRecord :: hasField(InputFieldType id)
 {
     return this->emptyRecord.find(id) != this->emptyRecord.end() ||
@@ -294,6 +304,11 @@ void DynamicInputRecord :: setField(const Dictionary &item, InputFieldType id)
 void DynamicInputRecord :: setField(const std :: list< Range > &item, InputFieldType id)
 {
     this->rangeRecord [ id ] = item;
+}
+
+void DynamicInputRecord :: setField(const ScalarFunction &item, InputFieldType id)
+{
+    this->scalarFunctionRecord [ id ] = item;
 }
 
 void DynamicInputRecord :: setField(InputFieldType id)
