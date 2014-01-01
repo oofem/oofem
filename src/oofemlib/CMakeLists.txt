@@ -13,6 +13,7 @@ set (core_unsorted
     externalfieldgenerator.C
     datastream.C
     set.C
+    scalarfunction.C
     rvematerial.C
     weakperiodicbc.C
     solutionbasedshapefunction.C

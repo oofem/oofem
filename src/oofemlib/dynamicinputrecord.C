@@ -329,6 +329,7 @@ void DynamicInputRecord :: unsetField(InputFieldType id)
     this->stringListRecord.erase(id);
     this->dictionaryRecord.erase(id);
     this->rangeRecord.erase(id);
+    this->scalarFunctionRecord.erase(id);
 }
 
 void
@@ -368,6 +369,7 @@ std :: string DynamicInputRecord :: giveRecordAsString() const
     forRecord(IntArray, intArrayRecord);
     forRecord(FloatMatrix, matrixRecord);
     forRecord(Dictionary, dictionaryRecord);
+    forRecord(ScalarFunction, scalarFunctionRecord);
 
     // Have to write special code for std::vector and std::list
     for ( std :: map< std :: string, std :: vector< std :: string > > :: const_iterator it = stringListRecord.begin(); it != stringListRecord.end(); ++it ) {

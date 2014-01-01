@@ -36,14 +36,13 @@
 #include "domain.h"
 #include "parser.h"
 #include "error.h"
+
 #include <string>
 #include <map>
-#include <string.h>
-#include <sstream>
 
 namespace oofem {
 /**
- *  Implementation of Scalar function. The scalar function can be defined as
+ * Implementation of Scalar function. The scalar function can be defined as
  * (i)   simple double (constant) value,
  * (ii)  simple expression, that is evaluated by internal parser and that can depend on any number of variables,
  * which are defined by calling context (time finctions depend on time variable 't', variable loads can depend
@@ -56,118 +55,65 @@ namespace oofem {
  */
 class ScalarFunction
 {
-    /// dataValue attribute defining the possible, supported variants
-    union {
-        /// constant, double value
-        double dValue;
-        /// simple expression (evaluated by internal parser); note: std::string not allowed in union
-        char *eValue;
-        /// reference to external function
-        int fReference;
-    } dataValue;
+    /// Constant, double value.
+    double dValue;
+    /// Simple expression (evaluated by internal parser)
+    std::string eValue;
+    /// Reference to external function
+    int fReference;
 
-    /// enum value determining the dataValue type
+    /// Enum value determining the dataValue type.
     enum { DV_ValueType, DV_SimpleExpressionType, DV_FunctionReferenceType } dvType;
 
 public:
     /**
-     *  Constructor. Creates constant scalar function defined by given value.
-     *  @param val defines the constant value
+     * Creates constant scalar function defined by given value.
+     * @param val Defines the constant value
      */
-    ScalarFunction(double val = 0) {
-        this->dvType = DV_ValueType;
-        this->setValue(val);
-    }
+    ScalarFunction(double val = 0);
     /**
-     *  Constructor. Creates scalar funtion defined by given simple expression
-     *  @param val string with simple expression
+     * Creates scalar funtion defined by given simple expression.
+     * @param val String with simple expression
      */
-    ScalarFunction(std :: string &val) {
-        // initialize type to DV_ValueType to prevent clear() method to clear unitialized memory. will be set correctly by set method.
-        this->dvType = DV_ValueType;
-        this->setSimpleExpression(val);
-    }
+    ScalarFunction(std :: string &val);
     /**
-     * Constructor of sclar function defined using external function
-     * @param val external function number
+     * Constructor of scalar function defined using external function.
+     * @param val External function number
      */
-    ScalarFunction(int val) {
-        // initialize type to DV_ValueType to prevent clear() method to clear unitialized memory. will be set correctly by set method.
-        this->dvType = DV_ValueType;
-        this->setReference(val);
-    }
+    ScalarFunction(int val);
 
-    ~ScalarFunction() { this->clear(); }
+    ~ScalarFunction();
     /**
-     *  Sets receiver to be a constant scalar function defined by given value.
-     *  @param val defines the constant value
+     * Sets receiver to be a constant scalar function defined by given value.
+     * @param val Defines the constant value
      */
-    void setValue(double val) {
-        this->clear();
-        this->dvType = DV_ValueType;
-        this->dataValue.dValue = 0.0;
-    }
+    void setValue(double val);
 
     /**
-     *  Sets receiver to be a scalar funtion defined by given simple expression
-     *  @param val string with simple expression
+     * Sets receiver to be a scalar funtion defined by given simple expression
+     * @param val String with simple expression
      */
-    void setSimpleExpression(std :: string &val) {
-        this->clear();
-        this->dvType = DV_SimpleExpressionType;
-        this->dataValue.eValue  = new char [ val.size() ];
-        strcpy( this->dataValue.eValue, val.c_str() );
-    };
+    void setSimpleExpression(std :: string &val);
 
     /**
      * Sets receiver to be a scalar function defined using external function
-     * @param val external function number
+     * @param val External function number
      */
-    void setReference(int val) {
-        this->clear();
-        this->dvType = DV_FunctionReferenceType;
-        this->dataValue.fReference = val;
-    };
+    void setReference(int val);
 
     /**
      * Evaluates the receiver.
      * @param valDict map defining input parameters in the form  (name, value) pairs
      * @param d domain managing external functions
      */
-    double eval(std :: map< std :: string, double >valDict, Domain *d) const {
-        if ( this->dvType == DV_ValueType ) {
-            return this->dataValue.dValue;
-        } else if ( this->dvType == DV_SimpleExpressionType ) {
-            std :: ostringstream buff;
-            Parser p;
-            int err;
-            // process valDict and call internal parser
-            std :: map< std :: string, double > :: iterator it;
-            for ( it = valDict.begin(); it != valDict.end(); it++ ) {
-                buff << it->first << "=" << it->second << ";";
-            }
-            buff << this->dataValue.eValue;
-            // evaluate the expression
-            double value = p.eval(buff.str().c_str(), err);
-            if ( err ) {
-                OOFEM_ERROR2( "ScalarFunction::eval parser syntax error (expr=\"%s\")", buff.str().c_str() );
-            }
-            return value;
-        } else if ( this->dvType == DV_FunctionReferenceType ) {
-            // d->giveLoadTimeFunction(this->dataValue.fReference)->evaluate (valDict);
-            return 0.0;
-        }
-        return 0.;
-    }
+    double eval(std :: map< std :: string, double >valDict, Domain *d) const;
 
     /**
      * Cleans up before changing receiver
      */
-    void clear() {
-        if ( ( this->dvType == DV_SimpleExpressionType ) && this->dataValue.eValue ) {
-            delete[] this->dataValue.eValue;
-            this->dataValue.eValue = NULL;
-        }
-    }
-}; // end class ScalarFunction
+    void clear();
+
+    friend std :: ostream &operator<<(std :: ostream &out, const ScalarFunction &s);
+};
+
 } // end namespace OOFEM
