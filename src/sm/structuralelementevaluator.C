@@ -62,7 +62,7 @@ StructuralElementEvaluator :: StructuralElementEvaluator()
  *
  *  // first evaluate nonzero basis function mask
  *  if ( elem->giveInterpolation()->hasSubPatchFormulation() ) {
- *      IGAIntegrationElement *ee = ( IGAIntegrationElement * ) ie;
+ *      IGAIntegrationElement *ee = static_cast< IGAIntegrationElement * >( ie );
  *      elem->giveInterpolation()->giveKnotSpanBasisFuncMask(* ee->giveKnotSpan(), mask);
  *      // loop over nonzero shape functions and assemble localization array
  *      answer.resize(0);

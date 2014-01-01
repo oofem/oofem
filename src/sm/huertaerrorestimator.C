@@ -1052,8 +1052,8 @@ HuertaRemeshingCriteria :: giveDofManDensity(int num)
 #if 0
     // Minimum density
     for ( i = 1; i <= isize; i++ ) {
-        interface = ( HuertaRemeshingCriteriaInterface * )
-                    domain->giveElement( con->at(i) )->giveInterface(HuertaRemeshingCriteriaInterfaceType);
+        interface = static_cast< HuertaRemeshingCriteriaInterface * >
+                    ( domain->giveElement( con->at(i) )->giveInterface(HuertaRemeshingCriteriaInterfaceType) );
         if ( !interface ) {
             _error("giveDofManDensity: element does not support HuertaRemeshingCriteriaInterface");
         }
@@ -3272,7 +3272,7 @@ HuertaErrorEstimator :: solveRefinedElementProblem(int elemId, IntArray &localNo
         double rate, size = 1.0, currDensity;
 
         HuertaRemeshingCriteriaInterface *remeshInterface;
-        remeshInterface = ( HuertaRemeshingCriteriaInterface * ) element->giveInterface(HuertaRemeshingCriteriaInterfaceType);
+        remeshInterface = static_cast< HuertaRemeshingCriteriaInterface * >( element->giveInterface(HuertaRemeshingCriteriaInterfaceType) );
         if ( !remeshInterface ) {
             _error("estimateMeshDensities: element does not support HuertaRemeshingCriteriaInterface");
         }

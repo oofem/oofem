@@ -69,9 +69,9 @@ Interface *
 TrPlaneStress2dXFEM :: giveInterface(InterfaceType it)
 {
     if ( it == XfemElementInterfaceType ) {
-        return ( XfemElementInterface * ) this;
+        return static_cast< XfemElementInterface * >( this );
     } else if ( it == VTKXMLExportModuleElementInterfaceType ) {
-        return ( VTKXMLExportModuleElementInterface * ) this;
+        return static_cast< VTKXMLExportModuleElementInterface * >( this );
     } else {
         return TrPlaneStress2d :: giveInterface(it);
     }

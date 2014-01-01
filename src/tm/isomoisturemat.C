@@ -139,7 +139,7 @@ IsotropicMoistureTransferMaterial :: giveIPValue(FloatArray &answer, GaussPoint 
     }
 
     /* else if (  type == IST_Humidity ) {
-     * FloatArray state = ( ( TransportMaterialStatus * ) giveStatus(gp) )->giveStateVector();
+     * FloatArray state = static_cast< TransportMaterialStatus * >( giveStatus(gp) )->giveStateVector();
      * if ( state.giveSize() < 1 ) {
      *  _error("computeWaterChange: undefined moisture status!");
      * }

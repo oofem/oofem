@@ -436,7 +436,7 @@ NRSolver :: applyConstraintsToStiffness(SparseMtrx *k)
             OOFEM_ERROR("NRSolver :: applyConstraintsToStiffness: PetscSparseMtrx Expected");
         }
 
-        PetscSparseMtrx *lhs = ( PetscSparseMtrx * ) k;
+        PetscSparseMtrx *lhs = static_cast< PetscSparseMtrx * >( k );
 
         if ( !prescribedEgsIS_defined ) {
             IntArray eqs;
@@ -480,7 +480,7 @@ NRSolver :: applyConstraintsToStiffness(SparseMtrx *k)
             OOFEM_ERROR("NRSolver :: applyConstraintsToStiffness: PetscSparseMtrx Expected");
         }
 
-        PetscSparseMtrx *lhs = ( PetscSparseMtrx * ) k;
+        PetscSparseMtrx *lhs = static_cast< PetscSparseMtrx * >( k );
 
         Vec diag;
         PetscScalar *ptr;
@@ -563,7 +563,7 @@ NRSolver :: applyConstraintsToLoadIncrement(int nite, const SparseMtrx *k, Float
                 OOFEM_ERROR("NRSolver :: applyConstraintsToStiffness: PetscSparseMtrx Expected");
             }
 
-            PetscSparseMtrx *lhs = ( PetscSparseMtrx * ) k;
+            PetscSparseMtrx *lhs = static_cast< PetscSparseMtrx * >( k );
 
             Vec diag;
             PetscScalar *ptr;

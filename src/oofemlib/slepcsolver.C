@@ -84,8 +84,8 @@ SLEPcSolver :: solve(SparseMtrx *a, SparseMtrx *b, FloatArray *_eigv, FloatMatri
         OOFEM_ERROR("SLEPcSolver :: solveYourselfAt: PetscSparseMtrx Expected");
     }
 
-    A = ( PetscSparseMtrx * ) a;
-    B = ( PetscSparseMtrx * ) b;
+    A = static_cast< PetscSparseMtrx * >( a );
+    B = static_cast< PetscSparseMtrx * >( b );
     size = engngModel->givePetscContext( A->giveDomainIndex() )->giveNumberOfNaturalEqs(); // A->giveLeqs();
 
     // check array for storing eigenvalues

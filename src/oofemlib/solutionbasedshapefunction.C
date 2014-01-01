@@ -629,8 +629,7 @@ SolutionbasedShapeFunction :: setBoundaryConditionOnDof(Dof *d, double value)
 
         d->setBcId(bcID);
     } else {
-        BoundaryCondition *bc;
-        bc = ( BoundaryCondition * ) d->giveDofManager()->giveDomain()->giveBc(bcID);
+        BoundaryCondition *bc = static_cast< BoundaryCondition * >( d->giveDofManager()->giveDomain()->giveBc(bcID) );
         bc->setPrescribedValue(value);
     }
 }

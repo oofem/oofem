@@ -157,6 +157,7 @@ public:
             // d->giveLoadTimeFunction(this->dataValue.fReference)->evaluate (valDict);
             return 0.0;
         }
+        return 0.;
     }
 
     /**

@@ -78,7 +78,7 @@ NM_Status PetscSolver :: solve(SparseMtrx *A, FloatArray *b, FloatArray *x)
         OOFEM_ERROR("PETScSolver :: solve: PetscSparseMtrx Expected");
     }
 
-    PetscSparseMtrx *Lhs = ( PetscSparseMtrx * ) A;
+    PetscSparseMtrx *Lhs = static_cast< PetscSparseMtrx * >( A );
 
     Vec globRhsVec;
     Vec globSolVec;
@@ -205,7 +205,7 @@ NM_Status PetscSolver :: solve(SparseMtrx *A, FloatMatrix &B, FloatMatrix &X)
         OOFEM_ERROR("PETScSolver :: solve: PetscSparseMtrx Expected");
     }
 
-    PetscSparseMtrx *Lhs = ( PetscSparseMtrx * ) A;
+    PetscSparseMtrx *Lhs = static_cast< PetscSparseMtrx * >( A );
 
     Vec globRhsVec;
     Vec globSolVec;

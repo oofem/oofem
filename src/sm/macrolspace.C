@@ -260,7 +260,6 @@ void MacroLSpace :: giveInternalForcesVector(FloatArray &answer, TimeStep *tStep
         this->microEngngModel->solveYourselfAt( this->microEngngModel->giveCurrentStep() );
         this->microEngngModel->updateYourself( this->microEngngModel->giveCurrentStep() );
         //this->microEngngModel->terminate( this->microEngngModel->giveCurrentStep() );
-        //microStructuralEngngModel = ( StructuralEngngModel * ) &this->microEngngModel;
         StructuralEngngModel *microStructuralEngngModel = dynamic_cast< StructuralEngngModel * >( this->microEngngModel );
 
 

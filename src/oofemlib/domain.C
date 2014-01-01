@@ -1543,7 +1543,7 @@ Domain :: createDofs()
             dof->setIcId(icid);
             // Slave dofs obtain their weights post-initialization, simple slave dofs must have their master node specified.
             if ( dtype == DT_simpleSlave ) {
-                ( ( SimpleSlaveDof * ) dof )->setMasterDofManagerNum( ( * dman->giveMasterMap() ) [ id ] );
+                static_cast< SimpleSlaveDof * >( dof )->setMasterDofManagerNum( ( * dman->giveMasterMap() ) [ id ] );
             }
             dman->setDof(c, dof);
         }

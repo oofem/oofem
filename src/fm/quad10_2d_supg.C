@@ -90,8 +90,7 @@ Quad10_2D_SUPG :: giveInterpolation(DofIDItem id) const
 DofManager *
 Quad10_2D_SUPG :: giveInternalDofManager(int i) const
 {
-    //_error2("No such DOF available on Element %d", number);
-    return ( DofManager * ) & pressureNode;
+    return const_cast< ElementDofManager * >( & pressureNode );
 }
 
 
