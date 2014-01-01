@@ -36,7 +36,7 @@
 #define heavisideltf_h
 
 #include "floatarray.h"
-#include "loadtimefunction.h"
+#include "function.h"
 
 ///@name Input fields for HeavisideLTF
 //@{
@@ -56,13 +56,13 @@ namespace oofem {
  * H(t) = \begin{cases} 0,& t\leq 0  \\ 1, & t>0 \end{cases}
  * @f]
  */
-class OOFEM_EXPORT HeavisideLTF : public LoadTimeFunction
+class OOFEM_EXPORT HeavisideLTF : public Function
 {
 private:
     double origin, value;
 
 public:
-    HeavisideLTF(int i, Domain *d) : LoadTimeFunction(i, d)
+    HeavisideLTF(int i, Domain *d) : Function(i, d)
     { origin = value = 0.; }
     virtual ~HeavisideLTF() { }
 

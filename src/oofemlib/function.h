@@ -31,14 +31,9 @@
  *  License along with this library; if not, write to the Free Software
  *  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  */
-/*
- * The original idea for this class comes from
- * Dubois-Pelerin, Y.: "Object-Oriented  Finite Elements: Programming concepts and Implementation",
- * PhD Thesis, EPFL, Lausanne, 1992.
- */
 
-#ifndef loadtime_h
-#define loadtime_h
+#ifndef function_h
+#define function_h
 
 #include "femcmpnn.h"
 #include "domain.h"
@@ -46,22 +41,18 @@
 
 #include <map>
 
-///@name Input fields for LoadTimeFunction
+///@name Input fields for Function
 //@{
-#define _IFT_LoadTimeFunction_initialvalue "initialvalue"
-#define _IFT_LoadTimeFunction_ft "f(t)"
+#define _IFT_Function_initialvalue "initialvalue" ///@todo Deprecated
+#define _IFT_Function_ft "f(t)" ///@todo Deprecated
 //@}
 
 namespace oofem {
 /**
- * Abstract base class representing load time function. Classes derived from Load class typically
- * describe load from spatial point of view. The purpose of introducing load time function is to express
- * variation of some components in time. Load time function typically belongs to domain and is
- * attribute of one or more loads. Generally load time function is real function of time, @f$ y=f(t) @f$.
- *
- * See TJR Hughes, "The Finite Element Method", p 677.
+ * Abstract base class representing a function with vector input and output.
+ * It is useful in many scenarios, in particular describing the load/b.c. amplitude in time.
  */
-class OOFEM_EXPORT LoadTimeFunction : public FEMComponent
+class OOFEM_EXPORT Function : public FEMComponent
 {
 protected:
     /**
@@ -82,9 +73,9 @@ public:
      * @param n Load time function number.
      * @param d Domain to which new object will belongs.
      */
-    LoadTimeFunction(int n, Domain *d);
+    Function(int n, Domain *d);
     /// Destructor
-    virtual ~LoadTimeFunction() { }
+    virtual ~Function() { }
 
     /**
      * Returns the value of load time function at given time. Abstract service.
@@ -126,4 +117,4 @@ public:
     virtual void giveInputRecord(DynamicInputRecord &input);
 };
 } // end namespace oofem
-#endif // loadtime_h
+#endif // function_h

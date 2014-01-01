@@ -59,7 +59,7 @@
 #define _IFT_NRSolver_lstype "lstype"
 #define _IFT_NRSolver_ddm "ddm"
 #define _IFT_NRSolver_ddv "ddv"
-#define _IFT_NRSolver_ddltf "ddltf"
+#define _IFT_NRSolver_ddfunc "ddltf"
 #define _IFT_NRSolver_linesearch "linesearch"
 #define _IFT_NRSolver_rtolv "rtolv"
 #define _IFT_NRSolver_rtolf "rtolf"

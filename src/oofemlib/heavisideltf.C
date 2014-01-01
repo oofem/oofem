@@ -37,7 +37,7 @@
 #include "classfactory.h"
 
 namespace oofem {
-REGISTER_LoadTimeFunction(HeavisideLTF);
+REGISTER_Function(HeavisideLTF);
 
 double
 HeavisideLTF :: evaluateAtTime(double time)
@@ -63,7 +63,7 @@ HeavisideLTF :: initializeFrom(InputRecord *ir)
     const char *__proc = "initializeFrom"; // Required by IR_GIVE_FIELD macro
     IRResultType result;                // Required by IR_GIVE_FIELD macro
 
-    LoadTimeFunction :: initializeFrom(ir);
+    Function :: initializeFrom(ir);
     IR_GIVE_FIELD(ir, origin, _IFT_HeavisideLTF_origin);
     IR_GIVE_FIELD(ir, value, _IFT_HeavisideLTF_value);
 
@@ -73,7 +73,7 @@ HeavisideLTF :: initializeFrom(InputRecord *ir)
 
 void HeavisideLTF :: giveInputRecord(DynamicInputRecord &input)
 {
-    LoadTimeFunction :: giveInputRecord(input);
+    Function :: giveInputRecord(input);
     input.setField(this->origin, _IFT_HeavisideLTF_origin);
     input.setField(this->value, _IFT_HeavisideLTF_value);
 }

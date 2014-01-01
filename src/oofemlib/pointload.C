@@ -33,7 +33,7 @@
  */
 
 #include "pointload.h"
-#include "loadtimefunction.h"
+#include "function.h"
 #include "floatarray.h"
 #include "classfactory.h"
 #include "dynamicinputrecord.h"
@@ -49,7 +49,7 @@ PointLoad :: computeValueAt(FloatArray &answer, TimeStep *tStep, FloatArray &coo
     Load :: computeComponentArrayAt(answer, tStep, mode);
 
     // time distribution
-    factor = this->giveLoadTimeFunction()->evaluate(tStep, mode);
+    factor = this->giveTimeFunction()->evaluate(tStep, mode);
     answer.times(factor);
 }
 

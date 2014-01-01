@@ -85,7 +85,7 @@ protected:
     int lumpedCapacityStab;
 
     /// Associated time function for time step increment.
-    int dtTimeFunction;
+    int dtFunction;
 
     /// Specified times where the problem is solved
     FloatArray discreteTimes;
@@ -137,7 +137,7 @@ public:
      * Used time function should provide step lengths as function of step number.
      * Initial step with number 0 is considered as [ -dt(0), 0 ], first step is [ 0, dt(1) ], ...
      */
-    LoadTimeFunction *giveDtTimeFunction();
+    Function *giveDtFunction();
 
     /**
      * Returns the time step length for given step number n, initial step is number 0.

@@ -52,7 +52,6 @@ namespace oofem {
 StructuralInterfaceElement :: StructuralInterfaceElement(int n, Domain *aDomain) : Element(n, aDomain)
 {
     // Constructor. Creates an element with number n, belonging to aDomain.
-    activityLtf = 0;
     initialDisplacements = NULL;
     nlGeometry = 0;
 }
@@ -274,7 +273,7 @@ StructuralInterfaceElement :: updateYourself(TimeStep *tStep)
     Element :: updateYourself(tStep);
 
     // record initial displacement if element not active
-    if ( activityLtf && !isActivated(tStep) ) {
+    if ( activityTimeFunction && !isActivated(tStep) ) {
         if ( !initialDisplacements ) {
             initialDisplacements = new FloatArray();
         }

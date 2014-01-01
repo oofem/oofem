@@ -36,7 +36,7 @@
 
 #include "boundarycondition.h"
 #include "timestep.h"
-#include "loadtimefunction.h"
+#include "function.h"
 #include "verbose.h"
 #include "dynamicinputrecord.h"
 #include "classfactory.h"
@@ -62,7 +62,7 @@ UserDefDirichletBC :: ~UserDefDirichletBC()
 double
 UserDefDirichletBC :: give(Dof *dof, ValueModeType mode, TimeStep *tStep)
 {
-    double factor = this->giveLoadTimeFunction()->evaluate(tStep, mode);
+    double factor = this->giveFunction()->evaluate(tStep, mode);
     DofManager *dMan = dof->giveDofManager();
 
 

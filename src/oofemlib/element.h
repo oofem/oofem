@@ -71,7 +71,7 @@
 #define _IFT_Element_lcs "lcs"
 #define _IFT_Element_partitions "partitions"
 #define _IFT_Element_remote "remote"
-#define _IFT_Element_activityltf "activityltf"
+#define _IFT_Element_activityTimeFunction "activityltf"
 #define _IFT_Element_nip "nip"
 //@}
 
@@ -178,7 +178,7 @@ protected:
     FloatMatrix elemLocalCS;
 
     /// Element activity time function. If defined, nonzero value indicates active receiver, zero value inactive element.
-    int activityLtf;
+    int activityTimeFunction;
 
     /**
      * In parallel mode, globalNumber contains globally unique DoFManager number.

@@ -48,7 +48,7 @@
 #include "leplic.h"
 #include "levelsetpcs.h"
 #include "datastream.h"
-#include "loadtimefunction.h"
+#include "function.h"
 #include "contextioerr.h"
 #include "timer.h"
 
@@ -105,8 +105,8 @@ SUPG :: initializeFrom(InputRecord *ir)
     sparseMtrxType = ( SparseMtrxType ) val;
 
     IR_GIVE_FIELD(ir, deltaT, _IFT_SUPG_deltat);
-    deltaTLTF = 0;
-    IR_GIVE_OPTIONAL_FIELD(ir, deltaTLTF, _IFT_SUPG_deltatltf);
+    deltaTF = 0;
+    IR_GIVE_OPTIONAL_FIELD(ir, deltaTF, _IFT_SUPG_deltatFunction);
 
     IR_GIVE_OPTIONAL_FIELD(ir, consistentMassFlag, _IFT_SUPG_cmflag);
 
@@ -247,8 +247,8 @@ SUPG :: giveNextStep()
 
     previousStep = currentStep;
 
-    if ( deltaTLTF ) {
-        dt *= domain->giveLoadTimeFunction(deltaTLTF)->evaluateAtTime(istep);
+    if ( deltaTF ) {
+        dt *= domain->giveFunction(deltaTF)->evaluateAtTime(istep);
     }
 
     // check for critical time step

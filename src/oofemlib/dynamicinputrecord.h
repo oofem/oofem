@@ -41,6 +41,9 @@
 #include <set>
 
 namespace oofem {
+
+class FEMComponent;
+
 /**
  * Class representing the a dynamic Input Record.
  * The input record is represented as a list of fields.
@@ -68,8 +71,10 @@ protected:
     std :: map< std :: string, ScalarFunction >scalarFunctionRecord;
 
 public:
-    /// Constructor. Creates an empty input record.
+    /// Creates an empty input record.
     DynamicInputRecord();
+    /// Creates an empty input record.
+    DynamicInputRecord(FEMComponent &femc); ///@todo Make FEMComponent const
     /// Copy constructor.
     DynamicInputRecord(const DynamicInputRecord &);
     /// Destructor.

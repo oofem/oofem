@@ -38,7 +38,7 @@
 #include "floatmatrix.h"
 #include "sparsemtrx.h"
 #include "unknownnumberingscheme.h"
-#include "loadtimefunction.h"
+#include "function.h"
 #include "timestep.h"
 #include "datastream.h"
 #include "contextioerr.h"
@@ -73,8 +73,8 @@ IRResultType LinearConstraintBC :: initializeFrom(InputRecord *ir)
     if ( weights.giveSize() != dofmans.giveSize() ) {
         OOFEM_ERROR3( "Size mismatch, weights %d and dofmans %d", weights.giveSize(), dofmans.giveSize() );
     }
-    IR_GIVE_OPTIONAL_FIELD(ir, weightsLtf, _IFT_LinearConstraintBC_weightsltf);
-    IR_GIVE_OPTIONAL_FIELD(ir, rhsLtf, _IFT_LinearConstraintBC_rhsltf);
+    IR_GIVE_OPTIONAL_FIELD(ir, weightsLtf, _IFT_LinearConstraintBC_weightsfuncs);
+    IR_GIVE_OPTIONAL_FIELD(ir, rhsLtf, _IFT_LinearConstraintBC_rhsfuncs);
 
     IR_GIVE_FIELD(ir, lhsType, _IFT_LinearConstraintBC_lhstype);
     IR_GIVE_FIELD(ir, rhsType, _IFT_LinearConstraintBC_rhstype);
@@ -117,7 +117,7 @@ void LinearConstraintBC :: assemble(SparseMtrx *answer, TimeStep *tStep, Equatio
         for ( int _i = 1; _i <= size; _i++ ) { // loop over dofs
             double factor = 1.;
             if ( weightsLtf.giveSize() ) {
-                factor = domain->giveLoadTimeFunction( weightsLtf.at(_i) )->evaluateAtTime( tStep->giveIntrinsicTime() );
+                factor = domain->giveFunction( weightsLtf.at(_i) )->evaluateAtTime( tStep->giveIntrinsicTime() );
             }
             contrib.at(_i, 1) = this->weights.at(_i) * factor;
         }
@@ -159,7 +159,7 @@ void LinearConstraintBC :: assembleVector(FloatArray &answer, TimeStep *tStep, E
         for ( int _i = 1; _i <= size; _i++ ) {
             factor = 1.;
             if ( weightsLtf.giveSize() ) {
-                factor = domain->giveLoadTimeFunction( weightsLtf.at(_i) )->evaluateAtTime( tStep->giveIntrinsicTime() );
+                factor = domain->giveFunction( weightsLtf.at(_i) )->evaluateAtTime( tStep->giveIntrinsicTime() );
             }
             idof = this->domain->giveDofManager( this->dofmans.at(_i) )->giveDof( this->dofs.at(_i) );
             if ( s.giveDofEquationNumber(idof) ) {
@@ -173,7 +173,7 @@ void LinearConstraintBC :: assembleVector(FloatArray &answer, TimeStep *tStep, E
         // use rhs value
 
         if ( rhsLtf ) {
-            factor = domain->giveLoadTimeFunction(rhsLtf)->evaluateAtTime( tStep->giveIntrinsicTime() );
+            factor = domain->giveFunction(rhsLtf)->evaluateAtTime( tStep->giveIntrinsicTime() );
         }
         this->giveLocArray( s, loc, lambdaeq.at(1) );
         vec.at(1) = rhs * factor;

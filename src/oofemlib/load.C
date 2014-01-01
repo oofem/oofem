@@ -35,7 +35,7 @@
 #include "load.h"
 #include "verbose.h"
 #include "timestep.h"
-#include "loadtimefunction.h"
+#include "function.h"
 #include "dynamicinputrecord.h"
 
 namespace oofem {
@@ -43,7 +43,7 @@ Load :: Load(int i, Domain *aDomain) :
     GeneralBoundaryCondition(i, aDomain), componentArray(), dofExcludeMask()
     // Constructor. Creates a load with number i, belonging to aDomain.
 {
-    loadTimeFunction = 0;
+    timeFunction = 0;
 }
 
 
@@ -62,7 +62,7 @@ Load :: computeComponentArrayAt(FloatArray &answer, TimeStep *tStep, ValueModeTy
 {
     double factor;
 
-    factor = this->giveLoadTimeFunction()->evaluate(tStep, mode);
+    factor = this->giveTimeFunction()->evaluate(tStep, mode);
     answer  = this->giveComponentArray();
     answer.times(factor);
 

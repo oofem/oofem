@@ -35,14 +35,14 @@
 #ifndef usrdeftimefunct_h
 #define usrdeftimefunct_h
 
-#include "loadtimefunction.h"
+#include "function.h"
 
-///@name Input fields for UserDefinedLoadTimeFunction
+///@name Input fields for UserDefinedFunction
 //@{
-#define _IFT_UserDefinedLoadTimeFunction_Name "usrdefltf"
-#define _IFT_UserDefinedLoadTimeFunction_ft "f(t)"
-#define _IFT_UserDefinedLoadTimeFunction_dfdt "dfdt(t)"
-#define _IFT_UserDefinedLoadTimeFunction_d2fdt2 "d2fdt2(t)"
+#define _IFT_UserDefinedFunction_Name "usrdefltf"
+#define _IFT_UserDefinedFunction_ft "f(t)"
+#define _IFT_UserDefinedFunction_dfdt "dfdt(t)"
+#define _IFT_UserDefinedFunction_d2fdt2 "d2fdt2(t)"
 //@}
 
 namespace oofem {
@@ -52,7 +52,7 @@ namespace oofem {
  * Load time function typically belongs to domain and is
  * attribute of one or more loads. Generally load time function is real function of time (@f$y=f(t)@f$).
  */
-class OOFEM_EXPORT UserDefinedLoadTimeFunction : public LoadTimeFunction
+class OOFEM_EXPORT UserDefinedFunction : public Function
 {
 private:
     /// Expression for the function value.
@@ -68,9 +68,9 @@ public:
      * @param n Load time function number.
      * @param d Domain to which new object will belongs..
      */
-    UserDefinedLoadTimeFunction(int n, Domain *d);
+    UserDefinedFunction(int n, Domain *d);
     /// Destructor.
-    virtual ~UserDefinedLoadTimeFunction() { }
+    virtual ~UserDefinedFunction() { }
 
     /**
      * Reads the fields
@@ -84,8 +84,8 @@ public:
     virtual double evaluateVelocityAtTime(double t);
     virtual double evaluateAccelerationAtTime(double t);
 
-    virtual const char *giveClassName() const { return "UserDefinedLoadTimeFunction"; }
-    virtual const char *giveInputRecordName() const { return _IFT_UserDefinedLoadTimeFunction_Name; }
+    virtual const char *giveClassName() const { return "UserDefinedFunction"; }
+    virtual const char *giveInputRecordName() const { return _IFT_UserDefinedFunction_Name; }
 };
 } // end namespace oofem
 #endif // usrdeftimefunct_h

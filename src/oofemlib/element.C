@@ -52,7 +52,7 @@
 #include "feinterpol1d.h"
 #include "feinterpol2d.h"
 #include "feinterpol3d.h"
-#include "loadtimefunction.h"
+#include "function.h"
 #include "dofmanager.h"
 #include "node.h"
 #include "dynamicinputrecord.h"
@@ -67,7 +67,7 @@ Element :: Element(int n, Domain *aDomain) :
     material           = 0;
     numberOfDofMans    = 0;
     numberOfIntegrationRules = 0;
-    activityLtf = 0;
+    activityTimeFunction = 0;
     integrationRulesArray  = NULL;
 }
 
@@ -744,7 +744,7 @@ Element :: initializeFrom(InputRecord *ir)
 
 #endif
 
-    IR_GIVE_OPTIONAL_FIELD(ir, activityLtf, _IFT_Element_activityltf);
+    IR_GIVE_OPTIONAL_FIELD(ir, activityTimeFunction, _IFT_Element_activityTimeFunction);
 
     IR_GIVE_OPTIONAL_FIELD(ir, numberOfGaussPoints, _IFT_Element_nip);
 
@@ -792,8 +792,8 @@ Element :: giveInputRecord(DynamicInputRecord &input)
     }
 #endif
 
-    if ( activityLtf > 0 ) {
-        input.setField(activityLtf, _IFT_Element_activityltf);
+    if ( activityTimeFunction > 0 ) {
+        input.setField(activityTimeFunction, _IFT_Element_activityTimeFunction);
     }
 
     input.setField(numberOfGaussPoints, _IFT_Element_nip);
@@ -836,9 +836,9 @@ Element :: updateYourself(TimeStep *tStep)
 bool
 Element :: isActivated(TimeStep *tStep)
 {
-    if ( activityLtf ) {
+    if ( activityTimeFunction ) {
         if ( tStep ) {
-            return ( domain->giveLoadTimeFunction(activityLtf)->evaluateAtTime(tStep->giveIntrinsicTime()) > 1.e-3 );
+            return ( domain->giveFunction(activityTimeFunction)->evaluateAtTime(tStep->giveIntrinsicTime()) > 1.e-3 );
         } else {
             return false;
         }

@@ -62,7 +62,7 @@
 #define _IFT_Domain_ncrosssect "ncrosssect"
 #define _IFT_Domain_nbc "nbc"
 #define _IFT_Domain_nic "nic"
-#define _IFT_Domain_nloadtimefunct "nltf"
+#define _IFT_Domain_nfunct "nltf"
 #define _IFT_Domain_nset "nset"
 #define _IFT_Domain_nbarrier "nbarrier"
 #define _IFT_Domain_nrandgen "nrandgen"
@@ -80,7 +80,7 @@ class Material;
 class GeneralBoundaryCondition;
 class InitialCondition;
 class Load;
-class LoadTimeFunction;
+class Function;
 class CrossSection;
 class ElementSide;
 class DofManager;
@@ -133,7 +133,7 @@ private:
     /// Initial condition list.
     AList< InitialCondition > *icList;
     /// Load time function list.
-    AList< LoadTimeFunction > *loadTimeFunctionList;
+    AList< Function > *functionList;
     /// Set list.
     AList< Set > *setList;
     /// Nonlocal barrier list.
@@ -291,7 +291,7 @@ public:
      * Generates error if no such load time function is defined.
      * @param n Pointer to n-th load time function is returned.
      */
-    LoadTimeFunction *giveLoadTimeFunction(int n);
+    Function *giveFunction(int n);
     /**
      * Service for accessing particular domain material model.
      * Generates error if no such material model is defined.
@@ -383,7 +383,7 @@ public:
     /// Returns number of initial conditions in domain.
     int giveNumberOfInitialConditions() const { return icList->giveSize(); }
     /// Returns number of load time functions in domain.
-    int giveNumberOfLoadTimeFunctions() const { return loadTimeFunctionList->giveSize(); }
+    int giveNumberOfFunctions() const { return functionList->giveSize(); }
     /// Returns number of regions. Currently regions corresponds to cross section models.
     int giveNumberOfRegions() const { return this->giveNumberOfCrossSectionModels(); }
     /// Returns number of nonlocal integration barriers
@@ -416,7 +416,7 @@ public:
     /// Resizes the internal data structure to accommodate space for _newSize initial conditions.
     void resizeInitialConditions(int _newSize);
     /// Resizes the internal data structure to accommodate space for _newSize load time functions.
-    void resizeLoadTimeFunctions(int _newSize);
+    void resizeFunctions(int _newSize);
     /// Resizes the internal data structure to accommodate space for _newSize random field generators.
     void resizeRandomFieldGenerators(int _newSize);
     /// Resizes the internal data structure to accommodate space for _newSize sets.
@@ -437,7 +437,7 @@ public:
     /// Sets i-th component. The component will be further managed and maintained by domain object.
     void setInitialCondition(int i, InitialCondition *obj);
     /// Sets i-th component. The component will be further managed and maintained by domain object.
-    void setLoadTimeFunction(int i, LoadTimeFunction *obj);
+    void setFunction(int i, Function *obj);
     /// Sets i-th component. The component will be further managed and maintained by domain object.
     void setRandomFieldGenerator(int i, RandomFieldGenerator *obj);
     /// Sets i-th component. The component will be further managed and maintained by domain object.

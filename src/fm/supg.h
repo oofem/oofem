@@ -45,7 +45,7 @@
 //@{
 #define _IFT_SUPG_Name "supg"
 #define _IFT_SUPG_deltat "deltat"
-#define _IFT_SUPG_deltatltf "deltatltf"
+#define _IFT_SUPG_deltatFunction "deltatltf"
 #define _IFT_SUPG_cmflag "cmflag"
 #define _IFT_SUPG_alpha "alpha"
 #define _IFT_SUPG_scaleflag "scaleflag"
@@ -80,8 +80,9 @@ protected:
     FloatArray accelerationVector; //, previousAccelerationVector;
     FloatArray incrementalSolutionVector;
 
+    ///@todo Use ScalarFunction here!
     double deltaT;
-    int deltaTLTF;
+    int deltaTF;
     /// Convergence tolerance.
     double atolv, rtolv;
     /// Max number of iterations.

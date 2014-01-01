@@ -39,7 +39,7 @@
 #include "valuemodetype.h"
 #include "floatarray.h"
 #include "floatmatrix.h"
-#include "loadtimefunction.h"
+#include "function.h"
 #include "engngm.h"
 #include "set.h"
 #include "node.h"
@@ -69,7 +69,7 @@ double PrescribedGradient :: give(Dof *dof, ValueModeType mode, TimeStep *tStep)
 
     FloatArray u;
     u.beProductOf(gradient, dx);
-    u.times( this->giveLoadTimeFunction()->evaluate(tStep, mode) );
+    u.times( this->giveTimeFunction()->evaluate(tStep, mode) );
 
     switch ( id ) {
     case D_u:

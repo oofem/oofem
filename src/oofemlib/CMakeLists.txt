@@ -91,7 +91,7 @@ set (core_fields
     )
 
 set (core_ltf
-    loadtimefunction.C
+    function.C
     constantfunction.C
     heavisideltf.C
     peakfunction.C

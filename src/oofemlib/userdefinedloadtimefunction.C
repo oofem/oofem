@@ -39,24 +39,24 @@
 #include <sstream>
 
 namespace oofem {
-REGISTER_LoadTimeFunction(UserDefinedLoadTimeFunction);
+REGISTER_Function(UserDefinedFunction);
 
-UserDefinedLoadTimeFunction :: UserDefinedLoadTimeFunction(int n, Domain *d) : LoadTimeFunction(n, d) { }
+UserDefinedFunction :: UserDefinedFunction(int n, Domain *d) : Function(n, d) { }
 
 IRResultType
-UserDefinedLoadTimeFunction :: initializeFrom(InputRecord *ir)
+UserDefinedFunction :: initializeFrom(InputRecord *ir)
 {
     const char *__proc = "initializeFrom";
     IRResultType result;
 
-    IR_GIVE_FIELD(ir, ftExpression, _IFT_UserDefinedLoadTimeFunction_ft);
-    IR_GIVE_OPTIONAL_FIELD(ir, dfdtExpression, _IFT_UserDefinedLoadTimeFunction_dfdt);
-    IR_GIVE_OPTIONAL_FIELD(ir, d2fdt2Expression, _IFT_UserDefinedLoadTimeFunction_d2fdt2);
+    IR_GIVE_FIELD(ir, ftExpression, _IFT_UserDefinedFunction_ft);
+    IR_GIVE_OPTIONAL_FIELD(ir, dfdtExpression, _IFT_UserDefinedFunction_dfdt);
+    IR_GIVE_OPTIONAL_FIELD(ir, d2fdt2Expression, _IFT_UserDefinedFunction_d2fdt2);
 
-    return LoadTimeFunction :: initializeFrom(ir);
+    return Function :: initializeFrom(ir);
 }
 
-double UserDefinedLoadTimeFunction :: evaluateAtTime(double time)
+double UserDefinedFunction :: evaluateAtTime(double time)
 {
     Parser myParser;
     int err;
@@ -72,7 +72,7 @@ double UserDefinedLoadTimeFunction :: evaluateAtTime(double time)
     return result;
 }
 
-double UserDefinedLoadTimeFunction :: evaluateVelocityAtTime(double time)
+double UserDefinedFunction :: evaluateVelocityAtTime(double time)
 {
     Parser myParser;
     int err;
@@ -94,7 +94,7 @@ double UserDefinedLoadTimeFunction :: evaluateVelocityAtTime(double time)
 }
 
 
-double UserDefinedLoadTimeFunction :: evaluateAccelerationAtTime(double time)
+double UserDefinedFunction :: evaluateAccelerationAtTime(double time)
 {
     Parser myParser;
     int err;

@@ -41,7 +41,7 @@
 #include "element.h"
 #include "generalboundarycondition.h"
 #include "dof.h"
-#include "loadtimefunction.h"
+#include "function.h"
 #include "linesearch.h"
 #include "classfactory.h"
 #include "exportmodulemanager.h"
@@ -163,7 +163,7 @@ NRSolver :: initializeFrom(InputRecord *ir)
     prescribedDofsValues.resize(0);
     IR_GIVE_OPTIONAL_FIELD(ir, prescribedDofsValues, _IFT_NRSolver_ddv);
     prescribedDisplacementLTF = 0;
-    IR_GIVE_OPTIONAL_FIELD(ir, prescribedDisplacementLTF, _IFT_NRSolver_ddltf);
+    IR_GIVE_OPTIONAL_FIELD(ir, prescribedDisplacementLTF, _IFT_NRSolver_ddfunc);
 
     numberOfPrescribedDofs = prescribedDofs.giveSize() / 2;
     if ( numberOfPrescribedDofs != prescribedDofsValues.giveSize() ) {
@@ -522,11 +522,11 @@ void
 NRSolver :: applyConstraintsToLoadIncrement(int nite, const SparseMtrx *k, FloatArray &R,
                                             referenceLoadInputModeType rlm, TimeStep *tStep)
 {
-    double factor = engngModel->giveDomain(1)->giveLoadTimeFunction(prescribedDisplacementLTF)->evaluateAtTime( tStep->giveTargetTime() );
+    double factor = engngModel->giveDomain(1)->giveFunction(prescribedDisplacementLTF)->evaluateAtTime( tStep->giveTargetTime() );
     if ( ( rlm == rlm_total ) && ( !tStep->isTheFirstStep() ) ) {
-        //factor -= engngModel->giveDomain(1)->giveLoadTimeFunction(prescribedDisplacementLTF)->
+        //factor -= engngModel->giveDomain(1)->giveFunction(prescribedDisplacementLTF)->
         // at(tStep->givePreviousStep()->giveTime()) ;
-        factor -= engngModel->giveDomain(1)->giveLoadTimeFunction(prescribedDisplacementLTF)->
+        factor -= engngModel->giveDomain(1)->giveFunction(prescribedDisplacementLTF)->
                   evaluateAtTime( tStep->giveTargetTime() - tStep->giveTimeIncrement() );
     }
 

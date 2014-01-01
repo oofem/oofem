@@ -475,7 +475,7 @@ SolutionbasedShapeFunction :: setLoads(EngngModel *myEngngModel, int d)
 
     ir.setRecordKeywordField("deadweight", 1);
     ir.setField(gradP, _IFT_Load_components);
-    ir.setField(1, _IFT_GeneralBoundaryCondition_LoadTimeFunct);
+    ir.setField(1, _IFT_GeneralBoundaryCondition_timeFunct);
 
     int bcID = myEngngModel->giveDomain(1)->giveNumberOfBoundaryConditions() + 1;
     GeneralBoundaryCondition *myBodyLoad;
@@ -617,7 +617,7 @@ SolutionbasedShapeFunction :: setBoundaryConditionOnDof(Dof *d, double value)
     if ( bcID == 0 ) {
         DynamicInputRecord ir;
         ir.setRecordKeywordField("boundarycondition", 1);
-        ir.setField(1, _IFT_GeneralBoundaryCondition_LoadTimeFunct);
+        ir.setField(1, _IFT_GeneralBoundaryCondition_timeFunct);
         ir.setField(value, _IFT_BoundaryCondition_PrescribedValue);
 
         bcID = d->giveDofManager()->giveDomain()->giveNumberOfBoundaryConditions() + 1;

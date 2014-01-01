@@ -33,7 +33,7 @@
  */
 
 #include "boundaryload.h"
-#include "loadtimefunction.h"
+#include "function.h"
 #include "floatarray.h"
 #include "timestep.h"
 #include "dynamicinputrecord.h"
@@ -79,12 +79,12 @@ BoundaryLoad :: computeValueAt(FloatArray &answer, TimeStep *tStep, FloatArray &
     // time distribution
 
     /*
-     * factor = this -> giveLoadTimeFunction() -> at(tStep->giveTime()) ;
+     * factor = this -> giveTimeFunction() -> at(tStep->giveTime()) ;
      * if ((mode==VM_Incremental) && (!tStep->isTheFirstStep()))
-     * //factor -= this->giveLoadTimeFunction()->at(tStep->givePreviousStep()->giveTime()) ;
-     * factor -= this->giveLoadTimeFunction()->at(tStep->giveTime()-tStep->giveTimeIncrement());
+     * //factor -= this->giveTimeFunction()->at(tStep->givePreviousStep()->giveTime()) ;
+     * factor -= this->giveTimeFunction()->at(tStep->giveTime()-tStep->giveTimeIncrement());
      */
-    factor = this->giveLoadTimeFunction()->evaluate(tStep, mode);
+    factor = this->giveTimeFunction()->evaluate(tStep, mode);
 
     answer.times(factor);
 }

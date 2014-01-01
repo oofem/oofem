@@ -39,7 +39,7 @@
 #include "femcmpnn.h"
 #include "domain.h"
 #include "floatmatrix.h"
-#include "loadtimefunction.h"
+#include "function.h"
 #include "matresponsemode.h"
 #include "valuemodetype.h"
 #include "integrationdomain.h"

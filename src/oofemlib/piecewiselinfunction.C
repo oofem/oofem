@@ -44,9 +44,9 @@
 namespace oofem {
 #define PiecewiseLinFunction_PRECISION 1.e-12
 
-REGISTER_LoadTimeFunction(PiecewiseLinFunction);
+REGISTER_Function(PiecewiseLinFunction);
 
-PiecewiseLinFunction :: PiecewiseLinFunction(int i, Domain *d) : LoadTimeFunction(i, d), dates(), values()
+PiecewiseLinFunction :: PiecewiseLinFunction(int i, Domain *d) : Function(i, d), dates(), values()
 {}
 
 double PiecewiseLinFunction :: evaluateAtTime(double time)
@@ -124,7 +124,7 @@ PiecewiseLinFunction :: initializeFrom(InputRecord *ir)
     const char *__proc = "initializeFrom"; // Required by IR_GIVE_FIELD macro
     IRResultType result;                // Required by IR_GIVE_FIELD macro
 
-    LoadTimeFunction :: initializeFrom(ir);
+    Function :: initializeFrom(ir);
 
     // Optional means, read data from external file (useful for very large sets of data)
     if ( ir->hasField(_IFT_PiecewiseLinFunction_dataFile) ) {
@@ -171,7 +171,7 @@ PiecewiseLinFunction :: initializeFrom(InputRecord *ir)
 
 void PiecewiseLinFunction :: giveInputRecord(DynamicInputRecord &input)
 {
-    LoadTimeFunction :: giveInputRecord(input);
+    Function :: giveInputRecord(input);
     input.setField(this->dates.giveSize(), _IFT_PiecewiseLinFunction_npoints);
     input.setField(this->dates, _IFT_PiecewiseLinFunction_t);
     input.setField(this->values, _IFT_PiecewiseLinFunction_ft);

@@ -41,7 +41,7 @@
 #include "crosssection.h"
 #include "load.h"
 #include "initialcondition.h"
-#include "loadtimefunction.h"
+#include "function.h"
 #include "set.h"
 #include "engngm.h"
 #include "oofem_limits.h"
@@ -105,7 +105,7 @@ Domain :: Domain(int n, int serNum, EngngModel *e) : defaultNodeDofIDArry()
     materialList             = new AList< Material >(0);
     bcList                   = new AList< GeneralBoundaryCondition >(0);
     icList                   = new AList< InitialCondition >(0);
-    loadTimeFunctionList     = new AList< LoadTimeFunction >(0);
+    functionList     = new AList< Function >(0);
     crossSectionList         = new AList< CrossSection >(0);
     nonlocalBarierList       = new AList< NonlocalBarrier >(0);
     setList                  = new AList< Set >(0);
@@ -173,7 +173,7 @@ Domain *Domain :: Clone()
     inputRec->setField(this->giveNumberOfMaterialModels(),              _IFT_Domain_nmat);
     inputRec->setField(this->giveNumberOfBoundaryConditions(),  _IFT_Domain_nbc);
     inputRec->setField(this->giveNumberOfInitialConditions(),   _IFT_Domain_nic);
-    inputRec->setField(this->giveNumberOfLoadTimeFunctions(),   _IFT_Domain_nloadtimefunct);
+    inputRec->setField(this->giveNumberOfFunctions(),   _IFT_Domain_nfunct);
     inputRec->setField(this->giveNumberOfSets(),                _IFT_Domain_nset);
     inputRec->setField(this->giveNumberOfSpatialDimensions(),   _IFT_Domain_numberOfSpatialDimensions);
     if ( this->isAxisymmetric() ) {
@@ -201,22 +201,14 @@ Domain *Domain :: Clone()
     //Nodes
     int nDofMan = this->giveNumberOfDofManagers();
     for ( int i = 1; i <= nDofMan; i++ ) {
-        DofManager *dMan = this->giveDofManager(i);
-
-        DynamicInputRecord *nodeRec = new DynamicInputRecord();
-        dMan->giveInputRecord(* nodeRec);
-
+        DynamicInputRecord *nodeRec = new DynamicInputRecord(*this->giveDofManager(i));
         dataReader.insertInputRecord(DataReader :: IR_dofmanRec, nodeRec);
     }
 
     //Elements
     int nEl = this->giveNumberOfElements();
     for ( int i = 1; i <= nEl; i++ ) {
-        Element *el = this->giveElement(i);
-
-        DynamicInputRecord *elRec = new DynamicInputRecord();
-        el->giveInputRecord(* elRec);
-
+        DynamicInputRecord *elRec = new DynamicInputRecord(*this->giveElement(i));
         dataReader.insertInputRecord(DataReader :: IR_elemRec, elRec);
     }
 
@@ -224,11 +216,7 @@ Domain *Domain :: Clone()
     //CrossSection
     int nCS = this->giveNumberOfCrossSectionModels();
     for ( int i = 1; i <= nCS; i++ ) {
-        CrossSection *cs = this->giveCrossSection(i);
-
-        DynamicInputRecord *csRec = new DynamicInputRecord();
-        cs->giveInputRecord(* csRec);
-
+        DynamicInputRecord *csRec = new DynamicInputRecord(*this->giveCrossSection(i));
         dataReader.insertInputRecord(DataReader :: IR_crosssectRec, csRec);
     }
 
@@ -236,60 +224,41 @@ Domain *Domain :: Clone()
     //Material
     int nMat = this->giveNumberOfMaterialModels();
     for ( int i = 1; i <= nMat; i++ ) {
-        Material *mat = this->giveMaterial(i);
-
-        DynamicInputRecord *matRec = new DynamicInputRecord();
-        mat->giveInputRecord(* matRec);
-
+        DynamicInputRecord *matRec = new DynamicInputRecord(*this->giveMaterial(i));
         dataReader.insertInputRecord(DataReader :: IR_matRec, matRec);
     }
 
     //Boundary Conditions
     int nBC = this->giveNumberOfBoundaryConditions();
     for ( int i = 1; i <= nBC; i++ ) {
-        GeneralBoundaryCondition *bc = this->giveBc(i);
-
-        DynamicInputRecord *bcRec = new DynamicInputRecord();
-        bc->giveInputRecord(* bcRec);
-
+        DynamicInputRecord *bcRec = new DynamicInputRecord(*this->giveBc(i));
         dataReader.insertInputRecord(DataReader :: IR_bcRec, bcRec);
     }
 
     //Initial Conditions
     int nIC = this->giveNumberOfInitialConditions();
     for ( int i = 1; i <= nIC; i++ ) {
-        InitialCondition *ic = this->giveIc(i);
-
-        DynamicInputRecord *icRec = new DynamicInputRecord();
-        ic->giveInputRecord(* icRec);
-
+        DynamicInputRecord *icRec = new DynamicInputRecord(*this->giveIc(i));
         dataReader.insertInputRecord(DataReader :: IR_icRec, icRec);
     }
 
     //Load-time functions
-    int nLoads = this->giveNumberOfLoadTimeFunctions();
+    int nLoads = this->giveNumberOfFunctions();
     for ( int i = 1; i <= nLoads; i++ ) {
-        LoadTimeFunction *ltf = this->giveLoadTimeFunction(i);
-
-        DynamicInputRecord *ltfRec = new DynamicInputRecord();
-        ltf->giveInputRecord(* ltfRec);
-
-        dataReader.insertInputRecord(DataReader :: IR_ltfRec, ltfRec);
+        DynamicInputRecord *funcRec = new DynamicInputRecord(*this->giveFunction(i));
+        dataReader.insertInputRecord(DataReader :: IR_funcRec, funcRec);
     }
 
 
     //Sets
     int nSets = this->giveNumberOfSets();
     for ( int i = 1; i <= nSets; i++ ) {
-        Set *set = this->giveSet(i);
-
-        DynamicInputRecord *ltfRec = new DynamicInputRecord();
-        set->giveInputRecord(* ltfRec);
-
-        dataReader.insertInputRecord(DataReader :: IR_ltfRec, ltfRec);
+        DynamicInputRecord *setRec = new DynamicInputRecord(*this->giveSet(i));
+        dataReader.insertInputRecord(DataReader :: IR_setRec, setRec);
     }
 
     //XFEM manager
+    ///@todo Redesign this part (as well as this whole clone function); / Mikael
     if ( this->xfemManager != NULL ) {
         DynamicInputRecord *xmanRec = new DynamicInputRecord();
         xfemManager->giveInputRecord(* xmanRec);
@@ -318,7 +287,7 @@ Domain :: ~Domain()
     delete materialList;
     delete bcList;
     delete icList;
-    delete loadTimeFunctionList;
+    delete functionList;
     delete crossSectionList;
     delete nonlocalBarierList;
     delete setList;
@@ -344,7 +313,7 @@ Domain :: clear()
     materialList->clear();
     bcList->clear();
     icList->clear();
-    loadTimeFunctionList->clear();
+    functionList->clear();
     crossSectionList->clear();
     nonlocalBarierList->clear();
     setList->clear();
@@ -449,18 +418,18 @@ Domain :: giveIc(int n)
 }
 
 
-LoadTimeFunction *
-Domain :: giveLoadTimeFunction(int n)
+Function *
+Domain :: giveFunction(int n)
 // Returns the n-th load-time function. Creates this fuction if it does
 // not exist yet.
 {
 #ifdef DEBUG
-    if ( !loadTimeFunctionList->includes(n) ) {
-        _error2("giveLoadTimeFunction: undefined load-time function (%d)", n);
+    if ( !functionList->includes(n) ) {
+        _error2("giveFunction: undefined load-time function (%d)", n);
     }
 #endif
 
-    return loadTimeFunctionList->at(n);
+    return functionList->at(n);
 }
 
 
@@ -646,7 +615,7 @@ void Domain :: resizeMaterials(int _newSize) { materialList->growTo(_newSize); }
 void Domain :: resizeNonlocalBarriers(int _newSize) { nonlocalBarierList->growTo(_newSize); }
 void Domain :: resizeBoundaryConditions(int _newSize) { bcList->growTo(_newSize); }
 void Domain :: resizeInitialConditions(int _newSize) { icList->growTo(_newSize); }
-void Domain :: resizeLoadTimeFunctions(int _newSize) { loadTimeFunctionList->growTo(_newSize); }
+void Domain :: resizeFunctions(int _newSize) { functionList->growTo(_newSize); }
 void Domain :: resizeRandomFieldGenerators(int _newSize) { randomFieldGeneratorList->growTo(_newSize); }
 void Domain :: resizeSets(int _newSize) { setList->growTo(_newSize); }
 
@@ -657,7 +626,7 @@ void Domain :: setMaterial(int i, Material *obj) { materialList->put(i, obj); }
 void Domain :: setNonlocalBarrier(int i, NonlocalBarrier *obj) { nonlocalBarierList->put(i, obj); }
 void Domain :: setBoundaryCondition(int i, GeneralBoundaryCondition *obj) { bcList->put(i, obj); }
 void Domain :: setInitialCondition(int i, InitialCondition *obj) { icList->put(i, obj); }
-void Domain :: setLoadTimeFunction(int i, LoadTimeFunction *obj) { loadTimeFunctionList->put(i, obj); }
+void Domain :: setFunction(int i, Function *obj) { functionList->put(i, obj); }
 void Domain :: setRandomFieldGenerator(int i, RandomFieldGenerator *obj) { randomFieldGeneratorList->put(i, obj); }
 void Domain :: setSet(int i, Set *obj) { setList->put(i, obj); }
 
@@ -713,7 +682,7 @@ Domain :: instanciateYourself(DataReader *dr)
     IR_GIVE_FIELD(ir, nmat, _IFT_Domain_nmat);
     IR_GIVE_FIELD(ir, nload, _IFT_Domain_nbc);
     IR_GIVE_FIELD(ir, nic, _IFT_Domain_nic);
-    IR_GIVE_FIELD(ir, nloadtimefunc, _IFT_Domain_nloadtimefunct);
+    IR_GIVE_FIELD(ir, nloadtimefunc, _IFT_Domain_nfunct);
     IR_GIVE_OPTIONAL_FIELD(ir, nset, _IFT_Domain_nset);
     IR_GIVE_OPTIONAL_FIELD(ir, nxfemman, _IFT_Domain_nxfemman);
     IR_GIVE_OPTIONAL_FIELD(ir, topologytype, _IFT_Domain_topology);
@@ -1003,27 +972,27 @@ Domain :: instanciateYourself(DataReader *dr)
 
 
     // read load time functions
-    loadTimeFunctionList->growTo(nloadtimefunc);
+    functionList->growTo(nloadtimefunc);
     for ( int i = 1; i <= nloadtimefunc; i++ ) {
-        LoadTimeFunction *ltf;
-        ir = dr->giveInputRecord(DataReader :: IR_ltfRec, i);
-        // read type of ltf
+        Function *func;
+        ir = dr->giveInputRecord(DataReader :: IR_funcRec, i);
+        // read type of func
         IR_GIVE_RECORD_KEYWORD_FIELD(ir, name, num);
-        if ( ( ltf = classFactory.createLoadTimeFunction(name.c_str(), num, this) ) == NULL ) {
+        if ( ( func = classFactory.createFunction(name.c_str(), num, this) ) == NULL ) {
             OOFEM_ERROR2( "Domain :: instanciateYourself - Couldn't create time function: %s", name.c_str() );
         }
 
-        ltf->initializeFrom(ir);
+        func->initializeFrom(ir);
 
         // check number
         if ( ( num < 1 ) || ( num > nloadtimefunc ) ) {
-            _error2("instanciateYourself: Invalid LoadTimeFunction number (num=%d)", num);
+            _error2("instanciateYourself: Invalid Function number (num=%d)", num);
         }
 
-        if ( !loadTimeFunctionList->includes(num) ) {
-            loadTimeFunctionList->put(num, ltf);
+        if ( !functionList->includes(num) ) {
+            functionList->put(num, func);
         } else {
-            _error2("instanciateYourself: LoadTimeFunction entry already exist (num=%d)", num);
+            _error2("instanciateYourself: Function entry already exist (num=%d)", num);
         }
 
         ir->finish();
@@ -1037,7 +1006,7 @@ Domain :: instanciateYourself(DataReader *dr)
     setList->growTo(nset);
     for ( int i = 1; i <= nset; i++ ) {
         ir = dr->giveInputRecord(DataReader :: IR_setRec, i);
-        // read type of ltf
+        // read type of set
         IR_GIVE_RECORD_KEYWORD_FIELD(ir, name, num);
         // Only one set for now (i don't see any need to ever introduce any other version)
         Set *set = new Set(num, this);
@@ -1712,7 +1681,7 @@ Domain :: saveContext(DataStream *stream, ContextMode mode, void *obj)
         ncomp [ 3 ] = this->giveNumberOfCrossSectionModels();
         ncomp [ 4 ] = this->giveNumberOfBoundaryConditions();
         ncomp [ 5 ] = this->giveNumberOfInitialConditions();
-        ncomp [ 6 ] = this->giveNumberOfLoadTimeFunctions();
+        ncomp [ 6 ] = this->giveNumberOfFunctions();
         ncomp [ 7 ] = this->giveNumberOfNonlocalBarriers();
         ncomp [ 8 ] = this->giveNumberOfRandomFieldGenerators();
 
@@ -1725,7 +1694,7 @@ Domain :: saveContext(DataStream *stream, ContextMode mode, void *obj)
         SAVE_COMPONENTS(this->giveNumberOfMaterialModels(), Material, this->giveMaterial);
         SAVE_COMPONENTS(this->giveNumberOfCrossSectionModels(), CrossSection, this->giveCrossSection);
         SAVE_COMPONENTS(this->giveNumberOfInitialConditions(), InitialCondition, this->giveIc);
-        SAVE_COMPONENTS(this->giveNumberOfLoadTimeFunctions(), LoadTimeFunction, this->giveLoadTimeFunction);
+        SAVE_COMPONENTS(this->giveNumberOfFunctions(), Function, this->giveFunction);
         SAVE_COMPONENTS(this->giveNumberOfNonlocalBarriers(), NonlocalBarrier, this->giveNonlocalBarrier);
         SAVE_COMPONENTS(this->giveNumberOfRandomFieldGenerators(), RandomFieldGenerator, this->giveRandomFieldGenerator);
     }
@@ -1758,7 +1727,7 @@ Domain :: restoreContext(DataStream *stream, ContextMode mode, void *obj)
     ErrorEstimator *ee;
     long ncomp [ DOMAIN_NCOMP ];
 
-    int nnodes, nelem, nmat, ncs, nbc, nic, nltf, nnlb, nrfg;
+    int nnodes, nelem, nmat, ncs, nbc, nic, nfunc, nnlb, nrfg;
 
 
     domainUpdated = false;
@@ -1780,7 +1749,7 @@ Domain :: restoreContext(DataStream *stream, ContextMode mode, void *obj)
         ncs   = ncomp [ 3 ];
         nbc   = ncomp [ 4 ];
         nic   = ncomp [ 5 ];
-        nltf  = ncomp [ 6 ];
+        nfunc = ncomp [ 6 ];
         nnlb  = ncomp [ 7 ];
         nrfg  = ncomp [ 8 ];
 
@@ -1790,7 +1759,7 @@ Domain :: restoreContext(DataStream *stream, ContextMode mode, void *obj)
         materialList->clear();
         bcList->clear();
         icList->clear();
-        loadTimeFunctionList->clear();
+        functionList->clear();
         nonlocalBarierList->clear();
         randomFieldGeneratorList->clear();
         setList->clear();
@@ -1802,7 +1771,7 @@ Domain :: restoreContext(DataStream *stream, ContextMode mode, void *obj)
         RESTORE_COMPONENTS(nmat, Material, this->resizeMaterials, classFactory.createMaterial, this->giveMaterial, this->setMaterial);
         RESTORE_COMPONENTS(ncs, CrossSection, this->resizeCrossSectionModels, classFactory.createCrossSection, this->giveCrossSection, this->setCrossSection);
         RESTORE_COMPONENTS(nic, InitialCondition, this->resizeInitialConditions, classFactory.createInitialCondition, this->giveIc, setInitialCondition);
-        RESTORE_COMPONENTS(nltf, LoadTimeFunction, resizeLoadTimeFunctions, classFactory.createLoadTimeFunction, giveLoadTimeFunction, setLoadTimeFunction);
+        RESTORE_COMPONENTS(nfunc, Function, resizeFunctions, classFactory.createFunction, giveFunction, setFunction);
         RESTORE_COMPONENTS(nnlb, NonlocalBarrier, resizeNonlocalBarriers, classFactory.createNonlocalBarrier, giveNonlocalBarrier, setNonlocalBarrier);
         RESTORE_COMPONENTS(nrfg, RandomFieldGenerator, resizeRandomFieldGenerators, classFactory.createRandomFieldGenerator, giveRandomFieldGenerator, setRandomFieldGenerator);
 
@@ -1828,7 +1797,7 @@ Domain :: restoreContext(DataStream *stream, ContextMode mode, void *obj)
         ncs = this->giveNumberOfCrossSectionModels();
         nbc = this->giveNumberOfBoundaryConditions();
         nic = this->giveNumberOfInitialConditions();
-        nltf = this->giveNumberOfLoadTimeFunctions();
+        nfunc = this->giveNumberOfFunctions();
         nnlb = this->giveNumberOfNonlocalBarriers();
         nrfg = this->giveNumberOfRandomFieldGenerators();
     }

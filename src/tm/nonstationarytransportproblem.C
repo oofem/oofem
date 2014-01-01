@@ -45,7 +45,7 @@
 #include "classfactory.h"
 #include "datastream.h"
 #include "contextioerr.h"
-#include "loadtimefunction.h"
+#include "function.h"
 #include "sparsenonlinsystemnm.h"
 
 #ifdef __CEMHYD_MODULE
@@ -61,7 +61,7 @@ NonStationaryTransportProblem :: NonStationaryTransportProblem(int i, EngngModel
     lumpedCapacityStab = 0;
     initT = 0.;
     deltaT = 0.;
-    dtTimeFunction = 0;
+    dtFunction = 0;
     internalVarUpdateStamp = 0;
     changingProblemSize = false;
     linSolver = NULL;
@@ -106,7 +106,7 @@ NonStationaryTransportProblem :: initializeFrom(InputRecord *ir)
     if ( ir->hasField(_IFT_NonStationaryTransportProblem_deltat) ) {
         IR_GIVE_FIELD(ir, deltaT, _IFT_NonStationaryTransportProblem_deltat);
     } else if ( ir->hasField(_IFT_NonStationaryTransportProblem_deltatfunction) ) {
-        IR_GIVE_FIELD(ir, dtTimeFunction, _IFT_NonStationaryTransportProblem_deltatfunction);
+        IR_GIVE_FIELD(ir, dtFunction, _IFT_NonStationaryTransportProblem_deltatfunction);
     } else if ( ir->hasField(_IFT_NonStationaryTransportProblem_prescribedtimes) ) {
         IR_GIVE_FIELD(ir, discreteTimes, _IFT_NonStationaryTransportProblem_prescribedtimes);
     } else {
@@ -175,22 +175,22 @@ NonStationaryTransportProblem :: giveSolutionStepWhenIcApply()
 }
 
 
-LoadTimeFunction *
-NonStationaryTransportProblem :: giveDtTimeFunction()
+Function *
+NonStationaryTransportProblem :: giveDtFunction()
 // Returns the load-time function of the receiver.
 {
-    if ( !dtTimeFunction || !ndomains ) {
+    if ( !dtFunction || !ndomains ) {
         return NULL;
     }
 
-    return giveDomain(1)->giveLoadTimeFunction(dtTimeFunction);
+    return giveDomain(1)->giveFunction(dtFunction);
 }
 
 double
 NonStationaryTransportProblem :: giveDeltaT(int n)
 {
-    if ( giveDtTimeFunction() ) {
-        return giveDtTimeFunction()->evaluateAtTime(n);
+    if ( giveDtFunction() ) {
+        return giveDtFunction()->evaluateAtTime(n);
     }
 
     if ( discreteTimes.giveSize() > 0 ) {

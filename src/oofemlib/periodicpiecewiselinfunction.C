@@ -38,7 +38,7 @@
 #include "dynamicinputrecord.h"
 
 namespace oofem {
-REGISTER_LoadTimeFunction(PeriodicPiecewiseLinFunction);
+REGISTER_Function(PeriodicPiecewiseLinFunction);
 
 double PeriodicPiecewiseLinFunction :: evaluateAtTime(double time)
 // Returns the value of the receiver at time 'time'. 'time' should be
@@ -51,12 +51,12 @@ double PeriodicPiecewiseLinFunction :: evaluateAtTime(double time)
         _error("at: Undefined dates and values!");
     }
 
-    if ( addTF && !domain->giveLoadTimeFunction(addTF) ) {
+    if ( addTF && !domain->giveFunction(addTF) ) {
         _error("at: Undefined time function to add!");
     }
 
     if ( addTF ) {
-        add = domain->giveLoadTimeFunction(addTF)->evaluateAtTime(time);
+        add = domain->giveFunction(addTF)->evaluateAtTime(time);
     } else {
         add = 0.;
     }
@@ -83,12 +83,12 @@ double PeriodicPiecewiseLinFunction :: evaluateVelocityAtTime(double time)
         _error("derAt: Undefined dates and values!");
     }
 
-    if ( addTF && !domain->giveLoadTimeFunction(addTF) ) {
+    if ( addTF && !domain->giveFunction(addTF) ) {
         _error("derAt: Undefined time function to add!");
     }
 
     if ( addTF ) {
-        add = domain->giveLoadTimeFunction(addTF)->evaluateVelocityAtTime(time);
+        add = domain->giveFunction(addTF)->evaluateVelocityAtTime(time);
     } else {
         add = 0.;
     }

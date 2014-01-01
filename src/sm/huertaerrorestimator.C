@@ -40,7 +40,7 @@
 #include "floatarray.h"
 #include "floatmatrix.h"
 #include "mathfem.h"
-#include "loadtimefunction.h"
+#include "function.h"
 #include "timestep.h"
 #include "metastep.h"
 #include "integrationrule.h"
@@ -1475,7 +1475,7 @@ HuertaErrorEstimatorInterface :: setupRefinedElementProblem1D(Element *element, 
                             for ( idof = 1; idof <= dofs; idof++ ) {
                                 DynamicInputRecord *ir = new DynamicInputRecord();
                                 ir->setRecordKeywordField(_IFT_BoundaryCondition_Name, ++localBcId);
-                                ir->setField(1, _IFT_GeneralBoundaryCondition_LoadTimeFunct);
+                                ir->setField(1, _IFT_GeneralBoundaryCondition_timeFunct);
                                 ir->setField(uFine.at(idof), _IFT_BoundaryCondition_PrescribedValue);
                                 refinedReader.insertInputRecord(DataReader :: IR_bcRec, ir);
                             }
@@ -2034,7 +2034,7 @@ HuertaErrorEstimatorInterface :: setupRefinedElementProblem2D(Element *element, 
                                 for ( idof = 1; idof <= dofs; idof++ ) {
                                     DynamicInputRecord *ir = new DynamicInputRecord();
                                     ir->setRecordKeywordField("BoundaryCondition", ++localBcId);
-                                    ir->setField(1, "loadtimefunction");
+                                    ir->setField(1, "Function");
                                     ir->setField(uFine.at(idof), "prescribedvalue");
                                     refinedReader.insertInputRecord(DataReader :: IR_bcRec, ir);
                                 }
@@ -2771,7 +2771,7 @@ HuertaErrorEstimatorInterface :: setupRefinedElementProblem3D(Element *element, 
                                     for ( idof = 1; idof <= dofs; idof++ ) {
                                         DynamicInputRecord *ir = new DynamicInputRecord();
                                         ir->setRecordKeywordField("boundarycondition", ++localBcId);
-                                        ir->setField(1, "loadtimefunction");
+                                        ir->setField(1, "Function");
                                         ir->setField(uFine.at(idof), "prescribedvalue");
                                         refinedReader.insertInputRecord(DataReader :: IR_bcRec, ir);
                                     }
@@ -2876,8 +2876,8 @@ HuertaErrorEstimator :: solveRefinedElementProblem(int elemId, IntArray &localNo
     RefinedElement *refinedElement;
     HuertaErrorEstimatorInterface *interface;
     EngngModel *problem, *refinedProblem;
-    int localNodeId, localElemId, localBcId, localLtf;
-    int mats, csects, loads, ltfuncs, nlbarriers;
+    int localNodeId, localElemId, localBcId, localf;
+    int mats, csects, loads, funcs, nlbarriers;
     int inode, idof, dofs, pos, ielem, size;
     IntArray dofIdArray;
     FloatArray nodeSolution, uCoarse, elementVector, patchVector, coarseVector;
@@ -2942,14 +2942,14 @@ HuertaErrorEstimator :: solveRefinedElementProblem(int elemId, IntArray &localNo
     mats = domain->giveNumberOfMaterialModels();
     csects = domain->giveNumberOfCrossSectionModels();
     loads = domain->giveNumberOfBoundaryConditions();
-    ltfuncs = domain->giveNumberOfLoadTimeFunctions();
+    funcs = domain->giveNumberOfFunctions();
     nlbarriers = domain->giveNumberOfNonlocalBarriers();
 
     localNodeIdArray.zero();
     localNodeId = 0;
     localElemId = 0;
     localBcId = 0;
-    localLtf = 0;
+    localf = 0;
 
     interface->HuertaErrorEstimatorI_setupRefinedElementProblem(refinedElement, this->refineLevel, 0,
                                                                 localNodeIdArray, globalNodeIdArray,
@@ -2971,11 +2971,11 @@ HuertaErrorEstimator :: solveRefinedElementProblem(int elemId, IntArray &localNo
                                                                     this->mode);
 
         localBcId = 0;
-        localLtf = 1;
+        localf = 1;
     }
 
     setupRefinedProblemProlog("element", elemId, localNodeIdArray, localNodeId, localElemId,
-                              mats, csects, loads + localBcId, ltfuncs + localLtf,
+                              mats, csects, loads + localBcId, funcs + localf,
                               controlNode, controlDof, tStep);
 
     globalNodeIdArray.resize(localNodeId);
@@ -3011,7 +3011,7 @@ HuertaErrorEstimator :: solveRefinedElementProblem(int elemId, IntArray &localNo
                                                                     this->mode);
     }
 
-    setupRefinedProblemEpilog2(ltfuncs);
+    setupRefinedProblemEpilog2(funcs);
 
 #ifdef TIME_INFO
     timer.stopTimer();
@@ -3325,8 +3325,8 @@ HuertaErrorEstimator :: solveRefinedPatchProblem(int nodeId, IntArray &localNode
     RefinedElement *refinedElement;
     HuertaErrorEstimatorInterface *interface;
     EngngModel *problem, *refinedProblem;
-    int localNodeId, localElemId, localBcId, localLtf;
-    int mats, csects, loads, ltfuncs, nlbarriers;
+    int localNodeId, localElemId, localBcId, localf;
+    int mats, csects, loads, funcs, nlbarriers;
     int inode, elemId, ielem, elems, skipped = 0;
     const IntArray *con;
     int idof, dofs, pos;
@@ -3397,14 +3397,14 @@ HuertaErrorEstimator :: solveRefinedPatchProblem(int nodeId, IntArray &localNode
     mats = domain->giveNumberOfMaterialModels();
     csects = domain->giveNumberOfCrossSectionModels();
     loads = domain->giveNumberOfBoundaryConditions();
-    ltfuncs = domain->giveNumberOfLoadTimeFunctions();
+    funcs = domain->giveNumberOfFunctions();
     nlbarriers = domain->giveNumberOfNonlocalBarriers();
 
     localNodeIdArray.zero();
     localNodeId = 0;
     localElemId = 0;
     localBcId = 0;
-    localLtf = 0;
+    localf = 0;
 
     for ( ielem = 1; ielem <= elems; ielem++ ) {
         elemId = con->at(ielem);
@@ -3475,11 +3475,11 @@ HuertaErrorEstimator :: solveRefinedPatchProblem(int nodeId, IntArray &localNode
         }
 
         localBcId = 0;
-        localLtf = 1;
+        localf = 1;
     }
 
     setupRefinedProblemProlog("patch", nodeId, localNodeIdArray, localNodeId, localElemId,
-                              mats, csects, loads + localBcId, ltfuncs + localLtf,
+                              mats, csects, loads + localBcId, funcs + localf,
                               controlNode, controlDof, tStep);
 
     globalNodeIdArray.resize(localNodeId);
@@ -3584,7 +3584,7 @@ HuertaErrorEstimator :: solveRefinedPatchProblem(int nodeId, IntArray &localNode
         }
     }
 
-    setupRefinedProblemEpilog2(ltfuncs);
+    setupRefinedProblemEpilog2(funcs);
 
 #ifdef TIME_INFO
     timer.stopTimer();
@@ -3683,8 +3683,8 @@ HuertaErrorEstimator :: solveRefinedWholeProblem(IntArray &localNodeIdArray, Int
     RefinedElement *refinedElement;
     HuertaErrorEstimatorInterface *interface;
     EngngModel *refinedProblem;
-    int localNodeId, localElemId, localBcId, localLtf;
-    int mats, csects, loads, ltfuncs, nlbarriers;
+    int localNodeId, localElemId, localBcId, localf;
+    int mats, csects, loads, funcs, nlbarriers;
     int inode, idof, dofs, pos, elemId, ielem, elems, size;
     IntArray dofIdArray;
     FloatArray nodeSolution, uCoarse, errorVector, coarseVector, fineVector;
@@ -3712,14 +3712,14 @@ HuertaErrorEstimator :: solveRefinedWholeProblem(IntArray &localNodeIdArray, Int
     mats = domain->giveNumberOfMaterialModels();
     csects = domain->giveNumberOfCrossSectionModels();
     loads = domain->giveNumberOfBoundaryConditions();
-    ltfuncs = domain->giveNumberOfLoadTimeFunctions();
+    funcs = domain->giveNumberOfFunctions();
     nlbarriers = domain->giveNumberOfNonlocalBarriers();
 
     localNodeIdArray.zero();
     localNodeId = 0;
     localElemId = 0;
     localBcId = 0;
-    localLtf = 0;
+    localf = 0;
 
     for ( elemId = 1; elemId <= elems; elemId++ ) {
         element = domain->giveElement(elemId);
@@ -3755,11 +3755,11 @@ HuertaErrorEstimator :: solveRefinedWholeProblem(IntArray &localNodeIdArray, Int
         }
 
         localBcId = 0;
-        localLtf = 1;
+        localf = 1;
     }
 
     setupRefinedProblemProlog("whole", 0, localNodeIdArray, localNodeId, localElemId,
-                              mats, csects, loads + localBcId, ltfuncs + localLtf,
+                              mats, csects, loads + localBcId, funcs + localf,
                               controlNode, controlDof, tStep);
 
     globalNodeIdArray.resize(localNodeId);
@@ -3810,7 +3810,7 @@ HuertaErrorEstimator :: solveRefinedWholeProblem(IntArray &localNodeIdArray, Int
         }
     }
 
-    setupRefinedProblemEpilog2(ltfuncs);
+    setupRefinedProblemEpilog2(funcs);
 
  #ifdef TIME_INFO
     timer.stopTimer();
@@ -4062,14 +4062,14 @@ HuertaErrorEstimator :: extractVectorFrom(Element *element, FloatArray &vector, 
 
 void
 HuertaErrorEstimator :: setupRefinedProblemProlog(const char *problemName, int problemId, IntArray &localNodeIdArray,
-                                                  int nodes, int elems, int csects, int mats, int loads, int ltfuncs,
+                                                  int nodes, int elems, int csects, int mats, int loads, int funcs,
                                                   IntArray &controlNode, IntArray &controlDof, TimeStep *tStep)
 {
     char line [ 1024 ];
     EngngModel *problem = this->domain->giveEngngModel();
     std :: string str;
     int i, nmstep, nsteps = 0;
-    int ddltf = 0, ddmSize = 0, ddvSize = 0, hpcSize = 0, hpcwSize = 0, renumber = 1;
+    int ddfunc = 0, ddmSize = 0, ddvSize = 0, hpcSize = 0, hpcwSize = 0, renumber = 1;
     int controlMode = 0, hpcMode = 0, stiffMode = 0, maxIter = 30, reqIter = 3, manrmsteps = 0;
     double rtolv, minStepLength = 0.0, initialStepLength, stepLength, psi = 1.0;
     IntArray ddm, hpc;
@@ -4142,7 +4142,7 @@ HuertaErrorEstimator :: setupRefinedProblemProlog(const char *problemName, int p
 
             IR_GIVE_OPTIONAL_FIELD(ir, ddm, _IFT_NRSolver_ddm);
             IR_GIVE_OPTIONAL_FIELD(ir, ddv, _IFT_NRSolver_ddv);
-            IR_GIVE_OPTIONAL_FIELD(ir, ddltf, _IFT_NRSolver_ddltf);
+            IR_GIVE_OPTIONAL_FIELD(ir, ddfunc, _IFT_NRSolver_ddfunc);
             IR_GIVE_FIELD(ir, rtolv, _IFT_NRSolver_rtolv);
 
             ddmSize = ddm.giveSize();
@@ -4301,8 +4301,8 @@ HuertaErrorEstimator :: setupRefinedProblemProlog(const char *problemName, int p
             }
             ir->setField(ddv_vals, "ddv");
 
-            // use last ltf to control dd
-            ir->setField(ltfuncs, "ddltf");
+            // use last funcs to control dd
+            ir->setField(funcs, _IFT_NRSolver_ddfunc);
 
             refinedReader.insertInputRecord(DataReader :: IR_mstepRec, ir);
         } else {
@@ -4369,8 +4369,8 @@ HuertaErrorEstimator :: setupRefinedProblemProlog(const char *problemName, int p
                     ir->setField(ddv, "ddv");
                 }
 
-                // use the original ltf to control dd
-                ir->setField(ddltf, "ddltf");
+                // use the original funcs to control dd
+                ir->setField(ddfunc, _IFT_NRSolver_ddfunc);
                 break;
             }
 
@@ -4406,7 +4406,7 @@ HuertaErrorEstimator :: setupRefinedProblemProlog(const char *problemName, int p
     ir->setField(mats, _IFT_Domain_ncrosssect);
     ir->setField(csects, _IFT_Domain_nmat);
     ir->setField(loads, _IFT_Domain_nbc);
-    ir->setField(ltfuncs, _IFT_Domain_nloadtimefunct);
+    ir->setField(funcs, _IFT_Domain_nfunct);
     refinedReader.insertInputRecord(DataReader :: IR_domainCompRec, ir);
 }
 
@@ -4441,24 +4441,24 @@ HuertaErrorEstimator :: setupRefinedProblemEpilog1(int csects, int mats, int loa
 
 
 void
-HuertaErrorEstimator :: setupRefinedProblemEpilog2(int ltfuncs)
+HuertaErrorEstimator :: setupRefinedProblemEpilog2(int funcs)
 {
     Domain *domain = this->domain;
 
     /* copy tfuncs */
 
-    for ( int i = 1; i <= ltfuncs; i++ ) {
+    for ( int i = 1; i <= funcs; i++ ) {
         DynamicInputRecord *ir = new DynamicInputRecord();
-        domain->giveLoadTimeFunction(i)->giveInputRecord(* ir);
-        refinedReader.insertInputRecord(DataReader :: IR_ltfRec, ir);
+        domain->giveFunction(i)->giveInputRecord(* ir);
+        refinedReader.insertInputRecord(DataReader :: IR_funcRec, ir);
     }
 
     if ( this->mode == HEE_nlinear ) {
         DynamicInputRecord *ir = new DynamicInputRecord();
-        ir->setRecordKeywordField(_IFT_HeavisideLTF_Name, ltfuncs + 1);
+        ir->setRecordKeywordField(_IFT_HeavisideLTF_Name, funcs + 1);
         ir->setField(this->domain->giveEngngModel()->giveCurrentStep()->giveTargetTime() - 0.1, _IFT_HeavisideLTF_origin);
         ir->setField(1., _IFT_HeavisideLTF_value);
-        refinedReader.insertInputRecord(DataReader :: IR_ltfRec, ir);
+        refinedReader.insertInputRecord(DataReader :: IR_funcRec, ir);
     }
 }
 } // end namespace oofem

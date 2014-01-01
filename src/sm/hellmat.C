@@ -7,7 +7,7 @@
 
 #include "gausspoint.h"
 #include "timestep.h"
-#include "loadtimefunction.h"
+#include "function.h"
 #include "isolinearelasticmaterial.h"
 #include "structuralcrosssection.h"
 #include "hellmat.h"
@@ -162,16 +162,16 @@ HellmichMaterial :: initializeFrom(InputRecord *ir)
     if ( initialTemperature >= 0 ) {
         printf("\nHellMat: Isothermal analysis at %.2f K.", initialTemperature);
         options = options | moIsothermal;
-        tTimeFunction = 0;
-        IR_GIVE_OPTIONAL_FIELD(ir, tTimeFunction, _IFT_HellmichMaterial_Tltf);
-        if ( tTimeFunction ) {
-            printf("\nHellMat: Time function number %d used as temperature history.", tTimeFunction);
+        tFunction = 0;
+        IR_GIVE_OPTIONAL_FIELD(ir, tFunction, _IFT_HellmichMaterial_Ttf);
+        if ( tFunction ) {
+            printf("\nHellMat: Time function number %d used as temperature history.", tFunction);
         }
 
-        hTimeFunction = 0;
-        IR_GIVE_OPTIONAL_FIELD(ir, tTimeFunction, _IFT_HellmichMaterial_hltf);
-        if ( tTimeFunction ) {
-            printf("\nHellMat: Time function number %d used as moisture history.", tTimeFunction);
+        hFunction = 0;
+        IR_GIVE_OPTIONAL_FIELD(ir, tFunction, _IFT_HellmichMaterial_htf);
+        if ( tFunction ) {
+            printf("\nHellMat: Time function number %d used as moisture history.", tFunction);
         }
     } else {
         options = options & ~moIsothermal;
@@ -1335,24 +1335,24 @@ void principalStresses(double *answer, double *s, stressStrainPrincMode mode)
 }
 
 
-LoadTimeFunction *HellmichMaterial :: giveTTimeFunction()
+Function *HellmichMaterial :: giveTFunction()
 // Returns the load-time function of the receiver.
 {
-    if ( !tTimeFunction ) {
+    if ( !tFunction ) {
         return NULL;
     }
 
-    return this->giveDomain()->giveLoadTimeFunction(tTimeFunction);
+    return this->giveDomain()->giveFunction(tFunction);
 }
 
-LoadTimeFunction *HellmichMaterial :: givehTimeFunction()
+Function *HellmichMaterial :: givehFunction()
 // Returns the load-time function of the receiver.
 {
-    if ( !hTimeFunction ) {
+    if ( !hFunction ) {
         return NULL;
     }
 
-    return this->giveDomain()->giveLoadTimeFunction(hTimeFunction);
+    return this->giveDomain()->giveFunction(hFunction);
 }
 
 
@@ -1569,16 +1569,16 @@ HellmichMaterial :: initAuxStatus(GaussPoint *gp, TimeStep *tStep)
     if ( options & moIsothermal ) { // === Isothermal ===
         // constant temperature in space
         // temperature history might be prescribed, computed from adiabatic/quasiadiabatic test sim., ....
-        // if history ltf is not prescribed, only takes previous value
+        // if history tf is not prescribed, only takes previous value
         // history is expected in original time scale
-        if ( giveTTimeFunction() ) {
-            T = giveTTimeFunction()->evaluateAtTime(tStep->giveIntrinsicTime());
+        if ( giveTFunction() ) {
+            T = giveTFunction()->evaluateAtTime(tStep->giveIntrinsicTime());
         } else {
             T = giveTemperature(gp);
         }
 
-        if ( givehTimeFunction() ) {
-            h = givehTimeFunction()->evaluateAtTime(tStep->giveIntrinsicTime());
+        if ( givehFunction() ) {
+            h = givehFunction()->evaluateAtTime(tStep->giveIntrinsicTime());
         } else {
             h = giveHumidity(gp, VM_Total);
         }

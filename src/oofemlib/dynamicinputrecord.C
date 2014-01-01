@@ -33,6 +33,7 @@
  */
 
 #include "dynamicinputrecord.h"
+#include "femcmpnn.h"
 #include "intarray.h"
 #include "floatarray.h"
 #include "floatmatrix.h"
@@ -57,6 +58,24 @@ DynamicInputRecord :: DynamicInputRecord() : InputRecord(),
     dictionaryRecord(),
     rangeRecord()
 {}
+
+DynamicInputRecord :: DynamicInputRecord(FEMComponent &femc) : InputRecord(),
+    recordKeyword(),
+    recordNumber(0),
+    emptyRecord(),
+    intRecord(),
+    doubleRecord(),
+    boolRecord(),
+    stringRecord(),
+    floatArrayRecord(),
+    intArrayRecord(),
+    matrixRecord(),
+    stringListRecord(),
+    dictionaryRecord(),
+    rangeRecord()
+{
+    femc.giveInputRecord(*this);
+}
 
 DynamicInputRecord :: DynamicInputRecord(const DynamicInputRecord &src) : InputRecord(src),
     recordKeyword(src.recordKeyword),

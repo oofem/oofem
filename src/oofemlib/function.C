@@ -38,18 +38,18 @@
  * PhD Thesis, EPFL, Lausanne, 1992.
  */
 
-#include "loadtimefunction.h"
+#include "function.h"
 #include "timestep.h"
 #include "dynamicinputrecord.h"
 
 namespace oofem {
-LoadTimeFunction :: LoadTimeFunction(int n, Domain *d) :
+Function :: Function(int n, Domain *d) :
     FEMComponent(n, d),
     initialValue(0.)
 {}
 
 double
-LoadTimeFunction :: evaluate(TimeStep *tStep, ValueModeType mode)
+Function :: evaluate(TimeStep *tStep, ValueModeType mode)
 {
     if ( mode == VM_Total ) {
         return this->evaluateAtTime( tStep->giveIntrinsicTime() );
@@ -66,7 +66,7 @@ LoadTimeFunction :: evaluate(TimeStep *tStep, ValueModeType mode)
             return this->evaluateAtTime( tStep->giveIntrinsicTime() ) - this->evaluateAtTime( tStep->giveIntrinsicTime() - tStep->giveTimeIncrement() );
         }
     } else {
-        _error2("LoadTimeFunction:: evaluate: unsupported mode(%d)", mode);
+        _error2("Function:: evaluate: unsupported mode(%d)", mode);
     }
 
     return 0.;
@@ -74,7 +74,7 @@ LoadTimeFunction :: evaluate(TimeStep *tStep, ValueModeType mode)
 
 
 IRResultType
-LoadTimeFunction :: initializeFrom(InputRecord *ir)
+Function :: initializeFrom(InputRecord *ir)
 {
     //
     // instanciates receiver according to input record
@@ -84,23 +84,24 @@ LoadTimeFunction :: initializeFrom(InputRecord *ir)
 
 
     this->initialValue = 0.;
-    IR_GIVE_OPTIONAL_FIELD(ir, this->initialValue, _IFT_LoadTimeFunction_initialvalue);
+    IR_GIVE_OPTIONAL_FIELD(ir, this->initialValue, _IFT_Function_initialvalue);
 
     return IRRT_OK;
 }
 
 
 void
-LoadTimeFunction :: giveInputRecord(DynamicInputRecord &input)
+Function :: giveInputRecord(DynamicInputRecord &input)
 {
     FEMComponent :: giveInputRecord(input);
-    input.setField(this->initialValue, _IFT_LoadTimeFunction_initialvalue);
+    input.setField(this->initialValue, _IFT_Function_initialvalue);
 }
 
 
 double
-LoadTimeFunction :: evaluateAtTime(double t)
+Function :: evaluateAtTime(double t)
 {
+    //std::map< std::string, double >valDict {{t, "t"}};
     std::map< std::string, double >valDict;
     valDict["t"] = t;
     FloatArray v = this->evaluate(valDict);
@@ -112,11 +113,10 @@ LoadTimeFunction :: evaluateAtTime(double t)
 
 ///@todo Move operator from C++11 would be nice here.
 FloatArray
-LoadTimeFunction :: evaluate(std::map< std::string, double > &valDict)
+Function :: evaluate(std::map< std::string, double > &valDict)
 {
     FloatArray v(1);
-    double t = valDict["t"];
-    v.at(1) = this->evaluateAtTime(t);
+    v.at(1) = this->evaluateAtTime(valDict["t"]);
     return v;
 }
 
