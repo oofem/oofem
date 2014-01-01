@@ -1572,13 +1572,13 @@ HellmichMaterial :: initAuxStatus(GaussPoint *gp, TimeStep *tStep)
         // if history ltf is not prescribed, only takes previous value
         // history is expected in original time scale
         if ( giveTTimeFunction() ) {
-            T = ( ( LoadTimeFunction * ) giveTTimeFunction() )->evaluate(tStep, VM_Total);
+            T = ( ( LoadTimeFunction * ) giveTTimeFunction() )->__at(tStep->giveIntrinsicTime());
         } else {
             T = giveTemperature(gp);
         }
 
         if ( givehTimeFunction() ) {
-            h = ( ( LoadTimeFunction * ) givehTimeFunction() )->evaluate(tStep, VM_Total);
+            h = ( ( LoadTimeFunction * ) givehTimeFunction() )->__at(tStep->giveIntrinsicTime());
         } else {
             h = giveHumidity(gp, VM_Total);
         }

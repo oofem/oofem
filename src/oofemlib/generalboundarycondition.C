@@ -37,6 +37,7 @@
 #include "bcvaltype.h"
 #include "loadtimefunction.h"
 #include "reinforcement.h"
+#include "timestep.h"
 #include "datastream.h"
 #include "contextioerr.h"
 #include "dynamicinputrecord.h"
@@ -95,7 +96,7 @@ bool GeneralBoundaryCondition :: isImposed(TimeStep *tStep)
     // in given time (nonzero indicates imposed b.c.).
 
     if ( isImposedTimeFunction ) {
-        return ( domain->giveLoadTimeFunction(isImposedTimeFunction)->evaluate(tStep, VM_Total) != 0. );
+        return ( domain->giveLoadTimeFunction(isImposedTimeFunction)->__at(tStep->giveIntrinsicTime()) != 0. );
     } else {
         // zero value indicates default behavior -> b.c. is imposed
         // anytime

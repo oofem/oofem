@@ -139,16 +139,16 @@ void FluidMaterialEvaluator :: solveYourself()
             // Update the controlled parts
             for ( int j = 1; j <= eControl.giveSize(); ++j ) {
                 int p = eControl.at(j);
-                strainDev.at(p) = d->giveLoadTimeFunction( cmpntFunctions.at(p) )->evaluate(tStep, VM_Total);
+                strainDev.at(p) = d->giveLoadTimeFunction( cmpntFunctions.at(p) )->__at(tStep->giveIntrinsicTime());
             }
 
             for ( int j = 1; j <= sControl.giveSize(); ++j ) {
                 int p = sControl.at(j);
-                stressDevC.at(j) = d->giveLoadTimeFunction( cmpntFunctions.at(p) )->evaluate(tStep, VM_Total);
+                stressDevC.at(j) = d->giveLoadTimeFunction( cmpntFunctions.at(p) )->__at(tStep->giveIntrinsicTime());
             }
 
             if ( pressureControl ) {
-                pressure = d->giveLoadTimeFunction(volFunction)->evaluate(tStep, VM_Total);
+                pressure = d->giveLoadTimeFunction(volFunction)->__at(tStep->giveIntrinsicTime());
             } else {
                 ///@todo Support volumetric strain control (which is actually quite tricky)
                 OOFEM_ERROR("Volumetric strain rate control not yet implemented");

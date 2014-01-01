@@ -838,7 +838,7 @@ Element :: isActivated(TimeStep *tStep)
 {
     if ( activityLtf ) {
         if ( tStep ) {
-            return ( domain->giveLoadTimeFunction(activityLtf)->evaluate(tStep, VM_Total) > 1.e-3 );
+            return ( domain->giveLoadTimeFunction(activityLtf)->__at(tStep->giveIntrinsicTime()) > 1.e-3 );
         } else {
             return false;
         }
