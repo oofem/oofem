@@ -40,7 +40,7 @@ namespace oofem {
 REGISTER_LoadTimeFunction(HeavisideLTF);
 
 double
-HeavisideLTF :: __at(double time)
+HeavisideLTF :: evaluateAtTime(double time)
 // Returns the value of the receiver at time 'time'. 'time' should be
 // one of the dates of the receiver (currently there is no interpola-
 // tion between two points).

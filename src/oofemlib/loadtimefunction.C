@@ -52,18 +52,18 @@ double
 LoadTimeFunction :: evaluate(TimeStep *tStep, ValueModeType mode)
 {
     if ( mode == VM_Total ) {
-        return this->__at( tStep->giveIntrinsicTime() );
+        return this->evaluateAtTime( tStep->giveIntrinsicTime() );
     } else if ( mode == VM_Velocity ) {
-        return this->__derAt( tStep->giveIntrinsicTime() );
+        return this->evaluateVelocityAtTime( tStep->giveIntrinsicTime() );
     } else if ( mode == VM_Acceleration ) {
-        return this->__accelAt( tStep->giveIntrinsicTime() );
+        return this->evaluateAccelerationAtTime( tStep->giveIntrinsicTime() );
     } else if ( mode == VM_Incremental ) {
-        //return this->__at( tStep->giveTime() ) - this->__at( tStep->giveTime() - tStep->giveTimeIncrement() );
+        //return this->evaluateAtTime( tStep->giveTime() ) - this->evaluateAtTime( tStep->giveTime() - tStep->giveTimeIncrement() );
 
         if ( tStep->isTheFirstStep() ) {
-            return this->__at(tStep->giveIntrinsicTime() - this->initialValue);
+            return this->evaluateAtTime(tStep->giveIntrinsicTime() - this->initialValue);
         } else {
-            return this->__at( tStep->giveIntrinsicTime() ) - this->__at( tStep->giveIntrinsicTime() - tStep->giveTimeIncrement() );
+            return this->evaluateAtTime( tStep->giveIntrinsicTime() ) - this->evaluateAtTime( tStep->giveIntrinsicTime() - tStep->giveTimeIncrement() );
         }
     } else {
         _error2("LoadTimeFunction:: evaluate: unsupported mode(%d)", mode);
@@ -96,4 +96,28 @@ LoadTimeFunction :: giveInputRecord(DynamicInputRecord &input)
     FEMComponent :: giveInputRecord(input);
     input.setField(this->initialValue, _IFT_LoadTimeFunction_initialvalue);
 }
+
+
+double
+LoadTimeFunction :: evaluateAtTime(double t)
+{
+    std::map< std::string, double >valDict;
+    valDict["t"] = t;
+    FloatArray v = this->evaluate(valDict);
+    if ( v.giveSize() != 1 ) {
+        OOFEM_ERROR2("%s :: evaluateAtTime - Function doesn't return scalar results.", this->giveClassName());
+    }
+    return v.at(1);
+}
+
+///@todo Move operator from C++11 would be nice here.
+FloatArray
+LoadTimeFunction :: evaluate(std::map< std::string, double > &valDict)
+{
+    FloatArray v(1);
+    double t = valDict["t"];
+    v.at(1) = this->evaluateAtTime(t);
+    return v;
+}
+
 } // end namespace oofem

@@ -40,7 +40,7 @@
 namespace oofem {
 REGISTER_LoadTimeFunction(PeriodicPiecewiseLinFunction);
 
-double PeriodicPiecewiseLinFunction :: __at(double time)
+double PeriodicPiecewiseLinFunction :: evaluateAtTime(double time)
 // Returns the value of the receiver at time 'time'. 'time' should be
 // one of the dates of the receiver (currently there is no interpola-
 // tion between two points).
@@ -56,7 +56,7 @@ double PeriodicPiecewiseLinFunction :: __at(double time)
     }
 
     if ( addTF ) {
-        add = domain->giveLoadTimeFunction(addTF)->__at(time);
+        add = domain->giveLoadTimeFunction(addTF)->evaluateAtTime(time);
     } else {
         add = 0.;
     }
@@ -68,11 +68,11 @@ double PeriodicPiecewiseLinFunction :: __at(double time)
         time = last + ( d - floor(d) - 1. ) * period;
     }
 
-    return add + PiecewiseLinFunction :: __at(time);
+    return add + PiecewiseLinFunction :: evaluateAtTime(time);
 }
 
 
-double PeriodicPiecewiseLinFunction :: __derAt(double time)
+double PeriodicPiecewiseLinFunction :: evaluateVelocityAtTime(double time)
 // Returns the value of the receiver at time 'time'. 'time' should be
 // one of the dates of the receiver (currently there is no interpola-
 // tion between two points).
@@ -88,7 +88,7 @@ double PeriodicPiecewiseLinFunction :: __derAt(double time)
     }
 
     if ( addTF ) {
-        add = domain->giveLoadTimeFunction(addTF)->__derAt(time);
+        add = domain->giveLoadTimeFunction(addTF)->evaluateVelocityAtTime(time);
     } else {
         add = 0.;
     }
@@ -100,7 +100,7 @@ double PeriodicPiecewiseLinFunction :: __derAt(double time)
         time = last + ( d - floor(d) - 1. ) * period;
     }
 
-    return add + PiecewiseLinFunction :: __derAt(time);
+    return add + PiecewiseLinFunction :: evaluateVelocityAtTime(time);
 }
 
 IRResultType

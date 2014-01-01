@@ -208,7 +208,7 @@ double
 StaggeredProblem :: giveDeltaT(int n)
 {
     if ( giveDtTimeFunction() ) {
-        return deltaT * giveDtTimeFunction()->__at(n);
+        return deltaT * giveDtTimeFunction()->evaluateAtTime(n);
     }
 
     //in the first step the time increment is taken as the initial, user-specified value

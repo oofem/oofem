@@ -80,9 +80,9 @@ public:
      */
     virtual IRResultType initializeFrom(InputRecord *ir);
 
-    virtual double __at(double t);
-    virtual double __derAt(double t);
-    virtual double __accelAt(double t);
+    virtual double evaluateAtTime(double t);
+    virtual double evaluateVelocityAtTime(double t);
+    virtual double evaluateAccelerationAtTime(double t);
 
     virtual const char *giveClassName() const { return "UserDefinedLoadTimeFunction"; }
     virtual const char *giveInputRecordName() const { return _IFT_UserDefinedLoadTimeFunction_Name; }

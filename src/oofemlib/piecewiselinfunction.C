@@ -49,7 +49,7 @@ REGISTER_LoadTimeFunction(PiecewiseLinFunction);
 PiecewiseLinFunction :: PiecewiseLinFunction(int i, Domain *d) : LoadTimeFunction(i, d), dates(), values()
 {}
 
-double PiecewiseLinFunction :: __at(double time)
+double PiecewiseLinFunction :: evaluateAtTime(double time)
 // Returns the value of the receiver at time 'time'. 'time' should be
 // one of the dates of the receiver (currently there is no interpola-
 // tion between two points).
@@ -66,7 +66,7 @@ double PiecewiseLinFunction :: __at(double time)
             return this->values.at(i);
         } else if ( this->dates.at(i) > time ) {
             if ( i == 1 ) {
-                OOFEM_WARNING3( "PiecewiseLinFunction :: __at: computational time %f is out of given time %f, extrapolating value(s)", time, dates.at(i) );
+                OOFEM_WARNING3( "PiecewiseLinFunction :: evaluateAtTime: computational time %f is out of given time %f, extrapolating value(s)", time, dates.at(i) );
                 return 0.;
             }
 
@@ -82,7 +82,7 @@ double PiecewiseLinFunction :: __at(double time)
     return 0.;
 }
 
-double PiecewiseLinFunction :: __derAt(double time)
+double PiecewiseLinFunction :: evaluateVelocityAtTime(double time)
 // Returns the derivative of the receiver at time 'time'. 'time' should be
 // one of the dates of the receiver (currently there is no interpola-
 // tion between two points).

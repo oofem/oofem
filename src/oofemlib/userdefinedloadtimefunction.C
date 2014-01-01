@@ -56,7 +56,7 @@ UserDefinedLoadTimeFunction :: initializeFrom(InputRecord *ir)
     return LoadTimeFunction :: initializeFrom(ir);
 }
 
-double UserDefinedLoadTimeFunction :: __at(double time)
+double UserDefinedLoadTimeFunction :: evaluateAtTime(double time)
 {
     Parser myParser;
     int err;
@@ -72,7 +72,7 @@ double UserDefinedLoadTimeFunction :: __at(double time)
     return result;
 }
 
-double UserDefinedLoadTimeFunction :: __derAt(double time)
+double UserDefinedLoadTimeFunction :: evaluateVelocityAtTime(double time)
 {
     Parser myParser;
     int err;
@@ -94,7 +94,7 @@ double UserDefinedLoadTimeFunction :: __derAt(double time)
 }
 
 
-double UserDefinedLoadTimeFunction :: __accelAt(double time)
+double UserDefinedLoadTimeFunction :: evaluateAccelerationAtTime(double time)
 {
     Parser myParser;
     int err;

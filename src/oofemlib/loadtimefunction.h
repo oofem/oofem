@@ -44,6 +44,8 @@
 #include "domain.h"
 #include "valuemodetype.h"
 
+#include <map>
+
 ///@name Input fields for LoadTimeFunction
 //@{
 #define _IFT_LoadTimeFunction_initialvalue "initialvalue"
@@ -94,23 +96,30 @@ public:
     double evaluate(TimeStep *tStep, ValueModeType mode);
 
     /**
-     * Returns the value of load time function at given time.
+     * Returns the Returns the value of the function at given time.
+     * @param valDict Dictionary with values.
+     * @return Function value.
+     */
+    virtual FloatArray evaluate(std :: map< std :: string, double > &valDict);
+
+    /**
+     * Returns the value of the function at given time.
      * @param t Time.
      * @return @f$ f(t) @f$.
      */
-    virtual double  __at(double t) { return 0.; }
+    virtual double evaluateAtTime(double t);
     /**
-     * Returns the first time derivative of load time function at given time.
+     * Returns the first time derivative of the function at given time.
      * @param t Time.
      * @return @f$ f'(t) @f$.
      */
-    virtual double __derAt(double t) { return 0.; }
+    virtual double evaluateVelocityAtTime(double t) = 0;
     /**
-     * Returns the second time derivative of load time function at given time.
+     * Returns the second time derivative of the function at given time.
      * @param t Time.
      * @return @f$ f''(t) @f$.
      */
-    virtual double __accelAt(double t) { return 0.; }
+    virtual double evaluateAccelerationAtTime(double t) = 0;
 
     // Overloaded methods:
     virtual IRResultType initializeFrom(InputRecord *ir);

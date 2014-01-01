@@ -1572,13 +1572,13 @@ HellmichMaterial :: initAuxStatus(GaussPoint *gp, TimeStep *tStep)
         // if history ltf is not prescribed, only takes previous value
         // history is expected in original time scale
         if ( giveTTimeFunction() ) {
-            T = ( ( LoadTimeFunction * ) giveTTimeFunction() )->__at(tStep->giveIntrinsicTime());
+            T = giveTTimeFunction()->evaluateAtTime(tStep->giveIntrinsicTime());
         } else {
             T = giveTemperature(gp);
         }
 
         if ( givehTimeFunction() ) {
-            h = ( ( LoadTimeFunction * ) givehTimeFunction() )->__at(tStep->giveIntrinsicTime());
+            h = givehTimeFunction()->evaluateAtTime(tStep->giveIntrinsicTime());
         } else {
             h = giveHumidity(gp, VM_Total);
         }
@@ -1591,7 +1591,7 @@ HellmichMaterial :: initAuxStatus(GaussPoint *gp, TimeStep *tStep)
         // == Temperature ==
         if ( ( tf = fm->giveField(FT_Temperature) ) ) {
             // temperature field registered
-            elem = ( StructuralElement * ) gp->giveElement();
+            elem = static_cast< StructuralElement * >( gp->giveElement() );
             elem->computeGlobalCoordinates( gcoords, * gp->giveCoordinates() );
             if ( flatTemperature ) {
                 if ( flatTemperature == -1 ) { // temperature xy -> xz (2D cross-section for 3D girder)

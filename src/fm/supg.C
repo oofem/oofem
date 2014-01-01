@@ -248,7 +248,7 @@ SUPG :: giveNextStep()
     previousStep = currentStep;
 
     if ( deltaTLTF ) {
-        dt *= domain->giveLoadTimeFunction(deltaTLTF)->__at(istep);
+        dt *= domain->giveLoadTimeFunction(deltaTLTF)->evaluateAtTime(istep);
     }
 
     // check for critical time step

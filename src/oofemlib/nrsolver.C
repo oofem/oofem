@@ -522,12 +522,12 @@ void
 NRSolver :: applyConstraintsToLoadIncrement(int nite, const SparseMtrx *k, FloatArray &R,
                                             referenceLoadInputModeType rlm, TimeStep *tStep)
 {
-    double factor = engngModel->giveDomain(1)->giveLoadTimeFunction(prescribedDisplacementLTF)->__at( tStep->giveTargetTime() );
+    double factor = engngModel->giveDomain(1)->giveLoadTimeFunction(prescribedDisplacementLTF)->evaluateAtTime( tStep->giveTargetTime() );
     if ( ( rlm == rlm_total ) && ( !tStep->isTheFirstStep() ) ) {
         //factor -= engngModel->giveDomain(1)->giveLoadTimeFunction(prescribedDisplacementLTF)->
         // at(tStep->givePreviousStep()->giveTime()) ;
         factor -= engngModel->giveDomain(1)->giveLoadTimeFunction(prescribedDisplacementLTF)->
-                  __at( tStep->giveTargetTime() - tStep->giveTimeIncrement() );
+                  evaluateAtTime( tStep->giveTargetTime() - tStep->giveTimeIncrement() );
     }
 
     if ( nite == 0 ) {

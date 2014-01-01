@@ -69,7 +69,10 @@ public:
     virtual const char *giveClassName() const { return "PeakFunction"; }
     virtual const char *giveInputRecordName() const { return _IFT_PeakFunction_Name; }
 
-    virtual double  __at(double);
+    virtual double evaluateAtTime(double);
+    virtual double evaluateVelocityAtTime(double t) { return 0.; }
+    virtual double evaluateAccelerationAtTime(double t) { return 0.; }
+
 };
 } // end namespace oofem
 #endif // peakfunction_h

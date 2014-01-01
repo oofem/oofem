@@ -190,7 +190,7 @@ double
 NonStationaryTransportProblem :: giveDeltaT(int n)
 {
     if ( giveDtTimeFunction() ) {
-        return giveDtTimeFunction()->__at(n);
+        return giveDtTimeFunction()->evaluateAtTime(n);
     }
 
     if ( discreteTimes.giveSize() > 0 ) {

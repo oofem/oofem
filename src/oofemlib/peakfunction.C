@@ -39,7 +39,8 @@
 namespace oofem {
 REGISTER_LoadTimeFunction(PeakFunction);
 
-double PeakFunction :: __at(double time)
+double
+PeakFunction :: evaluateAtTime(double time)
 // Returns the value of the receiver at time 'time'.
 {
     double precision = 1e-6;

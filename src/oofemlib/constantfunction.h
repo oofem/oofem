@@ -62,7 +62,9 @@ public:
     /// @return Value of receiver.
     double giveValue() { return value; }
 
-    virtual double __at(double t) { return this->giveValue(); }
+    virtual double evaluateAtTime(double t) { return this->giveValue(); }
+    virtual double evaluateVelocityAtTime(double t) { return 0.; }
+    virtual double evaluateAccelerationAtTime(double t) { return 0.; }
 
     virtual IRResultType initializeFrom(InputRecord *ir);
     virtual void giveInputRecord(DynamicInputRecord &input);

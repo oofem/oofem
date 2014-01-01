@@ -71,9 +71,9 @@ public:
     virtual contextIOResultType saveContext(DataStream *stream, ContextMode mode, void *obj = NULL);
     virtual contextIOResultType restoreContext(DataStream *stream, ContextMode mode, void *obj = NULL);
 
-    virtual double __at(double);
-    virtual double __derAt(double);
-    virtual double __accelAt(double) { return 0.; }
+    virtual double evaluateAtTime(double t);
+    virtual double evaluateVelocityAtTime(double t);
+    virtual double evaluateAccelerationAtTime(double t) { return 0.; }
 };
 } // end namespace oofem
 #endif // piecewiselinfunction_h

@@ -71,7 +71,9 @@ public:
     virtual const char *giveClassName() const { return "HeavisideLTF"; }
     virtual const char *giveInputRecordName() const { return _IFT_HeavisideLTF_Name; }
 
-    virtual double __at(double);
+    virtual double evaluateAtTime(double);
+    virtual double evaluateVelocityAtTime(double t) { return 0.; }
+    virtual double evaluateAccelerationAtTime(double t) { return 0.; }
 };
 } // end namespace oofem
 #endif // heavisideltf_h

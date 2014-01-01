@@ -117,7 +117,7 @@ void LinearConstraintBC :: assemble(SparseMtrx *answer, TimeStep *tStep, Equatio
         for ( int _i = 1; _i <= size; _i++ ) { // loop over dofs
             double factor = 1.;
             if ( weightsLtf.giveSize() ) {
-                factor = domain->giveLoadTimeFunction( weightsLtf.at(_i) )->__at( tStep->giveIntrinsicTime() );
+                factor = domain->giveLoadTimeFunction( weightsLtf.at(_i) )->evaluateAtTime( tStep->giveIntrinsicTime() );
             }
             contrib.at(_i, 1) = this->weights.at(_i) * factor;
         }
@@ -159,7 +159,7 @@ void LinearConstraintBC :: assembleVector(FloatArray &answer, TimeStep *tStep, E
         for ( int _i = 1; _i <= size; _i++ ) {
             factor = 1.;
             if ( weightsLtf.giveSize() ) {
-                factor = domain->giveLoadTimeFunction( weightsLtf.at(_i) )->__at( tStep->giveIntrinsicTime() );
+                factor = domain->giveLoadTimeFunction( weightsLtf.at(_i) )->evaluateAtTime( tStep->giveIntrinsicTime() );
             }
             idof = this->domain->giveDofManager( this->dofmans.at(_i) )->giveDof( this->dofs.at(_i) );
             if ( s.giveDofEquationNumber(idof) ) {
@@ -173,7 +173,7 @@ void LinearConstraintBC :: assembleVector(FloatArray &answer, TimeStep *tStep, E
         // use rhs value
 
         if ( rhsLtf ) {
-            factor = domain->giveLoadTimeFunction(rhsLtf)->__at( tStep->giveIntrinsicTime() );
+            factor = domain->giveLoadTimeFunction(rhsLtf)->evaluateAtTime( tStep->giveIntrinsicTime() );
         }
         this->giveLocArray( s, loc, lambdaeq.at(1) );
         vec.at(1) = rhs * factor;
@@ -181,7 +181,8 @@ void LinearConstraintBC :: assembleVector(FloatArray &answer, TimeStep *tStep, E
     }
 }
 
-void LinearConstraintBC :: giveLocationArrays(std :: vector< IntArray > &rows, std :: vector< IntArray > &cols, EquationID eid, CharType type, const UnknownNumberingScheme &r_s, const UnknownNumberingScheme &c_s) {
+void LinearConstraintBC :: giveLocationArrays(std :: vector< IntArray > &rows, std :: vector< IntArray > &cols, EquationID eid, CharType type, const UnknownNumberingScheme &r_s, const UnknownNumberingScheme &c_s)
+{
     rows.resize(3);
     cols.resize(3);
 
