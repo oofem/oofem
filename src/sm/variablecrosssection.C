@@ -39,7 +39,7 @@
 #include "classfactory.h"
 #include "dynamicinputrecord.h"
 #include "structuralms.h"
-#include "parser.h"
+
 #include <string>
 #include <sstream>
 
@@ -122,27 +122,27 @@ void VariableCrossSection :: giveInputRecord(DynamicInputRecord &input)
 void
 VariableCrossSection::giveExpression (const ScalarFunction** expr, CrossSectionProperty aProperty) const
 {
-  if (aProperty == CS_Thickness) {
-    *expr = &thicknessExpr;
-  } else if (aProperty ==  CS_Width) {
-    *expr = &widthExpr;
-  } else if (aProperty == CS_Area) {
-    *expr = &areaExpr;
-  } else if (aProperty == CS_TorsionMomentX) {
-    *expr = &ixExpr;
-  } else if (aProperty == CS_InertiaMomentY) {
-    *expr = &iyExpr;
-  } else if (aProperty == CS_InertiaMomentZ) {
-    *expr = &izExpr;
-  } else if (aProperty == CS_ShearAreaY) {
-    *expr = &shearAreayExpr;
-  } else if (aProperty == CS_ShearAreaZ) {
-    *expr = &shearAreazExpr;
-  } else if (aProperty == CS_DrillingStiffness) {
-    *expr = &drillingStiffnessExpr;
-  } else {
-    OOFEM_ERROR3("VariableCrossSection(%d)::give called with unknown ID %d", this->giveNumber(), aProperty);
-  }
+    if (aProperty == CS_Thickness) {
+        *expr = &thicknessExpr;
+    } else if (aProperty ==  CS_Width) {
+        *expr = &widthExpr;
+    } else if (aProperty == CS_Area) {
+        *expr = &areaExpr;
+    } else if (aProperty == CS_TorsionMomentX) {
+        *expr = &ixExpr;
+    } else if (aProperty == CS_InertiaMomentY) {
+        *expr = &iyExpr;
+    } else if (aProperty == CS_InertiaMomentZ) {
+        *expr = &izExpr;
+    } else if (aProperty == CS_ShearAreaY) {
+        *expr = &shearAreayExpr;
+    } else if (aProperty == CS_ShearAreaZ) {
+        *expr = &shearAreazExpr;
+    } else if (aProperty == CS_DrillingStiffness) {
+        *expr = &drillingStiffnessExpr;
+    } else {
+        OOFEM_ERROR3("VariableCrossSection(%d)::give called with unknown ID %d", this->giveNumber(), aProperty);
+    }
 }
 
 
@@ -163,36 +163,36 @@ VariableCrossSection :: give(CrossSectionProperty aProperty, const FloatArray* c
     if ( propertyDictionary->includes(aProperty) ) {
         value = propertyDictionary->at(aProperty);
     } else {
-      this->giveExpression(&expr, aProperty);
+        this->giveExpression(&expr, aProperty);
 
-      FloatArray c;
-      if (this->localFormulationFlag) {
-	if (local) {
-	  c = *coords;
-	} else {
-	  // convert given coords into local cs
-	  if (!elem->computeLocalCoordinates(c, *coords)) {
-	    OOFEM_ERROR2("VariableCrossSection::give: computeLocalCoordinates failed (element %d)", elem->giveNumber());
-	  }
-	}
-      } else { // global coordinates needed
-	if (local) {
-	  // convert given coords into global cs
-	  if (!elem->computeGlobalCoordinates(c, *coords)) {
-	    OOFEM_ERROR2("VariableCrossSection::give: computeGlobalCoordinates failed (element %d)", elem->giveNumber());
-	  }
-	} else {
-	  c = *coords;
-	}
-      }
-      std::map<std::string, double> m;
-      // construct parser parameter map
-      int nsd = c.giveSize();
-      if (nsd > 0) m["x"]=c(0);
-      if (nsd > 1) m["y"]=c(1);
-      if (nsd > 2) m["z"]=c(2);
-      // evaluate the expression
-      value = expr->eval (m, this->giveDomain());
+        FloatArray c;
+        if (this->localFormulationFlag) {
+            if (local) {
+                c = *coords;
+            } else {
+                // convert given coords into local cs
+                if (!elem->computeLocalCoordinates(c, *coords)) {
+                    OOFEM_ERROR2("VariableCrossSection::give: computeLocalCoordinates failed (element %d)", elem->giveNumber());
+                }
+            }
+        } else { // global coordinates needed
+            if (local) {
+                // convert given coords into global cs
+                if (!elem->computeGlobalCoordinates(c, *coords)) {
+                    OOFEM_ERROR2("VariableCrossSection::give: computeGlobalCoordinates failed (element %d)", elem->giveNumber());
+                }
+            } else {
+                c = *coords;
+            }
+        }
+        std::map<std::string, double> m;
+        // construct parser parameter map
+        int nsd = c.giveSize();
+        if (nsd > 0) m["x"]=c(0);
+        if (nsd > 1) m["y"]=c(1);
+        if (nsd > 2) m["z"]=c(2);
+        // evaluate the expression
+        value = expr->eval (m, this->giveDomain());
     }
 
     return value;

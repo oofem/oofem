@@ -39,8 +39,6 @@
 #include "structuralmaterial.h"
 #include "floatarray.h"
 #include "floatmatrix.h"
-#include "parser.h"
-#include <string>
 
 ///@name Input fields for SimpleCrossSection
 //@{
@@ -62,7 +60,7 @@ namespace oofem {
  */
 class OOFEM_EXPORT VariableCrossSection : public SimpleCrossSection
 {
- protected:
+protected:
   /// Expression for cross section thickness
   ScalarFunction thicknessExpr;
   /// Expression for cross section width
@@ -84,8 +82,8 @@ class OOFEM_EXPORT VariableCrossSection : public SimpleCrossSection
 
   /// if set to true, all expressions are in element local cs, otherwise are expressed in global cs
   bool localFormulationFlag;
-  
- public:
+
+public:
     /** 
      * Constructor.
      * @param n Cross section number.
@@ -115,7 +113,7 @@ class OOFEM_EXPORT VariableCrossSection : public SimpleCrossSection
     virtual double give(CrossSectionProperty a, GaussPoint *gp);
     virtual double give(CrossSectionProperty a, const FloatArray* coords, Element* elem, bool local);
 
- protected:
+protected:
     void giveExpression (const ScalarFunction** expr, CrossSectionProperty aProperty) const;
 
 };

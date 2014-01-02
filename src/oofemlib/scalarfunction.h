@@ -32,6 +32,9 @@
  *  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  */
 
+#ifndef scalarfunction_h
+#define scalarfunction_h
+
 #include "floatarray.h"
 #include "domain.h"
 #include "parser.h"
@@ -117,3 +120,5 @@ public:
 };
 
 } // end namespace OOFEM
+
+#endif // scalarfunction_h

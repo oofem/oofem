@@ -68,6 +68,28 @@ CalculatorFunction :: giveInputRecord(DynamicInputRecord &input)
 }
 
 
+FloatArray 
+CalculatorFunction :: evaluate(std :: map< std :: string, double > &valDict)
+{
+    Parser myParser;
+    int err;
+    FloatArray result(1);
+
+    std :: ostringstream buff;
+    //for (auto val : valDict) {
+    for (std :: map< std :: string, double > :: iterator val = valDict.begin(); val != valDict.end(); ++val) {
+        buff << val->first << "=" << val->second << ";" << fExpression;
+    }
+    result.at(1) = myParser.eval(buff.str().c_str(), err);
+    if ( err ) {
+        _error("at: parser syntax error");
+    }
+
+    //return {result};
+    return result;
+}
+
+
 double CalculatorFunction :: evaluateAtTime(double time)
 {
     Parser myParser;

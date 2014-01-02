@@ -35,6 +35,7 @@
 #include "scalarfunction.h"
 #include "floatarray.h"
 #include "domain.h"
+#include "function.h"
 #include "parser.h"
 #include "error.h"
 
@@ -123,8 +124,11 @@ ScalarFunction :: eval(std::map< std::string, double > valDict, Domain *d) const
         }
         return value;
     } else if (this->dvType == DV_FunctionReferenceType) {
-        // d->giveFunction(this->fReference)->evaluate (valDict);
-        return 0.0;
+        FloatArray val = d->giveFunction(this->fReference)->evaluate(valDict);
+        if ( val.giveSize() != 1 ) {
+            OOFEM_ERROR3("ScalarFunction::eval - Function @%d did not return a scalar (size = %d)", this->fReference, val.giveSize());
+        }
+        return val.at(1);
     }
     return 0.;
 }
