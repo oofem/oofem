@@ -32,17 +32,17 @@
  *  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  */
 
-#ifndef heavisideltf_h
-#define heavisideltf_h
+#ifndef heavisidetimefunction_h
+#define heavisidetimefunction_h
 
 #include "floatarray.h"
 #include "function.h"
 
-///@name Input fields for HeavisideLTF
+///@name Input fields for HeavisideTimeFunction
 //@{
-#define _IFT_HeavisideLTF_Name "heavisideltf"
-#define _IFT_HeavisideLTF_origin "origin"
-#define _IFT_HeavisideLTF_value "value"
+#define _IFT_HeavisideTimeFunction_Name "heavisideltf"
+#define _IFT_HeavisideTimeFunction_origin "origin"
+#define _IFT_HeavisideTimeFunction_value "value"
 //@}
 
 namespace oofem {
@@ -56,24 +56,24 @@ namespace oofem {
  * H(t) = \begin{cases} 0,& t\leq 0  \\ 1, & t>0 \end{cases}
  * @f]
  */
-class OOFEM_EXPORT HeavisideLTF : public Function
+class OOFEM_EXPORT HeavisideTimeFunction : public Function
 {
 private:
     double origin, value;
 
 public:
-    HeavisideLTF(int i, Domain *d) : Function(i, d)
+    HeavisideTimeFunction(int i, Domain *d) : Function(i, d)
     { origin = value = 0.; }
-    virtual ~HeavisideLTF() { }
+    virtual ~HeavisideTimeFunction() { }
 
     virtual IRResultType initializeFrom(InputRecord *ir);
     virtual void giveInputRecord(DynamicInputRecord &input);
-    virtual const char *giveClassName() const { return "HeavisideLTF"; }
-    virtual const char *giveInputRecordName() const { return _IFT_HeavisideLTF_Name; }
+    virtual const char *giveClassName() const { return "HeavisideTimeFunction"; }
+    virtual const char *giveInputRecordName() const { return _IFT_HeavisideTimeFunction_Name; }
 
     virtual double evaluateAtTime(double);
     virtual double evaluateVelocityAtTime(double t) { return 0.; }
     virtual double evaluateAccelerationAtTime(double t) { return 0.; }
 };
 } // end namespace oofem
-#endif // heavisideltf_h
+#endif // heavisidetimefunction_h

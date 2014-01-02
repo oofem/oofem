@@ -35,6 +35,7 @@
 #include "macrolspace.h"
 #include "micromaterial.h"
 #include "lspace.h"
+#include "constantfunction.h"
 #include "domain.h"
 #include "classfactory.h"
 #include "dynamicinputrecord.h"
@@ -190,7 +191,7 @@ void MacroLSpace :: changeMicroBoundaryConditions(TimeStep *tStep)
     }
 
     ir_func.setRecordKeywordField("constantfunction", 1);
-    ir_func.setField(1.0, _IFT_Function_ft);
+    ir_func.setField(1.0, _IFT_ConstantFunction_f);
     if ( ( timeFunct = classFactory.createFunction("constantfunction", 1, microDomain) ) == NULL ) {
         OOFEM_ERROR("MacroLSpace :: changeMicroBoundaryConditions - Couldn't create constant time function");
     }

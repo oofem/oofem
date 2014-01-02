@@ -32,38 +32,50 @@
  *  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  */
 
-#include "userdefinedloadtimefunction.h"
+#include "calculatorfunction.h"
 #include "parser.h"
+#include "dynamicinputrecord.h"
 #include "classfactory.h"
 
 #include <sstream>
 
 namespace oofem {
-REGISTER_Function(UserDefinedFunction);
+REGISTER_Function(CalculatorFunction);
 
-UserDefinedFunction :: UserDefinedFunction(int n, Domain *d) : Function(n, d) { }
+CalculatorFunction :: CalculatorFunction(int n, Domain *d) : Function(n, d) { }
 
 IRResultType
-UserDefinedFunction :: initializeFrom(InputRecord *ir)
+CalculatorFunction :: initializeFrom(InputRecord *ir)
 {
     const char *__proc = "initializeFrom";
     IRResultType result;
 
-    IR_GIVE_FIELD(ir, ftExpression, _IFT_UserDefinedFunction_ft);
-    IR_GIVE_OPTIONAL_FIELD(ir, dfdtExpression, _IFT_UserDefinedFunction_dfdt);
-    IR_GIVE_OPTIONAL_FIELD(ir, d2fdt2Expression, _IFT_UserDefinedFunction_d2fdt2);
+    IR_GIVE_FIELD(ir, fExpression, _IFT_CalculatorFunction_f);
+    IR_GIVE_OPTIONAL_FIELD(ir, dfdtExpression, _IFT_CalculatorFunction_dfdt);
+    IR_GIVE_OPTIONAL_FIELD(ir, d2fdt2Expression, _IFT_CalculatorFunction_d2fdt2);
 
     return Function :: initializeFrom(ir);
 }
 
-double UserDefinedFunction :: evaluateAtTime(double time)
+
+void
+CalculatorFunction :: giveInputRecord(DynamicInputRecord &input)
+{
+    Function :: giveInputRecord(input);
+    input.setField(this->fExpression, _IFT_CalculatorFunction_f);
+    input.setField(this->dfdtExpression, _IFT_CalculatorFunction_dfdt);
+    input.setField(this->d2fdt2Expression, _IFT_CalculatorFunction_d2fdt2);
+}
+
+
+double CalculatorFunction :: evaluateAtTime(double time)
 {
     Parser myParser;
     int err;
     double result;
 
     std :: ostringstream buff;
-    buff << "t=" << time << ";" << ftExpression;
+    buff << "t=" << time << ";" << fExpression;
     result = myParser.eval(buff.str().c_str(), err);
     if ( err ) {
         _error("at: parser syntax error");
@@ -72,7 +84,7 @@ double UserDefinedFunction :: evaluateAtTime(double time)
     return result;
 }
 
-double UserDefinedFunction :: evaluateVelocityAtTime(double time)
+double CalculatorFunction :: evaluateVelocityAtTime(double time)
 {
     Parser myParser;
     int err;
@@ -94,7 +106,7 @@ double UserDefinedFunction :: evaluateVelocityAtTime(double time)
 }
 
 
-double UserDefinedFunction :: evaluateAccelerationAtTime(double time)
+double CalculatorFunction :: evaluateAccelerationAtTime(double time)
 {
     Parser myParser;
     int err;

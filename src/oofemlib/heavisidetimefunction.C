@@ -32,18 +32,15 @@
  *  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  */
 
-#include "heavisideltf.h"
+#include "heavisidetimefunction.h"
 #include "dynamicinputrecord.h"
 #include "classfactory.h"
 
 namespace oofem {
-REGISTER_Function(HeavisideLTF);
+REGISTER_Function(HeavisideTimeFunction);
 
 double
-HeavisideLTF :: evaluateAtTime(double time)
-// Returns the value of the receiver at time 'time'. 'time' should be
-// one of the dates of the receiver (currently there is no interpola-
-// tion between two points).
+HeavisideTimeFunction :: evaluateAtTime(double time)
 {
     double relTime = time - this->origin;
     if ( relTime <= 0. ) {
@@ -55,26 +52,23 @@ HeavisideLTF :: evaluateAtTime(double time)
 
 
 IRResultType
-HeavisideLTF :: initializeFrom(InputRecord *ir)
-//
-// initializes according to input record
-//
+HeavisideTimeFunction :: initializeFrom(InputRecord *ir)
 {
     const char *__proc = "initializeFrom"; // Required by IR_GIVE_FIELD macro
     IRResultType result;                // Required by IR_GIVE_FIELD macro
 
     Function :: initializeFrom(ir);
-    IR_GIVE_FIELD(ir, origin, _IFT_HeavisideLTF_origin);
-    IR_GIVE_FIELD(ir, value, _IFT_HeavisideLTF_value);
+    IR_GIVE_FIELD(ir, origin, _IFT_HeavisideTimeFunction_origin);
+    IR_GIVE_FIELD(ir, value, _IFT_HeavisideTimeFunction_value);
 
     return IRRT_OK;
 }
 
 
-void HeavisideLTF :: giveInputRecord(DynamicInputRecord &input)
+void HeavisideTimeFunction :: giveInputRecord(DynamicInputRecord &input)
 {
     Function :: giveInputRecord(input);
-    input.setField(this->origin, _IFT_HeavisideLTF_origin);
-    input.setField(this->value, _IFT_HeavisideLTF_value);
+    input.setField(this->origin, _IFT_HeavisideTimeFunction_origin);
+    input.setField(this->value, _IFT_HeavisideTimeFunction_value);
 }
 } // end namespace oofem

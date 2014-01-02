@@ -49,7 +49,7 @@ ConstantFunction :: initializeFrom(InputRecord *ir)
     IRResultType result;                // Required by IR_GIVE_FIELD macro
 
     Function :: initializeFrom(ir);
-    IR_GIVE_FIELD(ir, value, _IFT_Function_ft);
+    IR_GIVE_FIELD(ir, value, _IFT_ConstantFunction_f);
 
     return IRRT_OK;
 }
@@ -59,6 +59,6 @@ void
 ConstantFunction :: giveInputRecord(DynamicInputRecord &input)
 {
     Function :: giveInputRecord(input);
-    input.setField(this->value, _IFT_Function_ft);
+    input.setField(this->value, _IFT_ConstantFunction_f);
 }
 } // end namespace oofem

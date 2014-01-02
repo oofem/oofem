@@ -61,7 +61,7 @@
 #include "classfactory.h"
 #include "dynamicdatareader.h"
 #include "dynamicinputrecord.h"
-#include "heavisideltf.h"
+#include "heavisidetimefunction.h"
 #include "outputmanager.h"
 #include "boundarycondition.h"
 
@@ -4455,9 +4455,9 @@ HuertaErrorEstimator :: setupRefinedProblemEpilog2(int funcs)
 
     if ( this->mode == HEE_nlinear ) {
         DynamicInputRecord *ir = new DynamicInputRecord();
-        ir->setRecordKeywordField(_IFT_HeavisideLTF_Name, funcs + 1);
-        ir->setField(this->domain->giveEngngModel()->giveCurrentStep()->giveTargetTime() - 0.1, _IFT_HeavisideLTF_origin);
-        ir->setField(1., _IFT_HeavisideLTF_value);
+        ir->setRecordKeywordField(_IFT_HeavisideTimeFunction_Name, funcs + 1);
+        ir->setField(this->domain->giveEngngModel()->giveCurrentStep()->giveTargetTime() - 0.1, _IFT_HeavisideTimeFunction_origin);
+        ir->setField(1., _IFT_HeavisideTimeFunction_value);
         refinedReader.insertInputRecord(DataReader :: IR_funcRec, ir);
     }
 }

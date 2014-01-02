@@ -93,11 +93,11 @@ set (core_fields
 set (core_ltf
     function.C
     constantfunction.C
-    heavisideltf.C
+    heavisidetimefunction.C
     peakfunction.C
     piecewiselinfunction.C
     periodicpiecewiselinfunction.C
-    userdefinedloadtimefunction.C
+    calculatorfunction.C
     )
 
 set (core_cs

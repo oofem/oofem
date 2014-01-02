@@ -38,6 +38,7 @@
 #include "function.h"
 
 #define _IFT_ConstantFunction_Name "constantfunction"
+#define _IFT_ConstantFunction_f "f(t)" ///@todo Rename this to just "f"
 
 namespace oofem {
 /**
@@ -62,6 +63,7 @@ public:
     /// @return Value of receiver.
     double giveValue() { return value; }
 
+    //virtual FloatArray evaluate(std :: map< std :: string, double > &valDict) { return {this->giveValue()}; }
     virtual double evaluateAtTime(double t) { return this->giveValue(); }
     virtual double evaluateVelocityAtTime(double t) { return 0.; }
     virtual double evaluateAccelerationAtTime(double t) { return 0.; }

@@ -44,7 +44,6 @@
 ///@name Input fields for Function
 //@{
 #define _IFT_Function_initialvalue "initialvalue" ///@todo Deprecated
-#define _IFT_Function_ft "f(t)" ///@todo Deprecated
 //@}
 
 namespace oofem {
