@@ -257,7 +257,7 @@ LWedge :: SPRNodalRecoveryMI_computeIPGlobalCoordinates(FloatArray &coords, Gaus
 SPRPatchType
 LWedge :: SPRNodalRecoveryMI_givePatchType()
 {
-    return SPRPatchType_3dBiQuadratic;
+    return SPRPatchType_3dBiLin;
 }
 
 
