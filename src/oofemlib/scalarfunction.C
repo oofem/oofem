@@ -124,7 +124,8 @@ ScalarFunction :: eval(std::map< std::string, double > valDict, Domain *d) const
         }
         return value;
     } else if (this->dvType == DV_FunctionReferenceType) {
-        FloatArray val = d->giveFunction(this->fReference)->evaluate(valDict);
+        FloatArray val;
+        d->giveFunction(this->fReference)->evaluate(val, valDict);
         if ( val.giveSize() != 1 ) {
             OOFEM_ERROR3("ScalarFunction::eval - Function @%d did not return a scalar (size = %d)", this->fReference, val.giveSize());
         }

@@ -104,7 +104,8 @@ Function :: evaluateAtTime(double t)
     //std::map< std::string, double >valDict {{t, "t"}};
     std::map< std::string, double >valDict;
     valDict["t"] = t;
-    FloatArray v = this->evaluate(valDict);
+    FloatArray v;
+    this->evaluate(v, valDict);
     if ( v.giveSize() != 1 ) {
         OOFEM_ERROR2("%s :: evaluateAtTime - Function doesn't return scalar results.", this->giveClassName());
     }
@@ -112,12 +113,11 @@ Function :: evaluateAtTime(double t)
 }
 
 ///@todo Move operator from C++11 would be nice here.
-FloatArray
-Function :: evaluate(std::map< std::string, double > &valDict)
+void
+Function :: evaluate(FloatArray &answer, std::map< std::string, double > &valDict)
 {
-    FloatArray v(1);
-    v.at(1) = this->evaluateAtTime(valDict["t"]);
-    return v;
+    answer.resize(1);
+    answer.at(1) = this->evaluateAtTime(valDict["t"]);
 }
 
 } // end namespace oofem

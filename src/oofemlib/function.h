@@ -88,9 +88,9 @@ public:
     /**
      * Returns the Returns the value of the function at given time.
      * @param valDict Dictionary with values.
-     * @return Function value.
+     * @param answer Function value.
      */
-    virtual FloatArray evaluate(std :: map< std :: string, double > &valDict);
+    virtual void evaluate(FloatArray &answer, std :: map< std :: string, double > &valDict);
 
     /**
      * Returns the value of the function at given time.
