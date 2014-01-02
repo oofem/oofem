@@ -106,9 +106,6 @@ VTKXMLExportModule :: initializeFrom(InputRecord *ir)
     IR_GIVE_OPTIONAL_FIELD(ir, internalVarsToExport, _IFT_VTKXMLExportModule_vars); // Macro - see internalstatetype.h
     IR_GIVE_OPTIONAL_FIELD(ir, primaryVarsToExport, _IFT_VTKXMLExportModule_primvars); // Macro - see unknowntype.h
     IR_GIVE_OPTIONAL_FIELD(ir, ipInternalVarsToExport, _IFT_VTKXMLExportModule_ipvars); // Macro - see internalstatetype.h
-    if(ipInternalVarsToExport.giveSize()){
-        this->tstep_substeps_out_flag = true;
-    }
 
     val = 1;
     IR_GIVE_OPTIONAL_FIELD(ir, val, _IFT_VTKXMLExportModule_stype); // Macro
@@ -1836,12 +1833,12 @@ VTKXMLExportModule :: exportIntVarsInGpAs(IntArray valIDs, TimeStep *tStep)
 
     /* loop over regions */
     for ( int ireg = 1; ireg <= nregions; ireg++ ) {
-        if ( this->regionsToSkip.contains(ireg) ) {
+        if ( ( ireg > 0 ) && ( this->regionsToSkip.contains(ireg) ) ) {
             continue;
         }
 
         for ( int ielem = 1; ielem <= nelem; ielem++ ) {
-            if ( this->regionsToSkip.contains(d->giveElement(ielem)->giveRegionNumber() ) ) {
+            if ( d->giveElement(ielem)->giveRegionNumber() != ireg ) {
                 continue;
             }
 
@@ -1852,7 +1849,7 @@ VTKXMLExportModule :: exportIntVarsInGpAs(IntArray valIDs, TimeStep *tStep)
         fprintf(stream, "<Piece NumberOfPoints=\"%d\" NumberOfCells=\"%d\">\n", nip, nip);
         fprintf(stream, "<Points>\n <DataArray type=\"Float64\" NumberOfComponents=\"3\" format=\"ascii\"> ");
         for ( int ielem = 1; ielem <= nelem; ielem++ ) {
-            if ( this->regionsToSkip.contains(d->giveElement(ielem)->giveRegionNumber() ) ) {
+            if ( d->giveElement(ielem)->giveRegionNumber() != ireg ) {
                 continue;
             }
 
@@ -1936,7 +1933,7 @@ VTKXMLExportModule :: exportIntVarsInGpAs(IntArray valIDs, TimeStep *tStep)
 
             fprintf(stream, "  <DataArray type=\"Float64\" Name=\"%s\" NumberOfComponents=\"%d\" format=\"ascii\">", __InternalStateTypeToString(isttype), nc);
             for ( int ielem = 1; ielem <= nelem; ielem++ ) {
-                if ( this->regionsToSkip.contains(d->giveElement(ielem)->giveRegionNumber() ) ) {
+	        if ( d->giveElement(ielem)->giveRegionNumber() != ireg ) {
                     continue;
                 }
 
