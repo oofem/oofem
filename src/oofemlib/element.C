@@ -1256,7 +1256,6 @@ Element :: giveIPValue(FloatArray &answer, GaussPoint *gp, InternalStateType typ
             answer.resize(0);
             return 0;
         }
-
         return 1;
     } else if ( type == IST_PrimaryUnknownError ) {
         ErrorEstimator *ee = this->giveDomain()->giveErrorEstimator();
@@ -1267,7 +1266,14 @@ Element :: giveIPValue(FloatArray &answer, GaussPoint *gp, InternalStateType typ
             answer.resize(0);
             return 0;
         }
-
+        return 1;
+    } else if ( type == IST_CrossSectionNumber ) {
+        answer.resize(1);
+        answer.at(1) = gp->giveCrossSection()->giveNumber();
+        return 1;
+    } else if ( type == IST_ElementNumber ) {
+        answer.resize(1);
+        answer.at(1) = this->giveNumber();
         return 1;
     } else {
         return this->giveCrossSection()->giveIPValue(answer, gp, type, tStep);

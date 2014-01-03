@@ -378,6 +378,8 @@ VTKXMLExportModule :: doOutput(TimeStep *tStep, bool forcedOutput)
         return;
     }
 
+
+
 #ifdef __VTK_MODULE
     this->fileStream = vtkSmartPointer< vtkUnstructuredGrid > :: New();
     this->nodes = vtkSmartPointer< vtkPoints > :: New();
@@ -1931,7 +1933,7 @@ VTKXMLExportModule :: exportIntVarsInGpAs(IntArray valIDs, TimeStep *tStep)
 
             fprintf(stream, "  <DataArray type=\"Float64\" Name=\"%s\" NumberOfComponents=\"%d\" format=\"ascii\">", __InternalStateTypeToString(isttype), nc);
             for ( int ielem = 1; ielem <= nelem; ielem++ ) {
-                if ( d->giveElement(ielem)->giveRegionNumber() != ireg ) {
+	        if ( d->giveElement(ielem)->giveRegionNumber() != ireg ) {
                     continue;
                 }
 
