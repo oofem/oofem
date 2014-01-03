@@ -135,6 +135,19 @@ ScalarFunction :: eval(std::map< std::string, double > valDict, Domain *d) const
 }
 
 
+double
+ScalarFunction :: eval(double time, Domain *d) const
+{
+    if (this->dvType == DV_ValueType) {
+        return this->dValue;
+    } else {
+        std::map< std::string, double > valDict;
+        valDict["t"] = time;
+        return this->eval(valDict, d);
+    }
+}
+
+
 void
 ScalarFunction :: clear()
 {

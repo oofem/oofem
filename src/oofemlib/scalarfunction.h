@@ -112,6 +112,22 @@ public:
     double eval(std :: map< std :: string, double >valDict, Domain *d) const;
 
     /**
+     * Evaluates the receiver (convenience function that directly takes just the time as a parameter).
+     * @param time Time to evaluate for.
+     * @param d domain managing external functions
+     */
+    double eval(double time, Domain *d) const;
+
+    ///@todo Support FloatArray inputs in the value dictionary, then implement this convenience function;
+    /*
+     * Evaluates the receiver (convenience function that directly takes just the time and coordinates as parameters).
+     * @param time Time to evaluate for.
+     * @param coords Coordinates to evaluate for.
+     * @param d domain managing external functions
+     */
+    //double eval(double time, const FloatArray &coords, Domain *d) const;
+
+    /**
      * Cleans up before changing receiver
      */
     void clear();
