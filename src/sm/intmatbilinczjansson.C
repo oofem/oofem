@@ -194,7 +194,7 @@ IntMatBilinearCZJansson :: giveFirstPKTraction_3d(FloatArray &answer, GaussPoint
 			
 			double beta = pow(Qt,2)*Kstiff.at(3,3)/(pow(Qn_M,2)*Kstiff.at(1,1) + pow(Qt,2)*Kstiff.at(3,3));
 
-			double G_beta = beta*this->GIIc + (1-beta)*this->GIc;	// assuming linear interpolation between mode I and II
+			double G_beta = beta*(this->GIIc - pow(gamma*sigf,2)/this->ks0) + (1-beta)*(this->GIc - pow(sigf,2)/this->kn0);	// assuming linear interpolation between mode I and II
 			
 			
 			double eta = (pow(Qn_M,2) + pow(Qt,2)*Kstiff.at(3,3)/Kstiff.at(1,1))/(G_beta*sigf);		
