@@ -72,6 +72,7 @@ class AlphaEdge2D : public Edge2D
 public:
     /// Constructor
     AlphaEdge2D(int node1, int node2, double _length);
+	AlphaEdge2D(int node1, int node2);
     /// Destructor
     ~AlphaEdge2D();
 

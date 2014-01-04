@@ -162,7 +162,11 @@ void DelaunayTriangulator :: writeMesh()
 		// first reset all pressure boundary conditions and alphaShapeProperty
 		for ( int i = 1; i <= domain->giveNumberOfDofManagers(); i++ ) {
 			Dof *jDof = domain->giveDofManager(i)->giveDofWithID(P_f);
-			jDof->setBcId(0);
+			// SHOULD BE REMOVED
+			if (jDof->giveBcId() != 4)
+			{
+				jDof->setBcId(0);
+			}
 
 			dynamic_cast<PFEMParticle*>(domain->giveDofManager(i))->setOnAlphaShape(false);
 		}
@@ -191,8 +195,15 @@ void DelaunayTriangulator :: writeMesh()
 			}
 			if (oneIsFree)
 			{
-				domain->giveDofManager( ( * elIT )->giveNode(1) )->giveDofWithID(P_f)->setBcId(2);
-				domain->giveDofManager( ( * elIT )->giveNode(2) )->giveDofWithID(P_f)->setBcId(2);
+				Dof* dofOnNode1 = domain->giveDofManager( ( * elIT )->giveNode(1) )->giveDofWithID(P_f);
+				// SHOULD BE REMOVED
+				if (dofOnNode1->giveBcId() != 4)
+					dofOnNode1->setBcId(2);
+
+				Dof* dofOnNode2 = domain->giveDofManager( ( * elIT )->giveNode(2) )->giveDofWithID(P_f);
+				// SHOULD BE REMOVED
+				if (dofOnNode2->giveBcId() != 4)
+					dofOnNode2->setBcId(2);
 			}
 		}
 	}
@@ -366,6 +377,110 @@ void DelaunayTriangulator :: giveAlphaShape()
             }
         }
     }
+
+	// SHOULD BE REMOVED
+	for (elIT = alphaShapeEdgeList.begin(); elIT != alphaShapeEdgeList.end(); ++elIT)
+	{
+		DelaunayTriangle* triangle1 = (*elIT)->giveShared(1);
+		if (triangle1->giveValidFlag())
+		{
+			int node1 = triangle1->giveNode(1);
+			int node2 = triangle1->giveNode(2);
+			int node3 = triangle1->giveNode(3);
+
+			int edgeNodeA = (*elIT)->giveNode(1); 
+			int edgeNodeB = (*elIT)->giveNode(2);
+
+			if (node1 != edgeNodeA && node1 != edgeNodeB)
+			{
+				if(domain->giveDofManager(node1)->giveDofWithID(P_f)->giveBcId() == 4)
+				{
+					triangle1->setValidFlag(false);
+					elIT = alphaShapeEdgeList.erase(elIT);
+					elIT--;
+					alphaShapeEdgeList.push_back(new AlphaEdge2D(edgeNodeA, node1));
+					alphaShapeEdgeList.push_back(new AlphaEdge2D(edgeNodeB, node1));
+					break;
+				}
+			}
+
+			if (node2 != edgeNodeA && node2 != edgeNodeB)
+			{
+				if(domain->giveDofManager(node2)->giveDofWithID(P_f)->giveBcId() == 4)
+				{
+					triangle1->setValidFlag(false);
+					elIT = alphaShapeEdgeList.erase(elIT);
+					elIT--;
+					alphaShapeEdgeList.push_back(new AlphaEdge2D(edgeNodeA, node2));
+					alphaShapeEdgeList.push_back(new AlphaEdge2D(edgeNodeB, node2));
+					break;
+				}
+			}
+
+			if (node3 != edgeNodeA && node3 != edgeNodeB)
+			{
+				if(domain->giveDofManager(node3)->giveDofWithID(P_f)->giveBcId() == 4)
+				{
+					triangle1->setValidFlag(false);
+					elIT = alphaShapeEdgeList.erase(elIT);
+					elIT--;
+					alphaShapeEdgeList.push_back(new AlphaEdge2D(edgeNodeA, node3));
+					alphaShapeEdgeList.push_back(new AlphaEdge2D(edgeNodeB, node3));
+					break;
+				}
+			}
+		}
+
+		DelaunayTriangle* triangle2 = (*elIT)->giveShared(1);
+		if (triangle2->giveValidFlag())
+		{
+			int node1 = triangle2->giveNode(1);
+			int node2 = triangle2->giveNode(2);
+			int node3 = triangle2->giveNode(3);
+
+			int edgeNodeA = (*elIT)->giveNode(1); 
+			int edgeNodeB = (*elIT)->giveNode(2);
+
+			if (node1 != edgeNodeA && node1 != edgeNodeB)
+			{
+				if(domain->giveDofManager(node1)->giveDofWithID(P_f)->giveBcId() == 4)
+				{
+					triangle2->setValidFlag(false);
+					elIT = alphaShapeEdgeList.erase(elIT);
+					elIT--;
+					alphaShapeEdgeList.push_back(new AlphaEdge2D(edgeNodeA, node1));
+					alphaShapeEdgeList.push_back(new AlphaEdge2D(edgeNodeB, node1));
+					break;
+				}
+			}
+
+			if (node2 != edgeNodeA && node2 != edgeNodeB)
+			{
+				if(domain->giveDofManager(node2)->giveDofWithID(P_f)->giveBcId() == 4)
+				{
+					triangle2->setValidFlag(false);
+					elIT = alphaShapeEdgeList.erase(elIT);
+					elIT--;
+					alphaShapeEdgeList.push_back(new AlphaEdge2D(edgeNodeA, node2));
+					alphaShapeEdgeList.push_back(new AlphaEdge2D(edgeNodeB, node2));
+					break;
+				}
+			}
+
+			if (node3 != edgeNodeA && node3 != edgeNodeB)
+			{
+				if(domain->giveDofManager(node3)->giveDofWithID(P_f)->giveBcId() == 4)
+				{
+					triangle2->setValidFlag(false);
+					elIT = alphaShapeEdgeList.erase(elIT);
+					elIT--;
+					alphaShapeEdgeList.push_back(new AlphaEdge2D(edgeNodeA, node3));
+					alphaShapeEdgeList.push_back(new AlphaEdge2D(edgeNodeB, node3));
+					break;
+				}
+			}
+		}
+	}
 }
 
 void
@@ -462,7 +577,8 @@ DelaunayTriangulator :: cleanUpTriangleList()
 
         if ( node1 == nnode + 1 || node1 == nnode + 2 || node1 == nnode + 3 || node1 == nnode + 4 ||
             node2 == nnode + 1 || node2 == nnode + 2 || node2 == nnode + 3 || node2 == nnode + 4 ||
-            node3 == nnode + 1 || node3 == nnode + 2 || node3 == nnode + 3 || node3 == nnode + 4 || !( ( * genIT )->giveValidFlag() ) ) {
+            node3 == nnode + 1 || node3 == nnode + 2 || node3 == nnode + 3 || node3 == nnode + 4 ||
+			!( ( * genIT )->giveValidFlag() ) ) {
             delete(* genIT);
             genIT = generalTriangleList.erase(genIT);
         } else   {

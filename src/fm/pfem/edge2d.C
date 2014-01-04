@@ -70,6 +70,19 @@ AlphaEdge2D :: AlphaEdge2D(int node1, int node2, double _length) :
     sharedByTriangles [ 1 ] = NULL;
 }
 
+// SHOULD BE REMOVED
+AlphaEdge2D :: AlphaEdge2D(int node1, int node2) :
+	Edge2D(node1, node2)
+	, isOnConvexHull(false)
+    , outerAlphaBound(0.0)
+    , innerAlphaBound(0.0)
+    , length(0.0)
+{
+	sharedByTriangles [ 0 ] = NULL;
+    sharedByTriangles [ 1 ] = NULL;
+}
+
+
 AlphaEdge2D :: ~AlphaEdge2D()
 { }
 
