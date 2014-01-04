@@ -300,21 +300,23 @@ PFEM :: giveNextStep()
 
     double ndt = ( ( PFEMElement * ) domain->giveElement(1) )->computeCriticalTimeStep(previousStep);
     // check for critical time step
-    TR1_2D_PFEM *ielem = NULL;
+	TR1_2D_PFEM* ielem = NULL;
     for ( i = 2; i <= domain->giveNumberOfElements(); i++ ) {
-        ielem = dynamic_cast< TR1_2D_PFEM * >( domain->giveElement(i) );
-        double idt = ielem->computeCriticalTimeStep(previousStep);
-        if ( idt < ndt ) {
-            ndt = idt;
-            printf("Reducing time step due to element #%i \n", i);
-        }
+		ielem = dynamic_cast<TR1_2D_PFEM*>(domain->giveElement(i));
+		double idt = ielem->computeCriticalTimeStep(previousStep);
+		if ( idt < ndt)
+		{
+			ndt = idt;
+			printf("Reducing time step due to element #%i \n", i);
+		}
+		
     }
 
     // UP error computeCriticalTimeStep
 
     //COdt = max(dt*0.8, minDeltaT);
-    ndt = min(ndt, deltaT);
-    //ndt = max (ndt, minDeltaT);
+    ndt = min (ndt, deltaT);
+	ndt = max (ndt, minDeltaT);
 
 
     if ( currentStep != NULL ) {
@@ -362,6 +364,7 @@ PFEM :: solveYourselfAt(TimeStep *tStep)
     // ??? stepWhenIcApply
     this->assemble( avLhs, tStep, EID_AuxMomentumBalance, LumpedMassMatrix, avns, this->giveDomain(1) );
 
+//	double ulala = avLhs->at(444,444);
     if ( pLhs ) {
         delete pLhs;
     }
@@ -454,7 +457,7 @@ PFEM :: solveYourselfAt(TimeStep *tStep)
             tStep->givePreviousStep()->setNumber(0);
         }
 
-        this->giveNumericalMethod( this->giveMetaStep( tStep->giveMetaStepNumber() ) );
+        this->giveNumericalMethod(this->giveMetaStep( tStep->giveMetaStepNumber()));
         nMethod->solve(avLhs, & rhs, & AuxVelocity);
 
         /************************* STEP 2 - calculates pressure ************************************/
@@ -468,7 +471,7 @@ PFEM :: solveYourselfAt(TimeStep *tStep)
 
         this->assembleVectorFromElements( rhs, tStep, EID_ConservationEquation, DivergenceVelocityVector, VM_Total, pns, this->giveDomain(1) );
 
-        this->giveNumericalMethod( this->giveMetaStep( tStep->giveMetaStepNumber() ) );
+        this->giveNumericalMethod(this->giveMetaStep( tStep->giveMetaStepNumber() ));
         pressureVector->resize(presneq);
         nMethod->solve(pLhs, & rhs, pressureVector);
 
@@ -495,7 +498,7 @@ PFEM :: solveYourselfAt(TimeStep *tStep)
         // deactivated, problem of prescribed pressure solved by improvement in alpha shape free surface definition
         // this->assembleVectorFromElements(rhs, tStep, EID_MomentumBalance, PrescribedPressureRhsVector, VM_Total, vns, this->giveDomain(1) );
 
-        this->giveNumericalMethod( this->giveMetaStep( tStep->giveMetaStepNumber() ) );
+        this->giveNumericalMethod(this->giveMetaStep( tStep->giveMetaStepNumber() ));
 
         nMethod->solve(vLhs, & rhs, velocityVector);
 
@@ -517,47 +520,47 @@ PFEM :: solveYourselfAt(TimeStep *tStep)
         } else {
             FloatArray diffVelocity = velocityVectorThisStep;
             diffVelocity.subtract(velocityVectorLastStep);
-            /*for (int i = 1; i <= diffVelocity.giveSize(); i++)
-             * {
-             *      if(fabs(diffVelocity.at(i)) > 1.e-2)
-             *      {
-             *
-             *              Dof* dof = vns.giveDofToEquationNumber(this->giveDomain(1), i);
-             *              if (dof)
-             *              {
-             *                      DofManager* dofman = dof->giveDofManager();
-             *                      printf("Too large difference at time step %i, iteration %i \n", tStep->giveNumber(), iteration);
-             *                      printf("Velocity thisStep %f - lastStep %f = difference %f \n", velocityVectorThisStep.at(i), velocityVectorLastStep.at(i), diffVelocity.at(i));
-             *                      printf("DofManager #%i at (%f, %f), DofID #%s \n", dofman->giveNumber(), dofman->giveCoordinate(1), dofman->giveCoordinate(2), __DofIDItemToString(dof->giveDofID()));
-             *                      char str[80];
-             *                      scanf ("%s",str);
-             *              }
-             *              else
-             *                      OOFEM_ERROR("Finding Dof to equation Number failed");
-             *      }
-             * }*/
+			/*for (int i = 1; i <= diffVelocity.giveSize(); i++)
+			{
+				if(fabs(diffVelocity.at(i)) > 1.e-2)
+				{
+					
+					Dof* dof = vns.giveDofToEquationNumber(this->giveDomain(1), i);
+					if (dof)
+					{
+						DofManager* dofman = dof->giveDofManager();
+						printf("Too large difference at time step %i, iteration %i \n", tStep->giveNumber(), iteration);
+						printf("Velocity thisStep %f - lastStep %f = difference %f \n", velocityVectorThisStep.at(i), velocityVectorLastStep.at(i), diffVelocity.at(i));
+						printf("DofManager #%i at (%f, %f), DofID #%s \n", dofman->giveNumber(), dofman->giveCoordinate(1), dofman->giveCoordinate(2), __DofIDItemToString(dof->giveDofID()));
+						char str[80];
+						scanf ("%s",str);
+					}
+					else
+						OOFEM_ERROR("Finding Dof to equation Number failed");
+				}
+			}*/
 
-            d_vnorm = 0.0;
-            for ( int i = 1; i <= diffVelocity.giveSize(); i++ ) {
-                d_vnorm = max( d_vnorm, fabs( diffVelocity.at(i) / velocityVectorLastStep.at(i) ) );
-            }
-
+			d_vnorm = 0.0;
+			for (int i = 1; i <= diffVelocity.giveSize(); i++)
+			{
+				d_vnorm = max(d_vnorm, abs(diffVelocity.at(i)/velocityVectorLastStep.at(i)));
+			}
             //d_vnorm = diffVelocity.computeNorm() / velocityVectorLastStep.computeNorm();
 
             FloatArray diffPressure = pressureVectorThisStep;
             diffPressure.subtract(pressureVectorLastStep);
-            /*double normDiffPressure = diffPressure.computeNorm();
-             * if (normDiffPressure < 1.e-9)
-             *      d_pnorm = 0.0;
-             * else
-             *      d_pnorm = normDiffPressure / pressureVectorLastStep.computeNorm();*/
-            d_pnorm = 0.0;
-            for ( int i = 1; i <= diffPressure.giveSize(); i++ ) {
-                d_pnorm = max( d_pnorm, fabs( diffPressure.at(i) / pressureVectorLastStep.at(i) ) );
-            }
+			/*double normDiffPressure = diffPressure.computeNorm();
+			if (normDiffPressure < 1.e-9)
+				d_pnorm = 0.0;
+			else
+				d_pnorm = normDiffPressure / pressureVectorLastStep.computeNorm();*/
+			d_pnorm = 0.0;
+			for (int i = 1; i <= diffPressure.giveSize(); i++)
+			{
+				d_pnorm = max(d_pnorm, abs(diffPressure.at(i)/pressureVectorLastStep.at(i)));
+			}
         }
     } while ( ( d_vnorm > 1.e-8 || d_pnorm > 1.e-8 ) && iteration < 50 );
-
 
     if ( iteration > 49 ) {
         OOFEM_ERROR("Maximal iteration count exceded");
