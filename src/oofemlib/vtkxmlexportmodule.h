@@ -66,6 +66,7 @@
 #define _IFT_VTKXMLExportModule_regionstoskip "regionstoskip"
 #define _IFT_VTKXMLExportModule_nvr "nvr"
 #define _IFT_VTKXMLExportModule_vrmap "vrmap"
+#define _IFT_VTKXMLExportModule_particleexportflag "particleexportflag"
 //@}
 
 namespace oofem {
@@ -166,6 +167,8 @@ protected:
     IntArray vrmap;
     /// Scaling time in output, e.g. conversion from seconds to hours
     double timeScale;
+	/// particle export flag
+	bool particleExportFlag;
 
     /// Buffer for earlier time steps exported to *.pvd file.
     std :: list< std :: string >pvdBuffer;

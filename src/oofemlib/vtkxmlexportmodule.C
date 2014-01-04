@@ -111,6 +111,9 @@ VTKXMLExportModule :: initializeFrom(InputRecord *ir)
     IR_GIVE_OPTIONAL_FIELD(ir, val, _IFT_VTKXMLExportModule_stype); // Macro
     stype = ( NodalRecoveryModel :: NodalRecoveryModelType ) val;
 
+    this->particleExportFlag = false;
+    IR_GIVE_OPTIONAL_FIELD(ir, particleExportFlag, _IFT_VTKXMLExportModule_particleexportflag); // Macro
+
     regionsToSkip.resize(0);
     IR_GIVE_OPTIONAL_FIELD(ir, regionsToSkip, _IFT_VTKXMLExportModule_regionstoskip); // Macro
 
@@ -395,6 +398,9 @@ VTKXMLExportModule :: doOutput(TimeStep *tStep, bool forcedOutput)
 
     this->giveSmoother(); // make sure smoother is created, Necessary? If it doesn't exist it is created /JB
 
+
+	if (!this->particleExportFlag) {
+
     /* Loop over pieces  ///@todo: this feature has been broken but not checked if it currently works /JB
      * Start default pieces containing all single cell elements. Elements built up from several vtk
      * cells (composite elements) are exported as individual pieces after the default ones.
@@ -443,6 +449,61 @@ VTKXMLExportModule :: doOutput(TimeStep *tStep, bool forcedOutput)
 #endif
         }
     }  // end loop over composite elements
+	} else { // if (particleExoportFlag)
+	// write out the particles (nodes exported as vertices = VTK_VERTEX)
+	Domain *d  = emodel->giveDomain(1);
+	int nnode = d->giveNumberOfDofManagers();
+	DofManager *node;
+	FloatArray *coords;
+	fprintf(this->fileStream, "<Piece NumberOfPoints=\"%d\" NumberOfCells=\"%d\">\n", nnode, nnode);
+    fprintf(this->fileStream, "<Points>\n <DataArray type=\"Float64\" NumberOfComponents=\"3\" format=\"ascii\"> ");
+
+	for (int inode = 1; inode<=nnode; inode++) {
+		node = d->giveNode(inode);
+        coords = node->giveCoordinates();
+        ///@todo move this below into setNodeCoords since it should alwas be 3 components anyway
+        for ( int i = 1; i <= coords->giveSize(); i++ ) {
+            fprintf( this->fileStream, "%e ", coords->at(i) );
+        }
+
+        for ( int i = coords->giveSize() + 1; i <= 3; i++ ) {
+            fprintf(this->fileStream, "%e ", 0.0);
+        }
+    }
+
+    fprintf(this->fileStream, "</DataArray>\n</Points>\n");
+
+
+   // output the cells connectivity data
+    fprintf(this->fileStream, "<Cells>\n");
+    fprintf(this->fileStream, " <DataArray type=\"Int32\" Name=\"connectivity\" format=\"ascii\"> ");
+
+    for ( int ielem = 1; ielem <= nnode; ielem++ ) {
+            fprintf(this->fileStream, "%d ", ielem - 1);
+        }
+
+    fprintf(this->fileStream, "</DataArray>\n");
+
+    // output the offsets (index of individual element data in connectivity array)
+    fprintf(this->fileStream, " <DataArray type=\"Int32\" Name=\"offsets\" format=\"ascii\"> ");
+
+    for ( int ielem = 1; ielem <= nnode; ielem++ ) {
+        fprintf( this->fileStream, "%d ", ielem);
+    }
+    fprintf(this->fileStream, "</DataArray>\n");
+
+
+    // output cell (element) types
+    fprintf(this->fileStream, " <DataArray type=\"UInt8\" Name=\"types\" format=\"ascii\"> ");
+    for ( int ielem = 1; ielem <= nnode; ielem++ ) {
+        fprintf( this->fileStream, "%d ", 1);
+    }
+
+    fprintf(this->fileStream, "</DataArray>\n");
+    fprintf(this->fileStream, "</Cells>\n");
+	fprintf(this->fileStream, "</Piece>\n");
+	}
+
 
     // Finilize the output:
     std :: string fname = giveOutputFileName(tStep);
