@@ -117,6 +117,8 @@ public:
 
     /// Asks new equation number
     int askNewEquationNumber() { return ++numEqs; }
+
+	Dof* giveDofToEquationNumber(Domain* d, int equationNumber);
 };
 
 /**

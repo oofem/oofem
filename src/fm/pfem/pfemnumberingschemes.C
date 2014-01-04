@@ -131,6 +131,33 @@ VelocityNumberingScheme :: giveDofEquationNumber(Dof *dof) const
     return 0;
 }
 
+Dof*
+VelocityNumberingScheme::giveDofToEquationNumber(Domain* d, int equationNumber)
+{
+	bool found = false;
+	Dof* foundDof = NULL;
+	for (int i = 1; i <= d->giveNumberOfDofManagers(); i++)
+	{
+		for (int j = 1; j <= d->giveDofManager(i)->giveNumberOfDofs(); j++)
+		{
+			Dof* dof = d->giveDofManager(i)->giveDof(j);
+			DofIDItem id = dof->giveDofID();
+			if ( id == V_u || id == V_v || id == V_w )
+			{
+				if (dof->__giveEquationNumber() == equationNumber)
+				{
+					foundDof = dof;
+					found = true;
+					break;
+				}
+			}
+		}
+		if (found)
+			break;
+	}
+	return foundDof;
+}
+
 AuxVelocityNumberingScheme :: AuxVelocityNumberingScheme() :
     UnknownNumberingScheme()
     , neq(0)
