@@ -558,7 +558,7 @@ TR1_2D_PFEM :: computeCriticalTimeStep(TimeStep *tStep)
 {
     double deltaT = tStep->giveTimeIncrement();
 #if 1
-    FloatArray u;
+    /*FloatArray u;
     this->computeVectorOf(EID_MomentumBalance, VM_Total, tStep, u);
     double vn1 = sqrt( u.at(1) * u.at(1) + u.at(2) * u.at(2) );
     double vn2 = sqrt( u.at(3) * u.at(3) + u.at(4) * u.at(4) );
@@ -608,7 +608,102 @@ TR1_2D_PFEM :: computeCriticalTimeStep(TimeStep *tStep)
 
     double dt_min = min( dt1, min(dt2, dt3) );
 
+    return dt_min;*/
+
+	//////////////////////////////////////////////////////////////////////////////////////////////////////
+
+	// assuming plane x-y !!!!!!!!!!!!!!!!!!!!!!
+
+	FloatArray u;
+    this->computeVectorOf(EID_MomentumBalance, VM_Total, tStep, u);
+	FloatArray u1(2), u2(2), u3(2);
+	u1.at(1) = u.at(1);
+	u1.at(2) = u.at(2);
+
+	u2.at(1) = u.at(3);
+	u2.at(2) = u.at(4);
+
+	u3.at(1) = u.at(5);
+	u3.at(2) = u.at(6);
+	
+    Node* node1 = giveNode(1);
+    Node* node2 = giveNode(2);
+    Node* node3 = giveNode(3);
+		
+	double x1, x2, x3, y1, y2, y3;
+
+	x1 = node1->giveCoordinate(1);
+    x2 = node2->giveCoordinate(1);
+    x3 = node3->giveCoordinate(1);
+
+    y1 = node1->giveCoordinate(2);
+    y2 = node2->giveCoordinate(2);
+    y3 = node3->giveCoordinate(2);
+
+	FloatArray p1(2), p2(2), p3(2);
+	p1.at(1) = x1;
+	p1.at(2) = y1;
+
+	p2.at(1) = x2;
+	p2.at(2) = y2;
+
+	p3.at(1) = x3;
+	p3.at(2) = y3;
+
+	FloatArray s12(p2), s23(p3), s31(p1);
+
+	s12.subtract(p1);
+	FloatArray s21(s12);
+	s21.negated();
+
+	s23.subtract(p2);
+	FloatArray s32(s23);
+	s32.negated();
+
+	s31.subtract(p3);
+	FloatArray s13(s31);
+	s13.negated();
+
+	FloatArray foot1(p2);
+	FloatArray foot2(p3);
+	FloatArray foot3(p1);
+	
+	double factor = s21.dotProduct(s23) / s23.dotProduct(s23);
+	foot1.add(factor, s23);
+
+	FloatArray altitude1(foot1);
+	altitude1.subtract(p1);
+	
+	factor = s32.dotProduct(s31) / s31.dotProduct(s31);
+	foot2.add(factor, s31);
+
+	FloatArray altitude2(foot2);
+	altitude2.subtract(p2);
+
+	factor = s13.dotProduct(s12) / s12.dotProduct(s12);
+	foot3.add(factor, s12);
+
+	FloatArray altitude3(foot3);
+	altitude3.subtract(p3);
+
+	double dt1(deltaT), dt2(deltaT), dt3(deltaT);
+
+	double u1_proj = u1.dotProduct(altitude1) / altitude1.computeNorm();
+	if (u1_proj > 1.e-6)
+	 dt1 = altitude1.computeNorm() / u1_proj;
+
+	double u2_proj = u2.dotProduct(altitude2) / altitude2.computeNorm();
+	if (u2_proj > 1.e-6)
+	 dt2 = altitude1.computeNorm() / u2_proj;
+
+	double u3_proj = u3.dotProduct(altitude3) / altitude3.computeNorm();
+	if (u3_proj > 1.e-6)
+	 dt3 = altitude3.computeNorm() / u3_proj;
+
+    double dt_min = min( dt1, min(dt2, dt3) );
+
     return dt_min;
+
 
 #else
     FloatArray u;
