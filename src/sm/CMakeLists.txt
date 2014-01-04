@@ -44,6 +44,7 @@ set (sm_element
     intelline1.C
     intelline2.C
     dkt.C
+    tet21ghostsolid.C
     )
 
 set (sm_crosssection
