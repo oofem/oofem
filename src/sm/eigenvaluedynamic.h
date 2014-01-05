@@ -107,7 +107,7 @@ public:
     virtual int resolveCorrespondingEigentStepumber(void *obj);
 
 #ifdef __SLEPC_MODULE
-    virtual void initPetscContexts();
+    virtual void initParallelContexts();
 #endif
 
     /**

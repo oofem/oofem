@@ -1292,15 +1292,15 @@ SUPG :: updateSolutionVectors(FloatArray &solutionVector, FloatArray &accelerati
 }
 
 
-#ifdef __PETSC_MODULE
+#ifdef __PARALLEL_MODE
 void
-SUPG :: initPetscContexts()
+SUPG :: initParallelContexts()
 {
-    PetscContext *petscContext;
-    petscContextList->growTo(ndomains);
+    ParallelContext *parallelContext;
+    parallelContextList->growTo(ndomains);
     for ( int i = 1; i <= this->ndomains; i++ ) {
-        petscContext =  new PetscContext(this);
-        petscContextList->put(i, petscContext);
+        parallelContext =  new ParallelContext(this);
+        parallelContextList->put(i, parallelContext);
     }
 }
 #endif

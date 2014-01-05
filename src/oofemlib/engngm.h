@@ -61,8 +61,8 @@
  #include "loadbalancer.h"
 #endif
 
-#ifdef __PETSC_MODULE
- #include "petsccontext.h"
+#ifdef __PARALLEL_MODE
+ #include "parallelcontext.h"
 #endif
 
 #ifdef __OOFEG
@@ -334,9 +334,9 @@ protected:
     int unpackDofManagers(FloatArray *dest, ProcessCommunicator &processComm, bool prescribedEquations);
 #endif // __PARALLEL_MODE
 
-#ifdef __PETSC_MODULE
-    /// List where PETSc contexts are stored.
-    AList< PetscContext > *petscContextList;
+#ifdef __PARALLEL_MODE
+    /// List where parallel contexts are stored.
+    AList< ParallelContext > *parallelContextList;
 #endif
 
 public:
@@ -611,7 +611,7 @@ public:
     virtual int instanciateYourself(DataReader *dr, InputRecord *ir, const char *outFileName, const char *desc);
     /**
      * Initialization of the receiver state (opening the default output stream, empty domain creation,
-     * initialization of PETSc context, etc)
+     * initialization of parallel context, etc)
      * before Initialization form DataReader. Called at the beginning of instanciateYourself.
      * @param dataOutputFileName Name of default output stream
      * @param ndomains number of receiver domains
@@ -869,17 +869,17 @@ public:
      */
     virtual void giveElementCharacteristicVector(FloatArray &answer, int num, CharType type, ValueModeType mode, TimeStep *tStep, Domain *domain);
 
-#ifdef __PETSC_MODULE
+#ifdef __PARALLEL_MODE
     /**
-     * Returns the PETSc context corresponding to given domain (n) and unknown type
-     * Default implementation returns i-th context from petscContextList.
+     * Returns the parallel context corresponding to given domain (n) and unknown type
+     * Default implementation returns i-th context from parallelContextList.
      */
-    virtual PetscContext *givePetscContext(int n);
+    virtual ParallelContext *giveParallelContext(int n);
     /**
-     * Creates PETSc contexts. Must be implemented by derived classes since the governing equation type is required
+     * Creates parallel contexts. Must be implemented by derived classes since the governing equation type is required
      * for context creation.
      */
-    virtual void initPetscContexts();
+    virtual void initParallelContexts();
 #endif
 
     /**

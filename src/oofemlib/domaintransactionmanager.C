@@ -88,7 +88,7 @@ DofManager *DomainTransactionManager :: giveDofManager(int label)
 {
     if ( dofmanTransactions.find(label) != dofmanTransactions.end() ) {
         // if modified record exist return it
-        return static_cast< DofManager * >( dofmanTransactions [ label ] );
+        return ( DofManager * )( dofmanTransactions [ label ] );
     } else {
         // no modification recorded -> return NULL
         return NULL;
@@ -100,7 +100,7 @@ Element *DomainTransactionManager :: giveElement(int label)
 {
     if ( elementTransactions.find(label) != elementTransactions.end() ) {
         // if modified record exist return it
-        return static_cast< Element * >( elementTransactions [ label ] );
+        return ( Element * )( elementTransactions [ label ] );
     } else {
         // no modification recorded -> return NULL
         return NULL;

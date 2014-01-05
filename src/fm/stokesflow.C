@@ -42,7 +42,7 @@
 #include "sparsenonlinsystemnm.h"
 #include "meshqualityerrorestimator.h"
 #include "topologydescription.h"
-#include "petsccontext.h"
+#include "parallelcontext.h"
 #include "exportmodulemanager.h"
 #include "primaryfield.h"
 
@@ -157,6 +157,9 @@ void StokesFlow :: solveYourselfAt(TimeStep *tStep)
     this->externalForces.zero();
     this->assembleVector( this->externalForces, tStep, EID_MomentumBalance_ConservationEquation, ExternalForcesVector, VM_Total,
                           EModelDefaultEquationNumbering(), this->giveDomain(1) );
+#ifdef __PARALLEL_MODE
+    this->updateSharedDofManagers(this->externalForces, LoadExchangeTag);
+#endif
 
     if ( this->giveProblemScale() == macroScale ) {
         OOFEM_LOG_INFO("StokesFlow :: solveYourselfAt - Solving step %d, metastep %d, (neq = %d)\n", tStep->giveNumber(), tStep->giveMetatStepumber(), neq);
@@ -213,6 +216,9 @@ void StokesFlow :: updateComponent(TimeStep *tStep, NumericalCmpn cmpn, Domain *
         this->internalForces.zero();
         this->assembleVector(this->internalForces, tStep, EID_MomentumBalance_ConservationEquation, InternalForcesVector, VM_Total,
                              EModelDefaultEquationNumbering(), this->giveDomain(1), & this->eNorm);
+#ifdef __PARALLEL_MODE
+        this->updateSharedDofManagers(this->internalForces, InternalForcesExchangeTag);
+#endif
         return;
     } else if ( cmpn == NonLinearLhs ) {
         this->stiffnessMatrix->zero();
@@ -257,14 +263,14 @@ double StokesFlow :: giveReynoldsNumber()
 }
 
 
-#ifdef __PETSC_MODULE
-void StokesFlow :: initPetscContexts()
+#ifdef __PARALLEL_MODE
+void StokesFlow :: initParallelContexts()
 {
-    PetscContext *petscContext;
-    petscContextList->growTo(ndomains);
+    ParallelContext *parallelContext;
+    parallelContextList->growTo(ndomains);
     for ( int i = 1; i <= this->ndomains; i++ ) {
-        petscContext =  new PetscContext(this);
-        petscContextList->put(i, petscContext);
+        parallelContext =  new ParallelContext(this);
+        parallelContextList->put(i, parallelContext);
     }
 }
 #endif

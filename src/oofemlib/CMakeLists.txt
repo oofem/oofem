@@ -207,7 +207,7 @@ set (core_parallel
     combuff.C
     domaintransactionmanager.C
     parallelordering.C
-    petsccontext.C
+    parallelcontext.C
     dyncombuff.C
     loadbalancer.C
     parmetisloadbalancer.C
@@ -272,12 +272,15 @@ set (core
     ${core_element}
     ${core_fei}
     ${core_xfem}
-    ${core_parallel}
     ${core_bc}
     ${core_iga}
     ${core_mesher}
     ${core_mapping}
     )
+
+if (USE_PARALLEL)
+    list (APPEND core ${core_parallel})
+endif ()
 
 add_library (core
     ${LIB_TYPE}
