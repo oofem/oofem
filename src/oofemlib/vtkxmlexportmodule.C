@@ -1724,8 +1724,13 @@ VTKXMLExportModule :: writeVTKCollection()
     time(& now);
     current = localtime(& now);
     char buff [ 1024 ];
-
-    std :: string fname = this->emodel->giveOutputBaseFileName() + ".pvd";
+    std :: string fname;
+    
+    if (tstep_substeps_out_flag){
+        fname = this->emodel->giveOutputBaseFileName() + ".gp.pvd";
+    } else {
+        fname = this->emodel->giveOutputBaseFileName() + ".pvd";
+    }
 
     std :: ofstream outfile( fname.c_str() );
 
