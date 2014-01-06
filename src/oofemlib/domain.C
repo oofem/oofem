@@ -66,7 +66,7 @@
 #include "fracturemanager.h"
 #include "dynamicinputrecord.h"
 #include "dynamicdatareader.h"
-#include "oofemtxtdatareader.h"
+#include "datareader.h"
 #include "initmodulemanager.h"
 #include "exportmodulemanager.h"
 #include "enrichmentitem.h"

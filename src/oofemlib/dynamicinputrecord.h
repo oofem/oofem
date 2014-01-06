@@ -85,6 +85,8 @@ public:
     virtual InputRecord *GiveCopy() { return new DynamicInputRecord(* this); }
     virtual void finish(bool wrn = true);
 
+    virtual std :: string giveRecordAsString() const;
+
     virtual IRResultType giveRecordKeywordField(std :: string &answer, int &value);
     virtual IRResultType giveRecordKeywordField(std :: string &answer);
     virtual IRResultType giveField(int &answer, InputFieldType id);
@@ -122,9 +124,6 @@ public:
 
     virtual void report_error(const char *_class, const char *proc, InputFieldType id,
                               IRResultType result, const char *file, int line);
-
-    /// Returns record as string.
-    std :: string giveRecordAsString() const;
 };
 } // end namespace oofem
 #endif // dynamicinputrecord_h
