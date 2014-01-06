@@ -44,6 +44,9 @@
 #include <map>
 
 namespace oofem {
+
+class FunctionArgument;
+
 /**
  * Implementation of Scalar function. The scalar function can be defined as
  * (i)   simple double (constant) value,
@@ -109,7 +112,7 @@ public:
      * @param valDict map defining input parameters in the form  (name, value) pairs
      * @param d domain managing external functions
      */
-    double eval(std :: map< std :: string, double >valDict, Domain *d) const;
+    double eval(std :: map< std :: string, FunctionArgument >valDict, Domain *d) const;
 
     /**
      * Evaluates the receiver (convenience function that directly takes just the time as a parameter).
@@ -126,11 +129,6 @@ public:
      * @param d domain managing external functions
      */
     //double eval(double time, const FloatArray &coords, Domain *d) const;
-
-    /**
-     * Cleans up before changing receiver
-     */
-    void clear();
 
     friend std :: ostream &operator<<(std :: ostream &out, const ScalarFunction &s);
 };

@@ -82,7 +82,7 @@ public:
     virtual IRResultType initializeFrom(InputRecord *ir);
     virtual void giveInputRecord(DynamicInputRecord &ir);
 
-    virtual void evaluate(FloatArray &answer, std :: map< std :: string, double > &valDict);
+    virtual void evaluate(FloatArray &answer, std :: map< std :: string, FunctionArgument > &valDict);
     virtual double evaluateAtTime(double t);
     virtual double evaluateVelocityAtTime(double t);
     virtual double evaluateAccelerationAtTime(double t);

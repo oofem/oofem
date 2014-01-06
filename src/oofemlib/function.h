@@ -47,6 +47,38 @@
 //@}
 
 namespace oofem {
+
+class FloatArray;
+class IntArray;
+
+/**
+ * Wrapper for values of varying types.
+ * Used in lists of function arguments.
+ */
+class OOFEM_EXPORT FunctionArgument
+{
+public:
+    enum FunctionArgumentType {
+        FAT_double,
+        FAT_FloatArray,
+        FAT_int,
+        FAT_IntArray,
+    };
+
+    /// Determines which of the types the instance points towards.
+    FunctionArgumentType type;
+
+    double val0;
+    const FloatArray &val1;
+    int val2;
+    const IntArray &val3;
+
+    FunctionArgument(double val): type(FAT_double), val0(val), val1(0), val2(0), val3(0) { }
+    FunctionArgument(const FloatArray &val): type(FAT_FloatArray),  val0(0), val1(val), val2(0), val3(0) { }
+    FunctionArgument(int val): type(FAT_int),  val0(0), val1(0), val2(val), val3(0) { }
+    FunctionArgument(const IntArray &val): type(FAT_IntArray),  val0(0), val1(0), val2(0), val3(val) { }
+};
+
 /**
  * Abstract base class representing a function with vector input and output.
  * It is useful in many scenarios, in particular describing the load/b.c. amplitude in time.
@@ -90,7 +122,7 @@ public:
      * @param valDict Dictionary with values.
      * @param answer Function value.
      */
-    virtual void evaluate(FloatArray &answer, std :: map< std :: string, double > &valDict);
+    virtual void evaluate(FloatArray &answer, std :: map< std :: string, FunctionArgument > &valDict);
 
     /**
      * Returns the value of the function at given time.

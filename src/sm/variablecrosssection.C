@@ -39,6 +39,8 @@
 #include "classfactory.h"
 #include "dynamicinputrecord.h"
 #include "structuralms.h"
+#include "scalarfunction.h"
+#include "function.h"
 
 #include <string>
 #include <sstream>
@@ -185,14 +187,12 @@ VariableCrossSection :: give(CrossSectionProperty aProperty, const FloatArray* c
                 c = *coords;
             }
         }
-        std::map<std::string, double> m;
-        // construct parser parameter map
-        int nsd = c.giveSize();
-        if (nsd > 0) m["x"]=c(0);
-        if (nsd > 1) m["y"]=c(1);
-        if (nsd > 2) m["z"]=c(2);
+        std::map< std::string, FunctionArgument > m;
+        m.insert(std::make_pair("x", FunctionArgument(c)));
         // evaluate the expression
-        value = expr->eval (m, this->giveDomain());
+        value = expr->eval(m, this->giveDomain());
+        ///@todo C++11 is really convenient;
+        //value = expr->eval({{"x", c}}, this->giveDomain());
     }
 
     return value;
