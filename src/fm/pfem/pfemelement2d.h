@@ -185,7 +185,7 @@ protected:
     // NOT IN USE - UP TO HERE
 
     void computePrescribedRhsVector(FloatArray &answer, TimeStep *tStep, ValueModeType mode);
-	void computePrescribedPressureRhsVector(FloatArray &answer, TimeStep *tStep, ValueModeType mode);
+    void computePrescribedPressureRhsVector(FloatArray &answer, TimeStep *tStep, ValueModeType mode);
 
     /// Calculates the shape function matrix on an edge
     void computeEdgeNMatrixAt(FloatMatrix &answer, int iedge, GaussPoint *gp);

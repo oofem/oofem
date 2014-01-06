@@ -117,12 +117,12 @@ public:
         , avLhs(NULL)
         , pLhs(NULL)
         , vLhs(NULL)
-	, PressureField(this, 1, FT_Pressure, EID_ConservationEquation, 1)
-	, VelocityField(this, 1, FT_Velocity, EID_MomentumBalance, 1)
-	, pns()
+        , PressureField(this, 1, FT_Pressure, EID_ConservationEquation, 1)
+        , VelocityField(this, 1, FT_Velocity, EID_MomentumBalance, 1)
+        , pns()
         , vns(false)
         , prescribedVns(true)
-        
+
     {
         initFlag = 1;
         lhs = NULL;
@@ -196,7 +196,7 @@ public:
     virtual bool giveBCEnforcementFlag(PrimaryField &field) { return true; }
 
 
-    virtual int giveUnknownDictHashIndx(ValueModeType mode, TimeStep *stepN);// { return ( int ) mode; }
+    virtual int giveUnknownDictHashIndx(ValueModeType mode, TimeStep *stepN); // { return ( int ) mode; }
     virtual void updateDofUnknownsDictionary(DofManager *inode, TimeStep *tStep);
 
     /// Writes pressures into the dof unknown dictionaries
