@@ -313,7 +313,7 @@ PFEM :: giveNextStep()
 
     //COdt = max(dt*0.8, minDeltaT);
     ndt = min (ndt, deltaT);
-	ndt = max (ndt, minDeltaT);
+	//ndt = max (ndt, minDeltaT);
 
 
     if ( currentStep != NULL ) {
