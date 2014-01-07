@@ -444,6 +444,13 @@ public:
     void beSymVectorFormOfStrain(const FloatMatrix &aMatrix);
 
     /**
+     * Swaps the fourth and sixth index in the array. This is to reorder the indices
+     * from OOFEM's order to Abaqus' and vice versa.
+     */
+    void changeComponentOrder();
+
+
+    /**
      * Reciever will be set to a given column in a matrix
      */
     void beColumnOf(const FloatMatrix &mat, int col);

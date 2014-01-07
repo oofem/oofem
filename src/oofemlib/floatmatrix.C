@@ -1685,6 +1685,33 @@ void FloatMatrix :: beMatrixForm(const FloatArray &aArray)
     }
 }
 
+void FloatMatrix ::changeComponentOrder()
+{
+	// Changes index order between abaqus <-> OOFEM
+#  ifdef DEBUG
+	if ( nRows != 6 || nColumns != 6 ) {
+		OOFEM_ERROR("FloatArray :: :changeComponentOrder : matrix dimension is not 6x6");
+	}
+#  endif
+
+	// This could probably be done more beautifully + efficiently.
+
+	std::swap(this->at(4,1), this->at(6,1));
+
+	std::swap(this->at(4,2), this->at(6,2));
+
+	std::swap(this->at(4,3), this->at(6,3));
+
+	std::swap(this->at(1,4), this->at(1,6));
+	std::swap(this->at(2,4), this->at(2,6));
+	std::swap(this->at(3,4), this->at(3,6));
+	std::swap(this->at(4,4), this->at(6,6));
+	std::swap(this->at(5,4), this->at(5,6));
+	std::swap(this->at(6,4), this->at(4,6));
+
+	std::swap(this->at(4,5), this->at(6,5));
+}
+
 
 
 double FloatMatrix :: computeReciprocalCondition(char p) const

@@ -1270,6 +1270,17 @@ void FloatArray :: beSymVectorForm(const FloatMatrix &aMatrix)
     this->at(6) = 0.5 * ( aMatrix.at(1, 2) + aMatrix.at(2, 1) );
 }
 
+void FloatArray :: changeComponentOrder()
+{
+    // Swaps the fourth and sixth index.
+#  ifdef DEBUG
+    if (  this->giveSize() != 6 ) {
+    OOFEM_ERROR("FloatArray :: changeComponentOrder : vector length is not 6");
+    }
+#  endif
+
+    std::swap(this->at(4), this->at(6));
+}
 
 
 //void FloatArray :: beColumnOf(const FloatMatrix &mat, int col)

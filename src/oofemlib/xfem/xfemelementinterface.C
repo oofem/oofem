@@ -125,8 +125,10 @@ void XfemElementInterface :: XfemElementInterface_createEnrBmatrixAt(FloatMatrix
 
 
     // XFEM part of B-matrix
-    XfemManager *xMan = iEl.giveDomain()->giveXfemManager();
-
+    XfemManager *xMan = NULL;
+	if( iEl.giveDomain()->hasXfemManager() ) {
+		xMan = iEl.giveDomain()->giveXfemManager();
+	}
 
     std :: vector< FloatMatrix >Bd(nDofMan);  // One Bd per node
 
@@ -137,11 +139,14 @@ void XfemElementInterface :: XfemElementInterface_createEnrBmatrixAt(FloatMatrix
 
         // Compute the total number of enrichments for node j
         int numEnrNode = 0;
-        for ( int i = 1; i <= xMan->giveNumberOfEnrichmentItems(); i++ ) {
-            EnrichmentItem *ei = xMan->giveEnrichmentItem(i);
-            if ( ei->isDofManEnriched(* dMan) ) {
-                numEnrNode += ei->giveNumDofManEnrichments(* dMan);
-            }
+
+        if( xMan != NULL ) {
+			for ( int i = 1; i <= xMan->giveNumberOfEnrichmentItems(); i++ ) {
+				EnrichmentItem *ei = xMan->giveEnrichmentItem(i);
+				if ( ei->isDofManEnriched(* dMan) ) {
+					numEnrNode += ei->giveNumDofManEnrichments(* dMan);
+				}
+			}
         }
 
         if ( numEnrNode > 0 ) {
@@ -902,24 +907,26 @@ void XfemElementInterface :: putPointsInCorrectPartition(std :: vector< std :: v
 
 void XfemElementInterface :: XfemElementInterface_computeConstitutiveMatrixAt(FloatMatrix &answer, MatResponseMode rMode, GaussPoint *gp, TimeStep *tStep)
 {
-    XfemManager *xMan = element->giveDomain()->giveXfemManager();
-    int nEI = xMan->giveNumberOfEnrichmentItems();
-    CrossSection *cs = NULL;
+    if( element->giveDomain()->hasXfemManager() ) {
 
-    for ( int i = 1; i <= nEI; i++ ) {
-        EnrichmentItem &ei = * ( xMan->giveEnrichmentItem(i) );
-        if ( ei.isMaterialModified(* gp, * element, cs) ) {
-            StructuralCrossSection *structCS = dynamic_cast< StructuralCrossSection * >( cs );
+		XfemManager *xMan = element->giveDomain()->giveXfemManager();
+		int nEI = xMan->giveNumberOfEnrichmentItems();
+		CrossSection *cs = NULL;
 
-            if ( structCS != NULL ) {
-                structCS->giveCharMaterialStiffnessMatrix(answer, rMode, gp, tStep);
-                return;
-            } else {
-                OOFEM_ERROR("XfemElementInterface :: XfemElementInterface_computeConstitutiveMatrixAt: failed to fetch StructuralMaterial\n");
-            }
-        }
+		for ( int i = 1; i <= nEI; i++ ) {
+			EnrichmentItem &ei = * ( xMan->giveEnrichmentItem(i) );
+			if ( ei.isMaterialModified(* gp, * element, cs) ) {
+				StructuralCrossSection *structCS = dynamic_cast< StructuralCrossSection * >( cs );
+
+				if ( structCS != NULL ) {
+					structCS->giveCharMaterialStiffnessMatrix(answer, rMode, gp, tStep);
+					return;
+				} else {
+					OOFEM_ERROR("XfemElementInterface :: XfemElementInterface_computeConstitutiveMatrixAt: failed to fetch StructuralMaterial\n");
+				}
+			}
+		}
     }
-
 
     // If no enrichment modifies the material,
     // compute stiffness based on the bulk material.
@@ -936,24 +943,26 @@ void XfemElementInterface :: XfemElementInterface_computeStressVector(FloatArray
 
     cs->giveRealStresses(answer, gp, strain, tStep);
 
+    if( element->giveDomain()->hasXfemManager() ) {
 
-    XfemManager *xMan = element->giveDomain()->giveXfemManager();
+		XfemManager *xMan = element->giveDomain()->giveXfemManager();
 
-    int nEI = xMan->giveNumberOfEnrichmentItems();
+		int nEI = xMan->giveNumberOfEnrichmentItems();
 
-    CrossSection *csInclusion = NULL;
-    for ( int i = 1; i <= nEI; i++ ) {
-        EnrichmentItem &ei = * ( xMan->giveEnrichmentItem(i) );
-        if ( ei.isMaterialModified(* gp, * element, csInclusion) ) {
-            StructuralCrossSection *structCSInclusion = dynamic_cast< StructuralCrossSection * >( csInclusion );
+		CrossSection *csInclusion = NULL;
+		for ( int i = 1; i <= nEI; i++ ) {
+			EnrichmentItem &ei = * ( xMan->giveEnrichmentItem(i) );
+			if ( ei.isMaterialModified(* gp, * element, csInclusion) ) {
+				StructuralCrossSection *structCSInclusion = dynamic_cast< StructuralCrossSection * >( csInclusion );
 
-            if ( structCSInclusion != NULL ) {
-                structCSInclusion->giveRealStresses(answer, gp, strain, tStep);
-                return;
-            } else {
-                OOFEM_ERROR("PlaneStress2dXfem :: computeStressVector: failed to fetch StructuralCrossSection\n");
-            }
-        }
+				if ( structCSInclusion != NULL ) {
+					structCSInclusion->giveRealStresses(answer, gp, strain, tStep);
+					return;
+				} else {
+					OOFEM_ERROR("PlaneStress2dXfem :: computeStressVector: failed to fetch StructuralCrossSection\n");
+				}
+			}
+		}
     }
 }
 

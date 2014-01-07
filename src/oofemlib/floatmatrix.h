@@ -519,6 +519,13 @@ public:
     void beMatrixFormOfStress(const FloatArray &aArray);
     void beMatrixForm(const FloatArray &aArray);
 
+    /**
+     * Swaps the indices in the 6x6 matrix such that it converts between OOFEM's
+     * and Abaqus' way of writing matrices. Currently used to convert the 6x6 Jacobian
+     * from Abaqus UMAT to OOFEM.
+     */
+    void changeComponentOrder();
+
     // Overloaded methods:
     contextIOResultType storeYourself(DataStream *stream, ContextMode mode);
     contextIOResultType restoreYourself(DataStream *stream, ContextMode mode);
