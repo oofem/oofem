@@ -237,6 +237,7 @@ set (core_bc
 
 if (USE_PYTHON)
     list (APPEND core_bc userdefdirichletbc.C)
+    list (APPEND core_unsorted pythonexpression.C)
 endif ()
 
 set (core_mapping

@@ -107,7 +107,7 @@ Function :: evaluateAtTime(double t)
     return v.at(1);
 }
 
-///@todo Move operator from C++11 would be nice here.
+
 void
 Function :: evaluate(FloatArray &answer, std::map< std::string, FunctionArgument > &valDict)
 {
