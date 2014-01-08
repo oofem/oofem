@@ -83,6 +83,21 @@ XfemElementInterface :: ~XfemElementInterface()
 
 void XfemElementInterface :: XfemElementInterface_createEnrBmatrixAt(FloatMatrix &oAnswer, GaussPoint &iGP, Element &iEl)
 {
+	ComputeBOrBHMatrix(oAnswer, iGP, iEl, false);
+}
+
+void XfemElementInterface :: XfemElementInterface_createEnrBHmatrixAt(FloatMatrix &oAnswer, GaussPoint &iGP, Element &iEl)
+{
+	ComputeBOrBHMatrix(oAnswer, iGP, iEl, true);
+}
+
+void XfemElementInterface :: ComputeBOrBHMatrix(FloatMatrix &oAnswer, GaussPoint &iGP, Element &iEl, bool iComputeBH)
+{
+	/*
+	 * Computes the B or BH matrix.
+	 * iComputeBH = true implies that BH is computed,
+	 * while B is computed if iComputeBH = false.
+	 */
     const int dim = 2;
     const int nDofMan = iEl.giveNumberOfDofManagers();
 
@@ -90,6 +105,10 @@ void XfemElementInterface :: XfemElementInterface_createEnrBmatrixAt(FloatMatrix
     if ( mUsePlaneStrain ) {
         shearInd = 4;
         numRows = 4;
+    }
+
+    if(iComputeBH){
+    	numRows++;
     }
 
     FloatMatrix dNdx;
@@ -120,7 +139,13 @@ void XfemElementInterface :: XfemElementInterface_createEnrBmatrixAt(FloatMatrix
         BNode.at(1, 1)                  = dNdx.at(i, 1);
         BNode.at(2, 2)                  = dNdx.at(i, 2);
         BNode.at(shearInd, 1)   = dNdx.at(i, 2);
-        BNode.at(shearInd, 2)   = dNdx.at(i, 1);
+
+        if(iComputeBH){
+        	BNode.at(shearInd+1	, 2)   = dNdx.at(i, 1);
+        }
+        else{
+            BNode.at(shearInd	, 2)   = dNdx.at(i, 1);
+        }
     }
 
 
@@ -202,7 +227,13 @@ void XfemElementInterface :: XfemElementInterface_createEnrBmatrixAt(FloatMatrix
                         BdNode.at(1, nodeEnrCounter + 1)                  = grad_ef_N.at(1);
                         BdNode.at(2, nodeEnrCounter + 2)                  = grad_ef_N.at(2);
                         BdNode.at(shearInd, nodeEnrCounter + 1)   = grad_ef_N.at(2);
-                        BdNode.at(shearInd, nodeEnrCounter + 2)   = grad_ef_N.at(1);
+
+                        if(iComputeBH){
+                        	BdNode.at(shearInd+1	, nodeEnrCounter + 2)   = grad_ef_N.at(1);
+                        }
+                        else {
+                        	BdNode.at(shearInd		, nodeEnrCounter + 2)   = grad_ef_N.at(1);
+                        }
 
                         nodeEnrCounter += 2;
                         counter += 2;

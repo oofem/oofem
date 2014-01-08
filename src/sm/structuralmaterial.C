@@ -2024,9 +2024,15 @@ StructuralMaterial :: giveReducedSymVectorForm(FloatArray &answer, const FloatAr
 {
     IntArray indx;
     StructuralMaterial :: giveVoigtSymVectorMask(indx, matMode);
-    answer.resize( indx.giveSize() );
-    for ( int i = 1; i <= indx.giveSize(); i++ ) {
-        answer.at(i) = vec.at( indx.at(i) );
+
+    if(indx.giveSize() == vec.giveSize()) {
+    	answer = vec;
+    }
+    else {
+		answer.resize( indx.giveSize() );
+		for ( int i = 1; i <= indx.giveSize(); i++ ) {
+			answer.at(i) = vec.at( indx.at(i) );
+		}
     }
 }
 
