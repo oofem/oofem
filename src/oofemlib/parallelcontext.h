@@ -32,18 +32,12 @@
  *  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  */
 
-#ifndef petscscontext_h
-#define petscscontext_h
+#ifndef parallelcontext_h
+#define parallelcontext_h
 
-#ifdef __PETSC_MODULE
-
- #ifndef __MAKE_DEPEND
-  #include <petscvec.h>
- #endif
-
- #include "oofemcfg.h"
- #include "parallelordering.h"
- #include "equationid.h"
+#include "oofemcfg.h"
+#include "parallelordering.h"
+#include "equationid.h"
 
 namespace oofem {
 class EngngModel;
@@ -51,26 +45,18 @@ class FloatArray;
 class DofManager;
 
 /**
- * This class provides an communication context to PETSc library.
+ * This class provides an communication context for distributed memory parallelism.
  * Tasks:
  * - Keeping track of the parallel communicator.
- * - Creating suitable parallel objects.
  * - Determining owner for shared dof managers.
  */
-class OOFEM_EXPORT PetscContext
+class OOFEM_EXPORT ParallelContext
 {
 protected:
     int di;
     EngngModel *emodel;
-    VecScatter n2gvecscat;
-    VecScatter l2gvecscat;
-    /// True if vectors are assumed to be natural distribution.
-    bool naturalVectors;
-
-#ifdef __PARALLEL_MODE
     Natural2GlobalOrdering n2g;
     Natural2LocalOrdering n2l;
- #endif
 
 public:
     /**
@@ -79,8 +65,8 @@ public:
      * @param naturalVectors Should be true if shared dofs only contain the local contributions.
      * Some engineering models manually scatter local vectors to their global value, in which case this would be false.
      */
-    PetscContext(EngngModel *e, bool naturalVectors = true);
-    ~PetscContext();
+    ParallelContext(EngngModel *e);
+    ~ParallelContext();
 
     /**
      * Initiates the mapping for given domain.
@@ -92,38 +78,9 @@ public:
     int giveNumberOfGlobalEqs();
     int giveNumberOfNaturalEqs();
 
-    /// Scatters global vector to natural one.
-    int scatterG2N(Vec src, Vec dest, InsertMode mode);
-    /// Scatters global vector to natural one.
-    int scatterG2N(Vec src, FloatArray *dest, InsertMode mode);
-
-    /// Scatters vectors (natural or local) to a global one. Uses the naturalVectors variable to determine.
-    int scatter2G(const FloatArray *src, Vec dest, InsertMode mode);
-
-    /// Scatters and gathers vector in natural ordering (sequential) to global (parallel) one.
-    int scatterN2G(Vec src, Vec dest, InsertMode mode);
-    /// Scatters and gathers vector in natural ordering (sequential) to global (parallel) one.
-    int scatterN2G(const FloatArray *src, Vec dest, InsertMode mode);
-
-    /**
-     * Scatters and gathers vector in natural ordering to global (parallel) one,
-     * but only local entries are processed.
-     */
-    int scatterL2G(const FloatArray *src, Vec dest, InsertMode mode);
-
     ///@name Convenience functions for working with distributed arrays.
     //@{
     bool isLocal(DofManager *dman);
-    /**
-     * Norm for a distributed array.
-     * Common for convergence criterion and such.
-     */
-    double norm(const FloatArray &src);
-    /**
-     * Norm for a naturally distributed array.
-     * Common for convergence criterion and such.
-     */
-    double naturalNorm(const FloatArray &src);
     /**
      * Norm for a locally distributed array.
      * Common for convergence criterion and such.
@@ -141,12 +98,6 @@ public:
      */
     double localDotProduct(const FloatArray &a, const FloatArray &b);
     /**
-     * Dot product for a naturally distributed array.
-     * Common for convergence criterion and such.
-     */
-    double naturalDotProduct(const FloatArray &a, const FloatArray &b);
-
-    /**
      * Accumulates the global value.
      */
     double accumulate(double local);
@@ -156,13 +107,11 @@ public:
     void accumulate(const FloatArray &local, FloatArray &global);
     //@}
 
-    void createVecGlobal(Vec *answer);
-
  #ifdef __PARALLEL_MODE
     Natural2GlobalOrdering *giveN2Gmap() { return & n2g; }
     Natural2LocalOrdering *giveN2Lmap() { return & n2l; }
  #endif
 };
 } // end namespace oofem
-#endif
-#endif // petscscontext_h
+
+#endif // parallelcontext_h

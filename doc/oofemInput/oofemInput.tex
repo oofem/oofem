@@ -353,8 +353,10 @@ problem. The export modules are specified after initialization modules. Export m
 allow to export computed data into external software for
 postprocessing. The available export modules are described in section
 \ref{ExportModulesSec}.
-\item \param{nxfemman} - number of xfem managers.
-Xfem managers wrap eXtended Finite Element (xfem) data: they  manage the list of enrichment items and associated enrichment functions, and their geometry representation. The number of xfem managers required is problem dependent, typically a single xfem manager is used. The syntax of xfem manager record and related records is described in section \ref{_XFEMManagerRecords}.
+\item \param{nxfemman} - 1 implies that an XFEM manager is created, 0 implies
+that no XFEM manager is created. The XFEM manager stores a list of enrichment
+items. The syntax of the XFEM manager record and related records is described in
+section \ref{_XFEMManagerRecords}.
 \item \param{eetype} - optional error estimator type used for the problem.
 Used for adaptive analysis, but can also be used to compute and write error estimates to the output files. See adaptive engineering models for details.
 \end{itemize}
@@ -563,7 +565,7 @@ following format:
   \recentry{}{\PoptFieldnotype{nonlocalext}}
   \recentry{}{\PoptFieldnotype{loadbalancing}}
 \end{record}
-This record is immediately followed by metastep records with the format described bellow.
+This record is immediately followed by metastep records with the format described below.
 The analysis parameters have following meaning
 \begin{itemize}
 \item \param{nmsteps} - determines the number of
@@ -643,13 +645,13 @@ fixed, however, the new reference loading vector will be assembled for
 the new metastep.
 \end{itemize}
 
-The direct solver corresponds to \param{controlmode}=1 and the Newton-Raphson solver is used.
+The direct control corresponds to \param{controlmode}=1 and the Newton-Raphson solver is used.
 Under the direct control, the total load
 vector assembled for specific solution step represents the load level,
 where equilibrium is searched. The implementation supports also
 displacement control -  it is possible to prescribe one or more
 displacements by applying ``quasi prescribed'' boundary
-condition(s)\footnote{Hovewer, the problem does not supports the
+condition(s)\footnote{Hovewer, the problem does not support the
 changes of static system. But it is possible to apply direct
 displacement control without requiring BC applied (see nrsolver
 documentation). Therefore it is possible to combine
@@ -668,6 +670,7 @@ load-control are:\\
   \recentry{}{\optField{lsearchmaxeta}{rn} \optField{lsearchtol}{rn}}
   \recentry{}{\optional{\field{nccdg}{in} \field{ccdg1}{ia} ... \field{ccdgN}{ia}  }}
   \recentry{}{\field{rtolv}{rn} \optField{rtolf}{rn} \optField{rtold}{tn}}
+  \recentry{}{\optField{initialGuess}{rn}}
 \end{record}
 where
 \begin{itemize}
@@ -706,6 +709,7 @@ iterative change vector and for residual unbalanced force vector). Optionally, t
 independent relative convergence crteria for unbalanced forces and displacement
 iterative change. If the default convergence criteria is used,
 the parameters \param{rtolv},\param{rtolf}, and \param{rtold} are real values. If the convergence criteria DOF groups are used (see bellow the description of \param{nccdg} parameter) then they should be specified as real valued arrays of \param{nccdg} size, and individual values define relative convergence criteria for each individual dof group.
+\item \param{initialGuess} is an optional parameter with default vaue 0, for which the first iteration of each step starts from the previously converged state and applies the prescribed displacement increments. This can lead to very high strains in elements connected to the nodes with changing prescribed displacements and the state can be far from equilibrium, which may results into slow convergence and strain localization near the boundary. If \param{initialGuess} is set to 1, the contribution of the prescribed displacement increments to the internal nodal forces is linearized and moved to the right-hand side, which often results into an initial solution closer to equilibrium. For instance, if the step is actually elastic, equilibrium is fully restored after the second iteration, while the default method may require more iterations.  
 \end{itemize}
 
 The indirect solver corresponds to \param{controlmode}=0 and the CALM
@@ -2145,7 +2149,8 @@ The numbering should start from one and should end at n, where n is the number o
 
 The crossSectType keyword can be one from following possibilities
 \begin{itemize}
-\item
+\item 
+Integral cross section with constant properties\\
 \begin{record}[0.9\textwidth]
   \recentry{\entKeywordInst{SimpleCS}}{\optField{thick}{rn} \optField{width}{rn} \optField{area}{rn}}
   \recentry{}{\optField{iy}{rn} \optField{iz}{rn} \optField{ik}{rn}}
@@ -2155,13 +2160,25 @@ Represents integral type of cross section model. In current
 implementation, such cross section is described using cross section
 thick (\param{thickVal}) and width (\param{widthVal}). For some
 problems (for example 3d), the corresponding volume and cross section dimensions are
-determined using element geometry, and then you can omit \param{thickVal} and \param{widthVal}
-parameters. Parameter \param{area} allows to set cross section area, parameters \param{iz}, \param{iz}, and \param{ik} represent 
+determined using element geometry, and then you can omit some (or all) parameters (refer to documentation of individual elements for required cross section properties). Parameter \param{area} allows to set cross section area, parameters \param{iz}, \param{iz}, and \param{ik} represent 
 inertia moment along y and z axis and torsion inertia moment. Parameter \param{beamshearcoeff} allows to set shear correction factor, or equivalent 
 shear areas (\param{shearareay} and \param{shearareaz} parameters) can be provided. 
 These cross section properties are assumed to be defined in local coordinate system of element.\\
 
 \item
+Integral cross section with variable properties\\
+\begin{record}[0.9\textwidth]
+  \recentry{\entKeywordInst{VariableCS}}{\optField{thick}{expr} \optField{width}{expr} \optField{area}{expr}}
+  \recentry{}{\optField{iy}{expr} \optField{iz}{expr} \optField{ik}{expr}}
+  \recentry{}{\optField{shearareay}{expr} \optField{shearareaz}{expr} }
+\end{record}
+Represents integral type of cross section model, where individual cross section parameters can be expressed as an arbitrary function of global coordinates x,y,z. Similar to SimpleCS, for some problems (for example 3d), the corresponding volume and cross section dimensions are
+determined using element geometry, then you can omit many (or some) parameters (refer to documentation of individual elements for required cross section properties). 
+Parameter \param{area} allows to set cross section area, parameters \param{iz}, \param{iz}, and \param{ik} represent 
+inertia moment along y and z axis and torsion inertia moment. Parameters (\param{shearareay} and \param{shearareaz} determine shear area, which is required by beam and plate elements. All cross section properties are assumed to be defined in local coordinate system of element.\\
+
+\item
+Layered cross section \\
 \begin{record}[0.9\textwidth]
   \recentry{\entKeywordInst{LayeredCS}}{\field{nLayers}{in}}
   \recentry{}{\field{LayerMaterials}{ia}}
@@ -2183,6 +2200,7 @@ momentum forces are then computed with regard to it's position).
 Elements using this cross section model must implement layered cross
 section extension. For information see element library manual.
 \item
+Fibered cross section\\
 \begin{record}[0.9\textwidth]
   \recentry{\entKeywordInst{FiberedCS}}{\field{nfibers}{in} \field{fibermaterials}{ia}}
   \recentry{}{\field{thicks}{ra} \field{widths}{ra} \field{thick}{rn} \field{width}{rn}}
@@ -2643,34 +2661,69 @@ Very general, but relatively slow.
 
 \subsection{Xfem manager record and associated records}
 \label{_XFEMManagerRecords}
-This record creates corresponding xfem manager and specifies the number of its components, in terms of number of enrichment functions, enrichment items, and geometry items. The global shape functions are represented by  individual enrichment functions. The enrichment items are abstractions of entities, which are included in the FE model using one or more global functions. Such entity may represent crack, material interface, slipping interface, etc. The particular records will follow immediately in input file. The general format is:\\
+This record specifies the number of enrichment items and simulation options
+common for all enrichment items. Functions used for enrichment (e.g. Heaviside,
+abs or branch functions) are not specified here, they are specified for each
+enrichment item separately. The same holds for the geometrical representation of
+each enrichment item (e.g. a polygon line or a circle). Currently, OOFEM
+supports XFEM simulations of cracks and material interfaces in 2D. The input
+format for the XFEM manager is:\\
 \begin{record}
-  \recentry{\entKeywordInst{XfemManager}}{\field{numberofenrichmentfunctions}{in}}
-  \recentry{}{\field{numberofenrichmentitems}{in}}
-  \recentry{}{\field{numberofgeometryitems}{in}}
+  \recentry{\entKeywordInst{XfemManager}}{\field{numberofenrichmentitems}{in}}
+  \recentry{}{\field{numberofgppertri}{in}}
+  \recentry{}{\field{debugvtk}{in}}
+  \recentry{}{\field{vtkexport}{in}}
+  \recentry{}{\field{exportfields}{in}}
 \end{record}
-where \param{numberofenrichmentfunctions} represents number of enrichment functions and their associated records, \param{numberofenrichmentitems}
-represents number of enrichment items and corresponding records, and \param{number\-of\-geometry\-items} represents number of geometry items, that are used to define the geometry of individual enrichment items.
+where \param{numberofenrichmentitems} represents number of enrichment items,
+\param{numberofgppertri} denotes the number of Gauss points in each subtriangle
+of a cut element (default 12) and \param{debugvtk} controls if additional debug
+vtk files should be written (1 activates the option, 0 is default).
 
-The enrichment function records describe individual enrichment functions. The general format is following:\\
+The specification of an enrichment item may consist of several lines, see e.g.
+the test \textit{sm/xFemCrackValBranch.in}. First, the enrichment item type is
+specified together with some optional parameters according to\\
+\noindent
+\begin{record}
+  \recentry{\entKeyword{EntType}}{\componentNum}
+  \recentry{}{\field{enrichmentfront}{in}}
+  \recentry{}{\field{propagationlaw}{in}}
+\end{record}
+where \param{enrichmentfront} specifies an enrichment front (we may for example
+employ branch functions at a crack tip and Heaviside enrichment along the rest
+of the crack, hence the ``front'' of the enrichment is treated separately) and
+\param{propagationlaw} specifies a rule for crack propagation (this feature is
+still highly experimental though). Specification of an \param{enrichmentfront}
+and a \param{propagationlaw} is optional.
+
+The next line specifies the enrichment function to be used:\\
 \noindent
 \begin{record}
   \recentry{\entKeyword{EntType}}{\componentNum}
 \end{record}
 
-The geometry item records describe individual geometries of enrichment items. The general format is following:\\
+This is followed by a line specifying the geometric description (e.g. a polygon
+line or a circle) according to\\
 \noindent
 \begin{record}
-  \recentry{\entKeyword{EntType}}{\componentNum}
+  \recentry{\entKeyword{EntType}}{\componentNum \ extra fields}
+\end{record}
+where the number and type of extra fields to specify will vary depending on the
+geometry chosen, e.g. center and radius for a circle or a number of points for a
+polygon line.
+
+If an enrichment front was specified previously, the type and properties of the
+enrichment front are specified on the next line according to\\
+\noindent
+\begin{record}
+  \recentry{\entKeyword{EntType}}{\componentNum \ extra fields}
 \end{record}
 
-
-The enrichment item records describe individual enrichment items. The general format is following:\\
+If a propagation law was specified previously, it's type and properties are also
+specified on a separate line according to\\
 \noindent
 \begin{record}
-  \recentry{\entKeyword{EntType}}{\componentNum}
-  \recentry{}{\field{geometryitem}{in}}
-  \recentry{}{\field{enrichmentfunction}{in}}
+  \recentry{\entKeyword{EntType}}{\componentNum \ extra fields}
 \end{record}
 
 

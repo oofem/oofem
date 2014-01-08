@@ -38,7 +38,6 @@
 #include "rheoChM.h"
 
 namespace oofem {
-
 /**
  * This class implements associated Material Status to KelvinChainMaterial.
  */
@@ -58,7 +57,6 @@ public:
 
     // definition
     virtual const char *giveClassName() const { return "KelvinChainMaterialStatus"; }
-    virtual classType giveClassID() const { return KelvinChainMaterialStatusClass; }
 };
 
 
@@ -75,7 +73,6 @@ public:
     // identification and auxiliary functions
     virtual int hasNonLinearBehaviour() { return 0; }
     virtual const char *giveClassName() const { return "KelvinChainMaterial"; }
-    virtual classType giveClassID() const { return KelvinChainMaterialClass; }
 
     virtual IRResultType initializeFrom(InputRecord *ir);
 
@@ -96,9 +93,9 @@ public:
 protected:
     virtual int hasIncrementalShrinkageFormulation() { return 0; }
 
-    virtual void computeCharCoefficients(FloatArray &answer, double atTime);
+    virtual void computeCharCoefficients(FloatArray &answer, double tStep);
 
-    virtual double giveEModulus(GaussPoint *gp, TimeStep *atTime);
+    virtual double giveEModulus(GaussPoint *gp, TimeStep *tStep);
 
     LinearElasticMaterial *giveLinearElasticMaterial();
 };

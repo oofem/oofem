@@ -65,7 +65,7 @@ public:
 
     // layered cross section support functions
     virtual void computeStrainVectorInLayer(FloatArray &answer, const FloatArray &masterGpStrain,
-                                    GaussPoint *slaveGp, TimeStep *tStep);
+                                            GaussPoint *masterGp, GaussPoint *slaveGp, TimeStep *tStep);
 
     virtual int computeGlobalCoordinates(FloatArray &answer, const FloatArray &lcoords);
 
@@ -75,12 +75,11 @@ public:
     virtual void giveDofManDofIDMask(int inode, EquationID eid, IntArray &) const;
     virtual double computeVolumeAround(GaussPoint *gp);
 
-    virtual FEInterpolation *giveInterpolation() const { return &interpolation; }
+    virtual FEInterpolation *giveInterpolation() const { return & interpolation; }
 
     // definition & identification
     virtual const char *giveInputRecordName() const { return _IFT_LIBeam2d_Name; }
     virtual const char *giveClassName() const { return "LIBeam2d"; }
-    virtual classType giveClassID() const { return LIBeam2dClass; }
     virtual IRResultType initializeFrom(InputRecord *ir);
 
     virtual MaterialMode giveMaterialMode() { return _2dBeam; }

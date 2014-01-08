@@ -144,62 +144,64 @@ void XfemElementInterface :: XfemElementInterface_createEnrBmatrixAt(FloatMatrix
             }
         }
 
-        FloatMatrix &BdNode = Bd [ j - 1 ];
-        BdNode.resize(numRows, numEnrNode * dim);
-        BdNode.zero();
+        if ( numEnrNode > 0 ) {
+            FloatMatrix &BdNode = Bd [ j - 1 ];
+            BdNode.resize(numRows, numEnrNode * dim);
+            BdNode.zero();
 
 
-        int globalNodeInd = dMan->giveGlobalNumber();
+            int globalNodeInd = dMan->giveGlobalNumber();
 
-        int nodeEnrCounter = 0;
+            int nodeEnrCounter = 0;
 
-        for ( int i = 1; i <= xMan->giveNumberOfEnrichmentItems(); i++ ) {
-            EnrichmentItem *ei = xMan->giveEnrichmentItem(i);
+            for ( int i = 1; i <= xMan->giveNumberOfEnrichmentItems(); i++ ) {
+                EnrichmentItem *ei = xMan->giveEnrichmentItem(i);
 
-            double levelSetGP = 0.0;
-            ei->interpLevelSet(levelSetGP, N, elNodes);
+                double levelSetGP = 0.0;
+                ei->interpLevelSet(levelSetGP, N, elNodes);
 
-            FloatArray gradLevelSetGP(dim);
-            ei->interpGradLevelSet(gradLevelSetGP, dNdx, elNodes);
-
-
-            if ( ei->isDofManEnriched(* dMan) ) {
-                int numEnr = ei->giveNumDofManEnrichments(* dMan);
-
-                // Enrichment function derivative in Gauss point
-                std :: vector< FloatArray >efgpD;
-                ei->evaluateEnrFuncDerivAt(efgpD, globalCoord, levelSetGP, gradLevelSetGP, globalNodeInd);
-
-                // Enrichment function in Gauss Point
-                std :: vector< double >efGP;
-                ei->evaluateEnrFuncAt(efGP, globalCoord, levelSetGP, globalNodeInd);
+                FloatArray gradLevelSetGP(dim);
+                ei->interpGradLevelSet(gradLevelSetGP, dNdx, elNodes);
 
 
-                const FloatArray &nodePos = * ( dMan->giveCoordinates() );
+                if ( ei->isDofManEnriched(* dMan) ) {
+                    int numEnr = ei->giveNumDofManEnrichments(* dMan);
 
-                double levelSetNode  = 0.0;
-                ei->evalLevelSetNormalInNode( levelSetNode, dMan->giveGlobalNumber() );
+                    // Enrichment function derivative in Gauss point
+                    std :: vector< FloatArray >efgpD;
+                    ei->evaluateEnrFuncDerivAt(efgpD, globalCoord, levelSetGP, gradLevelSetGP, globalNodeInd);
 
-                std :: vector< double >efNode;
-                ei->evaluateEnrFuncAt(efNode, nodePos, levelSetNode, globalNodeInd);
+                    // Enrichment function in Gauss Point
+                    std :: vector< double >efGP;
+                    ei->evaluateEnrFuncAt(efGP, globalCoord, levelSetGP, globalNodeInd);
 
 
-                for ( int k = 0; k < numEnr; k++ ) {
-                    // matrix to be added anytime a node is enriched
-                    // Creates nabla*(ef*N)
-                    FloatArray grad_ef_N;
-                    grad_ef_N.resize(dim);
-                    for ( int p = 1; p <= dim; p++ ) {
-                        grad_ef_N.at(p) = dNdx.at(j, p) * ( efGP [ k ] - efNode [ k ] ) + N.at(j) * efgpD [ k ].at(p);
+                    const FloatArray &nodePos = * ( dMan->giveCoordinates() );
+
+                    double levelSetNode  = 0.0;
+                    ei->evalLevelSetNormalInNode( levelSetNode, dMan->giveGlobalNumber() );
+
+                    std :: vector< double >efNode;
+                    ei->evaluateEnrFuncAt(efNode, nodePos, levelSetNode, globalNodeInd);
+
+
+                    for ( int k = 0; k < numEnr; k++ ) {
+                        // matrix to be added anytime a node is enriched
+                        // Creates nabla*(ef*N)
+                        FloatArray grad_ef_N;
+                        grad_ef_N.resize(dim);
+                        for ( int p = 1; p <= dim; p++ ) {
+                            grad_ef_N.at(p) = dNdx.at(j, p) * ( efGP [ k ] - efNode [ k ] ) + N.at(j) * efgpD [ k ].at(p);
+                        }
+
+                        BdNode.at(1, nodeEnrCounter + 1)                  = grad_ef_N.at(1);
+                        BdNode.at(2, nodeEnrCounter + 2)                  = grad_ef_N.at(2);
+                        BdNode.at(shearInd, nodeEnrCounter + 1)   = grad_ef_N.at(2);
+                        BdNode.at(shearInd, nodeEnrCounter + 2)   = grad_ef_N.at(1);
+
+                        nodeEnrCounter += 2;
+                        counter += 2;
                     }
-
-                    BdNode.at(1, nodeEnrCounter + 1)                  = grad_ef_N.at(1);
-                    BdNode.at(2, nodeEnrCounter + 2)                  = grad_ef_N.at(2);
-                    BdNode.at(shearInd, nodeEnrCounter + 1)   = grad_ef_N.at(2);
-                    BdNode.at(shearInd, nodeEnrCounter + 2)   = grad_ef_N.at(1);
-
-                    nodeEnrCounter += 2;
-                    counter += 2;
                 }
             }
         }
@@ -517,7 +519,7 @@ bool XfemElementInterface :: XfemElementInterface_updateIntegrationRule()
                                 delete [] coords;
                             }
                         }
-                    } else   {
+                    } else {
                         allTriCopy.push_back(allTri [ triIndex ]);
                     }
                 }
@@ -706,6 +708,8 @@ void XfemElementInterface :: XfemElementInterface_prepareNodesForDelaunay(std ::
             oCrackEndXi     = std :: max(minDistArcPos [ 0 ], tipArcPos);
         }             // If a tip was found
         else {
+            printf( "Warning: no tip found in element %d with only one edge intersection.\n", element->giveGlobalNumber() );
+
             oPointPartitions.resize(1);
 
             printf("Warning: No tip found.\n");
@@ -941,14 +945,14 @@ void XfemElementInterface :: XfemElementInterface_computeConstitutiveMatrixAt(Fl
     structEl.StructuralElement :: computeConstitutiveMatrixAt(answer, rMode, gp, tStep);
 }
 
-void XfemElementInterface :: XfemElementInterface_computeStressVector(FloatArray &answer, const FloatArray &strain, GaussPoint *gp, TimeStep *stepN)
+void XfemElementInterface :: XfemElementInterface_computeStressVector(FloatArray &answer, const FloatArray &strain, GaussPoint *gp, TimeStep *tStep)
 {
     StructuralCrossSection *cs = dynamic_cast< StructuralCrossSection * >( element->giveCrossSection() );
     if ( cs == NULL ) {
         OOFEM_ERROR("In XfemElementInterface :: XfemElementInterface_computeStressVector: cs == NULL.\n");
     }
 
-    cs->giveRealStresses(answer, gp, strain, stepN);
+    cs->giveRealStresses(answer, gp, strain, tStep);
 
 
     XfemManager *xMan = element->giveDomain()->giveXfemManager();
@@ -962,7 +966,7 @@ void XfemElementInterface :: XfemElementInterface_computeStressVector(FloatArray
             StructuralCrossSection *structCSInclusion = dynamic_cast< StructuralCrossSection * >( csInclusion );
 
             if ( structCSInclusion != NULL ) {
-                structCSInclusion->giveRealStresses(answer, gp, strain, stepN);
+                structCSInclusion->giveRealStresses(answer, gp, strain, tStep);
                 return;
             } else {
                 OOFEM_ERROR("PlaneStress2dXfem :: computeStressVector: failed to fetch StructuralCrossSection\n");
@@ -1016,7 +1020,7 @@ void XfemElementInterface :: computeCohesiveForces(FloatArray &answer, TimeStep 
 
                 NTimesT.beTProductOf(NMatrix, T2D);
                 CrossSection *cs  = element->giveCrossSection();
-                double thickness = cs->give(CS_Thickness);
+                double thickness = cs->give(CS_Thickness, & gp);
                 double dA = thickness * gp.giveWeight();
                 answer.add(dA, NTimesT);
             }
@@ -1190,7 +1194,6 @@ void XfemElementInterface :: computeCohesiveTangent(FloatMatrix &answer, TimeSte
                     jump2DPert.at(2) += eps;
                     computeGlobalCohesiveTractionVector(TPert, jump2DPert, crackNormal, NMatrix, gp, tStep);
 
-
                     K2D.at(1, 2) = ( TPert.at(1) - T.at(1) ) / eps;
                     K2D.at(2, 2) = ( TPert.at(2) - T.at(2) ) / eps;
 
@@ -1203,7 +1206,7 @@ void XfemElementInterface :: computeCohesiveTangent(FloatMatrix &answer, TimeSte
                 tmp2.beTProductOf(NMatrix, tmp);
 
                 CrossSection *cs  = element->giveCrossSection();
-                double thickness = cs->give(CS_Thickness);
+                double thickness = cs->give(CS_Thickness, & gp);
                 double dA = thickness * gp.giveWeight();
                 answer.add(dA, tmp2);
             }

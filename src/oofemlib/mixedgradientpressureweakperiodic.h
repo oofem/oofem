@@ -55,7 +55,7 @@ class SparseLinearSystemNM;
 
 /**
  * Applies a mean deviatoric shear rate and pressure (Neumann boundary condition) in a weakly periodic way.
- * 
+ *
  * @author Mikael Öhman
  */
 class OOFEM_EXPORT MixedGradientPressureWeakPeriodic : public MixedGradientPressureBC
@@ -123,27 +123,26 @@ public:
     virtual void setPrescribedDeviatoricGradientFromVoigt(const FloatArray &ddev);
 
     virtual void assembleVector(FloatArray &answer, TimeStep *tStep, EquationID eid,
-                                  CharType type, ValueModeType mode,
-                                  const UnknownNumberingScheme &s, FloatArray *eNorm = NULL);
-    
+                                CharType type, ValueModeType mode,
+                                const UnknownNumberingScheme &s, FloatArray *eNorm = NULL);
+
     virtual void assemble(SparseMtrx *answer, TimeStep *tStep, EquationID eid,
                           CharType type, const UnknownNumberingScheme &r_s, const UnknownNumberingScheme &c_s);
-    
-    virtual void giveLocationArrays(std::vector<IntArray> &rows, std::vector<IntArray> &cols, EquationID eid, CharType type,
+
+    virtual void giveLocationArrays(std :: vector< IntArray > &rows, std :: vector< IntArray > &cols, EquationID eid, CharType type,
                                     const UnknownNumberingScheme &r_s, const UnknownNumberingScheme &c_s);
 
     virtual const char *giveClassName() const { return "MixedGradientPressureWeakPeriodic"; }
     virtual const char *giveInputRecordName() const { return _IFT_MixedGradientPressureWeakPeriodic_Name; }
-    
+
 protected:
     void integrateTractionVelocityTangent(FloatMatrix &answer, Element *el, int boundary);
     void integrateTractionXTangent(FloatMatrix &answer, Element *el, int boundary);
     void integrateTractionDev(FloatArray &answer, Element *el, int boundary, const FloatMatrix &ddev);
     void evaluateTractionBasisFunctions(FloatArray &answer, const FloatArray &coords);
-    
+
     void constructFullMatrixForm(FloatMatrix &d, const FloatArray &d_voigt) const;
 };
 } // end namespace oofem
 
 #endif // mixedgradientpressurecneumann_h
-

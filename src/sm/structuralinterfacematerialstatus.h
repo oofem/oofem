@@ -117,7 +117,7 @@ public:
     /// Returns the const pointer to receiver's temporary deformation gradient vector.
     const FloatMatrix &giveTempF() const { return tempF; }
     /// Returns const reference to normal vector.
-    const FloatArray &giveNormal() const {return mNormalDir;}
+    const FloatArray &giveNormal() const { return mNormalDir; }
     /// Assigns jump to given vector v.
     void letJumpBe(const FloatArray &v) { jump = v; }
     /// Assigns traction to given vector v.
@@ -135,15 +135,13 @@ public:
     /// Assigns tempFVector to given vector v
     void letTempFBe(const FloatMatrix &v) { tempF = v; }
     /// Assigns normal vector
-    void letNormalBe(const FloatArray &iN) {mNormalDir = iN;}
+    void letNormalBe(const FloatArray &iN) { mNormalDir = iN; }
 
     virtual const char *giveClassName() const { return "StructuralInterfaceMaterialStatus"; }
-    //virtual classType giveClassID() const { return StructuralInterfaceMaterialStatus; }
 
     /// Functions for MaterialStatusMapperInterface
-	virtual void copyStateVariables(const MaterialStatus &iStatus);
-	virtual void addStateVariables(const MaterialStatus &iStatus);
-
+    virtual void copyStateVariables(const MaterialStatus &iStatus);
+    virtual void addStateVariables(const MaterialStatus &iStatus);
 };
 } // end namespace oofem
 #endif // structuralinterfacematerialstatus_h

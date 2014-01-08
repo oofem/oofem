@@ -63,17 +63,16 @@ public:
 
     virtual const char *giveInputRecordName() const { return _IFT_PlaneStress2dXfem_Name; }
     virtual const char *giveClassName() const { return "PlaneStress2dXfem"; }
-    virtual classType giveClassID() const { return PlaneStress2dXfemClass; }
     virtual int computeNumberOfDofs();
     virtual void computeGaussPoints();
     virtual void computeNmatrixAt(const FloatArray &iLocCoord, FloatMatrix &answer);
     virtual void computeBmatrixAt(GaussPoint *gp, FloatMatrix &answer,
                                   int lowerIndx = 1, int upperIndx = ALL_STRAINS);
-    virtual void computeBHmatrixAt(GaussPoint *aGaussPoint, FloatMatrix &answer)
+    virtual void computeBHmatrixAt(GaussPoint *gp, FloatMatrix &answer)
     { OOFEM_ERROR("PlaneStress2dXfem :: computeBHmatrixAt() not implemented"); }
     virtual void giveDofManDofIDMask(int inode, EquationID, IntArray & answer) const;
     virtual void computeConstitutiveMatrixAt(FloatMatrix &answer, MatResponseMode rMode, GaussPoint *, TimeStep *tStep);
-    virtual void computeStressVector(FloatArray &answer, const FloatArray &strain, GaussPoint *gp, TimeStep *stepN);
+    virtual void computeStressVector(FloatArray &answer, const FloatArray &strain, GaussPoint *gp, TimeStep *tStep);
     virtual void computeStiffnessMatrix(FloatMatrix &answer, MatResponseMode rMode, TimeStep *tStep);
     virtual void giveInternalForcesVector(FloatArray &answer, TimeStep *tStep, int useUpdatedGpRecord);
 

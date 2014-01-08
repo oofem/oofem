@@ -32,43 +32,35 @@
  *  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  */
 
-/*
- * The original idea for this class comes from
- * Dubois-Pelerin, Y.: "Object-Oriented  Finite Elements: Programming concepts and Implementation",
- * PhD Thesis, EPFL, Lausanne, 1992.
- */
-
-#include "loadtimefunction.h"
+#include "function.h"
 #include "timestep.h"
 #include "dynamicinputrecord.h"
 
 namespace oofem {
-
-LoadTimeFunction :: LoadTimeFunction ( int n, Domain* d ) :
-    FEMComponent( n, d ),
-    initialValue( 0.)
-{
-}
+Function :: Function(int n, Domain *d) :
+    FEMComponent(n, d),
+    initialValue(0.)
+{}
 
 double
-LoadTimeFunction :: evaluate(TimeStep *atTime, ValueModeType mode)
+Function :: evaluate(TimeStep *tStep, ValueModeType mode)
 {
     if ( mode == VM_Total ) {
-        return this->__at( atTime->giveIntrinsicTime() );
+        return this->evaluateAtTime( tStep->giveIntrinsicTime() );
     } else if ( mode == VM_Velocity ) {
-        return this->__derAt( atTime->giveIntrinsicTime() );
+        return this->evaluateVelocityAtTime( tStep->giveIntrinsicTime() );
     } else if ( mode == VM_Acceleration ) {
-        return this->__accelAt( atTime->giveIntrinsicTime() );
+        return this->evaluateAccelerationAtTime( tStep->giveIntrinsicTime() );
     } else if ( mode == VM_Incremental ) {
-        //return this->__at( atTime->giveTime() ) - this->__at( atTime->giveTime() - atTime->giveTimeIncrement() );
+        //return this->evaluateAtTime( tStep->giveTime() ) - this->evaluateAtTime( tStep->giveTime() - tStep->giveTimeIncrement() );
 
-        if ( atTime->isTheFirstStep() ) {
-            return this->__at(atTime->giveIntrinsicTime() - this->initialValue);
+        if ( tStep->isTheFirstStep() ) {
+            return this->evaluateAtTime(tStep->giveIntrinsicTime() - this->initialValue);
         } else {
-            return this->__at( atTime->giveIntrinsicTime() ) - this->__at( atTime->giveIntrinsicTime() - atTime->giveTimeIncrement() );
+            return this->evaluateAtTime( tStep->giveIntrinsicTime() ) - this->evaluateAtTime( tStep->giveIntrinsicTime() - tStep->giveTimeIncrement() );
         }
     } else {
-        _error2("LoadTimeFunction:: evaluate: unsupported mode(%d)", mode);
+        _error2("Function:: evaluate: unsupported mode(%d)", mode);
     }
 
     return 0.;
@@ -76,7 +68,7 @@ LoadTimeFunction :: evaluate(TimeStep *atTime, ValueModeType mode)
 
 
 IRResultType
-LoadTimeFunction :: initializeFrom(InputRecord *ir)
+Function :: initializeFrom(InputRecord *ir)
 {
     //
     // instanciates receiver according to input record
@@ -86,18 +78,47 @@ LoadTimeFunction :: initializeFrom(InputRecord *ir)
 
 
     this->initialValue = 0.;
-    IR_GIVE_OPTIONAL_FIELD(ir, this->initialValue, _IFT_LoadTimeFunction_initialvalue);
+    IR_GIVE_OPTIONAL_FIELD(ir, this->initialValue, _IFT_Function_initialvalue);
 
     return IRRT_OK;
 }
 
 
 void
-LoadTimeFunction :: giveInputRecord(DynamicInputRecord& input)
+Function :: giveInputRecord(DynamicInputRecord &input)
 {
     FEMComponent :: giveInputRecord(input);
-    input.setField(this->initialValue, _IFT_LoadTimeFunction_initialvalue);
+    input.setField(this->initialValue, _IFT_Function_initialvalue);
 }
 
+
+double
+Function :: evaluateAtTime(double t)
+{
+    std::map< std::string, FunctionArgument > valDict;
+    valDict.insert(std::make_pair("t", t));
+    FloatArray v;
+    this->evaluate(v, valDict);
+    ///@todo This should be possible and nice to use if we have C++11
+    //this->evaluate(v, {{t, "t"}});
+    if ( v.giveSize() != 1 ) {
+        OOFEM_ERROR2("%s :: evaluateAtTime - Function doesn't return scalar results.", this->giveClassName());
+    }
+    return v.at(1);
+}
+
+
+void
+Function :: evaluate(FloatArray &answer, std::map< std::string, FunctionArgument > &valDict)
+{
+    std::map< std::string, FunctionArgument > :: iterator it = valDict.find("t");
+#ifdef DEBUG
+    if ( it == valDict.end() ) {
+        OOFEM_ERROR("Funciton :: evaluate - Missing necessary argument \"t\"");
+    }
+#endif
+    answer.resize(1);
+    answer.at(1) = this->evaluateAtTime(it->second.val0);
+}
 
 } // end namespace oofem

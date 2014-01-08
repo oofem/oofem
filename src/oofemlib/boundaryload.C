@@ -33,7 +33,7 @@
  */
 
 #include "boundaryload.h"
-#include "loadtimefunction.h"
+#include "function.h"
 #include "floatarray.h"
 #include "timestep.h"
 #include "dynamicinputrecord.h"
@@ -48,7 +48,7 @@ BoundaryLoad :: computeComponentArrayAt(FloatArray &answer, TimeStep *tStep, Val
 
 
 void
-BoundaryLoad :: computeValueAt(FloatArray &answer, TimeStep *stepN, FloatArray &coords, ValueModeType mode)
+BoundaryLoad :: computeValueAt(FloatArray &answer, TimeStep *tStep, FloatArray &coords, ValueModeType mode)
 {
     // Evaluates the value at specific integration point
     int i, j, nSize;
@@ -79,12 +79,12 @@ BoundaryLoad :: computeValueAt(FloatArray &answer, TimeStep *stepN, FloatArray &
     // time distribution
 
     /*
-     * factor = this -> giveLoadTimeFunction() -> at(stepN->giveTime()) ;
-     * if ((mode==VM_Incremental) && (!stepN->isTheFirstStep()))
-     * //factor -= this->giveLoadTimeFunction()->at(stepN->givePreviousStep()->giveTime()) ;
-     * factor -= this->giveLoadTimeFunction()->at(stepN->giveTime()-stepN->giveTimeIncrement());
+     * factor = this -> giveTimeFunction() -> at(tStep->giveTime()) ;
+     * if ((mode==VM_Incremental) && (!tStep->isTheFirstStep()))
+     * //factor -= this->giveTimeFunction()->at(tStep->givePreviousStep()->giveTime()) ;
+     * factor -= this->giveTimeFunction()->at(tStep->giveTime()-tStep->giveTimeIncrement());
      */
-    factor = this->giveLoadTimeFunction()->evaluate(stepN, mode);
+    factor = this->giveTimeFunction()->evaluate(tStep, mode);
 
     answer.times(factor);
 }

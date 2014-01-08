@@ -53,7 +53,7 @@ EIPrimaryUnknownMapper :: mapAndUpdate(FloatArray &answer, ValueModeType mode,
                                        Domain *oldd, Domain *newd,  TimeStep *tStep)
 {
     int inode, nd_nnodes = newd->giveNumberOfDofManagers();
-    int nsize = newd->giveEngngModel()->giveNumberOfDomainEquations(newd->giveNumber(), EModelDefaultEquationNumbering());
+    int nsize = newd->giveEngngModel()->giveNumberOfDomainEquations( newd->giveNumber(), EModelDefaultEquationNumbering() );
     FloatArray unknownValues;
     IntArray dofMask, locationArray;
     IntArray reglist;
@@ -69,7 +69,7 @@ EIPrimaryUnknownMapper :: mapAndUpdate(FloatArray &answer, ValueModeType mode,
         /* HUHU CHEATING */
 #ifdef __PARALLEL_MODE
         if ( ( newd->giveNode(inode)->giveParallelMode() == DofManager_null ) ||
-            ( newd->giveNode(inode)->giveParallelMode() == DofManager_remote ) ) {
+             ( newd->giveNode(inode)->giveParallelMode() == DofManager_remote ) ) {
             continue;
         }
 
@@ -123,7 +123,7 @@ EIPrimaryUnknownMapper :: evaluateAt(FloatArray &answer, IntArray &dofMask, Valu
     EIPrimaryUnknownMapperInterface *interface;
     SpatialLocalizer *sl = oldd->giveSpatialLocalizer();
 
-///@todo Change to the other version after checking that it works properly. Will render "giveElementCloseToPoint" obsolete (superseeded by giveElementClosestToPoint).
+    ///@todo Change to the other version after checking that it works properly. Will render "giveElementCloseToPoint" obsolete (superseeded by giveElementClosestToPoint).
 #if 1
     if ( regList.isEmpty() ) {
         oelem = sl->giveElementContainingPoint(coords);
@@ -144,20 +144,20 @@ EIPrimaryUnknownMapper :: evaluateAt(FloatArray &answer, IntArray &dofMask, Valu
 #else
     FloatArray lcoords, closest;
     if ( regList.isEmpty() ) {
-        oelem = sl->giveElementClosestToPoint(lcoords, closest, coords, 0 );
+        oelem = sl->giveElementClosestToPoint(lcoords, closest, coords, 0);
     } else {
         // Take the minimum of any region
         double mindist = 0.0, distance;
         oelem = NULL;
         for ( int i = 1; i < regList.giveSize(); ++i ) {
-            Element *tmpelem = sl->giveElementClosestToPoint(lcoords, closest, coords, regList.at(i) );
+            Element *tmpelem = sl->giveElementClosestToPoint( lcoords, closest, coords, regList.at(i) );
             distance = closest.distance_square(coords);
             if ( tmpelem != NULL ) {
                 distance = closest.distance_square(coords);
                 if ( distance < mindist || i == 1 ) {
                     mindist = distance;
                     oelem = tmpelem;
-                    if (distance == 0.0) {
+                    if ( distance == 0.0 ) {
                         break;
                     }
                 }

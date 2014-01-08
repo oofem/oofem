@@ -50,7 +50,7 @@ Microplane :: ~Microplane()
 
 
 void
-Microplane :: printOutputAt(FILE *File, TimeStep *stepN)
+Microplane :: printOutputAt(FILE *File, TimeStep *tStep)
 // Prints the strains and stresses on the data file.
 {
     /*
@@ -59,14 +59,14 @@ Microplane :: printOutputAt(FILE *File, TimeStep *stepN)
      *
      *
      * fprintf (File,"  GP %d :",number) ;
-     * if (matStatus) matStatus -> printOutputAt (File,stepN) ;
+     * if (matStatus) matStatus -> printOutputAt (File,tStep) ;
      *
      * if ( numberOfGp != 0)  // layered material
      * {
      *  fprintf (File,"Layers report \n{\n");
      *  for ( i = 0; i< numberOfGp ; i++)
      *   {
-     *    gaussPointArray[i]->printOutputAt (File,stepN);
+     *    gaussPointArray[i]->printOutputAt (File,tStep);
      *   }
      *  fprintf (File,"} end layers report\n");
      * }

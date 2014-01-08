@@ -32,39 +32,83 @@
  *  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  */
 
-#include "userdefinedloadtimefunction.h"
+#include "calculatorfunction.h"
 #include "parser.h"
+#include "dynamicinputrecord.h"
 #include "classfactory.h"
 
 #include <sstream>
 
 namespace oofem {
+REGISTER_Function(CalculatorFunction);
 
-REGISTER_LoadTimeFunction( UserDefinedLoadTimeFunction );
-
-UserDefinedLoadTimeFunction :: UserDefinedLoadTimeFunction(int n, Domain *d) : LoadTimeFunction(n, d) { }
+CalculatorFunction :: CalculatorFunction(int n, Domain *d) : Function(n, d) { }
 
 IRResultType
-UserDefinedLoadTimeFunction :: initializeFrom(InputRecord *ir)
+CalculatorFunction :: initializeFrom(InputRecord *ir)
 {
     const char *__proc = "initializeFrom";
     IRResultType result;
 
-    IR_GIVE_FIELD(ir, ftExpression, _IFT_UserDefinedLoadTimeFunction_ft);
-    IR_GIVE_OPTIONAL_FIELD(ir, dfdtExpression, _IFT_UserDefinedLoadTimeFunction_dfdt);
-    IR_GIVE_OPTIONAL_FIELD(ir, d2fdt2Expression, _IFT_UserDefinedLoadTimeFunction_d2fdt2);
+    IR_GIVE_FIELD(ir, fExpression, _IFT_CalculatorFunction_f);
+    IR_GIVE_OPTIONAL_FIELD(ir, dfdtExpression, _IFT_CalculatorFunction_dfdt);
+    IR_GIVE_OPTIONAL_FIELD(ir, d2fdt2Expression, _IFT_CalculatorFunction_d2fdt2);
 
-    return LoadTimeFunction :: initializeFrom(ir);
+    return Function :: initializeFrom(ir);
 }
-    
-double UserDefinedLoadTimeFunction :: __at(double time)
+
+
+void
+CalculatorFunction :: giveInputRecord(DynamicInputRecord &input)
+{
+    Function :: giveInputRecord(input);
+    input.setField(this->fExpression, _IFT_CalculatorFunction_f);
+    input.setField(this->dfdtExpression, _IFT_CalculatorFunction_dfdt);
+    input.setField(this->d2fdt2Expression, _IFT_CalculatorFunction_d2fdt2);
+}
+
+
+void
+CalculatorFunction :: evaluate(FloatArray &answer, std :: map< std :: string, FunctionArgument > &valDict)
+{
+    Parser myParser;
+    int err;
+
+    std :: ostringstream buff;
+    //for (auto val : valDict) {
+    for (std :: map< std :: string, FunctionArgument > :: iterator val = valDict.begin(); val != valDict.end(); ++val) {
+        const FunctionArgument &arg = val->second;
+        if ( arg.type == FunctionArgument::FAT_double ) {
+            buff << val->first << "=" << arg.val0 << ";";
+        } else if ( arg.type == FunctionArgument::FAT_FloatArray ) {
+            for (int i = 1; i <= arg.val1.giveSize(); ++i) {
+                buff << val->first << i << "=" << arg.val1.at(i) << ";";
+            }
+        } else if ( arg.type == FunctionArgument::FAT_int ) {
+            buff << val->first << "=" << arg.val2 << ";";
+        } else if ( arg.type == FunctionArgument::FAT_IntArray ) {
+            for (int i = 1; i <= arg.val3.giveSize(); ++i) {
+                buff << val->first << i << "=" << arg.val3.at(i) << ";";
+            }
+        }
+    }
+    buff << fExpression;
+    answer.resize(1);
+    answer.at(1) = myParser.eval(buff.str().c_str(), err);
+    if ( err ) {
+        _error("at: parser syntax error");
+    }
+}
+
+
+double CalculatorFunction :: evaluateAtTime(double time)
 {
     Parser myParser;
     int err;
     double result;
 
-    std::ostringstream buff;
-    buff << "t=" << time << ";" << ftExpression;
+    std :: ostringstream buff;
+    buff << "t=" << time << ";" << fExpression;
     result = myParser.eval(buff.str().c_str(), err);
     if ( err ) {
         _error("at: parser syntax error");
@@ -73,7 +117,7 @@ double UserDefinedLoadTimeFunction :: __at(double time)
     return result;
 }
 
-double UserDefinedLoadTimeFunction :: __derAt(double time)
+double CalculatorFunction :: evaluateVelocityAtTime(double time)
 {
     Parser myParser;
     int err;
@@ -84,7 +128,7 @@ double UserDefinedLoadTimeFunction :: __derAt(double time)
         return 0.;
     }
 
-    std::ostringstream buff;
+    std :: ostringstream buff;
     buff << "t=" << time << ";" << dfdtExpression;
     result = myParser.eval(buff.str().c_str(), err);
     if ( err ) {
@@ -95,7 +139,7 @@ double UserDefinedLoadTimeFunction :: __derAt(double time)
 }
 
 
-double UserDefinedLoadTimeFunction :: __accelAt(double time)
+double CalculatorFunction :: evaluateAccelerationAtTime(double time)
 {
     Parser myParser;
     int err;
@@ -106,7 +150,7 @@ double UserDefinedLoadTimeFunction :: __accelAt(double time)
         return 0.;
     }
 
-    std::ostringstream buff;
+    std :: ostringstream buff;
     buff << "t=" << time << ";" << d2fdt2Expression;
     result = myParser.eval(buff.str().c_str(), err);
     if ( err ) {
@@ -115,5 +159,4 @@ double UserDefinedLoadTimeFunction :: __accelAt(double time)
 
     return result;
 }
-
 } // end namespace oofem

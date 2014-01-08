@@ -213,7 +213,6 @@ public:
 
     // definition
     virtual const char *giveClassName() const { return "NLStructuralElement"; }
-    virtual classType giveClassID() const { return NLStructuralElementClass; }
 
 protected:
     int checkConsistency();

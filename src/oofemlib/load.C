@@ -35,7 +35,7 @@
 #include "load.h"
 #include "verbose.h"
 #include "timestep.h"
-#include "loadtimefunction.h"
+#include "function.h"
 #include "dynamicinputrecord.h"
 
 namespace oofem {
@@ -43,7 +43,7 @@ Load :: Load(int i, Domain *aDomain) :
     GeneralBoundaryCondition(i, aDomain), componentArray(), dofExcludeMask()
     // Constructor. Creates a load with number i, belonging to aDomain.
 {
-    loadTimeFunction = 0;
+    timeFunction = 0;
 }
 
 
@@ -57,16 +57,16 @@ FloatArray &Load :: giveComponentArray()
 
 
 void
-Load :: computeComponentArrayAt(FloatArray &answer, TimeStep *stepN, ValueModeType mode)
-// Returns an array, the load induced at stepN by the receiver.
+Load :: computeComponentArrayAt(FloatArray &answer, TimeStep *tStep, ValueModeType mode)
+// Returns an array, the load induced at tStep by the receiver.
 {
     double factor;
 
-    factor = this->giveLoadTimeFunction()->evaluate(stepN, mode);
+    factor = this->giveTimeFunction()->evaluate(tStep, mode);
     answer  = this->giveComponentArray();
     answer.times(factor);
-    
-    if ( !isImposed(stepN) ){
+
+    if ( !isImposed(tStep) ) {
         answer.zero();
     }
 }
@@ -102,12 +102,12 @@ Load :: initializeFrom(InputRecord *ir)
 }
 
 
-void Load :: giveInputRecord ( DynamicInputRecord& input )
+void Load :: giveInputRecord(DynamicInputRecord &input)
 {
-    GeneralBoundaryCondition::giveInputRecord ( input );
-    input.setField( this->componentArray, _IFT_Load_components );
+    GeneralBoundaryCondition :: giveInputRecord(input);
+    input.setField(this->componentArray, _IFT_Load_components);
     if ( !this->dofExcludeMask.containsOnlyZeroes() ) {
-        input.setField( this->dofExcludeMask, _IFT_Load_dofexcludemask );
+        input.setField(this->dofExcludeMask, _IFT_Load_dofexcludemask);
     }
 }
 

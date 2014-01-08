@@ -39,8 +39,7 @@
 #include "classfactory.h"
 
 namespace oofem {
-
-REGISTER_NonlocalBarrier( SymmetryBarrier )
+REGISTER_NonlocalBarrier(SymmetryBarrier)
 
 SymmetryBarrier :: SymmetryBarrier(int n, Domain *aDomain) :
     NonlocalBarrier(n, aDomain), origin(), normals(), mask(), lcs(3, 3)

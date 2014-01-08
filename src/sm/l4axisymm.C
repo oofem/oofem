@@ -73,11 +73,11 @@ Interface *
 L4Axisymm :: giveInterface(InterfaceType interface)
 {
     if ( interface == ZZNodalRecoveryModelInterfaceType ) {
-        return static_cast< ZZNodalRecoveryModelInterface * >(this);
+        return static_cast< ZZNodalRecoveryModelInterface * >( this );
     } else if ( interface == SPRNodalRecoveryModelInterfaceType ) {
-        return static_cast< SPRNodalRecoveryModelInterface * >(this);
+        return static_cast< SPRNodalRecoveryModelInterface * >( this );
     } else if ( interface == SpatialLocalizerInterfaceType ) {
-        return static_cast< SpatialLocalizerInterface * >(this);
+        return static_cast< SpatialLocalizerInterface * >( this );
     }
 
     return NULL;
@@ -85,10 +85,10 @@ L4Axisymm :: giveInterface(InterfaceType interface)
 
 
 void
-L4Axisymm :: computeBmatrixAt(GaussPoint *aGaussPoint, FloatMatrix &answer, int li, int ui)
+L4Axisymm :: computeBmatrixAt(GaussPoint *gp, FloatMatrix &answer, int li, int ui)
 //
 // Returns the [6x8] strain-displacement matrix {B} of the receiver,
-// evaluated at aGaussPoint.
+// evaluated at gp.
 // (epsilon_x,epsilon_y,...,Gamma_xy) = B . r
 // r = ( u1,v1,u2,v2,u3,v3,u4,v4)
 {
@@ -96,7 +96,7 @@ L4Axisymm :: computeBmatrixAt(GaussPoint *aGaussPoint, FloatMatrix &answer, int 
     int size, ind = 1;
     FloatMatrix dnx;
 
-    this->interpolation.evaldNdx( dnx, * aGaussPoint->giveCoordinates(), FEIElementGeometryWrapper(this) );
+    this->interpolation.evaldNdx( dnx, * gp->giveCoordinates(), FEIElementGeometryWrapper(this) );
 
     if ( ui == ALL_STRAINS ) {
         size = 6;
@@ -130,7 +130,7 @@ L4Axisymm :: computeBmatrixAt(GaussPoint *aGaussPoint, FloatMatrix &answer, int 
 
     if ( ( li <= 3 ) && ( ui >= 3 ) ) {
         FloatArray n(4);
-        this->interpolation.evalN( n, * aGaussPoint->giveCoordinates(), FEIElementGeometryWrapper(this) );
+        this->interpolation.evalN( n, * gp->giveCoordinates(), FEIElementGeometryWrapper(this) );
 
         r = 0.;
         for ( int i = 1; i <= numberOfDofMans; i++ ) {
@@ -164,16 +164,16 @@ L4Axisymm :: computeBmatrixAt(GaussPoint *aGaussPoint, FloatMatrix &answer, int 
 
 
 void
-L4Axisymm :: computeBHmatrixAt(GaussPoint *aGaussPoint, FloatMatrix &answer)
+L4Axisymm :: computeBHmatrixAt(GaussPoint *gp, FloatMatrix &answer)
 // Returns the [9x8] displacement gradient matrix {BH} of the receiver,
-// evaluated at aGaussPoint.
+// evaluated at gp.
 // BH matrix  -  9 rows : du/dx, dv/dy, dw/dz = u/r, 0, 0, du/dy,  0, 0, dv/dx
 // @todo not checked if correct
 {
     FloatArray n;
     FloatMatrix dnx;
 
-    this->interpolation.evaldNdx( dnx, * aGaussPoint->giveCoordinates(), FEIElementGeometryWrapper(this) );
+    this->interpolation.evaldNdx( dnx, * gp->giveCoordinates(), FEIElementGeometryWrapper(this) );
 
     answer.resize(9, 8);
     answer.zero();
@@ -217,13 +217,13 @@ L4Axisymm :: computeGaussPoints()
 }
 
 double
-L4Axisymm :: computeVolumeAround(GaussPoint *aGaussPoint)
-// Returns the portion of the receiver which is attached to aGaussPoint.
+L4Axisymm :: computeVolumeAround(GaussPoint *gp)
+// Returns the portion of the receiver which is attached to gp.
 {
     double determinant, weight, volume, r, x;
     FloatArray n(4);
 
-    this->interpolation.evalN( n, * aGaussPoint->giveCoordinates(), FEIElementGeometryWrapper(this) );
+    this->interpolation.evalN( n, * gp->giveCoordinates(), FEIElementGeometryWrapper(this) );
 
     r = 0.;
     for ( int i = 1; i <= numberOfDofMans; i++ ) {
@@ -231,10 +231,10 @@ L4Axisymm :: computeVolumeAround(GaussPoint *aGaussPoint)
         r += x * n.at(i);
     }
 
-    determinant = fabs( this->interpolation.giveTransformationJacobian( * aGaussPoint->giveCoordinates(),
-                                                                       FEIElementGeometryWrapper(this) ) );
+    determinant = fabs( this->interpolation.giveTransformationJacobian( * gp->giveCoordinates(),
+                                                                        FEIElementGeometryWrapper(this) ) );
 
-    weight = aGaussPoint->giveWeight();
+    weight = gp->giveWeight();
     volume = determinant * weight * r;
 
     return volume;
@@ -244,16 +244,16 @@ IRResultType
 L4Axisymm :: initializeFrom(InputRecord *ir)
 {
     numberOfGaussPoints = 4;
-	IRResultType result = this->NLStructuralElement :: initializeFrom(ir);
-	if(result != IRRT_OK) {
-		return result;
-	}
+    IRResultType result = this->NLStructuralElement :: initializeFrom(ir);
+    if ( result != IRRT_OK ) {
+        return result;
+    }
 
 
     if ( !( ( numberOfGaussPoints == 1 ) ||
-           ( numberOfGaussPoints == 4 ) ||
-           ( numberOfGaussPoints == 9 ) ||
-           ( numberOfGaussPoints == 16 ) ) ) {
+            ( numberOfGaussPoints == 4 ) ||
+            ( numberOfGaussPoints == 9 ) ||
+            ( numberOfGaussPoints == 16 ) ) ) {
         numberOfGaussPoints = 4;
     }
 
@@ -265,9 +265,9 @@ L4Axisymm :: initializeFrom(InputRecord *ir)
 
 
 void
-L4Axisymm :: computeStrainVector(FloatArray &answer, GaussPoint *gp, TimeStep *stepN)
+L4Axisymm :: computeStrainVector(FloatArray &answer, GaussPoint *gp, TimeStep *tStep)
 // Computes the vector containing the strains at the Gauss point gp of
-// the receiver, at time step stepN. The nature of these strains depends
+// the receiver, at time step tStep. The nature of these strains depends
 // on the element's type.
 {
     FloatMatrix b, A;
@@ -277,7 +277,7 @@ L4Axisymm :: computeStrainVector(FloatArray &answer, GaussPoint *gp, TimeStep *s
     answer.resize(6);
     answer.zero();
     if ( mode == TL ) { // Total Lagrange formulation
-        this->computeVectorOf(EID_MomentumBalance, VM_Total, stepN, u);
+        this->computeVectorOf(EID_MomentumBalance, VM_Total, tStep, u);
         // linear part of strain tensor (in vector form)
 
         this->computeBmatrixAt(gp, b, 1, 2);
@@ -405,7 +405,7 @@ L4Axisymm :: SpatialLocalizerI_containsPoint(const FloatArray &coords)
 
 
 void
-L4Axisymm :: computeEgdeNMatrixAt(FloatMatrix &answer, int iedge, GaussPoint *aGaussPoint)
+L4Axisymm :: computeEgdeNMatrixAt(FloatMatrix &answer, int iedge, GaussPoint *gp)
 {
     /*
      * computes interpolation matrix for element edge.
@@ -421,7 +421,7 @@ L4Axisymm :: computeEgdeNMatrixAt(FloatMatrix &answer, int iedge, GaussPoint *aG
      */
 
     FloatArray n(2);
-    this->interpolation.edgeEvalN( n, iedge, * aGaussPoint->giveCoordinates(), FEIElementGeometryWrapper(this) );
+    this->interpolation.edgeEvalN( n, iedge, * gp->giveCoordinates(), FEIElementGeometryWrapper(this) );
 
     answer.resize(2, 4);
     answer.zero();
@@ -469,15 +469,15 @@ L4Axisymm :: giveEdgeDofMapping(IntArray &answer, int iEdge) const
 
 
 double
-L4Axisymm ::   computeEdgeVolumeAround(GaussPoint *aGaussPoint, int iEdge)
+L4Axisymm ::   computeEdgeVolumeAround(GaussPoint *gp, int iEdge)
 {
     FloatArray c(2);
-    this->computeEdgeIpGlobalCoords(c, aGaussPoint, iEdge);
-    double result = this->interpolation.edgeGiveTransformationJacobian( iEdge, * aGaussPoint->giveCoordinates(),
-                                                                       FEIElementGeometryWrapper(this) );
+    this->computeEdgeIpGlobalCoords(c, gp, iEdge);
+    double result = this->interpolation.edgeGiveTransformationJacobian( iEdge, * gp->giveCoordinates(),
+                                                                        FEIElementGeometryWrapper(this) );
 
 
-    return c.at(1) * result * aGaussPoint->giveWeight();
+    return c.at(1) * result * gp->giveWeight();
 }
 
 

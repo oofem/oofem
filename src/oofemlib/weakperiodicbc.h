@@ -102,7 +102,7 @@ private:
     std :: vector< int >side [ 2 ], element [ 2 ];
 
     /** Keeps track of which coordinate(s) are changing on the surface/edge */
-    std :: vector< double> directions;
+    std :: vector< double >directions;
 
     /** Type of surface/edge */
     integrationDomain sideGeom;
@@ -121,7 +121,7 @@ private:
 
     double factorial(int n);
 
-    double binomial(double n , int k);
+    double binomial(double n, int k);
 
     /** Compute exponent for term n. Exponents i and j are x^i*y^j */
     void getExponents(int n, int &i, int &j);
@@ -139,14 +139,14 @@ public:
 
     virtual IRResultType initializeFrom(InputRecord *ir);
 
-    basisType giveBasisType() {return useBasisType; }
+    basisType giveBasisType() { return useBasisType; }
 
-    virtual void assemble(SparseMtrx *answer, TimeStep *tStep, EquationID eid, CharType type, 
+    virtual void assemble(SparseMtrx *answer, TimeStep *tStep, EquationID eid, CharType type,
                           const UnknownNumberingScheme &r_s, const UnknownNumberingScheme &c_s);
 
     virtual void assembleVector(FloatArray &answer, TimeStep *tStep, EquationID eid,
-                                  CharType type, ValueModeType mode,
-                                  const UnknownNumberingScheme &s, FloatArray *eNorm = NULL);
+                                CharType type, ValueModeType mode,
+                                const UnknownNumberingScheme &s, FloatArray *eNorm = NULL);
 
     virtual int giveNumberOfInternalDofManagers();
 

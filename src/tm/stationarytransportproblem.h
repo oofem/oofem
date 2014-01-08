@@ -91,24 +91,23 @@ public:
 
     virtual int checkConsistency();
 
-    virtual void printDofOutputAt(FILE *stream, Dof *iDof, TimeStep *atTime);
+    virtual void printDofOutputAt(FILE *stream, Dof *iDof, TimeStep *tStep);
 
     // identification
     virtual const char *giveInputRecordName() const { return _IFT_StationaryTransportProblem_Name; }
     virtual const char *giveClassName() const { return "StationaryTransportProblem"; }
-    virtual classType giveClassID() const { return StationaryTransportProblemClass; }
     virtual fMode giveFormulation() { return TL; }
 
-#ifdef __PETSC_MODULE
-    virtual void initPetscContexts();
+#ifdef __PARALLEL_MODE
+    virtual void initParallelContexts();
 #endif
 
 protected:
     /**
      * Updates IP values on elements
-     * @param stepN Solution step.
+     * @param tStep Solution step.
      */
-    virtual void updateInternalState(TimeStep *stepN);
+    virtual void updateInternalState(TimeStep *tStep);
 };
 } // end namespace oofem
 #endif // stationarytransportproblem_h

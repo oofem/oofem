@@ -41,7 +41,7 @@
 namespace oofem {
 /**
  * Class representing implementation of linear wedge interpolation class.
- * 
+ *
  * @author Milan Jirasek
  * @author Mikael Öhman
  */

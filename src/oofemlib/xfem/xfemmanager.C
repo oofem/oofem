@@ -51,6 +51,7 @@
 #include "contextioerr.h"
 #include "dynamicinputrecord.h"
 #include "internalstatevaluetype.h"
+#include "XFEMDebugTools.h"
 
 namespace oofem {
 XfemManager :: XfemManager(Domain *domain)
@@ -276,6 +277,22 @@ void XfemManager :: propagateFronts()
 {
     for ( int i = 1; i <= enrichmentItemList->giveSize(); i++ ) {
         enrichmentItemList->at(i)->propagateFronts();
+
+        if ( giveVtkDebug() ) {
+            std :: vector< FloatArray >points;
+            enrichmentItemList->at(i)->giveSubPolygon(points, -0.1, 1.1);
+
+            std :: vector< double >x, y;
+            for ( size_t j = 0; j < points.size(); j++ ) {
+                x.push_back( points [ j ].at(1) );
+                y.push_back( points [ j ].at(2) );
+            }
+
+
+            char fileName [ 200 ];
+            sprintf(fileName, "crack%d.dat", i);
+            XFEMDebugTools :: WriteArrayToGnuplot(fileName, x, y);
+        }
     }
 }
 
@@ -294,7 +311,7 @@ bool XfemManager :: hasPropagatingFronts()
 void XfemManager :: postInitialize() 
 {
     for ( int i = 1; i <= enrichmentItemList->giveSize(); i++ ) {
-        this->giveEnrichmentItem(i)->postInitialize();
+        //this->giveEnrichmentItem(i)->postInitialize();
     }
     
     

@@ -44,8 +44,7 @@
 #include "dynamicinputrecord.h"
 
 namespace oofem {
-
-REGISTER_Material( J2plasticMaterial );
+REGISTER_Material(J2plasticMaterial);
 
 J2plasticMaterial :: J2plasticMaterial(int n, Domain *d) : PlasticMaterial(n, d)
 {
@@ -97,17 +96,17 @@ J2plasticMaterial :: initializeFrom(InputRecord *ir)
 
 void J2plasticMaterial :: giveInputRecord(DynamicInputRecord &input)
 {
-	PlasticMaterial::giveInputRecord(input);
+    PlasticMaterial :: giveInputRecord(input);
 
-	IsotropicLinearElasticMaterial *isoLE = dynamic_cast<IsotropicLinearElasticMaterial*> (linearElasticMaterial);
+    IsotropicLinearElasticMaterial *isoLE = dynamic_cast< IsotropicLinearElasticMaterial * >( linearElasticMaterial );
     input.setField(isoLE->giveYoungsModulus(), _IFT_IsotropicLinearElasticMaterial_e);
     input.setField(isoLE->givePoissonsRatio(), _IFT_IsotropicLinearElasticMaterial_n);
     input.setField(0.0, _IFT_IsotropicLinearElasticMaterial_talpha); // TODO: dirty fix
 
 
-	input.setField(k*sqrt(3.0), _IFT_J2plasticMaterial_ry);
-	input.setField(kinematicModuli, _IFT_J2plasticMaterial_khm);
-	input.setField(isotropicModuli, _IFT_J2plasticMaterial_ihm);
+    input.setField(k * sqrt(3.0), _IFT_J2plasticMaterial_ry);
+    input.setField(kinematicModuli, _IFT_J2plasticMaterial_khm);
+    input.setField(isotropicModuli, _IFT_J2plasticMaterial_ihm);
 }
 
 
@@ -138,7 +137,7 @@ J2plasticMaterial :: ComputeStressSpaceHardeningVars(GaussPoint *gp,
     }
 
     FloatArray *answer = new FloatArray(size);
-    StructuralMaterial :: giveVoigtSymVectorMask( mask, gp->giveMaterialMode());
+    StructuralMaterial :: giveVoigtSymVectorMask( mask, gp->giveMaterialMode() );
     isize = mask.giveSize();
     rSize = this->giveSizeOfReducedHardeningVarsVector(gp);
 
@@ -193,7 +192,7 @@ void
 J2plasticMaterial :: computeHardeningReducedModuli(FloatMatrix &answer,
                                                    GaussPoint *gp,
                                                    FloatArray *strainSpaceHardeningVariables,
-                                                   TimeStep *atTime)
+                                                   TimeStep *tStep)
 {
     /* computes hardening moduli in reduced stress strain space (for kinematic back-stress)*/
     int size = this->giveSizeOfReducedHardeningVarsVector(gp);
@@ -289,7 +288,7 @@ J2plasticMaterial :: ComputeStressSpaceHardeningVarsReducedGradient(GaussPoint *
     /* kinematic hardening variables first */
     if ( this->kinematicHardeningFlag ) {
         fullKinematicGradient = this->ComputeStressGradient(gp, stressVector, stressSpaceHardeningVars);
-        StructuralMaterial :: giveReducedSymVectorForm(reducedKinematicGrad, * fullKinematicGradient, gp->giveMaterialMode());
+        StructuralMaterial :: giveReducedSymVectorForm( reducedKinematicGrad, * fullKinematicGradient, gp->giveMaterialMode() );
         delete fullKinematicGradient;
 
         kcount = reducedKinematicGrad.giveSize();
@@ -330,7 +329,7 @@ J2plasticMaterial :: computeReducedGradientMatrix(FloatMatrix &answer,
     IntArray mask;
     double f, f32, f12, ax, ay, az;
 
-    StructuralMaterial :: giveInvertedVoigtVectorMask(mask, gp->giveMaterialMode() );
+    StructuralMaterial :: giveInvertedVoigtVectorMask( mask, gp->giveMaterialMode() );
     size = StructuralMaterial :: giveSizeOfVoigtSymVector( gp->giveMaterialMode() ) +
            this->giveSizeOfReducedHardeningVarsVector(gp);
 
@@ -423,27 +422,27 @@ J2plasticMaterial :: computeReducedGradientMatrix(FloatMatrix &answer,
 void
 J2plasticMaterial :: computeTrialStressIncrement(FloatArray &answer, GaussPoint *gp,
                                                  const FloatArray &strainIncrement,
-                                                 TimeStep *atTime)
+                                                 TimeStep *tStep)
 {
     /* Computes the full trial elastic stress vector */
     FloatArray reducedAnswer;
     FloatMatrix reducedModuli;
 
     this->giveLinearElasticMaterial()->giveStiffnessMatrix(reducedModuli, ElasticStiffness,
-                                                                gp, atTime);
+                                                           gp, tStep);
 
     reducedAnswer.beProductOf(reducedModuli, strainIncrement);
-    StructuralMaterial :: giveFullSymVectorForm(answer, reducedAnswer, gp->giveMaterialMode());
+    StructuralMaterial :: giveFullSymVectorForm( answer, reducedAnswer, gp->giveMaterialMode() );
 }
 
 
 void
 J2plasticMaterial :: compute3dElasticModuli(FloatMatrix &answer,
                                             GaussPoint *gp,
-                                            TimeStep *atTime)
+                                            TimeStep *tStep)
 {
     /* Returns 3d elastic moduli */
-    this->giveLinearElasticMaterial()->give3dMaterialStiffnessMatrix(answer, ElasticStiffness, gp, atTime);
+    this->giveLinearElasticMaterial()->give3dMaterialStiffnessMatrix(answer, ElasticStiffness, gp, tStep);
 }
 
 

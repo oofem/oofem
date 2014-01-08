@@ -35,6 +35,7 @@
 #include "macrolspace.h"
 #include "micromaterial.h"
 #include "lspace.h"
+#include "constantfunction.h"
 #include "domain.h"
 #include "classfactory.h"
 #include "dynamicinputrecord.h"
@@ -49,8 +50,7 @@
 #endif
 
 namespace oofem {
-
-REGISTER_Element( MacroLSpace );
+REGISTER_Element(MacroLSpace);
 
 //derived from linear brick element
 MacroLSpace :: MacroLSpace(int n, Domain *aDomain) : LSpace(n, aDomain)
@@ -89,15 +89,15 @@ IRResultType MacroLSpace :: initializeFrom(InputRecord *ir)
 #if 0
     val = IR_GIVE_OPTIONAL_FIELD2(ir, this->stiffMatrxFileName, _IFT_MacroLspace_stiffMatrxFileName, "stiffmatrxfilename");
 
-    if( ir->hasField(_IFT_MacroLspace_stiffMatrxFileName, "stiffmatrxfilename") ) {
-        if ( fopen(this->stiffMatrxFileName,"r") != NULL ) { //if the file exist
-            stiffMatrxFile = fopen(this->stiffMatrxFileName,"r");
-            this->stiffMatrxFileNoneReadingWriting=1;
-        }
-        else { //or create a new one
-            if((stiffMatrxFile = fopen(this->stiffMatrxFileName,"w")) == NULL)
-            OOFEM_ERROR2("Can not create a new file %s\n", this->stiffMatrxFileName);
-            this->stiffMatrxFileNoneReadingWriting=2;
+    if ( ir->hasField(_IFT_MacroLspace_stiffMatrxFileName, "stiffmatrxfilename") ) {
+        if ( fopen(this->stiffMatrxFileName, "r") != NULL ) { //if the file exist
+            stiffMatrxFile = fopen(this->stiffMatrxFileName, "r");
+            this->stiffMatrxFileNoneReadingWriting = 1;
+        } else   { //or create a new one
+            if ( ( stiffMatrxFile = fopen(this->stiffMatrxFileName, "w") ) == NULL ) {
+                OOFEM_ERROR2("Can not create a new file %s\n", this->stiffMatrxFileName);
+            }
+            this->stiffMatrxFileNoneReadingWriting = 2;
         }
     }
 #endif
@@ -135,7 +135,7 @@ void MacroLSpace :: computeStiffnessMatrix(FloatMatrix &answer, MatResponseMode 
 
     //call microproblem
     //activeMStep = microMat->problemMicro->giveMetaStep(1);//->setNumberOfSteps(1);
-    //activeMStep->giveMetaStepNumber();
+    //activeMStep->giveMetatStepumber();
     //microEngngModel->timer.startTimer(EngngModelTimer :: EMTT_AnalysisTimer);
     //microproblem must have the same actual time and zero time increment
 
@@ -169,8 +169,8 @@ void MacroLSpace :: changeMicroBoundaryConditions(TimeStep *tStep)
     //Domain *domain = this->giveDomain();
     DofManager *DofMan;
     GeneralBoundaryCondition *GeneralBoundaryCond;
-    LoadTimeFunction *LoadTimeFunct;
-    DynamicInputRecord ir_ltf, ir_bc;
+    Function *timeFunct;
+    DynamicInputRecord ir_func, ir_bc;
     FloatArray n(8), answer, localCoords;
     double displ;
     FloatArray displ_x(8), displ_y(8), displ_z(8);
@@ -186,17 +186,17 @@ void MacroLSpace :: changeMicroBoundaryConditions(TimeStep *tStep)
     }
 
     //overrides the first load-time function to be a constant
-    if ( !microDomain->giveNumberOfLoadTimeFunctions() ) {
-        microDomain->resizeLoadTimeFunctions(1);
+    if ( !microDomain->giveNumberOfFunctions() ) {
+        microDomain->resizeFunctions(1);
     }
 
-    ir_ltf.setRecordKeywordField("constantfunction", 1);
-    ir_ltf.setField(1.0, _IFT_LoadTimeFunction_ft);
-    if ( ( LoadTimeFunct = classFactory.createLoadTimeFunction("constantfunction", 1, microDomain) ) == NULL ) {
+    ir_func.setRecordKeywordField("constantfunction", 1);
+    ir_func.setField(1.0, _IFT_ConstantFunction_f);
+    if ( ( timeFunct = classFactory.createFunction("constantfunction", 1, microDomain) ) == NULL ) {
         OOFEM_ERROR("MacroLSpace :: changeMicroBoundaryConditions - Couldn't create constant time function");
     }
-    LoadTimeFunct->initializeFrom(&ir_ltf);
-    microDomain->setLoadTimeFunction(1, LoadTimeFunct);
+    timeFunct->initializeFrom(& ir_func);
+    microDomain->setFunction(1, timeFunct);
 
 
     /*assign to each boundary node the form "bc 3 # # #", set 0s on free nodes
@@ -217,12 +217,12 @@ void MacroLSpace :: changeMicroBoundaryConditions(TimeStep *tStep)
                 DofMan->giveDof(j)->setBcId(counter);
                 displ = n.dotProduct( j == 1 ? displ_x : ( j == 2 ? displ_y : displ_z ) );
                 ir_bc.setRecordKeywordField("boundarycondition", counter);
-                ir_bc.setField(1, _IFT_GeneralBoundaryCondition_LoadTimeFunct);
+                ir_bc.setField(1, _IFT_GeneralBoundaryCondition_timeFunct);
                 ir_bc.setField(displ, _IFT_BoundaryCondition_PrescribedValue);
                 if ( ( GeneralBoundaryCond = classFactory.createBoundaryCondition("boundarycondition", counter, microDomain) ) == NULL ) {
                     OOFEM_ERROR("MacroLSpace :: changeMicroBoundaryConditions - Couldn't create boundary condition.");
                 }
-                GeneralBoundaryCond->initializeFrom(&ir_bc);
+                GeneralBoundaryCond->initializeFrom(& ir_bc);
                 microDomain->setBoundaryCondition(counter, GeneralBoundaryCond);
                 counter++;
             }
@@ -261,8 +261,7 @@ void MacroLSpace :: giveInternalForcesVector(FloatArray &answer, TimeStep *tStep
         this->microEngngModel->solveYourselfAt( this->microEngngModel->giveCurrentStep() );
         this->microEngngModel->updateYourself( this->microEngngModel->giveCurrentStep() );
         //this->microEngngModel->terminate( this->microEngngModel->giveCurrentStep() );
-        //microStructuralEngngModel = ( StructuralEngngModel * ) &this->microEngngModel;
-        StructuralEngngModel *microStructuralEngngModel = dynamic_cast< StructuralEngngModel * >(this->microEngngModel);
+        StructuralEngngModel *microStructuralEngngModel = dynamic_cast< StructuralEngngModel * >( this->microEngngModel );
 
 
         //reaction vector contains contributions from unknownNumberingScheme
@@ -299,8 +298,8 @@ void MacroLSpace :: evalInterpolation(FloatArray &answer, const FloatArray **coo
 
     //this->interpolation.global2local(localCoords, coords, gcoords, 0.0);//returns even outside the element boundaries
     //this->interpolation.evalN(answer, localCoords, 0.0);
-    this->interpolation.global2local(localCoords, gcoords, FEIVertexListGeometryWrapper(8, coords)); //returns even outside the element boundaries
-    this->interpolation.evalN(answer, localCoords, FEIVertexListGeometryWrapper(8, coords));
+    this->interpolation.global2local( localCoords, gcoords, FEIVertexListGeometryWrapper(8, coords) ); //returns even outside the element boundaries
+    this->interpolation.evalN( answer, localCoords, FEIVertexListGeometryWrapper(8, coords) );
 }
 
 

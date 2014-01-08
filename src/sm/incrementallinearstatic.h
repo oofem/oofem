@@ -109,7 +109,7 @@ public:
 
     virtual NumericalMethod *giveNumericalMethod(MetaStep *mStep);
 
-    virtual void printDofOutputAt(FILE *stream, Dof *iDof, TimeStep *atTime);
+    virtual void printDofOutputAt(FILE *stream, Dof *iDof, TimeStep *tStep);
 
     virtual void terminate(TimeStep *tStep);
 
@@ -117,13 +117,12 @@ public:
 
     virtual const char *giveInputRecordName() const { return _IFT_IncrementalLinearStatic_Name; }
     virtual const char *giveClassName() const { return "IncrementalLinearStatic"; }
-    virtual classType giveClassID() const { return IncrementalLinearStaticClass; }
 
     virtual int requiresUnknownsDictionaryUpdate() { return true; }
     virtual bool requiresEquationRenumbering(TimeStep *) { return true; }
     virtual void updateDofUnknownsDictionary(DofManager *, TimeStep *);
     // Here we store only total and incremental value; so hash is computed from mode value only
-    virtual int giveUnknownDictHashIndx(ValueModeType mode, TimeStep *stepN);
+    virtual int giveUnknownDictHashIndx(ValueModeType mode, TimeStep *tStep);
 };
 } // end namespace oofem
 #endif // incrementallinearstatic_h

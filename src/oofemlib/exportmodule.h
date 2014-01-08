@@ -77,9 +77,9 @@ protected:
     /// User timeStep Output step. Indicates every tstep_step_out-th step selected.
     int tstep_step_out;
     /// List of user selected step numbers.
-    std::list< Range >tsteps_out;
+    std :: list< Range >tsteps_out;
     /**
-     * Flag turning output in solution step substeps/itarations. Allows to visualize the 
+     * Flag turning output in solution step substeps/itarations. Allows to visualize the
      * varibles during equilibrium iterations, etc. Usefull for debugging.
      * In this case the export module output name will contain timeStep substep number.
      *  This tStep substep must be set/managed by corresponding engineering model.
@@ -104,12 +104,12 @@ public:
      * @param tStep Time step.
      * @param forcedOutput If true, no testTimeStepOutput should be done.
      */
-    virtual void doOutput(TimeStep *tStep, bool forcedOutput=false) = 0;
+    virtual void doOutput(TimeStep *tStep, bool forcedOutput = false) = 0;
     /**
      * Writes the output. Abstract service.
      * @param tStep time step.
      */
-    void doForcedOutput(TimeStep *tStep) { doOutput(tStep,true); }
+    void doForcedOutput(TimeStep *tStep) { doOutput(tStep, true); }
     /**
      * Initializes receiver.
      * The init file messages should be printed.
@@ -117,7 +117,7 @@ public:
     /**
      * Returns true if module is configured to export indvidual substep/iterations.
      */
-    bool testSubStepOutput() {return this->tstep_substeps_out_flag;}
+    bool testSubStepOutput() { return this->tstep_substeps_out_flag; }
 
     virtual void initialize() { }
     /**
@@ -127,14 +127,14 @@ public:
      */
     virtual void terminate() { }
     /// Returns class name of the receiver.
-    virtual const char *giveClassName() const { return "ExportModule"; }
+    virtual const char *giveClassName() const = 0;
 
 protected:
     /**
      * Gives the appropriate name (minus specific file extension).
      * @param tStep Active time step.
      */
-    std::string giveOutputBaseFileName(TimeStep *tStep);
+    std :: string giveOutputBaseFileName(TimeStep *tStep);
     /**
      * Tests if given time step output is required.
      * @param tStep Time step to check.
@@ -152,6 +152,3 @@ protected:
 };
 } // end namespace oofem
 #endif // exportmodule_h
-
-
-

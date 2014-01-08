@@ -152,9 +152,9 @@ extern OOFEM_EXPORT Logger oofem_errLogger;
  * // General log-family macros
  * // Alternative definition using VARARGS
  *
- *#define LOG_FATAL(logger, ...) logger.writeELogMsg(Logger::LOG_LEVEL_FATAL, __FILE__, __LINE__, __VA_ARGS__)
- *#define LOG_ERROR(logger, ...) logger.writeELogMsg(Logger::LOG_LEVEL_ERROR, __FILE__, __LINE__, __VA_ARGS__)
- *#define LOG_WARNING(logger, ...) logger.writeELogMsg(Logger::LOG_LEVEL_WARNING, __FILE__, __LINE__, __VA_ARGS__)
+ ****#define LOG_FATAL(logger, ...) logger.writeELogMsg(Logger::LOG_LEVEL_FATAL, __FILE__, __LINE__, __VA_ARGS__)
+ ****#define LOG_ERROR(logger, ...) logger.writeELogMsg(Logger::LOG_LEVEL_ERROR, __FILE__, __LINE__, __VA_ARGS__)
+ ****#define LOG_WARNING(logger, ...) logger.writeELogMsg(Logger::LOG_LEVEL_WARNING, __FILE__, __LINE__, __VA_ARGS__)
  */
  #define LOG_RELEVANT(logger, ...) logger.writeLogMsg(Logger :: LOG_LEVEL_RELEVANT, __VA_ARGS__)
  #define LOG_INFO(logger, ...) logger.writeLogMsg(Logger :: LOG_LEVEL_INFO, __VA_ARGS__)

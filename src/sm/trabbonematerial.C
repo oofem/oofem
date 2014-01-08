@@ -41,8 +41,7 @@
 #include "classfactory.h"
 
 namespace oofem {
-
-REGISTER_Material( TrabBoneMaterial );
+REGISTER_Material(TrabBoneMaterial);
 
 TrabBoneMaterial :: TrabBoneMaterial(int n, Domain *d) : StructuralMaterial(n, d)
 {}
@@ -55,7 +54,7 @@ TrabBoneMaterial :: hasMaterialModeCapability(MaterialMode mode)
 }
 
 
-void TrabBoneMaterial :: computeCumPlastStrain(double &alpha, GaussPoint *gp, TimeStep *atTime)
+void TrabBoneMaterial :: computeCumPlastStrain(double &alpha, GaussPoint *gp, TimeStep *tStep)
 {
     TrabBoneMaterialStatus *status = static_cast< TrabBoneMaterialStatus * >( this->giveStatus(gp) );
     alpha = status->giveTempAlpha();
@@ -65,7 +64,7 @@ void TrabBoneMaterial :: computeCumPlastStrain(double &alpha, GaussPoint *gp, Ti
 void
 TrabBoneMaterial :: give1dStressStiffMtrx(FloatMatrix &answer,
                                           MatResponseMode mode, GaussPoint *gp,
-                                          TimeStep *atTime)
+                                          TimeStep *tStep)
 {
     TrabBoneMaterialStatus *status = static_cast< TrabBoneMaterialStatus * >( this->giveStatus(gp) );
 
@@ -140,7 +139,7 @@ TrabBoneMaterial :: performPlasticityReturn(GaussPoint *gp, const FloatArray &to
             gNewton = sigp / fabs(sigp) * ( E0 * epsnew - ( E0 + Ek ) * ( epsp + depsp ) ) - ( sigY + Eil * ( alpha +
                                                                                                               sigp / fabs(sigp) * depsp ) + Eie * ( 1 - exp( -kie * ( alpha + sigp / fabs(sigp) * depsp ) ) ) );
             dgNewton = -sigp / fabs(sigp) * ( ( E0 + Ek ) + Eil +
-                                             Eie * kie * exp( -kie * ( alpha + sigp / fabs(sigp) * depsp ) ) );
+                                              Eie * kie * exp( -kie * ( alpha + sigp / fabs(sigp) * depsp ) ) );
             depsp += -gNewton / dgNewton;
         }
 
@@ -200,11 +199,11 @@ TrabBoneMaterial :: computeDamageParam(double alpha, GaussPoint *gp)
 
 
 double
-TrabBoneMaterial :: computeDamage(GaussPoint *gp,  TimeStep *atTime)
+TrabBoneMaterial :: computeDamage(GaussPoint *gp,  TimeStep *tStep)
 {
     double alpha;
 
-    computeCumPlastStrain(alpha, gp, atTime);
+    computeCumPlastStrain(alpha, gp, tStep);
 
     double dam = computeDamageParam(alpha, gp);
 
@@ -214,8 +213,8 @@ TrabBoneMaterial :: computeDamage(GaussPoint *gp,  TimeStep *atTime)
 
 void
 TrabBoneMaterial :: giveRealStressVector_1d(FloatArray &answer, GaussPoint *gp,
-                                         const FloatArray &totalStrain,
-                                         TimeStep *atTime)
+                                            const FloatArray &totalStrain,
+                                            TimeStep *tStep)
 {
     double epsnew, epsp;
     double dam;
@@ -231,7 +230,7 @@ TrabBoneMaterial :: giveRealStressVector_1d(FloatArray &answer, GaussPoint *gp,
 
     computeDensification(gp, totalStrain);
 
-    dam = computeDamage(gp, atTime);
+    dam = computeDamage(gp, tStep);
 
     epsp = status->giveTempPlasStrainVector().at(1);
     sigc = status->giveSigC();
@@ -385,9 +384,9 @@ TrabBoneMaterialStatus :: initTempStatus()
 
 
 void
-TrabBoneMaterialStatus :: updateYourself(TimeStep *atTime)
+TrabBoneMaterialStatus :: updateYourself(TimeStep *tStep)
 {
-    StructuralMaterialStatus :: updateYourself(atTime);
+    StructuralMaterialStatus :: updateYourself(tStep);
     this->alpha = this->tempAlpha;
     this->dam = this->tempDam;
     this->epsp = this->tempEpsp;
@@ -436,5 +435,4 @@ MaterialStatus *TrabBoneMaterial :: CreateStatus(GaussPoint *gp) const
         new  TrabBoneMaterialStatus(1, StructuralMaterial :: giveDomain(), gp);
     return status;
 }
-
 } // end namespace oofem

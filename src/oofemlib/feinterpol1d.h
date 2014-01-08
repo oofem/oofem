@@ -75,9 +75,3 @@ public:
 };
 } // end namespace oofem
 #endif // feinterpol1d_h
-
-
-
-
-
-

@@ -153,4 +153,3 @@ protected:
 };
 } // end namespace oofem
 #endif // compcol_h
-

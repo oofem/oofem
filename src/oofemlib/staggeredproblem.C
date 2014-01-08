@@ -35,7 +35,7 @@
 #include "staggeredproblem.h"
 #include "engngm.h"
 #include "timestep.h"
-#include "loadtimefunction.h"
+#include "function.h"
 #include "metastep.h"
 #include "exportmodulemanager.h"
 #include "mathfem.h"
@@ -51,17 +51,16 @@
 #endif
 
 namespace oofem {
-
-REGISTER_EngngModel( StaggeredProblem );
+REGISTER_EngngModel(StaggeredProblem);
 
 StaggeredProblem :: StaggeredProblem(int i, EngngModel *_master) : EngngModel(i, _master)
 {
-    ndomains = 1; // domain is needed to store the time step ltf
+    ndomains = 1; // domain is needed to store the time step function
     nModels  = 2;
     emodelList = new AList< EngngModel >(nModels);
     inputStreamNames = new std :: string [ nModels ];
 
-    dtTimeFunction = 0;
+    dtFunction = 0;
     stepMultiplier = 1.;
     timeDefinedByProb = 0;
 }
@@ -87,12 +86,14 @@ StaggeredProblem :: instanciateYourself(DataReader *dr, InputRecord *ir, const c
 int
 StaggeredProblem :: instanciateDefaultMetaStep(InputRecord *ir)
 {
-    if ( !timeDefinedByProb ) {
-        EngngModel :: instanciateDefaultMetaStep(ir);
+    if ( timeDefinedByProb ) {
+        /* just set a nonzero number of steps;
+         * needed for instanciateDefaultMetaStep to pass; overall has no effect as time stepping is deteremined by slave
+         */
+        this->numberOfSteps = 1;
     }
-
+    EngngModel :: instanciateDefaultMetaStep(ir);
     //there are no slave problems initiated so far, the overall metaStep will defined in a slave problem instantiation
-
     return 1;
 }
 
@@ -133,20 +134,20 @@ StaggeredProblem :: initializeFrom(InputRecord *ir)
     if ( ir->hasField(_IFT_StaggeredProblem_deltat) ) {
         EngngModel :: initializeFrom(ir);
         IR_GIVE_FIELD(ir, deltaT, _IFT_StaggeredProblem_deltat);
-        dtTimeFunction = 0;
+        dtFunction = 0;
     } else if ( ir->hasField(_IFT_StaggeredProblem_prescribedtimes) ) {
         EngngModel :: initializeFrom(ir);
         IR_GIVE_FIELD(ir, discreteTimes, _IFT_StaggeredProblem_prescribedtimes);
-        dtTimeFunction = 0;
+        dtFunction = 0;
     } else {
         IR_GIVE_FIELD(ir, timeDefinedByProb, _IFT_StaggeredProblem_timeDefinedByProb);
     }
 
-    if ( dtTimeFunction < 1 ) {
+    if ( dtFunction < 1 ) {
         ndomains = 0;
     }
 
-    IR_GIVE_OPTIONAL_FIELD(ir, dtTimeFunction, _IFT_StaggeredProblem_dtf);
+    IR_GIVE_OPTIONAL_FIELD(ir, dtFunction, _IFT_StaggeredProblem_dtf);
     IR_GIVE_OPTIONAL_FIELD(ir, stepMultiplier, _IFT_StaggeredProblem_stepmultiplier);
     if ( stepMultiplier < 0 ) {
         _error("stepMultiplier must be > 0")
@@ -182,7 +183,7 @@ StaggeredProblem :: updateAttributes(MetaStep *mStep)
     if ( !timeDefinedByProb ) {
         if ( ir->hasField(_IFT_StaggeredProblem_deltat) ) {
             IR_GIVE_FIELD(ir, deltaT, _IFT_StaggeredProblem_deltat);
-            IR_GIVE_OPTIONAL_FIELD(ir, dtTimeFunction, _IFT_StaggeredProblem_dtf);
+            IR_GIVE_OPTIONAL_FIELD(ir, dtFunction, _IFT_StaggeredProblem_dtf);
             IR_GIVE_OPTIONAL_FIELD(ir, stepMultiplier, _IFT_StaggeredProblem_stepmultiplier);
             if ( stepMultiplier < 0 ) {
                 _error("stepMultiplier must be > 0")
@@ -193,21 +194,21 @@ StaggeredProblem :: updateAttributes(MetaStep *mStep)
     }
 }
 
-LoadTimeFunction *StaggeredProblem :: giveDtTimeFunction()
+Function *StaggeredProblem :: giveDtFunction()
 // Returns the load-time function of the receiver.
 {
-    if ( !dtTimeFunction || !ndomains ) {
+    if ( !dtFunction || !ndomains ) {
         return NULL;
     }
 
-    return giveDomain(1)->giveLoadTimeFunction(dtTimeFunction);
+    return giveDomain(1)->giveFunction(dtFunction);
 }
 
 double
 StaggeredProblem :: giveDeltaT(int n)
 {
-    if ( giveDtTimeFunction() ) {
-        return deltaT * giveDtTimeFunction()->__at(n);
+    if ( giveDtFunction() ) {
+        return deltaT * giveDtFunction()->evaluateAtTime(n);
     }
 
     //in the first step the time increment is taken as the initial, user-specified value
@@ -271,7 +272,7 @@ StaggeredProblem :: giveNextStep()
         TimeStep *newStep;
         // first step -> generate initial step
         newStep = giveSolutionStepWhenIcApply();
-        currentStep = new TimeStep(*newStep);
+        currentStep = new TimeStep(* newStep);
     }
 
     previousStep = currentStep;
@@ -297,7 +298,7 @@ StaggeredProblem :: solveYourself()
         EngngModel *sp = this->giveSlaveProblem(timeDefinedByProb);
 
         if ( sp->giveCurrentStep() ) {
-            smstep = sp->giveCurrentStep()->giveMetaStepNumber();
+            smstep = sp->giveCurrentStep()->giveMetatStepumber();
             sjstep = sp->giveMetaStep(smstep)->giveStepRelativeNumber( sp->giveCurrentStep()->giveNumber() ) + 1;
         } else {
             nMetaSteps = sp->giveNumberOfMetaSteps();
@@ -343,17 +344,17 @@ StaggeredProblem :: solveYourself()
 }
 
 void
-StaggeredProblem :: solveYourselfAt(TimeStep *stepN)
+StaggeredProblem :: solveYourselfAt(TimeStep *tStep)
 {
 #ifdef VERBOSE
-    OOFEM_LOG_RELEVANT( "Solving [step number %5d, time %e]\n", stepN->giveNumber(), stepN->giveTargetTime() );
+    OOFEM_LOG_RELEVANT( "Solving [step number %5d, time %e]\n", tStep->giveNumber(), tStep->giveTargetTime() );
 #endif
     for ( int i = 1; i <= nModels; i++ ) {
         EngngModel *emodel = this->giveSlaveProblem(i);
-        emodel->solveYourselfAt(stepN);
+        emodel->solveYourselfAt(tStep);
     }
 
-    stepN->incrementStateCounter();
+    tStep->incrementStateCounter();
 }
 
 int
@@ -372,13 +373,13 @@ StaggeredProblem :: forceEquationNumbering()
 }
 
 void
-StaggeredProblem :: updateYourself(TimeStep *stepN)
+StaggeredProblem :: updateYourself(TimeStep *tStep)
 {
     for ( int i = 1; i <= nModels; i++ ) {
-        this->giveSlaveProblem(i)->updateYourself(stepN);
+        this->giveSlaveProblem(i)->updateYourself(tStep);
     }
 
-    EngngModel :: updateYourself(stepN);
+    EngngModel :: updateYourself(tStep);
 }
 
 void
@@ -392,26 +393,26 @@ StaggeredProblem :: terminate(TimeStep *tStep)
 }
 
 void
-StaggeredProblem :: doStepOutput(TimeStep *stepN)
+StaggeredProblem :: doStepOutput(TimeStep *tStep)
 {
     FILE *File = this->giveOutputStream();
 
     // print output
-    this->printOutputAt(File, stepN);
+    this->printOutputAt(File, tStep);
     // export using export manager
     for ( int i = 1; i <= nModels; i++ ) {
-        this->giveSlaveProblem(i)->giveExportModuleManager()->doOutput(stepN);
+        this->giveSlaveProblem(i)->giveExportModuleManager()->doOutput(tStep);
     }
 }
 
 
 void
-StaggeredProblem :: printOutputAt(FILE *File, TimeStep *stepN)
+StaggeredProblem :: printOutputAt(FILE *File, TimeStep *tStep)
 {
     FILE *slaveFile;
     for ( int i = 1; i <= nModels; i++ ) {
         slaveFile = this->giveSlaveProblem(i)->giveOutputStream();
-        this->giveSlaveProblem(i)->printOutputAt(slaveFile, stepN);
+        this->giveSlaveProblem(i)->printOutputAt(slaveFile, tStep);
     }
 }
 

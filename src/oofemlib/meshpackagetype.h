@@ -38,7 +38,6 @@
 #include "enumitem.h"
 
 namespace oofem {
-
 #define MeshPackageType_DEF \
     ENUM_ITEM(MPT_T3D) \
     ENUM_ITEM(MPT_TARGE2) \

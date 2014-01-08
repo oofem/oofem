@@ -46,14 +46,13 @@
 //@}
 
 namespace oofem {
-
 /**
  * General class for boundary condition that prolongates macroscopic fields to incompressible flow.
- * Both the deviatoric strain rate, and the pressure is controlled. 
+ * Both the deviatoric strain rate, and the pressure is controlled.
  *
  * @see MixedGradientPressureDirichlet For implementation of Dirichlet type
  * @see MixedGradientPressureNeumann For implementation of Neumann type
- * 
+ *
  * @author Mikael Öhman
  */
 class OOFEM_EXPORT MixedGradientPressureBC : public ActiveBoundaryCondition
@@ -64,7 +63,7 @@ public:
      * @param n Boundary condition number.
      * @param d Domain to which new object will belongs.
      */
-    MixedGradientPressureBC(int n, Domain *d) : ActiveBoundaryCondition(n,d) { }
+    MixedGradientPressureBC(int n, Domain *d) : ActiveBoundaryCondition(n, d) { }
 
     /// Destructor
     virtual ~MixedGradientPressureBC() { };
@@ -124,4 +123,3 @@ public:
 } // end namespace oofem
 
 #endif // mixedgradientpressurebc_h
-

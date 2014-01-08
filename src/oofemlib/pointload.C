@@ -33,14 +33,13 @@
  */
 
 #include "pointload.h"
-#include "loadtimefunction.h"
+#include "function.h"
 #include "floatarray.h"
 #include "classfactory.h"
 #include "dynamicinputrecord.h"
 
 namespace oofem {
-
-REGISTER_BoundaryCondition( PointLoad );
+REGISTER_BoundaryCondition(PointLoad);
 
 void
 PointLoad :: computeValueAt(FloatArray &answer, TimeStep *tStep, FloatArray &coords, ValueModeType mode)
@@ -50,7 +49,7 @@ PointLoad :: computeValueAt(FloatArray &answer, TimeStep *tStep, FloatArray &coo
     Load :: computeComponentArrayAt(answer, tStep, mode);
 
     // time distribution
-    factor = this->giveLoadTimeFunction()->evaluate(tStep, mode);
+    factor = this->giveTimeFunction()->evaluate(tStep, mode);
     answer.times(factor);
 }
 
@@ -86,5 +85,4 @@ PointLoad :: giveInputRecord(DynamicInputRecord &input)
     input.setField(this->coordSystemType, _IFT_PointLoad_cstype);
     input.setField(this->coords, _IFT_PointLoad_coords);
 }
-
 } // end namespace oofem

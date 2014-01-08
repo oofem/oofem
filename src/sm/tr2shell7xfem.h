@@ -45,12 +45,11 @@
 #define _IFT_Tr2Shell7XFEM_Name "tr2shell7xfem"
 
 namespace oofem {
-
 class FEI3dTrQuad;
 class BoundaryLoad;
 
 /**
- * This class represent a 7 parameter shell element. 
+ * This class represent a 7 parameter shell element.
  * Each node has 7 degrees of freedom (displ. vec., director vec., inhomogeneous thickness strain ).
  * Add ref. to paper!
  * @author Jim Brouzoulis
@@ -66,9 +65,9 @@ protected:
     static IntArray ordering_gr;
     static IntArray ordering_gr_edge;
     static bool initOrdering() {
-        ordering_all.setValues(42, 1, 2, 3, 8, 9, 10, 15, 16, 17, 22, 23, 24, 29, 30 ,31, 36, 37, 38,
-                                   4, 5, 6, 11, 12, 13, 18, 19, 20, 25, 26, 27, 32, 33 ,34, 39, 40, 41,
-                                   7, 14, 21, 28, 35, 42);
+        ordering_all.setValues(42, 1, 2, 3, 8, 9, 10, 15, 16, 17, 22, 23, 24, 29, 30, 31, 36, 37, 38,
+                               4, 5, 6, 11, 12, 13, 18, 19, 20, 25, 26, 27, 32, 33, 34, 39, 40, 41,
+                               7, 14, 21, 28, 35, 42);
         ordering_gr.setValues(42, 1, 2, 3, 19, 20, 21, 37, 4, 5, 6, 22, 23, 24, 38, 7, 8, 9, 25, 26, 27, 39,
                               10, 11, 12, 28, 29, 30, 40, 13, 14, 15, 31, 32, 33, 41, 16, 17, 18,
                               34, 35, 36, 42);
@@ -93,7 +92,7 @@ protected:
     virtual FEInterpolation *giveInterpolation() const;
 
     // VTK
-    void vtkGiveUpdatedFictiousNodeCoords(FloatArray nodeCoords[15], int layer, TimeStep *tStep);
+    void vtkGiveUpdatedFictiousNodeCoords(FloatArray nodeCoords [ 15 ], int layer, TimeStep * tStep);
 
 public:
     Tr2Shell7XFEM(int n, Domain *d);
@@ -103,16 +102,13 @@ public:
     virtual int giveNumberOfEdgeDofManagers() { return 3;  }
     virtual const char *giveInputRecordName() const { return _IFT_Tr2Shell7XFEM_Name; }
     virtual const char *giveClassName() const { return "Tr2Shell7XFEM"; }
-    virtual classType giveClassID() const { return Tr2Shell7XFEMClass; }
 
     //virtual Element_Geometry_Type giveGeometryType() const { return EGT_triangle_2; }
     virtual Element_Geometry_Type giveGeometryType() const { return EGT_Composite; }
     virtual integrationDomain giveIntegrationDomain() const { return _Triangle; } // write new wedge-like type 'layeredWedge'
-    virtual void giveCompositeExportData( IntArray &primaryVarsToExport, IntArray &cellVarsToExport,
-                 std::vector<FloatArray> &nodeCoords, std::vector<IntArray> &cellNodes, IntArray &cellTypes, 
-                 std::vector<FloatArray> &primaryVars, std::vector<FloatArray> &cellVars, TimeStep *tStep ){};
+    virtual void giveCompositeExportData(IntArray &primaryVarsToExport, IntArray &cellVarsToExport,
+                                         std :: vector< FloatArray > &nodeCoords, std :: vector< IntArray > &cellNodes, IntArray &cellTypes,
+                                         std :: vector< FloatArray > &primaryVars, std :: vector< FloatArray > &cellVars, TimeStep *tStep) {};
 };
-
-
 } // end namespace oofem
-#endif 
+#endif

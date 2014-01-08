@@ -62,7 +62,7 @@ StructuralElementEvaluator :: StructuralElementEvaluator()
  *
  *  // first evaluate nonzero basis function mask
  *  if ( elem->giveInterpolation()->hasSubPatchFormulation() ) {
- *      IGAIntegrationElement *ee = ( IGAIntegrationElement * ) ie;
+ *      IGAIntegrationElement *ee = static_cast< IGAIntegrationElement * >( ie );
  *      elem->giveInterpolation()->giveKnotSpanBasisFuncMask(* ee->giveKnotSpan(), mask);
  *      // loop over nonzero shape functions and assemble localization array
  *      answer.resize(0);
@@ -208,7 +208,7 @@ void StructuralElementEvaluator :: computeConsistentMassMatrix(FloatMatrix &answ
 // Computes numerically the consistent (full) mass matrix of the receiver.
 {
     //Element *elem = this->giveElement();
-    StructuralElement *elem = static_cast < StructuralElement *> ( this->giveElement() );
+    StructuralElement *elem = static_cast< StructuralElement * >( this->giveElement() );
     int ndofs = elem->computeNumberOfDofs();
     FloatMatrix n;
     IntegrationRule *iRule;
@@ -322,7 +322,7 @@ void StructuralElementEvaluator :: computeStrainVector(FloatArray &answer, Gauss
     Element *elem = this->giveElement();
 
     if ( !this->isActivated(tStep) ) {
-        answer.resize( StructuralMaterial :: giveSizeOfVoigtSymVector(gp->giveMaterialMode()) );
+        answer.resize( StructuralMaterial :: giveSizeOfVoigtSymVector( gp->giveMaterialMode() ) );
         answer.zero();
         return;
     }
@@ -349,8 +349,10 @@ void StructuralElementEvaluator :: updateInternalState(TimeStep *tStep)
     elem->computeVectorOf(EID_MomentumBalance, VM_Total, tStep, u);
 
 #if 0
-     // subtract initial displacements, if defined
-     if (initialDisplacements) u.subtract(initialDisplacements);
+    // subtract initial displacements, if defined
+    if ( initialDisplacements ) {
+        u.subtract(initialDisplacements);
+    }
 #endif
 
     FloatArray strain, stress;
@@ -358,7 +360,9 @@ void StructuralElementEvaluator :: updateInternalState(TimeStep *tStep)
     // force updating strains & stresses
     for ( int i = 0; i < elem->giveNumberOfIntegrationRules(); i++ ) {
 #ifdef __PARALLEL_MODE
-        if (this->giveElement()->giveKnotSpanParallelMode(i) == Element_remote) continue;
+        if ( this->giveElement()->giveKnotSpanParallelMode(i) == Element_remote ) {
+            continue;
+        }
 #endif
         IntegrationRule *iRule = elem->giveIntegrationRule(i);
         for ( int j = 0; j < iRule->giveNumberOfIntegrationPoints(); j++ ) {
@@ -369,21 +373,23 @@ void StructuralElementEvaluator :: updateInternalState(TimeStep *tStep)
     }
 
 #if 0
-     // Original unoptimized version
-     int i, j;
-     IntegrationRule *iRule;
-     FloatArray stress;
-     Element *elem = this->giveElement();
-     // force updating strains & stresses
-     for ( i = 0; i < elem->giveNumberOfIntegrationRules(); i++ ) {
-     #ifdef __PARALLEL_MODE
-         if (this->giveElement()->giveKnotSpanParallelMode(i) == Element_remote) continue;
-     #endif
+    // Original unoptimized version
+    int i, j;
+    IntegrationRule *iRule;
+    FloatArray stress;
+    Element *elem = this->giveElement();
+    // force updating strains & stresses
+    for ( i = 0; i < elem->giveNumberOfIntegrationRules(); i++ ) {
+ #ifdef __PARALLEL_MODE
+        if ( this->giveElement()->giveKnotSpanParallelMode(i) == Element_remote ) {
+            continue;
+        }
+ #endif
         iRule = elem->giveIntegrationRule(i);
         for ( j = 0; j < iRule->giveNumberOfIntegrationPoints(); j++ ) {
             computeStressVector(stress, iRule->getIntegrationPoint(j), tStep);
         }
-     }
+    }
 #endif
 }
 
@@ -409,9 +415,10 @@ void StructuralElementEvaluator :: computeStiffnessMatrix(FloatMatrix &answer, M
     numberOfIntegrationRules = elem->giveNumberOfIntegrationRules();
     // loop over individual integration rules
     for ( int ir = 0; ir < numberOfIntegrationRules; ir++ ) {
-
 #ifdef __PARALLEL_MODE
-        if (this->giveElement()->giveKnotSpanParallelMode(ir) == Element_remote) continue;
+        if ( this->giveElement()->giveKnotSpanParallelMode(ir) == Element_remote ) {
+            continue;
+        }
         //fprintf (stderr, "[%d] Computing element.knotspan %d.%d\n", elem->giveDomain()->giveEngngModel()->giveRank(), elem->giveNumber(), ir);
 #endif
         m->resize(0, 0);
@@ -441,5 +448,4 @@ void StructuralElementEvaluator :: computeStiffnessMatrix(FloatMatrix &answer, M
         }
     } // end loop over irules
 }
-
 } // end namespace oofem

@@ -40,7 +40,6 @@
 #define _IFT_InterfaceElem2dQuad_Name "interface2dquad"
 
 namespace oofem {
-
 class FEI2dLineQuad;
 
 /**
@@ -79,7 +78,6 @@ public:
     // definition & identification
     virtual const char *giveInputRecordName() const { return _IFT_InterfaceElem2dQuad_Name; }
     virtual const char *giveClassName() const { return "InterfaceElem2dQuad"; }
-    virtual classType giveClassID() const { return InterfaceElem2dQuadClass; }
     virtual IRResultType initializeFrom(InputRecord *ir);
     virtual MaterialMode giveMaterialMode() { return _2dInterface; }
 

@@ -36,8 +36,7 @@
 #include "classfactory.h"
 
 namespace oofem {
-
-REGISTER_CrossSection( EmptyCS );
+REGISTER_CrossSection(EmptyCS);
 
 EmptyCS :: EmptyCS(int n, Domain *d) : CrossSection(n, d) { }
 

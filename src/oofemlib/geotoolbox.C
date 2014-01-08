@@ -58,7 +58,7 @@ Polygon :: testPoint(double x, double y) const
         y2 = p2.coords(1);
 
         if ( ( ( y1 < y ) && ( y2 >= y ) ) ||
-            ( ( y2 < y ) && ( y1 >= y ) ) ) {
+             ( ( y2 < y ) && ( y1 >= y ) ) ) {
             if ( x1 + ( y - y1 ) / ( y2 - y1 ) * ( x2 - x1 ) < x ) {
                 oddNODES = !oddNODES;
             }
@@ -297,7 +297,7 @@ Graph :: testIfCoincident(node *p1, node *p2, node *q1, node *q2, double *alpha1
     //       (p2->y - p1->y)*(q2->x - q1->x));
 
     par = ( ( p1->x - p2->x ) * ( q2->y - q1->y ) -
-           ( p1->y - p2->y ) * ( q2->x - q1->x ) );
+            ( p1->y - p2->y ) * ( q2->x - q1->x ) );
 
 #ifdef GRAPH_DEBUG_PRINT
     fprintf(stderr, "p1 [%e %e] p2 [%e %e]    q1 [%e %e] q2 [%e %e]\n", p1->x, p1->y, p2->x, p2->y, q1->x, q1->y, q2->x, q2->y);
@@ -488,7 +488,7 @@ Graph :: testIfIntersect(node *p1, node *p2, node *q1, node *q2,
     double x, y, tp, tq, par;
 
     par = ( ( p1->x - p2->x ) * ( q2->y - q1->y ) -
-           ( p1->y - p2->y ) * ( q2->x - q1->x ) );
+            ( p1->y - p2->y ) * ( q2->x - q1->x ) );
 
 #ifdef GRAPH_DEBUG_PRINT
     fprintf(stderr, "p1 [%e %e] p2 [%e %e]    q1 [%e %e] q2 [%e %e]\n", p1->x, p1->y, p2->x, p2->y, q1->x, q1->y, q2->x, q2->y);
@@ -579,7 +579,7 @@ void
 Graph :: clip(Polygon &result, const Polygon &a, const Polygon &b)
 {
     // create lists s,c from a and b
-    Polygon :: PolygonVertexIterator it( &a);
+    Polygon :: PolygonVertexIterator it(& a);
     Vertex v;
     node *nw;
     int ret;
@@ -1053,7 +1053,7 @@ Graph :: clip(Polygon &result, const Polygon &a, const Polygon &b)
                             bool skip = false;
                             // 1 .... regular intersection
                             if ( ( p1->status == NS_IntersectionVertex ) || ( p2->status == NS_IntersectionVertex ) ||
-                                ( q1->status == NS_IntersectionVertex ) || ( q2->status == NS_IntersectionVertex ) ) {
+                                 ( q1->status == NS_IntersectionVertex ) || ( q2->status == NS_IntersectionVertex ) ) {
                                 bool _p1 = false, _p2 = false, _q1 = false, _q2 = false;
                                 int c1 = 0, c2 = 0;
                                 // check if IV not associated to same line
@@ -1733,7 +1733,7 @@ Graph :: testPoint(node *s, double x, double y) const
             y2 = auxs->next->y;
 
             if ( ( ( y1 < y ) && ( y2 >= y ) ) ||
-                ( ( y2 < y ) && ( y1 >= y ) ) ) {
+                 ( ( y2 < y ) && ( y1 >= y ) ) ) {
                 if ( x1 + ( y - y1 ) / ( y2 - y1 ) * ( x2 - x1 ) < x ) {
                     oddNODES = !oddNODES;
                 }

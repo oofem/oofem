@@ -42,7 +42,6 @@
 #include <vector>
 
 namespace oofem {
-
 /**
  * Plane straight line graph used as input for meshing with triangle.
  */
@@ -77,10 +76,10 @@ public:
      * @param maxArea Maximum allowed area of a triangle.
      * @param quadratic True if generated mesh should be quadratic (6 nodes).
      */
-     TriangleMesherInterface(double minAngle, double maxArea, bool quadratic) :
-         minAngle(minAngle), maxArea(maxArea), quadratic(quadratic) {};
-     /// Destructor.
-     ~TriangleMesherInterface() {};
+    TriangleMesherInterface(double minAngle, double maxArea, bool quadratic) :
+        minAngle(minAngle), maxArea(maxArea), quadratic(quadratic) {};
+    /// Destructor.
+    ~TriangleMesherInterface() {};
 
     /**
      * Simplifies a PSLG while respecting topology, running in linear time.
@@ -94,7 +93,7 @@ public:
      * @param limit Maximum difference allowed from new to old line.
      * @param minlen Minimum length of any segment (shorter segments will be forcibly removed). Will not respect the error limit.
      */
-    static void simplifyPSLG(Triangle_PSLG &coarse, const Triangle_PSLG &pslg, double limit, double minlen=0.0);
+    static void simplifyPSLG(Triangle_PSLG &coarse, const Triangle_PSLG &pslg, double limit, double minlen = 0.0);
 
     /**
      * Constructs a mesh from a PSLG.
@@ -114,20 +113,18 @@ public:
      */
     bool meshPSLG(const Triangle_PSLG &pslg,
                   const IntArray &outside, const IntArray &inside,
-                  std::vector<FloatArray> &nodes, std::vector<IntArray> &n_markers,
-                  std::vector<IntArray> &triangles, IntArray &t_markers,
-                  std::vector<IntArray> &segments, IntArray &s_markers) const;
+                  std :: vector< FloatArray > &nodes, std :: vector< IntArray > &n_markers,
+                  std :: vector< IntArray > &triangles, IntArray &t_markers,
+                  std :: vector< IntArray > &segments, IntArray &s_markers) const;
 
 protected:
     /**
      * Adds all neighboring regions to every node region.
      * Necessary since triangle can only store a single node number.
      */
-    static void fixNodeMarkers(const std::vector<FloatArray> &nodes, std::vector<IntArray> &n_markers,
-                               const std::vector<IntArray> &triangles, const IntArray &t_markers,
-                               const std::vector<IntArray> &segments, const IntArray &s_markers);
+    static void fixNodeMarkers(const std :: vector< FloatArray > &nodes, std :: vector< IntArray > &n_markers,
+                               const std :: vector< IntArray > &triangles, const IntArray &t_markers,
+                               const std :: vector< IntArray > &segments, const IntArray &s_markers);
 };
-
 } // end namespace oofem
 #endif // trianglemesherinterface_h
-

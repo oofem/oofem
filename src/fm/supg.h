@@ -45,7 +45,7 @@
 //@{
 #define _IFT_SUPG_Name "supg"
 #define _IFT_SUPG_deltat "deltat"
-#define _IFT_SUPG_deltatltf "deltatltf"
+#define _IFT_SUPG_deltatFunction "deltatltf"
 #define _IFT_SUPG_cmflag "cmflag"
 #define _IFT_SUPG_alpha "alpha"
 #define _IFT_SUPG_scaleflag "scaleflag"
@@ -80,8 +80,9 @@ protected:
     FloatArray accelerationVector; //, previousAccelerationVector;
     FloatArray incrementalSolutionVector;
 
+    ///@todo Use ScalarFunction here!
     double deltaT;
-    int deltaTLTF;
+    int deltaTF;
     /// Convergence tolerance.
     double atolv, rtolv;
     /// Max number of iterations.
@@ -126,8 +127,11 @@ public:
     }
     virtual ~SUPG() {
         if ( VelocityPressureField ) { delete VelocityPressureField; }
+
         if ( materialInterface ) { delete materialInterface; }
+
         if ( nMethod ) { delete nMethod; }
+
         if ( lhs ) { delete lhs; }
     }
 
@@ -154,11 +158,10 @@ public:
     // identification
     virtual const char *giveClassName() const { return "SUPG"; }
     virtual const char *giveInputRecordName() const { return _IFT_SUPG_Name; }
-    virtual classType giveClassID() const { return SUPGClass; }
 
     virtual fMode giveFormulation() { return TL; }
 
-    virtual void printDofOutputAt(FILE *stream, Dof *iDof, TimeStep *atTime);
+    virtual void printDofOutputAt(FILE *stream, Dof *iDof, TimeStep *tStep);
 
     virtual int requiresUnknownsDictionaryUpdate() { return renumberFlag; }
 
@@ -166,12 +169,12 @@ public:
     virtual double giveVariableScale(VarScaleType varId);
 
     virtual void updateDofUnknownsDictionary(DofManager *dman, TimeStep *tStep);
-    virtual int giveUnknownDictHashIndx(ValueModeType mode, TimeStep *stepN);
+    virtual int giveUnknownDictHashIndx(ValueModeType mode, TimeStep *tStep);
 
     virtual MaterialInterface *giveMaterialInterface(int n) { return materialInterface; }
 
-#ifdef __PETSC_MODULE
-    virtual void initPetscContexts();
+#ifdef __PARALLEL_MODE
+    virtual void initParallelContexts();
 #endif
 
 
@@ -184,14 +187,14 @@ protected:
     void updateDofUnknownsDictionary_predictor(TimeStep *tStep);
     void updateDofUnknownsDictionary_corrector(TimeStep *tStep);
 
-    void updateSolutionVectors(FloatArray& solutionVector, FloatArray& accelerationVector, FloatArray& incrementalSolutionVector, TimeStep* tStep);
-    void updateSolutionVectors_predictor(FloatArray& solutionVector, FloatArray& accelerationVector, TimeStep* tStep);
+    void updateSolutionVectors(FloatArray &solutionVector, FloatArray &accelerationVector, FloatArray &incrementalSolutionVector, TimeStep *tStep);
+    void updateSolutionVectors_predictor(FloatArray &solutionVector, FloatArray &accelerationVector, TimeStep *tStep);
 
     //void initDofManActivityMap ();
     //void updateDofManActivityMap (TimeStep* tStep);
     void updateDofManVals(TimeStep *tStep);
-    //void imposeAmbientPressureInOuterNodes(SparseMtrx* lhs, FloatArray* rhs, TimeStep* stepN);
-    //void __debug(TimeStep* atTime);
+    //void imposeAmbientPressureInOuterNodes(SparseMtrx* lhs, FloatArray* rhs, TimeStep* tStep);
+    //void __debug(TimeStep* tStep);
 };
 } // end namespace oofem
 #endif // supg_h

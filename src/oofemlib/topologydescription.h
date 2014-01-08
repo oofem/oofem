@@ -86,7 +86,7 @@ public:
      * @param tStep Active time step.
      */
     virtual void doOutput(TimeStep *tStep)
-    { OOFEM_ERROR2("%s::doOutput - Not implemented",this->giveClassName()); };
+    { OOFEM_ERROR2( "%s::doOutput - Not implemented", this->giveClassName() ); };
 
     /**
      * Generates the FE components from the bare mesh.
@@ -94,7 +94,7 @@ public:
      * @todo Placing it in a new domain is probably preferable.
      */
     virtual void replaceFEMesh() // (Domain *& newDomain)
-    { OOFEM_ERROR2("%s::replaceFEMesh - Not implemented",this->giveClassName()); }
+    { OOFEM_ERROR2( "%s::replaceFEMesh - Not implemented", this->giveClassName() ); }
 
     /**
      * Changes the connected domain of receiver.
@@ -105,8 +105,7 @@ public:
     /**
      * Gives the name of the class.
      */
-    virtual const char *giveClassName() const { return "TopologyDescription"; }
+    virtual const char *giveClassName() const = 0;
 };
-
 } // end namespace oofem
 #endif // topologydescription_h

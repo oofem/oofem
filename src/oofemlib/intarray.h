@@ -47,7 +47,7 @@
 
 #include <iosfwd>
 #if __cplusplus > 199711L
-#include <initializer_list>
+ #include <initializer_list>
 #endif
 
 namespace oofem {
@@ -86,19 +86,20 @@ private:
 public:
     /// @name Iterator for for-each loops:
     //@{
-    class iterator {
-    private:
+    class iterator
+    {
+private:
         int pos;
         const IntArray *vec;
 
-    public:
-        iterator(const IntArray* vec, int pos);
+public:
+        iterator(const IntArray *vec, int pos);
 
-        bool operator!=(const IntArray :: iterator& other) const;
+        bool operator!=(const IntArray :: iterator &other) const;
 
         int operator*() const;
 
-        const IntArray :: iterator& operator++();
+        const IntArray :: iterator &operator++();
     };
 
     IntArray :: iterator begin();
@@ -113,15 +114,15 @@ public:
     IntArray(const IntArray &);
 #if __cplusplus > 199711L
     /// Initializer list constructor.
-    IntArray(std::initializer_list<int> list);
+    IntArray(std :: initializer_list< int >list);
     /// Assignment operator.
-    IntArray & operator=(std::initializer_list<int> list);
+    IntArray &operator=(std :: initializer_list< int >list);
 #endif
     /// Destructor.
     ~IntArray();
 
     /// Assignment operator
-    IntArray & operator=(const IntArray &);
+    IntArray &operator=(const IntArray &);
 
     /**
      * Coefficient access function. Returns l-value of coefficient at given
@@ -359,7 +360,7 @@ public:
      */
     contextIOResultType restoreYourself(DataStream *stream, ContextMode mode);
 
-    friend std::ostream& operator<< (std::ostream &out, const IntArray &x);
+    friend std :: ostream &operator<<(std :: ostream &out, const IntArray &x);
 
 #ifdef __PARALLEL_MODE
     /**@name Methods for packing/unpacking to/from communication buffer */
@@ -385,8 +386,8 @@ public:
 #endif
 
 #ifdef BOOST_PYTHON
-    void __setitem__(int i, int val) { this->at(i+1) = val; }
-    int __getitem__(int i) { return this->at(i+1); }
+    void __setitem__(int i, int val) { this->at(i + 1) = val; }
+    int __getitem__(int i) { return this->at(i + 1); }
     void beCopyOf(const IntArray &src) { this->operator=(src); }
 #endif
 };
@@ -447,5 +448,3 @@ template< class operation >void quickSort(IntArray &arry, int l, int r, operatio
 template< class operation >void sort(IntArray &arry, operation op) { quickSort(arry, 1, arry.giveSize(), op); }
 } // end namespace oofem
 #endif // intarray_h
-
-

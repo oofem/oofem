@@ -62,7 +62,7 @@ RankineMatNl :: RankineMatNl(int n, Domain *d) : RankineMat(n, d), StructuralNon
 
 void
 RankineMatNl :: giveRealStressVector_PlaneStress(FloatArray &answer, GaussPoint *gp,
-                                     const FloatArray &totalStrain, TimeStep *atTime)
+                                                 const FloatArray &totalStrain, TimeStep *tStep)
 {
     RankineMatNlStatus *nlStatus = static_cast< RankineMatNlStatus * >( this->giveStatus(gp) );
     //mj this->initGpForNewStep(gp);
@@ -73,7 +73,7 @@ RankineMatNl :: giveRealStressVector_PlaneStress(FloatArray &answer, GaussPoint 
     // nonlocal method "computeDamage" performs the plastic return
     // for all Gauss points when it is called for the first time
     // in the iteration
-    tempDam = this->computeDamage(gp, atTime);
+    tempDam = this->computeDamage(gp, tStep);
     nlStatus->giveTempEffectiveStress(tempEffStress);
     answer.beScaled(1.0 - tempDam, tempEffStress);
     nlStatus->setTempDamage(tempDam);
@@ -87,7 +87,7 @@ RankineMatNl :: giveRealStressVector_PlaneStress(FloatArray &answer, GaussPoint 
 
 void
 RankineMatNl :: giveRealStressVector_1d(FloatArray &answer, GaussPoint *gp,
-                                     const FloatArray &totalStrain, TimeStep *atTime)
+                                        const FloatArray &totalStrain, TimeStep *tStep)
 {
     RankineMatNlStatus *nlStatus = static_cast< RankineMatNlStatus * >( this->giveStatus(gp) );
     //mj this->initGpForNewStep(gp);
@@ -98,7 +98,7 @@ RankineMatNl :: giveRealStressVector_1d(FloatArray &answer, GaussPoint *gp,
     // nonlocal method "computeDamage" performs the plastic return
     // for all Gauss points when it is called for the first time
     // in the iteration
-    tempDam = this->computeDamage(gp, atTime);
+    tempDam = this->computeDamage(gp, tStep);
     nlStatus->giveTempEffectiveStress(tempEffStress);
     answer.beScaled(1.0 - tempDam, tempEffStress);
     nlStatus->setTempDamage(tempDam);
@@ -112,17 +112,17 @@ RankineMatNl :: giveRealStressVector_1d(FloatArray &answer, GaussPoint *gp,
 
 
 void
-RankineMatNl :: givePlaneStressStiffMtrx(FloatMatrix &answer, MatResponseMode mode, GaussPoint *gp, TimeStep *atTime)
+RankineMatNl :: givePlaneStressStiffMtrx(FloatMatrix &answer, MatResponseMode mode, GaussPoint *gp, TimeStep *tStep)
 {
     if ( mode == ElasticStiffness ) {
-        this->giveLinearElasticMaterial()->giveStiffnessMatrix(answer, mode, gp, atTime);
+        this->giveLinearElasticMaterial()->giveStiffnessMatrix(answer, mode, gp, tStep);
         return;
     }
 
     RankineMatNlStatus *status = static_cast< RankineMatNlStatus * >( this->giveStatus(gp) );
 
     if ( mode == SecantStiffness ) {
-        this->giveLinearElasticMaterial()->giveStiffnessMatrix(answer, mode, gp, atTime);
+        this->giveLinearElasticMaterial()->giveStiffnessMatrix(answer, mode, gp, tStep);
         double damage = status->giveTempDamage();
         answer.times(1. - damage);
         return;
@@ -136,12 +136,12 @@ RankineMatNl :: givePlaneStressStiffMtrx(FloatMatrix &answer, MatResponseMode mo
             gprime = 0.;
         } else { // loading
             double kappa;
-            computeCumPlasticStrain(kappa, gp, atTime);
+            computeCumPlasticStrain(kappa, gp, tStep);
             gprime = computeDamageParamPrime(kappa);
             gprime *= ( 1. - mm );
         }
 
-        evaluatePlaneStressStiffMtrx(answer, mode, gp, atTime, gprime);
+        evaluatePlaneStressStiffMtrx(answer, mode, gp, tStep, gprime);
         return;
     }
 
@@ -149,7 +149,7 @@ RankineMatNl :: givePlaneStressStiffMtrx(FloatMatrix &answer, MatResponseMode mo
 }
 
 void
-RankineMatNl :: updateBeforeNonlocAverage(const FloatArray &strainVector, GaussPoint *gp, TimeStep *atTime)
+RankineMatNl :: updateBeforeNonlocAverage(const FloatArray &strainVector, GaussPoint *gp, TimeStep *tStep)
 {
     /* Implements the service updating local variables in given integration points,
      * which take part in nonlocal average process. Actually, no update is necessary,
@@ -163,20 +163,20 @@ RankineMatNl :: updateBeforeNonlocAverage(const FloatArray &strainVector, GaussP
 
     this->initTempStatus(gp);
     this->performPlasticityReturn(gp, strainVector);
-    this->computeLocalCumPlasticStrain(cumPlasticStrain, gp, atTime);
+    this->computeLocalCumPlasticStrain(cumPlasticStrain, gp, tStep);
     // standard formulation based on averaging of equivalent strain
     nlstatus->setLocalCumPlasticStrainForAverage(cumPlasticStrain);
 }
 
 // returns in "kappa" the value of kappa_hat = m*kappa_nonlocal + (1-m)*kappa_local
 void
-RankineMatNl :: computeCumPlasticStrain(double &kappa, GaussPoint *gp, TimeStep *atTime)
+RankineMatNl :: computeCumPlasticStrain(double &kappa, GaussPoint *gp, TimeStep *tStep)
 {
     double nonlocalContribution, nonlocalCumPlasticStrain = 0.0;
     RankineMatNlStatus *nonlocStatus, *status = static_cast< RankineMatNlStatus * >( this->giveStatus(gp) );
 
     this->buildNonlocalPointTable(gp);
-    this->updateDomainBeforeNonlocAverage(atTime);
+    this->updateDomainBeforeNonlocAverage(tStep);
     double localCumPlasticStrain = status->giveLocalCumPlasticStrainForAverage();
     // compute nonlocal cumulative plastic strain
     std :: list< localIntegrationRecord > *list = this->giveIPIntegrationList(gp);
@@ -212,9 +212,9 @@ Interface *
 RankineMatNl :: giveInterface(InterfaceType type)
 {
     if ( type == NonlocalMaterialExtensionInterfaceType ) {
-        return static_cast< StructuralNonlocalMaterialExtensionInterface * >(this);
+        return static_cast< StructuralNonlocalMaterialExtensionInterface * >( this );
     } else if ( type == NonlocalMaterialStiffnessInterfaceType ) {
-        return static_cast< NonlocalMaterialStiffnessInterface * >(this);
+        return static_cast< NonlocalMaterialStiffnessInterface * >( this );
     } else {
         return NULL;
     }
@@ -244,11 +244,11 @@ RankineMatNl :: giveInputRecord(DynamicInputRecord &input)
 
 
 double
-RankineMatNl :: computeDamage(GaussPoint *gp, TimeStep *atTime)
+RankineMatNl :: computeDamage(GaussPoint *gp, TimeStep *tStep)
 {
     RankineMatNlStatus *nlStatus = static_cast< RankineMatNlStatus * >( this->giveStatus(gp) );
     double nlKappa;
-    this->computeCumPlasticStrain(nlKappa, gp, atTime);
+    this->computeCumPlasticStrain(nlKappa, gp, tStep);
     double dam, tempDam;
     dam = nlStatus->giveDamage();
     tempDam = this->computeDamageParam(nlKappa);
@@ -270,7 +270,7 @@ RankineMatNl :: computeDamage(GaussPoint *gp, TimeStep *atTime)
 // THIS METHOD CAN BE USED IN THE SAME FORM FOR ALL NONLOCAL DAMAGE-PLASTIC MODELS
 void
 RankineMatNl :: NonlocalMaterialStiffnessInterface_addIPContribution(SparseMtrx &dest, const UnknownNumberingScheme &s,
-                                                                     GaussPoint *gp, TimeStep *atTime)
+                                                                     GaussPoint *gp, TimeStep *tStep)
 {
     double coeff;
     RankineMatNlStatus *status = static_cast< RankineMatNlStatus * >( this->giveStatus(gp) );
@@ -282,14 +282,14 @@ RankineMatNl :: NonlocalMaterialStiffnessInterface_addIPContribution(SparseMtrx 
 
     FloatMatrix contrib;
 
-    if ( this->giveLocalNonlocalStiffnessContribution(gp, loc, s, lcontrib, atTime) == 0 ) {
+    if ( this->giveLocalNonlocalStiffnessContribution(gp, loc, s, lcontrib, tStep) == 0 ) {
         return;
     }
 
     for ( pos = list->begin(); pos != list->end(); ++pos ) {
         rmat = dynamic_cast< RankineMatNl * >( pos->nearGp->giveMaterial() );
         if ( rmat ) {
-            rmat->giveRemoteNonlocalStiffnessContribution(pos->nearGp, rloc, s, rcontrib, atTime);
+            rmat->giveRemoteNonlocalStiffnessContribution(pos->nearGp, rloc, s, rcontrib, tStep);
             coeff = gp->giveElement()->computeVolumeAround(gp) * pos->weight / status->giveIntegrationScale();
 
             int i, j, dim1 = loc.giveSize(), dim2 = rloc.giveSize();
@@ -319,7 +319,7 @@ RankineMatNl :: NonlocalMaterialStiffnessInterface_giveIntegrationDomainList(Gau
 // (if damage is not growing, the contribution is not considered at all)
 int
 RankineMatNl :: giveLocalNonlocalStiffnessContribution(GaussPoint *gp, IntArray &loc, const UnknownNumberingScheme &s,
-                                                       FloatArray &lcontrib, TimeStep *atTime)
+                                                       FloatArray &lcontrib, TimeStep *tStep)
 {
     int nrows, nsize;
     double sum, nlKappa, damage, tempDamage;
@@ -337,7 +337,7 @@ RankineMatNl :: giveLocalNonlocalStiffnessContribution(GaussPoint *gp, IntArray 
     elem->giveLocationArray(loc, EID_MomentumBalance, s);
     status->giveTempEffectiveStress(stress);
     elem->computeBmatrixAt(gp, b);
-    this->computeCumPlasticStrain(nlKappa, gp, atTime);
+    this->computeCumPlasticStrain(nlKappa, gp, tStep);
     double factor = computeDamageParamPrime(nlKappa);
     factor *= mm; // this factor is m*gprime
     nrows = b.giveNumberOfColumns();
@@ -360,7 +360,7 @@ RankineMatNl :: giveLocalNonlocalStiffnessContribution(GaussPoint *gp, IntArray 
 // (where eta is the derivative of cum. plastic strain wrt final strain)
 void
 RankineMatNl :: giveRemoteNonlocalStiffnessContribution(GaussPoint *gp, IntArray &rloc, const UnknownNumberingScheme &s,
-                                                        FloatArray &rcontrib, TimeStep *atTime)
+                                                        FloatArray &rcontrib, TimeStep *tStep)
 {
     RankineMatNlStatus *status = static_cast< RankineMatNlStatus * >( this->giveStatus(gp) );
     StructuralElement *elem = static_cast< StructuralElement * >( gp->giveElement() );
@@ -393,22 +393,22 @@ RankineMatNl :: giveRemoteNonlocalStiffnessContribution(GaussPoint *gp, IntArray
 
 
 int
-RankineMatNl :: giveIPValue(FloatArray &answer, GaussPoint *aGaussPoint, InternalStateType type, TimeStep *atTime)
+RankineMatNl :: giveIPValue(FloatArray &answer, GaussPoint *gp, InternalStateType type, TimeStep *tStep)
 {
     if ( type == IST_CumPlasticStrain_2 ) {
         answer.resize(1);
         double dummy;
         // this method also stores the nonlocal kappa in status ... kappa_nl
-        computeCumPlasticStrain(dummy, aGaussPoint, atTime);
-        RankineMatNlStatus *status = static_cast< RankineMatNlStatus * >( this->giveStatus(aGaussPoint) );
+        computeCumPlasticStrain(dummy, gp, tStep);
+        RankineMatNlStatus *status = static_cast< RankineMatNlStatus * >( this->giveStatus(gp) );
         answer.at(1) = status->giveKappa_nl();
         return 1;
     } else if ( type == IST_MaxEquivalentStrainLevel ) {
         answer.resize(1);
-        computeCumPlasticStrain(answer.at(1), aGaussPoint, atTime);
+        computeCumPlasticStrain(answer.at(1), gp, tStep);
         return 1;
     } else {
-        return RankineMat :: giveIPValue(answer, aGaussPoint, type, atTime);
+        return RankineMat :: giveIPValue(answer, gp, type, tStep);
     }
 }
 
@@ -452,14 +452,14 @@ RankineMatNlStatus :: initTempStatus()
 
 
 void
-RankineMatNlStatus :: updateYourself(TimeStep *atTime)
+RankineMatNlStatus :: updateYourself(TimeStep *tStep)
 //
 // updates variables (nonTemp variables describing situation at previous equilibrium state)
 // after a new equilibrium state has been reached
 // temporary variables are having values corresponding to newly reched equilibrium.
 //
 {
-    RankineMatStatus :: updateYourself(atTime);
+    RankineMatStatus :: updateYourself(tStep);
 }
 
 
@@ -502,7 +502,7 @@ Interface *
 RankineMatNlStatus :: giveInterface(InterfaceType type)
 {
     if ( type == NonlocalMaterialStatusExtensionInterfaceType ) {
-        return static_cast< StructuralNonlocalMaterialStatusExtensionInterface * >(this);
+        return static_cast< StructuralNonlocalMaterialStatusExtensionInterface * >( this );
     } else {
         return RankineMatStatus :: giveInterface(type);
     }
@@ -511,18 +511,18 @@ RankineMatNlStatus :: giveInterface(InterfaceType type)
 
 #ifdef __PARALLEL_MODE
 int
-RankineMatNl :: packUnknowns(CommunicationBuffer &buff, TimeStep *stepN, GaussPoint *ip)
+RankineMatNl :: packUnknowns(CommunicationBuffer &buff, TimeStep *tStep, GaussPoint *ip)
 {
     RankineMatNlStatus *nlStatus = static_cast< RankineMatNlStatus * >( this->giveStatus(ip) );
 
     this->buildNonlocalPointTable(ip);
-    this->updateDomainBeforeNonlocAverage(stepN);
+    this->updateDomainBeforeNonlocAverage(tStep);
 
     return buff.packDouble( nlStatus->giveLocalCumPlasticStrainForAverage() );
 }
 
 int
-RankineMatNl :: unpackAndUpdateUnknowns(CommunicationBuffer &buff, TimeStep *stepN, GaussPoint *ip)
+RankineMatNl :: unpackAndUpdateUnknowns(CommunicationBuffer &buff, TimeStep *tStep, GaussPoint *ip)
 {
     int result;
     RankineMatNlStatus *nlStatus = static_cast< RankineMatNlStatus * >( this->giveStatus(ip) );

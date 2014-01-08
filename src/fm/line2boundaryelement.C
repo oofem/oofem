@@ -40,8 +40,7 @@
 #include "classfactory.h"
 
 namespace oofem {
-
-REGISTER_Element( Line2BoundaryElement );
+REGISTER_Element(Line2BoundaryElement);
 
 FEI2dLineQuad Line2BoundaryElement :: fei(1, 2);
 
@@ -51,24 +50,22 @@ Line2BoundaryElement :: Line2BoundaryElement(int n, Domain *aDomain) : FMElement
     this->numberOfIntegrationRules = 1;
     integrationRulesArray = new IntegrationRule * [ 1 ];
     integrationRulesArray [ 0 ] = new GaussIntegrationRule(1, this);
-    this->giveCrossSection()->setupIntegrationPoints( *integrationRulesArray[0], 2, this );
+    this->giveCrossSection()->setupIntegrationPoints(* integrationRulesArray [ 0 ], 2, this);
 }
 
 Line2BoundaryElement :: ~Line2BoundaryElement()
-{
-}
+{}
 
-FEInterpolation * Line2BoundaryElement :: giveInterpolation() const
+FEInterpolation *Line2BoundaryElement :: giveInterpolation() const
 {
-    return &this->fei;
+    return & this->fei;
 }
 
 void Line2BoundaryElement :: giveDofManDofIDMask(int i, EquationID eid, IntArray &nodeDofIDMask) const
 {
-    if (eid == EID_MomentumBalance || eid == EID_MomentumBalance_ConservationEquation) {
+    if ( eid == EID_MomentumBalance || eid == EID_MomentumBalance_ConservationEquation ) {
         nodeDofIDMask.setValues(2, V_u, V_v);
-    }
-    else {
+    } else {
         nodeDofIDMask.resize(0);
     }
 }
@@ -76,31 +73,34 @@ void Line2BoundaryElement :: giveDofManDofIDMask(int i, EquationID eid, IntArray
 Interface *Line2BoundaryElement :: giveInterface(InterfaceType it)
 {
     switch ( it ) {
-        case SpatialLocalizerInterfaceType:
-            return static_cast< SpatialLocalizerInterface * >(this);
-        case EIPrimaryUnknownMapperInterfaceType:
-            return static_cast< EIPrimaryUnknownMapperInterface * >(this);
-        default:
-            return FMElement :: giveInterface(it);
+    case SpatialLocalizerInterfaceType:
+        return static_cast< SpatialLocalizerInterface * >( this );
+
+    case EIPrimaryUnknownMapperInterfaceType:
+        return static_cast< EIPrimaryUnknownMapperInterface * >( this );
+
+    default:
+        return FMElement :: giveInterface(it);
     }
 }
 
 double Line2BoundaryElement :: SpatialLocalizerI_giveDistanceFromParametricCenter(const FloatArray &coords)
 {
     FloatArray c;
-    c = *this->giveNode(3)->giveCoordinates();
+    c = * this->giveNode(3)->giveCoordinates();
     return c.distance(coords);
 }
 
 int Line2BoundaryElement :: EIPrimaryUnknownMI_computePrimaryUnknownVectorAt(ValueModeType mode,
-        TimeStep *tStep, const FloatArray &gcoords, FloatArray &answer)
+                                                                             TimeStep *tStep, const FloatArray &gcoords, FloatArray &answer)
 {
     FloatArray lcoords, closest;
     double distance = this->SpatialLocalizerI_giveClosestPoint(lcoords, closest, gcoords);
-    if (distance < 0) {
+    if ( distance < 0 ) {
         answer.resize(0);
         return false;
     }
+
     this->EIPrimaryUnknownMI_computePrimaryUnknownVectorAtLocal(mode, tStep, lcoords, answer);
     return true;
 }
@@ -111,21 +111,20 @@ void Line2BoundaryElement :: EIPrimaryUnknownMI_givePrimaryUnknownVectorDofID(In
 }
 
 void Line2BoundaryElement :: EIPrimaryUnknownMI_computePrimaryUnknownVectorAtLocal(ValueModeType mode,
-        TimeStep *tStep, const FloatArray &lcoords, FloatArray &answer)
+                                                                                   TimeStep *tStep, const FloatArray &lcoords, FloatArray &answer)
 {
     FloatArray n;
-    this->fei.evalN(answer, lcoords, FEIElementGeometryWrapper(this));
+    this->fei.evalN( answer, lcoords, FEIElementGeometryWrapper(this) );
 
     IntArray dofIDs;
     this->EIPrimaryUnknownMI_givePrimaryUnknownVectorDofID(dofIDs);
 
-    answer.resize(dofIDs.giveSize());
+    answer.resize( dofIDs.giveSize() );
     answer.zero();
-    for (int i = 1; i <= n.giveSize(); ++i) {
-        for (int j = 1; j <= dofIDs.giveSize(); ++j) {
-            answer.at(j) += n.at(i)*this->giveNode(i)->giveDofWithID(dofIDs.at(j))->giveUnknown(mode, tStep);
+    for ( int i = 1; i <= n.giveSize(); ++i ) {
+        for ( int j = 1; j <= dofIDs.giveSize(); ++j ) {
+            answer.at(j) += n.at(i) * this->giveNode(i)->giveDofWithID( dofIDs.at(j) )->giveUnknown(mode, tStep);
         }
     }
 }
-
 } // end namespace oofem

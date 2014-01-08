@@ -53,7 +53,6 @@
 //@}
 
 namespace oofem {
-
 /**
  * Mises Nonlocal material status.
  * @author Milan
@@ -79,7 +78,6 @@ public:
 
     // DEFINITION
     virtual const char *giveClassName() const { return "MisesMatNlStatus"; }
-    virtual classType giveClassID() const { return MisesMatClass; }
 
     virtual void initTempStatus();
 
@@ -108,7 +106,6 @@ public:
     virtual ~MisesMatNl();
 
     virtual const char *giveClassName() const { return "MisesMatNl"; }
-    virtual classType giveClassID() const { return MisesMatClass; }
     virtual const char *giveInputRecordName() const { return _IFT_MisesMatNl_Name; }
 
     virtual IRResultType initializeFrom(InputRecord *ir);
@@ -123,25 +120,25 @@ public:
      * @param tStep Time step.
      */
     virtual void computeCumPlasticStrain(double &kappa, GaussPoint *gp, TimeStep *tStep);
-    double computeDamage(GaussPoint *gp, TimeStep *atTime);
+    double computeDamage(GaussPoint *gp, TimeStep *tStep);
     void modifyNonlocalWeightFunctionAround(GaussPoint *gp);
     double computeDistanceModifier(double damage);
-    void computeLocalCumPlasticStrain(double &kappa, GaussPoint *gp, TimeStep *atTime)
+    void computeLocalCumPlasticStrain(double &kappa, GaussPoint *gp, TimeStep *tStep)
     {
-        MisesMat :: computeCumPlastStrain(kappa, gp, atTime);
+        MisesMat :: computeCumPlastStrain(kappa, gp, tStep);
     }
 
     virtual void give1dStressStiffMtrx(FloatMatrix &answer, MatResponseMode mmode, GaussPoint *gp, TimeStep *tStep);
-    //virtual void givePlaneStrainStiffMtrx(FloatMatrix& answer, MatResponseMode, GaussPoint *gp,TimeStep *atTime);
-    //virtual void give3dMaterialStiffnessMatrix(FloatMatrix& answer, MatResponseMode, GaussPoint *gp, TimeStep *atTime);
+    //virtual void givePlaneStrainStiffMtrx(FloatMatrix& answer, MatResponseMode, GaussPoint *gp,TimeStep *tStep);
+    //virtual void give3dMaterialStiffnessMatrix(FloatMatrix& answer, MatResponseMode, GaussPoint *gp, TimeStep *tStep);
 
 #ifdef __OOFEG
 #endif
 
     virtual void NonlocalMaterialStiffnessInterface_addIPContribution(SparseMtrx &dest, const UnknownNumberingScheme &s,
-                                                                      GaussPoint *gp, TimeStep *atTime);
+                                                                      GaussPoint *gp, TimeStep *tStep);
 
-    virtual std::list< localIntegrationRecord > *NonlocalMaterialStiffnessInterface_giveIntegrationDomainList(GaussPoint *gp);
+    virtual std :: list< localIntegrationRecord > *NonlocalMaterialStiffnessInterface_giveIntegrationDomainList(GaussPoint *gp);
 
     /**
      * Computes the "local" part of nonlocal stiffness contribution assembled for given integration point.
@@ -166,15 +163,15 @@ public:
     void giveRemoteNonlocalStiffnessContribution(GaussPoint *gp, IntArray &rloc, const UnknownNumberingScheme &s,
                                                  FloatArray &rcontrib, TimeStep *tStep);
 
-    virtual void giveRealStressVector(FloatArray &answer,  GaussPoint *gp, const FloatArray &strainVector, TimeStep *atTime);
+    virtual void giveRealStressVector(FloatArray &answer,  GaussPoint *gp, const FloatArray &strainVector, TimeStep *tStep);
 
-    virtual void updateBeforeNonlocAverage(const FloatArray &strainVector, GaussPoint *gp, TimeStep *atTime);
+    virtual void updateBeforeNonlocAverage(const FloatArray &strainVector, GaussPoint *gp, TimeStep *tStep);
 
     virtual int hasBoundedSupport() { return 1; }
 
 #ifdef __PARALLEL_MODE
-    int packUnknowns(CommunicationBuffer &buff, TimeStep *stepN, GaussPoint *ip);
-    int unpackAndUpdateUnknowns(CommunicationBuffer &buff, TimeStep *stepN, GaussPoint *ip);
+    int packUnknowns(CommunicationBuffer &buff, TimeStep *tStep, GaussPoint *ip);
+    int unpackAndUpdateUnknowns(CommunicationBuffer &buff, TimeStep *tStep, GaussPoint *ip);
     int estimatePackSize(CommunicationBuffer &buff, GaussPoint *ip);
 #endif
 

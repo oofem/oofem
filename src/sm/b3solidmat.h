@@ -64,7 +64,6 @@ public:
 
     // definition
     virtual const char *giveClassName() const { return "B3SolidMaterialStatus"; }
-    virtual classType giveClassID() const { return B3SolidMaterialStatusClass; }
 };
 
 
@@ -117,7 +116,6 @@ public:
 
     virtual const char *giveClassName() const { return "B3SolidMaterial"; }
     virtual const char *giveInputRecordName() const { return _IFT_B3SolidMaterial_Name; }
-    virtual classType giveClassID() const { return B3SolidMaterialClass; }
     virtual IRResultType initializeFrom(InputRecord *ir);
 
     virtual void giveThermalDilatationVector(FloatArray &answer, GaussPoint *, TimeStep *);
@@ -149,7 +147,7 @@ protected:
     double inverse_sorption_isotherm(double w);
 
     /// Evaluation of characteristic moduli of the non-aging Kelvin chain.
-    virtual void computeCharCoefficients(FloatArray &answer, double atTime);
+    virtual void computeCharCoefficients(FloatArray &answer, double tStep);
 
     virtual void computeCharTimes();
 
@@ -175,6 +173,5 @@ protected:
     /// Computes relative humidity increment at given time step and GP
     double giveHumidityIncrement(GaussPoint *gp, TimeStep *tStep);
 };
-
 } // end namespace oofem
 #endif // b3solidmat_h

@@ -46,7 +46,6 @@
 #define _IFT_Truss3d_Name "truss3d"
 
 namespace oofem {
-
 /**
  * This class implements a two-node truss bar element for three-dimensional
  * analysis.
@@ -63,7 +62,7 @@ public:
     Truss3d(int n, Domain *d);
     virtual ~Truss3d() { }
 
-    virtual FEInterpolation *giveInterpolation() const { return &interp; }
+    virtual FEInterpolation *giveInterpolation() const { return & interp; }
 
     virtual double computeLength();
 
@@ -99,7 +98,6 @@ public:
     // definition & identification
     virtual const char *giveInputRecordName() const { return _IFT_Truss3d_Name; }
     virtual const char *giveClassName() const { return "Truss3d"; }
-    virtual classType giveClassID() const { return Truss3dClass; }
     virtual IRResultType initializeFrom(InputRecord *ir);
     virtual MaterialMode giveMaterialMode() { return _1dMat; }
 

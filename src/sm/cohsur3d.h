@@ -70,7 +70,7 @@ public:
     CohesiveSurface3d(int n, Domain *d);
     virtual ~CohesiveSurface3d() {};
 
-    virtual void computeBmatrixAt(GaussPoint *aGaussPoint, FloatMatrix &answer, int li, int ui);
+    virtual void computeBmatrixAt(GaussPoint *gp, FloatMatrix &answer, int li, int ui);
     virtual double computeVolumeAround(GaussPoint *gp);
     virtual int computeNumberOfDofs() { return 6 * giveNumberOfNodes(); }
     virtual void giveDofManDofIDMask(int inode, EquationID ut, IntArray &answer) const;
@@ -81,7 +81,6 @@ public:
     // definition & identification
     virtual const char *giveClassName() const { return "CohesiveSurface3d"; }
     virtual const char *giveInputRecordName() const { return _IFT_CohesiveSurface3d_Name; }
-    virtual classType giveClassID() const { return CohesiveSurface3dClass; }
 
     // input and output
     virtual IRResultType initializeFrom(InputRecord *ir);

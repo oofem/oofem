@@ -58,14 +58,13 @@ protected:
 
 public:
     QBrick1_ht(int n, Domain *d);
-    virtual ~ QBrick1_ht();
+    virtual ~QBrick1_ht();
 
     virtual double computeVolumeAround(GaussPoint *gp);
     virtual FEInterpolation *giveInterpolation() const { return & interpolation; }
     // definition & identification
     virtual const char *giveInputRecordName() const { return _IFT_QBrick1_ht_Name; }
     virtual const char *giveClassName() const { return "QBrick1_ht"; }
-    virtual classType giveClassID() const { return QBrick1_htClass; }
 
     virtual int computeNumberOfDofs() { return ( emode == HeatTransferEM ) ? 20 : 40; }
     virtual IRResultType initializeFrom(InputRecord *ir);
@@ -80,7 +79,7 @@ public:
     virtual void SPRNodalRecoveryMI_giveDofMansDeterminedByPatch(IntArray &answer, int pap);
     virtual int SPRNodalRecoveryMI_giveNumberOfIP();
     virtual SPRPatchType SPRNodalRecoveryMI_givePatchType();
-    
+
     virtual Element *SpatialLocalizerI_giveElement() { return this; }
     virtual int SpatialLocalizerI_containsPoint(const FloatArray &coords);
     virtual double SpatialLocalizerI_giveDistanceFromParametricCenter(const FloatArray &coords);
@@ -100,8 +99,6 @@ public:
     virtual MaterialMode giveMaterialMode() { return _3dHeMo; }
     virtual const char *giveInputRecordName() const { return _IFT_QBrick1_hmt_Name; }
     virtual const char *giveClassName() const { return "QBrick1_hmt"; }
-    virtual classType giveClassID() const { return QBrick1_hmtClass; }
 };
-
 } // end namespace oofem
 #endif // qbrick1_ht_h

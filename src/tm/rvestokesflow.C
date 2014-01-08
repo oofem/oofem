@@ -33,7 +33,6 @@
  */
 
 #include "rvestokesflow.h"
-#include "oofemtxtdatareader.h"
 #include "util.h"
 #include "rveengngmodel.h"
 #include "engngm.h"
@@ -48,8 +47,7 @@
 #include <sstream>
 
 namespace oofem {
-
-REGISTER_Material( RVEStokesFlow );
+REGISTER_Material(RVEStokesFlow);
 
 RVEStokesFlowMaterialStatus :: RVEStokesFlowMaterialStatus(int n, Domain *d, GaussPoint *g, EngngModel *rve) :
     TransportMaterialStatus(n, d, g)
@@ -88,10 +86,10 @@ RVEStokesFlowMaterialStatus :: exportFilter(GaussPoint *gp, TimeStep *tStep)
     FloatArray grapP = this->giveTempGradient(), seepageVelocity;
 
     rveEngngModel *rveE;
-    rveE = dynamic_cast< rveEngngModel * >(this->rve);
+    rveE = dynamic_cast< rveEngngModel * >( this->rve );
 
     rveE->rveSetBoundaryConditions(10, grapP);
-    rveE->rveGiveCharacteristicData(1, &grapP, &seepageVelocity, tStep);
+    rveE->rveGiveCharacteristicData(1, & grapP, & seepageVelocity, tStep);
 
     basefilename = this->rve->giveOutputBaseFileName();
 
@@ -149,9 +147,7 @@ RVEStokesFlowMaterialStatus :: restoreContext(DataStream *stream, ContextMode mo
 }
 
 RVEStokesFlow :: RVEStokesFlow(int n, Domain *d) : RVEMaterial(n, d), TransportMaterial(n, d)
-{
-
-}
+{}
 
 IRResultType RVEStokesFlow :: initializeFrom(InputRecord *ir)
 {
@@ -162,10 +158,10 @@ IRResultType RVEStokesFlow :: initializeFrom(InputRecord *ir)
 }
 
 int
-RVEStokesFlow :: giveIPValue(FloatArray &answer, GaussPoint *aGaussPoint, InternalStateType type, TimeStep *atTime)
+RVEStokesFlow :: giveIPValue(FloatArray &answer, GaussPoint *gp, InternalStateType type, TimeStep *tStep)
 {
     RVEStokesFlowMaterialStatus *thisMaterialStatus;
-    thisMaterialStatus = static_cast< RVEStokesFlowMaterialStatus * >( this->giveStatus(aGaussPoint) );
+    thisMaterialStatus = static_cast< RVEStokesFlowMaterialStatus * >( this->giveStatus(gp) );
     FloatMatrix temp;
     answer.resize(3);
     answer.zero();
@@ -191,7 +187,7 @@ RVEStokesFlow :: giveIPValue(FloatArray &answer, GaussPoint *aGaussPoint, Intern
         answer.at(4) = temp.at(2, 2);
         break;
     default:
-        return TransportMaterial :: giveIPValue(answer, aGaussPoint, type, atTime);
+        return TransportMaterial :: giveIPValue(answer, gp, type, tStep);
     }
 
     return 1;
@@ -214,7 +210,7 @@ RVEStokesFlow :: giveFluxVector(FloatArray &answer, GaussPoint *gp, const FloatA
         FloatArray X;
         rveEngngModel *rveE;
 
-        rveE = dynamic_cast< rveEngngModel * >(this->rve);
+        rveE = dynamic_cast< rveEngngModel * >( this->rve );
 
         X = grad;
 
@@ -222,17 +218,17 @@ RVEStokesFlow :: giveFluxVector(FloatArray &answer, GaussPoint *gp, const FloatA
 
         // Compute seepage velocity
         rveE->rveSetBoundaryConditions(BCType, grad);
-        rveE->rveGiveCharacteristicData(1, &X, &answer, tStep);
+        rveE->rveGiveCharacteristicData(1, & X, & answer, tStep);
 
         OOFEM_LOG_DEBUG( "Pressure gradient gradP=[%f %f] yields velocity vector [%f %f]\n", X.at(1), X.at(2), answer.at(1), answer.at(2) );
 
-        
+
         status->setTempGradient(X);
         status->setTempFlux(answer);
 
         // Compute tangent
         FloatMatrix K;
-        rveE->rveGiveCharacteristicData(2, &X, &K, tStep);
+        rveE->rveGiveCharacteristicData(2, & X, & K, tStep);
         status->letTempTangentMatrixBe(K);
     }
 
@@ -264,7 +260,7 @@ RVEStokesFlow :: exportFilter(EngngModel *E, GaussPoint *gp, TimeStep *tStep)
 }
 
 void
-RVEStokesFlow :: giveCharacteristicMatrix(FloatMatrix &answer, MatResponseMode, GaussPoint *gp, TimeStep *atTime)
+RVEStokesFlow :: giveCharacteristicMatrix(FloatMatrix &answer, MatResponseMode, GaussPoint *gp, TimeStep *tStep)
 {
     this->suppressStdout();
 
@@ -285,5 +281,4 @@ RVEStokesFlow :: CreateStatus(GaussPoint *gp) const
 {
     return new RVEStokesFlowMaterialStatus(1, this->giveDomain(), gp, this->rve);
 }
-
 }

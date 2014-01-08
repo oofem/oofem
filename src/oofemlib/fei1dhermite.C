@@ -47,10 +47,10 @@ FEI1dHermite :: evalN(FloatArray &answer, const FloatArray &lcoords, const FEICe
     answer.resize(4);
     answer.zero();
 
-    answer.at(1) = 0.25 * (1.0 - ksi) * ( 1.0 - ksi) * (2.0 + ksi);
-    answer.at(2) =  0.125 * l * (1.0 - ksi) * (1.0 - ksi) * (1.0 + ksi);
-    answer.at(3) = 0.25 * (1.0 + ksi) * ( 1.0 + ksi) * (2.0 - ksi);
-    answer.at(4) = -0.125 * l * (1.0 + ksi) * (1.0 + ksi) * (1.0 - ksi);
+    answer.at(1) = 0.25 * ( 1.0 - ksi ) * ( 1.0 - ksi ) * ( 2.0 + ksi );
+    answer.at(2) =  0.125 * l * ( 1.0 - ksi ) * ( 1.0 - ksi ) * ( 1.0 + ksi );
+    answer.at(3) = 0.25 * ( 1.0 + ksi ) * ( 1.0 + ksi ) * ( 2.0 - ksi );
+    answer.at(4) = -0.125 * l * ( 1.0 + ksi ) * ( 1.0 + ksi ) * ( 1.0 - ksi );
 }
 
 double
@@ -63,10 +63,10 @@ FEI1dHermite :: evaldNdx(FloatMatrix &answer, const FloatArray &lcoords, const F
     answer.resize(1, 4);
     answer.zero();
 
-    answer.at(1, 1) =  1.5 * (-1.0 + ksi * ksi) * l_inv;
-    answer.at(1, 2) =  0.25 * (ksi - 1.0) * (1.0 + 3.0 * ksi);
-    answer.at(1, 3) = -1.5 * (-1.0 + ksi * ksi) * l_inv;
-    answer.at(1, 4) =  0.25 * (ksi - 1.0) * (1.0 + 3.0 * ksi);
+    answer.at(1, 1) =  1.5 * ( -1.0 + ksi * ksi ) * l_inv;
+    answer.at(1, 2) =  0.25 * ( ksi - 1.0 ) * ( 1.0 + 3.0 * ksi );
+    answer.at(1, 3) = -1.5 * ( -1.0 + ksi * ksi ) * l_inv;
+    answer.at(1, 4) =  0.25 * ( ksi - 1.0 ) * ( 1.0 + 3.0 * ksi );
 
     return 0.5 * l;
 }
@@ -80,9 +80,9 @@ FEI1dHermite :: evald2Ndx2(FloatMatrix &answer, const FloatArray &lcoords, const
     answer.zero();
 
     answer.at(1, 1) =  l_inv * 6.0 * ksi * l_inv;
-    answer.at(1, 2) =  l_inv * (3.0 * ksi - 1.0);
+    answer.at(1, 2) =  l_inv * ( 3.0 * ksi - 1.0 );
     answer.at(1, 3) = -l_inv * 6.0 * ksi * l_inv;
-    answer.at(1, 4) =  l_inv * (3.0 * ksi + 1.0);
+    answer.at(1, 4) =  l_inv * ( 3.0 * ksi + 1.0 );
 }
 
 void
@@ -93,7 +93,7 @@ FEI1dHermite :: local2global(FloatArray &answer, const FloatArray &lcoords, cons
 
     this->evalN(n, lcoords, cellgeo);
     answer.at(1) = ( n.at(1) * cellgeo.giveVertexCoordinates(1)->at(cindx) +
-            n.at(2) * cellgeo.giveVertexCoordinates(2)->at(cindx) + n.at(3) * cellgeo.giveVertexCoordinates(3)->at(cindx) );
+                     n.at(2) * cellgeo.giveVertexCoordinates(2)->at(cindx) + n.at(3) * cellgeo.giveVertexCoordinates(3)->at(cindx) );
 }
 
 int

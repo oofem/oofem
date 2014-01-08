@@ -31,8 +31,8 @@
 #define _IFT_HellmichMaterial_fc "fc"
 #define _IFT_HellmichMaterial_tAlpha "talpha"
 #define _IFT_HellmichMaterial_isoT "isot"
-#define _IFT_HellmichMaterial_Tltf "tltf"
-#define _IFT_HellmichMaterial_hltf "hltf"
+#define _IFT_HellmichMaterial_Ttf "tltf"
+#define _IFT_HellmichMaterial_htf "hltf"
 #define _IFT_HellmichMaterial_iniT "init"
 #define _IFT_HellmichMaterial_baseT "baset"
 #define _IFT_HellmichMaterial_flatT "flatt"
@@ -316,11 +316,11 @@ public:
     }
 
     // Plasticity
-    const FloatArray & givePlasticStrainVector() const {
+    const FloatArray &givePlasticStrainVector() const {
         if ( !plastData ) { _error("givePlasticStrainVector: missing plastData."); }
         return plastData->plasticStrainVector;
     }
-    const FloatArray & giveTempPlasticStrainVector() const {
+    const FloatArray &giveTempPlasticStrainVector() const {
         if ( !plastData ) { _error("giveTempPlasticStrainVector: missing plastData."); }
         return plastData->tempPlasticStrainVector;
     }
@@ -375,20 +375,20 @@ public:
     }
 
     // Creep strain vectors
-    const FloatArray & giveViscousStrainVector() const {
+    const FloatArray &giveViscousStrainVector() const {
         if ( !creepData ) { _error("giveViscousStrainVector: missing creepData."); }
 
         return creepData->viscousStrainVector;
     }
-    const FloatArray & giveTempViscousStrainVector() const {
+    const FloatArray &giveTempViscousStrainVector() const {
         if ( !creepData ) { _error("giveTempViscousStrainVector: missing creepData."); }
         return creepData->tempViscousStrainVector;
     }
-    const FloatArray & giveFlowStrainVector() const {
+    const FloatArray &giveFlowStrainVector() const {
         if ( !creepData ) { _error("giveFlowStrainVector: missing creepData."); }
         return creepData->flowStrainVector;
     }
-    const FloatArray & giveTempFlowStrainVector() const {
+    const FloatArray &giveTempFlowStrainVector() const {
         if ( !creepData ) { _error("giveTempFlowStrainVector: missing creepData."); }
         return creepData->tempFlowStrainVector;
     }
@@ -435,8 +435,8 @@ public:
     void setViscosity(double v) { if ( nonisoData ) { nonisoData->viscosity = v; } }
 
     // Plasticity
-    const FloatArray & givePlasticStrainVector() const { return plastData->plasticStrainVector; }
-    const FloatArray & giveTempPlasticStrainVector() const { return plastData->tempPlasticStrainVector; }
+    const FloatArray &givePlasticStrainVector() const { return plastData->plasticStrainVector; }
+    const FloatArray &giveTempPlasticStrainVector() const { return plastData->tempPlasticStrainVector; }
     double giveHardeningVar() { if ( plastData ) { return plastData->hardeningVar; } else { return 0.; } }
     double giveTempHardeningVar() { if ( plastData ) { return plastData->tempHardeningVar; } else { return 0.; } }
     void giveTrialStressVector(FloatArray &answer) const { if ( plastData ) { answer = plastData->trialStressVector; } }
@@ -477,15 +477,14 @@ public:
     // === Status services ===
     // Call data init/update according to material options
     virtual void initTempStatus(); // equilibrated -> temp - start of new iteration
-    virtual void updateYourself(TimeStep *atTime);
+    virtual void updateYourself(TimeStep *tStep);
 
-    virtual void printOutputAt(FILE *file, TimeStep *atTime);
+    virtual void printOutputAt(FILE *file, TimeStep *tStep);
     virtual contextIOResultType saveContext(DataStream *stream, ContextMode mode, void *obj = NULL);
     virtual contextIOResultType restoreContext(DataStream *stream, ContextMode mode, void *obj = NULL);
 
     // identification
     virtual const char *giveClassName() const { return "HellmichMaterialStatus"; }
-    virtual classType giveClassID() const { return ( classType ) HellmichMaterialStatusClass; }
 };
 
 
@@ -561,9 +560,9 @@ protected:
     double initialTemperature;
 
     /// Associated time function for temperature history input
-    int tTimeFunction;
+    int tFunction;
     /// Associated time function for humidity history input
-    int hTimeFunction;
+    int hFunction;
 
 
     /**
@@ -618,12 +617,12 @@ protected:
      * @param stress Stress vector.
      * @param strain Strain vector.
      * @param gp Integration point.
-     * @param atTime Time step.
+     * @param tStep Time step.
      * @param form Form of strain and stress vectors.
      * @param coeff determines whether creep viscosity coefficients should be taken into account (true)
      */
-    void elasticStiffness(FloatArray &stress, FloatArray &strain, GaussPoint *gp, TimeStep *atTime, MatResponseForm form, int coeff);
-    void elasticCompliance(FloatArray &strain, FloatArray &stress, GaussPoint *gp, TimeStep *atTime, int coeff);
+    void elasticStiffness(FloatArray &stress, FloatArray &strain, GaussPoint *gp, TimeStep *tStep, MatResponseForm form, int coeff);
+    void elasticCompliance(FloatArray &strain, FloatArray &stress, GaussPoint *gp, TimeStep *tStep, int coeff);
 
     /// autogenous shrinkage strains
     double autoShrinkageCoeff(double ksi);
@@ -640,9 +639,9 @@ protected:
     /// microprestress force Gamma0
     double computeGamma0(double t, double T);
     /// compute viscous slip (gamma) increment
-    double computeViscousSlipIncrement(GaussPoint *gp, TimeStep *atTime);
+    double computeViscousSlipIncrement(GaussPoint *gp, TimeStep *tStep);
     /// flow creep viscosity 1/ny,f(gamma, temperature)
-    double computeViscosity(GaussPoint *gp, TimeStep *atTime);
+    double computeViscosity(GaussPoint *gp, TimeStep *tStep);
 
     /// strength evolution due to hydration
     double fcStrength(double ksi);
@@ -659,21 +658,21 @@ protected:
     /// returns Delta lambda1,2_n+1 for chi1_n, ksi_n+1
     // uses auxiliary variables stored in material!!!
     void projection(ActiveSurface &active, double &dlambda1, double &dlambda2, FloatArray &stress);
-    void stressReturn(FloatArray &stress, FloatArray &trialStress, GaussPoint *gp, TimeStep *atTime);
+    void stressReturn(FloatArray &stress, FloatArray &trialStress, GaussPoint *gp, TimeStep *tStep);
 
     virtual void give1dMaterialStiffnessMatrix(FloatMatrix &answer,
-                                               MatResponseMode rMode, GaussPoint *gp, TimeStep *atTime);
+                                               MatResponseMode rMode, GaussPoint *gp, TimeStep *tStep);
     virtual void give3dMaterialStiffnessMatrix(FloatMatrix &answer,
-                                               MatResponseMode rMode, GaussPoint *gp, TimeStep *atTime);
+                                               MatResponseMode rMode, GaussPoint *gp, TimeStep *tStep);
 
     /**
      * Returns time function for temperature given as direct input.
      */
-    LoadTimeFunction *giveTTimeFunction();
+    Function *giveTFunction();
     /**
      * Returns time function for relative humidity as direct input
      */
-    LoadTimeFunction *givehTimeFunction();
+    Function *givehFunction();
 
 
 public:
@@ -714,22 +713,22 @@ public:
     virtual contextIOResultType restoreIPContext(DataStream *stream, ContextMode mode, GaussPoint *gp);
 
     /// Stress return visualization output
-    void plotReturn(FILE *outputStream, GaussPoint *gp, TimeStep *atTime);
+    void plotReturn(FILE *outputStream, GaussPoint *gp, TimeStep *tStep);
     /// Stress-strain graph output
-    void plotStressStrain(FILE *outputStream, GaussPoint *gp, TimeStep *atTime, int idx, int id, double err);
+    void plotStressStrain(FILE *outputStream, GaussPoint *gp, TimeStep *tStep, int idx, int id, double err);
     /// I1-|s| stress path output
-    void plotStressPath(FILE *outputStream, GaussPoint *gp, TimeStep *atTime, int id, bool trial);
+    void plotStressPath(FILE *outputStream, GaussPoint *gp, TimeStep *tStep, int id, bool trial);
 
     /**
-     * Returns the hydration degree at end of TimeStep atTime in given integraion point.
+     * Returns the hydration degree at end of TimeStep tStep in given integraion point.
      * Overriden from HydrationModelInterface to enable Isothermal analysis switch.
      * The value is obtained from gp/material hydration status via the hydration model.
      * @param gp integration point
-     * @param atTime solution step
+     * @param tStep solution step
      * @param mode value mode VM_Incremental or VM_Total
      * @return hydration degree or increment in given gp
      */
-    double giveHydrationDegree(GaussPoint *gp, TimeStep *atTime, ValueModeType mode);
+    double giveHydrationDegree(GaussPoint *gp, TimeStep *tStep, ValueModeType mode);
 
     // returns current temperature in given gp
     double giveTemperature(GaussPoint *gp);
@@ -766,42 +765,42 @@ public:
      * @param mode VM_Incremental:
      * @param kv  returns coefficient for viscous creep (ev)
      * @param gv  returns coefficient for flow creep    (fv)
-     * 
+     *
      * @param gp Integration point.
-     * @param atTime Time step.
-     */                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                       //ev        //fv
-    void giveKvCoeffs(GaussPoint *gp, TimeStep *atTime, double &kv, double &gv, ValueModeType mode);
+     * @param tStep Time step.
+     */                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                   //ev        //fv
+    void giveKvCoeffs(GaussPoint *gp, TimeStep *tStep, double &kv, double &gv, ValueModeType mode);
     /// Original service for compatibility with non-3D ananlysis, uses gv from giveKvCoeffs.
-    double giveKvCoeff(GaussPoint *gp, TimeStep *atTime);
+    double giveKvCoeff(GaussPoint *gp, TimeStep *tStep);
 
-    virtual void giveThermalDilatationVector(FloatArray &answer, GaussPoint *gp, TimeStep *atTime);
+    virtual void giveThermalDilatationVector(FloatArray &answer, GaussPoint *gp, TimeStep *tStep);
 
     // zero without hydration; with hydration, zero initial value is used
     void giveShrinkageStrainVector(FloatArray &answer, MatResponseForm form,
-                                   GaussPoint *gp, TimeStep *atTime, ValueModeType mode);
+                                   GaussPoint *gp, TimeStep *tStep, ValueModeType mode);
     // strain from prescribed prestress (called by giveEigenStrainVector)
     void givePrestressStrainVector(FloatArray &answer, MatResponseForm form,
-                                   GaussPoint *gp, TimeStep *atTime, ValueModeType mode);
+                                   GaussPoint *gp, TimeStep *tStep, ValueModeType mode);
     // sums viscous creep strains, flow creep strains and thermal dilation strains and prestress- if any
     // uses temporary creep status ???
     void giveEigenStrainVector(FloatArray &answer, MatResponseForm form,
-                               GaussPoint *gp, TimeStep *atTime, ValueModeType mode);
+                               GaussPoint *gp, TimeStep *tStep, ValueModeType mode);
 
     virtual void giveRealStressVector(FloatArray &, GaussPoint *,
-                              const FloatArray &, TimeStep *);
+                                      const FloatArray &, TimeStep *);
 
-    virtual void printOutputAt(FILE *file, TimeStep *atTime);
+    virtual void printOutputAt(FILE *file, TimeStep *tStep);
 
-    // returns the time increment dt of step atTime
-    double giveTimeIncrement(TimeStep *atTime);
-    // returns the time of step atTime
-    double giveTime(TimeStep *atTime);
+    // returns the time increment dt of step tStep
+    double giveTimeIncrement(TimeStep *tStep);
+    // returns the time of step tStep
+    double giveTime(TimeStep *tStep);
 
     /**
      * Updates auxiliary status values (temperature, hydration degree, viscosity) for given time
      * computed at step start, time saved in auxStateAt
      */
-    void initAuxStatus(GaussPoint *gp, TimeStep *atTime);
+    void initAuxStatus(GaussPoint *gp, TimeStep *tStep);
 
     /**
      * Initializes the status in given integration point.
@@ -811,30 +810,29 @@ public:
 
     virtual void initGpForNewStep(GaussPoint *gp);
 
-    virtual void updateYourself(GaussPoint *gp, TimeStep *atTime);
+    virtual void updateYourself(GaussPoint *gp, TimeStep *tStep);
 
     virtual int hasMaterialModeCapability(MaterialMode mode);
 
     virtual void giveStiffnessMatrix(FloatMatrix &answer,
-                                          MatResponseMode rMode, GaussPoint *gp, TimeStep *atTime);
+                                     MatResponseMode rMode, GaussPoint *gp, TimeStep *tStep);
 
     virtual void computeStressIndependentStrainVector(FloatArray &answer,
-                                                      GaussPoint *gp, TimeStep *atTime, ValueModeType mode);
+                                                      GaussPoint *gp, TimeStep *tStep, ValueModeType mode);
 
     // gives the base linear elastic material with current hydration state in given gp
     // for reduced stress modes without plasticity
-    LinearElasticMaterial *giveLinearElasticMaterial(GaussPoint *gp, TimeStep *atTime);
+    LinearElasticMaterial *giveLinearElasticMaterial(GaussPoint *gp, TimeStep *tStep);
 
     // === identification and auxiliary functions ===
 
     virtual const char *giveInputRecordName() const { return _IFT_HellmichMaterial_Name; }
     virtual const char *giveClassName() const { return "HellmichMaterial"; }
-    virtual classType giveClassID() const { return HellmichMaterialClass; }
 
     virtual double give(int aProperty, GaussPoint *gp);
 
     // === Postprocessing functions ===
-    virtual int giveIPValue(FloatArray &answer, GaussPoint *aGaussPoint, InternalStateType type, TimeStep *atTime);
+    virtual int giveIPValue(FloatArray &answer, GaussPoint *gp, InternalStateType type, TimeStep *tStep);
 
 protected:
     MaterialStatus *CreateStatus(GaussPoint *gp) const;
@@ -850,10 +848,9 @@ public:
     virtual ~HellmichMaterial() {}
 
     virtual void giveRealStressVector(FloatArray &answer, GaussPoint *gp,
-                              const FloatArray &strain, TimeStep *tstep) { answer.resize(0); }
+                                      const FloatArray &strain, TimeStep *tstep) { answer.resize(0); }
 
     virtual const char *giveClassName() const { return "HellmichMaterial"; }
-    virtual classType giveClassID() const { return HellmichMaterialClass; }
 };
 #endif
 } // end namespace oofem

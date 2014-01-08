@@ -41,7 +41,7 @@ InputRecord :: InputRecord() { }
 InputRecord :: InputRecord(const InputRecord &src) {  }
 
 InputRecord &
-InputRecord :: operator = ( const InputRecord & src )
+InputRecord :: operator=(const InputRecord &src)
 {
     return * this;
 }
@@ -95,7 +95,7 @@ InputRecord :: giveOptionalField(bool &answer, InputFieldType id)
 }
 
 IRResultType
-InputRecord :: giveOptionalField(std::string &answer, InputFieldType id)
+InputRecord :: giveOptionalField(std :: string &answer, InputFieldType id)
 {
     IRResultType r = this->giveField(answer, id);
     if ( r == IRRT_NOTFOUND ) {
@@ -139,7 +139,7 @@ InputRecord :: giveOptionalField(FloatMatrix &answer, InputFieldType id)
 }
 
 IRResultType
-InputRecord :: giveOptionalField(std::vector< std::string > &answer, InputFieldType id)
+InputRecord :: giveOptionalField(std :: vector< std :: string > &answer, InputFieldType id)
 {
     IRResultType r = this->giveField(answer, id);
     if ( r == IRRT_NOTFOUND ) {
@@ -161,7 +161,7 @@ InputRecord :: giveOptionalField(Dictionary &answer, InputFieldType id)
 }
 
 IRResultType
-InputRecord :: giveOptionalField(std::list< Range > &answer, InputFieldType id)
+InputRecord :: giveOptionalField(std :: list< Range > &answer, InputFieldType id)
 {
     IRResultType r = this->giveField(answer, id);
     if ( r == IRRT_NOTFOUND ) {
@@ -171,4 +171,14 @@ InputRecord :: giveOptionalField(std::list< Range > &answer, InputFieldType id)
     }
 }
 
+IRResultType
+InputRecord :: giveOptionalField(ScalarFunction& answer, InputFieldType id)
+{
+    IRResultType r = this->giveField(answer, id);
+    if ( r == IRRT_NOTFOUND ) {
+        return IRRT_OK;
+    } else {
+        return r;
+    }
+}
 } // end namespace oofem

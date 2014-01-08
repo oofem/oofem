@@ -51,6 +51,5 @@ class EngngModel;
  * @param contextFlag When set, turns on context output after each step.
  */
 OOFEM_EXPORT EngngModel *InstanciateProblem(DataReader *dr, problemMode mode, int contextFlag, EngngModel *master = 0, bool parallelFlag = false);
-
 } // end namespace oofem
 #endif // util_h

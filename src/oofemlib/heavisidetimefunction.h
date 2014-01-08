@@ -32,51 +32,48 @@
  *  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  */
 
-#include "heavisideltf.h"
-#include "dynamicinputrecord.h"
-#include "classfactory.h"
+#ifndef heavisidetimefunction_h
+#define heavisidetimefunction_h
+
+#include "floatarray.h"
+#include "function.h"
+
+///@name Input fields for HeavisideTimeFunction
+//@{
+#define _IFT_HeavisideTimeFunction_Name "heavisideltf"
+#define _IFT_HeavisideTimeFunction_origin "origin"
+#define _IFT_HeavisideTimeFunction_value "value"
+//@}
 
 namespace oofem {
-
-REGISTER_LoadTimeFunction( HeavisideLTF );
-
-double
-HeavisideLTF :: __at(double time)
-// Returns the value of the receiver at time 'time'. 'time' should be
-// one of the dates of the receiver (currently there is no interpola-
-// tion between two points).
+/**
+ * This class implements a Heaviside step load time function.
+ *
+ * The function is defined by the origin of step and value.
+ * The result is value*H(t-origin),
+ * where
+ * @f[
+ * H(t) = \begin{cases} 0,& t\leq 0  \\ 1, & t>0 \end{cases}
+ * @f]
+ */
+class OOFEM_EXPORT HeavisideTimeFunction : public Function
 {
-    double relTime = time - this->origin;
-    if ( relTime <= 0. ) {
-        return 0.;
-    }
+private:
+    double origin, value;
 
-    return value;
-}
+public:
+    HeavisideTimeFunction(int i, Domain *d) : Function(i, d)
+    { origin = value = 0.; }
+    virtual ~HeavisideTimeFunction() { }
 
+    virtual IRResultType initializeFrom(InputRecord *ir);
+    virtual void giveInputRecord(DynamicInputRecord &input);
+    virtual const char *giveClassName() const { return "HeavisideTimeFunction"; }
+    virtual const char *giveInputRecordName() const { return _IFT_HeavisideTimeFunction_Name; }
 
-IRResultType
-HeavisideLTF :: initializeFrom(InputRecord *ir)
-//
-// initializes according to input record
-//
-{
-    const char *__proc = "initializeFrom"; // Required by IR_GIVE_FIELD macro
-    IRResultType result;                // Required by IR_GIVE_FIELD macro
-
-    LoadTimeFunction :: initializeFrom(ir);
-    IR_GIVE_FIELD(ir, origin, _IFT_HeavisideLTF_origin);
-    IR_GIVE_FIELD(ir, value, _IFT_HeavisideLTF_value);
-
-    return IRRT_OK;
-}
-
-
-void HeavisideLTF :: giveInputRecord(DynamicInputRecord& input)
-{
-    LoadTimeFunction :: giveInputRecord ( input );
-    input.setField(this->origin, _IFT_HeavisideLTF_origin);
-    input.setField(this->value, _IFT_HeavisideLTF_value);
-}
-
+    virtual double evaluateAtTime(double);
+    virtual double evaluateVelocityAtTime(double t) { return 0.; }
+    virtual double evaluateAccelerationAtTime(double t) { return 0.; }
+};
 } // end namespace oofem
+#endif // heavisidetimefunction_h

@@ -53,7 +53,6 @@ public:
 
     virtual const char *giveInputRecordName() const { return _IFT_LSpaceBB_Name; }
     virtual const char *giveClassName() const { return "LSpaceBB"; }
-    virtual classType giveClassID() const { return LSpaceBBClass; }
 
 protected:
     virtual void computeBmatrixAt(GaussPoint *gp, FloatMatrix &answer, int = 1, int = ALL_STRAINS);

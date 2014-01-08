@@ -38,7 +38,6 @@
 #include "enumitem.h"
 
 namespace oofem {
-
 #define Element_Geometry_Type_DEF \
     ENUM_ITEM(EGT_point) /* point in space */   \
     ENUM_ITEM(EGT_line_1) /* line elements with two nodes  1-------2 */   \
@@ -49,14 +48,14 @@ namespace oofem {
     ENUM_ITEM(EGT_quad_1_interface)   /* same as quad_1 but with numbering according to interface element convention */   \
     ENUM_ITEM(EGT_quad_21_interface)   /* quadrialateral with 6 nodes (quadratic-linear) but with numbering according to interface element convention */   \
     ENUM_ITEM(EGT_quad_2)   /* quadratic quadrialateral with 8 nodes */   \
-	ENUM_ITEM(EGT_quad9_2)   /* quadratic quadrialateral with 9 nodes */   \
+    ENUM_ITEM(EGT_quad9_2)       /* quadratic quadrialateral with 9 nodes */   \
     ENUM_ITEM(EGT_tetra_1)  /* tetrahedron with 4 nodes */   \
     ENUM_ITEM(EGT_tetra_2)  /* tetrahedron with 10 nodes */   \
     ENUM_ITEM(EGT_hexa_1)   /* hexahedron with 8 nodes */   \
     ENUM_ITEM(EGT_hexa_2)   /* hexahedron with 20 nodes */   \
     ENUM_ITEM(EGT_hexa_27)   /* hexahedron with 27 nodes */   \
     ENUM_ITEM(EGT_wedge_1)  /* wedge with 6 nodes */ \
-    ENUM_ITEM(EGT_wedge_2)  /* wedge with 15 nodes */\
+    ENUM_ITEM(EGT_wedge_2)  /* wedge with 15 nodes */ \
     ENUM_ITEM(EGT_Composite) /* Composite geometry, vtk export supported by individual elements */ \
     ENUM_ITEM(EGT_unknown)  /* unknown element geometry type */
 
@@ -92,4 +91,3 @@ enum Element_Geometry_Type {
 const char *__Element_Geometry_TypeToString(Element_Geometry_Type _value);
 } // end namespace oofem
 #endif // elementgeometrytype_h
-

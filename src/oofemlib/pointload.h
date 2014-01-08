@@ -101,7 +101,6 @@ public:
 
     virtual bcType giveType() const { return lType; }
     virtual bcGeomType giveBCGeoType() const { return PointLoadBGT; }
-    virtual classType giveClassID() const { return PointLoadClass; }
     virtual const char *giveClassName() const { return "PointLoad"; }
     virtual const char *giveInputRecordName() const { return _IFT_PointLoad_Name; }
 };

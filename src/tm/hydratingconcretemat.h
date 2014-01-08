@@ -77,20 +77,19 @@ public:
 
     /// Return true if hydration heat source is present.
     virtual int hasInternalSource() { return 1; };
-    virtual void computeInternalSourceVector(FloatArray &val, GaussPoint *gp, TimeStep *atTime, ValueModeType mode);
+    virtual void computeInternalSourceVector(FloatArray &val, GaussPoint *gp, TimeStep *tStep, ValueModeType mode);
 
     virtual double giveCharacteristicValue(MatResponseMode mode,
                                            GaussPoint *gp,
-                                           TimeStep *atTime);
+                                           TimeStep *tStep);
 
     // identification and auxiliary functions
     virtual const char *giveClassName() const { return "HydratingConcreteMat"; }
-    virtual classType giveClassID() const { return HydratingConcreteMatClass; }
 
     virtual IRResultType initializeFrom(InputRecord *ir);
 
     // post-processing
-    virtual int giveIPValue(FloatArray &answer, GaussPoint *gp, InternalStateType type, TimeStep *atTime);
+    virtual int giveIPValue(FloatArray &answer, GaussPoint *gp, InternalStateType type, TimeStep *tStep);
     virtual double giveIsotropicConductivity(GaussPoint *gp);
     virtual double giveConcreteCapacity(GaussPoint *gp);
     virtual double giveConcreteDensity(GaussPoint *gp);
@@ -122,7 +121,7 @@ public:
     double DoH1, P1;
 
 protected:
-    double GivePower(TimeStep *atTime, GaussPoint *gp);
+    double GivePower(TimeStep *tStep, GaussPoint *gp);
     double scaleTemperature(GaussPoint *gp);
     /// Return affinity scaled to 25C.
     double affinity25(double alpha);
@@ -144,8 +143,8 @@ public:
     virtual ~HydratingConcreteMatStatus();
     /// Returns actual degree of hydration at last known equilibrium.
     double giveDoHActual();
-    virtual void updateYourself(TimeStep *atTime);
-    virtual void printOutputAt(FILE *file, TimeStep *atTime);
+    virtual void updateYourself(TimeStep *tStep);
+    virtual void printOutputAt(FILE *file, TimeStep *tStep);
     double power;
     double lastIntrinsicTime;
     double lastEquivalentTime, equivalentTime, degreeOfHydration, lastDegreeOfHydration;

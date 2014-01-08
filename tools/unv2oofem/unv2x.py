@@ -62,6 +62,7 @@ class UNVParser:
         oofem_elemProp.append(oofem_elementProperties("CCTplate3D",oofem_elemProp[-1]))
         oofem_elemProp.append(oofem_elementProperties("QTrPlStr", [2,0,4,1,5,3], [[2,1,0],[0,5,4],[4,3,2]],[]))#checked
         oofem_elemProp.append(oofem_elementProperties("PlaneStress2D", [0,1,2,3], [[0,1],[1,2],[2,3],[3,0]],[]))#checked
+        oofem_elemProp.append(oofem_elementProperties("PlaneStress2DXFEM", [0,1,2,3], [[0,1],[1,2],[2,3],[3,0]],[]))#checked
         oofem_elemProp.append(oofem_elementProperties("Quad1PlaneStrain", oofem_elemProp[-1]))
         oofem_elemProp.append(oofem_elementProperties("Quad1ht", oofem_elemProp[-1]))
         oofem_elemProp.append(oofem_elementProperties("Quadaxisym1ht", oofem_elemProp[-1]))

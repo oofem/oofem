@@ -64,7 +64,6 @@ public:
     virtual void printOutputAt(FILE *file, TimeStep *tStep);
 
     virtual const char *giveClassName() const { return "TrabBoneGrad3DStatus"; }
-    virtual classType giveClassID() const { return TrabBoneGrad3DClass; }
 
 
     virtual double giveNonlocalCumulatedStrain() { return nonlocalCumulatedStrain; }
@@ -90,7 +89,6 @@ public:
     virtual ~TrabBoneGrad3D();
 
     virtual const char *giveClassName() const { return "TrabBoneGrad3D"; }
-    virtual classType giveClassID() const { return TrabBoneGrad3DClass; }
     virtual const char *giveInputRecordName() const { return _IFT_TrabBoneGrad3D_Name; }
 
     virtual IRResultType initializeFrom(InputRecord *ir);
@@ -103,13 +101,13 @@ public:
     virtual void givePDGradMatrix_kk(FloatMatrix &answer, MatResponseMode mode, GaussPoint *gp, TimeStep *tStep);
     virtual void givePDGradMatrix_LD(FloatMatrix &answer, MatResponseMode mode, GaussPoint *gp, TimeStep *tStep);
 
-    virtual void giveStiffnessMatrix(FloatMatrix &answer, MatResponseMode rMode, GaussPoint *gp, TimeStep *atTime);
-    virtual void give3dMaterialStiffnessMatrix(FloatMatrix & answer, MatResponseMode, GaussPoint * gp, TimeStep * atTime);
-    void give3dKappaMatrix(FloatMatrix &answer, MatResponseMode mode, GaussPoint *gp, TimeStep *atTime);
-    void give3dGprime(FloatMatrix &answer, MatResponseMode mode, GaussPoint *gp, TimeStep *atTime);
-    void giveInternalLength(FloatMatrix &answer, MatResponseMode mode, GaussPoint *gp, TimeStep *atTime);
-    virtual void giveRealStressVectorGrad(FloatArray &answer1, double &answer2, GaussPoint *gp, const FloatArray &totalStrain, double nonlocalCumulatedStrain, TimeStep *atTime);
-    virtual void computeCumPlastStrain(double &kappa, GaussPoint *gp, TimeStep *atTime);
+    virtual void giveStiffnessMatrix(FloatMatrix &answer, MatResponseMode rMode, GaussPoint *gp, TimeStep *tStep);
+    virtual void give3dMaterialStiffnessMatrix(FloatMatrix & answer, MatResponseMode, GaussPoint * gp, TimeStep * tStep);
+    void give3dKappaMatrix(FloatMatrix &answer, MatResponseMode mode, GaussPoint *gp, TimeStep *tStep);
+    void give3dGprime(FloatMatrix &answer, MatResponseMode mode, GaussPoint *gp, TimeStep *tStep);
+    void giveInternalLength(FloatMatrix &answer, MatResponseMode mode, GaussPoint *gp, TimeStep *tStep);
+    virtual void giveRealStressVectorGrad(FloatArray &answer1, double &answer2, GaussPoint *gp, const FloatArray &totalStrain, double nonlocalCumulatedStrain, TimeStep *tStep);
+    virtual void computeCumPlastStrain(double &kappa, GaussPoint *gp, TimeStep *tStep);
     void performPlasticityReturn(GaussPoint *gp, const FloatArray &totalStrain);
     //LinearElasticMaterial *giveLinearElasticMaterial() { return linearElasticMaterial; }
 

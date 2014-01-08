@@ -53,8 +53,7 @@
 #endif
 
 namespace oofem {
-
-REGISTER_EngngModel( LinearStatic );
+REGISTER_EngngModel(LinearStatic);
 
 LinearStatic :: LinearStatic(int i, EngngModel *_master) : StructuralEngngModel(i, _master), loadVector(), displacementVector()
 {
@@ -75,7 +74,7 @@ LinearStatic :: LinearStatic(int i, EngngModel *_master) : StructuralEngngModel(
 
 LinearStatic :: ~LinearStatic()
 {
-    if (stiffnessMatrix) {
+    if ( stiffnessMatrix ) {
         delete stiffnessMatrix;
     }
     if ( nMethod ) {
@@ -193,7 +192,7 @@ TimeStep *LinearStatic :: giveNextStep()
 void LinearStatic :: solveYourself()
 {
 #ifdef __PARALLEL_MODE
-    if (this->isParallel()) {
+    if ( this->isParallel() ) {
  #ifdef __VERBOSE_PARALLEL
         // force equation numbering before setting up comm maps
         int neq = this->giveNumberOfDomainEquations(EID_MomentumBalance);
@@ -237,7 +236,7 @@ void LinearStatic :: solveYourselfAt(TimeStep *tStep)
         stiffnessMatrix->buildInternalStructure( this, 1, EID_MomentumBalance, EModelDefaultEquationNumbering() );
 
         this->assemble( stiffnessMatrix, tStep, EID_MomentumBalance, StiffnessMatrix,
-                       EModelDefaultEquationNumbering(), this->giveDomain(1) );
+                        EModelDefaultEquationNumbering(), this->giveDomain(1) );
 
         initFlag = 0;
     }
@@ -249,13 +248,13 @@ void LinearStatic :: solveYourselfAt(TimeStep *tStep)
     //
     // allocate space for displacementVector
     //
-    displacementVector.resize( this->giveNumberOfDomainEquations(1, EModelDefaultEquationNumbering()) );
+    displacementVector.resize( this->giveNumberOfDomainEquations( 1, EModelDefaultEquationNumbering() ) );
     displacementVector.zero();
 
     //
     // assembling the load vector
     //
-    loadVector.resize( this->giveNumberOfDomainEquations(1, EModelDefaultEquationNumbering()) );
+    loadVector.resize( this->giveNumberOfDomainEquations( 1, EModelDefaultEquationNumbering() ) );
     loadVector.zero();
     this->assembleVector( loadVector, tStep, EID_MomentumBalance, ExternalForcesVector, VM_Total,
                           EModelDefaultEquationNumbering(), this->giveDomain(1) );
@@ -263,7 +262,7 @@ void LinearStatic :: solveYourselfAt(TimeStep *tStep)
     //
     // internal forces (from Dirichlet b.c's, or thermal expansion, etc.)
     //
-    FloatArray internalForces( this->giveNumberOfDomainEquations(1, EModelDefaultEquationNumbering()) );
+    FloatArray internalForces( this->giveNumberOfDomainEquations( 1, EModelDefaultEquationNumbering() ) );
     internalForces.zero();
     this->assembleVector( internalForces, tStep, EID_MomentumBalance, InternalForcesVector, VM_Total,
                           EModelDefaultEquationNumbering(), this->giveDomain(1) );
@@ -273,7 +272,7 @@ void LinearStatic :: solveYourselfAt(TimeStep *tStep)
     //
     // set-up numerical model
     //
-    this->giveNumericalMethod( this->giveMetaStep( tStep->giveMetaStepNumber() ) );
+    this->giveNumericalMethod( this->giveMetaStep( tStep->giveMetatStepumber() ) );
 
     //
     // call numerical model to solve arose problem
@@ -282,7 +281,7 @@ void LinearStatic :: solveYourselfAt(TimeStep *tStep)
     OOFEM_LOG_INFO("\n\nSolving ...\n\n");
 #endif
     NM_Status s = nMethod->solve(stiffnessMatrix, & loadVector, & displacementVector);
-    if ( !(s & NM_Success) ) {
+    if ( !( s & NM_Success ) ) {
         OOFEM_ERROR("LinearStatic :: solverYourselfAt - No success in solving system.");
     }
 
@@ -337,7 +336,7 @@ contextIOResultType LinearStatic :: restoreContext(DataStream *stream, ContextMo
     int istep, iversion;
     FILE *file = NULL;
 
-    this->resolveCorrespondingStepNumber(istep, iversion, obj);
+    this->resolveCorrespondingtStepumber(istep, iversion, obj);
 
     if ( stream == NULL ) {
         if ( !this->giveContextFile(& file, istep, iversion, contextMode_read) ) {
@@ -372,7 +371,7 @@ LinearStatic :: terminate(TimeStep *tStep)
 {
     StructuralEngngModel :: terminate(tStep);
     this->printReactionForces(tStep, 1);
-    fflush(this->giveOutputStream());
+    fflush( this->giveOutputStream() );
 }
 
 
@@ -386,9 +385,9 @@ LinearStatic :: updateDomainLinks()
 
 
 void
-LinearStatic :: printDofOutputAt(FILE *stream, Dof *iDof, TimeStep *atTime)
+LinearStatic :: printDofOutputAt(FILE *stream, Dof *iDof, TimeStep *tStep)
 {
-    iDof->printSingleOutputAt(stream, atTime, 'd', VM_Total);
+    iDof->printSingleOutputAt(stream, tStep, 'd', VM_Total);
 }
 
 

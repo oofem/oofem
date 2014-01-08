@@ -76,7 +76,7 @@
 namespace oofem {
 class Domain;
 class EngngModel;
-class PetscContext;
+class ParallelContext;
 
 #define calm_SMALL_NUM 1.e-20
 #define calm_SMALL_ERROR_NUM 1.e-6
@@ -207,10 +207,8 @@ protected:
     FloatArray rtold;
 
 #ifdef __PARALLEL_MODE
-#ifdef __PETSC_MODULE
     /// Parallel context for computing norms, dot products and such.
-    PetscContext *parallel_context;
-#endif
+    ParallelContext *parallel_context;
 #endif
 
 public:

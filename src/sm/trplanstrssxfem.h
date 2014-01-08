@@ -75,7 +75,6 @@ public:
 
     virtual const char *giveInputRecordName() const { return _IFT_TrPlaneStress2dXFEM_Name; }
     virtual const char *giveClassName() const { return "TrPlaneStress2dXFEM"; }
-    virtual classType giveClassID() const { return TrPlaneStress2dXFEMClass; }
 
     virtual int computeNumberOfDofs();
     virtual void computeGaussPoints();
@@ -84,7 +83,7 @@ public:
                                   int lowerIndx = 1, int upperIndx = ALL_STRAINS);
     virtual void giveDofManDofIDMask(int inode, EquationID ut, IntArray &answer) const;
     virtual void computeConstitutiveMatrixAt(FloatMatrix &answer, MatResponseMode rMode, GaussPoint *, TimeStep *tStep);
-    virtual void computeStressVector(FloatArray &answer, const FloatArray &strain, GaussPoint *gp, TimeStep *stepN);
+    virtual void computeStressVector(FloatArray &answer, const FloatArray &strain, GaussPoint *gp, TimeStep *tStep);
     virtual void computeStiffnessMatrix(FloatMatrix &answer, MatResponseMode rMode, TimeStep *tStep);
     virtual void giveInternalForcesVector(FloatArray &answer, TimeStep *tStep, int useUpdatedGpRecord);
 
@@ -106,7 +105,7 @@ public:
 
     // For mapping of primary unknowns
     virtual int EIPrimaryUnknownMI_computePrimaryUnknownVectorAt(ValueModeType u,
-                                                                 TimeStep *stepN, const FloatArray &coords,
+                                                                 TimeStep *tStep, const FloatArray &coords,
                                                                  FloatArray &answer);
     virtual void EIPrimaryUnknownMI_givePrimaryUnknownVectorDofID(IntArray &answer);
 };

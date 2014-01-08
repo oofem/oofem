@@ -40,17 +40,16 @@
 #include "contextioerr.h"
 
 namespace oofem {
-
-IntegrationRule :: iterator :: iterator(IntegrationRule* ir, int pos): pos( pos ), ir( ir ) { }
+IntegrationRule :: iterator :: iterator(IntegrationRule *ir, int pos) : pos(pos), ir(ir) { }
 
 bool
-IntegrationRule :: iterator :: operator!=(const IntegrationRule :: iterator& other) const { return pos != other.pos; }
+IntegrationRule :: iterator :: operator!=(const IntegrationRule :: iterator &other) const { return pos != other.pos; }
 
 GaussPoint &
-IntegrationRule :: iterator :: operator*() const { return *(ir->getIntegrationPoint(pos)); }
+IntegrationRule :: iterator :: operator*() const { return * ( ir->getIntegrationPoint(pos) ); }
 
-const IntegrationRule :: iterator&
-IntegrationRule :: iterator :: operator++() { ++pos; return *this; }
+const IntegrationRule :: iterator &
+IntegrationRule :: iterator :: operator++() { ++pos; return * this; }
 
 IntegrationRule :: iterator
 IntegrationRule :: begin() { return iterator(this, 0); }
@@ -118,11 +117,11 @@ IntegrationRule :: getIntegrationPoint(int i)
 }
 
 void
-IntegrationRule :: printOutputAt(FILE *file, TimeStep *stepN)
+IntegrationRule :: printOutputAt(FILE *file, TimeStep *tStep)
 // Performs end-of-step operations.
 {
     for ( int i = 0; i < numberOfIntegrationPoints; i++ ) {
-        gaussPointArray [ i ]->printOutputAt(file, stepN);
+        gaussPointArray [ i ]->printOutputAt(file, tStep);
     }
 }
 
@@ -340,12 +339,13 @@ IntegrationRule :: setUpIntegrationPoints(integrationDomain mode, int nPoints,
 
     case _Wedge:
         // Limited wrapper for now;
-        if ( nPoints == 2 ) {
-            numberOfIntegrationPoints = this->SetUpPointsOnWedge(1, 2, matMode);
+        if ( nPoints == 6 ) {
+            numberOfIntegrationPoints = this->SetUpPointsOnWedge(3, 2, matMode);
         } else {
             numberOfIntegrationPoints = this->SetUpPointsOnWedge(3, 3, matMode);
         }
         return numberOfIntegrationPoints;
+
     default:
         OOFEM_ERROR2("IntegrationRule::setUpIntegrationPoints - unknown mode (%d)", mode);
     }
@@ -380,5 +380,4 @@ int IntegrationRule :: SetUpPoint(MaterialMode mode)
     this->intdomain = _Point;
     return this->numberOfIntegrationPoints;
 }
-
 } // end namespace oofem

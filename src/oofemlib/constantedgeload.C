@@ -33,14 +33,13 @@
  */
 
 #include "constantedgeload.h"
-#include "loadtimefunction.h"
+#include "function.h"
 #include "floatarray.h"
 #include "timestep.h"
 #include "classfactory.h"
 
 namespace oofem {
-
-REGISTER_BoundaryCondition( ConstantEdgeLoad );
+REGISTER_BoundaryCondition(ConstantEdgeLoad);
 
 IRResultType
 ConstantEdgeLoad :: initializeFrom(InputRecord *ir)
@@ -54,7 +53,7 @@ ConstantEdgeLoad :: initializeFrom(InputRecord *ir)
 }
 
 void
-ConstantEdgeLoad :: computeValueAt(FloatArray &answer, TimeStep *stepN, FloatArray &coords, ValueModeType mode)
+ConstantEdgeLoad :: computeValueAt(FloatArray &answer, TimeStep *tStep, FloatArray &coords, ValueModeType mode)
 {
     // we overload general implementation on the boundary load level due
     // to implementation efficiency
@@ -67,16 +66,16 @@ ConstantEdgeLoad :: computeValueAt(FloatArray &answer, TimeStep *stepN, FloatArr
 
     // ask time distribution
     /*
-     * factor = this -> giveLoadTimeFunction() -> at(stepN->giveTime()) ;
-     * if ((mode==VM_Incremental) && (!stepN->isTheFirstStep()))
-     * //factor -= this->giveLoadTimeFunction()->at(stepN->givePreviousStep()->giveTime()) ;
-     * factor -= this->giveLoadTimeFunction()->at(stepN->giveTime()-stepN->giveTimeIncrement()) ;
+     * factor = this -> giveTimeFunction() -> at(tStep->giveTime()) ;
+     * if ((mode==VM_Incremental) && (!tStep->isTheFirstStep()))
+     * //factor -= this->giveTimeFunction()->at(tStep->givePreviousStep()->giveTime()) ;
+     * factor -= this->giveTimeFunction()->at(tStep->giveTime()-tStep->giveTimeIncrement()) ;
      */
-    factor = this->giveLoadTimeFunction()->evaluate(stepN, mode);
+    factor = this->giveTimeFunction()->evaluate(tStep, mode);
     answer = componentArray;
     answer.times(factor);
-    
-    if ( !isImposed(stepN) ){
+
+    if ( !isImposed(tStep) ) {
         answer.zero();
     }
 }

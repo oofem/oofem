@@ -26,10 +26,9 @@
 #include <cstdio>
 
 namespace oofem {
+REGISTER_EngngModel(DarcyFlow);
 
-REGISTER_EngngModel( DarcyFlow );
-
-DarcyFlow :: DarcyFlow(int i, EngngModel *_master) : EngngModel (i, _master)
+DarcyFlow :: DarcyFlow(int i, EngngModel *_master) : EngngModel(i, _master)
 {
     this->nMethod = NULL;
     this->ndomains = 1;
@@ -37,10 +36,10 @@ DarcyFlow :: DarcyFlow(int i, EngngModel *_master) : EngngModel (i, _master)
     this->stiffnessMatrix = NULL;
 }
 
-DarcyFlow :: ~DarcyFlow ()
+DarcyFlow :: ~DarcyFlow()
 {
-    delete (PressureField);
-    delete (nMethod);
+    delete PressureField;
+    delete nMethod;
 }
 
 IRResultType DarcyFlow :: initializeFrom(InputRecord *ir)
@@ -61,7 +60,7 @@ IRResultType DarcyFlow :: initializeFrom(InputRecord *ir)
     // Create solution space for EID_ConservationEquation
     PressureField = new PrimaryField(this, 1, FT_Pressure, EID_ConservationEquation, 1);
 #if 0
-#ifdef __PARALLEL_MODE
+ #ifdef __PARALLEL_MODE
 
 
     printf("Parallel mode!\n");
@@ -72,13 +71,12 @@ IRResultType DarcyFlow :: initializeFrom(InputRecord *ir)
                                                this->commMode);
     }
 
-#endif
+ #endif
 #endif
     return IRRT_OK;
-
 }
 
-void DarcyFlow :: solveYourselfAt (TimeStep *tStep)
+void DarcyFlow :: solveYourselfAt(TimeStep *tStep)
 {
     /*
      * Assemble and solve system of equations as given timestep tStep.
@@ -88,7 +86,7 @@ void DarcyFlow :: solveYourselfAt (TimeStep *tStep)
     OOFEM_LOG_INFO("Parallelflag: %u\n", parallelFlag);
 
     FloatArray *solutionVector = NULL;
-    int neq = this->giveNumberOfDomainEquations(1, EModelDefaultEquationNumbering());
+    int neq = this->giveNumberOfDomainEquations( 1, EModelDefaultEquationNumbering() );
 
     // Move solution space to current timestep
     if ( !hasAdvanced ) {
@@ -112,12 +110,15 @@ void DarcyFlow :: solveYourselfAt (TimeStep *tStep)
     this->externalForces.resize(neq);
     this->externalForces.zero();
     this->assembleVectorFromElements( this->externalForces, tStep, EID_ConservationEquation, ExternalForcesVector, VM_Total,
-                                     EModelDefaultEquationNumbering(), this->giveDomain(1) );
+                                      EModelDefaultEquationNumbering(), this->giveDomain(1) );
+#ifdef __PARALLEL_MODE
+    this->updateSharedDofManagers(this->externalForces, LoadExchangeTag);
+#endif
 
     this->incrementOfSolution.resize(neq);
     this->internalForces.resize(neq);
 
-    this->giveNumericalMethod(this->giveCurrentMetaStep());
+    this->giveNumericalMethod( this->giveCurrentMetaStep() );
     double loadLevel;
     int currentIterations;
     this->updateComponent( tStep, InternalRhs, this->giveDomain(1) );
@@ -136,69 +137,67 @@ void DarcyFlow :: solveYourselfAt (TimeStep *tStep)
                                             currentIterations,
                                             tStep);
 
-    if (status & NM_NoSuccess) {
-        OOFEM_ERROR2("DarcyFlow :: couldn't solve for time step %d\n", tStep->giveNumber());
+    if ( status & NM_NoSuccess ) {
+        OOFEM_ERROR2( "DarcyFlow :: couldn't solve for time step %d\n", tStep->giveNumber() );
     }
-    
+
 #define DUMPMATRICES 0
 #if DUMPMATRICES
     FloatMatrix LHS_backup;
-    lhs->toFloatMatrix( LHS_backup);
-    DumpMatricesToFile( &LHS_backup, &rhs, NULL);
+    lhs->toFloatMatrix(LHS_backup);
+    DumpMatricesToFile(& LHS_backup, & rhs, NULL);
 #endif
 
     this->updateYourself(tStep);
-
 }
+
 
 void DarcyFlow :: DumpMatricesToFile(FloatMatrix *LHS, FloatArray *RHS, FloatArray *SolutionVector)
 {
-    FloatMatrix K;
-
     FILE *rhsFile = fopen("RHS.txt", "w");
     // rhs.printYourself();
 
-    for ( int i = 1; i <= RHS->giveSize(); i++ )
-        fprintf(rhsFile, "%0.15e\n", RHS->at(i));
+    for ( int i = 1; i <= RHS->giveSize(); i++ ) {
+        fprintf( rhsFile, "%0.15e\n", RHS->at(i) );
+    }
     fclose(rhsFile);
 
     FILE *lhsFile = fopen("LHS.txt", "w");
 
-    for ( int i = 1; i <= this->giveNumberOfDomainEquations(1, EModelDefaultEquationNumbering()); i++ ) {
-        for ( int j = 1; j <= this->giveNumberOfDomainEquations(1, EModelDefaultEquationNumbering()); j++ ) {
-            fprintf(lhsFile, "%0.15e\t", LHS->at(i,j));
+    for ( int i = 1; i <= this->giveNumberOfDomainEquations( 1, EModelDefaultEquationNumbering() ); i++ ) {
+        for ( int j = 1; j <= this->giveNumberOfDomainEquations( 1, EModelDefaultEquationNumbering() ); j++ ) {
+            fprintf( lhsFile, "%0.15e\t", LHS->at(i, j) );
         }
         fprintf(lhsFile, "\n");
     }
 
     fclose(lhsFile);
 
-    if (SolutionVector==NULL) {
+    if ( SolutionVector == NULL ) {
         return;
     }
 
     FILE *SolutionFile = fopen("SolutionVector.txt", "w");
-    for ( int i = 1; i <= SolutionVector->giveSize(); i++ )
-        fprintf(SolutionFile, "%0.15e\n", SolutionVector->at(i));
+    for ( int i = 1; i <= SolutionVector->giveSize(); i++ ) {
+        fprintf( SolutionFile, "%0.15e\n", SolutionVector->at(i) );
+    }
     fclose(SolutionFile);
-
 }
-void DarcyFlow :: printDofOutputAt(FILE *stream, Dof *iDof, TimeStep *atTime)
-{
 
+
+void DarcyFlow :: printDofOutputAt(FILE *stream, Dof *iDof, TimeStep *tStep)
+{
     DofIDItem type = iDof->giveDofID();
     if ( type == P_f ) {
-        iDof->printSingleOutputAt(stream, atTime, 'p', VM_Total, 1);
+        iDof->printSingleOutputAt(stream, tStep, 'p', VM_Total, 1);
     } else {
         _error("printDofOutputAt: unsupported dof type");
     }
-
 }
 
-void DarcyFlow :: updateYourself (TimeStep *tStep)
+void DarcyFlow :: updateYourself(TimeStep *tStep)
 {
     EngngModel :: updateYourself(tStep);
-
 }
 
 double DarcyFlow :: giveUnknownComponent(ValueModeType mode, TimeStep *tStep, Domain *d, Dof *dof)
@@ -208,30 +207,30 @@ double DarcyFlow :: giveUnknownComponent(ValueModeType mode, TimeStep *tStep, Do
 
 void DarcyFlow :: updateComponent(TimeStep *tStep, NumericalCmpn cmpn, Domain *d)
 {
-    switch (cmpn) {
+    switch ( cmpn ) {
     case InternalRhs:
         this->internalForces.zero();
         this->assembleVector(this->internalForces, tStep, EID_ConservationEquation,  InternalForcesVector, VM_Total,
-                EModelDefaultEquationNumbering(), d, &this->ebeNorm );
+                             EModelDefaultEquationNumbering(), d, & this->ebeNorm);
+#ifdef __PARALLEL_MODE
+        this->updateSharedDofManagers(this->externalForces, InternalForcesExchangeTag);
+#endif
         break;
 
     case NonLinearLhs:
 
         this->stiffnessMatrix->zero();
         this->assemble( this->stiffnessMatrix, tStep, EID_ConservationEquation, StiffnessMatrix,
-            EModelDefaultEquationNumbering(), this->giveDomain(1) );
+                        EModelDefaultEquationNumbering(), this->giveDomain(1) );
         break;
 
     default:
-    _error2("updateComponent: Unknown component id (%d)", (int) cmpn);
-
+        _error2("updateComponent: Unknown component id (%d)", ( int ) cmpn);
     }
-
 }
 
 int DarcyFlow :: forceEquationNumbering(int id)  // Is this really needed???!?
 {
-
     int neq = EngngModel :: forceEquationNumbering(id);
 
     this->equationNumberingCompleted = false;
@@ -259,7 +258,6 @@ NumericalMethod *DarcyFlow :: giveNumericalMethod(MetaStep *mStep)
         OOFEM_ERROR("giveNumericalMethod: numerical method creation failed");
     }
     return this->nMethod;
-
 }
 
 TimeStep *DarcyFlow :: giveNextStep()
@@ -278,19 +276,17 @@ TimeStep *DarcyFlow :: giveNextStep()
     currentStep = new TimeStep(istep, this, 1, ( double ) istep, 0., counter);
     // time and dt variables are set eq to 0 for statics - has no meaning
     return currentStep;
-
 }
 
-#ifdef __PETSC_MODULE
-void DarcyFlow :: initPetscContexts()
+#ifdef __PARALLEL_MODE
+void DarcyFlow :: initParallelContexts()
 {
-    PetscContext *petscContext;
-    petscContextList->growTo(ndomains);
+    ParallelContext *parallelContext;
+    parallelContextList->growTo(ndomains);
     for ( int i = 1; i <= this->ndomains; i++ ) {
-        petscContext =  new PetscContext(this);
-        petscContextList->put(i, petscContext);
+        parallelContext =  new ParallelContext(this);
+        parallelContextList->put(i, parallelContext);
     }
 }
 #endif
-
 }

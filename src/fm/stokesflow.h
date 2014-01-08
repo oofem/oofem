@@ -114,8 +114,8 @@ public:
 
     virtual IRResultType initializeFrom(InputRecord *ir);
 
-#ifdef __PETSC_MODULE
-    virtual void initPetscContexts();
+#ifdef __PARALLEL_MODE
+    virtual void initParallelContexts();
 #endif
 
     virtual int checkConsistency();
@@ -128,7 +128,6 @@ public:
 
     virtual const char *giveClassName() const { return "StokesFlow"; }
     virtual const char *giveInputRecordName() const { return _IFT_StokesFlow_Name; }
-    virtual classType giveClassID() const { return StokesFlowClass; }
 };
 } // end namespace oofem
 

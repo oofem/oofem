@@ -65,7 +65,7 @@ protected:
 
 public:
     /// Constructor, creates empty dictionary
-    Dictionary(): first(NULL), last(NULL) { }
+    Dictionary() : first(NULL), last(NULL) { }
     /// Destructor
     ~Dictionary();
 
@@ -111,7 +111,7 @@ public:
      */
     contextIOResultType restoreContext(DataStream *stream, ContextMode mode, void *obj = NULL);
 
-    friend std::ostream& operator<< (std::ostream &out, const Dictionary &r);
+    friend std :: ostream &operator<<(std :: ostream &out, const Dictionary &r);
 };
 } // end namespace oofem
 #endif // dictionr_h

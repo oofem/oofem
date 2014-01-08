@@ -41,7 +41,7 @@
 
 /**
  * @name Dirichlet boundary condition.
- * 
+ *
  */
 //@{
 #define _IFT_BoundaryCondition_Name "boundarycondition"
@@ -64,11 +64,11 @@ class Dof;
  * store the unknowns types, but this makes sense, when BC is associated to node,
  * but when associated to BC, the physical meaning of unknown is determined by DOF.
  *
- * Boundary condition can change its value in time using its inherited loadTimeFunction.
- * It can also switch itself on or off depending on nonzero value of 
+ * Boundary condition can change its value in time using its inherited TimeFunction.
+ * It can also switch itself on or off depending on nonzero value of
  * isImposedTimeFunction load time function. Please note, that previous option must be
  * supported by particular engineering model (because equation renumbering is necessary,
- * and for incremental solution schemes DOFs unknown dictionaries must be used). See 
+ * and for incremental solution schemes DOFs unknown dictionaries must be used). See
  * particular engineering model documentation for details.
  *
  * The services provided include
@@ -122,8 +122,6 @@ public:
     virtual void scale(double s);
     virtual const char *giveClassName() const { return "BoundaryCondition"; }
     virtual const char *giveInputRecordName() const { return _IFT_BoundaryCondition_Name; }
-    virtual classType giveClassID() const { return BoundaryConditionClass; }
 };
 } // end namespace oofem
 #endif // boudary_h
-

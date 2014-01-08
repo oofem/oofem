@@ -51,8 +51,8 @@ RowColumn :: RowColumn(int n, int st)
     diag   = 0.;
     size   = number - start;
     if ( size ) {
-        row    = (double*)calloc(size, sizeof(double));
-        column = (double*)calloc(size, sizeof(double));
+        row    = ( double * ) calloc( size, sizeof( double ) );
+        column = ( double * ) calloc( size, sizeof( double ) );
         if ( !row || !column ) {
             OOFEM_ERROR("RowColumn :: RowColumn - Failed to allocate memory");
         }
@@ -182,8 +182,8 @@ RowColumn :: growTo(int newStart)
 #  endif
 
     newSize   = number - newStart;
-    newRow    = (double*)calloc(newSize, sizeof(double));
-    newColumn = (double*)calloc(newSize, sizeof(double));
+    newRow    = ( double * ) calloc( newSize, sizeof( double ) );
+    newColumn = ( double * ) calloc( newSize, sizeof( double ) );
     if ( !newRow || !newColumn ) {
         OOFEM_ERROR("RowColumn :: growTo - Failed to allocate memory");
     }
@@ -259,8 +259,8 @@ RowColumn :: GiveCopy()
     int size = number - start;
 
     if ( size ) {
-        newRow    = (double*)malloc(size * sizeof(double));
-        newColumn = (double*)malloc(size * sizeof(double));
+        newRow    = ( double * ) malloc( size * sizeof( double ) );
+        newColumn = ( double * ) malloc( size * sizeof( double ) );
         if ( !newRow || !newColumn ) {
             OOFEM_ERROR("RowColumn :: GiveCopy - Failed to allocate memory");
         }

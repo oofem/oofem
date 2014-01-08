@@ -65,7 +65,6 @@ protected:
     static IntArray ordering_gr;
     static IntArray ordering_gr_edge;
     static bool initOrdering() {
-
         ordering_all.setValues(42, 1, 2, 3, 8, 9, 10, 15, 16, 17, 22, 23, 24, 29, 30, 31, 36, 37, 38,
                                4, 5, 6, 11, 12, 13, 18, 19, 20, 25, 26, 27, 32, 33, 34, 39, 40, 41,
                                7, 14, 21, 28, 35, 42);
@@ -103,11 +102,9 @@ public:
     virtual int giveNumberOfEdgeDofManagers() { return 3;  }
     virtual const char *giveInputRecordName() const { return _IFT_Tr2Shell7_Name; }
     virtual const char *giveClassName() const { return "Tr2Shell7"; }
-    virtual classType giveClassID() const { return Tr2Shell7Class; }
     //virtual Element_Geometry_Type giveGeometryType() const { return EGT_triangle_2; }
     virtual Element_Geometry_Type giveGeometryType() const { return EGT_Composite; }
     virtual integrationDomain giveIntegrationDomain() const { return _Triangle; }     // write new wedge-like type 'layeredWedge'
-
 };
 } // end namespace oofem
 #endif

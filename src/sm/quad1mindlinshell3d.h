@@ -43,7 +43,6 @@
 //@}
 
 namespace oofem {
-
 class FEI2dQuadLin;
 
 /**
@@ -51,12 +50,12 @@ class FEI2dQuadLin;
  * Each node has 3 degrees of freedom (out-of-plane displacement, in-plane rotations).
  * This type of element exhibit strong shear locking (thin plates exhibit almost no bending).
  * No reduced integration is used, as it causes numerical problems.
- * 
+ *
  * Loading types supported;
  * - Gravity load
- * 
+ *
  * @note Status: Experimental.
- * 
+ *
  * Reference:
  * Robert Cook, David Malkus, Michael Plesha
  * Concepts and Applications of Finite Element Analysis - Third edition
@@ -68,7 +67,7 @@ class Quad1MindlinShell3D : public NLStructuralElement
 {
 protected:
     /// Cached nodal coordinates in local c.s.,
-    FloatArray *lnodes[4];
+    FloatArray *lnodes [ 4 ];
     /// Cached coordinates in local c.s.,
     FloatMatrix lcsMatrix;
 
@@ -104,7 +103,6 @@ public:
     // definition & identification
     virtual const char *giveInputRecordName() const { return _IFT_Quad1MindlinShell3D_Name; }
     virtual const char *giveClassName() const { return "Quad1MindlinShell3D"; }
-    virtual classType giveClassID() const { return Quad1MindlinShell3DClass; }
     virtual IRResultType initializeFrom(InputRecord *ir);
 
     virtual int computeNumberOfDofs() { return 24; }
@@ -120,7 +118,7 @@ public:
     virtual void computeMassMatrix(FloatMatrix &answer, TimeStep *tStep)
     { computeLumpedMassMatrix(answer, tStep); }
 
-    virtual int giveIPValue(FloatArray &answer, GaussPoint *aGaussPoint, InternalStateType type, TimeStep *atTime);
+    virtual int giveIPValue(FloatArray &answer, GaussPoint *gp, InternalStateType type, TimeStep *tStep);
 
     virtual void computeLCS();
     virtual bool computeGtoLRotationMatrix(FloatMatrix &answer);

@@ -44,13 +44,13 @@
  #include "processcomm.h"
  #include "feticommunicator.h"
  #include "engngm.h"
- 
- ///@name Input fields for FETISolver
+
+///@name Input fields for FETISolver
 //@{
-#define _IFT_FETISolver_maxiter "maxiter"
-#define _IFT_FETISolver_maxerr "maxerr"
-#define _IFT_FETISolver_limit "limit"
-#define _IFT_FETISolver_energynormflag "energynormflag"
+ #define _IFT_FETISolver_maxiter "maxiter"
+ #define _IFT_FETISolver_maxerr "maxerr"
+ #define _IFT_FETISolver_limit "limit"
+ #define _IFT_FETISolver_energynormflag "energynormflag"
 //@}
 
 namespace oofem {
@@ -59,7 +59,7 @@ class EngngModel;
 
 
  #define FETISOLVER_MAX_RBM 6
- /// computer zero
+/// computer zero
  #define FETISOLVER_ZERONUM 1.e-40
 
 /**

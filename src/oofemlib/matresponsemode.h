@@ -38,7 +38,6 @@
 #include "enumitem.h"
 
 namespace oofem {
-
 #define MatResponseMode_DEF \
     ENUM_ITEM(TangentStiffness) \
     ENUM_ITEM(SecantStiffness) \
@@ -74,4 +73,3 @@ enum MatResponseMode {
 const char *__MatResponseModeToString(MatResponseMode _value);
 } // end namespace oofem
 #endif // matesponsemode_h
-

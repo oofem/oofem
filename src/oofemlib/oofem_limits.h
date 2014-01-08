@@ -40,4 +40,3 @@ namespace oofem {
 #define MAX_ERROR_MSG_LENGTH 2048
 } // end namespace oofem
 #endif // oofem_limits_h
-

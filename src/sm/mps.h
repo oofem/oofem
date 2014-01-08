@@ -74,7 +74,6 @@
 //@}
 
 namespace oofem {
-
 /**
  * This class implements associated Material Status to MPSMaterial,
  * which corresponds to a model for humidity- and temperature-dependent
@@ -142,7 +141,6 @@ public:
 
     // definition
     virtual const char *giveClassName() const { return "MPSMaterialStatus"; }
-    virtual classType giveClassID() const { return MPSMaterialStatusClass; }
 };
 
 
@@ -199,7 +197,6 @@ public:
 
     virtual const char *giveInputRecordName() const { return _IFT_MPSMaterial_Name; }
     virtual const char *giveClassName() const { return "MPSMaterial"; }
-    virtual classType giveClassID() const { return MPSMaterialClass; }
 
     virtual IRResultType initializeFrom(InputRecord *ir);
 
@@ -208,7 +205,7 @@ public:
 
     virtual void giveThermalDilatationVector(FloatArray &answer, GaussPoint *gp, TimeStep *tStep);
 
-    virtual void giveShrinkageStrainVector(FloatArray &answer, GaussPoint *gp, TimeStep *atTime, ValueModeType mode);
+    virtual void giveShrinkageStrainVector(FloatArray &answer, GaussPoint *gp, TimeStep *tStep, ValueModeType mode);
 
     virtual MaterialStatus *CreateStatus(GaussPoint *gp) const;
 
@@ -220,26 +217,26 @@ protected:
     /// Evaluation of characteristic moduli of the non-aging Kelvin chain
     virtual void computeCharCoefficients(FloatArray &answer, double);
 
-    virtual double giveEModulus(GaussPoint *gp, TimeStep *atTime);
+    virtual double giveEModulus(GaussPoint *gp, TimeStep *tStep);
 
-    virtual double computeSolidifiedVolume(GaussPoint *gp, TimeStep *atTime);
+    virtual double computeSolidifiedVolume(GaussPoint *gp, TimeStep *tStep);
 
-    virtual double computeBetaMu(GaussPoint *gp, TimeStep *atTime, int Mu);
-    virtual double computeLambdaMu(GaussPoint *gp, TimeStep *atTime, int Mu);
+    virtual double computeBetaMu(GaussPoint *gp, TimeStep *tStep, int Mu);
+    virtual double computeLambdaMu(GaussPoint *gp, TimeStep *tStep, int Mu);
 
     /// Evaluation of the flow term viscosity
-    double computeFlowTermViscosity(GaussPoint *gp, TimeStep *atTime);
+    double computeFlowTermViscosity(GaussPoint *gp, TimeStep *tStep);
 
     /// Returns initial value of the flow term viscosity
-    double giveInitViscosity(TimeStep *atTime);
+    double giveInitViscosity(TimeStep *tStep);
 
-    virtual void  giveEigenStrainVector(FloatArray &answer, GaussPoint *gp, TimeStep *atTime, ValueModeType mode);
+    virtual void  giveEigenStrainVector(FloatArray &answer, GaussPoint *gp, TimeStep *tStep, ValueModeType mode);
 
     virtual int hasIncrementalShrinkageFormulation() { return 1; }
 
 
     /// Evaluation of the shrinkageStrainVector - shrinkage is fully dependent on humidity rate in given GP
-    void computePointShrinkageStrainVector(FloatArray &answer, GaussPoint *gp, TimeStep *atTime);
+    void computePointShrinkageStrainVector(FloatArray &answer, GaussPoint *gp, TimeStep *tStep);
 
 
     double inverse_sorption_isotherm(double w);
@@ -249,31 +246,31 @@ protected:
     /// option = 1 ... end of the time step
     /// option = 2 ... average values
     /// option = 3 ... incremental values
-    double giveHumidity(GaussPoint *gp, TimeStep *atTime, int option);
+    double giveHumidity(GaussPoint *gp, TimeStep *tStep, int option);
 
     /// Gives value of temperature at given GP and timestep
     /// option = 0 ... beginning of the time step
     /// option = 1 ... end of the time step
     /// option = 2 ... average values
     /// option = 3 ... incremental values
-    double giveTemperature(GaussPoint *gp, TimeStep *atTime, int option);
+    double giveTemperature(GaussPoint *gp, TimeStep *tStep, int option);
 
     /// Evaluation of the factor transforming real time to reduced time (effect on the flow term)
     /// option = 0 ... beginning of the time step
     /// option = 1 ... end of the time step
     /// option = 2 ... average value
-    double computePsiR(GaussPoint *gp, TimeStep *atTime, int option);
+    double computePsiR(GaussPoint *gp, TimeStep *tStep, int option);
 
     /// Evaluation of the factor transforming real time to reduced time (effect on the evolution of microprestress)
-    double computePsiS(GaussPoint *gp, TimeStep *atTime);
+    double computePsiS(GaussPoint *gp, TimeStep *tStep);
 
     /// Evaluation of the factor transforming real time to equivalent time (effect on the solidified volume)
-    double computePsiE(GaussPoint *gp, TimeStep *atTime);
+    double computePsiE(GaussPoint *gp, TimeStep *tStep);
 
     /// Computes equivalent time at given time step and GP.
     /// If option == 0, equivalentTime is evaluated in the middle of the time step (to determine solidified ratio).
     /// If option == 1, equivalentTime is evaluated at the end of the time step. (for updating).
-    double computeEquivalentTime(GaussPoint *gp, TimeStep *atTime, int option);
+    double computeEquivalentTime(GaussPoint *gp, TimeStep *tStep, int option);
 
     friend class RankineMPSmat;
 };

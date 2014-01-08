@@ -85,112 +85,112 @@ public:
     /**
      * Computes acceleration terms (generalized mass matrix with stabilization terms) for momentum balance equations(s).
      */
-    virtual void computeAccelerationTerm_MB(FloatMatrix &answer, TimeStep *atTime) = 0;
+    virtual void computeAccelerationTerm_MB(FloatMatrix &answer, TimeStep *tStep) = 0;
     /**
      * Computes nonlinear advection terms for momentum balance equations(s).
      */
-    virtual void computeAdvectionTerm_MB(FloatArray &answer, TimeStep *atTime) = 0;
+    virtual void computeAdvectionTerm_MB(FloatArray &answer, TimeStep *tStep) = 0;
     /**
      * Computes the derivative of advection terms for momentum balance equations(s)
      * with respect to nodal velocities.
      */
-    virtual void computeAdvectionDerivativeTerm_MB(FloatMatrix &answer, TimeStep *atTime) = 0;
+    virtual void computeAdvectionDerivativeTerm_MB(FloatMatrix &answer, TimeStep *tStep) = 0;
     /**
      * Computes diffusion terms for momentum balance equations(s).
      */
-    virtual void computeDiffusionTerm_MB(FloatArray &answer, TimeStep *atTime) = 0;
+    virtual void computeDiffusionTerm_MB(FloatArray &answer, TimeStep *tStep) = 0;
     /**
      * Computes the derivative of diffusion terms for momentum balance equations(s)
      * with respect to nodal velocities.
      */
-    virtual void computeDiffusionDerivativeTerm_MB(FloatMatrix &answer, MatResponseMode mode, TimeStep *atTime) = 0;
+    virtual void computeDiffusionDerivativeTerm_MB(FloatMatrix &answer, MatResponseMode mode, TimeStep *tStep) = 0;
     /**
      * Computes pressure terms for momentum balance equations(s).
      */
-    virtual void computePressureTerm_MB(FloatMatrix &answer, TimeStep *atTime) = 0;
+    virtual void computePressureTerm_MB(FloatMatrix &answer, TimeStep *tStep) = 0;
     /**
      * Computes Lhs terms due to boundary conditions - pressure.
      */
-    virtual void computeBCLhsPressureTerm_MC(FloatMatrix &answer, TimeStep *atTime);
+    virtual void computeBCLhsPressureTerm_MC(FloatMatrix &answer, TimeStep *tStep);
     /**
      * Computes SLIC stabilization term for momentum balance equation(s).
      */
-    virtual void computeLSICStabilizationTerm_MB(FloatMatrix &answer, TimeStep *atTime) = 0;
+    virtual void computeLSICStabilizationTerm_MB(FloatMatrix &answer, TimeStep *tStep) = 0;
     /**
      * Computes the linear advection term for mass conservation equation.
      */
-    virtual void computeLinearAdvectionTerm_MC(FloatMatrix &answer, TimeStep *atTime) = 0;
+    virtual void computeLinearAdvectionTerm_MC(FloatMatrix &answer, TimeStep *tStep) = 0;
     /**
      * Computes advection terms for mass conservation equation.
      */
-    virtual void computeAdvectionTerm_MC(FloatArray &answer, TimeStep *atTime) = 0;
+    virtual void computeAdvectionTerm_MC(FloatArray &answer, TimeStep *tStep) = 0;
     /**
      * Computes the derivative of advection terms for mass conservation equation
      * with respect to nodal velocities.
      */
-    virtual void computeAdvectionDerivativeTerm_MC(FloatMatrix &answer, TimeStep *atTime) = 0;
+    virtual void computeAdvectionDerivativeTerm_MC(FloatMatrix &answer, TimeStep *tStep) = 0;
     /**
      * Computes diffusion derivative terms for mass conservation equation.
      */
-    virtual void computeDiffusionDerivativeTerm_MC(FloatMatrix &answer, TimeStep *atTime) = 0;
+    virtual void computeDiffusionDerivativeTerm_MC(FloatMatrix &answer, TimeStep *tStep) = 0;
     /**
      * Computes diffusion terms for mass conservation equation.
      */
-    virtual void computeDiffusionTerm_MC(FloatArray &answer, TimeStep *atTime) = 0;
+    virtual void computeDiffusionTerm_MC(FloatArray &answer, TimeStep *tStep) = 0;
     /**
      * Computes acceleration terms for mass conservation equation.
      */
-    virtual void computeAccelerationTerm_MC(FloatMatrix &answer, TimeStep *atTime) = 0;
+    virtual void computeAccelerationTerm_MC(FloatMatrix &answer, TimeStep *tStep) = 0;
     /**
      * Computes pressure terms for mass conservation equation.
      */
-    virtual void computePressureTerm_MC(FloatMatrix &answer, TimeStep *atTime) = 0;
+    virtual void computePressureTerm_MC(FloatMatrix &answer, TimeStep *tStep) = 0;
     /**
      * Computes Lhs terms due to boundary conditions - velocity.
      */
-    virtual void computeBCLhsTerm_MB(FloatMatrix &answer, TimeStep *atTime);
+    virtual void computeBCLhsTerm_MB(FloatMatrix &answer, TimeStep *tStep);
     /**
      * Computes Lhs terms due to boundary conditions - pressure.
      */
-    virtual void computeBCLhsPressureTerm_MB(FloatMatrix &answer, TimeStep *atTime);
+    virtual void computeBCLhsPressureTerm_MB(FloatMatrix &answer, TimeStep *tStep);
     /**
      * Computes Rhs terms due to boundary conditions.
      */
-    virtual void computeBCRhsTerm_MB(FloatArray &answer, TimeStep *atTime) = 0;
+    virtual void computeBCRhsTerm_MB(FloatArray &answer, TimeStep *tStep) = 0;
     /**
      * Computes Rhs terms due to boundary conditions.
      */
-    virtual void computeBCRhsTerm_MC(FloatArray &answer, TimeStep *atTime) = 0;
+    virtual void computeBCRhsTerm_MC(FloatArray &answer, TimeStep *tStep) = 0;
     /**
      * Computes Lhs term due to applied slip with friction bc.
      */
-    virtual void computeSlipWithFrictionBCTerm_MB(FloatMatrix &answer, Load *load, int side, TimeStep *atTime) {
+    virtual void computeSlipWithFrictionBCTerm_MB(FloatMatrix &answer, Load *load, int side, TimeStep *tStep) {
         _warning("computeSlipWithFrictionBCTerm_MB not implemented");
-        answer.resize(0,0);
+        answer.resize(0, 0);
     }
     /**
      * Computes Lhs contribution due to applied Penetration bc.
      */
-    virtual void computePenetrationWithResistanceBCTerm_MB(FloatMatrix &answer, Load *load, int side, TimeStep *atTime){
+    virtual void computePenetrationWithResistanceBCTerm_MB(FloatMatrix &answer, Load *load, int side, TimeStep *tStep) {
         _warning("computePenetrationWithResistanceBCTerm_MB not implemented");
-        answer.resize(0,0);
+        answer.resize(0, 0);
     }
     /**
      * Computes Lhs contribution due to outflow BC.
      */
-    virtual void computeOutFlowBCTerm_MB(FloatMatrix &answer, int side, TimeStep *atTime){
+    virtual void computeOutFlowBCTerm_MB(FloatMatrix &answer, int side, TimeStep *tStep) {
         _warning("computeOutFlowBCTerm_MB not implemented");
-        answer.resize(0,0);
+        answer.resize(0, 0);
     }
-    
 
-    virtual void computeHomogenizedReinforceTerm_MB(FloatMatrix &answer,  Load * load, TimeStep *atTime){
+
+    virtual void computeHomogenizedReinforceTerm_MB(FloatMatrix &answer,  Load *load, TimeStep *tStep) {
         _warning("computeHomogenizedReinforceTerm_MB");
-        answer.resize(0,0); 
+        answer.resize(0, 0);
     }
-    virtual void computeHomogenizedReinforceTerm_MC(FloatMatrix &answer,  Load * load, TimeStep *atTime){
+    virtual void computeHomogenizedReinforceTerm_MC(FloatMatrix &answer,  Load *load, TimeStep *tStep) {
         _warning("computeHomogenizedReinforceTerm_MB");
-        answer.resize(0,0); 
+        answer.resize(0, 0);
     }
 
 
@@ -204,7 +204,7 @@ public:
 
 #ifdef __OOFEG
     int giveInternalStateAtNode(FloatArray &answer, InternalStateType type, InternalStateMode mode,
-                                int node, TimeStep *atTime);
+                                int node, TimeStep *tStep);
     // Graphics output
     //void drawYourself(oofegGraphicContext&);
     //virtual void drawRawGeometry(oofegGraphicContext&) {}

@@ -100,7 +100,7 @@ public:
      * @param C Coefficient matrix to fill.
      */
     void updateCoefficientMatrix(FloatMatrix &C);
-    
+
     /**
      * Computes the homogenized, macroscopic, field (stress).
      * @param sigma Output quantity (typically stress).
@@ -108,7 +108,7 @@ public:
      * @param tStep Active time step.
      */
     void computeField(FloatArray &sigma, EquationID eid, TimeStep *tStep);
-    
+
     /**
      * Computes the macroscopic tangent for homogenization problems through sensitivity analysis.
      * @param tangent Output tangent.
@@ -145,13 +145,10 @@ public:
 
     virtual const char *giveClassName() const { return "PrescribedGradient"; }
     virtual const char *giveInputRecordName() const { return _IFT_PrescribedGradient_Name; }
-    virtual classType giveClassID() const { return PrescribedGradientClass; }
-    
+
 protected:
     double domainSize();
-    
 };
 } // end namespace oofem
 
 #endif // prescribedgradient_h
-

@@ -46,7 +46,7 @@
 namespace oofem {
 #define ZERO_LENGTH 1.e-6
 
-REGISTER_Material( OrthotropicLinearElasticMaterial );
+REGISTER_Material(OrthotropicLinearElasticMaterial);
 
 IRResultType
 OrthotropicLinearElasticMaterial :: initializeFrom(InputRecord *ir)
@@ -125,7 +125,7 @@ OrthotropicLinearElasticMaterial :: initializeFrom(InputRecord *ir)
     size = triplets.giveSize();
     if ( !( ( size == 0 ) || ( size == 6 ) ) ) {
         _warning2( "instanciateFrom: Warning: lcs in material %d is not properly defined, will be assumed as global",
-                  this->giveNumber() );
+                   this->giveNumber() );
     }
 
     if ( size == 6 ) {
@@ -150,13 +150,13 @@ OrthotropicLinearElasticMaterial :: initializeFrom(InputRecord *ir)
         // vector e3' computed from vector product of e1', e2'
         localCoordinateSystem->at(1, 3) =
             ( localCoordinateSystem->at(2, 1) * localCoordinateSystem->at(3, 2) -
-             localCoordinateSystem->at(3, 1) * localCoordinateSystem->at(2, 2) );
+              localCoordinateSystem->at(3, 1) * localCoordinateSystem->at(2, 2) );
         localCoordinateSystem->at(2, 3) =
             ( localCoordinateSystem->at(3, 1) * localCoordinateSystem->at(1, 2) -
-             localCoordinateSystem->at(1, 1) * localCoordinateSystem->at(3, 2) );
+              localCoordinateSystem->at(1, 1) * localCoordinateSystem->at(3, 2) );
         localCoordinateSystem->at(3, 3) =
             ( localCoordinateSystem->at(1, 1) * localCoordinateSystem->at(2, 2) -
-             localCoordinateSystem->at(2, 1) * localCoordinateSystem->at(1, 2) );
+              localCoordinateSystem->at(2, 1) * localCoordinateSystem->at(1, 2) );
     }
 
     // try to read ElementCS section
@@ -175,7 +175,7 @@ OrthotropicLinearElasticMaterial :: initializeFrom(InputRecord *ir)
         size = triplets.giveSize();
         if ( !( ( size == 0 ) || ( size == 3 ) ) ) {
             _warning2( "instanciateFrom: scs in material %d is not properly defined, will be assumed as global",
-                      this->giveNumber() );
+                       this->giveNumber() );
         }
 
         if ( size == 3 ) {
@@ -253,7 +253,6 @@ OrthotropicLinearElasticMaterial :: giveInputRecord(DynamicInputRecord &input)
     ///@todo Should add optional arguments:
     // _IFT_OrthotropicLinearElasticMaterial_lcs
     // _IFT_OrthotropicLinearElasticMaterial_scs
-
 }
 
 double
@@ -283,14 +282,14 @@ void
 OrthotropicLinearElasticMaterial :: give3dMaterialStiffnessMatrix(FloatMatrix &answer,
                                                                   MatResponseMode mode,
                                                                   GaussPoint *gp,
-                                                                  TimeStep *atTime)
+                                                                  TimeStep *tStep)
 //
 // forceElasticResponse ignored - always elastic
 //
 {
     FloatMatrix rotationMatrix;
 
-    this->give3dLocalMaterialStiffnessMatrix(answer, mode, gp, atTime);
+    this->give3dLocalMaterialStiffnessMatrix(answer, mode, gp, tStep);
 
     this->giveRotationMatrix(rotationMatrix, gp);
     answer.rotatedWith(rotationMatrix);
@@ -301,7 +300,7 @@ void
 OrthotropicLinearElasticMaterial :: give3dLocalMaterialStiffnessMatrix(FloatMatrix &answer,
                                                                        MatResponseMode mode,
                                                                        GaussPoint *gp,
-                                                                       TimeStep *atTime)
+                                                                       TimeStep *tStep)
 {
     double eksi, nxz, nyz, nxy, nzx, nzy, nyx;
     int i, j;
@@ -365,16 +364,16 @@ OrthotropicLinearElasticMaterial :: giveTensorRotationMatrix(FloatMatrix &answer
         // in localCoordinateSystem are stored directional cosines
         //
         if ( elementCsFlag ) {
-            answer.beProductOf(elementCs, *this->localCoordinateSystem);
+            answer.beProductOf(elementCs, * this->localCoordinateSystem);
         } else {
-            answer = *this->localCoordinateSystem;
+            answer = * this->localCoordinateSystem;
         }
     } else if ( this->cs_type == shellCS ) {
         FloatArray elementNormal, helpx, helpy;
         localCoordinateSystem = new FloatMatrix(3, 3);
 
         element->computeMidPlaneNormal(elementNormal, gp);
-        helpx.beVectorProductOf(*(this->helpPlaneNormal), elementNormal);
+        helpx.beVectorProductOf(* ( this->helpPlaneNormal ), elementNormal);
         // test if localCoordinateSystem is uniquely
         // defined by elementNormal and helpPlaneNormal
         if ( helpx.computeNorm() < ZERO_LENGTH ) {
@@ -382,7 +381,7 @@ OrthotropicLinearElasticMaterial :: giveTensorRotationMatrix(FloatMatrix &answer
         }
 
         helpy.beVectorProductOf(elementNormal, helpx);
-        for (int i = 1; i < 4; i++ ) {
+        for ( int i = 1; i < 4; i++ ) {
             localCoordinateSystem->at(i, 1) = helpx.at(i);
             localCoordinateSystem->at(i, 2) = helpy.at(i);
             localCoordinateSystem->at(i, 3) = elementNormal.at(i);
@@ -402,9 +401,9 @@ OrthotropicLinearElasticMaterial :: giveTensorRotationMatrix(FloatMatrix &answer
          * localCoordinateSystem = rotatedLocalCoordinateSystem;
          */
         if ( elementCsFlag ) {
-            answer.beProductOf(elementCs, *this->localCoordinateSystem);
+            answer.beProductOf(elementCs, * this->localCoordinateSystem);
         } else {
-            answer = *this->localCoordinateSystem;
+            answer = * this->localCoordinateSystem;
         }
 
         delete localCoordinateSystem;

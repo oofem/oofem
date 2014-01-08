@@ -45,10 +45,9 @@
 #endif
 
 namespace oofem {
-
-REGISTER_Element( QuadAxisym1_ht );
-REGISTER_Element( QuadAxisym1_hmt );
-REGISTER_Element( QuadAxisym1_mt );
+REGISTER_Element(QuadAxisym1_ht);
+REGISTER_Element(QuadAxisym1_hmt);
+REGISTER_Element(QuadAxisym1_mt);
 
 QuadAxisym1_ht :: QuadAxisym1_ht(int n, Domain *aDomain) : Quad1_ht(n, aDomain)
 { }
@@ -68,15 +67,15 @@ QuadAxisym1_ht :: ~QuadAxisym1_ht()
 { }
 
 double
-QuadAxisym1_ht :: computeVolumeAround(GaussPoint *aGaussPoint)
-// Returns the portion of the receiver which is attached to aGaussPoint.
+QuadAxisym1_ht :: computeVolumeAround(GaussPoint *gp)
+// Returns the portion of the receiver which is attached to gp.
 {
     double determinant, weight, volume;
-    determinant = fabs( this->interpolation.giveTransformationJacobian( * aGaussPoint->giveCoordinates(),
-                                                                       FEIElementGeometryWrapper(this) ) );
+    determinant = fabs( this->interpolation.giveTransformationJacobian( * gp->giveCoordinates(),
+                                                                        FEIElementGeometryWrapper(this) ) );
 
-    weight = aGaussPoint->giveWeight();
-    volume = determinant * weight * this->computeRadiusAt(aGaussPoint);
+    weight = gp->giveWeight();
+    volume = determinant * weight * this->computeRadiusAt(gp);
 
     return volume;
 }
@@ -96,7 +95,7 @@ QuadAxisym1_ht :: computeEdgeVolumeAround(GaussPoint *gp, int iEdge)
     radius = gcoords.at(1);
 
     double detJ = fabs( this->interpolation.edgeGiveTransformationJacobian( iEdge, * gp->giveCoordinates(),
-                                                                           FEIElementGeometryWrapper(this) ) );
+                                                                            FEIElementGeometryWrapper(this) ) );
     return detJ * gp->giveWeight() * radius;
 }
 

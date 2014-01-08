@@ -39,8 +39,7 @@
 #include "classfactory.h"
 
 namespace oofem {
-
-REGISTER_DofManager( SlaveNode );
+REGISTER_DofManager(SlaveNode);
 
 IRResultType SlaveNode :: initializeFrom(InputRecord *ir)
 {
@@ -53,8 +52,8 @@ IRResultType SlaveNode :: initializeFrom(InputRecord *ir)
     IR_GIVE_OPTIONAL_FIELD(ir, masterWeights, _IFT_SlaveNode_weights);
 
     if ( masterWeights.giveSize() == 0 ) {
-        masterWeights.resize(masterDofManagers.giveSize());
-        masterWeights.add(1/(double)masterDofManagers.giveSize());
+        masterWeights.resize( masterDofManagers.giveSize() );
+        masterWeights.add( 1 / ( double ) masterDofManagers.giveSize() );
     } else if ( masterDofManagers.giveSize() != masterWeights.giveSize() ) {
         _error("initializeFrom: master dof managers and weights size mismatch.");
     }
@@ -68,7 +67,7 @@ void SlaveNode :: postInitialize()
 
     // initialize slave dofs (inside check of consistency of receiver and master dof)
     for ( int i = 1; i <= numberOfDofs; ++i ) {
-        SlaveDof *sdof = dynamic_cast< SlaveDof* >( dofArray[i-1] );
+        SlaveDof *sdof = dynamic_cast< SlaveDof * >( dofArray [ i - 1 ] );
         if ( sdof ) {
             sdof->initialize(masterDofManagers.giveSize(), masterDofManagers, NULL, masterWeights);
         }
@@ -78,11 +77,10 @@ void SlaveNode :: postInitialize()
 
 void SlaveNode :: updateLocalNumbering(EntityRenumberingFunctor &f)
 {
-    for ( int i = 1; i <= masterDofManagers.giveSize(); ++i) {
+    for ( int i = 1; i <= masterDofManagers.giveSize(); ++i ) {
         masterDofManagers.at(i) = f(masterDofManagers.at(i), ERS_DofManager);
     }
 
-    DofManager::updateLocalNumbering(f);
+    DofManager :: updateLocalNumbering(f);
 }
-
 } // end namespace oofem

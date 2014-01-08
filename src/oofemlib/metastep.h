@@ -98,17 +98,17 @@ public:
      */
     IRResultType initializeFrom(InputRecord *ir);
     /// Sets the receiver bounds according to given solution step number, returns end index.
-    int setStepBounds(int startStepNumber);
+    int setStepBounds(int starttStepumber);
     /// Sets the number of steps within the metastep.
     void setNumberOfSteps(int numberOfSteps);
     /// Tests if step number is maintained by receiver.
-    int isStepValid(int solStepNumber);
+    int isStepValid(int soltStepumber);
     /// Returns the step relative number  to receiver.
-    int giveStepRelativeNumber(int stepNumber) { return ( stepNumber - sindex + 1 ); }
+    int giveStepRelativeNumber(int tStepumber) { return ( tStepumber - sindex + 1 ); }
     /// Returns first step number.
-    int giveFirstStepNumber() { return sindex; }
+    int giveFirsttStepumber() { return sindex; }
     /// Returns last step number.
-    int giveLastStepNumber() { return ( sindex + numberOfSteps - 1 ); }
+    int giveLasttStepumber() { return ( sindex + numberOfSteps - 1 ); }
     /// Returns class name of receiver.
     const char *giveClassName() const { return "MetaStep"; }
 };

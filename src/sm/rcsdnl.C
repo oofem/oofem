@@ -43,8 +43,7 @@
 #include "classfactory.h"
 
 namespace oofem {
-
-REGISTER_Material( RCSDNLMaterial );
+REGISTER_Material(RCSDNLMaterial);
 
 RCSDNLMaterial :: RCSDNLMaterial(int n, Domain *d) : RCSDEMaterial(n, d), StructuralNonlocalMaterialExtensionInterface(d)
 {
@@ -71,7 +70,7 @@ RCSDNLMaterial :: giveInterface(InterfaceType type)
 
 
 void
-RCSDNLMaterial :: updateBeforeNonlocAverage(const FloatArray &strainVector, GaussPoint *gp, TimeStep *atTime)
+RCSDNLMaterial :: updateBeforeNonlocAverage(const FloatArray &strainVector, GaussPoint *gp, TimeStep *tStep)
 {
     /*  Implements the service updating local variables in given integration points,
      * which take part in nonlocal average process. Actually, no update is necessary,
@@ -92,7 +91,7 @@ RCSDNLMaterial :: updateBeforeNonlocAverage(const FloatArray &strainVector, Gaus
 void
 RCSDNLMaterial :: giveRealStressVector(FloatArray &answer, GaussPoint *gp,
                                        const FloatArray &totalStrain,
-                                       TimeStep *atTime)
+                                       TimeStep *tStep)
 //
 // returns real stress vector in 3d stress space of receiver according to
 // previous level of stress and current
@@ -112,16 +111,16 @@ RCSDNLMaterial :: giveRealStressVector(FloatArray &answer, GaussPoint *gp,
     this->initTempStatus(gp);
     this->initGpForNewStep(gp);
     this->buildNonlocalPointTable(gp);
-    this->updateDomainBeforeNonlocAverage(atTime);
+    this->updateDomainBeforeNonlocAverage(tStep);
 
     // compute nonlocal strain increment first
-    std::list< localIntegrationRecord > *list = this->giveIPIntegrationList(gp); // !
-    std::list< localIntegrationRecord > :: iterator listIter;
+    std :: list< localIntegrationRecord > *list = this->giveIPIntegrationList(gp); // !
+    std :: list< localIntegrationRecord > :: iterator listIter;
 
     for ( listIter = list->begin(); listIter != list->end(); ++listIter ) {
-        nonlocStatus = static_cast< RCSDNLMaterialStatus * >( this->giveStatus( listIter->nearGp ) );
+        nonlocStatus = static_cast< RCSDNLMaterialStatus * >( this->giveStatus(listIter->nearGp) );
         nonlocalContribution = nonlocStatus->giveLocalStrainVectorForAverage();
-        nonlocalContribution.times( listIter->weight );
+        nonlocalContribution.times(listIter->weight);
 
         reducedNonlocStrainVector.add(nonlocalContribution);
     }
@@ -130,7 +129,7 @@ RCSDNLMaterial :: giveRealStressVector(FloatArray &answer, GaussPoint *gp,
     this->endIPNonlocalAverage(gp);  // !
 
     // subtract stress independent part
-    ////# this->giveStressDependentPartOfStrainVector(nonlocalStrainIncrement, gp, nonlocalTotalStrainIncrement,atTime);
+    ////# this->giveStressDependentPartOfStrainVector(nonlocalStrainIncrement, gp, nonlocalTotalStrainIncrement,tStep);
     //
 
     reducedLocalStrainVector = totalStrain;
@@ -139,11 +138,11 @@ RCSDNLMaterial :: giveRealStressVector(FloatArray &answer, GaussPoint *gp,
     // note: eigenStrains (temperature) is not contained in mechanical strain stored in gp
     // therefore it is necessary to subtract always the total eigen strain value
     this->giveStressDependentPartOfStrainVector(nonlocalStrain, gp, reducedNonlocStrainVector,
-                                                atTime, VM_Total);
+                                                tStep, VM_Total);
     this->giveStressDependentPartOfStrainVector(localStrain, gp, reducedLocalStrainVector,
-                                                atTime, VM_Total);
+                                                tStep, VM_Total);
 
-    StructuralMaterial :: giveFullSymVectorForm(fullNonlocStrainVector, nonlocalStrain, gp->giveMaterialMode());
+    StructuralMaterial :: giveFullSymVectorForm( fullNonlocStrainVector, nonlocalStrain, gp->giveMaterialMode() );
 
     status->giveTempCrackDirs(tempCrackDirs);
     this->computePrincipalValDir(principalStrain, tempCrackDirs,
@@ -154,10 +153,10 @@ RCSDNLMaterial :: giveRealStressVector(FloatArray &answer, GaussPoint *gp,
     if ( status->giveTempMode() == RCSDEMaterialStatus :: rcMode ) {
         // rotating crack mode
 
-        this->giveRealPrincipalStressVector3d(princStress, gp, principalStrain, tempCrackDirs, atTime);
+        this->giveRealPrincipalStressVector3d(princStress, gp, principalStrain, tempCrackDirs, tStep);
 
         ////#  //
-        ////#  // this -> giveRealPrincipalStressVector3d (princStress, gp, strainIncrement, atTime);
+        ////#  // this -> giveRealPrincipalStressVector3d (princStress, gp, strainIncrement, tStep);
         ////# princStress.resize (6);
         ////#  status->giveTempCrackDirs (tempCrackDirs);
         ////#  this -> transformStressVectorTo (answer, tempCrackDirs, princStress, 1);
@@ -170,7 +169,7 @@ RCSDNLMaterial :: giveRealStressVector(FloatArray &answer, GaussPoint *gp,
         this->updateCrackStatus(gp, crackStrain);
 
         ////#
-        this->giveMaterialStiffnessMatrix(Ds0, SecantStiffness, gp, atTime);
+        this->giveMaterialStiffnessMatrix(Ds0, SecantStiffness, gp, tStep);
 
         ////#  if (form == ReducedForm) {
         ////#   crossSection->giveReducedCharacteristicVector(reducedAnswer, gp, answer);
@@ -181,7 +180,7 @@ RCSDNLMaterial :: giveRealStressVector(FloatArray &answer, GaussPoint *gp,
         int anyOpeningCrack = 0;
         for ( int i = 1; i <= 3; i++ ) {
             if ( ( status->giveTempCrackStatus(i) == pscm_SOFTENING ) ||
-                ( status->giveTempCrackStatus(i) == pscm_OPEN ) ) {
+                 ( status->giveTempCrackStatus(i) == pscm_OPEN ) ) {
                 anyOpeningCrack++;
             }
         }
@@ -193,7 +192,7 @@ RCSDNLMaterial :: giveRealStressVector(FloatArray &answer, GaussPoint *gp,
             int ipos = 0;
             for ( int i = 1; i <= 3; i++ ) {
                 if ( ( status->giveTempCrackStatus(i) == pscm_SOFTENING ) ||
-                    ( status->giveTempCrackStatus(i) == pscm_OPEN ) ) {
+                     ( status->giveTempCrackStatus(i) == pscm_OPEN ) ) {
                     if ( princStress.at(i) < minSofteningPrincStress ) {
                         minSofteningPrincStress = princStress.at(i);
                         ipos = i;
@@ -212,7 +211,7 @@ RCSDNLMaterial :: giveRealStressVector(FloatArray &answer, GaussPoint *gp,
 
             ///@todo Double-Check the logic here with the mask:
             IntArray indx;
-            StructuralMaterial :: giveVoigtSymVectorMask(indx, gp->giveMaterialMode());
+            StructuralMaterial :: giveVoigtSymVectorMask( indx, gp->giveMaterialMode() );
             for ( int i = 4; i <= 6; i++ ) {
                 if ( indx.contains(i) ) {
                     if ( i == 4 ) {
@@ -247,7 +246,7 @@ RCSDNLMaterial :: giveRealStressVector(FloatArray &answer, GaussPoint *gp,
             ////#
 
             if ( ( minSofteningPrincStress <= this->SDTransitionCoeff * CurrFt ) ||
-                ( minG <= this->SDTransitionCoeff2 * G ) ) {
+                 ( minG <= this->SDTransitionCoeff2 * G ) ) {
                 //   printf ("minSofteningPrincStress=%lf, CurrFt=%lf, SDTransitionCoeff=%lf",minSofteningPrincStress, CurrFt, this->SDTransitionCoeff);
                 //   printf ("\nminG=%lf, G=%lf, SDTransitionCoeff2=%lf\n",minG, G, this->SDTransitionCoeff2);
 
@@ -255,7 +254,7 @@ RCSDNLMaterial :: giveRealStressVector(FloatArray &answer, GaussPoint *gp,
                 if ( ipos == 0 ) {
                     for ( int i = 1; i <= 3; i++ ) {
                         if ( ( status->giveTempCrackStatus(i) == pscm_SOFTENING ) ||
-                            ( status->giveTempCrackStatus(i) == pscm_OPEN ) ) {
+                             ( status->giveTempCrackStatus(i) == pscm_OPEN ) ) {
                             if ( ipos == 0 ) {
                                 ipos = i;
                                 minSofteningPrincStress = princStress.at(i);
@@ -289,9 +288,9 @@ RCSDNLMaterial :: giveRealStressVector(FloatArray &answer, GaussPoint *gp,
 
                 ef2 = Gf1 / princStress.at(ipos);
 
-                //this->giveMaterialStiffnessMatrix (Ds0, SecantStiffness, gp, atTime);
+                //this->giveMaterialStiffnessMatrix (Ds0, SecantStiffness, gp, tStep);
                 // compute reached equivalent strain
-                equivStrain = this->computeCurrEquivStrain(gp, nonlocalStrain, E, atTime);
+                equivStrain = this->computeCurrEquivStrain(gp, nonlocalStrain, E, tStep);
                 damage = this->computeDamageCoeff(equivStrain, e0, ef2);
 
                 //   printf ("Gf=%lf, Gf0=%lf, damage=%lf, e0=%lf, ef2=%lf, es=%lf\n",Gf, Gf0, damage,e0,ef2,equivStrain);
@@ -312,7 +311,7 @@ RCSDNLMaterial :: giveRealStressVector(FloatArray &answer, GaussPoint *gp,
         double damage;
 
         E = linearElasticMaterial->give(Ex, gp);
-        equivStrain = this->computeCurrEquivStrain(gp, nonlocalStrain, E, atTime);
+        equivStrain = this->computeCurrEquivStrain(gp, nonlocalStrain, E, tStep);
         equivStrain = max( equivStrain, status->giveTempMaxEquivStrain() );
         ////# reducedSpaceStressVector.beProductOf (*status->giveDs0Matrix(), reducedNonlocStrainVector);
         ef2 = status->giveEpsF2Coeff();
@@ -461,7 +460,7 @@ RCSDNLMaterialStatus :: printOutputAt(FILE *file, TimeStep *tStep)
 
     fprintf(file, "nonlocstatus { ");
     fprintf(file, "  nonloc strains ");
-    StructuralMaterial :: giveFullSymVectorForm(helpVec, nonlocalStrainVector, gp->giveMaterialMode());
+    StructuralMaterial :: giveFullSymVectorForm( helpVec, nonlocalStrainVector, gp->giveMaterialMode() );
     for ( int i = 1; i <= helpVec.giveSize(); i++ ) {
         fprintf( file, " % .4e", helpVec.at(i) );
     }
@@ -492,14 +491,14 @@ RCSDNLMaterialStatus :: initTempStatus()
 
 
 void
-RCSDNLMaterialStatus :: updateYourself(TimeStep *atTime)
+RCSDNLMaterialStatus :: updateYourself(TimeStep *tStep)
 //
 // updates variables (nonTemp variables describing situation at previous equilibrium state)
 // after a new equilibrium state has been reached
 // temporary variables are having values corresponding to newly reched equilibrium.
 //
 {
-    RCSDEMaterialStatus :: updateYourself(atTime);
+    RCSDEMaterialStatus :: updateYourself(tStep);
     nonlocalStrainVector = tempNonlocalStrainVector;
 }
 
@@ -563,18 +562,18 @@ RCSDNLMaterialStatus :: giveInterface(InterfaceType type)
 
 #ifdef __PARALLEL_MODE
 int
-RCSDNLMaterial :: packUnknowns(CommunicationBuffer &buff, TimeStep *stepN, GaussPoint *ip)
+RCSDNLMaterial :: packUnknowns(CommunicationBuffer &buff, TimeStep *tStep, GaussPoint *ip)
 {
     RCSDNLMaterialStatus *status = static_cast< RCSDNLMaterialStatus * >( this->giveStatus(ip) );
 
     this->buildNonlocalPointTable(ip);
-    this->updateDomainBeforeNonlocAverage(stepN);
+    this->updateDomainBeforeNonlocAverage(tStep);
 
     return status->giveLocalStrainVectorForAverage().packToCommBuffer(buff);
 }
 
 int
-RCSDNLMaterial :: unpackAndUpdateUnknowns(CommunicationBuffer &buff, TimeStep *stepN, GaussPoint *ip)
+RCSDNLMaterial :: unpackAndUpdateUnknowns(CommunicationBuffer &buff, TimeStep *tStep, GaussPoint *ip)
 {
     int result;
     RCSDNLMaterialStatus *status = static_cast< RCSDNLMaterialStatus * >( this->giveStatus(ip) );

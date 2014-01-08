@@ -147,7 +147,6 @@ public:
 
     // definition
     virtual const char *giveClassName() const { return "RCM2MaterialStatus"; }
-    virtual classType giveClassID() const { return RCMMaterialStatusClass; }
 
     virtual void initTempStatus();
     virtual void updateYourself(TimeStep *tStep);
@@ -185,7 +184,6 @@ public:
     virtual int hasMaterialModeCapability(MaterialMode mode);
 
     virtual const char *giveClassName() const { return "RCM2Material"; }
-    virtual classType giveClassID() const { return RCMMaterialClass; }
 
     virtual IRResultType initializeFrom(InputRecord *ir);
 
@@ -199,7 +197,7 @@ public:
                                                TimeStep *tStep);
 
     virtual void giveRealStressVector(FloatArray &answer, GaussPoint *gp,
-                              const FloatArray &reducedStrain, TimeStep *tStep);
+                                      const FloatArray &reducedStrain, TimeStep *tStep);
 
     virtual void giveRealStressVector_3d(FloatArray &answer, GaussPoint *gp, const FloatArray &reducedE, TimeStep *tStep)
     { this->giveRealStressVector(answer, gp, reducedE, tStep); }
@@ -266,20 +264,20 @@ protected:
 
 
     virtual void givePlaneStressStiffMtrx(FloatMatrix &answer, MatResponseMode mmode,
-                                  GaussPoint *gp,
-                                  TimeStep *tStep);
+                                          GaussPoint *gp,
+                                          TimeStep *tStep);
     virtual void givePlaneStrainStiffMtrx(FloatMatrix &answer, MatResponseMode mmode,
-                                  GaussPoint *gp,
-                                  TimeStep *tStep);
+                                          GaussPoint *gp,
+                                          TimeStep *tStep);
     virtual void give1dStressStiffMtrx(FloatMatrix &answer, MatResponseMode mmode,
-                               GaussPoint *gp,
-                               TimeStep *tStep);
+                                       GaussPoint *gp,
+                                       TimeStep *tStep);
     virtual void give2dBeamLayerStiffMtrx(FloatMatrix &answer, MatResponseMode mmode,
-                                  GaussPoint *gp,
-                                  TimeStep *tStep);
+                                          GaussPoint *gp,
+                                          TimeStep *tStep);
     virtual void givePlateLayerStiffMtrx(FloatMatrix &answer, MatResponseMode mmode,
-                                   GaussPoint *gp,
-                                   TimeStep *tStep);
+                                         GaussPoint *gp,
+                                         TimeStep *tStep);
 };
 } // end namespace oofem
 #endif // rcm2_h

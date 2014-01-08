@@ -38,7 +38,6 @@
 #include "structuralmaterial.h"
 
 namespace oofem {
-
 /**
  * This class is a abstract base class for all linear elastic material models
  * in a finite element problem. A material

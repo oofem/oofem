@@ -73,7 +73,7 @@ DomainTransactionManager :: addTransaction(DomainTransactionType dtt, DomainComp
         // local enry exist
         // delete previous record
         if ( ( * rec ) [ label ] ) {
-            delete(* rec) [ label ];
+            delete( * rec ) [ label ];
         }
     }
 
@@ -86,31 +86,25 @@ DomainTransactionManager :: addTransaction(DomainTransactionType dtt, DomainComp
 
 DofManager *DomainTransactionManager :: giveDofManager(int label)
 {
-    DofManager *answer;
     if ( dofmanTransactions.find(label) != dofmanTransactions.end() ) {
         // if modified record exist return it
-        answer = ( DofManager * ) dofmanTransactions [ label ];
+        return ( DofManager * )( dofmanTransactions [ label ] );
     } else {
         // no modification recorded -> return NULL
-        answer = NULL;
+        return NULL;
     }
-
-    return answer;
 }
 
 
 Element *DomainTransactionManager :: giveElement(int label)
 {
-    Element *answer;
     if ( elementTransactions.find(label) != elementTransactions.end() ) {
         // if modified record exist return it
-        answer = ( Element * ) elementTransactions [ label ];
+        return ( Element * )( elementTransactions [ label ] );
     } else {
         // no modification recorded -> return NULL
-        answer = NULL;
+        return NULL;
     }
-
-    return answer;
 }
 
 

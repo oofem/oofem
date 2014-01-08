@@ -46,7 +46,7 @@ KelvinChainSolidMaterial :: KelvinChainSolidMaterial(int n, Domain *d) : RheoCha
 {}
 
 double
-KelvinChainSolidMaterial :: giveEModulus(GaussPoint *gp, TimeStep *atTime)
+KelvinChainSolidMaterial :: giveEModulus(GaussPoint *gp, TimeStep *tStep)
 {
     /*
      * This function returns the incremental modulus for the given time increment.
@@ -64,17 +64,17 @@ KelvinChainSolidMaterial :: giveEModulus(GaussPoint *gp, TimeStep *atTime)
     double sum = 0.0;
 
     for ( mu = 1; mu <= nUnits; mu++ ) {
-        lambdaMu = this->computeLambdaMu(gp, atTime, mu);
+        lambdaMu = this->computeLambdaMu(gp, tStep, mu);
         Emu = this->giveEparModulus(mu);
         sum += ( 1 - lambdaMu ) / Emu;
     }
 
-    v = this->computeSolidifiedVolume(gp, atTime);
+    v = this->computeSolidifiedVolume(gp, tStep);
     return sum / v;
 }
 
 void
-KelvinChainSolidMaterial :: giveEigenStrainVector(FloatArray &answer, GaussPoint *gp, TimeStep *atTime, ValueModeType mode)
+KelvinChainSolidMaterial :: giveEigenStrainVector(FloatArray &answer, GaussPoint *gp, TimeStep *tStep, ValueModeType mode)
 //
 // computes the strain due to creep at constant stress during the increment
 // (in fact, the INCREMENT of creep strain is computed for mode == VM_Incremental)
@@ -89,8 +89,8 @@ KelvinChainSolidMaterial :: giveEigenStrainVector(FloatArray &answer, GaussPoint
 
     if ( mode == VM_Incremental ) {
         for ( mu = 1; mu <= nUnits; mu++ ) {
-            betaMu = this->computeBetaMu(gp, atTime, mu);
-            sigmaVMu =  &status->giveHiddenVarsVector(mu); // JB
+            betaMu = this->computeBetaMu(gp, tStep, mu);
+            sigmaVMu =  & status->giveHiddenVarsVector(mu); // JB
 
             if ( sigmaVMu ) {
                 help.zero();
@@ -102,9 +102,9 @@ KelvinChainSolidMaterial :: giveEigenStrainVector(FloatArray &answer, GaussPoint
 
         if ( sigmaVMu ) {
             help = reducedAnswer;
-            this->giveUnitComplianceMatrix(C, gp, atTime);
+            this->giveUnitComplianceMatrix(C, gp, tStep);
             reducedAnswer.beProductOf(C, help);
-            v = this->computeSolidifiedVolume(gp, atTime);
+            v = this->computeSolidifiedVolume(gp, tStep);
             reducedAnswer.times(1. / v);
         }
 
@@ -116,13 +116,13 @@ KelvinChainSolidMaterial :: giveEigenStrainVector(FloatArray &answer, GaussPoint
 }
 
 double
-KelvinChainSolidMaterial :: computeBetaMu(GaussPoint *gp, TimeStep *atTime, int Mu)
+KelvinChainSolidMaterial :: computeBetaMu(GaussPoint *gp, TimeStep *tStep, int Mu)
 {
     double betaMu;
     double deltaT;
     double tauMu;
 
-    deltaT = atTime->giveTimeIncrement() / timeFactor;
+    deltaT = tStep->giveTimeIncrement() / timeFactor;
     tauMu = this->giveCharTime(Mu);
 
     if ( deltaT / tauMu > 30 ) {
@@ -135,13 +135,13 @@ KelvinChainSolidMaterial :: computeBetaMu(GaussPoint *gp, TimeStep *atTime, int 
 }
 
 double
-KelvinChainSolidMaterial :: computeLambdaMu(GaussPoint *gp, TimeStep *atTime, int Mu)
+KelvinChainSolidMaterial :: computeLambdaMu(GaussPoint *gp, TimeStep *tStep, int Mu)
 {
     double lambdaMu;
     double deltaT;
     double tauMu;
 
-    deltaT = atTime->giveTimeIncrement() / timeFactor;
+    deltaT = tStep->giveTimeIncrement() / timeFactor;
     tauMu = this->giveCharTime(Mu);
 
     if ( deltaT / tauMu < 1.e-5 ) {
@@ -156,7 +156,7 @@ KelvinChainSolidMaterial :: computeLambdaMu(GaussPoint *gp, TimeStep *atTime, in
 }
 
 
-void 
+void
 KelvinChainSolidMaterial :: giveRealStressVector(FloatArray &answer, GaussPoint *gp, const FloatArray &reducedStrain, TimeStep *tStep)
 {
     RheoChainMaterial :: giveRealStressVector(answer, gp, reducedStrain, tStep);
@@ -233,7 +233,7 @@ KelvinChainSolidMaterial :: initializeFrom(InputRecord *ir)
 
 // useless here
 double
-KelvinChainSolidMaterial :: computeCreepFunction(double atTime, double ofAge)
+KelvinChainSolidMaterial :: computeCreepFunction(double tStep, double ofAge)
 {
     _error("computeCreepFunction: function has not been yet implemented to KelvinChainSolidMaterialStatus.C");
     return 0.;

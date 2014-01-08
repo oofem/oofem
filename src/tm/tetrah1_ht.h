@@ -43,12 +43,11 @@
 #define _IFT_Tetrah1_hmt_Name "tetrah1hmt"
 
 namespace oofem {
-
 class FEI3dTetLin;
 
 /**
  * Tetrahedral (3d) element with linear approximation for heat and mass transfer.
-*/
+ */
 class Tetrah1_ht : public TransportElement, public SpatialLocalizerInterface, public ZZNodalRecoveryModelInterface
 {
 protected:
@@ -59,13 +58,12 @@ public:
     virtual ~Tetrah1_ht();
 
     virtual FEInterpolation *giveInterpolation() const;
-    
+
     virtual double computeVolumeAround(GaussPoint *gp);
 
     // definition
     virtual const char *giveInputRecordName() const { return _IFT_Tetrah1_ht_Name; }
     virtual const char *giveClassName() const { return "Tetrah1_ht"; }
-    virtual classType giveClassID() const { return Tetrah1_htClass; }
 
     virtual int computeNumberOfDofs() { return ( emode == HeatTransferEM ) ? 4 : 8; }
     virtual IRResultType initializeFrom(InputRecord *ir);
@@ -104,9 +102,7 @@ public:
 
     virtual const char *giveInputRecordName() const { return _IFT_Tetrah1_hmt_Name; }
     virtual const char *giveClassName() const { return "Tetrah1_hmt"; }
-    virtual classType giveClassID() const { return Tetrah1_hmtClass; }
     virtual MaterialMode giveMaterialMode() { return _3dHeMo; }
 };
-
 } // end namespace oofem
 #endif // tetrah1_ht_h

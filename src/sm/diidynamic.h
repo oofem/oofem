@@ -109,14 +109,13 @@ public:
     // identification
     virtual const char *giveClassName() const { return "DIIDynamic"; }
     virtual const char *giveInputRecordName() const { return _IFT_DIIDynamic_Name; }
-    virtual classType giveClassID() const { return DIIDynamicClass; }
     virtual fMode giveFormulation() { return TL; }
     virtual int giveNumberOfTimeStepWhenIcApply() { return 0; }
 
     virtual void giveElementCharacteristicMatrix(FloatMatrix &answer, int num,
                                                  CharType type, TimeStep *tStep, Domain *domain);
 
-    virtual void printDofOutputAt(FILE *stream, Dof *iDof, TimeStep *atTime);
+    virtual void printDofOutputAt(FILE *stream, Dof *iDof, TimeStep *tStep);
 
     void timesMtrx(FloatArray &answer, FloatArray &vec, CharType type, Domain *domain, TimeStep *tStep);
     void assembleLoadVector(FloatArray &_loadVector, Domain *domain, ValueModeType mode, TimeStep *tStep);

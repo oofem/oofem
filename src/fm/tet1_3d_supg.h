@@ -42,7 +42,6 @@
 #define _IFT_Tet1_3D_SUPG_Name "tet1supg"
 
 namespace oofem {
-
 /**
  * Class representing 3d linear tetrahedral element
  * for solving incompressible fluid with SUPG solver
@@ -59,7 +58,6 @@ public:
     // definition
     virtual const char *giveClassName() const { return "Tet1_3D_SUPG"; }
     virtual const char *giveInputRecordName() const { return _IFT_Tet1_3D_SUPG_Name; }
-    virtual classType giveClassID() const { return Tet1_3D_SUPGClass; }
     virtual MaterialMode giveMaterialMode() { return _3dFlow; }
     virtual void giveElementDofIDMask(EquationID, IntArray & answer) const;
     virtual void giveDofManDofIDMask(int inode, EquationID ut, IntArray &answer) const;
@@ -85,13 +83,13 @@ public:
 protected:
     virtual void computeGaussPoints();
     virtual void computeNuMatrix(FloatMatrix &answer, GaussPoint *gp);
-    virtual void computeUDotGradUMatrix(FloatMatrix &answer, GaussPoint *gp, TimeStep *atTime);
+    virtual void computeUDotGradUMatrix(FloatMatrix &answer, GaussPoint *gp, TimeStep *tStep);
     virtual void computeBMatrix(FloatMatrix &anwer, GaussPoint *gp);
     virtual void computeDivUMatrix(FloatMatrix &answer, GaussPoint *gp);
     virtual void computeNpMatrix(FloatMatrix &answer, GaussPoint *gp);
     virtual void computeGradPMatrix(FloatMatrix &answer, GaussPoint *gp);
-    virtual void computeDivTauMatrix(FloatMatrix &answer, GaussPoint *gp, TimeStep *atTime);
-    virtual void computeGradUMatrix(FloatMatrix &answer, GaussPoint *gp, TimeStep *atTime);
+    virtual void computeDivTauMatrix(FloatMatrix &answer, GaussPoint *gp, TimeStep *tStep);
+    virtual void computeGradUMatrix(FloatMatrix &answer, GaussPoint *gp, TimeStep *tStep);
     virtual int  giveNumberOfSpatialDimensions();
 };
 } // end namespace oofem

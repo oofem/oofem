@@ -53,16 +53,15 @@
 //@}
 
 namespace oofem {
-    
 class GaussPoint;
 
 /**
  * For testing material behavior, particularly useful for multiscale modeling where one can test a single RVE.
  * The deviatoric and volumetric parts are split. No nodes or elements are used.
- * 
- * @note The user must take care to ensure that a deviatoric stress is possible, i.e. is all components are controlled for the stress, 
+ *
+ * @note The user must take care to ensure that a deviatoric stress is possible, i.e. is all components are controlled for the stress,
  * the time functions must evaluate to something deviatoric (e.g. all zeros).
- * 
+ *
  * This model will output data in its own way since it does not contain any actual FE-results.
  * It will not call the output manager at all.
  * @author Mikael Öhman
@@ -77,30 +76,29 @@ protected:
     int volFunction; /// Time function controlling the volumetric/pressure part
     IntArray sControl, eControl;
     bool pressureControl;
-    
+
     IntArray vars;
 
-    AList< GaussPoint > gps;
-    
-    std::ofstream outfile;
+    AList< GaussPoint >gps;
+
+    std :: ofstream outfile;
 
 public:
     FluidMaterialEvaluator(int i, EngngModel *_master = NULL);
     virtual ~FluidMaterialEvaluator();
-    
-    virtual IRResultType initializeFrom(InputRecord* ir);
+
+    virtual IRResultType initializeFrom(InputRecord *ir);
 
     virtual void solveYourself();
 
     /// Empty implementation, not relevant for this problem class.
-    virtual void printDofOutputAt(FILE *stream, Dof *iDof, TimeStep *atTime) {};
+    virtual void printDofOutputAt(FILE *stream, Dof *iDof, TimeStep *tStep) {};
     virtual int checkConsistency();
     virtual void doStepOutput(TimeStep *tStep);
     virtual TimeStep *giveNextStep();
 
     virtual const char *giveClassName() const { return "FluidMaterialEvaluator"; }
     virtual const char *giveInputRecordName() const { return _IFT_FluidMaterialEvaluator_Name; }
-    virtual classType giveClassID() const { return FluidMaterialEvaluatorClass; }
 };
 } // end namespace oofem
 

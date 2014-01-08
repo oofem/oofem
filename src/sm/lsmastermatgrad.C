@@ -74,7 +74,7 @@ LargeStrainMasterMaterialGrad :: CreateStatus(GaussPoint *gp) const
 
 
 void
-LargeStrainMasterMaterialGrad :: giveStiffnessMatrix(FloatMatrix &answer, MatResponseMode rMode, GaussPoint *gp, TimeStep *atTime)
+LargeStrainMasterMaterialGrad :: giveStiffnessMatrix(FloatMatrix &answer, MatResponseMode rMode, GaussPoint *gp, TimeStep *tStep)
 //
 // Returns characteristic material stiffness matrix of the receiver
 //
@@ -147,7 +147,7 @@ LargeStrainMasterMaterialGrad :: givePDGradMatrix_LD(FloatMatrix &answer, MatRes
 
 
 void
-LargeStrainMasterMaterialGrad :: giveInternalLength(FloatMatrix &answer, MatResponseMode mode, GaussPoint *gp, TimeStep *atTime)
+LargeStrainMasterMaterialGrad :: giveInternalLength(FloatMatrix &answer, MatResponseMode mode, GaussPoint *gp, TimeStep *tStep)
 {
     this->initTempStatus(gp);
     GradDpMaterialExtensionInterface *graddpmat = dynamic_cast< GradDpMaterialExtensionInterface * >( domain->giveMaterial(slaveMat)->giveInterface(GradDpMaterialExtensionInterfaceType) );
@@ -156,11 +156,11 @@ LargeStrainMasterMaterialGrad :: giveInternalLength(FloatMatrix &answer, MatResp
         return;
     }
 
-    graddpmat->givePDGradMatrix_kk(answer, mode, gp, atTime);
+    graddpmat->givePDGradMatrix_kk(answer, mode, gp, tStep);
 }
 
 void
-LargeStrainMasterMaterialGrad :: give3dGprime(FloatMatrix &answer, MatResponseMode mode, GaussPoint *gp, TimeStep *atTime)
+LargeStrainMasterMaterialGrad :: give3dGprime(FloatMatrix &answer, MatResponseMode mode, GaussPoint *gp, TimeStep *tStep)
 {
     LargeStrainMasterMaterialGradStatus *status = static_cast< LargeStrainMasterMaterialGradStatus * >( this->giveStatus(gp) );
     this->initTempStatus(gp);
@@ -172,7 +172,7 @@ LargeStrainMasterMaterialGrad :: give3dGprime(FloatMatrix &answer, MatResponseMo
         return;
     }
 
-    graddpmat->givePDGradMatrix_uk(gPrime, mode, gp, atTime);
+    graddpmat->givePDGradMatrix_uk(gPrime, mode, gp, tStep);
     gPrime.at(4, 1) =  2. * gPrime.at(4, 1);
     gPrime.at(5, 1) =  2. * gPrime.at(5, 1);
     gPrime.at(6, 1) =  2. * gPrime.at(6, 1);
@@ -182,7 +182,7 @@ LargeStrainMasterMaterialGrad :: give3dGprime(FloatMatrix &answer, MatResponseMo
 
 
 void
-LargeStrainMasterMaterialGrad :: give3dKappaMatrix(FloatMatrix &answer, MatResponseMode mode, GaussPoint *gp, TimeStep *atTime)
+LargeStrainMasterMaterialGrad :: give3dKappaMatrix(FloatMatrix &answer, MatResponseMode mode, GaussPoint *gp, TimeStep *tStep)
 {
     LargeStrainMasterMaterialGradStatus *status = static_cast< LargeStrainMasterMaterialGradStatus * >( this->giveStatus(gp) );
     this->initTempStatus(gp);
@@ -193,7 +193,7 @@ LargeStrainMasterMaterialGrad :: give3dKappaMatrix(FloatMatrix &answer, MatRespo
         return;
     }
 
-    graddpmat->givePDGradMatrix_ku(kappaMatrix, mode, gp, atTime);
+    graddpmat->givePDGradMatrix_ku(kappaMatrix, mode, gp, tStep);
     status->givePmatrix(P);
     kappaMatrix.at(1, 4) = 2. * kappaMatrix.at(1, 4);
     kappaMatrix.at(1, 5) = 2. * kappaMatrix.at(1, 5);
@@ -206,7 +206,7 @@ LargeStrainMasterMaterialGrad :: give3dKappaMatrix(FloatMatrix &answer, MatRespo
 
 
 void
-LargeStrainMasterMaterialGrad :: giveFirstPKStressVectorGrad(FloatArray &answer1, double &answer2, GaussPoint *gp, const FloatArray &vF, double nonlocalCumulatedStrain, TimeStep *atTime)
+LargeStrainMasterMaterialGrad :: giveFirstPKStressVectorGrad(FloatArray &answer1, double &answer2, GaussPoint *gp, const FloatArray &vF, double nonlocalCumulatedStrain, TimeStep *tStep)
 {
     LargeStrainMasterMaterialGradStatus *status = static_cast< LargeStrainMasterMaterialGradStatus * >( this->giveStatus(gp) );
     this->initTempStatus(gp);
@@ -215,7 +215,7 @@ LargeStrainMasterMaterialGrad :: giveFirstPKStressVectorGrad(FloatArray &answer1
         Material *mat;
         StructuralMaterial *sMat;
         mat = domain->giveMaterial(slaveMat);
-        sMat = dynamic_cast< StructuralMaterial * >(mat);
+        sMat = dynamic_cast< StructuralMaterial * >( mat );
         if ( sMat == NULL ) {
             _warning2("checkConsistency: material %d has no Structural support", slaveMat);
             return;
@@ -246,7 +246,7 @@ LargeStrainMasterMaterialGrad :: giveFirstPKStressVectorGrad(FloatArray &answer1
             E1 = 1. / 2. * log(lambda1);
             E2 = 1. / 2. * log(lambda2);
             E3 = 1. / 2. * log(lambda3);
-        } else   {
+        } else {
             E1 = 1. / ( 2. * m ) * ( pow(lambda1, m) - 1. );
             E2 = 1. / ( 2. * m ) * ( pow(lambda2, m) - 1. );
             E3 = 1. / ( 2. * m ) * ( pow(lambda3, m) - 1. );
@@ -262,7 +262,7 @@ LargeStrainMasterMaterialGrad :: giveFirstPKStressVectorGrad(FloatArray &answer1
 
 
         SethHillStrainVector.beSymVectorFormOfStrain(SethHillStrain);
-        dpmat->giveRealStressVectorGrad(stressVector, answer2, gp, SethHillStrainVector, nonlocalCumulatedStrain, atTime);
+        dpmat->giveRealStressVectorGrad(stressVector, answer2, gp, SethHillStrainVector, nonlocalCumulatedStrain, tStep);
         this->constructTransformationMatrix(T, eVecs);
         tT.beTranspositionOf(T);
 
@@ -338,9 +338,9 @@ void LargeStrainMasterMaterialGradStatus :: initTempStatus()
 
 // updates internal variables when equilibrium is reached
 void
-LargeStrainMasterMaterialGradStatus :: updateYourself(TimeStep *atTime)
+LargeStrainMasterMaterialGradStatus :: updateYourself(TimeStep *tStep)
 {
-    LargeStrainMasterMaterialStatus :: updateYourself(atTime);
+    LargeStrainMasterMaterialStatus :: updateYourself(tStep);
 }
 
 

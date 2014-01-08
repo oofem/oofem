@@ -46,8 +46,7 @@
 #include <cstdlib>
 
 namespace oofem {
-
-REGISTER_Material( NonlinearFluidMaterial );
+REGISTER_Material(NonlinearFluidMaterial);
 
 int
 NonlinearFluidMaterial :: hasMaterialModeCapability(MaterialMode mode)
@@ -133,7 +132,7 @@ NonlinearFluidMaterial :: computeDeviatoricStressVector(FloatArray &answer, Gaus
 
 void
 NonlinearFluidMaterial :: giveDeviatoricStiffnessMatrix(FloatMatrix &answer, MatResponseMode mode, GaussPoint *gp,
-                                                        TimeStep *atTime)
+                                                        TimeStep *tStep)
 {
     FloatArray eps;
     double normeps = 0;

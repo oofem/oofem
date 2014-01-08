@@ -46,7 +46,6 @@
 #define _IFT_Quad10_2D_SUPG_Name "quad1supg"
 
 namespace oofem {
-
 class FEI2dQuadLin;
 class FEI2dQuadConst;
 
@@ -72,7 +71,6 @@ public:
     // definition
     virtual const char *giveClassName() const { return "Quad1_2D_SUPG"; }
     virtual const char *giveInputRecordName() const { return _IFT_Quad10_2D_SUPG_Name; }
-    virtual classType giveClassID() const { return Quad10_2D_SUPGClass; }
     virtual MaterialMode giveMaterialMode() { return _2dFlow; }
 
     virtual void giveInternalDofManDofIDMask(int i, EquationID, IntArray & answer) const;
@@ -88,7 +86,7 @@ public:
 
     virtual double LS_PCS_computeF(LevelSetPCS *ls, TimeStep *tStep);
     virtual void LS_PCS_computedN(FloatMatrix &answer);
-    virtual double LS_PCS_computeVolume() {return 0.0;};
+    virtual double LS_PCS_computeVolume() { return 0.0; };
     virtual double LS_PCS_computeS(LevelSetPCS *ls, TimeStep *tStep);
     virtual void LS_PCS_computeVOFFractions(FloatArray &answer, FloatArray &fi);
 
@@ -97,9 +95,9 @@ public:
     virtual Element *ZZNodalRecoveryMI_giveElement() { return this; }
 
     virtual void NodalAveragingRecoveryMI_computeNodalValue(FloatArray &answer, int node,
-                                                    InternalStateType type, TimeStep *tStep);
+                                                            InternalStateType type, TimeStep *tStep);
     void NodalAveragingRecoveryMI_computeSideValue(FloatArray &answer, int side,
-                            InternalStateType type, TimeStep *tStep);
+                                                   InternalStateType type, TimeStep *tStep);
 
     /// @name Helping functions for computing VOFFractions.
     //@{
@@ -122,7 +120,7 @@ public:
 
 #ifdef __OOFEG
     int giveInternalStateAtNode(FloatArray &answer, InternalStateType type, InternalStateMode mode,
-                                int node, TimeStep *atTime);
+                                int node, TimeStep *tStep);
     // Graphics output
     //virtual void drawYourself(oofegGraphicContext&);
     virtual void drawRawGeometry(oofegGraphicContext &);
@@ -134,35 +132,34 @@ public:
     virtual double computeCriticalTimeStep(TimeStep *tStep);
 
     // three terms for computing their norms due to computing t_supg
-    virtual void computeAdvectionTerm(FloatMatrix &answer, TimeStep *atTime);
-    virtual void computeAdvectionDeltaTerm(FloatMatrix &answer, TimeStep *atTime);
-    virtual void computeMassDeltaTerm(FloatMatrix &answer, TimeStep *atTime);
-    virtual void computeLSICTerm(FloatMatrix &answer, TimeStep *atTime);
-    virtual void computeAdvectionEpsilonTerm(FloatMatrix &answer, TimeStep *atTime);
-    virtual void computeMassEpsilonTerm(FloatMatrix &answer, TimeStep *atTime);
+    virtual void computeAdvectionTerm(FloatMatrix &answer, TimeStep *tStep);
+    virtual void computeAdvectionDeltaTerm(FloatMatrix &answer, TimeStep *tStep);
+    virtual void computeMassDeltaTerm(FloatMatrix &answer, TimeStep *tStep);
+    virtual void computeLSICTerm(FloatMatrix &answer, TimeStep *tStep);
+    virtual void computeAdvectionEpsilonTerm(FloatMatrix &answer, TimeStep *tStep);
+    virtual void computeMassEpsilonTerm(FloatMatrix &answer, TimeStep *tStep);
 
     //virtual int giveNumberOfDofs() { return 1; }
     virtual int giveNumberOfInternalDofManagers() const { return 1; }
     virtual DofManager *giveInternalDofManager(int i) const;
 
 protected:
-    virtual void giveLocalVelocityDofMap (IntArray &map);
-    virtual void giveLocalPressureDofMap (IntArray &map);
+    virtual void giveLocalVelocityDofMap(IntArray &map);
+    virtual void giveLocalPressureDofMap(IntArray &map);
 
     virtual void computeGaussPoints();
     virtual void computeNuMatrix(FloatMatrix &answer, GaussPoint *gp);
-    virtual void computeUDotGradUMatrix(FloatMatrix &answer, GaussPoint *gp, TimeStep *atTime);
+    virtual void computeUDotGradUMatrix(FloatMatrix &answer, GaussPoint *gp, TimeStep *tStep);
     virtual void computeBMatrix(FloatMatrix &anwer, GaussPoint *gp);
     virtual void computeDivUMatrix(FloatMatrix &answer, GaussPoint *gp);
     virtual void computeNpMatrix(FloatMatrix &answer, GaussPoint *gp);
     virtual void computeGradPMatrix(FloatMatrix &answer, GaussPoint *gp);
-    virtual void computeDivTauMatrix(FloatMatrix &answer, GaussPoint *gp, TimeStep *atTime);
-    virtual void computeGradUMatrix(FloatMatrix &answer, GaussPoint *gp, TimeStep *atTime);
+    virtual void computeDivTauMatrix(FloatMatrix &answer, GaussPoint *gp, TimeStep *tStep);
+    virtual void computeGradUMatrix(FloatMatrix &answer, GaussPoint *gp, TimeStep *tStep);
     virtual int giveNumberOfSpatialDimensions();
     virtual double computeVolumeAround(GaussPoint *gp);
 
     virtual void updateStabilizationCoeffs(TimeStep *tStep);
 };
-
 } // end namespace oofem
 #endif // quad10_supg_h

@@ -51,14 +51,14 @@ StressStrainBaseVector :: StressStrainBaseVector(MaterialMode m) : FloatArray()
 StressStrainBaseVector :: StressStrainBaseVector(const FloatArray &src, MaterialMode m) : FloatArray(src)
 {
     if ( StructuralMaterial :: giveSizeOfVoigtSymVector(m) != src.giveSize() ) {
-        OOFEM_ERROR4("StressStrainBaseVector::StressStrainBaseVector: size mismatch. The source has size %d and a new MaterialMode %s has reduced size %d", src.giveSize(), __MaterialModeToString(m), StructuralMaterial :: giveSizeOfVoigtSymVector(m));
+        OOFEM_ERROR4( "StressStrainBaseVector::StressStrainBaseVector: size mismatch. The source has size %d and a new MaterialMode %s has reduced size %d", src.giveSize(), __MaterialModeToString(m), StructuralMaterial :: giveSizeOfVoigtSymVector(m) );
     }
 
     this->mode = m;
 }
 
 StressStrainBaseVector &
-StressStrainBaseVector :: operator = ( const StressStrainBaseVector & src )
+StressStrainBaseVector :: operator=(const StressStrainBaseVector &src)
 {
     // assignment: cleanup and copy
     double *srcVal;
@@ -90,8 +90,8 @@ StressStrainBaseVector :: convertToFullForm(FloatArray &answer) const
     answer.resize(answerSize);
     answer.zero();
 
-    StructuralMaterial :: giveVoigtSymVectorMask(indx, (MaterialMode)mode);
-    answer.assemble(*this, indx);
+    StructuralMaterial :: giveVoigtSymVectorMask(indx, ( MaterialMode ) mode);
+    answer.assemble(* this, indx);
 }
 
 void
@@ -109,7 +109,7 @@ StressStrainBaseVector :: convertFromFullForm(const FloatArray &vector, Material
             this->at(i) = vector.at(i);
         }
     } else {
-        StructuralMaterial :: giveVoigtSymVectorMask(indx, (MaterialMode)mode);
+        StructuralMaterial :: giveVoigtSymVectorMask(indx, ( MaterialMode ) mode);
         this->resize( StructuralMaterial :: giveSizeOfVoigtSymVector(mode) );
         this->zero();
 

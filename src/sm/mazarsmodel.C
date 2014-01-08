@@ -47,7 +47,7 @@ namespace oofem {
 #define _MAZARS_MODEL_ITER_TOL 1.e-15
 #define _MAZARS_MODEL_MAX_ITER 400.
 
-REGISTER_Material( MazarsMaterial );
+REGISTER_Material(MazarsMaterial);
 
 MazarsMaterial :: MazarsMaterial(int n, Domain *d) : IsotropicDamageMaterial1(n, d)
     //
@@ -126,7 +126,7 @@ MazarsMaterial :: initializeFrom(InputRecord *ir)
 
 
 void
-MazarsMaterial :: computeEquivalentStrain(double &kappa, const FloatArray &strain, GaussPoint *gp, TimeStep *atTime)
+MazarsMaterial :: computeEquivalentStrain(double &kappa, const FloatArray &strain, GaussPoint *gp, TimeStep *tStep)
 {
     double posNorm = 0.0;
     FloatArray principalStrains, strainb;
@@ -136,7 +136,7 @@ MazarsMaterial :: computeEquivalentStrain(double &kappa, const FloatArray &strai
         return;
     }
 
-    StructuralMaterial :: giveFullSymVectorForm(strainb, strain, gp->giveMaterialMode());
+    StructuralMaterial :: giveFullSymVectorForm( strainb, strain, gp->giveMaterialMode() );
     // if plane stress mode -> compute strain in z-direction from condition of zero stress in corresponding direction
     int ndim = giveNumberOfSpatialDimensions(gp);
     if ( ndim == 2 ) {
@@ -179,7 +179,7 @@ MazarsMaterial :: computeEquivalentStrain(double &kappa, const FloatArray &strai
  * void
  * MazarsMaterial :: giveNormalElasticStiffnessMatrix(FloatMatrix &answer,
  *                                                 MatResponseMode rMode,
- *                                                 GaussPoint *gp, TimeStep *atTime)
+ *                                                 GaussPoint *gp, TimeStep *tStep)
  * {
  *  //
  *  // return Elastic Stiffness matrix for normal Stresses
@@ -188,7 +188,7 @@ MazarsMaterial :: computeEquivalentStrain(double &kappa, const FloatArray &strai
  *  int i, j;
  *
  *  answer.resize(3, 3);
- *  lMat->give3dMaterialStiffnessMatrix(de, rMode, gp, atTime);
+ *  lMat->give3dMaterialStiffnessMatrix(de, rMode, gp, tStep);
  *  // copy first 3x3 submatrix to answer
  *  for ( i = 1; i <= 3; i++ ) {
  *      for ( j = 1; j <= 3; j++ ) {

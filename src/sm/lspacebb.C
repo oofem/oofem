@@ -45,16 +45,15 @@
 #endif
 
 namespace oofem {
-
-REGISTER_Element( LSpaceBB );
+REGISTER_Element(LSpaceBB);
 
 LSpaceBB :: LSpaceBB(int n, Domain *aDomain) : LSpace(n, aDomain)
 { }
 
 void
-LSpaceBB :: computeBmatrixAt(GaussPoint *aGaussPoint, FloatMatrix &answer, int li, int ui)
+LSpaceBB :: computeBmatrixAt(GaussPoint *gp, FloatMatrix &answer, int li, int ui)
 // Returns the [6x24] strain-displacement matrix {B} of the receiver, eva-
-// luated at aGaussPoint.
+// luated at gp.
 // B matrix  -  6 rows : epsilon-X, epsilon-Y, epsilon-Z, gamma-YZ, gamma-ZX, gamma-XY  :
 {
     int i;
@@ -66,8 +65,8 @@ LSpaceBB :: computeBmatrixAt(GaussPoint *aGaussPoint, FloatMatrix &answer, int l
     coord.zero();
 
 
-    LSpace :: interpolation.evaldNdx(dnx, * aGaussPoint->giveCoordinates(), FEIElementGeometryWrapper(this));
-    LSpace :: interpolation.evaldNdx(dnx0, coord, FEIElementGeometryWrapper(this));
+    LSpace :: interpolation.evaldNdx( dnx, * gp->giveCoordinates(), FEIElementGeometryWrapper(this) );
+    LSpace :: interpolation.evaldNdx( dnx0, coord, FEIElementGeometryWrapper(this) );
 
     // deviatoric part fully integrated, volumetric part in one point
     // here we follow BBar approach

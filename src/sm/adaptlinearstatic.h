@@ -45,7 +45,6 @@
 //@}
 
 namespace oofem {
-
 /**
  * This class implements an adaptive linear static engineering problem.
  * Multiple loading cases are not supported.
@@ -63,14 +62,14 @@ public:
     AdaptiveLinearStatic(int i, EngngModel *_master = NULL) : LinearStatic(i, _master) { }
     virtual ~AdaptiveLinearStatic() { }
 
-    virtual void updateYourself(TimeStep *stepN);
+    virtual void updateYourself(TimeStep *tStep);
 
     /**
      * Initializes the newly generated discretization state according to previous solution.
      * This process should typically include restoring old solution, instanciating newly
      * generated domain(s) and by mapping procedure.
      */
-    virtual int initializeAdaptive(int stepNumber);
+    virtual int initializeAdaptive(int tStepumber);
     virtual void terminate(TimeStep *tStep);
 
     virtual contextIOResultType restoreContext(DataStream *stream, ContextMode mode, void *obj = NULL);
@@ -82,7 +81,6 @@ public:
     // identification
     virtual const char *giveClassName() const { return "AdaptiveLinearStatic"; }
     virtual const char *giveInputRecordName() const { return _IFT_AdaptiveLinearStatic_Name; }
-    virtual classType giveClassID() const { return AdaptiveLinearStaticClass; }
 };
 } // end namespace oofem
 #endif // adaptlinearstatic_h

@@ -44,7 +44,6 @@
 //@}
 
 namespace oofem {
-
 /**
  * This class implements a simple lumped mass element. Its purpose is to introduce
  * an additional mass (mass components or rotary inertias) into a node.
@@ -90,13 +89,12 @@ public:
     // definition & identification
     virtual const char *giveInputRecordName() const { return _IFT_LumpedMassElement_Name; }
     virtual const char *giveClassName() const { return "LumpedMassElement"; }
-    virtual classType giveClassID() const { return LumpedMassElementClass; }
     virtual IRResultType initializeFrom(InputRecord *ir);
     virtual Element_Geometry_Type giveGeometryType() const { return EGT_point; }
 
 protected:
     virtual void computeBmatrixAt(GaussPoint *gp, FloatMatrix &answer,
-                          int lowerIndx = 1, int upperIndx = ALL_STRAINS)
+                                  int lowerIndx = 1, int upperIndx = ALL_STRAINS)
     {}
     virtual void computeNmatrixAt(const FloatArray &iLocCoord, FloatMatrix &answer) {}
 };

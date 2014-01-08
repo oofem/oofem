@@ -43,13 +43,12 @@
 #include "dynamicinputrecord.h"
 
 namespace oofem {
-
-REGISTER_Material( CebFipSlip90Material );
+REGISTER_Material(CebFipSlip90Material);
 
 CebFipSlip90Material :: CebFipSlip90Material(int n, Domain *d) : StructuralMaterial(n, d)
-//
-// constructor
-//
+    //
+    // constructor
+    //
 { }
 
 
@@ -73,7 +72,7 @@ void
 CebFipSlip90Material :: give3dMaterialStiffnessMatrix(FloatMatrix &answer,
                                                       MatResponseMode mode,
                                                       GaussPoint *gp,
-                                                      TimeStep *atTime)
+                                                      TimeStep *tStep)
 //
 // computes full constitutive matrix for case of gp stress-strain state.
 //
@@ -85,7 +84,7 @@ CebFipSlip90Material :: give3dMaterialStiffnessMatrix(FloatMatrix &answer,
 void
 CebFipSlip90Material :: giveRealStressVector(FloatArray &answer, GaussPoint *gp,
                                              const FloatArray &totalStrain,
-                                             TimeStep *atTime)
+                                             TimeStep *tStep)
 //
 // returns real stress vector in 3d stress space of receiver according to
 // previous level of stress and current
@@ -101,7 +100,7 @@ CebFipSlip90Material :: giveRealStressVector(FloatArray &answer, GaussPoint *gp,
     // subtract stress independent part
     // note: eigenStrains (temperature) is not contained in mechanical strain stored in gp
     // therefore it is necessary to subtract always the total eigen strain value
-    this->giveStressDependentPartOfStrainVector(reducedTotalStrainVector, gp, totalStrain, atTime, VM_Total);
+    this->giveStressDependentPartOfStrainVector(reducedTotalStrainVector, gp, totalStrain, tStep, VM_Total);
 
     //crossSection->giveFullCharacteristicVector(totalStrainVector, gp, reducedTotalStrainVector);
     slip = reducedTotalStrainVector.at(1);
@@ -133,8 +132,8 @@ CebFipSlip90Material :: giveRealStressVector(FloatArray &answer, GaussPoint *gp,
 
 void
 CebFipSlip90Material :: giveStiffnessMatrix(FloatMatrix &answer,
-                                                 MatResponseMode rMode,
-                                                 GaussPoint *gp, TimeStep *atTime)
+                                            MatResponseMode rMode,
+                                            GaussPoint *gp, TimeStep *tStep)
 //
 // Returns characteristic material stiffness matrix of the receiver
 //
@@ -142,17 +141,17 @@ CebFipSlip90Material :: giveStiffnessMatrix(FloatMatrix &answer,
     MaterialMode mMode = gp->giveMaterialMode();
     switch ( mMode ) {
     case _1dInterface:
-        give1dInterfaceMaterialStiffnessMatrix(answer, rMode, gp, atTime);
+        give1dInterfaceMaterialStiffnessMatrix(answer, rMode, gp, tStep);
         break;
     default:
-        StructuralMaterial :: giveStiffnessMatrix(answer, rMode, gp, atTime);
+        StructuralMaterial :: giveStiffnessMatrix(answer, rMode, gp, tStep);
     }
 }
 
 
 void
 CebFipSlip90Material :: give1dInterfaceMaterialStiffnessMatrix(FloatMatrix &answer, MatResponseMode rMode,
-                                                               GaussPoint *gp, TimeStep *atTime)
+                                                               GaussPoint *gp, TimeStep *tStep)
 {
     double kappa;
     CebFipSlip90MaterialStatus *status = static_cast< CebFipSlip90MaterialStatus * >( this->giveStatus(gp) );
@@ -175,9 +174,9 @@ CebFipSlip90Material :: give1dInterfaceMaterialStiffnessMatrix(FloatMatrix &answ
 
 
 int
-CebFipSlip90Material :: giveIPValue(FloatArray &answer, GaussPoint *aGaussPoint, InternalStateType type, TimeStep *atTime)
+CebFipSlip90Material :: giveIPValue(FloatArray &answer, GaussPoint *gp, InternalStateType type, TimeStep *tStep)
 {
-    return StructuralMaterial :: giveIPValue(answer, aGaussPoint, type, atTime);
+    return StructuralMaterial :: giveIPValue(answer, gp, type, tStep);
 }
 
 void
@@ -216,7 +215,7 @@ CebFipSlip90Material :: initializeFrom(InputRecord *ir)
 void
 CebFipSlip90Material :: giveInputRecord(DynamicInputRecord &input)
 {
-    StructuralMaterial::giveInputRecord(input);
+    StructuralMaterial :: giveInputRecord(input);
     input.setField(this->tmax, _IFT_CebFipSlip90Material_tmax);
     input.setField(this->tres, _IFT_CebFipSlip90Material_tres);
 
@@ -290,9 +289,9 @@ CebFipSlip90MaterialStatus :: initTempStatus()
 
 
 void
-CebFipSlip90MaterialStatus :: updateYourself(TimeStep *atTime)
+CebFipSlip90MaterialStatus :: updateYourself(TimeStep *tStep)
 {
-    StructuralMaterialStatus :: updateYourself(atTime);
+    StructuralMaterialStatus :: updateYourself(tStep);
     this->kappa = this->tempKappa;
 }
 

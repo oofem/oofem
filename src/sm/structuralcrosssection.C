@@ -40,11 +40,6 @@
 #include "structuralms.h"
 
 namespace oofem {
-
-
-
-
-
 void
 StructuralCrossSection :: giveRealStresses(FloatArray &answer, GaussPoint *gp, const FloatArray &strain, TimeStep *tStep)
 {
@@ -69,7 +64,7 @@ StructuralCrossSection :: giveRealStresses(FloatArray &answer, GaussPoint *gp, c
         // This should never happen ?
         ///@todo this part only works for simple cross section and will be removed soon when new interface elements are done /JB
         StructuralMaterial *mat = dynamic_cast< StructuralMaterial * >( gp->giveMaterial() );
-        if ( mat->hasMaterialModeCapability(gp->giveMaterialMode()) ) {
+        if ( mat->hasMaterialModeCapability( gp->giveMaterialMode() ) ) {
             mat->giveRealStressVector(answer, gp, strain, tStep);
         } else {
             _error("giveRealStresses : unsupported mode");
@@ -87,7 +82,7 @@ StructuralCrossSection :: giveRealStresses(FloatArray &answer, GaussPoint *gp, c
 //
 //    MaterialMode mode = gp->giveMaterialMode();
 //    StructuralMaterial *mat = dynamic_cast< StructuralMaterial * >( this->giveMaterial(gp) );
-//    
+//
 //    if ( mode == _3dMat ) {
 //        this->giveFirstPKStress_3d(answer, gp, reducedvF, tStep);
 //    } else if ( mode == _PlaneStrain ) {
@@ -111,7 +106,7 @@ StructuralCrossSection :: giveRealStresses(FloatArray &answer, GaussPoint *gp, c
 //
 //    MaterialMode mode = gp->giveMaterialMode();
 //    StructuralMaterial *mat = dynamic_cast< StructuralMaterial * >( this->giveMaterial(gp) );
-//    
+//
 //    if ( mode == _3dMat ) {
 //        this->giveCauchyStress_3d(answer, gp, reducedvF, tStep);
 //    } else if ( mode == _PlaneStrain ) {
@@ -130,7 +125,7 @@ StructuralCrossSection :: giveRealStresses(FloatArray &answer, GaussPoint *gp, c
 //                                                   TimeStep *tStep)
 //{
 //    StructuralMaterial *mat = dynamic_cast< StructuralMaterial * >( this->giveMaterial(gp) );
-//    
+//
 //    MaterialMode mode = gp->giveMaterialMode();
 //    if ( mode == _3dMat ) {
 //        this->give3dMaterialStiffnessMatrix_dPdF(answer, rMode, gp, tStep);
@@ -152,7 +147,7 @@ StructuralCrossSection :: giveRealStresses(FloatArray &answer, GaussPoint *gp, c
 //                                                   TimeStep *tStep)
 //{
 //    StructuralMaterial *mat = dynamic_cast< StructuralMaterial * >( this->giveMaterial(gp) );
-//    
+//
 //    MaterialMode mode = gp->giveMaterialMode();
 //    if ( mode == _3dMat ) {
 //        this->give3dMaterialStiffnessMatrix_dCde(answer, rMode, gp, tStep);
@@ -288,5 +283,4 @@ StructuralCrossSection :: hasMaterialModeCapability(MaterialMode mode)
     return mode == _3dMat || mode == _PlaneStress || mode == _PlaneStrain  || mode == _1dMat ||
            mode == _PlateLayer || mode == _2dBeamLayer || mode == _Fiber;
 }
-
 } // end namespace oofem

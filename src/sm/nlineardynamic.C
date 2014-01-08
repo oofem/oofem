@@ -56,8 +56,7 @@ using namespace std;
 #include "errorestimator.h"
 
 namespace oofem {
-
-REGISTER_EngngModel( NonLinearDynamic );
+REGISTER_EngngModel(NonLinearDynamic);
 
 NonLinearDynamic :: NonLinearDynamic(int i, EngngModel *_master) : StructuralEngngModel(i, _master),
     totalDisplacement(), incrementOfDisplacement(), internalForces(), forcesVector(), initialLoadVector(),
@@ -168,15 +167,16 @@ NonLinearDynamic :: initializeFrom(InputRecord *ir)
 
     initialTimeDiscretization = ( TimeDiscretizationType ) val;
 
-    gamma = 0.5; beta = 0.25; // Default Newmark parameters.
+    gamma = 0.5;
+    beta = 0.25;              // Default Newmark parameters.
     if ( initialTimeDiscretization == TD_Newmark ) {
-        OOFEM_LOG_INFO( "Selecting Newmark-beta metod\n" );
+        OOFEM_LOG_INFO("Selecting Newmark-beta metod\n");
         IR_GIVE_OPTIONAL_FIELD(ir, gamma, _IFT_NonLinearDynamic_gamma);
         IR_GIVE_OPTIONAL_FIELD(ir, beta, _IFT_NonLinearDynamic_beta);
     } else if ( initialTimeDiscretization == TD_TwoPointBackward ) {
-        OOFEM_LOG_INFO( "Selecting Two-point Backward Euler method\n" );
+        OOFEM_LOG_INFO("Selecting Two-point Backward Euler method\n");
     } else if ( initialTimeDiscretization == TD_ThreePointBackward ) {
-        OOFEM_LOG_INFO( "Selecting Three-point Backward Euler metod\n" );
+        OOFEM_LOG_INFO("Selecting Three-point Backward Euler metod\n");
     } else {
         _error("NonLinearDynamic: Time-stepping scheme not found!\n");
     }
@@ -242,7 +242,7 @@ double NonLinearDynamic :: giveUnknownComponent(ValueModeType mode, TimeStep *tS
 TimeStep *NonLinearDynamic :: giveNextStep()
 {
     int istep = giveNumberOfFirstStep();
-    int mstepNum = 1;
+    int mtStepum = 1;
     StateCounterType counter = 1;
     double deltaTtmp = deltaT;
     double totalTime = deltaT;
@@ -258,19 +258,19 @@ TimeStep *NonLinearDynamic :: giveNextStep()
         totalTime = currentStep->giveTargetTime() + deltaTtmp;
         istep =  currentStep->giveNumber() + 1;
         counter = currentStep->giveSolutionStateCounter() + 1;
-        mstepNum = currentStep->giveMetaStepNumber();
+        mtStepum = currentStep->giveMetatStepumber();
         td = currentStep->giveTimeDiscretization();
 
-        if ( !this->giveMetaStep(mstepNum)->isStepValid(istep) ) {
-            mstepNum++;
-            if ( mstepNum > nMetaSteps ) {
-                OOFEM_ERROR3("giveNextStep: no next step available, mstepNum=%d > nMetaSteps=%d", mstepNum, nMetaSteps);
+        if ( !this->giveMetaStep(mtStepum)->isStepValid(istep) ) {
+            mtStepum++;
+            if ( mtStepum > nMetaSteps ) {
+                OOFEM_ERROR3("giveNextStep: no next step available, mtStepum=%d > nMetaSteps=%d", mtStepum, nMetaSteps);
             }
         }
     }
 
     previousStep = currentStep;
-    currentStep = new TimeStep(istep, this, mstepNum, totalTime, deltaTtmp, counter, td);
+    currentStep = new TimeStep(istep, this, mtStepum, totalTime, deltaTtmp, counter, td);
 
     return currentStep;
 }
@@ -326,7 +326,7 @@ NonLinearDynamic :: terminate(TimeStep *tStep)
 {
     this->doStepOutput(tStep);
     this->printReactionForces(tStep, 1);
-    fflush(this->giveOutputStream());
+    fflush( this->giveOutputStream() );
     this->saveStepContext(tStep);
 }
 
@@ -336,7 +336,7 @@ NonLinearDynamic :: proceedStep(int di, TimeStep *tStep)
     // creates system of governing eq's and solves them at given time step
     // first assemble problem at current time step
 
-    int neq = this->giveNumberOfDomainEquations(1, EModelDefaultEquationNumbering());
+    int neq = this->giveNumberOfDomainEquations( 1, EModelDefaultEquationNumbering() );
 
     // Time-stepping constants
     this->determineConstants(tStep);
@@ -419,8 +419,8 @@ NonLinearDynamic :: proceedStep(int di, TimeStep *tStep)
         massMatrix->buildInternalStructure( this, di, EID_MomentumBalance, EModelDefaultEquationNumbering() );
 
         // Assemble mass matrix
-        this->assemble(massMatrix, tStep, EID_MomentumBalance, MassMatrix,
-                       EModelDefaultEquationNumbering(), this->giveDomain(di));
+        this->assemble( massMatrix, tStep, EID_MomentumBalance, MassMatrix,
+                        EModelDefaultEquationNumbering(), this->giveDomain(di) );
 
         // Initialize vectors
         help.resize(neq);
@@ -460,10 +460,10 @@ NonLinearDynamic :: proceedStep(int di, TimeStep *tStep)
 
     // Assembling the effective load vector
     for ( int i = 1; i <= neq; i++ ) {
-        help.at(i) = a2 * previousVelocityVector.at(i) + a3 * previousAccelerationVector.at(i)
-            + eta * ( a4 * previousVelocityVector.at(i)
-                      + a5 * previousAccelerationVector.at(i)
-                      + a6 * previousIncrementOfDisplacement.at(i) );
+        help.at(i) = a2 * previousVelocityVector.at(i) + a3 *previousAccelerationVector.at(i)
+                     + eta * ( a4 * previousVelocityVector.at(i)
+                               + a5 * previousAccelerationVector.at(i)
+                               + a6 * previousIncrementOfDisplacement.at(i) );
     }
 
     massMatrix->times(help, rhs);
@@ -496,7 +496,9 @@ NonLinearDynamic :: proceedStep(int di, TimeStep *tStep)
     //
     double loadLevel = 1.0;
 
-    if ( totIterations == 0 ) { incrementOfDisplacement.zero(); }
+    if ( totIterations == 0 ) {
+        incrementOfDisplacement.zero();
+    }
 
     if ( initialLoadVector.isNotEmpty() ) {
         numMetStatus = nMethod->solve(effectiveStiffnessMatrix, & rhs, & initialLoadVector,
@@ -511,9 +513,9 @@ NonLinearDynamic :: proceedStep(int di, TimeStep *tStep)
     for ( int i = 1; i <= neq; i++ ) {
         rhs.at(i)                = previousVelocityVector.at(i);
         rhs2.at(i)               = previousAccelerationVector.at(i);
-        accelerationVector.at(i) = a0 * incrementOfDisplacement.at(i) - a2 * rhs.at(i) - a3 * rhs2.at(i);
-        velocityVector.at(i)     = a1 * incrementOfDisplacement.at(i) - a4 * rhs.at(i) - a5 * rhs2.at(i)
-            - a6 * previousIncrementOfDisplacement.at(i);
+        accelerationVector.at(i) = a0 * incrementOfDisplacement.at(i) - a2 *rhs.at(i) - a3 *rhs2.at(i);
+        velocityVector.at(i)     = a1 * incrementOfDisplacement.at(i) - a4 *rhs.at(i) - a5 *rhs2.at(i)
+                                   - a6 *previousIncrementOfDisplacement.at(i);
     }
     totIterations += currentIterations;
 }
@@ -526,7 +528,7 @@ NonLinearDynamic :: determineConstants(TimeStep *tStep)
 
     if ( timeDiscretization == TD_Newmark ) {
         OOFEM_LOG_DEBUG("Solving using Newmark-beta method\n");
-    } else if ( timeDiscretization == TD_TwoPointBackward ){
+    } else if ( timeDiscretization == TD_TwoPointBackward ) {
         OOFEM_LOG_DEBUG("Solving using Backward Euler method\n");
     } else if ( timeDiscretization == TD_ThreePointBackward ) {
         OOFEM_LOG_DEBUG("Solving using Three-point Backward Euler method\n");
@@ -597,9 +599,9 @@ NonLinearDynamic :: giveElementCharacteristicMatrix(FloatMatrix &answer, int num
 }
 
 
-void NonLinearDynamic :: updateYourself(TimeStep *stepN)
+void NonLinearDynamic :: updateYourself(TimeStep *tStep)
 {
-    int neq = this->giveNumberOfDomainEquations(1, EModelDefaultEquationNumbering());
+    int neq = this->giveNumberOfDomainEquations( 1, EModelDefaultEquationNumbering() );
 
     totIterations = 0;
 
@@ -611,7 +613,7 @@ void NonLinearDynamic :: updateYourself(TimeStep *stepN)
         previousInternalForces.at(i)          = internalForces.at(i);
     }
 
-    StructuralEngngModel :: updateYourself(stepN);
+    StructuralEngngModel :: updateYourself(tStep);
 }
 
 void NonLinearDynamic :: updateComponent(TimeStep *tStep, NumericalCmpn cmpn, Domain *d)
@@ -622,7 +624,7 @@ void NonLinearDynamic :: updateComponent(TimeStep *tStep, NumericalCmpn cmpn, Do
 // of new equlibrium stage.
 //
 {
-    int neq = this->giveNumberOfDomainEquations(1, EModelDefaultEquationNumbering());
+    int neq = this->giveNumberOfDomainEquations( 1, EModelDefaultEquationNumbering() );
 
 #ifdef TIME_REPORT
     Timer timer;
@@ -632,8 +634,7 @@ void NonLinearDynamic :: updateComponent(TimeStep *tStep, NumericalCmpn cmpn, Do
     case NonLinearLhs:
         // Prevent assembly if already assembled ( totIterations > 0 )
         // Allow if MANRMSteps != 0
-        if ( ( totIterations == 0 ) || MANRMSteps )
-        {
+        if ( ( totIterations == 0 ) || MANRMSteps ) {
 #ifdef TIME_REPORT
             timer.startTimer();
 #endif
@@ -648,7 +649,7 @@ void NonLinearDynamic :: updateComponent(TimeStep *tStep, NumericalCmpn cmpn, Do
                            EModelDefaultEquationNumbering(), d);
 #ifdef TIME_REPORT
             timer.stopTimer();
-            OOFEM_LOG_DEBUG("User time consumed by updating nonlinear LHS: %.2fs\n", timer.getUtime() );
+            OOFEM_LOG_DEBUG( "User time consumed by updating nonlinear LHS: %.2fs\n", timer.getUtime() );
 #endif
         }
         break;
@@ -660,8 +661,7 @@ void NonLinearDynamic :: updateComponent(TimeStep *tStep, NumericalCmpn cmpn, Do
 #ifdef TIME_REPORT
             timer.startTimer();
 #endif
-            if ( ( currentIterations != 0 ) || ( totIterations == 0 ) )
-            {
+            if ( ( currentIterations != 0 ) || ( totIterations == 0 ) ) {
                 this->giveInternalForces(internalForces, true, 1, tStep);
 
                 // Updating the residual vector @ NR-solver
@@ -688,7 +688,7 @@ void NonLinearDynamic :: updateComponent(TimeStep *tStep, NumericalCmpn cmpn, Do
             }
 #ifdef TIME_REPORT
             timer.stopTimer();
-            OOFEM_LOG_DEBUG("User time consumed by updating internal RHS: %.2fs\n", timer.getUtime() );
+            OOFEM_LOG_DEBUG( "User time consumed by updating internal RHS: %.2fs\n", timer.getUtime() );
 #endif
         }
         break;
@@ -698,33 +698,33 @@ void NonLinearDynamic :: updateComponent(TimeStep *tStep, NumericalCmpn cmpn, Do
 }
 
 void
-NonLinearDynamic :: printOutputAt(FILE *File, TimeStep *stepN)
+NonLinearDynamic :: printOutputAt(FILE *File, TimeStep *tStep)
 {
     //FILE* File = this -> giveDomain() -> giveOutputStream() ;
 
-    if ( !this->giveDomain(1)->giveOutputManager()->testTimeStepOutput(stepN) ) {
+    if ( !this->giveDomain(1)->giveOutputManager()->testTimeStepOutput(tStep) ) {
         return; // Do not print even Solution step header
     }
 
-    fprintf(File, "\n\nOutput for time % .3e, solution step number %d\n", stepN->giveTargetTime(), stepN->giveNumber() );
+    fprintf( File, "\n\nOutput for time % .3e, solution step number %d\n", tStep->giveTargetTime(), tStep->giveNumber() );
     fprintf(File, "Equilibrium reached in %d iterations\n\n", currentIterations);
 
 
     nMethod->printState(File);
 
-    this->giveDomain(1)->giveOutputManager()->doDofManOutput(File, stepN);
-    this->giveDomain(1)->giveOutputManager()->doElementOutput(File, stepN);
+    this->giveDomain(1)->giveOutputManager()->doDofManOutput(File, tStep);
+    this->giveDomain(1)->giveOutputManager()->doElementOutput(File, tStep);
 }
 
 void
-NonLinearDynamic :: printDofOutputAt(FILE *stream, Dof *iDof, TimeStep *atTime)
+NonLinearDynamic :: printDofOutputAt(FILE *stream, Dof *iDof, TimeStep *tStep)
 {
     static char dofchar[] = "dva";
     static ValueModeType dofmodes[] = {
         VM_Total, VM_Velocity, VM_Acceleration
     };
 
-    iDof->printMultipleOutputAt(stream, atTime, dofchar, dofmodes, 3);
+    iDof->printMultipleOutputAt(stream, tStep, dofchar, dofmodes, 3);
 }
 
 contextIOResultType NonLinearDynamic :: saveContext(DataStream *stream, ContextMode mode, void *obj)
@@ -793,7 +793,7 @@ contextIOResultType NonLinearDynamic :: restoreContext(DataStream *stream, Conte
     contextIOResultType iores;
     FILE *file = NULL;
 
-    this->resolveCorrespondingStepNumber(istep, iversion, obj);
+    this->resolveCorrespondingtStepumber(istep, iversion, obj);
     if ( stream == NULL ) {
         if ( !this->giveContextFile(& file, istep, iversion, contextMode_read) ) {
             THROW_CIOERR(CIO_IOERR);
@@ -860,13 +860,13 @@ NonLinearDynamic :: updateDomainLinks()
 }
 
 
-#ifdef __PETSC_MODULE
+#ifdef __PARALLEL_MODE
 void
-NonLinearDynamic :: initPetscContexts()
+NonLinearDynamic :: initParallelContexts()
 {
-    petscContextList->growTo(ndomains);
+    parallelContextList->growTo(ndomains);
     for ( int i = 1; i <= this->ndomains; i++ ) {
-        petscContextList->put( i, new PetscContext(this, false) ); // false == using local vectors.
+        parallelContextList->put( i, new ParallelContext(this) );
     }
 }
 #endif
@@ -901,7 +901,7 @@ NonLinearDynamic :: assemble(SparseMtrx *answer, TimeStep *tStep, EquationID ut,
 
 #ifdef __OOFEG
 void
-NonLinearDynamic :: showSparseMtrxStructure(int type, oofegGraphicContext &context, TimeStep *atTime)
+NonLinearDynamic :: showSparseMtrxStructure(int type, oofegGraphicContext &context, TimeStep *tStep)
 {
     Domain *domain = this->giveDomain(1);
     CharType ctype;
@@ -914,11 +914,11 @@ NonLinearDynamic :: showSparseMtrxStructure(int type, oofegGraphicContext &conte
 
     int nelems = domain->giveNumberOfElements();
     for ( int i = 1; i <= nelems; i++ ) {
-        domain->giveElement(i)->showSparseMtrxStructure(ctype, context, atTime);
+        domain->giveElement(i)->showSparseMtrxStructure(ctype, context, tStep);
     }
 
     for ( int i = 1; i <= nelems; i++ ) {
-        domain->giveElement(i)->showExtendedSparseMtrxStructure(ctype, context, atTime);
+        domain->giveElement(i)->showExtendedSparseMtrxStructure(ctype, context, tStep);
     }
 }
 #endif
@@ -942,9 +942,9 @@ NonLinearDynamic :: assembleIncrementalReferenceLoadVectors(FloatArray &_increme
 {
     EModelDefaultEquationNumbering en;
 
-    _incrementalLoadVector.resize( sourceDomain->giveEngngModel()->giveNumberOfDomainEquations(sourceDomain->giveNumber(), EModelDefaultEquationNumbering()) );
+    _incrementalLoadVector.resize( sourceDomain->giveEngngModel()->giveNumberOfDomainEquations( sourceDomain->giveNumber(), EModelDefaultEquationNumbering() ) );
     _incrementalLoadVector.zero();
-    _incrementalLoadVectorOfPrescribed.resize( sourceDomain->giveEngngModel()->giveNumberOfDomainEquations(sourceDomain->giveNumber(), EModelDefaultPrescribedEquationNumbering()) );
+    _incrementalLoadVectorOfPrescribed.resize( sourceDomain->giveEngngModel()->giveNumberOfDomainEquations( sourceDomain->giveNumber(), EModelDefaultPrescribedEquationNumbering() ) );
     _incrementalLoadVectorOfPrescribed.zero();
 
     if ( _refMode == SparseNonLinearSystemNM :: rlm_incremental ) {
@@ -1104,7 +1104,7 @@ NonLinearDynamic :: giveLoadBalancerMonitor()
     }
 
     if ( loadBalancingFlag ) {
-        lbm = classFactory.createLoadBalancerMonitor( _IFT_WallClockLoadBalancerMonitor_Name, this);
+        lbm = classFactory.createLoadBalancerMonitor(_IFT_WallClockLoadBalancerMonitor_Name, this);
         return lbm;
     } else {
         return NULL;
@@ -1113,7 +1113,7 @@ NonLinearDynamic :: giveLoadBalancerMonitor()
 
 
 void
-NonLinearDynamic :: packMigratingData(TimeStep *atTime)
+NonLinearDynamic :: packMigratingData(TimeStep *tStep)
 {
     Domain *domain = this->giveDomain(1);
     int ndofman =  domain->giveNumberOfDofManagers(), ndofs, idofman, idof, _eq;
@@ -1130,23 +1130,23 @@ NonLinearDynamic :: packMigratingData(TimeStep *atTime)
             if ( _dof->isPrimaryDof() ) {
                 if ( ( _eq = _dof->__giveEquationNumber() ) ) {
                     // pack values in solution vectors
-                    _dof->updateUnknownsDictionary( atTime, VM_Total, totalDisplacement.at(_eq) );
+                    _dof->updateUnknownsDictionary( tStep, VM_Total, totalDisplacement.at(_eq) );
                     if ( initialLoadVectorEmpty ) {
-                        _dof->updateUnknownsDictionary(atTime, VM_RhsInitial, 0.0);
+                        _dof->updateUnknownsDictionary(tStep, VM_RhsInitial, 0.0);
                     } else {
-                        _dof->updateUnknownsDictionary( atTime, VM_RhsInitial, initialLoadVector.at(_eq) );
+                        _dof->updateUnknownsDictionary( tStep, VM_RhsInitial, initialLoadVector.at(_eq) );
                     }
 
-                    _dof->updateUnknownsDictionary( atTime, VM_RhsIncremental, incrementalLoadVector.at(_eq) );
+                    _dof->updateUnknownsDictionary( tStep, VM_RhsIncremental, incrementalLoadVector.at(_eq) );
                 } else if ( ( _eq = _dof->__givePrescribedEquationNumber() ) ) {
                     // pack values in prescribed solution vectors
                     if ( initialLoadVectorOfPrescribedEmpty ) {
-                        _dof->updateUnknownsDictionary(atTime, VM_RhsInitial, 0.0);
+                        _dof->updateUnknownsDictionary(tStep, VM_RhsInitial, 0.0);
                     } else {
-                        _dof->updateUnknownsDictionary( atTime, VM_RhsInitial, initialLoadVectorOfPrescribed.at(_eq) );
+                        _dof->updateUnknownsDictionary( tStep, VM_RhsInitial, initialLoadVectorOfPrescribed.at(_eq) );
                     }
 
-                    _dof->updateUnknownsDictionary( atTime, VM_RhsIncremental, incrementalLoadVectorOfPrescribed.at(_eq) );
+                    _dof->updateUnknownsDictionary( tStep, VM_RhsIncremental, incrementalLoadVectorOfPrescribed.at(_eq) );
                 }
             } // end primary dof
         } // end dof loop
@@ -1154,7 +1154,7 @@ NonLinearDynamic :: packMigratingData(TimeStep *atTime)
 }
 
 void
-NonLinearDynamic :: unpackMigratingData(TimeStep *atTime)
+NonLinearDynamic :: unpackMigratingData(TimeStep *tStep)
 {
     Domain *domain = this->giveDomain(1);
     int ndofman =  domain->giveNumberOfDofManagers(), ndofs, idofman, idof, _eq;
@@ -1163,13 +1163,13 @@ NonLinearDynamic :: unpackMigratingData(TimeStep *atTime)
     Dof *_dof;
 
     // resize target arrays
-    int neq = this->giveNumberOfDomainEquations(1, EModelDefaultEquationNumbering());
+    int neq = this->giveNumberOfDomainEquations( 1, EModelDefaultEquationNumbering() );
     totalDisplacement.resize(neq);
     incrementOfDisplacement.resize(neq);
     incrementalLoadVector.resize(neq);
     initialLoadVector.resize(neq);
-    initialLoadVectorOfPrescribed.resize( giveNumberOfDomainEquations(1, EModelDefaultPrescribedEquationNumbering()) );
-    incrementalLoadVectorOfPrescribed.resize( giveNumberOfDomainEquations(1, EModelDefaultPrescribedEquationNumbering()) );
+    initialLoadVectorOfPrescribed.resize( giveNumberOfDomainEquations( 1, EModelDefaultPrescribedEquationNumbering() ) );
+    incrementalLoadVectorOfPrescribed.resize( giveNumberOfDomainEquations( 1, EModelDefaultPrescribedEquationNumbering() ) );
 
     for ( idofman = 1; idofman <= ndofman; idofman++ ) {
         _dm = domain->giveDofManager(idofman);
@@ -1179,9 +1179,9 @@ NonLinearDynamic :: unpackMigratingData(TimeStep *atTime)
             if ( _dof->isPrimaryDof() ) {
                 if ( ( _eq = _dof->__giveEquationNumber() ) ) {
                     // pack values in solution vectors
-                    _dof->giveUnknownsDictionaryValue( atTime, VM_Total, totalDisplacement.at(_eq) );
-                    _dof->giveUnknownsDictionaryValue( atTime, VM_RhsInitial, initialLoadVector.at(_eq) );
-                    _dof->giveUnknownsDictionaryValue( atTime, VM_RhsIncremental, incrementalLoadVector.at(_eq) );
+                    _dof->giveUnknownsDictionaryValue( tStep, VM_Total, totalDisplacement.at(_eq) );
+                    _dof->giveUnknownsDictionaryValue( tStep, VM_RhsInitial, initialLoadVector.at(_eq) );
+                    _dof->giveUnknownsDictionaryValue( tStep, VM_RhsIncremental, incrementalLoadVector.at(_eq) );
 
  #if 0
                     // debug print
@@ -1194,8 +1194,8 @@ NonLinearDynamic :: unpackMigratingData(TimeStep *atTime)
  #endif
                 } else if ( ( _eq = _dof->__givePrescribedEquationNumber() ) ) {
                     // pack values in prescribed solution vectors
-                    _dof->giveUnknownsDictionaryValue( atTime, VM_RhsInitial, initialLoadVectorOfPrescribed.at(_eq) );
-                    _dof->giveUnknownsDictionaryValue( atTime, VM_RhsIncremental, incrementalLoadVectorOfPrescribed.at(_eq) );
+                    _dof->giveUnknownsDictionaryValue( tStep, VM_RhsInitial, initialLoadVectorOfPrescribed.at(_eq) );
+                    _dof->giveUnknownsDictionaryValue( tStep, VM_RhsIncremental, incrementalLoadVectorOfPrescribed.at(_eq) );
 
  #if 0
                     // debug print

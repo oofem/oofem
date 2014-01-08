@@ -127,8 +127,8 @@ FastMarchingMethod :: initialize(FloatArray &dmanValues,
             for ( l = 1; l <= neighborElem->giveNumberOfDofManagers(); l++ ) {
                 neighborNode = neighborElem->giveDofManagerNumber(l);
                 if ( ( dmanRecords.at(neighborNode - 1).status != FMM_Status_KNOWN ) &&
-                    ( dmanRecords.at(neighborNode - 1).status != FMM_Status_KNOWN_BOUNDARY ) &&
-                    ( dmanRecords.at(neighborNode - 1).status != FMM_Status_TRIAL ) ) {
+                     ( dmanRecords.at(neighborNode - 1).status != FMM_Status_KNOWN_BOUNDARY ) &&
+                     ( dmanRecords.at(neighborNode - 1).status != FMM_Status_TRIAL ) ) {
                     this->updateTrialValue(dmanValues, neighborNode, F);
                 }
             }
@@ -167,7 +167,7 @@ FastMarchingMethod :: updateTrialValue(FloatArray &dmanValues, int id, double F)
             bi = ie->giveDofManagerNumber(1 + ( _ind + 1 ) % 3);
 
             if ( ( dmanRecords.at(ai - 1).status == FMM_Status_KNOWN ) &&
-                ( dmanRecords.at(bi - 1).status == FMM_Status_KNOWN ) ) {
+                 ( dmanRecords.at(bi - 1).status == FMM_Status_KNOWN ) ) {
                 at = dmanValues.at(ai);
                 bt = dmanValues.at(bi);
                 if ( fabs(at) > fabs(bt) ) {
@@ -189,9 +189,9 @@ FastMarchingMethod :: updateTrialValue(FloatArray &dmanValues, int id, double F)
                 // b = distance of AC
                 b = cc->distance(ac);
                 // compute fi angle
-                cb.beDifferenceOf(*bc, *cc);
+                cb.beDifferenceOf(* bc, * cc);
                 cb.normalize();
-                ca.beDifferenceOf(*ac, *cc);
+                ca.beDifferenceOf(* ac, * cc);
                 ca.normalize();
                 cos_fi = cb.dotProduct(ca);
                 sin_fi = sqrt(1.0 - cos_fi * cos_fi);
@@ -253,9 +253,7 @@ FastMarchingMethod :: updateTrialValue(FloatArray &dmanValues, int id, double F)
 
                 dmanRecords.at(ci - 1).status = FMM_Status_TRIAL;
             } // admissible triangle
-
         } // end EGT_triangle_1 element type
-
     }
 }
 

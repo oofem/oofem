@@ -94,7 +94,7 @@ public:
      * @param cellgeo Underlying cell geometry.
      */
     virtual void edgeEvaldNdxi(FloatArray &answer, int iedge,
-                              const FloatArray &lcoords, const FEICellGeometry &cellgeo);
+                               const FloatArray &lcoords, const FEICellGeometry &cellgeo);
     /**
      * Evaluates edge global coordinates from given local ones.
      * These derivatives are in global coordinate system (where the nodal coordinates are defined).
@@ -138,8 +138,8 @@ public:
      * @param lcoords Array containing (local) coordinates.
      * @param cellgeo Underlying cell geometry.
      */
-    virtual void surfaceEvaldNdx (FloatMatrix&answer, int isurf,
-            const FloatArray& lcoords, const FEICellGeometry& cellgeo);
+    virtual void surfaceEvaldNdx(FloatMatrix &answer, int isurf,
+                                 const FloatArray &lcoords, const FEICellGeometry &cellgeo);
     /**
      * Evaluates the normal out of the surface at given point.
      * @param answer Contains resulting normal vector.
@@ -149,7 +149,7 @@ public:
      * @return Surface mapping jacobian.
      */
     virtual double surfaceEvalNormal(FloatArray &answer, int isurf, const FloatArray &lcoords,
-            const FEICellGeometry &cellgeo);
+                                     const FEICellGeometry &cellgeo);
 
     /**
      * Evaluates edge global coordinates from given local ones.
@@ -179,9 +179,3 @@ public:
 };
 } // end namespace oofem
 #endif // feinterpol3d_h
-
-
-
-
-
-

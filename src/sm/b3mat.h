@@ -108,11 +108,10 @@ public:
     B3Material(int n, Domain *d) : MaxwellChainMaterial(n, d) { shMode = B3_NoShrinkage; }
     virtual ~B3Material() { }
 
-    virtual void giveShrinkageStrainVector(FloatArray &answer, GaussPoint *gp, TimeStep *atTime, ValueModeType mode);
+    virtual void giveShrinkageStrainVector(FloatArray &answer, GaussPoint *gp, TimeStep *tStep, ValueModeType mode);
 
     virtual const char *giveClassName() const { return "B3Material"; }
     virtual const char *giveInputRecordName() const { return _IFT_B3Material_Name; }
-    virtual classType giveClassID() const { return B3MaterialClass; }
     virtual IRResultType initializeFrom(InputRecord *ir);
 
     virtual void giveThermalDilatationVector(FloatArray &answer, GaussPoint *gp, TimeStep *tStep);
@@ -120,11 +119,11 @@ public:
 protected:
     virtual int hasIncrementalShrinkageFormulation() { return 1; }
 
-    virtual void computeTotalAverageShrinkageStrainVector(FloatArray &answer, GaussPoint *gp, TimeStep *atTime);
+    virtual void computeTotalAverageShrinkageStrainVector(FloatArray &answer, GaussPoint *gp, TimeStep *tStep);
     /// Free shrinkage at material point, requires staggered analysis.
-    virtual void computeShrinkageStrainVector(FloatArray &answer, GaussPoint *gp, TimeStep *atTime, ValueModeType mode);
+    virtual void computeShrinkageStrainVector(FloatArray &answer, GaussPoint *gp, TimeStep *tStep, ValueModeType mode);
     void predictParametersFrom(double, double, double, double, double, double, double);
-    virtual double computeCreepFunction(double atTime, double ofAge);
+    virtual double computeCreepFunction(double tStep, double ofAge);
 
     /**
      * Function calculates relative humidity from water content (inverse relation form sorption isotherm).

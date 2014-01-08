@@ -83,7 +83,6 @@ public:
     // definition & identification
     virtual const char *giveInputRecordName() const { return _IFT_QTrPlaneStress2d_Name; }
     virtual const char *giveClassName() const { return "QTrPlaneStress2d"; }
-    virtual classType giveClassID() const { return QTrPlaneStress2dClass; }
     virtual IRResultType initializeFrom(InputRecord *ir);
 
     virtual Element *SpatialLocalizerI_giveElement() { return this; }
@@ -98,7 +97,7 @@ public:
     virtual double DirectErrorIndicatorRCI_giveCharacteristicSize();
 
     virtual int EIPrimaryUnknownMI_computePrimaryUnknownVectorAt(ValueModeType u,
-                                                                 TimeStep *stepN, const FloatArray &coords,
+                                                                 TimeStep *tStep, const FloatArray &coords,
                                                                  FloatArray &answer);
     virtual void EIPrimaryUnknownMI_givePrimaryUnknownVectorDofID(IntArray &answer);
 

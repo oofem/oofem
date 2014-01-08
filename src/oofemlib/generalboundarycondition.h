@@ -45,10 +45,10 @@
 
 ///@name Input fields for a general boundary condition
 //@{
-#define _IFT_GeneralBoundaryCondition_LoadTimeFunct "loadtimefunction"
+#define _IFT_GeneralBoundaryCondition_timeFunct "loadtimefunction"
 #define _IFT_GeneralBoundaryCondition_valType "valtype"
 #define _IFT_GeneralBoundaryCondition_dofs "dofs"
-#define _IFT_GeneralBoundaryCondition_IsImposedTimeFunct "isimposedtimefunction"
+#define _IFT_GeneralBoundaryCondition_isImposedTimeFunct "isimposedtimefunction"
 #define _IFT_GeneralBoundaryCondition_set "set"
 //@}
 
@@ -61,8 +61,8 @@ namespace oofem {
  *
  * This base class only declares itself as a base class of all boundary conditions,
  * and declares only very basic services. This base class introduces
- * 'loadTimeFunction' as an attribute of each boundary condition.
- * 'loadTimeFunction' represent time variation, its value is dependent on time step.
+ * 'TimeFunction' as an attribute of each boundary condition.
+ * 'TimeFunction' represent time variation, its value is dependent on time step.
  * The value (or the components) of a boundary condition (load) will be
  * the product of its value by the value of
  * the associated load time function at given time step.
@@ -80,15 +80,15 @@ class OOFEM_EXPORT GeneralBoundaryCondition : public FEMComponent
 {
 protected:
     /// Associated load time function.
-    int loadTimeFunction;
+    int timeFunction;
     /// Physical meaning of BC value.
     bcValType valType;
     /// Dofs that b.c. is applied to (relevant for Dirichlet type b.c.s).
     IntArray dofs;
-    /** 
+    /**
      * Zero by default - the BC is than always imposed. Otherwise the number of associated
-    * load time function. If the load time function returns aero value, the BC is inactive.
-    */
+     * load time function. If the load time function returns aero value, the BC is inactive.
+     */
     int isImposedTimeFunction;
     /// Set number for boundary condition to be applied to.
     int set;
@@ -117,7 +117,7 @@ public:
     /**
      * @return Associated load time function of receiver.
      */
-    LoadTimeFunction *giveLoadTimeFunction();
+    Function *giveTimeFunction();
 
     /**
      * Returns receiver load type. It distinguish particular boundary conditions according to
@@ -138,7 +138,7 @@ public:
      * Array with default dofs which b.c. acts on (only Dirichlet type b.c.s are afflicted).
      * @return Array with dof IDs.
      */
-    virtual const IntArray& giveDofIDs() const { return dofs; }
+    virtual const IntArray &giveDofIDs() const { return dofs; }
     /**
      * @return Type of boundary condition. It allows to distinguish BC according its
      * mathematical meaning, ie. like Dirichlet, Neumann, or Newton type.
@@ -168,4 +168,3 @@ public:
 };
 } // end namespace oofem
 #endif // generalbc_h
-

@@ -42,11 +42,10 @@
 
 
 namespace oofem {
-
 int
 CrossSection :: setupIntegrationPoints(IntegrationRule &irule, int npoints, Element *element)
 {
-    return irule.setUpIntegrationPoints(element->giveIntegrationDomain(), npoints, element->giveMaterialMode());
+    return irule.setUpIntegrationPoints( element->giveIntegrationDomain(), npoints, element->giveMaterialMode() );
 }
 
 
@@ -60,9 +59,20 @@ CrossSection :: initializeFrom(InputRecord *ir)
     IRResultType result;                   // Required by IR_GIVE_FIELD macro
 
     // Read set number the cross section is applied to
-    IR_GIVE_OPTIONAL_FIELD(ir, this->setNumber, _IFT_CrossSection_SetNumber );
+    IR_GIVE_OPTIONAL_FIELD(ir, this->setNumber, _IFT_CrossSection_SetNumber);
 
     return IRRT_OK;
+}
+
+int 
+CrossSection :: giveIPValue(FloatArray &answer, GaussPoint *ip, InternalStateType type, TimeStep *tStep)
+{
+   if ( type == IST_CrossSectionNumber ) {
+       answer.resize(1);
+       answer.at(1) = this->giveNumber();
+       return 1;
+    } 
+    return ip->giveMaterial()->giveIPValue(answer, ip, type, tStep);
 }
 
 
@@ -112,7 +122,20 @@ CrossSection :: restoreIPContext(DataStream *stream, ContextMode mode, GaussPoin
 
 
 double
-CrossSection :: give(CrossSectionProperty aProperty)
+CrossSection :: give(CrossSectionProperty aProperty, GaussPoint *gp)
+// Returns the value of the property aProperty of the receiver.
+{
+    if ( propertyDictionary->includes(aProperty) ) {
+        return propertyDictionary->at(aProperty);
+    } else {
+        OOFEM_ERROR3("Cross-section Number %d has undefined property ID %d", this->giveNumber(), aProperty);
+    }
+
+    return 0.0;
+}
+
+double
+CrossSection :: give(CrossSectionProperty aProperty, const FloatArray *coords, Element *elem, bool local)
 // Returns the value of the property aProperty of the receiver.
 {
     if ( propertyDictionary->includes(aProperty) ) {

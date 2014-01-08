@@ -186,11 +186,11 @@ bool Tr2Shell7XFEM :: updateIntegrationRule()
             
 
                 // For debugging only
-                EDCrack *edCrack =  dynamic_cast< EDCrack* > ( ei->giveEnrichmentDomain() );
+                /*EDCrack *edCrack =  dynamic_cast< EDCrack* > ( ei->giveEnrichmentDomain() );
                 PolygonLine *pl = dynamic_cast< PolygonLine * >( edCrack->bg );
                 if ( pl != NULL ) {
                     pl->printVTK();
-                }
+                }*/
             }
         }
 

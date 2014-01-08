@@ -44,10 +44,9 @@
 #include "contextioerr.h"
 
 namespace oofem {
-
 TimeStep :: TimeStep(int n, EngngModel *e, int mn, double tt, double dt, StateCounterType counter, TimeDiscretizationType td) :
-    eModel(e), targetTime(tt), intrinsicTime(tt), deltaT(dt), solutionStateCounter(counter), 
-    number(n), version(0), substepNumber(0), mstepNumber(mn), timeDiscretization(td)
+    eModel(e), targetTime(tt), intrinsicTime(tt), deltaT(dt), solutionStateCounter(counter),
+    number(n), version(0), subtStepumber(0), mtStepumber(mn), timeDiscretization(td)
 {
     // Target time and intrinsic time is the same in the constructor.
 }
@@ -61,8 +60,8 @@ TimeStep :: TimeStep(EngngModel *e)
     solutionStateCounter = 0;
     number = -1;
     version = 0;
-    mstepNumber = 0;
-    substepNumber = 0;
+    mtStepumber = 0;
+    subtStepumber = 0;
 }
 
 TimeStep :: TimeStep(const TimeStep &src)
@@ -74,12 +73,12 @@ TimeStep :: TimeStep(const TimeStep &src)
     solutionStateCounter = src.solutionStateCounter;
     number = src.number;
     version = src.version;
-    mstepNumber = src.mstepNumber;
-    substepNumber = src.substepNumber;
+    mtStepumber = src.mtStepumber;
+    subtStepumber = src.subtStepumber;
 }
 
 TimeStep &
-TimeStep :: operator = ( const TimeStep & src )
+TimeStep :: operator=(const TimeStep &src)
 {
     eModel = src.eModel;
     targetTime = src.targetTime;
@@ -88,8 +87,8 @@ TimeStep :: operator = ( const TimeStep & src )
     solutionStateCounter = src.solutionStateCounter;
     number = src.number;
     version = src.version;
-    mstepNumber = src.mstepNumber;
-    substepNumber = src.substepNumber;
+    mtStepumber = src.mtStepumber;
+    subtStepumber = src.subtStepumber;
 
     return * this;
 }
@@ -154,7 +153,7 @@ TimeStep :: saveContext(DataStream *stream, ContextMode mode, void *obj)
     }
 
     // write meta step number
-    if ( !stream->write(& mstepNumber, 1) ) {
+    if ( !stream->write(& mtStepumber, 1) ) {
         THROW_CIOERR(CIO_IOERR);
     }
 
@@ -179,8 +178,8 @@ TimeStep :: saveContext(DataStream *stream, ContextMode mode, void *obj)
     }
 
     // write timeDiscretization
-    int tDiscretization = (int) timeDiscretization;
-    if ( !stream->write(&tDiscretization, 1) ) {
+    int tDiscretization = ( int ) timeDiscretization;
+    if ( !stream->write(& tDiscretization, 1) ) {
         THROW_CIOERR(CIO_IOERR);
     }
 
@@ -197,7 +196,7 @@ TimeStep :: restoreContext(DataStream *stream, ContextMode mode, void *obj)
     }
 
     // read meta step number
-    if ( !stream->read(& mstepNumber, 1) ) {
+    if ( !stream->read(& mtStepumber, 1) ) {
         THROW_CIOERR(CIO_IOERR);
     }
 

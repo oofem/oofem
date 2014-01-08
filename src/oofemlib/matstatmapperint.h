@@ -36,7 +36,6 @@
 #define MATSTATMAPPERINT_H_
 
 namespace oofem {
-
 class MaterialStatus;
 class StructuralInterfaceMaterialStatus;
 class MaterialMappingAlgorithm;
@@ -62,14 +61,15 @@ class TimeStep;
  * @author Erik Svenning
  *  Created on: Nov 6, 2013
  */
-class MaterialStatusMapperInterface {
+class MaterialStatusMapperInterface
+{
 public:
     MaterialStatusMapperInterface();
     virtual ~MaterialStatusMapperInterface();
 
     virtual void copyStateVariables(const MaterialStatus &iStatus) = 0;
     virtual void addStateVariables(const MaterialStatus &iStatus) = 0;
-//    virtual void callCopyStateVariables(MaterialStatusMapperInterface &oStatus) = 0;
+    //    virtual void callCopyStateVariables(MaterialStatusMapperInterface &oStatus) = 0;
 
 
     /**
@@ -98,8 +98,6 @@ public:
 
 protected:
     MaterialMappingAlgorithm *mpMaterialMapper;
-
 };
-
 } /* namespace oofem */
 #endif /* MATSTATMAPPERINT_H_ */

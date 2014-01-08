@@ -38,8 +38,7 @@
 #include "classfactory.h"
 
 namespace oofem {
-
-REGISTER_Material( Concrete3 );
+REGISTER_Material(Concrete3);
 
 Concrete3 :: Concrete3(int n, Domain *d) : RCM2Material(n, d)
 {
@@ -98,7 +97,7 @@ Concrete3 :: computeStrength(GaussPoint *gp, double charLength)
         Ft = sqrt(2. * Ee * Gf / charLength);
         //
         OOFEM_LOG_INFO("Reducing Ft to %f in element %d, gp %d, Le %f",
-               Ft, gp->giveElement()->giveNumber(), gp->giveNumber(), charLength);
+                       Ft, gp->giveElement()->giveNumber(), gp->giveNumber(), charLength);
         //
     }
 
@@ -268,7 +267,7 @@ Concrete3 :: giveCrackingModulus(MatResponseMode rMode, GaussPoint *gp,
         if ( this->checkSizeLimit(gp, Le) ) {
             if ( softeningMode == linearSoftening ) {
                 if ( ( crackStrain >= minEffStrainForFullyOpenCrack ) ||
-                    ( status->giveTempMaxCrackStrain(i) >= minEffStrainForFullyOpenCrack ) ) {
+                     ( status->giveTempMaxCrackStrain(i) >= minEffStrainForFullyOpenCrack ) ) {
                     // fully open crack - no stiffness
                     Cf = 0.;
                 } else if ( crackStrain >= status->giveTempMaxCrackStrain(i) ) {
@@ -296,7 +295,7 @@ Concrete3 :: giveCrackingModulus(MatResponseMode rMode, GaussPoint *gp,
         if ( this->checkSizeLimit(gp, Le) ) {
             if ( softeningMode == linearSoftening ) {
                 if ( ( crackStrain >= minEffStrainForFullyOpenCrack ) ||
-                    ( status->giveTempMaxCrackStrain(i) >= minEffStrainForFullyOpenCrack ) ) {
+                     ( status->giveTempMaxCrackStrain(i) >= minEffStrainForFullyOpenCrack ) ) {
                     // fully open crack - no stiffness
                     Cf = 0.;
                 } else {
@@ -377,7 +376,7 @@ Concrete3 :: giveNormalCrackingStress(GaussPoint *gp, double crackStrain, int i)
     if ( this->checkSizeLimit(gp, Le) ) {
         if ( softeningMode == linearSoftening ) {
             if ( ( crackStrain >= minEffStrainForFullyOpenCrack ) ||
-                ( status->giveTempMaxCrackStrain(i) >= minEffStrainForFullyOpenCrack ) ) {
+                 ( status->giveTempMaxCrackStrain(i) >= minEffStrainForFullyOpenCrack ) ) {
                 // fully open crack - no stiffness
                 answer = 0.;
             } else if ( crackStrain >= status->giveTempMaxCrackStrain(i) ) {

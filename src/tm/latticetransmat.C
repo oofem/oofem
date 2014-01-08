@@ -40,12 +40,11 @@
 #include "staggeredproblem.h"
 #include "classfactory.h"
 #ifdef __SM_MODULE
-#include "latticestructuralelement.h"
+ #include "latticestructuralelement.h"
 #endif
 
 namespace oofem {
-
-REGISTER_Material( LatticeTransportMaterial );
+REGISTER_Material(LatticeTransportMaterial);
 
 IRResultType
 LatticeTransportMaterial :: initializeFrom(InputRecord *ir)
@@ -127,15 +126,15 @@ LatticeTransportMaterial :: give(int aProperty, GaussPoint *gp)
 double
 LatticeTransportMaterial :: giveCharacteristicValue(MatResponseMode mode,
                                                     GaussPoint *gp,
-                                                    TimeStep *atTime)
+                                                    TimeStep *tStep)
 {
-    LatticeTransportMaterialStatus *status = ( LatticeTransportMaterialStatus * ) this->giveStatus(gp);
+    LatticeTransportMaterialStatus *status = static_cast< LatticeTransportMaterialStatus * >( this->giveStatus(gp) );
     double suction = status->giveTempField().at(1);
 
     if ( mode == Capacity ) {
         return computeCapacity(suction, gp);
     } else if ( mode == Conductivity ) {
-        return computeConductivity(suction, gp, atTime);
+        return computeConductivity(suction, gp, tStep);
     } else {
         _error("giveCharacteristicValue : unknown mode");
     }
@@ -147,7 +146,7 @@ LatticeTransportMaterial :: giveCharacteristicValue(MatResponseMode mode,
 double
 LatticeTransportMaterial :: computeConductivity(double suction,
                                                 GaussPoint *gp,
-                                                TimeStep *stepN)
+                                                TimeStep *tStep)
 {
     LatticeTransportMaterialStatus *status = static_cast< LatticeTransportMaterialStatus * >( this->giveStatus(gp) );
 
@@ -164,20 +163,20 @@ LatticeTransportMaterial :: computeConductivity(double suction,
 #ifdef __SM_MODULE
     IntArray coupledModels;
     if ( domain->giveEngngModel()->giveMasterEngngModel() ) {
-        (static_cast< StaggeredProblem *>(domain->giveEngngModel()->giveMasterEngngModel()))->giveCoupledModels(coupledModels);
+        ( static_cast< StaggeredProblem * >( domain->giveEngngModel()->giveMasterEngngModel() ) )->giveCoupledModels(coupledModels);
         int couplingFlag = ( static_cast< LatticeTransportElement * >( gp->giveElement() ) )->giveCouplingFlag();
 
-        if ( couplingFlag == 1 && coupledModels.at(1) != 0 && !stepN->isTheFirstStep() ) {
+        if ( couplingFlag == 1 && coupledModels.at(1) != 0 && !tStep->isTheFirstStep() ) {
             int couplingNumber;
             couplingNumber = ( static_cast< LatticeTransportElement * >( gp->giveElement() ) )->giveCouplingNumber();
             LatticeStructuralElement *coupledElement;
             coupledElement  = static_cast< LatticeStructuralElement * >( domain->giveEngngModel()->giveMasterEngngModel()->giveSlaveProblem( coupledModels.at(1) )->giveDomain(1)->giveElement(couplingNumber) );
             crackWidth = coupledElement->giveCrackWidth();
         }
-    } 
+    }
 #endif
 
-    if (!domain->giveEngngModel()->giveMasterEngngModel() ) {
+    if ( !domain->giveEngngModel()->giveMasterEngngModel() ) {
         crackWidth = ( static_cast< LatticeTransportElement * >( gp->giveElement() ) )->giveCrackWidth();
     }
 
@@ -239,7 +238,6 @@ LatticeTransportMaterial :: computeCapacity(double suction, GaussPoint *gp)
 }
 
 
-
 MaterialStatus *
 LatticeTransportMaterial :: CreateStatus(GaussPoint *gp) const
 {
@@ -248,24 +246,8 @@ LatticeTransportMaterial :: CreateStatus(GaussPoint *gp) const
 }
 
 
-
-MaterialStatus *
-LatticeTransportMaterial :: giveStatus(GaussPoint *gp) const
-{
-    MaterialStatus *status = ( MaterialStatus * ) gp->giveMaterialStatus();
-    if ( status == NULL ) {
-        status = this->CreateStatus(gp);
-
-        if ( status != NULL ) {
-            gp->setMaterialStatus( status, this->giveNumber() );
-        }
-    }
-
-    return status;
-}
-
-
-void LatticeTransportMaterialStatus :: printOutputAt(FILE *File, TimeStep *tNow)
+void
+LatticeTransportMaterialStatus :: printOutputAt(FILE *File, TimeStep *tNow)
 {
     MaterialStatus :: printOutputAt(File, tNow);
 
@@ -279,7 +261,8 @@ void LatticeTransportMaterialStatus :: printOutputAt(FILE *File, TimeStep *tNow)
     fprintf(File, "\n");
 }
 
-void LatticeTransportMaterialStatus :: updateYourself(TimeStep *tStep)
+void
+LatticeTransportMaterialStatus :: updateYourself(TimeStep *tStep)
 {
     TransportMaterialStatus :: updateYourself(tStep);
 }
@@ -300,5 +283,4 @@ LatticeTransportMaterialStatus :: LatticeTransportMaterialStatus(int n, Domain *
     // tempStateVector = stateVector;
     mass = 0.;
 }
-
 } // end namespace oofem

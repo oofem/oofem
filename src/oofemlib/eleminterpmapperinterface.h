@@ -42,7 +42,6 @@
 #include "error.h"
 
 namespace oofem {
-
 class TimeStep;
 
 /**
@@ -76,7 +75,7 @@ public:
      * @return Nonzero if given point is in receiver volume otherwise zero
      */
     virtual void EIPrimaryUnknownMI_computePrimaryUnknownVectorAtLocal(ValueModeType mode,
-            TimeStep *tStep, const FloatArray &lcoords, FloatArray &answer)
+                                                                       TimeStep *tStep, const FloatArray &lcoords, FloatArray &answer)
     { OOFEM_ERROR("Not implemented\n"); }
 
     /**

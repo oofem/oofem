@@ -40,7 +40,6 @@
 #define _IFT_ConstantSurfaceLoad_Name "constantsurfaceload"
 
 namespace oofem {
-
 /**
  * This class implements a boundary load (force, moment,...) that acts
  * directly on a boundary of some finite element (on side, face, ..).
@@ -78,7 +77,6 @@ public:
     virtual IRResultType initializeFrom(InputRecord *ir);
     virtual bcGeomType giveBCGeoType() const { return SurfaceLoadBGT; }
 
-    virtual classType giveClassID() const { return ConstantSurfaceLoadClass; }
     virtual const char *giveClassName() const { return "ConstantSurfaceLoad"; }
     virtual const char *giveInputRecordName() const { return _IFT_ConstantSurfaceLoad_Name; }
 
@@ -87,9 +85,3 @@ private:
 };
 } // end namespace oofem
 #endif // constantsurfaceload_h
-
-
-
-
-
-
