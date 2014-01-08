@@ -44,6 +44,8 @@ set (sm_element
     intelline1.C
     intelline2.C
     dkt.C
+	planstrssphf.C
+    qplanstrssphf.C
     )
 
 set (sm_crosssection
