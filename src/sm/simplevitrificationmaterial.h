@@ -42,15 +42,15 @@
 ///@name Input fields for SimpleVitrificationMaterial
 //@{
 #define _IFT_SimpleVitrificationMaterial_Name "simplevitrificationmaterial"
-#define _IFT_SimpleVitrificationMaterial_vitrificationTime "vitrificationTime" ///< Describes the time where the material switches response.
+#define _IFT_SimpleVitrificationMaterial_vitrificationTime "vitrificationtime" ///< Describes the time where the material switches response.
 #define _IFT_SimpleVitrificationMaterial_E "e"
 #define _IFT_SimpleVitrificationMaterial_nu "nu"
 #define _IFT_SimpleVitrificationMaterial_G "g"
-#define _IFT_SimpleVitrificationMaterial_alpha "talpha"
+#define _IFT_SimpleVitrificationMaterial_alpha "alpha"
 #define _IFT_SimpleVitrificationMaterial_E_r "e_r"
 #define _IFT_SimpleVitrificationMaterial_nu_r "nu_r"
 #define _IFT_SimpleVitrificationMaterial_G_r "g_r"
-#define _IFT_SimpleVitrificationMaterial_alpha_r "talpha_r"
+#define _IFT_SimpleVitrificationMaterial_alpha_r "alpha_r"
 //@}
 
 namespace oofem {
@@ -66,9 +66,9 @@ class SimpleVitrificationMaterial : public StructuralMaterial
 private:
     /// Vitrification time (when equal or larger than this time the material changes response).
     double vitrTime;
-    /// Material parameters for the glass part of the model.
+    /// Material parameters for the glassy part of the model (after vitrification).
     FloatArray E, nu, G, alpha;
-    /// Material parameters for the rubber part of the model.
+    /// Material parameters for the rubbery part of the model (before vitrification).
     FloatArray E_r, nu_r, G_r, alpha_r;
 
 public:
@@ -86,6 +86,8 @@ public:
 
     virtual void giveRealStressVector_3d(FloatArray &answer, GaussPoint *gp,
                                          const FloatArray &reducedStrain, TimeStep *tStep);
+
+    virtual MaterialStatus *CreateStatus(GaussPoint *gp) const;
 
     virtual int hasNonLinearBehaviour() { return true; }
     virtual const char *giveClassName() const { return "SimpleVitrificationMaterial"; }

@@ -137,7 +137,7 @@ void SimpleVitrificationMaterial :: giveRealStressVector_3d(FloatArray &answer, 
     FloatMatrix d;
     FloatArray deltaStrain;
 
-    StructuralMaterialStatus *status = static_cast< StructuralMaterialStatus * >( this->giveStatus(gp) );
+    StructuralMaterialStatus *status = dynamic_cast< StructuralMaterialStatus * >( this->giveStatus(gp) );
 
     this->giveStressDependentPartOfStrainVector(strainVector, gp, reducedStrain, tStep, VM_Total);
 
@@ -154,6 +154,12 @@ void SimpleVitrificationMaterial :: giveRealStressVector_3d(FloatArray &answer, 
     // update gp
     status->letTempStrainVectorBe(reducedStrain);
     status->letTempStressVectorBe(answer);
+}
+
+
+MaterialStatus *SimpleVitrificationMaterial :: CreateStatus(GaussPoint *gp) const
+{
+    return new StructuralMaterialStatus(1, domain, gp);
 }
 
 } // end namespace oofem
