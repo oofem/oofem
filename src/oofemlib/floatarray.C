@@ -1272,14 +1272,14 @@ void FloatArray :: beSymVectorForm(const FloatMatrix &aMatrix)
 
 void FloatArray :: changeComponentOrder()
 {
-    // Swaps the fourth and sixth index.
-#  ifdef DEBUG
-    if (  this->giveSize() != 6 ) {
-    OOFEM_ERROR("FloatArray :: changeComponentOrder : vector length is not 6");
-    }
-#  endif
+    // OOFEM: 			11, 22, 33, 23, 13, 12, 32, 31, 21
+	// UMAT:			11, 22, 33, 12, 13, 23, 32, 21, 31
 
     std::swap(this->at(4), this->at(6));
+
+    if( this->giveSize() == 9 ) {
+        std::swap(this->at(8), this->at(9));
+    }
 }
 
 
