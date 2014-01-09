@@ -1469,14 +1469,11 @@ LayeredCrossSection :: giveIPValue(FloatArray &answer, GaussPoint *gp, InternalS
                 return 0;
             }
             return 1;
-        } else if ( type == IST_CrossSectionNumber ) {
-            answer.resize(1);
-            answer.at(1) = this->giveNumber();
-            return 1;
         } else {
             return layerMat->giveIPValue(answer, gp, type, tStep);
         }
     } else {
+        return CrossSection :: giveIPValue(answer, gp, type, tStep);
         ///@todo so far this only works for el where each layer has its own integration rule
         int layer = gp->giveIntegrationRule()->giveNumber();
         return this->giveDomain()->giveMaterial( this->giveLayerMaterial(layer) )->giveIPValue(answer, gp, type, tStep);
