@@ -319,7 +319,7 @@ LoadBalancer :: unpackMigratingData(Domain *d, ProcessCommunicator &pc)
             dofman->setParallelMode(DofManager_local);
             // add transaction if new entry allocated; otherwise existing one has been modified via returned dofman
             if ( _newentry ) {
-                dtm->addTransaction(DomainTransactionManager :: DTT_ADD, DomainTransactionManager :: DCT_DofManager, _globnum, dofman);
+                dtm->addDofManTransaction(DomainTransactionManager :: DTT_ADD, _globnum, dofman);
             }
 
             //dmanMap[_globnum] = dofman;
@@ -353,7 +353,7 @@ LoadBalancer :: unpackMigratingData(Domain *d, ProcessCommunicator &pc)
 #endif
             // add transaction if new entry allocated; otherwise existing one has been modified via returned dofman
             if ( _newentry ) {
-                dtm->addTransaction(DomainTransactionManager :: DTT_ADD, DomainTransactionManager :: DCT_DofManager, _globnum, dofman);
+                dtm->addDofManTransaction(DomainTransactionManager :: DTT_ADD, _globnum, dofman);
             }
 
             //dmanMap[_globnum] = dofman;
@@ -376,7 +376,7 @@ LoadBalancer :: unpackMigratingData(Domain *d, ProcessCommunicator &pc)
         elem = classFactory.createElement(_type.c_str(), 0, d);
         elem->restoreContext(& pcDataStream, CM_Definition | CM_State);
         elem->initForNewStep();
-        dtm->addTransaction(DomainTransactionManager :: DTT_ADD, DomainTransactionManager :: DCT_Element, elem->giveGlobalNumber(), elem);
+        dtm->addElementTransaction(DomainTransactionManager :: DTT_ADD, elem->giveGlobalNumber(), elem);
         nrecv++;
         //recvElemList.push_back(elem);
     } while ( 1 );
@@ -406,7 +406,7 @@ LoadBalancer :: deleteRemoteDofManagers(Domain *d)
         dmode = this->giveDofManState(i);
         if ( dmode == LoadBalancer :: DM_Remote ) {
             // positive candidate found
-            dtm->addTransaction(DomainTransactionManager :: DTT_Remove, DomainTransactionManager :: DCT_DofManager, d->giveDofManager(i)->giveGlobalNumber(), NULL);
+            dtm->addDofManTransaction(DomainTransactionManager :: DTT_Remove, d->giveDofManager(i)->giveGlobalNumber(), NULL);
             // dmanMap.erase (d->giveDofManager (i)->giveGlobalNumber());
             //dman = dofManagerList->unlink (i);
             //delete dman;
@@ -414,13 +414,13 @@ LoadBalancer :: deleteRemoteDofManagers(Domain *d)
             // positive candidate found; we delete all null dof managers
             // they will be created by nonlocalmatwtp if necessary.
             // potentially, they can be reused, but this will make the code too complex
-            dtm->addTransaction(DomainTransactionManager :: DTT_Remove, DomainTransactionManager :: DCT_DofManager, d->giveDofManager(i)->giveGlobalNumber(), NULL);
+            dtm->addDofManTransaction(DomainTransactionManager :: DTT_Remove, d->giveDofManager(i)->giveGlobalNumber(), NULL);
         } else if ( dmode == LoadBalancer :: DM_Shared ) {
             dman = d->giveDofManager(i);
             dman->setPartitionList( this->giveDofManPartitions(i) );
             dman->setParallelMode(DofManager_shared);
             if ( !dman->givePartitionList()->findFirstIndexOf(myrank) ) {
-                dtm->addTransaction(DomainTransactionManager :: DTT_Remove, DomainTransactionManager :: DCT_DofManager, d->giveDofManager(i)->giveGlobalNumber(), NULL);
+                dtm->addDofManTransaction(DomainTransactionManager :: DTT_Remove, d->giveDofManager(i)->giveGlobalNumber(), NULL);
                 //dmanMap.erase (this->giveDofManager (i)->giveGlobalNumber());
                 //dman = dofManagerList->unlink (i);
                 //delete dman;
@@ -455,12 +455,12 @@ LoadBalancer :: deleteRemoteElements(Domain *d)
         if ( this->giveElementPartition(i) != myrank ) {
             // positive candidate found
             // this->deleteElement (i);  // delete and set entry to NULL
-            dtm->addTransaction(DomainTransactionManager :: DTT_Remove, DomainTransactionManager :: DCT_Element, d->giveElement(i)->giveGlobalNumber(), NULL);
+            dtm->addElementTransaction(DomainTransactionManager :: DTT_Remove, d->giveElement(i)->giveGlobalNumber(), NULL);
             //elem = elementList->unlink (i);
             //dmanMap.erase (elem->giveGlobalNumber());
             //delete (elem);
         } else if ( d->giveElement(i)->giveParallelMode() != Element_local ) {
-            dtm->addTransaction(DomainTransactionManager :: DTT_Remove, DomainTransactionManager :: DCT_Element, d->giveElement(i)->giveGlobalNumber(), NULL);
+            dtm->addElementTransaction(DomainTransactionManager :: DTT_Remove, d->giveElement(i)->giveGlobalNumber(), NULL);
         }
     }
 }
