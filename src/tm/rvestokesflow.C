@@ -33,7 +33,6 @@
  */
 
 #include "rvestokesflow.h"
-#include "oofemtxtdatareader.h"
 #include "util.h"
 #include "rveengngmodel.h"
 #include "engngm.h"

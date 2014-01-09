@@ -48,11 +48,11 @@ REGISTER_SparseMtrx(PetscSparseMtrx, SMT_PetscMtrx);
 
 
 PetscSparseMtrx :: PetscSparseMtrx(int n, int m) : SparseMtrx(n, m),
-    mtrx(NULL), symmFlag(false), leqs(0), geqs(0), di(0), kspInit(false), newValues(true) {}
+    mtrx(NULL), symmFlag(false), leqs(0), geqs(0), di(0), kspInit(false), newValues(true), localIS(NULL), globalIS(NULL) {}
 
 
 PetscSparseMtrx :: PetscSparseMtrx() : SparseMtrx(),
-    mtrx(NULL), symmFlag(false), leqs(0), geqs(0), di(0), kspInit(false), newValues(true) {}
+    mtrx(NULL), symmFlag(false), leqs(0), geqs(0), di(0), kspInit(false), newValues(true), localIS(NULL), globalIS(NULL) {}
 
 
 PetscSparseMtrx :: ~PetscSparseMtrx()
@@ -60,6 +60,10 @@ PetscSparseMtrx :: ~PetscSparseMtrx()
     MatDestroy(& this->mtrx);
     if ( this->kspInit ) {
         KSPDestroy(& this->ksp);
+    }
+    if ( localIS ) {
+        ISDestroy( &localIS );
+        ISDestroy( &globalIS );
     }
 }
 
@@ -98,20 +102,17 @@ PetscSparseMtrx :: times(const FloatArray &x, FloatArray &answer) const
         Vec globX;
         Vec globY;
 
-        // "Parallel" context automatically uses sequential alternative if the engineering problem is sequential.
-        PetscContext *context = emodel->givePetscContext( this->giveDomainIndex() );
-
         /*
          * scatter and gather x to global representation
          */
-        context->createVecGlobal(& globX);
-        context->scatter2G(& x, globX, ADD_VALUES);
+        this->createVecGlobal(& globX);
+        this->scatterL2G(x, globX);
 
         VecDuplicate(globX, & globY);
 
         MatMult(this->mtrx, globX, globY);
 
-        context->scatterG2N(globY, & answer, INSERT_VALUES);
+        this->scatterG2L(globY, answer);
 
         VecDestroy(& globX);
         VecDestroy(& globY);
@@ -401,6 +402,7 @@ PetscSparseMtrx :: buildInternalStructure(EngngModel *eModel, int di, EquationID
     Domain *domain = eModel->giveDomain(di);
     int nelem;
 
+    // Delete old stuff first;
     if ( mtrx ) {
         MatDestroy(& mtrx);
     }
@@ -408,6 +410,13 @@ PetscSparseMtrx :: buildInternalStructure(EngngModel *eModel, int di, EquationID
     if ( this->kspInit ) {
         KSPDestroy(& ksp);
         this->kspInit  = false; // force ksp to be initialized
+    }
+
+    if ( localIS ) {
+        ISDestroy(& localIS);
+        ISDestroy(& globalIS);
+        localIS = NULL;
+        globalIS = NULL;
     }
 
     this->emodel = eModel;
@@ -418,8 +427,8 @@ PetscSparseMtrx :: buildInternalStructure(EngngModel *eModel, int di, EquationID
     if ( eModel->isParallel() ) {
         Natural2GlobalOrdering *n2g;
         Natural2LocalOrdering *n2l;
-        n2g = eModel->givePetscContext(di)->giveN2Gmap();
-        n2l = eModel->givePetscContext(di)->giveN2Lmap();
+        n2g = eModel->giveParallelContext(di)->giveN2Gmap();
+        n2l = eModel->giveParallelContext(di)->giveN2Lmap();
 
         n2l->init(eModel, di, s);
         n2g->init(eModel, di, s);
@@ -507,7 +516,7 @@ PetscSparseMtrx :: buildInternalStructure(EngngModel *eModel, int di, EquationID
         //fprintf (stderr,"\n[%d]PetscSparseMtrx: Creating MPIAIJ Matrix ...\n",rank);
 
         // create PETSc mat
-        MatCreate(PETSC_COMM_WORLD, & mtrx);
+        MatCreate(this->emodel->giveParallelComm(), & mtrx);
         MatSetSizes(mtrx, leqs, leqs, geqs, geqs);
         MatSetType(mtrx, MATMPIAIJ);
         MatSetFromOptions(mtrx);
@@ -519,6 +528,11 @@ PetscSparseMtrx :: buildInternalStructure(EngngModel *eModel, int di, EquationID
 
         MatSetOption(mtrx, MAT_ROW_ORIENTED, PETSC_FALSE); // To allow the insertion of values using MatSetValues in column major order
         MatSetOption(mtrx, MAT_NEW_NONZERO_ALLOCATION_ERR, PETSC_FALSE);
+
+        // Creates scatter context for PETSc.
+        ISCreateGeneral(this->emodel->giveParallelComm(), leqs, n2g->giveN2Gmap()->givePointer(), PETSC_USE_POINTER, & globalIS);
+        ISCreateStride(this->emodel->giveParallelComm(), leqs, 0, 1, & localIS);
+
 
  #ifdef __VERBOSE_PARALLEL
         VERBOSEPARALLEL_PRINT("PetscSparseMtrx:: buildInternalStructure", "done", rank);
@@ -621,7 +635,7 @@ PetscSparseMtrx :: assemble(const IntArray &loc, const FloatMatrix &mat)
 #ifdef __PARALLEL_MODE
     if ( emodel->isParallel() ) {
         // translate local code numbers to global ones
-        emodel->givePetscContext(this->di)->giveN2Gmap()->map2New(gloc, loc, 0);
+        emodel->giveParallelContext(this->di)->giveN2Gmap()->map2New(gloc, loc, 0);
 
         //fprintf (stderr, "[?] gloc=");
         //for (int i=1; i<=ndofe; i++) fprintf (stderr, "%d ", gloc.at(i));
@@ -650,8 +664,8 @@ PetscSparseMtrx :: assemble(const IntArray &rloc, const IntArray &cloc, const Fl
     if ( emodel->isParallel() ) {
         // translate eq numbers
         IntArray grloc( rloc.giveSize() ), gcloc( cloc.giveSize() );
-        emodel->givePetscContext(this->di)->giveN2Gmap()->map2New(grloc, rloc, 0);
-        emodel->givePetscContext(this->di)->giveN2Gmap()->map2New(gcloc, cloc, 0);
+        emodel->giveParallelContext(this->di)->giveN2Gmap()->map2New(grloc, rloc, 0);
+        emodel->giveParallelContext(this->di)->giveN2Gmap()->map2New(gcloc, cloc, 0);
 
         MatSetValues(this->mtrx, grloc.giveSize(), grloc.givePointer(),
                      gcloc.giveSize(), gcloc.givePointer(), mat.givePointer(), ADD_VALUES);
@@ -766,6 +780,107 @@ PetscSparseMtrx :: writeToFile(const char *fname) const
     PetscViewerASCIIOpen(PETSC_COMM_WORLD, fname, & viewer);
     MatView(this->mtrx, viewer);
     PetscViewerDestroy(& viewer);
+}
+
+
+void
+PetscSparseMtrx :: createVecGlobal(Vec *answer) const
+{
+#ifdef __PARALLEL_MODE
+    if ( emodel->isParallel() ) {
+        VecCreate(this->emodel->giveParallelComm(), answer);
+        VecSetSizes( * answer, this->leqs, this->geqs );
+        VecSetFromOptions(* answer);
+    } else {
+#endif
+    VecCreateSeq(PETSC_COMM_SELF, this->giveNumberOfRows(), answer);
+#ifdef __PARALLEL_MODE
+}
+#endif
+}
+
+
+int
+PetscSparseMtrx :: scatterG2L(Vec src, FloatArray &dest) const
+{
+    PetscScalar *ptr;
+
+#ifdef __PARALLEL_MODE
+    if ( emodel->isParallel() ) {
+        ParallelContext *context = emodel->giveParallelContext(di);
+        int neqs = context->giveNumberOfNaturalEqs();
+        Vec locVec;
+        VecCreateSeq(PETSC_COMM_SELF, neqs, & locVec);
+
+        VecScatter n2gvecscat;
+        VecScatterCreate(locVec, localIS, src, globalIS, & n2gvecscat);
+        VecScatterBegin(n2gvecscat, src, locVec, INSERT_VALUES, SCATTER_REVERSE);
+        VecScatterEnd(n2gvecscat, src, locVec, INSERT_VALUES, SCATTER_REVERSE);
+        VecScatterDestroy(& n2gvecscat);
+
+        dest.resize( neqs );
+        VecGetArray(locVec, & ptr);
+        for ( int i = 0; i < neqs; i++ ) {
+            dest.at(i + 1) = ptr [ i ];
+        }
+
+        VecRestoreArray(locVec, & ptr);
+        VecDestroy(& locVec);
+    } else {
+#endif
+        int neqs = this->giveNumberOfRows();
+        dest.resize(neqs);
+        VecGetArray(src, & ptr);
+        for ( int i = 0; i < neqs; i++ ) {
+            dest.at(i + 1) = ptr [ i ];
+        }
+        VecRestoreArray(src, & ptr);
+#ifdef __PARALLEL_MODE
+    }
+#endif
+    return 1;
+}
+
+
+int
+PetscSparseMtrx :: scatterL2G(const FloatArray &src, Vec dest) const
+{
+    PetscScalar *ptr;
+
+#ifdef __PARALLEL_MODE
+    if ( emodel->isParallel() ) {
+        ParallelContext *context = this->emodel->giveParallelContext(di);
+        int size = src.giveSize();
+        ptr = src.givePointer();
+
+        Natural2LocalOrdering *n2l = context->giveN2Lmap();
+        Natural2GlobalOrdering *n2g = context->giveN2Gmap();
+        for ( int i = 0; i < size; i++ ) {
+            if ( n2l->giveNewEq(i + 1) ) {
+                int eqg = n2g->giveNewEq(i + 1);
+                ///@todo INSERT_VALUES or ADD_VALUES? The overlapping values should be zero either way right?
+                VecSetValues(dest, 1, & eqg, ptr + i, ADD_VALUES);
+            }
+        }
+
+        VecAssemblyBegin(dest);
+        VecAssemblyEnd(dest);
+    } else {
+#endif
+
+    int size = src.giveSize();
+    ptr = src.givePointer();
+    for ( int i = 0; i < size; i++ ) {
+        //VecSetValues(dest, 1, & i, ptr + i, mode);
+        VecSetValue(dest, i, ptr [ i ], ADD_VALUES);
+    }
+
+    VecAssemblyBegin(dest);
+    VecAssemblyEnd(dest);
+#ifdef __PARALLEL_MODE
+}
+#endif
+    return 1;
 }
 
 

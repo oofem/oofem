@@ -32,6 +32,9 @@
  *  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  */
 
+#ifndef scalarfunction_h
+#define scalarfunction_h
+
 #include "floatarray.h"
 #include "domain.h"
 #include "parser.h"
@@ -41,6 +44,9 @@
 #include <map>
 
 namespace oofem {
+
+class FunctionArgument;
+
 /**
  * Implementation of Scalar function. The scalar function can be defined as
  * (i)   simple double (constant) value,
@@ -106,14 +112,27 @@ public:
      * @param valDict map defining input parameters in the form  (name, value) pairs
      * @param d domain managing external functions
      */
-    double eval(std :: map< std :: string, double >valDict, Domain *d) const;
+    double eval(std :: map< std :: string, FunctionArgument >valDict, Domain *d) const;
 
     /**
-     * Cleans up before changing receiver
+     * Evaluates the receiver (convenience function that directly takes just the time as a parameter).
+     * @param time Time to evaluate for.
+     * @param d domain managing external functions
      */
-    void clear();
+    double eval(double time, Domain *d) const;
+
+    ///@todo Support FloatArray inputs in the value dictionary, then implement this convenience function;
+    /*
+     * Evaluates the receiver (convenience function that directly takes just the time and coordinates as parameters).
+     * @param time Time to evaluate for.
+     * @param coords Coordinates to evaluate for.
+     * @param d domain managing external functions
+     */
+    //double eval(double time, const FloatArray &coords, Domain *d) const;
 
     friend std :: ostream &operator<<(std :: ostream &out, const ScalarFunction &s);
 };
 
 } // end namespace OOFEM
+
+#endif // scalarfunction_h

@@ -44,7 +44,6 @@
 #include "nonlocalbarrier.h"
 #include "initialcondition.h"
 #include "classfactory.h"
-#include "oofemtxtinputrecord.h"
 #include "outputmanager.h"
 #include "crosssection.h"
 #include "function.h"

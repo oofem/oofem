@@ -860,13 +860,13 @@ NonLinearDynamic :: updateDomainLinks()
 }
 
 
-#ifdef __PETSC_MODULE
+#ifdef __PARALLEL_MODE
 void
-NonLinearDynamic :: initPetscContexts()
+NonLinearDynamic :: initParallelContexts()
 {
-    petscContextList->growTo(ndomains);
+    parallelContextList->growTo(ndomains);
     for ( int i = 1; i <= this->ndomains; i++ ) {
-        petscContextList->put( i, new PetscContext(this, false) ); // false == using local vectors.
+        parallelContextList->put( i, new ParallelContext(this) );
     }
 }
 #endif

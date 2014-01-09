@@ -141,8 +141,8 @@ EngngModel :: EngngModel(int i, EngngModel *_master) : domainNeqs(), domainPresc
  #endif
 #endif
 
-#ifdef __PETSC_MODULE
-    petscContextList = new AList< PetscContext >(0);
+#ifdef __PARALLEL_MODE
+    parallelContextList = new AList< ParallelContext >(0);
 #endif
 }
 
@@ -188,8 +188,8 @@ EngngModel :: EngngModel(int i, char *s, EngngModel *_master) : domainNeqs(), do
     lbm = NULL;
  #endif
 
- #ifdef __PETSC_MODULE
-    petscContextList = new AList< PetscContext >(0);
+ #ifdef __PARALLEL_MODE
+    parallelContextList = new AList< ParallelContext >(0);
  #endif
 }
 #endif
@@ -218,8 +218,8 @@ EngngModel :: ~EngngModel()
     delete domainList;
     delete metaStepList;
 
-#ifdef __PETSC_MODULE
-    delete petscContextList;
+#ifdef __PARALLEL_MODE
+    delete parallelContextList;
 #endif
 
     if ( exportModuleManager ) {
@@ -310,8 +310,8 @@ EngngModel :: Instanciate_init(const char *dataOutputFileName, int ndomains)
 
     this->ndomains = ndomains;
 
-#ifdef __PETSC_MODULE
-    this->initPetscContexts();
+#ifdef __PARALLEL_MODE
+    this->initParallelContexts();
 #endif
 }
 
@@ -624,9 +624,9 @@ EngngModel :: forceEquationNumbering()
         this->numberOfPrescribedEquations += domainPrescribedNeqs.at(i);
     }
 
-#ifdef __PETSC_MODULE
-    for ( int i = 1; i <= petscContextList->giveSize(); i++ ) {
-        this->petscContextList->at(i)->init(i);
+#ifdef __PARALLEL_MODE
+    for ( int i = 1; i <= parallelContextList->giveSize(); i++ ) {
+        this->parallelContextList->at(i)->init(i);
     }
 
 #endif
@@ -1003,7 +1003,7 @@ void EngngModel :: assembleVector(FloatArray &answer, TimeStep *tStep, EquationI
     if ( this->isParallel() ) {
         if ( eNorms ) {
             FloatArray localENorms = * eNorms;
-            //this->givePetscContext(domain->giveNumber())->accumulate(localENorms, *eNorms);
+            //this->giveParallelContext(domain->giveNumber())->accumulate(localENorms, *eNorms);
             MPI_Allreduce(localENorms.givePointer(), eNorms->givePointer(), eNorms->giveSize(), MPI_DOUBLE, MPI_SUM, this->comm);
         }
     }
@@ -1196,6 +1196,16 @@ void EngngModel :: assembleVectorFromElements(FloatArray &answer, TimeStep *tSte
     FloatMatrix R;
     FloatArray charVec;
     int nelem = domain->giveNumberOfElements();
+
+
+#ifdef __PARALLEL_MODE
+    ///@todo Checking the chartype is not since there could be some other chartype in the future. We need to try and deal with chartype in a better way. 
+    /// For now, this is the best we can do.
+    if ( this->isParallel() && type == InternalForcesVector ) {
+        // Copies internal (e.g. Gauss-Point) data from remote elements to make sure they have all information necessary for nonlocal averaging.
+        this->exchangeRemoteElementData(RemoteElementExchangeTag);
+    }
+#endif
 
     this->timer.resumeTimer(EngngModelTimer :: EMTT_NetComputationalStepTimer);
     ///@todo Consider using private answer variables and sum them up at the end, but it just might be slower then a shared variable.
@@ -1727,25 +1737,25 @@ EngngModel :: setDomain(int i, Domain *ptr, bool iDeallocateOld)
 
 
 
-#ifdef __PETSC_MODULE
-PetscContext *
-EngngModel :: givePetscContext(int i)
+#ifdef __PARALLEL_MODE
+ParallelContext *
+EngngModel :: giveParallelContext(int i)
 {
     if ( ( i > 0 ) && ( i <= this->ndomains ) ) {
-        if  ( i > petscContextList->giveSize() ) {
-            _error("givePetscContext: petsc context not initialized for this problem");
+        if  ( i > parallelContextList->giveSize() ) {
+            _error("giveParallelContext: context not initialized for this problem");
         }
 
-        return this->petscContextList->at(i);
+        return this->parallelContextList->at(i);
     } else {
-        _error2("givePetscContext: Undefined domain index %d ", i);
+        _error2("giveParallelContext: Undefined domain index %d ", i);
     }
 
     return NULL;
 }
 
 void
-EngngModel :: initPetscContexts() { }
+EngngModel :: initParallelContexts() { }
 #endif
 
 

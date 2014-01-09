@@ -97,6 +97,9 @@ private:
     /// Material properties.
     FloatArray properties;
 
+    /// Name of the file that contains the umat function
+    std :: string filename;
+
 public:
     /// Constructor.
     AbaqusUserMaterial(int n, Domain *d) : StructuralMaterial(n, d), umatobj(NULL), umat(NULL) { }
@@ -111,6 +114,7 @@ public:
      *  - name (optional, string, default "umat"): Name of material model (used for input to umat routine).
      */
     virtual IRResultType initializeFrom(InputRecord *ir);
+    virtual void giveInputRecord(DynamicInputRecord &input);
 
     virtual MaterialStatus *CreateStatus(GaussPoint *gp) const;
 

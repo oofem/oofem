@@ -120,6 +120,9 @@ public:
     /** Creates a newly allocated copy of the receiver */
     virtual InputRecord *GiveCopy() = 0;
 
+    /// Returns string representation of record in OOFEMs text format.
+    virtual std :: string giveRecordAsString() const = 0;
+
     /**@name Compulsory field extraction methods
      * Reads the field value identified by keyword
      * @param answer contains result

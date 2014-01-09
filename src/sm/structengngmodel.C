@@ -140,14 +140,6 @@ StructuralEngngModel :: giveInternalForces(FloatArray &answer, bool normFlag, in
     // Update solution state counter
     tStep->incrementStateCounter();
 
-#ifdef __PARALLEL_MODE
-    ///@todo Move this into assembleVector
-    if ( this->isParallel() ) {
-        // Copies data from remote elements to make sure they have all information necessary for nonlocal averaging.
-        exchangeRemoteElementData(RemoteElementExchangeTag);
-    }
-#endif
-
     answer.resize( this->giveNumberOfDomainEquations( di, EModelDefaultEquationNumbering() ) );
     answer.zero();
     this->assembleVector(answer, tStep, EID_MomentumBalance, InternalForcesVector, VM_Total,
@@ -155,7 +147,6 @@ StructuralEngngModel :: giveInternalForces(FloatArray &answer, bool normFlag, in
 
 #ifdef __PARALLEL_MODE
     // Redistributes answer so that every process have the full values on all shared equations
-    ///@todo This is basically "scatterN2L" which we should have available for all dofs (not just from dofmanagers). Should be moved into engngmodel as well
     this->updateSharedDofManagers(answer, InternalForcesExchangeTag);
 #endif
 
@@ -279,16 +270,16 @@ StructuralEngngModel :: buildReactionTable(IntArray &restrDofMans, IntArray &res
 }
 
 
-#ifdef __PETSC_MODULE
+#ifdef __PARALLEL_MODE
 void
-StructuralEngngModel :: initPetscContexts()
+StructuralEngngModel :: initParallelContexts()
 {
-    PetscContext *petscContext;
+    ParallelContext *parallelContext;
 
-    petscContextList->growTo(ndomains);
+    parallelContextList->growTo(ndomains);
     for ( int i = 0; i < this->ndomains; i++ ) {
-        petscContext =  new PetscContext(this);
-        petscContextList->put(i + 1, petscContext);
+        parallelContext =  new ParallelContext(this);
+        parallelContextList->put(i + 1, parallelContext);
     }
 }
 #endif

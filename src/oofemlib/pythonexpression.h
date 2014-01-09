@@ -32,19 +32,24 @@
  *  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  */
 
-#ifndef calculatorfunction_h
-#define calculatorfunction_h
+#ifndef pythonexpression_h
+#define pythonexpression_h
 
 #include "function.h"
 
-///@name Input fields for CalculatorFunction
+#ifndef PyObject_HEAD
+struct _object;
+typedef _object PyObject;
+#endif
+
+///@name Input fields for PythonExpression
 //@{
-#define _IFT_CalculatorFunction_Name "usrdefltf"
-///@todo These aren't limited to just functions of "t" anymore; rename these.
-#define _IFT_CalculatorFunction_f "f(t)"
-#define _IFT_CalculatorFunction_dfdt "dfdt(t)"
-#define _IFT_CalculatorFunction_d2fdt2 "d2fdt2(t)"
+#define _IFT_PythonExpression_Name "pythonexpression"
+#define _IFT_PythonExpression_f "f" ///< Expression with return variable named "ret"
+#define _IFT_PythonExpression_dfdt "dfdt" ///< Velocity with return variable named "ret"
+#define _IFT_PythonExpression_d2fdt2 "d2fdt2" ///< Acceleration with return variable named "ret"
 //@}
+
 
 namespace oofem {
 /**
@@ -53,7 +58,7 @@ namespace oofem {
  * Load time function typically belongs to domain and is
  * attribute of one or more loads. Generally load time function is real function of time (@f$ y=f(t) @f$).
  */
-class OOFEM_EXPORT CalculatorFunction : public Function
+class OOFEM_EXPORT PythonExpression : public Function
 {
 private:
     /// Expression for the function value.
@@ -63,15 +68,28 @@ private:
     /// Expression for second time derivative.
     std :: string d2fdt2Expression;
 
+    PyObject *f;
+    PyObject *dfdt;
+    PyObject *d2fdt2;
+
+    PyObject *main_dict;
+
+    /// Helper function to convert the std::map to a Python dictionary.
+    PyObject *getDict(std :: map< std :: string, FunctionArgument > &valDict);
+    /// Helper function to run given function for given value dictionary.
+    void getArray(FloatArray &answer, PyObject *func, std :: map< std :: string, FunctionArgument > &valDict);
+    /// Helper function to run given function for given time
+    double getScalar(PyObject *func , double time);
+
 public:
     /**
      * Constructor. Creates load time function with given number, belonging to given domain.
      * @param n Load time function number.
      * @param d Domain to which new object will belongs..
      */
-    CalculatorFunction(int n, Domain *d);
+    PythonExpression(int n, Domain *d);
     /// Destructor.
-    virtual ~CalculatorFunction() { }
+    virtual ~PythonExpression();
 
     /**
      * Reads the fields
@@ -83,12 +101,14 @@ public:
     virtual void giveInputRecord(DynamicInputRecord &ir);
 
     virtual void evaluate(FloatArray &answer, std :: map< std :: string, FunctionArgument > &valDict);
+    virtual void evaluateVelocity(FloatArray &answer, std :: map< std :: string, FunctionArgument > &valDict);
+    virtual void evaluateAcceleration(FloatArray &answer, std :: map< std :: string, FunctionArgument > &valDict);
     virtual double evaluateAtTime(double t);
     virtual double evaluateVelocityAtTime(double t);
     virtual double evaluateAccelerationAtTime(double t);
 
-    virtual const char *giveClassName() const { return "CalculatorFunction"; }
-    virtual const char *giveInputRecordName() const { return _IFT_CalculatorFunction_Name; }
+    virtual const char *giveClassName() const { return "PythonExpression"; }
+    virtual const char *giveInputRecordName() const { return _IFT_PythonExpression_Name; }
 };
 } // end namespace oofem
-#endif // calculatorfunction_h
+#endif // pythonexpression_h

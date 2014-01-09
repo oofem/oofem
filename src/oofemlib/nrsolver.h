@@ -120,7 +120,7 @@ private:
     /// Array of prescribed values
     FloatArray prescribedDofsValues;
     /// Load Time Function of prescribed values
-    int prescribedDisplacementLTF;
+    int prescribedDisplacementTF;
     /// Array of prescribed equations
     IntArray prescribedEqs;
     /// Flag indicating that prescribedEqs were initialized

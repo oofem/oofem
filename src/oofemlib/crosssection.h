@@ -186,9 +186,7 @@ public:
      * @param tStep Time step.
      * @return Nonzero if o.k, zero otherwise.
      */
-    virtual int giveIPValue(FloatArray &answer, GaussPoint *ip, InternalStateType type, TimeStep *tStep)
-    { return ip->giveMaterial()->giveIPValue(answer, ip, type, tStep); }
-
+    virtual int giveIPValue(FloatArray &answer, GaussPoint *ip, InternalStateType type, TimeStep *tStep);
 
 #ifdef __PARALLEL_MODE
     /**

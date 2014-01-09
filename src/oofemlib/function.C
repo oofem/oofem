@@ -32,12 +32,6 @@
  *  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  */
 
-/*
- * The original idea for this class comes from
- * Dubois-Pelerin, Y.: "Object-Oriented  Finite Elements: Programming concepts and Implementation",
- * PhD Thesis, EPFL, Lausanne, 1992.
- */
-
 #include "function.h"
 #include "timestep.h"
 #include "dynamicinputrecord.h"
@@ -101,23 +95,30 @@ Function :: giveInputRecord(DynamicInputRecord &input)
 double
 Function :: evaluateAtTime(double t)
 {
-    //std::map< std::string, double >valDict {{t, "t"}};
-    std::map< std::string, double >valDict;
-    valDict["t"] = t;
-    FloatArray v = this->evaluate(valDict);
+    std::map< std::string, FunctionArgument > valDict;
+    valDict.insert(std::make_pair("t", t));
+    FloatArray v;
+    this->evaluate(v, valDict);
+    ///@todo This should be possible and nice to use if we have C++11
+    //this->evaluate(v, {{t, "t"}});
     if ( v.giveSize() != 1 ) {
         OOFEM_ERROR2("%s :: evaluateAtTime - Function doesn't return scalar results.", this->giveClassName());
     }
     return v.at(1);
 }
 
-///@todo Move operator from C++11 would be nice here.
-FloatArray
-Function :: evaluate(std::map< std::string, double > &valDict)
+
+void
+Function :: evaluate(FloatArray &answer, std::map< std::string, FunctionArgument > &valDict)
 {
-    FloatArray v(1);
-    v.at(1) = this->evaluateAtTime(valDict["t"]);
-    return v;
+    std::map< std::string, FunctionArgument > :: iterator it = valDict.find("t");
+#ifdef DEBUG
+    if ( it == valDict.end() ) {
+        OOFEM_ERROR("Funciton :: evaluate - Missing necessary argument \"t\"");
+    }
+#endif
+    answer.resize(1);
+    answer.at(1) = this->evaluateAtTime(it->second.val0);
 }
 
 } // end namespace oofem

@@ -86,7 +86,7 @@ SLEPcSolver :: solve(SparseMtrx *a, SparseMtrx *b, FloatArray *_eigv, FloatMatri
 
     A = static_cast< PetscSparseMtrx * >( a );
     B = static_cast< PetscSparseMtrx * >( b );
-    size = engngModel->givePetscContext( A->giveDomainIndex() )->giveNumberOfNaturalEqs(); // A->giveLeqs();
+    size = engngModel->giveParallelContext( A->giveDomainIndex() )->giveNumberOfNaturalEqs(); // A->giveLeqs();
 
     // check array for storing eigenvalues
     if ( _eigv == NULL ) {
@@ -200,7 +200,7 @@ SLEPcSolver :: solve(SparseMtrx *a, SparseMtrx *b, FloatArray *_eigv, FloatMatri
 
             //Store the eigenvector
 #ifdef __PARALLEL_MODE
-            engngModel->givePetscContext( A->giveDomainIndex() )->scatterG2N(Vr, Vr2, INSERT_VALUES);
+            engngModel->giveParallelContext( A->giveDomainIndex() )->scatterG2N(Vr, Vr2, INSERT_VALUES);
             ierr = VecGetArray(Vr2, & array);
             CHKERRQ(ierr);
             for ( int j = 0; j < size; j++ ) {

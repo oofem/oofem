@@ -35,6 +35,7 @@
 #include "abaqususermaterial.h"
 #include "gausspoint.h"
 #include "classfactory.h"
+#include "dynamicinputrecord.h"
 
 #ifdef _WIN32 //_MSC_VER and __MINGW32__ included
  #include <Windows.h>
@@ -68,22 +69,21 @@ IRResultType AbaqusUserMaterial :: initializeFrom(InputRecord *ir)
     const char *__proc = "initializeFrom";
     IRResultType result;
     std :: string umatname;
-    std :: string umatfile;
 
-    this->Material :: initializeFrom(ir);
+    StructuralMaterial :: initializeFrom(ir);
 
     IR_GIVE_FIELD(ir, this->numState, _IFT_AbaqusUserMaterial_numState);
     IR_GIVE_FIELD(ir, this->properties, _IFT_AbaqusUserMaterial_properties);
-    IR_GIVE_FIELD(ir, umatfile, _IFT_AbaqusUserMaterial_userMaterial);
+    IR_GIVE_FIELD(ir, this->filename, _IFT_AbaqusUserMaterial_userMaterial);
     umatname = "umat";
     IR_GIVE_OPTIONAL_FIELD(ir, umatname, _IFT_AbaqusUserMaterial_name);
     strncpy(this->cmname, umatname.c_str(), 80);
 
 #ifdef _WIN32
     ///@todo Check all the windows support.
-    this->umatobj = ( void * ) LoadLibrary( umatfile.c_str() );
+    this->umatobj = ( void * ) LoadLibrary( filename.c_str() );
     if ( !this->umatobj ) {
-        OOFEM_ERROR2( "AbaqusUserMaterial :: initializeFrom - couldn't load \"%s\",\ndlerror: %s", umatfile.c_str() );
+        OOFEM_ERROR2( "AbaqusUserMaterial :: initializeFrom - couldn't load \"%s\",\ndlerror: %s", filename.c_str() );
     }
 
     //     * ( void ** )( & this->umat ) = GetProcAddress( ( HMODULE ) this->umatobj, "umat_" );
@@ -95,9 +95,9 @@ IRResultType AbaqusUserMaterial :: initializeFrom(InputRecord *ir)
     }
 
 #else
-    this->umatobj = dlopen(umatfile.c_str(), RTLD_NOW);
+    this->umatobj = dlopen(filename.c_str(), RTLD_NOW);
     if ( !this->umatobj ) {
-        OOFEM_ERROR3( "AbaqusUserMaterial :: initializeFrom - couldn't load \"%s\",\ndlerror: %s", umatfile.c_str(), dlerror() );
+        OOFEM_ERROR3( "AbaqusUserMaterial :: initializeFrom - couldn't load \"%s\",\ndlerror: %s", filename.c_str(), dlerror() );
     }
 
     * ( void ** ) ( & this->umat ) = dlsym(this->umatobj, "umat_");
@@ -108,6 +108,16 @@ IRResultType AbaqusUserMaterial :: initializeFrom(InputRecord *ir)
 
 #endif
     return IRRT_OK;
+}
+
+void AbaqusUserMaterial :: giveInputRecord(DynamicInputRecord &input)
+{
+    StructuralMaterial :: giveInputRecord(input);
+
+    input.setField(this->numState, _IFT_AbaqusUserMaterial_numState);
+    input.setField(this->properties, _IFT_AbaqusUserMaterial_properties);
+    input.setField(this->filename, _IFT_AbaqusUserMaterial_userMaterial);
+    input.setField(this->cmname, _IFT_AbaqusUserMaterial_name);
 }
 
 MaterialStatus *AbaqusUserMaterial :: CreateStatus(GaussPoint *gp) const

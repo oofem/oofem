@@ -64,6 +64,17 @@ CrossSection :: initializeFrom(InputRecord *ir)
     return IRRT_OK;
 }
 
+int 
+CrossSection :: giveIPValue(FloatArray &answer, GaussPoint *ip, InternalStateType type, TimeStep *tStep)
+{
+   if ( type == IST_CrossSectionNumber ) {
+       answer.resize(1);
+       answer.at(1) = this->giveNumber();
+       return 1;
+    } 
+    return ip->giveMaterial()->giveIPValue(answer, ip, type, tStep);
+}
+
 
 void
 CrossSection :: printYourself()

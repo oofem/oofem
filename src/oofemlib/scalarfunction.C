@@ -35,6 +35,7 @@
 #include "scalarfunction.h"
 #include "floatarray.h"
 #include "domain.h"
+#include "function.h"
 #include "parser.h"
 #include "error.h"
 
@@ -68,16 +69,12 @@ ScalarFunction :: ScalarFunction(int val)
 }
 
 
-ScalarFunction :: ~ScalarFunction()
-{
-    this->clear();
-}
+ScalarFunction :: ~ScalarFunction() {}
 
 
 void
 ScalarFunction :: setValue(double val)
 {
-    this->clear();
     this->dvType = DV_ValueType;
     this->dValue = 0.0;
 }
@@ -86,7 +83,6 @@ ScalarFunction :: setValue(double val)
 void
 ScalarFunction :: setSimpleExpression(std::string &val)
 {
-    this->clear();
     this->dvType = DV_SimpleExpressionType;
     this->eValue = val;
 }
@@ -95,14 +91,13 @@ ScalarFunction :: setSimpleExpression(std::string &val)
 void
 ScalarFunction :: setReference(int val)
 {
-    this->clear();
     this->dvType = DV_FunctionReferenceType;
     this->fReference = val;
 }
 
 
 double
-ScalarFunction :: eval(std::map< std::string, double > valDict, Domain *d) const
+ScalarFunction :: eval(std::map< std::string, FunctionArgument > valDict, Domain *d) const
 {
     if (this->dvType == DV_ValueType) {
         return this->dValue;
@@ -111,11 +106,24 @@ ScalarFunction :: eval(std::map< std::string, double > valDict, Domain *d) const
         Parser p;
         int err;
         // process valDict and call internal parser
-        std :: map< std :: string, double > :: iterator it;
-        for (it = valDict.begin(); it != valDict.end(); it++) {
-            buff << it->first << "=" << it->second << ";";
+        for (std :: map< std :: string, FunctionArgument > :: iterator val = valDict.begin(); val != valDict.end(); ++val) {
+            const FunctionArgument &arg = val->second;
+            if ( arg.type == FunctionArgument::FAT_double ) {
+                buff << val->first << "=" << arg.val0 << ";";
+            } else if ( arg.type == FunctionArgument::FAT_FloatArray ) {
+                for (int i = 1; i <= arg.val1.giveSize(); ++i) {
+                    buff << val->first << i << "=" << arg.val1.at(i) << ";";
+                }
+            } else if ( arg.type == FunctionArgument::FAT_int ) {
+                buff << val->first << "=" << arg.val2 << ";";
+            } else if ( arg.type == FunctionArgument::FAT_IntArray ) {
+                for (int i = 1; i <= arg.val3.giveSize(); ++i) {
+                    buff << val->first << i << "=" << arg.val3.at(i) << ";";
+                }
+            }
         }
         buff << this->eValue;
+        //printf("string is %s\n", buff.str().c_str());
         // evaluate the expression
         double value = p.eval(buff.str().c_str(), err);
         if (err) {
@@ -123,19 +131,27 @@ ScalarFunction :: eval(std::map< std::string, double > valDict, Domain *d) const
         }
         return value;
     } else if (this->dvType == DV_FunctionReferenceType) {
-        // d->giveFunction(this->fReference)->evaluate (valDict);
-        return 0.0;
+        FloatArray val;
+        d->giveFunction(this->fReference)->evaluate(val, valDict);
+        if ( val.giveSize() != 1 ) {
+            OOFEM_ERROR3("ScalarFunction::eval - Function @%d did not return a scalar (size = %d)", this->fReference, val.giveSize());
+        }
+        return val.at(1);
     }
     return 0.;
 }
 
 
-void
-ScalarFunction :: clear()
+double
+ScalarFunction :: eval(double time, Domain *d) const
 {
-    this->dValue = 0.;
-    this->eValue = "";
-    this->fReference = 0;
+    if (this->dvType == DV_ValueType) {
+        return this->dValue;
+    } else {
+        std::map< std::string, FunctionArgument > valDict;
+        valDict.insert(std::make_pair("t", time));
+        return this->eval(valDict, d);
+    }
 }
 
 

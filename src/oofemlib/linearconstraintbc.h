@@ -73,9 +73,9 @@ class OOFEM_EXPORT LinearConstraintBC : public ActiveBoundaryCondition
 {
 protected:
     FloatArray weights;
-    IntArray weightsLtf;
+    IntArray weightsTf;
     double rhs;
-    int rhsLtf;
+    int rhsTf;
     IntArray dofmans;
     IntArray dofs;
     DofManager *md;

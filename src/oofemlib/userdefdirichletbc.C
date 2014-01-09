@@ -62,7 +62,7 @@ UserDefDirichletBC :: ~UserDefDirichletBC()
 double
 UserDefDirichletBC :: give(Dof *dof, ValueModeType mode, TimeStep *tStep)
 {
-    double factor = this->giveFunction()->evaluate(tStep, mode);
+    double factor = this->giveTimeFunction()->evaluate(tStep, mode);
     DofManager *dMan = dof->giveDofManager();
 
 
@@ -99,7 +99,7 @@ UserDefDirichletBC :: give(Dof *dof, ValueModeType mode, TimeStep *tStep)
     PyTuple_SetItem(pArgs, 2, pTargetTime);
 
     // Value returned from the Python function
-    PyObject *pRetVal;
+    PyObject *pRetVal = NULL;
 
     if ( PyCallable_Check(mpFunc) ) {
         pRetVal = PyObject_CallObject(mpFunc, pArgs);

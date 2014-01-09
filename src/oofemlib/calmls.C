@@ -45,6 +45,9 @@
 #include "dof.h"
 #include "contextioerr.h"
 #include "exportmodulemanager.h"
+#ifdef __PARALLEL_MODE
+#include "parallelcontext.h"
+#endif
 
 namespace oofem {
 #define CALM_RESET_STEP_REDUCE 0.25
@@ -99,9 +102,7 @@ CylindricalALM :: CylindricalALM(Domain *d, EngngModel *m) :
     maxRestarts = 4;
 
 #ifdef __PARALLEL_MODE
- #ifdef __PETSC_MODULE
-    parallel_context = engngModel->givePetscContext( d->giveNumber() );
- #endif
+    parallel_context = engngModel->giveParallelContext( d->giveNumber() );
 #endif
 }
 
@@ -526,9 +527,7 @@ CylindricalALM :: checkConvergence(const FloatArray &R, const FloatArray *R0, co
     bool answer;
     EModelDefaultEquationNumbering dn;
 #ifdef __PARALLEL_MODE
- #ifdef __PETSC_MODULE
     Natural2LocalOrdering *n2l = parallel_context->giveN2Lmap();
- #endif
 #endif
 
     answer = true;
@@ -1098,12 +1097,6 @@ CylindricalALM :: computeDeltaLambda(double &deltaLambda, const FloatArray &dX, 
 #ifndef __PARALLEL_MODE
     double XX;
 #endif
-
-#ifdef __PARALLEL_MODE
- #ifdef __PETSC_MODULE
-    //Natural2LocalOrdering *n2l = parallel_context->giveN2Lmap();
- #endif
-#endif
     //
     // B.3.
     //
@@ -1371,9 +1364,6 @@ CylindricalALM :: do_lineSearch(FloatArray &r, const FloatArray &rInitial, const
     double d6, d7, d8, d9;
 
 #ifdef __PARALLEL_MODE
- #ifdef __PETSC_MODULE
-    //Natural2LocalOrdering *n2l = parallel_context->giveN2Lmap();
- #endif
     d6 = parallel_context->localDotProduct(deltaX_, F);
     d7 = parallel_context->localDotProduct(deltaXt, F);
     d8 = -1.0 * parallel_context->localDotProduct(deltaX_, R);
