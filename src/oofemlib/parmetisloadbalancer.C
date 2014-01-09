@@ -46,6 +46,7 @@
 #include "communicator.h"
 
 #include <set>
+#include <stdlib.h>
 
 namespace oofem {
 //#define ParmetisLoadBalancer_DEBUG_PRINT

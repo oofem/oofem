@@ -566,7 +566,7 @@ NRSolver :: applyConstraintsToLoadIncrement(int nite, const SparseMtrx *k, Float
 
             Vec diag;
             PetscScalar *ptr;
-            engngModel->givePetscContext( this->domain->giveNumber() )->createVecGlobal(& diag);
+            lhs->createVecGlobal(& diag);
             MatGetDiagonal(* (const_cast<PetscSparseMtrx *> (lhs)->giveMtrx()), diag);
             VecGetArray(diag, & ptr);
 
