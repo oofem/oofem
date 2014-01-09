@@ -59,6 +59,7 @@ public:
     virtual void computeStiffnessMatrix(FloatMatrix &answer, MatResponseMode rMode, TimeStep *tStep);
     virtual void giveInternalForcesVector(FloatArray &answer, TimeStep *tStep, int useUpdatedGpRecord = 0);
     virtual void computeLoadVector(FloatArray &answer, Load *load, CharType type, ValueModeType mode, TimeStep *tStep);
+    virtual void computeForceLoadVectorX(FloatArray &answer, TimeStep *tStep, ValueModeType mode);
 
 protected:
     static FEI3dTetQuad interpolation;
