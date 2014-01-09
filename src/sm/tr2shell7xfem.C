@@ -157,8 +157,7 @@ bool Tr2Shell7XFEM :: updateIntegrationRule()
     XfemManager *xMan = this->giveDomain()->giveXfemManager();
 
     if ( xMan->isElementEnriched(this) ) {
-        //MaterialMode matMode = this->giveMaterialMode();
-        MaterialMode matMode = _3dMat;
+
 
         std :: vector< std :: vector< FloatArray > >pointPartitions;
         std :: vector< Triangle > allTri;
@@ -213,14 +212,12 @@ bool Tr2Shell7XFEM :: updateIntegrationRule()
         
         // Create integrationrule based on a 'wedge patch'
         int nPointsTri  = 6;   // points in the plane
-        int nPointsEdge = 2;   // edge integration
 
         //if ( allTri.size() == 0 ) { // No subdivision, return and create iRule as normal
         if ( this->allTri.size() == 0 ) { // No subdivision, return and create iRule as normal
             return partitionSucceeded;
 
         } else { // create iRule according to subdivision
-            int ruleNum = 1;
             int numberOfLayers     = this->layeredCS->giveNumberOfLayers();
             int numPointsThickness = this->layeredCS->giveNumIntegrationPointsInLayer();
 

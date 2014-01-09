@@ -1719,7 +1719,7 @@ Shell7BaseXFEM :: giveCompositeExportData(VTKPiece &vtkPiece, IntArray &primaryV
 
     int numSubCells = 1;
     if ( this->allTri.size() ) {
-        numSubCells = this->allTri.size();
+        numSubCells = (int)this->allTri.size();
     }
     
     int numLayers = this->layeredCS->giveNumberOfLayers();

@@ -60,18 +60,6 @@
 
 namespace oofem {
 
-/**
- * This class implements associated Material Status for IntMatBilinearCZFagerstrom
- */
-class IntMatBilinearCZFagerstromRateStatus : public IntMatBilinearCZFagerstromStatus
-{
-protected:
-
-   
-public:
-
-};
-
 
 /**
  * Simple isotropic damage based model for 2d interface elements with rate dependence.

@@ -1623,8 +1623,8 @@ Domain :: giveErrorEstimator()
     {                                               \
         for ( int i = 1; i <= size; i++ ) {         \
             type *obj = giveMethod(i);              \
-            if ( ( mode & CM_Definition ) ) {       \
-                if ( !stream->write( obj->giveInputRecordName() ) ) { \
+            if ( ( mode & CM_Definition ) != 0 ) {       \
+                if ( stream->write( std :: string( obj->giveInputRecordName() ) ) == 0 ) { \
                     THROW_CIOERR(CIO_IOERR);        \
                 }                                   \
             }                                       \

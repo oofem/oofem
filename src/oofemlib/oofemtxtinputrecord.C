@@ -797,7 +797,6 @@ OOFEMTXTInputRecord :: readMatrix(const char *helpSource, int r, int c, FloatMat
         return 0;
     }
 
-    return 0;
 }
 
 

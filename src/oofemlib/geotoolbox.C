@@ -568,7 +568,6 @@ Graph :: testIfIntersect(node *p1, node *p2, node *q1, node *q2,
             return -1;
         }
 
-        return -1;
     }
 }
 

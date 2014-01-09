@@ -424,7 +424,7 @@ IsoInterfaceDamageMaterial_2 :: computeDamageParam(double &omega, double kappa, 
             omega = damages.at( damages.giveSize() );
         } else {
             // std::lower_bound uses binary search to find index with value bounding kappa from above
-            double *index = std :: lower_bound(strains.givePointer(), strains.givePointer() + strains.giveSize(), kappa);
+            int index = (int)(std :: lower_bound(strains.givePointer(), strains.givePointer() + strains.giveSize(), kappa) - strains.givePointer());
 
 #if 0
             printf("e0 %lf\n", e0);
@@ -437,10 +437,10 @@ IsoInterfaceDamageMaterial_2 :: computeDamageParam(double &omega, double kappa, 
 #endif
 
             // Pointer arithmetic to find the values used in interpolation
-            double x0 = strains(index - strains.givePointer() - 1);
-            double x1 = strains( index - strains.givePointer() );
-            double y0 = damages(index - strains.givePointer() - 1);
-            double y1 = damages( index - strains.givePointer() );
+            double x0 = strains(index - 1);
+            double x1 = strains(index );
+            double y0 = damages(index - 1);
+            double y1 = damages(index );
 
             // Interpolation formula
             omega = y0 + ( y1 - y0 ) * ( kappa - x0 ) / ( x1 - x0 );
