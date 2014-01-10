@@ -62,8 +62,6 @@ public:
     /**
      * Creates a context belonging to a system of equations in a given engineering model.
      * @param e Engineering model to work with.
-     * @param naturalVectors Should be true if shared dofs only contain the local contributions.
-     * Some engineering models manually scatter local vectors to their global value, in which case this would be false.
      */
     ParallelContext(EngngModel *e);
     ~ParallelContext();

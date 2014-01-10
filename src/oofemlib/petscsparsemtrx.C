@@ -858,8 +858,7 @@ PetscSparseMtrx :: scatterL2G(const FloatArray &src, Vec dest) const
         for ( int i = 0; i < size; i++ ) {
             if ( n2l->giveNewEq(i + 1) ) {
                 int eqg = n2g->giveNewEq(i + 1);
-                ///@todo INSERT_VALUES or ADD_VALUES? The overlapping values should be zero either way right?
-                VecSetValues(dest, 1, & eqg, ptr + i, ADD_VALUES);
+                VecSetValue(dest, eqg, ptr [ i ], INSERT_VALUES);
             }
         }
 
@@ -872,7 +871,7 @@ PetscSparseMtrx :: scatterL2G(const FloatArray &src, Vec dest) const
     ptr = src.givePointer();
     for ( int i = 0; i < size; i++ ) {
         //VecSetValues(dest, 1, & i, ptr + i, mode);
-        VecSetValue(dest, i, ptr [ i ], ADD_VALUES);
+        VecSetValue(dest, i, ptr [ i ], INSERT_VALUES);
     }
 
     VecAssemblyBegin(dest);
