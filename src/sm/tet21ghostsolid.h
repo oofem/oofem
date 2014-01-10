@@ -48,6 +48,8 @@ class tet21ghostsolid : public NLStructuralElement
 private:
     FloatMatrix Dghost;
 
+    void giveDisplacementsIncrementData(FloatArray &u_prev, FloatArray &u, FloatArray &inc, TimeStep *tStep);
+
 public:
     tet21ghostsolid(int n, Domain *d);
 
