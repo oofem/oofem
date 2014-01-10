@@ -171,16 +171,48 @@ void AbaqusUserMaterial :: give3dMaterialStiffnessMatrix_dPdF(FloatMatrix &answe
     	this->giveFirstPKStressVector_3d(stress, gp, vF, tStep);
     }
 
-    if(mStressInterpretation == 0) {
+#if 1
+//    if(mStressInterpretation == 0) {
     	answer = ms->giveTempTangent();
+/*
     }
     else {
-		/* The Abaqus Documentation of User Subroutines for UMAT Section 1.1.31 says that DDSDDE is defined as
-		 * partial(Delta(sigma))/partial(Delta(epsilon)).  */
+		// The Abaqus Documentation of User Subroutines for UMAT Section 1.1.31 says that DDSDDE is defined as
+		// partial(Delta(sigma))/partial(Delta(epsilon)).
 		FloatMatrix dSdE;
 		dSdE = ms->giveTempTangent();
 		this->give_dPdF_from(dSdE, answer, gp);
     }
+*/
+#else
+    double h = 1e-7;
+    FloatArray vF, vF_h, stress, stressh;
+	vF = ms->giveTempFVector();
+    stress = ( ( StructuralMaterialStatus * ) gp->giveMaterialStatus() )->giveTempPVector();
+    FloatMatrix En( 9, 9 );
+    for ( int i = 1; i <= 9; ++i ) {
+        vF_h = vF;
+        vF_h.at(i) += h;
+        this->giveFirstPKStressVector_3d(stressh, gp, vF_h, tStep);
+        stressh.subtract(stress);
+        stressh.times(1.0 / h);
+        En.setColumn(stressh, i);
+    }
+/*
+    printf("En = ");
+    En.printYourself();
+
+	answer = ms->giveTempTangent();
+	printf("Tangent = ");
+    answer.printYourself();
+
+    FloatMatrix diff = En;
+    diff.subtract(answer);
+    printf("diff: "); diff.printYourself();
+*/
+
+    answer = En;
+#endif
 }
 
 void AbaqusUserMaterial :: givePlaneStrainStiffMtrx_dPdF(FloatMatrix &answer,
@@ -504,7 +536,6 @@ void AbaqusUserMaterial :: giveFirstPKStressVector_3d(FloatArray &answer, GaussP
 
 
     if(mStressInterpretation == 0) {
-
 
     	FloatMatrix P, cauchyStress;
     	P.beMatrixForm(stress);
