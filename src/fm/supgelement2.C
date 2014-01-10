@@ -556,7 +556,7 @@ SUPGElement2 :: computeAdvectionDerivativeTerm_MC(FloatMatrix &answer, TimeStep 
 void
 SUPGElement2 :: computeDiffusionDerivativeTerm_MC(FloatMatrix &answer, TimeStep *tStep)
 {
-    FloatMatrix dDB, _d, g;
+    FloatMatrix dDB, g;
 
     answer.resize(0, 0);
 

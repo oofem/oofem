@@ -37,9 +37,10 @@
 #include "classfactory.h"
 
 namespace oofem {
-REGISTER_LoadTimeFunction(PeakFunction);
+REGISTER_Function(PeakFunction);
 
-double PeakFunction :: __at(double time)
+double
+PeakFunction :: evaluateAtTime(double time)
 // Returns the value of the receiver at time 'time'.
 {
     double precision = 1e-6;
@@ -57,7 +58,7 @@ PeakFunction :: initializeFrom(InputRecord *ir)
     const char *__proc = "initializeFrom"; // Required by IR_GIVE_FIELD macro
     IRResultType result;                   // Required by IR_GIVE_FIELD macro
 
-    LoadTimeFunction :: initializeFrom(ir);
+    Function :: initializeFrom(ir);
     IR_GIVE_FIELD(ir, t, _IFT_PeakFunction_t);
     IR_GIVE_FIELD(ir, value, _IFT_PeakFunction_ft);
 

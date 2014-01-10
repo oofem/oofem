@@ -231,14 +231,14 @@ bool ClassFactory :: registerEngngModel( const char *name, EngngModel * ( * crea
     return true;
 }
 
-LoadTimeFunction *ClassFactory :: createLoadTimeFunction(const char *name, int number, Domain *domain)
+Function *ClassFactory :: createFunction(const char *name, int number, Domain *domain)
 {
-    return ( ltfList.count(name) == 1 ) ? ltfList [ name ](number, domain) : NULL;
+    return ( funcList.count(name) == 1 ) ? funcList [ name ](number, domain) : NULL;
 }
 
-bool ClassFactory :: registerLoadTimeFunction( const char *name, LoadTimeFunction * ( * creator )( int, Domain * ) )
+bool ClassFactory :: registerFunction( const char *name, Function * ( * creator )( int, Domain * ) )
 {
-    ltfList [ name ] = creator;
+    funcList [ name ] = creator;
     return true;
 }
 

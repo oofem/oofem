@@ -385,8 +385,7 @@ FiberedCrossSection :: giveIPValue(FloatArray &answer, GaussPoint *gp, InternalS
         answer = status->giveStrainVector();
         return 1;
     }
-
-    return 0;
+    return CrossSection :: giveIPValue(answer, gp, type, tStep);
 }
 
 

@@ -378,6 +378,8 @@ VTKXMLExportModule :: doOutput(TimeStep *tStep, bool forcedOutput)
         return;
     }
 
+
+
 #ifdef __VTK_MODULE
     this->fileStream = vtkSmartPointer< vtkUnstructuredGrid > :: New();
     this->nodes = vtkSmartPointer< vtkPoints > :: New();
@@ -1722,8 +1724,13 @@ VTKXMLExportModule :: writeVTKCollection()
     time(& now);
     current = localtime(& now);
     char buff [ 1024 ];
-
-    std :: string fname = this->emodel->giveOutputBaseFileName() + ".pvd";
+    std :: string fname;
+    
+    if (tstep_substeps_out_flag){
+        fname = this->emodel->giveOutputBaseFileName() + ".gp.pvd";
+    } else {
+        fname = this->emodel->giveOutputBaseFileName() + ".pvd";
+    }
 
     std :: ofstream outfile( fname.c_str() );
 
@@ -1809,7 +1816,7 @@ void
 VTKXMLExportModule :: exportIntVarsInGpAs(IntArray valIDs, TimeStep *tStep)
 {
     Domain *d = emodel->giveDomain(1);
-    int nip = 0;
+    int nip;
     int j, k, nc = 0;
     int nelem = d->giveNumberOfElements();
     FloatArray *lc, gc, value;
@@ -1835,6 +1842,7 @@ VTKXMLExportModule :: exportIntVarsInGpAs(IntArray valIDs, TimeStep *tStep)
             continue;
         }
 
+        nip = 0;
         for ( int ielem = 1; ielem <= nelem; ielem++ ) {
             if ( d->giveElement(ielem)->giveRegionNumber() != ireg ) {
                 continue;
@@ -1910,8 +1918,10 @@ VTKXMLExportModule :: exportIntVarsInGpAs(IntArray valIDs, TimeStep *tStep)
         }
 
         // print collected data summary in header
-        fprintf( stream, "<PointData Scalars=\"%s\" Vectors=\"%s\" Tensors=\"%s\" >\n",
-                 scalars.c_str(), vectors.c_str(), tensors.c_str() );
+        fprintf( stream, "<PointData Scalars=\"%s\" Vectors=\"%s\" Tensors=\"%s\" >\n", scalars.c_str(), vectors.c_str(), tensors.c_str() );
+        scalars.clear();
+        vectors.clear();
+        tensors.clear();
 
         // export actual data, loop over individual IDs to export
         for ( int vi = 1; vi <= valIDs.giveSize(); vi++ ) {
@@ -1931,7 +1941,7 @@ VTKXMLExportModule :: exportIntVarsInGpAs(IntArray valIDs, TimeStep *tStep)
 
             fprintf(stream, "  <DataArray type=\"Float64\" Name=\"%s\" NumberOfComponents=\"%d\" format=\"ascii\">", __InternalStateTypeToString(isttype), nc);
             for ( int ielem = 1; ielem <= nelem; ielem++ ) {
-                if ( d->giveElement(ielem)->giveRegionNumber() != ireg ) {
+	        if ( d->giveElement(ielem)->giveRegionNumber() != ireg ) {
                     continue;
                 }
 
@@ -1954,9 +1964,9 @@ VTKXMLExportModule :: exportIntVarsInGpAs(IntArray valIDs, TimeStep *tStep)
 
             fprintf(stream, "  </DataArray>\n");
         } // end loop over values to be exported
+        fprintf(stream, "</PointData>\n</Piece>\n");
     } // end loop over regions
 
-    fprintf(stream, "</PointData>\n</Piece>\n");
     fprintf(stream, "</UnstructuredGrid>\n");
     fprintf(stream, "</VTKFile>\n");
     fclose(stream);

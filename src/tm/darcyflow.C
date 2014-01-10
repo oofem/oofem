@@ -111,6 +111,9 @@ void DarcyFlow :: solveYourselfAt(TimeStep *tStep)
     this->externalForces.zero();
     this->assembleVectorFromElements( this->externalForces, tStep, EID_ConservationEquation, ExternalForcesVector, VM_Total,
                                       EModelDefaultEquationNumbering(), this->giveDomain(1) );
+#ifdef __PARALLEL_MODE
+    this->updateSharedDofManagers(this->externalForces, LoadExchangeTag);
+#endif
 
     this->incrementOfSolution.resize(neq);
     this->internalForces.resize(neq);
@@ -148,10 +151,9 @@ void DarcyFlow :: solveYourselfAt(TimeStep *tStep)
     this->updateYourself(tStep);
 }
 
+
 void DarcyFlow :: DumpMatricesToFile(FloatMatrix *LHS, FloatArray *RHS, FloatArray *SolutionVector)
 {
-    FloatMatrix K;
-
     FILE *rhsFile = fopen("RHS.txt", "w");
     // rhs.printYourself();
 
@@ -181,6 +183,8 @@ void DarcyFlow :: DumpMatricesToFile(FloatMatrix *LHS, FloatArray *RHS, FloatArr
     }
     fclose(SolutionFile);
 }
+
+
 void DarcyFlow :: printDofOutputAt(FILE *stream, Dof *iDof, TimeStep *tStep)
 {
     DofIDItem type = iDof->giveDofID();
@@ -208,6 +212,9 @@ void DarcyFlow :: updateComponent(TimeStep *tStep, NumericalCmpn cmpn, Domain *d
         this->internalForces.zero();
         this->assembleVector(this->internalForces, tStep, EID_ConservationEquation,  InternalForcesVector, VM_Total,
                              EModelDefaultEquationNumbering(), d, & this->ebeNorm);
+#ifdef __PARALLEL_MODE
+        this->updateSharedDofManagers(this->externalForces, InternalForcesExchangeTag);
+#endif
         break;
 
     case NonLinearLhs:
@@ -271,14 +278,14 @@ TimeStep *DarcyFlow :: giveNextStep()
     return currentStep;
 }
 
-#ifdef __PETSC_MODULE
-void DarcyFlow :: initPetscContexts()
+#ifdef __PARALLEL_MODE
+void DarcyFlow :: initParallelContexts()
 {
-    PetscContext *petscContext;
-    petscContextList->growTo(ndomains);
+    ParallelContext *parallelContext;
+    parallelContextList->growTo(ndomains);
     for ( int i = 1; i <= this->ndomains; i++ ) {
-        petscContext =  new PetscContext(this);
-        petscContextList->put(i, petscContext);
+        parallelContext =  new ParallelContext(this);
+        parallelContextList->put(i, parallelContext);
     }
 }
 #endif

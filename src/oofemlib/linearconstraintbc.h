@@ -48,9 +48,9 @@
 ///@name Input fields for active boundary condition
 //@{
 #define _IFT_LinearConstraintBC_weights "weights"
-#define _IFT_LinearConstraintBC_weightsltf "weightsltf"
+#define _IFT_LinearConstraintBC_weightsfuncs "weightsltf"
 #define _IFT_LinearConstraintBC_rhs "rhs"
-#define _IFT_LinearConstraintBC_rhsltf "rhsltf"
+#define _IFT_LinearConstraintBC_rhsfuncs "rhsltf"
 #define _IFT_LinearConstraintBC_dofmans "dofmans"
 #define _IFT_LinearConstraintBC_dofs "dofs"
 #define _IFT_LinearConstraintBC_lhstype "lhstype"
@@ -63,7 +63,7 @@ namespace oofem {
  * Class implementing linear constraint on selected DOFs in the form @f$ \sum_i w_i r_i = c @f$,
  * where @f$ r_i @f$ is i-th degree of freedom entering contraint, w_i is corresponding weight,
  * and @f$ c @f$ is given value. The weights and constant can have associated loadtime function,
- * so they can evolve in time. By default, the loadtimefunction value for all weights and
+ * so they can evolve in time. By default, the Function value for all weights and
  * constant is set to 1.0.
  * This boundary condition is introduced as additional stationary condition in energy
  * functional using Lagrange multiplier, which is an additional degree of freedom introduced
@@ -73,9 +73,9 @@ class OOFEM_EXPORT LinearConstraintBC : public ActiveBoundaryCondition
 {
 protected:
     FloatArray weights;
-    IntArray weightsLtf;
+    IntArray weightsTf;
     double rhs;
-    int rhsLtf;
+    int rhsTf;
     IntArray dofmans;
     IntArray dofs;
     DofManager *md;

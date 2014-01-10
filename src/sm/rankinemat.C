@@ -505,7 +505,7 @@ RankineMat :: givePlaneStressStiffMtrx(FloatMatrix &answer,
 void
 RankineMat :: give1dStressStiffMtrx(FloatMatrix &answer, MatResponseMode mode, GaussPoint *gp, TimeStep *tStep)
 {
-    RankineMatStatus *status = ( RankineMatStatus * ) this->giveStatus(gp);
+    RankineMatStatus *status = static_cast< RankineMatStatus * >( this->giveStatus(gp) );
     double om;
     if ( mode == ElasticStiffness ) {
         om = 0.0;

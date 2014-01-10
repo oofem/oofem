@@ -31,35 +31,59 @@
  *  License along with this library; if not, write to the Free Software
  *  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  */
-/*
- * The original idea for this class comes from
- * Dubois-Pelerin, Y.: "Object-Oriented  Finite Elements: Programming concepts and Implementation",
- * PhD Thesis, EPFL, Lausanne, 1992.
- */
 
-#ifndef loadtime_h
-#define loadtime_h
+#ifndef function_h
+#define function_h
 
 #include "femcmpnn.h"
 #include "domain.h"
 #include "valuemodetype.h"
 
-///@name Input fields for LoadTimeFunction
+#include <map>
+
+///@name Input fields for Function
 //@{
-#define _IFT_LoadTimeFunction_initialvalue "initialvalue"
-#define _IFT_LoadTimeFunction_ft "f(t)"
+#define _IFT_Function_initialvalue "initialvalue" ///@todo Deprecated
 //@}
 
 namespace oofem {
+
+class FloatArray;
+class IntArray;
+
 /**
- * Abstract base class representing load time function. Classes derived from Load class typically
- * describe load from spatial point of view. The purpose of introducing load time function is to express
- * variation of some components in time. Load time function typically belongs to domain and is
- * attribute of one or more loads. Generally load time function is real function of time, @f$ y=f(t) @f$.
- *
- * See TJR Hughes, "The Finite Element Method", p 677.
+ * Wrapper for values of varying types.
+ * Used in lists of function arguments.
  */
-class OOFEM_EXPORT LoadTimeFunction : public FEMComponent
+class OOFEM_EXPORT FunctionArgument
+{
+public:
+    enum FunctionArgumentType {
+        FAT_double,
+        FAT_FloatArray,
+        FAT_int,
+        FAT_IntArray,
+    };
+
+    /// Determines which of the types the instance points towards.
+    FunctionArgumentType type;
+
+    double val0;
+    const FloatArray &val1;
+    int val2;
+    const IntArray &val3;
+
+    FunctionArgument(double val): type(FAT_double), val0(val), val1(0), val2(0), val3(0) { }
+    FunctionArgument(const FloatArray &val): type(FAT_FloatArray),  val0(0), val1(val), val2(0), val3(0) { }
+    FunctionArgument(int val): type(FAT_int),  val0(0), val1(0), val2(val), val3(0) { }
+    FunctionArgument(const IntArray &val): type(FAT_IntArray),  val0(0), val1(0), val2(0), val3(val) { }
+};
+
+/**
+ * Abstract base class representing a function with vector input and output.
+ * It is useful in many scenarios, in particular describing the load/b.c. amplitude in time.
+ */
+class OOFEM_EXPORT Function : public FEMComponent
 {
 protected:
     /**
@@ -80,9 +104,9 @@ public:
      * @param n Load time function number.
      * @param d Domain to which new object will belongs.
      */
-    LoadTimeFunction(int n, Domain *d);
+    Function(int n, Domain *d);
     /// Destructor
-    virtual ~LoadTimeFunction() { }
+    virtual ~Function() { }
 
     /**
      * Returns the value of load time function at given time. Abstract service.
@@ -94,27 +118,34 @@ public:
     double evaluate(TimeStep *tStep, ValueModeType mode);
 
     /**
-     * Returns the value of load time function at given time.
+     * Returns the Returns the value of the function at given time.
+     * @param valDict Dictionary with values.
+     * @param answer Function value.
+     */
+    virtual void evaluate(FloatArray &answer, std :: map< std :: string, FunctionArgument > &valDict);
+
+    /**
+     * Returns the value of the function at given time.
      * @param t Time.
      * @return @f$ f(t) @f$.
      */
-    virtual double  __at(double t) { return 0.; }
+    virtual double evaluateAtTime(double t);
     /**
-     * Returns the first time derivative of load time function at given time.
+     * Returns the first time derivative of the function at given time.
      * @param t Time.
      * @return @f$ f'(t) @f$.
      */
-    virtual double __derAt(double t) { return 0.; }
+    virtual double evaluateVelocityAtTime(double t) = 0;
     /**
-     * Returns the second time derivative of load time function at given time.
+     * Returns the second time derivative of the function at given time.
      * @param t Time.
      * @return @f$ f''(t) @f$.
      */
-    virtual double __accelAt(double t) { return 0.; }
+    virtual double evaluateAccelerationAtTime(double t) = 0;
 
     // Overloaded methods:
     virtual IRResultType initializeFrom(InputRecord *ir);
     virtual void giveInputRecord(DynamicInputRecord &input);
 };
 } // end namespace oofem
-#endif // loadtime_h
+#endif // function_h

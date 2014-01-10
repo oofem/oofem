@@ -454,10 +454,9 @@ int NonlocalMaterialWTP :: unpackRemoteElements(Domain *d, ProcessCommunicator &
             // record already exist
             delete dofman;
         } else {
-            d->giveTransactionManager()->addTransaction(DomainTransactionManager :: DTT_ADD,
-                                                        DomainTransactionManager :: DCT_DofManager,
-                                                        dofman->giveGlobalNumber(),
-                                                        dofman);
+            d->giveTransactionManager()->addDofManTransaction(DomainTransactionManager :: DTT_ADD,
+							      dofman->giveGlobalNumber(),
+							      dofman);
         }
     } while ( 1 );
 
@@ -476,9 +475,8 @@ int NonlocalMaterialWTP :: unpackRemoteElements(Domain *d, ProcessCommunicator &
         elem->restoreContext(& pcDataStream, CM_Definition | CM_State);
         elem->setParallelMode(Element_remote);
         elem->setPartitionList(_partitions);
-        d->giveTransactionManager()->addTransaction(DomainTransactionManager :: DTT_ADD,
-                                                    DomainTransactionManager :: DCT_Element,
-                                                    elem->giveGlobalNumber(), elem);
+        d->giveTransactionManager()->addElementTransaction(DomainTransactionManager :: DTT_ADD,
+							   elem->giveGlobalNumber(), elem);
     } while ( 1 );
 
     return 1;

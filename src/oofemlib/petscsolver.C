@@ -78,19 +78,16 @@ NM_Status PetscSolver :: solve(SparseMtrx *A, FloatArray *b, FloatArray *x)
         OOFEM_ERROR("PETScSolver :: solve: PetscSparseMtrx Expected");
     }
 
-    PetscSparseMtrx *Lhs = ( PetscSparseMtrx * ) A;
+    PetscSparseMtrx *Lhs = static_cast< PetscSparseMtrx * >( A );
 
     Vec globRhsVec;
     Vec globSolVec;
 
-    // "Parallel" context automatically uses sequential alternative if the engineering problem is sequential.
-    PetscContext *context = engngModel->givePetscContext( Lhs->giveDomainIndex() );
-
     /*
-     * scatter and gather rhs to global representation
+     * scatter and gather rhs to global representation (automatically detects sequential/parallel modes)
      */
-    context->createVecGlobal(& globRhsVec);
-    context->scatter2G(b, globRhsVec, ADD_VALUES);
+    Lhs->createVecGlobal(& globRhsVec);
+    Lhs->scatterL2G(*b, globRhsVec);
 
     VecDuplicate(globRhsVec, & globSolVec);
 
@@ -98,7 +95,7 @@ NM_Status PetscSolver :: solve(SparseMtrx *A, FloatArray *b, FloatArray *x)
     NM_Status s = this->petsc_solve(Lhs, globRhsVec, globSolVec);
     //VecView(globSolVec,PETSC_VIEWER_STDOUT_WORLD);
 
-    context->scatterG2N(globSolVec, x, INSERT_VALUES);
+    Lhs->scatterG2L(globSolVec, *x);
 
     VecDestroy(& globSolVec);
     VecDestroy(& globRhsVec);
@@ -205,7 +202,7 @@ NM_Status PetscSolver :: solve(SparseMtrx *A, FloatMatrix &B, FloatMatrix &X)
         OOFEM_ERROR("PETScSolver :: solve: PetscSparseMtrx Expected");
     }
 
-    PetscSparseMtrx *Lhs = ( PetscSparseMtrx * ) A;
+    PetscSparseMtrx *Lhs = static_cast< PetscSparseMtrx * >( A );
 
     Vec globRhsVec;
     Vec globSolVec;

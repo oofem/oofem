@@ -62,6 +62,7 @@ class UNVParser:
         oofem_elemProp.append(oofem_elementProperties("CCTplate3D",oofem_elemProp[-1]))
         oofem_elemProp.append(oofem_elementProperties("QTrPlStr", [2,0,4,1,5,3], [[2,1,0],[0,5,4],[4,3,2]],[]))#checked
         oofem_elemProp.append(oofem_elementProperties("PlaneStress2D", [0,1,2,3], [[0,1],[1,2],[2,3],[3,0]],[]))#checked
+        oofem_elemProp.append(oofem_elementProperties("PlaneStress2DXFEM", [0,1,2,3], [[0,1],[1,2],[2,3],[3,0]],[]))#checked
         oofem_elemProp.append(oofem_elementProperties("Quad1PlaneStrain", oofem_elemProp[-1]))
         oofem_elemProp.append(oofem_elementProperties("Quad1ht", oofem_elemProp[-1]))
         oofem_elemProp.append(oofem_elementProperties("Quadaxisym1ht", oofem_elemProp[-1]))
@@ -172,49 +173,50 @@ class UNVParser:
         loop=True
         while loop:
             line1=file.readline()
-            line2=file.readline()
-            if len(line2)>0:
-                if line1.startswith(endFlag):
-                    loop=False
-                    break
+            if line1 == '\n':
+                continue
+            if line1.startswith(endFlag):
+                loop=False
+                break
+            else:
+                # read group
+                line2=file.readline()
+                dataline=Line2Int(line1)
+                groupname=line2
+                if(len(dataline)==0):
+                    print "Group %s is empty, did you remesh the object and lost the members?" % groupname
+                    exit(0)
                 else:
-                    # read group
-                    dataline=Line2Int(line1)
-                    groupname=line2
-                    if(len(dataline)==0):
-                        print "Group %s is empty, did you remesh the object and lost the members?" % groupname
-                        exit(0)
                     id=dataline[0]
                     nitems=dataline[7]
-                    nlines=(nitems+1)/2
-                    # read group items
-                    lst=[]
-                    for i in range(nlines):
-                        dat=Line2Int(file.readline())
-                        lst.append(dat[0:3])
-                        if len(dat)>4:
-                            lst.append(dat[4:7])
-                    # split group in node (7) sets, element or edge sets (8)
-                    nset=Group(id,groupname)
-                    elset=Group(id,groupname)
-                    nset.type=7
-                    elset.type=8
-                    for item in lst:
-                        if item[0]==7:
-                            nset.items.append(item[1])
-                        if item[0]==8:
-                            elset.items.append(item[1])
-                    nset.nitems=len(nset.items)
-                    elset.nitems=len(elset.items)
-                    # store non empty groups
-                    if nset.nitems>0:
-                        FEM.nodesets.append(nset)
-                    if elset.nitems>0:
-                        FEM.elemsets.append(elset)
-                    FEM.nnodesets=len(FEM.nodesets)
-                    FEM.nelemsets=len(FEM.elemsets)
-            else:
-                loop=False
+                nlines=(nitems+1)/2
+                # read group items
+                lst=[]
+                for i in range(nlines):
+                    dat=Line2Int(file.readline())
+                    print "dat = ", dat
+                    lst.append(dat[0:3])
+                    if len(dat)>4:
+                        lst.append(dat[4:7])
+                # split group in node (7) sets, element or edge sets (8)
+                nset=Group(id,groupname)
+                elset=Group(id,groupname)
+                nset.type=7
+                elset.type=8
+                for item in lst:
+                    if item[0]==7:
+                        nset.items.append(item[1])
+                    if item[0]==8:
+                        elset.items.append(item[1])
+                nset.nitems=len(nset.items)
+                elset.nitems=len(elset.items)
+                # store non empty groups
+                if nset.nitems>0:
+                    FEM.nodesets.append(nset)
+                if elset.nitems>0:
+                    FEM.elemsets.append(elset)
+                FEM.nnodesets=len(FEM.nodesets)
+                FEM.nelemsets=len(FEM.elemsets)
         return FEM
 
     def parse(self):

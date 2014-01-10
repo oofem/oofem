@@ -174,9 +174,9 @@ Interface
     if ( it != XfemElementInterfaceType ) {
         return Shell7Base :: giveInterface(it);
     } else if ( it == XfemElementInterfaceType ) {
-        return ( XfemElementInterface * ) this;
+        return static_cast< XfemElementInterface * >( this );
     } else {
-        return Shell7Base :: giveInterface(it); //@todo remove
+        return Shell7Base :: giveInterface(it); ///@todo remove
     }
 }
 

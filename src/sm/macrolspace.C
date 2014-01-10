@@ -35,6 +35,7 @@
 #include "macrolspace.h"
 #include "micromaterial.h"
 #include "lspace.h"
+#include "constantfunction.h"
 #include "domain.h"
 #include "classfactory.h"
 #include "dynamicinputrecord.h"
@@ -168,8 +169,8 @@ void MacroLSpace :: changeMicroBoundaryConditions(TimeStep *tStep)
     //Domain *domain = this->giveDomain();
     DofManager *DofMan;
     GeneralBoundaryCondition *GeneralBoundaryCond;
-    LoadTimeFunction *LoadTimeFunct;
-    DynamicInputRecord ir_ltf, ir_bc;
+    Function *timeFunct;
+    DynamicInputRecord ir_func, ir_bc;
     FloatArray n(8), answer, localCoords;
     double displ;
     FloatArray displ_x(8), displ_y(8), displ_z(8);
@@ -185,17 +186,17 @@ void MacroLSpace :: changeMicroBoundaryConditions(TimeStep *tStep)
     }
 
     //overrides the first load-time function to be a constant
-    if ( !microDomain->giveNumberOfLoadTimeFunctions() ) {
-        microDomain->resizeLoadTimeFunctions(1);
+    if ( !microDomain->giveNumberOfFunctions() ) {
+        microDomain->resizeFunctions(1);
     }
 
-    ir_ltf.setRecordKeywordField("constantfunction", 1);
-    ir_ltf.setField(1.0, _IFT_LoadTimeFunction_ft);
-    if ( ( LoadTimeFunct = classFactory.createLoadTimeFunction("constantfunction", 1, microDomain) ) == NULL ) {
+    ir_func.setRecordKeywordField("constantfunction", 1);
+    ir_func.setField(1.0, _IFT_ConstantFunction_f);
+    if ( ( timeFunct = classFactory.createFunction("constantfunction", 1, microDomain) ) == NULL ) {
         OOFEM_ERROR("MacroLSpace :: changeMicroBoundaryConditions - Couldn't create constant time function");
     }
-    LoadTimeFunct->initializeFrom(& ir_ltf);
-    microDomain->setLoadTimeFunction(1, LoadTimeFunct);
+    timeFunct->initializeFrom(& ir_func);
+    microDomain->setFunction(1, timeFunct);
 
 
     /*assign to each boundary node the form "bc 3 # # #", set 0s on free nodes
@@ -216,7 +217,7 @@ void MacroLSpace :: changeMicroBoundaryConditions(TimeStep *tStep)
                 DofMan->giveDof(j)->setBcId(counter);
                 displ = n.dotProduct( j == 1 ? displ_x : ( j == 2 ? displ_y : displ_z ) );
                 ir_bc.setRecordKeywordField("boundarycondition", counter);
-                ir_bc.setField(1, _IFT_GeneralBoundaryCondition_LoadTimeFunct);
+                ir_bc.setField(1, _IFT_GeneralBoundaryCondition_timeFunct);
                 ir_bc.setField(displ, _IFT_BoundaryCondition_PrescribedValue);
                 if ( ( GeneralBoundaryCond = classFactory.createBoundaryCondition("boundarycondition", counter, microDomain) ) == NULL ) {
                     OOFEM_ERROR("MacroLSpace :: changeMicroBoundaryConditions - Couldn't create boundary condition.");
@@ -260,7 +261,6 @@ void MacroLSpace :: giveInternalForcesVector(FloatArray &answer, TimeStep *tStep
         this->microEngngModel->solveYourselfAt( this->microEngngModel->giveCurrentStep() );
         this->microEngngModel->updateYourself( this->microEngngModel->giveCurrentStep() );
         //this->microEngngModel->terminate( this->microEngngModel->giveCurrentStep() );
-        //microStructuralEngngModel = ( StructuralEngngModel * ) &this->microEngngModel;
         StructuralEngngModel *microStructuralEngngModel = dynamic_cast< StructuralEngngModel * >( this->microEngngModel );
 
 

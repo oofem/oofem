@@ -43,6 +43,11 @@ set (sm_element
     structuralinterfaceelement.C
     intelline1.C
     intelline2.C
+    graddpelement.C graddpmaterialextensioninterface.C
+    qtruss1d.C qtruss1dgrad.C
+    qplanestrain.C qplanestraingrad.C
+    qtrplanestrain.C qtrplanestraingrad.C
+    qspacegrad.C
     dkt.C
     tet21ghostsolid.C
     )
@@ -111,7 +116,6 @@ set (sm_material
     micromaterial.C
     hyperelasticmaterial.C
     misesmat.C misesmatgrad.C misesmatnl.C
-    graddpelement.C graddpmaterialextensioninterface.C qtruss1d.C qtruss1dgrad.C qplanestrain.C qplanestraingrad.C qtrplanestrain.C qtrplanestraingrad.C qspacegrad.C
     trabbonematerial.C trabbonenl3d.C trabbonenl.C trabbone3d.C trabboneembed.C trabbonenlembed.C trabbonegrad3d.C
     cohint.C
     mps.C
@@ -128,6 +132,7 @@ set (sm_material
 	intmatbilinczjansson.C
     intmatbilinearcz.C
 	intmatbilinczelastic.C
+    simplevitrificationmaterial.C
     )
 
 set (sm_error

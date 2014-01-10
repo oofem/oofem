@@ -310,6 +310,21 @@ void EnrichmentItem :: propagateFronts()
     // Propagate interfaces
     mpPropagationLaw->propagateInterfaces(* giveDomain(), * mpEnrichmentDomain);
 
+    // For debugging only
+    if ( mpEnrichmentDomain->getVtkDebug() ) {
+
+    	int tStepInd = this->domain->giveEngngModel()->giveCurrentStep()->giveNumber();
+
+    	EnrichmentDomain_BG *enrDomBG = dynamic_cast<EnrichmentDomain_BG*> (mpEnrichmentDomain);
+
+    	if(enrDomBG != NULL) {
+			PolygonLine *pl = dynamic_cast< PolygonLine * >( enrDomBG->bg );
+			if ( pl != NULL ) {
+				pl->printVTK(tStepInd, number);
+			}
+    	}
+    }
+
     updateGeometry();
 }
 
@@ -1178,7 +1193,7 @@ IRResultType Delamination :: initializeFrom(InputRecord *ir)
     }
 
     this->delamXiCoord = -1.0;
-    double totalThickness = layeredCS->give(CS_Thickness, NULL, NULL, NULL); // no position available
+    double totalThickness = layeredCS->give(CS_Thickness, NULL, NULL, false); // no position available
     for ( int i = 1; i <= this->interfaceNum; i++ ) {
         this->delamXiCoord += layeredCS->giveLayerThickness(i) / totalThickness * 2.0;
     }

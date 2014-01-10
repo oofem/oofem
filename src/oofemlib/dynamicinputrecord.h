@@ -41,6 +41,9 @@
 #include <set>
 
 namespace oofem {
+
+class FEMComponent;
+
 /**
  * Class representing the a dynamic Input Record.
  * The input record is represented as a list of fields.
@@ -65,10 +68,13 @@ protected:
     std :: map< std :: string, std :: vector< std :: string > >stringListRecord;
     std :: map< std :: string, Dictionary >dictionaryRecord;
     std :: map< std :: string, std :: list< Range > >rangeRecord;
+    std :: map< std :: string, ScalarFunction >scalarFunctionRecord;
 
 public:
-    /// Constructor. Creates an empty input record.
+    /// Creates an empty input record.
     DynamicInputRecord();
+    /// Creates an empty input record.
+    DynamicInputRecord(FEMComponent &femc); ///@todo Make FEMComponent const
     /// Copy constructor.
     DynamicInputRecord(const DynamicInputRecord &);
     /// Destructor.
@@ -78,6 +84,8 @@ public:
 
     virtual InputRecord *GiveCopy() { return new DynamicInputRecord(* this); }
     virtual void finish(bool wrn = true);
+
+    virtual std :: string giveRecordAsString() const;
 
     virtual IRResultType giveRecordKeywordField(std :: string &answer, int &value);
     virtual IRResultType giveRecordKeywordField(std :: string &answer);
@@ -91,6 +99,7 @@ public:
     virtual IRResultType giveField(std :: vector< std :: string > &answer, InputFieldType id);
     virtual IRResultType giveField(Dictionary &answer, InputFieldType id);
     virtual IRResultType giveField(std :: list< Range > &answer, InputFieldType id);
+    virtual IRResultType giveField(ScalarFunction& function, InputFieldType id); 
 
     virtual bool hasField(InputFieldType id);
     virtual void printYourself();
@@ -107,6 +116,7 @@ public:
     virtual void setField(const std :: vector< std :: string > &item, InputFieldType id);
     virtual void setField(const Dictionary &item, InputFieldType id);
     virtual void setField(const std :: list< Range > &item, InputFieldType id);
+    virtual void setField(const ScalarFunction& function, InputFieldType id); 
     /// Sets an empty field with given id.
     virtual void setField(InputFieldType id);
     /// Removes given field from record.
@@ -114,9 +124,6 @@ public:
 
     virtual void report_error(const char *_class, const char *proc, InputFieldType id,
                               IRResultType result, const char *file, int line);
-
-    /// Returns record as string.
-    std :: string giveRecordAsString() const;
 };
 } // end namespace oofem
 #endif // dynamicinputrecord_h

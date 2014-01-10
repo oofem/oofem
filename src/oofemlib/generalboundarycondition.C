@@ -35,8 +35,9 @@
 #include "generalboundarycondition.h"
 #include "valuemodetype.h"
 #include "bcvaltype.h"
-#include "loadtimefunction.h"
+#include "function.h"
 #include "reinforcement.h"
+#include "timestep.h"
 #include "datastream.h"
 #include "contextioerr.h"
 #include "dynamicinputrecord.h"
@@ -44,21 +45,21 @@
 namespace oofem {
 GeneralBoundaryCondition :: GeneralBoundaryCondition(int n, Domain *d) : FEMComponent(n, d)
 {
-    loadTimeFunction = 0;
+    timeFunction = 0;
     isImposedTimeFunction = 0;
     set = 0;
 }
 
 
-LoadTimeFunction *GeneralBoundaryCondition :: giveLoadTimeFunction()
+Function *GeneralBoundaryCondition :: giveTimeFunction()
 // Returns the load-time function of the receiver. Reads its number in the
 // data file if has not been done yet.
 {
-    if ( !loadTimeFunction ) {
-        _error("giveLoadTimeFunction: LoadTimeFunction is not defined");
+    if ( !timeFunction ) {
+        _error("giveTimeFunction: TimeFunction is not defined");
     }
 
-    return domain->giveLoadTimeFunction(loadTimeFunction);
+    return domain->giveFunction(timeFunction);
 }
 
 
@@ -68,9 +69,9 @@ GeneralBoundaryCondition :: initializeFrom(InputRecord *ir)
     const char *__proc = "initializeFrom"; // Required by IR_GIVE_FIELD macro
     IRResultType result;           // Required by IR_GIVE_FIELD macro
 
-    IR_GIVE_FIELD(ir, loadTimeFunction, _IFT_GeneralBoundaryCondition_LoadTimeFunct);
-    if ( loadTimeFunction <= 0 ) {
-        _error("initializeFrom: bad loadtimefunction id");
+    IR_GIVE_FIELD(ir, timeFunction, _IFT_GeneralBoundaryCondition_timeFunct);
+    if ( timeFunction <= 0 ) {
+        _error("initializeFrom: bad TimeFunction id");
     }
 
     int val = 0;
@@ -81,7 +82,7 @@ GeneralBoundaryCondition :: initializeFrom(InputRecord *ir)
     IR_GIVE_OPTIONAL_FIELD(ir, dofs, _IFT_GeneralBoundaryCondition_dofs);
 
     isImposedTimeFunction = 0;
-    IR_GIVE_OPTIONAL_FIELD(ir, isImposedTimeFunction, _IFT_GeneralBoundaryCondition_IsImposedTimeFunct);
+    IR_GIVE_OPTIONAL_FIELD(ir, isImposedTimeFunction, _IFT_GeneralBoundaryCondition_isImposedTimeFunct);
 
     set = 0;
     IR_GIVE_OPTIONAL_FIELD(ir, set, _IFT_GeneralBoundaryCondition_set);
@@ -95,7 +96,7 @@ bool GeneralBoundaryCondition :: isImposed(TimeStep *tStep)
     // in given time (nonzero indicates imposed b.c.).
 
     if ( isImposedTimeFunction ) {
-        return ( domain->giveLoadTimeFunction(isImposedTimeFunction)->evaluate(tStep, VM_Total) != 0. );
+        return ( domain->giveFunction(isImposedTimeFunction)->evaluateAtTime(tStep->giveIntrinsicTime()) != 0. );
     } else {
         // zero value indicates default behavior -> b.c. is imposed
         // anytime
@@ -108,7 +109,7 @@ void
 GeneralBoundaryCondition :: giveInputRecord(DynamicInputRecord &input)
 {
     FEMComponent :: giveInputRecord(input);
-    input.setField(this->loadTimeFunction, _IFT_GeneralBoundaryCondition_LoadTimeFunct);
+    input.setField(this->timeFunction, _IFT_GeneralBoundaryCondition_timeFunct);
 
     if ( ( int ) this->giveBCValType() > 0 ) {
         input.setField(this->giveBCValType(), _IFT_GeneralBoundaryCondition_valType);
@@ -119,7 +120,7 @@ GeneralBoundaryCondition :: giveInputRecord(DynamicInputRecord &input)
     }
 
     if ( this->isImposedTimeFunction > 0 ) {
-        input.setField(this->isImposedTimeFunction, _IFT_GeneralBoundaryCondition_IsImposedTimeFunct);
+        input.setField(this->isImposedTimeFunction, _IFT_GeneralBoundaryCondition_isImposedTimeFunct);
     }
 
     if ( this->giveSetNumber() > 0 ) {
@@ -131,7 +132,7 @@ contextIOResultType
 GeneralBoundaryCondition :: saveContext(DataStream *stream, ContextMode mode, void *obj)
 {
     if ( mode & CM_Definition ) {
-        if ( !stream->write(& loadTimeFunction, 1) ) {
+        if ( !stream->write(& timeFunction, 1) ) {
             THROW_CIOERR(CIO_IOERR);
         }
     }
@@ -144,7 +145,7 @@ contextIOResultType
 GeneralBoundaryCondition :: restoreContext(DataStream *stream, ContextMode mode, void *obj)
 {
     if ( mode & CM_Definition ) {
-        if ( !stream->read(& loadTimeFunction, 1) ) {
+        if ( !stream->read(& timeFunction, 1) ) {
             THROW_CIOERR(CIO_IOERR);
         }
     }

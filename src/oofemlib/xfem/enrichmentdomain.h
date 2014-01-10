@@ -96,6 +96,7 @@ public:
     virtual bool propagateTips(const std :: vector< TipPropagation > &iTipProp) { return false; }
 
     void setVtkDebug(bool iDebugVTK) { mDebugVTK = iDebugVTK; }
+    bool getVtkDebug() const {return mDebugVTK;}
 
 protected:
     bool mDebugVTK;

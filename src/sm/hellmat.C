@@ -7,7 +7,7 @@
 
 #include "gausspoint.h"
 #include "timestep.h"
-#include "loadtimefunction.h"
+#include "function.h"
 #include "isolinearelasticmaterial.h"
 #include "structuralcrosssection.h"
 #include "hellmat.h"
@@ -162,16 +162,16 @@ HellmichMaterial :: initializeFrom(InputRecord *ir)
     if ( initialTemperature >= 0 ) {
         printf("\nHellMat: Isothermal analysis at %.2f K.", initialTemperature);
         options = options | moIsothermal;
-        tTimeFunction = 0;
-        IR_GIVE_OPTIONAL_FIELD(ir, tTimeFunction, _IFT_HellmichMaterial_Tltf);
-        if ( tTimeFunction ) {
-            printf("\nHellMat: Time function number %d used as temperature history.", tTimeFunction);
+        tFunction = 0;
+        IR_GIVE_OPTIONAL_FIELD(ir, tFunction, _IFT_HellmichMaterial_Ttf);
+        if ( tFunction ) {
+            printf("\nHellMat: Time function number %d used as temperature history.", tFunction);
         }
 
-        hTimeFunction = 0;
-        IR_GIVE_OPTIONAL_FIELD(ir, tTimeFunction, _IFT_HellmichMaterial_hltf);
-        if ( tTimeFunction ) {
-            printf("\nHellMat: Time function number %d used as moisture history.", tTimeFunction);
+        hFunction = 0;
+        IR_GIVE_OPTIONAL_FIELD(ir, tFunction, _IFT_HellmichMaterial_htf);
+        if ( tFunction ) {
+            printf("\nHellMat: Time function number %d used as moisture history.", tFunction);
         }
     } else {
         options = options & ~moIsothermal;
@@ -1335,24 +1335,24 @@ void principalStresses(double *answer, double *s, stressStrainPrincMode mode)
 }
 
 
-LoadTimeFunction *HellmichMaterial :: giveTTimeFunction()
+Function *HellmichMaterial :: giveTFunction()
 // Returns the load-time function of the receiver.
 {
-    if ( !tTimeFunction ) {
+    if ( !tFunction ) {
         return NULL;
     }
 
-    return this->giveDomain()->giveLoadTimeFunction(tTimeFunction);
+    return this->giveDomain()->giveFunction(tFunction);
 }
 
-LoadTimeFunction *HellmichMaterial :: givehTimeFunction()
+Function *HellmichMaterial :: givehFunction()
 // Returns the load-time function of the receiver.
 {
-    if ( !hTimeFunction ) {
+    if ( !hFunction ) {
         return NULL;
     }
 
-    return this->giveDomain()->giveLoadTimeFunction(hTimeFunction);
+    return this->giveDomain()->giveFunction(hFunction);
 }
 
 
@@ -1496,7 +1496,7 @@ HellmichMaterial :: giveHeMoMaterial()
         _error("giveHeMoMaterial: undefined reference to heat and moisture transport material.");
     }
 
-    return ( ( HeMoTKMaterial * ) giveDomain()->giveMaterial(hemoMaterial) );
+    return static_cast< HeMoTKMaterial * >( giveDomain()->giveMaterial(hemoMaterial) );
 }
 
 void
@@ -1569,16 +1569,16 @@ HellmichMaterial :: initAuxStatus(GaussPoint *gp, TimeStep *tStep)
     if ( options & moIsothermal ) { // === Isothermal ===
         // constant temperature in space
         // temperature history might be prescribed, computed from adiabatic/quasiadiabatic test sim., ....
-        // if history ltf is not prescribed, only takes previous value
+        // if history tf is not prescribed, only takes previous value
         // history is expected in original time scale
-        if ( giveTTimeFunction() ) {
-            T = ( ( LoadTimeFunction * ) giveTTimeFunction() )->evaluate(tStep, VM_Total);
+        if ( giveTFunction() ) {
+            T = giveTFunction()->evaluateAtTime(tStep->giveIntrinsicTime());
         } else {
             T = giveTemperature(gp);
         }
 
-        if ( givehTimeFunction() ) {
-            h = ( ( LoadTimeFunction * ) givehTimeFunction() )->evaluate(tStep, VM_Total);
+        if ( givehFunction() ) {
+            h = givehFunction()->evaluateAtTime(tStep->giveIntrinsicTime());
         } else {
             h = giveHumidity(gp, VM_Total);
         }
@@ -1591,7 +1591,7 @@ HellmichMaterial :: initAuxStatus(GaussPoint *gp, TimeStep *tStep)
         // == Temperature ==
         if ( ( tf = fm->giveField(FT_Temperature) ) ) {
             // temperature field registered
-            elem = ( StructuralElement * ) gp->giveElement();
+            elem = static_cast< StructuralElement * >( gp->giveElement() );
             elem->computeGlobalCoordinates( gcoords, * gp->giveCoordinates() );
             if ( flatTemperature ) {
                 if ( flatTemperature == -1 ) { // temperature xy -> xz (2D cross-section for 3D girder)
@@ -2022,7 +2022,7 @@ void HellmichMaterial :: giveEigenStrainVector(FloatArray &answer, MatResponseFo
 {
     FloatArray stress, auxvec, redvec, et;
     double dT, dt, ev, fv;
-    StructuralElement *elem = ( StructuralElement * ) gp->giveElement();
+    StructuralElement *elem = static_cast< StructuralElement * >( gp->giveElement() );
     StructuralCrossSection *crossSection =  dynamic_cast< StructuralCrossSection * >( gp->giveCrossSection() );
     MaterialMode mmode = gp->giveMaterialMode();
 
@@ -2484,7 +2484,7 @@ contextIOResultType HellmichMaterial :: saveIPContext(DataStream *stream, Contex
 
     // save hydration model data - maybe should check moHydration?
     // needs to save only in case nonisodata is present = moIsothermal option is not set in gp options
-    if ( gp && !( ( ( HellmichMaterialStatus * ) giveStatus(gp) )->giveMaterialOptions() & moIsothermal ) ) {
+    if ( gp && !( static_cast< HellmichMaterialStatus * >( giveStatus(gp) )->giveMaterialOptions() & moIsothermal ) ) {
         if ( ( iores = HydrationModelInterface :: saveContext(stream, mode, ( void * ) gp) ) != CIO_OK ) {
             THROW_CIOERR(iores);
         }
@@ -2518,7 +2518,7 @@ contextIOResultType HellmichMaterial :: restoreIPContext(DataStream *stream, Con
     }
 
     // read hydration model data - maybe should check moHydration?
-    if ( gp && !( ( ( HellmichMaterialStatus * ) giveStatus(gp) )->giveMaterialOptions() & moIsothermal ) ) {
+    if ( gp && !( static_cast< HellmichMaterialStatus * >( giveStatus(gp) )->giveMaterialOptions() & moIsothermal ) ) {
         if ( ( iores = HydrationModelInterface :: restoreContext(stream, mode, gp) ) != CIO_OK ) {
             THROW_CIOERR(iores);
         }
@@ -2577,7 +2577,7 @@ HellmichMaterial :: initGpForNewStep(GaussPoint *gp)
 void
 HellmichMaterial :: initTempStatus(GaussPoint *gp)
 {
-    HellmichMaterialStatus *status = ( HellmichMaterialStatus * ) this->giveStatus(gp);
+    HellmichMaterialStatus *status = static_cast< HellmichMaterialStatus * >( this->giveStatus(gp) );
     status->initTempStatus();
 }
 
@@ -2593,7 +2593,7 @@ HellmichMaterial :: updateYourself(GaussPoint *gp, TimeStep *tStep)
         updateYourself(giveMaterialGp(), tStep);
     }
 
-    HellmichMaterialStatus *status = ( HellmichMaterialStatus * ) this->giveStatus(gp);
+    HellmichMaterialStatus *status = static_cast< HellmichMaterialStatus * >( this->giveStatus(gp) );
     if ( status ) {
         status->updateYourself(tStep);
     }
@@ -2666,7 +2666,7 @@ int
 HellmichMaterial :: giveIPValue(FloatArray &answer, GaussPoint *gp, InternalStateType type, TimeStep *tStep)
 // returns the equilibrated IP value. should be called after step update or context restore - temp=equlib
 {
-    HellmichMaterialStatus *status = ( HellmichMaterialStatus * ) this->giveStatus(gp);
+    HellmichMaterialStatus *status = static_cast< HellmichMaterialStatus * >( this->giveStatus(gp) );
     if ( type == IST_PlasticStrainTensor ) {
         if ( options & moPlasticity ) {
             ///@todo Fill in correct full form values here! This just adds zeros!
@@ -2814,7 +2814,7 @@ HellmichMaterialStatus :: giveMaterialOptions()
 // Returns the material options mask.
 {
     if ( gp->giveNumber() ) {
-        return ( ( HellmichMaterial * ) gp->giveMaterial() )->giveOptions();
+        return static_cast< HellmichMaterial * >( gp->giveMaterial() )->giveOptions();
     } else {
         return moMaterialLevel;
     }
@@ -2835,7 +2835,7 @@ Interface *
 HellmichMaterialStatus :: giveInterface(InterfaceType type)
 {
     if ( type == HydrationModelStatusInterfaceType ) {
-        return ( HydrationModelStatusInterface * ) this;
+        return static_cast< HydrationModelStatusInterface * >( this );
     } else {
         return NULL;
     }
@@ -2938,7 +2938,7 @@ void HellmichMaterialStatus :: printOutputAt(FILE *stream, TimeStep *tStep)
 {
     FloatArray helpVec, fullHelpVec;
     int i, n;
-    HellmichMaterial *mat = ( HellmichMaterial * ) ( gp->giveMaterial() );
+    HellmichMaterial *mat = static_cast< HellmichMaterial * >( gp->giveMaterial() );
     MaterialOptions options = giveMaterialOptions();
     ActiveSurface as;
     // output material gp status if necessary

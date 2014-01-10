@@ -80,7 +80,7 @@ IMLSolver :: initializeFrom(InputRecord *ir)
     int val;
 
     val = 0;
-    IR_GIVE_OPTIONAL_FIELD(ir, val, _IFT_IMLSolver_lstype);
+    IR_GIVE_OPTIONAL_FIELD(ir, val, _IFT_IMLSolver_stype);
     solverType = ( IMLSolverType ) val;
 
     tol = 1.e-5;

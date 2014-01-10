@@ -237,8 +237,6 @@ public:
 
 class OOFEM_EXPORT PolygonLine : public BasicGeometry
 {
-    static int nextLineIdNumber;
-    int stepInd;
     bool mDebugVtk;
 public:
     PolygonLine();
@@ -278,10 +276,7 @@ public:
     virtual void printYourself();
 
     // For debugging
-    virtual void printVTK();
-
-    // Id for writing VTK
-    int lineIdNumber;
+    virtual void printVTK(int iTStepIndex, int iLineIndex);
 
 #ifdef __BOOST_MODULE
     // Upper and lower corner

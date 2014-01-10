@@ -35,7 +35,7 @@
 #include "staggeredproblem.h"
 #include "engngm.h"
 #include "timestep.h"
-#include "loadtimefunction.h"
+#include "function.h"
 #include "metastep.h"
 #include "exportmodulemanager.h"
 #include "mathfem.h"
@@ -55,12 +55,12 @@ REGISTER_EngngModel(StaggeredProblem);
 
 StaggeredProblem :: StaggeredProblem(int i, EngngModel *_master) : EngngModel(i, _master)
 {
-    ndomains = 1; // domain is needed to store the time step ltf
+    ndomains = 1; // domain is needed to store the time step function
     nModels  = 2;
     emodelList = new AList< EngngModel >(nModels);
     inputStreamNames = new std :: string [ nModels ];
 
-    dtTimeFunction = 0;
+    dtFunction = 0;
     stepMultiplier = 1.;
     timeDefinedByProb = 0;
 }
@@ -134,20 +134,20 @@ StaggeredProblem :: initializeFrom(InputRecord *ir)
     if ( ir->hasField(_IFT_StaggeredProblem_deltat) ) {
         EngngModel :: initializeFrom(ir);
         IR_GIVE_FIELD(ir, deltaT, _IFT_StaggeredProblem_deltat);
-        dtTimeFunction = 0;
+        dtFunction = 0;
     } else if ( ir->hasField(_IFT_StaggeredProblem_prescribedtimes) ) {
         EngngModel :: initializeFrom(ir);
         IR_GIVE_FIELD(ir, discreteTimes, _IFT_StaggeredProblem_prescribedtimes);
-        dtTimeFunction = 0;
+        dtFunction = 0;
     } else {
         IR_GIVE_FIELD(ir, timeDefinedByProb, _IFT_StaggeredProblem_timeDefinedByProb);
     }
 
-    if ( dtTimeFunction < 1 ) {
+    if ( dtFunction < 1 ) {
         ndomains = 0;
     }
 
-    IR_GIVE_OPTIONAL_FIELD(ir, dtTimeFunction, _IFT_StaggeredProblem_dtf);
+    IR_GIVE_OPTIONAL_FIELD(ir, dtFunction, _IFT_StaggeredProblem_dtf);
     IR_GIVE_OPTIONAL_FIELD(ir, stepMultiplier, _IFT_StaggeredProblem_stepmultiplier);
     if ( stepMultiplier < 0 ) {
         _error("stepMultiplier must be > 0")
@@ -183,7 +183,7 @@ StaggeredProblem :: updateAttributes(MetaStep *mStep)
     if ( !timeDefinedByProb ) {
         if ( ir->hasField(_IFT_StaggeredProblem_deltat) ) {
             IR_GIVE_FIELD(ir, deltaT, _IFT_StaggeredProblem_deltat);
-            IR_GIVE_OPTIONAL_FIELD(ir, dtTimeFunction, _IFT_StaggeredProblem_dtf);
+            IR_GIVE_OPTIONAL_FIELD(ir, dtFunction, _IFT_StaggeredProblem_dtf);
             IR_GIVE_OPTIONAL_FIELD(ir, stepMultiplier, _IFT_StaggeredProblem_stepmultiplier);
             if ( stepMultiplier < 0 ) {
                 _error("stepMultiplier must be > 0")
@@ -194,21 +194,21 @@ StaggeredProblem :: updateAttributes(MetaStep *mStep)
     }
 }
 
-LoadTimeFunction *StaggeredProblem :: giveDtTimeFunction()
+Function *StaggeredProblem :: giveDtFunction()
 // Returns the load-time function of the receiver.
 {
-    if ( !dtTimeFunction || !ndomains ) {
+    if ( !dtFunction || !ndomains ) {
         return NULL;
     }
 
-    return giveDomain(1)->giveLoadTimeFunction(dtTimeFunction);
+    return giveDomain(1)->giveFunction(dtFunction);
 }
 
 double
 StaggeredProblem :: giveDeltaT(int n)
 {
-    if ( giveDtTimeFunction() ) {
-        return deltaT * giveDtTimeFunction()->__at(n);
+    if ( giveDtFunction() ) {
+        return deltaT * giveDtFunction()->evaluateAtTime(n);
     }
 
     //in the first step the time increment is taken as the initial, user-specified value

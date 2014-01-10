@@ -386,14 +386,14 @@ EigenValueDynamic :: printDofOutputAt(FILE *stream, Dof *iDof, TimeStep *tStep)
 
 #ifdef __SLEPC_MODULE
 void
-EigenValueDynamic :: initPetscContexts()
+EigenValueDynamic :: initParallelContexts()
 {
-    PetscContext *petscContext;
+    ParallelContext *parallelContext;
 
-    petscContextList->growTo(ndomains);
+    parallelContextList->growTo(ndomains);
     for ( int i = 0; i < this->ndomains; i++ ) {
-        petscContext =  new PetscContext(this);
-        petscContextList->put(i + 1, petscContext);
+        parallelContext =  new ParallelContext(this);
+        parallelContextList->put(i + 1, parallelContext);
     }
 }
 #endif
