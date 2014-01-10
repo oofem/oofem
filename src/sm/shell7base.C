@@ -144,7 +144,7 @@ Shell7Base :: computeGlobalCoordinates(FloatArray &answer, const FloatArray &lco
 double
 Shell7Base::giveGlobalZcoord( double xi, FloatArray &lc )
 {
-    return xi * this->layeredCS->give( CS_Thickness, &lc, NULL, this ) * 0.5;
+    return xi * this->layeredCS->give( CS_Thickness, &lc, this, false ) * 0.5;
 }
 
 double // @todo move to layered crosssection

@@ -1759,16 +1759,13 @@ Shell7BaseXFEM :: giveCompositeExportData(VTKPiece &vtkPiece, IntArray &primaryV
             for ( int i = 1; i <= numCellNodes; i++ ) {            
                 nodes.at(i) = val++;
             }
-            //vtkPiece.setConnectivity(layer, nodes);
             vtkPiece.setConnectivity(currentCell, nodes);
         
             // Offset
             offset += numCellNodes;
-            //vtkPiece.setOffset(layer, offset);
             vtkPiece.setOffset(currentCell, offset);
 
             // Cell types
-            //vtkPiece.setCellType(layer, 26); // Quadratic wedge
             vtkPiece.setCellType(currentCell, 26); // Quadratic wedge
 
             currentCell++;
@@ -1954,6 +1951,10 @@ Shell7BaseXFEM :: giveFictiousUpdatedNodeCoordsForExport(std::vector<FloatArray>
     FloatArray nodeLocalXi1Coords, nodeLocalXi2Coords, nodeLocalXi3Coords;
     if ( subCell == 0) { 
         giveLocalNodeCoordsForExport(nodeLocalXi1Coords, nodeLocalXi2Coords, nodeLocalXi3Coords);
+
+        // must get local z-coord in terms of the total thickness not layerwise
+        
+
     } else {
         giveLocalNodeCoordsForExport(nodeLocalXi1Coords, nodeLocalXi2Coords, nodeLocalXi3Coords, subCell);
     }
@@ -1962,19 +1963,30 @@ Shell7BaseXFEM :: giveFictiousUpdatedNodeCoordsForExport(std::vector<FloatArray>
         FloatArray coords, localCoords(3);
         localCoords.at(1) = nodeLocalXi1Coords.at(i);
         localCoords.at(2) = nodeLocalXi2Coords.at(i);
+
+
+        // Map local layer cs to local shell cs
+        double scaleFactor = 0.9999; // Will be numerically unstable with xfem if the endpoints lie at +-1
+        double totalThickness = this->layeredCS->computeIntegralThick();
+        double zMid_i = this->layeredCS->giveLayerMidZ(layer); // global z-coord
+        double xiMid_i = 1.0 - 2.0 * ( totalThickness - this->layeredCS->giveMidSurfaceZcoordFromBottom() - zMid_i ) / totalThickness; // local z-coord
+        double deltaxi = nodeLocalXi3Coords.at(i) * this->layeredCS->giveLayerThickness(layer) / totalThickness; // distance from layer mid
+        nodeLocalXi3Coords.at(i) = xiMid_i + deltaxi * scaleFactor;
+
         localCoords.at(3) = nodeLocalXi3Coords.at(i);
-        
+        //localCoords.printYourself();
         this->vtkEvalUpdatedGlobalCoordinateAt(localCoords, layer, coords, tStep);
         nodes[i-1].resize(3); 
         nodes[i-1] = coords;
     }
+    nodeLocalXi3Coords.printYourself();
 }
 
 
 void
 Shell7BaseXFEM :: giveLocalNodeCoordsForExport(FloatArray &nodeLocalXi1Coords, FloatArray &nodeLocalXi2Coords, FloatArray &nodeLocalXi3Coords) {
     // Local coords for a quadratic wedge element (VTK cell type 26)
-    double z = 0.9999;
+    double z = 0.999;
     nodeLocalXi1Coords.setValues(15, 1., 0., 0., 1., 0., 0., .5, 0., .5, .5, 0., .5, 1., 0., 0.);      
     nodeLocalXi2Coords.setValues(15, 0., 1., 0., 0., 1., 0., .5, .5, 0., .5, .5, 0., 0., 1., 0.);
     nodeLocalXi3Coords.setValues(15, -z, -z, -z,  z,  z,  z, -z, -z, -z,  z,  z,  z, 0., 0., 0.);
@@ -1984,7 +1996,7 @@ Shell7BaseXFEM :: giveLocalNodeCoordsForExport(FloatArray &nodeLocalXi1Coords, F
 void
 Shell7BaseXFEM :: giveLocalNodeCoordsForExport(FloatArray &nodeLocalXi1Coords, FloatArray &nodeLocalXi2Coords, FloatArray &nodeLocalXi3Coords, int subCell) {
     // Local coords for a quadratic wedge element (VTK cell type 26)
-    double scale = 0.99999;
+    double scale = 0.999;
     double z = 1.0*scale;
     //nodeLocalXi1Coords.setValues(15, 1., 0., 0., 1., 0., 0., .5, 0., .5, .5, 0., .5, 1., 0., 0.);      
     //nodeLocalXi2Coords.setValues(15, 0., 1., 0., 0., 1., 0., .5, .5, 0., .5, .5, 0., 0., 1., 0.);
