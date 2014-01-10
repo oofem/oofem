@@ -1655,7 +1655,8 @@ Shell7BaseXFEM :: edgeComputeEnrichedBmatrixAt(FloatArray &lcoords, FloatMatrix 
 void
 Shell7BaseXFEM :: vtkEvalUpdatedGlobalCoordinateAt(FloatArray &localCoords, int layer, FloatArray &globalCoords, TimeStep *tStep)
 {
-    double zeta = this->giveGlobalZcoordInLayer(localCoords.at(3), layer); 
+    //double zeta = this->giveGlobalZcoordInLayer(localCoords.at(3), layer); 
+    double zeta = this->giveGlobalZcoord(localCoords.at(3), localCoords); 
 
     // Continuous part
     FloatArray solVec;
@@ -1974,12 +1975,10 @@ Shell7BaseXFEM :: giveFictiousUpdatedNodeCoordsForExport(std::vector<FloatArray>
         nodeLocalXi3Coords.at(i) = xiMid_i + deltaxi * scaleFactor;
 
         localCoords.at(3) = nodeLocalXi3Coords.at(i);
-        //localCoords.printYourself();
         this->vtkEvalUpdatedGlobalCoordinateAt(localCoords, layer, coords, tStep);
         nodes[i-1].resize(3); 
         nodes[i-1] = coords;
     }
-    nodeLocalXi3Coords.printYourself();
 }
 
 
