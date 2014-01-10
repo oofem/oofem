@@ -55,15 +55,15 @@
 #include <ctime>
 
 #ifdef __VTK_MODULE
- #include <vtkPoints.h>
- #include <vtkPointData.h>
- #include <vtkDoubleArray.h>
- #include <vtkCellArray.h>
- #include <vtkCellData.h>
- #include <vtkXMLUnstructuredGridWriter.h>
- #include <vtkXMLPUnstructuredGridWriter.h>
- #include <vtkUnstructuredGrid.h>
- #include <vtkSmartPointer.h>
+#include <vtkPoints.h>
+#include <vtkPointData.h>
+#include <vtkDoubleArray.h>
+#include <vtkCellArray.h>
+#include <vtkCellData.h>
+#include <vtkXMLUnstructuredGridWriter.h>
+#include <vtkXMLPUnstructuredGridWriter.h>
+#include <vtkUnstructuredGrid.h>
+#include <vtkSmartPointer.h>
 #endif
 
 namespace oofem {
@@ -456,7 +456,7 @@ VTKXMLExportModule :: doOutput(TimeStep *tStep, bool forcedOutput)
     std :: string fname = giveOutputFileName(tStep);
 #ifdef __VTK_MODULE
 
- #if 0
+#if 0
     // Code fragment intended for future support of composite elements in binary format
     // Doesn't as well as I would want it to, interface to VTK is to limited to control this.
     // * The PVTU-file is written by every process (seems to be impossible to avoid).
@@ -468,9 +468,9 @@ VTKXMLExportModule :: doOutput(TimeStep *tStep, bool forcedOutput)
     writer->SetEndPiece( this->emodel->giveRank() );
 
 
- #else
+#else
     vtkSmartPointer< vtkXMLUnstructuredGridWriter >writer = vtkSmartPointer< vtkXMLUnstructuredGridWriter > :: New();
- #endif
+#endif
 
     writer->SetFileName( fname.c_str() );
     writer->SetInput(this->fileStream); // VTK 4
@@ -513,12 +513,12 @@ VTKXMLExportModule :: doOutput(TimeStep *tStep, bool forcedOutput)
         this->writeVTKCollection();
     } else
 #endif
-    if ( !emodel->isParallel() && tStep->giveNumber() >= 1 ) { // For non-parallel enabled OOFEM, then we only check for multiple steps.
-        std :: ostringstream pvdEntry;
-        pvdEntry << "<DataSet timestep=\"" << tStep->giveIntrinsicTime() << "\" group=\"\" part=\"\" file=\"" << fname << "\"/>";
-        this->pvdBuffer.push_back( pvdEntry.str() );
-        this->writeVTKCollection();
-    }
+        if ( !emodel->isParallel() && tStep->giveNumber() >= 1 ) { // For non-parallel enabled OOFEM, then we only check for multiple steps.
+            std :: ostringstream pvdEntry;
+            pvdEntry << "<DataSet timestep=\"" << tStep->giveIntrinsicTime() << "\" group=\"\" part=\"\" file=\"" << fname << "\"/>";
+            this->pvdBuffer.push_back( pvdEntry.str() );
+            this->writeVTKCollection();
+        }
 }
 
 
@@ -898,8 +898,8 @@ VTKXMLExportModule :: giveDataHeaders(std :: string &pointHeader, std :: string 
 
     // print header
     pointHeader = "<PointData Scalars=\"" + scalars + "\" "
-                  +  "Vectors=\"" + vectors + "\" "
-                  +  "Tensors=\"" + tensors + "\" >\n";
+            +  "Vectors=\"" + vectors + "\" "
+            +  "Tensors=\"" + tensors + "\" >\n";
 
 
     scalars.clear();
@@ -930,8 +930,8 @@ VTKXMLExportModule :: giveDataHeaders(std :: string &pointHeader, std :: string 
 
     // print header
     cellHeader = "<CellData Scalars=\"" + scalars + "\" "
-                 +  "Vectors=\"" + vectors + "\" "
-                 +  "Tensors=\"" + tensors + "\" >\n";
+            +  "Vectors=\"" + vectors + "\" "
+            +  "Tensors=\"" + tensors + "\" >\n";
 }
 #endif
 
@@ -1403,7 +1403,35 @@ VTKXMLExportModule :: getNodalVariableFromPrimaryField(FloatArray &answer, DofMa
     InternalStateType iState = IST_DisplacementVector; // Shouldn't be necessary
 
     dofIDMask.resize(0);
-    if ( ( type == DisplacementVector ) || ( type == EigenVector ) || ( type == VelocityVector ) ) {
+    if ( type == DisplacementVector ) {
+        dofIDMask.setValues(3, ( int ) Undef, ( int ) Undef, ( int ) Undef);
+        for ( int j = 1; j <= dman->giveNumberOfDofs(); j++ ) {
+            id = dman->giveDof(j)->giveDofID();
+            if ( id == D_u ) {
+                dofIDMask.at(1) = id;
+            } else if ( id == D_v ) {
+                dofIDMask.at(2) = id;
+            } else if ( id == D_w ) {
+                dofIDMask.at(3) = id;
+            }
+        }
+
+        answer.resize(3);
+    } else if ( type == VelocityVector ) {
+        dofIDMask.setValues(3, ( int ) Undef, ( int ) Undef, ( int ) Undef);
+        for ( int j = 1; j <= dman->giveNumberOfDofs(); j++ ) {
+            id = dman->giveDof(j)->giveDofID();
+            if ( id == V_u ) {
+                dofIDMask.at(1) = id;
+            } else if ( id == V_v ) {
+                dofIDMask.at(2) = id;
+            } else if ( id == V_w ) {
+                dofIDMask.at(3) = id;
+            }
+        }
+
+        answer.resize(3);
+    } else if ( type == EigenVector ) {
         dofIDMask.setValues(3, ( int ) Undef, ( int ) Undef, ( int ) Undef);
         for ( int j = 1; j <= dman->giveNumberOfDofs(); j++ ) {
             id = dman->giveDof(j)->giveDofID();
@@ -1601,7 +1629,7 @@ VTKXMLExportModule :: getCellVariableFromIS(FloatArray &answer, Element *el, Int
 
         break;
 
-    // Special vectors
+        // Special vectors
     case IST_MaterialOrientation_x:
     case IST_MaterialOrientation_y:
     case IST_MaterialOrientation_z:
@@ -1625,7 +1653,7 @@ VTKXMLExportModule :: getCellVariableFromIS(FloatArray &answer, Element *el, Int
         valueArray.beColumnOf(rotMat, col);
         break;
 
-    // Export cell data as average from ip's as default
+        // Export cell data as average from ip's as default
     default:
 
         // compute cell average from ip values
@@ -1757,7 +1785,7 @@ VTKXMLExportModule :: writeVTKCollection()
 void VTKXMLExportModule :: exportCompositeElement(VTKPiece &vtkPiece, Element *el, TimeStep *tStep)
 {
     VTKXMLExportModuleElementInterface *interface =
-        static_cast< VTKXMLExportModuleElementInterface * >( el->giveInterface(VTKXMLExportModuleElementInterfaceType) );
+            static_cast< VTKXMLExportModuleElementInterface * >( el->giveInterface(VTKXMLExportModuleElementInterfaceType) );
     if ( interface ) {
         interface->giveCompositeExportData(vtkPiece, this->primaryVarsToExport, this->internalVarsToExport, this->cellVarsToExport, tStep);
 

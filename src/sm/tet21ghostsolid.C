@@ -23,13 +23,14 @@ IntArray tet21ghostsolid :: ghostdisplacement_ordering(30);
 tet21ghostsolid::tet21ghostsolid(int n, Domain *aDomain) : NLStructuralElement(n, aDomain)
 {
 
-    numberOfGaussPoints = 5;
+    numberOfGaussPoints = 4;
     numberOfDofMans = 10;
+
 
     double nu=.25, E=1;
     Dghost.resize(6,6);
     Dghost.zero();
-    Dghost.at(1,1) = 1-nu; Dghost.at(2,2) = Dghost.at(3,2) = nu;
+    Dghost.at(1,1) = 1-nu; Dghost.at(1,2) = Dghost.at(1,3) = nu;
     Dghost.at(2,2) = 1-nu; Dghost.at(2,1) = Dghost.at(2,3) = nu;
     Dghost.at(3,3) = 1-nu; Dghost.at(3,1) = Dghost.at(3,2) = nu;
     Dghost.at(4,4) = Dghost.at(5,5) = Dghost.at(6,6) = .5*(1-2*nu);
@@ -76,9 +77,6 @@ tet21ghostsolid :: computeGaussPoints()
 void
 tet21ghostsolid :: computeStiffnessMatrix(FloatMatrix &answer, MatResponseMode rMode, TimeStep *tStep)
 {
-
-    answer.resize(64, 64);
-    answer.zero();
 
     IntegrationRule *iRule = integrationRulesArray [ giveDefaultIntegrationRule() ];
     FluidDynamicMaterial *fluidMaterial = static_cast< FluidCrossSection * >( this->giveCrossSection() )->giveFluidMaterial();
@@ -127,30 +125,51 @@ tet21ghostsolid :: computeStiffnessMatrix(FloatMatrix &answer, MatResponseMode r
 
     }
 
-    double deltat = tStep->giveTimeIncrement();
-
-    FloatMatrix GT, GTdeltat;
+    FloatMatrix GT;
 
     GT.beTranspositionOf(G);
-    GTdeltat.beTranspositionOf(G);
-    GTdeltat.times(deltat);
+    //GTdeltat.beTranspositionOf(G);
+    //GTdeltat.times(deltat);
     Kf.symmetrized();
     Kx.symmetrized();
+    //    Kf.printYourself();
+    //    G.printYourself();
+    //    GT.printYourself();
+    //    Kx.printYourself();
 
+    answer.resize(64, 64);
+    answer.zero();
+#define USEUNCOUPLED 0
+
+#if USEUNCOUPLED == 1
+    // Totaly uncoupled
+    answer.assemble(Kf, momentum_ordering, momentum_ordering);
+    answer.assemble(G, momentum_ordering, conservation_ordering);
+    answer.assemble(GT, conservation_ordering, momentum_ordering);
+    answer.assemble(Kx, ghostdisplacement_ordering, ghostdisplacement_ordering);
+#else
+    answer.assemble(Kf, ghostdisplacement_ordering, ghostdisplacement_ordering);
     answer.assemble(Kf, ghostdisplacement_ordering, momentum_ordering);
     answer.assemble(G, ghostdisplacement_ordering, conservation_ordering);
-    // answer.assemble(GT, conservation_ordering, ghostdisplacement_ordering);
+    answer.assemble(GT, conservation_ordering, ghostdisplacement_ordering);
     answer.assemble(GT, conservation_ordering, momentum_ordering);
     answer.assemble(Kx, momentum_ordering, ghostdisplacement_ordering);
+#endif
 
     //answer.printYourself();
 
 }
 
+void
+tet21ghostsolid :: computeForceLoadVectorX(FloatArray &answer, TimeStep *tStep, ValueModeType mode)
+{
+
+}
 
 void
 tet21ghostsolid :: computeLoadVector(FloatArray &answer, Load *load, CharType type, ValueModeType mode, TimeStep *tStep)
 {
+
     answer.resize(64);
     answer.zero();
 
@@ -161,11 +180,17 @@ tet21ghostsolid :: computeLoadVector(FloatArray &answer, Load *load, CharType ty
 
     FluidDynamicMaterial *mat = static_cast< FluidCrossSection * >( this->giveCrossSection() )->giveFluidMaterial();
     IntegrationRule *iRule = this->integrationRulesArray [ 0 ];
-    FloatArray N, gVector, temparray(30), dNv;
+    FloatArray N, gVector, temparray(30), dNv, u, inc, u_prev, vload;
     FloatMatrix dNx, G;
+    IntArray *bodyLoads;
 
     load->computeComponentArrayAt(gVector, tStep, VM_Total);
     temparray.zero();
+
+    vload.resize(4);
+    vload.zero();
+
+    this->giveDisplacementsIncrementData(u_prev, u, inc, tStep);
 
     for ( int k = 0; k < iRule->giveNumberOfIntegrationPoints(); k++ ) {
         GaussPoint *gp = iRule->getIntegrationPoint(k);
@@ -198,22 +223,24 @@ tet21ghostsolid :: computeLoadVector(FloatArray &answer, Load *load, CharType ty
             dNv.at(k*3+3) = dNx.at(3,k+1);
         }
 
-        G.plusDyadUnsym(N, dNv, -dA);
+        G.plusDyadUnsym(N, dNv, dA);
+        FloatMatrix GT;
+        GT.beTranspositionOf(G);
+
+        vload.plusProduct(GT, u_prev, -0.0 );
+        //vload.printYourself();
+
     }
 
+#if USEUNCOUPLED == 1
+    // Totaly uncoupled
     answer.assemble(temparray, this->momentum_ordering);
+#else
+    answer.assemble(temparray, this->ghostdisplacement_ordering);
+    answer.assemble(vload, this->conservation_ordering);
+#endif
 
-    if (!tStep->isTheFirstStep()) {
-        G.printYourself();
-        FloatArray u_n;
-        IntArray id;
-        id.setValues(3, 1, 2, 3);
 
-        for (int i = 0; i<this->giveNumberOfDofManagers(); i++) {
-            this->giveDofManager(i+1)->giveUnknownVector(u_n, id, VM_Velocity, tStep );
-            u_n.printYourself();
-        }
-    }
 
     // answer.printYourself();
 }
@@ -221,8 +248,91 @@ tet21ghostsolid :: computeLoadVector(FloatArray &answer, Load *load, CharType ty
 void
 tet21ghostsolid :: giveInternalForcesVector(FloatArray &answer, TimeStep *tStep, int useUpdatedGpRecord)
 {
+
+    IntegrationRule *iRule = integrationRulesArray [ giveDefaultIntegrationRule() ];
+    FluidDynamicMaterial *fluidMaterial = static_cast< FluidCrossSection * >( this->giveCrossSection() )->giveFluidMaterial();
+
+    FloatMatrix Kf, G, Kx, B, Ed, dNx;
+    FloatArray Strain, Stress, Nlin, dNv, a, aVelocity, aPressure, aGhostDisplacement, fluidStress, epsf;
+    FloatArray momentum, conservation, auxstress;
+    double pressure, epsvol;
+
+    this->computeVectorOf(EID_MomentumBalance, VM_Total, tStep, a);
+    if (!tStep->isTheFirstStep()) {
+        // a.printYourself();
+    }
+
+    aVelocity.beSubArrayOf(a, momentum_ordering);
+    aPressure.beSubArrayOf(a, conservation_ordering);
+    aGhostDisplacement.beSubArrayOf(a, ghostdisplacement_ordering);
+
+    for (int j = 0; j<iRule->giveNumberOfIntegrationPoints(); j++) {
+        GaussPoint *gp = iRule->getIntegrationPoint(j);
+
+        double detJ = fabs( ( this->interpolation.giveTransformationJacobian( * gp->giveCoordinates(), FEIElementGeometryWrapper(this) ) ) );
+        double weight = gp->giveWeight();
+
+        this->interpolation.evaldNdx( dNx, * gp->giveCoordinates(), FEIElementGeometryWrapper(this) );
+        this->interpolation_lin.evalN( Nlin, * gp->giveCoordinates(), FEIElementGeometryWrapper(this) );
+
+        dNv.resize(30);
+        for (int k = 0; k<dNx.giveNumberOfColumns(); k++) {
+            dNv.at(k*3+1) = dNx.at(1,k+1);
+            dNv.at(k*3+2) = dNx.at(2,k+1);
+            dNv.at(k*3+3) = dNx.at(3,k+1);
+        }
+
+        if (nlGeometry == 0) {
+
+            this->computeBmatrixAt(gp, B);
+            epsf.beProductOf(B, aVelocity);
+            pressure = Nlin.dotProduct(aPressure);
+
+            // Fluid part
+            gp->setMaterialMode(_3dFlow);
+            fluidMaterial->computeDeviatoricStressVector(fluidStress, epsvol, gp, epsf, pressure, tStep);
+            gp->setMaterialMode(_3dMat);
+
+            momentum.plusProduct(B, fluidStress, detJ*weight);
+            momentum.add(-pressure * detJ * weight, dNv);
+            conservation.add(epsvol * detJ * weight, Nlin);
+
+            // Ghost solid part
+            Strain.beProductOf(B, aGhostDisplacement);
+            Stress.beProductOf(Dghost, Strain);
+            auxstress.plusProduct(B, Stress, detJ * weight);
+
+        } else {
+            OOFEM_CLASS_ERROR("No support for large deformations yet!");
+        }
+
+    }
     answer.resize(64);
     answer.zero();
+
+#if USEUNCOUPLED == 1
+    // Totaly uncoupled
+    answer.assemble(momentum, momentum_ordering);
+    answer.assemble(conservation, conservation_ordering);
+    answer.assemble(auxstress, ghostdisplacement_ordering);
+#else
+    answer.assemble(momentum, ghostdisplacement_ordering);
+    answer.assemble(conservation, conservation_ordering);
+    answer.assemble(auxstress, momentum_ordering);
+#endif
+
+    // Test linear
+
+    if (this->giveNumber() == 364) {
+        FloatMatrix K;
+        FloatArray ans;
+        this->computeStiffnessMatrix(K, TangentStiffness, tStep);
+        ans.beProductOf(K, a);
+        ans.printYourself();
+        answer.printYourself();
+    }
+
+
 }
 
 void
@@ -232,13 +342,13 @@ tet21ghostsolid :: giveDofManDofIDMask(int inode, EquationID ut, IntArray &answe
 
     if ( inode <= 4 ) {
         if ( ut == EID_MomentumBalance ) {
-            answer.setValues(7, V_u, V_v, V_w, D_u, D_u, D_w, P_f);
+            answer.setValues(7, V_u, V_v, V_w, D_u, D_v, D_w, P_f);
         } else {
             OOFEM_ERROR("tet21ghostsolid :: giveDofManDofIDMask: Unknown equation id encountered");
         }
     } else {
         if ( ut == EID_MomentumBalance || ut == EID_MomentumBalance_ConservationEquation ) {
-            answer.setValues(6, V_u, V_v, V_w, D_u, D_u, D_w);
+            answer.setValues(6, V_u, V_v, V_w, D_u, D_v, D_w);
         } else {
             OOFEM_ERROR("tet21ghostsolid :: giveDofManDofIDMask: Unknown equation id encountered");
         }
@@ -271,6 +381,37 @@ tet21ghostsolid :: computeBmatrixAt(GaussPoint *gp, FloatMatrix &answer, int li,
 
         answer.at(6, 3 * i - 2) = dnx.at(2, i);
         answer.at(6, 3 * i - 1) = dnx.at(1, i);
+    }
+}
+
+void
+tet21ghostsolid :: giveDisplacementsIncrementData(FloatArray &u_prev, FloatArray &u, FloatArray &inc, TimeStep *tStep)
+{
+
+    u_prev.resize(30);
+    u.resize(30);
+    inc.resize(30);
+
+    if (!tStep->isTheFirstStep()) {
+        //G.printYourself();
+        FloatArray u_n, inc_n;
+        IntArray id;
+        id.setValues(3, 1, 2, 3);
+
+        for (int i = 0; i<this->giveNumberOfDofManagers(); i++) {
+
+            this->giveDofManager(i+1)->giveUnknownVector(u_n, id, VM_Total, tStep );
+            this->giveDofManager(i+1)->giveUnknownVector(inc_n, id, VM_Incremental, tStep );
+            u_prev.at(3*i+1) = u_n.at(1)-inc_n.at(1);
+            u_prev.at(3*i+2) = u_n.at(2)-inc_n.at(2);
+            u_prev.at(3*i+3) = u_n.at(3)-inc_n.at(3);
+            u.at(3*i+1) = u_n.at(1);
+            u.at(3*i+2) = u_n.at(2);
+            u.at(3*i+3) = u_n.at(3);
+            inc.at(3*i+1) = inc_n.at(1);
+            inc.at(3*i+2) = inc_n.at(2);
+            inc.at(3*i+3) = inc_n.at(3);
+        }
     }
 }
 
