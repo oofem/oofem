@@ -427,8 +427,9 @@ PetscSparseMtrx :: buildInternalStructure(EngngModel *eModel, int di, EquationID
     if ( eModel->isParallel() ) {
         Natural2GlobalOrdering *n2g;
         Natural2LocalOrdering *n2l;
-        n2g = eModel->giveParallelContext(di)->giveN2Gmap();
-        n2l = eModel->giveParallelContext(di)->giveN2Lmap();
+        ParallelContext *context = eModel->giveParallelContext(di);
+        n2g = context->giveN2Gmap();
+        n2l = context->giveN2Lmap();
 
         n2l->init(eModel, di, s);
         n2g->init(eModel, di, s);
@@ -530,9 +531,8 @@ PetscSparseMtrx :: buildInternalStructure(EngngModel *eModel, int di, EquationID
         MatSetOption(mtrx, MAT_NEW_NONZERO_ALLOCATION_ERR, PETSC_FALSE);
 
         // Creates scatter context for PETSc.
-        ISCreateGeneral(this->emodel->giveParallelComm(), leqs, n2g->giveN2Gmap()->givePointer(), PETSC_USE_POINTER, & globalIS);
-        ISCreateStride(this->emodel->giveParallelComm(), leqs, 0, 1, & localIS);
-
+        ISCreateGeneral(this->emodel->giveParallelComm(), context->giveNumberOfNaturalEqs(), n2g->giveN2Gmap()->givePointer(), PETSC_USE_POINTER, & globalIS);
+        ISCreateStride(this->emodel->giveParallelComm(), context->giveNumberOfNaturalEqs(), 0, 1, & localIS);
 
  #ifdef __VERBOSE_PARALLEL
         VERBOSEPARALLEL_PRINT("PetscSparseMtrx:: buildInternalStructure", "done", rank);
