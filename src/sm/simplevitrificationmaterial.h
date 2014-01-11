@@ -87,6 +87,8 @@ public:
     virtual void giveRealStressVector_3d(FloatArray &answer, GaussPoint *gp,
                                          const FloatArray &reducedStrain, TimeStep *tStep);
 
+    virtual void giveThermalDilatationVector(FloatArray &answer, GaussPoint *gp, TimeStep *tStep);
+
     virtual MaterialStatus *CreateStatus(GaussPoint *gp) const;
 
     virtual int hasNonLinearBehaviour() { return true; }
