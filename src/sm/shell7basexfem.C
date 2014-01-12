@@ -48,12 +48,13 @@
 
 namespace oofem {
 
-
-const double DISC_DOF_SCALE_FAC = 1.0e-3;
+/* Scale factor fo the discontinuous dofs. Implies that the corresponding 
+   dofs must be scaled with 1/factor in the input file
+*/
+const double DISC_DOF_SCALE_FAC = 1.0e-3; 
 
 Shell7BaseXFEM :: Shell7BaseXFEM(int n, Domain *aDomain) : Shell7Base(n, aDomain), XfemElementInterface(this) 
 {
-    czMat = NULL;
 }
 
 int 
@@ -67,9 +68,7 @@ void
 Shell7BaseXFEM :: postInitialize()
 {
     Shell7Base :: postInitialize();
-
     this->xMan =  this->giveDomain()->giveXfemManager();
-
 }
 
 void
@@ -77,12 +76,12 @@ Shell7BaseXFEM :: computeFailureCriteriaQuantities(FailureCriteriaStatus *fcStat
 {
     
     // Compute necessary quantities for evaluation of failure criterias
-#if 1
+    ///@todo Ugly code and not tested in a while so probably broken
+
     if ( DamagedNeighborLayeredStatus *status = dynamic_cast<DamagedNeighborLayeredStatus *>(fcStatus) ) {
         /*
         Go through the neighbors of the element and check for each layer if the 
         corresponding cz is damaged (if applicable)
-
         */
         IntArray neighbors;
         IntArray elements(1);
@@ -145,7 +144,6 @@ Shell7BaseXFEM :: computeFailureCriteriaQuantities(FailureCriteriaStatus *fcStat
     //    }
     //    break;
     
-#endif  
 }
 
 
@@ -179,7 +177,7 @@ Interface
     } else if ( it == XfemElementInterfaceType ) {
         return ( XfemElementInterface * ) this;
     } else {
-        return Shell7Base :: giveInterface(it); //@todo remove
+        return Shell7Base :: giveInterface(it); ///@todo remove
     }
 }
 
@@ -190,8 +188,8 @@ Shell7BaseXFEM :: giveDofManDofIDMask(int inode, EquationID ut, IntArray &answer
     // Returns the total id mask of the dof manager - regular id's + enriched id's
 
     // Continuous part
-    Shell7Base ::giveDofManDofIDMask(inode, ut, answer);
-    XfemManager *xMan = this->giveDomain()->giveXfemManager(); // xman not initialized on el. level??
+    Shell7Base :: giveDofManDofIDMask(inode, ut, answer);
+    XfemManager *xMan = this->giveDomain()->giveXfemManager(); // xman not initialized on el. level when this is first called
 
     // Discontinuous part
     DofManager *dMan = this->giveDofManager(inode);
@@ -209,10 +207,10 @@ Shell7BaseXFEM :: giveDofManDofIDMask(int inode, EquationID ut, IntArray &answer
 void
 Shell7BaseXFEM :: evalCovarBaseVectorsAt(FloatArray &lCoords, FloatMatrix &gcov, FloatArray &genEpsC)
 {
-    // Continuous part
+    // Continuous part g_c
     Shell7Base :: evalCovarBaseVectorsAt(lCoords, gcov, genEpsC);
 
-    // Discontinuous part
+    // Discontinuous part g_d
     TimeStep *tStep = this->giveDomain()->giveEngngModel()->giveCurrentStep();
     FloatArray dGenEps;
     FloatMatrix gcovd; 
@@ -240,7 +238,6 @@ Shell7BaseXFEM :: computeDiscGeneralizedStrainVector(FloatArray &answer, FloatAr
     this->computeEnrichedBmatrixAt(lCoords, B, ei);
     Shell7Base :: computeGeneralizedStrainVectorNew(answer, solVecD, B);
 
-    //answer.times(DISC_DOF_SCALE_FAC);
 }
 
 
@@ -248,7 +245,7 @@ int
 Shell7BaseXFEM :: giveNumberOfDofs()
 {
     // Continuous part
-    int nDofs = Shell7Base ::giveNumberOfDofs();
+    int nDofs = Shell7Base :: giveNumberOfDofs();
 
     // Discontinuous part
     for ( int i = 1; i <= this->giveNumberOfDofManagers(); i++ ) {
@@ -269,16 +266,15 @@ Shell7BaseXFEM :: giveNumberOfDofs()
 void
 Shell7BaseXFEM :: giveDisSolutionVector(FloatArray &answer, const IntArray &dofIdArray, TimeStep *tStep)
 {
-    // Scales the discontinuous dofs with a factor
+    ///@todo remove, not neccessary anymore
     Shell7Base :: giveSolutionVector(answer, dofIdArray, tStep);
-    //answer.times(DISC_DOF_SCALE_FAC);
 }
 
 void
 Shell7BaseXFEM :: edgeGiveUpdatedSolutionVector(FloatArray &answer, const int iedge, TimeStep *tStep)
 {
     Shell7Base :: edgeGiveUpdatedSolutionVector(answer, iedge, tStep);
-    answer.times(DISC_DOF_SCALE_FAC);
+    answer.times(DISC_DOF_SCALE_FAC); ///@todo should this be here?
 }
 
 
@@ -339,9 +335,8 @@ Shell7BaseXFEM :: computeOrderingArray( IntArray &orderingArray, IntArray &activ
 
 void 
 Shell7BaseXFEM :: giveInternalForcesVector(FloatArray &answer, TimeStep *tStep, int useUpdatedGpRecord)
-//
-// Computes internal forces as the array of: [f_c, f_d1, ..., f_dn]
 {
+    // Computes internal forces as the array of: [f_c, f_d1, ..., f_dn]
     answer.resize( this->giveNumberOfDofs() );
     answer.zero();
     FloatArray solVec, temp;
@@ -406,8 +401,7 @@ Shell7BaseXFEM :: discComputeSectionalForces(FloatArray &answer, TimeStep *tStep
             this->computeGeneralizedStrainVectorNew(genEps,  solVec,  B);
             this->computeGeneralizedStrainVectorNew(genEpsD, solVecD, BEnr);
 
-            //double zeta = giveGlobalZcoord(gp->giveCoordinate(3));
-            double zeta = giveGlobalZcoord( gp->giveCoordinate( 3 ), *gp->giveCoordinates( ) );
+            double zeta = giveGlobalZcoord( *gp->giveCoordinates( ) );
             this->computeSectionalForcesAt(sectionalForces, gp, mat, tStep, genEps, genEpsD, zeta);
 
             // Computation of nodal forces: f = B^t*[N M T Ms Ts]^t
@@ -479,7 +473,6 @@ Shell7BaseXFEM :: giveMaxCZDamages(FloatArray &answer, TimeStep *tStep)
                 IntegrationPoint *ip = iRule->getIntegrationPoint(j);
 
                 mat = static_cast < StructuralInterfaceMaterial * > (this->layeredCS->giveInterfaceMaterial(i+1) );
-                //mat = static_cast < StructuralInterfaceMaterial * > ( this->czMat );
                 mat->giveIPValue(ipValues, ip, IST_DamageScalar, tStep);
 
                 double val = ipValues.at(1);
@@ -509,7 +502,7 @@ Shell7BaseXFEM :: computeCohesiveForces(FloatArray &answer, TimeStep *tStep, Flo
 
     FloatMatrix N, B, F;  
     int delamNum = dei->giveNumber();
-    IntegrationRule *iRuleL = czIntegrationRulesArray [ delamNum - 1 ]; ///@ todo does this work with giveNumber?
+    IntegrationRule *iRuleL = czIntegrationRulesArray [ delamNum - 1 ]; ///@ todo does this work with giveNumber? Probably not, will have to save num delam.
 
     StructuralInterfaceMaterial *intMat = static_cast < StructuralInterfaceMaterial * > 
         (this->layeredCS->giveInterfaceMaterial(delamNum) );
@@ -608,7 +601,7 @@ void
 Shell7BaseXFEM :: computeCohesiveTangentAt(FloatMatrix &answer, TimeStep *tStep, FloatArray &solVecD, 
     Delamination *dei)
 {
-    //Computes the cohesive tangent for a given interface
+    //Computes the cohesive tangent for a given interface K_cz = N^t*lambda*t * dT/dj * lambda * N
     FloatArray lCoords(3);
     FloatMatrix answerTemp, N, lambda, K, temp, tangent;
     int nDofs = Shell7Base :: giveNumberOfDofs();
@@ -621,8 +614,6 @@ Shell7BaseXFEM :: computeCohesiveTangentAt(FloatMatrix &answer, TimeStep *tStep,
         (this->layeredCS->giveInterfaceMaterial(delamNum) );
 
     double xi = dei->giveDelamXiCoord();
-    //double zeta = this->giveGlobalZcoord(xi);
-    //this->computeLambdaNMatrixDis(lambda, zeta);
 
     FloatMatrix Q;
     FloatArray nCov;
@@ -633,7 +624,8 @@ Shell7BaseXFEM :: computeCohesiveTangentAt(FloatMatrix &answer, TimeStep *tStep,
         lCoords.at(1) = ip->giveCoordinate(1);
         lCoords.at(2) = ip->giveCoordinate(2);
         lCoords.at(3) = dei->giveDelamXiCoord();
-        double zeta = giveGlobalZcoord( xi, lCoords);
+
+        double zeta = giveGlobalZcoord( lCoords);
         this->computeLambdaNMatrixDis( lambda, zeta );
         this->computeNmatrixAt(lCoords, N);
                 
@@ -668,7 +660,7 @@ Shell7BaseXFEM :: computeStiffnessMatrix(FloatMatrix &answer, MatResponseMode rM
     FloatMatrix tempRed, tempRedT;
     FloatMatrix KCC, KCD, KDD, Bc;
     IntArray orderingC, activeDofsC;
-    this->computeOrderingArray(orderingC, activeDofsC, NULL); //
+    this->computeOrderingArray(orderingC, activeDofsC, NULL); 
     std::vector<IntArray> orderingArrays;
     std::vector<IntArray> activeDofsArrays;
 
@@ -813,12 +805,6 @@ Shell7BaseXFEM :: computeStiffnessMatrix(FloatMatrix &answer, MatResponseMode rM
     }
 #endif
     
-    /*FloatMatrix test;
-    test= answer;
-    
-    NEW_computeStiffnessMatrix(answer, rMode, tStep);
-    test.subtract(answer);
-    test.printYourself();*/
 }
 
 
@@ -834,8 +820,7 @@ Shell7BaseXFEM :: discComputeBulkTangentMatrix(FloatMatrix &KdIJ, IntegrationPoi
     this->computeEnrichedBmatrixAt(lCoords, B1, ei1);
     this->computeEnrichedBmatrixAt(lCoords, B2, ei2);
 
-    //double zeta = giveGlobalZcoord(ip->giveCoordinate(3));
-    double zeta = giveGlobalZcoord( ip->giveCoordinate( 3 ), *ip->giveCoordinates( ) );
+    double zeta = giveGlobalZcoord( *ip->giveCoordinates( ) );
     if ( ei1 ) {
         this->computeLambdaGMatricesDis(lambda1, zeta);
     } else {
@@ -939,14 +924,15 @@ Shell7BaseXFEM :: computePressureTangentMatrixDis(FloatMatrix &KCC, FloatMatrix 
     FloatArray g1, g2, genEps;
     FloatMatrix lambdaGC [ 3 ], lambdaNC, lambdaGD [ 3 ], lambdaND;
     double xi   = pLoad->giveLoadOffset();
-    //double zeta = this->giveGlobalZcoord(xi);
+
     this->giveUpdatedSolutionVector(solVec, tStep);
     // compute w1,w2, KC
     lcoords.at(1) = ip->giveCoordinate(1);
     lcoords.at(2) = ip->giveCoordinate(2);
     lcoords.at(3) = xi;     // local coord where load is applied
 
-    double zeta = giveGlobalZcoord( xi, lcoords );
+    //double zeta = giveGlobalZcoord( xi, lcoords );
+    double zeta = giveGlobalZcoord( lcoords );
 
     this->computeNmatrixAt(lcoords, N);
     this->computeBmatrixAt(lcoords, B);
@@ -1195,8 +1181,6 @@ Shell7BaseXFEM :: computeTractionForce(FloatArray &answer, const int iEdge, Boun
 
     FloatMatrix N, Q;
     FloatArray fT(7), components, lCoords;
-    
-    //BoundaryLoad :: CoordSystType coordSystType = edgeLoad->giveCoordSystMode();
     Load :: CoordSystType coordSystType = edgeLoad->giveCoordSystMode();
 
     FloatArray Nftemp(21), Nf(21);
@@ -1208,7 +1192,6 @@ Shell7BaseXFEM :: computeTractionForce(FloatArray &answer, const int iEdge, Boun
         edgeLoad->computeValueAt(components, tStep, lCoords, mode);
         this->edgeComputeEnrichedNmatrixAt(lCoords, N, ei);
 
-        //if ( coordSystType ==  BoundaryLoad :: BL_UpdatedGlobalMode ) {
         if ( coordSystType ==  Load :: CST_UpdatedGlobal ) {
             
             // Updated global coord system
@@ -1226,7 +1209,6 @@ Shell7BaseXFEM :: computeTractionForce(FloatArray &answer, const int iEdge, Boun
             fT.addSubVector(t2,4);
             fT.at(7) = components.at(7); // don't do anything with the 'gamma'-load
 
-        //} else if( coordSystType == BoundaryLoad :: BL_GlobalMode ) { 
         } else if( coordSystType == Load :: CST_Global ) { 
             // Undeformed global coord system
             for ( int i = 1; i <= 7; i++) {
@@ -1359,7 +1341,7 @@ Shell7BaseXFEM :: computeEnrichedBmatrixAt(FloatArray &lcoords, FloatMatrix &ans
     if ( ei && dynamic_cast< Crack*>(ei) ) { 
 
         int ndofs = Shell7Base :: giveNumberOfDofs();
-        int ndofs_xm  = this->giveNumberOfFieldDofs(Midplane);
+        int ndofs_xm  = 3 * this->giveNumberOfDofManagers();
         answer.resize(18, ndofs);
         answer.zero();
         FloatArray N;
@@ -1450,8 +1432,7 @@ Shell7BaseXFEM :: EvaluateEnrFuncInDofMan(int dofManNum, EnrichmentItem *ei)
         } else {
             return 0.0;
         }
-        //return efNode [ 0 ];
-        //return 0.;
+        
 }
 
 
@@ -1462,7 +1443,7 @@ Shell7BaseXFEM :: computeEnrichedNmatrixAt(const FloatArray &lcoords, FloatMatri
     // evaluated at aGaussPoint.
 
     int ndofs = Shell7Base :: giveNumberOfDofs();
-    int ndofs_xm  = this->giveNumberOfFieldDofs(Midplane);
+    int ndofs_xm  = 3 * this->giveNumberOfDofManagers();
     answer.resize(7, ndofs);
     answer.zero();
     FloatArray N;
@@ -1655,8 +1636,7 @@ Shell7BaseXFEM :: edgeComputeEnrichedBmatrixAt(FloatArray &lcoords, FloatMatrix 
 void
 Shell7BaseXFEM :: vtkEvalUpdatedGlobalCoordinateAt(FloatArray &localCoords, int layer, FloatArray &globalCoords, TimeStep *tStep)
 {
-    //double zeta = this->giveGlobalZcoordInLayer(localCoords.at(3), layer); 
-    double zeta = this->giveGlobalZcoord(localCoords.at(3), localCoords); 
+    double zeta = this->giveGlobalZcoord( localCoords ); 
 
     // Continuous part
     FloatArray solVec;
@@ -1983,7 +1963,8 @@ Shell7BaseXFEM :: giveFictiousUpdatedNodeCoordsForExport(std::vector<FloatArray>
 
 
 void
-Shell7BaseXFEM :: giveLocalNodeCoordsForExport(FloatArray &nodeLocalXi1Coords, FloatArray &nodeLocalXi2Coords, FloatArray &nodeLocalXi3Coords) {
+Shell7BaseXFEM :: giveLocalNodeCoordsForExport(FloatArray &nodeLocalXi1Coords, FloatArray &nodeLocalXi2Coords, FloatArray &nodeLocalXi3Coords) 
+{
     // Local coords for a quadratic wedge element (VTK cell type 26)
     double z = 0.999;
     nodeLocalXi1Coords.setValues(15, 1., 0., 0., 1., 0., 0., .5, 0., .5, .5, 0., .5, 1., 0., 0.);      
@@ -1993,13 +1974,11 @@ Shell7BaseXFEM :: giveLocalNodeCoordsForExport(FloatArray &nodeLocalXi1Coords, F
 
 
 void
-Shell7BaseXFEM :: giveLocalNodeCoordsForExport(FloatArray &nodeLocalXi1Coords, FloatArray &nodeLocalXi2Coords, FloatArray &nodeLocalXi3Coords, int subCell) {
-    // Local coords for a quadratic wedge element (VTK cell type 26)
+Shell7BaseXFEM :: giveLocalNodeCoordsForExport(FloatArray &nodeLocalXi1Coords, FloatArray &nodeLocalXi2Coords, FloatArray &nodeLocalXi3Coords, int subCell) 
+{
+    // Local coords for a quadratic wedge element - coords for subtriangles
     double scale = 0.999;
     double z = 1.0*scale;
-    //nodeLocalXi1Coords.setValues(15, 1., 0., 0., 1., 0., 0., .5, 0., .5, .5, 0., .5, 1., 0., 0.);      
-    //nodeLocalXi2Coords.setValues(15, 0., 1., 0., 0., 1., 0., .5, .5, 0., .5, .5, 0., 0., 1., 0.);
-    //nodeLocalXi3Coords.setValues(15, -z, -z, -z,  z,  z,  z, -z, -z, -z,  z,  z,  z, 0., 0., 0.);
 
     FloatArray g1, g2, g3;
     g1 = this->allTri[subCell-1].giveVertex(1);
