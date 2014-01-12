@@ -86,7 +86,7 @@ IntElLine1 :: computeGaussPoints()
         integrationRulesArray = new IntegrationRule * [ 1 ];
         //integrationRulesArray[0] = new LobattoIntegrationRule (1,domain, 1, 2);
         integrationRulesArray [ 0 ] = new GaussIntegrationRule(1, this, 1, 2);
-        integrationRulesArray [ 0 ]->SetUpPointsOnLine(2, _2dInterface); //@todo - should be a parameter with num of ip
+        integrationRulesArray [ 0 ]->SetUpPointsOnLine(4, _2dInterface); ///@todo - should be a parameter with num of ip
     }
 }
 

@@ -226,10 +226,6 @@ protected:
      */
     int giveCellType(Element *element);
     /**
-     * Returns the number of elements vtk cells.
-     */
-    int giveNumberOfElementCells(Element *element);
-    /**
      * Returns number of nodes corresponding to cell type
      */
     int giveNumberOfNodesPerCell(int cellType);

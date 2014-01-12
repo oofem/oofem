@@ -270,75 +270,47 @@ VTKXMLExportModule :: giveNumberOfNodesPerCell(int cellType)
 void
 VTKXMLExportModule :: giveElementCell(IntArray &answer, Element *elem)
 {
-    Element_Geometry_Type elemGT = elem->giveGeometryType();
-    int nelemNodes;
+    // Gives the node mapping from the order used in OOFEM to that used in VTK
 
+    Element_Geometry_Type elemGT = elem->giveGeometryType();
+    IntArray nodeMapping(0);
     if ( ( elemGT == EGT_point ) ||
          ( elemGT == EGT_line_1 ) || ( elemGT == EGT_line_2 ) ||
          ( elemGT == EGT_triangle_1 ) || ( elemGT == EGT_triangle_2 ) ||
          ( elemGT == EGT_tetra_1 ) || ( elemGT == EGT_tetra_2 ) ||
          ( elemGT == EGT_quad_1 ) || ( elemGT == EGT_quad_2 ) ||
-         ( elemGT == EGT_hexa_1 ) ||
+         ( elemGT == EGT_hexa_1 ) || ( elemGT == EGT_quad9_2) ||
          ( elemGT == EGT_wedge_1 ) ) {
-        nelemNodes = elem->giveNumberOfNodes();
-        answer.resize(nelemNodes);
-        for ( int i = 1; i <= nelemNodes; i++ ) {
-            answer.at(i) = elem->giveNode(i)->giveNumber();
-        }
+
     } else if ( elemGT == EGT_hexa_27 ) {
-        int HexaQuadNodeMapping [] = {
-            5, 8, 7, 6, 1, 4, 3, 2, 16, 15, 14, 13, 12, 11, 10, 9, 17, 20, 19, 18, 23, 25, 26, 24, 22, 21, 27
-        };
-        nelemNodes = elem->giveNumberOfNodes();
-        answer.resize(nelemNodes);
-        for ( int i = 1; i <= nelemNodes; i++ ) {
-            answer.at(i) = elem->giveNode(HexaQuadNodeMapping [ i - 1 ])->giveNumber();
-        }
+        nodeMapping.setValues(27,  5, 8, 7, 6, 1, 4, 3, 2, 16, 15, 14, 13, 12, 11, 10, 9, 17, 20, 19, 18, 23, 25, 26, 24, 22, 21, 27);
+
     } else if ( elemGT == EGT_hexa_2 ) {
-        int HexaQuadNodeMapping [] = {
-            5, 8, 7, 6, 1, 4, 3, 2, 16, 15, 14, 13, 12, 11, 10, 9, 17, 20, 19, 18
-        };
-        nelemNodes = elem->giveNumberOfNodes();
-        answer.resize(nelemNodes);
-        for ( int i = 1; i <= nelemNodes; i++ ) {
-            answer.at(i) = elem->giveNode(HexaQuadNodeMapping [ i - 1 ])->giveNumber();
-        }
+        nodeMapping.setValues(20,  5, 8, 7, 6, 1, 4, 3, 2, 16, 15, 14, 13, 12, 11, 10, 9, 17, 20, 19, 18);
+
     } else if ( elemGT == EGT_wedge_2 ) {
-        int WedgeQuadNodeMapping [] = {
-            4, 6, 5, 1, 3, 2, 12, 11, 10, 9, 8, 7, 13, 15, 14
-        };
-        nelemNodes = elem->giveNumberOfNodes();
-        answer.resize(nelemNodes);
-        for ( int i = 1; i <= nelemNodes; i++ ) {
-            answer.at(i) = elem->giveNode(WedgeQuadNodeMapping [ i - 1 ])->giveNumber();
-        }
-    } else if ( elemGT == EGT_quad9_2 ) {
-        nelemNodes = elem->giveNumberOfNodes();
-        answer.resize(nelemNodes);
-        for ( int i = 1; i <= nelemNodes; i++ ) {
-            answer.at(i) = elem->giveNode(i)->giveNumber();
-        }
+        nodeMapping.setValues(15,  4, 6, 5, 1, 3, 2, 12, 11, 10, 9, 8, 7, 13, 15, 14);
+
     } else if ( elemGT == EGT_quad_1_interface ) {
-        int mapping [] = {
-            1, 2, 4, 3
-        };
-        nelemNodes = elem->giveNumberOfNodes();
-        answer.resize(nelemNodes);
-        for ( int i = 1; i <= nelemNodes; i++ ) {
-            answer.at(i) = elem->giveNode(mapping [ i - 1 ])->giveNumber();
-        }
-        //} else if ( elemGT == EGT_quad_21_interface ) {int mapping [] = { 1, 2, 5, 4, 3, 6 };
+        nodeMapping.setValues(4,  1, 2, 4, 3);
+
     } else if ( elemGT == EGT_quad_21_interface ) {
-        int mapping [] = {
-            1, 3, 2, 5, 6, 4
-        };                                                                                /// this is not the same ordering as defined in the VTK reference (typo?)
-        nelemNodes = elem->giveNumberOfNodes();
-        answer.resize(nelemNodes);
-        for ( int i = 1; i <= nelemNodes; i++ ) {
-            answer.at(i) = elem->giveNode(mapping [ i - 1 ])->giveNumber();
-        }
+        nodeMapping.setValues(6,  1, 2, 5, 4, 3, 6);
+
     } else {
         OOFEM_ERROR("VTKXMLExportModule: unsupported element geometry type");
+    }
+
+    int nelemNodes = elem->giveNumberOfNodes();
+    answer.resize(nelemNodes);
+    if ( nodeMapping.giveSize() > 0 ) {
+        for ( int i = 1; i <= nelemNodes; i++ ) {
+            answer.at(i) = elem->giveNode( nodeMapping.at(i) )->giveNumber();
+        }
+    } else {
+        for ( int i = 1; i <= nelemNodes; i++ ) {
+            answer.at(i) = elem->giveNode( i )->giveNumber();
+        }
     }
 }
 
@@ -347,27 +319,6 @@ bool
 VTKXMLExportModule :: isElementComposite(Element *elem)
 {
     return ( elem->giveGeometryType() == EGT_Composite );
-}
-
-
-int ///@todo intended for composite elements? Currently not in use, remove?
-VTKXMLExportModule :: giveNumberOfElementCells(Element *elem)
-{
-    Element_Geometry_Type elemGT = elem->giveGeometryType();
-
-    if ( ( elemGT == EGT_point ) ||
-         ( elemGT == EGT_line_1 ) || ( elemGT == EGT_line_2 ) ||
-         ( elemGT == EGT_triangle_1 ) || ( elemGT == EGT_triangle_2 ) ||
-         ( elemGT == EGT_tetra_1 ) || ( elemGT == EGT_tetra_2 ) ||
-         ( elemGT == EGT_quad_1 ) || ( elemGT == EGT_quad_2 ) || ( elemGT == EGT_quad9_2 ) ||
-         ( elemGT == EGT_hexa_1 ) || ( elemGT == EGT_hexa_2 ) || ( elemGT == EGT_hexa_27 ) ||
-         ( elemGT == EGT_wedge_1 ) || ( elemGT == EGT_wedge_2 ) ) {
-        return 1;
-    } else {
-        OOFEM_ERROR("VTKXMLExportModule: unsupported element geometry type");
-    }
-
-    return 0;
 }
 
 
@@ -631,7 +582,7 @@ VTKXMLExportModule :: setupVTKPiece(VTKPiece &vtkPiece, TimeStep *tStep, int reg
     IntArray mapG2L, mapL2G;
 
     // Assemble local->global and global->local region map and get number of
-    // single cells to process the composite cells exported individually.
+    // single cells to process, the composite cells exported individually.
     this->initRegionNodeNumbering(mapG2L, mapL2G, numNodes, numRegionEl, d, region);
 #ifndef __PARALLEL_MODE
     if ( numNodes && numRegionEl ) {
@@ -682,7 +633,6 @@ VTKXMLExportModule :: setupVTKPiece(VTKPiece &vtkPiece, TimeStep *tStep, int reg
             this->giveElementCell(cellNodes, elem);  // node numbering of the cell with according to the VTK format
 
             // Map from global to local node numbers for the current piece
-            //int numElNodes = elem->giveNumberOfNodes();
             int numElNodes = cellNodes.giveSize();
             IntArray connectivity(numElNodes);
             for ( int i = 1; i <= numElNodes; i++ ) {
@@ -693,7 +643,6 @@ VTKXMLExportModule :: setupVTKPiece(VTKPiece &vtkPiece, TimeStep *tStep, int reg
 
             vtkPiece.setCellType( cellNum, this->giveCellType(elem) ); // VTK cell type
 
-            //offset += elem->giveNumberOfNodes();
             offset += numElNodes;
             vtkPiece.setOffset(cellNum, offset);
         }
