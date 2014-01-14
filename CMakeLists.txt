@@ -679,6 +679,7 @@ file (GLOB fm_tests RELATIVE "${oofem_TEST_DIR}/fm" "${oofem_TEST_DIR}/fm/*.in")
 file (GLOB tm_tests RELATIVE "${oofem_TEST_DIR}/tm" "${oofem_TEST_DIR}/tm/*.in")
 file (GLOB tmsm_tests RELATIVE "${oofem_TEST_DIR}/tmsm" "${oofem_TEST_DIR}/tmsm/*.in")
 file (GLOB tmfm_tests RELATIVE "${oofem_TEST_DIR}/tmfm" "${oofem_TEST_DIR}/tmfm/*.in")
+file (GLOB tmcemhyd_tests RELATIVE "${oofem_TEST_DIR}/tmcemhyd" "${oofem_TEST_DIR}/tmcemhyd/*.in")
 foreach (case ${sm_tests})
     add_test (NAME "test_${case}" WORKING_DIRECTORY ${oofem_TEST_DIR}/sm COMMAND ${test_cmd} ${oofem_cmd} ${case} "s")
     # Separate commands so that we can use valgrind and gcov versions
