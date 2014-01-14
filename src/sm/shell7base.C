@@ -1802,8 +1802,8 @@ void Shell7Base :: NodalAveragingRecoveryMI_computeNodalValue(FloatArray &answer
 
 
 void
-Shell7Base :: ZZNodalRecoveryMI_computeNValProduct(FloatMatrix &answer, int layer, InternalStateType type,
-                                                   TimeStep *tStep)
+Shell7Base :: ZZNodalRecoveryMI_computeNValProductInLayer(FloatMatrix &answer, int layer, InternalStateType type,
+                                                          TimeStep *tStep)
 {  // evaluates N^T sigma over element volume
    // N(nsigma, nsigma*nnodes)
    // Definition : sigmaVector = N * nodalSigmaVector
@@ -1837,7 +1837,7 @@ Shell7Base :: ZZNodalRecoveryMI_computeNValProduct(FloatMatrix &answer, int laye
 }
 
 void
-Shell7Base :: ZZNodalRecoveryMI_computeNNMatrix(FloatArray &answer, int layer, InternalStateType type)
+Shell7Base :: ZZNodalRecoveryMI_computeNNMatrixInLayer(FloatArray &answer, int layer, InternalStateType type)
 {
     //
     // Returns NTN matrix (lumped) for Zienkiewicz-Zhu
@@ -1907,8 +1907,8 @@ Shell7Base :: ZZNodalRecoveryMI_recoverValues(std :: vector< FloatArray > &recov
     // ZZ recovery
     FloatArray nnMatrix;
     FloatMatrix nValProd;
-    ZZNodalRecoveryMI_computeNValProduct(nValProd, layer, type, tStep);
-    ZZNodalRecoveryMI_computeNNMatrix(nnMatrix, layer, type);
+    ZZNodalRecoveryMI_computeNValProductInLayer(nValProd, layer, type, tStep);
+    ZZNodalRecoveryMI_computeNNMatrixInLayer(nnMatrix, layer, type);
     int recoveredSize = nValProd.giveNumberOfColumns();
     int numNodes = nValProd.giveNumberOfRows();
     recoveredValues.resize(numNodes);

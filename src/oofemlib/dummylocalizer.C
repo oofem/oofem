@@ -196,7 +196,7 @@ DummySpatialLocalizer :: giveElementClosestToPoint(FloatArray &lcoords, FloatArr
 
 
 GaussPoint *
-DummySpatialLocalizer :: giveClosestIP(const FloatArray &coords, int region)
+DummySpatialLocalizer :: giveClosestIP(const FloatArray &coords, int region, bool iCohesiveZoneGP)
 {
     int nelem, i, j;
     double minDist = 1.e6, distance;

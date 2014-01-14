@@ -233,8 +233,8 @@ protected:
 
     // ZZ recovery
     virtual void ZZNodalRecoveryMI_ComputeEstimatedInterpolationMtrx(FloatArray &answer, GaussPoint *gp, InternalStateType type);
-    void ZZNodalRecoveryMI_computeNValProduct(FloatMatrix &answer, int layer, InternalStateType type, TimeStep *tStep);
-    void ZZNodalRecoveryMI_computeNNMatrix(FloatArray &answer, int layer, InternalStateType type);
+    void ZZNodalRecoveryMI_computeNValProductInLayer(FloatMatrix &answer, int layer, InternalStateType type, TimeStep *tStep);
+    void ZZNodalRecoveryMI_computeNNMatrixInLayer(FloatArray &answer, int layer, InternalStateType type);
     void ZZNodalRecoveryMI_recoverValues(std :: vector< FloatArray > &recoveredValues, int layer, InternalStateType type, TimeStep *tStep);
 
     // VTK interface
