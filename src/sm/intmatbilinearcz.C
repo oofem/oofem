@@ -136,6 +136,7 @@ void IntMatBilinearCZ :: giveFirstPKTraction_3d(FloatArray &answer, GaussPoint *
     const double damageTol = 1.0e-6;
     if ( status->mDamageOld > ( 1.0 - damageTol ) ) {
         status->mDamageNew = 1.0;
+        answer.resize(3);
         answer.zero();
         status->mTractionNew = answer;
         return;
@@ -189,6 +190,10 @@ void IntMatBilinearCZ :: giveFirstPKTraction_3d(FloatArray &answer, GaussPoint *
                 answer.beScaled( ( 1.0 - status->mDamageNew ), answer );
                 status->mTractionNew = answer;
 
+                // Jim
+                status->letTempJumpBe(jump);
+                status->letTempFirstPKTractionBe(answer);
+                
                 return;
             }
 

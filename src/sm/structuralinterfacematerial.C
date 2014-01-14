@@ -89,7 +89,7 @@ StructuralInterfaceMaterial :: giveInputRecord(DynamicInputRecord &input)
 void
 StructuralInterfaceMaterial :: giveStiffnessMatrix_dTdj_Num(FloatMatrix &answer, MatResponseMode rMode, GaussPoint *gp, TimeStep *tStep)
 {
-    // Numerical tangent
+    // Default implementation for computation of the numerical tangent
     // Computes the material stiffness using a central difference method
 
     StructuralInterfaceMaterialStatus *status = static_cast< StructuralInterfaceMaterialStatus * >( this->giveStatus(gp) );
@@ -102,10 +102,8 @@ StructuralInterfaceMaterial :: giveStiffnessMatrix_dTdj_Num(FloatMatrix &answer,
         const double eps = 1.0e-9;
         FloatArray T, TPlus, TMinus;
 
-
         FloatArray jump, jumpPlus, jumpMinus, Kcolumn;
         jump = status->giveTempJump();
-
         for ( int i = 1; i <= dim; i++ ) {
             jumpPlus = jumpMinus = jump;
             jumpPlus.at(i)  += eps;
@@ -117,11 +115,22 @@ StructuralInterfaceMaterial :: giveStiffnessMatrix_dTdj_Num(FloatMatrix &answer,
             answer.setColumn(Kcolumn, i);
         }
         answer.times( 1.0 / ( 2 * eps ) );
-
         this->giveFirstPKTraction_3d(T, gp, jump, F, tStep); // reset temp values by recomputing the stress
     }
 }
 #endif
+
+
+void
+StructuralInterfaceMaterial :: give1dStiffnessMatrix_Eng(FloatMatrix &answer, MatResponseMode mode, GaussPoint *gp, TimeStep *tStep)
+{
+    FloatMatrix answer3D;
+    give3dStiffnessMatrix_Eng(answer3D, mode, gp, tStep);
+    IntArray mask;
+    answer.resize(1,1);
+    answer.at(1,1) = answer3D.at(3,3);
+
+}
 
 
 void
@@ -133,7 +142,7 @@ StructuralInterfaceMaterial :: give2dStiffnessMatrix_Eng(FloatMatrix &answer, Ma
     mask.setValues(2,  1, 3);
     answer.beSubMatrixOf(answer3D, mask, mask);
 
-
+#if 0
     //debug
     printf("analytical tangent \n");
     answer3D.printYourself();
@@ -148,12 +157,13 @@ StructuralInterfaceMaterial :: give2dStiffnessMatrix_Eng(FloatMatrix &answer, Ma
     comp.subtract(answerNum);
     printf("difference in numerical tangent to mat method \n");
     comp.printYourself();
+#endif
 }
 
 void
 StructuralInterfaceMaterial :: give3dStiffnessMatrix_Eng(FloatMatrix &answer, MatResponseMode mode, GaussPoint *gp, TimeStep *tStep)
 {
-    //_error("give3dStiffnessMatrix_Eng: not implemented ");
+    // Default implementation. Will use large deformation dT/dj as stiffness
     give3dStiffnessMatrix_dTdj(answer, mode, gp, tStep);
 }
 
@@ -163,34 +173,45 @@ StructuralInterfaceMaterial :: give3dStiffnessMatrix_dTdj(FloatMatrix &answer, M
     _error("give3dStiffnessMatrix_dTdj: not implemented ")
 }
 
-void
-StructuralInterfaceMaterial :: give1dStiffnessMatrix_Eng(FloatMatrix &answer, MatResponseMode mode, GaussPoint *gp, TimeStep *tStep)
-{
-    give3dStiffnessMatrix_Eng(answer, mode, gp, tStep);
-}
 
 void
 StructuralInterfaceMaterial :: giveEngTraction_1d(FloatArray &answer, GaussPoint *gp, const FloatArray &jump, TimeStep *tStep)
 {
-    FloatArray modifiedJump(3);
-    modifiedJump.setValues( 3, 0.0, 0.0, jump.at(3) );
-    this->giveEngTraction_3d(answer, gp, modifiedJump, tStep);
+    FloatArray jump3D(3), traction3D;
+    jump3D.setValues( 3, 0.0, 0.0, jump.at(3) );
+    this->giveEngTraction_3d(traction3D, gp, jump3D, tStep);
+    answer.setValues( 1,  traction3D.at(3) );
+
+#ifdef DEBUG
+    if ( ( abs( traction3D.at(1) ) > 1.0e-3 ) || ( abs( traction3D.at(2) ) > 1.0e-3 )  ) {
+        OOFEM_ERROR1("StructuralInterfaceMaterial :: giveEngTraction_1d - Traction vector obtained from 3D state contains a nonzero shear stress component")
+    }
+#endif
 }
 
 void
 StructuralInterfaceMaterial :: giveEngTraction_2d(FloatArray &answer, GaussPoint *gp, const FloatArray &jump, TimeStep *tStep)
 {
-    FloatArray modifiedJump(3);
-    modifiedJump.setValues( 3, jump.at(1), 0.0, jump.at(3) );
-    this->giveEngTraction_3d(answer, gp, modifiedJump, tStep);
+    FloatArray jump3D(3), traction3D;
+    jump3D.setValues( 3, jump.at(1), 0.0, jump.at(2) );
+    this->giveEngTraction_3d(traction3D, gp, jump3D, tStep);
+    answer.setValues( 2,  traction3D.at(1), traction3D.at(3) );
+
+#ifdef DEBUG
+    if ( abs( traction3D.at(2) ) > 1.0e-3 ) {
+        OOFEM_ERROR1("StructuralInterfaceMaterial :: giveEngTraction_2d - Traction vector obtained from 3D state contains a nonzero thickness stress component")
+    }
+#endif
 }
 
 void
 StructuralInterfaceMaterial :: giveEngTraction_3d(FloatArray &answer, GaussPoint *gp, const FloatArray &jump, TimeStep *tStep)
 {
-    //_error("giveEngTraction_3d: not implemented ");
+    // Default implementation calls first PK version with F = I
     FloatMatrix F(3, 3);
     F.beUnitMatrix();
     giveFirstPKTraction_3d(answer, gp, jump, F, tStep);
 }
+
+
 } // end namespace oofem

@@ -70,15 +70,10 @@ StructuralInterfaceElement :: ~StructuralInterfaceElement()
 void
 StructuralInterfaceElement :: computeStiffnessMatrix(FloatMatrix &answer, MatResponseMode rMode, TimeStep *tStep)
 {
-    // Computes the stiffness matrix of the receiver
+    // Computes the stiffness matrix of the receiver K_cohesive = int_A ( N^t * dT/dj * N ) dA
     FloatMatrix N, D, DN;
     bool matStiffSymmFlag = this->giveCrossSection()->isCharacteristicMtrxSymmetric(rMode);
-
     answer.resize(0, 0);
-
-    if ( !this->isActivated(tStep) ) {
-        return;
-    }
 
     IntegrationRule *iRule = integrationRulesArray [ giveDefaultIntegrationRule() ];
     FloatMatrix rotationMatGtoL;
@@ -116,7 +111,7 @@ StructuralInterfaceElement :: computeStiffnessMatrix(FloatMatrix &answer, MatRes
 void
 StructuralInterfaceElement :: computeSpatialJump(FloatArray &answer, IntegrationPoint *ip, TimeStep *tStep)
 {
-    // Computes the spatial jump vector (allways 3 components) at the Gauss point (ip) of
+    // Computes the spatial jump vector at the Gauss point (ip) of
     // the receiver, at time step (tStep). jump = N*u
     FloatMatrix N;
     FloatArray u;
@@ -170,42 +165,14 @@ StructuralInterfaceElement :: giveInternalForcesVector(FloatArray &answer,
         IntegrationPoint *ip = iRule->getIntegrationPoint(i);
         this->computeNmatrixAt(ip, N);
 
-        //if ( useUpdatedGpRecord == 1 ) {
-        //    tractionTemp = static_cast<StructuralInterfaceMaterialStatus *> (ip->giveMaterialStatus())->giveTraction();
-        //    // modify sizes if stored traction has 3 components and the spatial dimension is less
-        //    int spatialDim = this->giveSpatialDimension();
-        //    if ( traction.giveSize() == 3 && spatialDim == 1 ) {
-        //        traction.setValues(1, tractionTemp.at(3) );
-        //    } else if ( traction.giveSize() == 3 && spatialDim == 2 ) {
-        //        traction.setValues(2, tractionTemp.at(1), tractionTemp.at(3) );
-        //    } else {
-        //        traction = tractionTemp;
-        //    }
-        //} else {
-        if ( this->isActivated(tStep) ) {
-            jump.beProductOf(N, u);
-        } else {
-            jump.resize(3);
-            jump.zero();
-        }
+        jump.beProductOf(N, u);
         this->computeTraction(traction, ip, jump, tStep);
-        //}
-
-        if ( traction.giveSize() == 0 ) {
-            break;
-        }
 
         // compute internal cohesive forces as f = N^T*traction dA
         double dA = this->computeAreaAround(ip);
         answer.plusProduct(N, traction, dA);
     }
 
-    // if inactive update state, but no contribution to global system
-    ///@todo why do we need to do this?
-    if ( !this->isActivated(tStep) ) {
-        answer.zero();
-        return;
-    }
 }
 
 void
@@ -365,3 +332,7 @@ StructuralInterfaceElement :: giveStiffnessMatrix_Eng(FloatMatrix &answer, MatRe
     ///@todo dT1dj = d(F*T2)/dj = dF/dj*T2 + F*dT2/dj - should we assume dFdj = 0? Otherwise it will be very complex!
 }
 } // end namespace oofem
+
+
+
+
