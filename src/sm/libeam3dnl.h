@@ -69,7 +69,7 @@ private:
     int referenceNode;
 
 public:
-    LIBeam3dNL(int n, Domain *d);
+    LIBeam3dNL(int n, Domain * d);
     virtual ~LIBeam3dNL() { }
 
     virtual void computeLumpedMassMatrix(FloatMatrix &answer, TimeStep *tStep);

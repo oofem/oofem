@@ -502,7 +502,7 @@ DruckerPragerPlasticitySM :: performVertexReturn(double eM, double gM, double kM
         } else {
             yieldValuePrime = yieldValuePrimeZero
                               - 2. / 9. / kM / kM *computeYieldStressPrime(tempKappa, eM)
-                              * deltaVolumetricStress / deltaKappa;
+            * deltaVolumetricStress / deltaKappa;
         }
 
         deltaVolumetricStressIncrement = -yieldValue / yieldValuePrime;
@@ -604,7 +604,7 @@ DruckerPragerPlasticitySM :: give3dMaterialStiffnessMatrix(FloatMatrix &answer,
 
     case TangentStiffness:
         switch ( ( static_cast< DruckerPragerPlasticitySMStatus * >( this->giveStatus(gp) ) )
-                 ->giveTempStateFlag() ) {
+                ->giveTempStateFlag() ) {
         case DruckerPragerPlasticitySMStatus :: DP_Elastic:        // elastic stiffness
         case DruckerPragerPlasticitySMStatus :: DP_Unloading:        // elastic stiffness
             LEMaterial->give3dMaterialStiffnessMatrix(answer, mode, gp, tStep);
@@ -840,7 +840,7 @@ DruckerPragerPlasticitySM :: predictRelativeComputationalCost(GaussPoint *gp)
     const int state_flag = status->giveStateFlag();
 
     if ( ( state_flag == DruckerPragerPlasticitySMStatus :: DP_Vertex ) ||
-         ( state_flag == DruckerPragerPlasticitySMStatus :: DP_Yielding ) ) {
+        ( state_flag == DruckerPragerPlasticitySMStatus :: DP_Yielding ) ) {
         return 20.;
     } else {
         return 1.0;

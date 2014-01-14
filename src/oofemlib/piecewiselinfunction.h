@@ -60,7 +60,7 @@ protected:
     FloatArray values;
 
 public:
-    PiecewiseLinFunction(int i, Domain *d);
+    PiecewiseLinFunction(int i, Domain * d);
     virtual ~PiecewiseLinFunction() { }
 
     virtual IRResultType initializeFrom(InputRecord *ir);

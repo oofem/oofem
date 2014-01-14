@@ -506,7 +506,7 @@ Beam3d :: computeEdgeLoadVectorAt(FloatArray &answer, Load *load, int iedge, Tim
     // evaluates the receivers edge load vector
     // for clamped beam
     //
-    BoundaryLoad *edgeLoad = dynamic_cast< BoundaryLoad * >( load );
+    BoundaryLoad *edgeLoad = dynamic_cast< BoundaryLoad * >(load);
     if ( edgeLoad ) {
         if ( edgeLoad->giveNumberOfDofs() != 6 ) {
             _error("computeEdgeLoadVectorAt: load number of dofs mismatch");
@@ -934,7 +934,7 @@ Interface *
 Beam3d :: giveInterface(InterfaceType interface)
 {
     if ( interface == FiberedCrossSectionInterfaceType ) {
-        return static_cast< FiberedCrossSectionInterface * >( this );
+        return static_cast< FiberedCrossSectionInterface * >(this);
     }
 
     return NULL;

@@ -861,7 +861,7 @@ IsotropicDamageMaterial1 :: damageFunction(double kappa, GaussPoint *gp)
         if ( kappa <= e1 ) {
             return 1.0 - exp( -pow(kappa / e0, md) );
         } else {
-            return 1.0 - s1 *exp( -( kappa - e1 ) / ( ef * ( 1. + pow( ( kappa - e1 ) / e2, nd ) ) ) ) / kappa;
+            return 1.0 - s1 *exp( -( kappa - e1 ) / ( ef * ( 1. + pow ( ( kappa - e1 ) / e2, nd ) ) ) ) / kappa;
         }
 
     default:
@@ -920,7 +920,7 @@ IsotropicDamageMaterial1 :: damageFunctionPrime(double kappa, GaussPoint *gp)
             return exp( -pow(kappa / e0, md) ) * md / pow(e0, md) * pow(kappa, md - 1.);
         } else {
             double a = ( ( ef * ( 1. + pow( ( kappa - e1 ) / e2, nd ) ) ) -  ef * nd * pow( ( kappa - e1 ) / e2, nd ) ) / ( ef * ( 1. + pow( ( kappa - e1 ) / e2, nd ) ) ) / ( ef * ( 1. + pow( ( kappa - e1 ) / e2, nd ) ) );
-            double answer =   s1 * exp( -( kappa - e1 ) / ( ef * ( 1. + pow( ( kappa - e1 ) / e2, nd ) ) ) ) / kappa / kappa +  s1 *exp( -( kappa - e1 ) / ( ef * ( 1. + pow( ( kappa - e1 ) / e2, nd ) ) ) ) / kappa * a;
+            double answer =   s1 * exp( -( kappa - e1 ) / ( ef * ( 1. + pow( ( kappa - e1 ) / e2, nd ) ) ) ) / kappa / kappa +  s1 *exp( -( kappa - e1 ) / ( ef * ( 1. + pow ( ( kappa - e1 ) / e2, nd ) ) ) ) / kappa * a;
             return answer;
         }
     } break;
@@ -1149,7 +1149,7 @@ Interface *
 IsotropicDamageMaterial1 :: giveInterface(InterfaceType type)
 {
     if ( type == MaterialModelMapperInterfaceType ) {
-        return static_cast< MaterialModelMapperInterface * >( this );
+        return static_cast< MaterialModelMapperInterface * >(this);
     } else {
         return NULL;
     }
@@ -1280,7 +1280,7 @@ Interface *
 IsotropicDamageMaterial1Status :: giveInterface(InterfaceType type)
 {
     if ( type == RandomMaterialStatusExtensionInterfaceType ) {
-        return static_cast< RandomMaterialStatusExtensionInterface * >( this );
+        return static_cast< RandomMaterialStatusExtensionInterface * >(this);
     } else {
         return NULL;
     }

@@ -69,7 +69,7 @@ QTruss1dGrad :: giveDofManDofIDMask(int inode, EquationID ut, IntArray &answer) 
 {
     if ( inode < 3 ) {
         answer.setValues(2, D_u, G_0);
-    } else   {
+    } else {
         answer.setValues(1, D_u);
     }
 }

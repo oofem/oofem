@@ -49,7 +49,7 @@ protected:
     static FEI2dQuadLin interpolation;
 
 public:
-    QPlaneStressGrad(int n, Domain *d);
+    QPlaneStressGrad(int n, Domain * d);
     virtual ~QPlaneStressGrad() { }
 
     virtual IRResultType initializeFrom(InputRecord *ir);

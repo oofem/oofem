@@ -81,7 +81,7 @@ public:
     BasicGeometry();
 
     /// Copy constructor: should be implemented when a class deals with pointers
-    BasicGeometry(const BasicGeometry &iBasicGeometry);
+    BasicGeometry(const BasicGeometry & iBasicGeometry);
 
     /// Destructor.
     virtual ~BasicGeometry();
@@ -153,9 +153,9 @@ class OOFEM_EXPORT Line : public BasicGeometry
 public:
     Line() : BasicGeometry() { }
     virtual ~Line() { }
-    Line(FloatArray *pointA, FloatArray *pointB);
+    Line(FloatArray * pointA, FloatArray * pointB);
 
-    virtual BasicGeometry *Clone() { return new Line(* this); }
+    virtual BasicGeometry *Clone() { return new Line(*this); }
 
     virtual double computeDistanceTo(const FloatArray *point);
     /// Computes tangential distance to a point
@@ -180,10 +180,10 @@ public:
 class OOFEM_EXPORT Triangle : public BasicGeometry
 {
 public:
-    Triangle(const FloatArray &iP1, const FloatArray &iP2, const FloatArray &iP3);
+    Triangle(const FloatArray & iP1, const FloatArray & iP2, const FloatArray & iP3);
     virtual ~Triangle() { }
 
-    virtual BasicGeometry *Clone() { return new Triangle(* this); }
+    virtual BasicGeometry *Clone() { return new Triangle(*this); }
 
     virtual void computeNormalSignDist(double &oDist, const FloatArray &iPoint) const { OOFEM_ERROR("Triangle::computeNormalSignDist -- not implemented"); };
     virtual void computeTangentialSignDist(double &oDist, const FloatArray &iPoint, double &oMinDistArcPos) const { OOFEM_ERROR("Triangle::computeTangentialSignDist -- not implemented"); };
@@ -213,9 +213,9 @@ protected:
 public:
     Circle() : BasicGeometry(), radius(0.0), mTangSignDist(1.0) { }
     virtual ~Circle() { }
-    Circle(FloatArray *center, double radius);
+    Circle(FloatArray * center, double radius);
 
-    virtual BasicGeometry *Clone() { return new Circle(* this); }
+    virtual BasicGeometry *Clone() { return new Circle(*this); }
 
     virtual void computeNormalSignDist(double &oDist, const FloatArray &iPoint) const;
 
@@ -244,7 +244,7 @@ public:
     PolygonLine();
     virtual ~PolygonLine() { }
 
-    virtual BasicGeometry *Clone() { return new PolygonLine(* this); }
+    virtual BasicGeometry *Clone() { return new PolygonLine(*this); }
 
     virtual void computeNormalSignDist(double &oDist, const FloatArray &iPoint) const;
     virtual void computeTangentialSignDist(double &oDist, const FloatArray &iPoint, double &oMinDistArcPos) const;
@@ -299,7 +299,7 @@ public:
     virtual ~PointSwarm() { }
     PointSwarm(std :: list< int >pointsID);
 
-    virtual BasicGeometry *Clone() { return new PointSwarm(* this); }
+    virtual BasicGeometry *Clone() { return new PointSwarm(*this); }
 
     virtual void computeNormalSignDist(double &oDist, const FloatArray &iPoint) const { OOFEM_ERROR("PointSwarm::computeNormalSignDist -- not implemented"); };
     virtual void computeTangentialSignDist(double &oDist, const FloatArray &iPoint, double &oMinDistArcPos) const { OOFEM_ERROR("PointSwarm::computeTangentialSignDist -- not implemented"); };

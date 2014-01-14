@@ -75,8 +75,8 @@ SLEPcSolver :: solve(SparseMtrx *a, SparseMtrx *b, FloatArray *_eigv, FloatMatri
     }
 
     if ( a->giveNumberOfRows() != a->giveNumberOfColumns() ||
-         b->giveNumberOfRows() != b->giveNumberOfRows() ||
-         a->giveNumberOfColumns() != b->giveNumberOfColumns() ) {
+        b->giveNumberOfRows() != b->giveNumberOfRows() ||
+        a->giveNumberOfColumns() != b->giveNumberOfColumns() ) {
         OOFEM_ERROR("SLEPcSolver :: solveYourselfAt : matrices size mismatch\n");
     }
 

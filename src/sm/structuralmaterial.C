@@ -1158,26 +1158,26 @@ StructuralMaterial :: computePrincipalValues(FloatArray &answer, const FloatArra
         if ( mode == principal_stress ) {
             I1 = s.at(1) + s.at(2) + s.at(3);
             I2 = s.at(1) * s.at(2) + s.at(2) * s.at(3) + s.at(3) * s.at(1) -
-                 ( s.at(4) * s.at(4) + s.at(5) * s.at(5) + s.at(6) * s.at(6) );
+            ( s.at(4) * s.at(4) + s.at(5) * s.at(5) + s.at(6) * s.at(6) );
             I3 = s.at(1) * s.at(2) * s.at(3) + 2. * s.at(4) * s.at(5) * s.at(6) -
-                 ( s.at(1) * s.at(4) * s.at(4) + s.at(2) * s.at(5) * s.at(5) +
-                   s.at(3) * s.at(6) * s.at(6) );
+            ( s.at(1) * s.at(4) * s.at(4) + s.at(2) * s.at(5) * s.at(5) +
+             s.at(3) * s.at(6) * s.at(6) );
         } else if ( mode == principal_deviatoricstress ) {
             help = ( s.at(1) + s.at(2) + s.at(3) ) / 3.0;
             I1 = 0.;
             I2 = -( 1. / 6. ) * ( ( s.at(1) - s.at(2) ) * ( s.at(1) - s.at(2) ) + ( s.at(2) - s.at(3) ) * ( s.at(2) - s.at(3) ) +
-                                  ( s.at(3) - s.at(1) ) * ( s.at(3) - s.at(1) ) ) - s.at(4) * s.at(4) - s.at(5) * s.at(5) -
-                 s.at(6) * s.at(6);
+                                 ( s.at(3) - s.at(1) ) * ( s.at(3) - s.at(1) ) ) - s.at(4) * s.at(4) - s.at(5) * s.at(5) -
+            s.at(6) * s.at(6);
             I3 = ( s.at(1) - help ) * ( s.at(2) - help ) * ( s.at(3) - help ) + 2. * s.at(4) * s.at(5) * s.at(6) -
-                 s.at(5) * s.at(5) * ( s.at(2) - help ) - s.at(4) * s.at(4) * ( s.at(1) - help ) -
-                 s.at(6) * s.at(6) * ( s.at(3) - help );
+            s.at(5) * s.at(5) * ( s.at(2) - help ) - s.at(4) * s.at(4) * ( s.at(1) - help ) -
+            s.at(6) * s.at(6) * ( s.at(3) - help );
         } else if ( mode == principal_strain ) {
             I1 = s.at(1) + s.at(2) + s.at(3);
             I2 = s.at(1) * s.at(2) + s.at(2) * s.at(3) + s.at(3) * s.at(1) -
-                 0.25 * ( s.at(4) * s.at(4) + s.at(5) * s.at(5) + s.at(6) * s.at(6) );
+            0.25 * ( s.at(4) * s.at(4) + s.at(5) * s.at(5) + s.at(6) * s.at(6) );
             I3 = s.at(1) * s.at(2) * s.at(3) +
-                 0.25 * ( s.at(4) * s.at(5) * s.at(6) - s.at(1) * s.at(4) * s.at(4) -
-                          s.at(2) * s.at(5) * s.at(5) - s.at(3) * s.at(6) * s.at(6) );
+            0.25 * ( s.at(4) * s.at(5) * s.at(6) - s.at(1) * s.at(4) * s.at(4) -
+                    s.at(2) * s.at(5) * s.at(5) - s.at(3) * s.at(6) * s.at(6) );
         } else {
             OOFEM_ERROR("StructuralMaterial :: ComputePrincipalValues: not supported");
         }
@@ -1373,7 +1373,7 @@ StructuralMaterial :: computeVonMisesStress(const FloatArray *currentStress)
     v3 = ( ( currentStress->at(3) - currentStress->at(1) ) * ( currentStress->at(3) - currentStress->at(1) ) );
 
     J2 = ( 1. / 6. ) * ( v1 + v2 + v3 ) + currentStress->at(4) * currentStress->at(4) +
-         currentStress->at(5) * currentStress->at(5) + currentStress->at(6) * currentStress->at(6);
+    currentStress->at(5) * currentStress->at(5) + currentStress->at(6) * currentStress->at(6);
 
     return sqrt(3 * J2);
 }

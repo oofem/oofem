@@ -52,7 +52,7 @@ protected:
     int numberOfDofs;
 
 public:
-    HTSelement(int n, Domain *d);
+    HTSelement(int n, Domain * d);
     virtual ~HTSelement() { }
 
     virtual IRResultType initializeFrom(InputRecord *ir);

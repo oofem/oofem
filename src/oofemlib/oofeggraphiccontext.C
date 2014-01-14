@@ -65,7 +65,7 @@ double oofegGraphicContext :: zprofilescale = 0.0;
 int oofegGraphicContext :: activeEigVal = 1;
 int oofegGraphicContext :: activeYieldStep;
 IntArray oofegGraphicContext :: matRegFilter;
-std :: list< Range >oofegGraphicContext :: element_filter;
+std :: list< Range > oofegGraphicContext :: element_filter;
 SmootherType oofegGraphicContext :: smootherType;
 ScalarAlgorithmType oofegGraphicContext :: scalarAlgo = SA_ISO_SURF;
 int oofegGraphicContext :: intVarDefGeoFlag = 0;
@@ -95,23 +95,23 @@ oofegGraphicContext :: init(EngngModel *d)
         int i, nmat;
 
         emodel = d;
-        meshFillColor = ColorGetPixelFromString(const_cast< char * >( "black" ), & suc);
-        edgeColor = ColorGetPixelFromString(const_cast< char * >( "black" ), & suc);
-        deformedElementColor = ColorGetPixelFromString(const_cast< char * >( "BlueViolet" ), & suc);
-        nodeColor  = ColorGetPixelFromString(const_cast< char * >( "black" ), & suc);
-        bcicColor  = ColorGetPixelFromString(const_cast< char * >( "orange" ), & suc);
-        bcForceColor  = ColorGetPixelFromString(const_cast< char * >( "red" ), & suc);
-        crackPatternColor = ColorGetPixelFromString(const_cast< char * >( "gray66" ), & suc);
-        activeCrackColor  = ColorGetPixelFromString(const_cast< char * >( "red2" ), & suc);
-        standardSparseProfileColor  = ColorGetPixelFromString(const_cast< char * >( "blue" ), & suc);
-        extendedSparseProfileColor  = ColorGetPixelFromString(const_cast< char * >( "red" ), & suc);
-        geometryColor = ColorGetPixelFromString(const_cast< char * >( "yellow" ), & suc);
+        meshFillColor = ColorGetPixelFromString(const_cast< char * >("black"), & suc);
+        edgeColor = ColorGetPixelFromString(const_cast< char * >("black"), & suc);
+        deformedElementColor = ColorGetPixelFromString(const_cast< char * >("BlueViolet"), & suc);
+        nodeColor  = ColorGetPixelFromString(const_cast< char * >("black"), & suc);
+        bcicColor  = ColorGetPixelFromString(const_cast< char * >("orange"), & suc);
+        bcForceColor  = ColorGetPixelFromString(const_cast< char * >("red"), & suc);
+        crackPatternColor = ColorGetPixelFromString(const_cast< char * >("gray66"), & suc);
+        activeCrackColor  = ColorGetPixelFromString(const_cast< char * >("red2"), & suc);
+        standardSparseProfileColor  = ColorGetPixelFromString(const_cast< char * >("blue"), & suc);
+        extendedSparseProfileColor  = ColorGetPixelFromString(const_cast< char * >("red"), & suc);
+        geometryColor = ColorGetPixelFromString(const_cast< char * >("yellow"), & suc);
 
-        yieldPlotColors [ 0 ] = ColorGetPixelFromString(const_cast< char * >( "pink" ), & suc);
-        yieldPlotColors [ 1 ] = ColorGetPixelFromString(const_cast< char * >( "PaleVioletRed" ), & suc);
-        yieldPlotColors [ 2 ] = ColorGetPixelFromString(const_cast< char * >( "maroon" ), & suc);
+        yieldPlotColors [ 0 ] = ColorGetPixelFromString(const_cast< char * >("pink"), & suc);
+        yieldPlotColors [ 1 ] = ColorGetPixelFromString(const_cast< char * >("PaleVioletRed"), & suc);
+        yieldPlotColors [ 2 ] = ColorGetPixelFromString(const_cast< char * >("maroon"), & suc);
 
-        crossSectionColor = ColorGetPixelFromString(const_cast< char * >( "blue" ), & suc);
+        crossSectionColor = ColorGetPixelFromString(const_cast< char * >("blue"), & suc);
 
         activeDomain = 1;
 

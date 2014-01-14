@@ -750,7 +750,7 @@ DustMaterial :: functionHDQ(double tempQ)
     double dxtq = functionXDQ(tempQ);
     switch ( hardeningType ) {
     case 1:
-        return wHard * dHard * exp(dHard * xtq) * dHard * dxtq;
+        return wHard *dHard *exp(dHard *xtq) * dHard * dxtq;
 
     default:     // 0
         return dHard * wHard * ( dxtq * ( 1 - dHard * xtq ) - xtq * ( -dHard * dxtq ) ) / ( 1 - dHard * xtq ) / ( 1 - dHard * xtq );
@@ -773,7 +773,7 @@ double
 DustMaterial :: computeDeltaGamma2(double tempQ, double q, double i1, double bulkModulus)
 {
     double vfH = functionH(q, tempQ);
-    return rEll * rEll * functionFe(tempQ) * vfH / ( 3 * ( i1 - 3 * bulkModulus * vfH - tempQ ) );
+    return rEll *rEll *functionFe(tempQ) * vfH / ( 3 * ( i1 - 3 * bulkModulus * vfH - tempQ ) );
 }
 
 double

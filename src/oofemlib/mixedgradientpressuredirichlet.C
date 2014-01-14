@@ -250,8 +250,7 @@ void MixedGradientPressureDirichlet :: computeFields(FloatArray &sigmaDev, doubl
 }
 
 
-void MixedGradientPressureDirichlet :: computeTangents(
-    FloatMatrix &Ed, FloatArray &Ep, FloatArray &Cd, double &Cp, EquationID eid, TimeStep *tStep)
+void MixedGradientPressureDirichlet :: computeTangents(FloatMatrix &Ed, FloatArray &Ep, FloatArray &Cd, double &Cp, EquationID eid, TimeStep *tStep)
 {
     double size = this->domainSize();
     // Fetch some information from the engineering model

@@ -52,7 +52,7 @@ namespace oofem {
 FEI3dWedgeQuad Shell7Base :: interpolationForExport;
 
 Shell7Base :: Shell7Base(int n, Domain *aDomain) : NLStructuralElement(n, aDomain),  LayeredCrossSectionInterface(),
-    VTKXMLExportModuleElementInterface(), ZZNodalRecoveryModelInterface(), FailureModuleElementInterface() {}
+    VTKXMLExportModuleElementInterface(), ZZNodalRecoveryModelInterface(), FailureModuleElementInterface() { }
 
 IRResultType Shell7Base :: initializeFrom(InputRecord *ir)
 {
@@ -87,19 +87,19 @@ Interface *Shell7Base :: giveInterface(InterfaceType it)
 {
     switch ( it ) {
     case NodalAveragingRecoveryModelInterfaceType:
-        return static_cast< NodalAveragingRecoveryModelInterface * >( this );
+        return static_cast< NodalAveragingRecoveryModelInterface * >(this);
 
     case LayeredCrossSectionInterfaceType:
-        return static_cast< LayeredCrossSectionInterface * >( this );
+        return static_cast< LayeredCrossSectionInterface * >(this);
 
     case VTKXMLExportModuleElementInterfaceType:
-        return static_cast< VTKXMLExportModuleElementInterface * >( this );
+        return static_cast< VTKXMLExportModuleElementInterface * >(this);
 
     case ZZNodalRecoveryModelInterfaceType:
-        return static_cast< ZZNodalRecoveryModelInterface * >( this );
+        return static_cast< ZZNodalRecoveryModelInterface * >(this);
 
     case FailureModuleElementInterfaceType:
-        return static_cast< FailureModuleElementInterface * >( this );
+        return static_cast< FailureModuleElementInterface * >(this);
 
     default:
         return StructuralElement :: giveInterface(it);
@@ -132,7 +132,7 @@ Shell7Base :: computeGlobalCoordinates(FloatArray &answer, const FloatArray &lco
 double
 Shell7Base :: giveGlobalZcoord(double xi, FloatArray &lc)
 {
-    return xi * this->layeredCS->give(CS_Thickness, & lc, NULL, this) * 0.5;
+    return xi *this->layeredCS->give(CS_Thickness, &lc, NULL, this) * 0.5;
 }
 
 double // @todo move to layered crosssection
@@ -430,7 +430,7 @@ Shell7Base :: computeStiffnessMatrix(FloatMatrix &answer, MatResponseMode rMode,
         int iSurf = this->boundaryLoadArray.at(2 * i);         // load_id
         Load *load = this->domain->giveLoad(load_number);
 
-        if ( dynamic_cast< ConstantPressureLoad * >( load ) ) {
+        if ( dynamic_cast< ConstantPressureLoad * >(load) ) {
             FloatMatrix K_pressure;
             this->computePressureTangentMatrix(K_pressure, load, iSurf, tStep);
             answer.add(K_pressure); // Should assemble with ordering
@@ -717,7 +717,7 @@ Shell7Base :: computePressureTangentMatrix(FloatMatrix &answer, Load *load, cons
 {
     // Computes tangent matrix associated with the linearization of pressure loading. Assumes constant pressure.
     IntegrationRule *iRule = specialIntegrationRulesArray [ 1 ];   // rule #2 for surface integration
-    ConstantPressureLoad *pLoad = dynamic_cast< ConstantPressureLoad * >( load );
+    ConstantPressureLoad *pLoad = dynamic_cast< ConstantPressureLoad * >(load);
 
     FloatMatrix N, B, NLB, L(7, 18), gcov, W1, W2;
     FloatArray lcoords(3), solVec, pressure;
@@ -840,7 +840,7 @@ Shell7Base :: computeStressMatrix(FloatArray &answer, FloatArray &genEps, GaussP
 {
     FloatArray vE;
     this->computeStrainVectorF(vE, gp, tStep, genEps);     // Green-Lagrange strain vector in Voigt form
-    static_cast< StructuralMaterial * >( mat )->giveRealStressVector(answer, gp, vE, tStep);
+    static_cast< StructuralMaterial * >(mat)->giveRealStressVector(answer, gp, vE, tStep);
 }
 
 
@@ -1418,7 +1418,7 @@ Shell7Base :: computeTripleProduct(FloatMatrix &answer, const FloatMatrix &a, co
 void
 Shell7Base :: computeEdgeLoadVectorAt(FloatArray &answer, Load *load, int iEdge, TimeStep *tStep, ValueModeType mode)
 {
-    BoundaryLoad *edgeLoad = dynamic_cast< BoundaryLoad * >( load );
+    BoundaryLoad *edgeLoad = dynamic_cast< BoundaryLoad * >(load);
     if ( edgeLoad ) {
         this->computeTractionForce(answer, iEdge, edgeLoad, tStep, mode);
         return;
@@ -1434,7 +1434,7 @@ void
 Shell7Base :: computeSurfaceLoadVectorAt(FloatArray &answer, Load *load,
                                          int iSurf, TimeStep *tStep, ValueModeType mode)
 {
-    BoundaryLoad *surfLoad = dynamic_cast< BoundaryLoad * >( load );
+    BoundaryLoad *surfLoad = dynamic_cast< BoundaryLoad * >(load);
     if ( surfLoad ) {
         FloatArray solVec, force;
         this->giveUpdatedSolutionVector(solVec, tStep);
@@ -1456,7 +1456,7 @@ void
 Shell7Base :: computePressureForce(FloatArray &answer, FloatArray solVec, const int iSurf, BoundaryLoad *surfLoad, TimeStep *tStep, ValueModeType mode)
 {
     // Computes pressure loading. Acts normal to the current (deformed) surface.
-    ConstantPressureLoad *pLoad = dynamic_cast< ConstantPressureLoad * >( surfLoad );
+    ConstantPressureLoad *pLoad = dynamic_cast< ConstantPressureLoad * >(surfLoad);
     IntegrationRule *iRule = specialIntegrationRulesArray [ 1 ];   // rule #2 for surface integration
 
     FloatMatrix N, B, lambda;
@@ -1497,7 +1497,7 @@ Shell7Base :: computePressureForceAt(GaussPoint *gp, FloatArray &traction, const
     }
 
     FloatArray load;
-    if ( ConstantPressureLoad * pLoad = dynamic_cast< ConstantPressureLoad * >( surfLoad ) ) {
+    if ( ConstantPressureLoad * pLoad = dynamic_cast< ConstantPressureLoad * >(surfLoad) ) {
         FloatMatrix gcov;
         FloatArray g1, g2;
         FloatArray lcoords(3);
@@ -1511,7 +1511,7 @@ Shell7Base :: computePressureForceAt(GaussPoint *gp, FloatArray &traction, const
         surfLoad->computeValueAt(load, tStep, lcoords, mode);        // pressure component
         traction.beVectorProductOf(g1, g2);        // normal vector (should not be normalized due to integraton in reference config.)
         traction.times( -load.at(1) );
-    } else if ( dynamic_cast< ConstantSurfaceLoad * >( surfLoad ) ) {
+    } else if ( dynamic_cast< ConstantSurfaceLoad * >(surfLoad) ) {
         surfLoad->computeValueAt(traction, tStep, * ( gp->giveCoordinates() ), mode);        // traction vector
     } else {
         _error("computePressureForceAt: incompatible load type");
@@ -1629,7 +1629,7 @@ Shell7Base :: edgeComputeLengthAround(GaussPoint *gp, const int iedge)
     lcoords = * gp->giveCoordinates();
     this->edgeEvalInitialCovarBaseVectorsAt(lcoords, iedge, G1, G3);
     detJ = G1.computeNorm();
-    return detJ * gp->giveWeight();
+    return detJ *gp->giveWeight();
 }
 #endif
 
@@ -1881,7 +1881,7 @@ Shell7Base :: ZZNodalRecoveryMI_ComputeEstimatedInterpolationMtrx(FloatArray &an
     // according to Zienkiewicz & Zhu paper
     // N(nsigma, nsigma*nnodes)
     // Definition : sigmaVector = N * nodalSigmaVector
-    FEInterpolation *interpol = static_cast< FEInterpolation * >( & this->interpolationForExport );
+    FEInterpolation *interpol = static_cast< FEInterpolation * >(& this->interpolationForExport);
 
     // test if underlying element provides interpolation
     if ( interpol ) {
@@ -2785,7 +2785,7 @@ Shell7Base :: computeBmatrixForStressRecAt(FloatArray &lcoords, FloatMatrix &ans
         coords [ i - 1 ] = & nodes [ pos - 1 ];
     }
 
-    FEInterpolation *interpol = static_cast< FEInterpolation * >( & this->interpolationForExport );
+    FEInterpolation *interpol = static_cast< FEInterpolation * >(& this->interpolationForExport);
     FloatMatrix dNdx;
     interpol->evaldNdx( dNdx, lcoords, FEIVertexListGeometryWrapper(numNodes, ( const FloatArray ** ) coords) );
 

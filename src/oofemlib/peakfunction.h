@@ -58,7 +58,7 @@ private:
     double value;
 
 public:
-    PeakFunction(int i, Domain *d) : LoadTimeFunction(i, d)
+    PeakFunction(int i, Domain * d) : LoadTimeFunction(i, d)
     {
         t = 0.0;
         value = 0.0;

@@ -59,18 +59,18 @@ namespace oofem {
  * - calculating its B,D,N matrices and dV.
  */
 class TrPlaneStress2d : public NLStructuralElement, public ZZNodalRecoveryModelInterface,
-    public NodalAveragingRecoveryModelInterface, public SPRNodalRecoveryModelInterface,
-    public SpatialLocalizerInterface,
-    public DirectErrorIndicatorRCInterface, public EIPrimaryUnknownMapperInterface,
-    public ZZErrorEstimatorInterface, public ZZRemeshingCriteriaInterface, public MMAShapeFunctProjectionInterface,
-    public HuertaErrorEstimatorInterface, public HuertaRemeshingCriteriaInterface
+public NodalAveragingRecoveryModelInterface, public SPRNodalRecoveryModelInterface,
+public SpatialLocalizerInterface,
+public DirectErrorIndicatorRCInterface, public EIPrimaryUnknownMapperInterface,
+public ZZErrorEstimatorInterface, public ZZRemeshingCriteriaInterface, public MMAShapeFunctProjectionInterface,
+public HuertaErrorEstimatorInterface, public HuertaRemeshingCriteriaInterface
 {
 protected:
     static FEI2dTrLin interp;
     double area;
 
 public:
-    TrPlaneStress2d(int n, Domain *d);
+    TrPlaneStress2d(int n, Domain * d);
     virtual ~TrPlaneStress2d() { }
 
     virtual FEInterpolation *giveInterpolation() const { return & interp; }

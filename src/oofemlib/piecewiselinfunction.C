@@ -47,7 +47,7 @@ namespace oofem {
 REGISTER_LoadTimeFunction(PiecewiseLinFunction);
 
 PiecewiseLinFunction :: PiecewiseLinFunction(int i, Domain *d) : LoadTimeFunction(i, d), dates(), values()
-{}
+{ }
 
 double PiecewiseLinFunction :: __at(double time)
 // Returns the value of the receiver at time 'time'. 'time' should be

@@ -79,7 +79,7 @@ public:
      * @param n Node number in domain aDomain.
      * @param aDomain Domain to which node belongs.
      */
-    HangingNode(int n, Domain *aDomain);
+    HangingNode(int n, Domain * aDomain);
     /// Destructor.
     virtual ~HangingNode(void) { }
 

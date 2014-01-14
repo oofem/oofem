@@ -166,8 +166,8 @@ void
 Quad1MindlinShell3D :: computeSurfaceLoadVectorAt(FloatArray &answer, Load *load,
                                                   int iSurf, TimeStep *tStep, ValueModeType mode)
 {
-    BoundaryLoad *surfLoad = static_cast< BoundaryLoad * >( load );
-    if ( dynamic_cast< ConstantPressureLoad * >( surfLoad ) ) { // Just checking the type of b.c.
+    BoundaryLoad *surfLoad = static_cast< BoundaryLoad * >(load);
+    if ( dynamic_cast< ConstantPressureLoad * >(surfLoad) ) { // Just checking the type of b.c.
         // EXPERIMENTAL CODE:
         IntegrationRule *iRule;
         FloatArray n, gcoords, pressure;
@@ -481,7 +481,7 @@ double
 Quad1MindlinShell3D :: computeEdgeVolumeAround(GaussPoint *gp, int iEdge)
 {
     double detJ = this->interp.edgeGiveTransformationJacobian( iEdge, * gp->giveCoordinates(), FEIVertexListGeometryWrapper(4, ( const FloatArray ** ) lnodes) );
-    return detJ * gp->giveWeight();
+    return detJ *gp->giveWeight();
 }
 
 

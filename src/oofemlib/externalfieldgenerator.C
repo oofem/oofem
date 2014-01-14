@@ -43,10 +43,10 @@ namespace oofem {
 REGISTER_RandomFieldGenerator(ExternalFieldGenerator);
 
 ExternalFieldGenerator :: ExternalFieldGenerator(int num, Domain *d) : RandomFieldGenerator(num, d)
-{}
+{ }
 
 ExternalFieldGenerator :: ~ExternalFieldGenerator()
-{}
+{ }
 
 void ExternalFieldGenerator :: generateRandomValue(double &value, FloatArray *globalCoordinates)
 {
@@ -110,9 +110,9 @@ void ExternalFieldGenerator :: generateRandomValue(double &value, FloatArray *gl
         if ( randomVariable == 0. ) {
             randomVariable =
                 ( 1. - helpX ) * ( 1. - helpY ) * field(3 * ( countXDown * numberReal(1) + countYDown ) + 2) +
-                helpX * ( 1. - helpY ) * field(3 * ( countXUp * numberReal(1) + countYDown ) + 2) +
-                helpX *helpY *field(3 * ( countXUp * numberReal(1) + countYUp ) + 2) +
-                ( 1. - helpX ) * helpY * field(3 * ( countXDown * numberReal(1) + countYUp ) + 2);
+            helpX * ( 1. - helpY ) * field(3 * ( countXUp * numberReal(1) + countYDown ) + 2) +
+            helpX *helpY *field(3 * ( countXUp *numberReal ( 1 ) + countYUp ) + 2) +
+            ( 1. - helpX ) * helpY * field(3 * ( countXDown * numberReal(1) + countYUp ) + 2);
         }
     }
 

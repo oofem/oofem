@@ -62,7 +62,7 @@ Interface *
 RCSDNLMaterial :: giveInterface(InterfaceType type)
 {
     if ( type == NonlocalMaterialExtensionInterfaceType ) {
-        return static_cast< StructuralNonlocalMaterialExtensionInterface * >( this );
+        return static_cast< StructuralNonlocalMaterialExtensionInterface * >(this);
     } else {
         return NULL;
     }
@@ -180,7 +180,7 @@ RCSDNLMaterial :: giveRealStressVector(FloatArray &answer, GaussPoint *gp,
         int anyOpeningCrack = 0;
         for ( int i = 1; i <= 3; i++ ) {
             if ( ( status->giveTempCrackStatus(i) == pscm_SOFTENING ) ||
-                 ( status->giveTempCrackStatus(i) == pscm_OPEN ) ) {
+                ( status->giveTempCrackStatus(i) == pscm_OPEN ) ) {
                 anyOpeningCrack++;
             }
         }
@@ -192,7 +192,7 @@ RCSDNLMaterial :: giveRealStressVector(FloatArray &answer, GaussPoint *gp,
             int ipos = 0;
             for ( int i = 1; i <= 3; i++ ) {
                 if ( ( status->giveTempCrackStatus(i) == pscm_SOFTENING ) ||
-                     ( status->giveTempCrackStatus(i) == pscm_OPEN ) ) {
+                    ( status->giveTempCrackStatus(i) == pscm_OPEN ) ) {
                     if ( princStress.at(i) < minSofteningPrincStress ) {
                         minSofteningPrincStress = princStress.at(i);
                         ipos = i;
@@ -228,9 +228,9 @@ RCSDNLMaterial :: giveRealStressVector(FloatArray &answer, GaussPoint *gp,
                     }
 
                     princStressDis = princStress.at(ii) -
-                                     princStress.at(jj);
+                    princStress.at(jj);
                     princStrainDis = principalStrain.at(ii) -
-                                     principalStrain.at(jj);
+                    principalStrain.at(jj);
 
                     if ( fabs(princStrainDis) < rcm_SMALL_STRAIN ) {
                         currG = G;
@@ -246,7 +246,7 @@ RCSDNLMaterial :: giveRealStressVector(FloatArray &answer, GaussPoint *gp,
             ////#
 
             if ( ( minSofteningPrincStress <= this->SDTransitionCoeff * CurrFt ) ||
-                 ( minG <= this->SDTransitionCoeff2 * G ) ) {
+                ( minG <= this->SDTransitionCoeff2 * G ) ) {
                 //   printf ("minSofteningPrincStress=%lf, CurrFt=%lf, SDTransitionCoeff=%lf",minSofteningPrincStress, CurrFt, this->SDTransitionCoeff);
                 //   printf ("\nminG=%lf, G=%lf, SDTransitionCoeff2=%lf\n",minG, G, this->SDTransitionCoeff2);
 
@@ -254,7 +254,7 @@ RCSDNLMaterial :: giveRealStressVector(FloatArray &answer, GaussPoint *gp,
                 if ( ipos == 0 ) {
                     for ( int i = 1; i <= 3; i++ ) {
                         if ( ( status->giveTempCrackStatus(i) == pscm_SOFTENING ) ||
-                             ( status->giveTempCrackStatus(i) == pscm_OPEN ) ) {
+                            ( status->giveTempCrackStatus(i) == pscm_OPEN ) ) {
                             if ( ipos == 0 ) {
                                 ipos = i;
                                 minSofteningPrincStress = princStress.at(i);

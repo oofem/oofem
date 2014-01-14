@@ -109,7 +109,7 @@ public:
     /**
      * Constructor. Creates an engineering model with number i belonging to domain d.
      */
-    StaggeredProblem(int i, EngngModel *_master = NULL);
+    StaggeredProblem(int i, EngngModel * _master = NULL);
     /// Destructor.
     virtual ~StaggeredProblem();
 
@@ -182,9 +182,17 @@ public:
     virtual EngngModel *giveSlaveProblem(int i);
     virtual int giveNumberOfSlaveProblems() { return nModels; }
 
-    virtual int giveNumberOfFirstStep() { if ( master ) { return master->giveNumberOfFirstStep(); } else { return 1; } }
+    virtual int giveNumberOfFirstStep() { if ( master ) {
+                                              return master->giveNumberOfFirstStep();
+                                          } else {
+                                              return 1;
+                                          } }
     virtual int giveNumberOfTimeStepWhenIcApply() {
-        if ( master ) { return master->giveNumberOfTimeStepWhenIcApply(); } else { return 0; }
+        if ( master ) {
+            return master->giveNumberOfTimeStepWhenIcApply();
+        } else {
+            return 0;
+        }
     }
     virtual int instanciateDefaultMetaStep(InputRecord *ir);
 

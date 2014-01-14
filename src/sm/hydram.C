@@ -246,7 +246,7 @@ HydrationModel :: dAdksi(double ksi)
     enaksi = exp(-ba * ksi);
 
     return ( aa * ( ca * da * ksinad * ( enaksi - 1 ) / ksi + ba * enaksi * ( ca * ksinad + 1 ) ) /
-             pow(1 + ca * ksinad, 2) );
+            pow(1 + ca * ksinad, 2) );
 }
 
 double
@@ -409,7 +409,7 @@ HydrationModel :: computeIntSource(const FloatArray &vec, GaussPoint *gp, TimeSt
         case IntSource:
         case IntSource_hh: return -le *dksidT(ksi, T, h, dt);
 
-        case IntSource_ww: return we * dksidh(ksi, T, h, dt);
+        case IntSource_ww: return we *dksidh(ksi, T, h, dt);
 
         case IntSource_hw: return -le *dksidh(ksi, T, h, dt);
 
@@ -638,7 +638,7 @@ void
 HydrationModelInterface :: updateInternalState(const FloatArray &vec, GaussPoint *gp, TimeStep *tStep)
 {
     if ( hydrationModel ) {
-        TimeStep *hydraTime = new TimeStep( ( const TimeStep ) * tStep );
+        TimeStep *hydraTime = new TimeStep( ( const TimeStep ) *tStep );
         int notime = 0;
         if ( tStep->giveTargetTime() - tStep->giveTimeIncrement() < castAt ) {
             if ( tStep->giveTargetTime() >= castAt ) {

@@ -97,7 +97,7 @@ protected:
 
 public:
     /// Creates new StructuralEngngModel with number i, associated to domain d.
-    StructuralEngngModel(int i, EngngModel *_master = NULL);
+    StructuralEngngModel(int i, EngngModel * _master = NULL);
     /// Destructor.
     virtual ~StructuralEngngModel();
 

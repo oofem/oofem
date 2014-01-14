@@ -72,7 +72,7 @@ QuadAxisym1_ht :: computeVolumeAround(GaussPoint *gp)
 {
     double determinant, weight, volume;
     determinant = fabs( this->interpolation.giveTransformationJacobian( * gp->giveCoordinates(),
-                                                                        FEIElementGeometryWrapper(this) ) );
+                                                                       FEIElementGeometryWrapper(this) ) );
 
     weight = gp->giveWeight();
     volume = determinant * weight * this->computeRadiusAt(gp);
@@ -95,8 +95,8 @@ QuadAxisym1_ht :: computeEdgeVolumeAround(GaussPoint *gp, int iEdge)
     radius = gcoords.at(1);
 
     double detJ = fabs( this->interpolation.edgeGiveTransformationJacobian( iEdge, * gp->giveCoordinates(),
-                                                                            FEIElementGeometryWrapper(this) ) );
-    return detJ * gp->giveWeight() * radius;
+                                                                           FEIElementGeometryWrapper(this) ) );
+    return detJ *gp->giveWeight() * radius;
 }
 
 double

@@ -167,7 +167,7 @@ TimeStep *
 NonStationaryTransportProblem :: giveSolutionStepWhenIcApply()
 {
     if ( stepWhenIcApply == NULL ) {
-        stepWhenIcApply = new TimeStep(giveNumberOfTimeStepWhenIcApply(), this, 0, this->initT - giveDeltaT( giveNumberOfFirstStep() ), giveDeltaT( giveNumberOfFirstStep() ), 0);
+        stepWhenIcApply = new TimeStep(giveNumberOfTimeStepWhenIcApply(), this, 0, this->initT - giveDeltaT ( giveNumberOfFirstStep() ), giveDeltaT ( giveNumberOfFirstStep() ), 0);
         //stepWhenIcApply = new TimeStep(giveNumberOfTimeStepWhenIcApply(), this, 0, -deltaT, deltaT, 0);
     }
 
@@ -231,11 +231,11 @@ NonStationaryTransportProblem :: giveNextStep()
         counter = currentStep->giveSolutionStateCounter() + 1;
     } else {
         // first step -> generate initial step
-        currentStep = new TimeStep( * giveSolutionStepWhenIcApply() );
+        currentStep = new TimeStep( *giveSolutionStepWhenIcApply() );
     }
 
     previousStep = currentStep;
-    currentStep = new TimeStep(istep, this, 1, totalTime, this->giveDeltaT(istep), counter);
+    currentStep = new TimeStep(istep, this, 1, totalTime, this->giveDeltaT ( istep ), counter);
     //set intrinsic time to time of integration
     intrinsicTime = previousStep->giveTargetTime() + this->alpha *this->giveDeltaT(istep);
     currentStep->setIntrinsicTime(intrinsicTime);
@@ -271,16 +271,16 @@ void NonStationaryTransportProblem :: solveYourselfAt(TimeStep *tStep)
 
         //edge or surface load on elements
         this->assembleVectorFromElements( bcRhs, stepWhenIcApply, EID_ConservationEquation, ElementBCTransportVector,
-                                          VM_Total, EModelDefaultEquationNumbering(), this->giveDomain(1) );
+                                         VM_Total, EModelDefaultEquationNumbering(), this->giveDomain(1) );
         //add prescribed value, such as temperature, on nodes
         this->assembleDirichletBcRhsVector( bcRhs, stepWhenIcApply, EID_ConservationEquation, VM_Total,
-                                            NSTP_MidpointLhs, EModelDefaultEquationNumbering(), this->giveDomain(1) );
+                                           NSTP_MidpointLhs, EModelDefaultEquationNumbering(), this->giveDomain(1) );
         //add internal source vector on elements
         this->assembleVectorFromElements( bcRhs, stepWhenIcApply, EID_ConservationEquation, ElementInternalSourceVector,
-                                          VM_Total, EModelDefaultEquationNumbering(), this->giveDomain(1) );
+                                         VM_Total, EModelDefaultEquationNumbering(), this->giveDomain(1) );
         //add nodal load
         this->assembleVectorFromDofManagers( bcRhs, stepWhenIcApply, ExternalForcesVector,
-                                             VM_Total, EModelDefaultEquationNumbering(), this->giveDomain(1) );
+                                            VM_Total, EModelDefaultEquationNumbering(), this->giveDomain(1) );
     }
 
     //Create a new lhs matrix if necessary
@@ -301,10 +301,10 @@ void NonStationaryTransportProblem :: solveYourselfAt(TimeStep *tStep)
 #endif
 
         this->assemble( conductivityMatrix, stepWhenIcApply, EID_ConservationEquation, LHSBCMatrix,
-                        EModelDefaultEquationNumbering(), this->giveDomain(1) );
+                       EModelDefaultEquationNumbering(), this->giveDomain(1) );
         conductivityMatrix->times(alpha);
         this->assemble( conductivityMatrix, stepWhenIcApply, EID_ConservationEquation, NSTP_MidpointLhs,
-                        EModelDefaultEquationNumbering(), this->giveDomain(1) );
+                       EModelDefaultEquationNumbering(), this->giveDomain(1) );
     }
 
     //obtain the last Rhs vector from DoFs directly
@@ -327,22 +327,22 @@ void NonStationaryTransportProblem :: solveYourselfAt(TimeStep *tStep)
     rhs.times(1. - alpha);
     bcRhs.zero();
     this->assembleVectorFromElements( bcRhs, tStep, EID_ConservationEquation, ElementBCTransportVector,
-                                      VM_Total, EModelDefaultEquationNumbering(), this->giveDomain(1) );
+                                     VM_Total, EModelDefaultEquationNumbering(), this->giveDomain(1) );
     this->assembleDirichletBcRhsVector( bcRhs, tStep, EID_ConservationEquation, VM_Total, NSTP_MidpointLhs,
-                                        EModelDefaultEquationNumbering(), this->giveDomain(1) );
+                                       EModelDefaultEquationNumbering(), this->giveDomain(1) );
     this->assembleVectorFromElements( bcRhs, tStep, EID_ConservationEquation, ElementInternalSourceVector,
-                                      VM_Total, EModelDefaultEquationNumbering(), this->giveDomain(1) );
+                                     VM_Total, EModelDefaultEquationNumbering(), this->giveDomain(1) );
 
     // assembling load from nodes
     this->assembleVectorFromDofManagers( bcRhs, tStep, InternalForcesVector, VM_Total,
-                                         EModelDefaultEquationNumbering(), this->giveDomain(1) );
+                                        EModelDefaultEquationNumbering(), this->giveDomain(1) );
     for ( int i = 1; i <= neq; i++ ) {
         rhs.at(i) += bcRhs.at(i) * alpha;
     }
 
     // add the rhs part depending on previous solution
     assembleAlgorithmicPartOfRhs( rhs, EID_ConservationEquation,
-                                  EModelDefaultEquationNumbering(), tStep->givePreviousStep() );
+                                 EModelDefaultEquationNumbering(), tStep->givePreviousStep() );
     // set-up numerical model
     this->giveNumericalMethod( this->giveCurrentMetaStep() );
 
@@ -517,7 +517,7 @@ NonStationaryTransportProblem :: checkConsistency()
 
     for ( int i = 1; i <= nelem; i++ ) {
         ePtr = domain->giveElement(i);
-        sePtr = dynamic_cast< TransportElement * >( ePtr );
+        sePtr = dynamic_cast< TransportElement * >(ePtr);
         if ( sePtr == NULL ) {
             _warning2("Element %d has no TransportElement base", i);
             return 0;

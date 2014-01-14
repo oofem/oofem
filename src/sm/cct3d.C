@@ -119,7 +119,7 @@ CCTPlate3d :: computeLocalCoordinates(FloatArray &answer, const FloatArray &coor
     const FloatArray *lcptr [ 3 ] = {
         lc, lc + 1, lc + 2
     };
-    this->giveLocalCoordinates( inputCoords_ElCS, const_cast< FloatArray & >( coords ) );
+    this->giveLocalCoordinates( inputCoords_ElCS, const_cast< FloatArray & >(coords) );
     for ( int _i = 0; _i < 3; _i++ ) {
         this->giveLocalCoordinates( lc [ _i ], * this->giveNode(_i + 1)->giveCoordinates() );
     }
@@ -129,7 +129,7 @@ CCTPlate3d :: computeLocalCoordinates(FloatArray &answer, const FloatArray &coor
     answer.resize(2);
     answer.at(1) = inputCoords_ElCS.at(1);
     answer.at(2) = inputCoords_ElCS.at(2);
-    GaussPoint _gp(NULL, 1, new FloatArray(answer), 2.0, _2dPlate);
+    GaussPoint _gp(NULL, 1, new FloatArray ( answer ), 2.0, _2dPlate);
     // now check if the third local coordinate is within the thickness of element
     bool outofplane = ( fabs( inputCoords_ElCS.at(3) ) <= this->giveCrossSection()->give(CS_Thickness, & _gp) / 2. );
 
@@ -271,7 +271,7 @@ CCTPlate3d :: giveCharacteristicTensor(FloatMatrix &answer, CharTensor type, Gau
     }
 
     if ( ( type == GlobalForceTensor  ) || ( type == GlobalMomentumTensor  ) ||
-         ( type == GlobalStrainTensor ) || ( type == GlobalCurvatureTensor ) ) {
+        ( type == GlobalStrainTensor ) || ( type == GlobalCurvatureTensor ) ) {
         this->computeGtoLRotationMatrix();
         answer.rotatedWith(* GtoLRotationMatrix);
     }
@@ -403,16 +403,16 @@ CCTPlate3d :: printOutputAt(FILE *file, TimeStep *tStep)
             this->giveIPValue(v, gp, IST_ShellStrainCurvatureTensor, tStep);
             fprintf(file, "  strains ");
             fprintf( file,
-                     " % .4e % .4e % .4e % .4e % .4e % .4e % .4e % .4e % .4e % .4e % .4e % .4e ",
-                     v.at(1), v.at(2), v.at(3),  2. * v.at(4), 2. * v.at(5), 2. * v.at(6),
-                     v.at(7), v.at(8), v.at(9),  2. * v.at(10), 2. * v.at(11), 2. * v.at(12) );
+                    " % .4e % .4e % .4e % .4e % .4e % .4e % .4e % .4e % .4e % .4e % .4e % .4e ",
+                    v.at(1), v.at(2), v.at(3),  2. * v.at(4), 2. * v.at(5), 2. * v.at(6),
+                    v.at(7), v.at(8), v.at(9),  2. * v.at(10), 2. * v.at(11), 2. * v.at(12) );
 
             this->giveIPValue(v, gp, IST_ShellForceMomentumTensor, tStep);
             fprintf(file, "\n              stresses");
             fprintf( file,
-                     " % .4e % .4e % .4e % .4e % .4e % .4e % .4e % .4e % .4e % .4e % .4e % .4e ",
-                     v.at(1), v.at(2), v.at(3),  v.at(4), v.at(5), v.at(6),
-                     v.at(7), v.at(8), v.at(9),  v.at(10), v.at(11), v.at(12) );
+                    " % .4e % .4e % .4e % .4e % .4e % .4e % .4e % .4e % .4e % .4e % .4e % .4e ",
+                    v.at(1), v.at(2), v.at(3),  v.at(4), v.at(5), v.at(6),
+                    v.at(7), v.at(8), v.at(9),  v.at(10), v.at(11), v.at(12) );
 
             fprintf(file, "\n");
         }

@@ -65,7 +65,7 @@ protected:
     double localCumPlasticStrainForAverage;
 
 public:
-    MisesMatNlStatus(int n, Domain *d, GaussPoint *g);
+    MisesMatNlStatus(int n, Domain * d, GaussPoint * g);
     virtual ~MisesMatNlStatus();
 
     virtual void printOutputAt(FILE *file, TimeStep *tStep);
@@ -94,7 +94,7 @@ public:
  * @author Milan
  */
 class MisesMatNl : public MisesMat, public StructuralNonlocalMaterialExtensionInterface,
-    public NonlocalMaterialStiffnessInterface
+public NonlocalMaterialStiffnessInterface
 {
 protected:
     double Rf;
@@ -102,7 +102,7 @@ protected:
     int averType;
 
 public:
-    MisesMatNl(int n, Domain *d);
+    MisesMatNl(int n, Domain * d);
     virtual ~MisesMatNl();
 
     virtual const char *giveClassName() const { return "MisesMatNl"; }

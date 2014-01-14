@@ -109,7 +109,7 @@ LoadBalancer :: migrateLoad(Domain *d)
     }
 
     CommunicatorBuff cb(nproc, CBT_dynamic);
-    Communicator com(d->giveEngngModel(), & cb, myrank, nproc, CommMode_Dynamic);
+    Communicator com(d->giveEngngModel(), &cb, myrank, nproc, CommMode_Dynamic);
 
     // move existing dofmans and elements, that will be local on current partition,
     // into local map
@@ -215,7 +215,7 @@ LoadBalancer :: packMigratingData(Domain *d, ProcessCommunicator &pc)
         // if dofman already present on remote partition then there is no need to sync
         //if ((this->giveDofManPartitions(idofman)->findFirstIndexOf(iproc))) {
         if ( ( this->giveDofManPartitions(idofman)->findFirstIndexOf(iproc) ) &&
-             ( !dofman->givePartitionList()->findFirstIndexOf(iproc) ) ) {
+            ( !dofman->givePartitionList()->findFirstIndexOf(iproc) ) ) {
             pcbuff->packString( dofman->giveInputRecordName() );
             pcbuff->packInt( this->giveDofManState(idofman) );
             pcbuff->packInt( dofman->giveGlobalNumber() );
@@ -238,7 +238,7 @@ LoadBalancer :: packMigratingData(Domain *d, ProcessCommunicator &pc)
     for ( int ielem = 1; ielem <= nelem; ielem++ ) { // begin loop over elements
         Element *elem = d->giveElement(ielem);
         if ( ( elem->giveParallelMode() == Element_local ) &&
-             ( this->giveElementPartition(ielem) == iproc ) ) {
+            ( this->giveElementPartition(ielem) == iproc ) ) {
             // pack local element (node numbers should be global ones!!!)
             // pack type
             pcbuff->packString( elem->giveInputRecordName() );
@@ -665,8 +665,8 @@ WallClockLoadBalancerMonitor :: decide(TimeStep *tStep)
 
     // decide
     if ( ( tStep->giveNumber() % this->lbstep == 0 ) &&
-         ( ( absWallClockImbalance > this->absWallClockImbalanceTreshold ) ||
-           ( ( relWallClockImbalance > this->relWallClockImbalanceTreshold ) && ( absWallClockImbalance > this->minAbsWallClockImbalanceTreshold ) ) ) ) {
+        ( ( absWallClockImbalance > this->absWallClockImbalanceTreshold ) ||
+         ( ( relWallClockImbalance > this->relWallClockImbalanceTreshold ) && ( absWallClockImbalance > this->minAbsWallClockImbalanceTreshold ) ) ) ) {
         OOFEM_LOG_RELEVANT("[%d] LoadBalancer: wall clock imbalance rel=%.2f\%,abs=%.2fs, recovering load\n", myrank, 100 * relWallClockImbalance, absWallClockImbalance);
         return LBD_RECOVER;
     } else {

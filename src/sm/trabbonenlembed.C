@@ -57,7 +57,7 @@ TrabBoneNLEmbed :: TrabBoneNLEmbed(int n, Domain *d) : TrabBoneEmbed(n, d), Stru
 }
 
 TrabBoneNLEmbed :: ~TrabBoneNLEmbed()
-{}
+{ }
 
 void
 TrabBoneNLEmbed :: updateBeforeNonlocAverage(const FloatArray &strainVector, GaussPoint *gp, TimeStep *tStep)
@@ -142,7 +142,7 @@ Interface *
 TrabBoneNLEmbed :: giveInterface(InterfaceType type)
 {
     if ( type == NonlocalMaterialExtensionInterfaceType ) {
-        return static_cast< StructuralNonlocalMaterialExtensionInterface * >( this );
+        return static_cast< StructuralNonlocalMaterialExtensionInterface * >(this);
     } else {
         return NULL;
     }
@@ -198,7 +198,7 @@ TrabBoneNLEmbedStatus :: TrabBoneNLEmbedStatus(int n, Domain *d, GaussPoint *g) 
 }
 
 TrabBoneNLEmbedStatus :: ~TrabBoneNLEmbedStatus()
-{}
+{ }
 
 void
 TrabBoneNLEmbedStatus :: printOutputAt(FILE *file, TimeStep *tStep)

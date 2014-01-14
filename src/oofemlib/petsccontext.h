@@ -79,7 +79,7 @@ public:
      * @param naturalVectors Should be true if shared dofs only contain the local contributions.
      * Some engineering models manually scatter local vectors to their global value, in which case this would be false.
      */
-    PetscContext(EngngModel *e, bool naturalVectors = true);
+    PetscContext(EngngModel * e, bool naturalVectors = true);
     ~PetscContext();
 
     /**

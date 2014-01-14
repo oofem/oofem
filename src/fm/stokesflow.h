@@ -94,7 +94,7 @@ protected:
     bool hasAdvanced;
 
 public:
-    StokesFlow(int i, EngngModel *_master = NULL);
+    StokesFlow(int i, EngngModel * _master = NULL);
     virtual ~StokesFlow();
 
     virtual void solveYourselfAt(TimeStep *tStep);

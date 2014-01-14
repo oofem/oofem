@@ -55,7 +55,9 @@ public:
      * @param i Load time function number.
      * @param d Domain to which new object will belongs.
      */
-    ConstantFunction(int i, Domain *d) : LoadTimeFunction(i, d) { value = 0; }
+    ConstantFunction(int i, Domain * d) : LoadTimeFunction(i, d) {
+        value = 0;
+    }
     /// Destructor.
     virtual ~ConstantFunction() { }
 

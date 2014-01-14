@@ -37,7 +37,7 @@
 
 #include <cstdarg>
 
-#if defined( __GNUC__ ) && defined( HAVE_EXECINFO_H )
+#if defined ( __GNUC__ ) && defined ( HAVE_EXECINFO_H )
  #include <cxxabi.h>
  #include <execinfo.h>
  #include <cstdio>
@@ -227,7 +227,7 @@ const char *
 Logger :: giveLevelName(logLevelType l) const
 {
     switch ( l ) {
-    //case LOG_LEVEL_FATAL:
+        //case LOG_LEVEL_FATAL:
     case LOG_LEVEL_ERROR:
         return "Error";
 

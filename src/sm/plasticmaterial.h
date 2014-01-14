@@ -68,7 +68,7 @@ protected:
     double gamma, temp_gamma;
 
 public:
-    PlasticMaterialStatus(int n, Domain *d, GaussPoint *g);
+    PlasticMaterialStatus(int n, Domain * d, GaussPoint * g);
     virtual ~PlasticMaterialStatus();
 
     virtual void printOutputAt(FILE *file, TimeStep *tStep);
@@ -124,7 +124,7 @@ protected:
     LinearElasticMaterial *linearElasticMaterial;
 
 public:
-    PlasticMaterial(int n, Domain *d);
+    PlasticMaterial(int n, Domain * d);
     virtual ~PlasticMaterial();
 
     // identification and auxiliary functions
@@ -172,10 +172,10 @@ protected:
                                       FloatArray *plasticStrainVectorR,
                                       FloatArray *strainSpaceHardeningVariables,
                                       FloatArray *gradientVectorR);
-    virtual void giveConsistentStiffnessMatrix(FloatMatrix & answer,
+    virtual void giveConsistentStiffnessMatrix(FloatMatrix &answer,
                                                MatResponseMode,
-                                               GaussPoint * gp,
-                                               TimeStep * tStep);
+                                               GaussPoint *gp,
+                                               TimeStep *tStep);
 
     void  computeConsistentModuli(FloatMatrix &answer,
                                   GaussPoint *gp, FloatMatrix &elasticModuliInverse,

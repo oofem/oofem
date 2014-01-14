@@ -215,7 +215,7 @@ LargeStrainMasterMaterialGrad :: giveFirstPKStressVectorGrad(FloatArray &answer1
         Material *mat;
         StructuralMaterial *sMat;
         mat = domain->giveMaterial(slaveMat);
-        sMat = dynamic_cast< StructuralMaterial * >( mat );
+        sMat = dynamic_cast< StructuralMaterial * >(mat);
         if ( sMat == NULL ) {
             _warning2("checkConsistency: material %d has no Structural support", slaveMat);
             return;
@@ -317,7 +317,7 @@ LargeStrainMasterMaterialGrad :: initializeFrom(InputRecord *ir)
 //=============================================================================
 
 LargeStrainMasterMaterialGradStatus :: LargeStrainMasterMaterialGradStatus(int n, Domain *d, GaussPoint *g, int s) : LargeStrainMasterMaterialStatus(n, d, g, s)
-{}
+{ }
 
 LargeStrainMasterMaterialGradStatus :: ~LargeStrainMasterMaterialGradStatus()
 { }

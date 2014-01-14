@@ -100,7 +100,7 @@ protected:
     FloatArray fiberYcoords, fiberZcoords;
 
 public:
-    FiberedCrossSection(int n, Domain *d) : StructuralCrossSection(n, d), fiberMaterials(), fiberThicks(), fiberWidths(),
+    FiberedCrossSection(int n, Domain * d) : StructuralCrossSection(n, d), fiberMaterials(), fiberThicks(), fiberWidths(),
         fiberYcoords(), fiberZcoords()
     {
         thick = 0.;

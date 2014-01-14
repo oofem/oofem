@@ -49,7 +49,7 @@ namespace oofem {
 REGISTER_Material(TrabBone3D);
 
 TrabBone3D :: TrabBone3D(int n, Domain *d) : StructuralMaterial(n, d)
-{}
+{ }
 
 
 int
@@ -1303,7 +1303,7 @@ TrabBone3DStatus :: TrabBone3DStatus(int n, Domain *d, GaussPoint *g) : Structur
 
 
 TrabBone3DStatus :: ~TrabBone3DStatus()
-{}
+{ }
 
 
 double

@@ -63,7 +63,7 @@ public:
      * @param aDomain Domain which receiver belongs to.
      * @param elem Element to which receiver belongs.
      */
-    ElementDofManager(int n, Domain *aDomain, Element *elem);
+    ElementDofManager(int n, Domain * aDomain, Element * elem);
     /// Destructor.
     virtual ~ElementDofManager();
 

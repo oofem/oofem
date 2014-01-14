@@ -68,7 +68,7 @@ protected:
 
 public:
     /// Constructor.
-    NLTransientTransportProblem(int i, EngngModel *_master);
+    NLTransientTransportProblem(int i, EngngModel * _master);
     /// Destructor.
     virtual ~NLTransientTransportProblem();
 

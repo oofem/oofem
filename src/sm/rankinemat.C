@@ -85,8 +85,8 @@ RankineMat :: initializeFrom(InputRecord *ir)
 
     StructuralMaterial :: initializeFrom(ir);
     linearElasticMaterial->initializeFrom(ir); // takes care of elastic constants
-    E = static_cast< IsotropicLinearElasticMaterial * >( linearElasticMaterial )->giveYoungsModulus();
-    nu = static_cast< IsotropicLinearElasticMaterial * >( linearElasticMaterial )->givePoissonsRatio();
+    E = static_cast< IsotropicLinearElasticMaterial * >(linearElasticMaterial)->giveYoungsModulus();
+    nu = static_cast< IsotropicLinearElasticMaterial * >(linearElasticMaterial)->givePoissonsRatio();
 
     IR_GIVE_FIELD(ir, sig0, _IFT_RankineMat_sig0); // uniaxial yield stress
 
@@ -249,7 +249,7 @@ RankineMat :: evalYieldStress(const double kappa)
     } else if ( plasthardtype == 2 ) { // exponential hardening before the peak stress sig0 and linear after the peak stress sig0
         if ( kappa <= ep ) {
             //1st branch in the rankine variation 2 trying to match the 1st branch of the smooth extended damage law reported by Grassl and Jirasek (2010)
-            yieldStress = 50. *E *kappa *exp(-pow(kappa / ep, md) / md);
+            yieldStress = 50. *E *kappa *exp(-pow ( kappa / ep, md ) / md);
         } else {  //linear hardening branch
             yieldStress = sig0 + H0 * kappa;
         }
@@ -444,7 +444,7 @@ RankineMat :: computeDamageParam(double tempKappa)
         } else if ( damlaw == 1 && tempKappa > ep ) {
             tempDam = 1.0 - exp( -param1 * pow( ( tempKappa - ep ) / ep, param2 ) );
         } else if ( damlaw == 2 && tempKappa > ep ) {
-            tempDam = 1.0 - param5 *exp( -param1 * pow( ( tempKappa - ep ) / ep, param2 ) ) - ( 1. - param5 ) * exp( -param3 * pow( ( tempKappa - ep ) / ep, param4 ) );
+            tempDam = 1.0 - param5 *exp( -param1 *pow ( ( tempKappa - ep ) / ep, param2 ) ) - ( 1. - param5 ) * exp( -param3 * pow( ( tempKappa - ep ) / ep, param4 ) );
         }
     }
 
@@ -459,9 +459,9 @@ RankineMat :: computeDamageParamPrime(double tempKappa)
         if ( damlaw == 0 ) {
             tempDam = a * exp(-a * tempKappa);
         } else if ( damlaw == 1 && tempKappa >= ep ) {
-            tempDam = param1 * param2 * pow( ( tempKappa - ep ) / ep, param2 - 1 ) / ep *exp( -param1 * pow( ( tempKappa - ep ) / ep, param2 ) );
+            tempDam = param1 * param2 * pow( ( tempKappa - ep ) / ep, param2 - 1 ) / ep *exp( -param1 *pow ( ( tempKappa - ep ) / ep, param2 ) );
         } else if ( damlaw == 2 && tempKappa >= ep ) {
-            tempDam = param5 * param1 * param2 * pow( ( tempKappa - ep ) / ep, param2 - 1 ) / ep *exp( -param1 * pow( ( tempKappa - ep ) / ep, param2 ) ) + ( 1. - param5 ) * param3 * param4 * pow( ( tempKappa - ep ) / ep, param4 - 1 ) / ep *exp( -param3 * pow( ( tempKappa - ep ) / ep, param4 ) );
+            tempDam = param5 * param1 * param2 * pow( ( tempKappa - ep ) / ep, param2 - 1 ) / ep *exp( -param1 *pow ( ( tempKappa - ep ) / ep, param2 ) ) + ( 1. - param5 ) * param3 * param4 * pow( ( tempKappa - ep ) / ep, param4 - 1 ) / ep *exp( -param3 *pow ( ( tempKappa - ep ) / ep, param4 ) );
         }
     }
 

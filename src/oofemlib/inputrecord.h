@@ -114,7 +114,7 @@ public:
     /// Destructor
     virtual ~InputRecord() { }
     /// Assignment operator.
-    InputRecord &operator=(const InputRecord &);
+    InputRecord &operator = ( const InputRecord & );
 
     /** Creates a newly allocated copy of the receiver */
     virtual InputRecord *GiveCopy() = 0;

@@ -62,8 +62,10 @@ private:
     Concrete3_softeningMode softeningMode;
 
 public:
-    Concrete3(int n, Domain *d);
-    virtual ~Concrete3() { delete linearElasticMaterial; }
+    Concrete3(int n, Domain * d);
+    virtual ~Concrete3() {
+        delete linearElasticMaterial;
+    }
 
     // identification and auxiliary functions
     virtual IRResultType initializeFrom(InputRecord *ir);

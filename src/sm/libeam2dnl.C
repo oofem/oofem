@@ -63,7 +63,7 @@ Interface *
 LIBeam2dNL :: giveInterface(InterfaceType interface)
 {
     if ( interface == LayeredCrossSectionInterfaceType ) {
-        return static_cast< LayeredCrossSectionInterface * >( this );
+        return static_cast< LayeredCrossSectionInterface * >(this);
     }
 
     return NULL;

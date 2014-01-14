@@ -64,7 +64,7 @@ protected:
     FloatArray deviatoricStrainVector, temp_deviatoricStrainVector;  // reduced form
 
 public:
-    NonlinearFluidMaterialStatus(int n, Domain *d, GaussPoint *g);
+    NonlinearFluidMaterialStatus(int n, Domain * d, GaussPoint * g);
 
     virtual ~NonlinearFluidMaterialStatus() { }
 
@@ -99,14 +99,14 @@ protected:
     double alpha;
 
 public:
-    NonlinearFluidMaterial(int n, Domain *d) : FluidDynamicMaterial(n, d) { }
+    NonlinearFluidMaterial(int n, Domain * d) : FluidDynamicMaterial(n, d) { }
 
     virtual ~NonlinearFluidMaterial() { }
 
     virtual void computeDeviatoricStressVector(FloatArray &answer, GaussPoint *gp, const FloatArray &eps, TimeStep *tStep);
 
-    virtual void giveDeviatoricStiffnessMatrix(FloatMatrix & answer, MatResponseMode, GaussPoint * gp,
-                                               TimeStep * tStep);
+    virtual void giveDeviatoricStiffnessMatrix(FloatMatrix &answer, MatResponseMode, GaussPoint *gp,
+                                               TimeStep *tStep);
 
     virtual double giveEffectiveViscosity(GaussPoint *gp, TimeStep *tStep);
     virtual double give(int aProperty, GaussPoint *);

@@ -80,10 +80,14 @@ public:
      * @param n Meta step number.
      * @param e Reference to corresponding engineering model.
      */
-    MetaStep(int n, EngngModel *e);
-    MetaStep(int n, EngngModel *e, int nsteps, InputRecord &attrib);
+    MetaStep(int n, EngngModel * e);
+    MetaStep(int n, EngngModel * e, int nsteps, InputRecord & attrib);
     /// Destructor.
-    ~MetaStep() { if ( attributes ) { delete attributes; } }
+    ~MetaStep() {
+        if ( attributes ) {
+            delete attributes;
+        }
+    }
 
     /// Returns receiver's number.
     int giveNumber() { return number; }

@@ -69,7 +69,7 @@ protected:
     int temp_yield_flag;
 
 public:
-    PerfectlyPlasticMaterialStatus(int n, Domain *d, GaussPoint *g);
+    PerfectlyPlasticMaterialStatus(int n, Domain * d, GaussPoint * g);
     virtual ~PerfectlyPlasticMaterialStatus();
 
     virtual void printOutputAt(FILE *file, TimeStep *tStep);
@@ -122,14 +122,16 @@ protected:
 
 public:
 
-    PerfectlyPlasticMaterial(int n, Domain *d) : StructuralMaterial(n, d)
+    PerfectlyPlasticMaterial(int n, Domain * d) : StructuralMaterial(n, d)
     {
         yieldCriteria = 0;
         loadingCriteria = 0;
         linearElasticMaterial = NULL;
     }
 
-    virtual ~PerfectlyPlasticMaterial() { delete linearElasticMaterial; }
+    virtual ~PerfectlyPlasticMaterial() {
+        delete linearElasticMaterial;
+    }
 
     virtual void giveRealStressVector(FloatArray &answer, GaussPoint *gp,
                                       const FloatArray &reducedStrain, TimeStep *tStep);

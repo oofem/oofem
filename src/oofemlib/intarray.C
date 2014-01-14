@@ -65,11 +65,18 @@
 namespace oofem {
 IntArray :: iterator :: iterator(const IntArray *vec, int pos) : pos(pos), vec(vec) { }
 
-bool IntArray :: iterator :: operator!=(const IntArray :: iterator &other) const { return pos != other.pos; }
+bool IntArray :: iterator :: operator != ( const IntArray :: iterator & other ) const {
+    return pos != other.pos;
+}
 
-int IntArray :: iterator :: operator*() const { return ( * vec )( pos ); }
+int IntArray :: iterator :: operator *( ) const {
+    return ( * vec )( pos );
+}
 
-const IntArray :: iterator &IntArray :: iterator :: operator++() { ++pos; return * this; }
+const IntArray :: iterator &IntArray :: iterator :: operator++ ( ) {
+    ++pos;
+    return * this;
+}
 
 IntArray :: iterator IntArray :: begin() { return iterator(this, 0); }
 IntArray :: iterator IntArray :: end() { return iterator(this, this->size); }
@@ -79,7 +86,7 @@ IntArray :: IntArray() :
     size(0),
     allocatedSize(0),
     values(NULL)
-{}
+{ }
 
 
 IntArray :: IntArray(int n) :
@@ -126,7 +133,7 @@ IntArray :: IntArray(std :: initializer_list< int >list)
 }
 
 
-IntArray &IntArray :: operator=(std :: initializer_list< int >list)
+IntArray &IntArray :: operator = ( std :: initializer_list< int >list )
 {
     RESIZE( ( int ) list.size() );
     int *p = this->values;
@@ -148,7 +155,7 @@ IntArray :: ~IntArray()
 }
 
 
-IntArray &IntArray :: operator=(const IntArray &src)
+IntArray &IntArray :: operator = ( const IntArray & src )
 {
     // assignment: cleanup and copy
     if ( values ) {
@@ -200,25 +207,25 @@ int IntArray :: at(int i) const
     return values [ i - 1 ];
 }
 
-int &IntArray :: operator()(int i)
+int &IntArray :: operator() (int i)
 {
     this->checkBounds(i);
     return values [ i ];
 }
 
-const int &IntArray :: operator()(int i) const
+const int &IntArray :: operator() (int i) const
 {
     this->checkBounds(i);
     return values [ i ];
 }
 
-int &IntArray :: operator[](int i)
+int &IntArray :: operator[] ( int i )
 {
     this->checkBounds(i);
     return values [ i ];
 }
 
-const int &IntArray :: operator[](int i) const
+const int &IntArray :: operator[] ( int i ) const
 {
     this->checkBounds(i);
     return values [ i ];
@@ -760,7 +767,7 @@ int IntArray :: givePackSize(CommunicationBuffer &buff)
 }
 #endif
 
-std :: ostream &operator<<(std :: ostream &out, const IntArray &x)
+std :: ostream &operator << ( std :: ostream & out, const IntArray & x )
 {
     out << x.size;
     for ( int i = 0; i < x.size; ++i ) {

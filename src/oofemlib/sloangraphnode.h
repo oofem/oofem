@@ -75,7 +75,7 @@ private:
 
 public:
     /// Creates node belonging to given graph with given old number.
-    SloanGraphNode(SloanGraph *graph, int numOld);
+    SloanGraphNode(SloanGraph * graph, int numOld);
     /// Destructor.
     ~SloanGraphNode();
 

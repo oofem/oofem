@@ -54,12 +54,16 @@ class Domain;
 class LargeStrainMasterMaterialGrad : public LargeStrainMasterMaterial, GradDpMaterialExtensionInterface
 {
 public:
-    LargeStrainMasterMaterialGrad(int n, Domain *d);
+    LargeStrainMasterMaterialGrad(int n, Domain * d);
     virtual ~LargeStrainMasterMaterialGrad();
 
     virtual IRResultType initializeFrom(InputRecord *ir);
     virtual int hasMaterialModeCapability(MaterialMode mode);
-    virtual Interface *giveInterface(InterfaceType t) { if ( t == GradDpMaterialExtensionInterfaceType ) { return static_cast< GradDpMaterialExtensionInterface * >( this ); } else { return NULL; } }
+    virtual Interface *giveInterface(InterfaceType t) { if ( t == GradDpMaterialExtensionInterfaceType ) {
+                                                            return static_cast< GradDpMaterialExtensionInterface * >(this);
+                                                        } else {
+                                                            return NULL;
+                                                        } }
 
     virtual void giveStiffnessMatrix(FloatMatrix &answer, MatResponseMode rMode, GaussPoint *gp, TimeStep *tStep);
 
@@ -86,7 +90,7 @@ public:
 class LargeStrainMasterMaterialGradStatus : public LargeStrainMasterMaterialStatus
 {
 public:
-    LargeStrainMasterMaterialGradStatus(int n, Domain *d, GaussPoint *g, int s);
+    LargeStrainMasterMaterialGradStatus(int n, Domain * d, GaussPoint * g, int s);
     virtual ~LargeStrainMasterMaterialGradStatus();
 
     virtual void printOutputAt(FILE *file, TimeStep *tStep);

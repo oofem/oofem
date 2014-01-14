@@ -65,7 +65,7 @@ public:
      * @param n Material number.
      * @param d Domain to which new material will belong.
      */
-    TwoFluidMaterial(int n, Domain *d) : FluidDynamicMaterial(n, d) { }
+    TwoFluidMaterial(int n, Domain * d) : FluidDynamicMaterial(n, d) { }
     /// Destructor.
     virtual ~TwoFluidMaterial() { }
 
@@ -96,7 +96,7 @@ protected:
 
 public:
     /// Constructor - creates new BinghamFluidMaterial2Status with number n, belonging to domain d and IntegrationPoint g.
-    TwoFluidMaterialStatus(int n, Domain *d, GaussPoint *g, const IntArray &slaveMaterial);
+    TwoFluidMaterialStatus(int n, Domain * d, GaussPoint * g, const IntArray & slaveMaterial);
     /// Destructor
     virtual ~TwoFluidMaterialStatus() { }
 

@@ -78,8 +78,10 @@ protected:
     FloatMatrix *GtoLRotationMatrix;
 
 public:
-    CCTPlate3d(int n, Domain *d);
-    virtual ~CCTPlate3d() { delete GtoLRotationMatrix; }
+    CCTPlate3d(int n, Domain * d);
+    virtual ~CCTPlate3d() {
+        delete GtoLRotationMatrix;
+    }
 
 protected:
     void giveLocalCoordinates(FloatArray &answer, FloatArray &global);
@@ -92,7 +94,7 @@ protected:
 
     virtual void computeBodyLoadVectorAt(FloatArray &answer, Load *forLoad, TimeStep *tStep, ValueModeType mode);
 
-    friend  class TR_SHELL01;
+    friend class TR_SHELL01;
 
 public:
     // definition & identification

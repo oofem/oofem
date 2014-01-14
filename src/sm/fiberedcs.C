@@ -416,10 +416,10 @@ FiberedCrossSection :: initializeFrom(InputRecord *ir)
     IR_GIVE_FIELD(ir, width, _IFT_FiberedCrossSection_width);
 
     if ( ( numberOfFibers != fiberMaterials.giveSize() ) ||
-         ( numberOfFibers != fiberThicks.giveSize() )     ||
-         ( numberOfFibers != fiberWidths.giveSize() )     ||
-         ( numberOfFibers != fiberYcoords.giveSize() )    ||
-         ( numberOfFibers != fiberZcoords.giveSize() ) ) {
+        ( numberOfFibers != fiberThicks.giveSize() )     ||
+        ( numberOfFibers != fiberWidths.giveSize() )     ||
+        ( numberOfFibers != fiberYcoords.giveSize() )    ||
+        ( numberOfFibers != fiberZcoords.giveSize() ) ) {
         _error("instanciateFrom : Array size mismatch ");
     }
 
@@ -647,7 +647,7 @@ FiberedCrossSection :: checkConsistency()
     int result = 1;
     for ( int i = 1; this->fiberMaterials.giveSize(); i++ ) {
         Material *mat = this->giveDomain()->giveMaterial( this->fiberMaterials.at(i) );
-        if ( !dynamic_cast< StructuralMaterial * >( mat ) ) {
+        if ( !dynamic_cast< StructuralMaterial * >(mat) ) {
             _warning2( "checkConsistency : material %s without structural support", mat->giveClassName() );
             result = 0;
             continue;

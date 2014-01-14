@@ -80,7 +80,7 @@ protected:
 
 public:
     /// Constructor
-    SparseNonLinearSystemNM(Domain *d, EngngModel *m) : NumericalMethod(d, m) { }
+    SparseNonLinearSystemNM(Domain * d, EngngModel * m) : NumericalMethod(d, m) { }
     /// Destructor
     virtual ~SparseNonLinearSystemNM() { }
 

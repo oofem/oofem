@@ -42,10 +42,10 @@ namespace oofem {
 REGISTER_RandomFieldGenerator(LocalGaussianRandomGenerator);
 
 LocalGaussianRandomGenerator :: LocalGaussianRandomGenerator(int num, Domain *d) : RandomFieldGenerator(num, d)
-{}
+{ }
 
 LocalGaussianRandomGenerator :: ~LocalGaussianRandomGenerator()
-{}
+{ }
 
 void
 LocalGaussianRandomGenerator :: generateRandomValue(double &value, FloatArray *position)

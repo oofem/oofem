@@ -82,7 +82,7 @@ protected:
     int mat [ 2 ];
 
 public:
-    TR1_2D_SUPG2(int n, Domain *d);
+    TR1_2D_SUPG2(int n, Domain * d);
     virtual ~TR1_2D_SUPG2();
 
     virtual void computeAccelerationTerm_MB(FloatMatrix &answer, TimeStep *tStep);
@@ -116,7 +116,7 @@ public:
     virtual const char *giveClassName() const { return "TR1_2D_SUPG2"; }
     virtual const char *giveInputRecordName() const { return _IFT_TR1_2D_SUPG2_Name; }
 
-    virtual void giveElementDofIDMask(EquationID, IntArray & answer) const;
+    virtual void giveElementDofIDMask(EquationID, IntArray &answer) const;
     virtual void giveDofManDofIDMask(int inode, EquationID ut, IntArray &answer) const;
     virtual int computeNumberOfDofs();
     virtual IRResultType initializeFrom(InputRecord *ir);

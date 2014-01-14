@@ -66,7 +66,7 @@ protected:
     /// Counter of all warning and error messages.
     int numberOfWrn, numberOfErr;
 public:
-    Logger(logLevelType level, FILE *stream);
+    Logger(logLevelType level, FILE * stream);
     ~Logger();
     /// Redirects log output to given file name (with path).
     void appendlogTo(char *fname);

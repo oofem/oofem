@@ -62,7 +62,7 @@ protected:
     int couplingFlag, couplingNumber;
 
 public:
-    Lattice2d(int n, Domain *d);
+    Lattice2d(int n, Domain * d);
     virtual ~Lattice2d();
 
     virtual int giveLocalCoordinateSystem(FloatMatrix &answer);

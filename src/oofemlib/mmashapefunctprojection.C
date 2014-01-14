@@ -109,7 +109,7 @@ MMAShapeFunctProjection :: mapVariable(FloatArray &answer, GaussPoint *gp, Inter
         for ( int inode = 1; inode <= nnodes; inode++ ) {
             container.put(inode, new FloatArray);
             this->smootherList.at(indx)->giveNodalVector( nvec, elem->giveDofManager(inode)->giveNumber(),
-                                                          elem->giveRegionNumber() );
+                                                         elem->giveRegionNumber() );
             * ( container.at(inode) ) = * nvec;
         }
 
@@ -148,7 +148,7 @@ MMAShapeFunctProjection :: __mapVariable(FloatArray &answer, FloatArray &coords,
         for ( int inode = 1; inode <= nnodes; inode++ ) {
             container.put(inode, new FloatArray);
             this->smootherList.at(indx)->giveNodalVector( nvec, elem->giveDofManager(inode)->giveNumber(),
-                                                          elem->giveRegionNumber() );
+                                                         elem->giveRegionNumber() );
             * ( container.at(inode) ) = * nvec;
         }
 

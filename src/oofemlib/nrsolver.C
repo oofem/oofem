@@ -527,7 +527,7 @@ NRSolver :: applyConstraintsToLoadIncrement(int nite, const SparseMtrx *k, Float
         //factor -= engngModel->giveDomain(1)->giveLoadTimeFunction(prescribedDisplacementLTF)->
         // at(tStep->givePreviousStep()->giveTime()) ;
         factor -= engngModel->giveDomain(1)->giveLoadTimeFunction(prescribedDisplacementLTF)->
-                  __at( tStep->giveTargetTime() - tStep->giveTimeIncrement() );
+        __at( tStep->giveTargetTime() - tStep->giveTimeIncrement() );
     }
 
     if ( nite == 0 ) {

@@ -215,9 +215,13 @@ class OOFEM_EXPORT CommunicationBuffer
 protected:
     MPI_Comm communicator;
 public:
-    CommunicationBuffer(MPI_Comm comm, int size, bool dynamic = 0) { communicator = comm; }
+    CommunicationBuffer(MPI_Comm comm, int size, bool dynamic = 0) {
+        communicator = comm;
+    }
     /// Constructor. Creates empty buffer, using given communicator for packing
-    CommunicationBuffer(MPI_Comm comm, bool dynamic = 0) { communicator = comm; }
+    CommunicationBuffer(MPI_Comm comm, bool dynamic = 0) {
+        communicator = comm;
+    }
     /// Destructor.
     virtual ~CommunicationBuffer() { }
 

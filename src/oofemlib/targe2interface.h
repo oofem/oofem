@@ -51,7 +51,7 @@ class OOFEM_EXPORT Targe2Interface : public MesherInterface
 {
 public:
     /// Constructor
-    Targe2Interface(Domain *d) : MesherInterface(d) { }
+    Targe2Interface(Domain * d) : MesherInterface(d) { }
     /// Destructor
     virtual ~Targe2Interface() { }
 

@@ -583,7 +583,7 @@ SimpleCrossSection :: checkConsistency()
 {
     int result = 1;
     Material *mat = this->giveDomain()->giveMaterial(this->materialNumber);
-    if ( !dynamic_cast< StructuralMaterial * >( mat ) ) {
+    if ( !dynamic_cast< StructuralMaterial * >(mat) ) {
         _warning2( "checkConsistency : material %s without structural support", mat->giveClassName() );
         result = 0;
     }

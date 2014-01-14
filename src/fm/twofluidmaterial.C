@@ -102,7 +102,7 @@ TwoFluidMaterial :: give(int aProperty, GaussPoint *gp)
     if ( ( aProperty == Viscosity ) || ( aProperty == 'd' ) ) {
         double vof = this->giveTempVOF(gp);
         return ( ( 1.0 - vof ) * giveMaterial(0)->give(aProperty, gp) +
-                 vof * giveMaterial(1)->give(aProperty, gp) );
+                vof * giveMaterial(1)->give(aProperty, gp) );
         /*
          * } else if ( aProperty == YieldStress ) {
          *  double vof = this->giveTempVOF(gp);

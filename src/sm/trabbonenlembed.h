@@ -65,7 +65,7 @@ protected:
     double localCumPlastStrainForAverage;
 
 public:
-    TrabBoneNLEmbedStatus(int n, Domain *d, GaussPoint *g);
+    TrabBoneNLEmbedStatus(int n, Domain * d, GaussPoint * g);
     virtual ~TrabBoneNLEmbedStatus();
 
     virtual void printOutputAt(FILE *file, TimeStep *tStep);
@@ -97,7 +97,7 @@ protected:
     double mParam;
 
 public:
-    TrabBoneNLEmbed(int n, Domain *d);
+    TrabBoneNLEmbed(int n, Domain * d);
     virtual ~TrabBoneNLEmbed();
 
     virtual const char *giveClassName() const { return "TrabBoneNLEmbed"; }

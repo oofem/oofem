@@ -91,7 +91,7 @@ public:
      * @param i Boundary condition number.
      * @param d Domain to which new object will belongs.
      */
-    UserDefDirichletBC(int i, Domain *d);
+    UserDefDirichletBC(int i, Domain * d);
 
     /// Destructor
     virtual ~UserDefDirichletBC();

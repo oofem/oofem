@@ -58,7 +58,7 @@ protected:
     static FEI2dQuadBiQuad interpolation;
 
 public:
-    Q9PlaneStress2d(int n, Domain *d);
+    Q9PlaneStress2d(int n, Domain * d);
     virtual ~Q9PlaneStress2d() { }
 
     virtual IRResultType initializeFrom(InputRecord *ir);

@@ -71,9 +71,9 @@ public:
     /// Destructor.
     virtual ~OOFEMTXTInputRecord() { }
     /// Assignment operator.
-    OOFEMTXTInputRecord &operator=(const OOFEMTXTInputRecord &);
+    OOFEMTXTInputRecord &operator = ( const OOFEMTXTInputRecord & );
 
-    virtual InputRecord *GiveCopy() { return new OOFEMTXTInputRecord(* this); }
+    virtual InputRecord *GiveCopy() { return new OOFEMTXTInputRecord(*this); }
 
 public:
     /// Sets the record string.

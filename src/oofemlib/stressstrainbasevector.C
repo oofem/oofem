@@ -58,7 +58,7 @@ StressStrainBaseVector :: StressStrainBaseVector(const FloatArray &src, Material
 }
 
 StressStrainBaseVector &
-StressStrainBaseVector :: operator=(const StressStrainBaseVector &src)
+StressStrainBaseVector :: operator = ( const StressStrainBaseVector & src )
 {
     // assignment: cleanup and copy
     double *srcVal;

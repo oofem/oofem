@@ -59,7 +59,7 @@ protected:
     MeshPackageType meshPackage;
 
 public:
-    AdaptiveLinearStatic(int i, EngngModel *_master = NULL) : LinearStatic(i, _master) { }
+    AdaptiveLinearStatic(int i, EngngModel * _master = NULL) : LinearStatic(i, _master) { }
     virtual ~AdaptiveLinearStatic() { }
 
     virtual void updateYourself(TimeStep *tStep);

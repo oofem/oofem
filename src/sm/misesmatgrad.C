@@ -55,7 +55,7 @@ MisesMatGrad :: MisesMatGrad(int n, Domain *d) : MisesMat(n, d), GradDpMaterialE
 }
 
 MisesMatGrad :: ~MisesMatGrad()
-{}
+{ }
 
 
 int
@@ -535,7 +535,7 @@ MisesMatGradStatus :: MisesMatGradStatus(int n, Domain *d, GaussPoint *g) :
 
 
 MisesMatGradStatus :: ~MisesMatGradStatus()
-{}
+{ }
 
 
 void

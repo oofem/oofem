@@ -74,7 +74,7 @@ MMAClosestIPTransfer MDM :: mapper2;
 MaterialStatus *
 MDM :: CreateStatus(GaussPoint *gp) const
 {
-    if ( dynamic_cast< Microplane * >( gp ) ) {
+    if ( dynamic_cast< Microplane * >(gp) ) {
         return NULL;
     } else {
         return new MDMStatus(1, this->nsd, this->numberOfMicroplanes, MicroplaneMaterial :: giveDomain(), gp);
@@ -113,7 +113,7 @@ MDM :: giveRealStressVector(FloatArray &answer, GaussPoint *gp,
         if ( tempDamageTensorEigenVals.at(ii) < 0.0 ) {
             char buff [ 1024 ];
             sprintf( buff, "giveRealStressVector: negative eigenvalue of damage tensor detected, element %d, ip %d",
-                     gp->giveElement()->giveNumber(), gp->giveNumber() );
+                    gp->giveElement()->giveNumber(), gp->giveNumber() );
             _error(buff);
         }
     }
@@ -383,36 +383,36 @@ MDM :: transformStrainToPDC(FloatArray &answer, FloatArray &strain,
 
         answer.resize(6);
         answer.at(1) = N(1, 1) * ( N(1, 1) * E(1) + N(1, 2) * E(6) + N(1, 3) * E(5) )
-                       + N(1, 2) * ( N(1, 2) * E(2) + N(1, 3) * E(4) )
-                       + N(1, 3) *  N(1, 3) * E(3);
+        + N(1, 2) * ( N(1, 2) * E(2) + N(1, 3) * E(4) )
+        + N(1, 3) *  N(1, 3) * E(3);
         answer.at(2) = N(2, 1) * ( N(2, 1) * E(1) + N(2, 2) * E(6) + N(2, 3) * E(5) )
-                       + N(2, 2) * ( N(2, 2) * E(2) + N(2, 3) * E(4) )
-                       + N(2, 3) *  N(2, 3) * E(3);
+        + N(2, 2) * ( N(2, 2) * E(2) + N(2, 3) * E(4) )
+        + N(2, 3) *  N(2, 3) * E(3);
         answer.at(3) = N(3, 1) * ( N(3, 1) * E(1) + N(3, 2) * E(6) + N(3, 3) * E(5) )
-                       + N(3, 2) * ( N(3, 2) * E(2) + N(3, 3) * E(4) )
-                       + N(3, 3) *  N(3, 3) * E(3);
+        + N(3, 2) * ( N(3, 2) * E(2) + N(3, 3) * E(4) )
+        + N(3, 3) *  N(3, 3) * E(3);
         answer.at(4) = N(2, 1) * ( N(3, 1) * E(1)  + N(3, 2) * E(6) / 2 + N(3, 3) * E(5) / 2 )
-                       + N(2, 2) * ( N(3, 1) * E(6) / 2 + N(3, 2) * E(2)  + N(3, 3) * E(4) / 2 )
-                       + N(2, 3) * ( N(3, 1) * E(5) / 2 + N(3, 2) * E(4) / 2 + N(3, 3) * E(3) );
+        + N(2, 2) * ( N(3, 1) * E(6) / 2 + N(3, 2) * E(2)  + N(3, 3) * E(4) / 2 )
+        + N(2, 3) * ( N(3, 1) * E(5) / 2 + N(3, 2) * E(4) / 2 + N(3, 3) * E(3) );
         answer.at(4) *= 2;
         answer.at(5) = N(1, 1) * ( N(3, 1) * E(1)  + N(3, 2) * E(6) / 2 + N(3, 3) * E(5) / 2 )
-                       + N(1, 2) * ( N(3, 1) * E(6) / 2 + N(3, 2) * E(2)  + N(3, 3) * E(4) / 2 )
-                       + N(1, 3) * ( N(3, 1) * E(5) / 2 + N(3, 2) * E(4) / 2 + N(3, 3) * E(3) );
+        + N(1, 2) * ( N(3, 1) * E(6) / 2 + N(3, 2) * E(2)  + N(3, 3) * E(4) / 2 )
+        + N(1, 3) * ( N(3, 1) * E(5) / 2 + N(3, 2) * E(4) / 2 + N(3, 3) * E(3) );
         answer.at(5) *= 2;
         answer.at(6) = N(1, 1) * ( N(2, 1) * E(1)  + N(2, 2) * E(6) / 2 + N(2, 3) * E(5) / 2 )
-                       + N(1, 2) * ( N(2, 1) * E(6) / 2 + N(2, 2) * E(2)  + N(2, 3) * E(4) / 2 )
-                       + N(1, 3) * ( N(2, 1) * E(5) / 2 + N(2, 2) * E(4) / 2 + N(2, 3) * E(3) );
+        + N(1, 2) * ( N(2, 1) * E(6) / 2 + N(2, 2) * E(2)  + N(2, 3) * E(4) / 2 )
+        + N(1, 3) * ( N(2, 1) * E(5) / 2 + N(2, 2) * E(4) / 2 + N(2, 3) * E(3) );
         answer.at(6) *= 2;
     } else if ( mdmMode == mdm_2d ) {
         fullStrain = strain;
 
         answer.resize(3);
         answer.at(1) = N(1, 1) * ( N(1, 1) * E(1) + N(1, 2) * E(3) )
-                       + N(1, 2) *  N(1, 2) * E(2);
+        + N(1, 2) *  N(1, 2) * E(2);
         answer.at(2) = N(2, 1) * ( N(2, 1) * E(1) + N(2, 2) * E(3) )
-                       + N(2, 2) *  N(2, 2) * E(2);
+        + N(2, 2) *  N(2, 2) * E(2);
         answer.at(3) = N(1, 1) * ( N(2, 1) * E(1)  + N(2, 2) * E(3) / 2 )
-                       + N(1, 2) * ( N(2, 1) * E(3) / 2 + N(2, 2) * E(2) );
+        + N(1, 2) * ( N(2, 1) * E(3) / 2 + N(2, 2) * E(2) );
         answer.at(3) *= 2;
     }
 }
@@ -493,34 +493,34 @@ MDM :: transformStressFromPDC(FloatArray &answer, const FloatArray &stressPDC, c
         //answer.resize (6);
 
         fullAnswer.at(1) = Nt(1, 1) * ( Nt(1, 1) * S(1) + 2 * Nt(1, 2) * S(6) + 2 * Nt(1, 3) * S(5) )
-                           + Nt(1, 2) * ( Nt(1, 2) * S(2) + 2 * Nt(1, 3) * S(4) )
-                           + Nt(1, 3) *  Nt(1, 3) * S(3);
+        + Nt(1, 2) * ( Nt(1, 2) * S(2) + 2 * Nt(1, 3) * S(4) )
+        + Nt(1, 3) *  Nt(1, 3) * S(3);
         fullAnswer.at(2) = Nt(2, 1) * ( Nt(2, 1) * S(1) + 2 * Nt(2, 2) * S(6) + 2 * Nt(2, 3) * S(5) )
-                           + Nt(2, 2) * ( Nt(2, 2) * S(2) + 2 * Nt(2, 3) * S(4) )
-                           + Nt(2, 3) *  Nt(2, 3) * S(3);
+        + Nt(2, 2) * ( Nt(2, 2) * S(2) + 2 * Nt(2, 3) * S(4) )
+        + Nt(2, 3) *  Nt(2, 3) * S(3);
         fullAnswer.at(3) = Nt(3, 1) * ( Nt(3, 1) * S(1) + 2 * Nt(3, 2) * S(6) + 2 * Nt(3, 3) * S(5) )
-                           + Nt(3, 2) * ( Nt(3, 2) * S(2) + 2 * Nt(3, 3) * S(4) )
-                           + Nt(3, 3) *  Nt(3, 3) * S(3);
+        + Nt(3, 2) * ( Nt(3, 2) * S(2) + 2 * Nt(3, 3) * S(4) )
+        + Nt(3, 3) *  Nt(3, 3) * S(3);
         fullAnswer.at(4) = Nt(2, 1) * ( Nt(3, 1) * S(1)  + Nt(3, 2) * S(6)  + Nt(3, 3) * S(5) )
-                           + Nt(2, 2) * ( Nt(3, 1) * S(6)  + Nt(3, 2) * S(2)  + Nt(3, 3) * S(4) )
-                           + Nt(2, 3) * ( Nt(3, 1) * S(5)  + Nt(3, 2) * S(4)  + Nt(3, 3) * S(3) );
+        + Nt(2, 2) * ( Nt(3, 1) * S(6)  + Nt(3, 2) * S(2)  + Nt(3, 3) * S(4) )
+        + Nt(2, 3) * ( Nt(3, 1) * S(5)  + Nt(3, 2) * S(4)  + Nt(3, 3) * S(3) );
         fullAnswer.at(5) = Nt(1, 1) * ( Nt(3, 1) * S(1)  + Nt(3, 2) * S(6)  + Nt(3, 3) * S(5) )
-                           + Nt(1, 2) * ( Nt(3, 1) * S(6)  + Nt(3, 2) * S(2)  + Nt(3, 3) * S(4) )
-                           + Nt(1, 3) * ( Nt(3, 1) * S(5)  + Nt(3, 2) * S(4)  + Nt(3, 3) * S(3) );
+        + Nt(1, 2) * ( Nt(3, 1) * S(6)  + Nt(3, 2) * S(2)  + Nt(3, 3) * S(4) )
+        + Nt(1, 3) * ( Nt(3, 1) * S(5)  + Nt(3, 2) * S(4)  + Nt(3, 3) * S(3) );
         fullAnswer.at(6) = Nt(1, 1) * ( Nt(2, 1) * S(1)  + Nt(2, 2) * S(6)  + Nt(2, 3) * S(5) )
-                           + Nt(1, 2) * ( Nt(2, 1) * S(6)  + Nt(2, 2) * S(2)  + Nt(2, 3) * S(4) )
-                           + Nt(1, 3) * ( Nt(2, 1) * S(5)  + Nt(2, 2) * S(4)  + Nt(2, 3) * S(3) );
+        + Nt(1, 2) * ( Nt(2, 1) * S(6)  + Nt(2, 2) * S(2)  + Nt(2, 3) * S(4) )
+        + Nt(1, 3) * ( Nt(2, 1) * S(5)  + Nt(2, 2) * S(4)  + Nt(2, 3) * S(3) );
 
         StructuralMaterial :: giveReducedSymVectorForm( answer, fullAnswer, gp->giveMaterialMode() );
     } else if ( mdmMode == mdm_2d ) {
         answer.resize(3);
 
         answer.at(1) = Nt(1, 1) * ( Nt(1, 1) * S(1) + Nt(1, 2) * 2. * S(3) )
-                       + Nt(1, 2) *  Nt(1, 2) * S(2);
+        + Nt(1, 2) *  Nt(1, 2) * S(2);
         answer.at(2) = Nt(2, 1) * ( Nt(2, 1) * S(1) + Nt(2, 2) * 2. * S(3) )
-                       + Nt(2, 2) *  Nt(2, 2) * S(2);
+        + Nt(2, 2) *  Nt(2, 2) * S(2);
         answer.at(3) = Nt(1, 1) * ( Nt(2, 1) * S(1) + Nt(2, 2) * S(3) )
-                       + Nt(1, 2) * ( Nt(2, 1) * S(3) + Nt(2, 2) * S(2) );
+        + Nt(1, 2) * ( Nt(2, 1) * S(3) + Nt(2, 2) * S(2) );
     }
 }
 
@@ -1292,9 +1292,9 @@ Interface *
 MDM :: giveInterface(InterfaceType type)
 {
     if ( type == NonlocalMaterialExtensionInterfaceType ) {
-        return static_cast< StructuralNonlocalMaterialExtensionInterface * >( this );
+        return static_cast< StructuralNonlocalMaterialExtensionInterface * >(this);
     } else if ( type == MaterialModelMapperInterfaceType ) {
-        return static_cast< MaterialModelMapperInterface * >( this );
+        return static_cast< MaterialModelMapperInterface * >(this);
     } else {
         return NULL;
     }

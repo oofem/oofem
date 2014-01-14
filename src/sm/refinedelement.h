@@ -53,7 +53,7 @@ protected:
     IntArray boundaryFlag;
 
 public:
-    RefinedElement(Domain *d, int elem, int level);
+    RefinedElement(Domain * d, int elem, int level);
     virtual ~RefinedElement();
 
     IntArray *giveFineNodeArray(int node);

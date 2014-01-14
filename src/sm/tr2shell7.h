@@ -94,7 +94,7 @@ protected:
 
 
 public:
-    Tr2Shell7(int n, Domain *d);        // constructor
+    Tr2Shell7(int n, Domain * d);        // constructor
     virtual ~Tr2Shell7() { }            // destructor -> declaring as virtual will make each subclass call their respective destr.
     // definition & identification
     virtual int giveNumberOfDofs() { return 42; }

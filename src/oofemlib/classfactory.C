@@ -85,7 +85,7 @@ ClassFactory &GiveClassFactory()
 
 ClassFactory &classFactory = GiveClassFactory();
 
-int ClassFactory :: CaseComp :: operator()(const std :: string &a, const std :: string &b) const
+int ClassFactory :: CaseComp :: operator() (const std :: string & a, const std :: string & b) const
 {
     return strncasecmp( a.c_str(), b.c_str(), ( int ) b.length() ) < 0;
 }
@@ -110,7 +110,7 @@ SparseMtrx *ClassFactory :: createSparseMtrx(SparseMtrxType name)
     return ( sparseMtrxList.count(name) == 1 ) ? sparseMtrxList [ name ]() : NULL;
 }
 
-bool ClassFactory :: registerSparseMtrx( SparseMtrxType name, SparseMtrx * ( * creator )( ) )
+bool ClassFactory :: registerSparseMtrx( SparseMtrxType name, SparseMtrx * ( *creator )( ) )
 {
     sparseMtrxList [ name ] = creator;
     return true;
@@ -126,7 +126,7 @@ SparseLinearSystemNM *ClassFactory :: createSparseLinSolver(LinSystSolverType na
     return ( sparseLinSolList.count(name) == 1 ) ? sparseLinSolList [ name ](d, m) : NULL;
 }
 
-bool ClassFactory :: registerSparseLinSolver( LinSystSolverType name, SparseLinearSystemNM * ( * creator )( Domain *, EngngModel * ) )
+bool ClassFactory :: registerSparseLinSolver( LinSystSolverType name, SparseLinearSystemNM * ( *creator )( Domain *, EngngModel * ) )
 {
     sparseLinSolList [ name ] = creator;
     return true;
@@ -137,7 +137,7 @@ ErrorEstimator *ClassFactory :: createErrorEstimator(ErrorEstimatorType name, in
     return ( errEstList.count(name) == 1 ) ? errEstList [ name ](num, d) : NULL;
 }
 
-bool ClassFactory :: registerErrorEstimator( ErrorEstimatorType name, ErrorEstimator * ( * creator )( int, Domain * ) )
+bool ClassFactory :: registerErrorEstimator( ErrorEstimatorType name, ErrorEstimator * ( *creator )( int, Domain * ) )
 {
     errEstList [ name ] = creator;
     return true;
@@ -170,7 +170,7 @@ Element *ClassFactory :: createElement(const char *name, int number, Domain *dom
     return ( elemList.count(name) == 1 ) ? elemList [ name ](number, domain) : NULL;
 }
 
-bool ClassFactory :: registerElement( const char *name, Element * ( * creator )( int, Domain * ) )
+bool ClassFactory :: registerElement( const char *name, Element * ( *creator )( int, Domain * ) )
 {
     elemList [ name ] = creator;
     return true;
@@ -181,7 +181,7 @@ DofManager *ClassFactory :: createDofManager(const char *name, int number, Domai
     return ( dofmanList.count(name) == 1 ) ? dofmanList [ name ](number, domain) : NULL;
 }
 
-bool ClassFactory :: registerDofManager( const char *name, DofManager * ( * creator )( int, Domain * ) )
+bool ClassFactory :: registerDofManager( const char *name, DofManager * ( *creator )( int, Domain * ) )
 {
     dofmanList [ name ] = creator;
     return true;
@@ -192,7 +192,7 @@ GeneralBoundaryCondition *ClassFactory :: createBoundaryCondition(const char *na
     return ( bcList.count(name) == 1 ) ? bcList [ name ](number, domain) : NULL;
 }
 
-bool ClassFactory :: registerBoundaryCondition( const char *name, GeneralBoundaryCondition * ( * creator )( int, Domain * ) )
+bool ClassFactory :: registerBoundaryCondition( const char *name, GeneralBoundaryCondition * ( *creator )( int, Domain * ) )
 {
     bcList [ name ] = creator;
     return true;
@@ -203,7 +203,7 @@ CrossSection *ClassFactory :: createCrossSection(const char *name, int number, D
     return ( csList.count(name) == 1 ) ? csList [ name ](number, domain) : NULL;
 }
 
-bool ClassFactory :: registerCrossSection( const char *name, CrossSection * ( * creator )( int, Domain * ) )
+bool ClassFactory :: registerCrossSection( const char *name, CrossSection * ( *creator )( int, Domain * ) )
 {
     csList [ name ] = creator;
     return true;
@@ -214,7 +214,7 @@ Material *ClassFactory :: createMaterial(const char *name, int number, Domain *d
     return ( matList.count(name) == 1 ) ? matList [ name ](number, domain) : NULL;
 }
 
-bool ClassFactory :: registerMaterial( const char *name, Material * ( * creator )( int, Domain * ) )
+bool ClassFactory :: registerMaterial( const char *name, Material * ( *creator )( int, Domain * ) )
 {
     matList [ name ] = creator;
     return true;
@@ -225,7 +225,7 @@ EngngModel *ClassFactory :: createEngngModel(const char *name, int number, Engng
     return ( engngList.count(name) == 1 ) ? engngList [ name ](number, master) : NULL;
 }
 
-bool ClassFactory :: registerEngngModel( const char *name, EngngModel * ( * creator )( int, EngngModel * ) )
+bool ClassFactory :: registerEngngModel( const char *name, EngngModel * ( *creator )( int, EngngModel * ) )
 {
     engngList [ name ] = creator;
     return true;
@@ -236,7 +236,7 @@ LoadTimeFunction *ClassFactory :: createLoadTimeFunction(const char *name, int n
     return ( ltfList.count(name) == 1 ) ? ltfList [ name ](number, domain) : NULL;
 }
 
-bool ClassFactory :: registerLoadTimeFunction( const char *name, LoadTimeFunction * ( * creator )( int, Domain * ) )
+bool ClassFactory :: registerLoadTimeFunction( const char *name, LoadTimeFunction * ( *creator )( int, Domain * ) )
 {
     ltfList [ name ] = creator;
     return true;
@@ -247,7 +247,7 @@ NonlocalBarrier *ClassFactory :: createNonlocalBarrier(const char *name, int num
     return ( nlbList.count(name) == 1 ) ? nlbList [ name ](number, domain) : NULL;
 }
 
-bool ClassFactory :: registerNonlocalBarrier( const char *name, NonlocalBarrier * ( * creator )( int, Domain * ) )
+bool ClassFactory :: registerNonlocalBarrier( const char *name, NonlocalBarrier * ( *creator )( int, Domain * ) )
 {
     nlbList [ name ] = creator;
     return true;
@@ -258,7 +258,7 @@ RandomFieldGenerator *ClassFactory :: createRandomFieldGenerator(const char *nam
     return ( rfgList.count(name) == 1 ) ? rfgList [ name ](number, domain) : NULL;
 }
 
-bool ClassFactory :: registerRandomFieldGenerator( const char *name, RandomFieldGenerator * ( * creator )( int, Domain * ) )
+bool ClassFactory :: registerRandomFieldGenerator( const char *name, RandomFieldGenerator * ( *creator )( int, Domain * ) )
 {
     rfgList [ name ] = creator;
     return true;
@@ -269,7 +269,7 @@ ExportModule *ClassFactory :: createExportModule(const char *name, int number, E
     return ( exportList.count(name) == 1 ) ? exportList [ name ](number, emodel) : NULL;
 }
 
-bool ClassFactory :: registerExportModule( const char *name, ExportModule * ( * creator )( int, EngngModel * ) )
+bool ClassFactory :: registerExportModule( const char *name, ExportModule * ( *creator )( int, EngngModel * ) )
 {
     exportList [ name ] = creator;
     return true;
@@ -280,7 +280,7 @@ SparseNonLinearSystemNM *ClassFactory :: createNonLinearSolver(const char *name,
     return ( nonlinList.count(name) == 1 ) ? nonlinList [ name ](d, emodel) : NULL;
 }
 
-bool ClassFactory :: registerSparseNonLinearSystemNM( const char *name, SparseNonLinearSystemNM * ( * creator )( Domain *, EngngModel * ) )
+bool ClassFactory :: registerSparseNonLinearSystemNM( const char *name, SparseNonLinearSystemNM * ( *creator )( Domain *, EngngModel * ) )
 {
     nonlinList [ name ] = creator;
     return true;
@@ -291,7 +291,7 @@ InitModule *ClassFactory :: createInitModule(const char *name, int number, Engng
     return ( initList.count(name) == 1 ) ? initList [ name ](number, emodel) : NULL;
 }
 
-bool ClassFactory :: registerInitModule( const char *name, InitModule * ( * creator )( int, EngngModel * ) )
+bool ClassFactory :: registerInitModule( const char *name, InitModule * ( *creator )( int, EngngModel * ) )
 {
     initList [ name ] = creator;
     return true;
@@ -302,7 +302,7 @@ TopologyDescription *ClassFactory :: createTopology(const char *name, Domain *do
     return ( topologyList.count(name) == 1 ) ? topologyList [ name ](domain) : NULL;
 }
 
-bool ClassFactory :: registerTopologyDescription( const char *name, TopologyDescription * ( * creator )( Domain * ) )
+bool ClassFactory :: registerTopologyDescription( const char *name, TopologyDescription * ( *creator )( Domain * ) )
 {
     topologyList [ name ] = creator;
     return true;
@@ -315,7 +315,7 @@ EnrichmentItem *ClassFactory :: createEnrichmentItem(const char *name, int numbe
     return ( enrichItemList.count(name) == 1 ) ? enrichItemList [ name ](number, xm, domain) : NULL;
 }
 
-bool ClassFactory :: registerEnrichmentItem( const char *name, EnrichmentItem * ( * creator )( int, XfemManager *, Domain * ) )
+bool ClassFactory :: registerEnrichmentItem( const char *name, EnrichmentItem * ( *creator )( int, XfemManager *, Domain * ) )
 {
     enrichItemList [ name ] = creator;
     return true;
@@ -326,7 +326,7 @@ EnrichmentFunction *ClassFactory :: createEnrichmentFunction(const char *name, i
     return ( enrichFuncList.count(name) == 1 ) ? enrichFuncList [ name ](number, domain) : NULL;
 }
 
-bool ClassFactory :: registerEnrichmentFunction( const char *name, EnrichmentFunction * ( * creator )( int, Domain * ) )
+bool ClassFactory :: registerEnrichmentFunction( const char *name, EnrichmentFunction * ( *creator )( int, Domain * ) )
 {
     enrichFuncList [ name ] = creator;
     return true;
@@ -337,7 +337,7 @@ EnrichmentDomain *ClassFactory :: createEnrichmentDomain(const char *name)
     return ( enrichmentDomainList.count(name) == 1 ) ? enrichmentDomainList [ name ]() : NULL;
 }
 
-bool ClassFactory :: registerEnrichmentDomain( const char *name, EnrichmentDomain * ( * creator )( ) )
+bool ClassFactory :: registerEnrichmentDomain( const char *name, EnrichmentDomain * ( *creator )( ) )
 {
     enrichmentDomainList [ name ] = creator;
     return true;
@@ -348,7 +348,7 @@ EnrichmentFront *ClassFactory :: createEnrichmentFront(const char *name)
     return ( enrichmentFrontList.count(name) == 1 ) ? enrichmentFrontList [ name ]() : NULL;
 }
 
-bool ClassFactory :: registerEnrichmentFront( const char *name, EnrichmentFront * ( * creator )( ) )
+bool ClassFactory :: registerEnrichmentFront( const char *name, EnrichmentFront * ( *creator )( ) )
 {
     enrichmentFrontList [ name ] = creator;
     return true;
@@ -359,7 +359,7 @@ PropagationLaw *ClassFactory :: createPropagationLaw(const char *name)
     return ( propagationLawList.count(name) == 1 ) ? propagationLawList [ name ]() : NULL;
 }
 
-bool ClassFactory :: registerPropagationLaw( const char *name, PropagationLaw * ( * creator )( ) )
+bool ClassFactory :: registerPropagationLaw( const char *name, PropagationLaw * ( *creator )( ) )
 {
     propagationLawList [ name ] = creator;
     return true;
@@ -370,7 +370,7 @@ BasicGeometry *ClassFactory :: createGeometry(const char *name)
     return ( geometryList.count(name) == 1 ) ? geometryList [ name ]() : NULL;
 }
 
-bool ClassFactory :: registerGeometry( const char *name, BasicGeometry * ( * creator )( ) )
+bool ClassFactory :: registerGeometry( const char *name, BasicGeometry * ( *creator )( ) )
 {
     geometryList [ name ] = creator;
     return true;
@@ -384,7 +384,7 @@ FailureCriteria *ClassFactory :: createFailureCriteria(const char *name, int num
     return ( failureCriteriaList.count(name) == 1 ) ? failureCriteriaList [ name ](number, fracManager) : NULL;
 }
 
-bool ClassFactory :: registerFailureCriteria( const char *name, FailureCriteria * ( * creator )( int, FractureManager * ) )
+bool ClassFactory :: registerFailureCriteria( const char *name, FailureCriteria * ( *creator )( int, FractureManager * ) )
 {
     failureCriteriaList [ name ] = creator;
     return true;
@@ -395,7 +395,7 @@ FailureCriteriaStatus *ClassFactory :: createFailureCriteriaStatus(const char *n
     return ( failureCriteriaList.count(name) == 1 ) ? failureCriteriaStatusList [ name ](number, fc) : NULL;
 }
 
-bool ClassFactory :: registerFailureCriteriaStatus( const char *name, FailureCriteriaStatus * ( * creator )( int, FailureCriteria * ) )
+bool ClassFactory :: registerFailureCriteriaStatus( const char *name, FailureCriteriaStatus * ( *creator )( int, FailureCriteria * ) )
 {
     failureCriteriaStatusList [ name ] = creator;
     return true;

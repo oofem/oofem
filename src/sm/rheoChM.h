@@ -76,7 +76,7 @@ protected:
     FloatArray shrinkageStrain;
 
 public:
-    RheoChainMaterialStatus(int n, Domain *d, GaussPoint *g, int nunits);
+    RheoChainMaterialStatus(int n, Domain * d, GaussPoint * g, int nunits);
     virtual ~RheoChainMaterialStatus();
 
     virtual void printOutputAt(FILE *file, TimeStep *tStep);
@@ -139,7 +139,7 @@ protected:
     double timeFactor;
 
 public:
-    RheoChainMaterial(int n, Domain *d);
+    RheoChainMaterial(int n, Domain * d);
     virtual ~RheoChainMaterial();
 
     virtual void giveRealStressVector(FloatArray &answer, GaussPoint *gp,
@@ -221,7 +221,7 @@ public:
      * @param tStep Time step (most models are able to respond only when tStep is the current time step).
      * @param mode Determines response mode.
      */
-    virtual void giveEigenStrainVector(FloatArray &answer, GaussPoint *gp, TimeStep *tStep, ValueModeType mode) {};
+    virtual void giveEigenStrainVector(FloatArray &answer, GaussPoint *gp, TimeStep *tStep, ValueModeType mode) { };
 
     virtual MaterialStatus *CreateStatus(GaussPoint *gp) const;
 

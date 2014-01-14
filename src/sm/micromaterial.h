@@ -65,7 +65,7 @@ class MicroMaterialStatus : public StructuralMaterialStatus
 {
 public:
     /// Constructor
-    MicroMaterialStatus(int, Domain *d, GaussPoint *gp);
+    MicroMaterialStatus(int, Domain * d, GaussPoint * gp);
 
     /// Destructor
     virtual ~MicroMaterialStatus();
@@ -92,7 +92,7 @@ class MicroMaterial : public StructuralMaterial, public UnknownNumberingScheme
 {
 public:
     /// Constructor
-    MicroMaterial(int n, Domain *d);
+    MicroMaterial(int n, Domain * d);
     /// Destructor
     virtual ~MicroMaterial();
 

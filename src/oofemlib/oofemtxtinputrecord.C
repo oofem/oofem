@@ -48,7 +48,7 @@
 
 namespace oofem {
 OOFEMTXTInputRecord :: OOFEMTXTInputRecord() : InputRecord(), tokenizer(), record()
-{}
+{ }
 
 OOFEMTXTInputRecord :: OOFEMTXTInputRecord(const OOFEMTXTInputRecord &src) : InputRecord(src), tokenizer(),
     record(src.record)
@@ -73,7 +73,7 @@ OOFEMTXTInputRecord :: OOFEMTXTInputRecord(const char *source) : InputRecord(), 
 }
 
 OOFEMTXTInputRecord &
-OOFEMTXTInputRecord :: operator=(const OOFEMTXTInputRecord &src)
+OOFEMTXTInputRecord :: operator = ( const OOFEMTXTInputRecord & src )
 {
     this->record = src.record;
     tokenizer.tokenizeLine( this->record.c_str() );
@@ -528,7 +528,7 @@ OOFEMTXTInputRecord :: __readSimpleString(const char *source, char *simpleString
         return NULL;
     }
 
-    while ( isspace(* curr) || !* curr ) {
+    while ( isspace(* curr) || ! * curr ) {
         curr++;
     }
 
@@ -536,7 +536,7 @@ OOFEMTXTInputRecord :: __readSimpleString(const char *source, char *simpleString
         OOFEM_ERROR("OOFEMTXTInputRecord::readSimpleString : unexpected end-of-line");
     }
 
-    while ( ( !( isspace(* curr) || !* curr ) ) && ( ++count < maxchar ) ) {
+    while ( ( !( isspace(* curr) || ! * curr ) ) && ( ++count < maxchar ) ) {
         * ss++ = * curr++;
     }
 
@@ -592,12 +592,12 @@ OOFEMTXTInputRecord :: __skipNextWord(const char *src)
 // skips next word in src ; returns pointer after it
 //
 {
-    while ( isspace(* src) || !* src ) {
+    while ( isspace(* src) || ! * src ) {
         src++;
     }
 
     // skips whitespaces if any
-    while ( !( isspace(* src) || !* src ) ) {
+    while ( !( isspace(* src) || ! * src ) ) {
         src++;
     }
 

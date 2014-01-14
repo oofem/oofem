@@ -81,7 +81,7 @@ protected:
 
 public:
     /// Constructor. Creates empty Output Manager. By default all components are selected.
-    POIExportModule(int n, EngngModel *e);
+    POIExportModule(int n, EngngModel * e);
     /// Destructor
     virtual ~POIExportModule();
 

@@ -56,7 +56,7 @@ private:
     int referenceNode;
 
 public:
-    LIBeam3d(int n, Domain *d);
+    LIBeam3d(int n, Domain * d);
     virtual ~LIBeam3d() { }
 
     virtual IRResultType initializeFrom(InputRecord *ir);

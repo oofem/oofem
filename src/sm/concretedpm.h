@@ -140,7 +140,7 @@ protected:
 
 public:
     /// Constructor.
-    ConcreteDPMStatus(int n, Domain *d, GaussPoint *gp);
+    ConcreteDPMStatus(int n, Domain * d, GaussPoint * gp);
 
     /// Destructor.
     virtual ~ConcreteDPMStatus();
@@ -465,7 +465,7 @@ protected:
 
 public:
     /// Constructor
-    ConcreteDPM(int n, Domain *d);
+    ConcreteDPM(int n, Domain * d);
     /// Destructor
     virtual ~ConcreteDPM();
 

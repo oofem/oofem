@@ -54,7 +54,7 @@
 namespace oofem {
 #ifdef __OOFEG
 class StructuralElementEvaluator;
-void drawIGAPatchDeformedGeometry(Element * elem, StructuralElementEvaluator * se, oofegGraphicContext & gc, UnknownType);
+void drawIGAPatchDeformedGeometry(Element *elem, StructuralElementEvaluator *se, oofegGraphicContext &gc, UnknownType);
 #endif
 
 /**
@@ -66,11 +66,11 @@ public:
     const IntArray *knotSpan;
     Element *elem;
 public:
-    FEIIGAElementGeometryWrapper(Element *_elem, const IntArray *_knotSpan) : FEICellGeometry() {
+    FEIIGAElementGeometryWrapper(Element * _elem, const IntArray * _knotSpan) : FEICellGeometry() {
         this->elem = _elem;
         this->knotSpan = _knotSpan;
     }
-    FEIIGAElementGeometryWrapper(Element *_elem) : FEICellGeometry() {
+    FEIIGAElementGeometryWrapper(Element * _elem) : FEICellGeometry() {
         this->elem = _elem;
         this->knotSpan = NULL;
     }
@@ -88,7 +88,7 @@ class OOFEM_EXPORT IGAIntegrationElement : public GaussIntegrationRule
 protected:
     IntArray knotSpan;     // knot_span(nsd)
 public:
-    IGAIntegrationElement(int _n, Element *_e, IntArray &_knotSpan) :
+    IGAIntegrationElement(int _n, Element * _e, IntArray & _knotSpan) :
         GaussIntegrationRule(_n, _e, 0, 0, false),
         knotSpan(_knotSpan) { }
     const IntArray *giveKnotSpan() { return & this->knotSpan; }
@@ -107,7 +107,7 @@ protected:
     IntArray knotSpanParallelMode;
 #endif
 public:
-    IGAElement(int n, Domain *aDomain) : Element(n, aDomain) { }
+    IGAElement(int n, Domain * aDomain) : Element(n, aDomain) { }
     IRResultType initializeFrom(InputRecord *ir);
 
 #ifdef __PARALLEL_MODE
@@ -129,7 +129,7 @@ protected:
 class OOFEM_EXPORT IGATSplineElement : public IGAElement
 {
 public:
-    IGATSplineElement(int n, Domain *aDomain) : IGAElement(n, aDomain) { }
+    IGATSplineElement(int n, Domain * aDomain) : IGAElement(n, aDomain) { }
     IRResultType initializeFrom(InputRecord *ir);
 
 protected:

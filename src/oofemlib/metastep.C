@@ -89,7 +89,7 @@ int
 MetaStep :: isStepValid(int soltStepumber)
 {
     if ( ( soltStepumber >= sindex ) &&
-         ( soltStepumber < ( sindex + numberOfSteps ) ) ) {
+        ( soltStepumber < ( sindex + numberOfSteps ) ) ) {
         return 1;
     }
 

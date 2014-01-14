@@ -101,9 +101,9 @@ public:
      */
     CompCol();
     /// Copy constructor
-    CompCol(const CompCol &S);
+    CompCol(const CompCol & S);
     /// Assignment operator
-    CompCol &operator=(const CompCol &C);
+    CompCol &operator = ( const CompCol & C );
     /// Destructor
     virtual ~CompCol() { }
 
@@ -112,7 +112,7 @@ public:
     void times(const FloatArray &x, FloatArray &answer) const;
     void timesT(const FloatArray &x, FloatArray &answer) const;
     virtual void times(double x);
-    int buildInternalStructure(EngngModel *, int, EquationID, const UnknownNumberingScheme & s);
+    int buildInternalStructure(EngngModel *, int, EquationID, const UnknownNumberingScheme &s);
     int assemble(const IntArray &loc, const FloatMatrix &mat);
     int assemble(const IntArray &rloc, const IntArray &cloc, const FloatMatrix &mat);
     bool canBeFactorized() const { return false; }
@@ -147,9 +147,9 @@ protected:
     /*  General access function (slow) */
     /***********************************/
     /// implements 0-based access
-    double operator()(int i, int j) const;
+    double operator() (int i, int j) const;
     /// implements 0-based access
-    double &operator()(int i, int j);
+    double &operator() (int i, int j);
 };
 } // end namespace oofem
 #endif // compcol_h

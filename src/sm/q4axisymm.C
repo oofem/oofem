@@ -300,16 +300,16 @@ Q4Axisymm :: initializeFrom(InputRecord *ir)
     IR_GIVE_OPTIONAL_FIELD(ir, numberOfFiAndShGaussPoints, _IFT_Q4Axisymm_nipfish);
 
     if ( !( ( numberOfGaussPoints == 1 ) ||
-            ( numberOfGaussPoints == 4 ) ||
-            ( numberOfGaussPoints == 9 ) ||
-            ( numberOfGaussPoints == 16 ) ) ) {
+           ( numberOfGaussPoints == 4 ) ||
+           ( numberOfGaussPoints == 9 ) ||
+           ( numberOfGaussPoints == 16 ) ) ) {
         numberOfGaussPoints = 4;
     }
 
     if ( !( ( numberOfFiAndShGaussPoints == 1 ) ||
-            ( numberOfFiAndShGaussPoints == 4 ) ||
-            ( numberOfFiAndShGaussPoints == 9 ) ||
-            ( numberOfFiAndShGaussPoints == 16 ) ) ) {
+           ( numberOfFiAndShGaussPoints == 4 ) ||
+           ( numberOfFiAndShGaussPoints == 9 ) ||
+           ( numberOfFiAndShGaussPoints == 16 ) ) ) {
         numberOfFiAndShGaussPoints = 1;
     }
 
@@ -349,7 +349,7 @@ Q4Axisymm :: computeVolumeAround(GaussPoint *gp)
     }
 
     determinant = fabs( this->interp.giveTransformationJacobian( * gp->giveCoordinates(), FEIElementGeometryWrapper(this) ) );
-    return determinant * gp->giveWeight() * r;
+    return determinant *gp->giveWeight() * r;
 }
 
 

@@ -110,7 +110,7 @@ void DarcyFlow :: solveYourselfAt(TimeStep *tStep)
     this->externalForces.resize(neq);
     this->externalForces.zero();
     this->assembleVectorFromElements( this->externalForces, tStep, EID_ConservationEquation, ExternalForcesVector, VM_Total,
-                                      EModelDefaultEquationNumbering(), this->giveDomain(1) );
+                                     EModelDefaultEquationNumbering(), this->giveDomain(1) );
 
     this->incrementOfSolution.resize(neq);
     this->internalForces.resize(neq);
@@ -214,7 +214,7 @@ void DarcyFlow :: updateComponent(TimeStep *tStep, NumericalCmpn cmpn, Domain *d
 
         this->stiffnessMatrix->zero();
         this->assemble( this->stiffnessMatrix, tStep, EID_ConservationEquation, StiffnessMatrix,
-                        EModelDefaultEquationNumbering(), this->giveDomain(1) );
+                       EModelDefaultEquationNumbering(), this->giveDomain(1) );
         break;
 
     default:

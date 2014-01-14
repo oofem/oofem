@@ -197,7 +197,7 @@ MPlasticMaterial :: closestPointReturn(FloatArray &answer,
     FloatMatrix elasticModuliInverse, hardeningModuliInverse;
     FloatMatrix helpMtrx, helpMtrx2;
     FloatMatrix gmat;
-    std :: vector< FloatArray >yieldGradVec(this->nsurf), loadGradVec(this->nsurf), * yieldGradVecPtr, * loadGradVecPtr;
+    std :: vector< FloatArray > yieldGradVec(this->nsurf), loadGradVec(this->nsurf), * yieldGradVecPtr, * loadGradVecPtr;
     FloatArray rhs;
     double yieldValue;
     int nIterations = 0;
@@ -408,7 +408,7 @@ MPlasticMaterial :: closestPointReturn(FloatArray &answer,
 
             if ( nIterations > PLASTIC_MATERIAL_MAX_ITERATIONS ) {
                 _warning4( "GiveRealStressVector: local equlibrium not reached in %d iterations\nElement %d, gp %d, continuing",
-                           PLASTIC_MATERIAL_MAX_ITERATIONS, gp->giveElement()->giveNumber(), gp->giveNumber() );
+                          PLASTIC_MATERIAL_MAX_ITERATIONS, gp->giveElement()->giveNumber(), gp->giveNumber() );
                 answer = fullStressVector;
                 break;
             }
@@ -434,7 +434,7 @@ MPlasticMaterial :: cuttingPlaneReturn(FloatArray &answer,
     FloatArray fSigmaGradientVectorR, gGradientVectorR, helpVector, trialStressIncrement, rhs;
     FloatArray di, dj;
     FloatMatrix elasticModuli, hardeningModuli, dmat, helpMtrx, gmatInv, gradMat;
-    std :: vector< FloatArray >yieldGradVec(this->nsurf), loadGradVec(this->nsurf), * yieldGradVecPtr, * loadGradVecPtr;
+    std :: vector< FloatArray > yieldGradVec(this->nsurf), loadGradVec(this->nsurf), * yieldGradVecPtr, * loadGradVecPtr;
     FloatArray dgamma(this->nsurf);
     double yieldValue;
     int nIterations = 0;
@@ -856,7 +856,7 @@ MPlasticMaterial :: giveConsistentStiffnessMatrix(FloatMatrix &answer,
     FloatArray gradientVector, stressVector, fullStressVector;
     FloatArray stressSpaceHardeningVars;
     FloatArray strainSpaceHardeningVariables, helpVector;
-    std :: vector< FloatArray >yieldGradVec(this->nsurf), loadGradVec(this->nsurf), * yieldGradVecPtr, * loadGradVecPtr;
+    std :: vector< FloatArray > yieldGradVec(this->nsurf), loadGradVec(this->nsurf), * yieldGradVecPtr, * loadGradVecPtr;
     FloatArray helpVec;
 
     IntArray activeConditionMap, mask;
@@ -1002,7 +1002,7 @@ MPlasticMaterial :: giveElastoPlasticStiffnessMatrix(FloatMatrix &answer,
     FloatArray gradientVector, stressVector, fullStressVector;
     FloatArray stressSpaceHardeningVars;
     FloatArray strainSpaceHardeningVariables, helpVector;
-    std :: vector< FloatArray >yieldGradVec(this->nsurf), loadGradVec(this->nsurf);
+    std :: vector< FloatArray > yieldGradVec(this->nsurf), loadGradVec(this->nsurf);
     FloatArray helpVec;
 
     IntArray activeConditionMap, mask;
@@ -1435,7 +1435,7 @@ void MPlasticMaterialStatus :: initTempStatus()
 
     if ( strainSpaceHardeningVarsVector.giveSize() == 0 ) {
         strainSpaceHardeningVarsVector.resize( static_cast< MPlasticMaterial * >( gp->giveMaterial() )->
-                                               giveSizeOfReducedHardeningVarsVector(gp) );
+                                              giveSizeOfReducedHardeningVarsVector(gp) );
         strainSpaceHardeningVarsVector.zero();
     }
 

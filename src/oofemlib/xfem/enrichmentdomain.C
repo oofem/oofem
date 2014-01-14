@@ -58,7 +58,7 @@ REGISTER_EnrichmentDomain(EDCrack)
 
 EnrichmentDomain :: EnrichmentDomain() :
     mDebugVTK(false)
-{}
+{ }
 
 void EnrichmentDomain_BG :: giveInputRecord(DynamicInputRecord &input)
 {
@@ -79,7 +79,7 @@ IRResultType EDCrack :: initializeFrom(InputRecord *ir)
 
     // For debugging only
     if ( mDebugVTK ) {
-        PolygonLine *pl = dynamic_cast< PolygonLine * >( bg );
+        PolygonLine *pl = dynamic_cast< PolygonLine * >(bg);
         if ( pl != NULL ) {
             pl->printVTK();
         }
@@ -214,7 +214,7 @@ bool EDCrack :: propagateTips(const std :: vector< TipPropagation > &iTipProp) {
             bg->insertVertexFront(pos);
         } else if ( iTipProp [ i ].mTipIndex == 1 ) {
             // Propagate end point
-            FloatArray pos( bg->giveVertex( bg->giveNrVertices() ) );
+            FloatArray pos( bg->giveVertex ( bg->giveNrVertices() ) );
             pos.add(iTipProp [ i ].mPropagationLength, iTipProp [ i ].mPropagationDir);
             bg->insertVertexBack(pos);
         }
@@ -222,7 +222,7 @@ bool EDCrack :: propagateTips(const std :: vector< TipPropagation > &iTipProp) {
 
     // For debugging only
     if ( mDebugVTK ) {
-        PolygonLine *pl = dynamic_cast< PolygonLine * >( bg );
+        PolygonLine *pl = dynamic_cast< PolygonLine * >(bg);
         if ( pl != NULL ) {
             pl->printVTK();
         }

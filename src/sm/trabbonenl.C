@@ -70,7 +70,7 @@ TrabBoneNL :: TrabBoneNL(int n, Domain *d) : TrabBoneMaterial(n, d), StructuralN
 //
 
 TrabBoneNL :: ~TrabBoneNL()
-{}
+{ }
 
 //
 // END: DESTRUCTOR
@@ -179,7 +179,7 @@ Interface *
 TrabBoneNL :: giveInterface(InterfaceType type)
 {
     if ( type == NonlocalMaterialExtensionInterfaceType ) {
-        return static_cast< StructuralNonlocalMaterialExtensionInterface * >( this );
+        return static_cast< StructuralNonlocalMaterialExtensionInterface * >(this);
     } else {
         return NULL;
     }
@@ -284,7 +284,7 @@ TrabBoneNLStatus :: TrabBoneNLStatus(int n, Domain *d, GaussPoint *g) :
 //
 
 TrabBoneNLStatus :: ~TrabBoneNLStatus()
-{}
+{ }
 
 //
 // END: DESTRUCTOR

@@ -156,22 +156,22 @@ int iperm(int val, int rank);
 #define MATHFEM_R ( 1 - MATHFEM_C )
 #define MATHFEM_BRENT_MAXITER 100
 
-template< class T >class mem_fun
+template< class T > class mem_fun
 {
-    double ( T :: *pmf )( double );
+    double ( T :: *pmf )(double);
     T *ptr;
 public:
-    mem_fun( T *o, double( T :: *p )( double ) ) : pmf(p), ptr(o) { }
-    double operator()(double x) const { return ( ptr->*pmf )(x); }
+    mem_fun( T * o, double ( T :: *p )(double) ) : pmf(p), ptr(o) { }
+    double operator() (double x) const { return ( ptr->*pmf )(x); }
 };
 
 
 class OOFEM_EXPORT c_fun
 {
-    double ( *func )(double);
+    double ( * func )(double);
 public:
-    c_fun( double( * p )( double ) ) : func(p) { }
-    double operator()(double x) const { return ( * func )( x ); }
+    c_fun( double ( * p )(double) ) : func(p) { }
+    double operator() (double x) const { return ( * func )( x ); }
 };
 
 
@@ -190,8 +190,8 @@ public:
  * Done according to Scientific Computation WS 2001/2002 by Gaston Gonnet
  * http://linneus20.ethz.ch:8080/wsrscript.html
  */
-template< class T >double gss(double ax, double bx, double cx, const T &f,
-                              double tol, double &xmin)
+template< class T > double gss(double ax, double bx, double cx, const T &f,
+                               double tol, double &xmin)
 {
     int ii = 0;
     double f1, f2, x0, x1, x2, x3;
@@ -244,8 +244,8 @@ template< class T >double gss(double ax, double bx, double cx, const T &f,
     }
 }
 
-template< class T >double brent(double ax, double bx, double cx, const T &f,
-                                double tol, double &xmin)
+template< class T > double brent(double ax, double bx, double cx, const T &f,
+                                 double tol, double &xmin)
 {
     int ii;
     double x_left = ax, x_right = cx;

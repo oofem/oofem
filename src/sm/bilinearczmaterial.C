@@ -47,7 +47,7 @@ BilinearCZMaterial :: BilinearCZMaterial(int n, Domain *d) : StructuralMaterial(
     //
     // constructor
     //
-{}
+{ }
 
 
 BilinearCZMaterial :: ~BilinearCZMaterial()
@@ -271,7 +271,7 @@ BilinearCZMaterial :: printYourself()
 }
 
 BilinearCZMaterialStatus :: BilinearCZMaterialStatus(int n, Domain *d, GaussPoint *g) : StructuralMaterialStatus(n, d, g)
-{}
+{ }
 
 
 BilinearCZMaterialStatus :: ~BilinearCZMaterialStatus()

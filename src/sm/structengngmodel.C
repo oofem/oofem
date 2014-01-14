@@ -89,9 +89,9 @@ StructuralEngngModel :: printReactionForces(TimeStep *tStep, int di)
     for ( int i = 1; i <= dofManMap.giveSize(); i++ ) {
         if ( domain->giveOutputManager()->testDofManOutput(dofManMap.at(i), tStep) ) {
             fprintf( outputStream, "\tNode %8d iDof %2d reaction % .4e    [bc-id: %d]\n",
-                     domain->giveDofManager( dofManMap.at(i) )->giveLabel(),
-                     dofMap.at(i), reactions.at( eqnMap.at(i) ),
-                     domain->giveDofManager( dofManMap.at(i) )->giveDof( dofMap.at(i) )->giveBcId() );
+                    domain->giveDofManager( dofManMap.at(i) )->giveLabel(),
+                    dofMap.at(i), reactions.at( eqnMap.at(i) ),
+                    domain->giveDofManager( dofManMap.at(i) )->giveDof( dofMap.at(i) )->giveBcId() );
         }
     }
 }
@@ -107,7 +107,7 @@ StructuralEngngModel :: computeReaction(FloatArray &answer, TimeStep *tStep, int
 
     // Add internal forces
     this->assembleVector( answer, tStep, EID_MomentumBalance, LastEquilibratedInternalForcesVector, VM_Total,
-                          EModelDefaultPrescribedEquationNumbering(), this->giveDomain(di) );
+                         EModelDefaultPrescribedEquationNumbering(), this->giveDomain(di) );
     // Subtract external loading
     ///@todo All engineering models should be using this (for consistency)
     //this->assembleVector( answer, tStep, EID_MomentumBalance, ExternalForcesVector, VM_Total,
@@ -128,7 +128,7 @@ StructuralEngngModel :: computeExternalLoadReactionContribution(FloatArray &reac
     reactions.resize( this->giveNumberOfDomainEquations( di, EModelDefaultPrescribedEquationNumbering() ) );
     reactions.zero();
     this->assembleVector( reactions, tStep, EID_MomentumBalance, ExternalForcesVector, VM_Total,
-                          EModelDefaultPrescribedEquationNumbering(), this->giveDomain(di) );
+                         EModelDefaultPrescribedEquationNumbering(), this->giveDomain(di) );
 }
 
 
@@ -181,9 +181,9 @@ StructuralEngngModel :: checkConsistency()
 
     for ( int i = 1; i <= nelem; i++ ) {
         Element *ePtr = domain->giveElement(i);
-        StructuralElement *sePtr = dynamic_cast< StructuralElement * >( ePtr );
-        StructuralInterfaceElement *siePtr = dynamic_cast< StructuralInterfaceElement * >( ePtr );
-        StructuralElementEvaluator *see = dynamic_cast< StructuralElementEvaluator * >( ePtr );
+        StructuralElement *sePtr = dynamic_cast< StructuralElement * >(ePtr);
+        StructuralInterfaceElement *siePtr = dynamic_cast< StructuralInterfaceElement * >(ePtr);
+        StructuralElementEvaluator *see = dynamic_cast< StructuralElementEvaluator * >(ePtr);
 
         if ( sePtr == NULL && see == NULL && siePtr == NULL ) {
             _warning2("checkConsistency: element %d has no Structural support", i);
@@ -218,7 +218,7 @@ StructuralEngngModel :: updateInternalState(TimeStep *tStep)
             GeneralBoundaryCondition *bc = domain->giveBc(i);
             ActiveBoundaryCondition *abc;
 
-            if ( ( abc = dynamic_cast< ActiveBoundaryCondition * >( bc ) ) ) {
+            if ( ( abc = dynamic_cast< ActiveBoundaryCondition * >(bc) ) ) {
                 int ndman = abc->giveNumberOfInternalDofManagers();
                 for ( int j = 1; j <= ndman; j++ ) {
                     this->updateDofUnknownsDictionary(abc->giveInternalDofManager(j), tStep);

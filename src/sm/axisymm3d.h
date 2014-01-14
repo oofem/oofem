@@ -57,8 +57,8 @@ namespace oofem {
  * - calculating its B,D,N matrices and dV.
  */
 class Axisymm3d : public NLStructuralElement, public ZZNodalRecoveryModelInterface,
-    public NodalAveragingRecoveryModelInterface, public SPRNodalRecoveryModelInterface,
-    public SpatialLocalizerInterface
+public NodalAveragingRecoveryModelInterface, public SPRNodalRecoveryModelInterface,
+public SpatialLocalizerInterface
 {
 protected:
     static FEI2dTrLin interpolation;
@@ -67,7 +67,7 @@ protected:
     double area;
 
 public:
-    Axisymm3d(int n, Domain *d);
+    Axisymm3d(int n, Domain * d);
     virtual ~Axisymm3d();
 
     virtual int computeNumberOfDofs() { return 6; }

@@ -43,7 +43,7 @@ namespace oofem {
 REGISTER_Material(TrabBoneEmbed);
 
 TrabBoneEmbed :: TrabBoneEmbed(int n, Domain *d) : StructuralMaterial(n, d)
-{}
+{ }
 
 
 int
@@ -238,7 +238,7 @@ TrabBoneEmbedStatus :: TrabBoneEmbedStatus(int n, Domain *d, GaussPoint *g) : St
 
 
 TrabBoneEmbedStatus :: ~TrabBoneEmbedStatus()
-{}
+{ }
 
 
 double

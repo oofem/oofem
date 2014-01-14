@@ -101,7 +101,7 @@ private:
     /// Flag indicating computation of energy norm.
     int energyNorm_comput_flag;
 public:
-    FETISolver(Domain *d, EngngModel *m);
+    FETISolver(Domain * d, EngngModel * m);
     virtual ~FETISolver();
 
     /**

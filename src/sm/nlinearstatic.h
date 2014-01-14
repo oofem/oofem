@@ -131,7 +131,7 @@ protected:
     InitialGuess initialGuessType;
 
 public:
-    NonLinearStatic(int i, EngngModel *_master = NULL);
+    NonLinearStatic(int i, EngngModel * _master = NULL);
     virtual ~NonLinearStatic();
 
     virtual void solveYourself();
@@ -140,7 +140,7 @@ public:
 
     virtual void printOutputAt(FILE *file, TimeStep *tStep);
 
-    virtual void updateComponent(TimeStep * tStep, NumericalCmpn, Domain * d);
+    virtual void updateComponent(TimeStep *tStep, NumericalCmpn, Domain *d);
     virtual void updateAttributes(MetaStep *mStep);
 
     virtual double giveUnknownComponent(ValueModeType type, TimeStep *tStep, Domain *d, Dof *dof);

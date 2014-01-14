@@ -51,7 +51,7 @@ TrabBoneGrad3D :: TrabBoneGrad3D(int n, Domain *d) : TrabBone3D(n, d), GradDpMat
 }
 
 TrabBoneGrad3D :: ~TrabBoneGrad3D()
-{}
+{ }
 
 int
 TrabBoneGrad3D :: hasMaterialModeCapability(MaterialMode mode)
@@ -353,7 +353,7 @@ TrabBoneGrad3DStatus :: TrabBoneGrad3DStatus(int n, Domain *d, GaussPoint *g) :
 
 
 TrabBoneGrad3DStatus :: ~TrabBoneGrad3DStatus()
-{}
+{ }
 
 
 void

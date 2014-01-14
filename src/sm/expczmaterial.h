@@ -60,7 +60,7 @@ protected:
 
 public:
     /// Constructor
-    ExpCZMaterialStatus(int n, Domain *d, GaussPoint *g);
+    ExpCZMaterialStatus(int n, Domain * d, GaussPoint * g);
     /// Destructor
     virtual ~ExpCZMaterialStatus();
 
@@ -110,7 +110,7 @@ protected:
                                                 GaussPoint *gp, TimeStep *tStep);
 public:
     /// Constructor
-    ExpCZMaterial(int n, Domain *d);
+    ExpCZMaterial(int n, Domain * d);
     /// Destructor
     virtual ~ExpCZMaterial();
 

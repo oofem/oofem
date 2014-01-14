@@ -80,7 +80,11 @@ public:
      * @return Pointer to corresponding process communicator buff, NULL otherwise.
      */
     ProcessCommunicatorBuff *
-    giveProcessCommunicatorBuff(int i) { if ( i < size ) { return processCommBuffs [ i ]; } else { return NULL; } }
+    giveProcessCommunicatorBuff(int i) { if ( i < size ) {
+                                             return processCommBuffs [ i ];
+                                         } else {
+                                             return NULL;
+                                         } }
 };
 
 
@@ -125,7 +129,7 @@ public:
      * @param size Number of collaborating processes.
      * @param mode Communicator mode.
      */
-    Communicator(EngngModel *emodel, CommunicatorBuff *buff, int rank, int size, CommunicatorMode mode = CommMode_Static);
+    Communicator(EngngModel * emodel, CommunicatorBuff * buff, int rank, int size, CommunicatorMode mode = CommMode_Static);
     /// Destructor
     virtual ~Communicator();
 
@@ -135,7 +139,11 @@ public:
      * @return Pointer to corresponding communicator, NULL otherwise.
      */
     ProcessCommunicator *
-    giveProcessCommunicator(int i) { if ( i < size ) { return processComms [ i ]; } else { return NULL; } }
+    giveProcessCommunicator(int i) { if ( i < size ) {
+                                         return processComms [ i ];
+                                     } else {
+                                         return NULL;
+                                     } }
 
     /**
      * Pack all problemCommunicators data to their send buffers.
@@ -143,7 +151,7 @@ public:
      * @param packFunc Function used to pack nodal data in to buffer.
      * @see NlDEIDynamic_Unpack_func
      */
-    template< class T >int packAllData( T * ptr, int ( T :: *packFunc )( ProcessCommunicator & ) );
+    template< class T > int packAllData( T *ptr, int ( T :: *packFunc )( ProcessCommunicator & ) );
     /**
      * Pack all problemCommuncators data to their send buffers.
      * @param ptr Pointer problem communicator.
@@ -152,7 +160,7 @@ public:
      * @see NlDEIDynamic_Unpack_func
      */
     //template <class T> int packAllData (T* ptr, FloatArray* src, int (T::*packFunc) (FloatArray*, ProcessCommunicator&));
-    template< class T, class P >int packAllData( T * ptr, P * src, int ( T :: *packFunc )( P *, ProcessCommunicator & ) );
+    template< class T, class P > int packAllData( T *ptr, P *src, int ( T :: *packFunc )( P *, ProcessCommunicator & ) );
     /**
      * Unpack all problemCommuncators data from recv buffers.
      * Waits until receive completion before unpacking buffer.
@@ -160,7 +168,7 @@ public:
      * @param unpackFunc Function used to unpack nodal data from buffer.
      * @see NlDEIDynamic_Unpack_func
      */
-    template< class T >int unpackAllData( T * ptr, int ( T :: *unpackFunc )( ProcessCommunicator & ) );
+    template< class T > int unpackAllData( T *ptr, int ( T :: *unpackFunc )( ProcessCommunicator & ) );
     /**
      * Unpack all problemCommuncators data from recv buffers.
      * Waits until receive completion before unpacking buffer.
@@ -170,7 +178,7 @@ public:
      * @see NlDEIDynamic_Unpack_func
      */
     //template <class T> int unpackAllData (T* ptr, FloatArray* dest, int (T::*unpackFunc) (FloatArray*, ProcessCommunicator&));
-    template< class T, class P >int unpackAllData( T * ptr, P * src, int ( T :: *unpackFunc )( P *, ProcessCommunicator & ) );
+    template< class T, class P > int unpackAllData( T *ptr, P *src, int ( T :: *unpackFunc )( P *, ProcessCommunicator & ) );
     /**
      * Initializes data exchange with all problems.
      * if send or receive pool is empty, communication is not performed.
@@ -212,7 +220,7 @@ public:
     void error(const char *file, int line, const char *format, ...) const;
 };
 
-template< class T >int
+template< class T > int
 Communicator :: packAllData( T *ptr, int ( T :: *packFunc )( ProcessCommunicator & ) )
 {
     int i = size, result = 1;
@@ -237,7 +245,7 @@ Communicator :: packAllData( T *ptr, int ( T :: *packFunc )( ProcessCommunicator
  * return result;
  * }
  */
-template< class T, class P >int
+template< class T, class P > int
 Communicator :: packAllData( T *ptr, P *src, int ( T :: *packFunc )( P *, ProcessCommunicator & ) )
 {
     int i = size, result = 1;
@@ -251,7 +259,7 @@ Communicator :: packAllData( T *ptr, P *src, int ( T :: *packFunc )( P *, Proces
     return result;
 }
 
-template< class T >int
+template< class T > int
 Communicator :: unpackAllData( T *ptr, int ( T :: *unpackFunc )( ProcessCommunicator & ) )
 {
     int i, received, num_recv = 0, result = 1;
@@ -261,7 +269,7 @@ Communicator :: unpackAllData( T *ptr, int ( T :: *unpackFunc )( ProcessCommunic
     for  ( i = 0; i < size; i++ ) {
         // receive if receive map is not empty or mode is dynamic
         if ( ( giveProcessCommunicator(i)->giveToRecvMap()->giveSize() ) ||
-             ( this->mode == CommMode_Dynamic ) ) {
+            ( this->mode == CommMode_Dynamic ) ) {
             recvFlag.at(i + 1) = 1;
             num_recv++;
         }
@@ -366,7 +374,7 @@ Communicator :: unpackAllData( T *ptr, int ( T :: *unpackFunc )( ProcessCommunic
  * }
  */
 
-template< class T, class P >int
+template< class T, class P > int
 Communicator :: unpackAllData( T *ptr, P *dest, int ( T :: *unpackFunc )( P *, ProcessCommunicator & ) )
 {
     int i, received, num_recv = 0, result = 1;
@@ -376,7 +384,7 @@ Communicator :: unpackAllData( T *ptr, P *dest, int ( T :: *unpackFunc )( P *, P
     for  ( i = 0; i < size; i++ ) {
         // receive if receive map is not empty or mode is dynamic
         if ( ( giveProcessCommunicator(i)->giveToRecvMap()->giveSize() ) ||
-             ( this->mode == CommMode_Dynamic ) ) {
+            ( this->mode == CommMode_Dynamic ) ) {
             recvFlag.at(i + 1) = 1;
             num_recv++;
         }

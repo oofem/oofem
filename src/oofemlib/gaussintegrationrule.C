@@ -63,7 +63,7 @@ GaussIntegrationRule :: SetUpPointsOnLine(int nPoints, MaterialMode mode)
     for ( int i = 1; i <= nPoints; i++ ) {
         FloatArray *coord = new FloatArray(1);
         coord->at(1) = coords_xi.at(i);
-        this->gaussPointArray [ i - 1 ] = new GaussPoint(this, i, coord, weights.at(i), mode);
+        this->gaussPointArray [ i - 1 ] = new GaussPoint(this, i, coord, weights.at ( i ), mode);
     }
 
     this->intdomain = _Line;
@@ -84,7 +84,7 @@ GaussIntegrationRule :: SetUpPointsOn2DEmbeddedLine(int nPoints, MaterialMode mo
         FloatArray *coord = new FloatArray(2);
         coord->at(1) = ( 1. - x ) * coords [ 0 ]->at(1) + x * coords [ 1 ]->at(1);
         coord->at(2) = ( 1. - x ) * coords [ 0 ]->at(2) + x * coords [ 1 ]->at(2);
-        this->gaussPointArray [ i - 1 ] = new GaussPoint(this, i, coord, weights.at(i), mode);
+        this->gaussPointArray [ i - 1 ] = new GaussPoint(this, i, coord, weights.at ( i ), mode);
     }
 
     this->intdomain = _Embedded2dLine;
@@ -96,7 +96,7 @@ int
 GaussIntegrationRule :: SetUpPointsOnSquare(int nPoints, MaterialMode mode)
 //GaussIntegrationRule :: SetUpPointsOnSquare(int nPoints_xi1, int nPoints_xi2, MaterialMode mode)
 {
-    int nPoints_xi1 = ( int ) floor( sqrt( double( nPoints ) ) );
+    int nPoints_xi1 = ( int ) floor( sqrt( double ( nPoints ) ) );
     int nPoints_xi2 = nPoints_xi1;
     FloatArray coords_xi1, weights1, coords_xi2, weights2;
     this->giveLineCoordsAndWeights(nPoints_xi1, coords_xi1, weights1);
@@ -109,7 +109,7 @@ GaussIntegrationRule :: SetUpPointsOnSquare(int nPoints, MaterialMode mode)
             FloatArray *coord = new FloatArray(2);
             coord->at(1) = coords_xi1.at(i);
             coord->at(2) = coords_xi2.at(j);
-            this->gaussPointArray [ count ] = new GaussPoint(this, count + 1, coord, weights1.at(i) * weights2.at(j), mode);
+            this->gaussPointArray [ count ] = new GaussPoint(this, count + 1, coord, weights1.at ( i ) *weights2.at ( j ), mode);
             count++;
         }
     }
@@ -123,7 +123,7 @@ int
 GaussIntegrationRule :: SetUpPointsOnCube(int nPoints, MaterialMode mode)
 //GaussIntegrationRule :: SetUpPointsOnCube(int nPoints_xi1, int nPoints_xi2, int nPoints_xi3, MaterialMode mode)
 {
-    int nPoints_xi1 = ( int ) floor(cbrt( double( nPoints ) ) + 0.5);
+    int nPoints_xi1 = ( int ) floor(cbrt( double ( nPoints ) ) + 0.5);
     int nPoints_xi2 = nPoints_xi1;
     int nPoints_xi3 = nPoints_xi1;
     FloatArray coords_xi1, weights1, coords_xi2, weights2, coords_xi3, weights3;
@@ -140,7 +140,7 @@ GaussIntegrationRule :: SetUpPointsOnCube(int nPoints, MaterialMode mode)
                 coord->at(1) = coords_xi1.at(i);
                 coord->at(2) = coords_xi2.at(j);
                 coord->at(3) = coords_xi3.at(k);
-                this->gaussPointArray [ count ] = new GaussPoint(this, count + 1, coord, weights1.at(i) * weights2.at(j) * weights3.at(k), mode);
+                this->gaussPointArray [ count ] = new GaussPoint(this, count + 1, coord, weights1.at ( i ) *weights2.at ( j ) *weights3.at ( k ), mode);
                 count++;
             }
         }
@@ -176,7 +176,7 @@ int GaussIntegrationRule :: SetUpPointsOnCubeLayers(int nPoints1, int nPoints2, 
                     coord->at(1) = coords_xi1.at(i);
                     coord->at(2) = coords_xi2.at(j);
                     coord->at(3) = ( coords_xi3.at(k) + 1. ) * scaledThickness + bottom;
-                    this->gaussPointArray [ count ] = new GaussPoint(this, count + 1, coord, weights1.at(i) * weights2.at(j) * ( weights3.at(k) * scaledThickness ), mode);
+                    this->gaussPointArray [ count ] = new GaussPoint(this, count + 1, coord, weights1.at ( i ) *weights2.at ( j ) * ( weights3.at ( k ) *scaledThickness ), mode);
                     count++;
                 }
             }
@@ -201,7 +201,7 @@ GaussIntegrationRule :: SetUpPointsOnTriangle(int nPoints, MaterialMode mode)
         FloatArray *coord = new FloatArray(2);
         coord->at(1) = coords_xi1.at(i);
         coord->at(2) = coords_xi2.at(i);
-        this->gaussPointArray [ i - 1 ] = new GaussPoint(this, i, coord, weights.at(i), mode);
+        this->gaussPointArray [ i - 1 ] = new GaussPoint(this, i, coord, weights.at ( i ), mode);
     }
 
     this->intdomain = _Triangle;
@@ -222,7 +222,7 @@ GaussIntegrationRule :: SetUpPointsOnTetrahedra(int nPoints, MaterialMode mode)
         coord->at(1) = coords_xi1.at(i);
         coord->at(2) = coords_xi2.at(i);
         coord->at(3) = coords_xi3.at(i);
-        this->gaussPointArray [ i - 1 ] = new GaussPoint(this, i, coord, weights.at(i), mode);
+        this->gaussPointArray [ i - 1 ] = new GaussPoint(this, i, coord, weights.at ( i ), mode);
     }
 
     this->intdomain = _Tetrahedra;
@@ -246,7 +246,7 @@ GaussIntegrationRule :: SetUpPointsOnWedge(int nPointsTri, int nPointsDepth, Mat
             coord->at(1) = coords_xi1.at(i);
             coord->at(2) = coords_xi2.at(i);
             coord->at(3) = coords_xi3.at(j);
-            this->gaussPointArray [ count ] = new GaussPoint(this, count + 1, coord, weightsTri.at(i) * weightsDepth.at(j), mode);
+            this->gaussPointArray [ count ] = new GaussPoint(this, count + 1, coord, weightsTri.at ( i ) *weightsDepth.at ( j ), mode);
             count++;
         }
     }
@@ -279,7 +279,7 @@ GaussIntegrationRule :: SetUpPointsOnWedgeLayers(int nPointsTri, int nPointsDept
                 coord->at(1) = coords_xi1.at(i);
                 coord->at(2) = coords_xi2.at(i);
                 coord->at(3) = ( coords_xi3.at(j) + 1. ) * scaledThickness + bottom;
-                this->gaussPointArray [ count ] = new GaussPoint(this, count + 1, coord, weightsTri.at(i) * ( weightsDepth.at(j) * scaledThickness ), mode);
+                this->gaussPointArray [ count ] = new GaussPoint(this, count + 1, coord, weightsTri.at ( i ) * ( weightsDepth.at ( j ) *scaledThickness ), mode);
                 count++;
             }
         }

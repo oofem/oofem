@@ -97,7 +97,7 @@ public:
      * @param n Element number.
      * @param d Domain to which new material will belong.
      */
-    NLStructuralElement(int n, Domain *d);
+    NLStructuralElement(int n, Domain * d);
     /// Destructor.
     virtual ~NLStructuralElement() { }
 

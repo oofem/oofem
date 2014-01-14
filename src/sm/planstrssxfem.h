@@ -55,7 +55,7 @@ protected:
 
 public:
     /// Constructor
-    PlaneStress2dXfem(int n, Domain *d) : PlaneStress2d(n, d), XfemElementInterface(this), VTKXMLExportModuleElementInterface() { }
+    PlaneStress2dXfem(int n, Domain * d) : PlaneStress2d(n, d), XfemElementInterface(this), VTKXMLExportModuleElementInterface() { }
     /// Destructor
     virtual ~PlaneStress2dXfem() { };
 
@@ -70,7 +70,7 @@ public:
                                   int lowerIndx = 1, int upperIndx = ALL_STRAINS);
     virtual void computeBHmatrixAt(GaussPoint *gp, FloatMatrix &answer)
     { OOFEM_ERROR("PlaneStress2dXfem :: computeBHmatrixAt() not implemented"); }
-    virtual void giveDofManDofIDMask(int inode, EquationID, IntArray & answer) const;
+    virtual void giveDofManDofIDMask(int inode, EquationID, IntArray &answer) const;
     virtual void computeConstitutiveMatrixAt(FloatMatrix &answer, MatResponseMode rMode, GaussPoint *, TimeStep *tStep);
     virtual void computeStressVector(FloatArray &answer, const FloatArray &strain, GaussPoint *gp, TimeStep *tStep);
     virtual void computeStiffnessMatrix(FloatMatrix &answer, MatResponseMode rMode, TimeStep *tStep);

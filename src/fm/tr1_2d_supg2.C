@@ -927,7 +927,7 @@ TR1_2D_SUPG2 :: computeBCRhsTerm_MB(FloatArray &answer, TimeStep *tStep)
             //nx = ty / length;
             //ny = -tx / length;
 
-            bload = dynamic_cast< BoundaryLoad * >( load );
+            bload = dynamic_cast< BoundaryLoad * >(load);
             if ( bload ) {
                 bload->computeValueAt(t, tStep, coords, VM_Total);
 
@@ -1242,17 +1242,17 @@ Interface *
 TR1_2D_SUPG2 :: giveInterface(InterfaceType interface)
 {
     if ( interface == ZZNodalRecoveryModelInterfaceType ) {
-        return static_cast< ZZNodalRecoveryModelInterface * >( this );
+        return static_cast< ZZNodalRecoveryModelInterface * >(this);
     } else if ( interface == NodalAveragingRecoveryModelInterfaceType ) {
-        return static_cast< NodalAveragingRecoveryModelInterface * >( this );
+        return static_cast< NodalAveragingRecoveryModelInterface * >(this);
     } else if ( interface == SPRNodalRecoveryModelInterfaceType ) {
-        return static_cast< SPRNodalRecoveryModelInterface * >( this );
+        return static_cast< SPRNodalRecoveryModelInterface * >(this);
     } else if ( interface == SpatialLocalizerInterfaceType ) {
-        return static_cast< SpatialLocalizerInterface * >( this );
+        return static_cast< SpatialLocalizerInterface * >(this);
     } else if ( interface == EIPrimaryFieldInterfaceType ) {
-        return static_cast< EIPrimaryFieldInterface * >( this );
+        return static_cast< EIPrimaryFieldInterface * >(this);
     } else if ( interface == LEPlicElementInterfaceType ) {
-        return static_cast< LEPlicElementInterface * >( this );
+        return static_cast< LEPlicElementInterface * >(this);
     }
 
     return NULL;
@@ -1443,10 +1443,10 @@ TR1_2D_SUPG2 :: formVolumeInterfacePoly(Polygon &matvolpoly, LEPlic *matInterfac
             if ( nodeIn [ i - 1 ] ) {
                 if ( updFlag ) {
                     v.setCoords( matInterface->giveUpdatedXCoordinate( this->giveNode(i)->giveNumber() ),
-                                 matInterface->giveUpdatedYCoordinate( this->giveNode(i)->giveNumber() ) );
+                                matInterface->giveUpdatedYCoordinate( this->giveNode(i)->giveNumber() ) );
                 } else {
                     v.setCoords( this->giveNode(i)->giveCoordinate(1),
-                                 this->giveNode(i)->giveCoordinate(2) );
+                                this->giveNode(i)->giveCoordinate(2) );
                 }
 
                 matvolpoly.addVertex(v);
@@ -1476,7 +1476,7 @@ TR1_2D_SUPG2 :: formVolumeInterfacePoly(Polygon &matvolpoly, LEPlic *matInterfac
                     if ( nodeIn [ i - 1 ] ) {
                         if ( updFlag ) {
                             v.setCoords( matInterface->giveUpdatedXCoordinate( this->giveNode(next)->giveNumber() ),
-                                         matInterface->giveUpdatedYCoordinate( this->giveNode(next)->giveNumber() ) );
+                                        matInterface->giveUpdatedYCoordinate( this->giveNode(next)->giveNumber() ) );
                         } else {
                             v.setCoords( this->giveNode(next)->giveCoordinate(1), this->giveNode(next)->giveCoordinate(2) );
                         }
@@ -1487,7 +1487,7 @@ TR1_2D_SUPG2 :: formVolumeInterfacePoly(Polygon &matvolpoly, LEPlic *matInterfac
                         matvolpoly.addVertex(v);
                         if ( updFlag ) {
                             v.setCoords( matInterface->giveUpdatedXCoordinate( this->giveNode(next)->giveNumber() ),
-                                         matInterface->giveUpdatedYCoordinate( this->giveNode(next)->giveNumber() ) );
+                                        matInterface->giveUpdatedYCoordinate( this->giveNode(next)->giveNumber() ) );
                         } else {
                             v.setCoords( this->giveNode(next)->giveCoordinate(1), this->giveNode(next)->giveCoordinate(2) );
                         }
@@ -1557,13 +1557,13 @@ TR1_2D_SUPG2 :: updateVolumePolygons(Polygon &referenceFluidPoly, Polygon &secon
             next = i < 3 ? i + 1 : 1;
             if ( nodeIn [ i - 1 ] ) {
                 v.setCoords( this->giveNode(i)->giveCoordinate(1),
-                             this->giveNode(i)->giveCoordinate(2) );
+                            this->giveNode(i)->giveCoordinate(2) );
 
                 referenceFluidPoly.addVertex(v);
                 rfPoints++;
             } else {
                 v.setCoords( this->giveNode(i)->giveCoordinate(1),
-                             this->giveNode(i)->giveCoordinate(2) );
+                            this->giveNode(i)->giveCoordinate(2) );
 
                 secondFluidPoly.addVertex(v);
                 sfPoints++;
@@ -1872,7 +1872,7 @@ TR1_2D_SUPG2 :: computeVolumeAroundID(GaussPoint *gp, integrationDomain id, cons
 
     if ( id == _Triangle ) {
         FEI2dTrLin __interpolation(1, 2);
-        return weight * fabs( __interpolation.giveTransformationJacobian( * gp->giveLocalCoordinates(), FEIVertexListGeometryWrapper(3, idpoly) ) );
+        return weight *fabs( __interpolation.giveTransformationJacobian ( *gp->giveLocalCoordinates(), FEIVertexListGeometryWrapper(3, idpoly) ) );
     } else {
         FEI2dQuadLin __interpolation(1, 2);
         double det = fabs( __interpolation.giveTransformationJacobian( * gp->giveLocalCoordinates(), FEIVertexListGeometryWrapper(4, idpoly) ) );
@@ -1934,8 +1934,8 @@ TR1_2D_SUPG2 :: SPRNodalRecoveryMI_giveDofMansDeterminedByPatch(IntArray &answer
 {
     answer.resize(1);
     if ( ( pap == this->giveNode(1)->giveNumber() ) ||
-         ( pap == this->giveNode(2)->giveNumber() ) ||
-         ( pap == this->giveNode(3)->giveNumber() ) ) {
+        ( pap == this->giveNode(2)->giveNumber() ) ||
+        ( pap == this->giveNode(3)->giveNumber() ) ) {
         answer.at(1) = pap;
     } else {
         _error("SPRNodalRecoveryMI_giveDofMansDeterminedByPatch: node unknown");

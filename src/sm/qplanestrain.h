@@ -53,7 +53,7 @@ protected:
     static FEI2dQuadQuad interpolation;
 
 public:
-    QPlaneStrain(int N, Domain *d);
+    QPlaneStrain(int N, Domain * d);
     virtual ~QPlaneStrain() { }
 
     virtual IRResultType initializeFrom(InputRecord *ir);

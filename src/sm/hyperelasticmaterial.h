@@ -53,7 +53,7 @@ class HyperElasticMaterialStatus : public StructuralMaterialStatus
 {
 public:
     /// Constructor
-    HyperElasticMaterialStatus(int n, Domain *d, GaussPoint *g);
+    HyperElasticMaterialStatus(int n, Domain * d, GaussPoint * g);
     /// Destructor
     virtual ~HyperElasticMaterialStatus();
 
@@ -74,7 +74,7 @@ protected:
     double G; ///< Shear modulus.
 
 public:
-    HyperElasticMaterial(int n, Domain *d);
+    HyperElasticMaterial(int n, Domain * d);
 
     virtual IRResultType initializeFrom(InputRecord *ir);
 

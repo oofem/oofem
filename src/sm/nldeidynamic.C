@@ -71,7 +71,7 @@ NlDEIDynamic :: NlDEIDynamic(int i, EngngModel *_master) : StructuralEngngModel(
 
 
 NlDEIDynamic :: ~NlDEIDynamic()
-{}
+{ }
 
 NumericalMethod *NlDEIDynamic :: giveNumericalMethod(MetaStep *mStep)
 // Only one has reason for NlDEIDynamic
@@ -503,7 +503,7 @@ void NlDEIDynamic :: solveYourselfAt(TimeStep *tStep)
     for ( i = 1; i <= neq; i++ ) {
         prevIncrOfDisplacement = previousIncrementOfDisplacementVector.at(i);
         incrOfDisplacement = loadVector.at(i) /
-                             ( massMatrix.at(i) * ( 1. / ( deltaT * deltaT ) + dumpingCoef / ( 2. * deltaT ) ) );
+        ( massMatrix.at(i) * ( 1. / ( deltaT * deltaT ) + dumpingCoef / ( 2. * deltaT ) ) );
 
         accelerationVector.at(i) = ( incrOfDisplacement - prevIncrOfDisplacement ) / ( deltaT * deltaT );
         velocityVector.at(i)     = ( incrOfDisplacement + prevIncrOfDisplacement ) / ( 2. * deltaT );
@@ -533,7 +533,7 @@ NlDEIDynamic :: computeLoadVector(FloatArray &answer, ValueModeType mode, TimeSt
     // Assemble the nodal part of load vector.
     //
     this->assembleVector( answer, tStep, EID_MomentumBalance, ExternalForcesVector, mode,
-                          EModelDefaultEquationNumbering(), this->giveDomain(1) );
+                         EModelDefaultEquationNumbering(), this->giveDomain(1) );
 
     //
     // Exchange contributions.

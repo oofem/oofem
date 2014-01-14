@@ -68,40 +68,40 @@
 // Some forward declarations for LAPACK. Remember to append the underscore to the function name.
 #ifdef __LAPACK_MODULE
 extern "C" {
-/// Computes the reciprocal condition number for a LU decomposed function.
-extern void dgecon_(const char *norm, const int *n, const double *a, const int *lda,
-                    const double *anorm, double *rcond, double *work, int *iwork, int *info, int norm_len);
-/// Replaces a with the LU-decomposition.
-extern int dgetrf_(const int *m, const int *n, double *a, const int *lda, int *lpiv, int *info);
-/// Replaces a with its inverse.
-extern int dgetri_(const int *n, double *a, const int *lda, int *ipiv, double *work, const int *lwork, int *info);
-/// Solves a system of equations.
-extern int dgesv_(const int *n, const int *nrhs, double *a, const int *lda, int *ipiv, const double *b, const int *ldb, int *info);
-/// Computes the norm.
-extern double dlange_(const char *norm, const int *m, const int *n, const double *a, const int *lda, double *work, int norm_len);
-/// Computes eigenvalues and vectors.
-extern int dsyevx_(const char *jobz,  const char *range, const char *uplo, const int *n, double *a, const int *lda,
-                   const double *vl, const double *vu, const int *il, const int *iu,
-                   const double *abstol, int *m, double *w, double *z, const int *ldz,
-                   double *work, int *lwork, int *iwork, int *ifail, int *info,
-                   int jobz_len, int range_len, int uplo_len);
-/// Solves system which has been LU-factorized.
-extern void dgetrs_(const char *trans, const int *n, const int *nrhs, double *a, const int *lda, int *ipiv, const double *b, const int *ldb, int *info);
-/// General matrix multiplication
-extern void dgemm_(const char *transa, const char *transb, const int *m, const int *n, const int *k, const double *alpha,
-                   const double *a, const int *lda, const double *b, const int *ldb, const double *beta, double *c, const int *ldc,
-                   int a_columns, int b_columns, int c_columns);
-/// General dyad product of vectors
-extern void dger_(const int *m, const int *n, const double *alpha, const double *x, const int *incx,
-                  const double *y, const int *incy, double *a, const int *lda,
-                  int x_len, int y_len, int a_columns);
-/// Symmetric dyad product of vector
-extern void dsyr_(const char *uplo, const int *n, const double *alpha, const double *x, const int *incx,
-                  double *a, const int *lda, int x_len, int a_columns);
-/// Y = Y + alpha * X
-extern void daxpy_(const int *n, const double *alpha, const double *x, const int *incx, double *y, const int *incy, int xsize, int ysize);
-/// X = alpha * X
-extern void dscal_(const int *n, const double *alpha, const double *x, const int *incx, int size);
+    /// Computes the reciprocal condition number for a LU decomposed function.
+    extern void dgecon_(const char *norm, const int *n, const double *a, const int *lda,
+                        const double *anorm, double *rcond, double *work, int *iwork, int *info, int norm_len);
+    /// Replaces a with the LU-decomposition.
+    extern int dgetrf_(const int *m, const int *n, double *a, const int *lda, int *lpiv, int *info);
+    /// Replaces a with its inverse.
+    extern int dgetri_(const int *n, double *a, const int *lda, int *ipiv, double *work, const int *lwork, int *info);
+    /// Solves a system of equations.
+    extern int dgesv_(const int *n, const int *nrhs, double *a, const int *lda, int *ipiv, const double *b, const int *ldb, int *info);
+    /// Computes the norm.
+    extern double dlange_(const char *norm, const int *m, const int *n, const double *a, const int *lda, double *work, int norm_len);
+    /// Computes eigenvalues and vectors.
+    extern int dsyevx_(const char *jobz,  const char *range, const char *uplo, const int *n, double *a, const int *lda,
+                       const double *vl, const double *vu, const int *il, const int *iu,
+                       const double *abstol, int *m, double *w, double *z, const int *ldz,
+                       double *work, int *lwork, int *iwork, int *ifail, int *info,
+                       int jobz_len, int range_len, int uplo_len);
+    /// Solves system which has been LU-factorized.
+    extern void dgetrs_(const char *trans, const int *n, const int *nrhs, double *a, const int *lda, int *ipiv, const double *b, const int *ldb, int *info);
+    /// General matrix multiplication
+    extern void dgemm_(const char *transa, const char *transb, const int *m, const int *n, const int *k, const double *alpha,
+                       const double *a, const int *lda, const double *b, const int *ldb, const double *beta, double *c, const int *ldc,
+                       int a_columns, int b_columns, int c_columns);
+    /// General dyad product of vectors
+    extern void dger_(const int *m, const int *n, const double *alpha, const double *x, const int *incx,
+                      const double *y, const int *incy, double *a, const int *lda,
+                      int x_len, int y_len, int a_columns);
+    /// Symmetric dyad product of vector
+    extern void dsyr_(const char *uplo, const int *n, const double *alpha, const double *x, const int *incx,
+                      double *a, const int *lda, int x_len, int a_columns);
+    /// Y = Y + alpha * X
+    extern void daxpy_(const int *n, const double *alpha, const double *x, const int *incx, double *y, const int *incy, int xsize, int ysize);
+    /// X = alpha * X
+    extern void dscal_(const int *n, const double *alpha, const double *x, const int *incx, int size);
 }
 #endif
 
@@ -129,7 +129,7 @@ FloatMatrix :: FloatMatrix() :
     nRows(0), nColumns(0),
     allocatedSize(0),
     values(NULL)
-{}
+{ }
 
 
 FloatMatrix :: FloatMatrix(const FloatArray *vector, bool transpose)
@@ -186,7 +186,7 @@ FloatMatrix :: FloatMatrix(std :: initializer_list< std :: initializer_list< dou
 }
 
 
-FloatMatrix &FloatMatrix :: operator=(std :: initializer_list< std :: initializer_list< double > >mat)
+FloatMatrix &FloatMatrix :: operator = ( std :: initializer_list< std :: initializer_list< double > >mat )
 {
     RESIZE( mat.begin()->size(), mat.size() );
     double *p = this->values;
@@ -237,7 +237,7 @@ void FloatMatrix :: checkBounds(int i, int j) const
 }
 
 
-FloatMatrix &FloatMatrix :: operator=(const FloatMatrix &src)
+FloatMatrix &FloatMatrix :: operator = ( const FloatMatrix & src )
 {
     // assignment: cleanup and copy
     RESIZE(src.nRows, src.nColumns);
@@ -265,13 +265,13 @@ double FloatMatrix :: at(int i, int j) const
     return values [ ( j - 1 ) * nRows + i - 1 ];
 }
 
-double &FloatMatrix :: operator()(int i, int j)
+double &FloatMatrix :: operator() (int i, int j)
 {
     this->checkBounds(i + 1, j + 1);
     return values [ j * nRows + i ];
 }
 
-double FloatMatrix :: operator()(int i, int j) const
+double FloatMatrix :: operator() (int i, int j) const
 {
     this->checkBounds(i + 1, j + 1);
     return values [ j * nRows + i ];
@@ -887,8 +887,8 @@ void FloatMatrix :: beInverseOf(const FloatMatrix &src)
         return;
     } else if ( nRows == 3 ) {
         det = src.at(1, 1) * src.at(2, 2) * src.at(3, 3) + src.at(1, 2) * src.at(2, 3) * src.at(3, 1) +
-              src.at(1, 3) * src.at(2, 1) * src.at(3, 2) - src.at(1, 3) * src.at(2, 2) * src.at(3, 1) -
-              src.at(2, 3) * src.at(3, 2) * src.at(1, 1) - src.at(3, 3) * src.at(1, 2) * src.at(2, 1);
+        src.at(1, 3) * src.at(2, 1) * src.at(3, 2) - src.at(1, 3) * src.at(2, 2) * src.at(3, 1) -
+        src.at(2, 3) * src.at(3, 2) * src.at(1, 1) - src.at(3, 3) * src.at(1, 2) * src.at(2, 1);
 
         this->at(1, 1) = ( src.at(2, 2) * src.at(3, 3) - src.at(2, 3) * src.at(3, 2) ) / det;
         this->at(2, 1) = ( src.at(2, 3) * src.at(3, 1) - src.at(2, 1) * src.at(3, 3) ) / det;
@@ -1003,7 +1003,7 @@ void FloatMatrix :: beSubMatrixOf(const FloatMatrix &src,
     }
 
     if ( ( src.nRows < bottomRow ) || ( src.nColumns < bottomCol ) || ( ( bottomRow - topRow ) > src.nRows ) ||
-         ( ( bottomCol - topCol ) > src.nColumns ) ) {
+        ( ( bottomCol - topCol ) > src.nColumns ) ) {
         OOFEM_ERROR("FloatMatrix::beSubMatrixOf : subindexes size mismatch");
     }
 #endif
@@ -1059,7 +1059,7 @@ void FloatMatrix :: add(const FloatMatrix &aMatrix)
     }
 
     if ( nRows * nColumns == 0 ) {
-        this->operator=(aMatrix);
+        this->operator = ( aMatrix );
         return;
     }
 #     ifdef DEBUG
@@ -1096,7 +1096,7 @@ void FloatMatrix :: add(double s, const FloatMatrix &aMatrix)
     }
 
     if ( !this->isNotEmpty() ) {
-        this->operator=(aMatrix);
+        this->operator = ( aMatrix );
         this->times(s);
         return;
     }
@@ -1128,7 +1128,7 @@ void FloatMatrix :: subtract(const FloatMatrix &aMatrix)
 // adjusts its size to that of aMatrix. Returns the modified receiver.
 {
     if ( !this->isNotEmpty() ) {
-        this->operator=(aMatrix);
+        this->operator = ( aMatrix );
         return;
     }
 #     ifdef DEBUG
@@ -1429,7 +1429,7 @@ void FloatMatrix :: resizeWithData(int rows, int columns)
         return;
     }
 
-    FloatMatrix old(* this);
+    FloatMatrix old(*this);
 
     if ( rows * columns > allocatedSize ) {
         // memory realocation necessary
@@ -1698,7 +1698,7 @@ double FloatMatrix :: computeReciprocalCondition(char p) const
 
 #  ifdef __LAPACK_MODULE
     int n = this->nRows;
-    FloatArray work(4 * n);
+    FloatArray work(4 *n);
     IntArray iwork(n);
     int info;
     double rcond;
@@ -1775,7 +1775,7 @@ bool FloatMatrix :: computeEigenValuesSymmetric(FloatArray &lambda, FloatMatrix 
     v.resize(n, neigs);
 
     IntArray ifail(n), iwork(5 * n);
-    FloatArray work( ( n + 3 ) * n ); // maximum block size should be less than n (?)
+    FloatArray work( ( n + 3 ) *n ); // maximum block size should be less than n (?)
     lwork = ( n + 3 ) * n;
     if ( neigs > 0 ) {
         int one = 1;
@@ -2087,7 +2087,7 @@ FloatMatrix :: __getitem__(boost :: python :: api :: object t)
 }
 #endif
 
-std :: ostream &operator<<(std :: ostream &out, const FloatMatrix &x)
+std :: ostream &operator << ( std :: ostream & out, const FloatMatrix & x )
 {
     out << x.nRows << " " << x.nColumns << " {";
     for ( int i = 0; i < x.nRows; ++i ) {

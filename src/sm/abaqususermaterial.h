@@ -83,13 +83,13 @@ private:
     void *umatobj;
 
     /// Pointer to the dynamically loaded umat-function (translated to C)
-    void ( *umat )(double *stress, double *statev, double *ddsdde, double *sse, double *spd, // 5
-                   double *scd, double *rpl, double *ddsddt, double *drplde, double *drpldt, // 5
-                   double *stran, double *dstran, double time [ 2 ], double *dtime, double *temp, // 4
-                   double *dtemp, double predef [ 1 ], double dpred [ 1 ], char cmname [ 80 ], int *ndi, // 5
-                   int *nshr, int *ntens, int *nstatv, double *props, int *nprops, double coords [ 3 ], // 6
-                   double *drot, double *pnewdt, double *celent, double *dfgrd0, double *dfgrd1, // 5
-                   int *noel, int *npt, int *layer, int *kspt, int *kstep, int *kinc); // 6
+    void ( * umat )(double *stress, double *statev, double *ddsdde, double *sse, double *spd, // 5
+                    double *scd, double *rpl, double *ddsddt, double *drplde, double *drpldt, // 5
+                    double *stran, double *dstran, double time [ 2 ], double *dtime, double *temp, // 4
+                    double *dtemp, double predef [ 1 ], double dpred [ 1 ], char cmname [ 80 ], int *ndi, // 5
+                    int *nshr, int *ntens, int *nstatv, double *props, int *nprops, double coords [ 3 ], // 6
+                    double *drot, double *pnewdt, double *celent, double *dfgrd0, double *dfgrd1, // 5
+                    int *noel, int *npt, int *layer, int *kspt, int *kstep, int *kinc); // 6
     /// Name for material routine.
     char cmname [ 80 ];
     /// Size of the state vector.
@@ -99,7 +99,7 @@ private:
 
 public:
     /// Constructor.
-    AbaqusUserMaterial(int n, Domain *d) : StructuralMaterial(n, d), umatobj(NULL), umat(NULL) { }
+    AbaqusUserMaterial(int n, Domain * d) : StructuralMaterial(n, d), umatobj(NULL), umat(NULL) { }
     /// Destructor.
     virtual ~AbaqusUserMaterial();
 
@@ -152,7 +152,7 @@ protected:
 
 public:
     /// Constructor.
-    AbaqusUserMaterialStatus(int n, Domain *d, GaussPoint *gp, int numState);
+    AbaqusUserMaterialStatus(int n, Domain * d, GaussPoint * gp, int numState);
     /// Destructor.
     virtual ~AbaqusUserMaterialStatus() { }
 
@@ -166,7 +166,8 @@ public:
     const FloatArray &giveTempStateVector() const { return tempStateVector; }
     FloatArray &letTempStateVectorBe(FloatArray &s) { return tempStateVector = s; }
     const FloatMatrix &giveTempTangent() { return tempTangent; }
-    void letTempTangentBe(FloatMatrix &t) { tempTangent = t; hasTangentFlag = true; }
+    void letTempTangentBe(FloatMatrix &t) { tempTangent = t;
+                                            hasTangentFlag = true; }
 
     virtual const char *giveClassName() const { return "AbaqusUserMaterialStatus"; }
 };

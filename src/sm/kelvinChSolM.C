@@ -43,7 +43,7 @@
 
 namespace oofem {
 KelvinChainSolidMaterial :: KelvinChainSolidMaterial(int n, Domain *d) : RheoChainMaterial(n, d)
-{}
+{ }
 
 double
 KelvinChainSolidMaterial :: giveEModulus(GaussPoint *gp, TimeStep *tStep)
@@ -244,7 +244,7 @@ KelvinChainSolidMaterial :: computeCreepFunction(double tStep, double ofAge)
 
 KelvinChainSolidMaterialStatus :: KelvinChainSolidMaterialStatus(int n, Domain *d,
                                                                  GaussPoint *g, int nunits) :
-    RheoChainMaterialStatus(n, d, g, nunits) {}
+    RheoChainMaterialStatus(n, d, g, nunits) { }
 
 void
 KelvinChainSolidMaterialStatus :: printOutputAt(FILE *file, TimeStep *tStep)

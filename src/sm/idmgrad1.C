@@ -458,7 +458,7 @@ IDGMaterial :: CreateStatus(GaussPoint *gp) const
 
 
 IDGMaterialStatus :: IDGMaterialStatus(int n, Domain *d, GaussPoint *g) : IsotropicDamageMaterial1Status(n, d, g)
-{}
+{ }
 
 
 IDGMaterialStatus :: ~IDGMaterialStatus()

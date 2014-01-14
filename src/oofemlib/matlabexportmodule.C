@@ -78,7 +78,7 @@ MatlabExportModule :: MatlabExportModule(int n, EngngModel *e) : ExportModule(n,
 
 
 MatlabExportModule :: ~MatlabExportModule()
-{}
+{ }
 
 
 IRResultType
@@ -269,7 +269,7 @@ MatlabExportModule :: doOutputData(TimeStep *tStep, FILE *FID)
 
             if ( it == DofIDList.end() ) {
                 DofIDList.push_back( thisDof->giveDofID() );
-                values = new( std :: vector< double > );
+                values = new(std :: vector< double > );
                 valuesList.push_back(values);
             } else {
                 std :: size_t pos = it - DofIDList.begin();
@@ -289,7 +289,7 @@ MatlabExportModule :: doOutputData(TimeStep *tStep, FILE *FID)
     fprintf(FID, "];\n");
 
     for ( size_t i = 0; i < valuesList.size(); i++ ) {
-        fprintf(FID, "\tdata.a{%lu}=[", static_cast< long unsigned int >( i ) + 1);
+        fprintf(FID, "\tdata.a{%lu}=[", static_cast< long unsigned int >(i) + 1);
         for ( size_t j = 0; j < valuesList.at(i)->size(); j++ ) {
             fprintf( FID, "%f,", valuesList.at(i)->at(j) );
         }
@@ -390,7 +390,7 @@ MatlabExportModule :: doOutputReactionForces(TimeStep *tStep,    FILE *FID)
     FloatArray reactions;
     IntArray dofManMap, dofMap, eqnMap;
 #if __SM_MODULE
-    StructuralEngngModel *strEngMod = dynamic_cast< StructuralEngngModel * >( emodel );
+    StructuralEngngModel *strEngMod = dynamic_cast< StructuralEngngModel * >(emodel);
     if ( strEngMod ) {
         strEngMod->buildReactionTable(dofManMap, dofMap, eqnMap, tStep, domainIndex);
         strEngMod->computeReaction(reactions, tStep, 1);
@@ -515,7 +515,7 @@ MatlabExportModule :: doOutputIntegrationPointFields(TimeStep *tStep,    FILE *F
             IntegrationRule *iRule = el->giveIntegrationRule(i - 1);
 
             fprintf( FID, "\tIntegrationPointFields.Elements{%i}.integrationRule{%i}.ip = cell(%i,1); \n ",
-                     ielem, i, iRule->giveNumberOfIntegrationPoints() );
+                    ielem, i, iRule->giveNumberOfIntegrationPoints() );
 
             // Loop over integration points
             for ( int j = 1; j <= iRule->giveNumberOfIntegrationPoints(); j++ ) {
@@ -561,12 +561,12 @@ MatlabExportModule :: doOutputIntegrationPointFields(TimeStep *tStep,    FILE *F
 
 void
 MatlabExportModule :: initialize()
-{}
+{ }
 
 
 void
 MatlabExportModule :: terminate()
-{}
+{ }
 
 
 FILE *

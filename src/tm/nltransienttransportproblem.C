@@ -114,7 +114,7 @@ void NLTransientTransportProblem :: solveYourselfAt(TimeStep *tStep)
     //create previous solution from IC or from previous tStep
     if ( tStep->isTheFirstStep() ) {
         if ( stepWhenIcApply == NULL ) {
-            stepWhenIcApply = new TimeStep( * tStep->givePreviousStep() );
+            stepWhenIcApply = new TimeStep( *tStep->givePreviousStep() );
         }
         this->applyIC(stepWhenIcApply); //insert solution to hash=1(previous), if changes in equation numbering
     }
@@ -162,26 +162,26 @@ void NLTransientTransportProblem :: solveYourselfAt(TimeStep *tStep)
             conductivityMatrix->zero();
             //Assembling left hand side - start with conductivity matrix
             this->assemble( conductivityMatrix, & TauStep, EID_ConservationEquation, LHSBCMatrix,
-                            EModelDefaultEquationNumbering(), this->giveDomain(1) );
+                           EModelDefaultEquationNumbering(), this->giveDomain(1) );
             this->assemble( conductivityMatrix, & TauStep, EID_ConservationEquation, IntSourceLHSMatrix,
-                            EModelDefaultEquationNumbering(), this->giveDomain(1) );
+                           EModelDefaultEquationNumbering(), this->giveDomain(1) );
             conductivityMatrix->times(alpha);
             //Add capacity matrix
             this->assemble( conductivityMatrix, & TauStep, EID_ConservationEquation, NSTP_MidpointLhs,
-                            EModelDefaultEquationNumbering(), this->giveDomain(1) );
+                           EModelDefaultEquationNumbering(), this->giveDomain(1) );
         }
 
         rhs.resize(neq);
         rhs.zero();
         //edge or surface load on element
         this->assembleVectorFromElements( rhs, & TauStep, EID_ConservationEquation, ElementBCTransportVector, VM_Total,
-                                          EModelDefaultEquationNumbering(), this->giveDomain(1) );
+                                         EModelDefaultEquationNumbering(), this->giveDomain(1) );
         //add internal source vector on elements
         this->assembleVectorFromElements( rhs, & TauStep, EID_ConservationEquation, ElementInternalSourceVector, VM_Total,
-                                          EModelDefaultEquationNumbering(), this->giveDomain(1) );
+                                         EModelDefaultEquationNumbering(), this->giveDomain(1) );
         //add nodal load
         this->assembleVectorFromDofManagers( rhs, & TauStep, ExternalForcesVector, VM_Total,
-                                             EModelDefaultEquationNumbering(), this->giveDomain(1) );
+                                            EModelDefaultEquationNumbering(), this->giveDomain(1) );
 
         // subtract the rhs part depending on previous solution
         assembleAlgorithmicPartOfRhs(rhs, EID_ConservationEquation, EModelDefaultEquationNumbering(), & TauStep);

@@ -61,9 +61,9 @@ namespace oofem {
  * - calculating its B,D,N matrices and dV.
  */
 class DKTPlate : public NLStructuralElement,
-    public LayeredCrossSectionInterface, public ZZNodalRecoveryModelInterface,
-    public NodalAveragingRecoveryModelInterface, public SPRNodalRecoveryModelInterface,
-    public ZZErrorEstimatorInterface, public ZZRemeshingCriteriaInterface
+public LayeredCrossSectionInterface, public ZZNodalRecoveryModelInterface,
+public NodalAveragingRecoveryModelInterface, public SPRNodalRecoveryModelInterface,
+public ZZErrorEstimatorInterface, public ZZRemeshingCriteriaInterface
 {
 protected:
     /// Element geometry approximation
@@ -71,7 +71,7 @@ protected:
     double area;
 
 public:
-    DKTPlate(int n, Domain *d);
+    DKTPlate(int n, Domain * d);
     virtual ~DKTPlate() { }
 
     virtual FEInterpolation *giveInterpolation() const { return & interp_lin; }

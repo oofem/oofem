@@ -133,7 +133,7 @@ protected:
 
 public:
     /// Constructor
-    HuertaErrorEstimator(int n, Domain *d) : ErrorEstimator(n, d), eNorms(0), primaryUnknownError(0),
+    HuertaErrorEstimator(int n, Domain * d) : ErrorEstimator(n, d), eNorms(0), primaryUnknownError(0),
         refinedElementList(0), refinedMesh()
     {
         eeType = EET_HEE;
@@ -265,13 +265,13 @@ protected:
                                       IntArray &controlNode, IntArray &controlDof,
                                       HuertaErrorEstimator :: AnalysisMode aMode, const char *quadtype);
 
-    void setupRefinedElementProblem3D(Element * element, RefinedElement * refinedElement,
-                                      int level, int nodeId, IntArray & localNodeIdArray, IntArray & globalNodeIdArray,
-                                      HuertaErrorEstimatorInterface :: SetupMode mode, TimeStep * tStep, int nodes,
-                                      FloatArray * * corner, FloatArray * midSide, FloatArray * midFace, FloatArray & midNode,
+    void setupRefinedElementProblem3D(Element *element, RefinedElement *refinedElement,
+                                      int level, int nodeId, IntArray &localNodeIdArray, IntArray &globalNodeIdArray,
+                                      HuertaErrorEstimatorInterface :: SetupMode mode, TimeStep *tStep, int nodes,
+                                      FloatArray **corner, FloatArray *midSide, FloatArray *midFace, FloatArray &midNode,
                                       int &localNodeId, int &localElemId, int &localBcId,
                                       int hexaSideNode [ 1 ] [ 3 ], int hexaFaceNode [ 1 ] [ 3 ],
-                                      IntArray & controlNode, IntArray & controlDof,
+                                      IntArray &controlNode, IntArray &controlDof,
                                       HuertaErrorEstimator :: AnalysisMode aMode, const char *hexatype);
 };
 
@@ -312,7 +312,7 @@ protected:
 
 public:
     /// Constructor
-    HuertaRemeshingCriteria(int n, ErrorEstimator *e);
+    HuertaRemeshingCriteria(int n, ErrorEstimator * e);
     /// Destructor
     virtual ~HuertaRemeshingCriteria() { }
 

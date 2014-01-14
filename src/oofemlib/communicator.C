@@ -63,7 +63,7 @@ CommunicatorBuff :: ~CommunicatorBuff()
 {
     for ( int i = 0; i < size; i++ ) {
         if ( processCommBuffs [ i ] ) {
-            delete( processCommBuffs [ i ] );
+            delete(processCommBuffs [ i ]);
         }
     }
 
@@ -83,7 +83,7 @@ Communicator :: Communicator(EngngModel *emodel, CommunicatorBuff *b, int rank, 
         processComms = new ProcessCommunicator * [ size ];
         for ( int i = 0; i < size; i++ ) {
             processComms [ i ] =
-                new ProcessCommunicator(b->giveProcessCommunicatorBuff(i), i, mode);
+                new ProcessCommunicator(b->giveProcessCommunicatorBuff ( i ), i, mode);
         }
     } else {
         processComms = NULL;
@@ -96,7 +96,7 @@ Communicator :: ~Communicator()
 
     if ( size ) {
         while ( i-- ) {
-            delete( processComms [ i ] );
+            delete(processComms [ i ]);
         }
 
         delete[]  processComms;

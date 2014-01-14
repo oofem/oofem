@@ -384,7 +384,7 @@ TrPlaneStrRot :: GiveDerivativeUX(GaussPoint *gp)
         int j = i + 1 - i / 3 * 3;
         int k = j + 1 - j / 3 * 3;
         nx->at(i) = ( d.at(j) / 2. * ( b.at(k) * shapeFunct.at(i) + shapeFunct.at(k) * b.at(i) ) * sin( angles->at(j) ) -
-                      d.at(k) / 2. * ( b.at(i) * shapeFunct.at(j) + shapeFunct.at(i) * b.at(j) ) * sin( angles->at(k) ) );
+                     d.at(k) / 2. * ( b.at(i) * shapeFunct.at(j) + shapeFunct.at(i) * b.at(j) ) * sin( angles->at(k) ) );
     }
 
     delete angles;
@@ -428,7 +428,7 @@ TrPlaneStrRot :: GiveDerivativeVX(GaussPoint *gp)
         int j = i + 1 - i / 3 * 3;
         int k = j + 1 - j / 3 * 3;
         nx->at(i) = ( d.at(j) / 2. * ( b.at(k) * shapeFunct.at(i) + shapeFunct.at(k) * b.at(i) ) * cos( angles->at(j) ) -
-                      d.at(k) / 2. * ( b.at(i) * shapeFunct.at(j) + shapeFunct.at(i) * b.at(j) ) * cos( angles->at(k) ) ) * ( -1.0 );
+                     d.at(k) / 2. * ( b.at(i) * shapeFunct.at(j) + shapeFunct.at(i) * b.at(j) ) * cos( angles->at(k) ) ) * ( -1.0 );
     }
 
     delete angles;
@@ -472,7 +472,7 @@ TrPlaneStrRot :: GiveDerivativeUY(GaussPoint *gp)
         int j = i + 1 - i / 3 * 3;
         int k = j + 1 - j / 3 * 3;
         ny->at(i) = ( d.at(j) / 2. * ( c.at(k) * shapeFunct.at(i) + shapeFunct.at(k) * c.at(i) ) * sin( angles->at(j) ) -
-                      d.at(k) / 2. * ( c.at(i) * shapeFunct.at(j) + shapeFunct.at(i) * c.at(j) ) * sin( angles->at(k) ) );
+                     d.at(k) / 2. * ( c.at(i) * shapeFunct.at(j) + shapeFunct.at(i) * c.at(j) ) * sin( angles->at(k) ) );
     }
 
     delete angles;
@@ -516,7 +516,7 @@ TrPlaneStrRot :: GiveDerivativeVY(GaussPoint *gp)
         int j = i + 1 - i / 3 * 3;
         int k = j + 1 - j / 3 * 3;
         ny->at(i) = ( d.at(j) / 2. * ( c.at(k) * shapeFunct.at(i) + shapeFunct.at(k) * c.at(i) ) * cos( angles->at(j) ) -
-                      d.at(k) / 2. * ( c.at(i) * shapeFunct.at(j) + shapeFunct.at(i) * c.at(j) ) * cos( angles->at(k) ) ) * ( -1.0 );
+                     d.at(k) / 2. * ( c.at(i) * shapeFunct.at(j) + shapeFunct.at(i) * c.at(j) ) * cos( angles->at(k) ) ) * ( -1.0 );
     }
 
     delete angles;
@@ -540,14 +540,14 @@ TrPlaneStrRot :: initializeFrom(InputRecord *ir)
     IR_GIVE_OPTIONAL_FIELD(ir, numberOfRotGaussPoints, _IFT_TrPlaneStrRot_niprot);
 
     if ( !( ( numberOfGaussPoints == 1 ) ||
-            ( numberOfGaussPoints == 4 ) ||
-            ( numberOfGaussPoints == 7 ) ) ) {
+           ( numberOfGaussPoints == 4 ) ||
+           ( numberOfGaussPoints == 7 ) ) ) {
         numberOfGaussPoints = 4;
     }
 
     if ( !( ( numberOfRotGaussPoints == 1 ) ||
-            ( numberOfRotGaussPoints == 4 ) ||
-            ( numberOfRotGaussPoints == 7 ) ) ) {
+           ( numberOfRotGaussPoints == 4 ) ||
+           ( numberOfRotGaussPoints == 7 ) ) ) {
         numberOfRotGaussPoints = 1;
     }
 

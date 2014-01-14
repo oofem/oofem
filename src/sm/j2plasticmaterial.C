@@ -98,7 +98,7 @@ void J2plasticMaterial :: giveInputRecord(DynamicInputRecord &input)
 {
     PlasticMaterial :: giveInputRecord(input);
 
-    IsotropicLinearElasticMaterial *isoLE = dynamic_cast< IsotropicLinearElasticMaterial * >( linearElasticMaterial );
+    IsotropicLinearElasticMaterial *isoLE = dynamic_cast< IsotropicLinearElasticMaterial * >(linearElasticMaterial);
     input.setField(isoLE->giveYoungsModulus(), _IFT_IsotropicLinearElasticMaterial_e);
     input.setField(isoLE->givePoissonsRatio(), _IFT_IsotropicLinearElasticMaterial_n);
     input.setField(0.0, _IFT_IsotropicLinearElasticMaterial_talpha); // TODO: dirty fix
@@ -331,7 +331,7 @@ J2plasticMaterial :: computeReducedGradientMatrix(FloatMatrix &answer,
 
     StructuralMaterial :: giveInvertedVoigtVectorMask( mask, gp->giveMaterialMode() );
     size = StructuralMaterial :: giveSizeOfVoigtSymVector( gp->giveMaterialMode() ) +
-           this->giveSizeOfReducedHardeningVarsVector(gp);
+    this->giveSizeOfReducedHardeningVarsVector(gp);
 
     answer.resize(size, size);
     answer.zero();
@@ -461,7 +461,7 @@ J2plasticMaterial :: computeJ2InvariantAt(FloatArray *stressVector)
     v3 = ( ( stressVector->at(3) - stressVector->at(1) ) * ( stressVector->at(3) - stressVector->at(1) ) );
 
     answer = ( 1. / 6. ) * ( v1 + v2 + v3 ) + stressVector->at(4) * stressVector->at(4) +
-             stressVector->at(5) * stressVector->at(5) + stressVector->at(6) * stressVector->at(6);
+    stressVector->at(5) * stressVector->at(5) + stressVector->at(6) * stressVector->at(6);
 
     return answer;
 }

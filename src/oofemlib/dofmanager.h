@@ -168,7 +168,7 @@ public:
      * @param n DofManager's number in domain
      * @param aDomain reference to DofManager's domain
      */
-    DofManager(int n, Domain *aDomain);
+    DofManager(int n, Domain * aDomain);
     /// Destructor.
     virtual ~DofManager();
 
@@ -563,7 +563,10 @@ public:
     /// Removes given partition from receiver list.
     void removePartitionFromList(int _part) {
         int _pos = partitions.findFirstIndexOf(_part);
-        if ( _pos ) { partitions.erase(_pos); } }
+        if ( _pos ) {
+            partitions.erase(_pos);
+        }
+    }
     /// Merges receiver partition list with given lists.
     void mergePartitionList(IntArray &_p);
     /**
@@ -573,7 +576,11 @@ public:
     /// Returns true if receiver is locally maintained.
     bool isLocal();
     /// Returns true if receiver is shared.
-    bool isShared() { if ( parallel_mode == DofManager_shared ) { return true; } else { return false; } }
+    bool isShared() { if ( parallel_mode == DofManager_shared ) {
+                          return true;
+                      } else {
+                          return false;
+                      } }
 #endif
 
     IntArray *giveCompleteGlobalDofIDArray() const; // JB - made it public

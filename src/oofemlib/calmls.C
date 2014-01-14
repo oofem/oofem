@@ -679,7 +679,7 @@ CylindricalALM :: checkConvergence(const FloatArray &R, const FloatArray *R0, co
             }
 
             if ( ( fabs( dg_forceErr.at(_dg) ) > rtolf.at(_dg) * CALM_MAX_REL_ERROR_BOUND ) ||
-                 ( fabs( dg_dispErr.at(_dg) )  > rtold.at(_dg) * CALM_MAX_REL_ERROR_BOUND ) ) {
+                ( fabs( dg_dispErr.at(_dg) )  > rtold.at(_dg) * CALM_MAX_REL_ERROR_BOUND ) ) {
                 errorOutOfRange = true;
             }
 
@@ -734,7 +734,7 @@ CylindricalALM :: checkConvergence(const FloatArray &R, const FloatArray *R0, co
         }
 
         if ( ( fabs(forceErr) > rtolf.at(1) * CALM_MAX_REL_ERROR_BOUND ) ||
-             ( fabs(dispErr)  > rtold.at(1) * CALM_MAX_REL_ERROR_BOUND ) ) {
+            ( fabs(dispErr)  > rtold.at(1) * CALM_MAX_REL_ERROR_BOUND ) ) {
             errorOutOfRange = true;
         }
 

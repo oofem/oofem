@@ -134,7 +134,7 @@ private:
     /** gsMatrix contains coefficients for the Gram-Schmidt polynomials*/
     FloatMatrix gsMatrix;
 public:
-    WeakPeriodicBoundaryCondition(int n, Domain *d);
+    WeakPeriodicBoundaryCondition(int n, Domain * d);
     virtual ~WeakPeriodicBoundaryCondition() { }
 
     virtual IRResultType initializeFrom(InputRecord *ir);

@@ -64,11 +64,11 @@ Interface *
 Truss3d :: giveInterface(InterfaceType interface)
 {
     if ( interface == DirectErrorIndicatorRCInterfaceType ) {
-        return static_cast< DirectErrorIndicatorRCInterface * >( this );
+        return static_cast< DirectErrorIndicatorRCInterface * >(this);
     } else if ( interface == ZZNodalRecoveryModelInterfaceType ) {
-        return static_cast< ZZNodalRecoveryModelInterface * >( this );
+        return static_cast< ZZNodalRecoveryModelInterface * >(this);
     } else if ( interface == NodalAveragingRecoveryModelInterfaceType ) {
-        return static_cast< NodalAveragingRecoveryModelInterface * >( this );
+        return static_cast< NodalAveragingRecoveryModelInterface * >(this);
     }
 
     //OOFEM_LOG_INFO("Interface on Truss3d element not supported");
@@ -176,7 +176,7 @@ Truss3d :: computeVolumeAround(GaussPoint *gp)
 {
     double detJ = this->interp.giveTransformationJacobian( * gp->giveCoordinates(), FEIElementGeometryWrapper(this) );
     double weight  = gp->giveWeight();
-    return detJ * weight * this->giveCrossSection()->give(CS_Area, gp);
+    return detJ *weight *this->giveCrossSection()->give(CS_Area, gp);
 }
 
 

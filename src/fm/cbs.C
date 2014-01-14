@@ -121,10 +121,10 @@ CBS :: initializeFrom(InputRecord *ir)
 
 #ifdef FIELDMANAGER_USE_SHARED_PTR
         //std::tr1::shared_ptr<Field> _velocityField = make_shared<MaskedPrimaryField>(FT_Velocity, &this->VelocityField, mask);
-        std :: tr1 :: shared_ptr< Field >_velocityField( new MaskedPrimaryField(FT_Velocity, & this->VelocityField, mask) );
+        std :: tr1 :: shared_ptr< Field > _velocityField( new MaskedPrimaryField ( FT_Velocity, &this->VelocityField, mask ) );
         fm->registerField(_velocityField, FT_Velocity);
 #else
-        MaskedPrimaryField *_velocityField = new MaskedPrimaryField(FT_Velocity, & this->VelocityField, mask);
+        MaskedPrimaryField *_velocityField = new MaskedPrimaryField(FT_Velocity, &this->VelocityField, mask);
         fm->registerField(_velocityField, FT_Velocity, true);
 #endif
     }
@@ -206,7 +206,7 @@ CBS :: giveNextStep()
 
     if ( currentStep == NULL ) {
         // first step -> generate initial step
-        currentStep = new TimeStep( * giveSolutionStepWhenIcApply() );
+        currentStep = new TimeStep( *giveSolutionStepWhenIcApply() );
     } else {
         istep = currentStep->giveNumber() + 1;
         counter = currentStep->giveSolutionStateCounter() + 1;
@@ -253,8 +253,8 @@ CBS :: solveYourselfAt(TimeStep *tStep)
         nodalPrescribedTractionPressureConnectivity.resize(presneq_prescribed);
         nodalPrescribedTractionPressureConnectivity.zero();
         this->assembleVectorFromElements( nodalPrescribedTractionPressureConnectivity, tStep, EID_MomentumBalance_ConservationEquation,
-                                          NumberOfNodalPrescribedTractionPressureContributions, VM_Total,
-                                          pnumPrescribed, this->giveDomain(1) );
+                                         NumberOfNodalPrescribedTractionPressureContributions, VM_Total,
+                                         pnumPrescribed, this->giveDomain(1) );
 
 
         lhs = classFactory.createSparseMtrx(sparseMtrxType);
@@ -265,7 +265,7 @@ CBS :: solveYourselfAt(TimeStep *tStep)
         lhs->buildInternalStructure(this, 1, EID_MomentumBalance_ConservationEquation, pnum);
 
         this->assemble( lhs, stepWhenIcApply, EID_MomentumBalance_ConservationEquation, PressureLhs,
-                        pnum, this->giveDomain(1) );
+                       pnum, this->giveDomain(1) );
         lhs->times(deltaT * theta1 * theta2);
 
         if ( consistentMassFlag ) {
@@ -276,12 +276,12 @@ CBS :: solveYourselfAt(TimeStep *tStep)
 
             mss->buildInternalStructure(this, 1, EID_MomentumBalance_ConservationEquation, vnum);
             this->assemble( mss, stepWhenIcApply, EID_MomentumBalance_ConservationEquation, MassMatrix,
-                            vnum, this->giveDomain(1) );
+                           vnum, this->giveDomain(1) );
         } else {
             mm.resize(momneq);
             mm.zero();
             this->assembleVectorFromElements( mm, tStep, EID_MomentumBalance_ConservationEquation, LumpedMassMatrix, VM_Total,
-                                              vnum, this->giveDomain(1) );
+                                             vnum, this->giveDomain(1) );
         }
 
         //<RESTRICTED_SECTION>
@@ -297,17 +297,17 @@ CBS :: solveYourselfAt(TimeStep *tStep)
     else if ( materialInterface ) {
         lhs->zero();
         this->assemble( lhs, stepWhenIcApply, EID_MomentumBalance_ConservationEquation, PressureLhs,
-                        pnum, this->giveDomain(1) );
+                       pnum, this->giveDomain(1) );
         lhs->times(deltaT * theta1 * theta2);
 
         if ( consistentMassFlag ) {
             mss->zero();
             this->assemble( mss, stepWhenIcApply, EID_MomentumBalance_ConservationEquation, MassMatrix,
-                            vnum, this->giveDomain(1) );
+                           vnum, this->giveDomain(1) );
         } else {
             mm.zero();
             this->assembleVectorFromElements( mm, tStep, EID_MomentumBalance_ConservationEquation, LumpedMassMatrix, VM_Total,
-                                              vnum, this->giveDomain(1) );
+                                             vnum, this->giveDomain(1) );
         }
     }
 
@@ -332,16 +332,16 @@ CBS :: solveYourselfAt(TimeStep *tStep)
     rhs.zero();
     // Depends on old v:
     this->assembleVectorFromElements( rhs, tStep, EID_MomentumBalance_ConservationEquation, IntermediateConvectionTerm, VM_Total,
-                                      vnum, this->giveDomain(1) );
+                                     vnum, this->giveDomain(1) );
     this->assembleVectorFromElements( rhs, tStep, EID_MomentumBalance_ConservationEquation, IntermediateDiffusionTerm, VM_Total,
-                                      vnum, this->giveDomain(1) );
+                                     vnum, this->giveDomain(1) );
     //this->assembleVectorFromElements(mm, tStep, EID_MomentumBalance_ConservationEquation, LumpedMassMatrix, VM_Total, this->giveDomain(1));
 
     if ( consistentMassFlag ) {
         rhs.times(deltaT);
         // Depends on prescribed v
         this->assembleVectorFromElements( rhs, tStep, EID_MomentumBalance_ConservationEquation, PrescribedVelocityRhsVector, VM_Incremental,
-                                          vnum, this->giveDomain(1) );
+                                         vnum, this->giveDomain(1) );
         nMethod->solve(mss, & rhs, & deltaAuxVelocity);
     } else {
         for ( int i = 1; i <= momneq; i++ ) {
@@ -353,8 +353,8 @@ CBS :: solveYourselfAt(TimeStep *tStep)
     this->prescribedTractionPressure.resize(presneq_prescribed);
     this->prescribedTractionPressure.zero();
     this->assembleVectorFromElements( prescribedTractionPressure, tStep, EID_MomentumBalance_ConservationEquation,
-                                      DensityPrescribedTractionPressure, VM_Total,
-                                      pnumPrescribed, this->giveDomain(1) );
+                                     DensityPrescribedTractionPressure, VM_Total,
+                                     pnumPrescribed, this->giveDomain(1) );
     for ( int i = 1; i <= presneq_prescribed; i++ ) {
         prescribedTractionPressure.at(i) /= nodalPrescribedTractionPressureConnectivity.at(i);
     }
@@ -367,10 +367,10 @@ CBS :: solveYourselfAt(TimeStep *tStep)
     rhs.resize(presneq);
     rhs.zero();
     this->assembleVectorFromElements( rhs, tStep, EID_MomentumBalance_ConservationEquation, DensityRhsVelocityTerms, VM_Total,
-                                      pnum, this->giveDomain(1) );
+                                     pnum, this->giveDomain(1) );
     // Depends on p:
     this->assembleVectorFromElements( rhs, tStep, EID_MomentumBalance_ConservationEquation, DensityRhsPressureTerms, VM_Total,
-                                      pnum, this->giveDomain(1) );
+                                     pnum, this->giveDomain(1) );
     this->giveNumericalMethod( this->giveCurrentMetaStep() );
     nMethod->solve(lhs, & rhs, pressureVector);
     pressureVector->times(this->theta2);
@@ -381,7 +381,7 @@ CBS :: solveYourselfAt(TimeStep *tStep)
     rhs.zero();
     // Depends on p:
     this->assembleVectorFromElements( rhs, tStep, EID_MomentumBalance_ConservationEquation, CorrectionRhs, VM_Total,
-                                      vnum, this->giveDomain(1) );
+                                     vnum, this->giveDomain(1) );
     if ( consistentMassFlag ) {
         rhs.times(deltaT);
         //this->assembleVectorFromElements(rhs, tStep, EID_MomentumBalance_ConservationEquation, PrescribedRhsVector, VM_Incremental, vnum, this->giveDomain(1));

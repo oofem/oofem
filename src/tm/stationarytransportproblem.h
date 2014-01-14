@@ -71,7 +71,7 @@ protected:
 
 public:
     /// Constructor.
-    StationaryTransportProblem(int i, EngngModel *_master);
+    StationaryTransportProblem(int i, EngngModel * _master);
     /// Destructor.
     virtual ~StationaryTransportProblem();
 

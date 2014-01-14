@@ -127,7 +127,7 @@ void MixedGradientPressureNeumann :: fromDeviatoricBase2D(FloatMatrix &cartesian
     cartesian.at(3, 2) = -( deviatoric.at(2, 1) + deviatoric.at(3, 1) ) / sqrt(8.0);
     //
     cartesian.at(3, 3) = ( deviatoric.at(2, 2) + deviatoric.at(2, 3) +
-                           deviatoric.at(3, 2) + deviatoric.at(3, 3) ) * 0.25;
+                          deviatoric.at(3, 2) + deviatoric.at(3, 3) ) * 0.25;
 }
 
 
@@ -563,8 +563,7 @@ void MixedGradientPressureNeumann :: computeFields(FloatArray &sigmaDev, double 
 }
 
 
-void MixedGradientPressureNeumann :: computeTangents(
-    FloatMatrix &Ed, FloatArray &Ep, FloatArray &Cd, double &Cp, EquationID eid, TimeStep *tStep)
+void MixedGradientPressureNeumann :: computeTangents(FloatMatrix &Ed, FloatArray &Ep, FloatArray &Cd, double &Cp, EquationID eid, TimeStep *tStep)
 {
     //double size = this->domainSize();
     // Fetch some information from the engineering model

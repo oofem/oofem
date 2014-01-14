@@ -51,8 +51,8 @@ protected:
     double microprestress_new;
 
 public:
-    B3SolidMaterialStatus(int n, Domain *d, GaussPoint *g, int nunits);
-    virtual ~B3SolidMaterialStatus() {}
+    B3SolidMaterialStatus(int n, Domain * d, GaussPoint * g, int nunits);
+    virtual ~B3SolidMaterialStatus() { }
 
     virtual void updateYourself(TimeStep *tStep);
 
@@ -105,7 +105,9 @@ protected:
 
 
 public:
-    B3SolidMaterial(int n, Domain *d) : KelvinChainMaterial(n, d) { shMode = B3_NoShrinkage; }
+    B3SolidMaterial(int n, Domain * d) : KelvinChainMaterial(n, d) {
+        shMode = B3_NoShrinkage;
+    }
     virtual ~B3SolidMaterial() { }
 
     virtual void giveRealStressVector(FloatArray &answer, GaussPoint *gp,

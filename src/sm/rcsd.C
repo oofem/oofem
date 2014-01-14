@@ -398,7 +398,7 @@ RCSDMaterial :: giveCrackingModulus(MatResponseMode rMode, GaussPoint *gp,
     if ( rMode == TangentStiffness ) {
         if ( this->checkSizeLimit(gp, Le) ) {
             if ( ( crackStrain >= minEffStrainForFullyOpenCrack ) ||
-                 ( status->giveTempMaxCrackStrain(i) >= minEffStrainForFullyOpenCrack ) ) {
+                ( status->giveTempMaxCrackStrain(i) >= minEffStrainForFullyOpenCrack ) ) {
                 // fully open crack - no stiffness
                 Cf = 0.;
             } else if ( crackStrain >= status->giveTempMaxCrackStrain(i) ) {
@@ -415,7 +415,7 @@ RCSDMaterial :: giveCrackingModulus(MatResponseMode rMode, GaussPoint *gp,
     } else {
         if ( this->checkSizeLimit(gp, Le) ) {
             if ( ( crackStrain >= minEffStrainForFullyOpenCrack ) ||
-                 ( status->giveTempMaxCrackStrain(i) >= minEffStrainForFullyOpenCrack ) ) {
+                ( status->giveTempMaxCrackStrain(i) >= minEffStrainForFullyOpenCrack ) ) {
                 // fully open crack - no stiffness
                 Cf = 0.;
             } else {
@@ -449,7 +449,7 @@ RCSDMaterial :: giveNormalCrackingStress(GaussPoint *gp, double crackStrain, int
 
     if ( this->checkSizeLimit(gp, Le) ) {
         if ( ( crackStrain >= minEffStrainForFullyOpenCrack ) ||
-             ( status->giveTempMaxCrackStrain(i) >= minEffStrainForFullyOpenCrack ) ) {
+            ( status->giveTempMaxCrackStrain(i) >= minEffStrainForFullyOpenCrack ) ) {
             // fully open crack - no stiffness
             answer = 0.;
         } else if ( crackStrain >= status->giveTempMaxCrackStrain(i) ) {
@@ -524,7 +524,7 @@ RCSDMaterialStatus :: printOutputAt(FILE *file, TimeStep *tStep)
                 }
 
                 fprintf( file, "crack %d {status %s, normal to crackplane { %f %f %f }} ",
-                         i, s, crackDirs.at(1, i), crackDirs.at(2, i), crackDirs.at(3, i) );
+                        i, s, crackDirs.at(1, i), crackDirs.at(2, i), crackDirs.at(3, i) );
             }
         }
     } else {

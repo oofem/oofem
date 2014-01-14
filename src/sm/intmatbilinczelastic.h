@@ -59,7 +59,7 @@ protected:
 
 public:
     /// Constructor
-    IntMatBilinearCZElasticStatus(int n, Domain *d, GaussPoint *g);
+    IntMatBilinearCZElasticStatus(int n, Domain * d, GaussPoint * g);
     /// Destructor
     virtual ~IntMatBilinearCZElasticStatus();
 
@@ -111,7 +111,7 @@ protected:
                                                 GaussPoint *gp, TimeStep *tStep);
 public:
     /// Constructor
-    IntMatBilinearCZElastic(int n, Domain *d);
+    IntMatBilinearCZElastic(int n, Domain * d);
     /// Destructor
     virtual ~IntMatBilinearCZElastic();
 

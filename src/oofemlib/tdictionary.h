@@ -40,8 +40,8 @@
 #include <cstdlib> // for NULL
 
 namespace oofem {
-template< class Key, class T >class TDictionaryIterator;
-template< class Key, class T >class TDictionary;
+template< class Key, class T > class TDictionaryIterator;
+template< class Key, class T > class TDictionary;
 
 /**
  * This class implements key/value associations,
@@ -55,7 +55,7 @@ template< class Key, class T >class TDictionary;
  * @note{ FEMComponent is assumed to have overloaded operator << }
  * @note{ FEMComponent is assumed to have printYourself() function }
  */
-template< class Key, class T >class TPair
+template< class Key, class T > class TPair
 {
 protected:
     /// Key, from client.
@@ -65,8 +65,10 @@ protected:
     /// Link to next TPair.
     TPair< Key, T > *next;
 public:
-    TPair(Key k, T *d) : key(k), data(d), next(NULL) { }
-    ~TPair() { delete data; }
+    TPair(Key k, T * d) : key(k), data(d), next(NULL) { }
+    ~TPair() {
+        delete data;
+    }
 
     void append(TPair< Key, T > *p) { next = p; }
     int  giveKey()               { return key; }
@@ -85,7 +87,7 @@ public:
  * Tasks:
  * - Storing pairs (method add) and returning the value of a pair (method at).
  */
-template< class Key, class T >class TDictionary
+template< class Key, class T > class TDictionary
 {
 protected:
     TPair< Key, T > *first;
@@ -107,7 +109,7 @@ protected:
     friend class TDictionaryIterator< Key, T >;
 };
 
-template< class Key, class T >class TDictionaryIterator
+template< class Key, class T > class TDictionaryIterator
 {
 protected:
     TPair< Key, T > *curr;
@@ -123,7 +125,7 @@ public:
 };
 
 
-template< class Key, class T >TDictionary< Key, T > :: ~TDictionary()
+template< class Key, class T > TDictionary< Key, T > :: ~TDictionary()
 // Destructor.
 {
     TPair< Key, T > *Next;
@@ -135,7 +137,7 @@ template< class Key, class T >TDictionary< Key, T > :: ~TDictionary()
     }
 }
 
-template< class Key, class T >TPair< Key, T > *TDictionary< Key, T > :: add(Key k, T *v)
+template< class Key, class T > TPair< Key, T > *TDictionary< Key, T > :: add(Key k, T *v)
 // Adds the pair (k,v) to the receiver. Returns this new pair.
 {
     TPair< Key, T > *newPair;
@@ -159,7 +161,7 @@ template< class Key, class T >TPair< Key, T > *TDictionary< Key, T > :: add(Key 
     return newPair;
 }
 
-template< class Key, class T >T *TDictionary< Key, T > :: at(Key aKey)
+template< class Key, class T > T *TDictionary< Key, T > :: at(Key aKey)
 // Returns the value of the pair which key is aKey. If such pair does
 // not exist, creates it and assign value 0.
 {
@@ -179,7 +181,7 @@ template< class Key, class T >T *TDictionary< Key, T > :: at(Key aKey)
     return NULL;
 }
 
-template< class Key, class T >bool TDictionary< Key, T > :: includes(Key aKey)
+template< class Key, class T > bool TDictionary< Key, T > :: includes(Key aKey)
 // Returns True if the receiver contains a pair which key is aKey, else
 // returns False.
 {
@@ -198,7 +200,7 @@ template< class Key, class T >bool TDictionary< Key, T > :: includes(Key aKey)
 }
 
 
-template< class Key, class T >void
+template< class Key, class T > void
 TDictionary< Key, T > :: clear()
 {
     TPair< Key, T > *Next;
@@ -216,7 +218,7 @@ template< class Key, class T >TDictionaryIterator< Key, T > :: TDictionaryIterat
     curr = l->first;
 }
 
-template< class Key, class T >T *TDictionaryIterator< Key, T > :: next() {
+template< class Key, class T > T *TDictionaryIterator< Key, T > :: next() {
     if ( curr ) {
         TPair< Key, T > *ret = curr;
         curr = curr->giveNext();

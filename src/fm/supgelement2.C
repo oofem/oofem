@@ -50,7 +50,7 @@ namespace oofem {
 SUPGElement2 :: SUPGElement2(int n, Domain *aDomain) :
     SUPGElement(n, aDomain)
     // Constructor. Creates an element with number n, belonging to aDomain.
-{}
+{ }
 
 
 SUPGElement2 :: ~SUPGElement2()

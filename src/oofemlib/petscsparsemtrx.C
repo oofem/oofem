@@ -48,11 +48,11 @@ REGISTER_SparseMtrx(PetscSparseMtrx, SMT_PetscMtrx);
 
 
 PetscSparseMtrx :: PetscSparseMtrx(int n, int m) : SparseMtrx(n, m),
-    mtrx(NULL), symmFlag(false), leqs(0), geqs(0), di(0), kspInit(false), newValues(true) {}
+    mtrx(NULL), symmFlag(false), leqs(0), geqs(0), di(0), kspInit(false), newValues(true) { }
 
 
 PetscSparseMtrx :: PetscSparseMtrx() : SparseMtrx(),
-    mtrx(NULL), symmFlag(false), leqs(0), geqs(0), di(0), kspInit(false), newValues(true) {}
+    mtrx(NULL), symmFlag(false), leqs(0), geqs(0), di(0), kspInit(false), newValues(true) { }
 
 
 PetscSparseMtrx :: ~PetscSparseMtrx()
@@ -317,7 +317,7 @@ PetscSparseMtrx :: buildInternalStructure(EngngModel *eModel, int di, EquationID
         //determine nonzero structure of matrix
         int ii, jj;
         IntArray r_loc, c_loc;
-        std :: vector< IntArray >rows_upper(nRows), rows_lower(nRows);
+        std :: vector< IntArray > rows_upper(nRows), rows_lower(nRows);
 
         nelem = domain->giveNumberOfElements();
         for ( int n = 1; n <= nelem; n++ ) {
@@ -443,8 +443,8 @@ PetscSparseMtrx :: buildInternalStructure(EngngModel *eModel, int di, EquationID
             // determine nonzero structure of a "local (maintained)" part of matrix, and the off-diagonal part
             // allocation map
             ///@todo Split this into upper and lower triangular part like for the sequential matrix (we can then use SBAIJ which is a huge performance boost)
-            std :: vector< IntArray >d_rows_upper(leqs), d_rows_lower(leqs);   // diagonal sub-matrix allocation
-            std :: vector< IntArray >o_rows_upper(leqs), o_rows_lower(leqs);   // off-diagonal allocation
+            std :: vector< IntArray > d_rows_upper(leqs), d_rows_lower(leqs);   // diagonal sub-matrix allocation
+            std :: vector< IntArray > o_rows_upper(leqs), o_rows_lower(leqs);   // off-diagonal allocation
 
             IntArray lloc, gloc;
 
@@ -531,7 +531,7 @@ PetscSparseMtrx :: buildInternalStructure(EngngModel *eModel, int di, EquationID
 
     {
         // allocation map:
-        std :: vector< IntArray >rows_upper(leqs);
+        std :: vector< IntArray > rows_upper(leqs);
 
         nelem = domain->giveNumberOfElements();
         for ( int n = 1; n <= nelem; n++ ) {

@@ -119,7 +119,7 @@ public:
      * @param ut Equation ID for unknowns in field.
      * @param nHist Number of old time steps to store.
      */
-    PrimaryField(EngngModel *a, int idomain, FieldType ft, EquationID ut, int nHist);
+    PrimaryField(EngngModel * a, int idomain, FieldType ft, EquationID ut, int nHist);
     virtual ~PrimaryField();
 
     /**

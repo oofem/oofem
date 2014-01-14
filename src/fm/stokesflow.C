@@ -156,7 +156,7 @@ void StokesFlow :: solveYourselfAt(TimeStep *tStep)
     this->externalForces.resize(neq);
     this->externalForces.zero();
     this->assembleVector( this->externalForces, tStep, EID_MomentumBalance_ConservationEquation, ExternalForcesVector, VM_Total,
-                          EModelDefaultEquationNumbering(), this->giveDomain(1) );
+                         EModelDefaultEquationNumbering(), this->giveDomain(1) );
 
     if ( this->giveProblemScale() == macroScale ) {
         OOFEM_LOG_INFO("StokesFlow :: solveYourselfAt - Solving step %d, metastep %d, (neq = %d)\n", tStep->giveNumber(), tStep->giveMetatStepumber(), neq);

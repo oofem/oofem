@@ -68,7 +68,7 @@ private:
     double period;
 
 public:
-    PeriodicPiecewiseLinFunction(int i, Domain *d) : PiecewiseLinFunction(i, d)
+    PeriodicPiecewiseLinFunction(int i, Domain * d) : PiecewiseLinFunction(i, d)
     {
         period = -1.0;
         addTF = 0;

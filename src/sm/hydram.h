@@ -120,7 +120,7 @@ protected:
     double tempHydrationDegree;
 
 public:
-    HydrationModelStatus(int n, Domain *d, GaussPoint *g);
+    HydrationModelStatus(int n, Domain * d, GaussPoint * g);
     virtual ~HydrationModelStatus() { }
 
     /// Returns the temp hydration degree.
@@ -281,9 +281,13 @@ protected:
     HydrationModelStatus *hydrationModelStatus;
 public:
     /// Constructor. Nulls the hydrationModelStatus pointer.
-    HydrationModelStatusInterface() { hydrationModelStatus = NULL; }
+    HydrationModelStatusInterface() {
+        hydrationModelStatus = NULL;
+    }
     /// Destructor. Deletes the associated hydration model status.
-    virtual ~HydrationModelStatusInterface() { delete hydrationModelStatus; }
+    virtual ~HydrationModelStatusInterface() {
+        delete hydrationModelStatus;
+    }
 
     /// Returns the associated hydration model status.
     HydrationModelStatus *giveHydrationModelStatus() { return hydrationModelStatus; }
@@ -311,7 +315,9 @@ public:
     /// Returns the associated hydration model.
     HydrationModel *giveHydrationModel() { return hydrationModel; }
     /// Destructor. Deletes the associated hydration model.
-    virtual ~HydrationModelInterface() { delete hydrationModel; }
+    virtual ~HydrationModelInterface() {
+        delete hydrationModel;
+    }
     /**
      * Creates and initializes the hydration model according to object description stored in input record.
      * The parent class instanciateFrom method is not called here.
@@ -320,13 +326,17 @@ public:
 
     contextIOResultType saveContext(DataStream *stream, ContextMode mode, void *obj = NULL)
     {
-        if ( hydrationModel ) { hydrationModel->saveContext(stream, mode, obj); }
+        if ( hydrationModel ) {
+            hydrationModel->saveContext(stream, mode, obj);
+        }
 
         return CIO_OK;
     }
     contextIOResultType restoreContext(DataStream *stream, ContextMode mode, void *obj = NULL)
     {
-        if ( hydrationModel ) { hydrationModel->restoreContext(stream, mode, obj); }
+        if ( hydrationModel ) {
+            hydrationModel->restoreContext(stream, mode, obj);
+        }
 
         return CIO_OK;
     }

@@ -86,7 +86,7 @@ public:
      * @param n Boundary condition number.
      * @param d Domain to which new object will belongs.
      */
-    MixedGradientPressureWeakPeriodic(int n, Domain *d);
+    MixedGradientPressureWeakPeriodic(int n, Domain * d);
 
     /// Destructor
     virtual ~MixedGradientPressureWeakPeriodic();

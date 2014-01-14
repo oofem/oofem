@@ -40,8 +40,8 @@
 
 
 #include "seek.h"
-#if defined(__NetBSD__) || defined(__FreeBSD__)
-#include <libgen.h>
+#if defined ( __NetBSD__ ) || defined ( __FreeBSD__ )
+ #include <libgen.h>
 #endif
 #include <stdlib.h>
 #include <math.h>
@@ -76,13 +76,13 @@
 #define MAX_KEYWORD_LENGTH 20
 
 #ifdef COLOR_MODE
-#define  NORMAL "\033[0;39m"
-#define  GREEN  "\033[1;32m"
-#define  RED    "\033[1;31m"
+ #define  NORMAL "\033[0;39m"
+ #define  GREEN  "\033[1;32m"
+ #define  RED    "\033[1;31m"
 #else
-#define  NORMAL ""
-#define  GREEN  ""
-#define  RED    ""
+ #define  NORMAL ""
+ #define  GREEN  ""
+ #define  RED    ""
 #endif
 
 //extern stateType currState;
@@ -925,7 +925,10 @@ int main(int argc, char *argv[]) {
     }
 
     // end of infinite loop until errorFlag
-    } while ( !errorFlag );
+}
+while ( !errorFlag ) {
+    ;
+}
 
 #endif
 

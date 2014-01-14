@@ -41,7 +41,7 @@ InputRecord :: InputRecord() { }
 InputRecord :: InputRecord(const InputRecord &src) {  }
 
 InputRecord &
-InputRecord :: operator=(const InputRecord &src)
+InputRecord :: operator = ( const InputRecord & src )
 {
     return * this;
 }

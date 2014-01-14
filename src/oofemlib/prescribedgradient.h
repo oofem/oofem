@@ -73,7 +73,7 @@ public:
      * @param n Boundary condition number.
      * @param d Domain to which new object will belongs.
      */
-    PrescribedGradient(int n, Domain *d) : BoundaryCondition(n, d) { }
+    PrescribedGradient(int n, Domain * d) : BoundaryCondition(n, d) { }
 
     /// Destructor
     virtual ~PrescribedGradient() { }

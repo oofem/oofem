@@ -85,7 +85,7 @@ public:
      * @param n Material number.
      * @param d Domain to which new material will belong.
      */
-    StructuralInterfaceMaterial(int n, Domain *d);
+    StructuralInterfaceMaterial(int n, Domain * d);
     /// Destructor.
     virtual ~StructuralInterfaceMaterial() { }
 

@@ -55,7 +55,7 @@ protected:
 public:
     double pitch, length;
 
-    LIBeam2d(int n, Domain *aDomain);
+    LIBeam2d(int n, Domain * aDomain);
     virtual ~LIBeam2d() { }
 
     virtual void computeLumpedMassMatrix(FloatMatrix &answer, TimeStep *tStep);

@@ -72,7 +72,7 @@ namespace oofem {
 class HydratingConcreteMat : public IsotropicHeatTransferMaterial
 {
 public:
-    HydratingConcreteMat(int n, Domain *d);
+    HydratingConcreteMat(int n, Domain * d);
     virtual ~HydratingConcreteMat();
 
     /// Return true if hydration heat source is present.
@@ -139,7 +139,7 @@ protected:
 class HydratingConcreteMatStatus : public TransportMaterialStatus
 {
 public:
-    HydratingConcreteMatStatus(int n, Domain *d, GaussPoint *g);
+    HydratingConcreteMatStatus(int n, Domain * d, GaussPoint * g);
     virtual ~HydratingConcreteMatStatus();
     /// Returns actual degree of hydration at last known equilibrium.
     double giveDoHActual();

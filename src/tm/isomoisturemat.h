@@ -47,7 +47,7 @@ namespace oofem {
 class IsotropicMoistureTransferMaterial : public TransportMaterial
 {
 public:
-    IsotropicMoistureTransferMaterial(int n, Domain *d) : TransportMaterial(n, d) { }
+    IsotropicMoistureTransferMaterial(int n, Domain * d) : TransportMaterial(n, d) { }
     virtual ~IsotropicMoistureTransferMaterial() { }
 
     virtual void giveFluxVector(FloatArray &answer, GaussPoint *gp, const FloatArray &grad, const FloatArray &field, TimeStep *tStep);

@@ -50,9 +50,9 @@ class FEI2dLineQuad;
  * @author Mikael Öhman
  */
 class Line2BoundaryElement :
-    public FMElement,
-    public SpatialLocalizerInterface,
-    public EIPrimaryUnknownMapperInterface
+public FMElement,
+public SpatialLocalizerInterface,
+public EIPrimaryUnknownMapperInterface
 {
 protected:
     static FEI2dLineQuad fei;
@@ -63,7 +63,7 @@ public:
      * @param n Element's number.
      * @param d Pointer to the domain to which element belongs.
      */
-    Line2BoundaryElement(int n, Domain *d);
+    Line2BoundaryElement(int n, Domain * d);
     /// Destructor.
     virtual ~Line2BoundaryElement();
 

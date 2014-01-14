@@ -46,7 +46,7 @@ namespace oofem {
 LoadTimeFunction :: LoadTimeFunction(int n, Domain *d) :
     FEMComponent(n, d),
     initialValue(0.)
-{}
+{ }
 
 double
 LoadTimeFunction :: evaluate(TimeStep *tStep, ValueModeType mode)

@@ -79,7 +79,7 @@ public:
      * @param n Cross section number.
      * @param d Domain to which new cross section will belong.
      */
-    StructuralCrossSection(int n, Domain *d) : CrossSection(n, d)  { }
+    StructuralCrossSection(int n, Domain * d) : CrossSection(n, d)  { }
     /// Destructor.
     virtual ~StructuralCrossSection() { }
 

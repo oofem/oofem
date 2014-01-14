@@ -54,15 +54,15 @@
 #include <fstream>
 
 namespace oofem {
-PrimaryVariableMapper :: PrimaryVariableMapper() {}
+PrimaryVariableMapper :: PrimaryVariableMapper() { }
 
-PrimaryVariableMapper :: ~PrimaryVariableMapper() {}
+PrimaryVariableMapper :: ~PrimaryVariableMapper() { }
 
 LSPrimaryVariableMapper :: LSPrimaryVariableMapper()
-{}
+{ }
 
 LSPrimaryVariableMapper :: ~LSPrimaryVariableMapper()
-{}
+{ }
 
 void LSPrimaryVariableMapper :: mapPrimaryVariables(FloatArray &oU, Domain &iOldDom, Domain &iNewDom, ValueModeType iMode, TimeStep &iTStep)
 {

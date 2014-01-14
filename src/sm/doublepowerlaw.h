@@ -60,7 +60,7 @@ protected:
     double alpha;
 
 public:
-    DoublePowerLawMaterial(int n, Domain *d) : MaxwellChainMaterial(n, d) { }
+    DoublePowerLawMaterial(int n, Domain * d) : MaxwellChainMaterial(n, d) { }
     virtual ~DoublePowerLawMaterial() { }
 
     virtual const char *giveClassName() const { return "DoublePowerLawMaterial"; }

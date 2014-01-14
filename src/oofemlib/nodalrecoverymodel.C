@@ -77,7 +77,7 @@ NodalRecoveryModel :: clear()
     FloatArray *valArray;
 
     if ( nnodes ) {
-        TDictionaryIterator< int, FloatArray >iterator( this->nodalValList.at(1) );
+        TDictionaryIterator< int, FloatArray > iterator( this->nodalValList.at(1) );
         for ( int i = 1; i <= nnodes; i++ ) {
             // this->nodalValList->at(i)->clear();
             iterator.initialize( this->nodalValList.at(i) );

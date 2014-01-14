@@ -99,7 +99,7 @@ StationaryTransportProblem :: initializeFrom(InputRecord *ir)
                 mask.at(1) = T_f;
 #ifdef FIELDMANAGER_USE_SHARED_PTR
                 //std::tr1::shared_ptr<Field> _temperatureField = make_shared<MaskedPrimaryField>(FT_Temperature, this->UnknownsField, mask);
-                std :: tr1 :: shared_ptr< Field >_temperatureField( new MaskedPrimaryField(FT_Temperature, this->UnknownsField, mask) );
+                std :: tr1 :: shared_ptr< Field > _temperatureField( new MaskedPrimaryField ( FT_Temperature, this->UnknownsField, mask ) );
                 fm->registerField( _temperatureField, ( FieldType ) exportFields.at(i) );
 #else
                 MaskedPrimaryField *_temperatureField = new MaskedPrimaryField(FT_Temperature, this->UnknownsField, mask);
@@ -109,7 +109,7 @@ StationaryTransportProblem :: initializeFrom(InputRecord *ir)
                 mask.at(1) = C_1;
 #ifdef FIELDMANAGER_USE_SHARED_PTR
                 //std::tr1::shared_ptr<Field> _temperatureField = make_shared<MaskedPrimaryField>(FT_Temperature, this->UnknownsField, mask);
-                std :: tr1 :: shared_ptr< Field >_concentrationField( new MaskedPrimaryField(FT_HumidityConcentration, this->UnknownsField, mask) );
+                std :: tr1 :: shared_ptr< Field > _concentrationField( new MaskedPrimaryField ( FT_HumidityConcentration, this->UnknownsField, mask ) );
                 fm->registerField( _concentrationField, ( FieldType ) exportFields.at(i) );
 #else
                 MaskedPrimaryField *_concentrationField = new MaskedPrimaryField(FT_HumidityConcentration, this->UnknownsField, mask);
@@ -183,9 +183,9 @@ void StationaryTransportProblem :: solveYourselfAt(TimeStep *tStep)
         if ( this->keepTangent ) {
             this->conductivityMatrix->zero();
             this->assemble( conductivityMatrix, tStep, EID_ConservationEquation, ConductivityMatrix,
-                            EModelDefaultEquationNumbering(), this->giveDomain(1) );
+                           EModelDefaultEquationNumbering(), this->giveDomain(1) );
             this->assemble( conductivityMatrix, tStep, EID_ConservationEquation, LHSBCMatrix,
-                            EModelDefaultEquationNumbering(), this->giveDomain(1) );
+                           EModelDefaultEquationNumbering(), this->giveDomain(1) );
         }
     }
 
@@ -243,9 +243,9 @@ StationaryTransportProblem :: updateComponent(TimeStep *tStep, NumericalCmpn cmp
             this->conductivityMatrix->zero();
             ///@todo We should use some problem-neutral names instead of "ConductivityMatrix" (and something nicer for LHSBCMatrix)
             this->assemble( conductivityMatrix, tStep, EID_ConservationEquation, ConductivityMatrix,
-                            EModelDefaultEquationNumbering(), this->giveDomain(1) );
+                           EModelDefaultEquationNumbering(), this->giveDomain(1) );
             this->assemble( conductivityMatrix, tStep, EID_ConservationEquation, LHSBCMatrix,
-                            EModelDefaultEquationNumbering(), this->giveDomain(1) );
+                           EModelDefaultEquationNumbering(), this->giveDomain(1) );
         }
         return;
     } else {
@@ -346,7 +346,7 @@ StationaryTransportProblem :: checkConsistency()
     int nelem = domain->giveNumberOfElements();
     for ( int i = 1; i <= nelem; i++ ) {
         Element *ePtr = domain->giveElement(i);
-        if ( !dynamic_cast< TransportElement * >( ePtr ) ) {
+        if ( !dynamic_cast< TransportElement * >(ePtr) ) {
             _warning2("Element %d has no TransportElement base", i);
             return 0;
         }

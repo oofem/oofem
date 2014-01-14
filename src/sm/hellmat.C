@@ -435,7 +435,7 @@ HellmichMaterial :: initializeFrom(InputRecord *ir)
     }
 
     printf("\nHellMat: Material options %d", options);
-    linMat = new AgingIsoLEMaterial(this->giveDomain()->giveNumberOfMaterialModels() + 1, this->giveDomain(), ae, ny);
+    linMat = new AgingIsoLEMaterial(this->giveDomain ( )->giveNumberOfMaterialModels() + 1, this->giveDomain(), ae, ny);
 
     printf("\n");
     return IRRT_OK;
@@ -716,14 +716,14 @@ double HellmichMaterial :: rcThreshold(double chi1, double ksi)
         if ( options & moSqrtHardeningLaw ) {
             if ( chi1 >= 0 ) {
                 return ( fcStrength(ksi) *
-                         ( omega + ( 1 - omega ) * sqrt( chi1 * ( 2 * chi1u - chi1 ) ) / chi1u ) );
+                        ( omega + ( 1 - omega ) * sqrt( chi1 * ( 2 * chi1u - chi1 ) ) / chi1u ) );
             } else { // symmetric negative branch needed for stability of return mapping iteration
                 return ( fcStrength(ksi) *
-                         ( omega - ( 1 - omega ) * sqrt( chi1 * ( -2 * chi1u - chi1 ) ) / chi1u ) );
+                        ( omega - ( 1 - omega ) * sqrt( chi1 * ( -2 * chi1u - chi1 ) ) / chi1u ) );
             }
         } else { // quadratic hardening law - original
             return ( fcStrength(ksi) *
-                     ( omega + ( 1 - omega ) * ( 1 - pow( ( chi1 - chi1u ) / chi1u, 2 ) ) ) );
+                    ( omega + ( 1 - omega ) * ( 1 - pow( ( chi1 - chi1u ) / chi1u, 2 ) ) ) );
         }
     } else {
         return ( fcStrength(ksi) );
@@ -1385,9 +1385,9 @@ void HellmichMaterial :: plotReturn(FILE *outputStream, GaussPoint *gp, TimeStep
     fprintf( outputStream, "%d\n", status->giveActiveSurface() );
     fprintf(outputStream, "%.15g\n", alpha);
     fprintf( outputStream, "%.15g\n",
-             auxkdp * rcThreshold(status->giveHardeningVar(), ksi) );
+            auxkdp * rcThreshold(status->giveHardeningVar(), ksi) );
     fprintf( outputStream, "%.15g\n",
-             auxkdp * rcThreshold(status->giveTempHardeningVar(), ksi) );
+            auxkdp * rcThreshold(status->giveTempHardeningVar(), ksi) );
     fprintf( outputStream, "%.15g\n", delta * fcStrength(ksi) );
 
     inv = invariantI1(trialStress);
@@ -2626,7 +2626,7 @@ HellmichMaterial :: giveStiffnessMatrix(FloatMatrix &answer, MatResponseMode rMo
         HellmichMaterialStatus *status = static_cast< HellmichMaterialStatus * >( giveStatus(gp) );
         if ( mMode == _1dMat ) {
             printf( "Time: %.2f, sig: %.10e, Eep: %.10e\n", giveTime(tStep),
-                    ( status->giveTempStressVector().giveSize() ) ? ( status->giveTempStressVector() )(0) : 0, answer(0, 0) );
+                   ( status->giveTempStressVector().giveSize() ) ? ( status->giveTempStressVector() )(0) : 0, answer(0, 0) );
         } else {
             answer.printYourself();
         }
@@ -2723,12 +2723,12 @@ double HellmichMaterial :: give(int aProperty, GaussPoint *gp)
  */
 {
     if ( ( aProperty == 'G' ) || ( aProperty == Gyz ) || ( aProperty == Gxz ) ||
-         ( aProperty == Gxy ) ) {
+        ( aProperty == Gxy ) ) {
         return agingG(1.0);
     }
 
     if ( ( aProperty == 'E' ) || ( aProperty == Ex ) || ( aProperty == Ey ) ||
-         ( aProperty == Ez ) ) {
+        ( aProperty == Ez ) ) {
         return agingE(1.0);
     }
 
@@ -2737,7 +2737,7 @@ double HellmichMaterial :: give(int aProperty, GaussPoint *gp)
     }
 
     if ( ( aProperty == 'n' ) || ( aProperty == NYzx ) || ( aProperty == NYzy ) ||
-         ( aProperty == NYyx ) ) {
+        ( aProperty == NYyx ) ) {
         return ny;
     } else {
         return this->Material :: give(aProperty, gp);

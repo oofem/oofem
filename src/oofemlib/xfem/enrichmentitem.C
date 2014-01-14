@@ -324,7 +324,7 @@ EnrichmentItem :: computeDofManDofIdArray(IntArray &answer, DofManager *dMan)
 
     // Go through the list of dofs that the EI supports and compare with the available dofs in the dofMan.
     // Store matches in dofMask
-    IntArray dofMask(eiEnrSize * numEnrFunc);
+    IntArray dofMask(eiEnrSize *numEnrFunc);
     dofMask.zero();
     int count = 0;
 
@@ -437,7 +437,7 @@ void EnrichmentItem :: updateLevelSets(XfemManager &ixFemMan)
         Node *node = ixFemMan.giveDomain()->giveNode(n);
 
         // Extract node coord
-        const FloatArray &pos( * node->giveCoordinates() );
+        const FloatArray &pos( *node->giveCoordinates() );
 
         // Calc normal sign dist
         double phi = 0.0;
@@ -488,8 +488,8 @@ void EnrichmentItem :: updateNodeEnrMarker(XfemManager &ixFemMan, const Enrichme
             minPhi = std :: min(minPhi, mLevelSetNormalDir [ nGlob - 1 ]);
             maxPhi = std :: max(maxPhi, mLevelSetNormalDir [ nGlob - 1 ]);
 
-            elCenter.at(1) += el->giveDofManager(elNodeInd)->giveCoordinate(1) / double( nElNodes );
-            elCenter.at(2) += el->giveDofManager(elNodeInd)->giveCoordinate(2) / double( nElNodes );
+            elCenter.at(1) += el->giveDofManager(elNodeInd)->giveCoordinate(1) / double ( nElNodes );
+            elCenter.at(2) += el->giveDofManager(elNodeInd)->giveCoordinate(2) / double ( nElNodes );
         }
 
 
@@ -596,7 +596,7 @@ void EnrichmentItem :: updateNodeEnrMarker(XfemManager &ixFemMan, const DofManLi
     //printf("\n The following nodes are enriched ");
     // Loop over nodes in the DofManList and mark nodes as enriched.
     const std :: vector< int > &dofList = iDofManList.giveDofManList();
-    for ( int i = 0; i < int( dofList.size() ); i++ ) {
+    for ( int i = 0; i < int ( dofList.size() ); i++ ) {
         mNodeEnrMarker [ dofList [ i ] - 1 ] = 1;
         mEnrNodeIndices.push_back(dofList [ i ]);
         //  printf(" %i", dofList [ i ]);
@@ -736,8 +736,8 @@ void EnrichmentItem :: computeIntersectionPoints(std :: vector< FloatArray > &oI
                     if ( fabs(phiS - phiE) < mLevelSetTol ) {
                         // If the crack is parallel to the edge.
 
-                        FloatArray ps( * ( element->giveDofManager(nsLoc)->giveCoordinates() ) );
-                        FloatArray pe( * ( element->giveDofManager(neLoc)->giveCoordinates() ) );
+                        FloatArray ps( * ( element->giveDofManager ( nsLoc )->giveCoordinates() ) );
+                        FloatArray pe( * ( element->giveDofManager ( neLoc )->giveCoordinates() ) );
 
                         // Check that the intersection points have not already been identified.
                         // This may happen if the crack intersects the element exactly at a node,
@@ -787,8 +787,8 @@ void EnrichmentItem :: computeIntersectionPoints(std :: vector< FloatArray > &oI
                             oIntersectedEdgeInd.push_back(edgeIndex);
                         }
                     } else {
-                        FloatArray ps( * ( element->giveDofManager(nsLoc)->giveCoordinates() ) );
-                        FloatArray pe( * ( element->giveDofManager(neLoc)->giveCoordinates() ) );
+                        FloatArray ps( * ( element->giveDofManager ( nsLoc )->giveCoordinates() ) );
+                        FloatArray pe( * ( element->giveDofManager ( neLoc )->giveCoordinates() ) );
 
                         int nDim = ps.giveSize();
                         FloatArray p;
@@ -1143,7 +1143,7 @@ Delamination :: updateGeometry(FailureCriteriaStatus *fc, TimeStep *tStep)
             }
         }
 
-        dynamic_cast< DofManList * >( this->mpEnrichmentDomain )->addDofManagers(dofManNumbers);     // fix JB
+        dynamic_cast< DofManList * >(this->mpEnrichmentDomain)->addDofManagers(dofManNumbers);     // fix JB
     }
 }
 
@@ -1325,7 +1325,7 @@ void EnrFrontExtend :: MarkNodesAsFront(std :: vector< int > &ioNodeEnrMarker, X
         // Check if the node is already enriched
         bool alreadyEnr = ( ioNodeEnrMarker [ i - 1 ] > 0 );
 
-#if defined( ENABLE_XFEM_CPP11 )
+#if defined ( ENABLE_XFEM_CPP11 )
         auto begin      = newEnrNodes.begin();
         auto end        = newEnrNodes.end();
 #else
@@ -1364,7 +1364,7 @@ void EnrFrontExtend :: MarkNodesAsFront(std :: vector< int > &ioNodeEnrMarker, X
 
 
     // Mark the new nodes to be enriched
-    for ( int i = 0; i < int( newEnrNodes.size() ); i++ ) {
+    for ( int i = 0; i < int ( newEnrNodes.size() ); i++ ) {
         ioNodeEnrMarker [ newEnrNodes [ i ] - 1 ] = 1;
     }
 }
@@ -1407,7 +1407,7 @@ void EnrFrontLinearBranchFuncRadius :: MarkNodesAsFront(std :: vector< int > &io
         DofManager *dMan = d->giveDofManager(i);
         const FloatArray &nodePos = * ( dMan->giveCoordinates() );
 
-        for ( int j = 0; j < int( iTipInfo.size() ); j++ ) {
+        for ( int j = 0; j < int ( iTipInfo.size() ); j++ ) {
             double radius2 = iTipInfo [ j ].mGlobalCoord.distance_square(nodePos);
 
             if ( radius2 < mEnrichmentRadius * mEnrichmentRadius ) {

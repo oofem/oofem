@@ -84,9 +84,9 @@ HTSelement :: initializeFrom(InputRecord *ir)
 
 #if 0
     if ( !( ( numberOfGaussPoints == 1 ) ||
-            ( numberOfGaussPoints == 4 ) ||
-            ( numberOfGaussPoints == 9 ) ||
-            ( numberOfGaussPoints == 16 ) ) ) {
+           ( numberOfGaussPoints == 4 ) ||
+           ( numberOfGaussPoints == 9 ) ||
+           ( numberOfGaussPoints == 16 ) ) ) {
         numberOfGaussPoints = 4;
     }
 #endif
@@ -291,7 +291,7 @@ HTSelement :: computeEdgeLoadVectorAt(FloatArray &answer, Load *load,
                                       int iEdge, TimeStep *tStep, ValueModeType mode)
 {
     double dV;
-    BoundaryLoad *edgeLoad = dynamic_cast< BoundaryLoad * >( load );
+    BoundaryLoad *edgeLoad = dynamic_cast< BoundaryLoad * >(load);
     GaussPoint *gp;
     IntegrationRule *iRule;
     FloatArray force, PsEdge, Ps(numberOfDofs);

@@ -46,7 +46,7 @@
 
 namespace oofem {
 #ifdef FIELDMANAGER_USE_SHARED_PTR
-typedef std :: tr1 :: shared_ptr< Field >FM_FieldPtr;
+typedef std :: tr1 :: shared_ptr< Field > FM_FieldPtr;
 #else
 typedef Field *FM_FieldPtr;
 #endif
@@ -78,10 +78,14 @@ protected:
         bool isManaged;
 public:
         /// Creates new field record, containing reference to given field.
-        fieldRecord(Field *f, bool managed) : field(f), isManaged(managed) { }
+        fieldRecord(Field * f, bool managed) : field(f), isManaged(managed) { }
         fieldRecord() : field(NULL), isManaged(false) { }
         /// Destructor. Deletes managed field.
-        ~fieldRecord() { if ( isManaged ) { delete field; } }
+        ~fieldRecord() {
+            if ( isManaged ) {
+                delete field;
+            }
+        }
 
         /// Return reference to field.
         Field *giveField() { return field; }

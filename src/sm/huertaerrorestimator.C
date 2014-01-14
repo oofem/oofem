@@ -159,7 +159,7 @@ HuertaErrorEstimator :: estimateError(EE_ErrorMode mode, TimeStep *tStep)
         skippedNelems = nelems;
         this->stateCounter = tStep->giveSolutionStateCounter();
         OOFEM_LOG_RELEVANT( "Relative error estimate [step number %5d]: skipped\n",
-                            d->giveEngngModel()->giveCurrentStep()->giveNumber() );
+                           d->giveEngngModel()->giveCurrentStep()->giveNumber() );
         return 1;
     }
 
@@ -170,17 +170,17 @@ HuertaErrorEstimator :: estimateError(EE_ErrorMode mode, TimeStep *tStep)
         skippedNelems = nelems;
         this->stateCounter = tStep->giveSolutionStateCounter();
         OOFEM_LOG_RELEVANT( "\nRelative error estimate [step number %5d]: skipped\n",
-                            d->giveEngngModel()->giveCurrentStep()->giveNumber() );
+                           d->giveEngngModel()->giveCurrentStep()->giveNumber() );
         return 1;
     }
 
 #ifdef __PARALLEL_MODE
     OOFEM_LOG_INFO( "[%d] Estimating error [step number %5d]\n",
-                    d->giveEngngModel()->giveRank(),
-                    d->giveEngngModel()->giveCurrentStep()->giveNumber() );
+                   d->giveEngngModel()->giveRank(),
+                   d->giveEngngModel()->giveCurrentStep()->giveNumber() );
 #else
     OOFEM_LOG_INFO( "Estimating error [step number %5d]\n",
-                    d->giveEngngModel()->giveCurrentStep()->giveNumber() );
+                   d->giveEngngModel()->giveCurrentStep()->giveNumber() );
 #endif
 
     if ( dynamic_cast< AdaptiveLinearStatic * >( d->giveEngngModel() ) ) {
@@ -444,7 +444,7 @@ HuertaErrorEstimator :: estimateError(EE_ErrorMode mode, TimeStep *tStep)
                     while ( tStepumber < curNumber ) {
                         try {
                             model->restoreContext(NULL, CM_State, ( void * ) & tStepumber);
-                        } catch ( ContextIOERR &c ) {
+                        } catch(ContextIOERR & c) {
                             c.print();
                             exit(1);
                         }
@@ -800,7 +800,7 @@ HuertaRemeshingCriteria :: estimateMeshDensities(TimeStep *tStep)
 
     this->nodalDensities.resize(nnode);
 
-    std :: vector< int >connectedElems(nnode);
+    std :: vector< int > connectedElems(nnode);
     for ( int i = 0; i < nnode; i++ ) {
         connectedElems [ i ] = 0;
     }
@@ -862,7 +862,7 @@ HuertaRemeshingCriteria :: estimateMeshDensities(TimeStep *tStep)
         // check whether to remesh because of low level of error
         if ( this->ee->giveErrorEstimatorType() == EET_HEE ) {
             /* HUHU toto je divne !!! pak se neuplatni refine viz dale */
-            if ( static_cast< HuertaErrorEstimator * >( this->ee )->giveAnalysisMode() == HuertaErrorEstimator :: HEE_linear ) {
+            if ( static_cast< HuertaErrorEstimator * >(this->ee)->giveAnalysisMode() == HuertaErrorEstimator :: HEE_linear ) {
                 stateCounter = tStep->giveSolutionStateCounter();
                 return 1;
             }
@@ -993,7 +993,7 @@ HuertaRemeshingCriteria :: estimateMeshDensities(TimeStep *tStep)
 
     if ( refine == true ) {
         if ( this->ee->giveErrorEstimatorType() == EET_HEE ) {
-            if ( static_cast< HuertaErrorEstimator * >( this->ee )->giveAnalysisMode() == HuertaErrorEstimator :: HEE_linear ) {
+            if ( static_cast< HuertaErrorEstimator * >(this->ee)->giveAnalysisMode() == HuertaErrorEstimator :: HEE_linear ) {
                 this->remeshingStrategy = RemeshingFromPreviousState_RS;
             }
         }
@@ -1235,8 +1235,8 @@ HuertaErrorEstimatorInterface :: setupRefinedElementProblem1D(Element *element, 
                     if ( ( lcs = node->giveLocalCoordinateTriplet() ) != NULL ) {
                         FloatArray lcs_vec;
                         lcs_vec.setValues( 6,
-                                           lcs->at(1, 1), lcs->at(1, 2), lcs->at(1, 3),
-                                           lcs->at(2, 1), lcs->at(2, 2), lcs->at(2, 3) );
+                                          lcs->at(1, 1), lcs->at(1, 2), lcs->at(1, 3),
+                                          lcs->at(2, 1), lcs->at(2, 2), lcs->at(2, 3) );
                         ir->setField(lcs_vec, _IFT_Node_lcs);
                     }
 
@@ -1331,7 +1331,7 @@ HuertaErrorEstimatorInterface :: setupRefinedElementProblem1D(Element *element, 
         return;
     }
 
-    std :: vector< FloatArray >newNodesVec( newNodes.begin(), newNodes.end() );
+    std :: vector< FloatArray > newNodesVec( newNodes.begin(), newNodes.end() );
     if ( mode == HuertaErrorEstimatorInterface :: ElemMode ) {
         int csect, csect2;
         int nd1, nd2;
@@ -1416,7 +1416,7 @@ HuertaErrorEstimatorInterface :: setupRefinedElementProblem1D(Element *element, 
             locCoord = new FloatArray;
             IntegrationRule ir(1, element);
             //gp = new GaussPoint(element, 1, locCoord, 1.0, mode);
-            gp = new GaussPoint(& ir, 1, locCoord, 1.0, mode);
+            gp = new GaussPoint( &ir, 1, locCoord, 1.0, mode);
 
             for ( inode = startNode; inode <= endNode; inode++ ) {
                 xc = corner [ inode - 1 ]->at(1);
@@ -1698,7 +1698,7 @@ HuertaErrorEstimatorInterface :: setupRefinedElementProblem2D(Element *element, 
                         if ( ( lcs = node->giveLocalCoordinateTriplet() ) != NULL ) {
                             FloatArray lcs_vec;
                             lcs_vec.setValues( 6, lcs->at(1, 1), lcs->at(1, 2), lcs->at(1, 3),
-                                               lcs->at(2, 1), lcs->at(2, 2), lcs->at(2, 3) );
+                                              lcs->at(2, 1), lcs->at(2, 2), lcs->at(2, 3) );
                             ir->setField(lcs_vec, _IFT_Node_lcs);
                         }
 
@@ -1940,7 +1940,7 @@ HuertaErrorEstimatorInterface :: setupRefinedElementProblem2D(Element *element, 
             // create a fictitious integration point
             locCoord = new FloatArray;
             IntegrationRule ir(0, element);
-            gp = new GaussPoint(& ir, 1, locCoord, 1.0, mode);
+            gp = new GaussPoint( &ir, 1, locCoord, 1.0, mode);
 
             for ( inode = startNode; inode <= endNode; inode++ ) {
                 s1 = inode;
@@ -2335,7 +2335,7 @@ HuertaErrorEstimatorInterface :: setupRefinedElementProblem3D(Element *element, 
                             if ( ( lcs = node->giveLocalCoordinateTriplet() ) != NULL ) {
                                 FloatArray lcs_vec;
                                 lcs_vec.setValues( 6, lcs->at(1, 1), lcs->at(1, 2), lcs->at(1, 3),
-                                                   lcs->at(2, 1), lcs->at(2, 2), lcs->at(2, 3) );
+                                                  lcs->at(2, 1), lcs->at(2, 2), lcs->at(2, 3) );
                                 ir->setField(lcs_vec, _IFT_Node_lcs);
                             }
 
@@ -2646,7 +2646,7 @@ HuertaErrorEstimatorInterface :: setupRefinedElementProblem3D(Element *element, 
             // create a fictitious integration point
             locCoord = new FloatArray;
             IntegrationRule irule(0, element);
-            gp = new GaussPoint(& irule, 1, locCoord, 1.0, mode);
+            gp = new GaussPoint( &irule, 1, locCoord, 1.0, mode);
 
             for ( inode = startNode; inode <= endNode; inode++ ) {
                 s1 = hexaSideNode [ inode - 1 ] [ 0 ];
@@ -2925,7 +2925,7 @@ HuertaErrorEstimator :: solveRefinedElementProblem(int elemId, IntArray &localNo
 #ifdef INFO
  #ifdef __PARALLEL_MODE
     OOFEM_LOG_DEBUG( "[%d] Element no %d: estimating error [step number %5d]\n",
-                     domain->giveEngngModel()->giveRank(), elemId, tStep->giveNumber() );
+                    domain->giveEngngModel()->giveRank(), elemId, tStep->giveNumber() );
  #else
     OOFEM_LOG_DEBUG( "Element no %d: estimating error [step number %5d]\n", elemId, tStep->giveNumber() );
  #endif
@@ -3055,9 +3055,9 @@ HuertaErrorEstimator :: solveRefinedElementProblem(int elemId, IntArray &localNo
         refinedProblem->solveYourself();
         refinedProblem->terminateAnalysis();
     } else {
-        AdaptiveNonLinearStatic *prob = dynamic_cast< AdaptiveNonLinearStatic * >( refinedProblem );
+        AdaptiveNonLinearStatic *prob = dynamic_cast< AdaptiveNonLinearStatic * >(refinedProblem);
         if ( prob ) {
-            static_cast< AdaptiveNonLinearStatic * >( refinedProblem )->initializeAdaptiveFrom(problem);
+            static_cast< AdaptiveNonLinearStatic * >(refinedProblem)->initializeAdaptiveFrom(problem);
         } else {
             OOFEM_ERROR("HuertaErrorEstimator :: solveRefinedElementProblem - Refined problem must be of the type AdaptiveNonLinearStatic");
         }
@@ -3225,7 +3225,7 @@ HuertaErrorEstimator :: solveRefinedElementProblem(int elemId, IntArray &localNo
  #ifdef EXACT_ERROR
             else {
                 OOFEM_LOG_DEBUG( "%5d: %3d  %15.8e %15.8e  %15.8e  %15.8e\n",
-                                 elemId, ielem, elementNorm, pEnorm, elementNorm + pEnorm, exactFineError.at(++finePos) );
+                                elemId, ielem, elementNorm, pEnorm, elementNorm + pEnorm, exactFineError.at(++finePos) );
             }
  #endif
 #endif
@@ -3386,7 +3386,7 @@ HuertaErrorEstimator :: solveRefinedPatchProblem(int nodeId, IntArray &localNode
 #ifdef INFO
  #ifdef __PARALLEL_MODE
     OOFEM_LOG_INFO( "[%d] Patch no %d: estimating error [step number %5d]\n",
-                    domain->giveEngngModel()->giveRank(), nodeId, tStep->giveNumber() );
+                   domain->giveEngngModel()->giveRank(), nodeId, tStep->giveNumber() );
  #else
     OOFEM_LOG_INFO( "Patch no %d: estimating error [step number %5d]\n", nodeId, tStep->giveNumber() );
  #endif
@@ -3623,9 +3623,9 @@ HuertaErrorEstimator :: solveRefinedPatchProblem(int nodeId, IntArray &localNode
         refinedProblem->solveYourself();
         refinedProblem->terminateAnalysis();
     } else {
-        AdaptiveNonLinearStatic *prob = dynamic_cast< AdaptiveNonLinearStatic * >( refinedProblem );
+        AdaptiveNonLinearStatic *prob = dynamic_cast< AdaptiveNonLinearStatic * >(refinedProblem);
         if ( prob ) {
-            static_cast< AdaptiveNonLinearStatic * >( refinedProblem )->initializeAdaptiveFrom(problem);
+            static_cast< AdaptiveNonLinearStatic * >(refinedProblem)->initializeAdaptiveFrom(problem);
         } else {
             OOFEM_ERROR("HuertaErrorEstimator :: solveRefinedElementProblem - Refined problem must be of the type AdaptiveNonLinearStatic");
         }
@@ -4094,7 +4094,7 @@ HuertaErrorEstimator :: setupRefinedProblemProlog(const char *problemName, int p
     sprintf(line, "Refined problem on %s %d", problemName, problemId);
     refinedReader.setDescription(line);
 
-    if ( dynamic_cast< AdaptiveLinearStatic * >( problem ) ) {
+    if ( dynamic_cast< AdaptiveLinearStatic * >(problem) ) {
         DynamicInputRecord *ir = new DynamicInputRecord();
         ir->setRecordKeywordField(_IFT_LinearStatic_Name, 0);
         ir->setField(1, _IFT_EngngModel_nsteps);
@@ -4106,7 +4106,7 @@ HuertaErrorEstimator :: setupRefinedProblemProlog(const char *problemName, int p
         ir->setField(0, _IFT_EngngModel_parallelflag);
 #endif
         refinedReader.insertInputRecord(DataReader :: IR_emodelRec, ir);
-    } else if ( dynamic_cast< AdaptiveNonLinearStatic * >( problem ) ) {
+    } else if ( dynamic_cast< AdaptiveNonLinearStatic * >(problem) ) {
         InputRecord *ir;
         nmstep = tStep->giveMetatStepumber();
         ir = problem->giveMetaStep(nmstep)->giveAttributesRecord();

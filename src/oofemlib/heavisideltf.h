@@ -62,8 +62,10 @@ private:
     double origin, value;
 
 public:
-    HeavisideLTF(int i, Domain *d) : LoadTimeFunction(i, d)
-    { origin = value = 0.; }
+    HeavisideLTF(int i, Domain * d) : LoadTimeFunction(i, d)
+    {
+        origin = value = 0.;
+    }
     virtual ~HeavisideLTF() { }
 
     virtual IRResultType initializeFrom(InputRecord *ir);

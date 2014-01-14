@@ -143,7 +143,7 @@ private:
     FloatArray rtold;
 
 public:
-    NRSolver(Domain *d, EngngModel *m);
+    NRSolver(Domain * d, EngngModel * m);
     virtual ~NRSolver();
 
     // Overloaded methods:

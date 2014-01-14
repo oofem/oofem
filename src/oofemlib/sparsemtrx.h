@@ -125,7 +125,8 @@ public:
      * care about proper deallocation of allocated space.
      * @return Newly allocated copy of receiver.
      */
-    virtual SparseMtrx *GiveCopy() const { OOFEM_ERROR("SparseMtrx :: GiveCopy - Not implemented"); return NULL; }
+    virtual SparseMtrx *GiveCopy() const { OOFEM_ERROR("SparseMtrx :: GiveCopy - Not implemented");
+                                           return NULL; }
 
     /**
      * Evaluates @f$ y = A \cdot x @f$
@@ -231,7 +232,8 @@ public:
     virtual void zero() = 0;
 
     /// Returns the norm of receiver.
-    virtual double computeNorm() const { OOFEM_ERROR("SparseMtrx :: computeNorm - Not implemented"); return 0.0; }
+    virtual double computeNorm() const { OOFEM_ERROR("SparseMtrx :: computeNorm - Not implemented");
+                                         return 0.0; }
 
     /// Returns coefficient at position (i,j).
     virtual double &at(int i, int j) = 0;
@@ -255,7 +257,7 @@ public:
     ///@name IML compatibility
     //@{
     /// IML compatibility, @f$ A \cdot x@f$
-    FloatArray operator*(const FloatArray &x) const
+    FloatArray operator *( const FloatArray & x ) const
     {
         FloatArray answer;
         this->times(x, answer);

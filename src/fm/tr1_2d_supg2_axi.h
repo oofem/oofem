@@ -68,7 +68,7 @@ protected:
     int mat [ 2 ];
 
 public:
-    TR1_2D_SUPG2_AXI(int n, Domain *d);
+    TR1_2D_SUPG2_AXI(int n, Domain * d);
     virtual ~TR1_2D_SUPG2_AXI();
 
     virtual void computeAccelerationTerm_MB(FloatMatrix &answer, TimeStep *tStep);

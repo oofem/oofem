@@ -58,7 +58,7 @@ class LinearElasticMaterial : public StructuralMaterial
 {
 public:
     /// Constructor.
-    LinearElasticMaterial(int n, Domain *d) : StructuralMaterial(n, d) { }
+    LinearElasticMaterial(int n, Domain * d) : StructuralMaterial(n, d) { }
     /// Destructor.
     virtual ~LinearElasticMaterial() { }
 

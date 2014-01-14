@@ -263,11 +263,11 @@ FEI3dHexaLin :: edgeLocal2global(FloatArray &answer, int iedge,
 
     answer.resize(3);
     answer.at(1) = ( n.at(1) * cellgeo.giveVertexCoordinates( edgeNodes.at(1) )->at(1) +
-                     n.at(2) * cellgeo.giveVertexCoordinates( edgeNodes.at(2) )->at(1) );
+                    n.at(2) * cellgeo.giveVertexCoordinates( edgeNodes.at(2) )->at(1) );
     answer.at(2) = ( n.at(1) * cellgeo.giveVertexCoordinates( edgeNodes.at(1) )->at(2) +
-                     n.at(2) * cellgeo.giveVertexCoordinates( edgeNodes.at(2) )->at(2) );
+                    n.at(2) * cellgeo.giveVertexCoordinates( edgeNodes.at(2) )->at(2) );
     answer.at(3) = ( n.at(1) * cellgeo.giveVertexCoordinates( edgeNodes.at(1) )->at(3) +
-                     n.at(2) * cellgeo.giveVertexCoordinates( edgeNodes.at(2) )->at(3) );
+                    n.at(2) * cellgeo.giveVertexCoordinates( edgeNodes.at(2) )->at(3) );
 }
 
 
@@ -361,11 +361,11 @@ FEI3dHexaLin :: surfaceLocal2global(FloatArray &answer, int iedge,
 
     answer.resize(3);
     answer.at(1) = n.at(1) * cellgeo.giveVertexCoordinates( nodes.at(1) )->at(1) + n.at(2) * cellgeo.giveVertexCoordinates( nodes.at(2) )->at(1) +
-                   n.at(3) * cellgeo.giveVertexCoordinates( nodes.at(3) )->at(1) + n.at(4) * cellgeo.giveVertexCoordinates( nodes.at(4) )->at(1);
+    n.at(3) * cellgeo.giveVertexCoordinates( nodes.at(3) )->at(1) + n.at(4) * cellgeo.giveVertexCoordinates( nodes.at(4) )->at(1);
     answer.at(2) = n.at(1) * cellgeo.giveVertexCoordinates( nodes.at(1) )->at(2) + n.at(2) * cellgeo.giveVertexCoordinates( nodes.at(2) )->at(2) +
-                   n.at(3) * cellgeo.giveVertexCoordinates( nodes.at(3) )->at(2) + n.at(4) * cellgeo.giveVertexCoordinates( nodes.at(4) )->at(2);
+    n.at(3) * cellgeo.giveVertexCoordinates( nodes.at(3) )->at(2) + n.at(4) * cellgeo.giveVertexCoordinates( nodes.at(4) )->at(2);
     answer.at(3) = n.at(1) * cellgeo.giveVertexCoordinates( nodes.at(1) )->at(3) + n.at(2) * cellgeo.giveVertexCoordinates( nodes.at(2) )->at(3) +
-                   n.at(3) * cellgeo.giveVertexCoordinates( nodes.at(3) )->at(3) + n.at(4) * cellgeo.giveVertexCoordinates( nodes.at(4) )->at(3);
+    n.at(3) * cellgeo.giveVertexCoordinates( nodes.at(3) )->at(3) + n.at(4) * cellgeo.giveVertexCoordinates( nodes.at(4) )->at(3);
 }
 
 double

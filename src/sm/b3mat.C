@@ -223,7 +223,7 @@ B3Material :: computeCreepFunction(double tStep, double ofAge)
     r  = 1.7 * pow(ofAge, 0.12) + 8.0;
     Q  = Qf * pow( ( 1. + pow( ( Qf / Z ), r ) ), -1. / r );
 
-    C0 = q2 * Q + q3 *log( 1. + pow(tStep - ofAge, n) ) + q4 *log(tStep / ofAge);
+    C0 = q2 * Q + q3 *log( 1. + pow ( tStep - ofAge, n ) ) + q4 *log(tStep / ofAge);
 
 
     if ( this->shMode == B3_AverageShrinkage ) {

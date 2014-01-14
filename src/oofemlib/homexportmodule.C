@@ -149,7 +149,7 @@ HOMExportModule :: doOutput(TimeStep *tStep, bool forcedOutput)
                 iRule = elem->giveDefaultIntegrationRulePtr();
                 for ( int i = 0; i < iRule->giveNumberOfIntegrationPoints(); i++ ) {
                     gp  = iRule->getIntegrationPoint(i);
-                    structElem = static_cast< StructuralElement * >( elem );
+                    structElem = static_cast< StructuralElement * >(elem);
                     structElem->computeResultingIPEigenstrainAt(VecEigStrain, tStep, gp, VM_Incremental);
                     dV  = elem->computeVolumeAround(gp);
                     elem->giveIPValue(VecStrain, gp, IST_StrainTensor, tStep);
@@ -158,7 +158,7 @@ HOMExportModule :: doOutput(TimeStep *tStep, bool forcedOutput)
 
                     //truss element has strains and stresses in the first array so transform them to global coordinates
                     ///@todo Should this be the job of giveIPValue to ensure that vectors are given in global c.s.?
-                    if ( dynamic_cast< Truss3d * >( elem ) ) {
+                    if ( dynamic_cast< Truss3d * >(elem) ) {
                         MaterialMode mmode = _3dMat;
                         tempStress.at(1) = VecStress.at(1);
                         tempStrain.at(1) = VecStrain.at(1);

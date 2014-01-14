@@ -100,7 +100,7 @@ void StructuralElement :: computeLoadVector(FloatArray &answer, Load *load, Char
         return;
     }
     // Just a wrapper for the deadweight body load computations:
-    PointLoad *p = dynamic_cast< PointLoad * >( load );
+    PointLoad *p = dynamic_cast< PointLoad * >(load);
     if ( p ) {
         FloatArray gcoords, lcoords;
         p->giveCoordinates(gcoords);
@@ -222,11 +222,11 @@ StructuralElement :: computePointLoadVectorAt(FloatArray &answer, Load *load, Ti
     FloatArray force, coords, lcoords;
     FloatMatrix T, n;
 
-    PointLoad *pointLoad = dynamic_cast< PointLoad * >( load );
+    PointLoad *pointLoad = dynamic_cast< PointLoad * >(load);
     pointLoad->giveCoordinates(coords);
     pointLoad->computeValueAt(force, tStep, coords, mode);
     if ( this->computeLocalCoordinates(lcoords, coords) ) {
-        GaussPoint __gp(NULL, 0, ( new FloatArray(lcoords) ), 1.0, _Unknown);
+        GaussPoint __gp(NULL, 0, ( new FloatArray ( lcoords ) ), 1.0, _Unknown);
         this->computeNmatrixAt(* ( __gp.giveLocalCoordinates() ), n);
         answer.beTProductOf(n, force);
     } else {
@@ -266,7 +266,7 @@ StructuralElement :: computeEdgeLoadVectorAt(FloatArray &answer, Load *load,
         _error("computeEdgeLoadVectorAt : no edge load support");
     }
 
-    BoundaryLoad *edgeLoad = dynamic_cast< BoundaryLoad * >( load );
+    BoundaryLoad *edgeLoad = dynamic_cast< BoundaryLoad * >(load);
     if ( edgeLoad ) {
         approxOrder = edgeLoad->giveApproxOrder() + this->giveApproxOrder();
         numberOfGaussPoints = ( int ) ceil( ( approxOrder + 1. ) / 2. );
@@ -346,7 +346,7 @@ StructuralElement :: computeSurfaceLoadVectorAt(FloatArray &answer, Load *load,
         _error("computeSurfaceLoadVectorAt : no surface load support");
     }
 
-    BoundaryLoad *surfLoad = dynamic_cast< BoundaryLoad * >( load );
+    BoundaryLoad *surfLoad = dynamic_cast< BoundaryLoad * >(load);
     if ( surfLoad ) {
         IntegrationRule *iRule;
         GaussPoint *gp;
@@ -468,7 +468,7 @@ StructuralElement :: computeConsistentMassMatrix(FloatMatrix &answer, TimeStep *
     }
 
     iRule.setUpIntegrationPoints( this->giveIntegrationDomain(),
-                                  nip, this->giveMaterialMode() );
+                                 nip, this->giveMaterialMode() );
 
     this->giveMassMtrxIntegrationgMask(mask);
 
@@ -675,7 +675,7 @@ StructuralElement :: computeResultingIPTemperatureAt(FloatArray &answer, TimeSte
         n = bodyLoadArray.at(i);
         load = domain->giveLoad(n);
         if ( load->giveBCValType() == TemperatureBVT ) {
-            static_cast< StructuralTemperatureLoad * >( load )->computeValueAt(temperature, tStep, gCoords, mode);
+            static_cast< StructuralTemperatureLoad * >(load)->computeValueAt(temperature, tStep, gCoords, mode);
             answer.add(temperature);
         }
     }
@@ -699,7 +699,7 @@ StructuralElement :: computeResultingIPEigenstrainAt(FloatArray &answer, TimeSte
         n = bodyLoadArray.at(i);
         load = domain->giveLoad(n);
         if ( load->giveBCValType() == EigenstrainBVT ) {
-            static_cast< StructuralEigenstrainLoad * >( load )->computeValueAt(eigenstrain, tStep, gCoords, mode);
+            static_cast< StructuralEigenstrainLoad * >(load)->computeValueAt(eigenstrain, tStep, gCoords, mode);
             answer.add(eigenstrain);
         }
     }
@@ -1128,7 +1128,7 @@ StructuralElement :: updateBeforeNonlocalAverage(TimeStep *tStep)
             // not possible - produces wrong result
             StructuralNonlocalMaterialExtensionInterface *materialExt;
             materialExt =  static_cast< StructuralNonlocalMaterialExtensionInterface * >( this->giveStructuralCrossSection()->
-                                                                                          giveMaterialInterface(NonlocalMaterialExtensionInterfaceType, ip) );
+                                                                                         giveMaterialInterface(NonlocalMaterialExtensionInterfaceType, ip) );
 
             if ( !materialExt ) {
                 return;             //_error ("updateBeforeNonlocalAverage: material with no StructuralNonlocalMaterial support");
@@ -1251,8 +1251,8 @@ StructuralElement :: condense(FloatMatrix *stiff, FloatMatrix *mass, FloatArray 
                 for ( k = 1; k <= size; k++ ) {
                     if ( ( ii != j ) && ( ii != k ) ) {
                         mass->at(j, k) += mass->at(j, ii) * gaussCoeff->at(k) +
-                                          mass->at(ii, k) * gaussCoeff->at(j) +
-                                          mass->at(ii, ii) * gaussCoeff->at(j) * gaussCoeff->at(k);
+                        mass->at(ii, k) * gaussCoeff->at(j) +
+                        mass->at(ii, ii) * gaussCoeff->at(j) * gaussCoeff->at(k);
                     }
                 }
             }
@@ -1301,7 +1301,7 @@ StructuralElement :: giveNonlocalLocationArray(IntArray &locationArray, const Un
     for ( int i = 0; i < iRule->giveNumberOfIntegrationPoints(); i++ ) {
         IntegrationPoint *ip = iRule->getIntegrationPoint(i);
         interface =  static_cast< NonlocalMaterialStiffnessInterface * >( this->giveStructuralCrossSection()->
-                                                                          giveMaterialInterface(NonlocalMaterialStiffnessInterfaceType, ip) );
+                                                                         giveMaterialInterface(NonlocalMaterialStiffnessInterfaceType, ip) );
 
 
         if ( interface == NULL ) {
@@ -1338,7 +1338,7 @@ StructuralElement :: addNonlocalStiffnessContributions(SparseMtrx &dest, const U
     for ( int i = 0; i < iRule->giveNumberOfIntegrationPoints(); i++ ) {
         IntegrationPoint *ip = iRule->getIntegrationPoint(i);
         interface = static_cast< NonlocalMaterialStiffnessInterface * >( this->giveStructuralCrossSection()->
-                                                                         giveMaterialInterface(NonlocalMaterialStiffnessInterfaceType, ip) );
+                                                                        giveMaterialInterface(NonlocalMaterialStiffnessInterfaceType, ip) );
         if ( interface == NULL ) {
             return;
         }
@@ -1361,7 +1361,7 @@ StructuralElement :: adaptiveUpdate(TimeStep *tStep)
         for ( int j = 0; j < iRule->giveNumberOfIntegrationPoints(); j++ ) {
             IntegrationPoint *ip = iRule->getIntegrationPoint(i);
             interface = static_cast< MaterialModelMapperInterface * >( this->giveStructuralCrossSection()->
-                                                                       giveMaterialInterface(MaterialModelMapperInterfaceType, ip) );
+                                                                      giveMaterialInterface(MaterialModelMapperInterfaceType, ip) );
 
             if ( interface == NULL ) {
                 return 0;
@@ -1430,7 +1430,7 @@ void
 StructuralElement :: showSparseMtrxStructure(CharType mtrx, oofegGraphicContext &gc, TimeStep *tStep)
 {
     if ( ( mtrx == StiffnessMatrix ) || ( mtrx == TangentStiffnessMatrix ) ||
-         ( mtrx == SecantStiffnessMatrix ) || ( mtrx == ElasticStiffnessMatrix ) ) {
+        ( mtrx == SecantStiffnessMatrix ) || ( mtrx == ElasticStiffnessMatrix ) ) {
         int i, j, n;
         IntArray loc;
         this->giveLocationArray( loc, EID_MomentumBalance, EModelDefaultEquationNumbering() );
@@ -1527,7 +1527,7 @@ StructuralElement :: showExtendedSparseMtrxStructure(CharType mtrx, oofegGraphic
         for ( i = 0; i < iRule->giveNumberOfIntegrationPoints(); i++ ) {
             IntegrationPoint *ip = iRule->getIntegrationPoint(i);
             interface = static_cast< NonlocalMaterialStiffnessInterface * >( this->giveStructuralCrossSection()->
-                                                                             giveMaterialInterface(NonlocalMaterialStiffnessInterfaceType, ip) );
+                                                                            giveMaterialInterface(NonlocalMaterialStiffnessInterfaceType, ip) );
 
             if ( interface == NULL ) {
                 return;

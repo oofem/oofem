@@ -60,7 +60,7 @@ protected:
     double localCumPlastStrainForAverage;
 
 public:
-    MisesMatGradStatus(int n, Domain *d, GaussPoint *g);
+    MisesMatGradStatus(int n, Domain * d, GaussPoint * g);
     virtual ~MisesMatGradStatus();
 
     virtual void printOutputAt(FILE *file, TimeStep *tStep);
@@ -86,7 +86,7 @@ protected:
     double mParam;
 
 public:
-    MisesMatGrad(int n, Domain *d);
+    MisesMatGrad(int n, Domain * d);
     virtual ~MisesMatGrad();
 
     // definition
@@ -96,13 +96,17 @@ public:
     virtual IRResultType initializeFrom(InputRecord *ir);
     virtual int hasMaterialModeCapability(MaterialMode mode);
 
-    virtual Interface *giveInterface(InterfaceType t) { if ( t == GradDpMaterialExtensionInterfaceType ) { return static_cast< GradDpMaterialExtensionInterface * >( this ); } else { return NULL; } }
+    virtual Interface *giveInterface(InterfaceType t) { if ( t == GradDpMaterialExtensionInterfaceType ) {
+                                                            return static_cast< GradDpMaterialExtensionInterface * >(this);
+                                                        } else {
+                                                            return NULL;
+                                                        } }
 
     virtual void giveStiffnessMatrix(FloatMatrix &answer, MatResponseMode rMode, GaussPoint *gp, TimeStep *tStep);
 
-    virtual void give1dStressStiffMtrx(FloatMatrix & answer, MatResponseMode, GaussPoint * gp, TimeStep * tStep);
-    virtual void givePlaneStrainStiffMtrx(FloatMatrix & answer, MatResponseMode, GaussPoint * gp, TimeStep * tStep);
-    virtual void give3dMaterialStiffnessMatrix(FloatMatrix & answer, MatResponseMode, GaussPoint * gp, TimeStep * tStep);
+    virtual void give1dStressStiffMtrx(FloatMatrix &answer, MatResponseMode, GaussPoint *gp, TimeStep *tStep);
+    virtual void givePlaneStrainStiffMtrx(FloatMatrix &answer, MatResponseMode, GaussPoint *gp, TimeStep *tStep);
+    virtual void give3dMaterialStiffnessMatrix(FloatMatrix &answer, MatResponseMode, GaussPoint *gp, TimeStep *tStep);
 
     virtual void givePDGradMatrix_uu(FloatMatrix &answer, MatResponseMode mode, GaussPoint *gp, TimeStep *tStep);
     virtual void givePDGradMatrix_ku(FloatMatrix &answer, MatResponseMode mode, GaussPoint *gp, TimeStep *tStep);

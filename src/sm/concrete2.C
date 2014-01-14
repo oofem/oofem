@@ -325,7 +325,7 @@ Concrete2 :: giveRealStresses3dShellLayer(FloatArray &answer,
     //
     ifsh = 0;
     psi2 = currentEffStrain.at(4) * currentEffStrain.at(4) +
-           currentEffStrain.at(5) * currentEffStrain.at(5);
+    currentEffStrain.at(5) * currentEffStrain.at(5);
     comp = sqrt(currentEffStrain.at(1) * currentEffStrain.at(1) +
                 currentEffStrain.at(2) * currentEffStrain.at(2) +
                 currentEffStrain.at(3) * currentEffStrain.at(3) +
@@ -437,8 +437,8 @@ label18:
         //  concrete component
         //
         us = ( pDir.at(3, 1) * pStress->at(1) * pDir.at(3, 1) +
-               pDir.at(3, 2) * pStress->at(2) * pDir.at(3, 2) +
-               pDir.at(3, 3) * pStress->at(3) * pDir.at(3, 3) );
+              pDir.at(3, 2) * pStress->at(2) * pDir.at(3, 2) +
+              pDir.at(3, 3) * pStress->at(3) * pDir.at(3, 3) );
         //
         // Stirrups component
         //
@@ -557,23 +557,23 @@ label18:
             //
             if ( this->give(c2_IS_PLASTIC_FLOW, gp) && this->give(c2_IFAD, gp) ) {
                 plasticStrain.at(1) += ( pDir.at(1, 1) * ep1 * pDir.at(1, 1) +
-                                         pDir.at(1, 2) * ep2 * pDir.at(1, 2) +
-                                         pDir.at(1, 3) * ep3 * pDir.at(1, 3) );
+                                        pDir.at(1, 2) * ep2 * pDir.at(1, 2) +
+                                        pDir.at(1, 3) * ep3 * pDir.at(1, 3) );
                 plasticStrain.at(2) += ( pDir.at(2, 1) * ep1 * pDir.at(2, 1) +
-                                         pDir.at(2, 2) * ep2 * pDir.at(2, 2) +
-                                         pDir.at(2, 3) * ep3 * pDir.at(2, 3) );
+                                        pDir.at(2, 2) * ep2 * pDir.at(2, 2) +
+                                        pDir.at(2, 3) * ep3 * pDir.at(2, 3) );
                 plasticStrain.at(3) += ( pDir.at(3, 1) * ep1 * pDir.at(3, 1) +
-                                         pDir.at(3, 2) * ep2 * pDir.at(3, 2) +
-                                         pDir.at(3, 3) * ep3 * pDir.at(3, 3) );
+                                        pDir.at(3, 2) * ep2 * pDir.at(3, 2) +
+                                        pDir.at(3, 3) * ep3 * pDir.at(3, 3) );
                 plasticStrain.at(4) += 2. * ( pDir.at(2, 1) * ep1 * pDir.at(3, 1) +
-                                              pDir.at(2, 2) * ep2 * pDir.at(3, 2) +
-                                              pDir.at(2, 3) * ep3 * pDir.at(3, 3) );
+                                             pDir.at(2, 2) * ep2 * pDir.at(3, 2) +
+                                             pDir.at(2, 3) * ep3 * pDir.at(3, 3) );
                 plasticStrain.at(5) += 2. * ( pDir.at(1, 1) * ep1 * pDir.at(3, 1) +
-                                              pDir.at(1, 2) * ep2 * pDir.at(3, 2) +
-                                              pDir.at(1, 3) * ep3 * pDir.at(3, 3) );
+                                             pDir.at(1, 2) * ep2 * pDir.at(3, 2) +
+                                             pDir.at(1, 3) * ep3 * pDir.at(3, 3) );
                 plasticStrain.at(6) += 2. * ( pDir.at(1, 1) * ep1 * pDir.at(2, 1) +
-                                              pDir.at(1, 2) * ep2 * pDir.at(2, 2) +
-                                              pDir.at(1, 3) * ep3 * pDir.at(2, 3) );
+                                             pDir.at(1, 2) * ep2 * pDir.at(2, 2) +
+                                             pDir.at(1, 3) * ep3 * pDir.at(2, 3) );
             }
 
             pVal.zero();
@@ -593,33 +593,33 @@ label18:
                     //  no transverse shear, 1-2 to x-y
                     //
                     plasticStrain.at(1) += ( pDir.at(1, 1) * ep1 * pDir.at(1, 1) +
-                                             pDir.at(1, 2) * ep2 * pDir.at(1, 2) );
+                                            pDir.at(1, 2) * ep2 * pDir.at(1, 2) );
                     plasticStrain.at(2) += ( pDir.at(2, 1) * ep1 * pDir.at(2, 1) +
-                                             pDir.at(2, 2) * ep2 * pDir.at(2, 2) );
+                                            pDir.at(2, 2) * ep2 * pDir.at(2, 2) );
                     plasticStrain.at(6) += 2. * ( pDir.at(1, 1) * ep1 * pDir.at(2, 1) +
-                                                  pDir.at(1, 2) * ep2 * pDir.at(2, 2) );
+                                                 pDir.at(1, 2) * ep2 * pDir.at(2, 2) );
                 } else {
                     //
                     //  transverse shear present , transform back to x,y,z
                     //
                     plasticStrain.at(1) += ( pDir.at(1, 1) * ep1 * pDir.at(1, 1) +
-                                             pDir.at(1, 2) * ep2 * pDir.at(1, 2) +
-                                             pDir.at(1, 3) * ep3 * pDir.at(1, 3) );
+                                            pDir.at(1, 2) * ep2 * pDir.at(1, 2) +
+                                            pDir.at(1, 3) * ep3 * pDir.at(1, 3) );
                     plasticStrain.at(2) += ( pDir.at(2, 1) * ep1 * pDir.at(2, 1) +
-                                             pDir.at(2, 2) * ep2 * pDir.at(2, 2) +
-                                             pDir.at(2, 3) * ep3 * pDir.at(2, 3) );
+                                            pDir.at(2, 2) * ep2 * pDir.at(2, 2) +
+                                            pDir.at(2, 3) * ep3 * pDir.at(2, 3) );
                     plasticStrain.at(3) += ( pDir.at(3, 1) * ep1 * pDir.at(3, 1) +
-                                             pDir.at(3, 2) * ep2 * pDir.at(3, 2) +
-                                             pDir.at(3, 3) * ep3 * pDir.at(3, 3) );
+                                            pDir.at(3, 2) * ep2 * pDir.at(3, 2) +
+                                            pDir.at(3, 3) * ep3 * pDir.at(3, 3) );
                     plasticStrain.at(4) += 2. * ( pDir.at(2, 1) * ep1 * pDir.at(3, 1) +
-                                                  pDir.at(2, 2) * ep2 * pDir.at(3, 2) +
-                                                  pDir.at(2, 3) * ep3 * pDir.at(3, 3) );
+                                                 pDir.at(2, 2) * ep2 * pDir.at(3, 2) +
+                                                 pDir.at(2, 3) * ep3 * pDir.at(3, 3) );
                     plasticStrain.at(5) += 2. * ( pDir.at(1, 1) * ep1 * pDir.at(3, 1) +
-                                                  pDir.at(1, 2) * ep2 * pDir.at(3, 2) +
-                                                  pDir.at(1, 3) * ep3 * pDir.at(3, 3) );
+                                                 pDir.at(1, 2) * ep2 * pDir.at(3, 2) +
+                                                 pDir.at(1, 3) * ep3 * pDir.at(3, 3) );
                     plasticStrain.at(6) += 2. * ( pDir.at(1, 1) * ep1 * pDir.at(2, 1) +
-                                                  pDir.at(1, 2) * ep2 * pDir.at(2, 2) +
-                                                  pDir.at(1, 3) * ep3 * pDir.at(2, 3) );
+                                                 pDir.at(1, 2) * ep2 * pDir.at(2, 2) +
+                                                 pDir.at(1, 3) * ep3 * pDir.at(2, 3) );
                 }
             }
         }
@@ -633,31 +633,31 @@ label18:
         G = 0.5 * this->give(c2_E, gp) / ( 1.0 + this->give(c2_n, gp) );
 
         currentStress.at(1) = ( pDir.at(1, 1) * pStress->at(1) * pDir.at(1, 1) +
-                                pDir.at(1, 2) * pStress->at(2) * pDir.at(1, 2) );
+                               pDir.at(1, 2) * pStress->at(2) * pDir.at(1, 2) );
         currentStress.at(2) = ( pDir.at(2, 1) * pStress->at(1) * pDir.at(2, 1) +
-                                pDir.at(2, 2) * pStress->at(2) * pDir.at(2, 2) );
+                               pDir.at(2, 2) * pStress->at(2) * pDir.at(2, 2) );
         currentStress.at(3) = 0.;
         currentStress.at(4) = currentStrain.at(4) * G;
         currentStress.at(5) = currentStrain.at(5) * G;
         currentStress.at(6) = ( pDir.at(1, 1) * pStress->at(1) * pDir.at(2, 1) +
-                                pDir.at(1, 2) * pStress->at(2) * pDir.at(2, 2) );
+                               pDir.at(1, 2) * pStress->at(2) * pDir.at(2, 2) );
     } else {
         currentStress.at(1) = ( pDir.at(1, 1) * pStress->at(1) * pDir.at(1, 1) +
-                                pDir.at(1, 2) * pStress->at(2) * pDir.at(1, 2) +
-                                pDir.at(1, 3) * pStress->at(3) * pDir.at(1, 3) );
+                               pDir.at(1, 2) * pStress->at(2) * pDir.at(1, 2) +
+                               pDir.at(1, 3) * pStress->at(3) * pDir.at(1, 3) );
         currentStress.at(2) = ( pDir.at(2, 1) * pStress->at(1) * pDir.at(2, 1) +
-                                pDir.at(2, 2) * pStress->at(2) * pDir.at(2, 2) +
-                                pDir.at(2, 3) * pStress->at(3) * pDir.at(2, 3) );
+                               pDir.at(2, 2) * pStress->at(2) * pDir.at(2, 2) +
+                               pDir.at(2, 3) * pStress->at(3) * pDir.at(2, 3) );
         currentStress.at(3) =  us;
         currentStress.at(4) = ( pDir.at(2, 1) * pStress->at(1) * pDir.at(3, 1) +
-                                pDir.at(2, 2) * pStress->at(2) * pDir.at(3, 2) +
-                                pDir.at(2, 3) * pStress->at(3) * pDir.at(3, 3) );
+                               pDir.at(2, 2) * pStress->at(2) * pDir.at(3, 2) +
+                               pDir.at(2, 3) * pStress->at(3) * pDir.at(3, 3) );
         currentStress.at(5) = ( pDir.at(1, 1) * pStress->at(1) * pDir.at(3, 1) +
-                                pDir.at(1, 2) * pStress->at(2) * pDir.at(3, 2) +
-                                pDir.at(1, 3) * pStress->at(3) * pDir.at(3, 3) );
+                               pDir.at(1, 2) * pStress->at(2) * pDir.at(3, 2) +
+                               pDir.at(1, 3) * pStress->at(3) * pDir.at(3, 3) );
         currentStress.at(6) = ( pDir.at(1, 1) * pStress->at(1) * pDir.at(2, 1) +
-                                pDir.at(1, 2) * pStress->at(2) * pDir.at(2, 2) +
-                                pDir.at(1, 3) * pStress->at(3) * pDir.at(2, 3) );
+                               pDir.at(1, 2) * pStress->at(2) * pDir.at(2, 2) +
+                               pDir.at(1, 3) * pStress->at(3) * pDir.at(2, 3) );
     }
 
     if ( this->give(c2_IFAD, gp) ) {
@@ -1086,7 +1086,7 @@ Concrete2 :: strsoft(GaussPoint *gp, double epsult, FloatArray *ep, double &ep1,
     //
     if ( this->give(c2_EOPP, gp) != 0. ) {
         eop = max(ep->at(1), 0.) + max(ep->at(2), 0.) +
-              max(ep->at(3), 0.);
+        max(ep->at(3), 0.);
         if ( eop >  status->giveTempMaxVolPlasticStrain() ) {
             //
             // Current plastic volum. strain is greater than max.
@@ -1185,7 +1185,7 @@ label14:
                             SCC = 0.;
                         } else {
                             SCC = this->give(c2_SCCC, gp) * ( 1. - ( eepr - this->give(c2_EPP, gp) ) /
-                                                              ( this->give(c2_EPU, gp) - this->give(c2_EPP, gp) ) );
+                                                             ( this->give(c2_EPU, gp) - this->give(c2_EPP, gp) ) );
                         }
 
                         //

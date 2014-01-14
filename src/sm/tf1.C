@@ -58,11 +58,11 @@ TF1 :: computeValueAt(FloatArray &answer, TimeStep *tStep, FloatArray &coords, V
         cd.at(i) = coords.at(i);
     }
 
-    result = -1.e-5 - k *macbra( atan(c * t + cd.at(2) - h) );
+    result = -1.e-5 - k *macbra( atan ( c *t + cd.at ( 2 ) - h ) );
 
     if ( ( mode == VM_Incremental ) && ( !tStep->isTheFirstStep() ) ) {
         t = tStep->giveTargetTime() - tStep->giveTimeIncrement();
-        result -= -1.e-5 - k *macbra( atan(c * t + cd.at(2) - h) );
+        result -= -1.e-5 - k *macbra( atan ( c *t + cd.at ( 2 ) - h ) );
     }
 
     answer.at(1) = result;

@@ -67,7 +67,7 @@ private:
 
 public:
     /// Creates new level structure assignment to graph, with root being the root node.
-    SloanLevelStructure(SloanGraph *graph, int root) : Structure(0)
+    SloanLevelStructure(SloanGraph * graph, int root) : Structure(0)
     {
         Graph = graph;
         Root = root;
@@ -90,13 +90,17 @@ public:
 
     /// Returns the depth of receiver.
     int  giveDepth() {
-        if ( !Depth ) { computeDepth(); }
+        if ( !Depth ) {
+            computeDepth();
+        }
 
         return Depth;
     }
     /// Returns the width of receiver.
     int  giveWidth() {
-        if ( !Width ) { computeWidth(); }
+        if ( !Width ) {
+            computeWidth();
+        }
 
         return Width;
     }

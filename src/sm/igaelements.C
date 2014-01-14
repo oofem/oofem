@@ -357,7 +357,7 @@ void NURBSPlaneStressElement :: drawScalar(oofegGraphicContext &context)
                         if ( x < 1.0e-10 ) {
                             phi = M_PI / 2.0;
                             r = y;
-                        } else   {
+                        } else {
                             phi = atan(y / x);
                             r = x / cos(phi);
                         }

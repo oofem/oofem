@@ -57,7 +57,7 @@ protected:
     static FEI3dHexaLin interpolation;
 
 public:
-    Brick1_ht(int n, Domain *d);
+    Brick1_ht(int n, Domain * d);
     virtual ~Brick1_ht();
 
     virtual double computeVolumeAround(GaussPoint *gp);
@@ -109,7 +109,7 @@ protected:
 class Brick1_hmt : public Brick1_ht
 {
 public:
-    Brick1_hmt(int n, Domain *d);
+    Brick1_hmt(int n, Domain * d);
 
     virtual const char *giveInputRecordName() const { return _IFT_Brick1_hmt_Name; }
     virtual const char *giveClassName() const { return "Brick1_hmt"; }
@@ -123,7 +123,7 @@ public:
 class Brick1_mt : public Brick1_ht
 {
 public:
-    Brick1_mt(int n, Domain *d);
+    Brick1_mt(int n, Domain * d);
 
     virtual const char *giveInputRecordName() const { return _IFT_Brick1_mt_Name; }
     virtual const char *giveClassName() const { return "Brick1_mt"; }

@@ -157,7 +157,7 @@ protected:
         calm_accelNRM, ///< Updates the tangent after a few steps.
     };
 
-    typedef std :: set< DofIDItem >__DofIDSet;
+    typedef std :: set< DofIDItem > __DofIDSet;
 
     int nsmax;
     int maxRestarts;
@@ -214,7 +214,7 @@ protected:
 #endif
 
 public:
-    CylindricalALM(Domain *d, EngngModel *m);
+    CylindricalALM(Domain * d, EngngModel * m);
     virtual ~CylindricalALM();
 
     // Overloaded methods:

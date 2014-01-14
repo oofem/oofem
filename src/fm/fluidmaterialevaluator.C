@@ -52,7 +52,7 @@ FluidMaterialEvaluator :: FluidMaterialEvaluator(int i, EngngModel *_master) : E
 }
 
 FluidMaterialEvaluator :: ~FluidMaterialEvaluator()
-{}
+{ }
 
 IRResultType FluidMaterialEvaluator :: initializeFrom(InputRecord *ir)
 {

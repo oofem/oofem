@@ -67,7 +67,7 @@ class ConstantPressureLoad : public BoundaryLoad
 {
 public:
     //ConstantPressureLoad(int i, Domain *d) : BoundaryLoad(i, d)
-    ConstantPressureLoad(int i, Domain *d);
+    ConstantPressureLoad(int i, Domain * d);
 
     // Overloaded methods:
     virtual void computeValueAt(FloatArray &answer, TimeStep *tStep, FloatArray &coords, ValueModeType mode);

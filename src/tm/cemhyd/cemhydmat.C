@@ -98,7 +98,7 @@ CemhydMat :: CemhydMat(int n, Domain *d) : IsotropicHeatTransferMaterial(n, d)
 }
 
 CemhydMat :: ~CemhydMat()
-{}
+{ }
 
 //returns hydration power [W/m3 of concrete]
 void
@@ -988,7 +988,7 @@ CemhydMatStatus :: ~CemhydMatStatus()
     dealloc_shortint_3D(faces, SYSIZE);
 }
 
-void CemhydMatStatus :: alloc_char_3D(char ***( & mic ), long SYSIZE)
+void CemhydMatStatus :: alloc_char_3D(char ***( &mic ), long SYSIZE)
 {
     mic = new char ** [ SYSIZE ];
     for ( int x = 0; x < SYSIZE; x++ ) {
@@ -1002,7 +1002,7 @@ void CemhydMatStatus :: alloc_char_3D(char ***( & mic ), long SYSIZE)
     }
 }
 
-void CemhydMatStatus :: dealloc_char_3D(char ***( & mic ), long SYSIZE)
+void CemhydMatStatus :: dealloc_char_3D(char ***( &mic ), long SYSIZE)
 {
     if ( mic != NULL ) {
         for ( int x = 0; x < SYSIZE; x++ ) {
@@ -1017,7 +1017,7 @@ void CemhydMatStatus :: dealloc_char_3D(char ***( & mic ), long SYSIZE)
     }
 }
 
-void CemhydMatStatus :: alloc_long_3D(long ***( & mic ), long SYSIZE)
+void CemhydMatStatus :: alloc_long_3D(long ***( &mic ), long SYSIZE)
 {
     mic = new long ** [ SYSIZE ];
     for ( int x = 0; x < SYSIZE; x++ ) {
@@ -1032,7 +1032,7 @@ void CemhydMatStatus :: alloc_long_3D(long ***( & mic ), long SYSIZE)
 }
 
 
-void CemhydMatStatus :: dealloc_long_3D(long ***( & mic ), long SYSIZE)
+void CemhydMatStatus :: dealloc_long_3D(long ***( &mic ), long SYSIZE)
 {
     if ( mic != NULL ) {
         for ( int x = 0; x < SYSIZE; x++ ) {
@@ -1047,7 +1047,7 @@ void CemhydMatStatus :: dealloc_long_3D(long ***( & mic ), long SYSIZE)
     }
 }
 
-void CemhydMatStatus :: alloc_int_3D(int ***( & mic ), long SYSIZE)
+void CemhydMatStatus :: alloc_int_3D(int ***( &mic ), long SYSIZE)
 {
     mic = new int ** [ SYSIZE ];
     for ( int x = 0; x < SYSIZE; x++ ) {
@@ -1062,7 +1062,7 @@ void CemhydMatStatus :: alloc_int_3D(int ***( & mic ), long SYSIZE)
 }
 
 
-void CemhydMatStatus :: dealloc_int_3D(int ***( & mic ), long SYSIZE)
+void CemhydMatStatus :: dealloc_int_3D(int ***( &mic ), long SYSIZE)
 {
     if ( mic != NULL ) {
         for ( int x = 0; x < SYSIZE; x++ ) {
@@ -1077,7 +1077,7 @@ void CemhydMatStatus :: dealloc_int_3D(int ***( & mic ), long SYSIZE)
     }
 }
 
-void CemhydMatStatus :: alloc_shortint_3D(short int ***( & mic ), long SYSIZE)
+void CemhydMatStatus :: alloc_shortint_3D(short int ***( &mic ), long SYSIZE)
 {
     mic = new short int ** [ SYSIZE ];
     for ( int x = 0; x < SYSIZE; x++ ) {
@@ -1092,7 +1092,7 @@ void CemhydMatStatus :: alloc_shortint_3D(short int ***( & mic ), long SYSIZE)
 }
 
 
-void CemhydMatStatus :: dealloc_shortint_3D(short int ***( & mic ), long SYSIZE)
+void CemhydMatStatus :: dealloc_shortint_3D(short int ***( &mic ), long SYSIZE)
 {
     if ( mic != NULL ) {
         for ( int x = 0; x < SYSIZE; x++ ) {
@@ -1107,7 +1107,7 @@ void CemhydMatStatus :: dealloc_shortint_3D(short int ***( & mic ), long SYSIZE)
     }
 }
 
-void CemhydMatStatus :: alloc_double_3D(double ***( & mic ), long SYSIZE)
+void CemhydMatStatus :: alloc_double_3D(double ***( &mic ), long SYSIZE)
 {
     mic = new double ** [ SYSIZE ];
     for ( int x = 0; x < SYSIZE; x++ ) {
@@ -1122,7 +1122,7 @@ void CemhydMatStatus :: alloc_double_3D(double ***( & mic ), long SYSIZE)
 }
 
 
-void CemhydMatStatus :: dealloc_double_3D(double ***( & mic ), long SYSIZE)
+void CemhydMatStatus :: dealloc_double_3D(double ***( &mic ), long SYSIZE)
 {
     if ( mic != NULL ) {
         for ( int x = 0; x < SYSIZE; x++ ) {
@@ -1162,7 +1162,7 @@ void CemhydMatStatus :: QueryNumAttributeExt(XMLDocument *xmlFile, const char *e
 {
     int temp;
     QueryNumAttributeExt(xmlFile, elementName, position, temp);
-    val = static_cast< long int >( temp );
+    val = static_cast< long int >(temp);
 }
 
 void CemhydMatStatus :: QueryNumAttributeExt(XMLDocument *xmlFile, const char *elementName, const char *key, int &val)
@@ -2359,9 +2359,9 @@ void CemhydMatStatus :: connect()
             ntot = 0;
             igood = 0; /* Indicates if bottom has been reached */
             if ( ( ( cement [ i ] [ j ] [ k ] == npix ) && ( ( cement [ i ] [ j ] [ SYSSIZE ] == npix ) ||
-                                                             ( cement [ i ] [ j ] [ SYSSIZE ] == ( npix + BURNTG ) ) ) ) ||
-                 ( ( cement [ i ] [ j ] [ SYSSIZE ] >= CEM ) &&
-                   ( cement [ i ] [ j ] [ k ] >= CEM ) && ( cement [ i ] [ j ] [ k ] < BURNTG ) && ( npix == 1 ) ) ) {
+                                                            ( cement [ i ] [ j ] [ SYSSIZE ] == ( npix + BURNTG ) ) ) ) ||
+                ( ( cement [ i ] [ j ] [ SYSSIZE ] >= CEM ) &&
+                 ( cement [ i ] [ j ] [ k ] >= CEM ) && ( cement [ i ] [ j ] [ k ] < BURNTG ) && ( npix == 1 ) ) ) {
                 /* Start a burn front */
                 cement [ i ] [ j ] [ k ] += BURNTG;
                 ntot += 1;
@@ -2413,7 +2413,7 @@ void CemhydMatStatus :: connect()
                             /* Nonperiodic in z direction so be sure to remain in the 3-D box */
                             if ( ( z1 >= 1 ) && ( z1 <= SYSSIZE ) ) {
                                 if ( ( cement [ x1 ] [ y1 ] [ z1 ] == npix ) || ( ( cement [ x1 ] [ y1 ] [ z1 ] >= CEM ) &&
-                                                                                  ( cement [ x1 ] [ y1 ] [ z1 ] < BURNTG ) && ( npix == 1 ) ) ) {
+                                                                                 ( cement [ x1 ] [ y1 ] [ z1 ] < BURNTG ) && ( npix == 1 ) ) ) {
                                     ntot += 1;
                                     cement [ x1 ] [ y1 ] [ z1 ] += BURNTG;
                                     nnew += 1;
@@ -5316,9 +5316,9 @@ void CemhydMatStatus :: dissolve(int cycle)
     if ( ( ( ncsbar + anhinit + heminit ) != 0.0 ) || ( temp_cur >= 70.0 ) ) {
         /* Account for all sulfate sources and forms */
         if ( ( soluble [ ETTR ] == 0 ) && ( ( temp_cur >= 70.0 ) || ( count [ AFM ] != 0 ) ||
-                                            ( ( ( ( float ) count [ GYPSUM ] + 1.42 * ( float ) count [ ANHYDRITE ] + 1.4 *
-                                                  ( float ) count [ HEMIHYD ] + ( float ) count [ GYPSUMS ] ) / ( ( float ) ncsbar +
-                                                                                                                  1.42 * ( float ) anhinit + 1.4 * ( float ) heminit + ( ( float ) netbar / 3.30 ) ) ) < 0.25 ) ) ) {
+                                           ( ( ( ( float ) count [ GYPSUM ] + 1.42 * ( float ) count [ ANHYDRITE ] + 1.4 *
+                                                ( float ) count [ HEMIHYD ] + ( float ) count [ GYPSUMS ] ) / ( ( float ) ncsbar +
+                                                                                                               1.42 * ( float ) anhinit + 1.4 * ( float ) heminit + ( ( float ) netbar / 3.30 ) ) ) < 0.25 ) ) ) {
             soluble [ ETTR ] = 1;
 #ifdef PRINTF
             printf("Ettringite is soluble beginning at cycle %d \n", cycle);
@@ -5392,8 +5392,8 @@ void CemhydMatStatus :: dissolve(int cycle)
     /* If lots of gypsum or reactive ettringite, allow C3AH6 to dissolve */
     /* to generate diffusing C3A species */
     if ( ( ( count [ GYPSUM ] + count [ GYPSUMS ] ) > ( int ) ( ( ( float ) ncsbar +
-                                                                  1.42 * ( float ) anhinit + 1.4 * ( float ) heminit ) * 0.05 ) ) ||
-         ( count [ ETTR ] > 500 * SYSIZE_POW3 / 1000000. ) ) {
+                                                                 1.42 * ( float ) anhinit + 1.4 * ( float ) heminit ) * 0.05 ) ) ||
+        ( count [ ETTR ] > 500 * SYSIZE_POW3 / 1000000. ) ) {
         soluble [ C3AH6 ] = 1;
         passone(C3AH6, C3AH6, 2, 0);
         /* Base C3AH6 solubility on maximum sulfate in solution */
@@ -7267,7 +7267,7 @@ void CemhydMatStatus :: disrealnew(double GiveTemp, double hydrationTime, int fl
 #ifdef OUTFILES
         fprintf(adiafile, "%d \t %.4f %.4f %.4f %.4f %.4f %.4f %.4f %.4f %.4f\n", cyccnt, time_cur, temp_cur, alpha_cur, krate, Cp_now, mass_cem_now, kpozz / krate, kslag / krate, alpha_fa_cur);
         fprintf( heatfile, "%d %f %f %f %f %f  %f \n",
-                 cyccnt - 1, time_cur, alpha, alpha_cur, heat_new * heat_cf, gsratio2, ( ( 0.68 * alpha_cur ) / ( 0.32 * alpha_cur + w_to_c ) ) );
+                cyccnt - 1, time_cur, alpha, alpha_cur, heat_new * heat_cf, gsratio2, ( ( 0.68 * alpha_cur ) / ( 0.32 * alpha_cur + w_to_c ) ) );
         fflush(adiafile);
         fflush(heatfile);
 #endif
@@ -7890,17 +7890,17 @@ int CemhydMatStatus :: burnset(int d1, int d2, int d3)
             /* start from a cement clinker, slag, fly ash ettringite, C3AH6, or
              * CSH pixel */
             if ( ( mic [ px ] [ py ] [ pz ] == C3S ) ||
-                 ( mic [ px ] [ py ] [ pz ] == C2S ) ||
-                 ( mic [ px ] [ py ] [ pz ] == SLAG ) ||
-                 ( mic [ px ] [ py ] [ pz ] == ASG ) ||
-                 ( mic [ px ] [ py ] [ pz ] == CAS2 ) ||
-                 ( mic [ px ] [ py ] [ pz ] == POZZ ) ||
-                 ( mic [ px ] [ py ] [ pz ] == CSH ) ||
-                 ( mic [ px ] [ py ] [ pz ] == C3AH6 ) ||
-                 ( mic [ px ] [ py ] [ pz ] == ETTR ) ||
-                 ( mic [ px ] [ py ] [ pz ] == ETTRC4AF ) ||
-                 ( mic [ px ] [ py ] [ pz ] == C3A ) ||
-                 ( mic [ px ] [ py ] [ pz ] == C4AF ) ) {
+                ( mic [ px ] [ py ] [ pz ] == C2S ) ||
+                ( mic [ px ] [ py ] [ pz ] == SLAG ) ||
+                ( mic [ px ] [ py ] [ pz ] == ASG ) ||
+                ( mic [ px ] [ py ] [ pz ] == CAS2 ) ||
+                ( mic [ px ] [ py ] [ pz ] == POZZ ) ||
+                ( mic [ px ] [ py ] [ pz ] == CSH ) ||
+                ( mic [ px ] [ py ] [ pz ] == C3AH6 ) ||
+                ( mic [ px ] [ py ] [ pz ] == ETTR ) ||
+                ( mic [ px ] [ py ] [ pz ] == ETTRC4AF ) ||
+                ( mic [ px ] [ py ] [ pz ] == C3A ) ||
+                ( mic [ px ] [ py ] [ pz ] == C4AF ) ) {
                 /* Start a burn front */
                 mic [ px ] [ py ] [ pz ] = BURNT;
                 ntot += 1;
@@ -7986,14 +7986,14 @@ int CemhydMatStatus :: burnset(int d1, int d2, int d3)
                                 }
                                 /* 2) old pixel is CSH or ETTR or C3AH6 and new pixel is one of cement clinker, slag, or fly ash phases */
                                 else if ( ( ( newmat [ qx ] [ qy ] [ qz ] == CSH ) || ( newmat [ qx ] [ qy ] [ qz ] == ETTRC4AF ) || ( newmat [ qx ] [ qy ] [ qz ] == C3AH6 ) || ( newmat [ qx ] [ qy ] [ qz ] == ETTR ) ) &&
-                                          ( ( mic [ px ] [ py ] [ pz ] == C3S ) ||
-                                            ( mic [ px ] [ py ] [ pz ] == C2S ) ||
-                                            ( mic [ px ] [ py ] [ pz ] == CAS2 ) ||
-                                            ( mic [ px ] [ py ] [ pz ] == SLAG ) ||
-                                            ( mic [ px ] [ py ] [ pz ] == POZZ ) ||
-                                            ( mic [ px ] [ py ] [ pz ] == ASG ) ||
-                                            ( mic [ px ] [ py ] [ pz ] == C3A ) ||
-                                            ( mic [ px ] [ py ] [ pz ] == C4AF ) ) ) {
+                                         ( ( mic [ px ] [ py ] [ pz ] == C3S ) ||
+                                          ( mic [ px ] [ py ] [ pz ] == C2S ) ||
+                                          ( mic [ px ] [ py ] [ pz ] == CAS2 ) ||
+                                          ( mic [ px ] [ py ] [ pz ] == SLAG ) ||
+                                          ( mic [ px ] [ py ] [ pz ] == POZZ ) ||
+                                          ( mic [ px ] [ py ] [ pz ] == ASG ) ||
+                                          ( mic [ px ] [ py ] [ pz ] == C3A ) ||
+                                          ( mic [ px ] [ py ] [ pz ] == C4AF ) ) ) {
                                     ntot += 1;
                                     mic [ px ] [ py ] [ pz ] = BURNT;
                                     nnew += 1;
@@ -8009,21 +8009,21 @@ int CemhydMatStatus :: burnset(int d1, int d2, int d3)
                                 /* are contained in the same initial cement particle */
                                 /* and it is not a one-pixel particle */
                                 else if ( ( micpart [ qx ] [ qy ] [ qz ] == micpart [ px ] [ py ] [ pz ] ) &&
-                                          ( ( mic [ px ] [ py ] [ pz ] == C3S ) ||
-                                            ( mic [ px ] [ py ] [ pz ] == C2S ) ||
-                                            ( mic [ px ] [ py ] [ pz ] == POZZ ) ||
-                                            ( mic [ px ] [ py ] [ pz ] == SLAG ) ||
-                                            ( mic [ px ] [ py ] [ pz ] == ASG ) ||
-                                            ( mic [ px ] [ py ] [ pz ] == CAS2 ) ||
-                                            ( mic [ px ] [ py ] [ pz ] == C3A ) ||
-                                            ( mic [ px ] [ py ] [ pz ] == C4AF ) ) && ( ( newmat [ qx ] [ qy ] [ qz ] == C3S ) ||
-                                                                                        ( newmat [ qx ] [ qy ] [ qz ] == C2S ) ||
-                                                                                        ( newmat [ qx ] [ qy ] [ qz ] == SLAG ) ||
-                                                                                        ( newmat [ qx ] [ qy ] [ qz ] == ASG ) ||
-                                                                                        ( newmat [ qx ] [ qy ] [ qz ] == POZZ ) ||
-                                                                                        ( newmat [ qx ] [ qy ] [ qz ] == CAS2 ) ||
-                                                                                        ( newmat [ qx ] [ qy ] [ qz ] == C3A ) ||
-                                                                                        ( newmat [ qx ] [ qy ] [ qz ] == C4AF ) ) ) {
+                                         ( ( mic [ px ] [ py ] [ pz ] == C3S ) ||
+                                          ( mic [ px ] [ py ] [ pz ] == C2S ) ||
+                                          ( mic [ px ] [ py ] [ pz ] == POZZ ) ||
+                                          ( mic [ px ] [ py ] [ pz ] == SLAG ) ||
+                                          ( mic [ px ] [ py ] [ pz ] == ASG ) ||
+                                          ( mic [ px ] [ py ] [ pz ] == CAS2 ) ||
+                                          ( mic [ px ] [ py ] [ pz ] == C3A ) ||
+                                          ( mic [ px ] [ py ] [ pz ] == C4AF ) ) && ( ( newmat [ qx ] [ qy ] [ qz ] == C3S ) ||
+                                                                                     ( newmat [ qx ] [ qy ] [ qz ] == C2S ) ||
+                                                                                     ( newmat [ qx ] [ qy ] [ qz ] == SLAG ) ||
+                                                                                     ( newmat [ qx ] [ qy ] [ qz ] == ASG ) ||
+                                                                                     ( newmat [ qx ] [ qy ] [ qz ] == POZZ ) ||
+                                                                                     ( newmat [ qx ] [ qy ] [ qz ] == CAS2 ) ||
+                                                                                     ( newmat [ qx ] [ qy ] [ qz ] == C3A ) ||
+                                                                                     ( newmat [ qx ] [ qy ] [ qz ] == C4AF ) ) ) {
                                     ntot += 1;
                                     mic [ px ] [ py ] [ pz ] = BURNT;
                                     nnew += 1;
@@ -8501,10 +8501,10 @@ int CemhydMatStatus :: movecsh(int xcur, int ycur, int zcur, int finalstep, int 
     }
     /* Changed prcsh limit from 0.1 to 0.01 for CH test 1/27/05 */
     else if ( ( check == SLAGCSH ) || ( check == POZZCSH ) || ( finalstep == 1 ) ||
-              ( ( ( check == C3S ) || ( check == C2S ) ) && ( prcsh < 0.001 ) ) ||
-              ( ( ( check == C3A ) || ( check == C4AF ) ) && ( prcsh < 0.2 ) ) ||
-              ( ( check == CH ) && ( prcsh < 0.01 ) ) ||
-              ( check == CACO3 ) || ( check == INERT ) ) {
+             ( ( ( check == C3S ) || ( check == C2S ) ) && ( prcsh < 0.001 ) ) ||
+             ( ( ( check == C3A ) || ( check == C4AF ) ) && ( prcsh < 0.2 ) ) ||
+             ( ( check == CH ) && ( prcsh < 0.01 ) ) ||
+             ( check == CACO3 ) || ( check == INERT ) ) {
         /* decrement count of diffusing CSH species */
         count [ DIFFCSH ] -= 1;
         /* and increment count of solid CSH if needed */
@@ -13021,10 +13021,10 @@ void CemhydMatStatus :: burn_phases(int d1, int d2, int d3)
                                 /* 1) new pixel is any solid except clinker phases */
 
                                 if ( ( IsSolidPhase(newmat [ px ] [ py ] [ pz ]) == 1 ) &&
-                                     ( newmat [ px ] [ py ] [ pz ] != C3S ) &&
-                                     ( newmat [ px ] [ py ] [ pz ] != C2S ) &&
-                                     ( newmat [ px ] [ py ] [ pz ] != C3A ) &&
-                                     ( newmat [ px ] [ py ] [ pz ] != C4AF ) ) {
+                                    ( newmat [ px ] [ py ] [ pz ] != C3S ) &&
+                                    ( newmat [ px ] [ py ] [ pz ] != C2S ) &&
+                                    ( newmat [ px ] [ py ] [ pz ] != C3A ) &&
+                                    ( newmat [ px ] [ py ] [ pz ] != C4AF ) ) {
                                     /*
                                      * if((newmat[px][py][pz]==CSH)||(newmat[px][py][pz]==ETTRC4AF)||(newmat[px][py][pz]==ETTR)){
                                      */
@@ -13042,14 +13042,14 @@ void CemhydMatStatus :: burn_phases(int d1, int d2, int d3)
                                 }
                                 /* 2) old pixel is solid except clinker and new pixel is one of cement clinker phases */
                                 else if ( ( ( IsSolidPhase(mic_CSH [ qx ] [ qy ] [ qz ]) == 1 ) &&
-                                            ( mic_CSH [ qx ] [ qy ] [ qz ] != C3S ) &&
-                                            ( mic_CSH [ qx ] [ qy ] [ qz ] != C2S ) &&
-                                            ( mic_CSH [ qx ] [ qy ] [ qz ] != C3A ) &&
-                                            ( mic_CSH [ qx ] [ qy ] [ qz ] != C4AF ) ) &&
-                                          ( ( newmat [ px ] [ py ] [ pz ] == C3S ) ||
-                                            ( newmat [ px ] [ py ] [ pz ] == C2S ) ||
-                                            ( newmat [ px ] [ py ] [ pz ] == C3A ) ||
-                                            ( newmat [ px ] [ py ] [ pz ] == C4AF ) ) ) {
+                                           ( mic_CSH [ qx ] [ qy ] [ qz ] != C3S ) &&
+                                           ( mic_CSH [ qx ] [ qy ] [ qz ] != C2S ) &&
+                                           ( mic_CSH [ qx ] [ qy ] [ qz ] != C3A ) &&
+                                           ( mic_CSH [ qx ] [ qy ] [ qz ] != C4AF ) ) &&
+                                         ( ( newmat [ px ] [ py ] [ pz ] == C3S ) ||
+                                          ( newmat [ px ] [ py ] [ pz ] == C2S ) ||
+                                          ( newmat [ px ] [ py ] [ pz ] == C3A ) ||
+                                          ( newmat [ px ] [ py ] [ pz ] == C4AF ) ) ) {
                                     phase_temp [ ( int ) newmat [ px ] [ py ] [ pz ] ]++;
                                     WriteUnsortedList(px, py, pz);
                                     newmat [ px ] [ py ] [ pz ] = BURNT;
@@ -13065,14 +13065,14 @@ void CemhydMatStatus :: burn_phases(int d1, int d2, int d3)
                                 /* 3) old and new pixels belong to one of cement clinker phases and */
                                 /* are contained in the same initial cement particle */
                                 else if ( ( micpart [ qx ] [ qy ] [ qz ] == micpart [ px ] [ py ] [ pz ] ) &&
-                                          ( ( newmat [ px ] [ py ] [ pz ] == C3S ) ||
-                                            ( newmat [ px ] [ py ] [ pz ] == C2S ) ||
-                                            ( newmat [ px ] [ py ] [ pz ] == C3A ) ||
-                                            ( newmat [ px ] [ py ] [ pz ] == C4AF ) ) &&
-                                          ( ( mic_CSH [ qx ] [ qy ] [ qz ] == C3S ) ||
-                                            ( mic_CSH [ qx ] [ qy ] [ qz ] == C2S ) ||
-                                            ( mic_CSH [ qx ] [ qy ] [ qz ] == C3A ) ||
-                                            ( mic_CSH [ qx ] [ qy ] [ qz ] == C4AF ) ) ) {
+                                         ( ( newmat [ px ] [ py ] [ pz ] == C3S ) ||
+                                          ( newmat [ px ] [ py ] [ pz ] == C2S ) ||
+                                          ( newmat [ px ] [ py ] [ pz ] == C3A ) ||
+                                          ( newmat [ px ] [ py ] [ pz ] == C4AF ) ) &&
+                                         ( ( mic_CSH [ qx ] [ qy ] [ qz ] == C3S ) ||
+                                          ( mic_CSH [ qx ] [ qy ] [ qz ] == C2S ) ||
+                                          ( mic_CSH [ qx ] [ qy ] [ qz ] == C3A ) ||
+                                          ( mic_CSH [ qx ] [ qy ] [ qz ] == C4AF ) ) ) {
                                     //          ntot+=1;
                                     phase_temp [ ( int ) newmat [ px ] [ py ] [ pz ] ]++;
                                     WriteUnsortedList(px, py, pz);
@@ -13234,9 +13234,9 @@ int CemhydMatStatus :: IsConnected(int cx, int cy, int cz, int dx, int dy, int d
             /* 1) old voxel is any solid, new voxel is any
              * solid except clinker phases */
             if ( ( NeighPhase != C3S ) &&
-                 NeighPhase != C2S &&
-                 NeighPhase != C3A &&
-                 NeighPhase != C4AF ) {
+                NeighPhase != C2S &&
+                NeighPhase != C3A &&
+                NeighPhase != C4AF ) {
                 return 2;
             }
             /*2) old voxel is solid except clinker and new voxel is one
@@ -13245,10 +13245,10 @@ int CemhydMatStatus :: IsConnected(int cx, int cy, int cz, int dx, int dy, int d
                         CentPhase != C2S &&
                         CentPhase != C3A &&
                         CentPhase != C4AF ) &&
-                      ( NeighPhase == C3S ||
-                        NeighPhase == C2S ||
-                        NeighPhase == C3A ||
-                        NeighPhase == C4AF ) ) {
+                     ( NeighPhase == C3S ||
+                       NeighPhase == C2S ||
+                       NeighPhase == C3A ||
+                       NeighPhase == C4AF ) ) {
                 return 2;
             }
             /* 3) old and new voxels belong to one of cement clinker phases and
@@ -13256,14 +13256,14 @@ int CemhydMatStatus :: IsConnected(int cx, int cy, int cz, int dx, int dy, int d
              * one-voxel particles have also non-zero ID number*/
             else if ( ( micpart [ AdjCoord(cx) ] [ AdjCoord(cy) ] [ AdjCoord(cz) ] ==
                         micpart [ AdjCoord(cx + dx) ] [ AdjCoord(cy + dy) ] [ AdjCoord(cz + dz) ] ) &&
-                      ( CentPhase == C3S ||
-                        CentPhase == C2S ||
-                        CentPhase == C3A ||
-                        CentPhase == C4AF ) &&
-                      ( NeighPhase == C3S ||
-                        NeighPhase == C2S ||
-                        NeighPhase == C3A ||
-                        NeighPhase == C4AF ) ) {
+                     ( CentPhase == C3S ||
+                       CentPhase == C2S ||
+                       CentPhase == C3A ||
+                       CentPhase == C4AF ) &&
+                     ( NeighPhase == C3S ||
+                       NeighPhase == C2S ||
+                       NeighPhase == C3A ||
+                       NeighPhase == C4AF ) ) {
                 return 2;
             } else {
                 return 1;
@@ -13355,8 +13355,8 @@ void CemhydMatStatus :: GenerateConnNumbers()
                     if ( IsSolidPhase(ArrPerc [ AdjCoord(cx + 1) ] [ AdjCoord(cy + 1) ] [ AdjCoord(cz) ]) ) {
                         if ( ( IsConnected(cx, cy, cz, 1, 0, 0) != 2 ||
                                IsConnected(cx + 1, cy, cz, 0, 1, 0) != 2 ) &&
-                             ( IsConnected(cx, cy, cz, 0, 1, 0) != 2 ||
-                               IsConnected(cx, cy + 1, cz, 1, 0, 0) != 2 ) ) {
+                            ( IsConnected(cx, cy, cz, 0, 1, 0) != 2 ||
+                              IsConnected(cx, cy + 1, cz, 1, 0, 0) != 2 ) ) {
                             ConnNumbers [ cx ] [ cy ] [ cz ] += 8;
                         }
                     }
@@ -13368,8 +13368,8 @@ void CemhydMatStatus :: GenerateConnNumbers()
                     if ( IsSolidPhase(ArrPerc [ AdjCoord(cx + 1) ] [ AdjCoord(cy) ] [ AdjCoord(cz + 1) ]) ) {
                         if ( ( IsConnected(cx, cy, cz, 1, 0, 0) != 2 ||
                                IsConnected(cx + 1, cy, cz, 0, 0, 1) != 2 ) &&
-                             ( IsConnected(cx, cy, cz, 0, 0, 1) != 2 ||
-                               IsConnected(cx, cy, cz + 1, 1, 0, 0) != 2 ) ) {
+                            ( IsConnected(cx, cy, cz, 0, 0, 1) != 2 ||
+                              IsConnected(cx, cy, cz + 1, 1, 0, 0) != 2 ) ) {
                             ConnNumbers [ cx ] [ cy ] [ cz ] += 16;
                         }
                     }
@@ -13381,8 +13381,8 @@ void CemhydMatStatus :: GenerateConnNumbers()
                     if ( IsSolidPhase(ArrPerc [ AdjCoord(cx) ] [ AdjCoord(cy + 1) ] [ AdjCoord(cz + 1) ]) ) {
                         if ( ( IsConnected(cx, cy, cz, 0, 1, 0) != 2 ||
                                IsConnected(cx, cy + 1, cz, 0, 0, 1) != 2 ) &&
-                             ( IsConnected(cx, cy, cz, 0, 0, 1) != 2 ||
-                               IsConnected(cx, cy, cz + 1, 0, 1, 0) != 2 ) ) {
+                            ( IsConnected(cx, cy, cz, 0, 0, 1) != 2 ||
+                              IsConnected(cx, cy, cz + 1, 0, 1, 0) != 2 ) ) {
                             ConnNumbers [ cx ] [ cy ] [ cz ] += 32;
                         }
                     }
@@ -13395,8 +13395,8 @@ void CemhydMatStatus :: GenerateConnNumbers()
                     if ( IsSolidPhase(ArrPerc [ AdjCoord(cx + 1) ] [ AdjCoord(cy) ] [ AdjCoord(cz - 1) ]) ) {
                         if ( ( IsConnected(cx, cy, cz, 1, 0, 0) != 2 ||
                                IsConnected(cx + 1, cy, cz, 0, 0, -1) != 2 ) &&
-                             ( IsConnected(cx, cy, cz, 0, 0, -1) != 2 ||
-                               IsConnected(cx, cy, cz - 1, 1, 0, 0) != 2 ) ) {
+                            ( IsConnected(cx, cy, cz, 0, 0, -1) != 2 ||
+                              IsConnected(cx, cy, cz - 1, 1, 0, 0) != 2 ) ) {
                             ConnNumbers [ cx ] [ cy ] [ cz ] += 64;
                         }
                     }
@@ -13409,8 +13409,8 @@ void CemhydMatStatus :: GenerateConnNumbers()
                     if ( IsSolidPhase(ArrPerc [ AdjCoord(cx) ] [ AdjCoord(cy + 1) ] [ AdjCoord(cz - 1) ]) ) {
                         if ( ( IsConnected(cx, cy, cz, 0, 1, 0) != 2 ||
                                IsConnected(cx, cy + 1, cz, 0, 0, -1) != 2 ) &&
-                             ( IsConnected(cx, cy, cz, 0, 0, -1) != 2 ||
-                               IsConnected(cx, cy, cz - 1, 0, 1, 0) != 2 ) ) {
+                            ( IsConnected(cx, cy, cz, 0, 0, -1) != 2 ||
+                              IsConnected(cx, cy, cz - 1, 0, 1, 0) != 2 ) ) {
                             ConnNumbers [ cx ] [ cy ] [ cz ] += 128;
                         }
                     }
@@ -13424,8 +13424,8 @@ void CemhydMatStatus :: GenerateConnNumbers()
                     if ( IsSolidPhase(ArrPerc [ AdjCoord(cx - 1) ] [ AdjCoord(cy + 1) ] [ AdjCoord(cz) ]) ) {
                         if ( ( IsConnected(cx, cy, cz, 0, 1, 0) != 2 ||
                                IsConnected(cx, cy + 1, cz, -1, 0, 0) != 2 ) &&
-                             ( IsConnected(cx, cy, cz, -1, 0, 0) != 2 ||
-                               IsConnected(cx - 1, cy, cz, 0, 1, 0) != 2 ) ) {
+                            ( IsConnected(cx, cy, cz, -1, 0, 0) != 2 ||
+                              IsConnected(cx - 1, cy, cz, 0, 1, 0) != 2 ) ) {
                             ConnNumbers [ cx ] [ cy ] [ cz ] += 256;
                         }
                     }
@@ -13441,23 +13441,23 @@ void CemhydMatStatus :: GenerateConnNumbers()
                         if ( ( IsConnected(cx, cy, cz, 1, 0, 0) != 2 ||
                                IsConnected(cx + 1, cy, cz, 0, 0, 1) != 2 ||
                                IsConnected(cx + 1, cy, cz + 1, 0, 1, 0) != 2 ) &&
-                             ( IsConnected(cx, cy, cz, 1, 0, 0) != 2 ||
-                               IsConnected(cx + 1, cy, cz, 0, 1, 0) != 2 ||
-                               IsConnected(cx + 1, cy + 1, cz, 0, 0, 1) != 2 ) &&
+                            ( IsConnected(cx, cy, cz, 1, 0, 0) != 2 ||
+                              IsConnected(cx + 1, cy, cz, 0, 1, 0) != 2 ||
+                              IsConnected(cx + 1, cy + 1, cz, 0, 0, 1) != 2 ) &&
 
-                             ( IsConnected(cx, cy, cz, 0, 1, 0) != 2 ||
-                               IsConnected(cx, cy + 1, cz, 1, 0, 0) != 2 ||
-                               IsConnected(cx + 1, cy + 1, cz, 0, 0, 1) != 2 ) &&
-                             ( IsConnected(cx, cy, cz, 0, 1, 0) != 2 ||
-                               IsConnected(cx, cy + 1, cz, 0, 0, 1) != 2 ||
-                               IsConnected(cx, cy + 1, cz + 1, 1, 0, 0) != 2 ) &&
+                            ( IsConnected(cx, cy, cz, 0, 1, 0) != 2 ||
+                              IsConnected(cx, cy + 1, cz, 1, 0, 0) != 2 ||
+                              IsConnected(cx + 1, cy + 1, cz, 0, 0, 1) != 2 ) &&
+                            ( IsConnected(cx, cy, cz, 0, 1, 0) != 2 ||
+                              IsConnected(cx, cy + 1, cz, 0, 0, 1) != 2 ||
+                              IsConnected(cx, cy + 1, cz + 1, 1, 0, 0) != 2 ) &&
 
-                             ( IsConnected(cx, cy, cz, 0, 0, 1) != 2 ||
-                               IsConnected(cx, cy, cz + 1, 1, 0, 0) != 2 ||
-                               IsConnected(cx + 1, cy, cz + 1, 0, 1, 0) != 2 ) &&
-                             ( IsConnected(cx, cy, cz, 0, 0, 1) != 2 ||
-                               IsConnected(cx, cy, cz + 1, 0, 1, 0) != 2 ||
-                               IsConnected(cx, cy + 1, cz + 1, 1, 0, 0) != 2 ) ) {
+                            ( IsConnected(cx, cy, cz, 0, 0, 1) != 2 ||
+                              IsConnected(cx, cy, cz + 1, 1, 0, 0) != 2 ||
+                              IsConnected(cx + 1, cy, cz + 1, 0, 1, 0) != 2 ) &&
+                            ( IsConnected(cx, cy, cz, 0, 0, 1) != 2 ||
+                              IsConnected(cx, cy, cz + 1, 0, 1, 0) != 2 ||
+                              IsConnected(cx, cy + 1, cz + 1, 1, 0, 0) != 2 ) ) {
                             ConnNumbers [ cx ] [ cy ] [ cz ] += 512;
                         }
                     }
@@ -13472,23 +13472,23 @@ void CemhydMatStatus :: GenerateConnNumbers()
                         if ( ( IsConnected(cx, cy, cz, 1, 0, 0) != 2 ||
                                IsConnected(cx + 1, cy, cz, 0, 0, -1) != 2 ||
                                IsConnected(cx + 1, cy, cz - 1, 0, 1, 0) != 2 ) &&
-                             ( IsConnected(cx, cy, cz, 1, 0, 0) != 2 ||
-                               IsConnected(cx + 1, cy, cz, 0, 1, 0) != 2 ||
-                               IsConnected(cx + 1, cy + 1, cz, 0, 0, -1) != 2 ) &&
+                            ( IsConnected(cx, cy, cz, 1, 0, 0) != 2 ||
+                              IsConnected(cx + 1, cy, cz, 0, 1, 0) != 2 ||
+                              IsConnected(cx + 1, cy + 1, cz, 0, 0, -1) != 2 ) &&
 
-                             ( IsConnected(cx, cy, cz, 0, 1, 0) != 2 ||
-                               IsConnected(cx, cy + 1, cz, 1, 0, 0) != 2 ||
-                               IsConnected(cx + 1, cy + 1, cz, 0, 0, -1) != 2 ) &&
-                             ( IsConnected(cx, cy, cz, 0, 1, 0) != 2 ||
-                               IsConnected(cx, cy + 1, cz, 0, 0, -1) != 2 ||
-                               IsConnected(cx, cy + 1, cz - 1, 1, 0, 0) != 2 ) &&
+                            ( IsConnected(cx, cy, cz, 0, 1, 0) != 2 ||
+                              IsConnected(cx, cy + 1, cz, 1, 0, 0) != 2 ||
+                              IsConnected(cx + 1, cy + 1, cz, 0, 0, -1) != 2 ) &&
+                            ( IsConnected(cx, cy, cz, 0, 1, 0) != 2 ||
+                              IsConnected(cx, cy + 1, cz, 0, 0, -1) != 2 ||
+                              IsConnected(cx, cy + 1, cz - 1, 1, 0, 0) != 2 ) &&
 
-                             ( IsConnected(cx, cy, cz, 0, 0, -1) != 2 ||
-                               IsConnected(cx, cy, cz - 1, 1, 0, 0) != 2 ||
-                               IsConnected(cx + 1, cy, cz - 1, 0, 1, 0) != 2 ) &&
-                             ( IsConnected(cx, cy, cz, 0, 0, -1) != 2 ||
-                               IsConnected(cx, cy, cz - 1, 0, 1, 0) != 2 ||
-                               IsConnected(cx, cy + 1, cz - 1, 1, 0, 0) != 2 ) ) {
+                            ( IsConnected(cx, cy, cz, 0, 0, -1) != 2 ||
+                              IsConnected(cx, cy, cz - 1, 1, 0, 0) != 2 ||
+                              IsConnected(cx + 1, cy, cz - 1, 0, 1, 0) != 2 ) &&
+                            ( IsConnected(cx, cy, cz, 0, 0, -1) != 2 ||
+                              IsConnected(cx, cy, cz - 1, 0, 1, 0) != 2 ||
+                              IsConnected(cx, cy + 1, cz - 1, 1, 0, 0) != 2 ) ) {
                             ConnNumbers [ cx ] [ cy ] [ cz ] += 1024;
                         }
                     }
@@ -13503,23 +13503,23 @@ void CemhydMatStatus :: GenerateConnNumbers()
                         if ( ( IsConnected(cx, cy, cz, -1, 0, 0) != 2 ||
                                IsConnected(cx - 1, cy, cz, 0, 0, -1) != 2 ||
                                IsConnected(cx - 1, cy, cz - 1, 0, 1, 0) != 2 ) &&
-                             ( IsConnected(cx, cy, cz, -1, 0, 0) != 2 ||
-                               IsConnected(cx - 1, cy, cz, 0, 1, 0) != 2 ||
-                               IsConnected(cx - 1, cy + 1, cz, 0, 0, -1) != 2 ) &&
+                            ( IsConnected(cx, cy, cz, -1, 0, 0) != 2 ||
+                              IsConnected(cx - 1, cy, cz, 0, 1, 0) != 2 ||
+                              IsConnected(cx - 1, cy + 1, cz, 0, 0, -1) != 2 ) &&
 
-                             ( IsConnected(cx, cy, cz, 0, 1, 0) != 2 ||
-                               IsConnected(cx, cy + 1, cz, -1, 0, 0) != 2 ||
-                               IsConnected(cx - 1, cy + 1, cz, 0, 0, -1) != 2 ) &&
-                             ( IsConnected(cx, cy, cz, 0, 1, 0) != 2 ||
-                               IsConnected(cx, cy + 1, cz, 0, 0, -1) != 2 ||
-                               IsConnected(cx, cy + 1, cz - 1, -1, 0, 0) != 2 ) &&
+                            ( IsConnected(cx, cy, cz, 0, 1, 0) != 2 ||
+                              IsConnected(cx, cy + 1, cz, -1, 0, 0) != 2 ||
+                              IsConnected(cx - 1, cy + 1, cz, 0, 0, -1) != 2 ) &&
+                            ( IsConnected(cx, cy, cz, 0, 1, 0) != 2 ||
+                              IsConnected(cx, cy + 1, cz, 0, 0, -1) != 2 ||
+                              IsConnected(cx, cy + 1, cz - 1, -1, 0, 0) != 2 ) &&
 
-                             ( IsConnected(cx, cy, cz, 0, 0, -1) != 2 ||
-                               IsConnected(cx, cy, cz - 1, -1, 0, 0) != 2 ||
-                               IsConnected(cx - 1, cy, cz - 1, 0, 1, 0) != 2 ) &&
-                             ( IsConnected(cx, cy, cz, 0, 0, -1) != 2 ||
-                               IsConnected(cx, cy, cz - 1, 0, 1, 0) != 2 ||
-                               IsConnected(cx, cy + 1, cz - 1, -1, 0, 0) != 2 ) ) {
+                            ( IsConnected(cx, cy, cz, 0, 0, -1) != 2 ||
+                              IsConnected(cx, cy, cz - 1, -1, 0, 0) != 2 ||
+                              IsConnected(cx - 1, cy, cz - 1, 0, 1, 0) != 2 ) &&
+                            ( IsConnected(cx, cy, cz, 0, 0, -1) != 2 ||
+                              IsConnected(cx, cy, cz - 1, 0, 1, 0) != 2 ||
+                              IsConnected(cx, cy + 1, cz - 1, -1, 0, 0) != 2 ) ) {
                             ConnNumbers [ cx ] [ cy ] [ cz ] += 2048;
                         }
                     }
@@ -13533,23 +13533,23 @@ void CemhydMatStatus :: GenerateConnNumbers()
                         if ( ( IsConnected(cx, cy, cz, -1, 0, 0) != 2 ||
                                IsConnected(cx - 1, cy, cz, 0, 0, 1) != 2 ||
                                IsConnected(cx - 1, cy, cz + 1, 0, 1, 0) != 2 ) &&
-                             ( IsConnected(cx, cy, cz, -1, 0, 0) != 2 ||
-                               IsConnected(cx - 1, cy, cz, 0, 1, 0) != 2 ||
-                               IsConnected(cx - 1, cy + 1, cz, 0, 0, 1) != 2 ) &&
+                            ( IsConnected(cx, cy, cz, -1, 0, 0) != 2 ||
+                              IsConnected(cx - 1, cy, cz, 0, 1, 0) != 2 ||
+                              IsConnected(cx - 1, cy + 1, cz, 0, 0, 1) != 2 ) &&
 
-                             ( IsConnected(cx, cy, cz, 0, 1, 0) != 2 ||
-                               IsConnected(cx, cy + 1, cz, -1, 0, 0) != 2 ||
-                               IsConnected(cx - 1, cy + 1, cz, 0, 0, 1) != 2 ) &&
-                             ( IsConnected(cx, cy, cz, 0, 1, 0) != 2 ||
-                               IsConnected(cx, cy + 1, cz, 0, 0, 1) != 2 ||
-                               IsConnected(cx, cy + 1, cz + 1, -1, 0, 0) != 2 ) &&
+                            ( IsConnected(cx, cy, cz, 0, 1, 0) != 2 ||
+                              IsConnected(cx, cy + 1, cz, -1, 0, 0) != 2 ||
+                              IsConnected(cx - 1, cy + 1, cz, 0, 0, 1) != 2 ) &&
+                            ( IsConnected(cx, cy, cz, 0, 1, 0) != 2 ||
+                              IsConnected(cx, cy + 1, cz, 0, 0, 1) != 2 ||
+                              IsConnected(cx, cy + 1, cz + 1, -1, 0, 0) != 2 ) &&
 
-                             ( IsConnected(cx, cy, cz, 0, 0, 1) != 2 ||
-                               IsConnected(cx, cy, cz + 1, -1, 0, 0) != 2 ||
-                               IsConnected(cx - 1, cy, cz + 1, 0, 1, 0) != 2 ) &&
-                             ( IsConnected(cx, cy, cz, 0, 0, 1) != 2 ||
-                               IsConnected(cx, cy, cz + 1, 0, 1, 0) != 2 ||
-                               IsConnected(cx, cy + 1, cz + 1, -1, 0, 0) != 2 ) ) {
+                            ( IsConnected(cx, cy, cz, 0, 0, 1) != 2 ||
+                              IsConnected(cx, cy, cz + 1, -1, 0, 0) != 2 ||
+                              IsConnected(cx - 1, cy, cz + 1, 0, 1, 0) != 2 ) &&
+                            ( IsConnected(cx, cy, cz, 0, 0, 1) != 2 ||
+                              IsConnected(cx, cy, cz + 1, 0, 1, 0) != 2 ||
+                              IsConnected(cx, cy + 1, cz + 1, -1, 0, 0) != 2 ) ) {
                             ConnNumbers [ cx ] [ cy ] [ cz ] += 4096;
                         }
                     }

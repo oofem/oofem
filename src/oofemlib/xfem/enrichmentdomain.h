@@ -84,7 +84,7 @@ public:
     virtual void giveSubPolygon(std :: vector< FloatArray > &oPoints, const double &iXiStart, const double &iXiEnd) const { OOFEM_ERROR("EnrichmentDomain::giveSubPolygon() is not implemented.\n"); }
 
     // Use double dispatch to call the correct version of CallNodeEnrMarkerUpdate.
-    virtual void CallNodeEnrMarkerUpdate(EnrichmentItem &iEnrItem, XfemManager &ixFemMan) const {}
+    virtual void CallNodeEnrMarkerUpdate(EnrichmentItem &iEnrItem, XfemManager &ixFemMan) const { }
 
 
     virtual bool giveClosestTipInfo(const FloatArray &iCoords, TipInfo &oInfo) const { return false; }
@@ -132,8 +132,12 @@ public:
 class OOFEM_EXPORT EDBGCircle : public EnrichmentDomain_BG
 {
 public:
-    EDBGCircle() { bg = new Circle; };
-    virtual ~EDBGCircle() { delete bg; }
+    EDBGCircle() {
+        bg = new Circle;
+    };
+    virtual ~EDBGCircle() {
+        delete bg;
+    }
 
     virtual IRResultType initializeFrom(InputRecord *ir) { return bg->initializeFrom(ir); }
 
@@ -147,8 +151,12 @@ public:
 class OOFEM_EXPORT EDCrack : public EnrichmentDomain_BG
 {
 public:
-    EDCrack() { bg = new PolygonLine; }
-    virtual ~EDCrack() { delete bg; }
+    EDCrack() {
+        bg = new PolygonLine;
+    }
+    virtual ~EDCrack() {
+        delete bg;
+    }
 
     virtual IRResultType initializeFrom(InputRecord *ir);
 

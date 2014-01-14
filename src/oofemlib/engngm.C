@@ -502,7 +502,7 @@ EngngModel :: instanciateDefaultMetaStep(InputRecord *ir)
     // create default meta steps
     this->nMetaSteps = 1;
     metaStepList->growTo(nMetaSteps);
-    mstep =  new MetaStep(1, this, numberOfSteps, * ir);
+    mstep =  new MetaStep(1, this, numberOfSteps, *ir);
     metaStepList->put(1, mstep);
 
     // set meta step bounds
@@ -806,7 +806,7 @@ EngngModel :: saveStepContext(TimeStep *tStep)
     // default - save only if ALWAYS is set ( see cltypes.h )
 
     if ( ( this->giveContextOutputMode() == COM_Always ) ||
-         ( this->giveContextOutputMode() == COM_Required ) ) {
+        ( this->giveContextOutputMode() == COM_Required ) ) {
         this->saveContext(NULL, CM_State);
     } else if ( this->giveContextOutputMode() == COM_UserDefined ) {
         if ( tStep->giveNumber() % this->giveContextOutputStep() == 0 ) {
@@ -1079,9 +1079,9 @@ void EngngModel :: assembleVectorFromBC(FloatArray &answer, TimeStep *tStep, Equ
         ActiveBoundaryCondition *abc;
         Load *load;
 
-        if ( ( abc = dynamic_cast< ActiveBoundaryCondition * >( bc ) ) ) {
+        if ( ( abc = dynamic_cast< ActiveBoundaryCondition * >(bc) ) ) {
             abc->assembleVector(answer, tStep, eid, type, mode, s, eNorms);
-        } else if ( bc->giveSetNumber() && ( load = dynamic_cast< Load * >( bc ) ) && bc->isImposed(tStep) ) {
+        } else if ( bc->giveSetNumber() && ( load = dynamic_cast< Load * >(bc) ) && bc->isImposed(tStep) ) {
             // Now we assemble the corresponding load type fo the respective components in the set:
             IntArray dofids, loc, dofIDarry, bNodes;
             FloatArray charVec;
@@ -1092,7 +1092,7 @@ void EngngModel :: assembleVectorFromBC(FloatArray &answer, TimeStep *tStep, Equ
             NodalLoad *nLoad;
             Set *set = domain->giveSet( bc->giveSetNumber() );
 
-            if ( ( bodyLoad = dynamic_cast< BodyLoad * >( load ) ) ) { // Body load:
+            if ( ( bodyLoad = dynamic_cast< BodyLoad * >(load) ) ) { // Body load:
                 const IntArray &elements = set->giveElementList();
                 for ( int ielem = 1; ielem <= elements.giveSize(); ++ielem ) {
                     Element *element = domain->giveElement( elements.at(ielem) );
@@ -1112,7 +1112,7 @@ void EngngModel :: assembleVectorFromBC(FloatArray &answer, TimeStep *tStep, Equ
                         }
                     }
                 }
-            } else if ( ( bLoad = dynamic_cast< BoundaryLoad * >( load ) ) ) { // Boundary load:
+            } else if ( ( bLoad = dynamic_cast< BoundaryLoad * >(load) ) ) { // Boundary load:
                 const IntArray &boundaries = set->giveBoundaryList();
                 for ( int ibnd = 1; ibnd <= boundaries.giveSize() / 2; ++ibnd ) {
                     Element *element = domain->giveElement( boundaries.at(ibnd * 2 - 1) );
@@ -1156,7 +1156,7 @@ void EngngModel :: assembleVectorFromBC(FloatArray &answer, TimeStep *tStep, Equ
                         }
                     }
                 }
-            } else if ( ( nLoad = dynamic_cast< NodalLoad * >( load ) ) ) { // Nodal load:
+            } else if ( ( nLoad = dynamic_cast< NodalLoad * >(load) ) ) { // Nodal load:
                 const IntArray &nodes = set->giveNodeList();
                 for ( int idman = 1; idman <= nodes.giveSize(); ++idman ) {
                     DofManager *node = domain->giveDofManager( nodes.at(idman) );
@@ -1435,7 +1435,7 @@ contextIOResultType EngngModel :: saveContext(DataStream *stream, ContextMode mo
 
     if ( closeFlag ) {
         fclose(file);
-        delete( stream );
+        delete(stream);
         stream = NULL;
     }                                                         // ensure consistent records
 
@@ -1505,7 +1505,7 @@ contextIOResultType EngngModel :: restoreContext(DataStream *stream, ContextMode
         delete previousStep;
     }
 
-    previousStep = new TimeStep(istep - 1, this, pmstep, currentStep->giveTargetTime() - currentStep->giveTimeIncrement(),
+    previousStep = new TimeStep(istep - 1, this, pmstep, currentStep->giveTargetTime ( ) - currentStep->giveTimeIncrement(),
                                 currentStep->giveTimeIncrement(), currentStep->giveSolutionStateCounter() - 1);
 
     // restore numberOfEquations and domainNeqs array
@@ -1777,7 +1777,7 @@ EngngModel :: giveOutputStream()
         FILE *sfp;
 
         if ( ( fd = mkstemp(sfn) ) == -1 ||
-             ( sfp = fdopen(fd, "w+") ) == NULL ) {
+            ( sfp = fdopen(fd, "w+") ) == NULL ) {
             if ( fd != -1 ) {
                 unlink(sfn);
                 close(fd);
@@ -1902,7 +1902,7 @@ EngngModel :: balanceLoad(TimeStep *tStep)
     if ( tStep->isNotTheLastStep() ) {
         _d = lbm->decide(tStep);
         if ( ( _d == LoadBalancerMonitor :: LBD_RECOVER ) ||
-             ( ( tStep->isTheFirstStep() ) && force_load_rebalance_in_first_step ) ) {
+            ( ( tStep->isTheFirstStep() ) && force_load_rebalance_in_first_step ) ) {
             this->timer.startTimer(EngngModelTimer :: EMTT_LoadBalancingTimer);
 
             // determine nwe partitioning

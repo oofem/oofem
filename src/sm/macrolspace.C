@@ -64,7 +64,7 @@ MacroLSpace :: MacroLSpace(int n, Domain *aDomain) : LSpace(n, aDomain)
     this->lastStiffMatrixTimeStep = NULL;
 }
 
-MacroLSpace :: ~MacroLSpace() {}
+MacroLSpace :: ~MacroLSpace() { }
 
 
 IRResultType MacroLSpace :: initializeFrom(InputRecord *ir)
@@ -92,7 +92,7 @@ IRResultType MacroLSpace :: initializeFrom(InputRecord *ir)
         if ( fopen(this->stiffMatrxFileName, "r") != NULL ) { //if the file exist
             stiffMatrxFile = fopen(this->stiffMatrxFileName, "r");
             this->stiffMatrxFileNoneReadingWriting = 1;
-        } else   { //or create a new one
+        } else {   //or create a new one
             if ( ( stiffMatrxFile = fopen(this->stiffMatrxFileName, "w") ) == NULL ) {
                 OOFEM_ERROR2("Can not create a new file %s\n", this->stiffMatrxFileName);
             }
@@ -261,7 +261,7 @@ void MacroLSpace :: giveInternalForcesVector(FloatArray &answer, TimeStep *tStep
         this->microEngngModel->updateYourself( this->microEngngModel->giveCurrentStep() );
         //this->microEngngModel->terminate( this->microEngngModel->giveCurrentStep() );
         //microStructuralEngngModel = ( StructuralEngngModel * ) &this->microEngngModel;
-        StructuralEngngModel *microStructuralEngngModel = dynamic_cast< StructuralEngngModel * >( this->microEngngModel );
+        StructuralEngngModel *microStructuralEngngModel = dynamic_cast< StructuralEngngModel * >(this->microEngngModel);
 
 
         //reaction vector contains contributions from unknownNumberingScheme

@@ -319,7 +319,7 @@ RCSDEMaterial :: computeStrength(GaussPoint *gp, double charLength)
     Gf = this->give(pscm_Gf, gp);
     Ft = this->give(pscm_Ft, gp);
 
-    if ( this->checkSizeLimit(gp, charLength) ) {} else {
+    if ( this->checkSizeLimit(gp, charLength) ) { } else {
         // we reduce Ft and there is no softening but sudden drop
         Ft = sqrt(2. * Ee * Gf / charLength);
         //
@@ -448,7 +448,7 @@ RCSDEMaterial :: giveNormalCrackingStress(GaussPoint *gp, double crackStrain, in
             // crack closing
             // or unloading or reloading regime
             answer = Ft * crackStrain / status->giveTempMaxCrackStrain(i) *
-                     exp(-status->giveTempMaxCrackStrain(i) / ef);
+            exp(-status->giveTempMaxCrackStrain(i) / ef);
         }
     } else {
         answer = 0.;
@@ -507,7 +507,7 @@ RCSDEMaterialStatus :: printOutputAt(FILE *file, TimeStep *tStep)
                 }
 
                 fprintf( file, "crack %d {status %s, normal to crackplane { %f %f %f }} ",
-                         i, s, crackDirs.at(1, i), crackDirs.at(2, i), crackDirs.at(3, i) );
+                        i, s, crackDirs.at(1, i), crackDirs.at(2, i), crackDirs.at(3, i) );
             }
         }
     } else {

@@ -75,7 +75,7 @@
 
 
 namespace oofem {
-template< class T >class AList;
+template< class T > class AList;
 class BasicGeometry;
 class EnrichmentFunction;
 class EnrichmentDomain;
@@ -105,7 +105,7 @@ class OOFEM_EXPORT EnrichmentItem : public FEMComponent
 {
 public:
     /// Constructor / destructor
-    EnrichmentItem(int n, XfemManager *xm, Domain *aDomain);
+    EnrichmentItem(int n, XfemManager * xm, Domain * aDomain);
     virtual ~EnrichmentItem();
 
     virtual IRResultType initializeFrom(InputRecord *ir);
@@ -135,7 +135,7 @@ public:
     virtual bool isMaterialModified(GaussPoint &iGP, Element &iEl, CrossSection * &opCS) const;
 
     // Should update receiver geometry to the state reached at given time step.
-    virtual void updateGeometry(FailureCriteriaStatus *fc, TimeStep *tStep) {};
+    virtual void updateGeometry(FailureCriteriaStatus *fc, TimeStep *tStep) { };
     virtual void updateGeometry();
     virtual void propagateFronts();
 
@@ -263,7 +263,7 @@ class OOFEM_EXPORT Inclusion : public EnrichmentItem
 protected:
     CrossSection *mpCrossSection;
 public:
-    Inclusion(int n, XfemManager *xm, Domain *aDomain);
+    Inclusion(int n, XfemManager * xm, Domain * aDomain);
     virtual ~Inclusion();
 
     // Returns true if the enrichment item assigns a different material to the Gauss point
@@ -287,7 +287,7 @@ protected:
     int matNum;
     double delamXiCoord;    // defines at what local xi-coord the delamination is defined
 public:
-    Delamination(int n, XfemManager *xm, Domain *aDomain);
+    Delamination(int n, XfemManager * xm, Domain * aDomain);
 
     virtual const char *giveClassName() const { return "Delamination"; }
     virtual const char *giveInputRecordName() const { return _IFT_Delamination_Name; }
@@ -310,7 +310,7 @@ public:
 class OOFEM_EXPORT Crack : public EnrichmentItem
 {
 public:
-    Crack(int n, XfemManager *xm, Domain *aDomain);
+    Crack(int n, XfemManager * xm, Domain * aDomain);
 
     virtual const char *giveClassName() const { return "Crack"; }
     virtual const char *giveInputRecordName() const { return _IFT_Crack_Name; }
@@ -388,8 +388,8 @@ void EnrichmentItem :: interpSurfaceLevelSet(double &oLevelSet, const FloatArray
 class OOFEM_EXPORT EnrichmentFront
 {
 public:
-    EnrichmentFront() {};
-    virtual ~EnrichmentFront() {};
+    EnrichmentFront() { };
+    virtual ~EnrichmentFront() { };
 
     /*
      *  MarkNodesAsFront:
@@ -440,8 +440,8 @@ protected:
 class OOFEM_EXPORT EnrFrontDoNothing : public EnrichmentFront
 {
 public:
-    EnrFrontDoNothing() {};
-    virtual ~EnrFrontDoNothing() {};
+    EnrFrontDoNothing() { };
+    virtual ~EnrFrontDoNothing() { };
 
     virtual void MarkNodesAsFront(std :: vector< int > &ioNodeEnrMarker, XfemManager &ixFemMan, const std :: vector< double > &iLevelSetNormalDir, const std :: vector< double > &iLevelSetTangDir, const std :: vector< TipInfo > &iTipInfo) { /*printf("Entering EnrFrontDoNothing::MarkNodesAsFront().\n");*/ }
 
@@ -450,9 +450,9 @@ public:
     virtual int  giveMaxNumEnrichments() const { return 0; }
 
     // Evaluate the enrichment function and its derivative in front nodes.
-    virtual void evaluateEnrFuncAt(std :: vector< double > &oEnrFunc, const FloatArray &iPos, const double &iLevelSet, int iNodeInd) const {};
-    virtual void evaluateEnrFuncDerivAt(std :: vector< FloatArray > &oEnrFuncDeriv, const FloatArray &iPos, const double &iLevelSet, const FloatArray &iGradLevelSet, int iNodeInd) const {};
-    virtual void evaluateEnrFuncJumps(std :: vector< double > &oEnrFuncJumps) const {};
+    virtual void evaluateEnrFuncAt(std :: vector< double > &oEnrFunc, const FloatArray &iPos, const double &iLevelSet, int iNodeInd) const { };
+    virtual void evaluateEnrFuncDerivAt(std :: vector< FloatArray > &oEnrFuncDeriv, const FloatArray &iPos, const double &iLevelSet, const FloatArray &iGradLevelSet, int iNodeInd) const { };
+    virtual void evaluateEnrFuncJumps(std :: vector< double > &oEnrFuncJumps) const { };
 
     virtual const char *giveClassName() const { return "EnrFrontDoNothing"; }
     virtual const char *giveInputRecordName() const { return _IFT_EnrFrontDoNothing_Name; }
@@ -464,8 +464,8 @@ public:
 class OOFEM_EXPORT EnrFrontExtend : public EnrichmentFront
 {
 public:
-    EnrFrontExtend() {};
-    virtual ~EnrFrontExtend() {};
+    EnrFrontExtend() { };
+    virtual ~EnrFrontExtend() { };
 
     virtual void MarkNodesAsFront(std :: vector< int > &ioNodeEnrMarker, XfemManager &ixFemMan, const std :: vector< double > &iLevelSetNormalDir, const std :: vector< double > &iLevelSetTangDir, const std :: vector< TipInfo > &iTipInfo);
 
@@ -475,9 +475,9 @@ public:
     virtual int  giveMaxNumEnrichments() const { return 0; }
 
     // Evaluate the enrichment function and its derivative in front nodes.
-    virtual void evaluateEnrFuncAt(std :: vector< double > &oEnrFunc, const FloatArray &iPos, const double &iLevelSet, int iNodeInd) const {};
-    virtual void evaluateEnrFuncDerivAt(std :: vector< FloatArray > &oEnrFuncDeriv, const FloatArray &iPos, const double &iLevelSet, const FloatArray &iGradLevelSet, int iNodeInd) const {};
-    virtual void evaluateEnrFuncJumps(std :: vector< double > &oEnrFuncJumps) const {};
+    virtual void evaluateEnrFuncAt(std :: vector< double > &oEnrFunc, const FloatArray &iPos, const double &iLevelSet, int iNodeInd) const { };
+    virtual void evaluateEnrFuncDerivAt(std :: vector< FloatArray > &oEnrFuncDeriv, const FloatArray &iPos, const double &iLevelSet, const FloatArray &iGradLevelSet, int iNodeInd) const { };
+    virtual void evaluateEnrFuncJumps(std :: vector< double > &oEnrFuncJumps) const { };
 
 
     virtual const char *giveClassName() const { return "EnrFrontExtend"; }

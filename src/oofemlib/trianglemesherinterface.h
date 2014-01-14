@@ -77,9 +77,9 @@ public:
      * @param quadratic True if generated mesh should be quadratic (6 nodes).
      */
     TriangleMesherInterface(double minAngle, double maxArea, bool quadratic) :
-        minAngle(minAngle), maxArea(maxArea), quadratic(quadratic) {};
+        minAngle(minAngle), maxArea(maxArea), quadratic(quadratic) { };
     /// Destructor.
-    ~TriangleMesherInterface() {};
+    ~TriangleMesherInterface() { };
 
     /**
      * Simplifies a PSLG while respecting topology, running in linear time.

@@ -63,7 +63,7 @@ public:
      * @param n Boundary condition number.
      * @param d Domain to which new object will belongs.
      */
-    MixedGradientPressureBC(int n, Domain *d) : ActiveBoundaryCondition(n, d) { }
+    MixedGradientPressureBC(int n, Domain * d) : ActiveBoundaryCondition(n, d) { }
 
     /// Destructor
     virtual ~MixedGradientPressureBC() { };

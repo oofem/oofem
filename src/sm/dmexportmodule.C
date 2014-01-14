@@ -51,7 +51,7 @@ DofManExportModule :: DofManExportModule(int n, EngngModel *e) : ExportModule(n,
 
 
 DofManExportModule :: ~DofManExportModule()
-{}
+{ }
 
 
 IRResultType
@@ -88,7 +88,7 @@ DofManExportModule :: doOutput(TimeStep *tStep, bool forcedOutput)
 
 
     IntArray dofManMap, dofMap, eqnMap;
-    StructuralEngngModel *strEngMod = dynamic_cast< StructuralEngngModel * >( emodel );
+    StructuralEngngModel *strEngMod = dynamic_cast< StructuralEngngModel * >(emodel);
     if ( strEngMod ) {
         strEngMod->buildReactionTable(dofManMap, dofMap, eqnMap, tStep, domainIndex);
         strEngMod->computeReaction(reactions, tStep, 1);

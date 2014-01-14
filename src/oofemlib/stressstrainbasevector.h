@@ -72,7 +72,7 @@ public:
      *  the FloatArray assignment operator is used, where the operand is converted to FloatArray (mode is lost).
      *  The assignment from FloatArray to StressStrainBaseVector is not defined (needs material mode).
      */
-    StressStrainBaseVector &operator=(const StressStrainBaseVector &);
+    StressStrainBaseVector &operator = ( const StressStrainBaseVector & );
 
     /// Returns the material mode of receiver.
     MaterialMode giveStressStrainMode() const { return ( MaterialMode ) mode; }

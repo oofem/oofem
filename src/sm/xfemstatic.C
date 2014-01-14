@@ -61,9 +61,9 @@ XFEMStatic :: XFEMStatic(int i, EngngModel *_master) :
     updateStructureFlag(false),
     mForceRemap(false),
     mSetValsFromDofMap(true)
-{}
+{ }
 
-XFEMStatic :: ~XFEMStatic() {}
+XFEMStatic :: ~XFEMStatic() { }
 
 void
 XFEMStatic :: solveYourselfAt(TimeStep *tStep)
@@ -85,7 +85,7 @@ XFEMStatic :: solveYourselfAt(TimeStep *tStep)
                 FloatArray totalDisplacementNew;
                 setValsFromDofMap(totalDisplacementNew, totalDisplacement);
                 totalDisplacement = totalDisplacementNew;
-            } else   {
+            } else {
                 totalDisplacement.resize(neq);
                 totalDisplacement.zero();
             }
@@ -97,7 +97,7 @@ XFEMStatic :: solveYourselfAt(TimeStep *tStep)
                 FloatArray incrementOfDisplacementNew;
                 setValsFromDofMap(incrementOfDisplacementNew, incrementOfDisplacement);
                 incrementOfDisplacement = incrementOfDisplacementNew;
-            } else   {
+            } else {
                 incrementOfDisplacement.resize(neq);
                 incrementOfDisplacement.zero();
             }
@@ -113,7 +113,7 @@ XFEMStatic :: solveYourselfAt(TimeStep *tStep)
                 incrementalLoadVector.zero();                 // temp JB - load vector needs to be recomputed if xfem dofs are introduced
                 setValsFromDofMap(incrementalLoadVectorNew, incrementalLoadVector);
                 incrementalLoadVector = incrementalLoadVectorNew;
-            } else   {
+            } else {
                 incrementalLoadVector.resize(neq);
                 incrementalLoadVector.zero();
             }
@@ -127,7 +127,7 @@ XFEMStatic :: solveYourselfAt(TimeStep *tStep)
                 initialLoadVector.zero();                 // temp JB - load vector needs to be recomputed if xfem dofs are introduced
                 setValsFromDofMap(initialLoadVectorNew, initialLoadVector);
                 initialLoadVector = initialLoadVectorNew;
-            } else   {
+            } else {
                 initialLoadVector.resize(neq);
                 initialLoadVector.zero();
             }
@@ -205,7 +205,7 @@ XFEMStatic :: terminate(TimeStep *tStep)
 
                 ////////////////////////////////////////////////////////
                 // Map state variables for cohesive zone if applicable
-                XfemElementInterface *xFemEl = dynamic_cast< XfemElementInterface * >( el );
+                XfemElementInterface *xFemEl = dynamic_cast< XfemElementInterface * >(el);
                 if ( xFemEl != NULL ) {
                     if ( xFemEl->mpCZMat != NULL ) {
                         size_t numCzRules = xFemEl->mpCZIntegrationRules.size();
@@ -229,7 +229,7 @@ XFEMStatic :: terminate(TimeStep *tStep)
 
 
                                     MaterialStatus *matStat = dynamic_cast< MaterialStatus * >( xFemEl->mpCZMat->giveStatus(& gp) );
-                                    StructuralInterfaceMaterialStatus *siMatStat = dynamic_cast< StructuralInterfaceMaterialStatus * >( matStat );
+                                    StructuralInterfaceMaterialStatus *siMatStat = dynamic_cast< StructuralInterfaceMaterialStatus * >(matStat);
                                     if ( siMatStat == NULL ) {
                                         OOFEM_ERROR("In XFEMStatic :: terminate: Failed to cast to StructuralInterfaceMaterialStatus.\n");
                                     }
@@ -531,7 +531,7 @@ void XFEMStatic :: buildDofMap() {
                 int eqNum = dof->giveEqn();
 
                 if ( eqNum > 0 ) {
-                    std :: vector< int >key(3);
+                    std :: vector< int > key(3);
                     key [ 0 ] = domainIndex;
                     key [ 1 ] = dManIndex;
                     key [ 2 ] = k;
@@ -567,7 +567,7 @@ void XFEMStatic :: setValsFromDofMap(FloatArray &oArray, const FloatArray &iArra
                 int eqNumNew = dof->giveEqn();
 
                 if ( eqNumNew > 0 ) {
-                    std :: vector< int >key(3);
+                    std :: vector< int > key(3);
                     key [ 0 ] = domainIndex;
                     key [ 1 ] = dManIndex;
                     key [ 2 ] = k;

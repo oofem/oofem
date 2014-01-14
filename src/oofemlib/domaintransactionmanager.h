@@ -97,7 +97,7 @@ protected:
     //list<DTM_Transaction> transactions;
 
 public:
-    DomainTransactionManager(Domain *d);
+    DomainTransactionManager(Domain * d);
     ~DomainTransactionManager();
 
     void initialize();

@@ -54,22 +54,22 @@ enum EntityRenumberingScheme {
 class OOFEM_EXPORT EntityRenumberingFunctor
 {
 public:
-    virtual ~EntityRenumberingFunctor() {}
+    virtual ~EntityRenumberingFunctor() { }
     // two possible functions to call member function. virtual cause derived
     // classes will use a pointer to an object and a pointer to a member function
     // to make the function call
     /// Call using operator.
-    virtual int operator()(int, EntityRenumberingScheme) = 0;
+    virtual int operator() (int, EntityRenumberingScheme) = 0;
     /// Call using function.
     virtual int call(int, EntityRenumberingScheme) = 0;
 };
 
 /// Derived template class
-template< class TClass >class SpecificEntityRenumberingFunctor : public EntityRenumberingFunctor
+template< class TClass > class SpecificEntityRenumberingFunctor : public EntityRenumberingFunctor
 {
 private:
     /// Pointer to member function
-    int ( TClass :: *fpt )( int, EntityRenumberingScheme );
+    int ( TClass :: *fpt )(int, EntityRenumberingScheme);
     /// Pointer to object
     TClass *pt2Object;
 
@@ -77,14 +77,16 @@ public:
 
     // constructor - takes pointer to an object and pointer to a member and stores
     // them in two private variables
-    SpecificEntityRenumberingFunctor( TClass *_pt2Object, int( TClass :: *_fpt )( int, EntityRenumberingScheme ) )
+    SpecificEntityRenumberingFunctor( TClass * _pt2Object, int ( TClass :: *_fpt )(int, EntityRenumberingScheme) )
     {
         pt2Object = _pt2Object;
         fpt = _fpt;
     };
 
-    virtual int operator()(int n, EntityRenumberingScheme ers)
-    { return ( * pt2Object.*fpt )(n, ers); };
+    virtual int operator() (int n, EntityRenumberingScheme ers)
+    {
+        return ( * pt2Object.*fpt )(n, ers);
+    };
 
     virtual int call(int n, EntityRenumberingScheme ers)
     { return ( * pt2Object.*fpt )(n, ers); };
@@ -98,25 +100,31 @@ private:
     std :: map< int, int > &dofmanMap, &elemMap;
 
 public:
-    MapBasedEntityRenumberingFunctor(std :: map< int, int > &_dofmanMap, std :: map< int, int > &_elemMap) :
+    MapBasedEntityRenumberingFunctor(std :: map< int, int > & _dofmanMap, std :: map< int, int > & _elemMap) :
         dofmanMap(_dofmanMap), elemMap(_elemMap)
-    {}
+    { }
 
-    virtual int operator()(int n, EntityRenumberingScheme ers)
+    virtual int operator() (int n, EntityRenumberingScheme ers)
     {
         std :: map< int, int > :: const_iterator it;
         if ( ers == ERS_DofManager ) {
-            if ( ( it = dofmanMap.find(n) ) != dofmanMap.end() ) { return it->second; }
+            if ( ( it = dofmanMap.find(n) ) != dofmanMap.end() ) {
+                return it->second;
+            }
         } else if ( ers == ERS_Element ) {
-            if ( ( it = elemMap.find(n) ) != elemMap.end() ) { return it->second; }
-        } else { OOFEM_ERROR("MapBasedEntityRenumberingFunctor: unsupported EntityRenumberingScheme"); }
+            if ( ( it = elemMap.find(n) ) != elemMap.end() ) {
+                return it->second;
+            }
+        } else {
+            OOFEM_ERROR("MapBasedEntityRenumberingFunctor: unsupported EntityRenumberingScheme");
+        }
 
         OOFEM_ERROR2("MapBasedEntityRenumberingFunctor: component label %d not found", n);
         return 0;
     }
 
     virtual int call(int n, EntityRenumberingScheme ers)
-    { return this->operator()(n, ers); };
+    { return this->operator() (n, ers); };
 };
 } // end namespace oofem
 #endif // entityrenumberingscheme_h

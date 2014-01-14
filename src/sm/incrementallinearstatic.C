@@ -153,7 +153,7 @@ TimeStep *IncrementalLinearStatic :: giveNextStep()
     if ( previousStep == NULL ) {
         previousStep = new TimeStep(giveNumberOfTimeStepWhenIcApply(), this, 0, -dt, dt, 0);
     }
-    currentStep = new TimeStep(istep, this, mtStepum, this->giveDiscreteTime(istep), dt, counter);
+    currentStep = new TimeStep(istep, this, mtStepum, this->giveDiscreteTime ( istep ), dt, counter);
     return currentStep;
 }
 
@@ -183,7 +183,7 @@ void IncrementalLinearStatic :: solveYourselfAt(TimeStep *tStep)
             GeneralBoundaryCondition *bc = d->giveBc(ibc);
             ActiveBoundaryCondition *abc;
 
-            if ( ( abc = dynamic_cast< ActiveBoundaryCondition * >( bc ) ) ) {
+            if ( ( abc = dynamic_cast< ActiveBoundaryCondition * >(bc) ) ) {
                 int ndman = abc->giveNumberOfInternalDofManagers();
                 for ( int i = 1; i <= ndman; i++ ) {
                     DofManager *dofman = abc->giveInternalDofManager(i);
@@ -232,12 +232,12 @@ void IncrementalLinearStatic :: solveYourselfAt(TimeStep *tStep)
     internalLoadVector.resize(neq);
     internalLoadVector.zero();
     this->assembleVector( internalLoadVector, tStep, EID_MomentumBalance, InternalForcesVector,
-                          VM_Total, EModelDefaultEquationNumbering(), this->giveDomain(1) );
+                         VM_Total, EModelDefaultEquationNumbering(), this->giveDomain(1) );
 
     loadVector.resize(neq);
     loadVector.zero();
     this->assembleVector( loadVector, tStep, EID_MomentumBalance, ExternalForcesVector,
-                          VM_Total, EModelDefaultEquationNumbering(), this->giveDomain(1) );
+                         VM_Total, EModelDefaultEquationNumbering(), this->giveDomain(1) );
 
     loadVector.subtract(internalLoadVector);
 
@@ -256,7 +256,7 @@ void IncrementalLinearStatic :: solveYourselfAt(TimeStep *tStep)
     stiffnessMatrix->buildInternalStructure( this, 1, EID_MomentumBalance, EModelDefaultEquationNumbering() );
     stiffnessMatrix->zero();
     this->assemble( stiffnessMatrix, tStep, EID_MomentumBalance, StiffnessMatrix,
-                    EModelDefaultEquationNumbering(), this->giveDomain(1) );
+                   EModelDefaultEquationNumbering(), this->giveDomain(1) );
 
 #ifdef VERBOSE
     OOFEM_LOG_INFO("Solving ...\n");

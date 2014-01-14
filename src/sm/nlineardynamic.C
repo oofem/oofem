@@ -420,7 +420,7 @@ NonLinearDynamic :: proceedStep(int di, TimeStep *tStep)
 
         // Assemble mass matrix
         this->assemble( massMatrix, tStep, EID_MomentumBalance, MassMatrix,
-                        EModelDefaultEquationNumbering(), this->giveDomain(di) );
+                       EModelDefaultEquationNumbering(), this->giveDomain(di) );
 
         // Initialize vectors
         help.resize(neq);
@@ -461,9 +461,9 @@ NonLinearDynamic :: proceedStep(int di, TimeStep *tStep)
     // Assembling the effective load vector
     for ( int i = 1; i <= neq; i++ ) {
         help.at(i) = a2 * previousVelocityVector.at(i) + a3 *previousAccelerationVector.at(i)
-                     + eta * ( a4 * previousVelocityVector.at(i)
-                               + a5 * previousAccelerationVector.at(i)
-                               + a6 * previousIncrementOfDisplacement.at(i) );
+        + eta * ( a4 * previousVelocityVector.at(i)
+                 + a5 * previousAccelerationVector.at(i)
+                 + a6 * previousIncrementOfDisplacement.at(i) );
     }
 
     massMatrix->times(help, rhs);
@@ -471,8 +471,8 @@ NonLinearDynamic :: proceedStep(int di, TimeStep *tStep)
     if ( delta != 0 ) {
         for ( int i = 1; i <= neq; i++ ) {
             help.at(i) = delta * ( a4 * previousVelocityVector.at(i)
-                                   + a5 * previousAccelerationVector.at(i)
-                                   + a6 * previousIncrementOfDisplacement.at(i) );
+                                  + a5 * previousAccelerationVector.at(i)
+                                  + a6 * previousIncrementOfDisplacement.at(i) );
         }
         this->timesMtrx(help, rhs2, TangentStiffnessMatrix, this->giveDomain(di), tStep);
 
@@ -515,7 +515,7 @@ NonLinearDynamic :: proceedStep(int di, TimeStep *tStep)
         rhs2.at(i)               = previousAccelerationVector.at(i);
         accelerationVector.at(i) = a0 * incrementOfDisplacement.at(i) - a2 *rhs.at(i) - a3 *rhs2.at(i);
         velocityVector.at(i)     = a1 * incrementOfDisplacement.at(i) - a4 *rhs.at(i) - a5 *rhs2.at(i)
-                                   - a6 *previousIncrementOfDisplacement.at(i);
+        - a6 *previousIncrementOfDisplacement.at(i);
     }
     totIterations += currentIterations;
 }

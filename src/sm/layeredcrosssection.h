@@ -100,7 +100,7 @@ protected:
     double area;
 
 public:
-    LayeredCrossSection(int n, Domain *d) : StructuralCrossSection(n, d), layerMaterials(), layerThicks(), layerWidths()
+    LayeredCrossSection(int n, Domain * d) : StructuralCrossSection(n, d), layerMaterials(), layerThicks(), layerWidths()
     {
         numberOfLayers = 0;
         totalThick = 0.;
@@ -269,8 +269,8 @@ public:
 class LayeredIntegrationRule : public IntegrationRule
 {
 public:
-    LayeredIntegrationRule(int n, Element *e, int startIndx, int endIndx, bool dynamic = false);
-    LayeredIntegrationRule(int n, Element *e);
+    LayeredIntegrationRule(int n, Element * e, int startIndx, int endIndx, bool dynamic = false);
+    LayeredIntegrationRule(int n, Element * e);
     virtual ~LayeredIntegrationRule();
 
     virtual const char *giveClassName() const { return "LayeredIntegrationRule"; }

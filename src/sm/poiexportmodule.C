@@ -300,7 +300,7 @@ POIExportModule :: exportPrimVarAs(UnknownType valID, FILE *stream, TimeStep *tS
             } else {
                 pv.resize(0);
                 OOFEM_WARNING2( "POIExportModule::exportPrimVarAs: element %d with no EIPrimaryUnknownMapperInterface support",
-                                source->giveNumber() );
+                               source->giveNumber() );
             }
 
             fprintf(stream, "%10d ", ( * PoiIter ).id);
@@ -313,7 +313,7 @@ POIExportModule :: exportPrimVarAs(UnknownType valID, FILE *stream, TimeStep *tS
             fprintf(stream, "\n");
         } else {
             OOFEM_ERROR4( "POIExportModule::exportPrimVarAs: no element containing POI(%e,%e,%e) found",
-                          coords.at(1), coords.at(2), coords.at(3) );
+                         coords.at(1), coords.at(2), coords.at(3) );
         }
     }
 }

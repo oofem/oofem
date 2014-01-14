@@ -54,7 +54,7 @@ Line2BoundaryElement :: Line2BoundaryElement(int n, Domain *aDomain) : FMElement
 }
 
 Line2BoundaryElement :: ~Line2BoundaryElement()
-{}
+{ }
 
 FEInterpolation *Line2BoundaryElement :: giveInterpolation() const
 {
@@ -74,10 +74,10 @@ Interface *Line2BoundaryElement :: giveInterface(InterfaceType it)
 {
     switch ( it ) {
     case SpatialLocalizerInterfaceType:
-        return static_cast< SpatialLocalizerInterface * >( this );
+        return static_cast< SpatialLocalizerInterface * >(this);
 
     case EIPrimaryUnknownMapperInterfaceType:
-        return static_cast< EIPrimaryUnknownMapperInterface * >( this );
+        return static_cast< EIPrimaryUnknownMapperInterface * >(this);
 
     default:
         return FMElement :: giveInterface(it);

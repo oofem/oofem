@@ -136,8 +136,8 @@ SPRNodalRecoveryModel :: recoverValues(InternalStateType type, TimeStep *tStep)
             if ( regionNodalNumbers.at(i) ) {
 #else
             if ( regionNodalNumbers.at(i) &&
-                 ( ( domain->giveDofManager(i)->giveParallelMode() == DofManager_local ) ||
-                   ( domain->giveDofManager(i)->giveParallelMode() == DofManager_shared ) ) ) {
+                ( ( domain->giveDofManager(i)->giveParallelMode() == DofManager_local ) ||
+                 ( domain->giveDofManager(i)->giveParallelMode() == DofManager_shared ) ) ) {
 #endif
                 int eq = ( regionNodalNumbers.at(i) - 1 ) * regionValSize;
                 if ( dofManPatchCount.at( regionNodalNumbers.at(i) ) ) {
@@ -726,7 +726,7 @@ SPRNodalRecoveryModel :: exchangeDofManValues(int ireg, FloatArray &dofManValues
     ProblemCommunicatorMode commMode = emodel->giveProblemCommMode();
 
     if ( commMode == ProblemCommMode__NODE_CUT ) {
-        parallelStruct ls(& dofManValues, & dofManPatchCount, & regionNodalNumbers, regionValSize);
+        parallelStruct ls( &dofManValues, &dofManPatchCount, &regionNodalNumbers, regionValSize);
 
         // exchange data for shared nodes
         communicator->packAllData(this, & ls, & SPRNodalRecoveryModel :: packSharedDofManData);

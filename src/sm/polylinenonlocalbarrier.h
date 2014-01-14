@@ -79,7 +79,7 @@ public:
      * @param n Barrier's number
      * @param aDomain Pointer to the domain to which element belongs.
      */
-    PolylineNonlocalBarrier(int n, Domain *aDomain);
+    PolylineNonlocalBarrier(int n, Domain * aDomain);
     /// Virtual destructor.
     virtual ~PolylineNonlocalBarrier();
 

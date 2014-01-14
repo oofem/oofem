@@ -42,7 +42,7 @@
 namespace oofem {
 Tokenizer :: Tokenizer() :
     tokens()
-{}
+{ }
 
 
 std :: string

@@ -88,7 +88,7 @@ protected:
 
 public:
     /// Constructor
-    IntMatBilinearCZJanssonStatus(int n, Domain *d, GaussPoint *g);
+    IntMatBilinearCZJanssonStatus(int n, Domain * d, GaussPoint * g);
     /// Destructor
     virtual ~IntMatBilinearCZJanssonStatus();
 
@@ -164,7 +164,7 @@ protected:
 
 public:
     /// Constructor
-    IntMatBilinearCZJansson(int n, Domain *d);
+    IntMatBilinearCZJansson(int n, Domain * d);
     /// Destructor
     virtual ~IntMatBilinearCZJansson();
 

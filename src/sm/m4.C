@@ -121,7 +121,7 @@ M4Material :: giveStiffnessMatrix(FloatMatrix &answer,
     answer.at(4, 4) = answer.at(5, 5) = answer.at(6, 6) = E / ( 2. + 2. * nu );
     answer.at(1, 1) = answer.at(2, 2) = answer.at(3, 3) = E * ( 1. - nu ) / ( ( 1. + nu ) * ( 1. - 2. * nu ) );
     answer.at(1, 2) = answer.at(2, 1) = answer.at(1, 3) = answer.at(3, 1) =
-                                                              answer.at(2, 3) = answer.at(3, 2) = E * nu / ( ( 1. + nu ) * ( 1. - 2. * nu ) );
+        answer.at(2, 3) = answer.at(3, 2) = E * nu / ( ( 1. + nu ) * ( 1. - 2. * nu ) );
 }
 
 
@@ -194,7 +194,7 @@ M4Material :: giveRealMicroplaneStressVector(FloatArray &answer,
 
     SED = previousStress.at(2) - previousStress.at(1) + CD * DEpsD;
     SD = min( max( SED, this->FDminus(EpsD, k1, c7, c8, c9, E) ),
-              this->FDplus(EpsD, k1, c5, c6, c7, c20, E) );
+             this->FDplus(EpsD, k1, c5, c6, c7, c20, E) );
 
     SNdash = SVdash + SD;
     answer.at(2) = min( SNdash, this->FN(EpsN, previousStress.at(1), k1, c1, c2, c3, c4, E, EV) );

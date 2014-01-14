@@ -267,7 +267,7 @@ DummySpatialLocalizer :: giveAllNodesWithinBox(nodeContainerType &nodeSet, const
     nnode = this->giveDomain()->giveNumberOfDofManagers();
     for ( i = 1; i <= nnode; i++ ) {
         idofman = this->giveDomain()->giveDofManager(i);
-        if ( ( inode = dynamic_cast< Node * >( idofman ) ) != NULL ) {
+        if ( ( inode = dynamic_cast< Node * >(idofman) ) != NULL ) {
             if ( coords.distance( inode->giveCoordinates() ) <= radius ) {
                 nodeSet.push_back(i);
             }

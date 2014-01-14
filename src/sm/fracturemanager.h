@@ -96,20 +96,20 @@ private:
 
 
 public:
-    FailureCriteriaStatus(int number, FailureCriteria *failCrit)
+    FailureCriteriaStatus(int number, FailureCriteria * failCrit)
     {
         this->number = number;
         this->failCrit = failCrit;
     }
 
-    FailureCriteriaStatus(Element *el, FailureCriteria *failCrit)
+    FailureCriteriaStatus(Element * el, FailureCriteria * failCrit)
     {
         this->el = el;
         this->failCrit = failCrit;
     }
 
-    FailureCriteriaStatus() {};
-    ~FailureCriteriaStatus() {}; // must destroy object correctly
+    FailureCriteriaStatus() { };
+    ~FailureCriteriaStatus() { }; // must destroy object correctly
     Element *el;
 
     std :: vector< std :: vector< FloatArray > >quantities;
@@ -140,12 +140,12 @@ private:
     int number;
 
 public:
-    FailureCriteria(int number, FractureManager *fMan)
+    FailureCriteria(int number, FractureManager * fMan)
     {
         this->number = number;
         this->fMan = fMan;
     };
-    ~FailureCriteria() {}; // must destroy object correctly
+    ~FailureCriteria() { }; // must destroy object correctly
 
     std :: vector< FailureCriteriaStatus * >list;
 
@@ -170,8 +170,8 @@ public:
 class DamagedNeighborLayeredStatus : public FailureCriteriaStatus
 {
 public:
-    DamagedNeighborLayeredStatus(Element *el, FailureCriteria *failCrit) :
-        FailureCriteriaStatus(el, failCrit) {}
+    DamagedNeighborLayeredStatus(Element * el, FailureCriteria * failCrit) :
+        FailureCriteriaStatus(el, failCrit) { }
 
     FloatArray layerDamageValues;
 };
@@ -183,8 +183,8 @@ private:
     double DamageThreshold;
 
 public:
-    DamagedNeighborLayered(int number, FractureManager *fracMan) :
-        FailureCriteria(number,  fracMan) {}
+    DamagedNeighborLayered(int number, FractureManager * fracMan) :
+        FailureCriteria(number,  fracMan) { }
 
     virtual bool evaluateFailureCriteria(FailureCriteriaStatus *fcStatus);
     virtual const char *giveClassName() const { return "DamagedNeighborLayered"; }
@@ -200,9 +200,9 @@ public:
 class FailureModuleElementInterface : public Interface
 {
 public:
-    FailureModuleElementInterface() : Interface() {}
+    FailureModuleElementInterface() : Interface() { }
     virtual const char *giveClassName() const { return "FailureModuleElementInterface"; }
-    virtual void computeFailureCriteriaQuantities(FailureCriteriaStatus *fc, TimeStep *tStep) {};
+    virtual void computeFailureCriteriaQuantities(FailureCriteriaStatus *fc, TimeStep *tStep) { };
 };
 
 
@@ -220,7 +220,7 @@ private:
 
 public:
     /// Constructor.
-    FractureManager(Domain *domain);
+    FractureManager(Domain * domain);
     /// Destructor.
     ~FractureManager();
 

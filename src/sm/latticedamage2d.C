@@ -52,11 +52,11 @@ namespace oofem {
 REGISTER_Material(LatticeDamage2d);
 
 LatticeDamage2d :: LatticeDamage2d(int n, Domain *d) : StructuralMaterial(n, d), RandomMaterialExtensionInterface()
-{}
+{ }
 
 
 LatticeDamage2d :: ~LatticeDamage2d()
-{}
+{ }
 
 int
 LatticeDamage2d :: hasMaterialModeCapability(MaterialMode mode)
@@ -769,7 +769,7 @@ Interface *
 LatticeDamage2dStatus :: giveInterface(InterfaceType type)
 {
     if ( type == RandomMaterialStatusExtensionInterfaceType ) {
-        return static_cast< RandomMaterialStatusExtensionInterface * >( this );
+        return static_cast< RandomMaterialStatusExtensionInterface * >(this);
     } else {
         return NULL;
     }
@@ -860,7 +860,7 @@ LatticeDamage2dStatus :: setVariableInStatus(double variable) {
 int
 LatticeDamage2dStatus :: giveCrackFlag()
 {
-    if ( crack_flag != 0 ) {}
+    if ( crack_flag != 0 ) { }
 
     return crack_flag;
 }

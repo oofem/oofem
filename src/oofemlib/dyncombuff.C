@@ -367,12 +367,12 @@ int
 DynamicCommunicationBuffer :: waitCompletion()
 {
     if ( mode == DCB_send ) {
-        while ( !this->sendCompleted() ) {}
+        while ( !this->sendCompleted() ) { }
 
         ;
         return 1;
     } else if ( mode == DCB_receive ) {
-        while ( !this->receiveCompleted() ) {}
+        while ( !this->receiveCompleted() ) { }
 
         ;
         return 1;
@@ -515,7 +515,7 @@ CommunicationPacketPool :: clear()
     std :: list< CommunicationPacket * > :: iterator it;
     for ( it = available_packets.begin(); it != available_packets.end(); ++it ) {
         if ( * it ) {
-            delete * it;
+            delete *it;
         }
     }
 

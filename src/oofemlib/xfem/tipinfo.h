@@ -22,8 +22,8 @@ namespace oofem {
  */
 struct TipInfo {
 public:
-    TipInfo() {}
-    ~TipInfo() {}
+    TipInfo() { }
+    ~TipInfo() { }
 
     FloatArray mGlobalCoord;
     double mArcPos;
@@ -34,8 +34,8 @@ public:
 };
 
 struct TipPropagation {
-    TipPropagation() {}
-    ~TipPropagation() {}
+    TipPropagation() { }
+    ~TipPropagation() { }
 
     int mTipIndex;
     FloatArray mPropagationDir;

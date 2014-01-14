@@ -48,7 +48,7 @@ namespace oofem {
 class LSpaceBB  : public LSpace
 {
 public:
-    LSpaceBB(int n, Domain *d);
+    LSpaceBB(int n, Domain * d);
     virtual ~LSpaceBB() { }
 
     virtual const char *giveInputRecordName() const { return _IFT_LSpaceBB_Name; }

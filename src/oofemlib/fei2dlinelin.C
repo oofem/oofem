@@ -68,9 +68,9 @@ void FEI2dLineLin :: local2global(FloatArray &answer, const FloatArray &lcoords,
     answer.resize( max(xind, yind) );
     answer.zero();
     answer.at(xind) = ( n(0) * cellgeo.giveVertexCoordinates(1)->at(xind) +
-                        n(1) * cellgeo.giveVertexCoordinates(2)->at(xind) );
+                       n(1) * cellgeo.giveVertexCoordinates(2)->at(xind) );
     answer.at(yind) = ( n(0) * cellgeo.giveVertexCoordinates(1)->at(yind) +
-                        n(1) * cellgeo.giveVertexCoordinates(2)->at(yind) );
+                       n(1) * cellgeo.giveVertexCoordinates(2)->at(yind) );
 }
 
 int FEI2dLineLin :: global2local(FloatArray &answer, const FloatArray &gcoords, const FEICellGeometry &cellgeo)
@@ -100,9 +100,9 @@ void FEI2dLineLin :: edgeEvaldNds(FloatArray &answer, int iedge,
     answer(1) =  0.5 * xi;
 
     double es1 = answer(0) * cellgeo.giveVertexCoordinates(1)->at(xind) +
-                 answer(1) * cellgeo.giveVertexCoordinates(2)->at(xind);
+    answer(1) * cellgeo.giveVertexCoordinates(2)->at(xind);
     double es2 = answer(0) * cellgeo.giveVertexCoordinates(1)->at(yind) +
-                 answer(1) * cellgeo.giveVertexCoordinates(2)->at(yind);
+    answer(1) * cellgeo.giveVertexCoordinates(2)->at(yind);
 
     double J = sqrt(es1 * es1 + es2 * es2);
     answer.times(1 / J);

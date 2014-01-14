@@ -67,7 +67,7 @@ void SlaveNode :: postInitialize()
 
     // initialize slave dofs (inside check of consistency of receiver and master dof)
     for ( int i = 1; i <= numberOfDofs; ++i ) {
-        SlaveDof *sdof = dynamic_cast< SlaveDof * >( dofArray [ i - 1 ] );
+        SlaveDof *sdof = dynamic_cast< SlaveDof * >(dofArray [ i - 1 ]);
         if ( sdof ) {
             sdof->initialize(masterDofManagers.giveSize(), masterDofManagers, NULL, masterWeights);
         }

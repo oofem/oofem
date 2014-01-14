@@ -146,7 +146,7 @@ public:
      *  node number in particular domain.
      *  @param d Domain to which component belongs to.
      */
-    LevelSetPCS(int n, Domain *d) : MaterialInterface(n, d) {
+    LevelSetPCS(int n, Domain * d) : MaterialInterface(n, d) {
         initialRefMatFlag = false;
         reinit_dt_flag = false;
         levelSetVersion = 0;

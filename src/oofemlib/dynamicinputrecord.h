@@ -74,9 +74,9 @@ public:
     /// Destructor.
     virtual ~DynamicInputRecord();
     /// Assignment operator.
-    DynamicInputRecord &operator=(const DynamicInputRecord &);
+    DynamicInputRecord &operator = ( const DynamicInputRecord & );
 
-    virtual InputRecord *GiveCopy() { return new DynamicInputRecord(* this); }
+    virtual InputRecord *GiveCopy() { return new DynamicInputRecord(*this); }
     virtual void finish(bool wrn = true);
 
     virtual IRResultType giveRecordKeywordField(std :: string &answer, int &value);

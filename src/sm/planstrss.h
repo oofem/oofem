@@ -56,15 +56,15 @@ namespace oofem {
  * stress elasticity finite element. Each node has 2 degrees of freedom.
  */
 class PlaneStress2d : public NLStructuralElement, public ZZNodalRecoveryModelInterface, public SPRNodalRecoveryModelInterface,
-    public SpatialLocalizerInterface,
-    public DirectErrorIndicatorRCInterface, public EIPrimaryUnknownMapperInterface,
-    public HuertaErrorEstimatorInterface, public HuertaRemeshingCriteriaInterface
+public SpatialLocalizerInterface,
+public DirectErrorIndicatorRCInterface, public EIPrimaryUnknownMapperInterface,
+public HuertaErrorEstimatorInterface, public HuertaRemeshingCriteriaInterface
 {
 protected:
     static FEI2dQuadLin interpolation;
 
 public:
-    PlaneStress2d(int n, Domain *d);
+    PlaneStress2d(int n, Domain * d);
     virtual ~PlaneStress2d();
 
     virtual int computeNumberOfDofs() { return 8; }

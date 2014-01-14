@@ -52,14 +52,14 @@ namespace oofem {
  * stress elasticity finite element. Each node has 2 degrees of freedom.
  */
 class QTrPlaneStrain : public NLStructuralElement, public SpatialLocalizerInterface,
-    public SPRNodalRecoveryModelInterface, public ZZNodalRecoveryModelInterface,
-    public DirectErrorIndicatorRCInterface, public EIPrimaryUnknownMapperInterface
+public SPRNodalRecoveryModelInterface, public ZZNodalRecoveryModelInterface,
+public DirectErrorIndicatorRCInterface, public EIPrimaryUnknownMapperInterface
 {
 protected:
     static FEI2dTrQuad interpolation;
 
 public:
-    QTrPlaneStrain(int n, Domain *d);
+    QTrPlaneStrain(int n, Domain * d);
     virtual ~QTrPlaneStrain() { }
 
     virtual int computeNumberOfDofs() { return 12; }

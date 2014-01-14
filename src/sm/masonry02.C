@@ -278,9 +278,9 @@ Masonry02 :: computeReducedHardeningVarsLamGradient(FloatMatrix &answer, GaussPo
 
     double help = this->gfI * this->c0 / ( this->gfII * this->ft0 );
     double k1 = sqrt( dlambda.at(1) * dlambda.at(1) +
-                      ( help * dlambda.at(2) ) * ( help * dlambda.at(2) ) );
+                     ( help * dlambda.at(2) ) * ( help * dlambda.at(2) ) );
     double k2 = sqrt( ( dlambda.at(1) / help ) * ( dlambda.at(1) / help ) +
-                      dlambda.at(2) * dlambda.at(2) );
+                     dlambda.at(2) * dlambda.at(2) );
 
     double p1 = 2.0 *this->Cnn *fullStressVector.at(1) + this->Cn;
     double p2 = 2.0 *this->Css *fullStressVector.at(2);

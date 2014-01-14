@@ -61,7 +61,9 @@ protected:
 
 public:
     /// Constructor
-    ScalarErrorIndicator(int n, Domain *d) : ErrorEstimator(n, d) { eeType = EET_SEI; }
+    ScalarErrorIndicator(int n, Domain * d) : ErrorEstimator(n, d) {
+        eeType = EET_SEI;
+    }
     /// Destructor
     virtual ~ScalarErrorIndicator() { }
 

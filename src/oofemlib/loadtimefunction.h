@@ -80,7 +80,7 @@ public:
      * @param n Load time function number.
      * @param d Domain to which new object will belongs.
      */
-    LoadTimeFunction(int n, Domain *d);
+    LoadTimeFunction(int n, Domain * d);
     /// Destructor
     virtual ~LoadTimeFunction() { }
 
