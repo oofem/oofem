@@ -711,6 +711,13 @@ if (USE_TM AND USE_FM)
   endforeach (case)
 endif()
 
+
+if (USE_TM AND USE_CEMHYD)
+  foreach (case ${tmcemhyd_tests})
+    add_test (NAME "test_${case}" WORKING_DIRECTORY ${oofem_TEST_DIR}/tmcemhyd COMMAND ${test_cmd} ${oofem_cmd} ${case} "s")
+  endforeach (case)
+endif()
+
 # Benchmarks
 file (GLOB benchmarks RELATIVE "${oofem_TEST_DIR}/benchmark" "${oofem_TEST_DIR}/benchmark/*.in")
 foreach (case ${benchmarks})
