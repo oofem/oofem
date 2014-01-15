@@ -224,7 +224,7 @@ LayeredCrossSection :: giveRealStress_Beam2d(FloatArray &answer, GaussPoint *gp,
     top = this->give(CS_TopZCoord, gp);
 
     if ( interface == NULL ) {
-        _error("giveRealStresses - element with no layer support encountered");
+        _error("giveRealStress_Beam2d - element with no layer support encountered");
     }
 
     for ( int layer = 1; layer <= numberOfLayers; layer++ ) {
@@ -285,7 +285,7 @@ LayeredCrossSection :: giveRealStress_Plate(FloatArray &answer, GaussPoint *gp, 
     top = this->give(CS_TopZCoord, gp);
 
     if ( interface == NULL ) {
-        _error("giveRealStresses - element with no layer support encountered");
+        _error("giveRealStress_Plate - element with no layer support encountered");
     }
 
     for ( int layer = 1; layer <= numberOfLayers; layer++ ) {
@@ -381,7 +381,7 @@ LayeredCrossSection :: giveRealStress_Shell(FloatArray &answer, GaussPoint *gp, 
     top = this->give(CS_TopZCoord, gp);
 
     if ( interface == NULL ) {
-        _error("giveRealStresses - element with no layer support encountered");
+        _error("giveRealStress_Shell - element with no layer support encountered");
     }
 
     for ( int layer = 1; layer <= numberOfLayers; layer++ ) {

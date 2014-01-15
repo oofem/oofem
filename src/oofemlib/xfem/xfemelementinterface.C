@@ -931,7 +931,7 @@ void XfemElementInterface :: XfemElementInterface_computeStressVector(FloatArray
 {
     StructuralCrossSection *cs = dynamic_cast< StructuralCrossSection * >( element->giveCrossSection() );
     if ( cs == NULL ) {
-        OOFEM_ERROR("In XfemElementInterface :: XfemElementInterface_computeStressVector: cs == NULL.\n");
+        OOFEM_ERROR("XfemElementInterface :: XfemElementInterface_computeStressVector: cs == NULL.\n");
     }
 
     cs->giveRealStresses(answer, gp, strain, tStep);

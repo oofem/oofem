@@ -137,7 +137,7 @@ GradDpElement :: computeStressVectorAndLocalCumulatedStrain(FloatArray &answer, 
             dpmat->giveRealStressVectorGrad(answer, localCumulatedStrain, gp, Epsilon, nlCumulatedStrain, tStep);
             return;
         } else {
-            OOFEM_ERROR("giveRealStresses : unsupported mode");
+            OOFEM_ERROR("computeStressVectorAndLocalCumulatedStrain : unsupported mode");
         }
     } else if ( nlGeo == 1 ) {
         if ( elem->giveDomain()->giveEngngModel()->giveFormulation() == TL ) {
@@ -147,7 +147,7 @@ GradDpElement :: computeStressVectorAndLocalCumulatedStrain(FloatArray &answer, 
                 dpmat->giveFirstPKStressVectorGrad(answer, localCumulatedStrain, gp, vF, nlCumulatedStrain, tStep);
                 return;
             } else {
-                OOFEM_ERROR("giveRealStresses : unsupported mode");
+                OOFEM_ERROR("computeStressVectorAndLocalCumulatedStrain : unsupported mode");
             }
         } else {
             FloatArray vF;
@@ -156,7 +156,7 @@ GradDpElement :: computeStressVectorAndLocalCumulatedStrain(FloatArray &answer, 
                 dpmat->giveCauchyStressVectorGrad(answer, localCumulatedStrain, gp, vF, nlCumulatedStrain, tStep);
                 return;
             } else {
-                OOFEM_ERROR("giveRealStresses : unsupported mode");
+                OOFEM_ERROR("computeStressVectorAndLocalCumulatedStrain : unsupported mode");
             }
         }
     }

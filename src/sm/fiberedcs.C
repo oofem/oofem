@@ -117,7 +117,7 @@ FiberedCrossSection :: giveRealStress_Beam3d(FloatArray &answer, GaussPoint *gp,
     FiberedCrossSectionInterface *interface;
 
     if ( ( interface = static_cast< FiberedCrossSectionInterface * >( element->giveInterface(FiberedCrossSectionInterfaceType) ) ) == NULL ) {
-        _error("giveRealStresses - element with no fiber support encountered");
+        _error("giveRealStress_Beam3d - element with no fiber support encountered");
     }
 
     answer.resize(6);
