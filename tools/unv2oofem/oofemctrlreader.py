@@ -233,7 +233,8 @@ class CTRLParser:
             print "Correct format: ncrosssect # nmat # nbc # nic # nltf #"
             print "but keywords are %s # %s # %s # %s # %s"%(dataline[0], dataline[2], dataline[4], dataline[6], dataline[8])
             sys.exit(0)
-        if dataline[10].lower() == "nset":
+        print dataline
+        if len(dataline)>10 and dataline[10].lower() == "nset":
             self.nset = int(dataline[11])
         self.ncrosssect=int(dataline[1])
         self.nmat=int(dataline[3])
@@ -241,11 +242,11 @@ class CTRLParser:
         self.nic=int(dataline[7])
         self.nltf=int(dataline[9])
         
-	print dataline
+        print dataline
 
-	if len(dataline)>=11:
-		if dataline[10].lower()=="nxfemman":
-			self.nxfemman=int(dataline[11])
+        if len(dataline)>=11:
+            if dataline[10].lower()=="nxfemman":
+                self.nxfemman=int(dataline[11])
 
         #read crossSect, material, bc, ic, and lft records into footer
         count = 0
