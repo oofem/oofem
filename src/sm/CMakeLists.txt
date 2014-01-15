@@ -49,6 +49,8 @@ set (sm_element
     qtrplanestrain.C qtrplanestraingrad.C
     qspacegrad.C
     dkt.C
+    coupledfieldselement.C
+    phasefieldelement.C
     )
 
 set (sm_crosssection
@@ -133,9 +135,8 @@ set (sm_material
     intmatbilinearcz.C
 	intmatbilinczelastic.C
     simplevitrificationmaterial.C
-    coupledfieldselement.C
-    phasefieldelement.C
 	intmatbilinczfagerstromrate.C
+    intmatisodamage.C
 	)
 
 set (sm_error
