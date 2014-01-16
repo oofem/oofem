@@ -57,7 +57,6 @@ const FloatArray
 }
 
 
-///@todo is not called!!
 int
 StructuralInterfaceCrossSection :: checkConsistency()
 {

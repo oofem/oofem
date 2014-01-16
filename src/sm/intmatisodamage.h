@@ -41,7 +41,7 @@
 
 ///@name Input fields for IntMatIsoDamage
 //@{
-#define _IFT_IntMatIsoDamage_Name "isointrfdm01"
+#define _IFT_IntMatIsoDamage_Name "intmatisodamage"
 #define _IFT_IntMatIsoDamage_kn "kn"
 #define _IFT_IntMatIsoDamage_ks "ks"
 #define _IFT_IntMatIsoDamage_ft "ft"
@@ -54,7 +54,7 @@ namespace oofem {
 class GaussPoint;
 
 /**
- * This class implements associated Material Status to IntMatIsoDamage.
+ * This class implements the InterfaceMaterialStatus associated with IntMatIsoDamage.
  */
 class IntMatIsoDamageStatus : public StructuralInterfaceMaterialStatus
 {
@@ -100,16 +100,16 @@ public:
 
 
 /**
- * Simple isotropic damage based model for 2d interface elements.
+ * Simple isotropic damage based model for interface elements.
  * In 2d, the interface elements are used to model contact layer between
- * element edges. The generalized strain vector contains two relative displacements
- * (in normal and shear direction). The generalized stress vector contains corresponding
+ * element edges. The jump vector contains the relative displacements
+ * (in normal and shear direction). The traction vector contains the corresponding
  * tractions in normal and tangent direction.
  *
  * The behaviour of the model is elastic, described by normal and shear stiffness components.
- * Isotropic damage is initiated  when the stress reaches the tensile strength. Damage evolution
- * is governed by normal component of generalized strain vector (normal relative displacement)
- * by an exponential softening law.
+ * Isotropic damage is initiated when the stress reaches the tensile strength. The damage evolution
+ * is governed by the normal jump
+ *.
  */
 class IntMatIsoDamage : public StructuralInterfaceMaterial
 {
@@ -138,6 +138,15 @@ public:
 
     virtual void giveEngTraction_3d(FloatArray &answer, GaussPoint *gp,
                                       const FloatArray &jump, TimeStep *tStep);
+
+    virtual void giveFirstPKTraction_3d(FloatArray &answer, GaussPoint *gp, const FloatArray &jump,
+                                        const FloatMatrix &F, TimeStep *tStep)
+    {
+        giveEngTraction_3d(answer, gp, jump, tStep);
+        IntMatIsoDamageStatus *status = static_cast< IntMatIsoDamageStatus * >( this->giveStatus(gp) );
+        status->letTempFirstPKTractionBe(answer);
+
+    }
 
     virtual int giveIPValue(FloatArray &answer, GaussPoint *gp, InternalStateType type, TimeStep *tStep);
     

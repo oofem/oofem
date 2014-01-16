@@ -164,9 +164,16 @@ StructuralInterfaceElement :: giveInternalForcesVector(FloatArray &answer,
     for ( int i = 0; i < iRule->giveNumberOfIntegrationPoints(); i++ ) {
         IntegrationPoint *ip = iRule->getIntegrationPoint(i);
         this->computeNmatrixAt(ip, N);
-
-        jump.beProductOf(N, u);
-        this->computeTraction(traction, ip, jump, tStep);
+        //if ( useUpdatedGpRecord == 1 ) {
+        //    StructuralInterfaceMaterialStatus *status = static_cast< StructuralInterfaceMaterialStatus * >( ip->giveMaterialStatus() );
+        //    //temp
+        //    FloatArray traction3d;
+        //    traction3d = status->giveTraction();
+        //    traction.setValues(2, traction3d.at(1), traction3d.at(3) );
+        //} else {
+            jump.beProductOf(N, u);
+            this->computeTraction(traction, ip, jump, tStep);
+        //}
 
         // compute internal cohesive forces as f = N^T*traction dA
         double dA = this->computeAreaAround(ip);
@@ -278,6 +285,7 @@ StructuralInterfaceElement :: checkConsistency()
         OOFEM_ERROR2( "StructuralInterfaceElement :: checkConsistency : cross section %s is not a structural interface cross section", this->giveCrossSection()->giveClassName() );
         result = 0;
     }
+    !this->giveInterfaceCrossSection()->checkConsistency();
     return result;
 }
 
