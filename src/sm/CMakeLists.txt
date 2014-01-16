@@ -104,7 +104,6 @@ set (sm_material
     isointerfacedamage02.C
     j2mat.C
     mat_cebfip90.C
-    hellmat.C
     mdm.C
     compodamagemat.C
     micromaterial.C
