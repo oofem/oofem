@@ -137,6 +137,7 @@ IntElLine1 :: giveDofManDofIDMask(int inode, EquationID, IntArray &answer) const
 void
 IntElLine1 :: computeTransformationMatrixAt(GaussPoint *gp, FloatMatrix &answer)
 {
+    // Transformation matrix to the local coordinate system
     FloatArray G;
     this->computeCovarBaseVectorAt(gp, G);
     G.normalize();

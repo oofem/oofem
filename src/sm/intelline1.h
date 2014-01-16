@@ -68,7 +68,7 @@ public:
 
     virtual int testElementExtension(ElementExtension ext) { return 0; }
 
-    virtual Interface *giveInterface(InterfaceType) { return NULL; }
+    //virtual Interface *giveInterface(InterfaceType) { return NULL; }
 
     // definition & identification
     virtual const char *giveInputRecordName() const { return _IFT_IntElLine1_Name; }
