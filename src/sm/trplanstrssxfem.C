@@ -90,15 +90,20 @@ int TrPlaneStress2dXFEM :: computeNumberOfDofs()
 
 void TrPlaneStress2dXFEM :: computeGaussPoints()
 {
-    XfemManager *xMan = this->giveDomain()->giveXfemManager();
+	if(giveDomain()->hasXfemManager()) {
+		XfemManager *xMan = giveDomain()->giveXfemManager();
 
-    if ( xMan->isElementEnriched(this) ) {
-        if ( !this->XfemElementInterface_updateIntegrationRule() ) {
-            TrPlaneStress2d :: computeGaussPoints();
-        }
-    } else   {
-        TrPlaneStress2d :: computeGaussPoints();
-    }
+		if ( xMan->isElementEnriched(this) ) {
+			if ( !this->XfemElementInterface_updateIntegrationRule() ) {
+				TrPlaneStress2d :: computeGaussPoints();
+			}
+		} else   {
+			TrPlaneStress2d :: computeGaussPoints();
+		}
+	}
+	else {
+		TrPlaneStress2d :: computeGaussPoints();
+	}
 }
 
 void TrPlaneStress2dXFEM :: computeBmatrixAt(GaussPoint *gp, FloatMatrix &answer, int li, int ui)
@@ -106,6 +111,10 @@ void TrPlaneStress2dXFEM :: computeBmatrixAt(GaussPoint *gp, FloatMatrix &answer
     XfemElementInterface_createEnrBmatrixAt(answer, * gp, * this);
 }
 
+void TrPlaneStress2dXFEM :: computeBHmatrixAt(GaussPoint *gp, FloatMatrix &answer)
+{
+    XfemElementInterface_createEnrBHmatrixAt(answer, * gp, * this);
+}
 
 void TrPlaneStress2dXFEM :: computeNmatrixAt(const FloatArray &iLocCoord, FloatMatrix &answer)
 {
@@ -119,13 +128,19 @@ TrPlaneStress2dXFEM :: giveDofManDofIDMask(int inode, EquationID ut, IntArray &a
 {
     // Returns the total id mask of the dof manager = regular id's + enriched id's
 
-    XfemManager *xMan = this->domain->giveXfemManager();
-    if ( xMan != NULL ) {
-        this->giveDofManager(inode)->giveCompleteMasterDofIDArray(answer);
-    } else {
-        // Continuous part
-        TrPlaneStress2d :: giveDofManDofIDMask(inode, ut, answer);
-    }
+	if(giveDomain()->hasXfemManager()) {
+
+		XfemManager *xMan = this->domain->giveXfemManager();
+		if ( xMan != NULL ) {
+			this->giveDofManager(inode)->giveCompleteMasterDofIDArray(answer);
+		} else {
+			// Continuous part
+			TrPlaneStress2d :: giveDofManDofIDMask(inode, ut, answer);
+		}
+	}
+	else {
+		TrPlaneStress2d :: giveDofManDofIDMask(inode, ut, answer);
+	}
 }
 
 void

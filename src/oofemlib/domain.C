@@ -1550,7 +1550,7 @@ Domain :: createDofs()
     }
 
     // XFEM manager create additional dofs themselves:
-    if ( xfemManager ) {
+    if ( this->hasXfemManager() ) {
         xfemManager->createEnrichedDofs();
     }
 }

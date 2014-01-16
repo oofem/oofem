@@ -81,6 +81,7 @@ public:
     virtual void computeNmatrixAt(const FloatArray &iLocCoord, FloatMatrix &answer);
     virtual void computeBmatrixAt(GaussPoint *gp, FloatMatrix &answer,
                                   int lowerIndx = 1, int upperIndx = ALL_STRAINS);
+    virtual void computeBHmatrixAt(GaussPoint *gp, FloatMatrix &answer);
     virtual void giveDofManDofIDMask(int inode, EquationID ut, IntArray &answer) const;
     virtual void computeConstitutiveMatrixAt(FloatMatrix &answer, MatResponseMode rMode, GaussPoint *, TimeStep *tStep);
     virtual void computeStressVector(FloatArray &answer, const FloatArray &strain, GaussPoint *gp, TimeStep *tStep);
