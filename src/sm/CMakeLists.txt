@@ -41,6 +41,7 @@ set (sm_element
     tr2shell7xfem.C
     trplanestressrotallman.C
     structuralinterfaceelement.C
+    intelpoint.C
     intelline1.C
     intelline2.C
     graddpelement.C graddpmaterialextensioninterface.C
