@@ -44,10 +44,9 @@
 #include "nonlocalbarrier.h"
 #include "initialcondition.h"
 #include "classfactory.h"
-#include "oofemtxtinputrecord.h"
 #include "outputmanager.h"
 #include "crosssection.h"
-#include "loadtimefunction.h"
+#include "function.h"
 #include "timer.h"
 #include "remeshingcrit.h"
 #include "dynamicinputrecord.h"
@@ -3556,7 +3555,7 @@ Subdivision :: createMesh(TimeStep *tStep, int domainNumber, int domainSerNum, D
     NonlocalBarrier *barrier;
     GeneralBoundaryCondition *bc;
     InitialCondition *ic;
-    LoadTimeFunction *ltf;
+    Function *func;
     std :: string name;
 
     // create new mesh (missing param for new mesh!)
@@ -3812,9 +3811,8 @@ Subdivision :: createMesh(TimeStep *tStep, int domainNumber, int domainSerNum, D
         parentElemMap.at(eNum) = parent;
 #endif
         if ( parent ) {
-            DynamicInputRecord ir;
             // Copy most of the existing parent element:
-            domain->giveElement(parent)->giveInputRecord(ir);
+            DynamicInputRecord ir(*domain->giveElement(parent));
             ir.setField(* mesh->giveElement(ielem)->giveNodes(), _IFT_Element_nodes);
             ir.giveRecordKeywordField(name);
             elem = classFactory.createElement(name.c_str(), eNum, * dNew);
@@ -3838,9 +3836,7 @@ Subdivision :: createMesh(TimeStep *tStep, int domainNumber, int domainSerNum, D
     int ncrosssect = domain->giveNumberOfCrossSectionModels();
     ( * dNew )->resizeCrossSectionModels(ncrosssect);
     for ( int i = 1; i <= ncrosssect; i++ ) {
-        DynamicInputRecord ir;
-        domain->giveCrossSection(i)->giveInputRecord(ir);
-        ir.giveRecordKeywordField(name);
+        DynamicInputRecord ir(*domain->giveCrossSection(i));
 
         crossSection = classFactory.createCrossSection(name.c_str(), i, * dNew);
         crossSection->initializeFrom(& ir);
@@ -3851,9 +3847,7 @@ Subdivision :: createMesh(TimeStep *tStep, int domainNumber, int domainSerNum, D
     int nmat = domain->giveNumberOfMaterialModels();
     ( * dNew )->resizeMaterials(nmat);
     for ( int i = 1; i <= nmat; i++ ) {
-        DynamicInputRecord ir;
-        domain->giveMaterial(i)->giveInputRecord(ir);
-        ir.giveRecordKeywordField(name);
+        DynamicInputRecord ir(*domain->giveMaterial(i));
 
         mat = classFactory.createMaterial(name.c_str(), i, * dNew);
         mat->initializeFrom(& ir);
@@ -3864,9 +3858,7 @@ Subdivision :: createMesh(TimeStep *tStep, int domainNumber, int domainSerNum, D
     int nbarriers = domain->giveNumberOfNonlocalBarriers();
     ( * dNew )->resizeNonlocalBarriers(nbarriers);
     for ( int i = 1; i <= nbarriers; i++ ) {
-        DynamicInputRecord ir;
-        domain->giveNonlocalBarrier(i)->giveInputRecord(ir);
-        ir.giveRecordKeywordField(name);
+        DynamicInputRecord ir(*domain->giveNonlocalBarrier(i));
 
         barrier = classFactory.createNonlocalBarrier(name.c_str(), i, * dNew);
         barrier->initializeFrom(& ir);
@@ -3877,9 +3869,7 @@ Subdivision :: createMesh(TimeStep *tStep, int domainNumber, int domainSerNum, D
     int nbc = domain->giveNumberOfBoundaryConditions();
     ( * dNew )->resizeBoundaryConditions(nbc);
     for ( int i = 1; i <= nbc; i++ ) {
-        DynamicInputRecord ir;
-        domain->giveBc(i)->giveInputRecord(ir);
-        ir.giveRecordKeywordField(name);
+        DynamicInputRecord ir(*domain->giveBc(i));
 
         bc = classFactory.createBoundaryCondition(name.c_str(), i, * dNew);
         bc->initializeFrom(& ir);
@@ -3890,9 +3880,7 @@ Subdivision :: createMesh(TimeStep *tStep, int domainNumber, int domainSerNum, D
     int nic = domain->giveNumberOfInitialConditions();
     ( * dNew )->resizeInitialConditions(nic);
     for ( int i = 1; i <= nic; i++ ) {
-        DynamicInputRecord ir;
-        domain->giveIc(i)->giveInputRecord(ir);
-        ir.giveRecordKeywordField(name);
+        DynamicInputRecord ir(*domain->giveIc(i));
 
         ic = new InitialCondition(i, * dNew);
         ic->initializeFrom(& ir);
@@ -3900,16 +3888,15 @@ Subdivision :: createMesh(TimeStep *tStep, int domainNumber, int domainSerNum, D
     }
 
     // load time functions
-    int nltf = domain->giveNumberOfLoadTimeFunctions();
-    ( * dNew )->resizeLoadTimeFunctions(nltf);
-    for ( int i = 1; i <= nltf; i++ ) {
-        DynamicInputRecord ir;
-        domain->giveLoadTimeFunction(i)->giveInputRecord(ir);
+    int nfunc = domain->giveNumberOfFunctions();
+    ( * dNew )->resizeFunctions(nfunc);
+    for ( int i = 1; i <= nfunc; i++ ) {
+        DynamicInputRecord ir(*domain->giveFunction(i));
         ir.giveRecordKeywordField(name);
 
-        ltf = classFactory.createLoadTimeFunction(name.c_str(), i, * dNew);
-        ltf->initializeFrom(& ir);
-        ( * dNew )->setLoadTimeFunction(i, ltf);
+        func = classFactory.createFunction(name.c_str(), i, * dNew);
+        func->initializeFrom(& ir);
+        ( * dNew )->setFunction(i, func);
     }
 
     // copy output manager settings
@@ -5141,13 +5128,13 @@ Subdivision :: exchangeRemoteElements(Domain *d, IntArray &parentMap)
     DomainTransactionManager *dtm = d->giveTransactionManager();
     for ( i = 1; i <= nnodes; i++ ) {
         if ( d->giveDofManager(i)->giveParallelMode() == DofManager_null ) {
-            dtm->addTransaction(DomainTransactionManager :: DTT_Remove, DomainTransactionManager :: DCT_DofManager, d->giveDofManager(i)->giveGlobalNumber(), NULL);
+            dtm->addDofManTransaction(DomainTransactionManager :: DTT_Remove, d->giveDofManager(i)->giveGlobalNumber(), NULL);
         }
     }
 
     for ( i = 1; i <= nelem; i++ ) {
         if ( d->giveElement(i)->giveParallelMode() == Element_remote ) {
-            dtm->addTransaction(DomainTransactionManager :: DTT_Remove, DomainTransactionManager :: DCT_Element, d->giveElement(i)->giveGlobalNumber(), NULL);
+            dtm->addElementTransaction(DomainTransactionManager :: DTT_Remove, d->giveElement(i)->giveGlobalNumber(), NULL);
         }
     }
 
@@ -5299,7 +5286,7 @@ Subdivision :: unpackRemoteElements(Domain *d, ProcessCommunicator &pc)
         dofman->setParallelMode(DofManager_null);
         // add transaction if new entry allocated; otherwise existing one has been modified via returned dofman
         if ( _newentry ) {
-            dtm->addTransaction(DomainTransactionManager :: DTT_ADD, DomainTransactionManager :: DCT_DofManager, _globnum, dofman);
+            dtm->addDofManTransaction(DomainTransactionManager :: DTT_ADD, _globnum, dofman);
         }
     } while ( 1 );
 
@@ -5317,7 +5304,7 @@ Subdivision :: unpackRemoteElements(Domain *d, ProcessCommunicator &pc)
         elem->restoreContext(& pcDataStream, CM_Definition | CM_DefinitionGlobal);
         elem->setParallelMode(Element_remote);
         elem->setPartitionList(elemPartitions);
-        dtm->addTransaction(DomainTransactionManager :: DTT_ADD, DomainTransactionManager :: DCT_Element, elem->giveGlobalNumber(), elem);
+        dtm->addElementTransaction(DomainTransactionManager :: DTT_ADD, elem->giveGlobalNumber(), elem);
         nrecv++;
         //OOFEM_LOG_INFO ("[%d] Received Remote elem [%d] from rank %d\n", myrank, elem->giveGlobalNumber(), iproc );
         //recvElemList.push_back(elem);

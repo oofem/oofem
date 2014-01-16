@@ -44,12 +44,12 @@
 namespace oofem {
 #define PiecewiseLinFunction_PRECISION 1.e-12
 
-REGISTER_LoadTimeFunction(PiecewiseLinFunction);
+REGISTER_Function(PiecewiseLinFunction);
 
-PiecewiseLinFunction :: PiecewiseLinFunction(int i, Domain *d) : LoadTimeFunction(i, d), dates(), values()
+PiecewiseLinFunction :: PiecewiseLinFunction(int i, Domain *d) : Function(i, d), dates(), values()
 {}
 
-double PiecewiseLinFunction :: __at(double time)
+double PiecewiseLinFunction :: evaluateAtTime(double time)
 // Returns the value of the receiver at time 'time'. 'time' should be
 // one of the dates of the receiver (currently there is no interpola-
 // tion between two points).
@@ -66,7 +66,7 @@ double PiecewiseLinFunction :: __at(double time)
             return this->values.at(i);
         } else if ( this->dates.at(i) > time ) {
             if ( i == 1 ) {
-                OOFEM_WARNING3( "PiecewiseLinFunction :: __at: computational time %f is out of given time %f, extrapolating value(s)", time, dates.at(i) );
+                OOFEM_WARNING3( "PiecewiseLinFunction :: evaluateAtTime: computational time %f is out of given time %f, extrapolating value(s)", time, dates.at(i) );
                 return 0.;
             }
 
@@ -82,7 +82,7 @@ double PiecewiseLinFunction :: __at(double time)
     return 0.;
 }
 
-double PiecewiseLinFunction :: __derAt(double time)
+double PiecewiseLinFunction :: evaluateVelocityAtTime(double time)
 // Returns the derivative of the receiver at time 'time'. 'time' should be
 // one of the dates of the receiver (currently there is no interpola-
 // tion between two points).
@@ -124,7 +124,7 @@ PiecewiseLinFunction :: initializeFrom(InputRecord *ir)
     const char *__proc = "initializeFrom"; // Required by IR_GIVE_FIELD macro
     IRResultType result;                // Required by IR_GIVE_FIELD macro
 
-    LoadTimeFunction :: initializeFrom(ir);
+    Function :: initializeFrom(ir);
 
     // Optional means, read data from external file (useful for very large sets of data)
     if ( ir->hasField(_IFT_PiecewiseLinFunction_dataFile) ) {
@@ -171,7 +171,7 @@ PiecewiseLinFunction :: initializeFrom(InputRecord *ir)
 
 void PiecewiseLinFunction :: giveInputRecord(DynamicInputRecord &input)
 {
-    LoadTimeFunction :: giveInputRecord(input);
+    Function :: giveInputRecord(input);
     input.setField(this->dates.giveSize(), _IFT_PiecewiseLinFunction_npoints);
     input.setField(this->dates, _IFT_PiecewiseLinFunction_t);
     input.setField(this->values, _IFT_PiecewiseLinFunction_ft);

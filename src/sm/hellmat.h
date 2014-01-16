@@ -31,8 +31,8 @@
 #define _IFT_HellmichMaterial_fc "fc"
 #define _IFT_HellmichMaterial_tAlpha "talpha"
 #define _IFT_HellmichMaterial_isoT "isot"
-#define _IFT_HellmichMaterial_Tltf "tltf"
-#define _IFT_HellmichMaterial_hltf "hltf"
+#define _IFT_HellmichMaterial_Ttf "tltf"
+#define _IFT_HellmichMaterial_htf "hltf"
 #define _IFT_HellmichMaterial_iniT "init"
 #define _IFT_HellmichMaterial_baseT "baset"
 #define _IFT_HellmichMaterial_flatT "flatt"
@@ -560,9 +560,9 @@ protected:
     double initialTemperature;
 
     /// Associated time function for temperature history input
-    int tTimeFunction;
+    int tFunction;
     /// Associated time function for humidity history input
-    int hTimeFunction;
+    int hFunction;
 
 
     /**
@@ -668,11 +668,11 @@ protected:
     /**
      * Returns time function for temperature given as direct input.
      */
-    LoadTimeFunction *giveTTimeFunction();
+    Function *giveTFunction();
     /**
      * Returns time function for relative humidity as direct input
      */
-    LoadTimeFunction *givehTimeFunction();
+    Function *givehFunction();
 
 
 public:

@@ -93,15 +93,17 @@ public:
      */
 protected:
     Domain *domain;
-    std :: map< int, FEMComponent * >dofmanTransactions, elementTransactions;
+    std :: map< int, DofManager * >dofmanTransactions;
+    std :: map< int, Element * >elementTransactions;
     //list<DTM_Transaction> transactions;
 
 public:
-    DomainTransactionManager(Domain *d);
+    DomainTransactionManager(Domain * d);
     ~DomainTransactionManager();
 
     void initialize();
-    int addTransaction(DomainTransactionType, DomainComponentType, int, FEMComponent *);
+    int addDofManTransaction(DomainTransactionType, int, DofManager *);
+    int addElementTransaction(DomainTransactionType, int, Element *);
     DofManager *giveDofManager(int label);
     Element *giveElement(int label);
     int  commitTransactions();

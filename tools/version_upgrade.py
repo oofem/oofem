@@ -111,6 +111,9 @@ keyword_renaming = {
 "quadaxisym1mt"     : "massaxi_quad1",
 "brick1mt"          : "mass_hexa1",
 "latticemt2d"       : "mass_lattice2d",
+# Other things (not elements):
+"heavisideltf"      : "heavisidetimefunction",
+"usrdefltf"         : "calculatorfunction",
 }
 
 

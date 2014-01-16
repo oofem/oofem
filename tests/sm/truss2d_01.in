@@ -17,7 +17,7 @@ truss2d 2 nodes 2 2 3 mat 1 crossSect 1
 truss2d 3 nodes 2 3 4 mat 1 crossSect 1 
 truss2d 4 nodes 2 4 5 mat 1 crossSect 1 
 truss2d 5 nodes 2 5 6 mat 1 crossSect 1 
-VariableCS 1 area "t=0.6+x*(0.1-0.6)/5.;t*1.0" 
+VariableCS 1 area $t=0.6+x1*(0.1-0.6)/5.;t*1.0$ 
 IsoLE 1 d 1. E 30. n 0.2 tAlpha 1.2e-5
 BoundaryCondition  1 loadTimeFunction 1 prescribedvalue 0.0
 NodalLoad 2 loadTimeFunction 1 Components 2 -10.0 0.0

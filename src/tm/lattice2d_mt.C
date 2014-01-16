@@ -108,11 +108,10 @@ double
 Lattice2d_mt :: givePressure()
 {
     LatticeTransportMaterialStatus *status;
-    GaussPoint *gp;
     IntegrationRule *iRule = integrationRulesArray [ giveDefaultIntegrationRule() ];
-    gp = iRule->getIntegrationPoint(0);
+    GaussPoint *gp = iRule->getIntegrationPoint(0);
 
-    status = ( LatticeTransportMaterialStatus * ) gp->giveMaterialStatus();
+    status = static_cast< LatticeTransportMaterialStatus * >( gp->giveMaterialStatus() );
 
     return status->givePressure();
 }
@@ -187,7 +186,7 @@ Lattice2d_mt :: updateInternalState(TimeStep *tStep)
     IntegrationRule *iRule;
     FloatArray f, r;
     FloatMatrix n;
-    TransportMaterial *mat = ( ( TransportMaterial * ) this->giveMaterial() );
+    TransportMaterial *mat = static_cast< TransportMaterial * >( this->giveMaterial() );
     GaussPoint *gp;
 
     // force updating ip values
@@ -334,7 +333,7 @@ Lattice2d_mt :: computeInternalSourceRhsVectorAt(FloatArray &answer, TimeStep *t
     nLoads    = this->giveBodyLoadArray()->giveSize();
     for ( i = 1; i <= nLoads; i++ ) {
         n     = bodyLoadArray.at(i);
-        load  = ( Load * ) domain->giveLoad(n);
+        load  = domain->giveLoad(n);
         ltype = load->giveBCGeoType();
 
         if ( ltype == GravityPressureBGT ) {

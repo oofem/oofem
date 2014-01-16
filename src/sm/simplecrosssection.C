@@ -472,7 +472,7 @@ SimpleCrossSection :: computeStressIndependentStrainVector(FloatArray &answer,
     double thick, width;
 
     if ( ( matmode == _2dBeam ) || ( matmode == _3dBeam ) || ( matmode == _3dShell ) || ( matmode == _2dPlate ) ) {
-        StructuralElement *elem = ( StructuralElement * ) gp->giveElement();
+        StructuralElement *elem = static_cast< StructuralElement * >( gp->giveElement() );
         elem->computeResultingIPTemperatureAt(et, tStep, gp, mode);
         FloatArray redAnswer;
 

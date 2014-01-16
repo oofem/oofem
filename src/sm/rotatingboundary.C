@@ -36,7 +36,7 @@
 #include "engngm.h"
 #include "dofmanager.h"
 #include "mathfem.h"
-#include "loadtimefunction.h"
+#include "function.h"
 #include "classfactory.h"
 #include "dynamicinputrecord.h"
 
@@ -52,7 +52,7 @@ double RotatingBoundary :: give(Dof *dof, ValueModeType mode, TimeStep *tStep)
     FloatArray answer, newcoords;
     double theta;
 
-    theta = this->giveLoadTimeFunction()->evaluate(tStep, mode);
+    theta = this->giveTimeFunction()->evaluate(tStep, mode);
 
     if ( axis.giveSize() != 3 ) {
         OOFEM_ERROR("RotatingBoundary :: give - Size of rotation axis != 3.");

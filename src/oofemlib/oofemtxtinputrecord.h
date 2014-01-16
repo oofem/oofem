@@ -79,7 +79,7 @@ public:
     /// Sets the record string.
     void setRecordString(const std :: string &newStr);
     /// Returns record string.
-    std :: string giveRecordAsString() { return this->record; }
+    virtual std :: string giveRecordAsString() const { return this->record; }
 
     void finish(bool wrn = true);
 
@@ -96,6 +96,7 @@ public:
     virtual IRResultType giveField(std :: vector< std :: string > &answer, InputFieldType id);
     virtual IRResultType giveField(Dictionary &answer, InputFieldType id);
     virtual IRResultType giveField(std :: list< Range > &answer, InputFieldType id);
+    virtual IRResultType giveField(ScalarFunction &answer, InputFieldType id);
 
     virtual bool hasField(InputFieldType id);
     virtual void printYourself();

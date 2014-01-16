@@ -219,7 +219,7 @@ void BsplinePlaneStressElement :: drawScalar(oofegGraphicContext &context)
  #ifdef COMPUTE_STRESS
                         FloatArray strain;
                         this->computeStrainVector(strain, & gp, tStep, u);
-                        ( ( StructuralCrossSection * ) this->giveCrossSection() )->giveRealStresses(val, & gp, strain, tStep);
+                        this->computeStressVector(val, strain, & gp, tStep);
  #endif
                         s [ k ] = val.at(indx);
                     }
@@ -335,7 +335,7 @@ void NURBSPlaneStressElement :: drawScalar(oofegGraphicContext &context)
  #ifdef COMPUTE_STRESS
                         FloatArray strain;
                         this->computeStrainVector(strain, & gp, tStep, u);
-                        ( ( StructuralCrossSection * ) this->giveCrossSection() )->giveRealStresses(val, & gp, strain, tStep);
+                        this->computeStressVector(val, strain, & gp, tStep);
  #endif
                         s [ k ] = val.at(indx);
 
@@ -542,7 +542,7 @@ void TSplinePlaneStressElement :: drawScalar(oofegGraphicContext &context)
  #ifdef COMPUTE_STRESS
                         FloatArray strain;
                         this->computeStrainVector(strain, & gp, tStep, u);
-                        ( ( StructuralCrossSection * ) this->giveCrossSection() )->giveRealStresses(val, & gp, strain, tStep);
+                        this->computeStressVector(val, strain, & gp, tStep);
  #endif
                         s [ k ] = val.at(indx);
                     }
@@ -738,7 +738,7 @@ void NURBSSpace3dElement :: drawScalar(oofegGraphicContext &context)
  #ifdef COMPUTE_STRESS
                             FloatArray strain;
                             this->computeStrainVector(strain, & gp, tStep, u);
-                            ( ( StructuralCrossSection * ) this->giveCrossSection() )->giveRealStresses(val, & gp, strain, tStep);
+                            this->computeStressVector(val, strain, & gp, tStep);
  #endif
                             s [ k ] = val.at(indx);
 

@@ -114,8 +114,8 @@ public:
 
     virtual IRResultType initializeFrom(InputRecord *ir);
 
-#ifdef __PETSC_MODULE
-    virtual void initPetscContexts();
+#ifdef __PARALLEL_MODE
+    virtual void initParallelContexts();
 #endif
 
     virtual int checkConsistency();

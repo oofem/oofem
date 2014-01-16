@@ -176,7 +176,7 @@ void MicroMaterial :: giveRealStressVector(FloatArray &answer, GaussPoint *gp, c
     //     IntegrationRule *iRule;
     //     Domain *microDomain = problemMicro->giveDomain(1); //from engngm.h
     //     EngngModel *microEngngModel = microDomain->giveEngngModel();
-    //     StructuralMaterialStatus *status = ( StructuralMaterialStatus * ) this->giveStatus(gp);
+    //     StructuralMaterialStatus *status = static_cast< StructuralMaterialStatus * >( this->giveStatus(gp) );
 
     OOFEM_ERROR("\n MicroMaterial :: giveRealStressVector should not be called, use giveInternalForcesVector instead\n");
 

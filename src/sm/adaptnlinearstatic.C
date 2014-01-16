@@ -53,8 +53,8 @@
 #include "contextioerr.h"
 #include "oofem_terminate.h"
 
-#ifdef __PETSC_MODULE
- #include "petsccontext.h"
+#ifdef __PARALLEL_MODE
+ #include "parallelcontext.h"
 #endif
 
 namespace oofem {
@@ -452,10 +452,10 @@ AdaptiveNonLinearStatic :: adaptiveRemap(Domain *dNew)
     this->domainPrescribedNeqs.at(2) = 0;
     this->domainList->put(2, dNew);
 
-#ifdef __PETSC_MODULE
-    PetscContext *pcNew = new PetscContext(this);
+#ifdef __PARALLEL_MODE
+    ParallelContext *pcNew = new ParallelContext(this);
 
-    this->petscContextList->put(2, pcNew);
+    this->parallelContextList->put(2, pcNew);
 #endif
 
     // init equation numbering
@@ -509,9 +509,9 @@ AdaptiveNonLinearStatic :: adaptiveRemap(Domain *dNew)
     domainList->put( 1, domainList->unlink(2) );
     domainList->at(1)->setNumber(1);
 
-#ifdef __PETSC_MODULE
-    petscContextList->put( 1, petscContextList->unlink(2) );
-    petscContextList->growTo(1);
+#ifdef __PARALLEL_MODE
+    parallelContextList->put( 1, parallelContextList->unlink(2) );
+    parallelContextList->growTo(1);
 #endif
 
     // keep equation numbering of new domain

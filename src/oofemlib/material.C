@@ -122,6 +122,12 @@ Material :: hasMaterialModeCapability(MaterialMode mode)
 int
 Material :: giveIPValue(FloatArray &answer, GaussPoint *gp, InternalStateType type, TimeStep *tStep)
 {
+    if ( type == IST_MaterialNumber ) {
+        answer.resize(1);
+        answer.at(1) = this->giveNumber();
+        return 1;
+    }
+
     answer.resize(0);
     return 0;
 }

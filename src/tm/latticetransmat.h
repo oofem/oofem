@@ -179,8 +179,6 @@ public:
     virtual double give(int, GaussPoint *gp);
 
     virtual MaterialStatus *CreateStatus(GaussPoint *gp) const;
-
-    virtual MaterialStatus *giveStatus(GaussPoint *gp) const;
 };
 } // end namespace oofem
 #define latticetransmat_h

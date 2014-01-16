@@ -197,6 +197,9 @@ void StationaryTransportProblem :: solveYourselfAt(TimeStep *tStep)
     FloatArray externalForces(neq);
     externalForces.zero();
     this->assembleVector( externalForces, tStep, EID_ConservationEquation, ExternalForcesVector, VM_Total, EModelDefaultEquationNumbering(), this->giveDomain(1) );
+#ifdef __PARALLEL_MODE
+    this->updateSharedDofManagers(externalForces, LoadExchangeTag);
+#endif
 
     // set-up numerical method
     this->giveNumericalMethod( this->giveCurrentMetaStep() );
@@ -236,6 +239,9 @@ StationaryTransportProblem :: updateComponent(TimeStep *tStep, NumericalCmpn cmp
         this->internalForces.zero();
         this->assembleVector(this->internalForces, tStep, EID_ConservationEquation, InternalForcesVector, VM_Total,
                              EModelDefaultEquationNumbering(), this->giveDomain(1), & this->eNorm);
+#ifdef __PARALLEL_MODE
+        this->updateSharedDofManagers(this->internalForces, InternalForcesExchangeTag);
+#endif
         return;
     } else if ( cmpn == NonLinearLhs ) {
         if ( !this->keepTangent ) {
@@ -385,14 +391,14 @@ StationaryTransportProblem :: updateInternalState(TimeStep *tStep)
 }
 
 
-#ifdef __PETSC_MODULE
+#ifdef __PARALLEL_MODE
 void
-StationaryTransportProblem :: initPetscContexts()
+StationaryTransportProblem :: initParallelContexts()
 {
-    petscContextList->growTo(ndomains);
+    parallelContextList->growTo(ndomains);
     for ( int i = 1; i <= this->ndomains; i++ ) {
-        PetscContext *petscContext =  new PetscContext(this);
-        petscContextList->put(i, petscContext);
+        ParallelContext *parallelContext =  new ParallelContext(this);
+        parallelContextList->put(i, parallelContext);
     }
 }
 #endif

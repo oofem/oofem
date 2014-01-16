@@ -32,8 +32,6 @@
  *  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  */
 
-#ifdef __PARALLEL_MODE
-
 #include "parallelordering.h"
 #include "engngm.h"
 #include "unknownnumberingscheme.h"
@@ -251,7 +249,7 @@ Natural2GlobalOrdering :: init(EngngModel *emodel, int di, const UnknownNumberin
         buffs [ p ]->resize( buffs [ p ]->givePackSize(MPI_INT, 1) * sizeToSend(p) );
 
 #if 0
-        OOFEM_LOG_INFO( "[%d]PetscN2G:: init: Send buffer[%d] size %d\n",
+        OOFEM_LOG_INFO( "[%d]Natural2GlobalOrdering :: init: Send buffer[%d] size %d\n",
                         myrank, p, sizeToSend(p) );
 #endif
     }
@@ -275,7 +273,7 @@ Natural2GlobalOrdering :: init(EngngModel *emodel, int di, const UnknownNumberin
                     }
 
 #if 0
-                    OOFEM_LOG_INFO("[%d]PetscN2G:: init: Sending localShared node %d[%d] to proc %d\n",
+                    OOFEM_LOG_INFO("[%d]Natural2GlobalOrdering :: init: Sending localShared node %d[%d] to proc %d\n",
                                    myrank, i, dman->giveGlobalNumber(), p);
 #endif
                     buffs [ p ]->packInt( dman->giveGlobalNumber() );
@@ -341,7 +339,7 @@ Natural2GlobalOrdering :: init(EngngModel *emodel, int di, const UnknownNumberin
         rbuffs [ p ] = new StaticCommunicationBuffer(MPI_COMM_WORLD, 0);
         rbuffs [ p ]->resize( rbuffs [ p ]->givePackSize(MPI_INT, 1) * sizeToRecv(p) );
 #if 0
-        OOFEM_LOG_INFO( "[%d]PetscN2G:: init: Receive buffer[%d] size %d\n",
+        OOFEM_LOG_INFO( "[%d]Natural2GlobalOrdering :: init: Receive buffer[%d] size %d\n",
                         myrank, p, sizeToRecv(p) );
 #endif
     }
@@ -371,7 +369,7 @@ Natural2GlobalOrdering :: init(EngngModel *emodel, int di, const UnknownNumberin
                         rbuffs [ p ]->unpackInt(shdm);
 
 #if 0
-                        OOFEM_LOG_INFO("[%d]PetscN2G:: init: Received shared node [%d] from proc %d\n",
+                        OOFEM_LOG_INFO("[%d]Natural2GlobalOrdering :: init: Received shared node [%d] from proc %d\n",
                                        myrank, shdm, p);
 #endif
                         //
@@ -591,4 +589,3 @@ Natural2LocalOrdering :: map2Old(IntArray &answer, const IntArray &src, int base
     }
 }
 } // end namespace oofem
-#endif

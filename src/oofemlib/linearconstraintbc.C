@@ -38,7 +38,7 @@
 #include "floatmatrix.h"
 #include "sparsemtrx.h"
 #include "unknownnumberingscheme.h"
-#include "loadtimefunction.h"
+#include "function.h"
 #include "timestep.h"
 #include "datastream.h"
 #include "contextioerr.h"
@@ -64,7 +64,7 @@ IRResultType LinearConstraintBC :: initializeFrom(InputRecord *ir)
     ActiveBoundaryCondition :: initializeFrom(ir);
     const char *__proc = "initializeFrom";
     IRResultType result;
-    rhsLtf = 0;
+    rhsTf = 0;
 
     IR_GIVE_FIELD(ir, weights, _IFT_LinearConstraintBC_weights);
     IR_GIVE_FIELD(ir, rhs, _IFT_LinearConstraintBC_rhs);
@@ -73,8 +73,8 @@ IRResultType LinearConstraintBC :: initializeFrom(InputRecord *ir)
     if ( weights.giveSize() != dofmans.giveSize() ) {
         OOFEM_ERROR3( "Size mismatch, weights %d and dofmans %d", weights.giveSize(), dofmans.giveSize() );
     }
-    IR_GIVE_OPTIONAL_FIELD(ir, weightsLtf, _IFT_LinearConstraintBC_weightsltf);
-    IR_GIVE_OPTIONAL_FIELD(ir, rhsLtf, _IFT_LinearConstraintBC_rhsltf);
+    IR_GIVE_OPTIONAL_FIELD(ir, weightsTf, _IFT_LinearConstraintBC_weightsfuncs);
+    IR_GIVE_OPTIONAL_FIELD(ir, rhsTf, _IFT_LinearConstraintBC_rhsfuncs);
 
     IR_GIVE_FIELD(ir, lhsType, _IFT_LinearConstraintBC_lhstype);
     IR_GIVE_FIELD(ir, rhsType, _IFT_LinearConstraintBC_rhstype);
@@ -116,8 +116,8 @@ void LinearConstraintBC :: assemble(SparseMtrx *answer, TimeStep *tStep, Equatio
     if ( this->isImposed(tStep) ) {
         for ( int _i = 1; _i <= size; _i++ ) { // loop over dofs
             double factor = 1.;
-            if ( weightsLtf.giveSize() ) {
-                factor = domain->giveLoadTimeFunction( weightsLtf.at(_i) )->__at( tStep->giveIntrinsicTime() );
+            if ( weightsTf.giveSize() ) {
+                factor = domain->giveFunction( weightsTf.at(_i) )->evaluateAtTime( tStep->giveIntrinsicTime() );
             }
             contrib.at(_i, 1) = this->weights.at(_i) * factor;
         }
@@ -158,8 +158,8 @@ void LinearConstraintBC :: assembleVector(FloatArray &answer, TimeStep *tStep, E
         // assemble location array
         for ( int _i = 1; _i <= size; _i++ ) {
             factor = 1.;
-            if ( weightsLtf.giveSize() ) {
-                factor = domain->giveLoadTimeFunction( weightsLtf.at(_i) )->__at( tStep->giveIntrinsicTime() );
+            if ( weightsTf.giveSize() ) {
+                factor = domain->giveFunction( weightsTf.at(_i) )->evaluateAtTime( tStep->giveIntrinsicTime() );
             }
             idof = this->domain->giveDofManager( this->dofmans.at(_i) )->giveDof( this->dofs.at(_i) );
             if ( s.giveDofEquationNumber(idof) ) {
@@ -172,8 +172,8 @@ void LinearConstraintBC :: assembleVector(FloatArray &answer, TimeStep *tStep, E
     } else {
         // use rhs value
 
-        if ( rhsLtf ) {
-            factor = domain->giveLoadTimeFunction(rhsLtf)->__at( tStep->giveIntrinsicTime() );
+        if ( rhsTf ) {
+            factor = domain->giveFunction(rhsTf)->evaluateAtTime( tStep->giveIntrinsicTime() );
         }
         this->giveLocArray( s, loc, lambdaeq.at(1) );
         vec.at(1) = rhs * factor;
@@ -181,7 +181,8 @@ void LinearConstraintBC :: assembleVector(FloatArray &answer, TimeStep *tStep, E
     }
 }
 
-void LinearConstraintBC :: giveLocationArrays(std :: vector< IntArray > &rows, std :: vector< IntArray > &cols, EquationID eid, CharType type, const UnknownNumberingScheme &r_s, const UnknownNumberingScheme &c_s) {
+void LinearConstraintBC :: giveLocationArrays(std :: vector< IntArray > &rows, std :: vector< IntArray > &cols, EquationID eid, CharType type, const UnknownNumberingScheme &r_s, const UnknownNumberingScheme &c_s)
+{
     rows.resize(3);
     cols.resize(3);
 
@@ -207,7 +208,7 @@ LinearConstraintBC :: saveContext(DataStream *stream, ContextMode mode, void *ob
         if ( ( iores = weights.storeYourself(stream, mode) ) != CIO_OK ) {
             THROW_CIOERR(iores);
         }
-        if ( ( iores = weightsLtf.storeYourself(stream, mode) ) != CIO_OK ) {
+        if ( ( iores = weightsTf.storeYourself(stream, mode) ) != CIO_OK ) {
             THROW_CIOERR(iores);
         }
         if ( ( iores = dofmans.storeYourself(stream, mode) ) != CIO_OK ) {
@@ -219,7 +220,7 @@ LinearConstraintBC :: saveContext(DataStream *stream, ContextMode mode, void *ob
         if ( !stream->write(& rhs, 1) ) {
             THROW_CIOERR(CIO_IOERR);
         }
-        if ( !stream->write(& rhsLtf, 1) ) {
+        if ( !stream->write(& rhsTf, 1) ) {
             THROW_CIOERR(CIO_IOERR);
         }
         if ( ( iores = lhsType.storeYourself(stream, mode) ) != CIO_OK ) {
@@ -246,7 +247,7 @@ LinearConstraintBC :: restoreContext(DataStream *stream, ContextMode mode, void 
         if ( ( iores = weights.restoreYourself(stream, mode) ) != CIO_OK ) {
             THROW_CIOERR(iores);
         }
-        if ( ( iores = weightsLtf.restoreYourself(stream, mode) ) != CIO_OK ) {
+        if ( ( iores = weightsTf.restoreYourself(stream, mode) ) != CIO_OK ) {
             THROW_CIOERR(iores);
         }
         if ( ( iores = dofmans.restoreYourself(stream, mode) ) != CIO_OK ) {
@@ -258,7 +259,7 @@ LinearConstraintBC :: restoreContext(DataStream *stream, ContextMode mode, void 
         if ( !stream->read(& rhs, 1) ) {
             THROW_CIOERR(CIO_IOERR);
         }
-        if ( !stream->read(& rhsLtf, 1) ) {
+        if ( !stream->read(& rhsTf, 1) ) {
             THROW_CIOERR(CIO_IOERR);
         }
         if ( ( iores = lhsType.restoreYourself(stream, mode) ) != CIO_OK ) {

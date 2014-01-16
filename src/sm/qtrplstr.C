@@ -72,7 +72,7 @@ QTrPlaneStress2d :: giveInterface(InterfaceType interface)
      * yielding zero entries in lumped form.
      *
      * if ( interface == ZZNodalRecoveryModelInterfaceType ) {
-     *    return ( ZZNodalRecoveryModelInterface * ) this;
+     *    return static_cast< ZZNodalRecoveryModelInterface * >( this );
      */
     if ( interface == SPRNodalRecoveryModelInterfaceType ) {
         return static_cast< SPRNodalRecoveryModelInterface * >( this );

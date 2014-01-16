@@ -89,7 +89,7 @@ protected:
     double deltaT;
     std :: string *inputStreamNames;
     /// Associated time function for time step increment
-    int dtTimeFunction;
+    int dtFunction;
     /**
      * Constant multiplier, optional input parameter. This parameter determines the ratio of
      * two consecutive time steps. Efficient for creep and relaxation analyses.
@@ -152,7 +152,7 @@ public:
      * Used time function should provide step lengths as function of step number.
      * Initial step with number 0 is considered as [ -dt(0), 0 ], first step is [ 0, dt(1) ], ...
      */
-    LoadTimeFunction *giveDtTimeFunction();
+    Function *giveDtFunction();
 
     /**
      * Returns the timestep length for given step number n, initial step is number 0

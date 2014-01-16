@@ -1193,7 +1193,7 @@ IRResultType Delamination :: initializeFrom(InputRecord *ir)
     }
 
     this->delamXiCoord = -1.0;
-    double totalThickness = layeredCS->give(CS_Thickness, NULL, NULL, NULL); // no position available
+    double totalThickness = layeredCS->give(CS_Thickness, NULL, NULL, false); // no position available
     for ( int i = 1; i <= this->interfaceNum; i++ ) {
         this->delamXiCoord += layeredCS->giveLayerThickness(i) / totalThickness * 2.0;
     }

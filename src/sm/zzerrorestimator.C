@@ -176,7 +176,7 @@ ZZErrorEstimator :: giveElementError(EE_ErrorType type, Element *elem, TimeStep 
     ZZErrorEstimatorInterface *interface;
     if ( type == internalStressET ) {
         double e, s;
-        interface = ( ZZErrorEstimatorInterface * ) elem->giveInterface(ZZErrorEstimatorInterfaceType);
+        interface = static_cast< ZZErrorEstimatorInterface * >( elem->giveInterface(ZZErrorEstimatorInterfaceType) );
         if ( interface ) {
             interface->ZZErrorEstimatorI_computeElementContributions(e, s, this->normType, tStep);
             return e;

@@ -62,13 +62,37 @@ Tokenizer :: readStringToken(std :: size_t &pos, const std :: string &line)
 std :: string
 Tokenizer :: readStructToken(std :: size_t &pos, const std :: string &line)
 {
-    std :: string x = this->readToken(pos, line, '}'); // read everything up to terminating '"' (or to the end of the string)
+    std :: string x = this->readToken(pos, line, '}'); // read everything up to terminating '}' (or to the end of the string)
     if ( line [ pos ] == '}' ) {
-        pos++;            // check if terminating '"' was found
+        pos++;            // check if terminating '}' was found
     } else {
         OOFEM_WARNING("Tokenizer::readStringToken : Missing closing separator (}) inserted at end of line");
     }
     return x + '}'; // structs are left with surrounding brackets, unlike strings ""
+}
+
+std :: string
+Tokenizer :: readSimpleExpressionToken(std :: size_t &pos, const std :: string &line)
+{
+    pos++;
+    std :: string x = this->readToken(pos, line, '$'); // read everything up to terminating '$' (or to the end of the string)
+    if ( line [ pos ] == '$' ) {
+        pos++;            // check if terminating '"' was found
+    } else {
+        OOFEM_WARNING("Tokenizer::readSimpleExpressionToken : Missing closing separator (\"$\") inserted at end of line");
+    }
+    return '$' + x + '$'; // simple expressions are left with surrounding '$";
+}
+
+
+std :: string
+Tokenizer :: readSimpleToken(std :: size_t &pos, const std :: string &line)
+{
+    std :: size_t startpos = pos;
+    while ( pos < line.size() && !isspace(line [ pos ]) ) {
+        pos++;
+    }
+    return line.substr(startpos, pos - startpos);
 }
 
 
@@ -76,17 +100,10 @@ std :: string
 Tokenizer :: readToken(std :: size_t &pos, const std :: string &line, char sep)
 {
     std :: size_t startpos = pos;
-    if ( sep == 0 ) {
-        while ( pos < line.size() && !isspace(line [ pos ]) ) {
-            pos++;
-        }
-        return line.substr(startpos, pos - startpos);
-    } else {
-        while ( pos < line.size() && line [ pos ] != sep ) {
-            pos++;
-        }
-        return line.substr(startpos, pos - startpos);
+    while ( pos < line.size() && line [ pos ] != sep ) {
+        pos++;
     }
+    return line.substr(startpos, pos - startpos);
 }
 
 
@@ -107,8 +124,10 @@ void Tokenizer :: tokenizeLine(const std :: string &currentLine)
             sList.push_back( this->readStringToken(bpos, currentLine) );
         } else if ( c == '{' ) {
             sList.push_back( this->readStructToken(bpos, currentLine) );
+        } else if (c == '$' ) {
+            sList.push_back( this->readSimpleExpressionToken(bpos, currentLine) );
         } else {
-            sList.push_back( this->readToken(bpos, currentLine, 0) );
+            sList.push_back( this->readSimpleToken(bpos, currentLine) );
         }
     }
 

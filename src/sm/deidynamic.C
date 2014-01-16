@@ -286,6 +286,10 @@ void DEIDynamic :: solveYourselfAt(TimeStep *tStep)
     loadVector.zero();
     this->assembleVector(loadVector, tStep, EID_MomentumBalance, ExternalForcesVector,
                          VM_Total, EModelDefaultEquationNumbering(), domain);
+#ifdef __PARALLEL_MODE
+    this->updateSharedDofManagers(loadVector, LoadExchangeTag);
+#endif
+
 
     //
     // assembling additional parts of right hand side

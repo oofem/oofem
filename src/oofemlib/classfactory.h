@@ -59,7 +59,7 @@ class DofManager;
 class GeneralBoundaryCondition;
 class CrossSection;
 class Material;
-class LoadTimeFunction;
+class Function;
 class NonlocalBarrier;
 class RandomFieldGenerator;
 class ExportModule;
@@ -101,7 +101,7 @@ template< typename T >GeneralBoundaryCondition *bcCreator(int n, Domain *d) { re
 template< typename T >CrossSection *csCreator(int n, Domain *d) { return new T(n, d); }
 template< typename T >Material *matCreator(int n, Domain *d) { return new T(n, d); }
 template< typename T >EngngModel *engngCreator(int n, EngngModel *m) { return ( new T(n, m) ); }
-template< typename T >LoadTimeFunction *ltfCreator(int n, Domain *d) { return new T(n, d); }
+template< typename T >Function *funcCreator(int n, Domain *d) { return new T(n, d); }
 template< typename T >NonlocalBarrier *nlbCreator(int n, Domain *d) { return new T(n, d); }
 template< typename T >RandomFieldGenerator *rfgCreator(int n, Domain *d) { return new T(n, d); }
 template< typename T >ExportModule *exportCreator(int n, EngngModel *e) { return ( new T(n, e) ); }
@@ -137,7 +137,7 @@ template< typename T >FailureCriteriaStatus *failureCriteriaCreator(int n, Failu
 #define REGISTER_CrossSection(class ) static bool __dummy_ ## class = GiveClassFactory().registerCrossSection(_IFT_ ## class ## _Name, csCreator< class > );
 #define REGISTER_Material(class ) static bool __dummy_ ## class = GiveClassFactory().registerMaterial(_IFT_ ## class ## _Name, matCreator< class > );
 #define REGISTER_EngngModel(class ) static bool __dummy_ ## class = GiveClassFactory().registerEngngModel(_IFT_ ## class ## _Name, engngCreator< class > );
-#define REGISTER_LoadTimeFunction(class ) static bool __dummy_ ## class = GiveClassFactory().registerLoadTimeFunction(_IFT_ ## class ## _Name, ltfCreator< class > );
+#define REGISTER_Function(class ) static bool __dummy_ ## class = GiveClassFactory().registerFunction(_IFT_ ## class ## _Name, funcCreator< class > );
 #define REGISTER_NonlocalBarrier(class ) static bool __dummy_ ## class = GiveClassFactory().registerNonlocalBarrier(_IFT_ ## class ## _Name, nlbCreator< class > );
 #define REGISTER_RandomFieldGenerator(class ) static bool __dummy_ ## class = GiveClassFactory().registerRandomFieldGenerator(_IFT_ ## class ## _Name, rfgCreator< class > );
 #define REGISTER_ExportModule(class ) static bool __dummy_ ## class = GiveClassFactory().registerExportModule(_IFT_ ## class ## _Name, exportCreator< class > );
@@ -191,8 +191,8 @@ private:
     std :: map< std :: string, Material * ( * )( int, Domain * ), CaseComp >matList;
     /// Associative container containing engng model creators with engng model name as key.
     std :: map< std :: string, EngngModel * ( * )( int, EngngModel * ), CaseComp >engngList;
-    /// Associative container containing load time function creators with ltf name as key.
-    std :: map< std :: string, LoadTimeFunction * ( * )( int, Domain * ), CaseComp >ltfList;
+    /// Associative container containing load time function creators with function name as key.
+    std :: map< std :: string, Function * ( * )( int, Domain * ), CaseComp >funcList;
     /// Associative container containing nonlocal barriers creators with barrier name as key.
     std :: map< std :: string, NonlocalBarrier * ( * )( int, Domain * ), CaseComp >nlbList;
     /// Associative container containing random field generator creators with names as key.
@@ -329,12 +329,12 @@ public:
      * @param domain Domain assigned to new object.
      * @return Newly allocated object of requested type, null if keyword not supported.
      */
-    LoadTimeFunction *createLoadTimeFunction(const char *name, int num, Domain *domain);
+    Function *createFunction(const char *name, int num, Domain *domain);
     /**
      * Registers a new load time function in the class factory.
      * @param name Keyword string.
      */
-    bool registerLoadTimeFunction( const char *name, LoadTimeFunction * ( * creator )( int, Domain * ) );
+    bool registerFunction( const char *name, Function * ( * creator )( int, Domain * ) );
     /**
      * Creates new instance of nonlocal barrier corresponding to given keyword.
      * @param name Keyword string determining the type of new instance.

@@ -48,7 +48,7 @@
 #include "leplic.h"
 #include "levelsetpcs.h"
 #include "datastream.h"
-#include "loadtimefunction.h"
+#include "function.h"
 #include "contextioerr.h"
 #include "timer.h"
 
@@ -105,8 +105,8 @@ SUPG :: initializeFrom(InputRecord *ir)
     sparseMtrxType = ( SparseMtrxType ) val;
 
     IR_GIVE_FIELD(ir, deltaT, _IFT_SUPG_deltat);
-    deltaTLTF = 0;
-    IR_GIVE_OPTIONAL_FIELD(ir, deltaTLTF, _IFT_SUPG_deltatltf);
+    deltaTF = 0;
+    IR_GIVE_OPTIONAL_FIELD(ir, deltaTF, _IFT_SUPG_deltatFunction);
 
     IR_GIVE_OPTIONAL_FIELD(ir, consistentMassFlag, _IFT_SUPG_cmflag);
 
@@ -247,8 +247,8 @@ SUPG :: giveNextStep()
 
     previousStep = currentStep;
 
-    if ( deltaTLTF ) {
-        dt *= domain->giveLoadTimeFunction(deltaTLTF)->__at(istep);
+    if ( deltaTF ) {
+        dt *= domain->giveFunction(deltaTF)->evaluateAtTime(istep);
     }
 
     // check for critical time step
@@ -385,13 +385,22 @@ SUPG :: solveYourselfAt(TimeStep *tStep)
     // assemble rhs (residual)
     //
     externalForces.zero();
-    this->assembleVectorFromElements( externalForces, tStep, EID_MomentumBalance_ConservationEquation, ExternalForcesVector, VM_Total,
-                                      EModelDefaultEquationNumbering(), this->giveDomain(1) );
+    this->assembleVector( externalForces, tStep, EID_MomentumBalance_ConservationEquation, ExternalForcesVector, VM_Total,
+                          EModelDefaultEquationNumbering(), this->giveDomain(1) );
+#ifdef __PARALLEL_MODE
+    this->updateSharedDofManagers(externalForces, LoadExchangeTag);
+#endif
+
     // algoritmic rhs part (assembled by e-model (in giveCharComponent service) from various element contribs)
     internalForces.zero();
-    this->assembleVectorFromElements( internalForces, tStep, EID_MomentumBalance_ConservationEquation, InternalForcesVector, VM_Total,
-                                      EModelDefaultEquationNumbering(), this->giveDomain(1) );
+    this->assembleVector( internalForces, tStep, EID_MomentumBalance_ConservationEquation, InternalForcesVector, VM_Total,
+                          EModelDefaultEquationNumbering(), this->giveDomain(1) );
+#ifdef __PARALLEL_MODE
+    this->updateSharedDofManagers(internalForces, InternalForcesExchangeTag);
+#endif
+
     rhs.beDifferenceOf(externalForces, internalForces);
+
     //
     // corrector
     //
@@ -490,8 +499,11 @@ SUPG :: solveYourselfAt(TimeStep *tStep)
         // assemble rhs (residual)
         //
         internalForces.zero();
-        this->assembleVectorFromElements( internalForces, tStep, EID_MomentumBalance_ConservationEquation, InternalForcesVector, VM_Total,
-                                          EModelDefaultEquationNumbering(), this->giveDomain(1) );
+        this->assembleVector( internalForces, tStep, EID_MomentumBalance_ConservationEquation, InternalForcesVector, VM_Total,
+                              EModelDefaultEquationNumbering(), this->giveDomain(1) );
+#ifdef __PARALLEL_MODE
+        this->updateSharedDofManagers(internalForces, InternalForcesExchangeTag);
+#endif
         rhs.beDifferenceOf(externalForces, internalForces);
 
         // check convergence and repeat iteration if desired
@@ -536,8 +548,11 @@ SUPG :: solveYourselfAt(TimeStep *tStep)
             // assemble rhs (residual)
             //
             internalForces.zero();
-            this->assembleVectorFromElements( internalForces, tStep, EID_MomentumBalance_ConservationEquation, InternalForcesVector, VM_Total,
-                                              EModelDefaultEquationNumbering(), this->giveDomain(1) );
+            this->assembleVector( internalForces, tStep, EID_MomentumBalance_ConservationEquation, InternalForcesVector, VM_Total,
+                                  EModelDefaultEquationNumbering(), this->giveDomain(1) );
+#ifdef __PARALLEL_MODE
+            this->updateSharedDofManagers(internalForces, InternalForcesExchangeTag);
+#endif
             rhs.beDifferenceOf(externalForces, internalForces);
         }
     } while ( ( rnorm > rtolv ) && ( _absErrResid > atolv ) && ( nite <= maxiter ) );
@@ -1292,15 +1307,15 @@ SUPG :: updateSolutionVectors(FloatArray &solutionVector, FloatArray &accelerati
 }
 
 
-#ifdef __PETSC_MODULE
+#ifdef __PARALLEL_MODE
 void
-SUPG :: initPetscContexts()
+SUPG :: initParallelContexts()
 {
-    PetscContext *petscContext;
-    petscContextList->growTo(ndomains);
+    ParallelContext *parallelContext;
+    parallelContextList->growTo(ndomains);
     for ( int i = 1; i <= this->ndomains; i++ ) {
-        petscContext =  new PetscContext(this);
-        petscContextList->put(i, petscContext);
+        parallelContext =  new ParallelContext(this);
+        parallelContextList->put(i, parallelContext);
     }
 }
 #endif

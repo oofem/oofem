@@ -131,12 +131,8 @@ public:
     void buildReactionTable(IntArray &restrDofMans, IntArray &restrDofs, IntArray &eqn, TimeStep *tStep, int di);
 
 
-#ifdef __PETSC_MODULE
-    /**
-     * Creates PETSc contexts. Must be implemented by derived classes since the governing equation type is required
-     * for context creation.
-     */
-    virtual void initPetscContexts();
+#ifdef __PARALLEL_MODE
+    virtual void initParallelContexts();
 #endif
 
 #ifdef __OOFEG

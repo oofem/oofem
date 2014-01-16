@@ -128,7 +128,7 @@ LatticeTransportMaterial :: giveCharacteristicValue(MatResponseMode mode,
                                                     GaussPoint *gp,
                                                     TimeStep *tStep)
 {
-    LatticeTransportMaterialStatus *status = ( LatticeTransportMaterialStatus * ) this->giveStatus(gp);
+    LatticeTransportMaterialStatus *status = static_cast< LatticeTransportMaterialStatus * >( this->giveStatus(gp) );
     double suction = status->giveTempField().at(1);
 
     if ( mode == Capacity ) {
@@ -238,7 +238,6 @@ LatticeTransportMaterial :: computeCapacity(double suction, GaussPoint *gp)
 }
 
 
-
 MaterialStatus *
 LatticeTransportMaterial :: CreateStatus(GaussPoint *gp) const
 {
@@ -247,24 +246,8 @@ LatticeTransportMaterial :: CreateStatus(GaussPoint *gp) const
 }
 
 
-
-MaterialStatus *
-LatticeTransportMaterial :: giveStatus(GaussPoint *gp) const
-{
-    MaterialStatus *status = ( MaterialStatus * ) gp->giveMaterialStatus();
-    if ( status == NULL ) {
-        status = this->CreateStatus(gp);
-
-        if ( status != NULL ) {
-            gp->setMaterialStatus( status, this->giveNumber() );
-        }
-    }
-
-    return status;
-}
-
-
-void LatticeTransportMaterialStatus :: printOutputAt(FILE *File, TimeStep *tNow)
+void
+LatticeTransportMaterialStatus :: printOutputAt(FILE *File, TimeStep *tNow)
 {
     MaterialStatus :: printOutputAt(File, tNow);
 
@@ -278,7 +261,8 @@ void LatticeTransportMaterialStatus :: printOutputAt(FILE *File, TimeStep *tNow)
     fprintf(File, "\n");
 }
 
-void LatticeTransportMaterialStatus :: updateYourself(TimeStep *tStep)
+void
+LatticeTransportMaterialStatus :: updateYourself(TimeStep *tStep)
 {
     TransportMaterialStatus :: updateYourself(tStep);
 }

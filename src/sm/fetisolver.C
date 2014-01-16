@@ -1068,7 +1068,7 @@ FETISolver :: solve(SparseMtrx *A, FloatArray *partitionLoad, FloatArray *partit
         OOFEM_ERROR("FETISolver :: solve: unsuported sparse matrix type");
     }
 
-    partitionStiffness = ( Skyline * ) A;
+    partitionStiffness = static_cast< Skyline * >( A );
 
     if ( ( partitionSolution->giveSize() ) != partitionLoad->giveSize() ) {
         OOFEM_ERROR("FETISolver :: solveYourselfAt: size mismatch");

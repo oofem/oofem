@@ -170,4 +170,15 @@ InputRecord :: giveOptionalField(std :: list< Range > &answer, InputFieldType id
         return r;
     }
 }
+
+IRResultType
+InputRecord :: giveOptionalField(ScalarFunction& answer, InputFieldType id)
+{
+    IRResultType r = this->giveField(answer, id);
+    if ( r == IRRT_NOTFOUND ) {
+        return IRRT_OK;
+    } else {
+        return r;
+    }
+}
 } // end namespace oofem

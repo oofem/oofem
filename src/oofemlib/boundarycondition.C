@@ -34,7 +34,7 @@
 
 #include "boundarycondition.h"
 #include "timestep.h"
-#include "loadtimefunction.h"
+#include "function.h"
 #include "verbose.h"
 #include "dynamicinputrecord.h"
 #include "classfactory.h"
@@ -46,7 +46,7 @@ double BoundaryCondition :: give(Dof *dof, ValueModeType mode, TimeStep *tStep)
 // Returns the value at tStep of the prescribed value of the kinematic
 // unknown 'u'. Returns 0 if 'u' has no prescribed value.
 {
-    double factor = this->giveLoadTimeFunction()->evaluate(tStep, mode);
+    double factor = this->giveTimeFunction()->evaluate(tStep, mode);
     int index = this->dofs.findFirstIndexOf( dof->giveDofID() );
     if ( !index ) {
         index = 1;

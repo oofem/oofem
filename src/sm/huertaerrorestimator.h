@@ -214,7 +214,7 @@ private:
     void extractVectorFrom(Element *element, FloatArray &vector, FloatArray &answer, int dofs, TimeStep *tStep);
 
     void setupRefinedProblemProlog(const char *problemName, int problemId, IntArray &localNodeIdArray,
-                                   int nodes, int elems, int csects, int mats, int loads, int ltfuncs,
+                                   int nodes, int elems, int csects, int mats, int loads, int funcs,
                                    IntArray &controlNode, IntArray &controlDof, TimeStep *tStep);
     void setupRefinedProblemEpilog1(int csects, int mats, int loads, int nlbarriers);
     void setupRefinedProblemEpilog2(int tfuncs);

@@ -32,17 +32,18 @@
  *  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  */
 
-#ifndef usrdeftimefunct_h
-#define usrdeftimefunct_h
+#ifndef calculatorfunction_h
+#define calculatorfunction_h
 
-#include "loadtimefunction.h"
+#include "function.h"
 
-///@name Input fields for UserDefinedLoadTimeFunction
+///@name Input fields for CalculatorFunction
 //@{
-#define _IFT_UserDefinedLoadTimeFunction_Name "usrdefltf"
-#define _IFT_UserDefinedLoadTimeFunction_ft "f(t)"
-#define _IFT_UserDefinedLoadTimeFunction_dfdt "dfdt(t)"
-#define _IFT_UserDefinedLoadTimeFunction_d2fdt2 "d2fdt2(t)"
+#define _IFT_CalculatorFunction_Name "usrdefltf"
+///@todo These aren't limited to just functions of "t" anymore; rename these.
+#define _IFT_CalculatorFunction_f "f(t)"
+#define _IFT_CalculatorFunction_dfdt "dfdt(t)"
+#define _IFT_CalculatorFunction_d2fdt2 "d2fdt2(t)"
 //@}
 
 namespace oofem {
@@ -50,13 +51,13 @@ namespace oofem {
  * Class representing user defined load time function. User input is function expression.
  * Uses Parser class to parse given expression. Slow but useful.
  * Load time function typically belongs to domain and is
- * attribute of one or more loads. Generally load time function is real function of time (@f$y=f(t)@f$).
+ * attribute of one or more loads. Generally load time function is real function of time (@f$ y=f(t) @f$).
  */
-class OOFEM_EXPORT UserDefinedLoadTimeFunction : public LoadTimeFunction
+class OOFEM_EXPORT CalculatorFunction : public Function
 {
 private:
     /// Expression for the function value.
-    std :: string ftExpression;
+    std :: string fExpression;
     /// Expression for first time derivative.
     std :: string dfdtExpression;
     /// Expression for second time derivative.
@@ -68,9 +69,9 @@ public:
      * @param n Load time function number.
      * @param d Domain to which new object will belongs..
      */
-    UserDefinedLoadTimeFunction(int n, Domain *d);
+    CalculatorFunction(int n, Domain *d);
     /// Destructor.
-    virtual ~UserDefinedLoadTimeFunction() { }
+    virtual ~CalculatorFunction() { }
 
     /**
      * Reads the fields
@@ -79,13 +80,15 @@ public:
      * - d2fdt2(t) (optional)
      */
     virtual IRResultType initializeFrom(InputRecord *ir);
+    virtual void giveInputRecord(DynamicInputRecord &ir);
 
-    virtual double __at(double t);
-    virtual double __derAt(double t);
-    virtual double __accelAt(double t);
+    virtual void evaluate(FloatArray &answer, std :: map< std :: string, FunctionArgument > &valDict);
+    virtual double evaluateAtTime(double t);
+    virtual double evaluateVelocityAtTime(double t);
+    virtual double evaluateAccelerationAtTime(double t);
 
-    virtual const char *giveClassName() const { return "UserDefinedLoadTimeFunction"; }
-    virtual const char *giveInputRecordName() const { return _IFT_UserDefinedLoadTimeFunction_Name; }
+    virtual const char *giveClassName() const { return "CalculatorFunction"; }
+    virtual const char *giveInputRecordName() const { return _IFT_CalculatorFunction_Name; }
 };
 } // end namespace oofem
-#endif // usrdeftimefunct_h
+#endif // calculatorfunction_h
