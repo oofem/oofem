@@ -108,7 +108,7 @@ private:
 
 public:
     /// Constructor.
-    AbaqusUserMaterial(int n, Domain *d) : StructuralMaterial(n, d), umatobj(NULL), umat(NULL) { }
+    AbaqusUserMaterial(int n, Domain *d);
     /// Destructor.
     virtual ~AbaqusUserMaterial();
 
