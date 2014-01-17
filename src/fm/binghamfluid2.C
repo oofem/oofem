@@ -63,13 +63,6 @@ BinghamFluidMaterial2 :: BinghamFluidMaterial2(int n, Domain *d) : FluidDynamicM
 {}
 
 
-int
-BinghamFluidMaterial2 :: hasMaterialModeCapability(MaterialMode mode)
-{
-    return mode == _2dFlow || mode == _3dFlow;
-}
-
-
 IRResultType
 BinghamFluidMaterial2 :: initializeFrom(InputRecord *ir)
 {
@@ -201,7 +194,7 @@ BinghamFluidMaterial2 :: computeDeviatoricStressVector(FloatArray &answer, Gauss
 #endif
     // update status
     status->letTempDeviatoricStrainVectorBe(epsd);
-    status->letTempDeviatoricStressVectorBe(answer);
+    status->letDeviatoricStressVectorBe(answer);
     status->letTempDevStrainMagnitudeBe(gamma);
     status->letTempDevStressMagnitudeBe(tau);
 }
@@ -553,11 +546,11 @@ BinghamFluidMaterial2Status :: BinghamFluidMaterial2Status(int n, Domain *d, Gau
         _error("BinghamFluidMaterial2Status: unsupported material mode");
     }
 
-    deviatoricStrainVector.resize(_size);
-    deviatoricStrainVector.zero();
+    deviatoricStrainRateVector.resize(_size);
+    deviatoricStrainRateVector.zero();
     deviatoricStressVector.resize(_size);
     deviatoricStressVector.zero();
-    temp_deviatoricStrainVector = deviatoricStrainVector;
+    temp_deviatoricStrainVector = deviatoricStrainRateVector;
 }
 
 void
@@ -565,8 +558,8 @@ BinghamFluidMaterial2Status :: printOutputAt(FILE *File, TimeStep *tNow)
 // Prints the strains and stresses on the data file.
 {
     fprintf(File, " strains ");
-    for ( int i = 1; i <= deviatoricStrainVector.giveSize(); i++ ) {
-        fprintf( File, " % .4e", deviatoricStrainVector.at(i) );
+    for ( int i = 1; i <= deviatoricStrainRateVector.giveSize(); i++ ) {
+        fprintf( File, " % .4e", deviatoricStrainRateVector.at(i) );
     }
 
     fprintf(File, "\n deviatoric stresses");
@@ -587,7 +580,7 @@ BinghamFluidMaterial2Status :: updateYourself(TimeStep *tStep)
 
     devStrainMagnitude = temp_devStrainMagnitude;
     devStressMagnitude = temp_devStressMagnitude;
-    deviatoricStrainVector = temp_deviatoricStrainVector;
+    deviatoricStrainRateVector = temp_deviatoricStrainVector;
 }
 
 
@@ -601,7 +594,7 @@ BinghamFluidMaterial2Status :: initTempStatus()
 
     temp_devStrainMagnitude = devStrainMagnitude;
     temp_devStressMagnitude = devStressMagnitude;
-    temp_deviatoricStrainVector = deviatoricStrainVector;
+    temp_deviatoricStrainVector = deviatoricStrainRateVector;
 }
 
 
@@ -629,10 +622,6 @@ BinghamFluidMaterial2Status :: saveContext(DataStream *stream, ContextMode mode,
         THROW_CIOERR(CIO_IOERR);
     }
 
-    if ( ( iores = deviatoricStrainVector.storeYourself(stream, mode) ) != CIO_OK ) {
-        THROW_CIOERR(iores);
-    }
-
     return CIO_OK;
 }
 
@@ -644,7 +633,6 @@ BinghamFluidMaterial2Status :: restoreContext(DataStream *stream, ContextMode mo
 // current state)
 //
 {
-    // FloatArray *s;
     contextIOResultType iores;
     if ( stream == NULL ) {
         _error("saveContex : can't write into NULL stream");
@@ -661,11 +649,6 @@ BinghamFluidMaterial2Status :: restoreContext(DataStream *stream, ContextMode mo
     if ( !stream->read(& devStressMagnitude, 1) ) {
         THROW_CIOERR(CIO_IOERR);
     }
-
-    if ( ( iores = deviatoricStrainVector.restoreYourself(stream, mode) ) != CIO_OK ) {
-        THROW_CIOERR(iores);
-    }
-
 
     return CIO_OK;
 }

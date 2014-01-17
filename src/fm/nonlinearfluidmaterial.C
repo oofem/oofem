@@ -115,19 +115,27 @@ NonlinearFluidMaterial :: computeDeviatoricStressVector(FloatArray &answer, Gaus
 {
     NonlinearFluidMaterialStatus *status = static_cast< NonlinearFluidMaterialStatus * >( this->giveStatus(gp) );
 
-    status->letTempDeviatoricStrainVectorBe(eps);
-
-    double normeps;
-
-    normeps = eps.at(1) * eps.at(1) + eps.at(2) * eps.at(2) + 0.5 * ( eps.at(3) * eps.at(3) );
-    normeps = sqrt(normeps);
+    double normeps2;
 
     answer = eps;
+    if ( eps.giveSize() == 3 ) {
+        normeps2 = eps.at(1) * eps.at(1) + eps.at(2) * eps.at(2) + 0.5 * ( eps.at(3) * eps.at(3) );
+        answer.at(3) *= 0.5;
+    } else if ( eps.giveSize() == 4 ) {
+        normeps2 = eps.at(1) * eps.at(1) + eps.at(2) * eps.at(2) + eps.at(3) * eps.at(3) + 0.5 * ( eps.at(4) * eps.at(4) );
+        answer.at(4) *= 0.5;
+    } else {
+        normeps2 = eps.at(1) * eps.at(1) + eps.at(2) * eps.at(2) + eps.at(3) * eps.at(3) + 0.5 * ( eps.at(4) * eps.at(4) + eps.at(5) * eps.at(5) +  eps.at(6) * eps.at(6) );
+        answer.at(4) *= 0.5;
+        answer.at(5) *= 0.5;
+        answer.at(6) *= 0.5;
+    }
 
-    answer.at(3) *= 0.5;
-    answer.times( 2.0 * viscosity * ( 1.0 + c * pow(normeps, alpha) ) );
+    answer.times( 2.0 * viscosity * ( 1.0 + c * pow(normeps2, alpha*0.5) ) );
 
     status->letTempDeviatoricStressVectorBe(answer);
+    status->letTempDeviatoricStrainVectorBe(eps);
+    status->letTempStrainNorm2Be(normeps2);
 }
 
 void
@@ -135,42 +143,42 @@ NonlinearFluidMaterial :: giveDeviatoricStiffnessMatrix(FloatMatrix &answer, Mat
                                                         TimeStep *tStep)
 {
     FloatArray eps;
-    double normeps = 0;
-
-    FloatMatrix op, t2;
+    double normeps2;
 
     NonlinearFluidMaterialStatus *status = static_cast< NonlinearFluidMaterialStatus * >( this->giveStatus(gp) );
     eps = status->giveTempDeviatoricStrainVector();
+    normeps2 = status->giveTempStrainNorm2();
 
-    eps.at(3) *= 0.5;
-
-    normeps = eps.at(1) * eps.at(1) + eps.at(2) * eps.at(2) + 2 * ( eps.at(3) * eps.at(3) );
-    normeps = sqrt(normeps);
-
-    op.resize(3, 3);
-    op.beDyadicProductOf(eps, eps);
-    if ( normeps != 0 ) {
-        op.times( 2 * viscosity * c * alpha * pow(normeps, alpha - 2) );
-    } else {
-        op.times(0);
-    }
-
-    t2.resize(3, 3);
-    t2.zero();
-    for ( int i = 1; i <= 3; i++ ) {
-        if ( normeps != 0 ) {
-            t2.at(i, i) = 2 * viscosity * ( 1 + c * pow(normeps, alpha) );
-        } else {
-            t2.at(i, i) = 2 * viscosity;
-        }
-    }
-
-    t2.at(3, 3) *= 0.5;
-
-    answer.resize(3, 3);
+    answer.resize(eps.giveSize(), eps.giveSize());
     answer.zero();
-    answer.add(op);
-    answer.add(t2);
+    for ( int i = 1; i <= answer.giveNumberOfRows(); i++ ) {
+        answer.at(i, i) = 1.;
+    }
+    if ( eps.giveSize() == 3 ) {
+        answer.at(3, 3) *= 0.5;
+    } else if ( eps.giveSize() == 4 ) {
+        answer.at(4, 4) *= 0.5;
+    } else {
+        answer.at(4, 4) *= 0.5;
+        answer.at(5, 5) *= 0.5;
+        answer.at(6, 6) *= 0.5;
+    }
+
+    if ( normeps2 != 0 ) {
+        FloatMatrix op;
+        if ( eps.giveSize() == 3 ) {
+            eps.at(3) *= 0.5;
+        } else {
+            eps.at(4) *= 0.5;
+            eps.at(5) *= 0.5;
+            eps.at(6) *= 0.5;
+        }
+        op.beDyadicProductOf(eps, eps);
+        answer.times( 2 * viscosity * ( 1 + c * pow(normeps2, alpha*0.5) ) );
+        answer.add( 2 * viscosity * c * alpha * pow(normeps2, alpha*0.5 - 1), op);
+    } else {
+        answer.times( 2 * viscosity );
+    }
 }
 
 int
@@ -193,6 +201,13 @@ NonlinearFluidMaterialStatus :: NonlinearFluidMaterialStatus(int n, Domain *d, G
 {
     temp_deviatoricStrainVector.resize(3);
     temp_deviatoricStrainVector.zero();
+    temp_deviatoricStressVector.resize(3);
+    temp_deviatoricStressVector.zero();
+    deviatoricStrainRateVector.resize(3);
+    deviatoricStrainRateVector.zero();
+    deviatoricStressVector.resize(3);
+    deviatoricStressVector.zero();
+    temp_norm2 = 0.;
 }
 
 void
@@ -200,7 +215,8 @@ NonlinearFluidMaterialStatus :: initTempStatus()
 {
     FluidDynamicMaterialStatus :: initTempStatus();
 
-    temp_deviatoricStrainVector = deviatoricStrainVector;
+    temp_deviatoricStressVector = deviatoricStressVector;
+    temp_deviatoricStrainVector = deviatoricStrainRateVector;
 }
 
 void
@@ -208,6 +224,7 @@ NonlinearFluidMaterialStatus :: updateYourself(TimeStep *tStep)
 {
     FluidDynamicMaterialStatus :: updateYourself(tStep);
 
-    deviatoricStrainVector = temp_deviatoricStrainVector;
+    deviatoricStressVector = temp_deviatoricStressVector;
+    deviatoricStrainRateVector = temp_deviatoricStrainVector;
 }
 } // end namespace oofem
