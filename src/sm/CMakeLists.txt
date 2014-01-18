@@ -112,7 +112,6 @@ set (sm_material
     druckerPragerPlasticitySM.C
     druckerpragercutmat.C
     masonry02.C
-    isointerfacedamage02.C
     j2mat.C
     mat_cebfip90.C
     hellmat.C
@@ -146,6 +145,7 @@ set (sm_interface_materials
     InterfaceMaterials/intmatisodamagetable.C
     InterfaceMaterials/intmatcoulombcontact.C
     InterfaceMaterials/Old/isointerfacedamage01.C
+    InterfaceMaterials/Old/isointerfacedamage02.C
     InterfaceMaterials/Old/simpleinterfacemat.C
     )
 
