@@ -117,7 +117,7 @@ FiberedCrossSection :: giveRealStress_Beam3d(FloatArray &answer, GaussPoint *gp,
     FiberedCrossSectionInterface *interface;
 
     if ( ( interface = static_cast< FiberedCrossSectionInterface * >( element->giveInterface(FiberedCrossSectionInterfaceType) ) ) == NULL ) {
-        _error("giveRealStresses - element with no fiber support encountered");
+        _error("giveRealStress_Beam3d - element with no fiber support encountered");
     }
 
     answer.resize(6);
@@ -384,12 +384,8 @@ FiberedCrossSection :: giveIPValue(FloatArray &answer, GaussPoint *gp, InternalS
     } else if ( type == IST_BeamStrainCurvatureTensor ) {
         answer = status->giveStrainVector();
         return 1;
-    } else if ( type == IST_CrossSectionNumber ) {
-        answer.resize(1);
-        answer.at(1) = this->giveNumber();
-        return 1;
     }
-    return 0;
+    return CrossSection :: giveIPValue(answer, gp, type, tStep);
 }
 
 

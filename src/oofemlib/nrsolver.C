@@ -587,12 +587,12 @@ NRSolver :: applyConstraintsToLoadIncrement(int nite, const SparseMtrx *k, Float
                 OOFEM_ERROR("NRSolver :: applyConstraintsToStiffness: PetscSparseMtrx Expected");
             }
 
-            PetscSparseMtrx *lhs = ( PetscSparseMtrx * )( k );
+            const PetscSparseMtrx *lhs = static_cast< const PetscSparseMtrx * >( k );
 
             Vec diag;
             PetscScalar *ptr;
             lhs->createVecGlobal(& diag);
-            MatGetDiagonal(* lhs->giveMtrx(), diag);
+            MatGetDiagonal(* (const_cast<PetscSparseMtrx *> (lhs)->giveMtrx()), diag);
             VecGetArray(diag, & ptr);
 
             for ( int i = 1; i <= numberOfPrescribedDofs; i++ ) {

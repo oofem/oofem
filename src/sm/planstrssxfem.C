@@ -76,20 +76,30 @@ PlaneStress2dXfem :: giveInterface(InterfaceType it)
 void
 PlaneStress2dXfem :: computeGaussPoints()
 {
-    XfemManager *xMan = this->giveDomain()->giveXfemManager();
+	if( this->giveDomain()->hasXfemManager() ) {
+		XfemManager *xMan = this->giveDomain()->giveXfemManager();
 
-    if ( xMan->isElementEnriched(this) ) {
-        if ( !this->XfemElementInterface_updateIntegrationRule() ) {
-            PlaneStress2d :: computeGaussPoints();
-        }
-    } else   {
-        PlaneStress2d :: computeGaussPoints();
-    }
+		if ( xMan->isElementEnriched(this) ) {
+			if ( !this->XfemElementInterface_updateIntegrationRule() ) {
+				PlaneStress2d :: computeGaussPoints();
+			}
+		} else   {
+			PlaneStress2d :: computeGaussPoints();
+		}
+	}
+	else {
+		PlaneStress2d :: computeGaussPoints();
+	}
 }
 
 void PlaneStress2dXfem :: computeBmatrixAt(GaussPoint *gp, FloatMatrix &answer, int li, int ui)
 {
     XfemElementInterface_createEnrBmatrixAt(answer, * gp, * this);
+}
+
+void PlaneStress2dXfem :: computeBHmatrixAt(GaussPoint *gp, FloatMatrix &answer)
+{
+    XfemElementInterface_createEnrBHmatrixAt(answer, * gp, * this);
 }
 
 
@@ -147,13 +157,18 @@ PlaneStress2dXfem :: giveInternalForcesVector(FloatArray &answer, TimeStep *tSte
 Element_Geometry_Type
 PlaneStress2dXfem :: giveGeometryType() const
 {
-    XfemManager *xMan = this->giveDomain()->giveXfemManager();
-    if ( xMan->isElementEnriched(this) ) {
-        //return EGT_Composite;
-        return EGT_quad_1;
-    } else {
-        return EGT_quad_1;
-    }
+	if( this->giveDomain()->hasXfemManager() ) {
+		XfemManager *xMan = this->giveDomain()->giveXfemManager();
+		if ( xMan->isElementEnriched(this) ) {
+			//return EGT_Composite;
+			return EGT_quad_1;
+		} else {
+			return EGT_quad_1;
+		}
+	}
+	else {
+		return EGT_quad_1;
+	}
 }
 
 

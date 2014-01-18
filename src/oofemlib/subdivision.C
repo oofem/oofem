@@ -5128,13 +5128,13 @@ Subdivision :: exchangeRemoteElements(Domain *d, IntArray &parentMap)
     DomainTransactionManager *dtm = d->giveTransactionManager();
     for ( i = 1; i <= nnodes; i++ ) {
         if ( d->giveDofManager(i)->giveParallelMode() == DofManager_null ) {
-            dtm->addTransaction(DomainTransactionManager :: DTT_Remove, DomainTransactionManager :: DCT_DofManager, d->giveDofManager(i)->giveGlobalNumber(), NULL);
+            dtm->addDofManTransaction(DomainTransactionManager :: DTT_Remove, d->giveDofManager(i)->giveGlobalNumber(), NULL);
         }
     }
 
     for ( i = 1; i <= nelem; i++ ) {
         if ( d->giveElement(i)->giveParallelMode() == Element_remote ) {
-            dtm->addTransaction(DomainTransactionManager :: DTT_Remove, DomainTransactionManager :: DCT_Element, d->giveElement(i)->giveGlobalNumber(), NULL);
+            dtm->addElementTransaction(DomainTransactionManager :: DTT_Remove, d->giveElement(i)->giveGlobalNumber(), NULL);
         }
     }
 
@@ -5286,7 +5286,7 @@ Subdivision :: unpackRemoteElements(Domain *d, ProcessCommunicator &pc)
         dofman->setParallelMode(DofManager_null);
         // add transaction if new entry allocated; otherwise existing one has been modified via returned dofman
         if ( _newentry ) {
-            dtm->addTransaction(DomainTransactionManager :: DTT_ADD, DomainTransactionManager :: DCT_DofManager, _globnum, dofman);
+            dtm->addDofManTransaction(DomainTransactionManager :: DTT_ADD, _globnum, dofman);
         }
     } while ( 1 );
 
@@ -5304,7 +5304,7 @@ Subdivision :: unpackRemoteElements(Domain *d, ProcessCommunicator &pc)
         elem->restoreContext(& pcDataStream, CM_Definition | CM_DefinitionGlobal);
         elem->setParallelMode(Element_remote);
         elem->setPartitionList(elemPartitions);
-        dtm->addTransaction(DomainTransactionManager :: DTT_ADD, DomainTransactionManager :: DCT_Element, elem->giveGlobalNumber(), elem);
+        dtm->addElementTransaction(DomainTransactionManager :: DTT_ADD, elem->giveGlobalNumber(), elem);
         nrecv++;
         //OOFEM_LOG_INFO ("[%d] Received Remote elem [%d] from rank %d\n", myrank, elem->giveGlobalNumber(), iproc );
         //recvElemList.push_back(elem);

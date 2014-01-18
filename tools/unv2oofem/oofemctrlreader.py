@@ -182,12 +182,15 @@ class CTRLParser:
                         for igroup in groups:
                             __gr=self.getElementGroup(FEM,igroup)
                             if __gr:
-                                if (__gr.oofem_boundaryLoadsNum):
-                                    elemName = 'RepresentsBoundaryLoad'#assign this name to an element so we know it represents a boundary load
-                                elif (__gr.oofem_sets):
-                                    elemName = 'RepresentsBoundaryLoad'
-                                else:
+                                if len(lineSplit) > 1:
                                     elemName = lineSplit[1].strip().rstrip('\n')
+                                else:
+                                    if (__gr.oofem_boundaryLoadsNum):
+                                        elemName = 'RepresentsBoundaryLoad'#assign this name to an element so we know it represents a boundary load
+                                    elif (__gr.oofem_sets):
+                                        elemName = 'RepresentsBoundaryLoad'
+                                    else:
+                                        elemName = 'Unknown'
                                 #check that elemName exists in a list and assign
                                 for n in range(len(self.oofem_elemProp)):
                                     if(self.oofem_elemProp[n].name.lower() == elemName.lower()):
@@ -222,24 +225,28 @@ class CTRLParser:
             if (line.split()[0].lower()=="outputmanager"):
                 break
 
-        # read component info (ncrossSect, nMat, mBc, nIc, nLtf) and extractor information to the end of the file
+        # read component info (ncrossSect, nMat, nBc, nIc, nLtf) and extractor information to the end of the file
         data=self.getRecordLine()
         dataline = data.split()
         if(dataline[0].lower()!="ncrosssect" or dataline[2].lower()!="nmat" or dataline[4].lower()!="nbc" or dataline[6].lower()!="nic" or dataline[8].lower()!="nltf"):
             print "Error in entry: %s" % data
-            print "Correct format: ncrosssect 1 nmat 8 nbc 2 nic 1 nltfs 1"
+            print "Correct format: ncrosssect # nmat # nbc # nic # nltf #"
+            print "but keywords are %s # %s # %s # %s # %s"%(dataline[0], dataline[2], dataline[4], dataline[6], dataline[8])
             sys.exit(0)
+        print dataline
+        if len(dataline)>10 and dataline[10].lower() == "nset":
+            self.nset = int(dataline[11])
         self.ncrosssect=int(dataline[1])
         self.nmat=int(dataline[3])
         self.nbc=int(dataline[5])
         self.nic=int(dataline[7])
         self.nltf=int(dataline[9])
         
-	print dataline
+        print dataline
 
-	if len(dataline)>=11:
-		if dataline[10].lower()=="nxfemman":
-			self.nxfemman=int(dataline[11])
+        if len(dataline)>=11:
+            if dataline[10].lower()=="nxfemman":
+                self.nxfemman=int(dataline[11])
 
         #read crossSect, material, bc, ic, and lft records into footer
         count = 0
@@ -255,13 +262,10 @@ class CTRLParser:
         #attach all following lines until empty line is hit. This is the end of OOFEM section
         while True:
             line=self.file.readline()
-            splitLine=line.split();
-            if(len(splitLine)>0):
-                if (splitLine[0].lower()=='set'):
-                    self.nset+=1
             if line.strip() == '':
                 break
             self.footer+= line
+        print "Number of sets = %d\n"%self.nset
 
         #look, whether the next line contains extractor data
         #pos = self.file.tell()

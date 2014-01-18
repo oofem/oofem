@@ -143,6 +143,10 @@ UserDefDirichletBC :: initializeFrom(InputRecord *ir)
         // Load and call Python function
         mpFunc = PyObject_GetAttrString(mpModule, "giveUserDefBC");
     }
+    else {
+    	printf("this->mFileName.c_str(): %s\n", this->mFileName.c_str() );
+    	OOFEM_ERROR("Error in UserDefDirichletBC :: initializeFrom(): mpModule == NULL")
+    }
 
     Py_INCREF(mpName);
     Py_INCREF(mpModule);

@@ -178,17 +178,14 @@ SLEPcSolver :: solve(SparseMtrx *a, SparseMtrx *b, FloatArray *_eigv, FloatMatri
 
     if ( nconv > 0 ) {
         fprintf(outStream, "SLEPcSolver :: solveYourselfAt: Convergence reached for RTOL=%20.15f", rtol);
-        PetscScalar kr, *array;
-        //PetscInt vSize;
+        PetscScalar kr;
         Vec Vr;
 
         ierr = MatGetVecs(* B->giveMtrx(), PETSC_NULL, & Vr);
         CHKERRQ(ierr);
 
 #ifdef __PARALLEL_MODE
-        Vec Vr2;
-        ierr = VecCreateSeq(PETSC_COMM_SELF, size, & Vr2);
-        CHKERRQ(ierr);
+        FloatArray Vr_loc;
 #endif
 
         for ( int i = 0; i < nconv && i < nroot; i++ ) {
@@ -199,35 +196,14 @@ SLEPcSolver :: solve(SparseMtrx *a, SparseMtrx *b, FloatArray *_eigv, FloatMatri
             _eigv->at(i + 1) = kr;
 
             //Store the eigenvector
-#ifdef __PARALLEL_MODE
-            engngModel->giveParallelContext( A->giveDomainIndex() )->scatterG2N(Vr, Vr2, INSERT_VALUES);
-            ierr = VecGetArray(Vr2, & array);
-            CHKERRQ(ierr);
+            A->scatterG2L(Vr, Vr_loc);
             for ( int j = 0; j < size; j++ ) {
-                _r->at(j + 1, i + 1) = array [ j ];
+                _r->at(j + 1, i + 1) = Vr_loc.at( j + 1 );
             }
-
-            ierr = VecRestoreArray(Vr2, & array);
-            CHKERRQ(ierr);
-#else
-            ierr = VecGetArray(Vr, & array);
-            CHKERRQ(ierr);
-            for ( int j = 0; j < size; j++ ) {
-                _r->at(j + 1, i + 1) = array [ j ];
-            }
-
-            ierr = VecRestoreArray(Vr, & array);
-            CHKERRQ(ierr);
-
-#endif
         }
 
         ierr = VecDestroy(Vr);
         CHKERRQ(ierr);
-#ifdef __PARALLEL_MODE
-        ierr = VecDestroy(Vr2);
-        CHKERRQ(ierr);
-#endif
     } else {
         OOFEM_ERROR("SLEPcSolver :: solveYourselfAt: No converged eigenpairs\n");
     }

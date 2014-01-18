@@ -97,12 +97,18 @@ private:
     /// Material properties.
     FloatArray properties;
 
+    /**
+     * Flag to determine how the stress and Jacobian are interpreted.
+     * 0 implies that the P and dPdF are returned from the umat routine.
+     */
+    int mStressInterpretation;
+
     /// Name of the file that contains the umat function
     std :: string filename;
 
 public:
     /// Constructor.
-    AbaqusUserMaterial(int n, Domain *d) : StructuralMaterial(n, d), umatobj(NULL), umat(NULL) { }
+    AbaqusUserMaterial(int n, Domain *d);
     /// Destructor.
     virtual ~AbaqusUserMaterial();
 
@@ -125,6 +131,10 @@ public:
                                                     MatResponseMode mode,
                                                     GaussPoint *gp,
                                                     TimeStep *tStep);
+
+    virtual void givePlaneStrainStiffMtrx_dPdF(FloatMatrix &answer,
+                                               MatResponseMode mmode, GaussPoint *gp,
+                                               TimeStep *tStep);
 
     virtual void giveRealStressVector_3d(FloatArray &answer, GaussPoint *gp,
                                          const FloatArray &reducedStrain, TimeStep *tStep);

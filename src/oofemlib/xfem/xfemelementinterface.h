@@ -83,6 +83,15 @@ public:
     /// Creates enriched B-matrix.
     void XfemElementInterface_createEnrBmatrixAt(FloatMatrix &oAnswer, GaussPoint &iGP, Element &iEl);
 
+    /// Creates enriched BH-matrix.
+    void XfemElementInterface_createEnrBHmatrixAt(FloatMatrix &oAnswer, GaussPoint &iGP, Element &iEl);
+
+    /**
+     * Help function for computation of B and BH.
+     * Avoid duplication of code.
+     */
+    void ComputeBOrBHMatrix(FloatMatrix &oAnswer, GaussPoint &iGP, Element &iEl, bool iComputeBH);
+
     /// Creates enriched N-matrix.
     void XfemElementInterface_createEnrNmatrixAt(FloatMatrix &oAnswer, const FloatArray &iLocCoord, Element &iEl);
 

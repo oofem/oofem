@@ -50,6 +50,14 @@ REGISTER_Material(AbaqusUserMaterial);
 
 int AbaqusUserMaterial :: n = 1;
 
+AbaqusUserMaterial :: AbaqusUserMaterial(int n, Domain *d) :
+StructuralMaterial(n, d),
+umatobj(NULL), umat(NULL),
+mStressInterpretation(0)
+{
+
+}
+
 AbaqusUserMaterial :: ~AbaqusUserMaterial()
 {
 #ifdef _WIN32
@@ -168,13 +176,62 @@ void AbaqusUserMaterial :: give3dMaterialStiffnessMatrix_dPdF(FloatMatrix &answe
     AbaqusUserMaterialStatus *ms = dynamic_cast< AbaqusUserMaterialStatus * >( this->giveStatus(gp) );
     if ( !ms->hasTangent() ) { ///@todo Make this hack fit more nicely into OOFEM in general;
         // Evaluating the function once, so that the tangent can be obtained.
-        FloatArray stress(9), vF;
-        vF = ms->giveTempFVector();
-        this->giveFirstPKStressVector_3d(stress, gp, vF, tStep);
+    	FloatArray stress, vF;
+    	vF = ms->giveTempFVector();
+    	this->giveFirstPKStressVector_3d(stress, gp, vF, tStep);
     }
-    FloatMatrix dSdE; // is this what Abaqus returns, why the extra D? (DDSDDE)
-    dSdE = ms->giveTempTangent();
-    this->give_dPdF_from(dSdE, answer, gp);
+
+#if 1
+//    if(mStressInterpretation == 0) {
+    	answer = ms->giveTempTangent();
+/*
+    }
+    else {
+		// The Abaqus Documentation of User Subroutines for UMAT Section 1.1.31 says that DDSDDE is defined as
+		// partial(Delta(sigma))/partial(Delta(epsilon)).
+		FloatMatrix dSdE;
+		dSdE = ms->giveTempTangent();
+		this->give_dPdF_from(dSdE, answer, gp);
+    }
+*/
+#else
+    double h = 1e-7;
+    FloatArray vF, vF_h, stress, stressh;
+	vF = ms->giveTempFVector();
+    stress = ( ( StructuralMaterialStatus * ) gp->giveMaterialStatus() )->giveTempPVector();
+    FloatMatrix En( 9, 9 );
+    for ( int i = 1; i <= 9; ++i ) {
+        vF_h = vF;
+        vF_h.at(i) += h;
+        this->giveFirstPKStressVector_3d(stressh, gp, vF_h, tStep);
+        stressh.subtract(stress);
+        stressh.times(1.0 / h);
+        En.setColumn(stressh, i);
+    }
+/*
+    printf("En = ");
+    En.printYourself();
+
+	answer = ms->giveTempTangent();
+	printf("Tangent = ");
+    answer.printYourself();
+
+    FloatMatrix diff = En;
+    diff.subtract(answer);
+    printf("diff: "); diff.printYourself();
+*/
+
+    answer = En;
+#endif
+}
+
+void AbaqusUserMaterial :: givePlaneStrainStiffMtrx_dPdF(FloatMatrix &answer,
+                                           MatResponseMode mmode, GaussPoint *gp,
+                                           TimeStep *tStep)
+{
+	FloatMatrix dPdF3d;
+    this->give3dMaterialStiffnessMatrix_dPdF(dPdF3d, mmode, gp, tStep);
+    StructuralMaterial::giveReducedMatrixForm(answer, dPdF3d, _PlaneStrain);
 }
 
 void AbaqusUserMaterial :: giveRealStressVector_3d(FloatArray &answer, GaussPoint *gp,
@@ -248,11 +305,13 @@ void AbaqusUserMaterial :: giveRealStressVector_3d(FloatArray &answer, GaussPoin
     /* Array containing the deformation gradient at the beginning of the increment. See the discussion
      * regarding the availability of the deformation gradient for various element types. */
     FloatMatrix dfgrd0(3, 3);
+    dfgrd0.beUnitMatrix();
     /* Array containing the deformation gradient at the end of the increment. The components of this array
      * are set to zero if nonlinear geometric effects are not included in the step definition associated with
      * this increment. See the discussion regarding the availability of the deformation gradient for various
      * element types. */
     FloatMatrix dfgrd1(3, 3);
+    dfgrd1.beUnitMatrix();
 
     int noel = gp->giveElement()->giveNumber(); // Element number.
     int npt = 0; // Integration point number.
@@ -265,6 +324,13 @@ void AbaqusUserMaterial :: giveRealStressVector_3d(FloatArray &answer, GaussPoin
     ///@todo No idea about these parameters
     double predef;
     double dpred;
+
+    // Change to Abaqus's component order
+    stress.changeComponentOrder();
+    strain.changeComponentOrder();
+    strainIncrement.changeComponentOrder();
+
+//    printf("stress oofem: "); stress.printYourself();
 
     OOFEM_LOG_DEBUG("AbaqusUserMaterial :: giveRealStressVector_3d - Calling subroutine");
     this->umat(stress.givePointer(), // STRESS
@@ -305,6 +371,12 @@ void AbaqusUserMaterial :: giveRealStressVector_3d(FloatArray &answer, GaussPoin
                & kstep, // KSTEP
                & kinc); // KINC
 
+    // Change to OOFEM's component order
+    stress.changeComponentOrder();
+    strain.changeComponentOrder();
+    strainIncrement.changeComponentOrder();
+    jacobian.changeComponentOrder();
+
     ms->letTempStrainVectorBe(reducedStrain);
     ms->letTempStressVectorBe(stress);
     ms->letTempStateVectorBe(state);
@@ -329,7 +401,7 @@ void AbaqusUserMaterial :: giveFirstPKStressVector_3d(FloatArray &answer, GaussP
     int nshr = 3;
 
     int ntens = ndi + nshr;
-    FloatArray stress(ntens);
+    FloatArray stress(9); // PK1
     FloatArray strain = ms->giveStrainVector();
     FloatArray strainIncrement;
 
@@ -347,7 +419,7 @@ void AbaqusUserMaterial :: giveFirstPKStressVector_3d(FloatArray &answer, GaussP
 
     strainIncrement.beDifferenceOf(reducedStrain, strain);
     FloatArray state = ms->giveStateVector();
-    FloatMatrix jacobian(ntens, ntens);
+    FloatMatrix jacobian(9, 9); // dPdF
     int numProperties = this->properties.giveSize();
 
     // Temperature and increment
@@ -405,6 +477,9 @@ void AbaqusUserMaterial :: giveFirstPKStressVector_3d(FloatArray &answer, GaussP
      * element types. */
     FloatMatrix dfgrd1(3, 3);
 
+    dfgrd0.beMatrixForm(ms->giveFVector());
+    dfgrd1.beMatrixForm(vF);
+
     int noel = gp->giveElement()->giveNumber(); // Element number.
     int npt = 0; // Integration point number.
 
@@ -417,6 +492,11 @@ void AbaqusUserMaterial :: giveFirstPKStressVector_3d(FloatArray &answer, GaussP
     ///@todo No idea about these parameters
     double predef;
     double dpred;
+
+    // Change to Abaqus's component order
+    stress.changeComponentOrder();
+    strain.changeComponentOrder();
+    strainIncrement.changeComponentOrder();
 
     OOFEM_LOG_DEBUG("AbaqusUserMaterial :: giveRealStressVector - Calling subroutine");
     this->umat(stress.givePointer(), // STRESS
@@ -457,22 +537,63 @@ void AbaqusUserMaterial :: giveFirstPKStressVector_3d(FloatArray &answer, GaussP
                & kstep, // KSTEP
                & kinc); // KINC
 
-    ms->letTempStrainVectorBe(reducedStrain);
-    ms->letTempStressVectorBe(stress);
-    ms->letTempStateVectorBe(state);
-    ms->letTempTangentBe(jacobian);
 
-    FloatArray vP;
-    // vP = ... // Compute first PK stress (P) from whatever stress measure Abaqus returns, if it is S then do:
-    // FloatMatrix P, S;
-    // S.beMatrixForm(stress);
-    // P.beProductOf(F, S);
-    // answer.beVectorForm(P);
-    answer = vP;
+    // Change to OOFEM's component order
+    stress.changeComponentOrder();
+    strain.changeComponentOrder();
+    strainIncrement.changeComponentOrder();
+    jacobian.changeComponentOrder();
 
-    ms->letTempFVectorBe(vF);
-    ms->letTempPVectorBe(vP);
 
+    if(mStressInterpretation == 0) {
+
+    	FloatMatrix P, cauchyStress;
+    	P.beMatrixForm(stress);
+
+		FloatArray vP;
+		vP.beVectorForm(P);
+
+		cauchyStress.beProductTOf(P,F);
+		cauchyStress.times( 1.0/F.giveDeterminant() );
+
+		FloatArray vCauchyStress;
+		vCauchyStress.beSymVectorForm(cauchyStress);
+
+		ms->letTempStrainVectorBe(reducedStrain);
+		ms->letTempStressVectorBe(vCauchyStress);
+		ms->letTempStateVectorBe(state);
+		ms->letTempTangentBe(jacobian);
+		ms->letTempPVectorBe(vP);
+		ms->letTempFVectorBe(vF);
+
+		answer = vP;
+
+    }
+    else {
+		FloatArray vP;
+		FloatMatrix P, sigma, F_inv;
+		F_inv.beInverseOf(F);
+
+		sigma.beMatrixForm(stress);
+		P.beProductOf(F, sigma);
+		vP.beVectorForm(P);
+		answer = vP;
+
+		// Convert from sigma to S
+		FloatMatrix S;
+		S.beProductOf(F_inv, P);
+		vS.beSymVectorForm(S);
+
+		// @todo Should convert from dsigmadE to dSdE here
+		// L2=detF*matmul( matmul ( inv(op_a_V9(F,F), cm-op_a_V9(ident,Tau)-op_b_V9(Tau,ident) ), inv(op_a_V9(Ft,Ft)))
+
+		ms->letTempStrainVectorBe(reducedStrain);
+		ms->letTempStressVectorBe(vS);
+		ms->letTempStateVectorBe(state);
+		ms->letTempTangentBe(jacobian);
+		ms->letTempPVectorBe(vP);
+		ms->letTempFVectorBe(vF);
+    }
 
     OOFEM_LOG_DEBUG("AbaqusUserMaterial :: giveRealStressVector_3d - Calling subroutine was successful");
 }
@@ -490,6 +611,9 @@ AbaqusUserMaterialStatus :: AbaqusUserMaterialStatus(int n, Domain *d, GaussPoin
     numState(numState), stateVector(numState), hasTangentFlag(false)
 {
     this->initTempStatus();
+
+    strainVector.resize(6);
+    strainVector.zero();
 }
 
 void AbaqusUserMaterialStatus :: updateYourself(TimeStep *tStep)

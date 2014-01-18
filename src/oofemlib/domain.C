@@ -1523,7 +1523,7 @@ Domain :: createDofs()
     }
 
     // XFEM manager create additional dofs themselves:
-    if ( xfemManager ) {
+    if ( this->hasXfemManager() ) {
         xfemManager->createEnrichedDofs();
     }
 }
@@ -1851,7 +1851,8 @@ Domain :: giveTransactionManager()
 int Domain :: commitTransactions(DomainTransactionManager *tm)
 {
     bool _exist;
-    std :: map< int, FEMComponent * > :: const_iterator it;
+    std :: map< int, DofManager * > :: const_iterator dit;
+    std :: map< int, Element * > :: const_iterator eit;
     AList< DofManager > *dofManagerList_new = new AList< DofManager >(0);
     AList< Element > *elementList_new = new AList< Element >(0);
 
@@ -1863,21 +1864,21 @@ int Domain :: commitTransactions(DomainTransactionManager *tm)
     this->initGlobalDofManMap();
     if ( !tm->dofmanTransactions.empty() ) {
         DofManager *dman;
-        for ( it = tm->dofmanTransactions.begin(); it != tm->dofmanTransactions.end(); ++it ) {
+        for ( dit = tm->dofmanTransactions.begin(); dit != tm->dofmanTransactions.end(); ++dit ) {
             _exist = false;
-            if ( dmanMap.find(it->first) != dmanMap.end() ) {
+            if ( dmanMap.find(dit->first) != dmanMap.end() ) {
                 _exist = true;
             }
 
             if ( _exist ) {
-                int lnum = dmanMap [ it->first ]->giveNumber();
+                int lnum = dmanMap [ dit->first ]->giveNumber();
                 dman = dofManagerList->unlink(lnum);
-                dmanMap.erase(it->first);
+                dmanMap.erase(dit->first);
                 delete dman;
             }
 
-            if ( it->second ) {
-                dmanMap [ it->first ] = ( DofManager * ) it->second;
+            if ( dit->second ) {
+                dmanMap [ dit->first ] = ( DofManager * ) dit->second;
             }
         } // end loop over DofmanTransactions
     }
@@ -1887,8 +1888,8 @@ int Domain :: commitTransactions(DomainTransactionManager *tm)
         int gen;
         Element *elem;
 
-        for ( it = tm->elementTransactions.begin(); it != tm->elementTransactions.end(); ++it ) {
-            gen = it->first;
+        for ( eit = tm->elementTransactions.begin(); eit != tm->elementTransactions.end(); ++eit ) {
+            gen = eit->first;
             bool _exist = false;
             if ( elementMap.find(gen) != elementMap.end() ) {
                 _exist = true;
@@ -1901,8 +1902,8 @@ int Domain :: commitTransactions(DomainTransactionManager *tm)
                 delete elem;
             }
 
-            if ( it->second ) {
-                elementMap [ gen ] = ( Element * ) it->second;
+            if ( eit->second ) {
+                elementMap [ gen ] = ( Element * ) eit->second;
             }
         }
     }

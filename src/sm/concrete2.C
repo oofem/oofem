@@ -183,7 +183,7 @@ Concrete2 :: giveRealStressVector(FloatArray &answer, GaussPoint *gp,
         giveRealStresses3dShellLayer(answer, gp, strain, tStep);
         break;
     default:
-        _error("giveRealStresses : unsupported stressMode\n");
+        _error("giveRealStressVector : unsupported stressMode\n");
     }
 }
 

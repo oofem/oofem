@@ -1,9 +1,11 @@
 #!/usr/bin/python3
+# -*- coding: iso-8859-1 -*-
 
 # Description: Creates a regular cubic grid of 27 node elements. Serves as an example of how to generate an input file for OOFEM from Python.
 # Author: Mikael Öhman
 # License: CC0
 
+from __future__ import print_function
 import rveToolbox
 from numpy import *
 
