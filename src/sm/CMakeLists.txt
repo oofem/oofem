@@ -135,9 +135,10 @@ set (sm_material
 	intmatbilinczjansson.C
     intmatbilinearcz.C
 	intmatbilinczelastic.C
-    simplevitrificationmaterial.C
 	intmatbilinczfagerstromrate.C
     intmatisodamage.C
+	intmatcoulombcontact.C
+	simplevitrificationmaterial.C
 	)
 
 set (sm_error
