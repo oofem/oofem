@@ -41,9 +41,6 @@ set (sm_element
     tr2shell7xfem.C
     trplanestressrotallman.C
     structuralinterfaceelement.C
-    intelpoint.C
-    intelline1.C
-    intelline2.C
     graddpelement.C graddpmaterialextensioninterface.C
     qtruss1d.C qtruss1dgrad.C
     qplanestrain.C qplanestraingrad.C
@@ -53,6 +50,13 @@ set (sm_element
     coupledfieldselement.C
     phasefieldelement.C
     )
+
+set (sm_interface_elements
+    InterfaceElements/intelpoint.C
+    InterfaceElements/intelline1.C
+    InterfaceElements/intelline2.C
+    )
+
 
 set (sm_crosssection
     structuralcrosssection.C
@@ -108,7 +112,6 @@ set (sm_material
     druckerPragerPlasticitySM.C
     druckerpragercutmat.C
     masonry02.C
-    isointerfacedamage01.C
     isointerfacedamage02.C
     j2mat.C
     mat_cebfip90.C
@@ -125,21 +128,26 @@ set (sm_material
     rankinematgrad.C
     rankinematnl.C
     kelvinChSolM.C
-    simpleinterfacemat.C
     latticematstatus.C
     latticedamage2d.C
     dustmat.C
     lsmastermat.C
 	lsmastermatgrad.C
-    intmatbilinczfagerstrom.C
-	intmatbilinczjansson.C
-    intmatbilinearcz.C
-	intmatbilinczelastic.C
-	intmatbilinczfagerstromrate.C
-    intmatisodamage.C
-	intmatcoulombcontact.C
 	simplevitrificationmaterial.C
 	)
+
+set (sm_interface_materials
+    InterfaceMaterials/intmatbilinczfagerstrom.C
+    InterfaceMaterials/intmatbilinczjansson.C
+    InterfaceMaterials/intmatbilinearcz.C
+    InterfaceMaterials/intmatbilinczelastic.C
+    InterfaceMaterials/intmatbilinczfagerstromrate.C
+    InterfaceMaterials/intmatisodamage.C
+    InterfaceMaterials/intmatisodamagetable.C
+    InterfaceMaterials/intmatcoulombcontact.C
+    InterfaceMaterials/Old/isointerfacedamage01.C
+    InterfaceMaterials/Old/simpleinterfacemat.C
+    )
 
 set (sm_error
     huertaerrorestimator.C
@@ -197,10 +205,12 @@ set (sm_obsolete
 
 set (sm
     ${sm_element}
+    ${sm_interface_elements}
     ${sm_crosssection}
     ${sm_loads}
     ${sm_emodel}
     ${sm_material}
+    ${sm_interface_materials}
     ${sm_status}
     ${sm_export}
     ${sm_barrier}
