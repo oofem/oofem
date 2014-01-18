@@ -32,25 +32,24 @@
  *  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  */
 
-#ifndef fei3dtriquad_h
-#define fei3dtriquad_h
+#ifndef fei3dtrilin_h
+#define fei3dtrilin_h
 
 #include "feinterpol3d.h"
 
 namespace oofem {
 /**
- * Second order triangular interpolation in 3D space (6 nodes).
+ * First order triangular interpolation in 3D space (3 nodes).
  * @todo This class is entirely unchecked.
  * @author Jim Brouzoulis
- * @author Mikael Öhman
  */
-class OOFEM_EXPORT FEI3dTrQuad : public FEInterpolation3d
+class OOFEM_EXPORT FEI3dTrLin : public FEInterpolation3d
 {
 public:
-    FEI3dTrQuad() : FEInterpolation3d(2) { }
+    FEI3dTrLin() : FEInterpolation3d(2) { }
 
     virtual integrationDomain giveIntegrationDomain() const { return _Triangle; }
-    virtual Element_Geometry_Type giveGeometryType() const { return EGT_triangle_2; }
+    virtual Element_Geometry_Type giveGeometryType() const { return EGT_triangle_1; }
 
     // Bulk
     virtual void evalN(FloatArray &answer, const FloatArray &lcoords, const FEICellGeometry &cellgeo);
@@ -59,10 +58,8 @@ public:
     virtual int  global2local(FloatArray &answer, const FloatArray &lcoords, const FEICellGeometry &cellgeo);
     virtual double giveTransformationJacobian(const FloatArray &lcoords, const FEICellGeometry &cellgeo);
 
-    // new methods
     void giveDerivativeXi(FloatArray &n, const FloatArray &lcoords);
     void giveDerivativeEta(FloatArray &n, const FloatArray &lcoords);
-    //void evaldNdxi(FloatMatrix &answer, const FloatArray &lcoords);
     virtual void evaldNdxi(FloatMatrix &answer, const FloatArray &lcoords, const FEICellGeometry &cellgeo);
     void surfaceEvaldNdxi(FloatMatrix &answer, const FloatArray &lcoords);
 
