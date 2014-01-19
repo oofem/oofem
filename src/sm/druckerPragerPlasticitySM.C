@@ -41,7 +41,6 @@
 #include "intarray.h"
 #include "structuralmaterial.h"
 #include "isolinearelasticmaterial.h"
-#include "structuralcrosssection.h"
 #include "datastream.h"
 #include "contextioerr.h"
 #include "mathfem.h"

@@ -35,7 +35,6 @@
 #include "b3mat.h"
 #include "mathfem.h"
 #include "gausspoint.h"
-#include "structuralcrosssection.h"
 #include "timestep.h"
 #include "classfactory.h"
 
