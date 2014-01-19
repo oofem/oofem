@@ -107,7 +107,7 @@ IntElPoint :: computeNmatrixAt(GaussPoint *gp, FloatMatrix &answer)
 //
 {
     setCoordMode();
-    this->computeLocalSlipDir(normal);
+    
 
     FloatArray N;
     switch ( mode ) {
@@ -162,6 +162,9 @@ IntElPoint :: computeTransformationMatrixAt(GaussPoint *gp, FloatMatrix &answer)
 
     case ie1d_3d:
     {
+        //FloatMatrix test;
+        //test.beLocalCoordSys(normal.normalize());
+
         FloatArray ly(3), lz(3);
         normal.normalize();
         ly.zero();
@@ -279,7 +282,7 @@ IntElPoint :: giveDofManDofIDMask(int inode, EquationID, IntArray &answer) const
         answer.setValues(1, D_u);
         break;
     case 2:
-        answer.setValues(2, D_u, D_w);
+        answer.setValues(2, D_u, D_v);
         break;
     case 3:
         answer.setValues(3, D_u, D_v, D_w);

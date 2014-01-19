@@ -131,7 +131,7 @@ IntMatIsoDamage :: give2dStiffnessMatrix_Eng(FloatMatrix &answer, MatResponseMod
         if ( rMode == SecantStiffness ) {
             // Secant stiffness
             om = status->giveTempDamage();
-            un = status->giveTempJump().at(3);
+            un = status->giveTempJump().at(2);
             om = min(om, maxOmega);
             // damage in tension only
             if ( un >= 0 ) {

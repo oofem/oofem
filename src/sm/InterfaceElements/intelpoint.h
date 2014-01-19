@@ -85,12 +85,25 @@ public:
 
     virtual void giveEngTraction(FloatArray &answer, GaussPoint *gp, const FloatArray &jump, TimeStep *tStep)
     {
-        this->giveInterfaceCrossSection()->giveEngTraction_1d(answer, gp, jump, tStep);
+        if ( this->giveDomain()->giveNumberOfSpatialDimensions() == 3 ) {
+            this->giveInterfaceCrossSection()->giveEngTraction_3d(answer, gp, jump, tStep);
+        } else if ( this->giveDomain()->giveNumberOfSpatialDimensions() == 2 ) {
+            this->giveInterfaceCrossSection()->giveEngTraction_2d(answer, gp, jump, tStep);
+        } else if ( this->giveDomain()->giveNumberOfSpatialDimensions() == 1 ) {
+            this->giveInterfaceCrossSection()->giveEngTraction_1d(answer, gp, jump, tStep);
+        }
     }
 
     virtual void giveStiffnessMatrix_Eng(FloatMatrix &answer, MatResponseMode rMode, IntegrationPoint *ip, TimeStep *tStep)
     {
-        this->giveInterfaceCrossSection()->give1dStiffnessMatrix_Eng(answer, rMode, ip, tStep);
+        if ( this->giveDomain()->giveNumberOfSpatialDimensions() == 3 ) {
+            this->giveInterfaceCrossSection()->give3dStiffnessMatrix_Eng(answer, rMode, ip, tStep);
+        } else if ( this->giveDomain()->giveNumberOfSpatialDimensions() == 2 ) {
+            this->giveInterfaceCrossSection()->give2dStiffnessMatrix_Eng(answer, rMode, ip, tStep);
+        } else if ( this->giveDomain()->giveNumberOfSpatialDimensions() == 1 ) {
+            this->giveInterfaceCrossSection()->give1dStiffnessMatrix_Eng(answer, rMode, ip, tStep);
+        }
+        
     }
 
 protected:
