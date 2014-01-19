@@ -79,8 +79,8 @@ IntElLine1 :: computeNmatrixAt(GaussPoint *ip, FloatMatrix &answer)
 
 void
 IntElLine1 :: computeGaussPoints()
-// Sets up the array of Gauss Points of the receiver.
 {
+    // Sets up the array of Gauss Points of the receiver.
     if ( !integrationRulesArray ) {
         numberOfIntegrationRules = 1;
         integrationRulesArray = new IntegrationRule * [ 1 ];

@@ -55,6 +55,7 @@ set (sm_interface_elements
     InterfaceElements/intelpoint.C
     InterfaceElements/intelline1.C
     InterfaceElements/intelline2.C
+    InterfaceElements/intelsurftr1.C
     )
 
 
