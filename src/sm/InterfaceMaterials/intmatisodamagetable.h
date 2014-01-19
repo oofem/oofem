@@ -41,7 +41,7 @@
 
 ///@name Input fields for IntMatIsoDamageTable
 //@{
-#define _IFT_IntMatIsoDamageTable_Name "intmatisodamage"
+#define _IFT_IntMatIsoDamageTable_Name "intmatisodamagetable"
 #define _IFT_IntMatIsoDamageTable_kn "kn"
 #define _IFT_IntMatIsoDamageTable_ks "ks"
 #define _IFT_IntMatIsoDamageTable_ft "ft"

@@ -174,7 +174,6 @@ IntMatCoulombContact::giveEngTraction_2d( FloatArray &answer, GaussPoint *gp, co
 
     IntMatCoulombContactStatus *status = static_cast< IntMatCoulombContactStatus * >( this->giveStatus( gp ) );
     this->initGpForNewStep( gp );
-
     double normalJump = jump.at( 2 );
     FloatArray shearJump;
     shearJump.setValues( 1, jump.at( 1 ) );
@@ -194,6 +193,7 @@ IntMatCoulombContact::giveEngTraction_2d( FloatArray &answer, GaussPoint *gp, co
     status->setTempShearStressShift( tempShearStressShift );
     status->letTempJumpBe( jump );
     status->letTempTractionBe( answer );
+
 }
 
 
@@ -225,7 +225,7 @@ IntMatCoulombContact::giveEngTraction_1d( FloatArray &answer, GaussPoint *gp, co
 
 
 void 
-IntMatCoulombContact::computeEngTraction( double normalStress, FloatArray &shearStress,
+IntMatCoulombContact::computeEngTraction( double &normalStress, FloatArray &shearStress,
 FloatArray &tempShearStressShift, const double normalJump, const FloatArray &shearJump )
 {
 
@@ -243,7 +243,6 @@ FloatArray &tempShearStressShift, const double normalJump, const FloatArray &she
 
     if(shearJump.giveSize() != 0) {
 
-        FloatArray shearStress;
         shearStress = this->kn * shearJump - tempShearStressShift;
         double dp = shearStress.dotProduct( shearStress );
         const double eps = 1.0e-15; // small number
@@ -267,7 +266,7 @@ IntMatCoulombContact :: giveGeneralStiffnessMatrix(FloatMatrix &answer,
 //
 {
 
-    IntMatCoulombContactStatus *status = static_cast< IntMatCoulombContactStatus * > ( gp->giveMaterialStatus() );
+    IntMatCoulombContactStatus *status = static_cast< IntMatCoulombContactStatus * > ( this->giveStatus(gp) );
     FloatArray jump;
     jump = status->giveTempJump();
 
@@ -285,7 +284,6 @@ IntMatCoulombContact :: giveGeneralStiffnessMatrix(FloatMatrix &answer,
     } else {
         answer.times( this->kn );
     }
-
 
 #if 0
     switch ( jump.giveSize() ) {
@@ -390,10 +388,12 @@ IntMatCoulombContact :: giveInputRecord(DynamicInputRecord &input)
 
 IntMatCoulombContactStatus :: IntMatCoulombContactStatus(int n, Domain *d, GaussPoint *g) : StructuralInterfaceMaterialStatus(n, d, g)
 {
-    shearStressShift.resize(2);
-    tempShearStressShift.resize(2);
+    int size = d->giveNumberOfSpatialDimensions() - 1;
+    shearStressShift.resize(size);
+    tempShearStressShift.resize(size);
     shearStressShift.zero();
     tempShearStressShift.zero();
+    //this->initTempStatus();
 }
 
 

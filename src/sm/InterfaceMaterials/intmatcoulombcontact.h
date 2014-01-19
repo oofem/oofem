@@ -41,7 +41,7 @@
 
 ///@name Input fields for IntMatCoulombContact
 //@{
-#define _IFT_IntMatCoulombContact_Name "simpleintermat"
+#define _IFT_IntMatCoulombContact_Name "intmatcoulombcontact"
 #define _IFT_IntMatCoulombContact_kn "kn"
 #define _IFT_IntMatCoulombContact_knt "knt"
 #define _IFT_IntMatCoulombContact_frictCoeff "fc"
@@ -133,7 +133,7 @@ public:
                                       GaussPoint *gp,
                                       TimeStep *tStep);
 
-    void computeEngTraction(double normalStress, FloatArray &shearStress, 
+    void computeEngTraction(double &normalStress, FloatArray &shearStress, 
                              FloatArray &tempShearStressShift,
                              const double normalJump, const FloatArray &shearJump );
 
