@@ -103,10 +103,10 @@ public:
      * @param tStep Current time step (most models are able to respond only when tStep is current time step).
      */
     virtual void giveFirstPKTraction_1d(FloatArray &answer, GaussPoint *gp, const FloatArray &jump,
-                                        const FloatArray &reducedF, TimeStep *tStep)
+                                         const FloatMatrix &reducedF, TimeStep *tStep )
     { _error("giveFirstPKTraction_1d: not implemented "); }
     virtual void giveFirstPKTraction_2d(FloatArray &answer, GaussPoint *gp, const FloatArray &jump,
-                                        const FloatArray &reducedF, TimeStep *tStep)
+                                         const FloatMatrix &reducedF, TimeStep *tStep )
     { _error("giveFirstPKTraction_2d: not implemented "); }
     virtual void giveFirstPKTraction_3d(FloatArray &answer, GaussPoint *gp, const FloatArray &jump,
                                         const FloatMatrix &F, TimeStep *tStep)
@@ -137,6 +137,23 @@ public:
     // Numerical stiffness (intended to work regardless of dimension)
     virtual void giveStiffnessMatrix_dTdj_Num(FloatMatrix &answer, MatResponseMode rMode, GaussPoint *gp, TimeStep *tStep);
 
+    virtual void giveStiffnessMatrix_dTdj_Num( FloatMatrix &answer, MatResponseMode rMode, GaussPoint *gp, TimeStep *tStep,
+                                               void (*giveTraction)( FloatArray, GaussPoint*, const FloatArray,
+                                               const FloatMatrix, TimeStep* ) );
+
+    virtual void giveStiffnessMatrix_Eng_Num( FloatMatrix &answer, MatResponseMode rMode, GaussPoint *gp, TimeStep *tStep,
+                                               void( *giveTraction )( FloatArray &answer, GaussPoint *gp, const FloatArray &jump,
+                                               TimeStep *tStep ) );
+
+    virtual void give1dStiffnessMatrix_dTdj_Num( FloatMatrix &answer, MatResponseMode rMode, GaussPoint *gp, TimeStep *tStep );
+    virtual void give2dStiffnessMatrix_dTdj_Num( FloatMatrix &answer, MatResponseMode rMode, GaussPoint *gp, TimeStep *tStep );
+    virtual void give3dStiffnessMatrix_dTdj_Num( FloatMatrix &answer, MatResponseMode rMode, GaussPoint *gp, TimeStep *tStep );
+
+    virtual void give1dStiffnessMatrix_Eng_Num( FloatMatrix &answer, MatResponseMode mode, GaussPoint *gp, TimeStep *tStep );
+    virtual void give2dStiffnessMatrix_Eng_Num( FloatMatrix &answer, MatResponseMode mode, GaussPoint *gp, TimeStep *tStep );
+    virtual void give3dStiffnessMatrix_Eng_Num( FloatMatrix &answer, MatResponseMode mode, GaussPoint *gp, TimeStep *tStep );
+
+    void giveReducedJump( FloatArray &answer, FloatArray &jump3d, const int size );
 
     /**
      * Tells if the model has implemented analytical tangent stiffness.

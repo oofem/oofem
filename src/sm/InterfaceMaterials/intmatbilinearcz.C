@@ -73,9 +73,9 @@ void IntMatBilinearCZStatus :: initTempStatus()
 
 void IntMatBilinearCZStatus :: updateYourself(TimeStep *tStep)
 {
-    mTractionOld    = mTractionNew;
-    mJumpOld                = mJumpNew;
-    mDamageOld              = mDamageNew;
+    mTractionOld = mTractionNew;
+    mJumpOld     = mJumpNew;
+    mDamageOld   = mDamageNew;
 }
 
 
@@ -86,12 +86,12 @@ void IntMatBilinearCZStatus :: copyStateVariables(const MaterialStatus &iStatus)
     MaterialStatus &tmpStat = const_cast< MaterialStatus & >( iStatus );
     const IntMatBilinearCZStatus &structStatus = dynamic_cast< IntMatBilinearCZStatus & >( tmpStat );
 
-    mDamageNew              = structStatus.mDamageNew;
-    mDamageOld              = structStatus.mDamageOld;
-    mTractionOld    = structStatus.mTractionOld;
-    mTractionNew    = structStatus.mTractionNew;
-    mJumpOld                = structStatus.mJumpOld;
-    mJumpNew                = structStatus.mJumpNew;
+    mDamageNew   = structStatus.mDamageNew;
+    mDamageOld   = structStatus.mDamageOld;
+    mTractionOld = structStatus.mTractionOld;
+    mTractionNew = structStatus.mTractionNew;
+    mJumpOld     = structStatus.mJumpOld;
+    mJumpNew     = structStatus.mJumpNew;
 }
 
 void IntMatBilinearCZStatus :: addStateVariables(const MaterialStatus &iStatus)

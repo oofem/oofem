@@ -214,4 +214,289 @@ StructuralInterfaceMaterial :: giveEngTraction_3d(FloatArray &answer, GaussPoint
 }
 
 
+
+// Numerical tangents
+void
+StructuralInterfaceMaterial :: giveStiffnessMatrix_dTdj_Num( FloatMatrix &answer, MatResponseMode rMode, GaussPoint *gp, TimeStep *tStep,
+void( *giveTraction )( FloatArray, GaussPoint*, const FloatArray,const FloatMatrix, TimeStep* ) )
+{
+    // Default implementation for computation of the numerical tangent dTdj
+    // Computes the material stiffness using a central difference method
+
+    StructuralInterfaceMaterialStatus *status = static_cast< StructuralInterfaceMaterialStatus * >( this->giveStatus( gp ) );
+    if(status) {
+        FloatMatrix F;
+        F = status->giveTempF( );
+        int dim = F.giveNumberOfRows( );
+        answer.resize( dim, dim );
+        answer.zero( );
+        const double eps = 1.0e-9;
+        FloatArray T, TPlus, TMinus;
+
+        FloatArray jump, jumpPlus, jumpMinus, Kcolumn;
+        jump = status->giveTempJump( );
+        for(int i = 1; i <= dim; i++) {
+            jumpPlus = jumpMinus = jump;
+            jumpPlus.at( i ) += eps;
+            jumpMinus.at( i ) -= eps;
+            giveTraction( TPlus, gp, jumpPlus, F, tStep );
+            giveTraction( TMinus, gp, jumpMinus, F, tStep );
+
+            Kcolumn = ( TPlus - TMinus );
+            answer.setColumn( Kcolumn, i );
+        }
+        answer.times( 1.0 / ( 2 * eps ) );
+        giveTraction( T, gp, jump, F, tStep ); // reset temp values by recomputing the stress
+    }
+}
+
+
+void
+StructuralInterfaceMaterial::giveStiffnessMatrix_Eng_Num( FloatMatrix &answer, MatResponseMode rMode, GaussPoint *gp, TimeStep *tStep,
+void( *giveTraction )( FloatArray &answer, GaussPoint *gp, const FloatArray &jump, TimeStep *tStep ) )
+{
+    // Default implementation for computation of the numerical tangent d(sig)/d(jump)
+    // Computes the material stiffness using a central difference method
+
+    StructuralInterfaceMaterialStatus *status = static_cast< StructuralInterfaceMaterialStatus * >( this->giveStatus( gp ) );
+    if(status) {
+        const double eps = 1.0e-9;
+        FloatArray t, tPlus, tMinus;
+        FloatArray jump, jumpPlus, jumpMinus, Kcolumn;
+        jump = status->giveTempJump( );
+        int dim = jump.giveSize();
+        answer.resize( dim, dim );
+        answer.zero( );
+
+        for(int i = 1; i <= dim; i++) {
+            jumpPlus = jumpMinus = jump;
+            jumpPlus.at( i ) += eps;
+            jumpMinus.at( i ) -= eps;
+            giveTraction( tPlus, gp, jumpPlus, tStep );
+            giveTraction( tMinus, gp, jumpMinus, tStep );
+
+            Kcolumn = ( tPlus - tMinus );
+            answer.setColumn( Kcolumn, i );
+        }
+        answer.times( 1.0 / ( 2 * eps ) );
+        giveTraction( t, gp, jump, tStep ); // reset temp values by recomputing the stress
+    }
+}
+
+
+
+
+
+void
+StructuralInterfaceMaterial :: give1dStiffnessMatrix_dTdj_Num( FloatMatrix &answer, MatResponseMode rMode, GaussPoint *gp, TimeStep *tStep )
+{
+    // Default implementation for computation of the numerical tangent
+    // Computes the material stiffness using a central difference method
+
+    StructuralInterfaceMaterialStatus *status = static_cast< StructuralInterfaceMaterialStatus * >( this->giveStatus( gp ) );
+    if(status) {
+        FloatMatrix F;
+        F = status->giveTempF( );
+        int dim = F.giveNumberOfRows( );
+        answer.resize( dim, dim );
+        answer.zero( );
+        const double eps = 1.0e-9;
+        FloatArray T, TPlus, TMinus;
+
+        FloatArray jump, jumpPlus, jumpMinus, Kcolumn;
+        jump = status->giveTempJump( );
+        for(int i = 1; i <= dim; i++) {
+            jumpPlus = jumpMinus = jump;
+            jumpPlus.at( i ) += eps;
+            jumpMinus.at( i ) -= eps;
+            this->giveFirstPKTraction_1d( TPlus, gp, jumpPlus, F, tStep );
+            this->giveFirstPKTraction_1d( TMinus, gp, jumpMinus, F, tStep );
+
+            Kcolumn = ( TPlus - TMinus );
+            answer.setColumn( Kcolumn, i );
+        }
+        answer.times( 1.0 / ( 2 * eps ) );
+        this->giveFirstPKTraction_1d( T, gp, jump, F, tStep ); // reset temp values by recomputing the stress
+    }
+}
+
+void
+StructuralInterfaceMaterial :: give2dStiffnessMatrix_dTdj_Num( FloatMatrix &answer, MatResponseMode rMode, GaussPoint *gp, TimeStep *tStep )
+{
+    // Default implementation for computation of the numerical tangent
+    // Computes the material stiffness using a central difference method
+
+    StructuralInterfaceMaterialStatus *status = static_cast< StructuralInterfaceMaterialStatus * >( this->giveStatus( gp ) );
+    if(status) {
+        FloatMatrix F;
+        F = status->giveTempF( );
+        int dim = F.giveNumberOfRows( );
+        answer.resize( dim, dim );
+        answer.zero( );
+        const double eps = 1.0e-9;
+        FloatArray T, TPlus, TMinus;
+
+        FloatArray jump, jumpPlus, jumpMinus, Kcolumn;
+        jump = status->giveTempJump( );
+        for(int i = 1; i <= dim; i++) {
+            jumpPlus = jumpMinus = jump;
+            jumpPlus.at( i ) += eps;
+            jumpMinus.at( i ) -= eps;
+            this->giveFirstPKTraction_2d( TPlus, gp, jumpPlus, F, tStep );
+            this->giveFirstPKTraction_2d( TMinus, gp, jumpMinus, F, tStep );
+
+            Kcolumn = ( TPlus - TMinus );
+            answer.setColumn( Kcolumn, i );
+        }
+        answer.times( 1.0 / ( 2 * eps ) );
+        this->giveFirstPKTraction_2d( T, gp, jump, F, tStep ); // reset temp values by recomputing the stress
+    }
+}
+
+void
+StructuralInterfaceMaterial :: give3dStiffnessMatrix_dTdj_Num( FloatMatrix &answer, MatResponseMode rMode, GaussPoint *gp, TimeStep *tStep )
+{
+    // Default implementation for computation of the numerical tangent
+    // Computes the material stiffness using a central difference method
+
+    StructuralInterfaceMaterialStatus *status = static_cast< StructuralInterfaceMaterialStatus * >( this->giveStatus( gp ) );
+    if(status) {
+        FloatMatrix F;
+        F = status->giveTempF( );
+        int dim = F.giveNumberOfRows( );
+        answer.resize( dim, dim );
+        answer.zero( );
+        const double eps = 1.0e-9;
+        FloatArray T, TPlus, TMinus;
+
+        FloatArray jump, jumpPlus, jumpMinus, Kcolumn;
+        jump = status->giveTempJump( );
+        for(int i = 1; i <= dim; i++) {
+            jumpPlus = jumpMinus = jump;
+            jumpPlus.at( i ) += eps;
+            jumpMinus.at( i ) -= eps;
+            this->giveFirstPKTraction_3d( TPlus, gp, jumpPlus, F, tStep );
+            this->giveFirstPKTraction_3d( TMinus, gp, jumpMinus, F, tStep );
+
+            Kcolumn = ( TPlus - TMinus );
+            answer.setColumn( Kcolumn, i );
+        }
+        answer.times( 1.0 / ( 2 * eps ) );
+        this->giveFirstPKTraction_3d( T, gp, jump, F, tStep ); // reset temp values by recomputing the stress
+    }
+}
+
+
+void
+StructuralInterfaceMaterial :: give1dStiffnessMatrix_Eng_Num( FloatMatrix &answer, MatResponseMode mode, GaussPoint *gp, TimeStep *tStep )
+{
+    // Default implementation for computation of the numerical tangent d(sig)/d(jump)
+    // Computes the material stiffness using a central difference method
+
+    StructuralInterfaceMaterialStatus *status = static_cast< StructuralInterfaceMaterialStatus * >( this->giveStatus( gp ) );
+    if(status) {
+        const double eps = 1.0e-9;
+        FloatArray t, tPlus, tMinus;
+        FloatArray jump, jumpPlus, jumpMinus, Kcolumn;
+        jump = status->giveTempJump( );
+        int dim = jump.giveSize( );
+        answer.resize( dim, dim );
+        answer.zero( );
+
+        for(int i = 1; i <= dim; i++) {
+            jumpPlus = jumpMinus = jump;
+            jumpPlus.at( i ) += eps;
+            jumpMinus.at( i ) -= eps;
+            this->giveEngTraction_1d( tPlus, gp, jumpPlus, tStep );
+            this->giveEngTraction_1d( tMinus, gp, jumpMinus, tStep );
+
+            Kcolumn = ( tPlus - tMinus );
+            answer.setColumn( Kcolumn, i );
+        }
+        answer.times( 1.0 / ( 2 * eps ) );
+        this->giveEngTraction_1d( t, gp, jump, tStep ); // reset temp values by recomputing the stress
+    }
+}
+
+void
+StructuralInterfaceMaterial :: give2dStiffnessMatrix_Eng_Num( FloatMatrix &answer, MatResponseMode mode, GaussPoint *gp, TimeStep *tStep )
+{
+    // Default implementation for computation of the numerical tangent d(sig)/d(jump)
+    // Computes the material stiffness using a central difference method
+
+    StructuralInterfaceMaterialStatus *status = static_cast< StructuralInterfaceMaterialStatus * >( this->giveStatus( gp ) );
+    if(status) {
+        const double eps = 1.0e-9;
+        FloatArray t, tPlus, tMinus;
+        FloatArray tempJump, jump, jumpPlus, jumpMinus, Kcolumn;
+        tempJump = status->giveTempJump( );
+        this->giveReducedJump(jump, tempJump, 2 );
+        int dim = jump.giveSize( );
+        answer.resize( dim, dim );
+        answer.zero( );
+
+        for(int i = 1; i <= dim; i++) {
+            jumpPlus = jumpMinus = jump;
+            jumpPlus.at( i ) += eps;
+            jumpMinus.at( i ) -= eps;
+            this->giveEngTraction_2d( tPlus, gp, jumpPlus, tStep );
+            this->giveEngTraction_2d( tMinus, gp, jumpMinus, tStep );
+
+            Kcolumn = ( tPlus - tMinus );
+            answer.setColumn( Kcolumn, i );
+        }
+        answer.times( 1.0 / ( 2 * eps ) );
+        this->giveEngTraction_2d( t, gp, jump, tStep ); // reset temp values by recomputing the stress
+    }
+}
+
+void
+StructuralInterfaceMaterial :: give3dStiffnessMatrix_Eng_Num( FloatMatrix &answer, MatResponseMode mode, GaussPoint *gp, TimeStep *tStep )
+{
+    // Default implementation for computation of the numerical tangent d(sig)/d(jump)
+    // Computes the material stiffness using a central difference method
+
+    StructuralInterfaceMaterialStatus *status = static_cast< StructuralInterfaceMaterialStatus * >( this->giveStatus( gp ) );
+    if(status) {
+        const double eps = 1.0e-9;
+        FloatArray t, tPlus, tMinus;
+        FloatArray jump, jumpPlus, jumpMinus, Kcolumn;
+        jump = status->giveTempJump( );
+        int dim = jump.giveSize( );
+        answer.resize( dim, dim );
+        answer.zero( );
+
+        for(int i = 1; i <= dim; i++) {
+            jumpPlus = jumpMinus = jump;
+            jumpPlus.at( i ) += eps;
+            jumpMinus.at( i ) -= eps;
+            this->giveEngTraction_3d( tPlus, gp, jumpPlus, tStep );
+            this->giveEngTraction_3d( tMinus, gp, jumpMinus, tStep );
+
+            Kcolumn = ( tPlus - tMinus );
+            answer.setColumn( Kcolumn, i );
+        }
+        answer.times( 1.0 / ( 2 * eps ) );
+        this->giveEngTraction_3d( t, gp, jump, tStep ); // reset temp values by recomputing the stress
+    }
+}
+
+
+
+void 
+StructuralInterfaceMaterial::giveReducedJump(FloatArray &answer, FloatArray &jump, const int size )
+{
+    if(size == jump.giveSize() ) {
+        answer = jump;
+    } else if( (size == 2) && (jump.giveSize() == 3) ) {
+        answer.setValues( 2,  jump.at( 1 ), jump.at( 3 ) );
+    }
+    else if(size == 1 && ( jump.giveSize( ) == 3 )) {
+        answer.setValues( 1,  jump.at( 3 ) );
+    }else{
+        OOFEM_ERROR1( "StructuralInterfaceMaterial::giveReducedJump - size must be 1, 2 or 3" );
+    }
+
+}
+
 } // end namespace oofem
