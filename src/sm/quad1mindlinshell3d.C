@@ -204,8 +204,8 @@ Quad1MindlinShell3D :: computeSurfaceLoadVectorAt(FloatArray &answer, Load *load
 void
 Quad1MindlinShell3D :: computeBmatrixAt(GaussPoint *gp, FloatMatrix &answer, int li, int ui)
 {
-  FloatArray n, ns;
-  FloatMatrix dn, dns;
+    FloatArray n, ns;
+    FloatMatrix dn, dns;
 
     this->interp.evaldNdx( dn, * gp->giveCoordinates(), FEIVertexListGeometryWrapper(4, ( const FloatArray ** ) lnodes) );
     this->interp.evalN( n, * gp->giveCoordinates(),  FEIVoidCellGeometry() );
@@ -214,15 +214,15 @@ Quad1MindlinShell3D :: computeBmatrixAt(GaussPoint *gp, FloatMatrix &answer, int
     answer.zero();
 
     // enforce one-point reduced integration if requested
-    if ( this-> reducedIntegrationFlag) {
-      FloatArray lc(2); 
-      lc.zero(); // set to element center coordinates
-      
-      this->interp.evaldNdx( dns, lc, FEIVertexListGeometryWrapper(4, ( const FloatArray ** ) lnodes) );
-      this->interp.evalN( ns, lc,  FEIVoidCellGeometry() );
+    if ( this->reducedIntegrationFlag ) {
+        FloatArray lc(2); 
+        lc.zero(); // set to element center coordinates
+        
+        this->interp.evaldNdx( dns, lc, FEIVertexListGeometryWrapper(4, ( const FloatArray ** ) lnodes) );
+        this->interp.evalN( ns, lc,  FEIVoidCellGeometry() );
     } else {
-      dns = dn;
-      ns = n;
+        dns = dn;
+        ns = n;
     }
 
 
@@ -242,7 +242,7 @@ Quad1MindlinShell3D :: computeBmatrixAt(GaussPoint *gp, FloatMatrix &answer, int
         answer(3 + 2, 2 + 1 + i * 5) = dn(i, 1);
         answer(3 + 2, 2 + 2 + i * 5) = dn(i, 0);
 
-	// shear strains
+        // shear strains
         answer(3 + 3, 2 + 0 + i * 5) = -dns(i, 1);
         answer(3 + 3, 2 + 2 + i * 5) = ns(i);
         answer(3 + 4, 2 + 0 + i * 5) = -dns(i, 0);
@@ -379,12 +379,7 @@ Quad1MindlinShell3D :: computeStiffnessMatrix(FloatMatrix &answer, MatResponseMo
 IRResultType
 Quad1MindlinShell3D :: initializeFrom(InputRecord *ir)
 {
-    const char *__proc = "initializeFrom"; // Required by IR_GIVE_FIELD macro
-    IRResultType result;                 // Required by IR_GIVE_FIELD macro
-
-    IR_GIVE_OPTIONAL_FIELD(ir, this->numberOfGaussPoints, _IFT_Element_nip);
-    IR_GIVE_OPTIONAL_FIELD(ir, this->reducedIntegrationFlag, _IFT_Quad1MindlinShell3D_ReducedIntegration);
-
+    this->reducedIntegrationFlag = ir->hasField(_IFT_Quad1MindlinShell3D_ReducedIntegration);
     return this->NLStructuralElement :: initializeFrom(ir);
 }
 
