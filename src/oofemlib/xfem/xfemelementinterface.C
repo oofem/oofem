@@ -83,6 +83,21 @@ XfemElementInterface :: ~XfemElementInterface()
 
 void XfemElementInterface :: XfemElementInterface_createEnrBmatrixAt(FloatMatrix &oAnswer, GaussPoint &iGP, Element &iEl)
 {
+	ComputeBOrBHMatrix(oAnswer, iGP, iEl, false);
+}
+
+void XfemElementInterface :: XfemElementInterface_createEnrBHmatrixAt(FloatMatrix &oAnswer, GaussPoint &iGP, Element &iEl)
+{
+	ComputeBOrBHMatrix(oAnswer, iGP, iEl, true);
+}
+
+void XfemElementInterface :: ComputeBOrBHMatrix(FloatMatrix &oAnswer, GaussPoint &iGP, Element &iEl, bool iComputeBH)
+{
+	/*
+	 * Computes the B or BH matrix.
+	 * iComputeBH = true implies that BH is computed,
+	 * while B is computed if iComputeBH = false.
+	 */
     const int dim = 2;
     const int nDofMan = iEl.giveNumberOfDofManagers();
 
@@ -90,6 +105,10 @@ void XfemElementInterface :: XfemElementInterface_createEnrBmatrixAt(FloatMatrix
     if ( mUsePlaneStrain ) {
         shearInd = 4;
         numRows = 4;
+    }
+
+    if(iComputeBH){
+    	numRows++;
     }
 
     FloatMatrix dNdx;
@@ -120,13 +139,21 @@ void XfemElementInterface :: XfemElementInterface_createEnrBmatrixAt(FloatMatrix
         BNode.at(1, 1)                  = dNdx.at(i, 1);
         BNode.at(2, 2)                  = dNdx.at(i, 2);
         BNode.at(shearInd, 1)   = dNdx.at(i, 2);
-        BNode.at(shearInd, 2)   = dNdx.at(i, 1);
+
+        if(iComputeBH){
+        	BNode.at(shearInd+1	, 2)   = dNdx.at(i, 1);
+        }
+        else{
+            BNode.at(shearInd	, 2)   = dNdx.at(i, 1);
+        }
     }
 
 
     // XFEM part of B-matrix
-    XfemManager *xMan = iEl.giveDomain()->giveXfemManager();
-
+    XfemManager *xMan = NULL;
+	if( iEl.giveDomain()->hasXfemManager() ) {
+		xMan = iEl.giveDomain()->giveXfemManager();
+	}
 
     std :: vector< FloatMatrix >Bd(nDofMan);  // One Bd per node
 
@@ -137,11 +164,14 @@ void XfemElementInterface :: XfemElementInterface_createEnrBmatrixAt(FloatMatrix
 
         // Compute the total number of enrichments for node j
         int numEnrNode = 0;
-        for ( int i = 1; i <= xMan->giveNumberOfEnrichmentItems(); i++ ) {
-            EnrichmentItem *ei = xMan->giveEnrichmentItem(i);
-            if ( ei->isDofManEnriched(* dMan) ) {
-                numEnrNode += ei->giveNumDofManEnrichments(* dMan);
-            }
+
+        if( xMan != NULL ) {
+			for ( int i = 1; i <= xMan->giveNumberOfEnrichmentItems(); i++ ) {
+				EnrichmentItem *ei = xMan->giveEnrichmentItem(i);
+				if ( ei->isDofManEnriched(* dMan) ) {
+					numEnrNode += ei->giveNumDofManEnrichments(* dMan);
+				}
+			}
         }
 
         if ( numEnrNode > 0 ) {
@@ -197,7 +227,13 @@ void XfemElementInterface :: XfemElementInterface_createEnrBmatrixAt(FloatMatrix
                         BdNode.at(1, nodeEnrCounter + 1)                  = grad_ef_N.at(1);
                         BdNode.at(2, nodeEnrCounter + 2)                  = grad_ef_N.at(2);
                         BdNode.at(shearInd, nodeEnrCounter + 1)   = grad_ef_N.at(2);
-                        BdNode.at(shearInd, nodeEnrCounter + 2)   = grad_ef_N.at(1);
+
+                        if(iComputeBH){
+                        	BdNode.at(shearInd+1	, nodeEnrCounter + 2)   = grad_ef_N.at(1);
+                        }
+                        else {
+                        	BdNode.at(shearInd		, nodeEnrCounter + 2)   = grad_ef_N.at(1);
+                        }
 
                         nodeEnrCounter += 2;
                         counter += 2;
@@ -902,24 +938,26 @@ void XfemElementInterface :: putPointsInCorrectPartition(std :: vector< std :: v
 
 void XfemElementInterface :: XfemElementInterface_computeConstitutiveMatrixAt(FloatMatrix &answer, MatResponseMode rMode, GaussPoint *gp, TimeStep *tStep)
 {
-    XfemManager *xMan = element->giveDomain()->giveXfemManager();
-    int nEI = xMan->giveNumberOfEnrichmentItems();
-    CrossSection *cs = NULL;
+    if( element->giveDomain()->hasXfemManager() ) {
 
-    for ( int i = 1; i <= nEI; i++ ) {
-        EnrichmentItem &ei = * ( xMan->giveEnrichmentItem(i) );
-        if ( ei.isMaterialModified(* gp, * element, cs) ) {
-            StructuralCrossSection *structCS = dynamic_cast< StructuralCrossSection * >( cs );
+		XfemManager *xMan = element->giveDomain()->giveXfemManager();
+		int nEI = xMan->giveNumberOfEnrichmentItems();
+		CrossSection *cs = NULL;
 
-            if ( structCS != NULL ) {
-                structCS->giveCharMaterialStiffnessMatrix(answer, rMode, gp, tStep);
-                return;
-            } else {
-                OOFEM_ERROR("XfemElementInterface :: XfemElementInterface_computeConstitutiveMatrixAt: failed to fetch StructuralMaterial\n");
-            }
-        }
+		for ( int i = 1; i <= nEI; i++ ) {
+			EnrichmentItem &ei = * ( xMan->giveEnrichmentItem(i) );
+			if ( ei.isMaterialModified(* gp, * element, cs) ) {
+				StructuralCrossSection *structCS = dynamic_cast< StructuralCrossSection * >( cs );
+
+				if ( structCS != NULL ) {
+					structCS->giveCharMaterialStiffnessMatrix(answer, rMode, gp, tStep);
+					return;
+				} else {
+					OOFEM_ERROR("XfemElementInterface :: XfemElementInterface_computeConstitutiveMatrixAt: failed to fetch StructuralMaterial\n");
+				}
+			}
+		}
     }
-
 
     // If no enrichment modifies the material,
     // compute stiffness based on the bulk material.
@@ -936,24 +974,26 @@ void XfemElementInterface :: XfemElementInterface_computeStressVector(FloatArray
 
     cs->giveRealStresses(answer, gp, strain, tStep);
 
+    if( element->giveDomain()->hasXfemManager() ) {
 
-    XfemManager *xMan = element->giveDomain()->giveXfemManager();
+		XfemManager *xMan = element->giveDomain()->giveXfemManager();
 
-    int nEI = xMan->giveNumberOfEnrichmentItems();
+		int nEI = xMan->giveNumberOfEnrichmentItems();
 
-    CrossSection *csInclusion = NULL;
-    for ( int i = 1; i <= nEI; i++ ) {
-        EnrichmentItem &ei = * ( xMan->giveEnrichmentItem(i) );
-        if ( ei.isMaterialModified(* gp, * element, csInclusion) ) {
-            StructuralCrossSection *structCSInclusion = dynamic_cast< StructuralCrossSection * >( csInclusion );
+		CrossSection *csInclusion = NULL;
+		for ( int i = 1; i <= nEI; i++ ) {
+			EnrichmentItem &ei = * ( xMan->giveEnrichmentItem(i) );
+			if ( ei.isMaterialModified(* gp, * element, csInclusion) ) {
+				StructuralCrossSection *structCSInclusion = dynamic_cast< StructuralCrossSection * >( csInclusion );
 
-            if ( structCSInclusion != NULL ) {
-                structCSInclusion->giveRealStresses(answer, gp, strain, tStep);
-                return;
-            } else {
-                OOFEM_ERROR("PlaneStress2dXfem :: computeStressVector: failed to fetch StructuralCrossSection\n");
-            }
-        }
+				if ( structCSInclusion != NULL ) {
+					structCSInclusion->giveRealStresses(answer, gp, strain, tStep);
+					return;
+				} else {
+					OOFEM_ERROR("PlaneStress2dXfem :: computeStressVector: failed to fetch StructuralCrossSection\n");
+				}
+			}
+		}
     }
 }
 
