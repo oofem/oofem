@@ -40,6 +40,7 @@
 ///@name Input fields for Quad1MindlinShell3D element
 //@{
 #define _IFT_Quad1MindlinShell3D_Name "quad1mindlinshell3d"
+#define _IFT_Quad1MindlinShell3D_ReducedIntegration "reducedintegration"
 //@}
 
 namespace oofem {
@@ -70,6 +71,8 @@ protected:
     FloatArray *lnodes [ 4 ];
     /// Cached coordinates in local c.s.,
     FloatMatrix lcsMatrix;
+    /// Flag controlling reduced (one - point) integration for shear
+    bool reducedIntegrationFlag;
 
     static FEI2dQuadLin interp;
 
