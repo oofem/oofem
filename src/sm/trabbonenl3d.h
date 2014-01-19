@@ -114,7 +114,7 @@ public:
      * @param gp Integration point.
      * @param tStep Time step.
      */
-    void computeLocalCumPlastStrain(double &kappa, const StrainVector &strain, GaussPoint *gp, TimeStep *tStep)
+    void computeLocalCumPlastStrain(double &kappa, const FloatArray &strain, GaussPoint *gp, TimeStep *tStep)
     {
         TrabBone3D :: computeCumPlastStrain(kappa, gp, tStep);
     }
@@ -154,7 +154,7 @@ public:
     void giveRemoteNonlocalStiffnessContribution(GaussPoint *gp, IntArray &rloc, const UnknownNumberingScheme &s,
                                                  FloatArray &rcontrib, TimeStep *tStep);
 
-    virtual void giveRealStressVector(FloatArray &answer, GaussPoint *gp, const FloatArray &strainVector, TimeStep *tStep);
+    virtual void giveRealStressVector_3d(FloatArray &answer, GaussPoint *gp, const FloatArray &strainVector, TimeStep *tStep);
 
     virtual void updateBeforeNonlocAverage(const FloatArray &strainVector, GaussPoint *gp, TimeStep *tStep);
 

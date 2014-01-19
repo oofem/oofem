@@ -72,16 +72,14 @@ TrabBoneNLEmbed :: updateBeforeNonlocAverage(const FloatArray &strainVector, Gau
 
     nlstatus->letTempStrainVectorBe(strainVector);
 
-    StrainVector strain( strainVector, gp->giveMaterialMode() );
-
-    this->performPlasticityReturn(gp, strain);
-    this->computeLocalCumPlastStrain(cumPlastStrain, strain, gp, tStep);
+    this->performPlasticityReturn(gp, strainVector);
+    this->computeLocalCumPlastStrain(cumPlastStrain, strainVector, gp, tStep);
 
     nlstatus->setLocalCumPlastStrainForAverage(cumPlastStrain);
 }
 
 void
-TrabBoneNLEmbed :: giveRealStressVector(FloatArray &answer,
+TrabBoneNLEmbed :: giveRealStressVector_3d(FloatArray &answer,
                                         GaussPoint *gp,
                                         const FloatArray &strainVector,
                                         TimeStep *tStep)
