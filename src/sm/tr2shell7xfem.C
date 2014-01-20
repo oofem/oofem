@@ -111,7 +111,6 @@ Tr2Shell7XFEM :: computeGaussPoints()
     if ( !integrationRulesArray ) {
 
         int nPointsTri  = 6;   // points in the plane
-        //int nPointsTri  = 25;   // points in the plane
         int nPointsEdge = 2;   // edge integration            
 
         // Cohesive zone
@@ -231,6 +230,22 @@ bool Tr2Shell7XFEM :: updateIntegrationRule()
             this->layeredCS->mapLayerGpCoordsToShellCoords(integrationRulesArray);
             
             
+        }
+    }
+
+    int nPointsTri  = 6;   // points in the plane
+    int nPointsEdge = 2;   // edge integration      
+
+    // Cohesive zone
+    for ( int i = 1; i <= xMan->giveNumberOfEnrichmentItems(); i++ ) { 
+        Delamination *dei =  dynamic_cast< Delamination * >( xMan->giveEnrichmentItem(i) ); 
+        if (dei) {
+            int numberOfInterfaces = this->layeredCS->giveNumberOfLayers()-1;
+            czIntegrationRulesArray = new IntegrationRule * [ numberOfInterfaces ];
+            for ( int i = 0; i < numberOfInterfaces; i++ ) {
+                czIntegrationRulesArray [ i ] = new GaussIntegrationRule(1, this);
+                czIntegrationRulesArray [ i ]->SetUpPointsOnTriangle(nPointsTri, _3dInterface);
+            }
         }
     }
 

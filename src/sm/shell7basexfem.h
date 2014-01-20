@@ -61,9 +61,6 @@ class EnrichmentItem;
 class Shell7BaseXFEM : public Shell7Base, public XfemElementInterface
 {
 protected:
-    Material *czMat; // cohesive zone material
-    //StructuralInterfaceMaterial *mat; // should replace with this
-    int czMatNum;
     XfemManager *xMan;
 
     virtual void updateYourself(TimeStep *tStep);
@@ -71,10 +68,8 @@ protected:
     void computeOrderingArray(IntArray &orderingArray, IntArray &activeDofsArray,  EnrichmentItem *ei);
 
     virtual void evalCovarBaseVectorsAt(FloatArray &lCoords, FloatMatrix &gcon, FloatArray &solVec);
-    //virtual void NEW_evalCovarBaseVectorsAt(FloatArray &lCoords, FloatMatrix &gcon, FloatArray &solVec);
     void discGiveInitialSolutionVector(FloatArray &answer, IntArray &eiDofIdArray); // should be replaced with general function
     void computeDiscGeneralizedStrainVector(FloatArray &dGenEps, FloatArray &lCoords, EnrichmentItem *ei, TimeStep *tStep);
-    //void NEW_computeDiscGeneralizedStrainVector(FloatArray &dGenEps, FloatArray &lCoords, EnrichmentItem *ei, TimeStep *tStep);
     void giveDisSolutionVector(FloatArray &answer, const IntArray &dofIdArray, TimeStep *tStep);
 
     // Internal forces
@@ -82,7 +77,7 @@ protected:
     void discComputeSectionalForces(FloatArray &answer, TimeStep *tStep, FloatArray &solVec, FloatArray &solVecD, EnrichmentItem *ei);
     double evaluateLevelSet(const FloatArray &lCoords, EnrichmentItem *ei);
     double edgeEvaluateLevelSet(const FloatArray &lCoords, EnrichmentItem *ei);
-    void computeCohesiveForces(FloatArray &answer, TimeStep *tStep, FloatArray &solVec, FloatArray &solVecD, Delamination *dei);
+    void computeCohesiveForces(FloatArray &answer, TimeStep *tStep, FloatArray &solVec, FloatArray &solVecD, EnrichmentItem *ei);
 
     // Tangent matrices
     void computeLambdaGMatricesDis(FloatMatrix lambdaD [ 3 ], double zeta);
@@ -130,7 +125,7 @@ protected:
     void giveFictiousUpdatedNodeCoordsForExport(std::vector<FloatArray> &nodes, int layer, TimeStep *tStep, int subCell);
     void giveLocalNodeCoordsForExport(FloatArray &nodeLocalXi1Coords, FloatArray &nodeLocalXi2Coords, FloatArray &nodeLocalXi3Coords, int subCell);
     void giveLocalNodeCoordsForExport(FloatArray &nodeLocalXi1Coords, FloatArray &nodeLocalXi2Coords, FloatArray &nodeLocalXi3Coords);
-
+    void mapXi3FromLocalToShell(FloatArray &answer, FloatArray &local, int layer);
 public:
     Shell7BaseXFEM(int n, Domain *d);
     virtual ~Shell7BaseXFEM() {};

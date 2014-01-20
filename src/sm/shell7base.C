@@ -2492,12 +2492,18 @@ Shell7Base :: recoverValuesFromIP(std::vector<FloatArray> &recoveredValues, int 
         }
     }
 
+   InternalStateValueType valueType =  giveInternalStateValueType(type);
+
     // recover ip values
     for ( int i = 1; i <= numNodes; i++ ) {
         ip = iRule->getIntegrationPoint( closestIPArray.at(i) );
         this->giveIPValue(ipValues, ip, type, tStep);
-        recoveredValues[i-1].resize(9);
-        recoveredValues[i-1] = convV6ToV9Stress(ipValues);
+        if ( valueType == ISVT_TENSOR_S3 ) {
+            recoveredValues[i-1].resize(9);
+            recoveredValues[i-1] = convV6ToV9Stress(ipValues);
+        } else {
+            recoveredValues[i-1] = ipValues;
+        }
     }
 
 }

@@ -43,6 +43,7 @@
 #include "zznodalrecoverymodel.h"
 #include "fei3dwedgequad.h"
 #include "fracturemanager.h"
+#include "cltypes.h"
 #include <vector>
 
 namespace oofem {

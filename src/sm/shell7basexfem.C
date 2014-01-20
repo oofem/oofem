@@ -166,7 +166,11 @@ IRResultType Shell7BaseXFEM :: initializeFrom(InputRecord *ir)
 bool 
 Shell7BaseXFEM :: hasCohesiveZone(int interfaceNum)
 {
-    return this->layeredCS->giveInterfaceMaterialNum(interfaceNum) > 0;
+    if ( interfaceNum <= this->layeredCS->giveNumberOfLayers()-1  ) { 
+        return this->layeredCS->giveInterfaceMaterialNum(interfaceNum) > 0;
+    } else {
+        return 0;
+    }
 }
 
 Interface
@@ -367,8 +371,7 @@ Shell7BaseXFEM :: giveInternalForcesVector(FloatArray &answer, TimeStep *tStep, 
 
             // Cohesive zone model
             if ( this->hasCohesiveZone(i) ) {
-                Delamination *dei =  dynamic_cast< Delamination * >( this->xMan->giveEnrichmentItem(i) ); // should check success
-                this->computeCohesiveForces( fCZ, tStep, solVec, solVecD, dei); 
+                this->computeCohesiveForces( fCZ, tStep, solVec, solVecD, this->xMan->giveEnrichmentItem(i)); 
                 tempRed.beSubArrayOf(fCZ, activeDofs);
                 answer.assemble(tempRed, ordering);
             }
@@ -493,65 +496,68 @@ Shell7BaseXFEM :: giveMaxCZDamages(FloatArray &answer, TimeStep *tStep)
 
 
 void
-Shell7BaseXFEM :: computeCohesiveForces(FloatArray &answer, TimeStep *tStep, FloatArray &solVecC, FloatArray &solVecD, Delamination *dei)
+Shell7BaseXFEM :: computeCohesiveForces(FloatArray &answer, TimeStep *tStep, FloatArray &solVecC, FloatArray &solVecD, EnrichmentItem *ei)
 {
     //Computes the cohesive nodal forces for a given interface
-    FloatArray answerTemp, lCoords(3);
-    answerTemp.resize(Shell7Base :: giveNumberOfDofs() ); 
-    answerTemp.zero();
 
-    FloatMatrix N, B, F;  
-    int delamNum = dei->giveNumber();
-    IntegrationRule *iRuleL = czIntegrationRulesArray [ delamNum - 1 ]; ///@ todo does this work with giveNumber? Probably not, will have to save num delam.
+    Delamination *dei =  dynamic_cast< Delamination * >( ei ); 
+    if ( dei ) { // For now only add cz for delaminations
+        FloatArray answerTemp, lCoords(3);
+        answerTemp.resize(Shell7Base :: giveNumberOfDofs() ); 
+        answerTemp.zero();
 
-    StructuralInterfaceMaterial *intMat = static_cast < StructuralInterfaceMaterial * > 
-        (this->layeredCS->giveInterfaceMaterial(delamNum) );
+        FloatMatrix N, B, F;  
+        int delamNum = dei->giveNumber();
+        IntegrationRule *iRuleL = czIntegrationRulesArray [ delamNum - 1 ]; ///@ todo does this work with giveNumber? Probably not, will have to save num delam.
 
-    FloatMatrix lambda, lambdaN, Q;
-    FloatArray Fp, T, interfaceXiCoords, nCov, xd, unknowns, genEpsC, genEpsD;
-    this->layeredCS->giveInterfaceXiCoords(interfaceXiCoords);
+        StructuralInterfaceMaterial *intMat = static_cast < StructuralInterfaceMaterial * > 
+            (this->layeredCS->giveInterfaceMaterial(delamNum) );
 
-    for ( int i = 1; i <= iRuleL->giveNumberOfIntegrationPoints(); i++ ) {
-        IntegrationPoint *ip = iRuleL->getIntegrationPoint(i - 1);
-        lCoords.at(1) = ip->giveCoordinate(1);
-        lCoords.at(2) = ip->giveCoordinate(2);
-        lCoords.at(3) = dei->giveDelamXiCoord();
+        FloatMatrix lambda, lambdaN, Q;
+        FloatArray Fp, T, nCov, xd, unknowns, genEpsC, genEpsD;
 
-        this->computeBmatrixAt(lCoords, B);
-        this->computeNmatrixAt(lCoords, N);
+        for ( int i = 1; i <= iRuleL->giveNumberOfIntegrationPoints(); i++ ) {
+            IntegrationPoint *ip = iRuleL->getIntegrationPoint(i - 1);
+            lCoords.at(1) = ip->giveCoordinate(1);
+            lCoords.at(2) = ip->giveCoordinate(2);
+            lCoords.at(3) = dei->giveDelamXiCoord();
 
-        // Lambda matrix
-        genEpsD.beProductOf(B, solVecD);
-        double xi = dei->giveDelamXiCoord();
-        double zeta = xi * this->layeredCS->computeIntegralThick() * 0.5;
-        this->computeLambdaNMatrix(lambda, genEpsD, zeta);
+            this->computeEnrichedBmatrixAt(lCoords, B, dei);
+            this->computeEnrichedNmatrixAt(lCoords, N, dei);
+
+            // Lambda matrix
+            genEpsD.beProductOf(B, solVecD);
+            double xi = dei->giveDelamXiCoord();
+            double zeta = xi * this->layeredCS->computeIntegralThick() * 0.5;
+            this->computeLambdaNMatrix(lambda, genEpsD, zeta);
         
-        // Compute jump vector
-        unknowns.beProductOf(N, solVecD);
-        xd.beProductOf(lambda,unknowns); // spatial jump
-		genEpsC.beProductOf(B, solVecC);
-		this->computeFAt(lCoords, F, genEpsC);
+            // Compute jump vector
+            unknowns.beProductOf(N, solVecD);
+            xd.beProductOf(lambda,unknowns); // spatial jump
+		    genEpsC.beProductOf(B, solVecC);
+		    this->computeFAt(lCoords, F, genEpsC);
 
-		// Transform xd and F to a local coord system
-        this->evalInitialCovarNormalAt(nCov, lCoords);
-        Q.beLocalCoordSys(nCov);
-        xd.rotatedWith(Q,'n');
-        F.rotatedWith(Q,'n');
+		    // Transform xd and F to a local coord system
+            this->evalInitialCovarNormalAt(nCov, lCoords);
+            Q.beLocalCoordSys(nCov);
+            xd.rotatedWith(Q,'n');
+            F.rotatedWith(Q,'n');
 
-        // Compute cohesive traction based on jump
-        intMat->giveFirstPKTraction_3d(T, ip, xd, F, tStep);
-        lambdaN.beProductOf(lambda,N);
-        T.rotatedWith(Q,'t'); // transform back to global coord system
+            // Compute cohesive traction based on jump
+            intMat->giveFirstPKTraction_3d(T, ip, xd, F, tStep);
+            lambdaN.beProductOf(lambda,N);
+            T.rotatedWith(Q,'t'); // transform back to global coord system
 
-        Fp.beTProductOf(lambdaN, T);
-        double dA = this->computeAreaAround(ip,xi);
-        answerTemp.add(dA*DISC_DOF_SCALE_FAC,Fp);
+            Fp.beTProductOf(lambdaN, T);
+            double dA = this->computeAreaAround(ip,xi);
+            answerTemp.add(dA*DISC_DOF_SCALE_FAC,Fp);
+        }
+
+        int ndofs = Shell7Base :: giveNumberOfDofs();
+        answer.resize(ndofs); answer.zero();
+        const IntArray &ordering = this->giveOrdering(All);
+        answer.assemble(answerTemp, ordering);
     }
-
-    int ndofs = Shell7Base :: giveNumberOfDofs();
-    answer.resize(ndofs); answer.zero();
-    const IntArray &ordering = this->giveOrdering(All);
-    answer.assemble(answerTemp, ordering);
 }
 
 void
@@ -627,7 +633,8 @@ Shell7BaseXFEM :: computeCohesiveTangentAt(FloatMatrix &answer, TimeStep *tStep,
 
         double zeta = giveGlobalZcoord( lCoords);
         this->computeLambdaNMatrixDis( lambda, zeta );
-        this->computeNmatrixAt(lCoords, N);
+        //this->computeNmatrixAt(lCoords, N);
+        this->computeEnrichedNmatrixAt(lCoords, N, dei);
                 
         intMat->give3dStiffnessMatrix_dTdj(K, TangentStiffness, ip, tStep);
         this->evalInitialCovarNormalAt(nCov, lCoords);
@@ -711,8 +718,11 @@ Shell7BaseXFEM :: computeStiffnessMatrix(FloatMatrix &answer, MatResponseMode rM
                         
                         if ( eiK->isElementEnriched(this) ) {
                             this->discComputeBulkTangentMatrix(KDD, ip, eiM, eiK, layer, A, tStep);
-                            tempRed.beSubMatrixOf(KDD, activeDofsArrays[m-1], activeDofsArrays[k-1]);
-                            answer.assemble(tempRed, orderingArrays[m-1], orderingArrays[k-1]);
+                            if ( activeDofsArrays[m-1].giveSize() != 0 && activeDofsArrays[k-1].giveSize() != 0 ) {
+                                tempRed.beSubMatrixOf(KDD, activeDofsArrays[m-1], activeDofsArrays[k-1]);
+                                answer.assemble(tempRed, orderingArrays[m-1], orderingArrays[k-1]);
+                            }
+                            
                         }
 
                     }
@@ -724,13 +734,12 @@ Shell7BaseXFEM :: computeStiffnessMatrix(FloatMatrix &answer, MatResponseMode rM
 
 
     // Cohesive zones
-#if 0
+#if 1
     FloatMatrix Kcoh;
-    //if ( this->hasCohesiveZone() ) {
-        this->computeCohesiveTangent(Kcoh, tStep);
-        Kcoh.times(DISC_DOF_SCALE_FAC*DISC_DOF_SCALE_FAC);
-        answer.add(Kcoh);
-    //}
+    this->computeCohesiveTangent(Kcoh, tStep);
+    //Kcoh.times(DISC_DOF_SCALE_FAC*DISC_DOF_SCALE_FAC);
+    answer.add(Kcoh);
+
 #endif
 
 
@@ -1798,7 +1807,7 @@ Shell7BaseXFEM :: giveCompositeExportData(VTKPiece &vtkPiece, IntArray &primaryV
         }
     }
 
-#if 0
+
 
     // Export nodal variables from internal fields
     
@@ -1807,13 +1816,16 @@ Shell7BaseXFEM :: giveCompositeExportData(VTKPiece &vtkPiece, IntArray &primaryV
         InternalStateType type = ( InternalStateType ) internalVarsToExport.at(fieldNum);
         nodeNum = 1;
         //this->recoverShearStress(tStep);
-        for ( int layer = 1; layer <= numCells; layer++ ) {            
-            recoverValuesFromIP(values, layer, type, tStep);        
-            for ( int j = 1; j <= numCellNodes; j++ ) {
-                vtkPiece.setInternalVarInNode( fieldNum, nodeNum, values[j-1] );
-                //ZZNodalRecoveryMI_recoverValues(el.nodeVars[fieldNum], layer, type, tStep);          
-                nodeNum += 1;        
-            }                                
+        int currentCell = 1;
+        for ( int layer = 1; layer <= numLayers; layer++ ) {            
+            for ( int subCell = 1; subCell <= numSubCells; subCell++ ) {
+                recoverValuesFromIP(values, layer, type, tStep);        
+                for ( int j = 1; j <= numCellNodes; j++ ) {
+                    vtkPiece.setInternalVarInNode( fieldNum, nodeNum, values[j-1] );
+                    //ZZNodalRecoveryMI_recoverValues(el.nodeVars[fieldNum], layer, type, tStep);          
+                    nodeNum += 1;        
+                }                                
+            }
         }  
     }
 
@@ -1823,35 +1835,36 @@ Shell7BaseXFEM :: giveCompositeExportData(VTKPiece &vtkPiece, IntArray &primaryV
     vtkPiece.setNumberOfCellVarsToExport(cellVarsToExport.giveSize(), numCells);
     for ( int i = 1; i <= cellVarsToExport.giveSize(); i++ ) {
         InternalStateType type = ( InternalStateType ) cellVarsToExport.at(i);;
-      
-        for ( int layer = 1; layer <= numCells; layer++ ) {     
-            IntegrationRule *iRuleL = integrationRulesArray [ layer - 1 ];
-            VTKXMLExportModule::computeIPAverage(average, iRuleL, this, type, tStep);
-            vtkPiece.setCellVar(i, layer, convV6ToV9Stress(average) );  
+        InternalStateValueType valueType =  giveInternalStateValueType(type);
+        int currentCell = 1;
+        for ( int layer = 1; layer <= numLayers; layer++ ) {  
+            for ( int subCell = 1; subCell <= numSubCells; subCell++ ) {
+                IntegrationRule *iRuleL = integrationRulesArray [ layer - 1 ];
+                VTKXMLExportModule::computeIPAverage(average, iRuleL, this, type, tStep);
+                if ( valueType == ISVT_TENSOR_S3 ) {
+                    vtkPiece.setCellVar(i, currentCell, convV6ToV9Stress(average) );  
+                } else {
+                    vtkPiece.setCellVar(i, currentCell, average);  
+                }
+                currentCell += 1;
+            }
         }
 
     }
 
-#endif 
 
 
-#if 0
+
+#if 1
 
 
     // Export of XFEM related quantities
-
-
-    //int numCells = this->layeredCS->giveNumberOfLayers();
-    //const int numCellNodes  = 15; // quadratic wedge
-    //int numTotalNodes = numCellNodes*numCells;
-
     XfemManager *xFemMan =  this->xMan;
     int nEnrIt = xFemMan->giveNumberOfEnrichmentItems();
 
-
     IntArray wedgeToTriMap;
+    // For each node in the wedge take the value from the triangle node given by the map below
     wedgeToTriMap.setValues(15, 1, 2, 3, 1, 2, 3, 4, 5, 6, 4, 5, 6, 1, 2, 3 );
-
 
     vtkPiece.setNumberOfInternalXFEMVarsToExport(xFemMan->vtkExportFields.giveSize(), nEnrIt, numTotalNodes);
     for ( int field = 1; field <= xFemMan->vtkExportFields.giveSize(); field++ ) {
@@ -1860,20 +1873,25 @@ Shell7BaseXFEM :: giveCompositeExportData(VTKPiece &vtkPiece, IntArray &primaryV
         for ( int enrItIndex = 1; enrItIndex <= nEnrIt; enrItIndex++ ) {
             EnrichmentItem *ei = xFemMan->giveEnrichmentItem(enrItIndex);
             int nodeNum = 1;
-            for ( int layer = 1; layer <= numCells; layer++ ) {
+            for ( int layer = 1; layer <= numLayers; layer++ ) {
 
 
                 for ( int subCell = 1; subCell <= numSubCells; subCell++ ) {
-
+                    FloatArray nodeLocalXi1Coords, nodeLocalXi2Coords, nodeLocalXi3Coords, nodeLocalXi3CoordsMapped;
+                    giveLocalNodeCoordsForExport(nodeLocalXi1Coords, nodeLocalXi2Coords, nodeLocalXi3Coords, subCell);
+                    mapXi3FromLocalToShell(nodeLocalXi3CoordsMapped, nodeLocalXi3Coords, layer);
                     for ( int nodeIndx = 1; nodeIndx <= numCellNodes; nodeIndx++ ) {
 
+                        FloatArray lCoords;
+                        lCoords.setValues(3,  nodeLocalXi1Coords.at(nodeIndx), nodeLocalXi2Coords.at(nodeIndx), nodeLocalXi3CoordsMapped.at(nodeIndx));
                         Node *node = this->giveNode( wedgeToTriMap.at(nodeIndx) );
                         FloatArray valueArray;
                         const FloatArray *val = NULL;
                         if ( xfemstype == XFEMST_LevelSetPhi ) {
                             valueArray.resize(1);
                             val = & valueArray;
-                            ei->evalLevelSetNormalInNode( valueArray.at(1), node->giveNumber() );
+                            //ei->evalLevelSetNormalInNode( valueArray.at(1), node->giveNumber() );
+                            valueArray.at(1) = this->evaluateLevelSet(lCoords, ei);
                         } else if ( xfemstype == XFEMST_LevelSetGamma ) {
                             valueArray.resize(1);
                             val = & valueArray;
@@ -1958,6 +1976,23 @@ Shell7BaseXFEM :: giveFictiousUpdatedNodeCoordsForExport(std::vector<FloatArray>
         this->vtkEvalUpdatedGlobalCoordinateAt(localCoords, layer, coords, tStep);
         nodes[i-1].resize(3); 
         nodes[i-1] = coords;
+    }
+}
+
+void
+Shell7BaseXFEM :: mapXi3FromLocalToShell(FloatArray &answer, FloatArray &local, int layer)
+{
+    // Map local layer cs to local shell cs
+    answer.resize(15);
+    for ( int i = 1; i <= 15; i++ ){
+        double scaleFactor = 0.9999; // Will be numerically unstable with xfem if the endpoints lie at +-1
+        double totalThickness = this->layeredCS->computeIntegralThick();
+        double zMid_i = this->layeredCS->giveLayerMidZ(layer); // global z-coord
+        double xiMid_i = 1.0 - 2.0 * ( totalThickness - this->layeredCS->giveMidSurfaceZcoordFromBottom() - zMid_i ) / totalThickness; // local z-coord
+        double deltaxi = local.at(i) * this->layeredCS->giveLayerThickness(layer) / totalThickness; // distance from layer mid
+        local.at(i) = xiMid_i + deltaxi * scaleFactor;
+
+        answer.at(i) = local.at(i);
     }
 }
 
