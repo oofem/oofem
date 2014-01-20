@@ -32,57 +32,72 @@
  *  License along with this library; if not, write to the Free Software
  *  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  */
-#if 0
+#if 1
 
 
 #ifndef phasefieldelement_h
 #define phasefieldelement_h
 
 #include "coupledfieldselement.h"
-#include "fei2dquadlin.h"
+#include "fei2dquadquad.h"
+#include "qplanstrss.h"
 
 namespace oofem {
 /**
  * Abstract class for phase field formulation
  */
-class PhaseFieldElement : public CoupledFieldsElement
+class PhaseFieldElement
 {
 protected:
     IntArray loc_u, loc_d;
-    int nlGeo;
 
 public:
-    PhaseFieldElement(int i, Domain *aDomain) : CoupledFieldsElement(i, aDomain) {};
+    PhaseFieldElement( int i, Domain *aDomain );
     virtual ~PhaseFieldElement() {}
+
+    virtual NLStructuralElement *giveElement( ) = 0;
 
     virtual IRResultType initializeFrom(InputRecord *ir);
     virtual void giveDofManDofIDMask_u(IntArray &answer) = 0;
     virtual void giveDofManDofIDMask_d(IntArray &answer) = 0;
 
-    // definition & identification
     virtual const char *giveClassName() const { return "PhaseFieldElement"; }
+
+    int computeNumberOfDofs();
+    void computeVectorOfDofIDs( const IntArray &dofIdArray, ValueModeType valueMode, TimeStep *stepN, FloatArray &answer );
+    void computeLocationArrayOfDofIDs( const IntArray &dofIdArray, IntArray &answer );
+
+    double computeFreeEnergy( GaussPoint *gp, TimeStep *tStep );
+
+    ///@todo move these to a cross section model later
+    double internalLength;
+    double giveInternalLength( ) { return internalLength; };
+    double criticalEnergy;
+    double giveCriticalEnergy() { return criticalEnergy; };
+    double relaxationTime;
+    double giveRelaxationTime( ) { return relaxationTime; };
 
 protected:
 
-    virtual void computeNStressAt(GaussPoint *, FloatArray &) = 0;
-    virtual void computeBStressAt(GaussPoint *, FloatArray &) = 0;
-    virtual double computeVolumeAround(GaussPoint *) = 0;
+    virtual void computeStiffnessMatrix(FloatMatrix &, MatResponseMode, TimeStep *);
 
-    void computeStiffnessMatrix(FloatMatrix &, MatResponseMode, TimeStep *);
-
-    void computeStiffnessMatrixGen(FloatMatrix &, MatResponseMode, TimeStep *, 
+    /*void computeStiffnessMatrixGen(FloatMatrix &, MatResponseMode, TimeStep *, 
         void (*Nfunc)(GaussPoint*, FloatMatrix), void (*Bfunc)(GaussPoint*, FloatMatrix),
         void (*NStiffness)(GaussPoint*, FloatMatrix), void (*BStiffness)(GaussPoint*, FloatMatrix),
         double (*volumeAround)(GaussPoint*)
         );
+     void Duu_B(FloatMatrix &, MatResponseMode, GaussPoint *, TimeStep *);
+     void Duu_d(FloatMatrix &, MatResponseMode, GaussPoint *, TimeStep *);
+     
+     void computeBStress_d(FloatArray &answer, GaussPoint *gp, TimeStep *tStep, int useUpdatedGpRecord);
+     */
 
     void computeStiffnessMatrix_uu(FloatMatrix &, MatResponseMode, TimeStep *);
     void computeStiffnessMatrix_ud(FloatMatrix &, MatResponseMode, TimeStep *);
     void computeStiffnessMatrix_dd(FloatMatrix &, MatResponseMode, TimeStep *);
     void computeStiffnessMatrix_du(FloatMatrix &, MatResponseMode, TimeStep *);
 
-    void Duu_B(FloatMatrix &, MatResponseMode, GaussPoint *, TimeStep *);
-    void Duu_d(FloatMatrix &, MatResponseMode, GaussPoint *, TimeStep *);
+    
     double computeG(GaussPoint *gp, ValueModeType valueMode, TimeStep *stepN);
     double computeGPrim(GaussPoint *gp, ValueModeType valueMode, TimeStep *stepN);
     double computeDamageAt(GaussPoint *gp, ValueModeType valueMode, TimeStep *stepN);
@@ -90,22 +105,16 @@ protected:
     void giveInternalForcesVector(FloatArray &answer, TimeStep *tStep, int useUpdatedGpRecord);
     void giveInternalForcesVector_u(FloatArray &answer, TimeStep *tStep, int useUpdatedGpRecord);
     void giveInternalForcesVector_d(FloatArray &answer, TimeStep *tStep, int useUpdatedGpRecord);
-
     void computeBStress_u(FloatArray &answer, GaussPoint *gp, TimeStep *tStep, int useUpdatedGpRecord);
-    void computeNStress_d(FloatArray &answer, GaussPoint *gp, TimeStep *tStep, int useUpdatedGpRecord);
-    void computeBStress_d(FloatArray &answer, GaussPoint *gp, TimeStep *tStep, int useUpdatedGpRecord);
-    
+    void computeNStress_d( FloatArray &answer, GaussPoint *gp, TimeStep *tStep, int useUpdatedGpRecord );
 
     void computeDisplacementUnknowns(FloatArray &answer, ValueModeType valueMode, TimeStep *stepN);
     void computeDamageUnknowns(FloatArray &answer, ValueModeType valueMode, TimeStep *stepN);
     
     //Interpolation matrices
     virtual void computeBd_matrixAt(GaussPoint *, FloatMatrix &, int = 1, int = ALL_STRAINS);
-    //virtual void computeBmatrixAt(GaussPoint *aGaussPoint, FloatMatrix &answer, int li, int ui)
     virtual void computeNd_matrixAt(const FloatArray &lCoords, FloatMatrix &N);
 
-    static FEI2dQuadLin interpolation_u;
-    static FEI2dQuadLin interpolation_d;
 };
 } // end namespace oofem
 

@@ -230,6 +230,7 @@ protected:
         return;
     }
     friend class GradDpElement;
+    friend class PhaseFieldElement;
 };
 } // end namespace oofem
 #endif // nlstructuralelement_h

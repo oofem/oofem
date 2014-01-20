@@ -164,6 +164,7 @@ IsotropicLinearElasticMaterial :: givePlaneStressStiffMtrx(FloatMatrix &answer,
                                                            GaussPoint *gp,
                                                            TimeStep *tStep)
 {
+    this->giveStatus(gp);
     double e, nu, ee, shear;
 
     e     = this->E;
