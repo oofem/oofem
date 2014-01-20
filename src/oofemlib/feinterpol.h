@@ -348,6 +348,11 @@ public:
      * Returns number of spatial dimensions.
      */
     virtual int giveNsd() = 0;
+    /**
+     * Returns number of edges.
+     */
+    virtual int giveNumberOfEdges() const 
+    { OOFEM_ERROR("FEInterpolation :: giveNumberOfEdges : Not overloaded."); return -1;}
     //@}
 
     /**

@@ -43,7 +43,7 @@
 #include "datastream.h"
 #include "gausspoint.h"
 #include "fei2dtrlin.h"
-
+#include "fei3dtrquad.h"
 #include "XFEMDebugTools.h"
 
 #include "timestep.h"
@@ -59,6 +59,7 @@ PatchIntegrationRule :: ~PatchIntegrationRule()
 {}
 
 FEI2dTrLin PatchIntegrationRule :: mTriInterp(1, 2);
+FEI3dTrQuad PatchIntegrationRule :: mTriInterpQuad;
 
 int
 PatchIntegrationRule :: SetUpPointsOnTriangle(int nPoints, MaterialMode mode)
@@ -192,6 +193,139 @@ PatchIntegrationRule :: SetUpPointsOnTriangle(int nPoints, MaterialMode mode)
 
     return numberOfIntegrationPoints;
 }
+
+
+
+
+int
+PatchIntegrationRule :: SetUpPointsOnWedge(int nPointsTri, int nPointsDepth, MaterialMode mode)
+{
+    int pointsPassed = 0;
+
+    // TODO: set properly
+    firstLocalStrainIndx = 1;
+    lastLocalStrainIndx = 3;
+
+    double totArea = 0.0;
+    for ( size_t i = 0; i < mTriangles.size(); i++ ) {
+        totArea += mTriangles [ i ].getArea();
+    }
+
+    std :: vector< int >triToKeep;
+    const double triTol = ( 1.0e-6 ) * totArea;
+
+    for ( size_t i = 0; i < mTriangles.size(); i++ ) {
+        if ( mTriangles [ i ].getArea() > triTol ) {
+            triToKeep.push_back(i);
+        }
+    }
+
+    int nPointsTot = nPointsTri * nPointsDepth * triToKeep.size();
+    FloatArray coords_xi1, coords_xi2, coords_xi3, weightsTri, weightsDepth;
+    this->giveTriCoordsAndWeights(nPointsTri, coords_xi1, coords_xi2, weightsTri);
+    this->giveLineCoordsAndWeights(nPointsDepth, coords_xi3, weightsDepth);
+
+    this->gaussPointArray = new GaussPoint * [ nPointsTot ];
+
+
+    std :: vector< FloatArray >newGPCoord;
+
+    double parentArea = this->elem->computeArea();
+    int count = 0;
+
+    // Loop over triangles
+    for ( int i = 0; i < int( triToKeep.size() ); i++ ) {
+
+        Triangle triangle = mTriangles [ triToKeep [ i ] ];
+        const FloatArray **gCoords = new const FloatArray * [ triangle.giveNrVertices() ];
+
+        // global coords of the the triangle verticies
+        for ( int j = 0; j < triangle.giveNrVertices(); j++ ) {
+            gCoords [ j ] = new FloatArray( ( triangle.giveVertex(j + 1) ) );
+        }
+        
+
+        for ( int k = 1; k <= nPointsTri; k++ ) {
+            for ( int m = 1; m <= nPointsDepth; m++ ) {
+                FloatArray *lCoords = new FloatArray(3);
+                lCoords->at(1) = coords_xi1.at(k);
+                lCoords->at(2) = coords_xi2.at(k);
+                lCoords->at(3) = coords_xi3.at(m);
+
+                // Compute global gp coordinate in the element from local gp coord in patch triangle
+                FloatArray global;
+                mTriInterp.local2global( global, *lCoords, FEIVertexListGeometryWrapper( triangle.giveNrVertices(), gCoords) );
+                
+
+                // Compute local gp coordinate in the element from global gp coord in the element
+                FloatArray local;
+                this->elem->computeLocalCoordinates(local, global);
+                local.at(3) = coords_xi3.at(m); // manually set third coordinate
+    
+                double refElArea = 0.5;
+                //double refElArea = this->elem->giveParentElSize();
+                double oldWeight = weightsTri.at(k) * weightsDepth.at(m);
+                double newWeight = 2.0 * refElArea * oldWeight * triangle.getArea() / parentArea; 
+
+
+                FloatArray *coord = new FloatArray(3);
+                coord->at(1) = local.at(1);
+                coord->at(2) = local.at(2);
+                coord->at(3) = local.at(3);
+
+                GaussPoint *gp = new GaussPoint(this, count + 1, coord, newWeight, mode);
+
+                //GaussPoint *gp = new GaussPoint(this, count + 1, &local, newWeight, mode);
+                this->gaussPointArray [ count ] = gp;
+                count++;
+
+                // Store new global gp coord for vtk output
+                this->elem->computeGlobalCoordinates(global, *gp->giveCoordinates() );
+                newGPCoord.push_back(global);
+            }
+        }
+
+
+        for ( int k = 0; k < mTriangles [ triToKeep [ i ] ].giveNrVertices(); k++ ) {
+            delete gCoords [ k ];
+        }
+
+        delete [] gCoords;
+    }
+
+    XfemManager *xMan = elem->giveDomain()->giveXfemManager();
+    if ( xMan != NULL ) {
+        if ( xMan->giveVtkDebug() ) {
+            double time = 0.0;
+
+            Element *el = this->elem;
+            if ( el != NULL ) {
+                Domain *dom = el->giveDomain();
+                if ( dom != NULL ) {
+                    EngngModel *em = dom->giveEngngModel();
+                    if ( em != NULL ) {
+                        TimeStep *ts = em->giveCurrentStep();
+                        if ( ts != NULL ) {
+                            time = ts->giveTargetTime();
+                        }
+                    }
+                }
+            }
+
+            int elIndex = this->elem->giveGlobalNumber();
+            std :: stringstream str;
+            str << "GaussPointsTime" << time << "El" << elIndex << ".vtk";
+            std :: string name = str.str();
+
+            XFEMDebugTools :: WritePointsToVTK(name, newGPCoord);
+        }
+    }
+
+    numberOfIntegrationPoints = count;
+
+    return numberOfIntegrationPoints;
+}
+
 
 contextIOResultType
 PatchIntegrationRule :: saveContext(DataStream *stream, ContextMode mode, void *obj)

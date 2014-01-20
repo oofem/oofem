@@ -203,6 +203,7 @@ public:
     virtual void postInitialize();
     void giveSubPolygon(std :: vector< FloatArray > &oPoints, const double &iXiStart, const double &iXiEnd) const;
 
+    EnrichmentDomain *giveEnrichmentDomain() { return mpEnrichmentDomain; };
 protected:
 
     EnrichmentDomain *mpEnrichmentDomain;

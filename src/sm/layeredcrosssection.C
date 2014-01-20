@@ -1336,6 +1336,14 @@ LayeredIntegrationRule :: SetUpPointsOnWedge(int nPointsTri, int nPointsThicknes
             coord->at(1) = coords_xi1.at(j);
             coord->at(2) = coords_xi2.at(j);
             coord->at(3) = coords_xi.at(i);
+            
+            //coord->printYourself();
+            //weights_tri.printYourself();
+            //weights_thickness.printYourself();
+
+            //GaussPoint *gp = new GaussPoint(this, ind+1, coord, weights_tri.at(j) * weights_thickness.at(i), mode);
+            //this->gaussPointArray [ ind ] = gp;
+
             this->gaussPointArray [ ind ] = 
                 new GaussPoint(this, 1, coord, weights_tri.at(j) * weights_thickness.at(i), mode);
             
