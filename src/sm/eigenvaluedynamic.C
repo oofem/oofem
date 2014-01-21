@@ -50,8 +50,7 @@
 #endif
 
 namespace oofem {
-
-REGISTER_EngngModel( EigenValueDynamic );
+REGISTER_EngngModel(EigenValueDynamic);
 
 NumericalMethod *EigenValueDynamic :: giveNumericalMethod(MetaStep *mStep)
 {
@@ -168,13 +167,13 @@ void EigenValueDynamic :: solveYourselfAt(TimeStep *tStep)
         massMatrix->buildInternalStructure( this, 1, EID_MomentumBalance, EModelDefaultEquationNumbering() );
 
         this->assemble( stiffnessMatrix, tStep, EID_MomentumBalance, StiffnessMatrix,
-                       EModelDefaultEquationNumbering(), this->giveDomain(1) );
+                        EModelDefaultEquationNumbering(), this->giveDomain(1) );
         this->assemble( massMatrix, tStep, EID_MomentumBalance, MassMatrix,
-                       EModelDefaultEquationNumbering(), this->giveDomain(1) );
+                        EModelDefaultEquationNumbering(), this->giveDomain(1) );
         //
         // create resulting objects eigVec and eigVal
         //
-        eigVec.resize(this->giveNumberOfDomainEquations(1, EModelDefaultEquationNumbering()), numberOfRequiredEigenValues);
+        eigVec.resize(this->giveNumberOfDomainEquations( 1, EModelDefaultEquationNumbering() ), numberOfRequiredEigenValues);
         eigVec.zero();
         eigVal.resize(numberOfRequiredEigenValues);
         eigVal.zero();
@@ -183,7 +182,7 @@ void EigenValueDynamic :: solveYourselfAt(TimeStep *tStep)
     //
     // set-up numerical model
     //
-    this->giveNumericalMethod(  this->giveMetaStep( tStep->giveMetaStepNumber() ) );
+    this->giveNumericalMethod( this->giveMetaStep( tStep->giveMetatStepumber() ) );
 
     //
     // call numerical model to solve arised problem
@@ -200,11 +199,11 @@ void EigenValueDynamic :: solveYourselfAt(TimeStep *tStep)
 }
 
 
-void EigenValueDynamic :: updateYourself(TimeStep *stepN)
+void EigenValueDynamic :: updateYourself(TimeStep *tStep)
 { }
 
 
-void EigenValueDynamic :: terminate(TimeStep *stepN)
+void EigenValueDynamic :: terminate(TimeStep *tStep)
 {
     Domain *domain = this->giveDomain(1);
     FILE *outputStream = this->giveOutputStream();
@@ -229,20 +228,20 @@ void EigenValueDynamic :: terminate(TimeStep *stepN)
     for ( i = 1; i <=  numberOfRequiredEigenValues; i++ ) {
         fprintf(outputStream, "\nOutput for eigen value no.  % .3e \n", ( double ) i);
         fprintf( outputStream,
-                "Printing eigen vector no. %d, corresponding eigen value is %15.8e\n\n",
-                i, eigVal.at(i) );
-        stepN->setTime( ( double ) i ); // we use time as intrinsic eigen value index
+                 "Printing eigen vector no. %d, corresponding eigen value is %15.8e\n\n",
+                 i, eigVal.at(i) );
+        tStep->setTime( ( double ) i ); // we use time as intrinsic eigen value index
 
         if ( this->requiresUnknownsDictionaryUpdate() ) {
             for ( j = 1; j <= nnodes; j++ ) {
-                this->updateDofUnknownsDictionary(domain->giveDofManager(j), stepN);
+                this->updateDofUnknownsDictionary(domain->giveDofManager(j), tStep);
             }
         }
 
 
         for ( j = 1; j <= nnodes; j++ ) {
-            domain->giveDofManager(j)->updateYourself(stepN);
-            domain->giveDofManager(j)->printOutputAt(outputStream, stepN);
+            domain->giveDofManager(j)->updateYourself(tStep);
+            domain->giveDofManager(j)->printOutputAt(outputStream, tStep);
         }
     }
 
@@ -252,12 +251,12 @@ void EigenValueDynamic :: terminate(TimeStep *stepN)
 
     for ( i = 1; i <=  numberOfRequiredEigenValues; i++ ) {
         // export using export manager
-        stepN->setTime( ( double ) i ); // we use time as intrinsic eigen value index
-        stepN->setNumber(i);
-        exportModuleManager->doOutput(stepN);
+        tStep->setTime( ( double ) i ); // we use time as intrinsic eigen value index
+        tStep->setNumber(i);
+        exportModuleManager->doOutput(tStep);
     }
-    fflush(this->giveOutputStream());
-    this->saveStepContext(stepN);
+    fflush( this->giveOutputStream() );
+    this->saveStepContext(tStep);
 }
 
 
@@ -308,7 +307,7 @@ contextIOResultType EigenValueDynamic :: restoreContext(DataStream *stream, Cont
 //
 {
     int closeFlag = 0;
-    int activeVector = this->resolveCorrespondingEigenStepNumber(obj);
+    int activeVector = this->resolveCorrespondingEigentStepumber(obj);
     int istep = 1, iversion = 0;
     contextIOResultType iores;
     FILE *file = NULL;
@@ -342,7 +341,6 @@ contextIOResultType EigenValueDynamic :: restoreContext(DataStream *stream, Cont
             delete stream;
             stream = NULL;
         } // ensure consistent records
-
     }
 
     if ( activeVector > numberOfRequiredEigenValues ) {
@@ -357,7 +355,7 @@ contextIOResultType EigenValueDynamic :: restoreContext(DataStream *stream, Cont
 }
 
 
-int EigenValueDynamic :: resolveCorrespondingEigenStepNumber(void *obj)
+int EigenValueDynamic :: resolveCorrespondingEigentStepumber(void *obj)
 {
     //
     // returns corresponding eigen step number
@@ -381,24 +379,22 @@ int EigenValueDynamic :: resolveCorrespondingEigenStepNumber(void *obj)
 
 
 void
-EigenValueDynamic :: printDofOutputAt(FILE *stream, Dof *iDof, TimeStep *atTime)
+EigenValueDynamic :: printDofOutputAt(FILE *stream, Dof *iDof, TimeStep *tStep)
 {
-    iDof->printSingleOutputAt(stream, atTime, 'd', VM_Total);
+    iDof->printSingleOutputAt(stream, tStep, 'd', VM_Total);
 }
 
 #ifdef __SLEPC_MODULE
 void
-EigenValueDynamic :: initPetscContexts()
+EigenValueDynamic :: initParallelContexts()
 {
-    PetscContext *petscContext;
+    ParallelContext *parallelContext;
 
-    petscContextList->growTo(ndomains);
+    parallelContextList->growTo(ndomains);
     for ( int i = 0; i < this->ndomains; i++ ) {
-        petscContext =  new PetscContext(this);
-        petscContextList->put(i + 1, petscContext);
+        parallelContext =  new ParallelContext(this);
+        parallelContextList->put(i + 1, parallelContext);
     }
 }
 #endif
-
-
 } // end namespace oofem

@@ -124,7 +124,7 @@ FEI2dTrConst :: giveTransformationJacobian(const FloatArray &lcoords, const FEIC
     y2 = cellgeo.giveVertexCoordinates(2)->at(yind);
     y3 = cellgeo.giveVertexCoordinates(3)->at(yind);
 
-    return x1*(y2 - y3) + x2*(-y1 + y3) + x3*(y1 - y2);
+    return x1 * ( y2 - y3 ) + x2 * ( -y1 + y3 ) + x3 * ( y1 - y2 );
 }
 
 
@@ -144,7 +144,7 @@ FEI2dTrConst :: edgeEvalNormal(FloatArray &answer, int iedge, const FloatArray &
 
 void
 FEI2dTrConst :: edgeEvaldNds(FloatArray &answer, int iedge,
-                           const FloatArray &lcoords, const FEICellGeometry &cellgeo)
+                             const FloatArray &lcoords, const FEICellGeometry &cellgeo)
 {
     answer.resize(2);
     answer.zero();
@@ -152,12 +152,12 @@ FEI2dTrConst :: edgeEvaldNds(FloatArray &answer, int iedge,
 
 void
 FEI2dTrConst :: edgeLocal2global(FloatArray &answer, int iedge,
-                               const FloatArray &lcoords, const FEICellGeometry &cellgeo)
+                                 const FloatArray &lcoords, const FEICellGeometry &cellgeo)
 {
     IntArray edgeNodes;
     FloatArray n(2);
-    n.at(1) = (1 - lcoords(0))*0.5;
-    n.at(2) = (1 + lcoords(0))*0.5;
+    n.at(1) = ( 1 - lcoords(0) ) * 0.5;
+    n.at(2) = ( 1 + lcoords(0) ) * 0.5;
     this->computeLocalEdgeMapping(edgeNodes, iedge);
 
     answer.resize(2);
@@ -212,6 +212,4 @@ FEI2dTrConst :: giveIntegrationRule(int order)
     iRule->SetUpPointsOnTriangle(points, mode);
     return iRule;
 }
-
-
 } // end namespace oofem

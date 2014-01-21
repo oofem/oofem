@@ -61,7 +61,6 @@
 //@}
 
 namespace oofem {
-
 /**
  * Specialized numbering scheme for CBS algorithm, since it needs velocities separately.
  */
@@ -80,6 +79,7 @@ public:
         if ( id == V_u || id == V_v || id == V_w ) {
             return prescribed ? dof->__givePrescribedEquationNumber() : dof->__giveEquationNumber();
         }
+
         return 0;
     }
     virtual int giveRequiredNumberOfDomainEquation() const { return numEqs; }
@@ -105,6 +105,7 @@ public:
         if ( id == P_f ) {
             return prescribed ? dof->__givePrescribedEquationNumber() : dof->__giveEquationNumber();
         }
+
         return 0;
     }
     virtual int giveRequiredNumberOfDomainEquation() const { return numEqs; }
@@ -168,9 +169,9 @@ protected:
     //</RESTRICTED_SECTION>
 public:
     CBS(int i, EngngModel *_master = NULL) : FluidModel(i, _master),
-            PressureField(this, 1, FT_Pressure, EID_ConservationEquation, 1),
-            VelocityField(this, 1, FT_Velocity, EID_MomentumBalance, 1),
-            vnum(false), vnumPrescribed(true), pnum(false), pnumPrescribed(true) {
+        PressureField(this, 1, FT_Pressure, EID_ConservationEquation, 1),
+        VelocityField(this, 1, FT_Velocity, EID_MomentumBalance, 1),
+        vnum(false), vnumPrescribed(true), pnum(false), pnumPrescribed(true) {
         initFlag = 1;
         lhs = NULL;
         ndomains = 1;
@@ -185,6 +186,7 @@ public:
     virtual ~CBS() {
         //<RESTRICTED_SECTION>
         if ( materialInterface ) { delete materialInterface; }
+
         //</RESTRICTED_SECTION>
     }
 
@@ -213,7 +215,6 @@ public:
     // identification
     virtual const char *giveClassName() const { return "CBS"; }
     virtual const char *giveInputRecordName() const { return _IFT_CBS_Name; }
-    virtual classType giveClassID() const { return CBSClass; }
     virtual fMode giveFormulation() { return TL; }
 
     virtual void printDofOutputAt(FILE *stream, Dof *iDof, TimeStep *tStep);

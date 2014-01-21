@@ -71,7 +71,7 @@ LEPlicElementInterface :: isBoundary()
         for ( i = 1; i <= nneighbr; i++ ) {
             ineighbr = neighborList.at(i);
             if ( ( ineghbrInterface =
-                      static_cast< LEPlicElementInterface * > ( domain->giveElement(ineighbr)->giveInterface(LEPlicElementInterfaceType) ) ) ) {
+                       static_cast< LEPlicElementInterface * >( domain->giveElement(ineighbr)->giveInterface(LEPlicElementInterfaceType) ) ) ) {
                 fvk = ineghbrInterface->giveTempVolumeFraction();
                 if ( fvk < 1.0 ) {
                     return true;
@@ -134,36 +134,36 @@ LEPlicElementInterface :: restoreContext(DataStream *stream, ContextMode mode, v
 
 
 void
-LEPlic :: updatePosition(TimeStep *atTime)
+LEPlic :: updatePosition(TimeStep *tStep)
 {
     ///@todo Can't have OOFEG stuff here, it will crash when running OOFEM normally.
 #ifdef __OOFEG
     //deleteLayerGraphics(OOFEG_DEBUG_LAYER);
     EVFastRedraw(myview);
 #endif
-    this->doLagrangianPhase(atTime);
-    this->doInterfaceReconstruction(atTime, true, false);
+    this->doLagrangianPhase(tStep);
+    this->doInterfaceReconstruction(tStep, true, false);
 #ifdef __OOFEG
     //ESIEventLoop (YES, "doInterfaceReconstruction Finished; Press Ctrl-p to continue");
     deleteLayerGraphics(OOFEG_DEBUG_LAYER);
 #endif
-    this->doInterfaceRemapping(atTime);
+    this->doInterfaceRemapping(tStep);
     // here the new VOF values are determined, now we call doInterfaceReconstruction
     // to reconstruct interface (normal, constant) on original grid
-    this->doInterfaceReconstruction(atTime, false, true);
+    this->doInterfaceReconstruction(tStep, false, true);
 #ifdef __OOFEG
-    ESIEventLoop( NO, const_cast< char * >("doInterfaceReconstruction Finished; Press Ctrl-p to continue") );
+    ESIEventLoop( NO, const_cast< char * >( "doInterfaceReconstruction Finished; Press Ctrl-p to continue" ) );
     //ESIEventLoop (YES, "doInterfaceReconstruction Finished; Press Ctrl-p to continue");
 #endif
 }
 
 void
-LEPlic :: doLagrangianPhase(TimeStep *atTime)
+LEPlic :: doLagrangianPhase(TimeStep *tStep)
 {
     //Maps element nodes along trajectories using basic Runge-Kutta method (midpoint rule)
     int i, ci, ndofman = domain->giveNumberOfDofManagers();
     int nsd = 2;
-    double dt = atTime->giveTimeIncrement();
+    double dt = tStep->giveTimeIncrement();
     DofManager *dman;
     Node *inode;
     IntArray velocityMask;
@@ -181,7 +181,7 @@ LEPlic :: doLagrangianPhase(TimeStep *atTime)
 
     for ( i = 1; i <= ndofman; i++ ) {
         dman = domain->giveDofManager(i);
-        inode = dynamic_cast< Node* >( dman );
+        inode = dynamic_cast< Node * >( dman );
         // skip dofmanagers with no position information
         if ( !inode ) {
             continue;
@@ -193,9 +193,9 @@ LEPlic :: doLagrangianPhase(TimeStep *atTime)
 
 #if 1
         /* Original version */
-        dman->giveUnknownVector( v_t, velocityMask, VM_Total, atTime->givePreviousStep() );
+        dman->giveUnknownVector( v_t, velocityMask, VM_Total, tStep->givePreviousStep() );
         /* Modified version */
-        //dman->giveUnknownVector(v_t, velocityMask, VM_Total, atTime);
+        //dman->giveUnknownVector(v_t, velocityMask, VM_Total, tStep);
 
         // Original version
         // compute updated position x(tn)+0.5*dt*v(tn,x(tn))
@@ -205,13 +205,13 @@ LEPlic :: doLagrangianPhase(TimeStep *atTime)
 
         // compute interpolated velocity field at x2 [ v(tn+1, x(tn)+0.5*dt*v(tn,x(tn))) = v(tn+1, x2) ]
 
-	FM_FieldPtr vfield;
+        FM_FieldPtr vfield;
         vfield = emodel->giveContext()->giveFieldManager()->giveField(FT_Velocity);
         if ( vfield == NULL ) {
             _error("doLagrangianPhase: Velocity field not available");
         }
 
-        err = vfield->evaluateAt(v_tn1, x2, VM_Total, atTime);
+        err = vfield->evaluateAt(v_tn1, x2, VM_Total, tStep);
         if ( err == 1 ) {
             // point outside domain -> be explicit
             v_tn1 = v_t;
@@ -226,7 +226,7 @@ LEPlic :: doLagrangianPhase(TimeStep *atTime)
 
 #else
         // pure explicit version
-        dman->giveUnknownVector(v_t, velocityMask, VM_Total, atTime);
+        dman->giveUnknownVector(v_t, velocityMask, VM_Total, tStep);
 
         for ( ci = 1; ci <= nsd; ci++ ) {
             x2.at(ci) = x.at(ci) + dt *v_t.at(ci);
@@ -240,7 +240,7 @@ LEPlic :: doLagrangianPhase(TimeStep *atTime)
 }
 
 void
-LEPlic :: doInterfaceReconstruction(TimeStep *atTime, bool coord_upd, bool temp_vof)
+LEPlic :: doInterfaceReconstruction(TimeStep *tStep, bool coord_upd, bool temp_vof)
 {
     /* Here volume materials are reconstructed on the new Lagrangian grid */
 
@@ -263,12 +263,11 @@ LEPlic :: doInterfaceReconstruction(TimeStep *atTime, bool coord_upd, bool temp_
         interface->setTempLineConstant(p);
         interface->setTempInterfaceNormal(fvgrad);
     } // end loop over all elements
-
 }
 
 
 void
-LEPlic :: doInterfaceRemapping(TimeStep *atTime)
+LEPlic :: doInterfaceRemapping(TimeStep *tStep)
 {
     /*
      * Final step: deposition of volume materials truncated on Lagrangian (updated)
@@ -286,7 +285,7 @@ LEPlic :: doInterfaceRemapping(TimeStep *atTime)
     LEPlicElementInterface *interface, *neghbrInterface;
     // loop over elements
     for ( ie = 1; ie <= nelem; ie++ ) {
-        if ( ( interface = static_cast< LEPlicElementInterface * > ( domain->giveElement(ie)->giveInterface(LEPlicElementInterfaceType) ) ) ) {
+        if ( ( interface = static_cast< LEPlicElementInterface * >( domain->giveElement(ie)->giveInterface(LEPlicElementInterfaceType) ) ) ) {
             interface->setTempVolumeFraction(0.0);
         }
     }
@@ -299,7 +298,7 @@ LEPlic :: doInterfaceRemapping(TimeStep *atTime)
         elNum.at(1) = ie;
         domain->giveConnectivityTable()->giveElementNeighbourList(neighbours, elNum);
         // form polygon of material volume on Lagrangian element
-        if ( ( interface = static_cast< LEPlicElementInterface * > ( domain->giveElement(ie)->giveInterface(LEPlicElementInterfaceType) ) ) ) {
+        if ( ( interface = static_cast< LEPlicElementInterface * >( domain->giveElement(ie)->giveInterface(LEPlicElementInterfaceType) ) ) ) {
             if ( interface->giveVolumeFraction() > LEPLIC_ZERO_VOF ) {
                 interface->giveTempInterfaceNormal(normal);
                 interface->formMaterialVolumePoly(matvolpoly, this, normal, interface->giveTempLineConstant(), true);
@@ -327,7 +326,7 @@ LEPlic :: doInterfaceRemapping(TimeStep *atTime)
                             matVolSum += in_vol;
                         }
                     }
-                } catch(GT_Exception & c) {
+                } catch ( GT_Exception &c ) {
                     c.print();
 
                     neighbrNum = neighbours.at(in);
@@ -343,7 +342,7 @@ LEPlic :: doInterfaceRemapping(TimeStep *atTime)
 #endif
                 double err = fabs(matVol - matVolSum) / matVol;
                 if ( ( err > 1.e-12 ) && ( fabs(matVol - matVolSum) > 1.e-4 ) && ( matVol > 1.e-6 ) ) {
-                    OOFEM_WARNING4("LEPlic::doInterfaceRemapping:  volume inconsistency %5.2f%%\n\ttstep %d, element %d\n", err * 100, atTime->giveNumber(), ie);
+                    OOFEM_WARNING4("LEPlic::doInterfaceRemapping:  volume inconsistency %5.2f%%\n\ttstep %d, element %d\n", err * 100, tStep->giveNumber(), ie);
                 }
 
 #if 0
@@ -416,9 +415,9 @@ LEPlic :: doInterfaceRemapping(TimeStep *atTime)
 
     // loop over elements
     for ( ie = 1; ie <= nelem; ie++ ) {
-        if ( ( interface = static_cast< LEPlicElementInterface * > ( domain->giveElement(ie)->giveInterface(LEPlicElementInterfaceType) ) ) ) {
+        if ( ( interface = static_cast< LEPlicElementInterface * >( domain->giveElement(ie)->giveInterface(LEPlicElementInterfaceType) ) ) ) {
             if ( interface->giveTempVolumeFraction() > 1.0 ) {
-                OOFEM_LOG_INFO("LEPlic::doInterfaceRemapping - Element %d: vof out of range, vof =%e",  ie, interface->giveTempVolumeFraction() );
+                OOFEM_LOG_INFO( "LEPlic::doInterfaceRemapping - Element %d: vof out of range, vof =%e",  ie, interface->giveTempVolumeFraction() );
             }
 
             if ( interface->giveTempVolumeFraction() >= 0.99999999 ) {
@@ -453,7 +452,7 @@ LEPlic :: doCellDLS(FloatArray &fvgrad, int ie, bool coord_upd, bool vof_temp_fl
     IntArray currCell(1), neighborList;
     ConnectivityTable *contable = domain->giveConnectivityTable();
 
-    if ( ( interface = static_cast< LEPlicElementInterface * > ( domain->giveElement(ie)->giveInterface(LEPlicElementInterfaceType) ) ) ) {
+    if ( ( interface = static_cast< LEPlicElementInterface * >( domain->giveElement(ie)->giveInterface(LEPlicElementInterfaceType) ) ) ) {
         if ( vof_temp_flag ) {
             fvi = interface->giveTempVolumeFraction();
         } else {
@@ -489,7 +488,7 @@ LEPlic :: doCellDLS(FloatArray &fvgrad, int ie, bool coord_upd, bool vof_temp_fl
                 }
 
                 if ( ( ineghbrInterface =
-                          static_cast< LEPlicElementInterface * > ( domain->giveElement(ineighbr)->giveInterface(LEPlicElementInterfaceType) ) ) ) {
+                           static_cast< LEPlicElementInterface * >( domain->giveElement(ineighbr)->giveInterface(LEPlicElementInterfaceType) ) ) ) {
                     if ( vof_temp_flag ) {
                         fvk = ineghbrInterface->giveTempVolumeFraction();
                     } else {
@@ -642,8 +641,8 @@ LEPlic :: findCellLineConstant(double &p, FloatArray &fvgrad, int ie, bool coord
              */
 #endif
         } else {
-	  //fprintf (stderr, "target_vof = %le, fvi=%le\n", target_vof, fvi);
-	  OOFEM_ERROR3("LEPlic::findCellLineConstant: finding lower and uper bounds of line constant value failed (lowerVOF = %lf, upperVOF=%lf)", lower_vof, upper_vof );
+            //fprintf (stderr, "target_vof = %le, fvi=%le\n", target_vof, fvi);
+            OOFEM_ERROR3("LEPlic::findCellLineConstant: finding lower and uper bounds of line constant value failed (lowerVOF = %lf, upperVOF=%lf)", lower_vof, upper_vof);
         }
     }
 }
@@ -675,7 +674,7 @@ LEPlic :: computeCriticalTimeStep(TimeStep *tStep)
     LEPlicElementInterface *interface;
 
     for ( ie = 1; ie <= nelem; ie++ ) {
-        if ( ( interface = static_cast< LEPlicElementInterface * > ( domain->giveElement(ie)->giveInterface(LEPlicElementInterfaceType) ) ) ) {
+        if ( ( interface = static_cast< LEPlicElementInterface * >( domain->giveElement(ie)->giveInterface(LEPlicElementInterfaceType) ) ) ) {
             dt = min( dt, interface->computeCriticalLEPlicTimeStep(tStep) );
         }
     }

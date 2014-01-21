@@ -141,7 +141,6 @@ public:
 
     // definition
     virtual const char *giveClassName() const { return "Concrete2MaterialStatus"; }
-    virtual classType giveClassID() const { return Concrete2MaterialStatusClass; }
 };
 
 
@@ -182,25 +181,25 @@ public:
     virtual ~Concrete2();
 
     virtual void giveRealStressVector(FloatArray &answer, GaussPoint *gp,
-                                      const FloatArray &, TimeStep *atTime);
+                                      const FloatArray &, TimeStep *tStep);
 
     virtual void give3dMaterialStiffnessMatrix(FloatMatrix &answer,
                                                MatResponseMode mode,
                                                GaussPoint *gp,
-                                               TimeStep *atTime);
+                                               TimeStep *tStep);
 
     virtual MaterialStatus *CreateStatus(GaussPoint *gp) const;
 
 protected:
     void giveRealStresses3dShellLayer(FloatArray &answer, GaussPoint *gp,
-                                       const FloatArray &strain, TimeStep *atTime);
+                                      const FloatArray &strain, TimeStep *tStep);
     void dtp3(GaussPoint *gp, FloatArray *e, FloatArray *s, FloatArray *ep,
-               double SCC, double SCT, int *ifplas);
+              double SCC, double SCT, int *ifplas);
     void dtp2(GaussPoint *gp, FloatArray *e, FloatArray *s, FloatArray *ep,
-               double SCC, double SCT, int *ifplas);
+              double SCC, double SCT, int *ifplas);
     void stirr(double dez, double srf);
     void strsoft(GaussPoint *gp, double epsult, FloatArray *ep, double &ep1,
-                  double &ep2, double &ep3, double SCC, double SCT, int &ifupd);
+                 double &ep2, double &ep3, double SCC, double SCT, int &ifupd);
 
     // two functions used to initialize and updating temporary variables in
     // gp's status. These variables are used to control process, when
@@ -214,7 +213,6 @@ public:
     virtual int hasNonLinearBehaviour() { return 1; }
     virtual const char *giveClassName() const { return "Concrete2"; }
     virtual const char *giveInputRecordName() const { return _IFT_Concrete2_Name; }
-    virtual classType giveClassID() const { return Concrete2Class; }
     virtual IRResultType initializeFrom(InputRecord *ir);
 };
 } // end namespace oofem

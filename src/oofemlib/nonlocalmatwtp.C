@@ -86,10 +86,10 @@ NonlocalMaterialWTP :: giveNonlocalDepArryElementPlugin(GaussPoint *gp, std :: s
 
     NonlocalMaterialStatusExtensionInterface *interface =
         static_cast< NonlocalMaterialStatusExtensionInterface * >( gp->giveMaterialStatus()->
-        giveInterface(NonlocalMaterialStatusExtensionInterfaceType) );
+                                                                   giveInterface(NonlocalMaterialStatusExtensionInterfaceType) );
     if ( interface ) {
-        std::list< localIntegrationRecord > *lir = interface->giveIntegrationDomainList();
-        std::list< localIntegrationRecord > :: iterator listIter;
+        std :: list< localIntegrationRecord > *lir = interface->giveIntegrationDomainList();
+        std :: list< localIntegrationRecord > :: iterator listIter;
 
         for ( listIter = lir->begin(); listIter != lir->end(); ++listIter ) {
             remoteElemNum = ( ( * listIter ).nearGp )->giveElement()->giveGlobalNumber();
@@ -114,7 +114,7 @@ NonlocalMaterialWTP :: init(Domain *domain)
     int nproc = emodel->giveNumberOfProcesses();
     int myrank = emodel->giveRank();
     CommunicatorBuff cb(nproc, CBT_dynamic);
-    Communicator com(emodel, &cb, myrank, nproc, CommMode_Dynamic);
+    Communicator com(emodel, & cb, myrank, nproc, CommMode_Dynamic);
     this->nonlocElementDependencyMap.clear();
 
     // build nonlocal element dependency array for each element
@@ -147,7 +147,7 @@ NonlocalMaterialWTP :: migrate()
     int nproc = emodel->giveNumberOfProcesses();
     int myrank = emodel->giveRank();
     CommunicatorBuff cb(nproc, CBT_dynamic);
-    Communicator com(emodel, &cb, myrank, nproc, CommMode_Dynamic);
+    Communicator com(emodel, & cb, myrank, nproc, CommMode_Dynamic);
     StaticCommunicationBuffer commBuff(MPI_COMM_WORLD);
 
     /*
@@ -323,7 +323,7 @@ int NonlocalMaterialWTP :: packMigratingElementDependencies(Domain *d, ProcessCo
     for ( ielem = 1; ielem <= nelem; ielem++ ) { // begin loop over elements
         elem = d->giveElement(ielem);
         if ( ( elem->giveParallelMode() == Element_local ) &&
-            ( lb->giveElementPartition(ielem) == iproc ) ) {
+             ( lb->giveElementPartition(ielem) == iproc ) ) {
             // pack local element (node numbers shuld be global ones!!!)
             // pack type
             _globnum = elem->giveGlobalNumber();
@@ -393,7 +393,7 @@ int NonlocalMaterialWTP :: packRemoteElements(Domain *d, ProcessCommunicator &pc
         for ( i = 1; i <= nnodes; i++ ) {
             node = elem->giveDofManager(i);
             if ( ( node->giveParallelMode() == DofManager_local ) ||
-                ( node->isShared() && !node->givePartitionList()->contains(iproc) ) ) {
+                 ( node->isShared() && !node->givePartitionList()->contains(iproc) ) ) {
                 nodesToSend.insert( elem->giveDofManager(i)->giveGlobalNumber() );
             }
         }
@@ -404,7 +404,7 @@ int NonlocalMaterialWTP :: packRemoteElements(Domain *d, ProcessCommunicator &pc
     for ( nit = nodesToSend.begin(); nit != nodesToSend.end(); ++nit ) {
         inode = d->dofmanGlobal2Local(* nit);
         dofman = d->giveDofManager(inode);
-        pcbuff->packString(dofman->giveInputRecordName());
+        pcbuff->packString( dofman->giveInputRecordName() );
         dofman->saveContext(& pcDataStream, CM_Definition | CM_State | CM_UnknownDictState);
     }
 
@@ -429,7 +429,7 @@ int NonlocalMaterialWTP :: unpackRemoteElements(Domain *d, ProcessCommunicator &
 {
     int myrank = d->giveEngngModel()->giveRank();
     int iproc = pc.giveRank();
-    std::string _type;
+    std :: string _type;
     DofManager *dofman;
     IntArray _partitions;
 
@@ -454,10 +454,9 @@ int NonlocalMaterialWTP :: unpackRemoteElements(Domain *d, ProcessCommunicator &
             // record already exist
             delete dofman;
         } else {
-            d->giveTransactionManager()->addTransaction(DomainTransactionManager :: DTT_ADD,
-                                                        DomainTransactionManager :: DCT_DofManager,
-                                                        dofman->giveGlobalNumber(),
-                                                        dofman);
+            d->giveTransactionManager()->addDofManTransaction(DomainTransactionManager :: DTT_ADD,
+							      dofman->giveGlobalNumber(),
+							      dofman);
         }
     } while ( 1 );
 
@@ -476,9 +475,8 @@ int NonlocalMaterialWTP :: unpackRemoteElements(Domain *d, ProcessCommunicator &
         elem->restoreContext(& pcDataStream, CM_Definition | CM_State);
         elem->setParallelMode(Element_remote);
         elem->setPartitionList(_partitions);
-        d->giveTransactionManager()->addTransaction(DomainTransactionManager :: DTT_ADD,
-                                                    DomainTransactionManager :: DCT_Element,
-                                                    elem->giveGlobalNumber(), elem);
+        d->giveTransactionManager()->addElementTransaction(DomainTransactionManager :: DTT_ADD,
+							   elem->giveGlobalNumber(), elem);
     } while ( 1 );
 
     return 1;
@@ -533,4 +531,3 @@ NonlocalMaterialWTP :: fastElementIPNonlocTableUpdater(GaussPoint *gp, IntArray 
 }
 } // end namespace oofem
 #endif
-

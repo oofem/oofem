@@ -120,19 +120,20 @@ protected:
 public:
     /// @name Iterator for for-each loops:
     //@{
-    class iterator {
-    private:
+    class iterator
+    {
+private:
         int pos;
         IntegrationRule *ir;
 
-    public:
-        iterator(IntegrationRule* ir, int pos);
+public:
+        iterator(IntegrationRule *ir, int pos);
 
-        bool operator!=(const IntegrationRule :: iterator& other) const;
+        bool operator!=(const IntegrationRule :: iterator &other) const;
 
-        GaussPoint & operator*() const;
+        GaussPoint &operator*() const;
 
-        const IntegrationRule :: iterator& operator++();
+        const IntegrationRule :: iterator &operator++();
     };
 
     IntegrationRule :: iterator begin();
@@ -199,7 +200,7 @@ public:
      * Prints receiver's output to given stream.
      * Invokes printOutputAt service on all receiver's integration points.
      */
-    virtual void printOutputAt(FILE *file, TimeStep *stepN);
+    virtual void printOutputAt(FILE *file, TimeStep *tStep);
     /**
      * Updates receiver state.
      * Calls updateYourself service of all receiver's integration points.

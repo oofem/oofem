@@ -38,8 +38,7 @@
 #include "classfactory.h"
 
 namespace oofem {
-
-REGISTER_Material( IsotropicLinMoistureTransferMaterial );
+REGISTER_Material(IsotropicLinMoistureTransferMaterial);
 
 IRResultType
 IsotropicLinMoistureTransferMaterial :: initializeFrom(InputRecord *ir)
@@ -57,13 +56,13 @@ IsotropicLinMoistureTransferMaterial :: initializeFrom(InputRecord *ir)
 
 
 double
-IsotropicLinMoistureTransferMaterial :: giveMoistureCapacity(GaussPoint *gp, TimeStep *atTime)
+IsotropicLinMoistureTransferMaterial :: giveMoistureCapacity(GaussPoint *gp, TimeStep *tStep)
 {
     return this->moistureCapacity;
 }
 
 double
-IsotropicLinMoistureTransferMaterial :: givePermeability(GaussPoint *gp, TimeStep *atTime)
+IsotropicLinMoistureTransferMaterial :: givePermeability(GaussPoint *gp, TimeStep *tStep)
 {
     return this->permeability;
 }

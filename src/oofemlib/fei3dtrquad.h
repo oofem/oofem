@@ -41,7 +41,7 @@ namespace oofem {
 /**
  * Second order triangular interpolation in 3D space (6 nodes).
  * @todo This class is entirely unchecked.
- * @author Jim Brozoulis
+ * @author Jim Brouzoulis
  * @author Mikael Öhman
  */
 class OOFEM_EXPORT FEI3dTrQuad : public FEInterpolation3d
@@ -53,7 +53,7 @@ public:
     virtual Element_Geometry_Type giveGeometryType() const { return EGT_triangle_2; }
 
     // Bulk
-    virtual void evalN(FloatArray &answer, const FloatArray &lcoords, const FEICellGeometry &cellgeo);    
+    virtual void evalN(FloatArray &answer, const FloatArray &lcoords, const FEICellGeometry &cellgeo);
     virtual double evaldNdx(FloatMatrix &answer, const FloatArray &lcoords, const FEICellGeometry &cellgeo);
     virtual void local2global(FloatArray &answer, const FloatArray &lcoords, const FEICellGeometry &cellgeo);
     virtual int  global2local(FloatArray &answer, const FloatArray &lcoords, const FEICellGeometry &cellgeo);
@@ -63,12 +63,12 @@ public:
     void giveDerivativeXi(FloatArray &n, const FloatArray &lcoords);
     void giveDerivativeEta(FloatArray &n, const FloatArray &lcoords);
     //void evaldNdxi(FloatMatrix &answer, const FloatArray &lcoords);
-    virtual void evaldNdxi(FloatMatrix &answer, const FloatArray &lcoords, const FEICellGeometry &cellgeo); 
+    virtual void evaldNdxi(FloatMatrix &answer, const FloatArray &lcoords, const FEICellGeometry &cellgeo);
     void surfaceEvaldNdxi(FloatMatrix &answer, const FloatArray &lcoords);
-    
+
     // Edge
     virtual void edgeEvalN(FloatArray &answer, int iedge, const FloatArray &lcoords, const FEICellGeometry &cellgeo);
-            void edgeEvaldNdxi(FloatArray &answer, int iedge, const FloatArray &lcoords, const FEICellGeometry &cellgeo);
+    void edgeEvaldNdxi(FloatArray &answer, int iedge, const FloatArray &lcoords, const FEICellGeometry &cellgeo);
     virtual void edgeEvaldNdx(FloatMatrix &answer, int iedge,
                               const FloatArray &lcoords, const FEICellGeometry &cellgeo);
     virtual void edgeLocal2global(FloatArray &answer, int iedge,
@@ -77,10 +77,12 @@ public:
                                                   const FEICellGeometry &cellgeo);
     virtual void computeLocalEdgeMapping(IntArray &edgeNodes, int iedge);
 
+    virtual int giveNumberOfEdges() const { return 3; };
+
     // Surface
     virtual void surfaceEvalN(FloatArray &answer, int isurf, const FloatArray &lcoords, const FEICellGeometry &cellgeo);
     virtual void surfaceEvaldNdx(FloatMatrix &answer, int isurf,
-                   const FloatArray &lcoords, const FEICellGeometry &cellgeo);
+                                 const FloatArray &lcoords, const FEICellGeometry &cellgeo);
 
     virtual double surfaceEvalNormal(FloatArray &answer, int isurf, const FloatArray &lcoords, const FEICellGeometry &cellgeo);
     virtual void surfaceLocal2global(FloatArray &answer, int isurf,
@@ -100,7 +102,6 @@ protected:
     double computeVolume(const FEICellGeometry &cellgeo);
 
     virtual void giveJacobianMatrixAt(FloatMatrix &jacobianMatrix, const FloatArray &lcoords, const FEICellGeometry &cellgeo);
-
 };
 } // end namespace oofem
 #endif // fei3dtetquad_h

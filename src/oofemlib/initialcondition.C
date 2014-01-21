@@ -36,7 +36,6 @@
 #include "cltypes.h"
 
 namespace oofem {
-
 double InitialCondition :: give(ValueModeType type)
 // Returns the prescribed value of the kinematic unknown 'u'.
 {

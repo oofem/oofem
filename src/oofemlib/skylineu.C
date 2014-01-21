@@ -51,8 +51,7 @@
 #endif
 
 namespace oofem {
-
-REGISTER_SparseMtrx( SkylineUnsym, SMT_SkylineU);
+REGISTER_SparseMtrx(SkylineUnsym, SMT_SkylineU);
 
 SkylineUnsym :: SkylineUnsym(int n) : SparseMtrx(n, n)
     // Constructor. Creates an empty skyline unsymmetric.
@@ -83,7 +82,7 @@ SkylineUnsym :: ~SkylineUnsym()
         i = size;
         p = rowColumns;
         while ( i-- ) {
-            delete *p++;
+            delete * p++;
         }
 
         delete [] rowColumns;
@@ -280,7 +279,7 @@ SkylineUnsym :: buildInternalStructure(EngngModel *eModel, int di, EquationID ut
         _i = size;
         _p = rowColumns;
         while ( _i-- ) {
-            delete *_p++;
+            delete * _p++;
         }
 
         delete [] rowColumns;
@@ -328,29 +327,29 @@ SkylineUnsym :: buildInternalStructure(EngngModel *eModel, int di, EquationID ut
 
     // loop over active boundary conditions
     int nbc = domain->giveNumberOfBoundaryConditions();
-    std::vector<IntArray> r_locs;
-    std::vector<IntArray> c_locs;
-    
+    std :: vector< IntArray >r_locs;
+    std :: vector< IntArray >c_locs;
+
     for ( int i = 1; i <= nbc; ++i ) {
         ActiveBoundaryCondition *bc = dynamic_cast< ActiveBoundaryCondition * >( domain->giveBc(i) );
         if ( bc != NULL ) {
             bc->giveLocationArrays(r_locs, c_locs, ut, UnknownCharType, s, s);
-	    for (std::size_t k = 0; k < r_locs.size(); k++) {
-	      IntArray &krloc = r_locs[k];
-	      IntArray &kcloc = c_locs[k];
-	      first = neq;
-	      for ( int j = 1; j <= kcloc.giveSize(); j++ ) {
-		if ( ( jj = kcloc.at(j) ) ) {
-		  first = min(first, jj);
-		}
-	      }
-	      for ( int i = 1; i <= krloc.giveSize(); i++ ) {
-		ii = krloc.at(i);
-		if ( ii & ( first < firstIndex.at(ii) ) ) {
-		  firstIndex.at(ii) = first;
-		}
-	      }
-	    }
+            for ( std :: size_t k = 0; k < r_locs.size(); k++ ) {
+                IntArray &krloc = r_locs [ k ];
+                IntArray &kcloc = c_locs [ k ];
+                first = neq;
+                for ( int j = 1; j <= kcloc.giveSize(); j++ ) {
+                    if ( ( jj = kcloc.at(j) ) ) {
+                        first = min(first, jj);
+                    }
+                }
+                for ( int i = 1; i <= krloc.giveSize(); i++ ) {
+                    ii = krloc.at(i);
+                    if ( ii & ( first < firstIndex.at(ii) ) ) {
+                        firstIndex.at(ii) = first;
+                    }
+                }
+            }
         }
     }
 
@@ -725,14 +724,14 @@ SkylineUnsym :: printStatistics() const
 
 
 void
-SkylineUnsym :: writeToFile(const char* fname) const
+SkylineUnsym :: writeToFile(const char *fname) const
 {
-    FILE *file = fopen(fname,"w");
+    FILE *file = fopen(fname, "w");
     FloatMatrix copy;
     this->toFloatMatrix(copy);
     for ( int i = 1; i <= nRows; ++i ) {
         for ( int j = 1; j <= nColumns; ++j ) {
-            fprintf(file, "%.16e ", copy.at(i, j) );
+            fprintf( file, "%.16e ", copy.at(i, j) );
         }
         fprintf(file, "\n");
     }

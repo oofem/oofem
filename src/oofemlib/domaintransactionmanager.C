@@ -35,7 +35,8 @@
 #ifdef __PARALLEL_MODE
 #include "domaintransactionmanager.h"
 #include "error.h"
-#include "femcmpnn.h"
+#include "dofmanager.h"
+#include "element.h"
 #include "domain.h"
 
 namespace oofem {
@@ -56,29 +57,43 @@ DomainTransactionManager :: initialize()
 { }
 
 int
-DomainTransactionManager :: addTransaction(DomainTransactionType dtt, DomainComponentType dct, int label, FEMComponent *obj)
+DomainTransactionManager :: addDofManTransaction(DomainTransactionType dtt, int label, DofManager *obj)
 {
-    std :: map< int, FEMComponent * > *rec;
-    if ( dct == DCT_Element ) {
-        rec = & elementTransactions;
-    } else {
-        rec = & dofmanTransactions;
-    }
-
     if ( dtt == DTT_Remove ) {
         obj = NULL;
     }
 
-    if ( rec->find(label) != rec->end() ) {
+    if ( dofmanTransactions.find(label) != dofmanTransactions.end() ) {
         // local enry exist
         // delete previous record
-        if ( ( * rec ) [ label ] ) {
-            delete(* rec) [ label ];
+        if ( dofmanTransactions [ label ] ) {
+            delete dofmanTransactions [ label ];
         }
     }
 
     // set new record
-    ( * rec ) [ label ] = obj;
+    dofmanTransactions [ label ] = obj;
+
+    return 1;
+}
+
+int
+DomainTransactionManager :: addElementTransaction(DomainTransactionType dtt,  int label, Element *obj)
+{
+    if ( dtt == DTT_Remove ) {
+        obj = NULL;
+    }
+
+    if ( elementTransactions.find(label) != elementTransactions.end() ) {
+        // local enry exist
+        // delete previous record
+        if ( elementTransactions [ label ] ) {
+            delete elementTransactions [ label ];
+        }
+    }
+
+    // set new record
+    elementTransactions [ label ] = obj;
 
     return 1;
 }
@@ -86,31 +101,25 @@ DomainTransactionManager :: addTransaction(DomainTransactionType dtt, DomainComp
 
 DofManager *DomainTransactionManager :: giveDofManager(int label)
 {
-    DofManager *answer;
     if ( dofmanTransactions.find(label) != dofmanTransactions.end() ) {
         // if modified record exist return it
-        answer = ( DofManager * ) dofmanTransactions [ label ];
+        return dofmanTransactions [ label ];
     } else {
         // no modification recorded -> return NULL
-        answer = NULL;
+        return NULL;
     }
-
-    return answer;
 }
 
 
 Element *DomainTransactionManager :: giveElement(int label)
 {
-    Element *answer;
     if ( elementTransactions.find(label) != elementTransactions.end() ) {
         // if modified record exist return it
-        answer = ( Element * ) elementTransactions [ label ];
+        return elementTransactions [ label ];
     } else {
         // no modification recorded -> return NULL
-        answer = NULL;
+        return NULL;
     }
-
-    return answer;
 }
 
 

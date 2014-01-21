@@ -160,7 +160,7 @@ UNV2OOFEM: Converts UNV file from Salome to OOFEM native file format
                                     #since boundary element may be in more unv groups, we need to find corresponding ctrl group
                                     for bel in belem.oofem_groups:
                                         #print "%d '%s' '%s'" % (len(belem.oofem_groups), bel.name.rstrip(), bel.oofem_groupNameForLoads)
-                                        if (bel.name.rstrip() != bel.oofem_groupNameForLoads):
+                                        if (bel.name.rstrip() == bel.oofem_groupNameForLoads):
                                             #continue
                                             #build a new int list, which reflects load numbers and edges/faces
                                             if (len(bel.oofem_boundaryLoadsNum) > 0):

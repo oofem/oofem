@@ -61,7 +61,7 @@ public:
 
 protected:
     /// Creates the mesher input, containing the required mesh density information.
-    int createInput(Domain *d, TimeStep *stepN);
+    int createInput(Domain *d, TimeStep *tStep);
 };
 } // end namespace oofem
 #endif // t3dinterface_h

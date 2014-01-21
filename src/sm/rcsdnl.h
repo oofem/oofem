@@ -54,7 +54,6 @@
 //@}
 
 namespace oofem {
-
 /**
  * This class implements associated Material Status to RCSDNLMaterial.
  */
@@ -79,7 +78,6 @@ public:
     // definition
     virtual const char *giveInputRecordName() const { return _IFT_RCSDNLMaterial_Name; }
     virtual const char *giveClassName() const { return "RCSDNLMaterialStatus"; }
-    virtual classType giveClassID() const { return RCSDNLMaterialStatusClass; }
 
     virtual void initTempStatus();
     virtual void updateYourself(TimeStep *);
@@ -122,14 +120,13 @@ public:
 
     // identification and auxiliary functions
     virtual const char *giveClassName() const { return "RCSDNLMaterial"; }
-    virtual classType giveClassID() const { return RCSDNLMaterialClass; }
 
     virtual Interface *giveInterface(InterfaceType t);
 
     virtual IRResultType initializeFrom(InputRecord *ir);
 
-    virtual void giveRealStressVector(FloatArray & answer, GaussPoint *,
-                              const FloatArray &, TimeStep *);
+    virtual void giveRealStressVector(FloatArray &answer, GaussPoint *,
+                                      const FloatArray &, TimeStep *);
 
     /**
      * Implements the service updating local variables in given integration points,
@@ -139,9 +136,9 @@ public:
      * This service is declared at StructuralNonlocalMaterial level.
      * @param strainVector total strain vector in given integration point.
      * @param gp integration point to update.
-     * @param atTime solution step indicating time of update.
+     * @param tStep solution step indicating time of update.
      */
-    virtual void updateBeforeNonlocAverage(const FloatArray &strainVector, GaussPoint *gp, TimeStep *atTime);
+    virtual void updateBeforeNonlocAverage(const FloatArray &strainVector, GaussPoint *gp, TimeStep *tStep);
 
     virtual double computeWeightFunction(const FloatArray &src, const FloatArray &coord);
     virtual int hasBoundedSupport() { return 1; }
@@ -152,8 +149,8 @@ public:
 
 
 #ifdef __PARALLEL_MODE
-    virtual int packUnknowns(CommunicationBuffer &buff, TimeStep *stepN, GaussPoint *ip);
-    virtual int unpackAndUpdateUnknowns(CommunicationBuffer &buff, TimeStep *stepN, GaussPoint *ip);
+    virtual int packUnknowns(CommunicationBuffer &buff, TimeStep *tStep, GaussPoint *ip);
+    virtual int unpackAndUpdateUnknowns(CommunicationBuffer &buff, TimeStep *tStep, GaussPoint *ip);
     virtual int estimatePackSize(CommunicationBuffer &buff, GaussPoint *ip);
 #endif
 

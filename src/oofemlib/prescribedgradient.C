@@ -39,7 +39,7 @@
 #include "valuemodetype.h"
 #include "floatarray.h"
 #include "floatmatrix.h"
-#include "loadtimefunction.h"
+#include "function.h"
 #include "engngm.h"
 #include "set.h"
 #include "node.h"
@@ -52,8 +52,7 @@
 #include "sparselinsystemnm.h"
 
 namespace oofem {
-
-REGISTER_BoundaryCondition( PrescribedGradient );
+REGISTER_BoundaryCondition(PrescribedGradient);
 
 double PrescribedGradient :: give(Dof *dof, ValueModeType mode, TimeStep *tStep)
 {
@@ -66,11 +65,11 @@ double PrescribedGradient :: give(Dof *dof, ValueModeType mode, TimeStep *tStep)
 
     // Reminder: u_i = d_ij . (x_j - xb_j) = d_ij . dx_j
     FloatArray dx;
-    dx.beDifferenceOf(*coords, this->centerCoord);
+    dx.beDifferenceOf(* coords, this->centerCoord);
 
     FloatArray u;
     u.beProductOf(gradient, dx);
-    u.times(this->giveLoadTimeFunction()->evaluate(tStep, mode));
+    u.times( this->giveTimeFunction()->evaluate(tStep, mode) );
 
     switch ( id ) {
     case D_u:
@@ -129,8 +128,8 @@ void PrescribedGradient :: updateCoefficientMatrix(FloatMatrix &C)
     int nNodes = domain->giveNumberOfDofManagers();
 
     int nsd = domain->giveNumberOfSpatialDimensions();
-    int npeq = domain->giveEngngModel()->giveNumberOfDomainEquations(domain->giveNumber(), EModelDefaultPrescribedEquationNumbering() );
-    C.resize(npeq, nsd*(nsd+1)/2);
+    int npeq = domain->giveEngngModel()->giveNumberOfDomainEquations( domain->giveNumber(), EModelDefaultPrescribedEquationNumbering() );
+    C.resize(npeq, nsd * ( nsd + 1 ) / 2);
     C.zero();
 
     FloatArray &cCoords = this->giveCenterCoordinate();
@@ -142,8 +141,8 @@ void PrescribedGradient :: updateCoefficientMatrix(FloatMatrix &C)
     for ( int i = 1; i <= nNodes; i++ ) {
         Node *n = domain->giveNode(i);
         FloatArray *coords = n->giveCoordinates();
-        Dof *d1 = n->giveDofWithID(this->dofs(0));
-        Dof *d2 = n->giveDofWithID(this->dofs(1));
+        Dof *d1 = n->giveDofWithID( this->dofs(0) );
+        Dof *d2 = n->giveDofWithID( this->dofs(1) );
         int k1 = d1->__givePrescribedEquationNumber();
         int k2 = d2->__givePrescribedEquationNumber();
         if ( nsd == 2 ) {
@@ -158,7 +157,7 @@ void PrescribedGradient :: updateCoefficientMatrix(FloatMatrix &C)
             }
         } else { // nsd == 3
             OOFEM_ERROR("PrescribedGradient :: updateCoefficientMatrix - 3D Not tested yet!");
-            Dof *d3 = n->giveDofWithID(this->dofs(2));
+            Dof *d3 = n->giveDofWithID( this->dofs(2) );
             int k3 = d3->__givePrescribedEquationNumber();
 
             if ( k1 ) {
@@ -189,36 +188,35 @@ double PrescribedGradient :: domainSize()
     Set *set = this->giveDomain()->giveSet(this->set);
     const IntArray &boundaries = set->giveBoundaryList();
 
-    for (int pos = 1; pos <= boundaries.giveSize()/2; ++pos) {
-        Element *e = this->giveDomain()->giveElement( boundaries.at(pos*2-1) );
-        int boundary = boundaries.at(pos*2);
+    for ( int pos = 1; pos <= boundaries.giveSize() / 2; ++pos ) {
+        Element *e = this->giveDomain()->giveElement( boundaries.at(pos * 2 - 1) );
+        int boundary = boundaries.at(pos * 2);
         FEInterpolation *fei = e->giveInterpolation();
         domain_size += fei->evalNXIntegral( boundary, FEIElementGeometryWrapper(e) );
     }
-    return domain_size/nsd;
+    return domain_size / nsd;
 }
 
 
 void PrescribedGradient :: computeField(FloatArray &sigma, EquationID eid, TimeStep *tStep)
 {
     EngngModel *emodel = this->domain->giveEngngModel();
-    int npeq = emodel->giveNumberOfDomainEquations(this->giveDomain()->giveNumber(), EModelDefaultPrescribedEquationNumbering());
+    int npeq = emodel->giveNumberOfDomainEquations( this->giveDomain()->giveNumber(), EModelDefaultPrescribedEquationNumbering() );
     FloatArray R_c(npeq), R_ext(npeq);
 
     R_c.zero();
     R_ext.zero();
     emodel->assembleVector( R_c, tStep, eid, InternalForcesVector, VM_Total,
-                          EModelDefaultPrescribedEquationNumbering(), this->giveDomain() );
+                            EModelDefaultPrescribedEquationNumbering(), this->giveDomain() );
     emodel->assembleVector( R_ext, tStep, eid, ExternalForcesVector, VM_Total,
-                          EModelDefaultPrescribedEquationNumbering(), this->giveDomain() );
+                            EModelDefaultPrescribedEquationNumbering(), this->giveDomain() );
     R_c.subtract(R_ext);
 
     // Condense it;
     FloatMatrix C;
     this->updateCoefficientMatrix(C);
     sigma.beTProductOf(C, R_c);
-    sigma.times(1./this->domainSize());
-    
+    sigma.times( 1. / this->domainSize() );
 }
 
 
@@ -235,8 +233,8 @@ void PrescribedGradient :: computeTangent(FloatMatrix &tangent, EquationID eid, 
     // Fetch some information from the engineering model
     EngngModel *rve = this->giveDomain()->giveEngngModel();
     ///@todo Get this from engineering model
-    SparseLinearSystemNM *solver = classFactory.createSparseLinSolver(ST_Petsc, this->domain, this->domain->giveEngngModel());// = rve->giveLinearSolver();
-    SparseMtrxType stype = SMT_PetscMtrx;// = rve->giveSparseMatrixType();
+    SparseLinearSystemNM *solver = classFactory.createSparseLinSolver( ST_Petsc, this->domain, this->domain->giveEngngModel() ); // = rve->giveLinearSolver();
+    SparseMtrxType stype = SMT_PetscMtrx; // = rve->giveSparseMatrixType();
     EModelDefaultEquationNumbering fnum;
     EModelDefaultPrescribedEquationNumbering pnum;
 
@@ -248,17 +246,17 @@ void PrescribedGradient :: computeTangent(FloatMatrix &tangent, EquationID eid, 
     if ( !Kff ) {
         OOFEM_ERROR2("MixedGradientPressureBC :: computeTangents - Couldn't create sparse matrix of type %d\n", stype);
     }
-    Kff->buildInternalStructure( rve, 1, eid, fnum );
-    Kfp->buildInternalStructure( rve, 1, eid, fnum, pnum );
-    Kpf->buildInternalStructure( rve, 1, eid, pnum, fnum );
-    Kpp->buildInternalStructure( rve, 1, eid, pnum );
-    rve->assemble(Kff, tStep, eid, StiffnessMatrix, fnum, this->domain );
-    rve->assemble(Kfp, tStep, eid, StiffnessMatrix, fnum, pnum, this->domain );
-    rve->assemble(Kpf, tStep, eid, StiffnessMatrix, pnum, fnum, this->domain );
-    rve->assemble(Kpp, tStep, eid, StiffnessMatrix, pnum, this->domain );
+    Kff->buildInternalStructure(rve, 1, eid, fnum);
+    Kfp->buildInternalStructure(rve, 1, eid, fnum, pnum);
+    Kpf->buildInternalStructure(rve, 1, eid, pnum, fnum);
+    Kpp->buildInternalStructure(rve, 1, eid, pnum);
+    rve->assemble(Kff, tStep, eid, StiffnessMatrix, fnum, this->domain);
+    rve->assemble(Kfp, tStep, eid, StiffnessMatrix, fnum, pnum, this->domain);
+    rve->assemble(Kpf, tStep, eid, StiffnessMatrix, pnum, fnum, this->domain);
+    rve->assemble(Kpp, tStep, eid, StiffnessMatrix, pnum, this->domain);
 
     FloatMatrix C, X, Kpfa, KfpC, a;
-    
+
     this->updateCoefficientMatrix(C);
     Kpf->timesT(C, KfpC);
     solver->solve(Kff, KfpC, a);
@@ -266,13 +264,13 @@ void PrescribedGradient :: computeTangent(FloatMatrix &tangent, EquationID eid, 
     Kpf->times(a, Kpfa);
     X.subtract(Kpfa);
     tangent.beTProductOf(C, X);
-    tangent.times(1./this->domainSize());
+    tangent.times( 1. / this->domainSize() );
 
     delete Kff;
     delete Kfp;
     delete Kpf;
     delete Kpp;
-    
+
     delete solver; ///@todo Remove this when solver is taken from engngmodel
 }
 
@@ -285,7 +283,7 @@ IRResultType PrescribedGradient :: initializeFrom(InputRecord *ir)
     GeneralBoundaryCondition :: initializeFrom(ir);
 
     IR_GIVE_FIELD(ir, this->gradient, _IFT_PrescribedGradient_gradient);
-    
+
     this->centerCoord.resize( this->gradient.giveNumberOfColumns() );
     this->centerCoord.zero();
     IR_GIVE_OPTIONAL_FIELD(ir, this->centerCoord, _IFT_PrescribedGradient_centercoords)
@@ -300,7 +298,4 @@ void PrescribedGradient :: giveInputRecord(DynamicInputRecord &input)
     input.setField(this->gradient, _IFT_PrescribedGradient_gradient);
     input.setField(this->centerCoord, _IFT_PrescribedGradient_centercoords);
 }
-
-
 } // end namespace oofem
-

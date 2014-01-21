@@ -38,9 +38,9 @@
 #include "sparsemtrx.h"
 #include "floatarray.h"
 extern "C" {
- #include <spooles/misc.h>
- #include <spooles/FrontMtx.h>
- #include <spooles/SymbFac.h>
+#include <spooles/misc.h>
+#include <spooles/FrontMtx.h>
+#include <spooles/SymbFac.h>
 };
 
 

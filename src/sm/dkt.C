@@ -52,8 +52,7 @@
 #endif
 
 namespace oofem {
-
-REGISTER_Element( DKTPlate );
+REGISTER_Element(DKTPlate);
 
 FEI2dTrLin DKTPlate :: interp_lin(1, 2);
 
@@ -71,7 +70,7 @@ DKTPlate :: DKTPlate(int n, Domain *aDomain) :
 FEInterpolation *
 DKTPlate :: giveInterpolation(DofIDItem id) const
 {
-  return & interp_lin;
+    return & interp_lin;
 }
 
 
@@ -83,14 +82,14 @@ DKTPlate :: computeGaussPoints()
         numberOfIntegrationRules = 1;
         integrationRulesArray = new IntegrationRule * [ 1 ];
         integrationRulesArray [ 0 ] = new GaussIntegrationRule(1, this, 1, 5);
-        this->giveCrossSection()->setupIntegrationPoints( *integrationRulesArray[0], numberOfGaussPoints, this );
+        this->giveCrossSection()->setupIntegrationPoints(* integrationRulesArray [ 0 ], numberOfGaussPoints, this);
     }
 }
 
 
 void
-DKTPlate :: computeBodyLoadVectorAt(FloatArray &answer, Load *forLoad, TimeStep *stepN, ValueModeType mode)
-// Computes numerically the load vector of the receiver due to the body loads, at stepN.
+DKTPlate :: computeBodyLoadVectorAt(FloatArray &answer, Load *forLoad, TimeStep *tStep, ValueModeType mode)
+// Computes numerically the load vector of the receiver due to the body loads, at tStep.
 // load is assumed to be in global cs.
 // load vector is then transformed to coordinate system in each node.
 // (should be global coordinate system, but there may be defined
@@ -108,12 +107,12 @@ DKTPlate :: computeBodyLoadVectorAt(FloatArray &answer, Load *forLoad, TimeStep 
     irule.SetUpPointsOnTriangle(1, _2dPlate);
 
     // note: force is assumed to be in global coordinate system.
-    forLoad->computeComponentArrayAt(force, stepN, mode);
+    forLoad->computeComponentArrayAt(force, tStep, mode);
 
     if ( force.giveSize() ) {
         gp = irule.getIntegrationPoint(0);
         double dens = this->giveStructuralCrossSection()->give('d', gp);
-        double dV   = this->computeVolumeAround(gp) * this->giveCrossSection()->give(CS_Thickness);
+        double dV   = this->computeVolumeAround(gp) * this->giveCrossSection()->give(CS_Thickness, gp);
 
         answer.resize(9);
         answer.zero();
@@ -146,141 +145,141 @@ DKTPlate :: computeBmatrixAt(GaussPoint *gp, FloatMatrix &answer, int li, int ui
     double ksi = gp->giveCoordinate(1);
     double eta = gp->giveCoordinate(2);
 
-    double N1dk = 4.0*ksi-1.0;
+    double N1dk = 4.0 * ksi - 1.0;
     double N2dk = 0.0;
-    double N3dk = -3.0+4.0*ksi+4.0*eta;
-    double N4dk = 4.0*eta;
-    double N5dk = -4.0*eta;
-    double N6dk = 4.0*(1.0-2.0*ksi-eta);
+    double N3dk = -3.0 + 4.0 * ksi + 4.0 * eta;
+    double N4dk = 4.0 * eta;
+    double N5dk = -4.0 * eta;
+    double N6dk = 4.0 * ( 1.0 - 2.0 * ksi - eta );
 
     double N1de = 0.0;
-    double N2de = 4.0*eta-1.0;
-    double N3de = -3.0+4.0*eta+4.0*ksi;
-    double N4de = 4.0*ksi;
-    double N5de = 4.0*(1.0-2.0*eta-ksi);
-    double N6de = -4.0*ksi;
+    double N2de = 4.0 * eta - 1.0;
+    double N3de = -3.0 + 4.0 * eta + 4.0 * ksi;
+    double N4de = 4.0 * ksi;
+    double N5de = 4.0 * ( 1.0 - 2.0 * eta - ksi );
+    double N6de = -4.0 * ksi;
 
-    double A = N1dk*x1+N2dk*x2+N3dk*x3+N4dk*(x1+x2)/2+N5dk*(x2+x3)/2+N6dk*(x1+x3)/2;
-    double B = N1dk*y1+N2dk*y2+N3dk*y3+N4dk*(y1+y2)/2+N5dk*(y2+y3)/2+N6dk*(y1+y3)/2;
-    double C = N1de*x1+N2de*x2+N3de*x3+N4de*(x1+x2)/2+N5de*(x2+x3)/2+N6de*(x1+x3)/2;
-    double D = N1de*y1+N2de*y2+N3de*y3+N4de*(y1+y2)/2+N5de*(y2+y3)/2+N6de*(y1+y3)/2;
+    double A = N1dk * x1 + N2dk * x2 + N3dk * x3 + N4dk * ( x1 + x2 ) / 2 + N5dk * ( x2 + x3 ) / 2 + N6dk * ( x1 + x3 ) / 2;
+    double B = N1dk * y1 + N2dk * y2 + N3dk * y3 + N4dk * ( y1 + y2 ) / 2 + N5dk * ( y2 + y3 ) / 2 + N6dk * ( y1 + y3 ) / 2;
+    double C = N1de * x1 + N2de * x2 + N3de * x3 + N4de * ( x1 + x2 ) / 2 + N5de * ( x2 + x3 ) / 2 + N6de * ( x1 + x3 ) / 2;
+    double D = N1de * y1 + N2de * y2 + N3de * y3 + N4de * ( y1 + y2 ) / 2 + N5de * ( y2 + y3 ) / 2 + N6de * ( y1 + y3 ) / 2;
 
-    double dxdk = D/(A*D-B*C); 
-    double dydk = -C/(A*D-B*C); 
-    double dxde = -B/(A*D-B*C); 
-    double dyde = A/(A*D-B*C); 
+    double dxdk = D / ( A * D - B * C );
+    double dydk = -C / ( A * D - B * C );
+    double dxde = -B / ( A * D - B * C );
+    double dyde = A / ( A * D - B * C );
 
-    double dN102 = N1dk*dxdk+N1de*dxde;
-    double dN104 = N2dk*dxdk+N2de*dxde;
-    double dN106 = N3dk*dxdk+N3de*dxde;
-    double dN108 = N4dk*dxdk+N4de*dxde;
-    double dN110 = N5dk*dxdk+N5de*dxde;
-    double dN112 = N6dk*dxdk+N6de*dxde;
-    
-    double dN201 = -N1dk*dydk-N1de*dyde;
-    double dN203 = -N2dk*dydk-N2de*dyde;
-    double dN205 = -N3dk*dydk-N3de*dyde;
-    double dN207 = -N4dk*dydk-N4de*dyde; 
-    double dN209 = -N5dk*dydk-N5de*dyde;
-    double dN211 = -N6dk*dydk-N6de*dyde;
-    
+    double dN102 = N1dk * dxdk + N1de * dxde;
+    double dN104 = N2dk * dxdk + N2de * dxde;
+    double dN106 = N3dk * dxdk + N3de * dxde;
+    double dN108 = N4dk * dxdk + N4de * dxde;
+    double dN110 = N5dk * dxdk + N5de * dxde;
+    double dN112 = N6dk * dxdk + N6de * dxde;
+
+    double dN201 = -N1dk * dydk - N1de * dyde;
+    double dN203 = -N2dk * dydk - N2de * dyde;
+    double dN205 = -N3dk * dydk - N3de * dyde;
+    double dN207 = -N4dk * dydk - N4de * dyde;
+    double dN209 = -N5dk * dydk - N5de * dyde;
+    double dN211 = -N6dk * dydk - N6de * dyde;
+
     // normals on element sides
-    double dx4 = x2-x1;
-    double dy4 = y2-y1;
-    double l4 = sqrt(dx4*dx4+dy4*dy4);
-    
-    double dx5 = x3-x2;
-    double dy5 = y3-y2;
-    double l5 = sqrt(dx5*dx5+dy5*dy5);
-    
-    double dx6 = x1-x3;
-    double dy6 = y1-y3;
-    double l6 = sqrt(dx6*dx6+dy6*dy6);
+    double dx4 = x2 - x1;
+    double dy4 = y2 - y1;
+    double l4 = sqrt(dx4 * dx4 + dy4 * dy4);
 
-    double c4 = dy4/l4;
-    double s4 = -dx4/l4;
+    double dx5 = x3 - x2;
+    double dy5 = y3 - y2;
+    double l5 = sqrt(dx5 * dx5 + dy5 * dy5);
 
-    double c5 = dy5/l5;
-    double s5 = -dx5/l5;
+    double dx6 = x1 - x3;
+    double dy6 = y1 - y3;
+    double l6 = sqrt(dx6 * dx6 + dy6 * dy6);
 
-    double c6 = dy6/l6;
-    double s6 = -dx6/l6;
+    double c4 = dy4 / l4;
+    double s4 = -dx4 / l4;
+
+    double c5 = dy5 / l5;
+    double s5 = -dx5 / l5;
+
+    double c6 = dy6 / l6;
+    double s6 = -dx6 / l6;
 
     // transformation matrix between element DOFs (w, fi_x, fi_y)  and DOFs of element with qudratic rotations
-    double T11 = -1.5/l4*c4;
-    double T12 = -0.25*c4*c4+0.5*s4*s4;
-    double T13 = -0.25*c4*s4-0.5*c4*s4;
-    double T14 = 1.5/l4*c4;
-    double T15 = -0.25*c4*c4+0.5*s4*s4;
-    double T16 = -0.25*c4*s4-0.5*c4*s4;
-    
-    double T21 = -1.5/l4*s4;
-    double T22 = -0.25*c4*s4-0.5*c4*s4;
-    double T23 = -0.25*s4*s4+0.5*c4*c4;
-    double T24 = 1.5/l4*s4;
-    double T25 = -0.25*c4*s4-0.5*c4*s4;
-    double T26 = -0.25*s4*s4+0.5*c4*c4;
+    double T11 = -1.5 / l4 * c4;
+    double T12 = -0.25 * c4 * c4 + 0.5 * s4 * s4;
+    double T13 = -0.25 * c4 * s4 - 0.5 * c4 * s4;
+    double T14 = 1.5 / l4 * c4;
+    double T15 = -0.25 * c4 * c4 + 0.5 * s4 * s4;
+    double T16 = -0.25 * c4 * s4 - 0.5 * c4 * s4;
 
-    double T34 = -1.5/l5*c5;
-    double T35 = -0.25*c5*c5+0.5*s5*s5;
-    double T36 = -0.25*c5*s5-0.5*c5*s5;
-    double T37 = 1.5/l5*c5;
-    double T38 = -0.25*c5*c5+0.5*s5*s5;
-    double T39 = -0.25*c5*s5-0.5*c5*s5;
-    
-    double T44 = -1.5/l5*s5;
-    double T45 = -0.25*c5*s5-0.5*c5*s5;
-    double T46 = -0.25*s5*s5+0.5*c5*c5;
-    double T47 = 1.5/l5*s5;
-    double T48 = -0.25*c5*s5-0.5*c5*s5;
-    double T49 = -0.25*s5*s5+0.5*c5*c5;
-    
-    double T51 = 1.5/l6*c6;
-    double T52 = -0.25*c6*c6+0.5*s6*s6;
-    double T53 = -0.25*c6*s6-0.5*c6*s6;
-    double T57 = -1.5/l6*c6;
-    double T58 = -0.25*c6*c6+0.5*s6*s6;
-    double T59 = -0.25*c6*s6-0.5*c6*s6;
-    
-    double T61 = 1.5/l6*s6;
-    double T62 = -0.25*c6*s6-0.5*c6*s6;
-    double T63 = -0.25*s6*s6+0.5*c6*c6;
-    double T67 = -1.5/l6*s6;
-    double T68 = -0.25*c6*s6-0.5*c6*s6;
-    double T69 = -0.25*s6*s6+0.5*c6*c6;
-    
+    double T21 = -1.5 / l4 * s4;
+    double T22 = -0.25 * c4 * s4 - 0.5 * c4 * s4;
+    double T23 = -0.25 * s4 * s4 + 0.5 * c4 * c4;
+    double T24 = 1.5 / l4 * s4;
+    double T25 = -0.25 * c4 * s4 - 0.5 * c4 * s4;
+    double T26 = -0.25 * s4 * s4 + 0.5 * c4 * c4;
+
+    double T34 = -1.5 / l5 * c5;
+    double T35 = -0.25 * c5 * c5 + 0.5 * s5 * s5;
+    double T36 = -0.25 * c5 * s5 - 0.5 * c5 * s5;
+    double T37 = 1.5 / l5 * c5;
+    double T38 = -0.25 * c5 * c5 + 0.5 * s5 * s5;
+    double T39 = -0.25 * c5 * s5 - 0.5 * c5 * s5;
+
+    double T44 = -1.5 / l5 * s5;
+    double T45 = -0.25 * c5 * s5 - 0.5 * c5 * s5;
+    double T46 = -0.25 * s5 * s5 + 0.5 * c5 * c5;
+    double T47 = 1.5 / l5 * s5;
+    double T48 = -0.25 * c5 * s5 - 0.5 * c5 * s5;
+    double T49 = -0.25 * s5 * s5 + 0.5 * c5 * c5;
+
+    double T51 = 1.5 / l6 * c6;
+    double T52 = -0.25 * c6 * c6 + 0.5 * s6 * s6;
+    double T53 = -0.25 * c6 * s6 - 0.5 * c6 * s6;
+    double T57 = -1.5 / l6 * c6;
+    double T58 = -0.25 * c6 * c6 + 0.5 * s6 * s6;
+    double T59 = -0.25 * c6 * s6 - 0.5 * c6 * s6;
+
+    double T61 = 1.5 / l6 * s6;
+    double T62 = -0.25 * c6 * s6 - 0.5 * c6 * s6;
+    double T63 = -0.25 * s6 * s6 + 0.5 * c6 * c6;
+    double T67 = -1.5 / l6 * s6;
+    double T68 = -0.25 * c6 * s6 - 0.5 * c6 * s6;
+    double T69 = -0.25 * s6 * s6 + 0.5 * c6 * c6;
+
     answer.resize(5, 9);
     answer.zero();
 
-    answer.at(1,1) = T21*dN108 + T61*dN112;
-    answer.at(1,2) = T22*dN108 + T62*dN112;
-    answer.at(1,3) = dN102 + T23*dN108 + T63*dN112;
-    answer.at(1,4) = T24*dN108 + T44*dN110;
-    answer.at(1,5) = T25*dN108 + T45*dN110;
-    answer.at(1,6) = dN104 + T26*dN108 + T46*dN110;
-    answer.at(1,7) = T47*dN110 + T67*dN112;
-    answer.at(1,8) = T48*dN110 + T68*dN112;
-    answer.at(1,9) = dN106 + T49*dN110 + T69*dN112;
+    answer.at(1, 1) = T21 * dN108 + T61 * dN112;
+    answer.at(1, 2) = T22 * dN108 + T62 * dN112;
+    answer.at(1, 3) = dN102 + T23 * dN108 + T63 * dN112;
+    answer.at(1, 4) = T24 * dN108 + T44 * dN110;
+    answer.at(1, 5) = T25 * dN108 + T45 * dN110;
+    answer.at(1, 6) = dN104 + T26 * dN108 + T46 * dN110;
+    answer.at(1, 7) = T47 * dN110 + T67 * dN112;
+    answer.at(1, 8) = T48 * dN110 + T68 * dN112;
+    answer.at(1, 9) = dN106 + T49 * dN110 + T69 * dN112;
 
-    answer.at(2,1) = T11*dN207 + T51*dN211;
-    answer.at(2,2) = dN201 + T12*dN207 + T52*dN211;
-    answer.at(2,3) = T13*dN207 + T53*dN211;
-    answer.at(2,4) = T14*dN207 + T34*dN209;
-    answer.at(2,5) = dN203 + T15*dN207 + T35*dN209;
-    answer.at(2,6) = T16*dN207 + T36*dN209;
-    answer.at(2,7) = T37*dN209 + T57*dN211;
-    answer.at(2,8) = dN205 + T38*dN209 + T58*dN211;
-    answer.at(2,9) = T39*dN209 + T59*dN211;
+    answer.at(2, 1) = T11 * dN207 + T51 * dN211;
+    answer.at(2, 2) = dN201 + T12 * dN207 + T52 * dN211;
+    answer.at(2, 3) = T13 * dN207 + T53 * dN211;
+    answer.at(2, 4) = T14 * dN207 + T34 * dN209;
+    answer.at(2, 5) = dN203 + T15 * dN207 + T35 * dN209;
+    answer.at(2, 6) = T16 * dN207 + T36 * dN209;
+    answer.at(2, 7) = T37 * dN209 + T57 * dN211;
+    answer.at(2, 8) = dN205 + T38 * dN209 + T58 * dN211;
+    answer.at(2, 9) = T39 * dN209 + T59 * dN211;
 
-    answer.at(3,1) = - T11*dN108 - T51*dN112 - T21*dN207 - T61*dN211;
-    answer.at(3,2) = - dN102 - T12*dN108 - T52*dN112 - T22*dN207 - T62*dN211;
-    answer.at(3,3) = - dN201 - T13*dN108 - T53*dN112 - T23*dN207 - T63*dN211;
-    answer.at(3,4) = - T14*dN108 - T34*dN110 - T24*dN207 - T44*dN209;
-    answer.at(3,5) = - dN104 - T15*dN108 - T35*dN110 - T25*dN207 - T45*dN209;
-    answer.at(3,6) = - dN203 - T16*dN108 - T36*dN110 - T26*dN207 - T46*dN209;
-    answer.at(3,7) = - T37*dN110 - T57*dN112 - T47*dN209 - T67*dN211;
-    answer.at(3,8) = - dN106 - T38*dN110 - T58*dN112 - T48*dN209 - T68*dN211;
-    answer.at(3,9) = - dN205 - T39*dN110 - T59*dN112 - T49*dN209 - T69*dN211;
+    answer.at(3, 1) = -T11 * dN108 - T51 * dN112 - T21 * dN207 - T61 * dN211;
+    answer.at(3, 2) = -dN102 - T12 * dN108 - T52 * dN112 - T22 * dN207 - T62 * dN211;
+    answer.at(3, 3) = -dN201 - T13 * dN108 - T53 * dN112 - T23 * dN207 - T63 * dN211;
+    answer.at(3, 4) = -T14 * dN108 - T34 * dN110 - T24 * dN207 - T44 * dN209;
+    answer.at(3, 5) = -dN104 - T15 * dN108 - T35 * dN110 - T25 * dN207 - T45 * dN209;
+    answer.at(3, 6) = -dN203 - T16 * dN108 - T36 * dN110 - T26 * dN207 - T46 * dN209;
+    answer.at(3, 7) = -T37 * dN110 - T57 * dN112 - T47 * dN209 - T67 * dN211;
+    answer.at(3, 8) = -dN106 - T38 * dN110 - T58 * dN112 - T48 * dN209 - T68 * dN211;
+    answer.at(3, 9) = -dN205 - T39 * dN110 - T59 * dN112 - T49 * dN209 - T69 * dN211;
 
     // Note: no shear strains, no shear forces => the 4th and 5th rows are zero
 }
@@ -290,7 +289,7 @@ void
 DKTPlate :: computeNmatrixAt(const FloatArray &iLocCoord, FloatMatrix &answer)
 // Returns the [3x9] displacement interpolation matrix {N} of the receiver,
 // evaluated at gp.
-// Note: this interpolation is not available, as the deflection is cubic along the edges, 
+// Note: this interpolation is not available, as the deflection is cubic along the edges,
 //       but not define in the interior of the element
 // Note: the interpolation of rotations is quadratic
 {
@@ -338,9 +337,9 @@ DKTPlate :: computeNmatrixAt(const FloatArray &iLocCoord, FloatMatrix &answer)
 
 
 void
-DKTPlate :: computeStressVector(FloatArray &answer, const FloatArray &strain, GaussPoint *gp, TimeStep *stepN)
+DKTPlate :: computeStressVector(FloatArray &answer, const FloatArray &strain, GaussPoint *gp, TimeStep *tStep)
 {
-    this->giveStructuralCrossSection()->giveRealStress_Plate(answer, gp, strain, stepN);
+    this->giveStructuralCrossSection()->giveRealStress_Plate(answer, gp, strain, tStep);
 }
 
 
@@ -436,7 +435,7 @@ DKTPlate :: computeLumpedMassMatrix(FloatMatrix &answer, TimeStep *tStep)
 
     double dV = this->computeVolumeAround(gp);
     double density = this->giveStructuralCrossSection()->give('d', gp);
-    double mss1 = dV * this->giveCrossSection()->give(CS_Thickness) * density / 3.;
+    double mss1 = dV * this->giveCrossSection()->give(CS_Thickness, gp) * density / 3.;
 
     answer.at(1, 1) = mss1;
     answer.at(4, 4) = mss1;
@@ -481,19 +480,6 @@ DKTPlate :: computeLocalCoordinates(FloatArray &answer, const FloatArray &coords
     // Fetch local coordinates.
     bool ok = this->interp_lin.global2local( answer, coords, FEIElementGeometryWrapper(this) ) > 0;
 
-    //get midplane location at this point
-    double midplZ;
-    midplZ = z [ 0 ] * answer.at(1) + z [ 1 ] * answer.at(2) + z [ 2 ] * answer.at(3);
-
-    //check that the z is within the element
-    StructuralCrossSection *cs = this->giveStructuralCrossSection();
-    double elthick = cs->give(CS_Thickness);
-
-    if ( elthick / 2.0 + midplZ - fabs( coords.at(3) ) < -POINT_TOL ) {
-        answer.zero();
-        return false;
-    }
-
     //check that the point is in the element and set flag
     for ( int i = 1; i <= 3; i++ ) {
         if ( answer.at(i) < ( 0. - POINT_TOL ) ) {
@@ -505,12 +491,26 @@ DKTPlate :: computeLocalCoordinates(FloatArray &answer, const FloatArray &coords
         }
     }
 
+    //get midplane location at this point
+    double midplZ;
+    midplZ = z [ 0 ] * answer.at(1) + z [ 1 ] * answer.at(2) + z [ 2 ] * answer.at(3);
+
+    //check that the z is within the element
+    StructuralCrossSection *cs = this->giveStructuralCrossSection();
+    double elthick = cs->give(CS_Thickness, & answer, NULL, this);
+
+    if ( elthick / 2.0 + midplZ - fabs( coords.at(3) ) < -POINT_TOL ) {
+        answer.zero();
+        return false;
+    }
+
+
     return ok;
 }
 
 
 int
-DKTPlate :: giveIPValue(FloatArray &answer, GaussPoint *gp, InternalStateType type, TimeStep *atTime)
+DKTPlate :: giveIPValue(FloatArray &answer, GaussPoint *gp, InternalStateType type, TimeStep *tStep)
 {
     if ( type == IST_ShellForceMomentumTensor ) {
         answer = static_cast< StructuralMaterialStatus * >( gp->giveMaterialStatus() )->giveStressVector();
@@ -519,13 +519,13 @@ DKTPlate :: giveIPValue(FloatArray &answer, GaussPoint *gp, InternalStateType ty
         answer = static_cast< StructuralMaterialStatus * >( gp->giveMaterialStatus() )->giveStrainVector();
         return 1;
     } else {
-      return NLStructuralElement::giveIPValue(answer, gp, type, atTime);
+        return NLStructuralElement :: giveIPValue(answer, gp, type, tStep);
     }
 }
 
 
-double 
-DKTPlate :: ZZRemeshingCriteriaI_giveCharacteristicSize() 
+double
+DKTPlate :: ZZRemeshingCriteriaI_giveCharacteristicSize()
 {
     return sqrt(this->computeArea() * 2.0);
 }
@@ -578,8 +578,8 @@ DKTPlate :: SPRNodalRecoveryMI_giveDofMansDeterminedByPatch(IntArray &answer, in
 {
     answer.resize(1);
     if ( ( pap == this->giveNode(1)->giveNumber() ) ||
-        ( pap == this->giveNode(2)->giveNumber() ) ||
-        ( pap == this->giveNode(3)->giveNumber() ) ) {
+         ( pap == this->giveNode(2)->giveNumber() ) ||
+         ( pap == this->giveNode(3)->giveNumber() ) ) {
         answer.at(1) = pap;
     } else {
         _error("SPRNodalRecoveryMI_giveDofMansDeterminedByPatch: node unknown");
@@ -598,15 +598,15 @@ DKTPlate :: SPRNodalRecoveryMI_givePatchType()
 // layered cross section support functions
 //
 void
-DKTPlate :: computeStrainVectorInLayer(FloatArray &answer, const FloatArray &masterGpStrain, 
-                                       GaussPoint *slaveGp, TimeStep *tStep)
+DKTPlate :: computeStrainVectorInLayer(FloatArray &answer, const FloatArray &masterGpStrain,
+                                       GaussPoint *masterGp, GaussPoint *slaveGp, TimeStep *tStep)
 // returns full 3d strain vector of given layer (whose z-coordinate from center-line is
 // stored in slaveGp) for given tStep
 {
     double layerZeta, layerZCoord, top, bottom;
 
-    top    = this->giveCrossSection()->give(CS_TopZCoord);
-    bottom = this->giveCrossSection()->give(CS_BottomZCoord);
+    top    = this->giveCrossSection()->give(CS_TopZCoord, masterGp);
+    bottom = this->giveCrossSection()->give(CS_BottomZCoord, masterGp);
     layerZeta = slaveGp->giveCoordinate(3);
     layerZCoord = 0.5 * ( ( 1. - layerZeta ) * bottom + ( 1. + layerZeta ) * top );
 
@@ -673,7 +673,7 @@ double
 DKTPlate :: computeEdgeVolumeAround(GaussPoint *gp, int iEdge)
 {
     double detJ = this->interp_lin.edgeGiveTransformationJacobian( iEdge, * gp->giveCoordinates(), FEIElementGeometryWrapper(this) );
-    return detJ *gp->giveWeight();
+    return detJ * gp->giveWeight();
 }
 
 
@@ -703,8 +703,8 @@ DKTPlate :: computeLoadLEToLRotationMatrix(FloatMatrix &answer, int iEdge, Gauss
 
     this->interp_lin.computeLocalEdgeMapping(edgeNodes, iEdge);
 
-    nodeA = this->giveNode(edgeNodes.at(1));
-    nodeB = this->giveNode(edgeNodes.at(2));
+    nodeA = this->giveNode( edgeNodes.at(1) );
+    nodeB = this->giveNode( edgeNodes.at(2) );
 
     dx = nodeB->giveCoordinate(1) - nodeA->giveCoordinate(1);
     dy = nodeB->giveCoordinate(2) - nodeA->giveCoordinate(2);

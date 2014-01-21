@@ -63,8 +63,7 @@ SubspaceIteration :: SubspaceIteration(Domain *d, EngngModel *m) :
 
 
 SubspaceIteration :: ~SubspaceIteration()
-{
-}
+{}
 
 NM_Status
 SubspaceIteration :: solve(SparseMtrx *a, SparseMtrx *b, FloatArray *_eigv, FloatMatrix *_r, double rtol, int nroot)
@@ -373,7 +372,6 @@ SubspaceIteration :: solve(SparseMtrx *a, SparseMtrx *b, FloatArray *_eigv, Floa
                     }
                 }
             }                   // label 360
-
         } while ( is != 0 );
 
 # ifdef DETAILED_REPORT
@@ -460,5 +458,4 @@ label400:
     solved = 1;
     return NM_Success;
 }
-
 } // end namespace oofem

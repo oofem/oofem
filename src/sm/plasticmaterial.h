@@ -79,10 +79,10 @@ public:
     virtual contextIOResultType saveContext(DataStream *stream, ContextMode mode, void *obj = NULL);
     virtual contextIOResultType restoreContext(DataStream *stream, ContextMode mode, void *obj = NULL);
 
-    const FloatArray & givePlasticStrainVector() const { return plasticStrainVector; }
-    const FloatArray & giveTempPlasticStrainVector() const { return tempPlasticStrainVector; }
-    const FloatArray & giveStrainSpaceHardeningVars() const { return strainSpaceHardeningVarsVector; }
-    const FloatArray & givetempStrainSpaceHardeningVarsVector() const { return tempStrainSpaceHardeningVarsVector; }
+    const FloatArray &givePlasticStrainVector() const { return plasticStrainVector; }
+    const FloatArray &giveTempPlasticStrainVector() const { return tempPlasticStrainVector; }
+    const FloatArray &giveStrainSpaceHardeningVars() const { return strainSpaceHardeningVarsVector; }
+    const FloatArray &givetempStrainSpaceHardeningVarsVector() const { return tempStrainSpaceHardeningVarsVector; }
 
     void letPlasticStrainVectorBe(const FloatArray &v) { plasticStrainVector = v; }
     void letTempPlasticStrainVectorBe(const FloatArray &v) { tempPlasticStrainVector = v; }
@@ -99,14 +99,12 @@ public:
 
     // definition
     virtual const char *giveClassName() const { return "PlasticMaterialStatus"; }
-    virtual classType giveClassID() const { return PerfectlyPlasticMaterialStatusClass; }
 
-    virtual void printYourself() {printf("I am a PlasticMaterialStatus. plasticStrainVector: \n"); plasticStrainVector.printYourself(); }
+    virtual void printYourself();
 
     /// Functions for MaterialStatusMapperInterface
-	virtual void copyStateVariables(const MaterialStatus &iStatus);
-	virtual void addStateVariables(const MaterialStatus &iStatus);
-
+    virtual void copyStateVariables(const MaterialStatus &iStatus);
+    virtual void addStateVariables(const MaterialStatus &iStatus);
 };
 
 /**
@@ -133,7 +131,6 @@ public:
     virtual int hasNonLinearBehaviour() { return 1; }
     virtual int hasMaterialModeCapability(MaterialMode mode);
     virtual const char *giveClassName() const { return "PlasticMaterial"; }
-    virtual classType giveClassID() const { return PerfectlyPlasticMaterialClass; }
 
     /// Returns reference to undamaged (bulk) material.
     LinearElasticMaterial *giveLinearElasticMaterial() { return linearElasticMaterial; }
@@ -145,7 +142,7 @@ public:
 
 
     virtual void giveRealStressVector(FloatArray &answer, GaussPoint *gp,
-                              const FloatArray &reducedStrain, TimeStep *tStep);
+                                      const FloatArray &reducedStrain, TimeStep *tStep);
 
     virtual void giveRealStressVector_3d(FloatArray &answer, GaussPoint *gp, const FloatArray &reducedE, TimeStep *tStep)
     { this->giveRealStressVector(answer, gp, reducedE, tStep); }
@@ -247,15 +244,14 @@ protected:
                                           TimeStep *tStep);
 
     virtual void givePlateLayerStiffMtrx(FloatMatrix &answer,
-                                           MatResponseMode mode,
-                                           GaussPoint *gp,
-                                           TimeStep *tStep);
+                                         MatResponseMode mode,
+                                         GaussPoint *gp,
+                                         TimeStep *tStep);
 
     virtual void give1dFiberStiffMtrx(FloatMatrix &answer,
                                       MatResponseMode mode,
                                       GaussPoint *gp,
-                                      TimeStep *atTime);
-
+                                      TimeStep *tStep);
 };
 } // end namespace oofem
 #endif // plasticmaterial_h

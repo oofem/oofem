@@ -46,8 +46,7 @@
 #include <cassert>
 
 namespace oofem {
-
-REGISTER_InitModule( GPInitModule )
+REGISTER_InitModule(GPInitModule)
 
 GPInitModule :: GPInitModule(int n, EngngModel *e) : InitModule(n, e)
 {}
@@ -87,7 +86,7 @@ GPInitModule :: doInit()
         // loop over Gauss points
         for ( igp = 0; igp < iRule->giveNumberOfIntegrationPoints(); igp++ ) {
             gp = iRule->getIntegrationPoint(igp);
-            MaterialStatus *status = static_cast< MaterialStatus *> ( gp->giveMaterialStatus() );
+            MaterialStatus *status = static_cast< MaterialStatus * >( gp->giveMaterialStatus() );
             if ( fscanf(initStream, "%d %d", & ie, & ig) != 2 ) {
                 OOFEM_ERROR("GPInitModule :: doInit: initStream reading error");
             }

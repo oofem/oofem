@@ -74,7 +74,6 @@ public:
     // definition & identification
     virtual const char *giveInputRecordName() const { return _IFT_L4Axisymm_Name; }
     virtual const char *giveClassName() const { return "L4Axisymm"; }
-    virtual classType giveClassID() const { return L4AxisymmClass; }
 
     virtual int testElementExtension(ElementExtension ext) { return ( ( ext == Element_EdgeLoadSupport ) ? 1 : 0 ); }
     virtual IRResultType initializeFrom(InputRecord *ir);

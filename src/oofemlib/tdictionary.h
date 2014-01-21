@@ -46,7 +46,7 @@ template< class Key, class T >class TDictionary;
 /**
  * This class implements key/value associations,
  * A pair is used as an entry in a dictionary.
-
+ *
  * A pair has three components : its name (a character), its value (a class FEMComponent),
  * a pointer to the next pair in the dictionary.
  * Tasks:
@@ -65,7 +65,7 @@ protected:
     /// Link to next TPair.
     TPair< Key, T > *next;
 public:
-    TPair(Key k, T *d): key(k), data(d), next(NULL) { }
+    TPair(Key k, T *d) : key(k), data(d), next(NULL) { }
     ~TPair() { delete data; }
 
     void append(TPair< Key, T > *p) { next = p; }
@@ -217,17 +217,17 @@ template< class Key, class T >TDictionaryIterator< Key, T > :: TDictionaryIterat
 }
 
 template< class Key, class T >T *TDictionaryIterator< Key, T > :: next() {
-  if (curr) {
-    TPair< Key, T > *ret = curr;
-    curr = curr->giveNext();
-    if ( curr == list->last ) {
-      curr = 0;
+    if ( curr ) {
+        TPair< Key, T > *ret = curr;
+        curr = curr->giveNext();
+        if ( curr == list->last ) {
+            curr = 0;
+        }
+
+        return ret->giveValue();
+    } else {
+        return 0;
     }
-    
-    return ret->giveValue();
-  } else {
-    return 0;
-  }
 }
 } // end namespace oofem
 #endif // tdictionary_h

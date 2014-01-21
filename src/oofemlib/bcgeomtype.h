@@ -48,4 +48,3 @@ enum bcGeomType {
 };
 } // end namespace oofem
 #endif // bcgeomtype_h
-

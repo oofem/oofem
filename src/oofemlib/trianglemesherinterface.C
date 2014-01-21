@@ -42,7 +42,7 @@
 
 #ifdef __TRIANGLE_MODULE
 extern "C" {
-#include <triangle.h>
+ #include <triangle.h>
 
 // Function prototypes from triangle.c
 void parsecommandline(int argc, char **argv, struct behavior *b);
@@ -59,7 +59,7 @@ void checkmesh(struct mesh *m, struct behavior *b);
 void checkdelaunay(struct mesh *m, struct behavior *b);
 void writeneighbors(struct mesh *m, struct behavior *b, int **neighborlist);
 void writevoronoi(struct mesh *m, struct behavior *b, REAL **vpointlist, REAL **vpointattriblist, int **vpointmarkerlist, int **vedgelist, int **vedgemarkerlist, REAL **vnormlist);
-int reconstruct(struct mesh *m, struct behavior *b, int *trianglelist, REAL *triangleattriblist, REAL *trianglearealist, int elements, int corners, int attribs, int *segmentlist,int *segmentmarkerlist, int numberofsegments);
+int reconstruct(struct mesh *m, struct behavior *b, int *trianglelist, REAL *triangleattriblist, REAL *trianglearealist, int elements, int corners, int attribs, int *segmentlist, int *segmentmarkerlist, int numberofsegments);
 subseg *subsegtraverse(struct mesh *m);
 void regionplague(struct mesh *m, struct behavior *b, REAL attribute, REAL area);
 void plague(struct mesh *m, struct behavior *b);
@@ -67,35 +67,35 @@ void poolinit(struct memorypool *pool, int bytecount, int itemcount, int firstit
 void pooldeinit(struct memorypool *pool);
 
 // Macros from triangle.c
-#define setelemattribute(otri, attnum, value)                                 \
-  ((REAL *) (otri).tri)[m->elemattribindex + (attnum)] = value
-#define elemattribute(otri, attnum)                                           \
-  ((REAL *) (otri).tri)[m->elemattribindex + (attnum)]
+ #define setelemattribute(otri, attnum, value)                                 \
+    ( ( REAL * ) ( otri ).tri ) [ m->elemattribindex + ( attnum ) ] = value
+ #define elemattribute(otri, attnum)                                           \
+    ( ( REAL * ) ( otri ).tri ) [ m->elemattribindex + ( attnum ) ]
 
-#define stpivot(osub, otri)                                                   \
-  ptr = (triangle) (osub).ss[6 + (osub).ssorient];                            \
-  decode(ptr, otri)
-#define ssymself(osub)                                                        \
-  (osub).ssorient = 1 - (osub).ssorient
-#define mark(osub)  (* (int *) ((osub).ss + 8))
-#define decode(ptr, otri)                                                     \
-  (otri).orient = (int) ((long)ptr & (long)3l);         \
-  (otri).tri = (triangle *) ((long)(ptr) ^ (long)(otri).orient)
-#define infect(otri)                                                          \
-  (otri).tri[6] = (triangle) ((long)(otri).tri[6] | (long)2l)
-#define org(otri, vertexptr)                                                  \
-  vertexptr = (vertex) (otri).tri[plus1mod3[(otri).orient] + 3]
-#define dest(otri, vertexptr)                                                 \
-  vertexptr = (vertex) (otri).tri[minus1mod3[(otri).orient] + 3]
-#define apex(otri, vertexptr)                                                 \
-  vertexptr = (vertex) (otri).tri[(otri).orient + 3]
-#define sorg(osub, vertexptr)                                                 \
-  vertexptr = (vertex) (osub).ss[2 + (osub).ssorient]
-#define sdest(osub, vertexptr)                                                \
-  vertexptr = (vertex) (osub).ss[3 - (osub).ssorient]
+ #define stpivot(osub, otri)                                                   \
+    ptr = ( triangle ) ( osub ).ss [ 6 + ( osub ).ssorient ];                            \
+    decode(ptr, otri)
+ #define ssymself(osub)                                                        \
+    ( osub ).ssorient = 1 - ( osub ).ssorient
+ #define mark(osub)  ( * ( int * ) ( ( osub ).ss + 8 ) )
+ #define decode(ptr, otri)                                                     \
+    ( otri ).orient = ( int ) ( ( long ) ptr & ( long ) 3l );         \
+    ( otri ).tri = ( triangle * ) ( ( long ) ( ptr ) ^ ( long ) ( otri ).orient )
+ #define infect(otri)                                                          \
+    ( otri ).tri [ 6 ] = ( triangle ) ( ( long ) ( otri ).tri [ 6 ] | ( long ) 2l )
+ #define org(otri, vertexptr)                                                  \
+    vertexptr = ( vertex ) ( otri ).tri [ plus1mod3 [ ( otri ).orient ] + 3 ]
+ #define dest(otri, vertexptr)                                                 \
+    vertexptr = ( vertex ) ( otri ).tri [ minus1mod3 [ ( otri ).orient ] + 3 ]
+ #define apex(otri, vertexptr)                                                 \
+    vertexptr = ( vertex ) ( otri ).tri [ ( otri ).orient + 3 ]
+ #define sorg(osub, vertexptr)                                                 \
+    vertexptr = ( vertex ) ( osub ).ss [ 2 + ( osub ).ssorient ]
+ #define sdest(osub, vertexptr)                                                \
+    vertexptr = ( vertex ) ( osub ).ss [ 3 - ( osub ).ssorient ]
 
 
-#define VIRUSPERBLOCK 1020   /* Number of virus triangles allocated at once. */
+ #define VIRUSPERBLOCK 1020  /* Number of virus triangles allocated at once. */
 
 // This customized version carves holes defined by the regions.
 // It'll remove any element which doesn't receive any region.
@@ -111,49 +111,49 @@ int custom_carveholes(struct mesh *m, struct behavior *b, const int *outside, co
     double triangle_attribute;
     int sane_mesh;
 
-    poolinit(&m->viri, sizeof(triangle *), VIRUSPERBLOCK, VIRUSPERBLOCK, 0);
+    poolinit(& m->viri, sizeof( triangle * ), VIRUSPERBLOCK, VIRUSPERBLOCK, 0);
 
     /* Assigns every triangle a regional attribute of -1 */
-    traversalinit(&m->triangles);
+    traversalinit(& m->triangles);
     triangleloop.orient = 0;
     triangleloop.tri = triangletraverse(m);
-    while (triangleloop.tri != (triangle *) NULL) {
-      setelemattribute(triangleloop, m->eextras, -1.0);
-      triangleloop.tri = triangletraverse(m);
+    while ( triangleloop.tri != ( triangle * ) NULL ) {
+        setelemattribute(triangleloop, m->eextras, -1.0);
+        triangleloop.tri = triangletraverse(m);
     }
 
     sane_mesh = 1;
 
     /* Loop over all segments */
-    traversalinit(&m->subsegs);
+    traversalinit(& m->subsegs);
     subsegloop.ss = subsegtraverse(m);
     subsegloop.ssorient = 0;
-    while (subsegloop.ss != (subseg *) NULL) {
-        if (subsegloop.ss != m->dummysub) {
+    while ( subsegloop.ss != ( subseg * ) NULL ) {
+        if ( subsegloop.ss != m->dummysub ) {
             /* First neighbor. */
             ssymself(subsegloop);
             stpivot(subsegloop, neighbortri);
             if ( neighbortri.tri != m->dummytri ) {
                 area = 0.0; /// @todo Possible set this as the minimum as well.
-                attribute = outside[mark(subsegloop)-1];
+                attribute = outside [ mark(subsegloop) - 1 ];
                 triangle_attribute = elemattribute(neighbortri, m->eextras);
 
                 /* The region no number yet. */
-                if (triangle_attribute < 0 && attribute >= 0) {
+                if ( triangle_attribute < 0 && attribute >= 0 ) {
                     infect(neighbortri);
-                    temptri = (triangle **) poolalloc(&m->viri);
-                    *temptri = neighbortri.tri;
+                    temptri = ( triangle ** ) poolalloc(& m->viri);
+                    * temptri = neighbortri.tri;
                     /* Apply one region's attribute and/or area constraint. */
                     regionplague(m, b, attribute, area);
                     /* The virus pool should be empty now. */
-                } else if (attribute >= 0 && triangle_attribute >= 0 && attribute != triangle_attribute) {
+                } else if ( attribute >= 0 && triangle_attribute >= 0 && attribute != triangle_attribute ) {
                     /* Check for problems. */
                     vertex v1, v2, v3;
                     org(neighbortri, v1);
                     dest(neighbortri, v2);
                     apex(neighbortri, v3);
                     fprintf(stdout, "Error: inconsistent region information (new %d, old %d from %d) (outside) at (%e, %e)\n",
-                            (int)attribute, (int)triangle_attribute,(int)mark(subsegloop), (v1[0]+v2[0]+v3[0])/3, (v1[1]+v2[1]+v3[1])/3);
+                            ( int ) attribute, ( int ) triangle_attribute, ( int ) mark(subsegloop), ( v1 [ 0 ] + v2 [ 0 ] + v3 [ 0 ] ) / 3, ( v1 [ 1 ] + v2 [ 1 ] + v3 [ 1 ] ) / 3);
                     sane_mesh = 0;
                 }
             }
@@ -161,23 +161,23 @@ int custom_carveholes(struct mesh *m, struct behavior *b, const int *outside, co
             /* Second neighbor (same procedure). */
             ssymself(subsegloop);
             stpivot(subsegloop, neighbortri);
-            if ( neighbortri.tri != m->dummytri) {
+            if ( neighbortri.tri != m->dummytri ) {
                 area = 0.0;
-                attribute = inside[mark(subsegloop)-1];
+                attribute = inside [ mark(subsegloop) - 1 ];
                 triangle_attribute = elemattribute(neighbortri, m->eextras);
 
-                if (triangle_attribute < 0 && attribute >= 0) {
+                if ( triangle_attribute < 0 && attribute >= 0 ) {
                     infect(neighbortri);
-                    temptri = (triangle **) poolalloc(&m->viri);
-                    *temptri = neighbortri.tri;
+                    temptri = ( triangle ** ) poolalloc(& m->viri);
+                    * temptri = neighbortri.tri;
                     regionplague(m, b, attribute, area);
-                } else if (attribute >= 0 && triangle_attribute >= 0 && attribute != triangle_attribute) {
+                } else if ( attribute >= 0 && triangle_attribute >= 0 && attribute != triangle_attribute ) {
                     vertex v1, v2, v3;
                     org(neighbortri, v1);
                     dest(neighbortri, v2);
                     apex(neighbortri, v3);
                     fprintf(stdout, "Error: inconsistent region information (new %d, old %d from %d) (inside) at (%e, %e)\n",
-                            (int)attribute, (int)triangle_attribute,(int)mark(subsegloop), (v1[0]+v2[0]+v3[0])/3, (v1[1]+v2[1]+v3[1])/3 );
+                            ( int ) attribute, ( int ) triangle_attribute, ( int ) mark(subsegloop), ( v1 [ 0 ] + v2 [ 0 ] + v3 [ 0 ] ) / 3, ( v1 [ 1 ] + v2 [ 1 ] + v3 [ 1 ] ) / 3);
                     sane_mesh = 0;
                 }
             }
@@ -187,20 +187,20 @@ int custom_carveholes(struct mesh *m, struct behavior *b, const int *outside, co
     }
 
     /* Remove all triangles with marker 0.0 */
-    traversalinit(&m->triangles);
+    traversalinit(& m->triangles);
     triangleloop.tri = triangletraverse(m);
-    int triangle_number=0;
-    while (triangleloop.tri != (triangle *) NULL) {
+    int triangle_number = 0;
+    while ( triangleloop.tri != ( triangle * ) NULL ) {
         if ( triangleloop.tri != m->dummytri ) {
             triangle_number++;
             attribute = elemattribute(triangleloop, m->eextras);
-            if (attribute == -1.0) {
-                fprintf(stderr, "Broken mesh at triangle %d\n",triangle_number);
+            if ( attribute == -1.0 ) {
+                fprintf(stderr, "Broken mesh at triangle %d\n", triangle_number);
                 sane_mesh = 0;
-            } else if (attribute == 0.0) {
+            } else if ( attribute == 0.0 ) {
                 infect(triangleloop);
-                temptri = (triangle **) poolalloc(&m->viri);
-                *temptri = triangleloop.tri;
+                temptri = ( triangle ** ) poolalloc(& m->viri);
+                * temptri = triangleloop.tri;
             }
         }
         triangleloop.tri = triangletraverse(m);
@@ -208,13 +208,13 @@ int custom_carveholes(struct mesh *m, struct behavior *b, const int *outside, co
     /* Remove the marked elements */
     plague(m, b);
 
-    if (b->regionattrib && !b->refine) {
+    if ( b->regionattrib && !b->refine ) {
         /* Note the fact that each triangle has an additional attribute. */
         m->eextras++;
     }
 
     /* Free up memory. */
-    pooldeinit(&m->viri);
+    pooldeinit(& m->viri);
 
     return sane_mesh;
 }
@@ -226,134 +226,135 @@ void custom_triangulate(char *triswitches, struct triangulateio *in, struct tria
     struct behavior b;
     //REAL *holearray;
     //REAL *regionarray;
-    triangleinit(&m);
-    parsecommandline(1, &triswitches, &b);
+    triangleinit(& m);
+    parsecommandline(1, & triswitches, & b);
     //b.verbose=2;
     m.steinerleft = b.steiner;
-    transfernodes(&m, &b, in->pointlist, in->pointattributelist,
-            in->pointmarkerlist, in->numberofpoints,
-            in->numberofpointattributes);
-    if (b.refine) {
-        m.hullsize = reconstruct(&m, &b, in->trianglelist,
-                in->triangleattributelist, in->trianglearealist,
-                in->numberoftriangles, in->numberofcorners,
-                in->numberoftriangleattributes,
-                in->segmentlist, in->segmentmarkerlist,
-                in->numberofsegments);
+    transfernodes(& m, & b, in->pointlist, in->pointattributelist,
+                  in->pointmarkerlist, in->numberofpoints,
+                  in->numberofpointattributes);
+    if ( b.refine ) {
+        m.hullsize = reconstruct(& m, & b, in->trianglelist,
+                                 in->triangleattributelist, in->trianglearealist,
+                                 in->numberoftriangles, in->numberofcorners,
+                                 in->numberoftriangleattributes,
+                                 in->segmentlist, in->segmentmarkerlist,
+                                 in->numberofsegments);
     } else {
-        m.hullsize = delaunay(&m, &b);
+        m.hullsize = delaunay(& m, & b);
     }
-    m.infvertex1 = (vertex) NULL;
-    m.infvertex2 = (vertex) NULL;
-    m.infvertex3 = (vertex) NULL;
-    if (b.usesegments) {
+    m.infvertex1 = ( vertex ) NULL;
+    m.infvertex2 = ( vertex ) NULL;
+    m.infvertex3 = ( vertex ) NULL;
+    if ( b.usesegments ) {
         m.checksegments = 1;
-        if (!b.refine) {
-            formskeleton(&m, &b, in->segmentlist,
-                    in->segmentmarkerlist, in->numberofsegments);
+        if ( !b.refine ) {
+            formskeleton(& m, & b, in->segmentlist,
+                         in->segmentmarkerlist, in->numberofsegments);
         }
     }
-#if 0
+ #if 0
     struct osub subsegloop;
-    traversalinit(&m.subsegs);
-    subsegloop.ss = subsegtraverse(&m);
+    traversalinit(& m.subsegs);
+    subsegloop.ss = subsegtraverse(& m);
     subsegloop.ssorient = 0;
-    while (subsegloop.ss != (subseg *) NULL) {
-        if (subsegloop.ss != m.dummysub) {
+    while ( subsegloop.ss != ( subseg * ) NULL ) {
+        if ( subsegloop.ss != m.dummysub ) {
             REAL *p1, *p2;
-            sorg(subsegloop,p1);
-            sdest(subsegloop,p2);
-            printf("  Connected (%f,%f) to (%f,%f)\n",p1[0],p1[1],p2[0],p2[1]);
-            subsegloop.ss = subsegtraverse(&m);
+            sorg(subsegloop, p1);
+            sdest(subsegloop, p2);
+            printf("  Connected (%f,%f) to (%f,%f)\n", p1 [ 0 ], p1 [ 1 ], p2 [ 0 ], p2 [ 1 ]);
+            subsegloop.ss = subsegtraverse(& m);
         }
     }
-#endif
-    if (b.poly && (m.triangles.items > 0)) {
+ #endif
+    if ( b.poly && ( m.triangles.items > 0 ) ) {
         //holearray = in->holelist;
         m.holes = in->numberofholes;
         //regionarray = in->regionlist;
         m.regions = in->numberofregions;
-        if (!b.refine) {
+        if ( !b.refine ) {
             /* Only increase quality if the regions are properly defined. */
-            int sane = custom_carveholes(&m, &b, outside, inside);
+            int sane = custom_carveholes(& m, & b, outside, inside);
             b.quality *= sane;
-            if (sane == 0) { printf("Probably bad PSLG\n"); exit(-1); }
-            
+            if ( sane == 0 ) {
+                printf("Probably bad PSLG\n");
+                exit(-1);
+            }
         }
     } else {
         m.holes = 0;
         m.regions = 0;
     }
-    if (b.quality && (m.triangles.items > 0)) {
-        enforcequality(&m, &b);
+    if ( b.quality && ( m.triangles.items > 0 ) ) {
+        enforcequality(& m, & b);
     }
-    m.edges = (3l * m.triangles.items + m.hullsize) / 2l;
-    if (b.order > 1) {
-        highorder(&m, &b);
+    m.edges = ( 3l * m.triangles.items + m.hullsize ) / 2l;
+    if ( b.order > 1 ) {
+        highorder(& m, & b);
     }
-    if (!b.quiet) {
+    if ( !b.quiet ) {
         printf("\n");
     }
-    if (b.jettison) {
+    if ( b.jettison ) {
         out->numberofpoints = m.vertices.items - m.undeads;
     } else {
         out->numberofpoints = m.vertices.items;
     }
     out->numberofpointattributes = m.nextras;
     out->numberoftriangles = m.triangles.items;
-    out->numberofcorners = (b.order + 1) * (b.order + 2) / 2;
+    out->numberofcorners = ( b.order + 1 ) * ( b.order + 2 ) / 2;
     out->numberoftriangleattributes = m.eextras;
     out->numberofedges = m.edges;
-    if (b.usesegments) {
+    if ( b.usesegments ) {
         out->numberofsegments = m.subsegs.items;
     } else {
         out->numberofsegments = m.hullsize;
     }
-    if (vorout != (struct triangulateio *) NULL) {
+    if ( vorout != ( struct triangulateio * ) NULL ) {
         vorout->numberofpoints = m.triangles.items;
         vorout->numberofpointattributes = m.nextras;
         vorout->numberofedges = m.edges;
     }
-    if (b.nonodewritten || (b.noiterationnum && m.readnodefile)) {
-        if (!b.quiet) {
+    if ( b.nonodewritten || ( b.noiterationnum && m.readnodefile ) ) {
+        if ( !b.quiet ) {
             printf("NOT writing vertices.\n");
         }
-        numbernodes(&m, &b);
+        numbernodes(& m, & b);
     } else {
-        writenodes(&m, &b, &out->pointlist, &out->pointattributelist,
-                &out->pointmarkerlist);
+        writenodes(& m, & b, & out->pointlist, & out->pointattributelist,
+                   & out->pointmarkerlist);
     }
 
     // Simp. always write the triangles.
-    writeelements(&m, &b, &out->trianglelist, &out->triangleattributelist);
+    writeelements(& m, & b, & out->trianglelist, & out->triangleattributelist);
 
-    if (b.poly || b.convex) {
-        writepoly(&m, &b, &out->segmentlist, &out->segmentmarkerlist);
+    if ( b.poly || b.convex ) {
+        writepoly(& m, & b, & out->segmentlist, & out->segmentmarkerlist);
         out->numberofholes = m.holes;
         out->numberofregions = m.regions;
-        if (b.poly) {
+        if ( b.poly ) {
             out->holelist = in->holelist;
             out->regionlist = in->regionlist;
         } else {
-            out->holelist = (REAL *) NULL;
-            out->regionlist = (REAL *) NULL;
+            out->holelist = ( REAL * ) NULL;
+            out->regionlist = ( REAL * ) NULL;
         }
     }
-    if (b.edgesout) {
-        writeedges(&m, &b, &out->edgelist, &out->edgemarkerlist);
+    if ( b.edgesout ) {
+        writeedges(& m, & b, & out->edgelist, & out->edgemarkerlist);
     }
     // Simp. no voronoi
-    if (b.neighbors) {
-        writeneighbors(&m, &b, &out->neighborlist);
+    if ( b.neighbors ) {
+        writeneighbors(& m, & b, & out->neighborlist);
     }
     // Simp. No statistics.
-    if (b.docheck) {
-        checkmesh(&m, &b);
-        checkdelaunay(&m, &b);
+    if ( b.docheck ) {
+        checkmesh(& m, & b);
+        checkdelaunay(& m, & b);
     }
-    triangledeinit(&m, &b);
+    triangledeinit(& m, & b);
 }
-
 }
 
 // Convenience function.
@@ -385,12 +386,11 @@ void clearTriangulateIO(struct triangulateio &t)
 #endif
 
 namespace oofem {
-
 bool TriangleMesherInterface :: meshPSLG(const Triangle_PSLG &pslg,
-        const IntArray &outside, const IntArray &inside,
-        std::vector<FloatArray> &nodes, std::vector<IntArray> &n_markers,
-        std::vector<IntArray> &triangles, IntArray &t_markers,
-        std::vector<IntArray> &segments, IntArray &s_markers) const
+                                         const IntArray &outside, const IntArray &inside,
+                                         std :: vector< FloatArray > &nodes, std :: vector< IntArray > &n_markers,
+                                         std :: vector< IntArray > &triangles, IntArray &t_markers,
+                                         std :: vector< IntArray > &segments, IntArray &s_markers) const
 {
 #ifdef __TRIANGLE_MODULE
     // 1. Fill the struct for triangle;
@@ -399,96 +399,96 @@ bool TriangleMesherInterface :: meshPSLG(const Triangle_PSLG &pslg,
 
     // 1.a. Copy over the node data.
     mesh.numberofpoints = pslg.nx.giveSize();
-    mesh.pointlist = new REAL[mesh.numberofpoints*2];
+    mesh.pointlist = new REAL [ mesh.numberofpoints * 2 ];
     //mesh.pointmarkerlist = new REAL[mesh.numberofpoints];
-    for (int i = 0; i < mesh.numberofpoints; ++i) {
-        mesh.pointlist[i*2] = pslg.nx(i);
-        mesh.pointlist[i*2+1] = pslg.ny(i);
+    for ( int i = 0; i < mesh.numberofpoints; ++i ) {
+        mesh.pointlist [ i * 2 ] = pslg.nx(i);
+        mesh.pointlist [ i * 2 + 1 ] = pslg.ny(i);
         //mesh.pointmarkerlist[i] = pslg.n_marker(i);
     }
 
     // 1.b. Copy over the segment data
     printf("Copying segment data\n");
     mesh.numberofsegments = pslg.segment_a.giveSize();
-    mesh.segmentlist = new int[mesh.numberofsegments*2];
-    for (int i = 0; i < mesh.numberofsegments; ++i) {
-        mesh.segmentlist[i*2] = pslg.segment_a(i);
-        mesh.segmentlist[i*2+1] = pslg.segment_b(i);
+    mesh.segmentlist = new int [ mesh.numberofsegments * 2 ];
+    for ( int i = 0; i < mesh.numberofsegments; ++i ) {
+        mesh.segmentlist [ i * 2 ] = pslg.segment_a(i);
+        mesh.segmentlist [ i * 2 + 1 ] = pslg.segment_b(i);
     }
 
-    if (pslg.segment_marker.giveSize() > 0) {
-        mesh.segmentmarkerlist = new int[mesh.numberofsegments];
-        for (int i = 0; i < mesh.numberofsegments; ++i) {
-            mesh.segmentmarkerlist[i] = pslg.segment_marker(i);
+    if ( pslg.segment_marker.giveSize() > 0 ) {
+        mesh.segmentmarkerlist = new int [ mesh.numberofsegments ];
+        for ( int i = 0; i < mesh.numberofsegments; ++i ) {
+            mesh.segmentmarkerlist [ i ] = pslg.segment_marker(i);
         }
     }
 
     // 2. Triangulate
-    char options[100];
+    char options [ 100 ];
     // Note: Not sure if -A is necessary when using the library interface.
-    sprintf(options, "-p -q %f -a%f %s -A",this->minAngle, this->maxArea, this->quadratic ? "-o2":"");
+    sprintf(options, "-p -q %f -a%f %s -A", this->minAngle, this->maxArea, this->quadratic ? "-o2" : "");
     struct triangulateio output;
     clearTriangulateIO(output);
-    custom_triangulate (options, &mesh, &output, NULL, outside.givePointer(), inside.givePointer());
+    custom_triangulate( options, & mesh, & output, NULL, outside.givePointer(), inside.givePointer() );
 
     // 3. Copy back
     nodes.resize(output.numberofpoints);
     //n_markers.resize(output.numberofpoints);
-    for (int i = 0; i < output.numberofpoints; ++i) {
-        nodes[i].resize(2);
-        nodes[i].at(1) = output.pointlist[i*2];
-        nodes[i].at(2) = output.pointlist[i*2+1];
+    for ( int i = 0; i < output.numberofpoints; ++i ) {
+        nodes [ i ].resize(2);
+        nodes [ i ].at(1) = output.pointlist [ i * 2 ];
+        nodes [ i ].at(2) = output.pointlist [ i * 2 + 1 ];
         //n_markers(i) = output.pointmarkerlist[i]; // Not enough.
     }
 
     triangles.resize(output.numberoftriangles);
     t_markers.resize(output.numberoftriangles);
-    for (int i = 0; i < output.numberoftriangles; ++i) {
-        IntArray &triangle = triangles[i];
+    for ( int i = 0; i < output.numberoftriangles; ++i ) {
+        IntArray &triangle = triangles [ i ];
         triangle.resize(output.numberofcorners);
-        for (int j = 0; j < 3; j++) { // First three
-            triangle(j) = output.trianglelist[i*output.numberofcorners + j];
+        for ( int j = 0; j < 3; j++ ) { // First three
+            triangle(j) = output.trianglelist [ i * output.numberofcorners + j ];
         }
         // Rearrange the strange ordering of the edge nodes.
-        if (output.numberofcorners == 6) {
-            triangle(3) = output.trianglelist[i*output.numberofcorners + 5];
-            triangle(4) = output.trianglelist[i*output.numberofcorners + 3];
-            triangle(5) = output.trianglelist[i*output.numberofcorners + 4];
+        if ( output.numberofcorners == 6 ) {
+            triangle(3) = output.trianglelist [ i * output.numberofcorners + 5 ];
+            triangle(4) = output.trianglelist [ i * output.numberofcorners + 3 ];
+            triangle(5) = output.trianglelist [ i * output.numberofcorners + 4 ];
         }
-        t_markers.at(i+1) = (int)round(output.triangleattributelist[i]);
+        t_markers.at(i + 1) = ( int ) round(output.triangleattributelist [ i ]);
     }
 
     // A somewhat annoying missing feature of triangle, it won't make the segments quadratic.
-    std::set< std::size_t > *node_triangle = NULL;
-    if (this->quadratic) {
-        node_triangle = new std::set< std::size_t >[output.numberofpoints];
-        for (std::size_t i = 0; i < triangles.size(); ++i) {
-            IntArray &triangle = triangles[i];
-            for (int j = 1; j <= 3; ++j) {
-                node_triangle[triangle.at(j)-1].insert(i);
+    std :: set< std :: size_t > *node_triangle = NULL;
+    if ( this->quadratic ) {
+        node_triangle = new std :: set< std :: size_t > [ output.numberofpoints ];
+        for ( std :: size_t i = 0; i < triangles.size(); ++i ) {
+            IntArray &triangle = triangles [ i ];
+            for ( int j = 1; j <= 3; ++j ) {
+                node_triangle [ triangle.at(j) - 1 ].insert(i);
             }
         }
     }
 
     segments.resize(output.numberofsegments);
     s_markers.resize(output.numberofsegments);
-    for (int i = 0; i < output.numberofsegments; ++i) {
-        IntArray &segment = segments[i];
-        segment.resize(this->quadratic ? 3:2);
-        segment.at(1) = output.segmentlist[i*2 + 0];
-        segment.at(2) = output.segmentlist[i*2 + 1];
+    for ( int i = 0; i < output.numberofsegments; ++i ) {
+        IntArray &segment = segments [ i ];
+        segment.resize(this->quadratic ? 3 : 2);
+        segment.at(1) = output.segmentlist [ i * 2 + 0 ];
+        segment.at(2) = output.segmentlist [ i * 2 + 1 ];
         //segment->at(3) = output.segmentlist[i*3 + 2]; // Quadratic meshes only, not for segments.
-        if (this->quadratic) {
+        if ( this->quadratic ) {
             int a, b, c;
-            std::set< std::size_t > tris = node_triangle[segment.at(1)-1];
+            std :: set< std :: size_t >tris = node_triangle [ segment.at(1) - 1 ];
             // Now look up any triangle with the other point included.
-            for (std::set< std::size_t >::iterator it = tris.begin(); it != tris.end(); ++it) {
-                IntArray &triangle = triangles[*it];
-                if ( (b = triangle.findFirstIndexOf(segment.at(2))) > 0) {
-                    a = triangle.findFirstIndexOf(segment.at(1));
-                    if (a+b == 3) {
+            for ( std :: set< std :: size_t > :: iterator it = tris.begin(); it != tris.end(); ++it ) {
+                IntArray &triangle = triangles [ * it ];
+                if ( ( b = triangle.findFirstIndexOf( segment.at(2) ) ) > 0 ) {
+                    a = triangle.findFirstIndexOf( segment.at(1) );
+                    if ( a + b == 3 ) {
                         c = 4;
-                    } else if (a+b == 5) {
+                    } else if ( a + b == 5 ) {
                         c = 5;
                     } else {
                         c = 6;
@@ -498,9 +498,9 @@ bool TriangleMesherInterface :: meshPSLG(const Triangle_PSLG &pslg,
                 }
             }
         }
-        s_markers.at(i+1) = output.segmentmarkerlist[i];
+        s_markers.at(i + 1) = output.segmentmarkerlist [ i ];
     }
-    if (this->quadratic) {
+    if ( this->quadratic ) {
         delete[] node_triangle;
     }
 
@@ -536,20 +536,20 @@ bool TriangleMesherInterface :: meshPSLG(const Triangle_PSLG &pslg,
     return true;
 }
 
-void TriangleMesherInterface :: fixNodeMarkers(const std::vector<FloatArray> &nodes, std::vector<IntArray> &n_markers,
-        const std::vector<IntArray> &triangles, const IntArray &t_markers,
-        const std::vector<IntArray> &segments, const IntArray &s_markers)
+void TriangleMesherInterface :: fixNodeMarkers(const std :: vector< FloatArray > &nodes, std :: vector< IntArray > &n_markers,
+                                               const std :: vector< IntArray > &triangles, const IntArray &t_markers,
+                                               const std :: vector< IntArray > &segments, const IntArray &s_markers)
 {
-    n_markers.resize(nodes.size());
+    n_markers.resize( nodes.size() );
 
-    for (std::size_t i = 0; i < segments.size(); ++i) {
-        for (int j = 1; j <= segments[i].giveSize(); ++j) {
-            n_markers[segments[i].at(j)-1].insertSortedOnce(s_markers(i));
+    for ( std :: size_t i = 0; i < segments.size(); ++i ) {
+        for ( int j = 1; j <= segments [ i ].giveSize(); ++j ) {
+            n_markers [ segments [ i ].at(j) - 1 ].insertSortedOnce( s_markers(i) );
         }
     }
-    for (std::size_t i = 0; i < triangles.size(); ++i) {
-        for (int j = 1; j <= triangles[i].giveSize(); ++j) {
-            n_markers[triangles[i].at(j)-1].insertSortedOnce(t_markers(i));
+    for ( std :: size_t i = 0; i < triangles.size(); ++i ) {
+        for ( int j = 1; j <= triangles [ i ].giveSize(); ++j ) {
+            n_markers [ triangles [ i ].at(j) - 1 ].insertSortedOnce( t_markers(i) );
         }
     }
 }
@@ -560,10 +560,10 @@ void TriangleMesherInterface :: simplifyPSLG(Triangle_PSLG &coarse, const Triang
     int nodes = pslg.nx.giveSize();
 
     // Calculate the inverted connection node->element
-    std::set<int> *connectivity = new std::set<int>[nodes];
-    for (int i = 0; i < segments; i++) {
-        connectivity[pslg.segment_a(i)-1].insert(i+1);
-        connectivity[pslg.segment_b(i)-1].insert(i+1);
+    std :: set< int > *connectivity = new std :: set< int > [ nodes ];
+    for ( int i = 0; i < segments; i++ ) {
+        connectivity [ pslg.segment_a(i) - 1 ].insert(i + 1);
+        connectivity [ pslg.segment_b(i) - 1 ].insert(i + 1);
     }
 
     // Some conservative error measure
@@ -578,42 +578,42 @@ void TriangleMesherInterface :: simplifyPSLG(Triangle_PSLG &coarse, const Triang
     error_x.zero();
     error_y.zero();
 
-    for (int j = 0; j < 2; ++j) {
-        double allowed = j*limit/2;
-        for (int i = 1; i <= nodes; i++) {
-            std::set<int> &elems = connectivity[i-1];
+    for ( int j = 0; j < 2; ++j ) {
+        double allowed = j * limit / 2;
+        for ( int i = 1; i <= nodes; i++ ) {
+            std :: set< int > &elems = connectivity [ i - 1 ];
 #if 1
-            if (elems.size() < 2) {
+            if ( elems.size() < 2 ) {
                 // Lone nodes or edges are removed. It is up for discussion whether or not this is a wanted.
                 nodeRemoval.at(i) = true;
-                if (elems.size() == 1) {
-                    int e0 = *elems.begin();
+                if ( elems.size() == 1 ) {
+                    int e0 = * elems.begin();
                     edgeRemoval.at(e0) = true;
                     // Find the other node and remove segment e0 from it;
                     int n1 = seg_a.at(e0) == i ? seg_b.at(e0) : seg_a.at(e0);
-                    connectivity[n1-1].erase(e0);
+                    connectivity [ n1 - 1 ].erase(e0);
                     elems.clear();
                     /*printf("Removing edge %d and node = %d\n", e0, n1);
-                    while (connectivity[n1-1].size() < 2) {
-                        nodeRemoval.at(n1) = true;
-                        if (connectivity[n1-1].size() == 1) {
-                            e0 = *connectivity[n1-1].begin();
-                            edgeRemoval.at(e0) = true;
-                            connectivity[n1-1].clear();
-                            n1 = seg_a.at(e0) == i ? seg_b.at(e0) : seg_a.at(e0);
-                            connectivity[n1-1].erase(e0);
-                        } else {
-                            OOFEM_WARNING("HAPPENS ONCE!");
-                            break;
-                        }
-                    }*/
+                     * while (connectivity[n1-1].size() < 2) {
+                     *  nodeRemoval.at(n1) = true;
+                     *  if (connectivity[n1-1].size() == 1) {
+                     *      e0 = *connectivity[n1-1].begin();
+                     *      edgeRemoval.at(e0) = true;
+                     *      connectivity[n1-1].clear();
+                     *      n1 = seg_a.at(e0) == i ? seg_b.at(e0) : seg_a.at(e0);
+                     *      connectivity[n1-1].erase(e0);
+                     *  } else {
+                     *      OOFEM_WARNING("HAPPENS ONCE!");
+                     *      break;
+                     *  }
+                     * }*/
                 }
-            } else 
+            } else
 #endif
-            if (elems.size() == 2) {
-                int e0 = *elems.begin();
-                int e1 = *(++elems.begin());
-                if (pslg.segment_marker.at(e0) == pslg.segment_marker.at(e1)) {
+            if ( elems.size() == 2 ) {
+                int e0 = * elems.begin();
+                int e1 = * ( ++elems.begin() );
+                if ( pslg.segment_marker.at(e0) == pslg.segment_marker.at(e1) ) {
                     double abac, acac;
                     int n0, n1, n2;
 
@@ -630,36 +630,36 @@ void TriangleMesherInterface :: simplifyPSLG(Triangle_PSLG &coarse, const Triang
                     acac = ac.computeSquaredNorm();
 
                     // Find the error (how far the point would be moved to obtain the following line without it).
-                    if (abac <= 0 || acac == 0) { // then -ab
+                    if ( abac <= 0 || acac == 0 ) { // then -ab
                         err_vec(0) = -ab(0);
                         err_vec(1) = -ab(1);
-                    } else if (abac >= acac) { // then bc
+                    } else if ( abac >= acac ) { // then bc
                         err_vec(0) = pslg.nx.at(n2) - pslg.nx.at(n1);
                         err_vec(1) = pslg.ny.at(n2) - pslg.ny.at(n1);
                     } else {
                         err_vec = ac;
-                        err_vec.times(abac/acac);
+                        err_vec.times(abac / acac);
                         err_vec.subtract(ab);
                     }
 
                     double ev_norm = err_vec.computeNorm();
                     // Max of new or old error;
                     double real_error = 0.0;
-                    if (ev_norm == 0) {
+                    if ( ev_norm == 0 ) {
                         real_error = 0.0;
                     } else {
                         error_x.at(n1) += err_vec(0);
                         error_y.at(n1) += err_vec(1);
-                        real_error = sqrt(error_x.at(n1)*error_x.at(n1) + error_y.at(n1)*error_y.at(n1));
+                        real_error = sqrt( error_x.at(n1) * error_x.at(n1) + error_y.at(n1) * error_y.at(n1) );
                     }
 
-                    if (real_error <= allowed) {
+                    if ( real_error <= allowed ) {
                         // Mark node for removal, remove second edge, more first edge connection to next node;
                         nodeRemoval.at(i) = true;
                         edgeRemoval.at(e1) = true;
-                        connectivity[n2-1].erase(e1);
-                        connectivity[n2-1].insert(e0);
-                        if (seg_a.at(e0) == n1) { // Doing the bothersome way to preserve direction of segments.
+                        connectivity [ n2 - 1 ].erase(e1);
+                        connectivity [ n2 - 1 ].insert(e0);
+                        if ( seg_a.at(e0) == n1 ) { // Doing the bothersome way to preserve direction of segments.
                             seg_a.at(e0) = n2;
                         } else {
                             seg_b.at(e0) = n2;
@@ -678,14 +678,14 @@ void TriangleMesherInterface :: simplifyPSLG(Triangle_PSLG &coarse, const Triang
 
     // Deleting the elements which are too short.
     bool edgeRemoved = true;
-    while (edgeRemoved) {
+    while ( edgeRemoved ) {
         edgeRemoved = false;
-        for (int i = 1; i <= nodes; i++) {
-            std::set<int> &elems = connectivity[i-1];
-            if (elems.size() == 2) {
-                int e0 = *elems.begin();
-                int e1 = *(++elems.begin());
-                if (pslg.segment_marker.at(e0) == pslg.segment_marker.at(e1)) {
+        for ( int i = 1; i <= nodes; i++ ) {
+            std :: set< int > &elems = connectivity [ i - 1 ];
+            if ( elems.size() == 2 ) {
+                int e0 = * elems.begin();
+                int e1 = * ( ++elems.begin() );
+                if ( pslg.segment_marker.at(e0) == pslg.segment_marker.at(e1) ) {
                     int n0, n1, n2;
 
                     n0 = seg_a.at(e0) == i ? seg_b.at(e0) : seg_a.at(e0);
@@ -697,13 +697,13 @@ void TriangleMesherInterface :: simplifyPSLG(Triangle_PSLG &coarse, const Triang
                     bc(0) = pslg.nx.at(n2) - pslg.nx.at(n1);
                     bc(1) = pslg.ny.at(n2) - pslg.ny.at(n1);
 
-                    if (ab.computeSquaredNorm() < minlen*minlen || bc.computeSquaredNorm() < minlen*minlen ) {
+                    if ( ab.computeSquaredNorm() < minlen * minlen || bc.computeSquaredNorm() < minlen * minlen ) {
                         // Mark node for removal, remove second edge, more first edge connection to next node;
                         nodeRemoval.at(i) = true;
                         edgeRemoval.at(e1) = true;
-                        connectivity[n2-1].erase(e1);
-                        connectivity[n2-1].insert(e0);
-                        if (seg_a.at(e0) == n1) { // Doing the bothersome way to preserve direction of segments.
+                        connectivity [ n2 - 1 ].erase(e1);
+                        connectivity [ n2 - 1 ].insert(e0);
+                        if ( seg_a.at(e0) == n1 ) { // Doing the bothersome way to preserve direction of segments.
                             seg_a.at(e0) = n2;
                         } else {
                             seg_b.at(e0) = n2;
@@ -718,11 +718,11 @@ void TriangleMesherInterface :: simplifyPSLG(Triangle_PSLG &coarse, const Triang
 
 
     // Remove simple double-connections like o<--->o
-    for (int i = 1; i <= nodes; i++) {
-        std::set<int> &elems = connectivity[i-1];
+    for ( int i = 1; i <= nodes; i++ ) {
+        std :: set< int > &elems = connectivity [ i - 1 ];
         if ( elems.size() == 2 ) {
-            int e0 = *elems.begin();
-            int e1 = *(++elems.begin());
+            int e0 = * elems.begin();
+            int e1 = * ( ++elems.begin() );
             int n0 = seg_a.at(e0) == i ? seg_b.at(e0) : seg_a.at(e0);
             int n1 = i;
             int n2 = seg_a.at(e1) == i ? seg_b.at(e1) : seg_a.at(e1);
@@ -732,11 +732,11 @@ void TriangleMesherInterface :: simplifyPSLG(Triangle_PSLG &coarse, const Triang
                 nodeRemoval.at(n1) = true;
                 edgeRemoval.at(e0) = true;
                 edgeRemoval.at(e1) = true;
-                connectivity[n1-1].erase(e0);
-                connectivity[n1-1].erase(e1);
-                connectivity[n2-1].erase(e0);
-                connectivity[n2-1].erase(e1);
-                if (connectivity[n1-1].size() == 0) {
+                connectivity [ n1 - 1 ].erase(e0);
+                connectivity [ n1 - 1 ].erase(e1);
+                connectivity [ n2 - 1 ].erase(e0);
+                connectivity [ n2 - 1 ].erase(e1);
+                if ( connectivity [ n1 - 1 ].size() == 0 ) {
                     nodeRemoval.at(n2) = true;
                 }
             }
@@ -751,8 +751,8 @@ void TriangleMesherInterface :: simplifyPSLG(Triangle_PSLG &coarse, const Triang
     newNumber.zero();
     coarse.nx.resize(nodes);
     coarse.ny.resize(nodes);
-    for (int i = 1; i <= nodes; i++) {
-        if (!nodeRemoval.at(i)) {
+    for ( int i = 1; i <= nodes; i++ ) {
+        if ( !nodeRemoval.at(i) ) {
             newNodes++;
             coarse.nx.at(newNodes) = pslg.nx.at(i);
             coarse.ny.at(newNodes) = pslg.ny.at(i);
@@ -767,11 +767,11 @@ void TriangleMesherInterface :: simplifyPSLG(Triangle_PSLG &coarse, const Triang
     coarse.segment_b.resize(segments);
     coarse.segment_marker.resize(segments);
 
-    for (int i = 1; i <= segments; i++) {
-        if (!edgeRemoval.at(i)) {
+    for ( int i = 1; i <= segments; i++ ) {
+        if ( !edgeRemoval.at(i) ) {
             newSegments++;
-            coarse.segment_a.at(newSegments) = newNumber.at(seg_a.at(i));
-            coarse.segment_b.at(newSegments) = newNumber.at(seg_b.at(i));
+            coarse.segment_a.at(newSegments) = newNumber.at( seg_a.at(i) );
+            coarse.segment_b.at(newSegments) = newNumber.at( seg_b.at(i) );
             coarse.segment_marker.at(newSegments) = pslg.segment_marker.at(i);
         }
     }
@@ -779,5 +779,4 @@ void TriangleMesherInterface :: simplifyPSLG(Triangle_PSLG &coarse, const Triang
     coarse.segment_b.resize(newSegments);
     coarse.segment_marker.resize(newSegments);
 }
-
 };

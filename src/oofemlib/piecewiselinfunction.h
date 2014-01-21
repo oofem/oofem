@@ -36,7 +36,7 @@
 #define piecewiselinfunction_h
 
 #include "floatarray.h"
-#include "loadtimefunction.h"
+#include "function.h"
 
 ///@name Input fields for PiecewiseLinFunction
 //@{
@@ -48,13 +48,12 @@
 //@}
 
 namespace oofem {
-
 /**
  * This class implements a piecewise linear function.
  * The function is defined by 'numberOfPoints' points. 'dates' and 'values'
  * store respectively the abscissas (t) and the values (f(t)) of the points
  */
-class OOFEM_EXPORT PiecewiseLinFunction : public LoadTimeFunction
+class OOFEM_EXPORT PiecewiseLinFunction : public Function
 {
 protected:
     FloatArray dates;
@@ -66,16 +65,15 @@ public:
 
     virtual IRResultType initializeFrom(InputRecord *ir);
     virtual void giveInputRecord(DynamicInputRecord &input);
-    virtual classType giveClassID() const { return PiecewiceClass; }
     virtual const char *giveClassName() const { return "PiecewiceLinFunction"; }
     virtual const char *giveInputRecordName() const { return _IFT_PiecewiseLinFunction_Name; }
 
     virtual contextIOResultType saveContext(DataStream *stream, ContextMode mode, void *obj = NULL);
     virtual contextIOResultType restoreContext(DataStream *stream, ContextMode mode, void *obj = NULL);
 
-    virtual double __at(double);
-    virtual double __derAt(double);
-    virtual double __accelAt(double) { return 0.; }
+    virtual double evaluateAtTime(double t);
+    virtual double evaluateVelocityAtTime(double t);
+    virtual double evaluateAccelerationAtTime(double t) { return 0.; }
 };
 } // end namespace oofem
 #endif // piecewiselinfunction_h

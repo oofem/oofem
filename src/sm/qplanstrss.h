@@ -62,7 +62,6 @@ public:
     // definition & identification
     virtual const char *giveInputRecordName() const { return _IFT_QPlaneStress2d_Name; }
     virtual const char *giveClassName() const { return "QPlaneStress2d"; }
-    virtual classType giveClassID() const { return QPlaneStress2dClass; }
     virtual FEInterpolation *giveInterpolation() const { return & interpolation; }
     virtual MaterialMode giveMaterialMode() { return _PlaneStress; }
 

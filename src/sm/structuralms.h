@@ -143,12 +143,10 @@ public:
     void letTempFVectorBe(const FloatArray &v) { tempFVector = v; }
 
     virtual const char *giveClassName() const { return "StructuralMaterialStatus"; }
-    virtual classType giveClassID() const { return StructuralMaterialStatusClass; }
 
     /// Functions for MaterialStatusMapperInterface
-	virtual void copyStateVariables(const MaterialStatus &iStatus);
-	virtual void addStateVariables(const MaterialStatus &iStatus);
-
+    virtual void copyStateVariables(const MaterialStatus &iStatus);
+    virtual void addStateVariables(const MaterialStatus &iStatus);
 };
 } // end namespace oofem
 #endif // structuralms_h

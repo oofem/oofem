@@ -87,7 +87,7 @@ StructuralMaterial :: giveRealStressVector(FloatArray &answer, GaussPoint *gp, c
 void
 StructuralMaterial :: giveRealStressVector_3d(FloatArray &answer, GaussPoint *gp, const FloatArray &reducedStrain, TimeStep *tStep)
 {
-    OOFEM_ERROR2("%s :: giveRealStressVector_3d - 3d mode not supported", this->giveClassName());
+    OOFEM_ERROR2( "%s :: giveRealStressVector_3d - 3d mode not supported", this->giveClassName() );
 }
 
 
@@ -490,7 +490,7 @@ StructuralMaterial :: give_dPdF_from(const FloatMatrix &dSdE, FloatMatrix &answe
 void
 StructuralMaterial :: giveStiffnessMatrix(FloatMatrix &answer,
                                           MatResponseMode rMode,
-                                          GaussPoint *gp, TimeStep *atTime)
+                                          GaussPoint *gp, TimeStep *tStep)
 //
 // Returns characteristic material stiffness matrix of the receiver
 //
@@ -498,26 +498,26 @@ StructuralMaterial :: giveStiffnessMatrix(FloatMatrix &answer,
     MaterialMode mMode = gp->giveMaterialMode();
     switch ( mMode ) {
     case _3dMat:
-        this->give3dMaterialStiffnessMatrix(answer, rMode, gp, atTime);
+        this->give3dMaterialStiffnessMatrix(answer, rMode, gp, tStep);
         break;
     case _PlaneStress:
-        this->givePlaneStressStiffMtrx(answer, rMode, gp, atTime);
+        this->givePlaneStressStiffMtrx(answer, rMode, gp, tStep);
         break;
     case _PlaneStrain:
-        this->givePlaneStrainStiffMtrx(answer, rMode, gp, atTime);
+        this->givePlaneStrainStiffMtrx(answer, rMode, gp, tStep);
         break;
     case _1dMat:
-        this->give1dStressStiffMtrx(answer, rMode, gp, atTime);
+        this->give1dStressStiffMtrx(answer, rMode, gp, tStep);
         break;
 
     case _PlateLayer:
-        this->givePlateLayerStiffMtrx(answer, rMode, gp, atTime);
+        this->givePlateLayerStiffMtrx(answer, rMode, gp, tStep);
         break;
     case _2dBeamLayer:
-        this->give2dBeamLayerStiffMtrx(answer, rMode, gp, atTime);
+        this->give2dBeamLayerStiffMtrx(answer, rMode, gp, tStep);
         break;
     case _Fiber:
-        this->giveFiberStiffMtrx(answer, rMode, gp, atTime);
+        this->giveFiberStiffMtrx(answer, rMode, gp, tStep);
         break;
     default:
         OOFEM_ERROR2( "StructuralMaterial :: giveStiffnessMatrix : unknown mode (%s)", __MaterialModeToString(mMode) );
@@ -648,7 +648,7 @@ StructuralMaterial :: convert_S_2_P(FloatArray &answer, const FloatArray &reduce
 void
 StructuralMaterial :: giveStressDependentPartOfStrainVector(FloatArray &answer, GaussPoint *gp,
                                                             const FloatArray &reducedStrainVector,
-                                                            TimeStep *stepN, ValueModeType mode)
+                                                            TimeStep *tStep, ValueModeType mode)
 {
     /*
      * This functions subtract from reducedStrainVector its stress independent part
@@ -658,7 +658,7 @@ StructuralMaterial :: giveStressDependentPartOfStrainVector(FloatArray &answer, 
     StructuralCrossSection *cs = static_cast< StructuralCrossSection * >( gp->giveElement()->giveCrossSection() );
 
     answer = reducedStrainVector;
-    cs->computeStressIndependentStrainVector(epsilonTemperature, gp, stepN, mode);
+    cs->computeStressIndependentStrainVector(epsilonTemperature, gp, tStep, mode);
     if ( epsilonTemperature.giveSize() ) {
         answer.subtract(epsilonTemperature);
     }
@@ -894,14 +894,14 @@ void
 StructuralMaterial :: givePlaneStressStiffMtrx(FloatMatrix &answer,
                                                MatResponseMode mode,
                                                GaussPoint *gp,
-                                               TimeStep *atTime)
+                                               TimeStep *tStep)
 //
 // returns Mat stiffness for PlaneStress
 //
 {
     FloatMatrix m3d, invMat3d, invAnswer;
 
-    this->give3dMaterialStiffnessMatrix(m3d, mode, gp, atTime);
+    this->give3dMaterialStiffnessMatrix(m3d, mode, gp, tStep);
 
     invMat3d.beInverseOf(m3d);
 
@@ -927,14 +927,14 @@ void
 StructuralMaterial :: givePlaneStrainStiffMtrx(FloatMatrix &answer,
                                                MatResponseMode mode,
                                                GaussPoint *gp,
-                                               TimeStep *atTime)
+                                               TimeStep *tStep)
 //
 // return material stiffness matrix for PlaneStrain mode
 //
 {
     FloatMatrix m3d;
 
-    this->give3dMaterialStiffnessMatrix(m3d, mode, gp, atTime);
+    this->give3dMaterialStiffnessMatrix(m3d, mode, gp, tStep);
 
     answer.resize(4, 4);
     answer.zero();
@@ -961,7 +961,7 @@ void
 StructuralMaterial :: give1dStressStiffMtrx(FloatMatrix &answer,
                                             MatResponseMode mode,
                                             GaussPoint *gp,
-                                            TimeStep *atTime)
+                                            TimeStep *tStep)
 //
 // return material stiffness matrix for 1d stress strain mode
 //
@@ -969,7 +969,7 @@ StructuralMaterial :: give1dStressStiffMtrx(FloatMatrix &answer,
     FloatMatrix m3d, invMat3d;
     double val11;
 
-    this->give3dMaterialStiffnessMatrix(m3d, mode, gp, atTime);
+    this->give3dMaterialStiffnessMatrix(m3d, mode, gp, tStep);
 
     invMat3d.beInverseOf(m3d);
     val11 = invMat3d.at(1, 1);
@@ -980,16 +980,16 @@ StructuralMaterial :: give1dStressStiffMtrx(FloatMatrix &answer,
 
 void
 StructuralMaterial :: give2dBeamLayerStiffMtrx(FloatMatrix &answer,
-                                             MatResponseMode mode,
-                                             GaussPoint *gp,
-                                             TimeStep *atTime)
+                                               MatResponseMode mode,
+                                               GaussPoint *gp,
+                                               TimeStep *tStep)
 //
 // return material stiffness matrix for2dBeamLayer mode
 //
 {
     FloatMatrix m3d, invMat3d, invMatLayer(2, 2);
 
-    this->give3dMaterialStiffnessMatrix(m3d, mode, gp, atTime);
+    this->give3dMaterialStiffnessMatrix(m3d, mode, gp, tStep);
 
     invMat3d.beInverseOf(m3d);
 
@@ -1006,14 +1006,14 @@ void
 StructuralMaterial :: givePlateLayerStiffMtrx(FloatMatrix &answer,
                                               MatResponseMode mode,
                                               GaussPoint *gp,
-                                              TimeStep *atTime)
+                                              TimeStep *tStep)
 //
 // return material stiffness matrix for 2dPlateLayer
 //
 {
     FloatMatrix m3d, invMat3d, invMatLayer(5, 5);
 
-    this->give3dMaterialStiffnessMatrix(m3d, mode, gp, atTime);
+    this->give3dMaterialStiffnessMatrix(m3d, mode, gp, tStep);
 
     invMat3d.beInverseOf(m3d);
     //invMatLayer.beSubMatrixOf(invMat3d, indx, indx);
@@ -1044,14 +1044,14 @@ void
 StructuralMaterial :: giveFiberStiffMtrx(FloatMatrix &answer,
                                          MatResponseMode mode,
                                          GaussPoint *gp,
-                                         TimeStep *atTime)
+                                         TimeStep *tStep)
 //
 // return material stiffness matrix for 2dPlateLayer
 //
 {
     FloatMatrix m3d, invMat3d, invMatLayer(3, 3);
 
-    this->give3dMaterialStiffnessMatrix(m3d, mode, gp, atTime);
+    this->give3dMaterialStiffnessMatrix(m3d, mode, gp, tStep);
 
     invMat3d.beInverseOf(m3d);
 
@@ -1161,12 +1161,12 @@ StructuralMaterial :: computePrincipalValues(FloatArray &answer, const FloatArra
                  ( s.at(4) * s.at(4) + s.at(5) * s.at(5) + s.at(6) * s.at(6) );
             I3 = s.at(1) * s.at(2) * s.at(3) + 2. * s.at(4) * s.at(5) * s.at(6) -
                  ( s.at(1) * s.at(4) * s.at(4) + s.at(2) * s.at(5) * s.at(5) +
-                  s.at(3) * s.at(6) * s.at(6) );
+                   s.at(3) * s.at(6) * s.at(6) );
         } else if ( mode == principal_deviatoricstress ) {
             help = ( s.at(1) + s.at(2) + s.at(3) ) / 3.0;
             I1 = 0.;
             I2 = -( 1. / 6. ) * ( ( s.at(1) - s.at(2) ) * ( s.at(1) - s.at(2) ) + ( s.at(2) - s.at(3) ) * ( s.at(2) - s.at(3) ) +
-                                 ( s.at(3) - s.at(1) ) * ( s.at(3) - s.at(1) ) ) - s.at(4) * s.at(4) - s.at(5) * s.at(5) -
+                                  ( s.at(3) - s.at(1) ) * ( s.at(3) - s.at(1) ) ) - s.at(4) * s.at(4) - s.at(5) * s.at(5) -
                  s.at(6) * s.at(6);
             I3 = ( s.at(1) - help ) * ( s.at(2) - help ) * ( s.at(3) - help ) + 2. * s.at(4) * s.at(5) * s.at(6) -
                  s.at(5) * s.at(5) * ( s.at(2) - help ) - s.at(4) * s.at(4) * ( s.at(1) - help ) -
@@ -1177,7 +1177,7 @@ StructuralMaterial :: computePrincipalValues(FloatArray &answer, const FloatArra
                  0.25 * ( s.at(4) * s.at(4) + s.at(5) * s.at(5) + s.at(6) * s.at(6) );
             I3 = s.at(1) * s.at(2) * s.at(3) +
                  0.25 * ( s.at(4) * s.at(5) * s.at(6) - s.at(1) * s.at(4) * s.at(4) -
-                         s.at(2) * s.at(5) * s.at(5) - s.at(3) * s.at(6) * s.at(6) );
+                          s.at(2) * s.at(5) * s.at(5) - s.at(3) * s.at(6) * s.at(6) );
         } else {
             OOFEM_ERROR("StructuralMaterial :: ComputePrincipalValues: not supported");
         }
@@ -1659,9 +1659,9 @@ StructuralMaterial :: sortPrincDirAndValCloseTo(FloatArray *pVal, FloatMatrix *p
 
 
 int
-StructuralMaterial :: setIPValue(const FloatArray &value, GaussPoint *aGaussPoint, InternalStateType type)
+StructuralMaterial :: setIPValue(const FloatArray &value, GaussPoint *gp, InternalStateType type)
 {
-    StructuralMaterialStatus *status = static_cast< StructuralMaterialStatus * >( this->giveStatus(aGaussPoint) );
+    StructuralMaterialStatus *status = static_cast< StructuralMaterialStatus * >( this->giveStatus(gp) );
     if ( type == IST_StressTensor ) {
         status->letStressVectorBe(value);
         return 1;
@@ -1681,13 +1681,13 @@ StructuralMaterial :: setIPValue(const FloatArray &value, GaussPoint *aGaussPoin
 
 
 int
-StructuralMaterial :: giveIPValue(FloatArray &answer, GaussPoint *aGaussPoint, InternalStateType type, TimeStep *atTime)
+StructuralMaterial :: giveIPValue(FloatArray &answer, GaussPoint *gp, InternalStateType type, TimeStep *tStep)
 {
-    StructuralMaterialStatus *status = static_cast< StructuralMaterialStatus * >( this->giveStatus(aGaussPoint) );
+    StructuralMaterialStatus *status = static_cast< StructuralMaterialStatus * >( this->giveStatus(gp) );
     if ( type == IST_StressTensor ) {
-        StructuralMaterial :: giveFullSymVectorForm(answer, status->giveStressVector(), aGaussPoint->giveMaterialMode());
+        StructuralMaterial :: giveFullSymVectorForm( answer, status->giveStressVector(), gp->giveMaterialMode() );
         return 1;
-    } else if (type == IST_StressTensor_Reduced ) {
+    } else if ( type == IST_StressTensor_Reduced ) {
         answer = status->giveStressVector();
         return 1;
     } else if ( type == IST_vonMisesStress ) {
@@ -1697,13 +1697,13 @@ StructuralMaterial :: giveIPValue(FloatArray &answer, GaussPoint *aGaussPoint, I
         return 1;
     } else if ( type == IST_StrainTensor ) {
         ///@todo Fill in correct full form values here! This just adds zeros!
-        StructuralMaterial :: giveFullSymVectorForm(answer, status->giveStrainVector(), aGaussPoint->giveMaterialMode());
-        if(aGaussPoint->giveMaterialMode()==_PlaneStress){
-            double Nxy = this->give(NYxy, aGaussPoint);
-            double Nxz = this->give(NYxz, aGaussPoint);
-            double Nyz = this->give(NYyz, aGaussPoint);
-            double Nyx = Nxy*this->give(Ey, aGaussPoint)/this->give(Ex, aGaussPoint);
-            answer.at(3)=(-(Nxz+Nxy*Nyz)*answer.at(1)-(Nyz+Nxz*Nyx)*answer.at(2))/(1.-Nxy*Nyx);
+        StructuralMaterial :: giveFullSymVectorForm( answer, status->giveStrainVector(), gp->giveMaterialMode() );
+        if ( gp->giveMaterialMode() == _PlaneStress ) {
+            double Nxy = this->give(NYxy, gp);
+            double Nxz = this->give(NYxz, gp);
+            double Nyz = this->give(NYyz, gp);
+            double Nyx = Nxy * this->give(Ey, gp) / this->give(Ex, gp);
+            answer.at(3) = ( -( Nxz + Nxy * Nyz ) * answer.at(1) - ( Nyz + Nxz * Nyx ) * answer.at(2) ) / ( 1. - Nxy * Nyx );
         }
         return 1;
     } else if ( type == IST_StrainTensor_Reduced ) {
@@ -1712,21 +1712,21 @@ StructuralMaterial :: giveIPValue(FloatArray &answer, GaussPoint *aGaussPoint, I
         return 1;
     } else if ( type == IST_StressTensorTemp ) {
         ///@todo Fill in correct full form values here! This just adds zeros!
-        StructuralMaterial :: giveFullSymVectorForm(answer, status->giveTempStressVector(), aGaussPoint->giveMaterialMode());
+        StructuralMaterial :: giveFullSymVectorForm( answer, status->giveTempStressVector(), gp->giveMaterialMode() );
         return 1;
     } else if ( type == IST_StrainTensorTemp ) {
         ///@todo Fill in correct full form values here! This just adds zeros!
-        StructuralMaterial :: giveFullSymVectorForm(answer, status->giveTempStrainVector(), aGaussPoint->giveMaterialMode());
+        StructuralMaterial :: giveFullSymVectorForm( answer, status->giveTempStrainVector(), gp->giveMaterialMode() );
         return 1;
     } else if ( type == IST_PrincipalStressTensor || type == IST_PrincipalStressTempTensor ) {
         FloatArray s;
 
         if ( type == IST_PrincipalStressTensor ) {
             ///@todo Fill in correct full form values here! This just adds zeros!
-            StructuralMaterial :: giveFullSymVectorForm(s, status->giveStressVector(), aGaussPoint->giveMaterialMode());
+            StructuralMaterial :: giveFullSymVectorForm( s, status->giveStressVector(), gp->giveMaterialMode() );
         } else {
             ///@todo Fill in correct full form values here! This just adds zeros!
-            StructuralMaterial :: giveFullSymVectorForm(s, status->giveTempStressVector(), aGaussPoint->giveMaterialMode());
+            StructuralMaterial :: giveFullSymVectorForm( s, status->giveTempStressVector(), gp->giveMaterialMode() );
         }
 
         this->computePrincipalValues(answer, s, principal_stress);
@@ -1736,10 +1736,10 @@ StructuralMaterial :: giveIPValue(FloatArray &answer, GaussPoint *aGaussPoint, I
 
         if ( type == IST_PrincipalStrainTensor ) {
             ///@todo Fill in correct full form values here! This just adds zeros!
-            StructuralMaterial :: giveFullSymVectorForm(s, status->giveStrainVector(), aGaussPoint->giveMaterialMode());
+            StructuralMaterial :: giveFullSymVectorForm( s, status->giveStrainVector(), gp->giveMaterialMode() );
         } else {
             ///@todo Fill in correct full form values here! This just adds zeros!
-            StructuralMaterial :: giveFullSymVectorForm(s, status->giveTempStrainVector(), aGaussPoint->giveMaterialMode());
+            StructuralMaterial :: giveFullSymVectorForm( s, status->giveTempStrainVector(), gp->giveMaterialMode() );
         }
 
         this->computePrincipalValues(answer, s, principal_strain);
@@ -1752,9 +1752,9 @@ StructuralMaterial :: giveIPValue(FloatArray &answer, GaussPoint *aGaussPoint, I
         if ( ( tf = fm->giveField(FT_Temperature) ) ) {
             // temperature field registered
             FloatArray gcoords, et2;
-            static_cast< StructuralElement * >( aGaussPoint->giveElement() )->computeGlobalCoordinates( gcoords, * aGaussPoint->giveCoordinates() );
-            if ( ( err = tf->evaluateAt(answer, gcoords, VM_Total, atTime) ) ) {
-                OOFEM_ERROR3("StructuralMaterial :: giveIPValue: tf->evaluateAt failed, element %d, error code %d", aGaussPoint->giveElement()->giveNumber(), err);
+            static_cast< StructuralElement * >( gp->giveElement() )->computeGlobalCoordinates( gcoords, * gp->giveCoordinates() );
+            if ( ( err = tf->evaluateAt(answer, gcoords, VM_Total, tStep) ) ) {
+                OOFEM_ERROR3("StructuralMaterial :: giveIPValue: tf->evaluateAt failed, element %d, error code %d", gp->giveElement()->giveNumber(), err);
             }
         } else {
             answer.resize(1);
@@ -1765,7 +1765,7 @@ StructuralMaterial :: giveIPValue(FloatArray &answer, GaussPoint *aGaussPoint, I
     } else if ( type == IST_CylindricalStressTensor || type == IST_CylindricalStrainTensor ) {
         FloatArray gc, val = status->giveStressVector();
         FloatMatrix base(3, 3);
-        static_cast< StructuralElement * >( aGaussPoint->giveElement() )->computeGlobalCoordinates( gc, * aGaussPoint->giveCoordinates() );
+        static_cast< StructuralElement * >( gp->giveElement() )->computeGlobalCoordinates( gc, * gp->giveCoordinates() );
         double l = sqrt( gc.at(1) * gc.at(1) + gc.at(2) * gc.at(2) );
         if ( l > 1.e-4 ) {
             base.at(1, 1) = gc.at(1) / l;
@@ -1797,14 +1797,14 @@ StructuralMaterial :: giveIPValue(FloatArray &answer, GaussPoint *aGaussPoint, I
         answer = status->givePVector();
         return 1;
     } else {
-        return Material :: giveIPValue(answer, aGaussPoint, type, atTime);
+        return Material :: giveIPValue(answer, gp, type, tStep);
     }
-    return 0;
+
 }
 
 void
 StructuralMaterial :: computeStressIndependentStrainVector(FloatArray &answer,
-                                                           GaussPoint *gp, TimeStep *stepN, ValueModeType mode)
+                                                           GaussPoint *gp, TimeStep *tStep, ValueModeType mode)
 {
     FloatArray fullAnswer, et, e0, eigenstrain, answerTemper, answerEigenstrain;
     FloatMatrix GCS;
@@ -1818,20 +1818,20 @@ StructuralMaterial :: computeStressIndependentStrainVector(FloatArray &answer,
     answerTemper.resize(0);
     answerEigenstrain.resize(0);
 
-    if ( stepN->giveIntrinsicTime() < this->castingTime ) {
+    if ( tStep->giveIntrinsicTime() < this->castingTime ) {
         answer.zero();
         return;
     }
 
     //sum up all prescribed temperatures over an element
-    //elem->computeResultingIPTemperatureAt(et, stepN, gp, mode);
+    //elem->computeResultingIPTemperatureAt(et, tStep, gp, mode);
     if ( selem ) {
-        selem->computeResultingIPTemperatureAt(et, stepN, gp, mode);        // HUHU
+        selem->computeResultingIPTemperatureAt(et, tStep, gp, mode);        // HUHU
     }
 
     //sum up all prescribed eigenstrain over an element
     if ( selem ) {
-        selem->computeResultingIPEigenstrainAt(eigenstrain, stepN, gp, mode);
+        selem->computeResultingIPEigenstrainAt(eigenstrain, tStep, gp, mode);
     }
 
     if ( eigenstrain.giveSize() != 0 && eigenstrain.giveSize() != giveSizeOfVoigtSymVector(matmode) ) {
@@ -1847,7 +1847,7 @@ StructuralMaterial :: computeStressIndependentStrainVector(FloatArray &answer,
         FloatArray gcoords, et2;
         int err;
         elem->computeGlobalCoordinates( gcoords, * gp->giveCoordinates() );
-        if ( ( err = tf->evaluateAt(et2, gcoords, mode, stepN) ) ) {
+        if ( ( err = tf->evaluateAt(et2, gcoords, mode, tStep) ) ) {
             OOFEM_ERROR3("StructuralMaterial :: computeStressIndependentStrainVector: tf->evaluateAt failed, element %d, error code %d", elem->giveNumber(), err);
         }
 
@@ -1864,11 +1864,11 @@ StructuralMaterial :: computeStressIndependentStrainVector(FloatArray &answer,
     if ( et.giveSize() ) { //found temperature boundary conditions or prescribed field
         double thick, width;
 
-        this->giveThermalDilatationVector(e0, gp, stepN);
+        this->giveThermalDilatationVector(e0, gp, tStep);
 
         switch ( matmode ) {
         case _2dBeam:
-            thick = crossSection->give(CS_Thickness);
+            thick = crossSection->give(CS_Thickness, gp);
             answerTemper.resize(3);
             answerTemper.zero();
             answerTemper.at(1) = e0.at(1) * ( et.at(1) - this->giveReferenceTemperature() );
@@ -1878,8 +1878,8 @@ StructuralMaterial :: computeStressIndependentStrainVector(FloatArray &answer,
 
             break;
         case _3dBeam:
-            thick = crossSection->give(CS_Thickness);
-            width = crossSection->give(CS_Width);
+            thick = crossSection->give(CS_Thickness, gp);
+            width = crossSection->give(CS_Width, gp);
             answerTemper.resize(6);
             answerTemper.zero();
             answerTemper.at(1) = e0.at(1) * ( et.at(1) - this->giveReferenceTemperature() );
@@ -1892,7 +1892,7 @@ StructuralMaterial :: computeStressIndependentStrainVector(FloatArray &answer,
 
             break;
         case _2dPlate:
-            thick = crossSection->give(CS_Thickness);
+            thick = crossSection->give(CS_Thickness, gp);
             if ( et.giveSize() > 1 ) {
                 answerTemper.resize(5);
                 answerTemper.zero();
@@ -1905,7 +1905,7 @@ StructuralMaterial :: computeStressIndependentStrainVector(FloatArray &answer,
 
             break;
         case _3dShell:
-            thick = crossSection->give(CS_Thickness);
+            thick = crossSection->give(CS_Thickness, gp);
             answerTemper.resize(8);
             answerTemper.zero();
 
@@ -1970,10 +1970,16 @@ StructuralMaterial :: computeStressIndependentStrainVector(FloatArray &answer,
 void
 StructuralMaterial :: giveFullSymVectorForm(FloatArray &answer, const FloatArray &vec, MaterialMode matMode)
 {
-    IntArray indx;
-    answer.resize( StructuralMaterial :: giveVoigtSymVectorMask(indx, matMode) );
-    answer.zero();
-    answer.assemble(vec, indx);
+	if(vec.giveSize() == 6) {
+		// If we use default 3D implementation to treat e.g. plane strain.
+		answer = vec;
+	}
+	else {
+		IntArray indx;
+		answer.resize( StructuralMaterial :: giveVoigtSymVectorMask(indx, matMode) );
+		answer.zero();
+		answer.assemble(vec, indx);
+	}
 }
 
 
@@ -2018,9 +2024,15 @@ StructuralMaterial :: giveReducedSymVectorForm(FloatArray &answer, const FloatAr
 {
     IntArray indx;
     StructuralMaterial :: giveVoigtSymVectorMask(indx, matMode);
-    answer.resize( indx.giveSize() );
-    for ( int i = 1; i <= indx.giveSize(); i++ ) {
-        answer.at(i) = vec.at( indx.at(i) );
+
+    if(indx.giveSize() == vec.giveSize()) {
+    	answer = vec;
+    }
+    else {
+		answer.resize( indx.giveSize() );
+		for ( int i = 1; i <= indx.giveSize(); i++ ) {
+			answer.at(i) = vec.at( indx.at(i) );
+		}
     }
 }
 

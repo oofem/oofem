@@ -55,7 +55,7 @@ NLStructuralElement :: NLStructuralElement(int n, Domain *aDomain) :
 
 
 void
-NLStructuralElement :: computeDeformationGradientVector(FloatArray &answer, GaussPoint *gp, TimeStep *stepN)
+NLStructuralElement :: computeDeformationGradientVector(FloatArray &answer, GaussPoint *gp, TimeStep *tStep)
 {
     // Computes the deformation gradient in the Voigt format at the Gauss point gp of
     // the receiver at time step tStep.
@@ -63,7 +63,7 @@ NLStructuralElement :: computeDeformationGradientVector(FloatArray &answer, Gaus
 
     // Obtain the current displacement vector of the element and subtract initial displacements (if present)
     FloatArray u;
-    this->computeVectorOf(EID_MomentumBalance, VM_Total, stepN, u); // solution vector
+    this->computeVectorOf(EID_MomentumBalance, VM_Total, tStep, u); // solution vector
     if ( initialDisplacements ) {
         u.subtract(* initialDisplacements);
     }
@@ -126,7 +126,7 @@ NLStructuralElement :: giveInternalForcesVector(FloatArray &answer, TimeStep *tS
     this->computeVectorOf(EID_MomentumBalance, VM_Total, tStep, u);
     // subtract initial displacements, if defined
     if ( initialDisplacements ) {
-        u.subtract(*initialDisplacements);
+        u.subtract(* initialDisplacements);
     }
 
     // zero answer will resize accordingly when adding first contribution
@@ -145,7 +145,7 @@ NLStructuralElement :: giveInternalForcesVector(FloatArray &answer, TimeStep *tS
             } else {
                 ///@todo Is this really what we should do for inactive elements?
                 if ( !this->isActivated(tStep) ) {
-                    vStrain.resize( StructuralMaterial :: giveSizeOfVoigtSymVector(gp->giveMaterialMode()) );
+                    vStrain.resize( StructuralMaterial :: giveSizeOfVoigtSymVector( gp->giveMaterialMode() ) );
                     vStrain.zero();
                 }
                 vStrain.beProductOf(B, u);
@@ -178,7 +178,33 @@ NLStructuralElement :: giveInternalForcesVector(FloatArray &answer, TimeStep *tS
 
         // Compute nodal internal forces at nodes as f = B^T*Stress dV
         double dV  = this->computeVolumeAround(gp);
-        answer.plusProduct(B, vStress, dV);
+
+        if ( nlGeometry == 1 ) {  // First Piola-Kirchhoff stress
+			if(vStress.giveSize() == 9) {
+				FloatArray stressTemp;
+				StructuralMaterial::giveReducedVectorForm(stressTemp, vStress, gp->giveMaterialMode());
+				answer.plusProduct(B, stressTemp, dV);
+			}
+			else {
+				answer.plusProduct(B, vStress, dV);
+			}
+        }
+        else {
+			if(vStress.giveSize() == 6) {
+				// It may happen that e.g. plane strain is computed
+				// using the default 3D implementation. If so,
+				// the stress needs to be reduced.
+				// (Note that no reduction will take place if
+				//  the simulation is actually 3D.)
+				FloatArray stressTemp;
+				StructuralMaterial::giveReducedSymVectorForm(stressTemp, vStress, gp->giveMaterialMode());
+				answer.plusProduct(B, stressTemp, dV);
+			}
+			else {
+				answer.plusProduct(B, vStress, dV);
+			}
+        }
+
     }
 
     // If inactive: update fields but do not give any contribution to the internal forces
@@ -235,7 +261,7 @@ NLStructuralElement :: giveInternalForcesVector_withIRulesAsSubcells(FloatArray 
             } else if ( nlGeometry == 1 ) {
                 if ( this->domain->giveEngngModel()->giveFormulation() == AL ) { // Cauchy stress
                     if ( useUpdatedGpRecord == 1 ) {
-                         vStress = matStat->giveCVector();
+                        vStress = matStat->giveCVector();
                     } else {
                         this->computeCauchyStressVector(vStress, gp, tStep);
                     }
@@ -285,7 +311,7 @@ NLStructuralElement :: computeStiffnessMatrix(FloatMatrix &answer,
                                               MatResponseMode rMode, TimeStep *tStep)
 {
     StructuralCrossSection *cs = this->giveStructuralCrossSection();
-    bool matStiffSymmFlag = cs->isCharacteristicMtrxSymmetric( rMode );
+    bool matStiffSymmFlag = cs->isCharacteristicMtrxSymmetric(rMode);
 
     answer.resize(0, 0);
 
@@ -408,7 +434,7 @@ NLStructuralElement :: computeStiffnessMatrix_withIRulesAsSubcells(FloatMatrix &
                                                                    MatResponseMode rMode, TimeStep *tStep)
 {
     StructuralCrossSection *cs = this->giveStructuralCrossSection();
-    bool matStiffSymmFlag = cs->isCharacteristicMtrxSymmetric( rMode );
+    bool matStiffSymmFlag = cs->isCharacteristicMtrxSymmetric(rMode);
 
     answer.resize(0, 0);
     if ( !this->isActivated(tStep) ) {
@@ -532,9 +558,9 @@ NLStructuralElement :: initializeFrom(InputRecord *ir)
 
 void NLStructuralElement :: giveInputRecord(DynamicInputRecord &input)
 {
-	StructuralElement::giveInputRecord(input);
+    StructuralElement :: giveInputRecord(input);
 
-	input.setField(nlGeometry, _IFT_NLStructuralElement_nlgeoflag);
+    input.setField(nlGeometry, _IFT_NLStructuralElement_nlgeoflag);
 }
 
 int

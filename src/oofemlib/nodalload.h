@@ -40,7 +40,6 @@
 #include "valuemodetype.h"
 
 namespace oofem {
-
 ///@name Input fields for nodal loads
 //@{
 #define _IFT_NodalLoad_Name "nodalload"
@@ -84,15 +83,14 @@ public:
     NodalLoad(int n, Domain *d) : Load(n, d) { }
 
     virtual const char *giveInputRecordName() const { return _IFT_NodalLoad_Name; }
-    virtual void computeValueAt(FloatArray &answer, TimeStep *atTime, FloatArray &coords, ValueModeType mode)
-    { computeComponentArrayAt(answer, atTime, mode); }
+    virtual void computeValueAt(FloatArray &answer, TimeStep *tStep, FloatArray &coords, ValueModeType mode)
+    { computeComponentArrayAt(answer, tStep, mode); }
     virtual CoordSystType giveCoordSystMode() { return coordSystemType; }
 
     virtual IRResultType initializeFrom(InputRecord *ir);
     virtual void giveInputRecord(DynamicInputRecord &input);
     virtual const char *giveClassName() const { return "NodalLoad"; }
     virtual bcGeomType giveBCGeoType() const { return NodalLoadBGT; }
-    virtual classType giveClassID() const { return NodalLoadClass; }
 };
 } // end namespace oofem
 #endif // nodalload_h

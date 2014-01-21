@@ -34,23 +34,20 @@
 
 #include "deadweight.h"
 #include "timestep.h"
-#include "loadtimefunction.h"
+#include "function.h"
 #include "classfactory.h"
 
 namespace oofem {
+REGISTER_BoundaryCondition(DeadWeight);
 
-REGISTER_BoundaryCondition( DeadWeight );
-
-void DeadWeight :: computeValueAt(FloatArray& answer, TimeStep* atTime, FloatArray& coords, ValueModeType mode)
+void DeadWeight :: computeValueAt(FloatArray &answer, TimeStep *tStep, FloatArray &coords, ValueModeType mode)
 {
-    computeComponentArrayAt(answer, atTime, mode);
+    computeComponentArrayAt(answer, tStep, mode);
 }
 
-void DeadWeight :: setDeadWeighComponents(const FloatArray& newComponents)
+void DeadWeight :: setDeadWeighComponents(const FloatArray &newComponents)
 {
     this->componentArray.at(1) = newComponents.at(1);
     this->componentArray.at(2) = newComponents.at(2);
 }
-
-
 } // end namespace oofem

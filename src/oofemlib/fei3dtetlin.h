@@ -69,9 +69,9 @@ public:
     // Surface
     virtual void surfaceEvalN(FloatArray &answer, int isurf, const FloatArray &lcoords, const FEICellGeometry &cellgeo);
     virtual void surfaceEvaldNdx(FloatMatrix &answer, int isurf,
-                   const FloatArray &lcoords, const FEICellGeometry &cellgeo);
+                                 const FloatArray &lcoords, const FEICellGeometry &cellgeo);
     virtual double surfaceEvalNormal(FloatArray &answer, int isurf,
-                   const FloatArray &lcoords, const FEICellGeometry &cellgeo);
+                                     const FloatArray &lcoords, const FEICellGeometry &cellgeo);
     virtual void surfaceLocal2global(FloatArray &answer, int isurf,
                                      const FloatArray &lcoords, const FEICellGeometry &cellgeo);
     virtual double surfaceGiveTransformationJacobian(int isurf, const FloatArray &lcoords,
@@ -87,4 +87,3 @@ protected:
 };
 } // end namespace oofem
 #endif // fei3dtetlin_h
-

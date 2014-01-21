@@ -38,6 +38,7 @@
 #include <vector>
 #include <list>
 #include <string>
+#include "scalarfunction.h"
 
 #include "oofemcfg.h"
 
@@ -58,7 +59,7 @@ class Range;
 enum IRResultType { IRRT_OK = 0, IRRT_NOTFOUND, IRRT_BAD_FORMAT };
 
 /// Identifier of fields in input records.
-typedef const char * InputFieldType;
+typedef const char *InputFieldType;
 
 /**
  * Macro simplifying the error reporting.
@@ -119,6 +120,9 @@ public:
     /** Creates a newly allocated copy of the receiver */
     virtual InputRecord *GiveCopy() = 0;
 
+    /// Returns string representation of record in OOFEMs text format.
+    virtual std :: string giveRecordAsString() const = 0;
+
     /**@name Compulsory field extraction methods
      * Reads the field value identified by keyword
      * @param answer contains result
@@ -150,6 +154,8 @@ public:
     virtual IRResultType giveField(Dictionary &answer, InputFieldType id) = 0;
     /// Reads the std::list<Range> field value.
     virtual IRResultType giveField(std :: list< Range > &answer, InputFieldType id) = 0;
+    /// Reads the ScalarFunction field value.
+    virtual IRResultType giveField(ScalarFunction& function, InputFieldType id) = 0;
     //@}
 
     /**@name Optional field extraction methods
@@ -179,6 +185,8 @@ public:
     IRResultType giveOptionalField(Dictionary &answer, InputFieldType id);
     /// Reads the std::list<Range> field value.
     IRResultType giveOptionalField(std :: list< Range > &answer, InputFieldType id);
+    /// Reads the ScalarFunction field value.
+    IRResultType giveOptionalField(ScalarFunction& function, InputFieldType id);
     //@}
 
     /// Returns true if record contains field identified by idString keyword.
@@ -191,7 +199,7 @@ public:
 
     /// Prints the error message.
     virtual void report_error(const char *_class, const char *proc, InputFieldType id,
-                      IRResultType result, const char *file, int line) = 0;
+                              IRResultType result, const char *file, int line) = 0;
 
     /// Terminates the current record session and if the flag is true, warning is printed for unscanned tokens.
     virtual void finish(bool wrn = true) = 0;

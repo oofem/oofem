@@ -94,8 +94,8 @@ FEI3dTetLin :: evaldNdx(FloatMatrix &answer, const FloatArray &lcoords, const FE
     answer.at(3, 3) = -( ( x1 - x4 ) * ( y2 - y4 ) - ( x2 - x4 ) * ( y1 - y4 ) );
     answer.at(4, 3) = ( x2 - x1 ) * ( y3 - y1 ) - ( x3 - x1 ) * ( y2 - y1 );
 
-    answer.times( 1. / detJ );
-    
+    answer.times(1. / detJ);
+
     return detJ;
 }
 
@@ -107,7 +107,7 @@ FEI3dTetLin :: local2global(FloatArray &answer, const FloatArray &lcoords, const
 
     answer.resize(0);
     for ( int i = 1; i <= 4; i++ ) {
-        answer.add( n.at(i), *cellgeo.giveVertexCoordinates(i) );
+        answer.add( n.at(i), * cellgeo.giveVertexCoordinates(i) );
     }
 }
 
@@ -139,22 +139,22 @@ FEI3dTetLin :: global2local(FloatArray &answer, const FloatArray &coords, const 
     zp = coords.at(3);
 
     volume = ( ( x4 - x1 ) * ( y2 - y1 ) * ( z3 - z1 ) - ( x4 - x1 ) * ( y3 - y1 ) * ( z2 - z1 ) +
-              ( x3 - x1 ) * ( y4 - y1 ) * ( z2 - z1 ) - ( x2 - x1 ) * ( y4 - y1 ) * ( z3 - z1 ) +
-              ( x2 - x1 ) * ( y3 - y1 ) * ( z4 - z1 ) - ( x3 - x1 ) * ( y2 - y1 ) * ( z4 - z1 ) ) / 6.;
+               ( x3 - x1 ) * ( y4 - y1 ) * ( z2 - z1 ) - ( x2 - x1 ) * ( y4 - y1 ) * ( z3 - z1 ) +
+               ( x2 - x1 ) * ( y3 - y1 ) * ( z4 - z1 ) - ( x3 - x1 ) * ( y2 - y1 ) * ( z4 - z1 ) ) / 6.;
 
     answer.resize(4);
 
     answer.at(1) = ( ( x3 - x2 ) * ( yp - y2 ) * ( z4 - z2 ) - ( xp - x2 ) * ( y3 - y2 ) * ( z4 - z2 ) +
-                    ( x4 - x2 ) * ( y3 - y2 ) * ( zp - z2 ) - ( x4 - x2 ) * ( yp - y2 ) * ( z3 - z2 ) +
-                    ( xp - x2 ) * ( y4 - y2 ) * ( z3 - z2 ) - ( x3 - x2 ) * ( y4 - y2 ) * ( zp - z2 ) ) / 6. / volume;
+                     ( x4 - x2 ) * ( y3 - y2 ) * ( zp - z2 ) - ( x4 - x2 ) * ( yp - y2 ) * ( z3 - z2 ) +
+                     ( xp - x2 ) * ( y4 - y2 ) * ( z3 - z2 ) - ( x3 - x2 ) * ( y4 - y2 ) * ( zp - z2 ) ) / 6. / volume;
 
     answer.at(2) = ( ( x4 - x1 ) * ( yp - y1 ) * ( z3 - z1 ) - ( xp - x1 ) * ( y4 - y1 ) * ( z3 - z1 ) +
-                    ( x3 - x1 ) * ( y4 - y1 ) * ( zp - z1 ) - ( x3 - x1 ) * ( yp - y1 ) * ( z4 - z1 ) +
-                    ( xp - x1 ) * ( y3 - y1 ) * ( z4 - z1 ) - ( x4 - x1 ) * ( y3 - y1 ) * ( zp - z1 ) ) / 6. / volume;
+                     ( x3 - x1 ) * ( y4 - y1 ) * ( zp - z1 ) - ( x3 - x1 ) * ( yp - y1 ) * ( z4 - z1 ) +
+                     ( xp - x1 ) * ( y3 - y1 ) * ( z4 - z1 ) - ( x4 - x1 ) * ( y3 - y1 ) * ( zp - z1 ) ) / 6. / volume;
 
     answer.at(3) = ( ( x2 - x1 ) * ( yp - y1 ) * ( z4 - z1 ) - ( xp - x1 ) * ( y2 - y1 ) * ( z4 - z1 ) +
-                    ( x4 - x1 ) * ( y2 - y1 ) * ( zp - z1 ) - ( x4 - x1 ) * ( yp - y1 ) * ( z2 - z1 ) +
-                    ( xp - x1 ) * ( y4 - y1 ) * ( z2 - z1 ) - ( x2 - x1 ) * ( y4 - y1 ) * ( zp - z1 ) ) / 6. / volume;
+                     ( x4 - x1 ) * ( y2 - y1 ) * ( zp - z1 ) - ( x4 - x1 ) * ( yp - y1 ) * ( z2 - z1 ) +
+                     ( xp - x1 ) * ( y4 - y1 ) * ( z2 - z1 ) - ( x2 - x1 ) * ( y4 - y1 ) * ( zp - z1 ) ) / 6. / volume;
 
     // test if inside + clamping
     bool inside = true;
@@ -218,7 +218,7 @@ FEI3dTetLin :: edgeEvalN(FloatArray &answer, int iedge, const FloatArray &lcoord
 
 void
 FEI3dTetLin :: edgeEvaldNdx(FloatMatrix &answer, int iedge,
-                           const FloatArray &lcoords, const FEICellGeometry &cellgeo)
+                            const FloatArray &lcoords, const FEICellGeometry &cellgeo)
 {
     double coeff, l, x1, x2, y1, y2, z1, z2;
     IntArray edgeNodes;
@@ -245,7 +245,7 @@ FEI3dTetLin :: edgeEvaldNdx(FloatMatrix &answer, int iedge,
 
 void
 FEI3dTetLin :: edgeLocal2global(FloatArray &answer, int iedge,
-                               const FloatArray &lcoords, const FEICellGeometry &cellgeo)
+                                const FloatArray &lcoords, const FEICellGeometry &cellgeo)
 {
     IntArray edgeNodes;
     FloatArray n;
@@ -306,7 +306,7 @@ FEI3dTetLin :: computeLocalEdgeMapping(IntArray &edgeNodes, int iedge)
 double
 FEI3dTetLin :: edgeComputeLength(IntArray &edgeNodes, const FEICellGeometry &cellgeo)
 {
-    return cellgeo.giveVertexCoordinates(edgeNodes.at(2))->distance(cellgeo.giveVertexCoordinates(edgeNodes.at(1)));
+    return cellgeo.giveVertexCoordinates( edgeNodes.at(2) )->distance( cellgeo.giveVertexCoordinates( edgeNodes.at(1) ) );
 }
 
 void
@@ -321,7 +321,7 @@ FEI3dTetLin :: surfaceEvalN(FloatArray &answer, int isurf, const FloatArray &lco
 
 void
 FEI3dTetLin :: surfaceLocal2global(FloatArray &answer, int iedge,
-                                  const FloatArray &lcoords, const FEICellGeometry &cellgeo)
+                                   const FloatArray &lcoords, const FEICellGeometry &cellgeo)
 {
     double l1, l2, l3;
     answer.resize(3);
@@ -354,19 +354,19 @@ FEI3dTetLin :: surfaceEvaldNdx(FloatMatrix &answer, int isurf, const FloatArray 
     c = 1.0 - a - b;
     FloatArray lcoords_tet(4);
     lcoords_tet.at(isurf) = 0.0;
-    if (isurf == 1) {
+    if ( isurf == 1 ) {
         lcoords_tet.at(4) = a;
         lcoords_tet.at(3) = b;
         lcoords_tet.at(2) = c;
-    } else if (isurf == 2) {
+    } else if ( isurf == 2 ) {
         lcoords_tet.at(1) = a;
         lcoords_tet.at(3) = b;
         lcoords_tet.at(4) = c;
-    } else if (isurf == 3) {
+    } else if ( isurf == 3 ) {
         lcoords_tet.at(1) = a;
         lcoords_tet.at(4) = b;
         lcoords_tet.at(2) = c;
-    } else if (isurf == 4) {
+    } else if ( isurf == 4 ) {
         lcoords_tet.at(2) = a;
         lcoords_tet.at(3) = b;
         lcoords_tet.at(1) = c;
@@ -381,8 +381,8 @@ FEI3dTetLin :: surfaceEvalNormal(FloatArray &answer, int isurf, const FloatArray
     IntArray snodes(3);
     this->computeLocalSurfaceMapping(snodes, isurf);
 
-    a.beDifferenceOf(*cellgeo.giveVertexCoordinates(snodes.at(2)), *cellgeo.giveVertexCoordinates(snodes.at(1)));
-    b.beDifferenceOf(*cellgeo.giveVertexCoordinates(snodes.at(3)), *cellgeo.giveVertexCoordinates(snodes.at(1)));
+    a.beDifferenceOf( * cellgeo.giveVertexCoordinates( snodes.at(2) ), * cellgeo.giveVertexCoordinates( snodes.at(1) ) );
+    b.beDifferenceOf( * cellgeo.giveVertexCoordinates( snodes.at(3) ), * cellgeo.giveVertexCoordinates( snodes.at(1) ) );
     answer.beVectorProductOf(a, b);
 
     return answer.normalize();
@@ -390,7 +390,7 @@ FEI3dTetLin :: surfaceEvalNormal(FloatArray &answer, int isurf, const FloatArray
 
 double
 FEI3dTetLin :: surfaceGiveTransformationJacobian(int isurf, const FloatArray &lcoords,
-                                                const FEICellGeometry &cellgeo)
+                                                 const FEICellGeometry &cellgeo)
 {
     FloatArray c;
     return this->surfaceEvalNormal(c, isurf, lcoords, cellgeo);
@@ -433,13 +433,13 @@ FEI3dTetLin :: evalNXIntegral(int iEdge, const FEICellGeometry &cellgeo)
     IntArray fNodes;
     this->computeLocalSurfaceMapping(fNodes, iEdge);
 
-    const FloatArray &c1 = *cellgeo.giveVertexCoordinates(fNodes.at(1));
-    const FloatArray &c2 = *cellgeo.giveVertexCoordinates(fNodes.at(2));
-    const FloatArray &c3 = *cellgeo.giveVertexCoordinates(fNodes.at(3));
+    const FloatArray &c1 = * cellgeo.giveVertexCoordinates( fNodes.at(1) );
+    const FloatArray &c2 = * cellgeo.giveVertexCoordinates( fNodes.at(2) );
+    const FloatArray &c3 = * cellgeo.giveVertexCoordinates( fNodes.at(3) );
 
-    return ( (c2.at(1)*c3.at(2) - c3.at(1)*c2.at(2))*c1.at(3) + 
-             (c3.at(1)*c1.at(2) - c1.at(1)*c3.at(2))*c2.at(3) + 
-             (c1.at(1)*c2.at(2) - c2.at(1)*c1.at(2))*c3.at(3) ) * 0.5;
+    return ( ( c2.at(1) * c3.at(2) - c3.at(1) * c2.at(2) ) * c1.at(3) +
+             ( c3.at(1) * c1.at(2) - c1.at(1) * c3.at(2) ) * c2.at(3) +
+             ( c1.at(1) * c2.at(2) - c2.at(1) * c1.at(2) ) * c3.at(3) ) * 0.5;
 }
 
 IntegrationRule *

@@ -42,7 +42,7 @@
 ///@name Input fields for Gausspoint export module
 //@{
 // gpexportmodule consistent with the documentation
-#define _IFT_GPExportModule_Name "gpexportmodule" 
+#define _IFT_GPExportModule_Name "gpexportmodule"
 #define _IFT_GPExportModule_vartypes "vars"
 #define _IFT_GPExportModule_ncoords "ncoords"
 //@}
@@ -69,7 +69,7 @@ public:
     virtual ~GPExportModule();
 
     virtual IRResultType initializeFrom(InputRecord *ir);
-    virtual void doOutput(TimeStep *tStep, bool forcedOutput=false);
+    virtual void doOutput(TimeStep *tStep, bool forcedOutput = false);
     virtual void initialize();
     virtual void terminate();
     virtual const char *giveClassName() const { return "GPExportModule"; }
@@ -79,7 +79,6 @@ protected:
     /// Returns the output stream for given solution step
     FILE *giveOutputStream(TimeStep *tStep);
 };
-
 } // namespace oofem
 
 #endif // gpexportmodule_h_

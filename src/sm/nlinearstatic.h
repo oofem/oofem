@@ -140,7 +140,7 @@ public:
 
     virtual void printOutputAt(FILE *file, TimeStep *tStep);
 
-    virtual void updateComponent(TimeStep *tStep, NumericalCmpn, Domain *d);
+    virtual void updateComponent(TimeStep * tStep, NumericalCmpn, Domain * d);
     virtual void updateAttributes(MetaStep *mStep);
 
     virtual double giveUnknownComponent(ValueModeType type, TimeStep *tStep, Domain *d, Dof *dof);
@@ -155,15 +155,13 @@ public:
 
     // identification
     virtual const char *giveClassName() const { return "NonLinearStatic"; }
-    virtual classType giveClassID() const { return NonLinearStaticClass; }
-    virtual int isIncremental() { return 1; }
     virtual fMode giveFormulation() { return nonLinFormulation; }
     virtual int useNonlocalStiffnessOption() { return this->nonlocalStiffnessFlag; }
     /// For load balancing purposes we store all values so hash is computed from mode value only
-    virtual int giveUnknownDictHashIndx(ValueModeType mode, TimeStep *stepN) { return ( int ) mode; }
+    virtual int giveUnknownDictHashIndx(ValueModeType mode, TimeStep *tStep) { return ( int ) mode; }
 
 #ifdef __OOFEG
-    void showSparseMtrxStructure(int type, oofegGraphicContext &context, TimeStep *atTime);
+    void showSparseMtrxStructure(int type, oofegGraphicContext &context, TimeStep *tStep);
 #endif
 
 #ifdef __PARALLEL_MODE
@@ -174,13 +172,13 @@ public:
 
 #endif
 
-#ifdef __PETSC_MODULE
-    virtual void initPetscContexts();
+#ifdef __PARALLEL_MODE
+    virtual void initParallelContexts();
 #endif
 
 protected:
     virtual void assemble(SparseMtrx *answer, TimeStep *tStep, EquationID ut, CharType type,
-                  const UnknownNumberingScheme &, Domain *domain);
+                          const UnknownNumberingScheme &, Domain *domain);
     void proceedStep(int di, TimeStep *tStep);
     virtual void updateLoadVectors(TimeStep *tStep);
     virtual void computeExternalLoadReactionContribution(FloatArray &reactions, TimeStep *tStep, int di);

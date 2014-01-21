@@ -53,7 +53,6 @@
 //@}
 
 namespace oofem {
-
 /**
  * Trabecular bone nonlocal material status
  */
@@ -73,7 +72,6 @@ public:
     void setLocalCumPlastStrainForAverage(double ls) { localCumPlastStrainForAverage = ls; }
 
     virtual const char *giveClassName() const { return "TrabBoneNLStatus"; }
-    virtual classType   giveClassID() const { return TrabBoneMaterialStatusClass; }
 
     virtual void initTempStatus();
 
@@ -97,7 +95,6 @@ public:
     virtual ~TrabBoneNL();
 
     virtual const char *giveClassName() const { return "TrabBoneNL"; }
-    virtual classType   giveClassID()   const { return TrabBoneNLClass; }
     virtual const char *giveInputRecordName() const { return _IFT_TrabBoneNL_Name; }
 
     virtual IRResultType initializeFrom(InputRecord *ir);
@@ -105,16 +102,16 @@ public:
 
     virtual Interface *giveInterface(InterfaceType);
 
-    virtual void computeCumPlastStrain(double &alpha, GaussPoint *gp, TimeStep *atTime);
+    virtual void computeCumPlastStrain(double &alpha, GaussPoint *gp, TimeStep *tStep);
 
-    virtual void giveRealStressVector(FloatArray &answer, GaussPoint *gp, const FloatArray &strainVector, TimeStep *atTime);
+    virtual void giveRealStressVector(FloatArray &answer, GaussPoint *gp, const FloatArray &strainVector, TimeStep *tStep);
 
-    void computeLocalCumPlastStrain(double &alpha, const StrainVector &strain, GaussPoint *gp, TimeStep *atTime)
+    void computeLocalCumPlastStrain(double &alpha, const StrainVector &strain, GaussPoint *gp, TimeStep *tStep)
     {
-        TrabBoneMaterial :: computeCumPlastStrain(alpha, gp, atTime);
+        TrabBoneMaterial :: computeCumPlastStrain(alpha, gp, tStep);
     }
 
-    virtual void updateBeforeNonlocAverage(const FloatArray &strainVector, GaussPoint *gp, TimeStep *atTime);
+    virtual void updateBeforeNonlocAverage(const FloatArray &strainVector, GaussPoint *gp, TimeStep *tStep);
 
     virtual double computeWeightFunction(const FloatArray &src, const FloatArray &coord);
 

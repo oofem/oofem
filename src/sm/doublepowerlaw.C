@@ -37,8 +37,7 @@
 #include "classfactory.h"
 
 namespace oofem {
-
-REGISTER_Material( DoublePowerLawMaterial );
+REGISTER_Material(DoublePowerLawMaterial);
 
 IRResultType
 DoublePowerLawMaterial :: initializeFrom(InputRecord *ir)
@@ -59,17 +58,17 @@ DoublePowerLawMaterial :: initializeFrom(InputRecord *ir)
 
 
 double
-DoublePowerLawMaterial :: computeCreepFunction(double atTime, double ofAge)
+DoublePowerLawMaterial :: computeCreepFunction(double tStep, double ofAge)
 {
     // computes the value of creep function at time ofAge
-    // when load is acting from atTime
+    // when load is acting from tStep
 
     double e0;
     double h1, h2, h3;
 
     e0 = 1.50 * E28;
 
-    h1 = pow(atTime - ofAge, n);
+    h1 = pow(tStep - ofAge, n);
     h2 = pow(ofAge, -m) + alpha;
     h3 = fi1 / e0;
 

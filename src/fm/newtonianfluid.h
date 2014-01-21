@@ -71,7 +71,7 @@ public:
     virtual double giveEffectiveViscosity(GaussPoint *gp, TimeStep *tStep);
 
     virtual void computeDeviatoricStressVector(FloatArray &answer, GaussPoint *gp, const FloatArray &eps, TimeStep *tStep);
-    virtual void giveDeviatoricStiffnessMatrix(FloatMatrix &answer, MatResponseMode, GaussPoint *gp, TimeStep *tStep);
+    virtual void giveDeviatoricStiffnessMatrix(FloatMatrix & answer, MatResponseMode, GaussPoint * gp, TimeStep * tStep);
 
     virtual double give(int aProperty, GaussPoint *gp);
     virtual IRResultType initializeFrom(InputRecord *ir);
@@ -79,7 +79,6 @@ public:
     virtual int hasMaterialModeCapability(MaterialMode mode);
     virtual const char *giveClassName() const { return "NewtonianFluidMaterial"; }
     virtual const char *giveInputRecordName() const { return _IFT_NewtonianFluidMaterial_Name; }
-    virtual classType giveClassID() const { return NewtonianFluidMaterialClass; }
     virtual int checkConsistency();
     virtual MaterialStatus *CreateStatus(GaussPoint *gp) const;
 };

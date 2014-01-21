@@ -136,7 +136,7 @@ public:
      * @param answer Contains result.
      * @param mode Material response mode.
      * @param gp Integration point.
-     * @param tStep Time step (most models are able to respond only when atTime is current time step).
+     * @param tStep Time step (most models are able to respond only when tStep is current time step).
      */
     virtual void giveStiffnessMatrix(FloatMatrix &answer,
                                      MatResponseMode mode,
@@ -154,7 +154,7 @@ public:
      * @param answer Stress vector in reduced form. For large deformations it is treated as the second Piola-Kirchoff stress.
      * @param gp Integration point.
      * @param reducedStrain Strain vector in reduced form. For large deformations it is treated as the Green-Lagrange strain.
-     * @param tStep Current time step (most models are able to respond only when atTime is current time step).
+     * @param tStep Current time step (most models are able to respond only when tStep is current time step).
      */
     virtual void giveRealStressVector(FloatArray &answer, GaussPoint *gp,
                                       const FloatArray &reducedStrain, TimeStep *tStep);
@@ -190,7 +190,7 @@ public:
      * @param answer Contains result.
      * @param gp Integration point.
      * @param reducedF Deformation gradient in in reduced form.
-     * @param tStep Current time step (most models are able to respond only when atTime is current time step).
+     * @param tStep Current time step (most models are able to respond only when tStep is current time step).
      */
     //@{
     /// Default implementation relies on giveRealStressVector for second Piola-Kirchoff stress
@@ -219,7 +219,7 @@ public:
      * @param answer Contains result.
      * @param gp Integration point.
      * @param reducedF Deformation gradient in in reduced form.
-     * @param tStep Current time step (most models are able to respond only when atTime is current time step).
+     * @param tStep Current time step (most models are able to respond only when tStep is current time step).
      */
     //@{
     virtual void giveCauchyStressVector_3d(FloatArray &answer, GaussPoint *gp, const FloatArray &reducedF, TimeStep *tStep)
@@ -247,7 +247,7 @@ public:
      * Returns a vector of coefficients of thermal dilatation in direction of each material principal (local) axis.
      * @param answer Vector of thermal dilatation coefficients.
      * @param gp Integration point.
-     * @param tStep Time step (most models are able to respond only when atTime is current time step).
+     * @param tStep Time step (most models are able to respond only when tStep is current time step).
      */
     virtual void giveThermalDilatationVector(FloatArray &answer, GaussPoint *gp, TimeStep *tStep)
     {
@@ -264,7 +264,7 @@ public:
      * Default implementation takes into account temperature induced strains and eigenstrains.
      * @param answer Returned strain vector.
      * @param gp Integration point.
-     * @param tStep Time step (most models are able to respond only when atTime is current time step).
+     * @param tStep Time step (most models are able to respond only when tStep is current time step).
      * @param mode Determines response mode (Total or incremental).
      */
     virtual void computeStressIndependentStrainVector(FloatArray &answer,
@@ -293,7 +293,7 @@ public:
      * @param answer Computed results.
      * @param mode Material response mode.
      * @param gp Integration point.
-     * @param tStep Time step (most models are able to respond only when atTime is current time step).
+     * @param tStep Time step (most models are able to respond only when tStep is current time step).
      */
     virtual void give3dMaterialStiffnessMatrix(FloatMatrix &answer,
                                                MatResponseMode mode,
@@ -406,7 +406,7 @@ public:
      * @param answer Stiffness matrix.
      * @param mmode Material response mode.
      * @param gp Integration point, which load history is used.
-     * @param tStep Time step (most models are able to respond only when atTime is current time step).
+     * @param tStep Time step (most models are able to respond only when tStep is current time step).
      */
     //@{
     virtual void givePlaneStressStiffMtrx(FloatMatrix &answer,
@@ -437,7 +437,7 @@ public:
      * @param answer Stiffness matrix.
      * @param mmode Material response mode.
      * @param gp Integration point, which load history is used.
-     * @param tStep Time step (most models are able to respond only when atTime is current time step).
+     * @param tStep Time step (most models are able to respond only when tStep is current time step).
      */
     //@{
     virtual void givePlaneStrainStiffMtrx(FloatMatrix &answer,
@@ -463,7 +463,7 @@ public:
      * @param answer Stiffness matrix.
      * @param mmode Material response mode.
      * @param gp Integration point, which load history is used.
-     * @param tStep Time step (most models are able to respond only when atTime is current time step).
+     * @param tStep Time step (most models are able to respond only when tStep is current time step).
      */
     //@{
     virtual void give1dStressStiffMtrx(FloatMatrix &answer,
@@ -489,11 +489,11 @@ public:
      * @param answer Stiffness matrix.
      * @param mmode Material response mode.
      * @param gp Integration point, which load history is used.
-     * @param tStep Time step (most models are able to respond only when atTime is current time step).
+     * @param tStep Time step (most models are able to respond only when tStep is current time step).
      */
     virtual void give2dBeamLayerStiffMtrx(FloatMatrix &answer,
-                                        MatResponseMode mmode, GaussPoint *gp,
-                                        TimeStep *tStep);
+                                          MatResponseMode mmode, GaussPoint *gp,
+                                          TimeStep *tStep);
     /**
      * Method for computing 2d plate layer stiffness matrix of receiver.
      * Default implementation computes 3d stiffness matrix using give3dMaterialStiffnessMatrix and
@@ -504,11 +504,11 @@ public:
      * @param answer Stiffness matrix.
      * @param mmode Material response mode.
      * @param gp Integration point, which load history is used.
-     * @param tStep Time step (most models are able to respond only when atTime is current time step).
+     * @param tStep Time step (most models are able to respond only when tStep is current time step).
      */
     virtual void givePlateLayerStiffMtrx(FloatMatrix &answer,
-                                           MatResponseMode mmode, GaussPoint *gp,
-                                           TimeStep *tStep);
+                                         MatResponseMode mmode, GaussPoint *gp,
+                                         TimeStep *tStep);
     /**
      * Method for computing 1d fiber stiffness matrix of receiver.
      * Default implementation computes 3d stiffness matrix using give3dMaterialStiffnessMatrix and
@@ -519,7 +519,7 @@ public:
      * @param answer Stiffness matrix.
      * @param mmode Material response mode.
      * @param gp Integration point, which load history is used.
-     * @param tStep Time step (most models are able to respond only when atTime is current time step).
+     * @param tStep Time step (most models are able to respond only when tStep is current time step).
      */
     virtual void giveFiberStiffMtrx(FloatMatrix &answer,
                                     MatResponseMode mmode, GaussPoint *gp,

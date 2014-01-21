@@ -45,7 +45,6 @@
 //@}
 
 namespace oofem {
-
 /**
  * This class implements a 3-dimensional Linear Isoparametric
  * Mindlin theory beam element, with reduced integration.
@@ -91,7 +90,6 @@ public:
     // definition & identification
     virtual const char *giveInputRecordName() const { return _IFT_LIBeam3dNL_Name; }
     virtual const char *giveClassName() const { return "LIBeam3dNL"; }
-    virtual classType giveClassID() const { return LIBeam3dNLClass; }
     virtual IRResultType initializeFrom(InputRecord *ir);
     virtual Element_Geometry_Type giveGeometryType() const { return EGT_line_1; }
 

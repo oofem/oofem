@@ -75,7 +75,7 @@ protected:
     class RS_Mesh;
     class RS_Node
     {
-    protected:
+protected:
         FloatArray coords;
         double requiredDensity;
         int number;
@@ -97,7 +97,7 @@ protected:
          */
         IntArray partitions;
 #endif
-    public:
+public:
         RS_Node(int n, Subdivision :: RS_Mesh *m, int parent, FloatArray &c, double rd, bool boundary) {
             this->number = n;
             this->mesh = m;
@@ -143,20 +143,24 @@ protected:
 
     class RS_IrregularNode : public RS_Node
     {
-    protected:
+protected:
         int iNode, jNode; // parent edge nodes
-    public:
+public:
         RS_IrregularNode(int n, Subdivision :: RS_Mesh *mesh, int parent, FloatArray &c, double rd, bool boundary) : RS_Node(n, mesh, parent, c, rd, boundary) {}
-        void setEdgeNodes(int i, int j) { iNode = i;
-                                          jNode = j; }
-        void giveEdgeNodes(int &i, int &j) { i = iNode;
-                                             j = jNode; }
+        void setEdgeNodes(int i, int j) {
+            iNode = i;
+            jNode = j;
+        }
+        void giveEdgeNodes(int &i, int &j) {
+            i = iNode;
+            j = jNode;
+        }
         virtual bool isIrregular() { return true; }
     };
 
     class RS_Element
     {
-    protected:
+protected:
         int number;
         // element regular nodes
         IntArray nodes;
@@ -180,7 +184,7 @@ protected:
         // numbers of shared edges
         IntArray shared_edges;
 #endif
-    public:
+public:
         RS_Element(int number, Subdivision :: RS_Mesh *m, int parent, IntArray &nodes) {
             this->number = number;
             this->nodes = nodes;
@@ -268,8 +272,10 @@ public:
 #endif
 #ifdef __PARALLEL_MODE
         void numberSharedEdges(int iNode, IntArray &connNodes);
-        void makeSharedEdges() { shared_edges.resize(3);
-                                 shared_edges.zero(); }
+        void makeSharedEdges() {
+            shared_edges.resize(3);
+            shared_edges.zero();
+        }
 #endif
     };
 
@@ -293,8 +299,10 @@ public:
 #endif
 #ifdef __PARALLEL_MODE
         void numberSharedEdges(int iNode, IntArray &connNodes);
-        void makeSharedEdges() { shared_edges.resize(6);
-                                 shared_edges.zero(); }
+        void makeSharedEdges() {
+            shared_edges.resize(6);
+            shared_edges.zero();
+        }
 #endif
     };
 
@@ -310,10 +318,14 @@ protected:
         RS_Mesh *mesh;
 public:
         RS_SharedEdge(Subdivision :: RS_Mesh *m) { this->mesh = m; }
-        void setEdgeNodes(int i, int j) { iNode = i;
-                                          jNode = j; }
-        void giveEdgeNodes(int &i, int &j) { i = iNode;
-                                             j = jNode; }
+        void setEdgeNodes(int i, int j) {
+            iNode = i;
+            jNode = j;
+        }
+        void giveEdgeNodes(int &i, int &j) {
+            i = iNode;
+            j = jNode;
+        }
         const IntArray *givePartitions()  { return & partitions; }
         void setPartitions(const IntArray &_p) { partitions = _p; }
         void addPartition(int _p, int allocChunk) { partitions.followedBy(_p, allocChunk); }
@@ -341,15 +353,21 @@ public:
 
 public:
 #ifdef __PARALLEL_MODE
-        RS_Mesh(Subdivision *s) : nodes(0, RS_ARRAY_CHUNK), elements(0, RS_ARRAY_CHUNK), edges(0, RS_ARRAY_CHUNK) { this->subdivision = s;
-                                                                                                                    sharedNodeMapInitialized = false; }
-        ~RS_Mesh() { nodes.clear();
-                     elements.clear();
-                     edges.clear(); }
+        RS_Mesh(Subdivision *s) : nodes(0, RS_ARRAY_CHUNK), elements(0, RS_ARRAY_CHUNK), edges(0, RS_ARRAY_CHUNK) {
+            this->subdivision = s;
+            sharedNodeMapInitialized = false;
+        }
+        ~RS_Mesh() {
+            nodes.clear();
+            elements.clear();
+            edges.clear();
+        }
 #else
         RS_Mesh(Subdivision *s) : nodes(0, RS_ARRAY_CHUNK), elements(0, RS_ARRAY_CHUNK) { this->subdivision = s; }
-        ~RS_Mesh() { nodes.clear();
-                     elements.clear(); }
+        ~RS_Mesh() {
+            nodes.clear();
+            elements.clear();
+        }
 #endif
 
         Subdivision :: RS_Node *giveNode(int i) { return nodes.at(i); }
@@ -393,8 +411,10 @@ public:
 
 public:
     /// Constructor
-    Subdivision(Domain *d) : MesherInterface(d) { mesh = 0;
-                                                  smoothingFlag = false; }
+    Subdivision(Domain *d) : MesherInterface(d) {
+        mesh = 0;
+        smoothingFlag = false;
+    }
     virtual ~Subdivision() { if ( mesh ) { delete mesh; } }
 
     /// Runs the mesh generation, mesh will be written to corresponding domain din file

@@ -54,7 +54,6 @@
 //@}
 
 namespace oofem {
-
 /**
  * Trabecular bone nonlocal material status.
  */
@@ -76,7 +75,6 @@ public:
 
     // definition
     virtual const char *giveClassName() const { return "TrabBoneNL3DStatus"; }
-    virtual classType giveClassID() const { return TrabBone3DStatusClass; }
 
     virtual void initTempStatus();
     virtual void updateYourself(TimeStep *tStep);
@@ -100,7 +98,6 @@ public:
     virtual ~TrabBoneNL3D();
 
     virtual const char *giveClassName() const { return "TrabBoneNL3D"; }
-    virtual classType giveClassID() const { return TrabBoneNL3DClass; }
     virtual const char *giveInputRecordName() const { return _IFT_TrabBoneNL3D_Name; }
 
     virtual IRResultType initializeFrom(InputRecord *ir);
@@ -130,9 +127,9 @@ public:
 #endif
 
     virtual void NonlocalMaterialStiffnessInterface_addIPContribution(SparseMtrx &dest, const UnknownNumberingScheme &s,
-                                                                      GaussPoint *gp, TimeStep *atTime);
+                                                                      GaussPoint *gp, TimeStep *tStep);
 
-    virtual std::list< localIntegrationRecord > *NonlocalMaterialStiffnessInterface_giveIntegrationDomainList(GaussPoint *gp);
+    virtual std :: list< localIntegrationRecord > *NonlocalMaterialStiffnessInterface_giveIntegrationDomainList(GaussPoint *gp);
 
     /**
      * Computes the "local" part of nonlocal stiffness contribution assembled for given integration point.

@@ -40,7 +40,6 @@
 #include "bcgeomtype.h"
 
 namespace oofem {
-
 /**
  * Class implementing element body load, acting over whole element volume (e.g., the dead weight).
  * Body load is usually attribute of one or more elements.
@@ -66,11 +65,3 @@ public:
 };
 } // end namespace oofem
 #endif // bodyload_h
-
-
-
-
-
-
-
-

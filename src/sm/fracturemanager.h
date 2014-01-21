@@ -38,7 +38,6 @@
 #include "alist.h"
 #include "datareader.h"
 #include "inputrecord.h"
-#include "classtype.h"
 #include "contextioresulttype.h"
 #include "contextmode.h"
 #include "timestep.h"
@@ -70,7 +69,7 @@ class FailureCriteriaStatus;
     ENUM_ITEM_WITH_VALUE(FC_Undefined, 0) \
     ENUM_ITEM_WITH_VALUE(IPLocal, 1) \
     ENUM_ITEM_WITH_VALUE(ELLocal, 2) \
-    ENUM_ITEM_WITH_VALUE(Nonlocal, 3) 
+    ENUM_ITEM_WITH_VALUE(Nonlocal, 3)
 
 enum FailureCriteriaType {
     FailureCriteria_DEF
@@ -85,49 +84,48 @@ enum FailureCriteriaType {
 class FailureCriteriaStatus
 {
     // abstract class from all the different failure criterias should be derived
-private:    
-    
-    //FractureManager *fMan;         
+private:
+
+    //FractureManager *fMan;
     FailureCriteria *failCrit;      // pointer to the corresponding failure criteria
     FailureCriteriaType type;       // local, nonlocal
     //FailureCriteriaName name;     // max strain, von Mises, effectivePlasticStrain, tsaiHill, J-integral, G, K etc.
     bool failedFlag;                // is the criteria fulfilled?
     int number;
-     
-    
+
+
 
 public:
     FailureCriteriaStatus(int number, FailureCriteria *failCrit)
-    { 
+    {
         this->number = number;
         this->failCrit = failCrit;
     }
 
     FailureCriteriaStatus(Element *el, FailureCriteria *failCrit)
-    { 
+    {
         this->el = el;
         this->failCrit = failCrit;
     }
 
-    FailureCriteriaStatus(){};
-    ~FailureCriteriaStatus(){}; // must destroy object correctly
+    FailureCriteriaStatus() {};
+    ~FailureCriteriaStatus() {}; // must destroy object correctly
     Element *el;
 
-    std::vector < std::vector < FloatArray > > quantities;
+    std :: vector< std :: vector< FloatArray > >quantities;
     FloatArray thresholds;
-    std :: vector< bool > failedFlags;
+    std :: vector< bool >failedFlags;
 
 
     //FailureCriteriaType giveType() { return this->giveFailureCriteria().giveType(); };
     FailureCriteria *giveFailureCriteria() { return this->failCrit; };
 
 
-    bool hasFailed( int i) { return failedFlags.at(i-1); }
+    bool hasFailed(int i) { return failedFlags.at(i - 1); }
 
     virtual IRResultType initializeFrom(InputRecord *ir);
-    virtual int instanciateYourself(DataReader *dr){ return 1;};
+    virtual int instanciateYourself(DataReader *dr) { return 1; };
     virtual const char *giveClassName() const { return "FailureCriteriaStatus"; }
-
 };
 
 
@@ -136,20 +134,20 @@ public:
 
 class FailureCriteria
 {
-private:    
-    FailureCriteriaType type;       // local, nonlocal 
+private:
+    FailureCriteriaType type;       // local, nonlocal
     FractureManager *fMan;          // pointer to its corresponding manager
     int number;
 
 public:
     FailureCriteria(int number, FractureManager *fMan)
-        {
-            this->number = number;
-            this->fMan = fMan;
-        };
-    ~FailureCriteria(){}; // must destroy object correctly
+    {
+        this->number = number;
+        this->fMan = fMan;
+    };
+    ~FailureCriteria() {}; // must destroy object correctly
 
-    std :: vector< FailureCriteriaStatus *> list;
+    std :: vector< FailureCriteriaStatus * >list;
 
     FailureCriteriaType giveType() { return this->type; }
     FractureManager *giveFractureManager() { return this->fMan; }
@@ -171,12 +169,11 @@ public:
 
 class DamagedNeighborLayeredStatus : public FailureCriteriaStatus
 {
-
 public:
-    DamagedNeighborLayeredStatus(Element *el, FailureCriteria *failCrit) 
-    : FailureCriteriaStatus(el, failCrit) {}
+    DamagedNeighborLayeredStatus(Element *el, FailureCriteria *failCrit) :
+        FailureCriteriaStatus(el, failCrit) {}
 
-    FloatArray layerDamageValues; 
+    FloatArray layerDamageValues;
 };
 
 
@@ -186,8 +183,8 @@ private:
     double DamageThreshold;
 
 public:
-    DamagedNeighborLayered(int number, FractureManager *fracMan) 
-    : FailureCriteria(number,  fracMan) {}
+    DamagedNeighborLayered(int number, FractureManager *fracMan) :
+        FailureCriteria(number,  fracMan) {}
 
     virtual bool evaluateFailureCriteria(FailureCriteriaStatus *fcStatus);
     virtual const char *giveClassName() const { return "DamagedNeighborLayered"; }
@@ -195,9 +192,7 @@ public:
     virtual IRResultType initializeFrom(InputRecord *ir);
 
     virtual FailureCriteriaStatus *CreateStatus(Element *el, FailureCriteria *failCrit) const
-        { return new DamagedNeighborLayeredStatus(el, failCrit); };
-
-
+    { return new DamagedNeighborLayeredStatus(el, failCrit); };
 };
 
 
@@ -207,7 +202,7 @@ class FailureModuleElementInterface : public Interface
 public:
     FailureModuleElementInterface() : Interface() {}
     virtual const char *giveClassName() const { return "FailureModuleElementInterface"; }
-    virtual void computeFailureCriteriaQuantities(FailureCriteriaStatus *fc, TimeStep *tStep) {};  
+    virtual void computeFailureCriteriaQuantities(FailureCriteriaStatus *fc, TimeStep *tStep) {};
 };
 
 
@@ -231,16 +226,16 @@ public:
 
     void setUpdateFlag(bool flag) { this->updateFlag = flag; };
     bool giveUpdateFlag() { return this->updateFlag; };
-      
+
     void evaluateFailureCriterias(TimeStep *tStep); //Loop through all elements and evaluate criteria (if supported)
-    
-    
+
+
     void evaluateYourself(TimeStep *tStep);
     void updateXFEM(TimeStep *tStep);
     void updateXFEM(FailureCriteriaStatus *fc, TimeStep *tStep);
 
 
-    
+
     IRResultType initializeFrom(InputRecord *ir);
     int instanciateYourself(DataReader *dr);
     const char *giveClassName() const { return "FractureManager"; }
@@ -248,18 +243,11 @@ public:
     void clear();
     Domain *giveDomain() { return this->domain; }
 
-    
 
-    std :: vector< FailureCriteria* > criteriaList;
-  //std :: vector< CrackManager*           > crackManagers;   // Keep track of all cracks - each crack may have several fronts/tips
-  //std :: vector< PropagationLawManager*  > propagationLawManagers;
 
-    
+    std :: vector< FailureCriteria * >criteriaList;
+    //std :: vector< CrackManager*           > crackManagers;   // Keep track of all cracks - each crack may have several fronts/tips
+    //std :: vector< PropagationLawManager*  > propagationLawManagers;
 };
-
-
-
-
-
 } // end namespace oofem
 #endif // fracturemanager_h

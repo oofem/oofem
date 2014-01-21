@@ -47,7 +47,7 @@
 
 #include <iosfwd>
 #if __cplusplus > 199711L
-#include <initializer_list>
+ #include <initializer_list>
 #endif
 
 namespace oofem {
@@ -113,9 +113,9 @@ public:
     FloatArray(const FloatArray &x);
 #if __cplusplus > 199711L
     /// Initializer list constructor.
-    FloatArray(std::initializer_list<double> list);
+    FloatArray(std :: initializer_list< double >list);
     /// Assignment operator.
-    FloatArray & operator=(std::initializer_list<double> list);
+    FloatArray &operator=(std :: initializer_list< double >list);
 #endif
     /// Destructor.
     virtual ~FloatArray();
@@ -372,13 +372,13 @@ public:
     double distance_square(const FloatArray &x) const;
 
     /**Returns index (between 1 and Size) of minimum element in the array
-    */
+     */
     int giveIndexMinElem(void);
-    
+
     /**Returns index (between 1 and Size) of maximum element in the array
-    */
+     */
     int giveIndexMaxElem(void);
-    
+
     /**
      * Computes the dot product (or inner product) of receiver and argument.
      * @param x Vector to contract to receiver.
@@ -435,7 +435,7 @@ public:
      */
     void beVectorForm(const FloatMatrix &aMatrix);
     /**
-     * Reciever will be a vector with 6 components formed from a 3x3 matrix. 
+     * Reciever will be a vector with 6 components formed from a 3x3 matrix.
      * Off-diagonals of the matrix are symmetrized.
      * Order of matrix components in vector: 11, 22, 33, 23, 13, 12
      * @param aMatrix Matrix to transform.
@@ -444,7 +444,14 @@ public:
     void beSymVectorFormOfStrain(const FloatMatrix &aMatrix);
 
     /**
-     * Reciever will be set to a given column in a matrix 
+     * Swaps the fourth and sixth index in the array. This is to reorder the indices
+     * from OOFEM's order to Abaqus' and vice versa.
+     */
+    void changeComponentOrder();
+
+
+    /**
+     * Reciever will be set to a given column in a matrix
      */
     void beColumnOf(const FloatMatrix &mat, int col);
 #ifdef __PARALLEL_MODE
@@ -456,7 +463,7 @@ public:
     contextIOResultType storeYourself(DataStream *stream, ContextMode mode);
     contextIOResultType restoreYourself(DataStream *stream, ContextMode mode);
 
-    friend std::ostream& operator<< (std::ostream &out, const FloatArray &x);
+    friend std :: ostream &operator<<(std :: ostream &out, const FloatArray &x);
 
     ///@name IML compatibility
     //@{
@@ -465,8 +472,8 @@ public:
     //@}
 
 #ifdef BOOST_PYTHON
-    void __setitem__(int i, double val) { this->at(i+1) = val; }
-    double __getitem__(int i) { return this->at(i+1); }
+    void __setitem__(int i, double val) { this->at(i + 1) = val; }
+    double __getitem__(int i) { return this->at(i + 1); }
     void beCopyOf(const FloatArray &src) { this->operator=(src); }
 #endif
 };

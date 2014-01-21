@@ -64,11 +64,3 @@ namespace oofem {
 #endif
 } // end namespace oofem
 #endif // verbose_h
-
-
-
-
-
-
-
-

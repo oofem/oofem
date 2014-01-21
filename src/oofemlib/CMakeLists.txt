@@ -13,6 +13,7 @@ set (core_unsorted
     externalfieldgenerator.C
     datastream.C
     set.C
+    scalarfunction.C
     rvematerial.C
     weakperiodicbc.C
     solutionbasedshapefunction.C
@@ -90,13 +91,13 @@ set (core_fields
     )
 
 set (core_ltf
-    loadtimefunction.C
+    function.C
     constantfunction.C
-    heavisideltf.C
+    heavisidetimefunction.C
     peakfunction.C
     piecewiselinfunction.C
     periodicpiecewiselinfunction.C
-    userdefinedloadtimefunction.C
+    calculatorfunction.C
     )
 
 set (core_cs
@@ -177,6 +178,7 @@ set (core_fei
     fei2dquadquad.C
     fei2dquadbiquad.C
     fei3dlinelin.C
+    fei3dtrlin.C
     fei3dtrquad.C
     fei3dtetlin.C
     fei3dtetquad.C
@@ -206,7 +208,7 @@ set (core_parallel
     combuff.C
     domaintransactionmanager.C
     parallelordering.C
-    petsccontext.C
+    parallelcontext.C
     dyncombuff.C
     loadbalancer.C
     parmetisloadbalancer.C
@@ -236,6 +238,7 @@ set (core_bc
 
 if (USE_PYTHON)
     list (APPEND core_bc userdefdirichletbc.C)
+    list (APPEND core_unsorted pythonexpression.C)
 endif ()
 
 set (core_mapping
@@ -271,12 +274,15 @@ set (core
     ${core_element}
     ${core_fei}
     ${core_xfem}
-    ${core_parallel}
     ${core_bc}
     ${core_iga}
     ${core_mesher}
     ${core_mapping}
     )
+
+if (USE_PARALLEL)
+    list (APPEND core ${core_parallel})
+endif ()
 
 add_library (core
     ${LIB_TYPE}

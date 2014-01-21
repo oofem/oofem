@@ -48,13 +48,13 @@ double MixedGradientPressureBC :: domainSize()
     Set *set = this->giveDomain()->giveSet(this->set);
     const IntArray &boundaries = set->giveBoundaryList();
 
-    for (int pos = 1; pos <= boundaries.giveSize()/2; ++pos) {
-        Element *e = this->giveDomain()->giveElement( boundaries.at(pos*2-1) );
-        int boundary = boundaries.at(pos*2);
+    for ( int pos = 1; pos <= boundaries.giveSize() / 2; ++pos ) {
+        Element *e = this->giveDomain()->giveElement( boundaries.at(pos * 2 - 1) );
+        int boundary = boundaries.at(pos * 2);
         FEInterpolation *fei = e->giveInterpolation();
         domain_size += fei->evalNXIntegral( boundary, FEIElementGeometryWrapper(e) );
     }
-    return domain_size/nsd;
+    return domain_size / nsd;
 }
 
 
@@ -76,6 +76,4 @@ IRResultType MixedGradientPressureBC :: initializeFrom(InputRecord *ir)
 
     return IRRT_OK;
 }
-
 } // end namespace oofem
-

@@ -67,8 +67,9 @@ NodalAveragingRecoveryModel :: recoverValues(InternalStateType type, TimeStep *t
 
 #ifdef __PARALLEL_MODE
     bool parallel = this->domain->giveEngngModel()->isParallel();
-    if (parallel)
+    if ( parallel ) {
         this->initCommMaps();
+    }
 #endif
 
     // clear nodal table
@@ -117,12 +118,12 @@ NodalAveragingRecoveryModel :: recoverValues(InternalStateType type, TimeStep *t
                 // if the element cannot evaluate this variable, it is ignored
                 if ( val.giveSize() == 0 ) {
                     continue;
-                } else if ( regionValSize == 0 ) { 
+                } else if ( regionValSize == 0 ) {
                     regionValSize = val.giveSize();
                     lhs.resize(regionDofMans * regionValSize);
                     lhs.zero();
                 } else if ( val.giveSize() != regionValSize ) {
-                    OOFEM_LOG_RELEVANT( "NodalAveragingRecoveryModel :: size mismatch for InternalStateType %s, ignoring all elements that doesn't use the size %d\n", __InternalStateTypeToString(type), regionValSize );
+                    OOFEM_LOG_RELEVANT("NodalAveragingRecoveryModel :: size mismatch for InternalStateType %s, ignoring all elements that doesn't use the size %d\n", __InternalStateTypeToString(type), regionValSize);
                     continue;
                 }
                 int eq = ( regionNodalNumbers.at(node) - 1 ) * regionValSize;
@@ -135,8 +136,9 @@ NodalAveragingRecoveryModel :: recoverValues(InternalStateType type, TimeStep *t
         } // end assemble element contributions
 
 #ifdef __PARALLEL_MODE
-        if (parallel)
+        if ( parallel ) {
             this->exchangeDofManValues(ireg, lhs, regionDofMansConnectivity, regionNodalNumbers, regionValSize);
+        }
 #endif
 
         // solve for recovered values of active region
@@ -197,7 +199,7 @@ NodalAveragingRecoveryModel :: exchangeDofManValues(int ireg, FloatArray &lhs, I
     ProblemCommunicatorMode commMode = emodel->giveProblemCommMode();
 
     if ( commMode == ProblemCommMode__NODE_CUT ) {
-        parallelStruct ls( &lhs, &regionDofMansConnectivity, &regionNodalNumbers, regionValSize);
+        parallelStruct ls(& lhs, & regionDofMansConnectivity, & regionNodalNumbers, regionValSize);
 
         // exchange data for shared nodes
         communicator->packAllData(this, & ls, & NodalAveragingRecoveryModel :: packSharedDofManData);

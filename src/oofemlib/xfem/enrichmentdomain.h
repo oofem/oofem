@@ -75,9 +75,6 @@ public:
     virtual void giveInputRecord(DynamicInputRecord &input) = 0;
     virtual void postInitialize(Domain *d) {};
 
-    // Update of description
-    virtual void updateEnrichmentDomain() {};
-
     virtual const char *giveInputRecordName() const = 0;
     virtual const char *giveClassName() const = 0;
 
@@ -100,6 +97,12 @@ public:
 
     /// Propagate tips
     virtual bool propagateTips(const std :: vector< TipPropagation > &iTipProp) { return false; }
+
+    void setVtkDebug(bool iDebugVTK) { mDebugVTK = iDebugVTK; }
+    bool getVtkDebug() const {return mDebugVTK;}
+
+protected:
+    bool mDebugVTK;
 };
 
 
@@ -148,10 +151,10 @@ public:
 class OOFEM_EXPORT EDCrack : public EnrichmentDomain_BG
 {
 public:
-    EDCrack() : mDebugVTK(false) { bg = new PolygonLine; }
+    EDCrack() { bg = new PolygonLine; }
     virtual ~EDCrack() { delete bg; }
 
-    virtual IRResultType initializeFrom(InputRecord *ir) { return bg->initializeFrom(ir); }
+    virtual IRResultType initializeFrom(InputRecord *ir);
 
     virtual const char *giveInputRecordName() const { return _IFT_EDCrack_Name; }
     virtual const char *giveClassName() const { return "EDCrack"; }
@@ -159,8 +162,6 @@ public:
     virtual bool giveClosestTipInfo(const FloatArray &iCoords, TipInfo &oInfo) const;
     virtual bool giveTipInfos(std :: vector< TipInfo > &oInfo) const;
     virtual bool propagateTips(const std :: vector< TipPropagation > &iTipProp);
-private:
-    bool mDebugVTK;
 };
 
 
@@ -189,7 +190,6 @@ public:
     virtual int instanciateYourself(Domain *d);
     void addDofManagers(IntArray &dofManNumbers);
     virtual void giveInputRecord(DynamicInputRecord &input);
-    virtual void updateEnrichmentDomain(IntArray &dofManNumbers);
 
     virtual const char *giveInputRecordName() const { return _IFT_DofManList_Name; }
     virtual const char *giveClassName() const { return "DofManList"; }

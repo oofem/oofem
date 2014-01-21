@@ -81,8 +81,7 @@
 #include <set>
 
 namespace oofem {
-
-REGISTER_SparseMtrx( CompCol, SMT_CompCol);
+REGISTER_SparseMtrx(CompCol, SMT_CompCol);
 
 CompCol :: CompCol(void) : SparseMtrx(), val_(0), rowind_(0), colptr_(0), base_(0), nz_(0)
 {
@@ -118,7 +117,7 @@ CompCol :: CompCol(const CompCol &S) : SparseMtrx(S.nRows, S.nColumns),
 /* Assignment operator...  */
 /***************************/
 
-CompCol &CompCol :: operator = ( const CompCol & C )
+CompCol &CompCol :: operator=(const CompCol &C)
 {
     dim_ [ 0 ] = C.dim_ [ 0 ];
     dim_ [ 1 ] = C.dim_ [ 1 ];
@@ -139,7 +138,7 @@ CompCol &CompCol :: operator = ( const CompCol & C )
 
 SparseMtrx *CompCol :: GiveCopy() const
 {
-    CompCol *result = new CompCol(*this);
+    CompCol *result = new CompCol(* this);
     return result;
 }
 
@@ -281,29 +280,29 @@ int CompCol :: buildInternalStructure(EngngModel *eModel, int di, EquationID ut,
     }
 
 
-     // loop over active boundary conditions
+    // loop over active boundary conditions
     int nbc = domain->giveNumberOfBoundaryConditions();
-    std::vector<IntArray> r_locs;
-    std::vector<IntArray> c_locs;
-    
+    std :: vector< IntArray >r_locs;
+    std :: vector< IntArray >c_locs;
+
     for ( int i = 1; i <= nbc; ++i ) {
         ActiveBoundaryCondition *bc = dynamic_cast< ActiveBoundaryCondition * >( domain->giveBc(i) );
         if ( bc != NULL ) {
             bc->giveLocationArrays(r_locs, c_locs, ut, UnknownCharType, s, s);
-	    for (std::size_t k = 0; k < r_locs.size(); k++) {
-	      IntArray &krloc = r_locs[k];
-	      IntArray &kcloc = c_locs[k];
-	      for ( int i = 1; i <= krloc.giveSize(); i++ ) {
-		if ( ( ii = krloc.at(i) ) ) {
-		  for ( int j = 1; j <= kcloc.giveSize(); j++ ) {
-		    if ( (jj = kcloc.at(j) ) ) {
-		      columns [ jj - 1 ].insert(ii - 1);
-		    }
-		  }
-		}
-	      }
-	    }
-	}
+            for ( std :: size_t k = 0; k < r_locs.size(); k++ ) {
+                IntArray &krloc = r_locs [ k ];
+                IntArray &kcloc = c_locs [ k ];
+                for ( int i = 1; i <= krloc.giveSize(); i++ ) {
+                    if ( ( ii = krloc.at(i) ) ) {
+                        for ( int j = 1; j <= kcloc.giveSize(); j++ ) {
+                            if ( ( jj = kcloc.at(j) ) ) {
+                                columns [ jj - 1 ].insert(ii - 1);
+                            }
+                        }
+                    }
+                }
+            }
+        }
     }
 
     for ( i = 0; i < neq; i++ ) {
@@ -462,7 +461,7 @@ double CompCol :: at(int i, int j) const
     }
 }
 
-double CompCol :: operator() (int i, int j)  const
+double CompCol :: operator()(int i, int j)  const
 {
     for ( int t = colptr_(j); t < colptr_(j + 1); t++ ) {
         if ( rowind_(t) == i ) {
@@ -478,7 +477,7 @@ double CompCol :: operator() (int i, int j)  const
     }
 }
 
-double &CompCol :: operator() (int i, int j)
+double &CompCol :: operator()(int i, int j)
 {
     // increment version
     this->version++;

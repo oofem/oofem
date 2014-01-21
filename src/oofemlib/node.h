@@ -154,7 +154,7 @@ public:
 
     virtual bool computeL2GTransformation(FloatMatrix &answer, const IntArray &dofIDArry);
     virtual bool requiresTransformation() { return ( this->hasLocalCS() || hasSlaveDofs ); }
-    virtual void computeLoadVector(FloatArray &answer, Load *load, CharType type, TimeStep *stepN, ValueModeType mode);
+    virtual void computeLoadVector(FloatArray &answer, Load *load, CharType type, TimeStep *tStep, ValueModeType mode);
 
     /**
      * Updates receiver at end of time step (i.e. after equilibrium has been reached).
@@ -168,7 +168,6 @@ public:
     // miscellaneous
     virtual const char *giveClassName() const { return "Node"; }
     virtual const char *giveInputRecordName() const { return _IFT_Node_Name; }
-    virtual classType giveClassID() const { return NodeClass; }
     virtual IRResultType initializeFrom(InputRecord *ir);
     virtual void giveInputRecord(DynamicInputRecord &input);
     virtual void printYourself();

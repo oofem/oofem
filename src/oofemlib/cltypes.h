@@ -50,7 +50,5 @@ int giveInternalStateTypeSize(InternalStateValueType type);
 
 // New /JB
 InternalStateValueType giveInternalStateValueType(UnknownType type);
-
 } // end namespace oofem
 #endif // cltypes_h
-

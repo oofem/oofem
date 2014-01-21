@@ -45,7 +45,6 @@
 #include <petscksp.h>
 
 namespace oofem {
-
 REGISTER_SparseLinSolver(PetscSolver, ST_Petsc);
 
 PetscSolver :: PetscSolver(Domain *d, EngngModel *m) : SparseLinearSystemNM(d, m) { }
@@ -79,19 +78,16 @@ NM_Status PetscSolver :: solve(SparseMtrx *A, FloatArray *b, FloatArray *x)
         OOFEM_ERROR("PETScSolver :: solve: PetscSparseMtrx Expected");
     }
 
-    PetscSparseMtrx *Lhs = ( PetscSparseMtrx * ) A;
+    PetscSparseMtrx *Lhs = static_cast< PetscSparseMtrx * >( A );
 
     Vec globRhsVec;
     Vec globSolVec;
 
-    // "Parallel" context automatically uses sequential alternative if the engineering problem is sequential.
-    PetscContext *context = engngModel->givePetscContext( Lhs->giveDomainIndex() );
-
     /*
-     * scatter and gather rhs to global representation
+     * scatter and gather rhs to global representation (automatically detects sequential/parallel modes)
      */
-    context->createVecGlobal(& globRhsVec);
-    context->scatter2G(b, globRhsVec, ADD_VALUES);
+    Lhs->createVecGlobal(& globRhsVec);
+    Lhs->scatterL2G(*b, globRhsVec);
 
     VecDuplicate(globRhsVec, & globSolVec);
 
@@ -99,10 +95,10 @@ NM_Status PetscSolver :: solve(SparseMtrx *A, FloatArray *b, FloatArray *x)
     NM_Status s = this->petsc_solve(Lhs, globRhsVec, globSolVec);
     //VecView(globSolVec,PETSC_VIEWER_STDOUT_WORLD);
 
-    context->scatterG2N(globSolVec, x, INSERT_VALUES);
+    Lhs->scatterG2L(globSolVec, *x);
 
-    VecDestroy(&globSolVec);
-    VecDestroy(&globRhsVec);
+    VecDestroy(& globSolVec);
+    VecDestroy(& globRhsVec);
 
     return s;
 }
@@ -139,7 +135,7 @@ PetscSolver :: petsc_solve(PetscSparseMtrx *Lhs, Vec b, Vec x)
      */
     if ( Lhs->newValues ) { // Optimization for successive solves
         ///@todo I'm not 100% on the choice MatStructure. SAME_NONZERO_PATTERN should be safe.
-        if (this->engngModel->requiresUnknownsDictionaryUpdate()) {
+        if ( this->engngModel->requiresUnknownsDictionaryUpdate() ) {
             KSPSetOperators(Lhs->ksp, * Lhs->giveMtrx(), * Lhs->giveMtrx(), DIFFERENT_NONZERO_PATTERN);
         } else {
             //KSPSetOperators(Lhs->ksp, * Lhs->giveMtrx(), * Lhs->giveMtrx(), SAME_PRECONDITIONER);
@@ -171,13 +167,13 @@ PetscSolver :: petsc_solve(PetscSparseMtrx *Lhs, Vec b, Vec x)
      *  - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - */
     //MatView(*Lhs->giveMtrx(),PETSC_VIEWER_STDOUT_SELF);
     err = KSPSolve(Lhs->ksp, b, x);
-    if (err != 0) {
+    if ( err != 0 ) {
         OOFEM_ERROR2("PetscSolver:  Error when solving: %d\n", err);
     }
     KSPGetConvergedReason(Lhs->ksp, & reason);
     KSPGetIterationNumber(Lhs->ksp, & nite);
 
-    if (reason >= 0) {
+    if ( reason >= 0 ) {
         //OOFEM_LOG_INFO("PetscSolver:  Converged. KSPConvergedReason: %d, number of iterations: %d\n", reason, nite);
     } else {
         OOFEM_WARNING3("PetscSolver:  Diverged! KSPConvergedReason: %d, number of iterations: %d\n", reason, nite);
@@ -206,7 +202,7 @@ NM_Status PetscSolver :: solve(SparseMtrx *A, FloatMatrix &B, FloatMatrix &X)
         OOFEM_ERROR("PETScSolver :: solve: PetscSparseMtrx Expected");
     }
 
-    PetscSparseMtrx *Lhs = ( PetscSparseMtrx * ) A;
+    PetscSparseMtrx *Lhs = static_cast< PetscSparseMtrx * >( A );
 
     Vec globRhsVec;
     Vec globSolVec;
@@ -218,19 +214,19 @@ NM_Status PetscSolver :: solve(SparseMtrx *A, FloatMatrix &B, FloatMatrix &X)
     X.resize(rows, cols);
     double *Xptr = X.givePointer();
 
-    for (int i = 0; i < cols; ++i) {
-        VecCreateSeqWithArray(PETSC_COMM_SELF, rows, B.givePointer() + rows*i, & globRhsVec);
+    for ( int i = 0; i < cols; ++i ) {
+        VecCreateSeqWithArray(PETSC_COMM_SELF, rows, B.givePointer() + rows * i, & globRhsVec);
         VecDuplicate(globRhsVec, & globSolVec);
         s = this->petsc_solve(Lhs, globRhsVec, globSolVec, newLhs);
-        if ( !(s & NM_Success) ) {
-            OOFEM_WARNING2("PetscSolver :: solve - No success at solving column %d",i+1);
+        if ( !( s & NM_Success ) ) {
+            OOFEM_WARNING2("PetscSolver :: solve - No success at solving column %d", i + 1);
             return s;
         }
         newLhs = false;
         double *ptr;
         VecGetArray(globSolVec, & ptr);
         for ( int j = 0; j < rows; ++j ) {
-            Xptr[ j + rows*i ] = ptr [ j ];
+            Xptr [ j + rows * i ] = ptr [ j ];
         }
         VecRestoreArray(globSolVec, & ptr);
     }
@@ -239,6 +235,4 @@ NM_Status PetscSolver :: solve(SparseMtrx *A, FloatMatrix &B, FloatMatrix &X)
     return s;
 }
 #endif
-
 } // end namespace oofem
-

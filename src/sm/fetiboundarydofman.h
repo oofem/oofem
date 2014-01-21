@@ -40,7 +40,6 @@
 #ifdef __PARALLEL_MODE
 
 namespace oofem {
-
 /**
  * Represent the abstraction for DOF manager. This DOF manager is on partition boundary and
  * influences to master equations. It is typically shared by two or more partitions.

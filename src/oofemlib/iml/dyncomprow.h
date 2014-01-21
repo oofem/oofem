@@ -133,4 +133,3 @@ protected:
 };
 } // end namespace oofem
 #endif // dyncomprow_h
-

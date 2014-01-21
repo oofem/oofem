@@ -41,8 +41,7 @@
 #include "classfactory.h"
 
 namespace oofem {
-
-REGISTER_Element( CCTPlate3d );
+REGISTER_Element(CCTPlate3d);
 
 CCTPlate3d :: CCTPlate3d(int n, Domain *aDomain) : CCTPlate(n, aDomain)
 {
@@ -69,7 +68,7 @@ CCTPlate3d :: giveLocalCoordinates(FloatArray &answer, FloatArray &global)
     }
 
     offset = global;
-    offset.subtract(*this->giveNode(1)->giveCoordinates());
+    offset.subtract( * this->giveNode(1)->giveCoordinates() );
     answer.beProductOf(* GtoLRotationMatrix, offset);
 }
 
@@ -116,33 +115,40 @@ CCTPlate3d :: computeLocalCoordinates(FloatArray &answer, const FloatArray &coor
 {
     // rotate the input point Coordinate System into the element CS
     FloatArray inputCoords_ElCS;
-    FloatArray lc[3], llc;
-    const FloatArray *lcptr[3] = {lc, lc+1, lc+2};
-    this->giveLocalCoordinates( inputCoords_ElCS, const_cast< FloatArray & >(coords) );
-    for (int _i=0; _i<3; _i++) {
-      this->giveLocalCoordinates( lc[_i], *this->giveNode(_i+1)->giveCoordinates());
+    FloatArray lc [ 3 ], llc;
+    const FloatArray *lcptr [ 3 ] = {
+        lc, lc + 1, lc + 2
+    };
+    this->giveLocalCoordinates( inputCoords_ElCS, const_cast< FloatArray & >( coords ) );
+    for ( int _i = 0; _i < 3; _i++ ) {
+        this->giveLocalCoordinates( lc [ _i ], * this->giveNode(_i + 1)->giveCoordinates() );
     }
     FEIVertexListGeometryWrapper wr(3, lcptr);
-    FEI2dTrLin _interp(1,2);
+    FEI2dTrLin _interp(1, 2);
     bool inplane = _interp.global2local(llc, inputCoords_ElCS, wr) > 0;
-    // now check if the thid local coordinate is within the thickness of element
-    bool outofplane = (fabs(inputCoords_ElCS.at(3)) <= this->giveCrossSection()->give(CS_Thickness)/2.); 
+    answer.resize(2);
+    answer.at(1) = inputCoords_ElCS.at(1);
+    answer.at(2) = inputCoords_ElCS.at(2);
+    GaussPoint _gp(NULL, 1, new FloatArray(answer), 2.0, _2dPlate);
+    // now check if the third local coordinate is within the thickness of element
+    bool outofplane = ( fabs( inputCoords_ElCS.at(3) ) <= this->giveCrossSection()->give(CS_Thickness, & _gp) / 2. );
+
     return inplane && outofplane;
 }
 
 
-int 
+int
 CCTPlate3d :: computeGlobalCoordinates(FloatArray &answer, const FloatArray &lcoords)
 {
-  double l1 = lcoords.at(1);
-  double l2 = lcoords.at(2);
-  double l3 = 1.-l2-l1;
+    double l1 = lcoords.at(1);
+    double l2 = lcoords.at(2);
+    double l3 = 1. - l2 - l1;
 
-  answer.resize(3);
-  for (int _i=1; _i<=3; _i++) {
-    answer.at(_i) = l1*this->giveNode(1)->giveCoordinate(_i) + l2*this->giveNode(2)->giveCoordinate(_i)+l3*this->giveNode(3)->giveCoordinate(_i);
-  }
-  return true;
+    answer.resize(3);
+    for ( int _i = 1; _i <= 3; _i++ ) {
+        answer.at(_i) = l1 * this->giveNode(1)->giveCoordinate(_i) + l2 *this->giveNode(2)->giveCoordinate(_i) + l3 *this->giveNode(3)->giveCoordinate(_i);
+    }
+    return true;
 }
 
 
@@ -172,12 +178,12 @@ CCTPlate3d :: computeGtoLRotationMatrix()
         e1.normalize();
 
         // compute e3' : vector product of e1' x help
-        e3.beVectorProductOf(e1,help);
+        e3.beVectorProductOf(e1, help);
         // let us normalize
         e3.normalize();
 
         // now from e3' x e1' compute e2'
-        e2.beVectorProductOf(e3,e1);
+        e2.beVectorProductOf(e3, e1);
 
         //
         GtoLRotationMatrix = new FloatMatrix(3, 3);
@@ -265,7 +271,7 @@ CCTPlate3d :: giveCharacteristicTensor(FloatMatrix &answer, CharTensor type, Gau
     }
 
     if ( ( type == GlobalForceTensor  ) || ( type == GlobalMomentumTensor  ) ||
-        ( type == GlobalStrainTensor ) || ( type == GlobalCurvatureTensor ) ) {
+         ( type == GlobalStrainTensor ) || ( type == GlobalCurvatureTensor ) ) {
         this->computeGtoLRotationMatrix();
         answer.rotatedWith(* GtoLRotationMatrix);
     }
@@ -273,7 +279,7 @@ CCTPlate3d :: giveCharacteristicTensor(FloatMatrix &answer, CharTensor type, Gau
 
 
 int
-CCTPlate3d :: giveIPValue(FloatArray &answer, GaussPoint *aGaussPoint, InternalStateType type, TimeStep *tStep)
+CCTPlate3d :: giveIPValue(FloatArray &answer, GaussPoint *gp, InternalStateType type, TimeStep *tStep)
 {
     FloatMatrix globTensor;
     CharTensor cht;
@@ -287,7 +293,7 @@ CCTPlate3d :: giveIPValue(FloatArray &answer, GaussPoint *aGaussPoint, InternalS
             cht = GlobalStrainTensor;
         }
 
-        this->giveCharacteristicTensor(globTensor, cht, aGaussPoint, tStep);
+        this->giveCharacteristicTensor(globTensor, cht, gp, tStep);
 
         answer.at(1) = globTensor.at(1, 1); //sxForce
         answer.at(2) = globTensor.at(2, 2); //syForce
@@ -302,7 +308,7 @@ CCTPlate3d :: giveIPValue(FloatArray &answer, GaussPoint *aGaussPoint, InternalS
             cht = GlobalCurvatureTensor;
         }
 
-        this->giveCharacteristicTensor(globTensor, cht, aGaussPoint, tStep);
+        this->giveCharacteristicTensor(globTensor, cht, gp, tStep);
 
         answer.at(7)  = globTensor.at(1, 1); //mxForce
         answer.at(8)  = globTensor.at(2, 2); //myForce
@@ -320,8 +326,8 @@ CCTPlate3d :: giveIPValue(FloatArray &answer, GaussPoint *aGaussPoint, InternalS
 
 
 void
-CCTPlate3d :: computeBodyLoadVectorAt(FloatArray &answer, Load *forLoad, TimeStep *stepN, ValueModeType mode)
-// Computes numerically the load vector of the receiver due to the body loads, at stepN.
+CCTPlate3d :: computeBodyLoadVectorAt(FloatArray &answer, Load *forLoad, TimeStep *tStep, ValueModeType mode)
+// Computes numerically the load vector of the receiver due to the body loads, at tStep.
 // load is assumed to be in global cs.
 // load vector is then transformed to coordinate system in each node.
 // (should be global coordinate system, but there may be defined
@@ -340,13 +346,13 @@ CCTPlate3d :: computeBodyLoadVectorAt(FloatArray &answer, Load *forLoad, TimeSte
     irule.SetUpPointsOnTriangle(1, _2dPlate);
 
     // note: force is assumed to be in global coordinate system.
-    forLoad->computeComponentArrayAt(force, stepN, mode);
+    forLoad->computeComponentArrayAt(force, tStep, mode);
 
     if ( force.giveSize() ) {
         gp = irule.getIntegrationPoint(0);
 
-        dens = this->giveStructuralCrossSection()->give('d', gp);
-        dV   = this->computeVolumeAround(gp) * this->giveCrossSection()->give(CS_Thickness);
+        dens = this->giveStructuralCrossSection()->give('d', gp); // constant density assumed
+        dV   = this->computeVolumeAround(gp) * this->giveCrossSection()->give(CS_Thickness, gp); // constant thickness assumed
 
         answer.resize(18);
         answer.zero();
@@ -390,28 +396,26 @@ CCTPlate3d :: printOutputAt(FILE *file, TimeStep *tStep)
         for ( j = 0; j < integrationRulesArray [ i ]->giveNumberOfIntegrationPoints(); j++ ) {
             gp = integrationRulesArray [ i ]->getIntegrationPoint(j);
 
-            // gp   -> printOutputAt(file,stepN) ;
+            // gp   -> printOutputAt(file,tStep) ;
 
             fprintf( file, "  GP %2d.%-2d :", i + 1, gp->giveNumber() );
 
             this->giveIPValue(v, gp, IST_ShellStrainCurvatureTensor, tStep);
             fprintf(file, "  strains ");
             fprintf( file,
-                    " % .4e % .4e % .4e % .4e % .4e % .4e % .4e % .4e % .4e % .4e % .4e % .4e ",
-                    v.at(1), v.at(2), v.at(3),  2. * v.at(4), 2. * v.at(5), 2. * v.at(6),
-                    v.at(7), v.at(8), v.at(9),  2. * v.at(10), 2. * v.at(11), 2. * v.at(12) );
+                     " % .4e % .4e % .4e % .4e % .4e % .4e % .4e % .4e % .4e % .4e % .4e % .4e ",
+                     v.at(1), v.at(2), v.at(3),  2. * v.at(4), 2. * v.at(5), 2. * v.at(6),
+                     v.at(7), v.at(8), v.at(9),  2. * v.at(10), 2. * v.at(11), 2. * v.at(12) );
 
             this->giveIPValue(v, gp, IST_ShellForceMomentumTensor, tStep);
             fprintf(file, "\n              stresses");
             fprintf( file,
-                    " % .4e % .4e % .4e % .4e % .4e % .4e % .4e % .4e % .4e % .4e % .4e % .4e ",
-                    v.at(1), v.at(2), v.at(3),  v.at(4), v.at(5), v.at(6),
-                    v.at(7), v.at(8), v.at(9),  v.at(10), v.at(11), v.at(12) );
+                     " % .4e % .4e % .4e % .4e % .4e % .4e % .4e % .4e % .4e % .4e % .4e % .4e ",
+                     v.at(1), v.at(2), v.at(3),  v.at(4), v.at(5), v.at(6),
+                     v.at(7), v.at(8), v.at(9),  v.at(10), v.at(11), v.at(12) );
 
             fprintf(file, "\n");
         }
     }
 }
-
-
 } // end namespace oofem

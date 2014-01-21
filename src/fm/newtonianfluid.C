@@ -42,8 +42,7 @@
 #include "classfactory.h"
 
 namespace oofem {
-
-REGISTER_Material( NewtonianFluidMaterial );
+REGISTER_Material(NewtonianFluidMaterial);
 
 int
 NewtonianFluidMaterial :: hasMaterialModeCapability(MaterialMode mode)
@@ -147,7 +146,7 @@ NewtonianFluidMaterial :: computeDeviatoricStressVector(FloatArray &answer, Gaus
 
 void
 NewtonianFluidMaterial :: giveDeviatoricStiffnessMatrix(FloatMatrix &answer, MatResponseMode mode, GaussPoint *gp,
-                                                        TimeStep *atTime)
+                                                        TimeStep *tStep)
 {
     if ( ( gp->giveMaterialMode() == _2dFlow ) ) {
         answer.resize(3, 3);
@@ -205,5 +204,4 @@ NewtonianFluidMaterial :: checkConsistency()
 
     return 1;
 }
-
 } // end namespace oofem

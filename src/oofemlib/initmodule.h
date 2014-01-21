@@ -82,6 +82,3 @@ public:
 };
 } // end namespace oofem
 #endif // initmodule_h
-
-
-

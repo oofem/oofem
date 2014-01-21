@@ -68,7 +68,7 @@ protected:
      * (like those for computing real internal forces or updating the internal state).
      */
     StateCounterType internalVarUpdateStamp;
-    
+
     LinSystSolverType solverType; ///@todo Remove this and use nonlinear methods.
     SparseLinearSystemNM *linSolver; ///@todo Remove this and use nonlinear methods.
 
@@ -85,7 +85,7 @@ protected:
     int lumpedCapacityStab;
 
     /// Associated time function for time step increment.
-    int dtTimeFunction;
+    int dtFunction;
 
     /// Specified times where the problem is solved
     FloatArray discreteTimes;
@@ -117,7 +117,6 @@ public:
     // identification
     virtual const char *giveInputRecordName() const { return _IFT_NonStationaryTransportProblem_Name; }
     virtual const char *giveClassName() const { return "NonStationaryTransportProblem"; }
-    virtual classType giveClassID() const { return NonStationaryTransportProblemClass; }
     virtual fMode giveFormulation() { return TL; }
 
     /// Allows to change number of equations during solution.
@@ -126,19 +125,19 @@ public:
     //Store solution vector to involved DoFs
     //virtual void updateDofUnknownsDictionary(DofManager *dman, TimeStep *tStep);
 
-    virtual int giveUnknownDictHashIndx(ValueModeType mode, TimeStep *stepN);
+    virtual int giveUnknownDictHashIndx(ValueModeType mode, TimeStep *tStep);
 
     virtual void giveElementCharacteristicMatrix(FloatMatrix &answer, int num,
                                                  CharType type, TimeStep *tStep, Domain *domain);
 
-    virtual void printDofOutputAt(FILE *stream, Dof *iDof, TimeStep *atTime);
+    virtual void printDofOutputAt(FILE *stream, Dof *iDof, TimeStep *tStep);
 
     /**
      * Returns time function for time step increment.
      * Used time function should provide step lengths as function of step number.
      * Initial step with number 0 is considered as [ -dt(0), 0 ], first step is [ 0, dt(1) ], ...
      */
-    LoadTimeFunction *giveDtTimeFunction();
+    Function *giveDtFunction();
 
     /**
      * Returns the time step length for given step number n, initial step is number 0.
@@ -180,9 +179,9 @@ protected:
 
     /**
      * Updates IP values on elements.
-     * @param stepN Solution step.
+     * @param tStep Solution step.
      */
-    virtual void updateInternalState(TimeStep *stepN);
+    virtual void updateInternalState(TimeStep *tStep);
 };
 } // end namespace oofem
 #endif // nonstationarytransportproblem_h

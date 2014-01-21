@@ -41,7 +41,6 @@
 #include <vector>
 
 namespace oofem {
-
 /**
  * Class representing the Input Record for OOFEM txt input file format.
  * The input record is represented as string consisting of several fields.
@@ -55,10 +54,10 @@ protected:
      * unread fields can be detected
      */
     Tokenizer tokenizer;
-    std::vector< bool > readFlag;
+    std :: vector< bool >readFlag;
 
     /// Record representation.
-    std::string record;
+    std :: string record;
 
     int lineNumber;
 
@@ -72,31 +71,32 @@ public:
     /// Destructor.
     virtual ~OOFEMTXTInputRecord() { }
     /// Assignment operator.
-    OOFEMTXTInputRecord & operator=(const OOFEMTXTInputRecord &);
+    OOFEMTXTInputRecord &operator=(const OOFEMTXTInputRecord &);
 
     virtual InputRecord *GiveCopy() { return new OOFEMTXTInputRecord(* this); }
 
 public:
     /// Sets the record string.
-    void setRecordString(const std::string &newStr);
+    void setRecordString(const std :: string &newStr);
     /// Returns record string.
-    std::string giveRecordAsString() { return this->record; }
+    virtual std :: string giveRecordAsString() const { return this->record; }
 
     void finish(bool wrn = true);
 
 public:
-    virtual IRResultType giveRecordKeywordField(std::string &answer, int &value);
-    virtual IRResultType giveRecordKeywordField(std::string &answer);
+    virtual IRResultType giveRecordKeywordField(std :: string &answer, int &value);
+    virtual IRResultType giveRecordKeywordField(std :: string &answer);
     virtual IRResultType giveField(int &answer, InputFieldType id);
     virtual IRResultType giveField(double &answer, InputFieldType id);
     virtual IRResultType giveField(bool &answer, InputFieldType id);
-    virtual IRResultType giveField(std::string &answer, InputFieldType id);
+    virtual IRResultType giveField(std :: string &answer, InputFieldType id);
     virtual IRResultType giveField(FloatArray &answer, InputFieldType id);
     virtual IRResultType giveField(IntArray &answer, InputFieldType id);
     virtual IRResultType giveField(FloatMatrix &answer, InputFieldType id);
-    virtual IRResultType giveField(std::vector< std::string > &answer, InputFieldType id);
+    virtual IRResultType giveField(std :: vector< std :: string > &answer, InputFieldType id);
     virtual IRResultType giveField(Dictionary &answer, InputFieldType id);
-    virtual IRResultType giveField(std::list< Range > &answer, InputFieldType id);
+    virtual IRResultType giveField(std :: list< Range > &answer, InputFieldType id);
+    virtual IRResultType giveField(ScalarFunction &answer, InputFieldType id);
 
     virtual bool hasField(InputFieldType id);
     virtual void printYourself();

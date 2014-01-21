@@ -44,7 +44,7 @@
 namespace oofem {
 #define ZERO_MASS  1.E-10   // unit dependent !!!!
 
-REGISTER_EngngModel( DEIDynamic );
+REGISTER_EngngModel(DEIDynamic);
 
 DEIDynamic :: ~DEIDynamic() { }
 
@@ -153,7 +153,7 @@ void DEIDynamic :: solveYourselfAt(TimeStep *tStep)
     FloatArray previousDisplacementVector;
 
 
-    neq = this->giveNumberOfDomainEquations(1, EModelDefaultEquationNumbering());
+    neq = this->giveNumberOfDomainEquations( 1, EModelDefaultEquationNumbering() );
     if ( tStep->giveNumber() == giveNumberOfFirstStep() ) {
         init = 1;
 #ifdef VERBOSE
@@ -282,10 +282,14 @@ void DEIDynamic :: solveYourselfAt(TimeStep *tStep)
     //
     // assembling the element part of load vector
     //
-    loadVector.resize( this->giveNumberOfDomainEquations(1, EModelDefaultEquationNumbering()) );
+    loadVector.resize( this->giveNumberOfDomainEquations( 1, EModelDefaultEquationNumbering() ) );
     loadVector.zero();
     this->assembleVector(loadVector, tStep, EID_MomentumBalance, ExternalForcesVector,
                          VM_Total, EModelDefaultEquationNumbering(), domain);
+#ifdef __PARALLEL_MODE
+    this->updateSharedDofManagers(loadVector, LoadExchangeTag);
+#endif
+
 
     //
     // assembling additional parts of right hand side
@@ -355,13 +359,13 @@ void DEIDynamic :: solveYourselfAt(TimeStep *tStep)
 }
 
 
-void DEIDynamic :: printDofOutputAt(FILE *stream, Dof *iDof, TimeStep *atTime)
+void DEIDynamic :: printDofOutputAt(FILE *stream, Dof *iDof, TimeStep *tStep)
 {
     static char dofchar[] = "dva";
     static ValueModeType dofmodes[] = {
         VM_Total, VM_Velocity, VM_Acceleration
     };
 
-    iDof->printMultipleOutputAt(stream, atTime, dofchar, dofmodes, 3);
+    iDof->printMultipleOutputAt(stream, tStep, dofchar, dofmodes, 3);
 }
 } // end namespace oofem

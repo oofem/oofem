@@ -69,7 +69,7 @@ public:
 
     // Definition & identification
     virtual const char *giveClassName() const { return "Shell7Base"; }
-    virtual classType giveClassID() const { return Shell7BaseClass; }
+//    virtual classType giveClassID() const { return Shell7BaseClass; }
     virtual MaterialMode giveMaterialMode() { return _3dMat; }
 
 
@@ -80,7 +80,7 @@ public:
     virtual Element *ZZNodalRecoveryMI_giveElement() { return this; }
     //void evalInitialCovarBaseVectorsAt(GaussPoint *gp, FloatMatrix &Gcov);
     void evalInitialCovarBaseVectorsAt(FloatArray &lCoords, FloatMatrix &Gcov);
-
+    
 protected:
     virtual Interface *giveInterface(InterfaceType it);
     IntegrationRule **specialIntegrationRulesArray;
@@ -137,15 +137,15 @@ protected:
 
     virtual void evalCovarNormalAt(FloatArray &nCov, FloatArray &lCoords, FloatArray &genEpsC);
     virtual void evalInitialCovarNormalAt(FloatArray &nCov, FloatArray &lCoords);
-    void evalContravarBaseVectorsAt(FloatArray &lCoords, FloatMatrix &gcon,  FloatArray &solVec);
-
+    
     void edgeEvalInitialDirectorAt(FloatArray &lCoords, FloatArray &answer, const int iEdge);
 
     void edgeEvalInitialCovarBaseVectorsAt(FloatArray &lCoords, const int iedge, FloatArray &G1, FloatArray &G3);
 
     void edgeEvalCovarBaseVectorsAt(FloatArray &lCoords, const int iedge, FloatMatrix &gcov, TimeStep *tStep);
 
-    virtual double giveGlobalZcoord(double xi);
+    virtual double giveGlobalZcoord(double xi, FloatArray &lc);
+    virtual double giveGlobalZcoord(FloatArray &lCoords);
     virtual double giveGlobalZcoordInLayer(double xi, int layer);
 
     FloatMatrix giveAxialMatrix(const FloatArray &vec);
@@ -219,9 +219,7 @@ protected:
    //void computeGeneralizedStrainVector(FloatArray &answer, const FloatArray &solVec, const FloatMatrix &B11,
    //                                     const FloatMatrix &B22, const FloatMatrix &B32, const FloatMatrix &B43, const FloatMatrix  &B53);
     void computeGeneralizedStrainVectorNew(FloatArray &answer, const FloatArray &solVec, const FloatMatrix &Bconst);
-    void computeSolutionFields(FloatArray &xbar, FloatArray &m, double &gam, const FloatArray &solVec, const FloatMatrix &N11, const FloatMatrix &N22, const FloatMatrix &N33);
-
-    void edgeGiveUpdatedSolutionVector(FloatArray &answer, const int iedge, TimeStep *tStep);
+    virtual void edgeGiveUpdatedSolutionVector(FloatArray &answer, const int iedge, TimeStep *tStep);
     void edgeGiveInitialSolutionVector(FloatArray &answer, const int iedge);
 
     void giveInitialSolutionVector(FloatArray &answer);
@@ -254,21 +252,13 @@ protected:
 
 
     // N and B matrices
-    int giveFieldSize(SolutionField fieldType);
-    int giveNumberOfFieldDofs(SolutionField fieldType);
-    //virtual void computeFieldBmatrix(FloatMatrix & answer, FloatMatrix & dNdxi, SolutionField);
-    //virtual void computeFieldNmatrix(FloatMatrix & answer, FloatArray & N, SolutionField);
-    //void computeBmatricesAt(GaussPoint *gp, FloatMatrix &B11, FloatMatrix &B22, FloatMatrix &B32, FloatMatrix &B43, FloatMatrix &B53);
-    //void computeNmatricesAt(GaussPoint *gp, FloatMatrix &N11, FloatMatrix &N22, FloatMatrix &N33);
     virtual void computeBmatrixAt(GaussPoint *gp, FloatMatrix &answer, int li = 1, int ui = ALL_STRAINS){};
-//    virtual void computeNmatrixAt(GaussPoint *gp, FloatMatrix &answer){};
-    //virtual void edgeComputeNmatrixAt(GaussPoint *gp, FloatMatrix &answer);
-    //virtual void edgeComputeBmatrixAt(GaussPoint *gp, FloatMatrix &answer, int li = 1, int ui = ALL_STRAINS);
+
     virtual void computeBmatrixAt(FloatArray &lCoords, FloatMatrix &answer, int li = 1, int ui = ALL_STRAINS);
     virtual void computeNmatrixAt(const FloatArray &iLocCoords, FloatMatrix &answer);
     virtual void edgeComputeNmatrixAt(FloatArray &lCoords, FloatMatrix &answer);
 
-    virtual void computeStrainVectorInLayer(FloatArray &answer, const FloatArray &masterGpStrain, GaussPoint *slaveGp, TimeStep *tStep);
+    virtual void computeStrainVectorInLayer( FloatArray &answer, const FloatArray &masterGpStrain, GaussPoint *masterGp, GaussPoint *slaveGp, TimeStep *tStep );
     virtual void edgeComputeBmatrixAt(FloatArray &lCoords, FloatMatrix &answer, int li = 1, int ui = ALL_STRAINS);
 
     // Misc

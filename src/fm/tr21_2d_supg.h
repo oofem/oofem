@@ -72,7 +72,6 @@ public:
     // definition
     virtual const char *giveClassName() const { return "TR21_2D_SUPG"; }
     virtual const char *giveInputRecordName() const { return _IFT_TR21_2D_SUPG_Name; }
-    virtual classType giveClassID() const { return TR21_2D_SUPGClass; }
     virtual MaterialMode giveMaterialMode() { return _2dFlow; }
 
     virtual void giveElementDofIDMask(EquationID, IntArray & answer) const;
@@ -98,9 +97,9 @@ public:
 
 
     virtual void NodalAveragingRecoveryMI_computeNodalValue(FloatArray &answer, int node,
-                                                    InternalStateType type, TimeStep *tStep);
+                                                            InternalStateType type, TimeStep *tStep);
     virtual void NodalAveragingRecoveryMI_computeSideValue(FloatArray &answer, int side,
-                                                   InternalStateType type, TimeStep *tStep);
+                                                           InternalStateType type, TimeStep *tStep);
 
     /// @name Helping functions for computing VOFFractions.
     //@{
@@ -113,11 +112,11 @@ public:
     void computeQuadraticFunct(FloatArray &answer, FloatArray line);
     //@{
 
-    virtual int giveIPValue(FloatArray &answer, GaussPoint *aGaussPoint, InternalStateType type, TimeStep *atTime);
+    virtual int giveIPValue(FloatArray &answer, GaussPoint *gp, InternalStateType type, TimeStep *tStep);
 
 #ifdef __OOFEG
     int giveInternalStateAtNode(FloatArray &answer, InternalStateType type, InternalStateMode mode,
-                                int node, TimeStep *atTime);
+                                int node, TimeStep *tStep);
     // Graphics output
     //void drawYourself(oofegGraphicContext&);
     virtual void drawRawGeometry(oofegGraphicContext &);
@@ -128,28 +127,28 @@ public:
     virtual double computeCriticalTimeStep(TimeStep *tStep);
 
     // three terms for computing their norms due to computing t_supg
-    virtual void computeAdvectionTerm(FloatMatrix &answer, TimeStep *atTime);
-    virtual void computeAdvectionDeltaTerm(FloatMatrix &answer, TimeStep *atTime);
-    virtual void computeMassDeltaTerm(FloatMatrix &answer, TimeStep *atTime);
-    virtual void computeLSICTerm(FloatMatrix &answer, TimeStep *atTime);
+    virtual void computeAdvectionTerm(FloatMatrix &answer, TimeStep *tStep);
+    virtual void computeAdvectionDeltaTerm(FloatMatrix &answer, TimeStep *tStep);
+    virtual void computeMassDeltaTerm(FloatMatrix &answer, TimeStep *tStep);
+    virtual void computeLSICTerm(FloatMatrix &answer, TimeStep *tStep);
 
     virtual Interface *giveInterface(InterfaceType);
 
 protected:
-    virtual void giveLocalVelocityDofMap (IntArray &map);
-    virtual void giveLocalPressureDofMap (IntArray &map);
+    virtual void giveLocalVelocityDofMap(IntArray &map);
+    virtual void giveLocalPressureDofMap(IntArray &map);
 
     virtual void computeGaussPoints();
     virtual void computeNuMatrix(FloatMatrix &answer, GaussPoint *gp);
-    virtual void computeUDotGradUMatrix(FloatMatrix &answer, GaussPoint *gp, TimeStep *atTime);
+    virtual void computeUDotGradUMatrix(FloatMatrix &answer, GaussPoint *gp, TimeStep *tStep);
     virtual void computeBMatrix(FloatMatrix &anwer, GaussPoint *gp);
     virtual void computeDivUMatrix(FloatMatrix &answer, GaussPoint *gp);
     virtual void computeNpMatrix(FloatMatrix &answer, GaussPoint *gp);
     virtual void computeGradPMatrix(FloatMatrix &answer, GaussPoint *gp);
-    virtual void computeDivTauMatrix(FloatMatrix &answer, GaussPoint *gp, TimeStep *atTime);
-    virtual void computeGradUMatrix(FloatMatrix &answer, GaussPoint *gp, TimeStep *atTime);
+    virtual void computeDivTauMatrix(FloatMatrix &answer, GaussPoint *gp, TimeStep *tStep);
+    virtual void computeGradUMatrix(FloatMatrix &answer, GaussPoint *gp, TimeStep *tStep);
     virtual int  giveNumberOfSpatialDimensions();
-    virtual double computeVolumeAround(GaussPoint *aGaussPoint);
+    virtual double computeVolumeAround(GaussPoint *gp);
     virtual void initGeometry();
 
     virtual void updateStabilizationCoeffs(TimeStep *tStep);

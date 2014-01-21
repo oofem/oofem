@@ -38,7 +38,6 @@
 #include "integrationpointstatus.h"
 
 namespace oofem {
-
 class GaussPoint;
 class Dictionary;
 class Domain;
@@ -91,7 +90,7 @@ public:
      * @param d Domain to which new status belongs.
      * @param g Associated integration point.
      */
-    MaterialStatus(int n, Domain *d, GaussPoint *g) : IntegrationPointStatus (n,d,g) {}
+    MaterialStatus(int n, Domain *d, GaussPoint *g) : IntegrationPointStatus(n, d, g) {}
     /// Destructor.
     virtual ~MaterialStatus() { }
     /// Print receiver's output to given stream.

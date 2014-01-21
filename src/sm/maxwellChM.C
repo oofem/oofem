@@ -47,7 +47,7 @@ MaxwellChainMaterial :: MaxwellChainMaterial(int n, Domain *d) : RheoChainMateri
 
 
 void
-MaxwellChainMaterial :: computeCharCoefficients(FloatArray &answer, double atTime)
+MaxwellChainMaterial :: computeCharCoefficients(FloatArray &answer, double tStep)
 {
     int i, j, r, rSize;
     double taui, tauj, sum, tti, ttj, sumRhs;
@@ -63,8 +63,8 @@ MaxwellChainMaterial :: computeCharCoefficients(FloatArray &answer, double atTim
     // a direct call to the relaxation function could be used, if available
     this->computeDiscreteRelaxationFunction(discreteRelaxFunctionVal,
                                             rTimes,
-                                            atTime,
-                                            atTime);
+                                            tStep,
+                                            tStep);
 
     // assemble the matrix of the set of linear equations
     // for computing the optimal moduli
@@ -73,10 +73,10 @@ MaxwellChainMaterial :: computeCharCoefficients(FloatArray &answer, double atTim
         for ( j = 1; j <= this->nUnits; j++ ) {
             tauj = this->giveCharTime(j);
             for ( sum = 0., r = 1; r <= rSize; r++ ) {
-                tti = pow( ( atTime + rTimes.at(r) ) / taui, giveCharTimeExponent(i) ) -
-                      pow( atTime / taui, giveCharTimeExponent(i) );
-                ttj = pow( ( atTime + rTimes.at(r) ) / tauj, giveCharTimeExponent(j) ) -
-                      pow( atTime / tauj, giveCharTimeExponent(j) );
+                tti = pow( ( tStep + rTimes.at(r) ) / taui, giveCharTimeExponent(i) ) -
+                      pow( tStep / taui, giveCharTimeExponent(i) );
+                ttj = pow( ( tStep + rTimes.at(r) ) / tauj, giveCharTimeExponent(j) ) -
+                      pow( tStep / tauj, giveCharTimeExponent(j) );
                 sum += exp(-tti - ttj);
             }
 
@@ -85,8 +85,8 @@ MaxwellChainMaterial :: computeCharCoefficients(FloatArray &answer, double atTim
 
         // assemble rhs
         for ( sumRhs = 0., r = 1; r <= rSize; r++ ) {
-            tti = pow( ( atTime + rTimes.at(r) ) / taui, giveCharTimeExponent(i) ) -
-                  pow( atTime / taui, giveCharTimeExponent(i) );
+            tti = pow( ( tStep + rTimes.at(r) ) / taui, giveCharTimeExponent(i) ) -
+                  pow( tStep / taui, giveCharTimeExponent(i) );
             sumRhs += exp(-tti) * discreteRelaxFunctionVal.at(r);
         }
 
@@ -100,7 +100,7 @@ MaxwellChainMaterial :: computeCharCoefficients(FloatArray &answer, double atTim
 
 
 double
-MaxwellChainMaterial :: giveEModulus(GaussPoint *gp, TimeStep *atTime)
+MaxwellChainMaterial :: giveEModulus(GaussPoint *gp, TimeStep *tStep)
 {
     /*
      * This function returns the incremental modulus for the given time increment.
@@ -112,10 +112,10 @@ MaxwellChainMaterial :: giveEModulus(GaussPoint *gp, TimeStep *atTime)
     double E = 0.0;
 
     ///@warning THREAD UNSAFE!
-    this->updateEparModuli(relMatAge + ( atTime->giveTargetTime() - 0.5 * atTime->giveTimeIncrement() ) / timeFactor);
+    this->updateEparModuli(relMatAge + ( tStep->giveTargetTime() - 0.5 * tStep->giveTimeIncrement() ) / timeFactor);
 
     for ( int mu = 1; mu <= nUnits; mu++ ) {
-        deltaYmu = atTime->giveTimeIncrement() / timeFactor / this->giveCharTime(mu);
+        deltaYmu = tStep->giveTimeIncrement() / timeFactor / this->giveCharTime(mu);
         if ( deltaYmu <= 0.0 ) {
             deltaYmu = 1.e-3;
         }
@@ -135,7 +135,7 @@ MaxwellChainMaterial :: giveEModulus(GaussPoint *gp, TimeStep *atTime)
 
 void
 MaxwellChainMaterial :: giveEigenStrainVector(FloatArray &answer,
-                                              GaussPoint *gp, TimeStep *atTime, ValueModeType mode)
+                                              GaussPoint *gp, TimeStep *tStep, ValueModeType mode)
 //
 // computes the strain due to creep at constant stress during the increment
 // (in fact, the INCREMENT of creep strain is computed for mode == VM_Incremental)
@@ -151,14 +151,14 @@ MaxwellChainMaterial :: giveEigenStrainVector(FloatArray &answer,
     MaxwellChainMaterialStatus *status = static_cast< MaxwellChainMaterialStatus * >( this->giveStatus(gp) );
 
     if ( mode == VM_Incremental ) {
-        this->giveUnitComplianceMatrix(B, gp, atTime);
+        this->giveUnitComplianceMatrix(B, gp, tStep);
         reducedAnswer.resize( B.giveNumberOfRows() );
         reducedAnswer.zero();
 
         for ( mu = 1; mu <= nUnits; mu++ ) {
-            deltaYmu = atTime->giveTimeIncrement() / timeFactor / this->giveCharTime(mu);
+            deltaYmu = tStep->giveTimeIncrement() / timeFactor / this->giveCharTime(mu);
             deltaYmu = pow( deltaYmu, this->giveCharTimeExponent(mu) );
-            
+
             sigmaMu  = status->giveHiddenVarsVector(mu); // JB
 
             if ( sigmaMu.giveSize() ) {
@@ -168,7 +168,7 @@ MaxwellChainMaterial :: giveEigenStrainVector(FloatArray &answer,
             }
         }
 
-        E = this->giveEModulus(gp, atTime);
+        E = this->giveEModulus(gp, tStep);
         reducedAnswer.times(1.0 / E);
 
         answer =  reducedAnswer;
@@ -179,10 +179,10 @@ MaxwellChainMaterial :: giveEigenStrainVector(FloatArray &answer,
 }
 
 
-void 
+void
 MaxwellChainMaterial :: giveRealStressVector(FloatArray &answer, GaussPoint *gp, const FloatArray &reducedStrain, TimeStep *tStep)
 {
-    RheoChainMaterial ::giveRealStressVector(answer, gp, reducedStrain, tStep);
+    RheoChainMaterial :: giveRealStressVector(answer, gp, reducedStrain, tStep);
 
     // Computes hidden variables and stores them as temporary
     this->computeHiddenVars(gp, tStep);
@@ -232,9 +232,9 @@ MaxwellChainMaterial :: computeHiddenVars(GaussPoint *gp, TimeStep *tNow)
         if ( muthHiddenVarsVector.giveSize() ) {
             muthHiddenVarsVector.times( exp(-deltaYmu) );
             muthHiddenVarsVector.add(help);
-            status->letTempHiddenVarsVectorBe( mu, muthHiddenVarsVector);
+            status->letTempHiddenVarsVectorBe(mu, muthHiddenVarsVector);
         } else {
-            status->letTempHiddenVarsVectorBe( mu, help);
+            status->letTempHiddenVarsVectorBe(mu, help);
         }
     }
 }

@@ -38,7 +38,6 @@
 #include "valuemodetype.h"
 
 namespace oofem {
-
 class FloatArray;
 class Domain;
 class TimeStep;
@@ -51,26 +50,27 @@ class TimeStep;
  * Created on: Nov 7, 2013
  * @author Erik Svenning
  */
-class PrimaryVariableMapper {
+class PrimaryVariableMapper
+{
 public:
-	PrimaryVariableMapper();
-	virtual ~PrimaryVariableMapper();
+    PrimaryVariableMapper();
+    virtual ~PrimaryVariableMapper();
 
-	virtual void mapPrimaryVariables(FloatArray &oU, Domain &iOldDom, Domain &iNewDom, ValueModeType iMode, TimeStep &iTStep) = 0;
+    virtual void mapPrimaryVariables(FloatArray &oU, Domain &iOldDom, Domain &iNewDom, ValueModeType iMode, TimeStep &iTStep) = 0;
 };
 
 /**
  * LSPrimaryVariableMapper: Least-squares primary variable mapper.
- * 
+ *
  * @author Erik Svenning
  */
-class LSPrimaryVariableMapper {
+class LSPrimaryVariableMapper
+{
 public:
-	LSPrimaryVariableMapper();
-	virtual ~LSPrimaryVariableMapper();
+    LSPrimaryVariableMapper();
+    virtual ~LSPrimaryVariableMapper();
 
-	virtual void mapPrimaryVariables(FloatArray &oU, Domain &iOldDom, Domain &iNewDom, ValueModeType iMode, TimeStep &iTStep);
+    virtual void mapPrimaryVariables(FloatArray &oU, Domain &iOldDom, Domain &iNewDom, ValueModeType iMode, TimeStep &iTStep);
 };
-
 } /* namespace oofem */
 #endif /* PRIMVARMAPPER_H_ */

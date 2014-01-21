@@ -45,12 +45,11 @@
 #include "staggeredproblem.h"
 #include "classfactory.h"
 #ifdef __TM_MODULE
-#include "latticetransportelement.h"
+ #include "latticetransportelement.h"
 #endif
 
 namespace oofem {
-
-REGISTER_Material( LatticeDamage2d );
+REGISTER_Material(LatticeDamage2d);
 
 LatticeDamage2d :: LatticeDamage2d(int n, Domain *d) : StructuralMaterial(n, d), RandomMaterialExtensionInterface()
 {}
@@ -131,7 +130,7 @@ LatticeDamage2d :: initializeFrom(InputRecord *ir)
 }
 
 void
-LatticeDamage2d :: computeEquivalentStrain(double &tempEquivStrain, const FloatArray &strain, GaussPoint *gp, TimeStep *atTime)
+LatticeDamage2d :: computeEquivalentStrain(double &tempEquivStrain, const FloatArray &strain, GaussPoint *gp, TimeStep *tStep)
 {
     if ( strain.isEmpty() ) {
         tempEquivStrain = 0.;
@@ -241,7 +240,7 @@ LatticeDamage2d :: computeDamageParam(double &omega, double tempKappa, const Flo
 void
 LatticeDamage2d :: computeStressIndependentStrainVector(FloatArray &answer,
                                                         GaussPoint *gp,
-                                                        TimeStep *stepN,
+                                                        TimeStep *tStep,
                                                         ValueModeType mode)
 {
     FloatArray et;
@@ -250,12 +249,12 @@ LatticeDamage2d :: computeStressIndependentStrainVector(FloatArray &answer,
     answer.resize(3);
     answer.zero();
 
-    if ( stepN->giveIntrinsicTime() < this->castingTime ) {
+    if ( tStep->giveIntrinsicTime() < this->castingTime ) {
         return;
     }
 
     if ( lselem ) {
-        lselem->computeResultingIPTemperatureAt(et, stepN, gp, mode);
+        lselem->computeResultingIPTemperatureAt(et, tStep, gp, mode);
     }
 
     if ( et.giveSize() == 0 ) {
@@ -296,7 +295,7 @@ LatticeDamage2d :: initDamaged(double kappa, FloatArray &strainVector, GaussPoin
     //get the random variable from the status
     const double e0 = this->give(e0_ID, gp) * this->e0Mean;
 
-    StructuralMaterial :: giveFullSymVectorForm(fullstrain, strainVector, gp->giveMaterialMode());
+    StructuralMaterial :: giveFullSymVectorForm( fullstrain, strainVector, gp->giveMaterialMode() );
 
     if ( ( kappa > e0 ) && ( status->giveDamage() == 0. ) ) {
         this->computePrincipalValDir(principalStrains, principalDir, fullstrain, principal_strain);
@@ -348,7 +347,7 @@ void
 LatticeDamage2d :: giveRealStressVector(FloatArray &answer,
                                         GaussPoint *gp,
                                         const FloatArray &totalStrain,
-                                        TimeStep *atTime)
+                                        TimeStep *tStep)
 //
 // returns real stress vector in 3d stress space of receiver according to
 // previous level of stress and current
@@ -370,10 +369,10 @@ LatticeDamage2d :: giveRealStressVector(FloatArray &answer,
     FloatArray testStrainOld( status->giveStrainVector() );
 
     // subtract stress independent part
-    this->giveStressDependentPartOfStrainVector(reducedStrain, gp, totalStrain, atTime, VM_Total);
+    this->giveStressDependentPartOfStrainVector(reducedStrain, gp, totalStrain, tStep, VM_Total);
 
     // compute equivalent strain
-    this->computeEquivalentStrain(equivStrain, reducedStrain, gp, atTime);
+    this->computeEquivalentStrain(equivStrain, reducedStrain, gp, tStep);
 
 
     // compute value of loading function if strainLevel crit apply
@@ -413,11 +412,11 @@ LatticeDamage2d :: giveRealStressVector(FloatArray &answer,
     double waterPressure = 0.;
 
 #ifdef __TM_MODULE
-    if (domain->giveEngngModel()->giveMasterEngngModel() ) {
-      (static_cast< StaggeredProblem *>(domain->giveEngngModel()->giveMasterEngngModel()))->giveCoupledModels(coupledModels);
+    if ( domain->giveEngngModel()->giveMasterEngngModel() ) {
+        ( static_cast< StaggeredProblem * >( domain->giveEngngModel()->giveMasterEngngModel() ) )->giveCoupledModels(coupledModels);
         int couplingFlag = ( static_cast< LatticeStructuralElement * >( gp->giveElement() ) )->giveCouplingFlag();
 
-        if ( couplingFlag == 1 && coupledModels.at(2) != 0 && !atTime->isTheFirstStep() ) {
+        if ( couplingFlag == 1 && coupledModels.at(2) != 0 && !tStep->isTheFirstStep() ) {
             int couplingNumber;
             couplingNumber = ( static_cast< LatticeStructuralElement * >( gp->giveElement() ) )->giveCouplingNumber();
             LatticeTransportElement *coupledElement;
@@ -432,7 +431,7 @@ LatticeDamage2d :: giveRealStressVector(FloatArray &answer,
     //Compute dissipation
     double tempDissipation = status->giveDissipation();
     double tempDeltaDissipation = 0.;
-    computeDeltaDissipation(omega, reducedStrain, gp, atTime);
+    computeDeltaDissipation(omega, reducedStrain, gp, tStep);
     tempDissipation += tempDeltaDissipation;
 
     //Compute crack width
@@ -459,7 +458,7 @@ double
 LatticeDamage2d :: computeDeltaDissipation(double omega,
                                            FloatArray &reducedStrain,
                                            GaussPoint *gp,
-                                           TimeStep *atTime)
+                                           TimeStep *tStep)
 {
     LatticeDamage2dStatus *status = static_cast< LatticeDamage2dStatus * >( this->giveStatus(gp) );
     double length = ( static_cast< LatticeStructuralElement * >( gp->giveElement() ) )->giveLength();
@@ -518,7 +517,7 @@ LatticeDamage2d :: computeDeltaDissipation(double omega,
             intermediateStrain(0) = reducedStrainOld(0) + ( k + 1 ) / intervals * ( reducedStrain(0) - reducedStrainOld(0) );
             intermediateStrain(1) = reducedStrainOld(1) + ( k + 1 ) / intervals * ( reducedStrain(1) - reducedStrainOld(1) );
             intermediateStrain(2) = reducedStrainOld(2) + ( k + 1 ) / intervals * ( reducedStrain(2) - reducedStrainOld(2) );
-            this->computeEquivalentStrain(equivStrain, intermediateStrain, gp, atTime);
+            this->computeEquivalentStrain(equivStrain, intermediateStrain, gp, tStep);
             f = equivStrain - oldKappa;
             if ( f > 0 ) {
                 this->computeDamageParam(intermediateOmega, equivStrain, intermediateStrain, gp);
@@ -571,19 +570,19 @@ LatticeDamage2d :: giveInterface(InterfaceType type)
 
 void
 LatticeDamage2d :: giveStiffnessMatrix(FloatMatrix &answer,
-                                            MatResponseMode rMode,
-                                            GaussPoint *gp, TimeStep *atTime)
+                                       MatResponseMode rMode,
+                                       GaussPoint *gp, TimeStep *tStep)
 {
     MaterialMode mMode = gp->giveMaterialMode();
     switch ( mMode ) {
     case _2dLattice:
 
         if ( rMode == ElasticStiffness ) {
-            this->giveElasticStiffnessMatrix(answer, gp, atTime);
+            this->giveElasticStiffnessMatrix(answer, gp, tStep);
         } else if ( rMode == SecantStiffness ) {
-            this->giveSecantStiffnessMatrix(answer, gp, atTime);
+            this->giveSecantStiffnessMatrix(answer, gp, tStep);
         } else if ( rMode == TangentStiffness ) {
-            this->giveSecantStiffnessMatrix(answer, gp, atTime);
+            this->giveSecantStiffnessMatrix(answer, gp, tStep);
         } else {
             _error("Unsupported stiffness mode\n");
         }
@@ -598,7 +597,7 @@ LatticeDamage2d :: giveStiffnessMatrix(FloatMatrix &answer,
 void
 LatticeDamage2d :: giveSecantStiffnessMatrix(FloatMatrix &answer,
                                              GaussPoint *gp,
-                                             TimeStep *atTime)
+                                             TimeStep *tStep)
 {
     LatticeDamage2dStatus *status = static_cast< LatticeDamage2dStatus * >( this->giveStatus(gp) );
 
@@ -620,7 +619,7 @@ LatticeDamage2d :: giveSecantStiffnessMatrix(FloatMatrix &answer,
 void
 LatticeDamage2d :: giveTangentStiffnessMatrix(FloatMatrix &answer,
                                               GaussPoint *gp,
-                                              TimeStep *atTime)
+                                              TimeStep *tStep)
 {
     _error("tangent stiffness not implemented\n");
 }
@@ -630,7 +629,7 @@ LatticeDamage2d :: giveTangentStiffnessMatrix(FloatMatrix &answer,
 void
 LatticeDamage2d :: giveElasticStiffnessMatrix(FloatMatrix &answer,
                                               GaussPoint *gp,
-                                              TimeStep *atTime)
+                                              TimeStep *tStep)
 {
     /* Returns elastic moduli in reduced stress-strain space*/
     answer.resize(3, 3);
@@ -671,7 +670,7 @@ int
 LatticeDamage2d :: giveIPValue(FloatArray &answer,
                                GaussPoint *gp,
                                InternalStateType type,
-                               TimeStep *atTime)
+                               TimeStep *tStep)
 {
     LatticeDamage2dStatus *status = static_cast< LatticeDamage2dStatus * >( this->giveStatus(gp) );
     if ( type == IST_CrackStatuses ) {
@@ -695,7 +694,7 @@ LatticeDamage2d :: giveIPValue(FloatArray &answer,
         answer.at(1) = status->giveDeltaDissipation();
         return 1;
     } else {
-        return StructuralMaterial :: giveIPValue(answer, gp, type, atTime);
+        return StructuralMaterial :: giveIPValue(answer, gp, type, tStep);
     }
 }
 
@@ -751,9 +750,9 @@ LatticeDamage2dStatus :: printOutputAt(FILE *file, TimeStep *tStep)
 
 
 void
-LatticeDamage2dStatus :: updateYourself(TimeStep *atTime)
+LatticeDamage2dStatus :: updateYourself(TimeStep *tStep)
 {
-    StructuralMaterialStatus :: updateYourself(atTime);
+    StructuralMaterialStatus :: updateYourself(tStep);
 
     this->reducedStrain = this->tempReducedStrain;
     this->kappa = this->tempKappa;
@@ -770,7 +769,7 @@ Interface *
 LatticeDamage2dStatus :: giveInterface(InterfaceType type)
 {
     if ( type == RandomMaterialStatusExtensionInterfaceType ) {
-        return static_cast< RandomMaterialStatusExtensionInterface * >(this);
+        return static_cast< RandomMaterialStatusExtensionInterface * >( this );
     } else {
         return NULL;
     }

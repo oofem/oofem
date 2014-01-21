@@ -47,11 +47,10 @@
 #define _IFT_QWedge_materialCoordinateSystem "matcs" ///< [optional] Experimental support for material directions
 
 namespace oofem {
-
 /**
  * This class implements an Quadratic 3d  15 - node structural finite element.
  * Each node has 3 degrees of freedom.
- * 
+ *
  * @author Mikael Öhman (among others)
  */
 class QWedge : public NLStructuralElement, public SPRNodalRecoveryModelInterface, public ZZNodalRecoveryModelInterface, public NodalAveragingRecoveryModelInterface
@@ -66,7 +65,7 @@ public:
     QWedge(int, Domain *);
     virtual ~QWedge() {}
 
-    virtual FEInterpolation *giveInterpolation() const { return &interpolation; }
+    virtual FEInterpolation *giveInterpolation() const { return & interpolation; }
 
     virtual IRResultType initializeFrom(InputRecord *ir);
     virtual void giveDofManDofIDMask(int inode, EquationID ut, IntArray &answer) const;
@@ -103,17 +102,15 @@ public:
     // definition & identification
     virtual const char *giveInputRecordName() const { return _IFT_QWedge_Name; }
     virtual const char *giveClassName() const { return "QWedge"; }
-    virtual classType giveClassID() const { return QWedgeClass; }
     virtual int computeNumberOfDofs() { return 45; }
     virtual MaterialMode giveMaterialMode();
 
 protected:
     virtual void computeGaussPoints();
-    
+
     virtual void computeBmatrixAt(GaussPoint *, FloatMatrix &, int = 1, int = ALL_STRAINS);
     //virtual void computeBFmatrixAt(GaussPoint *, FloatMatrix &);
     virtual void computeBHmatrixAt(GaussPoint *, FloatMatrix &);
-
 };
 } // end namespace oofem
 #endif

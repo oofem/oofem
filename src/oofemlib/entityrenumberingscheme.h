@@ -68,7 +68,7 @@ public:
 template< class TClass >class SpecificEntityRenumberingFunctor : public EntityRenumberingFunctor
 {
 private:
-     /// Pointer to member function
+    /// Pointer to member function
     int ( TClass :: *fpt )( int, EntityRenumberingScheme );
     /// Pointer to object
     TClass *pt2Object;
@@ -78,8 +78,10 @@ public:
     // constructor - takes pointer to an object and pointer to a member and stores
     // them in two private variables
     SpecificEntityRenumberingFunctor( TClass *_pt2Object, int( TClass :: *_fpt )( int, EntityRenumberingScheme ) )
-    { pt2Object = _pt2Object;
-      fpt = _fpt; };
+    {
+        pt2Object = _pt2Object;
+        fpt = _fpt;
+    };
 
     virtual int operator()(int n, EntityRenumberingScheme ers)
     { return ( * pt2Object.*fpt )(n, ers); };
@@ -118,4 +120,3 @@ public:
 };
 } // end namespace oofem
 #endif // entityrenumberingscheme_h
-

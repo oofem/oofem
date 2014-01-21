@@ -39,7 +39,6 @@
 #include <list>
 
 namespace oofem {
-
 class InputRecord;
 
 /**
@@ -54,9 +53,9 @@ class OOFEM_EXPORT DynamicDataReader : public DataReader
 {
 protected:
     /// Keeps track of the current position in the list
-    std::list<InputRecord*>::iterator it;
+    std :: list< InputRecord * > :: iterator it;
     /// All record types will be appended to this list, no split in terms of InputRecordType is implemented yet.
-    std::list<InputRecord*> recordList;
+    std :: list< InputRecord * >recordList;
 
 public:
     /// Constructor.
@@ -74,18 +73,18 @@ public:
     /**
      * Sets the output file name. Used for writing input files.
      */
-    void setOutputFileName(const std::string &outputFileName) { this->outputFileName = outputFileName; }
+    void setOutputFileName(const std :: string &outputFileName) { this->outputFileName = outputFileName; }
     /**
      * Sets the description line. Used for writing input files.
      */
-    void setDescription(const std::string &description) { this->description = description; }
+    void setDescription(const std :: string &description) { this->description = description; }
 
     virtual InputRecord *giveInputRecord(InputRecordType, int recordId);
     virtual void finish();
     virtual const char *giveDataSourceName() const { return ""; }
 
     /**
-     * Writes all input records to file. 
+     * Writes all input records to file.
      * @param fileName Name of file to dump data to.
      */
     void writeToFile(const char *fileName);

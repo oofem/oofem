@@ -61,8 +61,7 @@
 #endif
 
 namespace oofem {
-
-REGISTER_DofManager( Node );
+REGISTER_DofManager(Node);
 
 Node :: Node(int n, Domain *aDomain) :
     DofManager(n, aDomain), coordinates()
@@ -160,19 +159,18 @@ IRResultType Node :: initializeFrom(InputRecord *ir)
 
 void Node :: giveInputRecord(DynamicInputRecord &input)
 {
-	DofManager::giveInputRecord(input);
+    DofManager :: giveInputRecord(input);
 
     input.setField(coordinates, _IFT_Node_coords);
 
-    if(localCoordinateSystem != NULL) {
-        input.setField(*localCoordinateSystem, _IFT_Node_lcs);
+    if ( localCoordinateSystem != NULL ) {
+        input.setField(* localCoordinateSystem, _IFT_Node_lcs);
     }
-
 }
 
 
 void
-Node :: computeLoadVector(FloatArray &answer, Load *load, CharType type, TimeStep *stepN, ValueModeType mode)
+Node :: computeLoadVector(FloatArray &answer, Load *load, CharType type, TimeStep *tStep, ValueModeType mode)
 {
     if ( type != ExternalForcesVector ) {
         answer.resize(0);
@@ -188,7 +186,7 @@ Node :: computeLoadVector(FloatArray &answer, Load *load, CharType type, TimeSte
         _error("computeLoadVectorAt: incompatible load type applied");
     }
 
-    loadN->computeComponentArrayAt(answer, stepN, mode); // can be NULL
+    loadN->computeComponentArrayAt(answer, tStep, mode); // can be NULL
     // Transform from Global to Local c.s.
     if ( loadN->giveCoordSystMode() == NodalLoad :: CST_Global ) {
         IntArray dofIDarry(0);
@@ -281,7 +279,7 @@ Node :: giveUpdatedCoordinate(int ic, TimeStep *tStep, double scale)
             // in to global c.s and then to add them to global coordinates.
             //
             FloatMatrix *T = this->giveLocalCoordinateTriplet();
-            FloatArray displacements(T->giveNumberOfRows());
+            FloatArray displacements( T->giveNumberOfRows() );
             displacements.zero();
 
             for ( int i = 1; i <= numberOfDofs; i++ ) {
@@ -321,7 +319,7 @@ Node :: giveUpdatedCoordinates(FloatArray &coord, TimeStep *tStep, double scale)
         FloatArray vec;
         coord = this->coordinates;
         this->giveUnknownVectorOfType(vec, DisplacementVector, VM_Total, tStep);
-        for (int i = 1; i <= coord.giveSize(); i++) {
+        for ( int i = 1; i <= coord.giveSize(); i++ ) {
             coord.at(i) += scale * vec.at(i);
         }
     }
@@ -458,7 +456,7 @@ Node :: computeL2GTransformation(FloatMatrix &answer, const IntArray &dofIDArry)
                         id2 = giveDof(j)->giveDofID();
                         if ( ( id2 == D_u ) || ( id2 == D_v ) || ( id2 == D_w ) ) {
                             answer.at(j, i) = localCoordinateSystem->at( ( int ) ( id ) - ( int ) ( D_u ) + 1,
-                                                                        ( int ) ( id2 ) - ( int ) ( D_u ) + 1 );
+                                                                         ( int ) ( id2 ) - ( int ) ( D_u ) + 1 );
                         }
                     }
 
@@ -471,7 +469,7 @@ Node :: computeL2GTransformation(FloatMatrix &answer, const IntArray &dofIDArry)
                         id2 = giveDof(j)->giveDofID();
                         if ( ( id2 == V_u ) || ( id2 == V_v ) || ( id2 == V_w ) ) {
                             answer.at(j, i) = localCoordinateSystem->at( ( int ) ( id ) - ( int ) ( V_u ) + 1,
-                                                                        ( int ) ( id2 ) - ( int ) ( V_u ) + 1 );
+                                                                         ( int ) ( id2 ) - ( int ) ( V_u ) + 1 );
                         }
                     }
 
@@ -484,7 +482,7 @@ Node :: computeL2GTransformation(FloatMatrix &answer, const IntArray &dofIDArry)
                         id2 = giveDof(j)->giveDofID();
                         if ( ( id2 == R_u ) || ( id2 == R_v ) || ( id2 == R_w ) ) {
                             answer.at(j, i) = localCoordinateSystem->at( ( int ) ( id ) - ( int ) ( R_u ) + 1,
-                                                                        ( int ) ( id2 ) - ( int ) ( R_u ) + 1 );
+                                                                         ( int ) ( id2 ) - ( int ) ( R_u ) + 1 );
                         }
                     }
 
@@ -556,7 +554,6 @@ Node :: computeL2GTransformation(FloatMatrix &answer, const IntArray &dofIDArry)
                 }
             }
         } // end map is provided -> assemble for requested dofs
-
     } // end localCoordinateSystem defined
     return true;
 }
@@ -664,7 +661,7 @@ Node :: drawYourself(oofegGraphicContext &gc)
         if ( this->giveDomain()->hasXfemManager() ) {
             XfemManager *xf = this->giveDomain()->giveXfemManager();
             for ( int i = 1; i <= xf->giveNumberOfEnrichmentItems(); i++ ) {
-                if ( xf->giveEnrichmentItem(i)->isDofManEnriched( *this ) ) {
+                if ( xf->giveEnrichmentItem(i)->isDofManEnriched(* this) ) {
                     EASValsSetMType(SQUARE_MARKER);
                 }
             }
@@ -830,8 +827,8 @@ Node :: drawYourself(oofegGraphicContext &gc)
             FloatMatrix t;
             IntArray dofIDArry(0);
             computeLoadVectorAt(load, tStep, VM_Total);
-            if (computeL2GTransformation(t, dofIDArry)) {
-                load.rotatedWith(t,'n');
+            if ( computeL2GTransformation(t, dofIDArry) ) {
+                load.rotatedWith(t, 'n');
             }
 
             FloatArray force(3), momentum(3);

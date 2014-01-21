@@ -47,14 +47,13 @@
 #define _IFT_LWedge_Name "lwedge"
 
 namespace oofem {
-
 /**
  * This class implements a Linear 3d  6 - node elasticity finite element.
- * 
+ *
  * Each node has 3 degrees of freedom.
  * One single additional attribute is needed for Gauss integration purpose :
  * 'jacobianMatrix'. This 3x3 matrix contains polynomials.
- */    
+ */
 class LWedge : public NLStructuralElement, public SPRNodalRecoveryModelInterface, public ZZNodalRecoveryModelInterface, public NodalAveragingRecoveryModelInterface
 {
 protected:
@@ -64,12 +63,12 @@ public:
     LWedge(int, Domain *);
     virtual ~LWedge() {}
 
-    virtual FEInterpolation *giveInterpolation() const { return &interpolation; }
+    virtual FEInterpolation *giveInterpolation() const { return & interpolation; }
 
     virtual IRResultType initializeFrom(InputRecord *ir);
     virtual void giveDofManDofIDMask(int inode, EquationID ut, IntArray &answer) const;
     virtual double computeVolumeAround(GaussPoint *);
-   
+
     virtual Interface *giveInterface(InterfaceType);
     virtual int testElementExtension(ElementExtension ext) { return ( ( ext == Element_SurfaceLoadSupport ) ? 1 : 0 ); }
     virtual int giveApproxOrder() { return 1; }
@@ -92,7 +91,6 @@ public:
     //
     virtual const char *giveInputRecordName() const { return _IFT_LWedge_Name; }
     virtual const char *giveClassName() const { return "LWedge"; }
-    virtual classType giveClassID() const { return LWedgeClass; }
     virtual int computeNumberOfDofs() { return 18; }
     virtual MaterialMode giveMaterialMode();
 

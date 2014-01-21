@@ -80,8 +80,8 @@ MisesMat :: initializeFrom(InputRecord *ir)
 
     StructuralMaterial :: initializeFrom(ir);
     linearElasticMaterial->initializeFrom(ir); // takes care of elastic constants
-    G = static_cast< IsotropicLinearElasticMaterial * >(linearElasticMaterial)->giveShearModulus();
-    K = static_cast< IsotropicLinearElasticMaterial * >(linearElasticMaterial)->giveBulkModulus();
+    G = static_cast< IsotropicLinearElasticMaterial * >( linearElasticMaterial )->giveShearModulus();
+    K = static_cast< IsotropicLinearElasticMaterial * >( linearElasticMaterial )->giveBulkModulus();
 
     IR_GIVE_FIELD(ir, sig0, _IFT_MisesMat_sig0); // uniaxial yield stress
 
@@ -111,13 +111,13 @@ void
 MisesMat :: giveRealStressVector(FloatArray &answer,
                                  GaussPoint *gp,
                                  const FloatArray &totalStrain,
-                                 TimeStep *atTime)
+                                 TimeStep *tStep)
 {
     MisesMatStatus *status = static_cast< MisesMatStatus * >( this->giveStatus(gp) );
     this->initTempStatus(gp);
     this->initGpForNewStep(gp);
     this->performPlasticityReturn(gp, totalStrain);
-    double omega = computeDamage(gp, atTime);
+    double omega = computeDamage(gp, tStep);
     StressVector effStress(_3dMat), totalStress(_3dMat);
     status->giveTempEffectiveStress(effStress);
     totalStress = effStress;
@@ -126,7 +126,6 @@ MisesMat :: giveRealStressVector(FloatArray &answer,
     status->setTempDamage(omega);
     status->letTempStrainVectorBe(totalStrain);
     status->letTempStressVectorBe(answer);
-
 }
 
 
@@ -134,7 +133,7 @@ void
 MisesMat :: giveFirstPKStressVector_3d(FloatArray &answer,
                                        GaussPoint *gp,
                                        const FloatArray &totalDefGradOOFEM,
-                                       TimeStep *atTime)
+                                       TimeStep *tStep)
 {
     MisesMatStatus *status = static_cast< MisesMatStatus * >( this->giveStatus(gp) );
 
@@ -381,12 +380,12 @@ MisesMat :: computeDamageParamPrime(double tempKappa)
 
 
 double
-MisesMat :: computeDamage(GaussPoint *gp,  TimeStep *atTime)
+MisesMat :: computeDamage(GaussPoint *gp,  TimeStep *tStep)
 {
     double tempKappa, dam;
     MisesMatStatus *status = static_cast< MisesMatStatus * >( this->giveStatus(gp) );
     dam = status->giveDamage();
-    computeCumPlastStrain(tempKappa, gp, atTime);
+    computeCumPlastStrain(tempKappa, gp, tStep);
     double tempDam = computeDamageParam(tempKappa);
     if ( dam > tempDam ) {
         tempDam = dam;
@@ -396,24 +395,24 @@ MisesMat :: computeDamage(GaussPoint *gp,  TimeStep *atTime)
 }
 
 
-void MisesMat :: computeCumPlastStrain(double &tempKappa, GaussPoint *gp, TimeStep *atTime)
+void MisesMat :: computeCumPlastStrain(double &tempKappa, GaussPoint *gp, TimeStep *tStep)
 {
     MisesMatStatus *status = static_cast< MisesMatStatus * >( this->giveStatus(gp) );
     tempKappa = status->giveTempCumulativePlasticStrain();
 }
 
 void
-MisesMat :: give3dMaterialStiffnessMatrix(FloatMatrix &answer, MatResponseMode mode, GaussPoint *gp, TimeStep *atTime)
+MisesMat :: give3dMaterialStiffnessMatrix(FloatMatrix &answer, MatResponseMode mode, GaussPoint *gp, TimeStep *tStep)
 {
-    give3dSSMaterialStiffnessMatrix(answer, mode, gp, atTime);
+    give3dSSMaterialStiffnessMatrix(answer, mode, gp, tStep);
 }
 
 void
-MisesMat :: give3dMaterialStiffnessMatrix_dPdF(FloatMatrix &answer, MatResponseMode mode, GaussPoint *gp, TimeStep *atTime)
+MisesMat :: give3dMaterialStiffnessMatrix_dPdF(FloatMatrix &answer, MatResponseMode mode, GaussPoint *gp, TimeStep *tStep)
 {
     ///@todo Directly compute dPdF instead.
     FloatMatrix dSdE;
-    this->give3dLSMaterialStiffnessMatrix(dSdE, mode, gp, atTime);
+    this->give3dLSMaterialStiffnessMatrix(dSdE, mode, gp, tStep);
     this->give_dPdF_from(dSdE, answer, gp);
 }
 
@@ -422,10 +421,10 @@ void
 MisesMat :: give3dSSMaterialStiffnessMatrix(FloatMatrix &answer,
                                             MatResponseMode mode,
                                             GaussPoint *gp,
-                                            TimeStep *atTime)
+                                            TimeStep *tStep)
 {
     // start from the elastic stiffness
-    this->giveLinearElasticMaterial()->give3dMaterialStiffnessMatrix(answer, mode, gp, atTime);
+    this->giveLinearElasticMaterial()->give3dMaterialStiffnessMatrix(answer, mode, gp, tStep);
     if ( mode != TangentStiffness ) {
         return;
     }
@@ -483,9 +482,9 @@ void
 MisesMat :: give1dStressStiffMtrx(FloatMatrix &answer,
                                   MatResponseMode mode,
                                   GaussPoint *gp,
-                                  TimeStep *atTime)
+                                  TimeStep *tStep)
 {
-    this->giveLinearElasticMaterial()->giveStiffnessMatrix(answer, mode, gp, atTime);
+    this->giveLinearElasticMaterial()->giveStiffnessMatrix(answer, mode, gp, tStep);
     FloatArray stressVector;
     MisesMatStatus *status = static_cast< MisesMatStatus * >( this->giveStatus(gp) );
     double kappa = status->giveCumulativePlasticStrain();
@@ -515,9 +514,9 @@ void
 MisesMat :: givePlaneStrainStiffMtrx(FloatMatrix &answer,
                                      MatResponseMode mode,
                                      GaussPoint *gp,
-                                     TimeStep *atTime)
+                                     TimeStep *tStep)
 {
-    this->giveLinearElasticMaterial()->giveStiffnessMatrix(answer, mode, gp, atTime);
+    this->giveLinearElasticMaterial()->giveStiffnessMatrix(answer, mode, gp, tStep);
     if ( mode != TangentStiffness ) {
         return;
     }
@@ -574,7 +573,7 @@ MisesMat :: givePlaneStrainStiffMtrx(FloatMatrix &answer,
 }
 
 void
-MisesMat :: give3dLSMaterialStiffnessMatrix(FloatMatrix &answer, MatResponseMode mode, GaussPoint *gp, TimeStep *atTime)
+MisesMat :: give3dLSMaterialStiffnessMatrix(FloatMatrix &answer, MatResponseMode mode, GaussPoint *gp, TimeStep *tStep)
 {
     MisesMatStatus *status = static_cast< MisesMatStatus * >( this->giveStatus(gp) );
     // start from the elastic stiffness
@@ -687,7 +686,6 @@ MisesMat :: give3dLSMaterialStiffnessMatrix(FloatMatrix &answer, MatResponseMode
     }
 
 
-    //StructuralCrossSection *crossSection = ( StructuralCrossSection * ) ( gp->giveElement()->giveCrossSection() );
     double kappa = status->giveCumulativePlasticStrain();
     // increment of cumulative plastic strain as an indicator of plastic loading
     double dKappa = sqrt(3. / 2.) * ( status->giveTempCumulativePlasticStrain() - kappa );
@@ -769,13 +767,13 @@ MisesMat :: give3dLSMaterialStiffnessMatrix(FloatMatrix &answer, MatResponseMode
 #endif
 
 int
-MisesMat :: giveIPValue(FloatArray &answer, GaussPoint *aGaussPoint, InternalStateType type, TimeStep *atTime)
+MisesMat :: giveIPValue(FloatArray &answer, GaussPoint *gp, InternalStateType type, TimeStep *tStep)
 {
-    MisesMatStatus *status = static_cast< MisesMatStatus * >( this->giveStatus(aGaussPoint) );
+    MisesMatStatus *status = static_cast< MisesMatStatus * >( this->giveStatus(gp) );
     if ( type == IST_PlasticStrainTensor ) {
         const FloatArray &ep = status->givePlasDef();
         ///@todo Fix this so that it doesn't just fill in zeros for plane stress:
-        StructuralMaterial :: giveFullSymVectorForm(answer, ep, aGaussPoint->giveMaterialMode());
+        StructuralMaterial :: giveFullSymVectorForm( answer, ep, gp->giveMaterialMode() );
         return 1;
     } else if ( type == IST_MaxEquivalentStrainLevel ) {
         answer.resize(1);
@@ -786,7 +784,7 @@ MisesMat :: giveIPValue(FloatArray &answer, GaussPoint *aGaussPoint, InternalSta
         answer.at(1) = status->giveDamage();
         return 1;
     } else {
-        return StructuralMaterial :: giveIPValue(answer, aGaussPoint, type, atTime);
+        return StructuralMaterial :: giveIPValue(answer, gp, type, tStep);
     }
 }
 
@@ -888,9 +886,9 @@ void MisesMatStatus :: initTempStatus()
 
 // updates internal variables when equilibrium is reached
 void
-MisesMatStatus :: updateYourself(TimeStep *atTime)
+MisesMatStatus :: updateYourself(TimeStep *tStep)
 {
-    StructuralMaterialStatus :: updateYourself(atTime);
+    StructuralMaterialStatus :: updateYourself(tStep);
 
     plasticStrain = tempPlasticStrain;
     kappa = tempKappa;

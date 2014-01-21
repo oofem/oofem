@@ -51,17 +51,17 @@ class OOFEM_EXPORT DataReader
 {
 protected:
     /// Output file name (first line in OOFEM input files).
-    std::string outputFileName;
+    std :: string outputFileName;
     /// Description line (second line in OOFEM input files).
-    std::string description;
+    std :: string description;
 
 public:
     /// Determines the type of input record.
     enum InputRecordType {
         IR_domainRec, IR_outManRec, IR_domainCompRec, IR_geometryRec, IR_gbpmRec,
         IR_emodelRec, IR_mstepRec, IR_expModuleRec, IR_dofmanRec, IR_elemRec,
-        IR_crosssectRec, IR_matRec, IR_nlocBarRec, IR_bcRec, IR_icRec, IR_ltfRec, IR_setRec,
-        IR_nRandomFieldGenRec, IR_xfemManRec, IR_enrichFuncRec, IR_geoRec, IR_enrichItemRec, 
+        IR_crosssectRec, IR_matRec, IR_nlocBarRec, IR_bcRec, IR_icRec, IR_funcRec, IR_setRec,
+        IR_nRandomFieldGenRec, IR_xfemManRec, IR_enrichFuncRec, IR_geoRec, IR_enrichItemRec,
         IR_enrichFrontRec, IR_propagationLawRec, IR_fracManRec, IR_failCritRec
     };
 
@@ -82,9 +82,9 @@ public:
     virtual void finish() = 0;
 
     /// Gives the output file name
-    std::string giveOutputFileName() { return this->outputFileName; }
+    std :: string giveOutputFileName() { return this->outputFileName; }
     /// Gives the problem description
-    std::string giveDescription() { return this->description; }
+    std :: string giveDescription() { return this->description; }
 
     /// Prints the name (shortened) of data source.
     virtual const char *giveDataSourceName() const = 0;

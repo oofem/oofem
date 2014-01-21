@@ -65,7 +65,7 @@ HydrationModelStatus :: initTempStatus()
 }
 
 void
-HydrationModelStatus :: updateYourself(TimeStep *atTime)
+HydrationModelStatus :: updateYourself(TimeStep *tStep)
 // update after new equilibrium state reached - prepare status for saving context and for next time increment
 {
     hydrationDegree = tempHydrationDegree;
@@ -246,7 +246,7 @@ HydrationModel :: dAdksi(double ksi)
     enaksi = exp(-ba * ksi);
 
     return ( aa * ( ca * da * ksinad * ( enaksi - 1 ) / ksi + ba * enaksi * ( ca * ksinad + 1 ) ) /
-            pow(1 + ca * ksinad, 2) );
+             pow(1 + ca * ksinad, 2) );
 }
 
 double
@@ -310,21 +310,21 @@ HydrationModel :: giveStatus(GaussPoint *gp) const
 }
 
 void
-HydrationModel :: computeInternalSourceVector(FloatArray &val, GaussPoint *gp, TimeStep *atTime, ValueModeType mode)
+HydrationModel :: computeInternalSourceVector(FloatArray &val, GaussPoint *gp, TimeStep *tStep, ValueModeType mode)
 /*
- * Returns the hydration heat generated in gp during time step atTime.
+ * Returns the hydration heat generated in gp during time step tStep.
  * Can be overriden to return also water consumption as second component of the internal source vector.
  */
 // !!! Works only for current TimeStep, no check done
 // !!! Should suffice to return val(1) without moisture analysis.
 {
     val.resize(2);
-    val(0) = le * giveHydrationDegree(gp, atTime, mode); // heat SOURCE
-    val(1) = -we *giveHydrationDegree(gp, atTime, mode); // water CONSUMPTION
+    val(0) = le * giveHydrationDegree(gp, tStep, mode); // heat SOURCE
+    val(1) = -we *giveHydrationDegree(gp, tStep, mode); // water CONSUMPTION
 }
 
 double
-HydrationModel :: giveCharacteristicValue(const FloatArray &vec, MatResponseMode rmode, GaussPoint *gp, TimeStep *atTime)
+HydrationModel :: giveCharacteristicValue(const FloatArray &vec, MatResponseMode rmode, GaussPoint *gp, TimeStep *tStep)
 // Transport status needs to be obtained from master status, it's better to pass as a parameter
 // to enable usage from structural material
 {
@@ -335,7 +335,7 @@ HydrationModel :: giveCharacteristicValue(const FloatArray &vec, MatResponseMode
             _error("giveCharacteristicValue: undefined state vector.");
         }
 
-        answer = computeIntSource(vec, gp, atTime, rmode);
+        answer = computeIntSource(vec, gp, tStep, rmode);
     } else {
         _error("giveCharacteristicValue: wrong MatResponseMode.");
     }
@@ -383,7 +383,7 @@ HydrationModel :: computeHydrationDegreeIncrement(double ksi, double T, double h
 }
 
 double
-HydrationModel :: computeIntSource(const FloatArray &vec, GaussPoint *gp, TimeStep *atTime, MatResponseMode rmode)
+HydrationModel :: computeIntSource(const FloatArray &vec, GaussPoint *gp, TimeStep *tStep, MatResponseMode rmode)
 /*
  * Computes and returns the derivatives of the material-generated Internal Source with respect to the tm state vector.
  * Used in IntSourceLHS matrix for quadratic convergency of global iteration.
@@ -398,11 +398,11 @@ HydrationModel :: computeIntSource(const FloatArray &vec, GaussPoint *gp, TimeSt
 {
     // prepare ksi, T, h, dt
     double ksi, T, h, dt;
-    ksi = giveHydrationDegree(gp, atTime, VM_Total);
+    ksi = giveHydrationDegree(gp, tStep, VM_Total);
     T = vec(0);
     h = vec(1);
     // !!! timeScale
-    dt = atTime->giveTimeIncrement() * timeScale;
+    dt = tStep->giveTimeIncrement() * timeScale;
 
     if ( ksi < 1.0 ) {
         switch ( rmode ) {
@@ -425,7 +425,7 @@ HydrationModel :: computeIntSource(const FloatArray &vec, GaussPoint *gp, TimeSt
 // === public services ===
 
 double
-HydrationModel :: giveHydrationDegree(GaussPoint *gp, TimeStep *atTime, ValueModeType mode)
+HydrationModel :: giveHydrationDegree(GaussPoint *gp, TimeStep *tStep, ValueModeType mode)
 // returns the hydration degree in integration point gp
 {
     HydrationModelStatus *status = static_cast< HydrationModelStatus * >( giveStatus(gp) );
@@ -438,8 +438,8 @@ HydrationModel :: giveHydrationDegree(GaussPoint *gp, TimeStep *atTime, ValueMod
 }
 
 void
-HydrationModel :: updateInternalState(const FloatArray &vec, GaussPoint *gp, TimeStep *atTime)
-/* 
+HydrationModel :: updateInternalState(const FloatArray &vec, GaussPoint *gp, TimeStep *tStep)
+/*
  * Recalculates the hydration degree according to the given new state vector and time increment, using equilib status
  *  State vector is supposed to contain [1]->temperature, [2]->relative humidity!
  *  caller should ensure that this is called only when state vector is changed
@@ -467,8 +467,8 @@ HydrationModel :: updateInternalState(const FloatArray &vec, GaussPoint *gp, Tim
     }
 
     // !!! timeScale
-    if ( atTime->giveTimeIncrement() > 0. ) {
-        dksi = computeHydrationDegreeIncrement(ksi, T, h, atTime->giveTimeIncrement() * timeScale);
+    if ( tStep->giveTimeIncrement() > 0. ) {
+        dksi = computeHydrationDegreeIncrement(ksi, T, h, tStep->giveTimeIncrement() * timeScale);
     } else {
         dksi = 0.;
     }
@@ -578,18 +578,18 @@ HydrationModel :: CreateStatus(GaussPoint *gp) const
 
 // ======= HydrationModelStatusInterface implementation =======
 void
-HydrationModelStatusInterface :: updateYourself(TimeStep *atTime)
+HydrationModelStatusInterface :: updateYourself(TimeStep *tStep)
 {
     if ( hydrationModelStatus ) {
-        hydrationModelStatus->updateYourself(atTime);
+        hydrationModelStatus->updateYourself(tStep);
     }
 }
 
 void
-HydrationModelStatusInterface :: printOutputAt(FILE *file, TimeStep *atTime)
+HydrationModelStatusInterface :: printOutputAt(FILE *file, TimeStep *tStep)
 {
     if ( hydrationModelStatus ) {
-        hydrationModelStatus->printOutputAt(file, atTime);
+        hydrationModelStatus->printOutputAt(file, tStep);
     }
 }
 
@@ -635,14 +635,14 @@ HydrationModelInterface :: initializeFrom(InputRecord *ir)
 }
 
 void
-HydrationModelInterface :: updateInternalState(const FloatArray &vec, GaussPoint *gp, TimeStep *atTime)
+HydrationModelInterface :: updateInternalState(const FloatArray &vec, GaussPoint *gp, TimeStep *tStep)
 {
     if ( hydrationModel ) {
-        TimeStep *hydraTime = new TimeStep( ( const TimeStep ) *atTime );
+        TimeStep *hydraTime = new TimeStep( ( const TimeStep ) * tStep );
         int notime = 0;
-        if ( atTime->giveTargetTime() - atTime->giveTimeIncrement() < castAt ) {
-            if ( atTime->giveTargetTime() >= castAt ) {
-                hydraTime->setTimeIncrement(atTime->giveTargetTime() - castAt);
+        if ( tStep->giveTargetTime() - tStep->giveTimeIncrement() < castAt ) {
+            if ( tStep->giveTargetTime() >= castAt ) {
+                hydraTime->setTimeIncrement(tStep->giveTargetTime() - castAt);
             } else {
                 notime = 1;
             }
@@ -657,13 +657,12 @@ HydrationModelInterface :: updateInternalState(const FloatArray &vec, GaussPoint
 }
 
 double
-HydrationModelInterface :: giveHydrationDegree(GaussPoint *gp, TimeStep *atTime, ValueModeType mode)
+HydrationModelInterface :: giveHydrationDegree(GaussPoint *gp, TimeStep *tStep, ValueModeType mode)
 {
     if ( hydrationModel ) {
-        return hydrationModel->giveHydrationDegree(gp, atTime, mode);
+        return hydrationModel->giveHydrationDegree(gp, tStep, mode);
     } else {
         return constantHydrationDegree;
     }
 }
-
 } // end namespace oofem

@@ -72,7 +72,7 @@ protected:
     /// List of primary unknowns to export.
     IntArray primaryVarsToExport;
     /// List of POIs.
-    std::list< POI_dataType >POIList;
+    std :: list< POI_dataType >POIList;
 
     /// Smoother type.
     enum POIEM_MapperType { POI_CPT, POI_SFT, POI_LST } mtype;
@@ -87,14 +87,14 @@ public:
 
     virtual IRResultType initializeFrom(InputRecord *ir);
 
-    virtual void doOutput(TimeStep *tStep, bool forcedOutput=false);
+    virtual void doOutput(TimeStep *tStep, bool forcedOutput = false);
     virtual void initialize();
     virtual void terminate();
     virtual const char *giveInputRecordName() const { return _IFT_POIExportModule_Name; }
     virtual const char *giveClassName() const { return "POIExportModule"; }
 
 protected:
-    void readPOIFile(const std::string &poiFileName);
+    void readPOIFile(const std :: string &poiFileName);
     /// Returns the output stream for given solution step
     FILE *giveOutputStream(TimeStep *tStep);
     /**

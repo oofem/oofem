@@ -40,7 +40,6 @@
 #define _IFT_TrPlaneStrRot3d_Name "trplanestrrot3d"
 
 namespace oofem {
-
 #ifndef __CHARTENSOR
  #define __CHARTENSOR
 enum CharTensor {
@@ -84,9 +83,9 @@ protected:
     virtual void giveNodeCoordinates(FloatArray &x, FloatArray &y);
 
     void giveCharacteristicTensor(FloatMatrix &answer, CharTensor type, GaussPoint *gp, TimeStep *tStep);
-    virtual int giveIPValue(FloatArray &answer, GaussPoint *aGaussPoint, InternalStateType type, TimeStep *atTime);
+    virtual int giveIPValue(FloatArray &answer, GaussPoint *gp, InternalStateType type, TimeStep *tStep);
 
-    virtual void computeBodyLoadVectorAt(FloatArray &answer, Load *forLoad, TimeStep *stepN, ValueModeType mode);
+    virtual void computeBodyLoadVectorAt(FloatArray &answer, Load *forLoad, TimeStep *tStep, ValueModeType mode);
 
     friend class TR_SHELL01;
 
@@ -94,7 +93,6 @@ public:
     // definition & identification
     virtual const char *giveInputRecordName() const { return _IFT_TrPlaneStrRot3d_Name; }
     virtual const char *giveClassName() const { return "TrPlaneStrRot3d"; }
-    virtual classType giveClassID() const { return TrPlaneStrRot3dClass; }
 
     virtual int computeNumberOfDofs() { return 9; }
     virtual int computeNumberOfGlobalDofs() { return 18; }

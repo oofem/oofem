@@ -35,16 +35,13 @@
 #ifndef parallelordering_h
 #define parallelordering_h
 
-#ifdef __PARALLEL_MODE
+#include "oofemcfg.h"
+#include "intarray.h"
+#include "dofmanager.h"
 
- #include "oofemcfg.h"
- #include "intarray.h"
- #include "dofmanager.h"
-
- #include <map>
+#include <map>
 
 namespace oofem {
-
 class EngngModel;
 class IntArray;
 class UnknownNumberingScheme;
@@ -154,5 +151,5 @@ public:
     IntArray *giveN2Lmap() { return & n2l; }
 };
 } // end namespace oofem
-#endif
+
 #endif // parallelordering_h

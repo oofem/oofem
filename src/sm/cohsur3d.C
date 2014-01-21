@@ -51,8 +51,7 @@
 #endif
 
 namespace oofem {
-
-REGISTER_Element( CohesiveSurface3d );
+REGISTER_Element(CohesiveSurface3d);
 
 CohesiveSurface3d :: CohesiveSurface3d(int n, Domain *aDomain) : StructuralElement(n, aDomain)
     // Constructor.
@@ -65,7 +64,7 @@ CohesiveSurface3d :: CohesiveSurface3d(int n, Domain *aDomain) : StructuralEleme
 }
 
 void
-CohesiveSurface3d :: computeBmatrixAt(GaussPoint *aGaussPoint, FloatMatrix &answer, int li, int ui)
+CohesiveSurface3d :: computeBmatrixAt(GaussPoint *gp, FloatMatrix &answer, int li, int ui)
 // Returns the strain-displacement matrix of the receiver.
 {
     double x01, y01, z01, x02, y02, z02;
@@ -211,12 +210,12 @@ void CohesiveSurface3d :: computeGaussPoints()
     numberOfIntegrationRules = 1;
     integrationRulesArray = new IntegrationRule * [ 1 ];
     integrationRulesArray [ 0 ] = new GaussIntegrationRule(1, this);
-    this->giveCrossSection()->setupIntegrationPoints( *integrationRulesArray[0], 1, this );
+    this->giveCrossSection()->setupIntegrationPoints(* integrationRulesArray [ 0 ], 1, this);
 }
 
 
 double
-CohesiveSurface3d :: computeVolumeAround(GaussPoint *aGaussPoint)
+CohesiveSurface3d :: computeVolumeAround(GaussPoint *gp)
 {
     return area * length;
 }
@@ -412,7 +411,7 @@ CohesiveSurface3d :: computeGlobalCoordinates(FloatArray &answer, const FloatArr
 }
 
 void
-CohesiveSurface3d :: printOutputAt(FILE *File, TimeStep *stepN)
+CohesiveSurface3d :: printOutputAt(FILE *File, TimeStep *tStep)
 {
     // Performs end-of-step operations.
     FloatArray rg, rl, Fg, Fl;
@@ -421,7 +420,7 @@ CohesiveSurface3d :: printOutputAt(FILE *File, TimeStep *stepN)
     fprintf(File, "element %d :\n", number);
 
     for ( int i = 0; i < numberOfIntegrationRules; i++ ) {
-        integrationRulesArray [ i ]->printOutputAt(File, stepN);
+        integrationRulesArray [ i ]->printOutputAt(File, tStep);
     }
 
     fprintf(File, "\n");

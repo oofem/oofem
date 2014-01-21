@@ -36,8 +36,5 @@
 #include "classfactory.h"
 
 namespace oofem {
-
-REGISTER_Material( DummyMaterial );
-
+REGISTER_Material(DummyMaterial);
 } // end namespace oofem
-

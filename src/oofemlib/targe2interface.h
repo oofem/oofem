@@ -59,7 +59,7 @@ public:
 
 protected:
     /// Creates the mesher input, containing the required mesh density informations.
-    int createInput(Domain *d, TimeStep *stepN);
+    int createInput(Domain *d, TimeStep *tStep);
 };
 } // end namespace oofem
 #endif // targe2interface_h

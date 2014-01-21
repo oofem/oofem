@@ -37,7 +37,6 @@
 #include "gaussintegrationrule.h"
 
 namespace oofem {
-
 void FEInterpolation2d :: boundaryEdgeGiveNodes(IntArray &answer, int boundary)
 {
     answer.resize(1);
@@ -100,7 +99,7 @@ void FEInterpolation2d :: computeEdgeMapping(IntArray &edgeNodes, IntArray &elem
     int size = ln.giveSize();
     edgeNodes.resize(size);
     for ( int i = 1; i <= size; i++ ) {
-        edgeNodes.at(i) = elemNodes.at(ln.at(i));
+        edgeNodes.at(i) = elemNodes.at( ln.at(i) );
     }
 }
 
@@ -124,5 +123,4 @@ IntegrationRule *FEInterpolation2d :: giveBoundaryEdgeIntegrationRule(int order,
     iRule->SetUpPoint(_Unknown);
     return iRule;
 }
-
 } // end namespace oofem

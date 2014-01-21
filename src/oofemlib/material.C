@@ -45,7 +45,7 @@ double
 Material :: give(int aProperty, GaussPoint *gp)
 // Returns the value of the property aProperty (e.g. the Young's modulus
 // 'E') of the receiver.
-// atTime allows time dependent behavior to be taken into account
+// tStep allows time dependent behavior to be taken into account
 {
     double value = 0.0;
 
@@ -120,8 +120,14 @@ Material :: hasMaterialModeCapability(MaterialMode mode)
 
 
 int
-Material :: giveIPValue(FloatArray &answer, GaussPoint *aGaussPoint, InternalStateType type, TimeStep *atTime)
+Material :: giveIPValue(FloatArray &answer, GaussPoint *gp, InternalStateType type, TimeStep *tStep)
 {
+    if ( type == IST_MaterialNumber ) {
+        answer.resize(1);
+        answer.at(1) = this->giveNumber();
+        return 1;
+    }
+
     answer.resize(0);
     return 0;
 }
@@ -258,5 +264,4 @@ Material :: initMaterial(Element *element)
 {
     return 0;
 }
-
 } // end namespace oofem

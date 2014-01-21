@@ -45,7 +45,6 @@
 //@}
 
 namespace oofem {
-
 /**
  *
  * Class for a nonlinear fictitious transport material. The constitutive equation is given as
@@ -73,19 +72,18 @@ public:
     virtual void  giveCharacteristicMatrix(FloatMatrix &answer,
                                            MatResponseMode mode,
                                            GaussPoint *gp,
-                                           TimeStep *atTime);
+                                           TimeStep *tStep);
 
     virtual double giveCharacteristicValue(MatResponseMode mode,
                                            GaussPoint *gp,
-                                           TimeStep *atTime);
+                                           TimeStep *tStep);
 
     virtual void giveFluxVector(FloatArray &answer, GaussPoint *gp, const FloatArray &grad, const FloatArray &field, TimeStep *tStep);
 
-    virtual int giveIPValue(FloatArray &answer, GaussPoint *aGaussPoint, InternalStateType type, TimeStep *atTime);
+    virtual int giveIPValue(FloatArray &answer, GaussPoint *gp, InternalStateType type, TimeStep *tStep);
 
     virtual const char *giveInputRecordName() const { return _IFT_NonlinearMassTransferMaterial_Name; }
     virtual const char *giveClassName() const { return "NonlinearMassTransferMaterial"; };
-    virtual classType giveClassID() const { return NonlinearMassTransferMaterialClass; };
 
     virtual IRResultType initializeFrom(InputRecord *ir);
 };

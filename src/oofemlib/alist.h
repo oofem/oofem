@@ -41,7 +41,6 @@
 
 
 namespace oofem {
-
 /**
  * Class implementing generic list (or more precisely array).
  * It maintains the array of generic pointers to objects of type T using 1-based numbering.
@@ -220,7 +219,7 @@ AList< T > :: growTo(int newSize)
     size = newSize;
 }
 
-template< class T >T*
+template< class T >T *
 AList< T > :: at(int i) const
 {
 #ifdef DEBUG
@@ -253,8 +252,8 @@ AList< T > :: printYourself() const
 // Prints the receiver on screen.
 {
     printf("List of components of size %d\n", size);
-    for (int i = 1; i <= size; i++ ) {
-        printf("%d : %p\n",i, values [ i - 1 ] );
+    for ( int i = 1; i <= size; i++ ) {
+        printf("%d : %p\n", i, values [ i - 1 ]);
     }
 }
 
@@ -314,6 +313,3 @@ template< class T >T *AList< T > :: unlink(int i)
 }
 } // end namespace oofem
 #endif // alist_h
-
-
-

@@ -45,12 +45,11 @@
 #define _IFT_FluidCrossSection_material "mat"
 
 namespace oofem {
-
 class FluidDynamicMaterial;
 
 /**
  * Fluid cross-section. It's functionality is essentially only to keep track of the material used.
- * 
+ *
  * @author Mikael Öhman
  */
 class OOFEM_EXPORT FluidCrossSection : public CrossSection
@@ -74,7 +73,7 @@ public:
     virtual int checkConsistency();
 
     virtual bool isCharacteristicMtrxSymmetric(MatResponseMode rMode);
-    virtual int giveIPValue(FloatArray &answer, GaussPoint *ip, InternalStateType type, TimeStep *atTime);
+    virtual int giveIPValue(FloatArray &answer, GaussPoint *ip, InternalStateType type, TimeStep *tStep);
 
     FluidDynamicMaterial *giveFluidMaterial();
 
@@ -83,4 +82,3 @@ public:
 };
 } // end namespace oofem
 #endif // fluidcrosssection_h
-

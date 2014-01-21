@@ -71,7 +71,7 @@
 #define _IFT_Element_lcs "lcs"
 #define _IFT_Element_partitions "partitions"
 #define _IFT_Element_remote "remote"
-#define _IFT_Element_activityltf "activityltf"
+#define _IFT_Element_activityTimeFunction "activityltf"
 #define _IFT_Element_nip "nip"
 //@}
 
@@ -178,8 +178,8 @@ protected:
     FloatMatrix elemLocalCS;
 
     /// Element activity time function. If defined, nonzero value indicates active receiver, zero value inactive element.
-    int activityLtf;
-    
+    int activityTimeFunction;
+
     /**
      * In parallel mode, globalNumber contains globally unique DoFManager number.
      * The component number, inherited from FEMComponent class contains
@@ -218,13 +218,13 @@ public:
      * Results are cached at receiver for default scheme in locationArray attribute.
      */
     void giveLocationArray(IntArray & locationArray, EquationID, const UnknownNumberingScheme & s, IntArray * dofIds = NULL) const;
-    void giveLocationArray(IntArray & locationArray, const IntArray &dofIDMask, const UnknownNumberingScheme & s, IntArray * dofIds = NULL) const;
+    void giveLocationArray(IntArray &locationArray, const IntArray &dofIDMask, const UnknownNumberingScheme &s, IntArray *dofIds = NULL) const;
     /**
      * Returns the location array for the boundary of the element.
      * Only takes into account nodes in the bNodes vector.
      */
-    void giveBoundaryLocationArray(IntArray &locationArray, const IntArray &bNodes, EquationID eid, const UnknownNumberingScheme &s, IntArray * dofIds = NULL);
-    void giveBoundaryLocationArray(IntArray &locationArray, const IntArray &bNodes, const IntArray &dofIDMask, const UnknownNumberingScheme &s, IntArray * dofIds = NULL);
+    void giveBoundaryLocationArray(IntArray &locationArray, const IntArray &bNodes, EquationID eid, const UnknownNumberingScheme &s, IntArray *dofIds = NULL);
+    void giveBoundaryLocationArray(IntArray &locationArray, const IntArray &bNodes, const IntArray &dofIDMask, const UnknownNumberingScheme &s, IntArray *dofIds = NULL);
     /**
      * @return Number of DOFs in element.
      */
@@ -332,19 +332,19 @@ public:
      *
      * @param type   Identifies unknown type (eg. displacement or temperature vector).
      * @param u      Identifies mode of unknown (eg. total value or velocity of unknown).
-     * @param stepN  Time step, when vector of unknowns is requested.
+     * @param tStep  Time step, when vector of unknowns is requested.
      * @param answer Local vector of unknowns.
      */
-    virtual void computeVectorOf(EquationID type, ValueModeType u, TimeStep *stepN, FloatArray &answer);
+    virtual void computeVectorOf(EquationID type, ValueModeType u, TimeStep *tStep, FloatArray &answer);
     /**
      * Boundary version of computeVectorOf.
      * @param bNodes Boundary nodes.
      * @param eid Equation ID for unknowns.
      * @param u Identifies mode of unknown (eg. total value or velocity of unknown).
-     * @param stepN Time step, when vector of unknowns is requested.
+     * @param tStep Time step, when vector of unknowns is requested.
      * @param answer Local vector of unknowns.
      */
-    virtual void computeBoundaryVectorOf(const IntArray &bNodes, EquationID eid, ValueModeType u, TimeStep *stepN, FloatArray &answer);
+    virtual void computeBoundaryVectorOf(const IntArray &bNodes, EquationID eid, ValueModeType u, TimeStep *tStep, FloatArray &answer);
     /**
      * Returns local vector of unknowns. Local vector of unknowns is extracted from
      * given field and from boundary conditions (if dof has active boundary
@@ -353,21 +353,21 @@ public:
      *
      * @param field  Source field (eg. displacement or temperature vector).
      * @param u      Value mode of unknown (incremental, total, ...).
-     * @param stepN  Time step, when vector of unknowns is requested.
+     * @param tStep  Time step, when vector of unknowns is requested.
      * @param answer Local vector of unknowns.
      */
-    virtual void computeVectorOf(PrimaryField &field, ValueModeType u, TimeStep *stepN, FloatArray &answer);
+    virtual void computeVectorOf(PrimaryField &field, ValueModeType u, TimeStep *tStep, FloatArray &answer);
     /**
      * Returns local vector of prescribed unknowns. Local vector of prescribed unknowns is
      * extracted from nodal (and side - if they hold unknowns) boundary conditions.
      *
      * @param ut     Identifies mode of unknown (eg. total values or velocity of unknown).
      * @param type   Value mode of unknown (incremental, total, ...).
-     * @param stepN  Time step, when vector of prescribed unknowns is requested.
+     * @param tStep  Time step, when vector of prescribed unknowns is requested.
      * @param answer Local vector of prescribed unknowns. If unknown is not prescribed,
      * zero value is placed on position of free dof.
      */
-    void computeVectorOfPrescribed(EquationID ut, ValueModeType type, TimeStep *stepN, FloatArray &answer);
+    void computeVectorOfPrescribed(EquationID ut, ValueModeType type, TimeStep *tStep, FloatArray &answer);
 
     /**
      * Computes or simply returns total number of element's local DOFs.
@@ -669,7 +669,7 @@ public:
      * @return True, if receiver is activated for given solution step, otherwise false.
      */
     virtual bool isActivated(TimeStep *tStep);
-    
+
     // time step initialization (required for some non-linear solvers)
     /**
      * Initializes receivers state to new time step. It can be used also if
@@ -776,7 +776,7 @@ public:
      * Returns the size (length, area or volume depending on element type) of the parent
      * element. E.g. 4.0 for a quadrilateral.
      */
-    virtual double giveParentElSize() const {return 0.0;}
+    virtual double giveParentElSize() const { return 0.0; }
     /**
      * Updates internal element state (in all integration points of receiver)
      * before nonlocal averaging takes place. Used by so nonlocal materials,
@@ -892,11 +892,11 @@ public:
      * @param type Determines the internal variable requested (physical meaning).
      * @param mode Determines the mode of variable (recovered, local, ...).
      * @param node Node number, for which variable is required.
-     * @param atTime Time step.
+     * @param tStep Time step.
      * @return Nonzero if o.k, zero otherwise.
      */
     virtual int giveInternalStateAtNode(FloatArray &answer, InternalStateType type, InternalStateMode mode,
-                                        int node, TimeStep *atTime);
+                                        int node, TimeStep *tStep);
     /**
      * Returns internal state variable (like stress,strain) at side of element in Reduced form
      * If side is possessing DOFs, otherwise recover techniques will not work
@@ -905,20 +905,20 @@ public:
      * @param type Determines the internal variable requested (physical meaning).
      * @param mode Determines the mode of variable (recovered, local, ...).
      * @param side Side number, for which variable is required.
-     * @param atTime Time step.
+     * @param tStep Time step.
      * @return Nonzero if o.k, zero otherwise.
      */
     virtual int giveInternalStateAtSide(FloatArray &answer, InternalStateType type, InternalStateMode mode,
-                                        int side, TimeStep *atTime)
+                                        int side, TimeStep *tStep)
     {
         answer.resize(0);
         return 0;
     }
 
     /// Shows sparse structure
-    virtual void showSparseMtrxStructure(CharType mtrx, oofegGraphicContext &gc, TimeStep *atTime) { }
+    virtual void showSparseMtrxStructure(CharType mtrx, oofegGraphicContext &gc, TimeStep *tStep) { }
     /// Shows extended sparse structure (for example, due to nonlocal interactions for tangent stiffness)
-    virtual void showExtendedSparseMtrxStructure(CharType mtrx, oofegGraphicContext &gc, TimeStep *atTime) { }
+    virtual void showExtendedSparseMtrxStructure(CharType mtrx, oofegGraphicContext &gc, TimeStep *tStep) { }
 
 #endif
 
@@ -958,17 +958,17 @@ public:
      * no data are exchanged. For "nonlocal" constitutive models the send/receive of local values which
      * undergo averaging is performed between local and corresponding remote elements.
      * @param buff communication buffer
-     * @param stepN solution step.
+     * @param tStep solution step.
      */
-    int packUnknowns(CommunicationBuffer &buff, TimeStep *stepN);
+    int packUnknowns(CommunicationBuffer &buff, TimeStep *tStep);
     /**
      * Unpack and updates all necessary data of element (according to its parallel_mode) integration points
      * into given communication buffer.
      * @see packUnknowns service.
      * @param buff communication buffer
-     * @param stepN solution step.
+     * @param tStep solution step.
      */
-    int unpackAndUpdateUnknowns(CommunicationBuffer &buff, TimeStep *stepN);
+    int unpackAndUpdateUnknowns(CommunicationBuffer &buff, TimeStep *tStep);
     /**
      * Estimates the necessary pack size to hold all packed data of receiver.
      * The corresponding cross section service is invoked, which in

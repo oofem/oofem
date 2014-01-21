@@ -65,11 +65,10 @@ public:
 
     virtual const char *giveClassName() const { return "DoublePowerLawMaterial"; }
     virtual const char *giveInputRecordName() const { return _IFT_DoublePowerLawMaterial_Name; }
-    virtual classType giveClassID() const { return DoublePowerLawMaterialClass; }
     virtual IRResultType initializeFrom(InputRecord *ir);
 
 protected:
-    virtual double computeCreepFunction(double atTime, double ofAge);
+    virtual double computeCreepFunction(double tStep, double ofAge);
 };
 } // end namespace oofem
 #endif // doublepowerlaw_h

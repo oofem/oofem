@@ -66,7 +66,7 @@ public:
 
     virtual int computeGlobalCoordinates(FloatArray &answer, const FloatArray &lcoords);
     virtual bool computeLocalCoordinates(FloatArray &answer, const FloatArray &gcoords);
-    
+
     virtual int computeNumberOfDofs();
     virtual void giveDofManDofIDMask(int inode, EquationID ut, IntArray &answer) const;
 
@@ -85,7 +85,6 @@ public:
     // definition & identification
     virtual const char *giveInputRecordName() const { return _IFT_InterfaceElem1d_Name; }
     virtual const char *giveClassName() const { return "InterfaceElem1d"; }
-    virtual classType giveClassID() const { return InterfaceElem1dClass; }
     virtual IRResultType initializeFrom(InputRecord *ir);
     virtual Element_Geometry_Type giveGeometryType() const { return EGT_point; }
     virtual integrationDomain giveIntegrationDomain() const { return _Point; }

@@ -40,8 +40,7 @@
 #include "dofmanager.h"
 
 namespace oofem {
-
-REGISTER_EngngModel( StokesFlowVelocityHomogenization );
+REGISTER_EngngModel(StokesFlowVelocityHomogenization);
 
 StokesFlowVelocityHomogenization :: StokesFlowVelocityHomogenization(int i, EngngModel *_master) : StokesFlow(i, _master)
 {
@@ -58,6 +57,7 @@ StokesFlowVelocityHomogenization :: giveAreaOfDomain()
     if ( areaOfDomain > 0. ) {
         return areaOfDomain;
     }
+
     areaOfDomain = this->giveDomain(1)->giveArea();
     return areaOfDomain;
 }
@@ -71,12 +71,12 @@ StokesFlowVelocityHomogenization :: giveAreaOfRVE()
 
     FloatArray min, max;
 
-    min = *this->giveDomain(1)->giveDofManager(1)->giveCoordinates();
-    max = *this->giveDomain(1)->giveDofManager(1)->giveCoordinates();
+    min = * this->giveDomain(1)->giveDofManager(1)->giveCoordinates();
+    max = * this->giveDomain(1)->giveDofManager(1)->giveCoordinates();
 
     for ( int i = 1; i <= this->giveDomain(1)->giveNumberOfDofManagers(); i++ ) {
-        min.beMinOf(min,*this->giveDomain(1)->giveDofManager(i)->giveCoordinates());
-        max.beMaxOf(max,*this->giveDomain(1)->giveDofManager(i)->giveCoordinates());
+        min.beMinOf( min, * this->giveDomain(1)->giveDofManager(i)->giveCoordinates() );
+        max.beMaxOf( max, * this->giveDomain(1)->giveDofManager(i)->giveCoordinates() );
     }
 
     areaOfRVE = ( max.at(1) - min.at(1) ) * ( max.at(2) - min.at(2) );
@@ -91,14 +91,15 @@ StokesFlowVelocityHomogenization :: handlePrescribedValues()
 
     for ( int i = 1; i <= this->giveDomain(1)->giveNumberOfElements(); i++ ) {
 #if 0
-        if (CarlTr *ThisElement = dynamic_cast<CarlTr *> ( this->giveDomain(1)->giveElement(i) ) ) {
-            ThisElement = (CarlTr *)this->giveDomain(1)->giveElement(i);
+        if ( CarlTr * ThisElement = dynamic_cast< CarlTr * >( this->giveDomain(1)->giveElement(i) ) ) {
+            ThisElement = ( CarlTr * ) this->giveDomain(1)->giveElement(i);
             ThisElement->numberOfElementsOnDomain = this->giveDomain(1)->giveNumberOfElements();
             ThisElement->totalAreaOfDomain = this->giveAreaOfDomain();
-            ThisElement->specialUnknowns = & (this->SpecialUnknowns);
-            DofMan = (Node *) ThisElement->giveDofManager(7);
+            ThisElement->specialUnknowns = & ( this->SpecialUnknowns );
+            DofMan = ( Node * ) ThisElement->giveDofManager(7);
             this->prescribedType = ThisElement->prescribedType;
         }
+
 #endif
     }
 }
@@ -117,7 +118,7 @@ StokesFlowVelocityHomogenization :: rveSetBoundaryConditions(int BCType, FloatAr
 {}
 
 void
-StokesFlowVelocityHomogenization :: getMeans(FloatArray &gradP, FloatArray &v, TimeStep *atTime)
+StokesFlowVelocityHomogenization :: getMeans(FloatArray &gradP, FloatArray &v, TimeStep *tStep)
 {
     FloatMatrix gradPTemp, v_hatTemp;
     double Area = 0, AreaFull = 0; //(xmax-xmin)*(ymax-ymin);
@@ -151,8 +152,8 @@ StokesFlowVelocityHomogenization :: getMeans(FloatArray &gradP, FloatArray &v, T
                 }
             }
 
-            T->giveGradP(gradPTemp, atTime);
-            T->giveIntegratedVelocity(v_hatTemp, atTime);
+            T->giveGradP(gradPTemp, tStep);
+            T->giveIntegratedVelocity(v_hatTemp, tStep);
 
             gradP.at(1) = gradP.at(1) + gradPTemp.at(1, 1);
             gradP.at(2) = gradP.at(2) + gradPTemp.at(2, 1);
@@ -176,13 +177,13 @@ StokesFlowVelocityHomogenization :: updateC()
 }
 
 void
-StokesFlowVelocityHomogenization :: rveGiveCharacteristicData(int DataType, void *input, void *answer, TimeStep *atTime)
+StokesFlowVelocityHomogenization :: rveGiveCharacteristicData(int DataType, void *input, void *answer, TimeStep *tStep)
 {
     /*
-    * Datatype:
-    *  1 : Get velocity. *answer is a pointer to a FloatArray.
-    *  2 : Get tangent matrix. Linearization using the last tangent matrix using 1) but with other gradP
-    */
+     * Datatype:
+     *  1 : Get velocity. *answer is a pointer to a FloatArray.
+     *  2 : Get tangent matrix. Linearization using the last tangent matrix using 1) but with other gradP
+     */
 
     switch ( DataType ) {
     case 1: {
@@ -192,7 +193,6 @@ StokesFlowVelocityHomogenization :: rveGiveCharacteristicData(int DataType, void
 
         for ( int i = 1; i < this->giveDomain(1)->giveNumberOfElements(); i++ ) {
             if ( Tr21Stokes * T = dynamic_cast< Tr21Stokes * >( this->giveDomain(1)->giveElement(i) ) ) {
-
                 IntArray *bodyLoad = T->giveBodyLoadArray();
                 DeadWeight *load;
                 load = dynamic_cast< DeadWeight * >( this->giveDomain(1)->giveLoad( bodyLoad->at(1) ) );
@@ -207,9 +207,9 @@ StokesFlowVelocityHomogenization :: rveGiveCharacteristicData(int DataType, void
             }
         }
 
-        solveYourselfAt(atTime);
+        solveYourselfAt(tStep);
 
-        getMeans(thisGradP, v_hat, atTime);
+        getMeans(thisGradP, v_hat, tStep);
 
         ( ( FloatArray * ) answer )->resize(2);
         ( ( FloatArray * ) answer )->at(1) = v_hat.at(1);
@@ -220,7 +220,7 @@ StokesFlowVelocityHomogenization :: rveGiveCharacteristicData(int DataType, void
     case 2: {
         FloatMatrix K;
 
-        this->computeTangent(K, atTime);
+        this->computeTangent(K, tStep);
 
         ( ( FloatMatrix * ) answer )->resize(2, 2);
 
@@ -234,7 +234,7 @@ StokesFlowVelocityHomogenization :: rveGiveCharacteristicData(int DataType, void
     }
 }
 void
-StokesFlowVelocityHomogenization :: computeTangent(FloatMatrix &answer, TimeStep *atTime)
+StokesFlowVelocityHomogenization :: computeTangent(FloatMatrix &answer, TimeStep *tStep)
 {
     int ndof;
 
@@ -242,7 +242,7 @@ StokesFlowVelocityHomogenization :: computeTangent(FloatMatrix &answer, TimeStep
     FloatArray averagev;
 
     Domain *domain = this->giveDomain(1);
-    ndof = this->giveNumberOfDomainEquations(1, EModelDefaultEquationNumbering());
+    ndof = this->giveNumberOfDomainEquations( 1, EModelDefaultEquationNumbering() );
 
     // Build F matrix
     FloatMatrix F, Fe;
@@ -264,7 +264,7 @@ StokesFlowVelocityHomogenization :: computeTangent(FloatMatrix &answer, TimeStep
 
     FloatMatrix H;
 
-//    SparseLinearSystemNM *linMethod = classFactory.createSparseLinSolver(ST_Petsc, this->giveDomain(1), this);
+    //    SparseLinearSystemNM *linMethod = classFactory.createSparseLinSolver(ST_Petsc, this->giveDomain(1), this);
     SparseLinearSystemNM *linMethod = classFactory.createSparseLinSolver(solverType, this->giveDomain(1), this);
 
     H.resize( F.giveNumberOfRows(), F.giveNumberOfColumns() );
@@ -277,5 +277,4 @@ StokesFlowVelocityHomogenization :: computeTangent(FloatMatrix &answer, TimeStep
 
     delete linMethod;
 }
-
 }

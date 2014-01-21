@@ -111,7 +111,9 @@ BSplineInterpolation :: initializeFrom(InputRecord *ir)
 
         // transform knot vector to interval <0;1>
         double span = knotVal - knotValues [ n ].at(1);
-        for ( int i = 1; i <= size; i++ ) knotValues [ n ].at(i) = knotValues [ n ].at(i) / span;
+        for ( int i = 1; i <= size; i++ ) {
+            knotValues [ n ].at(i) = knotValues [ n ].at(i) / span;
+        }
 
         IR_GIVE_OPTIONAL_FIELD(ir, knotMultiplicity [ n ], IFT_knotMultiplicity [ n ]);
         if ( knotMultiplicity [ n ].giveSize() == 0 ) {
@@ -130,7 +132,7 @@ BSplineInterpolation :: initializeFrom(InputRecord *ir)
             for ( int i = 1; i < size - 1; i++ ) {
                 if ( knotMultiplicity [ n ].at(i + 1) < 1 || knotMultiplicity [ n ].at(i + 1) > degree [ n ] ) {
                     OOFEM_ERROR3( "BSplineInterpolation::initializeFrom - knot multiplicity %s out of range - value %d",
-                                 IFT_knotMultiplicity [ n ], knotMultiplicity [ n ].at(i + 1) );
+                                  IFT_knotMultiplicity [ n ], knotMultiplicity [ n ].at(i + 1) );
                 }
             }
 
@@ -176,11 +178,7 @@ void BSplineInterpolation :: evalN(FloatArray &answer, const FloatArray &lcoords
     FEIIGAElementGeometryWrapper *gw = ( FEIIGAElementGeometryWrapper * ) & cellgeo;
     IntArray span(nsd);
     int i, l, k, m, c = 1, count;
-#ifdef HAVE_VARIABLE_ARRAY_SIZE
-    FloatArray N [ nsd ];
-#else
-    FloatArray *N = new FloatArray [ nsd ];
-#endif
+    std :: vector< FloatArray > N(nsd);
 
 
     if ( gw->knotSpan ) {
@@ -219,10 +217,6 @@ void BSplineInterpolation :: evalN(FloatArray &answer, const FloatArray &lcoords
     } else {
         OOFEM_ERROR2("evalN not implemented for nsd = %d", nsd);
     }
-
-#ifndef HAVE_VARIABLE_ARRAY_SIZE
-    delete [] N;
-#endif
 }
 
 
@@ -234,11 +228,7 @@ double BSplineInterpolation :: evaldNdx(FloatMatrix &answer, const FloatArray &l
     IntArray span(nsd);
     double Jacob = 0.;
     int count, cnt, i, l, k, m, ind, indx, uind, vind, tind;
-#ifdef HAVE_VARIABLE_ARRAY_SIZE
-    FloatMatrix ders [ nsd ];
-#else
-    FloatMatrix *ders = new FloatMatrix [ nsd ];
-#endif
+    std :: vector< FloatMatrix > ders(nsd);
 
 
 
@@ -393,14 +383,14 @@ double BSplineInterpolation :: evaldNdx(FloatMatrix &answer, const FloatArray &l
                     tmp1(1) = ders [ 0 ](0, k) * ders [ 1 ](1, l) * ders [ 2 ](0, m);       // dN/dv=Nu*dNv/dv*Nt
                     tmp1(2) = ders [ 0 ](0, k) * ders [ 1 ](0, l) * ders [ 2 ](1, m);       // dN/dt=Nu*Nv*dNt/dt
                     answer(cnt, 0) = ( ( jacobian(1, 1) * jacobian(2, 2) - jacobian(1, 2) * jacobian(2, 1) ) * tmp1(0) +
-                                      ( jacobian(0, 2) * jacobian(2, 1) - jacobian(0, 1) * jacobian(2, 2) ) * tmp1(1) +
-                                      ( jacobian(0, 1) * jacobian(1, 2) - jacobian(0, 2) * jacobian(1, 1) ) * tmp1(2) ) / Jacob; // dN/dx
+                                       ( jacobian(0, 2) * jacobian(2, 1) - jacobian(0, 1) * jacobian(2, 2) ) * tmp1(1) +
+                                       ( jacobian(0, 1) * jacobian(1, 2) - jacobian(0, 2) * jacobian(1, 1) ) * tmp1(2) ) / Jacob; // dN/dx
                     answer(cnt, 1) = ( ( jacobian(1, 2) * jacobian(2, 0) - jacobian(1, 0) * jacobian(2, 2) ) * tmp1(0) +
-                                      ( jacobian(0, 0) * jacobian(2, 2) - jacobian(0, 2) * jacobian(2, 0) ) * tmp1(1) +
-                                      ( jacobian(0, 2) * jacobian(1, 0) - jacobian(0, 0) * jacobian(1, 2) ) * tmp1(2) ) / Jacob;                                                      // dN/dy
+                                       ( jacobian(0, 0) * jacobian(2, 2) - jacobian(0, 2) * jacobian(2, 0) ) * tmp1(1) +
+                                       ( jacobian(0, 2) * jacobian(1, 0) - jacobian(0, 0) * jacobian(1, 2) ) * tmp1(2) ) / Jacob;                                                     // dN/dy
                     answer(cnt, 2) = ( ( jacobian(1, 0) * jacobian(2, 1) - jacobian(1, 1) * jacobian(2, 0) ) * tmp1(0) +
-                                      ( jacobian(0, 1) * jacobian(2, 0) - jacobian(0, 0) * jacobian(2, 1) ) * tmp1(1) +
-                                      ( jacobian(0, 0) * jacobian(1, 1) - jacobian(0, 1) * jacobian(1, 0) ) * tmp1(2) ) / Jacob;                                                      // dN/dz
+                                       ( jacobian(0, 1) * jacobian(2, 0) - jacobian(0, 0) * jacobian(2, 1) ) * tmp1(1) +
+                                       ( jacobian(0, 0) * jacobian(1, 1) - jacobian(0, 1) * jacobian(1, 0) ) * tmp1(2) ) / Jacob;                                                     // dN/dz
                     cnt++;
                 }
             }
@@ -409,9 +399,6 @@ double BSplineInterpolation :: evaldNdx(FloatMatrix &answer, const FloatArray &l
         OOFEM_ERROR2("evaldNdx not implemented for nsd = %d", nsd);
     }
 
-#ifndef HAVE_VARIABLE_ARRAY_SIZE
-    delete [] ders;
-#endif
     return Jacob;
 }
 
@@ -423,11 +410,7 @@ void BSplineInterpolation :: local2global(FloatArray &answer, const FloatArray &
     const FloatArray *vertexCoordsPtr;
     IntArray span(nsd);
     int i, l, k, m, ind, indx, uind, vind, tind;
-#ifdef HAVE_VARIABLE_ARRAY_SIZE
-    FloatArray N [ nsd ];
-#else
-    FloatArray *N = new FloatArray [ nsd ];
-#endif
+    std :: vector< FloatArray > N(nsd);
 
 
     if ( gw->knotSpan ) {
@@ -508,9 +491,6 @@ void BSplineInterpolation :: local2global(FloatArray &answer, const FloatArray &
         OOFEM_ERROR2("local2global not implemented for nsd = %d", nsd);
     }
 
-#ifndef HAVE_VARIABLE_ARRAY_SIZE
-    delete [] N;
-#endif
 }
 
 
@@ -522,11 +502,7 @@ double BSplineInterpolation :: giveTransformationJacobian(const FloatArray &lcoo
     IntArray span(nsd);
     double Jacob;
     int i, l, k, m, indx, ind, uind, vind, tind;
-#ifdef HAVE_VARIABLE_ARRAY_SIZE
-    FloatMatrix ders [ nsd ];
-#else
-    FloatMatrix *ders = new FloatMatrix [ nsd ];
-#endif
+    std :: vector< FloatMatrix > ders(nsd);
 
 
     if ( gw->knotSpan ) {
@@ -644,9 +620,6 @@ double BSplineInterpolation :: giveTransformationJacobian(const FloatArray &lcoo
         OOFEM_ERROR("giveTransformationJacobian - zero Jacobian");
     }
 
-#ifndef HAVE_VARIABLE_ARRAY_SIZE
-    delete [] ders;
-#endif
     return Jacob;
 }
 
@@ -694,6 +667,7 @@ int BSplineInterpolation :: giveNumberOfKnotSpanBasisFunctions(const IntArray &k
 {
     int i, answer = 1;
     // there are always degree+1 nonzero basis functions on each knot span
+    ///@todo This loop seems meaningless. It just returns degree[nsd-1]+1 in the end ?
     for ( i = 0; i < nsd; i++ ) {
         answer *= ( degree [ i ] + 1 );
     }

@@ -41,7 +41,7 @@
 namespace oofem {
 /**
  * Class representing implementation of quadratic wedge interpolation class.
- * 
+ *
  * @author Milan Jirasek
  * @author Mikael Öhman
  */
@@ -73,7 +73,7 @@ public:
 
     // Surface
     virtual void surfaceEvalN(FloatArray &answer, int isurf, const FloatArray &lcoords, const FEICellGeometry &cellgeo);
-    virtual void surfaceLocal2global(FloatArray &answer, int iedge,const FloatArray &lcoords, const FEICellGeometry &cellgeo);
+    virtual void surfaceLocal2global(FloatArray &answer, int iedge, const FloatArray &lcoords, const FEICellGeometry &cellgeo);
     virtual double surfaceEvalNormal(FloatArray &answer, int isurf, const FloatArray &lcoords, const FEICellGeometry &cellgeo);
     virtual double surfaceGiveTransformationJacobian(int isurf, const FloatArray &lcoords,
                                                      const FEICellGeometry &cellgeo);

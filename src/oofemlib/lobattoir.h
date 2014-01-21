@@ -65,15 +65,13 @@ public:
 
     virtual int getRequiredNumberOfIntegrationPoints(integrationDomain dType, int approxOrder);
 
-    //@todo These 3 integration rules have not been verified but the code is identical 
+    //@todo These 3 integration rules have not been verified but the code is identical
     // to that in GaussIntegrationRule, only the point coords and weights differ /JB
     virtual int SetUpPointsOnLine(int nPoints, MaterialMode mode);
     virtual int SetUpPointsOnSquare(int nPoints, MaterialMode mode);
     virtual int SetUpPointsOnCube(int nPoints, MaterialMode mode);
     static void giveLineCoordsAndWeights(int nPoints, FloatArray &coords_xi, FloatArray &weights);
     virtual int SetUpPointsOnTriangle(int nPoints, MaterialMode mode);
-
-
 };
 } // end namespace oofem
 #endif // lobattoir_h

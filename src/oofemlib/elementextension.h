@@ -46,4 +46,3 @@ enum ElementExtension {
 };
 } // end namespace oofem
 #endif // elementextension_h
-

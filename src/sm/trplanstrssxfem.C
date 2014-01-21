@@ -69,9 +69,9 @@ Interface *
 TrPlaneStress2dXFEM :: giveInterface(InterfaceType it)
 {
     if ( it == XfemElementInterfaceType ) {
-        return ( XfemElementInterface * ) this;
+        return static_cast< XfemElementInterface * >( this );
     } else if ( it == VTKXMLExportModuleElementInterfaceType ) {
-        return ( VTKXMLExportModuleElementInterface * ) this;
+        return static_cast< VTKXMLExportModuleElementInterface * >( this );
     } else {
         return TrPlaneStress2d :: giveInterface(it);
     }
@@ -90,16 +90,20 @@ int TrPlaneStress2dXFEM :: computeNumberOfDofs()
 
 void TrPlaneStress2dXFEM :: computeGaussPoints()
 {
-    XfemManager *xMan = this->giveDomain()->giveXfemManager();
+	if(giveDomain()->hasXfemManager()) {
+		XfemManager *xMan = giveDomain()->giveXfemManager();
 
-    if( xMan->isElementEnriched(this) ) {
-    	if(!this->XfemElementInterface_updateIntegrationRule()) {
-        	TrPlaneStress2d :: computeGaussPoints();
-    	}
-    }
-    else {
-    	TrPlaneStress2d :: computeGaussPoints();
-    }
+		if ( xMan->isElementEnriched(this) ) {
+			if ( !this->XfemElementInterface_updateIntegrationRule() ) {
+				TrPlaneStress2d :: computeGaussPoints();
+			}
+		} else   {
+			TrPlaneStress2d :: computeGaussPoints();
+		}
+	}
+	else {
+		TrPlaneStress2d :: computeGaussPoints();
+	}
 }
 
 void TrPlaneStress2dXFEM :: computeBmatrixAt(GaussPoint *gp, FloatMatrix &answer, int li, int ui)
@@ -107,6 +111,10 @@ void TrPlaneStress2dXFEM :: computeBmatrixAt(GaussPoint *gp, FloatMatrix &answer
     XfemElementInterface_createEnrBmatrixAt(answer, * gp, * this);
 }
 
+void TrPlaneStress2dXFEM :: computeBHmatrixAt(GaussPoint *gp, FloatMatrix &answer)
+{
+    XfemElementInterface_createEnrBHmatrixAt(answer, * gp, * this);
+}
 
 void TrPlaneStress2dXFEM :: computeNmatrixAt(const FloatArray &iLocCoord, FloatMatrix &answer)
 {
@@ -120,13 +128,19 @@ TrPlaneStress2dXFEM :: giveDofManDofIDMask(int inode, EquationID ut, IntArray &a
 {
     // Returns the total id mask of the dof manager = regular id's + enriched id's
 
-    XfemManager *xMan = this->domain->giveXfemManager();
-    if ( xMan != NULL ) {
-        this->giveDofManager(inode)->giveCompleteMasterDofIDArray(answer);
-    } else   {
-        // Continuous part
-        TrPlaneStress2d :: giveDofManDofIDMask(inode, ut, answer);
-    }
+	if(giveDomain()->hasXfemManager()) {
+
+		XfemManager *xMan = this->domain->giveXfemManager();
+		if ( xMan != NULL ) {
+			this->giveDofManager(inode)->giveCompleteMasterDofIDArray(answer);
+		} else {
+			// Continuous part
+			TrPlaneStress2d :: giveDofManDofIDMask(inode, ut, answer);
+		}
+	}
+	else {
+		TrPlaneStress2d :: giveDofManDofIDMask(inode, ut, answer);
+	}
 }
 
 void
@@ -136,9 +150,9 @@ TrPlaneStress2dXFEM :: computeConstitutiveMatrixAt(FloatMatrix &answer, MatRespo
 }
 
 void
-TrPlaneStress2dXFEM :: computeStressVector(FloatArray &answer, const FloatArray &strain, GaussPoint *gp, TimeStep *stepN)
+TrPlaneStress2dXFEM :: computeStressVector(FloatArray &answer, const FloatArray &strain, GaussPoint *gp, TimeStep *tStep)
 {
-    XfemElementInterface :: XfemElementInterface_computeStressVector(answer, strain, gp, stepN);
+    XfemElementInterface :: XfemElementInterface_computeStressVector(answer, strain, gp, tStep);
 }
 
 void TrPlaneStress2dXFEM :: computeStiffnessMatrix(FloatMatrix &answer, MatResponseMode rMode, TimeStep *tStep)
@@ -257,7 +271,7 @@ void TrPlaneStress2dXFEM :: giveInputRecord(DynamicInputRecord &input)
 
 int
 TrPlaneStress2dXFEM :: EIPrimaryUnknownMI_computePrimaryUnknownVectorAt(ValueModeType mode,
-                                                                        TimeStep *stepN, const FloatArray &coords,
+                                                                        TimeStep *tStep, const FloatArray &coords,
                                                                         FloatArray &answer)
 {
     // TODO: Validate implementation.
@@ -270,7 +284,7 @@ TrPlaneStress2dXFEM :: EIPrimaryUnknownMI_computePrimaryUnknownVectorAt(ValueMod
 
     XfemElementInterface_createEnrNmatrixAt(n, lcoords, * this);
 
-    this->computeVectorOf(EID_MomentumBalance, mode, stepN, u);
+    this->computeVectorOf(EID_MomentumBalance, mode, tStep, u);
     answer.beProductOf(n, u);
 
     return result;

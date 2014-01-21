@@ -82,7 +82,7 @@ FEMComponent :: restoreContext(DataStream *stream, ContextMode mode, void *obj)
 void
 FEMComponent :: giveInputRecord(DynamicInputRecord &input)
 {
-    input.setRecordKeywordField(this->giveInputRecordName(), this->giveNumber());
+    input.setRecordKeywordField( this->giveInputRecordName(), this->giveNumber() );
 }
 
 
@@ -112,5 +112,4 @@ FEMComponent :: warning(const char *file, int line, const char *format, ...) con
 
     __OOFEM_WARNING4(file, line, "Class: %s, number: %d\n%s", giveClassName(), giveNumber(), buffer);
 }
-
 } // end namespace oofem

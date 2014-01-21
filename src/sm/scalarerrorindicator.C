@@ -41,7 +41,6 @@
 #include "classfactory.h"
 
 namespace oofem {
-
 REGISTER_ErrorEstimator(ScalarErrorIndicator, EET_SEI);
 
 int

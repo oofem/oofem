@@ -61,7 +61,6 @@ public:
 
     // definition
     virtual const char *giveClassName() const { return "HyperElasticMaterialStatus"; }
-    virtual classType giveClassID() const { return HyperElasticMaterialStatusClass; }
 
     virtual void initTempStatus();
     virtual void updateYourself(TimeStep *tStep);
@@ -85,14 +84,13 @@ public:
 
 
     virtual void giveRealStressVector_3d(FloatArray &answer, GaussPoint *gp,
-                                      const FloatArray &reducedStrain, TimeStep *tStep);
-    
+                                         const FloatArray &reducedStrain, TimeStep *tStep);
+
     virtual MaterialStatus *CreateStatus(GaussPoint *gp) const;
 
     virtual int hasMaterialModeCapability(MaterialMode);
     virtual const char *giveInputRecordName() const { return _IFT_HyperElasticMaterial_Name; }
     virtual const char *giveClassName() const { return "HyperElasticMaterial"; }
-    virtual classType giveClassID() const { return HyperElasticMaterialClass; }
 };
 } // end namespace oofem
 #endif

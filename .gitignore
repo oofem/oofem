@@ -23,6 +23,7 @@ targets/
 *.blg
 
 
+__pycache__
 *.swp
 .*.kate-swp
 *.backup

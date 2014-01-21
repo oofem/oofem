@@ -37,14 +37,12 @@
 #include "classfactory.h"
 
 namespace oofem {
+REGISTER_BoundaryCondition(TractionPressureBC);
 
-REGISTER_BoundaryCondition( TractionPressureBC );
-
-double TractionPressureBC :: give(Dof *dof, ValueModeType mode, TimeStep *stepN)
-// Returns the value at stepN of the prescribed value of the kinematic
+double TractionPressureBC :: give(Dof *dof, ValueModeType mode, TimeStep *tStep)
+// Returns the value at tStep of the prescribed value of the kinematic
 // unknown 'u'. Returns 0 if 'u' has no prescribed value.
 {
-    return static_cast< CBS * >(this->domain->giveEngngModel())->giveTractionPressure(dof);
+    return static_cast< CBS * >( this->domain->giveEngngModel() )->giveTractionPressure(dof);
 }
-
 } // end namespace oofem

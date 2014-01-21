@@ -67,7 +67,7 @@ protected:
     FloatArray normal, temp_normal;
 
 public:
-    LEPlicElementInterface(): permanentVofFlag(false), vof(0.), temp_vof(0.) { }
+    LEPlicElementInterface() : permanentVofFlag(false), vof(0.), temp_vof(0.) { }
     /**
      * @name The element interface required by LEPlicElementInterface
      */
@@ -161,7 +161,7 @@ public:
      */
     LEPlic(int n, Domain *d) : MaterialInterface(n, d) { orig_reference_fluid_volume = 0.0; }
 
-    virtual void updatePosition(TimeStep *atTime);
+    virtual void updatePosition(TimeStep *tStep);
     virtual void updateYourself(TimeStep *tStep) { }
     virtual void giveMaterialMixtureAt(FloatArray &answer, FloatArray &position);
     virtual void giveElementMaterialMixture(FloatArray &answer, int ielem);
@@ -185,12 +185,11 @@ public:
 
     // identification
     virtual const char *giveClassName() const { return "LEPlic"; }
-    virtual classType giveClassID() const { return LEPlicClass; }
 
 protected:
-    void doLagrangianPhase(TimeStep *atTime);
-    void doInterfaceReconstruction(TimeStep *atTime, bool coord_upd, bool temp_vof);
-    void doInterfaceRemapping(TimeStep *atTime);
+    void doLagrangianPhase(TimeStep *tStep);
+    void doInterfaceReconstruction(TimeStep *tStep, bool coord_upd, bool temp_vof);
+    void doInterfaceRemapping(TimeStep *tStep);
     void doCellDLS(FloatArray &fvgrad, int ie, bool coord_upd, bool temp_vof_flag);
     void findCellLineConstant(double &p, FloatArray &fvgrad, int ie, bool coord_upd, bool temp_vof_flag);
 
@@ -204,7 +203,7 @@ protected:
         double target_vof;
         bool upd;
 public:
-        computeLEPLICVolumeFractionWrapper(LEPlicElementInterface *i, LEPlic *mi, const FloatArray &n, const double target_vof_val, bool upd_val):
+        computeLEPLICVolumeFractionWrapper(LEPlicElementInterface *i, LEPlic *mi, const FloatArray &n, const double target_vof_val, bool upd_val) :
             iface(i), minterf(mi), normal(n), target_vof(target_vof_val), upd(upd_val) { }
         void setNormal(const FloatArray &n) { normal = n; }
         double eval(double x) { return fabs(iface->computeLEPLICVolumeFraction(normal, x, minterf, upd) - target_vof); }

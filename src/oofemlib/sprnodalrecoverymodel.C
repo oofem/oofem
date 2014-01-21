@@ -87,7 +87,7 @@ SPRNodalRecoveryModel :: recoverValues(InternalStateType type, TimeStep *tStep)
 #endif
 
     // loop over regions
-    for (int ireg = 1; ireg <= nregions; ireg++ ) {
+    for ( int ireg = 1; ireg <= nregions; ireg++ ) {
         SPRPatchType regType;
         int regionValSize;
         int regionDofMans;
@@ -111,7 +111,7 @@ SPRNodalRecoveryModel :: recoverValues(InternalStateType type, TimeStep *tStep)
         this->determinePatchAssemblyPoints(pap, ireg, regType);
 
         int npap = pap.giveSize();
-        for (int ipap = 1; ipap <= npap; ipap++ ) {
+        for ( int ipap = 1; ipap <= npap; ipap++ ) {
             int papNumber = pap.at(ipap);
             int oldSize = regionValSize;
 
@@ -136,8 +136,8 @@ SPRNodalRecoveryModel :: recoverValues(InternalStateType type, TimeStep *tStep)
             if ( regionNodalNumbers.at(i) ) {
 #else
             if ( regionNodalNumbers.at(i) &&
-                ( ( domain->giveDofManager(i)->giveParallelMode() == DofManager_local ) ||
-                 ( domain->giveDofManager(i)->giveParallelMode() == DofManager_shared ) ) ) {
+                 ( ( domain->giveDofManager(i)->giveParallelMode() == DofManager_local ) ||
+                   ( domain->giveDofManager(i)->giveParallelMode() == DofManager_shared ) ) ) {
 #endif
                 int eq = ( regionNodalNumbers.at(i) - 1 ) * regionValSize;
                 if ( dofManPatchCount.at( regionNodalNumbers.at(i) ) ) {
@@ -188,7 +188,7 @@ SPRNodalRecoveryModel :: initRegionMap(IntArray &regionMap, IntArray &regionType
     for ( int ielem = 1; ielem <= nelem; ielem++ ) {
         SPRNodalRecoveryModelInterface *interface;
         Element *element = domain->giveElement(ielem);
-        if ( !element-> isActivated(domain->giveEngngModel()->giveCurrentStep()) ) {  //skip inactivated elements
+        if ( !element->isActivated( domain->giveEngngModel()->giveCurrentStep() ) ) {  //skip inactivated elements
             continue;
         }
 #ifdef __PARALLEL_MODE
@@ -207,7 +207,7 @@ SPRNodalRecoveryModel :: initRegionMap(IntArray &regionMap, IntArray &regionType
             if ( ( elemVR = this->giveElementVirtualRegionNumber(ielem) ) ) { // test if elementVR is nonzero
                 if ( regionTypes.at(elemVR) == 0 ) {
                     regionTypes.at(elemVR) = interface->SPRNodalRecoveryMI_givePatchType();
-                } else  if ( regionTypes.at(elemVR) != ( int ) interface->SPRNodalRecoveryMI_givePatchType() ) {
+                } else if ( regionTypes.at(elemVR) != ( int ) interface->SPRNodalRecoveryMI_givePatchType() ) {
                     regionMap.at(elemVR) = 1;
                     /*
                      *   printf ("NodalRecoveryModel :: initRegionMap: element %d has incompatible Patch type, skipping region\n",ielem);
@@ -420,8 +420,8 @@ SPRNodalRecoveryModel :: initPatch(IntArray &patchElems, IntArray &dofManToDeter
 {
     int nelem, ndofman, ielem, count, patchElements, i, j, includes, npap, ipap;
     const IntArray *papDofManConnectivity = domain->giveConnectivityTable()->giveDofManConnectivityArray(papNumber);
-    std::list< int >dofManToDetermineList;
-    std::list< int > :: iterator dofManToDetermineListIter;
+    std :: list< int >dofManToDetermineList;
+    std :: list< int > :: iterator dofManToDetermineListIter;
     SPRNodalRecoveryModelInterface *interface;
     IntArray toDetermine, toDetermine2, elemPap, papInv;
     Element *element;
@@ -607,7 +607,6 @@ SPRNodalRecoveryModel :: computePatch(FloatMatrix &a, IntArray &patchElems, int 
                     }
                 }
             } // end loop over nip
-
         }
     } // end loop over elements
 
@@ -727,7 +726,7 @@ SPRNodalRecoveryModel :: exchangeDofManValues(int ireg, FloatArray &dofManValues
     ProblemCommunicatorMode commMode = emodel->giveProblemCommMode();
 
     if ( commMode == ProblemCommMode__NODE_CUT ) {
-        parallelStruct ls( &dofManValues, &dofManPatchCount, &regionNodalNumbers, regionValSize);
+        parallelStruct ls(& dofManValues, & dofManPatchCount, & regionNodalNumbers, regionValSize);
 
         // exchange data for shared nodes
         communicator->packAllData(this, & ls, & SPRNodalRecoveryModel :: packSharedDofManData);

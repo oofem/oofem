@@ -40,16 +40,14 @@
 #include "structuralinterfacematerialstatus.h"
 #include "gausspoint.h"
 namespace oofem {
-
 StructuralInterfaceMaterialStatus :: StructuralInterfaceMaterialStatus(int n, Domain *d, GaussPoint *g) :
     MaterialStatus(n, d, g), jump(), traction(), tempTraction(), tempJump(), firstPKTraction(), tempFirstPKTraction(), F(), tempF()
 {
-    //int size = StructuralMaterial :: giveSizeOfVoigtSymVector( gp->giveMaterialMode() ); ///@todo how to best get rid of matMode?
-    int size = 3;
+    int size = this->giveDomain()->giveNumberOfSpatialDimensions();
     this->jump.resize(size);
     this->traction.resize(size);
     this->firstPKTraction.resize(size);
-    this->F.resize(size,size);
+    this->F.resize(size, size);
     this->F.beUnitMatrix();
 
     // reset temp vars.
@@ -57,7 +55,6 @@ StructuralInterfaceMaterialStatus :: StructuralInterfaceMaterialStatus(int n, Do
     this->tempTraction        = this->traction;
     this->tempFirstPKTraction = this->firstPKTraction;
     this->tempF               = this->F;
-
 }
 
 
@@ -96,8 +93,8 @@ void StructuralInterfaceMaterialStatus :: updateYourself(TimeStep *tStep)
     MaterialStatus :: updateYourself(tStep);
 
     this->jump            = this->tempJump;
-    this->traction        = this->tempTraction; 
-    this->firstPKTraction = this->tempFirstPKTraction; 
+    this->traction        = this->tempTraction;
+    this->firstPKTraction = this->tempFirstPKTraction;
     this->F               = this->tempF;
 }
 
@@ -111,14 +108,15 @@ void StructuralInterfaceMaterialStatus :: initTempStatus()
 
     // see if vectors describing reached equilibrium are defined
     if ( this->giveJump().giveSize() == 0 ) {
-        //this->jump.resize( StructuralMaterial :: giveSizeOfVoigtSymVector( gp->giveMaterialMode() ) );
-        this->jump.resize(3);
+        
+        this->jump.resize( this->giveDomain()->giveNumberOfSpatialDimensions() );
+        //this->jump.resize(3);
         this->jump.zero();
     }
 
     if ( this->giveTraction().giveSize() == 0 ) {
-        //this->traction.resize( StructuralMaterial :: giveSizeOfVoigtSymVector( gp->giveMaterialMode() ) );
-        this->traction.resize(3);
+        this->traction.resize( this->giveDomain()->giveNumberOfSpatialDimensions() );
+        //this->traction.resize(3);
         this->traction.zero();
     }
 
@@ -186,25 +184,23 @@ StructuralInterfaceMaterialStatus :: restoreContext(DataStream *stream, ContextM
 
 void StructuralInterfaceMaterialStatus :: copyStateVariables(const MaterialStatus &iStatus)
 {
-	MaterialStatus &tmpStat = const_cast<MaterialStatus&>(iStatus);
-	const StructuralInterfaceMaterialStatus &structStatus = dynamic_cast<StructuralInterfaceMaterialStatus&>(tmpStat);
+    MaterialStatus &tmpStat = const_cast< MaterialStatus & >( iStatus );
+    const StructuralInterfaceMaterialStatus &structStatus = dynamic_cast< StructuralInterfaceMaterialStatus & >( tmpStat );
 
-	jump 				= structStatus.giveJump();
-	traction			= structStatus.giveTraction();
-	tempTraction		= structStatus.giveTempTraction();
-	tempJump			= structStatus.giveTempJump();
-	firstPKTraction		= structStatus.giveFirstPKTraction();
-	tempFirstPKTraction	= structStatus.giveTempFirstPKTraction();
-	F					= structStatus.giveF();
-	tempF				= structStatus.giveTempF();
-	mNormalDir			= structStatus.giveNormal();
+    jump                            = structStatus.giveJump();
+    traction                        = structStatus.giveTraction();
+    tempTraction            = structStatus.giveTempTraction();
+    tempJump                        = structStatus.giveTempJump();
+    firstPKTraction         = structStatus.giveFirstPKTraction();
+    tempFirstPKTraction     = structStatus.giveTempFirstPKTraction();
+    F                                       = structStatus.giveF();
+    tempF                           = structStatus.giveTempF();
+    mNormalDir                      = structStatus.giveNormal();
 }
 
 
 void StructuralInterfaceMaterialStatus :: addStateVariables(const MaterialStatus &iStatus)
 {
-	OOFEM_ERROR("Error: StructuralInterfaceMaterialStatus :: addStateVariables is not implemented.\n");
+    OOFEM_ERROR("Error: StructuralInterfaceMaterialStatus :: addStateVariables is not implemented.\n");
 }
-
-
 } // end namespace oofem

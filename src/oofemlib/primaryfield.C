@@ -47,7 +47,7 @@ PrimaryField :: PrimaryField(EngngModel *a, int idomain,
 {
     FloatArray *sv;
 
-    this->actualStepNumber = -999;
+    this->actualtStepumber = -999;
     this->actualStepIndx = 0;
     this->nHistVectors = nHist;
     this->ut = ut;
@@ -65,18 +65,18 @@ PrimaryField :: ~PrimaryField()
 { }
 
 void
-PrimaryField :: initialize(ValueModeType mode, TimeStep *atTime, FloatArray &answer, const UnknownNumberingScheme &s)
+PrimaryField :: initialize(ValueModeType mode, TimeStep *tStep, FloatArray &answer, const UnknownNumberingScheme &s)
 {
     int neq =  emodel->giveNumberOfDomainEquations(domainIndx, s);
     answer.resize(neq);
     answer.zero();
 
     if ( mode == VM_Total ) {
-        answer = * ( this->giveSolutionVector(atTime) );
+        answer = * ( this->giveSolutionVector(tStep) );
     } else if ( mode == VM_Incremental ) {
-        int indxm1 = this->resolveIndx(atTime, -1);
-        answer = * ( this->giveSolutionVector(atTime) );
-        answer.subtract( *this->giveSolutionVector(indxm1) );
+        int indxm1 = this->resolveIndx(tStep, -1);
+        answer = * ( this->giveSolutionVector(tStep) );
+        answer.subtract( * this->giveSolutionVector(indxm1) );
     } else {
         _error2( "giveUnknownValue: unsupported mode %s", __ValueModeTypeToString(mode) );
     }
@@ -84,18 +84,18 @@ PrimaryField :: initialize(ValueModeType mode, TimeStep *atTime, FloatArray &ans
 
 
 double
-PrimaryField :: giveUnknownValue(Dof *dof, ValueModeType mode, TimeStep *atTime)
+PrimaryField :: giveUnknownValue(Dof *dof, ValueModeType mode, TimeStep *tStep)
 {
-    int eq = dof->giveEquationNumber(emodel->giveUnknownNumberingScheme(this->ut));
+    int eq = dof->giveEquationNumber( emodel->giveUnknownNumberingScheme(this->ut) );
     if ( eq == 0 ) {
         _error("giveUnknownValue: invalid equation number");
     }
 
     if ( mode == VM_Total ) {
-        return this->giveSolutionVector(atTime)->at(eq);
+        return this->giveSolutionVector(tStep)->at(eq);
     } else if ( mode == VM_Incremental ) {
-        int indxm1 = this->resolveIndx(atTime, -1);
-        return ( this->giveSolutionVector(atTime)->at(eq) - this->giveSolutionVector(indxm1)->at(eq) );
+        int indxm1 = this->resolveIndx(tStep, -1);
+        return ( this->giveSolutionVector(tStep)->at(eq) - this->giveSolutionVector(indxm1)->at(eq) );
     } else {
         _error("giveUnknownValue: unsupported mode");
     }
@@ -104,32 +104,32 @@ PrimaryField :: giveUnknownValue(Dof *dof, ValueModeType mode, TimeStep *atTime)
 }
 
 int
-PrimaryField :: __evaluateAt(FloatArray &answer, DofManager* dman,
-                    ValueModeType mode, TimeStep *atTime,
-                    IntArray *dofId)
+PrimaryField :: __evaluateAt(FloatArray &answer, DofManager *dman,
+                             ValueModeType mode, TimeStep *tStep,
+                             IntArray *dofId)
 {
-    if (dman->giveDomain() == this->emodel->giveDomain(domainIndx)) {
-        if (dofId) {
-            dman->giveUnknownVector(answer, *dofId, *this, mode, atTime);
+    if ( dman->giveDomain() == this->emodel->giveDomain(domainIndx) ) {
+        if ( dofId ) {
+            dman->giveUnknownVector(answer, * dofId, * this, mode, tStep);
             return 0; // ok
         } else { // all dofs requested
             int size = dman->giveNumberOfDofs();
             for ( int i = 1; i <= size; i++ ) {
-                answer.at(i)=dman->giveDof(i)->giveUnknown(*this, mode, atTime);
+                answer.at(i) = dman->giveDof(i)->giveUnknown(* this, mode, tStep);
             }
             return 0; // ok
         }
     } else {
-        return this->__evaluateAt(answer, *dman->giveCoordinates(),
-                    mode, atTime, dofId);
+        return this->__evaluateAt(answer, * dman->giveCoordinates(),
+                                  mode, tStep, dofId);
     }
 }
 
 
 int
-PrimaryField :: __evaluateAt(FloatArray &answer, FloatArray& coords,
-                    ValueModeType mode, TimeStep *atTime,
-                    IntArray *dofId)
+PrimaryField :: __evaluateAt(FloatArray &answer, FloatArray &coords,
+                             ValueModeType mode, TimeStep *tStep,
+                             IntArray *dofId)
 {
     Element *bgelem;
     Domain *domain = emodel->giveDomain(domainIndx);
@@ -142,12 +142,12 @@ PrimaryField :: __evaluateAt(FloatArray &answer, FloatArray& coords,
 
     EIPrimaryFieldInterface *interface = static_cast< EIPrimaryFieldInterface * >( bgelem->giveInterface(EIPrimaryFieldInterfaceType) );
     if ( interface ) {
-        if (dofId) {
-            return interface->EIPrimaryFieldI_evaluateFieldVectorAt(answer, * this, coords, *dofId, mode, atTime);
+        if ( dofId ) {
+            return interface->EIPrimaryFieldI_evaluateFieldVectorAt(answer, * this, coords, * dofId, mode, tStep);
         } else { // use element default dof id mask
             IntArray elemDofId;
             bgelem->giveElementDofIDMask(this->giveEquationID(), elemDofId);
-            return interface->EIPrimaryFieldI_evaluateFieldVectorAt(answer, * this, coords, elemDofId, mode, atTime);
+            return interface->EIPrimaryFieldI_evaluateFieldVectorAt(answer, * this, coords, elemDofId, mode, tStep);
         }
     } else {
         _error("ScalarPrimaryField::operator(): background element does not support EIPrimaryFiledInterface\n");
@@ -157,24 +157,24 @@ PrimaryField :: __evaluateAt(FloatArray &answer, FloatArray& coords,
 
 int
 PrimaryField :: evaluateAt(FloatArray &answer, FloatArray &coords,
-                    ValueModeType mode, TimeStep *atTime)
+                           ValueModeType mode, TimeStep *tStep)
 {
-    return this->__evaluateAt(answer, coords, mode, atTime, NULL);
+    return this->__evaluateAt(answer, coords, mode, tStep, NULL);
 }
 
 
 int
-PrimaryField::evaluateAt(FloatArray &answer, DofManager* dman,
-                ValueModeType mode, TimeStep *atTime)
+PrimaryField :: evaluateAt(FloatArray &answer, DofManager *dman,
+                           ValueModeType mode, TimeStep *tStep)
 {
-    return this->__evaluateAt(answer, dman, mode, atTime, NULL);
+    return this->__evaluateAt(answer, dman, mode, tStep, NULL);
 }
 
 
 FloatArray *
-PrimaryField :: giveSolutionVector(TimeStep *atTime)
+PrimaryField :: giveSolutionVector(TimeStep *tStep)
 {
-    return this->giveSolutionVector( resolveIndx(atTime, 0) );
+    return this->giveSolutionVector( resolveIndx(tStep, 0) );
 }
 
 FloatArray *
@@ -193,14 +193,14 @@ PrimaryField :: giveSolutionVector(int i)
 
 
 int
-PrimaryField :: resolveIndx(TimeStep *atTime, int shift)
+PrimaryField :: resolveIndx(TimeStep *tStep, int shift)
 {
-    int stepNo = atTime->giveNumber();
-    int relPos = actualStepNumber - stepNo - shift;
+    int tStepo = tStep->giveNumber();
+    int relPos = actualtStepumber - tStepo - shift;
     if ( ( relPos >= 0 ) && ( relPos <= nHistVectors ) ) {
         return ( actualStepIndx + relPos ) % ( nHistVectors + 1 ) + 1;
     } else {
-        _error3("resolveIndx: History not available for relative step no. %d to step no. %d", shift, stepNo);
+        _error3("resolveIndx: History not available for relative step no. %d to step no. %d", shift, tStepo);
     }
 
     return 0;
@@ -208,19 +208,19 @@ PrimaryField :: resolveIndx(TimeStep *atTime, int shift)
 
 
 void
-PrimaryField :: advanceSolution(TimeStep *atTime)
+PrimaryField :: advanceSolution(TimeStep *tStep)
 {
     TimeStep *newts;
-    if ( ( actualStepNumber >= 0 ) && ( actualStepNumber + 1 != atTime->giveNumber() ) ) {
+    if ( ( actualtStepumber >= 0 ) && ( actualtStepumber + 1 != tStep->giveNumber() ) ) {
         _error("advanceSolution: can not advance due to steps skipped");
     }
 
     actualStepIndx = ( actualStepIndx > 0 ) ? actualStepIndx - 1 : nHistVectors;
-    actualStepNumber = atTime->giveNumber();
+    actualtStepumber = tStep->giveNumber();
     if ( ( newts = solStepList.at(actualStepIndx + 1) ) ) {
-        * newts = * atTime;
+        * newts = * tStep;
     } else {
-        solStepList.put( actualStepIndx + 1, new TimeStep(* atTime) );
+        solStepList.put( actualStepIndx + 1, new TimeStep(* tStep) );
     }
 }
 
@@ -230,7 +230,7 @@ PrimaryField :: saveContext(DataStream *stream, ContextMode mode)
 {
     contextIOResultType iores(CIO_IOERR);
 
-    if ( !stream->write(& actualStepNumber, 1) ) {
+    if ( !stream->write(& actualtStepumber, 1) ) {
         THROW_CIOERR(CIO_IOERR);
     }
 
@@ -272,7 +272,7 @@ PrimaryField :: restoreContext(DataStream *stream, ContextMode mode)
 {
     contextIOResultType iores(CIO_IOERR);
 
-    if ( !stream->read(& actualStepNumber, 1) ) {
+    if ( !stream->read(& actualtStepumber, 1) ) {
         THROW_CIOERR(CIO_IOERR);
     }
 

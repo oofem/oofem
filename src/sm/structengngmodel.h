@@ -105,10 +105,6 @@ public:
 
     virtual int checkConsistency();
 
-    // identification
-    virtual const char *giveClassName() const { return "StructuralEngngModel"; }
-    virtual classType giveClassID() const { return StructuralEngngModelClass; }
-
     /**
      * Computes reaction forces. The implementation assumes, that real
      * stresses corresponding to reached state are already computed (uses giveInternalForcesVector
@@ -135,19 +131,15 @@ public:
     void buildReactionTable(IntArray &restrDofMans, IntArray &restrDofs, IntArray &eqn, TimeStep *tStep, int di);
 
 
-#ifdef __PETSC_MODULE
-    /**
-     * Creates PETSc contexts. Must be implemented by derived classes since the governing equation type is required
-     * for context creation.
-     */
-    virtual void initPetscContexts();
+#ifdef __PARALLEL_MODE
+    virtual void initParallelContexts();
 #endif
 
 #ifdef __OOFEG
     /**
      * Shows the sparse structure of required matrix, type == 1 stiffness.
      */
-    void showSparseMtrxStructure(int type, oofegGraphicContext &context, TimeStep *atTime);
+    void showSparseMtrxStructure(int type, oofegGraphicContext &context, TimeStep *tStep);
 #endif
 };
 } // end namespace oofem

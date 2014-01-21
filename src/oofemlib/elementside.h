@@ -73,7 +73,6 @@ public:
     // miscellaneous
     virtual const char *giveClassName() const { return "ElementSide"; }
     virtual const char *giveInputRecordName() const { return _IFT_ElementSide_Name; }
-    virtual classType giveClassID() const { return ElementSideClass; }
     virtual IRResultType initializeFrom(InputRecord *ir);
     virtual void printYourself();
 

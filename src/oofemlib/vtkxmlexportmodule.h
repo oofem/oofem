@@ -172,7 +172,7 @@ protected:
 
 public:
     /// Constructor. Creates empty Output Manager. By default all components are selected.
-    VTKXMLExportModule(int n, EngngModel * e);
+    VTKXMLExportModule(int n, EngngModel *e);
     /// Destructor
     virtual ~VTKXMLExportModule();
 
@@ -225,10 +225,6 @@ protected:
      * Some common element types are supported, others can be supported via interface concept.
      */
     int giveCellType(Element *element);
-    /**
-     * Returns the number of elements vtk cells.
-     */
-    int giveNumberOfElementCells(Element *element);
     /**
      * Returns number of nodes corresponding to cell type
      */

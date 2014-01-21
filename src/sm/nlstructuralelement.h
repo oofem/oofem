@@ -213,7 +213,6 @@ public:
 
     // definition
     virtual const char *giveClassName() const { return "NLStructuralElement"; }
-    virtual classType giveClassID() const { return NLStructuralElementClass; }
 
 protected:
     int checkConsistency();
@@ -231,6 +230,7 @@ protected:
         return;
     }
     friend class GradDpElement;
+    friend class PhaseFieldElement;
 };
 } // end namespace oofem
 #endif // nlstructuralelement_h

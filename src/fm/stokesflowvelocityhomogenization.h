@@ -74,18 +74,17 @@ public:
 
     virtual const char *giveClassName() const { return "StokesFlowVelocityHomogenization"; }
     virtual const char *giveInputRecordName() const { return _IFT_StokesFlowVelocityHomogenization_Name; }
-    virtual classType giveClassID() const { return StokesFlowVelocityHomogenizationClass; }
 
     void updateC();
 
-    void computeTangent(FloatMatrix &answer, TimeStep *atTime);
+    void computeTangent(FloatMatrix &answer, TimeStep *tStep);
 
     virtual void rveSetBoundaryConditions(int type, FloatArray value);
-    virtual void rveGiveCharacteristicData(int type, void *value, void *answer, TimeStep *atTime);
+    virtual void rveGiveCharacteristicData(int type, void *value, void *answer, TimeStep *tStep);
 
 private:
     /** Computes the mean velocity and pressure gradient */
-    void getMeans(FloatArray &gradP, FloatArray &v, TimeStep *atTime);
+    void getMeans(FloatArray &gradP, FloatArray &v, TimeStep *tStep);
 };
 }
 #endif // stokesflowvelocityhomogenization_h

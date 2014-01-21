@@ -52,9 +52,8 @@
 #include <cstdio>
 
 namespace oofem {
+REGISTER_Element(QTRSpace);
 
-REGISTER_Element( QTRSpace );
- 
 FEI3dTetQuad QTRSpace :: interpolation;
 
 QTRSpace :: QTRSpace(int n, Domain *aDomain) : NLStructuralElement(n, aDomain)
@@ -68,11 +67,11 @@ QTRSpace :: initializeFrom(InputRecord *ir)
 {
     numberOfGaussPoints = 4;
     IRResultType result = this->NLStructuralElement :: initializeFrom(ir);
-	if(result != IRRT_OK) {
-		return result;
-	}
+    if ( result != IRRT_OK ) {
+        return result;
+    }
 
-    if ( ( numberOfGaussPoints != 1 ) && ( numberOfGaussPoints != 4 )&& ( numberOfGaussPoints != 5 ) ) {
+    if ( ( numberOfGaussPoints != 1 ) && ( numberOfGaussPoints != 4 ) && ( numberOfGaussPoints != 5 ) ) {
         numberOfGaussPoints = 4;
     }
 
@@ -80,10 +79,10 @@ QTRSpace :: initializeFrom(InputRecord *ir)
 }
 
 
-FEInterpolation*
+FEInterpolation *
 QTRSpace :: giveInterpolation() const
 {
-    return &interpolation;
+    return & interpolation;
 }
 
 
@@ -103,12 +102,12 @@ QTRSpace :: giveDofManDofIDMask(int inode, EquationID ut, IntArray &answer) cons
 
 
 double
-QTRSpace :: computeVolumeAround(GaussPoint *aGaussPoint)
-// Returns the portion of the receiver which is attached to aGaussPoint.
+QTRSpace :: computeVolumeAround(GaussPoint *gp)
+// Returns the portion of the receiver which is attached to gp.
 {
-    double determinant = fabs ((this->interpolation.giveTransformationJacobian(* aGaussPoint->giveCoordinates(), FEIElementGeometryWrapper(this))));
-    double weight = aGaussPoint->giveWeight();
-    return ( determinant * weight);
+    double determinant = fabs( ( this->interpolation.giveTransformationJacobian( * gp->giveCoordinates(), FEIElementGeometryWrapper(this) ) ) );
+    double weight = gp->giveWeight();
+    return ( determinant * weight );
 }
 
 
@@ -119,7 +118,7 @@ QTRSpace :: computeGaussPoints()
     numberOfIntegrationRules = 1;
     integrationRulesArray = new IntegrationRule * [ numberOfIntegrationRules ];
     integrationRulesArray [ 0 ] = new GaussIntegrationRule(1, this, 1, 6);
-    this->giveCrossSection()->setupIntegrationPoints( *integrationRulesArray[0], numberOfGaussPoints, this );
+    this->giveCrossSection()->setupIntegrationPoints(* integrationRulesArray [ 0 ], numberOfGaussPoints, this);
 }
 
 
@@ -131,14 +130,14 @@ QTRSpace :: giveMaterialMode()
 
 
 void
-QTRSpace :: computeBmatrixAt(GaussPoint *aGaussPoint, FloatMatrix &answer, int li, int ui)
+QTRSpace :: computeBmatrixAt(GaussPoint *gp, FloatMatrix &answer, int li, int ui)
 // Returns the [6x30] strain-displacement matrix {B} of the receiver, eva-
-// luated at aGaussPoint.
+// luated at gp.
 // B matrix  -  6 rows : epsilon-X, epsilon-Y, epsilon-Z, gamma-YZ, gamma-ZX, gamma-XY  :
 {
     FloatMatrix dnx;
 
-    this->interpolation.evaldNdx(dnx, * aGaussPoint->giveCoordinates(), FEIElementGeometryWrapper(this));
+    this->interpolation.evaldNdx( dnx, * gp->giveCoordinates(), FEIElementGeometryWrapper(this) );
 
     answer.resize(6, 30);
     answer.zero();
@@ -156,17 +155,16 @@ QTRSpace :: computeBmatrixAt(GaussPoint *aGaussPoint, FloatMatrix &answer, int l
 
         answer.at(6, 3 * i - 2) = dnx.at(2, i);
         answer.at(6, 3 * i - 1) = dnx.at(1, i);
-
     }
 }
 
 
 void
-QTRSpace :: computeBHmatrixAt(GaussPoint *aGaussPoint, FloatMatrix &answer)
+QTRSpace :: computeBHmatrixAt(GaussPoint *gp, FloatMatrix &answer)
 {
     FloatMatrix dnx;
-  
-    this->interpolation.evaldNdx(dnx, * aGaussPoint->giveCoordinates(), FEIElementGeometryWrapper(this));
+
+    this->interpolation.evaldNdx( dnx, * gp->giveCoordinates(), FEIElementGeometryWrapper(this) );
 
     answer.resize(9, 30);
     answer.zero();
@@ -175,11 +173,11 @@ QTRSpace :: computeBHmatrixAt(GaussPoint *aGaussPoint, FloatMatrix &answer)
         answer.at(1, 3 * i - 2) = dnx.at(i, 1);     // du/dx
         answer.at(2, 3 * i - 1) = dnx.at(i, 2);     // dv/dy
         answer.at(3, 3 * i - 0) = dnx.at(i, 3);     // dw/dz
-        answer.at(4, 3 * i - 1) = dnx.at(i, 3);     // dv/dz 
+        answer.at(4, 3 * i - 1) = dnx.at(i, 3);     // dv/dz
         answer.at(7, 3 * i - 0) = dnx.at(i, 2);     // dw/dy
-        answer.at(5, 3 * i - 2) = dnx.at(i, 3);     // du/dz 
+        answer.at(5, 3 * i - 2) = dnx.at(i, 3);     // du/dz
         answer.at(8, 3 * i - 0) = dnx.at(i, 1);     // dw/dx
-        answer.at(6, 3 * i - 2) = dnx.at(i, 2);     // du/dy 
+        answer.at(6, 3 * i - 2) = dnx.at(i, 2);     // du/dy
         answer.at(9, 3 * i - 1) = dnx.at(i, 1);     // dv/dx
     }
 }
@@ -261,5 +259,4 @@ QTRSpace :: NodalAveragingRecoveryMI_computeSideValue(FloatArray &answer, int si
 {
     answer.resize(0);
 }
-
 } // end namespace oofem

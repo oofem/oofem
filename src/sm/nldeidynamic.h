@@ -126,8 +126,8 @@ protected:
     double pyEstimate;
     /// Product of p^tM^(-1)p; where p is reference load vector.
     double pMp;
-    
-    SparseMtrx * massMatrixConsistent;
+
+    SparseMtrx *massMatrixConsistent;
     LinSystSolverType solverType;
     SparseMtrxType sparseMtrxType;
     SparseLinearSystemNM *nMethod;
@@ -154,12 +154,11 @@ public:
 
     virtual void printOutputAt(FILE *file, TimeStep *tStep);
 
-    virtual void printDofOutputAt(FILE *stream, Dof *iDof, TimeStep *atTime);
+    virtual void printDofOutputAt(FILE *stream, Dof *iDof, TimeStep *tStep);
 
     // identification
     virtual const char *giveInputRecordName() const { return _IFT_NlDEIDynamic_Name; }
     virtual const char *giveClassName() const { return "NlDEIDynamic"; }
-    virtual classType giveClassID() const { return NlDEIDynamicClass; }
     virtual fMode giveFormulation() { return TL; }
 
     virtual int giveNumberOfFirstStep() { return 0; }
@@ -171,9 +170,9 @@ protected:
      * If in parallel mode, the loads of shared/remote nodes are exchanged and remote contributions are taken into account.
      * @param answer Load vector.
      * @param mode Value type mode of load vector.
-     * @param stepN Solution step.
+     * @param tStep Solution step.
      */
-    void computeLoadVector(FloatArray &answer, ValueModeType mode, TimeStep *stepN);
+    void computeLoadVector(FloatArray &answer, ValueModeType mode, TimeStep *tStep);
     /**
      * Assembles the diagonal mass matrix of receiver.
      * Local or Global variant of zero mass elements replacement is performed.

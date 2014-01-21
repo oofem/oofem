@@ -57,7 +57,8 @@ REGISTER_EnrichmentDomain(EDBGCircle)
 REGISTER_EnrichmentDomain(EDCrack)
 
 
-EnrichmentDomain :: EnrichmentDomain()
+EnrichmentDomain :: EnrichmentDomain() :
+    mDebugVTK(false)
 {}
 
 void EnrichmentDomain_BG :: giveInputRecord(DynamicInputRecord &input)
@@ -70,6 +71,13 @@ void EnrichmentDomain_BG :: giveInputRecord(DynamicInputRecord &input)
 void EnrichmentDomain_BG :: CallNodeEnrMarkerUpdate(EnrichmentItem &iEnrItem, XfemManager &ixFemMan) const
 {
     iEnrItem.updateNodeEnrMarker(ixFemMan, * this);
+}
+
+IRResultType EDCrack :: initializeFrom(InputRecord *ir)
+{
+    IRResultType result = bg->initializeFrom(ir);
+
+    return result;
 }
 
 bool EDCrack :: giveClosestTipInfo(const FloatArray &iCoords, TipInfo &oInfo) const
@@ -96,8 +104,10 @@ bool EDCrack :: giveClosestTipInfo(const FloatArray &iCoords, TipInfo &oInfo) co
 
             oInfo.mTipIndex = 0;
 
+            oInfo.mArcPos = 0.0;
+
             return true;
-        } else   {
+        } else {
             const FloatArray &p1 = ( bg->giveVertex(nVert - 1) );
             const FloatArray &p2 = ( bg->giveVertex(nVert) );
 
@@ -112,6 +122,8 @@ bool EDCrack :: giveClosestTipInfo(const FloatArray &iCoords, TipInfo &oInfo) co
             oInfo.mNormalDir.setValues( 2, -oInfo.mTangDir.at(2), oInfo.mTangDir.at(1) );
 
             oInfo.mTipIndex = 1;
+
+            oInfo.mArcPos = 1.0;
 
             return true;
         }
@@ -135,16 +147,6 @@ DofManList :: addDofManagers(IntArray &dofManNumbers)
     std :: sort( dofManList.begin(), this->dofManList.end() );
 }
 
-// remove?
-void
-DofManList :: updateEnrichmentDomain(IntArray &dofManNumbers)
-{
-    this->addDofManagers(dofManNumbers);
-}
-
-
-
-
 bool EDCrack :: giveTipInfos(std :: vector< TipInfo > &oInfo) const
 {
     int nVert = bg->giveNrVertices();
@@ -165,6 +167,7 @@ bool EDCrack :: giveTipInfos(std :: vector< TipInfo > &oInfo) const
         info1.mNormalDir.setValues( 2, -info1.mTangDir.at(2), info1.mTangDir.at(1) );
 
         info1.mTipIndex = 0;
+        info1.mArcPos = 0.0;
 
         oInfo.push_back(info1);
 
@@ -184,6 +187,7 @@ bool EDCrack :: giveTipInfos(std :: vector< TipInfo > &oInfo) const
         info2.mNormalDir.setValues( 2, -info2.mTangDir.at(2), info2.mTangDir.at(1) );
 
         info2.mTipIndex = 1;
+        info2.mArcPos = 1.0;
 
         oInfo.push_back(info2);
 
@@ -200,20 +204,13 @@ bool EDCrack :: propagateTips(const std :: vector< TipPropagation > &iTipProp) {
             FloatArray pos( bg->giveVertex(1) );
             pos.add(iTipProp [ i ].mPropagationLength, iTipProp [ i ].mPropagationDir);
             bg->insertVertexFront(pos);
-        } else if ( iTipProp [ i ].mTipIndex == 1 )         {
+        } else if ( iTipProp [ i ].mTipIndex == 1 ) {
             // Propagate end point
             FloatArray pos( bg->giveVertex( bg->giveNrVertices() ) );
             pos.add(iTipProp [ i ].mPropagationLength, iTipProp [ i ].mPropagationDir);
             bg->insertVertexBack(pos);
         }
     }
-
-    // For debugging only
-    PolygonLine *pl = dynamic_cast< PolygonLine * >( bg );
-    if ( pl != NULL ) {
-        pl->printVTK();
-    }
-
     return true;
 }
 
@@ -225,7 +222,7 @@ void DofManList :: CallNodeEnrMarkerUpdate(EnrichmentItem &iEnrItem, XfemManager
 
 void DofManList :: computeSurfaceNormalSignDist(double &oDist, const FloatArray &iPoint) const
 {
-    oDist = iPoint.at(3) - this->xi;     
+    oDist = iPoint.at(3) - this->xi;     // will only work for plane el
 }
 
 IRResultType DofManList :: initializeFrom(InputRecord *ir)
@@ -233,41 +230,37 @@ IRResultType DofManList :: initializeFrom(InputRecord *ir)
     const char *__proc = "initializeFrom";     // Required by IR_GIVE_FIELD macro
     IRResultType result;     // Required by IR_GIVE_FIELD macro
 
-    IntArray idList(0);
-    IR_GIVE_OPTIONAL_FIELD(ir, idList, _IFT_DofManList_list);
+    IntArray idList;
+    IR_GIVE_FIELD(ir, idList, _IFT_DofManList_list);
     for ( int i = 1; i <= idList.giveSize(); i++ ) {
         this->dofManList.push_back( idList.at(i) );
     }
-    
-    // Read node set if given - initialization is done in postinitialize
-    this->setNumber = 0;
-    if ( ir->hasField(_IFT_DofManList_SetNumber) ) {
-        IR_GIVE_FIELD(ir, this->setNumber, _IFT_DofManList_SetNumber);
-    }
 
-    //std :: sort( dofManList.begin(), this->dofManList.end() );
-    
+    std :: sort( dofManList.begin(), this->dofManList.end() );
+    //IR_GIVE_FIELD(ir, this->xi, _IFT_DofManList_DelaminationLevel);
+
     return IRRT_OK;
 }
 
 int
-DofManList :: instanciateYourself(Domain *d)
+DofManList::instanciateYourself( Domain *d )
 {
 
     // Set the nodes based on a given node set
-    if ( this->setNumber > 0 ) {
-        
+    if(this->setNumber > 0) {
+
         Set *set = d->giveSet( this->setNumber );
-        const IntArray &nodes = set->giveNodeList();
+        const IntArray &nodes = set->giveNodeList( );
         //nodes.printYourself();
-        for ( int i = 1; i <= nodes.giveSize(); i++ ) {
-            this->dofManList.push_back( nodes.at(i) );
+        for(int i = 1; i <= nodes.giveSize( ); i++) {
+            this->dofManList.push_back( nodes.at( i ) );
         }
     }
-    std :: sort( dofManList.begin(), this->dofManList.end() );
+
+    std::sort( dofManList.begin( ), this->dofManList.end( ) );
+
     return 1;
 }
-
 
 void DofManList :: giveInputRecord(DynamicInputRecord &input)
 {
@@ -281,7 +274,6 @@ void DofManList :: giveInputRecord(DynamicInputRecord &input)
 
     input.setField(idList, _IFT_DofManList_list);
 }
-
 
 void WholeDomain :: CallNodeEnrMarkerUpdate(EnrichmentItem &iEnrItem, XfemManager &ixFemMan) const
 {

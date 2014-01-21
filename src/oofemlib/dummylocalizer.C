@@ -40,11 +40,10 @@
 #include "node.h"
 
 namespace oofem {
-
 int
 DummySpatialLocalizer :: init(bool force)
 {
-    if (!force && this->initialized) {
+    if ( !force && this->initialized ) {
         return true;
     }
 
@@ -55,7 +54,7 @@ DummySpatialLocalizer :: init(bool force)
 
     IntArray region_nelem(nregion);
     region_nelem.zero();
-    for (int i = 1; i <= nelem; i++) {
+    for ( int i = 1; i <= nelem; i++ ) {
         Element *e = this->domain->giveElement(i);
         r = e->giveRegionNumber();
         region_nelem.at(r)++;
@@ -63,17 +62,17 @@ DummySpatialLocalizer :: init(bool force)
 
     this->region_elements.resize(nregion);
     // Creates a new int array of correct size for each region
-    for (int i = 1; i <= nregion; i++) {
-        this->region_elements[i-1].resize(region_nelem.at(i));
+    for ( int i = 1; i <= nregion; i++ ) {
+        this->region_elements [ i - 1 ].resize( region_nelem.at(i) );
     }
     // Add the numbers into the list.
     IntArray c(nregion);
     c.zero();
-    for (int i = 1; i <= nelem; i++) {
+    for ( int i = 1; i <= nelem; i++ ) {
         Element *e = this->domain->giveElement(i);
         r = e->giveRegionNumber();
         c.at(r)++;
-        this->region_elements[r-1].at(c.at(r)) = i;
+        this->region_elements [ r - 1 ].at( c.at(r) ) = i;
     }
     return this->initialized = true;
 }
@@ -151,13 +150,13 @@ DummySpatialLocalizer :: giveElementClosestToPoint(FloatArray &lcoords, FloatArr
     closest.resize(0);
 
     if ( region > 0 ) {
-        IntArray &elems = this->region_elements[region-1];
+        IntArray &elems = this->region_elements [ region - 1 ];
         for ( int ielem = 1; ielem <= elems.giveSize(); ielem++ ) {
-            ielemptr = this->domain->giveElement(elems.at(ielem));
+            ielemptr = this->domain->giveElement( elems.at(ielem) );
             interface = static_cast< SpatialLocalizerInterface * >( ielemptr->giveInterface(SpatialLocalizerInterfaceType) );
             if ( interface ) {
                 currDist = interface->SpatialLocalizerI_giveClosestPoint(el_lcoords, el_coords, coords);
-                if ( answer == NULL || (currDist < dist && currDist >= 0.0) ) {
+                if ( answer == NULL || ( currDist < dist && currDist >= 0.0 ) ) {
                     answer = ielemptr;
                     lcoords = el_lcoords;
                     closest = el_coords;
@@ -179,7 +178,7 @@ DummySpatialLocalizer :: giveElementClosestToPoint(FloatArray &lcoords, FloatArr
                 }
 
                 currDist = interface->SpatialLocalizerI_giveClosestPoint(el_lcoords, el_coords, coords);
-                if ( answer == NULL || (currDist < dist && currDist >= 0.0) ) {
+                if ( answer == NULL || ( currDist < dist && currDist >= 0.0 ) ) {
                     answer = ielemptr;
                     lcoords = el_lcoords;
                     closest = el_coords;
@@ -255,7 +254,6 @@ DummySpatialLocalizer :: giveAllElementsWithIpWithinBox(elementContainerType &el
             }
         }
     } // end element loop
-
 }
 
 
@@ -269,7 +267,7 @@ DummySpatialLocalizer :: giveAllNodesWithinBox(nodeContainerType &nodeSet, const
     nnode = this->giveDomain()->giveNumberOfDofManagers();
     for ( i = 1; i <= nnode; i++ ) {
         idofman = this->giveDomain()->giveDofManager(i);
-        if ( ( inode = dynamic_cast< Node * >(idofman) ) != NULL ) {
+        if ( ( inode = dynamic_cast< Node * >( idofman ) ) != NULL ) {
             if ( coords.distance( inode->giveCoordinates() ) <= radius ) {
                 nodeSet.push_back(i);
             }

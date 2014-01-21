@@ -141,10 +141,10 @@ public:
     virtual void terminate(TimeStep *tStep);
 
     virtual void printOutputAt(FILE *file, TimeStep *tStep);
-    virtual void printDofOutputAt(FILE *stream, Dof *iDof, TimeStep *atTime);
+    virtual void printDofOutputAt(FILE *stream, Dof *iDof, TimeStep *tStep);
 
     virtual void updateYourself(TimeStep *tStep);
-    virtual void updateComponent(TimeStep *tStep, NumericalCmpn, Domain *d);
+    virtual void updateComponent(TimeStep * tStep, NumericalCmpn, Domain * d);
     virtual void updateAttributes(MetaStep *mStep);
 
     virtual double giveUnknownComponent(ValueModeType type, TimeStep *tStep, Domain *d, Dof *dof);
@@ -161,16 +161,14 @@ public:
     // Identification
     virtual const char *giveInputRecordName() const { return _IFT_NonLinearDynamic_Name; }
     virtual const char *giveClassName() const { return "NonLinearDynamic"; }
-    virtual classType giveClassID() const { return NonLinearDynamicClass; }
-    virtual int isIncremental() { return 1; }
     virtual fMode giveFormulation() { return nonLinFormulation; }
     virtual int useNonlocalStiffnessOption() { return this->nonlocalStiffnessFlag; }
     /// For load balancing purposes we store all values with same EquationID; so hash is computed from mode value only
-    virtual int giveUnknownDictHashIndx(ValueModeType mode, TimeStep *stepN) { return ( int ) mode; }
+    virtual int giveUnknownDictHashIndx(ValueModeType mode, TimeStep *tStep) { return ( int ) mode; }
     void timesMtrx(FloatArray &answer, FloatArray &vec, CharType type, Domain *domain, TimeStep *tStep);
 
 #ifdef __OOFEG
-    void showSparseMtrxStructure(int type, oofegGraphicContext &context, TimeStep *atTime);
+    void showSparseMtrxStructure(int type, oofegGraphicContext &context, TimeStep *tStep);
 #endif
 
 #ifdef __PARALLEL_MODE
@@ -185,8 +183,8 @@ public:
 
 #endif
 
-#ifdef __PETSC_MODULE
-    virtual void initPetscContexts();
+#ifdef __PARALLEL_MODE
+    virtual void initParallelContexts();
 #endif
 
 protected:

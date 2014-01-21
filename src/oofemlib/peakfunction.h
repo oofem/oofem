@@ -35,7 +35,7 @@
 #ifndef peakfunction_h
 #define peakfunction_h
 
-#include "loadtimefunction.h"
+#include "function.h"
 
 ///@name Input fields for PeakFunction
 //@{
@@ -49,7 +49,7 @@ namespace oofem {
  * This class implements a function that is 0 everywhere, except in a single
  * point.
  */
-class OOFEM_EXPORT PeakFunction : public LoadTimeFunction
+class OOFEM_EXPORT PeakFunction : public Function
 {
 private:
     /// Specific time when function is nonzero.
@@ -58,7 +58,7 @@ private:
     double value;
 
 public:
-    PeakFunction(int i, Domain *d) : LoadTimeFunction(i, d)
+    PeakFunction(int i, Domain *d) : Function(i, d)
     {
         t = 0.0;
         value = 0.0;
@@ -66,11 +66,13 @@ public:
     virtual ~PeakFunction() { }
 
     virtual IRResultType initializeFrom(InputRecord *ir);
-    virtual classType giveClassID() const { return PeakFunctionClass; }
     virtual const char *giveClassName() const { return "PeakFunction"; }
     virtual const char *giveInputRecordName() const { return _IFT_PeakFunction_Name; }
 
-    virtual double  __at(double);
+    virtual double evaluateAtTime(double);
+    virtual double evaluateVelocityAtTime(double t) { return 0.; }
+    virtual double evaluateAccelerationAtTime(double t) { return 0.; }
+
 };
 } // end namespace oofem
 #endif // peakfunction_h

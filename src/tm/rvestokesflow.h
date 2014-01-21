@@ -78,7 +78,6 @@ public:
     void exportFilter(GaussPoint *gp, TimeStep *tStep);
 
     virtual const char *giveClassName() const { return "RVEStokesFlowMaterialStatus"; }
-    virtual classType giveClassID() const { return RVEStokesFlowMaterialStatusClass; }
 };
 
 
@@ -104,16 +103,15 @@ public:
     virtual IRResultType initializeFrom(InputRecord *ir);
 
     virtual void giveFluxVector(FloatArray &answer, GaussPoint *gp, const FloatArray &grad, const FloatArray &field, TimeStep *tStep);
-    virtual void giveCharacteristicMatrix(FloatMatrix & answer, MatResponseMode, GaussPoint * gp, TimeStep * atTime);
-    virtual double giveCharacteristicValue(MatResponseMode mode, GaussPoint *gp, TimeStep *atTime) {return 0.0;};
+    virtual void giveCharacteristicMatrix(FloatMatrix & answer, MatResponseMode, GaussPoint * gp, TimeStep * tStep);
+    virtual double giveCharacteristicValue(MatResponseMode mode, GaussPoint *gp, TimeStep *tStep) { return 0.0; };
 
     virtual MaterialStatus *CreateStatus(GaussPoint *gp) const;
 
-    virtual int giveIPValue(FloatArray &answer, GaussPoint *aGaussPoint, InternalStateType type, TimeStep *atTime);
+    virtual int giveIPValue(FloatArray &answer, GaussPoint *gp, InternalStateType type, TimeStep *tStep);
 
     virtual const char *giveClassName() const { return "RVEStokesFlow"; }
     virtual const char *giveInputRecordName() const { return _IFT_RVEStokesFlow_Name; }
-    virtual classType giveClassID() const { return RVEStokesFlowClass; }
 };
 }
 

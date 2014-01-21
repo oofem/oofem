@@ -83,6 +83,21 @@ XfemElementInterface :: ~XfemElementInterface()
 
 void XfemElementInterface :: XfemElementInterface_createEnrBmatrixAt(FloatMatrix &oAnswer, GaussPoint &iGP, Element &iEl)
 {
+	ComputeBOrBHMatrix(oAnswer, iGP, iEl, false);
+}
+
+void XfemElementInterface :: XfemElementInterface_createEnrBHmatrixAt(FloatMatrix &oAnswer, GaussPoint &iGP, Element &iEl)
+{
+	ComputeBOrBHMatrix(oAnswer, iGP, iEl, true);
+}
+
+void XfemElementInterface :: ComputeBOrBHMatrix(FloatMatrix &oAnswer, GaussPoint &iGP, Element &iEl, bool iComputeBH)
+{
+	/*
+	 * Computes the B or BH matrix.
+	 * iComputeBH = true implies that BH is computed,
+	 * while B is computed if iComputeBH = false.
+	 */
     const int dim = 2;
     const int nDofMan = iEl.giveNumberOfDofManagers();
 
@@ -90,6 +105,10 @@ void XfemElementInterface :: XfemElementInterface_createEnrBmatrixAt(FloatMatrix
     if ( mUsePlaneStrain ) {
         shearInd = 4;
         numRows = 4;
+    }
+
+    if(iComputeBH){
+    	numRows++;
     }
 
     FloatMatrix dNdx;
@@ -120,13 +139,21 @@ void XfemElementInterface :: XfemElementInterface_createEnrBmatrixAt(FloatMatrix
         BNode.at(1, 1)                  = dNdx.at(i, 1);
         BNode.at(2, 2)                  = dNdx.at(i, 2);
         BNode.at(shearInd, 1)   = dNdx.at(i, 2);
-        BNode.at(shearInd, 2)   = dNdx.at(i, 1);
+
+        if(iComputeBH){
+        	BNode.at(shearInd+1	, 2)   = dNdx.at(i, 1);
+        }
+        else{
+            BNode.at(shearInd	, 2)   = dNdx.at(i, 1);
+        }
     }
 
 
     // XFEM part of B-matrix
-    XfemManager *xMan = iEl.giveDomain()->giveXfemManager();
-
+    XfemManager *xMan = NULL;
+	if( iEl.giveDomain()->hasXfemManager() ) {
+		xMan = iEl.giveDomain()->giveXfemManager();
+	}
 
     std :: vector< FloatMatrix >Bd(nDofMan);  // One Bd per node
 
@@ -137,69 +164,80 @@ void XfemElementInterface :: XfemElementInterface_createEnrBmatrixAt(FloatMatrix
 
         // Compute the total number of enrichments for node j
         int numEnrNode = 0;
-        for ( int i = 1; i <= xMan->giveNumberOfEnrichmentItems(); i++ ) {
-            EnrichmentItem *ei = xMan->giveEnrichmentItem(i);
-            if ( ei->isDofManEnriched(* dMan) ) {
-                numEnrNode += ei->giveNumDofManEnrichments(* dMan);
-            }
+
+        if( xMan != NULL ) {
+			for ( int i = 1; i <= xMan->giveNumberOfEnrichmentItems(); i++ ) {
+				EnrichmentItem *ei = xMan->giveEnrichmentItem(i);
+				if ( ei->isDofManEnriched(* dMan) ) {
+					numEnrNode += ei->giveNumDofManEnrichments(* dMan);
+				}
+			}
         }
 
-        FloatMatrix &BdNode = Bd [ j - 1 ];
-        BdNode.resize(numRows, numEnrNode * dim);
-        BdNode.zero();
+        if ( numEnrNode > 0 ) {
+            FloatMatrix &BdNode = Bd [ j - 1 ];
+            BdNode.resize(numRows, numEnrNode * dim);
+            BdNode.zero();
 
 
-        int globalNodeInd = dMan->giveGlobalNumber();
+            int globalNodeInd = dMan->giveGlobalNumber();
 
-        int nodeEnrCounter = 0;
+            int nodeEnrCounter = 0;
 
-        for ( int i = 1; i <= xMan->giveNumberOfEnrichmentItems(); i++ ) {
-            EnrichmentItem *ei = xMan->giveEnrichmentItem(i);
+            for ( int i = 1; i <= xMan->giveNumberOfEnrichmentItems(); i++ ) {
+                EnrichmentItem *ei = xMan->giveEnrichmentItem(i);
 
-            double levelSetGP = 0.0;
-            ei->interpLevelSet(levelSetGP, N, elNodes);
+                double levelSetGP = 0.0;
+                ei->interpLevelSet(levelSetGP, N, elNodes);
 
-            FloatArray gradLevelSetGP(dim);
-            ei->interpGradLevelSet(gradLevelSetGP, dNdx, elNodes);
-
-
-            if ( ei->isDofManEnriched(* dMan) ) {
-                int numEnr = ei->giveNumDofManEnrichments(* dMan);
-
-                // Enrichment function derivative in Gauss point
-                std :: vector< FloatArray >efgpD;
-                ei->evaluateEnrFuncDerivAt(efgpD, globalCoord, levelSetGP, gradLevelSetGP, globalNodeInd);
-
-                // Enrichment function in Gauss Point
-                std :: vector< double >efGP;
-                ei->evaluateEnrFuncAt(efGP, globalCoord, levelSetGP, globalNodeInd);
+                FloatArray gradLevelSetGP(dim);
+                ei->interpGradLevelSet(gradLevelSetGP, dNdx, elNodes);
 
 
-                const FloatArray &nodePos = * ( dMan->giveCoordinates() );
+                if ( ei->isDofManEnriched(* dMan) ) {
+                    int numEnr = ei->giveNumDofManEnrichments(* dMan);
 
-                double levelSetNode  = 0.0;
-                ei->evalLevelSetNormalInNode( levelSetNode, dMan->giveGlobalNumber() );
+                    // Enrichment function derivative in Gauss point
+                    std :: vector< FloatArray >efgpD;
+                    ei->evaluateEnrFuncDerivAt(efgpD, globalCoord, levelSetGP, gradLevelSetGP, globalNodeInd);
 
-                std :: vector< double >efNode;
-                ei->evaluateEnrFuncAt(efNode, nodePos, levelSetNode, globalNodeInd);
+                    // Enrichment function in Gauss Point
+                    std :: vector< double >efGP;
+                    ei->evaluateEnrFuncAt(efGP, globalCoord, levelSetGP, globalNodeInd);
 
 
-                for ( int k = 0; k < numEnr; k++ ) {
-                    // matrix to be added anytime a node is enriched
-                    // Creates nabla*(ef*N)
-                    FloatArray grad_ef_N;
-                    grad_ef_N.resize(dim);
-                    for ( int p = 1; p <= dim; p++ ) {
-                        grad_ef_N.at(p) = dNdx.at(j, p) * ( efGP [ k ] - efNode [ k ] ) + N.at(j) * efgpD [ k ].at(p);
+                    const FloatArray &nodePos = * ( dMan->giveCoordinates() );
+
+                    double levelSetNode  = 0.0;
+                    ei->evalLevelSetNormalInNode( levelSetNode, dMan->giveGlobalNumber() );
+
+                    std :: vector< double >efNode;
+                    ei->evaluateEnrFuncAt(efNode, nodePos, levelSetNode, globalNodeInd);
+
+
+                    for ( int k = 0; k < numEnr; k++ ) {
+                        // matrix to be added anytime a node is enriched
+                        // Creates nabla*(ef*N)
+                        FloatArray grad_ef_N;
+                        grad_ef_N.resize(dim);
+                        for ( int p = 1; p <= dim; p++ ) {
+                            grad_ef_N.at(p) = dNdx.at(j, p) * ( efGP [ k ] - efNode [ k ] ) + N.at(j) * efgpD [ k ].at(p);
+                        }
+
+                        BdNode.at(1, nodeEnrCounter + 1)                  = grad_ef_N.at(1);
+                        BdNode.at(2, nodeEnrCounter + 2)                  = grad_ef_N.at(2);
+                        BdNode.at(shearInd, nodeEnrCounter + 1)   = grad_ef_N.at(2);
+
+                        if(iComputeBH){
+                        	BdNode.at(shearInd+1	, nodeEnrCounter + 2)   = grad_ef_N.at(1);
+                        }
+                        else {
+                        	BdNode.at(shearInd		, nodeEnrCounter + 2)   = grad_ef_N.at(1);
+                        }
+
+                        nodeEnrCounter += 2;
+                        counter += 2;
                     }
-
-                    BdNode.at(1, nodeEnrCounter + 1)                  = grad_ef_N.at(1);
-                    BdNode.at(2, nodeEnrCounter + 2)                  = grad_ef_N.at(2);
-                    BdNode.at(shearInd, nodeEnrCounter + 1)   = grad_ef_N.at(2);
-                    BdNode.at(shearInd, nodeEnrCounter + 2)   = grad_ef_N.at(1);
-
-                    nodeEnrCounter += 2;
-                    counter += 2;
                 }
             }
         }
@@ -337,6 +375,8 @@ void XfemElementInterface :: XfemElementInterface_partitionElement(std :: vector
     Delaunay dl;
     dl.triangulate(iPoints, oTriangles);
 }
+
+
 
 bool XfemElementInterface :: XfemElementInterface_updateIntegrationRule()
 {
@@ -515,7 +555,7 @@ bool XfemElementInterface :: XfemElementInterface_updateIntegrationRule()
                                 delete [] coords;
                             }
                         }
-                    } else   {
+                    } else {
                         allTriCopy.push_back(allTri [ triIndex ]);
                     }
                 }
@@ -704,12 +744,25 @@ void XfemElementInterface :: XfemElementInterface_prepareNodesForDelaunay(std ::
             oCrackEndXi     = std :: max(minDistArcPos [ 0 ], tipArcPos);
         }             // If a tip was found
         else {
+            printf( "Warning: no tip found in element %d with only one edge intersection.\n", element->giveGlobalNumber() );
+
             oPointPartitions.resize(1);
+
+            printf("Warning: No tip found.\n");
 
             for ( int i = 1; i <= this->element->giveNumberOfDofManagers(); i++ ) {
                 const FloatArray &nodeCoord = * element->giveDofManager(i)->giveCoordinates();
                 oPointPartitions [ 0 ].push_back(nodeCoord);
             }
+
+            // test Jim
+            // Add first intersection point
+            oPointPartitions [ 0 ].push_back( intersecPoints [ 0 ] );
+
+            // want to add the extrapolated intersection point
+            //FloatArray test;
+            //test.setValues(2, 0.0, 0.4);
+            //oPointPartitions [ 0 ].push_back( test );
 
             // Export start and end points of
             // the intersection line.
@@ -718,6 +771,11 @@ void XfemElementInterface :: XfemElementInterface_prepareNodesForDelaunay(std ::
         }
 
         oIntersection = true;
+
+
+        //oPointPartitions.resize(0);
+        //oIntersection = true;
+        //false;
         return;
     }
 
@@ -898,24 +956,26 @@ void XfemElementInterface :: putPointsInCorrectPartition(std :: vector< std :: v
 
 void XfemElementInterface :: XfemElementInterface_computeConstitutiveMatrixAt(FloatMatrix &answer, MatResponseMode rMode, GaussPoint *gp, TimeStep *tStep)
 {
-    XfemManager *xMan = element->giveDomain()->giveXfemManager();
-    int nEI = xMan->giveNumberOfEnrichmentItems();
-    CrossSection *cs = NULL;
+    if( element->giveDomain()->hasXfemManager() ) {
 
-    for ( int i = 1; i <= nEI; i++ ) {
-        EnrichmentItem &ei = * ( xMan->giveEnrichmentItem(i) );
-        if ( ei.isMaterialModified(* gp, * element, cs) ) {
-            StructuralCrossSection *structCS = dynamic_cast< StructuralCrossSection * >( cs );
+		XfemManager *xMan = element->giveDomain()->giveXfemManager();
+		int nEI = xMan->giveNumberOfEnrichmentItems();
+		CrossSection *cs = NULL;
 
-            if ( structCS != NULL ) {
-                structCS->giveCharMaterialStiffnessMatrix(answer, rMode, gp, tStep);
-                return;
-            } else {
-                OOFEM_ERROR("XfemElementInterface :: XfemElementInterface_computeConstitutiveMatrixAt: failed to fetch StructuralMaterial\n");
-            }
-        }
+		for ( int i = 1; i <= nEI; i++ ) {
+			EnrichmentItem &ei = * ( xMan->giveEnrichmentItem(i) );
+			if ( ei.isMaterialModified(* gp, * element, cs) ) {
+				StructuralCrossSection *structCS = dynamic_cast< StructuralCrossSection * >( cs );
+
+				if ( structCS != NULL ) {
+					structCS->giveCharMaterialStiffnessMatrix(answer, rMode, gp, tStep);
+					return;
+				} else {
+					OOFEM_ERROR("XfemElementInterface :: XfemElementInterface_computeConstitutiveMatrixAt: failed to fetch StructuralMaterial\n");
+				}
+			}
+		}
     }
-
 
     // If no enrichment modifies the material,
     // compute stiffness based on the bulk material.
@@ -923,33 +983,35 @@ void XfemElementInterface :: XfemElementInterface_computeConstitutiveMatrixAt(Fl
     structEl.StructuralElement :: computeConstitutiveMatrixAt(answer, rMode, gp, tStep);
 }
 
-void XfemElementInterface :: XfemElementInterface_computeStressVector(FloatArray &answer, const FloatArray &strain, GaussPoint *gp, TimeStep *stepN)
+void XfemElementInterface :: XfemElementInterface_computeStressVector(FloatArray &answer, const FloatArray &strain, GaussPoint *gp, TimeStep *tStep)
 {
     StructuralCrossSection *cs = dynamic_cast< StructuralCrossSection * >( element->giveCrossSection() );
     if ( cs == NULL ) {
-        OOFEM_ERROR("In XfemElementInterface :: XfemElementInterface_computeStressVector: cs == NULL.\n");
+        OOFEM_ERROR("XfemElementInterface :: XfemElementInterface_computeStressVector: cs == NULL.\n");
     }
 
-    cs->giveRealStresses(answer, gp, strain, stepN);
+    cs->giveRealStresses(answer, gp, strain, tStep);
 
+    if( element->giveDomain()->hasXfemManager() ) {
 
-    XfemManager *xMan = element->giveDomain()->giveXfemManager();
+		XfemManager *xMan = element->giveDomain()->giveXfemManager();
 
-    int nEI = xMan->giveNumberOfEnrichmentItems();
+		int nEI = xMan->giveNumberOfEnrichmentItems();
 
-    CrossSection *csInclusion = NULL;
-    for ( int i = 1; i <= nEI; i++ ) {
-        EnrichmentItem &ei = * ( xMan->giveEnrichmentItem(i) );
-        if ( ei.isMaterialModified(* gp, * element, csInclusion) ) {
-            StructuralCrossSection *structCSInclusion = dynamic_cast< StructuralCrossSection * >( csInclusion );
+		CrossSection *csInclusion = NULL;
+		for ( int i = 1; i <= nEI; i++ ) {
+			EnrichmentItem &ei = * ( xMan->giveEnrichmentItem(i) );
+			if ( ei.isMaterialModified(* gp, * element, csInclusion) ) {
+				StructuralCrossSection *structCSInclusion = dynamic_cast< StructuralCrossSection * >( csInclusion );
 
-            if ( structCSInclusion != NULL ) {
-                structCSInclusion->giveRealStresses(answer, gp, strain, stepN);
-                return;
-            } else {
-                OOFEM_ERROR("PlaneStress2dXfem :: computeStressVector: failed to fetch StructuralCrossSection\n");
-            }
-        }
+				if ( structCSInclusion != NULL ) {
+					structCSInclusion->giveRealStresses(answer, gp, strain, tStep);
+					return;
+				} else {
+					OOFEM_ERROR("PlaneStress2dXfem :: computeStressVector: failed to fetch StructuralCrossSection\n");
+				}
+			}
+		}
     }
 }
 
@@ -998,7 +1060,7 @@ void XfemElementInterface :: computeCohesiveForces(FloatArray &answer, TimeStep 
 
                 NTimesT.beTProductOf(NMatrix, T2D);
                 CrossSection *cs  = element->giveCrossSection();
-                double thickness = cs->give(CS_Thickness);
+                double thickness = cs->give(CS_Thickness, & gp);
                 double dA = thickness * gp.giveWeight();
                 answer.add(dA, NTimesT);
             }
@@ -1172,7 +1234,6 @@ void XfemElementInterface :: computeCohesiveTangent(FloatMatrix &answer, TimeSte
                     jump2DPert.at(2) += eps;
                     computeGlobalCohesiveTractionVector(TPert, jump2DPert, crackNormal, NMatrix, gp, tStep);
 
-
                     K2D.at(1, 2) = ( TPert.at(1) - T.at(1) ) / eps;
                     K2D.at(2, 2) = ( TPert.at(2) - T.at(2) ) / eps;
 
@@ -1185,7 +1246,7 @@ void XfemElementInterface :: computeCohesiveTangent(FloatMatrix &answer, TimeSte
                 tmp2.beTProductOf(NMatrix, tmp);
 
                 CrossSection *cs  = element->giveCrossSection();
-                double thickness = cs->give(CS_Thickness);
+                double thickness = cs->give(CS_Thickness, & gp);
                 double dA = thickness * gp.giveWeight();
                 answer.add(dA, tmp2);
             }

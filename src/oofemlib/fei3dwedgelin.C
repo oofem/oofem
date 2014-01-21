@@ -66,7 +66,7 @@ FEI3dWedgeLin :: evaldNdx(FloatMatrix &answer, const FloatArray &lcoords, const 
     this->giveLocalDerivative(dNduvw, lcoords);
     coords.resize(3, 6);
     for ( int i = 1; i <= 6; i++ ) {
-        coords.setColumn(*cellgeo.giveVertexCoordinates(i), i);
+        coords.setColumn(* cellgeo.giveVertexCoordinates(i), i);
     }
     jacobianMatrix.beProductOf(coords, dNduvw);
     inv.beInverseOf(jacobianMatrix);
@@ -93,8 +93,8 @@ FEI3dWedgeLin :: local2global(FloatArray &answer, const FloatArray &lcoords, con
 int
 FEI3dWedgeLin :: global2local(FloatArray &answer, const FloatArray &coords, const FEICellGeometry &cellgeo)
 {
-     OOFEM_ERROR("FEI3dHexaQuad :: global2local not implemented");
-     return 1;
+    OOFEM_ERROR("FEI3dHexaQuad :: global2local not implemented");
+    return 1;
 }
 
 
@@ -104,7 +104,7 @@ FEI3dWedgeLin :: giveTransformationJacobian(const FloatArray &lcoords, const FEI
     FloatMatrix jacobianMatrix(3, 3);
 
     this->giveJacobianMatrixAt(jacobianMatrix, lcoords, cellgeo);
-    return jacobianMatrix.giveDeterminant()/2.; ///@todo Should this really be a factor 1/2 here?
+    return jacobianMatrix.giveDeterminant() / 2.; ///@todo Should this really be a factor 1/2 here?
 }
 
 
@@ -116,7 +116,7 @@ FEI3dWedgeLin :: giveJacobianMatrixAt(FloatMatrix &jacobianMatrix, const FloatAr
     this->giveLocalDerivative(dNduvw, lcoords);
     coords.resize(3, 6);
     for ( int i = 1; i <= 6; i++ ) {
-        coords.setColumn(*cellgeo.giveVertexCoordinates(i), i);
+        coords.setColumn(* cellgeo.giveVertexCoordinates(i), i);
     }
     jacobianMatrix.beProductOf(coords, dNduvw);
 }
@@ -142,7 +142,7 @@ FEI3dWedgeLin :: giveLocalDerivative(FloatMatrix &dN, const FloatArray &lcoords)
     dN.at(1, 2) = -0.5 * ( 1. - w );
     dN.at(2, 2) =  0.;
     dN.at(3, 2) =  0.5 * ( 1. - w );
-    dN.at(4, 2) =  0.5 * ( 1. + w );
+    dN.at(4, 2) = -0.5 * ( 1. + w );
     dN.at(5, 2) =  0.;
     dN.at(6, 2) =  0.5 * ( 1. + w );
 
@@ -183,7 +183,7 @@ FEI3dWedgeLin :: edgeLocal2global(FloatArray &answer, int iedge, const FloatArra
 
     answer.resize(0);
     for ( int i = 1; i <= n.giveSize(); ++i ) {
-        answer.add( n.at(i), * cellgeo.giveVertexCoordinates(nodes.at(i)));
+        answer.add( n.at(i), * cellgeo.giveVertexCoordinates( nodes.at(i) ) );
     }
 }
 
@@ -229,7 +229,7 @@ FEI3dWedgeLin :: surfaceEvalN(FloatArray &answer, int isurf, const FloatArray &l
     double ksi = lcoords.at(1);
     double eta = lcoords.at(2);
 
-    if ( isurf <= 2) {
+    if ( isurf <= 2 ) {
         answer.resize(3);
         answer.at(1) = ksi;
         answer.at(2) = eta;
@@ -256,7 +256,7 @@ FEI3dWedgeLin :: surfaceLocal2global(FloatArray &answer, int isurf,
 
     answer.resize(0);
     for ( int i = 1; i <= n.giveSize(); ++i ) {
-        answer.add( n.at(i), * cellgeo.giveVertexCoordinates(nodes.at(i)));
+        answer.add( n.at(i), * cellgeo.giveVertexCoordinates( nodes.at(i) ) );
     }
 }
 
@@ -316,5 +316,4 @@ FEI3dWedgeLin :: giveBoundaryIntegrationRule(int order, int boundary)
     }
     return iRule;
 }
-
 } // end namespace oofem

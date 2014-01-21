@@ -59,7 +59,7 @@
 #define _IFT_NRSolver_lstype "lstype"
 #define _IFT_NRSolver_ddm "ddm"
 #define _IFT_NRSolver_ddv "ddv"
-#define _IFT_NRSolver_ddltf "ddltf"
+#define _IFT_NRSolver_ddfunc "ddltf"
 #define _IFT_NRSolver_linesearch "linesearch"
 #define _IFT_NRSolver_rtolv "rtolv"
 #define _IFT_NRSolver_rtolf "rtolf"
@@ -123,7 +123,7 @@ private:
     /// Array of prescribed values
     FloatArray prescribedDofsValues;
     /// Load Time Function of prescribed values
-    int prescribedDisplacementLTF;
+    int prescribedDisplacementTF;
     /// Array of prescribed equations
     IntArray prescribedEqs;
     /// Flag indicating that prescribedEqs were initialized
@@ -193,7 +193,7 @@ protected:
     void initPrescribedEqs();
     void applyConstraintsToStiffness(SparseMtrx *k);
     void applyConstraintsToLoadIncrement(int nite, const SparseMtrx *k, FloatArray &R,
-                                         referenceLoadInputModeType rlm, TimeStep *atTime);
+                                         referenceLoadInputModeType rlm, TimeStep *tStep);
 
     /**
      * Determines whether or not the solution has reached convergence.

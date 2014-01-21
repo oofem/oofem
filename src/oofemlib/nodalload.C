@@ -37,8 +37,7 @@
 #include "dynamicinputrecord.h"
 
 namespace oofem {
-
-REGISTER_BoundaryCondition( NodalLoad );
+REGISTER_BoundaryCondition(NodalLoad);
 
 IRResultType
 NodalLoad :: initializeFrom(InputRecord *ir)
@@ -59,6 +58,4 @@ void NodalLoad :: giveInputRecord(DynamicInputRecord &input)
     Load :: giveInputRecord(input);
     input.setField(this->coordSystemType, _IFT_NodalLoad_cstype);
 }
-
-
 } // end namespace oofem
