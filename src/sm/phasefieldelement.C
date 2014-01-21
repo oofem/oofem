@@ -52,7 +52,7 @@ namespace oofem {
 PhaseFieldElement::PhaseFieldElement( int i, Domain *aDomain ) 
 {  
     ///@todo will be set by the cross section later
-    internalLength = 0.2;
+    internalLength = 6.0;
     criticalEnergy = 1.0e0;
     relaxationTime = 1.0;
 };
@@ -264,9 +264,9 @@ PhaseFieldElement :: computeG(GaussPoint *gp, ValueModeType valueMode, TimeStep 
 double 
 PhaseFieldElement :: computeGPrim(GaussPoint *gp, ValueModeType valueMode, TimeStep *stepN)
 {
-    // compute 2*(1-d)
+    // compute -2*(1-d)
     double d = this->computeDamageAt(gp, valueMode, stepN);
-    return 2.0 * (1.0 - d);
+    return -2.0 * (1.0 - d);
 }
 
 void
