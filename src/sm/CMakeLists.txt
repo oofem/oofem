@@ -49,6 +49,8 @@ set (sm_element
     dkt.C
     coupledfieldselement.C
     phasefieldelement.C
+	planstrssphf.C
+    qplanstrssphf.C
     )
 
 set (sm_interface_elements

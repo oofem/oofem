@@ -33,7 +33,7 @@
  *  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  */
 
-#if 0
+#if 1
 #include "coupledfieldselement.h"
 #include "node.h"
 #include "material.h"
@@ -75,9 +75,10 @@ CoupledFieldsElement :: computeLocationArrayOfDofIDs(const IntArray &dofIdArray,
             if ( dMan->hasDofID( (DofIDItem) dofIdArray.at(j) ) ) {
                 Dof *d = dMan->giveDofWithID( dofIdArray.at(j) );
                 answer.followedBy( k + d->giveNumber() );
+                //answer.followedBy( k + j );
             }
-            k += dMan->giveNumberOfDofs();
         }
+        k += dMan->giveNumberOfDofs( );
     }
 }
 
@@ -88,7 +89,7 @@ CoupledFieldsElement :: computeVectorOfDofIDs(const IntArray &dofIdArray, ValueM
     // Routine to extract the solution vector for an element given an dofid array.
     // Size will be numberOfDofs and if a certain dofId does not exist a zero is used as value. 
     
-    answer.resize( this->giveNumberOfDofs() );
+    answer.resize( numberOfDofMans * dofIdArray.giveSize() ); // equal number of nodes for all fields
     answer.zero();
     int k = 1;
     for ( int i = 1; i <= numberOfDofMans; i++ ) {
