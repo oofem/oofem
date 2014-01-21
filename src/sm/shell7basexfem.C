@@ -368,7 +368,7 @@ Shell7BaseXFEM :: giveInternalForcesVector(FloatArray &answer, TimeStep *tStep, 
             // Cohesive zone model
             if ( this->hasCohesiveZone(i) ) {
                 Delamination *dei =  dynamic_cast< Delamination * >( this->xMan->giveEnrichmentItem(i) ); // should check success
-                this->computeCohesiveForces( fCZ, tStep, solVec, solVecD, dei); 
+                this->computeCohesiveForces( fCZ, tStep, solVec, solVecD, dei);
                 tempRed.beSubArrayOf(fCZ, activeDofs);
                 answer.assemble(tempRed, ordering);
             }
@@ -500,7 +500,7 @@ Shell7BaseXFEM :: computeCohesiveForces(FloatArray &answer, TimeStep *tStep, Flo
     answerTemp.resize(Shell7Base :: giveNumberOfDofs() ); 
     answerTemp.zero();
 
-    FloatMatrix N, B, F;  
+    FloatMatrix Nenr, B, Benr, F;  
     int delamNum = dei->giveNumber();
     IntegrationRule *iRuleL = czIntegrationRulesArray [ delamNum - 1 ]; ///@ todo does this work with giveNumber? Probably not, will have to save num delam.
 
@@ -517,21 +517,21 @@ Shell7BaseXFEM :: computeCohesiveForces(FloatArray &answer, TimeStep *tStep, Flo
         lCoords.at(2) = ip->giveCoordinate(2);
         lCoords.at(3) = dei->giveDelamXiCoord();
 
+        computeEnrichedNmatrixAt(lCoords, Nenr, dei);
+        computeEnrichedBmatrixAt(lCoords, Benr, dei);
         this->computeBmatrixAt(lCoords, B);
-        this->computeNmatrixAt(lCoords, N);
 
         // Lambda matrix
-        genEpsD.beProductOf(B, solVecD);
+        genEpsD.beProductOf(Benr, solVecD);
         double xi = dei->giveDelamXiCoord();
         double zeta = xi * this->layeredCS->computeIntegralThick() * 0.5;
         this->computeLambdaNMatrix(lambda, genEpsD, zeta);
         
         // Compute jump vector
-        unknowns.beProductOf(N, solVecD);
+        unknowns.beProductOf(Nenr, solVecD);
         xd.beProductOf(lambda,unknowns); // spatial jump
 		genEpsC.beProductOf(B, solVecC);
 		this->computeFAt(lCoords, F, genEpsC);
-
 		// Transform xd and F to a local coord system
         this->evalInitialCovarNormalAt(nCov, lCoords);
         Q.beLocalCoordSys(nCov);
@@ -540,12 +540,11 @@ Shell7BaseXFEM :: computeCohesiveForces(FloatArray &answer, TimeStep *tStep, Flo
 
         // Compute cohesive traction based on jump
         intMat->giveFirstPKTraction_3d(T, ip, xd, F, tStep);
-        lambdaN.beProductOf(lambda,N);
+        lambdaN.beProductOf(lambda,Nenr);
         T.rotatedWith(Q,'t'); // transform back to global coord system
-
         Fp.beTProductOf(lambdaN, T);
         double dA = this->computeAreaAround(ip,xi);
-        answerTemp.add(dA*DISC_DOF_SCALE_FAC,Fp);
+        answerTemp.add(dA,Fp);
     }
 
     int ndofs = Shell7Base :: giveNumberOfDofs();
@@ -603,7 +602,7 @@ Shell7BaseXFEM :: computeCohesiveTangentAt(FloatMatrix &answer, TimeStep *tStep,
 {
     //Computes the cohesive tangent for a given interface K_cz = N^t*lambda*t * dT/dj * lambda * N
     FloatArray lCoords(3);
-    FloatMatrix answerTemp, N, lambda, K, temp, tangent;
+    FloatMatrix answerTemp, Nenr, lambda, K, temp, tangent;
     int nDofs = Shell7Base :: giveNumberOfDofs();
     answerTemp.resize(nDofs, nDofs); 
     answerTemp.zero();
@@ -627,7 +626,7 @@ Shell7BaseXFEM :: computeCohesiveTangentAt(FloatMatrix &answer, TimeStep *tStep,
 
         double zeta = giveGlobalZcoord( lCoords);
         this->computeLambdaNMatrixDis( lambda, zeta );
-        this->computeNmatrixAt(lCoords, N);
+        this->computeEnrichedNmatrixAt(lCoords, Nenr, dei);
                 
         intMat->give3dStiffnessMatrix_dTdj(K, TangentStiffness, ip, tStep);
         this->evalInitialCovarNormalAt(nCov, lCoords);
@@ -635,7 +634,7 @@ Shell7BaseXFEM :: computeCohesiveTangentAt(FloatMatrix &answer, TimeStep *tStep,
         K.rotatedWith(Q,'t');   // rotate back to global coord system
 
         this->computeTripleProduct(temp, lambda, K, lambda);
-        this->computeTripleProduct(tangent, N, temp, N);
+        this->computeTripleProduct(tangent, Nenr, temp, Nenr);
         double dA = this->computeAreaAround(ip,xi);
         answerTemp.add(dA,tangent); 
     }
@@ -724,11 +723,11 @@ Shell7BaseXFEM :: computeStiffnessMatrix(FloatMatrix &answer, MatResponseMode rM
 
 
     // Cohesive zones
-#if 0
+#if 1
     FloatMatrix Kcoh;
     //if ( this->hasCohesiveZone() ) {
         this->computeCohesiveTangent(Kcoh, tStep);
-        Kcoh.times(DISC_DOF_SCALE_FAC*DISC_DOF_SCALE_FAC);
+        //Kcoh.times(DISC_DOF_SCALE_FAC*DISC_DOF_SCALE_FAC);
         answer.add(Kcoh);
     //}
 #endif
