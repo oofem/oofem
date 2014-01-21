@@ -95,7 +95,6 @@ StructuralInterfaceMaterial :: giveInputRecord(DynamicInputRecord &input)
 void
 StructuralInterfaceMaterial :: giveStiffnessMatrix_dTdj_Num(FloatMatrix &answer, MatResponseMode rMode, GaussPoint *gp, TimeStep *tStep)
 {
-
     // Numerical tangent
     // Computes the material stiffness using a central difference method
 	
@@ -124,7 +123,7 @@ StructuralInterfaceMaterial :: giveStiffnessMatrix_dTdj_Num(FloatMatrix &answer,
             answer.setColumn(Kcolumn, i);
         }
         answer.times( 1.0/(2*eps) );
-
+		
         this->giveFirstPKTraction_3d(T, gp, jump, F, tStep); // reset temp values by recomputing the stress
 
     }
