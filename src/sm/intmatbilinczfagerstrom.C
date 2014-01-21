@@ -95,7 +95,7 @@ IntMatBilinearCZFagerstrom :: giveFirstPKTraction_3d(FloatArray &answer, GaussPo
     FloatArray dJ(3);
     dJ.beProductOf(Finv,d);
     status->letTempMaterialJumpBe(dJ);
-	dJ.printYourself();
+	//dJ.printYourself();
 
 
     double oldDamage = status->giveDamage();	
@@ -156,7 +156,7 @@ IntMatBilinearCZFagerstrom :: giveFirstPKTraction_3d(FloatArray &answer, GaussPo
 		double mu = this->mu;
 
 		double S = (this->GIc - pow(sigf,2)/this->kn0)/sigf;
-		double gammaGf = gamma*(this->GIc - pow(sigf,2)/this->kn0)/(this->GIIc - pow(gamma*sigf,2)/this->ks0);
+		double gammaGf = gamma*(this->GIIc - pow(gamma*sigf,2)/this->ks0)/(this->GIc - pow(sigf,2)/this->kn0);
 		
         double Qn_M = 0.5*(Qn + fabs(Qn));
         //double loadFun = sigf*pow(Qt/(gamma*sigf),2) + sigf*pow((Qn_M/sigf),2) - sigf;	///@todo Martin: no use of parameter mu!!!

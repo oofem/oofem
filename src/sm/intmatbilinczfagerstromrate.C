@@ -156,7 +156,7 @@ IntMatBilinearCZFagerstromRate :: giveFirstPKTraction_3d(FloatArray &answer, Gau
 		double m = this->m;
 		//double S = this->GIc/this->sigf;
 		double S = (this->GIc - pow(sigf,2)/this->kn0)/sigf;
-		double gammaGf = gamma*(this->GIc - pow(sigf,2)/this->kn0)/(this->GIIc - pow(gamma*sigf,2)/this->ks0);
+		double gammaGf = gamma*(this->GIIc - pow(gamma*sigf,2)/this->ks0)/(this->GIc - pow(sigf,2)/this->kn0);
 
 
         Qn_M = 0.5*(Qn + fabs(Qn));
