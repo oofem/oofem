@@ -416,8 +416,14 @@ double
 BinghamFluidMaterial2 :: computeActualViscosity(double Tau, double shearRate)
 {
 #ifdef BINGHAM_ALT
+  if (tau_0 > 0.0) {
+
     shearRate = max(shearRate, BINGHAM_MIN_SHEAR_RATE);
     return ( mu_0 + tau_0 * ( 1. - exp(-this->stressGrowthRate * shearRate) ) / shearRate );
+  } else {
+    // newtonian flow
+    return mu_0;
+  }
 
 #else
     if ( Tau <= tau_c ) {
