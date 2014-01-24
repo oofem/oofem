@@ -1645,6 +1645,9 @@ VTKXMLExportModule :: getCellVariableFromIS(FloatArray &answer, Element *el, Int
         } else if ( ncomponents != temp.giveSize() ) { // Trying to gracefully handle bad cases, just output zeros.
             valueArray.resize(9);
         }
+        else {
+        	valueArray = temp;
+        }
 
 #endif
     }
