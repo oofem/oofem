@@ -88,7 +88,6 @@ public:
 
     virtual MaterialStatus *CreateStatus(GaussPoint *gp) const;
 
-    virtual int hasMaterialModeCapability(MaterialMode);
     virtual const char *giveInputRecordName() const { return _IFT_HyperElasticMaterial_Name; }
     virtual const char *giveClassName() const { return "HyperElasticMaterial"; }
 };

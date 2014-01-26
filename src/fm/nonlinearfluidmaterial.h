@@ -60,8 +60,9 @@ class GaussPoint;
 class NonlinearFluidMaterialStatus : public FluidDynamicMaterialStatus
 {
 protected:
-
-    FloatArray deviatoricStrainVector, temp_deviatoricStrainVector;  // reduced form
+    FloatArray temp_deviatoricStressVector;
+    FloatArray temp_deviatoricStrainVector;
+    double temp_norm2;
 
 public:
     NonlinearFluidMaterialStatus(int n, Domain *d, GaussPoint *g);
@@ -72,9 +73,12 @@ public:
 
     virtual void updateYourself(TimeStep *);
 
-    const FloatArray &giveDeviatoricStrainVector() { return deviatoricStrainVector; }
+    const FloatArray &giveTempDeviatoricStressVector() { return temp_deviatoricStressVector; }
     const FloatArray &giveTempDeviatoricStrainVector() { return temp_deviatoricStrainVector; }
-    void  letTempDeviatoricStrainVectorBe(const FloatArray &v) { temp_deviatoricStrainVector = v; }
+    double giveTempStrainNorm2() { return temp_norm2; }
+    void letTempDeviatoricStressVectorBe(const FloatArray &v) { temp_deviatoricStressVector = v; }
+    void letTempDeviatoricStrainVectorBe(const FloatArray &v) { temp_deviatoricStrainVector = v; }
+    void letTempStrainNorm2Be(double v) { temp_norm2 = v; }
 
     virtual const char *giveClassName() const { return "NonlinearFluidMaterialStatus"; }
 };

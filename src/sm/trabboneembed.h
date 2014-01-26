@@ -121,8 +121,6 @@ public:
     virtual void giveRealStressVector_3d(FloatArray &answer, GaussPoint *gp,
                                          const FloatArray &reducedStrain, TimeStep *tStep);
 
-    virtual int hasMaterialModeCapability(MaterialMode);
-
     virtual const char *giveInputRecordName() const { return _IFT_TrabBoneEmbed_Name; }
     virtual const char *giveClassName() const { return "TrabBoneEmbed"; }
 

@@ -43,7 +43,6 @@
 #include "contextioerr.h"
 #include "structuralmaterial.h"
 #include "isolinearelasticmaterial.h"
-#include "structuralcrosssection.h"
 #include "classfactory.h"
 
 namespace oofem {

@@ -52,12 +52,6 @@ TrabBone3D :: TrabBone3D(int n, Domain *d) : StructuralMaterial(n, d)
 {}
 
 
-int
-TrabBone3D :: hasMaterialModeCapability(MaterialMode mode)
-{
-    return mode == _3dMat;
-}
-
 void TrabBone3D :: computePlasStrainEnerDensity(GaussPoint *gp, const FloatArray &totalStrain, const FloatArray &totalStress)
 {
     TrabBone3DStatus *status = static_cast< TrabBone3DStatus * >( this->giveStatus(gp) );
@@ -719,7 +713,7 @@ void TrabBone3D :: computeDensificationStress(FloatArray &answer, GaussPoint *gp
 
 
 void
-TrabBone3D :: giveRealStressVector(FloatArray &answer, GaussPoint *gp,
+TrabBone3D :: giveRealStressVector_3d(FloatArray &answer, GaussPoint *gp,
                                    const FloatArray &totalStrain, TimeStep *tStep)
 {
     double tempDam;

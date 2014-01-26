@@ -103,8 +103,6 @@ protected:
     void computeStressVectorAndLocalCumulatedStrain(FloatArray &answer, double localCumulatedPlasticStrain, GaussPoint *gp, TimeStep *tStep);
     void computeForceLoadVector(FloatArray &answer, TimeStep *tStep, ValueModeType mode);
     void computeLocForceLoadVector(FloatArray &answer, TimeStep *tStep, ValueModeType mode);
-    void computeLocNonForceLoadVector(FloatArray &answer, TimeStep *tStep, ValueModeType mode);
-    void computeNonForceLoadVector(FloatArray &answer, TimeStep *tStep, ValueModeType mode);
     void computeDistanceToBoundary();
 
     //@todo this method has been removed from NLStructuralElement and has simply been put here to

@@ -37,8 +37,6 @@
 #include "floatmatrix.h"
 #include "floatarray.h"
 #include "intarray.h"
-
-#include "structuralcrosssection.h"
 #include "mathfem.h"
 #include "datastream.h"
 #include "contextioerr.h"

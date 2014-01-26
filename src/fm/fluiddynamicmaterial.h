@@ -83,8 +83,8 @@ public:
     /**
      * Sets the deviatoric stress.
      */
-    void letTempDeviatoricStressVectorBe(const FloatArray &v) { deviatoricStressVector = v; }
-    void letTempDeviatoricStrainRateVectorBe(const FloatArray &v) { deviatoricStrainRateVector = v; }
+    void letDeviatoricStressVectorBe(const FloatArray &v) { deviatoricStressVector = v; }
+    void letDeviatoricStrainRateVectorBe(const FloatArray &v) { deviatoricStrainRateVector = v; }
 };
 
 
