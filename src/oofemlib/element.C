@@ -573,6 +573,21 @@ Element :: giveDofManager(int i) const
 }
 
 
+void
+Element :: addDofManager(DofManager *dMan)
+// Adds a new dMan to the dofManArray
+{
+#ifdef DEBUG
+    if ( dMan == NULL ) {
+        OOFEM_ERROR("Element :: addDofManager - dMan is a null pointer");
+    }
+#endif
+    int size =  dofManArray.giveSize();
+    this->dofManArray.resizeWithValues( size + 1 );
+    this->dofManArray.at(size + 1) = dMan->giveGlobalNumber();
+    
+}
+
 Node *
 Element :: giveNode(int i) const
 // Returns the i-th node of the receiver.

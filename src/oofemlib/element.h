@@ -521,6 +521,11 @@ public:
      * @param i Local index of the dof manager in element.
      * @return The i-th dofmanager of element.
      */
+    void addDofManager(DofManager *dMan);
+    /**
+     * @param dMan Pointer t a dof manager to add to the element.
+     * @return The i-th dofmanager of element.
+     */
     DofManager *giveDofManager(int i) const;
     /**
      * Returns reference to the i-th node of element.
