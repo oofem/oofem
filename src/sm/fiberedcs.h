@@ -160,9 +160,6 @@ public:
      */
     void giveFiberMaterialStiffnessMatrix(FloatMatrix &fiberMatrix, MatResponseMode mode, GaussPoint *layerGp, TimeStep *tStep);
 
-    virtual void computeStressIndependentStrainVector(FloatArray &answer,
-                                                      GaussPoint *gp, TimeStep *tStep, ValueModeType mode);
-
     virtual double give(CrossSectionProperty a, GaussPoint *gp);
 
     // identification and auxiliary functions

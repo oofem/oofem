@@ -382,7 +382,7 @@ public:
     /**
      * Method for subtracting from reduced space strain vector its stress-independent parts
      * (caused by temperature, shrinkage, creep and possibly by other phenomena).
-     * Calls StructuralElement::computeStressIndependentStrainVector to obtain stress
+     * Calls computeStressIndependentStrainVector to obtain stress
      * independent part of strain.
      * @param answer Computed strain vector.
      * @param gp Integration point.
