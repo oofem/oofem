@@ -1218,19 +1218,6 @@ LayeredCrossSection :: giveArea()
     return area;
 }
 
-void
-LayeredCrossSection :: computeStressIndependentStrainVector(FloatArray &answer,
-                                                            GaussPoint *gp, TimeStep *tStep, ValueModeType mode)
-{
-    StructuralElement *elem = static_cast< StructuralElement * >( gp->giveElement() );
-    FloatArray et;
-
-    elem->computeResultingIPTemperatureAt(et, tStep, gp, mode);
-
-    if ( et.isNotEmpty() ) {
-        _error("computeStressIndependentStrainVector: temperature loading not supported");
-    }
-}
 
 bool LayeredCrossSection :: isCharacteristicMtrxSymmetric(MatResponseMode rMode)
 {

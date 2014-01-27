@@ -64,6 +64,7 @@ Beam2d :: Beam2d(int n, Domain *aDomain) : StructuralElement(n, aDomain), Layere
     kappa = -1; // set kappa to undef value (should be always > 0.)
     length = 0.;
     pitch = 10.;  // a dummy value
+    numberOfGaussPoints = 3;
 
     dofsToCondense = NULL;
 }
@@ -90,25 +91,26 @@ void
 Beam2d :: computeBmatrixAt(GaussPoint *gp, FloatMatrix &answer, int li, int ui)
 // Returns the strain matrix of the receiver.
 {
-    double l, ksi, kappa;
+    double l, ksi, kappa, c1;
 
     l     = this->giveLength();
     ksi   = 0.5 + 0.5 * gp->giveCoordinate(1);
     kappa = this->giveKappaCoeff();
+    c1 = 1. + 2. * kappa;
 
     answer.resize(3, 6);
     answer.zero();
 
     answer.at(1, 1) =  -1. / l;
     answer.at(1, 4) =   1. / l;
-    answer.at(2, 2) =   ( 6. - 12. * ksi ) / ( l * l * ( 1. + 2. * kappa ) );
-    answer.at(2, 3) =   ( -2. * ( 2. + kappa ) + 6. * ksi ) / ( l * ( 1. + 2. * kappa ) );
-    answer.at(2, 5) =   ( -6. + 12. * ksi ) / ( l * l * ( 1. + 2. * kappa ) );
-    answer.at(2, 6) =   ( -2. * ( 1. - kappa ) + 6. * ksi ) / ( l * ( 1. + 2. * kappa ) );
-    answer.at(3, 2) =   ( -2. * kappa ) / ( l * ( 1. + 2. * kappa ) );
-    answer.at(3, 3) =   kappa / ( l * ( 1. + 2. * kappa ) );
-    answer.at(3, 5) =   2. * kappa / ( l * ( 1. + 2. * kappa ) );
-    answer.at(3, 6) =   kappa / ( l * ( 1. + 2. * kappa ) );
+    answer.at(2, 2) =   ( 6. - 12. * ksi ) / ( l * l * c1 );
+    answer.at(2, 3) =   ( -2. * ( 2. + kappa ) + 6. * ksi ) / ( l * c1 );
+    answer.at(2, 5) =   ( -6. + 12. * ksi ) / ( l * l * c1 );
+    answer.at(2, 6) =   ( -2. * ( 1. - kappa ) + 6. * ksi ) / ( l * c1 );
+    answer.at(3, 2) =   ( -2. * kappa ) / ( l * c1 );
+    answer.at(3, 3) =   kappa / ( l * c1 );
+    answer.at(3, 5) =   2. * kappa / ( l * c1 );
+    answer.at(3, 6) =   kappa / ( l * c1 );
 }
 
 
@@ -122,7 +124,7 @@ Beam2d :: computeGaussPoints()
         numberOfIntegrationRules = 1;
         integrationRulesArray = new IntegrationRule * [ 1 ];
         integrationRulesArray [ 0 ] = new GaussIntegrationRule(1, this, 1, 3);
-        this->giveCrossSection()->setupIntegrationPoints(* integrationRulesArray [ 0 ], 3, this);
+        this->giveCrossSection()->setupIntegrationPoints(* integrationRulesArray [ 0 ], this->numberOfGaussPoints, this);
     }
 }
 
@@ -150,12 +152,12 @@ Beam2d :: computeNmatrixAt(const FloatArray &iLocCoord, FloatMatrix &answer)
 
     answer.at(1, 1) = 1. - ksi;
     answer.at(1, 4) = ksi;
-    answer.at(2, 2) = ( ( 1. + 2. * kappa ) - 2. * kappa * ksi - 3. * ksi2 + 2. * ksi3 ) / c1;
+    answer.at(2, 2) = ( c1 - 2. * kappa * ksi - 3. * ksi2 + 2. * ksi3 ) / c1;
     answer.at(2, 3) = l * ( -( 1. + kappa ) * ksi + ( 2. + kappa ) * ksi2 - ksi3 ) / c1;
     answer.at(2, 5) = ( 2. * kappa * ksi + 3. * ksi2 - 2. * ksi3 ) / c1;
     answer.at(2, 6) = l * ( kappa * ksi + ( 1. - kappa ) * ksi2 - ksi3 ) / c1;
     answer.at(3, 2) = ( 6. * ksi - 6. * ksi2 ) / ( l * c1 );
-    answer.at(3, 3) = ( ( 1. + 2. * kappa ) - 2. * ( 2. + kappa ) * ksi + 3. * ksi2 ) / c1;
+    answer.at(3, 3) = ( c1 - 2. * ( 2. + kappa ) * ksi + 3. * ksi2 ) / c1;
     answer.at(3, 5) = ( -6. * ksi + 6. * ksi2 ) / ( l * c1 );
     answer.at(3, 6) = ( -2. * ( 1. - kappa ) * ksi + 3. * ksi2 ) / c1;
 }
@@ -194,35 +196,18 @@ Beam2d :: computeClampedStiffnessMatrix(FloatMatrix &answer,
 // axes. No integration over volume done, beam with constant material and crosssection
 // parameters assumed.
 {
-    double l, l2, l3, ei, kappa, c1;
-    FloatMatrix d;
-
-    this->computeConstitutiveMatrixAt(d, rMode, integrationRulesArray [ 0 ]->getIntegrationPoint(0), tStep);
-    l     = this->giveLength();
-    l2    = l * l;
-    l3    = l2 * l;
-    kappa = this->giveKappaCoeff();
-    c1 = 1. + 2. * kappa;
-    ei = d.at(2, 2);
-
-    answer.resize(6, 6);
-    answer.zero();
-
-    answer.at(1, 1) =  d.at(1, 1) / l;
-    answer.at(1, 4) = -d.at(1, 1) / l;
-    answer.at(2, 2) =  ei * 12. / ( l3 * c1 );
-    answer.at(2, 3) = -ei * 6.  / ( l2 * c1 );
-    answer.at(2, 5) = -ei * 12. / ( l3 * c1 );
-    answer.at(2, 6) = -ei * 6.  / ( l2 * c1 );
-    answer.at(3, 3) =  ei * 2. * ( 2. + kappa ) / ( l * c1 );
-    answer.at(3, 5) =  ei * 6.  / ( l2 * c1 );
-    answer.at(3, 6) =  ei * 2. * ( 1. - kappa ) / ( l * c1 );
-    answer.at(4, 4) =  d.at(1, 1) / l;
-    answer.at(5, 5) =  ei * 12. / ( l3 * c1 );
-    answer.at(5, 6) =  ei * 6.  / ( l2 * c1 );
-    answer.at(6, 6) =  ei * 2. * ( 2. + kappa ) / ( l * c1 );
-
-    answer.symmetrized();  // symmetrize answer
+    double l = this->computeLength();
+    IntegrationRule *ir = this->giveDefaultIntegrationRulePtr();
+    FloatMatrix B, d, DB;
+    for ( int i = 0; i < ir->giveNumberOfIntegrationPoints(); ++i ) {
+        GaussPoint *gp = ir->getIntegrationPoint(i);
+        this->computeBmatrixAt(gp, B);
+        this->computeConstitutiveMatrixAt(d, rMode, gp, tStep); 
+        double dV = gp->giveWeight() * 0.5*l;
+        DB.beProductOf(d, B);
+        answer.plusProductSymmUpper(B, DB, dV);
+    }
+    answer.symmetrized();
 }
 
 
@@ -351,7 +336,7 @@ Beam2d :: giveKappaCoeff()
         FloatMatrix d;
         double l = this->giveLength();
 
-        this->computeConstitutiveMatrixAt( d, TangentStiffness, integrationRulesArray [ 0 ]->getIntegrationPoint(0), domain->giveEngngModel()->giveCurrentStep() );
+        this->computeConstitutiveMatrixAt( d, ElasticStiffness, integrationRulesArray [ 0 ]->getIntegrationPoint(0), domain->giveEngngModel()->giveCurrentStep() );
         kappa = 6. * d.at(2, 2) / ( d.at(3, 3) * l * l );
     }
 
