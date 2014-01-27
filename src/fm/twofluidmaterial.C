@@ -138,8 +138,8 @@ TwoFluidMaterial :: computeDeviatoricStressVector(FloatArray &answer, GaussPoint
     answer.add(1.0 - vof, v0);
     answer.add(vof, v1);
 
-    status->letTempDeviatoricStrainRateVectorBe(eps);
-    status->letTempDeviatoricStressVectorBe(answer);
+    status->letDeviatoricStrainRateVectorBe(eps);
+    status->letDeviatoricStressVectorBe(answer);
 }
 
 void

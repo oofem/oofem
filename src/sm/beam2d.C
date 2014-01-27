@@ -411,19 +411,13 @@ Beam2d :: initializeFrom(InputRecord *ir)
 void
 Beam2d :: giveInternalForcesVector(FloatArray &answer, TimeStep *tStep, int useUpdatedGpRecord)
 {
-    // stress equivalent vector in nodes (vector of internal forces)
-    FloatArray prescStrainEndForces;
-    FloatMatrix stiffness;
-    FloatArray u;
+    StructuralElement :: giveInternalForcesVector(answer, tStep, useUpdatedGpRecord);
 
-    this->computeStiffnessMatrix(stiffness, SecantStiffness, tStep);
-    this->computeVectorOf(EID_MomentumBalance, VM_Total, tStep, u);
-
-    answer.beProductOf(stiffness, u);
-
-    this->computePrescribedStrainLoadVectorAt(prescStrainEndForces, tStep, VM_Total);
-    if ( prescStrainEndForces.giveSize() ) {
-        answer.subtract(prescStrainEndForces);
+    ///@todo Pretty sure this won't work for nonlinear problems. I think dofsToCondense should just be replaced by an extra slave node.
+    if ( this->dofsToCondense ) {
+        FloatMatrix stiff;
+        this->computeClampedStiffnessMatrix(stiff, TangentStiffness, tStep);
+        this->condense(&stiff, NULL, &answer, this->dofsToCondense);
     }
 }
 
@@ -433,20 +427,8 @@ Beam2d :: giveEndForcesVector(FloatArray &answer, TimeStep *tStep)
 {
     // stress equivalent vector in nodes (vector of internal forces)
     FloatArray u, load;
-    FloatMatrix stiffness;
 
-    // compute stifness matrix in global cs
-    this->computeLocalStiffnessMatrix(stiffness, SecantStiffness, tStep);
-
-    // compute vector of unknowns in global cs
-    this->computeVectorOf(EID_MomentumBalance, VM_Total, tStep, u);
-    answer.beProductOf(stiffness, u);
-
-    // subtract prescribed strain load
-    this->computePrescribedStrainLocalLoadVectorAt(load, tStep, VM_Total);
-    if ( load.isNotEmpty() ) {
-        answer.subtract(load);
-    }
+    this->giveInternalForcesVector(answer, tStep, false);
 
     // subtract exact end forces due to nonnodal loading
     this->computeLocalForceLoadVector(load, tStep, VM_Total);
@@ -459,7 +441,6 @@ Beam2d :: giveEndForcesVector(FloatArray &answer, TimeStep *tStep)
 void
 Beam2d :: computeEdgeLoadVectorAt(FloatArray &answer, Load *load, int iedge, TimeStep *tStep, ValueModeType mode)
 {
-    int i;
     FloatArray coords, components, help;
     FloatMatrix T;
     double l = this->giveLength();
@@ -521,25 +502,25 @@ Beam2d :: computeEdgeLoadVectorAt(FloatArray &answer, Load *load, int iedge, Tim
                 coords.resize(1);
                 coords.at(1) = -1.0;
                 edgeLoad->computeValueAt(help, tStep, coords, mode);
-                for ( i = 1; i <= 3; i++ ) {
+                for ( int i = 1; i <= 3; i++ ) {
                     components.at(i) = help.at(i);
                 }
 
                 coords.at(1) = 1.0;
                 edgeLoad->computeValueAt(help, tStep, coords, mode);
-                for ( i = 1; i <= 3; i++ ) {
+                for ( int i = 1; i <= 3; i++ ) {
                     components.at(i + 3) = help.at(i);
                 }
             } else {
                 coords = * ( this->giveNode(1)->giveCoordinates() );
                 edgeLoad->computeValueAt(help, tStep, coords, mode);
-                for ( i = 1; i <= 3; i++ ) {
+                for ( int i = 1; i <= 3; i++ ) {
                     components.at(i) = help.at(i);
                 }
 
                 coords = * ( this->giveNode(2)->giveCoordinates() );
                 edgeLoad->computeValueAt(help, tStep, coords, mode);
-                for ( i = 1; i <= 3; i++ ) {
+                for ( int i = 1; i <= 3; i++ ) {
                     components.at(i + 3) = help.at(i);
                 }
             }
@@ -595,7 +576,7 @@ Beam2d :: printOutputAt(FILE *File, TimeStep *tStep)
 {
     // Performs end-of-step operations.
 
-    int i, n;
+    int n;
     FloatArray rl, Fl;
     FloatMatrix T;
 
@@ -609,13 +590,13 @@ Beam2d :: printOutputAt(FILE *File, TimeStep *tStep)
 
     fprintf(File, "  local displacements ");
     n = rl.giveSize();
-    for ( i = 1; i <= n; i++ ) {
+    for ( int i = 1; i <= n; i++ ) {
         fprintf( File, " % .4e", rl.at(i) );
     }
 
     fprintf(File, "\n  local end forces    ");
     n = Fl.giveSize();
-    for ( i = 1; i <= n; i++ ) {
+    for ( int i = 1; i <= n; i++ ) {
         fprintf( File, " % .4e", Fl.at(i) );
     }
 
@@ -632,23 +613,6 @@ Beam2d :: computeLocalForceLoadVector(FloatArray &answer, TimeStep *tStep, Value
     StructuralElement :: computeLocalForceLoadVector(answer, tStep, mode);
 
     // condense requested dofs in local c.s
-    if ( answer.giveSize() && dofsToCondense ) {
-        if ( answer.giveSize() != 0 ) {
-            this->computeClampedStiffnessMatrix(stiff, TangentStiffness, tStep);
-            this->condense(& stiff, NULL, & answer, dofsToCondense);
-        }
-    }
-}
-
-
-void
-Beam2d :: computePrescribedStrainLocalLoadVectorAt(FloatArray &answer, TimeStep *tStep, ValueModeType mode)
-// Computes the load vector of the receiver, at tStep.
-{
-    StructuralElement :: computePrescribedStrainLocalLoadVectorAt(answer, tStep, mode);
-    FloatMatrix stiff;
-
-    // condense requested dofs
     if ( answer.giveSize() && dofsToCondense ) {
         if ( answer.giveSize() != 0 ) {
             this->computeClampedStiffnessMatrix(stiff, TangentStiffness, tStep);

@@ -236,10 +236,8 @@ public:
                                                MatResponseMode, GaussPoint * gp,
                                                TimeStep * tStep);
 
-    virtual void giveRealStressVector(FloatArray &answer, GaussPoint *,
+    virtual void giveRealStressVector_3d(FloatArray &answer, GaussPoint *,
                                       const FloatArray &, TimeStep *);
-
-    virtual int hasMaterialModeCapability(MaterialMode);
 
     virtual const char *giveInputRecordName() const { return _IFT_TrabBone3D_Name; }
     virtual const char *giveClassName() const { return "TrabBone3D"; }

@@ -51,6 +51,7 @@ set (sm_element
     phasefieldelement.C
 	planstrssphf.C
     qplanstrssphf.C
+    brouzoulisshell.C
     )
 
 set (sm_interface_elements

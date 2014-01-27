@@ -109,7 +109,7 @@ void FluidMaterialEvaluator :: solveYourself()
         // Initialize the strain vector;
         FluidDynamicMaterial *mat = static_cast< FluidDynamicMaterial * >( d->giveMaterial(i) );
         FluidDynamicMaterialStatus *status = static_cast< FluidDynamicMaterialStatus * >( mat->giveStatus( gps.at(i) ) );
-        status->letTempDeviatoricStrainRateVectorBe(initialStrain);
+        status->letDeviatoricStrainRateVectorBe(initialStrain);
     }
 
     std :: string outname = this->giveOutputBaseFileName() + ".matdata";

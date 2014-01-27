@@ -44,13 +44,6 @@ HyperElasticMaterial :: HyperElasticMaterial(int n, Domain *d) : StructuralMater
 {}
 
 
-int
-HyperElasticMaterial :: hasMaterialModeCapability(MaterialMode mode)
-{
-    return mode == _3dMat;
-}
-
-
 void
 HyperElasticMaterial :: give3dMaterialStiffnessMatrix(FloatMatrix &answer, MatResponseMode, GaussPoint *gp, TimeStep *tStep)
 

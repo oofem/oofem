@@ -46,13 +46,6 @@ TrabBoneEmbed :: TrabBoneEmbed(int n, Domain *d) : StructuralMaterial(n, d)
 {}
 
 
-int
-TrabBoneEmbed :: hasMaterialModeCapability(MaterialMode mode)
-{
-    return mode == _3dMat;
-}
-
-
 void TrabBoneEmbed :: computeCumPlastStrain(double &tempAlpha, GaussPoint *gp, TimeStep *tStep)
 {
     tempAlpha = 0.;

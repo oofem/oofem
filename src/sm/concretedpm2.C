@@ -43,7 +43,6 @@
 #include "timestep.h"
 #include "structuralmaterial.h"
 #include "isolinearelasticmaterial.h"
-#include "structuralcrosssection.h"
 #include "mathfem.h"
 #include "classfactory.h"
 
