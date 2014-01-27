@@ -1875,7 +1875,7 @@ StructuralMaterial :: computeStressIndependentStrainVector(FloatArray &answer,
     if ( answer.giveSize() ) {
         if ( eigenstrain.giveSize() ) {
             if ( answer.giveSize() != eigenstrain.giveSize() ) {
-                OOFEM_ERROR4( "StructuralMaterial :: Vector of temperature strains has the size %d which is different with the size of eigenstrain vector %d, element %d", answerTemper.giveSize(), answerEigenstrain.giveSize(), elem->giveNumber() );
+                OOFEM_ERROR4( "StructuralMaterial :: Vector of temperature strains has the size %d which is different with the size of eigenstrain vector %d, element %d", answer.giveSize(), eigenstrain.giveSize(), elem->giveNumber() );
             }
 
             answer.add(eigenstrain);
