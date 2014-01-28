@@ -102,14 +102,14 @@ FiberedCrossSection :: giveStiffnessMatrix_1d(FloatMatrix &answer, MatResponseMo
 }
 
 void
-FiberedCrossSection :: giveRealStress_Beam2d(FloatArray &answer, GaussPoint *gp, const FloatArray &strain, TimeStep *tStep)
+FiberedCrossSection :: giveGeneralizedStress_Beam2d(FloatArray &answer, GaussPoint *gp, const FloatArray &strain, TimeStep *tStep)
 {
-    OOFEM_ERROR("FiberedCrossSection :: giveRealStress_Beam2d - Not supported\n");
+    OOFEM_ERROR("FiberedCrossSection :: giveGeneralizedStress_Beam2d - Not supported\n");
 }
 
 
 void
-FiberedCrossSection :: giveRealStress_Beam3d(FloatArray &answer, GaussPoint *gp, const FloatArray &strain, TimeStep *tStep)
+FiberedCrossSection :: giveGeneralizedStress_Beam3d(FloatArray &answer, GaussPoint *gp, const FloatArray &strain, TimeStep *tStep)
 {
     double fiberThick, fiberWidth, fiberZCoord, fiberYCoord;
     FloatArray fiberStrain, fullStressVect, reducedFiberStress;
@@ -117,7 +117,7 @@ FiberedCrossSection :: giveRealStress_Beam3d(FloatArray &answer, GaussPoint *gp,
     FiberedCrossSectionInterface *interface;
 
     if ( ( interface = static_cast< FiberedCrossSectionInterface * >( element->giveInterface(FiberedCrossSectionInterfaceType) ) ) == NULL ) {
-        _error("giveRealStress_Beam3d - element with no fiber support encountered");
+        _error("giveGeneralizedStress_Beam3d - element with no fiber support encountered");
     }
 
     answer.resize(6);
@@ -164,23 +164,23 @@ FiberedCrossSection :: giveRealStress_Beam3d(FloatArray &answer, GaussPoint *gp,
 
 
 void
-FiberedCrossSection :: giveRealStress_Plate(FloatArray &answer, GaussPoint *gp, const FloatArray &strain, TimeStep *tStep)
+FiberedCrossSection :: giveGeneralizedStress_Plate(FloatArray &answer, GaussPoint *gp, const FloatArray &strain, TimeStep *tStep)
 {
-    OOFEM_ERROR("FiberedCrossSection :: giveRealStress_Plate - Not supported\n");
+    OOFEM_ERROR("FiberedCrossSection :: giveGeneralizedStress_Plate - Not supported\n");
 }
 
 
 void
-FiberedCrossSection :: giveRealStress_Shell(FloatArray &answer, GaussPoint *gp, const FloatArray &strain, TimeStep *tStep)
+FiberedCrossSection :: giveGeneralizedStress_Shell(FloatArray &answer, GaussPoint *gp, const FloatArray &strain, TimeStep *tStep)
 {
-    OOFEM_ERROR("FiberedCrossSection :: giveRealStress_Shell - Not supported\n");
+    OOFEM_ERROR("FiberedCrossSection :: giveGeneralizedStress_Shell - Not supported\n");
 }
 
 
 void
-FiberedCrossSection :: giveRealStress_MembraneRot(FloatArray &answer, GaussPoint *gp, const FloatArray &strain, TimeStep *tStep)
+FiberedCrossSection :: giveStress_MembraneRot(FloatArray &answer, GaussPoint *gp, const FloatArray &strain, TimeStep *tStep)
 {
-    OOFEM_ERROR("FiberedCrossSection :: giveRealStress_MembraneRot - Not supported in given cross-section (yet).");
+    OOFEM_ERROR("FiberedCrossSection :: giveStress_MembraneRot - Not supported in given cross-section (yet).");
 }
 
 

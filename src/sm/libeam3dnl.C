@@ -383,7 +383,7 @@ LIBeam3dNL :: initializeFrom(InputRecord *ir)
 
 
 double
-LIBeam3dNL :: giveLength()
+LIBeam3dNL :: computeLength()
 // Returns the original length (l0) of the receiver.
 {
     double dx, dy, dz;
@@ -409,7 +409,7 @@ LIBeam3dNL :: computeLumpedMassMatrix(FloatMatrix &answer, TimeStep *tStep)
 {
     GaussPoint *gp = integrationRulesArray [ 0 ]->getIntegrationPoint(0);
     double density = this->giveStructuralCrossSection()->give('d', gp);
-    double halfMass   = density * this->giveCrossSection()->give(CS_Area, gp) * this->giveLength() / 2.;
+    double halfMass   = density * this->giveCrossSection()->give(CS_Area, gp) * this->computeLength() / 2.;
     answer.resize(12, 12);
     answer.zero();
     answer.at(1, 1) = answer.at(2, 2) = answer.at(3, 3) = halfMass;
@@ -419,7 +419,7 @@ LIBeam3dNL :: computeLumpedMassMatrix(FloatMatrix &answer, TimeStep *tStep)
     Ik   = this->giveCrossSection()->give(CS_TorsionMomentX, gp);
     Iy   = this->giveCrossSection()->give(CS_InertiaMomentY, gp);
     Iz   = this->giveCrossSection()->give(CS_InertiaMomentZ, gp);
-    halfMass   = density * this->giveLength() / 2.;
+    halfMass   = density * this->computeLength() / 2.;
     answer.at(4, 4) = answer.at(10, 10) = Ik * halfMass;
     answer.at(5, 5) = answer.at(11, 11) = Iy * halfMass;
     answer.at(6, 6) = answer.at(12, 12) = Iz * halfMass;
@@ -467,7 +467,7 @@ LIBeam3dNL :: computeVolumeAround(GaussPoint *gp)
 // Gauss point is used.
 {
     double weight  = gp->giveWeight();
-    return weight * 0.5 * this->giveLength();
+    return weight * 0.5 * this->computeLength();
 }
 
 
@@ -506,7 +506,7 @@ LIBeam3dNL :: computeConstitutiveMatrixAt(FloatMatrix &answer, MatResponseMode r
 void
 LIBeam3dNL :: computeStressVector(FloatArray &answer, const FloatArray &strain, GaussPoint *gp, TimeStep *tStep)
 {
-    this->giveStructuralCrossSection()->giveRealStress_Beam3d(answer, gp, strain, tStep);
+    this->giveStructuralCrossSection()->giveGeneralizedStress_Beam3d(answer, gp, strain, tStep);
 }
 
 
@@ -557,7 +557,7 @@ LIBeam3dNL :: computeEdgeVolumeAround(GaussPoint *gp, int iEdge)
     }
 
     double weight  = gp->giveWeight();
-    return 0.5 * this->giveLength() * weight;
+    return 0.5 * this->computeLength() * weight;
 }
 
 
@@ -569,7 +569,7 @@ LIBeam3dNL :: giveLocalCoordinateSystem(FloatMatrix &answer)
 //
 {
     FloatArray lx(3), ly(3), lz(3), help(3);
-    double length = this->giveLength();
+    double length = this->computeLength();
     Node *nodeA, *nodeB, *refNode;
     int i;
 

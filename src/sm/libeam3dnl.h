@@ -124,7 +124,7 @@ protected:
 
     virtual void computeNmatrixAt(const FloatArray &iLocCoord, FloatMatrix &answer);
     virtual void computeGaussPoints();
-    double giveLength();
+    virtual double computeLength();
     //double givePitch();
     virtual int giveLocalCoordinateSystem(FloatMatrix &answer);
     /**

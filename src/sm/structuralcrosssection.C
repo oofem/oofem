@@ -45,13 +45,13 @@ StructuralCrossSection :: giveRealStresses(FloatArray &answer, GaussPoint *gp, c
 {
     MaterialMode mode = gp->giveMaterialMode();
     if ( mode == _2dBeam ) {
-        this->giveRealStress_Beam2d(answer, gp, strain, tStep);
+        this->giveGeneralizedStress_Beam2d(answer, gp, strain, tStep);
     } else if ( mode == _3dBeam ) {
-        this->giveRealStress_Beam3d(answer, gp, strain, tStep);
+        this->giveGeneralizedStress_Beam3d(answer, gp, strain, tStep);
     } else if ( mode == _2dPlate ) {
-        this->giveRealStress_Plate(answer, gp, strain, tStep);
+        this->giveGeneralizedStress_Plate(answer, gp, strain, tStep);
     } else if ( mode == _3dShell ) {
-        this->giveRealStress_Shell(answer, gp, strain, tStep);
+        this->giveGeneralizedStress_Shell(answer, gp, strain, tStep);
     } else if ( mode == _3dMat ) {
         this->giveRealStress_3d(answer, gp, strain, tStep);
     } else if ( mode == _PlaneStrain ) {

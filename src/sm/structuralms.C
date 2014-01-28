@@ -33,11 +33,12 @@
  */
 
 #include "structuralms.h"
-#include "structuralcrosssection.h"
 #include "structuralmaterial.h"
 #include "contextioerr.h"
 #include "nlstructuralelement.h"
+
 namespace oofem {
+
 StructuralMaterialStatus :: StructuralMaterialStatus(int n, Domain *d, GaussPoint *g) :
     MaterialStatus(n, d, g), strainVector(), stressVector(),
     tempStressVector(), tempStrainVector(), FVector(), tempFVector()
