@@ -106,14 +106,18 @@ void DelaunayTriangulator :: generateMesh()
     initializeTimers();
 
     for ( int insertedNode = 1; insertedNode <= nnode; insertedNode++ ) {
-        std :: list< Edge2D >polygon;
+		PFEMParticle *particle = dynamic_cast< PFEMParticle * >( domain->giveDofManager(insertedNode) );
+		if (particle->isActive())
+		{
+	        std :: list< Edge2D >polygon;
 
-        findNonDelaunayTriangles(insertedNode, tInsert, polygon);
+			findNonDelaunayTriangles(insertedNode, tInsert, polygon);
 
-        meshPolygon(insertedNode, tInsert, polygon);
+	        meshPolygon(insertedNode, tInsert, polygon);
+		}
     }
 
-    giveTimeReport();
+    //giveTimeReport();
 
     cleanUpTriangleList();
 
@@ -599,7 +603,7 @@ void DelaunayTriangulator :: buildInitialBBXMesh(InsertTriangleBasedOnCircumcirc
 
     Node *bottomLeftNode = new Node(nnode + 1, domain);
     BBX.giveOrigin(coords);
-    double diff = BBX.giveSize() * 0.01;
+    double diff = BBX.giveSize();
     for ( int ci = 1; ci <= 2; ci++ ) {
         coords.at(ci) -= diff;
     }

@@ -63,6 +63,7 @@ private:
 
 	/// the particle is a part of alpha-shape
 	bool alphaShapeFlag;
+	bool activeFlag;
 	
 	
 	FloatArray coordinatesAtTimeStepBegin;
@@ -100,6 +101,10 @@ public:
 	bool isOnAlphaShape() { return alphaShapeFlag; }
 	/// Sets the alphaShapeFlag
 	virtual void setOnAlphaShape(bool newFlag = true) { alphaShapeFlag = newFlag; }
+
+	bool isActive() { return activeFlag; }
+	void deactivate() { activeFlag = false; }
+
 
 	void storeCoordinatesTimeStepBegin();
 	

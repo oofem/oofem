@@ -65,7 +65,7 @@ class IntArray;
 template< class T > class OctreeSpatialLocalizerT;
 
 
-#define TEMPLATED_OCTREE_MAX_NODES_LIMIT 100
+#define TEMPLATED_OCTREE_MAX_NODES_LIMIT 300
 
 #define TEMPLATED_OCTREE_MAX_DEPTH 15
 
@@ -668,12 +668,14 @@ protected:
     IntArray octreeMask;
     CellPtrType rootCell;
     Domain *domain;
+	int maxDepthReached;
 
 public:
     /// Constructor
     OctreeSpatialLocalizerT(int n, Domain * d) {
         rootCell = NULL;
         domain = d;
+		maxDepthReached = 0;
     }
     /// Destructor
     ~OctreeSpatialLocalizerT() {
@@ -940,6 +942,11 @@ protected:
             cellDataList = cell->giveDataList();
             nCellItems = cellDataList->size();
             cellDepth  = this->giveCellDepth(cell);
+			if (cellDepth > maxDepthReached)
+			{
+				maxDepthReached = cellDepth;
+				//printf("Reached cell depth: %i \n", maxDepthReached);
+			}
             if ( ( nCellItems > TEMPLATED_OCTREE_MAX_NODES_LIMIT ) && ( cellDepth <= TEMPLATED_OCTREE_MAX_DEPTH ) ) {
                 cell->divideLocally(1, this->octreeMask);
                 for ( pos = cellDataList->begin(); pos != cellDataList->end(); ++pos ) {

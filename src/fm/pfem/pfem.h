@@ -56,6 +56,7 @@
 #define _IFT_CBS_mindeltat "mindeltat"
 #define _IFT_CBS_cmflag "cmflag"
 #define _IFT_PFEM_alphashapecoef "alphashapecoef"
+#define _IFT_PFEM_particalRemovalRatio "removalratio"
 
 //@}
 
@@ -95,6 +96,8 @@ protected:
     double deltaT, minDeltaT;
 
     double alphaShapeCoef;
+
+	double particleRemovalRatio;
 
     int initFlag;
 
