@@ -1982,7 +1982,7 @@ TR1_2D_SUPG :: printOutputAt(FILE *file, TimeStep *tStep)
 {
     SUPGElement :: printOutputAt(file, tStep);
     double rho = this->giveMaterial()->give( 'd', integrationRulesArray [ 0 ]->getIntegrationPoint(0) );
-    fprintf(file, "VOF %e, density %e\n\n", this->giveVolumeFraction(), rho);
+    fprintf(file, "\telement_status { VOF %e, density %e }\n\n", this->giveVolumeFraction(), rho);
 }
 
 
