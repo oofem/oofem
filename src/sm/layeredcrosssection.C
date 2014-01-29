@@ -468,9 +468,9 @@ LayeredCrossSection :: giveGeneralizedStress_Shell(FloatArray &answer, GaussPoin
 
 
 void
-LayeredCrossSection :: giveStress_MembraneRot(FloatArray &answer, GaussPoint *gp, const FloatArray &strain, TimeStep *tStep)
+LayeredCrossSection :: giveGeneralizedStress_MembraneRot(FloatArray &answer, GaussPoint *gp, const FloatArray &strain, TimeStep *tStep)
 {
-    OOFEM_ERROR("LayeredCrossSection :: giveStress_MembraneRot - Not supported in given cross-section (yet).");
+    OOFEM_ERROR("LayeredCrossSection :: giveGeneralizedStress_MembraneRot - Not supported in given cross-section (yet).");
 }
 
 

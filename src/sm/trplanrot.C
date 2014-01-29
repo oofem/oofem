@@ -672,7 +672,7 @@ void
 TrPlaneStrRot :: computeStressVector(FloatArray &answer, const FloatArray &strain, GaussPoint *gp, TimeStep *tStep)
 {
     StructuralCrossSection *cs = this->giveStructuralCrossSection();
-    cs->giveStress_MembraneRot(answer, gp, strain, tStep);
+    cs->giveGeneralizedStress_MembraneRot(answer, gp, strain, tStep);
 }
 
 

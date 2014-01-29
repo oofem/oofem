@@ -213,7 +213,7 @@ SimpleCrossSection :: giveGeneralizedStress_Shell(FloatArray &answer, GaussPoint
 
 
 void
-SimpleCrossSection :: giveStress_MembraneRot(FloatArray &answer, GaussPoint *gp, const FloatArray &strain, TimeStep *tStep)
+SimpleCrossSection :: giveGeneralizedStress_MembraneRot(FloatArray &answer, GaussPoint *gp, const FloatArray &strain, TimeStep *tStep)
 {
     FloatMatrix tangent;
     this->giveMembraneRotStiffMtrx(tangent, ElasticStiffness, gp, tStep);

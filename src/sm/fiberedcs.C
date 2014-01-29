@@ -178,9 +178,9 @@ FiberedCrossSection :: giveGeneralizedStress_Shell(FloatArray &answer, GaussPoin
 
 
 void
-FiberedCrossSection :: giveStress_MembraneRot(FloatArray &answer, GaussPoint *gp, const FloatArray &strain, TimeStep *tStep)
+FiberedCrossSection :: giveGeneralizedStress_MembraneRot(FloatArray &answer, GaussPoint *gp, const FloatArray &strain, TimeStep *tStep)
 {
-    OOFEM_ERROR("FiberedCrossSection :: giveStress_MembraneRot - Not supported in given cross-section (yet).");
+    OOFEM_ERROR("FiberedCrossSection :: giveGeneralizedStress_MembraneRot - Not supported in given cross-section (yet).");
 }
 
 
