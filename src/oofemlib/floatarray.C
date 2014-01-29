@@ -830,8 +830,8 @@ void FloatArray :: beTProductOf(const FloatMatrix &aMatrix, const FloatArray &an
     int nColumns = aMatrix.giveNumberOfColumns();
 
 #  ifdef DEBUG
-    if ( aMatrix.giveNumberOfRows() - anArray.giveSize() ) {
-        OOFEM_ERROR("FloatArray :: beTProductOf : dimension mismatch");
+    if ( aMatrix.giveNumberOfRows() != anArray.giveSize() ) {
+        OOFEM_ERROR3("FloatArray :: beTProductOf : dimension mismatch, matrix rows = %d, array size = %d", aMatrix.giveNumberOfRows(), anArray.giveSize());
     }
 
 #  endif

@@ -63,7 +63,7 @@ LIBeam3d :: computeBmatrixAt(GaussPoint *gp, FloatMatrix &answer, int li, int ui
 {
     double l, ksi, n1, n2, n1x, n2x;
 
-    l     = this->giveLength();
+    l     = this->computeLength();
     ksi   = gp->giveCoordinate(1);
 
     answer.resize(6, 12);
@@ -121,7 +121,7 @@ LIBeam3d :: computeConstitutiveMatrixAt(FloatMatrix &answer, MatResponseMode rMo
 void
 LIBeam3d :: computeStressVector(FloatArray &answer, const FloatArray &strain, GaussPoint *gp, TimeStep *tStep)
 {
-    this->giveStructuralCrossSection()->giveRealStress_Beam3d(answer, gp, strain, tStep);
+    this->giveStructuralCrossSection()->giveGeneralizedStress_Beam3d(answer, gp, strain, tStep);
 }
 
 
@@ -132,7 +132,7 @@ LIBeam3d :: computeLumpedMassMatrix(FloatMatrix &answer, TimeStep *tStep)
 {
     GaussPoint *gp = integrationRulesArray [ 0 ]->getIntegrationPoint(0);
     double density = this->giveStructuralCrossSection()->give('d', gp);
-    double halfMass = density * this->giveCrossSection()->give(CS_Area, gp) * this->giveLength() / 2.;
+    double halfMass = density * this->giveCrossSection()->give(CS_Area, gp) * this->computeLength() / 2.;
     answer.resize(12, 12);
     answer.zero();
     answer.at(1, 1) = answer.at(2, 2) = answer.at(3, 3) = halfMass;
@@ -205,7 +205,7 @@ LIBeam3d :: computeVolumeAround(GaussPoint *gp)
 // Gauss point is used.
 {
     double weight  = gp->giveWeight();
-    return weight * 0.5 * this->giveLength();
+    return weight * 0.5 * this->computeLength();
 }
 
 
@@ -242,7 +242,7 @@ LIBeam3d :: testElementExtension(ElementExtension ext)
 
 
 double
-LIBeam3d :: giveLength()
+LIBeam3d :: computeLength()
 // Returns the length of the receiver.
 {
     double dx, dy, dz;
@@ -331,7 +331,7 @@ LIBeam3d ::   computeEdgeVolumeAround(GaussPoint *gp, int iEdge)
     }
 
     double weight  = gp->giveWeight();
-    return 0.5 * this->giveLength() * weight;
+    return 0.5 * this->computeLength() * weight;
 }
 
 
@@ -392,7 +392,7 @@ LIBeam3d :: giveLocalCoordinateSystem(FloatMatrix &answer)
 //
 {
     FloatArray lx(3), ly(3), lz(3), help(3);
-    double length = this->giveLength();
+    double length = this->computeLength();
     Node *nodeA, *nodeB, *refNode;
 
     answer.resize(3, 3);

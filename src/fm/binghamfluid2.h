@@ -66,7 +66,7 @@ protected:
     /// Magnitude of deviatoric stresses
     double devStressMagnitude, temp_devStressMagnitude;
     /// Deviatoric stresses and strains (reduced form).
-    FloatArray deviatoricStrainVector, temp_deviatoricStrainVector;
+    FloatArray temp_deviatoricStrainVector;
 
 public:
     /// Constructor - creates new BinghamFluidMaterial2Status with number n, belonging to domain d and IntegrationPoint g.
@@ -90,7 +90,6 @@ public:
     void letTempDevStrainMagnitudeBe(double _val) { temp_devStrainMagnitude = _val; }
     void letTempDevStressMagnitudeBe(double _val) { temp_devStressMagnitude = _val; }
 
-    const FloatArray &giveDeviatoricStrainVector() { return deviatoricStrainVector; }
     const FloatArray &giveTempDeviatoricStrainVector() { return temp_deviatoricStrainVector; }
     void letTempDeviatoricStrainVectorBe(const FloatArray &v) { temp_deviatoricStrainVector = v; }
 
@@ -134,7 +133,6 @@ public:
     virtual double give(int aProperty, GaussPoint *gp);
     virtual IRResultType initializeFrom(InputRecord *ir);
     virtual void giveInputRecord(DynamicInputRecord &input);
-    virtual int hasMaterialModeCapability(MaterialMode mode);
     virtual const char *giveClassName() const { return "BinghamFluidMaterial2"; }
     virtual const char *giveInputRecordName() const { return _IFT_BinghamFluidMaterial2_Name; }
     virtual int checkConsistency();

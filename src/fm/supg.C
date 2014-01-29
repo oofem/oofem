@@ -388,7 +388,7 @@ SUPG :: solveYourselfAt(TimeStep *tStep)
     this->assembleVector( externalForces, tStep, EID_MomentumBalance_ConservationEquation, ExternalForcesVector, VM_Total,
                           EModelDefaultEquationNumbering(), this->giveDomain(1) );
 #ifdef __PARALLEL_MODE
-    this->updateSharedDofManagers(externalForces, LoadExchangeTag);
+    this->updateSharedDofManagers(externalForces,EModelDefaultEquationNumbering(),  LoadExchangeTag);
 #endif
 
     // algoritmic rhs part (assembled by e-model (in giveCharComponent service) from various element contribs)
@@ -396,7 +396,7 @@ SUPG :: solveYourselfAt(TimeStep *tStep)
     this->assembleVector( internalForces, tStep, EID_MomentumBalance_ConservationEquation, InternalForcesVector, VM_Total,
                           EModelDefaultEquationNumbering(), this->giveDomain(1) );
 #ifdef __PARALLEL_MODE
-    this->updateSharedDofManagers(internalForces, InternalForcesExchangeTag);
+    this->updateSharedDofManagers(internalForces, EModelDefaultEquationNumbering(), InternalForcesExchangeTag);
 #endif
 
     rhs.beDifferenceOf(externalForces, internalForces);
@@ -502,7 +502,7 @@ SUPG :: solveYourselfAt(TimeStep *tStep)
         this->assembleVector( internalForces, tStep, EID_MomentumBalance_ConservationEquation, InternalForcesVector, VM_Total,
                               EModelDefaultEquationNumbering(), this->giveDomain(1) );
 #ifdef __PARALLEL_MODE
-        this->updateSharedDofManagers(internalForces, InternalForcesExchangeTag);
+        this->updateSharedDofManagers(internalForces, EModelDefaultEquationNumbering(), InternalForcesExchangeTag);
 #endif
         rhs.beDifferenceOf(externalForces, internalForces);
 
@@ -551,7 +551,7 @@ SUPG :: solveYourselfAt(TimeStep *tStep)
             this->assembleVector( internalForces, tStep, EID_MomentumBalance_ConservationEquation, InternalForcesVector, VM_Total,
                                   EModelDefaultEquationNumbering(), this->giveDomain(1) );
 #ifdef __PARALLEL_MODE
-            this->updateSharedDofManagers(internalForces, InternalForcesExchangeTag);
+            this->updateSharedDofManagers(internalForces, EModelDefaultEquationNumbering(), InternalForcesExchangeTag);
 #endif
             rhs.beDifferenceOf(externalForces, internalForces);
         }

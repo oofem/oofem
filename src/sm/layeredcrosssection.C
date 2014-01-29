@@ -209,7 +209,7 @@ LayeredCrossSection :: giveStiffnessMatrix_1d(FloatMatrix &answer, MatResponseMo
 
 
 void
-LayeredCrossSection :: giveRealStress_Beam2d(FloatArray &answer, GaussPoint *gp, const FloatArray &strain, TimeStep *tStep)
+LayeredCrossSection :: giveGeneralizedStress_Beam2d(FloatArray &answer, GaussPoint *gp, const FloatArray &strain, TimeStep *tStep)
 {
     double layerThick, layerWidth, layerZCoord, top, bottom, layerZeta;
     FloatArray layerStrain, reducedLayerStress;
@@ -224,7 +224,7 @@ LayeredCrossSection :: giveRealStress_Beam2d(FloatArray &answer, GaussPoint *gp,
     top = this->give(CS_TopZCoord, gp);
 
     if ( interface == NULL ) {
-        _error("giveRealStress_Beam2d - element with no layer support encountered");
+        _error("giveGeneralizedStress_Beam2d - element with no layer support encountered");
     }
 
     for ( int layer = 1; layer <= numberOfLayers; layer++ ) {
@@ -241,7 +241,7 @@ LayeredCrossSection :: giveRealStress_Beam2d(FloatArray &answer, GaussPoint *gp,
         interface->computeStrainVectorInLayer(layerStrain, strain, gp, layerGp, tStep);
 
         if ( this->layerRots.at(layer) != 0. ) {
-            OOFEM_ERROR("LayeredCrossSection :: giveRealStress_Beam2d - Rotation not supported for beams");
+            OOFEM_ERROR("LayeredCrossSection :: giveGeneralizedStress_Beam2d - Rotation not supported for beams");
         } else {
             layerMat->giveRealStressVector_2dBeamLayer(reducedLayerStress, layerGp, layerStrain, tStep);
         }
@@ -263,14 +263,14 @@ LayeredCrossSection :: giveRealStress_Beam2d(FloatArray &answer, GaussPoint *gp,
 
 
 void
-LayeredCrossSection :: giveRealStress_Beam3d(FloatArray &answer, GaussPoint *gp, const FloatArray &strain, TimeStep *tStep)
+LayeredCrossSection :: giveGeneralizedStress_Beam3d(FloatArray &answer, GaussPoint *gp, const FloatArray &strain, TimeStep *tStep)
 {
-    OOFEM_ERROR("LayeredCrossSection :: giveRealStress_Beam3d - Not supported");
+    OOFEM_ERROR("LayeredCrossSection :: giveGeneralizedStress_Beam3d - Not supported");
 }
 
 
 void
-LayeredCrossSection :: giveRealStress_Plate(FloatArray &answer, GaussPoint *gp, const FloatArray &strain, TimeStep *tStep)
+LayeredCrossSection :: giveGeneralizedStress_Plate(FloatArray &answer, GaussPoint *gp, const FloatArray &strain, TimeStep *tStep)
 {
     double layerThick, layerWidth, layerZCoord, top, bottom, layerZeta;
     FloatArray layerStrain, reducedLayerStress;
@@ -285,7 +285,7 @@ LayeredCrossSection :: giveRealStress_Plate(FloatArray &answer, GaussPoint *gp, 
     top = this->give(CS_TopZCoord, gp);
 
     if ( interface == NULL ) {
-        _error("giveRealStress_Plate - element with no layer support encountered");
+        _error("giveGeneralizedStress_Plate - element with no layer support encountered");
     }
 
     for ( int layer = 1; layer <= numberOfLayers; layer++ ) {
@@ -366,7 +366,7 @@ LayeredCrossSection :: giveRealStress_Plate(FloatArray &answer, GaussPoint *gp, 
 
 
 void
-LayeredCrossSection :: giveRealStress_Shell(FloatArray &answer, GaussPoint *gp, const FloatArray &strain, TimeStep *tStep)
+LayeredCrossSection :: giveGeneralizedStress_Shell(FloatArray &answer, GaussPoint *gp, const FloatArray &strain, TimeStep *tStep)
 {
     double layerThick, layerWidth, layerZCoord, top, bottom, layerZeta;
     FloatArray layerStrain, reducedLayerStress;
@@ -381,7 +381,7 @@ LayeredCrossSection :: giveRealStress_Shell(FloatArray &answer, GaussPoint *gp, 
     top = this->give(CS_TopZCoord, gp);
 
     if ( interface == NULL ) {
-        _error("giveRealStress_Shell - element with no layer support encountered");
+        _error("giveGeneralizedStress_Shell - element with no layer support encountered");
     }
 
     for ( int layer = 1; layer <= numberOfLayers; layer++ ) {
@@ -468,9 +468,9 @@ LayeredCrossSection :: giveRealStress_Shell(FloatArray &answer, GaussPoint *gp, 
 
 
 void
-LayeredCrossSection :: giveRealStress_MembraneRot(FloatArray &answer, GaussPoint *gp, const FloatArray &strain, TimeStep *tStep)
+LayeredCrossSection :: giveGeneralizedStress_MembraneRot(FloatArray &answer, GaussPoint *gp, const FloatArray &strain, TimeStep *tStep)
 {
-    OOFEM_ERROR("LayeredCrossSection :: giveRealStress_MembraneRot - Not supported in given cross-section (yet).");
+    OOFEM_ERROR("LayeredCrossSection :: giveGeneralizedStress_MembraneRot - Not supported in given cross-section (yet).");
 }
 
 
@@ -1218,19 +1218,6 @@ LayeredCrossSection :: giveArea()
     return area;
 }
 
-void
-LayeredCrossSection :: computeStressIndependentStrainVector(FloatArray &answer,
-                                                            GaussPoint *gp, TimeStep *tStep, ValueModeType mode)
-{
-    StructuralElement *elem = static_cast< StructuralElement * >( gp->giveElement() );
-    FloatArray et;
-
-    elem->computeResultingIPTemperatureAt(et, tStep, gp, mode);
-
-    if ( et.isNotEmpty() ) {
-        _error("computeStressIndependentStrainVector: temperature loading not supported");
-    }
-}
 
 bool LayeredCrossSection :: isCharacteristicMtrxSymmetric(MatResponseMode rMode)
 {

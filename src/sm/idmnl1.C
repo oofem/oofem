@@ -36,7 +36,6 @@
 #include "gausspoint.h"
 #include "floatmatrix.h"
 #include "floatarray.h"
-#include "structuralcrosssection.h"
 #include "mathfem.h"
 #include "structuralelement.h"
 #include "sparsemtrx.h"

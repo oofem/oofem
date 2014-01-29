@@ -40,7 +40,6 @@
 #include "mathfem.h"
 #include "engngm.h"
 #include "timestep.h"
-#include "structuralcrosssection.h"
 #include "datastream.h"
 #include "contextioerr.h"
 #include "classfactory.h"
@@ -166,33 +165,10 @@ Concrete2 :: give(int aProperty, GaussPoint *gp)
 
 
 void
-Concrete2 :: giveRealStressVector(FloatArray &answer, GaussPoint *gp,
-                                  const FloatArray &strain,
-                                  TimeStep *tStep)
-//
-// returns stress vector (in full or reduced form - form parameter)
-// of receiver according to previous level
-// of stress and current
-// strain increment, the only way, how to correctly update gp records
-//
-{
-    MaterialMode mode = gp->giveMaterialMode();
-
-    switch ( mode ) {
-    case _PlateLayer:
-        giveRealStresses3dShellLayer(answer, gp, strain, tStep);
-        break;
-    default:
-        _error("giveRealStressVector : unsupported stressMode\n");
-    }
-}
-
-
-void
-Concrete2 :: giveRealStresses3dShellLayer(FloatArray &answer,
-                                          GaussPoint *gp,
-                                          const FloatArray &totalStrain,
-                                          TimeStep *tStep)
+Concrete2 :: giveRealStressVector_PlateLayer(FloatArray &answer,
+                                             GaussPoint *gp,
+                                             const FloatArray &totalStrain,
+                                             TimeStep *tStep)
 //
 // returns total stress vector of receiver according to
 // previous level of stress and current
@@ -1269,7 +1245,7 @@ Concrete2 :: updateStirrups(GaussPoint *gp, FloatArray *strainIncrement)
 
 
 void
-Concrete2 :: give3dMaterialStiffnessMatrix(FloatMatrix &answer,
+Concrete2 :: givePlateLayerStiffMtrx(FloatMatrix &answer,
                                            MatResponseMode rMode,
                                            GaussPoint *gp,
                                            TimeStep *tStep)
@@ -1280,8 +1256,8 @@ Concrete2 :: give3dMaterialStiffnessMatrix(FloatMatrix &answer,
 // plasticity is not taken into account !.
 //
 {
-    // error ("Give3dMaterialStiffnessMatrix: unable to compute");
-    linearElasticMaterial->give3dMaterialStiffnessMatrix(answer, rMode, gp, tStep);
+    // error ("givePlateLayerStiffMtrx: unable to compute");
+    linearElasticMaterial->givePlateLayerStiffMtrx(answer, rMode, gp, tStep);
 }
 
 

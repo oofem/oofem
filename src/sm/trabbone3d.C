@@ -36,7 +36,6 @@
 #include "gausspoint.h"
 #include "floatmatrix.h"
 #include "floatarray.h"
-#include "structuralcrosssection.h"
 #include "mathfem.h"
 #include "internalstatetype.h"
 #include "contextioerr.h"
@@ -51,12 +50,6 @@ REGISTER_Material(TrabBone3D);
 TrabBone3D :: TrabBone3D(int n, Domain *d) : StructuralMaterial(n, d)
 {}
 
-
-int
-TrabBone3D :: hasMaterialModeCapability(MaterialMode mode)
-{
-    return mode == _3dMat;
-}
 
 void TrabBone3D :: computePlasStrainEnerDensity(GaussPoint *gp, const FloatArray &totalStrain, const FloatArray &totalStress)
 {
@@ -719,7 +712,7 @@ void TrabBone3D :: computeDensificationStress(FloatArray &answer, GaussPoint *gp
 
 
 void
-TrabBone3D :: giveRealStressVector(FloatArray &answer, GaussPoint *gp,
+TrabBone3D :: giveRealStressVector_3d(FloatArray &answer, GaussPoint *gp,
                                    const FloatArray &totalStrain, TimeStep *tStep)
 {
     double tempDam;

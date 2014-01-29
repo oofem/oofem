@@ -42,7 +42,6 @@
 #include "gaussintegrationrule.h"
 #include "matresponsemode.h"
 #include "structuralcrosssection.h"
-#include "structuralcrosssection.h"
 #include "structuralmaterial.h"
 #include "structuralms.h"
 #include "mathfem.h"

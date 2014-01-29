@@ -728,17 +728,15 @@ void
 EngngModel :: updateYourself(TimeStep *tStep)
 {
     int ndomains = this->giveNumberOfDomains();
-    int nnodes;
-    Domain *domain;
 
     for ( int idomain = 1; idomain <= ndomains; idomain++ ) {
-        domain = this->giveDomain(idomain);
+        Domain *domain = this->giveDomain(idomain);
 
 #  ifdef VERBOSE
         VERBOSE_PRINT0( "Updating domain ", domain->giveNumber() )
 #  endif
 
-        nnodes = domain->giveNumberOfDofManagers();
+        int nnodes = domain->giveNumberOfDofManagers();
         for ( int j = 1; j <= nnodes; j++ ) {
             domain->giveDofManager(j)->updateYourself(tStep);
         }
@@ -821,11 +819,10 @@ EngngModel :: printOutputAt(FILE *File, TimeStep *tStep)
 {
     //FILE* File = this -> giveDomain() -> giveOutputStream() ;
     int domCount = 0;
-    Domain *domain;
 
     // fprintf (File,"\nOutput for time step number %d \n\n",tStep->giveNumber());
     for ( int idomain = 1; idomain <= this->ndomains; idomain++ ) {
-        domain = this->giveDomain(idomain);
+        Domain *domain = this->giveDomain(idomain);
         domCount += domain->giveOutputManager()->testTimeStepOutput(tStep);
     }
 
@@ -837,7 +834,7 @@ EngngModel :: printOutputAt(FILE *File, TimeStep *tStep)
     fprintf( File, "\nOutput for time % .8e ", tStep->giveTargetTime() * this->giveVariableScale(VST_Time) );
     fprintf(File, "\n==============================================================\n");
     for ( int idomain = 1; idomain <= this->ndomains; idomain++ ) {
-        domain = this->giveDomain(idomain);
+        Domain *domain = this->giveDomain(idomain);
         fprintf( File, "Output for domain %3d\n", domain->giveNumber() );
 
         domain->giveOutputManager()->doDofManOutput(File, tStep);
@@ -1334,15 +1331,12 @@ EngngModel :: initStepIncrements()
 // of temp variables.
 //
 {
-    Element *elem;
-    Domain *domain;
-
     for ( int idomain = 1; idomain <= this->ndomains; idomain++ ) {
-        domain = this->giveDomain(idomain);
+        Domain *domain = this->giveDomain(idomain);
 
         int nelem = domain->giveNumberOfElements();
         for ( int j = 1; j <= nelem; j++ ) {
-            elem = domain->giveElement(j);
+            Element *elem = domain->giveElement(j);
 #ifdef __PARALLEL_MODE
             // skip remote elements (these are used as mirrors of remote elements on other domains
             // when nonlocal constitutive models are used. They introduction is necessary to
@@ -1882,15 +1876,18 @@ EngngModel :: initParallel()
 #endif
 
 #ifdef __OOFEG
-void EngngModel :: drawYourself(oofegGraphicContext &context) {
+void EngngModel :: drawYourself(oofegGraphicContext &context)
+{
     this->giveDomain( context.getActiveDomain() )->drawYourself(context);
 }
 
-void EngngModel :: drawElements(oofegGraphicContext &context) {
+void EngngModel :: drawElements(oofegGraphicContext &context)
+{
     this->giveDomain( context.getActiveDomain() )->drawElements(context);
 }
 
-void EngngModel :: drawNodes(oofegGraphicContext &context) {
+void EngngModel :: drawNodes(oofegGraphicContext &context)
+{
     this->giveDomain( context.getActiveDomain() )->drawNodes(context);
 }
 
@@ -1956,7 +1953,7 @@ EngngModel :: balanceLoad(TimeStep *tStep)
 
 
 int
-EngngModel :: updateSharedDofManagers(FloatArray &answer, int ExchangeTag)
+EngngModel :: updateSharedDofManagers(FloatArray &answer, const UnknownNumberingScheme &s, int ExchangeTag)
 {
     int result = 1;
 
@@ -1966,7 +1963,10 @@ EngngModel :: updateSharedDofManagers(FloatArray &answer, int ExchangeTag)
         VERBOSEPARALLEL_PRINT( "EngngModel :: updateSharedDofManagers", "Packing data", this->giveRank() );
  #endif
 
-        result &= communicator->packAllData(this, & answer, & EngngModel :: packDofManagers);
+        ArrayWithNumbering tmp;
+        tmp.array = & answer;
+        tmp.numbering = & s;
+        result &= communicator->packAllData( this, & tmp, & EngngModel :: packDofManagers );
 
  #ifdef __VERBOSE_PARALLEL
         VERBOSEPARALLEL_PRINT( "EngngModel :: updateSharedDofManagers", "Exchange started", this->giveRank() );
@@ -1978,36 +1978,7 @@ EngngModel :: updateSharedDofManagers(FloatArray &answer, int ExchangeTag)
         VERBOSEPARALLEL_PRINT( "EngngModel :: updateSharedDofManagers", "Receiving and unpacking", this->giveRank() );
  #endif
 
-        result &= communicator->unpackAllData(this, & answer, & EngngModel :: unpackDofManagers);
-        result &= communicator->finishExchange();
-    }
-
-    return result;
-}
-
-int
-EngngModel :: updateSharedPrescribedDofManagers(FloatArray &answer, int ExchangeTag)
-{
-    int result = 1;
-
-    if ( isParallel() ) {
- #ifdef __VERBOSE_PARALLEL
-        VERBOSEPARALLEL_PRINT( "EngngModel :: updateSharedPrescribedDofManagers", "Packing data", this->giveRank() );
- #endif
-
-        result &= communicator->packAllData(this, & answer, & EngngModel :: packPrescribedDofManagers);
-
- #ifdef __VERBOSE_PARALLEL
-        VERBOSEPARALLEL_PRINT( "EngngModel :: updateSharedPrescribedDofManagers", "Exchange started", this->giveRank() );
- #endif
-
-        result &= communicator->initExchange(ExchangeTag);
-
- #ifdef __VERBOSE_PARALLEL
-        VERBOSEPARALLEL_PRINT( "EngngModel :: updateSharedDofManagers", "Receiving and unpacking", this->giveRank() );
- #endif
-
-        result &= communicator->unpackAllData(this, & answer, & EngngModel :: unpackPrescribedDofManagers);
+        result &= communicator->unpackAllData( this, & tmp, & EngngModel :: unpackDofManagers );
         result &= communicator->finishExchange();
     }
 
@@ -2082,12 +2053,11 @@ EngngModel :: unpackRemoteElementData(ProcessCommunicator &processComm)
     int result = 1;
     IntArray const *toRecvMap = processComm.giveToRecvMap();
     CommunicationBuffer *recv_buff = processComm.giveProcessCommunicatorBuff()->giveRecvBuff();
-    Element *element;
     Domain *domain = this->giveDomain(1);
 
 
     for ( int i = 1; i <= toRecvMap->giveSize(); i++ ) {
-        element = domain->giveElement( toRecvMap->at(i) );
+        Element *element = domain->giveElement( toRecvMap->at(i) );
         if ( element->giveParallelMode() == Element_remote ) {
             result &= element->unpackAndUpdateUnknowns( * recv_buff, this->giveCurrentStep() );
         } else {
@@ -2100,40 +2070,24 @@ EngngModel :: unpackRemoteElementData(ProcessCommunicator &processComm)
 
 
 int
-EngngModel :: packDofManagers(FloatArray *src, ProcessCommunicator &processComm)
+EngngModel :: packDofManagers(ArrayWithNumbering *srcData, ProcessCommunicator &processComm)
 {
-    return this->packDofManagers(src, processComm, false);
-}
-
-
-int
-EngngModel :: packPrescribedDofManagers(FloatArray *src, ProcessCommunicator &processComm)
-{
-    return this->packDofManagers(src, processComm, true);
-}
-
-
-int
-EngngModel :: packDofManagers(FloatArray *src, ProcessCommunicator &processComm, bool prescribedEquations)
-{
-    ///@todo Must fix: Internal dofmanagers in xfem and bc
+    FloatArray *src = srcData->array;
+    const UnknownNumberingScheme &s = *srcData->numbering;
     int result = 1;
     Domain *domain = this->giveDomain(1);
     IntArray const *toSendMap = processComm.giveToSendMap();
     ProcessCommunicatorBuff *pcbuff = processComm.giveProcessCommunicatorBuff();
 
+    ///@todo Shouldn't hardcode domain number 1
+    ///@todo Must fix: Internal dofmanagers in xfem and bc
     for ( int i = 1; i <= toSendMap->giveSize(); i++ ) {
         DofManager *dman = domain->giveDofManager( toSendMap->at(i) );
         int ndofs = dman->giveNumberOfDofs();
         for ( int j = 1; j <= ndofs; j++ ) {
             Dof *jdof = dman->giveDof(j);
             if ( jdof->isPrimaryDof() ) {
-                int eqNum;
-                if ( prescribedEquations ) {
-                    eqNum = jdof->__givePrescribedEquationNumber();
-                } else {
-                    eqNum = jdof->__giveEquationNumber();
-                }
+                int eqNum = jdof->giveEquationNumber(s);
                 if ( eqNum ) {
                     result &= pcbuff->packDouble( src->at(eqNum) );
                 }
@@ -2146,46 +2100,25 @@ EngngModel :: packDofManagers(FloatArray *src, ProcessCommunicator &processComm,
 
 
 int
-EngngModel :: unpackDofManagers(FloatArray *src, ProcessCommunicator &processComm)
+EngngModel :: unpackDofManagers(ArrayWithNumbering *destData, ProcessCommunicator &processComm)
 {
-    return this->unpackDofManagers(src, processComm, false);
-}
-
-
-int
-EngngModel :: unpackPrescribedDofManagers(FloatArray *src, ProcessCommunicator &processComm)
-{
-    return this->unpackDofManagers(src, processComm, true);
-}
-
-
-int
-EngngModel :: unpackDofManagers(FloatArray *dest, ProcessCommunicator &processComm, bool prescribedEquations)
-{
+    FloatArray *dest = destData->array;
+    const UnknownNumberingScheme &s = *destData->numbering;
     int result = 1;
-    int size;
-    int ndofs, eqNum;
     Domain *domain = this->giveDomain(1);
-    dofManagerParallelMode dofmanmode;
     IntArray const *toRecvMap = processComm.giveToRecvMap();
     ProcessCommunicatorBuff *pcbuff = processComm.giveProcessCommunicatorBuff();
-    DofManager *dman;
-    Dof *jdof;
     double value;
 
-
-    size = toRecvMap->giveSize();
-    for ( int i = 1; i <= size; i++ ) {
-        dman = domain->giveDofManager( toRecvMap->at(i) );
-        ndofs = dman->giveNumberOfDofs();
-        dofmanmode = dman->giveParallelMode();
+    ///@todo Shouldn't hardcode domain number 1
+    ///@todo Must fix: Internal dofmanagers in xfem and bc
+    for ( int i = 1; i <= toRecvMap->giveSize(); i++ ) {
+        DofManager *dman = domain->giveDofManager( toRecvMap->at(i) );
+        int ndofs = dman->giveNumberOfDofs();
+        dofManagerParallelMode dofmanmode = dman->giveParallelMode();
         for ( int j = 1; j <= ndofs; j++ ) {
-            jdof = dman->giveDof(j);
-            if ( prescribedEquations ) {
-                eqNum = jdof->__givePrescribedEquationNumber();
-            } else {
-                eqNum = jdof->__giveEquationNumber();
-            }
+            Dof *jdof = dman->giveDof(j);
+            int eqNum = jdof->giveEquationNumber(s);
             if ( jdof->isPrimaryDof() && eqNum ) {
                 result &= pcbuff->unpackDouble(value);
                 if ( dofmanmode == DofManager_shared ) {

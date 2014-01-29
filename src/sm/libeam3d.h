@@ -111,7 +111,7 @@ protected:
     virtual void computeConstitutiveMatrixAt(FloatMatrix &answer, MatResponseMode rMode, GaussPoint *gp, TimeStep *tStep);
     virtual void computeStressVector(FloatArray &answer, const FloatArray &strain, GaussPoint *gp, TimeStep *tStep);
 
-    double giveLength();
+    virtual double computeLength();
 };
 } // end namespace oofem
 #endif // libeam3d_h

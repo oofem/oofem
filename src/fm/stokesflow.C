@@ -158,7 +158,7 @@ void StokesFlow :: solveYourselfAt(TimeStep *tStep)
     this->assembleVector( this->externalForces, tStep, EID_MomentumBalance_ConservationEquation, ExternalForcesVector, VM_Total,
                           EModelDefaultEquationNumbering(), this->giveDomain(1) );
 #ifdef __PARALLEL_MODE
-    this->updateSharedDofManagers(this->externalForces, LoadExchangeTag);
+    this->updateSharedDofManagers(this->externalForces, EModelDefaultEquationNumbering(), LoadExchangeTag);
 #endif
 
     if ( this->giveProblemScale() == macroScale ) {
@@ -217,7 +217,7 @@ void StokesFlow :: updateComponent(TimeStep *tStep, NumericalCmpn cmpn, Domain *
         this->assembleVector(this->internalForces, tStep, EID_MomentumBalance_ConservationEquation, InternalForcesVector, VM_Total,
                              EModelDefaultEquationNumbering(), this->giveDomain(1), & this->eNorm);
 #ifdef __PARALLEL_MODE
-        this->updateSharedDofManagers(this->internalForces, InternalForcesExchangeTag);
+        this->updateSharedDofManagers(this->internalForces, EModelDefaultEquationNumbering(), InternalForcesExchangeTag);
 #endif
         return;
     } else if ( cmpn == NonLinearLhs ) {

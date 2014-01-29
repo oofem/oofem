@@ -341,21 +341,6 @@ GradDpElement :: computeForceLoadVector(FloatArray &answer, TimeStep *tStep, Val
     answer.assemble(nlForces, locK);
 }
 
-void
-GradDpElement :: computeNonForceLoadVector(FloatArray &answer, TimeStep *tStep, ValueModeType mode)
-{
-    //set displacement and nonlocal location array
-    this->setDisplacementLocationArray(locU, nPrimNodes, nPrimVars, nSecNodes, nSecVars);
-    this->setNonlocalLocationArray(locK, nPrimNodes, nPrimVars, nSecNodes, nSecVars);
-
-    FloatArray localForces(locSize);
-    FloatArray nlForces(nlSize);
-    answer.resize(totalSize);
-    answer.zero();
-
-    this->computeLocNonForceLoadVector(answer, tStep, mode);
-}
-
 
 /************************************************************************/
 void
@@ -379,21 +364,6 @@ GradDpElement :: computeLocForceLoadVector(FloatArray &answer, TimeStep *tStep, 
     } else {
         answer.resize(locSize);
         answer.zero();
-    }
-}
-
-
-void
-GradDpElement :: computeLocNonForceLoadVector(FloatArray &answer, TimeStep *tStep, ValueModeType mode)
-// Computes the load vector of the receiver, at tStep.
-{
-    FloatArray helpLoadVector;
-    StructuralElement *elem = this->giveStructuralElement();
-    answer.resize(0);
-
-    elem->computePrescribedStrainLoadVectorAt(helpLoadVector, tStep, mode);
-    if ( helpLoadVector.giveSize() ) {
-        answer.add(helpLoadVector);
     }
 }
 

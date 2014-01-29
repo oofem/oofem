@@ -401,52 +401,6 @@ StructuralElement :: computeSurfaceLoadVectorAt(FloatArray &answer, Load *load,
 
 
 void
-StructuralElement :: computePrescribedStrainLocalLoadVectorAt(FloatArray &answer, TimeStep *tStep, ValueModeType mode)
-//
-// Computes numerically temperature and eigenstrain load vector
-// Assumes that temperature is constant over the whole element
-{
-    // TemperatureLoad   *load;
-    double dV;
-    FloatArray et, de, bde;
-    FloatMatrix b, d;
-    IntegrationRule *iRule = integrationRulesArray [ giveDefaultIntegrationRule() ];
-    StructuralCrossSection *cs = this->giveStructuralCrossSection();
-    //   if (this -> giveBodyLoadArray() -> isEmpty())         // no loads
-    //      return NULL ;
-
-    //   else {
-    // perform assembling of load vector over
-    // complete volume
-    answer.resize(0);
-    for ( int i = 0; i < iRule->giveNumberOfIntegrationPoints(); i++ ) {
-        GaussPoint *gp = iRule->getIntegrationPoint(i);
-        cs->computeStressIndependentStrainVector(et, gp, tStep, mode);
-        if ( et.giveSize() ) {
-            this->computeBmatrixAt(gp, b);
-            this->computeConstitutiveMatrixAt(d, TangentStiffness, gp, tStep);
-            dV = this->computeVolumeAround(gp);
-            de.beProductOf(d, et);
-            bde.beTProductOf(b, de);
-            answer.add(dV, bde);
-        }
-    }
-}
-
-
-void
-StructuralElement :: computePrescribedStrainLoadVectorAt(FloatArray &answer, TimeStep *tStep, ValueModeType mode)
-//
-// Computes numerically temperature load vector
-// Assumes that temperature is constant over the
-// whole element
-//
-{
-    this->computePrescribedStrainLocalLoadVectorAt(answer, tStep, mode);
-}
-
-
-void
 StructuralElement :: computeConsistentMassMatrix(FloatMatrix &answer, TimeStep *tStep, double &mass, const double *ipDensity)
 // Computes numerically the consistent (full) mass matrix of the receiver.
 {
