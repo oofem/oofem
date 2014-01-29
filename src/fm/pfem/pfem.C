@@ -543,7 +543,7 @@ PFEM :: solveYourselfAt(TimeStep *tStep)
 			d_vnorm = 0.0;
 			for (int i = 1; i <= diffVelocity.giveSize(); i++)
 			{
-				d_vnorm = max(d_vnorm, abs(diffVelocity.at(i)/velocityVectorLastStep.at(i)));
+				d_vnorm = max(d_vnorm, fabs(diffVelocity.at(i)/velocityVectorLastStep.at(i)));
 			}
             //d_vnorm = diffVelocity.computeNorm() / velocityVectorLastStep.computeNorm();
 
@@ -557,7 +557,7 @@ PFEM :: solveYourselfAt(TimeStep *tStep)
 			d_pnorm = 0.0;
 			for (int i = 1; i <= diffPressure.giveSize(); i++)
 			{
-				d_pnorm = max(d_pnorm, abs(diffPressure.at(i)/pressureVectorLastStep.at(i)));
+				d_pnorm = max(d_pnorm, fabs(diffPressure.at(i)/pressureVectorLastStep.at(i)));
 			}
         }
     } while ( ( d_vnorm > 1.e-8 || d_pnorm > 1.e-8 ) && iteration < 50 );
