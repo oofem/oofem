@@ -539,7 +539,7 @@ NlDEIDynamic :: computeLoadVector(FloatArray &answer, ValueModeType mode, TimeSt
     // Exchange contributions.
     //
 #ifdef __PARALLEL_MODE
-    this->updateSharedDofManagers(answer, LoadExchangeTag);
+    this->updateSharedDofManagers(answer, EModelDefaultEquationNumbering(), LoadExchangeTag);
 #endif
 }
 
@@ -674,7 +674,7 @@ NlDEIDynamic :: computeMassMtrx(FloatArray &massMatrix, double &maxOm, TimeStep 
 #endif
 
 #ifdef __PARALLEL_MODE
-    this->updateSharedDofManagers(massMatrix, MassExchangeTag);
+    this->updateSharedDofManagers(massMatrix, EModelDefaultEquationNumbering(), MassExchangeTag);
 
     // Determine maxOm over all processes.
  #ifdef __USE_MPI

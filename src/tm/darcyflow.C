@@ -112,7 +112,7 @@ void DarcyFlow :: solveYourselfAt(TimeStep *tStep)
     this->assembleVectorFromElements( this->externalForces, tStep, EID_ConservationEquation, ExternalForcesVector, VM_Total,
                                       EModelDefaultEquationNumbering(), this->giveDomain(1) );
 #ifdef __PARALLEL_MODE
-    this->updateSharedDofManagers(this->externalForces, LoadExchangeTag);
+    this->updateSharedDofManagers(this->externalForces, EModelDefaultEquationNumbering(), LoadExchangeTag);
 #endif
 
     this->incrementOfSolution.resize(neq);
@@ -213,7 +213,7 @@ void DarcyFlow :: updateComponent(TimeStep *tStep, NumericalCmpn cmpn, Domain *d
         this->assembleVector(this->internalForces, tStep, EID_ConservationEquation,  InternalForcesVector, VM_Total,
                              EModelDefaultEquationNumbering(), d, & this->ebeNorm);
 #ifdef __PARALLEL_MODE
-        this->updateSharedDofManagers(this->externalForces, InternalForcesExchangeTag);
+        this->updateSharedDofManagers(this->externalForces, EModelDefaultEquationNumbering(), InternalForcesExchangeTag);
 #endif
         break;
 
