@@ -181,7 +181,7 @@ void AbaqusUserMaterial :: give3dMaterialStiffnessMatrix_dPdF(FloatMatrix &answe
     	this->giveFirstPKStressVector_3d(stress, gp, vF, tStep);
     }
 
-#if 1
+#if 0
 //    if(mStressInterpretation == 0) {
     	answer = ms->giveTempTangent();
 /*
@@ -195,7 +195,7 @@ void AbaqusUserMaterial :: give3dMaterialStiffnessMatrix_dPdF(FloatMatrix &answe
     }
 */
 #else
-    double h = 1e-7;
+    double h = 1e-9;
     FloatArray vF, vF_h, stress, stressh;
 	vF = ms->giveTempFVector();
     stress = ( ( StructuralMaterialStatus * ) gp->giveMaterialStatus() )->giveTempPVector();

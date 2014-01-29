@@ -131,7 +131,7 @@ set (sm_material
 	intmatbilinczjansson.C
     intmatbilinearcz.C
 	intmatbilinczelastic.C
-	interfacematerials/intmatdummycz.C
+	InterfaceMaterials/intmatdummycz.C
     simplevitrificationmaterial.C
     )
 
@@ -146,6 +146,7 @@ set (sm_error
 set (sm_export
     dmexportmodule.C
     poiexportmodule.C
+    export/gnuplotexportmodule.C
     )
 
 set (sm_barrier
