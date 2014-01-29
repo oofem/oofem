@@ -12,9 +12,9 @@
 #include "classfactory.h"
 #include "sparselinsystemnm.h"
 #include "mathfem.h"
-#include "tr1darcy.h"
 #include "sparsemtrx.h"
 #include "nrsolver.h"
+#include "primaryfield.h"
 
 #ifdef __PARALLEL_MODE
  #include "problemcomm.h"
