@@ -131,6 +131,7 @@ set (sm_material
 	intmatbilinczjansson.C
     intmatbilinearcz.C
 	intmatbilinczelastic.C
+	interfacematerials/intmatdummycz.C
     simplevitrificationmaterial.C
     )
 

@@ -49,8 +49,11 @@
 #include "propagationlaw.h"
 #include "dynamicinputrecord.h"
 #include "dynamicdatareader.h"
+#include "structuralinterfacematerialstatus.h"
+#include "XFEMDebugTools.h"
 #include <algorithm>
 #include <limits>
+#include <sstream>
 
 namespace oofem {
 
@@ -1266,6 +1269,97 @@ IRResultType Crack :: initializeFrom(InputRecord *ir)
     EnrichmentItem :: initializeFrom(ir);
 
     return IRRT_OK;
+}
+
+void Crack::AppendCohesiveZoneGaussPoint(GaussPoint *ipGP)
+{
+	StructuralInterfaceMaterialStatus *matStat = dynamic_cast<StructuralInterfaceMaterialStatus*> ( ipGP->giveMaterialStatus() );
+	matStat->printYourself();
+	if(matStat != NULL) {
+		// Compute arc length position of the Gauss point
+		const FloatArray &coord = *(ipGP->giveCoordinates());
+		double tangDist = 0.0, arcPos = 0.0;
+		mpEnrichmentDomain->computeTangentialSignDist(tangDist, coord, arcPos);
+
+		// Insert at correct position
+		std::vector<GaussPoint*>::iterator iteratorGP 	= mCohesiveZoneGaussPoints.begin();
+		std::vector<double>::iterator iteratorPos 		= mCohesiveZoneArcPositions.begin();
+		for(size_t i = 0; i < mCohesiveZoneArcPositions.size(); i++) {
+			if( arcPos > mCohesiveZoneArcPositions[i] ) {
+				iteratorGP++;
+				iteratorPos++;
+			}
+		}
+
+		mCohesiveZoneGaussPoints.insert(iteratorGP, ipGP);
+		mCohesiveZoneArcPositions.insert(iteratorPos, arcPos);
+	}
+	else{
+		OOFEM_ERROR("Error in Crack::AppendCohesiveZoneGaussPoint(GaussPoint *ipGP): matStat == NULL.")
+	}
+}
+
+void Crack::WriteCohesiveZoneOutput()
+{
+	size_t numPoints = mCohesiveZoneGaussPoints.size();
+
+	std::vector<double> arcLengthPositions, normalJumps, tangJumps;
+
+	for(size_t i = 0; i < numPoints; i++) {
+		GaussPoint *gp = mCohesiveZoneGaussPoints[i];
+
+		StructuralInterfaceMaterialStatus *matStat = dynamic_cast<StructuralInterfaceMaterialStatus*> ( gp->giveMaterialStatus() );
+		if(matStat != NULL) {
+
+			// Compute arc length position of the Gauss point
+			const FloatArray &coord = *(gp->giveCoordinates());
+			double tangDist = 0.0, arcPos = 0.0;
+			mpEnrichmentDomain->computeTangentialSignDist(tangDist, coord, arcPos);
+			arcLengthPositions.push_back(arcPos);
+
+			// Compute displacement jump in normal and tangential direction
+			// Local numbering: (tang_z, tang, normal)
+			const FloatArray &jumpLoc 		= matStat->giveJump();
+
+			double normalJump = jumpLoc.at(3);
+			normalJumps.push_back(normalJump);
+
+
+			tangJumps.push_back( jumpLoc.at(2) );
+		}
+	}
+
+
+
+    XfemManager *xMan = giveDomain()->giveXfemManager();
+    if ( xMan != NULL ) {
+        if ( xMan->giveVtkDebug() ) {
+            double time = 0.0;
+
+            EngngModel *em = giveDomain()->giveEngngModel();
+            if ( em != NULL ) {
+            	TimeStep *ts = em->giveCurrentStep();
+            	if ( ts != NULL ) {
+            		time = ts->giveTargetTime();
+            	}
+            }
+
+            int eiIndex = giveNumber();
+
+            std :: stringstream strNormalJump;
+            strNormalJump << "NormalJumpEI" << eiIndex << "Time" << time << ".dat";
+            std :: string nameNormalJump = strNormalJump.str();
+            XFEMDebugTools::WriteArrayToGnuplot(nameNormalJump, arcLengthPositions, normalJumps);
+
+            std :: stringstream strTangJump;
+            strTangJump << "TangJumpEI" << eiIndex << "Time" << time << ".dat";
+            std :: string nameTangJump = strTangJump.str();
+            XFEMDebugTools::WriteArrayToGnuplot(nameTangJump, arcLengthPositions, tangJumps);
+        }
+    }
+
+
+
 }
 
 REGISTER_EnrichmentFront(EnrFrontDoNothing)
