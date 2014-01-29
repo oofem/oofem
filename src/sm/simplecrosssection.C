@@ -110,7 +110,7 @@ SimpleCrossSection :: giveStiffnessMatrix_1d(FloatMatrix &answer, MatResponseMod
 
 
 void
-SimpleCrossSection :: giveRealStress_Beam2d(FloatArray &answer, GaussPoint *gp, const FloatArray &strain, TimeStep *tStep)
+SimpleCrossSection :: giveGeneralizedStress_Beam2d(FloatArray &answer, GaussPoint *gp, const FloatArray &strain, TimeStep *tStep)
 {
     StructuralMaterial *mat = static_cast< StructuralMaterial* >( this->giveMaterial(gp) );
     FloatArray elasticStrain, et, e0;
@@ -134,7 +134,7 @@ SimpleCrossSection :: giveRealStress_Beam2d(FloatArray &answer, GaussPoint *gp, 
 
 
 void
-SimpleCrossSection :: giveRealStress_Beam3d(FloatArray &answer, GaussPoint *gp, const FloatArray &strain, TimeStep *tStep)
+SimpleCrossSection :: giveGeneralizedStress_Beam3d(FloatArray &answer, GaussPoint *gp, const FloatArray &strain, TimeStep *tStep)
 {
     StructuralMaterial *mat = static_cast< StructuralMaterial* >( this->giveMaterial(gp) );
     FloatArray elasticStrain, et, e0;
@@ -163,7 +163,7 @@ SimpleCrossSection :: giveRealStress_Beam3d(FloatArray &answer, GaussPoint *gp, 
 
 
 void
-SimpleCrossSection :: giveRealStress_Plate(FloatArray &answer, GaussPoint *gp, const FloatArray &strain, TimeStep *tStep)
+SimpleCrossSection :: giveGeneralizedStress_Plate(FloatArray &answer, GaussPoint *gp, const FloatArray &strain, TimeStep *tStep)
 {
     StructuralMaterial *mat = static_cast< StructuralMaterial* >( this->giveMaterial(gp) );
     FloatArray elasticStrain, et, e0;
@@ -187,7 +187,7 @@ SimpleCrossSection :: giveRealStress_Plate(FloatArray &answer, GaussPoint *gp, c
 
 
 void
-SimpleCrossSection :: giveRealStress_Shell(FloatArray &answer, GaussPoint *gp, const FloatArray &strain, TimeStep *tStep)
+SimpleCrossSection :: giveGeneralizedStress_Shell(FloatArray &answer, GaussPoint *gp, const FloatArray &strain, TimeStep *tStep)
 {
     StructuralMaterial *mat = static_cast< StructuralMaterial* >( this->giveMaterial(gp) );
     FloatArray elasticStrain, et, e0;
@@ -213,7 +213,7 @@ SimpleCrossSection :: giveRealStress_Shell(FloatArray &answer, GaussPoint *gp, c
 
 
 void
-SimpleCrossSection :: giveRealStress_MembraneRot(FloatArray &answer, GaussPoint *gp, const FloatArray &strain, TimeStep *tStep)
+SimpleCrossSection :: giveGeneralizedStress_MembraneRot(FloatArray &answer, GaussPoint *gp, const FloatArray &strain, TimeStep *tStep)
 {
     FloatMatrix tangent;
     this->giveMembraneRotStiffMtrx(tangent, ElasticStiffness, gp, tStep);

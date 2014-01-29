@@ -126,7 +126,7 @@ protected:
     virtual void computeConstitutiveMatrixAt(FloatMatrix &answer, MatResponseMode rMode, GaussPoint *gp, TimeStep *tStep);
     virtual void computeStressVector(FloatArray &answer, const FloatArray &strain, GaussPoint *gp, TimeStep *tStep);
 
-    double giveLength();
+    virtual double computeLength();
     //double givePitch ();
     virtual int giveLocalCoordinateSystem(FloatMatrix &answer);
 

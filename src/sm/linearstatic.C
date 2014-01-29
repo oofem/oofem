@@ -270,7 +270,7 @@ void LinearStatic :: solveYourselfAt(TimeStep *tStep)
     loadVector.subtract(internalForces);
     
 #ifdef __PARALLEL_MODE
-    this->updateSharedDofManagers(loadVector, ReactionExchangeTag);
+    this->updateSharedDofManagers(loadVector, EModelDefaultEquationNumbering(), ReactionExchangeTag);
 #endif
 
     //

@@ -91,8 +91,8 @@ protected:
 class TwoFluidMaterialStatus : public FluidDynamicMaterialStatus
 {
 protected:
-    FluidDynamicMaterialStatus *slaveStatus0;
-    FluidDynamicMaterialStatus *slaveStatus1;
+    GaussPoint *slaveGp0;
+    GaussPoint *slaveGp1;
 
 public:
     /// Constructor - creates new BinghamFluidMaterial2Status with number n, belonging to domain d and IntegrationPoint g.
@@ -107,13 +107,10 @@ public:
 
     virtual contextIOResultType saveContext(DataStream *stream, ContextMode mode, void *obj = NULL);
     virtual contextIOResultType restoreContext(DataStream *stream, ContextMode mode, void *obj = NULL);
-
-    void setSlaveStatus0(FluidDynamicMaterialStatus *s) { this->slaveStatus0 = s; }
-    void setSlaveStatus1(FluidDynamicMaterialStatus *s) { this->slaveStatus1 = s; }
-    FluidDynamicMaterialStatus *getSlaveStatus0() const { return this->slaveStatus0; }
-    FluidDynamicMaterialStatus *getSlaveStatus1() const { return this->slaveStatus1; }
-
     virtual const char *giveClassName() const { return "TwoFluidMaterialStatus"; }
+
+    GaussPoint *giveSlaveGaussPoint0() { return this->slaveGp0; }
+    GaussPoint *giveSlaveGaussPoint1() { return this->slaveGp1; }
 };
 } // end namespace oofem
 #endif // twofluidmaterial_h

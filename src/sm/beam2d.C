@@ -93,7 +93,7 @@ Beam2d :: computeBmatrixAt(GaussPoint *gp, FloatMatrix &answer, int li, int ui)
 {
     double l, ksi, kappa, c1;
 
-    l     = this->giveLength();
+    l     = this->computeLength();
     ksi   = 0.5 + 0.5 * gp->giveCoordinate(1);
     kappa = this->giveKappaCoeff();
     c1 = 1. + 2. * kappa;
@@ -140,7 +140,7 @@ Beam2d :: computeNmatrixAt(const FloatArray &iLocCoord, FloatMatrix &answer)
 {
     double l, ksi, ksi2, ksi3, kappa, c1;
 
-    l     = this->giveLength();
+    l     = this->computeLength();
     ksi =   0.5 + 0.5 * iLocCoord.at(1);
     kappa = this->giveKappaCoeff();
     c1 = 1. + 2. * kappa;
@@ -199,6 +199,7 @@ Beam2d :: computeClampedStiffnessMatrix(FloatMatrix &answer,
     double l = this->computeLength();
     IntegrationRule *ir = this->giveDefaultIntegrationRulePtr();
     FloatMatrix B, d, DB;
+    answer.resize(0,0);
     for ( int i = 0; i < ir->giveNumberOfIntegrationPoints(); ++i ) {
         GaussPoint *gp = ir->getIntegrationPoint(i);
         this->computeBmatrixAt(gp, B);
@@ -221,7 +222,7 @@ Beam2d :: computeConstitutiveMatrixAt(FloatMatrix &answer, MatResponseMode rMode
 void
 Beam2d :: computeStressVector(FloatArray &answer, const FloatArray &strain, GaussPoint *gp, TimeStep *tStep)
 {
-    this->giveStructuralCrossSection()->giveRealStress_Beam2d(answer, gp, strain, tStep);
+    this->giveStructuralCrossSection()->giveGeneralizedStress_Beam2d(answer, gp, strain, tStep);
 }
 
 
@@ -254,7 +255,7 @@ Beam2d :: computeGtoLRotationMatrix(FloatMatrix &answer)
 double
 Beam2d :: computeVolumeAround(GaussPoint *gp)
 {
-    return 0.5 * this->giveLength() * gp->giveWeight();
+    return 0.5 * this->computeLength() * gp->giveWeight();
 }
 
 
@@ -287,7 +288,7 @@ Beam2d :: giveDofManDofIDMask(int inode, EquationID, IntArray &answer) const
 
 
 double
-Beam2d :: giveLength()
+Beam2d :: computeLength()
 // Returns the length of the receiver.
 {
     double dx, dy;
@@ -334,7 +335,7 @@ Beam2d :: giveKappaCoeff()
 
     if ( kappa < 0. ) {
         FloatMatrix d;
-        double l = this->giveLength();
+        double l = this->computeLength();
 
         this->computeConstitutiveMatrixAt( d, ElasticStiffness, integrationRulesArray [ 0 ]->getIntegrationPoint(0), domain->giveEngngModel()->giveCurrentStep() );
         kappa = 6. * d.at(2, 2) / ( d.at(3, 3) * l * l );
@@ -428,7 +429,7 @@ Beam2d :: computeEdgeLoadVectorAt(FloatArray &answer, Load *load, int iedge, Tim
 {
     FloatArray coords, components, help;
     FloatMatrix T;
-    double l = this->giveLength();
+    double l = this->computeLength();
     double kappa = this->giveKappaCoeff();
     double fx, fz, fm, dfx, dfz, dfm;
     double cosine, sine;
@@ -619,7 +620,7 @@ Beam2d :: computeConsistentMassMatrix(FloatMatrix &answer, TimeStep *tStep, doub
      * StructuralElement::computeMassMatrix(answer, tStep);
      * answer.times(this->giveCrossSection()->give('A'));
      */
-    double l = this->giveLength();
+    double l = this->computeLength();
     double kappa = this->giveKappaCoeff();
     double kappa2 = kappa * kappa;
 
@@ -682,7 +683,7 @@ Beam2d :: computeInitialStressMatrix(FloatMatrix &answer, TimeStep *tStep)
     FloatMatrix stiff;
     FloatArray endForces;
 
-    double l = this->giveLength();
+    double l = this->computeLength();
     double kappa = this->giveKappaCoeff();
     double kappa2 = kappa * kappa;
     double N;

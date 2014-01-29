@@ -114,7 +114,7 @@ protected:
     void computeBodyLoadVectorAt(FloatArray &answer, Load *load, TimeStep *tStep, ValueModeType mode);
 
     double giveKappaCoeff();
-    double giveLength();
+    virtual double computeLength();
     double givePitch();
     virtual void computeClampedStiffnessMatrix(FloatMatrix &answer,
                                                MatResponseMode rMode, TimeStep *tStep);

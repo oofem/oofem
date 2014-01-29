@@ -121,7 +121,7 @@ protected:
     double giveKappayCoeff();
     double giveKappazCoeff();
     void computeKappaCoeffs();
-    double giveLength();
+    virtual double computeLength();
     virtual void computeClampedStiffnessMatrix(FloatMatrix &answer,
                                                MatResponseMode rMode, TimeStep *tStep);
     virtual void computeLocalStiffnessMatrix(FloatMatrix &answer,

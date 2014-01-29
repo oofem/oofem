@@ -103,7 +103,7 @@ protected:
     virtual void computeNLBMatrixAt(FloatMatrix &answer, GaussPoint *gp, int);
     virtual void computeNmatrixAt(const FloatArray &iLocCoord, FloatMatrix &answer);
     virtual void computeGaussPoints();
-    double giveLength();
+    virtual double computeLength();
     double givePitch();
 };
 } // end namespace oofem

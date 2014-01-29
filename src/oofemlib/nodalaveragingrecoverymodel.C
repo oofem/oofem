@@ -171,7 +171,6 @@ NodalAveragingRecoveryModel :: recoverValues(InternalStateType type, TimeStep *t
 void
 NodalAveragingRecoveryModel :: initCommMaps()
 {
- #ifdef __PARALLEL_MODE
     if ( initCommMap ) {
         EngngModel *emodel = domain->giveEngngModel();
         ProblemCommunicatorMode commMode = emodel->giveProblemCommMode();
@@ -187,8 +186,6 @@ NodalAveragingRecoveryModel :: initCommMaps()
             OOFEM_ERROR("NodalAveragingRecoveryModel :: initCommMaps: unsupported comm mode");
         }
     }
-
- #endif
 }
 
 void
@@ -214,21 +211,21 @@ NodalAveragingRecoveryModel :: exchangeDofManValues(int ireg, FloatArray &lhs, I
 int
 NodalAveragingRecoveryModel :: packSharedDofManData(parallelStruct *s, ProcessCommunicator &processComm)
 {
-    int result = 1, i, j, indx, eq, size;
+    int result = 1, size;
     ProcessCommunicatorBuff *pcbuff = processComm.giveProcessCommunicatorBuff();
     IntArray const *toSendMap = processComm.giveToSendMap();
 
     size = toSendMap->giveSize();
-    for ( i = 1; i <= size; i++ ) {
+    for ( int i = 1; i <= size; i++ ) {
         // toSendMap contains all shared dofmans with remote partition
         // one has to check, if particular shared node value is available for given region
-        indx = s->regionNodalNumbers->at( toSendMap->at(i) );
+        int indx = s->regionNodalNumbers->at( toSendMap->at(i) );
         if ( indx ) {
             // pack "1" to indicate that for given shared node this is a valid contribution
             result &= pcbuff->packInt(1);
             result &= pcbuff->packInt( s->regionDofMansConnectivity->at(indx) );
-            eq = ( indx - 1 ) * s->regionValSize;
-            for ( j = 1; j <= s->regionValSize; j++ ) {
+            int eq = ( indx - 1 ) * s->regionValSize;
+            for ( int j = 1; j <= s->regionValSize; j++ ) {
                 result &= pcbuff->packDouble( s->lhs->at(eq + j) );
             }
         } else {
@@ -244,14 +241,14 @@ int
 NodalAveragingRecoveryModel :: unpackSharedDofManData(parallelStruct *s, ProcessCommunicator &processComm)
 {
     int result = 1;
-    int i, j, eq, indx, size, flag, intValue;
+    int size, flag, intValue;
     IntArray const *toRecvMap = processComm.giveToRecvMap();
     ProcessCommunicatorBuff *pcbuff = processComm.giveProcessCommunicatorBuff();
     double value;
 
     size = toRecvMap->giveSize();
-    for ( i = 1; i <= size; i++ ) {
-        indx = s->regionNodalNumbers->at( toRecvMap->at(i) );
+    for ( int i = 1; i <= size; i++ ) {
+        int indx = s->regionNodalNumbers->at( toRecvMap->at(i) );
         // toRecvMap contains all shared dofmans with remote partition
         // one has to check, if particular shared node received contribution is available for given region
         result &= pcbuff->unpackInt(flag);
@@ -263,8 +260,8 @@ NodalAveragingRecoveryModel :: unpackSharedDofManData(parallelStruct *s, Process
                 s->regionDofMansConnectivity->at(indx) += intValue;
             }
 
-            eq = ( indx - 1 ) * s->regionValSize;
-            for ( j = 1; j <= s->regionValSize; j++ ) {
+            int eq = ( indx - 1 ) * s->regionValSize;
+            for ( int j = 1; j <= s->regionValSize; j++ ) {
                 result &= pcbuff->unpackDouble(value);
                 if ( indx ) {
                     s->lhs->at(eq + j) += value;
