@@ -48,6 +48,7 @@
 #include "solutionbasedshapefunction.h"
 #include "timestep.h"
 #include "classfactory.h"
+#include "unknownnumberingscheme.h"
 
 #ifdef __FM_MODULE
  #include "tr21stokes.h"
@@ -59,7 +60,6 @@
  #include "structengngmodel.h"
 #endif
 
-#include "unknownnumberingscheme.h"
 
 namespace oofem {
 REGISTER_ExportModule(MatlabExportModule)
@@ -86,6 +86,8 @@ MatlabExportModule :: initializeFrom(InputRecord *ir)
 {
     const char *__proc = "initializeFrom";  // Required by IR_GIVE_FIELD macro
     IRResultType result;                    // Required by IR_GIVE_FIELD macro
+
+    ExportModule::initializeFrom(ir);
 
     exportMesh = ir->hasField(_IFT_MatlabExportModule_mesh);
     exportData = ir->hasField(_IFT_MatlabExportModule_data);
@@ -146,6 +148,10 @@ MatlabExportModule :: computeArea()
 void
 MatlabExportModule :: doOutput(TimeStep *tStep, bool forcedOutput)
 {
+    if (!(testTimeStepOutput(tStep) || forcedOutput)) {
+        return;
+    }
+
     FILE *FID;
     FID = giveOutputStream(tStep);
     Domain *domain  = emodel->giveDomain(1);
@@ -389,7 +395,7 @@ MatlabExportModule :: doOutputReactionForces(TimeStep *tStep,    FILE *FID)
 
     FloatArray reactions;
     IntArray dofManMap, dofMap, eqnMap;
-#if __SM_MODULE
+#ifdef __SM_MODULE
     StructuralEngngModel *strEngMod = dynamic_cast< StructuralEngngModel * >( emodel );
     if ( strEngMod ) {
         strEngMod->buildReactionTable(dofManMap, dofMap, eqnMap, tStep, domainIndex);
@@ -573,42 +579,43 @@ FILE *
 MatlabExportModule :: giveOutputStream(TimeStep *tStep)
 {
     FILE *answer;
-
-    std :: ostringstream baseFileName;
-    std :: string fileName;
+    std::ostringstream baseFileName;
+    std::string fileName;
 
     fileName = this->emodel->giveOutputBaseFileName();
 
     size_t foundDot;
     foundDot = fileName.rfind(".");
     fileName.replace(foundDot, 1, "_");
-    //fileName.erase(foundDot);
 
-    /*  fileName.erase(foundDot);
-     *
-     *  char fext[100];
-     *  sprintf( fext, "_m%d_%d", this->number, tStep->giveNumber() );
-     *  fileName += fext;
-     */
+    char fext[100];
+    if ( this->testSubStepOutput() ) {
+        // include tStep version in output file name
+#ifdef __PARALLEL_MODE
+        if ( this->emodel->isParallel() && this->emodel->giveNumberOfProcesses() > 1 ) {
+            sprintf( fext, "_%03d_m%d_%d_%d", emodel->giveRank(), this->number, tStep->giveNumber(), tStep->giveSubtStepumber() );
+        }
+        else
+#endif
+            sprintf(fext, "_m%d_%d_%d", this->number, tStep->giveNumber(), tStep->giveSubtStepumber());
+    }
+    else {
+#ifdef __PARALLEL_MODE
+        if (this->emodel->isParallel() && this->emodel->giveNumberOfProcesses() > 1) {
+            sprintf(fext, "_%03d_m%d_%d", emodel->giveRank(), this->number, tStep->giveNumber());
+        }
+        else
+#endif
+            sprintf(fext, "_m%d_%d", this->number, tStep->giveNumber());
+    }
+
+    fileName += fext;
 
     functionname = fileName;
+    fileName += ".m";
 
-    std :: cout << baseFileName.str() << std :: endl;
-    std :: cout << functionname << std :: endl;
-
-    size_t foundSlash;
-
-    foundSlash = functionname.find_last_of("/");
-    functionname.erase(0, foundSlash + 1);
-
-#ifdef __PARALLEL_MODE
-    baseFileName << fileName << "_" << emodel->giveRank() << "_V_" << tStep->giveNumber() << "m";
-#else
-    baseFileName << fileName << ".m";
-#endif
-
-    if ( ( answer = fopen(baseFileName.str().c_str(), "w") ) == NULL ) {
-        OOFEM_ERROR2( "MatlabExportModule::giveOutputStream: failed to open file %s", baseFileName.str().c_str() );
+    if ( ( answer = fopen(fileName.c_str(), "w") ) == NULL ) {
+        OOFEM_ERROR2( "MatlabExportModule::giveOutputStream: failed to open file %s", fileName.c_str() );
     }
 
     return answer;
