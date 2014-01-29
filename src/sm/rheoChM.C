@@ -229,7 +229,7 @@ RheoChainMaterial :: giveUnitStiffnessMatrix(FloatMatrix &answer,
      * defined by stressStrain mode in gp, which may be of a type suported
      * at the crosssection level).
      */
-    this->linearElasticMaterial->giveStiffnessMatrix(answer, ElasticStiffness, gp, tStep);
+    this->giveLinearElasticMaterial()->giveStiffnessMatrix(answer, ElasticStiffness, gp, tStep);
 }
 
 void
@@ -243,7 +243,7 @@ RheoChainMaterial :: giveUnitComplianceMatrix(FloatMatrix &answer,
  */
 {
     FloatMatrix tangent;
-    this->linearElasticMaterial->giveStiffnessMatrix(tangent, ElasticStiffness, gp, tStep);
+    this->giveLinearElasticMaterial()->giveStiffnessMatrix(tangent, ElasticStiffness, gp, tStep);
     answer.beInverseOf(tangent);
 }
 
