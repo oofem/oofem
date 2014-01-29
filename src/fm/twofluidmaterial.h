@@ -65,7 +65,7 @@ public:
      * @param n Material number.
      * @param d Domain to which new material will belong.
      */
-    TwoFluidMaterial(int n, Domain * d) : FluidDynamicMaterial(n, d) { }
+    TwoFluidMaterial(int n, Domain *d) : FluidDynamicMaterial(n, d) { }
     /// Destructor.
     virtual ~TwoFluidMaterial() { }
 
@@ -88,5 +88,29 @@ protected:
 };
 
 
+class TwoFluidMaterialStatus : public FluidDynamicMaterialStatus
+{
+protected:
+    GaussPoint *slaveGp0;
+    GaussPoint *slaveGp1;
+
+public:
+    /// Constructor - creates new BinghamFluidMaterial2Status with number n, belonging to domain d and IntegrationPoint g.
+    TwoFluidMaterialStatus(int n, Domain *d, GaussPoint *g, const IntArray &slaveMaterial);
+    /// Destructor
+    virtual ~TwoFluidMaterialStatus() { }
+
+    virtual void printOutputAt(FILE *file, TimeStep *tStep);
+
+    virtual void initTempStatus();
+    virtual void updateYourself(TimeStep *tStep);
+
+    virtual contextIOResultType saveContext(DataStream *stream, ContextMode mode, void *obj = NULL);
+    virtual contextIOResultType restoreContext(DataStream *stream, ContextMode mode, void *obj = NULL);
+    virtual const char *giveClassName() const { return "TwoFluidMaterialStatus"; }
+
+    GaussPoint *giveSlaveGaussPoint0() { return this->slaveGp0; }
+    GaussPoint *giveSlaveGaussPoint1() { return this->slaveGp1; }
+};
 } // end namespace oofem
 #endif // twofluidmaterial_h
