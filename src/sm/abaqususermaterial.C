@@ -53,7 +53,9 @@ int AbaqusUserMaterial :: n = 1;
 AbaqusUserMaterial :: AbaqusUserMaterial(int n, Domain *d) :
 StructuralMaterial(n, d),
 umatobj(NULL), umat(NULL),
-mStressInterpretation(0)
+mStressInterpretation(0),
+mUseNumericalTangent(false),
+mPerturbation(1.0e-7)
 {
 
 }
@@ -115,6 +117,16 @@ IRResultType AbaqusUserMaterial :: initializeFrom(InputRecord *ir)
     }
 
 #endif
+
+    if(ir->hasField(_IFT_AbaqusUserMaterial_numericalTangent)) {
+    	mUseNumericalTangent = true;
+    }
+
+    if(ir->hasField(_IFT_AbaqusUserMaterial_numericalTangentPerturbation)) {
+        IR_GIVE_OPTIONAL_FIELD(ir, mPerturbation, _IFT_AbaqusUserMaterial_numericalTangentPerturbation);
+        printf("mPerturbation: %e\n", mPerturbation);
+    }
+
     return IRRT_OK;
 }
 
@@ -181,7 +193,7 @@ void AbaqusUserMaterial :: give3dMaterialStiffnessMatrix_dPdF(FloatMatrix &answe
     	this->giveFirstPKStressVector_3d(stress, gp, vF, tStep);
     }
 
-#if 0
+    if(!mUseNumericalTangent) {
 //    if(mStressInterpretation == 0) {
     	answer = ms->giveTempTangent();
 /*
@@ -194,35 +206,41 @@ void AbaqusUserMaterial :: give3dMaterialStiffnessMatrix_dPdF(FloatMatrix &answe
 		this->give_dPdF_from(dSdE, answer, gp);
     }
 */
-#else
-    double h = 1e-9;
-    FloatArray vF, vF_h, stress, stressh;
-	vF = ms->giveTempFVector();
-    stress = ( ( StructuralMaterialStatus * ) gp->giveMaterialStatus() )->giveTempPVector();
-    FloatMatrix En( 9, 9 );
-    for ( int i = 1; i <= 9; ++i ) {
-        vF_h = vF;
-        vF_h.at(i) += h;
-        this->giveFirstPKStressVector_3d(stressh, gp, vF_h, tStep);
-        stressh.subtract(stress);
-        stressh.times(1.0 / h);
-        En.setColumn(stressh, i);
     }
-/*
-    printf("En = ");
-    En.printYourself();
+    else {
+		double h = mPerturbation;
+		FloatArray vF, vF_h, stress, stressh;
+		vF = ms->giveTempFVector();
+		stress = ( ( StructuralMaterialStatus * ) gp->giveMaterialStatus() )->giveTempPVector();
+		FloatMatrix En( 9, 9 );
+		for ( int i = 1; i <= 9; ++i ) {
+			vF_h = vF;
+			vF_h.at(i) += h;
+			this->giveFirstPKStressVector_3d(stressh, gp, vF_h, tStep);
+			stressh.subtract(stress);
+			stressh.times(1.0 / h);
+			En.setColumn(stressh, i);
+		}
 
-	answer = ms->giveTempTangent();
-	printf("Tangent = ");
-    answer.printYourself();
+		// Reset
+		this->giveFirstPKStressVector_3d(stressh, gp, vF, tStep);
 
-    FloatMatrix diff = En;
-    diff.subtract(answer);
-    printf("diff: "); diff.printYourself();
-*/
+	/*
+		printf("En = ");
+		En.printYourself();
 
-    answer = En;
-#endif
+		answer = ms->giveTempTangent();
+		printf("Tangent = ");
+		answer.printYourself();
+
+		FloatMatrix diff = En;
+		diff.subtract(answer);
+		printf("diff: "); diff.printYourself();
+	*/
+
+		answer = En;
+    }
+
 }
 
 void AbaqusUserMaterial :: givePlaneStrainStiffMtrx_dPdF(FloatMatrix &answer,
