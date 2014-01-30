@@ -287,7 +287,7 @@ restart:
 
     do {
         nite++;
-        tNow->incrementSubtStepumber();
+        tNow->incrementSubStepNumber();
 
         dXm1 = * dX;
         DeltaLambdam1 = DeltaLambda;

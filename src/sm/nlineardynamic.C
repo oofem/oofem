@@ -242,7 +242,7 @@ double NonLinearDynamic :: giveUnknownComponent(ValueModeType mode, TimeStep *tS
 TimeStep *NonLinearDynamic :: giveNextStep()
 {
     int istep = giveNumberOfFirstStep();
-    int mtStepum = 1;
+    int mStepNum = 1;
     StateCounterType counter = 1;
     double deltaTtmp = deltaT;
     double totalTime = deltaT;
@@ -258,19 +258,19 @@ TimeStep *NonLinearDynamic :: giveNextStep()
         totalTime = currentStep->giveTargetTime() + deltaTtmp;
         istep =  currentStep->giveNumber() + 1;
         counter = currentStep->giveSolutionStateCounter() + 1;
-        mtStepum = currentStep->giveMetatStepumber();
+        mStepNum = currentStep->giveMetaStepNumber();
         td = currentStep->giveTimeDiscretization();
 
-        if ( !this->giveMetaStep(mtStepum)->isStepValid(istep) ) {
-            mtStepum++;
-            if ( mtStepum > nMetaSteps ) {
-                OOFEM_ERROR3("giveNextStep: no next step available, mtStepum=%d > nMetaSteps=%d", mtStepum, nMetaSteps);
+        if ( !this->giveMetaStep(mStepNum)->isStepValid(istep) ) {
+            mStepNum++;
+            if ( mStepNum > nMetaSteps ) {
+                OOFEM_ERROR3("giveNextStep: no next step available, mStepNum=%d > nMetaSteps=%d", mStepNum, nMetaSteps);
             }
         }
     }
 
     previousStep = currentStep;
-    currentStep = new TimeStep(istep, this, mtStepum, totalTime, deltaTtmp, counter, td);
+    currentStep = new TimeStep(istep, this, mStepNum, totalTime, deltaTtmp, counter, td);
 
     return currentStep;
 }
@@ -793,7 +793,7 @@ contextIOResultType NonLinearDynamic :: restoreContext(DataStream *stream, Conte
     contextIOResultType iores;
     FILE *file = NULL;
 
-    this->resolveCorrespondingtStepumber(istep, iversion, obj);
+    this->resolveCorrespondingStepNumber(istep, iversion, obj);
     if ( stream == NULL ) {
         if ( !this->giveContextFile(& file, istep, iversion, contextMode_read) ) {
             THROW_CIOERR(CIO_IOERR);

@@ -162,7 +162,7 @@ void StokesFlow :: solveYourselfAt(TimeStep *tStep)
 #endif
 
     if ( this->giveProblemScale() == macroScale ) {
-        OOFEM_LOG_INFO("StokesFlow :: solveYourselfAt - Solving step %d, metastep %d, (neq = %d)\n", tStep->giveNumber(), tStep->giveMetatStepumber(), neq);
+        OOFEM_LOG_INFO("StokesFlow :: solveYourselfAt - Solving step %d, metastep %d, (neq = %d)\n", tStep->giveNumber(), tStep->giveMetaStepNumber(), neq);
     }
 
     this->giveNumericalMethod( this->giveCurrentMetaStep() );

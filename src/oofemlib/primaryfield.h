@@ -98,7 +98,7 @@ public:
 class OOFEM_EXPORT PrimaryField : public Field
 {
 protected:
-    int actualtStepumber;
+    int actualStepNumber;
     int actualStepIndx;
     int nHistVectors;
     AList< FloatArray >solutionVectors;

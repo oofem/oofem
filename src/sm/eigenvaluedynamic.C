@@ -182,7 +182,7 @@ void EigenValueDynamic :: solveYourselfAt(TimeStep *tStep)
     //
     // set-up numerical model
     //
-    this->giveNumericalMethod( this->giveMetaStep( tStep->giveMetatStepumber() ) );
+    this->giveNumericalMethod( this->giveMetaStep( tStep->giveMetaStepNumber() ) );
 
     //
     // call numerical model to solve arised problem
@@ -307,7 +307,7 @@ contextIOResultType EigenValueDynamic :: restoreContext(DataStream *stream, Cont
 //
 {
     int closeFlag = 0;
-    int activeVector = this->resolveCorrespondingEigentStepumber(obj);
+    int activeVector = this->resolveCorrespondingEigenStepNumber(obj);
     int istep = 1, iversion = 0;
     contextIOResultType iores;
     FILE *file = NULL;
@@ -355,7 +355,7 @@ contextIOResultType EigenValueDynamic :: restoreContext(DataStream *stream, Cont
 }
 
 
-int EigenValueDynamic :: resolveCorrespondingEigentStepumber(void *obj)
+int EigenValueDynamic :: resolveCorrespondingEigenStepNumber(void *obj)
 {
     //
     // returns corresponding eigen step number

@@ -474,7 +474,7 @@ public:
      * This process should typically include restoring old solution, instanciating newly
      * generated domain(s) and by mapping procedure.
      */
-    virtual int initializeAdaptive(int tStepumber) { return 0; }
+    virtual int initializeAdaptive(int tStepNumber) { return 0; }
 
     /**
      * Returns number of equations for given domain in active (current time step) time step.
@@ -651,7 +651,7 @@ public:
      * like error estimators, solvers, etc, having domains as attributes.
      */
     virtual void updateDomainLinks();
-    void resolveCorrespondingtStepumber(int &, int &, void *obj);
+    void resolveCorrespondingStepNumber(int &, int &, void *obj);
     /// Returns current meta step.
     MetaStep *giveCurrentMetaStep();
     /// Returns current time step.
@@ -702,15 +702,15 @@ public:
      * Assigns context file-descriptor for given step number to stream.
      * Returns nonzero on success.
      * @param contextFile Assigned file descriptor.
-     * @param tStepumber Solution step number to store/restore.
+     * @param tStepNumber Solution step number to store/restore.
      * @param stepVersion Version of step.
      * @param cmode Determines the i/o mode of context file.
      * @param errLevel Determines the amount of warning messages if errors are encountered, level 0 no warnings reported.
      */
-    int giveContextFile(FILE **contextFile, int tStepumber, int stepVersion,
+    int giveContextFile(FILE **contextFile, int tStepNumber, int stepVersion,
                         ContextFileMode cmode, int errLevel = 1);
     /** Returns true if context file for given step and version is available */
-    bool testContextFile(int tStepumber, int stepVersion);
+    bool testContextFile(int tStepNumber, int stepVersion);
     /**
      * Creates new DataReader for given domain.
      * Returns nonzero on success.

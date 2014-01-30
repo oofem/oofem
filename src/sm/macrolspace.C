@@ -135,7 +135,7 @@ void MacroLSpace :: computeStiffnessMatrix(FloatMatrix &answer, MatResponseMode 
 
     //call microproblem
     //activeMStep = microMat->problemMicro->giveMetaStep(1);//->setNumberOfSteps(1);
-    //activeMStep->giveMetatStepumber();
+    //activeMStep->giveMetaStepNumber();
     //microEngngModel->timer.startTimer(EngngModelTimer :: EMTT_AnalysisTimer);
     //microproblem must have the same actual time and zero time increment
 

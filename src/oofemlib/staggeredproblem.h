@@ -123,7 +123,7 @@ public:
     virtual int forceEquationNumbering();
     virtual void updateYourself(TimeStep *tStep);
     virtual void initializeYourself(TimeStep *tStep) { }
-    virtual int initializeAdaptive(int tStepumber) { return 0; }
+    virtual int initializeAdaptive(int tStepNumber) { return 0; }
     virtual void terminate(TimeStep *tStep);
     virtual void doStepOutput(TimeStep *tStep);
 

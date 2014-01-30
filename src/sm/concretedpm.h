@@ -221,11 +221,12 @@ public:
      */
     double giveEpsLoc() const { return epsloc; }
 
-    /**History variable of the modified size-dependent adjustment
+    /**
+     * History variable of the modified size-dependent adjustment
      * Assign the temp value of the damage variable of the damage model.
      * @param v New temp value of the damage variable.
      */
-    void letTempEpslocBe(const double v) { tempEpsloc = v; }
+    void letTempEpslocBe(double v) { tempEpsloc = v; }
 
 #endif
 

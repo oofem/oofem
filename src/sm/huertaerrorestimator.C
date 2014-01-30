@@ -428,11 +428,11 @@ HuertaErrorEstimator :: estimateError(EE_ErrorMode mode, TimeStep *tStep)
                         return 1;
                     }
 
-                    int tStepumber, curNumber = tStep->giveNumber();
+                    int tStepNumber, curNumber = tStep->giveNumber();
 
-                    tStepumber = curNumber - skippedSteps;
+                    tStepNumber = curNumber - skippedSteps;
 
-                    OOFEM_LOG_INFO("Returning to step %5d\n", tStepumber);
+                    OOFEM_LOG_INFO("Returning to step %5d\n", tStepNumber);
 
                     skippedSteps = 0;                // prevent recursion when returning
                     maxSkipSteps /= 2;               // prevent oscillation
@@ -441,9 +441,9 @@ HuertaErrorEstimator :: estimateError(EE_ErrorMode mode, TimeStep *tStep)
                     // IMPORTANT: I must restore context only from steps corresponding to this session !!!
                     //            this means I cannot go in previous adaptive run, because there was a different domain
                     // it would be much cleaner to call restore from engng model
-                    while ( tStepumber < curNumber ) {
+                    while ( tStepNumber < curNumber ) {
                         try {
-                            model->restoreContext(NULL, CM_State, ( void * ) & tStepumber);
+                            model->restoreContext(NULL, CM_State, ( void * ) & tStepNumber);
                         } catch ( ContextIOERR &c ) {
                             c.print();
                             exit(1);
@@ -457,7 +457,7 @@ HuertaErrorEstimator :: estimateError(EE_ErrorMode mode, TimeStep *tStep)
                             return 1;
                         }
 
-                        tStepumber += ( skippedSteps = stepsToSkip ) + 1;
+                        tStepNumber += ( skippedSteps = stepsToSkip ) + 1;
                     }
 
                     return 1;
@@ -4108,7 +4108,7 @@ HuertaErrorEstimator :: setupRefinedProblemProlog(const char *problemName, int p
         refinedReader.insertInputRecord(DataReader :: IR_emodelRec, ir);
     } else if ( dynamic_cast< AdaptiveNonLinearStatic * >( problem ) ) {
         InputRecord *ir;
-        nmstep = tStep->giveMetatStepumber();
+        nmstep = tStep->giveMetaStepNumber();
         ir = problem->giveMetaStep(nmstep)->giveAttributesRecord();
 
         IR_GIVE_OPTIONAL_FIELD(ir, stiffMode, _IFT_NonLinearStatic_stiffmode);

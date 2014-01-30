@@ -135,7 +135,7 @@ double IncrementalLinearStatic :: giveDiscreteTime(int iStep)
 TimeStep *IncrementalLinearStatic :: giveNextStep()
 {
     int istep = this->giveNumberOfFirstStep();
-    int mtStepum = 1;
+    int mStepNum = 1;
     double dt = this->giveDiscreteTime(istep);
     StateCounterType counter = 1;
 
@@ -153,7 +153,7 @@ TimeStep *IncrementalLinearStatic :: giveNextStep()
     if ( previousStep == NULL ) {
         previousStep = new TimeStep(giveNumberOfTimeStepWhenIcApply(), this, 0, -dt, dt, 0);
     }
-    currentStep = new TimeStep(istep, this, mtStepum, this->giveDiscreteTime(istep), dt, counter);
+    currentStep = new TimeStep(istep, this, mStepNum, this->giveDiscreteTime(istep), dt, counter);
     return currentStep;
 }
 
@@ -375,7 +375,7 @@ contextIOResultType IncrementalLinearStatic :: restoreContext(DataStream *stream
     int closeFlag = 0, istep, iversion;
     contextIOResultType iores;
     FILE *file = NULL;
-    this->resolveCorrespondingtStepumber(istep, iversion, obj);
+    this->resolveCorrespondingStepNumber(istep, iversion, obj);
     if ( stream == NULL ) {
         if ( !this->giveContextFile(& file, istep, iversion, contextMode_read) ) {
             THROW_CIOERR(CIO_IOERR);

@@ -305,7 +305,7 @@ NRSolver :: solve(SparseMtrx *k, FloatArray *R, FloatArray *R0,
         X->add(ddX);
         dX->add(ddX);
         tNow->incrementStateCounter(); // update solution state counter
-        tNow->incrementSubtStepumber();
+        tNow->incrementSubStepNumber();
         nite++; // iteration increment
 
         engngModel->giveExportModuleManager()->doOutput(tNow, true);

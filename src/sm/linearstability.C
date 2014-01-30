@@ -178,7 +178,7 @@ void LinearStability :: solveYourselfAt(TimeStep *tStep)
     //
     // creates system of governing eq's and solves them at given time step
     //
-    this->giveNumericalMethod( this->giveMetaStep( tStep->giveMetatStepumber() ) );
+    this->giveNumericalMethod( this->giveMetaStep( tStep->giveMetaStepNumber() ) );
     this->giveNumericalMethodForLinStaticProblem(tStep);
 
     // first assemble problem at current time step
@@ -465,7 +465,7 @@ contextIOResultType LinearStability :: restoreContext(DataStream *stream, Contex
     contextIOResultType iores;
     FILE *file = NULL;
 
-    this->resolveCorrespondingtStepumber(activeVector, version, obj);
+    this->resolveCorrespondingStepNumber(activeVector, version, obj);
     if ( eigVal.isEmpty() ) { // not restored before
         if ( stream == NULL ) {
             if ( !this->giveContextFile(& file, istep, iversion, contextMode_read) ) {

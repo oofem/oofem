@@ -69,7 +69,7 @@ public:
      * This process should typically include restoring old solution, instanciating newly
      * generated domain(s) and by mapping procedure.
      */
-    virtual int initializeAdaptive(int tStepumber);
+    virtual int initializeAdaptive(int tStepNumber);
     virtual void terminate(TimeStep *tStep);
 
     virtual contextIOResultType restoreContext(DataStream *stream, ContextMode mode, void *obj = NULL);
