@@ -36,8 +36,10 @@
 #define parallelcontext_h
 
 #include "oofemcfg.h"
-#include "parallelordering.h"
 #include "equationid.h"
+#ifdef __PARALLEL_MODE
+#include "parallelordering.h"
+#endif
 
 namespace oofem {
 class EngngModel;
@@ -55,8 +57,10 @@ class OOFEM_EXPORT ParallelContext
 protected:
     int di;
     EngngModel *emodel;
+#ifdef __PARALLEL_MODE
     Natural2GlobalOrdering n2g;
     Natural2LocalOrdering n2l;
+#endif
 
 public:
     /**
