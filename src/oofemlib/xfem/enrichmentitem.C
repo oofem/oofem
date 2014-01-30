@@ -51,6 +51,7 @@
 #include "dynamicdatareader.h"
 #include "structuralinterfacematerialstatus.h"
 #include "XFEMDebugTools.h"
+#include "export/gnuplotexportmodule.h"
 #include <algorithm>
 #include <limits>
 #include <sstream>
@@ -1080,6 +1081,10 @@ void EnrichmentItem :: giveSubPolygon(std :: vector< FloatArray > &oPoints, cons
     mpEnrichmentDomain->giveSubPolygon(oPoints, iXiStart, iXiEnd);
 }
 
+void EnrichmentItem :: callGnuplotExportModule(GnuplotExportModule &iExpMod)
+{
+	iExpMod.outputXFEM(*this);
+}
 
 Inclusion :: Inclusion(int n, XfemManager *xm, Domain *aDomain) :
     EnrichmentItem(n, xm, aDomain),
@@ -1299,67 +1304,9 @@ void Crack::AppendCohesiveZoneGaussPoint(GaussPoint *ipGP)
 	}
 }
 
-void Crack::WriteCohesiveZoneOutput()
+void Crack :: callGnuplotExportModule(GnuplotExportModule &iExpMod)
 {
-	size_t numPoints = mCohesiveZoneGaussPoints.size();
-
-	std::vector<double> arcLengthPositions, normalJumps, tangJumps;
-
-	for(size_t i = 0; i < numPoints; i++) {
-		GaussPoint *gp = mCohesiveZoneGaussPoints[i];
-
-		StructuralInterfaceMaterialStatus *matStat = dynamic_cast<StructuralInterfaceMaterialStatus*> ( gp->giveMaterialStatus() );
-		if(matStat != NULL) {
-
-			// Compute arc length position of the Gauss point
-			const FloatArray &coord = *(gp->giveCoordinates());
-			double tangDist = 0.0, arcPos = 0.0;
-			mpEnrichmentDomain->computeTangentialSignDist(tangDist, coord, arcPos);
-			arcLengthPositions.push_back(arcPos);
-
-			// Compute displacement jump in normal and tangential direction
-			// Local numbering: (tang_z, tang, normal)
-			const FloatArray &jumpLoc 		= matStat->giveJump();
-
-			double normalJump = jumpLoc.at(3);
-			normalJumps.push_back(normalJump);
-
-
-			tangJumps.push_back( jumpLoc.at(2) );
-		}
-	}
-
-
-
-    XfemManager *xMan = giveDomain()->giveXfemManager();
-    if ( xMan != NULL ) {
-        if ( xMan->giveVtkDebug() ) {
-            double time = 0.0;
-
-            EngngModel *em = giveDomain()->giveEngngModel();
-            if ( em != NULL ) {
-            	TimeStep *ts = em->giveCurrentStep();
-            	if ( ts != NULL ) {
-            		time = ts->giveTargetTime();
-            	}
-            }
-
-            int eiIndex = giveNumber();
-
-            std :: stringstream strNormalJump;
-            strNormalJump << "NormalJumpEI" << eiIndex << "Time" << time << ".dat";
-            std :: string nameNormalJump = strNormalJump.str();
-            XFEMDebugTools::WriteArrayToGnuplot(nameNormalJump, arcLengthPositions, normalJumps);
-
-            std :: stringstream strTangJump;
-            strTangJump << "TangJumpEI" << eiIndex << "Time" << time << ".dat";
-            std :: string nameTangJump = strTangJump.str();
-            XFEMDebugTools::WriteArrayToGnuplot(nameTangJump, arcLengthPositions, tangJumps);
-        }
-    }
-
-
-
+	iExpMod.outputXFEM(*this);
 }
 
 REGISTER_EnrichmentFront(EnrFrontDoNothing)

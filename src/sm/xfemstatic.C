@@ -148,19 +148,6 @@ XFEMStatic :: terminate(TimeStep *tStep)
     this->updateLoadVectors(tStep);
     this->saveStepContext(tStep);
 
-    // Write XFEM output
-    XfemManager *xMan = this->giveDomain(1)->giveXfemManager();
-    if(	xMan->giveVtkDebug() ) {
-		int numEI = xMan->giveNumberOfEnrichmentItems();
-		for(int i = 1; i <= numEI; i++) {
-			Crack *crack = dynamic_cast<Crack*>( xMan->giveEnrichmentItem(i) );
-
-			if(crack != NULL) {
-				crack->WriteCohesiveZoneOutput();
-			}
-		}
-    }
-
     // Propagate fronts
     int numDom = this->giveNumberOfDomains();
     for ( int i = 1; i <= numDom; i++ ) {

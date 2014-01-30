@@ -91,6 +91,7 @@ class LinElBranchFunction;
 class PropagationLaw;
 class DynamicDataReader;
 class Triangle;
+class GnuplotExportModule;
 /**
  * Abstract class representing entity, which is included in the FE model using one (or more)
  * global functions. Such entity may represent crack, material interface, etc.
@@ -203,6 +204,10 @@ public:
     bool hasPropagationLaw() { return this->mPropLawIndex != 0; };
 
     void giveSubPolygon(std :: vector< FloatArray > &oPoints, const double &iXiStart, const double &iXiEnd) const;
+
+    virtual void callGnuplotExportModule(GnuplotExportModule &iExpMod);
+
+    const EnrichmentDomain *giveEnrichmentDomain() const {return mpEnrichmentDomain;}
 
 protected:
 
@@ -320,7 +325,10 @@ public:
 
     void AppendCohesiveZoneGaussPoint(GaussPoint *ipGP);
 
-    void WriteCohesiveZoneOutput();
+    virtual void callGnuplotExportModule(GnuplotExportModule &iExpMod);
+
+    const std::vector<GaussPoint*> &giveCohesiveZoneGaussPoints() const {return mCohesiveZoneGaussPoints;}
+    const std::vector<double> &giveCohesiveZoneArcPositions() const {return mCohesiveZoneArcPositions;}
 
 protected:
     /**

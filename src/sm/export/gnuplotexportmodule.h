@@ -45,6 +45,8 @@
 //@}
 
 namespace oofem {
+class EnrichmentItem;
+class Crack;
 /**
  * (Under development) The Gnuplot export module enables OOFEM to export some
  * data in a format that can be directly plotted with Gnuplot.
@@ -66,6 +68,12 @@ public:
     virtual const char *giveClassName() const { return "GnuplotExportModule"; };
     virtual const char *giveInputRecordName() const { return _IFT_GnuplotExportModule_Name; }
 
+    /**
+     * XFEM output
+     */
+    void outputXFEM(EnrichmentItem &iEI);
+    void outputXFEM(Crack &iCrack);
+
 protected:
 	bool mExportReactionForces;
 
@@ -74,6 +82,8 @@ protected:
      */
     std::vector< std::vector<FloatArray> > mReactionForceHistory;
     std::vector< std::vector<double> > mDispHist;
+
+    void outputReactionForces(TimeStep *tStep);
 
 };
 } // end namespace oofem
