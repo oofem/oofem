@@ -48,14 +48,14 @@
 #include <cstring>
 #include <ostream>
 
-#define ALLOC(size) ( double * ) malloc( size * sizeof( double ) );
+#define ALLOC(size) new double[size];
 
 #define RESIZE(nr, nc) \
     { \
         this->nRows = nr; this->nColumns = nc; \
         if ( nr * nc > allocatedSize ) { \
             allocatedSize = nr * nc; \
-            if ( this->values ) { free(this->values); } \
+            if ( this->values ) { delete[] this->values; } \
             this->values = ALLOC(allocatedSize); \
         } \
     }
@@ -188,7 +188,7 @@ FloatMatrix :: FloatMatrix(std :: initializer_list< std :: initializer_list< dou
 
 FloatMatrix &FloatMatrix :: operator=(std :: initializer_list< std :: initializer_list< double > >mat)
 {
-    RESIZE( mat.begin()->size(), mat.size() );
+    RESIZE( (int)mat.begin()->size(), (int)mat.size() );
     double *p = this->values;
     for ( auto col : mat ) {
         for ( auto x : col ) {
@@ -211,7 +211,7 @@ FloatMatrix &FloatMatrix :: operator=(std :: initializer_list< std :: initialize
 FloatMatrix :: ~FloatMatrix()
 {
     if ( values ) {
-        free(values);
+        delete[] this->values;
     }
 }
 
@@ -1409,7 +1409,7 @@ void FloatMatrix :: resize(int rows, int columns)
     if ( rows * columns > allocatedSize ) {
         // memory realocation necessary
         if ( values ) {
-            free(values);
+            delete[] this->values;
         }
 
         allocatedSize = rows * columns;
@@ -1434,7 +1434,7 @@ void FloatMatrix :: resizeWithData(int rows, int columns)
     if ( rows * columns > allocatedSize ) {
         // memory realocation necessary
         if ( values ) {
-            free(values);
+            delete[] this->values;
         }
 
         allocatedSize = rows * columns; // REMEMBER NEW ALLOCATED SIZE
@@ -1463,7 +1463,7 @@ void FloatMatrix :: hardResize(int rows, int columns)
 {
     // memory realocation necessary
     if ( values ) {
-        free(values);
+        delete[] this->values;
     }
 
     allocatedSize = rows * columns; // REMEMBER NEW ALLOCATED SIZE
@@ -1886,7 +1886,7 @@ contextIOResultType FloatMatrix :: restoreYourself(DataStream *stream, ContextMo
     }
 
     if ( values != NULL ) {
-        free(values);
+        delete[] this->values;
     }
 
     if ( nRows * nColumns ) {

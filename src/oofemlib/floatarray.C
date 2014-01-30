@@ -49,19 +49,22 @@
 #include <cstdlib>
 #include <cstring>
 #include <ostream>
+#if __cplusplus > 199711L
+#include <memory>
+#endif
 
 #ifdef __PARALLEL_MODE
  #include "combuff.h"
 #endif
 
-#define ALLOC(size) ( double * ) malloc( sizeof( double ) * ( size ) );
+#define ALLOC(size) new double[size];
 
 #define RESIZE(n) \
     { \
         size = n; \
         if ( n > allocatedSize ) { \
             allocatedSize = n; \
-            if ( values ) { free(values); } \
+            if ( values ) { delete[] values; } \
             values = ALLOC(size); \
         } \
     }
@@ -118,14 +121,10 @@ FloatArray :: FloatArray(const FloatArray &src) :
 #if __cplusplus > 199711L
 FloatArray :: FloatArray(std :: initializer_list< double >list)
 {
-    this->size = this->allocatedSize = list.size();
+    this->size = this->allocatedSize = (int)list.size();
     if ( this->size ) {
         this->values = ALLOC(this->size);
-        double *p = this->values;
-        for ( double x : list ) {
-            * p = x;
-            p++;
-        }
+        std :: uninitialized_copy(list.begin(), list.end(), this->values);
     } else {
         this->values = NULL;
     }
@@ -134,12 +133,8 @@ FloatArray :: FloatArray(std :: initializer_list< double >list)
 
 FloatArray &FloatArray :: operator=(std :: initializer_list< double >list)
 {
-    RESIZE( list.size() );
-    double *p = this->values;
-    for ( double x : list ) {
-        * p = x;
-        p++;
-    }
+    RESIZE( (int)list.size() );
+    std :: uninitialized_copy(list.begin(), list.end(), this->values);
     return * this;
 }
 
@@ -147,9 +142,9 @@ FloatArray &FloatArray :: operator=(std :: initializer_list< double >list)
 
 FloatArray :: ~FloatArray()
 {
-    // Note! It is actually OK to free(NULL) !
+    // Note! It is actually OK to delete NULL !
     if ( values ) {
-        free(values);
+        delete[] values;
     }
 }
 
@@ -456,7 +451,8 @@ void FloatArray :: beVectorProductOf(const FloatArray &v1, const FloatArray &v2)
     this->at(3) = v1.at(1) * v2.at(2) - v1.at(2) * v2.at(1);
 }
 
-int FloatArray :: giveIndexMinElem(void) {
+int FloatArray :: giveIndexMinElem()
+{
     int index = 1;
     if ( !this->size ) {
         return -1;
@@ -471,7 +467,8 @@ int FloatArray :: giveIndexMinElem(void) {
     return index;
 }
 
-int FloatArray :: giveIndexMaxElem(void) {
+int FloatArray :: giveIndexMaxElem()
+{
     int index = 1;
     if ( !this->size ) {
         return -1;
@@ -700,7 +697,6 @@ void FloatArray :: resizeWithValues(int n, int allocChunk)
     }
     allocatedSize = n + allocChunk;
 
-    // For the typical small sizes we have, realloc doesn't seem to be worth it, better with just malloc.
     double *newValues = ALLOC(allocatedSize);
 #ifdef DEBUG
     if ( !newValues ) {
@@ -711,7 +707,7 @@ void FloatArray :: resizeWithValues(int n, int allocChunk)
     memset( & newValues [ size ], 0, ( allocatedSize - size ) * sizeof( double ) );
 
     if ( values ) {
-        free(values);
+        delete[] values;
     }
     values = newValues;
     size = n;
@@ -741,7 +737,7 @@ void FloatArray :: resize(int n)
     allocatedSize = n;
 
     if ( values ) {
-        free(values);
+        delete[] values;
     }
     values = ALLOC(allocatedSize);
     memset(this->values, 0, allocatedSize);
@@ -767,7 +763,7 @@ void FloatArray :: hardResize(int n)
     memset( & newValues [ size ], 0, ( allocatedSize - size ) * sizeof( double ) );
 
     if ( values ) {
-        free(values);
+        delete[] values;
     }
     values = newValues;
     size = n;
@@ -1008,7 +1004,7 @@ contextIOResultType FloatArray :: restoreYourself(DataStream *stream, ContextMod
 
     if ( size > allocatedSize ) {
         if ( values ) {
-            free(values);
+            delete[] values;
         }
 
         values = ALLOC(size);
