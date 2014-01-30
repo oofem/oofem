@@ -36,6 +36,8 @@
 #define quad1mindlinshell3d_h
 
 #include "nlstructuralelement.h"
+#include "zznodalrecoverymodel.h"
+#include "sprnodalrecoverymodel.h"
 
 ///@name Input fields for Quad1MindlinShell3D element
 //@{
@@ -64,7 +66,9 @@ class FEI2dQuadLin;
  *
  * @author Mikael Öhman
  */
-class Quad1MindlinShell3D : public NLStructuralElement
+ class Quad1MindlinShell3D : public NLStructuralElement,
+  public ZZNodalRecoveryModelInterface,
+  public SPRNodalRecoveryModelInterface
 {
 protected:
     /// Cached nodal coordinates in local c.s.,
@@ -125,6 +129,17 @@ public:
 
     virtual void computeLCS();
     virtual bool computeGtoLRotationMatrix(FloatMatrix &answer);
+
+    virtual Interface *giveInterface(InterfaceType it);
+
+    virtual void SPRNodalRecoveryMI_giveSPRAssemblyPoints(IntArray &pap);
+    virtual void SPRNodalRecoveryMI_giveDofMansDeterminedByPatch(IntArray &answer, int pap);
+    virtual int SPRNodalRecoveryMI_giveNumberOfIP() { return this->numberOfGaussPoints; }
+    virtual SPRPatchType SPRNodalRecoveryMI_givePatchType() { return SPRPatchType_2dxy; }
+    virtual Element *ZZNodalRecoveryMI_giveElement() { return this; }
+
+  
+
 
 protected:
     virtual void computeGaussPoints();
