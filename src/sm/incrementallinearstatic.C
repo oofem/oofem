@@ -212,11 +212,11 @@ void IncrementalLinearStatic :: solveYourselfAt(TimeStep *tStep)
     }
 
 
-#ifdef VERBOSE
-    OOFEM_LOG_RELEVANT( "Solving [step number %8d, time %15e]\n", tStep->giveNumber(), tStep->giveTargetTime() );
-#endif
-
     int neq = this->giveNumberOfDomainEquations( 1, EModelDefaultEquationNumbering() );
+
+#ifdef VERBOSE
+    OOFEM_LOG_RELEVANT( "Solving [step number %8d, time %15e, equations %d]\n", tStep->giveNumber(), tStep->giveTargetTime(), neq );
+#endif
 
     if ( neq == 0 ) { // Allows for fully prescribed/empty problems.
         return;
