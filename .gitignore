@@ -24,6 +24,7 @@ targets/
 
 
 __pycache__
+*.pyc
 *.swp
 .*.kate-swp
 *.backup

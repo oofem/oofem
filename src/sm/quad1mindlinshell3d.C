@@ -58,7 +58,8 @@ IntArray Quad1MindlinShell3D :: drillOrdering(4);
 bool Quad1MindlinShell3D :: __initialized = Quad1MindlinShell3D :: initOrdering();
 
 Quad1MindlinShell3D :: Quad1MindlinShell3D(int n, Domain *aDomain) :
-    NLStructuralElement(n, aDomain)
+  NLStructuralElement(n, aDomain), ZZNodalRecoveryModelInterface(),
+  SPRNodalRecoveryModelInterface()
 {
     numberOfGaussPoints = 4;
     this->numberOfDofMans = 4;
@@ -576,4 +577,47 @@ Quad1MindlinShell3D :: computeGtoLRotationMatrix(FloatMatrix &answer)
 
     return true;
 }
+
+Interface *
+Quad1MindlinShell3D :: giveInterface(InterfaceType interface)
+{
+    if ( interface == ZZNodalRecoveryModelInterfaceType ) {
+        return static_cast< ZZNodalRecoveryModelInterface * >( this );
+    } else if ( interface == SPRNodalRecoveryModelInterfaceType ) {
+        return static_cast< SPRNodalRecoveryModelInterface * >( this );
+    } 
+
+    return NULL;
+}
+
+
+
+void
+Quad1MindlinShell3D :: SPRNodalRecoveryMI_giveSPRAssemblyPoints(IntArray &pap)
+{
+    pap.resize(4);
+    for ( int i = 1; i < 5; i++ ) {
+        pap.at(i) = this->giveNode(i)->giveNumber();
+    }
+}
+
+void
+Quad1MindlinShell3D :: SPRNodalRecoveryMI_giveDofMansDeterminedByPatch(IntArray &answer, int pap)
+{
+    int found = 0;
+    answer.resize(1);
+
+    for ( int i = 1; i < 5; i++ ) {
+        if ( pap == this->giveNode(i)->giveNumber() ) {
+            found = 1;
+        }
+    }
+
+    if ( found ) {
+        answer.at(1) = pap;
+    } else {
+        _error("SPRNodalRecoveryMI_giveDofMansDeterminedByPatch: node unknown");
+    }
+}
+
 } // end namespace oofem
