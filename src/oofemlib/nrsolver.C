@@ -85,6 +85,7 @@ NRSolver :: NRSolver(Domain *d, EngngModel *m) :
     linesearchSolver = NULL;
     lsFlag = 0; // no line-search
     smConstraintVersion = 0;
+    mCalcStiffBeforeRes = true;
 #ifdef __PETSC_MODULE
     prescribedEgsIS_defined = false;
 #endif
@@ -185,6 +186,12 @@ NRSolver :: initializeFrom(InputRecord *ir)
         this->giveLineSearchSolver()->initializeFrom(ir);
     }
 
+    int calcStiffBeforeResFlag = 1;
+    IR_GIVE_OPTIONAL_FIELD(ir, calcStiffBeforeResFlag, _IFT_NRSolver_calcstiffbeforeres);
+    if(calcStiffBeforeResFlag == 0) {
+    	mCalcStiffBeforeRes = false;
+    }
+
     return IRRT_OK;
 }
 
@@ -245,6 +252,9 @@ NRSolver :: solve(SparseMtrx *k, FloatArray *R, FloatArray *R0,
     // Fetch the matrix before evaluating internal forces.
     // This is intentional, since its a simple way to drastically increase convergence for nonlinear problems.
     // (This old tangent is just used)
+    // This improves convergence for many nonlinear problems, but not all. It may actually
+    // cause divergence for some nonlinear problems. Therefore a flag is used to determine if
+    // the stiffness should be evaluated before the residual (default yes). /ES
 
     engngModel->updateComponent(tNow, NonLinearLhs, domain);
     if ( this->prescribedDofsFlag ) {
@@ -278,7 +288,7 @@ NRSolver :: solve(SparseMtrx *k, FloatArray *R, FloatArray *R0,
             break;
         }
 
-        if ( nite > 0 ) {
+        if ( nite > 0 || !mCalcStiffBeforeRes ) {
             if ( ( NR_Mode == nrsolverFullNRM ) || ( ( NR_Mode == nrsolverAccelNRM ) && ( nite % MANRMSteps == 0 ) ) ) {
                 engngModel->updateComponent(tNow, NonLinearLhs, domain);
                 applyConstraintsToStiffness(k);

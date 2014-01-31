@@ -408,7 +408,6 @@ bool XfemElementInterface :: XfemElementInterface_updateIntegrationRule()
 
         int numEI = xMan->giveNumberOfEnrichmentItems();
         for ( int eiIndex = 1; eiIndex <= numEI; eiIndex++ ) {
-            EnrichmentItem *ei = xMan->giveEnrichmentItem(eiIndex);
 
             if ( firstIntersection ) {
                 // Get the points describing each subdivision of the element
@@ -427,9 +426,14 @@ bool XfemElementInterface :: XfemElementInterface_updateIntegrationRule()
 
 
                     if ( mpCZMat != NULL ) {
+                        Crack *crack = dynamic_cast<Crack*>( xMan->giveEnrichmentItem(eiIndex) );
+                        if(crack == NULL) {
+                        	OOFEM_ERROR("Error in XfemElementInterface :: XfemElementInterface_updateIntegrationRule(): Cohesive zones are only available for cracks.\n")
+                        }
+
                         // We have xi_s and xi_e. Fetch sub polygon.
                         std :: vector< FloatArray >crackPolygon;
-                        ei->giveSubPolygon(crackPolygon, startXi, endXi);
+                        crack->giveSubPolygon(crackPolygon, startXi, endXi);
 
                         /*
                          *                                              printf("crackPolygon: \n");
@@ -474,6 +478,11 @@ bool XfemElementInterface :: XfemElementInterface_updateIntegrationRule()
                                 }
 
                                 ms->letNormalBe(crackNormal);
+
+                                // Give Gauss point reference to the enrichment item
+                                // to simplify post processing.
+                                crack->AppendCohesiveZoneGaussPoint(&gp);
+
                             }
 
                             delete coords [ 0 ];
@@ -507,9 +516,14 @@ bool XfemElementInterface :: XfemElementInterface_updateIntegrationRule()
                         // Add cohesive zone Gauss points
 
                         if ( mpCZMat != NULL ) {
+                            Crack *crack = dynamic_cast<Crack*>( xMan->giveEnrichmentItem(eiIndex) );
+                            if(crack == NULL) {
+                            	OOFEM_ERROR("Error in XfemElementInterface :: XfemElementInterface_updateIntegrationRule(): Cohesive zones are only available for cracks.\n")
+                            }
+
                             // We have xi_s and xi_e. Fetch sub polygon.
                             std :: vector< FloatArray >crackPolygon;
-                            ei->giveSubPolygon(crackPolygon, startXi, endXi);
+                            crack->giveSubPolygon(crackPolygon, startXi, endXi);
 
                             size_t numSeg = crackPolygon.size() - 1;
 
@@ -546,6 +560,10 @@ bool XfemElementInterface :: XfemElementInterface_updateIntegrationRule()
                                     }
 
                                     ms->letNormalBe(crackNormal);
+
+                                    // Give Gauss point reference to the enrichment item
+                                    // to simplify post processing.
+                                    crack->AppendCohesiveZoneGaussPoint(&gp);
                                 }
 
                                 delete coords [ 0 ];

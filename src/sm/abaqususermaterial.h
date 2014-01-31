@@ -47,6 +47,8 @@
 #define _IFT_AbaqusUserMaterial_properties "properties"
 #define _IFT_AbaqusUserMaterial_userMaterial "umat"
 #define _IFT_AbaqusUserMaterial_name "name"
+#define _IFT_AbaqusUserMaterial_numericalTangent "numericaltangent"
+#define _IFT_AbaqusUserMaterial_numericalTangentPerturbation "perturbation"
 //@}
 
 namespace oofem {
@@ -102,6 +104,16 @@ private:
      * 0 implies that the P and dPdF are returned from the umat routine.
      */
     int mStressInterpretation;
+
+    /**
+     * Flag to determine if numerical tangent should be used.
+     */
+    bool mUseNumericalTangent;
+
+    /**
+     * Size of perturbation if numerical tangent is used.
+     */
+    double mPerturbation;
 
     /// Name of the file that contains the umat function
     std :: string filename;

@@ -76,6 +76,8 @@ void IntMatBilinearCZStatus :: updateYourself(TimeStep *tStep)
     mTractionOld    = mTractionNew;
     mJumpOld                = mJumpNew;
     mDamageOld              = mDamageNew;
+
+    jump = mJumpNew;
 }
 
 
