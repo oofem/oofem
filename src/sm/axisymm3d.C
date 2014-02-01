@@ -382,7 +382,7 @@ Axisymm3d :: NodalAveragingRecoveryMI_computeNodalValue(FloatArray &answer, int 
     GaussPoint *gp;
 
     if ( numberOfGaussPoints != 1 ) {
-        answer.resize(0); // for more gp's need to be refined
+        answer.clear(); // for more gp's need to be refined
         return;
     }
 
@@ -394,7 +394,7 @@ void
 Axisymm3d :: NodalAveragingRecoveryMI_computeSideValue(FloatArray &answer, int side,
                                                        InternalStateType type, TimeStep *tStep)
 {
-    answer.resize(0);
+    answer.clear();
 }
 
 

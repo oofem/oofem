@@ -377,7 +377,7 @@ restart:
             //
             // update solution vectors
             //
-            ddX.resize(0);
+            ddX.clear();
             ddX.add(eta * deltaLambda, deltaXt);
             ddX.add(eta, deltaX_);
             * dX = dXm1;
@@ -835,10 +835,10 @@ CylindricalALM :: initializeFrom(InputRecord *ir)
     hpcMode = 0;
     IR_GIVE_OPTIONAL_FIELD(ir, hpcMode, _IFT_CylindricalALM_hpcmode);
 
-    calm_HPCDmanDofSrcArray.resize(0);
+    calm_HPCDmanDofSrcArray.clear();
     IR_GIVE_OPTIONAL_FIELD(ir, calm_HPCDmanDofSrcArray, _IFT_CylindricalALM_hpc);
 
-    calm_HPCDmanWeightSrcArray.resize(0);
+    calm_HPCDmanWeightSrcArray.clear();
     IR_GIVE_OPTIONAL_FIELD(ir, calm_HPCDmanWeightSrcArray, _IFT_CylindricalALM_hpcw);
     // in calm_HPCIndirectDofMask are stored pairs with following meaning:
     // inode idof
@@ -1406,7 +1406,7 @@ CylindricalALM :: do_lineSearch(FloatArray &r, const FloatArray &rInitial, const
         // update displacements
         drProduct = 0.0; // dotproduct of iterative displacement increment vector
 
-        ddX.resize(0);
+        ddX.clear();
         ddX.add(eta.at(ils) * deltaLambda, deltaXt);
         ddX.add(eta.at(ils), deltaX_);
         dX = dXm1;
@@ -1495,7 +1495,7 @@ CylindricalALM :: do_lineSearch(FloatArray &r, const FloatArray &rInitial, const
         deltaLambda = deltaLambdaForEta1;
         drProduct = 0.0; // dotproduct of iterative displacement increment vector
 
-        ddX.resize(0);
+        ddX.clear();
         ddX.add(deltaLambda, deltaXt);
         ddX.add(deltaX_);
         dX = dXm1;

@@ -51,7 +51,7 @@ void FEI2dLineQuad :: evalN(FloatArray &answer, const FloatArray &lcoords, const
 double FEI2dLineQuad :: evaldNdx(FloatMatrix &answer, const FloatArray &lcoords, const FEICellGeometry &cellgeo)
 {
     // Not meaningful to return anything.
-    answer.resize(0, 0);
+    answer.clear();
     return 0.;
 }
 

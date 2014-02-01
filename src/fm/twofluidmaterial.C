@@ -132,7 +132,7 @@ TwoFluidMaterial :: computeDeviatoricStressVector(FloatArray &answer, GaussPoint
     this->giveMaterial(0)->computeDeviatoricStressVector(v0, status->giveSlaveGaussPoint0(), eps, tStep);
     this->giveMaterial(1)->computeDeviatoricStressVector(v1, status->giveSlaveGaussPoint1(), eps, tStep);
 
-    answer.resize(0);
+    answer.clear();
     answer.add(1.0 - vof, v0);
     answer.add(vof, v1);
 
@@ -151,7 +151,7 @@ TwoFluidMaterial :: giveDeviatoricStiffnessMatrix(FloatMatrix &answer, MatRespon
     this->giveMaterial(0)->giveDeviatoricStiffnessMatrix(a0, mode, status->giveSlaveGaussPoint0(), tStep);
     this->giveMaterial(1)->giveDeviatoricStiffnessMatrix(a1, mode, status->giveSlaveGaussPoint1(), tStep);
 
-    answer.beEmptyMtrx();
+    answer.clear();
     answer.add(1.0 - vof, a0);
     answer.add(vof, a1);
 }

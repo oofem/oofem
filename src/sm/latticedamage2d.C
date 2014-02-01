@@ -257,7 +257,7 @@ LatticeDamage2d :: computeStressIndependentStrainVector(FloatArray &answer,
     }
 
     if ( et.giveSize() == 0 ) {
-        answer.resize(0);
+        answer.clear();
         return;
     }
 

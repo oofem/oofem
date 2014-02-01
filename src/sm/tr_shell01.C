@@ -271,7 +271,7 @@ void
 TR_SHELL01 :: NodalAveragingRecoveryMI_computeSideValue(FloatArray &answer, int side,
                                                         InternalStateType type, TimeStep *tStep)
 {
-    answer.resize(0);
+    answer.clear();
 }
 
 

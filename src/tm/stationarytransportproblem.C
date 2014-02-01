@@ -89,7 +89,7 @@ StationaryTransportProblem :: initializeFrom(InputRecord *ir)
 
     // read field export flag
     IntArray exportFields;
-    exportFields.resize(0);
+    exportFields.clear();
     IR_GIVE_OPTIONAL_FIELD(ir, exportFields, _IFT_StationaryTransportProblem_exportfields);
     if ( exportFields.giveSize() ) {
         IntArray mask(1);

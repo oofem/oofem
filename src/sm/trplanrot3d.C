@@ -264,7 +264,7 @@ TrPlaneStrRot3d :: giveIPValue(FloatArray &answer, GaussPoint *gp, InternalState
 
         return 1;
     } else {
-        answer.resize(0);
+        answer.clear();
         return 0;
     }
 }
@@ -319,7 +319,7 @@ TrPlaneStrRot3d :: computeBodyLoadVectorAt(FloatArray &answer, Load *forLoad, Ti
             answer.rotatedWith(T, 'n');
         }
     } else {
-        answer.resize(0);          // nil resultant
+        answer.clear();          // nil resultant
     }
 }
 

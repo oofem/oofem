@@ -198,7 +198,7 @@ public:
     OctreeSpatialLocalizer(Domain *d) : SpatialLocalizer(d), octreeMask(3) {
         rootCell = NULL;
         elementIPListsInitialized = false;
-        elementListsInitialized.resize(0);
+        elementListsInitialized.clear();
     }
     /// Destructor - deletes the octree tree
     virtual ~OctreeSpatialLocalizer() { if ( rootCell ) { delete rootCell; } }

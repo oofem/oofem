@@ -244,7 +244,7 @@ TrabBoneNL3D :: giveLocalNonlocalStiffnessContribution(GaussPoint *gp, IntArray 
 
         return 1;
     } else {
-        loc.resize(0);
+        loc.clear();
         return 0;
     }
 }

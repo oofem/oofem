@@ -74,7 +74,7 @@ StructuralInterfaceElement :: computeStiffnessMatrix(FloatMatrix &answer, MatRes
     FloatMatrix N, D, DN;
     bool matStiffSymmFlag = this->giveCrossSection()->isCharacteristicMtrxSymmetric(rMode);
 
-    answer.resize(0, 0);
+    answer.clear();
 
     if ( !this->isActivated(tStep) ) {
         return;
@@ -164,7 +164,7 @@ StructuralInterfaceElement :: giveInternalForcesVector(FloatArray &answer,
     }
 
     // zero answer will resize accordingly when adding first contribution
-    answer.resize(0);
+    answer.clear();
 
     for ( int i = 0; i < iRule->giveNumberOfIntegrationPoints(); i++ ) {
         IntegrationPoint *ip = iRule->getIntegrationPoint(i);

@@ -192,7 +192,7 @@ public:
      * @param mode Determines response mode.
      */
     virtual void computeInternalSourceVector(FloatArray &val, GaussPoint *gp, TimeStep *tStep, ValueModeType mode)
-    { val.resize(0); }
+    { val.clear(); }
     /**
      * Returns positive value of humidity if implemented and enabled in derived material, -1 otherwise.
      */

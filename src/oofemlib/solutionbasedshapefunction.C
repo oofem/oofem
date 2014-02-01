@@ -241,9 +241,9 @@ SolutionbasedShapeFunction :: computeCorrectionFactors(modeStruct &myMode, IntAr
 void
 SolutionbasedShapeFunction :: splitBoundaryNodeIDs(modeStruct &mode, Element &e, IntArray &bnodes, IntArray &pList, IntArray &mList, IntArray &zList, FloatMatrix &nodeValues)
 {
-    pList.resize(0);
-    mList.resize(0);
-    zList.resize(0);
+    pList.clear();
+    mList.clear();
+    zList.clear();
 
     for ( int j = 1; j <= bnodes.giveSize(); j++ ) {
         DofManager *dman = e.giveDofManager( bnodes.at(j) );

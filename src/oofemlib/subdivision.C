@@ -1301,7 +1301,7 @@ Subdivision :: RS_Triangle :: generate(std :: list< int > &sharedEdgesQueue)
      * also children array of receiver is updated to contain children numbers */
     if ( irregular_nodes.containsOnlyZeroes() ) {
         // no subdivision of receiver required
-        children.resize(0);
+        children.clear();
     } else {
         int i, ind, nIrregulars = 0;
         int childNum, iedge, jedge, kedge, inode, jnode, knode;
@@ -1815,7 +1815,7 @@ Subdivision :: RS_Tetra :: generate(std :: list< int > &sharedEdgesQueue)
 
     if ( irregular_nodes.containsOnlyZeroes() ) {
         // no subdivision of receiver required
-        children.resize(0);
+        children.clear();
     } else {
         int irregulars1 = 0, irregulars2 = 0;
         int childNum, iedge, jedge, kedge, iiedge, jjedge, kkedge, inode, jnode, knode, nnode, iside, jside, kside, nside;

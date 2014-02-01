@@ -421,7 +421,7 @@ LIBeam3d2 :: computeLoadLEToLRotationMatrix(FloatMatrix &answer, int iEdge, Gaus
     //
     // i.e. f(element local) = T * f(edge local)
     //
-    answer.beEmptyMtrx();
+    answer.clear();
     return 0;
 }
 

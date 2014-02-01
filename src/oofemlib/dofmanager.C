@@ -63,7 +63,7 @@ DofManager :: DofManager(int n, Domain *aDomain) :
     dofBCmap = NULL;
     dofICmap = NULL;
 #ifdef __PARALLEL_MODE
-    partitions.resize(0);
+    partitions.clear();
     parallel_mode = DofManager_local;
 #endif
 }
@@ -111,10 +111,10 @@ void DofManager :: computeLoadVectorAt(FloatArray &answer, TimeStep *tStep, Valu
     FloatArray contribution;
 
     if ( this->giveLoadArray()->isEmpty() ) {
-        answer.resize(0);
+        answer.clear();
         return;
     } else {
-        answer.resize(0);
+        answer.clear();
         int nLoads = loadArray.giveSize();     // the node may be subjected
         for ( int i = 1; i <= nLoads; i++ ) {   // to more than one load
             int n = loadArray.at(i);
@@ -255,7 +255,7 @@ void DofManager :: giveLocationArray(const IntArray &dofIDArry, IntArray &locati
         this->giveDofArray(dofIDArry, dofArray);
         int masterDofs = giveNumberOfPrimaryMasterDofs(dofArray);
         locationArray.preallocate(masterDofs);
-        locationArray.resize(0);
+        locationArray.clear();
 
         for ( int i = 1; i <= dofArray.giveSize(); i++ ) {
             this->giveDof( dofArray.at(i) )->giveEquationNumbers(mstrEqNmbrs, s);
@@ -274,7 +274,7 @@ void DofManager :: giveMasterDofIDArray(const IntArray &dofIDArry, IntArray &mas
         this->giveDofArray(dofIDArry, dofArray);
         int masterDofs = giveNumberOfPrimaryMasterDofs(dofArray);
         masterDofIDs.preallocate(masterDofs);
-        masterDofIDs.resize(0);
+        masterDofIDs.clear();
 
         for ( int i = 1; i <= numberOfDofs; i++ ) {
             this->giveDof(i)->giveDofIDs(temp);
@@ -300,7 +300,7 @@ void DofManager :: giveCompleteLocationArray(IntArray &locationArray, const Unkn
             nMasterDofs += this->giveDof(i)->giveNumberOfPrimaryMasterDofs();
         }
         locationArray.preallocate(nMasterDofs);
-        locationArray.resize(0);
+        locationArray.clear();
         for ( int i = 1; i <= numberOfDofs; i++ ) {
             this->giveDof(i)->giveEquationNumbers(temp, s);
             locationArray.followedBy(temp);
@@ -323,7 +323,7 @@ void DofManager :: giveCompleteMasterDofIDArray(IntArray &dofIDArray) const
             nMasterDofs += this->giveDof(i)->giveNumberOfPrimaryMasterDofs();
         }
         dofIDArray.preallocate(nMasterDofs);
-        dofIDArray.resize(0);
+        dofIDArray.clear();
         for ( int i = 1; i <= numberOfDofs; i++ ) {
             this->giveDof(i)->giveDofIDs(temp);
             dofIDArray.followedBy(temp);
@@ -440,9 +440,9 @@ DofManager :: initializeFrom(InputRecord *ir)
 
     IntArray dofIDArry;
     IntArray ic, masterMask, dofTypeMask;
-    mBC.resize(0);
+    mBC.clear();
 
-    loadArray.resize(0);
+    loadArray.clear();
     IR_GIVE_OPTIONAL_FIELD(ir, loadArray, _IFT_DofManager_load);
 
     ///@todo This is unnecessary, we should just check if user has supplied a dofidmask field or not and just drop "numberOfDofs"). It is left for now because it will give lots of warnings otherwise, but it is effectively ignored.
@@ -456,10 +456,10 @@ DofManager :: initializeFrom(InputRecord *ir)
         dofIDArry = domain->giveDefaultNodeDofIDArry();
     }
 
-    mBC.resize(0);
+    mBC.clear();
     IR_GIVE_OPTIONAL_FIELD(ir, mBC, _IFT_DofManager_bc);
 
-    ic.resize(0);
+    ic.clear();
     IR_GIVE_OPTIONAL_FIELD(ir, ic, _IFT_DofManager_ic);
 
     // reads master mask - in this array are numbers of master dofManagers
@@ -467,7 +467,7 @@ DofManager :: initializeFrom(InputRecord *ir)
     // if master mask index is zero then dof is created as master (i.e., having own equation number)
     // othervise slave dof connected to master DofManager is created.
     // by default if masterMask is not specifyed, all dofs are created as masters.
-    dofTypeMask.resize(0); // termitovo
+    dofTypeMask.clear(); // termitovo
     IR_GIVE_OPTIONAL_FIELD(ir, dofTypeMask, _IFT_DofManager_doftypemask);
 
     // read boundary flag
@@ -477,7 +477,7 @@ DofManager :: initializeFrom(InputRecord *ir)
 
 
 #ifdef __PARALLEL_MODE
-    partitions.resize(0);
+    partitions.clear();
     IR_GIVE_OPTIONAL_FIELD(ir, partitions, _IFT_DofManager_partitions);
 
     if ( ir->hasField(_IFT_DofManager_sharedflag) ) {
@@ -970,7 +970,7 @@ bool DofManager :: giveMasterDofMans(IntArray &masters)
     IntArray _dof_masters;
     bool answer = false;
 
-    masters.resize(0);
+    masters.clear();
     for ( int i = 1; i <= numberOfDofs; i++ ) {
         if ( !this->giveDof(i)->isPrimaryDof() ) {
             answer = true;
@@ -1009,7 +1009,7 @@ bool DofManager :: computeM2GTransformation(FloatMatrix &answer, const IntArray 
     bool hasM2L = computeM2LTransformation(M2L, dofMask);
 
     if ( !hasL2G && !hasM2L ) {
-        answer.beEmptyMtrx();
+        answer.clear();
         return false;
     } else if ( hasL2G && hasM2L ) {
         answer.beProductOf(L2G, M2L);

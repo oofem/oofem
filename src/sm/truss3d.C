@@ -79,7 +79,7 @@ Truss3d :: giveInterface(InterfaceType interface)
 void
 Truss3d :: NodalAveragingRecoveryMI_computeNodalValue(FloatArray &answer, int node, InternalStateType type, TimeStep *tStep)
 {
-    answer.resize(0);
+    answer.clear();
     _warning("Truss3d element: IP values will not be transferred to nodes. Use ZZNodalRecovery instead (parameter stype 1)");
 }
 
@@ -87,7 +87,7 @@ Truss3d :: NodalAveragingRecoveryMI_computeNodalValue(FloatArray &answer, int no
 void
 Truss3d :: NodalAveragingRecoveryMI_computeSideValue(FloatArray &answer, int side, InternalStateType type, TimeStep *tStep)
 {
-    answer.resize(0);
+    answer.clear();
 }
 
 

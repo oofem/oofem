@@ -78,10 +78,10 @@ IRResultType Set :: initializeFrom(InputRecord *ir)
 
 
 
-    this->elementBoundaries.resize(0);
+    this->elementBoundaries.clear();
     IR_GIVE_OPTIONAL_FIELD(ir, this->elementBoundaries, _IFT_Set_elementBoundaries);
 
-    this->elementEdges.resize(0);
+    this->elementEdges.clear();
     IR_GIVE_OPTIONAL_FIELD(ir, this->elementEdges, _IFT_Set_elementEdges);
 
     return IRRT_OK;
@@ -193,11 +193,11 @@ void Set :: setNodeList(const IntArray &newNodes) { this->nodes = newNodes; }
 
 void Set :: clear()
 {
-    this->elementEdges.resize(0);
-    this->elementBoundaries.resize(0);
-    this->elements.resize(0);
-    this->nodes.resize(0);
-    this->totalNodes.resize(0);
+    this->elementEdges.clear();
+    this->elementBoundaries.clear();
+    this->elements.clear();
+    this->nodes.clear();
+    this->totalNodes.clear();
 }
 
 void Set :: updateLocalNumbering(EntityRenumberingFunctor &f)
@@ -277,7 +277,7 @@ contextIOResultType Set :: restoreContext(DataStream *stream, ContextMode mode, 
         }
     }
 
-    this->totalNodes.resize(0);
+    this->totalNodes.clear();
 
     return CIO_OK;
 }

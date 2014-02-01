@@ -1780,7 +1780,7 @@ Shell7Base :: giveBondTransMatrix(FloatMatrix &answer, FloatMatrix &Q)
 void Shell7Base :: NodalAveragingRecoveryMI_computeSideValue(FloatArray &answer, int side, InternalStateType type, TimeStep *tStep)
 {
     // what is this?
-    answer.resize(0);
+    answer.clear();
 }
 
 void Shell7Base :: NodalAveragingRecoveryMI_computeNodalValue(FloatArray &answer, int node, InternalStateType type, TimeStep *tStep)
@@ -1793,7 +1793,7 @@ void Shell7Base :: NodalAveragingRecoveryMI_computeNodalValue(FloatArray &answer
         answer.at(3) += this->giveNode(node)->giveDofWithID(W_w)->giveUnknown(VM_Total, tStep);
         answer.times( this->giveCrossSection()->give(CS_Thickness, this->giveNode(node)->giveCoordinates(), this, false) );
     } else {
-        answer.resize(0);
+        answer.clear();
     }
 }
 

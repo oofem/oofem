@@ -216,7 +216,7 @@ ZZNodalRecoveryModelInterface :: ZZNodalRecoveryMI_computeNValProduct(FloatMatri
     FEInterpolation *interpol = elem->giveInterpolation();
     IntegrationRule *iRule = elem->giveDefaultIntegrationRulePtr();
 
-    answer.resize(0, 0);
+    answer.clear();
     for ( int i = 0; i < iRule->giveNumberOfIntegrationPoints(); i++ ) {
         GaussPoint *gp = iRule->getIntegrationPoint(i);
         double dV = elem->computeVolumeAround(gp);

@@ -55,8 +55,8 @@ REGISTER_Element(MacroLSpace);
 //derived from linear brick element
 MacroLSpace :: MacroLSpace(int n, Domain *aDomain) : LSpace(n, aDomain)
 {
-    this->microMasterNodes.resize(0);
-    this->microBoundaryNodes.resize(0);
+    this->microMasterNodes.clear();
+    this->microBoundaryNodes.clear();
     this->firstCall = true;
     microMaterial = NULL;
     microDomain = NULL;

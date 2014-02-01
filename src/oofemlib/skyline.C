@@ -809,7 +809,7 @@ void Skyline :: rbmodes(FloatMatrix &r, int &nse, IntArray &se,
             r.resize(neq, ise);
             r.zero();
         } else {
-            r.beEmptyMtrx();
+            r.clear();
         }
 
         for ( i = 1; i <= ise; i++ ) {

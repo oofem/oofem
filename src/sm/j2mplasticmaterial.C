@@ -126,7 +126,7 @@ J2MPlasticMaterial :: computeStressSpaceHardeningVars(FloatArray &answer, GaussP
     IntArray mask;
 
     if ( !hasHardening() ) {
-        answer.resize(0);
+        answer.clear();
         return;
     }
 
@@ -194,7 +194,7 @@ J2MPlasticMaterial :: computeHardeningReducedModuli(FloatMatrix &answer, GaussPo
     int size = this->giveSizeOfReducedHardeningVarsVector(gp);
 
     if ( !hasHardening() ) {
-        answer.resize(0, 0);
+        answer.clear();
         return;
     }
 
@@ -272,7 +272,7 @@ J2MPlasticMaterial :: computeStressSpaceHardeningVarsReducedGradient(FloatArray 
     FloatArray fullKinematicGradient, reducedKinematicGrad;
 
     if ( !hasHardening() ) {
-        answer.resize(0);
+        answer.clear();
         return;
     }
 
@@ -488,7 +488,7 @@ J2MPlasticMaterial :: giveStressBackVector(FloatArray &answer,
         return;
     }
 
-    answer.resize(0);
+    answer.clear();
 }
 
 

@@ -223,7 +223,7 @@ void MixedGradientPressureWeakPeriodic :: integrateTractionVelocityTangent(Float
     surfCoords.resize(nsd - 1);
     mMatrix.resize(nsd, total);
 
-    answer.resize(0, 0);
+    answer.clear();
     for ( int i = 0; i < ir->giveNumberOfIntegrationPoints(); ++i ) {
         GaussPoint *gp = ir->getIntegrationPoint(i);
         FloatArray &lcoords = * gp->giveCoordinates();
@@ -325,7 +325,7 @@ void MixedGradientPressureWeakPeriodic :: integrateTractionDev(FloatArray &answe
 
     surfCoords.resize(nsd - 1);
     contrib.resize(total);
-    answer.resize(0);
+    answer.clear();
 
     for ( int i = 0; i < ir->giveNumberOfIntegrationPoints(); ++i ) {
         GaussPoint *gp = ir->getIntegrationPoint(i);

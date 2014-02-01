@@ -66,7 +66,7 @@ void Line2BoundaryElement :: giveDofManDofIDMask(int i, EquationID eid, IntArray
     if ( eid == EID_MomentumBalance || eid == EID_MomentumBalance_ConservationEquation ) {
         nodeDofIDMask.setValues(2, V_u, V_v);
     } else {
-        nodeDofIDMask.resize(0);
+        nodeDofIDMask.clear();
     }
 }
 
@@ -97,7 +97,7 @@ int Line2BoundaryElement :: EIPrimaryUnknownMI_computePrimaryUnknownVectorAt(Val
     FloatArray lcoords, closest;
     double distance = this->SpatialLocalizerI_giveClosestPoint(lcoords, closest, gcoords);
     if ( distance < 0 ) {
-        answer.resize(0);
+        answer.clear();
         return false;
     }
 

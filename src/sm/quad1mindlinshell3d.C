@@ -159,7 +159,7 @@ Quad1MindlinShell3D :: computeBodyLoadVectorAt(FloatArray &answer, Load *forLoad
         answer.at(20) = forceY.at(4);
         answer.at(21) = forceZ.at(4);
     } else {
-        answer.resize(0);
+        answer.clear();
     }
 }
 

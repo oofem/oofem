@@ -80,7 +80,7 @@ public:
                                             GaussPoint *gp,
                                             TimeStep *tStep,
                                             ValueModeType mode)
-    { answer.resize(0); }
+    { answer.clear(); }
 
     virtual void  giveEigenStrainVector(FloatArray &answer, GaussPoint *gp, TimeStep *tStep, ValueModeType mode);
 

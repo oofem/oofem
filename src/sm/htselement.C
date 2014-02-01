@@ -261,7 +261,7 @@ HTSelement :: computePrescribedDisplacementLoadVectorAt(FloatArray &answer, Time
 
     this->computeVectorOf(EID_MomentumBalance, mode, tStep, u);
     if ( u.containsOnlyZeroes() ) {
-        answer.resize(0);
+        answer.clear();
     } else {
         this->computeStiffnessMatrix(K, TangentStiffness, tStep);
         answer.beProductOf(K, u);
@@ -323,7 +323,7 @@ HTSelement :: computeForceLoadVector(FloatArray &answer, TimeStep *tStep, ValueM
     Load *load;
     FloatArray helpLoadVector;
 
-    answer.resize(0);
+    answer.clear();
 
     // loop over boundary load array
     nLoads = this->giveBoundaryLoadArray()->giveSize() / 2;

@@ -72,7 +72,7 @@ ExportModule :: initializeFrom(InputRecord *ir)
     domain_all_flag = ir->hasField(_IFT_ExportModule_domainall);
 
     if ( !domain_all_flag ) {
-        domainMask.resize(0);
+        domainMask.clear();
         IR_GIVE_OPTIONAL_FIELD(ir, domainMask, _IFT_ExportModule_domainmask);
     }
 

@@ -154,7 +154,7 @@ SlaveDof :: giveEquationNumbers(IntArray &masterEqNumbers, const UnknownNumberin
 
     int masterDofs = this->giveNumberOfPrimaryMasterDofs();
     masterEqNumbers.preallocate(masterDofs);
-    masterEqNumbers.resize(0);
+    masterEqNumbers.clear();
 
     for ( int i = 1; i <= countOfMasterDofs; i++ ) {
         this->giveMasterDof(i)->giveEquationNumbers(mstrEqNmbrs, s);
@@ -170,7 +170,7 @@ SlaveDof :: giveDofIDs(IntArray &masterDofIDs)
 
     int masterDofs = this->giveNumberOfPrimaryMasterDofs();
     masterDofIDs.preallocate(masterDofs);
-    masterDofIDs.resize(0);
+    masterDofIDs.clear();
 
     for ( int i = 1; i <= countOfMasterDofs; i++ ) {
         this->giveMasterDof(i)->giveDofIDs(temp);
@@ -320,7 +320,7 @@ SlaveDof :: giveMasterDofManArray(IntArray &answer)
 
     int masterDofs = this->giveNumberOfPrimaryMasterDofs();
     answer.preallocate(masterDofs);
-    answer.resize(0);
+    answer.clear();
 
     for ( int i = 1; i <= countOfMasterDofs; i++ ) {
         this->giveMasterDof(i)->giveMasterDofManArray(mstrDofManArry);

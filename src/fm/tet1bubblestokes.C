@@ -100,7 +100,7 @@ void Tet1BubbleStokes :: giveDofManDofIDMask(int inode, EquationID ut, IntArray 
     } else if ( ut == EID_MomentumBalance_ConservationEquation ) {
         answer.setValues(4, V_u, V_v, V_w, P_f);
     } else {
-        answer.resize(0);
+        answer.clear();
     }
 }
 
@@ -109,7 +109,7 @@ void Tet1BubbleStokes :: giveInternalDofManDofIDMask(int i, EquationID eid, IntA
     if ( eid == EID_MomentumBalance_ConservationEquation || eid == EID_MomentumBalance ) {
         answer.setValues(3, V_u, V_v, V_w);
     } else {
-        answer.resize(0);
+        answer.clear();
     }
 }
 
@@ -197,7 +197,7 @@ void Tet1BubbleStokes :: computeExternalForcesVector(FloatArray &answer, TimeSte
     FloatArray vec;
 
     int nLoads = this->boundaryLoadArray.giveSize() / 2;
-    answer.resize(0);
+    answer.clear();
     for ( int i = 1; i <= nLoads; i++ ) {  // For each Neumann boundary condition
         int load_number = this->boundaryLoadArray.at(2 * i - 1);
         int load_id = this->boundaryLoadArray.at(2 * i);
@@ -230,7 +230,7 @@ void Tet1BubbleStokes :: computeExternalForcesVector(FloatArray &answer, TimeSte
 void Tet1BubbleStokes :: computeLoadVector(FloatArray &answer, Load *load, CharType type, ValueModeType mode, TimeStep *tStep)
 {
     if ( type != ExternalForcesVector ) {
-        answer.resize(0);
+        answer.clear();
         return;
     }
 
@@ -274,7 +274,7 @@ void Tet1BubbleStokes :: computeLoadVector(FloatArray &answer, Load *load, CharT
 void Tet1BubbleStokes :: computeBoundaryLoadVector(FloatArray &answer, BoundaryLoad *load, int iSurf, CharType type, ValueModeType mode, TimeStep *tStep)
 {
     if ( type != ExternalForcesVector ) {
-        answer.resize(0);
+        answer.clear();
         return;
     }
 
@@ -457,7 +457,7 @@ int Tet1BubbleStokes :: EIPrimaryUnknownMI_computePrimaryUnknownVectorAt(ValueMo
     FloatArray lcoords, n, n_lin;
     bool ok = this->computeLocalCoordinates(lcoords, gcoords);
     if ( !ok ) {
-        answer.resize(0);
+        answer.clear();
         return false;
     }
 

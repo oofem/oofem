@@ -744,7 +744,7 @@ OOFEMTXTInputRecord :: readMatrix(const char *helpSource, int r, int c, FloatMat
     const char *endptr = helpSource;
 
     if ( helpSource == NULL ) {
-        ans.resize(0, 0);
+        ans.clear();
         return 0;
     }
 

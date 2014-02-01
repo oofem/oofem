@@ -319,7 +319,7 @@ CCTPlate3d :: giveIPValue(FloatArray &answer, GaussPoint *gp, InternalStateType 
 
         return 1;
     } else {
-        answer.resize(0);
+        answer.clear();
         return 0;
     }
 }
@@ -377,7 +377,7 @@ CCTPlate3d :: computeBodyLoadVectorAt(FloatArray &answer, Load *forLoad, TimeSte
             answer.rotatedWith(T, 'n');
         }
     } else {
-        answer.resize(0);          // nil resultant
+        answer.clear();          // nil resultant
     }
 }
 

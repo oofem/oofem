@@ -95,7 +95,7 @@ StructuralElement :: computeConstitutiveMatrixAt(FloatMatrix &answer,
 void StructuralElement :: computeLoadVector(FloatArray &answer, Load *load, CharType type, ValueModeType mode, TimeStep *tStep)
 {
     if ( type != ExternalForcesVector ) {
-        answer.resize(0);
+        answer.clear();
         return;
     }
     // Just a wrapper for the deadweight body load computations:
@@ -114,7 +114,7 @@ void StructuralElement :: computeLoadVector(FloatArray &answer, Load *load, Char
 
 void StructuralElement :: computeBoundaryLoadVector(FloatArray &answer, BoundaryLoad *load, int boundary, CharType type, ValueModeType mode, TimeStep *tStep)
 {
-    answer.resize(0);
+    answer.clear();
     if ( type != ExternalForcesVector ) {
         return;
     }
@@ -199,7 +199,7 @@ StructuralElement :: computeBodyLoadVectorAt(FloatArray &answer, Load *forLoad, 
         force.rotatedWith(T, 'n');
     }
 
-    answer.resize(0);
+    answer.clear();
 
     if ( force.giveSize() ) {
         for ( int i = 0; i < iRule->giveNumberOfIntegrationPoints(); i++ ) {
@@ -474,7 +474,7 @@ StructuralElement :: computeLocalForceLoadVector(FloatArray &answer, TimeStep *t
 // so we need further subtract part corresponding to non-nodal loading.
 {
     FloatArray helpLoadVector(1);
-    answer.resize(0);
+    answer.clear();
 
     // loop over body load array first
     int nBodyLoads = this->giveBodyLoadArray()->giveSize();
@@ -622,7 +622,7 @@ StructuralElement :: computeResultingIPTemperatureAt(FloatArray &answer, TimeSte
         _error("computeResultingIPTemperatureAt: computeGlobalCoordinates failed");
     }
 
-    answer.resize(0);
+    answer.clear();
     nLoads = this->giveBodyLoadArray()->giveSize();
     for ( int i = 1; i <= nLoads; i++ ) {
         n = bodyLoadArray.at(i);
@@ -646,7 +646,7 @@ StructuralElement :: computeResultingIPEigenstrainAt(FloatArray &answer, TimeSte
         _error("computeResultingIPTemperatureAt: computeGlobalCoordinates failed");
     }
 
-    answer.resize(0);
+    answer.clear();
     nLoads = this->giveBodyLoadArray()->giveSize();
     for ( int i = 1; i <= nLoads; i++ ) {
         n = bodyLoadArray.at(i);
@@ -672,7 +672,7 @@ StructuralElement :: computeStiffnessMatrix(FloatMatrix &answer, MatResponseMode
     IntegrationRule *iRule;
     bool matStiffSymmFlag = this->giveCrossSection()->isCharacteristicMtrxSymmetric(rMode);
 
-    answer.resize(0, 0);
+    answer.clear();
 
     if ( !this->isActivated(tStep) ) {
         return;
@@ -773,7 +773,7 @@ void StructuralElement :: computeStiffnessMatrix_withIRulesAsSubcells(FloatMatri
         // localize irule contribution into element matrix
         if ( this->giveIntegrationRuleLocalCodeNumbers(irlocnum, iRule, EID_MomentumBalance) ) {
             answer.assemble(* m, irlocnum);
-            m->resize(0, 0);
+            m->clear();
         }
     } // end loop over irules
 
@@ -845,7 +845,7 @@ StructuralElement :: giveInternalForcesVector(FloatArray &answer,
     }
 
     // zero answer will resize accordingly when adding first contribution
-    answer.resize(0);
+    answer.clear();
 
     for ( int i = 0; i < iRule->giveNumberOfIntegrationPoints(); i++ ) {
         GaussPoint *gp = iRule->getIntegrationPoint(i);
@@ -920,7 +920,7 @@ StructuralElement :: giveInternalForcesVector_withIRulesAsSubcells(FloatArray &a
     }
 
     // zero answer will resize accordingly when adding first contribution
-    answer.resize(0);
+    answer.clear();
 
     FloatArray *m = & answer;
     if ( this->giveInterpolation() && this->giveInterpolation()->hasSubPatchFormulation() ) {
@@ -966,7 +966,7 @@ StructuralElement :: giveInternalForcesVector_withIRulesAsSubcells(FloatArray &a
             // localize irule contribution into element matrix
             if ( this->giveIntegrationRuleLocalCodeNumbers(irlocnum, iRule, EID_MomentumBalance) ) {
                 answer.assemble(* m, irlocnum);
-                m->resize(0);
+                m->clear();
             }
         }
     }
@@ -1261,7 +1261,7 @@ StructuralElement :: giveNonlocalLocationArray(IntArray &locationArray, const Un
     IntegrationRule *iRule = integrationRulesArray [ giveDefaultIntegrationRule() ];
     std :: list< localIntegrationRecord > :: iterator pos;
 
-    locationArray.resize(0);
+    locationArray.clear();
     // loop over element IP
     for ( int i = 0; i < iRule->giveNumberOfIntegrationPoints(); i++ ) {
         IntegrationPoint *ip = iRule->getIntegrationPoint(i);
@@ -1270,7 +1270,7 @@ StructuralElement :: giveNonlocalLocationArray(IntArray &locationArray, const Un
 
 
         if ( interface == NULL ) {
-            locationArray.resize(0);
+            locationArray.clear();
             return;
         }
 

@@ -105,7 +105,7 @@ FEI3dTetLin :: local2global(FloatArray &answer, const FloatArray &lcoords, const
     FloatArray n(4);
     this->evalN(n, lcoords, cellgeo);
 
-    answer.resize(0);
+    answer.clear();
     for ( int i = 1; i <= 4; i++ ) {
         answer.add( n.at(i), * cellgeo.giveVertexCoordinates(i) );
     }

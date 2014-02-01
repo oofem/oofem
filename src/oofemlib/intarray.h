@@ -205,6 +205,11 @@ public:
      */
     void resize(int n);
     /**
+     * Clears receiver (zero size).
+     * Same effect as resizing to zero, but has a clearer meaning and intent when used.
+     */
+    void clear() { size = 0; }
+    /**
      * Preallocates receiver to given futureSize if larger then allocatedSize.
      * @note{After this operation array values are in undefined state, programmer should zero receiver.}
      * @param futureSize Size to be allocated.

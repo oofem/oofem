@@ -90,7 +90,7 @@ InitialCondition :: initializeFrom(InputRecord *ir)
     ///@todo Make these both not optional (and remove the old approach). Not done right now because it breaks backwards compatibility with input files.
     this->set = 0;
     IR_GIVE_OPTIONAL_FIELD(ir, this->set, _IFT_InitialCondition_set);
-    this->dofIDs.resize(0);
+    this->dofIDs.clear();
     IR_GIVE_OPTIONAL_FIELD(ir, this->dofIDs, _IFT_InitialCondition_dofs);
 
     return IRRT_OK;

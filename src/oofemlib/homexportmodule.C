@@ -59,7 +59,7 @@ REGISTER_ExportModule(HOMExportModule)
 //inherit LinearElasticMaterial for accessing stress/strain transformation functions
 HOMExportModule :: HOMExportModule(int n, EngngModel *e) : ExportModule(n, e)
 {
-    this->matnum.resize(0);
+    this->matnum.clear();
 }
 
 

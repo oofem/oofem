@@ -569,7 +569,7 @@ TrPlaneStrRot :: giveInternalForcesVector(FloatArray &answer, TimeStep *tStep, i
     }
 
     // zero answer will resize accordingly when adding first contribution
-    answer.resize(0);
+    answer.clear();
 
     IntegrationRule *iRule = integrationRulesArray [ giveDefaultIntegrationRule() ];
     for ( int i = 0; i < iRule->giveNumberOfIntegrationPoints(); i++ ) {
@@ -726,7 +726,7 @@ TrPlaneStrRot :: computeBodyLoadVectorAt(FloatArray &answer, Load *forLoad, Time
             answer.rotatedWith(T, 'n');
         }
     } else {
-        answer.resize(0);          // nil resultant
+        answer.clear();          // nil resultant
     }
 }
 } // end namespace oofem

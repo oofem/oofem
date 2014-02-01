@@ -74,7 +74,7 @@ NonlocalMaterialWTP :: giveElementNonlocalDepArry(IntArray &answer, Domain *d, i
             answer.at(_i) = * relemsIter;
         }
     } else {
-        answer.resize(0);
+        answer.clear();
     }
 }
 

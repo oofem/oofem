@@ -1093,7 +1093,7 @@ void EngngModel :: assembleVectorFromBC(FloatArray &answer, TimeStep *tStep, Equ
                 const IntArray &elements = set->giveElementList();
                 for ( int ielem = 1; ielem <= elements.giveSize(); ++ielem ) {
                     Element *element = domain->giveElement( elements.at(ielem) );
-                    charVec.resize(0);
+                    charVec.clear();
                     element->computeLoadVector(charVec, bodyLoad, type, mode, tStep);
 
                     if ( charVec.isNotEmpty() ) {
@@ -1114,7 +1114,7 @@ void EngngModel :: assembleVectorFromBC(FloatArray &answer, TimeStep *tStep, Equ
                 for ( int ibnd = 1; ibnd <= boundaries.giveSize() / 2; ++ibnd ) {
                     Element *element = domain->giveElement( boundaries.at(ibnd * 2 - 1) );
                     int boundary = boundaries.at(ibnd * 2);
-                    charVec.resize(0);
+                    charVec.clear();
                     element->computeBoundaryLoadVector(charVec, bLoad, boundary, type, mode, tStep);
 
                     if ( charVec.isNotEmpty() ) {
@@ -1136,7 +1136,7 @@ void EngngModel :: assembleVectorFromBC(FloatArray &answer, TimeStep *tStep, Equ
                 for ( int ibnd = 1; ibnd <= edgeBoundaries.giveSize() / 2; ++ibnd ) {
                     Element *element = domain->giveElement( edgeBoundaries.at(ibnd * 2 - 1) );
                     int boundary = edgeBoundaries.at(ibnd * 2);
-                    charVec.resize(0);
+                    charVec.clear();
                     element->computeBoundaryEdgeLoadVector(charVec, bLoad, boundary, type, mode, tStep);
 
                     if ( charVec.isNotEmpty() ) {
@@ -1157,7 +1157,7 @@ void EngngModel :: assembleVectorFromBC(FloatArray &answer, TimeStep *tStep, Equ
                 const IntArray &nodes = set->giveNodeList();
                 for ( int idman = 1; idman <= nodes.giveSize(); ++idman ) {
                     DofManager *node = domain->giveDofManager( nodes.at(idman) );
-                    charVec.resize(0);
+                    charVec.clear();
                     node->computeLoadVector(charVec, nLoad, type, tStep, mode);
 
                     if ( charVec.isNotEmpty() ) {

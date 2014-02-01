@@ -520,7 +520,7 @@ PerfectlyPlasticMaterial :: computeTrialStressIncrement(FloatArray &answer, Gaus
     FloatMatrix materialMatrix;
 
     if ( strainIncrement.giveSize() == 0 ) {
-        answer.resize(0);
+        answer.clear();
         return;
     }
 

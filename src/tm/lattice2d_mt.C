@@ -326,7 +326,7 @@ Lattice2d_mt :: computeInternalSourceRhsVectorAt(FloatArray &answer, TimeStep *t
     FloatArray val, helpLoadVector, globalIPcoords;
     FloatMatrix nm;
     double k;
-    answer.resize(0);
+    answer.clear();
 
     FloatArray gravityHelp(2);
 

@@ -67,8 +67,8 @@ public:
     /// Destructor.
     virtual ~Line2BoundaryElement();
 
-    virtual void giveCharacteristicVector(FloatArray &answer, CharType type, ValueModeType mode, TimeStep *tStep) { answer.resize(0); }
-    virtual void giveCharacteristicMatrix(FloatMatrix &answer, CharType type, TimeStep *tStep) { answer.resize(0, 0); }
+    virtual void giveCharacteristicVector(FloatArray &answer, CharType type, ValueModeType mode, TimeStep *tStep) { answer.clear(); }
+    virtual void giveCharacteristicMatrix(FloatMatrix &answer, CharType type, TimeStep *tStep) { answer.clear(); }
 
     virtual void giveDofManDofIDMask(int i, EquationID eid, IntArray &nodeDofIDMask) const;
 

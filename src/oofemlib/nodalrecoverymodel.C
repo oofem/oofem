@@ -84,7 +84,7 @@ NodalRecoveryModel :: clear()
             while ( ( valArray = iterator.next() ) ) {
                 // test if INCLUDED
                 if ( valArray ) {
-                    valArray->resize(0);
+                    valArray->clear();
                 }
             }
         }

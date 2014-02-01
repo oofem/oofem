@@ -96,7 +96,7 @@ void ActiveDof :: giveEquationNumbers(IntArray &masterEqNumbers, const UnknownNu
 
     int countOfMasterDofs = this->giveNumberOfMasterDofs();
     masterEqNumbers.preallocate(countOfMasterDofs);
-    masterEqNumbers.resize(0);
+    masterEqNumbers.clear();
     for ( int i = 1; i <= countOfMasterDofs; i++ ) {
         this->giveMasterDof(i)->giveEquationNumbers(mstrEqNmbrs, s);
         masterEqNumbers.followedBy(mstrEqNmbrs);
@@ -115,7 +115,7 @@ void ActiveDof :: giveDofIDs(IntArray &masterDofIDs)
 
     int countOfMasterDofs = this->giveNumberOfMasterDofs();
     masterDofIDs.preallocate(countOfMasterDofs);
-    masterDofIDs.resize(0);
+    masterDofIDs.clear();
     for ( int i = 1; i <= countOfMasterDofs; i++ ) {
         this->giveMasterDof(i)->giveDofIDs(mstrDofIDs);
         masterDofIDs.followedBy(mstrDofIDs);

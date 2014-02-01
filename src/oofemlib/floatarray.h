@@ -193,6 +193,11 @@ public:
      */
     void resize(int s);
     /**
+     * Clears receiver (zero size).
+     * Same effect as resizing to zero, but has a clearer meaning and intent when used.
+     */
+    void clear() { size = 0; }
+    /**
      * Resizes the size of the receiver to requested bounds. Memory allocation always happens, more preferably use
      * resize() function instead. Array is zeroed.
      * @param s New size.

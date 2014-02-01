@@ -96,7 +96,7 @@ FEI3dHexaQuad :: local2global(FloatArray &answer, const FloatArray &lcoords, con
     FloatArray n;
 
     this->evalN(n, lcoords, cellgeo);
-    answer.resize(0);
+    answer.clear();
     for ( int i = 1; i <= n.giveSize(); i++ ) {
         answer.add( n.at(i), * cellgeo.giveVertexCoordinates(i) );
     }
@@ -191,7 +191,7 @@ void FEI3dHexaQuad :: edgeLocal2global(FloatArray &answer, int iedge, const Floa
     IntArray eNodes;
     double u = lcoords.at(1);
     this->computeLocalEdgeMapping(eNodes, iedge);
-    answer.resize(0);
+    answer.clear();
     answer.add( 0.5 * ( u - 1. ) * u, * cellgeo.giveVertexCoordinates( eNodes.at(1) ) );
     answer.add( 0.5 * ( u - 1. ) * u, * cellgeo.giveVertexCoordinates( eNodes.at(2) ) );
     answer.add( 1. - u * u,       * cellgeo.giveVertexCoordinates( eNodes.at(3) ) );
@@ -325,7 +325,7 @@ FEI3dHexaQuad :: surfaceLocal2global(FloatArray &answer, int isurf,
 
     this->surfaceEvalN(n, isurf, lcoords, cellgeo);
 
-    answer.resize(0);
+    answer.clear();
     for ( int i = 1; i <= n.giveSize(); ++i ) {
         answer.add( n.at(i), * cellgeo.giveVertexCoordinates( nodes.at(i) ) );
     }

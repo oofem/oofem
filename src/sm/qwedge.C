@@ -381,13 +381,13 @@ QWedge :: SPRNodalRecoveryMI_givePatchType()
 void
 QWedge :: NodalAveragingRecoveryMI_computeNodalValue(FloatArray &answer, int node, InternalStateType type, TimeStep *tStep)
 {
-    answer.resize(0);
+    answer.clear();
     _warning("QWedge element: IP values will not be transferred to nodes. Use ZZNodalRecovery instead (parameter stype 1)");
 }
 
 void
 QWedge :: NodalAveragingRecoveryMI_computeSideValue(FloatArray &answer, int side, InternalStateType type, TimeStep *tStep)
 {
-    answer.resize(0);
+    answer.clear();
 }
 } // end namespace oofem

@@ -40,7 +40,7 @@ ErrorEstimator :: ErrorEstimator(int n, Domain *d) : FEMComponent(n, d)
 {
     rc = NULL;
     skippedNelems = 0;
-    regionSkipMap.resize(0);
+    regionSkipMap.clear();
 }
 
 ErrorEstimator :: ~ErrorEstimator()
@@ -63,7 +63,7 @@ ErrorEstimator :: initializeFrom(InputRecord *ir)
     const char *__proc = "initializeFrom"; // Required by IR_GIVE_FIELD macro
     IRResultType result;                // Required by IR_GIVE_FIELD macro
 
-    regionSkipMap.resize(0);
+    regionSkipMap.clear();
     IR_GIVE_OPTIONAL_FIELD(ir, regionSkipMap, _IFT_ErrorEstimator_regionskipmap);
     this->IStype = IST_StressTensor;
     int val = ( int ) this->IStype;

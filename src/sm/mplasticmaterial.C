@@ -310,7 +310,7 @@ MPlasticMaterial :: closestPointReturn(FloatArray &answer,
                     hardeningModuliInverse.beInverseOf(hardeningModuli);
                     // delete hardeningModuli;
                 } else {
-                    hardeningModuliInverse.resize(0, 0);
+                    hardeningModuliInverse.clear();
                 }
 
                 this->computeAlgorithmicModuli(consistentModuli, gp, elasticModuliInverse,
@@ -902,7 +902,7 @@ MPlasticMaterial :: giveConsistentStiffnessMatrix(FloatMatrix &answer,
     if ( hardeningModuli.giveNumberOfRows() ) {
         hardeningModuliInverse.beInverseOf(hardeningModuli);
     } else {
-        hardeningModuliInverse.resize(0, 0);
+        hardeningModuliInverse.clear();
     }
 
     stressVector = status->giveStressVector();

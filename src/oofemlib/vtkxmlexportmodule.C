@@ -111,7 +111,7 @@ VTKXMLExportModule :: initializeFrom(InputRecord *ir)
     IR_GIVE_OPTIONAL_FIELD(ir, val, _IFT_VTKXMLExportModule_stype); // Macro
     stype = ( NodalRecoveryModel :: NodalRecoveryModelType ) val;
 
-    regionsToSkip.resize(0);
+    regionsToSkip.clear();
     IR_GIVE_OPTIONAL_FIELD(ir, regionsToSkip, _IFT_VTKXMLExportModule_regionstoskip); // Macro
 
     this->nvr = 0; // number of virtual regions
@@ -1402,7 +1402,7 @@ VTKXMLExportModule :: getNodalVariableFromPrimaryField(FloatArray &answer, DofMa
 
     InternalStateType iState = IST_DisplacementVector; // Shouldn't be necessary
 
-    dofIDMask.resize(0);
+    dofIDMask.clear();
     if ( ( type == DisplacementVector ) || ( type == EigenVector ) || ( type == VelocityVector ) ) {
         dofIDMask.setValues(3, ( int ) Undef, ( int ) Undef, ( int ) Undef);
         for ( int j = 1; j <= dman->giveNumberOfDofs(); j++ ) {
@@ -1701,7 +1701,7 @@ VTKXMLExportModule :: computeIPAverage(FloatArray &answer, IntegrationRule *iRul
 {
     // Computes the volume average (over an element) for the quantity defined by isType
     double gptot = 0.0;
-    answer.resize(0);
+    answer.clear();
     FloatArray temp;
     if ( iRule ) {
         for ( int i = 0; i < iRule->giveNumberOfIntegrationPoints(); ++i ) {
@@ -1775,14 +1775,14 @@ VTKPiece :: clear()
     ///@todo Will this give a memory leak? / JB
     numCells = 0;
     numNodes = 0;
-    this->connectivity.resize(0);
-    this->elCellTypes.resize(0);
-    this->elOffsets.resize(0);
-    this->elVars.resize(0);
-    this->nodeCoords.resize(0);
-    this->nodeVars.resize(0);
-    this->nodeVarsFromIS.resize(0);
-    this->nodeVarsFromXFEMIS.resize(0);
+    this->connectivity.clear();
+    this->elCellTypes.clear();
+    this->elOffsets.clear();
+    this->elVars.clear();
+    this->nodeCoords.clear();
+    this->nodeVars.clear();
+    this->nodeVarsFromIS.clear();
+    this->nodeVarsFromXFEMIS.clear();
 }
 
 

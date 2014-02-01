@@ -333,7 +333,7 @@ RerShell :: computeBodyLoadVectorAt(FloatArray &answer, Load *forLoad, TimeStep 
     forLoad->computeComponentArrayAt(f, tStep, mode);
 
     if ( f.giveSize() == 0 ) {
-        answer.resize(0);
+        answer.clear();
         return;                                             // nil resultant
     } else {
         dens = this->giveStructuralCrossSection()->give('d', gp);
@@ -705,7 +705,7 @@ void
 RerShell :: NodalAveragingRecoveryMI_computeSideValue(FloatArray &answer, int side,
                                                       InternalStateType type, TimeStep *tStep)
 {
-    answer.resize(0);
+    answer.clear();
 }
 
 
@@ -751,7 +751,7 @@ RerShell :: giveIPValue(FloatArray &answer, GaussPoint *gp, InternalStateType ty
 
         return 1;
     } else {
-        answer.resize(0);
+        answer.clear();
         return 0;
     }
 }

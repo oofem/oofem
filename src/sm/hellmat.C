@@ -1926,7 +1926,7 @@ void HellmichMaterial :: giveShrinkageStrainVector(FloatArray &answer, MatRespon
                                                    GaussPoint *gp, TimeStep *tStep, ValueModeType mode)
 {
     int size = 6;
-    answer.resize(0);
+    answer.clear();
     MaterialMode mmode = gp->giveMaterialMode();
 
     if ( ( ( options & moHasShrinkage ) == moHasShrinkage ) || ( options & moHumidityStrain ) ) {
@@ -1985,7 +1985,7 @@ void HellmichMaterial :: giveShrinkageStrainVector(FloatArray &answer, MatRespon
 void HellmichMaterial :: givePrestressStrainVector(FloatArray &answer, MatResponseForm form,
                                                    GaussPoint *gp, TimeStep *tStep, ValueModeType mode)
 {
-    answer.resize(0);
+    answer.clear();
     if ( prestress ) {
         double ksi, prestr, time = giveTime(tStep);
         prestr = prestressValue(time);
@@ -2043,7 +2043,7 @@ void HellmichMaterial :: giveEigenStrainVector(FloatArray &answer, MatResponseFo
     elem->computeResultingIPTemperatureAt(et, tStep, gp, mode);
 
     // thermal dilatation from intrinsic temperature (independent on StructuralTemperatureLoad)
-    answer.resize(0);
+    answer.clear();
     dT = giveTemperatureChange(gp, mode);
 
 
@@ -2454,7 +2454,7 @@ HellmichMaterial :: computeStressIndependentStrainVector(FloatArray &answer,
         return;
     }
 
-    answer.resize(0);
+    answer.clear();
 }
 
 contextIOResultType HellmichMaterial :: saveIPContext(DataStream *stream, ContextMode mode, GaussPoint *gp)

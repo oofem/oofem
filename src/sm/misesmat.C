@@ -879,7 +879,7 @@ void MisesMatStatus :: initTempStatus()
     tempDamage = damage;
     tempPlasticStrain = plasticStrain;
     tempKappa = kappa;
-    trialStressD.resize(0); // to indicate that it is not defined yet
+    trialStressD.clear(); // to indicate that it is not defined yet
     tempLeftCauchyGreen = leftCauchyGreen;
 }
 
@@ -893,7 +893,7 @@ MisesMatStatus :: updateYourself(TimeStep *tStep)
     plasticStrain = tempPlasticStrain;
     kappa = tempKappa;
     damage = tempDamage;
-    trialStressD.resize(0); // to indicate that it is not defined any more
+    trialStressD.clear(); // to indicate that it is not defined any more
     leftCauchyGreen = tempLeftCauchyGreen;
 }
 

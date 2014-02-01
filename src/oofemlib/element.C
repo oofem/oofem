@@ -327,7 +327,7 @@ Element :: giveRotationMatrix(FloatMatrix &answer, EquationID eid)
     } else if ( is_NtoG ) {
         answer = NtoG;
     } else {
-        answer.beEmptyMtrx();
+        answer.clear();
         return false;
     }
     return true;
@@ -346,7 +346,7 @@ Element :: computeDofTransformationMatrix(FloatMatrix &answer, const IntArray &n
     }
 
     if ( !flag ) {
-        answer.beEmptyMtrx();
+        answer.clear();
         return false;
     }
 
@@ -428,9 +428,9 @@ Element :: giveLocationArray(IntArray &locationArray, EquationID eid, const Unkn
 // simply appending the location array of every node of the receiver.
 {
     IntArray masterDofIDs, nodalArray, dofIDMask;
-    locationArray.resize(0);
+    locationArray.clear();
     if ( dofIdArray ) {
-        dofIdArray->resize(0);
+        dofIdArray->clear();
     }
     for ( int i = 1; i <= this->numberOfDofMans; i++ ) {
         this->giveDofManDofIDMask(i, eid, dofIDMask);
@@ -457,9 +457,9 @@ void
 Element :: giveLocationArray(IntArray &locationArray, const IntArray &dofIDMask, const UnknownNumberingScheme &s, IntArray *dofIdArray) const
 {
     IntArray masterDofIDs, nodalArray, ids = dofIDMask;
-    locationArray.resize(0);
+    locationArray.clear();
     if ( dofIdArray ) {
-        dofIdArray->resize(0);
+        dofIdArray->clear();
     }
     for ( int i = 1; i <= this->numberOfDofMans; i++ ) {
         if ( dofIDMask.giveSize() == 0 ) {
@@ -490,9 +490,9 @@ void
 Element :: giveBoundaryLocationArray(IntArray &locationArray, const IntArray &bNodes, EquationID eid, const UnknownNumberingScheme &s, IntArray *dofIdArray)
 {
     IntArray masterDofIDs, nodalArray, dofIDMask;
-    locationArray.resize(0);
+    locationArray.clear();
     if ( dofIdArray ) {
-        dofIdArray->resize(0);
+        dofIdArray->clear();
     }
     for ( int i = 1; i <= bNodes.giveSize(); i++ ) {
         this->giveDofManDofIDMask(bNodes.at(i), eid, dofIDMask);
@@ -510,9 +510,9 @@ void
 Element :: giveBoundaryLocationArray(IntArray &locationArray, const IntArray &bNodes, const IntArray &dofIDMask, const UnknownNumberingScheme &s, IntArray *dofIdArray)
 {
     IntArray masterDofIDs, nodalArray, ids = dofIDMask;
-    locationArray.resize(0);
+    locationArray.clear();
     if ( dofIdArray ) {
-        dofIdArray->resize(0);
+        dofIdArray->clear();
     }
     for ( int i = 1; i <= bNodes.giveSize(); i++ ) {
         if ( dofIDMask.giveSize() == 0 ) {
@@ -698,18 +698,18 @@ Element :: initializeFrom(InputRecord *ir)
 
     IR_GIVE_FIELD(ir, dofManArray, _IFT_Element_nodes);
 
-    bodyLoadArray.resize(0);
+    bodyLoadArray.clear();
     IR_GIVE_OPTIONAL_FIELD(ir, bodyLoadArray, _IFT_Element_bodyload);
 
-    boundaryLoadArray.resize(0);
+    boundaryLoadArray.clear();
     IR_GIVE_OPTIONAL_FIELD(ir, boundaryLoadArray, _IFT_Element_boundaryload);
 
-    elemLocalCS.resize(0, 0);
+    elemLocalCS.clear();
 
     if ( ir->hasField(_IFT_Element_lcs) ) { //local coordinate system
         double n1 = 0.0, n2 = 0.0;
         FloatArray triplets;
-        triplets.resize(0);
+        triplets.clear();
         IR_GIVE_OPTIONAL_FIELD(ir, triplets, _IFT_Element_lcs);
         elemLocalCS.resize(3, 3);
         for ( int j = 1; j <= 3; j++ ) {
@@ -734,7 +734,7 @@ Element :: initializeFrom(InputRecord *ir)
     }
 
 #ifdef __PARALLEL_MODE
-    partitions.resize(0);
+    partitions.clear();
     IR_GIVE_OPTIONAL_FIELD(ir, partitions, _IFT_Element_partitions);
     if ( ir->hasField(_IFT_Element_remote) ) {
         parallel_mode = Element_remote;
@@ -1189,7 +1189,7 @@ Element :: computeGlobalCoordinates(FloatArray &answer, const FloatArray &lcoord
     FEInterpolation *fei = this->giveInterpolation();
 #ifdef DEBUG
     if ( !fei ) {
-        answer.resize(0);
+        answer.clear();
         return false;
     }
 #endif
@@ -1217,7 +1217,7 @@ Element :: giveLocalCoordinateSystem(FloatMatrix &answer)
         answer = elemLocalCS;
         return 1;
     } else {
-        answer.beEmptyMtrx();
+        answer.clear();
     }
 
     return 0;
@@ -1242,7 +1242,7 @@ Element :: giveIPValue(FloatArray &answer, GaussPoint *gp, InternalStateType typ
             answer.resize(1);
             answer.at(1) = ee->giveElementError(indicatorET, this, tStep);
         } else {
-            answer.resize(0);
+            answer.clear();
             return 0;
         }
 
@@ -1253,7 +1253,7 @@ Element :: giveIPValue(FloatArray &answer, GaussPoint *gp, InternalStateType typ
             answer.resize(1);
             answer.at(1) = ee->giveElementError(internalStressET, this, tStep);
         } else {
-            answer.resize(0);
+            answer.clear();
             return 0;
         }
         return 1;
@@ -1263,7 +1263,7 @@ Element :: giveIPValue(FloatArray &answer, GaussPoint *gp, InternalStateType typ
             answer.resize(1);
             answer.at(1) = ee->giveElementError(primaryUnknownET, this, tStep);
         } else {
-            answer.resize(0);
+            answer.clear();
             return 0;
         }
         return 1;
@@ -1468,7 +1468,7 @@ Element :: giveGeometryType() const
 bool
 Element :: computeGtoLRotationMatrix(FloatMatrix &answer)
 {
-    answer.beEmptyMtrx();
+    answer.clear();
     return false;
 }
 
@@ -1614,7 +1614,7 @@ Element :: giveInternalStateAtNode(FloatArray &answer, InternalStateType type, I
                            giveRequiredDofManDensity(this->giveNode(node)->giveNumber(), tStep, 1);
             return 1;
         } else {
-            answer.resize(0);
+            answer.clear();
             return 0;
         }
     } else {
@@ -1626,7 +1626,7 @@ Element :: giveInternalStateAtNode(FloatArray &answer, InternalStateType type, I
             if ( nodval ) {
                 answer = * nodval;
             } else {
-                answer.resize(0);
+                answer.clear();
             }
 
             return result;

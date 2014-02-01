@@ -161,9 +161,9 @@ NRSolver :: initializeFrom(InputRecord *ir)
     IR_GIVE_OPTIONAL_FIELD(ir, rtolf.at(1), _IFT_NRSolver_rtolf);
     IR_GIVE_OPTIONAL_FIELD(ir, rtold.at(1), _IFT_NRSolver_rtold);
 
-    prescribedDofs.resize(0);
+    prescribedDofs.clear();
     IR_GIVE_OPTIONAL_FIELD(ir, prescribedDofs, _IFT_NRSolver_ddm);
-    prescribedDofsValues.resize(0);
+    prescribedDofsValues.clear();
     IR_GIVE_OPTIONAL_FIELD(ir, prescribedDofsValues, _IFT_NRSolver_ddv);
     prescribedDisplacementTF = 0;
     IR_GIVE_OPTIONAL_FIELD(ir, prescribedDisplacementTF, _IFT_NRSolver_ddfunc);
