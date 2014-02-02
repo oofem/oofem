@@ -442,7 +442,7 @@ NonLinearDynamic :: proceedStep(int di, TimeStep *tStep)
                         VM_Total, EModelDefaultEquationNumbering(), this->giveDomain(di));
 
 #ifdef __PARALLEL_MODE
-    this->updateSharedDofManagers(loadVector, LoadExchangeTag);
+    this->updateSharedDofManagers(loadVector, EModelDefaultEquationNumbering(), LoadExchangeTag);
 #endif
 
     // Assembling the effective load vector
