@@ -31,10 +31,9 @@
  *  License along with this library; if not, write to the Free Software
  *  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  */
-//----------------------------------------------------------------------
+
 #include <iostream>
 using namespace std;
-//----------------------------------------------------------------------
 
 #include "nlineardynamic.h"
 #include "nummet.h"
@@ -59,11 +58,9 @@ namespace oofem {
 REGISTER_EngngModel(NonLinearDynamic);
 
 NonLinearDynamic :: NonLinearDynamic(int i, EngngModel *_master) : StructuralEngngModel(i, _master),
-    totalDisplacement(), incrementOfDisplacement(), internalForces(), forcesVector(), initialLoadVector(),
-    incrementalLoadVector(), initialLoadVectorOfPrescribed(), incrementalLoadVectorOfPrescribed()
+    totalDisplacement(), incrementOfDisplacement(), internalForces(), forcesVector()
 {
     initialTimeDiscretization = TD_ThreePointBackward;
-    numMetStatus              = NM_None;
 
     ndomains                = 1;
     internalVarUpdateStamp  = 0;
@@ -73,7 +70,6 @@ NonLinearDynamic :: NonLinearDynamic(int i, EngngModel *_master) : StructuralEng
     massMatrix               = NULL;
     nMethod                  = NULL;
 
-    refLoadInputMode = SparseNonLinearSystemNM :: rlm_total;
 #ifdef __PARALLEL_MODE
     nonlocalExt = 0;
 
@@ -88,9 +84,7 @@ NonLinearDynamic :: NonLinearDynamic(int i, EngngModel *_master) : StructuralEng
 
 NonLinearDynamic :: ~NonLinearDynamic()
 {
-    if ( nMethod ) {
-        delete nMethod;
-    }
+    delete nMethod;
 }
 
 
@@ -131,10 +125,6 @@ NonLinearDynamic :: updateAttributes(MetaStep *mStep)
 
     delta = 0;
     IR_GIVE_OPTIONAL_FIELD(ir, delta, _IFT_NonLinearDynamic_delta);
-
-    int val = 0;
-    IR_GIVE_OPTIONAL_FIELD(ir, val, _IFT_NonLinearDynamic_refloadmode);
-    refLoadInputMode = ( SparseNonLinearSystemNM :: referenceLoadInputModeType ) val;
 }
 
 
@@ -164,7 +154,6 @@ NonLinearDynamic :: initializeFrom(InputRecord *ir)
 
     val = 0;
     IR_GIVE_OPTIONAL_FIELD(ir, val, _IFT_NonLinearDynamic_ddtScheme);
-
     initialTimeDiscretization = ( TimeDiscretizationType ) val;
 
     gamma = 0.5;
@@ -256,7 +245,7 @@ TimeStep *NonLinearDynamic :: giveNextStep()
     delete previousStep;
     if ( currentStep != NULL ) {
         totalTime = currentStep->giveTargetTime() + deltaTtmp;
-        istep =  currentStep->giveNumber() + 1;
+        istep = currentStep->giveNumber() + 1;
         counter = currentStep->giveSolutionStateCounter() + 1;
         mStepNum = currentStep->giveMetaStepNumber();
         td = currentStep->giveTimeDiscretization();
@@ -298,7 +287,8 @@ void NonLinearDynamic :: solveYourself()
 
 
 void
-NonLinearDynamic :: solveYourselfAt(TimeStep *tStep) {
+NonLinearDynamic :: solveYourselfAt(TimeStep *tStep)
+{
     if ( commInitFlag ) {
 #ifdef __PARALLEL_MODE
  #ifdef __VERBOSE_PARALLEL
@@ -336,7 +326,7 @@ NonLinearDynamic :: proceedStep(int di, TimeStep *tStep)
     // creates system of governing eq's and solves them at given time step
     // first assemble problem at current time step
 
-    int neq = this->giveNumberOfDomainEquations( 1, EModelDefaultEquationNumbering() );
+    int neq = this->giveNumberOfDomainEquations( di, EModelDefaultEquationNumbering() );
 
     // Time-stepping constants
     this->determineConstants(tStep);
@@ -367,25 +357,22 @@ NonLinearDynamic :: proceedStep(int di, TimeStep *tStep)
         TimeStep *stepWhenIcApply = new TimeStep(giveNumberOfTimeStepWhenIcApply(), this, 0,
                                                  -deltaT, deltaT, 0);
 
-        int nDofs, j, k, jj;
         int nman = this->giveDomain(di)->giveNumberOfDofManagers();
-        DofManager *node;
-        Dof *iDof;
 
         // Considering initial conditions.
-        for ( j = 1; j <= nman; j++ ) {
-            node = this->giveDomain(di)->giveDofManager(j);
-            nDofs = node->giveNumberOfDofs();
+        for ( int j = 1; j <= nman; j++ ) {
+            DofManager *node = this->giveDomain(di)->giveDofManager(j);
+            int nDofs = node->giveNumberOfDofs();
 
-            for ( k = 1; k <= nDofs; k++ ) {
+            for ( int k = 1; k <= nDofs; k++ ) {
                 // Ask for initial values obtained from
                 // bc (boundary conditions) and ic (initial conditions).
-                iDof  =  node->giveDof(k);
+                Dof *iDof = node->giveDof(k);
                 if ( !iDof->isPrimaryDof() ) {
                     continue;
                 }
 
-                jj = iDof->__giveEquationNumber();
+                int jj = iDof->__giveEquationNumber();
                 if ( jj ) {
                     totalDisplacement.at(jj)  = iDof->giveUnknown(VM_Total, stepWhenIcApply);
                     velocityVector.at(jj)     = iDof->giveUnknown(VM_Velocity, stepWhenIcApply);
@@ -419,8 +406,8 @@ NonLinearDynamic :: proceedStep(int di, TimeStep *tStep)
         massMatrix->buildInternalStructure( this, di, EID_MomentumBalance, EModelDefaultEquationNumbering() );
 
         // Assemble mass matrix
-        this->assemble( massMatrix, tStep, EID_MomentumBalance, MassMatrix,
-                        EModelDefaultEquationNumbering(), this->giveDomain(di) );
+        this->assemble(massMatrix, tStep, EID_MomentumBalance, MassMatrix,
+                       EModelDefaultEquationNumbering(), this->giveDomain(di));
 
         // Initialize vectors
         help.resize(neq);
@@ -430,18 +417,11 @@ NonLinearDynamic :: proceedStep(int di, TimeStep *tStep)
         rhs2.resize(neq);
         rhs2.zero();
 
-        previousIncrementOfDisplacement.resize(neq);
-        previousTotalDisplacement.resize(neq);
-        previousVelocityVector.resize(neq);
-        previousAccelerationVector.resize(neq);
-        previousInternalForces.resize(neq);
-        for ( int i = 1; i <= neq; i++ ) {
-            previousIncrementOfDisplacement.at(i) = incrementOfDisplacement.at(i);
-            previousTotalDisplacement.at(i)       = totalDisplacement.at(i);
-            previousVelocityVector.at(i)          = velocityVector.at(i);
-            previousAccelerationVector.at(i)      = accelerationVector.at(i);
-            previousInternalForces.at(i)          = internalForces.at(i);
-        }
+        previousIncrementOfDisplacement = incrementOfDisplacement;
+        previousTotalDisplacement = totalDisplacement;
+        previousVelocityVector = velocityVector;
+        previousAccelerationVector = accelerationVector;
+        previousInternalForces = internalForces;
 
         forcesVector.resize(neq);
         forcesVector.zero();
@@ -454,13 +434,20 @@ NonLinearDynamic :: proceedStep(int di, TimeStep *tStep)
     OOFEM_LOG_DEBUG("Assembling load\n");
 #endif
 
-    // Assemble the incremental reference load vector.
-    this->assembleIncrementalReferenceLoadVectors(incrementalLoadVector, incrementalLoadVectorOfPrescribed,
-                                                  refLoadInputMode, this->giveDomain(di), EID_MomentumBalance, tStep);
+    // Assemble the external forces
+    FloatArray loadVector;
+    loadVector.resize( this->giveNumberOfDomainEquations(di, EModelDefaultEquationNumbering())  );
+    loadVector.zero();
+    this->assembleVector(loadVector, tStep, EID_MomentumBalance, ExternalForcesVector,
+                        VM_Total, EModelDefaultEquationNumbering(), this->giveDomain(di));
+
+#ifdef __PARALLEL_MODE
+    this->updateSharedDofManagers(loadVector, LoadExchangeTag);
+#endif
 
     // Assembling the effective load vector
     for ( int i = 1; i <= neq; i++ ) {
-        help.at(i) = a2 * previousVelocityVector.at(i) + a3 *previousAccelerationVector.at(i)
+        help.at(i) = a2 * previousVelocityVector.at(i) + a3 * previousAccelerationVector.at(i)
                      + eta * ( a4 * previousVelocityVector.at(i)
                                + a5 * previousAccelerationVector.at(i)
                                + a6 * previousIncrementOfDisplacement.at(i) );
@@ -477,14 +464,11 @@ NonLinearDynamic :: proceedStep(int di, TimeStep *tStep)
         this->timesMtrx(help, rhs2, TangentStiffnessMatrix, this->giveDomain(di), tStep);
 
         help.zero();
-        for ( int i = 1; i <= neq; i++ ) {
-            rhs.at(i) += rhs2.at(i);
-        }
+        rhs.add(rhs2);
     }
 
-    for ( int i = 1; i <= neq; i++ ) {
-        rhs.at(i) += incrementalLoadVector.at(i) - previousInternalForces.at(i);
-    }
+    rhs.add(loadVector);
+    rhs.subtract(previousInternalForces);
 
     //
     // Set-up numerical model.
@@ -500,22 +484,19 @@ NonLinearDynamic :: proceedStep(int di, TimeStep *tStep)
         incrementOfDisplacement.zero();
     }
 
-    if ( initialLoadVector.isNotEmpty() ) {
-        numMetStatus = nMethod->solve(effectiveStiffnessMatrix, & rhs, & initialLoadVector,
-                                      & totalDisplacement, & incrementOfDisplacement, & forcesVector,
-                                      internalForcesEBENorm, loadLevel, refLoadInputMode, currentIterations, tStep);
-    } else {
-        numMetStatus = nMethod->solve(effectiveStiffnessMatrix, & rhs, NULL,
-                                      & totalDisplacement, & incrementOfDisplacement, & forcesVector,
-                                      internalForcesEBENorm, loadLevel, refLoadInputMode, currentIterations, tStep);
+    NM_Status numMetStatus = nMethod->solve(effectiveStiffnessMatrix, & rhs, NULL,
+                                    & totalDisplacement, & incrementOfDisplacement, & forcesVector,
+                                    internalForcesEBENorm, loadLevel, SparseNonLinearSystemNM :: rlm_total, currentIterations, tStep);
+    if ( !(numMetStatus & NM_Success) ) {
+        OOFEM_ERROR("NonLinearDynamic :: proceedStep - NRSolver failed to solve problem");
     }
 
+    rhs = previousVelocityVector;
+    rhs2 = previousAccelerationVector;
     for ( int i = 1; i <= neq; i++ ) {
-        rhs.at(i)                = previousVelocityVector.at(i);
-        rhs2.at(i)               = previousAccelerationVector.at(i);
-        accelerationVector.at(i) = a0 * incrementOfDisplacement.at(i) - a2 *rhs.at(i) - a3 *rhs2.at(i);
-        velocityVector.at(i)     = a1 * incrementOfDisplacement.at(i) - a4 *rhs.at(i) - a5 *rhs2.at(i)
-                                   - a6 *previousIncrementOfDisplacement.at(i);
+        accelerationVector.at(i) = a0 * incrementOfDisplacement.at(i) - a2 * rhs.at(i) - a3 * rhs2.at(i);
+        velocityVector.at(i)     = a1 * incrementOfDisplacement.at(i) - a4 * rhs.at(i) - a5 * rhs2.at(i)
+            - a6 * previousIncrementOfDisplacement.at(i);
     }
     totIterations += currentIterations;
 }
@@ -544,29 +525,29 @@ NonLinearDynamic :: determineConstants(TimeStep *tStep)
     double dt2 = deltaT * deltaT;
 
     if ( timeDiscretization == TD_Newmark ) {
-        a0 = 1 / ( beta * dt2 );
+        a0 = 1. / ( beta * dt2 );
         a1 = gamma / ( beta * deltaT );
-        a2 = 1 / ( beta * deltaT );
-        a3 = 1 / ( 2 *  beta ) - 1;
-        a4 = ( gamma / beta ) - 1;
-        a5 = deltaT / 2 * ( gamma / beta - 2 );
-        a6 = 0;
+        a2 = 1. / ( beta * deltaT );
+        a3 = 1. / ( 2. *  beta ) - 1.;
+        a4 = ( gamma / beta ) - 1.;
+        a5 = deltaT / 2. * ( gamma / beta - 2. );
+        a6 = 0.;
     } else if ( timeDiscretization == TD_TwoPointBackward ) {
-        a0 = 1 / dt2;
-        a1 = 1 / deltaT;
-        a2 = 1 / deltaT;
-        a3 = 0;
-        a4 = 0;
-        a5 = 0;
-        a6 = 0;
+        a0 = 1. / dt2;
+        a1 = 1. / deltaT;
+        a2 = 1. / deltaT;
+        a3 = 0.;
+        a4 = 0.;
+        a5 = 0.;
+        a6 = 0.;
     } else if ( timeDiscretization == TD_ThreePointBackward ) {
-        a0 = 2 / dt2;
-        a1 = 3 / ( 2 * deltaT );
-        a2 = 2 / deltaT;
-        a3 = 0;
-        a4 = 0;
-        a5 = 0;
-        a6 = 1 / ( 2 * deltaT );
+        a0 = 2. / dt2;
+        a1 = 3. / ( 2. * deltaT );
+        a2 = 2. / deltaT;
+        a3 = 0.;
+        a4 = 0.;
+        a5 = 0.;
+        a6 = 1. / ( 2. * deltaT );
     }
 }
 
@@ -601,17 +582,13 @@ NonLinearDynamic :: giveElementCharacteristicMatrix(FloatMatrix &answer, int num
 
 void NonLinearDynamic :: updateYourself(TimeStep *tStep)
 {
-    int neq = this->giveNumberOfDomainEquations( 1, EModelDefaultEquationNumbering() );
-
     totIterations = 0;
 
-    for ( int i = 1; i <= neq; i++ ) {
-        previousVelocityVector.at(i)          = velocityVector.at(i);
-        previousAccelerationVector.at(i)      = accelerationVector.at(i);
-        previousIncrementOfDisplacement.at(i) = incrementOfDisplacement.at(i);
-        previousTotalDisplacement.at(i)       = totalDisplacement.at(i);
-        previousInternalForces.at(i)          = internalForces.at(i);
-    }
+    previousVelocityVector = velocityVector;
+    previousAccelerationVector = accelerationVector;
+    previousIncrementOfDisplacement = incrementOfDisplacement;
+    previousTotalDisplacement = totalDisplacement;
+    previousInternalForces = internalForces;
 
     StructuralEngngModel :: updateYourself(tStep);
 }
@@ -624,8 +601,6 @@ void NonLinearDynamic :: updateComponent(TimeStep *tStep, NumericalCmpn cmpn, Do
 // of new equlibrium stage.
 //
 {
-    int neq = this->giveNumberOfDomainEquations( 1, EModelDefaultEquationNumbering() );
-
 #ifdef TIME_REPORT
     Timer timer;
 #endif
@@ -635,21 +610,24 @@ void NonLinearDynamic :: updateComponent(TimeStep *tStep, NumericalCmpn cmpn, Do
         // Prevent assembly if already assembled ( totIterations > 0 )
         // Allow if MANRMSteps != 0
         if ( ( totIterations == 0 ) || MANRMSteps ) {
+#ifdef VERBOSE
+            OOFEM_LOG_DEBUG("Updating effective stiffness matrix\n");
+#endif
 #ifdef TIME_REPORT
             timer.startTimer();
 #endif
-#ifdef VERBOSE
-            OOFEM_LOG_DEBUG("Updating nonlinear LHS\n");
-#endif
             effectiveStiffnessMatrix->zero();
-#ifdef VERBOSE
-            OOFEM_LOG_DEBUG("Assembling stiffness matrix\n");
-#endif
             this->assemble(effectiveStiffnessMatrix, tStep, EID_MomentumBalance, EffectiveStiffnessMatrix,
                            EModelDefaultEquationNumbering(), d);
+#if 0
+            this->assemble(effectiveStiffnessMatrix, tStep, EID_MomentumBalance, TangentStiffnessMatrix,
+                           EModelDefaultEquationNumbering(), d);
+            effectiveStiffnessMatrix->times(1. + this->delta * a1);
+            effectiveStiffnessMatrix->add(this->a0 + this->eta * this->a1, this->massMatrix);
+#endif
 #ifdef TIME_REPORT
             timer.stopTimer();
-            OOFEM_LOG_DEBUG( "User time consumed by updating nonlinear LHS: %.2fs\n", timer.getUtime() );
+            OOFEM_LOG_DEBUG("User time consumed by updating nonlinear LHS: %.2fs\n", timer.getUtime() );
 #endif
         }
         break;
@@ -665,30 +643,24 @@ void NonLinearDynamic :: updateComponent(TimeStep *tStep, NumericalCmpn cmpn, Do
                 this->giveInternalForces(internalForces, true, d->giveNumber(), tStep);
 
                 // Updating the residual vector @ NR-solver
-                for ( int i = 1; i <= neq; i++ ) {
-                    help.at(i) = ( a0 + eta * a1 ) * incrementOfDisplacement.at(i);
-                }
+                help.beScaled(a0 + eta * a1, incrementOfDisplacement);
 
                 massMatrix->times(help, rhs2);
 
-                for ( int i = 1; i <= neq; i++ ) {
-                    forcesVector.at(i) = internalForces.at(i) + rhs2.at(i) - previousInternalForces.at(i);
-                }
+                forcesVector = internalForces;
+                forcesVector.add(rhs2);
+                forcesVector.subtract(previousInternalForces);
 
                 if ( delta != 0 ) {
-                    for ( int i = 1; i <= neq; i++ ) {
-                        help.at(i) = delta * a1 * incrementOfDisplacement.at(i);
-                    }
-                    this->timesMtrx(help, rhs2, TangentStiffnessMatrix, d, tStep);
+                    help.beScaled(delta * a1, incrementOfDisplacement);
+                    this->timesMtrx(help, rhs2, TangentStiffnessMatrix, this->giveDomain(1), tStep);
 
-                    for ( int i = 1; i <= neq; i++ ) {
-                        forcesVector.at(i) += rhs2.at(i);
-                    }
+                    forcesVector.add(rhs2);
                 }
             }
 #ifdef TIME_REPORT
             timer.stopTimer();
-            OOFEM_LOG_DEBUG( "User time consumed by updating internal RHS: %.2fs\n", timer.getUtime() );
+            OOFEM_LOG_DEBUG("User time consumed by updating internal RHS: %.2fs\n", timer.getUtime() );
 #endif
         }
         break;
@@ -706,7 +678,7 @@ NonLinearDynamic :: printOutputAt(FILE *File, TimeStep *tStep)
         return; // Do not print even Solution step header
     }
 
-    fprintf( File, "\n\nOutput for time % .3e, solution step number %d\n", tStep->giveTargetTime(), tStep->giveNumber() );
+    fprintf(File, "\n\nOutput for time % .3e, solution step number %d\n", tStep->giveTargetTime(), tStep->giveNumber());
     fprintf(File, "Equilibrium reached in %d iterations\n\n", currentIterations);
 
 
@@ -763,18 +735,6 @@ contextIOResultType NonLinearDynamic :: saveContext(DataStream *stream, ContextM
         THROW_CIOERR(iores);
     }
 
-    if ( ( iores = internalForces.storeYourself(stream, mode) ) != CIO_OK ) {
-        THROW_CIOERR(iores);
-    }
-
-    if ( ( iores = initialLoadVector.storeYourself(stream, mode) ) != CIO_OK ) {
-        THROW_CIOERR(iores);
-    }
-
-    if ( ( iores = initialLoadVectorOfPrescribed.storeYourself(stream, mode) ) != CIO_OK ) {
-        THROW_CIOERR(iores);
-    }
-
     if ( closeFlag ) {
         fclose(file);
         delete stream;
@@ -820,18 +780,6 @@ contextIOResultType NonLinearDynamic :: restoreContext(DataStream *stream, Conte
     }
 
     if ( ( iores = accelerationVector.restoreYourself(stream, mode) ) != CIO_OK ) {
-        THROW_CIOERR(iores);
-    }
-
-    if ( ( iores = internalForces.restoreYourself(stream, mode) ) != CIO_OK ) {
-        THROW_CIOERR(iores);
-    }
-
-    if ( ( iores = initialLoadVector.restoreYourself(stream, mode) ) != CIO_OK ) {
-        THROW_CIOERR(iores);
-    }
-
-    if ( ( iores = initialLoadVectorOfPrescribed.restoreYourself(stream, mode) ) != CIO_OK ) {
         THROW_CIOERR(iores);
     }
 
@@ -923,48 +871,6 @@ NonLinearDynamic :: showSparseMtrxStructure(int type, oofegGraphicContext &conte
 }
 #endif
 
-void
-NonLinearDynamic :: computeExternalLoadReactionContribution(FloatArray &reactions, TimeStep *tStep, int di)
-{
-    if ( ( di == 1 ) && ( tStep == this->giveCurrentStep() ) ) {
-        reactions = incrementalLoadVectorOfPrescribed;
-        reactions.add(initialLoadVectorOfPrescribed);
-    } else {
-        _error("computeExternalLoadReactionContribution: unable to respond due to invalid solution step or domain");
-    }
-}
-
-void
-NonLinearDynamic :: assembleIncrementalReferenceLoadVectors(FloatArray &_incrementalLoadVector,
-                                                            FloatArray &_incrementalLoadVectorOfPrescribed,
-                                                            SparseNonLinearSystemNM :: referenceLoadInputModeType _refMode,
-                                                            Domain *sourceDomain, EquationID ut, TimeStep *tStep)
-{
-    EModelDefaultEquationNumbering en;
-
-    _incrementalLoadVector.resize( sourceDomain->giveEngngModel()->giveNumberOfDomainEquations( sourceDomain->giveNumber(), EModelDefaultEquationNumbering() ) );
-    _incrementalLoadVector.zero();
-    _incrementalLoadVectorOfPrescribed.resize( sourceDomain->giveEngngModel()->giveNumberOfDomainEquations( sourceDomain->giveNumber(), EModelDefaultPrescribedEquationNumbering() ) );
-    _incrementalLoadVectorOfPrescribed.zero();
-
-    if ( _refMode == SparseNonLinearSystemNM :: rlm_incremental ) {
-        this->assembleVector(_incrementalLoadVector, tStep, ut, ExternalForcesVector,
-                             VM_Incremental, EModelDefaultEquationNumbering(), sourceDomain);
-
-        this->assembleVector(_incrementalLoadVectorOfPrescribed, tStep, ut, ExternalForcesVector,
-                             VM_Incremental, EModelDefaultPrescribedEquationNumbering(), sourceDomain);
-    } else {
-        this->assembleVector(_incrementalLoadVector, tStep, ut, ExternalForcesVector,
-                             VM_Total, EModelDefaultEquationNumbering(), sourceDomain);
-        this->assembleVector(_incrementalLoadVectorOfPrescribed, tStep, ut, ExternalForcesVector,
-                             VM_Total, EModelDefaultPrescribedEquationNumbering(), sourceDomain);
-    }
-
-#ifdef __PARALLEL_MODE
-    this->updateSharedDofManagers(_incrementalLoadVector, EModelDefaultEquationNumbering(), LoadExchangeTag);
-#endif
-}
-
 
 void
 NonLinearDynamic :: timesMtrx(FloatArray &vec, FloatArray &answer, CharType type, Domain *domain, TimeStep *tStep)
@@ -974,13 +880,12 @@ NonLinearDynamic :: timesMtrx(FloatArray &vec, FloatArray &answer, CharType type
     int jj, kk, n;
     FloatMatrix charMtrx;
     IntArray loc;
-    Element *element;
     EModelDefaultEquationNumbering en;
 
     answer.resize( this->giveNumberOfDomainEquations(domain->giveNumber(), en) );
     answer.zero();
     for ( int i = 1; i <= nelem; i++ ) {
-        element = domain->giveElement(i);
+        Element *element = domain->giveElement(i);
 #ifdef __PARALLEL_MODE
         // Skip remote elements (these are used as mirrors of remote elements on other domains
         // when nonlocal constitutive models are used. They introduction is necessary to
@@ -1030,23 +935,22 @@ int
 NonLinearDynamic :: estimateMaxPackSize(IntArray &commMap, CommunicationBuffer &buff, int packUnpackType)
 {
     int mapSize = commMap.giveSize();
-    int i, j, ndofs, count = 0, pcount = 0;
+    int count = 0, pcount = 0;
     IntArray locationArray;
     Domain *domain = this->giveDomain(1);
-    DofManager *dman;
-    Dof *jdof;
 
     if ( packUnpackType == ProblemCommMode__ELEMENT_CUT ) {
-        for ( i = 1; i <= mapSize; i++ ) {
+        for ( int i = 1; i <= mapSize; i++ ) {
             count += domain->giveDofManager( commMap.at(i) )->giveNumberOfDofs();
         }
 
         return ( buff.givePackSize(MPI_DOUBLE, 1) * count );
     } else if ( packUnpackType == ProblemCommMode__NODE_CUT ) {
-        for ( i = 1; i <= mapSize; i++ ) {
-            ndofs = ( dman = domain->giveDofManager( commMap.at(i) ) )->giveNumberOfDofs();
-            for ( j = 1; j <= ndofs; j++ ) {
-                jdof = dman->giveDof(j);
+        for ( int i = 1; i <= mapSize; i++ ) {
+            DofManager *dman = domain->giveDofManager( commMap.at(i) );
+            int ndofs = dman->giveNumberOfDofs();
+            for ( int j = 1; j <= ndofs; j++ ) {
+                Dof *jdof = dman->giveDof(j);
                 if ( jdof->isPrimaryDof() && ( jdof->__giveEquationNumber() ) ) {
                     count++;
                 } else {
@@ -1058,7 +962,7 @@ NonLinearDynamic :: estimateMaxPackSize(IntArray &commMap, CommunicationBuffer &
         //printf ("\nestimated count is %d\n",count);
         return ( buff.givePackSize(MPI_DOUBLE, 1) * max(count, pcount) );
     } else if ( packUnpackType == ProblemCommMode__REMOTE_ELEMENT_MODE ) {
-        for ( i = 1; i <= mapSize; i++ ) {
+        for ( int i = 1; i <= mapSize; i++ ) {
             count += domain->giveElement( commMap.at(i) )->estimatePackSize(buff);
         }
 
@@ -1116,73 +1020,44 @@ void
 NonLinearDynamic :: packMigratingData(TimeStep *tStep)
 {
     Domain *domain = this->giveDomain(1);
-    int ndofman =  domain->giveNumberOfDofManagers(), ndofs, idofman, idof, _eq;
-    DofManager *_dm;
-    Dof *_dof;
-    bool initialLoadVectorEmpty = initialLoadVector.isEmpty();
-    bool initialLoadVectorOfPrescribedEmpty = initialLoadVectorOfPrescribed.isEmpty();
+    int ndofman = domain->giveNumberOfDofManagers(), _eq;
 
-    for ( idofman = 1; idofman <= ndofman; idofman++ ) {
-        _dm = domain->giveDofManager(idofman);
-        ndofs = _dm->giveNumberOfDofs();
-        for ( idof = 1; idof <= ndofs; idof++ ) {
-            _dof = _dm->giveDof(idof);
+    for ( int idofman = 1; idofman <= ndofman; idofman++ ) {
+        DofManager *_dm = domain->giveDofManager(idofman);
+        int ndofs = _dm->giveNumberOfDofs();
+        for ( int idof = 1; idof <= ndofs; idof++ ) {
+            Dof *_dof = _dm->giveDof(idof);
             if ( _dof->isPrimaryDof() ) {
                 if ( ( _eq = _dof->__giveEquationNumber() ) ) {
                     // pack values in solution vectors
                     _dof->updateUnknownsDictionary( tStep, VM_Total, totalDisplacement.at(_eq) );
-                    if ( initialLoadVectorEmpty ) {
-                        _dof->updateUnknownsDictionary(tStep, VM_RhsInitial, 0.0);
-                    } else {
-                        _dof->updateUnknownsDictionary( tStep, VM_RhsInitial, initialLoadVector.at(_eq) );
-                    }
-
-                    _dof->updateUnknownsDictionary( tStep, VM_RhsIncremental, incrementalLoadVector.at(_eq) );
-                } else if ( ( _eq = _dof->__givePrescribedEquationNumber() ) ) {
-                    // pack values in prescribed solution vectors
-                    if ( initialLoadVectorOfPrescribedEmpty ) {
-                        _dof->updateUnknownsDictionary(tStep, VM_RhsInitial, 0.0);
-                    } else {
-                        _dof->updateUnknownsDictionary( tStep, VM_RhsInitial, initialLoadVectorOfPrescribed.at(_eq) );
-                    }
-
-                    _dof->updateUnknownsDictionary( tStep, VM_RhsIncremental, incrementalLoadVectorOfPrescribed.at(_eq) );
                 }
-            } // end primary dof
-        } // end dof loop
-    } // end dofman loop
+            }
+        }
+    }
 }
 
 void
 NonLinearDynamic :: unpackMigratingData(TimeStep *tStep)
 {
     Domain *domain = this->giveDomain(1);
-    int ndofman =  domain->giveNumberOfDofManagers(), ndofs, idofman, idof, _eq;
+    int ndofman = domain->giveNumberOfDofManagers(), _eq;
     //int myrank = this->giveRank();
-    DofManager *_dm;
-    Dof *_dof;
 
     // resize target arrays
-    int neq = this->giveNumberOfDomainEquations( 1, EModelDefaultEquationNumbering() );
+    int neq = this->giveNumberOfDomainEquations(1, EModelDefaultEquationNumbering());
     totalDisplacement.resize(neq);
     incrementOfDisplacement.resize(neq);
-    incrementalLoadVector.resize(neq);
-    initialLoadVector.resize(neq);
-    initialLoadVectorOfPrescribed.resize( giveNumberOfDomainEquations( 1, EModelDefaultPrescribedEquationNumbering() ) );
-    incrementalLoadVectorOfPrescribed.resize( giveNumberOfDomainEquations( 1, EModelDefaultPrescribedEquationNumbering() ) );
 
-    for ( idofman = 1; idofman <= ndofman; idofman++ ) {
-        _dm = domain->giveDofManager(idofman);
-        ndofs = _dm->giveNumberOfDofs();
-        for ( idof = 1; idof <= ndofs; idof++ ) {
-            _dof = _dm->giveDof(idof);
+    for ( int idofman = 1; idofman <= ndofman; idofman++ ) {
+        DofManager *_dm = domain->giveDofManager(idofman);
+        int ndofs = _dm->giveNumberOfDofs();
+        for ( int idof = 1; idof <= ndofs; idof++ ) {
+            Dof *_dof = _dm->giveDof(idof);
             if ( _dof->isPrimaryDof() ) {
                 if ( ( _eq = _dof->__giveEquationNumber() ) ) {
                     // pack values in solution vectors
                     _dof->giveUnknownsDictionaryValue( tStep, VM_Total, totalDisplacement.at(_eq) );
-                    _dof->giveUnknownsDictionaryValue( tStep, VM_RhsInitial, initialLoadVector.at(_eq) );
-                    _dof->giveUnknownsDictionaryValue( tStep, VM_RhsIncremental, incrementalLoadVector.at(_eq) );
-
  #if 0
                     // debug print
                     if ( _dm->giveParallelMode() == DofManager_shared ) {
@@ -1192,19 +1067,10 @@ NonLinearDynamic :: unpackMigratingData(TimeStep *tStep)
                     }
 
  #endif
-                } else if ( ( _eq = _dof->__givePrescribedEquationNumber() ) ) {
-                    // pack values in prescribed solution vectors
-                    _dof->giveUnknownsDictionaryValue( tStep, VM_RhsInitial, initialLoadVectorOfPrescribed.at(_eq) );
-                    _dof->giveUnknownsDictionaryValue( tStep, VM_RhsIncremental, incrementalLoadVectorOfPrescribed.at(_eq) );
-
- #if 0
-                    // debug print
-                    fprintf(stderr, "[%d] %d(%d) -> %d\n", myrank, idofman, idof, -_eq);
- #endif
                 }
-            } // end primary dof
-        } // end dof loop
-    } // end dofman loop
+            }
+        }
+    }
 
     this->initializeCommMaps(true);
     nMethod->reinitialize();
