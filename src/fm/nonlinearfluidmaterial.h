@@ -118,8 +118,6 @@ public:
     virtual IRResultType initializeFrom(InputRecord *ir);
     virtual void giveInputRecord(DynamicInputRecord &input);
 
-    virtual int hasMaterialModeCapability(MaterialMode mode);
-
     virtual const char *giveClassName() const { return "NewtonianFluidMaterial"; }
     virtual const char *giveInputRecordName() const { return _IFT_NonlinearFluidMaterial_Name; }
 

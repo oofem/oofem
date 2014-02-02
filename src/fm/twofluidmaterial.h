@@ -76,7 +76,6 @@ public:
     virtual double give(int aProperty, GaussPoint *gp);
     virtual IRResultType initializeFrom(InputRecord *ir);
     virtual void giveInputRecord(DynamicInputRecord &input);
-    virtual int hasMaterialModeCapability(MaterialMode mode);
     virtual const char *giveClassName() const { return "TwoFluidMaterial"; }
     virtual const char *giveInputRecordName() const { return _IFT_TwoFluidMaterial_Name; }
     virtual int checkConsistency();

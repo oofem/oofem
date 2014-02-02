@@ -37,9 +37,7 @@
 
 #include "material.h"
 #include "matstatus.h"
-
 #include "floatarray.h"
-#include "floatmatrix.h"
 
 
 namespace oofem {
@@ -70,7 +68,6 @@ public:
 
     virtual void printOutputAt(FILE *file, TimeStep *tStep);
     virtual void initTempStatus();
-    virtual void updateYourself(TimeStep *tStep);
 
     virtual contextIOResultType saveContext(DataStream *stream, ContextMode mode, void *obj = NULL);
     virtual contextIOResultType restoreContext(DataStream *stream, ContextMode mode, void *obj = NULL);
@@ -89,17 +86,8 @@ public:
 
 
 /**
- * Abstract base class for all constitutive models for transport problems. It declares common  services provided
- * by all structural material models. The implementation of these services is partly left on derived classes,
- * which will implement constitutive model dependent part.
- * Some general purpose services are implemented on this level. For details, how to store
- * material model related history variables in integration points, see base class @ref Material documentation.
- *
- * The constitutive model can in general support several material modes (plane stress, plane strain ,... modes).
- * Its capabilities can be examined using hasMaterialModeCapability service.
- * It is generally assumed, that results obtained from constitutive model services are according to
- * valid material mode. This mode is determined from integration point, which is compulsory parameter of all material
- * services.
+ * Abstract base class for all fluid materials. The fluid materials can have compressible response, though most will be incompressible.
+ * The models are characterized by having deviatoric strain rate, and pressure as input at each integration point.
  */
 class FluidDynamicMaterial : public Material
 {
@@ -143,29 +131,17 @@ public:
      */
     virtual void giveDeviatoricStiffnessMatrix(FloatMatrix &answer, MatResponseMode mode, GaussPoint *gp, TimeStep *tStep) = 0;
     /**
-     * Computes the tangent @f$ \frac{\partial\sigma_{\mathrm{dev}}}{\partial p}@f$.
-     * @param answer Tangent vector.
+     * Computes the 4 tangents of the compressible material response in 3D.
+     * @param dsdd @f$ \frac{\partial\sigma_{\mathrm{dev}}}{\partial \epsilon_{\mathrm{dev}}}@f$.
+     * @param dsdp @f$ \frac{\partial\sigma_{\mathrm{dev}}}{\partial p}@f$
+     * @param dedd @f$ \frac{\partial\epsilon_{\mathrm{vol}}}{\partial\epsilon_{\mathrm{dev}}}@f$
+     * @param dedp @f$ \frac{\partial\epsilon_{\mathrm{vol}}}{\partial p}@f$
      * @param mode Mode of result.
      * @param gp Integration point.
      * @param tStep Time step.
      */
-    virtual void giveDeviatoricPressureStiffness(FloatArray &answer, MatResponseMode mode, GaussPoint *gp, TimeStep *tStep);
-    /**
-     * Computes the tangent @f$ \frac{\partial\epsilon_{\mathrm{vol}}}{\partial\epsilon_{\mathrm{dev}}}@f$.
-     * @param answer Tangent vector.
-     * @param mode Mode of result.
-     * @param gp Integration point.
-     * @param tStep Time step.
-     */
-    virtual void giveVolumetricDeviatoricStiffness(FloatArray &answer, MatResponseMode mode, GaussPoint *gp, TimeStep *tStep);
-    /**
-     * Computes the tangent @f$ \frac{\partial\epsilon_{\mathrm{vol}}}{\partial p}@f$.
-     * @param answer Tangent.
-     * @param mode Mode of result.
-     * @param gp Integration point.
-     * @param tStep Time step.
-     */
-    virtual void giveVolumetricPressureStiffness(double &answer, MatResponseMode mode, GaussPoint *gp, TimeStep *tStep);
+    virtual void giveStiffnessMatrices(FloatMatrix &dsdd, FloatArray &dsdp, FloatArray &dedd, double &dedp,
+                                       MatResponseMode mode, GaussPoint *gp, TimeStep *tStep);
 
     /**
      * Gives the effective viscosity for the given integration point.

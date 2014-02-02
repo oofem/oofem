@@ -38,6 +38,7 @@
 #include "fluiddynamicmaterial.h"
 #include "matstatus.h"
 #include "mixedgradientpressurebc.h"
+#include "floatmatrix.h"
 
 ///@name Input fields for FE^2 fluid material
 //@{
@@ -142,7 +143,6 @@ public:
     virtual void giveInputRecord(DynamicInputRecord &input);
 
     virtual int checkConsistency();
-    virtual int hasMaterialModeCapability(MaterialMode mode);
 
     virtual MaterialStatus *CreateStatus(GaussPoint *gp) const;
 
@@ -150,9 +150,8 @@ public:
     virtual void computeDeviatoricStressVector(FloatArray &answer, GaussPoint *gp, const FloatArray &eps, TimeStep *tStep);
 
     virtual void giveDeviatoricStiffnessMatrix(FloatMatrix &answer, MatResponseMode mode, GaussPoint *gp, TimeStep *tStep);
-    virtual void giveDeviatoricPressureStiffness(FloatArray &answer, MatResponseMode mode, GaussPoint *gp, TimeStep *tStep);
-    virtual void giveVolumetricDeviatoricStiffness(FloatArray &answer, MatResponseMode mode, GaussPoint *gp, TimeStep *tStep);
-    virtual void giveVolumetricPressureStiffness(double &answer, MatResponseMode mode, GaussPoint *gp, TimeStep *tStep);
+    virtual void giveStiffnessMatrices(FloatMatrix &dsdd, FloatArray &dsdp, FloatArray &dedd, double &dedp,
+                                       MatResponseMode mode, GaussPoint *gp, TimeStep *tStep);
 
     virtual double giveEffectiveViscosity(GaussPoint *gp, TimeStep *tStep);
 

@@ -52,13 +52,6 @@ TwoFluidMaterial :: checkConsistency()
            this->giveMaterial(1)->checkConsistency();
 }
 
-int
-TwoFluidMaterial :: hasMaterialModeCapability(MaterialMode mode)
-{
-    return this->giveMaterial(0)->hasMaterialModeCapability(mode) &&
-           this->giveMaterial(1)->hasMaterialModeCapability(mode);
-}
-
 
 IRResultType
 TwoFluidMaterial :: initializeFrom(InputRecord *ir)

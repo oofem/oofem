@@ -339,10 +339,8 @@ void Tr1BubbleStokes :: computeStiffnessMatrix(FloatMatrix &answer, TimeStep *tS
         dNv(7) = B(1, 7) = B(2, 6) = 27. * ( dN(0, 1) * N(1) * N(2) + N(0) * dN(1, 1) * N(2) + N(0) * N(1) * dN(2, 1) );
 
         // Computing the internal forces should have been done first.
-        mat->giveDeviatoricStiffnessMatrix(Ed, TangentStiffness, gp, tStep); // dsigma_dev/deps_dev
-        mat->giveDeviatoricPressureStiffness(Ep, TangentStiffness, gp, tStep); // dsigma_dev/dp
-        mat->giveVolumetricDeviatoricStiffness(Cd, TangentStiffness, gp, tStep); // deps_vol/deps_dev
-        mat->giveVolumetricPressureStiffness(Cp, TangentStiffness, gp, tStep); // deps_vol/dp
+        // dsigma_dev/deps_dev  dsigma_dev/dp  deps_vol/deps_dev  deps_vol/dp
+        mat->giveStiffnessMatrices(Ed, Ep, Cd, Cp, TangentStiffness, gp, tStep);
 
         EdB.beProductOf(Ed, B);
         K.plusProductSymmUpper(B, EdB, dA);

@@ -55,34 +55,22 @@ FluidDynamicMaterial :: computeDeviatoricStressVector(FloatArray &stress_dev, do
     this->computeDeviatoricStressVector(stress_dev, gp, eps, tStep);
 }
 
-
 void
-FluidDynamicMaterial :: giveDeviatoricPressureStiffness(FloatArray &answer, MatResponseMode mode, GaussPoint *gp, TimeStep *tStep)
+FluidDynamicMaterial :: giveStiffnessMatrices(FloatMatrix &dsdd, FloatArray &dsdp, FloatArray &dedd, double &dedp,
+                                       MatResponseMode mode, GaussPoint *gp, TimeStep *tStep)
 {
-    int size = static_cast< FluidDynamicMaterialStatus * >( this->giveStatus(gp) )->giveDeviatoricStressVector().giveSize();
-    answer.resize(size);
-    answer.zero();
-}
-
-
-void
-FluidDynamicMaterial :: giveVolumetricDeviatoricStiffness(FloatArray &answer, MatResponseMode mode, GaussPoint *gp, TimeStep *tStep)
-{
-    int size = static_cast< FluidDynamicMaterialStatus * >( this->giveStatus(gp) )->giveDeviatoricStressVector().giveSize();
-    answer.resize(size);
-    answer.zero();
-}
-
-
-void
-FluidDynamicMaterial :: giveVolumetricPressureStiffness(double &answer, MatResponseMode mode, GaussPoint *gp, TimeStep *tStep)
-{
-    answer = 0.0;
+    this->giveDeviatoricStiffnessMatrix(dsdd, mode, gp, tStep);
+    int size = dsdd.giveNumberOfRows();
+    dsdp.resize(size);
+    dsdp.zero();
+    dedd.resize(size);
+    dedd.zero();
+    dedp = 0;
 }
 
 
 FluidDynamicMaterialStatus :: FluidDynamicMaterialStatus(int n, Domain *d, GaussPoint *g) :
-    MaterialStatus(n, d, g), deviatoricStressVector()
+    MaterialStatus(n, d, g), deviatoricStressVector(), deviatoricStrainRateVector()
 { }
 
 void
@@ -99,18 +87,7 @@ FluidDynamicMaterialStatus :: printOutputAt(FILE *File, TimeStep *tNow)
 }
 
 void
-FluidDynamicMaterialStatus :: updateYourself(TimeStep *tStep)
-// Performs end-of-step updates.
-{
-    MaterialStatus :: updateYourself(tStep);
-}
-
-
-void
 FluidDynamicMaterialStatus :: initTempStatus()
-//
-// initialize record at the beginning of new load step
-//
 {
     MaterialStatus :: initTempStatus();
 }
@@ -197,9 +174,6 @@ FluidDynamicMaterial :: giveIPValue(FloatArray &answer, GaussPoint *gp, Internal
 
 contextIOResultType
 FluidDynamicMaterialStatus :: saveContext(DataStream *stream, ContextMode mode, void *obj)
-//
-// saves full ms context (saves state variables, that completely describe
-// current state)
 {
     contextIOResultType iores;
     if ( ( iores = MaterialStatus :: saveContext(stream, mode, obj) ) != CIO_OK ) {
@@ -220,10 +194,6 @@ FluidDynamicMaterialStatus :: saveContext(DataStream *stream, ContextMode mode, 
 
 contextIOResultType
 FluidDynamicMaterialStatus :: restoreContext(DataStream *stream, ContextMode mode, void *obj)
-//
-// restores full material context (saves state variables, that completely describe
-// current state)
-//
 {
     contextIOResultType iores;
     if ( ( iores = MaterialStatus :: restoreContext(stream, mode, obj) ) != CIO_OK ) {

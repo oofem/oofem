@@ -360,10 +360,8 @@ void Tet1BubbleStokes :: computeStiffnessMatrix(FloatMatrix &answer, TimeStep *t
         dNv(14) = B(2, 14) = B(4, 12) = B(3, 13) = dN(0, 2) * N(1) * N(2) * N(3) + N(0) * dN(1, 2) * N(2) * N(3) + N(0) * N(1) * dN(2, 2) * N(3) + N(0) * N(1) * N(2) * dN(3, 2);
 
         // Computing the internal forces should have been done first.
-        mat->giveDeviatoricStiffnessMatrix(Ed, TangentStiffness, gp, tStep); // dsigma_dev/deps_dev
-        mat->giveDeviatoricPressureStiffness(Ep, TangentStiffness, gp, tStep); // dsigma_dev/dp
-        mat->giveVolumetricDeviatoricStiffness(Cd, TangentStiffness, gp, tStep); // deps_vol/deps_dev
-        mat->giveVolumetricPressureStiffness(Cp, TangentStiffness, gp, tStep); // deps_vol/dp
+        // dsigma_dev/deps_dev  dsigma_dev/dp  deps_vol/deps_dev  deps_vol/dp
+        mat->giveStiffnessMatrices(Ed, Ep, Cd, Cp, TangentStiffness, gp, tStep);
 
         EdB.beProductOf(Ed, B);
         K.plusProductSymmUpper(B, EdB, dV);
