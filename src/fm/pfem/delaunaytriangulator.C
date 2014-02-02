@@ -67,10 +67,14 @@ DelaunayTriangulator :: ~DelaunayTriangulator()
         genIT = generalTriangleList.erase(genIT);
     }
 
-    // clean up alpha edge list
-    for ( elIT = alphaShapeEdgeList.begin(); elIT != alphaShapeEdgeList.end(); ++elIT ) {
-        delete(* elIT);
-    }
+    // alphaShapeEdgeList - is subset of of edgeList
+//    for ( elIT = alphaShapeEdgeList.begin(); elIT != alphaShapeEdgeList.end(); ++elIT ) {
+//        delete(* elIT);
+//    }
+
+	for ( elIT = edgeList.begin(); elIT != edgeList.end(); ++elIT ) {
+		delete(* elIT);
+	}
 }
 
 
@@ -84,7 +88,9 @@ void DelaunayTriangulator :: addUniqueEdgeToPolygon(Edge2D *edge, std :: list< E
         for ( pos = polygon.begin(); pos != polygon.end(); ) {
             if ( ( * pos ) == * edge ) {
                 pos = polygon.erase(pos);
+				delete edge;
                 addingMask = 0;
+				break;
             } else   {
                 ++pos;
             }
@@ -239,6 +245,7 @@ void DelaunayTriangulator :: computeAlphaComplex()
         containedEdge = giveBackEdgeIfAlreadyContainedInList(edge1);
 
         if ( containedEdge ) {
+			delete edge1;
             containedEdge->setSharing( 2, ( * genIT ) );
             double outAlph = containedEdge->giveOuterAlphaBound();
             if ( ccRadius < outAlph ) {
@@ -267,6 +274,7 @@ void DelaunayTriangulator :: computeAlphaComplex()
         containedEdge = giveBackEdgeIfAlreadyContainedInList(edge2);
 
         if ( containedEdge ) {
+			delete edge2;
             containedEdge->setSharing( 2, ( * genIT ) );
 
             double outAlph = containedEdge->giveOuterAlphaBound();
@@ -296,6 +304,7 @@ void DelaunayTriangulator :: computeAlphaComplex()
         containedEdge = giveBackEdgeIfAlreadyContainedInList(edge3);
 
         if ( containedEdge ) {
+			delete edge3;
             containedEdge->setSharing( 2, ( * genIT ) );
 
             double outAlph = containedEdge->giveOuterAlphaBound();
@@ -335,12 +344,11 @@ AlphaEdge2D *DelaunayTriangulator :: giveBackEdgeIfAlreadyContainedInList(AlphaE
             if ( ( * * elIT ) == ( * alphaEdge ) ) {
                 foundEdge = * elIT;
                 edgeList.erase(elIT);
-                delete alphaEdge;
                 break;
             }
         }
     }
-
+	
     return foundEdge;
 }
 
@@ -548,6 +556,7 @@ DelaunayTriangulator :: meshPolygon(int insertedNode, InsertTriangleBasedOnCircu
 
         generalTriangleList.push_back(newTriangle);
     }
+	polygon.clear();
 }
 
 void
