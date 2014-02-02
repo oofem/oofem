@@ -40,6 +40,8 @@
 #include "gaussintegrationrule.h"
 #include "classfactory.h"
 
+#include <cstdlib>
+
 namespace oofem {
 REGISTER_Element(CCTPlate3d);
 

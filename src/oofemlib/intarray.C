@@ -91,7 +91,8 @@ IntArray :: IntArray(int n) :
     // Constructor : creates an array of size n (filled with garbage).
 {
     if ( size ) {
-        values = ( int * ) calloc( size, sizeof( int ) );
+        values = ALLOC( size );
+        memset( values, 0, size * sizeof( int ) );
     } else {
         values = NULL;
     }
@@ -281,7 +282,8 @@ void IntArray :: resize(int n)
     if ( values ) {
         delete[] values;
     }
-    values = ( int * ) calloc( allocatedSize, sizeof( int ) );
+    values = ALLOC( allocatedSize );
+    memset( values, 0, allocatedSize * sizeof( int ) );
 #ifdef DEBUG
     if ( !values ) {
         OOFEM_FATAL2("IntArray :: resize - Failed in allocating %d doubles", allocatedSize);
@@ -361,7 +363,8 @@ void IntArray :: followedBy(int b, int allocChunk)
     int newSize = size + 1;
 
     if ( newSize > allocatedSize ) {
-        int *newValues = ( int * ) calloc( newSize + allocChunk, sizeof( int ) );
+        int *newValues = ALLOC( newSize + allocChunk );
+        memset( values, 0, (newSize + allocChunk) * sizeof( int ) );
 
         memcpy( newValues, values, size * sizeof( int ) );
         newValues [ size ] = b;
@@ -587,7 +590,8 @@ int IntArray :: insertSorted(int _val, int allocChunk)
     int *newValues = NULL, *p1, *p2;
 
     if ( newSize > allocatedSize ) { // realocate if needed
-        newValues = ( int * ) calloc( newSize + allocChunk, sizeof( int ) );
+        newValues = ALLOC( newSize + allocChunk );
+        memset( values, 0, (newSize + allocChunk) * sizeof( int ) );
 
         p1 = values;
         p2 = newValues;

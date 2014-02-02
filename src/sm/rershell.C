@@ -53,6 +53,8 @@
  #include "connectivitytable.h"
 #endif
 
+#include <cstdlib>
+
 namespace oofem {
 REGISTER_Element(RerShell);
 

@@ -62,6 +62,7 @@
  #include <Python.h>
 #endif
 
+#include <cstdlib>
 #include <cstdio>
 #include <cstring>
 #include <new>

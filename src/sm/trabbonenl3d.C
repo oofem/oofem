@@ -52,6 +52,7 @@
  #include "connectivitytable.h"
 #endif
 
+#include <cstdlib>
 
 namespace oofem {
 REGISTER_Material(TrabBoneNL3D);

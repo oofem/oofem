@@ -45,6 +45,7 @@
  #include "problemcomm.h"
 #endif
 
+#include <cstdlib>
 #include <list>
 
 namespace oofem {

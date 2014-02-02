@@ -47,6 +47,8 @@
  #include "latticetransportelement.h"
 #endif
 
+#include <cstdlib>
+
 namespace oofem {
 REGISTER_Material(LatticeDamage2d);
 

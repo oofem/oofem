@@ -57,6 +57,8 @@
  #include "parallelcontext.h"
 #endif
 
+#include <cstdlib>
+
 namespace oofem {
 REGISTER_EngngModel(AdaptiveNonLinearStatic);
 

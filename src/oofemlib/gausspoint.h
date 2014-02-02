@@ -46,7 +46,6 @@
 #include "integrationpointstatus.h"
 #include "element.h"
 #include "materialmode.h"
-#include "tdictionary.h"
 
 namespace oofem {
 class Material;
@@ -112,8 +111,7 @@ protected:
     int numberOfGp;
     /// List of slave integration points.
     GaussPoint **gaussPointArray;
-    //Disctionary of managed MaterialStatuses
-    //TDictionary<int,IntegrationPointStatus> statusDict;
+    /// Status of e.g. material in point
     IntegrationPointStatus *materialStatus;
 
 public:
