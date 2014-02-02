@@ -176,6 +176,9 @@ PFEM :: initializeFrom(InputRecord *ir)
 	particleRemovalRatio = 0.0;
 	IR_GIVE_OPTIONAL_FIELD(ir, particleRemovalRatio, _IFT_PFEM_particalRemovalRatio);
 
+	val = 0;
+	IR_GIVE_OPTIONAL_FIELD(ir, val, _IFT_PFEM_printVolumeReport);
+	printVolumeReport = (val == 1);
 
     return IRRT_OK;
 }
@@ -298,6 +301,8 @@ PFEM :: giveNextStep()
     // FORCE EQUATION NUMBERING
     this->forceEquationNumbering();
 
+	double volume = 0.0;
+
     double ndt = ( ( PFEMElement * ) domain->giveElement(1) )->computeCriticalTimeStep(previousStep);
     // check for critical time step
 	TR1_2D_PFEM* ielem = NULL;
@@ -309,6 +314,7 @@ PFEM :: giveNextStep()
 			ndt = idt;
 			printf("Reducing time step due to element #%i \n", i);
 		}
+		volume += ielem->computeArea();
 		
     }
 
@@ -327,6 +333,8 @@ PFEM :: giveNextStep()
     // time and dt variables are set eq to 0 for staics - has no meaning
 
     OOFEM_LOG_INFO( "SolutionStep %d : t = %e, dt = %e\n", istep, totalTime * this->giveVariableScale(VST_Time), ndt * this->giveVariableScale(VST_Time) );
+	if (printVolumeReport)
+		OOFEM_LOG_INFO( "Volume leakage: %.3f%%\n", (1.0-(volume/domainVolume))*100.0);
 
     return currentStep;
 }
@@ -917,8 +925,8 @@ PFEM :: printDofOutputAt(FILE *stream, Dof *iDof, TimeStep *atTime)
 {
     DofIDItem type = iDof->giveDofID();
     if ( ( type == V_u ) || ( type == V_v ) || ( type == V_w ) ) {
-        iDof->printSingleOutputAt(stream, atTime, 'x', VM_Intermediate);
-        iDof->printSingleOutputAt(stream, atTime, 'v', VM_Total);
+        iDof->printSingleOutputAt(stream, atTime, '*', VM_Intermediate);
+        iDof->printSingleOutputAt(stream, atTime, 'u', VM_Total);
     } else if ( ( type == P_f ) ) {
         iDof->printSingleOutputAt(stream, atTime, 'p', VM_Total);
     } else {
@@ -987,6 +995,7 @@ PFEM :: applyIC(TimeStep *stepWhenIcApply)
         element = ( PFEMElement * ) domain->giveElement(j);
         element->updateInternalState(stepWhenIcApply);
         element->updateYourself(stepWhenIcApply);
+		domainVolume += element->computeArea();
     }
 }
 

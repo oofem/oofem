@@ -184,7 +184,8 @@ public:
     virtual FEInterpolation *giveVelocityInterpolation() { return & velocityInterpolation; }
     virtual FEInterpolation *givePressureInterpolation() { return & pressureInterpolation; }
 
-
+	/// @return Interpolation of the element geometry, or NULL if none exist.
+    virtual FEInterpolation *giveInterpolation() const { return & velocityInterpolation; }
 protected:
 
     void computeGaussPoints();

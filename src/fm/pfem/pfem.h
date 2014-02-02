@@ -57,6 +57,7 @@
 #define _IFT_CBS_cmflag "cmflag"
 #define _IFT_PFEM_alphashapecoef "alphashapecoef"
 #define _IFT_PFEM_particalRemovalRatio "removalratio"
+#define _IFT_PFEM_printVolumeReport "volumereport"
 
 //@}
 
@@ -99,8 +100,11 @@ protected:
 
 	double particleRemovalRatio;
 
+	double domainVolume;
+
     int initFlag;
 
+	bool printVolumeReport;
 
     int numberOfMomentumEqs, numberOfConservationEqs;
     int numberOfPrescribedMomentumEqs, numberOfPrescribedConservationEqs;
@@ -132,6 +136,8 @@ public:
         ndomains = 1;
         nMethod = NULL;
         numberOfMomentumEqs = numberOfConservationEqs = numberOfPrescribedMomentumEqs = numberOfPrescribedConservationEqs = 0;
+		domainVolume = 0.0;
+		printVolumeReport = false;
     }
     ~PFEM() { }
 
