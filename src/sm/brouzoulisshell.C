@@ -45,6 +45,556 @@
 #include "classfactory.h"
 #include "node.h"
 #include "dofmanager.h"
+#include "layeredcrosssection.h"
+
+namespace oofem {
+REGISTER_Element(BrouzoulisShell);
+
+FEI2dQuadLin BrouzoulisShell :: interpolation(1,1);
+
+BrouzoulisShell :: BrouzoulisShell(int n, Domain *aDomain) : NLStructuralElement(n, aDomain)
+{
+    numberOfDofMans = 4;
+    corotTriad.resize(3,3);
+    corotTriad.beUnitMatrix();
+    tempCorotTriad.resize(3,3);
+    tempCorotTriad.beUnitMatrix();
+}
+
+
+
+IRResultType
+BrouzoulisShell :: initializeFrom(InputRecord *ir)
+{
+    numberOfGaussPoints = -1;
+
+    return this->NLStructuralElement :: initializeFrom(ir);
+}
+
+
+
+
+void
+BrouzoulisShell :: giveDofManDofIDMask(int inode, EquationID ut, IntArray &answer) const
+{
+    answer.setValues(6, D_u, D_v, D_w, R_u, R_v, R_w);
+}
+
+
+
+void
+BrouzoulisShell :: computeStressVector(FloatArray &answer, const FloatArray &e, GaussPoint *gp, TimeStep *tStep)
+{
+    this->giveStructuralCrossSection()->giveRealStress_Plate(answer, gp, e, tStep);
+    
+    //giveRealStressVector_PlateLayer(FloatArray &answer, GaussPoint *gp, const FloatArray &reducedStrain, TimeStep *tStep)
+}
+
+
+void
+BrouzoulisShell :: computeConstitutiveMatrixAt(FloatMatrix &answer, MatResponseMode rMode, GaussPoint *gp, TimeStep *tStep)
+{
+    this->giveStructuralCrossSection()->give2dPlateStiffMtrx(answer, rMode, gp, tStep);
+
+}
+
+
+double
+BrouzoulisShell :: computeVolumeAround(GaussPoint *gp)
+{
+    double determinant = fabs( this->interpolation.giveTransformationJacobian( * gp->giveCoordinates(), FEIElementGeometryWrapper(this) ) );
+    double weight      = gp->giveWeight();
+    return ( determinant * weight );
+}
+
+
+void
+BrouzoulisShell :: computeGaussPoints()
+// Sets up the array containing the Gauss points of the receiver.
+{
+    if ( !integrationRulesArray ) {
+        numberOfIntegrationRules = 1;
+        integrationRulesArray = new IntegrationRule * [ numberOfIntegrationRules ];
+        integrationRulesArray [ 0 ] = new GaussIntegrationRule(1, this, 1, 5);
+        numberOfGaussPoints = 1;
+        this->giveCrossSection()->setupIntegrationPoints(* integrationRulesArray [ 0 ], numberOfGaussPoints, this);
+    }
+}
+
+
+void
+BrouzoulisShell :: computedNdX(FloatMatrix &answer)
+{
+    FloatMatrix coords;
+    this->computeCoRotatedNodeCoords(coords);
+    // A = 0.5 * (x31*y42 +x24*y31) = 4J
+    double A = 0.5 * ( ( coords.at(1,3)-coords.at(1,1) )*( coords.at(2,4)-coords.at(2,2) ) + 
+                       ( coords.at(1,2)-coords.at(1,4) )*( coords.at(2,3)-coords.at(2,1) ) ); 
+
+    answer.resize(2,4);
+    int x = 1; int y = 2;
+    answer.at(1,1) = ( coords.at(y,2)-coords.at(y,4) ); 
+    answer.at(1,2) = ( coords.at(y,3)-coords.at(y,1) );
+    answer.at(1,3) = ( coords.at(y,4)-coords.at(y,2) );
+    answer.at(1,4) = ( coords.at(y,1)-coords.at(y,3) );
+
+    answer.at(2,1) = ( coords.at(x,4)-coords.at(x,2) ); 
+    answer.at(2,2) = ( coords.at(x,1)-coords.at(x,3) );
+    answer.at(2,3) = ( coords.at(x,2)-coords.at(x,4) );
+    answer.at(2,4) = ( coords.at(x,3)-coords.at(x,1) );
+    
+    double fac1 = 1.0 / (2.0*A);
+    answer.times(fac1);
+}
+
+void
+BrouzoulisShell :: computeBmatrixAt(GaussPoint *gp, FloatMatrix &answer, int li, int ui)
+// Returns the [6x60] strain-displacement matrix {B} of the receiver, eva-
+// luated at gp.
+// B matrix  -  3 rows : epsilon-X, epsilon-Y, gamma-YZ, gamma-ZX, gamma-XY  :
+{
+
+    FloatMatrix coords;
+    this->computeCoRotatedNodeCoords(coords);
+    // A = 0.5 * (x31*y42 +x24*y31) = 4J
+    double A = 0.5 * ( ( coords.at(1,3)-coords.at(1,1) )*( coords.at(2,4)-coords.at(2,2) ) + 
+                       ( coords.at(1,2)-coords.at(1,4) )*( coords.at(2,3)-coords.at(2,1) ) ); 
+
+    FloatMatrix dNdx(2,4);
+    int x = 1; int y = 2;
+    dNdx.at(1,1) = ( coords.at(y,2)-coords.at(y,4) ); 
+    dNdx.at(1,2) = ( coords.at(y,3)-coords.at(y,1) );
+    dNdx.at(1,3) = ( coords.at(y,4)-coords.at(y,2) );
+    dNdx.at(1,4) = ( coords.at(y,1)-coords.at(y,3) );
+
+    dNdx.at(2,1) = ( coords.at(x,4)-coords.at(x,2) ); 
+    dNdx.at(2,2) = ( coords.at(x,1)-coords.at(x,3) );
+    dNdx.at(2,3) = ( coords.at(x,2)-coords.at(x,4) );
+    dNdx.at(2,4) = ( coords.at(x,3)-coords.at(x,1) );
+    
+    //             
+    double zeta = 0.0;
+    double fac1 = 1.0 / (2.0*A);
+    dNdx.times(fac1);
+    answer.resize(5,20);
+
+    double N = 0.25; //N(0,0) = 1/4
+    for ( int i = 1, j = 0; i <= dNdx.giveNumberOfColumns(); i++, j += 5 ) {
+
+        answer.at(1, j + 1) = dNdx.at(x, i);         // du/dx
+        answer.at(1, j + 5) = zeta * dNdx.at(x, i);  // du/dx
+
+        answer.at(2, j + 2) =         dNdx.at(y, i); // dv/dy
+        answer.at(2, j + 4) = -zeta * dNdx.at(y, i); // dv/dy
+
+        answer.at(3, j + 1) = dNdx.at(y, i);         // du/dy
+        answer.at(3, j + 2) = dNdx.at(x, i);         // dv/dx
+        answer.at(3, j + 4) = -zeta * dNdx.at(x, i);         
+        answer.at(3, j + 5) =  zeta * dNdx.at(x, i);         
+
+        answer.at(4, j + 3) = dNdx.at(x, i);         
+        answer.at(4, j + 5) = N;
+
+        answer.at(5, j + 3) = dNdx.at(y, i);         
+        answer.at(5, j + 4) = -N;
+
+        
+    }
+    
+}
+
+
+bool
+BrouzoulisShell :: computeGtoLRotationMatrix(FloatMatrix &answer)
+{
+    answer.resize(24, 20);
+    answer.zero();
+    FloatMatrix temp;
+    temp.beSubMatrixOf(this->tempCorotTriad,1,2,1,2);
+
+    for ( int i = 0; i < 4; i++ ) { // Loops over nodes
+        // In each node, transform global c.s. {D_u, D_v, D_w, R_u, R_v, R_w} into local c.s.
+        answer.setSubMatrix(this->tempCorotTriad, 1 + i * 6, 1 + i * 5);     // Displacements
+        answer.setSubMatrix(temp, 1 + i * 6 + 3, 1 + i * 5 + 3); // Rotations
+    }
+    temp = answer;
+    answer.beTranspositionOf(temp);
+    return true;
+}
+
+void
+BrouzoulisShell :: computeBHmatrixAt(GaussPoint *gp, FloatMatrix &answer)
+{
+    //// BH = [BH1 BH2]
+    //// BH1 is for the lower order approximation
+    //FloatMatrix dNdx1x2, dNdx3;
+
+    //this->interpolation.evaldNdx( dNdx1x2, * gp->giveCoordinates(), FEIElementGeometryWrapper(this) ); // Interpolation for x1 and x2
+    //this->interpolation.evaldNdx( dNdx3, * gp->giveCoordinates(), FEIElementGeometryWrapper(this) );   // Interpolation for x3
+
+    //answer.resize(9, 27); // 6*2 + 15*1 = 27
+    //answer.zero();
+    //// everything associated with 'w' should use the higher interpolation 
+    //for ( int i = 1; i <= dNdx1x2.giveNumberOfRows(); i++ ) {
+    //    answer.at(1, 3 * i - 2) = dNdx1x2.at(i, 1);     // du/dx
+    //    answer.at(2, 3 * i - 1) = dNdx1x2.at(i, 2);     // dv/dy
+    //    answer.at(3, 3 * i - 0) = dNdx3.  at(i, 3);     // dw/dz
+    //    answer.at(4, 3 * i - 1) = dNdx1x2.at(i, 3);     // dv/dz
+    //    answer.at(7, 3 * i - 0) = dNdx3  .at(i, 2);     // dw/dy
+    //    answer.at(5, 3 * i - 2) = dNdx1x2.at(i, 3);     // du/dz
+    //    answer.at(8, 3 * i - 0) = dNdx3  .at(i, 1);     // dw/dx
+    //    answer.at(6, 3 * i - 2) = dNdx1x2.at(i, 2);     // du/dy
+    //    answer.at(9, 3 * i - 1) = dNdx1x2.at(i, 1);     // dv/dx
+    //}
+
+    //// Add contributions from higher order interpolation
+    //int pos = 18;
+    //int nodePos = 6;
+    //for ( int i = 1; i <= 15-6; i++ ) {
+    //    answer.at(3, pos + i) = dNdx3.at(nodePos + i, 3);     // dw/dz
+    //    answer.at(7, pos + i) = dNdx3.at(nodePos + i, 2);     // dw/dy
+    //    answer.at(8, pos + i) = dNdx3.at(nodePos + i, 1);     // dw/dx
+
+    //}
+
+}
+
+
+void
+BrouzoulisShell :: computeNmatrixAt(const FloatArray &iLocCoord, FloatMatrix &answer)
+// Returns the displacement interpolation matrix {N} of the receiver, eva-
+// luated at gp.
+{
+    FloatArray N;
+
+    this->interpolation.evalN( N, iLocCoord, FEIElementGeometryWrapper(this) ); 
+
+    answer.resize(2, 27);
+    answer.zero();
+
+    for ( int i = 1; i <= 6; i++ ) {
+        answer.at(1, 3 * i - 2) = N.at(i);
+        answer.at(2, 3 * i - 1) = N.at(i);
+        answer.at(3, 3 * i - 0) = N.at(i);
+    }
+}
+
+
+void
+BrouzoulisShell :: computeCoRotatedNodeCoords(FloatMatrix &answer)
+{
+    FloatArray coordsNode, coords;
+    FloatMatrix nodeCoords(3,4);
+
+    for ( int i = 1; i <= 4; i++ ) {
+        coords = *this->giveNode(i)->giveCoordinates();
+        nodeCoords.setColumn(coords,i);
+    }
+    //nodeCoords.rotatedWith(this->tempCorotTriad,'t');
+    answer.beTProductOf(this->tempCorotTriad, nodeCoords);
+}
+
+// ******************************
+// ***  Surface load support  ***
+// ******************************
+#if 1
+IntegrationRule *
+BrouzoulisShell :: GetSurfaceIntegrationRule(int approxOrder)
+{
+    IntegrationRule *iRule = new GaussIntegrationRule(1, this, 1, 1);
+    int npoints = iRule->getRequiredNumberOfIntegrationPoints(_Triangle, approxOrder);
+    iRule->SetUpPointsOnTriangle(npoints, _Unknown);
+    return iRule;
+}
+
+void
+BrouzoulisShell :: computeSurfaceNMatrixAt(FloatMatrix &answer, int iSurf, GaussPoint *sgp)
+{
+    FloatArray n;
+    //interpolationUV.surfaceEvalN( n, iSurf, * sgp->giveCoordinates(), FEIElementGeometryWrapper(this) );
+    //answer.beNMatrixOf(n, 3);
+}
+
+void
+BrouzoulisShell :: giveSurfaceDofMapping(IntArray &answer, int iSurf) const
+{
+    IntArray nodes;
+    const int ndofsn = 3;
+
+    //interpolation.computeLocalSurfaceMapping(nodes, iSurf); // Use lower order app for loads, ok?
+
+    answer.resize(9);
+
+    for ( int i = 1; i <= 3; i++ ) {
+        answer.at(i * ndofsn - 2) = nodes.at(i) * ndofsn - 2;
+        answer.at(i * ndofsn - 1) = nodes.at(i) * ndofsn - 1;
+        answer.at(i * ndofsn) = nodes.at(i) * ndofsn;
+    }
+}
+
+
+
+double
+BrouzoulisShell :: computeSurfaceVolumeAround(GaussPoint *gp, int iSurf)
+{
+    double determinant, weight, volume;
+    //determinant = fabs( interpolation.surfaceGiveTransformationJacobian( iSurf, * gp->giveCoordinates(), FEIElementGeometryWrapper(this) ) );
+
+    weight = gp->giveWeight();
+    volume = determinant * weight;
+
+    return volume;
+}
+
+
+
+
+void
+BrouzoulisShell :: computeSurfIpGlobalCoords(FloatArray &answer, GaussPoint *gp, int iSurf)
+{
+    //interpolation.surfaceLocal2global( answer, iSurf, * gp->giveCoordinates(), FEIElementGeometryWrapper(this) );
+}
+
+int
+BrouzoulisShell :: computeLoadLSToLRotationMatrix(FloatMatrix &answer, int iSurf, GaussPoint *gp)
+{
+    // returns transformation matrix from
+    // surface local coordinate system
+    // to element local c.s
+    // (same as global c.s in this case)
+    //
+    // i.e. f(element local) = T * f(edge local)
+
+    // definition of local c.s on surface:
+    // local z axis - perpendicular to surface, pointing outwards from element
+    // local x axis - is in global xy plane (perpendicular to global z axis)
+    // local y axis - completes the righ hand side cs.
+
+    /*
+     * _error ("computeLoadLSToLRotationMatrix: surface local coordinate system not supported");
+     * return 1;
+     */
+    FloatArray gc(3);
+    FloatArray h1(3), h2(3), nn(3), n(3);
+    IntArray snodes(4);
+
+    answer.resize(3, 3);
+    answer.zero();
+
+    //this->interpolation.computeSurfaceMapping(snodes, dofManArray, iSurf);
+    for ( int i = 1; i <= 3; i++ ) {
+        gc.add( * domain->giveNode( snodes.at(i) )->giveCoordinates() );
+    }
+
+    gc.times(1. / 0.5);
+    // determine "average normal"
+    for ( int i = 1; i <= 4; i++ ) {
+        int j = ( i ) % 4 + 1;
+        h1.beDifferenceOf(* domain->giveNode( snodes.at(i) )->giveCoordinates(), gc);
+        h2.beDifferenceOf(* domain->giveNode( snodes.at(j) )->giveCoordinates(), gc);
+        n.beVectorProductOf(h1, h2);
+        if ( n.computeSquaredNorm() > 1.e-6 ) {
+            n.normalize();
+        }
+
+        nn.add(n);
+    }
+
+    nn.times(1. / 4.);
+    if ( nn.computeSquaredNorm() < 1.e-6 ) {
+        answer.zero();
+    }
+
+    nn.normalize();
+    for ( int i = 1; i <= 3; i++ ) {
+        answer.at(i, 3) = nn.at(i);
+    }
+
+    // determine lcs of surface
+    // local x axis in xy plane
+    double test = fabs(fabs( nn.at(3) ) - 1.0);
+    if ( test < 1.e-5 ) {
+        h1.at(1) = answer.at(1, 1) = 1.0;
+        h1.at(2) = answer.at(2, 1) = 0.0;
+    } else {
+        h1.at(1) = answer.at(1, 1) = answer.at(2, 3);
+        h1.at(2) = answer.at(2, 1) = -answer.at(1, 3);
+    }
+
+    h1.at(3) = answer.at(3, 1) = 0.0;
+    // local y axis perpendicular to local x,z axes
+    h2.beVectorProductOf(nn, h1);
+    for ( int i = 1; i <= 3; i++ ) {
+        answer.at(i, 2) = h2.at(i);
+    }
+
+    return 1;
+}
+
+Interface *
+BrouzoulisShell :: giveInterface(InterfaceType interface)
+{
+    if( interface == NodalAveragingRecoveryModelInterfaceType ) {
+//        return static_cast< NodalAveragingRecoveryModelInterface * >( this );
+    } else {
+        OOFEM_LOG_INFO("Interface on BrouzoulisShell element not supported");
+        return NULL;
+    }
+}
+
+
+
+#endif
+
+
+
+void
+BrouzoulisShell :: giveInternalForcesVector(FloatArray &answer, TimeStep *tStep, int useUpdatedGpRecord)
+{
+    // Computes internal forces as a summation of: sectional forces
+
+    NLStructuralElement :: giveInternalForcesVector(answer, tStep, useUpdatedGpRecord);
+    
+}
+
+void 
+BrouzoulisShell :: computeSectionalForcesAt(FloatArray &sectionalForces, FloatArray &stress, GaussPoint *gp, TimeStep *tStep){
+
+    FloatArray vStress;
+
+    
+    //FloatArray PG1(3), PG2(3), PG3(3);
+    //FloatArray cartStressVector, contravarStressVector;
+    //FloatMatrix lambda[3];
+
+    //FloatMatrix Gcov, Gcon; 
+    //FloatArray lCoords = *gp->giveCoordinates();
+    ////this->evalInitialContravarBaseVectorsAt(lCoords, Gcon);
+    //FloatMatrix P, Sig;
+    //P.beMatrixFormOfStress(vStress);
+    //Sig.beProductTOf(Gcon,P);       // Stress resultants stored in each column
+    //PG1.beColumnOf(Sig,1);
+    //PG2.beColumnOf(Sig,2);
+    //PG3.beColumnOf(Sig,3);
+    //        
+    //double z = gp->giveCoordinate(3) * this->giveStructuralCrossSection()->give(CS_Thickness, gp);
+    //this->computeLambdaMatrices(lambda, z); // associated with the variation of the test functions   
+    //
+    //// f = lambda_1^T * PG1 + lambda_2^T * PG2 + lambda_3^T * PG3
+    //sectionalForces.resize(18);
+    //FloatArray temp;
+    //sectionalForces.zero();
+    //temp.beTProductOf(lambda [0], PG1);
+    //sectionalForces.add(temp);
+    //temp.beTProductOf(lambda [1], PG2);
+    //sectionalForces.add(temp);
+    //temp.beTProductOf(lambda [2], PG3);
+    //sectionalForces.add(temp);
+}
+
+
+
+
+
+void
+BrouzoulisShell :: setupInitialNodeDirectors()
+{
+    FloatArray lcoords(2), nodeLocalXiCoords, nodeLocalEtaCoords;
+
+    // Give the local coordinates for the element nodes - all at once
+
+    this->initialNodeDirectors.resize(6);
+    this->initialNodeMidSurface.resize(6);
+    FloatMatrix N;
+    FloatArray Xbar, M, Xtop, Xbottom;
+    for ( int node = 1; node <= 3; node++ ) {
+        this->initialNodeDirectors [ node - 1 ].resize(3);
+        this->initialNodeDirectors [ node - 1 ].zero();
+        this->initialNodeMidSurface [ node - 1 ].resize(3);
+        this->initialNodeMidSurface [ node - 1 ].zero();
+
+        Xbar = 0.5 * ( *this->giveNode(node)->giveCoordinates() + *this->giveNode(3+node)->giveCoordinates() );
+        M =          ( *this->giveNode(node)->giveCoordinates() - *this->giveNode(3+node)->giveCoordinates() );
+
+        this->initialNodeMidSurface [ node - 1 ] = Xbar;
+        this->initialNodeDirectors [ node - 1 ] = M;
+    }
+
+    for ( int node = 1; node <= 3; node++ ) {
+        this->initialNodeDirectors [ node + 3 - 1 ].resize(3);
+        this->initialNodeDirectors [ node + 3 - 1 ].zero();
+        this->initialNodeMidSurface [ node + 3 - 1 ].resize(3);
+        this->initialNodeMidSurface [ node + 3 - 1 ].zero();
+
+        Xbar = 0.5 * ( *this->giveNode(6 + node)->giveCoordinates() + *this->giveNode(9 + node)->giveCoordinates() );
+        M =          ( *this->giveNode(6 + node)->giveCoordinates() - *this->giveNode(9 + node)->giveCoordinates() );
+
+        this->initialNodeMidSurface [ node + 3 - 1 ] = Xbar;
+        this->initialNodeDirectors [ node + 3 - 1 ] = M;
+    }
+
+}
+
+
+
+
+} // end namespace oofem
+
+
+
+
+
+// OLD
+
+
+#if 0
+/*
+ *
+ *                 #####    #####   ######  ######  ###   ###
+ *               ##   ##  ##   ##  ##      ##      ## ### ##
+ *              ##   ##  ##   ##  ####    ####    ##  #  ##
+ *             ##   ##  ##   ##  ##      ##      ##     ##
+ *            ##   ##  ##   ##  ##      ##      ##     ##
+ *            #####    #####   ##      ######  ##     ##
+ *
+ *
+ *             OOFEM : Object Oriented Finite Element Code
+ *
+ *               Copyright (C) 1993 - 2013   Borek Patzak
+ *
+ *
+ *
+ *       Czech Technical University, Faculty of Civil Engineering,
+ *   Department of Structural Mechanics, 166 29 Prague, Czech Republic
+ *
+ *  This library is free software; you can redistribute it and/or
+ *  modify it under the terms of the GNU Lesser General Public
+ *  License as published by the Free Software Foundation; either
+ *  version 2.1 of the License, or (at your option) any later version.
+ *
+ *  This program is distributed in the hope that it will be useful,
+ *  but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+ *  Lesser General Public License for more details.
+ *
+ *  You should have received a copy of the GNU Lesser General Public
+ *  License along with this library; if not, write to the Free Software
+ *  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
+ */
+
+#include "brouzoulisshell.h"
+#include "node.h"
+#include "gausspoint.h"
+#include "gaussintegrationrule.h"
+#include "floatmatrix.h"
+#include "floatarray.h"
+#include "intarray.h"
+#include "domain.h"
+#include "mathfem.h"
+#include "structuralcrosssection.h"
+#include "classfactory.h"
+#include "node.h"
+#include "dofmanager.h"
 
 namespace oofem {
 REGISTER_Element(BrouzoulisShell);
@@ -666,3 +1216,5 @@ BrouzoulisShell :: giveLocalNodeCoords(FloatArray &nodeLocalXiCoords, FloatArray
 
 
 } // end namespace oofem
+
+#endif
