@@ -1820,8 +1820,10 @@ Shell7BaseXFEM :: giveCompositeExportData(VTKPiece &vtkPiece, IntArray &primaryV
         for ( int layer = 1; layer <= numLayers; layer++ ) {            
             for ( int subCell = 1; subCell <= numSubCells; subCell++ ) {
                 recoverValuesFromIP(values, layer, type, tStep);        
+                
                 for ( int j = 1; j <= numCellNodes; j++ ) {
                     vtkPiece.setInternalVarInNode( fieldNum, nodeNum, values[j-1] );
+                    //values[j-1].printYourself();
                     //ZZNodalRecoveryMI_recoverValues(el.nodeVars[fieldNum], layer, type, tStep);          
                     nodeNum += 1;        
                 }                                
@@ -1878,7 +1880,11 @@ Shell7BaseXFEM :: giveCompositeExportData(VTKPiece &vtkPiece, IntArray &primaryV
 
                 for ( int subCell = 1; subCell <= numSubCells; subCell++ ) {
                     FloatArray nodeLocalXi1Coords, nodeLocalXi2Coords, nodeLocalXi3Coords, nodeLocalXi3CoordsMapped;
-                    giveLocalNodeCoordsForExport(nodeLocalXi1Coords, nodeLocalXi2Coords, nodeLocalXi3Coords, subCell);
+                    if ( numSubCells == 1) {
+                        giveLocalNodeCoordsForExport(nodeLocalXi1Coords, nodeLocalXi2Coords, nodeLocalXi3Coords);
+                    } else {
+                        giveLocalNodeCoordsForExport(nodeLocalXi1Coords, nodeLocalXi2Coords, nodeLocalXi3Coords, subCell);
+                    }
                     mapXi3FromLocalToShell(nodeLocalXi3CoordsMapped, nodeLocalXi3Coords, layer);
                     for ( int nodeIndx = 1; nodeIndx <= numCellNodes; nodeIndx++ ) {
 
