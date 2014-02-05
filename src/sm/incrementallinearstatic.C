@@ -242,7 +242,7 @@ void IncrementalLinearStatic :: solveYourselfAt(TimeStep *tStep)
     loadVector.subtract(internalLoadVector);
     
 #ifdef __PARALLEL_MODE
-    this->updateSharedDofManagers(loadVector, ReactionExchangeTag);
+    this->updateSharedDofManagers(loadVector, EModelDefaultEquationNumbering(), ReactionExchangeTag);
 #endif
 
 

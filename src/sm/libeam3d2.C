@@ -77,7 +77,7 @@ LIBeam3d2 :: computeBmatrixAt(GaussPoint *gp, FloatMatrix &answer, int li, int u
     if ( this->nlGeometry ) {
         l = this->giveCurrentLength( domain->giveEngngModel()->giveCurrentStep() );
     } else {
-        l = this->giveLength();
+        l = this->computeLength();
     }
 
     ksi   = gp->giveCoordinate(1);
@@ -134,7 +134,7 @@ LIBeam3d2 :: computeLumpedMassMatrix(FloatMatrix &answer, TimeStep *tStep)
 {
     GaussPoint *gp = integrationRulesArray [ 0 ]->getIntegrationPoint(0);
     double density = this->giveStructuralCrossSection()->give('d', gp);
-    double halfMass   = density * this->giveCrossSection()->give(CS_Area, gp) * this->giveLength() / 2.;
+    double halfMass   = density * this->giveCrossSection()->give(CS_Area, gp) * this->computeLength() / 2.;
     answer.resize(12, 12);
     answer.zero();
     answer.at(1, 1) = answer.at(2, 2) = answer.at(3, 3) = halfMass;
@@ -222,7 +222,7 @@ LIBeam3d2 :: computeVolumeAround(GaussPoint *gp)
 // Gauss point is used.
 {
     double weight  = gp->giveWeight();
-    return weight * 0.5 * this->giveLength();
+    return weight * 0.5 * this->computeLength();
 }
 
 
@@ -261,7 +261,7 @@ LIBeam3d2 :: computeConstitutiveMatrixAt(FloatMatrix &answer, MatResponseMode rM
 void
 LIBeam3d2 :: computeStressVector(FloatArray &answer, const FloatArray &strain, GaussPoint *gp, TimeStep *tStep)
 {
-    this->giveStructuralCrossSection()->giveRealStress_Beam3d(answer, gp, strain, tStep);
+    this->giveStructuralCrossSection()->giveGeneralizedStress_Beam3d(answer, gp, strain, tStep);
 }
 
 
@@ -273,7 +273,7 @@ LIBeam3d2 :: testElementExtension(ElementExtension ext)
 
 
 double
-LIBeam3d2 :: giveLength()
+LIBeam3d2 :: computeLength()
 // Returns the length of the receiver.
 {
     double dx, dy, dz;
@@ -370,7 +370,7 @@ LIBeam3d2 :: computeEdgeVolumeAround(GaussPoint *gp, int iEdge)
     }
 
     double weight  = gp->giveWeight();
-    return 0.5 * this->giveLength() * weight;
+    return 0.5 * this->computeLength() * weight;
 }
 
 
@@ -434,7 +434,7 @@ LIBeam3d2 :: giveLocalCoordinateSystem(FloatMatrix &answer)
 //
 {
     FloatArray lx(3), ly(3), lz(3), help(3);
-    double length = this->giveLength();
+    double length = this->computeLength();
     Node *nodeA, *nodeB, *refNode;
 
     answer.resize(3, 3);
@@ -740,7 +740,7 @@ LIBeam3d2 :: drawDeformedGeometry(oofegGraphicContext &gc, UnknownType type)
 
     // draw centre triad
     int i, succ;
-    double coeff = this->giveLength() / 3.;
+    double coeff = this->computeLength() / 3.;
     //this->updateTempTriad (tStep);
 
     p [ 0 ].x = 0.5 * ( ( FPNum ) this->giveNode(1)->giveUpdatedCoordinate(1, tStep, defScale) + ( FPNum ) this->giveNode(2)->giveUpdatedCoordinate(1, tStep, defScale) );

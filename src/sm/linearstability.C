@@ -226,7 +226,7 @@ void LinearStability :: solveYourselfAt(TimeStep *tStep)
                           EModelDefaultEquationNumbering(), this->giveDomain(1) );
     
 #ifdef __PARALLEL_MODE
-    this->updateSharedDofManagers(loadVector, ReactionExchangeTag);
+    this->updateSharedDofManagers(loadVector, EModelDefaultEquationNumbering(), ReactionExchangeTag);
 #endif
 
 

@@ -539,20 +539,6 @@ protected:
     //@}
 
     /**
-     * Computes load vector due to prescribed strains. The load vector is obtained using numerical integration
-     * (using default integration iEdgerule of element) over
-     * element volume @f$ f=\int_v B^{\mathrm{T}} D \varepsilon \mathrm{d}V @f$, where @f$\varepsilon @f$ is stress independent strain vector
-     * in particular integration point (temperature, eigenstrain), obtained using computeStressIndependentStrainVector service.
-     * The load mode (Incremental or Total Load form) is  passed as parameter.
-     * @param answer Computed load vector contribution.
-     * @param tStep Time step.
-     * @param mode Load vector mode.
-     * @todo Deprecated, should be removed as soon as nonlinear beams are handled properly.
-     */
-    void computePrescribedStrainLoadVectorAt(FloatArray &answer, TimeStep *tStep, ValueModeType mode);
-    virtual void computePrescribedStrainLocalLoadVectorAt(FloatArray &answer, TimeStep *tStep, ValueModeType mode);
-
-    /**
      * Computes the stress vector of receiver at given integration point, at time step tStep.
      * The nature of these stresses depends on the element's type.
      * @param answer Stress vector.

@@ -75,7 +75,7 @@ LIBeam2d :: computeBmatrixAt(GaussPoint *gp, FloatMatrix &answer, int li, int ui
 {
     double l, ksi, n1x, n4x, n3xx, n6xx, n2xxx, n3xxx, n5xxx, n6xxx;
 
-    l    = this->giveLength();
+    l    = this->computeLength();
     ksi  = gp->giveCoordinate(1);
     n1x   = -1.0 / l;
     n4x   =  1.0 / l;
@@ -123,7 +123,7 @@ LIBeam2d :: computeConstitutiveMatrixAt(FloatMatrix &answer, MatResponseMode rMo
 void
 LIBeam2d :: computeStressVector(FloatArray &answer, const FloatArray &strain, GaussPoint *gp, TimeStep *tStep)
 {
-    this->giveStructuralCrossSection()->giveRealStress_Beam2d(answer, gp, strain, tStep);
+    this->giveStructuralCrossSection()->giveGeneralizedStress_Beam2d(answer, gp, strain, tStep);
 }
 
 
@@ -151,7 +151,7 @@ LIBeam2d :: computeLumpedMassMatrix(FloatMatrix &answer, TimeStep *tStep)
 {
     GaussPoint *gp = integrationRulesArray [ 0 ]->getIntegrationPoint(0);
     double density = this->giveStructuralCrossSection()->give('d', gp);
-    double halfMass   = density * this->giveCrossSection()->give(CS_Area, gp) * this->giveLength() / 2.;
+    double halfMass   = density * this->giveCrossSection()->give(CS_Area, gp) * this->computeLength() / 2.;
     answer.resize(6, 6);
     answer.zero();
     answer.at(1, 1) = halfMass;
@@ -225,7 +225,7 @@ LIBeam2d :: computeVolumeAround(GaussPoint *gp)
 // Gauss point is used.
 {
     double weight  = gp->giveWeight();
-    return weight * 0.5 * this->giveLength();
+    return weight * 0.5 * this->computeLength();
 }
 
 
@@ -258,7 +258,7 @@ LIBeam2d :: giveDofManDofIDMask(int inode, EquationID ut, IntArray &answer) cons
 
 
 double
-LIBeam2d :: giveLength()
+LIBeam2d :: computeLength()
 // Returns the length of the receiver.
 {
     double dx, dy;
@@ -355,7 +355,7 @@ LIBeam2d :: computeEdgeVolumeAround(GaussPoint *gp, int iEdge)
     }
 
     double weight  = gp->giveWeight();
-    return 0.5 * this->giveLength() * weight;
+    return 0.5 * this->computeLength() * weight;
 }
 
 

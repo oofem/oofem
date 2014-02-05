@@ -42,7 +42,6 @@
 #include "element.h"
 #include "dofmanager.h"
 #include "connectivitytable.h"
-#include "processcomm.h"
 
 #include <queue>
 #include <list>
@@ -63,6 +62,7 @@ namespace oofem {
 #define SUBDIVISION_SHARED_EDGE_REC_TAG 7659
 
 class TimeStep;
+class ProcessCommunicator;
 
 /**
  * This class represents the Rivara Subdivision algorithm for triangular meshes.

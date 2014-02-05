@@ -869,7 +869,7 @@ NonLinearStatic :: assembleIncrementalReferenceLoadVectors(FloatArray &_incremen
     }
 
 #ifdef __PARALLEL_MODE
-    this->updateSharedDofManagers(_incrementalLoadVector, LoadExchangeTag);
+    this->updateSharedDofManagers(_incrementalLoadVector, EModelDefaultEquationNumbering(), LoadExchangeTag);
 #endif
 }
 

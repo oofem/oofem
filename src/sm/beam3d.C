@@ -58,6 +58,7 @@ Beam3d :: Beam3d(int n, Domain *aDomain) : StructuralElement(n, aDomain)
     numberOfDofMans = 2;
     referenceNode = 0;
 
+    numberOfGaussPoints = 3;
     length = 0.;
     kappay = kappaz = -1.0;
     dofsToCondense = NULL;
@@ -74,38 +75,41 @@ Beam3d :: computeBmatrixAt(GaussPoint *gp, FloatMatrix &answer, int li, int ui)
 // Returns the strain matrix of the receiver.
 // eeps = {\eps_x, \gamma_xz, \gamma_xy, \der{phi_x}{x}, \kappa_y, \kappa_z}^T
 {
-    double l, ksi, kappay, kappaz;
+    double l, ksi, kappay, kappaz, c1y, c1z;
 
-    l     = this->giveLength();
+    l     = this->computeLength();
     ksi   = 0.5 + 0.5 * gp->giveCoordinate(1);
     kappay = this->giveKappayCoeff();
     kappaz = this->giveKappazCoeff();
+    c1y = 1. + 2. * kappay;
+    c1z = 1. + 2. * kappaz;
 
     answer.resize(6, 12);
     answer.zero();
 
     answer.at(1, 1) =  -1. / l;
     answer.at(1, 7) =   1. / l;
-    answer.at(2, 2) =   ( -2. * kappaz ) / ( l * ( 1. + 2. * kappaz ) );
-    answer.at(2, 6) =   kappaz / ( l * ( 1. + 2. * kappaz ) );
-    answer.at(2, 8) =   2. * kappaz / ( l * ( 1. + 2. * kappaz ) );
-    answer.at(2, 12) =   kappaz / ( l * ( 1. + 2. * kappaz ) );
-    answer.at(3, 3) =   ( -2. * kappay ) / ( l * ( 1. + 2. * kappay ) );
-    answer.at(3, 5) =   kappay / ( l * ( 1. + 2. * kappay ) );
-    answer.at(3, 9) =   2. * kappay / ( l * ( 1. + 2. * kappay ) );
-    answer.at(3, 11) =   kappay / ( l * ( 1. + 2. * kappay ) );
+    answer.at(2, 2) =   ( -2. * kappaz ) / ( l * c1z );
+    answer.at(2, 6) =   kappaz / ( l * c1z );
+    answer.at(2, 8) =   2. * kappaz / ( l * c1z );
+    answer.at(2, 12) =   kappaz / ( l * c1z );
+    answer.at(3, 3) =   ( -2. * kappay ) / ( l * c1y );
+    answer.at(3, 5) =   kappay / ( l * c1y );
+    answer.at(3, 9) =   2. * kappay / ( l * c1y );
+    answer.at(3, 11) =   kappay / ( l * c1y );
 
     answer.at(4, 4) =  -1. / l;
     answer.at(4, 10) =   1. / l;
-    answer.at(5, 3) =   ( 6. - 12. * ksi ) / ( l * l * ( 1. + 2. * kappay ) );
-    answer.at(5, 5) =   ( -2. * ( 2. + kappay ) + 6. * ksi ) / ( l * ( 1. + 2. * kappay ) );
-    answer.at(5, 9) =   ( -6. + 12. * ksi ) / ( l * l * ( 1. + 2. * kappay ) );
-    answer.at(5, 11) =   ( -2. * ( 1. - kappay ) + 6. * ksi ) / ( l * ( 1. + 2. * kappay ) );
-    answer.at(6, 2) =   ( 6. - 12. * ksi ) / ( l * l * ( 1. + 2. * kappaz ) );
-    answer.at(6, 6) =   ( -2. * ( 2. + kappaz ) + 6. * ksi ) / ( l * ( 1. + 2. * kappaz ) );
-    answer.at(6, 8) =   ( -6. + 12. * ksi ) / ( l * l * ( 1. + 2. * kappaz ) );
-    answer.at(6, 12) =   ( -2. * ( 1. - kappaz ) + 6. * ksi ) / ( l * ( 1. + 2. * kappaz ) );
+    answer.at(5, 3) =   ( 6. - 12. * ksi ) / ( l * l * c1y );
+    answer.at(5, 5) =   ( -2. * ( 2. + kappay ) + 6. * ksi ) / ( l * c1y );
+    answer.at(5, 9) =   ( -6. + 12. * ksi ) / ( l * l * c1y );
+    answer.at(5, 11) =   ( -2. * ( 1. - kappay ) + 6. * ksi ) / ( l * c1y );
+    answer.at(6, 2) =  -( 6. - 12. * ksi ) / ( l * l * c1z ); // new
+    answer.at(6, 6) =   ( -2. * ( 2. + kappaz ) + 6. * ksi ) / ( l * c1z );
+    answer.at(6, 8) =   (  6. - 12. * ksi ) / ( l * l * c1z ); // new
+    answer.at(6, 12) =   ( -2. * ( 1. - kappaz ) + 6. * ksi ) / ( l * c1z );
 }
+
 
 void Beam3d :: computeGaussPoints()
 // Sets up the array of Gauss Points of the receiver.
@@ -116,7 +120,7 @@ void Beam3d :: computeGaussPoints()
         numberOfIntegrationRules = 1;
         integrationRulesArray = new IntegrationRule * [ 1 ];
         integrationRulesArray [ 0 ] = new GaussIntegrationRule(1, this, 1, 2);
-        this->giveCrossSection()->setupIntegrationPoints(* integrationRulesArray [ 0 ], 3, this);
+        this->giveCrossSection()->setupIntegrationPoints(* integrationRulesArray [ 0 ], this->numberOfGaussPoints, this);
     }
 }
 
@@ -131,7 +135,7 @@ Beam3d :: computeNmatrixAt(const FloatArray &iLocCoord, FloatMatrix &answer)
 {
     double l, ksi, ksi2, ksi3, kappay, kappaz, c1y, c1z;
 
-    l     = this->giveLength();
+    l     = this->computeLength();
     ksi =   0.5 + 0.5 * iLocCoord.at(1);
     kappay = this->giveKappayCoeff();
     kappaz = this->giveKappazCoeff();
@@ -145,11 +149,11 @@ Beam3d :: computeNmatrixAt(const FloatArray &iLocCoord, FloatMatrix &answer)
 
     answer.at(1, 1) = 1. - ksi;
     answer.at(1, 7) = ksi;
-    answer.at(2, 2) = ( ( 1. + 2. * kappaz ) - 2. * kappaz * ksi - 3. * ksi2 + 2. * ksi3 ) / c1z;
+    answer.at(2, 2) = ( c1z - 2. * kappaz * ksi - 3. * ksi2 + 2. * ksi3 ) / c1z;
     answer.at(2, 6) = -l * ( -( 1. + kappaz ) * ksi + ( 2. + kappaz ) * ksi2 - ksi3 ) / c1z;
     answer.at(2, 8) = ( 2. * kappaz * ksi + 3. * ksi2 - 2. * ksi3 ) / c1z;
     answer.at(2, 12) = -l * ( kappaz * ksi + ( 1. - kappaz ) * ksi2 - ksi3 ) / c1z;
-    answer.at(3, 3) = ( ( 1. + 2. * kappay ) - 2. * kappay * ksi - 3. * ksi2 + 2. * ksi3 ) / c1y;
+    answer.at(3, 3) = ( c1y - 2. * kappay * ksi - 3. * ksi2 + 2. * ksi3 ) / c1y;
     answer.at(3, 5) = l * ( -( 1. + kappay ) * ksi + ( 2. + kappay ) * ksi2 - ksi3 ) / c1y;
     answer.at(3, 9) = ( 2. * kappay * ksi + 3. * ksi2 - 2. * ksi3 ) / c1y;
     answer.at(3, 11) = l * ( kappay * ksi + ( 1. - kappay ) * ksi2 - ksi3 ) / c1y;
@@ -158,12 +162,12 @@ Beam3d :: computeNmatrixAt(const FloatArray &iLocCoord, FloatMatrix &answer)
     answer.at(4, 4) = 1. - ksi;
     answer.at(4, 10) = ksi;
     answer.at(5, 3) = ( 6. * ksi - 6. * ksi2 ) / ( l * c1y );
-    answer.at(5, 5) = ( ( 1. + 2. * kappay ) - 2. * ( 2. + kappay ) * ksi + 3. * ksi2 ) / c1y;
-    answer.at(5, 9) = -( 6. * ksi + 6. * ksi2 ) / ( l * c1y );
+    answer.at(5, 5) = ( c1y - 2. * ( 2. + kappay ) * ksi + 3. * ksi2 ) / c1y;
+    answer.at(5, 9) = -( 6. * ksi - 6. * ksi2 ) / ( l * c1y );
     answer.at(5, 11) = ( -2. * ( 1. - kappay ) * ksi + 3. * ksi2 ) / c1y;
     answer.at(6, 2) = -( 6. * ksi - 6. * ksi2 ) / ( l * c1z );
-    answer.at(6, 6) = ( ( 1. + 2. * kappaz ) - 2. * ( 2. + kappaz ) * ksi + 3. * ksi2 ) / c1z;
-    answer.at(6, 8) = ( 6. * ksi + 6. * ksi2 ) / ( l * c1z );
+    answer.at(6, 6) = ( c1z - 2. * ( 2. + kappaz ) * ksi + 3. * ksi2 ) / c1z;
+    answer.at(6, 8) = ( 6. * ksi - 6. * ksi2 ) / ( l * c1z );
     answer.at(6, 12) = ( -2. * ( 1. - kappaz ) * ksi + 3. * ksi2 ) / c1z;
 }
 
@@ -201,53 +205,19 @@ Beam3d :: computeClampedStiffnessMatrix(FloatMatrix &answer,
 // axes. No integration over volume done, beam with constant material and crosssection
 // parameters assumed.
 {
-    double l, l2, l3, eiy, eiz, kappay, kappaz, c1y, c1z;
-    FloatMatrix d;
-
-    this->computeConstitutiveMatrixAt(d, rMode, integrationRulesArray [ 0 ]->getIntegrationPoint(0), tStep);
-    l     = this->giveLength();
-    l2    = l * l;
-    l3    = l2 * l;
-    kappay = this->giveKappayCoeff();
-    kappaz = this->giveKappazCoeff();
-    c1y = 1. + 2. * kappay;
-    c1z = 1. + 2. * kappaz;
-    eiy = d.at(5, 5);
-    eiz = d.at(6, 6);
-
-    answer.resize(12, 12);
-    answer.zero();
-
-    answer.at(1, 1) =  d.at(1, 1) / l;
-    answer.at(1, 7) = -d.at(1, 1) / l;
-    answer.at(2, 2) =  eiz * 12. / ( l3 * c1z );
-    answer.at(2, 6) =  eiz * 6.  / ( l2 * c1z );
-    answer.at(2, 8) = -eiz * 12. / ( l3 * c1z );
-    answer.at(2, 12) =  eiz * 6.  / ( l2 * c1z );
-    answer.at(3, 3) =  eiy * 12. / ( l3 * c1y );
-    answer.at(3, 5) = -eiy * 6.  / ( l2 * c1y );
-    answer.at(3, 9) = -eiy * 12. / ( l3 * c1y );
-    answer.at(3, 11) = -eiy * 6.  / ( l2 * c1y );
-
-    answer.at(4, 4) =  d.at(4, 4) / l;
-    answer.at(4, 10) = -d.at(4, 4) / l;
-    answer.at(5, 5) =  eiy * 2. * ( 2. + kappay ) / ( l * c1y );
-    answer.at(5, 9) =  eiy * 6.  / ( l2 * c1y );
-    answer.at(5, 11) =  eiy * 2. * ( 1. - kappay ) / ( l * c1y );
-    answer.at(6, 6) =  eiz * 2. * ( 2. + kappaz ) / ( l * c1z );
-    answer.at(6, 8) = -eiz * 6.  / ( l2 * c1z );
-    answer.at(6, 12) =  eiz * 2. * ( 1. - kappaz ) / ( l * c1z );
-
-    answer.at(7, 7) =  d.at(1, 1) / l;
-    answer.at(8, 8) =  eiz * 12. / ( l3 * c1z );
-    answer.at(8, 12) = -eiz * 6.  / ( l2 * c1z );
-    answer.at(9, 9) =  eiy * 12. / ( l3 * c1y );
-    answer.at(9, 11) =  eiy * 6.  / ( l2 * c1y );
-    answer.at(10, 10) = d.at(4, 4) / l;
-    answer.at(11, 11) = eiy * 2. * ( 2. + kappay ) / ( l * c1y );
-    answer.at(12, 12) = eiz * 2. * ( 2. + kappaz ) / ( l * c1z );
-
-    answer.symmetrized();  // symmetrize answer
+    double l = this->computeLength();
+    FloatMatrix B, DB, d;
+    IntegrationRule *ir = this->giveDefaultIntegrationRulePtr();
+    answer.resize(0,0);
+    for ( int i = 0; i < ir->giveNumberOfIntegrationPoints(); ++i ) {
+        GaussPoint *gp = ir->getIntegrationPoint(i);
+        this->computeBmatrixAt(gp, B);
+        this->computeConstitutiveMatrixAt(d, rMode, gp, tStep); 
+        double dV = gp->giveWeight() * 0.5*l;
+        DB.beProductOf(d, B);
+        answer.plusProductSymmUpper(B, DB, dV);
+    }
+    answer.symmetrized();
 }
 
 
@@ -296,7 +266,7 @@ double
 Beam3d :: computeVolumeAround(GaussPoint *gp)
 {
     double weight  = gp->giveWeight();
-    return weight * 0.5 * this->giveLength();
+    return weight * 0.5 * this->computeLength();
 }
 
 
@@ -308,7 +278,7 @@ Beam3d :: giveDofManDofIDMask(int inode, EquationID, IntArray &answer) const
 
 
 double
-Beam3d :: giveLength()
+Beam3d :: computeLength()
 // Returns the length of the receiver.
 {
     double dx, dy, dz;
@@ -334,9 +304,9 @@ Beam3d :: computeKappaCoeffs()
     // kappa_y = (6*E*Iy)/(k*G*A*l^2)
 
     FloatMatrix d;
-    double l = this->giveLength();
+    double l = this->computeLength();
 
-    this->computeConstitutiveMatrixAt( d, TangentStiffness, integrationRulesArray [ 0 ]->getIntegrationPoint(0), domain->giveEngngModel()->giveCurrentStep() );
+    this->computeConstitutiveMatrixAt( d, ElasticStiffness, integrationRulesArray [ 0 ]->getIntegrationPoint(0), domain->giveEngngModel()->giveCurrentStep() );
 
     //  kappay = 6. * d.at(5, 5) / ( d.at(3, 3) * l * l );
     //  kappaz = 6. * d.at(6, 6) / ( d.at(2, 2) * l * l );
@@ -383,9 +353,8 @@ Beam3d :: giveLocalCoordinateSystem(FloatMatrix &answer)
 //
 {
     FloatArray lx(3), ly(3), lz(3), help(3);
-    double length = this->giveLength();
+    double length = this->computeLength();
     Node *nodeA, *nodeB, *refNode;
-    int i;
 
     answer.resize(3, 3);
     answer.zero();
@@ -393,7 +362,7 @@ Beam3d :: giveLocalCoordinateSystem(FloatMatrix &answer)
     nodeB  = this->giveNode(2);
     refNode = this->giveDomain()->giveNode(this->referenceNode);
 
-    for ( i = 1; i <= 3; i++ ) {
+    for ( int i = 1; i <= 3; i++ ) {
         lx.at(i) = ( nodeB->giveCoordinate(i) - nodeA->giveCoordinate(i) ) / length;
         help.at(i) = ( refNode->giveCoordinate(i) - nodeA->giveCoordinate(i) );
     }
@@ -403,7 +372,7 @@ Beam3d :: giveLocalCoordinateSystem(FloatMatrix &answer)
     ly.beVectorProductOf(lz, lx);
     ly.normalize();
 
-    for ( i = 1; i <= 3; i++ ) {
+    for ( int i = 1; i <= 3; i++ ) {
         answer.at(1, i) = lx.at(i);
         answer.at(2, i) = ly.at(i);
         answer.at(3, i) = lz.at(i);
@@ -446,19 +415,23 @@ Beam3d :: initializeFrom(InputRecord *ir)
 void
 Beam3d :: giveInternalForcesVector(FloatArray &answer, TimeStep *tStep, int useUpdatedGpRecord)
 {
-    // stress equivalent vector in nodes (vector of internal forces)
-    FloatArray prescStrainEndForces;
+#if 0
     FloatMatrix stiffness;
     FloatArray u;
 
     this->computeStiffnessMatrix(stiffness, SecantStiffness, tStep);
     this->computeVectorOf(EID_MomentumBalance, VM_Total, tStep, u);
     answer.beProductOf(stiffness, u);
+#else
+    StructuralElement :: giveInternalForcesVector(answer, tStep, useUpdatedGpRecord);
 
-    this->computePrescribedStrainLoadVectorAt(prescStrainEndForces, tStep, VM_Total);
-    if ( prescStrainEndForces.giveSize() ) {
-        answer.subtract(prescStrainEndForces);
+    if ( this->dofsToCondense ) {
+        ///@todo Pretty sure this won't work for nonlinear problems. I think dofsToCondense should just be replaced by an extra slave node.
+        FloatMatrix stiff;
+        this->computeClampedStiffnessMatrix(stiff, TangentStiffness, tStep);
+        this->condense(&stiff, NULL, &answer, this->dofsToCondense);
     }
+#endif
 }
 
 
@@ -472,7 +445,7 @@ Beam3d :: computeConstitutiveMatrixAt(FloatMatrix &answer, MatResponseMode rMode
 void
 Beam3d :: computeStressVector(FloatArray &answer, const FloatArray &strain, GaussPoint *gp, TimeStep *tStep)
 {
-    this->giveStructuralCrossSection()->giveRealStress_Beam3d(answer, gp, strain, tStep);
+    this->giveStructuralCrossSection()->giveGeneralizedStress_Beam3d(answer, gp, strain, tStep);
 }
 
 
@@ -498,7 +471,7 @@ Beam3d :: computeEdgeLoadVectorAt(FloatArray &answer, Load *load, int iedge, Tim
     FloatArray coords, components, endComponents;
     FloatMatrix T;
     FloatArray floc(12);
-    double l = this->giveLength();
+    double l = this->computeLength();
     double kappay = this->giveKappayCoeff();
     double kappaz = this->giveKappazCoeff();
     double fx, fy, fz, fmx, fmy, fmz, dfx, dfy, dfz, dfmx, dfmy, dfmz;
@@ -655,7 +628,7 @@ Beam3d :: printOutputAt(FILE *File, TimeStep *tStep)
 {
     // Performs end-of-step operations.
 
-    int i, n;
+    int n;
     FloatArray rl, Fl;
     FloatMatrix T;
 
@@ -668,13 +641,13 @@ Beam3d :: printOutputAt(FILE *File, TimeStep *tStep)
 
     fprintf(File, "  local displacements ");
     n = rl.giveSize();
-    for ( i = 1; i <= n; i++ ) {
+    for ( int i = 1; i <= n; i++ ) {
         fprintf( File, " % .4e", rl.at(i) );
     }
 
     fprintf(File, "\n  local end forces    ");
     n = Fl.giveSize();
-    for ( i = 1; i <= n; i++ ) {
+    for ( int i = 1; i <= n; i++ ) {
         fprintf( File, " % .4e", Fl.at(i) );
     }
 
@@ -709,44 +682,6 @@ Beam3d :: computeBodyLoadVectorAt(FloatArray &answer, Load *load, TimeStep *tSte
 }
 
 
-/*
- * void
- * Beam3d :: computeForceLoadVector (FloatArray& answer, TimeStep* tStep, ValueModeType mode)
- * // Computes the load vector of the receiver, at tStep.
- * {
- * FloatMatrix stiff, *T;
- *
- * StructuralElement::computeForceLoadVector(answer, tStep, mode); // in global c.s
- *
- * if (answer.giveSize() && dofsToCondense) {
- * // condense requested dofs
- * if (answer.giveSize() != 0) {
- * this->computeClampedStiffnessMatrix (stiff, TangentStiffness, tStep) ;
- * this->condense (&stiff, NULL, &answer, dofsToCondense);
- * }
- *
- * }
- * }
- */
-
-
-void
-Beam3d :: computePrescribedStrainLocalLoadVectorAt(FloatArray &answer, TimeStep *tStep, ValueModeType mode)
-// Computes the load vector of the receiver, at tStep.
-{
-    StructuralElement :: computePrescribedStrainLocalLoadVectorAt(answer, tStep, mode); // ig g.c.s
-    FloatMatrix stiff;
-
-    if ( answer.giveSize() && dofsToCondense ) {
-        // condense requested dofs
-        if ( answer.giveSize() != 0 ) {
-            this->computeClampedStiffnessMatrix(stiff, TangentStiffness, tStep);
-            this->condense(& stiff, NULL, & answer, dofsToCondense);
-        }
-    }
-}
-
-
 void
 Beam3d :: computeConsistentMassMatrix(FloatMatrix &answer, TimeStep *tStep, double &mass, const double *ipDensity)
 {
@@ -759,7 +694,7 @@ Beam3d :: computeConsistentMassMatrix(FloatMatrix &answer, TimeStep *tStep, doub
      * StructuralElement::computeMassMatrix(answer, tStep);
      * answer.times(this->giveCrossSection()->give('A'));
      */
-    double l = this->giveLength();
+    double l = this->computeLength();
     double kappay = this->giveKappayCoeff();
     double kappaz = this->giveKappazCoeff();
     double kappay2 = kappay * kappay;
@@ -843,7 +778,7 @@ Beam3d :: computeInitialStressMatrix(FloatMatrix &answer, TimeStep *tStep)
     FloatMatrix stiff, T;
     FloatArray endForces;
 
-    double l = this->giveLength();
+    double l = this->computeLength();
     double kappay = this->giveKappayCoeff();
     double kappaz = this->giveKappazCoeff();
     double kappay2 = kappay * kappay;

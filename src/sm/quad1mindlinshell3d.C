@@ -254,7 +254,7 @@ Quad1MindlinShell3D :: computeBmatrixAt(GaussPoint *gp, FloatMatrix &answer, int
 void
 Quad1MindlinShell3D :: computeStressVector(FloatArray &answer, const FloatArray &strain, GaussPoint *gp, TimeStep *tStep)
 {
-    this->giveStructuralCrossSection()->giveRealStress_Shell(answer, gp, strain, tStep);
+    this->giveStructuralCrossSection()->giveGeneralizedStress_Shell(answer, gp, strain, tStep);
 }
 
 
@@ -302,7 +302,7 @@ Quad1MindlinShell3D :: giveInternalForcesVector(FloatArray &answer, TimeStep *tS
             stress = static_cast< StructuralMaterialStatus * >( gp->giveMaterialStatus() )->giveStressVector();
         } else {
             strain.beProductOf(b, shellUnknowns);
-            cs->giveRealStress_Shell(stress, gp, strain, tStep);
+            cs->giveGeneralizedStress_Shell(stress, gp, strain, tStep);
         }
         shellForces.plusProduct(b, stress, dV);
 

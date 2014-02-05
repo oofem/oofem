@@ -540,7 +540,7 @@ DIIDynamic :: assembleLoadVector(FloatArray &_loadVector, Domain *domain, ValueM
     this->assembleVector(_loadVector, tStep, EID_MomentumBalance, ExternalForcesVector, mode,
                          EModelDefaultEquationNumbering(), domain);
 #ifdef __PARALLEL_MODE
-    this->updateSharedDofManagers(_loadVector, LoadExchangeTag);
+    this->updateSharedDofManagers(_loadVector, EModelDefaultEquationNumbering(), LoadExchangeTag);
 #endif
 }
 

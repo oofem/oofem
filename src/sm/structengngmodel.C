@@ -117,7 +117,7 @@ StructuralEngngModel :: computeReaction(FloatArray &answer, TimeStep *tStep, int
     answer.subtract(contribution);
 
 #ifdef __PARALLEL_MODE
-    this->updateSharedPrescribedDofManagers(answer, ReactionExchangeTag);
+    this->updateSharedDofManagers(answer, EModelDefaultPrescribedEquationNumbering(), ReactionExchangeTag);
 #endif
 }
 
@@ -147,7 +147,7 @@ StructuralEngngModel :: giveInternalForces(FloatArray &answer, bool normFlag, in
 
 #ifdef __PARALLEL_MODE
     // Redistributes answer so that every process have the full values on all shared equations
-    this->updateSharedDofManagers(answer, InternalForcesExchangeTag);
+    this->updateSharedDofManagers(answer, EModelDefaultEquationNumbering(), InternalForcesExchangeTag);
 #endif
 
     // Remember last internal vars update time stamp.

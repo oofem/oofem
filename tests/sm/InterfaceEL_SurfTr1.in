@@ -1,4 +1,4 @@
-InterfaceEl_SurfTr1.out
+InterfaceEL_SurfTr1.out
 Patch test for a interface element with a linear triangle surface
 LinearStatic nsteps 1
 domain 3d
@@ -51,7 +51,7 @@ ConstantFunction 1 f(t) 1.0
 #
 #
 #
-#%BEGIN_CHECK% tolerance 1.e-5
+#%BEGIN_CHECK% tolerance 2.e-4
 ##
 ##
 ## check reactions 

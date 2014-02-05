@@ -33,8 +33,6 @@
  */
 
 #include "structuralmaterial.h"
-#include "structuralcrosssection.h"
-#include "simplecrosssection.h"
 #include "domain.h"
 #include "verbose.h"
 #include "structuralms.h"
@@ -655,10 +653,9 @@ StructuralMaterial :: giveStressDependentPartOfStrainVector(FloatArray &answer, 
      * caused by temperature, shrinkage and possibly by other phenomena.
      */
     FloatArray epsilonTemperature;
-    StructuralCrossSection *cs = static_cast< StructuralCrossSection * >( gp->giveElement()->giveCrossSection() );
 
     answer = reducedStrainVector;
-    cs->computeStressIndependentStrainVector(epsilonTemperature, gp, tStep, mode);
+    this->computeStressIndependentStrainVector(epsilonTemperature, gp, tStep, mode);
     if ( epsilonTemperature.giveSize() ) {
         answer.subtract(epsilonTemperature);
     }
@@ -1806,17 +1803,13 @@ void
 StructuralMaterial :: computeStressIndependentStrainVector(FloatArray &answer,
                                                            GaussPoint *gp, TimeStep *tStep, ValueModeType mode)
 {
-    FloatArray fullAnswer, et, e0, eigenstrain, answerTemper, answerEigenstrain;
+    FloatArray et, e0, eigenstrain;
     FloatMatrix GCS;
     MaterialMode matmode = gp->giveMaterialMode();
-    StructuralCrossSection *crossSection =  dynamic_cast< StructuralCrossSection * >( gp->giveCrossSection() );
     Element *elem = gp->giveElement();
     StructuralElement *selem = dynamic_cast< StructuralElement * >( gp->giveElement() );
 
-
     answer.resize(0);
-    answerTemper.resize(0);
-    answerEigenstrain.resize(0);
 
     if ( tStep->giveIntrinsicTime() < this->castingTime ) {
         answer.zero();
@@ -1862,106 +1855,34 @@ StructuralMaterial :: computeStressIndependentStrainVector(FloatArray &answer,
 
 
     if ( et.giveSize() ) { //found temperature boundary conditions or prescribed field
-        double thick, width;
+        FloatArray fullAnswer;
 
         this->giveThermalDilatationVector(e0, gp, tStep);
 
-        switch ( matmode ) {
-        case _2dBeam:
-            thick = crossSection->give(CS_Thickness, gp);
-            answerTemper.resize(3);
-            answerTemper.zero();
-            answerTemper.at(1) = e0.at(1) * ( et.at(1) - this->giveReferenceTemperature() );
-            if ( et.giveSize() > 1 ) {
-                answerTemper.at(2) = e0.at(1) * et.at(2) / thick;     // kappa_x
+        if ( e0.giveSize() ) {
+            fullAnswer = e0;
+            if ( mode == VM_Total ) {
+                fullAnswer.times(et.at(1) - this->referenceTemperature);
+            } else {
+                fullAnswer.times( et.at(1) );
             }
 
-            break;
-        case _3dBeam:
-            thick = crossSection->give(CS_Thickness, gp);
-            width = crossSection->give(CS_Width, gp);
-            answerTemper.resize(6);
-            answerTemper.zero();
-            answerTemper.at(1) = e0.at(1) * ( et.at(1) - this->giveReferenceTemperature() );
-            if ( et.giveSize() > 1 ) {
-                answerTemper.at(5) = e0.at(1) * et.at(2) / thick;     // kappa_y
-                if ( et.giveSize() > 2 ) {
-                    answerTemper.at(6) = e0.at(1) * et.at(3) / width;     // kappa_z
-                }
-            }
-
-            break;
-        case _2dPlate:
-            thick = crossSection->give(CS_Thickness, gp);
-            if ( et.giveSize() > 1 ) {
-                answerTemper.resize(5);
-                answerTemper.zero();
-
-                if ( et.giveSize() > 1 ) {
-                    answerTemper.at(1) = e0.at(1) * et.at(2) / thick;     // kappa_x
-                    answerTemper.at(2) = e0.at(2) * et.at(2) / thick;     // kappa_y
-                }
-            }
-
-            break;
-        case _3dShell:
-            thick = crossSection->give(CS_Thickness, gp);
-            answerTemper.resize(8);
-            answerTemper.zero();
-
-            answerTemper.at(1) = e0.at(1) * ( et.at(1) - this->giveReferenceTemperature() );
-            answerTemper.at(2) = e0.at(2) * ( et.at(1) - this->giveReferenceTemperature() );
-            if ( et.giveSize() > 1 ) {
-                answerTemper.at(4) = e0.at(1) * et.at(2) / thick;     // kappa_x
-                answerTemper.at(5) = e0.at(2) * et.at(2) / thick;     // kappa_y
-            }
-
-            break;
-        default:
-            if ( e0.giveSize() ) {
-                fullAnswer = e0;
-                if ( mode == VM_Total ) {
-                    fullAnswer.times(et.at(1) - this->referenceTemperature);
-                } else {
-                    fullAnswer.times( et.at(1) );
-                }
-
-                StructuralMaterial :: giveReducedSymVectorForm( answer, fullAnswer, gp->giveMaterialMode() );
-            }
+            StructuralMaterial :: giveReducedSymVectorForm( answer, fullAnswer, gp->giveMaterialMode() );
         }
-    }
-
-    if ( eigenstrain.giveSize() ) { //found prescribed eigenstrain
-        switch ( matmode ) {
-        case _1dMat:
-        case _3dMat:
-        case _PlaneStress:
-        case _PlaneStrain:
-        case _3dMicroplane:
-            fullAnswer = eigenstrain;
-            break;
-
-        default:
-            OOFEM_ERROR2( "StructuralMaterial :: Material mode %s for eigenstrains not supported", __MaterialModeToString(matmode) );
-        }
-
-        answerEigenstrain = fullAnswer;
-        //this->giveReducedCharacteristicVector(answerEigenstrain, gp, fullAnswer);
     }
 
     //join temperature and eigenstrain vectors, compare vector sizes
-    if ( answerTemper.giveSize() ) {
-        answer = answerTemper;
-        if ( answerEigenstrain.giveSize() ) {
-            if ( answerTemper.giveSize() != answerEigenstrain.giveSize() ) {
-                OOFEM_ERROR4( "StructuralMaterial :: Vector of temperature strains has the size %d which is different with the size of eigenstrain vector %d, element %d", answerTemper.giveSize(), answerEigenstrain.giveSize(), elem->giveNumber() );
+    if ( answer.giveSize() ) {
+        if ( eigenstrain.giveSize() ) {
+            if ( answer.giveSize() != eigenstrain.giveSize() ) {
+                OOFEM_ERROR4( "StructuralMaterial :: Vector of temperature strains has the size %d which is different with the size of eigenstrain vector %d, element %d", answer.giveSize(), eigenstrain.giveSize(), elem->giveNumber() );
             }
 
-            answer.add(answerEigenstrain);
+            answer.add(eigenstrain);
         }
     } else {
-        if ( answerEigenstrain.giveSize() ) {
-            answer = answerEigenstrain;
+        if ( eigenstrain.giveSize() ) {
+            answer = eigenstrain;
         }
     }
 }
@@ -1970,16 +1891,16 @@ StructuralMaterial :: computeStressIndependentStrainVector(FloatArray &answer,
 void
 StructuralMaterial :: giveFullSymVectorForm(FloatArray &answer, const FloatArray &vec, MaterialMode matMode)
 {
-	if(vec.giveSize() == 6) {
-		// If we use default 3D implementation to treat e.g. plane strain.
-		answer = vec;
-	}
-	else {
-		IntArray indx;
-		answer.resize( StructuralMaterial :: giveVoigtSymVectorMask(indx, matMode) );
-		answer.zero();
-		answer.assemble(vec, indx);
-	}
+    if(vec.giveSize() == 6) {
+        // If we use default 3D implementation to treat e.g. plane strain.
+        answer = vec;
+    }
+    else {
+        IntArray indx;
+        answer.resize( StructuralMaterial :: giveVoigtSymVectorMask(indx, matMode) );
+        answer.zero();
+        answer.assemble(vec, indx);
+    }
 }
 
 
@@ -2026,13 +1947,13 @@ StructuralMaterial :: giveReducedSymVectorForm(FloatArray &answer, const FloatAr
     StructuralMaterial :: giveVoigtSymVectorMask(indx, matMode);
 
     if(indx.giveSize() == vec.giveSize()) {
-    	answer = vec;
+        answer = vec;
     }
     else {
-		answer.resize( indx.giveSize() );
-		for ( int i = 1; i <= indx.giveSize(); i++ ) {
-			answer.at(i) = vec.at( indx.at(i) );
-		}
+        answer.resize( indx.giveSize() );
+        for ( int i = 1; i <= indx.giveSize(); i++ ) {
+            answer.at(i) = vec.at( indx.at(i) );
+        }
     }
 }
 

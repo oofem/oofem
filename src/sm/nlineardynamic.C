@@ -662,7 +662,7 @@ void NonLinearDynamic :: updateComponent(TimeStep *tStep, NumericalCmpn cmpn, Do
             timer.startTimer();
 #endif
             if ( ( currentIterations != 0 ) || ( totIterations == 0 ) ) {
-                this->giveInternalForces(internalForces, true, 1, tStep);
+                this->giveInternalForces(internalForces, true, d->giveNumber(), tStep);
 
                 // Updating the residual vector @ NR-solver
                 for ( int i = 1; i <= neq; i++ ) {
@@ -679,7 +679,7 @@ void NonLinearDynamic :: updateComponent(TimeStep *tStep, NumericalCmpn cmpn, Do
                     for ( int i = 1; i <= neq; i++ ) {
                         help.at(i) = delta * a1 * incrementOfDisplacement.at(i);
                     }
-                    this->timesMtrx(help, rhs2, TangentStiffnessMatrix, this->giveDomain(1), tStep);
+                    this->timesMtrx(help, rhs2, TangentStiffnessMatrix, d, tStep);
 
                     for ( int i = 1; i <= neq; i++ ) {
                         forcesVector.at(i) += rhs2.at(i);
@@ -961,7 +961,7 @@ NonLinearDynamic :: assembleIncrementalReferenceLoadVectors(FloatArray &_increme
     }
 
 #ifdef __PARALLEL_MODE
-    this->updateSharedDofManagers(_incrementalLoadVector, LoadExchangeTag);
+    this->updateSharedDofManagers(_incrementalLoadVector, EModelDefaultEquationNumbering(), LoadExchangeTag);
 #endif
 }
 
@@ -1020,7 +1020,7 @@ NonLinearDynamic :: timesMtrx(FloatArray &vec, FloatArray &answer, CharType type
     }
 
 #ifdef __PARALLEL_MODE
-    this->updateSharedDofManagers(answer, MassExchangeTag);
+    this->updateSharedDofManagers(answer, EModelDefaultEquationNumbering(), MassExchangeTag);
 #endif
 }
 

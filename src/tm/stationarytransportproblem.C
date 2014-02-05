@@ -198,7 +198,7 @@ void StationaryTransportProblem :: solveYourselfAt(TimeStep *tStep)
     externalForces.zero();
     this->assembleVector( externalForces, tStep, EID_ConservationEquation, ExternalForcesVector, VM_Total, EModelDefaultEquationNumbering(), this->giveDomain(1) );
 #ifdef __PARALLEL_MODE
-    this->updateSharedDofManagers(externalForces, LoadExchangeTag);
+    this->updateSharedDofManagers(externalForces, EModelDefaultEquationNumbering(), LoadExchangeTag);
 #endif
 
     // set-up numerical method
@@ -240,7 +240,7 @@ StationaryTransportProblem :: updateComponent(TimeStep *tStep, NumericalCmpn cmp
         this->assembleVector(this->internalForces, tStep, EID_ConservationEquation, InternalForcesVector, VM_Total,
                              EModelDefaultEquationNumbering(), this->giveDomain(1), & this->eNorm);
 #ifdef __PARALLEL_MODE
-        this->updateSharedDofManagers(this->internalForces, InternalForcesExchangeTag);
+        this->updateSharedDofManagers(this->internalForces, EModelDefaultEquationNumbering(), InternalForcesExchangeTag);
 #endif
         return;
     } else if ( cmpn == NonLinearLhs ) {
