@@ -593,11 +593,11 @@ MatlabExportModule :: giveOutputStream(TimeStep *tStep)
         // include tStep version in output file name
 #ifdef __PARALLEL_MODE
         if ( this->emodel->isParallel() && this->emodel->giveNumberOfProcesses() > 1 ) {
-            sprintf( fext, "_%03d_m%d_%d_%d", emodel->giveRank(), this->number, tStep->giveNumber(), tStep->giveSubtStepumber() );
+            sprintf( fext, "_%03d_m%d_%d_%d", emodel->giveRank(), this->number, tStep->giveNumber(), tStep->giveSubStepNumber() );
         }
         else
 #endif
-            sprintf(fext, "_m%d_%d_%d", this->number, tStep->giveNumber(), tStep->giveSubtStepumber());
+            sprintf(fext, "_m%d_%d_%d", this->number, tStep->giveNumber(), tStep->giveSubStepNumber());
     }
     else {
 #ifdef __PARALLEL_MODE

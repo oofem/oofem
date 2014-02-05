@@ -133,6 +133,7 @@ set (sm_material
 	intmatbilinczelastic.C
 	InterfaceMaterials/intmatdummycz.C
     simplevitrificationmaterial.C
+    anisodamagemodel.C
     )
 
 set (sm_error
