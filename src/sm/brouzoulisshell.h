@@ -36,36 +36,116 @@
 #define brouzoulisshell_h
 
 #include "nlstructuralelement.h"
-#include "fei3dwedgelin.h"
-#include "fei3dwedgequad.h"
+#include "fei2dquadlin.h"
+
 #include "floatmatrix.h"
-#include "nodalaveragingrecoverymodel.h"
+#include "floatarray.h"
+
 
 #define _IFT_BrouzoulisShell_Name "BrouzoulisShell"
 
 namespace oofem {
 
 
-///**
-// * Wrapper around element definition to provide FEICellGeometry interface.
-// */
-//class OOFEM_EXPORT FEIElementShellGeometryWrapper : public FEICellGeometry
-//{
-//protected:
-//    const Element *elem;
-//public:
-//    FEIElementShellGeometryWrapper(const Element *elem) : FEICellGeometry() { this->elem = elem; }
-//    virtual ~FEIElementShellGeometryWrapper() {}
-//    int giveNumberOfVertices() const;
-//    const FloatArray *giveVertexCoordinates(int i) const;
-//};
-
 
 /**
- * This class implements an Quadratic 3d  20 - node element. Each node has 3 degrees of freedom.
+ * This class implements an bi-linear quad shell element - (4 nodes) Each node has 5 or 6? degrees of freedom.
+ * Based on th paper: Advances in one-point quadrature shell elements
+ * By: Ted Belytschko, Bak Leong Wong and Huai-Yang Chiang
+ * Computer Methods in Applied Mechanics and Engineering 96 (1992) 93-107
  *
  * @author Jim Brouzoulis
  */
+class BrouzoulisShell : public NLStructuralElement
+{
+
+protected:
+    static FEI2dQuadLin interpolation;
+
+    bool matRotation;
+
+    /// Last equilibrium triad at the centre (xi1 = xi2 = 0).
+    FloatMatrix corotTriad;
+    /// Temporary triad at the centre.
+    FloatMatrix tempCorotTriad;
+    
+public:
+    BrouzoulisShell(int n, Domain *d);
+    virtual ~BrouzoulisShell() {}
+
+    virtual FEInterpolation *giveInterpolation() const { return & interpolation; }
+
+    virtual IRResultType initializeFrom(InputRecord *ir);
+    virtual void giveDofManDofIDMask(int inode, EquationID ut, IntArray &answer) const;
+    virtual double computeVolumeAround(GaussPoint *);
+
+    virtual void computeStressVector(FloatArray &answer, const FloatArray &strain, GaussPoint *gp, TimeStep *tStep);
+    virtual void computeConstitutiveMatrixAt(FloatMatrix &answer, MatResponseMode rMode, GaussPoint *gp, TimeStep *tStep);
+
+
+    virtual Interface *giveInterface(InterfaceType);
+    virtual int testElementExtension(ElementExtension ext) { return ( ( ext == Element_SurfaceLoadSupport ) ? 1 : 0 ); }
+
+    // definition & identification
+    virtual const char *giveInputRecordName() const { return _IFT_BrouzoulisShell_Name; }
+    virtual const char *giveClassName() const { return "BrouzoulisShell"; }
+    virtual int computeNumberOfDofs() { return 20; } // 4*5 dofs
+    virtual int computeNumberOfGlobalDofs() { return 24; } // 4*6 dofs
+    virtual MaterialMode giveMaterialMode() { return _2dPlate; };
+    virtual Element_Geometry_Type giveGeometryType() const { return EGT_quad_1; };
+
+
+    // Shell specific
+    virtual void giveInternalForcesVector(FloatArray &answer, TimeStep *tStep, int useUpdatedGpRecord);
+    void computeSectionalForcesAt(FloatArray &sectionalForces, FloatArray &stress, GaussPoint *gp, TimeStep *tStep);
+    void computedNdX(FloatMatrix &answer);
+
+    void setupInitialNodeDirectors();
+    void giveLocalNodeCoords(FloatArray &nodeLocalXiCoords, FloatArray &nodeLocalEtaCoords);
+    virtual bool computeGtoLRotationMatrix(FloatMatrix &answer);
+    FloatArray &giveInitialNodeDirector(int i) {
+        return this->initialNodeDirectors [ i - 1 ];
+    }
+
+    FloatArray &giveInitialNodeMidSurface(int i) {
+        return this->initialNodeMidSurface [ i - 1 ];
+    }
+
+
+    void computeCoRotatedNodeCoords(FloatMatrix &answer);
+
+protected:
+    std :: vector< FloatArray >initialNodeDirectors;
+    std :: vector< FloatArray >initialNodeMidSurface;
+    virtual void computeGaussPoints();
+
+    virtual void computeBmatrixAt(GaussPoint *, FloatMatrix &, int = 1, int = ALL_STRAINS);
+    virtual void computeBHmatrixAt(GaussPoint *, FloatMatrix &);
+    virtual void computeNmatrixAt(const FloatArray &iLocCoord, FloatMatrix &answer);
+    virtual int giveApproxOrder() { return 2; }
+    virtual int giveNumberOfIPForMassMtrxIntegration() { return 35; }
+
+    void createInternalNodes();
+    virtual void postInitialize(){ 
+        NLStructuralElement :: postInitialize();
+        //createInternalNodes(); 
+        //this->setupInitialNodeDirectors();
+    };
+    /**
+     * @name Surface load support
+     */
+    //@{
+    virtual IntegrationRule *GetSurfaceIntegrationRule(int);
+    virtual void computeSurfaceNMatrixAt(FloatMatrix &answer, int iSurf, GaussPoint *gp);
+    virtual void giveSurfaceDofMapping(IntArray &answer, int) const;
+    virtual double computeSurfaceVolumeAround(GaussPoint *gp, int);
+    virtual void computeSurfIpGlobalCoords(FloatArray &answer, GaussPoint *gp, int);
+    virtual int computeLoadLSToLRotationMatrix(FloatMatrix &answer, int, GaussPoint *gp);
+    //@}
+};
+} // end namespace oofem
+
+#if 0
 class BrouzoulisShell : public NLStructuralElement, NodalAveragingRecoveryModelInterface
 {
 
@@ -149,5 +229,6 @@ protected:
     virtual int computeLoadLSToLRotationMatrix(FloatMatrix &answer, int, GaussPoint *gp);
     //@}
 };
-} // end namespace oofem
+#endif
+
 #endif
