@@ -142,10 +142,10 @@ Quad1Mindlin :: computeBmatrixAt(GaussPoint *gp, FloatMatrix &answer, int li, in
         answer(2, 1 + i * 3) = dn(i, 1);
         answer(2, 2 + i * 3) = dn(i, 0);
 
-        answer(3, 0 + i * 3) = -dn(i, 1);
-        answer(3, 2 + i * 3) = n(i);
-        answer(4, 0 + i * 3) = -dn(i, 0);
-        answer(4, 1 + i * 3) = n(i);
+        answer(3, 0 + i * 3) = -dn(i, 0);
+        answer(3, 1 + i * 3) = n(i);
+        answer(4, 0 + i * 3) = -dn(i, 1);
+        answer(4, 2 + i * 3) = n(i);
     }
 }
 
