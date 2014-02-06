@@ -79,9 +79,13 @@ public:
     virtual int giveNumberOfEdgeDofs() = 0;
     virtual int giveNumberOfEdgeDofManagers() = 0;
     virtual Element *ZZNodalRecoveryMI_giveElement() { return this; }
-    //void evalInitialCovarBaseVectorsAt(GaussPoint *gp, FloatMatrix &Gcov);
     void evalInitialCovarBaseVectorsAt(FloatArray &lCoords, FloatMatrix &Gcov);
-    
+    void computeInitialGeneralizedStrainVector(FloatArray &lcoords, FloatArray &genStrain);
+
+    static void giveGeneralizedStrainComponents(FloatArray genEps, FloatArray &dphidxi1, FloatArray &dphidxi2, FloatArray &dmdxi1,
+                                         FloatArray &dmdxi2, FloatArray &m, double &dgamdxi1, double &dgamdxi2, double &gam);
+    static void giveDualBase(FloatMatrix &base1, FloatMatrix &base2);
+
 protected:
     virtual Interface *giveInterface(InterfaceType it);
     IntegrationRule **specialIntegrationRulesArray;
@@ -132,7 +136,7 @@ protected:
 
     void evalInitialContravarBaseVectorsAt(FloatArray &lCoords, FloatMatrix &Gcon);
 
-    void giveDualBase(FloatMatrix &base1, FloatMatrix &base2);
+    
     
     virtual void evalCovarBaseVectorsAt(FloatArray &lCoords, FloatMatrix &gcov, FloatArray &solVec);
 
@@ -155,8 +159,7 @@ protected:
     void computeFAt(FloatArray &lCoords, FloatMatrix &answer, FloatArray &genEps);
     void computeE(FloatMatrix &answer, FloatMatrix &F);
     void computeCovarStressAt(GaussPoint *gp, FloatArray &answer);
-    void giveGeneralizedStrainComponents(FloatArray genEps, FloatArray &dphidxi1, FloatArray &dphidxi2, FloatArray &dmdxi1,
-                                         FloatArray &dmdxi2, FloatArray &m, double &dgamdxi1, double &dgamdxi2, double &gam);
+    
     void computeStressResultantsAt(GaussPoint *gp, FloatArray &Svec, FloatArray &S1g, FloatArray &S2g, FloatArray &S3g, FloatArray &solVec);
 
     void computeStressVectorInMaterial(FloatArray &answer, FloatArray &genEps, GaussPoint *gp, Material *mat, TimeStep *stepN)

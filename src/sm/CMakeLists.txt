@@ -61,6 +61,9 @@ set (sm_interface_elements
     InterfaceElements/intelsurftr1.C
     )
 
+set (sm_boundary_conditions
+    prescribedgenstrainshell7.C
+    )
 
 set (sm_crosssection
     structuralcrosssection.C
@@ -223,6 +226,7 @@ set (sm
     ${sm_parallel}
     ${sm_obsolete}
     ${sm_new}
+	${sm_boundary_conditions}
     )
 
 add_library(sm

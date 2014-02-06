@@ -191,6 +191,40 @@ Shell7Base :: evalInitialCovarBaseVectorsAt(FloatArray &lcoords, FloatMatrix &Gc
     Gcov.setColumn(G1,1); Gcov.setColumn(G2,2); Gcov.setColumn(G3,3);
 }
 
+
+void
+Shell7Base :: computeInitialGeneralizedStrainVector(FloatArray &lcoords, FloatArray &genStrain)
+{
+
+    FloatArray M;
+    FloatMatrix dNdxi;
+
+    // In plane base vectors
+    this->fei->evaldNdxi( dNdxi, lcoords, FEIElementGeometryWrapper(this) );
+
+    FloatArray dPhi1(3), dPhi2(3), dM1(3), dM2(3); 
+    dPhi1.zero();
+    dPhi2.zero();
+    dM1.zero();
+    dM2.zero();
+    for ( int i = 1; i <= this->giveNumberOfDofManagers(); i++ ) {
+        FloatArray &xbar = * this->giveNode(i)->giveCoordinates();
+        M = this->giveInitialNodeDirector(i);
+        dPhi1 += dNdxi.at(i, 1) * xbar;
+        dPhi2 += dNdxi.at(i, 2) * xbar;   
+        dM1   += dNdxi.at(i, 1) * M;
+        dM2   += dNdxi.at(i, 2) * M;   
+    }
+
+    // Out of plane base vector = director
+    this->evalInitialDirectorAt(lcoords, M);     // G3=M
+    genStrain.setValues(15, dPhi1.at(1), dPhi1.at(2), dPhi1.at(3),  dPhi1.at(1), dPhi1.at(2), dPhi1.at(3),  
+                            dM1.at(1), dM1.at(2), dM1.at(3), dM2.at(1), dM2.at(2), dM2.at(3),
+                            M.at(1), M.at(2), M.at(3) );
+
+    
+}
+
 void
 Shell7Base :: edgeEvalInitialCovarBaseVectorsAt(FloatArray &lcoords, const int iedge, FloatArray &G1, FloatArray &G3)
 {
