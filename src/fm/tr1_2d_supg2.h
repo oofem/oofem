@@ -80,6 +80,12 @@ protected:
      * mat[1] second fluid.
      */
     int mat [ 2 ];
+    /**
+     * default integration rule over element volume.
+     * the standard integrationRulesArray contains two rules on element subvolumes.
+     */
+    IntegrationRule *defaultIRule;
+
 
 public:
     TR1_2D_SUPG2(int n, Domain * d);
@@ -160,6 +166,10 @@ public:
     virtual SPRPatchType SPRNodalRecoveryMI_givePatchType();
 
     virtual int giveIPValue(FloatArray &answer, GaussPoint *gp, InternalStateType type, TimeStep *tStep);
+    virtual int giveDefaultIntegrationRule() const { return 0; }
+    virtual IntegrationRule *giveDefaultIntegrationRulePtr() { return defaultIRule; }
+
+
 
 #ifdef __OOFEG
     int giveInternalStateAtNode(FloatArray &answer, InternalStateType type, InternalStateMode mode,

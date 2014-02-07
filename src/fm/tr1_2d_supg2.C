@@ -74,6 +74,7 @@ TR1_2D_SUPG2 :: TR1_2D_SUPG2(int n, Domain *aDomain) :
     numberOfDofMans  = 3;
     vcoords [ 0 ] = NULL;
     vcoords [ 1 ] = NULL;
+    defaultIRule = NULL;
 }
 
 TR1_2D_SUPG2 :: ~TR1_2D_SUPG2()
@@ -85,6 +86,9 @@ TR1_2D_SUPG2 :: ~TR1_2D_SUPG2()
         }
 
         vcoords [ i ] = NULL;
+    }
+    if (defaultIRule) {
+      delete defaultIRule;
     }
 }
 
@@ -184,6 +188,10 @@ TR1_2D_SUPG2 :: computeGaussPoints()
         integrationRulesArray = new IntegrationRule * [ 2 ];
         integrationRulesArray [ 0 ] = new GaussIntegrationRule(1, this, 1, 3, true);
         integrationRulesArray [ 1 ] = new GaussIntegrationRule(2, this, 1, 3, true);
+    }
+    if ( !defaultIRule ) {
+      defaultIRule = new GaussIntegrationRule(1, this, 1, 3, true);
+      this->giveCrossSection()->setupIntegrationPoints(*defaultIRule, 1, this);
     }
 }
 
