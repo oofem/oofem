@@ -364,7 +364,7 @@ void IntArray :: followedBy(int b, int allocChunk)
 
     if ( newSize > allocatedSize ) {
         int *newValues = ALLOC( newSize + allocChunk );
-        memset( values, 0, (newSize + allocChunk) * sizeof( int ) );
+        memset( newValues, 0, (newSize + allocChunk) * sizeof( int ) );
 
         memcpy( newValues, values, size * sizeof( int ) );
         newValues [ size ] = b;
