@@ -187,37 +187,22 @@ Truss3d :: giveLocalCoordinateSystem(FloatMatrix &answer)
 // stored rowwise (mainly used by some materials with ortho and anisotrophy)
 //
 {
-    FloatArray lx, ly(3), lz(3), help(3);
-    double length = this->computeLength();
-    Node *nodeA, *nodeB;
+    FloatArray lx, ly(3), lz;
 
-    // if (referenceNode == 0)
-    // _error ("instanciateFrom: wrong reference node specified");
+    lx.beDifferenceOf( * this->giveNode(2)->giveCoordinates(), * this->giveNode(1)->giveCoordinates() );
+    lx.normalize();
+
+    ly(0) = lx(1);
+    ly(1) = -lx(2);
+    ly(2) = lx(0);
+
+    // Construct orthogonal vector
+    double npn = ly.dotProduct(lx);
+    ly.add(-npn, lx);
+    ly.normalize();
+    lz.beVectorProductOf(ly, lx);
 
     answer.resize(3, 3);
-    answer.zero();
-    nodeA = this->giveNode(1);
-    nodeB = this->giveNode(2);
-    // refNode= this->giveDomain()->giveNode (this->referenceNode);
-
-    lx.beDifferenceOf( * nodeB->giveCoordinates(), * nodeA->giveCoordinates() );
-    lx.times(1.0 / length);
-
-    int minIndx = 1;
-    for ( int i = 2; i <= 3; i++ ) {
-        if ( lx.at(i) < fabs( lx.at(minIndx) ) ) {
-            minIndx = i;
-        }
-    }
-
-    help.zero();
-    help.at(minIndx) = 1.0;
-
-    lz.beVectorProductOf(lx, help);
-    lz.normalize();
-    ly.beVectorProductOf(lz, lx);
-    ly.normalize();
-
     for ( int i = 1; i <= 3; i++ ) {
         answer.at(1, i) = lx.at(i);
         answer.at(2, i) = ly.at(i);
