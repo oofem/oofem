@@ -522,6 +522,22 @@ TR1_2D_PFEM :: computeDeviatoricStress(FloatArray &answer, GaussPoint *gp, TimeS
     ( ( FluidDynamicMaterial * ) this->giveMaterial() )->computeDeviatoricStressVector(answer, gp, eps, tStep);
 }
 
+void
+TR1_2D_PFEM :: computeDeviatoricStressDivergence(FloatArray &answer, TimeStep *atTime)
+{
+    answer.resize(6);
+    answer.zero();
+    FloatArray stress;
+    
+	this->computeDeviatoricStress(stress, integrationRulesArray [ 0 ]->getIntegrationPoint(0), atTime );
+	    
+    // \int dNu/dxj \Tau_ij
+    for ( int i = 0; i < 3; i++ ) {
+        answer.at( ( i ) * 2 + 1 ) = area * ( stress.at(1) * b [ i ] + stress.at(3) * c [ i ] );
+        answer.at( ( i + 1 ) * 2 ) = area * ( stress.at(3) * b [ i ] + stress.at(2) * c [ i ] );
+    }
+}
+
 int
 TR1_2D_PFEM :: checkConsistency()
 {

@@ -166,12 +166,20 @@ PFEMElement ::  giveCharacteristicVector(FloatArray &answer, CharType mtrx, Valu
         this->giveCharacteristicMatrix(l, StabilizedLaplacianMatrix, tStep);
         this->computeVectorOf(EID_ConservationEquation, VM_Total, tStep, p);
         answer.beProductOf(l, p);
-    } else if ( mtrx == DivergenceVelocityVector ) {
+    } else if ( mtrx == DivergenceAuxVelocityVector ) {
+        FloatMatrix d;
+        this->giveCharacteristicMatrix(d, DivergenceMatrix, tStep);
+        FloatArray u_star;
+        this->computeVectorOf(EID_AuxMomentumBalance, VM_Intermediate, tStep, u_star);
+        answer.beProductOf(d, u_star);
+	} else if ( mtrx == DivergenceVelocityVector ) {
         FloatMatrix d;
         this->giveCharacteristicMatrix(d, DivergenceMatrix, tStep);
         FloatArray u;
-        this->computeVectorOf(EID_AuxMomentumBalance, VM_Intermediate, tStep, u);
+        this->computeVectorOf(EID_AuxMomentumBalance, VM_Total, tStep, u);
         answer.beProductOf(d, u);
+	} else if ( mtrx == DivergenceDeviatoricStressVector ) {
+		this->computeDeviatoricStressDivergence(answer, tStep);
     } else if ( mtrx == QMhat_invQTpressureVector ) {
         // NOT IN USE
         FloatMatrix Minv, QMinv, QMinvQT;

@@ -166,6 +166,7 @@ public:
 protected:
     virtual void computeGaussPoints() = 0;
     virtual void computeDeviatoricStress(FloatArray &answer, GaussPoint *gp, TimeStep *) = 0;
+	virtual void computeDeviatoricStressDivergence(FloatArray &answer, TimeStep *atTime) = 0;
 
     virtual void computeBMatrix(FloatMatrix &answer, GaussPoint *gp);
     virtual void computeStiffnessMatrix(FloatMatrix &answer, MatResponseMode mode, TimeStep *atTime); //K

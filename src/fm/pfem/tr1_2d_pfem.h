@@ -190,7 +190,9 @@ protected:
 
     void computeGaussPoints();
     virtual void computeDeviatoricStress(FloatArray &answer, GaussPoint *gp, TimeStep *);
-
+	
+	virtual void computeDeviatoricStressDivergence(FloatArray &answer, TimeStep *atTime);
+	
     virtual void computeForceVector(FloatArray &answer, TimeStep *atTime); //F
 
     // NOT IN USE

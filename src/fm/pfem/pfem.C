@@ -477,7 +477,7 @@ PFEM :: solveYourselfAt(TimeStep *tStep)
 
         rhs.times(-1.0);
 
-        this->assembleVectorFromElements( rhs, tStep, EID_ConservationEquation, DivergenceVelocityVector, VM_Total, pns, this->giveDomain(1) );
+        this->assembleVectorFromElements( rhs, tStep, EID_ConservationEquation, DivergenceAuxVelocityVector, VM_Total, pns, this->giveDomain(1) );
 
         this->giveNumericalMethod(this->giveMetaStep( tStep->giveMetaStepNumber() ));
         pressureVector->resize(presneq);
@@ -575,6 +575,27 @@ PFEM :: solveYourselfAt(TimeStep *tStep)
     } else {
         printf("\n %i iterations performed.\n", iteration);
     }
+
+	FloatArray velocityResiduum(auxmomneq);
+	FloatArray helpArray(auxmomneq);
+	this->assembleVectorFromElements( helpArray, tStep->givePreviousStep(), EID_AuxMomentumBalance, MassVelocityVector, VM_Total, avns, this->giveDomain(1) );
+	
+	this->assembleVectorFromElements( velocityResiduum, tStep, EID_AuxMomentumBalance, LoadVector, VM_Total, avns, this->giveDomain(1) );
+	this->assembleVectorFromElements( velocityResiduum, tStep, EID_AuxMomentumBalance, DivergenceDeviatoricStressVector, VM_Total, avns, this->giveDomain(1) );
+	velocityResiduum.times(-1.0);
+	this->assembleVectorFromElements( rhs, tStep, EID_MomentumBalance, PressureGradientVector, VM_Total, vns, this->giveDomain(1) );
+	velocityResiduum.times(deltaT);
+	
+	velocityResiduum.subtract(helpArray);
+	this->assembleVectorFromElements( velocityResiduum, tStep, EID_AuxMomentumBalance, MassVelocityVector, VM_Total, avns, this->giveDomain(1) );
+
+	double velocityResiduumNorm = velocityResiduum.computeNorm();
+	printf("Norm of the residuum in momentum balance equation %f\n", velocityResiduumNorm);
+
+	FloatArray pressureResiduum(presneq);
+	this->assembleVectorFromElements( pressureResiduum, tStep, EID_ConservationEquation, DivergenceVelocityVector, VM_Total, pns, this->giveDomain(1) );
+	double pressureResiduumNorm = pressureResiduum.computeNorm();
+	printf("Norm of the residuum in continuity equation %f\n", pressureResiduumNorm);
 
     Domain *d = this->giveDomain(1);
     for ( int i = 1; i <= this->giveDomain(1)->giveNumberOfDofManagers(); i++ ) {

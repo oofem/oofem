@@ -133,7 +133,8 @@ public:
 protected:
     /// Computes deviatoric stress vector in given integration point and solution step from given total strain vector
     virtual void computeDeviatoricStress(FloatArray &answer, GaussPoint *gp, TimeStep *) = 0;
-
+	/// Calculates the divergence of the deviatoric stress
+	virtual void computeDeviatoricStressDivergence(FloatArray &answer, TimeStep *atTime) = 0;
     /// Calculates the element shape funciton matrix for velocity degrees of freedom
     virtual void computeNuMatrix(FloatMatrix &answer, GaussPoint *gp) = 0;
     /// Calculates the element shape funciton matrix for pressure degrees of freedom
