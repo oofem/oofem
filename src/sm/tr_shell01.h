@@ -96,7 +96,9 @@ public:
     virtual void printOutputAt(FILE *file, TimeStep *tStep);
     virtual contextIOResultType saveContext(DataStream *stream, ContextMode mode, void *obj = NULL);
     virtual contextIOResultType restoreContext(DataStream *stream, ContextMode mode, void *obj = NULL);
-
+    virtual void postInitialize();
+    void updateLocalNumbering(EntityRenumberingFunctor &f);
+    void setCrossSection(int csIndx);
 #ifdef __OOFEG
     virtual void drawRawGeometry(oofegGraphicContext &);
     virtual void drawDeformedGeometry(oofegGraphicContext &, UnknownType type);
