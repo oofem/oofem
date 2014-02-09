@@ -560,7 +560,7 @@ public:
      * Sets the cross section model of receiver.
      * @param csIndx Index of new cross section.
      */
-    void setCrossSection(int csIndx) { this->crossSection = csIndx; }
+    virtual void setCrossSection(int csIndx) { this->crossSection = csIndx; }
 
     /// @return Number of dofmanagers of receiver.
     int giveNumberOfDofManagers() const { return numberOfDofMans; }
