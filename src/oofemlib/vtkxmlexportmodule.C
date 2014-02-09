@@ -1016,10 +1016,10 @@ VTKXMLExportModule :: getNodalVariableFromIS(FloatArray &answer, Node *node, Tim
         if ( mi ) {
             valueArray.resize(1);
             val = & valueArray;
-            valueArray.at(1) = mi->giveNodalScalarRepresentation( node->giveGlobalNumber() );
+            valueArray.at(1) = mi->giveNodalScalarRepresentation( node->giveNumber() );
         }
     } else {
-        int found = this->smoother->giveNodalVector(val, node->giveGlobalNumber(), ireg);
+        int found = this->smoother->giveNodalVector(val, node->giveNumber(), ireg);
         if ( !found ) {
             valueArray.resize( redIndx.giveSize() );
             val = & valueArray;
