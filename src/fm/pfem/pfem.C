@@ -427,6 +427,11 @@ PFEM :: solveYourselfAt(TimeStep *tStep)
         }
     }
 
+	FloatArray velocityResiduum(auxmomneq);
+	double velocityResiduumNorm = 1.0;
+	FloatArray pressureResiduum(presneq);
+	double pressureResiduumNorm = 1.0;
+
     int iteration = 0;
     do {
         iteration++;
@@ -438,7 +443,7 @@ PFEM :: solveYourselfAt(TimeStep *tStep)
 
         rhs.resize(auxmomneq);
         rhs.zero();
-
+		
         bool tStepNumberTricked = false;
         //in order not to get bc-value in getUnknown
         //will be reset
@@ -465,6 +470,8 @@ PFEM :: solveYourselfAt(TimeStep *tStep)
             tStep->givePreviousStep()->setNumber(0);
         }
 
+		rhs.subtract(velocityResiduum);
+
         this->giveNumericalMethod(this->giveMetaStep( tStep->giveMetaStepNumber()));
         nMethod->solve(avLhs, & rhs, & AuxVelocity);
 
@@ -472,12 +479,14 @@ PFEM :: solveYourselfAt(TimeStep *tStep)
 
         rhs.resize(presneq);
         rhs.zero();
-
+		
         this->assembleVectorFromElements( rhs, tStep, EID_ConservationEquation, PrescribedRhsVector, VM_Total, pns, this->giveDomain(1) );
 
         rhs.times(-1.0);
 
         this->assembleVectorFromElements( rhs, tStep, EID_ConservationEquation, DivergenceAuxVelocityVector, VM_Total, pns, this->giveDomain(1) );
+
+		rhs.subtract(pressureResiduum);
 
         this->giveNumericalMethod(this->giveMetaStep( tStep->giveMetaStepNumber() ));
         pressureVector->resize(presneq);
@@ -568,7 +577,33 @@ PFEM :: solveYourselfAt(TimeStep *tStep)
 				d_pnorm = max(d_pnorm, abs(diffPressure.at(i)/pressureVectorLastStep.at(i)));
 			}
         }
-    } while ( ( d_vnorm > 1.e-8 || d_pnorm > 1.e-8 ) && iteration < 50 );
+
+	velocityResiduum.zero();
+
+	FloatArray helpArray(auxmomneq);
+	this->assembleVectorFromElements( helpArray, tStep->givePreviousStep(), EID_AuxMomentumBalance, MassVelocityVector, VM_Total, avns, this->giveDomain(1) );
+	
+	this->assembleVectorFromElements( velocityResiduum, tStep, EID_AuxMomentumBalance, LoadVector, VM_Total, avns, this->giveDomain(1) );
+	this->assembleVectorFromElements( velocityResiduum, tStep, EID_AuxMomentumBalance, DivergenceDeviatoricStressVector, VM_Total, avns, this->giveDomain(1) );
+	velocityResiduum.times(-1.0);
+	this->assembleVectorFromElements( velocityResiduum, tStep, EID_AuxMomentumBalance, PressureGradientVector, VM_Total, avns, this->giveDomain(1) );
+	velocityResiduum.times(deltaT);
+	
+	velocityResiduum.subtract(helpArray);
+	this->assembleVectorFromElements( velocityResiduum, tStep, EID_AuxMomentumBalance, MassVelocityVector, VM_Total, avns, this->giveDomain(1) );
+
+	velocityResiduumNorm = velocityResiduum.computeNorm();
+	printf("Iteration %i\nNorm of the residuum in momentum balance equation %f\n", iteration, velocityResiduumNorm);
+
+	pressureResiduum.zero();
+	this->assembleVectorFromElements( pressureResiduum, tStep, EID_ConservationEquation, PrescribedRhsVector, VM_Total, pns, this->giveDomain(1) );
+	pressureResiduum.times(-1.0);
+	this->assembleVectorFromElements( pressureResiduum, tStep, EID_ConservationEquation, DivergenceVelocityVector, VM_Total, pns, this->giveDomain(1) );
+	pressureResiduumNorm = pressureResiduum.computeNorm();
+	printf("Norm of the residuum in continuity equation %f\n", pressureResiduumNorm);
+
+    } while ( ( velocityResiduumNorm > 1.e-6 || pressureResiduumNorm > 1.e-6 ) && iteration < 50 && tStep->giveNumber() > 1);
+	//} while ( ( d_vnorm > 1.e-8 || d_pnorm > 1.e-8 ) && iteration < 50 );
 
     if ( iteration > 49 ) {
         OOFEM_ERROR("Maximal iteration count exceded");
@@ -576,26 +611,8 @@ PFEM :: solveYourselfAt(TimeStep *tStep)
         printf("\n %i iterations performed.\n", iteration);
     }
 
-	FloatArray velocityResiduum(auxmomneq);
-	FloatArray helpArray(auxmomneq);
-	this->assembleVectorFromElements( helpArray, tStep->givePreviousStep(), EID_AuxMomentumBalance, MassVelocityVector, VM_Total, avns, this->giveDomain(1) );
 	
-	this->assembleVectorFromElements( velocityResiduum, tStep, EID_AuxMomentumBalance, LoadVector, VM_Total, avns, this->giveDomain(1) );
-	this->assembleVectorFromElements( velocityResiduum, tStep, EID_AuxMomentumBalance, DivergenceDeviatoricStressVector, VM_Total, avns, this->giveDomain(1) );
-	velocityResiduum.times(-1.0);
-	this->assembleVectorFromElements( rhs, tStep, EID_MomentumBalance, PressureGradientVector, VM_Total, vns, this->giveDomain(1) );
-	velocityResiduum.times(deltaT);
 	
-	velocityResiduum.subtract(helpArray);
-	this->assembleVectorFromElements( velocityResiduum, tStep, EID_AuxMomentumBalance, MassVelocityVector, VM_Total, avns, this->giveDomain(1) );
-
-	double velocityResiduumNorm = velocityResiduum.computeNorm();
-	printf("Norm of the residuum in momentum balance equation %f\n", velocityResiduumNorm);
-
-	FloatArray pressureResiduum(presneq);
-	this->assembleVectorFromElements( pressureResiduum, tStep, EID_ConservationEquation, DivergenceVelocityVector, VM_Total, pns, this->giveDomain(1) );
-	double pressureResiduumNorm = pressureResiduum.computeNorm();
-	printf("Norm of the residuum in continuity equation %f\n", pressureResiduumNorm);
 
     Domain *d = this->giveDomain(1);
     for ( int i = 1; i <= this->giveDomain(1)->giveNumberOfDofManagers(); i++ ) {
@@ -796,22 +813,22 @@ PFEM :: updateDofUnknownsDictionaryVelocities(DofManager *inode, TimeStep *tStep
 
     for ( int i = 1; i <= ndofs; i++ ) {
         Dof *iDof = inode->giveDof(i);
-        int eqNum = 0;
-        double val = 0;
-        if ( iDof->hasBc(tStep) ) { // boundary condition
-            val = iDof->giveBcValue(VM_Total, tStep);
-        } else {
-            DofIDItem type = iDof->giveDofID();
-            if ( type == V_u || type == V_v || type == V_w ) {
-                eqNum = iDof->__giveEquationNumber();
-                FloatArray *vect = VelocityField.giveSolutionVector(tStep);
-                if ( vect->giveSize() > 0 ) {
-                    val = vect->at(eqNum);
-                }
-            }
-        }
-
-        iDof->updateUnknownsDictionary(tStep, VM_Total, val);
+		DofIDItem type = iDof->giveDofID();
+        if ( type == V_u || type == V_v || type == V_w ) {
+			int eqNum = 0;
+			double val = 0;
+			if ( iDof->hasBc(tStep) ) { // boundary condition
+				val = iDof->giveBcValue(VM_Total, tStep);
+			} else {
+				eqNum = iDof->__giveEquationNumber();
+				FloatArray *vect = VelocityField.giveSolutionVector(tStep);
+				if ( vect->giveSize() > 0 ) {
+					val = vect->at(eqNum);
+				}
+			}
+        
+			iDof->updateUnknownsDictionary(tStep, VM_Total, val);
+		}
     }
 }
 
