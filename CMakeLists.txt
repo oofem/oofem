@@ -9,11 +9,11 @@ include (UsePkgConfig)
 
 project (oofem)
 set (oofem_VERSION_MAJOR 2)
-set (oofem_VERSION_MINOR 2)
+set (oofem_VERSION_MINOR 3)
 set (oofem_VERSION_PATCH 0) # Unused
 set (oofem_HOMEPAGE "http://www.oofem.org")
 set (bp_HOMEPAGE "http://ksm.fsv.cvut.cz/%7Ebp/bp.html")
-set (oofem_COPYRIGHT "2012")
+set (oofem_COPYRIGHT "2014")
 set (oofem_EMAIL "info@oofem.org")
 
 # Default is debug build
@@ -78,8 +78,7 @@ option (USE_TRIANGLE "Compile with Triangle bindings" OFF)
 option (USE_VTK "Enable VTK (for exporting binary VTU-files)" OFF)
 #option (USE_CGAL "CGAL" OFF)
 # Internal modules
-# SM module should be always included (XFem dependencies)
-# option (USE_SM "Enable structural mechanics module" ON)
+option (USE_SM "Enable structural mechanics module" ON)
 option (USE_FM "Enable fluid mechanics module" ON)
 option (USE_TM "Enable heat/mass transfer module" ON)
 option (USE_CEMHYD "Enable CemHyd support" OFF)
@@ -92,6 +91,8 @@ if (USE_PARALLEL)
     set (USE_MPI ON)
 endif ()
 
+# SM module should be always included (XFem dependencies)
+set (USE_SM ON)
 
 #######################################################################
 ######################## Internal libraries ###########################
