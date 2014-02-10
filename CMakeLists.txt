@@ -13,7 +13,7 @@ set (oofem_VERSION_MINOR 3)
 set (oofem_VERSION_PATCH 0) # Unused
 set (oofem_HOMEPAGE "http://www.oofem.org")
 set (bp_HOMEPAGE "http://ksm.fsv.cvut.cz/%7Ebp/bp.html")
-set (oofem_COPYRIGHT "2014")
+set (oofem_COPYRIGHT "Copyright (C) 1994-2014 Borek Patzak")
 set (oofem_EMAIL "info@oofem.org")
 
 # Default is debug build
