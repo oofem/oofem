@@ -123,11 +123,7 @@ TrabBoneGrad3D :: givePDGradMatrix_kk(FloatMatrix &answer, MatResponseMode mode,
 void
 TrabBoneGrad3D :: givePDGradMatrix_LD(FloatMatrix &answer, MatResponseMode mode, GaussPoint *gp, TimeStep *tStep)
 {
-    MaterialMode mMode = gp->giveMaterialMode();
-    switch ( mMode ) {
-    default:
-        _error2( "givePDGradMatrix_LD : unknown mode (%s)", __MaterialModeToString(mMode) );
-    }
+  _error2( "givePDGradMatrix_LD : unknown mode (%s)", __MaterialModeToString(mMode) );
 }
 
 

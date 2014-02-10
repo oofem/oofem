@@ -731,7 +731,7 @@ void FloatArray :: resize(int n)
     this->resizeWithValues(n);
     return;
 
-#endif
+#else
 
     size = n;
     if ( n <= allocatedSize ) {
@@ -749,6 +749,7 @@ void FloatArray :: resize(int n)
     if ( !values ) {
         OOFEM_FATAL2("FloatArray :: simple - Failed in allocating %d doubles", n);
     }
+#endif
 #endif
 }
 

@@ -71,7 +71,7 @@ class FloatMatrix;
  * -# For integrated cross section models (2d and 3d beams, plates and general shells)
  *    strainVectorShell {eps_x,eps_y,gamma_xy, kappa_x, kappa_y, kappa_xy, gamma_zx, gamma_zy}
  */
-class StructuralCrossSection : public CrossSection
+class OOFEM_EXPORT StructuralCrossSection : public CrossSection
 {
 public:
     /**

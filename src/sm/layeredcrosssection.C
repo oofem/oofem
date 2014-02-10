@@ -964,7 +964,7 @@ LayeredCrossSection :: setupIntegrationPoints(IntegrationRule &irule, int npoint
                                              element->giveMaterialMode(), this->layerThicks);
 
 #else
-        int points1 = floor(cbrt( double ( npoints ) ) + 0.5);
+        int points1 = (int) floor(cbrt( double ( npoints ) ) + 0.5);
         // If numberOfIntegrationPoints > 0 then use that, otherwise use the element's default.
         return irule.SetUpPointsOnCubeLayers(points1, points1, this->numberOfIntegrationPoints ? numberOfIntegrationPoints : points1,
                                              element->giveMaterialMode(), this->layerThicks);

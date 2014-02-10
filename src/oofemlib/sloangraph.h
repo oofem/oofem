@@ -38,13 +38,13 @@
 #include "oofemcfg.h"
 #include "sloangraphnode.h"
 #include "sloanlevelstruct.h"
+#include "dofmanager.h"
 #include "intarray.h"
 #include "alist.h"
 
 #include <list>
 
 namespace oofem {
-class DofManager;
 class TimeStep;
 
 #define SLOAN_TIME_CHUNK 60

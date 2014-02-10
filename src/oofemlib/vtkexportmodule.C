@@ -837,7 +837,7 @@ VTKExportModule :: exportIntVarAs(InternalStateType valID, InternalStateValueTyp
     int i, j, jsize;
     FloatArray iVal(3);
     FloatMatrix t(3, 3);
-    const FloatArray *val;
+    const FloatArray *val = NULL;
 
     this->giveSmoother();
 

@@ -138,11 +138,7 @@ LargeStrainMasterMaterialGrad :: givePDGradMatrix_kk(FloatMatrix &answer, MatRes
 void
 LargeStrainMasterMaterialGrad :: givePDGradMatrix_LD(FloatMatrix &answer, MatResponseMode mode, GaussPoint *gp, TimeStep *tStep)
 {
-    MaterialMode mMode = gp->giveMaterialMode();
-    switch ( mMode ) {
-    default:
-        _error2( "giveCharacteristicMatrix : unknown mode (%s)", __MaterialModeToString(mMode) );
-    }
+  _error2( "giveCharacteristicMatrix : unknown mode (%s)", __MaterialModeToString(mMode) );
 }
 
 
@@ -352,7 +348,7 @@ LargeStrainMasterMaterialGradStatus :: saveContext(DataStream *stream, ContextMo
     contextIOResultType iores;
 
     // save parent class status
-    if ( ( iores = LargeStrainMasterMaterialGradStatus :: saveContext(stream, mode, obj) ) != CIO_OK ) {
+    if ( ( iores = LargeStrainMasterMaterialStatus :: saveContext(stream, mode, obj) ) != CIO_OK ) {
         THROW_CIOERR(iores);
     }
 

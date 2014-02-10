@@ -951,7 +951,7 @@ OctreeSpatialLocalizer :: giveClosestIP(const FloatArray &coords, int region, bo
 {
     double dist, minDist;
     OctantRec *currCell;
-    GaussPoint *nearestGp, *jGp;
+    GaussPoint *nearestGp = NULL, *jGp;
     OctantRec :: BoundingBoxStatus BBStatus;
     elementContainerType :: iterator pos;
     elementContainerType *elementList;

@@ -39,7 +39,7 @@
 #include "materialmode.h"
 
 namespace oofem {
-typedef char StressStrainMatMode;
+typedef MaterialMode StressStrainMatMode;
 /**
  * Base class for stress/strain vector representations. It is derived from FloatArray class, which is used
  * to store the stress/strain vector components in reduced form. Additional attribute is introduced

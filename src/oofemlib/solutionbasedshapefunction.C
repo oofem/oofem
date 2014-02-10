@@ -526,11 +526,12 @@ SolutionbasedShapeFunction :: computeBaseFunctionValueAt(FloatArray &answer, Flo
             if ( ( fabs( maxCoord.at(i) - coords.at(i) ) < TOL ) || ( fabs( minCoord.at(i) - coords.at(i) ) < TOL ) ) {
                 permuteIndex.push_back(i);
                 n++;
-                thisMask = thisMask + pow(2.0, i - 1);
+                //thisMask = thisMask + pow(2.0, i - 1);   // compiler warning on conversion from double to int
+		thisMask = thisMask + ( 0x01 << (i - 1) );
             }
         }
-
-        for ( int i = 0; i < pow(2.0, n); i++ ) {
+	int _s = 0x01 << n;
+        for ( int i = 0; i < _s; i++ ) {
             int mask = i, counter = 1;
             FloatArray *newCoord = new(FloatArray) ( coords.giveSize() );
             * newCoord = coords;

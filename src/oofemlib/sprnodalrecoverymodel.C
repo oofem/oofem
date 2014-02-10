@@ -98,7 +98,7 @@ SPRNodalRecoveryModel :: recoverValues(InternalStateType type, TimeStep *tStep)
         }
 
         regType = ( SPRPatchType ) regionTypes.at(ireg);
-        regionValSize = 0.;
+        regionValSize = 0;
         // loop over elements and determine local region node numbering and determine and check nodal values size
         if ( this->initRegionNodeNumbering(regionNodalNumbers, regionDofMans, ireg) == 0 ) {
             continue;

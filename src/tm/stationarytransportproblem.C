@@ -261,7 +261,7 @@ StationaryTransportProblem :: saveContext(DataStream *stream, ContextMode mode, 
 {
     contextIOResultType iores;
     int closeFlag = 0;
-    FILE *file;
+    FILE *file = NULL;
 
     if ( stream == NULL ) {
         if ( !this->giveContextFile(& file, this->giveCurrentStep()->giveNumber(),

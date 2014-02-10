@@ -118,7 +118,7 @@ FEI3dHexaQuad :: global2local(FloatArray &answer, const FloatArray &gcoords, con
 {
     FloatArray res, delta, guess;
     FloatMatrix jac;
-    double convergence_limit, error;
+    double convergence_limit, error=0.0;
 
     // find a suitable convergence limit
     convergence_limit = 1e-6 * this->giveCharacteristicLength(cellgeo);

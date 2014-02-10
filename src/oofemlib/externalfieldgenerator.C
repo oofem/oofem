@@ -51,7 +51,7 @@ ExternalFieldGenerator :: ~ExternalFieldGenerator()
 void ExternalFieldGenerator :: generateRandomValue(double &value, FloatArray *globalCoordinates)
 {
     // Map the corresponding random value from the field
-    int countXDown = 0, countXUp = 0, countYDown = 0, countYUp;
+    int countXDown = 0, countXUp = 0, countYDown = 0, countYUp = 0;
     double randomVariable = 0.;
     //Determine x count
     double helpX = 0., helpY = 0.;
