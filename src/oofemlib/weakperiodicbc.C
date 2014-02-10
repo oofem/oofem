@@ -538,7 +538,7 @@ double WeakPeriodicBoundaryCondition :: computeBaseFunctionValue1D(int baseID, d
     } else if ( useBasisType == legendre ) {
         double n = ( double ) baseID;
         coordinate = 2.0 * coordinate - 1.0;
-        for ( int k = 0.; k <= baseID; k++ ) {
+        for ( int k = 0; k <= baseID; k++ ) {
             fVal = fVal + binomial(n, k) * binomial(-n - 1.0, k) * pow( ( 1.0 - coordinate ) / 2.0, ( double ) k );
         }
     }
@@ -658,7 +658,7 @@ DofManager *WeakPeriodicBoundaryCondition :: giveInternalDofManager(int i)
 
 double WeakPeriodicBoundaryCondition :: factorial(int n)
 {
-    int x = 1.0;
+    int x = 1;
     for ( int i = 1; i <= n; i++ ) {
         x = x * i;
     }

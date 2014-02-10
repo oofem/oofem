@@ -61,7 +61,7 @@ LocalGaussianRandomGenerator :: initializeFrom(InputRecord *ir)
 
     IR_GIVE_FIELD(ir, mean, _IFT_LocalGaussianRandomGenerator_mean);
     IR_GIVE_FIELD(ir, variance, _IFT_LocalGaussianRandomGenerator_variance);
-    randomInteger = -time(NULL);
+    randomInteger = (long) (-time(NULL));
     int seed = 0;
     IR_GIVE_OPTIONAL_FIELD(ir, seed, _IFT_LocalGaussianRandomGenerator_seed);
     if ( seed ) {
@@ -87,7 +87,7 @@ double LocalGaussianRandomGenerator :: ran1(long *idum)
     long k;
     static long iy = 0;
     static long iv [ NTAB ];
-    float temp;
+    double temp;
 
     if ( * idum <= 0 || !iy ) {
         if ( -( * idum ) < 1 ) {
