@@ -207,7 +207,7 @@ void BSplineInterpolation :: evalN(FloatArray &answer, const FloatArray &lcoords
             }
         }
     } else if ( nsd == 3 ) {
-        for ( m = 0; m <= degree [ 2 ]; k++ ) {
+        for ( m = 0; m <= degree [ 2 ]; m++ ) {
             for ( l = 0; l <= degree [ 1 ]; l++ ) {
                 for ( k = 0; k <= degree [ 0 ]; k++ ) {
                     answer.at(c++) = N [ 0 ](k) * N [ 1 ](l) * N [ 2 ](m);
