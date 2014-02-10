@@ -303,7 +303,7 @@ StationaryTransportProblem :: restoreContext(DataStream *stream, ContextMode mod
     contextIOResultType iores;
     int closeFlag = 0;
     int istep, iversion;
-    FILE *file;
+    FILE *file = NULL;
 
     this->resolveCorrespondingtStepumber(istep, iversion, obj);
 

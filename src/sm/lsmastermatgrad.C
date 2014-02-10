@@ -138,7 +138,8 @@ LargeStrainMasterMaterialGrad :: givePDGradMatrix_kk(FloatMatrix &answer, MatRes
 void
 LargeStrainMasterMaterialGrad :: givePDGradMatrix_LD(FloatMatrix &answer, MatResponseMode mode, GaussPoint *gp, TimeStep *tStep)
 {
-  _error2( "giveCharacteristicMatrix : unknown mode (%s)", __MaterialModeToString(mMode) );
+    MaterialMode mMode = gp->giveMaterialMode();
+    _error2( "giveCharacteristicMatrix : unknown mode (%s)", __MaterialModeToString(mMode) );
 }
 
 

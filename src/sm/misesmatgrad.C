@@ -155,7 +155,8 @@ MisesMatGrad :: givePDGradMatrix_kk(FloatMatrix &answer, MatResponseMode mode, G
 void
 MisesMatGrad :: givePDGradMatrix_LD(FloatMatrix &answer, MatResponseMode mode, GaussPoint *gp, TimeStep *tStep)
 {
-  _error2( "givePDGradMatrix_LD : unknown mode (%s)", __MaterialModeToString(mMode) );
+    MaterialMode mMode = gp->giveMaterialMode();
+    _error2( "givePDGradMatrix_LD : unknown mode (%s)", __MaterialModeToString(mMode) );
 }
 
 
