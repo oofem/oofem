@@ -729,9 +729,9 @@ WallClockLoadBalancerMonitor :: initializeFrom(InputRecord *ir)
     perturbFactor = 1.0;
     IR_GIVE_OPTIONAL_FIELD(ir, perturbFactor, _IFT_WallClockLoadBalancerMonitor_perturbfactor);
 
-    recoveredSteps.resize(0);
+    recoveredSteps.clear();
     IR_GIVE_OPTIONAL_FIELD(ir, recoveredSteps, _IFT_WallClockLoadBalancerMonitor_recoveredsteps);
-    processingWeights.resize(0);
+    processingWeights.clear();
     IR_GIVE_OPTIONAL_FIELD(ir, processingWeights, _IFT_WallClockLoadBalancerMonitor_processingweights);
     if ( recoveredSteps.giveSize() != processingWeights.giveSize() ) {
         OOFEM_ERROR("WallClockLoadBalancerMonitor::initializeFrom - mismatch size of lbrecoveredsteps and lbprocessingweights");

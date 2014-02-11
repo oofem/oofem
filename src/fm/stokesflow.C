@@ -53,7 +53,6 @@ StokesFlow :: StokesFlow(int i, EngngModel *_master) : FluidModel(i, _master)
 {
     this->nMethod = NULL;
     this->ndomains = 1;
-    this->hasAdvanced = false;
     this->stiffnessMatrix = NULL;
     this->meshqualityee = NULL;
 #ifdef __PARALLEL_MODE
@@ -129,10 +128,7 @@ void StokesFlow :: solveYourselfAt(TimeStep *tStep)
     int neq = this->giveNumberOfDomainEquations( 1, EModelDefaultEquationNumbering() );
 
     // Move solution space to current time step
-    if ( !hasAdvanced ) {
-        velocityPressureField->advanceSolution(tStep);
-        hasAdvanced = true;
-    }
+    velocityPressureField->advanceSolution(tStep);
 
     // Point pointer SolutionVector to current solution in velocityPressureField
     solutionVector = velocityPressureField->giveSolutionVector(tStep);
@@ -162,7 +158,7 @@ void StokesFlow :: solveYourselfAt(TimeStep *tStep)
 #endif
 
     if ( this->giveProblemScale() == macroScale ) {
-        OOFEM_LOG_INFO("StokesFlow :: solveYourselfAt - Solving step %d, metastep %d, (neq = %d)\n", tStep->giveNumber(), tStep->giveMetatStepumber(), neq);
+        OOFEM_LOG_INFO("StokesFlow :: solveYourselfAt - Solving step %d, metastep %d, (neq = %d)\n", tStep->giveNumber(), tStep->giveMetaStepNumber(), neq);
     }
 
     this->giveNumericalMethod( this->giveCurrentMetaStep() );
@@ -232,7 +228,6 @@ void StokesFlow :: updateComponent(TimeStep *tStep, NumericalCmpn cmpn, Domain *
 
 void StokesFlow :: updateYourself(TimeStep *tStep)
 {
-    hasAdvanced = false;
     this->updateInternalState(tStep);
     EngngModel :: updateYourself(tStep);
 }

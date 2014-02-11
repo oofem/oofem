@@ -153,7 +153,7 @@ public:
      * mass matrix integration (typically only displacements are taken into account).
      * @param answer Integration mask, if zero sized, all unknowns participate. This is default.
      */
-    virtual void giveMassMtrxIntegrationgMask(IntArray &answer) { answer.resize(0); }
+    virtual void giveMassMtrxIntegrationgMask(IntArray &answer) { answer.clear(); }
     /**
      * Computes numerically stiffness matrix of receiver. Default implementation computes element stiffness using
      * @f$ K=\int_v B^{\mathrm{T}} D B \mathrm{d}V @f$ formulae, where @f$ B @f$ is element geometric matrix and @f$ D @f$ is material stiffness matrix.
@@ -431,7 +431,7 @@ protected:
      * @param gp Integration point.
      * @todo Should be a FlotArray instead
      */
-    virtual void computeEgdeNMatrixAt(FloatMatrix &answer, int iedge, GaussPoint *gp) { answer.resize(0, 0); }
+    virtual void computeEgdeNMatrixAt(FloatMatrix &answer, int iedge, GaussPoint *gp) { answer.clear(); }
     /**
      * Computes surface interpolation matrix. Interpolation matrix provide way, how to compute
      * local surface unknowns (nonzero element unknowns on surface) at any integration point of surface, based on
@@ -443,7 +443,7 @@ protected:
      * @param iSurf Surface number.
      * @param gp Integration point.
      */
-    virtual void computeSurfaceNMatrixAt(FloatMatrix &answer, int iSurf, GaussPoint *gp) { answer.resize(0, 0); }
+    virtual void computeSurfaceNMatrixAt(FloatMatrix &answer, int iSurf, GaussPoint *gp) { answer.clear(); }
     /**
      * Assembles edge dof mapping mask, which provides mapping between edge local DOFs and "global" element
      * DOFs. Mask can be imagined as local edge code numbers used to localize local edge DOFs to
@@ -451,7 +451,7 @@ protected:
      * @param answer Edge DOF mapping.
      * @param iEdge Edge number.
      */
-    virtual void giveEdgeDofMapping(IntArray &answer, int iEdge) const { answer.resize(0); }
+    virtual void giveEdgeDofMapping(IntArray &answer, int iEdge) const { answer.clear(); }
     /**
      * Assembles surface dof mapping mask, which provides mapping between surface local DOFs and "global" element
      * DOFs. Mask can be imagined as local surface code numbers used to localize local DOFs to
@@ -459,7 +459,7 @@ protected:
      * @param answer Surface DOF mapping.
      * @param iSurf Surface number
      */
-    virtual void giveSurfaceDofMapping(IntArray &answer, int iSurf) const { answer.resize(0); }
+    virtual void giveSurfaceDofMapping(IntArray &answer, int iSurf) const { answer.clear(); }
     /**
      * Returns integration rule for integration over element surface.
      * @param i order of integrated polynomial
@@ -484,14 +484,14 @@ protected:
      * @param gp Edge integration point.
      * @param iEdge Edge number.
      */
-    virtual void computeEdgeIpGlobalCoords(FloatArray &answer, GaussPoint *gp, int iEdge) { answer.resize(0); }
+    virtual void computeEdgeIpGlobalCoords(FloatArray &answer, GaussPoint *gp, int iEdge) { answer.clear(); }
     /**
      * Computes global coordinates of integration point on  local surface.
      * @param answer Global coordinates.
      * @param gp Surface integration point.
      * @param iSurf Surface number.
      */
-    virtual void computeSurfIpGlobalCoords(FloatArray &answer, GaussPoint *gp, int iSurf) { answer.resize(0); }
+    virtual void computeSurfIpGlobalCoords(FloatArray &answer, GaussPoint *gp, int iSurf) { answer.clear(); }
 
     // Global to local element c.s transformation for load vector dofs
     /**
@@ -502,7 +502,7 @@ protected:
      * @return Nonzero if transformation matrix is not empty matrix, zero otherwise.
      */
     virtual int computeLoadGToLRotationMtrx(FloatMatrix &answer) {
-        answer.beEmptyMtrx();
+        answer.clear();
         return 0;
     }
 
@@ -519,7 +519,7 @@ protected:
      * @return Nonzero if transformation matrix is not empty matrix, zero otherwise.
      */
     virtual int computeLoadLEToLRotationMatrix(FloatMatrix &answer, int iEdge, GaussPoint *gp) {
-        answer.beEmptyMtrx();
+        answer.clear();
         return 0;
     }
     /**
@@ -533,7 +533,7 @@ protected:
      * @return Nonzero if transformation matrix is not empty matrix, zero otherwise.
      */
     virtual int computeLoadLSToLRotationMatrix(FloatMatrix &answer, int iSurf, GaussPoint *gp) {
-        answer.beEmptyMtrx();
+        answer.clear();
         return 0;
     }
     //@}

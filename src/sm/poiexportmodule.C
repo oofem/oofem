@@ -200,7 +200,7 @@ POIExportModule :: exportIntVarAs(InternalStateType valID, FILE *stream, TimeSte
         this->giveMapper()->__init(d, toMap, poiCoords, region, tStep);
         if ( !this->giveMapper()->__mapVariable(val, poiCoords, valID, tStep) ) {
             OOFEM_WARNING("POIExportModule :: exportIntVarAs - Failed to map variable");
-            val.resize(0);
+            val.clear();
         }
         fprintf(stream, "%10d ", ( * PoiIter ).id);
         for ( i = 1; i <= val.giveSize(); i++ ) {
@@ -298,7 +298,7 @@ POIExportModule :: exportPrimVarAs(UnknownType valID, FILE *stream, TimeStep *tS
             if ( interface ) {
                 interface->EIPrimaryUnknownMI_computePrimaryUnknownVectorAt(VM_Total, tStep, coords, pv);
             } else {
-                pv.resize(0);
+                pv.clear();
                 OOFEM_WARNING2( "POIExportModule::exportPrimVarAs: element %d with no EIPrimaryUnknownMapperInterface support",
                                 source->giveNumber() );
             }

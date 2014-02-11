@@ -107,7 +107,7 @@ RankinePlasticMaterial :: computeHardeningReducedModuli(FloatMatrix &answer,
                                                         const FloatArray &strainSpaceHardeningVariables,
                                                         TimeStep *tStep)
 {
-    answer.resize(0, 0);
+    answer.clear();
 }
 
 void
@@ -115,7 +115,7 @@ RankinePlasticMaterial :: computeStressSpaceHardeningVarsReducedGradient(FloatAr
                                                                          const FloatArray &stressVector,
                                                                          const FloatArray &stressSpaceHardeningVars)
 {
-    answer.resize(0);
+    answer.clear();
 }
 
 
@@ -125,7 +125,7 @@ RankinePlasticMaterial :: computeReducedGradientMatrix(FloatMatrix &answer, int 
                                                        const FloatArray &stressVector,
                                                        const FloatArray &stressSpaceHardeningVars)
 {
-    answer.resize(0, 0);
+    answer.clear();
 }
 
 
@@ -133,7 +133,7 @@ void
 RankinePlasticMaterial :: computeStressSpaceHardeningVars(FloatArray &answer, GaussPoint *gp,
                                                           const FloatArray &strainSpaceHardeningVariables)
 {
-    answer.resize(0);
+    answer.clear();
 }
 
 

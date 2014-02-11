@@ -94,7 +94,7 @@ TransportElement :: giveDofManDofIDMask(int inode, EquationID eid, IntArray &ans
             _error("Unknown ElementMode");
         }
     } else {
-        answer.resize(0);
+        answer.clear();
     }
 }
 
@@ -333,7 +333,7 @@ TransportElement :: computeCapacitySubMatrix(FloatMatrix &answer, MatResponseMod
     IntegrationRule *iRule = integrationRulesArray [ iri ];
     TransportMaterial *mat = static_cast< TransportMaterial * >( this->giveMaterial() );
 
-    answer.beEmptyMtrx();
+    answer.clear();
     for ( int i = 0; i < iRule->giveNumberOfIntegrationPoints(); i++ ) {
         GaussPoint *gp = iRule->getIntegrationPoint(i);
         this->computeNAt( n, * gp->giveCoordinates() );
@@ -382,7 +382,7 @@ TransportElement :: computeInternalSourceRhsSubVectorAt(FloatArray &answer, Time
     TransportMaterial *mat = static_cast< TransportMaterial * >( this->giveMaterial() );
 
     FloatArray val, helpLoadVector, globalIPcoords, n;
-    answer.resize(0);
+    answer.clear();
 
     int nLoads = this->giveBodyLoadArray()->giveSize();
     for ( int i = 1; i <= nLoads; i++ ) {
@@ -470,7 +470,7 @@ TransportElement :: computeIntSourceLHSMatrix(FloatMatrix &answer, TimeStep *tSt
             _error("Unknown ElementMode");
         }
     } else {
-        answer.beEmptyMtrx();
+        answer.clear();
     }
 }
 
@@ -486,7 +486,7 @@ TransportElement :: computeIntSourceLHSSubMatrix(FloatMatrix &answer, MatRespons
     IntegrationRule *iRule = integrationRulesArray [ iri ];
     TransportMaterial *mat = static_cast< TransportMaterial * >( this->giveMaterial() );
 
-    answer.beEmptyMtrx();
+    answer.clear();
     for ( int i = 0; i < iRule->giveNumberOfIntegrationPoints(); i++ ) {
         GaussPoint *gp = iRule->getIntegrationPoint(i);
         this->computeNAt( n, * gp->giveCoordinates() );
@@ -535,7 +535,7 @@ TransportElement :: computeInternalForcesVectorAt(FloatArray &answer, TimeStep *
 void
 TransportElement :: computeLoadVector(FloatArray &answer, Load *load, CharType type, ValueModeType mode, TimeStep *tStep)
 {
-    answer.resize(0);
+    answer.clear();
 
     if ( !( load->giveType() == TransmissionBC && type == ExternalForcesVector ) &&
          !( load->giveType() == ConvectionBC && type == InternalForcesVector ) ) {
@@ -595,7 +595,7 @@ TransportElement :: computeLoadVector(FloatArray &answer, Load *load, CharType t
 void
 TransportElement :: computeBoundaryLoadVector(FloatArray &answer, BoundaryLoad *load, int boundary, CharType type, ValueModeType mode, TimeStep *tStep)
 {
-    answer.resize(0);
+    answer.clear();
 
     if ( !( load->giveType() == TransmissionBC && type == ExternalForcesVector ) &&
          !( load->giveType() == ConvectionBC && type == InternalForcesVector ) ) {
@@ -655,7 +655,7 @@ TransportElement :: computeBoundaryLoadVector(FloatArray &answer, BoundaryLoad *
 void
 TransportElement :: computeBoundaryEdgeLoadVector(FloatArray &answer, BoundaryLoad *load, int boundary, CharType type, ValueModeType mode, TimeStep *tStep)
 {
-    answer.resize(0);
+    answer.clear();
 
     if ( !( load->giveType() == TransmissionBC && type == ExternalForcesVector ) &&
          !( load->giveType() == ConvectionBC && type == InternalForcesVector ) ) {
@@ -974,7 +974,7 @@ TransportElement :: computeBCSubMtrxAt(FloatMatrix &answer, TimeStep *tStep, Val
     // end loop over applied bc
 
     if ( !defined ) {
-        answer.resize(0, 0);
+        answer.clear();
     }
 }
 

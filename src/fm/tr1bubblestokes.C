@@ -100,7 +100,7 @@ void Tr1BubbleStokes :: giveDofManDofIDMask(int inode, EquationID ut, IntArray &
     } else if ( ut == EID_MomentumBalance_ConservationEquation ) {
         answer.setValues(3, V_u, V_v, P_f);
     } else {
-        answer.resize(0);
+        answer.clear();
     }
 }
 
@@ -109,7 +109,7 @@ void Tr1BubbleStokes :: giveInternalDofManDofIDMask(int i, EquationID eid, IntAr
     if ( eid == EID_MomentumBalance_ConservationEquation || eid == EID_MomentumBalance ) {
         answer.setValues(2, V_u, V_v);
     } else {
-        answer.resize(0);
+        answer.clear();
     }
 }
 
@@ -226,7 +226,7 @@ void Tr1BubbleStokes :: computeExternalForcesVector(FloatArray &answer, TimeStep
 void Tr1BubbleStokes :: computeLoadVector(FloatArray &answer, Load *load, CharType type, ValueModeType mode, TimeStep *tStep)
 {
     if ( type != ExternalForcesVector ) {
-        answer.resize(0);
+        answer.clear();
         return;
     }
 
@@ -264,7 +264,7 @@ void Tr1BubbleStokes :: computeLoadVector(FloatArray &answer, Load *load, CharTy
 void Tr1BubbleStokes :: computeBoundaryLoadVector(FloatArray &answer, BoundaryLoad *load, int iEdge, CharType type, ValueModeType mode, TimeStep *tStep)
 {
     if ( type != ExternalForcesVector ) {
-        answer.resize(0);
+        answer.clear();
         return;
     }
 
@@ -339,10 +339,8 @@ void Tr1BubbleStokes :: computeStiffnessMatrix(FloatMatrix &answer, TimeStep *tS
         dNv(7) = B(1, 7) = B(2, 6) = 27. * ( dN(0, 1) * N(1) * N(2) + N(0) * dN(1, 1) * N(2) + N(0) * N(1) * dN(2, 1) );
 
         // Computing the internal forces should have been done first.
-        mat->giveDeviatoricStiffnessMatrix(Ed, TangentStiffness, gp, tStep); // dsigma_dev/deps_dev
-        mat->giveDeviatoricPressureStiffness(Ep, TangentStiffness, gp, tStep); // dsigma_dev/dp
-        mat->giveVolumetricDeviatoricStiffness(Cd, TangentStiffness, gp, tStep); // deps_vol/deps_dev
-        mat->giveVolumetricPressureStiffness(Cp, TangentStiffness, gp, tStep); // deps_vol/dp
+        // dsigma_dev/deps_dev  dsigma_dev/dp  deps_vol/deps_dev  deps_vol/dp
+        mat->giveStiffnessMatrices(Ed, Ep, Cd, Cp, TangentStiffness, gp, tStep);
 
         EdB.beProductOf(Ed, B);
         K.plusProductSymmUpper(B, EdB, dA);
@@ -437,7 +435,7 @@ int Tr1BubbleStokes :: EIPrimaryUnknownMI_computePrimaryUnknownVectorAt(ValueMod
     FloatArray lcoords, n, n_lin;
     ok = this->computeLocalCoordinates(lcoords, gcoords);
     if ( !ok ) {
-        answer.resize(0);
+        answer.clear();
         return false;
     }
 

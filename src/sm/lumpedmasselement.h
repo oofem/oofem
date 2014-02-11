@@ -65,13 +65,13 @@ public:
     virtual void computeMassMatrix(FloatMatrix &answer, TimeStep *tStep)
     { computeLumpedMassMatrix(answer, tStep); }
     virtual void computeStiffnessMatrix(FloatMatrix &answer, MatResponseMode rMode, TimeStep *tStep)
-    { answer.resize(0, 0); }
+    { answer.clear(); }
     virtual void computeInitialStressMatrix(FloatMatrix &answer, TimeStep *tStep)
-    { answer.resize(0, 0); }
+    { answer.clear(); }
     virtual void computeForceLoadVector(FloatArray &answer, TimeStep *tStep, ValueModeType)
-    { answer.resize(0); }
+    { answer.clear(); }
     virtual void giveInternalForcesVector(FloatArray &answer, TimeStep *tStep, int useUpdatedGpRecord = 0)
-    { answer.resize(0); }
+    { answer.clear(); }
 
     virtual int computeNumberOfDofs();
     virtual void giveDofManDofIDMask(int inode, EquationID eid, IntArray &answer) const;

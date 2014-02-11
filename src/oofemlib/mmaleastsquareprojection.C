@@ -114,7 +114,7 @@ MMALeastSquareProjection :: __init(Domain *dold, IntArray &type, FloatArray &coo
         //if not,  construct the neighborhood
         dold->giveConnectivityTable()->giveElementNeighbourList(neighborList, patchList);
         // count number of available points
-        patchList.resize(0);
+        patchList.clear();
         actualNumberOfPoints = 0;
         for ( int i = 1; i <= neighborList.giveSize(); i++ ) {
             if ( this->stateFilter ) {

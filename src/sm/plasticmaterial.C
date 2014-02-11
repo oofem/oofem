@@ -164,7 +164,7 @@ PlasticMaterial :: giveRealStressVector(FloatArray &answer,
         if ( hardeningModuli.giveNumberOfRows() ) {
             hardeningModuliInverse.beInverseOf(hardeningModuli);
         } else {
-            hardeningModuliInverse.resize(0, 0);
+            hardeningModuliInverse.clear();
         }
 
         this->computeConsistentModuli(consistentModuli, gp, elasticModuliInverse,
@@ -437,7 +437,7 @@ PlasticMaterial :: giveConsistentStiffnessMatrix(FloatMatrix &answer,
     if ( hardeningModuli.giveNumberOfRows() ) {
         hardeningModuliInverse.beInverseOf(hardeningModuli);
     } else {
-        hardeningModuliInverse.resize(0, 0);
+        hardeningModuliInverse.clear();
     }
 
     stressVector = status->giveStressVector();

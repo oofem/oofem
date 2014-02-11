@@ -153,7 +153,7 @@ NonLinearStatic :: updateAttributes(MetaStep *mStep)
     LinearStatic :: updateAttributes(mStep1);
 
     /*
-     * if ((mstep->giveFirsttStepumber() == tStep->giveNumber()) && hasString(initString, "fixload")) {
+     * if ((mstep->giveFirstStepNumber() == tStep->giveNumber()) && hasString(initString, "fixload")) {
      * double factor;
      *
      * printf ("NonLinearStatic: fixed load level");
@@ -280,7 +280,7 @@ double NonLinearStatic :: giveUnknownComponent(ValueModeType mode, TimeStep *tSt
 TimeStep *NonLinearStatic :: giveNextStep()
 {
     int istep = giveNumberOfFirstStep();
-    int mtStepum = 1;
+    int mStepNum = 1;
     double totalTime = 0.0;
     StateCounterType counter = 1;
     double deltaTtmp = deltaT;
@@ -298,18 +298,18 @@ TimeStep *NonLinearStatic :: giveNextStep()
         totalTime = currentStep->giveTargetTime() + deltaTtmp;
         istep =  currentStep->giveNumber() + 1;
         counter = currentStep->giveSolutionStateCounter() + 1;
-        mtStepum = currentStep->giveMetatStepumber();
+        mStepNum = currentStep->giveMetaStepNumber();
 
-        if ( !this->giveMetaStep(mtStepum)->isStepValid(istep) ) {
-            mtStepum++;
-            if ( mtStepum > nMetaSteps ) {
-                OOFEM_ERROR3("giveNextStep: no next step available, mtStepum=%d > nMetaSteps=%d", mtStepum, nMetaSteps);
+        if ( !this->giveMetaStep(mStepNum)->isStepValid(istep) ) {
+            mStepNum++;
+            if ( mStepNum > nMetaSteps ) {
+                OOFEM_ERROR3("giveNextStep: no next step available, mStepNum=%d > nMetaSteps=%d", mStepNum, nMetaSteps);
             }
         }
     }
 
     previousStep = currentStep;
-    currentStep = new TimeStep(istep, this, mtStepum, totalTime, deltaTtmp, counter);
+    currentStep = new TimeStep(istep, this, mStepNum, totalTime, deltaTtmp, counter);
     // dt variable are set eq to 0 for statics - has no meaning
     // *Wrong* It has meaning for viscoelastic materials.
 
@@ -359,11 +359,11 @@ NonLinearStatic :: terminate(TimeStep *tStep)
 void
 NonLinearStatic :: updateLoadVectors(TimeStep *tStep)
 {
-    MetaStep *mstep = this->giveMetaStep( tStep->giveMetatStepumber() );
-    bool isLastMetaStep = ( tStep->giveNumber() == mstep->giveLasttStepumber() );
+    MetaStep *mstep = this->giveMetaStep( tStep->giveMetaStepNumber() );
+    bool isLastMetaStep = ( tStep->giveNumber() == mstep->giveLastStepNumber() );
 
     if ( controlMode == nls_indirectControl ) {
-        //if ((tStep->giveNumber() == mstep->giveLasttStepumber()) && ir->hasField("fixload")) {
+        //if ((tStep->giveNumber() == mstep->giveLastStepNumber()) && ir->hasField("fixload")) {
         if ( isLastMetaStep ) {
             if ( !mstep->giveAttributesRecord()->hasField(_IFT_NonLinearStatic_donotfixload) ) {
                 OOFEM_LOG_INFO("Fixed load level\n");
@@ -444,7 +444,7 @@ NonLinearStatic :: proceedStep(int di, TimeStep *tStep)
     }
 
 #if 0
-    if ( ( mstep->giveFirsttStepumber() == tStep->giveNumber() ) ) {
+    if ( ( mstep->giveFirstStepNumber() == tStep->giveNumber() ) ) {
  #ifdef VERBOSE
         OOFEM_LOG_INFO("Resetting load level\n");
  #endif
@@ -485,7 +485,7 @@ NonLinearStatic :: proceedStep(int di, TimeStep *tStep)
     //
     // set-up numerical model
     //
-    this->giveNumericalMethod( this->giveMetaStep( tStep->giveMetatStepumber() ) );
+    this->giveNumericalMethod( this->giveMetaStep( tStep->giveMetaStepNumber() ) );
     //
     // call numerical model to solve arise problem
     //
@@ -558,7 +558,7 @@ NonLinearStatic :: updateComponent(TimeStep *tStep, NumericalCmpn cmpn, Domain *
                            EModelDefaultEquationNumbering(), d);
             initFlag = 0;
         } else if ( ( stiffMode == nls_elasticStiffness ) && ( initFlag ||
-                                                               ( this->giveMetaStep( tStep->giveMetatStepumber() )->giveFirsttStepumber() == tStep->giveNumber() ) ) ) {
+                                                               ( this->giveMetaStep( tStep->giveMetaStepNumber() )->giveFirstStepNumber() == tStep->giveNumber() ) ) ) {
 #ifdef VERBOSE
             OOFEM_LOG_DEBUG("Assembling elastic stiffness matrix\n");
 #endif
@@ -684,7 +684,7 @@ NonLinearStatic :: restoreContext(DataStream *stream, ContextMode mode, void *ob
     contextIOResultType iores;
     FILE *file = NULL;
 
-    this->resolveCorrespondingtStepumber(istep, iversion, obj);
+    this->resolveCorrespondingStepNumber(istep, iversion, obj);
     if ( stream == NULL ) {
         if ( !this->giveContextFile(& file, istep, iversion, contextMode_read) ) {
             THROW_CIOERR(CIO_IOERR); // override

@@ -430,7 +430,7 @@ public:
      * @param ut     Equation DOFs belong to.
      * @param answer Mask for node.
      */
-    virtual void giveDofManDofIDMask(int inode, EquationID ut, IntArray &answer) const { answer.resize(0); }
+    virtual void giveDofManDofIDMask(int inode, EquationID ut, IntArray &answer) const { answer.clear(); }
     /**
      * Calls giveDofManDofIDMask with the default equation id for the type of problem.
      * @todo Cant have a pure virtual method because of the hacks in HellmichMaterial :: createMaterialGp()
@@ -450,11 +450,11 @@ public:
      * @param answer mask for node.
      */
     virtual void giveInternalDofManDofIDMask(int inode, EquationID ut, IntArray &answer) const
-    { answer.resize(0); }
+    { answer.clear(); }
     /**
      * Calls giveInternalDofManDofIDMask with the default equation id for the type of problem.
      */
-    virtual void giveDefaultInternalDofManDofIDMask(int inode, IntArray &answer) const { answer.resize(0); }
+    virtual void giveDefaultInternalDofManDofIDMask(int inode, IntArray &answer) const { answer.clear(); }
     /**
      * Returns element dof mask for node. This mask defines the dof ordering of the element interpolation.
      * Must be defined by particular element.
@@ -462,7 +462,7 @@ public:
      * @param ut Equation DOFs belong to.
      * @param answer DOF mask for receiver.
      */
-    virtual void giveElementDofIDMask(EquationID ut, IntArray &answer) const { answer.resize(0); }
+    virtual void giveElementDofIDMask(EquationID ut, IntArray &answer) const { answer.clear(); }
     /**
      * Returns volume related to given integration point. Used typically in subroutines,
      * that perform integration over element volume. Should be implemented by particular
@@ -552,15 +552,10 @@ public:
     /// @return Reference to the associated crossSection of element.
     CrossSection *giveCrossSection();
     /**
-     * Sets the material of receiver.
-     * @param matIndx Index of new material.
-     */
-    void setMaterial(int matIndx) { this->material = matIndx; }
-    /**
      * Sets the cross section model of receiver.
      * @param csIndx Index of new cross section.
      */
-    void setCrossSection(int csIndx) { this->crossSection = csIndx; }
+    virtual void setCrossSection(int csIndx) { this->crossSection = csIndx; }
 
     /// @return Number of dofmanagers of receiver.
     int giveNumberOfDofManagers() const { return numberOfDofMans; }
@@ -911,7 +906,7 @@ public:
     virtual int giveInternalStateAtSide(FloatArray &answer, InternalStateType type, InternalStateMode mode,
                                         int side, TimeStep *tStep)
     {
-        answer.resize(0);
+        answer.clear();
         return 0;
     }
 

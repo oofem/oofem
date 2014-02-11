@@ -95,7 +95,7 @@ Quad1Mindlin :: computeBodyLoadVectorAt(FloatArray &answer, Load *forLoad, TimeS
     // note: force is assumed to be in global coordinate system.
     forLoad->computeComponentArrayAt(gravity, tStep, mode);
 
-    force.resize(0);
+    force.clear();
     if ( gravity.giveSize() ) {
         IntegrationRule *ir = integrationRulesArray [ 0 ]; ///@todo Other/higher integration for lumped mass matrices perhaps?
         for ( int i = 0; i < ir->giveNumberOfIntegrationPoints(); ++i ) {
@@ -116,7 +116,7 @@ Quad1Mindlin :: computeBodyLoadVectorAt(FloatArray &answer, Load *forLoad, TimeS
         answer.at(7)  = force.at(3);
         answer.at(10) = force.at(4);
     } else {
-        answer.resize(0);
+        answer.clear();
     }
 }
 
@@ -142,10 +142,10 @@ Quad1Mindlin :: computeBmatrixAt(GaussPoint *gp, FloatMatrix &answer, int li, in
         answer(2, 1 + i * 3) = dn(i, 1);
         answer(2, 2 + i * 3) = dn(i, 0);
 
-        answer(3, 0 + i * 3) = -dn(i, 1);
-        answer(3, 2 + i * 3) = n(i);
-        answer(4, 0 + i * 3) = -dn(i, 0);
-        answer(4, 1 + i * 3) = n(i);
+        answer(3, 0 + i * 3) = -dn(i, 0);
+        answer(3, 1 + i * 3) = n(i);
+        answer(4, 0 + i * 3) = -dn(i, 1);
+        answer(4, 2 + i * 3) = n(i);
     }
 }
 

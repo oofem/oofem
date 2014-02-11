@@ -197,7 +197,7 @@ J2plasticMaterial :: computeHardeningReducedModuli(FloatMatrix &answer,
     int size = this->giveSizeOfReducedHardeningVarsVector(gp);
 
     if ( !hasHardening() ) {
-        answer.resize(0, 0);
+        answer.clear();
         return;
     }
 
@@ -515,7 +515,7 @@ J2plasticMaterial :: giveStressBackVector(FloatArray &answer,
         return;
     }
 
-    answer.resize(0);
+    answer.clear();
 }
 
 

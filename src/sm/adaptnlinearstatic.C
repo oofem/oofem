@@ -57,6 +57,8 @@
  #include "parallelcontext.h"
 #endif
 
+#include <cstdlib>
+
 namespace oofem {
 REGISTER_EngngModel(AdaptiveNonLinearStatic);
 
@@ -298,7 +300,7 @@ AdaptiveNonLinearStatic :: initializeAdaptiveFrom(EngngModel *sourceProblem)
      *
      *
      * if (this->giveCurrentStep()->giveNumber() ==
-     * this->giveMetaStep(this->giveCurrentStep()->giveMetatStepumber())->giveFirsttStepumber()) {
+     * this->giveMetaStep(this->giveCurrentStep()->giveMetaStepNumber())->giveFirstStepNumber()) {
      * this->updateAttributes (this->giveCurrentStep());
      * }
      */
@@ -407,11 +409,11 @@ AdaptiveNonLinearStatic :: initializeAdaptiveFrom(EngngModel *sourceProblem)
 
 
 int
-AdaptiveNonLinearStatic :: initializeAdaptive(int tStepumber)
+AdaptiveNonLinearStatic :: initializeAdaptive(int tStepNumber)
 {
     int stepinfo [ 2 ];
 
-    stepinfo [ 0 ] = tStepumber;
+    stepinfo [ 0 ] = tStepNumber;
     stepinfo [ 1 ] = 0;
 
     try {
@@ -587,7 +589,7 @@ AdaptiveNonLinearStatic :: adaptiveRemap(Domain *dNew)
         //cts->setTime(cts->giveTime()-cts->giveTimeIncrement());
     }
 
-    if ( this->giveCurrentStep()->giveNumber() == this->giveCurrentMetaStep()->giveFirsttStepumber() ) {
+    if ( this->giveCurrentStep()->giveNumber() == this->giveCurrentMetaStep()->giveFirstStepNumber() ) {
         this->updateAttributes( this->giveCurrentMetaStep() );
     }
 
@@ -779,7 +781,7 @@ AdaptiveNonLinearStatic :: restoreContext(DataStream *stream, ContextMode mode, 
     contextIOResultType iores;
     FILE *file = NULL;
 
-    this->resolveCorrespondingtStepumber(istep, iversion, obj);
+    this->resolveCorrespondingStepNumber(istep, iversion, obj);
     if ( stream == NULL ) {
         if ( !this->giveContextFile(& file, istep, iversion, contextMode_read) ) {
             THROW_CIOERR(CIO_IOERR); // override
@@ -822,7 +824,7 @@ AdaptiveNonLinearStatic :: assembleInitialLoadVector(FloatArray &loadVector, Flo
     const char *__proc = "assembleInitialLoadVector"; // Required by IR_GIVE_FIELD macro
     IRResultType result;                           // Required by IR_GIVE_FIELD macro
 
-    int mtStepum = tStep->giveMetatStepumber();
+    int mStepNum = tStep->giveMetaStepNumber();
     int hasfixed, mode;
     InputRecord *ir;
     MetaStep *iMStep;
@@ -839,7 +841,7 @@ AdaptiveNonLinearStatic :: assembleInitialLoadVector(FloatArray &loadVector, Flo
     _incrementalLoadVector.zero();
     _incrementalLoadVectorOfPrescribed.zero();
 
-    for ( int imstep = 1; imstep < mtStepum; imstep++ ) {
+    for ( int imstep = 1; imstep < mStepNum; imstep++ ) {
         iMStep = this->giveMetaStep(imstep);
         ir = iMStep->giveAttributesRecord();
         //hasfixed = ir->hasField("fixload");
@@ -863,8 +865,8 @@ AdaptiveNonLinearStatic :: assembleInitialLoadVector(FloatArray &loadVector, Flo
                 _error("assembleInitialLoadVector: fixload recovery not supported for direct displacement control");
             }
 
-            int firststep = iMStep->giveFirsttStepumber();
-            int laststep  = iMStep->giveLasttStepumber();
+            int firststep = iMStep->giveFirstStepNumber();
+            int laststep  = iMStep->giveLastStepNumber();
 
             int _val = 0;
             IR_GIVE_OPTIONAL_FIELD(ir, _val, _IFT_AdaptiveNonLinearStatic_refloadmode);
@@ -900,11 +902,11 @@ AdaptiveNonLinearStatic :: assembleInitialLoadVector(FloatArray &loadVector, Flo
     } // end loop over meta-steps
 
     /* if direct control; add to initial load also previous steps in same metestep */
-    iMStep = this->giveMetaStep(mtStepum);
+    iMStep = this->giveMetaStep(mStepNum);
     ir = iMStep->giveAttributesRecord();
     mode = 0;
     IR_GIVE_OPTIONAL_FIELD(ir, mode, _IFT_AdaptiveNonLinearStatic_controlmode);
-    int firststep = iMStep->giveFirsttStepumber();
+    int firststep = iMStep->giveFirstStepNumber();
     int laststep  = tStep->giveNumber();
     int _val = 0;
     IR_GIVE_OPTIONAL_FIELD(ir, _val, _IFT_AdaptiveNonLinearStatic_refloadmode);
@@ -913,7 +915,7 @@ AdaptiveNonLinearStatic :: assembleInitialLoadVector(FloatArray &loadVector, Flo
     if ( mode == ( int ) nls_directControl ) { // and only load control
         for ( int istep = firststep; istep <= laststep; istep++ ) {
             // bad practise here
-            TimeStep *old = new TimeStep(istep, this, mtStepum, istep - 1.0, deltaT, 0);
+            TimeStep *old = new TimeStep(istep, this, mStepNum, istep - 1.0, deltaT, 0);
             this->assembleIncrementalReferenceLoadVectors(_incrementalLoadVector, _incrementalLoadVectorOfPrescribed,
                                                           rlm, this->giveDomain(domainIndx), EID_MomentumBalance, old);
 
@@ -934,10 +936,10 @@ AdaptiveNonLinearStatic :: assembleInitialLoadVector(FloatArray &loadVector, Flo
  * const char *__proc = "assembleInitialLoadVector"; // Required by IR_GIVE_FIELD macro
  * IRResultType result;                              // Required by IR_GIVE_FIELD macro
  *
- * int mtStepum = tStep->giveMetatStepumber() ;
+ * int mStepNum = tStep->giveMetaStepNumber() ;
  * int mode;
  * InputRecord* ir;
- * MetaStep* mStep = sourceProblem->giveMetaStep(mtStepum);
+ * MetaStep* mStep = sourceProblem->giveMetaStep(mStepNum);
  * FloatArray _incrementalLoadVector, _incrementalLoadVectorOfPrescribed;
  * SparseNonLinearSystemNM::referenceLoadInputModeType rlm;
  * //Domain* sourceDomain = sourceProblem->giveDomain(domainIndx);
@@ -961,7 +963,7 @@ AdaptiveNonLinearStatic :: assembleInitialLoadVector(FloatArray &loadVector, Flo
  * int _val = 0;
  * IR_GIVE_OPTIONAL_FIELD (ir, _val, _IFT_AdaptiveNonLinearStatic_refloadmode, "refloadmode");
  *
- * int firststep = mStep->giveFirsttStepumber();
+ * int firststep = mStep->giveFirstStepNumber();
  * int laststep  = tStep->giveNumber()-1;
  *
  * rlm = (SparseNonLinearSystemNM::referenceLoadInputModeType) _val;
@@ -969,7 +971,7 @@ AdaptiveNonLinearStatic :: assembleInitialLoadVector(FloatArray &loadVector, Flo
  * if (mode == (int)nls_directControl) { // and only load control
  * for (int istep = firststep; istep<=laststep; istep++) {
  * // bad practise here
- * TimeStep* old = new TimeStep (istep, this, mtStepum, istep-1.0, deltaT, 0);
+ * TimeStep* old = new TimeStep (istep, this, mStepNum, istep-1.0, deltaT, 0);
  * this->assembleIncrementalReferenceLoadVectors (_incrementalLoadVector, _incrementalLoadVectorOfPrescribed,
  *                         rlm, this->giveDomain(domainIndx), EID_MomentumBalance, old);
  *
@@ -979,7 +981,7 @@ AdaptiveNonLinearStatic :: assembleInitialLoadVector(FloatArray &loadVector, Flo
  * }
  * } else if (mode == (int)nls_indirectControl) {
  * // bad practise here
- * TimeStep* old = new TimeStep (firststep, this, mtStepum, firststep-1.0, deltaT, 0);
+ * TimeStep* old = new TimeStep (firststep, this, mStepNum, firststep-1.0, deltaT, 0);
  * this->assembleIncrementalReferenceLoadVectors (_incrementalLoadVector, _incrementalLoadVectorOfPrescribed,
  *                        rlm, this->giveDomain(domainIndx), EID_MomentumBalance, old);
  *

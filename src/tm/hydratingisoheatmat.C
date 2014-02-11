@@ -136,7 +136,7 @@ HydratingIsoHeatMaterial :: computeInternalSourceVector(FloatArray &val, GaussPo
          * giveHydrationDegree(gp, tStep, VM_Total), giveHydrationDegree(gp, tStep, VM_Incremental), (val.giveSize())?val.at(1):0);
          */
     } else {
-        val.resize(0);
+        val.clear();
     }
 }
 

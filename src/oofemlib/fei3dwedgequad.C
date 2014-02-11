@@ -217,7 +217,7 @@ void FEI3dWedgeQuad :: edgeLocal2global(FloatArray &answer, int iedge, const Flo
     this->computeLocalEdgeMapping(nodes, iedge);
     this->edgeEvalN(n, iedge, lcoords, cellgeo);
 
-    answer.resize(0);
+    answer.clear();
     for ( int i = 1; i <= n.giveSize(); ++i ) {
         answer.add( n.at(i), * cellgeo.giveVertexCoordinates( nodes.at(i) ) );
     }
@@ -301,7 +301,7 @@ FEI3dWedgeQuad :: surfaceLocal2global(FloatArray &answer, int isurf,
     this->computeLocalSurfaceMapping(nodes, isurf);
     this->surfaceEvalN(n, isurf, lcoords, cellgeo);
 
-    answer.resize(0);
+    answer.clear();
     for ( int i = 1; i <= n.giveSize(); ++i ) {
         answer.add( n.at(i), * cellgeo.giveVertexCoordinates( nodes.at(i) ) );
     }

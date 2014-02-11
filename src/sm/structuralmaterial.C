@@ -140,7 +140,7 @@ StructuralMaterial :: giveRealStressVector_StressControl(FloatArray &answer, Gau
     }
 
     OOFEM_WARNING("StructuralMaterial :: giveRealStressVector_StressControl - Iteration did not converge");
-    answer.resize(0);
+    answer.clear();
 }
 
 
@@ -272,7 +272,7 @@ StructuralMaterial :: giveFirstPKStressVector_PlaneStress(FloatArray &answer, Ga
     }
 
     OOFEM_WARNING("StructuralMaterial :: giveFirstPKStressVector_PlaneStress - Iteration did not converge");
-    answer.resize(0);
+    answer.clear();
 }
 
 
@@ -309,7 +309,7 @@ StructuralMaterial :: giveFirstPKStressVector_1d(FloatArray &answer, GaussPoint 
     }
 
     OOFEM_WARNING("StructuralMaterial :: giveFirstPKStressVector_1d - Iteration did not converge");
-    answer.resize(0);
+    answer.clear();
 }
 
 
@@ -826,7 +826,7 @@ StructuralMaterial :: giveVoigtSymVectorMask(IntArray &answer, MaterialMode mmod
         return 3;
 
     case _Unknown:
-        answer.resize(0);
+        answer.clear();
         return 0;
 
     default:
@@ -1809,7 +1809,7 @@ StructuralMaterial :: computeStressIndependentStrainVector(FloatArray &answer,
     Element *elem = gp->giveElement();
     StructuralElement *selem = dynamic_cast< StructuralElement * >( gp->giveElement() );
 
-    answer.resize(0);
+    answer.clear();
 
     if ( tStep->giveIntrinsicTime() < this->castingTime ) {
         answer.zero();

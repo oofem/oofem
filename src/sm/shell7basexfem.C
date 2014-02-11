@@ -310,7 +310,7 @@ Shell7BaseXFEM :: computeOrderingArray(IntArray &orderingArray, IntArray &active
         orderingDofIndex += dofManDofIdMaskAll.giveSize();
         activeDofIndex   += fieldDofId.giveSize();
 
-        dofManDofIdMask.resize(0);
+        dofManDofIdMask.clear();
     }
 
     // Reduce arrays to actual size

@@ -122,7 +122,7 @@ void NLTransientTransportProblem :: solveYourselfAt(TimeStep *tStep)
     double dTTau = tStep->giveTimeIncrement();
     double Tau = tStep->giveTargetTime() - ( 1. - alpha ) * tStep->giveTimeIncrement();
     //Time step in which material laws are taken into account
-    TimeStep TauStep(tStep->giveNumber(), this, tStep->giveMetatStepumber(), Tau, dTTau, tStep->giveSolutionStateCounter() + 1);
+    TimeStep TauStep(tStep->giveNumber(), this, tStep->giveMetaStepNumber(), Tau, dTTau, tStep->giveSolutionStateCounter() + 1);
 
     //Predictor
     FloatArray *solutionVector;

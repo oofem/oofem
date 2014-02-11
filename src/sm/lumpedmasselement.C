@@ -124,7 +124,7 @@ void
 LumpedMassElement :: giveDofManDofIDMask(int inode, EquationID eid, IntArray &answer) const
 {
     answer.resize(6);
-    answer.resize(0);
+    answer.clear();
     DofManager *dman = this->giveDofManager(inode);
     int _ndof = dman->giveNumberOfDofs();
     DofIDItem _dofid;

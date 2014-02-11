@@ -147,7 +147,7 @@ void HangingNode :: postInitialize()
                 IntArray masterDofIDs, masterNodesDup, dofids;
                 fei->evalMultiN(multiContribution, dofids, lcoords, FEIElementGeometryWrapper(e), 0.0);
                 masterContribution.flatten(multiContribution);
-                masterDofIDs.resize(0);
+                masterDofIDs.clear();
                 for ( int i = 0; i <= multiContribution.giveNumberOfColumns(); ++i ) {
                     masterDofIDs.followedBy(dofids);
                     masterNodesDup.followedBy(masterNodes);

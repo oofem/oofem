@@ -504,7 +504,7 @@ void AbaqusUserMaterial :: giveFirstPKStressVector_3d(FloatArray &answer, GaussP
     // We intentionally ignore the layer number since that is handled by the layered cross-section in OOFEM.
     int layer = 0; // Layer number (for composite shells and layered solids)..
     int kspt = 0; // Section point number within the current layer.
-    int kstep = tStep->giveMetatStepumber(); // Step number.
+    int kstep = tStep->giveMetaStepNumber(); // Step number.
     int kinc = 0; // Increment number.
 
     ///@todo No idea about these parameters

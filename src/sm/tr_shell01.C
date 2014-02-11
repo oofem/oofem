@@ -82,16 +82,34 @@ TR_SHELL01 :: initializeFrom(InputRecord *ir)
     plate->initializeFrom(ir);
     membrane->initializeFrom(ir);
 
-    plate->computeGaussPoints();
-    membrane->computeGaussPoints();
-
-    // check the compatibility of irules of plate and membrane
-    if ( plate->giveDefaultIntegrationRulePtr()->giveNumberOfIntegrationPoints() != membrane->giveDefaultIntegrationRulePtr()->giveNumberOfIntegrationPoints() ) {
-        OOFEM_ERROR("TR_SHELL01: incompatible integration rules detected");
-    }
-
     return IRRT_OK;
 }
+
+void
+TR_SHELL01 :: postInitialize()
+{
+  StructuralElement::postInitialize();
+
+  if ( plate->giveDefaultIntegrationRulePtr()->giveNumberOfIntegrationPoints() != membrane->giveDefaultIntegrationRulePtr()->giveNumberOfIntegrationPoints() ) {
+    OOFEM_ERROR("TR_SHELL01: incompatible integration rules detected");
+  }
+}
+
+void
+TR_SHELL01 :: updateLocalNumbering(EntityRenumberingFunctor &f)
+{
+  StructuralElement::updateLocalNumbering(f);
+  plate->updateLocalNumbering(f);
+  membrane->updateLocalNumbering(f);
+}
+
+void TR_SHELL01 :: setCrossSection(int csIndx) 
+{ 
+  StructuralElement::setCrossSection(csIndx);
+  plate->setCrossSection(csIndx);
+  membrane->setCrossSection(csIndx);
+}
+
 
 
 void
@@ -271,7 +289,7 @@ void
 TR_SHELL01 :: NodalAveragingRecoveryMI_computeSideValue(FloatArray &answer, int side,
                                                         InternalStateType type, TimeStep *tStep)
 {
-    answer.resize(0);
+    answer.clear();
 }
 
 

@@ -73,31 +73,18 @@ NodalRecoveryModel :: ~NodalRecoveryModel()
 int
 NodalRecoveryModel :: clear()
 {
-    int nnodes = this->nodalValList.giveSize();
-    FloatArray *valArray;
-
-    if ( nnodes ) {
-        TDictionaryIterator< int, FloatArray >iterator( this->nodalValList.at(1) );
-        for ( int i = 1; i <= nnodes; i++ ) {
-            // this->nodalValList->at(i)->clear();
-            iterator.initialize( this->nodalValList.at(i) );
-            while ( ( valArray = iterator.next() ) ) {
-                // test if INCLUDED
-                if ( valArray ) {
-                    valArray->resize(0);
-                }
-            }
-        }
-    }
-
+    int nnodes = this->nodalValList.size();
+    this->nodalValList.clear();
+    this->nodalValList.resize(nnodes);
     return 1;
 }
 
 int
 NodalRecoveryModel :: giveNodalVector(const FloatArray * &answer, int node, int region)
 {
-    if ( this->includes(node, region) ) {
-        answer = this->nodalValList.at(node)->at(region);
+    std::map< int, FloatArray >::iterator it = this->nodalValList[node-1].find(region);
+    if ( it != this->nodalValList[node-1].end() ) {
+        answer = & it->second;
         if ( answer->giveSize() ) {
             return 1;
         }
@@ -108,56 +95,15 @@ NodalRecoveryModel :: giveNodalVector(const FloatArray * &answer, int node, int 
     return 0;
 }
 
-FloatArray *
-NodalRecoveryModel :: giveNodalVectorPtr(int node, int region)
-{
-    if ( this->includes(node, region) ) {
-        return this->nodalValList.at(node)->at(region);
-    } else {
-        OOFEM_ERROR3("NodalRecoveryModel::giveNodalVectorPtr: No such record exist (dofMan %d, region %d)\n", node, region);
-    }
-
-    return NULL;
-}
-
-int
-NodalRecoveryModel :: includes(int node, int region)
-{
-    vectorDictType *dict;
-    if ( this->nodalValList.includes(node) ) {
-        dict = this->nodalValList.at(node);
-        if ( dict->includes(region) ) {
-            return 1;
-        }
-    }
-
-    return 0;
-}
-
 int
 NodalRecoveryModel :: init()
 {
     /* Initializes receiver for given domain */
     int nnodes = domain->giveNumberOfDofManagers();
-    vectorDictType *dict;
 
     // allocate array of nodal dictionaries, containing nodal values for each region
-    if ( this->nodalValList.giveSize() == nnodes ) {  // Already allocated.
-        this->stateCounter = 0;
-        this->valType = IST_Undefined;
-        return 1;
-    }
-
     this->nodalValList.clear();
-    this->nodalValList.growTo(nnodes);
-
-    for ( int i = 1; i <= nnodes; i++ ) {
-        if ( this->nodalValList.at(i) == NULL ) {
-            // printf("d+");
-            dict = new vectorDictType();
-            this->nodalValList.put(i, dict);
-        }
-    }
+    this->nodalValList.resize(nnodes);
 
     this->stateCounter = 0;
     this->valType = IST_Undefined;
@@ -170,32 +116,15 @@ NodalRecoveryModel :: updateRegionRecoveredValues(const int ireg, const IntArray
                                                   int regionValSize, const FloatArray &rhs)
 {
     int nnodes = domain->giveNumberOfDofManagers();
-    FloatArray *nodalVal;
 
     // update recovered values
     for ( int node = 1; node <= nnodes; node++ ) {
         // find nodes in region
         if ( regionNodalNumbers.at(node) ) {
-            if ( this->includes(node, ireg) ) {
-                nodalVal = this->giveNodalVectorPtr(node, ireg);
-                if ( nodalVal ) {
-                    // override record
-                    nodalVal->resize(regionValSize);
-                } else {
-                    // create new entry
-                    // printf ("a+");
-                    nodalVal = new FloatArray(regionValSize);
-                    this->nodalValList.at(node)->add(ireg, nodalVal);
-                }
-            } else {
-                // create new entry
-                // printf ("a+");
-                nodalVal = new FloatArray(regionValSize);
-                this->nodalValList.at(node)->add(ireg, nodalVal);
-            }
-
+            FloatArray &nodalVal = this->nodalValList[node-1][ireg];
+            nodalVal.resize(regionValSize);
             for ( int i = 1; i <= regionValSize; i++ ) {
-                nodalVal->at(i) = rhs.at( ( regionNodalNumbers.at(node) - 1 ) * regionValSize + i );
+                nodalVal.at(i) = rhs.at( ( regionNodalNumbers.at(node) - 1 ) * regionValSize + i );
             }
         }
     } // end update recovered values

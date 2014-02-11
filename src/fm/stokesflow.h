@@ -87,12 +87,6 @@ protected:
     /// Topology state, most notably used for determining if there is a need to remesh.
     TopologyState ts;
 
-    /**
-     * Boolean value to keep track of advancing the primary field.
-     * This is necessary when solveYourselfAt might be called several times per time step. Shouldn't need to do this.
-     */
-    bool hasAdvanced;
-
 public:
     StokesFlow(int i, EngngModel *_master = NULL);
     virtual ~StokesFlow();

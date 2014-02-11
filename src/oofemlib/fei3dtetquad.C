@@ -216,7 +216,7 @@ FEI3dTetQuad :: local2global(FloatArray &answer, const FloatArray &lcoords, cons
 {
     FloatArray N;
     this->evalN(N, lcoords, cellgeo);
-    answer.resize(0);
+    answer.clear();
     for ( int i = 1; i <= N.giveSize(); i++ ) {
         answer.add( N.at(i), * cellgeo.giveVertexCoordinates(i) );
     }
@@ -350,7 +350,7 @@ FEI3dTetQuad :: edgeLocal2global(FloatArray &answer, int iedge,
     this->computeLocalEdgeMapping(edgeNodes, iedge);
     this->edgeEvalN(N, iedge, lcoords, cellgeo);
 
-    answer.resize(0);
+    answer.clear();
     for ( int i = 0; i < N.giveSize(); ++i ) {
         answer.add( N(i), * cellgeo.giveVertexCoordinates( edgeNodes(i) ) );
     }
@@ -436,7 +436,7 @@ FEI3dTetQuad :: surfaceLocal2global(FloatArray &answer, int isurf,
     this->computeLocalSurfaceMapping(nodes, isurf);
     this->surfaceEvalN(N, isurf, lcoords, cellgeo);
 
-    answer.resize(0);
+    answer.clear();
     for ( int i = 0; i < N.giveSize(); ++i ) {
         answer.add( N(i), * cellgeo.giveVertexCoordinates( nodes(i) ) );
     }

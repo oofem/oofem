@@ -521,7 +521,7 @@ void
 Q9PlaneStress2d :: NodalAveragingRecoveryMI_computeSideValue(FloatArray &answer, int side,
                                                              InternalStateType type, TimeStep *tStep)
 {
-    answer.resize(0);
+    answer.clear();
 }
 
 void

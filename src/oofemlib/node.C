@@ -173,7 +173,7 @@ void
 Node :: computeLoadVector(FloatArray &answer, Load *load, CharType type, TimeStep *tStep, ValueModeType mode)
 {
     if ( type != ExternalForcesVector ) {
-        answer.resize(0);
+        answer.clear();
         return;
     }
 
@@ -437,7 +437,7 @@ Node :: computeL2GTransformation(FloatMatrix &answer, const IntArray &dofIDArry)
     DofIDItem id, id2;
 
     if ( localCoordinateSystem == NULL ) {
-        answer.beEmptyMtrx();
+        answer.clear();
         return false;
     } else {
         if ( dofIDArry.isEmpty() ) {

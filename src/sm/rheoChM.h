@@ -159,7 +159,7 @@ public:
     { this->giveRealStressVector(answer, gp, reducedE, tStep); }
 
     virtual void giveThermalDilatationVector(FloatArray &answer, GaussPoint *gp, TimeStep *tStep)
-    { answer.resize(0); }
+    { answer.clear(); }
 
     /// Evaluation of the incremental modulus.
     virtual double giveEModulus(GaussPoint *gp, TimeStep *tStep) = 0;
@@ -210,7 +210,7 @@ public:
                                            GaussPoint *gp,
                                            TimeStep *tStep,
                                            ValueModeType mode)
-    { answer.resize(0); }
+    { answer.clear(); }
 
     // Note: must take LoadResponseMode into account
     /**

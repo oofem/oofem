@@ -471,7 +471,7 @@ NonStationaryTransportProblem :: restoreContext(DataStream *stream, ContextMode 
     int istep, iversion;
     FILE *file = NULL;
 
-    this->resolveCorrespondingtStepumber(istep, iversion, obj);
+    this->resolveCorrespondingStepNumber(istep, iversion, obj);
 
     if ( stream == NULL ) {
         if ( !this->giveContextFile(& file, istep, iversion, contextMode_read) ) {

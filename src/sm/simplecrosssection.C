@@ -671,7 +671,7 @@ void
 SimpleCrossSection :: giveTemperatureVector(FloatArray &answer, GaussPoint *gp, TimeStep *tStep)
 {
     Element *elem = gp->giveElement();
-    answer.resize(0);
+    answer.clear();
     //sum up all prescribed temperatures over an element
     StructuralElement *selem = dynamic_cast< StructuralElement * >( elem );
     selem->computeResultingIPTemperatureAt(answer, tStep, gp, VM_Total);

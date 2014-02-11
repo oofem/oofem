@@ -58,7 +58,8 @@ IntArray Quad1MindlinShell3D :: drillOrdering(4);
 bool Quad1MindlinShell3D :: __initialized = Quad1MindlinShell3D :: initOrdering();
 
 Quad1MindlinShell3D :: Quad1MindlinShell3D(int n, Domain *aDomain) :
-    NLStructuralElement(n, aDomain)
+  NLStructuralElement(n, aDomain), ZZNodalRecoveryModelInterface(),
+  SPRNodalRecoveryModelInterface()
 {
     numberOfGaussPoints = 4;
     this->numberOfDofMans = 4;
@@ -158,7 +159,7 @@ Quad1MindlinShell3D :: computeBodyLoadVectorAt(FloatArray &answer, Load *forLoad
         answer.at(20) = forceY.at(4);
         answer.at(21) = forceZ.at(4);
     } else {
-        answer.resize(0);
+        answer.clear();
     }
 }
 
@@ -206,9 +207,10 @@ Quad1MindlinShell3D :: computeBmatrixAt(GaussPoint *gp, FloatMatrix &answer, int
 {
     FloatArray n, ns;
     FloatMatrix dn, dns;
+    const FloatArray &localCoords = * gp->giveCoordinates();
 
-    this->interp.evaldNdx( dn, * gp->giveCoordinates(), FEIVertexListGeometryWrapper(4, ( const FloatArray ** ) lnodes) );
-    this->interp.evalN( n, * gp->giveCoordinates(),  FEIVoidCellGeometry() );
+    this->interp.evaldNdx( dn, localCoords, FEIVertexListGeometryWrapper(4, ( const FloatArray ** ) lnodes) );
+    this->interp.evalN( n, localCoords,  FEIVoidCellGeometry() );
 
     answer.resize(8, 4 * 5);
     answer.zero();
@@ -243,10 +245,10 @@ Quad1MindlinShell3D :: computeBmatrixAt(GaussPoint *gp, FloatMatrix &answer, int
         answer(3 + 2, 2 + 2 + i * 5) = dn(i, 0);
 
         // shear strains
-        answer(3 + 3, 2 + 0 + i * 5) = -dns(i, 1);
-        answer(3 + 3, 2 + 2 + i * 5) = ns(i);
-        answer(3 + 4, 2 + 0 + i * 5) = -dns(i, 0);
-        answer(3 + 4, 2 + 1 + i * 5) = ns(i);
+        answer(3 + 3, 2 + 0 + i * 5) = -dns(i, 0);
+        answer(3 + 3, 2 + 1 + i * 5) = ns(i);
+        answer(3 + 4, 2 + 0 + i * 5) = -dns(i, 1);
+        answer(3 + 4, 2 + 2 + i * 5) = ns(i);
     }
 }
 
@@ -576,4 +578,47 @@ Quad1MindlinShell3D :: computeGtoLRotationMatrix(FloatMatrix &answer)
 
     return true;
 }
+
+Interface *
+Quad1MindlinShell3D :: giveInterface(InterfaceType interface)
+{
+    if ( interface == ZZNodalRecoveryModelInterfaceType ) {
+        return static_cast< ZZNodalRecoveryModelInterface * >( this );
+    } else if ( interface == SPRNodalRecoveryModelInterfaceType ) {
+        return static_cast< SPRNodalRecoveryModelInterface * >( this );
+    } 
+
+    return NULL;
+}
+
+
+
+void
+Quad1MindlinShell3D :: SPRNodalRecoveryMI_giveSPRAssemblyPoints(IntArray &pap)
+{
+    pap.resize(4);
+    for ( int i = 1; i < 5; i++ ) {
+        pap.at(i) = this->giveNode(i)->giveNumber();
+    }
+}
+
+void
+Quad1MindlinShell3D :: SPRNodalRecoveryMI_giveDofMansDeterminedByPatch(IntArray &answer, int pap)
+{
+    int found = 0;
+    answer.resize(1);
+
+    for ( int i = 1; i < 5; i++ ) {
+        if ( pap == this->giveNode(i)->giveNumber() ) {
+            found = 1;
+        }
+    }
+
+    if ( found ) {
+        answer.at(1) = pap;
+    } else {
+        _error("SPRNodalRecoveryMI_giveDofMansDeterminedByPatch: node unknown");
+    }
+}
+
 } // end namespace oofem

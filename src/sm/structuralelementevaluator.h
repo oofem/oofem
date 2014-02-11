@@ -78,7 +78,7 @@ protected:
      * mass matrix integration (typically only displacements are taken into account).
      * @param answer Integration mask, if zero sized, all unknowns participate. This is default.
      */
-    virtual void giveMassMtrxIntegrationMask(IntArray &answer) { answer.resize(0); }
+    virtual void giveMassMtrxIntegrationMask(IntArray &answer) { answer.clear(); }
     /**
      * Computes lumped mass matrix of receiver. Default implementation returns lumped consistent mass matrix.
      * Then returns lumped mass transformed into nodal coordinate system.

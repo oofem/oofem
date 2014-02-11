@@ -59,7 +59,7 @@ REGISTER_ExportModule(HOMExportModule)
 //inherit LinearElasticMaterial for accessing stress/strain transformation functions
 HOMExportModule :: HOMExportModule(int n, EngngModel *e) : ExportModule(n, e)
 {
-    this->matnum.resize(0);
+    this->matnum.clear();
 }
 
 
@@ -150,7 +150,8 @@ HOMExportModule :: doOutput(TimeStep *tStep, bool forcedOutput)
                 for ( int i = 0; i < iRule->giveNumberOfIntegrationPoints(); i++ ) {
                     gp  = iRule->getIntegrationPoint(i);
                     structElem = static_cast< StructuralElement * >( elem );
-                    structElem->computeResultingIPEigenstrainAt(VecEigStrain, tStep, gp, VM_Incremental);
+//                     structElem->computeResultingIPEigenstrainAt(VecEigStrain, tStep, gp, VM_Incremental);
+                    structElem->computeResultingIPEigenstrainAt(VecEigStrain, tStep, gp, VM_Total);
                     dV  = elem->computeVolumeAround(gp);
                     elem->giveIPValue(VecStrain, gp, IST_StrainTensor, tStep);
                     elem->giveIPValue(VecStress, gp, IST_StressTensor, tStep);

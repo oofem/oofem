@@ -255,8 +255,6 @@ public:
 
     /// Zeroes all coefficient of receiver.
     void zero();
-    /// Sets size of receiver to be an empty matrix. It will have zero rows and zero columns size.
-    void beEmptyMtrx() { this->resize(0, 0); }
     /// Sets receiver to unity matrix.
     void beUnitMatrix();
     /// Sets receiver to the inverse of scaling matrix P multiplied by the deviatoric projector ID.
@@ -489,6 +487,8 @@ public:
      * @param c Number of columns.
      */
     void hardResize(int r, int c);
+    /// Sets size of receiver to be an empty matrix. It will have zero rows and zero columns size.
+    void clear() { this->nRows = 0; this->nColumns = 0; }
     /**
      * Computes eigenvalues and eigenvectors of receiver (must be symmetric)
      * The receiver is preserved.

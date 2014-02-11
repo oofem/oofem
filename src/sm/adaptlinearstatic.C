@@ -87,7 +87,7 @@ AdaptiveLinearStatic :: terminate(TimeStep *tStep)
 
 
 int
-AdaptiveLinearStatic :: initializeAdaptive(int tStepumber)
+AdaptiveLinearStatic :: initializeAdaptive(int tStepNumber)
 {
     /*
      * Due to linear character of the problem,
@@ -99,7 +99,7 @@ AdaptiveLinearStatic :: initializeAdaptive(int tStepumber)
     /*
      * this -> initStepIncrements();
      *
-     * int sernum = tStepumber + 1;
+     * int sernum = tStepNumber + 1;
      * printf ("\nrestoring domain %d.%d\n", 1, sernum);
      * Domain* dNew = new Domain (1, sernum, this);
      * FILE* domainInputFile;
@@ -115,7 +115,7 @@ AdaptiveLinearStatic :: initializeAdaptive(int tStepumber)
      * this->forceEquationNumbering();
      *
      * // set time step
-     * this->giveCurrentStep()->setTime(tStepumber+1);
+     * this->giveCurrentStep()->setTime(tStepNumber+1);
      *
      * // init equation numbering
      * // this->forceEquationNumbering();

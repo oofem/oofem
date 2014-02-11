@@ -244,7 +244,7 @@ J2Mat :: computeKGradientVector(FloatArray &answer, functType ftype, int isurf, 
     FloatArray reducedKinematicGrad;
 
     if ( !hasHardening() ) {
-        answer.resize(0);
+        answer.clear();
         return;
     }
 
@@ -486,7 +486,7 @@ J2Mat :: giveStressBackVector(FloatArray &answer, GaussPoint *gp,
             answer.at( mask.at(i) ) = ( -1.0 ) * this->kinematicModuli * strainSpaceHardeningVars.at(i);
         }
     } else {
-        answer.resize(0);
+        answer.clear();
         return;
     }
 }

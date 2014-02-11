@@ -251,7 +251,7 @@ public:
      */
     virtual void giveThermalDilatationVector(FloatArray &answer, GaussPoint *gp, TimeStep *tStep)
     {
-        answer.resize(0);
+        answer.clear();
     }
     /**
      * Returns the reference temperature of receiver.

@@ -107,7 +107,7 @@ Quad10_2D_SUPG :: giveDofManDofIDMask(int inode, EquationID ut, IntArray &answer
     if ( ut == EID_MomentumBalance || ut == EID_MomentumBalance_ConservationEquation ) {
         answer.setValues(2, V_u, V_v);
     } else if ( ut == EID_ConservationEquation ) {
-        answer.resize(0);
+        answer.clear();
     } else {
         _error("giveDofManDofIDMask: Unknown equation id encountered");
     }
@@ -118,7 +118,7 @@ void
 Quad10_2D_SUPG :: giveInternalDofManDofIDMask(int i, EquationID ut, IntArray &answer) const
 {
     if ( ut == EID_MomentumBalance ) {
-        answer.resize(0);
+        answer.clear();
     } else if ( ut == EID_ConservationEquation || ut == EID_MomentumBalance_ConservationEquation ) {
         answer.setValues(1, P_f);
     } else {
@@ -383,7 +383,7 @@ Quad10_2D_SUPG :: computeAdvectionTerm(FloatMatrix &answer, TimeStep *tStep)
 {
     FloatMatrix n, b;
 
-    answer.resize(0, 0);
+    answer.clear();
 
     IntegrationRule *iRule = this->integrationRulesArray [ 1 ];
     /* consistent part + supg stabilization term */
@@ -403,7 +403,7 @@ Quad10_2D_SUPG :: computeAdvectionDeltaTerm(FloatMatrix &answer, TimeStep *tStep
 {
     FloatMatrix n, b;
 
-    answer.resize(0, 0);
+    answer.clear();
 
     IntegrationRule *iRule = this->integrationRulesArray [ 1 ];
     /* consistent part + supg stabilization term */
@@ -424,7 +424,7 @@ Quad10_2D_SUPG :: computeMassDeltaTerm(FloatMatrix &answer, TimeStep *tStep)
 {
     FloatMatrix n, b;
 
-    answer.resize(0, 0);
+    answer.clear();
 
     IntegrationRule *iRule = this->integrationRulesArray [ 1 ];
     /* mtrx for computing t_supg, norm of this mtrx is computed */
@@ -444,7 +444,7 @@ Quad10_2D_SUPG :: computeLSICTerm(FloatMatrix &answer, TimeStep *tStep)
 {
     FloatMatrix b;
 
-    answer.resize(0, 0);
+    answer.clear();
 
     IntegrationRule *iRule = this->integrationRulesArray [ 1 ];
     for ( int k = 0; k < iRule->giveNumberOfIntegrationPoints(); k++ ) {
@@ -466,7 +466,7 @@ Quad10_2D_SUPG :: computeAdvectionEpsilonTerm(FloatMatrix &answer, TimeStep *tSt
     //  to compute t_pspg
     FloatMatrix g, b;
 
-    answer.resize(0, 0);
+    answer.clear();
 
     IntegrationRule *iRule = this->integrationRulesArray [ 1 ];
 
@@ -486,7 +486,7 @@ Quad10_2D_SUPG :: computeMassEpsilonTerm(FloatMatrix &answer, TimeStep *tStep)
     // to compute t_pspg
     FloatMatrix g, n;
 
-    answer.resize(0, 0);
+    answer.clear();
 
     IntegrationRule *iRule = this->integrationRulesArray [ 1 ];
 
@@ -568,7 +568,7 @@ void
 Quad10_2D_SUPG :: NodalAveragingRecoveryMI_computeSideValue(FloatArray &answer, int side,
                                                             InternalStateType type, TimeStep *tStep)
 {
-    answer.resize(0);
+    answer.clear();
 }
 
 

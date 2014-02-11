@@ -35,6 +35,8 @@
 #include "oofemtxtdatareader.h"
 #include "error.h"
 
+#include <string>
+
 namespace oofem {
 OOFEMTXTDataReader :: OOFEMTXTDataReader(const char *inputfilename) : DataReader(),
     ir(), inputStream(), dataSourceName(inputfilename)
@@ -123,6 +125,18 @@ OOFEMTXTDataReader :: giveRawLineFromInput(std :: string &line)
     do {
         this->lineNumber++;
         std :: getline(this->inputStream, line);
+#if __cplusplus > 199711L
+        if ( line.back() == '\\' ) {
+            line.pop_back();
+            std :: string continuedLine;
+            this->lineNumber++;
+            do {
+                std :: getline(this->inputStream, continuedLine);
+                continuedLine.pop_back();
+                line += continuedLine;
+            } while ( continuedLine.back() == '\\' );
+        }
+#endif
     } while ( line [ 0 ] == '#' ); // skip comments
 }
 } // end namespace oofem

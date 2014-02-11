@@ -62,7 +62,7 @@ XfemManager :: XfemManager(Domain *domain)
     mNumGpPerTri = 12;
     doVTKExport = false;
     mDebugVTK = false;
-    vtkExportFields.resize(0);
+    vtkExportFields.clear();
 }
 
 XfemManager :: ~XfemManager()

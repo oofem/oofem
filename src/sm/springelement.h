@@ -83,9 +83,9 @@ public:
     { computeLumpedMassMatrix(answer, tStep); }
     virtual void computeStiffnessMatrix(FloatMatrix &answer, MatResponseMode rMode, TimeStep *tStep);
     virtual void computeInitialStressMatrix(FloatMatrix &answer, TimeStep *tStep)
-    { answer.resize(0, 0); }
+    { answer.clear(); }
     virtual void computeForceLoadVector(FloatArray &answer, TimeStep *tStep, ValueModeType)
-    { answer.resize(0); }
+    { answer.clear(); }
     virtual void giveInternalForcesVector(FloatArray &answer, TimeStep *tStep, int useUpdatedGpRecord = 0);
 
     virtual int computeNumberOfDofs() { return 2; }

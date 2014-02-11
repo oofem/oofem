@@ -50,7 +50,7 @@
 namespace oofem {
 StructuralElementEvaluator :: StructuralElementEvaluator()
 {
-    this->rotationMatrix.beEmptyMtrx();
+    this->rotationMatrix.clear();
 }
 
 /*
@@ -64,7 +64,7 @@ StructuralElementEvaluator :: StructuralElementEvaluator()
  *      IGAIntegrationElement *ee = static_cast< IGAIntegrationElement * >( ie );
  *      elem->giveInterpolation()->giveKnotSpanBasisFuncMask(* ee->giveKnotSpan(), mask);
  *      // loop over nonzero shape functions and assemble localization array
- *      answer.resize(0);
+ *      answer.clear();
  *      for ( i = 1; i <= mask.giveSize(); i++ ) {
  *          elem->giveDofManDofIDMask(mask.at(i), ut, nodeDofIDMask);
  *          elem->giveDofManager( mask.at(i) )->giveLocationArray(nodeDofIDMask, nodalArray);
@@ -96,7 +96,7 @@ int StructuralElementEvaluator :: giveIntegrationElementLocalCodeNumbers(IntArra
         IGAIntegrationElement *ee = static_cast< IGAIntegrationElement * >( ie );
         elem->giveInterpolation()->giveKnotSpanBasisFuncMask(* ee->giveKnotSpan(), mask);
         // loop over nonzero shape functions and assemble localization array
-        answer.resize(0);
+        answer.clear();
         for ( int i = 1; i <= mask.giveSize(); i++ ) {
             nodalArray.resize( nodeDofIDMask.giveSize() );
             for ( int j = 1; j <= nsd; j++ ) {
@@ -120,7 +120,7 @@ void StructuralElementEvaluator :: giveCharacteristicVector(FloatArray &answer, 
     } else if ( type == LastEquilibratedInternalForcesVector ) {
         this->giveInternalForcesVector(answer, tStep, true); /// @todo Only for total value mode type (?)
     } else {
-        answer.resize(0);
+        answer.clear();
     }
 }
 
@@ -278,7 +278,7 @@ void StructuralElementEvaluator :: giveInternalForcesVector(FloatArray &answer, 
     int numberOfIntegrationRules = elem->giveNumberOfIntegrationRules();
     // loop over individual integration rules
     for ( int ir = 0; ir < numberOfIntegrationRules; ir++ ) {
-        m->resize(0);
+        m->clear();
         IntegrationRule *iRule = elem->giveIntegrationRule(ir);
         for ( int i = 0; i < iRule->giveNumberOfIntegrationPoints(); i++ ) {
             GaussPoint *gp = iRule->getIntegrationPoint(i);
@@ -420,7 +420,7 @@ void StructuralElementEvaluator :: computeStiffnessMatrix(FloatMatrix &answer, M
         }
         //fprintf (stderr, "[%d] Computing element.knotspan %d.%d\n", elem->giveDomain()->giveEngngModel()->giveRank(), elem->giveNumber(), ir);
 #endif
-        m->resize(0, 0);
+        m->clear();
         IntegrationRule *iRule = elem->giveIntegrationRule(ir);
         // loop over individual integration points
         for ( int j = 0; j < iRule->giveNumberOfIntegrationPoints(); j++ ) {

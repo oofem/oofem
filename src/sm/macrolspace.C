@@ -55,8 +55,8 @@ REGISTER_Element(MacroLSpace);
 //derived from linear brick element
 MacroLSpace :: MacroLSpace(int n, Domain *aDomain) : LSpace(n, aDomain)
 {
-    this->microMasterNodes.resize(0);
-    this->microBoundaryNodes.resize(0);
+    this->microMasterNodes.clear();
+    this->microBoundaryNodes.clear();
     this->firstCall = true;
     microMaterial = NULL;
     microDomain = NULL;
@@ -135,7 +135,7 @@ void MacroLSpace :: computeStiffnessMatrix(FloatMatrix &answer, MatResponseMode 
 
     //call microproblem
     //activeMStep = microMat->problemMicro->giveMetaStep(1);//->setNumberOfSteps(1);
-    //activeMStep->giveMetatStepumber();
+    //activeMStep->giveMetaStepNumber();
     //microEngngModel->timer.startTimer(EngngModelTimer :: EMTT_AnalysisTimer);
     //microproblem must have the same actual time and zero time increment
 

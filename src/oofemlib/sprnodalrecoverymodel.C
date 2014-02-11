@@ -45,6 +45,7 @@
  #include "problemcomm.h"
 #endif
 
+#include <cstdlib>
 #include <list>
 
 namespace oofem {
@@ -467,7 +468,7 @@ SPRNodalRecoveryModel :: initPatch(IntArray &patchElems, IntArray &dofManToDeter
 
     // determine dofManagers which values will be determined by this patch
     // first add those required by elements participating in patch
-    dofManToDetermine.resize(0);
+    dofManToDetermine.clear();
     for ( ielem = 1; ielem <= patchElements; ielem++ ) {
         element = domain->giveElement( patchElems.at(ielem) );
 

@@ -47,7 +47,7 @@ PrimaryField :: PrimaryField(EngngModel *a, int idomain,
 {
     FloatArray *sv;
 
-    this->actualtStepumber = -999;
+    this->actualStepNumber = -999;
     this->actualStepIndx = 0;
     this->nHistVectors = nHist;
     this->ut = ut;
@@ -196,7 +196,7 @@ int
 PrimaryField :: resolveIndx(TimeStep *tStep, int shift)
 {
     int tStepo = tStep->giveNumber();
-    int relPos = actualtStepumber - tStepo - shift;
+    int relPos = actualStepNumber - tStepo - shift;
     if ( ( relPos >= 0 ) && ( relPos <= nHistVectors ) ) {
         return ( actualStepIndx + relPos ) % ( nHistVectors + 1 ) + 1;
     } else {
@@ -211,12 +211,16 @@ void
 PrimaryField :: advanceSolution(TimeStep *tStep)
 {
     TimeStep *newts;
-    if ( ( actualtStepumber >= 0 ) && ( actualtStepumber + 1 != tStep->giveNumber() ) ) {
+    if ( actualStepNumber == tStep->giveNumber() ) {
+        // We're one the correct step already, no need to advance.
+        return;
+    }
+    if ( ( actualStepNumber >= 0 ) && ( actualStepNumber + 1 != tStep->giveNumber() ) ) {
         _error("advanceSolution: can not advance due to steps skipped");
     }
 
     actualStepIndx = ( actualStepIndx > 0 ) ? actualStepIndx - 1 : nHistVectors;
-    actualtStepumber = tStep->giveNumber();
+    actualStepNumber = tStep->giveNumber();
     if ( ( newts = solStepList.at(actualStepIndx + 1) ) ) {
         * newts = * tStep;
     } else {
@@ -230,7 +234,7 @@ PrimaryField :: saveContext(DataStream *stream, ContextMode mode)
 {
     contextIOResultType iores(CIO_IOERR);
 
-    if ( !stream->write(& actualtStepumber, 1) ) {
+    if ( !stream->write(& actualStepNumber, 1) ) {
         THROW_CIOERR(CIO_IOERR);
     }
 
@@ -272,7 +276,7 @@ PrimaryField :: restoreContext(DataStream *stream, ContextMode mode)
 {
     contextIOResultType iores(CIO_IOERR);
 
-    if ( !stream->read(& actualtStepumber, 1) ) {
+    if ( !stream->read(& actualStepNumber, 1) ) {
         THROW_CIOERR(CIO_IOERR);
     }
 

@@ -577,8 +577,8 @@ RheoChainMaterialStatus :: RheoChainMaterialStatus(int n, Domain *d,
     hiddenVars.resize(nUnits);
     tempHiddenVars.resize(nUnits);
     for ( int i = 0; i < nUnits; i++ ) {
-        hiddenVars [ i ].resize(0);
-        tempHiddenVars [ i ].resize(0);
+        hiddenVars [ i ].clear();
+        tempHiddenVars [ i ].clear();
     }
 }
 

@@ -81,7 +81,7 @@ public:
     virtual const char *giveInputRecordName() const { return _IFT_ConstantSurfaceLoad_Name; }
 
 private:
-    virtual void computeNArray(FloatArray &answer, FloatArray &coords) const { answer.resize(0); }
+    virtual void computeNArray(FloatArray &answer, FloatArray &coords) const { answer.clear(); }
 };
 } // end namespace oofem
 #endif // constantsurfaceload_h

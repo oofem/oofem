@@ -119,7 +119,7 @@ OrthotropicLinearElasticMaterial :: initializeFrom(InputRecord *ir)
     // if you wish to align local material orientation with element, use "lcs" keyword as an element parameter
 
     // try to read lcs section
-    triplets.resize(0);
+    triplets.clear();
     IR_GIVE_OPTIONAL_FIELD(ir, triplets, _IFT_OrthotropicLinearElasticMaterial_lcs);
 
     size = triplets.giveSize();
@@ -161,7 +161,7 @@ OrthotropicLinearElasticMaterial :: initializeFrom(InputRecord *ir)
 
     // try to read ElementCS section
     if ( cs_type == unknownCS ) {
-        triplets.resize(0);
+        triplets.clear();
         IR_GIVE_OPTIONAL_FIELD(ir, triplets, _IFT_OrthotropicLinearElasticMaterial_scs); // cs for shells.
         // first three numbers are direction of normal n - see orthoelasticmaterial.h for description
         // shellCS  - coordinate system of principal axes is specified in shell  coordinate system

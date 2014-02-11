@@ -98,7 +98,7 @@ VTKExportModule :: initializeFrom(InputRecord *ir)
     IR_GIVE_OPTIONAL_FIELD(ir, val, _IFT_VTKExportModule_stype);
     stype = ( NodalRecoveryModel :: NodalRecoveryModelType ) val;
 
-    regionsToSkip.resize(0);
+    regionsToSkip.clear();
     IR_GIVE_OPTIONAL_FIELD(ir, regionsToSkip, _IFT_VTKExportModule_regionstoskip);
 
     return IRRT_OK;
@@ -635,7 +635,7 @@ VTKExportModule :: exportCellVars(FILE *stream, int elemToProcess, TimeStep *tSt
                     }
 #endif
                     gptot = 0;
-                    vec.resize(0);
+                    vec.clear();
                     for ( int i = 0; i < elem->giveDefaultIntegrationRulePtr()->giveNumberOfIntegrationPoints(); ++i ) {
                         gp = elem->giveDefaultIntegrationRulePtr()->getIntegrationPoint(i);
                         elem->giveIPValue(temp, gp, type, tStep);

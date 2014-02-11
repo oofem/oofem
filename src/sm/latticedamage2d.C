@@ -47,6 +47,8 @@
  #include "latticetransportelement.h"
 #endif
 
+#include <cstdlib>
+
 namespace oofem {
 REGISTER_Material(LatticeDamage2d);
 
@@ -257,7 +259,7 @@ LatticeDamage2d :: computeStressIndependentStrainVector(FloatArray &answer,
     }
 
     if ( et.giveSize() == 0 ) {
-        answer.resize(0);
+        answer.clear();
         return;
     }
 

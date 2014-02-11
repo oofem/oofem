@@ -329,7 +329,7 @@ public:
         const IntArray *givePartitions()  { return & partitions; }
         void setPartitions(const IntArray &_p) { partitions = _p; }
         void addPartition(int _p, int allocChunk) { partitions.followedBy(_p, allocChunk); }
-        void removePartitions() { partitions.resize(0); }
+        void removePartitions() { partitions.clear(); }
         int giveSharedPartitions(IntArray &partitions);
     };
 #endif

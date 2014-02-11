@@ -298,7 +298,7 @@ StaggeredProblem :: solveYourself()
         EngngModel *sp = this->giveSlaveProblem(timeDefinedByProb);
 
         if ( sp->giveCurrentStep() ) {
-            smstep = sp->giveCurrentStep()->giveMetatStepumber();
+            smstep = sp->giveCurrentStep()->giveMetaStepNumber();
             sjstep = sp->giveMetaStep(smstep)->giveStepRelativeNumber( sp->giveCurrentStep()->giveNumber() ) + 1;
         } else {
             nMetaSteps = sp->giveNumberOfMetaSteps();

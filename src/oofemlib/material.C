@@ -128,7 +128,7 @@ Material :: giveIPValue(FloatArray &answer, GaussPoint *gp, InternalStateType ty
         return 1;
     }
 
-    answer.resize(0);
+    answer.clear();
     return 0;
 }
 

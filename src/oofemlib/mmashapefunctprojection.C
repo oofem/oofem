@@ -41,6 +41,8 @@
 #include "timestep.h"
 #include "nodalaveragingrecoverymodel.h"
 
+#include <cstdlib>
+
 namespace oofem {
 MMAShapeFunctProjection :: MMAShapeFunctProjection() : MaterialMappingAlgorithm()
 {

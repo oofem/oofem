@@ -92,7 +92,7 @@ IRResultType TSplineInterpolation :: initializeFrom(InputRecord *ir)
     }
 
     for ( int n = 0; n < nsd; n++ ) {
-        localIndexKnotVector_tmp.resize(0);
+        localIndexKnotVector_tmp.clear();
         IR_GIVE_FIELD(ir, localIndexKnotVector_tmp, IFT_localIndexKnotVector [ n ]);
         if ( localIndexKnotVector_tmp.giveSize() != totalNumberOfControlPoints * ( degree [ n ] + 2 ) ) {
             OOFEM_ERROR2("BSplineInterpolation::initializeFrom - invalid size of knot vector %s", IFT_localIndexKnotVector [ n ]);

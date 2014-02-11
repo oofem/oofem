@@ -701,7 +701,7 @@ IDNLMaterial :: giveLocalNonlocalStiffnessContribution(GaussPoint *gp, IntArray 
     /*
      * if (fabs(status->giveTempDamage()) <= 1.e-10) {
      * // already eleastic regime
-     * loc.resize(0);
+     * loc.clear();
      * return 0;
      * }
      */
@@ -718,7 +718,7 @@ IDNLMaterial :: giveLocalNonlocalStiffnessContribution(GaussPoint *gp, IntArray 
          * else printf ("_");
          * status->lst = IDNLMaterialStatus::LST_elastic;
          */
-        loc.resize(0);
+        loc.clear();
         return 0;
     } else {
         if ( status->giveDamage() >= 1.00 ) {

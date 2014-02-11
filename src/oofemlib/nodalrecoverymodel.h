@@ -36,13 +36,14 @@
 #define nodalrecoverymodel_h
 
 #include "oofemcfg.h"
-#include "tdictionary.h"
 #include "intarray.h"
 #include "floatarray.h"
-#include "alist.h"
 #include "interface.h"
 #include "internalstatetype.h"
 #include "statecountertype.h"
+
+#include <map>
+#include <vector>
 
 namespace oofem {
 class Domain;
@@ -70,12 +71,11 @@ public:
     enum NodalRecoveryModelType { NRM_NodalAveraging = 0, NRM_ZienkiewiczZhu = 1,  NRM_SPR = 2 };
 
 protected:
-    typedef TDictionary< int, FloatArray >vectorDictType;
     /**
      * Array of nodal dictionaries, containing nodal values for each region.
      * The region id is dictionary key to corresponding values.
      */
-    AList< vectorDictType >nodalValList;
+    std::vector< std::map< int, FloatArray > > nodalValList;
     /// Determines the type of recovered values.
     InternalStateType valType;
     /// Time stamp of recovered values.
@@ -145,13 +145,6 @@ public:
      */
     int giveNodalVector(const FloatArray * &ptr, int node, int region);
     /**
-     * Test if recovered values for given node and region exist.
-     * @param node Node number.
-     * @param region Region number.
-     * @return Nonzero if entry is in table, zero otherwise.
-     */
-    int includes(int node, int region);
-    /**
      * Returns the region record size. The default implementation scans the elements and once one belonging
      * to given region is found it is requested for the information. Slow.
      * The overloaded instances can cache these results, since they are easily
@@ -183,10 +176,6 @@ public:
     int giveNumberOfVirtualRegions() { return this->numberOfVirtualRegions; }
 
 protected:
-    /**
-     * Same as public giveNodalVector,but returns non-const pointer.
-     */
-    FloatArray *giveNodalVectorPtr(int node, int region);
     /**
      * Determine local region node numbering and determine and check nodal values size.
      * @param regionNodalNumbers on Return array containing for each dofManager its local region number.

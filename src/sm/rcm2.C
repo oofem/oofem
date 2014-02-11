@@ -242,7 +242,7 @@ RCM2Material :: giveRealPrincipalStressVector3d(FloatArray &answer, GaussPoint *
     // start iteration until stress computed from elastic increment
     // is equal to stress computed from cracking strain increment
     // we do this computation in reduced stress strain space
-    dSigma.resize(0);
+    dSigma.clear();
     for ( int iter = 1; iter <= 20; iter++ ) {
         //
         // first check if already cracked
@@ -437,7 +437,7 @@ RCM2Material :: checkForNewActiveCracks(IntArray &answer, GaussPoint *gp,
         return;
     }
 
-    answer.resize(0);
+    answer.clear();
 }
 
 
@@ -777,7 +777,7 @@ RCM2Material :: giveCrackedStiffnessMatrix(FloatMatrix &answer,
 
     status->giveCrackMap(crackMap);
     if ( numberOfActiveCracks == 0 ) {
-        answer.resize(0, 0);
+        answer.clear();
         return;
     }
 

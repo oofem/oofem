@@ -1795,7 +1795,7 @@ void
 TR1_2D_SUPG2_AXI :: NodalAveragingRecoveryMI_computeSideValue(FloatArray &answer, int side,
                                                               InternalStateType type, TimeStep *tStep)
 {
-    answer.resize(0);
+    answer.clear();
 }
 
 void

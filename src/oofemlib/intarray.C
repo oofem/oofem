@@ -45,19 +45,22 @@
 #include <cstdarg>
 #include <cstdlib>
 #include <cstring>
+#if __cplusplus > 199711L
+#include <memory>
+#endif
 
 #ifdef __PARALLEL_MODE
  #include "combuff.h"
 #endif
 
-#define ALLOC(size) ( int * ) malloc( sizeof( int ) * ( size ) );
+#define ALLOC(size) new int[size];
 
 #define RESIZE(n) \
     { \
         size = n; \
         if ( n > allocatedSize ) { \
             allocatedSize = n; \
-            if ( values ) { free(values); } \
+            if ( values ) { delete[] values; } \
             values = ALLOC(size); \
         } \
     }
@@ -88,7 +91,8 @@ IntArray :: IntArray(int n) :
     // Constructor : creates an array of size n (filled with garbage).
 {
     if ( size ) {
-        values = ( int * ) calloc( size, sizeof( int ) );
+        values = ALLOC( size );
+        memset( values, 0, size * sizeof( int ) );
     } else {
         values = NULL;
     }
@@ -115,11 +119,7 @@ IntArray :: IntArray(std :: initializer_list< int >list)
     this->size = this->allocatedSize = list.size();
     if ( this->size ) {
         this->values = ALLOC(this->size);
-        int *p = this->values;
-        for ( int x : list ) {
-            * p = x;
-            p++;
-        }
+        std :: uninitialized_copy(list.begin(), list.end(), this->values);
     } else {
         this->values = NULL;
     }
@@ -129,11 +129,7 @@ IntArray :: IntArray(std :: initializer_list< int >list)
 IntArray &IntArray :: operator=(std :: initializer_list< int >list)
 {
     RESIZE( ( int ) list.size() );
-    int *p = this->values;
-    for ( int x : list ) {
-        * p = x;
-        p++;
-    }
+    std :: uninitialized_copy(list.begin(), list.end(), this->values);
     return * this;
 }
 
@@ -143,7 +139,7 @@ IntArray &IntArray :: operator=(std :: initializer_list< int >list)
 IntArray :: ~IntArray()
 {
     if ( values ) {
-        free(values);
+        delete[] values;
     }
 }
 
@@ -152,7 +148,7 @@ IntArray &IntArray :: operator=(const IntArray &src)
 {
     // assignment: cleanup and copy
     if ( values ) {
-        free(values);
+        delete[] values;
     }
 
     allocatedSize = size = src.size;
@@ -268,7 +264,7 @@ void IntArray :: resizeWithValues(int n, int allocChunk)
     memset( & newValues [ size ], 0, ( allocatedSize - size ) * sizeof( int ) );
 
     if ( values ) {
-        free(values);
+        delete[] values;
     }
     values = newValues;
     size = n;
@@ -284,9 +280,10 @@ void IntArray :: resize(int n)
     allocatedSize = n;
 
     if ( values ) {
-        free(values);
+        delete[] values;
     }
-    values = ( int * ) calloc( allocatedSize, sizeof( int ) );
+    values = ALLOC( allocatedSize );
+    memset( values, 0, allocatedSize * sizeof( int ) );
 #ifdef DEBUG
     if ( !values ) {
         OOFEM_FATAL2("IntArray :: resize - Failed in allocating %d doubles", allocatedSize);
@@ -312,7 +309,7 @@ void IntArray :: preallocate(int futureSize)
     memset( & newValues [ size ], 0, ( allocatedSize - size ) * sizeof( int ) );
 
     if ( values ) {
-        free(values);
+        delete[] values;
     }
     values = newValues;
 }
@@ -348,7 +345,7 @@ void IntArray :: followedBy(const IntArray &b, int allocChunk)
         memset( newValues + newSize, 0, allocChunk * sizeof( int ) );
 
         if ( values ) {
-            free(values);
+            delete[] values;
         }
         values = newValues;
         allocatedSize = newSize + allocChunk;
@@ -366,13 +363,14 @@ void IntArray :: followedBy(int b, int allocChunk)
     int newSize = size + 1;
 
     if ( newSize > allocatedSize ) {
-        int *newValues = ( int * ) calloc( newSize + allocChunk, sizeof( int ) );
+        int *newValues = ALLOC( newSize + allocChunk );
+        memset( newValues, 0, (newSize + allocChunk) * sizeof( int ) );
 
         memcpy( newValues, values, size * sizeof( int ) );
         newValues [ size ] = b;
 
         if ( values ) {
-            free(values);
+            delete[] values;
         }
 
         values = newValues;
@@ -516,7 +514,7 @@ contextIOResultType IntArray :: restoreYourself(DataStream *stream, ContextMode 
     }
 
     if ( values != NULL ) {
-        free(values);
+        delete[] values;
     }
 
     if ( size ) {
@@ -592,7 +590,8 @@ int IntArray :: insertSorted(int _val, int allocChunk)
     int *newValues = NULL, *p1, *p2;
 
     if ( newSize > allocatedSize ) { // realocate if needed
-        newValues = ( int * ) calloc( newSize + allocChunk, sizeof( int ) );
+        newValues = ALLOC( newSize + allocChunk );
+        memset( values, 0, (newSize + allocChunk) * sizeof( int ) );
 
         p1 = values;
         p2 = newValues;
@@ -619,7 +618,7 @@ int IntArray :: insertSorted(int _val, int allocChunk)
 
         // dealocate original space
         if ( values ) {
-            free(values);
+            delete[] values;
         }
 
         values = newValues;
@@ -662,7 +661,7 @@ int IntArray :: insertSortedOnce(int _val, int allocChunk)
             memcpy(newValues, values, sizeof( int ) * first); // Copy over the values before _val
             memcpy( & newValues [ first + 1 ], & values [ first ], sizeof( int ) * ( size - first ) ); // Copy over the values after _val, leaving a gap
             // Replace the old data:
-            free(values);
+            delete[] values;
         }
         values = newValues;
         allocatedSize = newSize + allocChunk;

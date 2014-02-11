@@ -848,7 +848,7 @@ public:
     virtual ~HellmichMaterial() {}
 
     virtual void giveRealStressVector(FloatArray &answer, GaussPoint *gp,
-                                      const FloatArray &strain, TimeStep *tstep) { answer.resize(0); }
+                                      const FloatArray &strain, TimeStep *tstep) { answer.clear(); }
 
     virtual const char *giveClassName() const { return "HellmichMaterial"; }
 };

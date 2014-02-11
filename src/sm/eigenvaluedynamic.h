@@ -104,7 +104,7 @@ public:
     virtual TimeStep *giveNextStep();
     virtual NumericalMethod *giveNumericalMethod(MetaStep *mStep);
     virtual void setActiveVector(int i) { activeVector = i; }
-    virtual int resolveCorrespondingEigentStepumber(void *obj);
+    virtual int resolveCorrespondingEigenStepNumber(void *obj);
 
 #ifdef __SLEPC_MODULE
     virtual void initParallelContexts();

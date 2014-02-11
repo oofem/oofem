@@ -647,7 +647,7 @@ EngngModel :: solveYourself()
     this->timer.startTimer(EngngModelTimer :: EMTT_AnalysisTimer);
 
     if ( this->currentStep ) {
-        smstep = this->currentStep->giveMetatStepumber();
+        smstep = this->currentStep->giveMetaStepNumber();
         sjstep = this->giveMetaStep(smstep)->giveStepRelativeNumber( this->currentStep->giveNumber() ) + 1;
     }
 
@@ -1093,7 +1093,7 @@ void EngngModel :: assembleVectorFromBC(FloatArray &answer, TimeStep *tStep, Equ
                 const IntArray &elements = set->giveElementList();
                 for ( int ielem = 1; ielem <= elements.giveSize(); ++ielem ) {
                     Element *element = domain->giveElement( elements.at(ielem) );
-                    charVec.resize(0);
+                    charVec.clear();
                     element->computeLoadVector(charVec, bodyLoad, type, mode, tStep);
 
                     if ( charVec.isNotEmpty() ) {
@@ -1114,7 +1114,7 @@ void EngngModel :: assembleVectorFromBC(FloatArray &answer, TimeStep *tStep, Equ
                 for ( int ibnd = 1; ibnd <= boundaries.giveSize() / 2; ++ibnd ) {
                     Element *element = domain->giveElement( boundaries.at(ibnd * 2 - 1) );
                     int boundary = boundaries.at(ibnd * 2);
-                    charVec.resize(0);
+                    charVec.clear();
                     element->computeBoundaryLoadVector(charVec, bLoad, boundary, type, mode, tStep);
 
                     if ( charVec.isNotEmpty() ) {
@@ -1136,7 +1136,7 @@ void EngngModel :: assembleVectorFromBC(FloatArray &answer, TimeStep *tStep, Equ
                 for ( int ibnd = 1; ibnd <= edgeBoundaries.giveSize() / 2; ++ibnd ) {
                     Element *element = domain->giveElement( edgeBoundaries.at(ibnd * 2 - 1) );
                     int boundary = edgeBoundaries.at(ibnd * 2);
-                    charVec.resize(0);
+                    charVec.clear();
                     element->computeBoundaryEdgeLoadVector(charVec, bLoad, boundary, type, mode, tStep);
 
                     if ( charVec.isNotEmpty() ) {
@@ -1157,7 +1157,7 @@ void EngngModel :: assembleVectorFromBC(FloatArray &answer, TimeStep *tStep, Equ
                 const IntArray &nodes = set->giveNodeList();
                 for ( int idman = 1; idman <= nodes.giveSize(); ++idman ) {
                     DofManager *node = domain->giveDofManager( nodes.at(idman) );
-                    charVec.resize(0);
+                    charVec.clear();
                     node->computeLoadVector(charVec, nLoad, type, tStep, mode);
 
                     if ( charVec.isNotEmpty() ) {
@@ -1429,7 +1429,7 @@ contextIOResultType EngngModel :: saveContext(DataStream *stream, ContextMode mo
 
 
     // store nMethod
-    NumericalMethod *nmethod = this->giveNumericalMethod( this->giveMetaStep( giveCurrentStep()->giveMetatStepumber() ) );
+    NumericalMethod *nmethod = this->giveNumericalMethod( this->giveMetaStep( giveCurrentStep()->giveMetaStepNumber() ) );
     if ( nmethod ) {
         if ( ( iores = nmethod->saveContext(stream, mode) ) != CIO_OK ) {
             THROW_CIOERR(iores);
@@ -1475,7 +1475,7 @@ contextIOResultType EngngModel :: restoreContext(DataStream *stream, ContextMode
     Domain *domain;
     FILE *file = NULL;
 
-    this->resolveCorrespondingtStepumber(istep, iversion, obj);
+    this->resolveCorrespondingStepNumber(istep, iversion, obj);
     OOFEM_LOG_RELEVANT("Restoring context for time step %d.%d\n", istep, iversion);
 
     if ( stream == NULL ) {
@@ -1498,7 +1498,7 @@ contextIOResultType EngngModel :: restoreContext(DataStream *stream, ContextMode
 
     // this->updateAttributes (currentStep);
 
-    int pmstep = currentStep->giveMetatStepumber();
+    int pmstep = currentStep->giveMetaStepNumber();
     if ( nMetaSteps ) {
         if ( !this->giveMetaStep(pmstep)->isStepValid(istep - 1) ) {
             pmstep--;
@@ -1563,7 +1563,7 @@ contextIOResultType EngngModel :: restoreContext(DataStream *stream, ContextMode
 
 
 void
-EngngModel :: resolveCorrespondingtStepumber(int &istep, int &iversion, void *obj)
+EngngModel :: resolveCorrespondingStepNumber(int &istep, int &iversion, void *obj)
 {
     //
     // returns corresponding step number
@@ -1590,12 +1590,12 @@ EngngModel :: resolveCorrespondingtStepumber(int &istep, int &iversion, void *ob
 MetaStep *
 EngngModel :: giveCurrentMetaStep()
 {
-    return this->giveMetaStep( this->giveCurrentStep()->giveMetatStepumber() );
+    return this->giveMetaStep( this->giveCurrentStep()->giveMetaStepNumber() );
 }
 
 
 int
-EngngModel :: giveContextFile(FILE **contextFile, int tStepumber, int stepVersion, ContextFileMode cmode, int errLevel)
+EngngModel :: giveContextFile(FILE **contextFile, int tStepNumber, int stepVersion, ContextFileMode cmode, int errLevel)
 //
 //
 // assigns context file of given step number to stream
@@ -1604,7 +1604,7 @@ EngngModel :: giveContextFile(FILE **contextFile, int tStepumber, int stepVersio
 {
     std :: string fname = this->coreOutputFileName;
     char fext [ 100 ];
-    sprintf(fext, ".%d.%d.osf", tStepumber, stepVersion);
+    sprintf(fext, ".%d.%d.osf", tStepNumber, stepVersion);
     fname += fext;
 
     if ( cmode ==  contextMode_read ) {
@@ -1625,11 +1625,11 @@ EngngModel :: giveContextFile(FILE **contextFile, int tStepumber, int stepVersio
 }
 
 bool
-EngngModel :: testContextFile(int tStepumber, int stepVersion)
+EngngModel :: testContextFile(int tStepNumber, int stepVersion)
 {
     std :: string fname = this->coreOutputFileName;
     char fext [ 100 ];
-    sprintf(fext, ".%d.%d.osf", tStepumber, stepVersion);
+    sprintf(fext, ".%d.%d.osf", tStepNumber, stepVersion);
     fname.append(fext);
 
 #ifdef HAVE_ACCESS

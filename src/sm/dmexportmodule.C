@@ -46,7 +46,7 @@ REGISTER_ExportModule(DofManExportModule)
 
 DofManExportModule :: DofManExportModule(int n, EngngModel *e) : ExportModule(n, e)
 {
-    this->dofManList.resize(0);
+    this->dofManList.clear();
 }
 
 

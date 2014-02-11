@@ -54,8 +54,8 @@ LinearConstraintBC :: LinearConstraintBC(int n, Domain *d) : ActiveBoundaryCondi
     // this is internal lagrange multiplier used to enforce the receiver constrain
     // this allocates a new equation related to this constraint
     this->md->appendDof( new MasterDof( 0, this->md, ( DofIDItem ) ( d->giveNextFreeDofID() ) ) );
-    this->lhsType.resize(0);
-    this->rhsType.resize(0);
+    this->lhsType.clear();
+    this->rhsType.clear();
 }
 
 

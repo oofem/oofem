@@ -92,7 +92,7 @@ NonlinearMassTransferMaterial :: giveCharacteristicMatrix(FloatMatrix &answer,
         _error2( "giveCharacteristicMatrix : unknown mode (%s)", __MaterialModeToString(mMode) );
     }
 
-    answer.beEmptyMtrx();
+    answer.clear();
     answer.add(t1);
     answer.add(1 + C * pow(gradPNorm, alpha), t2);
 }

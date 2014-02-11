@@ -89,7 +89,7 @@ StationaryTransportProblem :: initializeFrom(InputRecord *ir)
 
     // read field export flag
     IntArray exportFields;
-    exportFields.resize(0);
+    exportFields.clear();
     IR_GIVE_OPTIONAL_FIELD(ir, exportFields, _IFT_StationaryTransportProblem_exportfields);
     if ( exportFields.giveSize() ) {
         IntArray mask(1);
@@ -311,7 +311,7 @@ StationaryTransportProblem :: restoreContext(DataStream *stream, ContextMode mod
     int istep, iversion;
     FILE *file;
 
-    this->resolveCorrespondingtStepumber(istep, iversion, obj);
+    this->resolveCorrespondingStepNumber(istep, iversion, obj);
 
     if ( stream == NULL ) {
         if ( !this->giveContextFile(& file, istep, iversion, contextMode_read) ) {

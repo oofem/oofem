@@ -88,26 +88,8 @@ ConcreteDPMStatus :: initTempStatus()
 void
 ConcreteDPMStatus :: updateYourself(TimeStep *tStep)
 {
-#if 0
- #ifdef SOPHISTICATED_SIZEDEPENDENT_ADJUSTMENT
-    // check whether the second-order work is negative
-    // (must be done !!!before!!! the update of strain and stress)
-    if ( epsloc < 0. ) {
-        FloatArray strainIncrement = tempStrainVector;
-        strainIncrement.subtract(strainVector);
-        FloatArray stressIncrement = tempStressVector;
-        stressIncrement.subtract(stressVector);
-        int n = strainIncrement.giveSize();
-        double work = strainIncrement.dotProduct(stressIncrement, n);
-        //printf(" work : %g\n", work);
-        if ( work < 0. ) {
-            double E = gp->giveMaterial()->give('E', gp);
-            double ft = gp->giveMaterial()->give(ft_strength, gp);
-            epsloc = kappaD + damage * ft / E;
-        }
-    }
-
- #endif
+#ifdef SOPHISTICATED_SIZEDEPENDENT_ADJUSTMENT
+    epsloc = tempEpsloc;
 #endif
     // Call corresponding function of the parent class to update
     // variables defined there.
@@ -508,25 +490,21 @@ ConcreteDPM :: giveRealStressVector(FloatArray &answer,
 
     answer = stress;
 
-    // Moved from material status updateYourself /JB
 #ifdef SOPHISTICATED_SIZEDEPENDENT_ADJUSTMENT
     // check whether the second-order work is negative
     // (must be done !!!before!!! the update of strain and stress)
     if ( status->giveEpsLoc() < 0. ) {
-        FloatArray strainIncrement = strainVector;
-        strainIncrement.subtract( status->giveStrainVector() );  // old value
-        FloatArray stressIncrement = stress;
-        stressIncrement.subtract( status->giveStressVector() );  // old value
+        FloatArray strainIncrement, stressIncrement;
+        strainIncrement.beDifferenceOf(strainVector, status->giveStrainVector());
+        strainIncrement.beDifferenceOf(stress, status->giveStressVector());
         int n = strainIncrement.giveSize();
         double work = strainIncrement.dotProduct(stressIncrement, n);
         //printf(" work : %g\n", work);
         if ( work < 0. ) {
-            double E = this->give('E', gp);
-            double ft = this->give(ft_strength, gp);
-            double kappaD = status->giveTempKappaD();
-            double damage = status->giveTempDamage();
-            double epsloc = kappaD + damage * ft / E;
-            status->letTempEpslocBe(epsloc);
+            double E = gp->giveMaterial()->give('E', gp);
+            double ft = gp->giveMaterial()->give(ft_strength, gp);
+            double tmpEpsloc = kappaD + damage * ft / E;
+            status->letTempEpslocBe(tmpEpsloc);
         }
     }
 

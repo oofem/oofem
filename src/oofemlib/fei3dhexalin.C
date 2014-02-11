@@ -82,7 +82,7 @@ FEI3dHexaLin :: local2global(FloatArray &answer, const FloatArray &lcoords, cons
     FloatArray n;
     this->evalN(n, lcoords, cellgeo);
 
-    answer.resize(0);
+    answer.clear();
     for ( int i = 1; i <= 8; i++ ) {
         answer.add( n.at(i), * cellgeo.giveVertexCoordinates(i) );
     }
