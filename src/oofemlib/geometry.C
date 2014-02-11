@@ -840,8 +840,6 @@ double PolygonLine :: computeLength() const
 
 void PolygonLine :: giveSubPolygon(std :: vector< FloatArray > &oPoints, const double &iXiStart, const double &iXiEnd) const
 {
-    printf("Entering PolygonLine :: giveSubPolygon().\n");
-
     double L = computeLength();
     double xSegStart = 0.0, xSegEnd = 0.0;
     double xiSegStart = 0.0, xiSegEnd = 0.0;

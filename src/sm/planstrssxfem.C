@@ -126,6 +126,12 @@ PlaneStress2dXfem :: giveDofManDofIDMask(int inode, EquationID, IntArray &answer
 {
     // Returns the total id mask of the dof manager = regular id's + enriched id's
     this->giveDofManager(inode)->giveCompleteMasterDofIDArray(answer);
+
+    if(answer.giveSize() == 0) {
+    	// TODO: How do we fix this in a nicer way? /ES
+    	answer.setValues(2, D_u, D_v);
+    }
+
 }
 
 
