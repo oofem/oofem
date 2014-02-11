@@ -63,15 +63,20 @@ double PrescribedGenStrainShell7 :: give(Dof *dof, ValueModeType mode, TimeStep 
         OOFEM_ERROR("PrescribedGenStrainShell7 :: give - Size of coordinate system different from center coordinate in b.c.");
     }
 
-    // Reminder: u_i = F_ij . (x_j - xb_j) = d_ij . dx_j
+    // Reminder: u_i = F_ij . (x_j - xb_j) = H_ij . dx_j
     FloatArray dx, temp;
     dx.beDifferenceOf(* coords, this->centerCoord);
 
     // Assuming the coordinate system to be local, dx(3) = z
     this->setDeformationGradient( dx.at(3) );
 
-    FloatArray u;
+    FloatArray u, u2;
     u.beProductOf(gradient, dx);
+
+    // Add second order contribution, note only higher order in the thickness direction
+    this->evaluateHigherOrderContribution(u2, dx.at(3), dx);
+    u.add(u2);
+
     u.times( this->giveTimeFunction()->evaluate(tStep, mode) );
 
     switch ( id ) {
@@ -92,22 +97,6 @@ double PrescribedGenStrainShell7 :: give(Dof *dof, ValueModeType mode, TimeStep 
     }
 }
 
-void PrescribedGenStrainShell7 :: setPrescribedGenStrain(const FloatArray &t)
-{
-    int n = t.giveSize();
-    if ( n == 18 ) {
-        this->gradient.resize(3, 3);
-        this->gradient.at(1, 1) = t.at(1);
-        this->gradient.at(2, 2) = t.at(2);
-        this->gradient.at(3, 3) = t.at(3);
-        // In voigt form, assuming the use of gamma_12 instead of eps_12
-        this->gradient.at(1, 2) = this->gradient.at(2, 1) = t.at(6) * 0.5;
-        this->gradient.at(1, 3) = this->gradient.at(3, 1) = t.at(5) * 0.5;
-        this->gradient.at(2, 3) = this->gradient.at(3, 2) = t.at(4) * 0.5;
-    } else {
-        OOFEM_ERROR("setPrescribedTensorVoigt: Tensor is in strange voigt format. Should be 3 or 6. Use setPrescribedTensor directly if needed.");
-    }
-}
 
 
 void
@@ -115,7 +104,6 @@ PrescribedGenStrainShell7 :: evalCovarBaseVectorsAt(FloatMatrix &gcov, FloatArra
 {
     // Evaluates the covariant base vectors in the current configuration
     FloatArray g1; FloatArray g2; FloatArray g3;
-    //double zeta = giveGlobalZcoord( lcoords );
 
     FloatArray dxdxi1, dxdxi2, m, dmdxi1, dmdxi2;
     double dgamdxi1, dgamdxi2, gam;
@@ -135,6 +123,7 @@ PrescribedGenStrainShell7 :: evalCovarBaseVectorsAt(FloatMatrix &gcov, FloatArra
 void
 PrescribedGenStrainShell7 :: evalInitialCovarBaseVectorsAt(FloatMatrix &Gcov, FloatArray &genEps,  double zeta)
 {
+    // Evaluates the initial base vectors given the array of generalized strain
     FloatArray G1(3), G2(3), G3(3); 
     
     G1.at(1) = genEps.at(1) + zeta * genEps.at(7);
@@ -169,9 +158,37 @@ PrescribedGenStrainShell7 :: setDeformationGradient(double zeta)
     this->gradient.at(1,1) -= 1.0;
     this->gradient.at(2,2) -= 1.0;
     this->gradient.at(3,3) -= 1.0;
-//    gradient.printYourself();
 }
 
+void
+PrescribedGenStrainShell7 :: evaluateHigherOrderContribution(FloatArray &answer, double zeta, FloatArray &dx)
+{
+    // Computes the higher order contribution from the second gradient F2_ijk = (g3,3)_i * (G^3)_j * (G^3)_k 
+    // Simplified version with only contribtion in the xi-direction
+    FloatMatrix gcov, Gcon, Gcov;
+
+    this->evalCovarBaseVectorsAt(gcov, this->genEps, zeta);
+    this->evalInitialCovarBaseVectorsAt(Gcov, this->initialGenEps, zeta);
+    Shell7Base :: giveDualBase(Gcov, Gcon);
+
+    FloatArray G3(3), u(3), g3prime(3), m(3);
+    G3.at(1) = Gcon.at(1,3);
+    G3.at(2) = Gcon.at(2,3);
+    G3.at(3) = Gcon.at(3,3);
+
+    double factor = G3.dotProduct(dx);
+    double gamma = this->genEps.at(18);
+    m.at(1) = this->genEps.at(13);
+    m.at(2) = this->genEps.at(14);
+    m.at(3) = this->genEps.at(15);
+    g3prime = gamma*m;
+    
+    answer = 0.5*factor*factor * g3prime;
+
+
+}
+
+#if 0
 void PrescribedGenStrainShell7 :: updateCoefficientMatrix(FloatMatrix &C)
 // This is written in a very general way, supporting both fm and sm problems.
 // v_prescribed = C.d = (x-xbar).d;
@@ -237,7 +254,7 @@ void PrescribedGenStrainShell7 :: updateCoefficientMatrix(FloatMatrix &C)
         }
     }
 }
-
+#endif
 
 double PrescribedGenStrainShell7 :: domainSize()
 {

@@ -52,7 +52,7 @@
 
 namespace oofem {
 /**
- * Prescribes @f$ v_i = d_{ij}(x_j-\bar{x}_j) @f$ or @f$ s = d_{1j}(x_j - \bar{x}_j) @f$
+ * Prescribes @f$ u_i = d_{ij}(x_j-\bar{x}_j) @f$ or @f$ s = d_{1j}(x_j - \bar{x}_j) @f$
  * where @f$ v_i @f$ are primary unknowns for the subscale.
  * This is typical boundary condition in multiscale analysis where @f$ d = \partial_x s@f$
  * would a macroscopic gradient at the integration point, i.e. this is a boundary condition for prolongation.
@@ -65,7 +65,15 @@ protected:
     /// Prescribed gradient @f$ d_{ij} @f$
     FloatMatrix gradient;
 
+    /**
+     * Initial generalized strain
+     * eps = [Xbar_{,alpha}, M_{,alpha}, M  ] = [ (3  3)  (3  3)  3] - 15 components
+     */
     FloatArray initialGenEps;
+    /** 
+     * Current generalized strain
+     * eps = [xbar_{,alpha}, m_{,alpha}, m, gamma_{,alpha}, gamma ] = [ (3  3)  (3  3)  3  (1 1) 1] - 18 components
+     */
     FloatArray genEps;
 
     /// Center coordinate @f$ \bar{x}_i @f$
@@ -103,28 +111,14 @@ public:
      * @todo Perhaps this routine should only give results for the dof it prescribes?
      * @param C Coefficient matrix to fill.
      */
-    void updateCoefficientMatrix(FloatMatrix &C);
+    //void updateCoefficientMatrix(FloatMatrix &C);
 
-
-
-    virtual void scale(double s) { gradient.times(s); }
-
-    /**
-     * Set prescribed tensor.
-     * @param t New prescribed value.
-     */
-    virtual void setPrescribedGenStrainShell7(const FloatMatrix &t) { gradient = t; }
-
-    /**
-     * Sets the prescribed tensor from the matrix from given voigt notation.
-     * Assumes use of double values for off-diagonal, usually the way for strain in Voigt form.
-     * @param t Vector in voigt format.
-     */
-    virtual void setPrescribedGenStrain(const FloatArray &t);
 
     void evalCovarBaseVectorsAt(FloatMatrix &gcov, FloatArray &genEps, double zeta);
     void evalInitialCovarBaseVectorsAt(FloatMatrix &Gcov, FloatArray &genEps, double zeta);
     void setDeformationGradient(double zeta);
+    void evaluateHigherOrderContribution(FloatArray &answer, double zeta, FloatArray &dx);
+
     /**
      * Set the center coordinate for the prescribed values to be set for.
      * @param x Center coordinate.
