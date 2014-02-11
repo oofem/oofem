@@ -120,7 +120,6 @@ PrescribedGenStrainShell7 :: evalCovarBaseVectorsAt(FloatMatrix &gcov, FloatArra
     FloatArray dxdxi1, dxdxi2, m, dmdxi1, dmdxi2;
     double dgamdxi1, dgamdxi2, gam;
     Shell7Base :: giveGeneralizedStrainComponents(genEps, dxdxi1, dxdxi2, dmdxi1, dmdxi2, m, dgamdxi1, dgamdxi2, gam);
-
     double fac1 = ( zeta + 0.5 * gam * zeta * zeta );
     double fac2 = ( 0.5 * zeta * zeta );
     double fac3 = ( 1.0 + zeta * gam );
@@ -128,7 +127,6 @@ PrescribedGenStrainShell7 :: evalCovarBaseVectorsAt(FloatMatrix &gcov, FloatArra
     g1 = dxdxi1 + fac1*dmdxi1 + fac2*dgamdxi1*m;
     g2 = dxdxi2 + fac1*dmdxi2 + fac2*dgamdxi2*m;
     g3 = fac3*m;
-
     gcov.resize(3,3);
     gcov.setColumn(g1,1); gcov.setColumn(g2,2); gcov.setColumn(g3,3);
 }
@@ -143,9 +141,9 @@ PrescribedGenStrainShell7 :: evalInitialCovarBaseVectorsAt(FloatMatrix &Gcov, Fl
     G1.at(2) = genEps.at(2) + zeta * genEps.at(8);
     G1.at(3) = genEps.at(3) + zeta * genEps.at(9);
 
-    G1.at(1) = genEps.at(4) + zeta * genEps.at(10);
-    G1.at(2) = genEps.at(5) + zeta * genEps.at(11);
-    G1.at(3) = genEps.at(6) + zeta * genEps.at(12);
+    G2.at(1) = genEps.at(4) + zeta * genEps.at(10);
+    G2.at(2) = genEps.at(5) + zeta * genEps.at(11);
+    G2.at(3) = genEps.at(6) + zeta * genEps.at(12);
 
     G3.at(1) = genEps.at(13);
     G3.at(2) = genEps.at(14);
@@ -162,12 +160,16 @@ PrescribedGenStrainShell7 :: setDeformationGradient(double zeta)
 {
     // Computes the deformation gradient in matrix form as open product(g_i, G^i) = gcov*Gcon^T
     FloatMatrix gcov, Gcon, Gcov;
-    FloatArray genEps, initialGenEps;
-    this->evalCovarBaseVectorsAt(gcov, genEps, zeta);
-    this->evalInitialCovarBaseVectorsAt(Gcov, initialGenEps, zeta);
+
+    this->evalCovarBaseVectorsAt(gcov, this->genEps, zeta);
+    this->evalInitialCovarBaseVectorsAt(Gcov, this->initialGenEps, zeta);
     Shell7Base :: giveDualBase(Gcov, Gcon);
 
     this->gradient.beProductTOf(gcov, Gcon);
+    this->gradient.at(1,1) -= 1.0;
+    this->gradient.at(2,2) -= 1.0;
+    this->gradient.at(3,3) -= 1.0;
+//    gradient.printYourself();
 }
 
 void PrescribedGenStrainShell7 :: updateCoefficientMatrix(FloatMatrix &C)
