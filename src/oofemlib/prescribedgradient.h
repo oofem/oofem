@@ -42,6 +42,8 @@
 #include "floatarray.h"
 #include "floatmatrix.h"
 
+#include "export/exportmodulecallerinterface.h"
+
 ///@name Input fields for PrescribedTensor
 //@{
 #define _IFT_PrescribedGradient_Name "prescribedgradient"
@@ -50,6 +52,8 @@
 //@}
 
 namespace oofem {
+class BCExportInterface;
+
 /**
  * Prescribes @f$ v_i = d_{ij}(x_j-\bar{x}_j) @f$ or @f$ s = d_{1j}(x_j - \bar{x}_j) @f$
  * where @f$ v_i @f$ are primary unknowns for the subscale.
@@ -58,7 +62,7 @@ namespace oofem {
  * It is also convenient to use when one wants to test a arbitrary specimen for shear.
  * @author Mikael Öhman
  */
-class OOFEM_EXPORT PrescribedGradient : public BoundaryCondition
+class OOFEM_EXPORT PrescribedGradient : public BoundaryCondition, public ExportModuleCallerInterface
 {
 protected:
     /// Prescribed gradient @f$ d_{ij} @f$
@@ -145,6 +149,11 @@ public:
 
     virtual const char *giveClassName() const { return "PrescribedGradient"; }
     virtual const char *giveInputRecordName() const { return _IFT_PrescribedGradient_Name; }
+
+    /**
+     * Overloaded function for ExportModuleCallerInterface.
+     */
+    virtual void callExportModule(BCExportInterface &iExpMod, TimeStep *tStep);
 
 protected:
     double domainSize();

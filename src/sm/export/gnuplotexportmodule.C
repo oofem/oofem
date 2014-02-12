@@ -51,6 +51,8 @@
 #include "structuralinterfacematerialstatus.h"
 #include "enrichmentdomain.h"
 #include "XFEMDebugTools.h"
+#include "prescribedgradient.h"
+#include "export/exportmodulecallerinterface.h"
 
 #include <sstream>
 
@@ -59,7 +61,8 @@ REGISTER_ExportModule(GnuplotExportModule)
 
 GnuplotExportModule::GnuplotExportModule(int n, EngngModel *e):
 ExportModule(n, e),
-mExportReactionForces(false)
+mExportReactionForces(false),
+mExportBoundaryConditions(false)
 {
 
 }
@@ -74,6 +77,10 @@ IRResultType GnuplotExportModule::initializeFrom(InputRecord *ir)
 
     if(ir->hasField(_IFT_GnuplotExportModule_ReactionForces)) {
     	mExportReactionForces = true;
+    }
+
+    if(ir->hasField(_IFT_GnuplotExportModule_BoundaryConditions)) {
+    	mExportBoundaryConditions = true;
     }
 
     ExportModule::initializeFrom(ir);
@@ -93,6 +100,20 @@ void GnuplotExportModule::doOutput(TimeStep *tStep, bool forcedOutput)
 	}
 
 	Domain *domain = emodel->giveDomain(1);
+
+	// Export output from boundary conditions
+	if(mExportBoundaryConditions) {
+		int numBC = domain->giveNumberOfBoundaryConditions();
+
+		for(int i = 1; i <= numBC; i++) {
+			ExportModuleCallerInterface *expModCaller = dynamic_cast<ExportModuleCallerInterface*>( domain->giveBc(i) );
+
+			if(expModCaller != NULL) {
+				expModCaller->callExportModule(*this, tStep);
+			}
+		}
+	}
+
 	if(domain->hasXfemManager()) {
 		XfemManager *xMan = domain->giveXfemManager();
 
@@ -284,5 +305,35 @@ void GnuplotExportModule::outputXFEM(Crack &iCrack)
     	XFEMDebugTools::WriteArrayToGnuplot(nameTangJump, arcLengthPositions, tangJumps);
     }
 }
+
+void GnuplotExportModule::outputBoundaryCondition(PrescribedGradient &iBC, TimeStep *tStep)
+{
+	FloatArray stress;
+	iBC.computeField(stress, EID_MomentumBalance, tStep);
+	printf("Mean stress computed in Gnuplot export module: "); stress.printYourself();
+
+	double time = 0.0;
+
+	TimeStep *ts = emodel->giveCurrentStep();
+	if ( ts != NULL ) {
+		time = ts->giveTargetTime();
+	}
+
+	int bcIndex = iBC.giveNumber();
+
+	std :: stringstream strMeanStress;
+	strMeanStress << "PrescribedGradientGnuplotMeanStress" << bcIndex << "Time" << time << ".dat";
+	std :: string nameMeanStress = strMeanStress.str();
+	std::vector<double> componentArray, stressArray;
+
+	for(int i = 1; i <= stress.giveSize(); i++) {
+		componentArray.push_back(i);
+		stressArray.push_back(stress.at(i));
+	}
+
+	XFEMDebugTools::WriteArrayToGnuplot(nameMeanStress, componentArray, stressArray);
+
+}
+
 
 } // end namespace oofem

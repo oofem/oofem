@@ -36,17 +36,21 @@
 #define GNUPLOTEXPORTMODULE_H_
 
 #include "exportmodule.h"
+#include "export/bcexportinterface.h"
 
 ///@name Input fields for MatlabExportModule
 //@{
 #define _IFT_GnuplotExportModule_Name "gnuplot"
 // Sum of reaction forces for each Dirichlet BC
 #define _IFT_GnuplotExportModule_ReactionForces "reactionforces"
+// Special output from boundary conditions
+#define _IFT_GnuplotExportModule_BoundaryConditions "boundaryconditions"
 //@}
 
 namespace oofem {
 class EnrichmentItem;
 class Crack;
+class PrescribedGradient;
 /**
  * (Under development) The Gnuplot export module enables OOFEM to export some
  * data in a format that can be directly plotted with Gnuplot.
@@ -55,7 +59,7 @@ class Crack;
  *
  * Created on: Jan 29, 2014
  */
-class OOFEM_EXPORT GnuplotExportModule : public ExportModule {
+class OOFEM_EXPORT GnuplotExportModule : public ExportModule, public BCExportInterface {
 public:
 	GnuplotExportModule(int n, EngngModel *e);
 	virtual ~GnuplotExportModule();
@@ -74,8 +78,15 @@ public:
     void outputXFEM(EnrichmentItem &iEI);
     void outputXFEM(Crack &iCrack);
 
+    /**
+     * Boundary condition output
+     */
+    virtual void outputBoundaryCondition(PrescribedGradient &iBC, TimeStep *tStep);
+
+
 protected:
 	bool mExportReactionForces;
+	bool mExportBoundaryConditions;
 
     /**
      * Stores the sum of reaction forces for each BC.

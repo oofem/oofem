@@ -47,9 +47,12 @@
 #include "classfactory.h"
 #include "dynamicinputrecord.h"
 #include "feinterpol.h"
+#include "export/bcexportinterface.h"
 
 #include "sparsemtrx.h"
 #include "sparselinsystemnm.h"
+
+#include <cmath>
 
 namespace oofem {
 REGISTER_BoundaryCondition(PrescribedGradient);
@@ -112,6 +115,15 @@ void PrescribedGradient :: setPrescribedGradientVoigt(const FloatArray &t)
         OOFEM_ERROR("setPrescribedTensorVoigt: Tensor is in strange voigt format. Should be 3 or 6. Use setPrescribedTensor directly if needed.");
     }
 }
+
+/**
+ * Overloaded function for ExportModuleCallerInterface.
+ */
+void PrescribedGradient :: callExportModule(BCExportInterface &iExpMod, TimeStep *tStep)
+{
+	iExpMod.outputBoundaryCondition(*this, tStep);
+}
+
 
 void PrescribedGradient :: updateCoefficientMatrix(FloatMatrix &C)
 // This is written in a very general way, supporting both fm and sm problems.
@@ -194,7 +206,7 @@ double PrescribedGradient :: domainSize()
         FEInterpolation *fei = e->giveInterpolation();
         domain_size += fei->evalNXIntegral( boundary, FEIElementGeometryWrapper(e) );
     }
-    return domain_size / nsd;
+    return fabs(domain_size / nsd);
 }
 
 
