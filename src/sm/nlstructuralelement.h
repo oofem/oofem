@@ -148,7 +148,7 @@ public:
 
     /**
      * Computes the initial stiffness matrix of receiver. This method is used only if mode = UL
-     * The response is evaluated using @f$ \int B ({\mathrm{\Cauchy}}\otime \delta )B_{\mathrm{H}} \;\mathrm{d}v @f$, where
+     * The response is evaluated using @f$ \int B ({\mathrm{\sigma}}\otimes \delta )B_{\mathrm{H}} \;\mathrm{d}v @f$, where
      * @f$ B @f$ is the classical B-matrix, but computed wrt updated node position
      *
      * @param answer Computed initial stiffness matrix.
