@@ -50,6 +50,7 @@ class EngngModel;
 class SparseMtrx;
 class FloatArray;
 class TimeStep;
+class SparseLinearSystemNM;
 
 /**
  * This base class is an abstraction for all numerical methods solving sparse
