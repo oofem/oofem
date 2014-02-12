@@ -61,6 +61,7 @@ class BCExportInterface;
  * would a macroscopic gradient at the integration point, i.e. this is a boundary condition for prolongation.
  * It is also convenient to use when one wants to test a arbitrary specimen for shear.
  * @author Mikael Öhman
+ * @author Erik Svenning
  */
 class OOFEM_EXPORT PrescribedGradient : public BoundaryCondition, public ExportModuleCallerInterface
 {
