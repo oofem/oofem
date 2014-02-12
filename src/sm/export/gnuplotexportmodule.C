@@ -76,11 +76,16 @@ IRResultType GnuplotExportModule::initializeFrom(InputRecord *ir)
     	mExportReactionForces = true;
     }
 
+    ExportModule::initializeFrom(ir);
+
     return IRRT_OK;
 }
 
 void GnuplotExportModule::doOutput(TimeStep *tStep, bool forcedOutput)
 {
+    if (!(testTimeStepOutput(tStep) || forcedOutput)) {
+        return;
+    }
 
 	// Export the sum of reaction forces for each Dirichlet BC
 	if(mExportReactionForces) {
