@@ -98,13 +98,13 @@ protected:
 
     double alphaShapeCoef;
 
-	double particleRemovalRatio;
+    double particleRemovalRatio;
 
-	double domainVolume;
+    double domainVolume;
 
     int initFlag;
 
-	bool printVolumeReport;
+    bool printVolumeReport;
 
     int numberOfMomentumEqs, numberOfConservationEqs;
     int numberOfPrescribedMomentumEqs, numberOfPrescribedConservationEqs;
@@ -136,8 +136,8 @@ public:
         ndomains = 1;
         nMethod = NULL;
         numberOfMomentumEqs = numberOfConservationEqs = numberOfPrescribedMomentumEqs = numberOfPrescribedConservationEqs = 0;
-		domainVolume = 0.0;
-		printVolumeReport = false;
+        domainVolume = 0.0;
+        printVolumeReport = false;
     }
     ~PFEM() { }
 

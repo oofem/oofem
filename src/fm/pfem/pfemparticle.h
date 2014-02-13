@@ -61,12 +61,12 @@ private:
     /// the particle is not building any element
     bool free;
 
-	/// the particle is a part of alpha-shape
-	bool alphaShapeFlag;
-	bool activeFlag;
-	
-	
-	FloatArray coordinatesAtTimeStepBegin;
+    /// the particle is a part of alpha-shape
+    bool alphaShapeFlag;
+    bool activeFlag;
+
+
+    FloatArray coordinatesAtTimeStepBegin;
 
 public:
     /**
@@ -97,20 +97,20 @@ public:
     /// Sets the free-property flag
     virtual void setFree(bool newFlag = true) { free = newFlag; }
 
-	/// Returns true if the particle is on alpha shape
-	bool isOnAlphaShape() { return alphaShapeFlag; }
-	/// Sets the alphaShapeFlag
-	virtual void setOnAlphaShape(bool newFlag = true) { alphaShapeFlag = newFlag; }
+    /// Returns true if the particle is on alpha shape
+    bool isOnAlphaShape() { return alphaShapeFlag; }
+    /// Sets the alphaShapeFlag
+    virtual void setOnAlphaShape(bool newFlag = true) { alphaShapeFlag = newFlag; }
 
-	bool isActive() { return activeFlag; }
-	void deactivate() { activeFlag = false; }
+    bool isActive() { return activeFlag; }
+    void deactivate() { activeFlag = false; }
 
 
-	void storeCoordinatesTimeStepBegin();
-	
-	void updateNodalCoordinates(TimeStep* tStep);
-	
-	void resetNodalCoordinates();
+    void storeCoordinatesTimeStepBegin();
+
+    void updateNodalCoordinates(TimeStep *tStep);
+
+    void resetNodalCoordinates();
 
 
     virtual void printOutputAt(FILE *stream, TimeStep *stepN);

@@ -59,7 +59,7 @@ PFEMParticle :: PFEMParticle(int n, Domain *aDomain) : Node(n, aDomain), free(tr
 IRResultType
 PFEMParticle :: initializeFrom(InputRecord *ir)
 {
-  return Node :: initializeFrom(ir);
+    return Node :: initializeFrom(ir);
 }
 
 
@@ -86,21 +86,21 @@ PFEMParticle :: updateYourself(TimeStep *tStep)
 }
 
 
-void 
+void
 PFEMParticle :: storeCoordinatesTimeStepBegin()
 {
-	coordinatesAtTimeStepBegin = this->coordinates;
+    coordinatesAtTimeStepBegin = this->coordinates;
 }
 
 void
 PFEMParticle :: resetNodalCoordinates()
 {
-	this->coordinates = coordinatesAtTimeStepBegin;
+    this->coordinates = coordinatesAtTimeStepBegin;
 }
 
-void PFEMParticle :: updateNodalCoordinates(TimeStep* tStep)
+void PFEMParticle :: updateNodalCoordinates(TimeStep *tStep)
 {
-	fMode mode = domain->giveEngngModel()->giveFormulation();
+    fMode mode = domain->giveEngngModel()->giveFormulation();
 
     if ( mode == AL ) { // updated Lagrange
         for ( int i = 1; i <= numberOfDofs; i++ ) {

@@ -153,16 +153,16 @@ PFEMElement2d :: computeStiffnessMatrix(FloatMatrix &answer, MatResponseMode mod
     //setting sizes????
     FloatMatrix B, D, BTD, BTDB;
 
-	//D.resize(3,3);
-	//D.beUnitMatrix();
+    //D.resize(3,3);
+    //D.beUnitMatrix();
 
     int i;
     double dV;
     GaussPoint *gp;
     IntegrationRule *iRule = integrationRulesArray [ giveDefaultIntegrationRule() ];
 
-	//double mu = static_cast< FluidDynamicMaterial * >( this->giveMaterial() )->giveEffectiveViscosity(iRule->getIntegrationPoint(0), atTime);
-	//D.times(mu);
+    //double mu = static_cast< FluidDynamicMaterial * >( this->giveMaterial() )->giveEffectiveViscosity(iRule->getIntegrationPoint(0), atTime);
+    //D.times(mu);
 
     for ( i = 0; i < iRule->giveNumberOfIntegrationPoints(); i++ ) {
         gp  = iRule->getIntegrationPoint(i);

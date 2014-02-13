@@ -173,12 +173,12 @@ PFEM :: initializeFrom(InputRecord *ir)
     alphaShapeCoef = 1.0;
     IR_GIVE_OPTIONAL_FIELD(ir, alphaShapeCoef, _IFT_PFEM_alphashapecoef);
 
-	particleRemovalRatio = 0.0;
-	IR_GIVE_OPTIONAL_FIELD(ir, particleRemovalRatio, _IFT_PFEM_particalRemovalRatio);
+    particleRemovalRatio = 0.0;
+    IR_GIVE_OPTIONAL_FIELD(ir, particleRemovalRatio, _IFT_PFEM_particalRemovalRatio);
 
-	val = 0;
-	IR_GIVE_OPTIONAL_FIELD(ir, val, _IFT_PFEM_printVolumeReport);
-	printVolumeReport = (val == 1);
+    val = 0;
+    IR_GIVE_OPTIONAL_FIELD(ir, val, _IFT_PFEM_printVolumeReport);
+    printVolumeReport = ( val == 1 );
 
     return IRRT_OK;
 }
@@ -261,9 +261,9 @@ PFEM :: giveNextStep()
 
     nnodes = domain->giveNumberOfDofManagers();
     for ( i = 1; i <= nnodes; i++ ) {
-        PFEMParticle* particle = dynamic_cast< PFEMParticle * >( domain->giveDofManager(i) );
-		particle->setFree();
-		//particle->storeCoordinatesTimeStepBegin();
+        PFEMParticle *particle = dynamic_cast< PFEMParticle * >( domain->giveDofManager(i) );
+        particle->setFree();
+        //particle->storeCoordinatesTimeStepBegin();
     }
 
     nelem = domain->giveNumberOfElements();
@@ -301,28 +301,27 @@ PFEM :: giveNextStep()
     // FORCE EQUATION NUMBERING
     this->forceEquationNumbering();
 
-	double volume = 0.0;
+    double volume = 0.0;
 
     double ndt = ( ( PFEMElement * ) domain->giveElement(1) )->computeCriticalTimeStep(previousStep);
     // check for critical time step
-	TR1_2D_PFEM* ielem = NULL;
+    TR1_2D_PFEM *ielem = NULL;
     for ( i = 2; i <= domain->giveNumberOfElements(); i++ ) {
-		ielem = dynamic_cast<TR1_2D_PFEM*>(domain->giveElement(i));
-		double idt = ielem->computeCriticalTimeStep(previousStep);
-		if ( idt < ndt)
-		{
-			ndt = idt;
-			printf("Reducing time step due to element #%i \n", i);
-		}
-		volume += ielem->computeArea();
-		
+        ielem = dynamic_cast< TR1_2D_PFEM * >( domain->giveElement(i) );
+        double idt = ielem->computeCriticalTimeStep(previousStep);
+        if ( idt < ndt ) {
+            ndt = idt;
+            printf("Reducing time step due to element #%i \n", i);
+        }
+
+        volume += ielem->computeArea();
     }
 
     // UP error computeCriticalTimeStep
 
     //COdt = max(dt*0.8, minDeltaT);
-    ndt = min (ndt, deltaT);
-	//ndt = max (ndt, minDeltaT);
+    ndt = min(ndt, deltaT);
+    //ndt = max (ndt, minDeltaT);
 
 
     if ( currentStep != NULL ) {
@@ -333,8 +332,9 @@ PFEM :: giveNextStep()
     // time and dt variables are set eq to 0 for staics - has no meaning
 
     OOFEM_LOG_INFO( "SolutionStep %d : t = %e, dt = %e\n", istep, totalTime * this->giveVariableScale(VST_Time), ndt * this->giveVariableScale(VST_Time) );
-	if (printVolumeReport)
-		OOFEM_LOG_INFO( "Volume leakage: %.3f%%\n", (1.0-(volume/domainVolume))*100.0);
+    if ( printVolumeReport ) {
+        OOFEM_LOG_INFO("Volume leakage: %.3f%%\n", ( 1.0 - ( volume / domainVolume ) ) * 100.0);
+    }
 
     return currentStep;
 }
@@ -372,7 +372,7 @@ PFEM :: solveYourselfAt(TimeStep *tStep)
     // ??? stepWhenIcApply
     this->assemble( avLhs, tStep, EID_AuxMomentumBalance, LumpedMassMatrix, avns, this->giveDomain(1) );
 
-//	double ulala = avLhs->at(444,444);
+    //	double ulala = avLhs->at(444,444);
     if ( pLhs ) {
         delete pLhs;
     }
@@ -427,10 +427,10 @@ PFEM :: solveYourselfAt(TimeStep *tStep)
         }
     }
 
-	FloatArray velocityResiduum(auxmomneq);
-	double velocityResiduumNorm = 1.0;
-	FloatArray pressureResiduum(presneq);
-	double pressureResiduumNorm = 1.0;
+    FloatArray velocityResiduum(auxmomneq);
+    double velocityResiduumNorm = 1.0;
+    FloatArray pressureResiduum(presneq);
+    double pressureResiduumNorm = 1.0;
 
     int iteration = 0;
     do {
@@ -443,7 +443,7 @@ PFEM :: solveYourselfAt(TimeStep *tStep)
 
         rhs.resize(auxmomneq);
         rhs.zero();
-		
+
         bool tStepNumberTricked = false;
         //in order not to get bc-value in getUnknown
         //will be reset
@@ -470,25 +470,25 @@ PFEM :: solveYourselfAt(TimeStep *tStep)
             tStep->givePreviousStep()->setNumber(0);
         }
 
-		rhs.subtract(velocityResiduum);
+        rhs.subtract(velocityResiduum);
 
-        this->giveNumericalMethod(this->giveMetaStep( tStep->giveMetaStepNumber()));
+        this->giveNumericalMethod( this->giveMetaStep( tStep->giveMetaStepNumber() ) );
         nMethod->solve(avLhs, & rhs, & AuxVelocity);
 
         /************************* STEP 2 - calculates pressure ************************************/
 
         rhs.resize(presneq);
         rhs.zero();
-		
+
         this->assembleVectorFromElements( rhs, tStep, EID_ConservationEquation, PrescribedRhsVector, VM_Total, pns, this->giveDomain(1) );
 
         rhs.times(-1.0);
 
         this->assembleVectorFromElements( rhs, tStep, EID_ConservationEquation, DivergenceAuxVelocityVector, VM_Total, pns, this->giveDomain(1) );
 
-		rhs.subtract(pressureResiduum);
+        rhs.subtract(pressureResiduum);
 
-        this->giveNumericalMethod(this->giveMetaStep( tStep->giveMetaStepNumber() ));
+        this->giveNumericalMethod( this->giveMetaStep( tStep->giveMetaStepNumber() ) );
         pressureVector->resize(presneq);
         nMethod->solve(pLhs, & rhs, pressureVector);
 
@@ -515,17 +515,16 @@ PFEM :: solveYourselfAt(TimeStep *tStep)
         // deactivated, problem of prescribed pressure solved by improvement in alpha shape free surface definition
         // this->assembleVectorFromElements(rhs, tStep, EID_MomentumBalance, PrescribedPressureRhsVector, VM_Total, vns, this->giveDomain(1) );
 
-        this->giveNumericalMethod(this->giveMetaStep( tStep->giveMetaStepNumber() ));
+        this->giveNumericalMethod( this->giveMetaStep( tStep->giveMetaStepNumber() ) );
 
         nMethod->solve(vLhs, & rhs, velocityVector);
 
-        for (int i = 1; i <= this->giveDomain(1)->giveNumberOfDofManagers(); i++)
-        {
-			PFEMParticle* particle = dynamic_cast<PFEMParticle*>(this->giveDomain(1)->giveDofManager(i));
-			this->updateDofUnknownsDictionaryVelocities(particle, tStep);
+        for ( int i = 1; i <= this->giveDomain(1)->giveNumberOfDofManagers(); i++ ) {
+            PFEMParticle *particle = dynamic_cast< PFEMParticle * >( this->giveDomain(1)->giveDofManager(i) );
+            this->updateDofUnknownsDictionaryVelocities(particle, tStep);
 
-			//particle->resetNodalCoordinates();
-			//particle->updateNodalCoordinates(tStep);
+            //particle->resetNodalCoordinates();
+            //particle->updateNodalCoordinates(tStep);
         }
 
         velocityVectorThisStep = * velocityVector;
@@ -537,73 +536,72 @@ PFEM :: solveYourselfAt(TimeStep *tStep)
         } else {
             FloatArray diffVelocity = velocityVectorThisStep;
             diffVelocity.subtract(velocityVectorLastStep);
-			/*for (int i = 1; i <= diffVelocity.giveSize(); i++)
-			{
-				if(fabs(diffVelocity.at(i)) > 1.e-2)
-				{
-					
-					Dof* dof = vns.giveDofToEquationNumber(this->giveDomain(1), i);
-					if (dof)
-					{
-						DofManager* dofman = dof->giveDofManager();
-						printf("Too large difference at time step %i, iteration %i \n", tStep->giveNumber(), iteration);
-						printf("Velocity thisStep %f - lastStep %f = difference %f \n", velocityVectorThisStep.at(i), velocityVectorLastStep.at(i), diffVelocity.at(i));
-						printf("DofManager #%i at (%f, %f), DofID #%s \n", dofman->giveNumber(), dofman->giveCoordinate(1), dofman->giveCoordinate(2), __DofIDItemToString(dof->giveDofID()));
-						char str[80];
-						scanf ("%s",str);
-					}
-					else
-						OOFEM_ERROR("Finding Dof to equation Number failed");
-				}
-			}*/
+            /*for (int i = 1; i <= diffVelocity.giveSize(); i++)
+             * {
+             *      if(fabs(diffVelocity.at(i)) > 1.e-2)
+             *      {
+             *
+             *              Dof* dof = vns.giveDofToEquationNumber(this->giveDomain(1), i);
+             *              if (dof)
+             *              {
+             *                      DofManager* dofman = dof->giveDofManager();
+             *                      printf("Too large difference at time step %i, iteration %i \n", tStep->giveNumber(), iteration);
+             *                      printf("Velocity thisStep %f - lastStep %f = difference %f \n", velocityVectorThisStep.at(i), velocityVectorLastStep.at(i), diffVelocity.at(i));
+             *                      printf("DofManager #%i at (%f, %f), DofID #%s \n", dofman->giveNumber(), dofman->giveCoordinate(1), dofman->giveCoordinate(2), __DofIDItemToString(dof->giveDofID()));
+             *                      char str[80];
+             *                      scanf ("%s",str);
+             *              }
+             *              else
+             *                      OOFEM_ERROR("Finding Dof to equation Number failed");
+             *      }
+             * }*/
 
-			d_vnorm = 0.0;
-			for (int i = 1; i <= diffVelocity.giveSize(); i++)
-			{
-				d_vnorm = max(d_vnorm, abs(diffVelocity.at(i)/velocityVectorLastStep.at(i)));
-			}
+            d_vnorm = 0.0;
+            for ( int i = 1; i <= diffVelocity.giveSize(); i++ ) {
+                d_vnorm = max( d_vnorm, fabs( diffVelocity.at(i) / velocityVectorLastStep.at(i) ) );
+            }
+
             //d_vnorm = diffVelocity.computeNorm() / velocityVectorLastStep.computeNorm();
 
             FloatArray diffPressure = pressureVectorThisStep;
             diffPressure.subtract(pressureVectorLastStep);
-			/*double normDiffPressure = diffPressure.computeNorm();
-			if (normDiffPressure < 1.e-9)
-				d_pnorm = 0.0;
-			else
-				d_pnorm = normDiffPressure / pressureVectorLastStep.computeNorm();*/
-			d_pnorm = 0.0;
-			for (int i = 1; i <= diffPressure.giveSize(); i++)
-			{
-				d_pnorm = max(d_pnorm, abs(diffPressure.at(i)/pressureVectorLastStep.at(i)));
-			}
+            /*double normDiffPressure = diffPressure.computeNorm();
+             * if (normDiffPressure < 1.e-9)
+             *      d_pnorm = 0.0;
+             * else
+             *      d_pnorm = normDiffPressure / pressureVectorLastStep.computeNorm();*/
+            d_pnorm = 0.0;
+            for ( int i = 1; i <= diffPressure.giveSize(); i++ ) {
+                d_pnorm = max( d_pnorm, fabs( diffPressure.at(i) / pressureVectorLastStep.at(i) ) );
+            }
         }
 
-	velocityResiduum.zero();
+        velocityResiduum.zero();
 
-	FloatArray helpArray(auxmomneq);
-	this->assembleVectorFromElements( helpArray, tStep->givePreviousStep(), EID_AuxMomentumBalance, MassVelocityVector, VM_Total, avns, this->giveDomain(1) );
-	
-	this->assembleVectorFromElements( velocityResiduum, tStep, EID_AuxMomentumBalance, LoadVector, VM_Total, avns, this->giveDomain(1) );
-	this->assembleVectorFromElements( velocityResiduum, tStep, EID_AuxMomentumBalance, DivergenceDeviatoricStressVector, VM_Total, avns, this->giveDomain(1) );
-	velocityResiduum.times(-1.0);
-	this->assembleVectorFromElements( velocityResiduum, tStep, EID_AuxMomentumBalance, PressureGradientVector, VM_Total, avns, this->giveDomain(1) );
-	velocityResiduum.times(deltaT);
-	
-	velocityResiduum.subtract(helpArray);
-	this->assembleVectorFromElements( velocityResiduum, tStep, EID_AuxMomentumBalance, MassVelocityVector, VM_Total, avns, this->giveDomain(1) );
+        FloatArray helpArray(auxmomneq);
+        this->assembleVectorFromElements( helpArray, tStep->givePreviousStep(), EID_AuxMomentumBalance, MassVelocityVector, VM_Total, avns, this->giveDomain(1) );
 
-	velocityResiduumNorm = velocityResiduum.computeNorm();
-	printf("Iteration %i\nNorm of the residuum in momentum balance equation %f\n", iteration, velocityResiduumNorm);
+        this->assembleVectorFromElements( velocityResiduum, tStep, EID_AuxMomentumBalance, LoadVector, VM_Total, avns, this->giveDomain(1) );
+        this->assembleVectorFromElements( velocityResiduum, tStep, EID_AuxMomentumBalance, DivergenceDeviatoricStressVector, VM_Total, avns, this->giveDomain(1) );
+        velocityResiduum.times(-1.0);
+        this->assembleVectorFromElements( velocityResiduum, tStep, EID_AuxMomentumBalance, PressureGradientVector, VM_Total, avns, this->giveDomain(1) );
+        velocityResiduum.times(deltaT);
 
-	pressureResiduum.zero();
-	this->assembleVectorFromElements( pressureResiduum, tStep, EID_ConservationEquation, PrescribedRhsVector, VM_Total, pns, this->giveDomain(1) );
-	pressureResiduum.times(-1.0);
-	this->assembleVectorFromElements( pressureResiduum, tStep, EID_ConservationEquation, DivergenceVelocityVector, VM_Total, pns, this->giveDomain(1) );
-	pressureResiduumNorm = pressureResiduum.computeNorm();
-	printf("Norm of the residuum in continuity equation %f\n", pressureResiduumNorm);
+        velocityResiduum.subtract(helpArray);
+        this->assembleVectorFromElements( velocityResiduum, tStep, EID_AuxMomentumBalance, MassVelocityVector, VM_Total, avns, this->giveDomain(1) );
 
-    } while ( ( velocityResiduumNorm > 1.e-6 || pressureResiduumNorm > 1.e-6 ) && iteration < 50 && tStep->giveNumber() > 1);
-	//} while ( ( d_vnorm > 1.e-8 || d_pnorm > 1.e-8 ) && iteration < 50 );
+        velocityResiduumNorm = velocityResiduum.computeNorm();
+        printf("Iteration %i\nNorm of the residuum in momentum balance equation %f\n", iteration, velocityResiduumNorm);
+
+        pressureResiduum.zero();
+        this->assembleVectorFromElements( pressureResiduum, tStep, EID_ConservationEquation, PrescribedRhsVector, VM_Total, pns, this->giveDomain(1) );
+        pressureResiduum.times(-1.0);
+        this->assembleVectorFromElements( pressureResiduum, tStep, EID_ConservationEquation, DivergenceVelocityVector, VM_Total, pns, this->giveDomain(1) );
+        pressureResiduumNorm = pressureResiduum.computeNorm();
+        printf("Norm of the residuum in continuity equation %f\n", pressureResiduumNorm);
+    } while ( ( velocityResiduumNorm > 1.e-6 || pressureResiduumNorm > 1.e-6 ) && iteration < 50 && tStep->giveNumber() > 1 );
+
+    //} while ( ( d_vnorm > 1.e-8 || d_pnorm > 1.e-8 ) && iteration < 50 );
 
     if ( iteration > 49 ) {
         OOFEM_ERROR("Maximal iteration count exceded");
@@ -611,17 +609,17 @@ PFEM :: solveYourselfAt(TimeStep *tStep)
         printf("\n %i iterations performed.\n", iteration);
     }
 
-	
-	
+
+
 
     Domain *d = this->giveDomain(1);
     for ( int i = 1; i <= this->giveDomain(1)->giveNumberOfDofManagers(); i++ ) {
         PFEMParticle *particle = dynamic_cast< PFEMParticle * >( d->giveDofManager(i) );
-		
-		//resetting coordinates of all particles to avoid doing it again in updateYourself()
+
+        //resetting coordinates of all particles to avoid doing it again in updateYourself()
         //particle->resetNodalCoordinates();
 
-		if ( particle->isFree() && particle->isActive()) {
+        if ( particle->isFree() && particle->isActive() ) {
             for ( int j = 1; j <= particle->giveNumberOfDofs(); j++ ) {
                 Dof *dof = particle->giveDof(j);
                 DofIDItem type  =  dof->giveDofID();
@@ -642,75 +640,57 @@ PFEM :: solveYourselfAt(TimeStep *tStep)
 
 
     tStep->incrementStateCounter();
-	this->updateYourself( this->giveCurrentStep() );
+    this->updateYourself( this->giveCurrentStep() );
 
-	// deactivating particles
-	if (particleRemovalRatio > 1.e-6) // >0
-	{
-		for ( int i = 1; i <= this->giveDomain(1)->giveNumberOfElements(); i++ ) {
-			TR1_2D_PFEM *element = dynamic_cast< TR1_2D_PFEM * >( d->giveElement(i) );
+    // deactivating particles
+    if ( particleRemovalRatio > 1.e-6 ) { // >0
+        for ( int i = 1; i <= this->giveDomain(1)->giveNumberOfElements(); i++ ) {
+            TR1_2D_PFEM *element = dynamic_cast< TR1_2D_PFEM * >( d->giveElement(i) );
 
-			PFEMParticle *particle1 = dynamic_cast< PFEMParticle * > (element->giveNode(1));
-			PFEMParticle *particle2 = dynamic_cast< PFEMParticle * > (element->giveNode(2));
-			PFEMParticle *particle3 = dynamic_cast< PFEMParticle * > (element->giveNode(3));
+            PFEMParticle *particle1 = dynamic_cast< PFEMParticle * >( element->giveNode(1) );
+            PFEMParticle *particle2 = dynamic_cast< PFEMParticle * >( element->giveNode(2) );
+            PFEMParticle *particle3 = dynamic_cast< PFEMParticle * >( element->giveNode(3) );
 
-			double l12 = particle1->giveCoordinates()->distance(particle2->giveCoordinates());
-			double l23 = particle2->giveCoordinates()->distance(particle3->giveCoordinates());
-			double l31 = particle3->giveCoordinates()->distance(particle1->giveCoordinates());
+            double l12 = particle1->giveCoordinates()->distance( particle2->giveCoordinates() );
+            double l23 = particle2->giveCoordinates()->distance( particle3->giveCoordinates() );
+            double l31 = particle3->giveCoordinates()->distance( particle1->giveCoordinates() );
 
-			double maxLength = max(l12, max(l23, l31));
-			double minLength = min(l12, min(l23, l31));
+            double maxLength = max( l12, max(l23, l31) );
+            double minLength = min( l12, min(l23, l31) );
 
-			if (minLength / maxLength < particleRemovalRatio)
-			{
-				if (fabs(l12 - minLength) < 1.e-6) // ==
-				{
-					if(particle1->isActive() && particle2->isActive())
-					{
-						particle1->deactivate();
-					}
-					else if (particle1->isActive() == false || particle2->isActive() == false)
-					{
-						;// it was deactivated by other element
-					}
-					else
-					{
-						_error("Both particles deactivated");
-					}
-				}
-				if (fabs(l23 - minLength) < 1.e-6) // ==
-				{
-					if(particle2->isActive() && particle3->isActive())
-					{
-						particle2->deactivate();
-					}
-					else if (particle2->isActive() == false || particle3->isActive() == false)
-					{
-						;// it was deactivated by other element
-					}
-					else
-					{
-						_error("Both particles deactivated");
-					}
-				}
-				if (fabs(l31 - minLength) < 1.e-6) // ==
-				{
-					if(particle3->isActive() && particle1->isActive())
-					{
-						particle3->deactivate();
-					}
-					else if (particle3->isActive() == false || particle1->isActive() == false)
-					{
-						;// it was deactivated by other element
-					}
-					else
-					{
-						_error("Both particles deactivated");
-					}
-				}
-			}
-		}
-	}
+            if ( minLength / maxLength < particleRemovalRatio ) {
+                if ( fabs(l12 - minLength) < 1.e-6 ) {             // ==
+                    if ( particle1->isActive() && particle2->isActive() ) {
+                        particle1->deactivate();
+                    } else if ( particle1->isActive() == false || particle2->isActive() == false )     {
+                        ;                        // it was deactivated by other element
+                    } else   {
+                        _error("Both particles deactivated");
+                    }
+                }
+
+                if ( fabs(l23 - minLength) < 1.e-6 ) {             // ==
+                    if ( particle2->isActive() && particle3->isActive() ) {
+                        particle2->deactivate();
+                    } else if ( particle2->isActive() == false || particle3->isActive() == false )     {
+                        ;                        // it was deactivated by other element
+                    } else   {
+                        _error("Both particles deactivated");
+                    }
+                }
+
+                if ( fabs(l31 - minLength) < 1.e-6 ) {             // ==
+                    if ( particle3->isActive() && particle1->isActive() ) {
+                        particle3->deactivate();
+                    } else if ( particle3->isActive() == false || particle1->isActive() == false )     {
+                        ;                        // it was deactivated by other element
+                    } else   {
+                        _error("Both particles deactivated");
+                    }
+                }
+            }
+        }
+    }
 }
 
 
@@ -813,22 +793,22 @@ PFEM :: updateDofUnknownsDictionaryVelocities(DofManager *inode, TimeStep *tStep
 
     for ( int i = 1; i <= ndofs; i++ ) {
         Dof *iDof = inode->giveDof(i);
-		DofIDItem type = iDof->giveDofID();
+        DofIDItem type = iDof->giveDofID();
         if ( type == V_u || type == V_v || type == V_w ) {
-			int eqNum = 0;
-			double val = 0;
-			if ( iDof->hasBc(tStep) ) { // boundary condition
-				val = iDof->giveBcValue(VM_Total, tStep);
-			} else {
-				eqNum = iDof->__giveEquationNumber();
-				FloatArray *vect = VelocityField.giveSolutionVector(tStep);
-				if ( vect->giveSize() > 0 ) {
-					val = vect->at(eqNum);
-				}
-			}
-        
-			iDof->updateUnknownsDictionary(tStep, VM_Total, val);
-		}
+            int eqNum = 0;
+            double val = 0;
+            if ( iDof->hasBc(tStep) ) {             // boundary condition
+                val = iDof->giveBcValue(VM_Total, tStep);
+            } else {
+                eqNum = iDof->__giveEquationNumber();
+                FloatArray *vect = VelocityField.giveSolutionVector(tStep);
+                if ( vect->giveSize() > 0 ) {
+                    val = vect->at(eqNum);
+                }
+            }
+
+            iDof->updateUnknownsDictionary(tStep, VM_Total, val);
+        }
     }
 }
 
@@ -1033,7 +1013,7 @@ PFEM :: applyIC(TimeStep *stepWhenIcApply)
         element = ( PFEMElement * ) domain->giveElement(j);
         element->updateInternalState(stepWhenIcApply);
         element->updateYourself(stepWhenIcApply);
-		domainVolume += element->computeArea();
+        domainVolume += element->computeArea();
     }
 }
 

@@ -52,7 +52,7 @@ Edge2D :: operator == ( const Edge2D & right )
     if ( ( this->nodes.at(1) == right.nodes.at(1) && this->nodes.at(2) == right.nodes.at(2) ) ||
         ( this->nodes.at(1) == right.nodes.at(2) && this->nodes.at(2) == right.nodes.at(1) ) ) {
         return true;
-    } else   {
+    } else {
         return false;
     }
 }
@@ -72,13 +72,13 @@ AlphaEdge2D :: AlphaEdge2D(int node1, int node2, double _length) :
 
 // SHOULD BE REMOVED
 AlphaEdge2D :: AlphaEdge2D(int node1, int node2) :
-	Edge2D(node1, node2)
-	, isOnConvexHull(false)
+    Edge2D(node1, node2)
+    , isOnConvexHull(false)
     , outerAlphaBound(0.0)
     , innerAlphaBound(0.0)
     , length(0.0)
 {
-	sharedByTriangles [ 0 ] = NULL;
+    sharedByTriangles [ 0 ] = NULL;
     sharedByTriangles [ 1 ] = NULL;
 }
 

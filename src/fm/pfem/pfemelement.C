@@ -172,14 +172,14 @@ PFEMElement ::  giveCharacteristicVector(FloatArray &answer, CharType mtrx, Valu
         FloatArray u_star;
         this->computeVectorOf(EID_AuxMomentumBalance, VM_Intermediate, tStep, u_star);
         answer.beProductOf(d, u_star);
-	} else if ( mtrx == DivergenceVelocityVector ) {
+    } else if ( mtrx == DivergenceVelocityVector ) {
         FloatMatrix d;
         this->giveCharacteristicMatrix(d, DivergenceMatrix, tStep);
         FloatArray u;
         this->computeVectorOf(EID_AuxMomentumBalance, VM_Total, tStep, u);
         answer.beProductOf(d, u);
-	} else if ( mtrx == DivergenceDeviatoricStressVector ) {
-		this->computeDeviatoricStressDivergence(answer, tStep);
+    } else if ( mtrx == DivergenceDeviatoricStressVector ) {
+        this->computeDeviatoricStressDivergence(answer, tStep);
     } else if ( mtrx == QMhat_invQTpressureVector ) {
         // NOT IN USE
         FloatMatrix Minv, QMinv, QMinvQT;
@@ -201,8 +201,8 @@ PFEMElement ::  giveCharacteristicVector(FloatArray &answer, CharType mtrx, Valu
         answer.negated();
     } else if ( mtrx ==  PrescribedRhsVector ) {
         this->computePrescribedRhsVector(answer, tStep, mode);
-	} else if ( mtrx == PrescribedPressureRhsVector) {
-		this->computePrescribedPressureRhsVector(answer, tStep, mode);
+    } else if ( mtrx == PrescribedPressureRhsVector ) {
+        this->computePrescribedPressureRhsVector(answer, tStep, mode);
     } else {
         _error("giveCharacteristicVector: Unknown Type of characteristic mtrx.");
     }

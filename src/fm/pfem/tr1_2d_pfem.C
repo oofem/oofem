@@ -528,9 +528,9 @@ TR1_2D_PFEM :: computeDeviatoricStressDivergence(FloatArray &answer, TimeStep *a
     answer.resize(6);
     answer.zero();
     FloatArray stress;
-    
-	this->computeDeviatoricStress(stress, integrationRulesArray [ 0 ]->getIntegrationPoint(0), atTime );
-	    
+
+    this->computeDeviatoricStress(stress, integrationRulesArray [ 0 ]->getIntegrationPoint(0), atTime);
+
     // \int dNu/dxj \Tau_ij
     for ( int i = 0; i < 3; i++ ) {
         answer.at( ( i ) * 2 + 1 ) = area * ( stress.at(1) * b [ i ] + stress.at(3) * c [ i ] );
@@ -575,19 +575,78 @@ TR1_2D_PFEM :: computeCriticalTimeStep(TimeStep *tStep)
     double deltaT = tStep->giveTimeIncrement();
 #if 1
     /*FloatArray u;
+     * this->computeVectorOf(EID_MomentumBalance, VM_Total, tStep, u);
+     * double vn1 = sqrt( u.at(1) * u.at(1) + u.at(2) * u.at(2) );
+     * double vn2 = sqrt( u.at(3) * u.at(3) + u.at(4) * u.at(4) );
+     * double vn3 = sqrt( u.at(5) * u.at(5) + u.at(6) * u.at(6) );
+     *
+     * Node *node1, *node2, *node3;
+     *
+     * node1 = giveNode(1);
+     * node2 = giveNode(2);
+     * node3 = giveNode(3);
+     *
+     * double x1, x2, x3, y1, y2, y3;
+     * double l12, l23, l31;
+     *
+     * x1 = node1->giveCoordinate(1);
+     * x2 = node2->giveCoordinate(1);
+     * x3 = node3->giveCoordinate(1);
+     *
+     * y1 = node1->giveCoordinate(2);
+     * y2 = node2->giveCoordinate(2);
+     * y3 = node3->giveCoordinate(2);
+     *
+     *
+     * l12 = sqrt( ( x2 - x1 ) * ( x2 - x1 ) + ( y2 - y1 ) * ( y2 - y1 ) );
+     * l23 = sqrt( ( x3 - x2 ) * ( x3 - x2 ) + ( y3 - y2 ) * ( y3 - y2 ) );
+     * l31 = sqrt( ( x1 - x3 ) * ( x1 - x3 ) + ( y1 - y3 ) * ( y1 - y3 ) );
+     *
+     * double dt1, dt2, dt3;
+     *
+     * if ( vn1 < 1.e-6 ) {
+     *  dt1 = deltaT;
+     * } else {
+     *  dt1 = min(l12, l31) / vn1;
+     * }
+     *
+     * if ( vn2 < 1.e-6 ) {
+     *  dt2 = deltaT;
+     * } else {
+     *  dt2 = min(l12, l23) / vn2;
+     * }
+     *
+     * if ( vn3 < 1.e-6 ) {
+     *  dt3 = deltaT;
+     * } else {
+     *  dt3 = min(l23, l31) / vn3;
+     * }
+     *
+     * double dt_min = min( dt1, min(dt2, dt3) );
+     *
+     * return dt_min;*/
+
+    //////////////////////////////////////////////////////////////////////////////////////////////////////
+
+    // assuming plane x-y !!!!!!!!!!!!!!!!!!!!!!
+
+    FloatArray u;
     this->computeVectorOf(EID_MomentumBalance, VM_Total, tStep, u);
-    double vn1 = sqrt( u.at(1) * u.at(1) + u.at(2) * u.at(2) );
-    double vn2 = sqrt( u.at(3) * u.at(3) + u.at(4) * u.at(4) );
-    double vn3 = sqrt( u.at(5) * u.at(5) + u.at(6) * u.at(6) );
+    FloatArray u1(2), u2(2), u3(2);
+    u1.at(1) = u.at(1);
+    u1.at(2) = u.at(2);
 
-    Node *node1, *node2, *node3;
+    u2.at(1) = u.at(3);
+    u2.at(2) = u.at(4);
 
-    node1 = giveNode(1);
-    node2 = giveNode(2);
-    node3 = giveNode(3);
+    u3.at(1) = u.at(5);
+    u3.at(2) = u.at(6);
+
+    Node *node1 = giveNode(1);
+    Node *node2 = giveNode(2);
+    Node *node3 = giveNode(3);
 
     double x1, x2, x3, y1, y2, y3;
-    double l12, l23, l31;
 
     x1 = node1->giveCoordinate(1);
     x2 = node2->giveCoordinate(1);
@@ -597,124 +656,68 @@ TR1_2D_PFEM :: computeCriticalTimeStep(TimeStep *tStep)
     y2 = node2->giveCoordinate(2);
     y3 = node3->giveCoordinate(2);
 
+    FloatArray p1(2), p2(2), p3(2);
+    p1.at(1) = x1;
+    p1.at(2) = y1;
 
-    l12 = sqrt( ( x2 - x1 ) * ( x2 - x1 ) + ( y2 - y1 ) * ( y2 - y1 ) );
-    l23 = sqrt( ( x3 - x2 ) * ( x3 - x2 ) + ( y3 - y2 ) * ( y3 - y2 ) );
-    l31 = sqrt( ( x1 - x3 ) * ( x1 - x3 ) + ( y1 - y3 ) * ( y1 - y3 ) );
+    p2.at(1) = x2;
+    p2.at(2) = y2;
 
-    double dt1, dt2, dt3;
+    p3.at(1) = x3;
+    p3.at(2) = y3;
 
-    if ( vn1 < 1.e-6 ) {
-        dt1 = deltaT;
-    } else {
-        dt1 = min(l12, l31) / vn1;
+    FloatArray s12(p2), s23(p3), s31(p1);
+
+    s12.subtract(p1);
+    FloatArray s21(s12);
+    s21.negated();
+
+    s23.subtract(p2);
+    FloatArray s32(s23);
+    s32.negated();
+
+    s31.subtract(p3);
+    FloatArray s13(s31);
+    s13.negated();
+
+    FloatArray foot1(p2);
+    FloatArray foot2(p3);
+    FloatArray foot3(p1);
+
+    double factor = s21.dotProduct(s23) / s23.dotProduct(s23);
+    foot1.add(factor, s23);
+
+    FloatArray altitude1(foot1);
+    altitude1.subtract(p1);
+
+    factor = s32.dotProduct(s31) / s31.dotProduct(s31);
+    foot2.add(factor, s31);
+
+    FloatArray altitude2(foot2);
+    altitude2.subtract(p2);
+
+    factor = s13.dotProduct(s12) / s12.dotProduct(s12);
+    foot3.add(factor, s12);
+
+    FloatArray altitude3(foot3);
+    altitude3.subtract(p3);
+
+    double dt1(deltaT), dt2(deltaT), dt3(deltaT);
+
+    double u1_proj = u1.dotProduct(altitude1) / altitude1.computeNorm();
+    if ( u1_proj > 1.e-6 ) {
+        dt1 = altitude1.computeNorm() / u1_proj;
     }
 
-    if ( vn2 < 1.e-6 ) {
-        dt2 = deltaT;
-    } else {
-        dt2 = min(l12, l23) / vn2;
+    double u2_proj = u2.dotProduct(altitude2) / altitude2.computeNorm();
+    if ( u2_proj > 1.e-6 ) {
+        dt2 = altitude1.computeNorm() / u2_proj;
     }
 
-    if ( vn3 < 1.e-6 ) {
-        dt3 = deltaT;
-    } else {
-        dt3 = min(l23, l31) / vn3;
+    double u3_proj = u3.dotProduct(altitude3) / altitude3.computeNorm();
+    if ( u3_proj > 1.e-6 ) {
+        dt3 = altitude3.computeNorm() / u3_proj;
     }
-
-    double dt_min = min( dt1, min(dt2, dt3) );
-
-    return dt_min;*/
-
-	//////////////////////////////////////////////////////////////////////////////////////////////////////
-
-	// assuming plane x-y !!!!!!!!!!!!!!!!!!!!!!
-
-	FloatArray u;
-    this->computeVectorOf(EID_MomentumBalance, VM_Total, tStep, u);
-	FloatArray u1(2), u2(2), u3(2);
-	u1.at(1) = u.at(1);
-	u1.at(2) = u.at(2);
-
-	u2.at(1) = u.at(3);
-	u2.at(2) = u.at(4);
-
-	u3.at(1) = u.at(5);
-	u3.at(2) = u.at(6);
-	
-    Node* node1 = giveNode(1);
-    Node* node2 = giveNode(2);
-    Node* node3 = giveNode(3);
-		
-	double x1, x2, x3, y1, y2, y3;
-
-	x1 = node1->giveCoordinate(1);
-    x2 = node2->giveCoordinate(1);
-    x3 = node3->giveCoordinate(1);
-
-    y1 = node1->giveCoordinate(2);
-    y2 = node2->giveCoordinate(2);
-    y3 = node3->giveCoordinate(2);
-
-	FloatArray p1(2), p2(2), p3(2);
-	p1.at(1) = x1;
-	p1.at(2) = y1;
-
-	p2.at(1) = x2;
-	p2.at(2) = y2;
-
-	p3.at(1) = x3;
-	p3.at(2) = y3;
-
-	FloatArray s12(p2), s23(p3), s31(p1);
-
-	s12.subtract(p1);
-	FloatArray s21(s12);
-	s21.negated();
-
-	s23.subtract(p2);
-	FloatArray s32(s23);
-	s32.negated();
-
-	s31.subtract(p3);
-	FloatArray s13(s31);
-	s13.negated();
-
-	FloatArray foot1(p2);
-	FloatArray foot2(p3);
-	FloatArray foot3(p1);
-	
-	double factor = s21.dotProduct(s23) / s23.dotProduct(s23);
-	foot1.add(factor, s23);
-
-	FloatArray altitude1(foot1);
-	altitude1.subtract(p1);
-	
-	factor = s32.dotProduct(s31) / s31.dotProduct(s31);
-	foot2.add(factor, s31);
-
-	FloatArray altitude2(foot2);
-	altitude2.subtract(p2);
-
-	factor = s13.dotProduct(s12) / s12.dotProduct(s12);
-	foot3.add(factor, s12);
-
-	FloatArray altitude3(foot3);
-	altitude3.subtract(p3);
-
-	double dt1(deltaT), dt2(deltaT), dt3(deltaT);
-
-	double u1_proj = u1.dotProduct(altitude1) / altitude1.computeNorm();
-	if (u1_proj > 1.e-6)
-	 dt1 = altitude1.computeNorm() / u1_proj;
-
-	double u2_proj = u2.dotProduct(altitude2) / altitude2.computeNorm();
-	if (u2_proj > 1.e-6)
-	 dt2 = altitude1.computeNorm() / u2_proj;
-
-	double u3_proj = u3.dotProduct(altitude3) / altitude3.computeNorm();
-	if (u3_proj > 1.e-6)
-	 dt3 = altitude3.computeNorm() / u3_proj;
 
     double dt_min = min( dt1, min(dt2, dt3) );
 
@@ -881,7 +884,7 @@ TR1_2D_PFEM :: giveInternalStateAtNode(FloatArray &answer, InternalStateType typ
     //</RESTRICTED_SECTION>
     if ( type == IST_Density ) {
         answer.resize(1);
-        answer.at(1) = this->giveMaterial()->give('d', integrationRulesArray [ 0 ]->getIntegrationPoint(0));
+        answer.at(1) = this->giveMaterial()->give( 'd', integrationRulesArray [ 0 ]->getIntegrationPoint(0) );
         return 1;
     } else {
         return PFEMElement :: giveInternalStateAtNode(answer, type, mode, node, atTime);

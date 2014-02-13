@@ -184,15 +184,15 @@ public:
     virtual FEInterpolation *giveVelocityInterpolation() { return & velocityInterpolation; }
     virtual FEInterpolation *givePressureInterpolation() { return & pressureInterpolation; }
 
-	/// @return Interpolation of the element geometry, or NULL if none exist.
+    /// @return Interpolation of the element geometry, or NULL if none exist.
     virtual FEInterpolation *giveInterpolation() const { return & velocityInterpolation; }
 protected:
 
     void computeGaussPoints();
     virtual void computeDeviatoricStress(FloatArray &answer, GaussPoint *gp, TimeStep *);
-	
-	virtual void computeDeviatoricStressDivergence(FloatArray &answer, TimeStep *atTime);
-	
+
+    virtual void computeDeviatoricStressDivergence(FloatArray &answer, TimeStep *atTime);
+
     virtual void computeForceVector(FloatArray &answer, TimeStep *atTime); //F
 
     // NOT IN USE

@@ -40,12 +40,12 @@
 
 namespace oofem {
 DelaunayTriangle :: DelaunayTriangle(Domain *d, int node1, int node2, int node3) :
-  domain(d),
-  nodes(3),
+    domain(d),
+    nodes(3),
 
-  circumCircle(3),
-  validFlag(true),
-  listOfCellsContainedInAndPosition(NULL)
+    circumCircle(3),
+    validFlag(true),
+    listOfCellsContainedInAndPosition(NULL)
 {
     nodes.at(1) = node1;
     nodes.at(2) = node2;

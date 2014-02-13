@@ -133,8 +133,8 @@ public:
 protected:
     /// Computes deviatoric stress vector in given integration point and solution step from given total strain vector
     virtual void computeDeviatoricStress(FloatArray &answer, GaussPoint *gp, TimeStep *) = 0;
-	/// Calculates the divergence of the deviatoric stress
-	virtual void computeDeviatoricStressDivergence(FloatArray &answer, TimeStep *atTime) = 0;
+    /// Calculates the divergence of the deviatoric stress
+    virtual void computeDeviatoricStressDivergence(FloatArray &answer, TimeStep *atTime) = 0;
     /// Calculates the element shape funciton matrix for velocity degrees of freedom
     virtual void computeNuMatrix(FloatMatrix &answer, GaussPoint *gp) = 0;
     /// Calculates the element shape funciton matrix for pressure degrees of freedom
@@ -163,11 +163,11 @@ protected:
     virtual void computePFEMSubstitutionMatrix(FloatMatrix &answer,  TimeStep *atTime) = 0; //S
     /// Calculates the prescribed velocity vector for the right hand side of the pressure equation
     virtual void computePrescribedRhsVector(FloatArray &answer, TimeStep *tStep, ValueModeType mode) = 0;
-	/**
-	 * Calculates the prescribed pressure vector for the right hand side of the velocity equation
-	 * Implementation not finished yet. At the moment not needed due to improved boundary condition setting in alpha shape
-	 */ 
-	virtual void computePrescribedPressureRhsVector(FloatArray &answer, TimeStep *tStep, ValueModeType mode) = 0;
+    /**
+     * Calculates the prescribed pressure vector for the right hand side of the velocity equation
+     * Implementation not finished yet. At the moment not needed due to improved boundary condition setting in alpha shape
+     */
+    virtual void computePrescribedPressureRhsVector(FloatArray &answer, TimeStep *tStep, ValueModeType mode) = 0;
 };
 } // end namespace oofem
 #endif // pfemelement_h

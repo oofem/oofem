@@ -296,7 +296,7 @@ public:
             } else {
                 return OctantRec :: BBS_ContainsCell;
             }
-        } else   {
+        } else {
             for ( i = 1; i <= 3; i++ ) {
                 if ( localizer->giveOctreeMaskValue(i) ) {
                     if ( BBXOrigin.at(i) > ( this->size + this->origin.at(i) ) ) {
@@ -568,7 +568,7 @@ public:
             if ( ( distance - distanceToClosestNode ) <= distance * 0.001 ) {
                 if ( ( distance - distanceToClosestNode ) >= -0.001 * distance ) {
                     closestNodeIndices.push_back(nodeNr);
-                } else   {
+                } else {
                     closestNodeIndices.clear();
                     closestNodeIndices.push_back(nodeNr);
                     distanceToClosestNode = distance;
@@ -579,7 +579,8 @@ public:
             distanceToClosestNode = startingPosition->distance( this->domain->giveNode( * ( closestNodeIndices.begin() ) )->giveCoordinates() );
             initFlag = true;
         }
-	return true;
+
+        return true;
     }
 
     void giveResult(std :: list< int > &answer) {
@@ -633,7 +634,7 @@ public:
         if ( ( startingPosition->distance(centerCoords) ) < radius ) {
             result.push_back(DTptr);
             return true;
-        } else   {
+        } else {
             return false;
         }
     }
@@ -668,14 +669,14 @@ protected:
     IntArray octreeMask;
     CellPtrType rootCell;
     Domain *domain;
-	int maxDepthReached;
+    int maxDepthReached;
 
 public:
     /// Constructor
     OctreeSpatialLocalizerT(int n, Domain * d) {
         rootCell = NULL;
         domain = d;
-		maxDepthReached = 0;
+        maxDepthReached = 0;
     }
     /// Destructor
     ~OctreeSpatialLocalizerT() {
@@ -819,7 +820,7 @@ public:
         }
 
         if ( filter.isBBXStage2Defined(BBS2) ) {
-            OctantRec::BoundingBoxStatus BBStatus = terminal->testBoundingBox(BBS2);
+            OctantRec :: BoundingBoxStatus BBStatus = terminal->testBoundingBox(BBS2);
             if ( BBStatus == OctantRec :: BBS_ContainsCell ) {
                 giveListOfTerminalCellsInBoundingBox(* cellListPostSearch, BBS2, rootCell);
                 for ( cellListPos = cellListPostSearch->begin(); cellListPos != cellListPostSearch->end(); ++cellListPos ) {
@@ -865,14 +866,14 @@ public:
                         positionInDataList = ( * insDataIT ).posInCellDataList;
                         cell->giveDataList()->erase(positionInDataList);
                     }
-                } else   {
+                } else {
                     // should not happen
                     removeMemberFromCell(_obj, insertor, terminal);
                 }
 
                 // actual iterator position might not be valid, so start from beginning
                 pos = cellDataList->begin();
-            } else   {
+            } else {
                 pos++;
             }
         }
@@ -942,11 +943,11 @@ protected:
             cellDataList = cell->giveDataList();
             nCellItems = cellDataList->size();
             cellDepth  = this->giveCellDepth(cell);
-			if (cellDepth > maxDepthReached)
-			{
-				maxDepthReached = cellDepth;
-				//printf("Reached cell depth: %i \n", maxDepthReached);
-			}
+            if ( cellDepth > maxDepthReached ) {
+                maxDepthReached = cellDepth;
+                //printf("Reached cell depth: %i \n", maxDepthReached);
+            }
+
             if ( ( nCellItems > TEMPLATED_OCTREE_MAX_NODES_LIMIT ) && ( cellDepth <= TEMPLATED_OCTREE_MAX_DEPTH ) ) {
                 cell->divideLocally(1, this->octreeMask);
                 for ( pos = cellDataList->begin(); pos != cellDataList->end(); ++pos ) {
@@ -956,7 +957,7 @@ protected:
                         for ( LIDiterator insDataIT = insData->begin(); insDataIT != insData->end(); ) {
                             if ( ( * insDataIT ).containedInCell == cell ) {
                                 insDataIT = insData->erase(insDataIT);
-                            } else   {
+                            } else {
                                 insDataIT++;
                             }
                         }
@@ -988,7 +989,8 @@ protected:
                 }
             }
         }
-	return 1;
+
+        return 1;
     }
 
     /// Removes member from cell using insertion functor to ensure member is contained in
@@ -1002,10 +1004,10 @@ protected:
                 if ( functor.evaluate(memberID, cell) ) {
                     cell->removeMember(memberID);
                     return 1;
-                } else   {
+                } else {
                     return 0;
                 }
-            } else   {
+            } else {
                 for ( i = 0; i <= 1; i++ ) {
                     for ( j = 0; j <= 1; j++ ) {
                         for ( k = 0; k <= 1; k++ ) {
@@ -1015,7 +1017,8 @@ protected:
                 }
             }
         }
-	return 1;
+
+        return 1;
     }
 
     /// Gives the maximal tree depth from given cell
@@ -1039,7 +1042,7 @@ protected:
     void giveListOfTerminalCellsInBoundingBox(std :: list< CellPtrType > &cellList, BoundingBox &BBX, CellPtrType currentCell)
     {
         int i, j, k;
-		OctantRec :: BoundingBoxStatus BBStatus = currentCell->testBoundingBox(BBX);
+        OctantRec :: BoundingBoxStatus BBStatus = currentCell->testBoundingBox(BBX);
         if ( ( BBStatus == OctantRec :: BBS_InsideCell ) || ( BBStatus == OctantRec :: BBS_ContainsCell ) ) {
             if ( currentCell->isTerminalOctant() ) {
                 cellList.push_back(currentCell);
