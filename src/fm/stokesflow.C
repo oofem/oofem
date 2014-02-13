@@ -55,6 +55,7 @@ StokesFlow :: StokesFlow(int i, EngngModel *_master) : FluidModel(i, _master)
     this->ndomains = 1;
     this->stiffnessMatrix = NULL;
     this->meshqualityee = NULL;
+    this->velocityPressureField = NULL;
 #ifdef __PARALLEL_MODE
     commMode = ProblemCommMode__NODE_CUT;
 #endif
@@ -64,14 +65,8 @@ StokesFlow :: ~StokesFlow()
 {
     delete this->velocityPressureField;
     delete this->nMethod;
-
-    if ( this->stiffnessMatrix ) {
-        delete this->stiffnessMatrix;
-    }
-
-    if ( this->meshqualityee ) {
-        delete this->meshqualityee;
-    }
+    delete this->stiffnessMatrix;
+    delete this->meshqualityee;
 }
 
 IRResultType StokesFlow :: initializeFrom(InputRecord *ir)
@@ -91,7 +86,12 @@ IRResultType StokesFlow :: initializeFrom(InputRecord *ir)
     this->deltaT = 1.0;
     IR_GIVE_OPTIONAL_FIELD(ir, deltaT, _IFT_StokesFlow_deltat);
 
+    delete this->velocityPressureField;
     this->velocityPressureField = new PrimaryField(this, 1, FT_VelocityPressure, EID_MomentumBalance_ConservationEquation, 1);
+    delete this->stiffnessMatrix;
+    this->stiffnessMatrix = NULL;
+    delete this->meshqualityee;
+    this->meshqualityee = NULL;
 
     this->ts = TS_OK;
 
