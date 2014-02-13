@@ -144,7 +144,7 @@ SUPG :: initializeFrom(InputRecord *ir)
         mask.setValues(3, V_u, V_v, V_w);
 
 #ifdef  FIELDMANAGER_USE_SHARED_PTR
-        std :: tr1 :: shared_ptr< Field >_velocityField( new MaskedPrimaryField(FT_Velocity, this->VelocityPressureField, mask) );
+        std :: tr1 :: shared_ptr< Field > _velocityField( new MaskedPrimaryField ( FT_Velocity, this->VelocityPressureField, mask ) );
         fm->registerField(_velocityField, FT_Velocity);
 #else
         MaskedPrimaryField *_velocityField = new MaskedPrimaryField(FT_Velocity, this->VelocityPressureField, mask);
@@ -239,7 +239,7 @@ SUPG :: giveNextStep()
 
     if ( currentStep == NULL ) {
         // first step -> generate initial step
-        currentStep = new TimeStep( * giveSolutionStepWhenIcApply() );
+        currentStep = new TimeStep( *giveSolutionStepWhenIcApply() );
     } else {
         istep =  currentStep->giveNumber() + 1;
         counter = currentStep->giveSolutionStateCounter() + 1;
@@ -417,10 +417,10 @@ SUPG :: solveYourselfAt(TimeStep *tStep)
             lhs->zero();
             if ( 1 ) { //if ((nite > 5)) // && (rnorm < 1.e4))
                 this->assemble( lhs, tStep, EID_MomentumBalance_ConservationEquation, TangentStiffnessMatrix,
-                                EModelDefaultEquationNumbering(), this->giveDomain(1) );
+                               EModelDefaultEquationNumbering(), this->giveDomain(1) );
             } else {
                 this->assemble( lhs, tStep, EID_MomentumBalance_ConservationEquation, SecantStiffnessMatrix,
-                                EModelDefaultEquationNumbering(), this->giveDomain(1) );
+                               EModelDefaultEquationNumbering(), this->giveDomain(1) );
             }
         }
         //if (this->fsflag) this->imposeAmbientPressureInOuterNodes(lhs,&rhs,tStep);
@@ -448,7 +448,7 @@ SUPG :: solveYourselfAt(TimeStep *tStep)
         }
 
         OOFEM_LOG_INFO("SUPG: solver check: absoluteError %e, relativeError %e\n", __absErr, __relErr);
-        delete( __lhs );
+        delete(__lhs);
 #endif
 
 
@@ -499,11 +499,16 @@ SUPG :: solveYourselfAt(TimeStep *tStep)
         // assemble rhs (residual)
         //
         internalForces.zero();
+<<<<<<< HEAD
         this->assembleVector( internalForces, tStep, EID_MomentumBalance_ConservationEquation, InternalForcesVector, VM_Total,
                               EModelDefaultEquationNumbering(), this->giveDomain(1) );
 #ifdef __PARALLEL_MODE
         this->updateSharedDofManagers(internalForces, EModelDefaultEquationNumbering(), InternalForcesExchangeTag);
 #endif
+=======
+        this->assembleVectorFromElements( internalForces, tStep, EID_MomentumBalance_ConservationEquation, InternalForcesVector, VM_Total,
+                                         EModelDefaultEquationNumbering(), this->giveDomain(1) );
+>>>>>>> rel-2.3
         rhs.beDifferenceOf(externalForces, internalForces);
 
         // check convergence and repeat iteration if desired
@@ -548,11 +553,16 @@ SUPG :: solveYourselfAt(TimeStep *tStep)
             // assemble rhs (residual)
             //
             internalForces.zero();
+<<<<<<< HEAD
             this->assembleVector( internalForces, tStep, EID_MomentumBalance_ConservationEquation, InternalForcesVector, VM_Total,
                                   EModelDefaultEquationNumbering(), this->giveDomain(1) );
 #ifdef __PARALLEL_MODE
             this->updateSharedDofManagers(internalForces, EModelDefaultEquationNumbering(), InternalForcesExchangeTag);
 #endif
+=======
+            this->assembleVectorFromElements( internalForces, tStep, EID_MomentumBalance_ConservationEquation, InternalForcesVector, VM_Total,
+                                             EModelDefaultEquationNumbering(), this->giveDomain(1) );
+>>>>>>> rel-2.3
             rhs.beDifferenceOf(externalForces, internalForces);
         }
     } while ( ( rnorm > rtolv ) && ( _absErrResid > atolv ) && ( nite <= maxiter ) );
@@ -738,7 +748,7 @@ SUPG :: checkConsistency()
 
     for ( int i = 1; i <= nelem; i++ ) {
         ePtr = domain->giveElement(i);
-        sePtr = dynamic_cast< SUPGElement * >( ePtr );
+        sePtr = dynamic_cast< SUPGElement * >(ePtr);
         if ( sePtr == NULL ) {
             _warning2("Element %d has no SUPG base", i);
             return 0;

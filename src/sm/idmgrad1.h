@@ -57,7 +57,7 @@ protected:
 
 public:
     /// Constructor
-    IDGMaterial(int n, Domain *d);
+    IDGMaterial(int n, Domain * d);
     /// Destructor
     virtual ~IDGMaterial();
 
@@ -67,7 +67,11 @@ public:
     virtual const char *giveInputRecordName() const { return _IFT_IDGMaterial_Name; }
     virtual IRResultType initializeFrom(InputRecord *ir);
 
-    virtual Interface *giveInterface(InterfaceType t) { if ( t == GradDpMaterialExtensionInterfaceType ) { return static_cast< GradDpMaterialExtensionInterface * >( this ); } else { return NULL; } }
+    virtual Interface *giveInterface(InterfaceType t) { if ( t == GradDpMaterialExtensionInterfaceType ) {
+                                                            return static_cast< GradDpMaterialExtensionInterface * >(this);
+                                                        } else {
+                                                            return NULL;
+                                                        } }
     virtual int hasMaterialModeCapability(MaterialMode mode);
 
     virtual void givePDGradMatrix_uu(FloatMatrix &answer, MatResponseMode mode, GaussPoint *gp, TimeStep *tStep);
@@ -78,7 +82,7 @@ public:
     virtual void giveRealStressVectorGrad(FloatArray &answer1, double &answer2, GaussPoint *gp, const FloatArray &totalStrain, double nonlocalCumulatedStrain, TimeStep *tStep);
 
     void giveStiffnessMatrix(FloatMatrix &answer,  MatResponseMode rMode, GaussPoint *gp, TimeStep *tStep);
-    virtual void give1dStressStiffMtrx(FloatMatrix & answer, MatResponseMode, GaussPoint * gp,  TimeStep * tStep);
+    virtual void give1dStressStiffMtrx(FloatMatrix &answer, MatResponseMode, GaussPoint *gp,  TimeStep *tStep);
     void give1dKappaMatrix(FloatMatrix &answer, MatResponseMode mode, GaussPoint *gp, TimeStep *tStep);
     void give1dGprime(FloatMatrix &answer, MatResponseMode mode, GaussPoint *gp, TimeStep *tStep);
     void givePlaneStressStiffMtrx(FloatMatrix &answer, MatResponseMode mode, GaussPoint *gp, TimeStep *tStep);
@@ -98,7 +102,7 @@ public:
 class IDGMaterialStatus : public IsotropicDamageMaterial1Status, GradDpMaterialStatusExtensionInterface
 {
 public:
-    IDGMaterialStatus(int n, Domain *d, GaussPoint *g);
+    IDGMaterialStatus(int n, Domain * d, GaussPoint * g);
     virtual ~IDGMaterialStatus();
 
     virtual const char *giveClassName() const { return "IDGMaterialStatus"; }

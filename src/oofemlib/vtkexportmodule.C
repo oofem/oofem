@@ -213,7 +213,7 @@ VTKExportModule :: doOutput(TimeStep *tStep, bool forcedOutput)
         elemToProcess++;
         // element composed from same-type cells asumed
         ncells = this->giveNumberOfElementCells( d->giveElement(ielem) );
-        celllistsize += ncells + ncells *this->giveNumberOfNodesPerCell( this->giveCellType( d->giveElement(ielem) ) );
+        celllistsize += ncells + ncells *this->giveNumberOfNodesPerCell( this->giveCellType ( d->giveElement ( ielem ) ) );
     }
 
     int nelemNodes;
@@ -465,11 +465,11 @@ VTKExportModule :: giveElementCell(IntArray &answer, Element *elem, int cell)
     int i, nelemNodes;
 
     if ( ( elemGT == EGT_point ) ||
-         ( elemGT == EGT_line_1 ) || ( elemGT == EGT_line_2 ) ||
-         ( elemGT == EGT_triangle_1 ) || ( elemGT == EGT_triangle_2 ) ||
-         ( elemGT == EGT_tetra_1 ) || ( elemGT == EGT_tetra_2 ) ||
-         ( elemGT == EGT_quad_1 ) || ( elemGT == EGT_quad_2 ) ||
-         ( elemGT == EGT_hexa_1 ) || ( elemGT == EGT_wedge_1 ) ) {
+        ( elemGT == EGT_line_1 ) || ( elemGT == EGT_line_2 ) ||
+        ( elemGT == EGT_triangle_1 ) || ( elemGT == EGT_triangle_2 ) ||
+        ( elemGT == EGT_tetra_1 ) || ( elemGT == EGT_tetra_2 ) ||
+        ( elemGT == EGT_quad_1 ) || ( elemGT == EGT_quad_2 ) ||
+        ( elemGT == EGT_hexa_1 ) || ( elemGT == EGT_wedge_1 ) ) {
         nelemNodes = elem->giveNumberOfNodes();
         answer.resize(nelemNodes);
         for ( i = 1; i <= nelemNodes; i++ ) {
@@ -505,12 +505,12 @@ VTKExportModule :: giveNumberOfElementCells(Element *elem)
     Element_Geometry_Type elemGT = elem->giveGeometryType();
 
     if ( ( elemGT == EGT_point ) ||
-         ( elemGT == EGT_line_1 ) || ( elemGT == EGT_line_2 ) ||
-         ( elemGT == EGT_triangle_1 ) || ( elemGT == EGT_triangle_2 ) ||
-         ( elemGT == EGT_tetra_1 ) || ( elemGT == EGT_tetra_2 ) ||
-         ( elemGT == EGT_quad_1 ) || ( elemGT == EGT_quad_2 ) ||
-         ( elemGT == EGT_hexa_1 ) || ( elemGT == EGT_hexa_2 ) ||
-         ( elemGT == EGT_wedge_1 ) || ( elemGT == EGT_wedge_2 ) ) {
+        ( elemGT == EGT_line_1 ) || ( elemGT == EGT_line_2 ) ||
+        ( elemGT == EGT_triangle_1 ) || ( elemGT == EGT_triangle_2 ) ||
+        ( elemGT == EGT_tetra_1 ) || ( elemGT == EGT_tetra_2 ) ||
+        ( elemGT == EGT_quad_1 ) || ( elemGT == EGT_quad_2 ) ||
+        ( elemGT == EGT_hexa_1 ) || ( elemGT == EGT_hexa_2 ) ||
+        ( elemGT == EGT_wedge_1 ) || ( elemGT == EGT_wedge_2 ) ) {
         return 1;
     } else {
         OOFEM_ERROR("VTKExportModule: unsupported element geometry type");
@@ -683,7 +683,7 @@ VTKExportModule :: giveTotalRBRNumberOfNodes(Domain *d)
 {
     Element *elem;
     int rbrnodes = 0, nnodes = d->giveNumberOfDofManagers(), nelems = d->giveNumberOfElements();
-    std :: vector< char >map(nnodes);
+    std :: vector< char > map(nnodes);
     //char map[nnodes];
     int i, j, nregions = smoother->giveNumberOfVirtualRegions();
     int elemnodes, ielemnode;
@@ -837,7 +837,7 @@ VTKExportModule :: exportIntVarAs(InternalStateType valID, InternalStateValueTyp
     int i, j, jsize;
     FloatArray iVal(3);
     FloatMatrix t(3, 3);
-    const FloatArray *val;
+    const FloatArray *val = NULL;
 
     this->giveSmoother();
 
@@ -885,7 +885,7 @@ VTKExportModule :: exportIntVarAs(InternalStateType valID, InternalStateValueTyp
                     val = & iVal;
                     for ( j = 1; j <= 3; j++ ) {
                         iVal.at(j) = d->giveNode( regionNodalNumbers.at(inode) )->giveUpdatedCoordinate(j, tStep, 1.0) -
-                                     d->giveNode( regionNodalNumbers.at(inode) )->giveCoordinate(j);
+                        d->giveNode( regionNodalNumbers.at(inode) )->giveCoordinate(j);
                     }
                 } else if ( valID == IST_MaterialInterfaceVal ) {
                     MaterialInterface *mi = emodel->giveMaterialInterface(1);
@@ -979,7 +979,7 @@ VTKExportModule :: exportIntVarAs(InternalStateType valID, InternalStateValueTyp
                         val = & iVal;
                         for ( j = 1; j <= 3; j++ ) {
                             iVal.at(j) = d->giveNode( regionNodalNumbers.at(inode) )->giveUpdatedCoordinate(j, tStep, 1.0) -
-                                         d->giveNode( regionNodalNumbers.at(inode) )->giveCoordinate(j);
+                            d->giveNode( regionNodalNumbers.at(inode) )->giveCoordinate(j);
                         }
                     } else if ( valID == IST_MaterialInterfaceVal ) {
                         MaterialInterface *mi = emodel->giveMaterialInterface(1);

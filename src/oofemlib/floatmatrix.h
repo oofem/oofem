@@ -119,19 +119,19 @@ public:
      * will be created and initialized, if true then a matrix of size (1,vector->giveSize())
      * will be created.
      */
-    FloatMatrix(const FloatArray *vector, bool transpose = false);
+    FloatMatrix(const FloatArray * vector, bool transpose = false);
     /// Copy constructor.
     FloatMatrix(const FloatMatrix &);
 #if __cplusplus > 199711L
     /// Initializer list constructor.
     FloatMatrix(std :: initializer_list< std :: initializer_list< double > >mat);
     /// Assignment operator.
-    FloatMatrix &operator=(std :: initializer_list< std :: initializer_list< double > >mat);
+    FloatMatrix &operator = ( std :: initializer_list< std :: initializer_list< double > >mat );
 #endif
     /// Destructor.
     ~FloatMatrix();
     /// Assignment operator, adjusts size of the receiver if necessary.
-    FloatMatrix &operator=(const FloatMatrix &);
+    FloatMatrix &operator = ( const FloatMatrix & );
 
     /**
      * Checks size of receiver towards requested bounds.
@@ -179,9 +179,11 @@ public:
      * @param j Column position of coefficient.
      */
 #ifdef DEBUG
-    double &operator()(int i, int j);
+    double &operator() (int i, int j);
 #else
-    inline double &operator()(int i, int j)  { return values [ j * nRows + i ]; };
+    inline double &operator() (int i, int j)  {
+        return values [ j * nRows + i ];
+    };
 #endif
     /**
      * Coefficient access function. Implements 0-based indexing.
@@ -189,9 +191,9 @@ public:
      * @param j Column position of coefficient.
      */
 #ifdef DEBUG
-    double operator()(int i, int j) const;
+    double operator() (int i, int j) const;
 #else
-    inline double operator()(int i, int j) const { return values [ j * nRows + i ]; }
+    inline double operator() (int i, int j) const { return values [ j * nRows + i ]; }
 #endif
     /**
      * Assembles the contribution using localization array into receiver. The receiver must
@@ -530,7 +532,7 @@ public:
     contextIOResultType storeYourself(DataStream *stream, ContextMode mode);
     contextIOResultType restoreYourself(DataStream *stream, ContextMode mode);
 
-    friend std :: ostream &operator<<(std :: ostream &out, const FloatMatrix &r);
+    friend std :: ostream &operator << ( std :: ostream & out, const FloatMatrix & r );
 
 #ifdef __PARALLEL_MODE
     int packToCommBuffer(CommunicationBuffer &buff) const;
@@ -541,7 +543,7 @@ public:
 #ifdef BOOST_PYTHON
     void __setitem__(boost :: python :: api :: object t, double val);
     double __getitem__(boost :: python :: api :: object t);
-    void beCopyOf(const FloatMatrix &src) { this->operator=(src); }
+    void beCopyOf(const FloatMatrix &src) { this->operator = ( src ); }
 #endif
 };
 } // end namespace oofem

@@ -40,7 +40,7 @@ namespace oofem {
 Function :: Function(int n, Domain *d) :
     FEMComponent(n, d),
     initialValue(0.)
-{}
+{ }
 
 double
 Function :: evaluate(TimeStep *tStep, ValueModeType mode)

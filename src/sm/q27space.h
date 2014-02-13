@@ -57,8 +57,8 @@ protected:
     static FEI3dHexaTriQuad interpolation;
 
 public:
-    Q27Space(int n, Domain *d);
-    virtual ~Q27Space() {}
+    Q27Space(int n, Domain * d);
+    virtual ~Q27Space() { }
 
     virtual FEInterpolation *giveInterpolation() const;
 

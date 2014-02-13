@@ -120,7 +120,7 @@ protected:
                                                  CharType type, TimeStep *tStep, Domain *domain);
 
 public:
-    NonLinearDynamic(int i, EngngModel *_master = NULL);
+    NonLinearDynamic(int i, EngngModel * _master = NULL);
     virtual ~NonLinearDynamic();
 
     virtual void solveYourself();
@@ -131,7 +131,7 @@ public:
     virtual void printDofOutputAt(FILE *stream, Dof *iDof, TimeStep *tStep);
 
     virtual void updateYourself(TimeStep *tStep);
-    virtual void updateComponent(TimeStep * tStep, NumericalCmpn, Domain * d);
+    virtual void updateComponent(TimeStep *tStep, NumericalCmpn, Domain *d);
     virtual void updateAttributes(MetaStep *mStep);
 
     virtual double giveUnknownComponent(ValueModeType type, TimeStep *tStep, Domain *d, Dof *dof);

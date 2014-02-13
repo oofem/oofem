@@ -132,7 +132,7 @@ BSplineInterpolation :: initializeFrom(InputRecord *ir)
             for ( int i = 1; i < size - 1; i++ ) {
                 if ( knotMultiplicity [ n ].at(i + 1) < 1 || knotMultiplicity [ n ].at(i + 1) > degree [ n ] ) {
                     OOFEM_ERROR3( "BSplineInterpolation::initializeFrom - knot multiplicity %s out of range - value %d",
-                                  IFT_knotMultiplicity [ n ], knotMultiplicity [ n ].at(i + 1) );
+                                 IFT_knotMultiplicity [ n ], knotMultiplicity [ n ].at(i + 1) );
                 }
             }
 
@@ -207,7 +207,7 @@ void BSplineInterpolation :: evalN(FloatArray &answer, const FloatArray &lcoords
             }
         }
     } else if ( nsd == 3 ) {
-        for ( m = 0; m <= degree [ 2 ]; k++ ) {
+        for ( m = 0; m <= degree [ 2 ]; m++ ) {
             for ( l = 0; l <= degree [ 1 ]; l++ ) {
                 for ( k = 0; k <= degree [ 0 ]; k++ ) {
                     answer.at(c++) = N [ 0 ](k) * N [ 1 ](l) * N [ 2 ](m);
@@ -383,14 +383,14 @@ double BSplineInterpolation :: evaldNdx(FloatMatrix &answer, const FloatArray &l
                     tmp1(1) = ders [ 0 ](0, k) * ders [ 1 ](1, l) * ders [ 2 ](0, m);       // dN/dv=Nu*dNv/dv*Nt
                     tmp1(2) = ders [ 0 ](0, k) * ders [ 1 ](0, l) * ders [ 2 ](1, m);       // dN/dt=Nu*Nv*dNt/dt
                     answer(cnt, 0) = ( ( jacobian(1, 1) * jacobian(2, 2) - jacobian(1, 2) * jacobian(2, 1) ) * tmp1(0) +
-                                       ( jacobian(0, 2) * jacobian(2, 1) - jacobian(0, 1) * jacobian(2, 2) ) * tmp1(1) +
-                                       ( jacobian(0, 1) * jacobian(1, 2) - jacobian(0, 2) * jacobian(1, 1) ) * tmp1(2) ) / Jacob; // dN/dx
+                                      ( jacobian(0, 2) * jacobian(2, 1) - jacobian(0, 1) * jacobian(2, 2) ) * tmp1(1) +
+                                      ( jacobian(0, 1) * jacobian(1, 2) - jacobian(0, 2) * jacobian(1, 1) ) * tmp1(2) ) / Jacob;  // dN/dx
                     answer(cnt, 1) = ( ( jacobian(1, 2) * jacobian(2, 0) - jacobian(1, 0) * jacobian(2, 2) ) * tmp1(0) +
-                                       ( jacobian(0, 0) * jacobian(2, 2) - jacobian(0, 2) * jacobian(2, 0) ) * tmp1(1) +
-                                       ( jacobian(0, 2) * jacobian(1, 0) - jacobian(0, 0) * jacobian(1, 2) ) * tmp1(2) ) / Jacob;                                                     // dN/dy
+                                      ( jacobian(0, 0) * jacobian(2, 2) - jacobian(0, 2) * jacobian(2, 0) ) * tmp1(1) +
+                                      ( jacobian(0, 2) * jacobian(1, 0) - jacobian(0, 0) * jacobian(1, 2) ) * tmp1(2) ) / Jacob;                                                      // dN/dy
                     answer(cnt, 2) = ( ( jacobian(1, 0) * jacobian(2, 1) - jacobian(1, 1) * jacobian(2, 0) ) * tmp1(0) +
-                                       ( jacobian(0, 1) * jacobian(2, 0) - jacobian(0, 0) * jacobian(2, 1) ) * tmp1(1) +
-                                       ( jacobian(0, 0) * jacobian(1, 1) - jacobian(0, 1) * jacobian(1, 0) ) * tmp1(2) ) / Jacob;                                                     // dN/dz
+                                      ( jacobian(0, 1) * jacobian(2, 0) - jacobian(0, 0) * jacobian(2, 1) ) * tmp1(1) +
+                                      ( jacobian(0, 0) * jacobian(1, 1) - jacobian(0, 1) * jacobian(1, 0) ) * tmp1(2) ) / Jacob;                                                      // dN/dz
                     cnt++;
                 }
             }
@@ -490,7 +490,6 @@ void BSplineInterpolation :: local2global(FloatArray &answer, const FloatArray &
     } else {
         OOFEM_ERROR2("local2global not implemented for nsd = %d", nsd);
     }
-
 }
 
 

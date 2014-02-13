@@ -56,15 +56,15 @@ namespace oofem {
  * stress structural finite element. Each node has 2 degrees of freedom.
  */
 class Quad1PlaneStrain : public StructuralElement, public ZZNodalRecoveryModelInterface, public SPRNodalRecoveryModelInterface,
-    public SpatialLocalizerInterface,
-    public DirectErrorIndicatorRCInterface, public EIPrimaryUnknownMapperInterface,
-    public HuertaErrorEstimatorInterface, public HuertaRemeshingCriteriaInterface
+public SpatialLocalizerInterface,
+public DirectErrorIndicatorRCInterface, public EIPrimaryUnknownMapperInterface,
+public HuertaErrorEstimatorInterface, public HuertaRemeshingCriteriaInterface
 {
 protected:
     static FEI2dQuadLin interp;
 
 public:
-    Quad1PlaneStrain(int n, Domain *d);
+    Quad1PlaneStrain(int n, Domain * d);
     virtual ~Quad1PlaneStrain();
 
     virtual int computeNumberOfDofs() { return 8; }

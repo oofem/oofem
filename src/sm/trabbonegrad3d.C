@@ -51,7 +51,7 @@ TrabBoneGrad3D :: TrabBoneGrad3D(int n, Domain *d) : TrabBone3D(n, d), GradDpMat
 }
 
 TrabBoneGrad3D :: ~TrabBoneGrad3D()
-{}
+{ }
 
 int
 TrabBoneGrad3D :: hasMaterialModeCapability(MaterialMode mode)
@@ -123,11 +123,8 @@ TrabBoneGrad3D :: givePDGradMatrix_kk(FloatMatrix &answer, MatResponseMode mode,
 void
 TrabBoneGrad3D :: givePDGradMatrix_LD(FloatMatrix &answer, MatResponseMode mode, GaussPoint *gp, TimeStep *tStep)
 {
-    MaterialMode mMode = gp->giveMaterialMode();
-    switch ( mMode ) {
-    default:
-        _error2( "givePDGradMatrix_LD : unknown mode (%s)", __MaterialModeToString(mMode) );
-    }
+  MaterialMode mMode = gp->giveMaterialMode();
+  _error2( "givePDGradMatrix_LD : unknown mode (%s)", __MaterialModeToString(mMode) );
 }
 
 
@@ -353,7 +350,7 @@ TrabBoneGrad3DStatus :: TrabBoneGrad3DStatus(int n, Domain *d, GaussPoint *g) :
 
 
 TrabBoneGrad3DStatus :: ~TrabBoneGrad3DStatus()
-{}
+{ }
 
 
 void

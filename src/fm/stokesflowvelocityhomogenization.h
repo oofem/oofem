@@ -59,7 +59,7 @@ protected:
     double areaOfRVE;
 
 public:
-    StokesFlowVelocityHomogenization(int i, EngngModel *_master = NULL);
+    StokesFlowVelocityHomogenization(int i, EngngModel * _master = NULL);
     virtual ~StokesFlowVelocityHomogenization();
 
     virtual void solveYourselfAt(TimeStep *tStep);

@@ -44,8 +44,8 @@ namespace oofem {
 class MaxwellChainMaterialStatus : public RheoChainMaterialStatus
 {
 public:
-    MaxwellChainMaterialStatus(int n, Domain *d, GaussPoint *g, int nunits);
-    virtual ~MaxwellChainMaterialStatus() {}
+    MaxwellChainMaterialStatus(int n, Domain * d, GaussPoint * g, int nunits);
+    virtual ~MaxwellChainMaterialStatus() { }
 
     virtual void printOutputAt(FILE *file, TimeStep *tStep);
 
@@ -68,8 +68,8 @@ public:
 class MaxwellChainMaterial : public RheoChainMaterial
 {
 public:
-    MaxwellChainMaterial(int n, Domain *d);
-    virtual ~MaxwellChainMaterial() {}
+    MaxwellChainMaterial(int n, Domain * d);
+    virtual ~MaxwellChainMaterial() { }
 
     // overload thesse function such that computation of hidden vars can be done after the computation of stress
     virtual void giveRealStressVector(FloatArray &answer, GaussPoint *gp, const FloatArray &reducedStrain, TimeStep *tStep);

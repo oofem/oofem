@@ -56,7 +56,9 @@ protected:
 public:
     enum returnCode { MI_OK, MI_NEEDS_EXTERNAL_ACTION, MI_FAILED };
     /// Constructor
-    MesherInterface(Domain *d) { domain = d; }
+    MesherInterface(Domain * d) {
+        domain = d;
+    }
     /// Destructor
     virtual ~MesherInterface() { }
 

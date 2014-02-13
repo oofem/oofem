@@ -79,11 +79,21 @@ protected:
     /// Nonzero spans in each directions [nsd]
     int *numberOfKnotSpans;                        // eg. 5 (0-1,1-2,2-3,3-4,4-5)
 public:
-    BSplineInterpolation(int nsd) : FEInterpolation(0) { this->nsd = nsd; }
+    BSplineInterpolation(int nsd) : FEInterpolation(0) {
+        this->nsd = nsd;
+    }
     virtual ~BSplineInterpolation();
 
     virtual integrationDomain giveIntegrationDomain() const {
-        if ( nsd == 3 ) { return _Cube; } else if ( nsd == 2 ) { return _Square; } else if ( nsd == 1 ) { return _Line; } else { return _Unknown_integrationDomain; }
+        if ( nsd == 3 ) {
+            return _Cube;
+        } else if ( nsd == 2 ) {
+            return _Square;
+        } else if ( nsd == 1 ) {
+            return _Line;
+        } else {
+            return _Unknown_integrationDomain;
+        }
     }
     virtual Element_Geometry_Type giveGeometryType() const { return EGT_unknown; }
 
@@ -95,7 +105,8 @@ public:
     virtual void boundaryEdgeEvalN(FloatArray &answer, int boundary, const FloatArray &lcoords, const FEICellGeometry &cellgeo)
     { OOFEM_ERROR("FEInterpolation1d :: boundaryEdge... - Functions not supported for this interpolator."); }
     virtual double boundaryEdgeGiveTransformationJacobian(int boundary, const FloatArray &lcoords, const FEICellGeometry &cellgeo)
-    { OOFEM_ERROR("FEInterpolation1d :: boundaryEdge... - Functions not supported for this interpolator."); return 0.; }
+    { OOFEM_ERROR("FEInterpolation1d :: boundaryEdge... - Functions not supported for this interpolator.");
+      return 0.; }
     virtual void boundaryEdgeLocal2Global(FloatArray &answer, int boundary, const FloatArray &lcoords, const FEICellGeometry &cellgeo)
     { OOFEM_ERROR("FEInterpolation1d :: boundaryEdge... - Functions not supported for this interpolator."); }
 
@@ -104,16 +115,20 @@ public:
     virtual void boundaryEvalN(FloatArray &answer, int boundary, const FloatArray &lcoords, const FEICellGeometry &cellgeo)
     { OOFEM_ERROR("BSplineInterpolation :: boundaryEvalN - Not implemented"); }
     virtual double boundaryEvalNormal(FloatArray &answer, int boundary, const FloatArray &lcoords, const FEICellGeometry &cellgeo)
-    { OOFEM_ERROR("BSplineInterpolation :: boundaryEvalNormal - Not implemented"); return 0.; }
+    { OOFEM_ERROR("BSplineInterpolation :: boundaryEvalNormal - Not implemented");
+      return 0.; }
     virtual double boundaryGiveTransformationJacobian(int boundary, const FloatArray &lcoords, const FEICellGeometry &cellgeo)
-    { OOFEM_ERROR("BSplineInterpolation :: boundaryGiveTransformationJacobian - Not implemented"); return 0.; }
+    { OOFEM_ERROR("BSplineInterpolation :: boundaryGiveTransformationJacobian - Not implemented");
+      return 0.; }
     virtual void boundaryLocal2Global(FloatArray &answer, int boundary, const FloatArray &lcoords, const FEICellGeometry &cellgeo)
     { OOFEM_ERROR("BSplineInterpolation :: boundaryLocal2Global - Not implemented"); }
 
 
     virtual int giveNumberOfKnotSpans(int dim) { return numberOfKnotSpans [ dim - 1 ]; }
     virtual int giveNumberOfControlPoints(int dim) { return numberOfControlPoints [ dim - 1 ]; }
-    virtual const double *const *giveKnotVector() { return this->knotVector; }
+    virtual const double *const *giveKnotVector() {
+        return this->knotVector;
+    }
     virtual const IntArray *giveKnotMultiplicity(int dim) { return & this->knotMultiplicity [ dim - 1 ]; }
     virtual const FloatArray *giveKnotValues(int dim) { return & this->knotValues [ dim - 1 ]; }
     virtual void evalN(FloatArray &answer, const FloatArray &lcoords, const FEICellGeometry &cellgeo);
@@ -131,11 +146,14 @@ public:
     virtual bool hasSubPatchFormulation() { return true; }
 
     virtual IntegrationRule *giveIntegrationRule(int order)
-    { OOFEM_ERROR("BSplineInterpolation :: giveIntegrationRule - Not supported."); return NULL; }
+    { OOFEM_ERROR("BSplineInterpolation :: giveIntegrationRule - Not supported.");
+      return NULL; }
     virtual IntegrationRule *giveBoundaryIntegrationRule(int order, int boundary)
-    { OOFEM_ERROR("BSplineInterpolation :: giveIntegrationRule - Not supported."); return NULL; }
+    { OOFEM_ERROR("BSplineInterpolation :: giveIntegrationRule - Not supported.");
+      return NULL; }
     virtual IntegrationRule *giveBoundaryEdgeIntegrationRule(int order, int boundary)
-    { OOFEM_ERROR("BSplineInterpolation :: giveIntegrationRule - Not supported."); return NULL; }
+    { OOFEM_ERROR("BSplineInterpolation :: giveIntegrationRule - Not supported.");
+      return NULL; }
 
 protected:
     /**
@@ -155,8 +173,8 @@ protected:
      * the NURBS book. The result is stored in the ders matrix, where
      * ders is of size (n+1,p+1) and the derivative
      * @f{align*}{
-     * N(u)   &= \mathit{ders}(0,span-p+j) \quad\text{where } j=0...p \\
-     * N'(u)  &= \mathit{ders}(1,span-p+j) \quad\text{where } j=0...p \\
+     * N(u)   &= \mathit{ders}(0,span-p+j) \quad\text{where } j=0...p \ \
+     * N'(u)  &= \mathit{ders}(1,span-p+j) \quad\text{where } j=0...p \ \
      * N''(u) &= \mathit{ders}(2,span-p+j) \quad\text{where } j=0...p
      * @f}
      *

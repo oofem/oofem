@@ -65,7 +65,7 @@ protected:
     FloatArray * * columns_; // data values per column
     IntArray **rowind_;   // row_ind per column
 #else
-    std :: map< int, double > **columns;
+    std :: map< int, double > ** columns;
 #endif
 
     int base_; // index base: offset of first element
@@ -80,9 +80,9 @@ public:
      */
     DynCompCol();
     /// Copy constructor
-    DynCompCol(const DynCompCol &S);
+    DynCompCol(const DynCompCol & S);
     /// Assignment operator
-    DynCompCol &operator=(const DynCompCol &C);
+    DynCompCol &operator = ( const DynCompCol & C );
     /// Destructor
     virtual ~DynCompCol();
 
@@ -121,9 +121,9 @@ protected:
     /*  General access function (slow) */
     /***********************************/
     /// Implements 0-based access
-    double operator()(int i, int j) const;
+    double operator() (int i, int j) const;
     /// Implements 0-based access
-    double &operator()(int i, int j);
+    double &operator() (int i, int j);
 
 #ifndef DynCompCol_USE_STL_SETS
     /// Returns the row index of given row at given column, else returns zero.

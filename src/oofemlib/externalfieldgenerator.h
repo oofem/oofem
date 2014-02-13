@@ -60,7 +60,7 @@ protected:
     IntArray numberReal;
 public:
     /// Constructor. Creates empty RandomFieldGenerator
-    ExternalFieldGenerator(int num, Domain *d);
+    ExternalFieldGenerator(int num, Domain * d);
     /// Destructor
     virtual ~ExternalFieldGenerator();
 

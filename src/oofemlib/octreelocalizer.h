@@ -45,7 +45,7 @@
 #include <list>
 
 namespace oofem {
-template< class T >class AList;
+template< class T > class AList;
 class Domain;
 class Element;
 class TimeStep;
@@ -90,7 +90,7 @@ public:
     enum ChildStatus { CS_ChildFound, CS_NoChild };
 
     /// Constructor.
-    OctantRec(OctreeSpatialLocalizer *loc, OctantRec *parent, FloatArray &origin, double halfWidth);
+    OctantRec(OctreeSpatialLocalizer * loc, OctantRec * parent, FloatArray & origin, double halfWidth);
     /// Destructor.
     ~OctantRec();
 
@@ -166,7 +166,9 @@ public:
      * Clears and deletes the nodeList.
      */
     void deleteNodeList() {
-        if ( nodeList ) { delete nodeList; }
+        if ( nodeList ) {
+            delete nodeList;
+        }
         nodeList = NULL;
     }
     /// Recursively prints structure.
@@ -195,13 +197,17 @@ protected:
 
 public:
     /// Constructor
-    OctreeSpatialLocalizer(Domain *d) : SpatialLocalizer(d), octreeMask(3) {
+    OctreeSpatialLocalizer(Domain * d) : SpatialLocalizer(d), octreeMask(3) {
         rootCell = NULL;
         elementIPListsInitialized = false;
         elementListsInitialized.clear();
     }
     /// Destructor - deletes the octree tree
-    virtual ~OctreeSpatialLocalizer() { if ( rootCell ) { delete rootCell; } }
+    virtual ~OctreeSpatialLocalizer() {
+        if ( rootCell ) {
+            delete rootCell;
+        }
+    }
 
     /**
      * Returns the octreeMask value given by the index

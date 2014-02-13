@@ -218,7 +218,7 @@ TimeStep *DIIDynamic :: giveNextStep()
         counter   = currentStep->giveSolutionStateCounter() + 1;
         td        = currentStep->giveTimeDiscretization();
         if ( ( currentStep->giveNumber() == giveNumberOfFirstStep() ) &&
-             ( initialTimeDiscretization == TD_ThreePointBackward ) ) {
+            ( initialTimeDiscretization == TD_ThreePointBackward ) ) {
             td = TD_ThreePointBackward;
         }
     }
@@ -343,12 +343,12 @@ void DIIDynamic :: solveYourselfAt(TimeStep *tStep)
 
     for ( int i = 1; i <= neq; i++ ) {
         help.at(i) = a0 * previousDisplacementVector.at(i)
-                     + a2 *previousVelocityVector.at(i)
-                     + a3 *previousAccelerationVector.at(i)
-                     + eta * ( a1 * previousDisplacementVector.at(i)
-                               + a4 * previousVelocityVector.at(i)
-                               + a5 * previousAccelerationVector.at(i)
-                               + a11 * previousIncrementOfDisplacement.at(i) );
+        + a2 *previousVelocityVector.at(i)
+        + a3 *previousAccelerationVector.at(i)
+        + eta * ( a1 * previousDisplacementVector.at(i)
+                 + a4 * previousVelocityVector.at(i)
+                 + a5 * previousAccelerationVector.at(i)
+                 + a11 * previousIncrementOfDisplacement.at(i) );
     }
 
     this->timesMtrx(help, rhs, MassMatrix, domain, tStep);
@@ -357,9 +357,9 @@ void DIIDynamic :: solveYourselfAt(TimeStep *tStep)
     if ( delta != 0 ) {
         for ( int i = 1; i <= neq; i++ ) {
             help.at(i) = delta * ( a1 * previousDisplacementVector.at(i)
-                                   + a4 * velocityVector.at(i)
-                                   + a5 * accelerationVector.at(i)
-                                   + a6 * previousIncrementOfDisplacement.at(i) );
+                                  + a4 * velocityVector.at(i)
+                                  + a5 * accelerationVector.at(i)
+                                  + a6 * previousIncrementOfDisplacement.at(i) );
         }
         this->timesMtrx(help, rhs2, StiffnessMatrix, domain, tStep);
         help.zero();
@@ -371,7 +371,7 @@ void DIIDynamic :: solveYourselfAt(TimeStep *tStep)
     if ( tStep->giveTimeDiscretization() == TD_Wilson ) {
         for ( int i = 1; i <= neq; i++ ) {
             rhs.at(i) += previousLoadVector.at(i)
-                         + theta * ( loadVector.at(i) - previousLoadVector.at(i) );
+            + theta * ( loadVector.at(i) - previousLoadVector.at(i) );
         }
     } else {
         for ( int i = 1; i <= neq; i++ ) {
@@ -393,17 +393,17 @@ void DIIDynamic :: solveYourselfAt(TimeStep *tStep)
         for ( int i = 1; i <= neq; i++ ) {
             accelerationVector.at(i) = a6 * ( displacementVector.at(i) - previousDisplacementVector.at(i) )
                                        - a7 *previousVelocityVector.at(i)
-                                       + a8 *previousAccelerationVector.at(i);
+            + a8 *previousAccelerationVector.at(i);
 
             velocityVector.at(i) = previousVelocityVector.at(i)
-                                   + a9 * ( previousAccelerationVector.at(i) + accelerationVector.at(i) );
+            + a9 * ( previousAccelerationVector.at(i) + accelerationVector.at(i) );
 
             displacementVector.at(i) = previousDisplacementVector.at(i)
-                                       + deltaT *previousVelocityVector.at(i)
-                                       + a10 * ( accelerationVector.at(i) + 2 * previousAccelerationVector.at(i) );
+            + deltaT *previousVelocityVector.at(i)
+            + a10 * ( accelerationVector.at(i) + 2 * previousAccelerationVector.at(i) );
         }
     } else if ( ( tStep->giveTimeDiscretization() == TD_ThreePointBackward ) ||
-                ( tStep->giveTimeDiscretization() == TD_TwoPointBackward ) ) {
+               ( tStep->giveTimeDiscretization() == TD_TwoPointBackward ) ) {
         for ( int i = 1; i <= neq; i++ ) {
             accelerationVector.at(i) = a0 * ( displacementVector.at(i) - previousDisplacementVector.at(i) )
                                        - a2 *previousVelocityVector.at(i);
@@ -415,11 +415,11 @@ void DIIDynamic :: solveYourselfAt(TimeStep *tStep)
         for ( int i = 1; i <= neq; i++ ) {
             accelerationVector.at(i) = a0 * ( displacementVector.at(i) - previousDisplacementVector.at(i) )
                                        - a2 *previousVelocityVector.at(i)
-                                       - a3 *previousAccelerationVector.at(i);
+            - a3 *previousAccelerationVector.at(i);
 
             velocityVector.at(i) = previousVelocityVector.at(i)
-                                   + a6 *previousAccelerationVector.at(i)
-                                   + a7 *accelerationVector.at(i);
+            + a6 *previousAccelerationVector.at(i)
+            + a7 *accelerationVector.at(i);
         }
     }
 }
@@ -548,7 +548,7 @@ void
 DIIDynamic :: determineConstants(TimeStep *tStep)
 {
     if ( ( currentStep->giveNumber() == giveNumberOfFirstStep() ) &&
-         ( initialTimeDiscretization == TD_ThreePointBackward ) ) {
+        ( initialTimeDiscretization == TD_ThreePointBackward ) ) {
         currentStep->setTimeDiscretization(TD_TwoPointBackward);
     }
 

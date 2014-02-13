@@ -70,7 +70,7 @@ protected:
     double t_supg, t_pspg, t_lsic;
 
 public:
-    SUPGElement(int n, Domain *aDomain);
+    SUPGElement(int n, Domain * aDomain);
     virtual ~SUPGElement();
 
     virtual IRResultType initializeFrom(InputRecord *ir);
@@ -211,8 +211,8 @@ public:
     //virtual void drawDeformedGeometry(oofegGraphicContext&, UnknownType) {}
 #endif
 
-    virtual void giveLocalVelocityDofMap(IntArray &map) {}
-    virtual void giveLocalPressureDofMap(IntArray &map) {}
+    virtual void giveLocalVelocityDofMap(IntArray &map) { }
+    virtual void giveLocalPressureDofMap(IntArray &map) { }
 
 protected:
     virtual void computeDeviatoricStrain(FloatArray &answer, GaussPoint *gp, TimeStep *tStep) = 0;

@@ -184,8 +184,8 @@ StructuralInterfaceMaterialStatus :: restoreContext(DataStream *stream, ContextM
 
 void StructuralInterfaceMaterialStatus :: copyStateVariables(const MaterialStatus &iStatus)
 {
-    MaterialStatus &tmpStat = const_cast< MaterialStatus & >( iStatus );
-    const StructuralInterfaceMaterialStatus &structStatus = dynamic_cast< StructuralInterfaceMaterialStatus & >( tmpStat );
+    MaterialStatus &tmpStat = const_cast< MaterialStatus & >(iStatus);
+    const StructuralInterfaceMaterialStatus &structStatus = dynamic_cast< StructuralInterfaceMaterialStatus & >(tmpStat);
 
     jump                            = structStatus.giveJump();
     traction                        = structStatus.giveTraction();

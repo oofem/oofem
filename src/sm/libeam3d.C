@@ -440,7 +440,7 @@ Interface *
 LIBeam3d :: giveInterface(InterfaceType interface)
 {
     if ( interface == FiberedCrossSectionInterfaceType ) {
-        return static_cast< FiberedCrossSectionInterface * >( this );
+        return static_cast< FiberedCrossSectionInterface * >(this);
     }
 
     return NULL;

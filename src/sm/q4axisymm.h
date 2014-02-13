@@ -58,7 +58,7 @@ protected:
     int numberOfGaussPoints, numberOfFiAndShGaussPoints;
 
 public:
-    Q4Axisymm(int n, Domain *d);
+    Q4Axisymm(int n, Domain * d);
     virtual ~Q4Axisymm();
 
     virtual FEInterpolation *giveInterpolation() const { return & interp; }

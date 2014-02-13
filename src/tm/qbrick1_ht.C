@@ -102,7 +102,7 @@ QBrick1_ht :: computeVolumeAround(GaussPoint *gp)
 {
     double determinant, weight, volume;
     determinant = fabs( this->interpolation.giveTransformationJacobian( * gp->giveCoordinates(),
-                                                                        FEIElementGeometryWrapper(this) ) );
+                                                                       FEIElementGeometryWrapper(this) ) );
 
     weight = gp->giveWeight();
     volume = determinant * weight;
@@ -114,8 +114,8 @@ double
 QBrick1_ht :: computeEdgeVolumeAround(GaussPoint *gp, int iEdge)
 {
     double result = this->interpolation.edgeGiveTransformationJacobian( iEdge, * gp->giveCoordinates(),
-                                                                        FEIElementGeometryWrapper(this) );
-    return result * gp->giveWeight();
+                                                                       FEIElementGeometryWrapper(this) );
+    return result *gp->giveWeight();
 }
 
 
@@ -144,13 +144,13 @@ Interface *
 QBrick1_ht :: giveInterface(InterfaceType interface)
 {
     if ( interface == SpatialLocalizerInterfaceType ) {
-        return static_cast< SpatialLocalizerInterface * >( this );
+        return static_cast< SpatialLocalizerInterface * >(this);
     } else if ( interface == EIPrimaryFieldInterfaceType ) {
-        return static_cast< EIPrimaryFieldInterface * >( this );
+        return static_cast< EIPrimaryFieldInterface * >(this);
     } else if ( interface == ZZNodalRecoveryModelInterfaceType ) {
-        return static_cast< ZZNodalRecoveryModelInterface * >( this );
+        return static_cast< ZZNodalRecoveryModelInterface * >(this);
     } else if ( interface == SPRNodalRecoveryModelInterfaceType ) {
-        return static_cast< SPRNodalRecoveryModelInterface * >( this );
+        return static_cast< SPRNodalRecoveryModelInterface * >(this);
     }
 
     return NULL;

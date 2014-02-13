@@ -63,7 +63,7 @@ public:
      * @param bc Boundary condition dof belongs to.
      * @param id DofID of slave dof.
      */
-    ActiveDof(int n, DofManager *aNode, int bc = 0, DofIDItem id = Undef);
+    ActiveDof(int n, DofManager * aNode, int bc = 0, DofIDItem id = Undef);
     /// Destructor.
     virtual ~ActiveDof() { }
 

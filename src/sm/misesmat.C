@@ -80,8 +80,8 @@ MisesMat :: initializeFrom(InputRecord *ir)
 
     StructuralMaterial :: initializeFrom(ir);
     linearElasticMaterial->initializeFrom(ir); // takes care of elastic constants
-    G = static_cast< IsotropicLinearElasticMaterial * >( linearElasticMaterial )->giveShearModulus();
-    K = static_cast< IsotropicLinearElasticMaterial * >( linearElasticMaterial )->giveBulkModulus();
+    G = static_cast< IsotropicLinearElasticMaterial * >(linearElasticMaterial)->giveShearModulus();
+    K = static_cast< IsotropicLinearElasticMaterial * >(linearElasticMaterial)->giveBulkModulus();
 
     IR_GIVE_FIELD(ir, sig0, _IFT_MisesMat_sig0); // uniaxial yield stress
 

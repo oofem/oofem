@@ -67,7 +67,7 @@ TransportMaterial :: updateInternalState(const FloatArray &stateVec, GaussPoint 
 
 TransportMaterialStatus :: TransportMaterialStatus(int n, Domain *d, GaussPoint *g) :
     MaterialStatus(n, d, g), temp_field(), temp_gradient(), temp_flux(), field(), gradient(), flux(), maturity(0.)
-{}
+{ }
 
 void TransportMaterialStatus :: printOutputAt(FILE *File, TimeStep *tNow)
 // Print the state variable and the flow vector on the data file.

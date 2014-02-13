@@ -46,8 +46,8 @@ namespace oofem {
 class OOFEM_EXPORT UnknownNumberingScheme
 {
 public:
-    UnknownNumberingScheme(void) {};
-    virtual ~UnknownNumberingScheme() {}
+    UnknownNumberingScheme(void) { };
+    virtual ~UnknownNumberingScheme() { }
 
     /**
      * Initializes the receiver, if necessary.
@@ -79,7 +79,7 @@ public:
 class OOFEM_EXPORT EModelDefaultEquationNumbering : public UnknownNumberingScheme
 {
 public:
-    EModelDefaultEquationNumbering(void) : UnknownNumberingScheme() {}
+    EModelDefaultEquationNumbering(void) : UnknownNumberingScheme() { }
 
     virtual bool isDefault() const { return true; }
     virtual int giveDofEquationNumber(Dof *dof) const {
@@ -96,7 +96,7 @@ public:
 class OOFEM_EXPORT EModelDefaultPrescribedEquationNumbering : public UnknownNumberingScheme
 {
 public:
-    EModelDefaultPrescribedEquationNumbering(void) : UnknownNumberingScheme() {}
+    EModelDefaultPrescribedEquationNumbering(void) : UnknownNumberingScheme() { }
 
     virtual int giveDofEquationNumber(Dof *dof) const {
         return dof->__givePrescribedEquationNumber();

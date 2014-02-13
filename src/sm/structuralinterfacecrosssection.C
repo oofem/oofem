@@ -64,7 +64,7 @@ StructuralInterfaceCrossSection :: checkConsistency()
     // Checks if the given cross section material is a 'StructuralInterfaceMaterial'
     int result = 1;
     Material *mat = this->giveDomain()->giveMaterial(this->materialNum);
-    if ( !dynamic_cast< StructuralInterfaceMaterial * >( mat ) ) {
+    if ( !dynamic_cast< StructuralInterfaceMaterial * >(mat) ) {
         OOFEM_ERROR2( "StructuralInterfaceCrossSection :: checkConsistency : material %s is not a structural interface material", mat->giveClassName() );
         result = 0;
     }

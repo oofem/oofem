@@ -98,7 +98,7 @@ protected:
         IntArray partitions;
 #endif
 public:
-        RS_Node(int n, Subdivision :: RS_Mesh *m, int parent, FloatArray &c, double rd, bool boundary) {
+        RS_Node(int n, Subdivision :: RS_Mesh * m, int parent, FloatArray & c, double rd, bool boundary) {
             this->number = n;
             this->mesh = m;
             this->coords = c;
@@ -110,7 +110,7 @@ public:
             this->globalNumber  = 0;
 #endif
         }
-        virtual ~RS_Node() {}
+        virtual ~RS_Node() { }
         double giveRequiredDensity() { return requiredDensity; }
         FloatArray *giveCoordinates() { return & coords; }
         double giveCoordinate(int i) { return coords.at(i); }
@@ -146,7 +146,7 @@ public:
 protected:
         int iNode, jNode; // parent edge nodes
 public:
-        RS_IrregularNode(int n, Subdivision :: RS_Mesh *mesh, int parent, FloatArray &c, double rd, bool boundary) : RS_Node(n, mesh, parent, c, rd, boundary) {}
+        RS_IrregularNode(int n, Subdivision :: RS_Mesh * mesh, int parent, FloatArray & c, double rd, bool boundary) : RS_Node(n, mesh, parent, c, rd, boundary) { }
         void setEdgeNodes(int i, int j) {
             iNode = i;
             jNode = j;
@@ -185,7 +185,7 @@ protected:
         IntArray shared_edges;
 #endif
 public:
-        RS_Element(int number, Subdivision :: RS_Mesh *m, int parent, IntArray &nodes) {
+        RS_Element(int number, Subdivision :: RS_Mesh * m, int parent, IntArray & nodes) {
             this->number = number;
             this->nodes = nodes;
             this->leIndex = 0;
@@ -197,7 +197,7 @@ public:
             this->parallel_mode = Element_local;
 #endif
         }
-        virtual ~RS_Element() {}
+        virtual ~RS_Element() { }
 
         /// Returns true if element has some irregular nodes
         bool hasIrregulars() { return !irregular_nodes.containsOnlyZeroes(); }
@@ -208,9 +208,9 @@ public:
         void setIrregular(int iedge, int ir) { this->irregular_nodes.at(iedge) = ir; }
 
         virtual int evaluateLongestEdge() { return 0; }
-        virtual void bisect(std :: queue< int > &subdivqueue, std :: list< int > &sharedIrregularsQueue) {}
-        virtual void generate(std :: list< int > &sharedEdgesQueue) {}
-        virtual void update_neighbours() {}
+        virtual void bisect(std :: queue< int > &subdivqueue, std :: list< int > &sharedIrregularsQueue) { }
+        virtual void generate(std :: list< int > &sharedEdgesQueue) { }
+        virtual void update_neighbours() { }
         virtual double giveDensity() { return 0.0; }
         virtual double giveRequiredDensity();
         const IntArray *giveChildren() { return & this->children; }
@@ -237,7 +237,7 @@ public:
         void setLeIndex(int _n) { this->leIndex = _n; }
 
 #ifdef __OOFEG
-        virtual void  drawGeometry() {}
+        virtual void  drawGeometry() { }
 #endif
 
 #ifdef __PARALLEL_MODE
@@ -257,7 +257,7 @@ public:
     class RS_Triangle : public Subdivision :: RS_Element
     {
 public:
-        RS_Triangle(int number, Subdivision :: RS_Mesh *mesh, int parent, IntArray &nodes);
+        RS_Triangle(int number, Subdivision :: RS_Mesh * mesh, int parent, IntArray & nodes);
         int evaluateLongestEdge();
         void bisect(std :: queue< int > &subdivqueue, std :: list< int > &sharedIrregularsQueue);
         void generate(std :: list< int > &sharedEdgesQueue);
@@ -284,7 +284,7 @@ public:
 protected:
         IntArray side_leIndex;
 public:
-        RS_Tetra(int number, Subdivision :: RS_Mesh *mesh, int parent, IntArray &nodes);
+        RS_Tetra(int number, Subdivision :: RS_Mesh * mesh, int parent, IntArray & nodes);
         int evaluateLongestEdge();
         void bisect(std :: queue< int > &subdivqueue, std :: list< int > &sharedIrregularsQueue);
         void generate(std :: list< int > &sharedEdgesQueue);
@@ -317,7 +317,9 @@ protected:
         // mesh
         RS_Mesh *mesh;
 public:
-        RS_SharedEdge(Subdivision :: RS_Mesh *m) { this->mesh = m; }
+        RS_SharedEdge(Subdivision :: RS_Mesh * m) {
+            this->mesh = m;
+        }
         void setEdgeNodes(int i, int j) {
             iNode = i;
             jNode = j;
@@ -353,7 +355,7 @@ public:
 
 public:
 #ifdef __PARALLEL_MODE
-        RS_Mesh(Subdivision *s) : nodes(0, RS_ARRAY_CHUNK), elements(0, RS_ARRAY_CHUNK), edges(0, RS_ARRAY_CHUNK) {
+        RS_Mesh(Subdivision * s) : nodes(0, RS_ARRAY_CHUNK), elements(0, RS_ARRAY_CHUNK), edges(0, RS_ARRAY_CHUNK) {
             this->subdivision = s;
             sharedNodeMapInitialized = false;
         }
@@ -363,7 +365,9 @@ public:
             edges.clear();
         }
 #else
-        RS_Mesh(Subdivision *s) : nodes(0, RS_ARRAY_CHUNK), elements(0, RS_ARRAY_CHUNK) { this->subdivision = s; }
+        RS_Mesh(Subdivision * s) : nodes(0, RS_ARRAY_CHUNK), elements(0, RS_ARRAY_CHUNK) {
+            this->subdivision = s;
+        }
         ~RS_Mesh() {
             nodes.clear();
             elements.clear();
@@ -392,8 +396,10 @@ public:
     {
         RS_Mesh *m;
 public:
-        RS_CompareNodePositions(RS_Mesh *_m) { m = _m; }
-        int operator()(int i, int j);
+        RS_CompareNodePositions(RS_Mesh * _m) {
+            m = _m;
+        }
+        int operator() (int i, int j);
     };
 
     struct RS_packRemoteElemsStruct {
@@ -411,11 +417,15 @@ public:
 
 public:
     /// Constructor
-    Subdivision(Domain *d) : MesherInterface(d) {
+    Subdivision(Domain * d) : MesherInterface(d) {
         mesh = 0;
         smoothingFlag = false;
     }
-    virtual ~Subdivision() { if ( mesh ) { delete mesh; } }
+    virtual ~Subdivision() {
+        if ( mesh ) {
+            delete mesh;
+        }
+    }
 
     /// Runs the mesh generation, mesh will be written to corresponding domain din file
     virtual returnCode createMesh(TimeStep *tStep, int domainNumber, int domainSerNum, Domain **dNew);

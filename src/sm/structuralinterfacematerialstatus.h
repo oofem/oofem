@@ -88,7 +88,7 @@ protected:
     FloatArray mNormalDir;
 public:
     /// Constructor. Creates new StructuralInterfaceMaterialStatus with number n, belonging to domain d and IntegrationPoint g.
-    StructuralInterfaceMaterialStatus(int n, Domain *d, GaussPoint *g);
+    StructuralInterfaceMaterialStatus(int n, Domain * d, GaussPoint * g);
     /// Destructor
     virtual ~StructuralInterfaceMaterialStatus();
 

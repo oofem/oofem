@@ -74,7 +74,7 @@ protected:
     int initFlag;
 
 public:
-    LinearStatic(int i, EngngModel *_master = NULL);
+    LinearStatic(int i, EngngModel * _master = NULL);
     virtual ~LinearStatic();
 
     virtual void solveYourself();

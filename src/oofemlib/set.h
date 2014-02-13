@@ -73,8 +73,8 @@ public:
      * @param n Set number.
      * @param d Domain to which component belongs to.
      */
-    Set(int n, Domain *d) : FEMComponent(n, d) { }
-    virtual ~Set() {}
+    Set(int n, Domain * d) : FEMComponent(n, d) { }
+    virtual ~Set() { }
 
     virtual IRResultType initializeFrom(InputRecord *ir);
     virtual void giveInputRecord(DynamicInputRecord &input);

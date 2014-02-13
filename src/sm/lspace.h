@@ -59,16 +59,16 @@ namespace oofem {
  * - Calculating its B,D,N matrices and dV.
  */
 class LSpace  : public NLStructuralElement, public ZZNodalRecoveryModelInterface,
-    public SPRNodalRecoveryModelInterface, public NodalAveragingRecoveryModelInterface,
-    public SpatialLocalizerInterface,
-    public EIPrimaryUnknownMapperInterface,
-    public HuertaErrorEstimatorInterface, public HuertaRemeshingCriteriaInterface
+public SPRNodalRecoveryModelInterface, public NodalAveragingRecoveryModelInterface,
+public SpatialLocalizerInterface,
+public EIPrimaryUnknownMapperInterface,
+public HuertaErrorEstimatorInterface, public HuertaRemeshingCriteriaInterface
 {
 protected:
     static FEI3dHexaLin interpolation;
 
 public:
-    LSpace(int n, Domain *d);
+    LSpace(int n, Domain * d);
     virtual ~LSpace() { }
 
     virtual int computeNumberOfDofs() { return 24; }

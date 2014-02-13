@@ -56,9 +56,9 @@ class FEI2dTrLin;
  * @author Mikael Öhman
  */
 class Tr1BubbleStokes : public FMElement,
-    public ZZNodalRecoveryModelInterface,
-    public SpatialLocalizerInterface,
-    public EIPrimaryUnknownMapperInterface
+public ZZNodalRecoveryModelInterface,
+public SpatialLocalizerInterface,
+public EIPrimaryUnknownMapperInterface
 {
 protected:
     /// Interpolation for pressure
@@ -85,7 +85,7 @@ protected:
     //FloatArray bubbleCoord; // Assumed fixed at 0 for now (i.e. only linear geometry)
 
 public:
-    Tr1BubbleStokes(int n, Domain *d);
+    Tr1BubbleStokes(int n, Domain * d);
     virtual ~Tr1BubbleStokes();
 
     virtual double computeVolumeAround(GaussPoint *gp);

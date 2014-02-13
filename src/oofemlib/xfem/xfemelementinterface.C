@@ -131,7 +131,7 @@ void XfemElementInterface :: ComputeBOrBHMatrix(FloatMatrix &oAnswer, GaussPoint
 
 
     // Standard FE part of B-matrix
-    std :: vector< FloatMatrix >Bc(nDofMan);
+    std :: vector< FloatMatrix > Bc(nDofMan);
     for ( int i = 1; i <= nDofMan; i++ ) {
         FloatMatrix &BNode = Bc [ i - 1 ];
         BNode.resize(numRows, 2);
@@ -155,7 +155,7 @@ void XfemElementInterface :: ComputeBOrBHMatrix(FloatMatrix &oAnswer, GaussPoint
 		xMan = iEl.giveDomain()->giveXfemManager();
 	}
 
-    std :: vector< FloatMatrix >Bd(nDofMan);  // One Bd per node
+    std :: vector< FloatMatrix > Bd(nDofMan);  // One Bd per node
 
     int counter = nDofMan * dim;
 
@@ -285,11 +285,11 @@ void XfemElementInterface :: XfemElementInterface_createEnrNmatrixAt(FloatMatrix
     XfemManager *xMan = iEl.giveDomain()->giveXfemManager();
 
 
-    std :: vector< FloatMatrix >Bd(nDofMan);  // One Bd per node
+    std :: vector< FloatMatrix > Bd(nDofMan);  // One Bd per node
 
     int counter = nDofMan * dim;
 
-    std :: vector< std :: vector< double > >Nd(nDofMan);
+    std :: vector< std :: vector< double > > Nd(nDofMan);
 
     for ( int j = 1; j <= nDofMan; j++ ) {
         DofManager *dMan = iEl.giveDofManager(j);
@@ -419,7 +419,7 @@ bool XfemElementInterface :: XfemElementInterface_updateIntegrationRule()
                     firstIntersection = false;
 
                     // Use XfemElementInterface_partitionElement to subdivide the element
-                    for ( int i = 0; i < int( pointPartitions.size() ); i++ ) {
+                    for ( int i = 0; i < int ( pointPartitions.size() ); i++ ) {
                         // Triangulate the subdivisions
                         this->XfemElementInterface_partitionElement(allTri, pointPartitions [ i ]);
                     }
@@ -508,7 +508,7 @@ bool XfemElementInterface :: XfemElementInterface_updateIntegrationRule()
 
                     if ( intersection ) {
                         // Use XfemElementInterface_partitionElement to subdivide triangle j
-                        for ( int i = 0; i < int( pointPartitionsTri.size() ); i++ ) {
+                        for ( int i = 0; i < int ( pointPartitionsTri.size() ); i++ ) {
                             this->XfemElementInterface_partitionElement(allTriCopy, pointPartitionsTri [ i ]);
                         }
 
@@ -1263,7 +1263,7 @@ void XfemElementInterface :: computeCohesiveTangentAt(FloatMatrix &answer, TimeS
 
 void XfemElementInterface :: XfemElementInterface_computeConsistentMassMatrix(FloatMatrix &answer, TimeStep *tStep, double &mass, const double *ipDensity)
 {
-    StructuralElement *structEl = dynamic_cast< StructuralElement * >( element );
+    StructuralElement *structEl = dynamic_cast< StructuralElement * >(element);
     if ( structEl == NULL ) {
         OOFEM_ERROR("Error in XfemElementInterface :: XfemElementInterface_computeConsistentMassMatrix().\n");
     }
@@ -1412,7 +1412,7 @@ void XfemElementInterface :: computeNCohesive(FloatMatrix &oN, GaussPoint &iGP, 
 
     int counter = nDofMan * dim;
 
-    std :: vector< std :: vector< double > >Nd(nDofMan);
+    std :: vector< std :: vector< double > > Nd(nDofMan);
 
     for ( int j = 1; j <= nDofMan; j++ ) {
         DofManager *dMan = element->giveDofManager(j);

@@ -145,13 +145,13 @@ IRResultType Node :: initializeFrom(InputRecord *ir)
         // vector e3' computed from vector product of e1', e2'
         localCoordinateSystem->at(3, 1) =
             localCoordinateSystem->at(1, 2) * localCoordinateSystem->at(2, 3) -
-            localCoordinateSystem->at(1, 3) * localCoordinateSystem->at(2, 2);
+        localCoordinateSystem->at(1, 3) * localCoordinateSystem->at(2, 2);
         localCoordinateSystem->at(3, 2) =
             localCoordinateSystem->at(1, 3) * localCoordinateSystem->at(2, 1) -
-            localCoordinateSystem->at(1, 1) * localCoordinateSystem->at(2, 3);
+        localCoordinateSystem->at(1, 1) * localCoordinateSystem->at(2, 3);
         localCoordinateSystem->at(3, 3) =
             localCoordinateSystem->at(1, 1) * localCoordinateSystem->at(2, 2) -
-            localCoordinateSystem->at(1, 2) * localCoordinateSystem->at(2, 1);
+        localCoordinateSystem->at(1, 2) * localCoordinateSystem->at(2, 1);
     }
 
     return IRRT_OK;
@@ -177,7 +177,7 @@ Node :: computeLoadVector(FloatArray &answer, Load *load, CharType type, TimeSte
         return;
     }
 
-    NodalLoad *loadN = dynamic_cast< NodalLoad * >( load );
+    NodalLoad *loadN = dynamic_cast< NodalLoad * >(load);
     if ( !loadN ) {
         _error("computeLoadVectorAt: incompatible load");
     }
@@ -456,7 +456,7 @@ Node :: computeL2GTransformation(FloatMatrix &answer, const IntArray &dofIDArry)
                         id2 = giveDof(j)->giveDofID();
                         if ( ( id2 == D_u ) || ( id2 == D_v ) || ( id2 == D_w ) ) {
                             answer.at(j, i) = localCoordinateSystem->at( ( int ) ( id ) - ( int ) ( D_u ) + 1,
-                                                                         ( int ) ( id2 ) - ( int ) ( D_u ) + 1 );
+                                                                        ( int ) ( id2 ) - ( int ) ( D_u ) + 1 );
                         }
                     }
 
@@ -469,7 +469,7 @@ Node :: computeL2GTransformation(FloatMatrix &answer, const IntArray &dofIDArry)
                         id2 = giveDof(j)->giveDofID();
                         if ( ( id2 == V_u ) || ( id2 == V_v ) || ( id2 == V_w ) ) {
                             answer.at(j, i) = localCoordinateSystem->at( ( int ) ( id ) - ( int ) ( V_u ) + 1,
-                                                                         ( int ) ( id2 ) - ( int ) ( V_u ) + 1 );
+                                                                        ( int ) ( id2 ) - ( int ) ( V_u ) + 1 );
                         }
                     }
 
@@ -482,7 +482,7 @@ Node :: computeL2GTransformation(FloatMatrix &answer, const IntArray &dofIDArry)
                         id2 = giveDof(j)->giveDofID();
                         if ( ( id2 == R_u ) || ( id2 == R_v ) || ( id2 == R_w ) ) {
                             answer.at(j, i) = localCoordinateSystem->at( ( int ) ( id ) - ( int ) ( R_u ) + 1,
-                                                                         ( int ) ( id2 ) - ( int ) ( R_u ) + 1 );
+                                                                        ( int ) ( id2 ) - ( int ) ( R_u ) + 1 );
                         }
                     }
 

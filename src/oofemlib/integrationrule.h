@@ -127,13 +127,13 @@ private:
         IntegrationRule *ir;
 
 public:
-        iterator(IntegrationRule *ir, int pos);
+        iterator(IntegrationRule * ir, int pos);
 
-        bool operator!=(const IntegrationRule :: iterator &other) const;
+        bool operator != ( const IntegrationRule :: iterator & other ) const;
 
-        GaussPoint &operator*() const;
+        GaussPoint &operator *( ) const;
 
-        const IntegrationRule :: iterator &operator++();
+        const IntegrationRule :: iterator &operator++ ( );
     };
 
     IntegrationRule :: iterator begin();
@@ -148,13 +148,13 @@ public:
      * @param endIndx Last component, for which rule applies.
      * @param dynamic Flag indicating that receiver can change.
      */
-    IntegrationRule(int n, Element *e, int startIndx, int endIndx, bool dynamic);
+    IntegrationRule(int n, Element * e, int startIndx, int endIndx, bool dynamic);
     /**
      * Constructor.
      * @param n Number associated with receiver.
      * @param e Reference to element.
      */
-    IntegrationRule(int n, Element *e);
+    IntegrationRule(int n, Element * e);
     /// Destructor.
     virtual ~IntegrationRule();
 

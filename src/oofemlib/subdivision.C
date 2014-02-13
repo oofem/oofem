@@ -586,7 +586,7 @@ Subdivision :: RS_Triangle :: giveEdgeIndex(int iNode, int jNode)
 
     if ( in == 0 || jn == 0 ) {
         OOFEM_ERROR4( "Subdivision::RS_Triangle::giveEdgeIndex - there is no edge connecting %d and %d on element %d",
-                      iNode, jNode, this->giveNumber() );
+                     iNode, jNode, this->giveNumber() );
         return 0;
     }
 
@@ -625,7 +625,7 @@ Subdivision :: RS_Tetra :: giveEdgeIndex(int iNode, int jNode)
 
     if ( in == 0 || jn == 0 ) {
         OOFEM_ERROR4( "Subdivision::RS_Tetra::giveEdgeIndex - there is no edge connecting %d and %d on element %d",
-                      iNode, jNode, this->giveNumber() );
+                     iNode, jNode, this->giveNumber() );
         return 0;
     }
 
@@ -681,7 +681,7 @@ Subdivision :: RS_Triangle :: bisect(std :: queue< int > &subdivqueue, std :: li
         coords.times(0.5);
         // compute required density of a new node
         density = 0.5 * ( mesh->giveNode(iNode)->giveRequiredDensity() +
-                          mesh->giveNode(jNode)->giveRequiredDensity() );
+                         mesh->giveNode(jNode)->giveRequiredDensity() );
         // create new irregular
         iNum = mesh->giveNumberOfNodes() + 1;
         irregular = new Subdivision :: RS_IrregularNode(iNum, mesh, 0, coords, density, boundary);
@@ -758,7 +758,7 @@ Subdivision :: RS_Triangle :: bisect(std :: queue< int > &subdivqueue, std :: li
  #ifdef DEBUG_CHECK
                     if ( !edge->givePartitions()->giveSize() ) {
                         OOFEM_ERROR3( "Subdivision::RS_Triangle::bisect - unshared edge %d of element %d is marked as shared",
-                                      shared_edges.at(leIndex), this->giveNumber() );
+                                     shared_edges.at(leIndex), this->giveNumber() );
                     }
 
  #endif
@@ -875,7 +875,7 @@ Subdivision :: RS_Tetra :: bisect(std :: queue< int > &subdivqueue, std :: list<
 
 #ifdef QUICK_HACK
     if ( mesh->giveNode( nodes.at(1) )->isBoundary() && mesh->giveNode( nodes.at(2) )->isBoundary() &&
-         mesh->giveNode( nodes.at(3) )->isBoundary() && mesh->giveNode( nodes.at(4) )->isBoundary() ) {
+        mesh->giveNode( nodes.at(3) )->isBoundary() && mesh->giveNode( nodes.at(4) )->isBoundary() ) {
         OOFEM_ERROR2( "Subdivision::RS_Tetra::bisect - quick hack not applicable due to element %d", this->giveNumber() );
     }
 
@@ -949,7 +949,7 @@ Subdivision :: RS_Tetra :: bisect(std :: queue< int > &subdivqueue, std :: list<
 #endif
             // compute required density of a new node
             density = 0.5 * ( mesh->giveNode(iNode)->giveRequiredDensity() +
-                              mesh->giveNode(jNode)->giveRequiredDensity() );
+                             mesh->giveNode(jNode)->giveRequiredDensity() );
             // create new irregular
             iNum = mesh->giveNumberOfNodes() + 1;
             irregular = new Subdivision :: RS_IrregularNode(iNum, mesh, 0, coords, density, false);
@@ -968,23 +968,23 @@ Subdivision :: RS_Tetra :: bisect(std :: queue< int > &subdivqueue, std :: list<
             // do not print global numbers of elements because they are not available (they are assigned at once after bisection);
             // do not print global numbers of irregulars as these may not be available yet
             OOFEM_LOG_INFO( "[%d] Irregular %d added on %d (edge %d, nodes %d %d [%d %d], nds %d %d %d %d [%d %d %d %d], ngbs %d %d %d %d, irr %d %d %d %d %d %d)\n",
-                            mesh->giveSubdivision()->giveRank(), iNum, this->number, eIndex, iNode, jNode,
-                            mesh->giveNode(iNode)->giveGlobalNumber(), mesh->giveNode(jNode)->giveGlobalNumber(),
-                            nodes.at(1), nodes.at(2), nodes.at(3), nodes.at(4),
-                            mesh->giveNode( nodes.at(1) )->giveGlobalNumber(), mesh->giveNode( nodes.at(2) )->giveGlobalNumber(),
-                            mesh->giveNode( nodes.at(3) )->giveGlobalNumber(), mesh->giveNode( nodes.at(4) )->giveGlobalNumber(),
-                            neghbours_base_elements.at(1), neghbours_base_elements.at(2),
-                            neghbours_base_elements.at(3), neghbours_base_elements.at(4),
-                            irregular_nodes.at(1), irregular_nodes.at(2), irregular_nodes.at(3),
-                            irregular_nodes.at(4), irregular_nodes.at(5), irregular_nodes.at(6) );
+                           mesh->giveSubdivision()->giveRank(), iNum, this->number, eIndex, iNode, jNode,
+                           mesh->giveNode(iNode)->giveGlobalNumber(), mesh->giveNode(jNode)->giveGlobalNumber(),
+                           nodes.at(1), nodes.at(2), nodes.at(3), nodes.at(4),
+                           mesh->giveNode( nodes.at(1) )->giveGlobalNumber(), mesh->giveNode( nodes.at(2) )->giveGlobalNumber(),
+                           mesh->giveNode( nodes.at(3) )->giveGlobalNumber(), mesh->giveNode( nodes.at(4) )->giveGlobalNumber(),
+                           neghbours_base_elements.at(1), neghbours_base_elements.at(2),
+                           neghbours_base_elements.at(3), neghbours_base_elements.at(4),
+                           irregular_nodes.at(1), irregular_nodes.at(2), irregular_nodes.at(3),
+                           irregular_nodes.at(4), irregular_nodes.at(5), irregular_nodes.at(6) );
  #else
             OOFEM_LOG_INFO( "Irregular %d added on %d (edge %d, nodes %d %d, nds %d %d %d %d, ngbs %d %d %d %d, irr %d %d %d %d %d %d)\n",
-                            iNum, this->number, eIndex, iNode, jNode,
-                            nodes.at(1), nodes.at(2), nodes.at(3), nodes.at(4),
-                            neghbours_base_elements.at(1), neghbours_base_elements.at(2),
-                            neghbours_base_elements.at(3), neghbours_base_elements.at(4),
-                            irregular_nodes.at(1), irregular_nodes.at(2), irregular_nodes.at(3),
-                            irregular_nodes.at(4), irregular_nodes.at(5), irregular_nodes.at(6) );
+                           iNum, this->number, eIndex, iNode, jNode,
+                           nodes.at(1), nodes.at(2), nodes.at(3), nodes.at(4),
+                           neghbours_base_elements.at(1), neghbours_base_elements.at(2),
+                           neghbours_base_elements.at(3), neghbours_base_elements.at(4),
+                           irregular_nodes.at(1), irregular_nodes.at(2), irregular_nodes.at(3),
+                           irregular_nodes.at(4), irregular_nodes.at(5), irregular_nodes.at(6) );
  #endif
 #endif
 
@@ -1000,7 +1000,7 @@ Subdivision :: RS_Tetra :: bisect(std :: queue< int > &subdivqueue, std :: list<
  #ifdef DEBUG_CHECK
                     if ( !edge->givePartitions()->giveSize() ) {
                         OOFEM_ERROR3( "Subdivision::RS_Tetra::bisect - unshared edge %d of element %d is marked as shared",
-                                      shared_edges.at(eIndex), this->giveNumber() );
+                                     shared_edges.at(eIndex), this->giveNumber() );
                     }
 
  #endif
@@ -1032,7 +1032,7 @@ Subdivision :: RS_Tetra :: bisect(std :: queue< int > &subdivqueue, std :: list<
  #ifdef DEBUG_CHECK
                     if ( !elems ) {
                         OOFEM_ERROR2( "Subdivision::RS_Tetra::bisect - shared edge %d is not shared by common elements",
-                                      shared_edges.at(eIndex) );
+                                     shared_edges.at(eIndex) );
                     }
 
  #endif
@@ -1048,7 +1048,7 @@ Subdivision :: RS_Tetra :: bisect(std :: queue< int > &subdivqueue, std :: list<
  #ifdef DEBUG_CHECK
                         if ( !elem->giveSharedEdges()->giveSize() ) {
                             OOFEM_ERROR3( "Subdivision::RS_Tetra::bisect - element %d incident to shared edge %d does not have shared edges",
-                                          common.at(j), shared_edges.at(eIndex) );
+                                         common.at(j), shared_edges.at(eIndex) );
                         }
 
  #endif
@@ -1067,24 +1067,24 @@ Subdivision :: RS_Tetra :: bisect(std :: queue< int > &subdivqueue, std :: list<
                         // do not print global numbers of elements because they are not available (they are assigned at once after bisection);
                         // do not print global numbers of irregulars as these may not be available yet
                         OOFEM_LOG_INFO( "[%d] Irregular %d added on %d (edge %d, nodes %d %d [%d %d], nds %d %d %d %d [%d %d %d %d], ngbs %d %d %d %d, irr %d %d %d %d %d %d)\n",
-                                        mesh->giveSubdivision()->giveRank(), iNum,
-                                        elem->giveNumber(), eInd, iNode, jNode,
-                                        mesh->giveNode(iNode)->giveGlobalNumber(), mesh->giveNode(jNode)->giveGlobalNumber(),
-                                        elem->giveNode(1), elem->giveNode(2), elem->giveNode(3), elem->giveNode(4),
-                                        mesh->giveNode( elem->giveNode(1) )->giveGlobalNumber(),
-                                        mesh->giveNode( elem->giveNode(2) )->giveGlobalNumber(),
-                                        mesh->giveNode( elem->giveNode(3) )->giveGlobalNumber(),
-                                        mesh->giveNode( elem->giveNode(4) )->giveGlobalNumber(),
-                                        elem->giveNeighbor(1), elem->giveNeighbor(2), elem->giveNeighbor(3), elem->giveNeighbor(4),
-                                        elem->giveIrregular(1), elem->giveIrregular(2), elem->giveIrregular(3),
-                                        elem->giveIrregular(4), elem->giveIrregular(5), elem->giveIrregular(6) );
+                                       mesh->giveSubdivision()->giveRank(), iNum,
+                                       elem->giveNumber(), eInd, iNode, jNode,
+                                       mesh->giveNode(iNode)->giveGlobalNumber(), mesh->giveNode(jNode)->giveGlobalNumber(),
+                                       elem->giveNode(1), elem->giveNode(2), elem->giveNode(3), elem->giveNode(4),
+                                       mesh->giveNode( elem->giveNode(1) )->giveGlobalNumber(),
+                                       mesh->giveNode( elem->giveNode(2) )->giveGlobalNumber(),
+                                       mesh->giveNode( elem->giveNode(3) )->giveGlobalNumber(),
+                                       mesh->giveNode( elem->giveNode(4) )->giveGlobalNumber(),
+                                       elem->giveNeighbor(1), elem->giveNeighbor(2), elem->giveNeighbor(3), elem->giveNeighbor(4),
+                                       elem->giveIrregular(1), elem->giveIrregular(2), elem->giveIrregular(3),
+                                       elem->giveIrregular(4), elem->giveIrregular(5), elem->giveIrregular(6) );
   #else
                         OOFEM_LOG_INFO( "Irregular %d added on %d (edge %d, nodes %d %d, nds %d %d %d %d, ngbs %d %d %d %d, irr %d %d %d %d %d %d)\n",
-                                        iNum, elem->giveNumber(), eInd, iNode, jNode,
-                                        elem->giveNode(1), elem->giveNode(2), elem->giveNode(3), elem->giveNode(4),
-                                        elem->giveNeighbor(1), elem->giveNeighbor(2), elem->giveNeighbor(3), elem->giveNeighbor(4),
-                                        elem->giveIrregular(1), elem->giveIrregular(2), elem->giveIrregular(3),
-                                        elem->giveIrregular(4), elem->giveIrregular(5), elem->giveIrregular(6) );
+                                       iNum, elem->giveNumber(), eInd, iNode, jNode,
+                                       elem->giveNode(1), elem->giveNode(2), elem->giveNode(3), elem->giveNode(4),
+                                       elem->giveNeighbor(1), elem->giveNeighbor(2), elem->giveNeighbor(3), elem->giveNeighbor(4),
+                                       elem->giveIrregular(1), elem->giveIrregular(2), elem->giveIrregular(3),
+                                       elem->giveIrregular(4), elem->giveIrregular(5), elem->giveIrregular(6) );
   #endif
  #endif
                     }
@@ -1140,24 +1140,24 @@ Subdivision :: RS_Tetra :: bisect(std :: queue< int > &subdivqueue, std :: list<
                     // do not print global numbers of elements because they are not available (they are assigned at once after bisection);
                     // do not print global numbers of irregulars as these may not be available yet
                     OOFEM_LOG_INFO( "[%d] Irregular %d added on %d (edge %d, nodes %d %d [%d %d], nds %d %d %d %d [%d %d %d %d], ngbs %d %d %d %d, irr %d %d %d %d %d %d)\n",
-                                    mesh->giveSubdivision()->giveRank(), iNum,
-                                    elem2->giveNumber(), eInd, iNode, jNode,
-                                    mesh->giveNode(iNode)->giveGlobalNumber(), mesh->giveNode(jNode)->giveGlobalNumber(),
-                                    elem2->giveNode(1), elem2->giveNode(2), elem2->giveNode(3), elem2->giveNode(4),
-                                    mesh->giveNode( elem2->giveNode(1) )->giveGlobalNumber(),
-                                    mesh->giveNode( elem2->giveNode(2) )->giveGlobalNumber(),
-                                    mesh->giveNode( elem2->giveNode(3) )->giveGlobalNumber(),
-                                    mesh->giveNode( elem2->giveNode(4) )->giveGlobalNumber(),
-                                    elem2->giveNeighbor(1), elem2->giveNeighbor(2), elem2->giveNeighbor(3), elem2->giveNeighbor(4),
-                                    elem2->giveIrregular(1), elem2->giveIrregular(2), elem2->giveIrregular(3),
-                                    elem2->giveIrregular(4), elem2->giveIrregular(5), elem2->giveIrregular(6) );
+                                   mesh->giveSubdivision()->giveRank(), iNum,
+                                   elem2->giveNumber(), eInd, iNode, jNode,
+                                   mesh->giveNode(iNode)->giveGlobalNumber(), mesh->giveNode(jNode)->giveGlobalNumber(),
+                                   elem2->giveNode(1), elem2->giveNode(2), elem2->giveNode(3), elem2->giveNode(4),
+                                   mesh->giveNode( elem2->giveNode(1) )->giveGlobalNumber(),
+                                   mesh->giveNode( elem2->giveNode(2) )->giveGlobalNumber(),
+                                   mesh->giveNode( elem2->giveNode(3) )->giveGlobalNumber(),
+                                   mesh->giveNode( elem2->giveNode(4) )->giveGlobalNumber(),
+                                   elem2->giveNeighbor(1), elem2->giveNeighbor(2), elem2->giveNeighbor(3), elem2->giveNeighbor(4),
+                                   elem2->giveIrregular(1), elem2->giveIrregular(2), elem2->giveIrregular(3),
+                                   elem2->giveIrregular(4), elem2->giveIrregular(5), elem2->giveIrregular(6) );
  #else
                     OOFEM_LOG_INFO( "Irregular %d added on %d (edge %d, nodes %d %d, nds %d %d %d %d, ngbs %d %d %d %d, irr %d %d %d %d %d %d)\n",
-                                    iNum, elem2->giveNumber(), eInd, iNode, jNode,
-                                    elem2->giveNode(1), elem2->giveNode(2), elem2->giveNode(3), elem2->giveNode(4),
-                                    elem2->giveNeighbor(1), elem2->giveNeighbor(2), elem2->giveNeighbor(3), elem2->giveNeighbor(4),
-                                    elem2->giveIrregular(1), elem2->giveIrregular(2), elem2->giveIrregular(3),
-                                    elem2->giveIrregular(4), elem2->giveIrregular(5), elem2->giveIrregular(6) );
+                                   iNum, elem2->giveNumber(), eInd, iNode, jNode,
+                                   elem2->giveNode(1), elem2->giveNode(2), elem2->giveNode(3), elem2->giveNode(4),
+                                   elem2->giveNeighbor(1), elem2->giveNeighbor(2), elem2->giveNeighbor(3), elem2->giveNeighbor(4),
+                                   elem2->giveIrregular(1), elem2->giveIrregular(2), elem2->giveIrregular(3),
+                                   elem2->giveIrregular(4), elem2->giveIrregular(5), elem2->giveIrregular(6) );
  #endif
 #endif
 
@@ -1245,24 +1245,24 @@ Subdivision :: RS_Tetra :: bisect(std :: queue< int > &subdivqueue, std :: list<
                             // do not print global numbers of elements because they are not available (they are assigned at once after bisection);
                             // do not print global numbers of irregulars as these may not be available yet
                             OOFEM_LOG_INFO( "[%d] Irregular %d added on %d (edge %d, nodes %d %d [%d %d], nds %d %d %d %d [%d %d %d %d], ngbs %d %d %d %d, irr %d %d %d %d %d %d)\n",
-                                            mesh->giveSubdivision()->giveRank(), iNum,
-                                            elem->giveNumber(), eInd, iNode, jNode,
-                                            mesh->giveNode(iNode)->giveGlobalNumber(), mesh->giveNode(jNode)->giveGlobalNumber(),
-                                            elem->giveNode(1), elem->giveNode(2), elem->giveNode(3), elem->giveNode(4),
-                                            mesh->giveNode( elem->giveNode(1) )->giveGlobalNumber(),
-                                            mesh->giveNode( elem->giveNode(2) )->giveGlobalNumber(),
-                                            mesh->giveNode( elem->giveNode(3) )->giveGlobalNumber(),
-                                            mesh->giveNode( elem->giveNode(4) )->giveGlobalNumber(),
-                                            elem->giveNeighbor(1), elem->giveNeighbor(2), elem->giveNeighbor(3), elem->giveNeighbor(4),
-                                            elem->giveIrregular(1), elem->giveIrregular(2), elem->giveIrregular(3),
-                                            elem->giveIrregular(4), elem->giveIrregular(5), elem->giveIrregular(6) );
+                                           mesh->giveSubdivision()->giveRank(), iNum,
+                                           elem->giveNumber(), eInd, iNode, jNode,
+                                           mesh->giveNode(iNode)->giveGlobalNumber(), mesh->giveNode(jNode)->giveGlobalNumber(),
+                                           elem->giveNode(1), elem->giveNode(2), elem->giveNode(3), elem->giveNode(4),
+                                           mesh->giveNode( elem->giveNode(1) )->giveGlobalNumber(),
+                                           mesh->giveNode( elem->giveNode(2) )->giveGlobalNumber(),
+                                           mesh->giveNode( elem->giveNode(3) )->giveGlobalNumber(),
+                                           mesh->giveNode( elem->giveNode(4) )->giveGlobalNumber(),
+                                           elem->giveNeighbor(1), elem->giveNeighbor(2), elem->giveNeighbor(3), elem->giveNeighbor(4),
+                                           elem->giveIrregular(1), elem->giveIrregular(2), elem->giveIrregular(3),
+                                           elem->giveIrregular(4), elem->giveIrregular(5), elem->giveIrregular(6) );
  #else
                             OOFEM_LOG_INFO( "Irregular %d added on %d (edge %d, nodes %d %d, nds %d %d %d %d, ngbs %d %d %d %d, irr %d %d %d %d %d %d)\n",
-                                            iNum, elem->giveNumber(), eInd, iNode, jNode,
-                                            elem->giveNode(1), elem->giveNode(2), elem->giveNode(3), elem->giveNode(4),
-                                            elem->giveNeighbor(1), elem->giveNeighbor(2), elem->giveNeighbor(3), elem->giveNeighbor(4),
-                                            elem->giveIrregular(1), elem->giveIrregular(2), elem->giveIrregular(3),
-                                            elem->giveIrregular(4), elem->giveIrregular(5), elem->giveIrregular(6) );
+                                           iNum, elem->giveNumber(), eInd, iNode, jNode,
+                                           elem->giveNode(1), elem->giveNode(2), elem->giveNode(3), elem->giveNode(4),
+                                           elem->giveNeighbor(1), elem->giveNeighbor(2), elem->giveNeighbor(3), elem->giveNeighbor(4),
+                                           elem->giveIrregular(1), elem->giveIrregular(2), elem->giveIrregular(3),
+                                           elem->giveIrregular(4), elem->giveIrregular(5), elem->giveIrregular(6) );
  #endif
 #endif
 
@@ -2093,10 +2093,10 @@ Subdivision :: RS_Tetra :: generate(std :: list< int > &sharedEdgesQueue)
                            ( child->giveIrregular(6) ) ? mesh->giveNode( child->giveIrregular(6) )->giveGlobalNumber() : 0);
  #else
             OOFEM_LOG_INFO( "Child %d generated on parent %d (leIndex %d, nds %d %d %d %d, ngbs %d %d %d %d, irr %d %d %d %d %d %d)\n",
-                            childNum, this->number, this->leIndex, _nodes.at(1), _nodes.at(2), _nodes.at(3), _nodes.at(4),
-                            child->giveNeighbor(1), child->giveNeighbor(2), child->giveNeighbor(3), child->giveNeighbor(4),
-                            child->giveIrregular(1), child->giveIrregular(2), child->giveIrregular(3),
-                            child->giveIrregular(4), child->giveIrregular(5), child->giveIrregular(6) );
+                           childNum, this->number, this->leIndex, _nodes.at(1), _nodes.at(2), _nodes.at(3), _nodes.at(4),
+                           child->giveNeighbor(1), child->giveNeighbor(2), child->giveNeighbor(3), child->giveNeighbor(4),
+                           child->giveIrregular(1), child->giveIrregular(2), child->giveIrregular(3),
+                           child->giveIrregular(4), child->giveIrregular(5), child->giveIrregular(6) );
  #endif
 #endif
 
@@ -2204,10 +2204,10 @@ Subdivision :: RS_Tetra :: generate(std :: list< int > &sharedEdgesQueue)
                            ( child->giveIrregular(6) ) ? mesh->giveNode( child->giveIrregular(6) )->giveGlobalNumber() : 0);
  #else
             OOFEM_LOG_INFO( "Child %d generated on parent %d (leIndex %d, nds %d %d %d %d, ngbs %d %d %d %d, irr %d %d %d %d %d %d)\n",
-                            childNum, this->number, this->leIndex, _nodes.at(1), _nodes.at(2), _nodes.at(3), _nodes.at(4),
-                            child->giveNeighbor(1), child->giveNeighbor(2), child->giveNeighbor(3), child->giveNeighbor(4),
-                            child->giveIrregular(1), child->giveIrregular(2), child->giveIrregular(3),
-                            child->giveIrregular(4), child->giveIrregular(5), child->giveIrregular(6) );
+                           childNum, this->number, this->leIndex, _nodes.at(1), _nodes.at(2), _nodes.at(3), _nodes.at(4),
+                           child->giveNeighbor(1), child->giveNeighbor(2), child->giveNeighbor(3), child->giveNeighbor(4),
+                           child->giveIrregular(1), child->giveIrregular(2), child->giveIrregular(3),
+                           child->giveIrregular(4), child->giveIrregular(5), child->giveIrregular(6) );
  #endif
 #endif
 
@@ -2468,10 +2468,10 @@ Subdivision :: RS_Tetra :: generate(std :: list< int > &sharedEdgesQueue)
                            ( child->giveIrregular(6) ) ? mesh->giveNode( child->giveIrregular(6) )->giveGlobalNumber() : 0);
  #else
             OOFEM_LOG_INFO( "Child %d generated on parent %d (leIndex %d, nds %d %d %d %d, ngbs %d %d %d %d, irr %d %d %d %d %d %d)\n",
-                            childNum, this->number, this->leIndex, _nodes.at(1), _nodes.at(2), _nodes.at(3), _nodes.at(4),
-                            child->giveNeighbor(1), child->giveNeighbor(2), child->giveNeighbor(3), child->giveNeighbor(4),
-                            child->giveIrregular(1), child->giveIrregular(2), child->giveIrregular(3),
-                            child->giveIrregular(4), child->giveIrregular(5), child->giveIrregular(6) );
+                           childNum, this->number, this->leIndex, _nodes.at(1), _nodes.at(2), _nodes.at(3), _nodes.at(4),
+                           child->giveNeighbor(1), child->giveNeighbor(2), child->giveNeighbor(3), child->giveNeighbor(4),
+                           child->giveIrregular(1), child->giveIrregular(2), child->giveIrregular(3),
+                           child->giveIrregular(4), child->giveIrregular(5), child->giveIrregular(6) );
  #endif
 #endif
 
@@ -2579,10 +2579,10 @@ Subdivision :: RS_Tetra :: generate(std :: list< int > &sharedEdgesQueue)
                            ( child->giveIrregular(6) ) ? mesh->giveNode( child->giveIrregular(6) )->giveGlobalNumber() : 0);
  #else
             OOFEM_LOG_INFO( "Child %d generated on parent %d (leIndex %d, nds %d %d %d %d, ngbs %d %d %d %d, irr %d %d %d %d %d %d)\n",
-                            childNum, this->number, this->leIndex, _nodes.at(1), _nodes.at(2), _nodes.at(3), _nodes.at(4),
-                            child->giveNeighbor(1), child->giveNeighbor(2), child->giveNeighbor(3), child->giveNeighbor(4),
-                            child->giveIrregular(1), child->giveIrregular(2), child->giveIrregular(3),
-                            child->giveIrregular(4), child->giveIrregular(5), child->giveIrregular(6) );
+                           childNum, this->number, this->leIndex, _nodes.at(1), _nodes.at(2), _nodes.at(3), _nodes.at(4),
+                           child->giveNeighbor(1), child->giveNeighbor(2), child->giveNeighbor(3), child->giveNeighbor(4),
+                           child->giveIrregular(1), child->giveIrregular(2), child->giveIrregular(3),
+                           child->giveIrregular(4), child->giveIrregular(5), child->giveIrregular(6) );
  #endif
 #endif
 
@@ -2863,11 +2863,11 @@ Subdivision :: RS_Tetra :: update_neighbours()
                             }
 
                             OOFEM_ERROR4( "Subdivision::RS_Tetra::update_neighbours: element %d is not neighbor (%d) of element %d",
-                                          this->number, i, this->neghbours_base_elements.at(i) );
+                                         this->number, i, this->neghbours_base_elements.at(i) );
                         }
                     } else {
                         OOFEM_ERROR4( "Subdivision::RS_Tetra::update_neighbours: element %d is not neighbor (%d) of element %d",
-                                      this->number, i, this->neghbours_base_elements.at(i) );
+                                     this->number, i, this->neghbours_base_elements.at(i) );
                     }
                 } else {
                     // ngb has not been yet processed ==> I cannot check particular side of ngb
@@ -2877,7 +2877,7 @@ Subdivision :: RS_Tetra :: update_neighbours()
                         }
 
                         OOFEM_ERROR3( "Subdivision::RS_Tetra::update_neighbours: element %d is not neighbor of element %d",
-                                      this->number, this->neghbours_base_elements.at(i) );
+                                     this->number, this->neghbours_base_elements.at(i) );
                     }
                 }
             } else {
@@ -3040,7 +3040,7 @@ Subdivision :: RS_Triangle :: importConnectivity(ConnectivityTable *ct)
 
  #endif
             if ( mesh->giveElement(el)->containsNode(iNode) &&
-                 mesh->giveElement(el)->containsNode(jNode) ) {
+                mesh->giveElement(el)->containsNode(jNode) ) {
                 neghbours_base_elements.at(iside) = el;
                 break;
             }
@@ -3149,8 +3149,8 @@ Subdivision :: RS_Tetra :: importConnectivity(ConnectivityTable *ct)
 
  #endif
         if ( mesh->giveElement(el)->containsNode(iNode) &&
-             mesh->giveElement(el)->containsNode(jNode) &&
-             mesh->giveElement(el)->containsNode(kNode) ) {
+            mesh->giveElement(el)->containsNode(jNode) &&
+            mesh->giveElement(el)->containsNode(kNode) ) {
             neghbours_base_elements.at(1) = el;
             break;
         }
@@ -3176,8 +3176,8 @@ Subdivision :: RS_Tetra :: importConnectivity(ConnectivityTable *ct)
 
  #endif
             if ( mesh->giveElement(el)->containsNode(iNode) &&
-                 mesh->giveElement(el)->containsNode(jNode) &&
-                 mesh->giveElement(el)->containsNode(kNode) ) {
+                mesh->giveElement(el)->containsNode(jNode) &&
+                mesh->giveElement(el)->containsNode(kNode) ) {
                 neghbours_base_elements.at(iside + 1) = el;
                 break;
             }
@@ -3243,7 +3243,7 @@ Subdivision :: RS_Tetra :: importConnectivity(ConnectivityTable *ct)
 #endif
 
         if ( mesh->giveElement(el)->containsNode(jNode) &&
-             mesh->giveElement(el)->containsNode(kNode) ) {
+            mesh->giveElement(el)->containsNode(kNode) ) {
             neghbours_base_elements.at(1) = el;
             break;
         }
@@ -3280,7 +3280,7 @@ Subdivision :: RS_Node :: drawGeometry()
     p [ 0 ].z = ( FPNum ) this->giveCoordinate(3);
 
     EASValsSetMType(FILLED_CIRCLE_MARKER);
-    color = ColorGetPixelFromString(const_cast< char * >( colors [ 0 ] ), & suc);
+    color = ColorGetPixelFromString(const_cast< char * >(colors [ 0 ]), & suc);
     EASValsSetColor(color);
     //EASValsSetColor( gc.getNodeColor() );
     EASValsSetLayer(OOFEG_RAW_GEOMETRY_LAYER);
@@ -3290,7 +3290,7 @@ Subdivision :: RS_Node :: drawGeometry()
     EMAddGraphicsToModel(ESIModel(), go);
 
     char num [ 6 ];
-    color = ColorGetPixelFromString(const_cast< char * >( colors [ 1 ] ), & suc);
+    color = ColorGetPixelFromString(const_cast< char * >(colors [ 1 ]), & suc);
     EASValsSetColor(color);
     //EASValsSetColor( gc.getNodeColor() );
     EASValsSetLayer(OOFEG_RAW_GEOMETRY_LAYER);
@@ -3316,9 +3316,9 @@ Subdivision :: RS_Triangle :: drawGeometry()
     };
 
     EASValsSetLineWidth(OOFEG_RAW_GEOMETRY_WIDTH);
-    color = ColorGetPixelFromString(const_cast< char * >( colors [ 0 ] ), & suc);
+    color = ColorGetPixelFromString(const_cast< char * >(colors [ 0 ]), & suc);
     EASValsSetColor(color);
-    color = ColorGetPixelFromString(const_cast< char * >( colors [ 1 ] ), & suc);
+    color = ColorGetPixelFromString(const_cast< char * >(colors [ 1 ]), & suc);
     EASValsSetEdgeColor(color);
     //EASValsSetColor( gc.getElementColor() );
     //EASValsSetEdgeColor( gc.getElementEdgeColor() );
@@ -3355,9 +3355,9 @@ Subdivision :: RS_Tetra :: drawGeometry()
     };
 
     EASValsSetLineWidth(OOFEG_RAW_GEOMETRY_WIDTH);
-    color = ColorGetPixelFromString(const_cast< char * >( colors [ 0 ] ), & suc);
+    color = ColorGetPixelFromString(const_cast< char * >(colors [ 0 ]), & suc);
     EASValsSetColor(color);
-    color = ColorGetPixelFromString(const_cast< char * >( colors [ 1 ] ), & suc);
+    color = ColorGetPixelFromString(const_cast< char * >(colors [ 1 ]), & suc);
     EASValsSetEdgeColor(color);
     //EASValsSetColor( gc.getElementColor() );
     //EASValsSetEdgeColor( gc.getElementEdgeColor() );
@@ -3409,9 +3409,9 @@ Subdivision :: createMesh(TimeStep *tStep, int domainNumber, int domainSerNum, D
     // all nodes (including remote which are not needed) are imported to ensure consistency between
     // node number (in the mesh) and its parent number (in the domain) because the domain is used to import connectivities
     for ( int i = 1; i <= nnodes; i++ ) {
-        _node = new Subdivision :: RS_Node( i, mesh, i, * ( domain->giveNode(i)->giveCoordinates() ),
-                                            domain->giveErrorEstimator()->giveRemeshingCrit()->giveRequiredDofManDensity(i, tStep),
-                                            domain->giveNode(i)->isBoundary() );
+        _node = new Subdivision :: RS_Node( i, mesh, i, * ( domain->giveNode ( i )->giveCoordinates() ),
+                                           domain->giveErrorEstimator ( )->giveRemeshingCrit ( )->giveRequiredDofManDensity ( i, tStep ),
+                                           domain->giveNode ( i )->isBoundary() );
 #ifdef __PARALLEL_MODE
         _node->setGlobalNumber( domain->giveNode(i)->giveGlobalNumber() );
         _node->setParallelMode( domain->giveNode(i)->giveParallelMode() );
@@ -3581,7 +3581,7 @@ Subdivision :: createMesh(TimeStep *tStep, int domainNumber, int domainSerNum, D
                 if ( idofPtr->isPrimaryDof() ) {
                     dof = new MasterDof( idof, node, idofPtr->giveBcId(), idofPtr->giveIcId(), idofPtr->giveDofID() );
                 } else {
-                    SimpleSlaveDof *simpleSlaveDofPtr = dynamic_cast< SimpleSlaveDof * >( idofPtr );
+                    SimpleSlaveDof *simpleSlaveDofPtr = dynamic_cast< SimpleSlaveDof * >(idofPtr);
                     if ( simpleSlaveDofPtr ) {
                         dof = new SimpleSlaveDof( idof, node, simpleSlaveDofPtr->giveMasterDofManagerNum(), idofPtr->giveDofID() );
                     } else {
@@ -3599,7 +3599,7 @@ Subdivision :: createMesh(TimeStep *tStep, int domainNumber, int domainSerNum, D
 #endif
         } else {
             // newly created node (irregular)
-            node = new Node(inode, * dNew);
+            node = new Node(inode, *dNew);
             //create new node with default DOFs
             int ndofs = dofIDArrayPtr.giveSize();
             node->setNumberOfDofs(ndofs);
@@ -3612,21 +3612,21 @@ Subdivision :: createMesh(TimeStep *tStep, int domainNumber, int domainSerNum, D
                 if ( !dof ) {
                     if ( fabs(coords->at(1) - 200.0) < 0.000001 ) {
                         if ( coords->at(2) > -0.000001 && coords->at(2) < 97.500001 ) {
-                            dof = new MasterDof( idof, node, 1, 0, dofIDArrayPtr.at(idof) );
+                            dof = new MasterDof( idof, node, 1, 0, dofIDArrayPtr.at ( idof ) );
                         }
                     }
                 }
 
                 if ( !dof ) {
                     if ( fabs( coords->at(2) ) < 0.000001 ) {
-                        dof = new MasterDof( idof, node, 1, 0, dofIDArrayPtr.at(idof) );
+                        dof = new MasterDof( idof, node, 1, 0, dofIDArrayPtr.at ( idof ) );
                     }
                 }
 
                 if ( !dof ) {
                     if ( fabs( coords->at(1) ) < 0.000001 ) {
                         if ( coords->at(2) > 102.4999999 && coords->at(2) < 199.9999999 ) {
-                            dof = new SimpleSlaveDof( idof, node, 5, ( DofID ) dofIDArrayPtr.at(idof) );                                // HUHU
+                            dof = new SimpleSlaveDof( idof, node, 5, ( DofID ) dofIDArrayPtr.at ( idof ) );                                // HUHU
                         }
                     }
                 }
@@ -3634,13 +3634,13 @@ Subdivision :: createMesh(TimeStep *tStep, int domainNumber, int domainSerNum, D
                 if ( !dof ) {
                     if ( fabs(coords->at(2) - 200.0) < 0.000001 ) {
                         if ( coords->at(1) > 0.000001 && coords->at(1) < 200.000001 ) {
-                            dof = new SimpleSlaveDof( idof, node, 6, ( DofID ) dofIDArrayPtr.at(idof) );                                  // HUHU
+                            dof = new SimpleSlaveDof( idof, node, 6, ( DofID ) dofIDArrayPtr.at ( idof ) );                                  // HUHU
                         }
                     }
                 }
 
                 if ( !dof ) {
-                    dof = new MasterDof( idof, node, 0, 0, dofIDArrayPtr.at(idof) );
+                    dof = new MasterDof( idof, node, 0, 0, dofIDArrayPtr.at ( idof ) );
                 }
 
 #else
@@ -3651,7 +3651,7 @@ Subdivision :: createMesh(TimeStep *tStep, int domainNumber, int domainSerNum, D
                     if ( fabs( coords->at(1) ) < 0.000001 ) {
                         if ( coords->at(2) > 0.000001 ) {
                             if ( idof == 1 ) {
-                                dof = new MasterDof( idof, node, 1, 0, dofIDArrayPtr.at(idof) );
+                                dof = new MasterDof( idof, node, 1, 0, dofIDArrayPtr.at ( idof ) );
                             }
                         }
                     }
@@ -3661,14 +3661,14 @@ Subdivision :: createMesh(TimeStep *tStep, int domainNumber, int domainSerNum, D
                     if ( fabs( coords->at(2) ) < 0.000001 ) {
                         if ( coords->at(1) > 0.000001 ) {
                             if ( idof == 2 ) {
-                                dof = new MasterDof( idof, node, 1, 0, dofIDArrayPtr.at(idof) );
+                                dof = new MasterDof( idof, node, 1, 0, dofIDArrayPtr.at ( idof ) );
                             }
                         }
                     }
                 }
 
                 if ( !dof ) {
-                    dof = new MasterDof( idof, node, 0, 0, dofIDArrayPtr.at(idof) );
+                    dof = new MasterDof( idof, node, 0, 0, dofIDArrayPtr.at ( idof ) );
                 }
 
  #else
@@ -3680,7 +3680,7 @@ Subdivision :: createMesh(TimeStep *tStep, int domainNumber, int domainSerNum, D
                         if ( coords->at(2) > 0.000001 ) {
                             if ( coords->at(3) > 499.999999 ) {
                                 if ( idof == 1 || idof == 3 ) {
-                                    dof = new MasterDof( idof, node, 1, 0, dofIDArrayPtr.at(idof) );
+                                    dof = new MasterDof( idof, node, 1, 0, dofIDArrayPtr.at ( idof ) );
                                 }
                             }
                         }
@@ -3692,7 +3692,7 @@ Subdivision :: createMesh(TimeStep *tStep, int domainNumber, int domainSerNum, D
                         if ( coords->at(2) > 0.000001 ) {
                             if ( coords->at(3) > 499.999999 ) {
                                 if ( idof == 3 ) {
-                                    dof = new MasterDof( idof, node, 1, 0, dofIDArrayPtr.at(idof) );
+                                    dof = new MasterDof( idof, node, 1, 0, dofIDArrayPtr.at ( idof ) );
                                 }
                             }
                         }
@@ -3700,7 +3700,7 @@ Subdivision :: createMesh(TimeStep *tStep, int domainNumber, int domainSerNum, D
                 }
 
                 if ( !dof ) {
-                    dof = new MasterDof( idof, node, 0, 0, dofIDArrayPtr.at(idof) );
+                    dof = new MasterDof( idof, node, 0, 0, dofIDArrayPtr.at ( idof ) );
                 }
 
   #else
@@ -3715,18 +3715,18 @@ Subdivision :: createMesh(TimeStep *tStep, int domainNumber, int domainSerNum, D
                         if ( coords->at(2) > 70.000001 ) {
                             if ( fabs(dist - 7.0 * 7.0) < 0.01 ) {                            // be very tolerant (geometry is not precise)
                                 if ( idof == 1 || idof == 3 ) {
-                                    dof = new MasterDof( idof, node, 1, 0, ( DofIDItem ) dofIDArrayPtr.at(idof) );
+                                    dof = new MasterDof( idof, node, 1, 0, ( DofIDItem ) dofIDArrayPtr.at ( idof ) );
                                 }
                             }
                         } else if ( coords->at(2) > 67.9999999 ) {
                             rad = 18.0 - 11.0 / 5.5 * ( coords->at(2) - 64.5 );
                             if ( fabs(dist - rad * rad) < 0.01 ) {                            // be very tolerant (geometry is not precise)
                                 if ( idof == 1 || idof == 3 ) {
-                                    dof = new MasterDof( idof, node, 1, 0, ( DofIDItem ) dofIDArrayPtr.at(idof) );
+                                    dof = new MasterDof( idof, node, 1, 0, ( DofIDItem ) dofIDArrayPtr.at ( idof ) );
                                 }
 
                                 if ( idof == 2 ) {
-                                    dof = new MasterDof( idof, node, 2, 0, ( DofIDItem ) dofIDArrayPtr.at(idof) );
+                                    dof = new MasterDof( idof, node, 2, 0, ( DofIDItem ) dofIDArrayPtr.at ( idof ) );
                                 }
                             }
                         }
@@ -3735,24 +3735,24 @@ Subdivision :: createMesh(TimeStep *tStep, int domainNumber, int domainSerNum, D
 
                 if ( !dof ) {
                     if ( coords->at(1) > 299.999999 || coords->at(3) > 299.999999 ) {
-                        dof = new MasterDof( idof, node, 1, 0, ( DofIDItem ) dofIDArrayPtr.at(idof) );
+                        dof = new MasterDof( idof, node, 1, 0, ( DofIDItem ) dofIDArrayPtr.at ( idof ) );
                     }
                 }
 
                 if ( !dof ) {
                     if ( coords->at(1) < 0.00000001 ) {
                         if ( idof == 1 ) {
-                            dof = new MasterDof( idof, node, 1, 0, ( DofIDItem ) dofIDArrayPtr.at(idof) );
+                            dof = new MasterDof( idof, node, 1, 0, ( DofIDItem ) dofIDArrayPtr.at ( idof ) );
                         }
                     }
                 }
 
                 if ( !dof ) {
-                    dof = new MasterDof( idof, node, 0, 0, ( DofIDItem ) dofIDArrayPtr.at(idof) );
+                    dof = new MasterDof( idof, node, 0, 0, ( DofIDItem ) dofIDArrayPtr.at ( idof ) );
                 }
 
    #else
-                dof = new MasterDof( idof, node, 0, 0, dofIDArrayPtr.at(idof) );
+                dof = new MasterDof( idof, node, 0, 0, dofIDArrayPtr.at ( idof ) );
    #endif
   #endif
  #endif
@@ -3768,7 +3768,7 @@ Subdivision :: createMesh(TimeStep *tStep, int domainNumber, int domainSerNum, D
         }
 
         // set node coordinates
-        static_cast< Node * >( node )->setCoordinates( * mesh->giveNode(inode)->giveCoordinates() );
+        static_cast< Node * >(node)->setCoordinates( * mesh->giveNode(inode)->giveCoordinates() );
         node->setBoundaryFlag( mesh->giveNode(inode)->isBoundary() );
         ( * dNew )->setDofManager(inode, node);
     } // end creating dof managers
@@ -3882,7 +3882,7 @@ Subdivision :: createMesh(TimeStep *tStep, int domainNumber, int domainSerNum, D
     for ( int i = 1; i <= nic; i++ ) {
         DynamicInputRecord ir(*domain->giveIc(i));
 
-        ic = new InitialCondition(i, * dNew);
+        ic = new InitialCondition(i, *dNew);
         ic->initializeFrom(& ir);
         ( * dNew )->setInitialCondition(i, ic);
     }
@@ -3905,10 +3905,10 @@ Subdivision :: createMesh(TimeStep *tStep, int domainNumber, int domainSerNum, D
     timer.stopTimer();
 #ifdef __PARALLEL_MODE
     OOFEM_LOG_INFO( "[%d] Subdivision: created new mesh (%d nodes and %d elements) in %.2fs\n",
-                    ( * dNew )->giveEngngModel()->giveRank(), nnodes, eNum, timer.getUtime() );
+                   ( * dNew )->giveEngngModel()->giveRank(), nnodes, eNum, timer.getUtime() );
 #else
     OOFEM_LOG_INFO( "Subdivision: created new mesh (%d nodes and %d elements) in %.2fs\n",
-                    nnodes, eNum, timer.getUtime() );
+                   nnodes, eNum, timer.getUtime() );
 #endif
 
 #ifdef __PARALLEL_MODE
@@ -4237,7 +4237,7 @@ Subdivision :: bisectMesh()
             mesh->giveElement(ie)->drawGeometry();
         }
 
-        ESIEventLoop( YES, const_cast< char * >( "Subdivision Bisection; Press Ctrl-p to continue" ) );
+        ESIEventLoop( YES, const_cast< char * >("Subdivision Bisection; Press Ctrl-p to continue") );
  #endif
 #endif
     }
@@ -4518,7 +4518,7 @@ Subdivision :: smoothMesh()
 #endif
 #ifdef __PARALLEL_MODE
             if ( ( mesh->giveNode(in)->giveParallelMode() == DofManager_shared ) ||
-                 ( mesh->giveNode(in)->giveParallelMode() == DofManager_null ) ) {
+                ( mesh->giveNode(in)->giveParallelMode() == DofManager_null ) ) {
                 continue;                                                                                 // skip shared and remote node
             }
 
@@ -4609,7 +4609,7 @@ Subdivision :: exchangeSharedIrregulars()
 
         // there are some shared irregulars -> data exchange
         CommunicatorBuff cb(this->giveNumberOfProcesses(), CBT_dynamic);
-        Communicator com(domain->giveEngngModel(), & cb, this->giveRank(), this->giveNumberOfProcesses(), CommMode_Dynamic);
+        Communicator com(domain->giveEngngModel(), &cb, this->giveRank(), this->giveNumberOfProcesses(), CommMode_Dynamic);
 
         com.packAllData(this, this, & Subdivision :: packSharedIrregulars);
         com.initExchange(SHARED_IRREGULAR_DATA_TAG);
@@ -4787,7 +4787,7 @@ Subdivision :: unpackSharedIrregulars(Subdivision *s, ProcessCommunicator &pc)
  #endif
                 // compute required density of a new node
                 density = 0.5 * ( mesh->giveNode(iNode)->giveRequiredDensity() +
-                                  mesh->giveNode(jNode)->giveRequiredDensity() );
+                                 mesh->giveNode(jNode)->giveRequiredDensity() );
                 // create new irregular to receiver
                 iNum = mesh->giveNumberOfNodes() + 1;
                 irregular = new Subdivision :: RS_IrregularNode(iNum, mesh, 0, coords, density, true);
@@ -4840,17 +4840,17 @@ Subdivision :: unpackSharedIrregulars(Subdivision *s, ProcessCommunicator &pc)
                         // do not print global numbers of elements because they are not available (they are assigned at once after bisection);
                         // do not print global numbers of irregulars as these may not be available yet
                         OOFEM_LOG_INFO( "[%d] Shared irregular %d added on %d (edge %d, nodes %d %d [%d %d], nds %d %d %d %d [%d %d %d %d], ngbs %d %d %d %d, irr %d %d %d %d %d %d)\n",
-                                        myrank, iNum,
-                                        elem->giveNumber(), eIndex, iNode, jNode,
-                                        mesh->giveNode(iNode)->giveGlobalNumber(), mesh->giveNode(jNode)->giveGlobalNumber(),
-                                        elem->giveNode(1), elem->giveNode(2), elem->giveNode(3), elem->giveNode(4),
-                                        mesh->giveNode( elem->giveNode(1) )->giveGlobalNumber(),
-                                        mesh->giveNode( elem->giveNode(2) )->giveGlobalNumber(),
-                                        mesh->giveNode( elem->giveNode(3) )->giveGlobalNumber(),
-                                        mesh->giveNode( elem->giveNode(4) )->giveGlobalNumber(),
-                                        elem->giveNeighbor(1), elem->giveNeighbor(2), elem->giveNeighbor(3), elem->giveNeighbor(4),
-                                        elem->giveIrregular(1), elem->giveIrregular(2), elem->giveIrregular(3),
-                                        elem->giveIrregular(4), elem->giveIrregular(5), elem->giveIrregular(6) );
+                                       myrank, iNum,
+                                       elem->giveNumber(), eIndex, iNode, jNode,
+                                       mesh->giveNode(iNode)->giveGlobalNumber(), mesh->giveNode(jNode)->giveGlobalNumber(),
+                                       elem->giveNode(1), elem->giveNode(2), elem->giveNode(3), elem->giveNode(4),
+                                       mesh->giveNode( elem->giveNode(1) )->giveGlobalNumber(),
+                                       mesh->giveNode( elem->giveNode(2) )->giveGlobalNumber(),
+                                       mesh->giveNode( elem->giveNode(3) )->giveGlobalNumber(),
+                                       mesh->giveNode( elem->giveNode(4) )->giveGlobalNumber(),
+                                       elem->giveNeighbor(1), elem->giveNeighbor(2), elem->giveNeighbor(3), elem->giveNeighbor(4),
+                                       elem->giveIrregular(1), elem->giveIrregular(2), elem->giveIrregular(3),
+                                       elem->giveIrregular(4), elem->giveIrregular(5), elem->giveIrregular(6) );
                     }
 
  #endif
@@ -4872,7 +4872,7 @@ Subdivision :: assignGlobalNumbersToSharedIrregulars()
 {
     // there are some shared irregulars -> data exchange
     CommunicatorBuff cb(this->giveNumberOfProcesses(), CBT_dynamic);
-    Communicator com(domain->giveEngngModel(), & cb, this->giveRank(),
+    Communicator com(domain->giveEngngModel(), &cb, this->giveRank(),
                      this->giveNumberOfProcesses(), CommMode_Dynamic);
 
     com.packAllData(this, this, & Subdivision :: packIrregularSharedGlobnums);
@@ -5112,7 +5112,7 @@ Subdivision :: exchangeRemoteElements(Domain *d, IntArray &parentMap)
 {
     int nproc = this->giveNumberOfProcesses(), myrank = this->giveRank();
     CommunicatorBuff cb(nproc, CBT_dynamic);
-    Communicator com(d->giveEngngModel(), & cb, myrank, nproc, CommMode_Dynamic);
+    Communicator com(d->giveEngngModel(), &cb, myrank, nproc, CommMode_Dynamic);
 
     // move existing dofmans and elements, that will be local on current partition,
     // into local map
@@ -5203,7 +5203,7 @@ Subdivision :: packRemoteElements(RS_packRemoteElemsStruct *s, ProcessCommunicat
         for ( in = 1; in <= nn; in++ ) {
             inode = relemPtr->giveDofManagerNumber(in);
             if ( ( d->giveDofManager(inode)->giveParallelMode() == DofManager_local ) ||
-                 ( ( d->giveDofManager(inode)->giveParallelMode() == DofManager_shared ) && ( !d->giveDofManager(inode)->givePartitionList()->contains(rproc) ) ) ) {
+                ( ( d->giveDofManager(inode)->giveParallelMode() == DofManager_shared ) && ( !d->giveDofManager(inode)->givePartitionList()->contains(rproc) ) ) ) {
                 // nodesToSend is set, therefore duplicity is avoided
                 nodesToSend.insert(inode);
             }
@@ -5401,7 +5401,7 @@ Subdivision :: exchangeSharedEdges()
         // there are some shared edges -> data exchange
 
         CommunicatorBuff cb(this->giveNumberOfProcesses(), CBT_dynamic);
-        Communicator com(domain->giveEngngModel(), & cb, this->giveRank(), this->giveNumberOfProcesses(), CommMode_Dynamic);
+        Communicator com(domain->giveEngngModel(), &cb, this->giveRank(), this->giveNumberOfProcesses(), CommMode_Dynamic);
 
         com.packAllData(this, this, & Subdivision :: packSharedEdges);
 
@@ -5583,7 +5583,7 @@ Subdivision :: unpackSharedEdges(Subdivision *s, ProcessCommunicator &pc)
 
  #ifdef __VERBOSE_PARALLEL
                 OOFEM_LOG_INFO( "[%d] Partition %d added to shared edge %d (%d %d) [%d %d]\n",
-                                myrank, iproc, elem->giveSharedEdge(eIndex), iNode, jNode, edgeInfo.at(1), edgeInfo.at(2) );
+                               myrank, iproc, elem->giveSharedEdge(eIndex), iNode, jNode, edgeInfo.at(1), edgeInfo.at(2) );
  #endif
             }
         } else {
@@ -5623,7 +5623,7 @@ Subdivision :: RS_Mesh :: sharedNodeGlobal2Local(int _globnum)
 
 
 int
-Subdivision :: RS_CompareNodePositions :: operator()(int i, int j)
+Subdivision :: RS_CompareNodePositions :: operator() (int i, int j)
 {
     double icoord, jcoord;
 

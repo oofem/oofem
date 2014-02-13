@@ -73,7 +73,7 @@ protected:
 
 
 public:
-    LargeStrainMasterMaterial(int n, Domain *d);
+    LargeStrainMasterMaterial(int n, Domain * d);
     virtual ~LargeStrainMasterMaterial();
 
     virtual int hasMaterialModeCapability(MaterialMode mode);
@@ -89,10 +89,10 @@ public:
 
     virtual MaterialStatus *CreateStatus(GaussPoint *gp) const;
 
-    virtual void give3dMaterialStiffnessMatrix(FloatMatrix & answer,
+    virtual void give3dMaterialStiffnessMatrix(FloatMatrix &answer,
                                                MatResponseMode,
-                                               GaussPoint * gp,
-                                               TimeStep * tStep);
+                                               GaussPoint *gp,
+                                               TimeStep *tStep);
 
     virtual void giveRealStressVector(FloatArray &answer, GaussPoint *, const FloatArray &, TimeStep *)
     { OOFEM_ERROR("LsMasterMat: giveRealStressVector is not implemented, this material is designed for large strains only"); }
@@ -115,7 +115,7 @@ protected:
     int slaveMat;
 
 public:
-    LargeStrainMasterMaterialStatus(int n, Domain *d, GaussPoint *g, int s);
+    LargeStrainMasterMaterialStatus(int n, Domain * d, GaussPoint * g, int s);
     virtual ~LargeStrainMasterMaterialStatus();
 
 

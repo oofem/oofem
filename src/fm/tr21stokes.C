@@ -74,7 +74,7 @@ Tr21Stokes :: Tr21Stokes(int n, Domain *aDomain) : FMElement(n, aDomain)
 }
 
 Tr21Stokes :: ~Tr21Stokes()
-{}
+{ }
 
 void Tr21Stokes :: computeGaussPoints()
 {
@@ -123,7 +123,7 @@ void Tr21Stokes :: giveDofManDofIDMask(int inode, EquationID ut, IntArray &answe
 double Tr21Stokes :: computeVolumeAround(GaussPoint *gp)
 {
     double detJ = fabs( this->interpolation_quad.giveTransformationJacobian( * gp->giveCoordinates(), FEIElementGeometryWrapper(this) ) );
-    return detJ * gp->giveWeight();
+    return detJ *gp->giveWeight();
 }
 
 void Tr21Stokes :: giveCharacteristicVector(FloatArray &answer, CharType mtrx, ValueModeType mode,
@@ -209,7 +209,7 @@ void Tr21Stokes :: computeExternalForcesVector(FloatArray &answer, TimeStep *tSt
         bcGeomType ltype = load->giveBCGeoType();
 
         if ( ltype == EdgeLoadBGT ) {
-            this->computeBoundaryLoadVector(vec, static_cast< BoundaryLoad * >( load ), load_id, ExternalForcesVector, VM_Total, tStep);
+            this->computeBoundaryLoadVector(vec, static_cast< BoundaryLoad * >(load), load_id, ExternalForcesVector, VM_Total, tStep);
             answer.add(vec);
         }
     }
@@ -268,7 +268,7 @@ void Tr21Stokes :: computeBoundaryLoadVector(FloatArray &answer, BoundaryLoad *l
     }
 
     if ( load->giveType() == TransmissionBC ) { // Neumann boundary conditions (traction)
-        BoundaryLoad *boundaryLoad = static_cast< BoundaryLoad * >( load );
+        BoundaryLoad *boundaryLoad = static_cast< BoundaryLoad * >(load);
 
         int numberOfEdgeIPs = ( int ) ceil( ( boundaryLoad->giveApproxOrder() + 1. ) / 2. ) * 2;
 
@@ -392,16 +392,16 @@ Interface *Tr21Stokes :: giveInterface(InterfaceType it)
 {
     switch ( it ) {
     case NodalAveragingRecoveryModelInterfaceType:
-        return static_cast< NodalAveragingRecoveryModelInterface * >( this );
+        return static_cast< NodalAveragingRecoveryModelInterface * >(this);
 
     case ZZNodalRecoveryModelInterfaceType:
-        return static_cast< ZZNodalRecoveryModelInterface * >( this );
+        return static_cast< ZZNodalRecoveryModelInterface * >(this);
 
     case SpatialLocalizerInterfaceType:
-        return static_cast< SpatialLocalizerInterface * >( this );
+        return static_cast< SpatialLocalizerInterface * >(this);
 
     case EIPrimaryUnknownMapperInterfaceType:
-        return static_cast< EIPrimaryUnknownMapperInterface * >( this );
+        return static_cast< EIPrimaryUnknownMapperInterface * >(this);
 
     default:
         return FMElement :: giveInterface(it);

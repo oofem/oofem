@@ -107,7 +107,7 @@ protected:
 
 public:
     /// Constructor
-    DirectErrorIndicatorRC(int n, ErrorEstimator *e);
+    DirectErrorIndicatorRC(int n, ErrorEstimator * e);
     virtual ~DirectErrorIndicatorRC();
 
     virtual double giveRequiredDofManDensity(int num, TimeStep *tStep, int relative = 0);

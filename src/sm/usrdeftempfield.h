@@ -73,7 +73,7 @@ public:
      * @param n Load time function number
      * @param d Domain to which new object will belongs.
      */
-    UserDefinedTemperatureField(int n, Domain *d) : StructuralTemperatureLoad(n, d), myParser() { }
+    UserDefinedTemperatureField(int n, Domain * d) : StructuralTemperatureLoad(n, d), myParser() { }
     /// Destructor
     virtual ~UserDefinedTemperatureField() { }
 

@@ -53,9 +53,9 @@ class FEI3dHexaTriQuad;
  * @author Mikael Öhman
  */
 class Hexa21Stokes : public FMElement,
-    public NodalAveragingRecoveryModelInterface,
-    public SpatialLocalizerInterface,
-    public EIPrimaryUnknownMapperInterface
+public NodalAveragingRecoveryModelInterface,
+public SpatialLocalizerInterface,
+public EIPrimaryUnknownMapperInterface
 {
 protected:
     /// Interpolation for pressure
@@ -78,7 +78,9 @@ protected:
             momentum_ordering(i * 3 + 0) = j++;
             momentum_ordering(i * 3 + 1) = j++;
             momentum_ordering(i * 3 + 2) = j++;
-            if ( i < 8 ) { j++; }
+            if ( i < 8 ) {
+                j++;
+            }
         }
 
         conservation_ordering.setValues(8, 4, 8, 12, 16, 20, 24, 28, 32);
@@ -152,7 +154,7 @@ protected:
     }
 
 public:
-    Hexa21Stokes(int n, Domain *d);
+    Hexa21Stokes(int n, Domain * d);
     virtual ~Hexa21Stokes();
 
     virtual void computeGaussPoints();

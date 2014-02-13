@@ -70,7 +70,7 @@ protected:
 
 public:
     /// Constructor. Creates empty Init Module with number n.
-    InitModule(int n, EngngModel *e);
+    InitModule(int n, EngngModel * e);
     /// Destructor
     virtual ~InitModule();
     /// Initializes receiver according to object description stored in input record.

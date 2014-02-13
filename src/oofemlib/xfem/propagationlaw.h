@@ -90,8 +90,8 @@ public:
 class OOFEM_EXPORT PLDoNothing : public PropagationLaw
 {
 public:
-    PLDoNothing() {};
-    virtual ~PLDoNothing() {};
+    PLDoNothing() { };
+    virtual ~PLDoNothing() { };
 
     virtual const char *giveClassName() const { return "PLDoNothing"; }
     virtual const char *giveInputRecordName() const { return _IFT_PLDoNothing_Name; }
@@ -99,7 +99,7 @@ public:
     virtual IRResultType initializeFrom(InputRecord *ir) { return IRRT_OK; }
     virtual void giveInputRecord(DynamicInputRecord &input);
 
-    virtual void propagateInterfaces(Domain &iDomain, EnrichmentDomain &ioEnrDom) {};
+    virtual void propagateInterfaces(Domain &iDomain, EnrichmentDomain &ioEnrDom) { };
 };
 
 /**
@@ -109,8 +109,8 @@ public:
 class OOFEM_EXPORT PLCrackPrescribedDir : public PropagationLaw
 {
 public:
-    PLCrackPrescribedDir() : mAngle(0.0), mIncrementLength(0.0) {};
-    virtual ~PLCrackPrescribedDir() {};
+    PLCrackPrescribedDir() : mAngle(0.0), mIncrementLength(0.0) { };
+    virtual ~PLCrackPrescribedDir() { };
 
     virtual const char *giveClassName() const { return "PLCrackPrescribedDir"; }
     virtual const char *giveInputRecordName() const { return _IFT_PLCrackPrescribedDir_Name; }
@@ -149,8 +149,8 @@ protected:
 class OOFEM_EXPORT PLHoopStressCirc : public PropagationLaw
 {
 public:
-    PLHoopStressCirc() : mRadius(0.0), mAngleInc(0.0), mIncrementLength(0.0), mHoopStressThreshold(0.0), mUseRadialBasisFunc(false) {};
-    virtual ~PLHoopStressCirc() {};
+    PLHoopStressCirc() : mRadius(0.0), mAngleInc(0.0), mIncrementLength(0.0), mHoopStressThreshold(0.0), mUseRadialBasisFunc(false) { };
+    virtual ~PLHoopStressCirc() { };
 
     virtual const char *giveClassName() const { return "PLHoopStressCirc"; }
     virtual const char *giveInputRecordName() const { return _IFT_PLHoopStressCirc_Name; }

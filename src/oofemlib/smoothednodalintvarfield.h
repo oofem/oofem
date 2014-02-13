@@ -64,7 +64,7 @@ public:
      * @param st Determines the type of nodal recovery model used.
      * @param d Domain which field belongs to.
      */
-    SmoothedNodalInternalVariableField(InternalStateType ist, FieldType b, NodalRecoveryModel :: NodalRecoveryModelType st, Domain *d);
+    SmoothedNodalInternalVariableField(InternalStateType ist, FieldType b, NodalRecoveryModel :: NodalRecoveryModelType st, Domain * d);
     virtual ~SmoothedNodalInternalVariableField();
 
     virtual int evaluateAt(FloatArray &answer, FloatArray &coords, ValueModeType mode, TimeStep *tStep);

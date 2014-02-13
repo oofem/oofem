@@ -124,7 +124,7 @@ public:
      * @param w Integration weight.
      * @param mode Material mode.
      */
-    GaussPoint(IntegrationRule *ir, int n, FloatArray *a, double w, MaterialMode mode);
+    GaussPoint(IntegrationRule * ir, int n, FloatArray * a, double w, MaterialMode mode);
     /// Destructor
     virtual ~GaussPoint();
 
@@ -135,9 +135,17 @@ public:
     void setCoordinates(const FloatArray &c) { * coordinates = c; }
 
     /// Returns local sub-patch coordinates of the receiver
-    FloatArray *giveLocalCoordinates() { if ( localCoordinates ) { return localCoordinates; } else { return coordinates; } }
+    FloatArray *giveLocalCoordinates() { if ( localCoordinates ) {
+                                             return localCoordinates;
+                                         } else {
+                                             return coordinates;
+                                         } }
     void setLocalCoordinates(const FloatArray &c)
-    { if ( localCoordinates ) { * localCoordinates = c; } else { localCoordinates = new FloatArray(c); } }
+    { if ( localCoordinates ) {
+          * localCoordinates = c;
+      } else {
+          localCoordinates = new FloatArray(c);
+      } }
 
     /// Returns  integration weight of receiver.
     virtual double giveWeight() { return weight; }

@@ -63,7 +63,7 @@ protected:
     FloatMatrix k; ///< Conductivity/permeability matrix. This matrix is read from the input file and should be given row-wise as a vector of 4, eg "C 4 1 0 0 1".
 
 public:
-    AnisotropicMassTransferMaterial(int n, Domain *d) : TransportMaterial(n, d) { };
+    AnisotropicMassTransferMaterial(int n, Domain * d) : TransportMaterial(n, d) { };
     virtual ~AnisotropicMassTransferMaterial() { };
 
     virtual IRResultType initializeFrom(InputRecord *ir);

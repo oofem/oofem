@@ -141,7 +141,7 @@ MPIBuffer :: packArray(MPI_Comm communicator, const void *src, int n, MPI_Dataty
         }
     }
 
-    void *__src = const_cast< void * >( src );   // throw away const
+    void *__src = const_cast< void * >(src);   // throw away const
     return ( MPI_Pack(__src, n, type, this->buff, this->size,
                       & this->curr_pos, communicator) == MPI_SUCCESS );
 }

@@ -78,7 +78,7 @@ public:
      * @param gp Gauss point that the status belongs to.
      * @param inputfile The input file describing the micro problem.
      */
-    FE2FluidMaterialStatus(int n, Domain *d, GaussPoint *gp, const std :: string &inputfile);
+    FE2FluidMaterialStatus(int n, Domain * d, GaussPoint * gp, const std :: string & inputfile);
     /// Destructor
     virtual ~FE2FluidMaterialStatus();
 
@@ -135,7 +135,7 @@ public:
      * @param n Material number.
      * @param d Domain to which new material will belong.
      */
-    FE2FluidMaterial(int n, Domain *d) : FluidDynamicMaterial(n, d) { }
+    FE2FluidMaterial(int n, Domain * d) : FluidDynamicMaterial(n, d) { }
     /// Destructor.
     virtual ~FE2FluidMaterial() { }
 

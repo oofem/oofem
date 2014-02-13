@@ -461,7 +461,7 @@ J2Mat :: computeJ2InvariantAt(const FloatArray &stressVector)
     v3 = ( ( stressVector.at(3) - stressVector.at(1) ) * ( stressVector.at(3) - stressVector.at(1) ) );
 
     answer = ( 1. / 6. ) * ( v1 + v2 + v3 ) + stressVector.at(4) * stressVector.at(4) +
-             stressVector.at(5) * stressVector.at(5) + stressVector.at(6) * stressVector.at(6);
+    stressVector.at(5) * stressVector.at(5) + stressVector.at(6) * stressVector.at(6);
 
     return answer;
 }

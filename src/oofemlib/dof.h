@@ -115,7 +115,7 @@ public:
      * @param id Physical meaning type.
      * @see cltypes.h, DofIDItem type
      */
-    Dof(int i, DofManager *aNode, DofIDItem id = Undef);
+    Dof(int i, DofManager * aNode, DofIDItem id = Undef);
     /// Destructor.
     virtual ~Dof() { }
 
@@ -331,7 +331,7 @@ public:
      * to return an updated number of specified entity type based on old number.
      * @param f Function that converts old to new equation number.
      */
-    virtual void updateLocalNumbering(EntityRenumberingFunctor &f) {}
+    virtual void updateLocalNumbering(EntityRenumberingFunctor &f) { }
 
     /**
      * Prints Dof output (it prints value of unknown related to dof at given timeStep).
@@ -398,21 +398,21 @@ public:
     /// Restores the receiver state previously written in stream.
     virtual contextIOResultType restoreContext(DataStream *stream, ContextMode mode, void *obj = NULL);
     /// Overwrites the boundary condition id (0-inactive BC), intended for specific purposes such as coupling of bc's in multiscale simulations
-    virtual void setBcId(int bcId) {}
+    virtual void setBcId(int bcId) { }
     /// Overwrites the initial condition id (0-inactive IC)
-    virtual void setIcId(int icId) {}
+    virtual void setIcId(int icId) { }
 
     /**
      * Sets a specific equation number to receiver.
      * @param equationNumber New equation number.
      */
-    virtual void setEquationNumber(int equationNumber) {};
+    virtual void setEquationNumber(int equationNumber) { };
 
     /**
      * Sets the dictionary of unknowns for receiver.
      * @param unknowns New dictionary of unknowns.
      */
-    virtual void setUnknowns(Dictionary *unknowns) {};
+    virtual void setUnknowns(Dictionary *unknowns) { };
     /**
      * Receives the dictionary of unknowns in receiver.
      * @return Dictionary of unknowns for DOF.

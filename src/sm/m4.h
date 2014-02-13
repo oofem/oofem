@@ -62,7 +62,7 @@ namespace oofem {
 class M4MaterialStatus : public StructuralMaterialStatus
 {
 public:
-    M4MaterialStatus(int n, Domain *d, GaussPoint *g);
+    M4MaterialStatus(int n, Domain * d, GaussPoint * g);
     virtual ~M4MaterialStatus();
 
     // definition
@@ -97,7 +97,7 @@ public:
      * @param n Material number.
      * @param d Domain to which newly created material belongs.
      */
-    M4Material(int n, Domain *d);
+    M4Material(int n, Domain * d);
     /// Destructor.
     virtual ~M4Material() { }
 

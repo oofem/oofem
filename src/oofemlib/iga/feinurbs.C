@@ -51,7 +51,7 @@ void NURBSInterpolation :: evalN(FloatArray &answer, const FloatArray &lcoords, 
     IntArray span(nsd);
     double sum = 0.0, val;
     int count, c = 1, i, l, k, m, ind, indx, uind, vind, tind;
-    std :: vector< FloatArray > N;
+    std :: vector< FloatArray >N;
 
     if ( gw->knotSpan ) {
         span = * gw->knotSpan;
@@ -521,14 +521,14 @@ double NURBSInterpolation :: evaldNdx(FloatMatrix &answer, const FloatArray &lco
                     tmp1(2) = ders [ 0 ](0, k) * ders [ 1 ](0, l) * ders [ 2 ](1, m) * w * weight - ders [ 0 ](0, k) * ders [ 1 ](0, l) * ders [ 2 ](0, m) * w * wders(3);
 
                     answer(cnt, 0) = ( ( jacobian(1, 1) * jacobian(2, 2) - jacobian(1, 2) * jacobian(2, 1) ) * tmp1(0) +
-                                       ( jacobian(0, 2) * jacobian(2, 1) - jacobian(0, 1) * jacobian(2, 2) ) * tmp1(1) +
-                                       ( jacobian(0, 1) * jacobian(1, 2) - jacobian(0, 2) * jacobian(1, 1) ) * tmp1(2) ) / product;                                                     // dN/dx
+                                      ( jacobian(0, 2) * jacobian(2, 1) - jacobian(0, 1) * jacobian(2, 2) ) * tmp1(1) +
+                                      ( jacobian(0, 1) * jacobian(1, 2) - jacobian(0, 2) * jacobian(1, 1) ) * tmp1(2) ) / product;                                                      // dN/dx
                     answer(cnt, 1) = ( ( jacobian(1, 2) * jacobian(2, 0) - jacobian(1, 0) * jacobian(2, 2) ) * tmp1(0) +
-                                       ( jacobian(0, 0) * jacobian(2, 2) - jacobian(0, 2) * jacobian(2, 0) ) * tmp1(1) +
-                                       ( jacobian(0, 2) * jacobian(1, 0) - jacobian(0, 0) * jacobian(1, 2) ) * tmp1(2) ) / product;                                                     // dN/dy
+                                      ( jacobian(0, 0) * jacobian(2, 2) - jacobian(0, 2) * jacobian(2, 0) ) * tmp1(1) +
+                                      ( jacobian(0, 2) * jacobian(1, 0) - jacobian(0, 0) * jacobian(1, 2) ) * tmp1(2) ) / product;                                                      // dN/dy
                     answer(cnt, 2) = ( ( jacobian(1, 0) * jacobian(2, 1) - jacobian(1, 1) * jacobian(2, 0) ) * tmp1(0) +
-                                       ( jacobian(0, 1) * jacobian(2, 0) - jacobian(0, 0) * jacobian(2, 1) ) * tmp1(1) +
-                                       ( jacobian(0, 0) * jacobian(1, 1) - jacobian(0, 1) * jacobian(1, 0) ) * tmp1(2) ) / product;                                                     // dN/dz
+                                      ( jacobian(0, 1) * jacobian(2, 0) - jacobian(0, 0) * jacobian(2, 1) ) * tmp1(1) +
+                                      ( jacobian(0, 0) * jacobian(1, 1) - jacobian(0, 1) * jacobian(1, 0) ) * tmp1(2) ) / product;                                                      // dN/dz
                     cnt++;
                 }
 

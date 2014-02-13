@@ -75,7 +75,7 @@ protected:
 
 public:
     /// Constructor.
-    SPRNodalRecoveryModel(Domain *d);
+    SPRNodalRecoveryModel(Domain * d);
     /// Destructor.
     virtual ~SPRNodalRecoveryModel();
 

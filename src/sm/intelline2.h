@@ -56,7 +56,7 @@ protected:
     static FEI2dLineQuad interp;
 
 public:
-    IntElLine2(int n, Domain *d);
+    IntElLine2(int n, Domain * d);
     virtual ~IntElLine2() { }
     virtual FEInterpolation *giveInterpolation() const;
     virtual int computeNumberOfDofs() { return 12; }

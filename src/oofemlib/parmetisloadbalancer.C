@@ -369,7 +369,7 @@ ParmetisLoadBalancer :: labelDofManagers()
 
     /* Exchange new partitions for shared nodes */
     CommunicatorBuff cb(nproc, CBT_dynamic);
-    Communicator com(domain->giveEngngModel(), & cb, myrank, nproc, CommMode_Dynamic);
+    Communicator com(domain->giveEngngModel(), &cb, myrank, nproc, CommMode_Dynamic);
     com.packAllData(this, & ParmetisLoadBalancer :: packSharedDmanPartitions);
     com.initExchange(SHARED_DOFMAN_PARTITIONS_TAG);
     com.unpackAllData(this, & ParmetisLoadBalancer :: unpackSharedDmanPartitions);
@@ -513,7 +513,7 @@ ParmetisLoadBalancer :: packSharedDmanPartitions(ProcessCommunicator &pc)
         dofman = domain->giveDofManager(idofman);
         // test if iproc is in list of existing shared partitions
         if ( ( dofman->giveParallelMode() == DofManager_shared ) &&
-             ( dofman->givePartitionList()->findFirstIndexOf(iproc) ) ) {
+            ( dofman->givePartitionList()->findFirstIndexOf(iproc) ) ) {
             // send new partitions to remote representation
             // fprintf (stderr, "[%d] sending shared plist of %d to [%d]\n", myrank, dofman->giveGlobalNumber(), iproc);
             pcbuff->packInt( dofman->giveGlobalNumber() );

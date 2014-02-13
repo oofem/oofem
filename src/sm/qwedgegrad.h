@@ -58,7 +58,7 @@ protected:
 
 public:
     QWedgeGrad(int, Domain *);
-    virtual ~QWedgeGrad() {}
+    virtual ~QWedgeGrad() { }
 
     virtual IRResultType initializeFrom(InputRecord *ir);
     virtual void giveDofManDofIDMask(int inode, EquationID ut, IntArray &answer) const;

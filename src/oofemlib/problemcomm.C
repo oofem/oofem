@@ -91,7 +91,7 @@ ProblemCommunicator :: setUpCommunicationMapsForNodeCut(EngngModel *pm, bool exc
     IntArray pos(size);
     IntArray **maps = new IntArray * [ size ];
     for ( i = 0; i < size; i++ ) {
-        maps [ i ] = new IntArray( domainNodeSendCount.at(i + 1) );
+        maps [ i ] = new IntArray( domainNodeSendCount.at ( i + 1 ) );
     }
 
 
@@ -176,7 +176,7 @@ ProblemCommunicator :: setUpCommunicationMapsForElementCut(EngngModel *pm,
         IntArray pos(size);
         IntArray **maps = new IntArray * [ size ];
         for ( i = 0; i < size; i++ ) {
-            maps [ i ] = new IntArray( domainNodeRecvCount.at(i + 1) );
+            maps [ i ] = new IntArray( domainNodeRecvCount.at ( i + 1 ) );
         }
 
         // allocate also domain receive list to be broadcasted
@@ -390,7 +390,7 @@ ProblemCommunicator :: setUpCommunicationMapsForRemoteElementMode(EngngModel *pm
         IntArray pos(size);
         IntArray **maps = new IntArray * [ size ];
         for ( i = 0; i < size; i++ ) {
-            maps [ i ] = new IntArray( domainNodeRecvCount.at(i + 1) );
+            maps [ i ] = new IntArray( domainNodeRecvCount.at ( i + 1 ) );
         }
 
         // allocate also domain receive list to be broadcasted
@@ -1001,13 +1001,13 @@ int
 ProblemCommunicator :: DofManCmp(int i, int j)
 {
     return ( engngModel->giveDomain(1)->giveDofManager(i)->giveGlobalNumber() -
-             engngModel->giveDomain(1)->giveDofManager(j)->giveGlobalNumber() );
+            engngModel->giveDomain(1)->giveDofManager(j)->giveGlobalNumber() );
 }
 int
 ProblemCommunicator :: ElemCmp(int i, int j)
 {
     return ( engngModel->giveDomain(1)->giveElement(i)->giveGlobalNumber() -
-             engngModel->giveDomain(1)->giveElement(j)->giveGlobalNumber() );
+            engngModel->giveDomain(1)->giveElement(j)->giveGlobalNumber() );
 }
 } // end namespace oofem
 #endif

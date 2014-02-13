@@ -614,7 +614,7 @@ Supported modes& 1dMat, PlaneStrain, 3dMat, 3dMatF\\
 
 VTKxml output can report Mises stress, which equals to $\sqrt{3J_2}$. When no hardening/softening exists, Mises stress reaches values up to given uniaxial yield stress $\param{sig0}$. 
 
-\subsubsection{Mises plasticity model with isotropic damage, nonlocal - MisesMatNL}
+\subsubsection{Mises plasticity model with isotropic damage, nonlocal - MisesMatNl, MisesMatGrad}
 The small-strain version of the model is regularized by the over-nonlocal formulation with damage driven by a combination of local and nonlocal cumulated plastic strain,
 \begin{equation}\label{overKappa1}
 \hat{\kappa} = (1-m)\kappa + m\bar{\kappa},
@@ -662,8 +662,8 @@ multiplying the Laplacean in (\ref{implicitGradient}), and thus has the dimensio
 \hline
 Description & Nonlocal Mises plasticity with isotropic hardening\\
 \hline
-Record Format & \descitem{MisesMatNL} \elemparam{}{in} \elemparam{d}{rn} \elemparam{E}{rn} \elemparam{n}{rn} 
-\elemparam{sig0}{rn} \elemparam{H}{rn} \elemparam{omega\_crit}{rn}\elemparam{a}{rn}\elemparam{r}{rn}\elemparam{m}{rn} \\
+Record Format & \descitem{MisesMatNl} \elemparam{}{in} \elemparam{d}{rn} \elemparam{E}{rn} \elemparam{n}{rn} 
+\elemparam{sig0}{rn} \elemparam{H}{rn} \elemparam{omega\_crit}{rn}\elemparam{a}{rn}\elemparam{r}{rn}\elemparam{m}{rn}[\elemparam{wft}{in}][\elemparam{scalingType}{in}] \\
 Parameters &- \param{} material number\\
 &- \param{d} material density\\
 &- \param{E} Young's modulus\\
@@ -674,6 +674,21 @@ Parameters &- \param{} material number\\
 &- \param{a} exponent in damage law\\
 &- \param{r} nonlocal interaction radius $R$  from eq.~(\ref{alpha0})\\
 &- \param{m} over-nonlocal parameter\\
+&- \param{wft} selects the type of nonlocal weight function (see Section~\ref{sec:nidm}):
+\begin{itemize}\setlength{\itemsep}{-3pt}
+\item[1 -] default, quartic spline (bell-shaped function with bounded support)
+\item[2 -] Gaussian function
+\item[3 -] exponential function (Green function in 1D)
+\item[4 -] uniform averaging up to distance $R$
+\item[5 -] uniform averaging over one finite element
+\item[6 -] special function obtained by reducing the 2D exponential function to 1D (by numerical integration)
+\end{itemize}\\
+&- \param{scalingType} selects the type of scaling of the weight function (e.g.\ near a boundary; see Section~\ref{sec:nidm}):
+\begin{itemize}\setlength{\itemsep}{-5pt}
+\item[1 -] default, standard scaling with integral of weight function in the denominator
+\item[2 -] no scaling (the weight function normalized in an infinite body is used even near a boundary)
+\item[3 -] Borino scaling (local complement)
+\end{itemize}\\
 Supported modes& 1dMat, PlaneStrain, 3dMat\\
 \hline
 \end{tabular}
@@ -709,7 +724,7 @@ Supported modes& 1dMat, PlaneStrain, 3dMat\\
 
 
 
-\subsubsection{Rankine plasticity model with isotropic damage}
+\subsubsection{Rankine plasticity model with isotropic damage and its nonlocal formulations - RankMat, RankMatNl, RankMatGrad}
 \label{sec:rankplast}
 
 This model has a very similar structure to the model described in Section~\ref{sec:misplast},
@@ -792,7 +807,7 @@ Supported modes& PlaneStress\\
 Description & Nonlocal Rankine plasticity with isotropic hardening and damage\\
 \hline
 Record Format & \descitem{RankMatNl}  \elemparam{}{in}
-\elemparam{d}{rn} \elemparam{E}{rn} \elemparam{n}{rn} \elemparam{plasthardtype}{in} \elemparam{sig0}{rn} \elemparam{H}{rn} \elemparam{delSigY}{rn} \elemparam{yieldtol}{rn} (\elemparam{gf}{rn} $\|$ \elemparam{a}{rn})\elemparam{r}{rn}\elemparam{m}{rn} \\
+\elemparam{d}{rn} \elemparam{E}{rn} \elemparam{n}{rn} \elemparam{plasthardtype}{in} \elemparam{sig0}{rn} \elemparam{H}{rn} \elemparam{delSigY}{rn} \elemparam{yieldtol}{rn} (\elemparam{gf}{rn} $\|$ \elemparam{a}{rn})\elemparam{r}{rn}\elemparam{m}{rn}[\elemparam{wft}{in}][\elemparam{scalingType}{in}] \\
 Parameters &- \param{} material number\\
 &- \param{d} material density\\
 &- \param{E} Young's modulus\\
@@ -806,10 +821,25 @@ Parameters &- \param{} material number\\
 &- \param{a} exponent in damage law (\ref{damagelawmp})\\
 &- \param{r} internal length scale parameter $l^2$ from eq.~(\ref{implicitGradient})\\
 &- \param{m} over-nonlocal parameter (default value 1.)\\
+&- \param{wft} selects the type of nonlocal weight function (see Section~\ref{sec:nidm}):
+\begin{itemize}\setlength{\itemsep}{-3pt}
+\item[1 -] default, quartic spline (bell-shaped function with bounded support)
+\item[2 -] Gaussian function
+\item[3 -] exponential function (Green function in 1D)
+\item[4 -] uniform averaging up to distance $R$
+\item[5 -] uniform averaging over one finite element
+\item[6 -] special function obtained by reducing the 2D exponential function to 1D (by numerical integration)
+\end{itemize}\\
+&- \param{scalingType} selects the type of scaling of the weight function (e.g.\ near a boundary; see Section~\ref{sec:nidm}):
+\begin{itemize}\setlength{\itemsep}{-5pt}
+\item[1 -] default, standard scaling with integral of weight function in the denominator
+\item[2 -] no scaling (the weight function normalized in an infinite body is used even near a boundary)
+\item[3 -] Borino scaling (local complement)
+\end{itemize}\\
 Supported modes& PlaneStress\\
 \hline
 \end{tabular}
-\caption{Nonlocal Rankine plasticity -- summary.}
+\caption{Nonlocal integral Rankine plasticity -- summary.}
 \label{rankineMatNl_table}
 %\end{center}
 \end{table}
@@ -1350,7 +1380,7 @@ strain tensor. The choice of the specific expression
 for the equivalent strain affects the shape of the elastic domain
 in the strain space and plays a similar role to the choice of a yield
 condition in plasticity.
-The following definitions of equivalent strain are currently supported:
+The following definitions of {\bf equivalent strain} are currently supported:
 \begin{itemize}
 \item {\bf Mazars} (1984) definition based on norm of positive part of strain:
 \begin{equation}
@@ -1437,7 +1467,7 @@ One should be aware that in this case the model would exhibit
 pathological sensitivity to the size of finite elements if the mesh
 is changed. 
 
-The following damage laws are currently implemented:
+The following {\bf damage laws} are currently implemented:
 \begin{itemize}
 \item
 {\bf Cohesive crack with exponential softening} postulates a relation
@@ -1580,7 +1610,7 @@ f_t = E\varepsilon_0\left({\rm e}M_d\right)^{-1/M_d}
 $$
 \item
 {\bf Extended smooth stress-strain law} is a special formulation used
-by Grassl and Jir\'{a}sek (2010). The damage law has a rather complicated form:
+by Grassl and Jir\'{a}sek \cite{GraJir10}. The damage law has a rather complicated form:
 \begin{equation} \label{eq:damageEvol}
 \omega = \left \{ \begin{array}{ll} 
 1-\exp\left(-\displaystyle\frac{1}{m}\left(\dfrac{\eps}{\varepsilon_{\rm p}}\right)^m\right) & \mbox{if $\eps \leq \varepsilon_1$}\\[2mm]
@@ -1676,9 +1706,9 @@ of equivalent strain:
 \item[2 -] scaled energy norm,  eq.~(\ref{energynorm})
 \item[3 -] modified Mises, eq.~(\ref{modifiedmises})
 \item[4 -] standard Rankine, eq.~(\ref{rankinestandard})
-\item[5 -] elestic energy based on positive stress
-\item[6 -] elestic energy based on positive strain
-\item[7 -] Griffith criterion eqs.~(\ref{griffith1}),(\ref{griffith2})
+\item[5 -] elastic energy based on positive stress
+\item[6 -] elastic energy based on positive strain
+\item[7 -] Griffith criterion eq.~(\ref{griffith2})
 
 \end{itemize}\\
 &- \param{k} ratio between uniaxial compressive and tensile strength, needed only if equivstraintype=3, default value 1\\
@@ -1787,6 +1817,15 @@ is located, and is zero everywhere else. Of course, this is not a physically
 objective definition of nonlocal averaging, since it depends on the
 discretization. However, this kind of averaging was proposed in a boundary
 layer by Prof.\ Ba\v{z}ant and was implemented into OOFEM for testing purposes.
+\item
+Special function 
+$$
+\alpha_0(s) =\int_{-\infty}^\infty \exp\left(-\frac{\sqrt{s^2+t^2}}{R}\right)\mbox{d}t
+$$
+obtained by reduction of the exponential function from 2D to 1D.
+The integral cannot be evaluated in closed form and is computed by OOFEM numerically.
+This function can be used in one-dimensional simulations of a two-dimensional specimen 
+under uniaxial tension; for more details see \cite{Gra13}.
 \end{itemize}  
  
 The above functions depend only on the distance $s$ between the interacting
@@ -1839,6 +1878,8 @@ $$
 The term on the right-hand side after the integral is a multiple of the local
 variable, and so it can be referred to as the local complement.  
 
+In a recent paper \cite{Gra13}, special techniques that modify the averaging procedure based on the distance from a physical boundary of the domain or on the stress state have been considered. The details are explained in \cite{Gra13}. These techniques can be invoked by setting the optional parameter {\it nonlocalVariation} to 1 or 2 and specifying additional parameters $\beta$ and $\zeta$ for distance-based averaging, or $\beta$ for stress-based averaging.  
+
 The model parameters are summarized
 in Tabs.~\ref{idnl_table} and \ref{idnl_table_cont}.
 
@@ -1867,8 +1908,11 @@ Record Format & \descitem{Idmnl1}
 [\elemparam{wft}{in}]
 [\elemparam{averagingType}{in}]
 [\elemparam{m}{rn}]
-[\elemparam{scaling}{in}]
-[\elemparam{averagedVar}{in}]
+[\elemparam{scalingType}{in}]
+[\elemparam{averagedQuantity}{in}]
+[\elemparam{nonlocalVariation}{in}]
+[\elemparam{beta}{rn}]
+[\elemparam{zeta}{rn}]
 [\elemparam{maxOmega}{rn}]\\
 Parameters &- \param{} material number\\
 &- \param{d} material density\\
@@ -1901,6 +1945,7 @@ value is nonzero.\\
 \item[3 -] exponential function (Green function in 1D)
 \item[4 -] uniform averaging up to distance $R$
 \item[5 -] uniform averaging over one finite element
+\item[6 -] special function obtained by reducing the 2D exponential function to 1D (by numerical integration)
 \end{itemize}\\
 & {\it --- continued in Tab.~\ref{idnl_table_cont} ---} \\
 \hline
@@ -1920,13 +1965,16 @@ Description & Nonlocal isotropic damage model for concrete in tension\\
 (equivalent to {\it wft}=5, but kept here for compatibility with previous version)\\
 &- \param{m} multiplier for overnonlocal or undernonlocal formulation, which use
 {\em m}-times the local variable plus $(1-m)$-times the nonlocal variable, default value 1\\
-&- \param{scaling} selects the type of scaling of the weight function (e.g.\ near a boundary):
-\begin{itemize}\setlength{\itemsep}{-3pt}
+&- \param{scalingType} selects the type of scaling of the weight function (e.g.\ near a boundary):
+\begin{itemize}\setlength{\itemsep}{-5pt}
 \item[1 -] default, standard scaling with integral of weight function in the denominator
 \item[2 -] no scaling (the weight function normalized in an infinite body is used even near a boundary)
 \item[3 -] Borino scaling (local complement)
 \end{itemize}\\
-&- \param{averagedVar} selects the variable to be averaged, default value 1 corresponds to equivalent strain, value 2 activates averaging of compliance variable\\
+&- \param{averagedQuantity} selects the variable to be averaged, default value 1 corresponds to equivalent strain, value 2 activates averaging of compliance variable\\
+&- \param{nonlocalVariation} activates a special averaging procedure, default value 0 does not change anything, value 1 means distance-based averaging (the characteristic length is reduced near a physical boundary), value 2 means stress-based averaging  (the averaging is anisotropic and the characteristic length is affected by the stress) \\
+&- \param{beta} parameter $\beta$, required only for distance-based and stress-based averaging (i.e., for {\it nonlocalVariation}=1 or 2) \\
+&- \param{zeta} parameter $\zeta$, required only for distance-based averaging (i.e., for {\it nonlocalVariation}=1) \\
 &- \param{maxOmega} maximum damage, used for convergence improvement
 (its value is between 0 and 0.999999 (default), and it affects only the secant stiffness
 but not the stress)\\
@@ -1956,8 +2004,8 @@ oriented nature of cracking, which is reflected by the anisotropic
 character of the damaged stiffness or compliance matrices.
 
 A number of anisotropic damage formulations have been proposed
-in the literature. Here we use a model outlined by M. Jir\'{a}sek
-in \cite{mdm}, which is based on the principle of energy
+in the literature. Here we use a model outlined by Jir\'{a}sek
+\cite{mdm}, which is based on the principle of energy
 equivalence and on the construction of the inverse integrity
 tensor by integration of a scalar over all spatial directions.
 Since the model uses certain concepts from the
@@ -4992,6 +5040,12 @@ Note that the matrices $\mbf{K}(\mbf{r}), \mbf{C}(\mbf{r})$ and the vector $\mbf
 \bibitem{GraJir} P.~Grassl and M.~Jir\'{a}sek.
 \newblock Damage-plastic model for concrete failure.
 \newblock {\em International Journal of Solids and Structures}, 43:7166--7196, 2006.
+\bibitem{GraJir10} P.~Grassl and M.~Jir\'{a}sek.
+\newblock Meso-scale approach to modelling the fracture process zone of concrete subjected to uniaxial tension.
+\newblock {\em International Journal of Solids and Structures}, 47: 957--968, 2010.
+\bibitem{Gra13} P.~Grassl, D.~Xenos, M.~Jir\'{a}sek andM.~ Hor\'{a}k.
+\newblock  Evaluation of nonlocal approaches for modelling fracture near nonconvex boundaries.
+\newblock {\em International Journal of Solids and Structures}, submitted in 2013.
 \bibitem{inel} M. Jir\'asek, Z.P. Ba\v zant: Inelastic analysis of
   structures, John Wiley, 2001.
 \bibitem{Hansen} P.F. Hansen: Coupled Moisture/Heat Transport in

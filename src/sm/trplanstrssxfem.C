@@ -57,7 +57,7 @@ void TrPlaneStress2dXFEM :: postInitialize()
 }
 
 
-TrPlaneStress2dXFEM :: ~TrPlaneStress2dXFEM() {}
+TrPlaneStress2dXFEM :: ~TrPlaneStress2dXFEM() { }
 
 int TrPlaneStress2dXFEM :: checkConsistency()
 {
@@ -226,7 +226,7 @@ void TrPlaneStress2dXFEM :: drawScalar(oofegGraphicContext &context)
             TimeStep *tStep = this->giveDomain()->giveEngngModel()->giveCurrentStep();
             PatchIntegrationRule *iRule;
             for ( int i = 0; i < numberOfIntegrationRules; i++ ) {
-                iRule = dynamic_cast< PatchIntegrationRule * >( integrationRulesArray [ i ] );
+                iRule = dynamic_cast< PatchIntegrationRule * >(integrationRulesArray [ i ]);
 
  #if 0
                 val = iRule->giveMaterial();

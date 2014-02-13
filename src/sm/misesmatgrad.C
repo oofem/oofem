@@ -55,7 +55,7 @@ MisesMatGrad :: MisesMatGrad(int n, Domain *d) : MisesMat(n, d), GradDpMaterialE
 }
 
 MisesMatGrad :: ~MisesMatGrad()
-{}
+{ }
 
 
 int
@@ -156,10 +156,7 @@ void
 MisesMatGrad :: givePDGradMatrix_LD(FloatMatrix &answer, MatResponseMode mode, GaussPoint *gp, TimeStep *tStep)
 {
     MaterialMode mMode = gp->giveMaterialMode();
-    switch ( mMode ) {
-    default:
-        _error2( "givePDGradMatrix_LD : unknown mode (%s)", __MaterialModeToString(mMode) );
-    }
+    _error2( "givePDGradMatrix_LD : unknown mode (%s)", __MaterialModeToString(mMode) );
 }
 
 
@@ -535,7 +532,7 @@ MisesMatGradStatus :: MisesMatGradStatus(int n, Domain *d, GaussPoint *g) :
 
 
 MisesMatGradStatus :: ~MisesMatGradStatus()
-{}
+{ }
 
 
 void

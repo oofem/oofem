@@ -49,7 +49,7 @@ StokesFlowVelocityHomogenization :: StokesFlowVelocityHomogenization(int i, Engn
 }
 
 StokesFlowVelocityHomogenization :: ~StokesFlowVelocityHomogenization()
-{}
+{ }
 
 double
 StokesFlowVelocityHomogenization :: giveAreaOfDomain()
@@ -115,7 +115,7 @@ StokesFlowVelocityHomogenization :: solveYourselfAt(TimeStep *tStep)
 
 void
 StokesFlowVelocityHomogenization :: rveSetBoundaryConditions(int BCType, FloatArray eps)
-{}
+{ }
 
 void
 StokesFlowVelocityHomogenization :: getMeans(FloatArray &gradP, FloatArray &v, TimeStep *tStep)

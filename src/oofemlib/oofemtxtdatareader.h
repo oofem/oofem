@@ -62,7 +62,7 @@ protected:
 public:
     /// Constructor.
     OOFEMTXTDataReader(const char *inputfilename);
-    OOFEMTXTDataReader(const OOFEMTXTDataReader &x);
+    OOFEMTXTDataReader(const OOFEMTXTDataReader & x);
     virtual ~OOFEMTXTDataReader();
 
     /// Return a line number, which is helpful for tracking errors.

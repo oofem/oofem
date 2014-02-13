@@ -45,8 +45,8 @@ namespace oofem {
 class KelvinChainSolidMaterialStatus : public RheoChainMaterialStatus
 {
 public:
-    KelvinChainSolidMaterialStatus(int n, Domain *d, GaussPoint *g, int nunits);
-    virtual ~KelvinChainSolidMaterialStatus() {}
+    KelvinChainSolidMaterialStatus(int n, Domain * d, GaussPoint * g, int nunits);
+    virtual ~KelvinChainSolidMaterialStatus() { }
     virtual void printOutputAt(FILE *file, TimeStep *tStep);
 
     virtual void initTempStatus();
@@ -67,8 +67,8 @@ public:
 class KelvinChainSolidMaterial : public RheoChainMaterial
 {
 public:
-    KelvinChainSolidMaterial(int n, Domain *d);
-    virtual ~KelvinChainSolidMaterial() {}
+    KelvinChainSolidMaterial(int n, Domain * d);
+    virtual ~KelvinChainSolidMaterial() { }
 
     virtual void giveRealStressVector(FloatArray &answer, GaussPoint *gp, const FloatArray &reducedStrain, TimeStep *tStep);
     void computeHiddenVars(GaussPoint *gp, TimeStep *tNow);

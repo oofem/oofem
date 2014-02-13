@@ -116,7 +116,9 @@ private:
     FILE *stream;
 public:
     /// Constructor, takes associated stream pointer as parameter
-    FileDataStream(FILE *s) { stream = s; }
+    FileDataStream(FILE * s) {
+        stream = s;
+    }
     /// Destructor (will not close stream!)
     virtual ~FileDataStream() { }
 
@@ -150,7 +152,9 @@ private:
 
 public:
     /// Constructor, takes associated communication buffer pointer as parameter
-    ComBuffDataStream(CommunicationBuffer *b) { buff = b; }
+    ComBuffDataStream(CommunicationBuffer * b) {
+        buff = b;
+    }
     /// Destructor
     virtual ~ComBuffDataStream() { }
 
@@ -183,7 +187,9 @@ private:
 
 public:
     /// Constructor
-    ProcessCommDataStream(ProcessCommunicatorBuff *b) { pc = b; }
+    ProcessCommDataStream(ProcessCommunicatorBuff * b) {
+        pc = b;
+    }
     /// Destructor
     virtual ~ProcessCommDataStream() { }
 

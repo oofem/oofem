@@ -52,7 +52,7 @@ protected:
     static FEI1dQuad interpolation;
 
 public:
-    QTruss1d(int n, Domain *d);
+    QTruss1d(int n, Domain * d);
     virtual ~QTruss1d() { }
 
     virtual IRResultType initializeFrom(InputRecord *ir);

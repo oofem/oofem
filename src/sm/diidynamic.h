@@ -95,7 +95,7 @@ protected:
     SparseLinearSystemNM *nMethod;
 
 public:
-    DIIDynamic(int i, EngngModel *_master = NULL);
+    DIIDynamic(int i, EngngModel * _master = NULL);
     virtual ~DIIDynamic();
 
     virtual void solveYourself();

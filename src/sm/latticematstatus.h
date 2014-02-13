@@ -51,7 +51,7 @@ class NonlocalMaterialStatusExtension;
 class LatticeMaterialStatus : public StructuralMaterialStatus
 {
 public:
-    LatticeMaterialStatus(int n, Domain *d, GaussPoint *g);
+    LatticeMaterialStatus(int n, Domain * d, GaussPoint * g);
     /// Destructor.
     virtual ~LatticeMaterialStatus() { }
 

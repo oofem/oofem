@@ -86,7 +86,7 @@ public:
      * @param n Cross section number.
      * @param d Associated domain.
      */
-    SimpleCrossSection(int n, Domain *d) : StructuralCrossSection(n, d) {
+    SimpleCrossSection(int n, Domain * d) : StructuralCrossSection(n, d) {
         materialNumber = 0;
         czMaterialNumber = 0;
     }

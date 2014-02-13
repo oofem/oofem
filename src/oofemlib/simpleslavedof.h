@@ -85,8 +85,8 @@ public:
      * @param master number of dofManager which contain master dof
      * @param id DofID of master dof (and slave too).
      */
-    SimpleSlaveDof(int i, DofManager *aNode, int master, DofIDItem id);
-    SimpleSlaveDof(int i, DofManager *aNode, DofIDItem id = Undef);
+    SimpleSlaveDof(int i, DofManager * aNode, int master, DofIDItem id);
+    SimpleSlaveDof(int i, DofManager * aNode, DofIDItem id = Undef);
     /// Destructor.
     virtual ~SimpleSlaveDof() { }
 
@@ -109,7 +109,7 @@ public:
      */
     virtual int askNewEquationNumber(TimeStep *tStep) { return 1; }
     virtual double giveUnknown(ValueModeType, TimeStep *);
-    virtual double giveUnknown(PrimaryField & field, ValueModeType, TimeStep * tStep);
+    virtual double giveUnknown(PrimaryField &field, ValueModeType, TimeStep *tStep);
     virtual bool hasBc(TimeStep *tStep);
     virtual bool hasIc();
     virtual bool hasIcOn(ValueModeType);

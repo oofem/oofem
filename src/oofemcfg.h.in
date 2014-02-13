@@ -1,11 +1,11 @@
 #define PRG_VERSION "OOFEM version @oofem_VERSION_MAJOR@.@oofem_VERSION_MINOR@"
 #define OOFEG_VERSION "OOFEG version @oofem_VERSION_MAJOR@.@oofem_VERSION_MINOR@"
-#define OOFEM_COPYRIGHT "Copyright (C) 1994-2013 Borek Patzak"
+#define OOFEM_COPYRIGHT "@oofem_COPYRIGHT@"
 
 #define PRG_HEADER_SM "\
 ____________________________________________________\n\
-           OOFEM - Finite Element Solver            \n\
-        Copyright (C) 1994-2013 Borek Patzak        \n\
+           OOFEM - Finite Element Solver\n\
+        @oofem_COPYRIGHT@\n\
 ____________________________________________________\n"
 
 #define PRG_HEADER "\
@@ -15,7 +15,7 @@ ____________________________________________________\n"
     #    #  #    #  #####   #####   # ## #\n\
    #    #  #    #  #       #       #    #\n\
   #    #  #    #  #       #       #    #   OOFEM ver. @oofem_VERSION_MAJOR@.@oofem_VERSION_MINOR@\n\
-  ####    ####   #       ######  #    #    Copyright (C) 1994-2013 Borek Patzak\n\
+  ####    ####   #       ######  #    #    @oofem_COPYRIGHT@\n\
 ################################################################################\n\n"
 
 #define HOST_TYPE "@HOST_TYPE@"

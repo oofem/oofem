@@ -66,7 +66,7 @@ class CompoDamageMatStatus : public StructuralMaterialStatus
 {
 public:
     /// Constructor
-    CompoDamageMatStatus(int n, Domain *d, GaussPoint *g);
+    CompoDamageMatStatus(int n, Domain * d, GaussPoint * g);
     /// Destructor
     virtual ~CompoDamageMatStatus();
 
@@ -138,7 +138,7 @@ class CompoDamageMat : public StructuralMaterial
 {
 public:
     /// Constructor
-    CompoDamageMat(int n, Domain *d);
+    CompoDamageMat(int n, Domain * d);
     /// Destructor
     virtual ~CompoDamageMat();
 

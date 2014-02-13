@@ -57,7 +57,7 @@ protected:
     ElementMode emode;
 
 public:
-    TransportElement(int n, Domain *d, ElementMode em = HeatTransferEM);
+    TransportElement(int n, Domain * d, ElementMode em = HeatTransferEM);
     virtual ~TransportElement();
 
     virtual void giveCharacteristicMatrix(FloatMatrix &answer, CharType type, TimeStep *tStep);
@@ -110,7 +110,7 @@ public:
     virtual void printOutputAt(FILE *file, TimeStep *tStep);
     virtual int checkConsistency();
 
-    virtual void giveElementDofIDMask(EquationID, IntArray & answer) const;
+    virtual void giveElementDofIDMask(EquationID, IntArray &answer) const;
 
     virtual int EIPrimaryFieldI_evaluateFieldVectorAt(FloatArray &answer, PrimaryField &pf,
                                                       FloatArray &coords, IntArray &dofId, ValueModeType mode,

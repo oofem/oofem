@@ -61,7 +61,7 @@ protected:
 
 public:
     /// Constructor. Creates empty RandomFieldGenerator
-    LocalGaussianRandomGenerator(int n, Domain *d);
+    LocalGaussianRandomGenerator(int n, Domain * d);
     /// Destructor
     virtual ~LocalGaussianRandomGenerator();
 

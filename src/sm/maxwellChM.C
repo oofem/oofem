@@ -42,7 +42,7 @@
 
 namespace oofem {
 MaxwellChainMaterial :: MaxwellChainMaterial(int n, Domain *d) : RheoChainMaterial(n, d)
-{}
+{ }
 
 
 void
@@ -73,9 +73,9 @@ MaxwellChainMaterial :: computeCharCoefficients(FloatArray &answer, double tStep
             tauj = this->giveCharTime(j);
             for ( sum = 0., r = 1; r <= rSize; r++ ) {
                 tti = pow( ( tStep + rTimes.at(r) ) / taui, giveCharTimeExponent(i) ) -
-                      pow( tStep / taui, giveCharTimeExponent(i) );
+                pow( tStep / taui, giveCharTimeExponent(i) );
                 ttj = pow( ( tStep + rTimes.at(r) ) / tauj, giveCharTimeExponent(j) ) -
-                      pow( tStep / tauj, giveCharTimeExponent(j) );
+                pow( tStep / tauj, giveCharTimeExponent(j) );
                 sum += exp(-tti - ttj);
             }
 
@@ -85,7 +85,7 @@ MaxwellChainMaterial :: computeCharCoefficients(FloatArray &answer, double tStep
         // assemble rhs
         for ( sumRhs = 0., r = 1; r <= rSize; r++ ) {
             tti = pow( ( tStep + rTimes.at(r) ) / taui, giveCharTimeExponent(i) ) -
-                  pow( tStep / taui, giveCharTimeExponent(i) );
+            pow( tStep / taui, giveCharTimeExponent(i) );
             sumRhs += exp(-tti) * discreteRelaxFunctionVal.at(r);
         }
 
@@ -260,7 +260,7 @@ MaxwellChainMaterial :: initializeFrom(InputRecord *ir)
 
 MaxwellChainMaterialStatus :: MaxwellChainMaterialStatus(int n, Domain *d,
                                                          GaussPoint *g, int nunits) :
-    RheoChainMaterialStatus(n, d, g, nunits) {}
+    RheoChainMaterialStatus(n, d, g, nunits) { }
 
 
 void

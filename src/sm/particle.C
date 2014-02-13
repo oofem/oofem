@@ -40,7 +40,7 @@ REGISTER_DofManager(Particle);
 
 
 Particle :: Particle(int n, Domain *aDomain) : Node(n, aDomain)
-{}
+{ }
 
 // Gets all the data of the receiver from the source line of the data file.
 IRResultType

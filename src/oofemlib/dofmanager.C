@@ -215,7 +215,7 @@ void DofManager :: removeDof(DofIDItem id)
         }
         // delete dof
         delete dofArray [ position - 1 ];
-        delete []dofArray;
+        delete [] dofArray;
         dofArray = dofArray_new;
         numberOfDofs--;
     } else {

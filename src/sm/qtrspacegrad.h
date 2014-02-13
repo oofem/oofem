@@ -60,7 +60,7 @@ protected:
 
 public:
     QTRSpaceGrad(int, Domain *);
-    virtual ~QTRSpaceGrad() {}
+    virtual ~QTRSpaceGrad() { }
 
     virtual IRResultType initializeFrom(InputRecord *ir);
     virtual void giveDofManDofIDMask(int inode, EquationID ut, IntArray &answer) const;

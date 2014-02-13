@@ -121,7 +121,7 @@ public:
     InternalStateValueType giveXFEMStateValueType(XFEMStateType type);
 
     /// Constructor.
-    XfemManager(Domain *domain);
+    XfemManager(Domain * domain);
     /// Destructor.
     virtual ~XfemManager();
 

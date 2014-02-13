@@ -63,7 +63,7 @@ QTrPlaneStrainGrad :: giveDofManDofIDMask(int inode, EquationID ut, IntArray &an
 {
     if ( inode <= nSecNodes ) {
         answer.setValues(3, D_u, D_v, G_0);
-    } else   {
+    } else {
         answer.setValues(2, D_u, D_v);
     }
 }

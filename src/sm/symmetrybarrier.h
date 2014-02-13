@@ -69,7 +69,7 @@ public:
      * @param n Element's number
      * @param d Pointer to the domain to which element belongs.
      */
-    SymmetryBarrier(int n, Domain *d);
+    SymmetryBarrier(int n, Domain * d);
     /// Destructor.
     virtual ~SymmetryBarrier();
 

@@ -71,7 +71,7 @@ protected:
 
 public:
     /// Constructor. Creates empty Output Manager.
-    HOMExportModule(int n, EngngModel *e);
+    HOMExportModule(int n, EngngModel * e);
     /// Destructor.
     virtual ~HOMExportModule();
     virtual IRResultType initializeFrom(InputRecord *ir);

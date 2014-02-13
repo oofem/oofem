@@ -90,7 +90,7 @@ protected:
 
 public:
     /// Constructor
-    IntMatBilinearCZFagerstromStatus(int n, Domain *d, GaussPoint *g);
+    IntMatBilinearCZFagerstromStatus(int n, Domain * d, GaussPoint * g);
     /// Destructor
     virtual ~IntMatBilinearCZFagerstromStatus();
 
@@ -166,7 +166,7 @@ protected:
 
 public:
     /// Constructor
-    IntMatBilinearCZFagerstrom(int n, Domain *d);
+    IntMatBilinearCZFagerstrom(int n, Domain * d);
     /// Destructor
     virtual ~IntMatBilinearCZFagerstrom();
 

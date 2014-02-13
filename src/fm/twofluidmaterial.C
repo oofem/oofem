@@ -95,7 +95,6 @@ TwoFluidMaterial :: give(int aProperty, GaussPoint *gp)
                      vof * giveMaterial(1)->give(aProperty, status->giveSlaveGaussPoint1());
 }
 
-
 int
 TwoFluidMaterial :: giveIPValue(FloatArray &answer, GaussPoint *gp, InternalStateType type, TimeStep *tStep)
 {
@@ -176,6 +175,24 @@ TwoFluidMaterialStatus :: TwoFluidMaterialStatus(int n, Domain *d, GaussPoint *g
     FluidDynamicMaterialStatus(n, d, gp)
 {
     MaterialMode mmode = gp->giveMaterialMode();
+<<<<<<< HEAD
+=======
+    int _size = 0;
+
+    if ( mmode == _2dFlow ) {
+        _size = 3;
+    } else if ( mmode == _2dAxiFlow ) {
+        _size = 4;
+    } else if ( mmode == _3dFlow ) {
+        _size = 6;
+    }
+
+    deviatoricStressVector.resize(_size);
+    deviatoricStressVector.zero();
+    deviatoricStrainRateVector.resize(_size);
+    deviatoricStrainRateVector.zero();
+
+>>>>>>> rel-2.3
     this->slaveGp0 = new GaussPoint(NULL, 0, NULL, 0., mmode);
     this->slaveGp1 = new GaussPoint(NULL, 0, NULL, 0., mmode);
     this->slaveGp0->setMaterialStatus( domain->giveMaterial( slaveMaterial(0) )->CreateStatus(this->slaveGp0), this->giveNumber() );

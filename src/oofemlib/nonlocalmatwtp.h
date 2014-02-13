@@ -70,7 +70,7 @@ protected:
     std :: vector< std :: list< int > >toSendList;
 
 public:
-    NonlocalMaterialWTP(LoadBalancer *_lb) :
+    NonlocalMaterialWTP(LoadBalancer * _lb) :
         LoadBalancer :: WorkTransferPlugin(_lb) { }
 
     /**

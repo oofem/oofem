@@ -44,7 +44,7 @@ namespace oofem {
 REGISTER_Material(TrabBoneMaterial);
 
 TrabBoneMaterial :: TrabBoneMaterial(int n, Domain *d) : StructuralMaterial(n, d)
-{}
+{ }
 
 
 int
@@ -139,7 +139,7 @@ TrabBoneMaterial :: performPlasticityReturn(GaussPoint *gp, const FloatArray &to
             gNewton = sigp / fabs(sigp) * ( E0 * epsnew - ( E0 + Ek ) * ( epsp + depsp ) ) - ( sigY + Eil * ( alpha +
                                                                                                               sigp / fabs(sigp) * depsp ) + Eie * ( 1 - exp( -kie * ( alpha + sigp / fabs(sigp) * depsp ) ) ) );
             dgNewton = -sigp / fabs(sigp) * ( ( E0 + Ek ) + Eil +
-                                              Eie * kie * exp( -kie * ( alpha + sigp / fabs(sigp) * depsp ) ) );
+                                             Eie * kie * exp( -kie * ( alpha + sigp / fabs(sigp) * depsp ) ) );
             depsp += -gNewton / dgNewton;
         }
 
@@ -292,7 +292,7 @@ TrabBoneMaterialStatus :: TrabBoneMaterialStatus(int n, Domain *d, GaussPoint *g
 
 
 TrabBoneMaterialStatus :: ~TrabBoneMaterialStatus()
-{}
+{ }
 
 
 double

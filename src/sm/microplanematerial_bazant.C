@@ -93,8 +93,8 @@ MicroplaneMaterial_Bazant :: giveRealStressVector(FloatArray &answer,
 
         for ( i = 0; i < 6; i++ ) {
             answer.at(i + 1) += ( ( N [ mPlaneIndex ] [ i ] - Kronecker [ i ] / 3. ) * SD +
-                                  L [ mPlaneIndex ] [ i ] * mPlaneShear_L_Stress.at(mPlaneIndex1) +
-                                  M [ mPlaneIndex ] [ i ] * mPlaneShear_M_Stress.at(mPlaneIndex1) )
+                                 L [ mPlaneIndex ] [ i ] * mPlaneShear_L_Stress.at(mPlaneIndex1) +
+                                 M [ mPlaneIndex ] [ i ] * mPlaneShear_M_Stress.at(mPlaneIndex1) )
                                 * mPlaneIntegrationWeight;
         }
     }
@@ -125,8 +125,8 @@ MicroplaneMaterial_Bazant :: giveRealStressVector(FloatArray &answer,
 
             for ( i = 0; i < 6; i++ ) {
                 answer.at(i + 1) += ( ( N [ mPlaneIndex ] [ i ] - Kronecker [ i ] / 3. ) * SD +
-                                      L [ mPlaneIndex ] [ i ] * mPlaneShear_L_Stress.at(mPlaneIndex1) +
-                                      M [ mPlaneIndex ] [ i ] * mPlaneShear_M_Stress.at(mPlaneIndex1) )
+                                     L [ mPlaneIndex ] [ i ] * mPlaneShear_L_Stress.at(mPlaneIndex1) +
+                                     M [ mPlaneIndex ] [ i ] * mPlaneShear_M_Stress.at(mPlaneIndex1) )
                                     * mPlaneIntegrationWeight;
             }
         }

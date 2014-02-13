@@ -52,7 +52,7 @@ SloanGraphNode :: SloanGraphNode(SloanGraph *graph, int numOld) : neighborList()
 }
 
 SloanGraphNode :: ~SloanGraphNode()
-{}
+{ }
 
 void SloanGraphNode :: addNeighbor(int neighbor)
 {

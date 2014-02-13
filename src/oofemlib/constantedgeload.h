@@ -62,7 +62,7 @@ namespace oofem {
 class OOFEM_EXPORT ConstantEdgeLoad : public BoundaryLoad
 {
 public:
-    ConstantEdgeLoad(int i, Domain *d) : BoundaryLoad(i, d) { }
+    ConstantEdgeLoad(int i, Domain * d) : BoundaryLoad(i, d) { }
 
     virtual void computeValueAt(FloatArray &answer, TimeStep *tStep, FloatArray &coords, ValueModeType mode);
     virtual int giveApproxOrder() { return 0; }

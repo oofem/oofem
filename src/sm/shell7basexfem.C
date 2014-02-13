@@ -73,7 +73,7 @@ Shell7BaseXFEM :: computeFailureCriteriaQuantities(FailureCriteriaStatus *fcStat
 {
     // Compute necessary quantities for evaluation of failure criterias
 #if 1
-    if ( DamagedNeighborLayeredStatus * status = dynamic_cast< DamagedNeighborLayeredStatus * >( fcStatus ) ) {
+    if ( DamagedNeighborLayeredStatus * status = dynamic_cast< DamagedNeighborLayeredStatus * >(fcStatus) ) {
         /*
          * Go through the neighbors of the element and check for each layer if the
          * corresponding cz is damaged (if applicable)
@@ -698,7 +698,7 @@ Shell7BaseXFEM :: computeStiffnessMatrix(FloatMatrix &answer, MatResponseMode rM
         Load *load = this->domain->giveLoad(load_number);
         std :: vector< double >efM, efK;
 
-        if ( ConstantPressureLoad * pLoad = dynamic_cast< ConstantPressureLoad * >( load ) ) {
+        if ( ConstantPressureLoad * pLoad = dynamic_cast< ConstantPressureLoad * >(load) ) {
             IntegrationRule *iRule = specialIntegrationRulesArray [ 1 ];
 
             for ( int i = 0; i < iRule->giveNumberOfIntegrationPoints(); i++ ) {
@@ -856,7 +856,7 @@ void
 Shell7BaseXFEM :: computePressureTangentMatrixDis(FloatMatrix &KCC, FloatMatrix &KCD, FloatMatrix &KDD, IntegrationPoint *ip, Load *load, const int iSurf, TimeStep *tStep)
 {
     // Computes tangent matrix associated with the linearization of pressure loading. Assumes constant pressure.
-    ConstantPressureLoad *pLoad = dynamic_cast< ConstantPressureLoad * >( load );
+    ConstantPressureLoad *pLoad = dynamic_cast< ConstantPressureLoad * >(load);
 
     FloatMatrix N, B, L(7, 18), gcov, W1, W2;
     FloatArray lcoords(3), solVec, pressure;
@@ -1071,7 +1071,7 @@ Shell7BaseXFEM :: computeMassMatrixNum(FloatMatrix &answer, TimeStep *tStep)
 void
 Shell7BaseXFEM :: computeEdgeLoadVectorAt(FloatArray &answer, Load *load, int iEdge, TimeStep *tStep, ValueModeType mode)
 {
-    BoundaryLoad *edgeLoad = dynamic_cast< BoundaryLoad * >( load );
+    BoundaryLoad *edgeLoad = dynamic_cast< BoundaryLoad * >(load);
     if ( edgeLoad ) {
         answer.resize( this->computeNumberOfDofs() );
         answer.zero();
@@ -1121,7 +1121,7 @@ void
 Shell7BaseXFEM :: computeSurfaceLoadVectorAt(FloatArray &answer, Load *load,
                                              int iSurf, TimeStep *tStep, ValueModeType mode)
 {
-    BoundaryLoad *surfLoad = dynamic_cast< BoundaryLoad * >( load );
+    BoundaryLoad *surfLoad = dynamic_cast< BoundaryLoad * >(load);
 
     if ( surfLoad ) {
         answer.resize( this->giveNumberOfDofs() );
@@ -1140,7 +1140,7 @@ Shell7BaseXFEM :: computeSurfaceLoadVectorAt(FloatArray &answer, Load *load,
 #if 1
         FloatArray solVecD;
         double xi = 0.0; // defaults to geometric midplane
-        if ( ConstantPressureLoad * pLoad = dynamic_cast< ConstantPressureLoad * >( load ) ) {
+        if ( ConstantPressureLoad * pLoad = dynamic_cast< ConstantPressureLoad * >(load) ) {
             xi = pLoad->giveLoadOffset();
         }
         std :: vector< double >ef;

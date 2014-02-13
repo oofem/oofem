@@ -312,7 +312,7 @@ ZZNodalRecoveryModel :: exchangeDofManValues(int ireg, FloatArray &lhs, FloatMat
     ProblemCommunicatorMode commMode = emodel->giveProblemCommMode();
 
     if ( commMode == ProblemCommMode__NODE_CUT ) {
-        parallelStruct ls(& lhs, & rhs, & rn);
+        parallelStruct ls( &lhs, &rhs, &rn);
 
         // exchange data for shared nodes
         communicator->packAllData(this, & ls, & ZZNodalRecoveryModel :: packSharedDofManData);

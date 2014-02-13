@@ -48,7 +48,9 @@ protected:
     int cindx;
 
 public:
-    FEI1dHermite(int coordIndx) : FEInterpolation1d(2) { cindx = coordIndx; }
+    FEI1dHermite(int coordIndx) : FEInterpolation1d(2) {
+        cindx = coordIndx;
+    }
 
     virtual integrationDomain giveIntegrationDomain() const { return _Line; }
     virtual Element_Geometry_Type giveGeometryType() const { return EGT_line_1; }

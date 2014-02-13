@@ -58,7 +58,7 @@ protected:
     double permeability;
 
 public:
-    IsotropicLinMoistureTransferMaterial(int n, Domain *d) : IsotropicMoistureTransferMaterial(n, d) { }
+    IsotropicLinMoistureTransferMaterial(int n, Domain * d) : IsotropicMoistureTransferMaterial(n, d) { }
     virtual ~IsotropicLinMoistureTransferMaterial() { }
 
     virtual double givePermeability(GaussPoint *gp, TimeStep *tStep);

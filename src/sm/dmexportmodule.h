@@ -59,7 +59,7 @@ protected:
 
 public:
     /// Constructor
-    DofManExportModule(int n, EngngModel *e);
+    DofManExportModule(int n, EngngModel * e);
 
     /// Destructor
     virtual ~DofManExportModule();

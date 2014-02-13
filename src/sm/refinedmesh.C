@@ -55,10 +55,10 @@ namespace oofem {
 
 /*  < : C style */
 #define elem_type(ID)    ( ( ( ID ) <= CUMUL_EDGES ) ? EDGE_ELEM :    \
-                           ( ( ID ) <= CUMUL_FACES ) ? FACE_ELEM :    \
-                           ( ( ID ) <= CUMUL_QUADS ) ? QUAD_ELEM :    \
-                           ( ( ID ) <= CUMUL_TETRAS ) ? TETRA_ELEM :  \
-                           ( ( ID ) <= CUMUL_HEXAS ) ? HEXA_ELEM : 0 )
+                          ( ( ID ) <= CUMUL_FACES ) ? FACE_ELEM :    \
+                          ( ( ID ) <= CUMUL_QUADS ) ? QUAD_ELEM :    \
+                          ( ( ID ) <= CUMUL_TETRAS ) ? TETRA_ELEM :  \
+                          ( ( ID ) <= CUMUL_HEXAS ) ? HEXA_ELEM : 0 )
 
 #define is_edge(ID)       ( ( elem_type(ID) == EDGE_ELEM ) ? 1 : 0 )
 #define is_face(ID)       ( ( elem_type(ID) == FACE_ELEM ) ? 1 : 0 )

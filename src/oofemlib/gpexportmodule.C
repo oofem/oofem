@@ -51,7 +51,7 @@ GPExportModule :: GPExportModule(int n, EngngModel *e) : ExportModule(n, e)
 
 
 GPExportModule :: ~GPExportModule()
-{}
+{ }
 
 
 IRResultType
@@ -174,12 +174,12 @@ GPExportModule :: doOutput(TimeStep *tStep, bool forcedOutput)
 
 void
 GPExportModule :: initialize()
-{}
+{ }
 
 
 void
 GPExportModule :: terminate()
-{}
+{ }
 
 
 FILE *

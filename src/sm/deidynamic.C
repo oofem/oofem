@@ -325,8 +325,8 @@ void DEIDynamic :: solveYourselfAt(TimeStep *tStep)
     for ( j = 1; j <= neq; j++ ) {
         coeff =  massMatrix.at(j);
         loadVector.at(j) += coeff * c3 * displacementVector.at(j) -
-                            coeff * ( c1 - dumpingCoef * c2 ) *
-                            previousDisplacementVector.at(j);
+        coeff * ( c1 - dumpingCoef * c2 ) *
+        previousDisplacementVector.at(j);
     }
 
     //
@@ -347,11 +347,11 @@ void DEIDynamic :: solveYourselfAt(TimeStep *tStep)
     for ( i = 1; i <= neq; i++ ) {
         prevD = previousDisplacementVector.at(i);
         nextDisplacementVector.at(i) = loadVector.at(i) /
-                                       ( massMatrix.at(i) * ( c1 + dumpingCoef * c2 ) );
+        ( massMatrix.at(i) * ( c1 + dumpingCoef * c2 ) );
         velocityVector.at(i) = nextDisplacementVector.at(i) - prevD;
         accelerationVector.at(i) =
             nextDisplacementVector.at(i) -
-            2. * displacementVector.at(i) + prevD;
+        2. * displacementVector.at(i) + prevD;
     }
 
     accelerationVector.times(c1);

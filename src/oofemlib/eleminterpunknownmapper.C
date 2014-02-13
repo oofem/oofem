@@ -69,7 +69,7 @@ EIPrimaryUnknownMapper :: mapAndUpdate(FloatArray &answer, ValueModeType mode,
         /* HUHU CHEATING */
 #ifdef __PARALLEL_MODE
         if ( ( newd->giveNode(inode)->giveParallelMode() == DofManager_null ) ||
-             ( newd->giveNode(inode)->giveParallelMode() == DofManager_remote ) ) {
+            ( newd->giveNode(inode)->giveParallelMode() == DofManager_remote ) ) {
             continue;
         }
 

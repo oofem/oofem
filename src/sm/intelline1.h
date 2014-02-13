@@ -54,7 +54,7 @@ protected:
     static FEI2dLineLin interp;
 
 public:
-    IntElLine1(int n, Domain *d);
+    IntElLine1(int n, Domain * d);
     virtual ~IntElLine1() { }
 
     virtual FEInterpolation *giveInterpolation() const;

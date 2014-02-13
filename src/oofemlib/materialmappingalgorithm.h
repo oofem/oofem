@@ -154,7 +154,7 @@ public:
      * Setups the input record of receiver.
      * @param input Input record to be filled.
      */
-    virtual void giveInputRecord(DynamicInputRecord &input) {}
+    virtual void giveInputRecord(DynamicInputRecord &input) { }
     /// Returns class name of the receiver.
     virtual const char *giveClassName() const  = 0;
 };

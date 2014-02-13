@@ -79,7 +79,7 @@ GJacobi :: solve(FloatMatrix *a, FloatMatrix *b, FloatArray *eigv, FloatMatrix *
     }
 
     if ( a->giveNumberOfRows() != b->giveNumberOfRows() ||
-         !a->isSquare() || !b->isSquare() ) {
+        !a->isSquare() || !b->isSquare() ) {
         OOFEM_ERROR("GJacobi :: solveYourselfAt: A matrix, B mtrix -> size mismatch");
     }
 

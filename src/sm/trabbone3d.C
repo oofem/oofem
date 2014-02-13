@@ -48,7 +48,7 @@ namespace oofem {
 REGISTER_Material(TrabBone3D);
 
 TrabBone3D :: TrabBone3D(int n, Domain *d) : StructuralMaterial(n, d)
-{}
+{ }
 
 
 void TrabBone3D :: computePlasStrainEnerDensity(GaussPoint *gp, const FloatArray &totalStrain, const FloatArray &totalStress)
@@ -1296,7 +1296,7 @@ TrabBone3DStatus :: TrabBone3DStatus(int n, Domain *d, GaussPoint *g) : Structur
 
 
 TrabBone3DStatus :: ~TrabBone3DStatus()
-{}
+{ }
 
 
 double

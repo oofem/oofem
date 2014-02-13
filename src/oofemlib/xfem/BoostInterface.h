@@ -59,16 +59,16 @@
 // Typedefs for boost types
 
 // 2D point
-typedef boost :: geometry :: model :: d2 :: point_xy< double >bPoint2;
+typedef boost :: geometry :: model :: d2 :: point_xy< double > bPoint2;
 
 // 2D segment
-typedef boost :: geometry :: model :: segment< bPoint2 >bSeg2;
+typedef boost :: geometry :: model :: segment< bPoint2 > bSeg2;
 
 // 2D line
-typedef boost :: geometry :: model :: linestring< bPoint2 >bLine2;
+typedef boost :: geometry :: model :: linestring< bPoint2 > bLine2;
 
 // Matrix
-typedef boost :: numeric :: ublas :: matrix< double >bMatrix;
+typedef boost :: numeric :: ublas :: matrix< double > bMatrix;
 
 /////////////////////////////////////
 // Distance
@@ -130,17 +130,17 @@ inline bool bSolve2by2(const bMatrix &iA, const bPoint2 &ib, bPoint2 &ox);
 
 inline double bDist(const bSeg2 &iLS1, const bSeg2 &iLS2, bPoint2 *oIntersectionPoint)
 {
-    bPoint2 pSpE( iLS1.second.x() - iLS1.first.x(), iLS1.second.y() - iLS1.first.y() );
+    bPoint2 pSpE( iLS1.second.x ( ) - iLS1.first.x(), iLS1.second.y ( ) - iLS1.first.y() );
     double l1 = bNorm(pSpE);
-    bPoint2 n1(pSpE.x() / l1, pSpE.y() / l1);
+    bPoint2 n1(pSpE.x ( ) / l1, pSpE.y ( ) / l1);
 
-    bPoint2 qSqE( iLS2.second.x() - iLS2.first.x(), iLS2.second.y() - iLS2.first.y() );
+    bPoint2 qSqE( iLS2.second.x ( ) - iLS2.first.x(), iLS2.second.y ( ) - iLS2.first.y() );
     double l2 = bNorm(qSqE);
-    bPoint2 n2(qSqE.x() / l2, qSqE.y() / l2);
+    bPoint2 n2(qSqE.x ( ) / l2, qSqE.y ( ) / l2);
 
 
-    bPoint2 psqs( iLS2.first.x() - iLS1.first.x(), iLS2.first.y() - iLS1.first.y() );
-    bPoint2 b( 2.0 * l1 * bDot(psqs, n1), -2.0 * l2 * bDot(psqs, n2) );
+    bPoint2 psqs( iLS2.first.x ( ) - iLS1.first.x(), iLS2.first.y ( ) - iLS1.first.y() );
+    bPoint2 b( 2.0 *l1 *bDot ( psqs, n1 ), -2.0 *l2 *bDot ( psqs, n2 ) );
 
 
     bMatrix A(2, 2);
@@ -172,8 +172,8 @@ inline double bDist(const bSeg2 &iLS1, const bSeg2 &iLS2, bPoint2 *oIntersection
             x.y(1.0);
         }
 
-        bPoint2 p( ( 1.0 - x.x() ) * iLS1.first.x() + x.x() * iLS1.second.x(), ( 1.0 - x.x() ) * iLS1.first.y() + x.x() * iLS1.second.y() );
-        bPoint2 q( ( 1.0 - x.y() ) * iLS2.first.x() + x.y() * iLS2.second.x(), ( 1.0 - x.y() ) * iLS2.first.y() + x.y() * iLS2.second.y() );
+        bPoint2 p( ( 1.0 - x.x ( ) ) *iLS1.first.x ( ) + x.x ( ) *iLS1.second.x(), ( 1.0 - x.x ( ) ) *iLS1.first.y ( ) + x.x ( ) *iLS1.second.y() );
+        bPoint2 q( ( 1.0 - x.y ( ) ) *iLS2.first.x ( ) + x.y ( ) *iLS2.second.x(), ( 1.0 - x.y ( ) ) *iLS2.first.y ( ) + x.y ( ) *iLS2.second.y() );
 
         if ( oIntersectionPoint != NULL ) {
             oIntersectionPoint->x( 0.5 * ( p.x() + q.x() ) );

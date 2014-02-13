@@ -68,7 +68,7 @@ public:
      * @param n Boundary condition number.
      * @param d Domain to which new object will belongs.
      */
-    ActiveBoundaryCondition(int n, Domain *d) : GeneralBoundaryCondition(n, d) { }
+    ActiveBoundaryCondition(int n, Domain * d) : GeneralBoundaryCondition(n, d) { }
     /// Destructor.
     virtual ~ActiveBoundaryCondition() { }
 
@@ -108,7 +108,7 @@ public:
      * @param c_s Column numbering scheme.
      */
     virtual void assemble(SparseMtrx *answer, TimeStep *tStep, EquationID eid,
-                          CharType type, const UnknownNumberingScheme &r_s, const UnknownNumberingScheme &c_s) {}
+                          CharType type, const UnknownNumberingScheme &r_s, const UnknownNumberingScheme &c_s) { }
 
     /**
      * Assembles B.C. contributions to specified vector.
@@ -123,7 +123,7 @@ public:
      */
     virtual void assembleVector(FloatArray &answer, TimeStep *tStep, EquationID eid,
                                 CharType type, ValueModeType mode,
-                                const UnknownNumberingScheme &s, FloatArray *eNorms = NULL) {}
+                                const UnknownNumberingScheme &s, FloatArray *eNorms = NULL) { }
 
     /**
      * Gives a list of location arrays that will be assembled.
@@ -139,7 +139,7 @@ public:
      * @param c_s Column numbering scheme.
      */
     virtual void giveLocationArrays(std :: vector< IntArray > &rows, std :: vector< IntArray > &cols, EquationID eid, CharType type,
-                                    const UnknownNumberingScheme &r_s, const UnknownNumberingScheme &c_s) {}
+                                    const UnknownNumberingScheme &r_s, const UnknownNumberingScheme &c_s) { }
 
 
     /**

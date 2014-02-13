@@ -89,7 +89,7 @@ protected:
 
 public:
     /// Constructor
-    BilinearCZMaterialFagerstromStatus(int n, Domain *d, GaussPoint *g);
+    BilinearCZMaterialFagerstromStatus(int n, Domain * d, GaussPoint * g);
     /// Destructor
     virtual ~BilinearCZMaterialFagerstromStatus();
 
@@ -164,7 +164,7 @@ protected:
                                                 GaussPoint *gp, TimeStep *tStep);
 public:
     /// Constructor
-    BilinearCZMaterialFagerstrom(int n, Domain *d);
+    BilinearCZMaterialFagerstrom(int n, Domain * d);
     /// Destructor
     virtual ~BilinearCZMaterialFagerstrom();
 

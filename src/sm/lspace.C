@@ -70,19 +70,19 @@ Interface *
 LSpace :: giveInterface(InterfaceType interface)
 {
     if ( interface == ZZNodalRecoveryModelInterfaceType ) {
-        return static_cast< ZZNodalRecoveryModelInterface * >( this );
+        return static_cast< ZZNodalRecoveryModelInterface * >(this);
     } else if ( interface == SPRNodalRecoveryModelInterfaceType ) {
-        return static_cast< SPRNodalRecoveryModelInterface * >( this );
+        return static_cast< SPRNodalRecoveryModelInterface * >(this);
     } else if ( interface == NodalAveragingRecoveryModelInterfaceType ) {
-        return static_cast< NodalAveragingRecoveryModelInterface * >( this );
+        return static_cast< NodalAveragingRecoveryModelInterface * >(this);
     } else if ( interface == SpatialLocalizerInterfaceType ) {
-        return static_cast< SpatialLocalizerInterface * >( this );
+        return static_cast< SpatialLocalizerInterface * >(this);
     } else if ( interface == EIPrimaryUnknownMapperInterfaceType ) {
-        return static_cast< EIPrimaryUnknownMapperInterface * >( this );
+        return static_cast< EIPrimaryUnknownMapperInterface * >(this);
     } else if ( interface == HuertaErrorEstimatorInterfaceType ) {
-        return static_cast< HuertaErrorEstimatorInterface * >( this );
+        return static_cast< HuertaErrorEstimatorInterface * >(this);
     } else if ( interface == HuertaRemeshingCriteriaInterfaceType ) {
-        return static_cast< HuertaRemeshingCriteriaInterface * >( this );
+        return static_cast< HuertaRemeshingCriteriaInterface * >(this);
     }
 
     return NULL;
@@ -193,7 +193,7 @@ double LSpace :: computeVolumeAround(GaussPoint *gp)
 {
     double determinant, weight, volume;
     determinant = fabs( this->interpolation.giveTransformationJacobian( * gp->giveCoordinates(),
-                                                                        FEIElementGeometryWrapper(this) ) );
+                                                                       FEIElementGeometryWrapper(this) ) );
 
 
     weight = gp->giveWeight();
@@ -516,7 +516,7 @@ LSpace :: HuertaErrorEstimatorI_setupRefinedElementProblem(RefinedElement *refin
                                             { 2, 6, 3 }, { 2, 3, 4 }, { 2, 4, 5 }, { 2, 5, 6 } };
 
     if ( sMode == HuertaErrorEstimatorInterface :: NodeMode ||
-         ( sMode == HuertaErrorEstimatorInterface :: BCMode && aMode == HuertaErrorEstimator :: HEE_linear ) ) {
+        ( sMode == HuertaErrorEstimatorInterface :: BCMode && aMode == HuertaErrorEstimator :: HEE_linear ) ) {
         for ( inode = 0; inode < nodes; inode++ ) {
             corner [ inode ] = element->giveNode(inode + 1)->giveCoordinates();
 
@@ -717,7 +717,7 @@ void LSpace :: drawTriad(FloatArray &coords, int isurf)
         p [ 1 ].y = p [ 0 ].y + coeff *jm.at(2, i);
         p [ 1 ].z = p [ 0 ].z + coeff *jm.at(3, i);
 
-        EASValsSetColor( ColorGetPixelFromString(const_cast< char * >( colors [ i - 1 ] ), & succ) );
+        EASValsSetColor( ColorGetPixelFromString(const_cast< char * >(colors [ i - 1 ]), & succ) );
 
         go = CreateLine3D(p);
         EGWithMaskChangeAttributes(WIDTH_MASK | COLOR_MASK | LAYER_MASK, go);
@@ -1038,8 +1038,8 @@ double
 LSpace :: computeEdgeVolumeAround(GaussPoint *gp, int iEdge)
 {
     double result = this->interpolation.edgeGiveTransformationJacobian( iEdge, * gp->giveCoordinates(),
-                                                                        FEIElementGeometryWrapper(this) );
-    return result * gp->giveWeight();
+                                                                       FEIElementGeometryWrapper(this) );
+    return result *gp->giveWeight();
 }
 
 

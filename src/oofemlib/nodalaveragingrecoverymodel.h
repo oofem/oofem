@@ -65,7 +65,7 @@ protected:
 
 public:
     /// Constructor.
-    NodalAveragingRecoveryModel(Domain *d);
+    NodalAveragingRecoveryModel(Domain * d);
     /// Destructor.
     ~NodalAveragingRecoveryModel();
 

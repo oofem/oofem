@@ -214,7 +214,7 @@ TrPlaneStrRot3d :: giveCharacteristicTensor(FloatMatrix &answer, CharTensor type
     }
 
     if ( ( type == GlobalForceTensor  ) || ( type == GlobalMomentumTensor  ) ||
-         ( type == GlobalStrainTensor ) || ( type == GlobalCurvatureTensor ) ) {
+        ( type == GlobalStrainTensor ) || ( type == GlobalCurvatureTensor ) ) {
         this->computeGtoLRotationMatrix();
         answer.rotatedWith(* GtoLRotationMatrix);
     }
@@ -343,16 +343,16 @@ TrPlaneStrRot3d :: printOutputAt(FILE *file, TimeStep *tStep)
             this->giveIPValue(v, gp, IST_ShellStrainCurvatureTensor, tStep);
             fprintf(file, "  strains ");
             fprintf( file,
-                     " % .4e % .4e % .4e % .4e % .4e % .4e % .4e % .4e % .4e % .4e % .4e % .4e ",
-                     v.at(1), v.at(2), v.at(3),  2. * v.at(4), 2. * v.at(5), 2. * v.at(6),
-                     v.at(7), v.at(8), v.at(9),  2. * v.at(10), 2. * v.at(11), 2. * v.at(12) );
+                    " % .4e % .4e % .4e % .4e % .4e % .4e % .4e % .4e % .4e % .4e % .4e % .4e ",
+                    v.at(1), v.at(2), v.at(3),  2. * v.at(4), 2. * v.at(5), 2. * v.at(6),
+                    v.at(7), v.at(8), v.at(9),  2. * v.at(10), 2. * v.at(11), 2. * v.at(12) );
 
             this->giveIPValue(v, gp, IST_ShellForceMomentumTensor, tStep);
             fprintf(file, "\n              stresses");
             fprintf( file,
-                     " % .4e % .4e % .4e % .4e % .4e % .4e % .4e % .4e % .4e % .4e % .4e % .4e ",
-                     v.at(1), v.at(2), v.at(3),  v.at(4), v.at(5), v.at(6),
-                     v.at(7), v.at(8), v.at(9),  v.at(10), v.at(11), v.at(12) );
+                    " % .4e % .4e % .4e % .4e % .4e % .4e % .4e % .4e % .4e % .4e % .4e % .4e ",
+                    v.at(1), v.at(2), v.at(3),  v.at(4), v.at(5), v.at(6),
+                    v.at(7), v.at(8), v.at(9),  v.at(10), v.at(11), v.at(12) );
 
             fprintf(file, "\n");
         }

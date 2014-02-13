@@ -50,7 +50,7 @@ class EngngModel;
 class OOFEM_EXPORT InitModuleManager : public ModuleManager< InitModule >
 {
 public:
-    InitModuleManager(EngngModel *emodel);
+    InitModuleManager(EngngModel * emodel);
     virtual ~InitModuleManager();
 
     InitModule *CreateModule(const char *name, int n, EngngModel *emodel);

@@ -76,7 +76,7 @@ public:
 
 public:
     /// Constructor.
-    XfemElementInterface(Element *e);
+    XfemElementInterface(Element * e);
 
     virtual ~XfemElementInterface();
 

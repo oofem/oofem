@@ -71,7 +71,7 @@ private:
     StateCounterType tempTcCounter;
 
 public:
-    LIBeam3d2(int n, Domain *d);
+    LIBeam3d2(int n, Domain * d);
     virtual ~LIBeam3d2() { }
 
     virtual IRResultType initializeFrom(InputRecord *ir);

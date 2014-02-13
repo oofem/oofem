@@ -96,7 +96,7 @@ protected:
     FloatArray timeStepLoadLevels;
 
 public:
-    AdaptiveNonLinearStatic(int i, EngngModel *_master = NULL);
+    AdaptiveNonLinearStatic(int i, EngngModel * _master = NULL);
     virtual ~AdaptiveNonLinearStatic();
 
     virtual void solveYourselfAt(TimeStep *tStep);

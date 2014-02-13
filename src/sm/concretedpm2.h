@@ -170,7 +170,7 @@ protected:
 
 public:
     /// Constructor
-    ConcreteDPM2Status(int n, Domain *d, GaussPoint *gp);
+    ConcreteDPM2Status(int n, Domain * d, GaussPoint * gp);
 
     /// Destructor
     virtual ~ConcreteDPM2Status();
@@ -671,7 +671,7 @@ protected:
 
 public:
     /// Constructor
-    ConcreteDPM2(int n, Domain *d);
+    ConcreteDPM2(int n, Domain * d);
     /// Destructor
     virtual ~ConcreteDPM2();
     virtual IRResultType initializeFrom(InputRecord *ir);

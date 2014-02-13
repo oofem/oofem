@@ -61,7 +61,7 @@ protected:
     int rotationMatrixDefined;
 
     StructuralElementEvaluator();
-    virtual ~StructuralElementEvaluator() {}
+    virtual ~StructuralElementEvaluator() { }
     virtual void giveCharacteristicMatrix(FloatMatrix &answer, CharType mtrx, TimeStep *tStep);
     virtual void giveCharacteristicVector(FloatArray &answer, CharType type, ValueModeType mode, TimeStep *tStep);
 
@@ -170,7 +170,7 @@ protected:
     virtual int giveIntegrationElementLocalCodeNumbers(IntArray &answer, Element *elem,
                                                        IntegrationRule *ie, EquationID ut);
 #ifdef __OOFEG
-    friend void drawIGAPatchDeformedGeometry(Element * elem, StructuralElementEvaluator * se, oofegGraphicContext & gc, UnknownType);
+    friend void drawIGAPatchDeformedGeometry(Element *elem, StructuralElementEvaluator *se, oofegGraphicContext &gc, UnknownType);
 #endif
 public:
     void elem(int arg1, EquationID arg2, IntArray arg3);

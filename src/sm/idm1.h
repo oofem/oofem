@@ -113,7 +113,7 @@ class IsotropicDamageMaterial1Status : public IsotropicDamageMaterialStatus, pub
 {
 public:
     /// Constructor
-    IsotropicDamageMaterial1Status(int n, Domain *d, GaussPoint *g);
+    IsotropicDamageMaterial1Status(int n, Domain * d, GaussPoint * g);
     /// Destructor
     virtual ~IsotropicDamageMaterial1Status() { }
 
@@ -136,8 +136,8 @@ public:
  * of the largest strain level ever reached in material (kappa).
  */
 class IsotropicDamageMaterial1 : public IsotropicDamageMaterial,
-    public RandomMaterialExtensionInterface,
-    public MaterialModelMapperInterface
+public RandomMaterialExtensionInterface,
+public MaterialModelMapperInterface
 {
 protected:
     /// Equivalent strain at stress peak (or a similar parameter).
@@ -216,7 +216,7 @@ protected:
 public:
 
     /// Constructor
-    IsotropicDamageMaterial1(int n, Domain *d);
+    IsotropicDamageMaterial1(int n, Domain * d);
     /// Destructor
     virtual ~IsotropicDamageMaterial1();
 

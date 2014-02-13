@@ -282,7 +282,7 @@ double
 Quad1Mindlin :: computeEdgeVolumeAround(GaussPoint *gp, int iEdge)
 {
     double detJ = this->interp_lin.edgeGiveTransformationJacobian( iEdge, * gp->giveCoordinates(), FEIElementGeometryWrapper(this) );
-    return detJ * gp->giveWeight();
+    return detJ *gp->giveWeight();
 }
 
 

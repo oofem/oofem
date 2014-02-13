@@ -47,7 +47,7 @@ IntMatBilinearCZElastic :: IntMatBilinearCZElastic(int n, Domain *d) : Structura
     //
     // constructor
     //
-{}
+{ }
 
 
 IntMatBilinearCZElastic :: ~IntMatBilinearCZElastic()
@@ -279,7 +279,7 @@ IntMatBilinearCZElastic :: printYourself()
 }
 
 IntMatBilinearCZElasticStatus :: IntMatBilinearCZElasticStatus(int n, Domain *d, GaussPoint *g) : StructuralInterfaceMaterialStatus(n, d, g)
-{}
+{ }
 
 
 IntMatBilinearCZElasticStatus :: ~IntMatBilinearCZElasticStatus()

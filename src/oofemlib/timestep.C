@@ -78,7 +78,7 @@ TimeStep :: TimeStep(const TimeStep &src)
 }
 
 TimeStep &
-TimeStep :: operator=(const TimeStep &src)
+TimeStep :: operator = ( const TimeStep & src )
 {
     eModel = src.eModel;
     targetTime = src.targetTime;

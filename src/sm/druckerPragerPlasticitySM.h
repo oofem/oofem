@@ -88,7 +88,7 @@ protected:
 
 public:
     /// Constructor
-    DruckerPragerPlasticitySMStatus(int n, Domain *d, GaussPoint *gp);
+    DruckerPragerPlasticitySMStatus(int n, Domain * d, GaussPoint * gp);
 
     /// Destructor
     virtual ~DruckerPragerPlasticitySMStatus();
@@ -240,7 +240,7 @@ protected:
 
 public:
     /// Constructor
-    DruckerPragerPlasticitySM(int n, Domain *d);
+    DruckerPragerPlasticitySM(int n, Domain * d);
     /// Destructor
     virtual ~DruckerPragerPlasticitySM();
 

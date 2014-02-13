@@ -1296,10 +1296,10 @@ TR1_2D_SUPG2_AXI :: formVolumeInterfacePoly(Polygon &matvolpoly, LEPlic *matInte
             if ( nodeIn [ i - 1 ] ) {
                 if ( updFlag ) {
                     v.setCoords( matInterface->giveUpdatedXCoordinate( this->giveNode(i)->giveNumber() ),
-                                 matInterface->giveUpdatedYCoordinate( this->giveNode(i)->giveNumber() ) );
+                                matInterface->giveUpdatedYCoordinate( this->giveNode(i)->giveNumber() ) );
                 } else {
                     v.setCoords( this->giveNode(i)->giveCoordinate(1),
-                                 this->giveNode(i)->giveCoordinate(2) );
+                                this->giveNode(i)->giveCoordinate(2) );
                 }
 
                 matvolpoly.addVertex(v);
@@ -1329,7 +1329,7 @@ TR1_2D_SUPG2_AXI :: formVolumeInterfacePoly(Polygon &matvolpoly, LEPlic *matInte
                     if ( nodeIn [ i - 1 ] ) {
                         if ( updFlag ) {
                             v.setCoords( matInterface->giveUpdatedXCoordinate( this->giveNode(next)->giveNumber() ),
-                                         matInterface->giveUpdatedYCoordinate( this->giveNode(next)->giveNumber() ) );
+                                        matInterface->giveUpdatedYCoordinate( this->giveNode(next)->giveNumber() ) );
                         } else {
                             v.setCoords( this->giveNode(next)->giveCoordinate(1), this->giveNode(next)->giveCoordinate(2) );
                         }
@@ -1340,7 +1340,7 @@ TR1_2D_SUPG2_AXI :: formVolumeInterfacePoly(Polygon &matvolpoly, LEPlic *matInte
                         matvolpoly.addVertex(v);
                         if ( updFlag ) {
                             v.setCoords( matInterface->giveUpdatedXCoordinate( this->giveNode(next)->giveNumber() ),
-                                         matInterface->giveUpdatedYCoordinate( this->giveNode(next)->giveNumber() ) );
+                                        matInterface->giveUpdatedYCoordinate( this->giveNode(next)->giveNumber() ) );
                         } else {
                             v.setCoords( this->giveNode(next)->giveCoordinate(1), this->giveNode(next)->giveCoordinate(2) );
                         }
@@ -1410,13 +1410,13 @@ TR1_2D_SUPG2_AXI :: updateVolumePolygons(Polygon &referenceFluidPoly, Polygon &s
             next = i < 3 ? i + 1 : 1;
             if ( nodeIn [ i - 1 ] ) {
                 v.setCoords( this->giveNode(i)->giveCoordinate(1),
-                             this->giveNode(i)->giveCoordinate(2) );
+                            this->giveNode(i)->giveCoordinate(2) );
 
                 referenceFluidPoly.addVertex(v);
                 rfPoints++;
             } else {
                 v.setCoords( this->giveNode(i)->giveCoordinate(1),
-                             this->giveNode(i)->giveCoordinate(2) );
+                            this->giveNode(i)->giveCoordinate(2) );
 
                 secondFluidPoly.addVertex(v);
                 sfPoints++;
@@ -1694,7 +1694,7 @@ TR1_2D_SUPG2_AXI :: computeVolumeAroundID(GaussPoint *gp, integrationDomain id, 
 
     if ( id == _Triangle ) {
         FEI2dTrLin __interpolation(1, 2);
-        return _r * weight * fabs( __interpolation.giveTransformationJacobian( * gp->giveLocalCoordinates(), FEIVertexListGeometryWrapper(3, idpoly) ) );
+        return _r *weight *fabs( __interpolation.giveTransformationJacobian ( *gp->giveLocalCoordinates(), FEIVertexListGeometryWrapper(3, idpoly) ) );
     } else {
         FEI2dQuadLin __interpolation(1, 2);
         double det = fabs( __interpolation.giveTransformationJacobian( * gp->giveLocalCoordinates(), FEIVertexListGeometryWrapper(4, idpoly) ) );
@@ -1812,8 +1812,8 @@ TR1_2D_SUPG2_AXI :: SPRNodalRecoveryMI_giveDofMansDeterminedByPatch(IntArray &an
 {
     answer.resize(1);
     if ( ( pap == this->giveNode(1)->giveNumber() ) ||
-         ( pap == this->giveNode(2)->giveNumber() ) ||
-         ( pap == this->giveNode(3)->giveNumber() ) ) {
+        ( pap == this->giveNode(2)->giveNumber() ) ||
+        ( pap == this->giveNode(3)->giveNumber() ) ) {
         answer.at(1) = pap;
     } else {
         _error("SPRNodalRecoveryMI_giveDofMansDeterminedByPatch: node unknown");

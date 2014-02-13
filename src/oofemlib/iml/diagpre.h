@@ -46,7 +46,7 @@ private:
 
 public:
     /// Constructor. Initializes the the receiver (constructs the precontioning matrix M) of given matrix.
-    DiagPreconditioner(const SparseMtrx &, InputRecord &attributes);
+    DiagPreconditioner(const SparseMtrx &, InputRecord & attributes);
     /// Constructor. The user should call initializeFrom and init services in this given order to ensure consistency.
     DiagPreconditioner() : Preconditioner() { }
     /// Destructor

@@ -66,10 +66,10 @@ IntMatBilinearCZStatus :: IntMatBilinearCZStatus(int n, Domain *d, GaussPoint *g
 
 
 IntMatBilinearCZStatus :: ~IntMatBilinearCZStatus()
-{}
+{ }
 
 void IntMatBilinearCZStatus :: initTempStatus()
-{}
+{ }
 
 void IntMatBilinearCZStatus :: updateYourself(TimeStep *tStep)
 {
@@ -85,8 +85,8 @@ void IntMatBilinearCZStatus :: copyStateVariables(const MaterialStatus &iStatus)
 {
     StructuralInterfaceMaterialStatus :: copyStateVariables(iStatus);
 
-    MaterialStatus &tmpStat = const_cast< MaterialStatus & >( iStatus );
-    const IntMatBilinearCZStatus &structStatus = dynamic_cast< IntMatBilinearCZStatus & >( tmpStat );
+    MaterialStatus &tmpStat = const_cast< MaterialStatus & >(iStatus);
+    const IntMatBilinearCZStatus &structStatus = dynamic_cast< IntMatBilinearCZStatus & >(tmpStat);
 
     mDamageNew              = structStatus.mDamageNew;
     mDamageOld              = structStatus.mDamageOld;
@@ -108,10 +108,10 @@ IntMatBilinearCZ :: IntMatBilinearCZ(int n, Domain *d) : StructuralInterfaceMate
     mSigmaF(0.0),
     mMu(0.0),
     mGamma(0.0)
-{}
+{ }
 
 IntMatBilinearCZ :: ~IntMatBilinearCZ()
-{}
+{ }
 
 int IntMatBilinearCZ :: checkConsistency()
 {
@@ -152,7 +152,7 @@ void IntMatBilinearCZ :: giveFirstPKTraction_3d(FloatArray &answer, GaussPoint *
 
         status->mTractionNew = answer;
         return;
-    } else   {
+    } else {
         // Iterate to find plastic strain increment.
         int maxIter = 50;
         double absTol = 1.0e-9; // Absolute error tolerance
@@ -237,7 +237,7 @@ void IntMatBilinearCZ :: computeTraction(FloatArray &oT, const FloatArray &iTTri
     // Normal part
     if ( iTTrial.at(3) <= 0.0 ) {    // TODO: Check if-statement
         oT.at(3) = iTTrial.at(3);
-    } else   {
+    } else {
         oT.at(3) = iTTrial.at(3) / ( 1.0 + 2.0 * mPenaltyStiffness * iPlastMultInc / mSigmaF );
     }
 }

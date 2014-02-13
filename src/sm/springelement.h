@@ -75,10 +75,10 @@ protected:
     SpringElementType mode;
 
 public:
-    SpringElement(int n, Domain *d);
+    SpringElement(int n, Domain * d);
     virtual ~SpringElement() { }
 
-    virtual void computeLumpedMassMatrix(FloatMatrix &answer, TimeStep *tStep) {}
+    virtual void computeLumpedMassMatrix(FloatMatrix &answer, TimeStep *tStep) { }
     virtual void computeMassMatrix(FloatMatrix &answer, TimeStep *tStep)
     { computeLumpedMassMatrix(answer, tStep); }
     virtual void computeStiffnessMatrix(FloatMatrix &answer, MatResponseMode rMode, TimeStep *tStep);
@@ -93,8 +93,8 @@ public:
 
     virtual void giveDofManDofIDMask(int inode, EquationID ut, IntArray &answer) const;
 
-    virtual void updateInternalState(TimeStep *tStep) {}
-    virtual void updateYourself(TimeStep *tStep) {}
+    virtual void updateInternalState(TimeStep *tStep) { }
+    virtual void updateYourself(TimeStep *tStep) { }
     virtual int checkConsistency() { return 1; }
     virtual void printOutputAt(FILE *file, TimeStep *tStep);
 
@@ -113,8 +113,8 @@ public:
 protected:
     virtual void computeBmatrixAt(GaussPoint *gp, FloatMatrix &answer,
                                   int lowerIndx = 1, int upperIndx = ALL_STRAINS)
-    {}
-    virtual void computeNmatrixAt(const FloatArray &iLocCoord, FloatMatrix &answer) {}
+    { }
+    virtual void computeNmatrixAt(const FloatArray &iLocCoord, FloatMatrix &answer) { }
     virtual bool computeGtoLRotationMatrix(FloatMatrix &answer);
     double computeSpringInternalForce(TimeStep *tStep);
 };

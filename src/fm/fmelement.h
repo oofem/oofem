@@ -54,7 +54,7 @@ namespace oofem {
 class FMElement : public Element
 {
 public:
-    FMElement(int n, Domain *aDomain);
+    FMElement(int n, Domain * aDomain);
     virtual ~FMElement();
 
     /**

@@ -54,7 +54,7 @@ public:
      * node number in particular domain.
      * @param d Domain to which component belongs to.
      */
-    MaterialInterface(int n, Domain *d) : FEMComponent(n, d) { }
+    MaterialInterface(int n, Domain * d) : FEMComponent(n, d) { }
 
     virtual const char *giveInputRecordName() const { return NULL; }
 

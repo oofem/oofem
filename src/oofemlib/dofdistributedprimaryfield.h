@@ -60,7 +60,7 @@ public:
      * @param ut Equation ID for unknowns in field.
      * @param nHist Number of old time steps to store.
      */
-    DofDistributedPrimaryField(EngngModel *a, int idomain, FieldType ft, EquationID ut, int nHist);
+    DofDistributedPrimaryField(EngngModel * a, int idomain, FieldType ft, EquationID ut, int nHist);
     virtual ~DofDistributedPrimaryField();
 
     virtual void initialize(ValueModeType mode, TimeStep *tStep, FloatArray &answer, const UnknownNumberingScheme &s);

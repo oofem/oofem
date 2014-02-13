@@ -60,7 +60,7 @@ LobattoIntegrationRule :: SetUpPointsOnLine(int nPoints, MaterialMode mode)
     for ( int i = 1; i <= nPoints; i++ ) {
         FloatArray *coord = new FloatArray(1);
         coord->at(1) = coords_xi.at(i);
-        this->gaussPointArray [ i - 1 ] = new GaussPoint(this, i, coord, weights.at(i), mode);
+        this->gaussPointArray [ i - 1 ] = new GaussPoint(this, i, coord, weights.at ( i ), mode);
     }
 
     this->intdomain = _Line;
@@ -72,7 +72,7 @@ int
 LobattoIntegrationRule :: SetUpPointsOnSquare(int nPoints, MaterialMode mode)
 //GaussIntegrationRule :: SetUpPointsOnSquare(int nPoints_xi1, int nPoints_xi2, MaterialMode mode)
 {
-    int nPoints_xi1 = floor( sqrt( double( nPoints ) ) );
+    int nPoints_xi1 = (int) floor( sqrt( double ( nPoints ) ) );
     int nPoints_xi2 = nPoints_xi1;
     FloatArray coords_xi1, weights1, coords_xi2, weights2;
     this->giveLineCoordsAndWeights(nPoints_xi1, coords_xi1, weights1);
@@ -86,7 +86,7 @@ LobattoIntegrationRule :: SetUpPointsOnSquare(int nPoints, MaterialMode mode)
             FloatArray *coord = new FloatArray(2);
             coord->at(1) = coords_xi1.at(i);
             coord->at(2) = coords_xi2.at(j);
-            this->gaussPointArray [ count - 1 ] = new GaussPoint(this, count, coord, weights1.at(i) * weights2.at(j), mode);
+            this->gaussPointArray [ count - 1 ] = new GaussPoint(this, count, coord, weights1.at ( i ) *weights2.at ( j ), mode);
         }
     }
 
@@ -99,7 +99,7 @@ int
 LobattoIntegrationRule :: SetUpPointsOnCube(int nPoints, MaterialMode mode)
 //GaussIntegrationRule :: SetUpPointsOnCube(int nPoints_xi1, int nPoints_xi2, int nPoints_xi3, MaterialMode mode)
 {
-    int nPoints_xi1 = floor(cbrt( double( nPoints ) ) + 0.5);
+    int nPoints_xi1 = (int) floor(cbrt( double ( nPoints ) ) + 0.5);
     int nPoints_xi2 = nPoints_xi1;
     int nPoints_xi3 = nPoints_xi1;
     FloatArray coords_xi1, weights1, coords_xi2, weights2, coords_xi3, weights3;
@@ -117,7 +117,7 @@ LobattoIntegrationRule :: SetUpPointsOnCube(int nPoints, MaterialMode mode)
                 coord->at(1) = coords_xi1.at(i);
                 coord->at(2) = coords_xi2.at(j);
                 coord->at(3) = coords_xi3.at(k);
-                this->gaussPointArray [ count - 1 ] = new GaussPoint(this, count, coord, weights1.at(i) * weights2.at(j) * weights3.at(k), mode);
+                this->gaussPointArray [ count - 1 ] = new GaussPoint(this, count, coord, weights1.at ( i ) *weights2.at ( j ) *weights3.at ( k ), mode);
             }
         }
     }
