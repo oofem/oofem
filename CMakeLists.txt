@@ -91,9 +91,6 @@ if (USE_PARALLEL)
     set (USE_MPI ON)
 endif ()
 
-# SM module should be always included (XFem dependencies)
-set (USE_SM ON)
-
 #######################################################################
 ######################## Internal libraries ###########################
 #######################################################################
