@@ -72,6 +72,7 @@ EnrichmentItem :: EnrichmentItem(int n, XfemManager *xMan, Domain *aDomain) : FE
     mEnrFrontIndex(0),
     mpPropagationLaw(NULL),
     mPropLawIndex(0),
+    mInheritBoundaryConditions(false),
     mLevelSetsNeedUpdate(true),
     mLevelSetTol2(1.0e-12)
 {
@@ -117,6 +118,9 @@ IRResultType EnrichmentItem :: initializeFrom(InputRecord *ir)
     mPropLawIndex = 0;
     IR_GIVE_OPTIONAL_FIELD(ir, mPropLawIndex, _IFT_EnrichmentItem_propagationlaw);
 
+    if(ir->hasField(_IFT_EnrichmentItem_inheritbc)) {
+    	mInheritBoundaryConditions = true;
+    }
 
     return IRRT_OK;
 }
@@ -128,6 +132,10 @@ void EnrichmentItem :: appendInputRecords(DynamicDataReader &oDR)
 
     eiRec->setField(mEnrFrontIndex,                     _IFT_EnrichmentItem_front);
     eiRec->setField(mPropLawIndex,                      _IFT_EnrichmentItem_propagationlaw);
+
+    if(mInheritBoundaryConditions) {
+    	eiRec->setField(_IFT_EnrichmentItem_inheritbc);
+    }
 
     oDR.insertInputRecord(DataReader :: IR_enrichItemRec, eiRec);
 
@@ -655,6 +663,9 @@ void EnrichmentItem :: createEnrichedDofs()
     int nrDofMan = this->giveDomain()->giveNumberOfDofManagers();
     IntArray dofIdArray;
 
+    int bcIndex = -1;
+    int icIndex = -1;
+
     // Create new dofs
     for ( int i = 1; i <= nrDofMan; i++ ) {
         DofManager *dMan = this->giveDomain()->giveDofManager(i);
@@ -665,7 +676,36 @@ void EnrichmentItem :: createEnrichedDofs()
             int nDofs = dMan->giveNumberOfDofs();
             for ( int m = 1; m <= dofIdArray.giveSize(); m++ ) {
                 if ( !dMan->hasDofID( ( DofIDItem ) ( dofIdArray.at(m) ) ) ) {
-                    dMan->appendDof( new MasterDof( nDofs + m, dMan, ( DofIDItem ) ( dofIdArray.at(m) ) ) );
+
+                	if( mInheritBoundaryConditions ) {
+                		// Check if the other dofs in the dof manager have
+                		// Dirichlet BCs. If so, let the new enriched dof
+                		// inherit the same BC.
+                		bool foundBC = false;
+                		for(int n = 1; n <= nDofs; n++) {
+                			Dof *dof = dMan->giveDof(n);
+                			if(dof->giveBcId() > 0) {
+                				foundBC = true;
+                				bcIndex = dof->giveBcId();
+                				break;
+                			}
+                		}
+
+                		if(foundBC) {
+                			// Append dof with BC
+                    		dMan->appendDof( new MasterDof( nDofs + m, dMan, bcIndex, icIndex, ( DofIDItem ) ( dofIdArray.at(m) ) ) );
+                		}
+                		else {
+                    		// No BC found, append enriched dof without BC
+                    		dMan->appendDof( new MasterDof( nDofs + m, dMan, ( DofIDItem ) ( dofIdArray.at(m) ) ) );
+                		}
+
+                	}
+                	else {
+                		// Append enriched dof without BC
+                		dMan->appendDof( new MasterDof( nDofs + m, dMan, ( DofIDItem ) ( dofIdArray.at(m) ) ) );
+                	}
+
                 }
             }
         }

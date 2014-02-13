@@ -58,6 +58,8 @@
 #define _IFT_EnrichmentItem_front "enrichmentfront"
 #define _IFT_EnrichmentItem_propagationlaw "propagationlaw"
 
+#define _IFT_EnrichmentItem_inheritbc "inheritbc"
+
 #define _IFT_Delamination_Name "delamination"
 #define _IFT_Delamination_xiCoord "delaminationxicoord"
 #define _IFT_Delamination_interfacenum "interfacenum"
@@ -224,6 +226,15 @@ protected:
 
     /// mPropLawIndex: nonzero if a propagation law is present, zero otherwise.
     int mPropLawIndex;
+
+    /**
+     * If newly created enriched dofs should inherit boundary conditions
+     * from the node they are introduced in. Default is false, i.e.
+     * XFEM dofs are free by default. Note: the routine takes the first
+     * Dirichlet BC it finds in the node. Therefore, we may get in trouble
+     * if the node has different Dirichlet BCs for different dofs.
+     */
+    bool mInheritBoundaryConditions;
 
     int startOfDofIdPool; // points to the first available dofId number associated with the ei
     int endOfDofIdPool;
