@@ -85,7 +85,7 @@ BrouzoulisShell :: giveDofManDofIDMask(int inode, EquationID ut, IntArray &answe
 void
 BrouzoulisShell :: computeStressVector(FloatArray &answer, const FloatArray &e, GaussPoint *gp, TimeStep *tStep)
 {
-    this->giveStructuralCrossSection()->giveRealStress_Plate(answer, gp, e, tStep);
+    //this->giveStructuralCrossSection()->giveRealStress_Plate(answer, gp, e, tStep);
     
     //giveRealStressVector_PlateLayer(FloatArray &answer, GaussPoint *gp, const FloatArray &reducedStrain, TimeStep *tStep)
 }
@@ -153,29 +153,11 @@ BrouzoulisShell :: computeBmatrixAt(GaussPoint *gp, FloatMatrix &answer, int li,
 // luated at gp.
 // B matrix  -  3 rows : epsilon-X, epsilon-Y, gamma-YZ, gamma-ZX, gamma-XY  :
 {
-
-    FloatMatrix coords;
-    this->computeCoRotatedNodeCoords(coords);
-    // A = 0.5 * (x31*y42 +x24*y31) = 4J
-    double A = 0.5 * ( ( coords.at(1,3)-coords.at(1,1) )*( coords.at(2,4)-coords.at(2,2) ) + 
-                       ( coords.at(1,2)-coords.at(1,4) )*( coords.at(2,3)-coords.at(2,1) ) ); 
-
-    FloatMatrix dNdx(2,4);
-    int x = 1; int y = 2;
-    dNdx.at(1,1) = ( coords.at(y,2)-coords.at(y,4) ); 
-    dNdx.at(1,2) = ( coords.at(y,3)-coords.at(y,1) );
-    dNdx.at(1,3) = ( coords.at(y,4)-coords.at(y,2) );
-    dNdx.at(1,4) = ( coords.at(y,1)-coords.at(y,3) );
-
-    dNdx.at(2,1) = ( coords.at(x,4)-coords.at(x,2) ); 
-    dNdx.at(2,2) = ( coords.at(x,1)-coords.at(x,3) );
-    dNdx.at(2,3) = ( coords.at(x,2)-coords.at(x,4) );
-    dNdx.at(2,4) = ( coords.at(x,3)-coords.at(x,1) );
     
-    //             
+    FloatMatrix dNdx;       
+    this->computedNdX(dNdx);
     double zeta = 0.0;
-    double fac1 = 1.0 / (2.0*A);
-    dNdx.times(fac1);
+    int x = 1; int y = 2;
     answer.resize(5,20);
 
     double N = 0.25; //N(0,0) = 1/4
@@ -290,7 +272,6 @@ BrouzoulisShell :: computeCoRotatedNodeCoords(FloatMatrix &answer)
         coords = *this->giveNode(i)->giveCoordinates();
         nodeCoords.setColumn(coords,i);
     }
-    //nodeCoords.rotatedWith(this->tempCorotTriad,'t');
     answer.beTProductOf(this->tempCorotTriad, nodeCoords);
 }
 
