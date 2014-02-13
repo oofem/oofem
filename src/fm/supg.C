@@ -499,16 +499,11 @@ SUPG :: solveYourselfAt(TimeStep *tStep)
         // assemble rhs (residual)
         //
         internalForces.zero();
-<<<<<<< HEAD
         this->assembleVector( internalForces, tStep, EID_MomentumBalance_ConservationEquation, InternalForcesVector, VM_Total,
                               EModelDefaultEquationNumbering(), this->giveDomain(1) );
 #ifdef __PARALLEL_MODE
         this->updateSharedDofManagers(internalForces, EModelDefaultEquationNumbering(), InternalForcesExchangeTag);
 #endif
-=======
-        this->assembleVectorFromElements( internalForces, tStep, EID_MomentumBalance_ConservationEquation, InternalForcesVector, VM_Total,
-                                         EModelDefaultEquationNumbering(), this->giveDomain(1) );
->>>>>>> rel-2.3
         rhs.beDifferenceOf(externalForces, internalForces);
 
         // check convergence and repeat iteration if desired
@@ -553,16 +548,11 @@ SUPG :: solveYourselfAt(TimeStep *tStep)
             // assemble rhs (residual)
             //
             internalForces.zero();
-<<<<<<< HEAD
             this->assembleVector( internalForces, tStep, EID_MomentumBalance_ConservationEquation, InternalForcesVector, VM_Total,
                                   EModelDefaultEquationNumbering(), this->giveDomain(1) );
 #ifdef __PARALLEL_MODE
             this->updateSharedDofManagers(internalForces, EModelDefaultEquationNumbering(), InternalForcesExchangeTag);
 #endif
-=======
-            this->assembleVectorFromElements( internalForces, tStep, EID_MomentumBalance_ConservationEquation, InternalForcesVector, VM_Total,
-                                             EModelDefaultEquationNumbering(), this->giveDomain(1) );
->>>>>>> rel-2.3
             rhs.beDifferenceOf(externalForces, internalForces);
         }
     } while ( ( rnorm > rtolv ) && ( _absErrResid > atolv ) && ( nite <= maxiter ) );

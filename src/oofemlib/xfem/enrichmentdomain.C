@@ -210,18 +210,6 @@ bool EDCrack :: propagateTips(const std :: vector< TipPropagation > &iTipProp) {
             bg->insertVertexBack(pos);
         }
     }
-<<<<<<< HEAD
-=======
-
-    // For debugging only
-    if ( mDebugVTK ) {
-        PolygonLine *pl = dynamic_cast< PolygonLine * >(bg);
-        if ( pl != NULL ) {
-            pl->printVTK();
-        }
-    }
-
->>>>>>> rel-2.3
     return true;
 }
 

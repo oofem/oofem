@@ -558,11 +558,8 @@ NonLinearStatic :: updateComponent(TimeStep *tStep, NumericalCmpn cmpn, Domain *
                            EModelDefaultEquationNumbering(), d);
             initFlag = 0;
         } else if ( ( stiffMode == nls_elasticStiffness ) && ( initFlag ||
-<<<<<<< HEAD
                                                                ( this->giveMetaStep( tStep->giveMetaStepNumber() )->giveFirstStepNumber() == tStep->giveNumber() ) ) ) {
-=======
-                                                              ( this->giveMetaStep( tStep->giveMetatStepumber() )->giveFirsttStepumber() == tStep->giveNumber() ) ) ) {
->>>>>>> rel-2.3
+
 #ifdef VERBOSE
             OOFEM_LOG_DEBUG("Assembling elastic stiffness matrix\n");
 #endif

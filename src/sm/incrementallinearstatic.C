@@ -153,7 +153,7 @@ TimeStep *IncrementalLinearStatic :: giveNextStep()
     if ( previousStep == NULL ) {
         previousStep = new TimeStep(giveNumberOfTimeStepWhenIcApply(), this, 0, -dt, dt, 0);
     }
-    currentStep = new TimeStep(istep, this, mtStepum, this->giveDiscreteTime ( istep ), dt, counter);
+    currentStep = new TimeStep(istep, this, mStepNum, this->giveDiscreteTime ( istep ), dt, counter);
     return currentStep;
 }
 

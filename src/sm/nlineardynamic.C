@@ -447,17 +447,10 @@ NonLinearDynamic :: proceedStep(int di, TimeStep *tStep)
 
     // Assembling the effective load vector
     for ( int i = 1; i <= neq; i++ ) {
-<<<<<<< HEAD
         help.at(i) = a2 * previousVelocityVector.at(i) + a3 * previousAccelerationVector.at(i)
                      + eta * ( a4 * previousVelocityVector.at(i)
                                + a5 * previousAccelerationVector.at(i)
                                + a6 * previousIncrementOfDisplacement.at(i) );
-=======
-        help.at(i) = a2 * previousVelocityVector.at(i) + a3 *previousAccelerationVector.at(i)
-        + eta * ( a4 * previousVelocityVector.at(i)
-                 + a5 * previousAccelerationVector.at(i)
-                 + a6 * previousIncrementOfDisplacement.at(i) );
->>>>>>> rel-2.3
     }
 
     massMatrix->times(help, rhs);
@@ -501,17 +494,9 @@ NonLinearDynamic :: proceedStep(int di, TimeStep *tStep)
     rhs = previousVelocityVector;
     rhs2 = previousAccelerationVector;
     for ( int i = 1; i <= neq; i++ ) {
-<<<<<<< HEAD
         accelerationVector.at(i) = a0 * incrementOfDisplacement.at(i) - a2 * rhs.at(i) - a3 * rhs2.at(i);
         velocityVector.at(i)     = a1 * incrementOfDisplacement.at(i) - a4 * rhs.at(i) - a5 * rhs2.at(i)
             - a6 * previousIncrementOfDisplacement.at(i);
-=======
-        rhs.at(i)                = previousVelocityVector.at(i);
-        rhs2.at(i)               = previousAccelerationVector.at(i);
-        accelerationVector.at(i) = a0 * incrementOfDisplacement.at(i) - a2 *rhs.at(i) - a3 *rhs2.at(i);
-        velocityVector.at(i)     = a1 * incrementOfDisplacement.at(i) - a4 *rhs.at(i) - a5 *rhs2.at(i)
-        - a6 *previousIncrementOfDisplacement.at(i);
->>>>>>> rel-2.3
     }
     totIterations += currentIterations;
 }

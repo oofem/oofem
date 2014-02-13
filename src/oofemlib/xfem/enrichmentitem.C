@@ -65,8 +65,6 @@ REGISTER_EnrichmentItem(Delamination)
 
 REGISTER_EnrichmentItem(Crack)
 
-const double EnrichmentItem :: mLevelSetTol = 1.0e-12;
-
 EnrichmentItem :: EnrichmentItem(int n, XfemManager *xMan, Domain *aDomain) : FEMComponent(n, aDomain),
     mpEnrichmentDomain(NULL),
     mpEnrichmentFunc(NULL),
