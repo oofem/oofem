@@ -633,7 +633,7 @@ If \param{refloadmode} is 1 (rlm\_inceremental) then the reference load vector i
 obtained as incremental load vector at given time.
 \item[-] \param{solverParams} - parameters of solver. The solver type
 is determined using \param{controlmode}.
-\item The  \param{sparselinsolverparams} parameter describes the sparse
+\item[-] The  \param{sparselinsolverparams} parameter describes the sparse
 linear solver attributes and is explained in section
 \ref{sparselinsolver}.
 \item[-] By default, reached load at the end of
@@ -1655,7 +1655,7 @@ InternalStateType enumeration, which is defined in include file
 
 \item The parameter \param{stype} allows to select smoothing procedure for
 internal variables, which is used to compute nodal values from values
-in integration points.
+in integration points. The supported values are $0$ for simple nodal averageing (generally supported only by triangular and tetrahedral elements), $1$ for Zienkiewicz Zhu recovery (default), and $2$ for Superconvergent Patch Recovery (SPR, based on least square fitting).
 
 \item The parameter \param{nvr} allows to set number of virual regions. The internal (state) variables defined in integration points need to be transfered into nodal values. This process is called nodal recovery. VTKXML module allows to perform recovery not only over the whole domain, but also over so called virtual regions. This allows to exactly match discontinuity along region boundary instead of smoothing it. The concept of virtual regions allows to map several true regions onto single virtual region and then perform recovery over virtual regions instead of true ones. Number of true region is given by element cross-section. If \param{nvr} is set to zero (default), the recovery is performed over whole domain (single virtual region), when positive, it should be equal to number of virtual regions and vrmap should be provided. If negative, then recovery over real regions is used.
 
