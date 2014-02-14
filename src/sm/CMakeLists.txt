@@ -173,6 +173,7 @@ set (sm_unsorted
     refinedmesh.C
     microplane.C
     gpinitmodule.C
+    stressstrainbasevector.C stressvector.C strainvector.C
     )
 
 set (sm_parallel

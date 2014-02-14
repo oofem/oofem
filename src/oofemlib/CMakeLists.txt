@@ -147,9 +147,6 @@ set (core_iga
 set (core_arrays
     intarray.C
     floatarray.C
-    stressstrainbasevector.C
-    stressvector.C
-    strainvector.C
     floatmatrix.C
     )
 
