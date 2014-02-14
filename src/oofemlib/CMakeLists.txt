@@ -17,6 +17,7 @@ set (core_unsorted
     rvematerial.C
     weakperiodicbc.C
     solutionbasedshapefunction.C
+    fracturemanager.C
     # Semi sorted:
     errorestimator.C meshqualityerrorestimator.C remeshingcrit.C
     sloangraph.C sloangraphnode.C sloanlevelstruct.C

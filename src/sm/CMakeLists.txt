@@ -75,7 +75,6 @@ set (sm_emodel
     diidynamic.C
     nldeidynamic.C
     incrementallinearstatic.C
-    fracturemanager.C
     )
 
 set (sm_loads
