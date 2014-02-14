@@ -993,8 +993,6 @@ void XfemElementInterface :: XfemElementInterface_computeStressVector(FloatArray
         OOFEM_ERROR("XfemElementInterface :: XfemElementInterface_computeStressVector: cs == NULL.\n");
     }
 
-    cs->giveRealStresses(answer, gp, strain, tStep);
-
     if( element->giveDomain()->hasXfemManager() ) {
 
 		XfemManager *xMan = element->giveDomain()->giveXfemManager();
@@ -1008,13 +1006,27 @@ void XfemElementInterface :: XfemElementInterface_computeStressVector(FloatArray
 				StructuralCrossSection *structCSInclusion = dynamic_cast< StructuralCrossSection * >( csInclusion );
 
 				if ( structCSInclusion != NULL ) {
-					structCSInclusion->giveRealStresses(answer, gp, strain, tStep);
+				    if(mUsePlaneStrain) {
+				    	structCSInclusion->giveRealStress_PlaneStrain(answer, gp, strain, tStep);
+				    }
+				    else {
+				    	structCSInclusion->giveRealStress_PlaneStress(answer, gp, strain, tStep);
+				    }
+
 					return;
 				} else {
 					OOFEM_ERROR("PlaneStress2dXfem :: computeStressVector: failed to fetch StructuralCrossSection\n");
 				}
 			}
 		}
+    }
+
+
+    if(mUsePlaneStrain) {
+    	cs->giveRealStress_PlaneStrain(answer, gp, strain, tStep);
+    }
+    else {
+    	cs->giveRealStress_PlaneStress(answer, gp, strain, tStep);
     }
 }
 
