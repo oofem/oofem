@@ -48,7 +48,7 @@
 
 #include "gausspoint.h"
 
-#include "primvarmapper.h"
+#include "mappers/primvarmapper.h"
 #include "matstatmapperint.h"
 #include "structuralinterfacematerial.h"
 #include "structuralinterfacematerialstatus.h"

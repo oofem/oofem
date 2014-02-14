@@ -52,7 +52,6 @@
 #include "xfem/enrichmentdomain.h"
 #include "xfem/XFEMDebugTools.h"
 #include "prescribedgradient.h"
-#include "export/exportmodulecallerinterface.h"
 
 #include <sstream>
 
@@ -96,10 +95,10 @@ void GnuplotExportModule::doOutput(TimeStep *tStep, bool forcedOutput)
 		int numBC = domain->giveNumberOfBoundaryConditions();
 
 		for(int i = 1; i <= numBC; i++) {
-			ExportModuleCallerInterface *expModCaller = dynamic_cast<ExportModuleCallerInterface*>( domain->giveBc(i) );
+			PrescribedGradient *presGradBC = dynamic_cast<PrescribedGradient*>( domain->giveBc(i) );
 
-			if(expModCaller != NULL) {
-				expModCaller->callExportModule(*this, tStep);
+			if(presGradBC != NULL) {
+				outputBoundaryCondition(*presGradBC, tStep);
 			}
 		}
 	}
