@@ -55,6 +55,9 @@
 #include <sstream>
 #include <math.h>
 
+// TODO: Remove need for these includes in base class. /ES
+#include "xfem/enrichmentitems/crack.h"
+
 namespace oofem {
 XfemElementInterface :: XfemElementInterface(Element *e) :
     Interface(),

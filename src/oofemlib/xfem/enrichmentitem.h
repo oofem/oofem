@@ -317,49 +317,6 @@ public:
     virtual void updateGeometry(FailureCriteriaStatus *fc, TimeStep *tStep);
 };
 
-
-
-
-
-/**
- * Crack.
- * @author Erik Svenning
- */
-class OOFEM_EXPORT Crack : public EnrichmentItem
-{
-public:
-    Crack(int n, XfemManager * xm, Domain * aDomain);
-
-    virtual const char *giveClassName() const { return "Crack"; }
-    virtual const char *giveInputRecordName() const { return _IFT_Crack_Name; }
-    virtual IRResultType initializeFrom(InputRecord *ir);
-
-    void AppendCohesiveZoneGaussPoint(GaussPoint *ipGP);
-
-    virtual void callGnuplotExportModule(GnuplotExportModule &iExpMod);
-
-    const std::vector<GaussPoint*> &giveCohesiveZoneGaussPoints() const {return mCohesiveZoneGaussPoints;}
-    const std::vector<double> &giveCohesiveZoneArcPositions() const {return mCohesiveZoneArcPositions;}
-
-protected:
-    /**
-     * Array of pointers to the Gauss points related to the
-     * cohesive zone. The array is used for data extraction
-     * and visualization only. The reason for keeping an array
-     * of pointers here is as follows: the cohesive zone Gauss
-     * points are created in the XFEMElementInterface, that
-     * (of course) only keeps track of GPs in that element.
-     * However, for visualization it is very valuable to be able
-     * to plot cohesive zone data (e.g. damage or crack opening)
-     * vs the arc length coordinate of the crack. This must be
-     * accomplished at the level of the EnrichmentItem, because
-     * here we know about the geometry of the crack.
-     */
-    std::vector<GaussPoint*> 	mCohesiveZoneGaussPoints;
-    std::vector<double>			mCohesiveZoneArcPositions;
-};
-
-
 /////////////////////////////////////////////////
 // Function implementations
 
