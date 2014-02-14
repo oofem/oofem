@@ -57,7 +57,7 @@ DynamicInputRecord :: DynamicInputRecord() : InputRecord(),
     stringListRecord(),
     dictionaryRecord(),
     rangeRecord()
-{}
+{ }
 
 DynamicInputRecord :: DynamicInputRecord(FEMComponent &femc) : InputRecord(),
     recordKeyword(),
@@ -91,12 +91,12 @@ DynamicInputRecord :: DynamicInputRecord(const DynamicInputRecord &src) : InputR
     stringListRecord(src.stringListRecord),
     dictionaryRecord(src.dictionaryRecord),
     rangeRecord(src.rangeRecord)
-{}
+{ }
 
 DynamicInputRecord :: ~DynamicInputRecord()
-{}
+{ }
 
-DynamicInputRecord &DynamicInputRecord :: operator=(const DynamicInputRecord &src)
+DynamicInputRecord &DynamicInputRecord :: operator = ( const DynamicInputRecord & src )
 {
     this->recordKeyword = src.recordKeyword;
     this->recordNumber = src.recordNumber;

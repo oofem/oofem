@@ -156,7 +156,7 @@ FEI2dTrQuad :: global2local(FloatArray &answer, const FloatArray &gcoords, const
 {
     FloatArray res, delta, guess, lcoords_guess;
     FloatMatrix jac, jacT;
-    double convergence_limit, error;
+    double convergence_limit, error=0.0;
 
     // find a suitable convergence limit
     convergence_limit = 1e-6 * this->giveCharacteristicLength(cellgeo);
@@ -249,11 +249,11 @@ FEI2dTrQuad :: edgeEvaldNds(FloatArray &answer, int iedge,
     dNdxi.at(3) = -2 * xi;
 
     dxdxi.at(1) = dNdxi.at(1) * cellgeo.giveVertexCoordinates( edgeNodes.at(1) )->at(xind) +
-                  dNdxi.at(2) * cellgeo.giveVertexCoordinates( edgeNodes.at(2) )->at(xind) +
-                  dNdxi.at(3) * cellgeo.giveVertexCoordinates( edgeNodes.at(3) )->at(xind);
+    dNdxi.at(2) * cellgeo.giveVertexCoordinates( edgeNodes.at(2) )->at(xind) +
+    dNdxi.at(3) * cellgeo.giveVertexCoordinates( edgeNodes.at(3) )->at(xind);
     dxdxi.at(2) = dNdxi.at(1) * cellgeo.giveVertexCoordinates( edgeNodes.at(1) )->at(yind) +
-                  dNdxi.at(2) * cellgeo.giveVertexCoordinates( edgeNodes.at(2) )->at(yind) +
-                  dNdxi.at(3) * cellgeo.giveVertexCoordinates( edgeNodes.at(3) )->at(yind);
+    dNdxi.at(2) * cellgeo.giveVertexCoordinates( edgeNodes.at(2) )->at(yind) +
+    dNdxi.at(3) * cellgeo.giveVertexCoordinates( edgeNodes.at(3) )->at(yind);
 
     double J = dxdxi.computeNorm();
     answer = dNdxi;
@@ -281,12 +281,12 @@ double FEI2dTrQuad :: edgeEvalNormal(FloatArray &normal, int iedge, const FloatA
     normal.resize(2);
 
     normal.at(1) = dN1dxi * cellgeo.giveVertexCoordinates( edgeNodes.at(1) )->at(yind) +
-                   dN2dxi *cellgeo.giveVertexCoordinates( edgeNodes.at(2) )->at(yind) +
-                   dN3dxi *cellgeo.giveVertexCoordinates( edgeNodes.at(3) )->at(yind);
+    dN2dxi *cellgeo.giveVertexCoordinates( edgeNodes.at(2) )->at(yind) +
+    dN3dxi *cellgeo.giveVertexCoordinates( edgeNodes.at(3) )->at(yind);
 
     normal.at(2) = -dN1dxi *cellgeo.giveVertexCoordinates( edgeNodes.at(1) )->at(xind) +
-                   -dN2dxi *cellgeo.giveVertexCoordinates( edgeNodes.at(2) )->at(xind) +
-                   -dN3dxi *cellgeo.giveVertexCoordinates( edgeNodes.at(3) )->at(xind);
+    - dN2dxi *cellgeo.giveVertexCoordinates( edgeNodes.at(2) )->at(xind) +
+    - dN3dxi *cellgeo.giveVertexCoordinates( edgeNodes.at(3) )->at(xind);
 
     return normal.normalize();
 }
@@ -302,11 +302,11 @@ FEI2dTrQuad :: edgeLocal2global(FloatArray &answer, int iedge,
 
     answer.resize(2);
     answer.at(1) = ( n.at(1) * cellgeo.giveVertexCoordinates( edgeNodes.at(1) )->at(xind) +
-                     n.at(2) * cellgeo.giveVertexCoordinates( edgeNodes.at(2) )->at(xind) +
-                     n.at(3) * cellgeo.giveVertexCoordinates( edgeNodes.at(3) )->at(xind) );
+                    n.at(2) * cellgeo.giveVertexCoordinates( edgeNodes.at(2) )->at(xind) +
+                    n.at(3) * cellgeo.giveVertexCoordinates( edgeNodes.at(3) )->at(xind) );
     answer.at(2) = ( n.at(1) * cellgeo.giveVertexCoordinates( edgeNodes.at(1) )->at(yind) +
-                     n.at(2) * cellgeo.giveVertexCoordinates( edgeNodes.at(2) )->at(yind) +
-                     n.at(3) * cellgeo.giveVertexCoordinates( edgeNodes.at(3) )->at(yind) );
+                    n.at(2) * cellgeo.giveVertexCoordinates( edgeNodes.at(2) )->at(yind) +
+                    n.at(3) * cellgeo.giveVertexCoordinates( edgeNodes.at(3) )->at(yind) );
 }
 
 
@@ -413,7 +413,7 @@ FEI2dTrQuad :: giveArea(const FEICellGeometry &cellgeo) const
     y6 = p->at(2);
 
     return ( 4 * ( -( x4 * y1 ) + x6 * y1 + x4 * y2 - x5 * y2 + x5 * y3 - x6 * y3 ) + x2 * ( y1 - y3 - 4 * y4 + 4 * y5 ) +
-             x1 * ( -y2 + y3 + 4 * y4 - 4 * y6 ) + x3 * ( -y1 + y2 - 4 * y5 + 4 * y6 ) ) / 6;
+            x1 * ( -y2 + y3 + 4 * y4 - 4 * y6 ) + x3 * ( -y1 + y2 - 4 * y5 + 4 * y6 ) ) / 6;
 }
 
 double

@@ -53,7 +53,7 @@ protected:
     static FEI2dQuadQuad interpolation;
 
 public:
-    QPlaneStress2d(int n, Domain *d);
+    QPlaneStress2d(int n, Domain * d);
     virtual ~QPlaneStress2d() { }
 
     virtual int computeNumberOfDofs() { return 16; }

@@ -87,9 +87,11 @@ protected:
     IntArray rhsType;
 
 public:
-    LinearConstraintBC(int n, Domain *d);
+    LinearConstraintBC(int n, Domain * d);
     /// Destructor.
-    virtual ~LinearConstraintBC() { delete this->md; }
+    virtual ~LinearConstraintBC() {
+        delete this->md;
+    }
 
     IRResultType initializeFrom(InputRecord *ir);
     virtual const char *giveInputRecordName() const { return _IFT_LinearConstraintBC_Name; }

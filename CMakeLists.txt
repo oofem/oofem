@@ -13,7 +13,7 @@ set (oofem_VERSION_MINOR 4)
 set (oofem_VERSION_PATCH 0) # Unused
 set (oofem_HOMEPAGE "http://www.oofem.org")
 set (bp_HOMEPAGE "http://ksm.fsv.cvut.cz/%7Ebp/bp.html")
-set (oofem_COPYRIGHT "2014")
+set (oofem_COPYRIGHT "Copyright (C) 1994-2014 Borek Patzak")
 set (oofem_EMAIL "info@oofem.org")
 
 # Default is debug build
@@ -90,7 +90,6 @@ if (USE_PARALLEL)
     add_definitions (-D__PARALLEL_MODE)
     set (USE_MPI ON)
 endif ()
-
 
 #######################################################################
 ######################## Internal libraries ###########################
@@ -678,6 +677,8 @@ file (GLOB sm_tests RELATIVE "${oofem_TEST_DIR}/sm" "${oofem_TEST_DIR}/sm/*.in")
 file (GLOB fm_tests RELATIVE "${oofem_TEST_DIR}/fm" "${oofem_TEST_DIR}/fm/*.in")
 file (GLOB tm_tests RELATIVE "${oofem_TEST_DIR}/tm" "${oofem_TEST_DIR}/tm/*.in")
 file (GLOB tmsm_tests RELATIVE "${oofem_TEST_DIR}/tmsm" "${oofem_TEST_DIR}/tmsm/*.in")
+file (GLOB tmfm_tests RELATIVE "${oofem_TEST_DIR}/tmfm" "${oofem_TEST_DIR}/tmfm/*.in")
+file (GLOB tmcemhyd_tests RELATIVE "${oofem_TEST_DIR}/tmcemhyd" "${oofem_TEST_DIR}/tmcemhyd/*.in")
 foreach (case ${sm_tests})
     add_test (NAME "test_${case}" WORKING_DIRECTORY ${oofem_TEST_DIR}/sm COMMAND ${test_cmd} ${oofem_cmd} ${case} "s")
     # Separate commands so that we can use valgrind and gcov versions
@@ -701,6 +702,19 @@ endif()
 if (USE_TM AND USE_SM)
   foreach (case ${tmsm_tests})
     add_test (NAME "test_${case}" WORKING_DIRECTORY ${oofem_TEST_DIR}/tmsm COMMAND ${test_cmd} ${oofem_cmd} ${case} "s")
+  endforeach (case)
+endif()
+
+if (USE_TM AND USE_FM)
+  foreach (case ${tmfm_tests})
+    add_test (NAME "test_${case}" WORKING_DIRECTORY ${oofem_TEST_DIR}/tmfm COMMAND ${test_cmd} ${oofem_cmd} ${case} "s")
+  endforeach (case)
+endif()
+
+
+if (USE_TM AND USE_CEMHYD)
+  foreach (case ${tmcemhyd_tests})
+    add_test (NAME "test_${case}" WORKING_DIRECTORY ${oofem_TEST_DIR}/tmcemhyd COMMAND ${test_cmd} ${oofem_cmd} ${case} "s")
   endforeach (case)
 endif()
 

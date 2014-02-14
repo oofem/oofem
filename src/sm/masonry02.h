@@ -102,7 +102,7 @@ protected:
     double kp, km, kr;
 public:
 
-    Masonry02(int n, Domain *d);
+    Masonry02(int n, Domain * d);
     virtual ~Masonry02();
 
     virtual IRResultType initializeFrom(InputRecord *ir);

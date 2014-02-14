@@ -105,7 +105,7 @@ public:
      * @param n Node number in domain aDomain.
      * @param aDomain Domain to which node belongs.
      */
-    Node(int n, Domain *aDomain);
+    Node(int n, Domain * aDomain);
     /// Destructor.
     virtual ~Node();
 

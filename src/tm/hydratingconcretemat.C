@@ -290,7 +290,7 @@ double HydratingConcreteMat :: GivePower(TimeStep *tStep, GaussPoint *gp)
         }
     } else if ( this->hydrationModelType == 2 ) { //affinity hydration model inspired by Miguel Cervera et al.
         //determine timeStep for integration
-        double alphaTrialOld, alphaTrialNew;
+        double alphaTrialOld, alphaTrialNew = 0.0;
         double time = ms->lastIntrinsicTime;
         double timeStep = ( intrinsicTime - time ) / this->minModelTimeStepIntegrations;
         if ( timeStep > this->maxModelIntegrationTime ) {

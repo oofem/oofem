@@ -64,7 +64,7 @@ Lattice2d :: Lattice2d(int n, Domain *aDomain) : LatticeStructuralElement(n, aDo
 }
 
 Lattice2d :: ~Lattice2d()
-{}
+{ }
 
 
 int

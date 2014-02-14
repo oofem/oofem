@@ -100,7 +100,7 @@ protected:
     double a;
 
 public:
-    DruckerPragerCutMat(int n, Domain *d);
+    DruckerPragerCutMat(int n, Domain * d);
     virtual ~DruckerPragerCutMat();
 
     virtual int hasMaterialModeCapability(MaterialMode mode);

@@ -627,7 +627,7 @@ PerfectlyPlasticMaterial :: GiveStressCorrectionBackToYieldSurface(GaussPoint *g
         help += yeldStressGrad->at(j) * yeldStressGrad->at(j);
     }
 
-    stressCorrection = new FloatArray(* yeldStressGrad);
+    stressCorrection = new FloatArray(*yeldStressGrad);
     stressCorrection->times(-f3 / help);
 
 

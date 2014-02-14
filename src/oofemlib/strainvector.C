@@ -172,10 +172,10 @@ StrainVector :: computePrincipalValues(FloatArray &answer) const
 
         I1 = s.at(1) + s.at(2) + s.at(3);
         I2 = s.at(1) * s.at(2) + s.at(2) * s.at(3) + s.at(3) * s.at(1) -
-             0.25 * ( s.at(4) * s.at(4) + s.at(5) * s.at(5) + s.at(6) * s.at(6) );
+        0.25 * ( s.at(4) * s.at(4) + s.at(5) * s.at(5) + s.at(6) * s.at(6) );
         I3 = s.at(1) * s.at(2) * s.at(3) +
-             0.25 * ( s.at(4) * s.at(5) * s.at(6) - s.at(1) * s.at(4) * s.at(4) -
-                      s.at(2) * s.at(5) * s.at(5) - s.at(3) * s.at(6) * s.at(6) );
+        0.25 * ( s.at(4) * s.at(5) * s.at(6) - s.at(1) * s.at(4) * s.at(4) -
+                s.at(2) * s.at(5) * s.at(5) - s.at(3) * s.at(6) * s.at(6) );
 
         /*
          * Call cubic3r to ensure, that all three real eigenvalues will be found, because we have symmetric tensor.

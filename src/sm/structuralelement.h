@@ -103,11 +103,11 @@ public:
      * @param n Element number.
      * @param d Domain to which new material will belong.
      */
-    StructuralElement(int n, Domain *d);
+    StructuralElement(int n, Domain * d);
     /// Destructor.
     virtual ~StructuralElement();
 
-    virtual void giveCharacteristicMatrix(FloatMatrix & answer, CharType, TimeStep * tStep);
+    virtual void giveCharacteristicMatrix(FloatMatrix &answer, CharType, TimeStep *tStep);
     virtual void giveCharacteristicVector(FloatArray &answer, CharType type, ValueModeType mode, TimeStep *tStep);
 
     virtual void giveDefaultDofManDofIDMask(int inode, IntArray &answer) const { this->giveDofManDofIDMask(inode, EID_MomentumBalance, answer); }

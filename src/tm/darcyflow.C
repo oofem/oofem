@@ -221,7 +221,7 @@ void DarcyFlow :: updateComponent(TimeStep *tStep, NumericalCmpn cmpn, Domain *d
 
         this->stiffnessMatrix->zero();
         this->assemble( this->stiffnessMatrix, tStep, EID_ConservationEquation, StiffnessMatrix,
-                        EModelDefaultEquationNumbering(), this->giveDomain(1) );
+                       EModelDefaultEquationNumbering(), this->giveDomain(1) );
         break;
 
     default:

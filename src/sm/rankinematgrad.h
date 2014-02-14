@@ -64,7 +64,7 @@ protected:
     double kappa_hat;
 
 public:
-    RankineMatGradStatus(int n, Domain *d, GaussPoint *g);
+    RankineMatGradStatus(int n, Domain * d, GaussPoint * g);
     virtual ~RankineMatGradStatus() { }
 
     virtual void printOutputAt(FILE *file, TimeStep *tStep);
@@ -95,15 +95,21 @@ protected:
     double negligible_damage;
 
 public:
-    RankineMatGrad(int n, Domain *d);
-    virtual ~RankineMatGrad() {; }
+    RankineMatGrad(int n, Domain * d);
+    virtual ~RankineMatGrad() {
+        ;
+    }
 
     virtual const char *giveClassName() const { return "RankineMatGrad"; }
     virtual const char *giveInputRecordName() const { return _IFT_RankineMatGrad_Name; }
 
     virtual IRResultType initializeFrom(InputRecord *ir);
     virtual int hasMaterialModeCapability(MaterialMode mode);
-    virtual Interface *giveInterface(InterfaceType t) { if ( t == GradDpMaterialExtensionInterfaceType ) { return static_cast< GradDpMaterialExtensionInterface * >( this ); } else { return NULL; } }
+    virtual Interface *giveInterface(InterfaceType t) { if ( t == GradDpMaterialExtensionInterfaceType ) {
+                                                            return static_cast< GradDpMaterialExtensionInterface * >(this);
+                                                        } else {
+                                                            return NULL;
+                                                        } }
 
     virtual void giveStiffnessMatrix(FloatMatrix &answer, MatResponseMode rMode, GaussPoint *gp, TimeStep *tStep);
 
@@ -114,7 +120,7 @@ public:
     virtual void givePDGradMatrix_LD(FloatMatrix &answer, MatResponseMode mode, GaussPoint *gp, TimeStep *tStep);
     virtual void giveRealStressVectorGrad(FloatArray &answer1, double &answer2, GaussPoint *gp, const FloatArray &totalStrain, double nonlocalCumulatedStrain, TimeStep *tStep);
 
-    virtual void givePlaneStressStiffMtrx(FloatMatrix & answer, MatResponseMode, GaussPoint * gp,  TimeStep * tStep);
+    virtual void givePlaneStressStiffMtrx(FloatMatrix &answer, MatResponseMode, GaussPoint *gp,  TimeStep *tStep);
     void givePlaneStressGprime(FloatMatrix &answer, MatResponseMode mode, GaussPoint *gp, TimeStep *tStep);
     void givePlaneStressKappaMatrix(FloatMatrix &answer, MatResponseMode mode, GaussPoint *gp, TimeStep *tStep);
     void giveInternalLength(FloatMatrix &answer, MatResponseMode mode, GaussPoint *gp, TimeStep *tStep);

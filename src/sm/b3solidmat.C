@@ -456,7 +456,7 @@ B3SolidMaterial :: computeCreepFunction(double tStep, double ofAge)
     r  = 1.7 * pow(ofAge, 0.12) + 8.0;
     Q  = Qf * pow( ( 1. + pow( ( Qf / Z ), r ) ), -1. / r );
 
-    C0 = q2 * Q + q3 *log( 1. + pow(tStep - ofAge, n) ) + q4 *log(tStep / ofAge);
+    C0 = q2 * Q + q3 *log( 1. + pow ( tStep - ofAge, n ) ) + q4 *log(tStep / ofAge);
 
 
     Cd = 0.0;
@@ -1005,7 +1005,7 @@ B3SolidMaterial :: giveRealStressVector(FloatArray &answer, GaussPoint *gp, cons
 
 
 B3SolidMaterialStatus :: B3SolidMaterialStatus(int n, Domain *d, GaussPoint *g, int nunits) :
-    KelvinChainMaterialStatus(n, d, g, nunits) {}
+    KelvinChainMaterialStatus(n, d, g, nunits) { }
 
 void
 B3SolidMaterialStatus :: updateYourself(TimeStep *tStep)

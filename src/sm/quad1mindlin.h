@@ -63,7 +63,7 @@ protected:
     static FEI2dQuadLin interp_lin;
 
 public:
-    Quad1Mindlin(int n, Domain *d);
+    Quad1Mindlin(int n, Domain * d);
     virtual ~Quad1Mindlin() { }
 
     virtual FEInterpolation *giveInterpolation() const { return & interp_lin; }

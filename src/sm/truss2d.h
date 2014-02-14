@@ -65,7 +65,7 @@ protected:
     ///@todo Use interpolator class for lines in 2D
 
 public:
-    Truss2d(int n, Domain *d);
+    Truss2d(int n, Domain * d);
     virtual ~Truss2d() { }
 
     virtual void computeLumpedMassMatrix(FloatMatrix &answer, TimeStep *tStep);

@@ -57,7 +57,7 @@ protected:
     int hydration, hydrationHeat, hydrationLHS, teplotaOut;
 
 public:
-    HydratingHeMoMaterial(int n, Domain *d) : HeMoTKMaterial(n, d), HydrationModelInterface() { }
+    HydratingHeMoMaterial(int n, Domain * d) : HeMoTKMaterial(n, d), HydrationModelInterface() { }
     virtual ~HydratingHeMoMaterial() { }
 
     void setMixture(MixtureType mix);

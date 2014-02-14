@@ -67,8 +67,10 @@ protected:
     FloatMatrix *GtoLRotationMatrix;
 
 public:
-    RerShell(int n, Domain *d);
-    virtual ~RerShell() { delete GtoLRotationMatrix; }
+    RerShell(int n, Domain * d);
+    virtual ~RerShell() {
+        delete GtoLRotationMatrix;
+    }
 
     virtual void computeLumpedMassMatrix(FloatMatrix &answer, TimeStep *tStep);
     virtual void computeMassMatrix(FloatMatrix &answer, TimeStep *tStep)

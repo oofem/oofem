@@ -319,7 +319,7 @@ J2MPlasticMaterial :: computeReducedGradientMatrix(FloatMatrix &answer, int isur
 
     StructuralMaterial :: giveInvertedVoigtVectorMask( mask, gp->giveMaterialMode() );
     size = StructuralMaterial :: giveSizeOfVoigtSymVector( gp->giveMaterialMode() ) +
-           this->giveSizeOfReducedHardeningVarsVector(gp);
+    this->giveSizeOfReducedHardeningVarsVector(gp);
 
     answer.resize(size, size);
     answer.zero();
@@ -433,7 +433,7 @@ J2MPlasticMaterial :: computeJ2InvariantAt(const FloatArray &stressVector)
     v3 = ( ( stressVector.at(3) - stressVector.at(1) ) * ( stressVector.at(3) - stressVector.at(1) ) );
 
     answer = ( 1. / 6. ) * ( v1 + v2 + v3 ) + stressVector.at(4) * stressVector.at(4) +
-             stressVector.at(5) * stressVector.at(5) + stressVector.at(6) * stressVector.at(6);
+    stressVector.at(5) * stressVector.at(5) + stressVector.at(6) * stressVector.at(6);
 
     return answer;
 }

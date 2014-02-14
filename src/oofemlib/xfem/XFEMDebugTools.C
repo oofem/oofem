@@ -8,9 +8,9 @@
 #include "XFEMDebugTools.h"
 
 namespace oofem {
-XFEMDebugTools :: XFEMDebugTools() {}
+XFEMDebugTools :: XFEMDebugTools() { }
 
-XFEMDebugTools :: ~XFEMDebugTools() {}
+XFEMDebugTools :: ~XFEMDebugTools() { }
 
 void XFEMDebugTools :: WriteTrianglesToVTK(const std :: string &iName, const std :: vector< Triangle > &iTriangles)
 {

@@ -65,7 +65,7 @@ protected:
 
 public:
     /// Constructor
-    SimpleInterfaceMaterialStatus(int n, Domain *d, GaussPoint *g);
+    SimpleInterfaceMaterialStatus(int n, Domain * d, GaussPoint * g);
     /// Destructor
     virtual ~SimpleInterfaceMaterialStatus();
 
@@ -103,7 +103,7 @@ protected:
 
 public:
     /// Constructor
-    SimpleInterfaceMaterial(int n, Domain *d);
+    SimpleInterfaceMaterial(int n, Domain * d);
     /// Destructor
     virtual ~SimpleInterfaceMaterial();
 

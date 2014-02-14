@@ -49,14 +49,14 @@ namespace oofem {
  * finite element. Each node has 2 degrees of freedom.
  */
 class L4Axisymm : public NLStructuralElement, public ZZNodalRecoveryModelInterface, public SPRNodalRecoveryModelInterface,
-    public SpatialLocalizerInterface
+public SpatialLocalizerInterface
 {
 protected:
     static FEI2dQuadLin interpolation;
     int numberOfGaussPoints, numberOfFiAndShGaussPoints;
 
 public:
-    L4Axisymm(int n, Domain *d);
+    L4Axisymm(int n, Domain * d);
     virtual ~L4Axisymm();
 
 

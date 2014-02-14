@@ -675,19 +675,19 @@ Interface *
 TR1_2D_CBS :: giveInterface(InterfaceType interface)
 {
     if ( interface == ZZNodalRecoveryModelInterfaceType ) {
-        return static_cast< ZZNodalRecoveryModelInterface * >( this );
+        return static_cast< ZZNodalRecoveryModelInterface * >(this);
     } else if ( interface == NodalAveragingRecoveryModelInterfaceType ) {
-        return static_cast< NodalAveragingRecoveryModelInterface * >( this );
+        return static_cast< NodalAveragingRecoveryModelInterface * >(this);
     } else if ( interface == SPRNodalRecoveryModelInterfaceType ) {
-        return static_cast< SPRNodalRecoveryModelInterface * >( this );
+        return static_cast< SPRNodalRecoveryModelInterface * >(this);
     } else if ( interface == SpatialLocalizerInterfaceType ) {
-        return static_cast< SpatialLocalizerInterface * >( this );
+        return static_cast< SpatialLocalizerInterface * >(this);
     } else if ( interface == EIPrimaryFieldInterfaceType ) {
-        return static_cast< EIPrimaryFieldInterface * >( this );
+        return static_cast< EIPrimaryFieldInterface * >(this);
     }
     //<RESTRICTED_SECTION>
     else if ( interface == LEPlicElementInterfaceType ) {
-        return static_cast< LEPlicElementInterface * >( this );
+        return static_cast< LEPlicElementInterface * >(this);
     }
 
     //</RESTRICTED_SECTION>
@@ -904,10 +904,10 @@ TR1_2D_CBS :: formVolumeInterfacePoly(Polygon &matvolpoly, LEPlic *matInterface,
             if ( nodeIn [ i - 1 ] ) {
                 if ( updFlag ) {
                     v.setCoords( matInterface->giveUpdatedXCoordinate( this->giveNode(i)->giveNumber() ),
-                                 matInterface->giveUpdatedYCoordinate( this->giveNode(i)->giveNumber() ) );
+                                matInterface->giveUpdatedYCoordinate( this->giveNode(i)->giveNumber() ) );
                 } else {
                     v.setCoords( this->giveNode(i)->giveCoordinate(1),
-                                 this->giveNode(i)->giveCoordinate(2) );
+                                this->giveNode(i)->giveCoordinate(2) );
                 }
 
                 matvolpoly.addVertex(v);
@@ -937,7 +937,7 @@ TR1_2D_CBS :: formVolumeInterfacePoly(Polygon &matvolpoly, LEPlic *matInterface,
                     if ( nodeIn [ i - 1 ] ) {
                         if ( updFlag ) {
                             v.setCoords( matInterface->giveUpdatedXCoordinate( this->giveNode(next)->giveNumber() ),
-                                         matInterface->giveUpdatedYCoordinate( this->giveNode(next)->giveNumber() ) );
+                                        matInterface->giveUpdatedYCoordinate( this->giveNode(next)->giveNumber() ) );
                         } else {
                             v.setCoords( this->giveNode(next)->giveCoordinate(1), this->giveNode(next)->giveCoordinate(2) );
                         }
@@ -948,7 +948,7 @@ TR1_2D_CBS :: formVolumeInterfacePoly(Polygon &matvolpoly, LEPlic *matInterface,
                         matvolpoly.addVertex(v);
                         if ( updFlag ) {
                             v.setCoords( matInterface->giveUpdatedXCoordinate( this->giveNode(next)->giveNumber() ),
-                                         matInterface->giveUpdatedYCoordinate( this->giveNode(next)->giveNumber() ) );
+                                        matInterface->giveUpdatedYCoordinate( this->giveNode(next)->giveNumber() ) );
                         } else {
                             v.setCoords( this->giveNode(next)->giveCoordinate(1), this->giveNode(next)->giveCoordinate(2) );
                         }
@@ -1139,8 +1139,8 @@ TR1_2D_CBS :: SPRNodalRecoveryMI_giveDofMansDeterminedByPatch(IntArray &answer, 
 {
     answer.resize(1);
     if ( ( pap == this->giveNode(1)->giveNumber() ) ||
-         ( pap == this->giveNode(2)->giveNumber() ) ||
-         ( pap == this->giveNode(3)->giveNumber() ) ) {
+        ( pap == this->giveNode(2)->giveNumber() ) ||
+        ( pap == this->giveNode(3)->giveNumber() ) ) {
         answer.at(1) = pap;
     } else {
         _error("SPRNodalRecoveryMI_giveDofMansDeterminedByPatch: node unknown");

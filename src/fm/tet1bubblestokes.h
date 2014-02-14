@@ -56,9 +56,9 @@ class FEI3dTetLin;
  * @author Mikael Öhman
  */
 class Tet1BubbleStokes : public FMElement,
-    public ZZNodalRecoveryModelInterface,
-    public SpatialLocalizerInterface,
-    public EIPrimaryUnknownMapperInterface
+public ZZNodalRecoveryModelInterface,
+public SpatialLocalizerInterface,
+public EIPrimaryUnknownMapperInterface
 {
 protected:
     /// Interpolation for pressure
@@ -89,7 +89,7 @@ protected:
     //FloatArray bubbleCoord; // Assumed fixed at 0 for now (i.e. only linear geometry)
 
 public:
-    Tet1BubbleStokes(int n, Domain *d);
+    Tet1BubbleStokes(int n, Domain * d);
     virtual ~Tet1BubbleStokes();
 
     virtual double computeVolumeAround(GaussPoint *gp);

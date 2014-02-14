@@ -82,9 +82,9 @@ void FEI2dLineHermite :: local2global(FloatArray &answer, const FloatArray &lcoo
     answer.resize( max(xind, yind) );
     answer.zero();
     answer.at(xind) = ( n.at(1) * cellgeo.giveVertexCoordinates(1)->at(xind) +
-                        n.at(2) * cellgeo.giveVertexCoordinates(2)->at(xind) );
+                       n.at(2) * cellgeo.giveVertexCoordinates(2)->at(xind) );
     answer.at(yind) = ( n.at(1) * cellgeo.giveVertexCoordinates(1)->at(yind) +
-                        n.at(2) * cellgeo.giveVertexCoordinates(2)->at(yind) );
+                       n.at(2) * cellgeo.giveVertexCoordinates(2)->at(yind) );
 }
 
 int FEI2dLineHermite :: global2local(FloatArray &answer, const FloatArray &gcoords, const FEICellGeometry &cellgeo)

@@ -123,7 +123,7 @@ Tr1_ht :: computeEdgeVolumeAround(GaussPoint *gp, int iEdge)
     double determinant = fabs( this->interp.edgeGiveTransformationJacobian( iEdge, * gp->giveCoordinates(), FEIElementGeometryWrapper(this) ) );
     FloatArray gc;
     double thick = this->giveCrossSection()->give(CS_Thickness, gp->giveCoordinates(), NULL, this); // 't'
-    return determinant * thick * gp->giveWeight();
+    return determinant *thick *gp->giveWeight();
 }
 
 
@@ -131,11 +131,11 @@ Interface *
 Tr1_ht :: giveInterface(InterfaceType interface)
 {
     if ( interface == SpatialLocalizerInterfaceType ) {
-        return static_cast< SpatialLocalizerInterface * >( this );
+        return static_cast< SpatialLocalizerInterface * >(this);
     } else if ( interface == EIPrimaryFieldInterfaceType ) {
-        return static_cast< EIPrimaryFieldInterface * >( this );
+        return static_cast< EIPrimaryFieldInterface * >(this);
     } else if ( interface == ZZNodalRecoveryModelInterfaceType ) {
-        return static_cast< ZZNodalRecoveryModelInterface * >( this );
+        return static_cast< ZZNodalRecoveryModelInterface * >(this);
     }
 
     return NULL;

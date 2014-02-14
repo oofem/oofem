@@ -301,7 +301,7 @@ void CompoDamageMat :: giveRealStressVector(FloatArray &answer, GaussPoint *gp, 
             }
 
             switch ( i ) { //need to subtract contributions from strains
-            //in equations we use nu12 = E11/E22*nu21, nu13 = E11/E33*nu31, nu23 = E22/E33*nu32
+                //in equations we use nu12 = E11/E22*nu21, nu13 = E11/E33*nu31, nu23 = E22/E33*nu32
             case 1: tmp = 1. - sigma / ( this->give(Ex, NULL) * strainVectorL.at(i) + this->give(NYxy, NULL) * tempStressVectorL.at(2) + this->give(NYxz, NULL) * tempStressVectorL.at(3) );
                 break;
             case 2: tmp = 1. - sigma / ( this->give(Ey, NULL) * strainVectorL.at(i) + this->give(NYyx, NULL) * tempStressVectorL.at(1) + this->give(NYyz, NULL) * tempStressVectorL.at(3) );

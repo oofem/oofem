@@ -225,9 +225,9 @@ void PrescribedGradient :: computeField(FloatArray &sigma, EquationID eid, TimeS
     R_c.zero();
     R_ext.zero();
     emodel->assembleVector( R_c, tStep, eid, InternalForcesVector, VM_Total,
-                            EModelDefaultPrescribedEquationNumbering(), this->giveDomain() );
+                           EModelDefaultPrescribedEquationNumbering(), this->giveDomain() );
     emodel->assembleVector( R_ext, tStep, eid, ExternalForcesVector, VM_Total,
-                            EModelDefaultPrescribedEquationNumbering(), this->giveDomain() );
+                           EModelDefaultPrescribedEquationNumbering(), this->giveDomain() );
     R_c.subtract(R_ext);
 
     // Condense it;

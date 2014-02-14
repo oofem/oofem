@@ -112,7 +112,7 @@ protected:
 
 public:
     /// Constructor
-    NodalRecoveryModel(Domain *d);
+    NodalRecoveryModel(Domain * d);
     /// Destructor
     virtual ~NodalRecoveryModel();
 

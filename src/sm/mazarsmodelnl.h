@@ -58,7 +58,7 @@ protected:
 
 public:
     /// Constructor
-    MazarsNLMaterialStatus(int n, Domain *d, GaussPoint *g);
+    MazarsNLMaterialStatus(int n, Domain * d, GaussPoint * g);
     /// Destructor
     virtual ~MazarsNLMaterialStatus();
 
@@ -106,7 +106,7 @@ protected:
 
 public:
     /// Constructor
-    MazarsNLMaterial(int n, Domain *d);
+    MazarsNLMaterial(int n, Domain * d);
     /// Destructor
     virtual ~MazarsNLMaterial();
 

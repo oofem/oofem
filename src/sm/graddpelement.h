@@ -55,7 +55,7 @@ protected:
 
 public:
     GradDpElement();
-    virtual ~GradDpElement() {}
+    virtual ~GradDpElement() { }
 
     virtual IRResultType initializeFrom(InputRecord *ir);
     //virtual void giveDofManDofIDMask (int inode, EquationID ut, IntArray& answer) const;

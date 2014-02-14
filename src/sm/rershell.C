@@ -75,11 +75,11 @@ Interface *
 RerShell :: giveInterface(InterfaceType interface)
 {
     if ( interface == LayeredCrossSectionInterfaceType ) {
-        return static_cast< LayeredCrossSectionInterface * >( this );
+        return static_cast< LayeredCrossSectionInterface * >(this);
     } else if ( interface == ZZNodalRecoveryModelInterfaceType ) {
-        return static_cast< ZZNodalRecoveryModelInterface * >( this );
+        return static_cast< ZZNodalRecoveryModelInterface * >(this);
     } else if ( interface == NodalAveragingRecoveryModelInterfaceType ) {
-        return static_cast< NodalAveragingRecoveryModelInterface * >( this );
+        return static_cast< NodalAveragingRecoveryModelInterface * >(this);
     }
 
     return NULL;
@@ -441,7 +441,7 @@ RerShell :: computeLocalCoordinates(FloatArray &answer, const FloatArray &coords
 
     //rotate the input point Coordinate System into the element CS
     FloatArray inputCoords_ElCS;
-    this->giveLocalCoordinates( inputCoords_ElCS, const_cast< FloatArray & >( coords ) );
+    this->giveLocalCoordinates( inputCoords_ElCS, const_cast< FloatArray & >(coords) );
 
     //Nodes are defined in the global CS, so they also need to be rotated into the element CS, therefore get the node points and
     //rotate them into the element CS
@@ -477,7 +477,7 @@ RerShell :: computeLocalCoordinates(FloatArray &answer, const FloatArray &coords
 
     //check that the z is within the element
     StructuralCrossSection *cs = this->giveStructuralCrossSection();
-    GaussPoint _gp(NULL, 1, new FloatArray(answer), 1.0, _2dPlate);
+    GaussPoint _gp(NULL, 1, new FloatArray ( answer ), 1.0, _2dPlate);
 
     double elthick;
 
@@ -618,7 +618,7 @@ RerShell :: giveCharacteristicTensor(FloatMatrix &answer, CharTensor type, Gauss
     }
 
     if ( ( type == GlobalForceTensor ) || ( type == GlobalMomentumTensor ) ||
-         ( type == GlobalStrainTensor ) || ( type == GlobalCurvatureTensor ) ) {
+        ( type == GlobalStrainTensor ) || ( type == GlobalCurvatureTensor ) ) {
         this->computeGtoLRotationMatrix();
         answer.rotatedWith(* GtoLRotationMatrix);
     }
@@ -669,19 +669,19 @@ RerShell :: printOutputAt(FILE *file, TimeStep *tStep)
         this->giveCharacteristicTensor(globTensorPlate, GlobalCurvatureTensor, gp, tStep);
         fprintf(file, "  strains ");
         fprintf( file, " % .4e % .4e % .4e % .4e % .4e % .4e % .4e % .4e % .4e % .4e % .4e % .4e ",
-                 globTensorMembrane.at(1, 1), globTensorMembrane.at(2, 2), globTensorMembrane.at(3, 3),
-                 2. * globTensorMembrane.at(2, 3), 2. * globTensorMembrane.at(3, 1), 2. * globTensorMembrane.at(1, 2),
-                 globTensorPlate.at(1, 1), globTensorPlate.at(2, 2), globTensorPlate.at(3, 3),
-                 2. * globTensorPlate.at(2, 3), 2. * globTensorPlate.at(1, 3), 2. * globTensorPlate.at(1, 2) );
+                globTensorMembrane.at(1, 1), globTensorMembrane.at(2, 2), globTensorMembrane.at(3, 3),
+                2. * globTensorMembrane.at(2, 3), 2. * globTensorMembrane.at(3, 1), 2. * globTensorMembrane.at(1, 2),
+                globTensorPlate.at(1, 1), globTensorPlate.at(2, 2), globTensorPlate.at(3, 3),
+                2. * globTensorPlate.at(2, 3), 2. * globTensorPlate.at(1, 3), 2. * globTensorPlate.at(1, 2) );
 
         this->giveCharacteristicTensor(globTensorMembrane, GlobalForceTensor, gp, tStep);
         this->giveCharacteristicTensor(globTensorPlate, GlobalMomentumTensor, gp, tStep);
         fprintf(file, "\n          stresses");
         fprintf( file, " % .4e % .4e % .4e % .4e % .4e % .4e % .4e % .4e % .4e % .4e % .4e % .4e ",
-                 globTensorMembrane.at(1, 1), globTensorMembrane.at(2, 2), globTensorMembrane.at(3, 3),
-                 globTensorMembrane.at(2, 3), globTensorMembrane.at(3, 1), globTensorMembrane.at(1, 2),
-                 globTensorPlate.at(1, 1), globTensorPlate.at(2, 2), globTensorPlate.at(3, 3),
-                 globTensorPlate.at(2, 3), globTensorPlate.at(1, 3), globTensorPlate.at(1, 2) );
+                globTensorMembrane.at(1, 1), globTensorMembrane.at(2, 2), globTensorMembrane.at(3, 3),
+                globTensorMembrane.at(2, 3), globTensorMembrane.at(3, 1), globTensorMembrane.at(1, 2),
+                globTensorPlate.at(1, 1), globTensorPlate.at(2, 2), globTensorPlate.at(3, 3),
+                globTensorPlate.at(2, 3), globTensorPlate.at(1, 3), globTensorPlate.at(1, 2) );
 
         fprintf(file, "\n");
     }

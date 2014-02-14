@@ -60,8 +60,8 @@ class IntegrationRule;
 class OOFEM_EXPORT FEICellGeometry
 {
 public:
-    FEICellGeometry() {}
-    virtual ~FEICellGeometry() {}
+    FEICellGeometry() { }
+    virtual ~FEICellGeometry() { }
     virtual int giveNumberOfVertices() const = 0;
     virtual const FloatArray *giveVertexCoordinates(int i) const = 0;
 };
@@ -74,8 +74,8 @@ public:
 class OOFEM_EXPORT FEIVoidCellGeometry : public FEICellGeometry
 {
 public:
-    FEIVoidCellGeometry() : FEICellGeometry() {}
-    virtual ~FEIVoidCellGeometry() {}
+    FEIVoidCellGeometry() : FEICellGeometry() { }
+    virtual ~FEIVoidCellGeometry() { }
     int giveNumberOfVertices() const {
         OOFEM_ERROR("FEIVoidCellGeometry: no reference geometry");
         return 0;
@@ -94,8 +94,10 @@ class OOFEM_EXPORT FEIElementGeometryWrapper : public FEICellGeometry
 protected:
     const Element *elem;
 public:
-    FEIElementGeometryWrapper(const Element *elem) : FEICellGeometry() { this->elem = elem; }
-    virtual ~FEIElementGeometryWrapper() {}
+    FEIElementGeometryWrapper(const Element * elem) : FEICellGeometry() {
+        this->elem = elem;
+    }
+    virtual ~FEIElementGeometryWrapper() { }
     int giveNumberOfVertices() const;
     const FloatArray *giveVertexCoordinates(int i) const;
 };
@@ -110,12 +112,12 @@ protected:
     const FloatArray **coords;
     int nvertices;
 public:
-    FEIVertexListGeometryWrapper(int nvertices, const FloatArray **coords) : FEICellGeometry()
+    FEIVertexListGeometryWrapper(int nvertices, const FloatArray * * coords) : FEICellGeometry()
     {
         this->nvertices = nvertices;
         this->coords = coords;
     }
-    virtual ~FEIVertexListGeometryWrapper() {}
+    virtual ~FEIVertexListGeometryWrapper() { }
     int giveNumberOfVertices() const { return this->nvertices; }
     const FloatArray *giveVertexCoordinates(int i) const { return this->coords [ i - 1 ]; }
 };
@@ -131,7 +133,9 @@ protected:
     int order;
 
 public:
-    FEInterpolation(int o) { order = o; }
+    FEInterpolation(int o) {
+        order = o;
+    }
     virtual ~FEInterpolation() { }
 
     /**
@@ -335,7 +339,9 @@ public:
     /**
      * Returns the subdivision of patch parametric space
      */
-    virtual const double *const *giveKnotVector() { return NULL; }
+    virtual const double *const *giveKnotVector() {
+        return NULL;
+    }
     /**
      * Returns the number of knot spans of the receiver.
      */

@@ -60,7 +60,7 @@ Tr1Darcy :: Tr1Darcy(int n, Domain *aDomain) : TransportElement(n, aDomain)
 }
 
 Tr1Darcy :: ~Tr1Darcy()
-{}
+{ }
 
 IRResultType Tr1Darcy :: initializeFrom(InputRecord *ir)
 {
@@ -196,7 +196,7 @@ void Tr1Darcy :: computeEdgeBCSubVectorAt(FloatArray &answer, Load *load, int iE
 
     if ( load->giveType() == TransmissionBC ) {                 // Neumann boundary conditions (traction)
         BoundaryLoad *boundaryLoad;
-        boundaryLoad = static_cast< BoundaryLoad * >( load );
+        boundaryLoad = static_cast< BoundaryLoad * >(load);
 
         int numberOfEdgeIPs;
         numberOfEdgeIPs = ( int ) ceil( ( boundaryLoad->giveApproxOrder() + 1. ) / 2. ) * 2;
@@ -242,7 +242,7 @@ double Tr1Darcy :: computeEdgeVolumeAround(GaussPoint *gp, int iEdge)
 {
     double thickness = 1;
     double detJ = fabs( this->interpolation_lin.edgeGiveTransformationJacobian( iEdge, * gp->giveLocalCoordinates(), FEIElementGeometryWrapper(this) ) );
-    return detJ * thickness * gp->giveWeight();
+    return detJ *thickness *gp->giveWeight();
 }
 
 void Tr1Darcy :: giveCharacteristicMatrix(FloatMatrix &answer, CharType mtrx, TimeStep *tStep)
@@ -297,7 +297,7 @@ Interface *
 Tr1Darcy :: giveInterface(InterfaceType interface)
 {
     if ( interface == NodalAveragingRecoveryModelInterfaceType ) {
-        return static_cast< NodalAveragingRecoveryModelInterface * >( this );
+        return static_cast< NodalAveragingRecoveryModelInterface * >(this);
     }
 
     return NULL;

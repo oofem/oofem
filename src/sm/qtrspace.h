@@ -66,7 +66,7 @@ protected:
 
 public:
     QTRSpace(int, Domain *);
-    virtual ~QTRSpace() {}
+    virtual ~QTRSpace() { }
 
     virtual FEInterpolation *giveInterpolation() const;
 

@@ -73,7 +73,7 @@ FEI1dLin :: local2global(FloatArray &answer, const FloatArray &lcoords, const FE
 
     this->evalN(n, lcoords, cellgeo);
     answer.at(1) = ( n.at(1) * cellgeo.giveVertexCoordinates(1)->at(cindx) +
-                     n.at(2) * cellgeo.giveVertexCoordinates(2)->at(cindx) );
+                    n.at(2) * cellgeo.giveVertexCoordinates(2)->at(cindx) );
 }
 
 int

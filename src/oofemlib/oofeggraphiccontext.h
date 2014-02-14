@@ -82,7 +82,7 @@ extern "C" {
 // not declared in any *.h Elixir file
 
 extern "C" {
-void EVFastRedraw(EView *v_p);
+    void EVFastRedraw(EView *v_p);
 };
 
 namespace oofem {

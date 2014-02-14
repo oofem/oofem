@@ -107,7 +107,7 @@ protected:
 
 public:
     /// Constructor
-    ZZErrorEstimator(int n, Domain *d) : ErrorEstimator(n, d) {
+    ZZErrorEstimator(int n, Domain * d) : ErrorEstimator(n, d) {
         eeType = EET_ZZEE;
         stateCounter = 0;
         normType = L2Norm;
@@ -199,7 +199,7 @@ protected:
 
 public:
     /// Constructor
-    ZZRemeshingCriteria(int n, ErrorEstimator *e);
+    ZZRemeshingCriteria(int n, ErrorEstimator * e);
     /// Destructor
     virtual ~ZZRemeshingCriteria() { }
 

@@ -80,8 +80,10 @@ protected:
     double dumpingCoef, deltaT;
 
 public:
-    DEIDynamic(int i, EngngModel *_master = NULL) : StructuralEngngModel(i, _master), massMatrix(), loadVector(),
-        nextDisplacementVector(), displacementVector(), velocityVector(), accelerationVector() { ndomains = 1; }
+    DEIDynamic(int i, EngngModel * _master = NULL) : StructuralEngngModel(i, _master), massMatrix(), loadVector(),
+        nextDisplacementVector(), displacementVector(), velocityVector(), accelerationVector() {
+        ndomains = 1;
+    }
     virtual ~DEIDynamic();
 
     virtual void solveYourselfAt(TimeStep *tStep);

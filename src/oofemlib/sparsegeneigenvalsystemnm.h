@@ -57,7 +57,7 @@ class OOFEM_EXPORT SparseGeneralEigenValueSystemNM : public NumericalMethod
 {
 public:
     /// Constructor.
-    SparseGeneralEigenValueSystemNM(Domain *d, EngngModel *m) : NumericalMethod(d, m) { };
+    SparseGeneralEigenValueSystemNM(Domain * d, EngngModel * m) : NumericalMethod(d, m) { };
     /// Destructor.
     virtual ~SparseGeneralEigenValueSystemNM() { };
 

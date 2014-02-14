@@ -49,7 +49,7 @@ namespace oofem {
 class QuadAxisym1_ht : public Quad1_ht
 {
 public:
-    QuadAxisym1_ht(int n, Domain *d);
+    QuadAxisym1_ht(int n, Domain * d);
     virtual ~QuadAxisym1_ht();
 
     virtual double computeVolumeAround(GaussPoint *gp);
@@ -69,7 +69,7 @@ protected:
 class QuadAxisym1_hmt : public QuadAxisym1_ht
 {
 public:
-    QuadAxisym1_hmt(int n, Domain *d);
+    QuadAxisym1_hmt(int n, Domain * d);
 
     virtual const char *giveClassName() const { return "QuadAxisym1_hmt"; }
 };
@@ -81,7 +81,7 @@ public:
 class QuadAxisym1_mt : public QuadAxisym1_ht
 {
 public:
-    QuadAxisym1_mt(int n, Domain *d);
+    QuadAxisym1_mt(int n, Domain * d);
     virtual const char *giveClassName() const { return "QuadAxisym1_mt"; }
 };
 } // end namespace oofem

@@ -62,7 +62,7 @@ protected:
     IntArray boundaryCodes;
 
 public:
-    CBSElement(int n, Domain *aDomain);
+    CBSElement(int n, Domain * aDomain);
     virtual ~CBSElement();
 
     virtual IRResultType initializeFrom(InputRecord *ir);

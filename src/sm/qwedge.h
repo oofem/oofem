@@ -63,7 +63,7 @@ protected:
 
 public:
     QWedge(int, Domain *);
-    virtual ~QWedge() {}
+    virtual ~QWedge() { }
 
     virtual FEInterpolation *giveInterpolation() const { return & interpolation; }
 

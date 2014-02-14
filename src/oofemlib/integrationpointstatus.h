@@ -63,7 +63,7 @@ public:
      * @param d domain to which new status belongs
      * @param g associated integration point
      */
-    IntegrationPointStatus(int n, Domain *d, GaussPoint *g) : FEMComponent(n, d), gp(g) { }
+    IntegrationPointStatus(int n, Domain * d, GaussPoint * g) : FEMComponent(n, d), gp(g) { }
     /// Destructor.
     virtual ~IntegrationPointStatus() { }
     /// Print receiver's output to given stream.
@@ -81,7 +81,7 @@ public:
      * variables, stresses, etc., which have been previously determined
      * by another simulation (e.g. of the manufacturing process).
      */
-    virtual void setStatusVariable(int varID, double value) {}
+    virtual void setStatusVariable(int varID, double value) { }
 
     virtual const char *giveInputRecordName() const { return NULL; }
     virtual const char *giveClassName() const { return "IntegrationPointStatus"; }

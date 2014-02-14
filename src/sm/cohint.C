@@ -51,7 +51,7 @@ CohesiveInterfaceMaterial :: CohesiveInterfaceMaterial(int n, Domain *d) : Struc
     //
     // constructor
     //
-{}
+{ }
 
 void
 CohesiveInterfaceMaterial :: giveRealStressVector(FloatArray &answer, GaussPoint *gp,
@@ -177,10 +177,10 @@ CohesiveInterfaceMaterial :: giveInputRecord(DynamicInputRecord &input)
 //---------------------------------------------------------------------------------------------------
 
 CohesiveInterfaceMaterialStatus :: CohesiveInterfaceMaterialStatus(int n, Domain *d, GaussPoint *g) : StructuralMaterialStatus(n, d, g)
-{}
+{ }
 
 CohesiveInterfaceMaterialStatus :: ~CohesiveInterfaceMaterialStatus()
-{}
+{ }
 
 void
 CohesiveInterfaceMaterialStatus :: printOutputAt(FILE *file, TimeStep *tStep)

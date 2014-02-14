@@ -274,12 +274,12 @@ VTKXMLExportModule :: giveElementCell(IntArray &answer, Element *elem)
     int nelemNodes;
 
     if ( ( elemGT == EGT_point ) ||
-         ( elemGT == EGT_line_1 ) || ( elemGT == EGT_line_2 ) ||
-         ( elemGT == EGT_triangle_1 ) || ( elemGT == EGT_triangle_2 ) ||
-         ( elemGT == EGT_tetra_1 ) || ( elemGT == EGT_tetra_2 ) ||
-         ( elemGT == EGT_quad_1 ) || ( elemGT == EGT_quad_2 ) ||
-         ( elemGT == EGT_hexa_1 ) ||
-         ( elemGT == EGT_wedge_1 ) ) {
+        ( elemGT == EGT_line_1 ) || ( elemGT == EGT_line_2 ) ||
+        ( elemGT == EGT_triangle_1 ) || ( elemGT == EGT_triangle_2 ) ||
+        ( elemGT == EGT_tetra_1 ) || ( elemGT == EGT_tetra_2 ) ||
+        ( elemGT == EGT_quad_1 ) || ( elemGT == EGT_quad_2 ) ||
+        ( elemGT == EGT_hexa_1 ) ||
+        ( elemGT == EGT_wedge_1 ) ) {
         nelemNodes = elem->giveNumberOfNodes();
         answer.resize(nelemNodes);
         for ( int i = 1; i <= nelemNodes; i++ ) {
@@ -356,12 +356,12 @@ VTKXMLExportModule :: giveNumberOfElementCells(Element *elem)
     Element_Geometry_Type elemGT = elem->giveGeometryType();
 
     if ( ( elemGT == EGT_point ) ||
-         ( elemGT == EGT_line_1 ) || ( elemGT == EGT_line_2 ) ||
-         ( elemGT == EGT_triangle_1 ) || ( elemGT == EGT_triangle_2 ) ||
-         ( elemGT == EGT_tetra_1 ) || ( elemGT == EGT_tetra_2 ) ||
-         ( elemGT == EGT_quad_1 ) || ( elemGT == EGT_quad_2 ) || ( elemGT == EGT_quad9_2 ) ||
-         ( elemGT == EGT_hexa_1 ) || ( elemGT == EGT_hexa_2 ) || ( elemGT == EGT_hexa_27 ) ||
-         ( elemGT == EGT_wedge_1 ) || ( elemGT == EGT_wedge_2 ) ) {
+        ( elemGT == EGT_line_1 ) || ( elemGT == EGT_line_2 ) ||
+        ( elemGT == EGT_triangle_1 ) || ( elemGT == EGT_triangle_2 ) ||
+        ( elemGT == EGT_tetra_1 ) || ( elemGT == EGT_tetra_2 ) ||
+        ( elemGT == EGT_quad_1 ) || ( elemGT == EGT_quad_2 ) || ( elemGT == EGT_quad9_2 ) ||
+        ( elemGT == EGT_hexa_1 ) || ( elemGT == EGT_hexa_2 ) || ( elemGT == EGT_hexa_27 ) ||
+        ( elemGT == EGT_wedge_1 ) || ( elemGT == EGT_wedge_2 ) ) {
         return 1;
     } else {
         OOFEM_ERROR("VTKXMLExportModule: unsupported element geometry type");
@@ -1490,7 +1490,7 @@ VTKXMLExportModule :: getNodalVariableFromPrimaryField(FloatArray &answer, DofMa
     InternalStateValueType valType = giveInternalStateValueType(type);
     //rotate back from nodal CS to global CS if applies
     if ( valType == ISVT_VECTOR ) { ///@todo in general, shouldn't this apply for 2nd order tensors as well? /JB
-        Node *node = dynamic_cast< Node * >( dman );
+        Node *node = dynamic_cast< Node * >(dman);
         if ( node && node->hasLocalCS() ) {
             answer.rotatedWith(* node->giveLocalCoordinateTriplet(), 't');
         }
@@ -1583,7 +1583,7 @@ VTKXMLExportModule :: getCellVariableFromIS(FloatArray &answer, Element *el, Int
     valueArray.resize(ncomponents);
 
     switch ( type ) {
-    // Special scalars
+        // Special scalars
     case IST_MaterialNumber:
         OOFEM_WARNING1("VTKExportModule - Material numbers are deprecated, outputing cross section number instead...");
     case IST_CrossSectionNumber:
@@ -1601,7 +1601,7 @@ VTKXMLExportModule :: getCellVariableFromIS(FloatArray &answer, Element *el, Int
 
         break;
 
-    // Special vectors
+        // Special vectors
     case IST_MaterialOrientation_x:
     case IST_MaterialOrientation_y:
     case IST_MaterialOrientation_z:
@@ -1625,7 +1625,7 @@ VTKXMLExportModule :: getCellVariableFromIS(FloatArray &answer, Element *el, Int
         valueArray.beColumnOf(rotMat, col);
         break;
 
-    // Export cell data as average from ip's as default
+        // Export cell data as average from ip's as default
     default:
 
         // compute cell average from ip values

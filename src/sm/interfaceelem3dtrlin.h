@@ -51,7 +51,7 @@ protected:
     static FEI2dTrLin interpolation;
 
 public:
-    InterfaceElement3dTrLin(int n, Domain *d);
+    InterfaceElement3dTrLin(int n, Domain * d);
     virtual ~InterfaceElement3dTrLin() { }
 
     virtual int computeGlobalCoordinates(FloatArray &answer, const FloatArray &lcoords);

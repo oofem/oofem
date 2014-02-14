@@ -118,7 +118,7 @@ Interface *
 Tet1_3D_SUPG :: giveInterface(InterfaceType interface)
 {
     if ( interface == LevelSetPCSElementInterfaceType ) {
-        return static_cast< LevelSetPCSElementInterface * >( this );
+        return static_cast< LevelSetPCSElementInterface * >(this);
     }
 
     return NULL;
@@ -419,7 +419,7 @@ Tet1_3D_SUPG :: computeVolumeAround(GaussPoint *gp)
 {
     double determinant, weight, volume;
     determinant = fabs( this->interpolation.giveTransformationJacobian( * gp->giveCoordinates(),
-                                                                        FEIElementGeometryWrapper(this) ) );
+                                                                       FEIElementGeometryWrapper(this) ) );
 
     weight = gp->giveWeight();
     volume = determinant * weight;
@@ -570,8 +570,8 @@ Tet1_3D_SUPG :: LS_PCS_computeVOFFractions(FloatArray &answer, FloatArray &fi)
 
                 // compute volume of this pyramid (si, xi[0], xi[1], xi[2])
                 double __vol = fabs( ( 1. / 6. ) * ( ( x1 - xi [ 0 ] ) * ( ( yi [ 1 ] - yi [ 0 ] ) * ( zi [ 2 ] - zi [ 0 ] ) - ( zi [ 1 ] - zi [ 0 ] ) * ( yi [ 2 ] - yi [ 0 ] ) ) +
-                                                     ( y1 - yi [ 0 ] ) * ( ( zi [ 1 ] - zi [ 0 ] ) * ( xi [ 2 ] - xi [ 0 ] ) - ( xi [ 1 ] - xi [ 0 ] ) * ( zi [ 2 ] - zi [ 0 ] ) ) +
-                                                     ( z1 - zi [ 0 ] ) * ( ( xi [ 1 ] - xi [ 0 ] ) * ( yi [ 2 ] - yi [ 0 ] ) - ( yi [ 1 ] - yi [ 0 ] ) * ( xi [ 2 ] - xi [ 0 ] ) ) ) );
+                                                    ( y1 - yi [ 0 ] ) * ( ( zi [ 1 ] - zi [ 0 ] ) * ( xi [ 2 ] - xi [ 0 ] ) - ( xi [ 1 ] - xi [ 0 ] ) * ( zi [ 2 ] - zi [ 0 ] ) ) +
+                                                    ( z1 - zi [ 0 ] ) * ( ( xi [ 1 ] - xi [ 0 ] ) * ( yi [ 2 ] - yi [ 0 ] ) - ( yi [ 1 ] - yi [ 0 ] ) * ( xi [ 2 ] - xi [ 0 ] ) ) ) );
 
 
                 double vol = LS_PCS_computeVolume();
@@ -646,25 +646,25 @@ Tet1_3D_SUPG :: LS_PCS_computeVOFFractions(FloatArray &answer, FloatArray &fi)
                 // compute volume of this wedge as a sum of volumes of three
                 // pyramids
                 double __v1 = ( ( p2i_x [ 0 ] - p1i_x [ 0 ] ) * ( p1i_y [ 1 ] - p1i_y [ 0 ] ) * ( p1i_z [ 2 ] - p1i_z [ 0 ] ) -
-                                ( p2i_x [ 0 ] - p1i_x [ 0 ] ) * ( p1i_y [ 2 ] - p1i_y [ 0 ] ) * ( p1i_z [ 1 ] - p1i_z [ 0 ] ) +
-                                ( p1i_x [ 2 ] - p1i_x [ 0 ] ) * ( p2i_y [ 0 ] - p1i_y [ 0 ] ) * ( p1i_z [ 1 ] - p1i_z [ 0 ] ) -
-                                ( p1i_x [ 1 ] - p1i_x [ 0 ] ) * ( p2i_y [ 0 ] - p1i_y [ 0 ] ) * ( p1i_z [ 2 ] - p1i_z [ 0 ] ) +
-                                ( p1i_x [ 1 ] - p1i_x [ 0 ] ) * ( p1i_y [ 2 ] - p1i_y [ 0 ] ) * ( p2i_z [ 0 ] - p1i_z [ 0 ] ) -
-                                ( p1i_x [ 2 ] - p1i_x [ 0 ] ) * ( p1i_y [ 1 ] - p1i_y [ 0 ] ) * ( p2i_z [ 0 ] - p1i_z [ 0 ] ) ) / 6.0;
+                               ( p2i_x [ 0 ] - p1i_x [ 0 ] ) * ( p1i_y [ 2 ] - p1i_y [ 0 ] ) * ( p1i_z [ 1 ] - p1i_z [ 0 ] ) +
+                               ( p1i_x [ 2 ] - p1i_x [ 0 ] ) * ( p2i_y [ 0 ] - p1i_y [ 0 ] ) * ( p1i_z [ 1 ] - p1i_z [ 0 ] ) -
+                               ( p1i_x [ 1 ] - p1i_x [ 0 ] ) * ( p2i_y [ 0 ] - p1i_y [ 0 ] ) * ( p1i_z [ 2 ] - p1i_z [ 0 ] ) +
+                               ( p1i_x [ 1 ] - p1i_x [ 0 ] ) * ( p1i_y [ 2 ] - p1i_y [ 0 ] ) * ( p2i_z [ 0 ] - p1i_z [ 0 ] ) -
+                               ( p1i_x [ 2 ] - p1i_x [ 0 ] ) * ( p1i_y [ 1 ] - p1i_y [ 0 ] ) * ( p2i_z [ 0 ] - p1i_z [ 0 ] ) ) / 6.0;
 
                 double __v2 = ( ( p2i_x [ 0 ] - p1i_x [ 1 ] ) * ( p1i_y [ 2 ] - p1i_y [ 1 ] ) * ( p2i_z [ 1 ] - p1i_z [ 1 ] ) -
-                                ( p2i_x [ 0 ] - p1i_x [ 1 ] ) * ( p2i_y [ 1 ] - p1i_y [ 1 ] ) * ( p1i_z [ 2 ] - p1i_z [ 1 ] ) +
-                                ( p2i_x [ 1 ] - p1i_x [ 1 ] ) * ( p2i_y [ 0 ] - p1i_y [ 1 ] ) * ( p1i_z [ 2 ] - p1i_z [ 1 ] ) -
-                                ( p1i_x [ 2 ] - p1i_x [ 1 ] ) * ( p2i_y [ 0 ] - p1i_y [ 1 ] ) * ( p2i_z [ 1 ] - p1i_z [ 1 ] ) +
-                                ( p1i_x [ 2 ] - p1i_x [ 1 ] ) * ( p2i_y [ 1 ] - p1i_y [ 1 ] ) * ( p2i_z [ 0 ] - p1i_z [ 1 ] ) -
-                                ( p2i_x [ 1 ] - p1i_x [ 1 ] ) * ( p1i_y [ 2 ] - p1i_y [ 1 ] ) * ( p2i_z [ 0 ] - p1i_z [ 1 ] ) ) / 6.0;
+                               ( p2i_x [ 0 ] - p1i_x [ 1 ] ) * ( p2i_y [ 1 ] - p1i_y [ 1 ] ) * ( p1i_z [ 2 ] - p1i_z [ 1 ] ) +
+                               ( p2i_x [ 1 ] - p1i_x [ 1 ] ) * ( p2i_y [ 0 ] - p1i_y [ 1 ] ) * ( p1i_z [ 2 ] - p1i_z [ 1 ] ) -
+                               ( p1i_x [ 2 ] - p1i_x [ 1 ] ) * ( p2i_y [ 0 ] - p1i_y [ 1 ] ) * ( p2i_z [ 1 ] - p1i_z [ 1 ] ) +
+                               ( p1i_x [ 2 ] - p1i_x [ 1 ] ) * ( p2i_y [ 1 ] - p1i_y [ 1 ] ) * ( p2i_z [ 0 ] - p1i_z [ 1 ] ) -
+                               ( p2i_x [ 1 ] - p1i_x [ 1 ] ) * ( p1i_y [ 2 ] - p1i_y [ 1 ] ) * ( p2i_z [ 0 ] - p1i_z [ 1 ] ) ) / 6.0;
 
                 double __v3 = ( ( p1i_x [ 2 ] - p2i_x [ 0 ] ) * ( p2i_y [ 1 ] - p2i_y [ 0 ] ) * ( p2i_z [ 2 ] - p2i_z [ 0 ] ) -
-                                ( p1i_x [ 2 ] - p2i_x [ 0 ] ) * ( p2i_y [ 2 ] - p2i_y [ 0 ] ) * ( p2i_z [ 1 ] - p2i_z [ 0 ] ) +
-                                ( p2i_x [ 2 ] - p2i_x [ 0 ] ) * ( p1i_y [ 2 ] - p2i_y [ 0 ] ) * ( p2i_z [ 1 ] - p2i_z [ 0 ] ) -
-                                ( p2i_x [ 1 ] - p2i_x [ 0 ] ) * ( p1i_y [ 2 ] - p2i_y [ 0 ] ) * ( p2i_z [ 2 ] - p2i_z [ 0 ] ) +
-                                ( p2i_x [ 1 ] - p2i_x [ 0 ] ) * ( p2i_y [ 2 ] - p2i_y [ 0 ] ) * ( p1i_z [ 2 ] - p2i_z [ 0 ] ) -
-                                ( p2i_x [ 2 ] - p2i_x [ 0 ] ) * ( p2i_y [ 1 ] - p2i_y [ 0 ] ) * ( p1i_z [ 2 ] - p2i_z [ 0 ] ) ) / 6.0;
+                               ( p1i_x [ 2 ] - p2i_x [ 0 ] ) * ( p2i_y [ 2 ] - p2i_y [ 0 ] ) * ( p2i_z [ 1 ] - p2i_z [ 0 ] ) +
+                               ( p2i_x [ 2 ] - p2i_x [ 0 ] ) * ( p1i_y [ 2 ] - p2i_y [ 0 ] ) * ( p2i_z [ 1 ] - p2i_z [ 0 ] ) -
+                               ( p2i_x [ 1 ] - p2i_x [ 0 ] ) * ( p1i_y [ 2 ] - p2i_y [ 0 ] ) * ( p2i_z [ 2 ] - p2i_z [ 0 ] ) +
+                               ( p2i_x [ 1 ] - p2i_x [ 0 ] ) * ( p2i_y [ 2 ] - p2i_y [ 0 ] ) * ( p1i_z [ 2 ] - p2i_z [ 0 ] ) -
+                               ( p2i_x [ 2 ] - p2i_x [ 0 ] ) * ( p2i_y [ 1 ] - p2i_y [ 0 ] ) * ( p1i_z [ 2 ] - p2i_z [ 0 ] ) ) / 6.0;
 
                 double __vol = fabs(__v1) + fabs(__v2) + fabs(__v3);
                 double vol = LS_PCS_computeVolume();

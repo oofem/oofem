@@ -59,7 +59,7 @@ LevelSetPCS :: initialize()
             previousLevelSetValues.resize(nnodes);
             for ( int i = 1; i <= nnodes; i++ ) {
                 previousLevelSetValues.at(i) = ( -1.0 ) * initialRefMatVol.pointDistance( domain->giveNode(i)->giveCoordinate(ci1),
-                                                                                          domain->giveNode(i)->giveCoordinate(ci2) );
+                                                                                         domain->giveNode(i)->giveCoordinate(ci2) );
             }
         }
 

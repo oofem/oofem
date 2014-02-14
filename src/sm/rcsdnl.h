@@ -63,7 +63,7 @@ protected:
     FloatArray nonlocalStrainVector, tempNonlocalStrainVector, localStrainVectorForAverage;
 
 public:
-    RCSDNLMaterialStatus(int n, Domain *d, GaussPoint *g);
+    RCSDNLMaterialStatus(int n, Domain * d, GaussPoint * g);
     virtual ~RCSDNLMaterialStatus();
 
     virtual void printOutputAt(FILE *file, TimeStep *tStep);
@@ -115,7 +115,7 @@ protected:
     double ef;
 
 public:
-    RCSDNLMaterial(int n, Domain *d);
+    RCSDNLMaterial(int n, Domain * d);
     virtual ~RCSDNLMaterial();
 
     // identification and auxiliary functions

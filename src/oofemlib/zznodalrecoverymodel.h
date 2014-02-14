@@ -66,7 +66,7 @@ protected:
 
 public:
     /// Constructor.
-    ZZNodalRecoveryModel(Domain *d);
+    ZZNodalRecoveryModel(Domain * d);
     /// Destructor.
     virtual ~ZZNodalRecoveryModel();
 

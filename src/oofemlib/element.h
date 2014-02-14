@@ -207,7 +207,7 @@ public:
      * @param n Element's number
      * @param aDomain Pointer to the domain to which element belongs.
      */
-    Element(int n, Domain *aDomain);
+    Element(int n, Domain * aDomain);
     /// Virtual destructor.
     virtual ~Element();
 
@@ -217,7 +217,7 @@ public:
      * Returns the location array (array of code numbers) of receiver for given numbering scheme.
      * Results are cached at receiver for default scheme in locationArray attribute.
      */
-    void giveLocationArray(IntArray & locationArray, EquationID, const UnknownNumberingScheme & s, IntArray * dofIds = NULL) const;
+    void giveLocationArray(IntArray &locationArray, EquationID, const UnknownNumberingScheme &s, IntArray *dofIds = NULL) const;
     void giveLocationArray(IntArray &locationArray, const IntArray &dofIDMask, const UnknownNumberingScheme &s, IntArray *dofIds = NULL) const;
     /**
      * Returns the location array for the boundary of the element.
@@ -857,9 +857,9 @@ public:
     virtual void updateLocalNumbering(EntityRenumberingFunctor &f);
 
     /// Integration point evaluator, loops over receiver IP's and calls given function (passed as f parameter) on them. The IP is parameter to function f.
-    template< class T >void ipEvaluator( T * src, void ( T :: *f )( GaussPoint * gp ) );
+    template< class T > void ipEvaluator( T *src, void ( T :: *f )( GaussPoint *gp ) );
     /// Integration point evaluator, loops over receiver IP's and calls given function (passed as f parameter) on them. The IP is parameter to function f as well as additional array.
-    template< class T, class S >void ipEvaluator(T * src, void ( T :: *f )( GaussPoint *, S & ), S & _val);
+    template< class T, class S > void ipEvaluator(T *src, void ( T :: *f )( GaussPoint *, S & ), S &_val);
 
     //@}
 
@@ -1028,8 +1028,8 @@ protected:
     virtual void computeGaussPoints() { }
 };
 
-template< class T >void
-Element :: ipEvaluator( T *src, void ( T :: *f )( GaussPoint * gp ) )
+template< class T > void
+Element :: ipEvaluator( T *src, void ( T :: *f )( GaussPoint *gp ) )
 {
     int ir, ip, nip;
     GaussPoint *gp;
@@ -1043,7 +1043,7 @@ Element :: ipEvaluator( T *src, void ( T :: *f )( GaussPoint * gp ) )
     }
 }
 
-template< class T, class S >void
+template< class T, class S > void
 Element :: ipEvaluator(T *src, void ( T :: *f )( GaussPoint *, S & ), S &_val)
 {
     int ir, ip, nip;

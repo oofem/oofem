@@ -1362,7 +1362,7 @@ Element :: giveNumberOfBoundarySides()
     }
 
     _error2( "giveSpatialDimension: failure, unsupported geometry type (%s)",
-             __Element_Geometry_TypeToString( this->giveGeometryType() ) );
+            __Element_Geometry_TypeToString( this->giveGeometryType() ) );
     return 0; // to make compiler happy
 }
 
@@ -1404,7 +1404,7 @@ Element :: mapStateVariables(const Domain &iOldDom, const TimeStep &iTStep)
                 OOFEM_ERROR("In Element :: mapStateVariables(): failed to fetch MaterialStatus.\n");
             }
 
-            MaterialStatusMapperInterface *interface = dynamic_cast< MaterialStatusMapperInterface * >( ms );
+            MaterialStatusMapperInterface *interface = dynamic_cast< MaterialStatusMapperInterface * >(ms);
             if ( interface == NULL ) {
                 OOFEM_ERROR("In Element :: mapStateVariables(): Failed to fetch MaterialStatusMapperInterface.\n");
             }
@@ -1611,7 +1611,7 @@ Element :: giveInternalStateAtNode(FloatArray &answer, InternalStateType type, I
         if ( ee ) {
             answer.resize(1);
             answer.at(1) = this->giveDomain()->giveErrorEstimator()->giveRemeshingCrit()->
-                           giveRequiredDofManDensity(this->giveNode(node)->giveNumber(), tStep, 1);
+            giveRequiredDofManDensity(this->giveNode(node)->giveNumber(), tStep, 1);
             return 1;
         } else {
             answer.clear();
@@ -1622,7 +1622,7 @@ Element :: giveInternalStateAtNode(FloatArray &answer, InternalStateType type, I
             const FloatArray *nodval;
             NodalRecoveryModel *smoother = this->giveDomain()->giveSmoother();
             int result = smoother->giveNodalVector( nodval, this->giveNode(node)->giveNumber(),
-                                                    smoother->giveElementVirtualRegionNumber(this->number) );
+                                                   smoother->giveElementVirtualRegionNumber(this->number) );
             if ( nodval ) {
                 answer = * nodval;
             } else {

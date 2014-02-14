@@ -115,7 +115,7 @@ NumericalMethod *NonLinearStatic :: giveNumericalMethod(MetaStep *mStep)
 
     if ( mode == nls_indirectControl ) {
         if ( nMethod ) {
-            if ( dynamic_cast< CylindricalALM * >( nMethod ) ) {
+            if ( dynamic_cast< CylindricalALM * >(nMethod) ) {
                 return nMethod;
             } else {
                 delete nMethod;
@@ -125,7 +125,7 @@ NumericalMethod *NonLinearStatic :: giveNumericalMethod(MetaStep *mStep)
         this->nMethod = new CylindricalALM(this->giveDomain(1), this);
     } else if ( mode == nls_directControl ) {
         if ( nMethod ) {
-            if ( dynamic_cast< NRSolver * >( nMethod ) ) {
+            if ( dynamic_cast< NRSolver * >(nMethod) ) {
                 return nMethod;
             } else {
                 delete nMethod;
@@ -559,6 +559,7 @@ NonLinearStatic :: updateComponent(TimeStep *tStep, NumericalCmpn cmpn, Domain *
             initFlag = 0;
         } else if ( ( stiffMode == nls_elasticStiffness ) && ( initFlag ||
                                                                ( this->giveMetaStep( tStep->giveMetaStepNumber() )->giveFirstStepNumber() == tStep->giveNumber() ) ) ) {
+
 #ifdef VERBOSE
             OOFEM_LOG_DEBUG("Assembling elastic stiffness matrix\n");
 #endif

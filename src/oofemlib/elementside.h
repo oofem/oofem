@@ -66,7 +66,7 @@ public:
      * @param n Side number in domain aDomain
      * @param aDomain Domain to which side belongs
      */
-    ElementSide(int n, Domain *aDomain);
+    ElementSide(int n, Domain * aDomain);
     /// Destructor.
     virtual ~ElementSide();
 

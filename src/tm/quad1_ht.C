@@ -98,8 +98,8 @@ Quad1_ht :: initializeFrom(InputRecord *ir)
     }
 
     if ( !( ( numberOfGaussPoints == 4 ) ||
-            ( numberOfGaussPoints == 9 ) ||
-            ( numberOfGaussPoints == 16 ) ) ) {
+           ( numberOfGaussPoints == 9 ) ||
+           ( numberOfGaussPoints == 16 ) ) ) {
         numberOfGaussPoints = 4;
     }
 
@@ -113,7 +113,7 @@ Quad1_ht :: computeVolumeAround(GaussPoint *gp)
 {
     double determinant, weight, thickness, volume;
     determinant = fabs( this->interpolation.giveTransformationJacobian( * gp->giveCoordinates(),
-                                                                        FEIElementGeometryWrapper(this) ) );
+                                                                       FEIElementGeometryWrapper(this) ) );
     weight      = gp->giveWeight();
     thickness   = this->giveCrossSection()->give(CS_Thickness, gp); // 't'
     volume      = determinant * weight * thickness;
@@ -133,25 +133,25 @@ double
 Quad1_ht :: computeEdgeVolumeAround(GaussPoint *gp, int iEdge)
 {
     double result = this->interpolation.edgeGiveTransformationJacobian( iEdge, * gp->giveCoordinates(),
-                                                                        FEIElementGeometryWrapper(this) );
+                                                                       FEIElementGeometryWrapper(this) );
     FloatArray gc;
     this->interpolation.edgeLocal2global( gc, iEdge, * gp->giveCoordinates(),
-                                          FEIElementGeometryWrapper(this) );
+                                         FEIElementGeometryWrapper(this) );
     // temporary gauss point on element (not edge) to evaluate thickness
-    GaussPoint _gp( NULL, 1, new FloatArray(gc), 1.0, gp->giveMaterialMode() );
+    GaussPoint _gp( NULL, 1, new FloatArray ( gc ), 1.0, gp->giveMaterialMode() );
     double thick = this->giveCrossSection()->give(CS_Thickness, & _gp); // 't'
-    return result * thick * gp->giveWeight();
+    return result *thick *gp->giveWeight();
 }
 
 Interface *
 Quad1_ht :: giveInterface(InterfaceType interface)
 {
     if ( interface == SpatialLocalizerInterfaceType ) {
-        return static_cast< SpatialLocalizerInterface * >( this );
+        return static_cast< SpatialLocalizerInterface * >(this);
     } else if ( interface == EIPrimaryFieldInterfaceType ) {
-        return static_cast< EIPrimaryFieldInterface * >( this );
+        return static_cast< EIPrimaryFieldInterface * >(this);
     } else if ( interface == ZZNodalRecoveryModelInterfaceType ) {
-        return static_cast< ZZNodalRecoveryModelInterface * >( this );
+        return static_cast< ZZNodalRecoveryModelInterface * >(this);
     }
 
     return NULL;
@@ -254,7 +254,7 @@ void Quad1_ht :: drawScalar(oofegGraphicContext &context)
             EMAddGraphicsToModel(ESIModel(), tr);
         }
     } else if ( ( ( ( emode == HeatTransferEM ) || ( emode == HeatMass1TransferEM ) ) && ( itype == IST_Temperature ) ) ||
-                ( ( emode == HeatMass1TransferEM ) && ( itype == IST_MassConcentration_1 ) ) ) {
+               ( ( emode == HeatMass1TransferEM ) && ( itype == IST_MassConcentration_1 ) ) ) {
         IntArray dofMask(1);
         if ( itype == IST_Temperature ) {
             dofMask.at(1) = T_f;

@@ -36,10 +36,10 @@
 
 namespace oofem {
 LatticeTransportElement :: LatticeTransportElement(int n, Domain *aDomain, ElementMode em) : TransportElement(n, aDomain, em)
-{}
+{ }
 
 LatticeTransportElement :: ~LatticeTransportElement()
-{}
+{ }
 
 
 IRResultType

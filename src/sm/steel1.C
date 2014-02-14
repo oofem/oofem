@@ -86,7 +86,7 @@ Steel1 :: computeJ2InvariantAt(FloatArray *currentStress)
     v3 = ( ( currentStress->at(3) - currentStress->at(1) ) * ( currentStress->at(3) - currentStress->at(1) ) );
 
     answer = ( 1. / 6. ) * ( v1 + v2 + v3 ) + currentStress->at(4) * currentStress->at(4) +
-             currentStress->at(5) * currentStress->at(5) + currentStress->at(6) * currentStress->at(6);
+    currentStress->at(5) * currentStress->at(5) + currentStress->at(6) * currentStress->at(6);
 
     return sqrt(answer);
 }

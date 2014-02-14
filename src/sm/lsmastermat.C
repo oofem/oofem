@@ -383,7 +383,7 @@ LargeStrainMasterMaterial :: give3dMaterialStiffnessMatrix(FloatMatrix &answer, 
         Material *mat;
         StructuralMaterial *sMat;
         mat = domain->giveMaterial(slaveMat);
-        sMat = dynamic_cast< StructuralMaterial * >( mat );
+        sMat = dynamic_cast< StructuralMaterial * >(mat);
         if ( sMat == NULL ) {
             _warning2("checkConsistency: material %d has no Structural support", slaveMat);
             return;
@@ -392,7 +392,7 @@ LargeStrainMasterMaterial :: give3dMaterialStiffnessMatrix(FloatMatrix &answer, 
         sMat->give3dMaterialStiffnessMatrix(answer, mode, gp, tStep);
     } else {
         mat = domain->giveMaterial(slaveMat);
-        sMat = dynamic_cast< StructuralMaterial * >( mat );
+        sMat = dynamic_cast< StructuralMaterial * >(mat);
         if ( sMat == NULL ) {
             _warning2("checkConsistency: material %d has no Structural support", slaveMat);
             return;
@@ -463,7 +463,7 @@ LargeStrainMasterMaterial :: giveIPValue(FloatArray &answer, GaussPoint *gp, Int
         Material *mat;
         StructuralMaterial *sMat;
         mat = domain->giveMaterial(slaveMat);
-        sMat = dynamic_cast< StructuralMaterial * >( mat );
+        sMat = dynamic_cast< StructuralMaterial * >(mat);
         if ( sMat == NULL ) {
             _warning2("checkConsistency: material %d has no Structural support", slaveMat);
             return 0;
@@ -497,7 +497,7 @@ LargeStrainMasterMaterialStatus :: printOutputAt(FILE *file, TimeStep *tStep)
     Material *mat;
     StructuralMaterial *sMat;
     mat = domain->giveMaterial(slaveMat);
-    sMat = static_cast< StructuralMaterial * >( mat );
+    sMat = static_cast< StructuralMaterial * >(mat);
     MaterialStatus *mS = sMat->giveStatus(gp);
 
     mS->printOutputAt(file, tStep);
@@ -511,7 +511,7 @@ void LargeStrainMasterMaterialStatus :: initTempStatus()
     Material *mat;
     StructuralMaterial *sMat;
     mat = domain->giveMaterial(slaveMat);
-    sMat = static_cast< StructuralMaterial * >( mat );
+    sMat = static_cast< StructuralMaterial * >(mat);
     MaterialStatus *mS = sMat->giveStatus(gp);
     mS->initTempStatus();
     //StructuralMaterialStatus :: initTempStatus();
@@ -525,7 +525,7 @@ LargeStrainMasterMaterialStatus :: updateYourself(TimeStep *tStep)
     Material *mat;
     StructuralMaterial *sMat;
     mat = domain->giveMaterial(slaveMat);
-    sMat = static_cast< StructuralMaterial * >( mat );
+    sMat = static_cast< StructuralMaterial * >(mat);
     MaterialStatus *mS = sMat->giveStatus(gp);
     mS->updateYourself(tStep);
     //  StructuralMaterialStatus :: updateYourself(tStep);
@@ -541,7 +541,7 @@ LargeStrainMasterMaterialStatus :: saveContext(DataStream *stream, ContextMode m
     Material *mat;
     StructuralMaterial *sMat;
     mat = domain->giveMaterial(slaveMat);
-    sMat = dynamic_cast< StructuralMaterial * >( mat );
+    sMat = dynamic_cast< StructuralMaterial * >(mat);
     MaterialStatus *mS = sMat->giveStatus(gp);
     // save parent class status
     if ( ( iores = mS->saveContext(stream, mode, obj) ) != CIO_OK ) {

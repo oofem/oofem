@@ -60,7 +60,7 @@ class CohesiveInterfaceMaterialStatus : public StructuralMaterialStatus
 {
 public:
     /// Constructor
-    CohesiveInterfaceMaterialStatus(int n, Domain *d, GaussPoint *g);
+    CohesiveInterfaceMaterialStatus(int n, Domain * d, GaussPoint * g);
     /// Destructor
     virtual ~CohesiveInterfaceMaterialStatus();
 
@@ -90,9 +90,9 @@ protected:
 
 public:
     /// Constructor
-    CohesiveInterfaceMaterial(int n, Domain *d);
+    CohesiveInterfaceMaterial(int n, Domain * d);
     /// Destructor
-    virtual ~CohesiveInterfaceMaterial() {};
+    virtual ~CohesiveInterfaceMaterial() { };
 
     virtual int hasNonLinearBehaviour() { return 0; }
     virtual int hasMaterialModeCapability(MaterialMode mode) { return ( mode == _3dInterface ); }
@@ -100,10 +100,10 @@ public:
     virtual const char *giveClassName() const { return "CohesiveInterfaceMaterial"; }
     virtual const char *giveInputRecordName() const { return _IFT_CohesiveInterfaceMaterial_Name; }
 
-    virtual void give3dMaterialStiffnessMatrix(FloatMatrix & answer,
+    virtual void give3dMaterialStiffnessMatrix(FloatMatrix &answer,
                                                MatResponseMode,
-                                               GaussPoint * gp,
-                                               TimeStep * tStep);
+                                               GaussPoint *gp,
+                                               TimeStep *tStep);
 
     double computeVolumetricStrain(GaussPoint *gp, TimeStep *tStep);
 

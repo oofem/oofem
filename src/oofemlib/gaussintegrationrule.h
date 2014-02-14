@@ -65,8 +65,8 @@ public:
      * @param endIndx Last component, for which rule applies.
      * @param dynamic Flag indicating that receiver can change.
      */
-    GaussIntegrationRule(int n, Element *e, int startIndx, int endIndx, bool dynamic = false);
-    GaussIntegrationRule(int n, Element *e);
+    GaussIntegrationRule(int n, Element * e, int startIndx, int endIndx, bool dynamic = false);
+    GaussIntegrationRule(int n, Element * e);
     /// Destructor
     virtual ~GaussIntegrationRule();
 

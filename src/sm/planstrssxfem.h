@@ -55,7 +55,7 @@ protected:
 
 public:
     /// Constructor
-    PlaneStress2dXfem(int n, Domain *d) : PlaneStress2d(n, d), XfemElementInterface(this), VTKXMLExportModuleElementInterface() { }
+    PlaneStress2dXfem(int n, Domain * d) : PlaneStress2d(n, d), XfemElementInterface(this), VTKXMLExportModuleElementInterface() { }
     /// Destructor
     virtual ~PlaneStress2dXfem() { };
 

@@ -408,7 +408,7 @@ IsotropicDamageMaterial1 :: computeEquivalentStrain(double &kappa, const FloatAr
         kappa = a + 1 / ( 2 * k ) * sqrt(b + c);
     } else if ( this->equivStrainType == EST_Griffith ) {
         kappa = 0.0;
-        double kappa1=0.0, kappa2=0.0;
+        double kappa1 = 0.0, kappa2 = 0.0;
         FloatArray stress, fullStress, principalStress;
         FloatMatrix de;
         lmat->giveStiffnessMatrix(de, SecantStiffness, gp, tStep);
@@ -427,7 +427,7 @@ IsotropicDamageMaterial1 :: computeEquivalentStrain(double &kappa, const FloatAr
         // Check zero division first
         maxStress = max(fabs(principalStress.at(1)), fabs(principalStress.at(3)));
         if (maxStress == 0. || fabs(principalStress.at(3))<1.e-6*maxStress || fabs(principalStress.at(1)+principalStress.at(3))<1.e-6*maxStress) {
-            //Skip evaluation
+	  //Skip evaluation
         } else if ( principalStress.at(1) / principalStress.at(3) >= -0.33333 ) {
             kappa2 = -( principalStress.at(1) - principalStress.at(3) ) * ( principalStress.at(1) - principalStress.at(3) ) / this->griff_n / ( principalStress.at(1) + principalStress.at(3) ) / lmat->give('E', gp);
         }
@@ -1120,7 +1120,7 @@ Interface *
 IsotropicDamageMaterial1 :: giveInterface(InterfaceType type)
 {
     if ( type == MaterialModelMapperInterfaceType ) {
-        return static_cast< MaterialModelMapperInterface * >( this );
+        return static_cast< MaterialModelMapperInterface * >(this);
     } else {
         return NULL;
     }
@@ -1251,7 +1251,7 @@ Interface *
 IsotropicDamageMaterial1Status :: giveInterface(InterfaceType type)
 {
     if ( type == RandomMaterialStatusExtensionInterfaceType ) {
-        return static_cast< RandomMaterialStatusExtensionInterface * >( this );
+        return static_cast< RandomMaterialStatusExtensionInterface * >(this);
     } else {
         return NULL;
     }

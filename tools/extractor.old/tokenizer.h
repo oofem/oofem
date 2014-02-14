@@ -60,7 +60,7 @@ private:
     int tokenizeLine();
 
 public:
-    Tokenizer(FILE *inFile, char separator = 0);
+    Tokenizer(FILE * inFile, char separator = 0);
     char *giveLineFromInput();
     int   giveNumberOfTokens();
     int   isEOF() { return isEOFflag; }

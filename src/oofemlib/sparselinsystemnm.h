@@ -58,7 +58,7 @@ class OOFEM_EXPORT SparseLinearSystemNM : public NumericalMethod
 {
 public:
     /// Constructor.
-    SparseLinearSystemNM(Domain *d, EngngModel *m);
+    SparseLinearSystemNM(Domain * d, EngngModel * m);
     /// Destructor.
     virtual ~SparseLinearSystemNM();
 

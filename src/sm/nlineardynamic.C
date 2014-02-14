@@ -406,8 +406,8 @@ NonLinearDynamic :: proceedStep(int di, TimeStep *tStep)
         massMatrix->buildInternalStructure( this, di, EID_MomentumBalance, EModelDefaultEquationNumbering() );
 
         // Assemble mass matrix
-        this->assemble(massMatrix, tStep, EID_MomentumBalance, MassMatrix,
-                       EModelDefaultEquationNumbering(), this->giveDomain(di));
+        this->assemble( massMatrix, tStep, EID_MomentumBalance, MassMatrix,
+                       EModelDefaultEquationNumbering(), this->giveDomain(di) );
 
         // Initialize vectors
         help.resize(neq);
@@ -458,8 +458,8 @@ NonLinearDynamic :: proceedStep(int di, TimeStep *tStep)
     if ( delta != 0 ) {
         for ( int i = 1; i <= neq; i++ ) {
             help.at(i) = delta * ( a4 * previousVelocityVector.at(i)
-                                   + a5 * previousAccelerationVector.at(i)
-                                   + a6 * previousIncrementOfDisplacement.at(i) );
+                                  + a5 * previousAccelerationVector.at(i)
+                                  + a6 * previousIncrementOfDisplacement.at(i) );
         }
         this->timesMtrx(help, rhs2, TangentStiffnessMatrix, this->giveDomain(di), tStep);
 

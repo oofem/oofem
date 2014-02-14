@@ -326,7 +326,7 @@ bool FE2FluidMaterialStatus :: createRVE(int n, GaussPoint *gp, const std :: str
     em->giveNextStep(); // Makes sure there is a timestep (which we will modify before solving a step)
     em->init();
 
-    this->rve = dynamic_cast< StokesFlow * >( em );
+    this->rve = dynamic_cast< StokesFlow * >(em);
     if ( !this->rve ) {
         return false;
     }

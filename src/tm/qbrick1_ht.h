@@ -57,7 +57,7 @@ protected:
     static FEI3dHexaQuad interpolation;
 
 public:
-    QBrick1_ht(int n, Domain *d);
+    QBrick1_ht(int n, Domain * d);
     virtual ~QBrick1_ht();
 
     virtual double computeVolumeAround(GaussPoint *gp);
@@ -94,7 +94,7 @@ protected:
 class QBrick1_hmt : public QBrick1_ht
 {
 public:
-    QBrick1_hmt(int n, Domain *d);
+    QBrick1_hmt(int n, Domain * d);
 
     virtual MaterialMode giveMaterialMode() { return _3dHeMo; }
     virtual const char *giveInputRecordName() const { return _IFT_QBrick1_hmt_Name; }

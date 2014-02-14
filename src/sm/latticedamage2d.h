@@ -134,9 +134,9 @@ protected:
 public:
 
     /// Constructor
-    LatticeDamage2dStatus(int n, Domain *d, GaussPoint *g);
+    LatticeDamage2dStatus(int n, Domain * d, GaussPoint * g);
     /// Destructor
-    virtual ~LatticeDamage2dStatus() {}
+    virtual ~LatticeDamage2dStatus() { }
 
 
     /// Returns the last equilibrated scalar measure of the largest strain level
@@ -288,7 +288,7 @@ protected:
 public:
 
     /// Constructor
-    LatticeDamage2d(int n, Domain *d);
+    LatticeDamage2d(int n, Domain * d);
     /// Destructor
     virtual ~LatticeDamage2d();
 

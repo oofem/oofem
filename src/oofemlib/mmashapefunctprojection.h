@@ -56,7 +56,7 @@ public:
     /**
      * Typedefs to introduce the container type for nodal numbers
      */
-    typedef AList< FloatArray >nodalValContainerType;
+    typedef AList< FloatArray > nodalValContainerType;
 
     enum coordType { coordType_local, coordType_global };
 

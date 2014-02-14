@@ -138,10 +138,7 @@ void
 LargeStrainMasterMaterialGrad :: givePDGradMatrix_LD(FloatMatrix &answer, MatResponseMode mode, GaussPoint *gp, TimeStep *tStep)
 {
     MaterialMode mMode = gp->giveMaterialMode();
-    switch ( mMode ) {
-    default:
-        _error2( "giveCharacteristicMatrix : unknown mode (%s)", __MaterialModeToString(mMode) );
-    }
+    _error2( "giveCharacteristicMatrix : unknown mode (%s)", __MaterialModeToString(mMode) );
 }
 
 
@@ -214,7 +211,7 @@ LargeStrainMasterMaterialGrad :: giveFirstPKStressVectorGrad(FloatArray &answer1
         Material *mat;
         StructuralMaterial *sMat;
         mat = domain->giveMaterial(slaveMat);
-        sMat = dynamic_cast< StructuralMaterial * >( mat );
+        sMat = dynamic_cast< StructuralMaterial * >(mat);
         if ( sMat == NULL ) {
             _warning2("checkConsistency: material %d has no Structural support", slaveMat);
             return;
@@ -316,7 +313,7 @@ LargeStrainMasterMaterialGrad :: initializeFrom(InputRecord *ir)
 //=============================================================================
 
 LargeStrainMasterMaterialGradStatus :: LargeStrainMasterMaterialGradStatus(int n, Domain *d, GaussPoint *g, int s) : LargeStrainMasterMaterialStatus(n, d, g, s)
-{}
+{ }
 
 LargeStrainMasterMaterialGradStatus :: ~LargeStrainMasterMaterialGradStatus()
 { }
@@ -351,7 +348,7 @@ LargeStrainMasterMaterialGradStatus :: saveContext(DataStream *stream, ContextMo
     contextIOResultType iores;
 
     // save parent class status
-    if ( ( iores = LargeStrainMasterMaterialGradStatus :: saveContext(stream, mode, obj) ) != CIO_OK ) {
+    if ( ( iores = LargeStrainMasterMaterialStatus :: saveContext(stream, mode, obj) ) != CIO_OK ) {
         THROW_CIOERR(iores);
     }
 

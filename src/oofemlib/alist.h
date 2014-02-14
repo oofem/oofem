@@ -54,7 +54,7 @@ namespace oofem {
  * component is very efficient. On the other hand, the resizing of array is relative time expensive (the whole
  * existing pointer table must be transferred) and is recommended to set size of the array to the final size.
  */
-template< class T >class AList
+template< class T > class AList
 {
 protected:
     /// Array or list size (number of components to store).
@@ -149,12 +149,12 @@ template< class T >AList< T > :: AList(int s, int sizeIncrement)
 }
 
 
-template< class T >AList< T > :: ~AList()
+template< class T > AList< T > :: ~AList()
 {
     this->clear(true);
 }
 
-template< class T >void
+template< class T > void
 AList< T > :: clear(bool deleteObjectFlag)
 {
     int i = size;
@@ -162,7 +162,7 @@ AList< T > :: clear(bool deleteObjectFlag)
     if ( size ) {
         if ( deleteObjectFlag ) {
             while ( i-- ) {
-                delete ( values [ i ] );
+                delete(values [ i ]);
             }
         }
 
@@ -174,7 +174,7 @@ AList< T > :: clear(bool deleteObjectFlag)
     values = NULL;
 }
 
-template< class T >void
+template< class T > void
 AList< T > :: growTo(int newSize)
 // Expands the receiver from its current size to newSize, in order to accommodate new entries.
 {
@@ -190,7 +190,7 @@ AList< T > :: growTo(int newSize)
         i = size;
         if ( size ) {
             while ( ( --i ) >= newSize ) {
-                delete ( values [ i ] );
+                delete(values [ i ]);
                 values [ i ] = NULL;
             }
         }
@@ -219,7 +219,7 @@ AList< T > :: growTo(int newSize)
     size = newSize;
 }
 
-template< class T >T *
+template< class T > T *
 AList< T > :: at(int i) const
 {
 #ifdef DEBUG
@@ -230,7 +230,7 @@ AList< T > :: at(int i) const
     return values [ i - 1 ];
 }
 
-template< class T >bool
+template< class T > bool
 AList< T > :: includes(int i) const
 // Returns True if the receiver has a non-null i-th entry, else returns
 // False.
@@ -247,7 +247,7 @@ AList< T > :: includes(int i) const
     }
 }
 
-template< class T >void
+template< class T > void
 AList< T > :: printYourself() const
 // Prints the receiver on screen.
 {
@@ -257,7 +257,7 @@ AList< T > :: printYourself() const
     }
 }
 
-template< class T >void AList< T > :: put(int i, T *anObject)
+template< class T > void AList< T > :: put(int i, T *anObject)
 // Stores anObject at position i. Enlarge the receiver if too small.
 {
 #ifdef DEBUG
@@ -277,7 +277,7 @@ template< class T >void AList< T > :: put(int i, T *anObject)
     values [ i - 1 ] = anObject;
 }
 
-template< class T >void AList< T > :: remove(int i)
+template< class T > void AList< T > :: remove(int i)
 {
 #ifdef DEBUG
     if ( i < 0 ) {
@@ -296,7 +296,7 @@ template< class T >void AList< T > :: remove(int i)
 }
 
 
-template< class T >T *AList< T > :: unlink(int i)
+template< class T > T *AList< T > :: unlink(int i)
 {
 #ifdef DEBUG
     if ( i <= 0 ) {

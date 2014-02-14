@@ -133,7 +133,7 @@ protected:
     SparseLinearSystemNM *nMethod;
 
 public:
-    NlDEIDynamic(int i, EngngModel *_master = NULL);
+    NlDEIDynamic(int i, EngngModel * _master = NULL);
 
     virtual ~NlDEIDynamic();
 

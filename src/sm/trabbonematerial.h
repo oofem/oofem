@@ -74,7 +74,7 @@ protected:
     FloatArray tempEpsp, epsp, tempDepsp;
 
 public:
-    TrabBoneMaterialStatus(int n, Domain *d, GaussPoint *g);
+    TrabBoneMaterialStatus(int n, Domain * d, GaussPoint * g);
     virtual ~TrabBoneMaterialStatus();
 
     void printOutputAt(FILE *file, TimeStep *tStep);
@@ -122,7 +122,7 @@ protected:
     double E0, Eil, Eie, kie, Ek, Cc, Cc2, EpsC, SigYp, SigYn, adam;
 
 public:
-    TrabBoneMaterial(int n, Domain *d);
+    TrabBoneMaterial(int n, Domain * d);
 
     void performPlasticityReturn(GaussPoint *gp, const FloatArray &totalStrain);
 

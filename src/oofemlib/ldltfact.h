@@ -61,7 +61,7 @@ private:
 
 public:
     /// Constructor - creates new instance of LDLTFactorization, with number i, belonging to domain d and Engngmodel m.
-    LDLTFactorization(Domain *d, EngngModel *m);
+    LDLTFactorization(Domain * d, EngngModel * m);
     /// Destructor
     virtual ~LDLTFactorization();
 

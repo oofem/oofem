@@ -69,7 +69,7 @@ ConcreteDPMStatus :: ConcreteDPMStatus(int n, Domain *d, GaussPoint *gp) :
 }
 
 ConcreteDPMStatus :: ~ConcreteDPMStatus()
-{}
+{ }
 
 void
 ConcreteDPMStatus :: initTempStatus()
@@ -557,9 +557,9 @@ ConcreteDPM :: computeEquivalentStrain(double &tempEquivStrain, const StrainVect
         StrainVector tempPlasticStrain = status->giveTempPlasticStrain();
 
         double volumetricPlasticStrain = plasticStrain(0) + plasticStrain(1) +
-                                         plasticStrain(2);
+        plasticStrain(2);
         double tempVolumetricPlasticStrain = tempPlasticStrain(0) +
-                                             tempPlasticStrain(1) + tempPlasticStrain(2);
+        tempPlasticStrain(1) + tempPlasticStrain(2);
         if ( kappaP < 1.0 ) {
             //compute volumetric plastic strain at peak
             double peakVolumetricPlasticStrain = ( 1. - kappaP ) / ( tempKappaP - kappaP ) *
@@ -744,7 +744,7 @@ ConcreteDPM :: computeDuctilityMeasureDamage(const StrainVector &strain, GaussPo
     StrainVector principalStrain(matMode);
     double ductilityMeasure;
     double volStrain = tempPlasticStrain(0) + tempPlasticStrain(1) +
-                       tempPlasticStrain(2);
+    tempPlasticStrain(2);
     //compute sum of negative principal strains
     tempPlasticStrain.computePrincipalValues(principalStrain);
     double negativeVolStrain = 0.;
@@ -841,10 +841,10 @@ ConcreteDPM :: checkForVertexCase(double &answer,
         while ( fabs(FZero) > yieldTol && l <= newtonIter ) {
             l++;
             FZero = pow( ( 1. - yieldHardOne ), 2. ) * pow( ( sigZero / fc ), 4. ) +
-                    pow(yieldHardOne, 2.) * m * ( sigZero / fc ) - pow(yieldHardOne, 2.);
+            pow(yieldHardOne, 2.) * m * ( sigZero / fc ) - pow(yieldHardOne, 2.);
 
             dFZeroDSigZero = pow( ( 1. - yieldHardOne ), 2. ) * 4. * pow( ( sigZero / fc ), 3. ) / fc +
-                             pow(yieldHardOne, 2.) * m / fc;
+            pow(yieldHardOne, 2.) * m / fc;
 
             sigZero = sigZero - FZero / dFZeroDSigZero;
         }
@@ -952,7 +952,7 @@ ConcreteDPM :: performRegularReturn(StressVector &effectiveStress,
 
         // weighted norm
         residualNorm = pow(residual(0), 2.) + pow(residual(1), 2.) +
-                       pow(residual(2), 2.) + pow(yieldValue, 2.);
+        pow(residual(2), 2.) + pow(yieldValue, 2.);
         residualNorm = sqrt(residualNorm);
         //    printf("\n residualNorm= %e\n", residualNorm);
         if ( residualNorm > yieldTol ) {
@@ -1001,9 +1001,9 @@ ConcreteDPM :: performRegularReturn(StressVector &effectiveStress,
 
                 deltaLambdaIncrementNew =
                     ( -aMatrix(1, 0) * residual(0) - aMatrix(1, 1) * residual(1) -
-                      aMatrix(1, 2) * residual(2) - answerIncrement(1) ) /
+                     aMatrix(1, 2) * residual(2) - answerIncrement(1) ) /
                     ( flowRules(0) * aMatrix(1, 0) + flowRules(1) * aMatrix(1, 1) +
-                      flowRules(2) * aMatrix(1, 2) );
+                     flowRules(2) * aMatrix(1, 2) );
 
                 // Special case, if deltaLambdaIncrement is equal to zero.
                 if ( fabs(deltaLambdaIncrementNew) < yieldTol * 1.e3 ) {
@@ -1161,7 +1161,7 @@ ConcreteDPM :: performVertexReturn(StressVector &effectiveStress,
             double ratioTrial = rhoTrial / ( sigTrial - sigAnswer );
 
             if ( ( ( ( ratioPotential >= ratioTrial ) && vertexType == VT_Tension ) ) ||
-                 ( ( ratioPotential <= ratioTrial ) && vertexType == VT_Compression ) ) {
+                ( ( ratioPotential <= ratioTrial ) && vertexType == VT_Compression ) ) {
                 return;
             } else {
                 vertexType = VT_Regular;
@@ -1185,7 +1185,7 @@ ConcreteDPM :: computeTempKappa(const double kappaInitial,
     FloatArray deltaPlasticStrainPrincipal(3);
     rho = 0.;
     equivalentDeltaPlasticStrain = sqrt( 1. / 9. * pow( ( sigTrial - sig ) / ( kM ), 2. ) +
-                                         pow(rhoTrial / ( 2. * gM ), 2.) );
+                                        pow(rhoTrial / ( 2. * gM ), 2.) );
 
     double thetaVertex = 0.;
     double ductilityMeasure = computeDuctilityMeasure(sig, rho, thetaVertex);
@@ -1206,14 +1206,14 @@ ConcreteDPM :: computeYieldValue(const double sig,
 
     //  compute elliptic function r
     const double rFunction = ( 4. * ( 1. - pow(ecc, 2.) ) * pow(cos(theta), 2.) +
-                               pow( ( 2. * ecc - 1. ), 2. ) ) /
+                              pow( ( 2. * ecc - 1. ), 2. ) ) /
                              ( 2. * ( 1. - pow(ecc, 2.) ) * cos(theta) +
-                               ( 2. * ecc - 1. ) * sqrt(4. * ( 1. - pow(ecc, 2.) ) * pow(cos(theta), 2.)
-                                                        + 5. * pow(ecc, 2.) - 4. * ecc) );
+                              ( 2. * ecc - 1. ) * sqrt(4. * ( 1. - pow(ecc, 2.) ) * pow(cos(theta), 2.)
+                                                       + 5. * pow(ecc, 2.) - 4. * ecc) );
 
     //compute help function Al
     const double Al = ( 1. - yieldHardOne ) * pow( ( sig / fc + rho / ( sqrt(6.) * fc ) ), 2. ) +
-                      sqrt(3. / 2.) * rho / fc;
+    sqrt(3. / 2.) * rho / fc;
 
     //Compute yield equation
     return pow(Al, 2.) +
@@ -1239,7 +1239,7 @@ ConcreteDPM :: computeDFDKappa(const double sig,
     const double rFunction =
         ( 4. * ( 1. - ecc * ecc ) * cos(theta) * cos(theta) + ( 2. * ecc - 1. ) * ( 2. * ecc - 1. ) ) /
         ( 2 * ( 1. - ecc * ecc ) * cos(theta) + ( 2. * ecc - 1. ) *
-          sqrt(4. * ( 1. - ecc * ecc ) * cos(theta) * cos(theta) + 5. * ecc * ecc - 4. * ecc) );
+         sqrt(4. * ( 1. - ecc * ecc ) * cos(theta) * cos(theta) + 5. * ecc * ecc - 4. * ecc) );
 
     //compute help functions Al, Bl
     const double Al = ( 1. - yieldHardOne ) * pow( ( sig / fc + rho / ( sqrt(6.) * fc ) ), 2. ) + sqrt(3. / 2.) * rho / fc;
@@ -1247,7 +1247,7 @@ ConcreteDPM :: computeDFDKappa(const double sig,
     const double Bl = sig / fc + rho / ( fc * sqrt(6.) );
 
     const double dFDYieldHardOne = -2. *Al *pow(Bl, 2.)
-                                   + 2. * yieldHardOne * m * ( sig / fc + rho * rFunction / ( sqrt(6.) * fc ) );
+    + 2. * yieldHardOne * m * ( sig / fc + rho * rFunction / ( sqrt(6.) * fc ) );
 
     const double dFDYieldHardTwo = -2. * yieldHardTwo;
 
@@ -1309,7 +1309,7 @@ ConcreteDPM :: computeDKappaDDeltaLambda(const double sig,
     FloatArray dGDStressPrincipal(3);
 
     equivalentDGDStress = sqrt( 1. / 3. * pow(dGDInv(0), 2.) +
-                                pow(dGDInv(1), 2.) );
+                               pow(dGDInv(1), 2.) );
 
     double ductilityMeasure = computeDuctilityMeasure(sig, rho, this->thetaTrial);
     double dKappaDDeltaLambda = equivalentDGDStress / ductilityMeasure;
@@ -1337,7 +1337,7 @@ ConcreteDPM :: computeDDKappaDDeltaLambdaDInv(FloatArray &answer,
 
     //Compute equivalentDGDStress
     equivalentDGDStress = sqrt( 1. / 3. * pow(dGDInv(0), 2.) +
-                                pow(dGDInv(1), 2.) );
+                               pow(dGDInv(1), 2.) );
 
     //computeDuctilityMeasure
     double ductilityMeasure = computeDuctilityMeasure(sig, rho, this->thetaTrial);
@@ -1377,7 +1377,7 @@ ConcreteDPM :: computeDDKappaDDeltaLambdaDKappa(const double sig,
     computeDDGDInvDKappa(dDGDInvDKappa, sig, rho, tempKappa);
 
     equivalentDGDStress = sqrt( 1. / 3. * pow(dGDInv(0), 2.) +
-                                pow(dGDInv(1), 2.) );
+                               pow(dGDInv(1), 2.) );
 
     //computeDuctilityMeasure
     double ductilityMeasure = computeDuctilityMeasure(sig, rho, this->thetaTrial);
@@ -1544,7 +1544,7 @@ ConcreteDPM :: computeDDGDInvDKappa(FloatArray &answer,
 
     const double dDGDRhoDKappa =
         ( dAlDYieldHard / ( sqrt(6.) * fc ) * ( 4. * ( 1. - yieldHardOne ) * Bl + 6. ) -
-          4. * Al / ( sqrt(6.) * fc ) * Bl + 2. * m * yieldHardOne / ( sqrt(6.) * fc ) ) * dYieldHardOneDKappa;
+         4. * Al / ( sqrt(6.) * fc ) * Bl + 2. * m * yieldHardOne / ( sqrt(6.) * fc ) ) * dYieldHardOneDKappa;
 
     answer(0) = dDGDSigDKappa;
     answer(1) = dDGDRhoDKappa;
@@ -1572,7 +1572,7 @@ ConcreteDPM :: computeDDGDDInv(FloatMatrix &answer,
     const double Bl = sig / fc + rho / ( fc * sqrt(6.) );
 
     const double Al = ( 1. - yieldHardOne ) * pow(Bl, 2.) +
-                      sqrt(3. / 2.) * rho / fc;
+    sqrt(3. / 2.) * rho / fc;
 
     const double dAlDSig = 2. * ( 1. - yieldHardOne ) * Bl / fc;
     const double dBlDSig = 1. / fc;
@@ -1879,15 +1879,15 @@ double
 ConcreteDPM :: computeDRDCosTheta(const double theta, const double ecc) const
 {
     double ACostheta = 4. * ( 1. - ecc * ecc ) * cos(theta) * cos(theta) +
-                       ( 2. * ecc - 1. ) * ( 2. * ecc - 1. );
+    ( 2. * ecc - 1. ) * ( 2. * ecc - 1. );
     double BCostheta = 2. * ( 1. - ecc * ecc ) * cos(theta) +
-                       ( 2. * ecc - 1. ) * sqrt(4. * ( 1. - ecc * ecc ) * cos(theta) * cos(theta)
-                                                + 5. * ecc * ecc - 4. * ecc);
+    ( 2. * ecc - 1. ) * sqrt(4. * ( 1. - ecc * ecc ) * cos(theta) * cos(theta)
+                             + 5. * ecc * ecc - 4. * ecc);
     double A1Costheta = 8. * ( 1. - pow(ecc, 2.) ) * cos(theta);
     double B1Costheta = 2. * ( 1. - pow(ecc, 2.) ) +
                         4. * ( 2. * ecc - 1. ) * ( 1. - pow(ecc, 2.) ) * cos(theta) /
-                        sqrt(4. * ( 1. - pow(ecc, 2.) ) * pow(cos(theta), 2.) +
-                             5. * pow(ecc, 2.) - 4. * ecc);
+    sqrt(4. * ( 1. - pow(ecc, 2.) ) * pow(cos(theta), 2.) +
+         5. * pow(ecc, 2.) - 4. * ecc);
     double dRDCostheta = A1Costheta / BCostheta - ACostheta / pow(BCostheta, 2.) * B1Costheta;
     return dRDCostheta;
 }

@@ -46,7 +46,7 @@ namespace oofem {
 class OOFEM_EXPORT FEI2dLineQuad : public FEInterpolation2d
 {
 public:
-    FEI2dLineQuad(int ind1, int ind2) : FEInterpolation2d(2, ind1, ind2) {}
+    FEI2dLineQuad(int ind1, int ind2) : FEInterpolation2d(2, ind1, ind2) { }
 
     virtual integrationDomain giveIntegrationDomain() const { return _Line; }
     virtual Element_Geometry_Type giveGeometryType() const { return EGT_line_2; }

@@ -122,6 +122,9 @@ errorestimate_re = re.compile(r"""
 gpstress_re = re.compile (r"""[ ]stresses\s*([\s+-e\d]+)""",re.X)
 gpstrain_re = re.compile (r"""[ ]strains\s*([\s+-e\d]+)""",re.X)
 gpstatus_re = re.compile (r"""status\s.*""", re.X)
+gpelementstatus_re = re.compile (r"""element_status\s.*""", re.X)
+
+# following element reported keywors are obsolete; should be reported inside gpelementstatus
 gpDamage_re = re.compile (r"""damage\s*([\s+-e\d]+)""",re.X)
 gpstate_re = re.compile (r"""state\s*([\s+-e\d]+)""",re.X)
 gpflow_re = re.compile (r"""flow\s*([\s+-e\d]+)""",re.X)
@@ -441,6 +444,12 @@ def match_gpsubrec (context, aline):
     if ppmatch:
         check_element_rec (context, 'status', aline)
         if debug: print ( "     status rec %s" % aline )
+        return 1
+    #check element status 
+    ppmatch = gpelementstatus_re.search(aline)
+    if ppmatch:
+        check_element_rec (context, 'elementstatus', aline)
+        if debug: print ( "     element_status rec %s" % aline )
         return 1
     #get omega (damage)
     ppmatch = gpDamage_re.search(aline)

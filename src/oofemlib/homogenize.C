@@ -563,22 +563,22 @@ void Homogenize :: herveZaoui(FloatMatrix &PhaseMatrix)
     nu_n = ( 3. * k(NumPhases - 2) - 2. * mu(NumPhases - 2) ) / ( 6. * k(NumPhases - 2) + 2. * mu(NumPhases - 2) );
 
     a = 4. * pow(r(NumPhases - 2), 10.) * ( 1. - 2. * nu_n ) * ( 7. - 10. * nu_n ) * Z(0, 1) +
-        20. * pow(r(NumPhases - 2), 7.) * ( 7. - 12. * nu_n + 8. * nu_n * nu_n ) * Z(3, 1) +
-        12. * pow(r(NumPhases - 2), 5.) * ( 1. - 2. * nu_n ) * ( Z(0, 3) - 7. * Z(1, 2) ) +
-        20. * pow(r(NumPhases - 2), 3.) * ( 1. - 2. * nu_n ) * ( 1. - 2. * nu_n ) * Z(0, 2) +
-        16. * ( 4. - 5. * nu_n ) * ( 1. - 2. * nu_n ) * Z(3, 2);
+    20. * pow(r(NumPhases - 2), 7.) * ( 7. - 12. * nu_n + 8. * nu_n * nu_n ) * Z(3, 1) +
+    12. * pow(r(NumPhases - 2), 5.) * ( 1. - 2. * nu_n ) * ( Z(0, 3) - 7. * Z(1, 2) ) +
+    20. * pow(r(NumPhases - 2), 3.) * ( 1. - 2. * nu_n ) * ( 1. - 2. * nu_n ) * Z(0, 2) +
+    16. * ( 4. - 5. * nu_n ) * ( 1. - 2. * nu_n ) * Z(3, 2);
 
     b = 3. * pow(r(NumPhases - 2), 10.) * ( 1. - 2. * nu_n ) * ( 15. * nu_n - 7. ) * Z(0, 1) +
-        60. * pow(r(NumPhases - 2), 7.) * ( nu_n - 3. ) * nu_n * Z(3, 1) -
-        24. * pow(r(NumPhases - 2), 5.) * ( 1. - 2. * nu_n ) * ( Z(0, 3) - 7. * Z(1, 2) ) -
-        40. * pow(r(NumPhases - 2), 3.) * ( 1. - 2. * nu_n ) * ( 1. - 2. * nu_n ) * Z(0, 2) -
-        8. * ( 1. - 5. * nu_n ) * ( 1. - 2. * nu_n ) * Z(3, 2);
+    60. * pow(r(NumPhases - 2), 7.) * ( nu_n - 3. ) * nu_n * Z(3, 1) -
+    24. * pow(r(NumPhases - 2), 5.) * ( 1. - 2. * nu_n ) * ( Z(0, 3) - 7. * Z(1, 2) ) -
+    40. * pow(r(NumPhases - 2), 3.) * ( 1. - 2. * nu_n ) * ( 1. - 2. * nu_n ) * Z(0, 2) -
+    8. * ( 1. - 5. * nu_n ) * ( 1. - 2. * nu_n ) * Z(3, 2);
 
     c = -pow(r(NumPhases - 2), 10.) * ( 1. - 2. * nu_n ) * ( 7. + 5 * nu_n ) * Z(0, 1) +
-        10. * pow(r(NumPhases - 2), 7.) * ( 7. - nu_n * nu_n ) * Z(3, 1) +
-        12. * pow(r(NumPhases - 2), 5.) * ( 1. - 2. * nu_n ) * ( Z(0, 3) - 7. * Z(1, 2) ) +
-        20. * pow(r(NumPhases - 2), 3.) * ( 1. - 2. * nu_n ) * ( 1. - 2. * nu_n ) * Z(0, 2) -
-        8. * ( 7. - 5. * nu_n ) * ( 1. - 2. * nu_n ) * Z(3, 2);
+    10. * pow(r(NumPhases - 2), 7.) * ( 7. - nu_n * nu_n ) * Z(3, 1) +
+    12. * pow(r(NumPhases - 2), 5.) * ( 1. - 2. * nu_n ) * ( Z(0, 3) - 7. * Z(1, 2) ) +
+    20. * pow(r(NumPhases - 2), 3.) * ( 1. - 2. * nu_n ) * ( 1. - 2. * nu_n ) * Z(0, 2) -
+    8. * ( 7. - 5. * nu_n ) * ( 1. - 2. * nu_n ) * Z(3, 2);
 
     //solve quadratic equation, report higher number
     sqr = b * b - 4. * a * c;

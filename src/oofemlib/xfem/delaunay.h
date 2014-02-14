@@ -54,7 +54,7 @@ class Triangle;
 class OOFEM_EXPORT Delaunay
 {
 public:
-    Delaunay() : mTol(1.0e-12) {}
+    Delaunay() : mTol(1.0e-12) { }
 
     bool colinear(const FloatArray &iP1, const FloatArray &iP2, const FloatArray &iP3) const;
     void printTriangles(AList< Triangle > *triangles);

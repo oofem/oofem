@@ -68,7 +68,7 @@ BoundaryCondition *MasterDof :: giveBc()
     if ( bc ) {
         GeneralBoundaryCondition *bcptr = dofManager->giveDomain()->giveBc(bc);
         if ( bcptr->giveType() == DirichletBT ) {
-            return static_cast< BoundaryCondition * >( bcptr );
+            return static_cast< BoundaryCondition * >(bcptr);
         }
     }
 
@@ -196,7 +196,7 @@ double MasterDof :: giveUnknown(ValueModeType mode, TimeStep *tStep)
     }
 
     return ( dofManager->giveDomain()->giveEngngModel()->
-             giveUnknownComponent(mode, tStep, dofManager->giveDomain(), this) );
+            giveUnknownComponent(mode, tStep, dofManager->giveDomain(), this) );
 }
 
 double MasterDof :: giveUnknown(PrimaryField &field, ValueModeType mode, TimeStep *tStep)

@@ -43,7 +43,7 @@ namespace oofem {
 REGISTER_Material(TrabBoneEmbed);
 
 TrabBoneEmbed :: TrabBoneEmbed(int n, Domain *d) : StructuralMaterial(n, d)
-{}
+{ }
 
 
 void TrabBoneEmbed :: computeCumPlastStrain(double &tempAlpha, GaussPoint *gp, TimeStep *tStep)
@@ -231,7 +231,7 @@ TrabBoneEmbedStatus :: TrabBoneEmbedStatus(int n, Domain *d, GaussPoint *g) : St
 
 
 TrabBoneEmbedStatus :: ~TrabBoneEmbedStatus()
-{}
+{ }
 
 
 double

@@ -513,7 +513,7 @@ RCM2Material :: updateCrackStatus(GaussPoint *gp, const FloatArray &crackStrain)
             minCrackStrainsForFullyOpenCrack = this->giveMinCrackStrainsForFullyOpenCrack(gp, i);
             //if ((crackStrain.at(i) >= status->giveMinCrackStrainsForFullyOpenCrack(i)) &&
             if ( ( crackStrain.at(i) >= minCrackStrainsForFullyOpenCrack ) &&
-                 ( crackStrain.at(i) >= status->giveTempMaxCrackStrain(i) ) ) {
+                ( crackStrain.at(i) >= status->giveTempMaxCrackStrain(i) ) ) {
                 //
                 // fully open crack
                 //
@@ -712,9 +712,9 @@ RCM2Material :: giveEffectiveMaterialStiffnessMatrix(FloatMatrix &answer,
             }
 
             princStressDis = principalStressVector.at(ii) -
-                             principalStressVector.at(jj);
+            principalStressVector.at(jj);
             princStrainDis = principalStrainVector.at(ii) -
-                             principalStrainVector.at(jj);
+            principalStrainVector.at(jj);
             if ( fabs(princStrainDis) < rcm_SMALL_STRAIN ) {
                 compliance.at(indi, indi) = 1. / G;
             } else if ( fabs(princStressDis) < 1.e-8 ) {
@@ -1078,7 +1078,7 @@ RCM2MaterialStatus :: printOutputAt(FILE *file, TimeStep *tStep)
             }
 
             fprintf( file, "crack %d {status %s, normal to crackplane { %f %f %f }} ",
-                     i, s, crackDirs.at(1, i), crackDirs.at(2, i), crackDirs.at(3, i) );
+                    i, s, crackDirs.at(1, i), crackDirs.at(2, i), crackDirs.at(3, i) );
         }
     }
 

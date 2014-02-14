@@ -62,8 +62,8 @@ protected:
     bool matRotation;
 
 public:
-    QSpace(int n, Domain *d);
-    virtual ~QSpace() {}
+    QSpace(int n, Domain * d);
+    virtual ~QSpace() { }
 
     virtual FEInterpolation *giveInterpolation() const { return & interpolation; }
 

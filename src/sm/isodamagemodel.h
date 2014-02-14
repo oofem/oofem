@@ -93,7 +93,7 @@ protected:
 
 public:
     /// Constructor
-    IsotropicDamageMaterialStatus(int n, Domain *d, GaussPoint *g);
+    IsotropicDamageMaterialStatus(int n, Domain * d, GaussPoint * g);
     /// Destructor
     virtual ~IsotropicDamageMaterialStatus();
 
@@ -180,7 +180,7 @@ protected:
 
 public:
     /// Constructor
-    IsotropicDamageMaterial(int n, Domain *d);
+    IsotropicDamageMaterial(int n, Domain * d);
     /// Destructor
     virtual ~IsotropicDamageMaterial();
 

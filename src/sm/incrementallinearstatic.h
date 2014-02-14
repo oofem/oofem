@@ -79,7 +79,7 @@ protected:
     SparseMtrxType sparseMtrxType;
 
 public:
-    IncrementalLinearStatic(int i, EngngModel *_master = NULL);
+    IncrementalLinearStatic(int i, EngngModel * _master = NULL);
     virtual ~IncrementalLinearStatic();
 
     virtual IRResultType initializeFrom(InputRecord *ir);

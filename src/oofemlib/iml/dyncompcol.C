@@ -82,7 +82,7 @@ DynCompCol :: DynCompCol(const DynCompCol &S) : SparseMtrx(S.nRows, S.nColumns),
     if ( S.columns_ ) {
         this->columns_ = new FloatArray * [ S.nColumns ];
         for ( i = 0; i < S.nColumns; i++ ) {
-            this->columns_ [ i ] = new FloatArray(* S.columns_ [ i ]);
+            this->columns_ [ i ] = new FloatArray(*S.columns_ [ i ]);
         }
     } else {
         this->columns_ = NULL;
@@ -91,7 +91,7 @@ DynCompCol :: DynCompCol(const DynCompCol &S) : SparseMtrx(S.nRows, S.nColumns),
     if ( S.rowind_ ) {
         this->rowind_ = new IntArray * [ S.nColumns ];
         for ( i = 0; i < S.nColumns; i++ ) {
-            this->rowind_ [ i ] = new IntArray(* S.rowind_ [ i ]);
+            this->rowind_ [ i ] = new IntArray(*S.rowind_ [ i ]);
         }
     } else {
         this->rowind_ = NULL;
@@ -102,7 +102,7 @@ DynCompCol :: DynCompCol(const DynCompCol &S) : SparseMtrx(S.nRows, S.nColumns),
     if ( S.columns ) {
         this->columns = new std :: map< int, double > * [ S.nColumns ];
         for ( i = 0; i < S.nColumns; i++ ) {
-            this->columns [ i ] = new std :: map< int, double >(* S.columns [ i ]);
+            this->columns [ i ] = new std :: map< int, double >(*S.columns [ i ]);
         }
     } else {
         this->columns = NULL;
@@ -158,7 +158,7 @@ DynCompCol :: ~DynCompCol()
 /* Assignment operator...  */
 /***************************/
 
-DynCompCol &DynCompCol :: operator=(const DynCompCol &C)
+DynCompCol &DynCompCol :: operator = ( const DynCompCol & C )
 {
     base_   = C.base_;
 
@@ -176,7 +176,7 @@ DynCompCol &DynCompCol :: operator=(const DynCompCol &C)
     if ( C.columns_ ) {
         this->columns_ = new FloatArray * [ C.nColumns ];
         for ( i = 0; i < C.nColumns; i++ ) {
-            this->columns_ [ i ] = new FloatArray(* C.columns_ [ i ]);
+            this->columns_ [ i ] = new FloatArray(*C.columns_ [ i ]);
         }
     } else {
         this->columns_ = NULL;
@@ -194,7 +194,7 @@ DynCompCol &DynCompCol :: operator=(const DynCompCol &C)
     if ( C.rowind_ ) {
         this->rowind_ = new IntArray * [ C.nColumns ];
         for ( i = 0; i < C.nColumns; i++ ) {
-            this->rowind_ [ i ] = new IntArray(* C.rowind_ [ i ]);
+            this->rowind_ [ i ] = new IntArray(*C.rowind_ [ i ]);
         }
     } else {
         this->rowind_ = NULL;
@@ -220,7 +220,7 @@ DynCompCol &DynCompCol :: operator=(const DynCompCol &C)
 
 SparseMtrx *DynCompCol :: GiveCopy() const
 {
-    DynCompCol *result = new DynCompCol(* this);
+    DynCompCol *result = new DynCompCol(*this);
     return result;
 }
 
@@ -718,7 +718,7 @@ double DynCompCol :: at(int i, int j) const
 #endif
 }
 
-double DynCompCol :: operator()(int i, int j)  const
+double DynCompCol :: operator() (int i, int j)  const
 {
 #ifndef DynCompCol_USE_STL_SETS
     /*
@@ -757,7 +757,7 @@ double DynCompCol :: operator()(int i, int j)  const
 #endif
 }
 
-double &DynCompCol :: operator()(int i, int j)
+double &DynCompCol :: operator() (int i, int j)
 {
     // increment version
     this->version++;

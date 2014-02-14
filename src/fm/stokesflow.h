@@ -88,7 +88,7 @@ protected:
     TopologyState ts;
 
 public:
-    StokesFlow(int i, EngngModel *_master = NULL);
+    StokesFlow(int i, EngngModel * _master = NULL);
     virtual ~StokesFlow();
 
     virtual void solveYourselfAt(TimeStep *tStep);

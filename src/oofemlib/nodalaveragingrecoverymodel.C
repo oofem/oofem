@@ -196,7 +196,7 @@ NodalAveragingRecoveryModel :: exchangeDofManValues(int ireg, FloatArray &lhs, I
     ProblemCommunicatorMode commMode = emodel->giveProblemCommMode();
 
     if ( commMode == ProblemCommMode__NODE_CUT ) {
-        parallelStruct ls(& lhs, & regionDofMansConnectivity, & regionNodalNumbers, regionValSize);
+        parallelStruct ls( &lhs, &regionDofMansConnectivity, &regionNodalNumbers, regionValSize);
 
         // exchange data for shared nodes
         communicator->packAllData(this, & ls, & NodalAveragingRecoveryModel :: packSharedDofManData);

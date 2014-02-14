@@ -59,7 +59,7 @@ protected:
 
 public:
     /// Constructor
-    BilinearCZMaterialStatus(int n, Domain *d, GaussPoint *g);
+    BilinearCZMaterialStatus(int n, Domain * d, GaussPoint * g);
     /// Destructor
     virtual ~BilinearCZMaterialStatus();
 
@@ -111,7 +111,7 @@ protected:
                                                 GaussPoint *gp, TimeStep *tStep);
 public:
     /// Constructor
-    BilinearCZMaterial(int n, Domain *d);
+    BilinearCZMaterial(int n, Domain * d);
     /// Destructor
     virtual ~BilinearCZMaterial();
 

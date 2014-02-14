@@ -106,7 +106,7 @@ protected:
     FloatMatrix tempDamageTensorEigenVectors, damageTensorEigenVectors;
 
 public:
-    MDMStatus(int n, int nsd, int nmplanes, Domain *d, GaussPoint *g);
+    MDMStatus(int n, int nsd, int nmplanes, Domain * d, GaussPoint * g);
     virtual ~MDMStatus();
 
     void setTempDamageTensorEigenVals(const FloatArray &src) { tempDamageTensorEigenValues = src; }
@@ -226,7 +226,7 @@ public:
      * @param n Material number.
      * @param d Domain to which newly created material belongs.
      */
-    MDM(int n, Domain *d) : MicroplaneMaterial(n, d), StructuralNonlocalMaterialExtensionInterface(d), MaterialModelMapperInterface()
+    MDM(int n, Domain * d) : MicroplaneMaterial(n, d), StructuralNonlocalMaterialExtensionInterface(d), MaterialModelMapperInterface()
     {
         linearElasticMaterial = NULL;
         nonlocal = 0;
@@ -235,7 +235,11 @@ public:
         mdm_Ep = mdm_Efp = -1.0;
     }
     /// Destructor.
-    virtual ~MDM() { if ( linearElasticMaterial ) { delete linearElasticMaterial; } }
+    virtual ~MDM() {
+        if ( linearElasticMaterial ) {
+            delete linearElasticMaterial;
+        }
+    }
 
     virtual int hasMaterialModeCapability(MaterialMode mode);
 

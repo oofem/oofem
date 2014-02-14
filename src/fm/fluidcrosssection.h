@@ -63,7 +63,7 @@ public:
      * @param n Cross section number.
      * @param d Domain for cross section.
      */
-    FluidCrossSection(int n, Domain *d);
+    FluidCrossSection(int n, Domain * d);
     /// Destructor.
     virtual ~FluidCrossSection();
 

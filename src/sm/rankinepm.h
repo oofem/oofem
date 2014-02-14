@@ -57,7 +57,7 @@ protected:
     double k;
 
 public:
-    RankinePlasticMaterial(int n, Domain *d);
+    RankinePlasticMaterial(int n, Domain * d);
     virtual ~RankinePlasticMaterial();
 
     virtual IRResultType initializeFrom(InputRecord *ir);

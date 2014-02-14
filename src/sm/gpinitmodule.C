@@ -49,11 +49,11 @@ namespace oofem {
 REGISTER_InitModule(GPInitModule)
 
 GPInitModule :: GPInitModule(int n, EngngModel *e) : InitModule(n, e)
-{}
+{ }
 
 
 GPInitModule :: ~GPInitModule()
-{}
+{ }
 
 
 IRResultType

@@ -63,7 +63,7 @@ protected:
     IntArray pressureDofManArray;
 
 public:
-    TR21_2D_SUPG(int n, Domain *aDomain);
+    TR21_2D_SUPG(int n, Domain * aDomain);
     virtual ~TR21_2D_SUPG();
 
     virtual FEInterpolation *giveInterpolation() const;
@@ -74,7 +74,7 @@ public:
     virtual const char *giveInputRecordName() const { return _IFT_TR21_2D_SUPG_Name; }
     virtual MaterialMode giveMaterialMode() { return _2dFlow; }
 
-    virtual void giveElementDofIDMask(EquationID, IntArray & answer) const;
+    virtual void giveElementDofIDMask(EquationID, IntArray &answer) const;
     virtual void giveDofManDofIDMask(int inode, EquationID ut, IntArray &answer) const;
     virtual int computeNumberOfDofs();
     virtual IRResultType initializeFrom(InputRecord *ir);

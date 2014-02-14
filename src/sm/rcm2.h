@@ -100,7 +100,7 @@ protected:
     IntArray crackMap;
 
 public:
-    RCM2MaterialStatus(int n, Domain *d, GaussPoint *g);
+    RCM2MaterialStatus(int n, Domain * d, GaussPoint * g);
     virtual ~RCM2MaterialStatus();
 
     virtual void printOutputAt(FILE *file, TimeStep *tStep);
@@ -137,7 +137,11 @@ public:
     void letCrackStrainVectorBe(const FloatArray &a) { crackStrainVector = a; }
     void letOldCrackStrainVectorBe(const FloatArray &a) { oldCrackStrainVector = a; }
 
-    double giveCharLength(int icrack) const { if ( icrack ) { return charLengths.at(icrack); } else { return 0.0; } }
+    double giveCharLength(int icrack) const { if ( icrack ) {
+                                                  return charLengths.at(icrack);
+                                              } else {
+                                                  return 0.0;
+                                              } }
     void setCharLength(int icrack, double val) { charLengths.at(icrack) = val; }
 
     // query for non-tem variables (usefull for postprocessing)
@@ -176,7 +180,7 @@ protected:
     //double beta;
 
 public:
-    RCM2Material(int n, Domain *d);
+    RCM2Material(int n, Domain * d);
     virtual ~RCM2Material();
 
     // identification and auxiliary functions
@@ -234,9 +238,9 @@ protected:
     virtual double giveCrackingModulus(MatResponseMode rMode, GaussPoint *gp,
                                        double effStrain, int i) { return 1.e20; }
 
-    virtual void giveMaterialStiffnessMatrix(FloatMatrix & answer, MatResponseMode,
-                                             GaussPoint * gp,
-                                             TimeStep * tStep);
+    virtual void giveMaterialStiffnessMatrix(FloatMatrix &answer, MatResponseMode,
+                                             GaussPoint *gp,
+                                             TimeStep *tStep);
 
     void giveCrackedStiffnessMatrix(FloatMatrix &answer,
                                     MatResponseMode rMode,
@@ -253,9 +257,9 @@ protected:
 
     void giveRealPrincipalStressVector3d(FloatArray &answer, GaussPoint *,
                                          FloatArray &, FloatMatrix &, TimeStep *);
-    void giveNormalElasticStiffnessMatrix(FloatMatrix & answer,
+    void giveNormalElasticStiffnessMatrix(FloatMatrix &answer,
                                           bool reduce, MatResponseMode,
-                                          GaussPoint *, TimeStep * tStep,
+                                          GaussPoint *, TimeStep *tStep,
                                           const FloatMatrix &);
     void updateActiveCrackMap(GaussPoint *gp, const IntArray *activatedCracks = NULL);
     // Give3dMaterialStiffnessMatrix should return 3d material stiffness matrix

@@ -68,7 +68,7 @@ protected:
 
 public:
     /// Constructor
-    GravityPressure(int i, Domain *d) : BodyLoad(i, d) { }
+    GravityPressure(int i, Domain * d) : BodyLoad(i, d) { }
 
     virtual bcGeomType giveBCGeoType() const { return GravityPressureBGT; }
     virtual void computeValueAt(FloatArray &answer, TimeStep *tStep, FloatArray &coords, ValueModeType mode);

@@ -62,7 +62,7 @@ protected:
     double kappa_hat;
 
 public:
-    RankineMatNlStatus(int n, Domain *d, GaussPoint *g);
+    RankineMatNlStatus(int n, Domain * d, GaussPoint * g);
     virtual ~RankineMatNlStatus();
 
     virtual void printOutputAt(FILE *file, TimeStep *tStep);
@@ -93,11 +93,13 @@ public:
  * Rankine nonlocal material
  */
 class RankineMatNl : public RankineMat, public StructuralNonlocalMaterialExtensionInterface,
-    public NonlocalMaterialStiffnessInterface
+public NonlocalMaterialStiffnessInterface
 {
 public:
-    RankineMatNl(int n, Domain *d);
-    virtual ~RankineMatNl() {; }
+    RankineMatNl(int n, Domain * d);
+    virtual ~RankineMatNl() {
+        ;
+    }
 
     virtual const char *giveClassName() const { return "RankineMatNl"; }
     virtual const char *giveInputRecordName() const { return _IFT_RankineMatNl_Name; }

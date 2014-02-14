@@ -86,7 +86,7 @@ NonlocalMaterialWTP :: giveNonlocalDepArryElementPlugin(GaussPoint *gp, std :: s
 
     NonlocalMaterialStatusExtensionInterface *interface =
         static_cast< NonlocalMaterialStatusExtensionInterface * >( gp->giveMaterialStatus()->
-                                                                   giveInterface(NonlocalMaterialStatusExtensionInterfaceType) );
+                                                                  giveInterface(NonlocalMaterialStatusExtensionInterfaceType) );
     if ( interface ) {
         std :: list< localIntegrationRecord > *lir = interface->giveIntegrationDomainList();
         std :: list< localIntegrationRecord > :: iterator listIter;
@@ -114,7 +114,7 @@ NonlocalMaterialWTP :: init(Domain *domain)
     int nproc = emodel->giveNumberOfProcesses();
     int myrank = emodel->giveRank();
     CommunicatorBuff cb(nproc, CBT_dynamic);
-    Communicator com(emodel, & cb, myrank, nproc, CommMode_Dynamic);
+    Communicator com(emodel, &cb, myrank, nproc, CommMode_Dynamic);
     this->nonlocElementDependencyMap.clear();
 
     // build nonlocal element dependency array for each element
@@ -147,7 +147,7 @@ NonlocalMaterialWTP :: migrate()
     int nproc = emodel->giveNumberOfProcesses();
     int myrank = emodel->giveRank();
     CommunicatorBuff cb(nproc, CBT_dynamic);
-    Communicator com(emodel, & cb, myrank, nproc, CommMode_Dynamic);
+    Communicator com(emodel, &cb, myrank, nproc, CommMode_Dynamic);
     StaticCommunicationBuffer commBuff(MPI_COMM_WORLD);
 
     /*
@@ -323,7 +323,7 @@ int NonlocalMaterialWTP :: packMigratingElementDependencies(Domain *d, ProcessCo
     for ( ielem = 1; ielem <= nelem; ielem++ ) { // begin loop over elements
         elem = d->giveElement(ielem);
         if ( ( elem->giveParallelMode() == Element_local ) &&
-             ( lb->giveElementPartition(ielem) == iproc ) ) {
+            ( lb->giveElementPartition(ielem) == iproc ) ) {
             // pack local element (node numbers shuld be global ones!!!)
             // pack type
             _globnum = elem->giveGlobalNumber();
@@ -393,7 +393,7 @@ int NonlocalMaterialWTP :: packRemoteElements(Domain *d, ProcessCommunicator &pc
         for ( i = 1; i <= nnodes; i++ ) {
             node = elem->giveDofManager(i);
             if ( ( node->giveParallelMode() == DofManager_local ) ||
-                 ( node->isShared() && !node->givePartitionList()->contains(iproc) ) ) {
+                ( node->isShared() && !node->givePartitionList()->contains(iproc) ) ) {
                 nodesToSend.insert( elem->giveDofManager(i)->giveGlobalNumber() );
             }
         }

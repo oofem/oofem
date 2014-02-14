@@ -60,7 +60,7 @@ public:
      * @param a Sparse matrix to be preconditioned.
      * @param attributes Attributes of receiver.
      */
-    Preconditioner(const SparseMtrx &a, InputRecord &attributes);
+    Preconditioner(const SparseMtrx & a, InputRecord & attributes);
     /**
      * Constructor.
      * The user should call initializeFrom and init services in this given order to ensure consistency.

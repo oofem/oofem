@@ -56,20 +56,20 @@ namespace oofem {
  * strain elasticity finite element. Each node has 2 degrees of freedom.
  */
 class TrPlaneStrain : public StructuralElement, public ZZNodalRecoveryModelInterface,
-    public NodalAveragingRecoveryModelInterface, public SPRNodalRecoveryModelInterface,
-    public SpatialLocalizerInterface,
-    public DirectErrorIndicatorRCInterface,
-    public EIPrimaryUnknownMapperInterface,
-    public ZZErrorEstimatorInterface, public ZZRemeshingCriteriaInterface,
-    public MMAShapeFunctProjectionInterface,
-    public HuertaErrorEstimatorInterface, public HuertaRemeshingCriteriaInterface
+public NodalAveragingRecoveryModelInterface, public SPRNodalRecoveryModelInterface,
+public SpatialLocalizerInterface,
+public DirectErrorIndicatorRCInterface,
+public EIPrimaryUnknownMapperInterface,
+public ZZErrorEstimatorInterface, public ZZRemeshingCriteriaInterface,
+public MMAShapeFunctProjectionInterface,
+public HuertaErrorEstimatorInterface, public HuertaRemeshingCriteriaInterface
 {
 protected:
     static FEI2dTrLin interp;
     double area;
 
 public:
-    TrPlaneStrain(int n, Domain *d);
+    TrPlaneStrain(int n, Domain * d);
     virtual ~TrPlaneStrain() { }
 
     virtual FEInterpolation *giveInterpolation() const { return & interp; }

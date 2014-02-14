@@ -55,9 +55,9 @@ namespace oofem {
  * - calculating its B,D,N matrices and dV.
  */
 class CCTPlate : public NLStructuralElement,
-    public LayeredCrossSectionInterface, public ZZNodalRecoveryModelInterface,
-    public NodalAveragingRecoveryModelInterface, public SPRNodalRecoveryModelInterface,
-    public ZZErrorEstimatorInterface, public ZZRemeshingCriteriaInterface
+public LayeredCrossSectionInterface, public ZZNodalRecoveryModelInterface,
+public NodalAveragingRecoveryModelInterface, public SPRNodalRecoveryModelInterface,
+public ZZErrorEstimatorInterface, public ZZRemeshingCriteriaInterface
 {
 protected:
     static FEI2dTrLin interp_lin;
@@ -66,7 +66,7 @@ protected:
     double area;
 
 public:
-    CCTPlate(int n, Domain *d);
+    CCTPlate(int n, Domain * d);
     virtual ~CCTPlate() { }
 
     virtual FEInterpolation *giveInterpolation() const { return & interp_lin; }

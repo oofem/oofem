@@ -212,15 +212,15 @@ Interface *
 TR_SHELL01 :: giveInterface(InterfaceType interface)
 {
     if ( interface == ZZNodalRecoveryModelInterfaceType ) {
-        return static_cast< ZZNodalRecoveryModelInterface * >( this );
+        return static_cast< ZZNodalRecoveryModelInterface * >(this);
     } else if ( interface == NodalAveragingRecoveryModelInterfaceType ) {
-        return static_cast< NodalAveragingRecoveryModelInterface * >( this );
+        return static_cast< NodalAveragingRecoveryModelInterface * >(this);
     } else if ( interface == ZZErrorEstimatorInterfaceType ) {
-        return static_cast< ZZErrorEstimatorInterface * >( this );
+        return static_cast< ZZErrorEstimatorInterface * >(this);
     } else if ( interface == ZZRemeshingCriteriaInterfaceType ) {
-        return static_cast< ZZRemeshingCriteriaInterface * >( this );
+        return static_cast< ZZRemeshingCriteriaInterface * >(this);
     } else if ( interface == SpatialLocalizerInterfaceType ) {
-        return static_cast< SpatialLocalizerInterface * >( this );
+        return static_cast< SpatialLocalizerInterface * >(this);
     }
 
 
@@ -316,9 +316,9 @@ TR_SHELL01 :: printOutputAt(FILE *file, TimeStep *tStep)
 
         fprintf(file, "  strains ");
         fprintf( file,
-                 " % .4e % .4e % .4e % .4e % .4e % .4e % .4e % .4e % .4e % .4e % .4e % .4e ",
-                 v.at(1), v.at(2), v.at(3),  2. * v.at(4), 2. * v.at(5), 2. * v.at(6),
-                 v.at(7), v.at(8), v.at(9),  2. * v.at(10), 2. * v.at(11), 2. * v.at(12) );
+                " % .4e % .4e % .4e % .4e % .4e % .4e % .4e % .4e % .4e % .4e % .4e % .4e ",
+                v.at(1), v.at(2), v.at(3),  2. * v.at(4), 2. * v.at(5), 2. * v.at(6),
+                v.at(7), v.at(8), v.at(9),  2. * v.at(10), 2. * v.at(11), 2. * v.at(12) );
 
         // Strain - Curvature
         plate->giveIPValue(v, gp, IST_ShellForceMomentumTensor, tStep);
@@ -327,9 +327,9 @@ TR_SHELL01 :: printOutputAt(FILE *file, TimeStep *tStep)
 
         fprintf(file, "\n              stresses");
         fprintf( file,
-                 " % .4e % .4e % .4e % .4e % .4e % .4e % .4e % .4e % .4e % .4e % .4e % .4e ",
-                 v.at(1), v.at(2), v.at(3),  v.at(4), v.at(5), v.at(6),
-                 v.at(7), v.at(8), v.at(9),  v.at(10), v.at(11), v.at(12) );
+                " % .4e % .4e % .4e % .4e % .4e % .4e % .4e % .4e % .4e % .4e % .4e % .4e ",
+                v.at(1), v.at(2), v.at(3),  v.at(4), v.at(5), v.at(6),
+                v.at(7), v.at(8), v.at(9),  v.at(10), v.at(11), v.at(12) );
 
         fprintf(file, "\n");
     }

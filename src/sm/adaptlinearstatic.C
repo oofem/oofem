@@ -62,7 +62,7 @@ AdaptiveLinearStatic :: updateYourself(TimeStep *tStep)
         MesherInterface :: returnCode result =
             mesher->createMesh(tStep, 1, this->giveDomain(1)->giveSerialNumber() + 1, & newDomain);
 
-        if ( result == MesherInterface :: MI_OK ) {} else if ( result == MesherInterface :: MI_NEEDS_EXTERNAL_ACTION ) {
+        if ( result == MesherInterface :: MI_OK ) { } else if ( result == MesherInterface :: MI_NEEDS_EXTERNAL_ACTION ) {
             // terminate step
             //this->terminate( tStep );
             //this->terminateAnalysis();

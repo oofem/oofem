@@ -46,8 +46,7 @@
 #include <sstream>
 
 namespace oofem {
-
-REGISTER_CrossSection( VariableCrossSection );
+REGISTER_CrossSection(VariableCrossSection);
 
 
 IRResultType
@@ -98,7 +97,7 @@ VariableCrossSection :: initializeFrom(InputRecord *ir)
     if ( ir->hasField(_IFT_SimpleCrossSection_drillStiffness)) {
         IR_GIVE_OPTIONAL_FIELD(ir, drillingStiffnessExpr, _IFT_SimpleCrossSection_drillStiffness);
     }
-    
+
     IR_GIVE_OPTIONAL_FIELD(ir, this->materialNumber, _IFT_SimpleCrossSection_MaterialNumber);
 
     return IRRT_OK;
@@ -150,14 +149,14 @@ VariableCrossSection::giveExpression (const ScalarFunction** expr, CrossSectionP
 
 
 double
-VariableCrossSection :: give(CrossSectionProperty aProperty, GaussPoint* gpx)
+VariableCrossSection :: give(CrossSectionProperty aProperty, GaussPoint *gpx)
 {
-  return this->give (aProperty, gpx->giveCoordinates(), gpx->giveElement(), true);
+    return this->give(aProperty, gpx->giveCoordinates(), gpx->giveElement(), true);
 }
 
 
 double
-VariableCrossSection :: give(CrossSectionProperty aProperty, const FloatArray* coords, Element* elem, bool local)
+VariableCrossSection :: give(CrossSectionProperty aProperty, const FloatArray *coords, Element *elem, bool local)
 {
     double value = 0.0;
     const ScalarFunction* expr;
@@ -197,5 +196,4 @@ VariableCrossSection :: give(CrossSectionProperty aProperty, const FloatArray* c
 
     return value;
 }
-
 } // end namespace oofem

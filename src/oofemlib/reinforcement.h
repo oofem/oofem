@@ -65,7 +65,7 @@ protected:
 
 public:
     /// Constructor
-    Reinforcement(int i, Domain *d) : BodyLoad(i, d) { }
+    Reinforcement(int i, Domain * d) : BodyLoad(i, d) { }
     /**
      * Computes components values of deadweight field at given point (coordinates given in Global c.s.).
      * taking into account corresponding load time function value while respecting load response mode.

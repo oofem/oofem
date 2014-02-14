@@ -90,10 +90,10 @@ void Space3dStructuralElementEvaluator :: computeBMatrixAt(FloatMatrix &answer, 
 double Space3dStructuralElementEvaluator :: computeVolumeAround(GaussPoint *gp)
 {
     double determinant = fabs( this->giveElement()->giveInterpolation()
-                               ->giveTransformationJacobian( * gp->giveCoordinates(),
-                                                             FEIIGAElementGeometryWrapper( this->giveElement(),
-                                                                                           gp->giveIntegrationRule()->giveKnotSpan() ) ) );
-    return determinant * gp->giveWeight();
+                              ->giveTransformationJacobian( * gp->giveCoordinates(),
+                                                           FEIIGAElementGeometryWrapper( this->giveElement(),
+                                                                                        gp->giveIntegrationRule()->giveKnotSpan() ) ) );
+    return determinant *gp->giveWeight();
 }
 
 

@@ -53,7 +53,7 @@ class Domain;
 class Steel1 : public PerfectlyPlasticMaterial
 {
 public:
-    Steel1(int n, Domain *d);
+    Steel1(int n, Domain * d);
     virtual ~Steel1() { }
 
     virtual IRResultType initializeFrom(InputRecord *ir);

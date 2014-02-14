@@ -79,7 +79,7 @@ DynCompRow :: DynCompRow(const DynCompRow &S) : SparseMtrx(S.nRows, S.nColumns),
     if ( S.rows_ ) {
         this->rows_ = new FloatArray * [ S.nRows ];
         for ( i = 0; i < S.nRows; i++ ) {
-            this->rows_ [ i ] = new FloatArray(* S.rows_ [ i ]);
+            this->rows_ [ i ] = new FloatArray(*S.rows_ [ i ]);
         }
     } else {
         this->rows_ = NULL;
@@ -88,7 +88,7 @@ DynCompRow :: DynCompRow(const DynCompRow &S) : SparseMtrx(S.nRows, S.nColumns),
     if ( S.colind_ ) {
         this->colind_ = new IntArray * [ S.nRows ];
         for ( i = 0; i < S.nRows; i++ ) {
-            this->colind_ [ i ] = new IntArray(* S.colind_ [ i ]);
+            this->colind_ [ i ] = new IntArray(*S.colind_ [ i ]);
         }
     } else {
         this->colind_ = NULL;
@@ -128,7 +128,7 @@ DynCompRow :: ~DynCompRow()
 /* Assignment operator...  */
 /***************************/
 
-DynCompRow &DynCompRow :: operator=(const DynCompRow &C)
+DynCompRow &DynCompRow :: operator = ( const DynCompRow & C )
 {
     base_   = C.base_;
 
@@ -145,7 +145,7 @@ DynCompRow &DynCompRow :: operator=(const DynCompRow &C)
     if ( C.rows_ ) {
         this->rows_ = new FloatArray * [ C.nRows ];
         for ( i = 0; i < C.nRows; i++ ) {
-            this->rows_ [ i ] = new FloatArray(* C.rows_ [ i ]);
+            this->rows_ [ i ] = new FloatArray(*C.rows_ [ i ]);
         }
     } else {
         this->rows_ = NULL;
@@ -163,7 +163,7 @@ DynCompRow &DynCompRow :: operator=(const DynCompRow &C)
     if ( C.colind_ ) {
         this->colind_ = new IntArray * [ C.nRows ];
         for ( i = 0; i < C.nRows; i++ ) {
-            this->colind_ [ i ] = new IntArray(* C.colind_ [ i ]);
+            this->colind_ [ i ] = new IntArray(*C.colind_ [ i ]);
         }
     } else {
         this->colind_ = NULL;
@@ -177,7 +177,7 @@ DynCompRow &DynCompRow :: operator=(const DynCompRow &C)
 
 SparseMtrx *DynCompRow :: GiveCopy() const
 {
-    DynCompRow *result = new DynCompRow(* this);
+    DynCompRow *result = new DynCompRow(*this);
     return result;
 }
 
@@ -514,7 +514,7 @@ double DynCompRow :: at(int i, int j) const
     }
 }
 
-double DynCompRow :: operator()(int i, int j)  const
+double DynCompRow :: operator() (int i, int j)  const
 {
     int colIndx;
     if ( ( colIndx = this->giveColIndx(i, j) ) ) {
@@ -529,7 +529,7 @@ double DynCompRow :: operator()(int i, int j)  const
     }
 }
 
-double &DynCompRow :: operator()(int i, int j)
+double &DynCompRow :: operator() (int i, int j)
 {
     int colIndx;
 

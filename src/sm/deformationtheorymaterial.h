@@ -45,7 +45,7 @@ namespace oofem {
 class DeformationTheoryMaterial : public StructuralMaterial
 {
 public:
-    DeformationTheoryMaterial(int n, Domain *d) : StructuralMaterial(n, d) { }
+    DeformationTheoryMaterial(int n, Domain * d) : StructuralMaterial(n, d) { }
     virtual ~DeformationTheoryMaterial()  { }
 
     // identification and auxiliary functions

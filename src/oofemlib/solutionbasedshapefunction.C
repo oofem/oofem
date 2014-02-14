@@ -39,7 +39,7 @@ namespace oofem {
 template< class T >
 void logData(T myArray) {
     for ( int xyz = 1; xyz <= myArray.giveSize(); xyz++ ) {
-        if ( dynamic_cast< IntArray * >( & myArray ) ) {
+        if ( dynamic_cast< IntArray * >(& myArray) ) {
             printf( "%u ", myArray.at(xyz) );
         } else {
             printf( "%f ", myArray.at(xyz) );
@@ -414,7 +414,7 @@ SolutionbasedShapeFunction :: loadProblem()
         myEngngModel->letOutputBaseFileNameBe(originalFilename + "_1_Base");
         myEngngModel->doStepOutput(thisTimestep);
 
-        modeStruct *mode = new( modeStruct );
+        modeStruct *mode = new(modeStruct);
         mode->myEngngModel = myEngngModel;
 
         // Check elements
@@ -456,7 +456,7 @@ SolutionbasedShapeFunction :: updateModelWithFactors(modeStruct *m)
         factor = m->SurfaceData.at(j)->isMinus ? m->am : factor;
         factor = m->SurfaceData.at(j)->isZeroBoundary ? 1.0 : factor;
 
-        if ( dynamic_cast< MasterDof * >( d ) && m->SurfaceData.at(j)->isFree ) {
+        if ( dynamic_cast< MasterDof * >(d) && m->SurfaceData.at(j)->isFree ) {
             double u = m->SurfaceData.at(j)->value;
             this->setBoundaryConditionOnDof(dman->giveDofWithID(m->SurfaceData.at(j)->DofID), u * factor);
         }
@@ -526,13 +526,14 @@ SolutionbasedShapeFunction :: computeBaseFunctionValueAt(FloatArray &answer, Flo
             if ( ( fabs( maxCoord.at(i) - coords.at(i) ) < TOL ) || ( fabs( minCoord.at(i) - coords.at(i) ) < TOL ) ) {
                 permuteIndex.push_back(i);
                 n++;
-                thisMask = thisMask + pow(2.0, i - 1);
+                //thisMask = thisMask + pow(2.0, i - 1);   // compiler warning on conversion from double to int
+		thisMask = thisMask + ( 0x01 << (i - 1) );
             }
         }
-
-        for ( int i = 0; i < pow(2.0, n); i++ ) {
+	int _s = 0x01 << n;
+        for ( int i = 0; i < _s; i++ ) {
             int mask = i, counter = 1;
-            FloatArray *newCoord = new ( FloatArray ) ( coords.giveSize() );
+            FloatArray *newCoord = new(FloatArray) ( coords.giveSize() );
             * newCoord = coords;
 
             for ( int j = 1; j <= n; j++ ) {
@@ -811,7 +812,7 @@ SolutionbasedShapeFunction :: copyDofManagersToSurfaceData(modeStruct *mode, Int
         computeBaseFunctionValueAt(values, * dman->giveCoordinates(), this->dofs, * mode->myEngngModel);
 
         for ( int j = 1; j <= this->dofs.giveSize(); j++ ) {
-            SurfaceDataStruct *surfaceData = new( SurfaceDataStruct );
+            SurfaceDataStruct *surfaceData = new(SurfaceDataStruct);
             Dof *d = dman->giveDofWithID( dofs.at(j) );
 
             surfaceData->DofID = ( DofIDItem ) this->dofs.at(j);

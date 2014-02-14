@@ -94,7 +94,7 @@ protected:
     }
 
 public:
-    Quad1MindlinShell3D(int n, Domain *d);
+    Quad1MindlinShell3D(int n, Domain * d);
     virtual ~Quad1MindlinShell3D();
 
     virtual FEInterpolation *giveInterpolation() const;

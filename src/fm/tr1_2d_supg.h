@@ -68,9 +68,9 @@ namespace oofem {
  * as material model for this situation.
  */
 class TR1_2D_SUPG : public SUPGElement,
-    public SpatialLocalizerInterface, public EIPrimaryFieldInterface,
-    public ZZNodalRecoveryModelInterface, public NodalAveragingRecoveryModelInterface, public SPRNodalRecoveryModelInterface,
-    public LEPlicElementInterface, public LevelSetPCSElementInterface
+public SpatialLocalizerInterface, public EIPrimaryFieldInterface,
+public ZZNodalRecoveryModelInterface, public NodalAveragingRecoveryModelInterface, public SPRNodalRecoveryModelInterface,
+public LEPlicElementInterface, public LevelSetPCSElementInterface
 {
 protected:
     static FEI2dTrLin interp;
@@ -81,7 +81,7 @@ protected:
     double area;
 
 public:
-    TR1_2D_SUPG(int n, Domain *d);
+    TR1_2D_SUPG(int n, Domain * d);
     virtual ~TR1_2D_SUPG();
 
     virtual FEInterpolation *giveInterpolation() const { return & interp; }
@@ -124,7 +124,7 @@ public:
     virtual const char *giveInputRecordName() const { return _IFT_TR1_2D_SUPG_Name; }
     virtual MaterialMode giveMaterialMode() { return _2dFlow; }
 
-    virtual void giveElementDofIDMask(EquationID, IntArray & answer) const;
+    virtual void giveElementDofIDMask(EquationID, IntArray &answer) const;
     virtual void giveDofManDofIDMask(int inode, EquationID ut, IntArray &answer) const;
     virtual int computeNumberOfDofs();
     virtual IRResultType initializeFrom(InputRecord *ir);

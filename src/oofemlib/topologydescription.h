@@ -65,7 +65,7 @@ protected:
     Domain *d;
 
 public:
-    TopologyDescription(Domain *d) {
+    TopologyDescription(Domain * d) {
         this->d = d;
     }
     virtual ~TopologyDescription() { }

@@ -75,8 +75,10 @@ protected:
     FloatMatrix *GtoLRotationMatrix;
 
 public:
-    TrPlaneStrRot3d(int n, Domain *d);
-    virtual ~TrPlaneStrRot3d() { delete GtoLRotationMatrix; }
+    TrPlaneStrRot3d(int n, Domain * d);
+    virtual ~TrPlaneStrRot3d() {
+        delete GtoLRotationMatrix;
+    }
 
 protected:
     void giveLocalCoordinates(FloatArray &answer, FloatArray &global);

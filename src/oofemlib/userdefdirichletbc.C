@@ -48,7 +48,7 @@ namespace oofem {
 REGISTER_BoundaryCondition(UserDefDirichletBC);
 
 UserDefDirichletBC :: UserDefDirichletBC(int i, Domain *d) : BoundaryCondition(i, d)
-{}
+{ }
 
 
 UserDefDirichletBC :: ~UserDefDirichletBC()

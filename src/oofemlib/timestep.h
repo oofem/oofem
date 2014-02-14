@@ -116,10 +116,10 @@ public:
      * @param counter Solution state counter.
      * @param td Time discretization.
      */
-    TimeStep(int n, EngngModel *e, int mn, double tt, double dt, StateCounterType counter, TimeDiscretizationType td = TD_Unspecified);
+    TimeStep(int n, EngngModel * e, int mn, double tt, double dt, StateCounterType counter, TimeDiscretizationType td = TD_Unspecified);
     TimeStep(const TimeStep &);
-    TimeStep(EngngModel *e);
-    TimeStep &operator=(const TimeStep &);
+    TimeStep(EngngModel * e);
+    TimeStep &operator = ( const TimeStep & );
 
     /// Returns receiver's number.
     int giveNumber() { return number; }
@@ -147,7 +147,8 @@ public:
     /// Sets solution step time increment.
     void setTimeIncrement(double newDt) { deltaT = newDt; }
     /// Sets target and intrinsic time to be equal.
-    void setTime(double newt) { targetTime = newt; intrinsicTime = newt; }
+    void setTime(double newt) { targetTime = newt;
+                                intrinsicTime = newt; }
     /// Sets only target time.
     void setTargetTime(double newt) { targetTime = newt; }
     /// Sets only intrinsic time.

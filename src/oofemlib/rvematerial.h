@@ -71,10 +71,12 @@ public:
     EngngModel *rve;
 
     // Constructor
-    RVEMaterial(int n, Domain *d) { }; // : Material(n, d) { };
+    RVEMaterial(int n, Domain * d) { }; // : Material(n, d) { };
 
     // Destructor
-    ~RVEMaterial() { free(rve); };
+    ~RVEMaterial() {
+        free(rve);
+    };
 
     int SupressRVEoutput;
 

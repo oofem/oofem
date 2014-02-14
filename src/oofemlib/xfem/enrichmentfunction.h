@@ -66,7 +66,7 @@ public:
      * @param n Number associated with receiver.
      * @param aDomain Reference to domain.
      */
-    EnrichmentFunction(int n, Domain *aDomain) : FEMComponent(n, aDomain) { }
+    EnrichmentFunction(int n, Domain * aDomain) : FEMComponent(n, aDomain) { }
     /// Destructor
     virtual ~EnrichmentFunction() { };
 
@@ -95,14 +95,15 @@ protected:
 class OOFEM_EXPORT DiscontinuousFunction : public EnrichmentFunction
 {
 public:
-    DiscontinuousFunction(int n, Domain *aDomain) : EnrichmentFunction(n, aDomain) {
+    DiscontinuousFunction(int n, Domain * aDomain) : EnrichmentFunction(n, aDomain) {
         this->numberOfDofs = 1;
     }
 
     virtual void evaluateEnrFuncAt(double &oEnrFunc, const FloatArray &iPos, const double &iLevelSet, const EnrichmentDomain *ipEnrDom) const;
     virtual void evaluateEnrFuncDerivAt(FloatArray &oEnrFuncDeriv, const FloatArray &iPos, const double &iLevelSet, const FloatArray &iGradLevelSet, const EnrichmentDomain *ipEnrDom) const;
 
-    virtual void giveJump(std :: vector< double > &oJumps) const { oJumps.clear(); oJumps.push_back(2.0); }
+    virtual void giveJump(std :: vector< double > &oJumps) const { oJumps.clear();
+                                                                   oJumps.push_back(2.0); }
 
     virtual const char *giveClassName() const { return "DiscontinuousFunction"; }
     virtual const char *giveInputRecordName() const { return _IFT_DiscontinuousFunction_Name; }
@@ -116,14 +117,15 @@ public:
 class OOFEM_EXPORT HeavisideFunction : public EnrichmentFunction
 {
 public:
-    HeavisideFunction(int n, Domain *aDomain) : EnrichmentFunction(n, aDomain) {
+    HeavisideFunction(int n, Domain * aDomain) : EnrichmentFunction(n, aDomain) {
         this->numberOfDofs = 1;
     }
 
     virtual void evaluateEnrFuncAt(double &oEnrFunc, const FloatArray &iPos, const double &iLevelSet, const EnrichmentDomain *ipEnrDom) const;
     virtual void evaluateEnrFuncDerivAt(FloatArray &oEnrFuncDeriv, const FloatArray &iPos, const double &iLevelSet, const FloatArray &iGradLevelSet, const EnrichmentDomain *ipEnrDom) const;
 
-    virtual void giveJump(std :: vector< double > &oJumps) const { oJumps.clear(); oJumps.push_back(1.0); }
+    virtual void giveJump(std :: vector< double > &oJumps) const { oJumps.clear();
+                                                                   oJumps.push_back(1.0); }
 
     virtual const char *giveClassName() const { return "HeavisideFunction"; }
     virtual const char *giveInputRecordName() const { return _IFT_HeavisideFunction_Name; }
@@ -133,8 +135,8 @@ public:
 class OOFEM_EXPORT LinElBranchFunction
 {
 public:
-    LinElBranchFunction() {}
-    virtual ~LinElBranchFunction() {}
+    LinElBranchFunction() { }
+    virtual ~LinElBranchFunction() { }
 
     virtual void evaluateEnrFuncAt(std :: vector< double > &oEnrFunc, const double &iR, const double &iTheta) const;
     virtual void evaluateEnrFuncDerivAt(std :: vector< FloatArray > &oEnrFuncDeriv, const double &iR, const double &iTheta) const;
@@ -147,14 +149,15 @@ class OOFEM_EXPORT RampFunction : public EnrichmentFunction
 {
 public:
 
-    RampFunction(int n, Domain *aDomain) : EnrichmentFunction(n, aDomain) {
+    RampFunction(int n, Domain * aDomain) : EnrichmentFunction(n, aDomain) {
         this->numberOfDofs = 1;
     }
 
     virtual void evaluateEnrFuncAt(double &oEnrFunc, const FloatArray &iPos, const double &iLevelSet, const EnrichmentDomain *ipEnrDom) const;
     virtual void evaluateEnrFuncDerivAt(FloatArray &oEnrFuncDeriv, const FloatArray &iPos, const double &iLevelSet, const FloatArray &iGradLevelSet, const EnrichmentDomain *ipEnrDom) const;
 
-    virtual void giveJump(std :: vector< double > &oJumps) const { oJumps.clear(); oJumps.push_back(0.0); }
+    virtual void giveJump(std :: vector< double > &oJumps) const { oJumps.clear();
+                                                                   oJumps.push_back(0.0); }
 
     virtual const char *giveClassName() const { return "RampFunction"; }
     virtual const char *giveInputRecordName() const { return _IFT_RampFunction_Name; }

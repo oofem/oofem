@@ -43,9 +43,9 @@ class OOFEM_EXPORT RandomFieldGenerator : public FEMComponent
 {
 public:
     /// Constructor. Creates empty RandomFieldGenerator.
-    RandomFieldGenerator(int n, Domain *d) : FEMComponent(n, d) {}
+    RandomFieldGenerator(int n, Domain * d) : FEMComponent(n, d) { }
     /// Destructor.
-    virtual ~RandomFieldGenerator() {}
+    virtual ~RandomFieldGenerator() { }
     /**
      * Generates random value.
      */

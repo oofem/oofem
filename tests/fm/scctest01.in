@@ -1,0 +1,268 @@
+scctest01.out
+scc specimen, gravity colapse
+#supg nsteps 20 lstype 1 smtype 2 stype 1 lsprecond 2 deltaT 1.0e-2 rtolv 5.e-3 alpha 0.5 miflag 1 nmodules 0 stopmaxiter 0
+supg nsteps 20 lstype 0 smtype 1 deltaT 1.0e-2 rtolv 5.e-3 alpha 0.5 miflag 1 nmodules 0 stopmaxiter 0
+#vtkxml tstep_step 1 domain_all primvars 2 1 5 vars 1 43
+domain 2dIncompFlow
+OutputManager tstep_all dofman_all element_all
+ndofman 91 nelem 148 ncrosssect 1 nmat 3 nbc 3 nic 0 nltf 1
+node 1 coords 3 0.000000e+00 0.000000e+00 0.000000e+00 bc 3 1 1 0
+node 2 coords 3 1.000000e+00 0.000000e+00 0.000000e+00 bc 3 1 1 0
+node 3 coords 3 0.000000e+00 6.000000e-01 0.000000e+00 bc 3 1 0 2
+node 4 coords 3 1.000000e+00 6.000000e-01 0.000000e+00 bc 3 1 0 2
+node 5 coords 3 3.000000e-01 0.000000e+00 0.000000e+00 bc 3 0 1 0
+node 6 coords 3 3.000000e-01 5.000000e-01 0.000000e+00
+node 7 coords 3 0.000000e+00 5.000000e-01 0.000000e+00 bc 3 1 0 0
+node 8 coords 3 1.000000e-01 0.000000e+00 0.000000e+00 bc 3 0 1 0
+node 9 coords 3 2.000000e-01 0.000000e+00 0.000000e+00 bc 3 0 1 0
+node 10 coords 3 4.000000e-01 0.000000e+00 0.000000e+00 bc 3 0 1 0
+node 11 coords 3 5.000000e-01 0.000000e+00 0.000000e+00 bc 3 0 1 0
+node 12 coords 3 6.000000e-01 0.000000e+00 0.000000e+00 bc 3 0 1 0
+node 13 coords 3 7.000000e-01 0.000000e+00 0.000000e+00 bc 3 0 1 0
+node 14 coords 3 8.000000e-01 0.000000e+00 0.000000e+00 bc 3 0 1 0
+node 15 coords 3 9.000000e-01 0.000000e+00 0.000000e+00 bc 3 0 1 0
+node 16 coords 3 1.000000e+00 1.000000e-01 0.000000e+00 bc 3 1 0 0
+node 17 coords 3 1.000000e+00 2.000000e-01 0.000000e+00 bc 3 1 0 0
+node 18 coords 3 1.000000e+00 3.000000e-01 0.000000e+00 bc 3 1 0 0
+node 19 coords 3 1.000000e+00 4.000000e-01 0.000000e+00 bc 3 1 0 0
+node 20 coords 3 1.000000e+00 5.000000e-01 0.000000e+00 bc 3 1 0 0
+node 21 coords 3 0.000000e+00 4.000000e-01 0.000000e+00 bc 3 1 0 0
+node 22 coords 3 0.000000e+00 3.000000e-01 0.000000e+00 bc 3 1 0 0
+node 23 coords 3 0.000000e+00 2.000000e-01 0.000000e+00 bc 3 1 0 0
+node 24 coords 3 0.000000e+00 1.000000e-01 0.000000e+00 bc 3 1 0 0
+node 25 coords 3 9.000000e-01 6.000000e-01 0.000000e+00
+node 26 coords 3 8.000000e-01 6.000000e-01 0.000000e+00
+node 27 coords 3 7.000000e-01 6.000000e-01 0.000000e+00
+node 28 coords 3 6.000000e-01 6.000000e-01 0.000000e+00
+node 29 coords 3 5.000000e-01 6.000000e-01 0.000000e+00
+node 30 coords 3 4.000000e-01 6.000000e-01 0.000000e+00
+node 31 coords 3 3.000000e-01 6.000000e-01 0.000000e+00
+node 32 coords 3 2.000000e-01 6.000000e-01 0.000000e+00
+node 33 coords 3 1.000000e-01 6.000000e-01 0.000000e+00
+node 34 coords 3 3.000000e-01 1.000000e-01 0.000000e+00
+node 35 coords 3 3.000000e-01 2.000000e-01 0.000000e+00
+node 36 coords 3 3.000000e-01 3.000000e-01 0.000000e+00
+node 37 coords 3 3.000000e-01 4.000000e-01 0.000000e+00
+node 38 coords 3 2.000000e-01 5.000000e-01 0.000000e+00
+node 39 coords 3 1.000000e-01 5.000000e-01 0.000000e+00
+node 40 coords 3 3.660274e-01 6.588427e-02 0.000000e+00
+node 41 coords 3 4.478756e-01 8.188671e-02 0.000000e+00
+node 42 coords 3 5.494168e-01 8.930441e-02 0.000000e+00
+node 43 coords 3 6.530039e-01 8.780763e-02 0.000000e+00
+node 44 coords 3 7.551829e-01 8.708462e-02 0.000000e+00
+node 45 coords 3 8.542806e-01 7.990612e-02 0.000000e+00
+node 46 coords 3 9.347081e-01 6.507610e-02 0.000000e+00
+node 47 coords 3 9.194401e-01 1.453831e-01 0.000000e+00
+node 48 coords 3 9.112544e-01 2.453580e-01 0.000000e+00
+node 49 coords 3 9.102974e-01 3.505469e-01 0.000000e+00
+node 50 coords 3 9.180528e-01 4.523256e-01 0.000000e+00
+node 51 coords 3 9.341362e-01 5.340860e-01 0.000000e+00
+node 52 coords 3 8.524493e-01 5.180391e-01 0.000000e+00
+node 53 coords 3 7.510242e-01 5.106010e-01 0.000000e+00
+node 54 coords 3 6.474595e-01 5.121121e-01 0.000000e+00
+node 55 coords 3 5.451907e-01 5.128551e-01 0.000000e+00
+node 56 coords 3 4.459388e-01 5.200514e-01 0.000000e+00
+node 57 coords 3 3.653801e-01 5.349021e-01 0.000000e+00
+node 58 coords 3 3.807693e-01 4.545716e-01 0.000000e+00
+node 59 coords 3 3.890793e-01 3.545656e-01 0.000000e+00
+node 60 coords 3 3.900852e-01 2.493499e-01 0.000000e+00
+node 61 coords 3 3.822615e-01 1.475346e-01 0.000000e+00
+node 62 coords 3 4.895158e-01 1.887213e-01 0.000000e+00
+node 63 coords 3 6.061082e-01 1.776347e-01 0.000000e+00
+node 64 coords 3 7.074651e-01 1.730476e-01 0.000000e+00
+node 65 coords 3 8.166370e-01 1.818342e-01 0.000000e+00
+node 66 coords 3 8.212729e-01 2.943059e-01 0.000000e+00
+node 67 coords 3 8.112501e-01 4.111443e-01 0.000000e+00
+node 68 coords 3 6.947951e-01 4.222392e-01 0.000000e+00
+node 69 coords 3 5.933768e-01 4.268640e-01 0.000000e+00
+node 70 coords 3 4.839635e-01 4.180628e-01 0.000000e+00
+node 71 coords 3 4.795092e-01 3.055177e-01 0.000000e+00
+node 72 coords 3 5.714772e-01 2.706643e-01 0.000000e+00
+node 73 coords 3 6.663011e-01 2.568278e-01 0.000000e+00
+node 74 coords 3 7.483441e-01 2.472235e-01 0.000000e+00
+node 75 coords 3 7.296985e-01 3.292956e-01 0.000000e+00
+node 76 coords 3 6.349371e-01 3.431239e-01 0.000000e+00
+node 77 coords 3 5.527718e-01 3.527049e-01 0.000000e+00
+node 78 coords 3 6.444744e-02 6.858823e-02 0.000000e+00
+node 79 coords 3 1.496248e-01 9.137342e-02 0.000000e+00
+node 80 coords 3 2.351191e-01 6.859574e-02 0.000000e+00
+node 81 coords 3 2.263835e-01 1.515596e-01 0.000000e+00
+node 82 coords 3 2.250543e-01 2.500470e-01 0.000000e+00
+node 83 coords 3 2.263328e-01 3.485227e-01 0.000000e+00
+node 84 coords 3 2.350813e-01 4.314533e-01 0.000000e+00
+node 85 coords 3 1.495444e-01 4.086984e-01 0.000000e+00
+node 86 coords 3 6.437061e-02 4.314467e-01 0.000000e+00
+node 87 coords 3 7.269265e-02 3.485167e-01 0.000000e+00
+node 88 coords 3 7.381327e-02 2.500464e-01 0.000000e+00
+node 89 coords 3 7.261240e-02 1.515677e-01 0.000000e+00
+node 90 coords 3 1.490303e-01 1.992801e-01 0.000000e+00
+node 91 coords 3 1.489495e-01 3.008869e-01 0.000000e+00
+tr1supg 1 nodes 3 5 10 40 crossSect 1 mat 1 vof 0.0 bodyloads 1 3
+tr1supg 2 nodes 3 10 11 41 crossSect 1 mat 1 vof 0.0 bodyloads 1 3
+tr1supg 3 nodes 3 11 12 42 crossSect 1 mat 1 vof 0.0 bodyloads 1 3
+tr1supg 4 nodes 3 12 13 43 crossSect 1 mat 1 vof 0.0 bodyloads 1 3
+tr1supg 5 nodes 3 13 14 44 crossSect 1 mat 1 vof 0.0 bodyloads 1 3
+tr1supg 6 nodes 3 14 15 45 crossSect 1 mat 1 vof 0.0 bodyloads 1 3
+tr1supg 7 nodes 3 15 2 46 crossSect 1 mat 1 vof 0.0 bodyloads 1 3
+tr1supg 8 nodes 3 2 16 46 crossSect 1 mat 1 vof 0.0 bodyloads 1 3
+tr1supg 9 nodes 3 16 17 47 crossSect 1 mat 1 vof 0.0 bodyloads 1 3
+tr1supg 10 nodes 3 17 18 48 crossSect 1 mat 1 vof 0.0 bodyloads 1 3
+tr1supg 11 nodes 3 18 19 49 crossSect 1 mat 1 vof 0.0 bodyloads 1 3
+tr1supg 12 nodes 3 19 20 50 crossSect 1 mat 1 vof 0.0 bodyloads 1 3
+tr1supg 13 nodes 3 20 4 51 crossSect 1 mat 1 vof 0.0 bodyloads 1 3
+tr1supg 14 nodes 3 4 25 51 crossSect 1 mat 1 vof 0.0 bodyloads 1 3
+tr1supg 15 nodes 3 25 26 52 crossSect 1 mat 1 vof 0.0 bodyloads 1 3
+tr1supg 16 nodes 3 26 27 53 crossSect 1 mat 1 vof 0.0 bodyloads 1 3
+tr1supg 17 nodes 3 27 28 54 crossSect 1 mat 1 vof 0.0 bodyloads 1 3
+tr1supg 18 nodes 3 28 29 55 crossSect 1 mat 1 vof 0.0 bodyloads 1 3
+tr1supg 19 nodes 3 29 30 56 crossSect 1 mat 1 vof 0.0 bodyloads 1 3
+tr1supg 20 nodes 3 30 31 57 crossSect 1 mat 1 vof 0.0 bodyloads 1 3
+tr1supg 21 nodes 3 31 32 6 crossSect 1 mat 1 vof 0.0 bodyloads 1 3
+tr1supg 22 nodes 3 32 33 38 crossSect 1 mat 1 vof 0.0 bodyloads 1 3
+tr1supg 23 nodes 3 33 3 7 crossSect 1 mat 1 vof 0.0 bodyloads 1 3
+tr1supg 24 nodes 3 6 37 58 crossSect 1 mat 1 vof 0.0 bodyloads 1 3
+tr1supg 25 nodes 3 37 36 59 crossSect 1 mat 1 vof 0.0 bodyloads 1 3
+tr1supg 26 nodes 3 36 35 60 crossSect 1 mat 1 vof 0.0 bodyloads 1 3
+tr1supg 27 nodes 3 35 34 61 crossSect 1 mat 1 vof 0.0 bodyloads 1 3
+tr1supg 28 nodes 3 34 5 40 crossSect 1 mat 1 vof 0.0 bodyloads 1 3
+tr1supg 29 nodes 3 7 39 33 crossSect 1 mat 1 vof 0.0 bodyloads 1 3
+tr1supg 30 nodes 3 39 38 33 crossSect 1 mat 1 vof 0.0 bodyloads 1 3
+tr1supg 31 nodes 3 38 6 32 crossSect 1 mat 1 vof 0.0 bodyloads 1 3
+tr1supg 32 nodes 3 40 10 41 crossSect 1 mat 1 vof 0.0 bodyloads 1 3
+tr1supg 33 nodes 3 41 11 42 crossSect 1 mat 1 vof 0.0 bodyloads 1 3
+tr1supg 34 nodes 3 42 12 43 crossSect 1 mat 1 vof 0.0 bodyloads 1 3
+tr1supg 35 nodes 3 43 13 44 crossSect 1 mat 1 vof 0.0 bodyloads 1 3
+tr1supg 36 nodes 3 44 14 45 crossSect 1 mat 1 vof 0.0 bodyloads 1 3
+tr1supg 37 nodes 3 45 15 46 crossSect 1 mat 1 vof 0.0 bodyloads 1 3
+tr1supg 38 nodes 3 46 16 47 crossSect 1 mat 1 vof 0.0 bodyloads 1 3
+tr1supg 39 nodes 3 47 17 48 crossSect 1 mat 1 vof 0.0 bodyloads 1 3
+tr1supg 40 nodes 3 48 18 49 crossSect 1 mat 1 vof 0.0 bodyloads 1 3
+tr1supg 41 nodes 3 49 19 50 crossSect 1 mat 1 vof 0.0 bodyloads 1 3
+tr1supg 42 nodes 3 50 20 51 crossSect 1 mat 1 vof 0.0 bodyloads 1 3
+tr1supg 43 nodes 3 51 25 52 crossSect 1 mat 1 vof 0.0 bodyloads 1 3
+tr1supg 44 nodes 3 52 26 53 crossSect 1 mat 1 vof 0.0 bodyloads 1 3
+tr1supg 45 nodes 3 53 27 54 crossSect 1 mat 1 vof 0.0 bodyloads 1 3
+tr1supg 46 nodes 3 54 28 55 crossSect 1 mat 1 vof 0.0 bodyloads 1 3
+tr1supg 47 nodes 3 55 29 56 crossSect 1 mat 1 vof 0.0 bodyloads 1 3
+tr1supg 48 nodes 3 56 30 57 crossSect 1 mat 1 vof 0.0 bodyloads 1 3
+tr1supg 49 nodes 3 57 31 6 crossSect 1 mat 1 vof 0.0 bodyloads 1 3
+tr1supg 50 nodes 3 6 58 57 crossSect 1 mat 1 vof 0.0 bodyloads 1 3
+tr1supg 51 nodes 3 58 37 59 crossSect 1 mat 1 vof 0.0 bodyloads 1 3
+tr1supg 52 nodes 3 59 36 60 crossSect 1 mat 1 vof 0.0 bodyloads 1 3
+tr1supg 53 nodes 3 60 35 61 crossSect 1 mat 1 vof 0.0 bodyloads 1 3
+tr1supg 54 nodes 3 61 34 40 crossSect 1 mat 1 vof 0.0 bodyloads 1 3
+tr1supg 55 nodes 3 40 41 61 crossSect 1 mat 1 vof 0.0 bodyloads 1 3
+tr1supg 56 nodes 3 41 42 62 crossSect 1 mat 1 vof 0.0 bodyloads 1 3
+tr1supg 57 nodes 3 42 43 63 crossSect 1 mat 1 vof 0.0 bodyloads 1 3
+tr1supg 58 nodes 3 43 44 64 crossSect 1 mat 1 vof 0.0 bodyloads 1 3
+tr1supg 59 nodes 3 44 45 65 crossSect 1 mat 1 vof 0.0 bodyloads 1 3
+tr1supg 60 nodes 3 45 46 47 crossSect 1 mat 1 vof 0.0 bodyloads 1 3
+tr1supg 61 nodes 3 47 48 65 crossSect 1 mat 1 vof 0.0 bodyloads 1 3
+tr1supg 62 nodes 3 48 49 66 crossSect 1 mat 1 vof 0.0 bodyloads 1 3
+tr1supg 63 nodes 3 49 50 67 crossSect 1 mat 1 vof 0.0 bodyloads 1 3
+tr1supg 64 nodes 3 50 51 52 crossSect 1 mat 1 vof 0.0 bodyloads 1 3
+tr1supg 65 nodes 3 52 53 67 crossSect 1 mat 1 vof 0.0 bodyloads 1 3
+tr1supg 66 nodes 3 53 54 68 crossSect 1 mat 1 vof 0.0 bodyloads 1 3
+tr1supg 67 nodes 3 54 55 69 crossSect 1 mat 1 vof 0.0 bodyloads 1 3
+tr1supg 68 nodes 3 55 56 70 crossSect 1 mat 1 vof 0.0 bodyloads 1 3
+tr1supg 69 nodes 3 56 57 58 crossSect 1 mat 1 vof 0.0 bodyloads 1 3
+tr1supg 70 nodes 3 58 59 70 crossSect 1 mat 1 vof 0.0 bodyloads 1 3
+tr1supg 71 nodes 3 59 60 71 crossSect 1 mat 1 vof 0.0 bodyloads 1 3
+tr1supg 72 nodes 3 60 61 62 crossSect 1 mat 1 vof 0.0 bodyloads 1 3
+tr1supg 73 nodes 3 61 41 62 crossSect 1 mat 1 vof 0.0 bodyloads 1 3
+tr1supg 74 nodes 3 62 42 63 crossSect 1 mat 1 vof 0.0 bodyloads 1 3
+tr1supg 75 nodes 3 63 43 64 crossSect 1 mat 1 vof 0.0 bodyloads 1 3
+tr1supg 76 nodes 3 64 44 65 crossSect 1 mat 1 vof 0.0 bodyloads 1 3
+tr1supg 77 nodes 3 65 45 47 crossSect 1 mat 1 vof 0.0 bodyloads 1 3
+tr1supg 78 nodes 3 65 48 66 crossSect 1 mat 1 vof 0.0 bodyloads 1 3
+tr1supg 79 nodes 3 66 49 67 crossSect 1 mat 1 vof 0.0 bodyloads 1 3
+tr1supg 80 nodes 3 67 50 52 crossSect 1 mat 1 vof 0.0 bodyloads 1 3
+tr1supg 81 nodes 3 67 53 68 crossSect 1 mat 1 vof 0.0 bodyloads 1 3
+tr1supg 82 nodes 3 68 54 69 crossSect 1 mat 1 vof 0.0 bodyloads 1 3
+tr1supg 83 nodes 3 69 55 70 crossSect 1 mat 1 vof 0.0 bodyloads 1 3
+tr1supg 84 nodes 3 70 56 58 crossSect 1 mat 1 vof 0.0 bodyloads 1 3
+tr1supg 85 nodes 3 70 59 71 crossSect 1 mat 1 vof 0.0 bodyloads 1 3
+tr1supg 86 nodes 3 71 60 62 crossSect 1 mat 1 vof 0.0 bodyloads 1 3
+tr1supg 87 nodes 3 62 63 72 crossSect 1 mat 1 vof 0.0 bodyloads 1 3
+tr1supg 88 nodes 3 63 64 73 crossSect 1 mat 1 vof 0.0 bodyloads 1 3
+tr1supg 89 nodes 3 64 65 74 crossSect 1 mat 1 vof 0.0 bodyloads 1 3
+tr1supg 90 nodes 3 65 66 74 crossSect 1 mat 1 vof 0.0 bodyloads 1 3
+tr1supg 91 nodes 3 66 67 75 crossSect 1 mat 1 vof 0.0 bodyloads 1 3
+tr1supg 92 nodes 3 67 68 75 crossSect 1 mat 1 vof 0.0 bodyloads 1 3
+tr1supg 93 nodes 3 68 69 76 crossSect 1 mat 1 vof 0.0 bodyloads 1 3
+tr1supg 94 nodes 3 69 70 77 crossSect 1 mat 1 vof 0.0 bodyloads 1 3
+tr1supg 95 nodes 3 70 71 77 crossSect 1 mat 1 vof 0.0 bodyloads 1 3
+tr1supg 96 nodes 3 71 62 72 crossSect 1 mat 1 vof 0.0 bodyloads 1 3
+tr1supg 97 nodes 3 72 63 73 crossSect 1 mat 1 vof 0.0 bodyloads 1 3
+tr1supg 98 nodes 3 73 64 74 crossSect 1 mat 1 vof 0.0 bodyloads 1 3
+tr1supg 99 nodes 3 74 66 75 crossSect 1 mat 1 vof 0.0 bodyloads 1 3
+tr1supg 100 nodes 3 75 68 76 crossSect 1 mat 1 vof 0.0 bodyloads 1 3
+tr1supg 101 nodes 3 76 69 77 crossSect 1 mat 1 vof 0.0 bodyloads 1 3
+tr1supg 102 nodes 3 77 71 72 crossSect 1 mat 1 vof 0.0 bodyloads 1 3
+tr1supg 103 nodes 3 72 73 76 crossSect 1 mat 1 vof 0.0 bodyloads 1 3
+tr1supg 104 nodes 3 73 74 75 crossSect 1 mat 1 vof 0.0 bodyloads 1 3
+tr1supg 105 nodes 3 75 76 73 crossSect 1 mat 1 vof 0.0 bodyloads 1 3
+tr1supg 106 nodes 3 76 77 72 crossSect 1 mat 1 vof 0.0 bodyloads 1 3
+tr1supg 107 nodes 3 1 8 78 crossSect 1 mat 1 vof 1.0 bodyloads 1 3
+tr1supg 108 nodes 3 8 9 79 crossSect 1 mat 1 vof 1.0 bodyloads 1 3
+tr1supg 109 nodes 3 9 5 80 crossSect 1 mat 1 vof 1.0 bodyloads 1 3
+tr1supg 110 nodes 3 5 34 80 crossSect 1 mat 1 vof 1.0 bodyloads 1 3
+tr1supg 111 nodes 3 34 35 81 crossSect 1 mat 1 vof 1.0 bodyloads 1 3
+tr1supg 112 nodes 3 35 36 82 crossSect 1 mat 1 vof 1.0 bodyloads 1 3
+tr1supg 113 nodes 3 36 37 83 crossSect 1 mat 1 vof 1.0 bodyloads 1 3
+tr1supg 114 nodes 3 37 6 84 crossSect 1 mat 1 vof 1.0 bodyloads 1 3
+tr1supg 115 nodes 3 6 38 84 crossSect 1 mat 1 vof 1.0 bodyloads 1 3
+tr1supg 116 nodes 3 38 39 85 crossSect 1 mat 1 vof 1.0 bodyloads 1 3
+tr1supg 117 nodes 3 39 7 86 crossSect 1 mat 1 vof 1.0 bodyloads 1 3
+tr1supg 118 nodes 3 7 21 86 crossSect 1 mat 1 vof 1.0 bodyloads 1 3
+tr1supg 119 nodes 3 21 22 87 crossSect 1 mat 1 vof 1.0 bodyloads 1 3
+tr1supg 120 nodes 3 22 23 88 crossSect 1 mat 1 vof 1.0 bodyloads 1 3
+tr1supg 121 nodes 3 23 24 89 crossSect 1 mat 1 vof 1.0 bodyloads 1 3
+tr1supg 122 nodes 3 24 1 78 crossSect 1 mat 1 vof 1.0 bodyloads 1 3
+tr1supg 123 nodes 3 78 8 79 crossSect 1 mat 1 vof 1.0 bodyloads 1 3
+tr1supg 124 nodes 3 79 9 80 crossSect 1 mat 1 vof 1.0 bodyloads 1 3
+tr1supg 125 nodes 3 80 34 81 crossSect 1 mat 1 vof 1.0 bodyloads 1 3
+tr1supg 126 nodes 3 81 35 82 crossSect 1 mat 1 vof 1.0 bodyloads 1 3
+tr1supg 127 nodes 3 82 36 83 crossSect 1 mat 1 vof 1.0 bodyloads 1 3
+tr1supg 128 nodes 3 83 37 84 crossSect 1 mat 1 vof 1.0 bodyloads 1 3
+tr1supg 129 nodes 3 84 38 85 crossSect 1 mat 1 vof 1.0 bodyloads 1 3
+tr1supg 130 nodes 3 85 39 86 crossSect 1 mat 1 vof 1.0 bodyloads 1 3
+tr1supg 131 nodes 3 86 21 87 crossSect 1 mat 1 vof 1.0 bodyloads 1 3
+tr1supg 132 nodes 3 87 22 88 crossSect 1 mat 1 vof 1.0 bodyloads 1 3
+tr1supg 133 nodes 3 88 23 89 crossSect 1 mat 1 vof 1.0 bodyloads 1 3
+tr1supg 134 nodes 3 89 24 78 crossSect 1 mat 1 vof 1.0 bodyloads 1 3
+tr1supg 135 nodes 3 78 79 89 crossSect 1 mat 1 vof 1.0 bodyloads 1 3
+tr1supg 136 nodes 3 79 80 81 crossSect 1 mat 1 vof 1.0 bodyloads 1 3
+tr1supg 137 nodes 3 81 82 90 crossSect 1 mat 1 vof 1.0 bodyloads 1 3
+tr1supg 138 nodes 3 82 83 91 crossSect 1 mat 1 vof 1.0 bodyloads 1 3
+tr1supg 139 nodes 3 83 84 85 crossSect 1 mat 1 vof 1.0 bodyloads 1 3
+tr1supg 140 nodes 3 85 86 87 crossSect 1 mat 1 vof 1.0 bodyloads 1 3
+tr1supg 141 nodes 3 87 88 91 crossSect 1 mat 1 vof 1.0 bodyloads 1 3
+tr1supg 142 nodes 3 88 89 90 crossSect 1 mat 1 vof 1.0 bodyloads 1 3
+tr1supg 143 nodes 3 89 79 90 crossSect 1 mat 1 vof 1.0 bodyloads 1 3
+tr1supg 144 nodes 3 79 81 90 crossSect 1 mat 1 vof 1.0 bodyloads 1 3
+tr1supg 145 nodes 3 90 82 91 crossSect 1 mat 1 vof 1.0 bodyloads 1 3
+tr1supg 146 nodes 3 91 83 85 crossSect 1 mat 1 vof 1.0 bodyloads 1 3
+tr1supg 147 nodes 3 85 87 91 crossSect 1 mat 1 vof 1.0 bodyloads 1 3
+tr1supg 148 nodes 3 91 88 90 crossSect 1 mat 1 vof 1.0 bodyloads 1 3
+emptycs 1
+twofluidmat 1 mat 2 2 3
+#air
+#binghamfluid2 2 d 1.0 mu0 0.1 tau0 0.0 muinf 0.1
+newtonianfluid 2 d 1.0 mu 0.1
+#concrete
+binghamfluid2 3 d 2450 mu0 100.0 tau0 25.0 muinf 1.0
+#prescribed zero velocity - wall condition
+BoundaryCondition 1 loadTimeFunction 1 prescribedvalue 0.0 valtype 5
+#pressure 
+BoundaryCondition 2 loadTimeFunction 1 prescribedvalue 0.0 valtype 3
+#gravity 
+deadweight 3 components 2 0.0 -9.81 loadTimeFunction 1 valtype 2
+ConstantFunction 1 f(t) 1.0
+
+#%BEGIN_CHECK%
+#ELEMENT tStep 1.91754642e-01 number 1 gp 1 keyword "VOF" component 1 value 1.0
+#ELEMENT tStep 1.91754642e-01 number 2 gp 1 keyword "VOF" component 1 value 1.0
+#ELEMENT tStep 1.91754642e-01 number 3 gp 1 keyword "VOF" component 1 value 1.951728e-01
+#ELEMENT tStep 1.91754642e-01 number 4 gp 1 keyword "VOF" component 1 value 0.0
+#%END_CHECK%

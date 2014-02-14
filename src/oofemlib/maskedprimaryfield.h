@@ -57,7 +57,9 @@ protected:
     PrimaryField *master;
     IntArray mask;
 public:
-    MaskedPrimaryField(FieldType b, PrimaryField *m, IntArray &dofIdMask) : Field(b), mask(dofIdMask) { master = m; }
+    MaskedPrimaryField(FieldType b, PrimaryField * m, IntArray & dofIdMask) : Field(b), mask(dofIdMask) {
+        master = m;
+    }
 
     virtual int evaluateAt(FloatArray &answer, FloatArray &coords,
                            ValueModeType mode, TimeStep *tStep);

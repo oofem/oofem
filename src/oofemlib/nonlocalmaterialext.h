@@ -217,7 +217,7 @@ public:
      * Constructor. Creates material with given number, belonging to given domain.
      * @param d Domain to which new material will belong.
      */
-    NonlocalMaterialExtensionInterface(Domain *d);
+    NonlocalMaterialExtensionInterface(Domain * d);
     /// Destructor.
     virtual ~NonlocalMaterialExtensionInterface() { }
 

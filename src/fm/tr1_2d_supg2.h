@@ -80,9 +80,15 @@ protected:
      * mat[1] second fluid.
      */
     int mat [ 2 ];
+    /**
+     * default integration rule over element volume.
+     * the standard integrationRulesArray contains two rules on element subvolumes.
+     */
+    IntegrationRule *defaultIRule;
+
 
 public:
-    TR1_2D_SUPG2(int n, Domain *d);
+    TR1_2D_SUPG2(int n, Domain * d);
     virtual ~TR1_2D_SUPG2();
 
     virtual void computeAccelerationTerm_MB(FloatMatrix &answer, TimeStep *tStep);
@@ -116,7 +122,7 @@ public:
     virtual const char *giveClassName() const { return "TR1_2D_SUPG2"; }
     virtual const char *giveInputRecordName() const { return _IFT_TR1_2D_SUPG2_Name; }
 
-    virtual void giveElementDofIDMask(EquationID, IntArray & answer) const;
+    virtual void giveElementDofIDMask(EquationID, IntArray &answer) const;
     virtual void giveDofManDofIDMask(int inode, EquationID ut, IntArray &answer) const;
     virtual int computeNumberOfDofs();
     virtual IRResultType initializeFrom(InputRecord *ir);
@@ -160,6 +166,10 @@ public:
     virtual SPRPatchType SPRNodalRecoveryMI_givePatchType();
 
     virtual int giveIPValue(FloatArray &answer, GaussPoint *gp, InternalStateType type, TimeStep *tStep);
+    virtual int giveDefaultIntegrationRule() const { return 0; }
+    virtual IntegrationRule *giveDefaultIntegrationRulePtr() { return defaultIRule; }
+
+
 
 #ifdef __OOFEG
     int giveInternalStateAtNode(FloatArray &answer, InternalStateType type, InternalStateMode mode,

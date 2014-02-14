@@ -49,7 +49,7 @@ BilinearCZMaterialFagerstrom :: BilinearCZMaterialFagerstrom(int n, Domain *d) :
     //
     // constructor
     //
-{}
+{ }
 
 
 BilinearCZMaterialFagerstrom :: ~BilinearCZMaterialFagerstrom()

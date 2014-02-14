@@ -67,7 +67,7 @@ Interface *
 MazarsNLMaterial :: giveInterface(InterfaceType type)
 {
     if ( type == NonlocalMaterialExtensionInterfaceType ) {
-        return static_cast< StructuralNonlocalMaterialExtensionInterface * >( this );
+        return static_cast< StructuralNonlocalMaterialExtensionInterface * >(this);
     } else {
         return NULL;
     }
@@ -269,7 +269,7 @@ Interface *
 MazarsNLMaterialStatus :: giveInterface(InterfaceType type)
 {
     if ( type == NonlocalMaterialStatusExtensionInterfaceType ) {
-        return static_cast< StructuralNonlocalMaterialStatusExtensionInterface * >( this );
+        return static_cast< StructuralNonlocalMaterialStatusExtensionInterface * >(this);
     } else {
         return NULL;
     }

@@ -78,7 +78,7 @@ public:
      * @param n Load number.
      * @param d Domain to which new object will belongs.
      */
-    PointLoad(int n, Domain *d) : BodyLoad(n, d) {
+    PointLoad(int n, Domain * d) : BodyLoad(n, d) {
         nDofs = 0;
         coordSystemType = CST_Global;
     }

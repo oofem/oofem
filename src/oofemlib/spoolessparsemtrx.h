@@ -69,7 +69,11 @@ public:
         sflag = SPOOLES_SYMMETRIC;
         mtrx = NULL;
     }
-    virtual ~SpoolesSparseMtrx() { if ( mtrx ) { InpMtx_free(mtrx); } }
+    virtual ~SpoolesSparseMtrx() {
+        if ( mtrx ) {
+            InpMtx_free(mtrx);
+        }
+    }
 
     // Overloaded methods
     virtual SparseMtrx *GiveCopy() const;

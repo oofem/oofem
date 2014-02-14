@@ -105,7 +105,9 @@ protected:
     double talpha;   ///< Thermal dilatation coeff.
     //@}
 public:
-    B3Material(int n, Domain *d) : MaxwellChainMaterial(n, d) { shMode = B3_NoShrinkage; }
+    B3Material(int n, Domain * d) : MaxwellChainMaterial(n, d) {
+        shMode = B3_NoShrinkage;
+    }
     virtual ~B3Material() { }
 
     virtual void giveShrinkageStrainVector(FloatArray &answer, GaussPoint *gp, TimeStep *tStep, ValueModeType mode);

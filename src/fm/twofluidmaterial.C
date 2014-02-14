@@ -95,7 +95,6 @@ TwoFluidMaterial :: give(int aProperty, GaussPoint *gp)
                      vof * giveMaterial(1)->give(aProperty, status->giveSlaveGaussPoint1());
 }
 
-
 int
 TwoFluidMaterial :: giveIPValue(FloatArray &answer, GaussPoint *gp, InternalStateType type, TimeStep *tStep)
 {

@@ -58,7 +58,7 @@ private:
     bool epsInit;
 
 public:
-    SLEPcSolver(Domain *d, EngngModel *m);
+    SLEPcSolver(Domain * d, EngngModel * m);
     virtual ~SLEPcSolver();
 
     virtual NM_Status solve(SparseMtrx *a, SparseMtrx *b, FloatArray *v, FloatMatrix *x, double rtol, int nroot);
