@@ -22,7 +22,6 @@ set (core_unsorted
     errorestimator.C meshqualityerrorestimator.C remeshingcrit.C
     sloangraph.C sloangraphnode.C sloanlevelstruct.C
     eleminterpunknownmapper.C primaryunknownmapper.C materialmappingalgorithm.C
-    primvarmapper.C
     nonlocalmaterialext.C randommaterialext.C
     inputrecord.C oofemtxtinputrecord.C dynamicinputrecord.C
     dynamicdatareader.C oofemtxtdatareader.C tokenizer.C parser.C
