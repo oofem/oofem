@@ -25,18 +25,18 @@
 
 
 #include "structuralmaterial.h"
-#include "xfemelementinterface.h"
-#include "enrichmentfunction.h"
-#include "enrichmentitem.h"
-#include "enrichmentdomain.h"
+#include "xfem/xfemelementinterface.h"
+#include "xfem/enrichmentfunction.h"
+#include "xfem/enrichmentitem.h"
+#include "xfem/enrichmentdomain.h"
 #include "structuralcrosssection.h"
 #include "vtkxmlexportmodule.h"
-#//ifdef __OOFEG
-#include "patchintegrationrule.h"
-//#endif
-#include "delaunay.h"
+#ifdef __OOFEG
+#include "xfem/patchintegrationrule.h"
+#endif
+#include "xfem/delaunay.h"
 
-#include "XFEMDebugTools.h"
+#include "xfem/XFEMDebugTools.h"
 #include <string>
 #include <sstream>
 

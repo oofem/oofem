@@ -49,7 +49,7 @@
 #include "contextioerr.h"
 #include "field.h"
 #include "equationid.h"
-#include "xfemmanager.h"
+#include "xfem/xfemmanager.h"
 
 #include <cstring>
 #include <string>

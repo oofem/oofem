@@ -34,8 +34,8 @@
 
 #include "shell7basexfem.h"
 #include "shell7base.h"
-#include "enrichmentitem.h"
-#include "xfemmanager.h"
+#include "xfem/enrichmentitem.h"
+#include "xfem/xfemmanager.h"
 #include "dofmanager.h"
 #include "constantpressureload.h"
 #include "simpleinterfacemat.h"

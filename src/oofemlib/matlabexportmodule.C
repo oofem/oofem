@@ -51,13 +51,13 @@
 #include "unknownnumberingscheme.h"
 
 #ifdef __FM_MODULE
- #include "tr21stokes.h"
- #include "tet21stokes.h"
- #include "stokesflow.h"
+ #include "../fm/tr21stokes.h"
+ #include "../fm/tet21stokes.h"
+ #include "../fm/stokesflow.h"
 #endif
 
 #ifdef __SM_MODULE
- #include "structengngmodel.h"
+ #include "../sm/structengngmodel.h"
 #endif
 
 

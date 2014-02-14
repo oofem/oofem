@@ -66,7 +66,7 @@
 #include "feinterpol3d.h"
 #include "classfactory.h"
 #include "oofem_limits.h"
-#include "xfemmanager.h"
+#include "xfem/xfemmanager.h"
 
 #ifdef __PARALLEL_MODE
  #include "problemcomm.h"

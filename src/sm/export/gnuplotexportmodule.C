@@ -46,11 +46,11 @@
 #include "outputmanager.h"
 #include "dofmanager.h"
 #include "boundarycondition.h"
-#include "enrichmentitem.h"
-#include "xfemmanager.h"
+#include "xfem/enrichmentitem.h"
+#include "xfem/xfemmanager.h"
 #include "structuralinterfacematerialstatus.h"
-#include "enrichmentdomain.h"
-#include "XFEMDebugTools.h"
+#include "xfem/enrichmentdomain.h"
+#include "xfem/XFEMDebugTools.h"
 #include "prescribedgradient.h"
 #include "export/exportmodulecallerinterface.h"
 
@@ -73,19 +73,9 @@ GnuplotExportModule::~GnuplotExportModule() {
 
 IRResultType GnuplotExportModule::initializeFrom(InputRecord *ir)
 {
-//    const char *__proc = "initializeFrom";  // Required by IR_GIVE_FIELD macro
-
-    if(ir->hasField(_IFT_GnuplotExportModule_ReactionForces)) {
-    	mExportReactionForces = true;
-    }
-
-    if(ir->hasField(_IFT_GnuplotExportModule_BoundaryConditions)) {
-    	mExportBoundaryConditions = true;
-    }
-
-    ExportModule::initializeFrom(ir);
-
-    return IRRT_OK;
+    mExportReactionForces = ir->hasField(_IFT_GnuplotExportModule_ReactionForces);
+    mExportBoundaryConditions = ir->hasField(_IFT_GnuplotExportModule_BoundaryConditions);
+    return ExportModule::initializeFrom(ir);
 }
 
 void GnuplotExportModule::doOutput(TimeStep *tStep, bool forcedOutput)

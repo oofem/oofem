@@ -45,9 +45,9 @@
 #include "classfactory.h"
 #include "crosssection.h"
 
-//#include "xfemmanager.h"
-#include "enrichmentitem.h"
-#include "enrichmentdomain.h"
+#include "xfem/xfemmanager.h"
+#include "xfem/enrichmentitem.h"
+#include "xfem/enrichmentdomain.h"
 
 #include <string>
 #include <sstream>

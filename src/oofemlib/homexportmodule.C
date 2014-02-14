@@ -41,15 +41,15 @@
 #include "classfactory.h"
 
 #ifdef __SM_MODULE
- #include "structuralelement.h"
- #include "structuralmaterial.h"
- #include "truss3d.h"
- #include "stressvector.h"
- #include "strainvector.h"
+ #include "../sm/structuralelement.h"
+ #include "../sm/structuralmaterial.h"
+ #include "../sm/truss3d.h"
+ #include "../sm/stressvector.h"
+ #include "../sm/strainvector.h"
 #endif
 
 #ifdef __TM_MODULE
- #include "transportmaterial.h"
+ #include "../tm/transportmaterial.h"
 #endif
 
 

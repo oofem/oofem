@@ -38,7 +38,7 @@
 #include "material.h"
 #include "gausspoint.h"
 #include "matstatmapperint.h"
-#include "xfemelementinterface.h"
+#include "xfem/xfemelementinterface.h"
 #include "structuralinterfacematerial.h"
 
 namespace oofem {

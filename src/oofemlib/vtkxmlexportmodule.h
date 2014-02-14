@@ -43,7 +43,7 @@
 #include "interface.h"
 #include "internalstatevaluetype.h"
 #include "integrationrule.h"
-#include "xfemmanager.h"
+#include "xfem/xfemmanager.h"
 
 
 

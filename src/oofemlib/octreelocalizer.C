@@ -44,7 +44,7 @@
 #include "mathfem.h"
 #include "timer.h"
 #include "error.h"
-#include "xfemelementinterface.h"
+#include "xfem/xfemelementinterface.h"
 
 #include <iostream>
 

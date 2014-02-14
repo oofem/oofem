@@ -41,10 +41,8 @@
 #include "datareader.h"
 #include "datastream.h"
 #include "contextioerr.h"
-
-#include "layeredcrosssection.h"
-#include "xfemmanager.h"
-#include "enrichmentdomain.h"
+#include "xfem/xfemmanager.h"
+#include "xfem/enrichmentdomain.h"
 #include "classfactory.h"
 
 

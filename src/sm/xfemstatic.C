@@ -39,7 +39,7 @@
 #include "dictionary.h"
 #include "classfactory.h"
 #include "dofmanager.h"
-#include "xfemelementinterface.h"
+#include "xfem/xfemelementinterface.h"
 #include "element.h"
 #include "structuralelement.h"
 

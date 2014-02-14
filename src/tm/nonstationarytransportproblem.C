@@ -49,7 +49,7 @@
 #include "sparsenonlinsystemnm.h"
 
 #ifdef __CEMHYD_MODULE
- #include "cemhydmat.h"
+ #include "cemhyd/cemhydmat.h"
 #endif
 
 namespace oofem {

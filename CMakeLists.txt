@@ -96,8 +96,6 @@ endif ()
 #######################################################################
 # I believe the subdirs should be used when including instead.
 include_directories ("${oofem_SOURCE_DIR}/src/oofemlib")
-include_directories ("${oofem_SOURCE_DIR}/src/oofemlib/xfem")
-include_directories ("${oofem_SOURCE_DIR}/src/oofemlib/iga")
 include_directories ("${oofem_BINARY_DIR}")
 
 # Is there really any reason not to compile all of them? Some has cross dependencies.
@@ -120,7 +118,6 @@ endif ()
 
 if (USE_TM)
     include_directories ("${oofem_SOURCE_DIR}/src/tm")
-    include_directories ("${oofem_SOURCE_DIR}/src/tm/cemhyd")
     add_definitions (-D__TM_MODULE)
     if (${CMAKE_VERSION} VERSION_LESS "2.8.8")
         list (APPEND LIBS tm)

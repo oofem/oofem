@@ -36,7 +36,7 @@
 #define TRPLANSTRSSXFEM_H_
 
 #include "trplanstrss.h"
-#include "xfemelementinterface.h"
+#include "xfem/xfemelementinterface.h"
 #include "vtkxmlexportmodule.h"
 
 

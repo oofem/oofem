@@ -45,7 +45,7 @@
 #include "structuralmaterial.h"
 #include "structuralms.h"
 #include "mathfem.h"
-#include "iga.h"
+#include "iga/iga.h"
 
 namespace oofem {
 StructuralElementEvaluator :: StructuralElementEvaluator()

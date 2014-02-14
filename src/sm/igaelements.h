@@ -35,12 +35,12 @@
 #ifndef igaelements_h
 #define igaelements_h
 
-#include "iga.h"
+#include "iga/iga.h"
+#include "iga/feibspline.h"
+#include "iga/feinurbs.h"
+#include "iga/feitspline.h"
 #include "planestresselementevaluator.h"
 #include "space3delementevaluator.h"
-#include "feibspline.h"
-#include "feinurbs.h"
-#include "feitspline.h"
 #include "floatarray.h"
 #include "floatmatrix.h"
 #include "matresponsemode.h"
