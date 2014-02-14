@@ -267,6 +267,37 @@ Quad1MindlinShell3D :: computeConstitutiveMatrixAt(FloatMatrix &answer, MatRespo
 }
 
 
+void 
+Quad1MindlinShell3D:: splitUnknowns (FloatArray &shellUnknowns, FloatArray &drillUnknowns, FloatArray &unknowns)
+{
+    shellUnknowns.resize(20);
+    drillUnknowns.resize(4);
+    // Split this for practical reasons into normal shell dofs and drilling dofs
+    for ( int i = 0; i < 4; ++i ) {
+        shellUnknowns(0 + i * 5) = unknowns(0 + i * 6);
+        shellUnknowns(1 + i * 5) = unknowns(1 + i * 6);
+        shellUnknowns(2 + i * 5) = unknowns(2 + i * 6);
+        shellUnknowns(3 + i * 5) = unknowns(3 + i * 6);
+        shellUnknowns(4 + i * 5) = unknowns(4 + i * 6);
+        drillUnknowns(i) = unknowns(5 + i * 6);
+    }
+}
+
+
+void
+Quad1MindlinShell3D :: computeStrainVector(FloatArray &answer, GaussPoint *gp, TimeStep *tStep) 
+{
+    FloatArray shellUnknowns, drillUnknowns, unknowns;
+    FloatMatrix b;
+    /* Here we do compute only the "traditional" part of shell strain vector, the quasi-strain related to rotations is not computed */
+    this->computeVectorOf(EID_MomentumBalance, VM_Total, tStep, unknowns);
+    this->splitUnknowns(shellUnknowns, drillUnknowns, unknowns);
+
+    this->computeBmatrixAt(gp, b);
+    answer.beProductOf(b, shellUnknowns);
+}
+
+
 void
 Quad1MindlinShell3D :: giveInternalForcesVector(FloatArray &answer, TimeStep *tStep, int useUpdatedGpRecord)
 {
@@ -278,15 +309,7 @@ Quad1MindlinShell3D :: giveInternalForcesVector(FloatArray &answer, TimeStep *tS
     bool drillCoeffFlag = false;
 
     this->computeVectorOf(EID_MomentumBalance, VM_Total, tStep, unknowns);
-    // Split this for practical reasons into normal shell dofs and drilling dofs
-    for ( int i = 0; i < 4; ++i ) {
-        shellUnknowns(0 + i * 5) = unknowns(0 + i * 6);
-        shellUnknowns(1 + i * 5) = unknowns(1 + i * 6);
-        shellUnknowns(2 + i * 5) = unknowns(2 + i * 6);
-        shellUnknowns(3 + i * 5) = unknowns(3 + i * 6);
-        shellUnknowns(4 + i * 5) = unknowns(4 + i * 6);
-        drillUnknowns(i) = unknowns(5 + i * 6);
-    }
+    this->splitUnknowns(shellUnknowns, drillUnknowns, unknowns); // Split this for practical reasons into normal shell dofs and drilling dofs
 
     FloatArray shellForces(20), drillMoment(4);
     shellForces.zero();
