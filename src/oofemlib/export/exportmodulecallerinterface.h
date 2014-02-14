@@ -60,9 +60,6 @@ public:
 	ExportModuleCallerInterface();
 	virtual ~ExportModuleCallerInterface();
 
-    // GnuplotExportModule lives in the sm module. However, it is
-    // forward declared and unused in this version of the function.
-    // Hence this is legal :-)
     virtual void callExportModule(BCExportInterface &iExpMod, TimeStep *tStep) = 0;
 
 };
