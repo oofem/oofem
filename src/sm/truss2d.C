@@ -75,7 +75,7 @@ Truss2d :: computeBmatrixAt(GaussPoint *gp, FloatMatrix &answer, int li, int ui)
 
     double l, x1, x2, z1, z2;
     //determine in which plane the truss is defined
-    int c1, c2;
+    int c1 = 0, c2 = 0;
     resolveCoordIndices(c1, c2);
 
     x1 = this->giveNode(1)->giveCoordinate(c1);
@@ -161,7 +161,7 @@ int
 Truss2d :: computeGlobalCoordinates(FloatArray &answer, const FloatArray &lcoords)
 {
     //determine in which plane the truss is defined
-    int c1, c2;
+    int c1 = 0, c2 = 0;
     resolveCoordIndices(c1, c2);
 
     double ksi, n1, n2;
@@ -192,7 +192,7 @@ double Truss2d :: computeLength()
 // Returns the length of the receiver.
 {
     //determine in which plane the truss is defined
-    int c1, c2;
+    int c1 = 0, c2 = 0;
     resolveCoordIndices(c1, c2);
 
     double dx, dz;
@@ -216,7 +216,7 @@ double Truss2d :: givePitch()
     double xA, xB, zA, zB;
     Node *nodeA, *nodeB;
     //determine in which plane the truss is defined
-    int c1, c2;
+    int c1 = 0, c2 = 0;
     resolveCoordIndices(c1, c2);
 
     if ( pitch == 10. ) {             // 10. : dummy initialization value
