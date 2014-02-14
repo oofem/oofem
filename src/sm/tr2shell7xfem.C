@@ -100,10 +100,10 @@ void
 Tr2Shell7XFEM :: computeGaussPoints()
 {
 
-    XfemManager *xMan = this->giveDomain()->giveXfemManager();
+    this->xMan = this->giveDomain()->giveXfemManager();
 
     if ( !integrationRulesArray ) {  
-        if( xMan->isElementEnriched(this) ) {
+        if( this->xMan->isElementEnriched(this) ) {
             this->updateIntegrationRule();
         }
     }
@@ -114,8 +114,8 @@ Tr2Shell7XFEM :: computeGaussPoints()
         int nPointsEdge = 2;   // edge integration            
 
         // Cohesive zone
-        for ( int i = 1; i <= xMan->giveNumberOfEnrichmentItems(); i++ ) { 
-            Delamination *dei =  dynamic_cast< Delamination * >( xMan->giveEnrichmentItem(i) ); 
+        for ( int i = 1; i <= this->xMan->giveNumberOfEnrichmentItems(); i++ ) { 
+            Delamination *dei =  dynamic_cast< Delamination * >( this->xMan->giveEnrichmentItem(i) ); 
             if (dei) {
                 int numberOfInterfaces = this->layeredCS->giveNumberOfLayers()-1;
                 czIntegrationRulesArray = new IntegrationRule * [ numberOfInterfaces ];
@@ -153,17 +153,17 @@ Tr2Shell7XFEM :: computeGaussPoints()
 bool Tr2Shell7XFEM :: updateIntegrationRule()
 {
     bool partitionSucceeded = false;
-    XfemManager *xMan = this->giveDomain()->giveXfemManager();
+    //XfemManager *xMan = this->giveDomain()->giveXfemManager();
 
-    if ( xMan->isElementEnriched(this) ) {
+    if ( this->xMan->isElementEnriched(this) ) {
 
 
         std :: vector< std :: vector< FloatArray > >pointPartitions;
-        std :: vector< Triangle > allTri;
+        //std :: vector< Triangle > allTri;
 
-        int numEI = xMan->giveNumberOfEnrichmentItems();
+        int numEI = this->xMan->giveNumberOfEnrichmentItems();
         for ( int eiIndex = 1; eiIndex <= numEI; eiIndex++ ) {
-            EnrichmentItem *ei = xMan->giveEnrichmentItem(eiIndex);
+            EnrichmentItem *ei = this->xMan->giveEnrichmentItem(eiIndex);
             if ( dynamic_cast< Crack*> (ei) ) {
 
                 // Get the points describing each subdivision of the element
@@ -199,7 +199,7 @@ bool Tr2Shell7XFEM :: updateIntegrationRule()
         // Therefore, we can set up integration
         // points on each triangle.
 
-        if ( xMan->giveVtkDebug() ) {
+        if ( this->xMan->giveVtkDebug() ) {
             std :: stringstream str3;
             int elIndex = this->giveGlobalNumber();
             str3 << "TriEl" << elIndex << ".vtk";
@@ -233,12 +233,11 @@ bool Tr2Shell7XFEM :: updateIntegrationRule()
         }
     }
 
-    int nPointsTri  = 6;   // points in the plane
-    int nPointsEdge = 2;   // edge integration      
+    int nPointsTri  = 6;   // points in the plane  
 
     // Cohesive zone
-    for ( int i = 1; i <= xMan->giveNumberOfEnrichmentItems(); i++ ) { 
-        Delamination *dei =  dynamic_cast< Delamination * >( xMan->giveEnrichmentItem(i) ); 
+    for ( int i = 1; i <= this->xMan->giveNumberOfEnrichmentItems(); i++ ) { 
+        Delamination *dei =  dynamic_cast< Delamination * >( this->xMan->giveEnrichmentItem(i) ); 
         if (dei) {
             int numberOfInterfaces = this->layeredCS->giveNumberOfLayers()-1;
             czIntegrationRulesArray = new IntegrationRule * [ numberOfInterfaces ];

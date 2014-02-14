@@ -85,7 +85,7 @@ BrouzoulisShell :: giveDofManDofIDMask(int inode, EquationID ut, IntArray &answe
 void
 BrouzoulisShell :: computeStressVector(FloatArray &answer, const FloatArray &e, GaussPoint *gp, TimeStep *tStep)
 {
-    this->giveStructuralCrossSection()->giveRealStress_Plate(answer, gp, e, tStep);
+    //this->giveStructuralCrossSection()->giveRealStress_Plate(answer, gp, e, tStep);
     
     //giveRealStressVector_PlateLayer(FloatArray &answer, GaussPoint *gp, const FloatArray &reducedStrain, TimeStep *tStep)
 }

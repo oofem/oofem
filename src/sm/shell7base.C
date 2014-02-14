@@ -1822,7 +1822,7 @@ void Shell7Base :: NodalAveragingRecoveryMI_computeNodalValue(FloatArray &answer
 
 
 void
-Shell7Base :: ZZNodalRecoveryMI_computeNValProduct(FloatMatrix &answer, int layer, InternalStateType type,
+Shell7Base :: NodalRecoveryMI_computeNValProduct(FloatMatrix &answer, int layer, InternalStateType type,
                                                                       TimeStep *tStep)
 {  // evaluates N^T sigma over element volume
    // N(nsigma, nsigma*nnodes)
@@ -1858,7 +1858,7 @@ Shell7Base :: ZZNodalRecoveryMI_computeNValProduct(FloatMatrix &answer, int laye
 }
 
 void
-Shell7Base :: ZZNodalRecoveryMI_computeNNMatrix(FloatArray &answer, int layer, InternalStateType type)
+Shell7Base :: NodalRecoveryMI_computeNNMatrix(FloatArray &answer, int layer, InternalStateType type)
 {
     //
     // Returns NTN matrix (lumped) for Zienkiewicz-Zhu
@@ -1920,13 +1920,13 @@ Shell7Base :: ZZNodalRecoveryMI_ComputeEstimatedInterpolationMtrx(FloatArray &an
 
 
 void 
-Shell7Base :: ZZNodalRecoveryMI_recoverValues(std::vector<FloatArray> &recoveredValues, int layer, InternalStateType type, TimeStep *tStep)
+Shell7Base :: NodalRecoveryMI_recoverValues(std::vector<FloatArray> &recoveredValues, int layer, InternalStateType type, TimeStep *tStep)
 {
     // ZZ recovery
     FloatArray nnMatrix;
     FloatMatrix nValProd;
-    ZZNodalRecoveryMI_computeNValProduct(nValProd, layer, type, tStep);
-    ZZNodalRecoveryMI_computeNNMatrix(nnMatrix, layer, type);
+    NodalRecoveryMI_computeNValProduct(nValProd, layer, type, tStep);
+    NodalRecoveryMI_computeNNMatrix(nnMatrix, layer, type);
     int recoveredSize = nValProd.giveNumberOfColumns();
     int numNodes = nValProd.giveNumberOfRows();
     recoveredValues.resize(numNodes);
@@ -2446,7 +2446,7 @@ Shell7Base :: giveCompositeExportData(VTKPiece &vtkPiece, IntArray &primaryVarsT
                 }
 
             } else {
-                ZZNodalRecoveryMI_recoverValues(values, layer, ( InternalStateType ) 1, tStep); // does not work well - fix
+                NodalRecoveryMI_recoverValues(values, layer, ( InternalStateType ) 1, tStep); // does not work well - fix
                 for ( int j = 1; j <= numCellNodes; j++ ) {
                     vtkPiece.setPrimaryVarInNode(fieldNum, nodeNum, values[j-1]);
                     nodeNum += 1;

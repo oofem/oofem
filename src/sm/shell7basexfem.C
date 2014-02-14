@@ -677,7 +677,7 @@ Shell7BaseXFEM :: computeStiffnessMatrix(FloatMatrix &answer, MatResponseMode rM
 
     for ( int layer = 1; layer <= numberOfLayers; layer++ ) {
         IntegrationRule *iRule = integrationRulesArray [ layer - 1 ];
-        StructuralMaterial *material = static_cast< StructuralMaterial* >( domain->giveMaterial( this->layeredCS->giveLayerMaterial(layer) ) );
+        StructuralMaterial *layerMaterial = static_cast< StructuralMaterial* >( domain->giveMaterial( this->layeredCS->giveLayerMaterial(layer) ) );
 
         for ( int i = 0; i < iRule->giveNumberOfIntegrationPoints(); i++ ) {
             IntegrationPoint *ip = iRule->getIntegrationPoint(i);
@@ -685,7 +685,7 @@ Shell7BaseXFEM :: computeStiffnessMatrix(FloatMatrix &answer, MatResponseMode rM
             this->computeEnrichedBmatrixAt(lCoords, Bc, NULL);
             this->computeGeneralizedStrainVectorNew(genEpsC, solVecC , Bc);
             
-            Shell7Base :: computeLinearizedStiffness(ip, material, tStep, A, genEpsC);
+            Shell7Base :: computeLinearizedStiffness(ip, layerMaterial, tStep, A, genEpsC);
             
             // Continuous part K_{c,c}
             this->discComputeBulkTangentMatrix(KCC, ip, NULL, NULL, layer, A, tStep);
@@ -1167,7 +1167,7 @@ Shell7BaseXFEM :: computeEdgeLoadVectorAt(FloatArray &answer, Load *load, int iE
 
             EnrichmentItem *ei = this->xMan->giveEnrichmentItem(i);
             if ( ei->isElementEnriched(this) ) {
-                this->computeTractionForce(temp, iEdge, edgeLoad, tStep, mode, ei);
+                this->computeEnrTractionForce(temp, iEdge, edgeLoad, tStep, mode, ei);
                 this->computeOrderingArray(ordering, activeDofs, ei); 
                 tempRed.beSubArrayOf(temp, activeDofs);
                 answer.assemble(tempRed, ordering);                    
@@ -1182,7 +1182,7 @@ Shell7BaseXFEM :: computeEdgeLoadVectorAt(FloatArray &answer, Load *load, int iE
 
 
 void
-Shell7BaseXFEM :: computeTractionForce(FloatArray &answer, const int iEdge, BoundaryLoad *edgeLoad, TimeStep *tStep, ValueModeType mode, EnrichmentItem *ei)
+Shell7BaseXFEM :: computeEnrTractionForce(FloatArray &answer, const int iEdge, BoundaryLoad *edgeLoad, TimeStep *tStep, ValueModeType mode, EnrichmentItem *ei)
 {
     // 
     IntegrationRule *iRule = specialIntegrationRulesArray [ 2 ];   // rule #3 for edge integration of distributed loads given in [*/m]
@@ -1370,12 +1370,13 @@ Shell7BaseXFEM :: computeEnrichedBmatrixAt(FloatArray &lcoords, FloatMatrix &ans
         std :: vector< double > efGP;
         double levelSetGP = this->evaluateLevelSet(lcoords, ei);
         ei->evaluateEnrFuncAt(efGP, lcoords, levelSetGP);
-
+        //printf("enr func in gp = %e \n", efGP[0]);
         int ndofman = this->giveNumberOfDofManagers();
 
         // First column
         for ( int i = 1, j = 0; i <= ndofman; i++, j += 3 ) {
             double factor = efGP [ 0 ] - EvaluateEnrFuncInDofMan(i, ei);
+            //printf("enr func in dofman %d = %e \n", i, EvaluateEnrFuncInDofMan(i, ei));
 
             answer.at(1, 1 + j) = dNdxi.at(i, 1) * factor;
             answer.at(2, 2 + j) = dNdxi.at(i, 1) * factor;
@@ -1795,7 +1796,7 @@ Shell7BaseXFEM :: giveCompositeExportData(VTKPiece &vtkPiece, IntArray &primaryV
                     }
 
                 } else {
-                    ZZNodalRecoveryMI_recoverValues(values, layer, ( InternalStateType ) 1, tStep); // does not work well - fix
+                    NodalRecoveryMI_recoverValues(values, layer, ( InternalStateType ) 1, tStep); // does not work well - fix
                     for ( int j = 1; j <= numCellNodes; j++ ) {
                         vtkPiece.setPrimaryVarInNode(fieldNum, nodeNum, values[j-1]);
                         nodeNum += 1;
