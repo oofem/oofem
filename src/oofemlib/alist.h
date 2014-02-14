@@ -129,7 +129,7 @@ public:
 template< class T >AList< T > :: AList(int s, int sizeIncrement)
 // Constructor : creates a list of size s.
 {
-    register int i;
+    int i;
     T **p;
 
     allocatedSize = size = s;
@@ -178,7 +178,7 @@ template< class T > void
 AList< T > :: growTo(int newSize)
 // Expands the receiver from its current size to newSize, in order to accommodate new entries.
 {
-    register int i;
+    int i;
     T **newValues, **p1, **p2;
 
 

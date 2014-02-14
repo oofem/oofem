@@ -7,7 +7,7 @@ include (CheckCXXSourceCompiles)
 include (GenerateExportHeader)
 include (UsePkgConfig)
 
-project (oofem)
+project (oofem CXX)
 set (oofem_VERSION_MAJOR 2)
 set (oofem_VERSION_MINOR 4)
 set (oofem_VERSION_PATCH 0) # Unused
@@ -27,6 +27,9 @@ if (MSVC)
     set (CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -W4 -wd4786 -wd4100 -wd4996 -wd4706 -wd4512 -wd4251")
 else ()
     set (CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall -fPIC")
+endif ()
+if (CMAKE_COMPILER_IS_GNUCXX OR CMAKE_CXX_COMPILER_ID STREQUAL "Clang")
+    set (CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11")
 endif ()
 
 set (CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} -DDEBUG")
