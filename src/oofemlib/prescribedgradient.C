@@ -47,7 +47,6 @@
 #include "classfactory.h"
 #include "dynamicinputrecord.h"
 #include "feinterpol.h"
-#include "export/bcexportinterface.h"
 
 #include "sparsemtrx.h"
 #include "sparselinsystemnm.h"
@@ -115,15 +114,6 @@ void PrescribedGradient :: setPrescribedGradientVoigt(const FloatArray &t)
         OOFEM_ERROR("setPrescribedTensorVoigt: Tensor is in strange voigt format. Should be 3 or 6. Use setPrescribedTensor directly if needed.");
     }
 }
-
-/**
- * Overloaded function for ExportModuleCallerInterface.
- */
-void PrescribedGradient :: callExportModule(BCExportInterface &iExpMod, TimeStep *tStep)
-{
-    iExpMod.outputBoundaryCondition(*this, tStep);
-}
-
 
 void PrescribedGradient :: updateCoefficientMatrix(FloatMatrix &C)
 // This is written in a very general way, supporting both fm and sm problems.

@@ -133,8 +133,6 @@ set (core_export
     homexportmodule.C
     matlabexportmodule.C
     gpexportmodule.C
-    export/exportmodulecallerinterface.C
-    export/bcexportinterface.C
     )
 
 set (core_iga
