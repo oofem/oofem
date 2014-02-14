@@ -166,6 +166,10 @@ set (sm_status
     microplanematerial.C microplanematerial_bazant.C
     )
 
+set (sm_xfem
+	xfem/enrichmentitems/crack.C
+	)
+
 set (sm_unsorted
     particle.C
     refinedelement.C
@@ -202,6 +206,7 @@ set (sm
     ${sm_export}
     ${sm_barrier}
     ${sm_error}
+    ${sm_xfem}
     ${sm_unsorted}
     ${sm_parallel}
     ${sm_obsolete}

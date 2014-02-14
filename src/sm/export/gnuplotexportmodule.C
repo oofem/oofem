@@ -52,6 +52,7 @@
 #include "xfem/enrichmentdomain.h"
 #include "xfem/XFEMDebugTools.h"
 #include "prescribedgradient.h"
+#include "xfem/enrichmentitems/crack.h"
 
 #include <sstream>
 

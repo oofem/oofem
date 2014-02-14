@@ -195,6 +195,12 @@ set (core_xfem
     xfem/enrichmentdomain.C
     xfem/propagationlaw.C
     xfem/XFEMDebugTools.C
+    xfem/enrichmentfronts/enrichmentfront.C
+    xfem/enrichmentfronts/enrichmentfrontdonothing.C
+    xfem/enrichmentfronts/enrichmentfrontextend.C
+    xfem/enrichmentfronts/enrichmentfrontreducefront.C
+    xfem/enrichmentfronts/enrichmentfrontlinbranchfuncradius.C
+    xfem/enrichmentfronts/enrichmentfrontlinbranchfunconeel.C
     )
 
 set (core_parallel
