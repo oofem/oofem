@@ -448,8 +448,6 @@ check_cxx_symbol_exists ("strncasecmp" "strings.h" HAVE_STRNCASECMP)
 check_cxx_symbol_exists ("access" "unistd.h" HAVE_ACCESS)
 check_cxx_symbol_exists ("cbrt" "cmath" HAVE_CBRT)
 check_cxx_symbol_exists ("isnan" "cmath" HAVE_ISNAN)
-check_cxx_symbol_exists ("M_PI" "cmath" HAVE_M_PI)
-check_cxx_symbol_exists ("M_LN2" "cmath" HAVE_M_LN2)
 check_cxx_source_compiles ("
 #include <stdio.h>
 #define LOG_FATAL(file,...) fprintf (file, __VA_ARGS__)

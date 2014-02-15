@@ -51,13 +51,6 @@ ____________________________________________________\n"
 /* Define if isnan is defined */
 #cmakedefine HAVE_ISNAN 1
 
-/* Variables */
-/* Define if M_PI constant is defined */
-#cmakedefine HAVE_M_PI 1
-
-/* Define if M_LN2 constant is defined */
-#cmakedefine HAVE_M_LN2 1
-
 /* Other */
 /* Define if __VA_ARGS__ macro is supported by preprocessor */
 #cmakedefine HAVE_MACRO_VA_ARGS 1
