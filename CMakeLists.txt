@@ -436,11 +436,6 @@ site_name (HOST_NAME)
 set (HOST_TYPE "${CMAKE_SYSTEM_PROCESSOR}-${CMAKE_SYSTEM_NAME}") # This should be renamed TARGET_TYPE.
 set (BUILDNAME "OOFEM(${MODULE_LIST})-${HOST_TYPE}-${HOST_NAME}")
 
-check_include_file_cxx ("sys/time.h" HAVE_SYS_TIME_H)
-check_include_file_cxx ("time.h" HAVE_TIME_H)
-if (HAVE_TIME_H AND HAVE_SYS_TIME_H)
-    set (TIME_WITH_SYS_TIME true)
-endif ()
 check_include_file_cxx ("strings.h" HAVE_STRINGS_H)
 check_include_file_cxx ("unistd.h" HAVE_UNISTD_H)
 check_include_file_cxx ("execinfo.h" HAVE_EXECINFO_H)
