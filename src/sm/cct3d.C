@@ -334,6 +334,27 @@ CCTPlate3d :: giveIPValue(FloatArray &answer, GaussPoint *gp, InternalStateType 
     }
 }
 
+int
+CCTPlate3d :: computeLoadGToLRotationMtrx(FloatMatrix &answer)
+// Returns the rotation matrix of the receiver of the size [6,6]
+// f(local) = T * f(global)
+{
+    // test if previously computed
+    if ( GtoLRotationMatrix == NULL ) {
+        this->computeGtoLRotationMatrix();
+    }
+
+    answer.resize(6, 6);
+    answer.zero();
+
+    for ( int i = 1; i <= 3; i++ ) {
+        answer.at(1, i) = answer.at(4, i + 3) = GtoLRotationMatrix->at(1, i);
+        answer.at(2, i) = answer.at(5, i + 3) = GtoLRotationMatrix->at(2, i);
+        answer.at(3, i) = answer.at(6, i + 3) = GtoLRotationMatrix->at(3, i);
+    }
+
+    return 1;
+}
 
 void
 CCTPlate3d :: computeBodyLoadVectorAt(FloatArray &answer, Load *forLoad, TimeStep *tStep, ValueModeType mode)
