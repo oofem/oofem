@@ -237,14 +237,14 @@ int main(int argc, char *argv[])
     }
 #endif
     if ( outputFileFlag ) {
-        oofem_logger.appendlogTo( const_cast< char * >( outputFileName.str().c_str() ) );
+        oofem_logger.appendlogTo( outputFileName.str() );
     }
     if ( errOutputFileFlag ) {
-        oofem_errLogger.appendlogTo( const_cast< char * >( errOutputFileName.str().c_str() ) );
+        oofem_errLogger.appendlogTo( errOutputFileName.str() );
     }
 
     // print header to redirected output
-    LOG_FORCED_MSG(oofem_logger, PRG_HEADER_SM);
+    OOFEM_LOG_FORCED(PRG_HEADER_SM);
 
     OOFEMTXTDataReader dr( inputFileName.str ( ).c_str() );
     problem = :: InstanciateProblem(& dr, _processor, contextFlag, NULL, parallelFlag);
