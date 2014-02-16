@@ -52,13 +52,13 @@
 % macros for items related to parallel
 \newcommand{\Pmode}[1]{{\sffamily #1}}
 \newcommand{\Pparam}[1]{\param{#1}}
-\renewcommand{\parallel}[1]{$\langle${#1}$\rangle$}
-\newcommand{\PentKeyword    }[1]{\parallel{\entKeyword{#1}}}
-\newcommand{\PentKeywordInst}[1]{\parallel{\entKeywordInst{#1}}}
-\newcommand{\Pfield         }[2]{\parallel{\field{#1}{#2}}}
-\newcommand{\Pfieldnotype   }[1]{\parallel{\fieldnotype{#1}}}
-\newcommand{\PoptField      }[2]{\parallel{\optField{#1}{#2}}}
-\newcommand{\PoptFieldnotype}[1]{\parallel{\optFieldnotype{#1}}}
+\newcommand{\oofemParallel}[1]{$\langle${#1}$\rangle$}
+\newcommand{\PentKeyword}[1]{\oofemParallel{\entKeyword{#1}}}
+\newcommand{\PentKeywordInst}[1]{\oofemParallel{\entKeywordInst{#1}}}
+\newcommand{\Pfield}[2]{\oofemParallel{\field{#1}{#2}}}
+\newcommand{\Pfieldnotype}[1]{\oofemParallel{\fieldnotype{#1}}}
+\newcommand{\PoptField}[2]{\oofemParallel{\optField{#1}{#2}}}
+\newcommand{\PoptFieldnotype}[1]{\oofemParallel{\optFieldnotype{#1}}}
 
 \begin{htmlonly}
 \newenvironment{record}[1][]{\begin{tabular}{|ll}}{\end{tabular}\\}
@@ -1477,7 +1477,7 @@ various interfaces on fixed grids. Typical examples include free surface,
 evolving interface between two materials, etc.
 Available representations include:
 
-\begin{tabular}{|l|l|l|l|}
+\begin{tabular}{|l|l|l|}
 \hline
 MI & miflag & Compatibility  \\
 \hline
@@ -1495,7 +1495,7 @@ LevelSet & 1 & 2D triangular \\
 \item
 parameter \param{refvol} allows to set initial volume of reference fluid, then the reference volume is computed in each step and printed, so the accuracy and mass conservation can be monitored.
 \end{itemize}
-\item[]
+\item
 LevelSet- level set based representation\\
 \begin{record}[0.9\textwidth]
   \recentry{}{\mbox{[\field{levelset}{ra} OR \field{refmatpolyx}{ra} \field{refmatpolyy}{ra}]}}
