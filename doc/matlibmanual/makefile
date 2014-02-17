@@ -4,7 +4,7 @@ RCP = scp
 
 html: ps
 	if [ x"$(ROBOT)" != "x" ]; then $(ROBOT) < include.src.tex > include.tex; fi
-	latex2html -style "/oofeml2h.css" -local_icons -dir html -mkdir matlibmanual
+	latex2html -style "/oofeml2h.css" -local_icons -dir html -mkdir matlibmanual -init_file "latex2html-init"
 
 ps:
 	if [ x"$(ROBOT)" != "x" ]; then $(ROBOT) < include.src.tex > include.tex; fi
