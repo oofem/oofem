@@ -161,25 +161,25 @@ The program can be executed by typing\\
 on the command line prompt with the following command line options:\\[1em]
 \begin{tabularx}{\textwidth}{l|X}
 \hline
-\textbf{-v} & Prints oofem version.\\
-\textbf{-f~string} & path to oofem input file name, if not present, program interactively
+\textbf{\mbox{-v}} & Prints oofem version.\\
+\textbf{\mbox{-f~string}} & path to oofem input file name, if not present, program interactively
 reads this parameter.\Pmode{When invoking the solver in parallel mode, only base name of input file should be specified, 
 the partition name is appended automatically. On the other hand, the partition name is not appended to output file name, as specified
 in output file record (see section \ref{_OutputFileRecord}).}\\
-\textbf{-r~int} & Restarts the analysis from given solution step. The corresponding
+\textbf{\mbox{-r~int}} & Restarts the analysis from given solution step. The corresponding
 context file (*.osf) must exist.\\
-\textbf{-rn} & Turns on the equation renumbering. Default is off.\\
-\textbf{-ar~int} & 
+\textbf{\mbox{-rn}} & Turns on the equation renumbering. Default is off.\\
+\textbf{\mbox{-ar~int}} & 
 Restarts the adaptive computation from given solution step.
 Requires the corresponding context file (*.osf) and domain input file
 (*.din) to exists. The domain input file describes the new mesh, its
 syntax is identical to syntax of input file, but it does not contains
 the output file record, job description record and analysis record.\\
-\textbf{-l~int} & Sets treshold for log messages (Errors=0, Warnings=1,
+\textbf{\mbox{-l~int}} & Sets treshold for log messages (Errors=0, Warnings=1,
 Relevant=2, Info=3, Debug=4).\\
-\textbf{-qo~string} & Redirect the standard output stream (stdout) to given file.\\
-\textbf{-qe~string} & Redirect standard error stream (stderr) to given file.\\
-\textbf{-c} & Forces the creation of context file for each solution step.\\
+\textbf{\mbox{-qo~string}} & Redirect the standard output stream (stdout) to given file.\\
+\textbf{\mbox{-qe~string}} & Redirect standard error stream (stderr) to given file.\\
+\textbf{\mbox{-c}} & Forces the creation of context file for each solution step.\\
 \hline
 \end{tabularx}\\[1em]
 
@@ -2570,6 +2570,7 @@ where $\langle \tens{\strain} \rangle$ can be imposed as eigenstrain over the do
   \recentry{}{\optField{dofexcludemask}{ia}}
   \recentry{}{\optField{csType}{in}}
   \recentry{}{\optField{properties}{dc}}
+  \recentry{}{\optField{propertytf}{dc}}
 \end{record}
 \item Constant surface fluxes (load)
 
@@ -2580,6 +2581,7 @@ where $\langle \tens{\strain} \rangle$ can be imposed as eigenstrain over the do
   \recentry{}{\optField{dofexcludemask}{ia}}
   \recentry{}{\optField{csType}{in}}
   \recentry{}{\optField{properties}{dc}}
+  \recentry{}{\optField{propertytf}{dc}}
 \end{record}
 Represent constant edge/surface loads or boundary conditions. The \param{ndofs} parameter must be set
 equal to element's number of unknowns. Parameter \param{loadType}
@@ -2606,6 +2608,7 @@ environmental values (temperature of the environment) corresponding to
 element unknowns, and \param{properties} dictionary should contain
 value of transfer (convection) coefficient (assumed to be a constant) under the key 'a'.
 
+The properties can vary in time. Each property can have associated time function which determines its time variation. The time functions are set up using optional \param{propertytf} dictionary, containing for selected properties the corresponding time function number. The time function must be registered under the same key as in \param{properties} dictionary. The property value is then computed by product of property value (determined by \param{properties}) and corresponding time finction evaluated at given time. If no time function provided for particula property, a unit constant function is assumed.
 
 The load can be defined in global coordinate system (\param{csType} =
 0, default) or in entity - specific local coordinate system
