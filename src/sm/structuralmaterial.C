@@ -1695,7 +1695,7 @@ StructuralMaterial :: giveIPValue(FloatArray &answer, GaussPoint *gp, InternalSt
     } else if ( type == IST_StrainTensor ) {
         ///@todo Fill in correct full form values here! This just adds zeros!
         StructuralMaterial :: giveFullSymVectorForm( answer, status->giveStrainVector(), gp->giveMaterialMode() );
-        if ( gp->giveMaterialMode() == _PlaneStress ) {
+        if ( gp->giveMaterialMode() == _PlaneStress && 0) {
             double Nxy = this->give(NYxy, gp);
             double Nxz = this->give(NYxz, gp);
             double Nyz = this->give(NYyz, gp);
