@@ -21,6 +21,7 @@
 %\usepackage{tikz}
 %\usepackage{hyperref}
 \usepackage[top=0.1\paperheight, bottom=0.1\paperheight, left=0.1\paperwidth, right=0.1\paperwidth]{geometry}
+\usepackage{tabularx}
 \usepackage{ifthen}
 
 \input{include.tex}
@@ -157,45 +158,30 @@ of relations between their remote counterparts (see further).
 \label{_running_the_code}
 The program can be executed by typing\\
 \texttt{oofem [option [parameter]] ...}\\
-on the command line prompt with the following command line options:
-\begin{itemize}
-\item
-\textbf{-v}\\ 
-Prints oofem version.
-\item
-\textbf{-f string}\\ oofem input file name, if not present, program interactively
-reads this parameter.
-\item
-\textbf{-r int}\\
-Restarts the analysis from given solution step. The corresponding
-context file (*.osf) must exist.
-\Pmode{When invoking the solver in parallel mode, only base name of input file should be specified, 
+on the command line prompt with the following command line options:\\[1em]
+\begin{tabularx}{\textwidth}{l|X}
+\hline
+\textbf{-v} & Prints oofem version.\\
+\textbf{-f~string} & path to oofem input file name, if not present, program interactively
+reads this parameter.\Pmode{When invoking the solver in parallel mode, only base name of input file should be specified, 
 the partition name is appended automatically. On the other hand, the partition name is not appended to output file name, as specified
-in output file record (see section \ref{_OutputFileRecord}).}
-\item
-\textbf{-rn}\\
-Turns on the equation renumbering. Default is off.
-\item
-\textbf{-ar int}\\
+in output file record (see section \ref{_OutputFileRecord}).}\\
+\textbf{-r~int} & Restarts the analysis from given solution step. The corresponding
+context file (*.osf) must exist.\\
+\textbf{-rn} & Turns on the equation renumbering. Default is off.\\
+\textbf{-ar~int} & 
 Restarts the adaptive computation from given solution step.
 Requires the corresponding context file (*.osf) and domain input file
 (*.din) to exists. The domain input file describes the new mesh, its
 syntax is identical to syntax of input file, but it does not contains
-the output file record, job description record and analysis record.
-\textbf{-l int}\\
-Sets treshold for log messages (Errors=0, Warnings=1,
-Relevant=2, Info=3, Debug=4).
-\item
-\textbf{-qo string}\\
-Redirect the standard output stream (stdout) to given file.
-\item
-\textbf{-qe string}\\
-Redirect standard error stream (stderr) to given file.
-\item
-\textbf{-c}\\
-Forces the creation of context file for each solution step.
-\item
-\end{itemize}
+the output file record, job description record and analysis record.\\
+\textbf{-l~int} & Sets treshold for log messages (Errors=0, Warnings=1,
+Relevant=2, Info=3, Debug=4).\\
+\textbf{-qo~string} & Redirect the standard output stream (stdout) to given file.\\
+\textbf{-qe~string} & Redirect standard error stream (stderr) to given file.\\
+\textbf{-c} & Forces the creation of context file for each solution step.\\
+\hline
+\end{tabularx}\\[1em]
 
 \Pmode{
 The parallel version uses the MPI (Message Passing Interface) standard for message-passing communication. Thus, to execute POOFEM program,
@@ -210,7 +196,7 @@ For instance, when using the MPICH implementation of MPI and many others, the fo
 \section{Syntax and general rules}
 
 Input file is composed of records. In the current implementation, each record is represented by one line in input file.
-The order of records in file is compulsory, and is followinghas following structure:
+The order of records in file is compulsory, and it has following structure:
 \begin{enumerate}
 \item output file record, see section \ref{_OutputFileRecord},
 \item job description record, see section \ref{_JobDescriptionRecord},
