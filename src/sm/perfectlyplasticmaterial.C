@@ -520,7 +520,7 @@ PerfectlyPlasticMaterial :: computeTrialStressIncrement(FloatArray &answer, Gaus
     FloatMatrix materialMatrix;
 
     if ( strainIncrement.giveSize() == 0 ) {
-        answer.resize(0);
+        answer.clear();
         return;
     }
 
@@ -627,7 +627,7 @@ PerfectlyPlasticMaterial :: GiveStressCorrectionBackToYieldSurface(GaussPoint *g
         help += yeldStressGrad->at(j) * yeldStressGrad->at(j);
     }
 
-    stressCorrection = new FloatArray(* yeldStressGrad);
+    stressCorrection = new FloatArray(*yeldStressGrad);
     stressCorrection->times(-f3 / help);
 
 

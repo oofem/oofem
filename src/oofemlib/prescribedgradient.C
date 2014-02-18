@@ -51,6 +51,8 @@
 #include "sparsemtrx.h"
 #include "sparselinsystemnm.h"
 
+#include <cmath>
+
 namespace oofem {
 REGISTER_BoundaryCondition(PrescribedGradient);
 
@@ -116,9 +118,10 @@ void PrescribedGradient :: setPrescribedGradientVoigt(const FloatArray &t)
 void PrescribedGradient :: updateCoefficientMatrix(FloatMatrix &C)
 // This is written in a very general way, supporting both fm and sm problems.
 // v_prescribed = C.d = (x-xbar).d;
-// C = [x 0 y]
-//     [0 y x]
-//     [ ... ] in 2D, voigt form [d_11, d_22, d_12]
+// Modified by ES.
+// C = [x 0 0 y]
+//     [0 y x 0]
+//     [ ... ] in 2D, voigt form [d_11, d_22, d_12 d_21]
 // C = [x 0 0 y z 0]
 //     [0 y 0 x 0 z]
 //     [0 0 z 0 x y]
@@ -129,7 +132,12 @@ void PrescribedGradient :: updateCoefficientMatrix(FloatMatrix &C)
 
     int nsd = domain->giveNumberOfSpatialDimensions();
     int npeq = domain->giveEngngModel()->giveNumberOfDomainEquations( domain->giveNumber(), EModelDefaultPrescribedEquationNumbering() );
-    C.resize(npeq, nsd * ( nsd + 1 ) / 2);
+    if ( nsd == 2 ) {
+    	C.resize(npeq, 4);
+    }
+    else {
+    	C.resize(npeq, nsd * ( nsd + 1 ) / 2);
+    }
     C.zero();
 
     FloatArray &cCoords = this->giveCenterCoordinate();
@@ -148,7 +156,7 @@ void PrescribedGradient :: updateCoefficientMatrix(FloatMatrix &C)
         if ( nsd == 2 ) {
             if ( k1 ) {
                 C.at(k1, 1) = coords->at(1) - xbar;
-                C.at(k1, 3) = coords->at(2) - ybar;
+                C.at(k1, 4) = coords->at(2) - ybar;
             }
 
             if ( k2 ) {
@@ -194,7 +202,7 @@ double PrescribedGradient :: domainSize()
         FEInterpolation *fei = e->giveInterpolation();
         domain_size += fei->evalNXIntegral( boundary, FEIElementGeometryWrapper(e) );
     }
-    return domain_size / nsd;
+    return fabs(domain_size / nsd);
 }
 
 
@@ -207,9 +215,9 @@ void PrescribedGradient :: computeField(FloatArray &sigma, EquationID eid, TimeS
     R_c.zero();
     R_ext.zero();
     emodel->assembleVector( R_c, tStep, eid, InternalForcesVector, VM_Total,
-                            EModelDefaultPrescribedEquationNumbering(), this->giveDomain() );
+                           EModelDefaultPrescribedEquationNumbering(), this->giveDomain() );
     emodel->assembleVector( R_ext, tStep, eid, ExternalForcesVector, VM_Total,
-                            EModelDefaultPrescribedEquationNumbering(), this->giveDomain() );
+                           EModelDefaultPrescribedEquationNumbering(), this->giveDomain() );
     R_c.subtract(R_ext);
 
     // Condense it;

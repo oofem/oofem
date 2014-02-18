@@ -372,7 +372,7 @@ LIBeam3d :: computeLoadLEToLRotationMatrix(FloatMatrix &answer, int iEdge, Gauss
     //
     // i.e. f(element local) = T * f(edge local)
     //
-    answer.beEmptyMtrx();
+    answer.clear();
     return 0;
 }
 
@@ -440,7 +440,7 @@ Interface *
 LIBeam3d :: giveInterface(InterfaceType interface)
 {
     if ( interface == FiberedCrossSectionInterfaceType ) {
-        return static_cast< FiberedCrossSectionInterface * >( this );
+        return static_cast< FiberedCrossSectionInterface * >(this);
     }
 
     return NULL;

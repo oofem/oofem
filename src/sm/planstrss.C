@@ -223,8 +223,8 @@ double
 PlaneStress2d :: computeEdgeVolumeAround(GaussPoint *gp, int iEdge)
 {
     double result = this->interpolation.edgeGiveTransformationJacobian( iEdge, * gp->giveCoordinates(),
-                                                                        FEIElementGeometryWrapper(this) );
-    return result * gp->giveWeight();
+                                                                       FEIElementGeometryWrapper(this) );
+    return result *gp->giveWeight();
 }
 
 void
@@ -277,7 +277,7 @@ PlaneStress2d :: computeVolumeAround(GaussPoint *gp)
 {
     double determinant, weight, thickness, volume;
     determinant = fabs( this->interpolation.giveTransformationJacobian( * gp->giveCoordinates(),
-                                                                        FEIElementGeometryWrapper(this) ) );
+                                                                       FEIElementGeometryWrapper(this) ) );
 
 
     weight      = gp->giveWeight();
@@ -428,19 +428,19 @@ Interface *
 PlaneStress2d :: giveInterface(InterfaceType interface)
 {
     if ( interface == ZZNodalRecoveryModelInterfaceType ) {
-        return static_cast< ZZNodalRecoveryModelInterface * >( this );
+        return static_cast< ZZNodalRecoveryModelInterface * >(this);
     } else if ( interface == SPRNodalRecoveryModelInterfaceType ) {
-        return static_cast< SPRNodalRecoveryModelInterface * >( this );
+        return static_cast< SPRNodalRecoveryModelInterface * >(this);
     } else if ( interface == SpatialLocalizerInterfaceType ) {
-        return static_cast< SpatialLocalizerInterface * >( this );
+        return static_cast< SpatialLocalizerInterface * >(this);
     } else if ( interface == DirectErrorIndicatorRCInterfaceType ) {
-        return static_cast< DirectErrorIndicatorRCInterface * >( this );
+        return static_cast< DirectErrorIndicatorRCInterface * >(this);
     } else if ( interface == EIPrimaryUnknownMapperInterfaceType ) {
-        return static_cast< EIPrimaryUnknownMapperInterface * >( this );
+        return static_cast< EIPrimaryUnknownMapperInterface * >(this);
     } else if ( interface == HuertaErrorEstimatorInterfaceType ) {
-        return static_cast< HuertaErrorEstimatorInterface * >( this );
+        return static_cast< HuertaErrorEstimatorInterface * >(this);
     } else if ( interface == HuertaRemeshingCriteriaInterfaceType ) {
-        return static_cast< HuertaRemeshingCriteriaInterface * >( this );
+        return static_cast< HuertaRemeshingCriteriaInterface * >(this);
     }
 
     return NULL;
@@ -463,7 +463,7 @@ PlaneStress2d :: HuertaErrorEstimatorI_setupRefinedElementProblem(RefinedElement
     static int sideNode [ 4 ] [ 2 ] = { { 1, 2 }, { 2, 3 }, { 3, 4 }, { 4, 1 } };
 
     if ( sMode == HuertaErrorEstimatorInterface :: NodeMode ||
-         ( sMode == HuertaErrorEstimatorInterface :: BCMode && aMode == HuertaErrorEstimator :: HEE_linear ) ) {
+        ( sMode == HuertaErrorEstimatorInterface :: BCMode && aMode == HuertaErrorEstimator :: HEE_linear ) ) {
         for ( inode = 0; inode < nodes; inode++ ) {
             corner [ inode ] = element->giveNode(inode + 1)->giveCoordinates();
             if ( corner [ inode ]->giveSize() != 3 ) {
@@ -847,13 +847,13 @@ PlaneStress2d :: drawSpecial(oofegGraphicContext &gc)
                             gpglobalcoords.resize(2);
 
                             gpglobalcoords.at(1) = ( n1 * this->giveNode(1)->giveUpdatedCoordinate(1, tStep, defScale) +
-                                                     n2 * this->giveNode(2)->giveUpdatedCoordinate(1, tStep, defScale) +
-                                                     n3 * this->giveNode(3)->giveUpdatedCoordinate(1, tStep, defScale) +
-                                                     n4 * this->giveNode(4)->giveUpdatedCoordinate(1, tStep, defScale) );
+                                                    n2 * this->giveNode(2)->giveUpdatedCoordinate(1, tStep, defScale) +
+                                                    n3 * this->giveNode(3)->giveUpdatedCoordinate(1, tStep, defScale) +
+                                                    n4 * this->giveNode(4)->giveUpdatedCoordinate(1, tStep, defScale) );
                             gpglobalcoords.at(2) = ( n1 * this->giveNode(1)->giveUpdatedCoordinate(2, tStep, defScale) +
-                                                     n2 * this->giveNode(2)->giveUpdatedCoordinate(2, tStep, defScale) +
-                                                     n3 * this->giveNode(3)->giveUpdatedCoordinate(2, tStep, defScale) +
-                                                     n4 * this->giveNode(4)->giveUpdatedCoordinate(2, tStep, defScale) );
+                                                    n2 * this->giveNode(2)->giveUpdatedCoordinate(2, tStep, defScale) +
+                                                    n3 * this->giveNode(3)->giveUpdatedCoordinate(2, tStep, defScale) +
+                                                    n4 * this->giveNode(4)->giveUpdatedCoordinate(2, tStep, defScale) );
                         } else {
                             computeGlobalCoordinates( gpglobalcoords, * ( gp->giveCoordinates() ) );
                         }

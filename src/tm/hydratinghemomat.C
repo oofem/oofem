@@ -147,7 +147,7 @@ HydratingHeMoMaterial :: computeInternalSourceVector(FloatArray &val, GaussPoint
          * giveHydrationDegree(gp, tStep, VM_Total), giveHydrationDegree(gp, tStep, VM_Incremental), (val.giveSize())?val.at(1):0);
          */
     } else {
-        val.resize(0);
+        val.clear();
     }
 }
 
@@ -194,8 +194,8 @@ HydratingHeMoMaterial :: updateInternalState(const FloatArray &vec, GaussPoint *
 
                 aux.times( 1. / give('d', gp) );
                 fprintf( vyst, "Elem %.3d krok %.2d: t= %.0f, dt=%.0f, %ld. it, ksi= %.12f, T= %.8f, heat=%.8f\n", gp->giveElement()->giveNumber(), tStep->giveNumber(),
-                         tStep->giveTargetTime(), tStep->giveTimeIncrement(), tStep->giveSolutionStateCounter(),
-                         giveHydrationDegree(gp, tStep, VM_Total), vec.at(1), aux.at(1) * tStep->giveTimeIncrement() );
+                        tStep->giveTargetTime(), tStep->giveTimeIncrement(), tStep->giveSolutionStateCounter(),
+                        giveHydrationDegree(gp, tStep, VM_Total), vec.at(1), aux.at(1) * tStep->giveTimeIncrement() );
                 fclose(vyst);
             }
         }
@@ -227,7 +227,7 @@ HydratingHeMoMaterial :: giveCharacteristicValue(MatResponseMode rmode, GaussPoi
             }
 
             answer = hydrationModel->giveCharacteristicValue(vec, rmode, gp, tStep)
-                     / tStep->giveTimeIncrement();
+            / tStep->giveTimeIncrement();
             if ( ( rmode == IntSource_ww ) || ( rmode == IntSource_hw ) ) {
                 answer *= give_dphi_dw( vec.at(2) );
             }

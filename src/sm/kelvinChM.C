@@ -42,7 +42,7 @@
 
 namespace oofem {
 KelvinChainMaterial :: KelvinChainMaterial(int n, Domain *d) : RheoChainMaterial(n, d)
-{}
+{ }
 
 void
 KelvinChainMaterial :: computeCharCoefficients(FloatArray &answer, double tStep)
@@ -277,7 +277,7 @@ KelvinChainMaterial :: initializeFrom(InputRecord *ir)
 
 KelvinChainMaterialStatus :: KelvinChainMaterialStatus(int n, Domain *d,
                                                        GaussPoint *g, int nunits) :
-    RheoChainMaterialStatus(n, d, g, nunits) {}
+    RheoChainMaterialStatus(n, d, g, nunits) { }
 
 void
 KelvinChainMaterialStatus :: printOutputAt(FILE *file, TimeStep *tStep)

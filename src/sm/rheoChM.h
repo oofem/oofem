@@ -76,7 +76,7 @@ protected:
     FloatArray shrinkageStrain;
 
 public:
-    RheoChainMaterialStatus(int n, Domain *d, GaussPoint *g, int nunits);
+    RheoChainMaterialStatus(int n, Domain * d, GaussPoint * g, int nunits);
     virtual ~RheoChainMaterialStatus();
 
     virtual void printOutputAt(FILE *file, TimeStep *tStep);
@@ -139,7 +139,7 @@ protected:
     double timeFactor;
 
 public:
-    RheoChainMaterial(int n, Domain *d);
+    RheoChainMaterial(int n, Domain * d);
     virtual ~RheoChainMaterial();
 
     virtual void giveRealStressVector(FloatArray &answer, GaussPoint *gp,
@@ -159,7 +159,7 @@ public:
     { this->giveRealStressVector(answer, gp, reducedE, tStep); }
 
     virtual void giveThermalDilatationVector(FloatArray &answer, GaussPoint *gp, TimeStep *tStep)
-    { answer.resize(0); }
+    { answer.clear(); }
 
     /// Evaluation of the incremental modulus.
     virtual double giveEModulus(GaussPoint *gp, TimeStep *tStep) = 0;
@@ -210,7 +210,7 @@ public:
                                            GaussPoint *gp,
                                            TimeStep *tStep,
                                            ValueModeType mode)
-    { answer.resize(0); }
+    { answer.clear(); }
 
     // Note: must take LoadResponseMode into account
     /**
@@ -221,7 +221,7 @@ public:
      * @param tStep Time step (most models are able to respond only when tStep is the current time step).
      * @param mode Determines response mode.
      */
-    virtual void giveEigenStrainVector(FloatArray &answer, GaussPoint *gp, TimeStep *tStep, ValueModeType mode) {};
+    virtual void giveEigenStrainVector(FloatArray &answer, GaussPoint *gp, TimeStep *tStep, ValueModeType mode) { };
 
     virtual MaterialStatus *CreateStatus(GaussPoint *gp) const;
 

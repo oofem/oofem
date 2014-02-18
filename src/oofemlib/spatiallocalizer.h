@@ -121,12 +121,12 @@ protected:
 
 public:
     /// Typedefs to introduce the container type for element numbers, returned by some services.
-    typedef std :: set< int >elementContainerType;
+    typedef std :: set< int > elementContainerType;
     /// Typedefs to introduce the container type for nodal numbers, returned by some services.
-    typedef std :: list< int >nodeContainerType;
+    typedef std :: list< int > nodeContainerType;
 
     /// Constructor
-    SpatialLocalizer(Domain *d) : domain(d) { }
+    SpatialLocalizer(Domain * d) : domain(d) { }
 
     virtual ~SpatialLocalizer() { }
 

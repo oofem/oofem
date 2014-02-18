@@ -106,9 +106,9 @@ FEI2dQuadLin :: local2global(FloatArray &answer, const FloatArray &lcoords, cons
 
     answer.resize(2);
     answer.at(1) = n1 * cellgeo.giveVertexCoordinates(1)->at(xind) + n2 *cellgeo.giveVertexCoordinates(2)->at(xind) +
-                   n3 *cellgeo.giveVertexCoordinates(3)->at(xind) + n4 *cellgeo.giveVertexCoordinates(4)->at(xind);
+    n3 *cellgeo.giveVertexCoordinates(3)->at(xind) + n4 *cellgeo.giveVertexCoordinates(4)->at(xind);
     answer.at(2) = n1 * cellgeo.giveVertexCoordinates(1)->at(yind) + n2 *cellgeo.giveVertexCoordinates(2)->at(yind) +
-                   n3 *cellgeo.giveVertexCoordinates(3)->at(yind) + n4 *cellgeo.giveVertexCoordinates(4)->at(yind);
+    n3 *cellgeo.giveVertexCoordinates(3)->at(yind) + n4 *cellgeo.giveVertexCoordinates(4)->at(yind);
 }
 
 #define POINT_TOL 1.e-6
@@ -297,9 +297,9 @@ FEI2dQuadLin :: edgeLocal2global(FloatArray &answer, int iedge,
 
     answer.resize(2);
     answer.at(1) = ( n.at(1) * cellgeo.giveVertexCoordinates( edgeNodes.at(1) )->at(xind) +
-                     n.at(2) * cellgeo.giveVertexCoordinates( edgeNodes.at(2) )->at(xind) );
+                    n.at(2) * cellgeo.giveVertexCoordinates( edgeNodes.at(2) )->at(xind) );
     answer.at(2) = ( n.at(1) * cellgeo.giveVertexCoordinates( edgeNodes.at(1) )->at(yind) +
-                     n.at(2) * cellgeo.giveVertexCoordinates( edgeNodes.at(2) )->at(yind) );
+                    n.at(2) * cellgeo.giveVertexCoordinates( edgeNodes.at(2) )->at(yind) );
 }
 
 void

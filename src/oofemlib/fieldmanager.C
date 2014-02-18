@@ -37,7 +37,7 @@
 namespace oofem {
 #ifdef FIELDMANAGER_USE_SHARED_PTR
 FieldManager :: ~FieldManager()
-{}
+{ }
 
 void
 FieldManager :: registerField(std :: tr1 :: shared_ptr< Field >eField, FieldType key)
@@ -82,7 +82,7 @@ FieldManager :: ~FieldManager()
 {
     std :: map< FieldType, fieldRecord * > :: iterator i;
     for ( i = this->externalFields.begin(); i != this->externalFields.end(); ++i ) {
-        delete ( * i ).second;
+        delete(* i).second;
     }
 }
 
@@ -93,7 +93,7 @@ FieldManager :: registerField(Field *eField, FieldType key, bool managedFlag)
     std :: map< FieldType, fieldRecord * > :: iterator i;
     if ( ( i = this->externalFields.find(key) ) != this->externalFields.end() ) {
         // delete old entry, since map contains only pointers, not fields themselves
-        delete( * i ).second;
+        delete(* i).second;
     }
 
     this->externalFields [ key ] = new fieldRecord(eField, managedFlag);
@@ -125,7 +125,7 @@ FieldManager :: unregisterField(FieldType key)
         return;
     }
 
-    delete ( * i ).second;
+    delete(* i).second;
     this->externalFields.erase(i);
 }
 

@@ -56,9 +56,9 @@ namespace oofem {
     ENUM_ITEM_WITH_VALUE(IST_PrincipalStrainTempTensor, 6) \
     ENUM_ITEM_WITH_VALUE(IST_BeamForceMomentumTensor, 7) \
     ENUM_ITEM_WITH_VALUE(IST_BeamStrainCurvatureTensor, 8) \
-    ENUM_ITEM_WITH_VALUE(IST_ShellForceMomentumTensor, 9) \
-    ENUM_ITEM_WITH_VALUE(IST_ShellStrainCurvatureTensor, 10) \
-    ENUM_ITEM_WITH_VALUE(IST_CurvatureTensor, 11) \
+    ENUM_ITEM_WITH_VALUE(IST_ShellMomentumTensor, 9)  \
+    ENUM_ITEM_WITH_VALUE(IST_ShellForceTensor, 10) \
+    ENUM_ITEM_WITH_VALUE(IST_ShellCurvatureTensor, 11) \
     ENUM_ITEM_WITH_VALUE(IST_DisplacementVector, 12) \
     ENUM_ITEM_WITH_VALUE(IST_DamageTensor, 13) \
     ENUM_ITEM_WITH_VALUE(IST_DamageInvTensor, 14) \
@@ -149,7 +149,9 @@ namespace oofem {
     ENUM_ITEM_WITH_VALUE(IST_InterfaceFirstPKTraction, 99) \
     ENUM_ITEM_WITH_VALUE(IST_StressTensor_Reduced, 100) \
     ENUM_ITEM_WITH_VALUE(IST_StrainTensor_Reduced, 101) \
-    ENUM_ITEM_WITH_VALUE(IST_CrossSectionNumber, 102)
+    ENUM_ITEM_WITH_VALUE(IST_CrossSectionNumber, 102) \
+    ENUM_ITEM_WITH_VALUE(IST_ShellStrainTensor, 103)  
+
 /**
  * Type  representing the physical meaning of element or constitutive model internal variable.
  * Values of this type are used, when these internal variables are requested.

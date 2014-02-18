@@ -41,15 +41,15 @@
 #include "classfactory.h"
 
 #ifdef __SM_MODULE
- #include "structuralelement.h"
- #include "structuralmaterial.h"
- #include "truss3d.h"
- #include "stressvector.h"
- #include "strainvector.h"
+ #include "../sm/structuralelement.h"
+ #include "../sm/structuralmaterial.h"
+ #include "../sm/truss3d.h"
+ #include "../sm/stressvector.h"
+ #include "../sm/strainvector.h"
 #endif
 
 #ifdef __TM_MODULE
- #include "transportmaterial.h"
+ #include "../tm/transportmaterial.h"
 #endif
 
 
@@ -59,7 +59,7 @@ REGISTER_ExportModule(HOMExportModule)
 //inherit LinearElasticMaterial for accessing stress/strain transformation functions
 HOMExportModule :: HOMExportModule(int n, EngngModel *e) : ExportModule(n, e)
 {
-    this->matnum.resize(0);
+    this->matnum.clear();
 }
 
 
@@ -150,7 +150,8 @@ HOMExportModule :: doOutput(TimeStep *tStep, bool forcedOutput)
                 for ( int i = 0; i < iRule->giveNumberOfIntegrationPoints(); i++ ) {
                     gp  = iRule->getIntegrationPoint(i);
                     structElem = static_cast< StructuralElement * >( elem );
-                    structElem->computeResultingIPEigenstrainAt(VecEigStrain, tStep, gp, VM_Incremental);
+		    // structElem->computeResultingIPEigenstrainAt(VecEigStrain, tStep, gp, VM_Incremental);
+                    structElem->computeResultingIPEigenstrainAt(VecEigStrain, tStep, gp, VM_Total);
                     dV  = elem->computeVolumeAround(gp);
                     elem->giveIPValue(VecStrain, gp, IST_StrainTensor, tStep);
                     elem->giveIPValue(VecStress, gp, IST_StressTensor, tStep);
@@ -158,7 +159,7 @@ HOMExportModule :: doOutput(TimeStep *tStep, bool forcedOutput)
 
                     //truss element has strains and stresses in the first array so transform them to global coordinates
                     ///@todo Should this be the job of giveIPValue to ensure that vectors are given in global c.s.?
-                    if ( dynamic_cast< Truss3d * >( elem ) ) {
+                    if ( dynamic_cast< Truss3d * >(elem) ) {
                         MaterialMode mmode = _3dMat;
                         tempStress.at(1) = VecStress.at(1);
                         tempStrain.at(1) = VecStrain.at(1);

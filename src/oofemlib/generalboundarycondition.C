@@ -78,7 +78,7 @@ GeneralBoundaryCondition :: initializeFrom(InputRecord *ir)
     IR_GIVE_OPTIONAL_FIELD(ir, val, _IFT_GeneralBoundaryCondition_valType);
     valType = ( bcValType ) val;
 
-    dofs.resize(0);
+    dofs.clear();
     IR_GIVE_OPTIONAL_FIELD(ir, dofs, _IFT_GeneralBoundaryCondition_dofs);
 
     isImposedTimeFunction = 0;

@@ -93,13 +93,13 @@ private:
         const IntArray *vec;
 
 public:
-        iterator(const IntArray *vec, int pos);
+        iterator(const IntArray * vec, int pos);
 
-        bool operator!=(const IntArray :: iterator &other) const;
+        bool operator != ( const IntArray :: iterator & other ) const;
 
-        int operator*() const;
+        int operator *( ) const;
 
-        const IntArray :: iterator &operator++();
+        const IntArray :: iterator &operator++ ( );
     };
 
     IntArray :: iterator begin();
@@ -116,13 +116,13 @@ public:
     /// Initializer list constructor.
     IntArray(std :: initializer_list< int >list);
     /// Assignment operator.
-    IntArray &operator=(std :: initializer_list< int >list);
+    IntArray &operator = ( std :: initializer_list< int >list );
 #endif
     /// Destructor.
     ~IntArray();
 
     /// Assignment operator
-    IntArray &operator=(const IntArray &);
+    IntArray &operator = ( const IntArray & );
 
     /**
      * Coefficient access function. Returns l-value of coefficient at given
@@ -153,9 +153,11 @@ public:
      * @return Value at position.
      */
 #ifdef DEBUG
-    int &operator()(int i);
+    int &operator() (int i);
 #else
-    inline int &operator()(int i) { return values [ i ]; }
+    inline int &operator() (int i) {
+        return values [ i ];
+    }
 #endif
     /**
      * Coefficient access function. Returns value of coefficient at given
@@ -164,21 +166,25 @@ public:
      * @return Value at position.
      */
 #ifdef DEBUG
-    const int &operator()(int i) const;
+    const int &operator() (int i) const;
 #else
-    inline const int &operator()(int i) const { return values [ i ]; }
+    inline const int &operator() (int i) const { return values [ i ]; }
 #endif
 
 #ifdef DEBUG
-    int &operator[](int i);
+    int &operator[] ( int i );
 #else
-    inline int &operator[](int i) { return values [ i ]; }
+    inline int &operator[] ( int i ) {
+        return values [ i ];
+    }
 #endif
 
 #ifdef DEBUG
-    const int &operator[](int i) const;
+    const int &operator[] ( int i ) const;
 #else
-    inline const int &operator[](int i) const { return values [ i ]; }
+    inline const int &operator[] ( int i ) const {
+        return values [ i ];
+    }
 #endif
 
 #ifdef DEBUG
@@ -204,6 +210,11 @@ public:
      * @param n New size of array.
      */
     void resize(int n);
+    /**
+     * Clears receiver (zero size).
+     * Same effect as resizing to zero, but has a clearer meaning and intent when used.
+     */
+    void clear() { size = 0; }
     /**
      * Preallocates receiver to given futureSize if larger then allocatedSize.
      * @note{After this operation array values are in undefined state, programmer should zero receiver.}
@@ -360,7 +371,7 @@ public:
      */
     contextIOResultType restoreYourself(DataStream *stream, ContextMode mode);
 
-    friend std :: ostream &operator<<(std :: ostream &out, const IntArray &x);
+    friend std :: ostream &operator << ( std :: ostream & out, const IntArray & x );
 
 #ifdef __PARALLEL_MODE
     /**@name Methods for packing/unpacking to/from communication buffer */
@@ -388,12 +399,12 @@ public:
 #ifdef BOOST_PYTHON
     void __setitem__(int i, int val) { this->at(i + 1) = val; }
     int __getitem__(int i) { return this->at(i + 1); }
-    void beCopyOf(const IntArray &src) { this->operator=(src); }
+    void beCopyOf(const IntArray &src) { this->operator = ( src ); }
 #endif
 };
 
 
-template< class operation >int
+template< class operation > int
 quickSortPartition(IntArray &arry, int l, int r, operation op) {
     int i = l - 1, j = r;
     int v = arry.at(r);
@@ -427,7 +438,7 @@ quickSortPartition(IntArray &arry, int l, int r, operation op) {
 
 
 
-template< class operation >void quickSort(IntArray &arry, int l, int r, operation op) {
+template< class operation > void quickSort(IntArray &arry, int l, int r, operation op) {
     if ( r <= l ) {
         return;
     }
@@ -445,6 +456,6 @@ template< class operation >void quickSort(IntArray &arry, int l, int r, operatio
  * zero if the arguments are equal, and a positive number otherwise.
  * @param arry Array to sort.
  */
-template< class operation >void sort(IntArray &arry, operation op) { quickSort(arry, 1, arry.giveSize(), op); }
+template< class operation > void sort(IntArray &arry, operation op) { quickSort(arry, 1, arry.giveSize(), op); }
 } // end namespace oofem
 #endif // intarray_h

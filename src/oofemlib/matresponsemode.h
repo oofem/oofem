@@ -42,7 +42,7 @@ namespace oofem {
     ENUM_ITEM(TangentStiffness) \
     ENUM_ITEM(SecantStiffness) \
     ENUM_ITEM(ElasticStiffness)                                           \
-    ENUM_ITEM(Conductivity)  /* element level conductivity matrix */   \
+    ENUM_ITEM(Conductivity)  /* element level conductivity matrix */ \
     ENUM_ITEM(Conductivity_ww) /* material level conductivity submatrix */ \
     ENUM_ITEM(Conductivity_hh) /* material level conductivity submatrix */ \
     ENUM_ITEM(Conductivity_hw) /* material level conductivity submatrix */ \

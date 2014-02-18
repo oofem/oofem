@@ -92,7 +92,7 @@ IRResultType TSplineInterpolation :: initializeFrom(InputRecord *ir)
     }
 
     for ( int n = 0; n < nsd; n++ ) {
-        localIndexKnotVector_tmp.resize(0);
+        localIndexKnotVector_tmp.clear();
         IR_GIVE_FIELD(ir, localIndexKnotVector_tmp, IFT_localIndexKnotVector [ n ]);
         if ( localIndexKnotVector_tmp.giveSize() != totalNumberOfControlPoints * ( degree [ n ] + 2 ) ) {
             OOFEM_ERROR2("BSplineInterpolation::initializeFrom - invalid size of knot vector %s", IFT_localIndexKnotVector [ n ]);
@@ -515,7 +515,7 @@ int TSplineInterpolation :: giveKnotSpanBasisFuncMask(const IntArray &knotSpan, 
         nonzero = 1;
         for ( j = 0; j < nsd; j++ ) {
             if ( ( knotEnd(j) <= knotValues [ j ].at(localIndexKnotVector [ i ] [ j ] [ 0 ]) ) ||
-                 ( knotStart(j) >= knotValues [ j ].at(localIndexKnotVector [ i ] [ j ] [ degree [ j ] + 1 ]) ) ) {
+                ( knotStart(j) >= knotValues [ j ].at(localIndexKnotVector [ i ] [ j ] [ degree [ j ] + 1 ]) ) ) {
                 nonzero = 0;
                 break;
             }
@@ -552,7 +552,7 @@ int TSplineInterpolation :: giveNumberOfKnotSpanBasisFunctions(const IntArray &k
         // whether local knot vector overlaps the given knot span
         for ( j = 0; j < nsd; j++ ) {
             if ( ( knotEnd(j) <= knotValues [ j ].at(localIndexKnotVector [ i ] [ j ] [ 0 ]) ) ||
-                 ( knotStart(j) >= knotValues [ j ].at(localIndexKnotVector [ i ] [ j ] [ degree [ j ] + 1 ]) ) ) {
+                ( knotStart(j) >= knotValues [ j ].at(localIndexKnotVector [ i ] [ j ] [ degree [ j ] + 1 ]) ) ) {
                 answer--;
                 break;
             }
@@ -594,7 +594,7 @@ int TSplineInterpolation :: giveKnotSpanBasisFuncMask(const IntArray &startKnotS
         nonzero = 1;
         for ( j = 0; j < nsd; j++ ) {
             if ( ( knotEnd(j) <= knotValues [ j ].at(localIndexKnotVector [ i ] [ j ] [ 0 ]) ) ||
-                 ( knotStart(j) >= knotValues [ j ].at(localIndexKnotVector [ i ] [ j ] [ degree [ j ] + 1 ]) ) ) {
+                ( knotStart(j) >= knotValues [ j ].at(localIndexKnotVector [ i ] [ j ] [ degree [ j ] + 1 ]) ) ) {
                 nonzero = 0;
                 break;
             }
@@ -631,7 +631,7 @@ int TSplineInterpolation :: giveNumberOfKnotSpanBasisFunctions(const IntArray &s
         // whether local knot vector overlaps at least partially the knot span interval
         for ( j = 0; j < nsd; j++ ) {
             if ( ( knotEnd(j) <= knotValues [ j ].at(localIndexKnotVector [ i ] [ j ] [ 0 ]) ) ||
-                 ( knotStart(j) >= knotValues [ j ].at(localIndexKnotVector [ i ] [ j ] [ degree [ j ] + 1 ]) ) ) {
+                ( knotStart(j) >= knotValues [ j ].at(localIndexKnotVector [ i ] [ j ] [ degree [ j ] + 1 ]) ) ) {
                 answer--;
                 break;
             }

@@ -51,15 +51,15 @@ namespace oofem {
  * analysis.
  */
 class Truss3d : public NLStructuralElement,
-    public DirectErrorIndicatorRCInterface,
-    public ZZNodalRecoveryModelInterface,
-    public NodalAveragingRecoveryModelInterface
+public DirectErrorIndicatorRCInterface,
+public ZZNodalRecoveryModelInterface,
+public NodalAveragingRecoveryModelInterface
 {
 protected:
     static FEI3dLineLin interp;
 
 public:
-    Truss3d(int n, Domain *d);
+    Truss3d(int n, Domain * d);
     virtual ~Truss3d() { }
 
     virtual FEInterpolation *giveInterpolation() const { return & interp; }

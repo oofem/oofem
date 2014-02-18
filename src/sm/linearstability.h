@@ -83,7 +83,7 @@ private:
     SparseLinearSystemNM *nMethodLS;
 
 public:
-    LinearStability(int i, EngngModel *_master = NULL) : StructuralEngngModel(i, _master),
+    LinearStability(int i, EngngModel * _master = NULL) : StructuralEngngModel(i, _master),
         loadVector(), displacementVector(), eigVec(), eigVal()
     {
         stiffnessMatrix = NULL;
@@ -94,10 +94,14 @@ public:
         ndomains = 1;
     }
     virtual ~LinearStability() {
-        delete  stiffnessMatrix;
+        delete stiffnessMatrix;
         delete initialStressMatrix;
-        if ( nMethodLS ) { delete nMethodLS; }
-        if ( nMethod ) { delete nMethod; }
+        if ( nMethodLS ) {
+            delete nMethodLS;
+        }
+        if ( nMethod ) {
+            delete nMethod;
+        }
     }
 
     virtual void solveYourself();

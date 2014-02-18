@@ -83,7 +83,7 @@ FEI3dWedgeLin :: local2global(FloatArray &answer, const FloatArray &lcoords, con
 
     this->evalN(n, lcoords, cellgeo);
 
-    answer.resize(0);
+    answer.clear();
     for ( int i = 1; i <= 6; i++ ) {
         answer.add( n.at(i), * cellgeo.giveVertexCoordinates(i) );
     }
@@ -181,7 +181,7 @@ FEI3dWedgeLin :: edgeLocal2global(FloatArray &answer, int iedge, const FloatArra
     this->computeLocalEdgeMapping(nodes, iedge);
     this->edgeEvalN(n, iedge, lcoords, cellgeo);
 
-    answer.resize(0);
+    answer.clear();
     for ( int i = 1; i <= n.giveSize(); ++i ) {
         answer.add( n.at(i), * cellgeo.giveVertexCoordinates( nodes.at(i) ) );
     }
@@ -254,7 +254,7 @@ FEI3dWedgeLin :: surfaceLocal2global(FloatArray &answer, int isurf,
     this->computeLocalSurfaceMapping(nodes, isurf);
     this->surfaceEvalN(n, isurf, lcoords, cellgeo);
 
-    answer.resize(0);
+    answer.clear();
     for ( int i = 1; i <= n.giveSize(); ++i ) {
         answer.add( n.at(i), * cellgeo.giveVertexCoordinates( nodes.at(i) ) );
     }

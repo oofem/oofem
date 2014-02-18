@@ -95,7 +95,7 @@ Quad1Mindlin :: computeBodyLoadVectorAt(FloatArray &answer, Load *forLoad, TimeS
     // note: force is assumed to be in global coordinate system.
     forLoad->computeComponentArrayAt(gravity, tStep, mode);
 
-    force.resize(0);
+    force.clear();
     if ( gravity.giveSize() ) {
         IntegrationRule *ir = integrationRulesArray [ 0 ]; ///@todo Other/higher integration for lumped mass matrices perhaps?
         for ( int i = 0; i < ir->giveNumberOfIntegrationPoints(); ++i ) {
@@ -116,7 +116,7 @@ Quad1Mindlin :: computeBodyLoadVectorAt(FloatArray &answer, Load *forLoad, TimeS
         answer.at(7)  = force.at(3);
         answer.at(10) = force.at(4);
     } else {
-        answer.resize(0);
+        answer.clear();
     }
 }
 
@@ -142,10 +142,10 @@ Quad1Mindlin :: computeBmatrixAt(GaussPoint *gp, FloatMatrix &answer, int li, in
         answer(2, 1 + i * 3) = dn(i, 1);
         answer(2, 2 + i * 3) = dn(i, 0);
 
-        answer(3, 0 + i * 3) = -dn(i, 1);
-        answer(3, 2 + i * 3) = n(i);
-        answer(4, 0 + i * 3) = -dn(i, 0);
-        answer(4, 1 + i * 3) = n(i);
+        answer(3, 0 + i * 3) = -dn(i, 0);
+        answer(3, 1 + i * 3) = n(i);
+        answer(4, 0 + i * 3) = -dn(i, 1);
+        answer(4, 2 + i * 3) = n(i);
     }
 }
 
@@ -236,11 +236,56 @@ Quad1Mindlin :: computeLumpedMassMatrix(FloatMatrix &answer, TimeStep *tStep)
 int
 Quad1Mindlin :: giveIPValue(FloatArray &answer, GaussPoint *gp, InternalStateType type, TimeStep *tStep)
 {
-    if ( type == IST_ShellForceMomentumTensor ) {
-        answer = static_cast< StructuralMaterialStatus * >( gp->giveMaterialStatus() )->giveStressVector();
+  FloatArray help;
+  answer.resize(9);
+  if (( type == IST_ShellForceTensor ) || (type == IST_ShellMomentumTensor )) {
+        help = static_cast< StructuralMaterialStatus * >( gp->giveMaterialStatus() )->giveStressVector();
+	if ( type == IST_ShellForceTensor ) {
+	  answer.at(1) = help.at(1); // nx
+	  answer.at(2) = help.at(3); // vxy
+	  answer.at(3) = help.at(7); // vxz
+	  answer.at(4) = help.at(3); // vxy
+	  answer.at(5) = help.at(2); // ny
+	  answer.at(6) = help.at(8); // vyz
+	  answer.at(7) = help.at(7); // vxy
+	  answer.at(8) = help.at(8); // ny
+	  answer.at(9) = 0.0;
+	} else {
+	  answer.at(1) = help.at(4); // mx
+	  answer.at(2) = help.at(6); // mxy
+	  answer.at(3) = 0.0;        // mxz
+	  answer.at(4) = help.at(6); // mxy
+	  answer.at(5) = help.at(5); // my
+	  answer.at(6) = 0.0;        // myz
+	  answer.at(7) = 0.0;        // mzx
+	  answer.at(8) = 0.0;        // mzy
+	  answer.at(9) = 0.0;        // mz
+	}
         return 1;
-    } else if ( type == IST_ShellStrainCurvatureTensor ) {
-        answer = static_cast< StructuralMaterialStatus * >( gp->giveMaterialStatus() )->giveStrainVector();
+
+    } else if (( type == IST_ShellStrainTensor )  || (type == IST_ShellCurvatureTensor ) ) {
+        help = static_cast< StructuralMaterialStatus * >( gp->giveMaterialStatus() )->giveStrainVector();
+	if ( type == IST_ShellForceTensor ) {
+	  answer.at(1) = help.at(1); // nx
+	  answer.at(2) = help.at(3); // vxy
+	  answer.at(3) = help.at(7); // vxz
+	  answer.at(4) = help.at(3); // vxy
+	  answer.at(5) = help.at(2); // ny
+	  answer.at(6) = help.at(8); // vyz
+	  answer.at(7) = help.at(7); // vxy
+	  answer.at(8) = help.at(8); // ny
+	  answer.at(9) = 0.0;
+	} else {
+	  answer.at(1) = help.at(4); // mx
+	  answer.at(2) = help.at(6); // mxy
+	  answer.at(3) = 0.0;        // mxz
+	  answer.at(4) = help.at(6); // mxy
+	  answer.at(5) = help.at(5); // my
+	  answer.at(6) = 0.0;        // myz
+	  answer.at(7) = 0.0;        // mzx
+	  answer.at(8) = 0.0;        // mzy
+	  answer.at(9) = 0.0;        // mz
+	}
         return 1;
     } else {
         return NLStructuralElement :: giveIPValue(answer, gp, type, tStep);
@@ -282,7 +327,7 @@ double
 Quad1Mindlin :: computeEdgeVolumeAround(GaussPoint *gp, int iEdge)
 {
     double detJ = this->interp_lin.edgeGiveTransformationJacobian( iEdge, * gp->giveCoordinates(), FEIElementGeometryWrapper(this) );
-    return detJ * gp->giveWeight();
+    return detJ *gp->giveWeight();
 }
 
 

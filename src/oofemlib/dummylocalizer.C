@@ -146,8 +146,8 @@ DummySpatialLocalizer :: giveElementClosestToPoint(FloatArray &lcoords, FloatArr
     SpatialLocalizerInterface *interface;
     double dist = 0.0, currDist;
     FloatArray el_coords, el_lcoords;
-    lcoords.resize(0);
-    closest.resize(0);
+    lcoords.clear();
+    closest.clear();
 
     if ( region > 0 ) {
         IntArray &elems = this->region_elements [ region - 1 ];
@@ -196,7 +196,7 @@ DummySpatialLocalizer :: giveElementClosestToPoint(FloatArray &lcoords, FloatArr
 
 
 GaussPoint *
-DummySpatialLocalizer :: giveClosestIP(const FloatArray &coords, int region)
+DummySpatialLocalizer :: giveClosestIP(const FloatArray &coords, int region, bool iCohesiveZoneGP)
 {
     int nelem, i, j;
     double minDist = 1.e6, distance;
@@ -267,7 +267,7 @@ DummySpatialLocalizer :: giveAllNodesWithinBox(nodeContainerType &nodeSet, const
     nnode = this->giveDomain()->giveNumberOfDofManagers();
     for ( i = 1; i <= nnode; i++ ) {
         idofman = this->giveDomain()->giveDofManager(i);
-        if ( ( inode = dynamic_cast< Node * >( idofman ) ) != NULL ) {
+        if ( ( inode = dynamic_cast< Node * >(idofman) ) != NULL ) {
             if ( coords.distance( inode->giveCoordinates() ) <= radius ) {
                 nodeSet.push_back(i);
             }

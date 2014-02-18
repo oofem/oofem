@@ -67,7 +67,7 @@ protected:
     static FEI2dLineHermite interp_beam;
 
 public:
-    Beam2d(int n, Domain *aDomain);
+    Beam2d(int n, Domain * aDomain);
     virtual ~Beam2d();
 
     virtual void computeConsistentMassMatrix(FloatMatrix &answer, TimeStep *tStep, double &mass, const double *ipDensity = NULL);

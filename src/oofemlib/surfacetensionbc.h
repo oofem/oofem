@@ -66,7 +66,7 @@ public:
      * @param n Boundary condition number.
      * @param d Domain to which new object will belongs.
      */
-    SurfaceTensionBoundaryCondition(int n, Domain *d) : ActiveBoundaryCondition(n, d) { }
+    SurfaceTensionBoundaryCondition(int n, Domain * d) : ActiveBoundaryCondition(n, d) { }
     /// Destructor.
     virtual ~SurfaceTensionBoundaryCondition() { }
 

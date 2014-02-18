@@ -53,9 +53,9 @@ class FEI3dTetQuad;
  * @author Mikael Öhman
  */
 class Tet21Stokes : public FMElement,
-    public NodalAveragingRecoveryModelInterface,
-    public SpatialLocalizerInterface,
-    public EIPrimaryUnknownMapperInterface
+public NodalAveragingRecoveryModelInterface,
+public SpatialLocalizerInterface,
+public EIPrimaryUnknownMapperInterface
 {
 protected:
     /// Interpolation for pressure
@@ -78,7 +78,9 @@ protected:
             momentum_ordering(i * 3 + 0) = j++;
             momentum_ordering(i * 3 + 1) = j++;
             momentum_ordering(i * 3 + 2) = j++;
-            if ( i <= 3 ) { j++; }
+            if ( i <= 3 ) {
+                j++;
+            }
         }
 
         conservation_ordering.setValues(4, 4, 8, 12, 16);
@@ -114,7 +116,7 @@ protected:
     }
 
 public:
-    Tet21Stokes(int n, Domain *d);
+    Tet21Stokes(int n, Domain * d);
     virtual ~Tet21Stokes();
 
     virtual void computeGaussPoints();

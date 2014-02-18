@@ -87,7 +87,7 @@ protected:
     double a;
 
 public:
-    MisesMat(int n, Domain *d);
+    MisesMat(int n, Domain * d);
     virtual ~MisesMat();
 
     void performPlasticityReturn(GaussPoint *gp, const FloatArray &totalStrain);
@@ -193,7 +193,7 @@ protected:
     FloatMatrix tempLeftCauchyGreen;
 
 public:
-    MisesMatStatus(int n, Domain *d, GaussPoint *g);
+    MisesMatStatus(int n, Domain * d, GaussPoint * g);
     virtual ~MisesMatStatus();
 
     void givePlasticStrain(FloatArray &answer) { answer = plasticStrain; }

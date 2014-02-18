@@ -119,13 +119,13 @@ OrthotropicLinearElasticMaterial :: initializeFrom(InputRecord *ir)
     // if you wish to align local material orientation with element, use "lcs" keyword as an element parameter
 
     // try to read lcs section
-    triplets.resize(0);
+    triplets.clear();
     IR_GIVE_OPTIONAL_FIELD(ir, triplets, _IFT_OrthotropicLinearElasticMaterial_lcs);
 
     size = triplets.giveSize();
     if ( !( ( size == 0 ) || ( size == 6 ) ) ) {
         _warning2( "instanciateFrom: Warning: lcs in material %d is not properly defined, will be assumed as global",
-                   this->giveNumber() );
+                  this->giveNumber() );
     }
 
     if ( size == 6 ) {
@@ -150,18 +150,18 @@ OrthotropicLinearElasticMaterial :: initializeFrom(InputRecord *ir)
         // vector e3' computed from vector product of e1', e2'
         localCoordinateSystem->at(1, 3) =
             ( localCoordinateSystem->at(2, 1) * localCoordinateSystem->at(3, 2) -
-              localCoordinateSystem->at(3, 1) * localCoordinateSystem->at(2, 2) );
+             localCoordinateSystem->at(3, 1) * localCoordinateSystem->at(2, 2) );
         localCoordinateSystem->at(2, 3) =
             ( localCoordinateSystem->at(3, 1) * localCoordinateSystem->at(1, 2) -
-              localCoordinateSystem->at(1, 1) * localCoordinateSystem->at(3, 2) );
+             localCoordinateSystem->at(1, 1) * localCoordinateSystem->at(3, 2) );
         localCoordinateSystem->at(3, 3) =
             ( localCoordinateSystem->at(1, 1) * localCoordinateSystem->at(2, 2) -
-              localCoordinateSystem->at(2, 1) * localCoordinateSystem->at(1, 2) );
+             localCoordinateSystem->at(2, 1) * localCoordinateSystem->at(1, 2) );
     }
 
     // try to read ElementCS section
     if ( cs_type == unknownCS ) {
-        triplets.resize(0);
+        triplets.clear();
         IR_GIVE_OPTIONAL_FIELD(ir, triplets, _IFT_OrthotropicLinearElasticMaterial_scs); // cs for shells.
         // first three numbers are direction of normal n - see orthoelasticmaterial.h for description
         // shellCS  - coordinate system of principal axes is specified in shell  coordinate system
@@ -175,7 +175,7 @@ OrthotropicLinearElasticMaterial :: initializeFrom(InputRecord *ir)
         size = triplets.giveSize();
         if ( !( ( size == 0 ) || ( size == 3 ) ) ) {
             _warning2( "instanciateFrom: scs in material %d is not properly defined, will be assumed as global",
-                       this->giveNumber() );
+                      this->giveNumber() );
         }
 
         if ( size == 3 ) {

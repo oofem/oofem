@@ -127,7 +127,7 @@ void MixedGradientPressureNeumann :: fromDeviatoricBase2D(FloatMatrix &cartesian
     cartesian.at(3, 2) = -( deviatoric.at(2, 1) + deviatoric.at(3, 1) ) / sqrt(8.0);
     //
     cartesian.at(3, 3) = ( deviatoric.at(2, 2) + deviatoric.at(2, 3) +
-                           deviatoric.at(3, 2) + deviatoric.at(3, 3) ) * 0.25;
+                          deviatoric.at(3, 2) + deviatoric.at(3, 3) ) * 0.25;
 }
 
 
@@ -224,7 +224,7 @@ void MixedGradientPressureNeumann :: setPrescribedDeviatoricGradientFromVoigt(co
 
         this->volGradient = t.at(1) + t.at(2);
     } else {
-        this->devGradient.resize(0);
+        this->devGradient.clear();
         this->volGradient = t.at(1);
     }
 }
@@ -294,7 +294,7 @@ void MixedGradientPressureNeumann :: integrateVolTangent(FloatArray &answer, Ele
     int order = interp->giveInterpolationOrder() - 1 + interpUnknown->giveInterpolationOrder();
     IntegrationRule *ir = interp->giveBoundaryIntegrationRule(order, boundary);
 
-    answer.resize(0);
+    answer.clear();
     for ( int i = 0; i < ir->giveNumberOfIntegrationPoints(); i++ ) {
         GaussPoint *gp = ir->getIntegrationPoint(i);
         FloatArray &lcoords = * gp->giveCoordinates();
@@ -331,7 +331,7 @@ void MixedGradientPressureNeumann :: integrateDevTangent(FloatMatrix &answer, El
     int order = interp->giveInterpolationOrder() - 1 + interpUnknown->giveInterpolationOrder();
     IntegrationRule *ir = interp->giveBoundaryIntegrationRule(order, boundary);
 
-    answer.resize(0, 0);
+    answer.clear();
     for ( int i = 0; i < ir->giveNumberOfIntegrationPoints(); i++ ) {
         GaussPoint *gp = ir->getIntegrationPoint(i);
         FloatArray &lcoords = * gp->giveCoordinates();
@@ -389,7 +389,7 @@ void MixedGradientPressureNeumann :: integrateDevTangent(FloatMatrix &answer, El
             E_n.at(3, 1) = 0.;
             E_n.at(3, 2) = normal.at(1);
         } else {
-            E_n.resize(0, 0);
+            E_n.clear();
         }
 
         contrib.beProductOf(E_n, nMatrix);
@@ -541,7 +541,7 @@ void MixedGradientPressureNeumann :: computeFields(FloatArray &sigmaDev, double 
     } else if ( nsd == 2 ) {
         this->fromDeviatoricBase2D(sigmaDev, sigmaDevBase);
     } else {
-        sigmaDev.resize(0);
+        sigmaDev.clear();
     }
 
     // Postprocessing; vol = int v . n dA
@@ -563,8 +563,7 @@ void MixedGradientPressureNeumann :: computeFields(FloatArray &sigmaDev, double 
 }
 
 
-void MixedGradientPressureNeumann :: computeTangents(
-    FloatMatrix &Ed, FloatArray &Ep, FloatArray &Cd, double &Cp, EquationID eid, TimeStep *tStep)
+void MixedGradientPressureNeumann :: computeTangents(FloatMatrix &Ed, FloatArray &Ep, FloatArray &Cd, double &Cp, EquationID eid, TimeStep *tStep)
 {
     //double size = this->domainSize();
     // Fetch some information from the engineering model
@@ -677,9 +676,9 @@ void MixedGradientPressureNeumann :: computeTangents(
         this->fromDeviatoricBase2D(Ep, sigma_p);
         this->fromDeviatoricBase2D(Ed, sigma_d);
     } else { // For 1D case, there simply are no deviatoric components!
-        Cd.resize(0);
-        Ep.resize(0);
-        Ed.beEmptyMtrx();
+        Cd.clear();
+        Ep.clear();
+        Ed.clear();
     }
 
     delete Kff;

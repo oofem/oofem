@@ -95,7 +95,9 @@ public:
      * @param n Material number.
      * @param d Domain to which newly created material belongs.
      */
-    MicroplaneMaterial(int n, Domain *d) : StructuralMaterial(n, d) { numberOfMicroplanes = 0; }
+    MicroplaneMaterial(int n, Domain * d) : StructuralMaterial(n, d) {
+        numberOfMicroplanes = 0;
+    }
     /// Destructor.
     virtual ~MicroplaneMaterial() { }
 

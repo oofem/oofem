@@ -63,7 +63,7 @@ SubspaceIteration :: SubspaceIteration(Domain *d, EngngModel *m) :
 
 
 SubspaceIteration :: ~SubspaceIteration()
-{}
+{ }
 
 NM_Status
 SubspaceIteration :: solve(SparseMtrx *a, SparseMtrx *b, FloatArray *_eigv, FloatMatrix *_r, double rtol, int nroot)

@@ -44,7 +44,7 @@
 #include "mathfem.h"
 #include "timer.h"
 #include "error.h"
-#include "xfemelementinterface.h"
+#include "xfem/xfemelementinterface.h"
 
 #include <iostream>
 
@@ -228,7 +228,7 @@ OctantRec :: testBoundingBox(const FloatArray &coords, double radius)
                 return BBS_OutsideCell;
             }
             // Other cases; We first check if bb is completely inside the cell, in every spatial dimension
-            bbInside = bbInside && oct0< bb0 &&oct1 >bb1;
+            bbInside = bbInside && oct0 < bb0 && oct1 > bb1;
         }
     }
     return bbInside ? BBS_InsideCell : BBS_ContainsCell;
@@ -304,7 +304,7 @@ OctreeSpatialLocalizer :: buildOctreeDataStructure()
     // first determine domain extends (bounding box), and check for degenerated domain type
     for ( int i = 1; i <= nnode; i++ ) {
         dman = domain->giveDofManager(i);
-        node = dynamic_cast< Node * >( dman );
+        node = dynamic_cast< Node * >(dman);
         if ( node ) {
             coords = node->giveCoordinates();
             if ( init ) {
@@ -356,7 +356,7 @@ OctreeSpatialLocalizer :: buildOctreeDataStructure()
     // insert domain nodes into tree
     for ( int i = 1; i <= nnode; i++ ) {
         dman = domain->giveDofManager(i);
-        node = dynamic_cast< Node * >( dman );
+        node = dynamic_cast< Node * >(dman);
         if ( node ) {
             coords = node->giveCoordinates();
             this->insertNodeIntoOctree(this->rootCell, i, * coords);
@@ -578,7 +578,7 @@ OctreeSpatialLocalizer :: insertNodeIntoOctree(OctantRec *rootCell, int nodeNum,
         // propagate all nodes already assigned to currCell to children
         for ( pos = cellNodeList->begin(); pos != cellNodeList->end(); ++pos ) {
             dman = domain->giveDofManager(* pos);
-            nodeCoords = static_cast< Node * >( dman )->giveCoordinates();
+            nodeCoords = static_cast< Node * >(dman)->giveCoordinates();
             this->insertNodeIntoOctree(currCell, * pos, * nodeCoords);
         }
 
@@ -951,7 +951,7 @@ OctreeSpatialLocalizer :: giveClosestIP(const FloatArray &coords, int region, bo
 {
     double dist, minDist;
     OctantRec *currCell;
-    GaussPoint *nearestGp, *jGp;
+    GaussPoint *nearestGp = NULL, *jGp;
     OctantRec :: BoundingBoxStatus BBStatus;
     elementContainerType :: iterator pos;
     elementContainerType *elementList;
@@ -1006,7 +1006,7 @@ OctreeSpatialLocalizer :: giveClosestIP(const FloatArray &coords, int region, bo
             } else {
                 ////////////////////////////////
                 // Check for cohesive zone Gauss points
-                XfemElementInterface *xFemEl = dynamic_cast< XfemElementInterface * >( ielem );
+                XfemElementInterface *xFemEl = dynamic_cast< XfemElementInterface * >(ielem);
 
                 if ( xFemEl != NULL ) {
                     size_t numCZRules = xFemEl->mpCZIntegrationRules.size();
@@ -1183,7 +1183,7 @@ OctreeSpatialLocalizer :: giveClosestIPWithinOctant(OctantRec *currentCell, //el
                 } else {
                     //////////////////////////////////////////////////////////
                     // Check for cohesive zone Gauss points
-                    XfemElementInterface *xFemEl = dynamic_cast< XfemElementInterface * >( ielem );
+                    XfemElementInterface *xFemEl = dynamic_cast< XfemElementInterface * >(ielem);
 
                     if ( xFemEl != NULL ) {
                         size_t numCZRules = xFemEl->mpCZIntegrationRules.size();
@@ -1304,7 +1304,7 @@ OctreeSpatialLocalizer :: giveElementsWithIPWithinBox(elementContainerType &elem
                 } else {
                     ///////////////////////////////////////////////////
 
-                    XfemElementInterface *xFemEl = dynamic_cast< XfemElementInterface * >( ielem );
+                    XfemElementInterface *xFemEl = dynamic_cast< XfemElementInterface * >(ielem);
 
                     if ( xFemEl != NULL ) {
                         size_t numCZRules = xFemEl->mpCZIntegrationRules.size();

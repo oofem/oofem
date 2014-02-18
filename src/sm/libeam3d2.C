@@ -421,7 +421,7 @@ LIBeam3d2 :: computeLoadLEToLRotationMatrix(FloatMatrix &answer, int iEdge, Gaus
     //
     // i.e. f(element local) = T * f(edge local)
     //
-    answer.beEmptyMtrx();
+    answer.clear();
     return 0;
 }
 
@@ -672,7 +672,7 @@ Interface *
 LIBeam3d2 :: giveInterface(InterfaceType interface)
 {
     if ( interface == FiberedCrossSectionInterfaceType ) {
-        return static_cast< FiberedCrossSectionInterface * >( this );
+        return static_cast< FiberedCrossSectionInterface * >(this);
     }
 
     return NULL;
@@ -753,7 +753,7 @@ LIBeam3d2 :: drawDeformedGeometry(oofegGraphicContext &gc, UnknownType type)
         p [ 1 ].y = p [ 0 ].y + coeff *tc.at(2, i);
         p [ 1 ].z = p [ 0 ].z + coeff *tc.at(3, i);
 
-        EASValsSetColor( ColorGetPixelFromString(const_cast< char * >( colors [ i - 1 ] ), & succ) );
+        EASValsSetColor( ColorGetPixelFromString(const_cast< char * >(colors [ i - 1 ]), & succ) );
 
         go = CreateLine3D(p);
         EGWithMaskChangeAttributes(WIDTH_MASK | COLOR_MASK | LAYER_MASK, go);

@@ -92,7 +92,7 @@ public:
      * @param n Node number in domain aDomain.
      * @param aDomain Domain to which node belongs.
      */
-    RigidArmNode(int n, Domain *aDomain);
+    RigidArmNode(int n, Domain * aDomain);
     /// Destructor.
     virtual ~RigidArmNode(void) { }
 

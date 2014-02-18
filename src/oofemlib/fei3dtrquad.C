@@ -104,7 +104,7 @@ FEI3dTrQuad :: local2global(FloatArray &answer, const FloatArray &lcoords, const
 {
     FloatArray n;
     this->evalN(n, lcoords, cellgeo);
-    answer.resize(0);
+    answer.clear();
     for ( int i = 1; i <= 6; ++i ) {
         answer.add( n.at(i), * cellgeo.giveVertexCoordinates(i) );
     }
@@ -173,7 +173,7 @@ FEI3dTrQuad :: edgeLocal2global(FloatArray &answer, int iedge,
     this->computeLocalEdgeMapping(edgeNodes, iedge);
     this->edgeEvalN(N, iedge, lcoords, cellgeo);
 
-    answer.resize(0);
+    answer.clear();
     for ( int i = 0; i < N.giveSize(); ++i ) {
         answer.add( N(i), * cellgeo.giveVertexCoordinates( edgeNodes(i) ) );
     }
@@ -269,7 +269,7 @@ FEI3dTrQuad :: surfaceLocal2global(FloatArray &answer, int isurf,
     FloatArray N;
     this->surfaceEvalN(N, isurf, lcoords, cellgeo);
 
-    answer.resize(0);
+    answer.clear();
     for ( int i = 0; i < N.giveSize(); ++i ) {
         answer.add( N(i), * cellgeo.giveVertexCoordinates(i) );
     }
@@ -289,8 +289,8 @@ FEI3dTrQuad :: surfaceEvalBaseVectorsAt(FloatArray &G1, FloatArray &G2, const Fl
     FloatMatrix dNdxi;
     this->surfaceEvaldNdxi(dNdxi, lcoords);
 
-    G1.resize(0);
-    G2.resize(0);
+    G1.clear();
+    G2.clear();
     for ( int i = 0; i < 6; ++i ) {
         G1.add( dNdxi(i, 1), * cellgeo.giveVertexCoordinates(i) );
         G2.add( dNdxi(i, 2), * cellgeo.giveVertexCoordinates(i) );

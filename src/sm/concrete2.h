@@ -103,7 +103,7 @@ protected:
     double SEZ;  ///< Current strain in transverse (z) direction.
 
 public:
-    Concrete2MaterialStatus(int n, Domain *d, GaussPoint *g);
+    Concrete2MaterialStatus(int n, Domain * d, GaussPoint * g);
     virtual ~Concrete2MaterialStatus();
     virtual void printOutputAt(FILE *file, TimeStep *tStep)
     { StructuralMaterialStatus :: printOutputAt(file, tStep); }
@@ -177,7 +177,7 @@ private:
     LinearElasticMaterial *linearElasticMaterial;
 
 public:
-    Concrete2(int n, Domain *d);
+    Concrete2(int n, Domain * d);
     virtual ~Concrete2();
 
     virtual void giveRealStressVector_PlateLayer(FloatArray &answer, GaussPoint *gp,

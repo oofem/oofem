@@ -501,8 +501,8 @@ int seekStressStrainGPRecord(Tokenizer *t, int ifstress, int ifstrain,
             return 0;
         }
     } /* else {
-    * if (!strncmp(t->giveToken(1),"status",6)) return 0;
-    * } */
+       * if (!strncmp(t->giveToken(1),"status",6)) return 0;
+       * } */
 
     if ( ifstrain || ifstress ) { // read directly value
         if ( ( pos + stressstraincomp ) > t->giveNumberOfTokens() ) {
@@ -512,9 +512,9 @@ int seekStressStrainGPRecord(Tokenizer *t, int ifstress, int ifstrain,
         sscanf(t->giveToken(pos + stressstraincomp), "%lf", & val);
         return 1;
     } /*else {
-    * // status record
-    *
-    * }*/
+       * // status record
+       *
+       * }*/
 
     return 0;
 }
@@ -548,8 +548,8 @@ int seekAndParseMaterialStatusRecord(Tokenizer *t, char *keyword, int valIndex, 
 
     // seek keyword
     for ( int i = 1; i <= t->giveNumberOfTokens(); i++ ) {
-      //if ( !strncmp(t->giveToken(i), keyword, strlen(keyword) - 1) ) {
-      if ( !strncmp(t->giveToken(i), keyword, strlen(keyword)) ) {
+        //if ( !strncmp(t->giveToken(i), keyword, strlen(keyword) - 1) ) {
+        if ( !strncmp( t->giveToken(i), keyword, strlen(keyword) ) ) {
             // keyword found
             if ( i + valIndex > t->giveNumberOfTokens() ) {
                 return 0;
@@ -606,8 +606,8 @@ int seekBeamRecord(Tokenizer *t, int ifforce, int ifdispl,
 
         pos = 3;
     } /* else {
-    * if (!strncmp(t->giveToken(1),"status",6)) return 0;
-    * } */
+       * if (!strncmp(t->giveToken(1),"status",6)) return 0;
+       * } */
 
     if ( ifforce || ifdispl ) { // read directly value
         if ( ( pos + stressstraincomp ) > t->giveNumberOfTokens() ) {
@@ -617,9 +617,9 @@ int seekBeamRecord(Tokenizer *t, int ifforce, int ifdispl,
         sscanf(t->giveToken(pos + stressstraincomp), "%lf", & val);
         return 1;
     } /*else {
-    * // status record
-    *
-    * }*/
+       * // status record
+       *
+       * }*/
 
     return 0;
 }

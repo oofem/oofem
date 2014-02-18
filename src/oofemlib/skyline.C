@@ -82,7 +82,7 @@ Skyline :: ~Skyline()
     // Destructor.
     if ( this->giveNumberOfRows() ) {
         free(mtrx);
-        delete( adr );
+        delete(adr);
     }
 }
 
@@ -333,7 +333,7 @@ int Skyline :: setInternalStructure(IntArray *a)
     // allocates and built structure according to given
     // array of maximal column heights
     //
-    adr = new IntArray(* a);
+    adr = new IntArray(*a);
     int n = a->giveSize();
     nwk = adr->at(n); // check
     if ( mtrx ) {
@@ -699,7 +699,7 @@ void Skyline :: rbmodes(FloatMatrix &r, int &nse, IntArray &se,
     int i, j, k, ii, jj, kk, lj, uj, li, ui, lk, uk, mi, ise, ib, neq = this->giveNumberOfRows();
     IntArray adrb(7);
     double s, g;
-    FloatArray b(6 * neq);
+    FloatArray b(6 *neq);
 
     /**********************/
     /*  rozklad matice A  */
@@ -809,7 +809,7 @@ void Skyline :: rbmodes(FloatMatrix &r, int &nse, IntArray &se,
             r.resize(neq, ise);
             r.zero();
         } else {
-            r.beEmptyMtrx();
+            r.clear();
         }
 
         for ( i = 1; i <= ise; i++ ) {

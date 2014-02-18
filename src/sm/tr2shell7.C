@@ -175,7 +175,7 @@ Tr2Shell7 :: computeAreaAround(GaussPoint *gp, double xi)
     G2.beColumnOf(Gcov, 2);
     temp.beVectorProductOf(G1, G2);
     double detJ = temp.computeNorm();
-    return detJ * gp->giveWeight();
+    return detJ *gp->giveWeight();
 }
 
 
@@ -189,7 +189,7 @@ Tr2Shell7 :: computeVolumeAroundLayer(GaussPoint *gp, int layer)
     lcoords = * gp->giveCoordinates();
     this->evalInitialCovarBaseVectorsAt(lcoords, Gcov);
     detJ = Gcov.giveDeterminant() * 0.5 * this->layeredCS->giveLayerThickness(layer);
-    return detJ * gp->giveWeight();
+    return detJ *gp->giveWeight();
 }
 
 

@@ -1,0 +1,3 @@
+The sources in this directory illustrate the use of oofemlib from external C/C++ applications.
+
+beam01.C    ->   2d beam example (see InputManual, section examples for reference)

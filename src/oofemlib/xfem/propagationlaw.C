@@ -55,9 +55,9 @@ REGISTER_PropagationLaw(PLDoNothing)
 REGISTER_PropagationLaw(PLCrackPrescribedDir)
 REGISTER_PropagationLaw(PLHoopStressCirc)
 
-PropagationLaw :: PropagationLaw() {}
+PropagationLaw :: PropagationLaw() { }
 
-PropagationLaw :: ~PropagationLaw() {}
+PropagationLaw :: ~PropagationLaw() { }
 
 void PLDoNothing :: giveInputRecord(DynamicInputRecord &input)
 {
@@ -283,7 +283,7 @@ void PLHoopStressCirc :: propagateInterfaces(Domain &iDomain, EnrichmentDomain &
 
                     if ( fabs(sumWiVi) > 1.0e-12 ) {
                         stressVec.beScaled(1.0 / sumWiVi, sumQiWiVi);
-                    } else   {
+                    } else {
                         // Take stress from closest Gauss point
                         int region = 1;
                         bool useCZGP = false;
@@ -298,7 +298,7 @@ void PLHoopStressCirc :: propagateInterfaces(Domain &iDomain, EnrichmentDomain &
 
                         stressVec = ms->giveStressVector();
                     }
-                } else   {
+                } else {
                     // Take stress from closest Gauss point
                     int region = 1;
                     bool useCZGP = false;

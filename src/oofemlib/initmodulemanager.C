@@ -38,10 +38,10 @@
 
 namespace oofem {
 InitModuleManager :: InitModuleManager(EngngModel *emodel) : ModuleManager< InitModule >(emodel)
-{}
+{ }
 
 InitModuleManager :: ~InitModuleManager()
-{}
+{ }
 
 IRResultType
 InitModuleManager :: initializeFrom(InputRecord *ir)

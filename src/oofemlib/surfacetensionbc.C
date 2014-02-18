@@ -186,7 +186,7 @@ void SurfaceTensionBoundaryCondition :: computeTangentFromElement(FloatMatrix &a
             side = 1;
         }
 
-        FEInterpolation2d *fei2d = static_cast< FEInterpolation2d * >( fei );
+        FEInterpolation2d *fei2d = static_cast< FEInterpolation2d * >(fei);
 
         ///@todo More of this grunt work should be moved to the interpolation classes
         FloatMatrix xy(2, nodes);
@@ -197,10 +197,10 @@ void SurfaceTensionBoundaryCondition :: computeTangentFromElement(FloatMatrix &a
             xy.at(2, i) = node->giveCoordinate(2);
         }
 
-        FloatArray tmpA(2 * nodes);
+        FloatArray tmpA(2 *nodes);
         FloatArray es; // Tangent vector to curve
         FloatArray dNds;
-        FloatMatrix B(2, 2 * nodes);
+        FloatMatrix B(2, 2 *nodes);
         B.zero();
         answer.resize(2 * nodes, 2 * nodes);
         answer.zero();
@@ -208,7 +208,7 @@ void SurfaceTensionBoundaryCondition :: computeTangentFromElement(FloatMatrix &a
         if ( e->giveDomain()->isAxisymmetric() ) {
             FloatArray N;
             FloatArray gcoords;
-            FloatArray tmpB(2 * nodes);
+            FloatArray tmpB(2 *nodes);
             for ( int k = 0; k < iRule->giveNumberOfIntegrationPoints(); k++ ) {
                 GaussPoint *gp = iRule->getIntegrationPoint(k);
                 fei2d->edgeEvaldNds( dNds, side, * gp->giveCoordinates(), FEIElementGeometryWrapper(e) );
@@ -265,11 +265,11 @@ void SurfaceTensionBoundaryCondition :: computeTangentFromElement(FloatMatrix &a
             side = 1;
         }
 
-        FEInterpolation3d *fei3d = static_cast< FEInterpolation3d * >( fei );
+        FEInterpolation3d *fei3d = static_cast< FEInterpolation3d * >(fei);
 
         OOFEM_ERROR("SurfaceTensionBoundaryCondition :: assembleVectorFromElement - 3D tangents not implemented yet.");
 
-        FloatMatrix tmp(3 * nodes, 3 * nodes);
+        FloatMatrix tmp(3 *nodes, 3 *nodes);
         FloatMatrix dNdx;
         FloatArray n;
         answer.resize(3 * nodes, 3 * nodes);
@@ -313,7 +313,7 @@ void SurfaceTensionBoundaryCondition :: computeLoadVectorFromElement(FloatArray 
             side = 1;
         }
 
-        FEInterpolation2d *fei2d = static_cast< FEInterpolation2d * >( fei );
+        FEInterpolation2d *fei2d = static_cast< FEInterpolation2d * >(fei);
 
         ///@todo More of this grunt work should be moved to the interpolation classes
         FloatMatrix xy(2, nodes);
@@ -324,7 +324,7 @@ void SurfaceTensionBoundaryCondition :: computeLoadVectorFromElement(FloatArray 
             xy.at(2, i) = node->giveCoordinate(2);
         }
 
-        FloatArray tmp(2 * nodes); // Integrand
+        FloatArray tmp(2 *nodes); // Integrand
         FloatArray es; // Tangent vector to curve
         FloatArray dNds;
         answer.resize(2 * nodes);
@@ -377,8 +377,8 @@ void SurfaceTensionBoundaryCondition :: computeLoadVectorFromElement(FloatArray 
             side = 1;
         }
 
-        FEInterpolation3d *fei3d = static_cast< FEInterpolation3d * >( fei );
-        FloatArray tmp(3 * nodes);
+        FEInterpolation3d *fei3d = static_cast< FEInterpolation3d * >(fei);
+        FloatArray tmp(3 *nodes);
         FloatMatrix dNdx;
         FloatArray n;
         answer.resize(3 * nodes);

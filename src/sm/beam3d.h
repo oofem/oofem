@@ -64,7 +64,7 @@ protected:
     IntArray *dofsToCondense;
 
 public:
-    Beam3d(int n, Domain *d);
+    Beam3d(int n, Domain * d);
     virtual ~Beam3d();
 
     virtual void computeConsistentMassMatrix(FloatMatrix &answer, TimeStep *tStep, double &mass, const double *ipDensity = NULL);

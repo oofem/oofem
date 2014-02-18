@@ -44,8 +44,8 @@ namespace oofem {
 class KelvinChainMaterialStatus : public RheoChainMaterialStatus
 {
 public:
-    KelvinChainMaterialStatus(int n, Domain *d, GaussPoint *g, int nunits);
-    virtual ~KelvinChainMaterialStatus() {}
+    KelvinChainMaterialStatus(int n, Domain * d, GaussPoint * g, int nunits);
+    virtual ~KelvinChainMaterialStatus() { }
 
     virtual void printOutputAt(FILE *file, TimeStep *tStep);
 
@@ -67,8 +67,8 @@ public:
 class KelvinChainMaterial : public RheoChainMaterial
 {
 public:
-    KelvinChainMaterial(int n, Domain *d);
-    virtual ~KelvinChainMaterial() {}
+    KelvinChainMaterial(int n, Domain * d);
+    virtual ~KelvinChainMaterial() { }
 
     // identification and auxiliary functions
     virtual int hasNonLinearBehaviour() { return 0; }
@@ -80,7 +80,7 @@ public:
                                             GaussPoint *gp,
                                             TimeStep *tStep,
                                             ValueModeType mode)
-    { answer.resize(0); }
+    { answer.clear(); }
 
     virtual void  giveEigenStrainVector(FloatArray &answer, GaussPoint *gp, TimeStep *tStep, ValueModeType mode);
 

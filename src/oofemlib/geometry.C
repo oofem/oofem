@@ -50,14 +50,14 @@ REGISTER_Geometry(Circle)
 REGISTER_Geometry(PointSwarm)
 
 BasicGeometry :: BasicGeometry()
-{}
+{ }
 
 BasicGeometry :: BasicGeometry(const BasicGeometry &iBasicGeometry) :
     mVertices(iBasicGeometry.mVertices)
-{}
+{ }
 
 BasicGeometry :: ~BasicGeometry()
-{}
+{ }
 
 // TODO: change to const FloatArray &iVertex
 void BasicGeometry :: setVertex(FloatArray *vertex)
@@ -175,7 +175,7 @@ void Line :: computeIntersectionPoints(Element *element, std :: vector< FloatArr
                 FloatArray answer(2);
                 for ( int j = 1; j <= answer.giveSize(); j++ ) {
                     answer.at(j) = ( 1 - r ) * element->giveDofManager(n1)->giveCoordinate(j)
-                                   + r *element->giveDofManager(n2)->giveCoordinate(j);
+                    + r *element->giveDofManager(n2)->giveCoordinate(j);
                 }
 
                 oIntersectionPoints.push_back(answer);
@@ -282,8 +282,8 @@ Triangle :: Triangle(const FloatArray &iP1, const FloatArray &iP2, const FloatAr
 double Triangle :: getArea()
 {
     return fabs( 0.5 * ( mVertices [ 0 ].at(1) * ( mVertices [ 1 ].at(2) - mVertices [ 2 ].at(2) )
-                         + mVertices [ 1 ].at(1) * ( mVertices [ 2 ].at(2) - mVertices [ 0 ].at(2) ) +
-                         mVertices [ 2 ].at(1) * ( mVertices [ 0 ].at(2) - mVertices [ 1 ].at(2) ) ) );
+                        + mVertices [ 1 ].at(1) * ( mVertices [ 2 ].at(2) - mVertices [ 0 ].at(2) ) +
+                        mVertices [ 2 ].at(1) * ( mVertices [ 0 ].at(2) - mVertices [ 1 ].at(2) ) ) );
 }
 
 double Triangle :: getRadiusOfCircumCircle()
@@ -503,17 +503,17 @@ void Circle :: computeIntersectionPoints(Element *element, std :: vector< FloatA
     if ( intersects(element) ) {
         for ( int i = 1; i <= element->giveNumberOfBoundarySides(); i++ ) {
             std :: vector< FloatArray >oneLineIntersects;
-            FloatArray *a = new FloatArray( * ( element->giveDofManager(i)->giveCoordinates() ) );
+            FloatArray *a = new FloatArray( * ( element->giveDofManager ( i )->giveCoordinates() ) );
             FloatArray *b = NULL;
             if ( i != element->giveNumberOfBoundarySides() ) {
-                b = new FloatArray( * ( element->giveDofManager(i + 1)->giveCoordinates() ) );
+                b = new FloatArray( * ( element->giveDofManager ( i + 1 )->giveCoordinates() ) );
             } else {
-                b = new FloatArray( * ( element->giveDofManager(1)->giveCoordinates() ) );
+                b = new FloatArray( * ( element->giveDofManager ( 1 )->giveCoordinates() ) );
             }
 
             Line l(a, b);
             computeIntersectionPoints(& l, oneLineIntersects);
-            for ( int j = 1; j <= int( oneLineIntersects.size() ); j++ ) {
+            for ( int j = 1; j <= int ( oneLineIntersects.size() ); j++ ) {
                 oIntersectionPoints.push_back(oneLineIntersects [ j - 1 ]);
             }
         }
@@ -632,9 +632,9 @@ void PolygonLine :: computeNormalSignDist(double &oDist, const FloatArray &iPoin
 
     for ( int segId = 1; segId <= numSeg; segId++ ) {
         // Crack segment
-        const FloatArray &crackP1( this->giveVertex(segId) );
+        const FloatArray &crackP1( this->giveVertex ( segId ) );
 
-        const FloatArray &crackP2( this->giveVertex(segId + 1) );
+        const FloatArray &crackP2( this->giveVertex ( segId + 1 ) );
 
         double dist = 0.0;
         if ( segId == 1 ) {
@@ -742,7 +742,7 @@ void PolygonLine :: computeTangentialSignDist(double &oDist, const FloatArray &i
 
 
     const FloatArray &crackPS( this->giveVertex(1) );
-    const FloatArray &crackPE( this->giveVertex(numSeg + 1) );
+    const FloatArray &crackPE( this->giveVertex ( numSeg + 1 ) );
 
     double minDist = min( point.distance(crackPS), point.distance(crackPE) );
     double xiEl = 0.0;
@@ -753,9 +753,9 @@ void PolygonLine :: computeTangentialSignDist(double &oDist, const FloatArray &i
     double arcDistPassed = 0.0, minArcDist = 0.0;
     for ( int segId = 1; segId <= numSeg; segId++ ) {
         // Crack segment
-        const FloatArray &crackP1( this->giveVertex(segId) );
+        const FloatArray &crackP1( this->giveVertex ( segId ) );
 
-        const FloatArray &crackP2( this->giveVertex(segId + 1) );
+        const FloatArray &crackP2( this->giveVertex ( segId + 1 ) );
 
         double distSeg = point.distance(crackP1, crackP2, xiEl);
 
@@ -801,8 +801,8 @@ void PolygonLine :: computeTangentialSignDist(double &oDist, const FloatArray &i
             oDist = sign * minDist;
             return;
         } else if ( minDistSegIndex == numSeg ) {
-            const FloatArray &P1( this->giveVertex(minDistSegIndex) );
-            const FloatArray &P2( this->giveVertex(minDistSegIndex + 1) );
+            const FloatArray &P1( this->giveVertex ( minDistSegIndex ) );
+            const FloatArray &P2( this->giveVertex ( minDistSegIndex + 1 ) );
 
             FloatArray t;
             t.beDifferenceOf(P2, P1);
@@ -824,7 +824,7 @@ void PolygonLine :: computeTangentialSignDist(double &oDist, const FloatArray &i
 }
 
 void PolygonLine :: computeLocalCoordinates(FloatArray &oLocCoord, const FloatArray &iPoint) const
-{}
+{ }
 
 double PolygonLine :: computeLength() const
 {
@@ -840,8 +840,6 @@ double PolygonLine :: computeLength() const
 
 void PolygonLine :: giveSubPolygon(std :: vector< FloatArray > &oPoints, const double &iXiStart, const double &iXiEnd) const
 {
-    printf("Entering PolygonLine :: giveSubPolygon().\n");
-
     double L = computeLength();
     double xSegStart = 0.0, xSegEnd = 0.0;
     double xiSegStart = 0.0, xiSegEnd = 0.0;
@@ -985,15 +983,15 @@ bool PolygonLine :: intersects(Element *element)
     for ( int segId = 1; segId <= numSeg; segId++ ) {
         if ( element->giveGeometryType() == EGT_triangle_1 ) {
             // Crack segment
-            bPoint2 crackP1( this->giveVertex(segId)->at(1), this->giveVertex(segId)->at(2) );
-            bPoint2 crackP2( this->giveVertex(segId + 1)->at(1), this->giveVertex(segId + 1)->at(2) );
+            bPoint2 crackP1( this->giveVertex ( segId )->at(1), this->giveVertex ( segId )->at(2) );
+            bPoint2 crackP2( this->giveVertex ( segId + 1 )->at(1), this->giveVertex ( segId + 1 )->at(2) );
             bSeg2 crackSeg(crackP1, crackP2);
 
 
             // Triangle vertices
-            bPoint2 x1( element->giveNode(1)->giveCoordinate(1), element->giveNode(1)->giveCoordinate(2) );
-            bPoint2 x2( element->giveNode(2)->giveCoordinate(1), element->giveNode(2)->giveCoordinate(2) );
-            bPoint2 x3( element->giveNode(3)->giveCoordinate(1), element->giveNode(3)->giveCoordinate(2) );
+            bPoint2 x1( element->giveNode ( 1 )->giveCoordinate(1), element->giveNode ( 1 )->giveCoordinate(2) );
+            bPoint2 x2( element->giveNode ( 2 )->giveCoordinate(1), element->giveNode ( 2 )->giveCoordinate(2) );
+            bPoint2 x3( element->giveNode ( 3 )->giveCoordinate(1), element->giveNode ( 3 )->giveCoordinate(2) );
 
             bSeg2 edge1(x1, x2);
             bSeg2 edge2(x2, x3);
@@ -1070,18 +1068,18 @@ void PolygonLine :: computeIntersectionPoints(Element *element, std :: vector< F
 
     for ( int i = 1; i <= element->giveNumberOfBoundarySides(); i++ ) {
         std :: vector< FloatArray >oneLineIntersects;
-        FloatArray *a = new FloatArray( * ( element->giveDofManager(i)->giveCoordinates() ) );
+        FloatArray *a = new FloatArray( * ( element->giveDofManager ( i )->giveCoordinates() ) );
         FloatArray *b = NULL;
         if ( i != element->giveNumberOfBoundarySides() ) {
-            b = new FloatArray( * ( element->giveDofManager(i + 1)->giveCoordinates() ) );
+            b = new FloatArray( * ( element->giveDofManager ( i + 1 )->giveCoordinates() ) );
         } else {
-            b = new FloatArray( * ( element->giveDofManager(1)->giveCoordinates() ) );
+            b = new FloatArray( * ( element->giveDofManager ( 1 )->giveCoordinates() ) );
         }
 
         Line l(a, b);
 
         computeIntersectionPoints(& l, oneLineIntersects);
-        for ( int j = 1; j <= int( oneLineIntersects.size() ); j++ ) {
+        for ( int j = 1; j <= int ( oneLineIntersects.size() ); j++ ) {
             // Check that the intersection point has not already been identified.
             // This may happen if the crack intersects the element exactly at a node,
             // so that intersection is detected for both element edges in that node.
@@ -1125,8 +1123,8 @@ void PolygonLine :: computeIntersectionPoints(Line *l, std :: vector< FloatArray
 
 
     // Segment
-    bPoint2 lineP1( l->giveVertex(1)->at(1), l->giveVertex(1)->at(2) );
-    bPoint2 lineP2( l->giveVertex(2)->at(1), l->giveVertex(2)->at(2) );
+    bPoint2 lineP1( l->giveVertex ( 1 )->at(1), l->giveVertex ( 1 )->at(2) );
+    bPoint2 lineP2( l->giveVertex ( 2 )->at(1), l->giveVertex ( 2 )->at(2) );
     bSeg2 lineSeg(lineP1, lineP2);
 
 
@@ -1138,8 +1136,8 @@ void PolygonLine :: computeIntersectionPoints(Line *l, std :: vector< FloatArray
     // overlap with the element
     for ( int segId = 1; segId <= numSeg; segId++ ) {
         // Crack segment
-        bPoint2 crackP1( this->giveVertex(segId)->at(1), this->giveVertex(segId)->at(2) );
-        bPoint2 crackP2( this->giveVertex(segId + 1)->at(1), this->giveVertex(segId + 1)->at(2) );
+        bPoint2 crackP1( this->giveVertex ( segId )->at(1), this->giveVertex ( segId )->at(2) );
+        bPoint2 crackP2( this->giveVertex ( segId + 1 )->at(1), this->giveVertex ( segId + 1 )->at(2) );
         bSeg2 crackSeg(crackP1, crackP2);
 
         bPoint2 intersectionPoint(0.0, 0.0);

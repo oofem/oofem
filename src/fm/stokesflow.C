@@ -53,9 +53,9 @@ StokesFlow :: StokesFlow(int i, EngngModel *_master) : FluidModel(i, _master)
 {
     this->nMethod = NULL;
     this->ndomains = 1;
-    this->hasAdvanced = false;
     this->stiffnessMatrix = NULL;
     this->meshqualityee = NULL;
+    this->velocityPressureField = NULL;
 #ifdef __PARALLEL_MODE
     commMode = ProblemCommMode__NODE_CUT;
 #endif
@@ -65,14 +65,8 @@ StokesFlow :: ~StokesFlow()
 {
     delete this->velocityPressureField;
     delete this->nMethod;
-
-    if ( this->stiffnessMatrix ) {
-        delete this->stiffnessMatrix;
-    }
-
-    if ( this->meshqualityee ) {
-        delete this->meshqualityee;
-    }
+    delete this->stiffnessMatrix;
+    delete this->meshqualityee;
 }
 
 IRResultType StokesFlow :: initializeFrom(InputRecord *ir)
@@ -92,7 +86,12 @@ IRResultType StokesFlow :: initializeFrom(InputRecord *ir)
     this->deltaT = 1.0;
     IR_GIVE_OPTIONAL_FIELD(ir, deltaT, _IFT_StokesFlow_deltat);
 
+    delete this->velocityPressureField;
     this->velocityPressureField = new PrimaryField(this, 1, FT_VelocityPressure, EID_MomentumBalance_ConservationEquation, 1);
+    delete this->stiffnessMatrix;
+    this->stiffnessMatrix = NULL;
+    delete this->meshqualityee;
+    this->meshqualityee = NULL;
 
     this->ts = TS_OK;
 
@@ -129,10 +128,7 @@ void StokesFlow :: solveYourselfAt(TimeStep *tStep)
     int neq = this->giveNumberOfDomainEquations( 1, EModelDefaultEquationNumbering() );
 
     // Move solution space to current time step
-    if ( !hasAdvanced ) {
-        velocityPressureField->advanceSolution(tStep);
-        hasAdvanced = true;
-    }
+    velocityPressureField->advanceSolution(tStep);
 
     // Point pointer SolutionVector to current solution in velocityPressureField
     solutionVector = velocityPressureField->giveSolutionVector(tStep);
@@ -232,7 +228,6 @@ void StokesFlow :: updateComponent(TimeStep *tStep, NumericalCmpn cmpn, Domain *
 
 void StokesFlow :: updateYourself(TimeStep *tStep)
 {
-    hasAdvanced = false;
     this->updateInternalState(tStep);
     EngngModel :: updateYourself(tStep);
 }

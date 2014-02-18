@@ -55,7 +55,7 @@ protected:
     static FEI1dLin interpolation;
 
 public:
-    QTruss1dGrad(int n, Domain *d);
+    QTruss1dGrad(int n, Domain * d);
     virtual ~QTruss1dGrad() { }
 
     virtual const char *giveInputRecordName() const { return _IFT_QTruss1dGrad_Name; }
@@ -64,10 +64,6 @@ public:
     virtual MaterialMode giveMaterialMode() { return _1dMat; }
     virtual IRResultType initializeFrom(InputRecord *ir);
     virtual int computeNumberOfDofs() { return 5; }
-    int getNprimNodes() { return 3; }
-    int getNprimVars() { return 1; }
-    int getNsecNodes() { return 2; }
-    int getNsecVars() { return 1; }
 
 protected:
     virtual void computeBkappaMatrixAt(GaussPoint *gp, FloatMatrix &answer);

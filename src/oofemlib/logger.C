@@ -37,7 +37,7 @@
 
 #include <cstdarg>
 
-#if defined( __GNUC__ ) && defined( HAVE_EXECINFO_H )
+#if defined ( __GNUC__ ) && defined ( HAVE_EXECINFO_H )
  #include <cxxabi.h>
  #include <execinfo.h>
  #include <cstdio>
@@ -153,17 +153,17 @@ Logger :: ~Logger()
 }
 
 void
-Logger :: appendlogTo(char *fname)
+Logger :: appendlogTo(const std::string &fname)
 {
     FILE *stream = NULL;
     if ( this->closeFlag ) {
-        stream = freopen(fname, "w", mylogStream);
+        stream = freopen(fname.c_str(), "w", mylogStream);
     } else {
-        stream = fopen(fname, "w");
+        stream = fopen(fname.c_str(), "w");
     }
 
     if ( stream == NULL ) {
-        OOFEM_WARNING2("Logger::appendlogTo : file opening error (%s)", fname);
+        OOFEM_WARNING2("Logger::appendlogTo : file opening error (%s)", fname.c_str());
     } else {
         mylogStream = stream;
     }
@@ -206,7 +206,7 @@ Logger :: writeELogMsg(logLevelType level, const char *_file, int _line, const c
         if ( _file ) {
             fprintf(mylogStream, "%s\n%s: (%s:%d)\n", LOG_ERR_HEADER, giveLevelName(level), _file, _line);
         } else {
-            fprintf( mylogStream, "%s\n%s:\n", LOG_ERR_HEADER, giveLevelName(level) );
+            fprintf(mylogStream, "%s\n%s:\n", LOG_ERR_HEADER, giveLevelName(level) );
         }
 
         va_start(args, format);
@@ -227,7 +227,7 @@ const char *
 Logger :: giveLevelName(logLevelType l) const
 {
     switch ( l ) {
-    //case LOG_LEVEL_FATAL:
+        //case LOG_LEVEL_FATAL:
     case LOG_LEVEL_ERROR:
         return "Error";
 

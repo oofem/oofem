@@ -46,12 +46,12 @@ REGISTER_ExportModule(DofManExportModule)
 
 DofManExportModule :: DofManExportModule(int n, EngngModel *e) : ExportModule(n, e)
 {
-    this->dofManList.resize(0);
+    this->dofManList.clear();
 }
 
 
 DofManExportModule :: ~DofManExportModule()
-{}
+{ }
 
 
 IRResultType
@@ -88,7 +88,7 @@ DofManExportModule :: doOutput(TimeStep *tStep, bool forcedOutput)
 
 
     IntArray dofManMap, dofMap, eqnMap;
-    StructuralEngngModel *strEngMod = dynamic_cast< StructuralEngngModel * >( emodel );
+    StructuralEngngModel *strEngMod = dynamic_cast< StructuralEngngModel * >(emodel);
     if ( strEngMod ) {
         strEngMod->buildReactionTable(dofManMap, dofMap, eqnMap, tStep, domainIndex);
         strEngMod->computeReaction(reactions, tStep, 1);

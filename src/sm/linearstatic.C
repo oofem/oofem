@@ -236,7 +236,7 @@ void LinearStatic :: solveYourselfAt(TimeStep *tStep)
         stiffnessMatrix->buildInternalStructure( this, 1, EID_MomentumBalance, EModelDefaultEquationNumbering() );
 
         this->assemble( stiffnessMatrix, tStep, EID_MomentumBalance, StiffnessMatrix,
-                        EModelDefaultEquationNumbering(), this->giveDomain(1) );
+                       EModelDefaultEquationNumbering(), this->giveDomain(1) );
 
         initFlag = 0;
     }
@@ -257,7 +257,7 @@ void LinearStatic :: solveYourselfAt(TimeStep *tStep)
     loadVector.resize( this->giveNumberOfDomainEquations( 1, EModelDefaultEquationNumbering() ) );
     loadVector.zero();
     this->assembleVector( loadVector, tStep, EID_MomentumBalance, ExternalForcesVector, VM_Total,
-                          EModelDefaultEquationNumbering(), this->giveDomain(1) );
+                         EModelDefaultEquationNumbering(), this->giveDomain(1) );
 
     //
     // internal forces (from Dirichlet b.c's, or thermal expansion, etc.)
@@ -265,7 +265,7 @@ void LinearStatic :: solveYourselfAt(TimeStep *tStep)
     FloatArray internalForces( this->giveNumberOfDomainEquations( 1, EModelDefaultEquationNumbering() ) );
     internalForces.zero();
     this->assembleVector( internalForces, tStep, EID_MomentumBalance, InternalForcesVector, VM_Total,
-                          EModelDefaultEquationNumbering(), this->giveDomain(1) );
+                         EModelDefaultEquationNumbering(), this->giveDomain(1) );
 
     loadVector.subtract(internalForces);
     

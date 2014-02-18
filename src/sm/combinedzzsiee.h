@@ -59,7 +59,9 @@ protected:
 
 public:
     /// Constructor
-    CombinedZZSIErrorEstimator(int n, Domain *d) : ErrorEstimator(n, d), zzee(n, d), siee(n, d) { eeType = EET_CZZSI; }
+    CombinedZZSIErrorEstimator(int n, Domain * d) : ErrorEstimator(n, d), zzee(n, d), siee(n, d) {
+        eeType = EET_CZZSI;
+    }
     /// Destructor
     virtual ~CombinedZZSIErrorEstimator() { }
 
@@ -95,7 +97,7 @@ protected:
 
 public:
     /// Constructor
-    CombinedZZSIRemeshingCriteria(int n, ErrorEstimator *e);
+    CombinedZZSIRemeshingCriteria(int n, ErrorEstimator * e);
     /// Destructor
     virtual ~CombinedZZSIRemeshingCriteria() { }
 

@@ -62,6 +62,7 @@ set (sm_crosssection
 
 set (sm_emodel
     structengngmodel.C
+    staticstructural.C
     linearstatic.C
     nlinearstatic.C
     xfemstatic.C
@@ -74,7 +75,6 @@ set (sm_emodel
     diidynamic.C
     nldeidynamic.C
     incrementallinearstatic.C
-    fracturemanager.C
     )
 
 set (sm_loads
@@ -109,7 +109,6 @@ set (sm_material
     isointerfacedamage02.C
     j2mat.C
     mat_cebfip90.C
-    hellmat.C
     mdm.C
     compodamagemat.C
     micromaterial.C
@@ -167,12 +166,18 @@ set (sm_status
     microplanematerial.C microplanematerial_bazant.C
     )
 
+set (sm_xfem
+	xfem/enrichmentitems/crack.C
+	)
+
 set (sm_unsorted
     particle.C
     refinedelement.C
     refinedmesh.C
     microplane.C
     gpinitmodule.C
+    stressstrainbasevector.C stressvector.C strainvector.C
+    mappers/primvarmapper.C
     )
 
 set (sm_parallel
@@ -201,6 +206,7 @@ set (sm
     ${sm_export}
     ${sm_barrier}
     ${sm_error}
+    ${sm_xfem}
     ${sm_unsorted}
     ${sm_parallel}
     ${sm_obsolete}

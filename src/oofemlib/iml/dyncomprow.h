@@ -72,9 +72,9 @@ public:
      */
     DynCompRow();
     /// Copy constructor
-    DynCompRow(const DynCompRow &S);
+    DynCompRow(const DynCompRow & S);
     /// Assignment operator
-    DynCompRow &operator=(const DynCompRow &C);
+    DynCompRow &operator = ( const DynCompRow & C );
     /// Destructor
     virtual ~DynCompRow();
 
@@ -115,9 +115,9 @@ protected:
     /*  General access function (slow) */
     /***********************************/
     /// implements 0-based access
-    double operator()(int i, int j) const;
+    double operator() (int i, int j) const;
     /// implements 0-based access
-    double &operator()(int i, int j);
+    double &operator() (int i, int j);
 
     /// returns the column index of given column at given row, else returns zero.
     int giveColIndx(int row, int col) const;

@@ -94,7 +94,7 @@ protected:
     }
 
 public:
-    Quad1MindlinShell3D(int n, Domain *d);
+    Quad1MindlinShell3D(int n, Domain * d);
     virtual ~Quad1MindlinShell3D();
 
     virtual FEInterpolation *giveInterpolation() const;
@@ -147,6 +147,7 @@ protected:
     virtual void computeSurfaceLoadVectorAt(FloatArray &answer, Load *load, int iSurf, TimeStep *tStep, ValueModeType mode);
     virtual void computeBmatrixAt(GaussPoint *gp, FloatMatrix &answer, int = 1, int = ALL_STRAINS);
 
+    virtual void computeStrainVector(FloatArray &answer, GaussPoint *gp, TimeStep *tStep);
     virtual void computeStressVector(FloatArray &answer, const FloatArray &strain, GaussPoint *gp, TimeStep *tStep);
     virtual void computeConstitutiveMatrixAt(FloatMatrix &answer, MatResponseMode rMode, GaussPoint *gp, TimeStep *tStep);
 
@@ -155,11 +156,12 @@ protected:
     virtual double computeEdgeVolumeAround(GaussPoint *gp, int iEdge);
     virtual void computeEdgeIpGlobalCoords(FloatArray &answer, GaussPoint *gp, int iEdge);
     virtual int computeLoadLEToLRotationMatrix(FloatMatrix &answer, int iEdge, GaussPoint *gp);
-    //virtual void computeSurfaceNMatrixAt(FloatMatrix &answer, GaussPoint *gp) { answer.resize(0, 0); }
-    //virtual void giveSurfaceDofMapping(IntArray &answer, int iSurf) const { answer.resize(0); }
+    //virtual void computeSurfaceNMatrixAt(FloatMatrix &answer, GaussPoint *gp) { answer.clear(); }
+    //virtual void giveSurfaceDofMapping(IntArray &answer, int iSurf) const { answer.clear(); }
     //virtual IntegrationRule *GetSurfaceIntegrationRule(int i) { return NULL; }
     //virtual double computeSurfaceVolumeAround(GaussPoint *gp, int iSurf) { return 0.; }
-    //virtual void computeSurfIpGlobalCoords(FloatArray &answer, GaussPoint *gp, int iSurf) { answer.resize(0); }
+    //virtual void computeSurfIpGlobalCoords(FloatArray &answer, GaussPoint *gp, int iSurf) { answer.clear(); }
+    void splitUnknowns (FloatArray &shellUnknowns, FloatArray &drillUnknowns, FloatArray &unknowns);
 };
 } // end namespace oofem
 #endif // quad1mindlinshell3d_h

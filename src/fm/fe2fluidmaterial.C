@@ -66,7 +66,6 @@ void FE2FluidMaterialStatus :: setTimeStep(TimeStep *tStep)
 
 void FE2FluidMaterial :: computeDeviatoricStressVector(FloatArray &answer, GaussPoint *gp, const FloatArray &eps, TimeStep *tStep)
 {
-    // This assumes that the RVE doesn't have any pores.
     double r_vol;
     this->computeDeviatoricStressVector(answer, r_vol, gp, eps, 0.0, tStep);
     if ( gp->giveMaterialMode() == _2dFlow ) {
@@ -113,7 +112,22 @@ void FE2FluidMaterial :: giveDeviatoricStiffnessMatrix(FloatMatrix &answer, MatR
     ms->computeTangents(tStep);
     if ( mode == TangentStiffness ) {
         answer = ms->giveDeviatoricTangent();
-#ifdef DEBUG_TANGENT
+    } else {
+        OOFEM_ERROR("Mode not implemented");
+    }
+}
+
+void FE2FluidMaterial :: giveStiffnessMatrices(FloatMatrix &dsdd, FloatArray &dsdp, FloatArray &dedd, double &dedp,
+                                               MatResponseMode mode, GaussPoint *gp, TimeStep *tStep)
+{
+    FE2FluidMaterialStatus *ms = static_cast< FE2FluidMaterialStatus * >( this->giveStatus(gp) );
+    ms->computeTangents(tStep);
+    if ( mode == TangentStiffness ) {
+        dsdd = ms->giveDeviatoricTangent();
+        dsdp = ms->giveDeviatoricPressureTangent();
+        dedd = ms->giveVolumetricDeviatoricTangent();
+        dedp = ms->giveVolumetricPressureTangent();
+#if 0
         // Numerical ATS for debugging
         FloatArray tempStrain(3);
         tempStrain.zero();
@@ -149,28 +163,16 @@ void FE2FluidMaterial :: giveDeviatoricStiffnessMatrix(FloatMatrix &answer, MatR
         numericalATS.setColumn(dsig22, 2);
         numericalATS.setColumn(dsig12, 3);
         printf("Analytical deviatoric tangent = ");
-        answer.printYourself();
+        dsdd.printYourself();
         printf("Numerical deviatoric tangent = ");
         numericalATS.printYourself();
-        numericalATS.subtract(answer);
+        numericalATS.subtract(dsdd);
         double norm = numericalATS.computeFrobeniusNorm();
-        if ( norm > answer.computeFrobeniusNorm() * DEBUG_ERR && norm > 0.0 ) {
+        if ( norm > dsdd.computeFrobeniusNorm() * DEBUG_ERR && norm > 0.0 ) {
             OOFEM_ERROR("Error in deviatoric tangent");
         }
-
 #endif
-    } else {
-        OOFEM_ERROR("Mode not implemented");
-    }
-}
-
-void FE2FluidMaterial :: giveDeviatoricPressureStiffness(FloatArray &answer, MatResponseMode mode, GaussPoint *gp, TimeStep *tStep)
-{
-    FE2FluidMaterialStatus *ms = static_cast< FE2FluidMaterialStatus * >( this->giveStatus(gp) );
-    ms->computeTangents(tStep);
-    if ( mode == TangentStiffness ) {
-        answer = ms->giveDeviatoricPressureTangent();
-#ifdef DEBUG_TANGENT
+#if 0
         // Numerical ATS for debugging
         FloatArray strain(3);
         strain.zero();
@@ -185,28 +187,16 @@ void FE2FluidMaterial :: giveDeviatoricPressureStiffness(FloatArray &answer, Mat
         dsigh.times(1 / h);
 
         printf("Analytical deviatoric pressure tangent = ");
-        answer.printYourself();
+        dsdp.printYourself();
         printf("Numerical deviatoric pressure tangent = ");
         dsigh.printYourself();
-        dsigh.subtract(answer);
+        dsigh.subtract(dsdp);
         double norm = dsigh.computeNorm();
-        if ( norm > answer.computeNorm() * DEBUG_ERR && norm > 0.0 ) {
+        if ( norm > dsdp.computeNorm() * DEBUG_ERR && norm > 0.0 ) {
             OOFEM_ERROR("Error in deviatoric pressure tangent");
         }
-
 #endif
-    } else {
-        OOFEM_ERROR("Mode not implemented");
-    }
-}
-
-void FE2FluidMaterial :: giveVolumetricDeviatoricStiffness(FloatArray &answer, MatResponseMode mode, GaussPoint *gp, TimeStep *tStep)
-{
-    FE2FluidMaterialStatus *ms = static_cast< FE2FluidMaterialStatus * >( this->giveStatus(gp) );
-    ms->computeTangents(tStep);
-    if ( mode == TangentStiffness ) {
-        answer = ms->giveVolumetricDeviatoricTangent();
-#ifdef DEBUG_TANGENT
+#if 0
         // Numerical ATS for debugging
         FloatArray tempStrain(3);
         tempStrain.zero();
@@ -233,28 +223,16 @@ void FE2FluidMaterial :: giveVolumetricDeviatoricStiffness(FloatArray &answer, M
         dvol.at(2) += 1.0;
 
         printf("Analytical volumetric deviatoric tangent = ");
-        answer.printYourself();
+        dedd.printYourself();
         printf("Numerical volumetric deviatoric tangent = ");
         dvol.printYourself();
-        dvol.subtract(answer);
+        dvol.subtract(dedd);
         double norm = dvol.computeNorm();
-        if ( norm > answer.computeNorm() * DEBUG_ERR && norm > 0.0 ) {
+        if ( norm > dedd.computeNorm() * DEBUG_ERR && norm > 0.0 ) {
             OOFEM_ERROR("Error in volumetric deviatoric tangent");
         }
-
 #endif
-    } else {
-        OOFEM_ERROR("Mode not implemented");
-    }
-}
-
-void FE2FluidMaterial :: giveVolumetricPressureStiffness(double &answer, MatResponseMode mode, GaussPoint *gp, TimeStep *tStep)
-{
-    FE2FluidMaterialStatus *ms = static_cast< FE2FluidMaterialStatus * >( this->giveStatus(gp) );
-    ms->computeTangents(tStep);
-    if ( mode == TangentStiffness ) {
-        answer = ms->giveVolumetricPressureTangent();
-#ifdef DEBUG_TANGENT
+#if 0
         // Numerical ATS for debugging
         FloatArray strain(3);
         strain.zero();
@@ -271,19 +249,13 @@ void FE2FluidMaterial :: giveVolumetricPressureStiffness(double &answer, MatResp
         printf("Numerical volumetric pressure tangent = %e\n", dvol);
 
         double norm = fabs(dvol - answer);
-        if ( norm > fabs(answer) * DEBUG_ERR && norm > 0.0 ) {
+        if ( norm > fabs(dedp) * DEBUG_ERR && norm > 0.0 ) {
             OOFEM_ERROR("Error in volumetric pressure tangent");
         }
-
 #endif
     } else {
         OOFEM_ERROR("Mode not implemented");
     }
-}
-
-int FE2FluidMaterial :: hasMaterialModeCapability(MaterialMode mode)
-{
-    return mode == _2dFlow || mode == _3dFlow;
 }
 
 IRResultType FE2FluidMaterial :: initializeFrom(InputRecord *ir)
@@ -354,7 +326,7 @@ bool FE2FluidMaterialStatus :: createRVE(int n, GaussPoint *gp, const std :: str
     em->giveNextStep(); // Makes sure there is a timestep (which we will modify before solving a step)
     em->init();
 
-    this->rve = dynamic_cast< StokesFlow * >( em );
+    this->rve = dynamic_cast< StokesFlow * >(em);
     if ( !this->rve ) {
         return false;
     }

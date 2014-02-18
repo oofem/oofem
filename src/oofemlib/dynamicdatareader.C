@@ -74,7 +74,7 @@ DynamicDataReader :: finish()
 {
     // Not sure if i need to do this;
     for ( std :: list< InputRecord * > :: iterator tempit = this->recordList.begin(); tempit != this->recordList.end(); ++tempit ) {
-        delete * tempit;
+        delete *tempit;
     }
     this->recordList.clear();
 }

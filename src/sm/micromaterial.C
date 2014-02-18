@@ -99,8 +99,8 @@ MicroMaterial :: MicroMaterial(int n, Domain *d) : StructuralMaterial(n, d), Unk
     this->microBoundaryDofs = NULL;
     this->microInternalDofs = NULL;
     this->microDefaultDofs = NULL;
-    this->microBoundaryDofsArr.resize(0);
-    this->microInternalDofsArr.resize(0);
+    this->microBoundaryDofsArr.clear();
+    this->microInternalDofsArr.clear();
     this->microMatIsUsed = false;
 }
 
@@ -390,8 +390,8 @@ void MicroMaterial :: giveMacroStiffnessMatrix(FloatMatrix &answer, TimeStep *tS
 
     //     IntArray interiorDofNode; //equation numbers to be condensed out, sorted
     //     IntArray boundaryDofNode;//equation numbers in rows (or columns) of stiffness matrix without interior nodes, sorted
-    //     interiorDofNode.resize(0);
-    //     boundaryDofNode.resize(0);
+    //     interiorDofNode.clear();
+    //     boundaryDofNode.clear();
     //     for ( i = 1; i <= microDomain->giveNumberOfDofManagers(); i++){
     //       DofMan = microDomain->giveDofManager(i);
     //       for ( j = 1; j <= DofMan->giveNumberOfDofs(); j++){

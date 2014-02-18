@@ -50,9 +50,9 @@ class FEI2dLineQuad;
  * @author Mikael Öhman
  */
 class Line2BoundaryElement :
-    public FMElement,
-    public SpatialLocalizerInterface,
-    public EIPrimaryUnknownMapperInterface
+public FMElement,
+public SpatialLocalizerInterface,
+public EIPrimaryUnknownMapperInterface
 {
 protected:
     static FEI2dLineQuad fei;
@@ -63,12 +63,12 @@ public:
      * @param n Element's number.
      * @param d Pointer to the domain to which element belongs.
      */
-    Line2BoundaryElement(int n, Domain *d);
+    Line2BoundaryElement(int n, Domain * d);
     /// Destructor.
     virtual ~Line2BoundaryElement();
 
-    virtual void giveCharacteristicVector(FloatArray &answer, CharType type, ValueModeType mode, TimeStep *tStep) { answer.resize(0); }
-    virtual void giveCharacteristicMatrix(FloatMatrix &answer, CharType type, TimeStep *tStep) { answer.resize(0, 0); }
+    virtual void giveCharacteristicVector(FloatArray &answer, CharType type, ValueModeType mode, TimeStep *tStep) { answer.clear(); }
+    virtual void giveCharacteristicMatrix(FloatMatrix &answer, CharType type, TimeStep *tStep) { answer.clear(); }
 
     virtual void giveDofManDofIDMask(int i, EquationID eid, IntArray &nodeDofIDMask) const;
 

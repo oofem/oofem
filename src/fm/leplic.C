@@ -71,7 +71,7 @@ LEPlicElementInterface :: isBoundary()
         for ( i = 1; i <= nneighbr; i++ ) {
             ineighbr = neighborList.at(i);
             if ( ( ineghbrInterface =
-                       static_cast< LEPlicElementInterface * >( domain->giveElement(ineighbr)->giveInterface(LEPlicElementInterfaceType) ) ) ) {
+                      static_cast< LEPlicElementInterface * >( domain->giveElement(ineighbr)->giveInterface(LEPlicElementInterfaceType) ) ) ) {
                 fvk = ineghbrInterface->giveTempVolumeFraction();
                 if ( fvk < 1.0 ) {
                     return true;
@@ -152,7 +152,7 @@ LEPlic :: updatePosition(TimeStep *tStep)
     // to reconstruct interface (normal, constant) on original grid
     this->doInterfaceReconstruction(tStep, false, true);
 #ifdef __OOFEG
-    ESIEventLoop( NO, const_cast< char * >( "doInterfaceReconstruction Finished; Press Ctrl-p to continue" ) );
+    ESIEventLoop( NO, const_cast< char * >("doInterfaceReconstruction Finished; Press Ctrl-p to continue") );
     //ESIEventLoop (YES, "doInterfaceReconstruction Finished; Press Ctrl-p to continue");
 #endif
 }
@@ -181,7 +181,7 @@ LEPlic :: doLagrangianPhase(TimeStep *tStep)
 
     for ( i = 1; i <= ndofman; i++ ) {
         dman = domain->giveDofManager(i);
-        inode = dynamic_cast< Node * >( dman );
+        inode = dynamic_cast< Node * >(dman);
         // skip dofmanagers with no position information
         if ( !inode ) {
             continue;
@@ -326,7 +326,7 @@ LEPlic :: doInterfaceRemapping(TimeStep *tStep)
                             matVolSum += in_vol;
                         }
                     }
-                } catch ( GT_Exception &c ) {
+                } catch(GT_Exception & c) {
                     c.print();
 
                     neighbrNum = neighbours.at(in);
@@ -488,7 +488,7 @@ LEPlic :: doCellDLS(FloatArray &fvgrad, int ie, bool coord_upd, bool vof_temp_fl
                 }
 
                 if ( ( ineghbrInterface =
-                           static_cast< LEPlicElementInterface * >( domain->giveElement(ineighbr)->giveInterface(LEPlicElementInterfaceType) ) ) ) {
+                          static_cast< LEPlicElementInterface * >( domain->giveElement(ineighbr)->giveInterface(LEPlicElementInterfaceType) ) ) ) {
                     if ( vof_temp_flag ) {
                         fvk = ineghbrInterface->giveTempVolumeFraction();
                     } else {

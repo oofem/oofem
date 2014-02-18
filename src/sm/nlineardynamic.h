@@ -108,32 +108,19 @@ protected:
     FloatArray previousTotalDisplacement, totalDisplacement,  incrementOfDisplacement;
     FloatArray internalForces, forcesVector;
 
-    /// A load vector already applied, which does not scales.
-    FloatArray initialLoadVector;
-    FloatArray incrementalLoadVector;
-
-    /// A load vector which does not scale for prescribed DOFs.
-    FloatArray initialLoadVectorOfPrescribed;
-
-    /// incremental Load Vector for prescribed DOFs.
-    FloatArray incrementalLoadVectorOfPrescribed;
-
     int currentIterations, totIterations, MANRMSteps;
     int commInitFlag;
     int nonlocalStiffnessFlag;
-    NM_Status numMetStatus;
     /// Numerical method used to solve the problem.
     SparseNonLinearSystemNM *nMethod;
     /// Intrinsic time increment.
     double deltaT;
 
-    SparseNonLinearSystemNM :: referenceLoadInputModeType refLoadInputMode;
-
     virtual void giveElementCharacteristicMatrix(FloatMatrix &answer, int num,
                                                  CharType type, TimeStep *tStep, Domain *domain);
 
 public:
-    NonLinearDynamic(int i, EngngModel *_master = NULL);
+    NonLinearDynamic(int i, EngngModel * _master = NULL);
     virtual ~NonLinearDynamic();
 
     virtual void solveYourself();
@@ -144,7 +131,7 @@ public:
     virtual void printDofOutputAt(FILE *stream, Dof *iDof, TimeStep *tStep);
 
     virtual void updateYourself(TimeStep *tStep);
-    virtual void updateComponent(TimeStep * tStep, NumericalCmpn, Domain * d);
+    virtual void updateComponent(TimeStep *tStep, NumericalCmpn, Domain *d);
     virtual void updateAttributes(MetaStep *mStep);
 
     virtual double giveUnknownComponent(ValueModeType type, TimeStep *tStep, Domain *d, Dof *dof);
@@ -193,11 +180,6 @@ protected:
 
     void proceedStep(int di, TimeStep *tStep);
     void determineConstants(TimeStep *tStep);
-    void computeExternalLoadReactionContribution(FloatArray &reactions, TimeStep *tStep, int di);
-    void assembleIncrementalReferenceLoadVectors(FloatArray &_incrementalLoadVector,
-                                                 FloatArray &_incrementalLoadVectorOfPrescribed,
-                                                 SparseNonLinearSystemNM :: referenceLoadInputModeType _refMode,
-                                                 Domain *sourceDomain, EquationID ut, TimeStep *tStep);
 #ifdef __PARALLEL_MODE
     /** Packs receiver data when rebalancing load. When rebalancing happens, the local numbering will be lost on majority of processors.
      *  Instead of identifying values of solution vectors that have to be send/received and then performing renumbering, all solution vectors

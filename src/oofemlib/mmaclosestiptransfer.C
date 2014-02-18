@@ -38,7 +38,7 @@
 #include "material.h"
 #include "gausspoint.h"
 #include "matstatmapperint.h"
-#include "xfemelementinterface.h"
+#include "xfem/xfemelementinterface.h"
 #include "structuralinterfacematerial.h"
 
 namespace oofem {
@@ -84,7 +84,7 @@ int
 MMAClosestIPTransfer :: mapStatus(MaterialStatus &oStatus) const
 {
     if ( mpMaterialStatus != NULL ) {
-        MaterialStatusMapperInterface &interface = dynamic_cast< MaterialStatusMapperInterface & >( oStatus );
+        MaterialStatusMapperInterface &interface = dynamic_cast< MaterialStatusMapperInterface & >(oStatus);
         interface.copyStateVariables(* mpMaterialStatus);
 
         return 1;

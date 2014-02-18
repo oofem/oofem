@@ -68,7 +68,7 @@ public:
      * @param n Node number in domain aDomain.
      * @param aDomain Domain to which node belongs.
      */
-    SlaveNode(int n, Domain *aDomain) : Node(n, aDomain) { }
+    SlaveNode(int n, Domain * aDomain) : Node(n, aDomain) { }
     /// Destructor.
     virtual ~SlaveNode(void) { }
 

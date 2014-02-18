@@ -71,7 +71,7 @@ Tet21Stokes :: Tet21Stokes(int n, Domain *aDomain) : FMElement(n, aDomain)
 }
 
 Tet21Stokes :: ~Tet21Stokes()
-{}
+{ }
 
 void Tet21Stokes :: computeGaussPoints()
 {
@@ -108,7 +108,7 @@ void Tet21Stokes :: giveDofManDofIDMask(int inode, EquationID ut, IntArray &answ
         if ( ut == EID_MomentumBalance || ut == EID_MomentumBalance_ConservationEquation ) {
             answer.setValues(3, V_u, V_v, V_w);
         } else if ( ut == EID_ConservationEquation ) {
-            answer.resize(0);
+            answer.clear();
         } else {
             OOFEM_ERROR("Tet21Stokes :: giveDofManDofIDMask: Unknown equation id encountered");
         }
@@ -188,7 +188,7 @@ void Tet21Stokes :: computeExternalForcesVector(FloatArray &answer, TimeStep *tS
     FloatArray vec;
 
     int nLoads = this->boundaryLoadArray.giveSize() / 2;
-    answer.resize(0);
+    answer.clear();
 
     for ( int i = 1; i <= nLoads; i++ ) {  // For each Neumann boundary condition
         load_number = this->boundaryLoadArray.at(2 * i - 1);
@@ -197,7 +197,7 @@ void Tet21Stokes :: computeExternalForcesVector(FloatArray &answer, TimeStep *tS
         ltype = load->giveBCGeoType();
 
         if ( ltype == SurfaceLoadBGT ) {
-            this->computeBoundaryLoadVector(vec, static_cast< BoundaryLoad * >( load ), load_id, ExternalForcesVector, VM_Total, tStep);
+            this->computeBoundaryLoadVector(vec, static_cast< BoundaryLoad * >(load), load_id, ExternalForcesVector, VM_Total, tStep);
             answer.add(vec);
         }
     }
@@ -216,7 +216,7 @@ void Tet21Stokes :: computeExternalForcesVector(FloatArray &answer, TimeStep *tS
 void Tet21Stokes :: computeLoadVector(FloatArray &answer, Load *load, CharType type, ValueModeType mode, TimeStep *tStep)
 {
     if ( type != ExternalForcesVector ) {
-        answer.resize(0);
+        answer.clear();
         return;
     }
 
@@ -252,7 +252,7 @@ void Tet21Stokes :: computeLoadVector(FloatArray &answer, Load *load, CharType t
 void Tet21Stokes :: computeBoundaryLoadVector(FloatArray &answer, BoundaryLoad *load, int iSurf, CharType type, ValueModeType mode, TimeStep *tStep)
 {
     if ( type != ExternalForcesVector ) {
-        answer.resize(0);
+        answer.clear();
         return;
     }
 
@@ -260,7 +260,7 @@ void Tet21Stokes :: computeBoundaryLoadVector(FloatArray &answer, BoundaryLoad *
     answer.zero();
 
     if ( load->giveType() == TransmissionBC ) { // Neumann boundary conditions (traction)
-        BoundaryLoad *boundaryLoad = static_cast< BoundaryLoad * >( load );
+        BoundaryLoad *boundaryLoad = static_cast< BoundaryLoad * >(load);
 
         int numberOfSurfaceIPs = ( int ) ceil( ( boundaryLoad->giveApproxOrder() + 1. ) / 2. ) * 2; ///@todo Check this.
 
@@ -329,13 +329,9 @@ void Tet21Stokes :: computeStiffnessMatrix(FloatMatrix &answer, TimeStep *tStep)
         }
 
         // Computing the internal forces should have been done first.
-        mat->giveDeviatoricStiffnessMatrix(Ed, TangentStiffness, gp, tStep); // dsigma_dev/deps_dev
-        mat->giveDeviatoricPressureStiffness(Ep, TangentStiffness, gp, tStep); // dsigma_dev/dp
-        mat->giveVolumetricDeviatoricStiffness(Cd, TangentStiffness, gp, tStep); // deps_vol/deps_dev
-        mat->giveVolumetricPressureStiffness(Cp, TangentStiffness, gp, tStep); // deps_vol/dp
+        // dsigma_dev/deps_dev  dsigma_dev/dp  deps_vol/deps_dev  deps_vol/dp
+        mat->giveStiffnessMatrices(Ed, Ep, Cd, Cp, TangentStiffness, gp, tStep);
 
-        //        Ed.printYourself();
-        //        B.printYourself();
         EdB.beProductOf(Ed, B);
         K.plusProductSymmUpper(B, EdB, dV);
         G.plusDyadUnsym(dN_V, Nlin, -dV);
@@ -393,13 +389,13 @@ Interface *Tet21Stokes :: giveInterface(InterfaceType it)
 {
     switch ( it ) {
     case NodalAveragingRecoveryModelInterfaceType:
-        return static_cast< NodalAveragingRecoveryModelInterface * >( this );
+        return static_cast< NodalAveragingRecoveryModelInterface * >(this);
 
     case SpatialLocalizerInterfaceType:
-        return static_cast< SpatialLocalizerInterface * >( this );
+        return static_cast< SpatialLocalizerInterface * >(this);
 
     case EIPrimaryUnknownMapperInterfaceType:
-        return static_cast< EIPrimaryUnknownMapperInterface * >( this );
+        return static_cast< EIPrimaryUnknownMapperInterface * >(this);
 
     default:
         return FMElement :: giveInterface(it);
@@ -460,7 +456,7 @@ double Tet21Stokes :: SpatialLocalizerI_giveDistanceFromParametricCenter(const F
 
 void Tet21Stokes :: NodalAveragingRecoveryMI_computeSideValue(FloatArray &answer, int side, InternalStateType type, TimeStep *tStep)
 {
-    answer.resize(0);
+    answer.clear();
 }
 
 void Tet21Stokes :: NodalAveragingRecoveryMI_computeNodalValue(FloatArray &answer, int node, InternalStateType type, TimeStep *tStep)
@@ -477,7 +473,7 @@ void Tet21Stokes :: NodalAveragingRecoveryMI_computeNodalValue(FloatArray &answe
                 this->giveNode( eNodes.at(2) )->giveDofWithID(P_f)->giveUnknown(VM_Total, tStep) );
         }
     } else {
-        answer.resize(0);
+        answer.clear();
     }
 }
 

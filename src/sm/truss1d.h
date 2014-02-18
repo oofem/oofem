@@ -56,17 +56,17 @@ namespace oofem {
  * analysis.
  */
 class Truss1d : public StructuralElement,
-    public ZZNodalRecoveryModelInterface, public NodalAveragingRecoveryModelInterface, public SpatialLocalizerInterface,
-    public DirectErrorIndicatorRCInterface,
-    public EIPrimaryUnknownMapperInterface,
-    public ZZErrorEstimatorInterface, public ZZRemeshingCriteriaInterface, public MMAShapeFunctProjectionInterface,
-    public HuertaErrorEstimatorInterface, public HuertaRemeshingCriteriaInterface
+public ZZNodalRecoveryModelInterface, public NodalAveragingRecoveryModelInterface, public SpatialLocalizerInterface,
+public DirectErrorIndicatorRCInterface,
+public EIPrimaryUnknownMapperInterface,
+public ZZErrorEstimatorInterface, public ZZRemeshingCriteriaInterface, public MMAShapeFunctProjectionInterface,
+public HuertaErrorEstimatorInterface, public HuertaRemeshingCriteriaInterface
 {
 protected:
     static FEI1dLin interp;
 
 public:
-    Truss1d(int n, Domain *d);
+    Truss1d(int n, Domain * d);
     virtual ~Truss1d() { }
 
     virtual FEInterpolation *giveInterpolation() const { return & interp; }

@@ -44,7 +44,7 @@
 #include "crosssection.h"
 #include "structuralcrosssection.h"
 #include "mathfem.h"
-#include "iga.h"
+#include "iga/iga.h"
 #include "classfactory.h"
 
 #ifdef __OOFEG
@@ -357,7 +357,7 @@ void NURBSPlaneStressElement :: drawScalar(oofegGraphicContext &context)
                         if ( x < 1.0e-10 ) {
                             phi = M_PI / 2.0;
                             r = y;
-                        } else   {
+                        } else {
                             phi = atan(y / x);
                             r = x / cos(phi);
                         }

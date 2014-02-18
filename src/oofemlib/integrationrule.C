@@ -43,13 +43,20 @@ namespace oofem {
 IntegrationRule :: iterator :: iterator(IntegrationRule *ir, int pos) : pos(pos), ir(ir) { }
 
 bool
-IntegrationRule :: iterator :: operator!=(const IntegrationRule :: iterator &other) const { return pos != other.pos; }
+IntegrationRule :: iterator :: operator != ( const IntegrationRule :: iterator & other ) const {
+    return pos != other.pos;
+}
 
 GaussPoint &
-IntegrationRule :: iterator :: operator*() const { return * ( ir->getIntegrationPoint(pos) ); }
+IntegrationRule :: iterator :: operator *( ) const {
+    return * ( ir->getIntegrationPoint(pos) );
+}
 
 const IntegrationRule :: iterator &
-IntegrationRule :: iterator :: operator++() { ++pos; return * this; }
+IntegrationRule :: iterator :: operator++ ( ) {
+    ++pos;
+    return * this;
+}
 
 IntegrationRule :: iterator
 IntegrationRule :: begin() { return iterator(this, 0); }
@@ -294,7 +301,7 @@ IntegrationRule :: restoreContext(DataStream *stream, ContextMode mode, void *ob
             // read dynamic flag
 
             if ( __create ) {
-                gaussPointArray [ i ] = new GaussPoint(this, i + 1, ( new FloatArray(c) ), w, m);
+                gaussPointArray [ i ] = new GaussPoint(this, i + 1, ( new FloatArray ( c ) ), w, m);
             } else {
                 GaussPoint *gp = gaussPointArray [ i ];
                 gp->setWeight(w);

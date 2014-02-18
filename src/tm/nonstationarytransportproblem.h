@@ -95,7 +95,7 @@ protected:
 
 public:
     /// Constructor.
-    NonStationaryTransportProblem(int i, EngngModel *_master);
+    NonStationaryTransportProblem(int i, EngngModel * _master);
     /// Destructor.
     virtual ~NonStationaryTransportProblem();
 

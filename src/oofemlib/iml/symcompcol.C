@@ -101,7 +101,7 @@ SymCompCol :: SymCompCol(const SymCompCol &S) : CompCol(S)
 
 SparseMtrx *SymCompCol :: GiveCopy() const
 {
-    SymCompCol *result = new SymCompCol(* this);
+    SymCompCol *result = new SymCompCol(*this);
     return result;
 }
 
@@ -185,7 +185,7 @@ int SymCompCol :: buildInternalStructure(EngngModel *eModel, int di, EquationID 
     int i, ii, j, jj, n, indx;
     Element *elem;
     // allocation map
-    std :: vector< std :: set< int > >columns(neq);
+    std :: vector< std :: set< int > > columns(neq);
     /*
      * std::set<int> **columns = new std::set<int>*[neq];
      * for (j=0; j<neq; j++) {
@@ -441,7 +441,7 @@ double SymCompCol :: at(int i, int j) const
     }
 }
 
-double SymCompCol :: operator()(int i, int j)  const
+double SymCompCol :: operator() (int i, int j)  const
 {
     int ii = i, jj = j;
     if ( ii < jj ) {
@@ -463,7 +463,7 @@ double SymCompCol :: operator()(int i, int j)  const
     }
 }
 
-double &SymCompCol :: operator()(int i, int j)
+double &SymCompCol :: operator() (int i, int j)
 {
     int ii = i, jj = j;
     if ( ii < jj ) {

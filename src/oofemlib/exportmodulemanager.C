@@ -39,10 +39,10 @@
 
 namespace oofem {
 ExportModuleManager :: ExportModuleManager(EngngModel *emodel) : ModuleManager< ExportModule >(emodel)
-{}
+{ }
 
 ExportModuleManager :: ~ExportModuleManager()
-{}
+{ }
 
 IRResultType
 ExportModuleManager :: initializeFrom(InputRecord *ir)

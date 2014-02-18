@@ -140,8 +140,12 @@ private:
 
     int allocatedPackets, leasedPackets, freePackets;
 public:
-    CommunicationPacketPool() : available_packets(), leased_packets() { allocatedPackets = leasedPackets = freePackets; }
-    ~CommunicationPacketPool() { this->clear(); }
+    CommunicationPacketPool() : available_packets(), leased_packets() {
+        allocatedPackets = leasedPackets = freePackets;
+    }
+    ~CommunicationPacketPool() {
+        this->clear();
+    }
 
     CommunicationPacket *popPacket(MPI_Comm);
     void pushPacket(CommunicationPacket *);
@@ -253,7 +257,7 @@ protected:
      * Templated version used since implementation is similar for different types
      * but type info is needed since implementation is relying on pointer arithmetic.
      */
-    template< class T >int __packArray(T *src, int n, MPI_Datatype type) {
+    template< class T > int __packArray(T *src, int n, MPI_Datatype type) {
         int _result = 1;
         int start_indx = 0, end_indx, _size;
         int remaining_size = n;
@@ -262,9 +266,13 @@ protected:
             _size = this->giveFitSize(type, active_packet->giveAvailableSpace(), remaining_size);
             end_indx = start_indx + _size;
 
-            if ( _size ) { _result &= active_packet->packArray(communicator, src + start_indx, _size, type); }
+            if ( _size ) {
+                _result &= active_packet->packArray(communicator, src + start_indx, _size, type);
+            }
 
-            if ( end_indx >= n ) { break; }
+            if ( end_indx >= n ) {
+                break;
+            }
 
             // active packet full, allocate a new one
             active_packet = this->allocateNewPacket(++number_of_packets);
@@ -281,7 +289,7 @@ protected:
      * Templated version used since implementation is similar for different types
      * but type info is needed since implementation is relying on pointer arithmetic.
      */
-    template< class T >int __unpackArray(T *dest, int n, MPI_Datatype type) {
+    template< class T > int __unpackArray(T *dest, int n, MPI_Datatype type) {
         int _result = 1;
         int start_indx = 0, end_indx, _size;
         int remaining_size = n;
@@ -290,9 +298,13 @@ protected:
             _size = this->giveFitSize(type, active_packet->giveAvailableSpace(), remaining_size);
             end_indx = start_indx + _size;
 
-            if ( _size ) { _result &= active_packet->unpackArray(communicator, dest + start_indx, _size, type); }
+            if ( _size ) {
+                _result &= active_packet->unpackArray(communicator, dest + start_indx, _size, type);
+            }
 
-            if ( end_indx >= n ) { break; }
+            if ( end_indx >= n ) {
+                break;
+            }
 
             // active packet exhausted, pop a new one
             this->popNewRecvPacket();

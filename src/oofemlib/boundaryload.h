@@ -135,7 +135,7 @@ public:
      * @param i Load number.
      * @param d Domain to which new object will belongs.
      */
-    BoundaryLoad(int i, Domain *d) : Load(i, d), nDofs(0), coordSystemType(CST_Global) { }
+    BoundaryLoad(int i, Domain * d) : Load(i, d), nDofs(0), coordSystemType(CST_Global) { }
 
     virtual void computeValueAt(FloatArray &answer, TimeStep *tStep, FloatArray &coords, ValueModeType mode);
     /**

@@ -71,10 +71,10 @@ class IntArray;
  * Should be used with CBS solution algorithm.
  */
 class TR1_2D_CBS : public CBSElement, public SpatialLocalizerInterface, public EIPrimaryFieldInterface,
-    public ZZNodalRecoveryModelInterface, public NodalAveragingRecoveryModelInterface, public SPRNodalRecoveryModelInterface
-    //<RESTRICTED_SECTION>
-    , public LEPlicElementInterface
-    //</RESTRICTED_SECTION>
+public ZZNodalRecoveryModelInterface, public NodalAveragingRecoveryModelInterface, public SPRNodalRecoveryModelInterface
+//<RESTRICTED_SECTION>
+, public LEPlicElementInterface
+//</RESTRICTED_SECTION>
 {
 protected:
     static FEI2dTrLin interp;
@@ -84,7 +84,7 @@ protected:
     double area;
 
 public:
-    TR1_2D_CBS(int n, Domain *aDomain);
+    TR1_2D_CBS(int n, Domain * aDomain);
     virtual ~TR1_2D_CBS();
 
     virtual FEInterpolation *giveInterpolation() const { return & interp; }
@@ -106,7 +106,7 @@ public:
     virtual const char *giveInputRecordName() const { return _IFT_TR1_2D_CBS_Name; }
     virtual MaterialMode giveMaterialMode() { return _2dFlow; }
 
-    virtual void giveElementDofIDMask(EquationID, IntArray & answer) const;
+    virtual void giveElementDofIDMask(EquationID, IntArray &answer) const;
     virtual void giveDofManDofIDMask(int inode, EquationID ut, IntArray &answer) const;
     virtual int computeNumberOfDofs();
     virtual IRResultType initializeFrom(InputRecord *ir);

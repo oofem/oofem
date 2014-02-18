@@ -8,9 +8,9 @@
 #include "XFEMDebugTools.h"
 
 namespace oofem {
-XFEMDebugTools :: XFEMDebugTools() {}
+XFEMDebugTools :: XFEMDebugTools() { }
 
-XFEMDebugTools :: ~XFEMDebugTools() {}
+XFEMDebugTools :: ~XFEMDebugTools() { }
 
 void XFEMDebugTools :: WriteTrianglesToVTK(const std :: string &iName, const std :: vector< Triangle > &iTriangles)
 {
@@ -143,6 +143,9 @@ void XFEMDebugTools :: WriteArrayToGnuplot(const std :: string &iName, const std
 
     std :: ofstream file;
     file.open( iName.data() );
+
+    // Set some output options
+    file << std::scientific;
 
     file << "# x y\n";
 

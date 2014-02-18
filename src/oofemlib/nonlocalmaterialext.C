@@ -108,7 +108,7 @@ NonlocalMaterialExtensionInterface :: buildNonlocalPointTable(GaussPoint *gp)
 
     NonlocalMaterialStatusExtensionInterface *statusExt =
         static_cast< NonlocalMaterialStatusExtensionInterface * >( gp->giveMaterialStatus()->
-                                                                   giveInterface(NonlocalMaterialStatusExtensionInterfaceType) );
+                                                                  giveInterface(NonlocalMaterialStatusExtensionInterfaceType) );
     std :: list< localIntegrationRecord > *iList;
 
     Element *ielem;
@@ -233,7 +233,7 @@ NonlocalMaterialExtensionInterface :: rebuildNonlocalPointTable(GaussPoint *gp, 
 
     NonlocalMaterialStatusExtensionInterface *statusExt =
         static_cast< NonlocalMaterialStatusExtensionInterface * >( gp->giveMaterialStatus()->
-                                                                   giveInterface(NonlocalMaterialStatusExtensionInterfaceType) );
+                                                                  giveInterface(NonlocalMaterialStatusExtensionInterfaceType) );
     std :: list< localIntegrationRecord > *iList;
 
     Element *ielem;
@@ -327,7 +327,7 @@ NonlocalMaterialExtensionInterface :: giveIPIntegrationList(GaussPoint *gp)
 {
     NonlocalMaterialStatusExtensionInterface *statusExt =
         static_cast< NonlocalMaterialStatusExtensionInterface * >( gp->giveMaterialStatus()->
-                                                                   giveInterface(NonlocalMaterialStatusExtensionInterfaceType) );
+                                                                  giveInterface(NonlocalMaterialStatusExtensionInterfaceType) );
 
     if ( !statusExt ) {
         OOFEM_ERROR("NonlocalMaterialExtensionInterface::givIPIntegrationList : local material status encountered");
@@ -345,7 +345,7 @@ NonlocalMaterialExtensionInterface :: endIPNonlocalAverage(GaussPoint *gp)
 {
     NonlocalMaterialStatusExtensionInterface *statusExt =
         static_cast< NonlocalMaterialStatusExtensionInterface * >( gp->giveMaterialStatus()->
-                                                                   giveInterface(NonlocalMaterialStatusExtensionInterfaceType) );
+                                                                  giveInterface(NonlocalMaterialStatusExtensionInterfaceType) );
 
     if ( !statusExt ) {
         OOFEM_ERROR("NonlocalMaterialExtensionInterface::givIPIntegrationList : local material status encountered");
@@ -437,11 +437,11 @@ NonlocalMaterialExtensionInterface :: giveIntegralOfWeightFunction(const int spa
 
     case WFT_Gauss:
         switch ( spatial_dimension ) {
-        case 1: return cl * sqrt(pi);
+        case 1: return cl *sqrt(pi);
 
         case 2: return cl * cl * pi;
 
-        case 3: return cl * cl * cl * sqrt(pi * pi * pi) / 4.;
+        case 3: return cl *cl *cl *sqrt(pi *pi *pi) / 4.;
 
         default: return 1.;
         }

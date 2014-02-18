@@ -69,7 +69,7 @@ Lattice2d_mt :: Lattice2d_mt(int n, Domain *aDomain, ElementMode em) :
 
 Lattice2d_mt :: ~Lattice2d_mt()
 // Destructor
-{}
+{ }
 
 double Lattice2d_mt :: giveLength()
 // Returns the length of the receiver.
@@ -260,7 +260,7 @@ double
 Lattice2d_mt :: computeVolumeAround(GaussPoint *gp)
 // Returns the portion of the receiver which is attached to gp.
 {
-    return this->width * this->thickness * this->giveLength();
+    return this->width *this->thickness *this->giveLength();
 }
 
 void
@@ -326,7 +326,7 @@ Lattice2d_mt :: computeInternalSourceRhsVectorAt(FloatArray &answer, TimeStep *t
     FloatArray val, helpLoadVector, globalIPcoords;
     FloatMatrix nm;
     double k;
-    answer.resize(0);
+    answer.clear();
 
     FloatArray gravityHelp(2);
 

@@ -57,8 +57,8 @@ public:
     /**
      * Constructor. Creates an empty field of given type associated to given domain.
      */
-    DofManValueField(FieldType b, Domain *d);
-    virtual ~DofManValueField() {}
+    DofManValueField(FieldType b, Domain * d);
+    virtual ~DofManValueField() { }
     /**
      * Evaluates the field at given point.
      * @param coords Coordinates of the point of interest

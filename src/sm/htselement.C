@@ -84,9 +84,9 @@ HTSelement :: initializeFrom(InputRecord *ir)
 
 #if 0
     if ( !( ( numberOfGaussPoints == 1 ) ||
-            ( numberOfGaussPoints == 4 ) ||
-            ( numberOfGaussPoints == 9 ) ||
-            ( numberOfGaussPoints == 16 ) ) ) {
+           ( numberOfGaussPoints == 4 ) ||
+           ( numberOfGaussPoints == 9 ) ||
+           ( numberOfGaussPoints == 16 ) ) ) {
         numberOfGaussPoints = 4;
     }
 #endif
@@ -261,7 +261,7 @@ HTSelement :: computePrescribedDisplacementLoadVectorAt(FloatArray &answer, Time
 
     this->computeVectorOf(EID_MomentumBalance, mode, tStep, u);
     if ( u.containsOnlyZeroes() ) {
-        answer.resize(0);
+        answer.clear();
     } else {
         this->computeStiffnessMatrix(K, TangentStiffness, tStep);
         answer.beProductOf(K, u);
@@ -291,7 +291,7 @@ HTSelement :: computeEdgeLoadVectorAt(FloatArray &answer, Load *load,
                                       int iEdge, TimeStep *tStep, ValueModeType mode)
 {
     double dV;
-    BoundaryLoad *edgeLoad = dynamic_cast< BoundaryLoad * >( load );
+    BoundaryLoad *edgeLoad = dynamic_cast< BoundaryLoad * >(load);
     GaussPoint *gp;
     IntegrationRule *iRule;
     FloatArray force, PsEdge, Ps(numberOfDofs);
@@ -323,7 +323,7 @@ HTSelement :: computeForceLoadVector(FloatArray &answer, TimeStep *tStep, ValueM
     Load *load;
     FloatArray helpLoadVector;
 
-    answer.resize(0);
+    answer.clear();
 
     // loop over boundary load array
     nLoads = this->giveBoundaryLoadArray()->giveSize() / 2;

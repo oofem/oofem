@@ -74,7 +74,7 @@ protected:
  #endif
 
 public:
-    ParmetisLoadBalancer(Domain *d);
+    ParmetisLoadBalancer(Domain * d);
     virtual ~ParmetisLoadBalancer();
 
     virtual void calculateLoadTransfer();

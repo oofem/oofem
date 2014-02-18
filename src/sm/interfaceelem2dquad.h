@@ -54,7 +54,7 @@ protected:
     static FEI2dLineQuad interp;
 
 public:
-    InterfaceElem2dQuad(int n, Domain *d);
+    InterfaceElem2dQuad(int n, Domain * d);
     virtual ~InterfaceElem2dQuad() { }
 
     virtual FEInterpolation *giveInterpolation() const;

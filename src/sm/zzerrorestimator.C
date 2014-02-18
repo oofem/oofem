@@ -260,7 +260,7 @@ ZZErrorEstimatorInterface :: ZZErrorEstimatorI_computeElementContributions(doubl
     // assemble nodal recovered stresses
     for ( int i = 1; i <= elem->giveNumberOfNodes(); i++ ) {
         elem->giveDomain()->giveSmoother()->giveNodalVector( recoveredStress, elem->giveDofManager(i)->giveNumber(),
-                                                             elem->giveRegionNumber() );
+                                                            elem->giveRegionNumber() );
         if ( i == 1 ) {
             nodalRecoveredStreses.resize( nDofMans, recoveredStress->giveSize() );
         }
@@ -294,7 +294,7 @@ ZZErrorEstimatorInterface :: ZZErrorEstimatorI_computeElementContributions(doubl
     } else if ( norm == ZZErrorEstimator :: EnergyNorm ) {
         FloatArray help, ldiff_reduced, lsig_reduced;
         FloatMatrix D, DInv;
-        StructuralElement *selem = static_cast< StructuralElement * >( elem );
+        StructuralElement *selem = static_cast< StructuralElement * >(elem);
 
         for ( int i = 0; i < iRule->giveNumberOfIntegrationPoints(); i++ ) {
             GaussPoint *gp = iRule->getIntegrationPoint(i);
@@ -381,7 +381,7 @@ ZZRemeshingCriteria :: estimateMeshDensities(TimeStep *tStep)
 
     //std::vector<char> nodalDensities(nnode);
     this->nodalDensities.resize(nnode);
-    std :: vector< char >dofManInitFlag(nnode);
+    std :: vector< char > dofManInitFlag(nnode);
     for ( int i = 0; i < nnode; i++ ) {
         dofManInitFlag [ i ] = 0;
     }
@@ -411,7 +411,7 @@ ZZRemeshingCriteria :: estimateMeshDensities(TimeStep *tStep)
     }
 
     elemErrLimit = sqrt( ( globValNorm * globValNorm + globValErrorNorm * globValErrorNorm ) / nelem ) *
-                   this->requiredError * coeff;
+    this->requiredError * coeff;
 
     for ( int i = 1; i <= nelem; i++ ) {
         ielem = domain->giveElement(i);

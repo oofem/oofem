@@ -66,7 +66,7 @@ public:
     /**
      * Constructor. Creates new Connectivity table belonging to given domain.
      */
-    ConnectivityTable(Domain *d) : domain(d), nodalConnectivity(0), nodalConnectivityFlag(0) { }
+    ConnectivityTable(Domain * d) : domain(d), nodalConnectivity(0), nodalConnectivityFlag(0) { }
     /// Destructor
     ~ConnectivityTable();
     /// reset receiver to an initial state (will force table update, when needed next time)

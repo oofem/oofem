@@ -46,7 +46,7 @@ ExpCZMaterial :: ExpCZMaterial(int n, Domain *d) : StructuralMaterial(n, d)
     //
     // constructor
     //
-{}
+{ }
 
 
 ExpCZMaterial :: ~ExpCZMaterial()
@@ -150,7 +150,7 @@ ExpCZMaterial :: give3dInterfaceMaterialStiffnessMatrix(FloatMatrix &answer, Mat
         double xin  = gn / ( gn0 + tolerance );
         double xit  = gs / ( gs0 + tolerance );
         double dtndgn = GIc / gn0 / gn0 *exp(-xin) *
-                        ( ( 1.0 - xin ) * exp(-xit * xit) + ( 1.0 - q ) / ( r - 1.0 ) * ( 1.0 - exp(-xit * xit) ) * ( -r + xin - 1.0 ) );
+        ( ( 1.0 - xin ) * exp(-xit * xit) + ( 1.0 - q ) / ( r - 1.0 ) * ( 1.0 - exp(-xit * xit) ) * ( -r + xin - 1.0 ) );
 
         answer.at(3, 3) = dtndgn;
     }  else {
@@ -479,7 +479,7 @@ ExpCZMaterial :: printYourself()
 }
 
 ExpCZMaterialStatus :: ExpCZMaterialStatus(int n, Domain *d, GaussPoint *g) : StructuralMaterialStatus(n, d, g)
-{}
+{ }
 
 
 ExpCZMaterialStatus :: ~ExpCZMaterialStatus()

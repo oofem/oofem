@@ -82,7 +82,7 @@ SkylineUnsym :: ~SkylineUnsym()
         i = size;
         p = rowColumns;
         while ( i-- ) {
-            delete * p++;
+            delete *p++;
         }
 
         delete [] rowColumns;
@@ -279,7 +279,7 @@ SkylineUnsym :: buildInternalStructure(EngngModel *eModel, int di, EquationID ut
         _i = size;
         _p = rowColumns;
         while ( _i-- ) {
-            delete * _p++;
+            delete *_p++;
         }
 
         delete [] rowColumns;

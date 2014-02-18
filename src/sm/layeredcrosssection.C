@@ -86,7 +86,7 @@ LayeredCrossSection :: giveRealStress_3d(FloatArray &answer, GaussPoint *gp, con
             rotStrain.at(6) = ( c * c - s * s ) * strain.at(6) + 2 * c * s * ( strain.at(1) - strain.at(2) );
 #endif
 
-            static_cast< StructuralMaterial * >( layerMat )->giveRealStressVector_3d(rotStress, gp, rotStrain, tStep);
+            static_cast< StructuralMaterial * >(layerMat)->giveRealStressVector_3d(rotStress, gp, rotStrain, tStep);
 
 #if 0
             answer = {
@@ -107,7 +107,7 @@ LayeredCrossSection :: giveRealStress_3d(FloatArray &answer, GaussPoint *gp, con
             answer.at(6) = ( c * c - s * s ) * rotStress.at(6) - c * s * ( rotStress.at(1) - rotStress.at(2) );
 #endif
         } else {
-            static_cast< StructuralMaterial * >( layerMat )->giveRealStressVector_3d(answer, gp, strain, tStep);
+            static_cast< StructuralMaterial * >(layerMat)->giveRealStressVector_3d(answer, gp, strain, tStep);
         }
     } else {
         OOFEM_ERROR("LayeredCrossSection :: giveRealStress_3d - Only cubes and wedges are meaningful for layered cross-sections");
@@ -146,7 +146,7 @@ LayeredCrossSection :: giveStiffnessMatrix_3d(FloatMatrix &answer, MatResponseMo
         int gpsperlayer = ngps / this->numberOfLayers;
         int layer = ( gpnum - 1 ) / gpsperlayer + 1;
         Material *layerMat = this->domain->giveMaterial( this->giveLayerMaterial(layer) );
-        static_cast< StructuralMaterial * >( layerMat )->give3dMaterialStiffnessMatrix(answer, rMode, gp, tStep);
+        static_cast< StructuralMaterial * >(layerMat)->give3dMaterialStiffnessMatrix(answer, rMode, gp, tStep);
 
         if ( this->layerRots.at(layer) != 0. ) {
             double rot = this->layerRots.at(layer);
@@ -324,7 +324,7 @@ LayeredCrossSection :: giveGeneralizedStress_Plate(FloatArray &answer, GaussPoin
             rotStrain.at(5) = ( c * c - s * s ) * strain.at(5) + c * s * ( strain.at(1) - strain.at(2) );
 #endif
 
-            static_cast< StructuralMaterial * >( layerMat )->giveRealStressVector_PlateLayer(rotStress, gp, rotStrain, tStep);
+            static_cast< StructuralMaterial * >(layerMat)->giveRealStressVector_PlateLayer(rotStress, gp, rotStrain, tStep);
 
 #if 0
             answer = {
@@ -420,7 +420,7 @@ LayeredCrossSection :: giveGeneralizedStress_Shell(FloatArray &answer, GaussPoin
             rotStrain.at(5) = ( c * c - s * s ) * strain.at(5) + c * s * ( strain.at(1) - strain.at(2) );
 #endif
 
-            static_cast< StructuralMaterial * >( layerMat )->giveRealStressVector_PlateLayer(rotStress, gp, rotStrain, tStep);
+            static_cast< StructuralMaterial * >(layerMat)->giveRealStressVector_PlateLayer(rotStress, gp, rotStrain, tStep);
 
 #if 0
             answer = {
@@ -885,8 +885,8 @@ LayeredCrossSection :: initializeFrom(InputRecord *ir)
     IR_GIVE_OPTIONAL_FIELD(ir, layerRots, _IFT_LayeredCrossSection_layerRotations);
 
     if ( numberOfLayers != layerMaterials.giveSize() ||
-         numberOfLayers != layerThicks.giveSize()  ||
-         numberOfLayers != layerRots.giveSize() ) { //|| ( numberOfLayers != layerWidths.giveSize() ) )
+        numberOfLayers != layerThicks.giveSize()  ||
+        numberOfLayers != layerRots.giveSize() ) {  //|| ( numberOfLayers != layerWidths.giveSize() ) )
         _warning("initializeFrom : numberOfLayers does not equal given number of thicknesses. ");
         return IRRT_BAD_FORMAT;
     }
@@ -964,7 +964,7 @@ LayeredCrossSection :: setupIntegrationPoints(IntegrationRule &irule, int npoint
                                              element->giveMaterialMode(), this->layerThicks);
 
 #else
-        int points1 = floor(cbrt( double( npoints ) ) + 0.5);
+        int points1 = (int) floor(cbrt( double ( npoints ) ) + 0.5);
         // If numberOfIntegrationPoints > 0 then use that, otherwise use the element's default.
         return irule.SetUpPointsOnCubeLayers(points1, points1, this->numberOfIntegrationPoints ? numberOfIntegrationPoints : points1,
                                              element->giveMaterialMode(), this->layerThicks);
@@ -1342,7 +1342,7 @@ LayeredIntegrationRule :: SetUpPointsOnWedge(int nPointsTri, int nPointsThicknes
             coord->at(2) = coords_xi2.at(j);
             coord->at(3) = coords_xi.at(i);
             this->gaussPointArray [ ind ] =
-                new GaussPoint(this, 1, coord, weights_tri.at(j) * weights_thickness.at(i), mode);
+                new GaussPoint(this, 1, coord, weights_tri.at ( j ) *weights_thickness.at ( i ), mode);
 
             // store interface points
             if ( i == 1 && nPointsThickness > 1 ) { //then lower surface
@@ -1368,7 +1368,7 @@ LayeredCrossSection :: checkConsistency()
     int result = 1;
     for ( int i = 1; this->giveNumberOfLayers(); i++ ) {
         Material *mat = this->giveDomain()->giveMaterial( this->giveLayerMaterial(i) );
-        if ( !dynamic_cast< StructuralMaterial * >( mat ) ) {
+        if ( !dynamic_cast< StructuralMaterial * >(mat) ) {
             _warning2( "checkConsistency : material %s without structural support", mat->giveClassName() );
             result = 0;
             continue;

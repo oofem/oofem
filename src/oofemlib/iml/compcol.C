@@ -117,7 +117,7 @@ CompCol :: CompCol(const CompCol &S) : SparseMtrx(S.nRows, S.nColumns),
 /* Assignment operator...  */
 /***************************/
 
-CompCol &CompCol :: operator=(const CompCol &C)
+CompCol &CompCol :: operator = ( const CompCol & C )
 {
     dim_ [ 0 ] = C.dim_ [ 0 ];
     dim_ [ 1 ] = C.dim_ [ 1 ];
@@ -138,7 +138,7 @@ CompCol &CompCol :: operator=(const CompCol &C)
 
 SparseMtrx *CompCol :: GiveCopy() const
 {
-    CompCol *result = new CompCol(* this);
+    CompCol *result = new CompCol(*this);
     return result;
 }
 
@@ -254,7 +254,7 @@ int CompCol :: buildInternalStructure(EngngModel *eModel, int di, EquationID ut,
     int i, ii, j, jj, n, indx;
     Element *elem;
     // allocation map
-    std :: vector< std :: set< int > >columns(neq);
+    std :: vector< std :: set< int > > columns(neq);
     /*
      * std::set<int> **columns = new std::set<int>*[neq];
      * for (j=0; j<neq; j++) {
@@ -461,7 +461,7 @@ double CompCol :: at(int i, int j) const
     }
 }
 
-double CompCol :: operator()(int i, int j)  const
+double CompCol :: operator() (int i, int j)  const
 {
     for ( int t = colptr_(j); t < colptr_(j + 1); t++ ) {
         if ( rowind_(t) == i ) {
@@ -477,7 +477,7 @@ double CompCol :: operator()(int i, int j)  const
     }
 }
 
-double &CompCol :: operator()(int i, int j)
+double &CompCol :: operator() (int i, int j)
 {
     // increment version
     this->version++;

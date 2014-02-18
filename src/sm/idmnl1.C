@@ -425,11 +425,11 @@ Interface *
 IDNLMaterial :: giveInterface(InterfaceType type)
 {
     if ( type == NonlocalMaterialExtensionInterfaceType ) {
-        return static_cast< StructuralNonlocalMaterialExtensionInterface * >( this );
+        return static_cast< StructuralNonlocalMaterialExtensionInterface * >(this);
     } else if ( type == NonlocalMaterialStiffnessInterfaceType ) {
-        return static_cast< NonlocalMaterialStiffnessInterface * >( this );
+        return static_cast< NonlocalMaterialStiffnessInterface * >(this);
     } else if ( type == MaterialModelMapperInterfaceType ) {
-        return static_cast< MaterialModelMapperInterface * >( this );
+        return static_cast< MaterialModelMapperInterface * >(this);
     } else {
         return NULL;
     }
@@ -701,7 +701,7 @@ IDNLMaterial :: giveLocalNonlocalStiffnessContribution(GaussPoint *gp, IntArray 
     /*
      * if (fabs(status->giveTempDamage()) <= 1.e-10) {
      * // already eleastic regime
-     * loc.resize(0);
+     * loc.clear();
      * return 0;
      * }
      */
@@ -718,7 +718,7 @@ IDNLMaterial :: giveLocalNonlocalStiffnessContribution(GaussPoint *gp, IntArray 
          * else printf ("_");
          * status->lst = IDNLMaterialStatus::LST_elastic;
          */
-        loc.resize(0);
+        loc.clear();
         return 0;
     } else {
         if ( status->giveDamage() >= 1.00 ) {
@@ -741,7 +741,7 @@ IDNLMaterial :: giveLocalNonlocalStiffnessContribution(GaussPoint *gp, IntArray 
         stress.beProductOf(de, strain);
 
         f = ( e0 / ( equivStrain * equivStrain ) ) * exp( -( equivStrain - e0 ) / ( ef - e0 ) )
-            + ( e0 / equivStrain ) * exp( -( equivStrain - e0 ) / ( ef - e0 ) ) * 1.0 / ( ef - e0 );
+        + ( e0 / equivStrain ) * exp( -( equivStrain - e0 ) / ( ef - e0 ) ) * 1.0 / ( ef - e0 );
 
         nrows = b.giveNumberOfColumns();
         nsize = stress.giveSize();
@@ -1036,7 +1036,7 @@ Interface *
 IDNLMaterialStatus :: giveInterface(InterfaceType type)
 {
     if ( type == NonlocalMaterialStatusExtensionInterfaceType ) {
-        return static_cast< StructuralNonlocalMaterialStatusExtensionInterface * >( this );
+        return static_cast< StructuralNonlocalMaterialStatusExtensionInterface * >(this);
     } else {
         return IsotropicDamageMaterial1Status :: giveInterface(type);
     }

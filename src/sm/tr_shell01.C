@@ -82,16 +82,34 @@ TR_SHELL01 :: initializeFrom(InputRecord *ir)
     plate->initializeFrom(ir);
     membrane->initializeFrom(ir);
 
-    plate->computeGaussPoints();
-    membrane->computeGaussPoints();
-
-    // check the compatibility of irules of plate and membrane
-    if ( plate->giveDefaultIntegrationRulePtr()->giveNumberOfIntegrationPoints() != membrane->giveDefaultIntegrationRulePtr()->giveNumberOfIntegrationPoints() ) {
-        OOFEM_ERROR("TR_SHELL01: incompatible integration rules detected");
-    }
-
     return IRRT_OK;
 }
+
+void
+TR_SHELL01 :: postInitialize()
+{
+  StructuralElement::postInitialize();
+
+  if ( plate->giveDefaultIntegrationRulePtr()->giveNumberOfIntegrationPoints() != membrane->giveDefaultIntegrationRulePtr()->giveNumberOfIntegrationPoints() ) {
+    OOFEM_ERROR("TR_SHELL01: incompatible integration rules detected");
+  }
+}
+
+void
+TR_SHELL01 :: updateLocalNumbering(EntityRenumberingFunctor &f)
+{
+  StructuralElement::updateLocalNumbering(f);
+  plate->updateLocalNumbering(f);
+  membrane->updateLocalNumbering(f);
+}
+
+void TR_SHELL01 :: setCrossSection(int csIndx) 
+{ 
+  StructuralElement::setCrossSection(csIndx);
+  plate->setCrossSection(csIndx);
+  membrane->setCrossSection(csIndx);
+}
+
 
 
 void
@@ -194,15 +212,15 @@ Interface *
 TR_SHELL01 :: giveInterface(InterfaceType interface)
 {
     if ( interface == ZZNodalRecoveryModelInterfaceType ) {
-        return static_cast< ZZNodalRecoveryModelInterface * >( this );
+        return static_cast< ZZNodalRecoveryModelInterface * >(this);
     } else if ( interface == NodalAveragingRecoveryModelInterfaceType ) {
-        return static_cast< NodalAveragingRecoveryModelInterface * >( this );
+        return static_cast< NodalAveragingRecoveryModelInterface * >(this);
     } else if ( interface == ZZErrorEstimatorInterfaceType ) {
-        return static_cast< ZZErrorEstimatorInterface * >( this );
+        return static_cast< ZZErrorEstimatorInterface * >(this);
     } else if ( interface == ZZRemeshingCriteriaInterfaceType ) {
-        return static_cast< ZZRemeshingCriteriaInterface * >( this );
+        return static_cast< ZZRemeshingCriteriaInterface * >(this);
     } else if ( interface == SpatialLocalizerInterfaceType ) {
-        return static_cast< SpatialLocalizerInterface * >( this );
+        return static_cast< SpatialLocalizerInterface * >(this);
     }
 
 
@@ -218,24 +236,15 @@ TR_SHELL01 :: computeVolumeAround(GaussPoint *gp)
 int
 TR_SHELL01 :: giveIPValue(FloatArray &answer, GaussPoint *gp, InternalStateType type, TimeStep *tStep)
 {
-    if ( type == IST_ShellForceMomentumTensor ) {
+  if (( type == IST_ShellForceTensor ) || ( type == IST_ShellStrainTensor ) || 
+      ( type == IST_ShellMomentumTensor ) || ( type == IST_ShellCurvatureTensor ) ) {
         FloatArray aux;
         GaussPoint *membraneGP = membrane->giveDefaultIntegrationRulePtr()->getIntegrationPoint(gp->giveNumber() - 1);
         GaussPoint *plateGP = plate->giveDefaultIntegrationRulePtr()->getIntegrationPoint(gp->giveNumber() - 1);
 
-        plate->giveIPValue(answer, plateGP, IST_ShellForceMomentumTensor, tStep);
-        membrane->giveIPValue(aux, membraneGP, IST_ShellForceMomentumTensor, tStep);
+        plate->giveIPValue(answer, plateGP, type, tStep);
+        membrane->giveIPValue(aux, membraneGP, type, tStep);
         answer.add(aux);
-        return 1;
-    } else if ( type == IST_ShellStrainCurvatureTensor ) {
-        FloatArray aux;
-        GaussPoint *membraneGP = membrane->giveDefaultIntegrationRulePtr()->getIntegrationPoint(gp->giveNumber() - 1);
-        GaussPoint *plateGP = plate->giveDefaultIntegrationRulePtr()->getIntegrationPoint(gp->giveNumber() - 1);
-
-        plate->giveIPValue(answer, plateGP, IST_ShellStrainCurvatureTensor, tStep);
-        membrane->giveIPValue(aux, membraneGP, IST_ShellStrainCurvatureTensor, tStep);
-        answer.add(aux);
-
         return 1;
     } else {
         return StructuralElement :: giveIPValue(answer, gp, type, tStep);
@@ -271,7 +280,7 @@ void
 TR_SHELL01 :: NodalAveragingRecoveryMI_computeSideValue(FloatArray &answer, int side,
                                                         InternalStateType type, TimeStep *tStep)
 {
-    answer.resize(0);
+    answer.clear();
 }
 
 
@@ -292,27 +301,47 @@ TR_SHELL01 :: printOutputAt(FILE *file, TimeStep *tStep)
         fprintf( file, "  GP %2d.%-2d :", iRule->giveNumber(), gp->giveNumber() );
         membraneGP = membrane->giveDefaultIntegrationRulePtr()->getIntegrationPoint(gp->giveNumber() - 1);
         // Strain - Curvature
-        plate->giveIPValue(v, gp, IST_ShellStrainCurvatureTensor, tStep);
-        membrane->giveIPValue(aux, membraneGP, IST_ShellStrainCurvatureTensor, tStep);
+        plate->giveIPValue(v, gp, IST_ShellStrainTensor, tStep);
+        membrane->giveIPValue(aux, membraneGP, IST_ShellStrainTensor, tStep);
         v.add(aux);
 
-        fprintf(file, "  strains ");
+        fprintf(file, "  strains    ");
+	// eps_x, eps_y, eps_z, eps_yz, eps_xz, eps_xy (global)
         fprintf( file,
-                 " % .4e % .4e % .4e % .4e % .4e % .4e % .4e % .4e % .4e % .4e % .4e % .4e ",
-                 v.at(1), v.at(2), v.at(3),  2. * v.at(4), 2. * v.at(5), 2. * v.at(6),
-                 v.at(7), v.at(8), v.at(9),  2. * v.at(10), 2. * v.at(11), 2. * v.at(12) );
-
-        // Strain - Curvature
-        plate->giveIPValue(v, gp, IST_ShellForceMomentumTensor, tStep);
-        membrane->giveIPValue(aux, membraneGP, IST_ShellForceMomentumTensor, tStep);
+                " % .4e % .4e % .4e % .4e % .4e % .4e ",
+		 v.at(1), v.at(5), v.at(9),  v.at(6), v.at(3), v.at(2));
+ 
+	plate->giveIPValue(v, gp, IST_ShellCurvatureTensor, tStep);
+        membrane->giveIPValue(aux, membraneGP, IST_ShellCurvatureTensor, tStep);
         v.add(aux);
 
-        fprintf(file, "\n              stresses");
+        fprintf(file, "\n              curvatures ");
+	// k_x, k_y, k_z, k_yz, k_xz, k_xy (global)
         fprintf( file,
-                 " % .4e % .4e % .4e % .4e % .4e % .4e % .4e % .4e % .4e % .4e % .4e % .4e ",
-                 v.at(1), v.at(2), v.at(3),  v.at(4), v.at(5), v.at(6),
-                 v.at(7), v.at(8), v.at(9),  v.at(10), v.at(11), v.at(12) );
+                " % .4e % .4e % .4e % .4e % .4e % .4e ",
+		 v.at(1), v.at(5), v.at(9),  v.at(6), v.at(3), v.at(2));
 
+	// Forces - Moments
+        plate->giveIPValue(v, gp, IST_ShellForceTensor, tStep);
+        membrane->giveIPValue(aux, membraneGP, IST_ShellForceTensor, tStep);
+        v.add(aux);
+
+        fprintf(file, "\n              stresses   ");
+ 	// n_x, n_y, n_z, v_yz, v_xz, v_xy (global)
+        fprintf( file,
+                " % .4e % .4e % .4e % .4e % .4e % .4e ",
+		 v.at(1), v.at(5), v.at(9),  v.at(6), v.at(3), v.at(2));
+
+        plate->giveIPValue(v, gp, IST_ShellMomentumTensor, tStep);
+        membrane->giveIPValue(aux, membraneGP, IST_ShellMomentumTensor, tStep);
+        v.add(aux);
+
+        fprintf(file, "\n              moments    ");
+ 	// m_x, m_y, m_z, m_yz, m_xz, m_xy (global)
+        fprintf( file,
+                " % .4e % .4e % .4e % .4e % .4e % .4e ",
+		 v.at(1), v.at(5), v.at(9),  v.at(6), v.at(3), v.at(2));
+  
         fprintf(file, "\n");
     }
 }

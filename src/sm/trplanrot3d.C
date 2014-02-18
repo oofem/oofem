@@ -40,6 +40,7 @@
 #include "structuralms.h"
 #include "mathfem.h"
 #include "classfactory.h"
+#include "gaussintegrationrule.h"
 
 namespace oofem {
 REGISTER_Element(TrPlaneStrRot3d);
@@ -214,7 +215,7 @@ TrPlaneStrRot3d :: giveCharacteristicTensor(FloatMatrix &answer, CharTensor type
     }
 
     if ( ( type == GlobalForceTensor  ) || ( type == GlobalMomentumTensor  ) ||
-         ( type == GlobalStrainTensor ) || ( type == GlobalCurvatureTensor ) ) {
+        ( type == GlobalStrainTensor ) || ( type == GlobalCurvatureTensor ) ) {
         this->computeGtoLRotationMatrix();
         answer.rotatedWith(* GtoLRotationMatrix);
     }
@@ -227,10 +228,10 @@ TrPlaneStrRot3d :: giveIPValue(FloatArray &answer, GaussPoint *gp, InternalState
     FloatMatrix globTensor;
     CharTensor cht;
 
-    answer.resize(12);
+    answer.resize(9);
 
-    if ( ( type == IST_ShellForceMomentumTensor ) || ( type == IST_ShellStrainCurvatureTensor ) ) {
-        if ( type == IST_ShellForceMomentumTensor ) {
+    if ( ( type == IST_ShellForceTensor ) || ( type == IST_ShellStrainTensor ) ) {
+        if ( type == IST_ShellForceTensor ) {
             cht = GlobalForceTensor;
         } else {
             cht = GlobalStrainTensor;
@@ -239,15 +240,21 @@ TrPlaneStrRot3d :: giveIPValue(FloatArray &answer, GaussPoint *gp, InternalState
         this->giveCharacteristicTensor(globTensor, cht, gp, tStep);
 
         answer.at(1) = globTensor.at(1, 1); //sxForce
-        answer.at(2) = globTensor.at(2, 2); //syForce
-        answer.at(3) = globTensor.at(3, 3); //szForce
-        answer.at(4) = globTensor.at(2, 3); //syzForce
-        answer.at(5) = globTensor.at(1, 3); //qxzForce
-        answer.at(6) = globTensor.at(1, 2); //qxyForce
+        answer.at(2) = globTensor.at(1, 2); //qxyForce
+	answer.at(3) = globTensor.at(1, 3); //qxzForce
+	answer.at(4) = globTensor.at(1, 2); //qxyForce
+	answer.at(5) = globTensor.at(2, 2); //syForce
+	answer.at(6) = globTensor.at(2, 3); //syzForce
+	answer.at(7) = globTensor.at(1, 3); //qxzForce
+        answer.at(8) = globTensor.at(2, 3); //syzForce
+        answer.at(9) = 0.0;
         // mutiply stresses by thickness to get forces
         answer.times( this->giveCrossSection()->give(CS_Thickness, gp) );
 
-        if ( type == IST_ShellForceMomentumTensor ) {
+	return 1;
+    } else if ( ( type == IST_ShellMomentumTensor ) || ( type == IST_ShellCurvatureTensor ) ) {
+
+        if ( type == IST_ShellMomentumTensor ) {
             cht = GlobalMomentumTensor;
         } else {
             cht = GlobalCurvatureTensor;
@@ -255,18 +262,42 @@ TrPlaneStrRot3d :: giveIPValue(FloatArray &answer, GaussPoint *gp, InternalState
 
         this->giveCharacteristicTensor(globTensor, cht, gp, tStep);
 
-        answer.at(7)  = globTensor.at(1, 1); //mxForce
-        answer.at(8)  = globTensor.at(2, 2); //myForce
+        answer.at(1)  = globTensor.at(1, 1); //mxForce
+	answer.at(2)  = globTensor.at(1, 2); //mxyForce
+	answer.at(3)  = 0.0;
+	answer.at(4)  = globTensor.at(1, 2); //mxyForce
+	answer.at(5)  = globTensor.at(2, 2); //myForce
+	answer.at(6)  = 0.0;
+        answer.at(7)  = 0.0;
+	answer.at(8)  = 0.0;
         answer.at(9)  = globTensor.at(3, 3); //mzForce
-        answer.at(10) = globTensor.at(2, 3); //myzForce
-        answer.at(11) = globTensor.at(1, 3); //mxzForce
-        answer.at(12) = globTensor.at(1, 2); //mxyForce
-
         return 1;
     } else {
-        answer.resize(0);
+        answer.clear();
         return 0;
     }
+}
+
+int
+TrPlaneStrRot3d :: computeLoadGToLRotationMtrx(FloatMatrix &answer)
+// Returns the rotation matrix of the receiver of the size [6,6]
+// f(local) = T * f(global)
+{
+    // test if previously computed
+    if ( GtoLRotationMatrix == NULL ) {
+        this->computeGtoLRotationMatrix();
+    }
+
+    answer.resize(6, 6);
+    answer.zero();
+
+    for ( int i = 1; i <= 3; i++ ) {
+        answer.at(1, i) = answer.at(4, i + 3) = GtoLRotationMatrix->at(1, i);
+        answer.at(2, i) = answer.at(5, i + 3) = GtoLRotationMatrix->at(2, i);
+        answer.at(3, i) = answer.at(6, i + 3) = GtoLRotationMatrix->at(3, i);
+    }
+
+    return 1;
 }
 
 
@@ -319,8 +350,79 @@ TrPlaneStrRot3d :: computeBodyLoadVectorAt(FloatArray &answer, Load *forLoad, Ti
             answer.rotatedWith(T, 'n');
         }
     } else {
-        answer.resize(0);          // nil resultant
+        answer.clear();          // nil resultant
     }
+}
+
+void
+TrPlaneStrRot3d :: computeSurfaceNMatrixAt(FloatMatrix &answer, int iSurf, GaussPoint *sgp)
+{
+  int i,j;
+  FloatMatrix ne;
+  this->computeNmatrixAt (* sgp->giveCoordinates(), ne);
+
+  answer.resize(6, 18);
+  answer.zero();
+  int ri[]={0,1,5};
+  int ci[]={0,1,5, 6,7,11, 12,13,17};
+
+  for (i=0; i<3; i++) {
+    for (j=0; j<9; j++) {
+      answer(ri[i], ci[j]) = ne(i,j);
+    }
+  }
+}
+
+void
+TrPlaneStrRot3d :: giveSurfaceDofMapping(IntArray &answer, int iSurf) const
+{
+    answer.resize(18);
+    answer.zero();
+    if ( iSurf == 1 ) {
+        answer.at(1) = 1; // node 1
+        answer.at(2) = 2;
+        answer.at(6) = 3;
+
+        answer.at(7)  = 4; // node 2
+        answer.at(8)  = 5;
+        answer.at(12) = 6;
+
+        answer.at(13) = 7; // node 3
+        answer.at(14) = 8;
+        answer.at(18) = 9;
+    } else {
+        _error("giveSurfaceDofMapping: wrong surface number");
+    }
+
+}
+
+IntegrationRule *
+TrPlaneStrRot3d :: GetSurfaceIntegrationRule(int approxOrder)
+{
+    IntegrationRule *iRule = new GaussIntegrationRule(1, this, 1, 1);
+    int npoints = iRule->getRequiredNumberOfIntegrationPoints(_Triangle, approxOrder);
+    iRule->SetUpPointsOnTriangle(npoints, _Unknown);
+    return iRule;
+}
+
+double
+TrPlaneStrRot3d :: computeSurfaceVolumeAround(GaussPoint *gp, int iSurf)
+{
+  return this->computeVolumeAround (gp);
+}
+
+
+void
+TrPlaneStrRot3d :: computeSurfIpGlobalCoords(FloatArray &answer, GaussPoint *gp, int isurf)
+{
+  this-> computeGlobalCoordinates(answer, * gp->giveCoordinates());
+}
+
+
+int
+TrPlaneStrRot3d :: computeLoadLSToLRotationMatrix(FloatMatrix &answer, int isurf, GaussPoint *gp)
+{
+  return 0;
 }
 
 
@@ -340,21 +442,36 @@ TrPlaneStrRot3d :: printOutputAt(FILE *file, TimeStep *tStep)
 
             fprintf( file, "  GP %2d.%-2d :", i + 1, gp->giveNumber() );
 
-            this->giveIPValue(v, gp, IST_ShellStrainCurvatureTensor, tStep);
-            fprintf(file, "  strains ");
-            fprintf( file,
-                     " % .4e % .4e % .4e % .4e % .4e % .4e % .4e % .4e % .4e % .4e % .4e % .4e ",
-                     v.at(1), v.at(2), v.at(3),  2. * v.at(4), 2. * v.at(5), 2. * v.at(6),
-                     v.at(7), v.at(8), v.at(9),  2. * v.at(10), 2. * v.at(11), 2. * v.at(12) );
+            this->giveIPValue(v, gp, IST_ShellStrainTensor, tStep);
+	    fprintf(file, "  strains    ");
+	    // eps_x, eps_y, eps_z, eps_yz, eps_xz, eps_xy (global)
+	    fprintf( file,
+		     " % .4e % .4e % .4e % .4e % .4e % .4e ",
+		     v.at(1), v.at(5), v.at(9),  v.at(6), v.at(3), v.at(2));
 
-            this->giveIPValue(v, gp, IST_ShellForceMomentumTensor, tStep);
-            fprintf(file, "\n              stresses");
-            fprintf( file,
-                     " % .4e % .4e % .4e % .4e % .4e % .4e % .4e % .4e % .4e % .4e % .4e % .4e ",
-                     v.at(1), v.at(2), v.at(3),  v.at(4), v.at(5), v.at(6),
-                     v.at(7), v.at(8), v.at(9),  v.at(10), v.at(11), v.at(12) );
+	    this->giveIPValue(v, gp, IST_ShellCurvatureTensor, tStep);
+	    fprintf(file, "\n              curvatures ");
+	    // k_x, k_y, k_z, k_yz, k_xz, k_xy (global)
+	    fprintf( file,
+		     " % .4e % .4e % .4e % .4e % .4e % .4e ",
+		     v.at(1), v.at(5), v.at(9),  v.at(6), v.at(3), v.at(2));
 
-            fprintf(file, "\n");
+	    // Forces - Moments
+	    this->giveIPValue(v, gp, IST_ShellForceTensor, tStep);
+	    fprintf(file, "\n              stresses   ");
+	    // n_x, n_y, n_z, v_yz, v_xz, v_xy (global)
+	    fprintf( file,
+		     " % .4e % .4e % .4e % .4e % .4e % .4e ",
+		     v.at(1), v.at(5), v.at(9),  v.at(6), v.at(3), v.at(2));
+
+	    this->giveIPValue(v, gp, IST_ShellMomentumTensor, tStep);
+	    fprintf(file, "\n              moments    ");
+	    // m_x, m_y, m_z, m_yz, m_xz, m_xy (global)
+	    fprintf( file,
+		     " % .4e % .4e % .4e % .4e % .4e % .4e ",
+		     v.at(1), v.at(5), v.at(9),  v.at(6), v.at(3), v.at(2));
+
+             fprintf(file, "\n");
         }
     }
 }

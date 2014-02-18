@@ -71,7 +71,7 @@ Hexa21Stokes :: Hexa21Stokes(int n, Domain *aDomain) : FMElement(n, aDomain)
 }
 
 Hexa21Stokes :: ~Hexa21Stokes()
-{}
+{ }
 
 void Hexa21Stokes :: computeGaussPoints()
 {
@@ -108,7 +108,7 @@ void Hexa21Stokes :: giveDofManDofIDMask(int inode, EquationID ut, IntArray &ans
         if ( ut == EID_MomentumBalance || ut == EID_MomentumBalance_ConservationEquation ) {
             answer.setValues(3, V_u, V_v, V_w);
         } else if ( ut == EID_ConservationEquation ) {
-            answer.resize(0);
+            answer.clear();
         } else {
             OOFEM_ERROR("Hexa21Stokes :: giveDofManDofIDMask: Unknown equation id encountered");
         }
@@ -185,7 +185,7 @@ void Hexa21Stokes :: computeExternalForcesVector(FloatArray &answer, TimeStep *t
     FloatArray vec;
 
     int nLoads = this->boundaryLoadArray.giveSize() / 2;
-    answer.resize(0);
+    answer.clear();
 
     for ( int i = 1; i <= nLoads; i++ ) {  // For each Neumann boundary condition
         int load_number = this->boundaryLoadArray.at(2 * i - 1);
@@ -193,7 +193,7 @@ void Hexa21Stokes :: computeExternalForcesVector(FloatArray &answer, TimeStep *t
         Load *load = this->domain->giveLoad(load_number);
 
         if ( load->giveBCGeoType() == SurfaceLoadBGT ) {
-            this->computeBoundaryLoadVector(vec, static_cast< BoundaryLoad * >( load ), load_id, ExternalForcesVector, VM_Total, tStep);
+            this->computeBoundaryLoadVector(vec, static_cast< BoundaryLoad * >(load), load_id, ExternalForcesVector, VM_Total, tStep);
             answer.add(vec);
         }
     }
@@ -211,7 +211,7 @@ void Hexa21Stokes :: computeExternalForcesVector(FloatArray &answer, TimeStep *t
 void Hexa21Stokes :: computeLoadVector(FloatArray &answer, Load *load, CharType type, ValueModeType mode, TimeStep *tStep)
 {
     if ( type != ExternalForcesVector ) {
-        answer.resize(0);
+        answer.clear();
         return;
     }
 
@@ -247,12 +247,12 @@ void Hexa21Stokes :: computeLoadVector(FloatArray &answer, Load *load, CharType 
 void Hexa21Stokes :: computeBoundaryLoadVector(FloatArray &answer, BoundaryLoad *load, int iSurf, CharType type, ValueModeType mode, TimeStep *tStep)
 {
     if ( type != ExternalForcesVector ) {
-        answer.resize(0);
+        answer.clear();
         return;
     }
 
     if ( load->giveType() == TransmissionBC ) { // Neumann boundary conditions (traction)
-        BoundaryLoad *boundaryLoad = static_cast< BoundaryLoad * >( load );
+        BoundaryLoad *boundaryLoad = static_cast< BoundaryLoad * >(load);
 
         int numberOfSurfaceIPs = ( int ) ceil( ( boundaryLoad->giveApproxOrder() + 1. ) / 2. ) * 2; ///@todo Check this.
 
@@ -320,10 +320,8 @@ void Hexa21Stokes :: computeStiffnessMatrix(FloatMatrix &answer, TimeStep *tStep
         }
 
         // Computing the internal forces should have been done first.
-        mat->giveDeviatoricStiffnessMatrix(Ed, TangentStiffness, gp, tStep); // dsigma_dev/deps_dev
-        mat->giveDeviatoricPressureStiffness(Ep, TangentStiffness, gp, tStep); // dsigma_dev/dp
-        mat->giveVolumetricDeviatoricStiffness(Cd, TangentStiffness, gp, tStep); // deps_vol/deps_dev
-        mat->giveVolumetricPressureStiffness(Cp, TangentStiffness, gp, tStep); // deps_vol/dp
+        // dsigma_dev/deps_dev  dsigma_dev/dp  deps_vol/deps_dev  deps_vol/dp
+        mat->giveStiffnessMatrices(Ed, Ep, Cd, Cp, TangentStiffness, gp, tStep);
 
         EdB.beProductOf(Ed, B);
         K.plusProductSymmUpper(B, EdB, dV);
@@ -378,13 +376,13 @@ Interface *Hexa21Stokes :: giveInterface(InterfaceType it)
 {
     switch ( it ) {
     case NodalAveragingRecoveryModelInterfaceType:
-        return static_cast< NodalAveragingRecoveryModelInterface * >( this );
+        return static_cast< NodalAveragingRecoveryModelInterface * >(this);
 
     case SpatialLocalizerInterfaceType:
-        return static_cast< SpatialLocalizerInterface * >( this );
+        return static_cast< SpatialLocalizerInterface * >(this);
 
     case EIPrimaryUnknownMapperInterfaceType:
-        return static_cast< EIPrimaryUnknownMapperInterface * >( this );
+        return static_cast< EIPrimaryUnknownMapperInterface * >(this);
 
     default:
         return FMElement :: giveInterface(it);
@@ -422,7 +420,7 @@ int Hexa21Stokes :: EIPrimaryUnknownMI_computePrimaryUnknownVectorAt(ValueModeTy
     FloatArray lcoords, n, n_lin;
     ok = this->computeLocalCoordinates(lcoords, gcoords);
     if ( !ok ) {
-        answer.resize(0);
+        answer.clear();
         return false;
     }
 
@@ -446,7 +444,7 @@ double Hexa21Stokes :: SpatialLocalizerI_giveDistanceFromParametricCenter(const 
 
 void Hexa21Stokes :: NodalAveragingRecoveryMI_computeSideValue(FloatArray &answer, int side, InternalStateType type, TimeStep *tStep)
 {
-    answer.resize(0);
+    answer.clear();
 }
 
 void Hexa21Stokes :: NodalAveragingRecoveryMI_computeNodalValue(FloatArray &answer, int node, InternalStateType type, TimeStep *tStep)
@@ -484,7 +482,7 @@ void Hexa21Stokes :: NodalAveragingRecoveryMI_computeNodalValue(FloatArray &answ
                 this->giveNode(8)->giveDofWithID(P_f)->giveUnknown(VM_Total, tStep) );
         }
     } else {
-        answer.resize(0);
+        answer.clear();
     }
 }
 } // end namespace oofem

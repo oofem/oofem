@@ -58,7 +58,7 @@ private:
     int solved;
 
 public:
-    GJacobi(Domain *d, EngngModel *m);
+    GJacobi(Domain * d, EngngModel * m);
     virtual ~GJacobi();
 
     /**

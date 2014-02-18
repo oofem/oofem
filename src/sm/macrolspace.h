@@ -61,7 +61,7 @@ class MicroMaterial;
 class MacroLSpace : public LSpace
 {
 public:
-    MacroLSpace(int n, Domain *d);
+    MacroLSpace(int n, Domain * d);
     virtual ~MacroLSpace();
 
     virtual const char *giveInputRecordName() const { return _IFT_MacroLSpace_Name; }

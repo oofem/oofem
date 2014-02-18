@@ -108,7 +108,7 @@ public:
      * @param n Boundary condition number.
      * @param d Domain to which new object will belongs.
      */
-    MixedGradientPressureNeumann(int n, Domain *d);
+    MixedGradientPressureNeumann(int n, Domain * d);
 
     /// Destructor
     virtual ~MixedGradientPressureNeumann();

@@ -44,13 +44,6 @@
 namespace oofem {
 REGISTER_Material(NewtonianFluidMaterial);
 
-int
-NewtonianFluidMaterial :: hasMaterialModeCapability(MaterialMode mode)
-{
-    return mode == _2dFlow || mode == _3dFlow;
-}
-
-
 IRResultType
 NewtonianFluidMaterial :: initializeFrom(InputRecord *ir)
 {

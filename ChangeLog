@@ -1,3 +1,24 @@
+2014-02-12  Borek Patzak  <Borek.Patzak@fsv.cvut.cz>
+
+	* OOFEM 2.3 released.
+        * XFEM support for cracks in 2D including branch functions and coupling of cohesive zones with XFEM.
+        * XFEM elements: TrPlaneStress2dXFEM (new) and PlaneStress2dXfem (major modifications).
+        * Support for Sets: Useable for boundary conditions, cross-sections.
+        * FE^2 support for incompressible fluids with Dirichlet, Neumann and periodic boundary conditions.
+        * Support for material orientations in layered cross section.
+        * Improved support for directly using OOFEM from within custom applications.
+	* Improved model for cement hydration.
+	* A new isotropic damage model for tension/compression based on Griffith's solution.
+	* VtkXml outputs at integration points.
+	* Added variable cross section model.
+	* New DKT plate element and plane stress element with vertex rotations.
+	* New wedge elements for structural analysis.
+	* Improved generic geometric non-linearity, many elements are now supported.
+	* New options in nonlocal integral models - modified averaging operator based on the distance from the boundary or on the stress state.
+	* Added new anisotropic damage model.
+	* New linear constraint boundary condition.
+	* Many bug fixes, small enhancements and documentation updates.
+
 2013-02-08  Borek Patzak  <Borek.Patzak@fsv.cvut.cz>
 
 	* OOFEM 2.2 released.

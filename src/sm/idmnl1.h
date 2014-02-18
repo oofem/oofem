@@ -69,7 +69,7 @@ protected:
 
 public:
     /// Constructor.
-    IDNLMaterialStatus(int n, Domain *d, GaussPoint *g);
+    IDNLMaterialStatus(int n, Domain * d, GaussPoint * g);
     /// Destructor.
     virtual ~IDNLMaterialStatus();
 
@@ -109,7 +109,7 @@ public:
  * Model based on nonlocal averaging of equivalent strain.
  */
 class IDNLMaterial : public IsotropicDamageMaterial1, public StructuralNonlocalMaterialExtensionInterface,
-    public NonlocalMaterialStiffnessInterface
+public NonlocalMaterialStiffnessInterface
 {
 protected:
     /// Final value of interaction radius, for a model with evolving characteristic length.
@@ -121,7 +121,7 @@ protected:
 
 public:
     /// Constructor
-    IDNLMaterial(int n, Domain *d);
+    IDNLMaterial(int n, Domain * d);
     /// Destructor
     virtual ~IDNLMaterial();
 

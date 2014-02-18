@@ -45,7 +45,7 @@ class Space3dStructuralElementEvaluator : public StructuralElementEvaluator
 {
 public:
     Space3dStructuralElementEvaluator() : StructuralElementEvaluator() { }
-    virtual ~Space3dStructuralElementEvaluator() {}
+    virtual ~Space3dStructuralElementEvaluator() { }
 
 protected:
     /**

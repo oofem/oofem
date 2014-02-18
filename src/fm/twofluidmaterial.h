@@ -69,14 +69,15 @@ public:
     /// Destructor.
     virtual ~TwoFluidMaterial() { }
 
+    virtual IRResultType initializeFrom(InputRecord *ir);
+    virtual void giveInputRecord(DynamicInputRecord &input);
+
     virtual void computeDeviatoricStressVector(FloatArray &answer, GaussPoint *gp, const FloatArray &eps, TimeStep *tStep);
     virtual void giveDeviatoricStiffnessMatrix(FloatMatrix &answer, MatResponseMode mode, GaussPoint *gp, TimeStep *tStep);
 
     virtual double giveEffectiveViscosity(GaussPoint *gp, TimeStep *tStep);
     virtual double give(int aProperty, GaussPoint *gp);
-    virtual IRResultType initializeFrom(InputRecord *ir);
-    virtual void giveInputRecord(DynamicInputRecord &input);
-    virtual int hasMaterialModeCapability(MaterialMode mode);
+    virtual int giveIPValue(FloatArray &answer, GaussPoint *gp, InternalStateType type, TimeStep *tStep);
     virtual const char *giveClassName() const { return "TwoFluidMaterial"; }
     virtual const char *giveInputRecordName() const { return _IFT_TwoFluidMaterial_Name; }
     virtual int checkConsistency();

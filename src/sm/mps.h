@@ -97,8 +97,8 @@ protected:
     double flowTermViscosityTemp;
 
 public:
-    MPSMaterialStatus(int n, Domain *d, GaussPoint *g, int nunits);
-    virtual ~MPSMaterialStatus() {}
+    MPSMaterialStatus(int n, Domain * d, GaussPoint * g, int nunits);
+    virtual ~MPSMaterialStatus() { }
 
     virtual void updateYourself(TimeStep *tStep);
 
@@ -192,7 +192,7 @@ protected:
     double alphaE, alphaR, alphaS; //[-]
 
 public:
-    MPSMaterial(int n, Domain *d) : KelvinChainSolidMaterial(n, d) { }
+    MPSMaterial(int n, Domain * d) : KelvinChainSolidMaterial(n, d) { }
     virtual ~MPSMaterial() { }
 
     virtual const char *giveInputRecordName() const { return _IFT_MPSMaterial_Name; }

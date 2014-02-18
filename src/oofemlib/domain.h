@@ -235,7 +235,7 @@ public:
      * @param e Engineering model domain will belong to.
      * @see giveSerialNumber
      */
-    Domain(int n, int serNum, EngngModel *e);
+    Domain(int n, int serNum, EngngModel * e);
 
     /// Create a copy of the domain using the dynamic data reader.
     Domain *Clone();

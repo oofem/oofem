@@ -95,7 +95,7 @@ public:
      */
     SymCompCol();
     /// Copy constructor
-    SymCompCol(const SymCompCol &S);
+    SymCompCol(const SymCompCol & S);
     /// Destructor
     virtual ~SymCompCol() { }
 
@@ -137,9 +137,9 @@ protected:
     /*  General access function (slow) */
     /***********************************/
     /// implements 0-based access
-    double operator()(int i, int j) const;
+    double operator() (int i, int j) const;
     /// implements 0-based access
-    double &operator()(int i, int j);
+    double &operator() (int i, int j);
 };
 } // end namespace oofem
 #endif // symcompcol_h

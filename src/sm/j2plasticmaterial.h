@@ -62,7 +62,7 @@ protected:
     double k;
 
 public:
-    J2plasticMaterial(int n, Domain *d);
+    J2plasticMaterial(int n, Domain * d);
     virtual ~J2plasticMaterial();
 
     virtual IRResultType initializeFrom(InputRecord *ir);

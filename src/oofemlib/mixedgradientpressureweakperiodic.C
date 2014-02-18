@@ -102,7 +102,7 @@ IRResultType MixedGradientPressureWeakPeriodic :: initializeFrom(InputRecord *ir
     }
 
     int nsd = this->domain->giveNumberOfSpatialDimensions();
-    int total = nsd * nsd * ( int ) pow(double( order + 1 ), nsd - 1);
+    int total = nsd * nsd * ( int ) pow(double ( order + 1 ), nsd - 1);
     this->tractionsdman->setNumberOfDofs(total);
     for ( int i = 1; i <= total; ++i ) {
         // Simply use t_i = S_i . n, where S_1 = [1,0,0;0,0,0;0,0,0], S_2 = [0,1,0;0,0,0;0,0,0], etc.
@@ -218,12 +218,12 @@ void MixedGradientPressureWeakPeriodic :: integrateTractionVelocityTangent(Float
     int maxorder = this->order + interp->giveInterpolationOrder() * 3 - 2;
     IntegrationRule *ir = interp->giveBoundaryIntegrationRule(maxorder, boundary);
     int nsd = el->giveDomain()->giveNumberOfSpatialDimensions();
-    int total = nsd * nsd * ( int ) pow(double( order + 1 ), nsd - 1);
+    int total = nsd * nsd * ( int ) pow(double ( order + 1 ), nsd - 1);
 
     surfCoords.resize(nsd - 1);
     mMatrix.resize(nsd, total);
 
-    answer.resize(0, 0);
+    answer.clear();
     for ( int i = 0; i < ir->giveNumberOfIntegrationPoints(); ++i ) {
         GaussPoint *gp = ir->getIntegrationPoint(i);
         FloatArray &lcoords = * gp->giveCoordinates();
@@ -271,7 +271,7 @@ void MixedGradientPressureWeakPeriodic :: integrateTractionXTangent(FloatMatrix 
     int maxorder = this->order + interp->giveInterpolationOrder() * 3 - 2;
     IntegrationRule *ir = interp->giveBoundaryIntegrationRule(maxorder, boundary);
     int nsd = el->giveDomain()->giveNumberOfSpatialDimensions();
-    int total = nsd * nsd * ( int ) pow(double( order + 1 ), nsd - 1);
+    int total = nsd * nsd * ( int ) pow(double ( order + 1 ), nsd - 1);
 
     surfCoords.resize(nsd - 1);
 
@@ -321,11 +321,11 @@ void MixedGradientPressureWeakPeriodic :: integrateTractionDev(FloatArray &answe
     int maxorder = this->order + interp->giveInterpolationOrder() * 3 - 2;
     IntegrationRule *ir = interp->giveBoundaryIntegrationRule(maxorder, boundary);
     int nsd = el->giveDomain()->giveNumberOfSpatialDimensions();
-    int total = nsd * nsd * ( int ) pow(double( order + 1 ), nsd - 1);
+    int total = nsd * nsd * ( int ) pow(double ( order + 1 ), nsd - 1);
 
     surfCoords.resize(nsd - 1);
     contrib.resize(total);
-    answer.resize(0);
+    answer.clear();
 
     for ( int i = 0; i < ir->giveNumberOfIntegrationPoints(); ++i ) {
         GaussPoint *gp = ir->getIntegrationPoint(i);
@@ -368,7 +368,7 @@ MixedGradientPressureWeakPeriodic :: evaluateTractionBasisFunctions(FloatArray &
 {
     // This evaluates the function x^a * y^b, for a, b in [0,order]
     int nsd = coords.giveSize() + 1;
-    int total = ( int ) pow(double( order + 1 ), nsd - 1);
+    int total = ( int ) pow(double ( order + 1 ), nsd - 1);
     answer.resize(total);
     int pos = 0;
     double tx = 1.;
@@ -619,8 +619,7 @@ void MixedGradientPressureWeakPeriodic :: computeFields(FloatArray &sigmaDev, do
 }
 
 
-void MixedGradientPressureWeakPeriodic :: computeTangents(
-    FloatMatrix &Ed, FloatArray &Ep, FloatArray &Cd, double &Cp, EquationID eid, TimeStep *tStep)
+void MixedGradientPressureWeakPeriodic :: computeTangents(FloatMatrix &Ed, FloatArray &Ep, FloatArray &Cd, double &Cp, EquationID eid, TimeStep *tStep)
 {
     //double size = this->domainSize();
     // Fetch some information from the engineering model

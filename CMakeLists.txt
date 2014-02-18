@@ -7,13 +7,13 @@ include (CheckCXXSourceCompiles)
 include (GenerateExportHeader)
 include (UsePkgConfig)
 
-project (oofem)
+project (oofem CXX)
 set (oofem_VERSION_MAJOR 2)
 set (oofem_VERSION_MINOR 4)
 set (oofem_VERSION_PATCH 0) # Unused
 set (oofem_HOMEPAGE "http://www.oofem.org")
 set (bp_HOMEPAGE "http://ksm.fsv.cvut.cz/%7Ebp/bp.html")
-set (oofem_COPYRIGHT "2014")
+set (oofem_COPYRIGHT "Copyright (C) 1994-2014 Borek Patzak")
 set (oofem_EMAIL "info@oofem.org")
 
 # Default is debug build
@@ -27,6 +27,14 @@ if (MSVC)
     set (CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -W4 -wd4786 -wd4100 -wd4996 -wd4706 -wd4512 -wd4251")
 else ()
     set (CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall -fPIC")
+endif ()
+# Check with more compilers as time go on
+if (CMAKE_COMPILER_IS_GNUCXX AND CMAKE_CXX_COMPILER_VERSION VERSION_LESS 4.7)
+    set (CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++0x")
+elseif (CMAKE_CXX_COMPILER_ID STREQUAL "Clang" OR CMAKE_COMPILER_IS_GNUCXX)
+    set (CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11")
+elseif (MSVC)
+    # Nothing to do for MSVC.
 endif ()
 
 set (CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} -DDEBUG")
@@ -91,14 +99,11 @@ if (USE_PARALLEL)
     set (USE_MPI ON)
 endif ()
 
-
 #######################################################################
 ######################## Internal libraries ###########################
 #######################################################################
 # I believe the subdirs should be used when including instead.
 include_directories ("${oofem_SOURCE_DIR}/src/oofemlib")
-include_directories ("${oofem_SOURCE_DIR}/src/oofemlib/xfem")
-include_directories ("${oofem_SOURCE_DIR}/src/oofemlib/iga")
 include_directories ("${oofem_BINARY_DIR}")
 
 # Is there really any reason not to compile all of them? Some has cross dependencies.
@@ -121,7 +126,6 @@ endif ()
 
 if (USE_TM)
     include_directories ("${oofem_SOURCE_DIR}/src/tm")
-    include_directories ("${oofem_SOURCE_DIR}/src/tm/cemhyd")
     add_definitions (-D__TM_MODULE)
     if (${CMAKE_VERSION} VERSION_LESS "2.8.8")
         list (APPEND LIBS tm)
@@ -432,20 +436,13 @@ site_name (HOST_NAME)
 set (HOST_TYPE "${CMAKE_SYSTEM_PROCESSOR}-${CMAKE_SYSTEM_NAME}") # This should be renamed TARGET_TYPE.
 set (BUILDNAME "OOFEM(${MODULE_LIST})-${HOST_TYPE}-${HOST_NAME}")
 
-check_include_files ("sys/time.h" HAVE_SYS_TIME_H)
-check_include_files ("time.h" HAVE_TIME_H)
-if (HAVE_TIME_H AND HAVE_SYS_TIME_H)
-    set (TIME_WITH_SYS_TIME true)
-endif ()
-check_include_files ("strings.h" HAVE_STRINGS_H)
-check_include_files ("unistd.h" HAVE_UNISTD_H)
-check_include_files ("execinfo.h" HAVE_EXECINFO_H)
-check_symbol_exists ("strncasecmp" "strings.h" HAVE_STRNCASECMP)
-check_symbol_exists ("access" "unistd.h" HAVE_ACCESS)
+check_include_file_cxx ("strings.h" HAVE_STRINGS_H)
+check_include_file_cxx ("unistd.h" HAVE_UNISTD_H)
+check_include_file_cxx ("execinfo.h" HAVE_EXECINFO_H)
+check_cxx_symbol_exists ("strncasecmp" "strings.h" HAVE_STRNCASECMP)
+check_cxx_symbol_exists ("access" "unistd.h" HAVE_ACCESS)
 check_cxx_symbol_exists ("cbrt" "cmath" HAVE_CBRT)
 check_cxx_symbol_exists ("isnan" "cmath" HAVE_ISNAN)
-check_cxx_symbol_exists ("M_PI" "cmath" HAVE_M_PI)
-check_cxx_symbol_exists ("M_LN2" "cmath" HAVE_M_LN2)
 check_cxx_source_compiles ("
 #include <stdio.h>
 #define LOG_FATAL(file,...) fprintf (file, __VA_ARGS__)
@@ -678,6 +675,8 @@ file (GLOB sm_tests RELATIVE "${oofem_TEST_DIR}/sm" "${oofem_TEST_DIR}/sm/*.in")
 file (GLOB fm_tests RELATIVE "${oofem_TEST_DIR}/fm" "${oofem_TEST_DIR}/fm/*.in")
 file (GLOB tm_tests RELATIVE "${oofem_TEST_DIR}/tm" "${oofem_TEST_DIR}/tm/*.in")
 file (GLOB tmsm_tests RELATIVE "${oofem_TEST_DIR}/tmsm" "${oofem_TEST_DIR}/tmsm/*.in")
+file (GLOB tmfm_tests RELATIVE "${oofem_TEST_DIR}/tmfm" "${oofem_TEST_DIR}/tmfm/*.in")
+file (GLOB tmcemhyd_tests RELATIVE "${oofem_TEST_DIR}/tmcemhyd" "${oofem_TEST_DIR}/tmcemhyd/*.in")
 foreach (case ${sm_tests})
     add_test (NAME "test_${case}" WORKING_DIRECTORY ${oofem_TEST_DIR}/sm COMMAND ${test_cmd} ${oofem_cmd} ${case} "s")
     # Separate commands so that we can use valgrind and gcov versions
@@ -701,6 +700,19 @@ endif()
 if (USE_TM AND USE_SM)
   foreach (case ${tmsm_tests})
     add_test (NAME "test_${case}" WORKING_DIRECTORY ${oofem_TEST_DIR}/tmsm COMMAND ${test_cmd} ${oofem_cmd} ${case} "s")
+  endforeach (case)
+endif()
+
+if (USE_TM AND USE_FM)
+  foreach (case ${tmfm_tests})
+    add_test (NAME "test_${case}" WORKING_DIRECTORY ${oofem_TEST_DIR}/tmfm COMMAND ${test_cmd} ${oofem_cmd} ${case} "s")
+  endforeach (case)
+endif()
+
+
+if (USE_TM AND USE_CEMHYD)
+  foreach (case ${tmcemhyd_tests})
+    add_test (NAME "test_${case}" WORKING_DIRECTORY ${oofem_TEST_DIR}/tmcemhyd COMMAND ${test_cmd} ${oofem_cmd} ${case} "s")
   endforeach (case)
 endif()
 

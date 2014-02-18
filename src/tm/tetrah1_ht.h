@@ -54,7 +54,7 @@ protected:
     static FEI3dTetLin interpolation;
 
 public:
-    Tetrah1_ht(int n, Domain *d);
+    Tetrah1_ht(int n, Domain * d);
     virtual ~Tetrah1_ht();
 
     virtual FEInterpolation *giveInterpolation() const;
@@ -98,7 +98,7 @@ protected:
 class Tetrah1_hmt : public Tetrah1_ht
 {
 public:
-    Tetrah1_hmt(int n, Domain *d);
+    Tetrah1_hmt(int n, Domain * d);
 
     virtual const char *giveInputRecordName() const { return _IFT_Tetrah1_hmt_Name; }
     virtual const char *giveClassName() const { return "Tetrah1_hmt"; }

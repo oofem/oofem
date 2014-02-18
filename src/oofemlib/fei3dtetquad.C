@@ -216,7 +216,7 @@ FEI3dTetQuad :: local2global(FloatArray &answer, const FloatArray &lcoords, cons
 {
     FloatArray N;
     this->evalN(N, lcoords, cellgeo);
-    answer.resize(0);
+    answer.clear();
     for ( int i = 1; i <= N.giveSize(); i++ ) {
         answer.add( N.at(i), * cellgeo.giveVertexCoordinates(i) );
     }
@@ -229,7 +229,7 @@ FEI3dTetQuad :: global2local(FloatArray &answer, const FloatArray &gcoords, cons
 {
     FloatArray res, delta, guess, lcoords_guess;
     FloatMatrix jac;
-    double convergence_limit, error;
+    double convergence_limit, error=0.0;
 
     // find a suitable convergence limit
     convergence_limit = 1e-6 * this->giveCharacteristicLength(cellgeo);
@@ -350,7 +350,7 @@ FEI3dTetQuad :: edgeLocal2global(FloatArray &answer, int iedge,
     this->computeLocalEdgeMapping(edgeNodes, iedge);
     this->edgeEvalN(N, iedge, lcoords, cellgeo);
 
-    answer.resize(0);
+    answer.clear();
     for ( int i = 0; i < N.giveSize(); ++i ) {
         answer.add( N(i), * cellgeo.giveVertexCoordinates( edgeNodes(i) ) );
     }
@@ -436,7 +436,7 @@ FEI3dTetQuad :: surfaceLocal2global(FloatArray &answer, int isurf,
     this->computeLocalSurfaceMapping(nodes, isurf);
     this->surfaceEvalN(N, isurf, lcoords, cellgeo);
 
-    answer.resize(0);
+    answer.clear();
     for ( int i = 0; i < N.giveSize(); ++i ) {
         answer.add( N(i), * cellgeo.giveVertexCoordinates( nodes(i) ) );
     }
@@ -577,35 +577,35 @@ double FEI3dTetQuad :: evalNXIntegral(int iEdge, const FEICellGeometry &cellgeo)
     // Expression derived in Mathematica:
     return (
                c1(2) * ( c2(1) * ( -2 * c3(0) -  3 * c4(0) +  5 * c5(0) +  5 * c6(0) ) +
-                         c3(1) * ( 2 * c2(0)            -  5 * c4(0) -  5 * c5(0) +  3 * c6(0) ) +
-                         c4(1) * ( 3 * c2(0) +  5 * c3(0)            -  4 * c5(0) - 24 * c6(0) ) +
-                         c5(1) * ( -5 * c2(0) +  5 * c3(0) +  4 * c4(0)            -  4 * c6(0) ) +
-                         c6(1) * ( -5 * c2(0) -  3 * c3(0) + 24 * c4(0) +  4 * c5(0) ) ) +
+                        c3(1) * ( 2 * c2(0)            -  5 * c4(0) -  5 * c5(0) +  3 * c6(0) ) +
+                        c4(1) * ( 3 * c2(0) +  5 * c3(0)            -  4 * c5(0) - 24 * c6(0) ) +
+                        c5(1) * ( -5 * c2(0) +  5 * c3(0) +  4 * c4(0)            -  4 * c6(0) ) +
+                        c6(1) * ( -5 * c2(0) -  3 * c3(0) + 24 * c4(0) +  4 * c5(0) ) ) +
                c2(2) * ( c1(1) * ( 2 * c3(0) +  3 * c4(0) -  5 * c5(0) -  5 * c6(0) ) +
-                         c3(1) * ( -2 * c1(0)                       +  5 * c4(0) -  3 * c5(0) +  5 * c6(0) ) +
-                         c4(1) * ( -3 * c1(0)            -  5 * c3(0)            + 24 * c5(0) +  4 * c6(0) ) +
-                         c5(1) * ( 5 * c1(0)            +  3 * c3(0) - 24 * c4(0)            -  4 * c6(0) ) +
-                         c6(1) * ( 5 * c1(0)            -  5 * c3(0) -  4 * c4(0) +  4 * c5(0) ) ) +
+                        c3(1) * ( -2 * c1(0)                       +  5 * c4(0) -  3 * c5(0) +  5 * c6(0) ) +
+                        c4(1) * ( -3 * c1(0)            -  5 * c3(0)            + 24 * c5(0) +  4 * c6(0) ) +
+                        c5(1) * ( 5 * c1(0)            +  3 * c3(0) - 24 * c4(0)            -  4 * c6(0) ) +
+                        c6(1) * ( 5 * c1(0)            -  5 * c3(0) -  4 * c4(0) +  4 * c5(0) ) ) +
                c3(2) * ( c1(1) * ( -2 * c2(0)            +  5 * c4(0) +  5 * c5(0) -  3 * c6(0) ) +
-                         c2(1) * ( 2 * c1(0)                       -  5 * c4(0) +  3 * c5(0) -  5 * c6(0) ) +
-                         c4(1) * ( -5 * c1(0) +  5 * c2(0)                       -  4 * c5(0) +  4 * c6(0) ) +
-                         c5(1) * ( -5 * c1(0) -  3 * c2(0)            +  4 * c4(0)            + 24 * c6(0) ) +
-                         c6(1) * ( 3 * c1(0) +  5 * c2(0)            -  4 * c4(0) - 24 * c5(0) ) ) +
+                        c2(1) * ( 2 * c1(0)                       -  5 * c4(0) +  3 * c5(0) -  5 * c6(0) ) +
+                        c4(1) * ( -5 * c1(0) +  5 * c2(0)                       -  4 * c5(0) +  4 * c6(0) ) +
+                        c5(1) * ( -5 * c1(0) -  3 * c2(0)            +  4 * c4(0)            + 24 * c6(0) ) +
+                        c6(1) * ( 3 * c1(0) +  5 * c2(0)            -  4 * c4(0) - 24 * c5(0) ) ) +
                c4(2) * ( c1(1) * ( -3 * c2(0) -  5 * c3(0)            +  4 * c5(0) + 24 * c6(0) ) +
-                         c2(1) * ( 3 * c1(0)            +  5 * c3(0)            - 24 * c5(0) -  4 * c6(0) ) +
-                         c3(1) * ( 5 * c1(0) -  5 * c2(0)                       +  4 * c5(0) -  4 * c6(0) ) +
-                         c5(1) * ( -4 * c1(0) + 24 * c2(0) -  4 * c3(0)                       - 16 * c6(0) ) +
-                         c6(1) * ( -24 * c1(0) +  4 * c2(0) +  4 * c3(0)            + 16 * c5(0) ) ) +
+                        c2(1) * ( 3 * c1(0)            +  5 * c3(0)            - 24 * c5(0) -  4 * c6(0) ) +
+                        c3(1) * ( 5 * c1(0) -  5 * c2(0)                       +  4 * c5(0) -  4 * c6(0) ) +
+                        c5(1) * ( -4 * c1(0) + 24 * c2(0) -  4 * c3(0)                       - 16 * c6(0) ) +
+                        c6(1) * ( -24 * c1(0) +  4 * c2(0) +  4 * c3(0)            + 16 * c5(0) ) ) +
                c5(2) * ( c1(1) * ( 5 * c2(0) -  5 * c3(0) -  4 * c4(0)            +  4 * c6(0) ) +
-                         c2(1) * ( -5 * c1(0)            -  3 * c3(0) + 24 * c4(0)            +  4 * c6(0) ) +
-                         c3(1) * ( 5 * c1(0) +  3 * c2(0)            -  4 * c4(0)            - 24 * c6(0) ) +
-                         c4(1) * ( 4 * c1(0) - 24 * c2(0) +  4 * c3(0)                       + 16 * c6(0) ) +
-                         c6(1) * ( -4 * c1(0) -  4 * c2(0) + 24 * c3(0) - 16 * c4(0) ) ) +
+                        c2(1) * ( -5 * c1(0)            -  3 * c3(0) + 24 * c4(0)            +  4 * c6(0) ) +
+                        c3(1) * ( 5 * c1(0) +  3 * c2(0)            -  4 * c4(0)            - 24 * c6(0) ) +
+                        c4(1) * ( 4 * c1(0) - 24 * c2(0) +  4 * c3(0)                       + 16 * c6(0) ) +
+                        c6(1) * ( -4 * c1(0) -  4 * c2(0) + 24 * c3(0) - 16 * c4(0) ) ) +
                c6(2) * ( c1(1) * ( 5 * c2(0) +  3 * c3(0) - 24 * c4(0) -  4 * c5(0) ) +
-                         c2(1) * ( -5 * c1(0)            +  5 * c3(0) +  4 * c4(0) -  4 * c5(0) ) +
-                         c3(1) * ( -3 * c1(0) -  5 * c2(0)            +  4 * c4(0) + 24 * c5(0) ) +
-                         c4(1) * ( 24 * c1(0) -  4 * c2(0) -  4 * c3(0)            - 16 * c5(0) ) +
-                         c5(1) * ( 4 * c1(0) +  4 * c2(0) - 24 * c3(0) + 16 * c4(0) ) )
+                        c2(1) * ( -5 * c1(0)            +  5 * c3(0) +  4 * c4(0) -  4 * c5(0) ) +
+                        c3(1) * ( -3 * c1(0) -  5 * c2(0)            +  4 * c4(0) + 24 * c5(0) ) +
+                        c4(1) * ( 24 * c1(0) -  4 * c2(0) -  4 * c3(0)            - 16 * c5(0) ) +
+                        c5(1) * ( 4 * c1(0) +  4 * c2(0) - 24 * c3(0) + 16 * c4(0) ) )
                ) / 30.;
 }
 

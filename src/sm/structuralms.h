@@ -89,7 +89,7 @@ protected:
 
 public:
     /// Constructor. Creates new StructuralMaterialStatus with number n, belonging to domain d and IntegrationPoint g.
-    StructuralMaterialStatus(int n, Domain *d, GaussPoint *g);
+    StructuralMaterialStatus(int n, Domain * d, GaussPoint * g);
     /// Destructor
     virtual ~StructuralMaterialStatus();
 

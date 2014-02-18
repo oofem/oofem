@@ -43,7 +43,7 @@
 #include "interface.h"
 #include "internalstatevaluetype.h"
 #include "integrationrule.h"
-#include "xfemmanager.h"
+#include "xfem/xfemmanager.h"
 
 
 
@@ -172,7 +172,7 @@ protected:
 
 public:
     /// Constructor. Creates empty Output Manager. By default all components are selected.
-    VTKXMLExportModule(int n, EngngModel *e);
+    VTKXMLExportModule(int n, EngngModel * e);
     /// Destructor
     virtual ~VTKXMLExportModule();
 

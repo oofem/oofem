@@ -61,7 +61,7 @@ protected:
 
 public:
     LWedge(int, Domain *);
-    virtual ~LWedge() {}
+    virtual ~LWedge() { }
 
     virtual FEInterpolation *giveInterpolation() const { return & interpolation; }
 

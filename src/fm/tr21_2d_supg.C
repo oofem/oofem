@@ -101,7 +101,7 @@ TR21_2D_SUPG :: giveDofManDofIDMask(int inode, EquationID ut, IntArray &answer) 
         if ( ( inode >= 1 ) && ( inode < 4 ) ) {
             answer.setValues(1, P_f);
         } else {
-            answer.resize(0);
+            answer.clear();
         }
     } else if ( ut == EID_MomentumBalance_ConservationEquation ) {
         if ( ( inode >= 1 ) && ( inode < 4 ) ) {
@@ -345,7 +345,7 @@ TR21_2D_SUPG :: computeAdvectionTerm(FloatMatrix &answer, TimeStep *tStep)
 {
     FloatMatrix n, b;
 
-    answer.resize(0, 0);
+    answer.clear();
 
     IntegrationRule *iRule = this->integrationRulesArray [ 1 ];
     /* consistent part + supg stabilization term */
@@ -365,7 +365,7 @@ TR21_2D_SUPG :: computeAdvectionDeltaTerm(FloatMatrix &answer, TimeStep *tStep)
 {
     FloatMatrix n, b;
 
-    answer.resize(0, 0);
+    answer.clear();
 
     IntegrationRule *iRule = this->integrationRulesArray [ 1 ];
     /* consistent part + supg stabilization term */
@@ -387,7 +387,7 @@ TR21_2D_SUPG :: computeMassDeltaTerm(FloatMatrix &answer, TimeStep *tStep)
 {
     FloatMatrix n, b;
 
-    answer.resize(0, 0);
+    answer.clear();
 
     IntegrationRule *iRule = this->integrationRulesArray [ 1 ];
     /* mtrx for computing t_supg, norm of this mtrx is computed */
@@ -407,7 +407,7 @@ TR21_2D_SUPG :: computeLSICTerm(FloatMatrix &answer, TimeStep *tStep)
 {
     FloatMatrix b;
 
-    answer.resize(0, 0);
+    answer.clear();
 
     IntegrationRule *iRule = this->integrationRulesArray [ 1 ];
     for ( int k = 0; k < iRule->giveNumberOfIntegrationPoints(); k++ ) {
@@ -472,7 +472,7 @@ TR21_2D_SUPG :: LS_PCS_computedN(FloatMatrix &answer)
     FloatMatrix dn;
     IntegrationRule *iRule = this->integrationRulesArray [ 1 ];
 
-    answer.resize(0, 0);
+    answer.clear();
 
     for ( int k = 0; k < iRule->giveNumberOfIntegrationPoints(); k++ ) {
         GaussPoint *gp = iRule->getIntegrationPoint(k);
@@ -1388,7 +1388,7 @@ void
 TR21_2D_SUPG :: NodalAveragingRecoveryMI_computeSideValue(FloatArray &answer, int side,
                                                           InternalStateType type, TimeStep *tStep)
 {
-    answer.resize(0);
+    answer.clear();
 }
 
 
@@ -1485,11 +1485,11 @@ Interface *
 TR21_2D_SUPG :: giveInterface(InterfaceType interface)
 {
     if ( interface == LevelSetPCSElementInterfaceType ) {
-        return static_cast< LevelSetPCSElementInterface * >( this );
+        return static_cast< LevelSetPCSElementInterface * >(this);
     } else if ( interface == ZZNodalRecoveryModelInterfaceType ) {
-        return static_cast< ZZNodalRecoveryModelInterface * >( this );
+        return static_cast< ZZNodalRecoveryModelInterface * >(this);
     } else if ( interface == NodalAveragingRecoveryModelInterfaceType ) {
-        return static_cast< NodalAveragingRecoveryModelInterface * >( this );
+        return static_cast< NodalAveragingRecoveryModelInterface * >(this);
     }
 
     return NULL;

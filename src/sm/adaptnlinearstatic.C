@@ -57,6 +57,8 @@
  #include "parallelcontext.h"
 #endif
 
+#include <cstdlib>
+
 namespace oofem {
 REGISTER_EngngModel(AdaptiveNonLinearStatic);
 
@@ -73,7 +75,7 @@ AdaptiveNonLinearStatic :: AdaptiveNonLinearStatic(int i, EngngModel *_master) :
 
 
 AdaptiveNonLinearStatic :: ~AdaptiveNonLinearStatic()
-{}
+{ }
 
 
 IRResultType
@@ -105,7 +107,7 @@ AdaptiveNonLinearStatic :: solveYourselfAt(TimeStep *tStep)
     this->updateYourself(tStep);
 
 #ifdef __OOFEG
-    ESIEventLoop( YES, const_cast< char * >( "AdaptiveNonLinearStatic: Solution finished; Press Ctrl-p to continue" ) );
+    ESIEventLoop( YES, const_cast< char * >("AdaptiveNonLinearStatic: Solution finished; Press Ctrl-p to continue") );
 #endif
 
     this->terminate( this->giveCurrentStep() );
@@ -233,7 +235,7 @@ AdaptiveNonLinearStatic :: initializeAdaptiveFrom(EngngModel *sourceProblem)
     double mc1, mc2, mc3;
     timer.startTimer();
 
-    if ( dynamic_cast< AdaptiveNonLinearStatic * >( sourceProblem ) ) {
+    if ( dynamic_cast< AdaptiveNonLinearStatic * >(sourceProblem) ) {
         _error("AdaptiveNonLinearStatic :: initializeAdaptiveFrom - source problem must also be AdaptiveNonlinearStatic.");
     }
 
@@ -251,10 +253,10 @@ AdaptiveNonLinearStatic :: initializeAdaptiveFrom(EngngModel *sourceProblem)
     incrementOfDisplacement.zero();
 
     result &= mapper.mapAndUpdate( totalDisplacement, VM_Total,
-                                   sourceProblem->giveDomain(1), this->giveDomain(1), sourceProblem->giveCurrentStep() );
+                                  sourceProblem->giveDomain(1), this->giveDomain(1), sourceProblem->giveCurrentStep() );
 
     result &= mapper.mapAndUpdate( incrementOfDisplacement, VM_Incremental,
-                                   sourceProblem->giveDomain(1), this->giveDomain(1), sourceProblem->giveCurrentStep() );
+                                  sourceProblem->giveDomain(1), this->giveDomain(1), sourceProblem->giveCurrentStep() );
 
     timer.stopTimer();
     mc1 = timer.getUtime();
@@ -264,7 +266,7 @@ AdaptiveNonLinearStatic :: initializeAdaptiveFrom(EngngModel *sourceProblem)
     nelem = this->giveDomain(1)->giveNumberOfElements();
     for ( ielem = 1; ielem <= nelem; ielem++ ) {
         result &= this->giveDomain(1)->giveElement(ielem)->adaptiveMap( sourceProblem->giveDomain(1),
-                                                                        sourceProblem->giveCurrentStep() );
+                                                                       sourceProblem->giveCurrentStep() );
     }
 
     timer.stopTimer();
@@ -310,7 +312,7 @@ AdaptiveNonLinearStatic :: initializeAdaptiveFrom(EngngModel *sourceProblem)
 
     // assemble new initial load for new discretization
     this->assembleInitialLoadVector( initialLoadVector, initialLoadVectorOfPrescribed,
-                                     static_cast< AdaptiveNonLinearStatic * >( sourceProblem ), 1, this->giveCurrentStep() );
+                                    static_cast< AdaptiveNonLinearStatic * >(sourceProblem), 1, this->giveCurrentStep() );
     // assemble new total load for new discretization
     // this->assembleCurrentTotalLoadVector (totalLoadVector, totalLoadVectorOfPrescribed, this->giveCurrentStep());
     // set bcloadVector to zero (no increment within same step)
@@ -351,7 +353,7 @@ AdaptiveNonLinearStatic :: initializeAdaptiveFrom(EngngModel *sourceProblem)
             stiffnessMatrix->buildInternalStructure( this, 1, EID_MomentumBalance, EModelDefaultEquationNumbering() );
             stiffnessMatrix->zero(); // zero stiffness matrix
             this->assemble( stiffnessMatrix, this->giveCurrentStep(), EID_MomentumBalance, SecantStiffnessMatrix,
-                            EModelDefaultEquationNumbering(), this->giveDomain(1) );
+                           EModelDefaultEquationNumbering(), this->giveDomain(1) );
             initFlag = 0;
         }
 
@@ -359,31 +361,31 @@ AdaptiveNonLinearStatic :: initializeAdaptiveFrom(EngngModel *sourceProblem)
         //this->updateYourself(this->giveCurrentStep());
 #ifdef VERBOSE
         OOFEM_LOG_INFO( "Equilibrating mapped configuration [step number %5d.%d]\n",
-                        this->giveCurrentStep()->giveNumber(), this->giveCurrentStep()->giveVersion() );
+                       this->giveCurrentStep()->giveNumber(), this->giveCurrentStep()->giveVersion() );
 #endif
 
         //double deltaL = nMethod->giveUnknownComponent (StepLength, 0);
         double deltaL = nMethod->giveCurrentStepLength();
         this->assembleIncrementalReferenceLoadVectors( incrementalLoadVector, incrementalLoadVectorOfPrescribed,
-                                                       refLoadInputMode, this->giveDomain(1), EID_MomentumBalance, this->giveCurrentStep() );
+                                                      refLoadInputMode, this->giveDomain(1), EID_MomentumBalance, this->giveCurrentStep() );
         //
         // call numerical model to solve arised problem
         //
 #ifdef VERBOSE
         OOFEM_LOG_RELEVANT( "Solving [step number %5d.%d]\n",
-                            this->giveCurrentStep()->giveNumber(), this->giveCurrentStep()->giveVersion() );
+                           this->giveCurrentStep()->giveNumber(), this->giveCurrentStep()->giveVersion() );
 #endif
 
         //nMethod -> solveYourselfAt(this->giveCurrentStep()) ;
         nMethod->setStepLength(deltaL / 5.0);
         if ( initialLoadVector.isNotEmpty() ) {
             numMetStatus = nMethod->solve( stiffnessMatrix, & incrementalLoadVector, & initialLoadVector,
-                                           & totalDisplacement, & incrementOfDisplacement, & internalForces,
-                                           internalForcesEBENorm, loadLevel, refLoadInputMode, currentIterations, this->giveCurrentStep() );
+                                          & totalDisplacement, & incrementOfDisplacement, & internalForces,
+                                          internalForcesEBENorm, loadLevel, refLoadInputMode, currentIterations, this->giveCurrentStep() );
         } else {
             numMetStatus = nMethod->solve( stiffnessMatrix, & incrementalLoadVector, NULL,
-                                           & totalDisplacement, & incrementOfDisplacement, & internalForces,
-                                           internalForcesEBENorm, loadLevel, refLoadInputMode, currentIterations, this->giveCurrentStep() );
+                                          & totalDisplacement, & incrementOfDisplacement, & internalForces,
+                                          internalForcesEBENorm, loadLevel, refLoadInputMode, currentIterations, this->giveCurrentStep() );
         }
 
 
@@ -416,7 +418,7 @@ AdaptiveNonLinearStatic :: initializeAdaptive(int tStepNumber)
 
     try {
         this->restoreContext(NULL, CM_State, ( void * ) stepinfo);
-    } catch ( ContextIOERR &c ) {
+    } catch(ContextIOERR & c) {
         c.print();
         exit(1);
     }
@@ -477,10 +479,10 @@ AdaptiveNonLinearStatic :: adaptiveRemap(Domain *dNew)
     d2_incrementOfDisplacement.zero();
 
     result &= mapper.mapAndUpdate( d2_totalDisplacement, VM_Total,
-                                   this->giveDomain(1), this->giveDomain(2), this->giveCurrentStep() );
+                                  this->giveDomain(1), this->giveDomain(2), this->giveCurrentStep() );
 
     result &= mapper.mapAndUpdate( d2_incrementOfDisplacement, VM_Incremental,
-                                   this->giveDomain(1), this->giveDomain(2), this->giveCurrentStep() );
+                                  this->giveDomain(1), this->giveDomain(2), this->giveCurrentStep() );
 
     timer.stopTimer();
     mc1 = timer.getUtime();
@@ -597,10 +599,10 @@ AdaptiveNonLinearStatic :: adaptiveRemap(Domain *dNew)
 
     // assemble new initial load for new discretization
     this->assembleInitialLoadVector( initialLoadVector, initialLoadVectorOfPrescribed,
-                                     this, 1, this->giveCurrentStep() );
+                                    this, 1, this->giveCurrentStep() );
     this->assembleIncrementalReferenceLoadVectors( incrementalLoadVector, incrementalLoadVectorOfPrescribed,
-                                                   refLoadInputMode, this->giveDomain(1), EID_MomentumBalance,
-                                                   this->giveCurrentStep() );
+                                                  refLoadInputMode, this->giveDomain(1), EID_MomentumBalance,
+                                                  this->giveCurrentStep() );
 
     // assemble new total load for new discretization
     // this->assembleCurrentTotalLoadVector (totalLoadVector, totalLoadVectorOfPrescribed, this->giveCurrentStep());
@@ -656,7 +658,7 @@ AdaptiveNonLinearStatic :: adaptiveRemap(Domain *dNew)
      *************/
 
 #ifdef __OOFEG
-    ESIEventLoop( YES, const_cast< char * >( "AdaptiveRemap: Press Ctrl-p to continue" ) );
+    ESIEventLoop( YES, const_cast< char * >("AdaptiveRemap: Press Ctrl-p to continue") );
 #endif
 
     //
@@ -686,7 +688,7 @@ AdaptiveNonLinearStatic :: adaptiveRemap(Domain *dNew)
             stiffnessMatrix->buildInternalStructure( this, 1, EID_MomentumBalance, EModelDefaultEquationNumbering() );
             stiffnessMatrix->zero(); // zero stiffness matrix
             this->assemble( stiffnessMatrix, this->giveCurrentStep(), EID_MomentumBalance, SecantStiffnessMatrix,
-                            EModelDefaultEquationNumbering(), this->giveDomain(1) );
+                           EModelDefaultEquationNumbering(), this->giveDomain(1) );
             initFlag = 0;
         }
 
@@ -694,7 +696,7 @@ AdaptiveNonLinearStatic :: adaptiveRemap(Domain *dNew)
         //this->updateYourself(this->giveCurrentStep());
 #ifdef VERBOSE
         OOFEM_LOG_INFO( "Equilibrating mapped configuration [step number %5d.%d]\n",
-                        this->giveCurrentStep()->giveNumber(), this->giveCurrentStep()->giveVersion() );
+                       this->giveCurrentStep()->giveNumber(), this->giveCurrentStep()->giveVersion() );
 #endif
 
         //double deltaL = nMethod->giveUnknownComponent (StepLength, 0);
@@ -704,19 +706,19 @@ AdaptiveNonLinearStatic :: adaptiveRemap(Domain *dNew)
         //
 #ifdef VERBOSE
         OOFEM_LOG_RELEVANT( "Solving [step number %5d.%d]\n",
-                            this->giveCurrentStep()->giveNumber(), this->giveCurrentStep()->giveVersion() );
+                           this->giveCurrentStep()->giveNumber(), this->giveCurrentStep()->giveVersion() );
 #endif
 
         //nMethod -> solveYourselfAt(this->giveCurrentStep()) ;
         nMethod->setStepLength(deltaL / 5.0);
         if ( initialLoadVector.isNotEmpty() ) {
             numMetStatus = nMethod->solve( stiffnessMatrix, & incrementalLoadVector, & initialLoadVector,
-                                           & totalDisplacement, & incrementOfDisplacement, & internalForces,
-                                           internalForcesEBENorm, loadLevel, refLoadInputMode, currentIterations, this->giveCurrentStep() );
+                                          & totalDisplacement, & incrementOfDisplacement, & internalForces,
+                                          internalForcesEBENorm, loadLevel, refLoadInputMode, currentIterations, this->giveCurrentStep() );
         } else {
             numMetStatus = nMethod->solve( stiffnessMatrix, & incrementalLoadVector, NULL,
-                                           & totalDisplacement, & incrementOfDisplacement, & internalForces,
-                                           internalForcesEBENorm, loadLevel, refLoadInputMode, currentIterations, this->giveCurrentStep() );
+                                          & totalDisplacement, & incrementOfDisplacement, & internalForces,
+                                          internalForcesEBENorm, loadLevel, refLoadInputMode, currentIterations, this->giveCurrentStep() );
         }
 
 

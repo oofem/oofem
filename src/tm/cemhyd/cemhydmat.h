@@ -93,7 +93,7 @@ class CemhydMat : public IsotropicHeatTransferMaterial
 {
 public:
     /// Constructor
-    CemhydMat(int n, Domain *d);
+    CemhydMat(int n, Domain * d);
     /// Destructor
     virtual ~CemhydMat();
     /// Returns input record name of the receiver.
@@ -163,7 +163,7 @@ public:
      * @param CemStat A pointer to existing microstructure, from which the 3D image is copied.
      * @param withMicrostructure Creates also 3D microstructure representation at the integration point.
      */
-    CemhydMatStatus(int n, Domain *d, GaussPoint *gp, CemhydMatStatus *CemStat, CemhydMat *cemhydmat, bool withMicrostructure);
+    CemhydMatStatus(int n, Domain * d, GaussPoint * gp, CemhydMatStatus * CemStat, CemhydMat * cemhydmat, bool withMicrostructure);
     virtual ~CemhydMatStatus();
     //virtual Interface *giveInterface(InterfaceType);
     virtual const char *giveClassName() const { return "CemhydMatStatus"; }
@@ -486,16 +486,16 @@ private:
     void connect(void);
     void outmic(void);
     int genpartnew(void);
-    void alloc_char_3D(char ***( & mic ), long SYSIZE);
-    void dealloc_char_3D(char ***( & mic ), long SYSIZE);
-    void alloc_long_3D(long ***( & mic ), long SYSIZE);
-    void dealloc_long_3D(long ***( & mic ), long SYSIZE);
-    void alloc_int_3D(int ***( & mask ), long SYSIZE);
-    void dealloc_int_3D(int ***( & mask ), long SYSIZE);
-    void alloc_shortint_3D(short int ***( & mic ), long SYSIZE);
-    void dealloc_shortint_3D(short int ***( & mic ), long SYSIZE);
-    void alloc_double_3D(double ***( & mic ), long SYSIZE);
-    void dealloc_double_3D(double ***( & mic ), long SYSIZE);
+    void alloc_char_3D(char ***( &mic ), long SYSIZE);
+    void dealloc_char_3D(char ***( &mic ), long SYSIZE);
+    void alloc_long_3D(long ***( &mic ), long SYSIZE);
+    void dealloc_long_3D(long ***( &mic ), long SYSIZE);
+    void alloc_int_3D(int ***( &mask ), long SYSIZE);
+    void dealloc_int_3D(int ***( &mask ), long SYSIZE);
+    void alloc_shortint_3D(short int ***( &mic ), long SYSIZE);
+    void dealloc_shortint_3D(short int ***( &mic ), long SYSIZE);
+    void alloc_double_3D(double ***( &mic ), long SYSIZE);
+    void dealloc_double_3D(double ***( &mic ), long SYSIZE);
 
     char ***micorig; //char micorig [SYSIZE] [SYSIZE] [SYSIZE];
     long int ***micpart; //long int micpart [SYSIZE] [SYSIZE] [SYSIZE];
@@ -601,7 +601,7 @@ private:
     int movec3a(int xcur, int ycur, int zcur, int finalstep, float nucprob);
     int movec4a(int xcur, int ycur, int zcur, int finalstep, float nucprob);
     void hydrate(int fincyc, int stepmax, float chpar1, float chpar2, float hgpar1, float hgpar2, float fhpar1, float fhpar2, float gypar1, float gypar2);
-    void laguer(fcomplex_cem a[], int m, fcomplex_cem * x, float eps, int polish);
+    void laguer(fcomplex_cem a[], int m, fcomplex_cem *x, float eps, int polish);
     void zroots(fcomplex_cem a[], int m, fcomplex_cem roots[], int polish);
     void pHpred(void);
 

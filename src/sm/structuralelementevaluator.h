@@ -35,7 +35,7 @@
 #ifndef structuralelementevaluator_h
 #define structuralelementevaluator_h
 
-#include "iga.h"
+#include "iga/iga.h"
 #include "matresponsemode.h"
 
 namespace oofem {
@@ -61,7 +61,7 @@ protected:
     int rotationMatrixDefined;
 
     StructuralElementEvaluator();
-    virtual ~StructuralElementEvaluator() {}
+    virtual ~StructuralElementEvaluator() { }
     virtual void giveCharacteristicMatrix(FloatMatrix &answer, CharType mtrx, TimeStep *tStep);
     virtual void giveCharacteristicVector(FloatArray &answer, CharType type, ValueModeType mode, TimeStep *tStep);
 
@@ -78,7 +78,7 @@ protected:
      * mass matrix integration (typically only displacements are taken into account).
      * @param answer Integration mask, if zero sized, all unknowns participate. This is default.
      */
-    virtual void giveMassMtrxIntegrationMask(IntArray &answer) { answer.resize(0); }
+    virtual void giveMassMtrxIntegrationMask(IntArray &answer) { answer.clear(); }
     /**
      * Computes lumped mass matrix of receiver. Default implementation returns lumped consistent mass matrix.
      * Then returns lumped mass transformed into nodal coordinate system.
@@ -170,7 +170,7 @@ protected:
     virtual int giveIntegrationElementLocalCodeNumbers(IntArray &answer, Element *elem,
                                                        IntegrationRule *ie, EquationID ut);
 #ifdef __OOFEG
-    friend void drawIGAPatchDeformedGeometry(Element * elem, StructuralElementEvaluator * se, oofegGraphicContext & gc, UnknownType);
+    friend void drawIGAPatchDeformedGeometry(Element *elem, StructuralElementEvaluator *se, oofegGraphicContext &gc, UnknownType);
 #endif
 public:
     void elem(int arg1, EquationID arg2, IntArray arg3);

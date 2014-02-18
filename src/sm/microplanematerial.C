@@ -72,7 +72,7 @@ MicroplaneMaterial :: giveMicroplane(int i, GaussPoint *masterGp)
         slave = masterGp->gaussPointArray [ i ];
     }
 
-    return static_cast< Microplane * >( slave );
+    return static_cast< Microplane * >(slave);
 }
 
 

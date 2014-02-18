@@ -52,6 +52,7 @@
  #include "connectivitytable.h"
 #endif
 
+#include <cstdlib>
 
 namespace oofem {
 REGISTER_Material(TrabBoneNL3D);
@@ -63,7 +64,7 @@ TrabBoneNL3D :: TrabBoneNL3D(int n, Domain *d) : TrabBone3D(n, d), StructuralNon
 
 
 TrabBoneNL3D :: ~TrabBoneNL3D()
-{}
+{ }
 
 
 void
@@ -244,7 +245,7 @@ TrabBoneNL3D :: giveLocalNonlocalStiffnessContribution(GaussPoint *gp, IntArray 
 
         return 1;
     } else {
-        loc.resize(0);
+        loc.clear();
         return 0;
     }
 }
@@ -366,9 +367,9 @@ Interface *
 TrabBoneNL3D :: giveInterface(InterfaceType type)
 {
     if ( type == NonlocalMaterialExtensionInterfaceType ) {
-        return static_cast< StructuralNonlocalMaterialExtensionInterface * >( this );
+        return static_cast< StructuralNonlocalMaterialExtensionInterface * >(this);
     } else if ( type == NonlocalMaterialStiffnessInterfaceType ) {
-        return static_cast< NonlocalMaterialStiffnessInterface * >( this );
+        return static_cast< NonlocalMaterialStiffnessInterface * >(this);
     } else {
         return NULL;
     }
@@ -432,7 +433,7 @@ TrabBoneNL3DStatus :: TrabBoneNL3DStatus(int n, Domain *d, GaussPoint *g) :
 
 
 TrabBoneNL3DStatus :: ~TrabBoneNL3DStatus()
-{}
+{ }
 
 
 void

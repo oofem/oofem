@@ -58,7 +58,7 @@ protected:
     FloatArray normal;
 
 public:
-    InterfaceElem1d(int n, Domain *d);
+    InterfaceElem1d(int n, Domain * d);
     virtual ~InterfaceElem1d() { }
 
     virtual void computeLumpedMassMatrix(FloatMatrix &answer, TimeStep *tStep);

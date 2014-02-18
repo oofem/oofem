@@ -25,18 +25,18 @@
 
 
 #include "structuralmaterial.h"
-#include "xfemelementinterface.h"
-#include "enrichmentfunction.h"
-#include "enrichmentitem.h"
-#include "enrichmentdomain.h"
+#include "xfem/xfemelementinterface.h"
+#include "xfem/enrichmentfunction.h"
+#include "xfem/enrichmentitem.h"
+#include "xfem/enrichmentdomain.h"
 #include "structuralcrosssection.h"
 #include "vtkxmlexportmodule.h"
-#//ifdef __OOFEG
-#include "patchintegrationrule.h"
-//#endif
-#include "delaunay.h"
+#ifdef __OOFEG
+#include "xfem/patchintegrationrule.h"
+#endif
+#include "xfem/delaunay.h"
 
-#include "XFEMDebugTools.h"
+#include "xfem/XFEMDebugTools.h"
 #include <string>
 #include <sstream>
 
@@ -57,7 +57,7 @@ void TrPlaneStress2dXFEM :: postInitialize()
 }
 
 
-TrPlaneStress2dXFEM :: ~TrPlaneStress2dXFEM() {}
+TrPlaneStress2dXFEM :: ~TrPlaneStress2dXFEM() { }
 
 int TrPlaneStress2dXFEM :: checkConsistency()
 {
@@ -141,6 +141,13 @@ TrPlaneStress2dXFEM :: giveDofManDofIDMask(int inode, EquationID ut, IntArray &a
 	else {
 		TrPlaneStress2d :: giveDofManDofIDMask(inode, ut, answer);
 	}
+
+
+    if(answer.giveSize() == 0) {
+    	// TODO: How do we fix this in a nicer way? /ES
+    	answer.setValues(2, D_u, D_v);
+    }
+
 }
 
 void
@@ -219,7 +226,7 @@ void TrPlaneStress2dXFEM :: drawScalar(oofegGraphicContext &context)
             TimeStep *tStep = this->giveDomain()->giveEngngModel()->giveCurrentStep();
             PatchIntegrationRule *iRule;
             for ( int i = 0; i < numberOfIntegrationRules; i++ ) {
-                iRule = dynamic_cast< PatchIntegrationRule * >( integrationRulesArray [ i ] );
+                iRule = dynamic_cast< PatchIntegrationRule * >(integrationRulesArray [ i ]);
 
  #if 0
                 val = iRule->giveMaterial();

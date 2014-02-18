@@ -50,7 +50,7 @@ namespace oofem {
 SUPGElement2 :: SUPGElement2(int n, Domain *aDomain) :
     SUPGElement(n, aDomain)
     // Constructor. Creates an element with number n, belonging to aDomain.
-{}
+{ }
 
 
 SUPGElement2 :: ~SUPGElement2()
@@ -297,7 +297,7 @@ SUPGElement2 :: computeAccelerationTerm_MB(FloatMatrix &answer, TimeStep *tStep)
 {
     FloatMatrix n, b;
 
-    answer.resize(0, 0);
+    answer.clear();
 
     int rule = 2;
     IntegrationRule *iRule = this->integrationRulesArray [ rule ];
@@ -321,7 +321,7 @@ SUPGElement2 :: computeAdvectionTerm_MB(FloatArray &answer, TimeStep *tStep)
     FloatMatrix n, b, bn;
     FloatArray u, v(3);
 
-    answer.resize(0);
+    answer.clear();
 
     this->computeVectorOf(EID_MomentumBalance, VM_Total, tStep, u);
 
@@ -349,7 +349,7 @@ SUPGElement2 :: computeAdvectionDerivativeTerm_MB(FloatMatrix &answer, TimeStep 
 {
     FloatMatrix n, b, bn, grad_u, grad_uN, N;
 
-    answer.resize(0, 0);
+    answer.clear();
 
     int rule = 2;
     IntegrationRule *iRule = this->integrationRulesArray [ rule ];
@@ -382,7 +382,7 @@ SUPGElement2 :: computeDiffusionTerm_MB(FloatArray &answer, TimeStep *tStep)
     FloatMatrix b, un_gu, dDB;
     double Re = static_cast< FluidModel * >( domain->giveEngngModel() )->giveReynoldsNumber();
 
-    answer.resize(0);
+    answer.clear();
 
     this->computeVectorOf(EID_MomentumBalance, VM_Total, tStep, u);
 
@@ -412,7 +412,7 @@ SUPGElement2 :: computeDiffusionDerivativeTerm_MB(FloatMatrix &answer, MatRespon
     double Re = static_cast< FluidModel * >( domain->giveEngngModel() )->giveReynoldsNumber();
     FloatArray dDB_u;
 
-    answer.resize(0, 0);
+    answer.clear();
 
     int rule = 1;
     IntegrationRule *iRule = this->integrationRulesArray [ rule ];
@@ -439,7 +439,7 @@ SUPGElement2 :: computePressureTerm_MB(FloatMatrix &answer, TimeStep *tStep)
 {
     FloatMatrix gu, np, b;
 
-    answer.resize(0, 0);
+    answer.clear();
 
     int rule = 1;
     IntegrationRule *iRule = this->integrationRulesArray [ rule ];
@@ -473,7 +473,7 @@ SUPGElement2 :: computeLSICStabilizationTerm_MB(FloatMatrix &answer, TimeStep *t
 {
     FloatMatrix b;
 
-    answer.resize(0, 0);
+    answer.clear();
 
     int rule = 0;
     IntegrationRule *iRule = this->integrationRulesArray [ rule ];
@@ -494,7 +494,7 @@ SUPGElement2 :: computeLinearAdvectionTerm_MC(FloatMatrix &answer, TimeStep *tSt
 {
     FloatMatrix gu, np;
 
-    answer.resize(0, 0);
+    answer.clear();
 
     int rule = 0;
     IntegrationRule *iRule = this->integrationRulesArray [ rule ];
@@ -516,7 +516,7 @@ SUPGElement2 :: computeAdvectionTerm_MC(FloatArray &answer, TimeStep *tStep)
     FloatMatrix g, b;
     FloatArray u, v;
 
-    answer.resize(0);
+    answer.clear();
 
     int rule = 1;
     IntegrationRule *iRule = this->integrationRulesArray [ rule ];
@@ -539,7 +539,7 @@ SUPGElement2 :: computeAdvectionDerivativeTerm_MC(FloatMatrix &answer, TimeStep 
 {
     FloatMatrix g, b;
 
-    answer.resize(0, 0);
+    answer.clear();
 
     int rule = 1;
     IntegrationRule *iRule = this->integrationRulesArray [ rule ];
@@ -558,7 +558,7 @@ SUPGElement2 :: computeDiffusionDerivativeTerm_MC(FloatMatrix &answer, TimeStep 
 {
     FloatMatrix dDB, g;
 
-    answer.resize(0, 0);
+    answer.clear();
 
     int rule = 1;
     IntegrationRule *iRule = this->integrationRulesArray [ rule ];
@@ -582,7 +582,7 @@ SUPGElement2 :: computeDiffusionDerivativeTerm_MC(FloatMatrix &answer, TimeStep 
 void
 SUPGElement2 :: computeDiffusionTerm_MC(FloatArray &answer, TimeStep *tStep)
 {
-    answer.resize(0);
+    answer.clear();
 
     /*
      * FloatMatrix dDB, _d, g;
@@ -626,7 +626,7 @@ SUPGElement2 :: computeAccelerationTerm_MC(FloatMatrix &answer, TimeStep *tStep)
 {
     FloatMatrix g, n;
 
-    answer.resize(0, 0);
+    answer.clear();
     // pspg stabilization term: M_\epsilon term
 
 
@@ -647,7 +647,7 @@ SUPGElement2 :: computePressureTerm_MC(FloatMatrix &answer, TimeStep *tStep)
 {
     FloatMatrix g;
 
-    answer.resize(0, 0);
+    answer.clear();
 
     int rule = 0;
     IntegrationRule *iRule = this->integrationRulesArray [ rule ];
@@ -669,7 +669,7 @@ SUPGElement2 :: computeBCRhsTerm_MB(FloatArray &answer, TimeStep *tStep)
 {
     int nLoads;
 
-    answer.resize(0);
+    answer.clear();
 
     int rule = 0;
     IntegrationRule *iRule = this->integrationRulesArray [ rule ];
@@ -736,7 +736,7 @@ SUPGElement2 :: computeBCRhsTerm_MC(FloatArray &answer, TimeStep *tStep)
     int rule = 1;
     IntegrationRule *iRule = this->integrationRulesArray [ rule ];
 
-    answer.resize(0);
+    answer.clear();
 
     nLoads = this->giveBodyLoadArray()->giveSize();
     for ( int i = 1; i <= nLoads; i++ ) {

@@ -54,7 +54,7 @@ public:
      * @param d Domain which solver belongs to.
      * @param m Engineering model which solver belongs to.
      */
-    PetscSolver(Domain *d, EngngModel *m);
+    PetscSolver(Domain * d, EngngModel * m);
 
     virtual ~PetscSolver();
 

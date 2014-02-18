@@ -46,7 +46,6 @@
 //@}
 
 namespace oofem {
-
 /**
  * Class implementing cross section model in finite element problem.
  * A cross section properties are not a constant values, but they can be set as 
@@ -55,7 +54,7 @@ namespace oofem {
  * This cross section model is a integral model, so it does not perform any integration over cross-section volume.
  *
  * Note: varible cross section model uses the same keywords as simple cs model. As it is derived from simple cross section class,
- * the initializeFrom method does not calls the parent method, because the same keywords are used to read 
+ * the initializeFrom method does not calls the parent method, because the same keywords are used to read
  * variables of different type.
  */
 class OOFEM_EXPORT VariableCrossSection : public SimpleCrossSection
@@ -89,7 +88,9 @@ public:
      * @param n Cross section number.
      * @param d Associated domain.
      */
-     VariableCrossSection(int n, Domain *d) : SimpleCrossSection(n, d) {localFormulationFlag = false;}
+    VariableCrossSection(int n, Domain * d) : SimpleCrossSection(n, d) {
+        localFormulationFlag = false;
+    }
 
     /**
      * Initializes receiver acording to object description stored in input record.
@@ -116,6 +117,8 @@ public:
 protected:
     void giveExpression (const ScalarFunction** expr, CrossSectionProperty aProperty) const;
 
+protected:
+    std :: string giveExpression(CrossSectionProperty aProperty);
 };
 } // end namespace oofem
 #endif // variablecrosssection_h

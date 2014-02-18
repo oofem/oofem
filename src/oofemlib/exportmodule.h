@@ -94,7 +94,7 @@ protected:
 public:
 
     /// Constructor. Creates empty Output Manager with number n.
-    ExportModule(int n, EngngModel *e);
+    ExportModule(int n, EngngModel * e);
     /// Destructor
     virtual ~ExportModule();
     /// Initializes receiver according to object description stored in input record.

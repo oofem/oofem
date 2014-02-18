@@ -58,26 +58,26 @@ protected:
     FloatArray components;
 
 public:
-    LumpedMassElement(int n, Domain *d);
+    LumpedMassElement(int n, Domain * d);
     virtual ~LumpedMassElement() { }
 
     virtual void computeLumpedMassMatrix(FloatMatrix &answer, TimeStep *tStep);
     virtual void computeMassMatrix(FloatMatrix &answer, TimeStep *tStep)
     { computeLumpedMassMatrix(answer, tStep); }
     virtual void computeStiffnessMatrix(FloatMatrix &answer, MatResponseMode rMode, TimeStep *tStep)
-    { answer.resize(0, 0); }
+    { answer.clear(); }
     virtual void computeInitialStressMatrix(FloatMatrix &answer, TimeStep *tStep)
-    { answer.resize(0, 0); }
+    { answer.clear(); }
     virtual void computeForceLoadVector(FloatArray &answer, TimeStep *tStep, ValueModeType)
-    { answer.resize(0); }
+    { answer.clear(); }
     virtual void giveInternalForcesVector(FloatArray &answer, TimeStep *tStep, int useUpdatedGpRecord = 0)
-    { answer.resize(0); }
+    { answer.clear(); }
 
     virtual int computeNumberOfDofs();
     virtual void giveDofManDofIDMask(int inode, EquationID eid, IntArray &answer) const;
 
-    virtual void updateInternalState(TimeStep *tStep) {}
-    virtual void updateYourself(TimeStep *tStep) {}
+    virtual void updateInternalState(TimeStep *tStep) { }
+    virtual void updateYourself(TimeStep *tStep) { }
     virtual int checkConsistency();
 
 #ifdef __OOFEG
@@ -95,8 +95,8 @@ public:
 protected:
     virtual void computeBmatrixAt(GaussPoint *gp, FloatMatrix &answer,
                                   int lowerIndx = 1, int upperIndx = ALL_STRAINS)
-    {}
-    virtual void computeNmatrixAt(const FloatArray &iLocCoord, FloatMatrix &answer) {}
+    { }
+    virtual void computeNmatrixAt(const FloatArray &iLocCoord, FloatMatrix &answer) { }
 };
 } // end namespace oofem
 #endif // lumpedmasselement_h

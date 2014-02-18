@@ -41,10 +41,8 @@
 #include "datareader.h"
 #include "datastream.h"
 #include "contextioerr.h"
-
-#include "layeredcrosssection.h"
-#include "xfemmanager.h"
-#include "enrichmentdomain.h"
+#include "xfem/xfemmanager.h"
+#include "xfem/enrichmentdomain.h"
 #include "classfactory.h"
 
 
@@ -61,10 +59,10 @@ FractureManager :: FractureManager(Domain *domain)
     this->updateFlag = false;
 }
 
-FractureManager :: ~FractureManager() {}
+FractureManager :: ~FractureManager() { }
 
 void
-FractureManager :: clear() {}
+FractureManager :: clear() { }
 
 
 
@@ -237,7 +235,7 @@ bool
 DamagedNeighborLayered :: evaluateFailureCriteria(FailureCriteriaStatus *fcStatus)
 {
     // Go through all the layers and compare against threshold value
-    DamagedNeighborLayeredStatus *status = dynamic_cast< DamagedNeighborLayeredStatus * >( fcStatus );
+    DamagedNeighborLayeredStatus *status = dynamic_cast< DamagedNeighborLayeredStatus * >(fcStatus);
     bool criteriaFulfilled = false;
     status->failedFlags.resize( status->layerDamageValues.giveSize() );
     for ( int i = 1; i <= ( int ) status->failedFlags.size(); i++ ) { // if there are several quantities like interfaces

@@ -36,7 +36,7 @@
 #define Shell7BaseXFEM_h
 
 #include "shell7base.h"
-#include "xfemelementinterface.h"
+#include "xfem/xfemelementinterface.h"
 
 
 ///@name Input fields for el
@@ -106,8 +106,8 @@ protected:
     void computeFailureCriteriaQuantities(FailureCriteriaStatus *fc, TimeStep *tStep);
 
 public:
-    Shell7BaseXFEM(int n, Domain *d);
-    virtual ~Shell7BaseXFEM() {};
+    Shell7BaseXFEM(int n, Domain * d);
+    virtual ~Shell7BaseXFEM() { };
     virtual int checkConsistency();
 
     void giveMaxCZDamages(FloatArray &answer, TimeStep *tStep);

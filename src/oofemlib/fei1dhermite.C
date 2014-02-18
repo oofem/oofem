@@ -93,7 +93,7 @@ FEI1dHermite :: local2global(FloatArray &answer, const FloatArray &lcoords, cons
 
     this->evalN(n, lcoords, cellgeo);
     answer.at(1) = ( n.at(1) * cellgeo.giveVertexCoordinates(1)->at(cindx) +
-                     n.at(2) * cellgeo.giveVertexCoordinates(2)->at(cindx) + n.at(3) * cellgeo.giveVertexCoordinates(3)->at(cindx) );
+                    n.at(2) * cellgeo.giveVertexCoordinates(2)->at(cindx) + n.at(3) * cellgeo.giveVertexCoordinates(3)->at(cindx) );
 }
 
 int

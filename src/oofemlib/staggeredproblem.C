@@ -246,7 +246,7 @@ StaggeredProblem :: giveSolutionStepWhenIcApply()
     if ( stepWhenIcApply == NULL ) {
         int inin = giveNumberOfTimeStepWhenIcApply();
         int nFirst = giveNumberOfFirstStep();
-        stepWhenIcApply = new TimeStep(inin, this, 0, -giveDeltaT(nFirst), giveDeltaT(nFirst), 0);
+        stepWhenIcApply = new TimeStep(inin, this, 0, -giveDeltaT ( nFirst ), giveDeltaT ( nFirst ), 0);
     }
 
     return stepWhenIcApply;
@@ -272,11 +272,11 @@ StaggeredProblem :: giveNextStep()
         TimeStep *newStep;
         // first step -> generate initial step
         newStep = giveSolutionStepWhenIcApply();
-        currentStep = new TimeStep(* newStep);
+        currentStep = new TimeStep(*newStep);
     }
 
     previousStep = currentStep;
-    currentStep = new TimeStep(istep, this, 1, totalTime, this->giveDeltaT(istep), counter);
+    currentStep = new TimeStep(istep, this, 1, totalTime, this->giveDeltaT ( istep ), counter);
 
     // time and dt variables are set eq to 0 for statics - has no meaning
     return currentStep;

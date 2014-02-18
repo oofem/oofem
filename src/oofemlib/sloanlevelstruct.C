@@ -84,7 +84,7 @@ SloanLevelStructure :: formYourself(int limitWidth)
         /* start new level */
         PrevLevelWidth = PrevLevel->giveSize();
         /* loop over nodes on prev. level */
-        workLevel.resize(0);
+        workLevel.clear();
         CurrLevelWidth = 0;
         for ( i = 1; i <= PrevLevelWidth; i++ ) {
             Node = Graph->giveNode( PrevLevel->at(i) );

@@ -257,7 +257,7 @@ LIBeam3dNL :: computeStiffnessMatrix(FloatMatrix &answer, MatResponseMode rMode,
     IntegrationRule *iRule = integrationRulesArray [ giveDefaultIntegrationRule() ];
     GaussPoint *gp = iRule->getIntegrationPoint(0);
 
-    answer.resize(0, 0);
+    answer.clear();
 
     // linear part
 
@@ -664,7 +664,7 @@ LIBeam3dNL :: computeLoadLEToLRotationMatrix(FloatMatrix &answer, int iEdge, Gau
     //
     // i.e. f(element local) = T * f(edge local)
     //
-    answer.beEmptyMtrx();
+    answer.clear();
     return 0;
 }
 

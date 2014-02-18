@@ -211,6 +211,10 @@ void
 PrimaryField :: advanceSolution(TimeStep *tStep)
 {
     TimeStep *newts;
+    if ( actualStepNumber == tStep->giveNumber() ) {
+        // We're one the correct step already, no need to advance.
+        return;
+    }
     if ( ( actualStepNumber >= 0 ) && ( actualStepNumber + 1 != tStep->giveNumber() ) ) {
         _error("advanceSolution: can not advance due to steps skipped");
     }

@@ -206,7 +206,7 @@ void LinearStability :: solveYourselfAt(TimeStep *tStep)
  #endif
     stiffnessMatrix->zero();
     this->assemble( stiffnessMatrix, tStep, EID_MomentumBalance, StiffnessMatrix,
-                    EModelDefaultEquationNumbering(), this->giveDomain(1) );
+                   EModelDefaultEquationNumbering(), this->giveDomain(1) );
 #endif
 
 
@@ -219,7 +219,7 @@ void LinearStability :: solveYourselfAt(TimeStep *tStep)
 
     // Internal forces first, negated;
     this->assembleVector( loadVector, tStep, EID_MomentumBalance, InternalForcesVector, VM_Total,
-                          EModelDefaultEquationNumbering(), this->giveDomain(1) );
+                         EModelDefaultEquationNumbering(), this->giveDomain(1) );
     loadVector.negated();
 
     this->assembleVector( loadVector, tStep, EID_MomentumBalance, ExternalForcesVector, VM_Total,
@@ -228,7 +228,6 @@ void LinearStability :: solveYourselfAt(TimeStep *tStep)
 #ifdef __PARALLEL_MODE
     this->updateSharedDofManagers(loadVector, EModelDefaultEquationNumbering(), ReactionExchangeTag);
 #endif
-
 
     //
     // call numerical model to solve problem
@@ -255,12 +254,12 @@ void LinearStability :: solveYourselfAt(TimeStep *tStep)
     OOFEM_LOG_INFO("Assembling stiffness  matrix\n");
 #endif
     this->assemble( stiffnessMatrix, tStep, EID_MomentumBalance, StiffnessMatrix,
-                    EModelDefaultEquationNumbering(), this->giveDomain(1) );
+                   EModelDefaultEquationNumbering(), this->giveDomain(1) );
 #ifdef VERBOSE
     OOFEM_LOG_INFO("Assembling  initial stress matrix\n");
 #endif
     this->assemble( initialStressMatrix, tStep, EID_MomentumBalance, InitialStressMatrix,
-                    EModelDefaultEquationNumbering(), this->giveDomain(1) );
+                   EModelDefaultEquationNumbering(), this->giveDomain(1) );
     initialStressMatrix->times(-1.0);
 
     //  stiffnessMatrix->printYourself();
@@ -378,8 +377,8 @@ void LinearStability :: terminate(TimeStep *tStep)
     for ( i = 1; i <=  numberOfRequiredEigenValues; i++ ) {
         fprintf(outputStream, "\nOutput for eigen value no.  % .3e \n", ( double ) i);
         fprintf( outputStream,
-                 "Printing eigen vector no. %d, corresponding eigen value is %15.8e\n\n",
-                 i, eigVal.at(i) );
+                "Printing eigen vector no. %d, corresponding eigen value is %15.8e\n\n",
+                i, eigVal.at(i) );
         tStep->setTime( ( double ) i );
 
         if ( this->requiresUnknownsDictionaryUpdate() ) {
@@ -508,7 +507,7 @@ contextIOResultType LinearStability :: restoreContext(DataStream *stream, Contex
     }
 
     OOFEM_LOG_INFO( "Restoring - corresponding index is %d, EigenValue is %f\n",
-                    activeVector, eigVal.at(activeVector) );
+                   activeVector, eigVal.at(activeVector) );
     this->giveCurrentStep()->setTime( ( double ) activeVector );
 
     return CIO_OK;

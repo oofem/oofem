@@ -41,7 +41,7 @@ namespace oofem {
 REGISTER_Material(HyperElasticMaterial);
 
 HyperElasticMaterial :: HyperElasticMaterial(int n, Domain *d) : StructuralMaterial(n, d)
-{}
+{ }
 
 
 void
@@ -177,7 +177,7 @@ HyperElasticMaterialStatus :: HyperElasticMaterialStatus(int n, Domain *d, Gauss
 
 
 HyperElasticMaterialStatus :: ~HyperElasticMaterialStatus()
-{}
+{ }
 
 
 void

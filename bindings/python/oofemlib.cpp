@@ -58,7 +58,7 @@ namespace bp = boost::python;
 #include "sparsemtrx.h"
 #include "load.h"
 #include "initialcondition.h"
-#include "loadtimefunction.h"
+#include "function.h"
 #include "material.h"
 #include "crosssection.h"
 #include "node.h"
@@ -527,7 +527,7 @@ void pyclass_Domain()
         .def("giveLoad", &Domain::giveLoad, return_internal_reference<>())
         .def("giveBc", &Domain::giveBc, return_internal_reference<>())
         .def("giveIc", &Domain::giveIc, return_internal_reference<>())
-        .def("giveLoadTimeFunction", &Domain::giveLoadTimeFunction, return_internal_reference<>())
+        .def("giveLoadTimeFunction", &Domain::giveFunction, return_internal_reference<>())
         .def("giveMaterial", &Domain::giveMaterial, return_internal_reference<>())
         .def("giveCrossSection", &Domain::giveCrossSection, return_internal_reference<>())
         .def("giveNode", &Domain::giveNode, return_internal_reference<>())
@@ -548,8 +548,8 @@ void pyclass_Domain()
         .add_property("numberOfBoundaryConditions",&Domain::giveNumberOfBoundaryConditions)
         .def("giveNumberOfInitialConditions", &Domain::giveNumberOfInitialConditions)
         .add_property("numberOfInitialConditions",&Domain::giveNumberOfInitialConditions)
-        .def("giveNumberOfLoadTimeFunctions", &Domain::giveNumberOfLoadTimeFunctions)
-        .add_property("numberOfLoadTimeFunctions",&Domain::giveNumberOfLoadTimeFunctions)
+        .def("giveNumberOfLoadTimeFunctions", &Domain::giveNumberOfFunctions)
+        .add_property("numberOfLoadTimeFunctions",&Domain::giveNumberOfFunctions)
         .def("giveNumberOfRegions", &Domain::giveNumberOfRegions)
         .add_property("numberOfRegions",&Domain::giveNumberOfRegions)
 
@@ -559,7 +559,7 @@ void pyclass_Domain()
         .def("resizeMaterials", &Domain::resizeMaterials)
         .def("resizeBoundaryConditions", &Domain::resizeBoundaryConditions)
         .def("resizeInitialConditions", &Domain::resizeInitialConditions)
-        .def("resizeLoadTimeFunctions", &Domain::resizeLoadTimeFunctions)
+        .def("resizeLoadTimeFunctions", &Domain::resizeFunctions)
 
         .def("setDofManager", &Domain::setDofManager)
         .def("setElement", &Domain::setElement)
@@ -567,7 +567,7 @@ void pyclass_Domain()
         .def("setMaterial", &Domain::setMaterial)
         .def("setBoundaryCondition", &Domain::setBoundaryCondition)
         .def("setInitialCondition", &Domain::setInitialCondition)
-        .def("setLoadTimeFunction", &Domain::setLoadTimeFunction)
+        .def("setLoadTimeFunction", &Domain::setFunction)
 
         .def("checkConsistency", &Domain::checkConsistency)
         .def("giveConnectivityTable", &Domain::giveConnectivityTable, return_internal_reference<>())
@@ -716,8 +716,6 @@ void pyclass_Element()
         .def("giveDefaultIntegrationRulePtr", &Element::giveDefaultIntegrationRulePtr, return_internal_reference<>())
         .add_property("defaultIntegrationRule",make_function(&PyElement::giveDefaultIntegrationRulePtr, return_internal_reference<>()))
         .def("giveMaterial", &Element::giveMaterial, return_internal_reference<>())
-        .def("setMaterial", &Element::setMaterial)
-        .add_property("material",make_function(&PyElement::giveMaterial, return_internal_reference<>()), &PyElement::setMaterial)
         .def("giveCrossSection", &Element::giveCrossSection, return_internal_reference<>())
         .def("setCrossSection", &Element::setCrossSection)
         .add_property("crossSection",make_function(&PyElement::giveCrossSection, return_internal_reference<>()), &PyElement::setCrossSection)
@@ -1499,8 +1497,8 @@ object loadTimeFunction(bp::tuple args, bp::dict kw)
     string aClass = extract<string>(args[0])();
     int number =     len(args)>1? extract<int>(args[1])() : 0;
     Domain *domain = len(args)>2? extract<Domain*>(args[2])() : NULL;
-    LoadTimeFunction *ltf = classFactory.createLoadTimeFunction(aClass.c_str(),number,domain);
-    if (ltf==NULL) { LOG_ERROR(oofem_errLogger,"loadTimeFunction: wrong input data"); }
+    LoadTimeFunction *ltf = classFactory.createFunction(aClass.c_str(),number,domain);
+    if (ltf==NULL) { LOG_ERROR(oofem_errLogger,"function: wrong input data"); }
     OOFEMTXTInputRecord ir = makeOOFEMTXTInputRecordFrom(kw);
     ltf->initializeFrom(&ir);
     return object(ptr(ltf));

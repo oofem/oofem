@@ -70,7 +70,7 @@ protected:
     double t_supg, t_pspg, t_lsic;
 
 public:
-    SUPGElement(int n, Domain *aDomain);
+    SUPGElement(int n, Domain * aDomain);
     virtual ~SUPGElement();
 
     virtual IRResultType initializeFrom(InputRecord *ir);
@@ -166,31 +166,31 @@ public:
      */
     virtual void computeSlipWithFrictionBCTerm_MB(FloatMatrix &answer, Load *load, int side, TimeStep *tStep) {
         _warning("computeSlipWithFrictionBCTerm_MB not implemented");
-        answer.resize(0, 0);
+        answer.clear();
     }
     /**
      * Computes Lhs contribution due to applied Penetration bc.
      */
     virtual void computePenetrationWithResistanceBCTerm_MB(FloatMatrix &answer, Load *load, int side, TimeStep *tStep) {
         _warning("computePenetrationWithResistanceBCTerm_MB not implemented");
-        answer.resize(0, 0);
+        answer.clear();
     }
     /**
      * Computes Lhs contribution due to outflow BC.
      */
     virtual void computeOutFlowBCTerm_MB(FloatMatrix &answer, int side, TimeStep *tStep) {
         _warning("computeOutFlowBCTerm_MB not implemented");
-        answer.resize(0, 0);
+        answer.clear();
     }
 
 
     virtual void computeHomogenizedReinforceTerm_MB(FloatMatrix &answer,  Load *load, TimeStep *tStep) {
         _warning("computeHomogenizedReinforceTerm_MB");
-        answer.resize(0, 0);
+        answer.clear();
     }
     virtual void computeHomogenizedReinforceTerm_MC(FloatMatrix &answer,  Load *load, TimeStep *tStep) {
         _warning("computeHomogenizedReinforceTerm_MB");
-        answer.resize(0, 0);
+        answer.clear();
     }
 
 
@@ -211,8 +211,8 @@ public:
     //virtual void drawDeformedGeometry(oofegGraphicContext&, UnknownType) {}
 #endif
 
-    virtual void giveLocalVelocityDofMap(IntArray &map) {}
-    virtual void giveLocalPressureDofMap(IntArray &map) {}
+    virtual void giveLocalVelocityDofMap(IntArray &map) { }
+    virtual void giveLocalPressureDofMap(IntArray &map) { }
 
 protected:
     virtual void computeDeviatoricStrain(FloatArray &answer, GaussPoint *gp, TimeStep *tStep) = 0;

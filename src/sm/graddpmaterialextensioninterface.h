@@ -114,7 +114,7 @@ public:
      * Constructor. Creates material with given number, belonging to given domain.
      * @param d Domain to which new material will belong.
      */
-    GradDpMaterialExtensionInterface(Domain *d);
+    GradDpMaterialExtensionInterface(Domain * d);
     /// Destructor.
     virtual ~GradDpMaterialExtensionInterface() { }
     /// Left upper block

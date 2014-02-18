@@ -117,7 +117,7 @@ public:
      * @param n Material number.
      * @param d Domain to which new material will belong.
      */
-    StructuralMaterial(int n, Domain *d) : Material(n, d) { }
+    StructuralMaterial(int n, Domain * d) : Material(n, d) { }
     /// Destructor.
     virtual ~StructuralMaterial() { }
 
@@ -251,7 +251,7 @@ public:
      */
     virtual void giveThermalDilatationVector(FloatArray &answer, GaussPoint *gp, TimeStep *tStep)
     {
-        answer.resize(0);
+        answer.clear();
     }
     /**
      * Returns the reference temperature of receiver.

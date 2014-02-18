@@ -58,8 +58,8 @@ protected:
     static FEI3dHexaLin interpolation;
 
 public:
-    QSpaceGrad(int n, Domain *d);
-    virtual ~QSpaceGrad() {}
+    QSpaceGrad(int n, Domain * d);
+    virtual ~QSpaceGrad() { }
 
     virtual IRResultType initializeFrom(InputRecord *ir);
     virtual void giveDofManDofIDMask(int inode, EquationID ut, IntArray &answer) const;

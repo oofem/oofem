@@ -64,19 +64,18 @@ public:
      * @param n Material number.
      * @param d Domain to which new material will belong.
      */
-    NewtonianFluidMaterial(int n, Domain *d) : FluidDynamicMaterial(n, d) { }
+    NewtonianFluidMaterial(int n, Domain * d) : FluidDynamicMaterial(n, d) { }
     /// Destructor.
     virtual ~NewtonianFluidMaterial() { }
 
     virtual double giveEffectiveViscosity(GaussPoint *gp, TimeStep *tStep);
 
     virtual void computeDeviatoricStressVector(FloatArray &answer, GaussPoint *gp, const FloatArray &eps, TimeStep *tStep);
-    virtual void giveDeviatoricStiffnessMatrix(FloatMatrix & answer, MatResponseMode, GaussPoint * gp, TimeStep * tStep);
+    virtual void giveDeviatoricStiffnessMatrix(FloatMatrix &answer, MatResponseMode, GaussPoint *gp, TimeStep *tStep);
 
     virtual double give(int aProperty, GaussPoint *gp);
     virtual IRResultType initializeFrom(InputRecord *ir);
     virtual void giveInputRecord(DynamicInputRecord &input);
-    virtual int hasMaterialModeCapability(MaterialMode mode);
     virtual const char *giveClassName() const { return "NewtonianFluidMaterial"; }
     virtual const char *giveInputRecordName() const { return _IFT_NewtonianFluidMaterial_Name; }
     virtual int checkConsistency();

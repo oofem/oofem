@@ -17,11 +17,11 @@ set (core_unsorted
     rvematerial.C
     weakperiodicbc.C
     solutionbasedshapefunction.C
+    fracturemanager.C
     # Semi sorted:
     errorestimator.C meshqualityerrorestimator.C remeshingcrit.C
     sloangraph.C sloangraphnode.C sloanlevelstruct.C
     eleminterpunknownmapper.C primaryunknownmapper.C materialmappingalgorithm.C
-    primvarmapper.C
     nonlocalmaterialext.C randommaterialext.C
     inputrecord.C oofemtxtinputrecord.C dynamicinputrecord.C
     dynamicdatareader.C oofemtxtdatareader.C tokenizer.C parser.C
@@ -145,9 +145,6 @@ set (core_iga
 set (core_arrays
     intarray.C
     floatarray.C
-    stressstrainbasevector.C
-    stressvector.C
-    strainvector.C
     floatmatrix.C
     )
 
@@ -198,6 +195,12 @@ set (core_xfem
     xfem/enrichmentdomain.C
     xfem/propagationlaw.C
     xfem/XFEMDebugTools.C
+    xfem/enrichmentfronts/enrichmentfront.C
+    xfem/enrichmentfronts/enrichmentfrontdonothing.C
+    xfem/enrichmentfronts/enrichmentfrontextend.C
+    xfem/enrichmentfronts/enrichmentfrontreducefront.C
+    xfem/enrichmentfronts/enrichmentfrontlinbranchfuncradius.C
+    xfem/enrichmentfronts/enrichmentfrontlinbranchfunconeel.C
     )
 
 set (core_parallel

@@ -71,15 +71,15 @@
 
 #ifdef __LAPACK_MODULE
 extern "C" {
-extern void dgemv_(const char *trans, const int *m, const int *n, const double *alpha, const double *a, const int *lda, const double *x,
-                   const int *incx, const double *beta, double *y, const int *incy, int aColumns, int xSize, int ySize);
-// Y = Y + alpha * X
-extern void daxpy_(const int *n, const double *alpha, const double *x, const int *incx, double *y, const int *incy, int xsize, int ysize);
+    extern void dgemv_(const char *trans, const int *m, const int *n, const double *alpha, const double *a, const int *lda, const double *x,
+                       const int *incx, const double *beta, double *y, const int *incy, int aColumns, int xSize, int ySize);
+    // Y = Y + alpha * X
+    extern void daxpy_(const int *n, const double *alpha, const double *x, const int *incx, double *y, const int *incy, int xsize, int ysize);
 }
 #endif
 
 namespace oofem {
-FloatArray :: FloatArray() : size(0), allocatedSize(0), values(NULL) {}
+FloatArray :: FloatArray() : size(0), allocatedSize(0), values(NULL) { }
 
 
 FloatArray :: FloatArray(int n) :
@@ -131,7 +131,7 @@ FloatArray :: FloatArray(std :: initializer_list< double >list)
 }
 
 
-FloatArray &FloatArray :: operator=(std :: initializer_list< double >list)
+FloatArray &FloatArray :: operator = ( std :: initializer_list< double >list )
 {
     RESIZE( (int)list.size() );
     std :: uninitialized_copy(list.begin(), list.end(), this->values);
@@ -149,7 +149,7 @@ FloatArray :: ~FloatArray()
 }
 
 FloatArray &
-FloatArray :: operator=(const FloatArray &src)
+FloatArray :: operator = ( const FloatArray & src )
 {
     if ( this != & src ) { // beware of s=s;
         RESIZE(src.size);
@@ -161,7 +161,7 @@ FloatArray :: operator=(const FloatArray &src)
 
 #ifdef DEBUG
 double &
-FloatArray :: operator()(int i)
+FloatArray :: operator() (int i)
 {
     if ( i >= size ) {
         OOFEM_ERROR2("FloatArray :: operator() : array error on index : %d <= 0 \n", i);
@@ -170,7 +170,7 @@ FloatArray :: operator()(int i)
 }
 
 const double &
-FloatArray :: operator()(int i) const
+FloatArray :: operator() (int i) const
 {
     if ( i >= size ) {
         OOFEM_ERROR2("FloatArray :: operator() : array error on index : %d <= 0 \n", i);
@@ -727,7 +727,7 @@ void FloatArray :: resize(int n)
     this->resizeWithValues(n);
     return;
 
-#endif
+#else
 
     size = n;
     if ( n <= allocatedSize ) {
@@ -745,6 +745,7 @@ void FloatArray :: resize(int n)
     if ( !values ) {
         OOFEM_FATAL2("FloatArray :: simple - Failed in allocating %d doubles", n);
     }
+#endif
 #endif
 }
 
@@ -1062,7 +1063,7 @@ int FloatArray :: givePackSize(CommunicationBuffer &buff) const
 
 // IML compat
 
-FloatArray &FloatArray :: operator=(const double &val)
+FloatArray &FloatArray :: operator = ( const double & val )
 {
     for ( int i = 0; i < size; i++ ) {
         values [ i ] = val;
@@ -1071,7 +1072,7 @@ FloatArray &FloatArray :: operator=(const double &val)
     return * this;
 }
 
-FloatArray &operator*=(FloatArray &x, const double &a)
+FloatArray &operator *= ( FloatArray & x, const double & a )
 {
     int N = x.giveSize();
     for ( int i = 0; i < N; i++ ) {
@@ -1082,7 +1083,7 @@ FloatArray &operator*=(FloatArray &x, const double &a)
 }
 
 
-FloatArray operator*(const double &a, const FloatArray &x)
+FloatArray operator *( const double & a, const FloatArray & x )
 {
     int N = x.giveSize();
     FloatArray result(N);
@@ -1093,7 +1094,7 @@ FloatArray operator*(const double &a, const FloatArray &x)
     return result;
 }
 
-FloatArray operator*(const FloatArray &x, const double &a)
+FloatArray operator *( const FloatArray & x, const double & a )
 {
     // This is the other commutative case of vector*scalar.
     // It should be just defined to be
@@ -1112,7 +1113,7 @@ FloatArray operator*(const FloatArray &x, const double &a)
     return result;
 }
 
-FloatArray operator+(const FloatArray &x, const FloatArray &y)
+FloatArray operator + ( const FloatArray & x, const FloatArray & y )
 {
     int N = x.giveSize();
 #ifdef DEBUG
@@ -1129,7 +1130,7 @@ FloatArray operator+(const FloatArray &x, const FloatArray &y)
     return result;
 }
 
-FloatArray operator-(const FloatArray &x, const FloatArray &y)
+FloatArray operator - ( const FloatArray & x, const FloatArray & y )
 {
     int N = x.giveSize();
 #ifdef DEBUG
@@ -1147,7 +1148,7 @@ FloatArray operator-(const FloatArray &x, const FloatArray &y)
 }
 
 
-FloatArray &operator+=(FloatArray &x, const FloatArray &y)
+FloatArray &operator += ( FloatArray & x, const FloatArray & y )
 {
     int N = x.giveSize();
 #ifdef DEBUG
@@ -1164,7 +1165,7 @@ FloatArray &operator+=(FloatArray &x, const FloatArray &y)
 }
 
 
-FloatArray &operator-=(FloatArray &x, const FloatArray &y)
+FloatArray &operator -= ( FloatArray & x, const FloatArray & y )
 {
     int N = x.giveSize();
 #ifdef DEBUG
@@ -1305,7 +1306,7 @@ void FloatArray :: changeComponentOrder()
 //
 //}
 
-std :: ostream &operator<<(std :: ostream &out, const FloatArray &x)
+std :: ostream &operator << ( std :: ostream & out, const FloatArray & x )
 {
     out << x.size;
     for ( int i = 0; i < x.size; ++i ) {

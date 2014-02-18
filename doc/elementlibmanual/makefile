@@ -24,7 +24,7 @@ pdf:
 	pdflatex -shell-escape elementlibmanual
 
 
-www-install: html pdf
+www-install: html ps
 ifdef INSTALLDIR
 	$(RCP) -r html $(INSTALLDIR)/resources/doc/elementlibmanual
 	$(RCP) -r elementlibmanual.ps $(INSTALLDIR)/resources/doc/elementlibmanual

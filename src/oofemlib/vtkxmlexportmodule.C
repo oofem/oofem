@@ -45,9 +45,9 @@
 #include "classfactory.h"
 #include "crosssection.h"
 
-//#include "xfemmanager.h"
-#include "enrichmentitem.h"
-#include "enrichmentdomain.h"
+#include "xfem/xfemmanager.h"
+#include "xfem/enrichmentitem.h"
+#include "xfem/enrichmentdomain.h"
 
 #include <string>
 #include <sstream>
@@ -111,7 +111,7 @@ VTKXMLExportModule :: initializeFrom(InputRecord *ir)
     IR_GIVE_OPTIONAL_FIELD(ir, val, _IFT_VTKXMLExportModule_stype); // Macro
     stype = ( NodalRecoveryModel :: NodalRecoveryModelType ) val;
 
-    regionsToSkip.resize(0);
+    regionsToSkip.clear();
     IR_GIVE_OPTIONAL_FIELD(ir, regionsToSkip, _IFT_VTKXMLExportModule_regionstoskip); // Macro
 
     this->nvr = 0; // number of virtual regions
@@ -274,12 +274,12 @@ VTKXMLExportModule :: giveElementCell(IntArray &answer, Element *elem)
     int nelemNodes;
 
     if ( ( elemGT == EGT_point ) ||
-         ( elemGT == EGT_line_1 ) || ( elemGT == EGT_line_2 ) ||
-         ( elemGT == EGT_triangle_1 ) || ( elemGT == EGT_triangle_2 ) ||
-         ( elemGT == EGT_tetra_1 ) || ( elemGT == EGT_tetra_2 ) ||
-         ( elemGT == EGT_quad_1 ) || ( elemGT == EGT_quad_2 ) ||
-         ( elemGT == EGT_hexa_1 ) ||
-         ( elemGT == EGT_wedge_1 ) ) {
+        ( elemGT == EGT_line_1 ) || ( elemGT == EGT_line_2 ) ||
+        ( elemGT == EGT_triangle_1 ) || ( elemGT == EGT_triangle_2 ) ||
+        ( elemGT == EGT_tetra_1 ) || ( elemGT == EGT_tetra_2 ) ||
+        ( elemGT == EGT_quad_1 ) || ( elemGT == EGT_quad_2 ) ||
+        ( elemGT == EGT_hexa_1 ) ||
+        ( elemGT == EGT_wedge_1 ) ) {
         nelemNodes = elem->giveNumberOfNodes();
         answer.resize(nelemNodes);
         for ( int i = 1; i <= nelemNodes; i++ ) {
@@ -356,12 +356,12 @@ VTKXMLExportModule :: giveNumberOfElementCells(Element *elem)
     Element_Geometry_Type elemGT = elem->giveGeometryType();
 
     if ( ( elemGT == EGT_point ) ||
-         ( elemGT == EGT_line_1 ) || ( elemGT == EGT_line_2 ) ||
-         ( elemGT == EGT_triangle_1 ) || ( elemGT == EGT_triangle_2 ) ||
-         ( elemGT == EGT_tetra_1 ) || ( elemGT == EGT_tetra_2 ) ||
-         ( elemGT == EGT_quad_1 ) || ( elemGT == EGT_quad_2 ) || ( elemGT == EGT_quad9_2 ) ||
-         ( elemGT == EGT_hexa_1 ) || ( elemGT == EGT_hexa_2 ) || ( elemGT == EGT_hexa_27 ) ||
-         ( elemGT == EGT_wedge_1 ) || ( elemGT == EGT_wedge_2 ) ) {
+        ( elemGT == EGT_line_1 ) || ( elemGT == EGT_line_2 ) ||
+        ( elemGT == EGT_triangle_1 ) || ( elemGT == EGT_triangle_2 ) ||
+        ( elemGT == EGT_tetra_1 ) || ( elemGT == EGT_tetra_2 ) ||
+        ( elemGT == EGT_quad_1 ) || ( elemGT == EGT_quad_2 ) || ( elemGT == EGT_quad9_2 ) ||
+        ( elemGT == EGT_hexa_1 ) || ( elemGT == EGT_hexa_2 ) || ( elemGT == EGT_hexa_27 ) ||
+        ( elemGT == EGT_wedge_1 ) || ( elemGT == EGT_wedge_2 ) ) {
         return 1;
     } else {
         OOFEM_ERROR("VTKXMLExportModule: unsupported element geometry type");
@@ -1016,10 +1016,10 @@ VTKXMLExportModule :: getNodalVariableFromIS(FloatArray &answer, Node *node, Tim
         if ( mi ) {
             valueArray.resize(1);
             val = & valueArray;
-            valueArray.at(1) = mi->giveNodalScalarRepresentation( node->giveGlobalNumber() );
+            valueArray.at(1) = mi->giveNodalScalarRepresentation( node->giveNumber() );
         }
     } else {
-        int found = this->smoother->giveNodalVector(val, node->giveGlobalNumber(), ireg);
+        int found = this->smoother->giveNodalVector(val, node->giveNumber(), ireg);
         if ( !found ) {
             valueArray.resize( redIndx.giveSize() );
             val = & valueArray;
@@ -1402,7 +1402,7 @@ VTKXMLExportModule :: getNodalVariableFromPrimaryField(FloatArray &answer, DofMa
 
     InternalStateType iState = IST_DisplacementVector; // Shouldn't be necessary
 
-    dofIDMask.resize(0);
+    dofIDMask.clear();
     if ( ( type == DisplacementVector ) || ( type == EigenVector ) || ( type == VelocityVector ) ) {
         dofIDMask.setValues(3, ( int ) Undef, ( int ) Undef, ( int ) Undef);
         for ( int j = 1; j <= dman->giveNumberOfDofs(); j++ ) {
@@ -1490,7 +1490,7 @@ VTKXMLExportModule :: getNodalVariableFromPrimaryField(FloatArray &answer, DofMa
     InternalStateValueType valType = giveInternalStateValueType(type);
     //rotate back from nodal CS to global CS if applies
     if ( valType == ISVT_VECTOR ) { ///@todo in general, shouldn't this apply for 2nd order tensors as well? /JB
-        Node *node = dynamic_cast< Node * >( dman );
+        Node *node = dynamic_cast< Node * >(dman);
         if ( node && node->hasLocalCS() ) {
             answer.rotatedWith(* node->giveLocalCoordinateTriplet(), 't');
         }
@@ -1583,7 +1583,7 @@ VTKXMLExportModule :: getCellVariableFromIS(FloatArray &answer, Element *el, Int
     valueArray.resize(ncomponents);
 
     switch ( type ) {
-    // Special scalars
+        // Special scalars
     case IST_MaterialNumber:
         OOFEM_WARNING1("VTKExportModule - Material numbers are deprecated, outputing cross section number instead...");
     case IST_CrossSectionNumber:
@@ -1601,7 +1601,7 @@ VTKXMLExportModule :: getCellVariableFromIS(FloatArray &answer, Element *el, Int
 
         break;
 
-    // Special vectors
+        // Special vectors
     case IST_MaterialOrientation_x:
     case IST_MaterialOrientation_y:
     case IST_MaterialOrientation_z:
@@ -1625,7 +1625,7 @@ VTKXMLExportModule :: getCellVariableFromIS(FloatArray &answer, Element *el, Int
         valueArray.beColumnOf(rotMat, col);
         break;
 
-    // Export cell data as average from ip's as default
+        // Export cell data as average from ip's as default
     default:
 
         // compute cell average from ip values
@@ -1701,7 +1701,7 @@ VTKXMLExportModule :: computeIPAverage(FloatArray &answer, IntegrationRule *iRul
 {
     // Computes the volume average (over an element) for the quantity defined by isType
     double gptot = 0.0;
-    answer.resize(0);
+    answer.clear();
     FloatArray temp;
     if ( iRule ) {
         for ( int i = 0; i < iRule->giveNumberOfIntegrationPoints(); ++i ) {
@@ -1775,14 +1775,14 @@ VTKPiece :: clear()
     ///@todo Will this give a memory leak? / JB
     numCells = 0;
     numNodes = 0;
-    this->connectivity.resize(0);
-    this->elCellTypes.resize(0);
-    this->elOffsets.resize(0);
-    this->elVars.resize(0);
-    this->nodeCoords.resize(0);
-    this->nodeVars.resize(0);
-    this->nodeVarsFromIS.resize(0);
-    this->nodeVarsFromXFEMIS.resize(0);
+    this->connectivity.clear();
+    this->elCellTypes.clear();
+    this->elOffsets.clear();
+    this->elVars.clear();
+    this->nodeCoords.clear();
+    this->nodeVars.clear();
+    this->nodeVarsFromIS.clear();
+    this->nodeVarsFromXFEMIS.clear();
 }
 
 

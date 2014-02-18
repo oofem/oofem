@@ -292,7 +292,7 @@ TR1_2D_SUPG :: computeAdvectionDerivativeTerm_MB(FloatMatrix &answer, TimeStep *
                     dij = ( i == j );
                     coeff = ( m == k ) ? area / 6. : area / 12.;
                     answer.at(w_dof_addr, u_dof_addr) = rho * ( 0.0 * d1j * dudx [ i - 1 ] [ 0 ] * coeff + dij * b [ m - 1 ] * ar12 * ( usum [ 0 ] + un.at( ( k - 1 ) * 2 + 1 ) ) +
-                                                                0.0 * d2j * dudx [ i - 1 ] [ 1 ] * coeff + dij * c [ m - 1 ] * ar12 * ( usum [ 1 ] + un.at( ( k - 1 ) * 2 + 2 ) ) );
+                                                               0.0 * d2j * dudx [ i - 1 ] [ 1 ] * coeff + dij * c [ m - 1 ] * ar12 * ( usum [ 1 ] + un.at( ( k - 1 ) * 2 + 2 ) ) );
                 }
             }
         }
@@ -602,7 +602,7 @@ TR1_2D_SUPG :: computeSlipWithFrictionBCTerm_MB(FloatMatrix &answer, Load *load,
     answer.zero();
     //beta
     //area
-    BoundaryLoad *edgeLoad = static_cast< BoundaryLoad * >( load );
+    BoundaryLoad *edgeLoad = static_cast< BoundaryLoad * >(load);
     beta = edgeLoad->giveProperty('a');
     node1 = side;
     node2 = ( node1 == 3 ? 1 : node1 + 1 );
@@ -698,7 +698,7 @@ TR1_2D_SUPG :: computePenetrationWithResistanceBCTerm_MB(FloatMatrix &answer, Lo
     answer.resize(6, 6);
     answer.zero();
 
-    BoundaryLoad *edgeLoad = static_cast< BoundaryLoad * >( load );
+    BoundaryLoad *edgeLoad = static_cast< BoundaryLoad * >(load);
     alpha = edgeLoad->giveProperty('a');
     node1 = side;
     node2 = ( node1 == 3 ? 1 : node1 + 1 );
@@ -850,7 +850,7 @@ TR1_2D_SUPG :: computeHomogenizedReinforceTerm_MB(FloatMatrix &answer, Load *loa
 
     usum [ 0 ] = un.at(1) + un.at(3) + un.at(5);
     usum [ 1 ] = un.at(2) + un.at(4) + un.at(6);
-    Reinforcement *reinfload  = dynamic_cast< Reinforcement * >( load );
+    Reinforcement *reinfload  = dynamic_cast< Reinforcement * >(load);
     double kx = reinfload->givePermeability()->at(1);
     double ky = reinfload->givePermeability()->at(2);
     // double tau_0 = this->giveMaterial()->give( YieldStress, integrationRulesArray [ 0 ]->getIntegrationPoint(0) );
@@ -872,7 +872,7 @@ TR1_2D_SUPG :: computeHomogenizedReinforceTerm_MC(FloatMatrix &answer, Load *loa
 {
     double coeffx, coeffy;
 
-    Reinforcement *reinfload  = dynamic_cast< Reinforcement * >( load );
+    Reinforcement *reinfload  = dynamic_cast< Reinforcement * >(load);
     double kx = reinfload->givePermeability()->at(1);
     double ky = reinfload->givePermeability()->at(2);
     // double tau_0 = this->giveMaterial()->give( YieldStress, integrationRulesArray [ 0 ]->getIntegrationPoint(0) );
@@ -1144,7 +1144,7 @@ TR1_2D_SUPG :: updateStabilizationCoeffs(TimeStep *tStep)
                     dij = ( i == j );
                     coeff = ( m == k ) ? area / 6. : area / 12.;
                     __tmp.at(w_dof_addr, u_dof_addr) = rho * ( 0.0 * d1j * dudx [ i - 1 ] [ 0 ] * coeff + dij * b [ m - 1 ] * ( area / 12. ) * ( usum [ 0 ] + un.at( ( k - 1 ) * 2 + 1 ) ) +
-                                                               0.0 * d2j * dudx [ i - 1 ] [ 1 ] * coeff + dij * c [ m - 1 ] * ( area / 12. ) * ( usum [ 1 ] + un.at( ( k - 1 ) * 2 + 2 ) ) );
+                                                              0.0 * d2j * dudx [ i - 1 ] [ 1 ] * coeff + dij * c [ m - 1 ] * ( area / 12. ) * ( usum [ 1 ] + un.at( ( k - 1 ) * 2 + 2 ) ) );
                 }
             }
         }
@@ -1419,19 +1419,19 @@ Interface *
 TR1_2D_SUPG :: giveInterface(InterfaceType interface)
 {
     if ( interface == ZZNodalRecoveryModelInterfaceType ) {
-        return static_cast< ZZNodalRecoveryModelInterface * >( this );
+        return static_cast< ZZNodalRecoveryModelInterface * >(this);
     } else if ( interface == NodalAveragingRecoveryModelInterfaceType ) {
-        return static_cast< NodalAveragingRecoveryModelInterface * >( this );
+        return static_cast< NodalAveragingRecoveryModelInterface * >(this);
     } else if ( interface == SPRNodalRecoveryModelInterfaceType ) {
-        return static_cast< SPRNodalRecoveryModelInterface * >( this );
+        return static_cast< SPRNodalRecoveryModelInterface * >(this);
     } else if ( interface == SpatialLocalizerInterfaceType ) {
-        return static_cast< SpatialLocalizerInterface * >( this );
+        return static_cast< SpatialLocalizerInterface * >(this);
     } else if ( interface == EIPrimaryFieldInterfaceType ) {
-        return static_cast< EIPrimaryFieldInterface * >( this );
+        return static_cast< EIPrimaryFieldInterface * >(this);
     } else if ( interface == LEPlicElementInterfaceType ) {
-        return static_cast< LEPlicElementInterface * >( this );
+        return static_cast< LEPlicElementInterface * >(this);
     } else if ( interface == LevelSetPCSElementInterfaceType ) {
-        return static_cast< LevelSetPCSElementInterface * >( this );
+        return static_cast< LevelSetPCSElementInterface * >(this);
     }
 
     return NULL;
@@ -1674,10 +1674,10 @@ TR1_2D_SUPG :: formVolumeInterfacePoly(Polygon &matvolpoly, LEPlic *matInterface
             if ( nodeIn [ i - 1 ] ) {
                 if ( updFlag ) {
                     v.setCoords( matInterface->giveUpdatedXCoordinate( this->giveNode(i)->giveNumber() ),
-                                 matInterface->giveUpdatedYCoordinate( this->giveNode(i)->giveNumber() ) );
+                                matInterface->giveUpdatedYCoordinate( this->giveNode(i)->giveNumber() ) );
                 } else {
                     v.setCoords( this->giveNode(i)->giveCoordinate(1),
-                                 this->giveNode(i)->giveCoordinate(2) );
+                                this->giveNode(i)->giveCoordinate(2) );
                 }
 
                 matvolpoly.addVertex(v);
@@ -1707,7 +1707,7 @@ TR1_2D_SUPG :: formVolumeInterfacePoly(Polygon &matvolpoly, LEPlic *matInterface
                     if ( nodeIn [ i - 1 ] ) {
                         if ( updFlag ) {
                             v.setCoords( matInterface->giveUpdatedXCoordinate( this->giveNode(next)->giveNumber() ),
-                                         matInterface->giveUpdatedYCoordinate( this->giveNode(next)->giveNumber() ) );
+                                        matInterface->giveUpdatedYCoordinate( this->giveNode(next)->giveNumber() ) );
                         } else {
                             v.setCoords( this->giveNode(next)->giveCoordinate(1), this->giveNode(next)->giveCoordinate(2) );
                         }
@@ -1718,7 +1718,7 @@ TR1_2D_SUPG :: formVolumeInterfacePoly(Polygon &matvolpoly, LEPlic *matInterface
                         matvolpoly.addVertex(v);
                         if ( updFlag ) {
                             v.setCoords( matInterface->giveUpdatedXCoordinate( this->giveNode(next)->giveNumber() ),
-                                         matInterface->giveUpdatedYCoordinate( this->giveNode(next)->giveNumber() ) );
+                                        matInterface->giveUpdatedYCoordinate( this->giveNode(next)->giveNumber() ) );
                         } else {
                             v.setCoords( this->giveNode(next)->giveCoordinate(1), this->giveNode(next)->giveCoordinate(2) );
                         }
@@ -1939,7 +1939,7 @@ void
 TR1_2D_SUPG :: NodalAveragingRecoveryMI_computeSideValue(FloatArray &answer, int side,
                                                          InternalStateType type, TimeStep *tStep)
 {
-    answer.resize(0);
+    answer.clear();
 }
 
 void
@@ -1956,8 +1956,8 @@ TR1_2D_SUPG :: SPRNodalRecoveryMI_giveDofMansDeterminedByPatch(IntArray &answer,
 {
     answer.resize(1);
     if ( ( pap == this->giveNode(1)->giveNumber() ) ||
-         ( pap == this->giveNode(2)->giveNumber() ) ||
-         ( pap == this->giveNode(3)->giveNumber() ) ) {
+        ( pap == this->giveNode(2)->giveNumber() ) ||
+        ( pap == this->giveNode(3)->giveNumber() ) ) {
         answer.at(1) = pap;
     } else {
         _error("SPRNodalRecoveryMI_giveDofMansDeterminedByPatch: node unknown");
@@ -1982,7 +1982,7 @@ TR1_2D_SUPG :: printOutputAt(FILE *file, TimeStep *tStep)
 {
     SUPGElement :: printOutputAt(file, tStep);
     double rho = this->giveMaterial()->give( 'd', integrationRulesArray [ 0 ]->getIntegrationPoint(0) );
-    fprintf(file, "VOF %e, density %e\n\n", this->giveVolumeFraction(), rho);
+    fprintf(file, "\telement_status { VOF %e, density %e }\n\n", this->giveVolumeFraction(), rho);
 }
 
 

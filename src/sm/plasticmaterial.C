@@ -164,7 +164,7 @@ PlasticMaterial :: giveRealStressVector(FloatArray &answer,
         if ( hardeningModuli.giveNumberOfRows() ) {
             hardeningModuliInverse.beInverseOf(hardeningModuli);
         } else {
-            hardeningModuliInverse.resize(0, 0);
+            hardeningModuliInverse.clear();
         }
 
         this->computeConsistentModuli(consistentModuli, gp, elasticModuliInverse,
@@ -211,7 +211,7 @@ PlasticMaterial :: giveRealStressVector(FloatArray &answer,
 
         if ( nIterations > PLASTIC_MATERIAL_MAX_ITERATIONS ) {
             _warning4( "GiveRealStressVector: local equlibrium not reached in %d iterations\nElement %d, gp %d, continuing",
-                       PLASTIC_MATERIAL_MAX_ITERATIONS, gp->giveElement()->giveNumber(), gp->giveNumber() );
+                      PLASTIC_MATERIAL_MAX_ITERATIONS, gp->giveElement()->giveNumber(), gp->giveNumber() );
             break;
         }
     } while ( 1 );
@@ -437,7 +437,7 @@ PlasticMaterial :: giveConsistentStiffnessMatrix(FloatMatrix &answer,
     if ( hardeningModuli.giveNumberOfRows() ) {
         hardeningModuliInverse.beInverseOf(hardeningModuli);
     } else {
-        hardeningModuliInverse.resize(0, 0);
+        hardeningModuliInverse.clear();
     }
 
     stressVector = status->giveStressVector();
@@ -771,7 +771,7 @@ void PlasticMaterialStatus :: initTempStatus()
 
     if ( strainSpaceHardeningVarsVector.giveSize() == 0 ) {
         strainSpaceHardeningVarsVector.resize( static_cast< PlasticMaterial * >( gp->giveMaterial() )->
-                                               giveSizeOfReducedHardeningVarsVector(gp) );
+                                              giveSizeOfReducedHardeningVarsVector(gp) );
         strainSpaceHardeningVarsVector.zero();
     }
 
@@ -871,8 +871,8 @@ void PlasticMaterialStatus :: copyStateVariables(const MaterialStatus &iStatus)
 {
     StructuralMaterialStatus :: copyStateVariables(iStatus);
 
-    MaterialStatus &tmpStat = const_cast< MaterialStatus & >( iStatus );
-    const PlasticMaterialStatus &plastStatus = dynamic_cast< PlasticMaterialStatus & >( tmpStat );
+    MaterialStatus &tmpStat = const_cast< MaterialStatus & >(iStatus);
+    const PlasticMaterialStatus &plastStatus = dynamic_cast< PlasticMaterialStatus & >(tmpStat);
 
     plasticStrainVector = plastStatus.givePlasticStrainVector();
     tempPlasticStrainVector = plastStatus.giveTempPlasticStrainVector();

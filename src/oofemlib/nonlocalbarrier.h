@@ -61,7 +61,7 @@ public:
      * @param n Element's number
      * @param aDomain Pointer to the domain to which element belongs.
      */
-    NonlocalBarrier(int n, Domain *aDomain);
+    NonlocalBarrier(int n, Domain * aDomain);
     /// Destructor.
     virtual ~NonlocalBarrier() { };
 

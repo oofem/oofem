@@ -68,12 +68,14 @@ protected:
 
 public:
     /// Constructor
-    TR_SHELL01(int n, Domain *d);
+    TR_SHELL01(int n, Domain * d);
     /// Destructor
     virtual ~TR_SHELL01() {
         delete plate;
         delete membrane;
-        if ( this->compositeIR ) { delete this->compositeIR; }
+        if ( this->compositeIR ) {
+            delete this->compositeIR;
+        }
     }
 
     virtual FEInterpolation *giveInterpolation() const { return plate->giveInterpolation(); }
@@ -96,7 +98,9 @@ public:
     virtual void printOutputAt(FILE *file, TimeStep *tStep);
     virtual contextIOResultType saveContext(DataStream *stream, ContextMode mode, void *obj = NULL);
     virtual contextIOResultType restoreContext(DataStream *stream, ContextMode mode, void *obj = NULL);
-
+    virtual void postInitialize();
+    void updateLocalNumbering(EntityRenumberingFunctor &f);
+    void setCrossSection(int csIndx);
 #ifdef __OOFEG
     virtual void drawRawGeometry(oofegGraphicContext &);
     virtual void drawDeformedGeometry(oofegGraphicContext &, UnknownType type);
@@ -148,7 +152,8 @@ protected:
     /// @todo In time delete
 protected:
     virtual void computeGaussPoints()
-    { this->membrane->computeGaussPoints(); this->plate->computeGaussPoints(); }
+    { this->membrane->computeGaussPoints();
+      this->plate->computeGaussPoints(); }
     virtual void computeStressVector(FloatArray &answer, const FloatArray &strain, GaussPoint *gp, TimeStep *tStep)
     { _error("TR_SHELL01 :: computeStressVector: calling of this function is not allowed"); }
     virtual void computeBodyLoadVectorAt(FloatArray &answer, Load *forLoad, TimeStep *tStep, ValueModeType mode)

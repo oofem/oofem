@@ -49,7 +49,7 @@
 #include "contextioerr.h"
 #include "field.h"
 #include "equationid.h"
-#include "xfemmanager.h"
+#include "xfem/xfemmanager.h"
 
 #include <cstring>
 #include <string>
@@ -78,7 +78,7 @@ InternalStateValueType giveInternalStateValueType(InternalStateType type)
     switch ( type ) {
     case IST_StressTensor:
     case IST_StrainTensor:
-    case IST_CurvatureTensor:
+    //case IST_CurvatureTensor:
     case IST_DamageTensor:
     case IST_DamageInvTensor:
     case IST_PrincipalDamageTensor:
@@ -100,8 +100,10 @@ InternalStateValueType giveInternalStateValueType(InternalStateType type)
 
     case IST_BeamForceMomentumTensor:
     case IST_BeamStrainCurvatureTensor:
-    case IST_ShellForceMomentumTensor:
-    case IST_ShellStrainCurvatureTensor:
+    case IST_ShellStrainTensor:
+    case IST_ShellCurvatureTensor:
+    case IST_ShellForceTensor:
+    case IST_ShellMomentumTensor:
     case IST_DeformationGradientTensor:
     case IST_FirstPKStressTensor:
         return ISVT_TENSOR_G;

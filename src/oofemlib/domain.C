@@ -57,7 +57,7 @@
 #include "nonlocalbarrier.h"
 #include "classfactory.h"
 #include "logger.h"
-#include "xfemmanager.h"
+#include "xfem/xfemmanager.h"
 #include "topologydescription.h"
 #include "randomfieldgenerator.h"
 #include "errorestimator.h"
@@ -69,10 +69,10 @@
 #include "datareader.h"
 #include "initmodulemanager.h"
 #include "exportmodulemanager.h"
-#include "enrichmentitem.h"
-#include "enrichmentfunction.h"
-#include "enrichmentdomain.h"
-#include "propagationlaw.h"
+#include "xfem/enrichmentitem.h"
+#include "xfem/enrichmentfunction.h"
+#include "xfem/enrichmentdomain.h"
+#include "xfem/propagationlaw.h"
 
 #include "boundarycondition.h"
 #include "activebc.h"
@@ -665,7 +665,7 @@ Domain :: instanciateYourself(DataReader *dr)
 
     resolveDomainDofsDefaults( name.c_str() );
     fprintf( outputStream, "Domain type: %s, default ndofs per node is %d\n\n\n",
-             name.c_str(), giveDefaultNodeDofIDArry().giveSize() );
+            name.c_str(), giveDefaultNodeDofIDArry().giveSize() );
 
     // read output manager record
     std :: string tmp;
@@ -1285,7 +1285,7 @@ Domain :: drawYourself(oofegGraphicContext &context)
 {
     OGC_PlotModeType plotMode = context.giveIntVarPlotMode();
     if ( ( plotMode == OGC_nodeAnnotation ) || ( plotMode == OGC_nodeGeometry ) || ( plotMode == OGC_essentialBC ) ||
-         ( plotMode == OGC_naturalBC ) || ( plotMode == OGC_nodeScalarPlot ) || ( plotMode == OGC_nodeVectorPlot ) ) {
+        ( plotMode == OGC_naturalBC ) || ( plotMode == OGC_nodeScalarPlot ) || ( plotMode == OGC_nodeVectorPlot ) ) {
         this->drawNodes(context);
     } else {
         this->drawElements(context);
@@ -1385,7 +1385,7 @@ Domain :: createDofs()
 
     ///////////////////////////////////////////////////////////////////////////////////////////////
     /////////////////// Step 1. Scan all required nodal dofs.
-    std :: vector< std :: set< int > >node_dofs( this->giveNumberOfDofManagers() );
+    std :: vector< std :: set< int > > node_dofs( this->giveNumberOfDofManagers() );
     for ( int i = 1; i <= this->giveNumberOfElements(); ++i ) {
         // Scan for all dofs needed by element.
         Element *element = this->giveElement(i);
@@ -1411,14 +1411,14 @@ Domain :: createDofs()
     // Step 2. Scan all Dirichlet b.c.s (or active dofs). For every node we store a map from the dofid to it's b.c. number.
     // This loop won't check for slave dofs or so, and will give a bc id for every single relevant dof.
     // This must be a separate step since we store the inverse mapping (bc->dof instead of dof->bc) so we want to loop over all b.c.s to invert this.
-    std :: vector< std :: map< int, int > >dof_bc( this->giveNumberOfDofManagers() );
+    std :: vector< std :: map< int, int > > dof_bc( this->giveNumberOfDofManagers() );
     for ( int i = 1; i <= this->giveNumberOfBoundaryConditions(); ++i ) {
         GeneralBoundaryCondition *gbc = this->giveBc(i);
         if ( gbc->giveSetNumber() > 0 ) { ///@todo This will eventually not be optional.
             // Loop over nodes in set and store the bc number in each dof.
             Set *set = this->giveSet( gbc->giveSetNumber() );
-            ActiveBoundaryCondition *active_bc = dynamic_cast< ActiveBoundaryCondition * >( gbc );
-            BoundaryCondition *bc = dynamic_cast< BoundaryCondition * >( gbc );
+            ActiveBoundaryCondition *active_bc = dynamic_cast< ActiveBoundaryCondition * >(gbc);
+            BoundaryCondition *bc = dynamic_cast< BoundaryCondition * >(gbc);
             if ( bc || ( active_bc && active_bc->requiresActiveDofs() ) ) {
                 const IntArray &appliedDofs = gbc->giveDofIDs();
                 const IntArray &nodes = set->giveNodeList();
@@ -1442,7 +1442,7 @@ Domain :: createDofs()
 
     ///////////////////////////////////////////////////////////////////////////////////////////////
     // Step 3. Same for initial conditions as for boundary conditions in step 2.
-    std :: vector< std :: map< int, int > >dof_ic( this->giveNumberOfDofManagers() );
+    std :: vector< std :: map< int, int > > dof_ic( this->giveNumberOfDofManagers() );
     for ( int i = 1; i <= this->giveNumberOfInitialConditions(); ++i ) {
         InitialCondition *ic = this->giveIc(i);
         if ( ic->giveSetNumber() > 0 ) { ///@todo This will eventually not be optional.
@@ -2036,8 +2036,8 @@ Domain :: renumberDofManData(DomainTransactionManager *tm)
 {
     std :: map< int, DofManager * > :: iterator it;
 
-    SpecificEntityRenumberingFunctor< Domain >domainGToLFunctor(this, & Domain :: LB_giveUpdatedGlobalNumber);
-    SpecificEntityRenumberingFunctor< Domain >domainLToLFunctor(this, & Domain :: LB_giveUpdatedLocalNumber);
+    SpecificEntityRenumberingFunctor< Domain > domainGToLFunctor(this, &Domain :: LB_giveUpdatedGlobalNumber);
+    SpecificEntityRenumberingFunctor< Domain > domainLToLFunctor(this, &Domain :: LB_giveUpdatedLocalNumber);
 
 
     for ( it = dmanMap.begin(); it != dmanMap.end(); it++ ) {
@@ -2057,8 +2057,8 @@ Domain :: renumberElementData(DomainTransactionManager *tm)
 {
     std :: map< int, Element * > :: iterator it;
 
-    SpecificEntityRenumberingFunctor< Domain >domainGToLFunctor(this, & Domain :: LB_giveUpdatedGlobalNumber);
-    SpecificEntityRenumberingFunctor< Domain >domainLToLFunctor(this, & Domain :: LB_giveUpdatedLocalNumber);
+    SpecificEntityRenumberingFunctor< Domain > domainGToLFunctor(this, &Domain :: LB_giveUpdatedGlobalNumber);
+    SpecificEntityRenumberingFunctor< Domain > domainLToLFunctor(this, &Domain :: LB_giveUpdatedLocalNumber);
 
 
     for ( it = elementMap.begin(); it != elementMap.end(); it++ ) {

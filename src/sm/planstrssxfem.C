@@ -34,10 +34,10 @@
 
 #include "planstrssxfem.h"
 #include "structuralmaterial.h"
-#include "xfemelementinterface.h"
-#include "enrichmentfunction.h"
-#include "enrichmentitem.h"
-#include "enrichmentdomain.h"
+#include "xfem/xfemelementinterface.h"
+#include "xfem/enrichmentfunction.h"
+#include "xfem/enrichmentitem.h"
+#include "xfem/enrichmentdomain.h"
 #include "structuralcrosssection.h"
 #include "vtkxmlexportmodule.h"
 #include "dynamicinputrecord.h"
@@ -126,6 +126,12 @@ PlaneStress2dXfem :: giveDofManDofIDMask(int inode, EquationID, IntArray &answer
 {
     // Returns the total id mask of the dof manager = regular id's + enriched id's
     this->giveDofManager(inode)->giveCompleteMasterDofIDArray(answer);
+
+    if(answer.giveSize() == 0) {
+    	// TODO: How do we fix this in a nicer way? /ES
+    	answer.setValues(2, D_u, D_v);
+    }
+
 }
 
 
@@ -221,7 +227,7 @@ void PlaneStress2dXfem :: drawScalar(oofegGraphicContext &context)
             TimeStep *tStep = this->giveDomain()->giveEngngModel()->giveCurrentStep();
             PatchIntegrationRule *iRule;
             for ( int i = 0; i < numberOfIntegrationRules; i++ ) {
-                iRule = dynamic_cast< PatchIntegrationRule * >( integrationRulesArray [ i ] );
+                iRule = dynamic_cast< PatchIntegrationRule * >(integrationRulesArray [ i ]);
 
  #if 0
                 val = iRule->giveMaterial();

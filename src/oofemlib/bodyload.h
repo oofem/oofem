@@ -55,7 +55,7 @@ public:
      * @param i Load number
      * @param d Domain to which new load belongs.
      */
-    BodyLoad(int i, Domain *d) : Load(i, d) { }
+    BodyLoad(int i, Domain * d) : Load(i, d) { }
 
     /**
      * Returns receiver's load geometry type.

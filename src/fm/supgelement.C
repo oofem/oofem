@@ -193,7 +193,7 @@ SUPGElement :: computeBCLhsTerm_MB(FloatMatrix &answer, TimeStep *tStep)
     FloatMatrix helpMatrix;
     // loop over boundary load array
 
-    answer.resize(0, 0);
+    answer.clear();
 
     nLoads = this->giveBoundaryLoadArray()->giveSize() / 2;
     if ( nLoads ) {
@@ -237,7 +237,7 @@ SUPGElement :: computeBCLhsPressureTerm_MB(FloatMatrix &answer, TimeStep *tStep)
     //bcType loadtype;
     FloatMatrix helpMatrix;
     // loop over boundary load array
-    answer.resize(0, 0);
+    answer.clear();
 
     nLoads = this->giveBoundaryLoadArray()->giveSize() / 2;
 
@@ -265,7 +265,7 @@ SUPGElement :: computeBCLhsPressureTerm_MC(FloatMatrix &answer, TimeStep *tStep)
     FloatMatrix helpMatrix;
 
     nLoads = this->giveBodyLoadArray()->giveSize();
-    answer.resize(0, 0);
+    answer.clear();
     if ( nLoads ) {
         bcGeomType ltype;
         for ( int i = 1; i <= nLoads; i++ ) {

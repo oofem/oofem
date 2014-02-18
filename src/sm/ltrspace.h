@@ -57,17 +57,17 @@ class FEI3dTetLin;
  * Each node has 3 degrees of freedom.
  */
 class LTRSpace : public NLStructuralElement, public ZZNodalRecoveryModelInterface,
-    public NodalAveragingRecoveryModelInterface, public SPRNodalRecoveryModelInterface,
-    public SpatialLocalizerInterface,
-    public DirectErrorIndicatorRCInterface, public EIPrimaryUnknownMapperInterface,
-    public ZZErrorEstimatorInterface, public ZZRemeshingCriteriaInterface, public MMAShapeFunctProjectionInterface,
-    public HuertaErrorEstimatorInterface, public HuertaRemeshingCriteriaInterface
+public NodalAveragingRecoveryModelInterface, public SPRNodalRecoveryModelInterface,
+public SpatialLocalizerInterface,
+public DirectErrorIndicatorRCInterface, public EIPrimaryUnknownMapperInterface,
+public ZZErrorEstimatorInterface, public ZZRemeshingCriteriaInterface, public MMAShapeFunctProjectionInterface,
+public HuertaErrorEstimatorInterface, public HuertaRemeshingCriteriaInterface
 {
 protected:
     static FEI3dTetLin interpolation;
 
 public:
-    LTRSpace(int n, Domain *d);
+    LTRSpace(int n, Domain * d);
     virtual ~LTRSpace() { }
 
     virtual FEInterpolation *giveInterpolation() const;

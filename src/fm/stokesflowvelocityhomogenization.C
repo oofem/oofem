@@ -49,7 +49,7 @@ StokesFlowVelocityHomogenization :: StokesFlowVelocityHomogenization(int i, Engn
 }
 
 StokesFlowVelocityHomogenization :: ~StokesFlowVelocityHomogenization()
-{}
+{ }
 
 double
 StokesFlowVelocityHomogenization :: giveAreaOfDomain()
@@ -115,7 +115,7 @@ StokesFlowVelocityHomogenization :: solveYourselfAt(TimeStep *tStep)
 
 void
 StokesFlowVelocityHomogenization :: rveSetBoundaryConditions(int BCType, FloatArray eps)
-{}
+{ }
 
 void
 StokesFlowVelocityHomogenization :: getMeans(FloatArray &gradP, FloatArray &v, TimeStep *tStep)
@@ -170,11 +170,6 @@ StokesFlowVelocityHomogenization :: getMeans(FloatArray &gradP, FloatArray &v, T
     v.times(1. / AreaFull);
 }
 
-void
-StokesFlowVelocityHomogenization :: updateC()
-{
-    OOFEM_LOG_ERROR("Uses StokesFlowVelocityHomogenization :: updateC()");
-}
 
 void
 StokesFlowVelocityHomogenization :: rveGiveCharacteristicData(int DataType, void *input, void *answer, TimeStep *tStep)

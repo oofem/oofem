@@ -65,8 +65,8 @@ RandomMaterialExtensionInterface :: initializeFrom(InputRecord *ir)
     const char *__proc = "initializeFrom"; // Required by IR_GIVE_FIELD macro
     IRResultType result;              // Required by IR_GIVE_FIELD macro
 
-    randVariables.resize(0);
-    randomVariableGenerators.resize(0);
+    randVariables.clear();
+    randomVariableGenerators.clear();
     IR_GIVE_OPTIONAL_FIELD(ir, randVariables, _IFT_RandomMaterialExt_randVariables);
     IR_GIVE_OPTIONAL_FIELD(ir, randomVariableGenerators, _IFT_RandomMaterialExt_randGen);
 

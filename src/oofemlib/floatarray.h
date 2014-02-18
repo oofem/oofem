@@ -110,18 +110,18 @@ public:
      * Copy constructor. Creates the array from another array.
      * @param x Array to copy.
      */
-    FloatArray(const FloatArray &x);
+    FloatArray(const FloatArray & x);
 #if __cplusplus > 199711L
     /// Initializer list constructor.
     FloatArray(std :: initializer_list< double >list);
     /// Assignment operator.
-    FloatArray &operator=(std :: initializer_list< double >list);
+    FloatArray &operator = ( std :: initializer_list< double >list );
 #endif
     /// Destructor.
     virtual ~FloatArray();
 
     /// Assignment operator
-    FloatArray &operator=(const FloatArray &);
+    FloatArray &operator = ( const FloatArray & );
 
     /// Sets values in array. Convenient for writing small specific vectors.
     void setValues(int n, ...);
@@ -153,9 +153,11 @@ public:
      * @param i Position of coefficient in array.
      */
 #ifdef DEBUG
-    double &operator()(int i);
+    double &operator() (int i);
 #else
-    inline double &operator()(int i) { return values [ i ]; };
+    inline double &operator() (int i) {
+        return values [ i ];
+    };
 #endif
     /**
      * Coefficient access function. Returns value of coefficient at given
@@ -163,9 +165,9 @@ public:
      * @param i Position of coefficient in array.
      */
 #ifdef DEBUG
-    const double &operator()(int i) const;
+    const double &operator() (int i) const;
 #else
-    inline const double &operator()(int i) const { return values [ i ]; };
+    inline const double &operator() (int i) const { return values [ i ]; };
 #endif
     /** Checks size of receiver towards requested bounds.
      * Current implementation will call exit(1), if dimension
@@ -192,6 +194,11 @@ public:
      * @param s New size.
      */
     void resize(int s);
+    /**
+     * Clears receiver (zero size).
+     * Same effect as resizing to zero, but has a clearer meaning and intent when used.
+     */
+    void clear() { size = 0; }
     /**
      * Resizes the size of the receiver to requested bounds. Memory allocation always happens, more preferably use
      * resize() function instead. Array is zeroed.
@@ -463,18 +470,18 @@ public:
     contextIOResultType storeYourself(DataStream *stream, ContextMode mode);
     contextIOResultType restoreYourself(DataStream *stream, ContextMode mode);
 
-    friend std :: ostream &operator<<(std :: ostream &out, const FloatArray &x);
+    friend std :: ostream &operator << ( std :: ostream & out, const FloatArray & x );
 
     ///@name IML compatibility
     //@{
     /// Assignment of scalar to all components of receiver
-    FloatArray &operator=(const double &);
+    FloatArray &operator = ( const double & );
     //@}
 
 #ifdef BOOST_PYTHON
     void __setitem__(int i, double val) { this->at(i + 1) = val; }
     double __getitem__(int i) { return this->at(i + 1); }
-    void beCopyOf(const FloatArray &src) { this->operator=(src); }
+    void beCopyOf(const FloatArray &src) { this->operator = ( src ); }
 #endif
 };
 
@@ -482,13 +489,13 @@ public:
 ///@name IML compatibility
 //@{
 /// Vector multiplication by scalar
-FloatArray &operator*=(FloatArray &x, const double &a);
-FloatArray operator*(const double &a, const FloatArray &x);
-FloatArray operator*(const FloatArray &x, const double &a);
-FloatArray operator+(const FloatArray &x, const FloatArray &y);
-FloatArray operator-(const FloatArray &x, const FloatArray &y);
-FloatArray &operator+=(FloatArray &x, const FloatArray &y);
-FloatArray &operator-=(FloatArray &x, const FloatArray &y);
+FloatArray &operator *= ( FloatArray & x, const double & a );
+FloatArray operator *( const double & a, const FloatArray & x );
+FloatArray operator *( const FloatArray & x, const double & a );
+FloatArray operator + ( const FloatArray & x, const FloatArray & y );
+FloatArray operator - ( const FloatArray & x, const FloatArray & y );
+FloatArray &operator += ( FloatArray & x, const FloatArray & y );
+FloatArray &operator -= ( FloatArray & x, const FloatArray & y );
 
 double norm(const FloatArray &x);
 double dot(const FloatArray &x, const FloatArray &y);

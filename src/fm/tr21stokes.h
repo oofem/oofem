@@ -56,10 +56,10 @@ class FEI2dTrQuad;
  * @author Mikael Öhman
  */
 class Tr21Stokes : public FMElement,
-    public NodalAveragingRecoveryModelInterface,
-    public ZZNodalRecoveryModelInterface,
-    public SpatialLocalizerInterface,
-    public EIPrimaryUnknownMapperInterface
+public NodalAveragingRecoveryModelInterface,
+public ZZNodalRecoveryModelInterface,
+public SpatialLocalizerInterface,
+public EIPrimaryUnknownMapperInterface
 {
 protected:
     /// Interpolation for pressure
@@ -83,7 +83,7 @@ protected:
     }
 
 public:
-    Tr21Stokes(int n, Domain *d);
+    Tr21Stokes(int n, Domain * d);
     virtual ~Tr21Stokes();
 
     // ** To be removed

@@ -468,8 +468,8 @@ void WeakPeriodicBoundaryCondition :: assemble(SparseMtrx *answer, TimeStep *tSt
             //thisElement->giveBoundaryLocationArray(r_sideLoc, bNodes, dofids, eid, r_s);
             //thisElement->giveBoundaryLocationArray(c_sideLoc, bNodes, dofids, eid, c_s);
 
-            r_sideLoc.resize(0);
-            c_sideLoc.resize(0);
+            r_sideLoc.clear();
+            c_sideLoc.clear();
             dofCountOnBoundary = 0;
             for ( int i = 1; i <= bNodes.giveSize(); i++ ) {
                 thisElement->giveDofManDofIDMask(bNodes.at(i), EID_MomentumBalance_ConservationEquation, nodeDofIDMask);
@@ -538,7 +538,7 @@ double WeakPeriodicBoundaryCondition :: computeBaseFunctionValue1D(int baseID, d
     } else if ( useBasisType == legendre ) {
         double n = ( double ) baseID;
         coordinate = 2.0 * coordinate - 1.0;
-        for ( int k = 0.; k <= baseID; k++ ) {
+        for ( int k = 0; k <= baseID; k++ ) {
             fVal = fVal + binomial(n, k) * binomial(-n - 1.0, k) * pow( ( 1.0 - coordinate ) / 2.0, ( double ) k );
         }
     }
@@ -592,9 +592,9 @@ void WeakPeriodicBoundaryCondition :: assembleVector(FloatArray &answer, TimeSte
             //thisElement->giveBoundaryLocationArray(sideLocation, bNodes, &dofids, eid, s, &masterDofIDs);
             //thisElement->computeBoundaryVectorOf(bNodes, eid, VM_Total, tStep, a);
 
-            sideLocation.resize(0);
-            masterDofIDs.resize(0);
-            a.resize(0);
+            sideLocation.clear();
+            masterDofIDs.clear();
+            a.clear();
             dofCountOnBoundary = 0;
             for ( int i = 1; i <= bNodes.giveSize(); i++ ) {
                 thisElement->giveDofManDofIDMask(bNodes.at(i), EID_MomentumBalance_ConservationEquation, nodeDofIDMask);
@@ -658,7 +658,7 @@ DofManager *WeakPeriodicBoundaryCondition :: giveInternalDofManager(int i)
 
 double WeakPeriodicBoundaryCondition :: factorial(int n)
 {
-    int x = 1.0;
+    int x = 1;
     for ( int i = 1; i <= n; i++ ) {
         x = x * i;
     }

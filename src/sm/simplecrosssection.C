@@ -555,7 +555,7 @@ SimpleCrossSection :: checkConsistency()
 {
     int result = 1;
     Material *mat = this->giveDomain()->giveMaterial(this->materialNumber);
-    if ( !dynamic_cast< StructuralMaterial * >( mat ) ) {
+    if ( !dynamic_cast< StructuralMaterial * >(mat) ) {
         _warning2( "checkConsistency : material %s without structural support", mat->giveClassName() );
         result = 0;
     }
@@ -671,7 +671,7 @@ void
 SimpleCrossSection :: giveTemperatureVector(FloatArray &answer, GaussPoint *gp, TimeStep *tStep)
 {
     Element *elem = gp->giveElement();
-    answer.resize(0);
+    answer.clear();
     //sum up all prescribed temperatures over an element
     StructuralElement *selem = dynamic_cast< StructuralElement * >( elem );
     selem->computeResultingIPTemperatureAt(answer, tStep, gp, VM_Total);

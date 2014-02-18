@@ -87,8 +87,8 @@ DruckerPragerCutMat :: initializeFrom(InputRecord *ir)
 
     StructuralMaterial :: initializeFrom(ir);
     linearElasticMaterial->initializeFrom(ir); // takes care of elastic constants
-    G = static_cast< IsotropicLinearElasticMaterial * >( linearElasticMaterial )->giveShearModulus();
-    K = static_cast< IsotropicLinearElasticMaterial * >( linearElasticMaterial )->giveBulkModulus();
+    G = static_cast< IsotropicLinearElasticMaterial * >(linearElasticMaterial)->giveShearModulus();
+    K = static_cast< IsotropicLinearElasticMaterial * >(linearElasticMaterial)->giveBulkModulus();
 
     IR_GIVE_FIELD(ir, tau0, _IFT_DruckerPragerCutMat_tau0); // initial yield stress under pure shear (DP model)
     IR_GIVE_FIELD(ir, sigT, _IFT_DruckerPragerCutMat_sigT); // uniaxial tensile strength for cut-off, (Rankine plasticity model)

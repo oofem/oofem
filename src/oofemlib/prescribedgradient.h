@@ -50,6 +50,8 @@
 //@}
 
 namespace oofem {
+class BCExportInterface;
+
 /**
  * Prescribes @f$ v_i = d_{ij}(x_j-\bar{x}_j) @f$ or @f$ s = d_{1j}(x_j - \bar{x}_j) @f$
  * where @f$ v_i @f$ are primary unknowns for the subscale.
@@ -57,6 +59,7 @@ namespace oofem {
  * would a macroscopic gradient at the integration point, i.e. this is a boundary condition for prolongation.
  * It is also convenient to use when one wants to test a arbitrary specimen for shear.
  * @author Mikael Öhman
+ * @author Erik Svenning
  */
 class OOFEM_EXPORT PrescribedGradient : public BoundaryCondition
 {
@@ -73,7 +76,7 @@ public:
      * @param n Boundary condition number.
      * @param d Domain to which new object will belongs.
      */
-    PrescribedGradient(int n, Domain *d) : BoundaryCondition(n, d) { }
+    PrescribedGradient(int n, Domain * d) : BoundaryCondition(n, d) { }
 
     /// Destructor
     virtual ~PrescribedGradient() { }

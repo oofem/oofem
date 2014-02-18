@@ -62,7 +62,7 @@ protected:
     EngngModel *emodel;
 
 public:
-    ModuleManager(EngngModel *emodel) {
+    ModuleManager(EngngModel * emodel) {
         this->emodel = emodel;
 
         moduleList = new AList< M >(0);

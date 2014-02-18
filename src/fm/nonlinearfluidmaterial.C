@@ -48,16 +48,6 @@
 namespace oofem {
 REGISTER_Material(NonlinearFluidMaterial);
 
-int
-NonlinearFluidMaterial :: hasMaterialModeCapability(MaterialMode mode)
-{
-    if ( mode == _2dFlow ) {
-        return 1;
-    }
-
-    return 0;
-}
-
 
 IRResultType
 NonlinearFluidMaterial :: initializeFrom(InputRecord *ir)
@@ -168,6 +158,8 @@ NonlinearFluidMaterial :: giveDeviatoricStiffnessMatrix(FloatMatrix &answer, Mat
         FloatMatrix op;
         if ( eps.giveSize() == 3 ) {
             eps.at(3) *= 0.5;
+        } else if ( eps.giveSize() == 4 ) {
+            eps.at(4) *= 0.5;
         } else {
             eps.at(4) *= 0.5;
             eps.at(5) *= 0.5;
@@ -197,17 +189,11 @@ NonlinearFluidMaterial :: checkConsistency()
 }
 
 NonlinearFluidMaterialStatus :: NonlinearFluidMaterialStatus(int n, Domain *d, GaussPoint *g) :
-    FluidDynamicMaterialStatus(n, d, g)
+    FluidDynamicMaterialStatus(n, d, g),
+    temp_deviatoricStressVector(),
+    temp_deviatoricStrainVector(),
+    temp_norm2(0)
 {
-    temp_deviatoricStrainVector.resize(3);
-    temp_deviatoricStrainVector.zero();
-    temp_deviatoricStressVector.resize(3);
-    temp_deviatoricStressVector.zero();
-    deviatoricStrainRateVector.resize(3);
-    deviatoricStrainRateVector.zero();
-    deviatoricStressVector.resize(3);
-    deviatoricStressVector.zero();
-    temp_norm2 = 0.;
 }
 
 void

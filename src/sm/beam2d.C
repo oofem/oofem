@@ -80,7 +80,7 @@ Interface *
 Beam2d :: giveInterface(InterfaceType interface)
 {
     if ( interface == LayeredCrossSectionInterfaceType ) {
-        return static_cast< LayeredCrossSectionInterface * >( this );
+        return static_cast< LayeredCrossSectionInterface * >(this);
     }
 
     return NULL;
@@ -199,7 +199,7 @@ Beam2d :: computeClampedStiffnessMatrix(FloatMatrix &answer,
     double l = this->computeLength();
     IntegrationRule *ir = this->giveDefaultIntegrationRulePtr();
     FloatMatrix B, d, DB;
-    answer.resize(0,0);
+    answer.clear();
     for ( int i = 0; i < ir->giveNumberOfIntegrationPoints(); ++i ) {
         GaussPoint *gp = ir->getIntegrationPoint(i);
         this->computeBmatrixAt(gp, B);
@@ -437,7 +437,7 @@ Beam2d :: computeEdgeLoadVectorAt(FloatArray &answer, Load *load, int iedge, Tim
     // evaluates the receivers edge load vector
     // for clamped beam
     //
-    BoundaryLoad *edgeLoad = dynamic_cast< BoundaryLoad * >( load );
+    BoundaryLoad *edgeLoad = dynamic_cast< BoundaryLoad * >(load);
     if ( edgeLoad ) {
         if ( edgeLoad->giveNumberOfDofs() != 3 ) {
             _error("computeEdgeLoadVectorAt: load number of dofs mismatch");

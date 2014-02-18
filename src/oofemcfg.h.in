@@ -1,11 +1,11 @@
 #define PRG_VERSION "OOFEM version @oofem_VERSION_MAJOR@.@oofem_VERSION_MINOR@"
 #define OOFEG_VERSION "OOFEG version @oofem_VERSION_MAJOR@.@oofem_VERSION_MINOR@"
-#define OOFEM_COPYRIGHT "Copyright (C) 1994-2013 Borek Patzak"
+#define OOFEM_COPYRIGHT "@oofem_COPYRIGHT@"
 
 #define PRG_HEADER_SM "\
 ____________________________________________________\n\
-           OOFEM - Finite Element Solver            \n\
-        Copyright (C) 1994-2013 Borek Patzak        \n\
+           OOFEM - Finite Element Solver\n\
+        @oofem_COPYRIGHT@\n\
 ____________________________________________________\n"
 
 #define PRG_HEADER "\
@@ -15,7 +15,7 @@ ____________________________________________________\n"
     #    #  #    #  #####   #####   # ## #\n\
    #    #  #    #  #       #       #    #\n\
   #    #  #    #  #       #       #    #   OOFEM ver. @oofem_VERSION_MAJOR@.@oofem_VERSION_MINOR@\n\
-  ####    ####   #       ######  #    #    Copyright (C) 1994-2013 Borek Patzak\n\
+  ####    ####   #       ######  #    #    @oofem_COPYRIGHT@\n\
 ################################################################################\n\n"
 
 #define HOST_TYPE "@HOST_TYPE@"
@@ -23,8 +23,6 @@ ____________________________________________________\n"
 #define MODULE_LIST "@MODULE_LIST@"
 
 /* Headers */
-/* Define if #include<sys/time.h> exist */
-#cmakedefine HAVE_SYS_TIME_H 1
 
 /* Define if strings.h defined */
 #cmakedefine HAVE_STRINGS_H 1
@@ -34,9 +32,6 @@ ____________________________________________________\n"
 
 /* Define if execinfo.h defined */
 #cmakedefine HAVE_EXECINFO_H 1
-
-/* Define if program may include both 'time.h' and 'sys/time.h' */
-#cmakedefine TIME_WITH_SYS_TIME 1
 
 /* Symbols */
 /* Define if access is defined */
@@ -50,13 +45,6 @@ ____________________________________________________\n"
 
 /* Define if isnan is defined */
 #cmakedefine HAVE_ISNAN 1
-
-/* Variables */
-/* Define if M_PI constant is defined */
-#cmakedefine HAVE_M_PI 1
-
-/* Define if M_LN2 constant is defined */
-#cmakedefine HAVE_M_LN2 1
 
 /* Other */
 /* Define if __VA_ARGS__ macro is supported by preprocessor */

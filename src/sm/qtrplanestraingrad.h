@@ -46,7 +46,7 @@ class QTrPlaneStrainGrad : public QTrPlaneStrain, public GradDpElement
 protected:
 
 public:
-    QTrPlaneStrainGrad(int n, Domain *d);
+    QTrPlaneStrainGrad(int n, Domain * d);
     virtual ~QTrPlaneStrainGrad() { }
 
     virtual IRResultType initializeFrom(InputRecord *ir);

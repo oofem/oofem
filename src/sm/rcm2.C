@@ -242,7 +242,7 @@ RCM2Material :: giveRealPrincipalStressVector3d(FloatArray &answer, GaussPoint *
     // start iteration until stress computed from elastic increment
     // is equal to stress computed from cracking strain increment
     // we do this computation in reduced stress strain space
-    dSigma.resize(0);
+    dSigma.clear();
     for ( int iter = 1; iter <= 20; iter++ ) {
         //
         // first check if already cracked
@@ -437,7 +437,7 @@ RCM2Material :: checkForNewActiveCracks(IntArray &answer, GaussPoint *gp,
         return;
     }
 
-    answer.resize(0);
+    answer.clear();
 }
 
 
@@ -513,7 +513,7 @@ RCM2Material :: updateCrackStatus(GaussPoint *gp, const FloatArray &crackStrain)
             minCrackStrainsForFullyOpenCrack = this->giveMinCrackStrainsForFullyOpenCrack(gp, i);
             //if ((crackStrain.at(i) >= status->giveMinCrackStrainsForFullyOpenCrack(i)) &&
             if ( ( crackStrain.at(i) >= minCrackStrainsForFullyOpenCrack ) &&
-                 ( crackStrain.at(i) >= status->giveTempMaxCrackStrain(i) ) ) {
+                ( crackStrain.at(i) >= status->giveTempMaxCrackStrain(i) ) ) {
                 //
                 // fully open crack
                 //
@@ -712,9 +712,9 @@ RCM2Material :: giveEffectiveMaterialStiffnessMatrix(FloatMatrix &answer,
             }
 
             princStressDis = principalStressVector.at(ii) -
-                             principalStressVector.at(jj);
+            principalStressVector.at(jj);
             princStrainDis = principalStrainVector.at(ii) -
-                             principalStrainVector.at(jj);
+            principalStrainVector.at(jj);
             if ( fabs(princStrainDis) < rcm_SMALL_STRAIN ) {
                 compliance.at(indi, indi) = 1. / G;
             } else if ( fabs(princStressDis) < 1.e-8 ) {
@@ -777,7 +777,7 @@ RCM2Material :: giveCrackedStiffnessMatrix(FloatMatrix &answer,
 
     status->giveCrackMap(crackMap);
     if ( numberOfActiveCracks == 0 ) {
-        answer.resize(0, 0);
+        answer.clear();
         return;
     }
 
@@ -1078,7 +1078,7 @@ RCM2MaterialStatus :: printOutputAt(FILE *file, TimeStep *tStep)
             }
 
             fprintf( file, "crack %d {status %s, normal to crackplane { %f %f %f }} ",
-                     i, s, crackDirs.at(1, i), crackDirs.at(2, i), crackDirs.at(3, i) );
+                    i, s, crackDirs.at(1, i), crackDirs.at(2, i), crackDirs.at(3, i) );
         }
     }
 
