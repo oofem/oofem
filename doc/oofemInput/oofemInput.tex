@@ -131,9 +131,9 @@ Th\'akurova 7, 166 29 Prague, Czech Republic
 \tableofcontents
 \newpage
 \section{Introduction}
-This report describes in details the format and structure of OOFEM
+This manual describes in details the format and structure of OOFEM
 text input file. Input file can be prepared in any text editor or can be generated
-by a conversion program or by a FEM pre-processor.
+by a conversion program or FEM pre-processor.
 
 \Pmode{Some parts of this document are relevant only to the parallel version of the code (POOFEM).
 These parts are distinguished by typing the text in sans serif font family.}
@@ -155,7 +155,7 @@ of relations between their remote counterparts (see further).
 
 \section{Running the code}
 \label{_running_the_code}
-The program may be executed by typing\\
+The program can be executed by typing\\
 \texttt{oofem [option [parameter]] ...}\\
 on the command line prompt with the following command line options:
 \begin{itemize}
@@ -210,7 +210,7 @@ For instance, when using the MPICH implementation of MPI and many others, the fo
 \section{Syntax and general rules}
 
 Input file is composed of records. In the current implementation, each record is represented by one line in input file.
-The order of records in file is compulsory, and is following
+The order of records in file is compulsory, and is followinghas following structure:
 \begin{enumerate}
 \item output file record, see section \ref{_OutputFileRecord},
 \item job description record, see section \ref{_JobDescriptionRecord},
@@ -232,9 +232,15 @@ The order of records in file is compulsory, and is following
 When input line begins with '\#' character, then it is ignored  by the parser and
 can serve as a comment inside input file.
 
-The individual records consist of record keyword followed by one or more attributes, where each attribute is identified by
-its keyword, which is followed by attribute value(s). Some attributes have no values.
-The order of attributes is optional.
+The individual records consist of record keyword followed by one or more attributes. Each attribute is identified by
+its keyword, which can be followed by attribute value(s). Some attributes have no values.
+The order of attributes in the record is optional.
+
+Sometimes, the record keyword itself can be variable, taking on a restricted range of possible values.
+As an example, OOFEM has element record, desribing particulat element, and record keyword determines the  particular element type.
+In this case, the record keyword is preceded by star. We call such record keyword as entity keyword. The possible
+substitutions for entity keyword are typed using \entKeywordInst{Typewriter} font family.
+Often, some attributes are specific to particular entity keyword. Then the general format of record is described and entity specific attributes are described separately. The possible attributes are then union of general and entity specific attributes.
 
 \begin{lstlisting}[style=oofem, language=oofeminput, caption={Example of input records}]
 # nodal records
@@ -244,44 +250,55 @@ Node 2 coords 3 0. 0. 2. bc 2 1 0
 Truss2d 1 nodes 2 1 2 mat 1 crossSect 1
 \end{lstlisting}
 
-The type of attribute values is attribute specific. To describe the type of attribute, the following notation is used: 
-\field{AttributeKeyword}{type}, where type determines the attribute type and \# is the placeholder for attribute value.
-Sometimes, record keyword can be variable, depending on entity type which is
-described by particular record. For example, we have element records, where attribute keywords determine particular element types. In this case, the keyword is preceded by star. We call such keyword as entity keyword. The possible
-substitutions for entity keyword are typed using \entKeywordInst{Typewriter} font family.
-
-Often, many attributes are specific to particular entity keyword. Then we describe
-general format of record without these specific attributes and we describe
-entity specific attributes separately.
-
-In a special case of analysis record, the input record can be followed
-by optional meta-step input records (see section
-\ref{_AnalysisRecord}). Then certain attributes originally in analysis
-record should appear in meta-step record instead. This is marked by
-adding ``M'' superscript to keyword. Then the attribute format is \field{Keyword$^M$}{type}.
-
-As already mentioned, each attribute value has type. The possible types are:
+Each attribute value has a specific type, which describe its size and layout. To describe the type of an attribute, the following notation is used: 
+\field{Keyword}{type}, where type determines the attribute type and \# is the placeholder for the attribute value.
+The possible types of attribute values are following:
 \begin{itemize}
-\item in - integer number.
-\item rn - real number.
-\item ch - character (usually for unknowns description ('d' for
-displacement unknown, 't' for temperature unknown, ...).
-\item ia - integer array, format of integer array is
+\item \textbf{in} - integer number.
+\begin{lstlisting}[style=oofem, language=oofeminput, moreemph={val1}]
+val1 25
+\end{lstlisting}
+
+\item \textbf{rn} - real number.
+\begin{lstlisting}[style=oofem, language=oofeminput, moreemph={val2}]
+val2 -0.234e-3
+\end{lstlisting}
+\item \textbf{ch} - character (usually for description of unknown type ('d' for
+displacement, 't' for temperature, etc.).
+\begin{lstlisting}[style=oofem, language=oofeminput, moreemph={val3}]
+val3 t
+\end{lstlisting}
+
+\item \textbf{ia} - integer array. The format of integer array is
 ``size~val(1)~...~val(size)'', where size, val(1),...,val(size) are
-integer numbers. Values are separated by one or more spaces.
-\item ra - real array, format of real array is
+integer numbers. Values are separated by one or more spaces. As an example, consider the integer array attribute called \param{bc}$=\{1,2,3\}$:
+\begin{lstlisting}[style=oofem, language=oofeminput, moreemph={bc}]
+bc 3 1 2 3
+\end{lstlisting}
+\item \textbf{ra} - real array. The format of real array is
 ``size~val(1)~...~val(size)'', where size is integer number and val(1),
-..., val(size) are real numbers. Values are separated by one or more spaces;
-\item rm - real matrix, format of real matrix is\\
+..., val(size) are real numbers. Values are separated by one or more spaces. As an example, consider the real array attribute called \param{coords}$=\{1.0,2.0,3.0\}$:
+\begin{lstlisting}[style=oofem, language=oofeminput, moreemph={coords}]
+coords 3 1.0 2.0 3.0
+\end{lstlisting}
+\item \textbf{rm} - real matrix, format of real matrix is\\
 ``rows~columns~\{val(1,1)~val(1,2)~...;~val(2,1)~...\}'', where ``rows'' and ``columns'' are integer numbers and val(1,1),
 ..., are real numbers. Columns are seperated by space or comma and lines by semicolon.
-\item dc - dictionary. Dictionary consist of pairs, each pair has key
+As an example, consider the real matrix attribute called $\param{mat1}=\left[\begin{array}{ccc}1.0&-1.0&0.0\\2.0&2.5&5.0\end{array}\right]$:
+\begin{lstlisting}[style=oofem, language=oofeminput, moreemph={mat1}]
+mat1 2 3 1.0 -1.0 0.0 2.0 2.5 5.0
+\end{lstlisting}
+
+\item \textbf{dc} - dictionary. Dictionary consist of pairs, each pair has key
 (character type) and its associated value (integer type).
 Format of dictionary is
 ``size~key(1)~val(1)~...~key(size)~val(size)'', where size is integer
 number, key(1),...,key(size) are single character values, and val(1),
 ..., val(size) are real numbers. Values are separated by one or more spaces;
-\item rl - range list. Range list syntax is \{ number1 .. numberN (start1
+\begin{lstlisting}[style=oofem, language=oofeminput, moreemph={dict1}]
+dict1 2 a 1.0 v 0.0 
+\end{lstlisting}
+\item \textbf{rl} - range list. Range list syntax is \{ number1 .. numberN (start1
 end1) (start2 end2)\}. The enclosing brackets are compulsory. The range
 list represent list of integer values. Single values can be specified
 using single values (number1, .., NumberN). The range of values
@@ -289,11 +306,17 @@ using single values (number1, .., NumberN). The range of values
 specified using range value in the form (startI endI). The range is
 described using its start and end values enclosed in parenthesis.
 Any number of ranges and single values can be used to specify range list.
-\item et - entity type. For  example, it describes the finite element
+\begin{lstlisting}[style=oofem, language=oofeminput, moreemph={range1}]
+range1 { 1 7 8 (10 20) (25 30) }
+\end{lstlisting}
+\item \textbf{et} - entity type. For  example, it describes the finite element
 type. Possible type values are mentioned in specific sections.
-\item s - character string. The string have to be enclosed
+\item \textbf{s} - character string. The string have to be enclosed
 in quotes ("") following after corresponding keyword.
-\item expr - function expression. The expression have to be enclosed
+\begin{lstlisting}[style=oofem, language=oofeminput, moreemph={string1}]
+string1 ``string example''
+\end{lstlisting}
+\item \textbf{expr} - function expression. The expression have to be enclosed
 in quotes (""). The expression is evaluated by internal parser and
 represent mathematical expressions as a function of certain variables.
 The variable names and meaning are described in specific sections.
@@ -302,6 +325,10 @@ evaluation order is taken into account. The evaluation order can be
 changed using parenthesis. Several built-in functions are supported
 (sqrt, sin, cos, tan, atan, asin and acos) - these must be typed using
 lowercase letters and their arguments must be enclosed in parenthesis.
+\begin{lstlisting}[style=oofem, language=oofeminput, moreemph={expr1}]
+expr1 ``2.0*sin(t)/3.0''
+\end{lstlisting}
+
 \end{itemize}
 
 The general format of record is \\
@@ -315,6 +342,12 @@ The general format of record is \\
 
 The keywords and their values are separated by one or more spaces. Please note, that a single record cooresponds to one input line in input file. 
 
+%In a special case of analysis record, the input record can be followed
+%by optional meta-step input records (see section
+%\ref{_AnalysisRecord}). Then certain attributes originally in analysis
+%record should appear in meta-step record instead. This is marked by
+%adding ``M'' superscript to keyword. Then the attribute format is \field{Keyword$^M$}{type}.
+
 When some attribute is enclosed in brackets [~], then it's use is optional
 and often overwrites the default behavior or adds additional (but
 optional) information or property (for example adds a loading to
@@ -323,12 +356,12 @@ node).
 \Pmode{If any attribute (and thus its keyword and value) is enclosed within angle brackets $\langle$~$\rangle$ then it is related to parallel version of oofem is not available in sequential version.}
 
 {\flushleft \bf Example of input record.}\\
-As an example, consider following record description:\\
+As an example, consider the following record description:\\
 \begin{record}
   \recentry{\entKeywordInstWithVal{Particle}{in}}{\field{color}{in} \field{mass}{rn}}
   \recentry{}{\field{coords}{ra} \field{name}{s}}
 \end{record}
-The following listing shows the formatted input record:
+The following listing shows the corresponding, properly formatted, input record:
 \begin{lstlisting}[style=oofem, language=oofeminput, caption={Corresponding input record}, moreemph={color, mass, name}, morekeywords={Particle}]
 Particle 2 color 5 mass 0.18 coords 3 0.0 1.0 2.0 name "P1_36"
 \end{lstlisting}
