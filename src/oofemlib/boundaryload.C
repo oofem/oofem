@@ -37,6 +37,7 @@
 #include "floatarray.h"
 #include "timestep.h"
 #include "dynamicinputrecord.h"
+#include "valuemodetype.h"
 
 namespace oofem {
 void
@@ -109,6 +110,7 @@ BoundaryLoad :: initializeFrom(InputRecord *ir)
     coordSystemType = ( CoordSystType ) value;
 
     IR_GIVE_OPTIONAL_FIELD(ir, propertyDictionary, _IFT_BoundaryLoad_properties);
+    IR_GIVE_OPTIONAL_FIELD(ir, propertyTimeFunctDictionary, _IFT_BoundaryLoad_propertyTimeFunctions);
 
     return result;
 }
@@ -122,16 +124,22 @@ BoundaryLoad :: giveInputRecord(DynamicInputRecord &input)
     input.setField(this->lType, _IFT_BoundaryLoad_loadtype);
     input.setField(this->coordSystemType, _IFT_BoundaryLoad_cstype);
     input.setField(this->propertyDictionary, _IFT_BoundaryLoad_properties);
+    input.setField(this->propertyTimeFunctDictionary, _IFT_BoundaryLoad_propertyTimeFunctions);
 }
 
 
 double
-BoundaryLoad :: giveProperty(int aProperty)
+BoundaryLoad :: giveProperty(int aProperty, TimeStep* tStep)
 // Returns the value of the property aProperty (e.g. the area
 // 'A') of the receiver.
 {
     if ( propertyDictionary.includes(aProperty) ) {
+      // check if time fuction registered under the same key
+      if ( propertyTimeFunctDictionary.includes(aProperty) ) {
+	return propertyDictionary.at(aProperty) * domain->giveFunction(propertyTimeFunctDictionary.at(aProperty))->evaluate(tStep, VM_Total);
+      } else {
         return propertyDictionary.at(aProperty);
+      }
     } else {
         _error("give: property not defined");
     }
