@@ -44,6 +44,12 @@ namespace oofem {
 
 class FEMComponent;
 
+/// Helper function for creating a dynamic input record for a node
+DynamicInputRecord* CreateNodeIR(int i, InputFieldType nodeType, const FloatArray& coord);
+
+/// Helper function for creating elements (with optional cross-section number).
+DynamicInputRecord* CreateElementIR(int i, InputFieldType elementType, const IntArray& nodes, int cs = 0);
+
 /**
  * Class representing the a dynamic Input Record.
  * The input record is represented as a list of fields.
@@ -72,8 +78,8 @@ protected:
 
 public:
     /// Creates an empty input record.
-    DynamicInputRecord();
-    /// Creates an empty input record.
+    DynamicInputRecord(std :: string answer = "", int value = 0);
+    /// Extracts input record from given component
     DynamicInputRecord(FEMComponent &femc); ///@todo Make FEMComponent const
     /// Copy constructor.
     DynamicInputRecord(const DynamicInputRecord &);

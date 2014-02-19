@@ -39,13 +39,34 @@
 #include "floatmatrix.h"
 #include "dictionary.h"
 #include "range.h"
+#include "node.h"
+#include "element.h"
 
 #include <sstream>
 
 namespace oofem {
-DynamicInputRecord :: DynamicInputRecord() : InputRecord(),
-    recordKeyword(),
-    recordNumber(0),
+
+DynamicInputRecord* CreateNodeIR(int i, InputFieldType nodeType, const FloatArray& coord)
+{
+     DynamicInputRecord* result = new DynamicInputRecord(nodeType, i);
+     result->setField(coord, _IFT_Node_coords);
+     return result;
+}
+
+DynamicInputRecord* CreateElementIR(int i, InputFieldType elementType, const IntArray& nodes, int cs)
+{
+     DynamicInputRecord* result = new DynamicInputRecord(elementType, i);
+     result->setField(nodes, _IFT_Element_nodes);
+     if ( cs != 0 ) {
+        result->setField(cs, _IFT_Element_crosssect);
+     }
+     return result;
+}
+
+
+DynamicInputRecord :: DynamicInputRecord(std :: string keyword, int value) : InputRecord(),
+    recordKeyword(keyword), ///@todo std::move here
+    recordNumber(value),
     emptyRecord(),
     intRecord(),
     doubleRecord(),
