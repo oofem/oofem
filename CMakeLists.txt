@@ -436,17 +436,11 @@ site_name (HOST_NAME)
 set (HOST_TYPE "${CMAKE_SYSTEM_PROCESSOR}-${CMAKE_SYSTEM_NAME}") # This should be renamed TARGET_TYPE.
 set (BUILDNAME "OOFEM(${MODULE_LIST})-${HOST_TYPE}-${HOST_NAME}")
 
-check_include_file_cxx ("strings.h" HAVE_STRINGS_H)
 check_include_file_cxx ("unistd.h" HAVE_UNISTD_H)
 check_include_file_cxx ("execinfo.h" HAVE_EXECINFO_H)
-check_cxx_symbol_exists ("strncasecmp" "strings.h" HAVE_STRNCASECMP)
 check_cxx_symbol_exists ("access" "unistd.h" HAVE_ACCESS)
 check_cxx_symbol_exists ("cbrt" "cmath" HAVE_CBRT)
 check_cxx_symbol_exists ("isnan" "cmath" HAVE_ISNAN)
-check_cxx_source_compiles ("
-#include <stdio.h>
-#define LOG_FATAL(file,...) fprintf (file, __VA_ARGS__)
-int main(void) { return 0; }" HAVE_MACRO_VA_ARGS)
 if (USE_SHARED_LIB)
     set (OOFEM_EXPORT_HEADER "#include \"oofem_export.h\"")
     # For consistant library on linux and windows platforms.

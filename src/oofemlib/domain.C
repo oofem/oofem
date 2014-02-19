@@ -62,7 +62,6 @@
 #include "randomfieldgenerator.h"
 #include "errorestimator.h"
 #include "range.h"
-#include "compiler.h"
 #include "fracturemanager.h"
 #include "dynamicinputrecord.h"
 #include "dynamicdatareader.h"
@@ -1232,41 +1231,41 @@ Domain :: resolveDomainDofsDefaults(const char *typeName)
 // and also resolves default dof mask according to domain type.
 //
 {
-    if ( !strncasecmp(typeName, "2dplanestressrot", 16) ) {
+    if ( !strncmp(typeName, "2dplanestressrot", 16) ) {
         dType = _2dPlaneStressRotMode;
-    } else if ( !strncasecmp(typeName, "2dplanestress", 12) ) {
+    } else if ( !strncmp(typeName, "2dplanestress", 12) ) {
         dType = _2dPlaneStressMode;
-    } else if ( !strncasecmp(typeName, "planestrain", 11) ) {
+    } else if ( !strncmp(typeName, "planestrain", 11) ) {
         dType = _PlaneStrainMode;
-    } else if ( !strncasecmp(typeName, "3daxisymm", 9) ) {
+    } else if ( !strncmp(typeName, "3daxisymm", 9) ) {
         dType = _3dAxisymmMode;
-    } else if  ( !strncasecmp(typeName, "2dmindlinplate", 14) ) {
+    } else if  ( !strncmp(typeName, "2dmindlinplate", 14) ) {
         dType = _2dMindlinPlateMode;
-    } else if ( !strncasecmp(typeName, "3dshell", 7) ) {
+    } else if ( !strncmp(typeName, "3dshell", 7) ) {
         dType = _3dShellMode;
-    } else if  ( !strncasecmp(typeName, "2dtruss", 7) ) {
+    } else if  ( !strncmp(typeName, "2dtruss", 7) ) {
         dType = _2dTrussMode;
-    } else if  ( !strncasecmp(typeName, "1dtruss", 7) ) {
+    } else if  ( !strncmp(typeName, "1dtruss", 7) ) {
         dType = _1dTrussMode;
-    } else if  ( !strncasecmp(typeName, "2dbeam", 6) ) {
+    } else if  ( !strncmp(typeName, "2dbeam", 6) ) {
         dType = _2dBeamMode;
-    } else if  ( !strncasecmp(typeName, "2dlattice", 9) ) {
+    } else if  ( !strncmp(typeName, "2dlattice", 9) ) {
         dType = _2dLatticeMode;
-    } else if  ( !strncasecmp(typeName, "heattransfer", 12) ) {
+    } else if  ( !strncmp(typeName, "heattransfer", 12) ) {
         dType = _HeatTransferMode;
-    } else if  ( !strncasecmp(typeName, "mass1transfer", 13) ) {
+    } else if  ( !strncmp(typeName, "mass1transfer", 13) ) {
         dType = _Mass1TransferMode;
-    } else if  ( !strncasecmp(typeName, "hema1", 5) ) {
+    } else if  ( !strncmp(typeName, "hema1", 5) ) {
         dType = _HeatMass1Mode;
-    } else if ( !strncasecmp(typeName, "2dincompflow", 12) ) {
+    } else if ( !strncmp(typeName, "2dincompflow", 12) ) {
         dType = _2dIncompressibleFlow;
-    } else if ( !strncasecmp(typeName, "3dincompflow", 12) ) {
+    } else if ( !strncmp(typeName, "3dincompflow", 12) ) {
         dType = _3dIncompressibleFlow;
-    } else if  ( !strncasecmp(typeName, "3ddirshell", 10) ) {
+    } else if  ( !strncmp(typeName, "3ddirshell", 10) ) {
         dType = _3dDirShellMode;
-    } else if  ( !strncasecmp(typeName, "2dmasslatticetransport", 22) ) {
+    } else if  ( !strncmp(typeName, "2dmasslatticetransport", 22) ) {
         dType = _2dLatticeMassTransportMode;
-    } else if  ( !strncasecmp(typeName, "3d", 2) ) {
+    } else if  ( !strncmp(typeName, "3d", 2) ) {
         dType = _3dMode;
     } else {
         _error2("resolveDomainDofsDefaults : unknown domainType (%s)", typeName);

@@ -173,43 +173,38 @@ template< typename T > FailureCriteriaStatus *failureCriteriaCreator(int n, Fail
  */
 class OOFEM_EXPORT ClassFactory
 {
-    struct CaseComp
-    {
-        int operator() (const std :: string &a, const std :: string &b) const;
-    };
-
 private:
     /// Associative container containing element creators with element name as key.
-    std :: map < std :: string, Element * ( * )(int, Domain *), CaseComp > elemList;
+    std :: map < std :: string, Element * ( * )(int, Domain *) > elemList;
     /// Associative container containing dofmanager creators with dofmanager  name as key.
-    std :: map < std :: string, DofManager * ( * )(int, Domain *), CaseComp > dofmanList;
+    std :: map < std :: string, DofManager * ( * )(int, Domain *) > dofmanList;
     /// Associative container containing boundary condition creators with bc  name as key.
-    std :: map < std :: string, GeneralBoundaryCondition * ( * )(int, Domain *), CaseComp > bcList;
+    std :: map < std :: string, GeneralBoundaryCondition * ( * )(int, Domain *) > bcList;
     /// Associative container containing cross section creators with cross section name as key.
-    std :: map < std :: string, CrossSection * ( * )(int, Domain *), CaseComp > csList;
+    std :: map < std :: string, CrossSection * ( * )(int, Domain *) > csList;
     /// Associative container containing material creators with material name as key.
-    std :: map < std :: string, Material * ( * )(int, Domain *), CaseComp > matList;
+    std :: map < std :: string, Material * ( * )(int, Domain *) > matList;
     /// Associative container containing engng model creators with engng model name as key.
-    std :: map< std :: string, EngngModel * ( * )( int, EngngModel * ), CaseComp >engngList;
+    std :: map< std :: string, EngngModel * ( * )( int, EngngModel * ) >engngList;
     /// Associative container containing load time function creators with function name as key.
-    std :: map< std :: string, Function * ( * )( int, Domain * ), CaseComp >funcList;
+    std :: map< std :: string, Function * ( * )( int, Domain * ) >funcList;
     /// Associative container containing nonlocal barriers creators with barrier name as key.
-    std :: map < std :: string, NonlocalBarrier * ( * )(int, Domain *), CaseComp > nlbList;
+    std :: map < std :: string, NonlocalBarrier * ( * )(int, Domain *) > nlbList;
     /// Associative container containing random field generator creators with names as key.
-    std :: map < std :: string, RandomFieldGenerator * ( * )(int, Domain *), CaseComp > rfgList;
+    std :: map < std :: string, RandomFieldGenerator * ( * )(int, Domain *) > rfgList;
     /// Associative container containing export module creators.
-    std :: map < std :: string, ExportModule * ( * )(int, EngngModel *), CaseComp > exportList;
+    std :: map < std :: string, ExportModule * ( * )(int, EngngModel *) > exportList;
     /// Associative container containing nonlinear solver creators.
-    std :: map < std :: string, SparseNonLinearSystemNM * ( * )(Domain *, EngngModel *), CaseComp > nonlinList;
+    std :: map < std :: string, SparseNonLinearSystemNM * ( * )(Domain *, EngngModel *) > nonlinList;
     /// Associative container containing init module creators.
-    std :: map < std :: string, InitModule * ( * )(int, EngngModel *), CaseComp > initList;
+    std :: map < std :: string, InitModule * ( * )(int, EngngModel *) > initList;
     /// Associative container containing topology description creators.
-    std :: map < std :: string, TopologyDescription * ( * )(Domain *), CaseComp > topologyList;
+    std :: map < std :: string, TopologyDescription * ( * )(Domain *) > topologyList;
     /// Associative container containing load balancer creators.
 #ifdef __PARALLEL_MODE
-    std :: map < std :: string, LoadBalancer * ( * )(Domain *), CaseComp > loadBalancerList;
+    std :: map < std :: string, LoadBalancer * ( * )(Domain *) > loadBalancerList;
     /// Associative container containing load balancer monitor creators.
-    std :: map < std :: string, LoadBalancerMonitor * ( * )(EngngModel *), CaseComp > loadMonitorList;
+    std :: map < std :: string, LoadBalancerMonitor * ( * )(EngngModel *) > loadMonitorList;
 #endif
     // Internal structures (accessed by hard-coded enum values)
     /// Associative container containing sparse matrix creators.
@@ -223,22 +218,22 @@ private:
 
     // XFEM:
     /// Associative container containing enrichment item creators
-    std :: map < std :: string, EnrichmentItem * ( * )(int, XfemManager *, Domain *), CaseComp > enrichItemList;
+    std :: map < std :: string, EnrichmentItem * ( * )(int, XfemManager *, Domain *) > enrichItemList;
     /// Associative container containing enrichment function creators
-    std :: map < std :: string, EnrichmentFunction * ( * )(int, Domain *), CaseComp > enrichFuncList;
+    std :: map < std :: string, EnrichmentFunction * ( * )(int, Domain *) > enrichFuncList;
     /// Associative container containing geometry creators
-    std :: map < std :: string, BasicGeometry * ( * )(), CaseComp > geometryList;
+    std :: map < std :: string, BasicGeometry * ( * )() > geometryList;
     /// Associative container containing enrichment-domain creators
-    std :: map < std :: string, EnrichmentDomain * ( * )(), CaseComp > enrichmentDomainList;
+    std :: map < std :: string, EnrichmentDomain * ( * )() > enrichmentDomainList;
     /// Associative container containing enrichment front creators
-    std :: map < std :: string, EnrichmentFront * ( * )(), CaseComp > enrichmentFrontList;
+    std :: map < std :: string, EnrichmentFront * ( * )() > enrichmentFrontList;
     /// Associative container containing propagation law creators
-    std :: map < std :: string, PropagationLaw * ( * )(), CaseComp > propagationLawList;
+    std :: map < std :: string, PropagationLaw * ( * )() > propagationLawList;
 
 
     /// Associative container containing failure criteria creators
-    std :: map < std :: string, FailureCriteria * ( * )(int, FractureManager *), CaseComp > failureCriteriaList;
-    std :: map < std :: string, FailureCriteriaStatus * ( * )(int, FailureCriteria *), CaseComp > failureCriteriaStatusList;
+    std :: map < std :: string, FailureCriteria * ( * )(int, FractureManager *) > failureCriteriaList;
+    std :: map < std :: string, FailureCriteriaStatus * ( * )(int, FailureCriteria *) > failureCriteriaStatusList;
 
 public:
     /// Constructor, registers all classes

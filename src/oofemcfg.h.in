@@ -24,9 +24,6 @@ ____________________________________________________\n"
 
 /* Headers */
 
-/* Define if strings.h defined */
-#cmakedefine HAVE_STRINGS_H 1
-
 /* Define if unistd.h defined */
 #cmakedefine HAVE_UNISTD_H 1
 
@@ -36,9 +33,6 @@ ____________________________________________________\n"
 /* Symbols */
 /* Define if access is defined */
 #cmakedefine HAVE_ACCESS 1
-
-/* Define if strncasecmp is defined */
-#cmakedefine HAVE_STRNCASECMP 1
 
 /* Define if cbrt is defined */
 #cmakedefine HAVE_CBRT 1
