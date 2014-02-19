@@ -43,6 +43,7 @@
 namespace oofem {
 
 class FEMComponent;
+class DynamicInputRecord;
 
 /// Helper function for creating a dynamic input record for a node
 DynamicInputRecord* CreateNodeIR(int i, InputFieldType nodeType, const FloatArray& coord);
