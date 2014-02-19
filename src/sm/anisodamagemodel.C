@@ -884,7 +884,6 @@ AnisotropicDamageMaterial :: give3dMaterialStiffnessMatrix(FloatMatrix &answer,
 {
 	AnisotropicDamageMaterialStatus *status = static_cast< AnisotropicDamageMaterialStatus * >( this->giveStatus(gp) );
 	if ( mode == ElasticStiffness ) {
-		LinearElasticMaterial *lmat = this->giveLinearElasticMaterial();
 		this->giveLinearElasticMaterial()->give3dMaterialStiffnessMatrix(answer, mode, gp, atTime);
 	} else {
 		FloatArray strain = status->giveTempStrainVector();
