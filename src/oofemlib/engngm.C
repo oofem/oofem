@@ -1813,14 +1813,14 @@ EngngModel :: terminateAnalysis()
     tsec = this->timer.getWtime(EngngModelTimer :: EMTT_AnalysisTimer);
     this->timer.convert2HMS(nhrs, nmin, nsec, tsec);
     fprintf(out, "Real time consumed: %03dh:%02dm:%02ds\n", nhrs, nmin, nsec);
-    LOG_FORCED_MSG(oofem_logger, "\n\nANALYSIS FINISHED\n\n\n");
-    LOG_FORCED_MSG(oofem_logger, "Real time consumed: %03dh:%02dm:%02ds\n", nhrs, nmin, nsec);
+    OOFEM_LOG_FORCED("\n\nANALYSIS FINISHED\n\n\n");
+    OOFEM_LOG_FORCED("Real time consumed: %03dh:%02dm:%02ds\n", nhrs, nmin, nsec);
     // compute processor time used by the program
     // nsec = (endClock - startClock) / CLOCKS_PER_SEC;
     tsec = this->timer.getUtime(EngngModelTimer :: EMTT_AnalysisTimer);
     this->timer.convert2HMS(nhrs, nmin, nsec, tsec);
     fprintf(out, "User time consumed: %03dh:%02dm:%02ds\n\n\n", nhrs, nmin, nsec);
-    LOG_FORCED_MSG(oofem_logger, "User time consumed: %03dh:%02dm:%02ds\n", nhrs, nmin, nsec);
+    OOFEM_LOG_FORCED("User time consumed: %03dh:%02dm:%02ds\n", nhrs, nmin, nsec);
     exportModuleManager->terminate();
 }
 

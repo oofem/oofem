@@ -582,7 +582,7 @@ TransportElement :: computeLoadVector(FloatArray &answer, Load *load, CharType t
                 load->computeValueAt(val, tStep, gcoords, mode);
             }
             val.at(1) -= field;
-            val.times( -1.0 * load->giveProperty('a') );
+            val.times( -1.0 * load->giveProperty('a', tStep) );
         }
 
         answer.add(val.at(1) * dV, n);
@@ -642,7 +642,7 @@ TransportElement :: computeBoundaryLoadVector(FloatArray &answer, BoundaryLoad *
                 load->computeValueAt(val, tStep, gcoords, mode);
             }
             val.at(1) -= field;
-            val.times( -1.0 * load->giveProperty('a') );
+            val.times( -1.0 * load->giveProperty('a', tStep) );
         }
 
         answer.add(val.at(1) * dA, n);
@@ -702,7 +702,7 @@ TransportElement :: computeBoundaryEdgeLoadVector(FloatArray &answer, BoundaryLo
                 load->computeValueAt(val, tStep, gcoords, mode);
             }
             val.at(1) -= field;
-            val.times( -1.0 * load->giveProperty('a') );
+            val.times( -1.0 * load->giveProperty('a', tStep) );
         }
 
         answer.add(val.at(1) * dL, n);
@@ -815,7 +815,7 @@ TransportElement :: computeEdgeBCSubVectorAt(FloatArray &answer, Load *load, int
         if ( load->giveType() == TransmissionBC ) {
             coeff = -1.0;
         } else {
-            coeff = edgeLoad->giveProperty('a');
+	  coeff = edgeLoad->giveProperty('a', tStep);
         }
 
         for ( int i = 0; i < iRule.giveNumberOfIntegrationPoints(); i++ ) {
@@ -866,7 +866,7 @@ TransportElement :: computeSurfaceBCSubVectorAt(FloatArray &answer, Load *load,
         if ( load->giveType() == TransmissionBC ) {
             coeff = -1.0;
         } else {
-            coeff = surfLoad->giveProperty('a');
+	  coeff = surfLoad->giveProperty('a', tStep);
         }
 
         int approxOrder = surfLoad->giveApproxOrder() + this->giveApproxOrder(indx);
@@ -934,7 +934,7 @@ TransportElement :: computeBCSubMtrxAt(FloatMatrix &answer, TimeStep *tStep, Val
                     GaussPoint *gp = iRule.getIntegrationPoint(igp);
                     this->computeEgdeNAt( n, id, * gp->giveCoordinates() );
                     double dV = this->computeEdgeVolumeAround(gp, id);
-                    subAnswer.plusDyadSymmUpper( n, dV * edgeLoad->giveProperty('a') );
+                    subAnswer.plusDyadSymmUpper( n, dV * edgeLoad->giveProperty('a', tStep) );
                 }
 
                 subAnswer.symmetrized();
@@ -958,7 +958,7 @@ TransportElement :: computeBCSubMtrxAt(FloatMatrix &answer, TimeStep *tStep, Val
                     GaussPoint *gp = iRule->getIntegrationPoint(igp);
                     this->computeSurfaceNAt( n, id, * gp->giveCoordinates() );
                     double dV = this->computeSurfaceVolumeAround(gp, id);
-                    subAnswer.plusDyadSymmUpper( n, dV * surfLoad->giveProperty('a') );
+                    subAnswer.plusDyadSymmUpper( n, dV * surfLoad->giveProperty('a', tStep) );
                 }
 
                 delete iRule;

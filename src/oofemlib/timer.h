@@ -37,26 +37,7 @@
 
 #include "oofemcfg.h"
 
-#ifndef _MSC_VER
- #ifdef TIME_WITH_SYS_TIME
-  # include <sys/time.h>
-  # include <ctime>
- #else
-  # ifdef HAVE_SYS_TIME_H
-   #  include <sys/time.h>
-  # else
-   #  include <ctime>
-  # endif
- #endif
-typedef timeval oofem_timeval;
-#else // _MSC_VER
- #include <ctime>
-typedef struct
-{
-    unsigned long tv_sec;          ///< Seconds.
-    unsigned long tv_usec;         ///< Microseconds.
-} oofem_timeval;
-#endif
+#include <chrono>
 
 namespace oofem {
 /**
@@ -64,12 +45,12 @@ namespace oofem {
  */
 class OOFEM_EXPORT Timer
 {
-    /// Wall clock time structures.
-    oofem_timeval start_wtime, end_wtime;
-    /// User time struct.
-    oofem_timeval start_utime, end_utime;
+    /// Wall clock time markers.
+    std::chrono::time_point<std::chrono::high_resolution_clock> start_wtime, end_wtime;
+    /// User time.
+    std::chrono::duration<double> start_utime, end_utime;
     /// Accumulated wtime and utime (in seconds) from start.
-    oofem_timeval elapsedWTime, elapsedUTime;
+    std::chrono::duration<double> elapsedWTime, elapsedUTime;
     /// Flag indicating whether timer is running.
     bool running;
 
@@ -95,14 +76,6 @@ public:
      * @param[out] nsec Number of seconds.
      * @param[in] tsec Total time in seconds.
      */
-    static void convert2HMS(int &nhrs, int &nmin, int &nsec, long int tsec);
-    /**
-     * Converts total seconds into hours, minutes and remaining seconds
-     * @param[out] nhrs Number of hours.
-     * @param[out] nmin Number of minutes.
-     * @param[out] nsec Number of seconds.
-     * @param[in] tsec Total time in seconds.
-     */
     static void convert2HMS(int &nhrs, int &nmin, int &nsec, double tsec);
 
     /// Prints receiver state into a string.
@@ -112,9 +85,9 @@ public:
 
 private:
     /// Platform independent wrapper for user time
-    void getUtime(oofem_timeval &answer);
+    void getUtime(std::chrono::duration<double> &answer);
     /// Platform independent wrapper for wall time
-    void getTime(oofem_timeval &answer);
+    void getTime(std::chrono::time_point<std::chrono::high_resolution_clock> &answer);
 };
 
 /**
@@ -168,8 +141,7 @@ public:
     /// Returns pointer to timer determined by EngngModelTimerType.
     const Timer *getTimer(EngngModelTimerType t)  { return timers + t; }
     /// Converts total seconds into hours, mins, and seconds.
-    void convert2HMS(int &nhrs, int &nmin, int &nsec, long int tsec) const;
-    void convert2HMS(int &nhrs, int &nmin, int &nsec, double tsec) const;
+    static void convert2HMS(int &nhrs, int &nmin, int &nsec, double tsec);
     /// Printing & formatting.
     void toString(EngngModelTimerType t, char *buff);
     //@}

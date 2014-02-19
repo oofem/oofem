@@ -157,7 +157,7 @@ DIIDynamic :: initializeFrom(InputRecord *ir)
         OOFEM_LOG_INFO("Selecting Wilson-theta metod\n");
         IR_GIVE_OPTIONAL_FIELD(ir, theta, _IFT_DIIDynamic_theta);
         if ( theta < 1.37 ) {
-            OOFEM_LOG_WARNING("Found theta < 1.37. Performing correction, theta = 1.37");
+            OOFEM_WARNING("Found theta < 1.37. Performing correction, theta = 1.37");
             theta = 1.37;
         }
     } else {
