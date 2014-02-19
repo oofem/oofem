@@ -549,6 +549,12 @@ if (USE_OOFEG)
     install(TARGETS oofeg DESTINATION bin)
 endif ()
 
+# Example of using liboofem with dynamic input record:
+add_executable(beam01 ${oofem_SOURCE_DIR}/bindings/oofemlib/beam01.C)
+set_target_properties(beam01 PROPERTIES EXCLUDE_FROM_ALL TRUE)
+target_link_libraries (beam01 liboofem)
+
+
 
 # CppCheck target (not built by default)
 add_custom_target(cppcheck)
