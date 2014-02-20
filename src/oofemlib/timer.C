@@ -98,8 +98,8 @@ void Timer :: resumeTimer()
 
 void Timer :: initTimer()
 {
-    elapsedWTime.zero();
-    elapsedUTime.zero();
+    elapsedWTime = elapsedWTime.zero();
+    elapsedUTime = elapsedUTime.zero();
     running = false;
 }
 
@@ -119,6 +119,8 @@ double Timer :: getWtime()
 void Timer :: convert2HMS(int &nhrs, int &nmin, int &nsec, double tsec)
 {
     long int _nsec = ( long int )tsec;
+    nhrs = 0;
+    nmin = 0;
     if ( _nsec > 60 ) {
         nmin = _nsec / 60;
         _nsec %= 60;
