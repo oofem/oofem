@@ -815,7 +815,7 @@ TransportElement :: computeEdgeBCSubVectorAt(FloatArray &answer, Load *load, int
         if ( load->giveType() == TransmissionBC ) {
             coeff = -1.0;
         } else {
-	  coeff = edgeLoad->giveProperty('a', tStep);
+            coeff = edgeLoad->giveProperty('a', tStep);
         }
 
         for ( int i = 0; i < iRule.giveNumberOfIntegrationPoints(); i++ ) {
@@ -866,7 +866,7 @@ TransportElement :: computeSurfaceBCSubVectorAt(FloatArray &answer, Load *load,
         if ( load->giveType() == TransmissionBC ) {
             coeff = -1.0;
         } else {
-	  coeff = surfLoad->giveProperty('a', tStep);
+            coeff = surfLoad->giveProperty('a', tStep);
         }
 
         int approxOrder = surfLoad->giveApproxOrder() + this->giveApproxOrder(indx);
