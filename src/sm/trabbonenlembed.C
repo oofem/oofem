@@ -80,9 +80,9 @@ TrabBoneNLEmbed :: updateBeforeNonlocAverage(const FloatArray &strainVector, Gau
 
 void
 TrabBoneNLEmbed :: giveRealStressVector_3d(FloatArray &answer,
-                                        GaussPoint *gp,
-                                        const FloatArray &strainVector,
-                                        TimeStep *tStep)
+                                           GaussPoint *gp,
+                                           const FloatArray &strainVector,
+                                           TimeStep *tStep)
 {
     TrabBoneNLEmbedStatus *nlStatus = static_cast< TrabBoneNLEmbedStatus * >( this->giveStatus(gp) );
 

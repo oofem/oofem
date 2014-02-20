@@ -268,7 +268,7 @@ void LinearStatic :: solveYourselfAt(TimeStep *tStep)
                          EModelDefaultEquationNumbering(), this->giveDomain(1) );
 
     loadVector.subtract(internalForces);
-    
+
 #ifdef __PARALLEL_MODE
     this->updateSharedDofManagers(loadVector, EModelDefaultEquationNumbering(), ReactionExchangeTag);
 #endif

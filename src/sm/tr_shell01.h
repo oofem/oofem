@@ -152,8 +152,10 @@ protected:
     /// @todo In time delete
 protected:
     virtual void computeGaussPoints()
-    { this->membrane->computeGaussPoints();
-      this->plate->computeGaussPoints(); }
+    {
+        this->membrane->computeGaussPoints();
+        this->plate->computeGaussPoints();
+    }
     virtual void computeStressVector(FloatArray &answer, const FloatArray &strain, GaussPoint *gp, TimeStep *tStep)
     { _error("TR_SHELL01 :: computeStressVector: calling of this function is not allowed"); }
     virtual void computeBodyLoadVectorAt(FloatArray &answer, Load *forLoad, TimeStep *tStep, ValueModeType mode)

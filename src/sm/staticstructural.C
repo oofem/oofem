@@ -156,7 +156,7 @@ void StaticStructural :: solveYourself()
     if ( this->isParallel() ) {
  #ifdef __VERBOSE_PARALLEL
         // force equation numbering before setting up comm maps
-        OOFEM_LOG_INFO("[process rank %d] neq is %d\n", this->giveRank(), this->giveNumberOfDomainEquations(EID_MomentumBalance));
+        OOFEM_LOG_INFO( "[process rank %d] neq is %d\n", this->giveRank(), this->giveNumberOfDomainEquations(EID_MomentumBalance) );
  #endif
 
         // set up communication patterns
@@ -205,7 +205,7 @@ void StaticStructural :: solveYourselfAt(TimeStep *tStep)
     FloatArray externalForces(neq);
     externalForces.zero();
     this->assembleVector( externalForces, tStep, EID_MomentumBalance, ExternalForcesVector, VM_Total,
-                          EModelDefaultEquationNumbering(), this->giveDomain(1) );
+                         EModelDefaultEquationNumbering(), this->giveDomain(1) );
 #ifdef __PARALLEL_MODE
     this->updateSharedDofManagers(externalForces, EModelDefaultEquationNumbering(), LoadExchangeTag);
 #endif
@@ -229,7 +229,7 @@ void StaticStructural :: solveYourselfAt(TimeStep *tStep)
                                             tStep);
 
     if ( !( status & NM_Success ) ) {
-        OOFEM_ERROR( "StaticStructural :: solveYourselfAt - No success in solving problem" );
+        OOFEM_ERROR("StaticStructural :: solveYourselfAt - No success in solving problem");
     }
 }
 

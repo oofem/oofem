@@ -72,13 +72,13 @@ protected:
     /// Non-equilibrated scalar measure of the largest strain level.
     double tempKappa;
     /// Second order damage tensor
-	FloatMatrix damage;
-	/// Non-equilibrated second order damage tensor
-	FloatMatrix tempDamage;
-	/// This flag turns into 1 and remains 1 when the trace of the damage tensor is >1 in compression (tr(strainTensor)<0)
-	int flag;
-	int tempFlag;
-    
+    FloatMatrix damage;
+    /// Non-equilibrated second order damage tensor
+    FloatMatrix tempDamage;
+    /// This flag turns into 1 and remains 1 when the trace of the damage tensor is >1 in compression (tr(strainTensor)<0)
+    int flag;
+    int tempFlag;
+
 #ifdef keep_track_of_dissipated_energy
     /// Density of total work done by stresses on strain increments.
     double stressWork;
@@ -92,7 +92,7 @@ protected:
 
 public:
     /// Constructor
-    AnisotropicDamageMaterialStatus(int n, Domain *d, GaussPoint *g);
+    AnisotropicDamageMaterialStatus(int n, Domain * d, GaussPoint * g);
     /// Destructor
     virtual ~AnisotropicDamageMaterialStatus();
 
@@ -105,21 +105,21 @@ public:
     /// Sets the temp scalar measure of the largest strain level to given value.
     void setTempKappa(double newKappa) { tempKappa = newKappa; }
     /// Returns the last equilibrated second order damage tensor.
-//	void giveDamage(FloatMatrix &answer){answer = damage;}
-	FloatMatrix giveDamage(){return damage; }
-	/// Returns the temp. second order damage tensor.
-//	void giveTempDamage(FloatMatrix &answer){answer = tempDamage;}
-	FloatMatrix giveTempDamage(){return tempDamage; }
-	// Assigns temp. damage tensor to given tensor d
-//	void setTempDamage(FloatMatrix &d){tempDamage = d;}
-	void setTempDamage(FloatMatrix d){tempDamage = d;}
-	/// Returns the value of the flag.
-	int giveFlag(){return flag; }
+    //	void giveDamage(FloatMatrix &answer){answer = damage;}
+    FloatMatrix giveDamage() { return damage; }
+    /// Returns the temp. second order damage tensor.
+    //	void giveTempDamage(FloatMatrix &answer){answer = tempDamage;}
+    FloatMatrix giveTempDamage() { return tempDamage; }
+    // Assigns temp. damage tensor to given tensor d
+    //	void setTempDamage(FloatMatrix &d){tempDamage = d;}
+    void setTempDamage(FloatMatrix d) { tempDamage = d; }
+    /// Returns the value of the flag.
+    int giveFlag() { return flag; }
     /// Sets the value of the temporary value of flag.
     void setTempFlag(int newflag) { tempFlag = newflag; }
-	/// Returns the value of the temporary value of flag.
-	int giveTempFlag(){return tempFlag; }
-    
+    /// Returns the value of the temporary value of flag.
+    int giveTempFlag() { return tempFlag; }
+
 
 #ifdef keep_track_of_dissipated_energy
     /// Returns the density of total work of stress on strain increments.
@@ -140,7 +140,7 @@ public:
 
     // definition
     virtual const char *giveClassName() const { return "AnisotropicDamageMaterialModelStatus"; }
-//    virtual classType giveClassID() const { return AnisotropicDamageMaterialStatusClass; }
+    //    virtual classType giveClassID() const { return AnisotropicDamageMaterialStatusClass; }
 
     virtual void initTempStatus();
     virtual void updateYourself(TimeStep *tStep);
@@ -160,7 +160,7 @@ public:
 class AnisotropicDamageMaterial : public StructuralMaterial
 {
 protected:
-    
+
     /// Reference to bulk (undamaged) material
     LinearElasticMaterial *linearElasticMaterial;
     /// Damage parameters A and a, needed to obtain Kappa(trD), according to eq. 33 in the paper mentioned above.
@@ -168,23 +168,23 @@ protected:
     double A;
     /// Damage threshold kappa0, as defined in the paper mentioned above.
     double kappa0;
-	/// Type characterizing the algorithm used to compute equivalent strain measure.
+    /// Type characterizing the algorithm used to compute equivalent strain measure.
     enum EquivStrainType { EST_Unknown, EST_Mazars, EST_Rankine_Smooth, EST_Rankine_Standard, EST_ElasticEnergy, EST_ElasticEnergyPositiveStress, EST_ElasticEnergyPositiveStrain, EST_Mises, EST_Griffith };
     /// Parameter specifying the definition of equivalent strain.
     EquivStrainType equivStrainType;
-    
+
 public:
     /// Constructor
-    AnisotropicDamageMaterial(int n, Domain *d);
+    AnisotropicDamageMaterial(int n, Domain * d);
     /// Destructor
     virtual ~AnisotropicDamageMaterial();
 
     virtual int hasNonLinearBehaviour() { return 1; }
     virtual int hasMaterialModeCapability(MaterialMode mode);
-   
-	// identification and auxiliary functions
+
+    // identification and auxiliary functions
     virtual const char *giveClassName() const { return "AnisotropicDamageMaterial"; }
-//    virtual classType giveClassID() const { return AnisotropicDamageMaterialClass; }
+    //    virtual classType giveClassID() const { return AnisotropicDamageMaterialClass; }
     virtual const char *giveInputRecordName() const { return _IFT_AnisotropicDamageMaterial_Name; }
 
     /// Returns reference to undamaged (bulk) material
@@ -192,18 +192,18 @@ public:
 
 
 
-	// Obtains the proportion of the damage tensor that is needed to get the first eigenvalue equal to the damage threshold
-	double obtainAlpha1(FloatMatrix tempDamageTensor, double deltaLambda, FloatMatrix positiveStrainTensor, double damageThreshold);
-	// Obtains the proportion of the damage tensor that is needed to get the second eigenvalue equal to the damage threshold
-	double obtainAlpha2(FloatMatrix tempDamageTensor, double deltaLambda, FloatMatrix positiveStrainTensor, FloatMatrix ProjMatrix, double damageThreshold);
-	// Obtains the proportion of the damage tensor that is needed to get the third eigenvalue equal to the damage threshold
-	double obtainAlpha3(FloatMatrix tempDamageTensor, double deltaLambda, FloatMatrix positiveStrainTensor, FloatArray vec3, double damageThreshold);
+    // Obtains the proportion of the damage tensor that is needed to get the first eigenvalue equal to the damage threshold
+    double obtainAlpha1(FloatMatrix tempDamageTensor, double deltaLambda, FloatMatrix positiveStrainTensor, double damageThreshold);
+    // Obtains the proportion of the damage tensor that is needed to get the second eigenvalue equal to the damage threshold
+    double obtainAlpha2(FloatMatrix tempDamageTensor, double deltaLambda, FloatMatrix positiveStrainTensor, FloatMatrix ProjMatrix, double damageThreshold);
+    // Obtains the proportion of the damage tensor that is needed to get the third eigenvalue equal to the damage threshold
+    double obtainAlpha3(FloatMatrix tempDamageTensor, double deltaLambda, FloatMatrix positiveStrainTensor, FloatArray vec3, double damageThreshold);
 
-	double checkSymmetry(FloatMatrix matrix);
+    double checkSymmetry(FloatMatrix matrix);
 
-	void correctBigValues(FloatMatrix &matrix);
+    void correctBigValues(FloatMatrix &matrix);
 
-	double computeTraceD(FloatMatrix tempDamageTensor, FloatMatrix strainTensor, GaussPoint *gp);
+    double computeTraceD(FloatMatrix tempDamageTensor, FloatMatrix strainTensor, GaussPoint *gp);
 
     virtual void give3dMaterialStiffnessMatrix(FloatMatrix &answer,
                                                MatResponseMode mode,
@@ -225,9 +225,9 @@ public:
     { this->giveRealStressVector(answer, gp, reducedE, tStep); }
 
     //virtual int giveIPValue(FloatArray &answer, GaussPoint *aGaussPoint, InternalStateType type, TimeStep *atTime);
-	virtual int giveIPValue(FloatArray &answer, GaussPoint *aGaussPoint, InternalStateType type, TimeStep *atTime);
+    virtual int giveIPValue(FloatArray &answer, GaussPoint *aGaussPoint, InternalStateType type, TimeStep *atTime);
 
-//    virtual InternalStateValueType giveIPValueType(InternalStateType type);
+    //    virtual InternalStateValueType giveIPValueType(InternalStateType type);
     //virtual void giveThermalDilatationVector(FloatArray &answer, GaussPoint *, TimeStep *);
 
     /**
@@ -238,7 +238,7 @@ public:
      * @param tStep Time step.
      */
     virtual void computeEquivalentStrain(double &kappa, const FloatArray &strain, GaussPoint *gp, TimeStep *tStep);
-   
+
     virtual IRResultType initializeFrom(InputRecord *ir);
     virtual void giveInputRecord(DynamicInputRecord &input);
 
@@ -260,15 +260,14 @@ protected:
                                        TimeStep *tStep);
 
     virtual void computeDamageTensor(FloatMatrix &answer, GaussPoint *gp,
-            						const FloatArray &totalStrain,
-            						TimeStep *atTime);
+                                     const FloatArray &totalStrain,
+                                     TimeStep *atTime);
 
 
     virtual void computeSecantOperator(FloatMatrix &answer, FloatMatrix strainTensor,
                                        FloatMatrix damageTensor, GaussPoint *gp);
 
-	double computeK(GaussPoint *gp);
-
+    double computeK(GaussPoint *gp);
 };
 } // end namespace oofem
 #endif // anisodamagemodel_h

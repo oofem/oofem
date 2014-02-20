@@ -88,26 +88,26 @@ TR_SHELL01 :: initializeFrom(InputRecord *ir)
 void
 TR_SHELL01 :: postInitialize()
 {
-  StructuralElement::postInitialize();
+    StructuralElement :: postInitialize();
 
-  if ( plate->giveDefaultIntegrationRulePtr()->giveNumberOfIntegrationPoints() != membrane->giveDefaultIntegrationRulePtr()->giveNumberOfIntegrationPoints() ) {
-    OOFEM_ERROR("TR_SHELL01: incompatible integration rules detected");
-  }
+    if ( plate->giveDefaultIntegrationRulePtr()->giveNumberOfIntegrationPoints() != membrane->giveDefaultIntegrationRulePtr()->giveNumberOfIntegrationPoints() ) {
+        OOFEM_ERROR("TR_SHELL01: incompatible integration rules detected");
+    }
 }
 
 void
 TR_SHELL01 :: updateLocalNumbering(EntityRenumberingFunctor &f)
 {
-  StructuralElement::updateLocalNumbering(f);
-  plate->updateLocalNumbering(f);
-  membrane->updateLocalNumbering(f);
+    StructuralElement :: updateLocalNumbering(f);
+    plate->updateLocalNumbering(f);
+    membrane->updateLocalNumbering(f);
 }
 
-void TR_SHELL01 :: setCrossSection(int csIndx) 
-{ 
-  StructuralElement::setCrossSection(csIndx);
-  plate->setCrossSection(csIndx);
-  membrane->setCrossSection(csIndx);
+void TR_SHELL01 :: setCrossSection(int csIndx)
+{
+    StructuralElement :: setCrossSection(csIndx);
+    plate->setCrossSection(csIndx);
+    membrane->setCrossSection(csIndx);
 }
 
 
@@ -236,8 +236,8 @@ TR_SHELL01 :: computeVolumeAround(GaussPoint *gp)
 int
 TR_SHELL01 :: giveIPValue(FloatArray &answer, GaussPoint *gp, InternalStateType type, TimeStep *tStep)
 {
-  if (( type == IST_ShellForceTensor ) || ( type == IST_ShellStrainTensor ) || 
-      ( type == IST_ShellMomentumTensor ) || ( type == IST_ShellCurvatureTensor ) ) {
+    if ( ( type == IST_ShellForceTensor ) || ( type == IST_ShellStrainTensor ) ||
+        ( type == IST_ShellMomentumTensor ) || ( type == IST_ShellCurvatureTensor ) ) {
         FloatArray aux;
         GaussPoint *membraneGP = membrane->giveDefaultIntegrationRulePtr()->getIntegrationPoint(gp->giveNumber() - 1);
         GaussPoint *plateGP = plate->giveDefaultIntegrationRulePtr()->getIntegrationPoint(gp->giveNumber() - 1);
@@ -306,42 +306,42 @@ TR_SHELL01 :: printOutputAt(FILE *file, TimeStep *tStep)
         v.add(aux);
 
         fprintf(file, "  strains    ");
-	// eps_x, eps_y, eps_z, eps_yz, eps_xz, eps_xy (global)
+        // eps_x, eps_y, eps_z, eps_yz, eps_xz, eps_xy (global)
         fprintf( file,
                 " % .4e % .4e % .4e % .4e % .4e % .4e ",
-		 v.at(1), v.at(5), v.at(9),  v.at(6), v.at(3), v.at(2));
- 
-	plate->giveIPValue(v, gp, IST_ShellCurvatureTensor, tStep);
+                v.at(1), v.at(5), v.at(9),  v.at(6), v.at(3), v.at(2) );
+
+        plate->giveIPValue(v, gp, IST_ShellCurvatureTensor, tStep);
         membrane->giveIPValue(aux, membraneGP, IST_ShellCurvatureTensor, tStep);
         v.add(aux);
 
         fprintf(file, "\n              curvatures ");
-	// k_x, k_y, k_z, k_yz, k_xz, k_xy (global)
+        // k_x, k_y, k_z, k_yz, k_xz, k_xy (global)
         fprintf( file,
                 " % .4e % .4e % .4e % .4e % .4e % .4e ",
-		 v.at(1), v.at(5), v.at(9),  v.at(6), v.at(3), v.at(2));
+                v.at(1), v.at(5), v.at(9),  v.at(6), v.at(3), v.at(2) );
 
-	// Forces - Moments
+        // Forces - Moments
         plate->giveIPValue(v, gp, IST_ShellForceTensor, tStep);
         membrane->giveIPValue(aux, membraneGP, IST_ShellForceTensor, tStep);
         v.add(aux);
 
         fprintf(file, "\n              stresses   ");
- 	// n_x, n_y, n_z, v_yz, v_xz, v_xy (global)
+        // n_x, n_y, n_z, v_yz, v_xz, v_xy (global)
         fprintf( file,
                 " % .4e % .4e % .4e % .4e % .4e % .4e ",
-		 v.at(1), v.at(5), v.at(9),  v.at(6), v.at(3), v.at(2));
+                v.at(1), v.at(5), v.at(9),  v.at(6), v.at(3), v.at(2) );
 
         plate->giveIPValue(v, gp, IST_ShellMomentumTensor, tStep);
         membrane->giveIPValue(aux, membraneGP, IST_ShellMomentumTensor, tStep);
         v.add(aux);
 
         fprintf(file, "\n              moments    ");
- 	// m_x, m_y, m_z, m_yz, m_xz, m_xy (global)
+        // m_x, m_y, m_z, m_yz, m_xz, m_xy (global)
         fprintf( file,
                 " % .4e % .4e % .4e % .4e % .4e % .4e ",
-		 v.at(1), v.at(5), v.at(9),  v.at(6), v.at(3), v.at(2));
-  
+                v.at(1), v.at(5), v.at(9),  v.at(6), v.at(3), v.at(2) );
+
         fprintf(file, "\n");
     }
 }

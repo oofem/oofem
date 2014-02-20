@@ -56,8 +56,7 @@
 
 namespace oofem {
 GradDpElement :: GradDpElement()
-{
-}
+{ }
 
 void
 GradDpElement :: setDisplacementLocationArray(IntArray &answer, int nPrimNodes, int nPrimVars, int nSecNodes, int nSecVars)

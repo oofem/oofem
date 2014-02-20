@@ -215,7 +215,7 @@ void IncrementalLinearStatic :: solveYourselfAt(TimeStep *tStep)
     int neq = this->giveNumberOfDomainEquations( 1, EModelDefaultEquationNumbering() );
 
 #ifdef VERBOSE
-    OOFEM_LOG_RELEVANT( "Solving [step number %8d, time %15e, equations %d]\n", tStep->giveNumber(), tStep->giveTargetTime(), neq );
+    OOFEM_LOG_RELEVANT("Solving [step number %8d, time %15e, equations %d]\n", tStep->giveNumber(), tStep->giveTargetTime(), neq);
 #endif
 
     if ( neq == 0 ) { // Allows for fully prescribed/empty problems.
@@ -240,7 +240,7 @@ void IncrementalLinearStatic :: solveYourselfAt(TimeStep *tStep)
                          VM_Total, EModelDefaultEquationNumbering(), this->giveDomain(1) );
 
     loadVector.subtract(internalLoadVector);
-    
+
 #ifdef __PARALLEL_MODE
     this->updateSharedDofManagers(loadVector, EModelDefaultEquationNumbering(), ReactionExchangeTag);
 #endif

@@ -181,7 +181,7 @@ public:
     virtual ~Concrete2();
 
     virtual void giveRealStressVector_PlateLayer(FloatArray &answer, GaussPoint *gp,
-                                      const FloatArray &, TimeStep *tStep);
+                                                 const FloatArray &, TimeStep *tStep);
 
     virtual void givePlateLayerStiffMtrx(FloatMatrix &answer,
                                          MatResponseMode mode,

@@ -1246,9 +1246,9 @@ Concrete2 :: updateStirrups(GaussPoint *gp, FloatArray *strainIncrement)
 
 void
 Concrete2 :: givePlateLayerStiffMtrx(FloatMatrix &answer,
-                                           MatResponseMode rMode,
-                                           GaussPoint *gp,
-                                           TimeStep *tStep)
+                                     MatResponseMode rMode,
+                                     GaussPoint *gp,
+                                     TimeStep *tStep)
 //
 // This material is currently unable compute material stiffness
 // so it uses slave material (linearElasticMaterial ) to perform this work

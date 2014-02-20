@@ -299,18 +299,18 @@ CCTPlate3d :: giveIPValue(FloatArray &answer, GaussPoint *gp, InternalStateType 
 
         answer.at(1) = globTensor.at(1, 1); //sxForce
         answer.at(2) = globTensor.at(1, 2); //qxyForce
-	answer.at(3) = globTensor.at(1, 3); //qxzForce
-	answer.at(4) = globTensor.at(1, 2); //qxyForce
-	answer.at(5) = globTensor.at(2, 2); //syForce
-	answer.at(6) = globTensor.at(2, 3); //syzForce
-	answer.at(7) = globTensor.at(1, 3); //qxzForce
+        answer.at(3) = globTensor.at(1, 3); //qxzForce
+        answer.at(4) = globTensor.at(1, 2); //qxyForce
+        answer.at(5) = globTensor.at(2, 2); //syForce
+        answer.at(6) = globTensor.at(2, 3); //syzForce
+        answer.at(7) = globTensor.at(1, 3); //qxzForce
         answer.at(8) = globTensor.at(2, 3); //syzForce
         answer.at(9) = 0.0;
 
-	return 1;
+        return 1;
     } else if ( ( type == IST_ShellMomentumTensor ) || ( type == IST_ShellCurvatureTensor ) ) {
         if ( type == IST_ShellMomentumTensor ) {
-	    cht = GlobalMomentumTensor;
+            cht = GlobalMomentumTensor;
         } else {
             cht = GlobalCurvatureTensor;
         }
@@ -318,13 +318,13 @@ CCTPlate3d :: giveIPValue(FloatArray &answer, GaussPoint *gp, InternalStateType 
         this->giveCharacteristicTensor(globTensor, cht, gp, tStep);
 
         answer.at(1)  = globTensor.at(1, 1); //mxForce
-	answer.at(2)  = globTensor.at(1, 2); //mxyForce
-	answer.at(3)  = 0.0;
-	answer.at(4)  = globTensor.at(1, 2); //mxyForce
-	answer.at(5)  = globTensor.at(2, 2); //myForce
-	answer.at(6)  = 0.0;
+        answer.at(2)  = globTensor.at(1, 2); //mxyForce
+        answer.at(3)  = 0.0;
+        answer.at(4)  = globTensor.at(1, 2); //mxyForce
+        answer.at(5)  = globTensor.at(2, 2); //myForce
+        answer.at(6)  = 0.0;
         answer.at(7)  = 0.0;
-	answer.at(8)  = 0.0;
+        answer.at(8)  = 0.0;
         answer.at(9)  = globTensor.at(3, 3); //mzForce
 
         return 1;
@@ -415,20 +415,24 @@ CCTPlate3d :: computeBodyLoadVectorAt(FloatArray &answer, Load *forLoad, TimeSte
 void
 CCTPlate3d :: computeSurfaceNMatrixAt(FloatMatrix &answer, int iSurf, GaussPoint *sgp)
 {
-  int i,j;
-  FloatMatrix ne;
-  this->computeNmatrixAt (* sgp->giveCoordinates(), ne);
+    int i, j;
+    FloatMatrix ne;
+    this->computeNmatrixAt(* sgp->giveCoordinates(), ne);
 
-  answer.resize(6, 18);
-  answer.zero();
-  int ri[]={2,3,4};
-  int ci[]={2,3,4, 8,9,10, 14,15,16};
+    answer.resize(6, 18);
+    answer.zero();
+    int ri[] = {
+        2, 3, 4
+    };
+    int ci[] = {
+        2, 3, 4, 8, 9, 10, 14, 15, 16
+    };
 
-  for (i=0; i<3; i++) {
-    for (j=0; j<9; j++) {
-      answer(ri[i], ci[j]) = ne(i,j);
+    for ( i = 0; i < 3; i++ ) {
+        for ( j = 0; j < 9; j++ ) {
+            answer(ri [ i ], ci [ j ]) = ne(i, j);
+        }
     }
-  }
 }
 
 void
@@ -451,7 +455,6 @@ CCTPlate3d :: giveSurfaceDofMapping(IntArray &answer, int iSurf) const
     } else {
         _error("giveSurfaceDofMapping: wrong surface number");
     }
-
 }
 
 IntegrationRule *
@@ -466,21 +469,21 @@ CCTPlate3d :: GetSurfaceIntegrationRule(int approxOrder)
 double
 CCTPlate3d :: computeSurfaceVolumeAround(GaussPoint *gp, int iSurf)
 {
-  return this->computeVolumeAround (gp);
+    return this->computeVolumeAround(gp);
 }
 
 
 void
 CCTPlate3d :: computeSurfIpGlobalCoords(FloatArray &answer, GaussPoint *gp, int isurf)
 {
-  this-> computeGlobalCoordinates(answer, * gp->giveCoordinates());
+    this->computeGlobalCoordinates( answer, * gp->giveCoordinates() );
 }
 
 
 int
 CCTPlate3d :: computeLoadLSToLRotationMatrix(FloatMatrix &answer, int isurf, GaussPoint *gp)
 {
-  return 0;
+    return 0;
 }
 
 void
@@ -502,33 +505,33 @@ CCTPlate3d :: printOutputAt(FILE *file, TimeStep *tStep)
             fprintf( file, "  GP %2d.%-2d :", i + 1, gp->giveNumber() );
 
             this->giveIPValue(v, gp, IST_ShellStrainTensor, tStep);
-	    fprintf(file, "  strains    ");
-	    // eps_x, eps_y, eps_z, eps_yz, eps_xz, eps_xy (global)
-	    fprintf( file,
-		     " % .4e % .4e % .4e % .4e % .4e % .4e ",
-		     v.at(1), v.at(5), v.at(9),  v.at(6), v.at(3), v.at(2));
+            fprintf(file, "  strains    ");
+            // eps_x, eps_y, eps_z, eps_yz, eps_xz, eps_xy (global)
+            fprintf( file,
+                    " % .4e % .4e % .4e % .4e % .4e % .4e ",
+                    v.at(1), v.at(5), v.at(9),  v.at(6), v.at(3), v.at(2) );
 
-	    this->giveIPValue(v, gp, IST_ShellCurvatureTensor, tStep);
-	    fprintf(file, "\n              curvatures ");
-	    // k_x, k_y, k_z, k_yz, k_xz, k_xy (global)
-	    fprintf( file,
-		     " % .4e % .4e % .4e % .4e % .4e % .4e ",
-		     v.at(1), v.at(5), v.at(9),  v.at(6), v.at(3), v.at(2));
+            this->giveIPValue(v, gp, IST_ShellCurvatureTensor, tStep);
+            fprintf(file, "\n              curvatures ");
+            // k_x, k_y, k_z, k_yz, k_xz, k_xy (global)
+            fprintf( file,
+                    " % .4e % .4e % .4e % .4e % .4e % .4e ",
+                    v.at(1), v.at(5), v.at(9),  v.at(6), v.at(3), v.at(2) );
 
-	    // Forces - Moments
-	    this->giveIPValue(v, gp, IST_ShellForceTensor, tStep);
-	    fprintf(file, "\n              stresses   ");
-	    // n_x, n_y, n_z, v_yz, v_xz, v_xy (global)
-	    fprintf( file,
-		     " % .4e % .4e % .4e % .4e % .4e % .4e ",
-		     v.at(1), v.at(5), v.at(9),  v.at(6), v.at(3), v.at(2));
+            // Forces - Moments
+            this->giveIPValue(v, gp, IST_ShellForceTensor, tStep);
+            fprintf(file, "\n              stresses   ");
+            // n_x, n_y, n_z, v_yz, v_xz, v_xy (global)
+            fprintf( file,
+                    " % .4e % .4e % .4e % .4e % .4e % .4e ",
+                    v.at(1), v.at(5), v.at(9),  v.at(6), v.at(3), v.at(2) );
 
-	    this->giveIPValue(v, gp, IST_ShellMomentumTensor, tStep);
-	    fprintf(file, "\n              moments    ");
-	    // m_x, m_y, m_z, m_yz, m_xz, m_xy (global)
-	    fprintf( file,
-		     " % .4e % .4e % .4e % .4e % .4e % .4e ",
-		     v.at(1), v.at(5), v.at(9),  v.at(6), v.at(3), v.at(2));
+            this->giveIPValue(v, gp, IST_ShellMomentumTensor, tStep);
+            fprintf(file, "\n              moments    ");
+            // m_x, m_y, m_z, m_yz, m_xz, m_xy (global)
+            fprintf( file,
+                    " % .4e % .4e % .4e % .4e % .4e % .4e ",
+                    v.at(1), v.at(5), v.at(9),  v.at(6), v.at(3), v.at(2) );
 
             fprintf(file, "\n");
         }

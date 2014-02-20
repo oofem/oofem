@@ -964,7 +964,7 @@ LayeredCrossSection :: setupIntegrationPoints(IntegrationRule &irule, int npoint
                                              element->giveMaterialMode(), this->layerThicks);
 
 #else
-        int points1 = (int) floor(cbrt( double ( npoints ) ) + 0.5);
+        int points1 = ( int ) floor(cbrt( double ( npoints ) ) + 0.5);
         // If numberOfIntegrationPoints > 0 then use that, otherwise use the element's default.
         return irule.SetUpPointsOnCubeLayers(points1, points1, this->numberOfIntegrationPoints ? numberOfIntegrationPoints : points1,
                                              element->giveMaterialMode(), this->layerThicks);
@@ -1461,6 +1461,7 @@ LayeredCrossSection :: giveIPValue(FloatArray &answer, GaussPoint *gp, InternalS
         }
     } else {
         return CrossSection :: giveIPValue(answer, gp, type, tStep);
+
         ///@todo so far this only works for el where each layer has its own integration rule
         int layer = gp->giveIntegrationRule()->giveNumber();
         return this->giveDomain()->giveMaterial( this->giveLayerMaterial(layer) )->giveIPValue(answer, gp, type, tStep);

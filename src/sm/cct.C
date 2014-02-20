@@ -432,56 +432,55 @@ CCTPlate :: computeLocalCoordinates(FloatArray &answer, const FloatArray &coords
 int
 CCTPlate :: giveIPValue(FloatArray &answer, GaussPoint *gp, InternalStateType type, TimeStep *tStep)
 {
-  FloatArray help;
-  answer.resize(9);
-  if (( type == IST_ShellForceTensor ) || (type == IST_ShellMomentumTensor )) {
+    FloatArray help;
+    answer.resize(9);
+    if ( ( type == IST_ShellForceTensor ) || ( type == IST_ShellMomentumTensor ) ) {
         help = static_cast< StructuralMaterialStatus * >( gp->giveMaterialStatus() )->giveStressVector();
-	if ( type == IST_ShellForceTensor ) {
-	  answer.at(1) = help.at(1); // nx
-	  answer.at(2) = help.at(3); // vxy
-	  answer.at(3) = help.at(7); // vxz
-	  answer.at(4) = help.at(3); // vxy
-	  answer.at(5) = help.at(2); // ny
-	  answer.at(6) = help.at(8); // vyz
-	  answer.at(7) = help.at(7); // vxy
-	  answer.at(8) = help.at(8); // ny
-	  answer.at(9) = 0.0;
-	} else {
-	  answer.at(1) = help.at(4); // mx
-	  answer.at(2) = help.at(6); // mxy
-	  answer.at(3) = 0.0;        // mxz
-	  answer.at(4) = help.at(6); // mxy
-	  answer.at(5) = help.at(5); // my
-	  answer.at(6) = 0.0;        // myz
-	  answer.at(7) = 0.0;        // mzx
-	  answer.at(8) = 0.0;        // mzy
-	  answer.at(9) = 0.0;        // mz
-	}
+        if ( type == IST_ShellForceTensor ) {
+            answer.at(1) = help.at(1); // nx
+            answer.at(2) = help.at(3); // vxy
+            answer.at(3) = help.at(7); // vxz
+            answer.at(4) = help.at(3); // vxy
+            answer.at(5) = help.at(2); // ny
+            answer.at(6) = help.at(8); // vyz
+            answer.at(7) = help.at(7); // vxy
+            answer.at(8) = help.at(8); // ny
+            answer.at(9) = 0.0;
+        } else {
+            answer.at(1) = help.at(4); // mx
+            answer.at(2) = help.at(6); // mxy
+            answer.at(3) = 0.0;      // mxz
+            answer.at(4) = help.at(6); // mxy
+            answer.at(5) = help.at(5); // my
+            answer.at(6) = 0.0;      // myz
+            answer.at(7) = 0.0;      // mzx
+            answer.at(8) = 0.0;      // mzy
+            answer.at(9) = 0.0;      // mz
+        }
         return 1;
-
-    } else if (( type == IST_ShellStrainTensor )  || (type == IST_ShellCurvatureTensor ) ) {
+    } else if ( ( type == IST_ShellStrainTensor )  || ( type == IST_ShellCurvatureTensor ) ) {
         help = static_cast< StructuralMaterialStatus * >( gp->giveMaterialStatus() )->giveStrainVector();
-	if ( type == IST_ShellForceTensor ) {
-	  answer.at(1) = help.at(1); // nx
-	  answer.at(2) = help.at(3); // vxy
-	  answer.at(3) = help.at(7); // vxz
-	  answer.at(4) = help.at(3); // vxy
-	  answer.at(5) = help.at(2); // ny
-	  answer.at(6) = help.at(8); // vyz
-	  answer.at(7) = help.at(7); // vxy
-	  answer.at(8) = help.at(8); // ny
-	  answer.at(9) = 0.0;
-	} else {
-	  answer.at(1) = help.at(4); // mx
-	  answer.at(2) = help.at(6); // mxy
-	  answer.at(3) = 0.0;        // mxz
-	  answer.at(4) = help.at(6); // mxy
-	  answer.at(5) = help.at(5); // my
-	  answer.at(6) = 0.0;        // myz
-	  answer.at(7) = 0.0;        // mzx
-	  answer.at(8) = 0.0;        // mzy
-	  answer.at(9) = 0.0;        // mz
-	}
+        if ( type == IST_ShellForceTensor ) {
+            answer.at(1) = help.at(1); // nx
+            answer.at(2) = help.at(3); // vxy
+            answer.at(3) = help.at(7); // vxz
+            answer.at(4) = help.at(3); // vxy
+            answer.at(5) = help.at(2); // ny
+            answer.at(6) = help.at(8); // vyz
+            answer.at(7) = help.at(7); // vxy
+            answer.at(8) = help.at(8); // ny
+            answer.at(9) = 0.0;
+        } else {
+            answer.at(1) = help.at(4); // mx
+            answer.at(2) = help.at(6); // mxy
+            answer.at(3) = 0.0;      // mxz
+            answer.at(4) = help.at(6); // mxy
+            answer.at(5) = help.at(5); // my
+            answer.at(6) = 0.0;      // myz
+            answer.at(7) = 0.0;      // mzx
+            answer.at(8) = 0.0;      // mzy
+            answer.at(9) = 0.0;      // mz
+        }
         return 1;
     } else {
         return NLStructuralElement :: giveIPValue(answer, gp, type, tStep);
@@ -505,12 +504,12 @@ CCTPlate :: NodalAveragingRecoveryMI_computeNodalValue(FloatArray &answer, int n
                                                        InternalStateType type, TimeStep *tStep)
 {
     GaussPoint *gp;
-    if (( type == IST_ShellForceTensor ) || (type == IST_ShellMomentumTensor ) ||
-	( type == IST_ShellStrainTensor )  || (type == IST_ShellCurvatureTensor ) ) {
-      gp = integrationRulesArray [ 0 ]->getIntegrationPoint(0);
-      this->giveIPValue (answer, gp, type, tStep);
+    if ( ( type == IST_ShellForceTensor ) || ( type == IST_ShellMomentumTensor ) ||
+        ( type == IST_ShellStrainTensor )  || ( type == IST_ShellCurvatureTensor ) ) {
+        gp = integrationRulesArray [ 0 ]->getIntegrationPoint(0);
+        this->giveIPValue(answer, gp, type, tStep);
     } else {
-      answer.clear();
+        answer.clear();
     }
 }
 

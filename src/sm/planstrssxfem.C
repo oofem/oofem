@@ -64,9 +64,9 @@ Interface *
 PlaneStress2dXfem :: giveInterface(InterfaceType it)
 {
     if ( it == XfemElementInterfaceType ) {
-        return static_cast< XfemElementInterface * >( this );
+        return static_cast< XfemElementInterface * >(this);
     } else if ( it == VTKXMLExportModuleElementInterfaceType ) {
-        return static_cast< VTKXMLExportModuleElementInterface * >( this );
+        return static_cast< VTKXMLExportModuleElementInterface * >(this);
     } else {
         return PlaneStress2d :: giveInterface(it);
     }
@@ -76,20 +76,19 @@ PlaneStress2dXfem :: giveInterface(InterfaceType it)
 void
 PlaneStress2dXfem :: computeGaussPoints()
 {
-	if( this->giveDomain()->hasXfemManager() ) {
-		XfemManager *xMan = this->giveDomain()->giveXfemManager();
+    if ( this->giveDomain()->hasXfemManager() ) {
+        XfemManager *xMan = this->giveDomain()->giveXfemManager();
 
-		if ( xMan->isElementEnriched(this) ) {
-			if ( !this->XfemElementInterface_updateIntegrationRule() ) {
-				PlaneStress2d :: computeGaussPoints();
-			}
-		} else   {
-			PlaneStress2d :: computeGaussPoints();
-		}
-	}
-	else {
-		PlaneStress2d :: computeGaussPoints();
-	}
+        if ( xMan->isElementEnriched(this) ) {
+            if ( !this->XfemElementInterface_updateIntegrationRule() ) {
+                PlaneStress2d :: computeGaussPoints();
+            }
+        } else {
+            PlaneStress2d :: computeGaussPoints();
+        }
+    } else   {
+        PlaneStress2d :: computeGaussPoints();
+    }
 }
 
 void PlaneStress2dXfem :: computeBmatrixAt(GaussPoint *gp, FloatMatrix &answer, int li, int ui)
@@ -127,11 +126,10 @@ PlaneStress2dXfem :: giveDofManDofIDMask(int inode, EquationID, IntArray &answer
     // Returns the total id mask of the dof manager = regular id's + enriched id's
     this->giveDofManager(inode)->giveCompleteMasterDofIDArray(answer);
 
-    if(answer.giveSize() == 0) {
-    	// TODO: How do we fix this in a nicer way? /ES
-    	answer.setValues(2, D_u, D_v);
+    if ( answer.giveSize() == 0 ) {
+        // TODO: How do we fix this in a nicer way? /ES
+        answer.setValues(2, D_u, D_v);
     }
-
 }
 
 
@@ -163,18 +161,17 @@ PlaneStress2dXfem :: giveInternalForcesVector(FloatArray &answer, TimeStep *tSte
 Element_Geometry_Type
 PlaneStress2dXfem :: giveGeometryType() const
 {
-	if( this->giveDomain()->hasXfemManager() ) {
-		XfemManager *xMan = this->giveDomain()->giveXfemManager();
-		if ( xMan->isElementEnriched(this) ) {
-			//return EGT_Composite;
-			return EGT_quad_1;
-		} else {
-			return EGT_quad_1;
-		}
-	}
-	else {
-		return EGT_quad_1;
-	}
+    if ( this->giveDomain()->hasXfemManager() ) {
+        XfemManager *xMan = this->giveDomain()->giveXfemManager();
+        if ( xMan->isElementEnriched(this) ) {
+            //return EGT_Composite;
+            return EGT_quad_1;
+        } else {
+            return EGT_quad_1;
+        }
+    } else   {
+        return EGT_quad_1;
+    }
 }
 
 

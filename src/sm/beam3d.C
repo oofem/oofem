@@ -212,8 +212,8 @@ Beam3d :: computeClampedStiffnessMatrix(FloatMatrix &answer,
     for ( int i = 0; i < ir->giveNumberOfIntegrationPoints(); ++i ) {
         GaussPoint *gp = ir->getIntegrationPoint(i);
         this->computeBmatrixAt(gp, B);
-        this->computeConstitutiveMatrixAt(d, rMode, gp, tStep); 
-        double dV = gp->giveWeight() * 0.5*l;
+        this->computeConstitutiveMatrixAt(d, rMode, gp, tStep);
+        double dV = gp->giveWeight() * 0.5 * l;
         DB.beProductOf(d, B);
         answer.plusProductSymmUpper(B, DB, dV);
     }
@@ -429,7 +429,7 @@ Beam3d :: giveInternalForcesVector(FloatArray &answer, TimeStep *tStep, int useU
         ///@todo Pretty sure this won't work for nonlinear problems. I think dofsToCondense should just be replaced by an extra slave node.
         FloatMatrix stiff;
         this->computeClampedStiffnessMatrix(stiff, TangentStiffness, tStep);
-        this->condense(&stiff, NULL, &answer, this->dofsToCondense);
+        this->condense(& stiff, NULL, & answer, this->dofsToCondense);
     }
 #endif
 }

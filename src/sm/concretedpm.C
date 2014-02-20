@@ -495,8 +495,8 @@ ConcreteDPM :: giveRealStressVector(FloatArray &answer,
     // (must be done !!!before!!! the update of strain and stress)
     if ( status->giveEpsLoc() < 0. ) {
         FloatArray strainIncrement, stressIncrement;
-        strainIncrement.beDifferenceOf(strainVector, status->giveStrainVector());
-        stressIncrement.beDifferenceOf(stress, status->giveStressVector());
+        strainIncrement.beDifferenceOf( strainVector, status->giveStrainVector() );
+        stressIncrement.beDifferenceOf( stress, status->giveStressVector() );
         int n = strainIncrement.giveSize();
         double work = strainIncrement.dotProduct(stressIncrement, n);
         //printf(" work : %g\n", work);
