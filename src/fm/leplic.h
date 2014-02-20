@@ -98,9 +98,10 @@ public:
 
     void setTempLineConstant(double tp) { temp_p = tp; }
     void setTempInterfaceNormal(const FloatArray &tg) { temp_normal = tg; }
-    void setTempVolumeFraction(double v) { if ( !permanentVofFlag ) {
-                                               temp_vof = v;
-                                           }
+    void setTempVolumeFraction(double v) {
+        if ( !permanentVofFlag ) {
+            temp_vof = v;
+        }
     }
     void setPermanentVolumeFraction(double v) {
         temp_vof = vof = v;
