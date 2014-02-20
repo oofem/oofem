@@ -250,7 +250,7 @@ Natural2GlobalOrdering :: init(EngngModel *emodel, int di, const UnknownNumberin
 
 #if 0
         OOFEM_LOG_INFO( "[%d]Natural2GlobalOrdering :: init: Send buffer[%d] size %d\n",
-                        myrank, p, sizeToSend(p) );
+                       myrank, p, sizeToSend(p) );
 #endif
     }
 
@@ -340,7 +340,7 @@ Natural2GlobalOrdering :: init(EngngModel *emodel, int di, const UnknownNumberin
         rbuffs [ p ]->resize( rbuffs [ p ]->givePackSize(MPI_INT, 1) * sizeToRecv(p) );
 #if 0
         OOFEM_LOG_INFO( "[%d]Natural2GlobalOrdering :: init: Receive buffer[%d] size %d\n",
-                        myrank, p, sizeToRecv(p) );
+                       myrank, p, sizeToRecv(p) );
 #endif
     }
 

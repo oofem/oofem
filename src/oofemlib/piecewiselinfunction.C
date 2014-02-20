@@ -47,7 +47,7 @@ namespace oofem {
 REGISTER_Function(PiecewiseLinFunction);
 
 PiecewiseLinFunction :: PiecewiseLinFunction(int i, Domain *d) : Function(i, d), dates(), values()
-{}
+{ }
 
 double PiecewiseLinFunction :: evaluateAtTime(double time)
 // Returns the value of the receiver at time 'time'. 'time' should be

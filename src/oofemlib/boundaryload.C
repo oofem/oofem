@@ -129,17 +129,17 @@ BoundaryLoad :: giveInputRecord(DynamicInputRecord &input)
 
 
 double
-BoundaryLoad :: giveProperty(int aProperty, TimeStep* tStep)
+BoundaryLoad :: giveProperty(int aProperty, TimeStep *tStep)
 // Returns the value of the property aProperty (e.g. the area
 // 'A') of the receiver.
 {
     if ( propertyDictionary.includes(aProperty) ) {
-      // check if time fuction registered under the same key
-      if ( propertyTimeFunctDictionary.includes(aProperty) ) {
-	return propertyDictionary.at(aProperty) * domain->giveFunction(propertyTimeFunctDictionary.at(aProperty))->evaluate(tStep, VM_Total);
-      } else {
-        return propertyDictionary.at(aProperty);
-      }
+        // check if time fuction registered under the same key
+        if ( propertyTimeFunctDictionary.includes(aProperty) ) {
+            return propertyDictionary.at(aProperty) * domain->giveFunction( propertyTimeFunctDictionary.at(aProperty) )->evaluate(tStep, VM_Total);
+        } else {
+            return propertyDictionary.at(aProperty);
+        }
     } else {
         _error("give: property not defined");
     }

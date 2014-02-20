@@ -455,8 +455,8 @@ int NonlocalMaterialWTP :: unpackRemoteElements(Domain *d, ProcessCommunicator &
             delete dofman;
         } else {
             d->giveTransactionManager()->addDofManTransaction(DomainTransactionManager :: DTT_ADD,
-							      dofman->giveGlobalNumber(),
-							      dofman);
+                                                              dofman->giveGlobalNumber(),
+                                                              dofman);
         }
     } while ( 1 );
 
@@ -476,7 +476,7 @@ int NonlocalMaterialWTP :: unpackRemoteElements(Domain *d, ProcessCommunicator &
         elem->setParallelMode(Element_remote);
         elem->setPartitionList(_partitions);
         d->giveTransactionManager()->addElementTransaction(DomainTransactionManager :: DTT_ADD,
-							   elem->giveGlobalNumber(), elem);
+                                                           elem->giveGlobalNumber(), elem);
     } while ( 1 );
 
     return 1;

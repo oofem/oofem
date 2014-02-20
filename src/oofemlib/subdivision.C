@@ -3812,7 +3812,7 @@ Subdivision :: createMesh(TimeStep *tStep, int domainNumber, int domainSerNum, D
 #endif
         if ( parent ) {
             // Copy most of the existing parent element:
-            DynamicInputRecord ir(*domain->giveElement(parent));
+            DynamicInputRecord ir( *domain->giveElement ( parent ) );
             ir.setField(* mesh->giveElement(ielem)->giveNodes(), _IFT_Element_nodes);
             ir.giveRecordKeywordField(name);
             elem = classFactory.createElement(name.c_str(), eNum, * dNew);
@@ -3836,7 +3836,7 @@ Subdivision :: createMesh(TimeStep *tStep, int domainNumber, int domainSerNum, D
     int ncrosssect = domain->giveNumberOfCrossSectionModels();
     ( * dNew )->resizeCrossSectionModels(ncrosssect);
     for ( int i = 1; i <= ncrosssect; i++ ) {
-        DynamicInputRecord ir(*domain->giveCrossSection(i));
+        DynamicInputRecord ir( *domain->giveCrossSection ( i ) );
 
         crossSection = classFactory.createCrossSection(name.c_str(), i, * dNew);
         crossSection->initializeFrom(& ir);
@@ -3847,7 +3847,7 @@ Subdivision :: createMesh(TimeStep *tStep, int domainNumber, int domainSerNum, D
     int nmat = domain->giveNumberOfMaterialModels();
     ( * dNew )->resizeMaterials(nmat);
     for ( int i = 1; i <= nmat; i++ ) {
-        DynamicInputRecord ir(*domain->giveMaterial(i));
+        DynamicInputRecord ir( *domain->giveMaterial ( i ) );
 
         mat = classFactory.createMaterial(name.c_str(), i, * dNew);
         mat->initializeFrom(& ir);
@@ -3858,7 +3858,7 @@ Subdivision :: createMesh(TimeStep *tStep, int domainNumber, int domainSerNum, D
     int nbarriers = domain->giveNumberOfNonlocalBarriers();
     ( * dNew )->resizeNonlocalBarriers(nbarriers);
     for ( int i = 1; i <= nbarriers; i++ ) {
-        DynamicInputRecord ir(*domain->giveNonlocalBarrier(i));
+        DynamicInputRecord ir( *domain->giveNonlocalBarrier ( i ) );
 
         barrier = classFactory.createNonlocalBarrier(name.c_str(), i, * dNew);
         barrier->initializeFrom(& ir);
@@ -3869,7 +3869,7 @@ Subdivision :: createMesh(TimeStep *tStep, int domainNumber, int domainSerNum, D
     int nbc = domain->giveNumberOfBoundaryConditions();
     ( * dNew )->resizeBoundaryConditions(nbc);
     for ( int i = 1; i <= nbc; i++ ) {
-        DynamicInputRecord ir(*domain->giveBc(i));
+        DynamicInputRecord ir( *domain->giveBc ( i ) );
 
         bc = classFactory.createBoundaryCondition(name.c_str(), i, * dNew);
         bc->initializeFrom(& ir);
@@ -3880,7 +3880,7 @@ Subdivision :: createMesh(TimeStep *tStep, int domainNumber, int domainSerNum, D
     int nic = domain->giveNumberOfInitialConditions();
     ( * dNew )->resizeInitialConditions(nic);
     for ( int i = 1; i <= nic; i++ ) {
-        DynamicInputRecord ir(*domain->giveIc(i));
+        DynamicInputRecord ir( *domain->giveIc ( i ) );
 
         ic = new InitialCondition(i, *dNew);
         ic->initializeFrom(& ir);
@@ -3891,7 +3891,7 @@ Subdivision :: createMesh(TimeStep *tStep, int domainNumber, int domainSerNum, D
     int nfunc = domain->giveNumberOfFunctions();
     ( * dNew )->resizeFunctions(nfunc);
     for ( int i = 1; i <= nfunc; i++ ) {
-        DynamicInputRecord ir(*domain->giveFunction(i));
+        DynamicInputRecord ir( *domain->giveFunction ( i ) );
         ir.giveRecordKeywordField(name);
 
         func = classFactory.createFunction(name.c_str(), i, * dNew);

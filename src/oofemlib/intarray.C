@@ -46,14 +46,14 @@
 #include <cstdlib>
 #include <cstring>
 #if __cplusplus > 199711L
-#include <memory>
+ #include <memory>
 #endif
 
 #ifdef __PARALLEL_MODE
  #include "combuff.h"
 #endif
 
-#define ALLOC(size) new int[size];
+#define ALLOC(size) new int [ size ];
 
 #define RESIZE(n) \
     { \
@@ -98,7 +98,7 @@ IntArray :: IntArray(int n) :
     // Constructor : creates an array of size n (filled with garbage).
 {
     if ( size ) {
-        values = ALLOC( size );
+        values = ALLOC(size);
         memset( values, 0, size * sizeof( int ) );
     } else {
         values = NULL;
@@ -289,7 +289,7 @@ void IntArray :: resize(int n)
     if ( values ) {
         delete[] values;
     }
-    values = ALLOC( allocatedSize );
+    values = ALLOC(allocatedSize);
     memset( values, 0, allocatedSize * sizeof( int ) );
 #ifdef DEBUG
     if ( !values ) {
@@ -370,8 +370,8 @@ void IntArray :: followedBy(int b, int allocChunk)
     int newSize = size + 1;
 
     if ( newSize > allocatedSize ) {
-        int *newValues = ALLOC( newSize + allocChunk );
-        memset( newValues, 0, (newSize + allocChunk) * sizeof( int ) );
+        int *newValues = ALLOC(newSize + allocChunk);
+        memset( newValues, 0, ( newSize + allocChunk ) * sizeof( int ) );
 
         memcpy( newValues, values, size * sizeof( int ) );
         newValues [ size ] = b;
@@ -597,8 +597,8 @@ int IntArray :: insertSorted(int _val, int allocChunk)
     int *newValues = NULL, *p1, *p2;
 
     if ( newSize > allocatedSize ) { // realocate if needed
-        newValues = ALLOC( newSize + allocChunk );
-        memset( values, 0, (newSize + allocChunk) * sizeof( int ) );
+        newValues = ALLOC(newSize + allocChunk);
+        memset( values, 0, ( newSize + allocChunk ) * sizeof( int ) );
 
         p1 = values;
         p2 = newValues;

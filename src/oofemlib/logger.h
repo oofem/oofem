@@ -70,7 +70,7 @@ public:
     Logger(logLevelType level, FILE * stream);
     ~Logger();
     /// Redirects log output to given file name (with path).
-    void appendlogTo(const std::string &fname);
+    void appendlogTo(const std :: string &fname);
 
     /// Writes the normal log message.
     void writeLogMsg(logLevelType level, const char *format, ...);
@@ -97,9 +97,9 @@ extern OOFEM_EXPORT Logger oofem_errLogger;
  * Log reporting macros
  */
 //@{
-#define OOFEM_LOG_FATAL(...) oofem_errLogger.writeELogMsg(Logger::LOG_LEVEL_FATAL, __FILE__, __LINE__, __VA_ARGS__)
-#define OOFEM_LOG_ERROR(...) oofem_errLogger.writeELogMsg(Logger::LOG_LEVEL_ERROR, __FILE__, __LINE__, __VA_ARGS__)
-#define OOFEM_LOG_WARNING(...) oofem_errLogger.writeELogMsg(Logger::LOG_LEVEL_WARNING, __FILE__, __LINE__, __VA_ARGS__)
+#define OOFEM_LOG_FATAL(...) oofem_errLogger.writeELogMsg(Logger :: LOG_LEVEL_FATAL, __FILE__, __LINE__, __VA_ARGS__)
+#define OOFEM_LOG_ERROR(...) oofem_errLogger.writeELogMsg(Logger :: LOG_LEVEL_ERROR, __FILE__, __LINE__, __VA_ARGS__)
+#define OOFEM_LOG_WARNING(...) oofem_errLogger.writeELogMsg(Logger :: LOG_LEVEL_WARNING, __FILE__, __LINE__, __VA_ARGS__)
 
 #define OOFEM_LOG_FORCED(...) oofem_logger.writeLogMsg(Logger :: LOG_LEVEL_FORCED, __VA_ARGS__)
 #define OOFEM_LOG_RELEVANT(...) oofem_logger.writeLogMsg(Logger :: LOG_LEVEL_RELEVANT, __VA_ARGS__)

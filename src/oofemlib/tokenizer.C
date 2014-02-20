@@ -124,7 +124,7 @@ void Tokenizer :: tokenizeLine(const std :: string &currentLine)
             sList.push_back( this->readStringToken(bpos, currentLine) );
         } else if ( c == '{' ) {
             sList.push_back( this->readStructToken(bpos, currentLine) );
-        } else if (c == '$' ) {
+        } else if ( c == '$' ) {
             sList.push_back( this->readSimpleExpressionToken(bpos, currentLine) );
         } else {
             sList.push_back( this->readSimpleToken(bpos, currentLine) );

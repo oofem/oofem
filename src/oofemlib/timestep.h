@@ -147,8 +147,10 @@ public:
     /// Sets solution step time increment.
     void setTimeIncrement(double newDt) { deltaT = newDt; }
     /// Sets target and intrinsic time to be equal.
-    void setTime(double newt) { targetTime = newt;
-                                intrinsicTime = newt; }
+    void setTime(double newt) {
+        targetTime = newt;
+        intrinsicTime = newt;
+    }
     /// Sets only target time.
     void setTargetTime(double newt) { targetTime = newt; }
     /// Sets only intrinsic time.

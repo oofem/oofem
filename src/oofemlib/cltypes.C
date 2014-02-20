@@ -78,7 +78,7 @@ InternalStateValueType giveInternalStateValueType(InternalStateType type)
     switch ( type ) {
     case IST_StressTensor:
     case IST_StrainTensor:
-    //case IST_CurvatureTensor:
+        //case IST_CurvatureTensor:
     case IST_DamageTensor:
     case IST_DamageInvTensor:
     case IST_PrincipalDamageTensor:

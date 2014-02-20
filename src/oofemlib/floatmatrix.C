@@ -48,7 +48,7 @@
 #include <cstring>
 #include <ostream>
 
-#define ALLOC(size) new double[size];
+#define ALLOC(size) new double [ size ];
 
 #define RESIZE(nr, nc) \
     { \
@@ -188,7 +188,7 @@ FloatMatrix :: FloatMatrix(std :: initializer_list< std :: initializer_list< dou
 
 FloatMatrix &FloatMatrix :: operator = ( std :: initializer_list< std :: initializer_list< double > >mat )
 {
-    RESIZE( (int)mat.begin()->size(), (int)mat.size() );
+    RESIZE( ( int ) mat.begin()->size(), ( int ) mat.size() );
     double *p = this->values;
     for ( auto col : mat ) {
         for ( auto x : col ) {
@@ -1685,47 +1685,48 @@ void FloatMatrix :: beMatrixForm(const FloatArray &aArray)
     }
 }
 
-void FloatMatrix ::changeComponentOrder()
+void FloatMatrix :: changeComponentOrder()
 {
-	// Changes index order between abaqus <-> OOFEM
-//#  ifdef DEBUG
-//	if ( nRows != 6 || nColumns != 6 ) {
-//		OOFEM_ERROR("FloatArray :: :changeComponentOrder : matrix dimension is not 6x6");
-//	}
-//#  endif
+    // Changes index order between abaqus <-> OOFEM
+    //#  ifdef DEBUG
+    //	if ( nRows != 6 || nColumns != 6 ) {
+    //		OOFEM_ERROR("FloatArray :: :changeComponentOrder : matrix dimension is not 6x6");
+    //	}
+    //#  endif
 
-	if( nRows == 6 && nColumns == 6 ) {
-		// This could probably be done more beautifully + efficiently.
+    if ( nRows == 6 && nColumns == 6 ) {
+        // This could probably be done more beautifully + efficiently.
 
-		std::swap(this->at(4,1), this->at(6,1));
+        std :: swap( this->at(4, 1), this->at(6, 1) );
 
-		std::swap(this->at(4,2), this->at(6,2));
+        std :: swap( this->at(4, 2), this->at(6, 2) );
 
-		std::swap(this->at(4,3), this->at(6,3));
+        std :: swap( this->at(4, 3), this->at(6, 3) );
 
-		std::swap(this->at(1,4), this->at(1,6));
-		std::swap(this->at(2,4), this->at(2,6));
-		std::swap(this->at(3,4), this->at(3,6));
-		std::swap(this->at(4,4), this->at(6,6));
-		std::swap(this->at(5,4), this->at(5,6));
-		std::swap(this->at(6,4), this->at(4,6));
+        std :: swap( this->at(1, 4), this->at(1, 6) );
+        std :: swap( this->at(2, 4), this->at(2, 6) );
+        std :: swap( this->at(3, 4), this->at(3, 6) );
+        std :: swap( this->at(4, 4), this->at(6, 6) );
+        std :: swap( this->at(5, 4), this->at(5, 6) );
+        std :: swap( this->at(6, 4), this->at(4, 6) );
 
-		std::swap(this->at(4,5), this->at(6,5));
-	}
-	else if( nRows == 9 && nColumns == 9 ) {
-	    // OOFEM: 			11, 22, 33, 23, 13, 12, 32, 31, 21
-		// UMAT:			11, 22, 33, 12, 13, 23, 32, 21, 31
-		const int abq2oo[9] = {  1,  2,  3,  6,  5,  4,  7,  9,  8};
+        std :: swap( this->at(4, 5), this->at(6, 5) );
+    } else if ( nRows == 9 && nColumns == 9 )    {
+        // OOFEM: 			11, 22, 33, 23, 13, 12, 32, 31, 21
+        // UMAT:			11, 22, 33, 12, 13, 23, 32, 21, 31
+        const int abq2oo [ 9 ] = {
+            1,  2,  3,  6,  5,  4,  7,  9,  8
+        };
 
-		FloatMatrix tmp(9,9);
-		for(int i = 1; i <= 9; i++) {
-			for(int j = 1; j <= 9; j++) {
-				tmp.at(i,j) = this->at( abq2oo[i-1], abq2oo[j-1] );
-			}
-		}
+        FloatMatrix tmp(9, 9);
+        for ( int i = 1; i <= 9; i++ ) {
+            for ( int j = 1; j <= 9; j++ ) {
+                tmp.at(i, j) = this->at(abq2oo [ i - 1 ], abq2oo [ j - 1 ]);
+            }
+        }
 
-		*this = tmp;
-	}
+        * this = tmp;
+    }
 }
 
 

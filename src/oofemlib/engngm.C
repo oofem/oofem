@@ -325,7 +325,7 @@ int EngngModel :: instanciateYourself(DataReader *dr, InputRecord *ir, const cha
 
     fprintf(outputStream, "%s", PRG_HEADER);
     this->startTime = time(NULL);
-    fprintf(outputStream, "\nStarting analysis on: %s\n", ctime(& this->startTime) );
+    fprintf( outputStream, "\nStarting analysis on: %s\n", ctime(& this->startTime) );
 
     fprintf(outputStream, "%s\n", desc);
 
@@ -1195,7 +1195,7 @@ void EngngModel :: assembleVectorFromElements(FloatArray &answer, TimeStep *tSte
 
 
 #ifdef __PARALLEL_MODE
-    ///@todo Checking the chartype is not since there could be some other chartype in the future. We need to try and deal with chartype in a better way. 
+    ///@todo Checking the chartype is not since there could be some other chartype in the future. We need to try and deal with chartype in a better way.
     /// For now, this is the best we can do.
     if ( this->isParallel() && type == InternalForcesVector ) {
         // Copies internal (e.g. Gauss-Point) data from remote elements to make sure they have all information necessary for nonlocal averaging.
@@ -1963,7 +1963,7 @@ EngngModel :: updateSharedDofManagers(FloatArray &answer, const UnknownNumbering
         ArrayWithNumbering tmp;
         tmp.array = & answer;
         tmp.numbering = & s;
-        result &= communicator->packAllData( this, & tmp, & EngngModel :: packDofManagers );
+        result &= communicator->packAllData(this, & tmp, & EngngModel :: packDofManagers);
 
  #ifdef __VERBOSE_PARALLEL
         VERBOSEPARALLEL_PRINT( "EngngModel :: updateSharedDofManagers", "Exchange started", this->giveRank() );
@@ -1975,7 +1975,7 @@ EngngModel :: updateSharedDofManagers(FloatArray &answer, const UnknownNumbering
         VERBOSEPARALLEL_PRINT( "EngngModel :: updateSharedDofManagers", "Receiving and unpacking", this->giveRank() );
  #endif
 
-        result &= communicator->unpackAllData( this, & tmp, & EngngModel :: unpackDofManagers );
+        result &= communicator->unpackAllData(this, & tmp, & EngngModel :: unpackDofManagers);
         result &= communicator->finishExchange();
     }
 
@@ -2070,7 +2070,7 @@ int
 EngngModel :: packDofManagers(ArrayWithNumbering *srcData, ProcessCommunicator &processComm)
 {
     FloatArray *src = srcData->array;
-    const UnknownNumberingScheme &s = *srcData->numbering;
+    const UnknownNumberingScheme &s = * srcData->numbering;
     int result = 1;
     Domain *domain = this->giveDomain(1);
     IntArray const *toSendMap = processComm.giveToSendMap();
@@ -2100,7 +2100,7 @@ int
 EngngModel :: unpackDofManagers(ArrayWithNumbering *destData, ProcessCommunicator &processComm)
 {
     FloatArray *dest = destData->array;
-    const UnknownNumberingScheme &s = *destData->numbering;
+    const UnknownNumberingScheme &s = * destData->numbering;
     int result = 1;
     Domain *domain = this->giveDomain(1);
     IntArray const *toRecvMap = processComm.giveToRecvMap();

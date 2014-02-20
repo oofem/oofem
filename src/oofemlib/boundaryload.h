@@ -166,7 +166,7 @@ public:
      * See cltypes.h file for details.
      */
     virtual bcType giveType() const { return lType; }
-    virtual double giveProperty(int aProperty, TimeStep* tStep);
+    virtual double giveProperty(int aProperty, TimeStep *tStep);
 
 protected:
     /**

@@ -45,22 +45,21 @@
 #include <sstream>
 
 namespace oofem {
-
-DynamicInputRecord* CreateNodeIR(int i, InputFieldType nodeType, const FloatArray& coord)
+DynamicInputRecord *CreateNodeIR(int i, InputFieldType nodeType, const FloatArray &coord)
 {
-     DynamicInputRecord* result = new DynamicInputRecord(nodeType, i);
-     result->setField(coord, _IFT_Node_coords);
-     return result;
+    DynamicInputRecord *result = new DynamicInputRecord(nodeType, i);
+    result->setField(coord, _IFT_Node_coords);
+    return result;
 }
 
-DynamicInputRecord* CreateElementIR(int i, InputFieldType elementType, const IntArray& nodes, int cs)
+DynamicInputRecord *CreateElementIR(int i, InputFieldType elementType, const IntArray &nodes, int cs)
 {
-     DynamicInputRecord* result = new DynamicInputRecord(elementType, i);
-     result->setField(nodes, _IFT_Element_nodes);
-     if ( cs != 0 ) {
+    DynamicInputRecord *result = new DynamicInputRecord(elementType, i);
+    result->setField(nodes, _IFT_Element_nodes);
+    if ( cs != 0 ) {
         result->setField(cs, _IFT_Element_crosssect);
-     }
-     return result;
+    }
+    return result;
 }
 
 
@@ -95,7 +94,7 @@ DynamicInputRecord :: DynamicInputRecord(FEMComponent &femc) : InputRecord(),
     dictionaryRecord(),
     rangeRecord()
 {
-    femc.giveInputRecord(*this);
+    femc.giveInputRecord(* this);
 }
 
 DynamicInputRecord :: DynamicInputRecord(const DynamicInputRecord &src) : InputRecord(src),

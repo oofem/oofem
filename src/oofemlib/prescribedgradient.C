@@ -133,10 +133,9 @@ void PrescribedGradient :: updateCoefficientMatrix(FloatMatrix &C)
     int nsd = domain->giveNumberOfSpatialDimensions();
     int npeq = domain->giveEngngModel()->giveNumberOfDomainEquations( domain->giveNumber(), EModelDefaultPrescribedEquationNumbering() );
     if ( nsd == 2 ) {
-    	C.resize(npeq, 4);
-    }
-    else {
-    	C.resize(npeq, nsd * ( nsd + 1 ) / 2);
+        C.resize(npeq, 4);
+    } else   {
+        C.resize(npeq, nsd * ( nsd + 1 ) / 2);
     }
     C.zero();
 

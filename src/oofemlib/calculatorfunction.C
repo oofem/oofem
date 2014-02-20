@@ -76,18 +76,18 @@ CalculatorFunction :: evaluate(FloatArray &answer, std :: map< std :: string, Fu
 
     std :: ostringstream buff;
     //for (auto val : valDict) {
-    for (std :: map< std :: string, FunctionArgument > :: iterator val = valDict.begin(); val != valDict.end(); ++val) {
+    for ( std :: map< std :: string, FunctionArgument > :: iterator val = valDict.begin(); val != valDict.end(); ++val ) {
         const FunctionArgument &arg = val->second;
-        if ( arg.type == FunctionArgument::FAT_double ) {
+        if ( arg.type == FunctionArgument :: FAT_double ) {
             buff << val->first << "=" << arg.val0 << ";";
-        } else if ( arg.type == FunctionArgument::FAT_FloatArray ) {
-            for (int i = 1; i <= arg.val1.giveSize(); ++i) {
+        } else if ( arg.type == FunctionArgument :: FAT_FloatArray ) {
+            for ( int i = 1; i <= arg.val1.giveSize(); ++i ) {
                 buff << val->first << i << "=" << arg.val1.at(i) << ";";
             }
-        } else if ( arg.type == FunctionArgument::FAT_int ) {
+        } else if ( arg.type == FunctionArgument :: FAT_int ) {
             buff << val->first << "=" << arg.val2 << ";";
-        } else if ( arg.type == FunctionArgument::FAT_IntArray ) {
-            for (int i = 1; i <= arg.val3.giveSize(); ++i) {
+        } else if ( arg.type == FunctionArgument :: FAT_IntArray ) {
+            for ( int i = 1; i <= arg.val3.giveSize(); ++i ) {
                 buff << val->first << i << "=" << arg.val3.at(i) << ";";
             }
         }

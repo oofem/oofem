@@ -156,7 +156,7 @@ FEI2dTrQuad :: global2local(FloatArray &answer, const FloatArray &gcoords, const
 {
     FloatArray res, delta, guess, lcoords_guess;
     FloatMatrix jac, jacT;
-    double convergence_limit, error=0.0;
+    double convergence_limit, error = 0.0;
 
     // find a suitable convergence limit
     convergence_limit = 1e-6 * this->giveCharacteristicLength(cellgeo);
