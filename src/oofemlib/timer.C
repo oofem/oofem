@@ -106,7 +106,6 @@ void Timer :: initTimer()
 double Timer :: getUtime()
 {
     this->updateElapsedTime();
-    //return ( double ) elapsedUTime.tv_sec + ( double ) elapsedUTime.tv_usec * 1.e-6;
     return elapsedUTime.count();
 }
 
