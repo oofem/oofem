@@ -151,8 +151,8 @@ public:
      * @param aProperty id of property requested
      * @return property value
      */
-    virtual double giveProperty(int aProperty) { OOFEM_ERROR("Load :: giveProperty - Not supported for this boundary condition.");
-                                                 return 0; }
+    virtual double giveProperty(int aProperty, TimeStep* tStep) { OOFEM_ERROR("Load :: giveProperty - Not supported for this boundary condition.");
+      return 0; }
 
     virtual IRResultType initializeFrom(InputRecord *ir);
     virtual void giveInputRecord(DynamicInputRecord &input);

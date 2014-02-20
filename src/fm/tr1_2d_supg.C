@@ -603,7 +603,7 @@ TR1_2D_SUPG :: computeSlipWithFrictionBCTerm_MB(FloatMatrix &answer, Load *load,
     //beta
     //area
     BoundaryLoad *edgeLoad = static_cast< BoundaryLoad * >(load);
-    beta = edgeLoad->giveProperty('a');
+    beta = edgeLoad->giveProperty('a', tStep);
     node1 = side;
     node2 = ( node1 == 3 ? 1 : node1 + 1 );
 
@@ -699,7 +699,7 @@ TR1_2D_SUPG :: computePenetrationWithResistanceBCTerm_MB(FloatMatrix &answer, Lo
     answer.zero();
 
     BoundaryLoad *edgeLoad = static_cast< BoundaryLoad * >(load);
-    alpha = edgeLoad->giveProperty('a');
+    alpha = edgeLoad->giveProperty('a', tStep);
     node1 = side;
     node2 = ( node1 == 3 ? 1 : node1 + 1 );
 

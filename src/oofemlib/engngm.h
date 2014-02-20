@@ -266,8 +266,6 @@ protected:
     problemScale pScale;
     /// Solution start time.
     time_t startTime;
-    // initial value of processor time used by program
-    // clock_t startClock;
 
     /// Master e-model; if defined receiver is in maintained (slave) mode.
     EngngModel *master;
