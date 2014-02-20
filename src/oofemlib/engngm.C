@@ -325,8 +325,7 @@ int EngngModel :: instanciateYourself(DataReader *dr, InputRecord *ir, const cha
 
     fprintf(outputStream, "%s", PRG_HEADER);
     this->startTime = time(NULL);
-    //this->startClock= this-> getClock();
-    fprintf( outputStream, "\nStarting analysis on: %s\n", ctime(& this->startTime) );
+    fprintf(outputStream, "\nStarting analysis on: %s\n", ctime(& this->startTime) );
 
     fprintf(outputStream, "%s\n", desc);
 
@@ -1815,8 +1814,6 @@ EngngModel :: terminateAnalysis()
     fprintf(out, "Real time consumed: %03dh:%02dm:%02ds\n", nhrs, nmin, nsec);
     OOFEM_LOG_FORCED("\n\nANALYSIS FINISHED\n\n\n");
     OOFEM_LOG_FORCED("Real time consumed: %03dh:%02dm:%02ds\n", nhrs, nmin, nsec);
-    // compute processor time used by the program
-    // nsec = (endClock - startClock) / CLOCKS_PER_SEC;
     tsec = this->timer.getUtime(EngngModelTimer :: EMTT_AnalysisTimer);
     this->timer.convert2HMS(nhrs, nmin, nsec, tsec);
     fprintf(out, "User time consumed: %03dh:%02dm:%02ds\n\n\n", nhrs, nmin, nsec);
