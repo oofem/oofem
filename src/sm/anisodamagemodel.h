@@ -77,6 +77,7 @@ protected:
 	FloatMatrix tempDamage;
 	/// This flag turns into 1 and remains 1 when the trace of the damage tensor is >1 in compression (tr(strainTensor)<0)
 	int flag;
+	int tempFlag;
     
 #ifdef keep_track_of_dissipated_energy
     /// Density of total work done by stresses on strain increments.
@@ -112,10 +113,12 @@ public:
 	// Assigns temp. damage tensor to given tensor d
 //	void setTempDamage(FloatMatrix &d){tempDamage = d;}
 	void setTempDamage(FloatMatrix d){tempDamage = d;}
-    /// Sets the value of the flag.
-    void setFlag(int newflag) { flag = newflag; }
 	/// Returns the value of the flag.
 	int giveFlag(){return flag; }
+    /// Sets the value of the temporary value of flag.
+    void setTempFlag(int newflag) { tempFlag = newflag; }
+	/// Returns the value of the temporary value of flag.
+	int giveTempFlag(){return tempFlag; }
     
 
 #ifdef keep_track_of_dissipated_energy
@@ -196,6 +199,10 @@ public:
 	// Obtains the proportion of the damage tensor that is needed to get the third eigenvalue equal to the damage threshold
 	double obtainAlpha3(FloatMatrix tempDamageTensor, double deltaLambda, FloatMatrix positiveStrainTensor, FloatArray vec3, double damageThreshold);
 
+	double checkSymmetry(FloatMatrix matrix);
+
+	void correctBigValues(FloatMatrix &matrix);
+
 	double computeTraceD(FloatMatrix tempDamageTensor, FloatMatrix strainTensor, GaussPoint *gp);
 
     virtual void give3dMaterialStiffnessMatrix(FloatMatrix &answer,
@@ -251,6 +258,11 @@ protected:
     virtual void give1dStressStiffMtrx(FloatMatrix &answer, MatResponseMode mmode,
                                        GaussPoint *gp,
                                        TimeStep *tStep);
+
+    virtual void computeDamageTensor(FloatMatrix &answer, GaussPoint *gp,
+            						const FloatArray &totalStrain,
+            						TimeStep *atTime);
+
 
     virtual void computeSecantOperator(FloatMatrix &answer, FloatMatrix strainTensor,
                                        FloatMatrix damageTensor, GaussPoint *gp);
