@@ -90,10 +90,11 @@ ZZErrorEstimator :: estimateError(EE_ErrorMode mode, TimeStep *tStep)
     oldSmoother = this->domain->giveSmoother();
     this->domain->setSmoother(rm, 0); // do not delete old one
 
-    // set recovery mode
-    rm->setRecoveryMode( -1, IntArray() );
-    // recover nodal values
-    rm->recoverValues(type, tStep);
+    // create a new set containing all elements
+    Set elemSet(0, this->domain);
+    elemSet.addAllElements();
+    // recover nodal values on entire elemSet (domain)
+    rm->recoverValues(elemSet, type, tStep);
 
 #ifdef ZZErrorEstimator_ElementResultCashed
     this->eNorms.resize(nelems);
@@ -259,8 +260,8 @@ ZZErrorEstimatorInterface :: ZZErrorEstimatorI_computeElementContributions(doubl
     nDofMans = elem->giveNumberOfDofManagers();
     // assemble nodal recovered stresses
     for ( int i = 1; i <= elem->giveNumberOfNodes(); i++ ) {
-        elem->giveDomain()->giveSmoother()->giveNodalVector( recoveredStress, elem->giveDofManager(i)->giveNumber(),
-                                                            elem->giveRegionNumber() );
+        elem->giveDomain()->giveSmoother()->giveNodalVector( recoveredStress,
+                                                            elem->giveDofManager(i)->giveNumber() );
         if ( i == 1 ) {
             nodalRecoveredStreses.resize( nDofMans, recoveredStress->giveSize() );
         }

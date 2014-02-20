@@ -52,7 +52,7 @@ MMALeastSquareProjection :: MMALeastSquareProjection() : MaterialMappingAlgorith
 MMALeastSquareProjection :: ~MMALeastSquareProjection() { }
 
 void
-MMALeastSquareProjection :: __init(Domain *dold, IntArray &type, FloatArray &coords, int region, TimeStep *tStep, bool iCohesiveZoneGP)
+MMALeastSquareProjection :: __init(Domain *dold, IntArray &type, FloatArray &coords, Set &elemSet, TimeStep *tStep, bool iCohesiveZoneGP)
 //(Domain* dold, IntArray& varTypes, GaussPoint* gp, TimeStep* tStep)
 {
     GaussPoint *sourceIp;
@@ -66,7 +66,7 @@ MMALeastSquareProjection :: __init(Domain *dold, IntArray &type, FloatArray &coo
 
     this->patchDomain = dold;
     // find the closest IP on old mesh
-    sourceElement = sl->giveElementContainingPoint(coords);
+    sourceElement = sl->giveElementContainingPoint(coords, elemSet);
 
     if ( !sourceElement ) {
         OOFEM_ERROR("MMALeastSquareProjection::__init: no suitable source element found");
@@ -120,7 +120,7 @@ MMALeastSquareProjection :: __init(Domain *dold, IntArray &type, FloatArray &coo
             if ( this->stateFilter ) {
                 element = patchDomain->giveElement( neighborList.at(i) );
                 // exclude elements in different regions
-                if ( this->regionFilter && ( element->giveRegionNumber() != region ) ) {
+                if ( !elemSet.hasElement( element->giveNumber() ) ) {
                     continue;
                 }
 
@@ -145,7 +145,7 @@ MMALeastSquareProjection :: __init(Domain *dold, IntArray &type, FloatArray &coo
             } else { // if (! yhis->stateFilter)
                 element = patchDomain->giveElement( neighborList.at(i) );
                 // exclude elements in different regions
-                if ( this->regionFilter && ( element->giveRegionNumber() != region ) ) {
+                if ( !elemSet.hasElement( element->giveNumber() ) ) {
                     continue;
                 }
 
@@ -161,7 +161,7 @@ MMALeastSquareProjection :: __init(Domain *dold, IntArray &type, FloatArray &coo
     if ( nite > 2 ) {
         // not enough points -> take closest point projection
         patchGPList.clear();
-        sourceIp = sl->giveClosestIP(coords, region);
+        sourceIp = sl->giveClosestIP(coords, elemSet);
         patchGPList.push_front(sourceIp);
         //fprintf(stderr, "MMALeastSquareProjection: too many neighbor search iterations\n");
         //exit (1);

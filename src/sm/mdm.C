@@ -849,8 +849,6 @@ MDM :: initializeFrom(InputRecord *ir)
     OOFEM_LOG_INFO("MDM: using optional mapper %d\n", mapperType);
 #endif
 
-
-
     MicroplaneMaterial :: initializeFrom(ir);
     if ( this->nonlocal ) {
         StructuralNonlocalMaterialExtensionInterface :: initializeFrom(ir);
@@ -1035,7 +1033,7 @@ MDM :: giveRawMDMParameters(double &Efp, double &Ep, const FloatArray &reducedSt
         dir.at(3) = dirs.at(3, indx);
 
         //h  = gp->giveElement()->giveCharacteristicLenght(gp, dir);
-	h  = gp->giveElement()->giveLenghtInDir(dir);
+        h  = gp->giveElement()->giveLenghtInDir(dir);
         double E  = this->giveLinearElasticMaterial()->give(Ex, gp);
         Ep = this->mdm_Ep;
         if ( nsd == 2 ) {
@@ -1193,18 +1191,32 @@ MDM :: MMI_map(GaussPoint *gp, Domain *oldd, TimeStep *tStep)
 
     toMap.at(1) = ( int ) IST_MicroplaneDamageValues;
 
+    // Set up source element set if not set up by user
+    if ( sourceElemSet == NULL ) {
+        sourceElemSet = new Set(0, oldd);
+        IntArray el;
+        // compile source list to contain all elements on old odmain with the same material id
+        for ( int i = 1; i <= oldd->giveNumberOfElements(); i++ ) {
+            if ( oldd->giveElement(i)->giveMaterial()->giveNumber() == this->giveNumber() ) {
+                // add oldd domain element to source list
+                el.followedBy(i, 10);
+            }
+        }
+        sourceElemSet->setElementList(el);
+    }
+
 #ifndef MDM_MAPPING_DEBUG
-    this->mapper.init(oldd, toMap, gp, tStep);
+    this->mapper.init(oldd, toMap, gp, * sourceElemSet, tStep);
     result = mapper.mapVariable(intVal, gp, IST_MicroplaneDamageValues, tStep);
 #else
     if ( mapperType == mdm_cpt ) {
-        this->mapper2.init(oldd, toMap, gp, tStep);
+        this->mapper2.init(oldd, toMap, gp, * sourceElemSet, tStep);
         result = mapper2.mapVariable(intVal, gp, IST_MicroplaneDamageValues, tStep);
     } else if ( mapperType == mdm_sft ) {
-        this->mapperSFT.init(oldd, toMap, gp, tStep);
+        this->mapperSFT.init(oldd, toMap, gp, * sourceElemSet, tStep);
         result = mapperSFT.mapVariable(intVal, gp, IST_MicroplaneDamageValues, tStep);
     } else if ( mapperType == mdm_lst ) {
-        this->mapperLST.init(oldd, toMap, gp, tStep);
+        this->mapperLST.init(oldd, toMap, gp, * sourceElemSet, tStep);
         result = mapperLST.mapVariable(intVal, gp, IST_MicroplaneDamageValues, tStep);
     } else {
         _error("MMI_map: unsupported Mapper id");
@@ -1240,7 +1252,7 @@ MDM :: MMI_map(GaussPoint *gp, Domain *oldd, TimeStep *tStep)
     toMap.resize(2);
     toMap.at(1) = ( int ) IST_StrainTensor;
     toMap.at(2) = ( int ) IST_StressTensor;
-    this->mapper2.init(oldd, toMap, gp, tStep);
+    this->mapper2.init(oldd, toMap, gp, * sourceElemSet, tStep);
 
     result = mapper2.mapVariable(intVal, gp, IST_StressTensor, tStep);
     if ( result ) {

@@ -69,7 +69,7 @@
 namespace oofem {
 REGISTER_ExportModule(VTKXMLExportModule)
 
-VTKXMLExportModule :: VTKXMLExportModule(int n, EngngModel *e) : ExportModule(n, e), internalVarsToExport(), primaryVarsToExport()
+VTKXMLExportModule :: VTKXMLExportModule(int n, EngngModel *e) : ExportModule(n, e), internalVarsToExport(), primaryVarsToExport(), regionSets(), defaultElementSet( 0, e->giveDomain(1) )
 {
     primVarSmoother = NULL;
     smoother = NULL;
@@ -111,13 +111,8 @@ VTKXMLExportModule :: initializeFrom(InputRecord *ir)
     IR_GIVE_OPTIONAL_FIELD(ir, val, _IFT_VTKXMLExportModule_stype); // Macro
     stype = ( NodalRecoveryModel :: NodalRecoveryModelType ) val;
 
-    regionsToSkip.clear();
-    IR_GIVE_OPTIONAL_FIELD(ir, regionsToSkip, _IFT_VTKXMLExportModule_regionstoskip); // Macro
-
-    this->nvr = 0; // number of virtual regions
-    IR_GIVE_OPTIONAL_FIELD(ir, nvr, _IFT_VTKXMLExportModule_nvr); // Macro
-    IR_GIVE_OPTIONAL_FIELD(ir, vrmap, _IFT_VTKXMLExportModule_vrmap); // Macro
-
+    regionSets.resize(0);
+    IR_GIVE_OPTIONAL_FIELD(ir, regionSets, _IFT_VTKXMLExportModule_regionsets); // Macro
     return IRRT_OK;
 }
 
@@ -128,6 +123,14 @@ VTKXMLExportModule :: initialize()
     if ( this->smoother ) {
         delete this->smoother;
         this->smoother = NULL;
+    }
+
+    if ( regionSets.isEmpty() ) {
+        // default: whole domain region
+        regionSets.resize(1);
+        regionSets.at(1) = -1;
+
+        defaultElementSet.addAllElements();
     }
 }
 
@@ -407,12 +410,8 @@ VTKXMLExportModule :: doOutput(TimeStep *tStep, bool forcedOutput)
      * Start default pieces containing all single cell elements. Elements built up from several vtk
      * cells (composite elements) are exported as individual pieces after the default ones.
      */
-    int nPiecesToExport = this->smoother->giveNumberOfVirtualRegions(); //old name: region
+    int nPiecesToExport = this->giveNumberOfRegions(); //old name: region, meaning: sets
     for ( int pieceNum = 1; pieceNum <= nPiecesToExport; pieceNum++ ) {
-        if ( this->regionsToSkip.contains(pieceNum) ) {
-            continue;
-        }
-
         // Fills a data struct (VTKPiece) with all the necessary data.
         this->setupVTKPiece(this->defaultVTKPiece, tStep, pieceNum);
 
@@ -430,19 +429,26 @@ VTKXMLExportModule :: doOutput(TimeStep *tStep, bool forcedOutput)
     int nelem = d->giveNumberOfElements();
 
     for ( int ielem = 1; ielem <= nelem; ielem++ ) {
-        if ( this->regionsToSkip.contains( this->smoother->giveElementVirtualRegionNumber(ielem) ) ) {
-            continue;
-        }
+        el =  d->giveElement(ielem);
+        if ( this->isElementComposite(el) ) {
+            bool proceed = false;
+            for ( int pieceNum = 1; pieceNum <= nPiecesToExport; pieceNum++ ) {
+                // test if element in one of the regions (aka sets)
+                if ( this->giveRegionSet(pieceNum)->hasElement(ielem) ) {
+                    proceed = true;
+                }
+            }
+            if ( !proceed ) {
+                continue;
+            }
 
-        el = d->giveElement(ielem);
 #ifdef __PARALLEL_MODE
-        if ( el->giveParallelMode() != Element_local ) {
-            continue;
-        }
+            if ( el->giveParallelMode() != Element_local ) {
+                continue;
+            }
 
 #endif
 
-        if ( this->isElementComposite(el) ) {
 #ifndef __VTK_MODULE
             this->exportCompositeElement(this->defaultVTKPiece, el, tStep);
             this->writeVTKPiece(this->defaultVTKPiece, tStep);
@@ -655,7 +661,9 @@ VTKXMLExportModule :: setupVTKPiece(VTKPiece &vtkPiece, TimeStep *tStep, int reg
 
         int offset = 0;
         int cellNum = 0;
-        for ( int elNum = 1; elNum <= emodel->giveDomain(1)->giveNumberOfElements(); elNum++ ) {
+        IntArray elems = this->giveRegionSet(region)->giveElementList();
+        for ( int ei = 1; ei <= elems.giveSize(); ei++ ) {
+            int elNum = elems.at(ei);
             elem = d->giveElement(elNum);
 
             // Skip elements that:
@@ -670,11 +678,6 @@ VTKXMLExportModule :: setupVTKPiece(VTKPiece &vtkPiece, TimeStep *tStep, int reg
             }
 
 #endif
-
-            // skip elements not in active region
-            if ( ( region > 0 ) && ( this->smoother->giveElementVirtualRegionNumber(elNum) != region ) ) {
-                continue;
-            }
 
             cellNum++;
 
@@ -951,7 +954,7 @@ VTKXMLExportModule :: exportIntVars(VTKPiece &vtkPiece, IntArray &mapG2L, IntArr
     InternalStateType isType;
     FloatArray answer;
 
-    this->giveSmoother()->init(); // Makes sure smoother is up-to-date with potentially new mesh.
+    this->giveSmoother()->clear(); // Makes sure smoother is up-to-date with potentially new mesh.
 
     // Export of Internal State Type fields
     vtkPiece.setNumberOfInternalVarsToExport(internalVarsToExport.giveSize(), numNodes);
@@ -991,12 +994,12 @@ VTKXMLExportModule :: getNodalVariableFromIS(FloatArray &answer, Node *node, Tim
 {
     // Recovers nodal values from Internal States defined in the integration points.
     // Should return an array with proper size supported by VTK (1, 3 or 9)
-
+    // Domain *d = emodel->giveDomain(1);
     this->giveSmoother();
     IntArray redIndx;
 
     if ( !( type == IST_DisplacementVector || type == IST_MaterialInterfaceVal  ) ) {
-        this->smoother->recoverValues(type, tStep);
+        this->smoother->recoverValues(* this->giveRegionSet(ireg), type, tStep);
     }
 
 
@@ -1019,7 +1022,7 @@ VTKXMLExportModule :: getNodalVariableFromIS(FloatArray &answer, Node *node, Tim
             valueArray.at(1) = mi->giveNodalScalarRepresentation( node->giveNumber() );
         }
     } else {
-        int found = this->smoother->giveNodalVector(val, node->giveNumber(), ireg);
+        int found = this->smoother->giveNodalVector( val, node->giveNumber() );
         if ( !found ) {
             valueArray.resize( redIndx.giveSize() );
             val = & valueArray;
@@ -1295,7 +1298,6 @@ VTKXMLExportModule :: initRegionNodeNumbering(IntArray &regionG2LNodalNumbers,
     // The i-th value contains the corresponding global node number.
 
 
-    int nelem = domain->giveNumberOfElements();
     int nnodes = domain->giveNumberOfDofManagers();
     int elemNodes;
     int elementNode, node;
@@ -1307,11 +1309,10 @@ VTKXMLExportModule :: initRegionNodeNumbering(IntArray &regionG2LNodalNumbers,
     regionDofMans = 0;
     regionSingleCells = 0;
 
-    for ( int ielem = 1; ielem <= nelem; ielem++ ) {
+    IntArray elements = this->giveRegionSet(reg)->giveElementList();
+    for ( int ie = 1; ie <= elements.giveSize(); ie++ ) {
+        int ielem = elements.at(ie);
         element = domain->giveElement(ielem);
-        if ( ( reg > 0 ) && ( this->smoother->giveElementVirtualRegionNumber(ielem) != reg ) ) {
-            continue;
-        }
 
         if ( this->isElementComposite(element) ) {
             continue;                                    // composite cells exported individually
@@ -1372,7 +1373,7 @@ VTKXMLExportModule :: exportPrimaryVars(VTKPiece &vtkPiece, IntArray &mapG2L, In
 {
     Domain *d = emodel->giveDomain(1);
     FloatArray valueArray;
-    this->givePrimVarSmoother()->init(); // Makes sure primary smoother is up-to-date with potentially new mesh.
+    this->givePrimVarSmoother()->clear(); // Makes sure primary smoother is up-to-date with potentially new mesh.
 
     vtkPiece.setNumberOfPrimaryVarsToExport(primaryVarsToExport.giveSize(), numNodes);
     for ( int i = 1, n = primaryVarsToExport.giveSize(); i <= n; i++ ) {
@@ -1454,9 +1455,9 @@ VTKXMLExportModule :: getNodalVariableFromPrimaryField(FloatArray &answer, DofMa
         } else if ( iState == IST_DirectorField ) {
             indx = dman->findDofWithDofId( ( DofIDItem ) dofIDMask.at(j) );
             answer.at(j) = dman->giveDof(indx)->giveUnknown(VM_Total, tStep);
-
-            this->givePrimVarSmoother()->recoverValues(iState, tStep); // recover values if not done before
-            this->givePrimVarSmoother()->giveNodalVector(recoveredVal, dman->giveNumber(), ireg);
+            // recover values if not done before
+            this->givePrimVarSmoother()->recoverValues(* this->giveRegionSet(ireg), iState, tStep);
+            this->givePrimVarSmoother()->giveNodalVector( recoveredVal, dman->giveNumber() );
             if ( size == recoveredVal->giveSize() ) {
                 answer.at(j) = recoveredVal->at(j);
             } else {
@@ -1471,9 +1472,10 @@ VTKXMLExportModule :: getNodalVariableFromPrimaryField(FloatArray &answer, DofMa
             // but equivalent InternalStateType provided
             // in this case use smoother to recover nodal value
 
-            // This can't deal with ValueModeType, and would recover over and over for some vectorial quantities like velocity.
-            this->givePrimVarSmoother()->recoverValues(iState, tStep); // recover values if not done before
-            this->givePrimVarSmoother()->giveNodalVector(recoveredVal, dman->giveNumber(), ireg);
+            // This can't deal with ValueModeType, and would recover over and over for some vectorial quantities like velocity
+            // recover values if not done before.
+            this->givePrimVarSmoother()->recoverValues(* this->giveRegionSet(ireg), iState, tStep);
+            this->givePrimVarSmoother()->giveNodalVector( recoveredVal, dman->giveNumber() );
             // here we have a lack of information about how to convert recovered values to response
             // if the size is compatible we accept it, otherwise give a warning and zero value.
             if ( size == recoveredVal->giveSize() ) {
@@ -1644,9 +1646,8 @@ VTKXMLExportModule :: getCellVariableFromIS(FloatArray &answer, Element *el, Int
                                  0.0);
         } else if ( ncomponents != temp.giveSize() ) { // Trying to gracefully handle bad cases, just output zeros.
             valueArray.resize(9);
-        }
-        else {
-        	valueArray = temp;
+        } else   {
+            valueArray = temp;
         }
 
 #endif
@@ -1728,8 +1729,8 @@ VTKXMLExportModule :: writeVTKCollection()
     current = localtime(& now);
     char buff [ 1024 ];
     std :: string fname;
-    
-    if (tstep_substeps_out_flag){
+
+    if ( tstep_substeps_out_flag ) {
         fname = this->emodel->giveOutputBaseFileName() + ".gp.pvd";
     } else {
         fname = this->emodel->giveOutputBaseFileName() + ".pvd";
@@ -1794,7 +1795,6 @@ VTKXMLExportModule :: giveSmoother()
 
     if ( this->smoother == NULL ) {
         this->smoother = classFactory.createNodalRecoveryModel(this->stype, d);
-        this->smoother->setRecoveryMode(nvr, vrmap);
     }
 
     return this->smoother;
@@ -1808,7 +1808,6 @@ VTKXMLExportModule :: givePrimVarSmoother()
 
     if ( this->primVarSmoother == NULL ) {
         this->primVarSmoother = classFactory.createNodalRecoveryModel(NodalRecoveryModel :: NRM_NodalAveraging, d);
-        this->primVarSmoother->setRecoveryMode(nvr, vrmap);
     }
 
     return this->primVarSmoother;
@@ -1821,7 +1820,6 @@ VTKXMLExportModule :: exportIntVarsInGpAs(IntArray valIDs, TimeStep *tStep)
     Domain *d = emodel->giveDomain(1);
     int nip;
     int j, k, nc = 0;
-    int nelem = d->giveNumberOfElements();
     FloatArray *lc, gc, value;
     FILE *stream;
     InternalStateType isttype;
@@ -1829,7 +1827,7 @@ VTKXMLExportModule :: exportIntVarsInGpAs(IntArray valIDs, TimeStep *tStep)
     std :: string scalars, vectors, tensors;
 
     // output nodes Region By Region
-    int nregions = this->smoother->giveNumberOfVirtualRegions();
+    int nregions = this->giveNumberOfRegions(); // aka sets
     // open output stream
     std :: string outputFileName = this->giveOutputBaseFileName(tStep) + ".gp.vtu";
     if ( ( stream = fopen(outputFileName.c_str(), "w") ) == NULL ) {
@@ -1841,26 +1839,18 @@ VTKXMLExportModule :: exportIntVarsInGpAs(IntArray valIDs, TimeStep *tStep)
 
     /* loop over regions */
     for ( int ireg = 1; ireg <= nregions; ireg++ ) {
-        if ( ( ireg > 0 ) && ( this->regionsToSkip.contains(ireg) ) ) {
-            continue;
-        }
+        IntArray elements = d->giveSet(ireg)->giveElementList();
 
         nip = 0;
-        for ( int ielem = 1; ielem <= nelem; ielem++ ) {
-            if ( d->giveElement(ielem)->giveRegionNumber() != ireg ) {
-                continue;
-            }
-
-            nip += d->giveElement(ielem)->giveDefaultIntegrationRulePtr()->giveNumberOfIntegrationPoints();
+        for ( int i = 1; i <= elements.giveSize(); i++ ) {
+            nip += d->giveElement( elements.at(i) )->giveDefaultIntegrationRulePtr()->giveNumberOfIntegrationPoints();
         }
 
         //Create one cell per each GP
         fprintf(stream, "<Piece NumberOfPoints=\"%d\" NumberOfCells=\"%d\">\n", nip, nip);
         fprintf(stream, "<Points>\n <DataArray type=\"Float64\" NumberOfComponents=\"3\" format=\"ascii\"> ");
-        for ( int ielem = 1; ielem <= nelem; ielem++ ) {
-            if ( d->giveElement(ielem)->giveRegionNumber() != ireg ) {
-                continue;
-            }
+        for ( int i = 1; i <= elements.giveSize(); i++ ) {
+            int ielem = elements.at(i);
 
             int enip = d->giveElement(ielem)->giveDefaultIntegrationRulePtr()->giveNumberOfIntegrationPoints();
             for ( j = 0; j < enip; j++ ) {
@@ -1943,10 +1933,8 @@ VTKXMLExportModule :: exportIntVarsInGpAs(IntArray valIDs, TimeStep *tStep)
             }
 
             fprintf(stream, "  <DataArray type=\"Float64\" Name=\"%s\" NumberOfComponents=\"%d\" format=\"ascii\">", __InternalStateTypeToString(isttype), nc);
-            for ( int ielem = 1; ielem <= nelem; ielem++ ) {
-	        if ( d->giveElement(ielem)->giveRegionNumber() != ireg ) {
-                    continue;
-                }
+            for ( int i = 1; i <= elements.giveSize(); i++ ) {
+                int ielem = elements.at(i);
 
                 nip = d->giveElement(ielem)->giveDefaultIntegrationRulePtr()->giveNumberOfIntegrationPoints();
                 // loop over default IRule gps
@@ -1973,5 +1961,19 @@ VTKXMLExportModule :: exportIntVarsInGpAs(IntArray valIDs, TimeStep *tStep)
     fprintf(stream, "</UnstructuredGrid>\n");
     fprintf(stream, "</VTKFile>\n");
     fclose(stream);
+}
+
+int VTKXMLExportModule :: giveNumberOfRegions() {
+    /// Returns number of regions (aka sets)
+    return this->regionSets.giveSize();
+}
+
+Set *VTKXMLExportModule :: giveRegionSet(int i) {
+    int setid = regionSets.at(i);
+    if ( setid > 0 ) {
+        return emodel->giveDomain(1)->giveSet(setid);
+    } else {
+        return & this->defaultElementSet;
+    }
 }
 } // end namespace oofem

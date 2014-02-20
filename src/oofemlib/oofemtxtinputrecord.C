@@ -407,37 +407,35 @@ OOFEMTXTInputRecord :: giveField(ScalarFunction &answer, InputFieldType id)
         setReadFlag(indx);
         rec = tokenizer.giveToken(++indx);
         if ( * rec == '@' ) {
-            // reference to function 
-	    int refVal;
-	    if ( scanInteger(rec+1, refVal) == 0 ) {
-	      return IRRT_BAD_FORMAT;
-	    }
-        setReadFlag(indx);
-	answer.setReference(refVal);
+            // reference to function
+            int refVal;
+            if ( scanInteger(rec + 1, refVal) == 0 ) {
+                return IRRT_BAD_FORMAT;
+            }
+            setReadFlag(indx);
+            answer.setReference(refVal);
+        } else if ( * rec == '$' ) {
+            // simple expression
+            std :: string expr;
 
-	} else if (* rec == '$' ) {
-	  // simple expression 
-	  std::string expr;
+            expr = std :: string( tokenizer.giveToken(indx) );
+            setReadFlag(indx);
+            std :: string _v = expr.substr(1, expr.size() - 2);
 
-	  expr = std :: string( tokenizer.giveToken(indx) );
-	  setReadFlag(indx);
-	  std::string _v = expr.substr(1,expr.size()-2);
+            answer.setSimpleExpression(_v); // get rid of enclosing '$'
+        } else {
+            double val;
+            if ( scanDouble(tokenizer.giveToken(indx), val) == 0 ) {
+                return IRRT_BAD_FORMAT;
+            }
 
-	  answer.setSimpleExpression(_v); // get rid of enclosing '$'
+            setReadFlag(indx);
+            answer.setValue(val);
+        }
 
-	} else {
-	  double val;
-	  if ( scanDouble(tokenizer.giveToken(indx), val) == 0 ) {
-            return IRRT_BAD_FORMAT;
-	  }
-
-	  setReadFlag(indx);
-	  answer.setValue(val);
-	}
-	  
         return IRRT_OK;
     } else {
-      return IRRT_NOTFOUND;
+        return IRRT_NOTFOUND;
     }
 }
 

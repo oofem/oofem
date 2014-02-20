@@ -83,6 +83,7 @@ IsotropicDamageMaterial1 :: IsotropicDamageMaterial1(int n, Domain *d) : Isotrop
     gf = 0.;
     griff_n = 8.;
     ecsMethod = ECSM_Unknown;
+    sourceElemSet = NULL;
 }
 
 
@@ -90,7 +91,11 @@ IsotropicDamageMaterial1 :: ~IsotropicDamageMaterial1()
 //
 // destructor
 //
-{ }
+{
+    if ( sourceElemSet ) {
+        delete sourceElemSet;
+    }
+}
 
 IRResultType
 IsotropicDamageMaterial1 :: initializeFrom(InputRecord *ir)
@@ -425,9 +430,9 @@ IsotropicDamageMaterial1 :: computeEquivalentStrain(double &kappa, const FloatAr
         kappa1 = sum / lmat->give('E', gp);
         //Compute equivalent strain for Griffith's criterion
         // Check zero division first
-        maxStress = max(fabs(principalStress.at(1)), fabs(principalStress.at(3)));
-        if (maxStress == 0. || fabs(principalStress.at(3))<1.e-6*maxStress || fabs(principalStress.at(1)+principalStress.at(3))<1.e-6*maxStress) {
-	  //Skip evaluation
+        maxStress = max( fabs( principalStress.at(1) ), fabs( principalStress.at(3) ) );
+        if ( maxStress == 0. || fabs( principalStress.at(3) ) < 1.e-6 * maxStress || fabs( principalStress.at(1) + principalStress.at(3) ) < 1.e-6 * maxStress ) {
+            //Skip evaluation
         } else if ( principalStress.at(1) / principalStress.at(3) >= -0.33333 ) {
             kappa2 = -( principalStress.at(1) - principalStress.at(3) ) * ( principalStress.at(1) - principalStress.at(3) ) / this->griff_n / ( principalStress.at(1) + principalStress.at(3) ) / lmat->give('E', gp);
         }
@@ -832,7 +837,7 @@ IsotropicDamageMaterial1 :: damageFunction(double kappa, GaussPoint *gp)
         if ( kappa <= e1 ) {
             return 1.0 - exp( -pow(kappa / e0, md) );
         } else {
-            return 1.0 - s1 *exp( -( kappa - e1 ) / ( ef * ( 1. + pow( ( kappa - e1 ) / e2, nd ) ) ) ) / kappa;
+            return 1.0 - s1 *exp( -( kappa - e1 ) / ( ef * ( 1. + pow ( ( kappa - e1 ) / e2, nd ) ) ) ) / kappa;
         }
 
     default:
@@ -891,7 +896,7 @@ IsotropicDamageMaterial1 :: damageFunctionPrime(double kappa, GaussPoint *gp)
             return exp( -pow(kappa / e0, md) ) * md / pow(e0, md) * pow(kappa, md - 1.);
         } else {
             double a = ( ( ef * ( 1. + pow( ( kappa - e1 ) / e2, nd ) ) ) -  ef * nd * pow( ( kappa - e1 ) / e2, nd ) ) / ( ef * ( 1. + pow( ( kappa - e1 ) / e2, nd ) ) ) / ( ef * ( 1. + pow( ( kappa - e1 ) / e2, nd ) ) );
-            double answer =   s1 * exp( -( kappa - e1 ) / ( ef * ( 1. + pow( ( kappa - e1 ) / e2, nd ) ) ) ) / kappa / kappa +  s1 *exp( -( kappa - e1 ) / ( ef * ( 1. + pow( ( kappa - e1 ) / e2, nd ) ) ) ) / kappa * a;
+            double answer =   s1 * exp( -( kappa - e1 ) / ( ef * ( 1. + pow( ( kappa - e1 ) / e2, nd ) ) ) ) / kappa / kappa +  s1 *exp( -( kappa - e1 ) / ( ef * ( 1. + pow ( ( kappa - e1 ) / e2, nd ) ) ) ) / kappa * a;
             return answer;
         }
     } break;
@@ -1164,7 +1169,23 @@ IsotropicDamageMaterial1 :: MMI_map(GaussPoint *gp, Domain *oldd, TimeStep *tSte
     toMap.at(1) = ( int ) IST_MaxEquivalentStrainLevel;
     toMap.at(2) = ( int ) IST_DamageTensor;
     toMap.at(3) = ( int ) IST_StrainTensor;
-    this->mapper.init(oldd, toMap, gp, tStep);
+
+
+    if ( sourceElemSet == NULL ) {
+        sourceElemSet = new Set(0, oldd);
+        IntArray el;
+        // compile source list to contain all elements on old odmain with the same material id
+        for ( int i = 1; i <= oldd->giveNumberOfElements(); i++ ) {
+            if ( oldd->giveElement(i)->giveMaterial()->giveNumber() == this->giveNumber() ) {
+                // add oldd domain element to source list
+                el.followedBy(i, 10);
+            }
+        }
+        sourceElemSet->setElementList(el);
+    }
+
+    // Set up source element set if not set up by user
+    this->mapper.init(oldd, toMap, gp, * sourceElemSet, tStep);
 
     result = mapper.mapVariable(intVal, gp, IST_MaxEquivalentStrainLevel, tStep);
     if ( result ) {

@@ -42,6 +42,7 @@ class MaterialMappingAlgorithm;
 class GaussPoint;
 class Domain;
 class TimeStep;
+class Set;
 
 /**
  * matstatmapperint.h
@@ -57,6 +58,9 @@ class TimeStep;
  * in the corresponding material status class. Hence, mapping
  * functionality can be implemented for new material models with
  * minimum effort.
+ *
+ * @note bp: this is however renundant to existing MaterialModelMapperInterface (MMI_map, MMI_update),
+ * which is perhaps more flexible (several mapping algorithms, etc).
  *
  * @author Erik Svenning
  *  Created on: Nov 6, 2013
@@ -80,9 +84,9 @@ public:
      * @param iTStep Time step.
      * @return Nonzero if o.k.
      */
-    virtual int MSMI_map(const GaussPoint &iGP, const Domain &iOldDom, const TimeStep &iTStep, MaterialStatus &oStatus);
+    virtual int MSMI_map(const GaussPoint &iGP, const Domain &iOldDom, Set &sourceSet, const TimeStep &iTStep, MaterialStatus &oStatus);
 
-    virtual int MSMI_map(const GaussPoint &iGP, const Domain &iOldDom, const TimeStep &iTStep, StructuralInterfaceMaterialStatus &oStatus);
+    virtual int MSMI_map(const GaussPoint &iGP, const Domain &iOldDom, Set &sourceSet, const TimeStep &iTStep, StructuralInterfaceMaterialStatus &oStatus);
     /**
      * Updates the internal state variables from previously mapped values.
      * @param iGP Integration point belonging to the new domain.
@@ -94,7 +98,6 @@ public:
      * Finishes the mapping for given time step. Used to perform cleanup.
      */
     virtual int MSMI_finish(const TimeStep &iTStep);
-
 
 protected:
     MaterialMappingAlgorithm *mpMaterialMapper;

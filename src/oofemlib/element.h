@@ -831,7 +831,7 @@ public:
      * @param iTStep Time step.
      * @return Nonzero if o.k, otherwise zero.
      */
-    virtual int mapStateVariables(const Domain &iOldDom, const TimeStep &iTStep);
+    virtual int mapStateVariables(Domain &iOldDom, const TimeStep &iTStep);
     /**
      * Updates the internal state variables stored in all IPs according to
      * already mapped state.

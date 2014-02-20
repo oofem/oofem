@@ -46,10 +46,10 @@ MMAClosestIPTransfer :: MMAClosestIPTransfer() : MaterialMappingAlgorithm()
 { }
 
 void
-MMAClosestIPTransfer :: __init(Domain *dold, IntArray &type, FloatArray &coords, int region, TimeStep *tStep, bool iCohesiveZoneGP)
+MMAClosestIPTransfer :: __init(Domain *dold, IntArray &type, FloatArray &coords, Set &elemSet, TimeStep *tStep, bool iCohesiveZoneGP)
 {
     SpatialLocalizer *sl = dold->giveSpatialLocalizer();
-    this->source = sl->giveClosestIP(coords, region, iCohesiveZoneGP);
+    this->source = sl->giveClosestIP(coords, elemSet, iCohesiveZoneGP);
 
     if ( iCohesiveZoneGP ) {
         XfemElementInterface *xFemEl = dynamic_cast< XfemElementInterface * >( source->giveElement() );

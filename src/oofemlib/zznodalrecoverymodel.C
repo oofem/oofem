@@ -60,10 +60,8 @@ ZZNodalRecoveryModel :: ~ZZNodalRecoveryModel()
 { }
 
 int
-ZZNodalRecoveryModel :: recoverValues(InternalStateType type, TimeStep *tStep)
+ZZNodalRecoveryModel :: recoverValues(Set elementSet, InternalStateType type, TimeStep *tStep)
 {
-    int nregions = this->giveNumberOfVirtualRegions();
-    int nelem = domain->giveNumberOfElements();
     int nnodes = domain->giveNumberOfDofManagers();
     IntArray regionNodalNumbers(nnodes);
     // following variable is for better error reporting only
@@ -86,118 +84,114 @@ ZZNodalRecoveryModel :: recoverValues(InternalStateType type, TimeStep *tStep)
     // clear nodal table
     this->clear();
 
-    // loop over regions
-    for ( int ireg = 1; ireg <= nregions; ireg++ ) {
-        int elemNodes;
-        int regionValSize;
-        int regionDofMans;
+    int elemNodes;
+    int regionValSize;
+    int regionDofMans;
 
-        // loop over elements and determine local region node numbering and determine and check nodal values size
-        if ( this->initRegionNodeNumbering(regionNodalNumbers, regionDofMans, ireg) == 0 ) {
-            break;
-        }
+    // loop over elements and determine local region node numbering and determine and check nodal values size
+    if ( this->initRegionNodeNumbering(regionNodalNumbers, regionDofMans, elementSet) == 0 ) {
+        return 0;
+    }
 
-        regionValSize = 0;
-        lhs.resize(regionDofMans);
-        lhs.zero();
-        // assemble element contributions
-        for ( int ielem = 1; ielem <= nelem; ielem++ ) {
-            ZZNodalRecoveryModelInterface *interface;
-            Element *element = domain->giveElement(ielem);
+    regionValSize = 0;
+    lhs.resize(regionDofMans);
+    lhs.zero();
+    IntArray elements = elementSet.giveElementList();
+    // assemble element contributions
+    for ( int i = 1; i <= elements.giveSize(); i++ ) {
+        int ielem = elements.at(i);
+        ZZNodalRecoveryModelInterface *interface;
+        Element *element = domain->giveElement(ielem);
 
 #ifdef __PARALLEL_MODE
-            if ( element->giveParallelMode() != Element_local ) {
-                continue;
-            }
+        if ( element->giveParallelMode() != Element_local ) {
+            continue;
+        }
 
 #endif
-            if ( this->giveElementVirtualRegionNumber(ielem) != ireg ) {
-                continue;
-            }
-
-            // If an element doesn't implement the interface, it is ignored.
-            if ( ( interface = static_cast< ZZNodalRecoveryModelInterface * >( element->giveInterface(ZZNodalRecoveryModelInterfaceType) ) ) == NULL ) {
-                //abort();
-                continue;
-            }
+        // If an element doesn't implement the interface, it is ignored.
+        if ( ( interface = static_cast< ZZNodalRecoveryModelInterface * >( element->giveInterface(ZZNodalRecoveryModelInterfaceType) ) ) == NULL ) {
+            //abort();
+            continue;
+        }
 
 
-            // ask element contributions
-            interface->ZZNodalRecoveryMI_computeNNMatrix(nn, type);
-            interface->ZZNodalRecoveryMI_computeNValProduct(nsig, type, tStep);
-            // assemble contributions
-            elemNodes = element->giveNumberOfDofManagers();
+        // ask element contributions
+        interface->ZZNodalRecoveryMI_computeNNMatrix(nn, type);
+        interface->ZZNodalRecoveryMI_computeNValProduct(nsig, type, tStep);
+        // assemble contributions
+        elemNodes = element->giveNumberOfDofManagers();
 
+        if ( regionValSize == 0 ) {
+            regionValSize = nsig.giveNumberOfColumns();
+            rhs.resize(regionDofMans, regionValSize);
+            rhs.zero();
             if ( regionValSize == 0 ) {
-                regionValSize = nsig.giveNumberOfColumns();
-                rhs.resize(regionDofMans, regionValSize);
-                rhs.zero();
-                if ( regionValSize == 0 ) {
-                    OOFEM_LOG_RELEVANT( "ZZNodalRecoveryModel :: unknown size of InternalStateType %s\n", __InternalStateTypeToString(type) );
-                }
-            } else if ( regionValSize != nsig.giveNumberOfColumns() ) {
-                nsig.resize(regionDofMans, regionValSize);
-                nsig.zero();
-                OOFEM_LOG_RELEVANT( "ZZNodalRecoveryModel :: changing size of for InternalStateType %s. New sized results ignored (this shouldn't happen).\n", __InternalStateTypeToString(type) );
+                OOFEM_LOG_RELEVANT( "ZZNodalRecoveryModel :: unknown size of InternalStateType %s\n", __InternalStateTypeToString(type) );
+            }
+        } else if ( regionValSize != nsig.giveNumberOfColumns() ) {
+            nsig.resize(regionDofMans, regionValSize);
+            nsig.zero();
+            OOFEM_LOG_RELEVANT( "ZZNodalRecoveryModel :: changing size of for InternalStateType %s. New sized results ignored (this shouldn't happen).\n", __InternalStateTypeToString(type) );
+        }
+
+        //loc.resize ((elemNodes+elemSides)*regionValSize);
+        int eq = 1;
+        for ( int elementNode = 1; elementNode <= elemNodes; elementNode++ ) {
+            int node = element->giveDofManager(elementNode)->giveNumber();
+            lhs.at( regionNodalNumbers.at(node) ) += nn.at(eq);
+            for ( int i = 1; i <= regionValSize; i++ ) {
+                rhs.at(regionNodalNumbers.at(node), i) += nsig.at(eq, i);
             }
 
-            //loc.resize ((elemNodes+elemSides)*regionValSize);
-            int eq = 1;
-            for ( int elementNode = 1; elementNode <= elemNodes; elementNode++ ) {
-                int node = element->giveDofManager(elementNode)->giveNumber();
-                lhs.at( regionNodalNumbers.at(node) ) += nn.at(eq);
-                for ( int i = 1; i <= regionValSize; i++ ) {
-                    rhs.at(regionNodalNumbers.at(node), i) += nsig.at(eq, i);
-                }
-
-                eq++;
-            }
-        } // end assemble element contributions
+            eq++;
+        }
+    } // end assemble element contributions
 
 #ifdef __PARALLEL_MODE
-        if ( this->domain->giveEngngModel()->isParallel() ) {
-            this->exchangeDofManValues(ireg, lhs, rhs, regionNodalNumbers);
-        }
+    if ( this->domain->giveEngngModel()->isParallel() ) {
+        this->exchangeDofManValues(lhs, rhs, regionNodalNumbers);
+    }
 #endif
 
-        sol.resize(regionDofMans * regionValSize);
-        sol.zero();
+    sol.resize(regionDofMans * regionValSize);
+    sol.zero();
 
-        bool missingDofManContribution = false;
-        unresolvedDofMans.clear();
-        // solve for recovered values of active region
-        for ( int i = 1; i <= regionDofMans; i++ ) {
-            int eq = ( i - 1 ) * regionValSize;
-            for ( int j = 1; j <= regionValSize; j++ ) {
-                // rhs will be overriden by recovered values
-                if ( fabs( lhs.at(i) ) > ZZNRM_ZERO_VALUE ) {
-                    sol.at(eq + j) = rhs.at(i, j) / lhs.at(i);
-                } else {
-                    missingDofManContribution = true;
-                    unresolvedDofMans.insert( regionNodalNumbers.at(i) );
-                    sol.at(eq + j) = 0.0;
-                }
+    bool missingDofManContribution = false;
+    unresolvedDofMans.clear();
+    // solve for recovered values of active region
+    for ( int i = 1; i <= regionDofMans; i++ ) {
+        int eq = ( i - 1 ) * regionValSize;
+        for ( int j = 1; j <= regionValSize; j++ ) {
+            // rhs will be overriden by recovered values
+            if ( fabs( lhs.at(i) ) > ZZNRM_ZERO_VALUE ) {
+                sol.at(eq + j) = rhs.at(i, j) / lhs.at(i);
+            } else {
+                missingDofManContribution = true;
+                unresolvedDofMans.insert( regionNodalNumbers.at(i) );
+                sol.at(eq + j) = 0.0;
             }
         }
+    }
 
-        // update recovered values
-        this->updateRegionRecoveredValues(ireg, regionNodalNumbers, regionValSize, sol);
+    // update recovered values
+    this->updateRegionRecoveredValues(regionNodalNumbers, regionValSize, sol);
 
-        if ( missingDofManContribution ) {
-            std :: ostringstream msg;
-            int i = 0;
-            for ( std :: set< int > :: const_iterator sit = unresolvedDofMans.begin(); sit != unresolvedDofMans.end(); ++sit ) {
-                msg << * sit << ' ';
-                if ( ++i > 20 ) {
-                    break;
-                }
+    if ( missingDofManContribution ) {
+        std :: ostringstream msg;
+        int i = 0;
+        for ( std :: set< int > :: const_iterator sit = unresolvedDofMans.begin(); sit != unresolvedDofMans.end(); ++sit ) {
+            msg << * sit << ' ';
+            if ( ++i > 20 ) {
+                break;
             }
-            if ( i > 20 ) {
-                msg << "...";
-            }
-            OOFEM_WARNING3( "ZZNodalRecoveryModel::recoverValues: region %d: values of some dofmanagers undetermined\n[%s]", ireg, msg.str().c_str() );
         }
-    } // end loop over regions
+        if ( i > 20 ) {
+            msg << "...";
+        }
+        OOFEM_WARNING( "ZZNodalRecoveryModel::recoverValues: some values of some dofmanagers undetermined\n[%s]", msg.str().c_str() );
+    }
+
 
     this->valType = type;
     this->stateCounter = tStep->giveSolutionStateCounter();
@@ -306,7 +300,7 @@ ZZNodalRecoveryModel :: initCommMaps()
 }
 
 void
-ZZNodalRecoveryModel :: exchangeDofManValues(int ireg, FloatArray &lhs, FloatMatrix &rhs, IntArray &rn)
+ZZNodalRecoveryModel :: exchangeDofManValues(FloatArray &lhs, FloatMatrix &rhs, IntArray &rn)
 {
     EngngModel *emodel = domain->giveEngngModel();
     ProblemCommunicatorMode commMode = emodel->giveProblemCommMode();
@@ -316,7 +310,7 @@ ZZNodalRecoveryModel :: exchangeDofManValues(int ireg, FloatArray &lhs, FloatMat
 
         // exchange data for shared nodes
         communicator->packAllData(this, & ls, & ZZNodalRecoveryModel :: packSharedDofManData);
-        communicator->initExchange(789 + ireg);
+        communicator->initExchange(788);
         communicator->unpackAllData(this, & ls, & ZZNodalRecoveryModel :: unpackSharedDofManData);
         communicator->finishExchange();
     } else {

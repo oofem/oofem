@@ -156,10 +156,15 @@ XFEMStatic :: terminate(TimeStep *tStep)
         xMan->propagateFronts();
     }
 
+
     // Update element subdivisions if necessary
     // (e.g. if a crack has moved and cut a new element)
     for ( int domInd = 1; domInd <= this->giveNumberOfDomains(); domInd++ ) {
         Domain *domain = this->giveDomain(domInd);
+
+        // create a new set containing all elements
+        Set elemSet(0, domain);
+        elemSet.addAllElements();
 
         if ( domain->giveXfemManager()->hasPropagatingFronts() || mForceRemap ) {
             // If domain cloning is performed, there is no need to
@@ -233,7 +238,7 @@ XFEMStatic :: terminate(TimeStep *tStep)
                                     if ( siMatStat == NULL ) {
                                         OOFEM_ERROR("In XFEMStatic :: terminate: Failed to cast to StructuralInterfaceMaterialStatus.\n");
                                     }
-                                    interface->MSMI_map(gp, * domain, * tStep, * siMatStat);
+                                    interface->MSMI_map(gp, * domain, elemSet, * tStep, * siMatStat);
                                 }
                             }
                         }

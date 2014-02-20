@@ -69,12 +69,12 @@ public:
     /// Destructor.
     ~NodalAveragingRecoveryModel();
 
-    int recoverValues(InternalStateType type, TimeStep *tStep);
+    int recoverValues(Set elementSet, InternalStateType type, TimeStep *tStep);
 
 private:
 #ifdef __PARALLEL_MODE
     void initCommMaps();
-    void exchangeDofManValues(int ireg, FloatArray &lhs, IntArray &, IntArray &, int);
+    void exchangeDofManValues(FloatArray &lhs, IntArray &, IntArray &, int);
     int  packSharedDofManData(parallelStruct *s, ProcessCommunicator &processComm);
     int  unpackSharedDofManData(parallelStruct *s, ProcessCommunicator &processComm);
 #endif
