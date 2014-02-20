@@ -40,6 +40,8 @@
 #include "datastream.h"
 #include "contextioerr.h"
 #include "classfactory.h"
+#include "dynamicinputrecord.h"
+
 namespace oofem {
 REGISTER_Material(IntMatBilinearCZElastic);
 
@@ -238,6 +240,17 @@ IntMatBilinearCZElastic :: initializeFrom(InputRecord *ir)
     this->checkConsistency();                                // check validity of the material paramters
     this->printYourself();
     return IRRT_OK;
+}
+
+void IntMatBilinearCZElastic :: giveInputRecord(DynamicInputRecord &input)
+{
+    StructuralInterfaceMaterial :: giveInputRecord(input);
+
+    input.setField(kn0, _IFT_IntMatBilinearCZElastic_kn);
+    input.setField(knc, _IFT_IntMatBilinearCZElastic_knc);
+    input.setField(ks0, _IFT_IntMatBilinearCZElastic_ks);
+    input.setField(GIc, _IFT_IntMatBilinearCZElastic_g1c);
+    input.setField(sigfn, _IFT_IntMatBilinearCZElastic_sigfn);
 }
 
 int
