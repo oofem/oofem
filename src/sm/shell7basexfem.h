@@ -37,7 +37,7 @@
 
 #include "shell7base.h"
 #include "xfemelementinterface.h"
-
+#include "fei3dtrquad.h"
 
 ///@name Input fields for el
 //@{
@@ -57,7 +57,7 @@ class EnrichmentItem;
  * @author Jim Brouzoulis
  * @date 2012-11-01
  */
-
+#define _ExportCZ
 class Shell7BaseXFEM : public Shell7Base, public XfemElementInterface
 {
 protected:
@@ -113,6 +113,8 @@ protected:
 
     // VTK
     virtual void giveCompositeExportData(VTKPiece &vtkPiece, IntArray &primaryVarsToExport, IntArray &internalVarsToExport, IntArray cellVarsToExport, TimeStep *tStep );
+    virtual void giveCZExportData(VTKPiece &vtkPiece, IntArray &primaryVarsToExport, IntArray &internalVarsToExport, IntArray cellVarsToExport, TimeStep *tStep );
+
     virtual void vtkEvalUpdatedGlobalCoordinateAt(FloatArray &localCoords, int layer, FloatArray &globalCoords, TimeStep *tStep);
     void giveDisUnknownsAt(FloatArray &lcoords, EnrichmentItem *ei, FloatArray &solVec, FloatArray &x, FloatArray &m, double gam, TimeStep *tStep);
     IntArray DelaminatedInterfaceList;
@@ -123,9 +125,16 @@ protected:
     std :: vector< Triangle > allTri;
     void giveFictiousNodeCoordsForExport(std::vector<FloatArray> &nodes, int layer, int subCell);
     void giveFictiousUpdatedNodeCoordsForExport(std::vector<FloatArray> &nodes, int layer, TimeStep *tStep, int subCell);
-    void giveLocalNodeCoordsForExport(FloatArray &nodeLocalXi1Coords, FloatArray &nodeLocalXi2Coords, FloatArray &nodeLocalXi3Coords, int subCell);
-    void giveLocalNodeCoordsForExport(FloatArray &nodeLocalXi1Coords, FloatArray &nodeLocalXi2Coords, FloatArray &nodeLocalXi3Coords);
+    void giveFictiousUpdatedCZNodeCoordsForExport(std::vector<FloatArray> &nodes, int layer, TimeStep *tStep, int subCell);
+    void giveLocalNodeCoordsForExport(FloatArray &nodeLocalXi1Coords, FloatArray &nodeLocalXi2Coords, FloatArray &nodeLocalXi3Coords, int subCell, FloatMatrix &localNodeCoords);
+    //void giveLocalNodeCoordsForExport(FloatArray &nodeLocalXi1Coords, FloatArray &nodeLocalXi2Coords, FloatArray &nodeLocalXi3Coords);
     void mapXi3FromLocalToShell(FloatArray &answer, FloatArray &local, int layer);
+#ifdef _ExportCZ
+    FEI3dTrQuad Shell7BaseXFEM :: interpolationForExport;
+#else
+    FEI3dWedgeQuad Shell7BaseXFEM :: interpolationForExport;
+#endif
+
 public:
     Shell7BaseXFEM(int n, Domain *d);
     virtual ~Shell7BaseXFEM() {};

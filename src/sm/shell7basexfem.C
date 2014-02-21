@@ -1707,6 +1707,9 @@ void
 Shell7BaseXFEM :: giveCompositeExportData(VTKPiece &vtkPiece, IntArray &primaryVarsToExport, IntArray &internalVarsToExport, IntArray cellVarsToExport, TimeStep *tStep )
 {
 
+    this->giveCZExportData(vtkPiece, primaryVarsToExport, internalVarsToExport, cellVarsToExport, tStep );
+    return;
+
     int numSubCells = 1;
     if ( this->allTri.size() ) {
         numSubCells = (int)this->allTri.size();
@@ -1715,7 +1718,12 @@ Shell7BaseXFEM :: giveCompositeExportData(VTKPiece &vtkPiece, IntArray &primaryV
     int numLayers = this->layeredCS->giveNumberOfLayers();
     int numCells = numLayers * numSubCells;
     
-    const int numCellNodes  = 15; // quadratic wedge
+    int numCellNodes = 0;
+#ifdef _ExportCZ
+        numCellNodes = 6;   // quadratic triangle
+#else 
+        numCellNodes  = 15; // quadratic wedge
+#endif
     int numTotalNodes = numCellNodes*numCells;
 
     vtkPiece.setNumberOfCells(numCells);
@@ -1756,8 +1764,11 @@ Shell7BaseXFEM :: giveCompositeExportData(VTKPiece &vtkPiece, IntArray &primaryV
             vtkPiece.setOffset(currentCell, offset);
 
             // Cell types
+#ifdef _ExportCZ
+            vtkPiece.setCellType(currentCell, 22); // Quadratic triangle
+#else
             vtkPiece.setCellType(currentCell, 26); // Quadratic wedge
-
+#endif
             currentCell++;
         }
     }
@@ -1876,20 +1887,21 @@ Shell7BaseXFEM :: giveCompositeExportData(VTKPiece &vtkPiece, IntArray &primaryV
             EnrichmentItem *ei = xFemMan->giveEnrichmentItem(enrItIndex);
             int nodeNum = 1;
             for ( int layer = 1; layer <= numLayers; layer++ ) {
-
-
+                FloatMatrix localNodeCoords;
+                
                 for ( int subCell = 1; subCell <= numSubCells; subCell++ ) {
                     FloatArray nodeLocalXi1Coords, nodeLocalXi2Coords, nodeLocalXi3Coords, nodeLocalXi3CoordsMapped;
                     if ( numSubCells == 1) {
-                        giveLocalNodeCoordsForExport(nodeLocalXi1Coords, nodeLocalXi2Coords, nodeLocalXi3Coords);
+                        this->interpolationForExport.giveLocalNodeCoords(localNodeCoords);
                     } else {
-                        giveLocalNodeCoordsForExport(nodeLocalXi1Coords, nodeLocalXi2Coords, nodeLocalXi3Coords, subCell);
+                        giveLocalNodeCoordsForExport(nodeLocalXi1Coords, nodeLocalXi2Coords, nodeLocalXi3Coords, subCell, localNodeCoords);
                     }
                     mapXi3FromLocalToShell(nodeLocalXi3CoordsMapped, nodeLocalXi3Coords, layer);
                     for ( int nodeIndx = 1; nodeIndx <= numCellNodes; nodeIndx++ ) {
 
                         FloatArray lCoords;
-                        lCoords.setValues(3,  nodeLocalXi1Coords.at(nodeIndx), nodeLocalXi2Coords.at(nodeIndx), nodeLocalXi3CoordsMapped.at(nodeIndx));
+                        //lCoords.setValues(3,  nodeLocalXi1Coords.at(nodeIndx), nodeLocalXi2Coords.at(nodeIndx), nodeLocalXi3CoordsMapped.at(nodeIndx));
+                        lCoords.beColumnOf(localNodeCoords, nodeIndx);
                         Node *node = this->giveNode( wedgeToTriMap.at(nodeIndx) );
                         FloatArray valueArray;
                         const FloatArray *val = NULL;
@@ -1929,18 +1941,20 @@ Shell7BaseXFEM :: giveFictiousNodeCoordsForExport(std::vector<FloatArray> &nodes
 
     // compute fictious node coords
     FloatArray nodeLocalXi1Coords, nodeLocalXi2Coords, nodeLocalXi3Coords;
-
+    FloatMatrix localNodeCoords;
     // need to return local coordinates corresponding to the nodes of the sub triangles
-    giveLocalNodeCoordsForExport(nodeLocalXi1Coords, nodeLocalXi2Coords, nodeLocalXi3Coords, subCell);
+    giveLocalNodeCoordsForExport(nodeLocalXi1Coords, nodeLocalXi2Coords, nodeLocalXi3Coords, subCell, localNodeCoords);
 
+    //this->interpolationForExport.giveLocalNodeCoords(localNodeCoords);
 
-    nodes.resize(15);
-    for ( int i = 1; i <= 15; i++ ){
+    nodes.resize(localNodeCoords.giveNumberOfColumns());
+    for ( int i = 1; i <= localNodeCoords.giveNumberOfColumns(); i++ ){
         FloatArray coords, localCoords(3);
         localCoords.at(1) = nodeLocalXi1Coords.at(i);
         localCoords.at(2) = nodeLocalXi2Coords.at(i);
         localCoords.at(3) = nodeLocalXi3Coords.at(i);
-        
+        localCoords.beColumnOf(localNodeCoords,i);
+
         this->vtkEvalInitialGlobalCoordinateAt(localCoords, layer, coords);
         nodes[i-1].resize(3); 
         nodes[i-1] = coords;
@@ -1954,36 +1968,71 @@ Shell7BaseXFEM :: giveFictiousUpdatedNodeCoordsForExport(std::vector<FloatArray>
 {
     // compute fictious node coords
     FloatArray nodeLocalXi1Coords, nodeLocalXi2Coords, nodeLocalXi3Coords;
-    if ( subCell == 0) { 
-        giveLocalNodeCoordsForExport(nodeLocalXi1Coords, nodeLocalXi2Coords, nodeLocalXi3Coords);
 
+    FloatMatrix localNodeCoords;
+
+
+    if ( subCell == 0) { 
+        this->interpolationForExport.giveLocalNodeCoords(localNodeCoords);
         // must get local z-coord in terms of the total thickness not layerwise
         
-
     } else {
-        giveLocalNodeCoordsForExport(nodeLocalXi1Coords, nodeLocalXi2Coords, nodeLocalXi3Coords, subCell);
+        giveLocalNodeCoordsForExport(nodeLocalXi1Coords, nodeLocalXi2Coords, nodeLocalXi3Coords, subCell, localNodeCoords);
     }
-    nodes.resize(15);
-    for ( int i = 1; i <= 15; i++ ){
+    nodes.resize(localNodeCoords.giveNumberOfColumns());
+    for ( int i = 1; i <= localNodeCoords.giveNumberOfColumns(); i++ ){
         FloatArray coords, localCoords(3);
-        localCoords.at(1) = nodeLocalXi1Coords.at(i);
-        localCoords.at(2) = nodeLocalXi2Coords.at(i);
-
+        localCoords.beColumnOf(localNodeCoords, i);
 
         // Map local layer cs to local shell cs
-        double scaleFactor = 0.9999; // Will be numerically unstable with xfem if the endpoints lie at +-1
+        double scaleFactor = 0.9999; // Will be numerically unstable with xfem if the endpoints lie at +-1 - or will it?
         double totalThickness = this->layeredCS->computeIntegralThick();
         double zMid_i = this->layeredCS->giveLayerMidZ(layer); // global z-coord
         double xiMid_i = 1.0 - 2.0 * ( totalThickness - this->layeredCS->giveMidSurfaceZcoordFromBottom() - zMid_i ) / totalThickness; // local z-coord
-        double deltaxi = nodeLocalXi3Coords.at(i) * this->layeredCS->giveLayerThickness(layer) / totalThickness; // distance from layer mid
-        nodeLocalXi3Coords.at(i) = xiMid_i + deltaxi * scaleFactor;
+        double deltaxi = localCoords.at(3) * this->layeredCS->giveLayerThickness(layer) / totalThickness; // distance from layer mid
+        localCoords.at(3) = xiMid_i + deltaxi * scaleFactor;
 
-        localCoords.at(3) = nodeLocalXi3Coords.at(i);
         this->vtkEvalUpdatedGlobalCoordinateAt(localCoords, layer, coords, tStep);
         nodes[i-1].resize(3); 
         nodes[i-1] = coords;
     }
 }
+
+void 
+Shell7BaseXFEM :: giveFictiousUpdatedCZNodeCoordsForExport(std::vector<FloatArray> &nodes, int interface, TimeStep *tStep, int subCell)
+{
+    // compute fictious node coords
+    FloatArray nodeLocalXi1Coords, nodeLocalXi2Coords, nodeLocalXi3Coords;
+
+    FloatMatrix localNodeCoords;
+
+
+    if ( subCell == 0) { 
+        this->interpolationForExport.giveLocalNodeCoords(localNodeCoords);
+        // must get local z-coord in terms of the total thickness not layerwise
+        
+    } else {
+        giveLocalNodeCoordsForExport(nodeLocalXi1Coords, nodeLocalXi2Coords, nodeLocalXi3Coords, subCell, localNodeCoords);
+    }
+    nodes.resize(localNodeCoords.giveNumberOfColumns());
+    for ( int i = 1; i <= localNodeCoords.giveNumberOfColumns(); i++ ){
+        FloatArray coords, localCoords(3);
+        localCoords.beColumnOf(localNodeCoords, i);
+        localCoords.at(3) = 1.0;
+        // Map local layer cs to local shell cs
+        double scaleFactor = 0.9999; // Will be numerically unstable with xfem if the endpoints lie at +-1 - or will it?
+        double totalThickness = this->layeredCS->computeIntegralThick();
+        double zMid_i = this->layeredCS->giveLayerMidZ(interface); // global z-coord
+        double xiMid_i = 1.0 - 2.0 * ( totalThickness - this->layeredCS->giveMidSurfaceZcoordFromBottom() - zMid_i ) / totalThickness; // local z-coord
+        double deltaxi = localCoords.at(3) * this->layeredCS->giveLayerThickness(interface) / totalThickness; // distance from layer mid
+        localCoords.at(3) = xiMid_i + deltaxi * scaleFactor;
+
+        this->vtkEvalUpdatedGlobalCoordinateAt(localCoords, interface, coords, tStep);
+        nodes[i-1].resize(3); 
+        nodes[i-1] = coords;
+    }
+}
+
 
 void
 Shell7BaseXFEM :: mapXi3FromLocalToShell(FloatArray &answer, FloatArray &local, int layer)
@@ -2003,41 +2052,44 @@ Shell7BaseXFEM :: mapXi3FromLocalToShell(FloatArray &answer, FloatArray &local, 
 }
 
 
-void
-Shell7BaseXFEM :: giveLocalNodeCoordsForExport(FloatArray &nodeLocalXi1Coords, FloatArray &nodeLocalXi2Coords, FloatArray &nodeLocalXi3Coords) 
-{
-    // Local coords for a quadratic wedge element (VTK cell type 26)
-    double z = 0.999;
-    nodeLocalXi1Coords.setValues(15, 1., 0., 0., 1., 0., 0., .5, 0., .5, .5, 0., .5, 1., 0., 0.);      
-    nodeLocalXi2Coords.setValues(15, 0., 1., 0., 0., 1., 0., .5, .5, 0., .5, .5, 0., 0., 1., 0.);
-    nodeLocalXi3Coords.setValues(15, -z, -z, -z,  z,  z,  z, -z, -z, -z,  z,  z,  z, 0., 0., 0.);
-}
+//void
+//Shell7BaseXFEM :: giveLocalNodeCoordsForExport(FloatArray &nodeLocalXi1Coords, FloatArray &nodeLocalXi2Coords, FloatArray &nodeLocalXi3Coords) 
+//{
+//    // Local coords for a quadratic wedge element (VTK cell type 26)
+//    double z = 0.999;
+//    nodeLocalXi1Coords.setValues(15, 1., 0., 0., 1., 0., 0., .5, 0., .5, .5, 0., .5, 1., 0., 0.);      
+//    nodeLocalXi2Coords.setValues(15, 0., 1., 0., 0., 1., 0., .5, .5, 0., .5, .5, 0., 0., 1., 0.);
+//    nodeLocalXi3Coords.setValues(15, -z, -z, -z,  z,  z,  z, -z, -z, -z,  z,  z,  z, 0., 0., 0.);
+//}
 
 
 void
-Shell7BaseXFEM :: giveLocalNodeCoordsForExport(FloatArray &nodeLocalXi1Coords, FloatArray &nodeLocalXi2Coords, FloatArray &nodeLocalXi3Coords, int subCell) 
+Shell7BaseXFEM :: giveLocalNodeCoordsForExport(FloatArray &nodeLocalXi1Coords, FloatArray &nodeLocalXi2Coords, FloatArray &nodeLocalXi3Coords, int subCell, FloatMatrix &localNodeCoords) 
 {
     // Local coords for a quadratic wedge element - coords for subtriangles
     double scale = 0.999;
     double z = 1.0*scale;
 
+    // Triangle coordinates
     FloatArray g1, g2, g3;
     g1 = this->allTri[subCell-1].giveVertex(1);
     g2 = this->allTri[subCell-1].giveVertex(2);
     g3 = this->allTri[subCell-1].giveVertex(3);
 
     FloatArray gs1, gs2, gs3;
-    
+    // Move the triangle nodes slightly towards the center to avoid numerical problems - controlled by 'scale' 
     double alpha1 = scale; double alpha2 = (1.0-alpha1)*0.5; double alpha3 = alpha2;
     gs1 = alpha1*g1 + alpha2*g2 + alpha3*g3;
     gs2 = alpha2*g1 + alpha1*g2 + alpha3*g3;
     gs3 = alpha2*g1 + alpha3*g2 + alpha1*g3;
 
+    // Local coordinates for the (scaled) triangle coordinates
     FloatArray loc1, loc2, loc3;
     this->computeLocalCoordinates(loc1, gs1);
     this->computeLocalCoordinates(loc2, gs2);
     this->computeLocalCoordinates(loc3, gs3);
 
+    // Compute coordinates for the three mid nodes 
     FloatArray loc12, loc23, loc31;
     loc12 = 0.5 * (loc1 + loc2);
     loc23 = 0.5 * (loc2 + loc3);
@@ -2059,7 +2111,245 @@ Shell7BaseXFEM :: giveLocalNodeCoordsForExport(FloatArray &nodeLocalXi1Coords, F
     nodeLocalXi2Coords.setValues(15, a, b, c, a, b, c, d, e, f, d, e, f, a, b, c);
 
     nodeLocalXi3Coords.setValues(15, -z, -z, -z,  z,  z,  z, -z, -z, -z,  z,  z,  z, 0., 0., 0.);
+
+    localNodeCoords.resize(3,15);
+    
+
 }
+
+
+
+
+void
+Shell7BaseXFEM :: giveCZExportData(VTKPiece &vtkPiece, IntArray &primaryVarsToExport, IntArray &internalVarsToExport, IntArray cellVarsToExport, TimeStep *tStep )
+{
+
+    int numSubCells = 1;
+    if ( this->allTri.size() ) {
+        numSubCells = (int)this->allTri.size();
+    }
+    
+    int numLayers = this->layeredCS->giveNumberOfLayers()-1;
+    int numCells = numLayers * numSubCells;
+    
+    int numCellNodes = 0;
+#ifdef _ExportCZ
+        numCellNodes = 6;   // quadratic triangle
+#else 
+        numCellNodes  = 15; // quadratic wedge
+#endif
+    int numTotalNodes = numCellNodes*numCells;
+
+    vtkPiece.setNumberOfCells(numCells);
+    vtkPiece.setNumberOfNodes(numTotalNodes);
+
+    std::vector <FloatArray> nodeCoords;
+    int val    = 1;
+    int offset = 0;
+    int currentCell = 1;
+    IntArray nodes(numCellNodes);
+
+    // Compute fictious node coords
+    int nodeNum = 1;
+    for ( int layer = 1; layer <= numLayers; layer++ ) {
+        
+        for ( int subCell = 1; subCell <= numSubCells; subCell++ ) {
+
+            // Node coordinates
+            if ( numSubCells == 1 ) {
+                Shell7Base :: giveFictiousNodeCoordsForExport(nodeCoords, layer); 
+            } else {
+                this->giveFictiousNodeCoordsForExport(nodeCoords, layer, subCell);       
+            }
+        
+            for ( int node = 1; node <= numCellNodes; node++ ) {    
+                vtkPiece.setNodeCoords(nodeNum, nodeCoords[node-1] );
+                nodeNum += 1;
+            }
+
+            // Connectivity       
+            for ( int i = 1; i <= numCellNodes; i++ ) {            
+                nodes.at(i) = val++;
+            }
+            vtkPiece.setConnectivity(currentCell, nodes);
+        
+            // Offset
+            offset += numCellNodes;
+            vtkPiece.setOffset(currentCell, offset);
+
+            // Cell types
+#ifdef _ExportCZ
+            vtkPiece.setCellType(currentCell, 22); // Quadratic triangle
+#else
+            vtkPiece.setCellType(currentCell, 26); // Quadratic wedge
+#endif
+            currentCell++;
+        }
+    }
+
+
+
+
+    // Export nodal variables from primary fields        
+    vtkPiece.setNumberOfPrimaryVarsToExport(primaryVarsToExport.giveSize(), numTotalNodes);
+
+    std::vector<FloatArray> updatedNodeCoords;
+    FloatArray u(3);
+    std::vector<FloatArray> values;
+    for ( int fieldNum = 1; fieldNum <= primaryVarsToExport.giveSize(); fieldNum++ ) {
+        UnknownType type = ( UnknownType ) primaryVarsToExport.at(fieldNum);
+        nodeNum = 1;
+        int currentCell = 1;
+        for ( int layer = 1; layer <= numLayers; layer++ ) {            
+            
+            for ( int subCell = 1; subCell <= numSubCells; subCell++ ) {
+
+                if ( type == DisplacementVector ) { // compute displacement as u = x - X
+                    if ( numSubCells == 1 ) {
+                        Shell7Base :: giveFictiousCZNodeCoordsForExport(nodeCoords, layer);
+                        this->giveFictiousUpdatedCZNodeCoordsForExport(updatedNodeCoords, layer, tStep, 0);
+                    } else {
+                        this->giveFictiousNodeCoordsForExport(nodeCoords, layer, subCell);
+                        this->giveFictiousUpdatedNodeCoordsForExport(updatedNodeCoords, layer, tStep, subCell);
+                    }
+                    for ( int j = 1; j <= numCellNodes; j++ ) {
+                        u = updatedNodeCoords[j-1];
+                        u.subtract(nodeCoords[j-1]);
+                        vtkPiece.setPrimaryVarInNode(fieldNum, nodeNum, u);
+                        nodeNum += 1;        
+                    }
+
+                } else {
+                    ZZNodalRecoveryMI_recoverValues(values, layer, ( InternalStateType ) 1, tStep); // does not work well - fix
+                    for ( int j = 1; j <= numCellNodes; j++ ) {
+                        vtkPiece.setPrimaryVarInNode(fieldNum, nodeNum, values[j-1]);
+                        nodeNum += 1;
+                    }
+                }
+
+                currentCell++;
+            }
+        }
+    }
+
+
+
+    // Export nodal variables from internal fields
+    
+    vtkPiece.setNumberOfInternalVarsToExport( internalVarsToExport.giveSize(), numTotalNodes );
+    for ( int fieldNum = 1; fieldNum <= internalVarsToExport.giveSize(); fieldNum++ ) {
+        InternalStateType type = ( InternalStateType ) internalVarsToExport.at(fieldNum);
+        nodeNum = 1;
+        //this->recoverShearStress(tStep);
+        int currentCell = 1;
+        for ( int layer = 1; layer <= numLayers; layer++ ) {            
+            for ( int subCell = 1; subCell <= numSubCells; subCell++ ) {
+                recoverValuesFromIP(values, layer, type, tStep);        
+                
+                for ( int j = 1; j <= numCellNodes; j++ ) {
+                    vtkPiece.setInternalVarInNode( fieldNum, nodeNum, values[j-1] );
+                    //values[j-1].printYourself();
+                    //ZZNodalRecoveryMI_recoverValues(el.nodeVars[fieldNum], layer, type, tStep);          
+                    nodeNum += 1;        
+                }                                
+            }
+        }  
+    }
+
+
+    // Export cell variables
+    FloatArray average;
+    vtkPiece.setNumberOfCellVarsToExport(cellVarsToExport.giveSize(), numCells);
+    for ( int i = 1; i <= cellVarsToExport.giveSize(); i++ ) {
+        InternalStateType type = ( InternalStateType ) cellVarsToExport.at(i);;
+        InternalStateValueType valueType =  giveInternalStateValueType(type);
+        int currentCell = 1;
+        for ( int layer = 1; layer <= numLayers; layer++ ) {  
+            for ( int subCell = 1; subCell <= numSubCells; subCell++ ) {
+                IntegrationRule *iRuleL = integrationRulesArray [ layer - 1 ];
+                VTKXMLExportModule::computeIPAverage(average, iRuleL, this, type, tStep);
+                if ( valueType == ISVT_TENSOR_S3 ) {
+                    vtkPiece.setCellVar(i, currentCell, convV6ToV9Stress(average) );  
+                } else {
+                    vtkPiece.setCellVar(i, currentCell, average);  
+                }
+                currentCell += 1;
+            }
+        }
+
+    }
+
+
+
+
+#if 1
+
+
+    // Export of XFEM related quantities
+    XfemManager *xFemMan =  this->xMan;
+    int nEnrIt = xFemMan->giveNumberOfEnrichmentItems();
+
+    IntArray wedgeToTriMap;
+    // For each node in the wedge take the value from the triangle node given by the map below
+    wedgeToTriMap.setValues(15, 1, 2, 3, 1, 2, 3, 4, 5, 6, 4, 5, 6, 1, 2, 3 );
+
+    vtkPiece.setNumberOfInternalXFEMVarsToExport(xFemMan->vtkExportFields.giveSize(), nEnrIt, numTotalNodes);
+    for ( int field = 1; field <= xFemMan->vtkExportFields.giveSize(); field++ ) {
+        XFEMStateType xfemstype = ( XFEMStateType ) xFemMan->vtkExportFields [ field - 1 ];
+        
+        for ( int enrItIndex = 1; enrItIndex <= nEnrIt; enrItIndex++ ) {
+            EnrichmentItem *ei = xFemMan->giveEnrichmentItem(enrItIndex);
+            int nodeNum = 1;
+            for ( int layer = 1; layer <= numLayers; layer++ ) {
+                FloatMatrix localNodeCoords;
+                
+                for ( int subCell = 1; subCell <= numSubCells; subCell++ ) {
+                    FloatArray nodeLocalXi1Coords, nodeLocalXi2Coords, nodeLocalXi3Coords, nodeLocalXi3CoordsMapped;
+                    if ( numSubCells == 1) {
+                        this->interpolationForExport.giveLocalNodeCoords(localNodeCoords);
+                    } else {
+                        giveLocalNodeCoordsForExport(nodeLocalXi1Coords, nodeLocalXi2Coords, nodeLocalXi3Coords, subCell, localNodeCoords);
+                    }
+                    mapXi3FromLocalToShell(nodeLocalXi3CoordsMapped, nodeLocalXi3Coords, layer);
+                    for ( int nodeIndx = 1; nodeIndx <= numCellNodes; nodeIndx++ ) {
+
+                        FloatArray lCoords;
+                        //lCoords.setValues(3,  nodeLocalXi1Coords.at(nodeIndx), nodeLocalXi2Coords.at(nodeIndx), nodeLocalXi3CoordsMapped.at(nodeIndx));
+                        lCoords.beColumnOf(localNodeCoords, nodeIndx);
+                        Node *node = this->giveNode( wedgeToTriMap.at(nodeIndx) );
+                        FloatArray valueArray;
+                        const FloatArray *val = NULL;
+                        if ( xfemstype == XFEMST_LevelSetPhi ) {
+                            valueArray.resize(1);
+                            val = & valueArray;
+                            //ei->evalLevelSetNormalInNode( valueArray.at(1), node->giveNumber() );
+                            valueArray.at(1) = this->evaluateLevelSet(lCoords, ei);
+                        } else if ( xfemstype == XFEMST_LevelSetGamma ) {
+                            valueArray.resize(1);
+                            val = & valueArray;
+                            ei->evalLevelSetTangInNode( valueArray.at(1), node->giveNumber() );
+                        } else if ( xfemstype == XFEMST_NodeEnrMarker ) {
+                            valueArray.resize(1);
+                            val = & valueArray;
+                            ei->evalNodeEnrMarkerInNode( valueArray.at(1), node->giveNumber() );
+                        } else {
+                            //OOFEM_WARNING2("VTKXMLExportModule::getNodalVariableFromXFEMST: invalid data in node %d", inode);
+                        }
+
+                        vtkPiece.setInternalXFEMVarInNode(field, enrItIndex, nodeNum, valueArray);
+                        nodeNum += 1;
+                    }
+                }
+            }
+        }
+    }
+#endif    
+
+
+}
+
+
+
 
 
 } // end namespace oofem

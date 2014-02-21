@@ -50,7 +50,12 @@
 #include "fracturemanager.h"
 
 namespace oofem {
-FEI3dWedgeQuad Shell7Base :: interpolationForExport;
+//FEI3dWedgeQuad Shell7Base :: interpolationForExport;
+#ifdef _ExportCZ
+    FEI3dTrQuad  Shell7Base :: interpolationForExport;
+#else
+    FEI3dWedgeQuad Shell7Base :: interpolationForExport;
+#endif
 
 Shell7Base :: Shell7Base(int n, Domain *aDomain) : NLStructuralElement(n, aDomain),  LayeredCrossSectionInterface(), 
     VTKXMLExportModuleElementInterface(), ZZNodalRecoveryModelInterface(), FailureModuleElementInterface(){}
@@ -2366,6 +2371,22 @@ Shell7Base :: vtkEvalInitialGlobalCoordinateAt(FloatArray &localCoords, int laye
 
 }
 
+void
+Shell7Base :: vtkEvalInitialGlobalCZCoordinateAt(FloatArray &localCoords, int interface, FloatArray &globalCoords)
+{
+    double zeta = giveGlobalZcoordInLayer(1.0, interface);
+    FloatArray N;
+    this->fei->evalN( N, localCoords, FEIElementGeometryWrapper(this) );
+
+    globalCoords.resize(3);
+    globalCoords.zero();
+    for ( int i = 1; i <= this->giveNumberOfDofManagers(); i++ ) {
+        FloatArray &xbar = *this->giveNode(i)->giveCoordinates();
+        FloatArray M = this->giveInitialNodeDirector(i);
+        globalCoords += N.at(i) * ( xbar + zeta * M );
+    }
+
+}
 
 void
 Shell7Base :: vtkEvalUpdatedGlobalCoordinateAt(FloatArray &localCoords, int layer, FloatArray &globalCoords, TimeStep *tStep)
@@ -2499,8 +2520,10 @@ Shell7Base :: recoverValuesFromIP(std::vector<FloatArray> &recoveredValues, int 
     //FEInterpolation *interpol = static_cast< FEInterpolation * >( &this->interpolationForExport );
 
     // composite element interpolator
+    FloatMatrix localNodeCoords;
+    this->interpolationForExport.giveLocalNodeCoords(localNodeCoords);
 
-    int numNodes = 15;
+    int numNodes = localNodeCoords.giveNumberOfColumns();
     recoveredValues.resize(numNodes);
     
     IntegrationRule *iRule = integrationRulesArray [ layer - 1 ];
@@ -2509,11 +2532,9 @@ Shell7Base :: recoverValuesFromIP(std::vector<FloatArray> &recoveredValues, int 
     // Find closest ip to the nodes
     IntArray closestIPArray(numNodes);
     FloatArray nodeCoords, ipCoords, ipValues;
-    FloatArray nodeLocalXi1Coords, nodeLocalXi2Coords, nodeLocalXi3Coords;
-    giveLocalNodeCoordsForExport(nodeLocalXi1Coords, nodeLocalXi2Coords, nodeLocalXi3Coords);   
 
     for ( int i = 1; i <= numNodes; i++ ) {
-        nodeCoords.setValues(3, nodeLocalXi1Coords.at(i), nodeLocalXi2Coords.at(i), nodeLocalXi3Coords.at(i) );
+        nodeCoords.beColumnOf(localNodeCoords, i);
         double distOld = 3.0; // should not be larger
         for ( int j = 0; j < iRule->giveNumberOfIntegrationPoints(); j++ ) {
             ip = iRule->getIntegrationPoint(j);
@@ -2655,16 +2676,36 @@ void
 Shell7Base :: giveFictiousNodeCoordsForExport(std::vector<FloatArray> &nodes, int layer)
 {
     // compute fictious node coords
-    FloatArray nodeLocalXi1Coords, nodeLocalXi2Coords, nodeLocalXi3Coords;
-    giveLocalNodeCoordsForExport(nodeLocalXi1Coords, nodeLocalXi2Coords, nodeLocalXi3Coords);
-    nodes.resize(15);
-    for ( int i = 1; i <= 15; i++ ){
+    FloatMatrix localNodeCoords;
+    this->interpolationForExport.giveLocalNodeCoords(localNodeCoords);
+    
+    nodes.resize(localNodeCoords.giveNumberOfColumns());
+    for ( int i = 1; i <= localNodeCoords.giveNumberOfColumns(); i++ ){
         FloatArray coords, localCoords(3);
-        localCoords.at(1) = nodeLocalXi1Coords.at(i);
-        localCoords.at(2) = nodeLocalXi2Coords.at(i);
-        localCoords.at(3) = nodeLocalXi3Coords.at(i);
-        
+        localCoords.beColumnOf(localNodeCoords,i);
+
         this->vtkEvalInitialGlobalCoordinateAt(localCoords, layer, coords);
+        nodes[i-1].resize(3); 
+        nodes[i-1] = coords;
+    }
+
+}
+
+
+void 
+Shell7Base :: giveFictiousCZNodeCoordsForExport(std::vector<FloatArray> &nodes, int interface)
+{
+    // compute fictious node coords
+    FloatMatrix localNodeCoords;
+    this->interpolationForExport.giveLocalNodeCoords(localNodeCoords);
+    
+    nodes.resize(localNodeCoords.giveNumberOfColumns());
+    for ( int i = 1; i <= localNodeCoords.giveNumberOfColumns(); i++ ){
+        FloatArray coords, localCoords(3);
+        localCoords.beColumnOf(localNodeCoords,i);
+
+        localCoords.at(3) = 1.0;
+        this->vtkEvalInitialGlobalCoordinateAt(localCoords, interface, coords);
         nodes[i-1].resize(3); 
         nodes[i-1] = coords;
     }
@@ -2675,15 +2716,14 @@ void
 Shell7Base :: giveFictiousUpdatedNodeCoordsForExport(std::vector<FloatArray> &nodes, int layer, TimeStep *tStep)
 {
     // compute fictious node coords
-    FloatArray nodeLocalXi1Coords, nodeLocalXi2Coords, nodeLocalXi3Coords;
-    giveLocalNodeCoordsForExport(nodeLocalXi1Coords, nodeLocalXi2Coords, nodeLocalXi3Coords);
-    nodes.resize(15);
-    for ( int i = 1; i <= 15; i++ ){
+
+    FloatMatrix localNodeCoords;
+    this->giveInterpolation()->giveLocalNodeCoords(localNodeCoords);
+    nodes.resize(localNodeCoords.giveNumberOfColumns());
+    for ( int i = 1; i <= localNodeCoords.giveNumberOfColumns(); i++ ){
         FloatArray coords, localCoords(3);
-        localCoords.at(1) = nodeLocalXi1Coords.at(i);
-        localCoords.at(2) = nodeLocalXi2Coords.at(i);
-        localCoords.at(3) = nodeLocalXi3Coords.at(i);
-        
+        localCoords.beColumnOf(localNodeCoords,i);
+
         this->vtkEvalUpdatedGlobalCoordinateAt(localCoords, layer, coords, tStep);
         nodes[i-1].resize(3); 
         nodes[i-1] = coords;
@@ -2691,14 +2731,14 @@ Shell7Base :: giveFictiousUpdatedNodeCoordsForExport(std::vector<FloatArray> &no
 }
 
 
-void
-Shell7Base :: giveLocalNodeCoordsForExport(FloatArray &nodeLocalXi1Coords, FloatArray &nodeLocalXi2Coords, FloatArray &nodeLocalXi3Coords) {
-    // Local coords for a quadratic wedge element (VTK cell type 26)
-    double z = 0.999;
-    nodeLocalXi1Coords.setValues(15, 1., 0., 0., 1., 0., 0., .5, 0., .5, .5, 0., .5, 1., 0., 0.);      
-    nodeLocalXi2Coords.setValues(15, 0., 1., 0., 0., 1., 0., .5, .5, 0., .5, .5, 0., 0., 1., 0.);
-    nodeLocalXi3Coords.setValues(15, -z, -z, -z,  z,  z,  z, -z, -z, -z,  z,  z,  z, 0., 0., 0.);
-}
+//void
+//Shell7Base :: giveLocalNodeCoordsForExport(FloatArray &nodeLocalXi1Coords, FloatArray &nodeLocalXi2Coords, FloatArray &nodeLocalXi3Coords) {
+//    // Local coords for a quadratic wedge element (VTK cell type 26)
+//    double z = 0.999;
+//    nodeLocalXi1Coords.setValues(15, 1., 0., 0., 1., 0., 0., .5, 0., .5, .5, 0., .5, 1., 0., 0.);      
+//    nodeLocalXi2Coords.setValues(15, 0., 1., 0., 0., 1., 0., .5, .5, 0., .5, .5, 0., 0., 1., 0.);
+//    nodeLocalXi3Coords.setValues(15, -z, -z, -z,  z,  z,  z, -z, -z, -z,  z,  z,  z, 0., 0., 0.);
+//}
 
 #endif
 

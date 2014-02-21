@@ -42,12 +42,15 @@
 #include "vtkxmlexportmodule.h"
 #include "zznodalrecoverymodel.h"
 #include "fei3dwedgequad.h"
+#include "fei3dtrquad.h"
 #include "fracturemanager.h"
 #include "cltypes.h"
 #include <vector>
 
 namespace oofem {
 class BoundaryLoad;
+
+#define _ExportCZ
 
 /**
  * This class represent a 7 parameter shell element.
@@ -90,7 +93,12 @@ protected:
     virtual Interface *giveInterface(InterfaceType it);
     IntegrationRule **specialIntegrationRulesArray;
     LayeredCrossSection *layeredCS;
+    //static FEI3dWedgeQuad interpolationForExport;
+#ifdef _ExportCZ
+     static FEI3dTrQuad  interpolationForExport;
+#else
     static FEI3dWedgeQuad interpolationForExport;
+#endif
     FEInterpolation3d *fei;
 
     enum SolutionField {
@@ -244,11 +252,13 @@ protected:
     virtual void vtkEvalInitialGlobalCoordinateAt(FloatArray &localCoords, int layer, FloatArray &globalCoords);
     virtual void vtkEvalUpdatedGlobalCoordinateAt(FloatArray &localCoords, int layer, FloatArray &globalCoords, TimeStep *tStep);
     
+    virtual void vtkEvalInitialGlobalCZCoordinateAt(FloatArray &localCoords, int interface, FloatArray &globalCoords);
     
     virtual void giveCompositeExportData(VTKPiece &vtkPiece, IntArray &primaryVarsToExport, IntArray &internalVarsToExport, IntArray cellVarsToExport, TimeStep *tStep );
     void giveFictiousNodeCoordsForExport(std::vector<FloatArray> &nodes, int layer);
+    void giveFictiousCZNodeCoordsForExport(std::vector<FloatArray> &nodes, int interface);
     void giveFictiousUpdatedNodeCoordsForExport(std::vector<FloatArray> &nodes, int layer, TimeStep *tStep);
-    void giveLocalNodeCoordsForExport(FloatArray &nodeLocalXi1Coords, FloatArray &nodeLocalXi2Coords, FloatArray &nodeLocalXi3Coords);
+    //void giveLocalNodeCoordsForExport(FloatArray &nodeLocalXi1Coords, FloatArray &nodeLocalXi2Coords, FloatArray &nodeLocalXi3Coords);
 
     void recoverValuesFromIP(std::vector<FloatArray> &nodes, int layer, InternalStateType type, TimeStep *tStep);
     void recoverShearStress(TimeStep *tStep);
