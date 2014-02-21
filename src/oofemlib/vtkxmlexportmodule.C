@@ -424,37 +424,27 @@ VTKXMLExportModule :: doOutput(TimeStep *tStep, bool forcedOutput)
      * Output all composite elements - one piece per composite element
      * Each element is responsible of setting up a VTKPiece which can then be exported
      */
-    Domain *d  = emodel->giveDomain(1);
-    Element *el;
-    int nelem = d->giveNumberOfElements();
+    Domain *d = emodel->giveDomain(1);
 
-    for ( int ielem = 1; ielem <= nelem; ielem++ ) {
-        el =  d->giveElement(ielem);
-        if ( this->isElementComposite(el) ) {
-            bool proceed = false;
-            for ( int pieceNum = 1; pieceNum <= nPiecesToExport; pieceNum++ ) {
-                // test if element in one of the regions (aka sets)
-                if ( this->giveRegionSet(pieceNum)->hasElement(ielem) ) {
-                    proceed = true;
-                }
-            }
-            if ( !proceed ) {
-                continue;
-            }
-
+    for ( int pieceNum = 1; pieceNum <= nPiecesToExport; pieceNum++ ) {
+        const IntArray &elements = this->giveRegionSet(pieceNum)->giveElementList();
+        for ( int i = 1; i <= elements.giveSize(); i++ ) {
+            Element *el = d->giveElement(elements.at(i));
+            if ( this->isElementComposite(el) ) {
 #ifdef __PARALLEL_MODE
-            if ( el->giveParallelMode() != Element_local ) {
-                continue;
-            }
+                if ( el->giveParallelMode() != Element_local ) {
+                    continue;
+                }
 
 #endif
 
 #ifndef __VTK_MODULE
-            this->exportCompositeElement(this->defaultVTKPiece, el, tStep);
-            this->writeVTKPiece(this->defaultVTKPiece, tStep);
+                this->exportCompositeElement(this->defaultVTKPiece, el, tStep);
+                this->writeVTKPiece(this->defaultVTKPiece, tStep);
 #else
-            // No support for binary export yet
+                // No support for binary export yet
 #endif
+            }
         }
     }  // end loop over composite elements
 
