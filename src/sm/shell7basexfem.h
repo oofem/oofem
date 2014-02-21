@@ -112,7 +112,9 @@ protected:
     void computeMassMatrixNum(FloatMatrix &answer, TimeStep *tStep);
 
     // VTK
+    virtual void giveCompositeExportData(std::vector < VTKPiece > &vtkPieces, IntArray &primaryVarsToExport, IntArray &internalVarsToExport, IntArray cellVarsToExport, TimeStep *tStep );
     virtual void giveCompositeExportData(VTKPiece &vtkPiece, IntArray &primaryVarsToExport, IntArray &internalVarsToExport, IntArray cellVarsToExport, TimeStep *tStep );
+    virtual void giveShellExportData(VTKPiece &vtkPiece, IntArray &primaryVarsToExport, IntArray &internalVarsToExport, IntArray cellVarsToExport, TimeStep *tStep );
     virtual void giveCZExportData(VTKPiece &vtkPiece, IntArray &primaryVarsToExport, IntArray &internalVarsToExport, IntArray cellVarsToExport, TimeStep *tStep );
 
     virtual void vtkEvalUpdatedGlobalCoordinateAt(FloatArray &localCoords, int layer, FloatArray &globalCoords, TimeStep *tStep);
@@ -129,11 +131,11 @@ protected:
     void giveLocalNodeCoordsForExport(FloatArray &nodeLocalXi1Coords, FloatArray &nodeLocalXi2Coords, FloatArray &nodeLocalXi3Coords, int subCell, FloatMatrix &localNodeCoords);
     //void giveLocalNodeCoordsForExport(FloatArray &nodeLocalXi1Coords, FloatArray &nodeLocalXi2Coords, FloatArray &nodeLocalXi3Coords);
     void mapXi3FromLocalToShell(FloatArray &answer, FloatArray &local, int layer);
-#ifdef _ExportCZ
-    FEI3dTrQuad Shell7BaseXFEM :: interpolationForExport;
-#else
+    
+    FEI3dTrQuad Shell7BaseXFEM    :: interpolationForCZExport;
     FEI3dWedgeQuad Shell7BaseXFEM :: interpolationForExport;
-#endif
+
+
 
 public:
     Shell7BaseXFEM(int n, Domain *d);

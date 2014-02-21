@@ -93,12 +93,10 @@ protected:
     virtual Interface *giveInterface(InterfaceType it);
     IntegrationRule **specialIntegrationRulesArray;
     LayeredCrossSection *layeredCS;
-    //static FEI3dWedgeQuad interpolationForExport;
-#ifdef _ExportCZ
-     static FEI3dTrQuad  interpolationForExport;
-#else
+
+    static FEI3dTrQuad  interpolationForCZExport;
     static FEI3dWedgeQuad interpolationForExport;
-#endif
+
     FEInterpolation3d *fei;
 
     enum SolutionField {
@@ -254,7 +252,9 @@ protected:
     
     virtual void vtkEvalInitialGlobalCZCoordinateAt(FloatArray &localCoords, int interface, FloatArray &globalCoords);
     
-    virtual void giveCompositeExportData(VTKPiece &vtkPiece, IntArray &primaryVarsToExport, IntArray &internalVarsToExport, IntArray cellVarsToExport, TimeStep *tStep );
+    virtual void giveCompositeExportData(std::vector< VTKPiece > &vtkPieces, IntArray &primaryVarsToExport, IntArray &internalVarsToExport, IntArray cellVarsToExport, TimeStep *tStep );
+    virtual void giveShellExportData(VTKPiece &vtkPiece, IntArray &primaryVarsToExport, IntArray &internalVarsToExport, IntArray cellVarsToExport, TimeStep *tStep );
+    
     void giveFictiousNodeCoordsForExport(std::vector<FloatArray> &nodes, int layer);
     void giveFictiousCZNodeCoordsForExport(std::vector<FloatArray> &nodes, int interface);
     void giveFictiousUpdatedNodeCoordsForExport(std::vector<FloatArray> &nodes, int layer, TimeStep *tStep);

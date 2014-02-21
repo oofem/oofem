@@ -395,8 +395,12 @@ VTKXMLExportModule :: doOutput(TimeStep *tStep, bool forcedOutput)
 
         if ( this->isElementComposite(el) ) {
 #ifndef __VTK_MODULE
-            this->exportCompositeElement(this->defaultVTKPiece, el, tStep);
-            this->writeVTKPiece(this->defaultVTKPiece, tStep);
+            //this->exportCompositeElement(this->defaultVTKPiece, el, tStep);
+            this->exportCompositeElement(this->defaultVTKPieces, el, tStep);
+
+            for ( int i = 0; i < this->defaultVTKPieces.size(); i++ ) {
+                this->writeVTKPiece(this->defaultVTKPieces[i], tStep);
+            }
 #else
             // No support for binary export yet
 #endif
@@ -1714,6 +1718,16 @@ void VTKXMLExportModule :: exportCompositeElement(VTKPiece &vtkPiece, Element *e
     }
 }
 
+void VTKXMLExportModule :: exportCompositeElement(std::vector< VTKPiece > &vtkPieces, Element *el, TimeStep *tStep)
+{
+    VTKXMLExportModuleElementInterface *interface =
+        static_cast< VTKXMLExportModuleElementInterface * >( el->giveInterface(VTKXMLExportModuleElementInterfaceType) );
+    if ( interface ) {
+        interface->giveCompositeExportData(vtkPieces, this->primaryVarsToExport, this->internalVarsToExport, this->cellVarsToExport, tStep);
+
+        //this->writeVTKPiece(this->defaultVTKPiece, tStep);
+    }
+}
 
 void
 VTKPiece :: clear()

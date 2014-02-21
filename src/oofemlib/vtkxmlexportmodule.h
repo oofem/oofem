@@ -205,6 +205,8 @@ public:
 
     VTKPiece defaultVTKPiece;
 
+    std :: vector < VTKPiece > defaultVTKPieces;
+
     /**
      * Computes a cell average of an InternalStateType varible based on the weights
      * in the integrationpoints (=> volume/area/length average)
@@ -329,6 +331,7 @@ protected:
 
     bool isElementComposite(Element *elem); /// Returns true if element geometry type is composite (not a single cell).
     void exportCompositeElement(VTKPiece &vtkPiece, Element *el, TimeStep *tStep);
+    void exportCompositeElement(std::vector< VTKPiece > &vtkPieces, Element *el, TimeStep *tStep);
 };
 
 
@@ -346,6 +349,7 @@ public:
     VTKXMLExportModuleElementInterface() : Interface() { }
     virtual const char *giveClassName() const { return "VTKXMLExportModuleElementInterface"; }
     virtual void giveCompositeExportData(VTKPiece &vtkPiece, IntArray &primaryVarsToExport, IntArray &internalVarsToExport, IntArray cellVarsToExport, TimeStep *tStep) { };
+    virtual void giveCompositeExportData(std::vector< VTKPiece > &vtkPieces, IntArray &primaryVarsToExport, IntArray &internalVarsToExport, IntArray cellVarsToExport, TimeStep *tStep) { };
 };
 } // end namespace oofem
 #endif // vtkxmlexportmodule_h

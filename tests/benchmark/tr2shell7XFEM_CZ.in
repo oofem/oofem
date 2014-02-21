@@ -1,8 +1,8 @@
 tr2shell7XFEM_CZ.out
 Test of internal cohesive zone model in Tr2Shell7XFEM. Pure shear test.
 #
-XFEMStatic nsteps 7 deltaT 0.5 lstype 0 smtype 0 rtold -1.0 rtolf 1.0e-5 manrmsteps 1 controllmode 1 nmodules 2 refloadmode 1 
-vtkxml tstep_all dofman_all element_all primvars 1 1 
+XFEMStatic nsteps 7 deltaT 0.5 lstype 0 smtype 0 rtold -1.0 rtolf 1.0e-5 manrmsteps 1 controllmode 1 nmodules 1 refloadmode 1 
+#vtkxml tstep_all dofman_all element_all primvars 1 1 
 matlab reactionforces dofmanlist 6 1 2 3 4 5 6 
 domain 3dDirShell 
 OutputManager tstep_all dofman_all element_all

@@ -1705,12 +1705,28 @@ Shell7BaseXFEM :: giveDisUnknownsAt(FloatArray &lcoords, EnrichmentItem *ei, Flo
 
 
 void
+Shell7BaseXFEM :: giveCompositeExportData(std::vector< VTKPiece > &vtkPieces, IntArray &primaryVarsToExport, IntArray &internalVarsToExport, IntArray cellVarsToExport, TimeStep *tStep )
+{
+    vtkPieces.resize(2);
+    this->giveShellExportData(vtkPieces[0], primaryVarsToExport, internalVarsToExport, cellVarsToExport, tStep );
+    this->giveCZExportData(vtkPieces[1], primaryVarsToExport, internalVarsToExport, cellVarsToExport, tStep );
+    
+}
+
+
+
+void
 Shell7BaseXFEM :: giveCompositeExportData(VTKPiece &vtkPiece, IntArray &primaryVarsToExport, IntArray &internalVarsToExport, IntArray cellVarsToExport, TimeStep *tStep )
 {
 
     this->giveCZExportData(vtkPiece, primaryVarsToExport, internalVarsToExport, cellVarsToExport, tStep );
-    return;
+    //this->giveShellExportData(vtkPiece, primaryVarsToExport, internalVarsToExport, cellVarsToExport, tStep );
+    
+}
 
+void
+Shell7BaseXFEM :: giveShellExportData(VTKPiece &vtkPiece, IntArray &primaryVarsToExport, IntArray &internalVarsToExport, IntArray cellVarsToExport, TimeStep *tStep )
+{
     int numSubCells = 1;
     if ( this->allTri.size() ) {
         numSubCells = (int)this->allTri.size();
@@ -1719,12 +1735,8 @@ Shell7BaseXFEM :: giveCompositeExportData(VTKPiece &vtkPiece, IntArray &primaryV
     int numLayers = this->layeredCS->giveNumberOfLayers();
     int numCells = numLayers * numSubCells;
     
-    int numCellNodes = 0;
-#ifdef _ExportCZ
-        numCellNodes = 6;   // quadratic triangle
-#else 
-        numCellNodes  = 15; // quadratic wedge
-#endif
+    int    numCellNodes  = 15; // quadratic wedge
+
     int numTotalNodes = numCellNodes*numCells;
 
     vtkPiece.setNumberOfCells(numCells);
@@ -1765,11 +1777,9 @@ Shell7BaseXFEM :: giveCompositeExportData(VTKPiece &vtkPiece, IntArray &primaryV
             vtkPiece.setOffset(currentCell, offset);
 
             // Cell types
-#ifdef _ExportCZ
-            vtkPiece.setCellType(currentCell, 22); // Quadratic triangle
-#else
+
             vtkPiece.setCellType(currentCell, 26); // Quadratic wedge
-#endif
+
             currentCell++;
         }
     }
@@ -2009,7 +2019,7 @@ Shell7BaseXFEM :: giveFictiousUpdatedCZNodeCoordsForExport(std::vector<FloatArra
 
 
     if ( subCell == 0) { 
-        this->interpolationForExport.giveLocalNodeCoords(localNodeCoords);
+        this->interpolationForCZExport.giveLocalNodeCoords(localNodeCoords);
         // must get local z-coord in terms of the total thickness not layerwise
         
     } else {
@@ -2052,16 +2062,6 @@ Shell7BaseXFEM :: mapXi3FromLocalToShell(FloatArray &answer, FloatArray &local, 
     }
 }
 
-
-//void
-//Shell7BaseXFEM :: giveLocalNodeCoordsForExport(FloatArray &nodeLocalXi1Coords, FloatArray &nodeLocalXi2Coords, FloatArray &nodeLocalXi3Coords) 
-//{
-//    // Local coords for a quadratic wedge element (VTK cell type 26)
-//    double z = 0.999;
-//    nodeLocalXi1Coords.setValues(15, 1., 0., 0., 1., 0., 0., .5, 0., .5, .5, 0., .5, 1., 0., 0.);      
-//    nodeLocalXi2Coords.setValues(15, 0., 1., 0., 0., 1., 0., .5, .5, 0., .5, .5, 0., 0., 1., 0.);
-//    nodeLocalXi3Coords.setValues(15, -z, -z, -z,  z,  z,  z, -z, -z, -z,  z,  z,  z, 0., 0., 0.);
-//}
 
 
 void
@@ -2130,15 +2130,11 @@ Shell7BaseXFEM :: giveCZExportData(VTKPiece &vtkPiece, IntArray &primaryVarsToEx
         numSubCells = (int)this->allTri.size();
     }
     
-    int numLayers = this->layeredCS->giveNumberOfLayers()-1;
-    int numCells = numLayers * numSubCells;
+    int numInterfaces = this->layeredCS->giveNumberOfLayers()-1;
+    int numCells = numInterfaces * numSubCells;
     
-    int numCellNodes = 0;
-#ifdef _ExportCZ
-        numCellNodes = 6;   // quadratic triangle
-#else 
-        numCellNodes  = 15; // quadratic wedge
-#endif
+    int numCellNodes = 6;   // quadratic triangle
+
     int numTotalNodes = numCellNodes*numCells;
 
     vtkPiece.setNumberOfCells(numCells);
@@ -2152,13 +2148,13 @@ Shell7BaseXFEM :: giveCZExportData(VTKPiece &vtkPiece, IntArray &primaryVarsToEx
 
     // Compute fictious node coords
     int nodeNum = 1;
-    for ( int layer = 1; layer <= numLayers; layer++ ) {
+    for ( int layer = 1; layer <= numInterfaces; layer++ ) {
         
         for ( int subCell = 1; subCell <= numSubCells; subCell++ ) {
 
             // Node coordinates
             if ( numSubCells == 1 ) {
-                Shell7Base :: giveFictiousNodeCoordsForExport(nodeCoords, layer); 
+                Shell7Base :: giveFictiousCZNodeCoordsForExport(nodeCoords, layer); 
             } else {
                 this->giveFictiousNodeCoordsForExport(nodeCoords, layer, subCell);       
             }
@@ -2179,11 +2175,8 @@ Shell7BaseXFEM :: giveCZExportData(VTKPiece &vtkPiece, IntArray &primaryVarsToEx
             vtkPiece.setOffset(currentCell, offset);
 
             // Cell types
-#ifdef _ExportCZ
             vtkPiece.setCellType(currentCell, 22); // Quadratic triangle
-#else
-            vtkPiece.setCellType(currentCell, 26); // Quadratic wedge
-#endif
+
             currentCell++;
         }
     }
@@ -2201,7 +2194,7 @@ Shell7BaseXFEM :: giveCZExportData(VTKPiece &vtkPiece, IntArray &primaryVarsToEx
         UnknownType type = ( UnknownType ) primaryVarsToExport.at(fieldNum);
         nodeNum = 1;
         int currentCell = 1;
-        for ( int layer = 1; layer <= numLayers; layer++ ) {            
+        for ( int layer = 1; layer <= numInterfaces; layer++ ) {            
             
             for ( int subCell = 1; subCell <= numSubCells; subCell++ ) {
 
@@ -2221,7 +2214,7 @@ Shell7BaseXFEM :: giveCZExportData(VTKPiece &vtkPiece, IntArray &primaryVarsToEx
                     }
 
                 } else {
-                    ZZNodalRecoveryMI_recoverValues(values, layer, ( InternalStateType ) 1, tStep); // does not work well - fix
+                    NodalRecoveryMI_recoverValues(values, layer, ( InternalStateType ) 1, tStep); // does not work well - fix
                     for ( int j = 1; j <= numCellNodes; j++ ) {
                         vtkPiece.setPrimaryVarInNode(fieldNum, nodeNum, values[j-1]);
                         nodeNum += 1;
@@ -2243,7 +2236,7 @@ Shell7BaseXFEM :: giveCZExportData(VTKPiece &vtkPiece, IntArray &primaryVarsToEx
         nodeNum = 1;
         //this->recoverShearStress(tStep);
         int currentCell = 1;
-        for ( int layer = 1; layer <= numLayers; layer++ ) {            
+        for ( int layer = 1; layer <= numInterfaces; layer++ ) {            
             for ( int subCell = 1; subCell <= numSubCells; subCell++ ) {
                 recoverValuesFromIP(values, layer, type, tStep);        
                 
@@ -2265,10 +2258,14 @@ Shell7BaseXFEM :: giveCZExportData(VTKPiece &vtkPiece, IntArray &primaryVarsToEx
         InternalStateType type = ( InternalStateType ) cellVarsToExport.at(i);;
         InternalStateValueType valueType =  giveInternalStateValueType(type);
         int currentCell = 1;
-        for ( int layer = 1; layer <= numLayers; layer++ ) {  
+        for ( int layer = 1; layer <= numInterfaces; layer++ ) {  
             for ( int subCell = 1; subCell <= numSubCells; subCell++ ) {
-                IntegrationRule *iRuleL = integrationRulesArray [ layer - 1 ];
-                VTKXMLExportModule::computeIPAverage(average, iRuleL, this, type, tStep);
+                if ( type == IST_CrossSectionNumber ) {
+                    average.setValues(1,  -double(layer) ); // Set a negative number for interfaces
+                } else {
+                    IntegrationRule *iRuleL = integrationRulesArray [ layer - 1 ];
+                    VTKXMLExportModule::computeIPAverage(average, iRuleL, this, type, tStep);
+                }
                 if ( valueType == ISVT_TENSOR_S3 ) {
                     vtkPiece.setCellVar(i, currentCell, convV6ToV9Stress(average) );  
                 } else {
@@ -2283,7 +2280,7 @@ Shell7BaseXFEM :: giveCZExportData(VTKPiece &vtkPiece, IntArray &primaryVarsToEx
 
 
 
-#if 1
+#if 0
 
 
     // Export of XFEM related quantities
@@ -2301,7 +2298,7 @@ Shell7BaseXFEM :: giveCZExportData(VTKPiece &vtkPiece, IntArray &primaryVarsToEx
         for ( int enrItIndex = 1; enrItIndex <= nEnrIt; enrItIndex++ ) {
             EnrichmentItem *ei = xFemMan->giveEnrichmentItem(enrItIndex);
             int nodeNum = 1;
-            for ( int layer = 1; layer <= numLayers; layer++ ) {
+            for ( int layer = 1; layer <= numInterfaces; layer++ ) {
                 FloatMatrix localNodeCoords;
                 
                 for ( int subCell = 1; subCell <= numSubCells; subCell++ ) {

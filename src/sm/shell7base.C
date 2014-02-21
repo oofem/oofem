@@ -50,12 +50,10 @@
 #include "fracturemanager.h"
 #include <fstream>
 namespace oofem {
-//FEI3dWedgeQuad Shell7Base :: interpolationForExport;
-#ifdef _ExportCZ
-    FEI3dTrQuad  Shell7Base :: interpolationForExport;
-#else
+
+    FEI3dTrQuad  Shell7Base   :: interpolationForCZExport;
     FEI3dWedgeQuad Shell7Base :: interpolationForExport;
-#endif
+
 
 Shell7Base :: Shell7Base(int n, Domain *aDomain) : NLStructuralElement(n, aDomain),  LayeredCrossSectionInterface(), 
     VTKXMLExportModuleElementInterface(), ZZNodalRecoveryModelInterface(), FailureModuleElementInterface(){}
@@ -2431,9 +2429,17 @@ Shell7Base :: vtkEvalUpdatedGlobalCoordinateAt(FloatArray &localCoords, int laye
     globalCoords = x + fac*m;
 }
 
+void
+Shell7Base :: giveCompositeExportData(std::vector< VTKPiece > &vtkPieces, IntArray &primaryVarsToExport, IntArray &internalVarsToExport, IntArray cellVarsToExport, TimeStep *tStep )
+{
+    vtkPieces.resize(1);
+    this->giveShellExportData(vtkPieces[0], primaryVarsToExport, internalVarsToExport, cellVarsToExport, tStep );
+    //this->giveCZExportData(vtkPieces[1], primaryVarsToExport, internalVarsToExport, cellVarsToExport, tStep );
+    
+}
 
 void 
-Shell7Base :: giveCompositeExportData(VTKPiece &vtkPiece, IntArray &primaryVarsToExport, IntArray &internalVarsToExport, IntArray cellVarsToExport, TimeStep *tStep )            
+Shell7Base :: giveShellExportData(VTKPiece &vtkPiece, IntArray &primaryVarsToExport, IntArray &internalVarsToExport, IntArray cellVarsToExport, TimeStep *tStep )            
 {   
 
     int numCells = this->layeredCS->giveNumberOfLayers();
@@ -2730,7 +2736,7 @@ Shell7Base :: giveFictiousCZNodeCoordsForExport(std::vector<FloatArray> &nodes, 
 {
     // compute fictious node coords
     FloatMatrix localNodeCoords;
-    this->interpolationForExport.giveLocalNodeCoords(localNodeCoords);
+    this->interpolationForCZExport.giveLocalNodeCoords(localNodeCoords);
     
     nodes.resize(localNodeCoords.giveNumberOfColumns());
     for ( int i = 1; i <= localNodeCoords.giveNumberOfColumns(); i++ ){
@@ -2751,7 +2757,7 @@ Shell7Base :: giveFictiousUpdatedNodeCoordsForExport(std::vector<FloatArray> &no
     // compute fictious node coords
 
     FloatMatrix localNodeCoords;
-    this->giveInterpolation()->giveLocalNodeCoords(localNodeCoords);
+    this->interpolationForExport.giveLocalNodeCoords(localNodeCoords);
     nodes.resize(localNodeCoords.giveNumberOfColumns());
     for ( int i = 1; i <= localNodeCoords.giveNumberOfColumns(); i++ ){
         FloatArray coords, localCoords(3);
