@@ -660,7 +660,7 @@ SPRNodalRecoveryModel :: initCommMaps()
 }
 
 void
-SPRNodalRecoveryModel :: exchangeDofManValues(int ireg, FloatArray &dofManValues, IntArray &dofManPatchCount,
+SPRNodalRecoveryModel :: exchangeDofManValues(FloatArray &dofManValues, IntArray &dofManPatchCount,
                                               IntArray &regionNodalNumbers, int regionValSize)
 {
     EngngModel *emodel = domain->giveEngngModel();
@@ -671,7 +671,7 @@ SPRNodalRecoveryModel :: exchangeDofManValues(int ireg, FloatArray &dofManValues
 
         // exchange data for shared nodes
         communicator->packAllData(this, & ls, & SPRNodalRecoveryModel :: packSharedDofManData);
-        communicator->initExchange(789 + ireg);
+        communicator->initExchange(789);
         communicator->unpackAllData(this, & ls, & SPRNodalRecoveryModel :: unpackSharedDofManData);
         communicator->finishExchange();
     } else {

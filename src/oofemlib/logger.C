@@ -34,6 +34,7 @@
 
 #include "logger.h"
 #include "error.h"
+#include "oofem_limits.h"
 
 #include <cstdarg>
 
@@ -292,29 +293,29 @@ Logger :: printStatistics()
 
  #endif
 
-void LOG_FORCED_MSG(Logger &logger, const char *format, ...)
+void OOFEM_LOG_FATAL(const char *format, ...)
 {
     __PROCESS_LOG;
-    logger.writeLogMsg(Logger :: LOG_LEVEL_FORCED, buff);
+    oofem_logger.writeLogMsg(Logger :: LOG_LEVEL_FATAL, buff);
 }
 
-void LOG_RELEVANT(Logger &logger, const char *format, ...)
+void OOFEM_LOG_ERROR(const char *format, ...)
 {
     __PROCESS_LOG;
-    logger.writeLogMsg(Logger :: LOG_LEVEL_RELEVANT, buff);
+    oofem_logger.writeLogMsg(Logger :: LOG_LEVEL_ERROR, buff);
 }
 
 
-void LOG_INFO(Logger &logger, const char *format, ...)
+void OOFEM_LOG_WARNING(const char *format, ...)
 {
     __PROCESS_LOG;
-    logger.writeLogMsg(Logger :: LOG_LEVEL_INFO, buff);
+    oofem_logger.writeLogMsg(Logger :: LOG_LEVEL_WARNING, buff);
 }
 
-void LOG_DEBUG(Logger &logger, const char *format, ...)
+void OOFEM_LOG_FORCED(const char *format, ...)
 {
     __PROCESS_LOG;
-    logger.writeLogMsg(Logger :: LOG_LEVEL_DEBUG, buff);
+    oofem_logger.writeLogMsg(Logger :: LOG_LEVEL_FORCED, buff);
 }
 
 void OOFEM_LOG_RELEVANT(const char *format, ...)

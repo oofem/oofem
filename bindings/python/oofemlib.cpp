@@ -175,7 +175,6 @@ void pyclass_FloatMatrix()
         .def("assembleu", assemble_2, "Assembles the contribution using localization array into receiver. The receiver must have dimensions large enough to localize contribution")
         .def("giveDeterminant", &FloatMatrix::giveDeterminant, "Returns determinant of the receiver. Receiver should be square matrix")
         .def("zero", &FloatMatrix::zero, "Zeroes all coefficient of receiver")
-        .def("beEmptyMtrx", &FloatMatrix::beEmptyMtrx, "Sets size of receiver to be an empty matrix. It will have zero rows and zero columns size")
         .def("beUnitMatrix", &FloatMatrix::beUnitMatrix, "Sets receiver to unity matrix")
         .def("beTranspositionOf", &FloatMatrix::beTranspositionOf, "Assigns to the receiver the transposition of parameter")
         .def("beProductOf", &FloatMatrix::beProductOf, "Assigns to the receiver product of a * b")
@@ -332,10 +331,11 @@ void pyclass_SparseMtrx()
 /*****************************************************
 * SpatialLocalizer
 *****************************************************/
+Element* (SpatialLocalizer::*giveElementContainingPoint_1)(const FloatArray &coords, const IntArray* regionList) = &SpatialLocalizer::giveElementContainingPoint;
 void pyclass_SpatialLocalizer()
 {
     class_<SpatialLocalizer, boost::noncopyable>("SpatialLocalizer", no_init)
-        .def("giveElementContainingPoint", &SpatialLocalizer::giveElementContainingPoint, return_internal_reference<>())
+      .def("giveElementContainingPoint", pure_virtual(giveElementContainingPoint_1), return_internal_reference<>())
         .def("giveElementCloseToPoint", &SpatialLocalizer::giveElementCloseToPoint, return_internal_reference<>())
         .def("giveElementClosestToPoint", &SpatialLocalizer::giveElementClosestToPoint, return_internal_reference<>())
         .def("init", &SpatialLocalizer::init)
@@ -527,7 +527,7 @@ void pyclass_Domain()
         .def("giveLoad", &Domain::giveLoad, return_internal_reference<>())
         .def("giveBc", &Domain::giveBc, return_internal_reference<>())
         .def("giveIc", &Domain::giveIc, return_internal_reference<>())
-        .def("giveLoadTimeFunction", &Domain::giveFunction, return_internal_reference<>())
+        .def("giveFunction", &Domain::giveFunction, return_internal_reference<>())
         .def("giveMaterial", &Domain::giveMaterial, return_internal_reference<>())
         .def("giveCrossSection", &Domain::giveCrossSection, return_internal_reference<>())
         .def("giveNode", &Domain::giveNode, return_internal_reference<>())
@@ -548,8 +548,8 @@ void pyclass_Domain()
         .add_property("numberOfBoundaryConditions",&Domain::giveNumberOfBoundaryConditions)
         .def("giveNumberOfInitialConditions", &Domain::giveNumberOfInitialConditions)
         .add_property("numberOfInitialConditions",&Domain::giveNumberOfInitialConditions)
-        .def("giveNumberOfLoadTimeFunctions", &Domain::giveNumberOfFunctions)
-        .add_property("numberOfLoadTimeFunctions",&Domain::giveNumberOfFunctions)
+        .def("giveNumberOfFunctions", &Domain::giveNumberOfFunctions)
+        .add_property("numberOfFunctions",&Domain::giveNumberOfFunctions)
         .def("giveNumberOfRegions", &Domain::giveNumberOfRegions)
         .add_property("numberOfRegions",&Domain::giveNumberOfRegions)
 
@@ -559,7 +559,7 @@ void pyclass_Domain()
         .def("resizeMaterials", &Domain::resizeMaterials)
         .def("resizeBoundaryConditions", &Domain::resizeBoundaryConditions)
         .def("resizeInitialConditions", &Domain::resizeInitialConditions)
-        .def("resizeLoadTimeFunctions", &Domain::resizeFunctions)
+        .def("resizeFunctions", &Domain::resizeFunctions)
 
         .def("setDofManager", &Domain::setDofManager)
         .def("setElement", &Domain::setElement)
@@ -567,7 +567,7 @@ void pyclass_Domain()
         .def("setMaterial", &Domain::setMaterial)
         .def("setBoundaryCondition", &Domain::setBoundaryCondition)
         .def("setInitialCondition", &Domain::setInitialCondition)
-        .def("setLoadTimeFunction", &Domain::setFunction)
+        .def("setFunction", &Domain::setFunction)
 
         .def("checkConsistency", &Domain::checkConsistency)
         .def("giveConnectivityTable", &Domain::giveConnectivityTable, return_internal_reference<>())
@@ -676,7 +676,19 @@ public:
     virtual void giveDofManDofIDMask(int inode, EquationID ut, IntArray &answer) const {
         this->get_override("giveDofManDofIDMask")();
     }
+
+    int evaluateAt(FloatArray &answer, FloatArray &coords,
+            ValueModeType mode, TimeStep *atTime) {
+        return this->get_override("evaluateAt")(answer, coords,mode,atTime);
+    }
+
+
+
 };
+
+
+void (PyElement::*giveLocationArray_1)(IntArray &locationArray, EquationID id, const UnknownNumberingScheme &s, IntArray *dofIds) const  = &Element::giveLocationArray;
+void (PyElement::*giveLocationArray_2)(IntArray &locationArray, const IntArray &dofIDMask, const UnknownNumberingScheme &s, IntArray *dofIds) const = &Element::giveLocationArray;
 
 void pyclass_Element()
 {
@@ -699,7 +711,8 @@ void pyclass_Element()
         .add_property("length", &PyElement::computeLength)
         .def("giveLabel", &Element::giveLabel)
         .add_property("label",&Element::giveLabel)
-        .def("giveLocationArray", &PyElement::giveLocationArray)
+        .def("giveLocationArray", giveLocationArray_1)
+        .def("giveLocationArray2", giveLocationArray_2)
         .def("giveNumberOfDofManagers", &PyElement::giveNumberOfDofManagers)
         .add_property("numberOfDofManagers", &PyElement::giveNumberOfDofManagers)
         .def("computeNumberOfDofs", &PyElement::computeNumberOfDofs)
@@ -817,9 +830,9 @@ void pyclass_Load()
 /*****************************************************
 * LoadTimeFunction
 *****************************************************/
-void pyclass_LoadTimeFunction()
+void pyclass_Function()
 {
-    class_<LoadTimeFunction, bases<FEMComponent>, boost::noncopyable >("LoadTimeFunction", no_init)
+    class_<Function, bases<FEMComponent>, boost::noncopyable >("Function", no_init)
         ;
 }
 
@@ -1286,12 +1299,12 @@ object engngModel(bp::tuple args, bp::dict kw)
     int number = len(args)>1? extract<int>(args[1])() : 0;
     EngngModel* master = len(args)>2? extract<EngngModel*>(args[2])() : NULL;
     EngngModel *engngm = classFactory.createEngngModel(aClass.c_str(),number,master);
-    if (engngm==NULL) { LOG_ERROR(oofem_errLogger,"engngModel: wrong input data"); }
+    if (engngm==NULL) { OOFEM_LOG_ERROR("engngModel: wrong input data"); }
     OOFEMTXTInputRecord ir = makeOOFEMTXTInputRecordFrom(kw);
     engngm->initializeFrom(&ir);
     // instanciateYourself
     if ( ir.hasField(_IFT_EngngModel_nmsteps) ) {
-        LOG_ERROR(oofem_errLogger,"engngModel: simulation with metasteps is not (yet) supported in Python");
+        OOFEM_LOG_ERROR("engngModel: simulation with metasteps is not (yet) supported in Python");
     } else {
         engngm->instanciateDefaultMetaStep(&ir);
     }
@@ -1368,7 +1381,7 @@ object element(bp::tuple args, bp::dict kw)
     // create Element (convert aClass to char* - expected by classFactory.createElement)
     Element *elem = classFactory.createElement(aClass.c_str(),number,domain);
     // if elem==NULL, something was wrong
-    if (elem==NULL) { LOG_ERROR(oofem_errLogger,"element: wrong input data"); }
+    if (elem==NULL) { OOFEM_LOG_ERROR("element: wrong input data"); }
     // sets globalNumber == number befor initializeFrom
     elem->setGlobalNumber(number);
     // construct OOFEMTXTInputRecord from bp::dict **kw
@@ -1400,7 +1413,7 @@ object dofManager(bp::tuple args, bp::dict kw)
     int number =     len(args)>1? extract<int>(args[1])() : 0;
     Domain *domain = len(args)>2? extract<Domain*>(args[2])() : NULL;
     DofManager *dofMan = classFactory.createDofManager(aClass.c_str(),number,domain);
-    if (dofMan==NULL) { LOG_ERROR(oofem_errLogger,"dofManager: wrong input data"); }
+    if (dofMan==NULL) { OOFEM_LOG_ERROR("dofManager: wrong input data"); }
     dofMan->setGlobalNumber(number);
     OOFEMTXTInputRecord ir = makeOOFEMTXTInputRecordFrom(kw);
     dofMan->initializeFrom(&ir);
@@ -1425,7 +1438,7 @@ object generalBoundaryCondition(bp::tuple args, bp::dict kw)
     int number =     len(args)>1? extract<int>(args[1])() : 0;
     Domain *domain = len(args)>2? extract<Domain*>(args[2])() : NULL;
     GeneralBoundaryCondition *bc = classFactory.createBoundaryCondition(aClass.c_str(),number,domain);
-    if (bc==NULL) { LOG_ERROR(oofem_errLogger,"generalBoundaryCondition: wrong input data"); }
+    if (bc==NULL) { OOFEM_LOG_ERROR("generalBoundaryCondition: wrong input data"); }
     OOFEMTXTInputRecord ir = makeOOFEMTXTInputRecordFrom(kw);
     bc->initializeFrom(&ir);
     return object(ptr(bc));
@@ -1451,7 +1464,7 @@ object material(bp::tuple args, bp::dict kw)
     int number =     len(args)>1? extract<int>(args[1])() : 0;
     Domain *domain = len(args)>2? extract<Domain*>(args[2])() : NULL;
     Material *mat = classFactory.createMaterial(aClass.c_str(),number,domain);
-    if (mat==NULL) { LOG_ERROR(oofem_errLogger,"material: wrong input data"); }
+    if (mat==NULL) { OOFEM_LOG_ERROR("material: wrong input data"); }
     OOFEMTXTInputRecord ir = makeOOFEMTXTInputRecordFrom(kw);
     mat->initializeFrom(&ir);
     return object(ptr(mat));
@@ -1474,7 +1487,7 @@ object crossSection(bp::tuple args, bp::dict kw)
     int number =     len(args)>1? extract<int>(args[1])() : 0;
     Domain *domain = len(args)>2? extract<Domain*>(args[2])() : NULL;
     CrossSection *cs = classFactory.createCrossSection(aClass.c_str(),number,domain);
-    if (cs==NULL) { LOG_ERROR(oofem_errLogger,"crossSection: wrong input data"); }
+    if (cs==NULL) { OOFEM_LOG_ERROR("crossSection: wrong input data"); }
     OOFEMTXTInputRecord ir = makeOOFEMTXTInputRecordFrom(kw);
     cs->initializeFrom(&ir);
     return object(ptr(cs));
@@ -1497,8 +1510,8 @@ object loadTimeFunction(bp::tuple args, bp::dict kw)
     string aClass = extract<string>(args[0])();
     int number =     len(args)>1? extract<int>(args[1])() : 0;
     Domain *domain = len(args)>2? extract<Domain*>(args[2])() : NULL;
-    LoadTimeFunction *ltf = classFactory.createFunction(aClass.c_str(),number,domain);
-    if (ltf==NULL) { LOG_ERROR(oofem_errLogger,"function: wrong input data"); }
+    Function *ltf = classFactory.createFunction(aClass.c_str(),number,domain);
+    if (ltf==NULL) { OOFEM_LOG_ERROR("function: wrong input data"); }
     OOFEMTXTInputRecord ir = makeOOFEMTXTInputRecordFrom(kw);
     ltf->initializeFrom(&ir);
     return object(ptr(ltf));
@@ -1522,7 +1535,7 @@ object exportModule(bp::tuple args, bp::dict kw)
     int number =     len(args)>1? extract<int>(args[1])() : 0;
     EngngModel *engngm = len(args)>2? extract<EngngModel*>(args[2])() : NULL;
     ExportModule *module = classFactory.createExportModule(aClass.c_str(),number,engngm);
-    if (module==NULL) { LOG_ERROR(oofem_errLogger,"exportModule: wrong input data"); }
+    if (module==NULL) { OOFEM_LOG_ERROR("exportModule: wrong input data"); }
     OOFEMTXTInputRecord ir = makeOOFEMTXTInputRecordFrom(kw);
     module->initializeFrom(&ir);
     return object(ptr(module));
@@ -1569,7 +1582,7 @@ BOOST_PYTHON_MODULE (liboofem)
     pyclass_GeneralBoundaryCondition();
     pyclass_BoundaryCondition();
     pyclass_Load();
-    pyclass_LoadTimeFunction();
+    pyclass_Function();
     pyclass_MaterialStatus();
     pyclass_StructuralMaterialStatus();
     pyclass_TimeStep();
