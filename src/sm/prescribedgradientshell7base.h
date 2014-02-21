@@ -47,12 +47,11 @@
 #define _IFT_PrescribedGenStrainShell7_Name "PrescribedGenStrainShell7"
 #define _IFT_PrescribedGenStrainShell7_centercoords "ccoord"
 #define _IFT_PrescribedGenStrainShell7_generalizedstrain "generalizedstrain"
-#define _IFT_PrescribedGenStrainShell7_initialgeneralizedstrain "initialgeneralizedstrain"
 //@}
 
 namespace oofem {
 /**
- * Prescribes @f$ u_i = d_{ij}(x_j-\bar{x}_j) @f$ or @f$ s = d_{1j}(x_j - \bar{x}_j) @f$
+ * Prescribes @f$ v_i = d_{ij}(x_j-\bar{x}_j) @f$ or @f$ s = d_{1j}(x_j - \bar{x}_j) @f$
  * where @f$ v_i @f$ are primary unknowns for the subscale.
  * This is typical boundary condition in multiscale analysis where @f$ d = \partial_x s@f$
  * would a macroscopic gradient at the integration point, i.e. this is a boundary condition for prolongation.
@@ -64,17 +63,6 @@ class OOFEM_EXPORT PrescribedGenStrainShell7 : public BoundaryCondition
 protected:
     /// Prescribed gradient @f$ d_{ij} @f$
     FloatMatrix gradient;
-
-    /**
-     * Initial generalized strain
-     * eps = [Xbar_{,alpha}, M_{,alpha}, M  ] = [ (3  3)  (3  3)  3] - 15 components
-     */
-    FloatArray initialGenEps;
-    /** 
-     * Current generalized strain
-     * eps = [xbar_{,alpha}, m_{,alpha}, m, gamma_{,alpha}, gamma ] = [ (3  3)  (3  3)  3  (1 1) 1] - 18 components
-     */
-    FloatArray genEps;
 
     /// Center coordinate @f$ \bar{x}_i @f$
     FloatArray centerCoord;
@@ -111,13 +99,41 @@ public:
      * @todo Perhaps this routine should only give results for the dof it prescribes?
      * @param C Coefficient matrix to fill.
      */
-    //void updateCoefficientMatrix(FloatMatrix &C);
+    void updateCoefficientMatrix(FloatMatrix &C);
 
+    /**
+     * Computes the homogenized, macroscopic, field (stress).
+     * @param sigma Output quantity (typically stress).
+     * @param eid Equation ID to which sigma belongs.
+     * @param tStep Active time step.
+     */
+    void computeField(FloatArray &sigma, EquationID eid, TimeStep *tStep);
 
-    void evalCovarBaseVectorsAt(FloatMatrix &gcov, FloatArray &genEps, double zeta);
-    void evalInitialCovarBaseVectorsAt(FloatMatrix &Gcov, FloatArray &genEps, double zeta);
-    void setDeformationGradient(double zeta);
-    void evaluateHigherOrderContribution(FloatArray &answer, double zeta, FloatArray &dx);
+    /**
+     * Computes the macroscopic tangent for homogenization problems through sensitivity analysis.
+     * @param tangent Output tangent.
+     * @param eid Equation ID to tangent belongs.
+     * @param tStep Active time step.
+     */
+    void computeTangent(FloatMatrix &tangent, EquationID eid, TimeStep *tStep);
+
+    virtual void scale(double s) { gradient.times(s); }
+
+    /**
+     * Set prescribed tensor.
+     * @param t New prescribed value.
+     */
+    virtual void setPrescribedGenStrainShell7(const FloatMatrix &t) { gradient = t; }
+
+    /**
+     * Sets the prescribed tensor from the matrix from given voigt notation.
+     * Assumes use of double values for off-diagonal, usually the way for strain in Voigt form.
+     * @param t Vector in voigt format.
+     */
+    virtual void setPrescribedGenStrainShell7Voigt(const FloatArray &t);
+
+    /// @warning Not used. Do not call.
+    virtual void setPrescribedValue(double) { OOFEM_ERROR("Scalar value not used for prescribed tensors."); }
 
     /**
      * Set the center coordinate for the prescribed values to be set for.

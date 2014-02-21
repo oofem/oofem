@@ -105,7 +105,7 @@ protected:
     virtual void computeEdgeLoadVectorAt(FloatArray &answer, Load *load, int iEdge, TimeStep *tStep, ValueModeType mode);
     virtual void computeSurfaceLoadVectorAt(FloatArray &answer, Load *load,
                                             int iSurf, TimeStep *tStep, ValueModeType mode);
-    virtual void computeTractionForce(FloatArray &answer, const int iedge, BoundaryLoad *edgeLoad, TimeStep *tStep, 
+    void computeEnrTractionForce(FloatArray &answer, const int iedge, BoundaryLoad *edgeLoad, TimeStep *tStep, 
         ValueModeType mode, EnrichmentItem *ei);
 
     // Mass matrices

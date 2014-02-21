@@ -48,7 +48,7 @@
 #include "constantsurfaceload.h"
 #include "vtkxmlexportmodule.h"
 #include "fracturemanager.h"
-
+#include <fstream>
 namespace oofem {
 //FEI3dWedgeQuad Shell7Base :: interpolationForExport;
 #ifdef _ExportCZ
@@ -223,7 +223,7 @@ Shell7Base :: computeInitialGeneralizedStrainVector(FloatArray &lcoords, FloatAr
 
     // Out of plane base vector = director
     this->evalInitialDirectorAt(lcoords, M);     // G3=M
-    genStrain.setValues(15, dPhi1.at(1), dPhi1.at(2), dPhi1.at(3),  dPhi1.at(1), dPhi1.at(2), dPhi1.at(3),  
+    genStrain.setValues(15, dPhi1.at(1), dPhi1.at(2), dPhi1.at(3),  dPhi2.at(1), dPhi2.at(2), dPhi2.at(3),  
                             dM1.at(1), dM1.at(2), dM1.at(3), dM2.at(1), dM2.at(2), dM2.at(3),
                             M.at(1), M.at(2), M.at(3) );
 
@@ -382,6 +382,11 @@ Shell7Base :: evalCovarBaseVectorsAt(FloatArray &lcoords, FloatMatrix &gcov, Flo
 
     gcov.resize(3,3);
     gcov.setColumn(g1,1); gcov.setColumn(g2,2); gcov.setColumn(g3,3);
+
+
+
+
+
 }
 
 
@@ -620,6 +625,32 @@ Shell7Base :: computeLinearizedStiffness(GaussPoint *gp, StructuralMaterial *mat
     S.beMatrixFormOfStress(contravarStressVector);
 
     FloatMatrix gcov; 
+
+    if ( this->giveGlobalNumber() == 195 && gp->giveNumber() == 5 ) {
+        FloatArray initialGenStrain;
+        this->computeInitialGeneralizedStrainVector(lcoords, initialGenStrain);
+
+
+        std :: ofstream file;
+        std :: string iName = "GeneralizedStrain.txt";
+        file.open( iName.data() );
+
+        // Write header
+        file << "Initial generalized strain \n";
+
+        for ( size_t i = 1; i <= initialGenStrain.giveSize(); i++ ) {
+            const double &y = initialGenStrain.at(i);
+            file << y << "  ";
+        }
+        file << " \n";
+
+        for ( size_t i = 1; i <= genEps.giveSize(); i++ ) {
+            const double &y = genEps.at(i);
+            file << y << "  ";
+        }
+        file << " \n";
+    }
+
     this->evalCovarBaseVectorsAt(lcoords, gcov, genEps);
 
     FloatMatrix gg11, gg12, gg13, gg21, gg22, gg23, gg31, gg32, gg33;
@@ -1827,7 +1858,7 @@ void Shell7Base :: NodalAveragingRecoveryMI_computeNodalValue(FloatArray &answer
 
 
 void
-Shell7Base :: ZZNodalRecoveryMI_computeNValProduct(FloatMatrix &answer, int layer, InternalStateType type,
+Shell7Base :: NodalRecoveryMI_computeNValProduct(FloatMatrix &answer, int layer, InternalStateType type,
                                                                       TimeStep *tStep)
 {  // evaluates N^T sigma over element volume
    // N(nsigma, nsigma*nnodes)
@@ -1863,7 +1894,7 @@ Shell7Base :: ZZNodalRecoveryMI_computeNValProduct(FloatMatrix &answer, int laye
 }
 
 void
-Shell7Base :: ZZNodalRecoveryMI_computeNNMatrix(FloatArray &answer, int layer, InternalStateType type)
+Shell7Base :: NodalRecoveryMI_computeNNMatrix(FloatArray &answer, int layer, InternalStateType type)
 {
     //
     // Returns NTN matrix (lumped) for Zienkiewicz-Zhu
@@ -1925,13 +1956,13 @@ Shell7Base :: ZZNodalRecoveryMI_ComputeEstimatedInterpolationMtrx(FloatArray &an
 
 
 void 
-Shell7Base :: ZZNodalRecoveryMI_recoverValues(std::vector<FloatArray> &recoveredValues, int layer, InternalStateType type, TimeStep *tStep)
+Shell7Base :: NodalRecoveryMI_recoverValues(std::vector<FloatArray> &recoveredValues, int layer, InternalStateType type, TimeStep *tStep)
 {
     // ZZ recovery
     FloatArray nnMatrix;
     FloatMatrix nValProd;
-    ZZNodalRecoveryMI_computeNValProduct(nValProd, layer, type, tStep);
-    ZZNodalRecoveryMI_computeNNMatrix(nnMatrix, layer, type);
+    NodalRecoveryMI_computeNValProduct(nValProd, layer, type, tStep);
+    NodalRecoveryMI_computeNNMatrix(nnMatrix, layer, type);
     int recoveredSize = nValProd.giveNumberOfColumns();
     int numNodes = nValProd.giveNumberOfRows();
     recoveredValues.resize(numNodes);
@@ -2467,7 +2498,7 @@ Shell7Base :: giveCompositeExportData(VTKPiece &vtkPiece, IntArray &primaryVarsT
                 }
 
             } else {
-                ZZNodalRecoveryMI_recoverValues(values, layer, ( InternalStateType ) 1, tStep); // does not work well - fix
+                NodalRecoveryMI_recoverValues(values, layer, ( InternalStateType ) 1, tStep); // does not work well - fix
                 for ( int j = 1; j <= numCellNodes; j++ ) {
                     vtkPiece.setPrimaryVarInNode(fieldNum, nodeNum, values[j-1]);
                     nodeNum += 1;
@@ -2507,6 +2538,8 @@ Shell7Base :: giveCompositeExportData(VTKPiece &vtkPiece, IntArray &primaryVarsT
         }
 
     }
+
+
 
 
 }

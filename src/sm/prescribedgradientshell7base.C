@@ -32,7 +32,7 @@
  *  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  */
 
-#include "PrescribedGenStrainShell7.h"
+#include "PrescribedGenStrainShell7shell7base.h"
 #include "dofiditem.h"
 #include "dofmanager.h"
 #include "dof.h"
@@ -47,9 +47,9 @@
 #include "classfactory.h"
 #include "dynamicinputrecord.h"
 #include "feinterpol.h"
+
 #include "sparsemtrx.h"
 #include "sparselinsystemnm.h"
-#include "shell7base.h"
 
 namespace oofem {
 REGISTER_BoundaryCondition(PrescribedGenStrainShell7);
@@ -63,20 +63,12 @@ double PrescribedGenStrainShell7 :: give(Dof *dof, ValueModeType mode, TimeStep 
         OOFEM_ERROR("PrescribedGenStrainShell7 :: give - Size of coordinate system different from center coordinate in b.c.");
     }
 
-    // Reminder: u_i = F_ij . (x_j - xb_j) = H_ij . dx_j
-    FloatArray dx, temp;
+    // Reminder: u_i = F_ij . (x_j - xb_j) = d_ij . dx_j
+    FloatArray dx;
     dx.beDifferenceOf(* coords, this->centerCoord);
 
-    // Assuming the coordinate system to be local, dx(3) = z
-    this->setDeformationGradient( dx.at(3) );
-
-    FloatArray u, u2;
+    FloatArray u;
     u.beProductOf(gradient, dx);
-
-    // Add second order contribution, note only higher order in the thickness direction
-    this->evaluateHigherOrderContribution(u2, dx.at(3), dx);
-    u.add(u2);
-
     u.times( this->giveTimeFunction()->evaluate(tStep, mode) );
 
     switch ( id ) {
@@ -97,98 +89,28 @@ double PrescribedGenStrainShell7 :: give(Dof *dof, ValueModeType mode, TimeStep 
     }
 }
 
-
-
-void
-PrescribedGenStrainShell7 :: evalCovarBaseVectorsAt(FloatMatrix &gcov, FloatArray &genEps, double zeta)
+void PrescribedGenStrainShell7 :: setPrescribedGenStrainShell7Voigt(const FloatArray &t)
 {
-    // Evaluates the covariant base vectors in the current configuration
-    FloatArray g1; FloatArray g2; FloatArray g3;
-
-    FloatArray dxdxi1, dxdxi2, m, dmdxi1, dmdxi2;
-    double dgamdxi1, dgamdxi2, gam;
-    Shell7Base :: giveGeneralizedStrainComponents(genEps, dxdxi1, dxdxi2, dmdxi1, dmdxi2, m, dgamdxi1, dgamdxi2, gam);
-    double fac1 = ( zeta + 0.5 * gam * zeta * zeta );
-    double fac2 = ( 0.5 * zeta * zeta );
-    double fac3 = ( 1.0 + zeta * gam );
-
-    g1 = dxdxi1 + fac1*dmdxi1 + fac2*dgamdxi1*m;
-    g2 = dxdxi2 + fac1*dmdxi2 + fac2*dgamdxi2*m;
-    g3 = fac3*m;
-    gcov.resize(3,3);
-    gcov.setColumn(g1,1); gcov.setColumn(g2,2); gcov.setColumn(g3,3);
+    int n = t.giveSize();
+    if ( n == 3 ) { // Then 2D
+        this->gradient.resize(2, 2);
+        this->gradient.at(1, 1) = t.at(1);
+        this->gradient.at(2, 2) = t.at(2);
+        this->gradient.at(1, 2) = this->gradient.at(2, 1) = t.at(3);
+    } else if ( n == 6 ) { // Then 3D
+        this->gradient.resize(3, 3);
+        this->gradient.at(1, 1) = t.at(1);
+        this->gradient.at(2, 2) = t.at(2);
+        this->gradient.at(3, 3) = t.at(3);
+        // In voigt form, assuming the use of gamma_12 instead of eps_12
+        this->gradient.at(1, 2) = this->gradient.at(2, 1) = t.at(6) * 0.5;
+        this->gradient.at(1, 3) = this->gradient.at(3, 1) = t.at(5) * 0.5;
+        this->gradient.at(2, 3) = this->gradient.at(3, 2) = t.at(4) * 0.5;
+    } else {
+        OOFEM_ERROR("setPrescribedTensorVoigt: Tensor is in strange voigt format. Should be 3 or 6. Use setPrescribedTensor directly if needed.");
+    }
 }
 
-
-void
-PrescribedGenStrainShell7 :: evalInitialCovarBaseVectorsAt(FloatMatrix &Gcov, FloatArray &genEps,  double zeta)
-{
-    // Evaluates the initial base vectors given the array of generalized strain
-    FloatArray G1(3), G2(3), G3(3); 
-    
-    G1.at(1) = genEps.at(1) + zeta * genEps.at(7);
-    G1.at(2) = genEps.at(2) + zeta * genEps.at(8);
-    G1.at(3) = genEps.at(3) + zeta * genEps.at(9);
-
-    G2.at(1) = genEps.at(4) + zeta * genEps.at(10);
-    G2.at(2) = genEps.at(5) + zeta * genEps.at(11);
-    G2.at(3) = genEps.at(6) + zeta * genEps.at(12);
-
-    G3.at(1) = genEps.at(13);
-    G3.at(2) = genEps.at(14);
-    G3.at(3) = genEps.at(15);
-
-
-    Gcov.resize(3,3);
-    Gcov.setColumn(G1,1); Gcov.setColumn(G2,2); Gcov.setColumn(G3,3);
-}
-
-
-void
-PrescribedGenStrainShell7 :: setDeformationGradient(double zeta)
-{
-    // Computes the deformation gradient in matrix form as open product(g_i, G^i) = gcov*Gcon^T
-    FloatMatrix gcov, Gcon, Gcov;
-
-    this->evalCovarBaseVectorsAt(gcov, this->genEps, zeta);
-    this->evalInitialCovarBaseVectorsAt(Gcov, this->initialGenEps, zeta);
-    Shell7Base :: giveDualBase(Gcov, Gcon);
-
-    this->gradient.beProductTOf(gcov, Gcon);
-    this->gradient.at(1,1) -= 1.0;
-    this->gradient.at(2,2) -= 1.0;
-    this->gradient.at(3,3) -= 1.0;
-}
-
-void
-PrescribedGenStrainShell7 :: evaluateHigherOrderContribution(FloatArray &answer, double zeta, FloatArray &dx)
-{
-    // Computes the higher order contribution from the second gradient F2_ijk = (g3,3)_i * (G^3)_j * (G^3)_k 
-    // Simplified version with only contribtion in the xi-direction
-    FloatMatrix gcov, Gcon, Gcov;
-
-    this->evalCovarBaseVectorsAt(gcov, this->genEps, zeta);
-    this->evalInitialCovarBaseVectorsAt(Gcov, this->initialGenEps, zeta);
-    Shell7Base :: giveDualBase(Gcov, Gcon);
-
-    FloatArray G3(3), u(3), g3prime(3), m(3);
-    G3.at(1) = Gcon.at(1,3);
-    G3.at(2) = Gcon.at(2,3);
-    G3.at(3) = Gcon.at(3,3);
-
-    double factor = G3.dotProduct(dx);
-    double gamma = this->genEps.at(18);
-    m.at(1) = this->genEps.at(13);
-    m.at(2) = this->genEps.at(14);
-    m.at(3) = this->genEps.at(15);
-    g3prime = gamma*m;
-    
-    answer = 0.5*factor*factor * g3prime;
-
-
-}
-
-#if 0
 void PrescribedGenStrainShell7 :: updateCoefficientMatrix(FloatMatrix &C)
 // This is written in a very general way, supporting both fm and sm problems.
 // v_prescribed = C.d = (x-xbar).d;
@@ -254,7 +176,7 @@ void PrescribedGenStrainShell7 :: updateCoefficientMatrix(FloatMatrix &C)
         }
     }
 }
-#endif
+
 
 double PrescribedGenStrainShell7 :: domainSize()
 {
@@ -274,6 +196,81 @@ double PrescribedGenStrainShell7 :: domainSize()
 }
 
 
+void PrescribedGenStrainShell7 :: computeField(FloatArray &sigma, EquationID eid, TimeStep *tStep)
+{
+    EngngModel *emodel = this->domain->giveEngngModel();
+    int npeq = emodel->giveNumberOfDomainEquations( this->giveDomain()->giveNumber(), EModelDefaultPrescribedEquationNumbering() );
+    FloatArray R_c(npeq), R_ext(npeq);
+
+    R_c.zero();
+    R_ext.zero();
+    emodel->assembleVector( R_c, tStep, eid, InternalForcesVector, VM_Total,
+                            EModelDefaultPrescribedEquationNumbering(), this->giveDomain() );
+    emodel->assembleVector( R_ext, tStep, eid, ExternalForcesVector, VM_Total,
+                            EModelDefaultPrescribedEquationNumbering(), this->giveDomain() );
+    R_c.subtract(R_ext);
+
+    // Condense it;
+    FloatMatrix C;
+    this->updateCoefficientMatrix(C);
+    sigma.beTProductOf(C, R_c);
+    sigma.times( 1. / this->domainSize() );
+}
+
+
+void PrescribedGenStrainShell7 :: computeTangent(FloatMatrix &tangent, EquationID eid, TimeStep *tStep)
+// a = [a_c; a_f];
+// K.a = [R_c,0];
+// [K_cc, K_cf; K_fc, K_ff].[a_c;a_f] = [R_c; 0];
+// a_c = d.[x-x_b] = [x-x_b].d = C.d
+// E = C'.(K_cc - K_cf.K_ff^(-1).K_fc).C
+//   = C'.(K_cc.C - K_cf.(K_ff^(-1).(K_fc.C)))
+//   = C'.(K_cc.C - K_cf.a)
+//   = C'.X
+{
+    // Fetch some information from the engineering model
+    EngngModel *rve = this->giveDomain()->giveEngngModel();
+    ///@todo Get this from engineering model
+    SparseLinearSystemNM *solver = classFactory.createSparseLinSolver( ST_Petsc, this->domain, this->domain->giveEngngModel() ); // = rve->giveLinearSolver();
+    SparseMtrxType stype = SMT_PetscMtrx; // = rve->giveSparseMatrixType();
+    EModelDefaultEquationNumbering fnum;
+    EModelDefaultPrescribedEquationNumbering pnum;
+
+    // Set up and assemble tangent FE-matrix which will make up the sensitivity analysis for the macroscopic material tangent.
+    SparseMtrx *Kff = classFactory.createSparseMtrx(stype);
+    SparseMtrx *Kfp = classFactory.createSparseMtrx(stype);
+    SparseMtrx *Kpf = classFactory.createSparseMtrx(stype);
+    SparseMtrx *Kpp = classFactory.createSparseMtrx(stype);
+    if ( !Kff ) {
+        OOFEM_ERROR2("MixedGradientPressureBC :: computeTangents - Couldn't create sparse matrix of type %d\n", stype);
+    }
+    Kff->buildInternalStructure(rve, 1, eid, fnum);
+    Kfp->buildInternalStructure(rve, 1, eid, fnum, pnum);
+    Kpf->buildInternalStructure(rve, 1, eid, pnum, fnum);
+    Kpp->buildInternalStructure(rve, 1, eid, pnum);
+    rve->assemble(Kff, tStep, eid, StiffnessMatrix, fnum, this->domain);
+    rve->assemble(Kfp, tStep, eid, StiffnessMatrix, fnum, pnum, this->domain);
+    rve->assemble(Kpf, tStep, eid, StiffnessMatrix, pnum, fnum, this->domain);
+    rve->assemble(Kpp, tStep, eid, StiffnessMatrix, pnum, this->domain);
+
+    FloatMatrix C, X, Kpfa, KfpC, a;
+
+    this->updateCoefficientMatrix(C);
+    Kpf->timesT(C, KfpC);
+    solver->solve(Kff, KfpC, a);
+    Kpp->times(C, X);
+    Kpf->times(a, Kpfa);
+    X.subtract(Kpfa);
+    tangent.beTProductOf(C, X);
+    tangent.times( 1. / this->domainSize() );
+
+    delete Kff;
+    delete Kfp;
+    delete Kpf;
+    delete Kpp;
+
+    delete solver; ///@todo Remove this when solver is taken from engngmodel
+}
 
 
 IRResultType PrescribedGenStrainShell7 :: initializeFrom(InputRecord *ir)
@@ -283,8 +280,7 @@ IRResultType PrescribedGenStrainShell7 :: initializeFrom(InputRecord *ir)
 
     GeneralBoundaryCondition :: initializeFrom(ir);
 
-    IR_GIVE_FIELD(ir, this->initialGenEps, _IFT_PrescribedGenStrainShell7_initialgeneralizedstrain);
-    IR_GIVE_FIELD(ir, this->genEps, _IFT_PrescribedGenStrainShell7_generalizedstrain);
+    IR_GIVE_FIELD(ir, this->gradient, _IFT_PrescribedGenStrainShell7_gradient);
 
     this->centerCoord.resize( this->gradient.giveNumberOfColumns() );
     this->centerCoord.zero();
@@ -297,8 +293,7 @@ IRResultType PrescribedGenStrainShell7 :: initializeFrom(InputRecord *ir)
 void PrescribedGenStrainShell7 :: giveInputRecord(DynamicInputRecord &input)
 {
     BoundaryCondition :: giveInputRecord(input);
-    input.setField(this->initialGenEps, _IFT_PrescribedGenStrainShell7_initialgeneralizedstrain);
-    input.setField(this->genEps, _IFT_PrescribedGenStrainShell7_generalizedstrain);
+    input.setField(this->gradient, _IFT_PrescribedGenStrainShell7_gradient);
     input.setField(this->centerCoord, _IFT_PrescribedGenStrainShell7_centercoords);
 }
 } // end namespace oofem

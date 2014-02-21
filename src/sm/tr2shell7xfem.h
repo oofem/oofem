@@ -76,12 +76,10 @@ protected:
     }
 
     virtual const IntArray &giveOrdering(SolutionField fieldType) const;
-
-    //specific
     void giveSurfaceDofMapping(IntArray &answer, int iSurf) const;
     void giveEdgeDofMapping(IntArray &answer, int iEdge) const;
 
-    //virtual double computeVolumeAround(GaussPoint *gp);
+
     virtual double computeVolumeAroundLayer(GaussPoint *mastergp, int layer);
     virtual double computeAreaAround(GaussPoint *gp, double xi);
 
@@ -103,12 +101,9 @@ public:
     virtual const char *giveInputRecordName() const { return _IFT_Tr2Shell7XFEM_Name; }
     virtual const char *giveClassName() const { return "Tr2Shell7XFEM"; }
 
-    //virtual Element_Geometry_Type giveGeometryType() const { return EGT_triangle_2; }
     virtual Element_Geometry_Type giveGeometryType() const { return EGT_Composite; }
     virtual integrationDomain giveIntegrationDomain() const { return _Triangle; } // write new wedge-like type 'layeredWedge'
-    virtual void giveCompositeExportData(IntArray &primaryVarsToExport, IntArray &cellVarsToExport,
-                                         std :: vector< FloatArray > &nodeCoords, std :: vector< IntArray > &cellNodes, IntArray &cellTypes,
-                                         std :: vector< FloatArray > &primaryVars, std :: vector< FloatArray > &cellVars, TimeStep *tStep) {};
+
 };
 } // end namespace oofem
 #endif
