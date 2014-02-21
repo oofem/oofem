@@ -62,7 +62,7 @@ public:
     // new methods
     void giveDerivativeXi(FloatArray &n, const FloatArray &lcoords);
     void giveDerivativeEta(FloatArray &n, const FloatArray &lcoords);
-    //void evaldNdxi(FloatMatrix &answer, const FloatArray &lcoords);
+    virtual void giveLocalNodeCoords(FloatMatrix &answer);
     virtual void evaldNdxi(FloatMatrix &answer, const FloatArray &lcoords, const FEICellGeometry &cellgeo);
     void surfaceEvaldNdxi(FloatMatrix &answer, const FloatArray &lcoords);
 

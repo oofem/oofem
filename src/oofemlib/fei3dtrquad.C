@@ -100,6 +100,29 @@ FEI3dTrQuad :: giveDerivativeEta(FloatArray &n, const FloatArray &lc)
 
 
 void
+FEI3dTrQuad :: giveLocalNodeCoords(FloatMatrix &answer)
+{
+
+    answer.resize(3,6);
+    answer.zero();
+    answer.at(1,1) = 1.0;
+    answer.at(1,2) = 0.0;
+    answer.at(1,3) = 0.0;
+    answer.at(1,4) = 0.5;
+    answer.at(1,5) = 0.0;
+    answer.at(1,6) = 0.5;
+
+    answer.at(2,1) = 0.0;
+    answer.at(2,2) = 1.0;
+    answer.at(2,3) = 0.0;
+    answer.at(2,4) = 0.5;
+    answer.at(2,5) = 0.5;
+    answer.at(2,6) = 0.0;
+
+}
+
+
+void
 FEI3dTrQuad :: local2global(FloatArray &answer, const FloatArray &lcoords, const FEICellGeometry &cellgeo)
 {
     FloatArray n;

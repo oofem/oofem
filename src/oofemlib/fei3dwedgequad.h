@@ -65,6 +65,7 @@ public:
     virtual void edgeEvalN(FloatArray &answer, int iedge, const FloatArray &lcoords, const FEICellGeometry &cellgeo);
     virtual void edgeEvaldNdx(FloatMatrix &answer, int iedge,
                               const FloatArray &lcoords, const FEICellGeometry &cellgeo);
+    virtual void giveLocalNodeCoords(FloatMatrix &answer);
     virtual void edgeLocal2global(FloatArray &answer, int iedge,
                                   const FloatArray &lcoords, const FEICellGeometry &cellgeo);
     virtual double edgeGiveTransformationJacobian(int iedge, const FloatArray &lcoords,
