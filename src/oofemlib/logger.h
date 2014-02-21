@@ -97,6 +97,7 @@ extern OOFEM_EXPORT Logger oofem_errLogger;
  * Log reporting macros
  */
 //@{
+#ifdef HAVE_MACRO_VA_ARGS
 #define OOFEM_LOG_FATAL(...) oofem_errLogger.writeELogMsg(Logger :: LOG_LEVEL_FATAL, __FILE__, __LINE__, __VA_ARGS__)
 #define OOFEM_LOG_ERROR(...) oofem_errLogger.writeELogMsg(Logger :: LOG_LEVEL_ERROR, __FILE__, __LINE__, __VA_ARGS__)
 #define OOFEM_LOG_WARNING(...) oofem_errLogger.writeELogMsg(Logger :: LOG_LEVEL_WARNING, __FILE__, __LINE__, __VA_ARGS__)
@@ -105,6 +106,16 @@ extern OOFEM_EXPORT Logger oofem_errLogger;
 #define OOFEM_LOG_RELEVANT(...) oofem_logger.writeLogMsg(Logger :: LOG_LEVEL_RELEVANT, __VA_ARGS__)
 #define OOFEM_LOG_INFO(...) oofem_logger.writeLogMsg(Logger :: LOG_LEVEL_INFO, __VA_ARGS__)
 #define OOFEM_LOG_DEBUG(...) oofem_logger.writeLogMsg(Logger :: LOG_LEVEL_DEBUG, __VA_ARGS__)
+#else
+void OOFEM_LOG_FATAL(const char *format, ...);
+void OOFEM_LOG_ERROR(const char *format, ...);
+void OOFEM_LOG_WARNING(const char *format, ...);
+void OOFEM_LOG_FORCED(const char *format, ...);
+void OOFEM_LOG_RELEVANT(const char *format, ...);
+void OOFEM_LOG_INFO(const char *format, ...);
+void OOFEM_LOG_DEBUG(const char *format, ...);
+#endif
+
 //@}
 } // end namespace oofem
 #endif // logger_h

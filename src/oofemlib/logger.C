@@ -321,20 +321,20 @@ void LOG_DEBUG(Logger &logger, const char *format, ...)
 void OOFEM_LOG_RELEVANT(const char *format, ...)
 {
     __PROCESS_LOG;
-    logger.writeLogMsg(Logger :: LOG_LEVEL_RELEVANT, buff);
+    oofem_logger.writeLogMsg(Logger :: LOG_LEVEL_RELEVANT, buff);
 }
 
 
 void OOFEM_LOG_INFO(const char *format, ...)
 {
     __PROCESS_LOG;
-    logger.writeLogMsg(Logger :: LOG_LEVEL_INFO, buff);
+    oofem_logger.writeLogMsg(Logger :: LOG_LEVEL_INFO, buff);
 }
 
 void OOFEM_LOG_DEBUG(const char *format, ...)
 {
     __PROCESS_LOG;
-    logger.writeLogMsg(Logger :: LOG_LEVEL_DEBUG, buff);
+    oofem_logger.writeLogMsg(Logger :: LOG_LEVEL_DEBUG, buff);
 }
 
 #endif
