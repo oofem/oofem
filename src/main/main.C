@@ -158,7 +158,6 @@ int main(int argc, char *argv[])
                     i++;
                     int level = strtol(argv [ i ], NULL, 10);
                     oofem_logger.setLogLevel(level);
-                    oofem_errLogger.setLogLevel(level);
                 }
             } else if ( strcmp(argv [ i ], "-qe") == 0 ) {
                 if ( i + 1 < argc ) {
@@ -237,10 +236,10 @@ int main(int argc, char *argv[])
     }
 #endif
     if ( outputFileFlag ) {
-        oofem_logger.appendlogTo( outputFileName.str() );
+        oofem_logger.appendLogTo( outputFileName.str() );
     }
     if ( errOutputFileFlag ) {
-        oofem_errLogger.appendlogTo( errOutputFileName.str() );
+        oofem_logger.appendErrorTo( errOutputFileName.str() );
     }
 
     // print header to redirected output
@@ -292,7 +291,7 @@ int main(int argc, char *argv[])
         DynamicCommunicationBuffer :: printInfo();
     }
 #endif
-    oofem_errLogger.printStatistics();
+    oofem_logger.printStatistics();
     delete problem;
 
     oofem_finalize_modules();

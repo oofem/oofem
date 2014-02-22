@@ -85,53 +85,53 @@ OOFEM_EXPORT void oofem_exit(int code);
 
 
 
-#define OOFEM_FATAL1(_1) { oofem_errLogger.writeELogMsg(Logger :: LOG_LEVEL_FATAL, __FILE__, __LINE__, _1); oofem_exit(1); }
-#define OOFEM_FATAL2(_1, _2) { oofem_errLogger.writeELogMsg(Logger :: LOG_LEVEL_FATAL, __FILE__, __LINE__, _1, _2); oofem_exit(1); }
-#define OOFEM_FATAL3(_1, _2, _3) { oofem_errLogger.writeELogMsg(Logger :: LOG_LEVEL_FATAL, __FILE__, __LINE__, _1, _2, _3); oofem_exit(1); }
+#define OOFEM_FATAL1(_1) { oofem_logger.writeELogMsg(Logger :: LOG_LEVEL_FATAL, __FILE__, __LINE__, _1); oofem_exit(1); }
+#define OOFEM_FATAL2(_1, _2) { oofem_logger.writeELogMsg(Logger :: LOG_LEVEL_FATAL, __FILE__, __LINE__, _1, _2); oofem_exit(1); }
+#define OOFEM_FATAL3(_1, _2, _3) { oofem_logger.writeELogMsg(Logger :: LOG_LEVEL_FATAL, __FILE__, __LINE__, _1, _2, _3); oofem_exit(1); }
 
-#define OOFEM_ERROR1(_1) { oofem_errLogger.writeELogMsg(Logger :: LOG_LEVEL_ERROR, __FILE__, __LINE__, _1); oofem_exit(1); }
-#define OOFEM_ERROR2(_1, _2) { oofem_errLogger.writeELogMsg(Logger :: LOG_LEVEL_ERROR, __FILE__, __LINE__, _1, _2); oofem_exit(1); }
-#define OOFEM_ERROR3(_1, _2, _3) { oofem_errLogger.writeELogMsg(Logger :: LOG_LEVEL_ERROR, __FILE__, __LINE__, _1, _2, _3); oofem_exit(1); }
-#define OOFEM_ERROR4(_1, _2, _3, _4) { oofem_errLogger.writeELogMsg(Logger :: LOG_LEVEL_ERROR, __FILE__, __LINE__, _1, _2, _3, _4); oofem_exit(1); }
-#define OOFEM_ERROR5(_1, _2, _3, _4, _5) { oofem_errLogger.writeELogMsg(Logger :: LOG_LEVEL_ERROR, __FILE__, __LINE__, _1, _2, _3, _4, _5); oofem_exit(1); }
-#define OOFEM_ERROR6(_1, _2, _3, _4, _5, _6) { oofem_errLogger.writeELogMsg(Logger :: LOG_LEVEL_ERROR, __FILE__, __LINE__, _1, _2, _3, _4, _5, _6); oofem_exit(1); }
+#define OOFEM_ERROR1(_1) { oofem_logger.writeELogMsg(Logger :: LOG_LEVEL_ERROR, __FILE__, __LINE__, _1); oofem_exit(1); }
+#define OOFEM_ERROR2(_1, _2) { oofem_logger.writeELogMsg(Logger :: LOG_LEVEL_ERROR, __FILE__, __LINE__, _1, _2); oofem_exit(1); }
+#define OOFEM_ERROR3(_1, _2, _3) { oofem_logger.writeELogMsg(Logger :: LOG_LEVEL_ERROR, __FILE__, __LINE__, _1, _2, _3); oofem_exit(1); }
+#define OOFEM_ERROR4(_1, _2, _3, _4) { oofem_logger.writeELogMsg(Logger :: LOG_LEVEL_ERROR, __FILE__, __LINE__, _1, _2, _3, _4); oofem_exit(1); }
+#define OOFEM_ERROR5(_1, _2, _3, _4, _5) { oofem_logger.writeELogMsg(Logger :: LOG_LEVEL_ERROR, __FILE__, __LINE__, _1, _2, _3, _4, _5); oofem_exit(1); }
+#define OOFEM_ERROR6(_1, _2, _3, _4, _5, _6) { oofem_logger.writeELogMsg(Logger :: LOG_LEVEL_ERROR, __FILE__, __LINE__, _1, _2, _3, _4, _5, _6); oofem_exit(1); }
 
-#define OOFEM_WARNING1(_1) { oofem_errLogger.writeELogMsg(Logger :: LOG_LEVEL_WARNING, __FILE__, __LINE__, _1); }
-#define OOFEM_WARNING2(_1, _2) { oofem_errLogger.writeELogMsg(Logger :: LOG_LEVEL_WARNING, __FILE__, __LINE__, _1, _2); }
-#define OOFEM_WARNING3(_1, _2, _3) { oofem_errLogger.writeELogMsg(Logger :: LOG_LEVEL_WARNING, __FILE__, __LINE__, _1, _2, _3); }
-#define OOFEM_WARNING4(_1, _2, _3, _4) { oofem_errLogger.writeELogMsg(Logger :: LOG_LEVEL_WARNING, __FILE__, __LINE__, _1, _2, _3, _4); }
-#define OOFEM_WARNING5(_1, _2, _3, _4, _5) { oofem_errLogger.writeELogMsg(Logger :: LOG_LEVEL_WARNING, __FILE__, __LINE__, _1, _2, _3, _4, _5); }
-#define OOFEM_WARNING6(_1, _2, _3, _4, _5, _6) { oofem_errLogger.writeELogMsg(Logger :: LOG_LEVEL_WARNING, __FILE__, __LINE__, _1, _2, _3, _4, _5, _6); }
+#define OOFEM_WARNING1(_1) { oofem_logger.writeELogMsg(Logger :: LOG_LEVEL_WARNING, __FILE__, __LINE__, _1); }
+#define OOFEM_WARNING2(_1, _2) { oofem_logger.writeELogMsg(Logger :: LOG_LEVEL_WARNING, __FILE__, __LINE__, _1, _2); }
+#define OOFEM_WARNING3(_1, _2, _3) { oofem_logger.writeELogMsg(Logger :: LOG_LEVEL_WARNING, __FILE__, __LINE__, _1, _2, _3); }
+#define OOFEM_WARNING4(_1, _2, _3, _4) { oofem_logger.writeELogMsg(Logger :: LOG_LEVEL_WARNING, __FILE__, __LINE__, _1, _2, _3, _4); }
+#define OOFEM_WARNING5(_1, _2, _3, _4, _5) { oofem_logger.writeELogMsg(Logger :: LOG_LEVEL_WARNING, __FILE__, __LINE__, _1, _2, _3, _4, _5); }
+#define OOFEM_WARNING6(_1, _2, _3, _4, _5, _6) { oofem_logger.writeELogMsg(Logger :: LOG_LEVEL_WARNING, __FILE__, __LINE__, _1, _2, _3, _4, _5, _6); }
 //@}
 
 /**
  * Log-family macros that allow to pass file and line info. They use OOFEM loggers (and exit for fatals and errors).
  */
 //@{
-#define __OOFEM_FATAL(_file, _line, ...) { oofem_errLogger.writeELogMsg(Logger :: LOG_LEVEL_FATAL, _file, _line, __VA_ARGS__); oofem_exit(1); }
-#define __OOFEM_ERROR(_file, _line, ...) { oofem_errLogger.writeELogMsg(Logger :: LOG_LEVEL_ERROR, _file, _line, __VA_ARGS__); oofem_exit(1); }
-#define __OOFEM_WARNING(_file, _line, ...) { oofem_errLogger.writeELogMsg(Logger :: LOG_LEVEL_WARNING, _file, _line, __VA_ARGS__); }
+#define __OOFEM_FATAL(_file, _line, ...) { oofem_logger.writeELogMsg(Logger :: LOG_LEVEL_FATAL, _file, _line, __VA_ARGS__); oofem_exit(1); }
+#define __OOFEM_ERROR(_file, _line, ...) { oofem_logger.writeELogMsg(Logger :: LOG_LEVEL_ERROR, _file, _line, __VA_ARGS__); oofem_exit(1); }
+#define __OOFEM_WARNING(_file, _line, ...) { oofem_logger.writeELogMsg(Logger :: LOG_LEVEL_WARNING, _file, _line, __VA_ARGS__); }
 
 
 
 
-#define __OOFEM_FATAL1(_file, _line, _1) { oofem_errLogger.writeELogMsg(Logger :: LOG_LEVEL_FATAL, _file, _line, _1); oofem_exit(1); }
-#define __OOFEM_FATAL2(_file, _line, _1, _2) { oofem_errLogger.writeELogMsg(Logger :: LOG_LEVEL_FATAL, _file, _line, _1, _2); oofem_exit(1); }
-#define __OOFEM_FATAL3(_file, _line, _1, _2, _3) { oofem_errLogger.writeELogMsg(Logger :: LOG_LEVEL_FATAL, _file, _line, _1, _2, _3); oofem_exit(1); }
+#define __OOFEM_FATAL1(_file, _line, _1) { oofem_logger.writeELogMsg(Logger :: LOG_LEVEL_FATAL, _file, _line, _1); oofem_exit(1); }
+#define __OOFEM_FATAL2(_file, _line, _1, _2) { oofem_logger.writeELogMsg(Logger :: LOG_LEVEL_FATAL, _file, _line, _1, _2); oofem_exit(1); }
+#define __OOFEM_FATAL3(_file, _line, _1, _2, _3) { oofem_logger.writeELogMsg(Logger :: LOG_LEVEL_FATAL, _file, _line, _1, _2, _3); oofem_exit(1); }
 
 
-#define __OOFEM_ERROR1(_file, _line, _1) { oofem_errLogger.writeELogMsg(Logger :: LOG_LEVEL_ERROR, _file, _line, _1); oofem_exit(1); }
-#define __OOFEM_ERROR2(_file, _line, _1, _2) { oofem_errLogger.writeELogMsg(Logger :: LOG_LEVEL_ERROR, _file, _line, _1, _2); oofem_exit(1); }
-#define __OOFEM_ERROR3(_file, _line, _1, _2, _3) { oofem_errLogger.writeELogMsg(Logger :: LOG_LEVEL_ERROR, _file, _line, _1, _2, _3); oofem_exit(1); }
-#define __OOFEM_ERROR4(_file, _line, _1, _2, _3, _4) { oofem_errLogger.writeELogMsg(Logger :: LOG_LEVEL_ERROR, _file, _line, _1, _2, _3, _4); oofem_exit(1); }
-#define __OOFEM_ERROR5(_file, _line, _1, _2, _3, _4, _5) { oofem_errLogger.writeELogMsg(Logger :: LOG_LEVEL_ERROR, _file, _line, _1, _2, _3, _4, _5); oofem_exit(1); }
-#define __OOFEM_ERROR6(_file, _line, _1, _2, _3, _4, _5, _6) { oofem_errLogger.writeELogMsg(Logger :: LOG_LEVEL_ERROR, _file, _line, _1, _2, _3, _4, _5, _6); oofem_exit(1); }
+#define __OOFEM_ERROR1(_file, _line, _1) { oofem_logger.writeELogMsg(Logger :: LOG_LEVEL_ERROR, _file, _line, _1); oofem_exit(1); }
+#define __OOFEM_ERROR2(_file, _line, _1, _2) { oofem_logger.writeELogMsg(Logger :: LOG_LEVEL_ERROR, _file, _line, _1, _2); oofem_exit(1); }
+#define __OOFEM_ERROR3(_file, _line, _1, _2, _3) { oofem_logger.writeELogMsg(Logger :: LOG_LEVEL_ERROR, _file, _line, _1, _2, _3); oofem_exit(1); }
+#define __OOFEM_ERROR4(_file, _line, _1, _2, _3, _4) { oofem_logger.writeELogMsg(Logger :: LOG_LEVEL_ERROR, _file, _line, _1, _2, _3, _4); oofem_exit(1); }
+#define __OOFEM_ERROR5(_file, _line, _1, _2, _3, _4, _5) { oofem_logger.writeELogMsg(Logger :: LOG_LEVEL_ERROR, _file, _line, _1, _2, _3, _4, _5); oofem_exit(1); }
+#define __OOFEM_ERROR6(_file, _line, _1, _2, _3, _4, _5, _6) { oofem_logger.writeELogMsg(Logger :: LOG_LEVEL_ERROR, _file, _line, _1, _2, _3, _4, _5, _6); oofem_exit(1); }
 
-#define __OOFEM_WARNING1(_file, _line, _1) { oofem_errLogger.writeELogMsg(Logger :: LOG_LEVEL_WARNING, _file, _line, _1); }
-#define __OOFEM_WARNING2(_file, _line, _1, _2) { oofem_errLogger.writeELogMsg(Logger :: LOG_LEVEL_WARNING, _file, _line, _1, _2); }
-#define __OOFEM_WARNING3(_file, _line, _1, _2, _3) { oofem_errLogger.writeELogMsg(Logger :: LOG_LEVEL_WARNING, _file, _line, _1, _2, _3); }
-#define __OOFEM_WARNING4(_file, _line, _1, _2, _3, _4) { oofem_errLogger.writeELogMsg(Logger :: LOG_LEVEL_WARNING, _file, _line, _1, _2, _3, _4); }
-#define __OOFEM_WARNING5(_file, _line, _1, _2, _3, _4, _5) { oofem_errLogger.writeELogMsg(Logger :: LOG_LEVEL_WARNING, _file, _line, _1, _2, _3, _4, _5); }
+#define __OOFEM_WARNING1(_file, _line, _1) { oofem_logger.writeELogMsg(Logger :: LOG_LEVEL_WARNING, _file, _line, _1); }
+#define __OOFEM_WARNING2(_file, _line, _1, _2) { oofem_logger.writeELogMsg(Logger :: LOG_LEVEL_WARNING, _file, _line, _1, _2); }
+#define __OOFEM_WARNING3(_file, _line, _1, _2, _3) { oofem_logger.writeELogMsg(Logger :: LOG_LEVEL_WARNING, _file, _line, _1, _2, _3); }
+#define __OOFEM_WARNING4(_file, _line, _1, _2, _3, _4) { oofem_logger.writeELogMsg(Logger :: LOG_LEVEL_WARNING, _file, _line, _1, _2, _3, _4); }
+#define __OOFEM_WARNING5(_file, _line, _1, _2, _3, _4, _5) { oofem_logger.writeELogMsg(Logger :: LOG_LEVEL_WARNING, _file, _line, _1, _2, _3, _4, _5); }
 //@}
 } // end namespace oofem
 #endif // error_h

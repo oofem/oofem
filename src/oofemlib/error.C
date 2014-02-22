@@ -42,7 +42,7 @@
 namespace oofem {
 void oofem_exit(int code)
 {
-    oofem_errLogger.printStatistics();
+    oofem_logger.printStatistics();
     fprintf(stderr, "oofem exit code %d\n", code);
     exit(code);
 }

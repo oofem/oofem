@@ -318,7 +318,6 @@ main(int argc, char *argv[])
                     strcpy(buff, argv [ i + 1 ]);
                     int level = strtol(buff, ( char ** ) NULL, 10);
                     oofem_logger.setLogLevel(level);
-                    oofem_errLogger.setLogLevel(level);
                 }
             }   else if ( strcmp(argv [ i ], "-p") == 0 ) {
 #ifdef __PARALLEL_MODE
