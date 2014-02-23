@@ -418,7 +418,7 @@ GaussIntegrationRule :: getRequiredNumberOfIntegrationPoints(integrationDomain d
         break;
 
     default:
-        OOFEM_ERROR("GaussIntegrationRule::setUpIntegrationPoints - unknown integrationDomain");
+        OOFEM_ERROR("unknown integrationDomain");
     }
 
     return -1;
@@ -947,7 +947,7 @@ GaussIntegrationRule :: giveTetCoordsAndWeights(int nPoints, FloatArray &coords_
         break;
 
     default:
-        OOFEM_ERROR2("GaussIntegrationRule :: giveTetCoordsAndWeights: unsupported number of IPs (%d)", nPoints);
+        OOFEM_ERROR("unsupported number of IPs (%d)", nPoints);
     }
 }
 
@@ -1391,7 +1391,7 @@ GaussIntegrationRule :: giveTriCoordsAndWeights(int nPoints, FloatArray &coords_
         break;
 
     default:
-        OOFEM_ERROR2("giveTriCoordsAndWeights: unsupported number of IPs (%d)", nPoints);
+        OOFEM_SIMPLE_ERROR("giveTriCoordsAndWeights: unsupported number of IPs (%d)", nPoints);
     }
 }
 
@@ -1868,7 +1868,7 @@ GaussIntegrationRule :: giveLineCoordsAndWeights(int nPoints, FloatArray &coords
         break;
 
     default:
-        OOFEM_ERROR2("SetUpPointsOnLine: unsupported number of IPs (%d)", nPoints);
+        OOFEM_SIMPLE_ERROR("SetUpPointsOnLine: unsupported number of IPs (%d)", nPoints);
     }
 }
 } // end namespace oofem

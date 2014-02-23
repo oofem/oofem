@@ -119,7 +119,7 @@ FloatMatrix :: FloatMatrix(int n, int m) :
     memset( this->values, 0, allocatedSize * sizeof( double ) );
 #ifdef DEBUG
     if ( !values ) {
-        OOFEM_FATAL2("FloatArray :: FloatArray - Failed in allocating %d doubles", n);
+        OOFEM_SIMPLE_FATAL("FloatArray :: FloatArray - Failed in allocating %d doubles", n);
     }
 #endif
 }
@@ -171,8 +171,8 @@ FloatMatrix :: FloatMatrix(std :: initializer_list< std :: initializer_list< dou
         double *p = this->values;
         for ( auto col : mat ) {
  #if DEBUG
-            if ( this->nRows != col.size() ) {
-                OOFEM_ERROR("FloatMatrix :: FloatMatrix - Initializer list has inconsistent column sizes.");
+            if ( this->nRows != (int)col.size() ) {
+                OOFEM_SIMPLE_ERROR("FloatMatrix :: FloatMatrix - Initializer list has inconsistent column sizes.");
             }
  #endif
             for ( auto x : col ) {
@@ -193,8 +193,8 @@ FloatMatrix &FloatMatrix :: operator = ( std :: initializer_list< std :: initial
     for ( auto col : mat ) {
         for ( auto x : col ) {
  #if DEBUG
-            if ( this->nRows != col.size() ) {
-                OOFEM_ERROR("FloatMatrix :: FloatMatrix - Initializer list has inconsistent column sizes.");
+            if ( this->nRows != (int)col.size() ) {
+                OOFEM_SIMPLE_ERROR("FloatMatrix :: FloatMatrix - Initializer list has inconsistent column sizes.");
             }
  #endif
             * p = x;
@@ -220,19 +220,19 @@ void FloatMatrix :: checkBounds(int i, int j) const
 // Checks that the receiver includes a position (i,j).
 {
     if ( i <= 0 ) {
-        OOFEM_ERROR2("FloatMatrix::checkBounds : matrix error on rows : %d < 0", i);
+        OOFEM_SIMPLE_ERROR("FloatMatrix::checkBounds : matrix error on rows : %d < 0", i);
     }
 
     if ( j <= 0 ) {
-        OOFEM_ERROR2("FloatMatrix::checkBounds : matrix error on columns : %d < 0", j);
+        OOFEM_SIMPLE_ERROR("FloatMatrix::checkBounds : matrix error on columns : %d < 0", j);
     }
 
     if ( i > nRows ) {
-        OOFEM_ERROR3("FloatMatrix::checkBounds : matrix error on rows : %d > %d", i, nRows);
+        OOFEM_SIMPLE_ERROR("FloatMatrix::checkBounds : matrix error on rows : %d > %d", i, nRows);
     }
 
     if ( j > nColumns ) {
-        OOFEM_ERROR3("FloatMatrix::checkBounds : matrix error on columns : %d > %d", j, nColumns);
+        OOFEM_SIMPLE_ERROR("FloatMatrix::checkBounds : matrix error on columns : %d > %d", j, nColumns);
     }
 }
 
@@ -285,11 +285,11 @@ void FloatMatrix :: assemble(const FloatMatrix &src, const IntArray &loc)
 
 #ifdef DEBUG
     if ( size != loc.giveSize() ) {
-        OOFEM_ERROR("FloatMatrix :: assemble : dimensions of 'src' and 'loc' mismatch");
+        OOFEM_SIMPLE_ERROR("FloatMatrix :: assemble : dimensions of 'src' and 'loc' mismatch");
     }
 
     if ( !src.isSquare() ) {
-        OOFEM_ERROR("FloatMatrix :: assemble : 'src' is not sqaure matrix");
+        OOFEM_SIMPLE_ERROR("FloatMatrix :: assemble : 'src' is not sqaure matrix");
     }
 #endif
 
@@ -313,11 +313,11 @@ void FloatMatrix :: assemble(const FloatMatrix &src, const IntArray &rowind, con
 
 #ifdef DEBUG
     if ( nr != rowind.giveSize() ) {
-        OOFEM_ERROR("FloatMatrix :: assemble : row dimensions of 'src' and 'rowind' mismatch");
+        OOFEM_SIMPLE_ERROR("FloatMatrix :: assemble : row dimensions of 'src' and 'rowind' mismatch");
     }
 
     if ( nc != colind.giveSize() ) {
-        OOFEM_ERROR("FloatMatrix :: assemble : column dimensions of 'src' and 'colind' mismatch");
+        OOFEM_SIMPLE_ERROR("FloatMatrix :: assemble : column dimensions of 'src' and 'colind' mismatch");
     }
 #endif
 
@@ -370,7 +370,7 @@ void FloatMatrix :: beProductOf(const FloatMatrix &aMatrix, const FloatMatrix &b
 {
 #  ifdef DEBUG
     if ( aMatrix.nColumns != bMatrix.nRows ) {
-        OOFEM_ERROR("FloatMatrix::beProductOf : error in product A*B : dimensions do not match");
+        OOFEM_SIMPLE_ERROR("FloatMatrix::beProductOf : error in product A*B : dimensions do not match");
     }
 #  endif
     RESIZE(aMatrix.nRows, bMatrix.nColumns);
@@ -400,7 +400,7 @@ void FloatMatrix :: beTProductOf(const FloatMatrix &aMatrix, const FloatMatrix &
 {
 #  ifdef DEBUG
     if ( aMatrix.nRows != bMatrix.nRows ) {
-        OOFEM_ERROR("FloatMatrix::beTProductOf : error in product A*B : dimensions do not match");
+        OOFEM_SIMPLE_ERROR("FloatMatrix::beTProductOf : error in product A*B : dimensions do not match");
     }
 #  endif
     RESIZE(aMatrix.nColumns, bMatrix.nColumns);
@@ -430,7 +430,7 @@ void FloatMatrix :: beProductTOf(const FloatMatrix &aMatrix, const FloatMatrix &
 {
 #  ifdef DEBUG
     if ( aMatrix.nColumns != bMatrix.nColumns ) {
-        OOFEM_ERROR("FloatMatrix::beProductTOf : error in product A*B : dimensions do not match");
+        OOFEM_SIMPLE_ERROR("FloatMatrix::beProductTOf : error in product A*B : dimensions do not match");
     }
 #  endif
     RESIZE(aMatrix.nRows, bMatrix.nRows);
@@ -460,10 +460,10 @@ void FloatMatrix :: addProductOf(const FloatMatrix &aMatrix, const FloatMatrix &
 {
 #  ifdef DEBUG
     if ( aMatrix.nColumns != bMatrix.nRows ) {
-        OOFEM_ERROR("FloatMatrix::addProductOf : error in product A*B : dimensions do not match");
+        OOFEM_SIMPLE_ERROR("FloatMatrix::addProductOf : error in product A*B : dimensions do not match");
     }
     if ( aMatrix.nRows != this->nRows || bMatrix.nColumns != this->nColumns ) {
-        OOFEM_ERROR("FloatMatrix::addTProductOf : error in product receiver : dimensions do not match");
+        OOFEM_SIMPLE_ERROR("FloatMatrix::addTProductOf : error in product receiver : dimensions do not match");
     }
 #  endif
 
@@ -492,10 +492,10 @@ void FloatMatrix :: addTProductOf(const FloatMatrix &aMatrix, const FloatMatrix 
 {
 #  ifdef DEBUG
     if ( aMatrix.nRows != bMatrix.nRows ) {
-        OOFEM_ERROR("FloatMatrix::addTProductOf : error in product A*B : dimensions do not match");
+        OOFEM_SIMPLE_ERROR("FloatMatrix::addTProductOf : error in product A*B : dimensions do not match");
     }
     if ( aMatrix.nColumns != this->nColumns || bMatrix.nColumns != this->nRows ) {
-        OOFEM_ERROR("FloatMatrix::addTProductOf : error in product receiver : dimensions do not match");
+        OOFEM_SIMPLE_ERROR("FloatMatrix::addTProductOf : error in product receiver : dimensions do not match");
     }
 #  endif
 
@@ -582,7 +582,7 @@ void FloatMatrix :: beLocalCoordSys(const FloatArray &normal)
         this->at(3, 2) = normal(1);
         this->at(3, 3) = normal(2);
     } else {
-        OOFEM_ERROR("FloatMatrix :: beLocalCoordinateTransformation - Normal needs 1 to 3 components.");
+        OOFEM_SIMPLE_ERROR("FloatMatrix :: beLocalCoordinateTransformation - Normal needs 1 to 3 components.");
     }
 }
 
@@ -597,7 +597,7 @@ void FloatMatrix :: setSubMatrix(const FloatMatrix &src, int sr, int sc)
     int nc = sc + srcCols;
 
     if ( ( this->giveNumberOfRows() < nr ) || ( this->giveNumberOfColumns() < nc ) ) {
-        OOFEM_ERROR("FloatMatrix :: setSubMatrix  - Sub matrix doesn't fit inside allocated space.");
+        OOFEM_SIMPLE_ERROR("FloatMatrix :: setSubMatrix  - Sub matrix doesn't fit inside allocated space.");
     }
 #endif
 
@@ -622,7 +622,7 @@ void FloatMatrix :: setTSubMatrix(const FloatMatrix &src, int sr, int sc)
     int nc = sc + srcRows;
 
     if ( ( this->giveNumberOfRows() < nr ) || ( this->giveNumberOfColumns() < nc ) ) {
-        OOFEM_ERROR("FloatMatrix :: setTSubMatrix  - Sub matrix doesn't fit inside allocated space");
+        OOFEM_SIMPLE_ERROR("FloatMatrix :: setTSubMatrix  - Sub matrix doesn't fit inside allocated space");
     }
 #endif
 
@@ -682,7 +682,7 @@ void FloatMatrix :: setColumn(const FloatArray &src, int c)
     int nr = src.giveSize();
 #ifdef DEBUG
     if ( this->giveNumberOfRows() != nr || c < 1 || c > this->giveNumberOfColumns() ) {
-        OOFEM_ERROR("FloatMatrix :: setColumn - Size mismatch");
+        OOFEM_SIMPLE_ERROR("FloatMatrix :: setColumn - Size mismatch");
     }
 #endif
 
@@ -697,7 +697,7 @@ void FloatMatrix :: copyColumn(FloatArray &dest, int c) const
     int nr = this->giveNumberOfRows();
 #ifdef DEBUG
     if ( c < 1 || c > this->giveNumberOfColumns() ) {
-        OOFEM_ERROR2("FloatMatrix :: copyColumn - Column outside range (%d)", c);
+        OOFEM_SIMPLE_ERROR("FloatMatrix :: copyColumn - Column outside range (%d)", c);
     }
 #endif
 
@@ -869,7 +869,7 @@ void FloatMatrix :: beInverseOf(const FloatMatrix &src)
 
 #  ifdef DEBUG
     if ( !src.isSquare() ) {
-        OOFEM_ERROR3("FloatMatrix::beInverseOf : cannot inverse a %d by %d matrix", src.nRows, src.nColumns);
+        OOFEM_SIMPLE_ERROR("FloatMatrix::beInverseOf : cannot inverse a %d by %d matrix", src.nRows, src.nColumns);
     }
 #  endif
 
@@ -920,7 +920,7 @@ void FloatMatrix :: beInverseOf(const FloatMatrix &src)
         // LU-factorization
         dgetrf_(& n, & n, this->values, & n, ipiv.givePointer(), & info);
         if ( info != 0 ) {
-            OOFEM_ERROR2("FloatMatrix::beInverseOf : dgetrf error %d", info);
+            OOFEM_SIMPLE_ERROR("FloatMatrix::beInverseOf : dgetrf error %d", info);
         }
 
         // Inverse
@@ -928,9 +928,9 @@ void FloatMatrix :: beInverseOf(const FloatMatrix &src)
         FloatArray work(lwork);
         dgetri_(& this->nRows, this->values, & this->nRows, ipiv.givePointer(), work.givePointer(), & lwork, & info);
         if ( info > 0 ) {
-            OOFEM_ERROR2("FloatMatrix::beInverseOf : Singular at %d", info);
+            OOFEM_SIMPLE_ERROR("FloatMatrix::beInverseOf : Singular at %d", info);
         } else if ( info < 0 ) {
-            OOFEM_ERROR2("FloatMatrix::beInverseOf : Error on input %d", info);
+            OOFEM_SIMPLE_ERROR("FloatMatrix::beInverseOf : Error on input %d", info);
         }
 #else
         // size >3 ... gaussian elimination - slow but safe
@@ -947,7 +947,7 @@ void FloatMatrix :: beInverseOf(const FloatMatrix &src)
         for ( int i = 1; i < nRows; i++ ) {
             piv = tmp.at(i, i);
             if ( fabs(piv) < 1.e-20 ) {
-                OOFEM_ERROR3("FloatMatrix::beInverseOf : cannot inverse a %d by %d matrix", nRows, nColumns);
+                OOFEM_SIMPLE_ERROR("FloatMatrix::beInverseOf : cannot inverse a %d by %d matrix", nRows, nColumns);
             }
 
             for ( int j = i + 1; j <= nRows; j++ ) {
@@ -999,12 +999,12 @@ void FloatMatrix :: beSubMatrixOf(const FloatMatrix &src,
 {
 #ifdef DEBUG
     if ( ( topRow < 1 ) || ( bottomRow < 1 ) || ( topCol < 1 ) || ( bottomCol < 1 ) ) {
-        OOFEM_ERROR("FloatMatrix::beSubMatrixOf : subindexes size mismatch");
+        OOFEM_SIMPLE_ERROR("FloatMatrix::beSubMatrixOf : subindexes size mismatch");
     }
 
     if ( ( src.nRows < bottomRow ) || ( src.nColumns < bottomCol ) || ( ( bottomRow - topRow ) > src.nRows ) ||
         ( ( bottomCol - topCol ) > src.nColumns ) ) {
-        OOFEM_ERROR("FloatMatrix::beSubMatrixOf : subindexes size mismatch");
+        OOFEM_SIMPLE_ERROR("FloatMatrix::beSubMatrixOf : subindexes size mismatch");
     }
 #endif
 
@@ -1035,7 +1035,7 @@ FloatMatrix :: beSubMatrixOf(const FloatMatrix &src, const IntArray &indxRow, co
 #  ifdef DEBUG
     if ( indxRow.maximum() > src.giveNumberOfRows()  ||  indxCol.maximum() > src.giveNumberOfColumns()  ||
          indxRow.minimum() < 1  ||  indxCol.minimum() < 1 ) {
-        OOFEM_ERROR("FloatMatrix::beSubMatrixOf : index exceeds source dimensions");
+        OOFEM_SIMPLE_ERROR("FloatMatrix::beSubMatrixOf : index exceeds source dimensions");
     }
 # endif
 
@@ -1064,7 +1064,7 @@ void FloatMatrix :: add(const FloatMatrix &aMatrix)
     }
 #     ifdef DEBUG
     if ( ( aMatrix.nRows != nRows || aMatrix.nColumns != nColumns ) && aMatrix.isNotEmpty() ) {
-        OOFEM_ERROR5("FloatMatrix::add : dimensions mismatch : (r1,c1)+(r2,c2) : (%d,%d)+(%d,%d)", nRows, nColumns, aMatrix.nRows, aMatrix.nColumns);
+        OOFEM_SIMPLE_ERROR("FloatMatrix::add : dimensions mismatch : (r1,c1)+(r2,c2) : (%d,%d)+(%d,%d)", nRows, nColumns, aMatrix.nRows, aMatrix.nColumns);
     }
 #     endif
 
@@ -1079,7 +1079,7 @@ void FloatMatrix :: add(const FloatMatrix &aMatrix)
 
     double *P1 = values;
     double *P2 = aMatrix.values;
-    register int i  = n * m;
+    int i  = n * m;
     while ( i-- ) {
         * P1++ += * P2++;
     }
@@ -1102,7 +1102,7 @@ void FloatMatrix :: add(double s, const FloatMatrix &aMatrix)
     }
 #     ifdef DEBUG
     if ( ( aMatrix.nRows != nRows || aMatrix.nColumns != nColumns ) && aMatrix.isNotEmpty() ) {
-        OOFEM_ERROR5("FloatMatrix::add : dimensions mismatch : (r1,c1)+(r2,c2) : (%d,%d)+(%d,%d)", nRows, nColumns, aMatrix.nRows, aMatrix.nColumns);
+        OOFEM_SIMPLE_ERROR("FloatMatrix::add : dimensions mismatch : (r1,c1)+(r2,c2) : (%d,%d)+(%d,%d)", nRows, nColumns, aMatrix.nRows, aMatrix.nColumns);
     }
 #     endif
 
@@ -1116,7 +1116,7 @@ void FloatMatrix :: add(double s, const FloatMatrix &aMatrix)
 
     double *P1 = values;
     double *P2 = aMatrix.values;
-    register int i  = n * m;
+    int i  = n * m;
     while ( i-- ) {
         * P1++ += s * ( * P2++ );
     }
@@ -1133,7 +1133,7 @@ void FloatMatrix :: subtract(const FloatMatrix &aMatrix)
     }
 #     ifdef DEBUG
     if ( ( aMatrix.nRows != nRows || aMatrix.nColumns != nColumns ) && aMatrix.isNotEmpty() ) {
-        OOFEM_ERROR5("FloatMatrix::subtract : dimensions mismatch : (r1,c1)-(r2,c2) : (%d,%d)-(%d,%d)", nRows, nColumns, aMatrix.nRows, aMatrix.nColumns);
+        OOFEM_SIMPLE_ERROR("FloatMatrix::subtract : dimensions mismatch : (r1,c1)-(r2,c2) : (%d,%d)-(%d,%d)", nRows, nColumns, aMatrix.nRows, aMatrix.nColumns);
     }
 #     endif
 
@@ -1148,7 +1148,7 @@ void FloatMatrix :: subtract(const FloatMatrix &aMatrix)
 
     double *P1 = values;
     double *P2 = aMatrix.values;
-    register int i  = n * m;
+    int i  = n * m;
     while ( i-- ) {
         * P1++ -= * P2++;
     }
@@ -1161,11 +1161,11 @@ void FloatMatrix :: solveForRhs(const FloatArray &b, FloatArray &answer, bool tr
 {
 #  ifdef DEBUG
     if ( !this->isSquare() ) {
-        OOFEM_ERROR3("FloatMatrix::solveForRhs : cannot solve a %d by %d matrix", nRows, nColumns);
+        OOFEM_SIMPLE_ERROR("FloatMatrix::solveForRhs : cannot solve a %d by %d matrix", nRows, nColumns);
     }
 
     if ( nRows != b.giveSize() ) {
-        OOFEM_ERROR("FloatMatrix::solveForRhs : dimension mismatch");
+        OOFEM_SIMPLE_ERROR("FloatMatrix::solveForRhs : dimension mismatch");
     }
 #  endif
 
@@ -1179,7 +1179,7 @@ void FloatMatrix :: solveForRhs(const FloatArray &b, FloatArray &answer, bool tr
         dgetrs_(transpose ? "Transpose" : "No transpose", & this->nRows, & nrhs, this->values, & this->nRows, ipiv.givePointer(), answer.givePointer(), & this->nRows, & info);
     }
     if ( info != 0 ) {
-        OOFEM_ERROR2("FloatMatrix::solveForRhs : error %d", info);
+        OOFEM_SIMPLE_ERROR("FloatMatrix::solveForRhs : error %d", info);
     }
 #else
     int pivRow;
@@ -1208,7 +1208,7 @@ void FloatMatrix :: solveForRhs(const FloatArray &b, FloatArray &answer, bool tr
         }
 
         if ( piv < 1.e-20 ) {
-            OOFEM_ERROR2("FloatMatrix::solveForRhs : cannot solve, seems to be singular at row %d", pivRow);
+            OOFEM_SIMPLE_ERROR("FloatMatrix::solveForRhs : cannot solve, seems to be singular at row %d", pivRow);
         }
 
         // exchange rows
@@ -1255,11 +1255,11 @@ void FloatMatrix :: solveForRhs(const FloatMatrix &b, FloatMatrix &answer, bool 
 {
 #  ifdef DEBUG
     if ( !this->isSquare() ) {
-        OOFEM_ERROR3("FloatMatrix::solveForRhs : cannot solve a %d by %d matrix", nRows, nColumns);
+        OOFEM_SIMPLE_ERROR("FloatMatrix::solveForRhs : cannot solve a %d by %d matrix", nRows, nColumns);
     }
 
     if ( nRows != b.giveNumberOfRows() ) {
-        OOFEM_ERROR("FloatMatrix::solveForRhs : dimension mismatch");
+        OOFEM_SIMPLE_ERROR("FloatMatrix::solveForRhs : dimension mismatch");
     }
 #  endif
 
@@ -1272,7 +1272,7 @@ void FloatMatrix :: solveForRhs(const FloatMatrix &b, FloatMatrix &answer, bool 
         dgetrs_(transpose ? "t" : "n", & this->nRows, & answer.nColumns, this->values, & this->nRows, ipiv.givePointer(), answer.givePointer(), & this->nRows, & info);
     }
     if ( info != 0 ) {
-        OOFEM_ERROR2("FloatMatrix::solveForRhs : error %d", info);
+        OOFEM_SIMPLE_ERROR("FloatMatrix::solveForRhs : error %d", info);
     }
 #else
     int pivRow, nPs;
@@ -1301,7 +1301,7 @@ void FloatMatrix :: solveForRhs(const FloatMatrix &b, FloatMatrix &answer, bool 
         }
 
         if ( fabs(piv) < 1.e-20 ) {
-            OOFEM_ERROR3("FloatMatrix::solveForRhs : pivot too small, cannot solve %d by %d matrix", nRows, nColumns);
+            OOFEM_SIMPLE_ERROR("FloatMatrix::solveForRhs : pivot too small, cannot solve %d by %d matrix", nRows, nColumns);
         }
 
         // exchange rows
@@ -1320,7 +1320,7 @@ void FloatMatrix :: solveForRhs(const FloatMatrix &b, FloatMatrix &answer, bool 
         }
 
         if ( fabs(piv) < 1.e-20 ) {
-            OOFEM_ERROR("FloatMatrix::solveForRhs : cannot solve, zero pivot encountered");
+            OOFEM_SIMPLE_ERROR("FloatMatrix::solveForRhs : cannot solve, zero pivot encountered");
         }
 
         for ( int j = i + 1; j <= nRows; j++ ) {
@@ -1376,7 +1376,7 @@ void FloatMatrix :: beUnitMatrix()
 {
 #ifdef DEBUG
     if ( !this->isSquare() ) {
-        OOFEM_ERROR3("FloatMatrix::beUnitMatrix : cannot make unit matrix of %d by %d matrix", nRows, nColumns);
+        OOFEM_SIMPLE_ERROR("FloatMatrix::beUnitMatrix : cannot make unit matrix of %d by %d matrix", nRows, nColumns);
     }
 #endif
 
@@ -1480,7 +1480,7 @@ double FloatMatrix :: giveDeterminant() const
 {
 #  ifdef DEBUG
     if ( !this->isSquare() ) {
-        OOFEM_ERROR3("FloatMatrix::giveDeterminant : cannot compute determinant of a %d by %d matrix", nRows, nColumns);
+        OOFEM_SIMPLE_ERROR("FloatMatrix::giveDeterminant : cannot compute determinant of a %d by %d matrix", nRows, nColumns);
     }
 
 #  endif
@@ -1494,7 +1494,7 @@ double FloatMatrix :: giveDeterminant() const
                  values [ 6 ] * values [ 1 ] * values [ 5 ] - values [ 6 ] * values [ 4 ] * values [ 2 ] -
                  values [ 7 ] * values [ 5 ] * values [ 0 ] - values [ 8 ] * values [ 3 ] * values [ 1 ] );
     } else {
-        OOFEM_ERROR3("FloatMatrix::giveDeterminant : sorry, cannot inverse %d by %d matrices", nRows, nColumns);
+        OOFEM_SIMPLE_ERROR("FloatMatrix::giveDeterminant : sorry, cannot inverse %d by %d matrices", nRows, nColumns);
     }
 
     return 0.;
@@ -1552,7 +1552,7 @@ void FloatMatrix :: rotatedWith(const FloatMatrix &r, char mode)
         rta.beProductOf(r, * this);      //  r . a
         this->beProductTOf(rta, r);      //  r . a . r^T
     } else {
-        OOFEM_ERROR("FloatMatrix :: rotatedWith: unsupported mode");
+        OOFEM_SIMPLE_ERROR("FloatMatrix :: rotatedWith: unsupported mode");
     }
 }
 
@@ -1563,7 +1563,7 @@ void FloatMatrix :: symmetrized()
 {
 #  ifdef DEBUG
     if ( nRows != nColumns ) {
-        OOFEM_ERROR("FloatMatrix::symmetrized : cannot symmetrize a non-square matrix");
+        OOFEM_SIMPLE_ERROR("FloatMatrix::symmetrized : cannot symmetrize a non-square matrix");
     }
 
 #   endif
@@ -1643,7 +1643,7 @@ double FloatMatrix :: computeNorm(char p) const
      *  Ata.eigenValues(eigs, 1);
      *  return sqrt(eigs(0));
      * } */else {
-        OOFEM_ERROR2("FloatMatrix::computeNorm(p) : p == %d not implemented.\n", p);
+        OOFEM_SIMPLE_ERROR("FloatMatrix::computeNorm(p) : p == %d not implemented.\n", p);
         return 0.0;
     }
 #  endif
@@ -1658,7 +1658,7 @@ void FloatMatrix :: beMatrixForm(const FloatArray &aArray)
     // order: 11, 22, 33, 23, 13, 12, 32, 31, 21
 #  ifdef DEBUG
     if ( aArray.giveSize() != 6 && aArray.giveSize() != 9 ) {
-        OOFEM_ERROR("FloatArray :: beMatrixForm : matrix dimension is not 3x3");
+        OOFEM_SIMPLE_ERROR("FloatArray :: beMatrixForm : matrix dimension is not 3x3");
     }
 #  endif
     this->resize(3, 3);
@@ -1690,7 +1690,7 @@ void FloatMatrix :: changeComponentOrder()
     // Changes index order between abaqus <-> OOFEM
     //#  ifdef DEBUG
     //	if ( nRows != 6 || nColumns != 6 ) {
-    //		OOFEM_ERROR("FloatArray :: :changeComponentOrder : matrix dimension is not 6x6");
+    //		OOFEM_SIMPLE_ERROR("FloatArray :: :changeComponentOrder : matrix dimension is not 6x6");
     //	}
     //#  endif
 
@@ -1735,7 +1735,7 @@ double FloatMatrix :: computeReciprocalCondition(char p) const
 {
 #  ifdef DEBUG
     if ( !this->isSquare() ) {
-        OOFEM_ERROR3("FloatMatrix::computeReciprocalCondition : receiver must be square (is %d by %d)", this->nRows, this->nColumns);
+        OOFEM_SIMPLE_ERROR("FloatMatrix::computeReciprocalCondition : receiver must be square (is %d by %d)", this->nRows, this->nColumns);
     }
 #  endif
     double anorm = this->computeNorm(p);
@@ -1751,11 +1751,11 @@ double FloatMatrix :: computeReciprocalCondition(char p) const
         FloatMatrix a_cpy = * this;
         dgetrf_(& n, & n, a_cpy.values, & n, iwork.givePointer(), & info);
         if ( info < 0 ) {
-            OOFEM_ERROR2("FloatMatrix::computeReciprocalCondition : dgetfr error %d\n", info);
+            OOFEM_SIMPLE_ERROR("FloatMatrix::computeReciprocalCondition : dgetfr error %d\n", info);
         }
         dgecon_(& p, & ( this->nRows ), a_cpy.values, & this->nRows, & anorm, & rcond, work.givePointer(), iwork.givePointer(), & info, 1);
         if ( info < 0 ) {
-            OOFEM_ERROR2("FloatMatrix::computeReciprocalCondition : dgecon error %d\n", info);
+            OOFEM_SIMPLE_ERROR("FloatMatrix::computeReciprocalCondition : dgecon error %d\n", info);
         }
         return rcond;
     }
@@ -1773,7 +1773,7 @@ void FloatMatrix :: beMatrixFormOfStress(const FloatArray &aArray)
     // Revrites the  matrix on vector form (symmetrized matrix used), order: 11, 22, 33, 23, 13, 12
 #  ifdef DEBUG
     if ( aArray.giveSize() != 6 && aArray.giveSize() != 9 ) {
-        OOFEM_ERROR("FloatArray :: beMatrixForm : matrix dimension is not 3x3");
+        OOFEM_SIMPLE_ERROR("FloatArray :: beMatrixForm : matrix dimension is not 3x3");
     }
 #  endif
     this->resize(3, 3);
@@ -1839,7 +1839,7 @@ bool FloatMatrix :: computeEigenValuesSymmetric(FloatArray &lambda, FloatMatrix 
     return info == 0;
 
  #else
-    OOFEM_ERROR("FloatMatrix::computeEigenValuesSymmetric : Requires LAPACK\n");
+    OOFEM_SIMPLE_ERROR("FloatMatrix::computeEigenValuesSymmetric : Requires LAPACK\n");
     return false;
 
  #endif
@@ -1935,14 +1935,14 @@ bool FloatMatrix :: jaco_(FloatArray &eval, FloatMatrix &v, int nf)
     /* Function Body */
 #ifdef DEBUG
     if ( !isSquare() ) {
-        OOFEM_ERROR("FloatMatrix::jaco_: Not square matrix");
+        OOFEM_SIMPLE_ERROR("FloatMatrix::jaco_: Not square matrix");
     }
     // check for symmetry
     for ( i = 1; i <= neq; i++ ) {
         for ( j = i + 1; j <= neq; j++ ) {
             //if ( this->at(i, j) != this->at(j, i) ) {
             if ( fabs( this->at(i, j) - this->at(j, i) ) > 1.0e-6 ) {
-                OOFEM_ERROR("FloatMatrix::jaco_: Not Symmetric matrix");
+                OOFEM_SIMPLE_ERROR("FloatMatrix::jaco_: Not Symmetric matrix");
             }
         }
     }
@@ -2065,7 +2065,7 @@ bool FloatMatrix :: jaco_(FloatArray &eval, FloatMatrix &v, int nf)
 
         /* ---- CHECK FOR CONVERGENCE -------------------- */
         if ( ++ite > 50 ) {
-            OOFEM_ERROR("FloatMatrix::jaco_: too many iterations");
+            OOFEM_SIMPLE_ERROR("FloatMatrix::jaco_: too many iterations");
         }
     } while ( fabs(ssum) / sum > tol );
 

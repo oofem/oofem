@@ -82,7 +82,6 @@ IRResultType
 AdaptiveNonLinearStatic :: initializeFrom(InputRecord *ir)
 // input from inputString
 {
-    const char *__proc = "initializeFrom"; // Required by IR_GIVE_FIELD macro
     IRResultType result;                // Required by IR_GIVE_FIELD macro
     int _val;
 
@@ -155,7 +154,7 @@ AdaptiveNonLinearStatic :: solveYourselfAt(TimeStep *tStep)
             this->terminateAnalysis();
             throw OOFEM_Terminate();
         } else {
-            _error("solveYourselfAt: MesherInterface::createMesh failed");
+            OOFEM_ERROR("MesherInterface::createMesh failed");
         }
     }
 }
@@ -189,12 +188,12 @@ double AdaptiveNonLinearStatic :: giveUnknownComponent(ValueModeType mode, TimeS
     int eq = dof->__giveEquationNumber();
 #ifdef DEBUG
     if ( eq == 0 ) {
-        _error("giveUnknownComponent: invalid equation number");
+        OOFEM_ERROR("invalid equation number");
     }
 #endif
 
     if ( tStep != this->giveCurrentStep() ) {
-        _error("giveUnknownComponent: unknown time step encountered");
+        OOFEM_ERROR("unknown time step encountered");
         return 0.;
     }
 
@@ -215,7 +214,7 @@ double AdaptiveNonLinearStatic :: giveUnknownComponent(ValueModeType mode, TimeS
             }
 
         default:
-            _error("giveUnknownComponent: Unknown is of undefined ValueModeType for this problem");
+            OOFEM_ERROR("Unknown is of undefined ValueModeType for this problem");
         }
     } else {
         return NonLinearStatic :: giveUnknownComponent(mode, tStep, d, dof);
@@ -236,7 +235,7 @@ AdaptiveNonLinearStatic :: initializeAdaptiveFrom(EngngModel *sourceProblem)
     timer.startTimer();
 
     if ( dynamic_cast< AdaptiveNonLinearStatic * >(sourceProblem) ) {
-        _error("AdaptiveNonLinearStatic :: initializeAdaptiveFrom - source problem must also be AdaptiveNonlinearStatic.");
+        OOFEM_ERROR("source problem must also be AdaptiveNonlinearStatic.");
     }
 
     this->currentStep = new TimeStep( * ( sourceProblem->giveCurrentStep() ) );
@@ -341,12 +340,12 @@ AdaptiveNonLinearStatic :: initializeAdaptiveFrom(EngngModel *sourceProblem)
         if ( initFlag ) {
             stiffnessMatrix = classFactory.createSparseMtrx(sparseMtrxType);
             if ( stiffnessMatrix == NULL ) {
-                _error("proceedStep: sparse matrix creation failed");
+                OOFEM_ERROR("sparse matrix creation failed");
             }
 
             if ( nonlocalStiffnessFlag ) {
                 if ( !stiffnessMatrix->isAsymmetric() ) {
-                    _error("proceedStep: stiffnessMatrix does not support asymmetric storage");
+                    OOFEM_ERROR("stiffnessMatrix does not support asymmetric storage");
                 }
             }
 
@@ -430,7 +429,7 @@ AdaptiveNonLinearStatic :: initializeAdaptive(int tStepNumber)
     Domain *dNew = new Domain(2, sernum + 1, this);
     DataReader *domainDr = this->GiveDomainDataReader(1, sernum + 1, contextMode_read);
     if ( !dNew->instanciateYourself(domainDr) ) {
-        _error("initializeAdaptive: domain Instanciation failed");
+        OOFEM_ERROR("domain Instanciation failed");
     }
 
     delete domainDr;
@@ -675,13 +674,13 @@ AdaptiveNonLinearStatic :: adaptiveRemap(Domain *dNew)
             if ( !stiffnessMatrix ) {
                 stiffnessMatrix = classFactory.createSparseMtrx(sparseMtrxType);
                 if ( stiffnessMatrix == NULL ) {
-                    _error("proceedStep: sparse matrix creation failed");
+                    OOFEM_ERROR("sparse matrix creation failed");
                 }
             }
 
             if ( nonlocalStiffnessFlag ) {
                 if ( !stiffnessMatrix->isAsymmetric() ) {
-                    _error("proceedStep: stiffnessMatrix does not support asymmetric storage");
+                    OOFEM_ERROR("stiffnessMatrix does not support asymmetric storage");
                 }
             }
 
@@ -821,7 +820,6 @@ AdaptiveNonLinearStatic :: assembleInitialLoadVector(FloatArray &loadVector, Flo
                                                      AdaptiveNonLinearStatic *sourceProblem, int domainIndx,
                                                      TimeStep *tStep)
 {
-    const char *__proc = "assembleInitialLoadVector"; // Required by IR_GIVE_FIELD macro
     IRResultType result;                           // Required by IR_GIVE_FIELD macro
 
     int mStepNum = tStep->giveMetaStepNumber();
@@ -862,7 +860,7 @@ AdaptiveNonLinearStatic :: assembleInitialLoadVector(FloatArray &loadVector, Flo
 
             // check if displacement control takes place
             if ( ir->hasField(_IFT_AdaptiveNonLinearStatic_ddm) ) {
-                _error("assembleInitialLoadVector: fixload recovery not supported for direct displacement control");
+                OOFEM_ERROR("fixload recovery not supported for direct displacement control");
             }
 
             int firststep = iMStep->giveFirstStepNumber();
@@ -896,7 +894,7 @@ AdaptiveNonLinearStatic :: assembleInitialLoadVector(FloatArray &loadVector, Flo
                     loadVectorOfPrescribed.add(_incrementalLoadVectorOfPrescribed);
                 }
             } else {
-                _error("assembleInitialLoadVector: fixload recovery not supported");
+                OOFEM_ERROR("fixload recovery not supported");
             }
         }
     } // end loop over meta-steps
@@ -933,7 +931,6 @@ AdaptiveNonLinearStatic :: assembleInitialLoadVector(FloatArray &loadVector, Flo
  *                           AdaptiveNonLinearStatic* sourceProblem, int domainIndx,
  *                           TimeStep* tStep)
  * {
- * const char *__proc = "assembleInitialLoadVector"; // Required by IR_GIVE_FIELD macro
  * IRResultType result;                              // Required by IR_GIVE_FIELD macro
  *
  * int mStepNum = tStep->giveMetaStepNumber() ;
@@ -959,7 +956,7 @@ AdaptiveNonLinearStatic :: assembleInitialLoadVector(FloatArray &loadVector, Flo
  *
  * // check if displacement control takes place
  * if (ir->hasField(_IFT_AdaptiveNonLinearStatic_ddm, "ddm"))
- * _error ("assembleCurrentTotalLoadVector: fixload recovery not supported for direct displacement control");
+ * OOFEM_ERROR("fixload recovery not supported for direct displacement control");
  * int _val = 0;
  * IR_GIVE_OPTIONAL_FIELD (ir, _val, _IFT_AdaptiveNonLinearStatic_refloadmode, "refloadmode");
  *
@@ -989,7 +986,7 @@ AdaptiveNonLinearStatic :: assembleInitialLoadVector(FloatArray &loadVector, Flo
  * loadVector.add(_incrementalLoadVector);
  * loadVectorOfPrescribed.add(_incrementalLoadVectorOfPrescribed);
  * } else {
- * _error ("assembleCurrentTotalLoadVector: totalload recovery not supported");
+ * OOFEM_ERROR("totalload recovery not supported");
  * }
  *
  *
@@ -1003,7 +1000,7 @@ AdaptiveNonLinearStatic :: giveTimeStepLoadLevel(int istep)
     if ( ( istep >= this->giveNumberOfFirstStep() ) && ( istep <= this->giveNumberOfSteps() ) ) {
         return timeStepLoadLevels.at(istep);
     } else {
-        _error("solution step out of range");
+        OOFEM_ERROR("solution step out of range");
     }
 
     return 0.0; // to make compiler happy

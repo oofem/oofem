@@ -89,7 +89,7 @@ Quad1Mindlin :: computeBodyLoadVectorAt(FloatArray &answer, Load *forLoad, TimeS
     FloatArray force, gravity, n;
 
     if ( ( forLoad->giveBCGeoType() != BodyLoadBGT ) || ( forLoad->giveBCValType() != ForceLoadBVT ) ) {
-        _error("computeBodyLoadVectorAt: unknown load type");
+        OOFEM_ERROR("computeBodyLoadVectorAt: unknown load type");
     }
 
     // note: force is assumed to be in global coordinate system.
@@ -317,7 +317,7 @@ Quad1Mindlin :: giveEdgeDofMapping(IntArray &answer, int iEdge) const
     } else if ( iEdge == 4 ) { // edge between nodes 4 1
         answer.setValues(6, 10, 11, 12, 1, 2, 3);
     } else {
-        _error("giveEdgeDofMapping: wrong edge number");
+        OOFEM_ERROR("giveEdgeDofMapping: wrong edge number");
     }
 }
 

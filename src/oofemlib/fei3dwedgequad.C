@@ -102,7 +102,7 @@ FEI3dWedgeQuad :: local2global(FloatArray &answer, const FloatArray &lcoords, co
 int
 FEI3dWedgeQuad :: global2local(FloatArray &answer, const FloatArray &coords, const FEICellGeometry &cellgeo)
 {
-    OOFEM_ERROR("FEI3dHexaQuad :: global2local not implemented");
+    OOFEM_ERROR("not implemented");
     return 1;
 }
 
@@ -205,7 +205,7 @@ void FEI3dWedgeQuad :: edgeEvalN(FloatArray &answer, int iedge, const FloatArray
 
 void FEI3dWedgeQuad :: edgeEvaldNdx(FloatMatrix &answer, int iedge, const FloatArray &lcoords, const FEICellGeometry &cellgeo)
 {
-    OOFEM_ERROR("FEI3dWedgeQuad :: edgeEvaldNdx not implemented");
+    OOFEM_ERROR("not implemented");
 }
 
 
@@ -246,14 +246,14 @@ FEI3dWedgeQuad :: computeLocalEdgeMapping(IntArray &edgeNodes, int iedge)
     } else if ( iedge == 9 ) {
         edgeNodes.setValues(3, 3, 6, 15);
     } else {
-        OOFEM_ERROR2("FEI3dWedgeQuad :: computeLocalEdgeMapping - Edge %d doesn't exist.\n", iedge);
+        OOFEM_ERROR("Edge %d doesn't exist.\n", iedge);
     }
 }
 
 
 double FEI3dWedgeQuad :: edgeGiveTransformationJacobian(int iedge, const FloatArray &lcoords, const FEICellGeometry &cellgeo)
 {
-    OOFEM_ERROR("FEI3dWedgeQuad :: edgeGiveTransformationJacobian not implemented");
+    OOFEM_ERROR("not implemented");
     return 0.0;
 }
 
@@ -322,7 +322,7 @@ FEI3dWedgeQuad :: computeLocalSurfaceMapping(IntArray &nodes, int isurf)
     } else if ( isurf == 5 ) {
         nodes.setValues(8, 3, 1, 4, 6, 9, 13, 12, 15);
     } else {
-        OOFEM_ERROR2("FEI3dWedgeQuad :: computeLocalSurfaceMapping - Surface %d doesn't exist.\n", isurf);
+        OOFEM_ERROR("Surface %d doesn't exist.\n", isurf);
     }
 }
 

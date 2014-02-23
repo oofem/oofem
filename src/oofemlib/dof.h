@@ -391,8 +391,8 @@ public:
      */
     virtual void giveUnknownsDictionaryValue(TimeStep *tStep, ValueModeType mode, double &dofValue) { }
 
-    /// Prints simple error message and exits.
-    void error(const char *file, int line, const char *format, ...) const;
+    /// Returns string for prepending output (used by error reporting macros).
+    std :: string errorInfo(const char *func) const;
     /// Stores receiver state to output stream.
     virtual contextIOResultType saveContext(DataStream *stream, ContextMode mode, void *obj = NULL);
     /// Restores the receiver state previously written in stream.

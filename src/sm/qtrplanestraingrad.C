@@ -71,7 +71,6 @@ QTrPlaneStrainGrad :: giveDofManDofIDMask(int inode, EquationID ut, IntArray &an
 IRResultType
 QTrPlaneStrainGrad :: initializeFrom(InputRecord *ir)
 {
-    //const char *__proc = "initializeFrom"; // Required by IR_GIVE_FIELD macro
     //IRResultType result;                 // Required by IR_GIVE_FIELD macro
     this->StructuralElement :: initializeFrom(ir);
     numberOfGaussPoints = 4;

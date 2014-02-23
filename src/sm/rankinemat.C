@@ -80,7 +80,6 @@ RankineMat :: hasMaterialModeCapability(MaterialMode mode)
 IRResultType
 RankineMat :: initializeFrom(InputRecord *ir)
 {
-    const char *__proc = "initializeFrom"; // required by IR_GIVE_FIELD macro
     IRResultType result;                 // required by IR_GIVE_FIELD macro
 
     StructuralMaterial :: initializeFrom(ir);
@@ -106,7 +105,7 @@ RankineMat :: initializeFrom(InputRecord *ir)
         ep = ep - sig0 / E; // user input is strain at peak stress sig0 and is converted to plastic strain at peak stress sig0
         md = 1. / log(50. * E * ep / sig0); // exponent used on the 1st plasticity branch
     } else {
-        OOFEM_ERROR2(" Plasticity hardening type number  %d is unknown", plasthardtype);
+        OOFEM_ERROR(" Plasticity hardening type number  %d is unknown", plasthardtype);
     }
 
     yieldtol = 1.e-10;
@@ -128,7 +127,7 @@ RankineMat :: initializeFrom(InputRecord *ir)
         IR_GIVE_FIELD(ir, param4, _IFT_RankineMat_param4);
         IR_GIVE_FIELD(ir, param5, _IFT_RankineMat_param5);
     } else {
-        OOFEM_ERROR2("Damage law number  %d is unknown", damlaw);
+        OOFEM_ERROR("Damage law number  %d is unknown", damlaw);
     }
 
     double gf = 0.;
@@ -515,7 +514,7 @@ RankineMat :: give1dStressStiffMtrx(FloatMatrix &answer, MatResponseMode mode, G
         answer.at(1, 1) = this->E;
         answer.times(1.0 - om);
     } else {
-        _error("RankineMatNl :: give1dStressStiffMtrx ... unknown type of stiffness (secant stiffness not implemented for 1d)\n");
+        OOFEM_ERROR("RankineMatNl :: give1dStressStiffMtrx ... unknown type of stiffness (secant stiffness not implemented for 1d)\n");
     }
 
     return;

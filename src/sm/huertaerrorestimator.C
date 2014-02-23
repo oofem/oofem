@@ -188,7 +188,7 @@ HuertaErrorEstimator :: estimateError(EE_ErrorMode mode, TimeStep *tStep)
     } else if ( dynamic_cast< AdaptiveNonLinearStatic * >( d->giveEngngModel() ) ) {
         this->mode = HEE_nlinear;
     } else {
-        _error("estimateError: Unsupported analysis type");
+        OOFEM_ERROR("Unsupported analysis type");
         this->mode = HEE_linear;
     }
 
@@ -572,7 +572,6 @@ HuertaErrorEstimator :: giveRemeshingCrit()
 IRResultType
 HuertaErrorEstimator :: initializeFrom(InputRecord *ir)
 {
-    const char *__proc = "initializeFrom";    // Required by IR_GIVE_FIELD macro
     IRResultType result;                       // Required by IR_GIVE_FIELD macro
     int n, level, wErrorFlag = 0;
 
@@ -623,7 +622,7 @@ HuertaErrorEstimator :: initializeFrom(InputRecord *ir)
         IR_GIVE_OPTIONAL_FIELD(ir, impPos, _IFT_HuertaErrorEstimator_impPos);
 
         if ( impCSect != 0 && perCSect == 0 ) {
-            _error("initializeFrom: Missing perfect material specification (through cross-section)");
+            OOFEM_ERROR("Missing perfect material specification (through cross-section)");
         }
 
 #ifdef EXACT_ERROR
@@ -784,7 +783,7 @@ HuertaRemeshingCriteria :: estimateMeshDensities(TimeStep *tStep)
         globValWErrorNorm = this->ee->giveValue(globalWeightedErrorEEV, tStep);
         errorType = primaryUnknownET;
     } else {
-        _error("estimateMeshDensities: unsupported mode");
+        OOFEM_ERROR("unsupported mode");
     }
 
     globValNorm2 = globValNorm * globValNorm;
@@ -826,7 +825,7 @@ HuertaRemeshingCriteria :: estimateMeshDensities(TimeStep *tStep)
                  */
                 interface = static_cast< HuertaRemeshingCriteriaInterface * >( ielem->giveInterface(HuertaRemeshingCriteriaInterfaceType) );
                 if ( !interface ) {
-                    _error("estimateMeshDensities: element does not support HuertaRemeshingCriteriaInterface");
+                    OOFEM_ERROR("element does not support HuertaRemeshingCriteriaInterface");
                 }
 
                 currDensity = interface->HuertaRemeshingCriteriaI_giveCharacteristicSize();
@@ -923,7 +922,7 @@ HuertaRemeshingCriteria :: estimateMeshDensities(TimeStep *tStep)
          */
         interface = static_cast< HuertaRemeshingCriteriaInterface * >( ielem->giveInterface(HuertaRemeshingCriteriaInterfaceType) );
         if ( !interface ) {
-            _error("estimateMeshDensities: element does not support HuertaRemeshingCriteriaInterface");
+            OOFEM_ERROR("element does not support HuertaRemeshingCriteriaInterface");
         }
 
         eerror = this->ee->giveElementError(errorType, ielem, tStep);
@@ -1008,7 +1007,6 @@ HuertaRemeshingCriteria :: estimateMeshDensities(TimeStep *tStep)
 IRResultType
 HuertaRemeshingCriteria :: initializeFrom(InputRecord *ir)
 {
-    const char *__proc = "initializeFrom"; // Required by IR_GIVE_FIELD macro
     IRResultType result;                // Required by IR_GIVE_FIELD macro
     double coeff;
     int noRemeshFlag = 0, wErrorFlag = 0;
@@ -1055,7 +1053,7 @@ HuertaRemeshingCriteria :: giveDofManDensity(int num)
         interface = static_cast< HuertaRemeshingCriteriaInterface * >
                     ( domain->giveElement( con->at(i) )->giveInterface(HuertaRemeshingCriteriaInterfaceType) );
         if ( !interface ) {
-            _error("giveDofManDensity: element does not support HuertaRemeshingCriteriaInterface");
+            OOFEM_ERROR("element does not support HuertaRemeshingCriteriaInterface");
         }
         if ( i == 1 ) {
             density = interface->HuertaRemeshingCriteriaI_giveCharacteristicSize();
@@ -1072,7 +1070,7 @@ HuertaRemeshingCriteria :: giveDofManDensity(int num)
         interface = static_cast< HuertaRemeshingCriteriaInterface * >
                     ( domain->giveElement( con->at(i) )->giveInterface(HuertaRemeshingCriteriaInterfaceType) );
         if ( !interface ) {
-            _error("giveDofManDensity: element does not support HuertaRemeshingCriteriaInterface");
+            OOFEM_ERROR("element does not support HuertaRemeshingCriteriaInterface");
         }
 
         density += interface->HuertaRemeshingCriteriaI_giveCharacteristicSize();
@@ -1106,7 +1104,7 @@ HuertaErrorEstimator :: buildRefinedMesh()
     }
 
     if ( refinedMesh.refineMeshGlobally(d, this->refineLevel, this->refinedElementList) != 0 ) {
-        _error("buildRefinedMesh: refineMeshGlobally failed");
+        OOFEM_ERROR("refineMeshGlobally failed");
     }
 
     this->refinedMesh.completed = 1;
@@ -1204,7 +1202,7 @@ HuertaErrorEstimatorInterface :: setupRefinedElementProblem1D(Element *element, 
             node = element->giveNode(inode);
 
             if ( node->giveNumberOfDofs() != dofs ) {
-                OOFEM_ERROR("HuertaErrorEstimatorInterface::setupRefinedElementProblem1D : Dof mismatch");
+                OOFEM_SIMPLE_ERROR("HuertaErrorEstimatorInterface::setupRefinedElementProblem1D : Dof mismatch");
             }
 
             connectivity = refinedElement->giveFineNodeArray(inode);
@@ -1666,7 +1664,7 @@ HuertaErrorEstimatorInterface :: setupRefinedElementProblem2D(Element *element, 
             node = element->giveNode(inode);
 
             if ( node->giveNumberOfDofs() != dofs ) {
-                OOFEM_ERROR("HuertaErrorEstimatorInterface::setupRefinedElementProblem2D : Dof mismatch");
+                OOFEM_SIMPLE_ERROR("HuertaErrorEstimatorInterface::setupRefinedElementProblem2D : Dof mismatch");
             }
 
             connectivity = refinedElement->giveFineNodeArray(inode);
@@ -2147,7 +2145,7 @@ HuertaErrorEstimatorInterface :: setupRefinedElementProblem3D(Element *element, 
             abort();
         }
 
-        //   _error ("setupRefinedElementProblem3D: unexpected situation");
+        //   OOFEM_ERROR("unexpected situation");
 
         /* number of internal quad faces = nodes * 3 / 2;
          *
@@ -2299,7 +2297,7 @@ HuertaErrorEstimatorInterface :: setupRefinedElementProblem3D(Element *element, 
             node = element->giveNode(inode);
 
             if ( node->giveNumberOfDofs() != dofs ) {
-                OOFEM_ERROR("HuertaErrorEstimatorInterface::setupRefinedElementProblem3D : Dof mismatch");
+                OOFEM_SIMPLE_ERROR("HuertaErrorEstimatorInterface::setupRefinedElementProblem3D : Dof mismatch");
             }
 
             connectivity = refinedElement->giveFineNodeArray(inode);
@@ -2934,7 +2932,7 @@ HuertaErrorEstimator :: solveRefinedElementProblem(int elemId, IntArray &localNo
     refinedElement = this->refinedElementList.at(elemId);
     interface = static_cast< HuertaErrorEstimatorInterface * >( element->giveInterface(HuertaErrorEstimatorInterfaceType) );
     if ( interface == NULL ) {
-        _error("solveRefinedElementProblem: Element has no Huerta error estimator interface defined");
+        OOFEM_ERROR("Element has no Huerta error estimator interface defined");
     }
 
     problem = domain->giveEngngModel();
@@ -3059,7 +3057,7 @@ HuertaErrorEstimator :: solveRefinedElementProblem(int elemId, IntArray &localNo
         if ( prob ) {
             static_cast< AdaptiveNonLinearStatic * >(refinedProblem)->initializeAdaptiveFrom(problem);
         } else {
-            OOFEM_ERROR("HuertaErrorEstimator :: solveRefinedElementProblem - Refined problem must be of the type AdaptiveNonLinearStatic");
+            OOFEM_ERROR("Refined problem must be of the type AdaptiveNonLinearStatic");
         }
     }
 
@@ -3154,7 +3152,7 @@ HuertaErrorEstimator :: solveRefinedElementProblem(int elemId, IntArray &localNo
                     coeff = 0.0;
                 } else {
                     if ( fabs(mixedNorm) > 1.0e6 * fabs(elementNorm) ) {
-                        _error("solveRefinedElementProblem: division by zero");
+                        OOFEM_ERROR("division by zero");
                     }
 
                     coeff = mixedNorm / elementNorm;
@@ -3201,7 +3199,7 @@ HuertaErrorEstimator :: solveRefinedElementProblem(int elemId, IntArray &localNo
                     coeff = 0.0;
                 } else {
                     if ( fabs(mixedNorm) > 1.0e6 * fabs(elementNorm) ) {
-                        _error("solveRefinedElementProblem: division by zero");
+                        OOFEM_ERROR("division by zero");
                     }
 
                     coeff = mixedNorm / elementNorm;
@@ -3235,7 +3233,7 @@ HuertaErrorEstimator :: solveRefinedElementProblem(int elemId, IntArray &localNo
         OOFEM_LOG_DEBUG("\n");
 #endif
     } else {
-        _error("solveRefinedElementProblem: Unsupported norm type");
+        OOFEM_ERROR("Unsupported norm type");
     }
 
     // update primaryUnknownError
@@ -3274,7 +3272,7 @@ HuertaErrorEstimator :: solveRefinedElementProblem(int elemId, IntArray &localNo
         HuertaRemeshingCriteriaInterface *remeshInterface;
         remeshInterface = static_cast< HuertaRemeshingCriteriaInterface * >( element->giveInterface(HuertaRemeshingCriteriaInterfaceType) );
         if ( !remeshInterface ) {
-            _error("estimateMeshDensities: element does not support HuertaRemeshingCriteriaInterface");
+            OOFEM_ERROR("element does not support HuertaRemeshingCriteriaInterface");
         }
 
         currDensity = remeshInterface->HuertaRemeshingCriteriaI_giveCharacteristicSize();
@@ -3421,7 +3419,7 @@ HuertaErrorEstimator :: solveRefinedPatchProblem(int nodeId, IntArray &localNode
         refinedElement = this->refinedElementList.at(elemId);
         interface = static_cast< HuertaErrorEstimatorInterface * >( element->giveInterface(HuertaErrorEstimatorInterfaceType) );
         if ( interface == NULL ) {
-            _error("solveRefinedPatchProblem: Element has no Huerta error estimator interface defined");
+            OOFEM_ERROR("Element has no Huerta error estimator interface defined");
         }
 
         for ( inode = 1; inode <= element->giveNumberOfNodes(); inode++ ) {
@@ -3627,7 +3625,7 @@ HuertaErrorEstimator :: solveRefinedPatchProblem(int nodeId, IntArray &localNode
         if ( prob ) {
             static_cast< AdaptiveNonLinearStatic * >(refinedProblem)->initializeAdaptiveFrom(problem);
         } else {
-            OOFEM_ERROR("HuertaErrorEstimator :: solveRefinedElementProblem - Refined problem must be of the type AdaptiveNonLinearStatic");
+            OOFEM_ERROR("Refined problem must be of the type AdaptiveNonLinearStatic");
         }
     }
 
@@ -3726,7 +3724,7 @@ HuertaErrorEstimator :: solveRefinedWholeProblem(IntArray &localNodeIdArray, Int
         refinedElement = this->refinedElementList.at(elemId);
         interface = static_cast< HuertaErrorEstimatorInterface * >( element->giveInterface(HuertaErrorEstimatorInterfaceType) );
         if ( interface == NULL ) {
-            _error("solveRefinedWholeProblem: Element has no Huerta error estimator interface defined");
+            OOFEM_ERROR("Element has no Huerta error estimator interface defined");
         }
 
         interface->HuertaErrorEstimatorI_setupRefinedElementProblem(refinedElement, this->refineLevel, 0,
@@ -4020,7 +4018,7 @@ HuertaErrorEstimator :: solveRefinedWholeProblem(IntArray &localNodeIdArray, Int
  #endif
         }
     } else {
-        _error("solveRefinedWholeProblem: Unsupported norm type");
+        OOFEM_ERROR("Unsupported norm type");
     }
 
  #ifdef TIME_INFO
@@ -4074,7 +4072,6 @@ HuertaErrorEstimator :: setupRefinedProblemProlog(const char *problemName, int p
     double rtolv, minStepLength = 0.0, initialStepLength, stepLength, psi = 1.0;
     IntArray ddm, hpc;
     FloatArray ddv, hpcw;
-    const char *__proc = "setupRefinedProblemProlog"; // Required by IR_GIVE_FIELD macro
     IRResultType result;                           // Required by IR_GIVE_FIELD macro
 
 #if defined ( USE_OUTPUT_FILE ) || defined ( USE_CONTEXT_FILE )
@@ -4149,7 +4146,7 @@ HuertaErrorEstimator :: setupRefinedProblemProlog(const char *problemName, int p
             ddvSize = ddv.giveSize();
             break;
         default:
-            _error("setupRefinedProblemProlog: Unsupported control mode");
+            OOFEM_ERROR("Unsupported control mode");
         }
 
         if ( problemId != 0 ) {
@@ -4377,7 +4374,7 @@ HuertaErrorEstimator :: setupRefinedProblemProlog(const char *problemName, int p
             refinedReader.insertInputRecord(DataReader :: IR_emodelRec, ir);
         }
     } else {
-        _error("setupRefinedProblemProlog: Unsupported analysis type");
+        OOFEM_ERROR("Unsupported analysis type");
     }
 
     DynamicInputRecord *ir = new DynamicInputRecord();

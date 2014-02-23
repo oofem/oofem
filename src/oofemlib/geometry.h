@@ -95,8 +95,8 @@ public:
     /// Used by XFEM level set functions.
     virtual void computeNormalSignDist(double &oDist, const FloatArray &iPoint) const = 0;
     virtual void computeTangentialSignDist(double &oDist, const FloatArray &iPoint, double &oMinDistArcPos) const = 0;
-    virtual void computeLocalCoordinates(FloatArray &oLocCoord, const FloatArray &iPoint) const { OOFEM_ERROR("BasicGeometry::computeLocalCoordinates() is not implemented.\n"); }
-    virtual void giveSubPolygon(std :: vector< FloatArray > &oPoints, const double &iXiStart, const double &iXiEnd) const { OOFEM_ERROR("BasicGeometry::giveSubPolygon()"); }
+    virtual void computeLocalCoordinates(FloatArray &oLocCoord, const FloatArray &iPoint) const { OOFEM_ERROR("not implemented.\n"); }
+    virtual void giveSubPolygon(std :: vector< FloatArray > &oPoints, const double &iXiStart, const double &iXiEnd) const { OOFEM_ERROR("?"); }
 
     /// Checks whether an element is interacted, Element reference will be later replaced by Geometry.
     virtual bool intersects(Element *element) { return false; }
@@ -115,9 +115,10 @@ public:
 
     /// Initializes the Geometry from the InputRecord.
     virtual IRResultType initializeFrom(InputRecord *ir) { return IRRT_OK; }
-    virtual void giveInputRecord(DynamicInputRecord &input) { OOFEM_ERROR("giveInputRecord is not implemented for this subclass of BasicGeometry."); }
+    virtual void giveInputRecord(DynamicInputRecord &input) { OOFEM_ERROR("not implemented"); }
     /// Gives class name.
     virtual const char *giveClassName() const { return NULL; }
+    std :: string errorInfo(const char *func) const { return std :: string(giveClassName()) + func; }
     /// Returns number of Geometry vertices.
     int giveNrVertices() const { return mVertices.size(); }
     virtual bool isOutside(BasicGeometry *bg) { return false; }
@@ -160,8 +161,8 @@ public:
     virtual double computeDistanceTo(const FloatArray *point);
     /// Computes tangential distance to a point
 
-    virtual void computeNormalSignDist(double &oDist, const FloatArray &iPoint) const { OOFEM_ERROR("Line::computeNormalSignDist -- not implemented"); };
-    virtual void computeTangentialSignDist(double &oDist, const FloatArray &iPoint, double &oMinDistArcPos) const { OOFEM_ERROR("Line::computeTangentialSignDist -- not implemented"); };
+    virtual void computeNormalSignDist(double &oDist, const FloatArray &iPoint) const { OOFEM_ERROR("not implemented"); };
+    virtual void computeTangentialSignDist(double &oDist, const FloatArray &iPoint, double &oMinDistArcPos) const { OOFEM_ERROR("not implemented"); };
 
 
     double computeTangentialDistanceToEnd(FloatArray *point);
@@ -185,8 +186,8 @@ public:
 
     virtual BasicGeometry *Clone() { return new Triangle(*this); }
 
-    virtual void computeNormalSignDist(double &oDist, const FloatArray &iPoint) const { OOFEM_ERROR("Triangle::computeNormalSignDist -- not implemented"); };
-    virtual void computeTangentialSignDist(double &oDist, const FloatArray &iPoint, double &oMinDistArcPos) const { OOFEM_ERROR("Triangle::computeTangentialSignDist -- not implemented"); };
+    virtual void computeNormalSignDist(double &oDist, const FloatArray &iPoint) const { OOFEM_SIMPLE_ERROR("Triangle::computeNormalSignDist -- not implemented"); };
+    virtual void computeTangentialSignDist(double &oDist, const FloatArray &iPoint, double &oMinDistArcPos) const { OOFEM_SIMPLE_ERROR("Triangle::computeTangentialSignDist -- not implemented"); };
 
     double getArea();
     void computeBarycentrCoor(FloatArray &answer) const;
@@ -296,8 +297,8 @@ public:
 
     virtual BasicGeometry *Clone() { return new PointSwarm(*this); }
 
-    virtual void computeNormalSignDist(double &oDist, const FloatArray &iPoint) const { OOFEM_ERROR("PointSwarm::computeNormalSignDist -- not implemented"); };
-    virtual void computeTangentialSignDist(double &oDist, const FloatArray &iPoint, double &oMinDistArcPos) const { OOFEM_ERROR("PointSwarm::computeTangentialSignDist -- not implemented"); };
+    virtual void computeNormalSignDist(double &oDist, const FloatArray &iPoint) const { OOFEM_ERROR("not implemented"); };
+    virtual void computeTangentialSignDist(double &oDist, const FloatArray &iPoint, double &oMinDistArcPos) const { OOFEM_ERROR("not implemented"); };
 
     /// Computes the normal distance to the surface not to the center.
     // virtual double computeDistanceTo(FloatArray *point);

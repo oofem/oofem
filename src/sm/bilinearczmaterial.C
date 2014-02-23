@@ -184,7 +184,7 @@ BilinearCZMaterial :: give3dInterfaceMaterialStiffnessMatrix(FloatMatrix &answer
             //printf("Failed...\n");
         }
     }  else {
-        _error("give2dInterfaceMaterialStiffnessMatrix: unknown MatResponseMode");
+        OOFEM_ERROR("unknown MatResponseMode");
     }
 }
 
@@ -206,7 +206,6 @@ const double tolerance = 1.0e-12; // small number
 IRResultType
 BilinearCZMaterial :: initializeFrom(InputRecord *ir)
 {
-    const char *__proc = "initializeFrom";  // Required by IR_GIVE_FIELD macro
     IRResultType result;                    // Required by IR_GIVE_FIELD macro
 
     IR_GIVE_FIELD(ir, kn0, _IFT_BilinearCZMaterial_kn);
@@ -237,13 +236,13 @@ BilinearCZMaterial :: checkConsistency()
 {
     double kn0min = 0.5 * this->sigfn * this->sigfn / this->GIc;
     if ( this->kn0 < 0.0 ) {
-        OOFEM_ERROR2("BilinearCZMaterial :: initializeFrom - stiffness kn0 is negative (%.2e)", this->kn0);
+        OOFEM_ERROR("stiffness kn0 is negative (%.2e)", this->kn0);
     } else if ( this->ks0 < 0.0 ) {
-        OOFEM_ERROR2("BilinearCZMaterial :: initializeFrom - stiffness ks0 is negative (%.2e)", this->ks0);
+        OOFEM_ERROR("stiffness ks0 is negative (%.2e)", this->ks0);
     } else if ( this->GIc < 0.0 ) {
-        OOFEM_ERROR2("BilinearCZMaterial :: initializeFrom - GIc is negative (%.2e)", this->GIc);
+        OOFEM_ERROR("GIc is negative (%.2e)", this->GIc);
     } else if ( this->kn0 < kn0min  ) { // => gn0 > gnmax
-        //   OOFEM_ERROR3("BilinearCZMaterial :: initializeFrom - kn0 (%.2e) is below minimum stiffness (%.2e), => gn0 > gnmax, which is unphysical" ,
+        //   OOFEM_ERROR("kn0 (%.2e) is below minimum stiffness (%.2e), => gn0 > gnmax, which is unphysical" ,
         //       this->kn0, kn0min);
     }
     return 1;

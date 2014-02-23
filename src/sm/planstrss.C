@@ -215,7 +215,7 @@ PlaneStress2d :: giveEdgeDofMapping(IntArray &answer, int iEdge) const
         answer.at(3) = 1;
         answer.at(4) = 2;
     } else {
-        _error("giveEdgeDofMapping: wrong edge number");
+        OOFEM_ERROR("giveEdgeDofMapping: wrong edge number");
     }
 }
 
@@ -298,7 +298,7 @@ PlaneStress2d :: initializeFrom(InputRecord *ir)
 
     if ( numberOfGaussPoints != 1 && numberOfGaussPoints != 4 && numberOfGaussPoints != 9 && numberOfGaussPoints != 16 ) {
         numberOfGaussPoints = 4;
-        OOFEM_WARNING1("Number of Gauss points enforced to 4");
+        OOFEM_WARNING("Number of Gauss points enforced to 4");
     }
 
     return IRRT_OK;
@@ -407,13 +407,13 @@ PlaneStress2d :: giveCharacteristicSize(GaussPoint *gp, FloatArray &normalToCrac
         }
 
         if ( dPhidN == 0. ) {
-            _error("Zero value of dPhidN in PlaneStress2d :: giveCharacteristicSize\n");
+            OOFEM_ERROR("Zero value of dPhidN in PlaneStress2d :: giveCharacteristicSize\n");
         }
 
         return 1. / fabs(dPhidN);
     }
 
-    _error("PlaneStress2d :: giveCharacteristicSize: invalid method");
+    OOFEM_ERROR("PlaneStress2d :: giveCharacteristicSize: invalid method");
     return 0.;
 }
 
@@ -911,7 +911,7 @@ PlaneStress2d :: SPRNodalRecoveryMI_giveDofMansDeterminedByPatch(IntArray &answe
     if ( found ) {
         answer.at(1) = pap;
     } else {
-        _error("SPRNodalRecoveryMI_giveDofMansDeterminedByPatch: node unknown");
+        OOFEM_ERROR("SPRNodalRecoveryMI_giveDofMansDeterminedByPatch: node unknown");
     }
 }
 
@@ -949,7 +949,7 @@ PlaneStress2d :: SpatialLocalizerI_giveDistanceFromParametricCenter(const FloatA
     this->computeGlobalCoordinates(gcoords, lcoords);
 
     if ( ( size = coords.giveSize() ) < ( gsize = gcoords.giveSize() ) ) {
-        _error("SpatialLocalizerI_giveDistanceFromParametricCenter: coordinates size mismatch");
+        OOFEM_ERROR("SpatialLocalizerI_giveDistanceFromParametricCenter: coordinates size mismatch");
     }
 
     if ( size == gsize ) {

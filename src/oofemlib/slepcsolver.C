@@ -71,17 +71,17 @@ SLEPcSolver :: solve(SparseMtrx *a, SparseMtrx *b, FloatArray *_eigv, FloatMatri
 
     // first check whether Lhs is defined
     if ( ( !a ) || ( !b ) ) {
-        OOFEM_ERROR("SLEPcSolver :: solveYourselfAt : matrices are not defined\n");
+        OOFEM_ERROR("matrices are not defined\n");
     }
 
     if ( a->giveNumberOfRows() != a->giveNumberOfColumns() ||
         b->giveNumberOfRows() != b->giveNumberOfRows() ||
         a->giveNumberOfColumns() != b->giveNumberOfColumns() ) {
-        OOFEM_ERROR("SLEPcSolver :: solveYourselfAt : matrices size mismatch\n");
+        OOFEM_ERROR("matrices size mismatch\n");
     }
 
     if ( a->giveType() != SMT_PetscMtrx || b->giveType() != SMT_PetscMtrx ) {
-        OOFEM_ERROR("SLEPcSolver :: solveYourselfAt: PetscSparseMtrx Expected");
+        OOFEM_ERROR("PetscSparseMtrx Expected");
     }
 
     A = static_cast< PetscSparseMtrx * >(a);
@@ -90,20 +90,20 @@ SLEPcSolver :: solve(SparseMtrx *a, SparseMtrx *b, FloatArray *_eigv, FloatMatri
 
     // check array for storing eigenvalues
     if ( _eigv == NULL ) {
-        OOFEM_ERROR("SLEPcSolver :: solveYourselfAt: unknown eigenvalue array");
+        OOFEM_ERROR("unknown eigenvalue array");
     }
 
     if ( _eigv->giveSize() != nroot ) {
-        OOFEM_ERROR("SLEPcSolver :: solveYourselfAt: eigv size mismatch");
+        OOFEM_ERROR("eigv size mismatch");
     }
 
     // check matrix for storing resulted eigen vectors at the end
     if ( _r == NULL ) {
-        OOFEM_ERROR("SLEPcSolver :: solveYourselfAt: unknown eigen vectors mtrx");
+        OOFEM_ERROR("unknown eigen vectors mtrx");
     }
 
     if ( ( _r->giveNumberOfRows() != size ) || ( _r->giveNumberOfColumns() != nroot ) ) {
-        OOFEM_ERROR("SLEPcSolver :: solveYourselfAt: _r size mismatch");
+        OOFEM_ERROR("_r size mismatch");
     }
 
 
@@ -205,7 +205,7 @@ SLEPcSolver :: solve(SparseMtrx *a, SparseMtrx *b, FloatArray *_eigv, FloatMatri
         ierr = VecDestroy(Vr);
         CHKERRQ(ierr);
     } else {
-        OOFEM_ERROR("SLEPcSolver :: solveYourselfAt: No converged eigenpairs\n");
+        OOFEM_ERROR("No converged eigenpairs\n");
     }
 
 #ifdef TIME_REPORT

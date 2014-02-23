@@ -43,7 +43,6 @@ REGISTER_DofManager(SlaveNode);
 
 IRResultType SlaveNode :: initializeFrom(InputRecord *ir)
 {
-    const char *__proc = "initializeFrom"; // Required by IR_GIVE_FIELD macro
     IRResultType result;                   // Required by IR_GIVE_FIELD macro
 
     Node :: initializeFrom(ir);
@@ -55,7 +54,7 @@ IRResultType SlaveNode :: initializeFrom(InputRecord *ir)
         masterWeights.resize( masterDofManagers.giveSize() );
         masterWeights.add( 1 / ( double ) masterDofManagers.giveSize() );
     } else if ( masterDofManagers.giveSize() != masterWeights.giveSize() ) {
-        _error("initializeFrom: master dof managers and weights size mismatch.");
+        OOFEM_ERROR("master dof managers and weights size mismatch.");
     }
     return IRRT_OK;
 }

@@ -35,32 +35,13 @@
 
 #include "primaryunknownmapper.h"
 #include "error.h"
-#include "oofem_limits.h"
 
 #include <cstdarg>
 
 namespace oofem {
-void PrimaryUnknownMapper :: error(const char *file, int line, const char *format, ...) const
+std :: string PrimaryUnknownMapper :: errorInfo(const char *func) const
 {
-    char buffer [ MAX_ERROR_MSG_LENGTH ];
-    va_list args;
-
-    va_start(args, format);
-    vsprintf(buffer, format, args);
-    va_end(args);
-
-    __OOFEM_ERROR2(file, line, "Class: PrimaryUnknownMapper\n%s", buffer);
+    return std :: string("PrimaryUnknownMapper::") + func;
 }
 
-void PrimaryUnknownMapper :: warning(const char *file, int line, const char *format, ...) const
-{
-    char buffer [ MAX_ERROR_MSG_LENGTH ];
-    va_list args;
-
-    va_start(args, format);
-    vsprintf(buffer, format, args);
-    va_end(args);
-
-    __OOFEM_WARNING2(file, line, "Class: PrimaryUnknownMapper\n%s", buffer);
-}
 } // end namespace oofem

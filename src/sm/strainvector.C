@@ -53,12 +53,12 @@ StrainVector :: computeDeviatoricVolumetricSplit(StrainVector &dev, double &vol)
 
     if ( myMode == _1dMat ) {
         // 1D model
-        OOFEM_ERROR("StrainVector::computeDeviatoricVolumetricSplit: No Split for 1D!");
+        OOFEM_SIMPLE_ERROR("StrainVector::computeDeviatoricVolumetricSplit: No Split for 1D!");
         //  dev.resize(1); dev.at(1) = 0.0;
         // vol = this->at (1);
     } else if ( myMode == _PlaneStress ) {
         // plane stress problem
-        OOFEM_ERROR("StrainVector::computeDeviatoricVolumetricSplit: No Split for plane stress!");
+        OOFEM_SIMPLE_ERROR("StrainVector::computeDeviatoricVolumetricSplit: No Split for plane stress!");
         //  dev = *this;
         // vol = (this->at(1)+this->at(2))/2.0;
         //    dev.at(1) -= vol;
@@ -80,12 +80,12 @@ StrainVector :: computeDeviatoricVolumetricSum(StrainVector &answer, const doubl
 
     if ( myMode == _1dMat ) {
         // 1D model
-        OOFEM_ERROR("StrainVector::computeDeviatoricVolumetricSum: No sum for 1D!");
+        OOFEM_SIMPLE_ERROR("StrainVector::computeDeviatoricVolumetricSum: No sum for 1D!");
         //  dev.resize(1); dev.at(1) = 0.0;
         // vol = this->at (1);
     } else if ( myMode == _PlaneStress ) {
         // plane stress problem
-        OOFEM_ERROR("StrainVector::computeDeviatoricVolumetricSum: No sum for plane stress!");
+        OOFEM_SIMPLE_ERROR("StrainVector::computeDeviatoricVolumetricSum: No sum for plane stress!");
         //  dev = *this;
         // vol = (this->at(1)+this->at(2))/2.0;
         //    dev.at(1) -= vol;
@@ -135,7 +135,7 @@ StrainVector :: computePrincipalValues(FloatArray &answer) const
         D = dst * dst + this->at(3) * this->at(3);
 
         if ( D < 0. ) {
-            OOFEM_ERROR("StrainVector::computePrincipalValues: Imaginar roots ");
+            OOFEM_SIMPLE_ERROR("StrainVector::computePrincipalValues: Imaginar roots ");
         }
 
         D = sqrt(D);
@@ -403,7 +403,7 @@ StrainVector :: applyElasticStiffness(StressVector &stress, const double EModulu
         stress(2) = factor * ( ( ( 1 - nu ) / 2. ) * values [ 2 ] );
     } else if ( myMode == _PlaneStrain ) {
         if ( nu >= 0.5 ) {
-            OOFEM_ERROR("StrainVector::applyElasticStiffness: nu must be less than 0.5");
+            OOFEM_SIMPLE_ERROR("StrainVector::applyElasticStiffness: nu must be less than 0.5");
         }
 
         const double factor = EModulus / ( ( 1. + nu ) * ( 1. - 2. * nu ) );
@@ -413,7 +413,7 @@ StrainVector :: applyElasticStiffness(StressVector &stress, const double EModulu
         stress(3) = factor * ( ( ( 1. - 2. * nu ) / 2. ) * values [ 3 ] );
     } else {
         if ( nu >= 0.5 ) {
-            OOFEM_ERROR("StrainVector::applyElasticStiffness: nu must be less than 0.5");
+            OOFEM_SIMPLE_ERROR("StrainVector::applyElasticStiffness: nu must be less than 0.5");
         }
 
         const double factor = EModulus / ( ( 1. + nu ) * ( 1. - 2. * nu ) );
@@ -448,9 +448,9 @@ StrainVector :: applyDeviatoricElasticStiffness(StressVector &stress,
 
     MaterialMode myMode = giveStressStrainMode();
     if ( myMode == _1dMat ) {
-        OOFEM_ERROR("StrainVector::applyDeviatoricElasticStiffness: No Split for 1D");
+        OOFEM_SIMPLE_ERROR("StrainVector::applyDeviatoricElasticStiffness: No Split for 1D");
     } else if ( myMode == _PlaneStress ) {
-        OOFEM_ERROR("StrainVector::applyDeviatoricElasticStiffness: No Split for Plane Stress");
+        OOFEM_SIMPLE_ERROR("StrainVector::applyDeviatoricElasticStiffness: No Split for Plane Stress");
     } else if ( myMode == _PlaneStrain ) {
         if ( stress.giveStressStrainMode() != _PlaneStrain ) {
             stress.letStressStrainModeBe(_PlaneStrain);

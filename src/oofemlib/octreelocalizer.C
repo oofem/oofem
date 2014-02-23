@@ -135,7 +135,7 @@ OctantRec :: giveChild(int xi, int yi, int zi)
     if ( ( xi >= 0 ) && ( xi < 2 ) && ( yi >= 0 ) && ( yi < 2 ) && ( zi >= 0 ) && ( zi < 2 ) ) {
         return this->child [ xi ] [ yi ] [ zi ];
     } else {
-        OOFEM_ERROR4("OctantRec::giveChild invalid child index (%d,%d,%d)", xi, yi, zi);
+        OOFEM_ERROR("invalid child index (%d,%d,%d)", xi, yi, zi);
     }
 
     return NULL;
@@ -271,7 +271,7 @@ OctreeSpatialLocalizer :: findTerminalContaining(OctantRec *startCell, const Flo
     while ( !currCell->isTerminalOctant() ) {
         result = currCell->giveChildContainingPoint(& currCell, coords);
         if ( result == OctantRec :: CS_NoChild ) {
-            OOFEM_ERROR("OctreeSpatialLocalizer :: findTerminalContaining: internal error - octree inconsistency");
+            OOFEM_ERROR("internal error - octree inconsistency");
         }
     }
     return currCell;
@@ -403,7 +403,7 @@ OctreeSpatialLocalizer :: initElementIPDataStructure()
                     if ( ielem->computeGlobalCoordinates( jGpCoords, * ( jGp->giveCoordinates() ) ) ) {
                         this->insertIPElementIntoOctree(this->rootCell, i, jGpCoords);
                     } else {
-                        OOFEM_ERROR("OctreeSpatialLocalizer :: initElementIPDataStructure: computeGlobalCoordinates failed");
+                        OOFEM_ERROR("computeGlobalCoordinates failed");
                     }
                 }
                 continue;
@@ -597,7 +597,7 @@ OctreeSpatialLocalizer :: insertNodeIntoOctree(OctantRec *rootCell, int nodeNum,
         // find child containing new node
         result = currCell->giveChildContainingPoint(& currCell, coords);
         if ( result != OctantRec :: CS_ChildFound ) {
-            OOFEM_ERROR("OctreeSpatialLocalizer :: insertNodeIntoOctree: internal error - octree inconsistency");
+            OOFEM_ERROR("insertNodeIntoOctree: internal error - octree inconsistency");
         }
     }
 
@@ -846,7 +846,7 @@ OctreeSpatialLocalizer :: giveElementCloseToPoint(const FloatArray &coords, cons
                     minDist = currDist;
                 }
             } else {
-                OOFEM_ERROR("OctreeSpatialLocalizer :: giveElementCloseToPoint: no interface");
+                OOFEM_ERROR("no interface");
             }
         }
 
@@ -1012,7 +1012,7 @@ OctreeSpatialLocalizer :: giveElementCloseToPointWithinOctant(OctantRec *cell, c
                         minDist = currDist;
                     }
                 } else {
-                    OOFEM_ERROR("OctreeSpatialLocalizer :: giveElementCloseToPointWithinOctant: no interface");
+                    OOFEM_ERROR("no interface");
                 }
             }
         }
@@ -1093,7 +1093,7 @@ OctreeSpatialLocalizer :: giveClosestIP(const FloatArray &coords, int region, bo
                             nearestGp = jGp;
                         }
                     } else {
-                        OOFEM_ERROR("OctreeSpatialLocalizer :: giveClosestIP: computeGlobalCoordinates failed");
+                        OOFEM_ERROR("computeGlobalCoordinates failed");
                     }
                 }
             } else {
@@ -1117,11 +1117,11 @@ OctreeSpatialLocalizer :: giveClosestIP(const FloatArray &coords, int region, bo
                                         nearestGp = jGp;
                                     }
                                 } else {
-                                    OOFEM_ERROR("OctreeSpatialLocalizer :: giveClosestIP: computeGlobalCoordinates failed");
+                                    OOFEM_ERROR("computeGlobalCoordinates failed");
                                 }
                             }
                         } else {
-                            OOFEM_ERROR("OctreeSpatialLocalizer::giveClosestIP: iRule == NULL");
+                            OOFEM_ERROR("iRule == NULL");
                         }
                     }
                 }
@@ -1206,7 +1206,7 @@ OctreeSpatialLocalizer :: giveClosestIP(const FloatArray &coords, int region, bo
                                 nearestGp = jGp;
                             }
                         } else {
-                            OOFEM_ERROR("giveClosestIP: computeGlobalCoordinates failed");
+                            OOFEM_ERROR("computeGlobalCoordinates failed");
                         }
                     }
                 }
@@ -1216,7 +1216,7 @@ OctreeSpatialLocalizer :: giveClosestIP(const FloatArray &coords, int region, bo
     } else {
         printf("coords: ");
         coords.printYourself();
-        OOFEM_ERROR("OctreeSpatialLocalizer :: giveClosestIP: octree inconsistency found");
+        OOFEM_ERROR("octree inconsistency found");
     }
 
     return NULL;
@@ -1270,7 +1270,7 @@ OctreeSpatialLocalizer :: giveClosestIPWithinOctant(OctantRec *currentCell, //el
                                 * answer = iRule->getIntegrationPoint(j);
                             }
                         } else {
-                            OOFEM_ERROR("OctreeSpatialLocalizer :: giveClosestIPWithinOctant: computeGlobalCoordinates failed");
+                            OOFEM_ERROR("computeGlobalCoordinates failed");
                         }
                     }
                 } else {
@@ -1292,7 +1292,7 @@ OctreeSpatialLocalizer :: giveClosestIPWithinOctant(OctantRec *currentCell, //el
                                             * answer = iRule->getIntegrationPoint(j);
                                         }
                                     } else {
-                                        OOFEM_ERROR("OctreeSpatialLocalizer :: giveClosestIPWithinOctant: computeGlobalCoordinates failed");
+                                        OOFEM_ERROR("computeGlobalCoordinates failed");
                                     }
                                 }
                             }
@@ -1380,7 +1380,7 @@ OctreeSpatialLocalizer :: giveClosestIP(const FloatArray &coords, Set &elementSe
                             nearestGp = jGp;
                         }
                     } else {
-                        OOFEM_ERROR("OctreeSpatialLocalizer :: giveClosestIP: computeGlobalCoordinates failed");
+                        OOFEM_ERROR("computeGlobalCoordinates failed");
                     }
                 }
             } else {
@@ -1404,11 +1404,11 @@ OctreeSpatialLocalizer :: giveClosestIP(const FloatArray &coords, Set &elementSe
                                         nearestGp = jGp;
                                     }
                                 } else {
-                                    OOFEM_ERROR("OctreeSpatialLocalizer :: giveClosestIP: computeGlobalCoordinates failed");
+                                    OOFEM_ERROR("computeGlobalCoordinates failed");
                                 }
                             }
                         } else {
-                            OOFEM_ERROR("OctreeSpatialLocalizer::giveClosestIP: iRule == NULL");
+                            OOFEM_ERROR("iRule == NULL");
                         }
                     }
                 }
@@ -1493,7 +1493,7 @@ OctreeSpatialLocalizer :: giveClosestIP(const FloatArray &coords, Set &elementSe
                                 nearestGp = jGp;
                             }
                         } else {
-                            OOFEM_ERROR("giveClosestIP: computeGlobalCoordinates failed");
+                            OOFEM_ERROR("computeGlobalCoordinates failed");
                         }
                     }
                 }
@@ -1503,7 +1503,7 @@ OctreeSpatialLocalizer :: giveClosestIP(const FloatArray &coords, Set &elementSe
     } else {
         printf("coords: ");
         coords.printYourself();
-        OOFEM_ERROR("OctreeSpatialLocalizer :: giveClosestIP: octree inconsistency found");
+        OOFEM_ERROR("octree inconsistency found");
     }
 
     return NULL;
@@ -1557,7 +1557,7 @@ OctreeSpatialLocalizer :: giveClosestIPWithinOctant(OctantRec *currentCell, //el
                                 * answer = iRule->getIntegrationPoint(j);
                             }
                         } else {
-                            OOFEM_ERROR("OctreeSpatialLocalizer :: giveClosestIPWithinOctant: computeGlobalCoordinates failed");
+                            OOFEM_ERROR("computeGlobalCoordinates failed");
                         }
                     }
                 } else {
@@ -1579,7 +1579,7 @@ OctreeSpatialLocalizer :: giveClosestIPWithinOctant(OctantRec *currentCell, //el
                                             * answer = iRule->getIntegrationPoint(j);
                                         }
                                     } else {
-                                        OOFEM_ERROR("OctreeSpatialLocalizer :: giveClosestIPWithinOctant: computeGlobalCoordinates failed");
+                                        OOFEM_ERROR("computeGlobalCoordinates failed");
                                     }
                                 }
                             }
@@ -1635,7 +1635,7 @@ OctreeSpatialLocalizer :: giveAllElementsWithIpWithinBox(elementContainerType &e
     // loop over all child (if any) and found all nodes meeting the criteria
     this->giveElementsWithIPWithinBox(elemSet, currCell, coords, radius, iCohesiveZoneGP);
     if ( elemSet.empty() ) {
-        OOFEM_ERROR("OctreeSpatialLocalizer :: giveAllElementsWithIpWithinBox empty set found");
+        OOFEM_ERROR("empty set found");
     }
 }
 
@@ -1679,7 +1679,7 @@ OctreeSpatialLocalizer :: giveElementsWithIPWithinBox(elementContainerType &elem
                                 elemSet.insert(* pos);
                             }
                         } else {
-                            OOFEM_ERROR("OctreeSpatialLocalizer :: giveElementsWithIPWithinBox: computeGlobalCoordinates failed");
+                            OOFEM_ERROR("computeGlobalCoordinates failed");
                         }
                     }
                 } else {
@@ -1700,7 +1700,7 @@ OctreeSpatialLocalizer :: giveElementsWithIPWithinBox(elementContainerType &elem
                                             elemSet.insert(* pos);
                                         }
                                     } else {
-                                        OOFEM_ERROR("OctreeSpatialLocalizer :: giveElementsWithIPWithinBox: computeGlobalCoordinates failed");
+                                        OOFEM_ERROR("computeGlobalCoordinates failed");
                                     }
                                 }
                             }

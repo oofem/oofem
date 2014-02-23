@@ -91,7 +91,7 @@ public:
      */
     virtual double SpatialLocalizerI_giveDistanceFromParametricCenter(const FloatArray &coords)
     {
-        OOFEM_ERROR2( "SpatialLocalizerInterface :: SpatialLocalizerI_giveDistanceFromParametricCenter - Not implemented for %s", this->giveClassName() );
+        OOFEM_SIMPLE_ERROR( "SpatialLocalizerInterface :: SpatialLocalizerI_giveDistanceFromParametricCenter - Not implemented for %s", this->giveClassName() );
         return 0.0;
     }
 
@@ -166,7 +166,7 @@ public:
     virtual Element *giveElementClosestToPoint(FloatArray &lcoords, FloatArray &closest,
                                                const FloatArray &coords, int region = 0)
     {
-        OOFEM_ERROR2( "SpatialLocalizer :: giveElementClosestToPoint - Not implemented for %s", this->giveClassName() );
+        OOFEM_SIMPLE_ERROR( "SpatialLocalizer :: giveElementClosestToPoint - Not implemented for %s", this->giveClassName() );
         return NULL;
     }
     /**
@@ -227,6 +227,8 @@ public:
     virtual int init(bool force = false) { return 1; }
 
     virtual const char *giveClassName() const = 0;
+    /// Error printing helper.
+    std :: string errorInfo(const char *func) const { return std :: string(giveClassName()) + func; }
 };
 } // end namespace oofem
 #endif // spatiallocalizer_h

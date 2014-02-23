@@ -50,7 +50,6 @@
 namespace oofem {
 IRResultType Set :: initializeFrom(InputRecord *ir)
 {
-    const char *__proc = "initializeFrom";
     IRResultType result;
 
     FEMComponent :: initializeFrom(ir);

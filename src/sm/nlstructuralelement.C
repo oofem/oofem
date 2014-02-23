@@ -85,7 +85,7 @@ NLStructuralElement :: computeDeformationGradientVector(FloatArray &answer, Gaus
     } else if ( matMode == _1dMat ) {
         answer.at(1) += 1.0;
     } else {
-        OOFEM_ERROR2( "computeDeformationGradientVector : MaterialMode is not supported yet (%s)", __MaterialModeToString(matMode) );
+        OOFEM_ERROR("MaterialMode is not supported yet (%s)", __MaterialModeToString(matMode) );
     }
 }
 
@@ -354,7 +354,7 @@ NLStructuralElement :: computeStiffnessMatrix(FloatMatrix &answer,
         }
     } else { /// @todo Verify that it works with large deformations
         if ( this->domain->giveEngngModel()->giveFormulation() == AL ) {
-            OOFEM_ERROR("NLStructuralElement :: computeStiffnessMatrix - Updated lagrangian not supported yet");
+            OOFEM_ERROR("Updated lagrangian not supported yet");
         }
 
         int iStartIndx, iEndIndx, jStartIndx, jEndIndx;
@@ -542,7 +542,6 @@ NLStructuralElement :: computeInitialStressMatrix(FloatMatrix &answer, TimeStep 
 IRResultType
 NLStructuralElement :: initializeFrom(InputRecord *ir)
 {
-    const char *__proc = "initializeFrom"; // Required by IR_GIVE_FIELD macro
     IRResultType result;                   // Required by IR_GIVE_FIELD macro
     this->StructuralElement :: initializeFrom(ir);
 
@@ -563,12 +562,12 @@ int
 NLStructuralElement :: checkConsistency()
 {
     if ( this->nlGeometry == 2 ) {
-        OOFEM_ERROR("NLStructuralElement :: checkConsistency - nlGeometry = 2 is not supported anymore. If access to F is needed, then the material \n should overload giveFirstPKStressVector which has F as input.");
+        OOFEM_ERROR("nlGeometry = 2 is not supported anymore. If access to F is needed, then the material \n should overload giveFirstPKStressVector which has F as input.");
         return 0;
     }
 
     if ( this->nlGeometry != 0  &&  this->nlGeometry != 1 ) {
-        OOFEM_ERROR2("NLStructuralElement :: checkConsistency - nlGeometry must be either 0 or 1 (%d not supported)", this->nlGeometry);
+        OOFEM_ERROR("nlGeometry must be either 0 or 1 (%d not supported)", this->nlGeometry);
         return 0;
     } else {
         return 1;

@@ -116,7 +116,7 @@ IntegrationRule :: getIntegrationPoint(int i)
 {
 #  ifdef DEBUG
     if ( ( i < 0 ) || ( i >= numberOfIntegrationPoints ) ) {
-        OOFEM_ERROR2("IntegrationRule::getIntegrationPoint - request out of bounds (%d)", i);
+        OOFEM_ERROR("request out of bounds (%d)", i);
     }
 
 #  endif
@@ -167,7 +167,7 @@ IntegrationRule :: saveContext(DataStream *stream, ContextMode mode, void *obj)
     contextIOResultType iores;
 
     if ( stream == NULL ) {
-        OOFEM_ERROR("saveContex : can't write into NULL stream");
+        OOFEM_ERROR("can't write into NULL stream");
     }
 
     int isdyn = isDynamic;
@@ -238,7 +238,7 @@ IntegrationRule :: restoreContext(DataStream *stream, ContextMode mode, void *ob
     //Element* __parelem = (Element*) obj;
 
     if ( stream == NULL ) {
-        OOFEM_ERROR("restoreContex : can't write into NULL stream");
+        OOFEM_ERROR("can't write into NULL stream");
     }
 
     int isdyn;
@@ -354,7 +354,7 @@ IntegrationRule :: setUpIntegrationPoints(integrationDomain mode, int nPoints,
         return numberOfIntegrationPoints;
 
     default:
-        OOFEM_ERROR2("IntegrationRule::setUpIntegrationPoints - unknown mode (%d)", mode);
+        OOFEM_ERROR("unknown mode (%d)", mode);
     }
 
     return 0;
@@ -371,7 +371,7 @@ IntegrationRule :: setUpEmbeddedIntegrationPoints(integrationDomain mode, int nP
         return  ( numberOfIntegrationPoints = this->SetUpPointsOn2DEmbeddedLine(nPoints, matMode, coords) );
 
     default:
-        OOFEM_ERROR("IntegrationRule::setUpEmbeddedIntegrationPoints - unknown mode");
+        OOFEM_ERROR("unknown mode");
     }
 
     return 0;

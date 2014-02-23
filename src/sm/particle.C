@@ -46,14 +46,13 @@ Particle :: Particle(int n, Domain *aDomain) : Node(n, aDomain)
 IRResultType
 Particle :: initializeFrom(InputRecord *ir)
 {
-    const char *__proc = "initializeFrom";
     IRResultType result;
 
     Node :: initializeFrom(ir);
 
     IR_GIVE_FIELD(ir, radius, _IFT_Particle_rad);
     if ( radius < 0.0 ) {
-        _error("particle: negative radius");
+        OOFEM_ERROR("negative radius");
     }
 
     return IRRT_OK;

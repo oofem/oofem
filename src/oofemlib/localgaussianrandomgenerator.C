@@ -56,7 +56,6 @@ LocalGaussianRandomGenerator :: generateRandomValue(double &value, FloatArray *p
 IRResultType
 LocalGaussianRandomGenerator :: initializeFrom(InputRecord *ir)
 {
-    const char *__proc = "initializeFrom"; // Required by IR_GIVE_FIELD macro
     IRResultType result;                   // Required by IR_GIVE_FIELD macro
 
     IR_GIVE_FIELD(ir, mean, _IFT_LocalGaussianRandomGenerator_mean);
@@ -132,7 +131,7 @@ double LocalGaussianRandomGenerator :: normalCdfInverse(double cdf, double a, do
     double x;
     double x2;
     if ( cdf < 0.0 || 1.0 < cdf ) {
-        OOFEM_ERROR("LocalGaussianRandomGenerator :: normalCdfInverse - NORMAL_CDF_INV - Fatal error!\nCDF < 0 or 1 < CDF.");
+        OOFEM_ERROR("NORMAL_CDF_INV - Fatal error!\nCDF < 0 or 1 < CDF.");
     }
 
     x2 = normal01CdfInverse(cdf);
@@ -210,7 +209,7 @@ double LocalGaussianRandomGenerator :: normal01CdfInverse(double p)
 
         if ( r <= 0.0 ) {
             value = -1.0;
-            OOFEM_ERROR("LocalGaussianRandomGenerator :: normal01CdfInverse - r < 0.0!");
+            OOFEM_ERROR("r < 0.0!");
         }
 
         r = sqrt( -log(r) );

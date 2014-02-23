@@ -136,7 +136,7 @@ StructuralInterfaceMaterialStatus :: saveContext(DataStream *stream, ContextMode
 {
     //contextIOResultType iores;
     //if ( stream == NULL ) {
-    //    _error("saveContex : can't write into NULL stream");
+    //    OOFEM_ERROR("saveContex : can't write into NULL stream");
     //}
 
     //if ( ( iores = MaterialStatus :: saveContext(stream, mode, obj) ) != CIO_OK ) {
@@ -164,7 +164,7 @@ StructuralInterfaceMaterialStatus :: restoreContext(DataStream *stream, ContextM
 {
     //contextIOResultType iores;
     //if ( stream == NULL ) {
-    //    _error("saveContex : can't write into NULL stream");
+    //    OOFEM_ERROR("saveContex : can't write into NULL stream");
     //}
 
     //if ( ( iores = MaterialStatus :: restoreContext(stream, mode, obj) ) != CIO_OK ) {

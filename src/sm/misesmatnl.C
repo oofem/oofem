@@ -304,7 +304,6 @@ MisesMatNl :: giveInterface(InterfaceType type)
 IRResultType
 MisesMatNl :: initializeFrom(InputRecord *ir)
 {
-    const char *__proc = "initializeFrom"; // Required by IR_GIVE_FIELD macro
     IRResultType result;                // Required by IR_GIVE_FIELD macro
 
     MisesMat :: initializeFrom(ir);

@@ -223,13 +223,13 @@ public:
      */
     //@{
     virtual void giveCauchyStressVector_3d(FloatArray &answer, GaussPoint *gp, const FloatArray &reducedF, TimeStep *tStep)
-    { _error("giveCauchyStressVector_3d: not implemented "); }
+    { OOFEM_ERROR("giveCauchyStressVector_3d: not implemented "); }
     virtual void giveCauchyStressVector_PlaneStrain(FloatArray &answer, GaussPoint *gp, const FloatArray &reducedF, TimeStep *tStep)
-    { _error("giveCauchyStressVector_PlaneStrain: not implemented "); }
+    { OOFEM_ERROR("giveCauchyStressVector_PlaneStrain: not implemented "); }
     virtual void giveCauchyStressVector_PlaneStress(FloatArray &answer, GaussPoint *gp, const FloatArray &reducedF, TimeStep *tStep)
-    { _error("giveCauchyStressVector_PlaneStress: not implemented "); }
+    { OOFEM_ERROR("giveCauchyStressVector_PlaneStress: not implemented "); }
     virtual void giveCauchyStressVector_1d(FloatArray &answer, GaussPoint *gp, const FloatArray &reducedF, TimeStep *tStep)
-    { _error("giveCauchyStressVector__1d: not implemented "); }
+    { OOFEM_ERROR("giveCauchyStressVector__1d: not implemented "); }
     //@}
 
     void give_dPdF_from(const FloatMatrix &dSdE, FloatMatrix &answer, GaussPoint *gp);
@@ -299,7 +299,7 @@ public:
                                                MatResponseMode mode,
                                                GaussPoint *gp,
                                                TimeStep *tStep)
-    { _error("give3dMaterialStiffnessMatrix: not implemented "); }
+    { OOFEM_ERROR("give3dMaterialStiffnessMatrix: not implemented "); }
 
 
     virtual void give3dMaterialStiffnessMatrix_dPdF(FloatMatrix &answer,

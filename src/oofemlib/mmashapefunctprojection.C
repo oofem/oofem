@@ -118,7 +118,7 @@ MMAShapeFunctProjection :: mapVariable(FloatArray &answer, GaussPoint *gp, Inter
                                                                         MMAShapeFunctProjectionInterface :: coordType_local,
                                                                         container, type, tStep);
     } else {
-        OOFEM_ERROR("MMAShapeFunctProjection::mapVariable: var not initialized");
+        OOFEM_ERROR("var not initialized");
     }
 
     return 1;
@@ -156,7 +156,7 @@ MMAShapeFunctProjection :: __mapVariable(FloatArray &answer, FloatArray &coords,
                                                                         MMAShapeFunctProjectionInterface :: coordType_global,
                                                                         container, type, tStep);
     } else {
-        OOFEM_ERROR("MMAShapeFunctProjection::__mapVariable: var not initialized");
+        OOFEM_ERROR("var not initialized");
     }
 
     return 1;
@@ -165,7 +165,7 @@ MMAShapeFunctProjection :: __mapVariable(FloatArray &answer, FloatArray &coords,
 int
 MMAShapeFunctProjection :: mapStatus(MaterialStatus &oStatus) const
 {
-    OOFEM_ERROR("ERROR: MMAShapeFunctProjection :: mapStatus() is not implemented yet.")
+    OOFEM_ERROR("not implemented yet.")
 
     return 0;
 }

@@ -101,11 +101,11 @@ void IntArray :: checkBounds(int i) const
 // Checks that the receiver includes an index i.
 {
     if ( i < 0 ) {
-        OOFEM_ERROR("IntArray::checkBounds : array error on index : %d < 0", i);
+        OOFEM_SIMPLE_ERROR("IntArray::checkBounds : array error on index : %d < 0", i);
     }
 
     if ( i > this->giveSize() ) {
-        OOFEM_ERROR("IntArray::checkBounds : array error on index : %d > %d", i, this->giveSize());
+        OOFEM_SIMPLE_ERROR("IntArray::checkBounds : array error on index : %d > %d", i, this->giveSize());
     }
 }
 #endif
@@ -185,7 +185,7 @@ int IntArray :: minimum() const
 {
 #ifdef DEBUG
     if ( this->isEmpty() ) {
-        OOFEM_ERROR("IntArray :: minimum - Empty array.");
+        OOFEM_SIMPLE_ERROR("IntArray :: minimum - Empty array.");
     }
 #endif
     return *std::min_element(values.begin(), values.end());
@@ -196,7 +196,7 @@ int IntArray :: maximum() const
 {
 #ifdef DEBUG
     if ( this->isEmpty() ) {
-        OOFEM_ERROR("IntArray :: maximum - Empty array.");
+        OOFEM_SIMPLE_ERROR("IntArray :: maximum - Empty array.");
     }
 #endif
     return *std::max_element(values.begin(), values.end());

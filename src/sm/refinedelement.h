@@ -85,8 +85,8 @@ protected:
     int giveCompatibleBcDofArray(Node *master_node, Node *slave_node, IntArray &dofArray, int dofs, IntArray *answer,
                                  ValueModeType mode, TimeStep *tStep);
 
-    /// Prints simple error message and exits.
-    void error(const char *file, int line, const char *format, ...) const;
+    /// Returns string for prepending output (used by error reporting macros).
+    std :: string errorInfo(const char *func) const;
 };
 } // end namespace oofem
 #endif // refinedelement_h

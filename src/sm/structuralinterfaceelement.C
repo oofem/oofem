@@ -244,7 +244,7 @@ StructuralInterfaceElement :: giveCharacteristicMatrix(FloatMatrix &answer, Char
     } else if ( mtrx == ElasticStiffnessMatrix ) {
         this->computeStiffnessMatrix(answer, ElasticStiffness, tStep);
     } else {
-        _error2( "giveCharacteristicMatrix: Unknown Type of characteristic mtrx (%s)", __CharTypeToString(mtrx) );
+        OOFEM_ERROR( "giveCharacteristicMatrix: Unknown Type of characteristic mtrx (%s)", __CharTypeToString(mtrx) );
     }
 }
 
@@ -308,7 +308,7 @@ StructuralInterfaceElement :: checkConsistency()
     // check if the cross section is a 'StructuralInterfaceCrossSection'
     int result = 1;
     if ( !this->giveInterfaceCrossSection()->testCrossSectionExtension(this->giveInterfaceCrossSection()->crossSectionType) ) {
-        OOFEM_ERROR2( "StructuralInterfaceElement :: checkConsistency : cross section %s is not a structural interface cross section", this->giveCrossSection()->giveClassName() );
+        OOFEM_ERROR( "StructuralInterfaceElement :: checkConsistency : cross section %s is not a structural interface cross section", this->giveCrossSection()->giveClassName() );
         result = 0;
     }
     return result;

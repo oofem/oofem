@@ -353,7 +353,7 @@ AnisotropicDamageMaterial :: computeEquivalentStrain(double &kappa, const FloatA
         sum = max(sum, 0.);
         kappa = sum / lmat->give('E', gp);
     } else {
-        _error("computeEquivalentStrain: unknown EquivStrainType");
+        OOFEM_ERROR("unknown EquivStrainType");
     }
 }
 
@@ -1503,7 +1503,6 @@ AnisotropicDamageMaterial :: giveIPValue(FloatArray &answer, GaussPoint *aGaussP
 IRResultType
 AnisotropicDamageMaterial :: initializeFrom(InputRecord *ir)
 {
-    const char *__proc = "initializeFrom"; // Required by IR_GIVE_FIELD macro
     IRResultType result;                // Required by IR_GIVE_FIELD macro
 
     linearElasticMaterial->initializeFrom(ir);
@@ -1650,7 +1649,7 @@ AnisotropicDamageMaterialStatus :: saveContext(DataStream *stream, ContextMode m
     contextIOResultType iores;
 
     if ( stream == NULL ) {
-        _error("saveContext : can't write into NULL stream");
+        OOFEM_ERROR("can't write into NULL stream");
     }
 
     // save parent class status

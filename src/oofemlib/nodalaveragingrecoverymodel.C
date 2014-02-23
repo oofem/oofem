@@ -144,7 +144,7 @@ NodalAveragingRecoveryModel :: recoverValues(Set elementSet, InternalStateType t
                 if ( regionDofMansConnectivity.at( regionNodalNumbers.at(inode) ) > 0 ) {
                     lhs.at(eq + i) /= regionDofMansConnectivity.at( regionNodalNumbers.at(inode) );
                 } else {
-                    OOFEM_WARNING2("NodalAveragingRecoveryModel::recoverValues: values of dofmanager %d undetermined", inode);
+                    OOFEM_WARNING("NodalAveragingRecoveryModel::recoverValues: values of dofmanager %d undetermined", inode);
                     lhs.at(eq + i) = 0.0;
                 }
             }
@@ -176,7 +176,7 @@ NodalAveragingRecoveryModel :: initCommMaps()
             OOFEM_LOG_INFO("NodalAveragingRecoveryModel :: initCommMaps: initialized comm maps\n");
             initCommMap = false;
         } else {
-            OOFEM_ERROR("NodalAveragingRecoveryModel :: initCommMaps: unsupported comm mode");
+            OOFEM_ERROR("unsupported comm mode");
         }
     }
 }
@@ -197,7 +197,7 @@ NodalAveragingRecoveryModel :: exchangeDofManValues(FloatArray &lhs, IntArray &r
         communicator->unpackAllData(this, & ls, & NodalAveragingRecoveryModel :: unpackSharedDofManData);
         communicator->finishExchange();
     } else {
-        OOFEM_ERROR("NodalAveragingRecoveryModel :: exchangeDofManValues: Unsupported commMode");
+        OOFEM_ERROR("Unsupported commMode");
     }
 }
 

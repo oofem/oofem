@@ -179,7 +179,7 @@ Element :: computeBoundaryVectorOf(const IntArray &bNodes, EquationID type, Valu
     }
 
     if ( this->computeGtoLRotationMatrix(G2L) ) {
-        OOFEM_ERROR("Element :: computeBoundaryVector - Local coordinate system is not implemented yet");
+        OOFEM_ERROR("Local coordinate system is not implemented yet");
     }
 }
 
@@ -304,18 +304,18 @@ Element :: giveRotationMatrix(FloatMatrix &answer, EquationID eid)
 #ifdef DEBUG
     if ( is_GtoL ) {
         if ( GtoL.giveNumberOfColumns() != this->computeNumberOfGlobalDofs() ) {
-            _error("Element :: updateRotationMatrix - GtoL transformation matrix size mismatch in columns");
+            OOFEM_ERROR("GtoL transformation matrix size mismatch in columns");
         }
         if ( GtoL.giveNumberOfRows() != this->computeNumberOfDofs() ) {
-            _error("Element :: updateRotationMatrix - GtoL transformation matrix size mismatch in rows");
+            OOFEM_ERROR("GtoL transformation matrix size mismatch in rows");
         }
     }
     if ( is_NtoG ) {
         if ( NtoG.giveNumberOfColumns() != this->computeNumberOfPrimaryMasterDofs(eid) ) {
-            _error("Element :: updateRotationMatrix - NtoG transformation matrix size mismatch in columns");
+            OOFEM_ERROR("NtoG transformation matrix size mismatch in columns");
         }
         if ( NtoG.giveNumberOfRows() != this->computeNumberOfGlobalDofs() ) {
-            _error("Element :: updateRotationMatrix - NtoG transformation matrix size mismatch in rows");
+            OOFEM_ERROR("NtoG transformation matrix size mismatch in rows");
         }
     }
 #endif
@@ -534,7 +534,7 @@ Material *Element :: giveMaterial()
 #ifdef DEBUG
     if ( !material ) {
         // material = this -> readInteger("mat") ;
-        _error("giveMaterial: material not defined");
+        OOFEM_ERROR("material not defined");
     }
 #endif
     return domain->giveMaterial(material);
@@ -546,7 +546,7 @@ CrossSection *Element :: giveCrossSection()
 {
 #ifdef DEBUG
     if ( !crossSection ) {
-        _error("giveCrossSection: crossSection not defined");
+        OOFEM_ERROR("crossSection not defined");
     }
 #endif
     return domain->giveCrossSection(crossSection);
@@ -566,7 +566,7 @@ Element :: giveDofManager(int i) const
 {
 #ifdef DEBUG
     if ( ( i <= 0 ) || ( i > dofManArray.giveSize() ) ) {
-        OOFEM_ERROR2("giveNode: Node %i is not defined", i);
+        OOFEM_ERROR("Node %i is not defined", i);
     }
 #endif
     return domain->giveDofManager( dofManArray.at(i) );
@@ -579,7 +579,7 @@ Element :: giveNode(int i) const
 {
 #ifdef DEBUG
     if ( ( i <= 0 ) || ( i > dofManArray.giveSize() ) ) {
-        _error("giveNode: Node is not defined");
+        OOFEM_ERROR("Node is not defined");
     }
 #endif
     return domain->giveNode( dofManArray.at(i) );
@@ -592,7 +592,7 @@ Element :: giveSide(int i) const
 {
 #ifdef DEBUG
     if ( ( i <= 0 ) || ( i > dofManArray.giveSize() ) ) {
-        _error("giveNode: Side is not defined");
+        OOFEM_ERROR("Side is not defined");
     }
 #endif
     return domain->giveSide( dofManArray.at(i) );
@@ -634,7 +634,7 @@ Element :: giveCharacteristicMatrix(FloatMatrix &answer,
 // returns characteristics matrix of receiver according to mtrx
 //
 {
-    _error("giveCharacteristicMatrix: Unknown Type of characteristic mtrx.");
+    OOFEM_ERROR("Unknown Type of characteristic mtrx.");
 }
 
 
@@ -644,21 +644,21 @@ Element :: giveCharacteristicVector(FloatArray &answer, CharType type, ValueMode
 // returns characteristics vector of receiver according to mtrx
 //
 {
-    _error("giveCharacteristicVector: Unknown Type of characteristic mtrx.");
+    OOFEM_ERROR("Unknown Type of characteristic mtrx.");
 }
 
 
 void
 Element :: computeLoadVector(FloatArray &answer, Load *load, CharType type, ValueModeType mode, TimeStep *tStep)
 {
-    _error("computeLoadVector: Unknown load type.");
+    OOFEM_ERROR("Unknown load type.");
 }
 
 
 void
 Element :: computeBoundaryLoadVector(FloatArray &answer, BoundaryLoad *load, int boundary, CharType type, ValueModeType mode, TimeStep *tStep)
 {
-    _error("computeBoundaryLoadVector: Unknown load type.");
+    OOFEM_ERROR("Unknown load type.");
 }
 
 
@@ -666,7 +666,7 @@ void
 Element :: computeBoundaryEdgeLoadVector(FloatArray &answer, BoundaryLoad *load, int edge, CharType type, ValueModeType mode, TimeStep *tStep)
 {
     ///@todo Change the load type to "BoundaryEdgeLoad" maybe?
-    _error("computeBoundaryEdgeLoadVector: Unknown load type.");
+    OOFEM_ERROR("Unknown load type.");
 }
 
 
@@ -676,7 +676,7 @@ Element :: giveCharacteristicValue(CharType mtrx, TimeStep *tStep)
 // returns characteristics value of receiver according to CharType
 //
 {
-    _error("giveCharacteristicValue: Unknown Type of characteristic mtrx.");
+    OOFEM_ERROR("Unknown Type of characteristic mtrx.");
     return 0.;
 }
 
@@ -684,7 +684,6 @@ Element :: giveCharacteristicValue(CharType mtrx, TimeStep *tStep)
 IRResultType
 Element :: initializeFrom(InputRecord *ir)
 {
-    const char *__proc = "initializeFrom"; // Required by IR_GIVE_FIELD macro
     IRResultType result;                          // Required by IR_GIVE_FIELD macro
 
 #  ifdef VERBOSE
@@ -1119,7 +1118,7 @@ Element :: computeVolume()
     FEInterpolation3d *fei = dynamic_cast< FEInterpolation3d * >( this->giveInterpolation() );
 #ifdef DEBUG
     if ( !fei ) {
-        OOFEM_ERROR("Element :: computeVolume - Function not overloaded and necessary interpolator isn't available");
+        OOFEM_ERROR("Function not overloaded and necessary interpolator isn't available");
         return 0.0;
     }
 #endif
@@ -1133,7 +1132,7 @@ Element :: computeArea()
     FEInterpolation2d *fei = dynamic_cast< FEInterpolation2d * >( this->giveInterpolation() );
 #ifdef DEBUG
     if ( !fei ) {
-        OOFEM_ERROR("Element :: computeArea - Function not overloaded and necessary interpolator isn't available");
+        OOFEM_ERROR("Function not overloaded and necessary interpolator isn't available");
         return 0.0;
     }
 #endif
@@ -1147,7 +1146,7 @@ Element :: computeLength()
     FEInterpolation1d *fei = dynamic_cast< FEInterpolation1d * >( this->giveInterpolation() );
 #ifdef DEBUG
     if ( !fei ) {
-        OOFEM_ERROR("Element :: computeLength - Function not overloaded and necessary interpolator isn't available");
+        OOFEM_ERROR("Function not overloaded and necessary interpolator isn't available");
         return 0.0;
     }
 #endif
@@ -1229,7 +1228,7 @@ Element :: computeMidPlaneNormal(FloatArray &answer, const GaussPoint *)
 // valid only for plane elements (shells, plates, ....)
 // computes mid-plane normal at gaussPoint - for materials with orthotrophy
 {
-    _error("Unable to compute mid-plane normal, not supported");
+    OOFEM_ERROR("Unable to compute mid-plane normal, not supported");
 }
 
 
@@ -1315,7 +1314,7 @@ Element :: giveSpatialDimension()
         break;
     }
 
-    _error("giveSpatialDimension: failure (maybe new element type was registered)");
+    OOFEM_ERROR("failure (maybe new element type was registered)");
     return 0; //to make compiler happy
 }
 
@@ -1361,8 +1360,8 @@ Element :: giveNumberOfBoundarySides()
         break;
     }
 
-    _error2( "giveSpatialDimension: failure, unsupported geometry type (%s)",
-            __Element_Geometry_TypeToString( this->giveGeometryType() ) );
+    OOFEM_ERROR("failure, unsupported geometry type (%s)",
+            __Element_Geometry_TypeToString( this->giveGeometryType() ));
     return 0; // to make compiler happy
 }
 
@@ -1414,12 +1413,12 @@ Element :: mapStateVariables(Domain &iOldDom, const TimeStep &iTStep)
 
             MaterialStatus *ms = dynamic_cast< MaterialStatus * >( gp.giveMaterialStatus() );
             if ( ms == NULL ) {
-                OOFEM_ERROR("In Element :: mapStateVariables(): failed to fetch MaterialStatus.\n");
+                OOFEM_ERROR("failed to fetch MaterialStatus.\n");
             }
 
             MaterialStatusMapperInterface *interface = dynamic_cast< MaterialStatusMapperInterface * >(ms);
             if ( interface == NULL ) {
-                OOFEM_ERROR("In Element :: mapStateVariables(): Failed to fetch MaterialStatusMapperInterface.\n");
+                OOFEM_ERROR("Failed to fetch MaterialStatusMapperInterface.\n");
             }
 
             result &= interface->MSMI_map( gp, iOldDom, sourceElemSet, iTStep, * ( ms ) );
@@ -1573,7 +1572,7 @@ Element :: drawYourself(oofegGraphicContext &gc)
     } else if ( mode == OGC_elemSpecial ) {
         this->drawSpecial(gc);
     } else {
-        _error("drawYourself : unsupported mode");
+        OOFEM_ERROR("unsupported mode");
     }
 }
 

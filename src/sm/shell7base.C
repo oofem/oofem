@@ -1423,7 +1423,7 @@ Shell7Base :: computeEdgeLoadVectorAt(FloatArray &answer, Load *load, int iEdge,
         this->computeTractionForce(answer, iEdge, edgeLoad, tStep, mode);
         return;
     } else {
-        _error("Shell7Base :: computeEdgeLoadVectorAt: load type not supported");
+        OOFEM_ERROR("Shell7Base :: computeEdgeLoadVectorAt: load type not supported");
         return;
     }
 }
@@ -1447,7 +1447,7 @@ Shell7Base :: computeSurfaceLoadVectorAt(FloatArray &answer, Load *load,
 
         return;
     } else {
-        _error("Shell7Base :: computeSurfaceLoadVectorAt: load type not supported");
+        OOFEM_ERROR("Shell7Base :: computeSurfaceLoadVectorAt: load type not supported");
         return;
     }
 }
@@ -1493,7 +1493,7 @@ Shell7Base :: computePressureForceAt(GaussPoint *gp, FloatArray &traction, const
     // Computes pressure loading. Acts normal to the current (deformed) surface.
     //@todo traction load should be moved outside this method
     if ( iSurf != 0 ) {
-        _error("computePressureForceAt: incompatible load surface must be 0 for this element");
+        OOFEM_ERROR("computePressureForceAt: incompatible load surface must be 0 for this element");
     }
 
     FloatArray load;
@@ -1514,7 +1514,7 @@ Shell7Base :: computePressureForceAt(GaussPoint *gp, FloatArray &traction, const
     } else if ( dynamic_cast< ConstantSurfaceLoad * >(surfLoad) ) {
         surfLoad->computeValueAt(traction, tStep, * ( gp->giveCoordinates() ), mode);        // traction vector
     } else {
-        _error("computePressureForceAt: incompatible load type");
+        OOFEM_ERROR("computePressureForceAt: incompatible load type");
     }
 }
 
@@ -1887,7 +1887,7 @@ Shell7Base :: ZZNodalRecoveryMI_ComputeEstimatedInterpolationMtrx(FloatArray &an
     if ( interpol ) {
         ///@todo fix this whole compostie recovery thing in a better way
         //if ( !this->giveIPValueSize(type, gp) ) {
-        //    OOFEM_ERROR3("ZZNodalRecoveryMI_computeNNMatrix: Element %d not supporting type %d", this->giveNumber(), type);
+        //    OOFEM_ERROR("ZZNodalRecoveryMI_computeNNMatrix: Element %d not supporting type %d", this->giveNumber(), type);
         //    return;
         //}
 
@@ -1896,7 +1896,7 @@ Shell7Base :: ZZNodalRecoveryMI_ComputeEstimatedInterpolationMtrx(FloatArray &an
         // ok default implementation can not work, as element is not providing valid interpolation
         // to resolve this, one can overload this method for element implementing ZZNodalRecoveryModelInterface
         // or element should provide interpolation.
-        OOFEM_ERROR2( "ZZNodalRecoveryMI_computeNNMatrix: Element %d not providing valid interpolation", this->giveNumber() );
+        OOFEM_ERROR( "ZZNodalRecoveryMI_computeNNMatrix: Element %d not providing valid interpolation", this->giveNumber() );
     }
 }
 
@@ -2363,7 +2363,7 @@ Shell7Base :: giveFieldSize(SolutionField fieldType)
     } else if ( fieldType == All  ) {
         return 7;
     } else {
-        _error("giveFieldSize: unknown fieldType");
+        OOFEM_ERROR("giveFieldSize: unknown fieldType");
         return 0;
     }
 }

@@ -55,7 +55,6 @@ MetaStep :: MetaStep(int n, EngngModel *e, int nsteps, InputRecord &attrib)
 IRResultType
 MetaStep :: initializeFrom(InputRecord *ir)
 {
-    const char *__proc = "initializeFrom"; // Required by IR_GIVE_FIELD macro
     IRResultType result;                // Required by IR_GIVE_FIELD macro
 
     IR_GIVE_FIELD(ir, numberOfSteps, _IFT_MetaStep_nsteps);

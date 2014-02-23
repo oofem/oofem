@@ -108,7 +108,7 @@ Axisymm3d :: computeBmatrixAt(GaussPoint *gp, FloatMatrix &answer, int li, int u
     }
 
     if ( ( size < 0 ) || ( size > 6 ) ) {
-        _error("ComputeBmatrixAt size mismatch");
+        OOFEM_ERROR("ComputeBmatrixAt size mismatch");
     }
 
     answer.resize(size, 6);
@@ -256,7 +256,6 @@ Axisymm3d :: computeGaussPoints()
 IRResultType
 Axisymm3d :: initializeFrom(InputRecord *ir)
 {
-    const char *__proc = "initializeFrom"; // Required by IR_GIVE_FIELD macro
     IRResultType result;                // Required by IR_GIVE_FIELD macro
 
     numberOfGaussPoints = 1;
@@ -318,7 +317,7 @@ Axisymm3d :: computeStrainVector(FloatArray &answer, GaussPoint *gp, TimeStep *t
 
             this->computeBmatrixAt(helpGaussPoint, b, 3, 6);
         } else {
-            _error("ComputeStrainVector: numberOfRotGaussPoints size mismatch");
+            OOFEM_ERROR("numberOfRotGaussPoints size mismatch");
         }
 
         Epsilon.beProductOf(b, u);
@@ -326,10 +325,10 @@ Axisymm3d :: computeStrainVector(FloatArray &answer, GaussPoint *gp, TimeStep *t
         answer.at(6) = Epsilon.at(4);
 
         if ( nlGeometry ) {
-            OOFEM_ERROR("Axisymm3d :: computeStrainVector - only supports nlGeometry = 0");
+            OOFEM_ERROR("only supports nlGeometry = 0");
         }
     } else if ( mode == AL ) { // actualized Lagrange formulation
-        _error("computeStrainVector : unsupported mode");
+        OOFEM_ERROR("unsupported mode");
     }
 }
 
@@ -416,7 +415,7 @@ Axisymm3d :: SPRNodalRecoveryMI_giveDofMansDeterminedByPatch(IntArray &answer, i
         ( pap == this->giveNode(3)->giveNumber() ) ) {
         answer.at(1) = pap;
     } else {
-        _error("SPRNodalRecoveryMI_giveDofMansDeterminedByPatch: node unknown");
+        OOFEM_ERROR("node unknown");
     }
 }
 
@@ -490,7 +489,7 @@ Axisymm3d :: giveEdgeDofMapping(IntArray &answer, int iEdge) const
         answer.at(3) = 1;
         answer.at(4) = 2;
     } else {
-        _error("giveEdgeDofMapping: wrong edge number");
+        OOFEM_ERROR("wrong edge number");
     }
 }
 
@@ -542,7 +541,7 @@ Axisymm3d :: computeLoadLEToLRotationMatrix(FloatMatrix &answer, int iEdge, Gaus
         aNode = 3;
         bNode = 1;
     } else {
-        _error("computeLoadLBtoLRotationMatrix: wrong egde number");
+        OOFEM_ERROR("wrong egde number");
     }
 
     nodeA   = this->giveNode(aNode);
@@ -580,7 +579,7 @@ Axisymm3d :: SpatialLocalizerI_giveDistanceFromParametricCenter(const FloatArray
     this->computeGlobalCoordinates(gcoords, lcoords);
 
     if ( ( size = coords.giveSize() ) < ( gsize = gcoords.giveSize() ) ) {
-        _error("SpatialLocalizerI_giveDistanceFromParametricCenter: coordinates size mismatch");
+        OOFEM_ERROR("coordinates size mismatch");
     }
 
     if ( size == gsize ) {

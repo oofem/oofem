@@ -152,7 +152,7 @@ SkylineUnsym :: assemble(const IntArray &loc, const FloatMatrix &mat)
 #  ifdef DEBUG
     dim = mat.giveNumberOfRows();
     if ( dim != loc.giveSize() ) {
-        OOFEM_ERROR("SkylineUnsym :: assemble : dimension of 'k' and 'loc' mismatch");
+        OOFEM_ERROR("dimension of 'k' and 'loc' mismatch");
     }
 
     this->checkSizeTowards(loc);
@@ -550,7 +550,7 @@ SkylineUnsym :: backSubstitutionWith(FloatArray &y) const
     }
 
     if ( y.giveSize() != size ) {
-        OOFEM_ERROR("SkylineUnsym::backSubstitutionWith : size mismatch");
+        OOFEM_ERROR("size mismatch");
     }
 
     for ( k = 1; k <= size; k++ ) {
@@ -565,7 +565,7 @@ SkylineUnsym :: backSubstitutionWith(FloatArray &y) const
         diag = this->giveRowColumn(k)->atDiag();
 #     ifdef DEBUG
         if ( fabs(diag) < SkylineUnsym_TINY_PIVOT ) {
-            OOFEM_ERROR2("SkylineUnsym::backSubstitutionWith : diagScaling: pivot %d is small", k);
+            OOFEM_ERROR("diagScaling: pivot %d is small", k);
         }
 
 #     endif
@@ -615,7 +615,7 @@ SkylineUnsym :: times(const FloatArray &x, FloatArray &answer) const
     // first check sizes
     //
     if ( this->size != x.giveSize() ) {
-        OOFEM_ERROR("SkylineUnsym::times : size mismatch");
+        OOFEM_ERROR("size mismatch");
     }
 
     answer.resize(this->size);
@@ -661,7 +661,7 @@ SkylineUnsym :: giveRowColumn(int j) const
 {
     if ( size < j ) {
         // this -> growTo(j) ;
-        OOFEM_ERROR("SkylineUnsym::giveRowColumn : size mismatch");
+        OOFEM_ERROR("size mismatch");
     }
 
     if ( !rowColumns [ j - 1 ] ) {
@@ -685,7 +685,7 @@ SkylineUnsym :: growTo(int n)
 
 #  ifdef DEBUG
     else if ( n <= size ) {
-        OOFEM_ERROR3("SkylineUnsym::growTo : cannot grow from %d to %d", size, n);
+        OOFEM_ERROR("cannot grow from %d to %d", size, n);
     }
 #  endif
 
@@ -810,7 +810,7 @@ void SkylineUnsym :: timesT(const FloatArray &x, FloatArray &answer) const
 
     // first check sizes
     if ( this->size != x.giveSize() ) {
-        OOFEM_ERROR("SkylineUnsym::trans_mult : size mismatch");
+        OOFEM_ERROR("size mismatch");
     }
 
     answer.resize(this->size);

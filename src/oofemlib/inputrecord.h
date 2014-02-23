@@ -64,8 +64,8 @@ typedef const char *InputFieldType;
 /**
  * Macro simplifying the error reporting.
  */
-#define IR_IOERR(__class, __proc, __keyword, __ir, __result) \
-    __ir->report_error(__class, __proc, __keyword, __result, __FILE__, __LINE__);
+#define IR_IOERR(__keyword, __ir, __result) \
+    __ir->report_error(this->giveClassName(), __func__, __keyword, __result, __FILE__, __LINE__);
 
 /**
  * Macro facilitating the use of input record reading methods.
@@ -74,7 +74,7 @@ typedef const char *InputFieldType;
  * Includes also the error reporting.
  */
 #define IR_GIVE_FIELD(__ir, __value, __id) result = __ir->giveField(__value, __id); \
-    if ( result != IRRT_OK ) { IR_IOERR(giveClassName(), __proc, __id, __ir, result); }
+    if ( result != IRRT_OK ) { IR_IOERR(__id, __ir, result); }
 
 /**
  * Macro facilitating the use of input record reading methods.
@@ -83,7 +83,7 @@ typedef const char *InputFieldType;
  * Includes also the error reporting.
  */
 #define IR_GIVE_OPTIONAL_FIELD(__ir, __value, __id) result = __ir->giveOptionalField(__value, __id); \
-    if ( result != IRRT_OK ) { IR_IOERR(giveClassName(), __proc, __id, __ir, result); }
+    if ( result != IRRT_OK ) { IR_IOERR(__id, __ir, result); }
 
 /**
  * Macro facilitating the use of input record reading methods.
@@ -92,7 +92,7 @@ typedef const char *InputFieldType;
  */
 #define IR_GIVE_RECORD_KEYWORD_FIELD(__ir, __name, __value) \
     result = __ir->giveRecordKeywordField(__name, __value); \
-    if ( result != IRRT_OK ) { IR_IOERR(giveClassName(), __proc, "RecordIDField", __ir, result); }
+    if ( result != IRRT_OK ) { IR_IOERR("RecordIDField", __ir, result); }
 
 
 

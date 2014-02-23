@@ -154,7 +154,7 @@ PetscSparseMtrx :: timesT(const FloatArray &x, FloatArray &answer) const
 
 #ifdef __PARALLEL_MODE
     if ( emodel->isParallel() ) {
-        OOFEM_ERROR("PetscSparseMtrx :: timesT - Not implemented");
+        OOFEM_ERROR("Not implemented");
     }
 #endif
     Vec globX, globY;
@@ -186,7 +186,7 @@ PetscSparseMtrx :: times(const FloatMatrix &B, FloatMatrix &answer) const
 
 #ifdef __PARALLEL_MODE
     if ( emodel->isParallel() ) {
-        OOFEM_ERROR("PetscSparseMtrx :: times - Not implemented");
+        OOFEM_ERROR("Not implemented");
     }
 #endif
     // I'm opting to work with a set of vectors, as i think it might be faster and more robust. / Mikael
@@ -245,7 +245,7 @@ PetscSparseMtrx :: timesT(const FloatMatrix &B, FloatMatrix &answer) const
 
 #ifdef __PARALLEL_MODE
     if ( emodel->isParallel() ) {
-        OOFEM_ERROR("PetscSparseMtrx :: times - Not implemented");
+        OOFEM_ERROR("Not implemented");
     }
 #endif
     int nr = this->giveNumberOfColumns();
@@ -302,7 +302,7 @@ PetscSparseMtrx :: buildInternalStructure(EngngModel *eModel, int di, EquationID
 
 #ifdef __PARALLEL_MODE
     if ( eModel->isParallel() ) {
-        OOFEM_ERROR("PetscSparseMtrx :: buildInternalStructure - Not implemented");
+        OOFEM_ERROR("Not implemented");
     }
 #endif
 
@@ -731,14 +731,14 @@ double &
 PetscSparseMtrx :: at(int i, int j)
 {
     static double a;
-    OOFEM_ERROR("PetscSparseMtrx::at(i,j) - unsupported");
+    OOFEM_ERROR("unsupported");
     return a;
 }
 
 double
 PetscSparseMtrx :: at(int i, int j) const
 {
-    OOFEM_ERROR("PetscSparseMtrx::at(i,j) - unsupported");
+    OOFEM_ERROR("unsupported");
     return 0;
     //double value;
     //int row = i-1, col = j-1;
@@ -749,7 +749,7 @@ PetscSparseMtrx :: at(int i, int j) const
 void
 PetscSparseMtrx :: toFloatMatrix(FloatMatrix &answer) const
 {
-    OOFEM_ERROR("PetscSparseMtrx::toFloatMatrix() - unsupported");
+    OOFEM_ERROR("unsupported");
 }
 
 void

@@ -422,7 +422,7 @@ XFEMStatic ::  giveUnknownComponent(ValueModeType mode, TimeStep *tStep, Domain 
             return 0.0; ///@todo: how should one treat newly created dofs?
             // If we are not happy with setting them to zero,
             // I suggest that we use the primary variable mapper. /ES
-            //OOFEM_ERROR2( "giveUnknown:  Dof unknowns dictionary does not contain unknown of value mode (%s)", __ValueModeTypeToString(mode) );
+            //OOFEM_ERROR( "giveUnknown:  Dof unknowns dictionary does not contain unknown of value mode (%s)", __ValueModeTypeToString(mode) );
         }
     } else {
         return NonLinearStatic ::  giveUnknownComponent(mode, tStep, d, dof);
@@ -431,7 +431,6 @@ XFEMStatic ::  giveUnknownComponent(ValueModeType mode, TimeStep *tStep, Domain 
 
 IRResultType XFEMStatic :: initializeFrom(InputRecord *ir)
 {
-    const char *__proc = "initializeFrom"; // Required by IR_GIVE_FIELD macro
     IRResultType result;                // Required by IR_GIVE_FIELD macro
 
     NonLinearStatic :: initializeFrom(ir);

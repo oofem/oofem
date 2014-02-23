@@ -169,7 +169,6 @@ IRResultType
 DustMaterial :: initializeFrom(InputRecord *ir)
 {
     // Required by IR_GIVE_FIELD macro
-    const char *__proc = "initializeFrom";
     IRResultType result;
     // call the corresponding service of structural material
     StructuralMaterial :: initializeFrom(ir);
@@ -428,7 +427,7 @@ DustMaterial :: performF1return(double i1, double rho, GaussPoint *gp)
     }
 
     OOFEM_LOG_DEBUG("  i1 %e rho %e  bulkM %e  shearM %e\n", i1, rho, bulkModulus, shearModulus);
-    OOFEM_ERROR("performF1return: Newton's method did not converge\n");
+    OOFEM_ERROR("Newton's method did not converge\n");
 }
 
 void
@@ -468,7 +467,7 @@ DustMaterial :: performF2return(double i1, double rho, GaussPoint *gp)
         tempQ = .5 * ( qLeft + qRight );
     }
 
-    OOFEM_ERROR("performF2return: bisection method did not converge\n");
+    OOFEM_ERROR("bisection method did not converge\n");
 }
 
 void
@@ -494,7 +493,7 @@ DustMaterial :: computeQFromPlastVolEps(double &answer, double q, double deltaVo
     }
 
     OOFEM_LOG_DEBUG("  dVolEpsPl: %e\n", deltaVolumetricPlasticStrain);
-    OOFEM_ERROR("computeQFromPlastVolEps: Newton's method did not converge\n");
+    OOFEM_ERROR("Newton's method did not converge\n");
 }
 
 void
@@ -514,7 +513,7 @@ DustMaterial :: give3dMaterialStiffnessMatrix(FloatMatrix &answer,
         LEMaterial->give3dMaterialStiffnessMatrix(answer, mode, gp, tStep);
         answer.times(coeff);
     } else {
-        _error("Unsupported MatResponseMode\n");
+        OOFEM_ERROR("Unsupported MatResponseMode\n");
     }
 }
 
@@ -652,7 +651,7 @@ DustMaterial :: solveQ0(double &answer)
         }
     }
 
-    OOFEM_ERROR("solveQ0: Newton's method did not converge\n");
+    OOFEM_ERROR("Newton's method did not converge\n");
 }
 
 void

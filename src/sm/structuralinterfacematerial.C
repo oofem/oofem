@@ -69,7 +69,6 @@ StructuralInterfaceMaterial :: giveIPValue(FloatArray &answer, GaussPoint *gp, I
 IRResultType
 StructuralInterfaceMaterial :: initializeFrom(InputRecord *ir)
 {
-    const char *__proc = "initializeFrom";  // Required by IR_GIVE_FIELD macro
     IRResultType result;                    // Required by IR_GIVE_FIELD macro
 
     IR_GIVE_OPTIONAL_FIELD(ir, this->useNumericalTangent, _IFT_StructuralInterfaceMaterial_useNumericalTangent);
@@ -160,7 +159,7 @@ StructuralInterfaceMaterial :: give3dStiffnessMatrix_Eng(FloatMatrix &answer, Ma
 void
 StructuralInterfaceMaterial :: give3dStiffnessMatrix_dTdj(FloatMatrix &answer, MatResponseMode rMode, GaussPoint *gp, TimeStep *tStep)
 {
-    _error("give3dStiffnessMatrix_dTdj: not implemented ")
+    OOFEM_ERROR("give3dStiffnessMatrix_dTdj: not implemented ")
 }
 
 void

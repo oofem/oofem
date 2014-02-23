@@ -55,7 +55,7 @@ public:
         if ( gp->giveElement()->computeGlobalCoordinates( globalCoordinates, * ( gp->giveLocalCoordinates() ) ) ) {
             this->generateRandomValue(value, & globalCoordinates);
         } else {
-            OOFEM_ERROR("RandomFieldGenerator::generateRandomValue computeGlobalCoordinates failed");
+            OOFEM_ERROR("computeGlobalCoordinates failed");
         }
     }
 

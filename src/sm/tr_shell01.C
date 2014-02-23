@@ -68,13 +68,13 @@ TR_SHELL01 :: initializeFrom(InputRecord *ir)
     /*
      * IR_GIVE_OPTIONAL_FIELD(ir, val, _IFT_Element_nip);
      * if ( val != -1 ) {
-     *  _error("key word NIP is not allowed for element TR_SHELL01");
+     *  OOFEM_ERROR("key word NIP is not allowed for element TR_SHELL01");
      * }
      *
      *
      * IR_GIVE_OPTIONAL_FIELD(ir, val, _IFT_TrPlaneStrRot_niprot, "niprot");
      * if ( val != -1 ) {
-     *  _error("key word NIProt is not allowed for element TR_SHELL01");
+     *  OOFEM_ERROR("key word NIProt is not allowed for element TR_SHELL01");
      * }
      */
 

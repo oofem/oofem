@@ -122,7 +122,7 @@ FluidDynamicMaterial :: giveIPValue(FloatArray &answer, GaussPoint *gp, Internal
             answer = vec;
             return 1;
         } else {
-            OOFEM_ERROR("FluidDynamicMaterial :: giveIPValue: material mode not supported");
+            OOFEM_ERROR("material mode not supported");
             return 0;
         }
 
@@ -153,7 +153,7 @@ FluidDynamicMaterial :: giveIPValue(FloatArray &answer, GaussPoint *gp, Internal
             answer = vec;
             return 1;
         } else {
-            OOFEM_ERROR("FluidDynamicMaterial :: giveIPValue: material mode not supported");
+            OOFEM_ERROR("material mode not supported");
             return 0;
         }
 

@@ -239,7 +239,7 @@ public:
      * @return DOF number i.
      */
     virtual DofManager *giveInternalDofManager(int i) const {
-        _error2("No such DOF available on Element %d", number);
+        OOFEM_ERROR("No such DOF available on Element %d", number);
         return NULL;
     }
     //@}

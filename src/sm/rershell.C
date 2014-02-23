@@ -552,7 +552,7 @@ RerShell :: giveLocalCoordinates(FloatArray &answer, const FloatArray &global)
 {
     // test the parameter
     if ( global.giveSize() != 3 ) {
-        _error("GiveLocalCoordinate : cannot transform coordinates- size mismatch");
+        OOFEM_ERROR("GiveLocalCoordinate : cannot transform coordinates- size mismatch");
         exit(1);
     }
 
@@ -613,7 +613,7 @@ RerShell :: giveCharacteristicTensor(FloatMatrix &answer, CharTensor type, Gauss
         answer.at(1, 2) = curv.at(6) / 2.;
         answer.at(2, 1) = curv.at(6) / 2.;
     } else {
-        _error("GiveCharacteristicTensor: unsupported tensor mode");
+        OOFEM_ERROR("GiveCharacteristicTensor: unsupported tensor mode");
         exit(1);
     }
 

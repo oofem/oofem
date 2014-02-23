@@ -96,7 +96,6 @@ VTKXMLExportModule :: ~VTKXMLExportModule()
 IRResultType
 VTKXMLExportModule :: initializeFrom(InputRecord *ir)
 {
-    const char *__proc = "initializeFrom"; // Required by IR_GIVE_FIELD macro
     IRResultType result;                // Required by IR_GIVE_FIELD macro
     int val;
 
@@ -172,7 +171,7 @@ VTKXMLExportModule :: giveOutputStream(TimeStep *tStep)
     FILE *answer;
     std :: string fileName = giveOutputFileName(tStep);
     if ( ( answer = fopen(fileName.c_str(), "w") ) == NULL ) {
-        OOFEM_ERROR2( "VTKXMLExportModule::giveOutputStream: failed to open file %s", fileName.c_str() );
+        OOFEM_ERROR("failed to open file %s", fileName.c_str());
     }
 
     return answer;
@@ -217,7 +216,7 @@ VTKXMLExportModule :: giveCellType(Element *elem)
     } else if ( elemGT == EGT_wedge_2 ) {
         vtkCellType = 26;
     } else {
-        OOFEM_ERROR2( "VTKXMLExportModule: unsupported element geometry type on element %d", elem->giveNumber() );
+        OOFEM_ERROR("unsupported element geometry type on element %d", elem->giveNumber());
     }
 
     return vtkCellType;
@@ -263,7 +262,7 @@ VTKXMLExportModule :: giveNumberOfNodesPerCell(int cellType)
         return 27;
 
     default:
-        OOFEM_ERROR("VTKXMLExportModule: unsupported cell type ID");
+        OOFEM_ERROR("unsupported cell type ID");
     }
 
     return 0; // to make compiler happy
@@ -341,7 +340,7 @@ VTKXMLExportModule :: giveElementCell(IntArray &answer, Element *elem)
             answer.at(i) = elem->giveNode(mapping [ i - 1 ])->giveNumber();
         }
     } else {
-        OOFEM_ERROR("VTKXMLExportModule: unsupported element geometry type");
+        OOFEM_ERROR("unsupported element geometry type");
     }
 }
 
@@ -367,7 +366,7 @@ VTKXMLExportModule :: giveNumberOfElementCells(Element *elem)
         ( elemGT == EGT_wedge_1 ) || ( elemGT == EGT_wedge_2 ) ) {
         return 1;
     } else {
-        OOFEM_ERROR("VTKXMLExportModule: unsupported element geometry type");
+        OOFEM_ERROR("unsupported element geometry type");
     }
 
     return 0;
@@ -857,7 +856,7 @@ VTKXMLExportModule :: giveDataHeaders(std :: string &pointHeader, std :: string 
             scalars += __UnknownTypeToString(type);
             scalars.append(" ");
         } else {
-            OOFEM_ERROR2( "VTKXMLExportModule::exportPrimVarAs: unsupported UnknownType %s", __UnknownTypeToString(type) );
+            OOFEM_ERROR("unsupported UnknownType %s", __UnknownTypeToString(type) );
         }
     }
 
@@ -1039,7 +1038,7 @@ VTKXMLExportModule :: getNodalVariableFromIS(FloatArray &answer, Node *node, Tim
             answer.at(i) = val->at(i);
         }
     } else {
-        OOFEM_ERROR("TKXMLExportModule ::getNodalVariableFromIS - ISVT_UNDEFINED encountered")
+        OOFEM_ERROR("ISVT_UNDEFINED encountered")
     }
 }
 
@@ -1073,7 +1072,7 @@ VTKXMLExportModule :: getNodalVariableFromXFEMST(FloatArray &answer, Node *node,
         val = & valueArray;
         ei->evalNodeEnrMarkerInNode( valueArray.at(1), node->giveNumber() );
     } else {
-        //OOFEM_WARNING2("VTKXMLExportModule::getNodalVariableFromXFEMST: invalid data in node %d", inode);
+        //OOFEM_WARNING("VTKXMLExportModule::getNodalVariableFromXFEMST: invalid data in node %d", inode);
     }
 
     ///@todo duplicated code from getNodalVariableFromIS - uneccessary
@@ -1097,7 +1096,7 @@ VTKXMLExportModule :: getNodalVariableFromXFEMST(FloatArray &answer, Node *node,
             answer.at(i) = val->at(i);
         }
     } else {
-        OOFEM_ERROR("TKXMLExportModule ::getNodalVariableFromIS - ISVT_UNDEFINED encountered")
+        OOFEM_ERROR("ISVT_UNDEFINED encountered")
     }
 }
 
@@ -1432,7 +1431,7 @@ VTKXMLExportModule :: getNodalVariableFromPrimaryField(FloatArray &answer, DofMa
 
         iState = IST_DirectorField;
     } else {
-        OOFEM_ERROR2( "VTKXMLExportModule: unsupported unknownType %s", __UnknownTypeToString(type) );
+        OOFEM_ERROR("unsupported unknownType %s", __UnknownTypeToString(type) );
     }
 
     size = dofIDMask.giveSize();
@@ -1451,7 +1450,7 @@ VTKXMLExportModule :: getNodalVariableFromPrimaryField(FloatArray &answer, DofMa
             if ( size == recoveredVal->giveSize() ) {
                 answer.at(j) = recoveredVal->at(j);
             } else {
-                OOFEM_WARNING2("VTKXMLExportModule :: getDofManPrimaryVariable: recovered variable size mismatch for %d", type);
+                OOFEM_WARNING("VTKXMLExportModule :: getDofManPrimaryVariable: recovered variable size mismatch for %d", type);
                 answer.at(j) = 0.0;
             }
         } else if ( ( indx = dman->findDofWithDofId(id) ) ) {
@@ -1471,7 +1470,7 @@ VTKXMLExportModule :: getNodalVariableFromPrimaryField(FloatArray &answer, DofMa
             if ( size == recoveredVal->giveSize() ) {
                 answer.at(j) = recoveredVal->at(j);
             } else {
-                OOFEM_WARNING2("VTKXMLExportModule :: getDofManPrimaryVariable: recovered variable size mismatch for %d", type);
+                OOFEM_WARNING("VTKXMLExportModule :: getDofManPrimaryVariable: recovered variable size mismatch for %d", type);
                 answer.at(j) = 0.0;
             }
         }
@@ -1577,7 +1576,7 @@ VTKXMLExportModule :: getCellVariableFromIS(FloatArray &answer, Element *el, Int
     switch ( type ) {
         // Special scalars
     case IST_MaterialNumber:
-        OOFEM_WARNING1("VTKExportModule - Material numbers are deprecated, outputing cross section number instead...");
+        OOFEM_WARNING("VTKExportModule - Material numbers are deprecated, outputing cross section number instead...");
     case IST_CrossSectionNumber:
         valueArray.at(1) = ( double ) el->giveCrossSection()->giveNumber();
         break;
@@ -1821,7 +1820,7 @@ VTKXMLExportModule :: exportIntVarsInGpAs(IntArray valIDs, TimeStep *tStep)
     // open output stream
     std :: string outputFileName = this->giveOutputBaseFileName(tStep) + ".gp.vtu";
     if ( ( stream = fopen(outputFileName.c_str(), "w") ) == NULL ) {
-        OOFEM_ERROR2( "VTKXMLExportModule::exportIntVarsInGpAs: failed to open file %s", outputFileName.c_str() );
+        OOFEM_ERROR("failed to open file %s", outputFileName.c_str() );
     }
 
     fprintf(stream, "<VTKFile type=\"UnstructuredGrid\" version=\"0.1\" byte_order=\"LittleEndian\">\n");

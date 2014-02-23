@@ -85,7 +85,7 @@ StructuralMaterial :: giveRealStressVector(FloatArray &answer, GaussPoint *gp, c
 void
 StructuralMaterial :: giveRealStressVector_3d(FloatArray &answer, GaussPoint *gp, const FloatArray &reducedStrain, TimeStep *tStep)
 {
-    OOFEM_ERROR2( "%s :: giveRealStressVector_3d - 3d mode not supported", this->giveClassName() );
+    OOFEM_ERROR( "%s :: giveRealStressVector_3d - 3d mode not supported", this->giveClassName() );
 }
 
 
@@ -518,7 +518,7 @@ StructuralMaterial :: giveStiffnessMatrix(FloatMatrix &answer,
         this->giveFiberStiffMtrx(answer, rMode, gp, tStep);
         break;
     default:
-        OOFEM_ERROR2( "StructuralMaterial :: giveStiffnessMatrix : unknown mode (%s)", __MaterialModeToString(mMode) );
+        OOFEM_ERROR( "StructuralMaterial :: giveStiffnessMatrix : unknown mode (%s)", __MaterialModeToString(mMode) );
     }
 }
 
@@ -830,7 +830,7 @@ StructuralMaterial :: giveVoigtSymVectorMask(IntArray &answer, MaterialMode mmod
         return 0;
 
     default:
-        OOFEM_ERROR2( "StructuralMaterial :: giveVoigtSymVectorMask : unknown mode (%s)", __MaterialModeToString(mmode) );
+        OOFEM_SIMPLE_ERROR( "StructuralMaterial :: giveVoigtSymVectorMask : unknown mode (%s)", __MaterialModeToString(mmode) );
         return 0;
     }
 }
@@ -881,7 +881,7 @@ StructuralMaterial :: giveVoigtVectorMask(IntArray &answer, MaterialMode mmode)
         return 9;
 
     default:
-        //OOFEM_ERROR2( "StructuralMaterial :: giveVoigtVectorMask: unknown mode (%s)", __MaterialModeToString(mmode) );
+        //OOFEM_ERROR( "StructuralMaterial :: giveVoigtVectorMask: unknown mode (%s)", __MaterialModeToString(mmode) );
         return 0;
     }
 }
@@ -1093,7 +1093,7 @@ StructuralMaterial :: computePrincipalValues(FloatArray &answer, const FloatArra
 {
     int size = s.giveSize();
     if ( !( ( size == 3 ) || ( size == 4 ) || ( size == 6 ) ) ) {
-        OOFEM_ERROR("StructuralMaterial :: ComputePrincipalValues: Vector size mismatch");
+        OOFEM_SIMPLE_ERROR("StructuralMaterial :: ComputePrincipalValues: Vector size mismatch");
     }
 
     double swap;
@@ -1121,11 +1121,11 @@ StructuralMaterial :: computePrincipalValues(FloatArray &answer, const FloatArra
         } else if ( mode == principal_stress ) {
             D = dst * dst + 4.0 * s.at(size) * s.at(size);
         } else {
-            OOFEM_ERROR("StructuralMaterial :: ComputePrincipalValues: not supported");
+            OOFEM_SIMPLE_ERROR("StructuralMaterial :: ComputePrincipalValues: not supported");
         }
 
         if ( D < 0. ) {
-            OOFEM_ERROR("StructuralMaterial :: ComputePrincipalValues: Imaginary roots ");
+            OOFEM_SIMPLE_ERROR("StructuralMaterial :: ComputePrincipalValues: Imaginary roots ");
         }
 
         D = sqrt(D);
@@ -1176,7 +1176,7 @@ StructuralMaterial :: computePrincipalValues(FloatArray &answer, const FloatArra
             0.25 * ( s.at(4) * s.at(5) * s.at(6) - s.at(1) * s.at(4) * s.at(4) -
                     s.at(2) * s.at(5) * s.at(5) - s.at(3) * s.at(6) * s.at(6) );
         } else {
-            OOFEM_ERROR("StructuralMaterial :: ComputePrincipalValues: not supported");
+            OOFEM_SIMPLE_ERROR("StructuralMaterial :: ComputePrincipalValues: not supported");
         }
 
         /*
@@ -1251,7 +1251,7 @@ StructuralMaterial :: computePrincipalValDir(FloatArray &answer, FloatMatrix &di
 
     // printf ("size is %d\n",size);
     if ( !( ( size == 3 ) || ( size == 4 ) || ( size == 6 ) ) ) {
-        OOFEM_ERROR("StructuralMaterial :: computePrincipalValDir: Vector size mismatch");
+        OOFEM_SIMPLE_ERROR("StructuralMaterial :: computePrincipalValDir: Vector size mismatch");
     }
 
     if ( ( size == 3 ) || ( size == 4 ) ) {
@@ -1279,7 +1279,7 @@ StructuralMaterial :: computePrincipalValDir(FloatArray &answer, FloatMatrix &di
         } else if ( mode == principal_stress ) {
             ss.at(1, 2) = ss.at(2, 1) = s.at(size);
         } else {
-            OOFEM_ERROR("StructuralMaterial :: computePrincipalValDir: not supported");
+            OOFEM_SIMPLE_ERROR("StructuralMaterial :: computePrincipalValDir: not supported");
         }
     } else {
         // 3D problem
@@ -1322,7 +1322,7 @@ StructuralMaterial :: computePrincipalValDir(FloatArray &answer, FloatMatrix &di
             ss.at(1, 3) = ss.at(3, 1) = 0.5 * s.at(5);
             ss.at(2, 3) = ss.at(3, 2) = 0.5 * s.at(4);
         } else {
-            OOFEM_ERROR("StructuralMaterial :: computePrincipalDirection: not supported");
+            OOFEM_SIMPLE_ERROR("StructuralMaterial :: computePrincipalDirection: not supported");
         }
     }
 
@@ -1604,15 +1604,15 @@ StructuralMaterial :: sortPrincDirAndValCloseTo(FloatArray *pVal, FloatMatrix *p
 
 #ifdef DEBUG
     if ( ( !pDir->isSquare() ) || ( !toPDir->isSquare() ) ) {
-        OOFEM_ERROR("StructuralMaterial :: sortPrincDirandValCloseTo - Not square matrix");
+        OOFEM_SIMPLE_ERROR("StructuralMaterial :: sortPrincDirandValCloseTo - Not square matrix");
     }
 
     if ( pDir->giveNumberOfRows() != toPDir->giveNumberOfRows() ) {
-        OOFEM_ERROR("StructuralMaterial :: sortPrincDirandValCloseTo - Incompatible matrices");
+        OOFEM_SIMPLE_ERROR("StructuralMaterial :: sortPrincDirandValCloseTo - Incompatible matrices");
     }
 
     if ( pDir->giveNumberOfRows() != pVal->giveSize() ) {
-        OOFEM_ERROR("StructuralMaterial :: sortPrincDirandValCloseTo - Incompatible pVal Array size");
+        OOFEM_SIMPLE_ERROR("StructuralMaterial :: sortPrincDirandValCloseTo - Incompatible pVal Array size");
     }
 
 #endif
@@ -1754,7 +1754,7 @@ StructuralMaterial :: giveIPValue(FloatArray &answer, GaussPoint *gp, InternalSt
             FloatArray gcoords, et2;
             static_cast< StructuralElement * >( gp->giveElement() )->computeGlobalCoordinates( gcoords, * gp->giveCoordinates() );
             if ( ( err = tf->evaluateAt(answer, gcoords, VM_Total, tStep) ) ) {
-                OOFEM_ERROR3("StructuralMaterial :: giveIPValue: tf->evaluateAt failed, element %d, error code %d", gp->giveElement()->giveNumber(), err);
+                OOFEM_ERROR("StructuralMaterial :: giveIPValue: tf->evaluateAt failed, element %d, error code %d", gp->giveElement()->giveNumber(), err);
             }
         } else {
             answer.resize(1);
@@ -1831,7 +1831,7 @@ StructuralMaterial :: computeStressIndependentStrainVector(FloatArray &answer,
     }
 
     if ( eigenstrain.giveSize() != 0 && eigenstrain.giveSize() != giveSizeOfVoigtSymVector(matmode) ) {
-        OOFEM_ERROR5( "StructuralMaterial :: Number of given eigenstrain components %d is different than required %d by material mode %s, element %d", eigenstrain.giveSize(), giveSizeOfVoigtSymVector(matmode), __MaterialModeToString(matmode), elem->giveNumber() );
+        OOFEM_ERROR( "StructuralMaterial :: Number of given eigenstrain components %d is different than required %d by material mode %s, element %d", eigenstrain.giveSize(), giveSizeOfVoigtSymVector(matmode), __MaterialModeToString(matmode), elem->giveNumber() );
     }
 
     /* add external source, if provided */
@@ -1844,7 +1844,7 @@ StructuralMaterial :: computeStressIndependentStrainVector(FloatArray &answer,
         int err;
         elem->computeGlobalCoordinates( gcoords, * gp->giveCoordinates() );
         if ( ( err = tf->evaluateAt(et2, gcoords, mode, tStep) ) ) {
-            OOFEM_ERROR3("StructuralMaterial :: computeStressIndependentStrainVector: tf->evaluateAt failed, element %d, error code %d", elem->giveNumber(), err);
+            OOFEM_ERROR("StructuralMaterial :: computeStressIndependentStrainVector: tf->evaluateAt failed, element %d, error code %d", elem->giveNumber(), err);
         }
 
         if ( et2.isNotEmpty() ) {
@@ -1878,7 +1878,7 @@ StructuralMaterial :: computeStressIndependentStrainVector(FloatArray &answer,
     if ( answer.giveSize() ) {
         if ( eigenstrain.giveSize() ) {
             if ( answer.giveSize() != eigenstrain.giveSize() ) {
-                OOFEM_ERROR4( "StructuralMaterial :: Vector of temperature strains has the size %d which is different with the size of eigenstrain vector %d, element %d", answer.giveSize(), eigenstrain.giveSize(), elem->giveNumber() );
+                OOFEM_ERROR( "StructuralMaterial :: Vector of temperature strains has the size %d which is different with the size of eigenstrain vector %d, element %d", answer.giveSize(), eigenstrain.giveSize(), elem->giveNumber() );
             }
 
             answer.add(eigenstrain);
@@ -1992,7 +1992,6 @@ StructuralMaterial :: giveReducedSymMatrixForm(FloatMatrix &answer, const FloatM
 IRResultType
 StructuralMaterial :: initializeFrom(InputRecord *ir)
 {
-    const char *__proc = "initializeFrom"; // Required by IR_GIVE_FIELD macro
     IRResultType result;                // Required by IR_GIVE_FIELD macro
 
 #  ifdef VERBOSE

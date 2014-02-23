@@ -72,6 +72,8 @@ public:
 
     virtual int recoverValues(Set elementSet, InternalStateType type, TimeStep *tStep);
 
+    virtual const char *giveClassName() const { return "ZZNodalRecoveryModel"; }
+
 private:
     /**
      * Initializes the region table indicating regions to skip.

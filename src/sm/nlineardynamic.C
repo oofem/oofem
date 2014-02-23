@@ -91,7 +91,7 @@ NonLinearDynamic :: ~NonLinearDynamic()
 NumericalMethod *NonLinearDynamic :: giveNumericalMethod(MetaStep *mStep)
 {
     if ( mStep == NULL ) {
-        _error("giveNumericalMethod: undefined meta step");
+        OOFEM_ERROR("undefined meta step");
     }
 
     if ( this->nMethod ) {
@@ -107,7 +107,6 @@ NumericalMethod *NonLinearDynamic :: giveNumericalMethod(MetaStep *mStep)
 void
 NonLinearDynamic :: updateAttributes(MetaStep *mStep)
 {
-    const char *__proc = "updateAttributes"; // Required by IR_GIVE_FIELD macro
     IRResultType result;                     // Required by IR_GIVE_FIELD macro
 
     InputRecord *ir = mStep->giveAttributesRecord();
@@ -117,7 +116,7 @@ NonLinearDynamic :: updateAttributes(MetaStep *mStep)
     deltaT = 1.0;
     IR_GIVE_OPTIONAL_FIELD(ir, deltaT, _IFT_NonLinearDynamic_deltat);
     if ( deltaT < 0. ) {
-        _error("updateAttributes: deltaT < 0");
+        OOFEM_ERROR("deltaT < 0");
     }
 
     eta = 0;
@@ -131,7 +130,6 @@ NonLinearDynamic :: updateAttributes(MetaStep *mStep)
 IRResultType
 NonLinearDynamic :: initializeFrom(InputRecord *ir)
 {
-    const char *__proc = "initializeFrom"; // Required by IR_GIVE_FIELD macro
     IRResultType result;                   // Required by IR_GIVE_FIELD macro
 
     StructuralEngngModel :: initializeFrom(ir);
@@ -149,7 +147,7 @@ NonLinearDynamic :: initializeFrom(InputRecord *ir)
     deltaT = 1.0;
     IR_GIVE_OPTIONAL_FIELD(ir, deltaT, _IFT_NonLinearDynamic_deltat);
     if ( deltaT < 0. ) {
-        _error("updateAttributes: deltaT < 0");
+        OOFEM_ERROR("deltaT < 0");
     }
 
     val = 0;
@@ -167,7 +165,7 @@ NonLinearDynamic :: initializeFrom(InputRecord *ir)
     } else if ( initialTimeDiscretization == TD_ThreePointBackward ) {
         OOFEM_LOG_INFO("Selecting Three-point Backward Euler metod\n");
     } else {
-        _error("NonLinearDynamic: Time-stepping scheme not found!\n");
+        OOFEM_ERROR("Time-stepping scheme not found!\n");
     }
 
     MANRMSteps = 0;
@@ -198,12 +196,12 @@ double NonLinearDynamic :: giveUnknownComponent(ValueModeType mode, TimeStep *tS
     int eq = dof->__giveEquationNumber();
 #ifdef DEBUG
     if ( eq == 0 ) {
-        _error("giveUnknownComponent: invalid equation number");
+        OOFEM_ERROR("invalid equation number");
     }
 #endif
 
     if ( tStep != this->giveCurrentStep() ) {
-        _error("giveUnknownComponent: unknown time step encountered");
+        OOFEM_ERROR("unknown time step encountered");
         return 0.;
     }
 
@@ -221,7 +219,7 @@ double NonLinearDynamic :: giveUnknownComponent(ValueModeType mode, TimeStep *tS
         return accelerationVector.at(eq);
 
     default:
-        _error("giveUnknownComponent: Unknown is of undefined ValueModeType for this problem");
+        OOFEM_ERROR("Unknown is of undefined ValueModeType for this problem");
     }
 
     return 0.0;
@@ -253,7 +251,7 @@ TimeStep *NonLinearDynamic :: giveNextStep()
         if ( !this->giveMetaStep(mStepNum)->isStepValid(istep) ) {
             mStepNum++;
             if ( mStepNum > nMetaSteps ) {
-                OOFEM_ERROR3("giveNextStep: no next step available, mStepNum=%d > nMetaSteps=%d", mStepNum, nMetaSteps);
+                OOFEM_ERROR("no next step available, mStepNum=%d > nMetaSteps=%d", mStepNum, nMetaSteps);
             }
         }
     }
@@ -393,12 +391,12 @@ NonLinearDynamic :: proceedStep(int di, TimeStep *tStep)
         }
 
         if ( effectiveStiffnessMatrix == NULL || massMatrix == NULL ) {
-            _error("proceedStep: sparse matrix creation failed");
+            OOFEM_ERROR("sparse matrix creation failed");
         }
 
         if ( nonlocalStiffnessFlag ) {
             if ( !effectiveStiffnessMatrix->isAsymmetric() ) {
-                _error("proceedStep: effectiveStiffnessMatrix does not support asymmetric storage");
+                OOFEM_ERROR("effectiveStiffnessMatrix does not support asymmetric storage");
             }
         }
 
@@ -488,7 +486,7 @@ NonLinearDynamic :: proceedStep(int di, TimeStep *tStep)
                                             & totalDisplacement, & incrementOfDisplacement, & forcesVector,
                                             internalForcesEBENorm, loadLevel, SparseNonLinearSystemNM :: rlm_total, currentIterations, tStep);
     if ( !( numMetStatus & NM_Success ) ) {
-        OOFEM_ERROR("NonLinearDynamic :: proceedStep - NRSolver failed to solve problem");
+        OOFEM_ERROR("NRSolver failed to solve problem");
     }
 
     rhs = previousVelocityVector;
@@ -517,7 +515,7 @@ NonLinearDynamic :: determineConstants(TimeStep *tStep)
             timeDiscretization = TD_TwoPointBackward;
         }
     } else {
-        _error("NonLinearDynamic: Time-stepping scheme not found!\n")
+        OOFEM_ERROR("Time-stepping scheme not found!\n")
     }
 
     deltaT = tStep->giveTimeIncrement();
@@ -665,7 +663,7 @@ void NonLinearDynamic :: updateComponent(TimeStep *tStep, NumericalCmpn cmpn, Do
         }
         break;
     default:
-        _error("updateComponent: Unknown Type of component.");
+        OOFEM_ERROR("Unknown Type of component.");
     }
 }
 
@@ -904,7 +902,7 @@ NonLinearDynamic :: timesMtrx(FloatArray &vec, FloatArray &answer, CharType type
         //
 #ifdef DEBUG
         if ( ( n = loc.giveSize() ) != charMtrx.giveNumberOfRows() ) {
-            _error("solveYourselfAt : dimension mismatch");
+            OOFEM_ERROR("dimension mismatch");
         }
 
 #endif

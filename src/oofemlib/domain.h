@@ -644,8 +644,8 @@ public:
 private:
     void resolveDomainDofsDefaults(const char *);
 
-    void error(const char *file, int line, const char *format, ...);
-    void warning(const char *file, int line, const char *format, ...);
+    /// Returns string for prepending output (used by error reporting macros).
+    std :: string errorInfo(const char *func) const;
 };
 } // end namespace oofem
 #endif // domain_h

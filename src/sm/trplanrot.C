@@ -113,7 +113,7 @@ TrPlaneStrRot :: computeBmatrixAt(GaussPoint *gp, FloatMatrix &answer, int li, i
     }
 
     if ( ( size < 0 ) || ( size > 4 ) ) {
-        _error("ComputeBmatrixAt size mismatch");
+        OOFEM_ERROR("ComputeBmatrixAt size mismatch");
     }
 
     //
@@ -527,7 +527,6 @@ TrPlaneStrRot :: GiveDerivativeVY(GaussPoint *gp)
 IRResultType
 TrPlaneStrRot :: initializeFrom(InputRecord *ir)
 {
-    const char *__proc = "initializeFrom"; // Required by IR_GIVE_FIELD macro
     IRResultType result;              // Required by IR_GIVE_FIELD macro
 
     numberOfGaussPoints = 4;
@@ -652,7 +651,7 @@ TrPlaneStrRot :: computeStrainVector(FloatArray &answer, GaussPoint *gp, TimeSte
 
         this->computeBmatrixAt(helpGaussPoint, b, 4, 4);
     } else {
-        _error("ComputeStrainVector: numberOfRotGaussPoints size mismatch");
+        OOFEM_ERROR("ComputeStrainVector: numberOfRotGaussPoints size mismatch");
     }
 
     Epsilon.beProductOf(b, u);
@@ -696,7 +695,7 @@ TrPlaneStrRot :: computeBodyLoadVectorAt(FloatArray &answer, Load *forLoad, Time
     FloatMatrix T;
 
     if ( ( forLoad->giveBCGeoType() != BodyLoadBGT ) || ( forLoad->giveBCValType() != ForceLoadBVT ) ) {
-        _error("computeBodyLoadVectorAt: unknown load type");
+        OOFEM_ERROR("computeBodyLoadVectorAt: unknown load type");
     }
 
     // note: force is assumed to be in global coordinate system.

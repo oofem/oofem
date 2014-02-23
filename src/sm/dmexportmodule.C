@@ -57,7 +57,6 @@ DofManExportModule :: ~DofManExportModule()
 IRResultType
 DofManExportModule :: initializeFrom(InputRecord *ir)
 {
-    const char *__proc = "initializeFrom"; // Required by IR_GIVE_FIELD macro
     IRResultType result;                   // Required by IR_GIVE_FIELD macro
 
     // Read in dofMan's to export - defaults to all
@@ -153,7 +152,7 @@ DofManExportModule :: giveOutputStream(TimeStep *tStep)
 
     std :: string fileName = this->giveOutputBaseFileName(tStep) + ".dm";
     if ( ( answer = fopen(fileName.c_str(), "w") ) == NULL ) {
-        OOFEM_ERROR2( "DofManExportModule::giveOutputStream: failed to open file %s", fileName.c_str() );
+        OOFEM_ERROR("failed to open file %s", fileName.c_str() );
     }
 
     return answer;
