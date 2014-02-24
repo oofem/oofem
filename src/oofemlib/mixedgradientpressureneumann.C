@@ -665,7 +665,7 @@ void MixedGradientPressureNeumann :: computeTangents(FloatMatrix &Ed, FloatArray
     e_d.times(1. / rve_size);
 
     // Now we need to express the tangents in the normal cartesian coordinate system (as opposed to the deviatoric base we use during computations
-    Cp = e_p; // Scalar components are of course the same
+    Cp = - e_p; // Scalar components are of course the same
     double nsd = this->giveDomain()->giveNumberOfSpatialDimensions();
     if ( nsd == 3 ) {
         this->fromDeviatoricBase3D(Cd, e_d);

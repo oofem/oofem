@@ -138,39 +138,38 @@ void MixedGradientPressureDirichlet :: computeDofTransformation(ActiveDof *dof, 
     if ( id == D_u || id == V_u ) {
         masterContribs.at(1) = dx.at(1) / 3.0;      // d_vol
         if ( nsd == 2 ) {
-            masterContribs.at(2) = dx.at(1);      // d_dev_11
-            masterContribs.at(3) = 0.0;           // d_dev_22
+            masterContribs.at(2) = dx.at(1);        // d_dev_11
+            masterContribs.at(3) = 0.0;             // d_dev_22
             masterContribs.at(4) = dx.at(2) / 2.0;  // gamma_12
         } else if ( nsd == 3 ) {
-            masterContribs.at(2) = dx.at(1);      // d_dev_11
-            masterContribs.at(3) = 0.0;           // d_dev_22
-            masterContribs.at(4) = 0.0;           // d_dev_33
-            masterContribs.at(5) = 0.0;           // gamma_23
+            masterContribs.at(2) = dx.at(1);        // d_dev_11
+            masterContribs.at(3) = 0.0;             // d_dev_22
+            masterContribs.at(4) = 0.0;             // d_dev_33
+            masterContribs.at(5) = 0.0;             // gamma_23
             masterContribs.at(6) = dx.at(3) / 2.0;  // gamma_13
             masterContribs.at(7) = dx.at(2) / 2.0;  // gamma_12
         }
     } else if ( id == D_v || id == V_v ) {
         masterContribs.at(1) = dx.at(2) / 3.0;      // d_vol
-        if ( nsd == 2 ) {
-            masterContribs.at(2) = 0.0;           // d_dev_11
-            masterContribs.at(3) = dx.at(2);      // d_dev_22
-            masterContribs.at(4) = dx.at(1) / 2.0;  // gamma_12
-        } else if ( nsd == 3 ) {
-            masterContribs.at(2) = 0.0;           // d_dev_11
-            masterContribs.at(3) = dx.at(2);      // d_dev_22
-            masterContribs.at(4) = 0.0;           // d_dev_33
+        masterContribs.at(2) = 0.0;                 // d_dev_11
+        masterContribs.at(3) = dx.at(2);            // d_dev_22
+        masterContribs.at(4) = dx.at(1) / 2.0;      // gamma_12
+        if ( nsd == 3 ) {
+            masterContribs.at(2) = 0.0;             // d_dev_11
+            masterContribs.at(3) = dx.at(2);        // d_dev_22
+            masterContribs.at(4) = 0.0;             // d_dev_33
             masterContribs.at(5) = dx.at(3) / 2.0;  // gamma_23
-            masterContribs.at(6) = 0.0;           // gamma_13
+            masterContribs.at(6) = 0.0;             // gamma_13
             masterContribs.at(7) = dx.at(1) / 2.0;  // gamma_12
         }
-    } else if ( id == D_w || id == V_w ) { // 3D only:
+    } else if ( id == D_w || id == V_w ) {      // 3D only:
         masterContribs.at(1) = dx.at(3) / 3.0;  // d_vol
-        masterContribs.at(2) = 0.0;           // d_dev_11
-        masterContribs.at(3) = 0.0;           // d_dev_22
-        masterContribs.at(4) = dx.at(3);      // d_dev_33
+        masterContribs.at(2) = 0.0;             // d_dev_11
+        masterContribs.at(3) = 0.0;             // d_dev_22
+        masterContribs.at(4) = dx.at(3);        // d_dev_33
         masterContribs.at(5) = dx.at(2) / 2.0;  // gamma_23
         masterContribs.at(6) = dx.at(1) / 2.0;  // gamma_13
-        masterContribs.at(7) = 0.0;           // gamma_12
+        masterContribs.at(7) = 0.0;             // gamma_12
     } else {
         OOFEM_ERROR("MixedGradientPressureDirichlet :: computeDofTransformation - Incompatible id on subjected dof\n");
     }
@@ -252,7 +251,7 @@ void MixedGradientPressureDirichlet :: computeFields(FloatArray &sigmaDev, doubl
 
 void MixedGradientPressureDirichlet :: computeTangents(FloatMatrix &Ed, FloatArray &Ep, FloatArray &Cd, double &Cp, EquationID eid, TimeStep *tStep)
 {
-    double size = this->domainSize();
+    double rve_size = this->domainSize();
     // Fetch some information from the engineering model
     EngngModel *rve = this->giveDomain()->giveEngngModel();
     ///@todo Get this from engineering model
@@ -297,20 +296,20 @@ void MixedGradientPressureDirichlet :: computeTangents(FloatMatrix &Ed, FloatArr
     ddev_pert.zero();
     for ( int i = 1; i <= ndev; ++i ) {
         int eqn = this->devdman->giveDof(i)->__givePrescribedEquationNumber();
-        ddev_pert.at(eqn, i) = -1.0; // Minus sign for moving it to the RHS
+        ddev_pert.at(eqn, i) = -1.0 * rve_size; // Minus sign for moving it to the RHS
     }
     Kfp->times(ddev_pert, rhs_d);
 
     // Sensitivity analysis for p (already in rhs, just set value directly)
     rhs_p.zero();
-    rhs_p.at(dvol_eq) = -1.0; // dp = -1.0 (unit size)
+    rhs_p.at(dvol_eq) = -1.0 * rve_size; // dp = 1.0 (unit size)
 
     // Solve all sensitivities
     solver->solve(Kff, & rhs_p, & s_p);
     solver->solve(Kff, rhs_d, s_d);
 
     // Sensitivities for d_vol is solved for directly;
-    Cp = s_p.at(dvol_eq);
+    Cp = - s_p.at(dvol_eq); // Note: Defined with negative sign de = - C * dp
     Cd.resize(ndev);
     for ( int i = 1; i <= ndev; ++i ) {
         Cd.at(i) = s_d.at(dvol_eq, i); // Copy over relevant row from solution
@@ -325,7 +324,7 @@ void MixedGradientPressureDirichlet :: computeTangents(FloatMatrix &Ed, FloatArr
 
     Ed.subtract(tmpMat);
 
-    Ed.times(1.0 / size);
+    Ed.times(1.0 / rve_size);
 
     // Not sure if i actually need to do this part, but the obtained tangents are to dsigma/dp, not dsigma_dev/dp, so they need to be corrected;
     int nsd = this->domain->giveNumberOfSpatialDimensions();

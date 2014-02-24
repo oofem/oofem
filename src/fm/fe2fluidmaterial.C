@@ -42,9 +42,7 @@
 #include "util.h"
 #include "classfactory.h"
 #include "dynamicinputrecord.h"
-
-// Used for computing
-#include "line2boundaryelement.h"
+#include "mathfem.h"
 
 #include <sstream>
 
@@ -245,10 +243,10 @@ void FE2FluidMaterial :: giveStiffnessMatrices(FloatMatrix &dsdd, FloatArray &ds
 
         double dvol = ( epspvolh - epspvol ) / h;
 
-        printf("Analytical volumetric pressure tangent = %e\n", answer);
+        printf("Analytical volumetric pressure tangent = %e\n", dedp);
         printf("Numerical volumetric pressure tangent = %e\n", dvol);
 
-        double norm = fabs(dvol - answer);
+        double norm = fabs(dvol - dedp);
         if ( norm > fabs(dedp) * DEBUG_ERR && norm > 0.0 ) {
             OOFEM_ERROR("Error in volumetric pressure tangent");
         }
@@ -278,6 +276,31 @@ int FE2FluidMaterial :: giveIPValue(FloatArray &answer, GaussPoint *gp, Internal
     FE2FluidMaterialStatus *status = static_cast< FE2FluidMaterialStatus * >( this->giveStatus(gp) );
     if ( type == IST_VOFFraction ) {
         answer.setValues( 1, status->giveVOFFraction() );
+        return true;
+    } else if ( type == IST_Undefined ) { ///@todo What should one call this value? Relation between pressure and volumetric strain-rate.
+#if 0
+        // Numerical ATS for debugging
+        FloatArray strain(3);
+        strain.zero();
+        FloatArray sig;
+        double epspvol, epspvolh, pressure = 0.0;
+        double h = 1.0; // Linear problem, size of this doesn't matter.
+
+        computeDeviatoricStressVector(sig, epspvol, gp, strain, pressure, tStep);
+        computeDeviatoricStressVector(sig, epspvolh, gp, strain, pressure + h, tStep);
+
+        double dvol = - ( epspvolh - epspvol ) / h;
+
+        
+        printf("Analytical volumetric pressure tangent = %f\n", status->giveVolumetricPressureTangent());
+        printf("Numerical volumetric pressure tangent = %f\n", dvol);
+
+        double norm = fabs(dvol - status->giveVolumetricPressureTangent());
+        if ( norm > fabs(status->giveVolumetricPressureTangent()) * DEBUG_ERR && norm > 0.0 ) {
+            OOFEM_ERROR("Error in volumetric pressure tangent");
+        }
+#endif
+        answer.setValues( 1, status->giveVolumetricPressureTangent() );
         return true;
     } else {
         return FluidDynamicMaterial :: giveIPValue(answer, gp, type, tStep);

@@ -667,7 +667,7 @@ void MixedGradientPressureWeakPeriodic :: computeTangents(FloatMatrix &Ed, Float
     FloatArray tmp(neq), fe, ddevVoigt(nd);
     for ( int i = 1; i <= nd; ++i ) {
         ddevVoigt.zero();
-        ddevVoigt.at(i) = 1.0 * rve_size;
+        ddevVoigt.at(i) = 1.0;
         this->constructFullMatrixForm(ddev_tmp, ddevVoigt);
         for ( int k = 1; k <= boundaries.giveSize() / 2; ++k ) {
             Element *e = this->giveDomain()->giveElement( boundaries.at(k * 2 - 1) );
@@ -683,7 +683,7 @@ void MixedGradientPressureWeakPeriodic :: computeTangents(FloatMatrix &Ed, Float
 
     // Unit pertubation for p
     p_pert.zero();
-    p_pert.at( e_loc.at(1) ) = 1.0 * rve_size;
+    p_pert.at( e_loc.at(1) ) = - 1.0 * rve_size;
 
     // Solve all sensitivities
     solver->solve(Kff, ddev_pert, s_d);
@@ -700,7 +700,7 @@ void MixedGradientPressureWeakPeriodic :: computeTangents(FloatMatrix &Ed, Float
     }
 
     // The de/dp tangent:
-    Cp = s_p.at( e_loc.at(1) ) / rve_size;
+    Cp = - s_p.at( e_loc.at(1) );
     // The de/dd tangent:
     Cd.resize(nd);
     if ( nsd == 3 ) {
