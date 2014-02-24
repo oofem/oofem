@@ -40,7 +40,7 @@
 #include "constantpressureload.h"
 //#include "InterfaceMaterials\Old\simpleinterfacemat.h"
 #include "connectivitytable.h"
-#include "InterfaceMaterials\intmatbilinczfagerstrom.h"
+#include "InterfaceMaterials/intmatbilinczfagerstrom.h"
 #include "mathfem.h"
 #include "node.h"
 
