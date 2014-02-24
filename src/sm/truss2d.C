@@ -274,7 +274,7 @@ Truss2d :: resolveCoordIndices(int &c1, int &c2)
         c1 = 2;
         c2 = 3;
     } else {
-        OOFEM_ERROR("resolveCoordIndices: Unknow cs_mode");
+        OOFEM_ERROR("Unknow cs_mode");
     }
 }
 
@@ -343,7 +343,7 @@ Truss2d :: giveEdgeDofMapping(IntArray &answer, int iEdge) const
      */
 
     if ( iEdge != 1 ) {
-        OOFEM_ERROR("giveEdgeDofMapping: wrong edge number");
+        OOFEM_ERROR("wrong edge number");
     }
 
 
@@ -358,7 +358,7 @@ double
 Truss2d ::   computeEdgeVolumeAround(GaussPoint *gp, int iEdge)
 {
     if ( iEdge != 1 ) { // edge between nodes 1 2
-        OOFEM_ERROR("computeEdgeVolumeAround: wrong egde number");
+        OOFEM_ERROR("wrong egde number");
     }
 
     double weight  = gp->giveWeight();

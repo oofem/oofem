@@ -185,7 +185,7 @@ FEI2dTrQuad :: global2local(FloatArray &answer, const FloatArray &gcoords, const
         lcoords_guess.add(delta);
     }
     if ( error > convergence_limit ) { // Imperfect, could give false negatives.
-        //OOFEM_WARNING("FEI2dTrQuad :: global2local - Failed convergence");
+        //OOFEM_WARNING("Failed convergence");
         answer.setValues(3, 1. / 3., 1. / 3., 1. / 3.);
         return false;
     }

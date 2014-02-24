@@ -177,7 +177,7 @@ StructuralEngngModel :: checkConsistency()
         StructuralElementEvaluator *see = dynamic_cast< StructuralElementEvaluator * >(ePtr);
 
         if ( sePtr == NULL && see == NULL && siePtr == NULL ) {
-            OOFEM_WARNING("checkConsistency: element %d has no Structural support", i);
+            OOFEM_WARNING("element %d has no Structural support", i);
             return 0;
         }
     }

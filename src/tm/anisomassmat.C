@@ -92,7 +92,7 @@ AnisotropicMassTransferMaterial :: giveCharacteristicMatrix(FloatMatrix &answer,
         return;
 
     default:
-        OOFEM_ERROR( "giveCharacteristicMatrix : unknown mode (%s)", __MaterialModeToString(mMode) );
+        OOFEM_ERROR("unknown mode (%s)", __MaterialModeToString(mMode) );
     }
 }
 
@@ -100,7 +100,7 @@ AnisotropicMassTransferMaterial :: giveCharacteristicMatrix(FloatMatrix &answer,
 double
 AnisotropicMassTransferMaterial :: giveCharacteristicValue(MatResponseMode mode, GaussPoint *gp, TimeStep *tStep)
 {
-    OOFEM_ERROR( "giveCharacteristicValue : unknown mode (%s)", __MatResponseModeToString(mode) );
+    OOFEM_ERROR("unknown mode (%s)", __MatResponseModeToString(mode) );
 
     return 0.;
 }

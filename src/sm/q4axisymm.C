@@ -142,7 +142,7 @@ Q4Axisymm :: computeBmatrixAt(GaussPoint *gp, FloatMatrix &answer, int li, int u
     }
 
     if ( ( size < 0 ) || ( size > 6 ) ) {
-        OOFEM_ERROR("ComputeBmatrixAt size mismatch");
+        OOFEM_ERROR("size mismatch");
     }
 
     answer.resize(size, 16);
@@ -394,7 +394,7 @@ Q4Axisymm :: computeStrainVector(FloatArray &answer, GaussPoint *gp, TimeStep *t
         answer.at(3) = Epsilon.at(1);
         answer.at(6) = Epsilon.at(4);
     } else if ( mode == AL ) { // actualized Lagrange formulation
-        OOFEM_ERROR("ComputeStrainVector : unsupported mode");
+        OOFEM_ERROR("unsupported mode");
     }
 }
 

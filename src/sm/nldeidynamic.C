@@ -602,7 +602,7 @@ NlDEIDynamic :: computeMassMtrx(FloatArray &massMatrix, double &maxOm, TimeStep 
         }
 
         if ( maxElmass <= 0.0 ) {
-            OOFEM_WARNING("solveYourselfAt: Element (%d) with zero (or negative) lumped mass encountered\n", i);
+            OOFEM_WARNING("Element (%d) with zero (or negative) lumped mass encountered\n", i);
         }
 
         for ( j = 1; j <= n; j++ ) {

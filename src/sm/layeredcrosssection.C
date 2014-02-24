@@ -886,12 +886,12 @@ LayeredCrossSection :: initializeFrom(InputRecord *ir)
     if ( numberOfLayers != layerMaterials.giveSize() ||
         numberOfLayers != layerThicks.giveSize()  ||
         numberOfLayers != layerRots.giveSize() ) {  //|| ( numberOfLayers != layerWidths.giveSize() ) )
-        OOFEM_WARNING("initializeFrom : numberOfLayers does not equal given number of thicknesses. ");
+        OOFEM_WARNING("numberOfLayers does not equal given number of thicknesses. ");
         return IRRT_BAD_FORMAT;
     }
 
     if ( numberOfLayers <= 0 ) {
-        OOFEM_WARNING("instanciateFrom : numberOfLayers<= 0 is not allowed");
+        OOFEM_WARNING("numberOfLayers<= 0 is not allowed");
         return IRRT_BAD_FORMAT;
     }
 
@@ -1368,7 +1368,7 @@ LayeredCrossSection :: checkConsistency()
     for ( int i = 1; this->giveNumberOfLayers(); i++ ) {
         Material *mat = this->giveDomain()->giveMaterial( this->giveLayerMaterial(i) );
         if ( !dynamic_cast< StructuralMaterial * >(mat) ) {
-            OOFEM_WARNING( "checkConsistency : material %s without structural support", mat->giveClassName() );
+            OOFEM_WARNING("material %s without structural support", mat->giveClassName() );
             result = 0;
             continue;
         }

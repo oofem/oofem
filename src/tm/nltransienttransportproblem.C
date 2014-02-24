@@ -101,7 +101,7 @@ void NLTransientTransportProblem :: solveYourselfAt(TimeStep *tStep)
 
         conductivityMatrix = classFactory.createSparseMtrx(sparseMtrxType);
         if ( conductivityMatrix == NULL ) {
-            OOFEM_ERROR("solveYourselfAt: sparse matrix creation failed");
+            OOFEM_ERROR("sparse matrix creation failed");
         }
 
         conductivityMatrix->buildInternalStructure( this, 1, EID_ConservationEquation, EModelDefaultEquationNumbering() );
@@ -226,7 +226,7 @@ double NLTransientTransportProblem :: giveUnknownComponent(ValueModeType mode, T
         if ( dof->giveUnknowns()->includes(hash) ) {
             return dof->giveUnknowns()->at(hash);
         } else {
-            OOFEM_ERROR( "giveUnknown:  Dof unknowns dictionary does not contain unknown of value mode (%s)", __ValueModeTypeToString(mode) );
+            OOFEM_ERROR("Dof unknowns dictionary does not contain unknown of value mode (%s)", __ValueModeTypeToString(mode) );
         }
     }
 
@@ -234,7 +234,7 @@ double NLTransientTransportProblem :: giveUnknownComponent(ValueModeType mode, T
     TimeStep *previousStep = this->givePreviousStep(), *currentStep = this->giveCurrentStep();
 
     if ( dof->__giveEquationNumber() == 0 ) {
-        OOFEM_ERROR( "giveUnknownComponent: invalid equation number on DoF %d", dof->giveNumber() );
+        OOFEM_ERROR("invalid equation number on DoF %d", dof->giveNumber() );
     }
 
     if ( ( t >= previousStep->giveTargetTime() ) && ( t <= currentStep->giveTargetTime() ) ) {
@@ -248,10 +248,10 @@ double NLTransientTransportProblem :: giveUnknownComponent(ValueModeType mode, T
         } else if ( mode == VM_Total ) {
             return psi * rtdt + ( 1. - psi ) * rt;
         } else {
-            OOFEM_ERROR( "giveUnknownComponent: Unknown mode %s is undefined for this problem", __ValueModeTypeToString(mode) );
+            OOFEM_ERROR("Unknown mode %s is undefined for this problem", __ValueModeTypeToString(mode) );
         }
     } else {
-        OOFEM_ERROR( "giveUnknownComponent: time value %f not within bounds %f and %f", t, previousStep->giveTargetTime(), currentStep->giveTargetTime() );
+        OOFEM_ERROR("time value %f not within bounds %f and %f", t, previousStep->giveTargetTime(), currentStep->giveTargetTime() );
     }
 
     return 0.; // to make compiler happy;
@@ -319,10 +319,10 @@ NLTransientTransportProblem :: giveUnknownDictHashIndx(ValueModeType mode, TimeS
         } else if ( tStep->giveNumber() == this->giveCurrentStep()->giveNumber() - 1 ) { //previous time
             return 1;
         } else {
-            OOFEM_ERROR( "No history available at TimeStep %d = %f, called from TimeStep %d = %f", tStep->giveNumber(), tStep->giveTargetTime(), this->giveCurrentStep()->giveNumber(), this->giveCurrentStep()->giveTargetTime() );
+            OOFEM_ERROR("No history available at TimeStep %d = %f, called from TimeStep %d = %f", tStep->giveNumber(), tStep->giveTargetTime(), this->giveCurrentStep()->giveNumber(), this->giveCurrentStep()->giveTargetTime() );
         }
     } else {
-        OOFEM_ERROR( "ValueModeType %s undefined", __ValueModeTypeToString(mode) );
+        OOFEM_ERROR("ValueModeType %s undefined", __ValueModeTypeToString(mode));
     }
 
     return 0;
@@ -448,7 +448,7 @@ NLTransientTransportProblem :: assembleAlgorithmicPartOfRhs(FloatArray &answer, 
             r = rc;
             r.add(rp);
         } else {
-            OOFEM_ERROR("assembleAlgorithmicPartOfRhs: unsupported time value");
+            OOFEM_ERROR("unsupported time value");
         }
 
 

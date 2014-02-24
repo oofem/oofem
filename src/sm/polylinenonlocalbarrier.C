@@ -81,7 +81,7 @@ PolylineNonlocalBarrier :: isActivated(const FloatArray &c1, const FloatArray &c
 
     int mci = max(localXCoordIndx, localYCoordIndx);
     if ( ( c1.giveSize() > mci ) || ( c2.giveSize() > mci ) ) {
-        OOFEM_ERROR("PolylineNonlocalBarrier::isActivated: local coordinate index size violation");
+        OOFEM_ERROR("local coordinate index size violation");
     }
 
     xc1 = c1.at(localXCoordIndx);

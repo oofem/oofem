@@ -66,7 +66,7 @@ double PiecewiseLinFunction :: evaluateAtTime(double time)
             return this->values.at(i);
         } else if ( this->dates.at(i) > time ) {
             if ( i == 1 ) {
-                OOFEM_WARNING( "PiecewiseLinFunction :: evaluateAtTime: computational time %f is out of given time %f, extrapolating value(s)", time, dates.at(i) );
+                OOFEM_WARNING("computational time %f is out of given time %f, extrapolating value(s)", time, dates.at(i) );
                 return 0.;
             }
 

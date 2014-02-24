@@ -67,7 +67,7 @@ StructuralCrossSection :: giveRealStresses(FloatArray &answer, GaussPoint *gp, c
         if ( mat->hasMaterialModeCapability( gp->giveMaterialMode() ) ) {
             mat->giveRealStressVector(answer, gp, strain, tStep);
         } else {
-            OOFEM_ERROR("giveRealStresses : unsupported mode");
+            OOFEM_ERROR("unsupported mode");
         }
     }
 }
@@ -92,7 +92,7 @@ StructuralCrossSection :: giveRealStresses(FloatArray &answer, GaussPoint *gp, c
 //    } else if ( mode == _1dMat ) {
 //        this->giveFirstPKStress_1d(answer, gp, reducedvF, tStep);
 //    } else {
-//        OOFEM_ERROR("StructuralCrossSection :: giveStiffnessMatrix_dPdF : unknown mode (%s)", __MaterialModeToString(mode) );
+//        OOFEM_ERROR("unknown mode (%s)", __MaterialModeToString(mode) );
 //    }
 //}
 //
@@ -136,7 +136,7 @@ StructuralCrossSection :: giveRealStresses(FloatArray &answer, GaussPoint *gp, c
 //    } else if ( mode == _1dMat ) {
 //        this->give1dStressStiffMtrx_dPdF(answer, rMode, gp, tStep);
 //    } else {
-//        OOFEM_ERROR("StructuralCrossSection :: giveStiffnessMatrix_dPdF : unknown mode (%s)", __MaterialModeToString(mode) );
+//        OOFEM_ERROR("unknown mode (%s)", __MaterialModeToString(mode) );
 //    }
 //}
 //
@@ -158,7 +158,7 @@ StructuralCrossSection :: giveRealStresses(FloatArray &answer, GaussPoint *gp, c
 //    } else if ( mode == _1dMat ) {
 //        this->give1dStressStiffMtrx_dCde(answer, rMode, gp, tStep);
 //    } else {
-//        OOFEM_ERROR("StructuralCrossSection :: giveStiffnessMatrix_dCde : unknown mode (%s)", __MaterialModeToString(mode) );
+//        OOFEM_ERROR("unknown mode (%s)", __MaterialModeToString(mode) );
 //    }
 //}
 
@@ -182,7 +182,7 @@ StructuralCrossSection :: imposeStressConstrainsOnGradient(GaussPoint *gp,
 {
     MaterialMode mode = gp->giveMaterialMode();
     if ( gradientStressVector3d->giveSize() != 6 ) {
-        OOFEM_ERROR("ImposeStressConstrainsOnGradient: gradientStressVector3d size mismatch");
+        OOFEM_ERROR("gradientStressVector3d size mismatch");
     }
 
     if ( mode == _3dMat ) {
@@ -208,7 +208,7 @@ StructuralCrossSection :: imposeStressConstrainsOnGradient(GaussPoint *gp,
 
         break;
     default:
-        OOFEM_ERROR( "ImposeStressConstrainsOnGradient: unknown mode (%s)", __MaterialModeToString(mode) );
+        OOFEM_ERROR("unknown mode (%s)", __MaterialModeToString(mode) );
         break;
     }
 
@@ -230,7 +230,7 @@ StructuralCrossSection :: imposeStrainConstrainsOnGradient(GaussPoint *gp,
 {
     MaterialMode mode = gp->giveMaterialMode();
     if ( gradientStrainVector3d->giveSize() != 6 ) {
-        OOFEM_ERROR("ImposeStrainConstrainsOnGradient: gradientStrainVector3d size mismatch");
+        OOFEM_ERROR("gradientStrainVector3d size mismatch");
     }
 
     if ( mode == _3dMat ) {
@@ -256,7 +256,7 @@ StructuralCrossSection :: imposeStrainConstrainsOnGradient(GaussPoint *gp,
 
         break;
     default:
-        OOFEM_ERROR( "ImposeStrainConstrainsOnGradient: unknown mode (%s)", __MaterialModeToString(mode) );
+        OOFEM_ERROR("unknown mode (%s)", __MaterialModeToString(mode) );
         break;
     }
 

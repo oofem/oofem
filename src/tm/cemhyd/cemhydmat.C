@@ -292,7 +292,7 @@ CemhydMat :: giveCharacteristicValue(MatResponseMode mode, GaussPoint *gp, TimeS
 
         return val;
     } else {
-        OOFEM_ERROR( "giveCharacteristicValue : unknown mode (%s)\n", __MatResponseModeToString(mode) );
+        OOFEM_ERROR("unknown mode (%s)\n", __MatResponseModeToString(mode) );
     }
 
     return 0.;
@@ -438,12 +438,12 @@ IRResultType CemhydMat :: initializeFrom(InputRecord *ir)
     IR_GIVE_OPTIONAL_FIELD(ir, eachGP, _IFT_CemhydMat_eachgp);
     IR_GIVE_OPTIONAL_FIELD(ir, nowarnings, _IFT_CemhydMat_nowarnings);
     if ( nowarnings.giveSize() != 4 ) {
-        OOFEM_ERROR( "Incorrect size %d of nowarnings", nowarnings.giveSize() );
+        OOFEM_ERROR("Incorrect size %d of nowarnings", nowarnings.giveSize() );
     }
 
     IR_GIVE_OPTIONAL_FIELD(ir, scaling, _IFT_CemhydMat_scaling);
     if ( scaling.giveSize() != 3 ) {
-        OOFEM_ERROR( "Incorrect size %d of scaling", nowarnings.giveSize() );
+        OOFEM_ERROR("Incorrect size %d of scaling", nowarnings.giveSize() );
     }
 
     IR_GIVE_OPTIONAL_FIELD(ir, reinforcementDegree, _IFT_CemhydMat_reinforcementDegree);
@@ -3711,7 +3711,7 @@ void CemhydMatStatus :: distrib3d()
             for ( j = 1; j <= SYSIZE; j++ ) {
                 for ( i = 1; i <= SYSIZE; i++ ) {
                     if ( fscanf(infile, "%d", & valin) != 1 ) {
-                        OOFEM_ERROR("CemhydMatStatus :: distrib3d reading error");
+                        OOFEM_ERROR("distrib3d reading error");
                     }
 
                     mask [ i ] [ j ] [ k ] = valin;
@@ -4231,62 +4231,61 @@ void CemhydMatStatus :: init()
         /* Read in values for slag characteristics */
 
         if ( ( slagfile = fopen("slagchar.dat", "r") ) == NULL ) {
-            printf("Slag file can not be opened\n");
-            exit(1);
+            OOFEM_ERROR("Slag file can not be opened\n");
         }
 
 
         if ( fscanf(slagfile, "%lf", & slagin) != 1 ) {
-            OOFEM_ERROR("CemhydMatStatus::init: slagfile reading error");
+            OOFEM_ERROR("slagfile reading error");
         }
 
         if ( fscanf(slagfile, "%lf", & slagin) != 1 ) {
-            OOFEM_ERROR("CemhydMatStatus::init: slagfile reading error");
+            OOFEM_ERROR("slagfile reading error");
         }
 
         if ( fscanf(slagfile, "%lf", & slagin) != 1 ) {
-            OOFEM_ERROR("CemhydMatStatus::init: slagfile reading error");
+            OOFEM_ERROR("slagfile reading error");
         }
 
         specgrav [ SLAG ] = slagin;
         if ( fscanf(slagfile, "%lf", & slagin) != 1 ) {
-            OOFEM_ERROR("CemhydMatStatus::init: slagfile reading error");
+            OOFEM_ERROR("slagfile reading error");
         }
 
         specgrav [ SLAGCSH ] = slagin;
         if ( fscanf(slagfile, "%lf", & slagin) != 1 ) {
-            OOFEM_ERROR("CemhydMatStatus::init: slagfile reading error");
+            OOFEM_ERROR("slagfile reading error");
         }
 
         molarv [ SLAG ] = slagin;
         if ( fscanf(slagfile, "%lf", & slagin) != 1 ) {
-            OOFEM_ERROR("CemhydMatStatus::init: slagfile reading error");
+            OOFEM_ERROR("slagfile reading error");
         }
 
         molarv [ SLAGCSH ] = slagin;
         if ( fscanf(slagfile, "%lf", & slagcasi) != 1 ) {
-            OOFEM_ERROR("CemhydMatStatus::init: slagfile reading error");
+            OOFEM_ERROR("slagfile reading error");
         }
 
         if ( fscanf(slagfile, "%lf", & slaghydcasi) != 1 ) {
-            OOFEM_ERROR("CemhydMatStatus::init: slagfile reading error");
+            OOFEM_ERROR("slagfile reading error");
         }
 
         if ( fscanf(slagfile, "%lf", & siperslag) != 1 ) {
-            OOFEM_ERROR("CemhydMatStatus::init: slagfile reading error");
+            OOFEM_ERROR("slagfile reading error");
         }
 
         if ( fscanf(slagfile, "%lf", & slagin) != 1 ) {
-            OOFEM_ERROR("CemhydMatStatus::init: slagfile reading error");
+            OOFEM_ERROR("slagfile reading error");
         }
 
         waterc [ SLAGCSH ] = slagin * siperslag;
         if ( fscanf(slagfile, "%lf", & slagc3a) != 1 ) {
-            OOFEM_ERROR("CemhydMatStatus::init: slagfile reading error");
+            OOFEM_ERROR("slagfile reading error");
         }
 
         if ( fscanf(slagfile, "%lf", & slagreact) != 1 ) {
-            OOFEM_ERROR("CemhydMatStatus::init: slagfile reading error");
+            OOFEM_ERROR("slagfile reading error");
         }
 
         waterc [ SLAG ] = 0.0;

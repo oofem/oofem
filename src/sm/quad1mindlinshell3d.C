@@ -118,7 +118,7 @@ Quad1MindlinShell3D :: computeBodyLoadVectorAt(FloatArray &answer, Load *forLoad
     FloatArray forceX, forceY, forceZ, glob_gravity, gravity, n;
 
     if ( ( forLoad->giveBCGeoType() != BodyLoadBGT ) || ( forLoad->giveBCValType() != ForceLoadBVT ) ) {
-        OOFEM_ERROR("computeBodyLoadVectorAt: unknown load type");
+        OOFEM_ERROR("unknown load type");
     }
 
     // note: force is assumed to be in global coordinate system.
@@ -197,7 +197,7 @@ Quad1MindlinShell3D :: computeSurfaceLoadVectorAt(FloatArray &answer, Load *load
             answer.negated();
         }
     } else {
-        OOFEM_ERROR("Quad1MindlinShell3D only supports constant pressure boundary load.");
+        OOFEM_ERROR("only supports constant pressure boundary load.");
     }
 }
 
@@ -553,7 +553,7 @@ Quad1MindlinShell3D :: giveEdgeDofMapping(IntArray &answer, int iEdge) const
     } else if ( iEdge == 4 ) { // edge between nodes 4 1
         answer.setValues(12, 19, 20, 21, 22, 23, 24, 1, 2, 3, 4, 5, 6);
     } else {
-        OOFEM_ERROR("giveEdgeDofMapping: wrong edge number");
+        OOFEM_ERROR("wrong edge number");
     }
 }
 
@@ -685,7 +685,7 @@ Quad1MindlinShell3D :: SPRNodalRecoveryMI_giveDofMansDeterminedByPatch(IntArray 
     if ( found ) {
         answer.at(1) = pap;
     } else {
-        OOFEM_ERROR("SPRNodalRecoveryMI_giveDofMansDeterminedByPatch: node unknown");
+        OOFEM_ERROR("node unknown");
     }
 }
 } // end namespace oofem

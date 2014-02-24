@@ -106,7 +106,7 @@ RigidArmNode :: postInitialize()
 
     this->masterNode = dynamic_cast< Node * >( this->domain->giveDofManager(masterDofMngr) );
     if ( !masterNode ) {
-        OOFEM_WARNING("RigidArmNode :: postInitialize: master dofManager is not a node");
+        OOFEM_WARNING("master dofManager is not a node");
     }
 
     int masterNdofs = masterNode->giveNumberOfDofs();
@@ -139,7 +139,7 @@ RigidArmNode :: postInitialize()
     // check if master in same mode
     if ( parallel_mode != DofManager_local ) {
         if ( ( * masterNode )->giveParallelMode() != parallel_mode ) {
-            OOFEM_WARNING("checkConsistency: mismatch in parallel mode of RigidArmNode and master", 1);
+            OOFEM_WARNING("mismatch in parallel mode of RigidArmNode and master", 1);
             result = 0;
         }
     }
@@ -160,7 +160,7 @@ RigidArmNode :: checkConsistency()
 
     // check if receiver has the same coordinate system as master dofManager
     if ( !this->hasSameLCS(this->masterNode) ) {
-        OOFEM_WARNING("checkConsistency: different lcs for master/slave nodes", 1);
+        OOFEM_WARNING("different lcs for master/slave nodes", 1);
         result = 0;
     }
 

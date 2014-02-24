@@ -176,7 +176,7 @@ PetscSolver :: petsc_solve(PetscSparseMtrx *Lhs, Vec b, Vec x)
     if ( reason >= 0 ) {
         //OOFEM_LOG_INFO("PetscSolver:  Converged. KSPConvergedReason: %d, number of iterations: %d\n", reason, nite);
     } else {
-        OOFEM_WARNING("PetscSolver:  Diverged! KSPConvergedReason: %d, number of iterations: %d\n", reason, nite);
+        OOFEM_WARNING("Diverged! KSPConvergedReason: %d, number of iterations: %d\n", reason, nite);
     }
 
     timer.stopTimer();
@@ -219,7 +219,7 @@ NM_Status PetscSolver :: solve(SparseMtrx *A, FloatMatrix &B, FloatMatrix &X)
         VecDuplicate(globRhsVec, & globSolVec);
         s = this->petsc_solve(Lhs, globRhsVec, globSolVec, newLhs);
         if ( !( s & NM_Success ) ) {
-            OOFEM_WARNING("PetscSolver :: solve - No success at solving column %d", i + 1);
+            OOFEM_WARNING("No success at solving column %d", i + 1);
             return s;
         }
         newLhs = false;

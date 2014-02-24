@@ -342,7 +342,7 @@ LEPlic :: doInterfaceRemapping(TimeStep *tStep)
 #endif
                 double err = fabs(matVol - matVolSum) / matVol;
                 if ( ( err > 1.e-12 ) && ( fabs(matVol - matVolSum) > 1.e-4 ) && ( matVol > 1.e-6 ) ) {
-                    OOFEM_WARNING("LEPlic::doInterfaceRemapping:  volume inconsistency %5.2f%%\n\ttstep %d, element %d\n", err * 100, tStep->giveNumber(), ie);
+                    OOFEM_WARNING("volume inconsistency %5.2f%%\n\ttstep %d, element %d\n", err * 100, tStep->giveNumber(), ie);
                 }
 
 #if 0

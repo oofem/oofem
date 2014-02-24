@@ -1744,7 +1744,7 @@ EngngModel :: giveOutputStream()
     if ( !outputStream ) {
 #ifdef _WIN32 //_MSC_VER and __MINGW32__ included
         char *tmp = tmpnam(NULL);
-        OOFEM_WARNING("giveOutputStream: using default output stream %s", tmp);
+        OOFEM_WARNING("using default output stream %s", tmp);
         outputStream = fopen(tmp, "w");
 #else
         char sfn[] = "oofem.out.XXXXXX";

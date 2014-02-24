@@ -1650,7 +1650,7 @@ TR1_2D_SUPG2_AXI :: updateIntegrationRules()
     /*
      * double __err = fabs(__area-area)/area;
      * if (__err > 1.e-6) {
-     * OOFEM_WARNING2 ("updateIntegrationRules: volume inconsistency (%5.2f\%)", __err*100);
+     * OOFEM_WARNING("volume inconsistency (%5.2f\%)", __err*100);
      *
      * __area=0.0;
      * for (ifluid = 0; ifluid< 2; ifluid++) {

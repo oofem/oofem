@@ -144,7 +144,7 @@ NodalAveragingRecoveryModel :: recoverValues(Set elementSet, InternalStateType t
                 if ( regionDofMansConnectivity.at( regionNodalNumbers.at(inode) ) > 0 ) {
                     lhs.at(eq + i) /= regionDofMansConnectivity.at( regionNodalNumbers.at(inode) );
                 } else {
-                    OOFEM_WARNING("NodalAveragingRecoveryModel::recoverValues: values of dofmanager %d undetermined", inode);
+                    OOFEM_WARNING("values of dofmanager %d undetermined", inode);
                     lhs.at(eq + i) = 0.0;
                 }
             }

@@ -161,13 +161,13 @@ public:
     virtual void giveEngTraction(FloatArray &answer, GaussPoint *gp, const FloatArray &jump, TimeStep *tStep);
     virtual void giveFirstPKTraction(FloatArray &answer, GaussPoint *gp, const FloatArray &jump, const FloatMatrix &F, TimeStep *tStep)
     {
-        OOFEM_ERROR("giveFirstPKTraction not implemented for the current element");
+        OOFEM_ERROR("not implemented for the current element");
     }
 
     virtual void giveStiffnessMatrix_Eng(FloatMatrix &answer, MatResponseMode rMode, IntegrationPoint *ip, TimeStep *tStep);
     virtual void giveStiffnessMatrix_dTdj(FloatMatrix &answer, MatResponseMode rMode, IntegrationPoint *ip, TimeStep *tStep)
     {
-        OOFEM_ERROR("giveStiffnessMatrix_dTdj not implemented for the current element");
+        OOFEM_ERROR("not implemented for the current element");
     }
 protected:
 

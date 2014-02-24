@@ -98,7 +98,7 @@ LargeStrainMasterMaterial :: giveFirstPKStressVector_3d(FloatArray &answer, Gaus
     if  ( mode == _3dMat ) {
         StructuralMaterial *sMat = dynamic_cast< StructuralMaterial * >( domain->giveMaterial(slaveMat) );
         if ( sMat == NULL ) {
-            OOFEM_WARNING("checkConsistency: material %d has no Structural support", slaveMat);
+            OOFEM_WARNING("material %d has no Structural support", slaveMat);
             return;
         }
 
@@ -384,7 +384,7 @@ LargeStrainMasterMaterial :: give3dMaterialStiffnessMatrix(FloatMatrix &answer, 
         mat = domain->giveMaterial(slaveMat);
         sMat = dynamic_cast< StructuralMaterial * >(mat);
         if ( sMat == NULL ) {
-            OOFEM_WARNING("checkConsistency: material %d has no Structural support", slaveMat);
+            OOFEM_WARNING("material %d has no Structural support", slaveMat);
             return;
         }
 
@@ -393,7 +393,7 @@ LargeStrainMasterMaterial :: give3dMaterialStiffnessMatrix(FloatMatrix &answer, 
         mat = domain->giveMaterial(slaveMat);
         sMat = dynamic_cast< StructuralMaterial * >(mat);
         if ( sMat == NULL ) {
-            OOFEM_WARNING("checkConsistency: material %d has no Structural support", slaveMat);
+            OOFEM_WARNING("material %d has no Structural support", slaveMat);
             return;
         }
 
@@ -464,7 +464,7 @@ LargeStrainMasterMaterial :: giveIPValue(FloatArray &answer, GaussPoint *gp, Int
         mat = domain->giveMaterial(slaveMat);
         sMat = dynamic_cast< StructuralMaterial * >(mat);
         if ( sMat == NULL ) {
-            OOFEM_WARNING("checkConsistency: material %d has no Structural support", slaveMat);
+            OOFEM_WARNING("material %d has no Structural support", slaveMat);
             return 0;
         }
 

@@ -527,7 +527,7 @@ RheoChainMaterial :: saveIPContext(DataStream *stream, ContextMode mode, GaussPo
     contextIOResultType iores;
 
     if ( stream == NULL ) {
-        OOFEM_ERROR("saveContext : can't write into NULL stream");
+        OOFEM_ERROR("can't write into NULL stream");
     }
 
     if ( ( iores = Material :: saveIPContext(stream, mode, gp) ) != CIO_OK ) {
@@ -594,7 +594,7 @@ RheoChainMaterialStatus :: letTempHiddenVarsVectorBe(int i, FloatArray &valueArr
     // Sets the i:th hidden variables vector to valueArray.
 #if DEBUG
     if ( i > nUnits ) {
-        OOFEM_ERROR("RheoChainMaterialStatus :: letTempHiddenVarsVectorBe - unit number exceeds the specified limit");
+        OOFEM_ERROR("unit number exceeds the specified limit");
     }
 #endif
     this->tempHiddenVars [ i - 1 ] = valueArray;
@@ -658,7 +658,7 @@ RheoChainMaterialStatus :: saveContext(DataStream *stream, ContextMode mode, voi
     contextIOResultType iores;
 
     if ( stream == NULL ) {
-        OOFEM_ERROR("saveContext : can't write into NULL stream");
+        OOFEM_ERROR("can't write into NULL stream");
     }
 
     if ( ( iores = StructuralMaterialStatus :: saveContext(stream, mode, obj) ) != CIO_OK ) {

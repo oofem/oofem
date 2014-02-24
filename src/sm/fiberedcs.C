@@ -633,7 +633,7 @@ FiberedCrossSection :: checkConsistency()
     for ( int i = 1; this->fiberMaterials.giveSize(); i++ ) {
         Material *mat = this->giveDomain()->giveMaterial( this->fiberMaterials.at(i) );
         if ( !dynamic_cast< StructuralMaterial * >(mat) ) {
-            OOFEM_WARNING( "checkConsistency : material %s without structural support", mat->giveClassName() );
+            OOFEM_WARNING("material %s without structural support", mat->giveClassName() );
             result = 0;
             continue;
         }

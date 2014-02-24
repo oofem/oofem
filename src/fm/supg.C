@@ -559,7 +559,7 @@ SUPG :: solveYourselfAt(TimeStep *tStep)
     if ( nite <= maxiter ) {
         OOFEM_LOG_INFO("SUPG info: number of iterations: %d\n", nite);
     } else {
-        OOFEM_WARNING("SUPG info: Convergence not reached, number of iterations: %d\n", nite);
+        OOFEM_WARNING("Convergence not reached, number of iterations: %d\n", nite);
         if ( stopmaxiter ) {
             exit(1);
         }

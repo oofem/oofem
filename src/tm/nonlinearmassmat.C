@@ -88,7 +88,7 @@ NonlinearMassTransferMaterial :: giveCharacteristicMatrix(FloatMatrix &answer,
         t2.at(1, 1) = t2.at(2, 2) = t2.at(3, 3) = 1;
         break;
     default:
-        OOFEM_ERROR( "giveCharacteristicMatrix : unknown mode (%s)", __MaterialModeToString(mMode) );
+        OOFEM_ERROR("unknown mode (%s)", __MaterialModeToString(mMode));
     }
 
     answer.clear();

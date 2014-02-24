@@ -134,7 +134,7 @@ HeMoTKMaterial :: giveCharacteristicMatrix(FloatMatrix &answer,
     if ( ( mode == Conductivity_ww ) || ( mode == Conductivity_hh ) || ( mode == Conductivity_hw ) || ( mode == Conductivity_wh ) ) {
         this->computeConductivityMtrx(answer, mode, gp, tStep);
     } else {
-        OOFEM_ERROR( "giveCharacteristicMatrix : unknown mode (%s)", __MatResponseModeToString(mode) );
+        OOFEM_ERROR("unknown mode (%s)", __MatResponseModeToString(mode) );
     }
 }
 
@@ -183,7 +183,7 @@ HeMoTKMaterial :: matcond1d(FloatMatrix &d, GaussPoint *gp, MatResponseMode mode
     //  t = Tm->ip[ipp].av[1];
     s = status->giveTempField();
     if ( s.isEmpty() ) {
-        OOFEM_ERROR("matcond1d: undefined state vector");
+        OOFEM_ERROR("undefined state vector");
     }
 
     w = s.at(2);
@@ -222,7 +222,7 @@ HeMoTKMaterial :: matcond2d(FloatMatrix &d, GaussPoint *gp, MatResponseMode mode
     //  t = Tm->ip[ipp].av[1];
     s = status->giveTempField();
     if ( s.isEmpty() ) {
-        OOFEM_ERROR("matcond2d: undefined state vector");
+        OOFEM_ERROR("undefined state vector");
     }
 
     w = s.at(2);
@@ -264,7 +264,7 @@ HeMoTKMaterial :: matcond3d(FloatMatrix &d, GaussPoint *gp, MatResponseMode mode
     //  t = Tm->ip[ipp].av[1];
     s = status->giveTempField();
     if ( s.isEmpty() ) {
-        OOFEM_ERROR("matcond3d: undefined state vector");
+        OOFEM_ERROR("undefined state vector");
     }
 
     w = s.at(2);
@@ -308,7 +308,7 @@ double HeMoTKMaterial :: computeCapacityCoeff(MatResponseMode mode, GaussPoint *
 
         s = status->giveTempField();
         if ( s.isEmpty() ) {
-            OOFEM_ERROR("computeCapacityCoeff: undefined state vector");
+            OOFEM_ERROR("undefined state vector");
         }
 
         w = s.at(2);
@@ -321,7 +321,7 @@ double HeMoTKMaterial :: computeCapacityCoeff(MatResponseMode mode, GaussPoint *
 
         s = status->giveTempField();
         if ( s.isEmpty() ) {
-            OOFEM_ERROR("computeCapacityCoeff: undefined state vector");
+            OOFEM_ERROR("undefined state vector");
         }
 
         w = s.at(2);
@@ -341,7 +341,7 @@ HeMoTKMaterial :: giveHumidity(GaussPoint *gp, ValueModeType mode)
     TransportMaterialStatus *ms = static_cast< TransportMaterialStatus * >( this->giveStatus(gp) );
     const FloatArray &tempState = ms->giveTempField();
     if ( tempState.giveSize() < 2 ) {
-        OOFEM_ERROR("giveHumidity: undefined moisture status!");
+        OOFEM_ERROR("undefined moisture status!");
     }
 
     FloatArray state = ms->giveField();
@@ -409,7 +409,7 @@ HeMoTKMaterial :: give_delta_gw(double phi)
     double delta_gw;
 
     if ( ( phi < 0.2 ) || ( phi > 0.98 ) ) {
-        OOFEM_ERROR("give_delta_gw : Relative humidity is out of range");
+        OOFEM_ERROR("Relative humidity is out of range");
     }
 
     // water vapor permeability
@@ -432,7 +432,7 @@ HeMoTKMaterial :: sorption_isotherm(double phi)
     double w;
 
     if ( ( phi < 0.2 ) || ( phi > 0.98 ) ) {
-        OOFEM_ERROR("HeMoTKMaterial :: sorption_isotherm : Relative humidity %.3f is out of range", phi);
+        OOFEM_ERROR("Relative humidity %.3f is out of range", phi);
     }
 
     // water content
@@ -459,7 +459,7 @@ HeMoTKMaterial :: inverse_sorption_isotherm(double w)
     phi = exp( a * ( 1.0 - pow( ( w_h / w ), ( n ) ) ) );
 
     if ( ( phi < 0.2 ) || ( phi > 0.98 ) ) {
-        OOFEM_ERROR("HeMoTKMaterial :: inverse_sorption_isotherm : Relative humidity %.3f is out of range", phi);
+        OOFEM_ERROR("Relative humidity %.3f is out of range", phi);
     }
 
     return ( phi );
@@ -594,7 +594,7 @@ HeMoTKMaterial :: isCharacteristicMtrxSymmetric(MatResponseMode mode)
     if ( ( mode == Conductivity_ww ) || ( mode == Conductivity_hh ) || ( mode == Conductivity_hw ) || ( mode == Conductivity_wh ) ) {
         return false;
     } else {
-        OOFEM_ERROR( "isCharacteristicMtrxSymmetric : unknown mode (%s)", __MatResponseModeToString(mode) );
+        OOFEM_ERROR("unknown mode (%s)", __MatResponseModeToString(mode) );
     }
 
     return false; // to make compiler happy

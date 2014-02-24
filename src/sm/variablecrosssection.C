@@ -141,7 +141,7 @@ VariableCrossSection :: giveExpression(const ScalarFunction **expr, CrossSection
     } else if ( aProperty == CS_DrillingStiffness ) {
         * expr = & drillingStiffnessExpr;
     } else {
-        OOFEM_ERROR("VariableCrossSection(%d)::give called with unknown ID %d", this->giveNumber(), aProperty);
+        OOFEM_ERROR("called with unknown ID %d", this->giveNumber(), aProperty);
     }
 }
 
@@ -172,14 +172,14 @@ VariableCrossSection :: give(CrossSectionProperty aProperty, const FloatArray *c
             } else {
                 // convert given coords into local cs
                 if ( !elem->computeLocalCoordinates(c, * coords) ) {
-                    OOFEM_ERROR( "VariableCrossSection::give: computeLocalCoordinates failed (element %d)", elem->giveNumber() );
+                    OOFEM_ERROR("computeLocalCoordinates failed (element %d)", elem->giveNumber() );
                 }
             }
         } else { // global coordinates needed
             if ( local ) {
                 // convert given coords into global cs
                 if ( !elem->computeGlobalCoordinates(c, * coords) ) {
-                    OOFEM_ERROR( "VariableCrossSection::give: computeGlobalCoordinates failed (element %d)", elem->giveNumber() );
+                    OOFEM_ERROR("computeGlobalCoordinates failed (element %d)", elem->giveNumber() );
                 }
             } else {
                 c = * coords;

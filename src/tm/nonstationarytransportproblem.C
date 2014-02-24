@@ -85,7 +85,7 @@ NumericalMethod *NonStationaryTransportProblem :: giveNumericalMethod(MetaStep *
 
     linSolver = classFactory.createSparseLinSolver(solverType, this->giveDomain(1), this);
     if ( linSolver == NULL ) {
-        OOFEM_ERROR("giveNumericalMethod: linear solver creation failed");
+        OOFEM_ERROR("linear solver creation failed");
     }
 
     return linSolver;
@@ -150,12 +150,12 @@ double NonStationaryTransportProblem :: giveUnknownComponent(ValueModeType mode,
         if ( dof->giveUnknowns()->includes(hash) ) {
             return dof->giveUnknowns()->at(hash);
         } else {
-            OOFEM_ERROR( "giveUnknown:  Dof unknowns dictionary does not contain unknown of value mode (%s)", __ValueModeTypeToString(mode) );
+            OOFEM_ERROR("Dof unknowns dictionary does not contain unknown of value mode (%s)", __ValueModeTypeToString(mode));
         }
     }
 
     if ( dof->__giveEquationNumber() == 0 ) {
-        OOFEM_ERROR( "giveUnknownComponent: invalid equation number on DoF %d", dof->giveNumber() );
+        OOFEM_ERROR("invalid equation number on DoF %d", dof->giveNumber());
     }
 
     return UnknownsField->giveUnknownValue(dof, mode, tStep);
@@ -210,7 +210,7 @@ NonStationaryTransportProblem :: giveDiscreteTime(int iStep)
         return ( initT );
     }
 
-    OOFEM_ERROR("giveDiscreteTime: invalid iStep");
+    OOFEM_ERROR("invalid iStep");
     return 0.0;
 }
 
@@ -290,7 +290,7 @@ void NonStationaryTransportProblem :: solveYourselfAt(TimeStep *tStep)
 
         conductivityMatrix = classFactory.createSparseMtrx(sparseMtrxType);
         if ( conductivityMatrix == NULL ) {
-            OOFEM_ERROR("solveYourselfAt: sparse matrix creation failed");
+            OOFEM_ERROR("sparse matrix creation failed");
         }
 
         conductivityMatrix->buildInternalStructure( this, 1, EID_ConservationEquation, EModelDefaultEquationNumbering() );
@@ -544,7 +544,7 @@ NonStationaryTransportProblem :: giveUnknownDictHashIndx(ValueModeType mode, Tim
     } else if ( mode == VM_RhsTotal ) { //Nodal Rhs
         return 1;
     } else {
-        OOFEM_ERROR( "ValueModeType %s undefined", __ValueModeTypeToString(mode) );
+        OOFEM_ERROR("ValueModeType %s undefined", __ValueModeTypeToString(mode));
     }
 
     return 0;

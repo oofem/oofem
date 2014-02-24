@@ -90,7 +90,7 @@ LumpedMassElement :: checkConsistency()
     int _result = StructuralElement :: checkConsistency();
     int _ndofs = this->computeNumberOfDofs();
     if ( _ndofs != this->components.giveSize() ) {
-        OOFEM_WARNING("checkConsistency : component array size mismatch");
+        OOFEM_WARNING("component array size mismatch");
         _result = 0;
     }
 

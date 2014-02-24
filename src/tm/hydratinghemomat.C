@@ -111,7 +111,7 @@ HydratingHeMoMaterial :: setMixture(MixtureType mix)
     if ( hydrationModel ) {
         hydrationModel->setMixture(mix);
     } else if ( hydration ) {
-        OOFEM_ERROR("setMixture: Can't setup undefined hydrationModel.");
+        OOFEM_ERROR("Can't setup undefined hydrationModel.");
     }
 }
 
@@ -160,7 +160,7 @@ HydratingHeMoMaterial :: updateInternalState(const FloatArray &vec, GaussPoint *
         if ( hydration ) {
             /* OBSOLETE
              * FloatArray s = ms->giveStateVector ();
-             * if (vec.isEmpty()) OOFEM_ERROR("updateInternalState: empty new state vector");
+             * if (vec.isEmpty()) OOFEM_ERROR("empty new state vector");
              * aux.resize(2);
              * aux.at(1) = vec.at(1);
              * if (s.isEmpty()||(tStep->giveTime()<=0)) aux.at(2) = initialHydrationDegree; // apply initial conditions
@@ -232,7 +232,7 @@ HydratingHeMoMaterial :: giveCharacteristicValue(MatResponseMode rmode, GaussPoi
             }
         }
     } else {
-        OOFEM_ERROR( "giveCharacteristicValue: unknown MatResponseMode (%s)", __MatResponseModeToString(rmode) );
+        OOFEM_ERROR("unknown MatResponseMode (%s)", __MatResponseModeToString(rmode) );
     }
 
     return answer;

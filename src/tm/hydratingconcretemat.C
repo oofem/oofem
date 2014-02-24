@@ -124,7 +124,7 @@ HydratingConcreteMat :: computeInternalSourceVector(FloatArray &val, GaussPoint 
     if ( mode == VM_Total ) {
         val.at(1) = this->GivePower(tStep, gp);
     } else {
-        OOFEM_ERROR( "Undefined mode %s\n", __ValueModeTypeToString(mode) );
+        OOFEM_ERROR("Undefined mode %s\n", __ValueModeTypeToString(mode) );
     }
 }
 
@@ -141,7 +141,7 @@ HydratingConcreteMat :: giveCharacteristicValue(MatResponseMode mode, GaussPoint
         double tempStateVec = ms->giveTempField().at(1) + 273.15;
         return this->activationEnergy / ( 8.314 * tempStateVec * tempStateVec ) * exp(1. / stateVec -  1. / tempStateVec);
     } else {
-        OOFEM_ERROR( "giveCharacteristicValue : unknown mode (%s)\n", __MatResponseModeToString(mode) );
+        OOFEM_ERROR("unknown mode (%s)\n", __MatResponseModeToString(mode) );
     }
 
     return 0.;

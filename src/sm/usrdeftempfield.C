@@ -49,7 +49,7 @@ UserDefinedTemperatureField :: computeValueAt(FloatArray &answer, TimeStep *tSte
     double result;
 
     if ( ( mode != VM_Incremental ) && ( mode != VM_Total ) ) {
-        OOFEM_ERROR( "computeComponentArrayAt: unknown mode (%s)", __ValueModeTypeToString(mode) );
+        OOFEM_ERROR("unknown mode (%s)", __ValueModeTypeToString(mode) );
     }
 
     answer.resize(this->size);
@@ -59,7 +59,7 @@ UserDefinedTemperatureField :: computeValueAt(FloatArray &answer, TimeStep *tSte
         ";t=" << tStep->giveTargetTime() << ";" << ftExpression [ i - 1 ];
         result = myParser.eval(buff.str().c_str(), err);
         if ( err ) {
-            OOFEM_ERROR("computeValueAt: parser syntax error");
+            OOFEM_ERROR("parser syntax error");
         }
 
         answer.at(i) = result;
@@ -69,7 +69,7 @@ UserDefinedTemperatureField :: computeValueAt(FloatArray &answer, TimeStep *tSte
             ";t=" << ( tStep->giveTargetTime() - tStep->giveTimeIncrement() ) << ";" << ftExpression [ i - 1 ];
             result = myParser.eval(buff.str().c_str(), err);
             if ( err ) {
-                OOFEM_ERROR("computeValueAt: parser syntax error");
+                OOFEM_ERROR("parser syntax error");
             }
 
             answer.at(i) -= result;

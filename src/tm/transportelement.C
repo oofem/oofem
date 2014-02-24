@@ -115,7 +115,7 @@ TransportElement :: giveCharacteristicMatrix(FloatMatrix &answer,
     } else if ( mtrx == IntSourceLHSMatrix ) {
         this->computeIntSourceLHSMatrix(answer, tStep);
     } else {
-        OOFEM_ERROR( "giveCharacteristicMatrix: Unknown Type of characteristic mtrx (%s)", __CharTypeToString(mtrx) );
+        OOFEM_ERROR("Unknown Type of characteristic mtrx (%s)", __CharTypeToString(mtrx));
     }
 }
 
@@ -136,7 +136,7 @@ TransportElement :: giveCharacteristicVector(FloatArray &answer, CharType mtrx, 
     } else if ( mtrx == ElementInternalSourceVector ) { ///@todo Remove this, only external and internal.
         this->computeInternalSourceRhsVectorAt(answer, tStep, mode);
     } else {
-        OOFEM_ERROR( "giveCharacteristicVector: Unknown Type of characteristic mtrx (%s)",
+        OOFEM_ERROR( "Unknown Type of characteristic mtrx (%s)",
                 __CharTypeToString(mtrx) );
     }
 }
@@ -151,13 +151,13 @@ TransportElement :: checkConsistency()
 {
     int result = 1;
     if ( !dynamic_cast< TransportMaterial * >( giveMaterial() ) ) {
-        OOFEM_WARNING("checkConsistency : material without support for transport problems");
+        OOFEM_WARNING("material without support for transport problems");
         result = 0;
     }
 
 #if 0
     if ( !this->giveCrossSection()->testCrossSectionExtension(CS_TransportCapability) ) {
-        OOFEM_WARNING("checkConsistency : cross-section without support for transport problems", 1);
+        OOFEM_WARNING("cross-section without support for transport problems", 1);
         result = 0;
     }
 
@@ -783,7 +783,7 @@ TransportElement :: computeBCSubVectorAt(FloatArray &answer, TimeStep *tStep, Va
         } else if ( ltype == SurfaceLoadBGT ) {
             this->computeSurfaceBCSubVectorAt(vec, load, id, tStep, mode, indx);
         } else {
-            OOFEM_ERROR("computeBCSubVectorAt : unsupported bc type encountered");
+            OOFEM_ERROR("unsupported bc type encountered");
         }
 
         answer.add(vec);
@@ -838,7 +838,7 @@ TransportElement :: computeEdgeBCSubVectorAt(FloatArray &answer, Load *load, int
         this->giveEdgeDofMapping(mask, iEdge);
         answer.assemble(reducedAnswer, mask);
     } else {
-        OOFEM_ERROR("computeBCSubVectorAt : unsupported bc type encountered");
+        OOFEM_ERROR("unsupported bc type encountered");
     }
 }
 
@@ -847,7 +847,7 @@ TransportElement :: computeSurfaceBCSubVectorAt(FloatArray &answer, Load *load,
                                                 int iSurf, TimeStep *tStep, ValueModeType mode, int indx)
 {
     if ( !this->testElementExtension(Element_SurfaceLoadSupport) ) {
-        OOFEM_ERROR("computeSurfaceBCSubVectorAt : no surface load support");
+        OOFEM_ERROR("no surface load support");
     }
 
     BoundaryLoad *surfLoad = dynamic_cast< BoundaryLoad * >(load);
@@ -892,7 +892,7 @@ TransportElement :: computeSurfaceBCSubVectorAt(FloatArray &answer, Load *load,
 
         delete iRule;
     } else {
-        OOFEM_ERROR("computeSurfaceBCSubVectorAt : unsupported bc type encountered");
+        OOFEM_ERROR("unsupported bc type encountered");
     }
 }
 
@@ -966,7 +966,7 @@ TransportElement :: computeBCSubMtrxAt(FloatMatrix &answer, TimeStep *tStep, Val
                 this->giveSurfaceDofMapping(mask, id);
                 answer.assemble(subAnswer, mask);
             } else {
-                OOFEM_ERROR("computeBCSubMtrxAt : unsupported bc type encountered");
+                OOFEM_ERROR("unsupported bc type encountered");
             }
         }
     }
@@ -1123,7 +1123,7 @@ TransportElement :: EIPrimaryFieldI_evaluateFieldVectorAt(FloatArray &answer, Pr
 
         return 0; // ok
     } else {
-        OOFEM_ERROR("EIPrimaryFieldI_evaluateFieldVectorAt: target point not in receiver volume");
+        OOFEM_ERROR("target point not in receiver volume");
         return 1; // failed
     }
 }

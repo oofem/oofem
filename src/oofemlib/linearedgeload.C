@@ -97,14 +97,14 @@ LinearEdgeLoad :: computeNArray(FloatArray &answer, FloatArray &coords) const
         dir.subtract(startCoords);
 
         if ( ( ksi < -1.0 ) ||  ( ksi > 1.0 ) ) {
-            OOFEM_WARNING("computeNArray: point out of receiver, skipped", 1);
+            OOFEM_WARNING("point out of receiver, skipped", 1);
             answer.resize(2);
             answer.zero();
         }
 
         for ( i = 1; i <= dir.giveSize(); i++ ) {
             if ( fabs( startCoords.at(i) + dir.at(i) * eta - coords.at(i) ) > 1.e-6 ) {
-                OOFEM_WARNING("computeNArray: point out of receiver, skipped", 1);
+                OOFEM_WARNING("point out of receiver, skipped", 1);
                 answer.resize(2);
                 answer.zero();
             }

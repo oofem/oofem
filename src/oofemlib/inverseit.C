@@ -193,7 +193,7 @@ InverseIteration :: solve(SparseMtrx *a, SparseMtrx *b, FloatArray *_eigv, Float
     if ( i < nitem ) {
         OOFEM_LOG_INFO("InverseIt info: convergence reached in %d iterations\n", i);
     } else {
-        OOFEM_WARNING("InverseIt info: convergence not reached after %d iterations\n", i);
+        OOFEM_WARNING("convergence not reached after %d iterations\n", i);
     }
 
     solved = 1;

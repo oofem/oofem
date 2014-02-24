@@ -439,7 +439,7 @@ VTKExportModule :: exportCellVars(FILE *stream, int elemToProcess, TimeStep *tSt
                 }
 #endif
                 if ( type == IST_MaterialNumber || type == IST_CrossSectionNumber ) {
-                    OOFEM_WARNING("VTKExportModule - Material numbers are deprecated, outputing cross section number instead...");
+                    OOFEM_WARNING("Material numbers are deprecated, outputing cross section number instead...");
                     fprintf( stream, "%d\n", elem->giveCrossSection()->giveNumber() );
                 } else if ( type == IST_ElementNumber ) {
                     fprintf( stream, "%d\n", elem->giveNumber() );
@@ -975,7 +975,7 @@ VTKExportModule :: getDofManPrimaryVariable(FloatArray &answer, DofManager *dman
             if ( size == recoveredVal->giveSize() ) {
                 answer.at(j) = recoveredVal->at(j);
             } else {
-                OOFEM_WARNING("VTKExportModule :: getDofManPrimaryVariable: recovered variable size mismatch for %d", iType);
+                OOFEM_WARNING("recovered variable size mismatch for %d", iType);
                 answer.at(j) = 0.0;
             }
         }

@@ -65,7 +65,7 @@ TrabBoneGrad3D :: giveStiffnessMatrix(FloatMatrix &answer,
 // Returns characteristic material stiffness matrix of the receiver
 //
 {
-    OOFEM_ERROR("giveStiffnessMatrix : Shouldn't be called");
+    OOFEM_ERROR("Shouldn't be called");
 }
 
 void
@@ -90,7 +90,7 @@ TrabBoneGrad3D :: givePDGradMatrix_ku(FloatMatrix &answer, MatResponseMode mode,
         give3dKappaMatrix(answer, mode, gp, tStep);
         break;
     default:
-        OOFEM_ERROR( "givePDGradMatrix_ku : unknown mode (%s)", __MaterialModeToString(mMode) );
+        OOFEM_ERROR("unknown mode (%s)", __MaterialModeToString(mMode) );
     }
 }
 
@@ -103,7 +103,7 @@ TrabBoneGrad3D :: givePDGradMatrix_uk(FloatMatrix &answer, MatResponseMode mode,
         give3dGprime(answer, mode, gp, tStep);
         break;
     default:
-        OOFEM_ERROR( "givePDGradMatrix_uk : unknown mode (%s)", __MaterialModeToString(mMode) );
+        OOFEM_ERROR("unknown mode (%s)", __MaterialModeToString(mMode) );
     }
 }
 
@@ -116,7 +116,7 @@ TrabBoneGrad3D :: givePDGradMatrix_kk(FloatMatrix &answer, MatResponseMode mode,
         giveInternalLength(answer, mode, gp, tStep);
         break;
     default:
-        OOFEM_ERROR( "givePDGradMatrix_kk : unknown mode (%s)", __MaterialModeToString(mMode) );
+        OOFEM_ERROR("unknown mode (%s)", __MaterialModeToString(mMode) );
     }
 }
 
@@ -124,7 +124,7 @@ void
 TrabBoneGrad3D :: givePDGradMatrix_LD(FloatMatrix &answer, MatResponseMode mode, GaussPoint *gp, TimeStep *tStep)
 {
     MaterialMode mMode = gp->giveMaterialMode();
-    OOFEM_ERROR( "givePDGradMatrix_LD : unknown mode (%s)", __MaterialModeToString(mMode) );
+    OOFEM_ERROR("unknown mode (%s)", __MaterialModeToString(mMode) );
 }
 
 

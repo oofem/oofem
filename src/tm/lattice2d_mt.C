@@ -419,7 +419,7 @@ Lattice2d_mt :: drawYourself(oofegGraphicContext &gc)
         this->drawRawGeometry(gc);
         this->drawRawCrossSections(gc);
     } else {
-        OOFEM_ERROR("drawYourself : unsupported mode");
+        OOFEM_ERROR("unsupported mode");
     }
 }
 

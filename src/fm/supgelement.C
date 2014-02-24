@@ -304,7 +304,7 @@ SUPGElement :: checkConsistency()
     int result = 1;
     /*
      * if (!this->giveMaterial()->testMaterialExtension(Material_TransportCapability)) {
-     * OOFEM_WARNING("checkConsistency : material without support for transport problems");
+     * OOFEM_WARNING("material without support for transport problems");
      * result =0;
      * }
      */

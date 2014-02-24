@@ -131,7 +131,7 @@ double StationaryTransportProblem :: giveUnknownComponent(ValueModeType mode, Ti
 {
 #ifdef DEBUG
     if ( dof->__giveEquationNumber() == 0 ) {
-        OOFEM_ERROR("giveUnknownComponent: invalid equation number");
+        OOFEM_ERROR("invalid equation number");
     }
 #endif
     return UnknownsField->giveUnknownValue(dof, mode, tStep);
@@ -175,7 +175,7 @@ void StationaryTransportProblem :: solveYourselfAt(TimeStep *tStep)
 
         conductivityMatrix = classFactory.createSparseMtrx(sparseMtrxType);
         if ( conductivityMatrix == NULL ) {
-            OOFEM_ERROR("solveYourselfAt: sparse matrix creation failed");
+            OOFEM_ERROR("sparse matrix creation failed");
         }
 
         conductivityMatrix->buildInternalStructure( this, 1, EID_ConservationEquation, EModelDefaultEquationNumbering() );
@@ -254,7 +254,7 @@ StationaryTransportProblem :: updateComponent(TimeStep *tStep, NumericalCmpn cmp
         }
         return;
     } else {
-        OOFEM_ERROR("StationaryTransportProblem::updateComponent - Unknown component");
+        OOFEM_ERROR("Unknown component");
     }
 }
 

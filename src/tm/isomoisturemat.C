@@ -107,7 +107,7 @@ IsotropicMoistureTransferMaterial :: giveCharacteristicMatrix(FloatMatrix &answe
         return;
 
     default:
-        OOFEM_ERROR( "giveCharacteristicMatrix : unknown mode (%s)", __MaterialModeToString(mMode) );
+        OOFEM_ERROR("unknown mode (%s)", __MaterialModeToString(mMode) );
     }
 
     return;
@@ -122,7 +122,7 @@ IsotropicMoistureTransferMaterial :: giveCharacteristicValue(MatResponseMode mod
     if ( mode == Capacity ) {
         return ( this->giveMoistureCapacity(gp, tStep) );
     } else {
-        OOFEM_ERROR( "giveCharacteristicValue : unknown mode (%s)", __MatResponseModeToString(mode) );
+        OOFEM_ERROR("unknown mode (%s)", __MatResponseModeToString(mode) );
     }
 
     return 0.;
@@ -141,7 +141,7 @@ IsotropicMoistureTransferMaterial :: giveIPValue(FloatArray &answer, GaussPoint 
     /* else if (  type == IST_Humidity ) {
      * FloatArray state = static_cast< TransportMaterialStatus * >( giveStatus(gp) )->giveStateVector();
      * if ( state.giveSize() < 1 ) {
-     *  OOFEM_ERROR("computeWaterChange: undefined moisture status!");
+     *  OOFEM_ERROR("undefined moisture status!");
      * }
      *
      * answer.resize(1);

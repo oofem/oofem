@@ -78,7 +78,7 @@ SimpleInterfaceMaterial :: give3dMaterialStiffnessMatrix(FloatMatrix &answer,
 // computes full constitutive matrix for case of gp stress-strain state.
 //
 {
-    OOFEM_ERROR("give3dMaterialStiffnessMatrix: not implemented");
+    OOFEM_ERROR("not implemented");
 }
 
 
@@ -151,7 +151,7 @@ SimpleInterfaceMaterial :: giveRealStressVector(FloatArray &answer, GaussPoint *
         answer.at(3) = shearStress.at(2);
         break;
     default:
-        OOFEM_ERROR("giveMaterialMode: Unsupported interface mode");
+        OOFEM_ERROR("Unsupported interface mode");
     }
 
     double lim = 1.e+50;
@@ -195,7 +195,7 @@ SimpleInterfaceMaterial :: giveStiffnessMatrix(FloatMatrix &answer,
             if ( rMode == ElasticStiffness ) {
                 answer.at(1, 1) = this->kn;
             } else {
-                OOFEM_ERROR( "give2dInterfaceMaterialStiffnessMatrix: unknown MatResponseMode (%s)", __MatResponseModeToString(rMode) );
+                OOFEM_ERROR("unknown MatResponseMode (%s)", __MatResponseModeToString(rMode) );
             }
         }
 
@@ -213,7 +213,7 @@ SimpleInterfaceMaterial :: giveStiffnessMatrix(FloatMatrix &answer,
             if ( rMode == ElasticStiffness ) {
                 answer.at(1, 1) = answer.at(2, 2) = this->kn;
             } else {
-                OOFEM_ERROR( "give2dInterfaceMaterialStiffnessMatrix: unknown MatResponseMode (%s)", __MatResponseModeToString(rMode) );
+                OOFEM_ERROR("unknown MatResponseMode (%s)", __MatResponseModeToString(rMode) );
             }
         }
 
@@ -231,7 +231,7 @@ SimpleInterfaceMaterial :: giveStiffnessMatrix(FloatMatrix &answer,
             if ( rMode == ElasticStiffness ) {
                 answer.at(1, 1) = answer.at(2, 2) = answer.at(3, 3) = this->kn;
             } else {
-                OOFEM_ERROR( "give2dInterfaceMaterialStiffnessMatrix: unknown MatResponseMode (%s)", __MatResponseModeToString(rMode) );
+                OOFEM_ERROR("unknown MatResponseMode (%s)", __MatResponseModeToString(rMode) );
             }
         }
 

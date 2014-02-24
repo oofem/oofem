@@ -127,7 +127,7 @@ IsotropicHeatTransferMaterial :: giveCharacteristicMatrix(FloatMatrix &answer,
         return;
 
     default:
-        OOFEM_ERROR( "giveCharacteristicMatrix : unknown mode (%s)", __MaterialModeToString(mMode) );
+        OOFEM_ERROR("unknown mode (%s)", __MaterialModeToString(mMode) );
     }
 }
 
@@ -140,7 +140,7 @@ IsotropicHeatTransferMaterial :: giveCharacteristicValue(MatResponseMode mode,
     if ( mode == Capacity ) {
         return ( capacity * this->give('d', gp) );
     } else {
-        OOFEM_ERROR( "giveCharacteristicValue : unknown mode (%s)", __MatResponseModeToString(mode) );
+        OOFEM_ERROR("unknown mode (%s)", __MatResponseModeToString(mode) );
     }
 
     return 0.;

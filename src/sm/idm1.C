@@ -783,7 +783,7 @@ IsotropicDamageMaterial1 :: computeDamageParamForCohesiveCrack(double &omega, do
         }
 
         if ( omega > 1.0 ) {
-            OOFEM_WARNING("computeDamageParam: damage parameter is %f, which is greater than 1, snap-back problems", omega);
+            OOFEM_WARNING("damage parameter is %f, which is greater than 1, snap-back problems", omega);
             omega = maxOmega;
             if ( checkSnapBack ) {
                 OOFEM_ERROR("\n");
@@ -791,7 +791,7 @@ IsotropicDamageMaterial1 :: computeDamageParamForCohesiveCrack(double &omega, do
         }
 
         if ( omega < 0.0 ) {
-            OOFEM_WARNING("computeDamageParam: damage parameter is %f, which is smaller than 0, snap-back problems", omega);
+            OOFEM_WARNING("damage parameter is %f, which is smaller than 0, snap-back problems", omega);
             omega = 0.0;
             if ( checkSnapBack ) {
                 OOFEM_ERROR("\n");
@@ -840,7 +840,7 @@ IsotropicDamageMaterial1 :: damageFunction(double kappa, GaussPoint *gp)
         }
 
     default:
-        OOFEM_WARNING("IsotropicDamageMaterial1::damageFunction ... undefined softening type %d\n", softType);
+        OOFEM_WARNING(":damageFunction ... undefined softening type %d\n", softType);
     }
 
     return 0.;         // to make the compiler happy

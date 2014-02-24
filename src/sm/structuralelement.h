@@ -198,7 +198,7 @@ public:
      */
     virtual void computeInitialStressMatrix(FloatMatrix &answer, TimeStep *tStep)
     {
-        OOFEM_ERROR("computeInitialStressMatrix: not implemented");
+        OOFEM_ERROR("not implemented");
     }
 
     /**

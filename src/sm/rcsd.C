@@ -217,7 +217,7 @@ RCSDMaterial :: giveEffectiveMaterialStiffnessMatrix(FloatMatrix &answer,
             this->giveLinearElasticMaterial()->giveStiffnessMatrix(answer, rMode, gp, tStep);
             return;
         } else {
-            OOFEM_ERROR("giveEffectiveMaterialStiffnessMatrix: usupported mode");
+            OOFEM_ERROR("unsupported mode");
         }
     }
 }

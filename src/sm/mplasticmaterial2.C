@@ -823,7 +823,7 @@ huhu: //label for goto
 
                     continue;
                 } else {
-                    OOFEM_WARNING( "GiveRealStressVector: local equlibrium not reached in %d iterations\nElement %d, gp %d, continuing",
+                    OOFEM_WARNING("local equlibrium not reached in %d iterations\nElement %d, gp %d, continuing",
                               PLASTIC_MATERIAL_MAX_ITERATIONS, gp->giveElement()->giveNumber(), gp->giveNumber() );
                     answer = fullStressVector;
                     // debug line
@@ -1205,7 +1205,7 @@ huhu: //label for goto
 
                     continue;
                 } else {
-                    OOFEM_WARNING( "GiveRealStressVector: local equlibrium not reached in %d iterations\nElement %d, gp %d, continuing",
+                    OOFEM_WARNING("local equlibrium not reached in %d iterations\nElement %d, gp %d, continuing",
                               PLASTIC_MATERIAL_MAX_ITERATIONS, gp->giveElement()->giveNumber(), gp->giveNumber() );
                     answer = fullStressVector;
                     // debug line

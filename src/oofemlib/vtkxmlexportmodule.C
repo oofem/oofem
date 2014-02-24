@@ -1072,7 +1072,7 @@ VTKXMLExportModule :: getNodalVariableFromXFEMST(FloatArray &answer, Node *node,
         val = & valueArray;
         ei->evalNodeEnrMarkerInNode( valueArray.at(1), node->giveNumber() );
     } else {
-        //OOFEM_WARNING("VTKXMLExportModule::getNodalVariableFromXFEMST: invalid data in node %d", inode);
+        //OOFEM_WARNING("invalid data in node %d", inode);
     }
 
     ///@todo duplicated code from getNodalVariableFromIS - uneccessary
@@ -1450,7 +1450,7 @@ VTKXMLExportModule :: getNodalVariableFromPrimaryField(FloatArray &answer, DofMa
             if ( size == recoveredVal->giveSize() ) {
                 answer.at(j) = recoveredVal->at(j);
             } else {
-                OOFEM_WARNING("VTKXMLExportModule :: getDofManPrimaryVariable: recovered variable size mismatch for %d", type);
+                OOFEM_WARNING("recovered variable size mismatch for %d", type);
                 answer.at(j) = 0.0;
             }
         } else if ( ( indx = dman->findDofWithDofId(id) ) ) {
@@ -1470,7 +1470,7 @@ VTKXMLExportModule :: getNodalVariableFromPrimaryField(FloatArray &answer, DofMa
             if ( size == recoveredVal->giveSize() ) {
                 answer.at(j) = recoveredVal->at(j);
             } else {
-                OOFEM_WARNING("VTKXMLExportModule :: getDofManPrimaryVariable: recovered variable size mismatch for %d", type);
+                OOFEM_WARNING("recovered variable size mismatch for %d", type);
                 answer.at(j) = 0.0;
             }
         }
@@ -1576,7 +1576,7 @@ VTKXMLExportModule :: getCellVariableFromIS(FloatArray &answer, Element *el, Int
     switch ( type ) {
         // Special scalars
     case IST_MaterialNumber:
-        OOFEM_WARNING("VTKExportModule - Material numbers are deprecated, outputing cross section number instead...");
+        OOFEM_WARNING("Material numbers are deprecated, outputing cross section number instead...");
     case IST_CrossSectionNumber:
         valueArray.at(1) = ( double ) el->giveCrossSection()->giveNumber();
         break;

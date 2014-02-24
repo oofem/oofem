@@ -288,7 +288,7 @@ void SurfaceTensionBoundaryCondition :: computeTangentFromElement(FloatMatrix &a
             ///@todo  Derive expressions for this.
         }
     } else {
-        OOFEM_WARNING("SurfaceTensionBoundaryCondition :: assembleVectorFromElement - Only 2D or 3D is possible!");
+        OOFEM_WARNING("Only 2D or 3D is possible!");
     }
 }
 
@@ -394,7 +394,7 @@ void SurfaceTensionBoundaryCondition :: computeLoadVectorFromElement(FloatArray 
             }
             answer.add(-gamma * J * gp->giveWeight(), tmp);
         }
-        OOFEM_WARNING("SurfaceTensionBoundaryCondition :: assembleVectorFromElement - 3D Completely untested!");
+        OOFEM_WARNING("3D Completely untested!");
     }
 }
 } // end namespace oofem

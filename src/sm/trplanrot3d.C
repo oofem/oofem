@@ -59,7 +59,7 @@ TrPlaneStrRot3d :: giveLocalCoordinates(FloatArray &answer, FloatArray &global)
 {
     // test the parameter
     if ( global.giveSize() != 3 ) {
-        OOFEM_ERROR("giveLocalCoordinate : cannot transform coordinates - size mismatch");
+        OOFEM_ERROR("cannot transform coordinates - size mismatch");
         exit(1);
     }
 
@@ -210,7 +210,7 @@ TrPlaneStrRot3d :: giveCharacteristicTensor(FloatMatrix &answer, CharTensor type
 
         answer.at(3, 3) = charVect.at(4);
     } else {
-        OOFEM_ERROR("GiveCharacteristicTensor: unsupported tensor mode");
+        OOFEM_ERROR("unsupported tensor mode");
         exit(1);
     }
 
@@ -314,7 +314,7 @@ TrPlaneStrRot3d :: computeBodyLoadVectorAt(FloatArray &answer, Load *forLoad, Ti
     FloatMatrix T;
 
     if ( ( forLoad->giveBCGeoType() != BodyLoadBGT ) || ( forLoad->giveBCValType() != ForceLoadBVT ) ) {
-        OOFEM_ERROR("computeBodyLoadVectorAt: unknown load type");
+        OOFEM_ERROR("unknown load type");
     }
 
     // note: force is assumed to be in global coordinate system.
@@ -394,7 +394,7 @@ TrPlaneStrRot3d :: giveSurfaceDofMapping(IntArray &answer, int iSurf) const
         answer.at(14) = 8;
         answer.at(18) = 9;
     } else {
-        OOFEM_ERROR("giveSurfaceDofMapping: wrong surface number");
+        OOFEM_ERROR("wrong surface number");
     }
 }
 

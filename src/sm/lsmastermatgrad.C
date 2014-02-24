@@ -148,7 +148,7 @@ LargeStrainMasterMaterialGrad :: giveInternalLength(FloatMatrix &answer, MatResp
     this->initTempStatus(gp);
     GradDpMaterialExtensionInterface *graddpmat = dynamic_cast< GradDpMaterialExtensionInterface * >( domain->giveMaterial(slaveMat)->giveInterface(GradDpMaterialExtensionInterfaceType) );
     if ( graddpmat == NULL ) {
-        OOFEM_WARNING("checkConsistency: material %d has no Structural support", slaveMat);
+        OOFEM_WARNING("material %d has no Structural support", slaveMat);
         return;
     }
 
@@ -164,7 +164,7 @@ LargeStrainMasterMaterialGrad :: give3dGprime(FloatMatrix &answer, MatResponseMo
     FloatMatrix gPrime;
     GradDpMaterialExtensionInterface *graddpmat = dynamic_cast< GradDpMaterialExtensionInterface * >( domain->giveMaterial(slaveMat)->giveInterface(GradDpMaterialExtensionInterfaceType) );
     if ( graddpmat == NULL ) {
-        OOFEM_WARNING("checkConsistency: material %d has no Structural support", slaveMat);
+        OOFEM_WARNING("material %d has no Structural support", slaveMat);
         return;
     }
 
@@ -185,7 +185,7 @@ LargeStrainMasterMaterialGrad :: give3dKappaMatrix(FloatMatrix &answer, MatRespo
     FloatMatrix kappaMatrix, kappaTMatrix, P;
     GradDpMaterialExtensionInterface *graddpmat = dynamic_cast< GradDpMaterialExtensionInterface * >( domain->giveMaterial(slaveMat)->giveInterface(GradDpMaterialExtensionInterfaceType) );
     if ( graddpmat == NULL ) {
-        OOFEM_WARNING("checkConsistency: material %d has no Structural support", slaveMat);
+        OOFEM_WARNING("material %d has no Structural support", slaveMat);
         return;
     }
 
@@ -213,7 +213,7 @@ LargeStrainMasterMaterialGrad :: giveFirstPKStressVectorGrad(FloatArray &answer1
         mat = domain->giveMaterial(slaveMat);
         sMat = dynamic_cast< StructuralMaterial * >(mat);
         if ( sMat == NULL ) {
-            OOFEM_WARNING("checkConsistency: material %d has no Structural support", slaveMat);
+            OOFEM_WARNING("material %d has no Structural support", slaveMat);
             return;
         }
 

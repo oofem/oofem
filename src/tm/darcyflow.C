@@ -137,7 +137,7 @@ void DarcyFlow :: solveYourselfAt(TimeStep *tStep)
                                             tStep);
 
     if ( status & NM_NoSuccess ) {
-        OOFEM_ERROR( "DarcyFlow :: couldn't solve for time step %d\n", tStep->giveNumber() );
+        OOFEM_ERROR("couldn't solve for time step %d\n", tStep->giveNumber() );
     }
 
 #define DUMPMATRICES 0
@@ -190,7 +190,7 @@ void DarcyFlow :: printDofOutputAt(FILE *stream, Dof *iDof, TimeStep *tStep)
     if ( type == P_f ) {
         iDof->printSingleOutputAt(stream, tStep, 'p', VM_Total, 1);
     } else {
-        OOFEM_ERROR("printDofOutputAt: unsupported dof type");
+        OOFEM_ERROR("unsupported dof type");
     }
 }
 
@@ -224,7 +224,7 @@ void DarcyFlow :: updateComponent(TimeStep *tStep, NumericalCmpn cmpn, Domain *d
         break;
 
     default:
-        OOFEM_ERROR("updateComponent: Unknown component id (%d)", ( int ) cmpn);
+        OOFEM_ERROR("Unknown component id (%d)", ( int ) cmpn);
     }
 }
 
@@ -254,7 +254,7 @@ NumericalMethod *DarcyFlow :: giveNumericalMethod(MetaStep *mStep)
 
     this->nMethod = new NRSolver(this->giveDomain(1), this);
     if ( !nMethod ) {
-        OOFEM_ERROR("giveNumericalMethod: numerical method creation failed");
+        OOFEM_ERROR("numerical method creation failed");
     }
     return this->nMethod;
 }

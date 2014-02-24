@@ -65,7 +65,7 @@ StructuralInterfaceCrossSection :: checkConsistency()
     int result = 1;
     Material *mat = this->giveDomain()->giveMaterial(this->materialNum);
     if ( !dynamic_cast< StructuralInterfaceMaterial * >(mat) ) {
-        OOFEM_ERROR( "StructuralInterfaceCrossSection :: checkConsistency : material %s is not a structural interface material", mat->giveClassName() );
+        OOFEM_ERROR("material %s is not a structural interface material", mat->giveClassName() );
         result = 0;
     }
 
@@ -104,7 +104,7 @@ StructuralInterfaceCrossSection :: give2dStiffnessMatrix_Eng(FloatMatrix &answer
     } else if ( mat->hasAnalyticalTangentStiffness() ) {
         mat->give2dStiffnessMatrix_Eng(answer, rMode, gp, tStep);
     } else {
-        OOFEM_ERROR("StructuralInterfaceCrossSection :: give2dStiffnessMatrix_Eng: not implemented - use numerical tangent instead (keyword: 'use_num_tangent') ");
+        OOFEM_ERROR("not implemented - use numerical tangent instead (keyword: 'use_num_tangent') ");
     }
 }
 
@@ -122,7 +122,7 @@ StructuralInterfaceCrossSection :: give1dStiffnessMatrix_dTdj(FloatMatrix &answe
     } else if ( mat->hasAnalyticalTangentStiffness() ) {
         mat->give1dStiffnessMatrix_dTdj(answer, rMode, gp, tStep);
     } else {
-        OOFEM_ERROR("StructuralInterfaceCrossSection :: give1dStiffnessMatrix_dTdj: not implemented - use numerical tangent instead (keyword: 'use_num_tangent') ");
+        OOFEM_ERROR("not implemented - use numerical tangent instead (keyword: 'use_num_tangent') ");
     }
 }
 
@@ -135,7 +135,7 @@ StructuralInterfaceCrossSection :: give2dStiffnessMatrix_dTdj(FloatMatrix &answe
     } else if ( mat->hasAnalyticalTangentStiffness() ) {
         mat->give2dStiffnessMatrix_dTdj(answer, rMode, gp, tStep);
     } else {
-        OOFEM_ERROR("StructuralInterfaceCrossSection :: give2dStiffnessMatrix_dTdj: not implemented - use numerical tangent instead (keyword: 'use_num_tangent') ");
+        OOFEM_ERROR("not implemented - use numerical tangent instead (keyword: 'use_num_tangent') ");
     }
 }
 
@@ -149,7 +149,7 @@ StructuralInterfaceCrossSection :: give3dStiffnessMatrix_dTdj(FloatMatrix &answe
     } else if ( mat->hasAnalyticalTangentStiffness() ) {
         mat->give3dStiffnessMatrix_dTdj(answer, rMode, gp, tStep);
     } else {
-        OOFEM_ERROR("StructuralInterfaceCrossSection :: give3dStiffnessMatrix_dTdj: not implemented - use numerical tangent instead (keyword: 'use_num_tangent') ");
+        OOFEM_ERROR("not implemented - use numerical tangent instead (keyword: 'use_num_tangent') ");
     }
 }
 } // end namespace oofem

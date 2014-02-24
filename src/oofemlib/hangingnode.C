@@ -74,7 +74,7 @@ int HangingNode :: checkConsistency()
     if ( parallel_mode != DofManager_local ) {
         for ( int i = 1; i <= countOfMasterNodes; i++ ) {
             if ( e->giveNode(i)->giveParallelMode() != parallel_mode ) {
-                OOFEM_WARNING("HangingNode :: checkConsistency - Mismatch in parallel mode of HangingNode and master");
+                OOFEM_WARNING("Mismatch in parallel mode of HangingNode and master");
                 return false;
             }
         }
@@ -85,7 +85,7 @@ int HangingNode :: checkConsistency()
     // Check local coordinate systems
     for ( int i = 1; i <= e->giveNumberOfNodes(); ++i ) {
         if ( !this->hasSameLCS( e->giveNode(i) ) ) {
-            OOFEM_WARNING("HangingNode :: checkConsistency - Different lcs for master/slave nodes.");
+            OOFEM_WARNING("Different lcs for master/slave nodes.");
             result = false;
         }
     }

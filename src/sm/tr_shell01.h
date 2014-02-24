@@ -145,9 +145,9 @@ public:
 
 protected:
     virtual void computeBmatrixAt(GaussPoint *, FloatMatrix &, int = 1, int = ALL_STRAINS)
-    { OOFEM_ERROR("TR_SHELL01 :: computeBmatrixAt: calling of this function is not allowed"); }
+    { OOFEM_ERROR("calling of this function is not allowed"); }
     virtual void computeNmatrixAt(const FloatArray &iLocCoord, FloatMatrix &)
-    { OOFEM_ERROR("TR_SHELL01 :: computeNmatrixAt: calling of this function is not allowed"); }
+    { OOFEM_ERROR("calling of this function is not allowed"); }
 
     /// @todo In time delete
 protected:
@@ -157,19 +157,19 @@ protected:
         this->plate->computeGaussPoints();
     }
     virtual void computeStressVector(FloatArray &answer, const FloatArray &strain, GaussPoint *gp, TimeStep *tStep)
-    { OOFEM_ERROR("TR_SHELL01 :: computeStressVector: calling of this function is not allowed"); }
+    { OOFEM_ERROR("calling of this function is not allowed"); }
     virtual void computeBodyLoadVectorAt(FloatArray &answer, Load *forLoad, TimeStep *tStep, ValueModeType mode)
-    { OOFEM_ERROR("TR_SHELL01 :: ...: calling of this function is not allowed"); }
+    { OOFEM_ERROR("calling of this function is not allowed"); }
     virtual void computeForceLoadVector(FloatArray &answer, TimeStep *tStep, ValueModeType mode)
-    { OOFEM_ERROR("TR_SHELL01 :: ...: calling of this function is not allowed"); }
+    { OOFEM_ERROR("calling of this function is not allowed"); }
 
 public:
     virtual void computeStiffnessMatrix(FloatMatrix &answer, MatResponseMode rMode, TimeStep *tStep)
-    { OOFEM_ERROR("TR_SHELL01 :: ...: calling of this function is not allowed"); }
+    { OOFEM_ERROR("calling of this function is not allowed"); }
     virtual void computeMassMatrix(FloatMatrix &answer, TimeStep *tStep)
-    { OOFEM_ERROR("TR_SHELL01 :: ...: calling of this function is not allowed"); }
+    { OOFEM_ERROR("calling of this function is not allowed"); }
     virtual void giveInternalForcesVector(FloatArray &answer, TimeStep *tStep, int useUpdatedGpRecord)
-    { OOFEM_ERROR("TR_SHELL01 :: ...: calling of this function is not allowed"); }
+    { OOFEM_ERROR("calling of this function is not allowed"); }
 };
 } // end namespace oofem
 #endif

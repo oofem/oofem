@@ -438,7 +438,7 @@ restart:
                 goto restart;
             } else {
                 status = NM_NoSuccess;
-                OOFEM_WARNING("CALMLS :: solve - Convergence not reached after %d iterations", nsmax);
+                OOFEM_WARNING("Convergence not reached after %d iterations", nsmax);
                 // exit(1);
                 break;
             }
@@ -1022,7 +1022,7 @@ void CylindricalALM :: convertHPCMap()
 
 #ifndef __PARALLEL_MODE
     if ( count != size ) {
-        OOFEM_WARNING("CylindricalALM :: convertHPCMap: some dofmans/Dofs in HPCarray not recognized");
+        OOFEM_WARNING("some dofmans/Dofs in HPCarray not recognized");
     }
 
 #endif

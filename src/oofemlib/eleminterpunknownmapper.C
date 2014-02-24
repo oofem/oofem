@@ -137,7 +137,7 @@ EIPrimaryUnknownMapper :: evaluateAt(FloatArray &answer, IntArray &dofMask, Valu
             oelem = oldd->giveSpatialLocalizer()->giveElementCloseToPoint(coords, & regList);
         }
         if ( !oelem ) {
-            OOFEM_WARNING("EIPrimaryUnknownMapper :: evaluateAt - Couldn't find any element containing point.");
+            OOFEM_WARNING("Couldn't find any element containing point.");
             return false;
         }
     }
@@ -165,7 +165,7 @@ EIPrimaryUnknownMapper :: evaluateAt(FloatArray &answer, IntArray &dofMask, Valu
         }
     }
     if ( !oelem ) {
-        OOFEM_WARNING("EIPrimaryUnknownMapper :: evaluateAt - Couldn't find any element containing point.");
+        OOFEM_WARNING("Couldn't find any element containing point.");
         return false;
     }
 #endif

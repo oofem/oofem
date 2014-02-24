@@ -210,7 +210,7 @@ PlasticMaterial :: giveRealStressVector(FloatArray &answer,
         delete residualVectorR;
 
         if ( nIterations > PLASTIC_MATERIAL_MAX_ITERATIONS ) {
-            OOFEM_WARNING( "GiveRealStressVector: local equlibrium not reached in %d iterations\nElement %d, gp %d, continuing",
+            OOFEM_WARNING("local equlibrium not reached in %d iterations\nElement %d, gp %d, continuing",
                       PLASTIC_MATERIAL_MAX_ITERATIONS, gp->giveElement()->giveNumber(), gp->giveNumber() );
             break;
         }
@@ -543,7 +543,7 @@ PlasticMaterial :: give3dMaterialStiffnessMatrix(FloatMatrix &answer,
 {
     MaterialMode originalMode = gp->giveMaterialMode();
     if ( originalMode != _3dMat ) {
-        OOFEM_ERROR("give3dMaterialStiffnessMatrix : Different stressStrain mode encountered");
+        OOFEM_ERROR("Different stressStrain mode encountered");
     }
 
     // we can force 3d response, and we obtain correct 3d tangent matrix,

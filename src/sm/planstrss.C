@@ -215,7 +215,7 @@ PlaneStress2d :: giveEdgeDofMapping(IntArray &answer, int iEdge) const
         answer.at(3) = 1;
         answer.at(4) = 2;
     } else {
-        OOFEM_ERROR("giveEdgeDofMapping: wrong edge number");
+        OOFEM_ERROR("wrong edge number");
     }
 }
 
@@ -407,13 +407,13 @@ PlaneStress2d :: giveCharacteristicSize(GaussPoint *gp, FloatArray &normalToCrac
         }
 
         if ( dPhidN == 0. ) {
-            OOFEM_ERROR("Zero value of dPhidN in PlaneStress2d :: giveCharacteristicSize\n");
+            OOFEM_ERROR("Zero value of dPhidN");
         }
 
         return 1. / fabs(dPhidN);
     }
 
-    OOFEM_ERROR("PlaneStress2d :: giveCharacteristicSize: invalid method");
+    OOFEM_ERROR("invalid method");
     return 0.;
 }
 
@@ -911,7 +911,7 @@ PlaneStress2d :: SPRNodalRecoveryMI_giveDofMansDeterminedByPatch(IntArray &answe
     if ( found ) {
         answer.at(1) = pap;
     } else {
-        OOFEM_ERROR("SPRNodalRecoveryMI_giveDofMansDeterminedByPatch: node unknown");
+        OOFEM_ERROR("node unknown");
     }
 }
 
@@ -949,7 +949,7 @@ PlaneStress2d :: SpatialLocalizerI_giveDistanceFromParametricCenter(const FloatA
     this->computeGlobalCoordinates(gcoords, lcoords);
 
     if ( ( size = coords.giveSize() ) < ( gsize = gcoords.giveSize() ) ) {
-        OOFEM_ERROR("SpatialLocalizerI_giveDistanceFromParametricCenter: coordinates size mismatch");
+        OOFEM_ERROR("coordinates size mismatch");
     }
 
     if ( size == gsize ) {

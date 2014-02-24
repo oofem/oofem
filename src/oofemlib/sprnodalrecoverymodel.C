@@ -131,9 +131,9 @@ SPRNodalRecoveryModel :: recoverValues(Set elementSet, InternalStateType type, T
                 }
             } else {
 #ifndef __PARALLEL_MODE
-                OOFEM_WARNING("SPRNodalRecoveryModel::recoverValues : values of %s in dofmanager %d undetermined", __InternalStateTypeToString(type), i);
+                OOFEM_WARNING("values of %s in dofmanager %d undetermined", __InternalStateTypeToString(type), i);
 #else
-                OOFEM_WARNING("[%d] SPRNodalRecoveryModel::recoverValues : values of %s in dofmanager %d undetermined",
+                OOFEM_WARNING("values of %s in dofmanager %d undetermined",
                                domain->giveEngngModel()->giveRank(), __InternalStateTypeToString(type), i);
 #endif
                 for ( int j = 1; j <= regionValSize; j++ ) {
@@ -308,7 +308,7 @@ SPRNodalRecoveryModel :: determinePatchAssemblyPoints(IntArray &pap, SPRPatchTyp
                 // if the pap with papStatus_littleNIPs status found, which values could not be determined using
                 // regular pap or boundary pap then we are unable to determine such value
                 if ( dofManFlags.at(idofMan) == papStatus_littleNIPs ) {
-                    OOFEM_WARNING("SPRNodalRecoveryModel::determinePatchAssemblyPoints - unable to determine dofMan %d\n", idofMan);
+                    OOFEM_WARNING("unable to determine dofMan %d\n", idofMan);
                     //abort_flag = true;
                 }
             }

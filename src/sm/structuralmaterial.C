@@ -85,7 +85,7 @@ StructuralMaterial :: giveRealStressVector(FloatArray &answer, GaussPoint *gp, c
 void
 StructuralMaterial :: giveRealStressVector_3d(FloatArray &answer, GaussPoint *gp, const FloatArray &reducedStrain, TimeStep *tStep)
 {
-    OOFEM_ERROR( "%s :: giveRealStressVector_3d - 3d mode not supported", this->giveClassName() );
+    OOFEM_ERROR("3d mode not supported");
 }
 
 
@@ -139,7 +139,7 @@ StructuralMaterial :: giveRealStressVector_StressControl(FloatArray &answer, Gau
         vE.assemble(increment_vE, stressControl);
     }
 
-    OOFEM_WARNING("StructuralMaterial :: giveRealStressVector_StressControl - Iteration did not converge");
+    OOFEM_WARNING("Iteration did not converge");
     answer.clear();
 }
 
@@ -271,7 +271,7 @@ StructuralMaterial :: giveFirstPKStressVector_PlaneStress(FloatArray &answer, Ga
         vF.assemble(increment_vF, P_control);
     }
 
-    OOFEM_WARNING("StructuralMaterial :: giveFirstPKStressVector_PlaneStress - Iteration did not converge");
+    OOFEM_WARNING("Iteration did not converge");
     answer.clear();
 }
 
@@ -308,7 +308,7 @@ StructuralMaterial :: giveFirstPKStressVector_1d(FloatArray &answer, GaussPoint 
         vF.assemble(increment_vF, P_control);
     }
 
-    OOFEM_WARNING("StructuralMaterial :: giveFirstPKStressVector_1d - Iteration did not converge");
+    OOFEM_WARNING("Iteration did not converge");
     answer.clear();
 }
 
@@ -518,7 +518,7 @@ StructuralMaterial :: giveStiffnessMatrix(FloatMatrix &answer,
         this->giveFiberStiffMtrx(answer, rMode, gp, tStep);
         break;
     default:
-        OOFEM_ERROR( "StructuralMaterial :: giveStiffnessMatrix : unknown mode (%s)", __MaterialModeToString(mMode) );
+        OOFEM_ERROR("unknown mode (%s)", __MaterialModeToString(mMode) );
     }
 }
 
@@ -573,7 +573,7 @@ StructuralMaterial :: give3dMaterialStiffnessMatrix_dCde(FloatMatrix &answer,
                                                          GaussPoint *gp, TimeStep *tStep)
 {
     ///@todo what should be default implementaiton?
-    OOFEM_ERROR("StructuralMaterial :: give3dMaterialStiffnessMatrix_dCde - There is no default implementation");
+    OOFEM_ERROR("There is no default implementation");
 }
 
 
@@ -582,7 +582,7 @@ StructuralMaterial :: givePlaneStressStiffMtrx_dCde(FloatMatrix &answer,
                                                     MatResponseMode mode,
                                                     GaussPoint *gp, TimeStep *tStep)
 {
-    OOFEM_ERROR("StructuralMaterial :: givePlaneStressStiffMtrx_dCde - There is no default implementation");
+    OOFEM_ERROR("There is no default implementation");
 }
 
 
@@ -591,7 +591,7 @@ StructuralMaterial :: givePlaneStrainStiffMtrx_dCde(FloatMatrix &answer,
                                                     MatResponseMode mode,
                                                     GaussPoint *gp, TimeStep *tStep)
 {
-    OOFEM_ERROR("StructuralMaterial :: givePlaneStrainStiffMtrx_dCde - There is no default implementation");
+    OOFEM_ERROR("There is no default implementation");
 }
 
 
@@ -600,7 +600,7 @@ StructuralMaterial :: give1dStressStiffMtrx_dCde(FloatMatrix &answer,
                                                  MatResponseMode mode,
                                                  GaussPoint *gp, TimeStep *tStep)
 {
-    OOFEM_ERROR("StructuralMaterial :: give1dStressStiffMtrx_dCde - There is no default implementation");
+    OOFEM_ERROR("There is no default implementation");
 }
 
 
@@ -881,7 +881,7 @@ StructuralMaterial :: giveVoigtVectorMask(IntArray &answer, MaterialMode mmode)
         return 9;
 
     default:
-        //OOFEM_ERROR( "StructuralMaterial :: giveVoigtVectorMask: unknown mode (%s)", __MaterialModeToString(mmode) );
+        //OOFEM_ERROR("unknown mode (%s)", __MaterialModeToString(mmode) );
         return 0;
     }
 }
@@ -1754,7 +1754,7 @@ StructuralMaterial :: giveIPValue(FloatArray &answer, GaussPoint *gp, InternalSt
             FloatArray gcoords, et2;
             static_cast< StructuralElement * >( gp->giveElement() )->computeGlobalCoordinates( gcoords, * gp->giveCoordinates() );
             if ( ( err = tf->evaluateAt(answer, gcoords, VM_Total, tStep) ) ) {
-                OOFEM_ERROR("StructuralMaterial :: giveIPValue: tf->evaluateAt failed, element %d, error code %d", gp->giveElement()->giveNumber(), err);
+                OOFEM_ERROR("tf->evaluateAt failed, element %d, error code %d", gp->giveElement()->giveNumber(), err);
             }
         } else {
             answer.resize(1);
@@ -1831,7 +1831,7 @@ StructuralMaterial :: computeStressIndependentStrainVector(FloatArray &answer,
     }
 
     if ( eigenstrain.giveSize() != 0 && eigenstrain.giveSize() != giveSizeOfVoigtSymVector(matmode) ) {
-        OOFEM_ERROR( "StructuralMaterial :: Number of given eigenstrain components %d is different than required %d by material mode %s, element %d", eigenstrain.giveSize(), giveSizeOfVoigtSymVector(matmode), __MaterialModeToString(matmode), elem->giveNumber() );
+        OOFEM_ERROR("Number of given eigenstrain components %d is different than required %d by material mode %s, element %d", eigenstrain.giveSize(), giveSizeOfVoigtSymVector(matmode), __MaterialModeToString(matmode), elem->giveNumber() );
     }
 
     /* add external source, if provided */
@@ -1844,7 +1844,7 @@ StructuralMaterial :: computeStressIndependentStrainVector(FloatArray &answer,
         int err;
         elem->computeGlobalCoordinates( gcoords, * gp->giveCoordinates() );
         if ( ( err = tf->evaluateAt(et2, gcoords, mode, tStep) ) ) {
-            OOFEM_ERROR("StructuralMaterial :: computeStressIndependentStrainVector: tf->evaluateAt failed, element %d, error code %d", elem->giveNumber(), err);
+            OOFEM_ERROR("tf->evaluateAt failed, element %d, error code %d", elem->giveNumber(), err);
         }
 
         if ( et2.isNotEmpty() ) {
@@ -1878,7 +1878,7 @@ StructuralMaterial :: computeStressIndependentStrainVector(FloatArray &answer,
     if ( answer.giveSize() ) {
         if ( eigenstrain.giveSize() ) {
             if ( answer.giveSize() != eigenstrain.giveSize() ) {
-                OOFEM_ERROR( "StructuralMaterial :: Vector of temperature strains has the size %d which is different with the size of eigenstrain vector %d, element %d", answer.giveSize(), eigenstrain.giveSize(), elem->giveNumber() );
+                OOFEM_ERROR("Vector of temperature strains has the size %d which is different with the size of eigenstrain vector %d, element %d", answer.giveSize(), eigenstrain.giveSize(), elem->giveNumber() );
             }
 
             answer.add(eigenstrain);

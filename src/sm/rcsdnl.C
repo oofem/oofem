@@ -270,8 +270,8 @@ RCSDNLMaterial :: giveRealStressVector(FloatArray &answer, GaussPoint *gp,
                 // test for internal consistency error
                 // we should switch to scalar damage, but no softening take place
                 if ( ipos == 0 ) {
-                    //RCSDEMaterial :: OOFEM_ERROR("giveRealStressVector: can not switch to sd mode, while no cracking");
-                    OOFEM_ERROR("giveRealStressVector: can not switch to sd mode, while no cracking");
+                    //RCSDEMaterial :: OOFEM_ERROR("can not switch to sd mode, while no cracking");
+                    OOFEM_ERROR("can not switch to sd mode, while no cracking");
                 }
 
                 //if (minSofteningPrincStress <= this->SDTransitionCoeff * CurrFt) printf (".");
@@ -381,7 +381,7 @@ RCSDNLMaterial :: initializeFrom(InputRecord *ir)
         IR_GIVE_FIELD(ir, this->Gf, _IFT_RCSDNLMaterial_gf);
         this->ef = this->Gf / this->Ft;
     } else {
-        OOFEM_ERROR("initializeFrom: cannont determine Gf and ef from input data");
+        OOFEM_ERROR("cannot determine Gf and ef from input data");
     }
 
     return IRRT_OK;

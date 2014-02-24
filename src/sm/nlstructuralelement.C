@@ -527,7 +527,7 @@ NLStructuralElement :: computeInitialStressMatrix(FloatMatrix &answer, TimeStep 
             }
             stress_ident.beSubMatrixOf(stress_identFull, indx, indx);
             stress_ident.symmetrized();
-            OOFEM_WARNING("NLStructuralElement :: computeInitialStressMatrix - Implementation not tested yet!");
+            OOFEM_WARNING("Implementation not tested yet!");
 
             this->computeBmatrixAt(gp, B);
             answer.plusProductSymmUpper( B, stress_ident, this->computeVolumeAround(gp) );

@@ -98,7 +98,7 @@ ScalarErrorIndicator :: initializeFrom(InputRecord *ir)
 
     IR_GIVE_FIELD(ir, indicatorType, _IFT_ScalarErrorIndicator_vartype);
     if ( indicatorType != 1 ) {
-        OOFEM_ERROR("instanciateFrom: usupported varType");
+        OOFEM_ERROR("usupported varType");
     }
 
     return this->giveRemeshingCrit()->initializeFrom(ir);

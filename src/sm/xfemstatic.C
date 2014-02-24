@@ -222,21 +222,21 @@ XFEMStatic :: terminate(TimeStep *tStep)
 
                                     MaterialStatus *ms = xFemEl->mpCZMat->giveStatus(& gp);
                                     if ( ms == NULL ) {
-                                        OOFEM_ERROR("In Element :: mapStateVariables(): Failed to fetch material status.\n");
+                                        OOFEM_ERROR("Failed to fetch material status.\n");
                                     }
 
                                     MaterialStatusMapperInterface *interface = dynamic_cast< MaterialStatusMapperInterface * >
                                                                                ( xFemEl->mpCZMat->giveStatus(& gp) );
 
                                     if ( interface == NULL ) {
-                                        OOFEM_ERROR("In XFEMStatic :: mapStateVariables(): Failed to fetch MaterialStatusMapperInterface.\n");
+                                        OOFEM_ERROR("Failed to fetch MaterialStatusMapperInterface.\n");
                                     }
 
 
                                     MaterialStatus *matStat = dynamic_cast< MaterialStatus * >( xFemEl->mpCZMat->giveStatus(& gp) );
                                     StructuralInterfaceMaterialStatus *siMatStat = dynamic_cast< StructuralInterfaceMaterialStatus * >(matStat);
                                     if ( siMatStat == NULL ) {
-                                        OOFEM_ERROR("In XFEMStatic :: terminate: Failed to cast to StructuralInterfaceMaterialStatus.\n");
+                                        OOFEM_ERROR("Failed to cast to StructuralInterfaceMaterialStatus.\n");
                                     }
                                     interface->MSMI_map(gp, * domain, elemSet, * tStep, * siMatStat);
                                 }
@@ -422,7 +422,7 @@ XFEMStatic ::  giveUnknownComponent(ValueModeType mode, TimeStep *tStep, Domain 
             return 0.0; ///@todo: how should one treat newly created dofs?
             // If we are not happy with setting them to zero,
             // I suggest that we use the primary variable mapper. /ES
-            //OOFEM_ERROR( "giveUnknown:  Dof unknowns dictionary does not contain unknown of value mode (%s)", __ValueModeTypeToString(mode) );
+            //OOFEM_ERROR("Dof unknowns dictionary does not contain unknown of value mode (%s)", __ValueModeTypeToString(mode) );
         }
     } else {
         return NonLinearStatic ::  giveUnknownComponent(mode, tStep, d, dof);

@@ -473,7 +473,7 @@ SkylineUnsym :: factorized()
     }
 
     if ( !size ) {
-        OOFEM_WARNING("SkylineUnsym::factorized : null-sized matrix factorized");
+        OOFEM_WARNING("null-sized matrix factorized");
         isFactorized = 1;
         return this;
     }

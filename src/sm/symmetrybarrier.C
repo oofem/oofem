@@ -134,7 +134,7 @@ SymmetryBarrier :: initializeFrom(InputRecord *ir)
     lcs.resize(3, 3);
     int size = normals.giveSize();
     if ( !( ( size == 0 ) || ( size == 6 ) ) ) {
-        OOFEM_WARNING( "initializeFrom: lcs in node %d is not properly defined, will be ignored", this->giveNumber() );
+        OOFEM_WARNING("lcs in node %d is not properly defined, will be ignored", this->giveNumber() );
     }
 
     if ( size == 6 ) {
@@ -150,7 +150,7 @@ SymmetryBarrier :: initializeFrom(InputRecord *ir)
         n1 = sqrt(n1);
         n2 = sqrt(n2);
         if ( ( n1 <= 1.e-6 ) || ( n2 <= 1.e-6 ) ) {
-            OOFEM_ERROR("instanciateFrom : lcs input error");
+            OOFEM_ERROR("lcs input error");
         }
 
         for ( int j = 1; j <= 3; j++ ) { // normalize e1' e2'
@@ -166,7 +166,7 @@ SymmetryBarrier :: initializeFrom(InputRecord *ir)
 
     IR_GIVE_FIELD(ir, mask, _IFT_SymmetryBarrier_activemask);
     if ( mask.giveSize() != 3 ) {
-        OOFEM_ERROR("instanciateFrom: activemask size should be 3");
+        OOFEM_ERROR("activemask size should be 3");
     }
 
     return IRRT_OK;

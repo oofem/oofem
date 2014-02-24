@@ -121,7 +121,7 @@ void StructuralElement :: computeBoundaryLoadVector(FloatArray &answer, Boundary
 
     FEInterpolation *fei = this->giveInterpolation();
     if ( !fei ) {
-        OOFEM_ERROR("StructuralElement :: computeBoundaryLoadVector - No interpolator available\n");
+        OOFEM_ERROR("No interpolator available\n");
     }
 
     FloatArray n_vec;
@@ -189,7 +189,7 @@ StructuralElement :: computeBodyLoadVectorAt(FloatArray &answer, Load *forLoad, 
     IntegrationRule *iRule = integrationRulesArray [ giveDefaultIntegrationRule() ];
 
     if ( ( forLoad->giveBCGeoType() != BodyLoadBGT ) || ( forLoad->giveBCValType() != ForceLoadBVT ) ) {
-        OOFEM_ERROR("computeBodyLoadVectorAt: unknown load type");
+        OOFEM_ERROR("unknown load type");
     }
 
     // note: force is assumed to be in global coordinate system.
@@ -229,7 +229,7 @@ StructuralElement :: computePointLoadVectorAt(FloatArray &answer, Load *load, Ti
         this->computeNmatrixAt(* ( __gp.giveLocalCoordinates() ), n);
         answer.beTProductOf(n, force);
     } else {
-        OOFEM_WARNING("computePointLoadVectorAt: point load outside element");
+        OOFEM_WARNING("point load outside element");
     }
 
     // transform force
@@ -262,7 +262,7 @@ StructuralElement :: computeEdgeLoadVectorAt(FloatArray &answer, Load *load,
     FloatArray globalIPcoords;
 
     if ( !this->testElementExtension(Element_EdgeLoadSupport) ) {
-        OOFEM_ERROR("computeEdgeLoadVectorAt : no edge load support");
+        OOFEM_ERROR("no edge load support");
     }
 
     BoundaryLoad *edgeLoad = dynamic_cast< BoundaryLoad * >(load);
@@ -313,7 +313,7 @@ StructuralElement :: computeEdgeLoadVectorAt(FloatArray &answer, Load *load,
 
         return;
     } else {
-        OOFEM_ERROR("computeEdgeLoadVectorAt: incompatible load");
+        OOFEM_ERROR("incompatible load");
         return;
     }
 }
@@ -342,7 +342,7 @@ StructuralElement :: computeSurfaceLoadVectorAt(FloatArray &answer, Load *load,
     FloatMatrix T;
 
     if ( !this->testElementExtension(Element_SurfaceLoadSupport) ) {
-        OOFEM_ERROR("computeSurfaceLoadVectorAt : no surface load support");
+        OOFEM_ERROR("no surface load support");
     }
 
     BoundaryLoad *surfLoad = dynamic_cast< BoundaryLoad * >(load);
@@ -394,7 +394,7 @@ StructuralElement :: computeSurfaceLoadVectorAt(FloatArray &answer, Load *load,
 
         return;
     } else {
-        OOFEM_ERROR("computeSurfaceLoadVectorAt: incompatible load");
+        OOFEM_ERROR("incompatible load");
         return;
     }
 }
@@ -417,7 +417,7 @@ StructuralElement :: computeConsistentMassMatrix(FloatMatrix &answer, TimeStep *
     }
 
     if ( ( nip = this->giveNumberOfIPForMassMtrxIntegration() ) == 0 ) {
-        OOFEM_ERROR("computeConsistentMassMatrix no integration points available");
+        OOFEM_ERROR("no integration points available");
     }
 
     iRule.setUpIntegrationPoints( this->giveIntegrationDomain(),
@@ -490,7 +490,7 @@ StructuralElement :: computeLocalForceLoadVector(FloatArray &answer, TimeStep *t
         } else {
             if ( load->giveBCValType() != TemperatureBVT && load->giveBCValType() != EigenstrainBVT ) {
                 // temperature and eigenstrain is handled separately at computeLoadVectorAt subroutine
-                OOFEM_ERROR("StructuralElement :: computeLocalForceLoadVector - body load %d is of unsupported type (%d)", id, ltype);
+                OOFEM_ERROR("body load %d is of unsupported type (%d)", id, ltype);
             }
         }
     }
@@ -519,7 +519,7 @@ StructuralElement :: computeLocalForceLoadVector(FloatArray &answer, TimeStep *t
                 answer.add(helpLoadVector);
             }
         } else {
-            OOFEM_ERROR("StructuralElement :: computeLocalForceLoadVector - boundary load %d is of unsupported type (%d)", id, ltype);
+            OOFEM_ERROR("boundary load %d is of unsupported type (%d)", id, ltype);
         }
     }
 }
@@ -595,7 +595,7 @@ StructuralElement :: computeLumpedMassMatrix(FloatMatrix &answer, TimeStep *tSte
     }
 
     if ( indx != ldofs ) {
-        OOFEM_ERROR("computeMassMatrix : internal consistency check failed");
+        OOFEM_ERROR("internal consistency check failed");
     }
 
     dim = dimFlag.at(1) + dimFlag.at(2) + dimFlag.at(3);
@@ -619,7 +619,7 @@ StructuralElement :: computeResultingIPTemperatureAt(FloatArray &answer, TimeSte
     FloatArray gCoords, temperature;
 
     if ( this->computeGlobalCoordinates( gCoords, * ( gp->giveCoordinates() ) ) == 0 ) {
-        OOFEM_ERROR("computeResultingIPTemperatureAt: computeGlobalCoordinates failed");
+        OOFEM_ERROR("computeGlobalCoordinates failed");
     }
 
     answer.clear();
@@ -643,7 +643,7 @@ StructuralElement :: computeResultingIPEigenstrainAt(FloatArray &answer, TimeSte
     FloatArray gCoords, eigenstrain;
 
     if ( this->computeGlobalCoordinates( gCoords, * ( gp->giveCoordinates() ) ) == 0 ) {
-        OOFEM_ERROR("computeResultingIPTemperatureAt: computeGlobalCoordinates failed");
+        OOFEM_ERROR("computeGlobalCoordinates failed");
     }
 
     answer.clear();
@@ -1000,7 +1000,7 @@ StructuralElement :: giveCharacteristicMatrix(FloatMatrix &answer,
     } else if ( mtrx == InitialStressMatrix ) {
         this->computeInitialStressMatrix(answer, tStep);
     } else {
-        OOFEM_ERROR( "giveCharacteristicMatrix: Unknown Type of characteristic mtrx (%s)", __CharTypeToString(mtrx) );
+        OOFEM_ERROR("Unknown Type of characteristic mtrx (%s)", __CharTypeToString(mtrx) );
     }
 }
 
@@ -1023,7 +1023,7 @@ StructuralElement :: giveCharacteristicVector(FloatArray &answer, CharType mtrx,
          * statuses. Mainly used to compute reaction forces */
         this->giveInternalForcesVector(answer, tStep, 1);
     } else {
-        OOFEM_ERROR( "giveCharacteristicVector: Unknown Type of characteristic mtrx (%s)", __CharTypeToString(mtrx) );
+        OOFEM_ERROR("Unknown Type of characteristic mtrx (%s)", __CharTypeToString(mtrx) );
     }
 }
 
@@ -1113,7 +1113,7 @@ StructuralElement :: checkConsistency()
 {
     int result = 1;
     if ( !this->giveCrossSection()->testCrossSectionExtension(CS_StructuralCapability) ) {
-        OOFEM_WARNING( "checkConsistency : cross-section %s without structural support", this->giveCrossSection()->giveClassName() );
+        OOFEM_WARNING("cross-section %s without structural support", this->giveCrossSection()->giveClassName() );
         result = 0;
     }
 
@@ -1154,18 +1154,18 @@ StructuralElement :: condense(FloatMatrix *stiff, FloatMatrix *mass, FloatArray 
 
     // check
     if ( !stiff->isSquare() ) {
-        OOFEM_ERROR("condense: stiffness size mismatch");
+        OOFEM_ERROR("stiffness size mismatch");
     }
 
     if ( mass ) {
         if ( !( mass->isSquare() && mass->giveNumberOfRows() == size ) ) {
-            OOFEM_ERROR("condense: mass size mismatch");
+            OOFEM_ERROR("mass size mismatch");
         }
     }
 
     if ( load ) {
         if ( !( load->giveSize() == size ) ) {
-            OOFEM_ERROR("condense: load size mismatch");
+            OOFEM_ERROR("load size mismatch");
         }
     }
 
@@ -1177,7 +1177,7 @@ StructuralElement :: condense(FloatMatrix *stiff, FloatMatrix *mass, FloatArray 
     for ( i = 1; i <= nkon; i++ ) {
         ii  = what->at(i);
         if ( ( ii > size ) || ( ii <= 0 ) ) {
-            OOFEM_ERROR("condense: wrong dof number");
+            OOFEM_ERROR("wrong dof number");
         }
 
         dii = stiff->at(ii, ii);

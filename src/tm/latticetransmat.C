@@ -78,7 +78,7 @@ LatticeTransportMaterial :: initializeFrom(InputRecord *ir)
         IR_GIVE_OPTIONAL_FIELD(ir, this->suctionAirEntry, _IFT_LatticeTransportMaterial_paev);
 
         if ( thetaM < thetaS ) {
-            OOFEM_WARNING("initializeFrom : thetaM cannot be smaller than thetaS. Choose thetaM=thetaS.");
+            OOFEM_WARNING("thetaM cannot be smaller than thetaS. Choose thetaM=thetaS.");
             thetaM = thetaS;
         }
 
@@ -90,7 +90,7 @@ LatticeTransportMaterial :: initializeFrom(InputRecord *ir)
         }
     } //end of contype condition
     else if ( conType != 0 && conType != 1 ) {
-        OOFEM_ERROR("initializeFrom : unknown conType mode");
+        OOFEM_ERROR("unknown conType mode");
     }
 
     crackTortuosity = 1.;
@@ -135,7 +135,7 @@ LatticeTransportMaterial :: giveCharacteristicValue(MatResponseMode mode,
     } else if ( mode == Conductivity ) {
         return computeConductivity(suction, gp, tStep);
     } else {
-        OOFEM_ERROR("giveCharacteristicValue : unknown mode");
+        OOFEM_ERROR("unknown mode");
     }
 
     return 0; // to make compiler happy

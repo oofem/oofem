@@ -117,7 +117,7 @@ IRResultType Node :: initializeFrom(InputRecord *ir)
         IR_GIVE_FIELD(ir, triplets, _IFT_Node_lcs);
         size = triplets.giveSize();
         if ( size != 6 ) {
-            OOFEM_WARNING( "initializeFrom: lcs in node %d is not properly defined, will be ignored", this->giveNumber() );
+            OOFEM_WARNING("lcs in node %d is not properly defined, will be ignored", this->giveNumber() );
         }
 
         double n1 = 0.0, n2 = 0.0;
@@ -374,10 +374,10 @@ Node :: checkConsistency()
                 // compare coordinate systems
                 masterNode = dynamic_cast< Node * >( domain->giveDofManager(master) );
                 if ( !masterNode ) {
-                    OOFEM_WARNING("checkConsistency: master dofManager is not compatible", 1);
+                    OOFEM_WARNING("master dofManager is not compatible", 1);
                     result = 0;
                 } else if ( !this->hasSameLCS(masterNode) ) {
-                    OOFEM_WARNING("checkConsistency: different lcs for master/slave nodes", 1);
+                    OOFEM_WARNING("different lcs for master/slave nodes", 1);
                     result = 0;
                 }
             }

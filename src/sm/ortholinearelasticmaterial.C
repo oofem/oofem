@@ -107,7 +107,7 @@ OrthotropicLinearElasticMaterial :: initializeFrom(InputRecord *ir)
      * nyzy = this->give(NYzy);
      * nyyx = this->give(NYyx);
      * if ( ( nyzx < 0. ) || ( nyzx > 0.5 ) || ( nyzy < 0. ) || ( nyzy > 0.5 ) || ( nyyx < 0. ) || ( nyyx > 0.5 ) ) {
-     *  OOFEM_WARNING("instanciateFrom: suspicious parameters", 1);
+     *  OOFEM_WARNING("suspicious parameters", 1);
      * }
      */
 
@@ -123,7 +123,7 @@ OrthotropicLinearElasticMaterial :: initializeFrom(InputRecord *ir)
 
     size = triplets.giveSize();
     if ( !( ( size == 0 ) || ( size == 6 ) ) ) {
-        OOFEM_WARNING( "instanciateFrom: Warning: lcs in material %d is not properly defined, will be assumed as global",
+        OOFEM_WARNING("Warning: lcs in material %d is not properly defined, will be assumed as global",
                   this->giveNumber() );
     }
 
@@ -173,7 +173,7 @@ OrthotropicLinearElasticMaterial :: initializeFrom(InputRecord *ir)
         //
         size = triplets.giveSize();
         if ( !( ( size == 0 ) || ( size == 3 ) ) ) {
-            OOFEM_WARNING( "instanciateFrom: scs in material %d is not properly defined, will be assumed as global",
+            OOFEM_WARNING("scs in material %d is not properly defined, will be assumed as global",
                       this->giveNumber() );
         }
 

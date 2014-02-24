@@ -105,7 +105,7 @@ RankineMat :: initializeFrom(InputRecord *ir)
         ep = ep - sig0 / E; // user input is strain at peak stress sig0 and is converted to plastic strain at peak stress sig0
         md = 1. / log(50. * E * ep / sig0); // exponent used on the 1st plasticity branch
     } else {
-        OOFEM_ERROR(" Plasticity hardening type number  %d is unknown", plasthardtype);
+        OOFEM_ERROR("Plasticity hardening type number  %d is unknown", plasthardtype);
     }
 
     yieldtol = 1.e-10;
@@ -134,7 +134,7 @@ RankineMat :: initializeFrom(InputRecord *ir)
     IR_GIVE_OPTIONAL_FIELD(ir, gf, _IFT_RankineMat_gf); // dissipated energy per unit VOLUME
 
     if ( ( a != 0. ) && ( gf != 0 ) ) {
-        OOFEM_ERROR("RankineMat: parameters a and gf cannot be prescribed simultaneously");
+        OOFEM_ERROR("parameters a and gf cannot be prescribed simultaneously");
     }
 
     if ( gf > 0. ) {
@@ -143,7 +143,7 @@ RankineMat :: initializeFrom(InputRecord *ir)
         double B = sig0 * ( 1. + H0 / E );
         double C = 0.5 * sig0 * sig0 / E - gf;
         if ( C >= 0. ) {
-            OOFEM_ERROR("RankineMat: parameter gf is too low");
+            OOFEM_ERROR("parameter gf is too low");
         }
 
         double kappaf = ( -B + sqrt(B * B - 4. * A * C) ) / ( 2. * A );
@@ -310,7 +310,7 @@ RankineMat :: performPlasticityReturn(GaussPoint *gp, const FloatArray &totalStr
                 i = i + 1;
                 if ( i > 1000 ) {
                     printf("kappa, ftrial: %g %g\n", kappa, ftrial);
-                    OOFEM_ERROR("RankineMat::giveRealStressVector: no convergence of regular stress return algorithm");
+                    OOFEM_ERROR("no convergence of regular stress return algorithm");
                 }
 
                 double ddKappa = f / ( E + evalPlasticModulus(tempKappa) );
@@ -338,7 +338,7 @@ RankineMat :: performPlasticityReturn(GaussPoint *gp, const FloatArray &totalStr
                     finalStress.computePrincipalValDir(sigPrinc, nPrinc);
                     sigPrinc.pY();
                     printf("kappa, ftrial: %g %g\n", kappa, ftrial);
-                    OOFEM_ERROR("RankineMat::giveRealStressVector : no convergence of regular stress return algorithm");
+                    OOFEM_ERROR("no convergence of regular stress return algorithm");
                 }
 
                 H = evalPlasticModulus(tempKappa);
@@ -370,7 +370,7 @@ RankineMat :: performPlasticityReturn(GaussPoint *gp, const FloatArray &totalStr
                         finalStress.computePrincipalValDir(sigPrinc, nPrinc);
                         sigPrinc.pY();
                         printf("kappa, ftrial: %g %g\n", kappa, ftrial);
-                        OOFEM_ERROR("RankineMat::giveRealStressVector : no convergence of vertex stress return algorithm");
+                        OOFEM_ERROR("no convergence of vertex stress return algorithm");
                     }
 
                     dkap1 += f / C;
@@ -514,7 +514,7 @@ RankineMat :: give1dStressStiffMtrx(FloatMatrix &answer, MatResponseMode mode, G
         answer.at(1, 1) = this->E;
         answer.times(1.0 - om);
     } else {
-        OOFEM_ERROR("RankineMatNl :: give1dStressStiffMtrx ... unknown type of stiffness (secant stiffness not implemented for 1d)\n");
+        OOFEM_ERROR("unknown type of stiffness (secant stiffness not implemented for 1d)\n");
     }
 
     return;
