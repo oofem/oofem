@@ -325,7 +325,6 @@ int EngngModel :: instanciateYourself(DataReader *dr, InputRecord *ir, const cha
 
     fprintf(outputStream, "%s", PRG_HEADER);
     this->startTime = time(NULL);
-    //this->startClock= this-> getClock();
     fprintf( outputStream, "\nStarting analysis on: %s\n", ctime(& this->startTime) );
 
     fprintf(outputStream, "%s\n", desc);
@@ -1196,7 +1195,7 @@ void EngngModel :: assembleVectorFromElements(FloatArray &answer, TimeStep *tSte
 
 
 #ifdef __PARALLEL_MODE
-    ///@todo Checking the chartype is not since there could be some other chartype in the future. We need to try and deal with chartype in a better way. 
+    ///@todo Checking the chartype is not since there could be some other chartype in the future. We need to try and deal with chartype in a better way.
     /// For now, this is the best we can do.
     if ( this->isParallel() && type == InternalForcesVector ) {
         // Copies internal (e.g. Gauss-Point) data from remote elements to make sure they have all information necessary for nonlocal averaging.
@@ -1813,14 +1812,12 @@ EngngModel :: terminateAnalysis()
     tsec = this->timer.getWtime(EngngModelTimer :: EMTT_AnalysisTimer);
     this->timer.convert2HMS(nhrs, nmin, nsec, tsec);
     fprintf(out, "Real time consumed: %03dh:%02dm:%02ds\n", nhrs, nmin, nsec);
-    LOG_FORCED_MSG(oofem_logger, "\n\nANALYSIS FINISHED\n\n\n");
-    LOG_FORCED_MSG(oofem_logger, "Real time consumed: %03dh:%02dm:%02ds\n", nhrs, nmin, nsec);
-    // compute processor time used by the program
-    // nsec = (endClock - startClock) / CLOCKS_PER_SEC;
+    OOFEM_LOG_FORCED("\n\nANALYSIS FINISHED\n\n\n");
+    OOFEM_LOG_FORCED("Real time consumed: %03dh:%02dm:%02ds\n", nhrs, nmin, nsec);
     tsec = this->timer.getUtime(EngngModelTimer :: EMTT_AnalysisTimer);
     this->timer.convert2HMS(nhrs, nmin, nsec, tsec);
     fprintf(out, "User time consumed: %03dh:%02dm:%02ds\n\n\n", nhrs, nmin, nsec);
-    LOG_FORCED_MSG(oofem_logger, "User time consumed: %03dh:%02dm:%02ds\n", nhrs, nmin, nsec);
+    OOFEM_LOG_FORCED("User time consumed: %03dh:%02dm:%02ds\n", nhrs, nmin, nsec);
     exportModuleManager->terminate();
 }
 
@@ -1966,7 +1963,7 @@ EngngModel :: updateSharedDofManagers(FloatArray &answer, const UnknownNumbering
         ArrayWithNumbering tmp;
         tmp.array = & answer;
         tmp.numbering = & s;
-        result &= communicator->packAllData( this, & tmp, & EngngModel :: packDofManagers );
+        result &= communicator->packAllData(this, & tmp, & EngngModel :: packDofManagers);
 
  #ifdef __VERBOSE_PARALLEL
         VERBOSEPARALLEL_PRINT( "EngngModel :: updateSharedDofManagers", "Exchange started", this->giveRank() );
@@ -1978,7 +1975,7 @@ EngngModel :: updateSharedDofManagers(FloatArray &answer, const UnknownNumbering
         VERBOSEPARALLEL_PRINT( "EngngModel :: updateSharedDofManagers", "Receiving and unpacking", this->giveRank() );
  #endif
 
-        result &= communicator->unpackAllData( this, & tmp, & EngngModel :: unpackDofManagers );
+        result &= communicator->unpackAllData(this, & tmp, & EngngModel :: unpackDofManagers);
         result &= communicator->finishExchange();
     }
 
@@ -2073,7 +2070,7 @@ int
 EngngModel :: packDofManagers(ArrayWithNumbering *srcData, ProcessCommunicator &processComm)
 {
     FloatArray *src = srcData->array;
-    const UnknownNumberingScheme &s = *srcData->numbering;
+    const UnknownNumberingScheme &s = * srcData->numbering;
     int result = 1;
     Domain *domain = this->giveDomain(1);
     IntArray const *toSendMap = processComm.giveToSendMap();
@@ -2103,7 +2100,7 @@ int
 EngngModel :: unpackDofManagers(ArrayWithNumbering *destData, ProcessCommunicator &processComm)
 {
     FloatArray *dest = destData->array;
-    const UnknownNumberingScheme &s = *destData->numbering;
+    const UnknownNumberingScheme &s = * destData->numbering;
     int result = 1;
     Domain *domain = this->giveDomain(1);
     IntArray const *toRecvMap = processComm.giveToRecvMap();

@@ -713,7 +713,7 @@ void TrabBone3D :: computeDensificationStress(FloatArray &answer, GaussPoint *gp
 
 void
 TrabBone3D :: giveRealStressVector_3d(FloatArray &answer, GaussPoint *gp,
-                                   const FloatArray &totalStrain, TimeStep *tStep)
+                                      const FloatArray &totalStrain, TimeStep *tStep)
 {
     double tempDam;
     FloatArray effStress, densStress;

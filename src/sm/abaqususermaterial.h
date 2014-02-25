@@ -120,7 +120,7 @@ private:
 
 public:
     /// Constructor.
-    AbaqusUserMaterial(int n, Domain *d);
+    AbaqusUserMaterial(int n, Domain * d);
     /// Destructor.
     virtual ~AbaqusUserMaterial();
 
@@ -192,8 +192,10 @@ public:
     const FloatArray &giveTempStateVector() const { return tempStateVector; }
     FloatArray &letTempStateVectorBe(FloatArray &s) { return tempStateVector = s; }
     const FloatMatrix &giveTempTangent() { return tempTangent; }
-    void letTempTangentBe(FloatMatrix &t) { tempTangent = t;
-                                            hasTangentFlag = true; }
+    void letTempTangentBe(FloatMatrix &t) {
+        tempTangent = t;
+        hasTangentFlag = true;
+    }
 
     virtual const char *giveClassName() const { return "AbaqusUserMaterialStatus"; }
 };

@@ -87,8 +87,8 @@ TR1_2D_SUPG2 :: ~TR1_2D_SUPG2()
 
         vcoords [ i ] = NULL;
     }
-    if (defaultIRule) {
-      delete defaultIRule;
+    if ( defaultIRule ) {
+        delete defaultIRule;
     }
 }
 
@@ -190,8 +190,8 @@ TR1_2D_SUPG2 :: computeGaussPoints()
         integrationRulesArray [ 1 ] = new GaussIntegrationRule(2, this, 1, 3, true);
     }
     if ( !defaultIRule ) {
-      defaultIRule = new GaussIntegrationRule(1, this, 1, 3, true);
-      this->giveCrossSection()->setupIntegrationPoints(*defaultIRule, 1, this);
+        defaultIRule = new GaussIntegrationRule(1, this, 1, 3, true);
+        this->giveCrossSection()->setupIntegrationPoints(* defaultIRule, 1, this);
     }
 }
 

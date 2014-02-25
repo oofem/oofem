@@ -266,8 +266,6 @@ protected:
     problemScale pScale;
     /// Solution start time.
     time_t startTime;
-    // initial value of processor time used by program
-    // clock_t startClock;
 
     /// Master e-model; if defined receiver is in maintained (slave) mode.
     EngngModel *master;
@@ -661,41 +659,51 @@ public:
     /// Returns current meta step.
     MetaStep *giveCurrentMetaStep();
     /// Returns current time step.
-    TimeStep *giveCurrentStep() { if ( master ) {
-                                      return master->giveCurrentStep();
-                                  } else {
-                                      return currentStep;
-                                  } }
+    TimeStep *giveCurrentStep() {
+        if ( master ) {
+            return master->giveCurrentStep();
+        } else {
+            return currentStep;
+        }
+    }
     /// Returns previous time step.
-    TimeStep *givePreviousStep() { if ( master ) {
-                                       return master->givePreviousStep();
-                                   } else {
-                                       return previousStep;
-                                   } }
+    TimeStep *givePreviousStep() {
+        if ( master ) {
+            return master->givePreviousStep();
+        } else {
+            return previousStep;
+        }
+    }
     /// Returns next time step (next to current step) of receiver.
     virtual TimeStep *giveNextStep() { return NULL; }
     /// Returns the solution step when Initial Conditions (IC) apply.
-    virtual TimeStep *giveSolutionStepWhenIcApply() { if ( master ) {
-                                                          return master->giveCurrentStep();
-                                                      } else {
-                                                          return stepWhenIcApply;
-                                                      } }
+    virtual TimeStep *giveSolutionStepWhenIcApply() {
+        if ( master ) {
+            return master->giveCurrentStep();
+        } else {
+            return stepWhenIcApply;
+        }
+    }
     /// Returns number of first time step used by receiver.
-    virtual int giveNumberOfFirstStep() { if ( master ) {
-                                              return master->giveNumberOfFirstStep();
-                                          } else {
-                                              return 1;
-                                          } }
+    virtual int giveNumberOfFirstStep() {
+        if ( master ) {
+            return master->giveNumberOfFirstStep();
+        } else {
+            return 1;
+        }
+    }
     /// Return number of meta steps.
     int giveNumberOfMetaSteps() { return nMetaSteps; }
     /// Returns the i-th meta step.
     MetaStep *giveMetaStep(int i);
     /// Returns total number of steps.
-    int giveNumberOfSteps() { if ( master ) {
-                                  return master->giveNumberOfSteps();
-                              } else {
-                                  return numberOfSteps;
-                              } }
+    int giveNumberOfSteps() {
+        if ( master ) {
+            return master->giveNumberOfSteps();
+        } else {
+            return numberOfSteps;
+        }
+    }
     /// Returns end of time interest (time corresponding to end of time integration).
     virtual double giveEndOfTimeOfInterest() { return 0.; }
     /// Returns the time step number, when initial conditions should apply.

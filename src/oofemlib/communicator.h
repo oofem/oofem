@@ -80,11 +80,13 @@ public:
      * @return Pointer to corresponding process communicator buff, NULL otherwise.
      */
     ProcessCommunicatorBuff *
-    giveProcessCommunicatorBuff(int i) { if ( i < size ) {
-                                             return processCommBuffs [ i ];
-                                         } else {
-                                             return NULL;
-                                         } }
+    giveProcessCommunicatorBuff(int i) {
+        if ( i < size ) {
+            return processCommBuffs [ i ];
+        } else {
+            return NULL;
+        }
+    }
 };
 
 
@@ -139,11 +141,13 @@ public:
      * @return Pointer to corresponding communicator, NULL otherwise.
      */
     ProcessCommunicator *
-    giveProcessCommunicator(int i) { if ( i < size ) {
-                                         return processComms [ i ];
-                                     } else {
-                                         return NULL;
-                                     } }
+    giveProcessCommunicator(int i) {
+        if ( i < size ) {
+            return processComms [ i ];
+        } else {
+            return NULL;
+        }
+    }
 
     /**
      * Pack all problemCommunicators data to their send buffers.

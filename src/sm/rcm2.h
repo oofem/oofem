@@ -137,11 +137,13 @@ public:
     void letCrackStrainVectorBe(const FloatArray &a) { crackStrainVector = a; }
     void letOldCrackStrainVectorBe(const FloatArray &a) { oldCrackStrainVector = a; }
 
-    double giveCharLength(int icrack) const { if ( icrack ) {
-                                                  return charLengths.at(icrack);
-                                              } else {
-                                                  return 0.0;
-                                              } }
+    double giveCharLength(int icrack) const {
+        if ( icrack ) {
+            return charLengths.at(icrack);
+        } else {
+            return 0.0;
+        }
+    }
     void setCharLength(int icrack, double val) { charLengths.at(icrack) = val; }
 
     // query for non-tem variables (usefull for postprocessing)

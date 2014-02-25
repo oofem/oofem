@@ -444,7 +444,7 @@ HuertaErrorEstimator :: estimateError(EE_ErrorMode mode, TimeStep *tStep)
                     while ( tStepNumber < curNumber ) {
                         try {
                             model->restoreContext(NULL, CM_State, ( void * ) & tStepNumber);
-                        } catch ( ContextIOERR &c ) {
+                        } catch(ContextIOERR & c) {
                             c.print();
                             exit(1);
                         }

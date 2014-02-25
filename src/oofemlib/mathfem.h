@@ -48,10 +48,10 @@
 namespace oofem {
 class FloatArray;
 
-#ifndef HAVE_M_PI
+#ifndef M_PI
  #define M_PI 3.1415926535897932384626433832795029L
 #endif
-#ifndef HAVE_M_LN2
+#ifndef M_LN2
  #define M_LN2 0.6931471805599453094172321214581766L
 #endif
 

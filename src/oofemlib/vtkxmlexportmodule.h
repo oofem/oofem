@@ -44,7 +44,7 @@
 #include "internalstatevaluetype.h"
 #include "integrationrule.h"
 #include "xfem/xfemmanager.h"
-
+#include "set.h"
 
 
 #ifdef __VTK_MODULE
@@ -63,9 +63,7 @@
 #define _IFT_VTKXMLExportModule_primvars "primvars"
 #define _IFT_VTKXMLExportModule_ipvars "ipvars"
 #define _IFT_VTKXMLExportModule_stype "stype"
-#define _IFT_VTKXMLExportModule_regionstoskip "regionstoskip"
-#define _IFT_VTKXMLExportModule_nvr "nvr"
-#define _IFT_VTKXMLExportModule_vrmap "vrmap"
+#define _IFT_VTKXMLExportModule_regionsets "regionsets"
 //@}
 
 namespace oofem {
@@ -158,12 +156,11 @@ protected:
     NodalRecoveryModel *smoother;
     /// Smoother for primary variables.
     NodalRecoveryModel *primVarSmoother;
-    /// List of regions to skip.
-    IntArray regionsToSkip;
-    /// Number of virtual regions.
-    int nvr;
-    /// Real->virtual region map.
-    IntArray vrmap;
+    /// regions represented by sets
+    IntArray regionSets;
+    /// Default region set
+    Set defaultElementSet;
+
     /// Scaling time in output, e.g. conversion from seconds to hours
     double timeScale;
 
@@ -212,6 +209,7 @@ public:
     static void computeIPAverage(FloatArray &answer, IntegrationRule *iRule, Element *elem,  InternalStateType isType, TimeStep *tStep);
 
 protected:
+
     /// Gives the full form of given symmetrically stored tensors, missing components are filled with zeros.
     void makeFullForm(FloatArray &answer, const FloatArray &reducedForm);
 
@@ -312,6 +310,10 @@ protected:
     int initRegionNodeNumbering(IntArray &mapG2L, IntArray &mapL2G,
                                 int &regionDofMans, int &totalcells,
                                 Domain *domain, int reg);
+    /// Returns number of regions (aka regionSets)
+    int giveNumberOfRegions();
+    /// Returns element set
+    Set *giveRegionSet(int i);
     /**
      * Writes a VTK collection file where time step data is stored.
      */

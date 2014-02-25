@@ -188,8 +188,8 @@ NRSolver :: initializeFrom(InputRecord *ir)
 
     int calcStiffBeforeResFlag = 1;
     IR_GIVE_OPTIONAL_FIELD(ir, calcStiffBeforeResFlag, _IFT_NRSolver_calcstiffbeforeres);
-    if(calcStiffBeforeResFlag == 0) {
-    	mCalcStiffBeforeRes = false;
+    if ( calcStiffBeforeResFlag == 0 ) {
+        mCalcStiffBeforeRes = false;
     }
 
     return IRRT_OK;
@@ -446,7 +446,7 @@ NRSolver :: applyConstraintsToStiffness(SparseMtrx *k)
             OOFEM_ERROR("NRSolver :: applyConstraintsToStiffness: PetscSparseMtrx Expected");
         }
 
-        PetscSparseMtrx *lhs = static_cast< PetscSparseMtrx * >( k );
+        PetscSparseMtrx *lhs = static_cast< PetscSparseMtrx * >(k);
 
         if ( !prescribedEgsIS_defined ) {
             IntArray eqs;
@@ -490,7 +490,7 @@ NRSolver :: applyConstraintsToStiffness(SparseMtrx *k)
             OOFEM_ERROR("NRSolver :: applyConstraintsToStiffness: PetscSparseMtrx Expected");
         }
 
-        PetscSparseMtrx *lhs = static_cast< PetscSparseMtrx * >( k );
+        PetscSparseMtrx *lhs = static_cast< PetscSparseMtrx * >(k);
 
         Vec diag;
         PetscScalar *ptr;
@@ -536,7 +536,7 @@ NRSolver :: applyConstraintsToLoadIncrement(int nite, const SparseMtrx *k, Float
         //factor -= engngModel->giveDomain(1)->giveFunction(prescribedDisplacementTF)->
         // at(tStep->givePreviousStep()->giveTime()) ;
         factor -= engngModel->giveDomain(1)->giveFunction(prescribedDisplacementTF)->
-                  evaluateAtTime( tStep->giveTargetTime() - tStep->giveTimeIncrement() );
+        evaluateAtTime( tStep->giveTargetTime() - tStep->giveTimeIncrement() );
     }
 
     if ( nite == 0 ) {
@@ -572,12 +572,12 @@ NRSolver :: applyConstraintsToLoadIncrement(int nite, const SparseMtrx *k, Float
                 OOFEM_ERROR("NRSolver :: applyConstraintsToStiffness: PetscSparseMtrx Expected");
             }
 
-            const PetscSparseMtrx *lhs = static_cast< const PetscSparseMtrx * >( k );
+            const PetscSparseMtrx *lhs = static_cast< const PetscSparseMtrx * >(k);
 
             Vec diag;
             PetscScalar *ptr;
             lhs->createVecGlobal(& diag);
-            MatGetDiagonal(* (const_cast<PetscSparseMtrx *> (lhs)->giveMtrx()), diag);
+            MatGetDiagonal(* ( const_cast< PetscSparseMtrx * >(lhs)->giveMtrx() ), diag);
             VecGetArray(diag, & ptr);
 
             for ( int i = 1; i <= numberOfPrescribedDofs; i++ ) {

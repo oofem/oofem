@@ -62,6 +62,13 @@
 \newcommand{\refeqs}[2]{Eqs.~(\ref{#1}), (\ref{#2})}
 \newcommand{\refeqsr}[2]{\mbox{Eqs.~(\ref{#1})-(\ref{#2})}}
 \newcommand{\C}{$^{\circ}\mathrm{C}$}
+%% mmt envronmet - material model table
+%begin{latexonly}
+\newenvironment{mmt}{\begin{tabular}{|l|p{9cm}|}}{\end{tabular}\\}
+%end{latexonly}
+\begin{htmlonly}
+\newenvironment{mmt}{\begin{tabular}{|l|l|}}{\end{tabular}\\}
+\end{htmlonly}
 
 \begin{document}
 
@@ -103,7 +110,7 @@ in Tab.~\ref{IsoLE_table}.
 
 \begin{table}[!htb]
 %\begin{center}
-\begin{tabular}{|l|p{9cm}|}
+\begin{mmt}
 \hline
 Description & Linear isotropic elastic material\\
 \hline
@@ -120,7 +127,7 @@ Supported modes& 3dMat, PlaneStress, PlaneStrain, 1dMat,
 3dBeam, PlaneStressRot\\
 Features & Adaptivity support\\
 \hline
-\end{tabular}
+\end{mmt}
 \caption{Linear Isotropic Material - summary.}
 \label{IsoLE_table}
 %\end{center}
@@ -195,7 +202,7 @@ in Tab.~\ref{OrthoLE_table}.
 
 \begin{table}[!htb]
 %\begin{center}
-\begin{tabular}{|l|p{9cm}|}
+\begin{mmt}
 \hline
 Description & Orthotropic, linear elastic material\\
 \hline
@@ -221,7 +228,7 @@ Supported modes& 3dMat, PlaneStress, PlaneStrain, 1dMat,
 2dPlateLayer, 2dBeamLayer, 3dShellLayer, 2dPlate, 2dBeam, 3dShell,
 3dBeam, PlaneStressRot\\
 \hline
-\end{tabular}
+\end{mmt}
 \caption{Orthotropic, linear elastic material -- summary.}
 \label{OrthoLE_table}
 %\end{center}
@@ -242,7 +249,7 @@ where $\mbf{S}$ is the second Piola-Kirchhoff stress, $\mbf{E}$ is the Green-Lag
 The model description and parameters are summarized in Tab.~\ref{hyperElMat_table}.
 \begin{table}[!htb]
 %\begin{center}
-\begin{tabular}{|l|p{9cm}|}
+\begin{mmt}
 \hline
 Description & Hyperelastic material\\
 \hline
@@ -254,7 +261,7 @@ Parameters &- \param{} material number\\
 &- \param{G} shear modulus\\
 Supported modes& 3dMat\\
 \hline
-\end{tabular}
+\end{mmt}
 \caption{Hyperelastic material - summary.}
 \label{hyperElMat_table}
 %\end{center}
@@ -275,7 +282,7 @@ In the first step, strain measure is computed from equation (\ref{generalizedStr
 The model description and parameters are summarized in Tab.~\ref{LSmasterMat_table}.
 \begin{table}[!htb]
 \begin{center}
-\begin{tabular}{|l|p{9cm}|}
+\begin{mmt}
 \hline
 Description & Large-strain master material material\\
 \hline
@@ -286,7 +293,7 @@ Parameters &- \param{} material number\\
 &- \param{slavemat} number of slave material\\
 Supported modes& 3dMatF\\
 \hline
-\end{tabular}
+\end{mmt}
 \caption{Large-strain master material material - summary.}
 \label{LSmasterMat_table}
 \end{center}
@@ -409,7 +416,7 @@ tension-dominated.
 
 \begin{table}[!htb]
 %\begin{center}
-\begin{tabular}{|l|p{9cm}|}
+\begin{mmt}
 \hline
 Description & DP material\\
 \hline
@@ -435,7 +442,7 @@ hardening\\
 &- \param{newtonIter} maximum number of iterations in $\lambda$ search, default value 30\\
 Supported modes& 3dMat, PlaneStrain, 3dRotContinuum\\
 \hline
-\end{tabular}
+\end{mmt}
 \caption{DP material - summary.}
 \label{DP_table}
 %\end{center}
@@ -502,7 +509,7 @@ $\alphaPsi \leq \alpha$, and the non-associated model is formulated.
 
 \begin{table}[!htb]
 %\begin{center}
-\begin{tabular}{|l|p{9cm}|}
+\begin{mmt}
 \hline
 Description & Drucker Prager material with tension cut-off\\
 \hline
@@ -524,7 +531,7 @@ Parameters &- \param{num} material model number\\
 &- \param{newtonIter} maximum number of iterations in $\lambda$ search, default value 30\\
 Supported modes& 1dMat, 3dMat, PlaneStrain\\
 \hline
-\end{tabular}
+\end{mmt}
 \caption{Drucker Prager material with tension cut-off - summary.}
 \label{DP_table}
 %\end{center}
@@ -590,7 +597,7 @@ classical radial return mapping; see \cite{SimoHughes} for more details. Damage 
 The model description and parameters are summarized in Tab.~\ref{misesMat_table}.
 \begin{table}[!htb]
 %\begin{center}
-\begin{tabular}{|l|p{9cm}|}
+\begin{mmt}
 \hline
 Description & Mises plasticity model with isotropic hardening\\
 \hline
@@ -606,7 +613,7 @@ Parameters &- \param{} material number\\
 &- \param{a} exponent in damage law (\ref{damagelawmp})\\
 Supported modes& 1dMat, PlaneStrain, 3dMat, 3dMatF\\
 \hline
-\end{tabular}
+\end{mmt}
 \caption{Mises plasticity -- summary.}
 \label{misesMat_table}
 %\end{center}
@@ -658,7 +665,7 @@ of length) but for the gradient version it has the meaning of the coefficient $l
 multiplying the Laplacean in (\ref{implicitGradient}), and thus has the dimension of length squared.
 \begin{table}[!htb]
 %\begin{center}
-\begin{tabular}{|l|p{9cm}|}
+\begin{mmt}
 \hline
 Description & Nonlocal Mises plasticity with isotropic hardening\\
 \hline
@@ -691,14 +698,14 @@ Parameters &- \param{} material number\\
 \end{itemize}\\
 Supported modes& 1dMat, PlaneStrain, 3dMat\\
 \hline
-\end{tabular}
+\end{mmt}
 \caption{Nonlocal integral Mises plasticity -- summary.}
 \label{misesMatNl_table}
 %\end{center}
 \end{table}
 \begin{table}[!htb]
 %\begin{center}
-\begin{tabular}{|l|p{9cm}|}
+\begin{mmt}
 \hline
 Description & Gradient-enhanced Mises plasticity with isotropic damage\\
 \hline
@@ -716,7 +723,7 @@ Parameters &- \param{} material number\\
 &- \param{m} over-nonlocal parameter\\
 Supported modes& 1dMat, PlaneStrain, 3dMat\\
 \hline
-\end{tabular}
+\end{mmt}
 \caption{Gradient-enhanced Mises plasticity -- summary.}
 \label{misesMatGrad_table}
 %\end{center}
@@ -775,7 +782,7 @@ but it is recommended to set it e.g.\ to 1.e-6.
 
 \begin{table}[!htb]
 %\begin{center}
-\begin{tabular}{|l|p{9cm}|}
+\begin{mmt}
 \hline
 Description & Rankine plasticity with isotropic hardening and damage\\
 \hline
@@ -794,7 +801,7 @@ Parameters &- \param{} material number\\
 &- \param{a} exponent in damage law (\ref{damagelawmp})\\
 Supported modes& PlaneStress\\
 \hline
-\end{tabular}
+\end{mmt}
 \caption{Rankine plasticity -- summary.}
 \label{rankineMat_table}
 %\end{center}
@@ -802,7 +809,7 @@ Supported modes& PlaneStress\\
 
 \begin{table}[!htb]
 %\begin{center}
-\begin{tabular}{|l|p{9cm}|}
+\begin{mmt}
 \hline
 Description & Nonlocal Rankine plasticity with isotropic hardening and damage\\
 \hline
@@ -838,7 +845,7 @@ Parameters &- \param{} material number\\
 \end{itemize}\\
 Supported modes& PlaneStress\\
 \hline
-\end{tabular}
+\end{mmt}
 \caption{Nonlocal integral Rankine plasticity -- summary.}
 \label{rankineMatNl_table}
 %\end{center}
@@ -846,7 +853,7 @@ Supported modes& PlaneStress\\
 
 \begin{table}[!htb]
 %\begin{center}
-\begin{tabular}{|l|p{9cm}|}
+\begin{mmt}
 \hline
 Description & Gradient-enhanced Rankine plasticity with isotropic hardening and damage\\
 \hline
@@ -868,7 +875,7 @@ Parameters &- \param{} material number\\
 &- \param{negligible\_damage} optional parameter (default value 0.)\\
 Supported modes& PlaneStress\\
 \hline
-\end{tabular}
+\end{mmt}
 \caption{Gradient-enhanced Rankine plasticity -- summary.}
 \label{rankineMatGrad_table}
 %\end{center}
@@ -884,7 +891,7 @@ described in Section~\ref{sec:misplast}.
 
 \begin{table}[!htb]
 %\begin{center}
-\begin{tabular}{|l|p{9cm}|}
+\begin{mmt}
 \hline
 Description & Perfectly plastic material with Mises condition\\
 \hline
@@ -901,7 +908,7 @@ Supported modes& 3dMat, PlaneStress, PlaneStrain, 1dMat,
 2dPlateLayer, 2dBeamLayer, 3dShellLayer
 3dBeam, PlaneStressRot\\
 \hline
-\end{tabular}
+\end{mmt}
 \caption{Perfectly plastic material  with Mises condition -- summary.}
 \label{Steel1_table}
 %\end{center}
@@ -1045,7 +1052,7 @@ the input parameters accordingly (one can modify dilatancy angle, for example).
 
 \begin{table}[!htb]
 %\begin{center}
-\begin{tabular}{|l|p{9cm}|}
+\begin{mmt}
 \hline
 Description & Composite plasticity model for masonry\\
 \hline
@@ -1075,7 +1082,7 @@ Parameters &- \param{num} material model number\\
 &- \param{cnn},\param{css},\param{cn} cap mode parametrs\\
 Supported modes& \_2dInterface\\
 \hline
-\end{tabular}
+\end{mmt}
 \caption{Composite model for masonry - summary.}
 \label{compomasonry1_table}
 %\end{center}
@@ -1097,7 +1104,7 @@ in Tab.~\ref{Rer_table}.
 
 \begin{table}[!htb]
 %\begin{center}
-\begin{tabular}{|l|p{9cm}|}
+\begin{mmt}
 \hline
 Description & Nonlinear elasto-plastic material model for concrete
 plates and shells\\
@@ -1139,7 +1146,7 @@ material\\
 &- \param{SHTIRR\_H} isotropic hardening factor for stirrups\\
 Supported modes& 3dShellLayer, 2dPlateLayer\\
 \hline
-\end{tabular}
+\end{mmt}
 \caption{Nonlinear elasto-plastic material model for concrete - summary.}
 \label{Rer_table}
 %\end{center}
@@ -1175,7 +1182,7 @@ in Tab.~\ref{rcm_table}.
 
 \begin{table}[!htb]
 %\begin{center}
-\begin{tabular}{|l|p{9cm}|}
+\begin{mmt}
 \hline
 Description & Rotating crack model for concrete\\
 \hline
@@ -1193,7 +1200,7 @@ exponential, 1 = linear)\\
 Supported modes& 3dMat, PlaneStress, PlaneStrain, 1dMat,
 2dPlateLayer, 2dBeamLayer, 3dShellLayer\\
 \hline
-\end{tabular}
+\end{mmt}
 \caption{Rotating crack model for concrete - summary.}
 \label{rcm_table}
 %\end{center}
@@ -1237,7 +1244,7 @@ in Tab.~\ref{rcsd_table}.
 
 \begin{table}[!htb]
 %\begin{center}
-\begin{tabular}{|l|p{9cm}|}
+\begin{mmt}
 \hline
 Description & Smeared rotating crack model with transition to scalar
 damage - linear softening\\
@@ -1257,7 +1264,7 @@ stress to tension strength is less than  \param{sdtransitioncoeff} value\\
 Supported modes& 3dMat, PlaneStress, PlaneStrain, 1dMat,
 2dPlateLayer, 2dBeamLayer, 3dShellLayer\\
 \hline
-\end{tabular}
+\end{mmt}
 \caption{RC-SD model for  concrete - summary.}
 \label{rcsd_table}
 %\end{center}
@@ -1274,7 +1281,7 @@ The description and model summary (Tab.~\ref{rcsde_table}) are the
 same as for the RC-SD model with linear softening law (see section~\ref{rcsd}).
 \begin{table}[!htb]
 %\begin{center}
-\begin{tabular}{|l|p{9cm}|}
+\begin{mmt}
 \hline
 Description & Smeared rotating crack model with transition to scalar
 damage - exponential softening\\
@@ -1282,7 +1289,7 @@ damage - exponential softening\\
 Record Format & \descitem{RCSDE} \elemparam{d}{rn} \elemparam{E}{rn}
 \elemparam{n}{rn} \elemparam{Gf}{rn} \elemparam{Ft}{rn} \elemparam{sdtransitioncoeff}{rn} \elemparam{tAlpha}{rn} \\
 \hline
-\end{tabular}
+\end{mmt}
 \caption{RC-SD model for  concrete - summary.}
 \label{rcsde_table}
 %\end{center}
@@ -1325,7 +1332,7 @@ in Tab.~\ref{rcsdnl_table}.
 
 \begin{table}[!htb]
 %\begin{center}
-\begin{tabular}{|l|p{9cm}|}
+\begin{mmt}
 \hline
 Description & Nonlocal smeared rotating crack model with transition to scalar damage for concrete\\
 \hline
@@ -1355,7 +1362,7 @@ value is nonzero.\\
 Supported modes& 3dMat, PlaneStress, PlaneStrain, 1dMat,
 2dPlateLayer, 2dBeamLayer, 3dShellLayer\\
 \hline
-\end{tabular}
+\end{mmt}
 \caption{RC-SD-NL model for  concrete - summary.}
 \label{rcsdnl_table}
 %\end{center}
@@ -1885,7 +1892,7 @@ in Tabs.~\ref{idnl_table} and \ref{idnl_table_cont}.
 
 
 \begin{table}[!htb]
-\begin{tabular}{|l|p{9cm}|}
+\begin{mmt}
 \hline
 Description & Nonlocal isotropic damage model for concrete in tension\\
 \hline
@@ -1949,7 +1956,7 @@ value is nonzero.\\
 \end{itemize}\\
 & {\it --- continued in Tab.~\ref{idnl_table_cont} ---} \\
 \hline
-\end{tabular}
+\end{mmt}
 \caption{Nonlocal isotropic damage model for tensile failure -- summary.}
 \label{idnl_table}
 %\end{center}
@@ -1957,7 +1964,7 @@ value is nonzero.\\
 
 
 \begin{table}[!htb]
-\begin{tabular}{|l|p{9cm}|}
+\begin{mmt}
 \hline
 Description & Nonlocal isotropic damage model for concrete in tension\\
 \hline
@@ -1981,7 +1988,7 @@ but not the stress)\\
 Supported modes& 3dMat, PlaneStress, PlaneStrain, 1dMat\\
 Features & Adaptivity support\\
 \hline
-\end{tabular}
+\end{mmt}
 \caption{Nonlocal isotropic damage model for tensile failure -- continued.}
 \label{idnl_table_cont}
 %\end{center}
@@ -2206,7 +2213,7 @@ in Tab.~\ref{mdm_table}.
 
 \begin{table}[!htb]
 %\begin{center}
-\begin{tabular}{|l|p{9cm}|}
+\begin{mmt}
 \hline
 Description & MDM Anisotropic damage model\\
 \hline
@@ -2255,7 +2262,7 @@ Additional params &\elemparam{gf}{rn} \elemparam{ep}{rn}\\
 Supported modes& 3dMat, PlaneStress\\
 Features & Adaptivity support\\
 \hline
-\end{tabular}
+\end{mmt}
 \caption{MDM model - summary.}
 \label{mdm_table}
 %\end{center}
@@ -2286,7 +2293,7 @@ The model parameters are summarized in Tab.~\ref{iid_table}.
 \begin{table}[!htb]
 %\begin{center}
   \small
-\begin{tabular}{|l|p{9cm}|}
+\begin{mmt}
 \hline
 Description & Isotropic damage model for concrete in tension\\
 \hline
@@ -2304,7 +2311,7 @@ and it affects only the secant stiffness but not the stress)\\
 Supported modes& 2dInterface, 3dInterface\\
 Features & \\
 \hline
-\end{tabular}
+\end{mmt}
 \caption{Isotropic damage model for interface elements -- summary.}
 \label{iid_table}
 %\end{center}
@@ -2331,7 +2338,7 @@ The model parameters are summarized in Tab.~\ref{iid_table}.
 \begin{table}[!htb]
 %\begin{center}
   \small
-\begin{tabular}{|l|p{9cm}|}
+\begin{mmt}
 \hline
 Description & Isotropic damage model for concrete in tension\\
 \hline
@@ -2349,7 +2356,7 @@ and it affects only the secant stiffness but not the stress)\\
 Supported modes& 2dInterface, 3dInterface\\
 Features & \\
 \hline
-\end{tabular}
+\end{mmt}
 \caption{Isotropic damage model for interface elements  using tabulated data for damage -- summary.}
 \label{iid_table}
 %\end{center}
@@ -2383,7 +2390,7 @@ in Tab.~\ref{maz_table}.
 
 \begin{table}[!htb]
 %\begin{center}
-\begin{tabular}{|l|p{9cm}|}
+\begin{mmt}
 \hline
 Description & Mazars damage model for concrete\\
 \hline
@@ -2422,7 +2429,7 @@ $g_t = 1.0-(\varepsilon_0/\kappa)*\exp((\varepsilon_0-\kappa)/A_t)$\\
 &- \param{maxOmega} limit maximum damage, use for convergency improvement\\
 Supported modes& 3dMat, PlaneStress, PlaneStrain, 1dMat\\
 \hline
-\end{tabular}
+\end{mmt}
 \caption{Mazars damage model  -- summary.}
 \label{maz_table}
 %\end{center}
@@ -2439,7 +2446,7 @@ in Tab.~\ref{maznl_table}.
 
 \begin{table}[!htb]
 %\begin{center}
-\begin{tabular}{|l|p{9cm}|}
+\begin{mmt}
 \hline
 Description & Nonlocal Mazars damage model for concrete\\
 \hline
@@ -2471,7 +2478,7 @@ response under shear. Default value set to 1.06\\
 &- \param{r} parameter specifying the width of nonlocal averaging zone\\
 Supported modes& 3dMat, PlaneStress, PlaneStrain, 1dMat\\
 \hline
-\end{tabular}
+\end{mmt}
 \caption{Nonlocal Mazars damage model  -- summary.}
 \label{maznl_table}
 %\end{center}
@@ -2486,7 +2493,7 @@ in Tab.~\ref{cebfip_table}.
 
 \begin{table}[!htb]
 %\begin{center}
-\begin{tabular}{|l|p{9cm}|}
+\begin{mmt}
 \hline
 Description & CebFip78 model  for concrete creep with aging\\
 \hline
@@ -2505,7 +2512,7 @@ Parameters &- \param{num} material model number\\
 Supported modes& 3dMat, PlaneStress, PlaneStrain, 1dMat,
 2dPlateLayer,2dBeamLayer, 3dShellLayer\\
 \hline
-\end{tabular}
+\end{mmt}
 \caption{CebFip78 material model -- summary.}
 \label{cebfip_table}
 %\end{center}
@@ -2521,7 +2528,7 @@ in Tab.~\ref{doublepowerlaw_table}.
 
 \begin{table}[!htb]
 %\begin{center}
-\begin{tabular}{|l|p{9cm}|}
+\begin{mmt}
 \hline
 Description & Double-power law model  for concrete creep with aging\\
 \hline
@@ -2539,7 +2546,7 @@ Parameters &- \param{num} material model number\\
 Supported modes& 3dMat, PlaneStress, PlaneStrain, 1dMat,
 2dPlateLayer,2dBeamLayer, 3dShellLayer\\
 \hline
-\end{tabular}
+\end{mmt}
 \caption{Double-power law model -- summary.}
 \label{doublepowerlaw_table}
 %\end{center}
@@ -2665,7 +2672,7 @@ $\bar{f}_c$ in MPa and $c$ in kg/m$^3$, which are used in empirical formulae.
 
 \begin{table}[!htb]
 %\begin{center}
-\begin{tabular}{|l|p{9cm}|}
+\begin{mmt}
 \hline
 Description & B3 material model  for concrete aging\\
 \hline
@@ -2742,7 +2749,7 @@ $2=$ point shrinkage (needed: \param{es0}, \param{r}, \param{rprime},
 Supported modes& 3dMat, PlaneStress, PlaneStrain, 1dMat,
 2dPlateLayer,2dBeamLayer, 3dShellLayer\\
 \hline
-\end{tabular}
+\end{mmt}
 \caption{B3 creep and shrinkage model -- summary.}
 \label{b3_table}
 %\end{center}
@@ -2782,7 +2789,7 @@ the material input record reduces to following:
 %%%%%%%% B3 SOLID MAT %%%%%%%%%
 
 \begin{table}[!htb]
-\begin{tabular}{|l|p{9cm}|}
+\begin{mmt}
 \hline
 Description & B3solid material model  for concrete creep\\
 \hline
@@ -2843,11 +2850,11 @@ time interval with good approximation of the compliance function
 &- \param{timefactor} scaling factor transforming the simulation time units into days\\
 &- \param{relMatAge} relative material age [day]\\
 \hline
-\end{tabular}
+\end{mmt}
 \end{table}
 
 \begin{table}
-\begin{tabular}{|l|p{9cm}|}
+\begin{mmt}
 \hline
 &- \param{fc} 28-day mean cylinder compression strength [MPa]\\
 &- \param{cc} cement content of concrete mixture  [kg/m$^{3}$] \\
@@ -2882,7 +2889,7 @@ time interval with good approximation of the compliance function
 Supported modes& 3dMat, PlaneStress, PlaneStrain, 1dMat,
 2dPlateLayer, 2dBeamLayer, 3dShellLayer\\
 \hline
-\end{tabular}
+\end{mmt}
 
 \caption{B3solid creep and shrinkage model -- summary.}
 \label{b3solid_table}
@@ -2947,7 +2954,7 @@ shmode 3 c0 1. c1 0.2 tS0 7. w\_h 0.0476 ncoeff 0.182 a 4.867  kSh 1.27258e-003}
 
 
 \begin{table}[!htb]
-\begin{tabular}{|l|p{9cm}|}
+\begin{mmt}
 \hline
 Description & Microprestress-solidification theory material model for concrete creep\\
 \hline
@@ -2989,12 +2996,12 @@ Record Format & \descitem{mps}
 &- \param{relMatAge} relative material age\\
 %
 \hline
-\end{tabular}
+\end{mmt}
 \end{table}
 
 
 \begin{table}[!htb]
-\begin{tabular}{|l|p{9cm}|}
+\begin{mmt}
 \hline
 %
 &- \param{fc} 28-day standard cylinder compression strength [MPa]\\
@@ -3018,7 +3025,7 @@ Record Format & \descitem{mps}
 Supported modes& 3dMat, PlaneStress, PlaneStrain, 1dMat,
 2dPlateLayer, 2dBeamLayer, 3dShellLayer\\
 \hline
-\end{tabular}
+\end{mmt}
 
 \caption{MPS theory---summary.}
 \label{mps_table}
@@ -3115,7 +3122,7 @@ in Tab.~\ref{m4_table}.
 
 \begin{table}[!htb]
 %\begin{center}
-\begin{tabular}{|l|p{9cm}|}
+\begin{mmt}
 \hline
 Description & M4 material model\\
 \hline
@@ -3131,7 +3138,7 @@ Parameters &- \param{nmp} number of microplanes, supported values are
 \param{k4}  model parameters\\
 Supported modes& 3dMat\\
 \hline
-\end{tabular}
+\end{mmt}
 \caption{Microplane model M4 -- summary.}
 \label{m4_table}
 %\end{center}
@@ -3329,7 +3336,7 @@ For uniaxial tension, for instance, all three principal plastic strain rates are
 
 \begin{table}[!htb]
 %\begin{center}
-\begin{tabular}{|l|p{9cm}|}
+\begin{mmt}
 \hline
 Description & Damage-plastic model for concrete\\
 \hline
@@ -3359,7 +3366,7 @@ Parameters &- \param{d} material density\\
 &- \param{newtoniter} maximum number of iterations in the implicit stress return algorithm, optional, default value 100\\
 Supported modes& 3dMat\\
 \hline
-\end{tabular}
+\end{mmt}
 \caption{Damage-plastic model for concrete -- summary.}
 \label{dpm_table}
 %\end{center}
@@ -3544,7 +3551,7 @@ The damage initiation is based on a trial stress. It becomes necessary for  high
 \end{figure}
 
 \begin{table}[!htb]
-\begin{tabular}{|l|p{9cm}|}
+\begin{mmt}
 \hline
 Description & Orthotropic damage model with fixed crack orientations for composites\\
 \hline
@@ -3566,7 +3573,7 @@ Supported modes& 3dMat, 1dMat\\
 &- \param {afterIter} how many iterations must pass until damage is computed from strains, zero is default. User must ensure that the solver proceeds the minimum number of iterations.\\
 &- \param {allowSnapBack} array to skip checking for snap-back. The array members are 1-6 for tension and 7-12 for compression components.\\
 \hline
-\end{tabular}
+\end{mmt}
 \caption{Orthotropic damage model with fixed crack orientations for composites -- summary.}
 \label{compdammat_table}
 \end{table}
@@ -3658,7 +3665,7 @@ In the equation above $\sigma_i^{\pm} = \sigma_0^{\pm}\rho^p m_i^{2q}$ is uniaxi
 The model description and parameters are summarized in Tab.~\ref{trabbone_table}.
 \begin{table}[!htb]
 %\begin{center}
-\begin{tabular}{|l|p{9cm}|}
+\begin{mmt}
 \hline
 Description & Anisotropic elastoplastic model with isotropic damage\\
 \hline
@@ -3687,7 +3694,7 @@ Parameters &- \param{} material number\\
 &- \param{expp} exponent $p$ in the expression for tensor \mbf{F}\\
 Supported modes& 3dMat\\
 \hline
-\end{tabular}
+\end{mmt}
 \caption{Anisotropic elastoplastic model with isotropic damage - summary.}
 \label{trabbone_table}
 %\end{center}
@@ -3713,7 +3720,7 @@ Parameter $R$ is related to the internal length of the material.
 The model description and parameters are summarized in Tab.~\ref{trabboneNl_table}.
 \begin{table}[!htb]
 %\begin{center}
-\begin{tabular}{|l|p{9cm}|}
+\begin{mmt}
 \hline
 Description & Nonlocal anisotropic elastoplastic model with isotropic damage\\
 \hline
@@ -3744,7 +3751,7 @@ Parameters &- \param{} material number\\
 &- \param{R} nonlocal interaction radius\\
 Supported modes& 3dMat\\
 \hline
-\end{tabular}
+\end{mmt}
 \caption{Nonlocal formulation of anisotropic elastoplastic model with isotropic damage -- summary.}
 \label{trabboneNl_table}
 %\end{center}
@@ -3791,7 +3798,7 @@ The model description and parameters are summarized in Tab.~\ref{simpleinterface
 
 \begin{table}[!htb]
 %\begin{center}
-\begin{tabular}{|l|p{9cm}|}
+\begin{mmt}
 \hline
 Description & Simple interface material\\
 \hline
@@ -3805,7 +3812,7 @@ Parameters &- \param{} material number\\
 
 Supported modes& \_1dInterface\\
 \hline
-\end{tabular}
+\end{mmt}
 \caption{Simple interface material -- summary.}
 \label{simpleinterfacemat_table}
 %\end{center}
@@ -3866,7 +3873,7 @@ The strength envelope is elliptic (Figure~\ref{StrengthLatticeDamage2d}) and det
 The model parameters are summarised in Tab.~\ref{latticedamage2d_table}.
 \begin{table}[!htb]
 %\begin{center}
-\begin{tabular}{|l|p{9cm}|}
+\begin{mmt}
 \hline
 Description & Saclar damage model for lattice2d \\
 \hline
@@ -3886,7 +3893,7 @@ Parameters &- \param{} material number\\
 
 Supported modes& 2dlattice\\
 \hline
-\end{tabular}
+\end{mmt}
 \caption{Scalar damage model for 2d lattice elements -- summary.}
 \label{latticedamage2d_table}
 %\end{center}
@@ -3909,7 +3916,7 @@ in Tab.~\ref{Isoheat_table}.
 
 \begin{table}[!htb]
 %\begin{center}
-\begin{tabular}{|l|p{9cm}|}
+\begin{mmt}
 \hline
 Description & Linear isotropic elastic material\\
 \hline
@@ -3921,7 +3928,7 @@ Parameters &- \param{num} material model number\\
 &- \param{c} Specific heat capacity\\
 Supported modes& \_2dHeat\\
 \hline
-\end{tabular}
+\end{mmt}
 \caption{Linear isotropic material for heat transport - summary.}
 \label{Isoheat_table}
 %\end{center}
@@ -3952,7 +3959,7 @@ in Tab.~\ref{IsoLinmoistureMat_table}.
 
 \begin{table}[!htb]
 %\begin{center}
-\begin{tabular}{|l|p{9cm}|}
+\begin{mmt}
 \hline
 Description & Linear isotropic material for moisture transport\\
 \hline
@@ -3964,7 +3971,7 @@ Parameters &- \param{num} material model number\\
 &- \param{capa} moisture capacity\\
 Supported modes& \_2dHeat\\
 \hline
-\end{tabular}
+\end{mmt}
 \caption{Linear isotropic material for moisture transport - summary.}
 \label{IsoLinmoistureMat_table}
 %\end{center}
@@ -4003,7 +4010,7 @@ into water content loss (mass of lost water per unit volume).
 The model parameters are summarized in Tab.~\ref{BazantNajjarMoistureMat}.
 \begin{table}[!htb]
 %\begin{center}
-\begin{tabular}{|l|p{9cm}|}
+\begin{mmt}
 \hline
 Description & Nonlinear isotropic material for moisture transport\\
 \hline
@@ -4021,7 +4028,7 @@ between its minimum and maximum value [-] \\
 
 Supported modes& \_2dHeat\\
 \hline
-\end{tabular}
+\end{mmt}
 \caption{Nonlinear isotropic material for moisture transport - summary.}
 \label{BazantNajjarMoistureMat}
 %\end{center}
@@ -4156,7 +4163,7 @@ parameter $C_1$ from \refeq{BNmodel:governing}.
 The model parameters are summarized in Tab.~\ref{NlIsoMoistureMat}.
 \begin{table}[!htb]
 %\begin{center}
-\begin{tabular}{|l|p{9cm}|}
+\begin{mmt}
 \hline
 Description & Nonlinear isotropic material for moisture transport \\
 \hline
@@ -4209,7 +4216,7 @@ between its minimum and maximum value (for $permeabilityType=1$) \\
 
 Supported modes& \_2dHeat \\
 \hline
-\end{tabular}
+\end{mmt}
 \caption{Nonlinear isotropic material for moisture transport - summary.}
 \label{NlIsoMoistureMat}
 %\end{center}
@@ -4238,7 +4245,7 @@ examples was published \cite{Smilauer:09}. Tab.~\ref{Cemhydmat_table} summarizes
 
 \begin{table}[!htb]
 %\begin{center}
-\begin{tabular}{|l|p{9cm}|}
+\begin{mmt}
 \hline
 Description & Cemhyd - hydrating material\\
 \hline
@@ -4258,7 +4265,7 @@ Parameters &- \param{num} material model number\\
 &- \param{reinforcementDegree} specifies the area fraction of reinforcement. Typical values is 0.015. Steel reinforcement slightly increases concrete conductivity and slightly decreases its capacity. Thermal properties of steel are considered 20~W/m/K and 500~J/kg/K.\\
 Supported modes& \_2dHeat, \_3dHeat\\
 \hline
-\end{tabular}
+\end{mmt}
 \caption{Cemhydmat - summary.}
 \label{Cemhydmat_table}
 %\end{center}
@@ -4311,7 +4318,7 @@ where $B_1, B_2$ are coefficients to be calibrated, $\alpha_\infty$ is the ultim
 
 \begin{table}[!htb]
 %\begin{center}
-\begin{tabular}{|l|p{9cm}|}
+\begin{mmt}
 \hline
 Description & HydratingConcreteMat\\
 \hline
@@ -4336,7 +4343,7 @@ Parameters &- \param{num} material model number\\
 &- \param{scaling} components in the array scale density, conductivity, capacity in this order. \param{nowarnings} are checked before scaling.\\
 Supported modes& \_2dHeat, \_3dHeat\\
 \hline
-\end{tabular}
+\end{mmt}
 \caption{HydratingConcreteMat - summary of affinity hydration models.}
 \label{Affinity1_table}
 %\end{center}
@@ -4365,7 +4372,7 @@ regions). The model parameters are summarized
 in Tab.~\ref{hemotk_table}.
 \begin{table}[!htb]
 %\begin{center}
-\begin{tabular}{|l|p{9cm}|}
+\begin{mmt}
 \hline
 Description & Coupled heat and mass transfer material model\\
 \hline
@@ -4396,7 +4403,7 @@ experiments) delta\_wet [Bazant and Najjar, 1972]\\
 &- \param{rho\_gws} saturation volume density\\
 Supported modes& \_2dHeMo\\
 \hline
-\end{tabular}
+\end{mmt}
 \caption{Coupled heat and mass transfer material model - summary.}
 \label{hemotk_table}
 %\end{center}
@@ -4412,7 +4419,7 @@ in Tab.~\ref{NewtonianFluidMaterial_table}.
 
 \begin{table}[!htb]
 %\begin{center}
-\begin{tabular}{|l|p{9cm}|}
+\begin{mmt}
 \hline
 Description & Newtonian Fluid material\\
 \hline
@@ -4423,7 +4430,7 @@ Parameters &- \param{num} material model number\\
 &- \param{mu} viscosity\\
 Supported modes& 2d, 3d flow\\
 \hline
-\end{tabular}
+\end{mmt}
 \caption{Newtonian Fluid material - summary.}
 \label{NewtonianFluidMaterial_table}
 %\end{center}
@@ -4483,7 +4490,7 @@ constitutive equation (\ref{eq:bigham-model}) is obtained.
 
 \begin{table}[!htb]
 %\begin{center}
-\begin{tabular}{|l|p{9cm}|}
+\begin{mmt}
 \hline
 Description & Bingham fluid material\\
 \hline
@@ -4495,7 +4502,7 @@ Parameters &- \param{num} material model number\\
 &- \param{tau0} Yield stress\\
 Supported modes& 2d, 3d flow\\
 \hline
-\end{tabular}
+\end{mmt}
 \caption{Bingham Fluid material - summary.}
 \label{BinghamFluidMaterial_table}
 %\end{center}
@@ -4511,7 +4518,7 @@ The model parameters are summarized in Tab.~\ref{TwoFluidMaterial_table}.
 
 \begin{table}[!htb]
 %\begin{center}
-\begin{tabular}{|l|p{9cm}|}
+\begin{mmt}
 \hline
 Description & Two-Fluid material\\
 \hline
@@ -4524,7 +4531,7 @@ with index 0 is a material, that is fully active in a cell with VOF=0,
 material with index 1 is a material fully active in a cell with VOF=1.\\
 Supported modes& 2d flow\\
 \hline
-\end{tabular}
+\end{mmt}
 \caption{Two-Fluid material - summary.}
 \label{TwoFluidMaterial_table}
 %\end{center}
@@ -4542,7 +4549,7 @@ The model parameters are summarized in Tab.~\ref{FE2FluidMaterial_table}.
 
 \begin{table}[!htb]
 \centering
-\begin{tabular}{|l|p{9cm}|}
+\begin{mmt}
 \hline
 Description & FE\textsuperscript{2} Fluid material\\
 \hline
@@ -4552,7 +4559,7 @@ Parameters &- \param{num}       material model number\\
            &- \param{inputfile} input file for RVE problem\\
 Supported modes&  2d, 3d flow\\
 \hline
-\end{tabular}
+\end{mmt}
 \caption{FE\textsuperscript{2} fluid material - summary.}
 \label{NewtonianFluidMaterial_table}
 \end{table}

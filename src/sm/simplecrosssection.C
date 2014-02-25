@@ -112,7 +112,7 @@ SimpleCrossSection :: giveStiffnessMatrix_1d(FloatMatrix &answer, MatResponseMod
 void
 SimpleCrossSection :: giveGeneralizedStress_Beam2d(FloatArray &answer, GaussPoint *gp, const FloatArray &strain, TimeStep *tStep)
 {
-    StructuralMaterial *mat = static_cast< StructuralMaterial* >( this->giveMaterial(gp) );
+    StructuralMaterial *mat = static_cast< StructuralMaterial * >( this->giveMaterial(gp) );
     FloatArray elasticStrain, et, e0;
     FloatMatrix tangent;
     elasticStrain = strain;
@@ -136,7 +136,7 @@ SimpleCrossSection :: giveGeneralizedStress_Beam2d(FloatArray &answer, GaussPoin
 void
 SimpleCrossSection :: giveGeneralizedStress_Beam3d(FloatArray &answer, GaussPoint *gp, const FloatArray &strain, TimeStep *tStep)
 {
-    StructuralMaterial *mat = static_cast< StructuralMaterial* >( this->giveMaterial(gp) );
+    StructuralMaterial *mat = static_cast< StructuralMaterial * >( this->giveMaterial(gp) );
     FloatArray elasticStrain, et, e0;
     FloatMatrix tangent;
     elasticStrain = strain;
@@ -152,7 +152,6 @@ SimpleCrossSection :: giveGeneralizedStress_Beam3d(FloatArray &answer, GaussPoin
                 elasticStrain.at(6) -= e0.at(1) * et.at(3) / width;     // kappa_z
             }
         }
-
     }
     this->give3dBeamStiffMtrx(tangent, ElasticStiffness, gp, tStep);
     answer.beProductOf(tangent, elasticStrain);
@@ -165,7 +164,7 @@ SimpleCrossSection :: giveGeneralizedStress_Beam3d(FloatArray &answer, GaussPoin
 void
 SimpleCrossSection :: giveGeneralizedStress_Plate(FloatArray &answer, GaussPoint *gp, const FloatArray &strain, TimeStep *tStep)
 {
-    StructuralMaterial *mat = static_cast< StructuralMaterial* >( this->giveMaterial(gp) );
+    StructuralMaterial *mat = static_cast< StructuralMaterial * >( this->giveMaterial(gp) );
     FloatArray elasticStrain, et, e0;
     FloatMatrix tangent;
     elasticStrain = strain;
@@ -189,7 +188,7 @@ SimpleCrossSection :: giveGeneralizedStress_Plate(FloatArray &answer, GaussPoint
 void
 SimpleCrossSection :: giveGeneralizedStress_Shell(FloatArray &answer, GaussPoint *gp, const FloatArray &strain, TimeStep *tStep)
 {
-    StructuralMaterial *mat = static_cast< StructuralMaterial* >( this->giveMaterial(gp) );
+    StructuralMaterial *mat = static_cast< StructuralMaterial * >( this->giveMaterial(gp) );
     FloatArray elasticStrain, et, e0;
     FloatMatrix tangent;
     elasticStrain = strain;
@@ -673,7 +672,7 @@ SimpleCrossSection :: giveTemperatureVector(FloatArray &answer, GaussPoint *gp, 
     Element *elem = gp->giveElement();
     answer.clear();
     //sum up all prescribed temperatures over an element
-    StructuralElement *selem = dynamic_cast< StructuralElement * >( elem );
+    StructuralElement *selem = dynamic_cast< StructuralElement * >(elem);
     selem->computeResultingIPTemperatureAt(answer, tStep, gp, VM_Total);
 
     /* add external source, if provided */
@@ -697,6 +696,5 @@ SimpleCrossSection :: giveTemperatureVector(FloatArray &answer, GaussPoint *gp, 
             }
         }
     }
-
 }
 } // end namespace oofem

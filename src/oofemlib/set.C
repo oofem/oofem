@@ -191,6 +191,16 @@ void Set :: setEdgeList(const IntArray &newEdges) { this->elementEdges = newEdge
 
 void Set :: setNodeList(const IntArray &newNodes) { this->nodes = newNodes; }
 
+void Set :: addAllElements()
+{
+    this->elements.enumerate(this->giveDomain()->giveNumberOfElements());
+}
+
+bool Set :: hasElement(int number) const
+{
+    return this->elements.contains(number);
+}
+
 void Set :: clear()
 {
     this->elementEdges.clear();

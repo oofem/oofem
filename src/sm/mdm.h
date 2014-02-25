@@ -86,6 +86,7 @@
 #define _IFT_MDM_formulation "formulation"
 #define _IFT_MDM_mode "mode"
 #define _IFT_MDM_mapper "mapper"
+#define _IFT_MDM_sourceRegionSet "sourceregset"
 //@}
 
 namespace oofem {
@@ -193,6 +194,9 @@ protected:
     /// Interaction radius, related to the nonlocal characteristic length of material.
     double R;
 
+    ///cached source element set used to map internal variables (adaptivity), created on demand
+    Set *sourceElemSet;
+
 #ifdef MDM_MAPPING_DEBUG
     /// Mapper used to map internal variables in adaptivity.
     static MMAShapeFunctProjection mapperSFT;
@@ -233,11 +237,15 @@ public:
         type_dam = 0;
         type_soft = 0;
         mdm_Ep = mdm_Efp = -1.0;
+        sourceElemSet = NULL;
     }
     /// Destructor.
     virtual ~MDM() {
         if ( linearElasticMaterial ) {
             delete linearElasticMaterial;
+        }
+        if ( sourceElemSet ) {
+            delete sourceElemSet;
         }
     }
 

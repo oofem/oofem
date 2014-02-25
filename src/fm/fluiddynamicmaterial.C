@@ -57,7 +57,7 @@ FluidDynamicMaterial :: computeDeviatoricStressVector(FloatArray &stress_dev, do
 
 void
 FluidDynamicMaterial :: giveStiffnessMatrices(FloatMatrix &dsdd, FloatArray &dsdp, FloatArray &dedd, double &dedp,
-                                       MatResponseMode mode, GaussPoint *gp, TimeStep *tStep)
+                                              MatResponseMode mode, GaussPoint *gp, TimeStep *tStep)
 {
     this->giveDeviatoricStiffnessMatrix(dsdd, mode, gp, tStep);
     int size = dsdd.giveNumberOfRows();

@@ -303,7 +303,7 @@ TrabBoneNL3D :: giveRemoteNonlocalStiffnessContribution(GaussPoint *gp, IntArray
 
 void
 TrabBoneNL3D :: giveRealStressVector_3d(FloatArray &answer, GaussPoint *gp,
-                                     const FloatArray &totalStrain, TimeStep *tStep)
+                                        const FloatArray &totalStrain, TimeStep *tStep)
 {
     TrabBoneNL3DStatus *nlStatus = static_cast< TrabBoneNL3DStatus * >( this->giveStatus(gp) );
     this->initGpForNewStep(gp);

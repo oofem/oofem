@@ -155,7 +155,7 @@ public:
     /// Reads the std::list<Range> field value.
     virtual IRResultType giveField(std :: list< Range > &answer, InputFieldType id) = 0;
     /// Reads the ScalarFunction field value.
-    virtual IRResultType giveField(ScalarFunction& function, InputFieldType id) = 0;
+    virtual IRResultType giveField(ScalarFunction &function, InputFieldType id) = 0;
     //@}
 
     /**@name Optional field extraction methods
@@ -186,7 +186,7 @@ public:
     /// Reads the std::list<Range> field value.
     IRResultType giveOptionalField(std :: list< Range > &answer, InputFieldType id);
     /// Reads the ScalarFunction field value.
-    IRResultType giveOptionalField(ScalarFunction& function, InputFieldType id);
+    IRResultType giveOptionalField(ScalarFunction &function, InputFieldType id);
     //@}
 
     /// Returns true if record contains field identified by idString keyword.

@@ -62,7 +62,6 @@
 #include "randomfieldgenerator.h"
 #include "errorestimator.h"
 #include "range.h"
-#include "compiler.h"
 #include "fracturemanager.h"
 #include "dynamicinputrecord.h"
 #include "dynamicdatareader.h"
@@ -201,14 +200,14 @@ Domain *Domain :: Clone()
     //Nodes
     int nDofMan = this->giveNumberOfDofManagers();
     for ( int i = 1; i <= nDofMan; i++ ) {
-        DynamicInputRecord *nodeRec = new DynamicInputRecord(*this->giveDofManager(i));
+        DynamicInputRecord *nodeRec = new DynamicInputRecord( *this->giveDofManager ( i ) );
         dataReader.insertInputRecord(DataReader :: IR_dofmanRec, nodeRec);
     }
 
     //Elements
     int nEl = this->giveNumberOfElements();
     for ( int i = 1; i <= nEl; i++ ) {
-        DynamicInputRecord *elRec = new DynamicInputRecord(*this->giveElement(i));
+        DynamicInputRecord *elRec = new DynamicInputRecord( *this->giveElement ( i ) );
         dataReader.insertInputRecord(DataReader :: IR_elemRec, elRec);
     }
 
@@ -216,7 +215,7 @@ Domain *Domain :: Clone()
     //CrossSection
     int nCS = this->giveNumberOfCrossSectionModels();
     for ( int i = 1; i <= nCS; i++ ) {
-        DynamicInputRecord *csRec = new DynamicInputRecord(*this->giveCrossSection(i));
+        DynamicInputRecord *csRec = new DynamicInputRecord( *this->giveCrossSection ( i ) );
         dataReader.insertInputRecord(DataReader :: IR_crosssectRec, csRec);
     }
 
@@ -224,28 +223,28 @@ Domain *Domain :: Clone()
     //Material
     int nMat = this->giveNumberOfMaterialModels();
     for ( int i = 1; i <= nMat; i++ ) {
-        DynamicInputRecord *matRec = new DynamicInputRecord(*this->giveMaterial(i));
+        DynamicInputRecord *matRec = new DynamicInputRecord( *this->giveMaterial ( i ) );
         dataReader.insertInputRecord(DataReader :: IR_matRec, matRec);
     }
 
     //Boundary Conditions
     int nBC = this->giveNumberOfBoundaryConditions();
     for ( int i = 1; i <= nBC; i++ ) {
-        DynamicInputRecord *bcRec = new DynamicInputRecord(*this->giveBc(i));
+        DynamicInputRecord *bcRec = new DynamicInputRecord( *this->giveBc ( i ) );
         dataReader.insertInputRecord(DataReader :: IR_bcRec, bcRec);
     }
 
     //Initial Conditions
     int nIC = this->giveNumberOfInitialConditions();
     for ( int i = 1; i <= nIC; i++ ) {
-        DynamicInputRecord *icRec = new DynamicInputRecord(*this->giveIc(i));
+        DynamicInputRecord *icRec = new DynamicInputRecord( *this->giveIc ( i ) );
         dataReader.insertInputRecord(DataReader :: IR_icRec, icRec);
     }
 
     //Load-time functions
     int nLoads = this->giveNumberOfFunctions();
     for ( int i = 1; i <= nLoads; i++ ) {
-        DynamicInputRecord *funcRec = new DynamicInputRecord(*this->giveFunction(i));
+        DynamicInputRecord *funcRec = new DynamicInputRecord( *this->giveFunction ( i ) );
         dataReader.insertInputRecord(DataReader :: IR_funcRec, funcRec);
     }
 
@@ -253,7 +252,7 @@ Domain *Domain :: Clone()
     //Sets
     int nSets = this->giveNumberOfSets();
     for ( int i = 1; i <= nSets; i++ ) {
-        DynamicInputRecord *setRec = new DynamicInputRecord(*this->giveSet(i));
+        DynamicInputRecord *setRec = new DynamicInputRecord( *this->giveSet ( i ) );
         dataReader.insertInputRecord(DataReader :: IR_setRec, setRec);
     }
 
@@ -1232,41 +1231,41 @@ Domain :: resolveDomainDofsDefaults(const char *typeName)
 // and also resolves default dof mask according to domain type.
 //
 {
-    if ( !strncasecmp(typeName, "2dplanestressrot", 16) ) {
+    if ( !strncmp(typeName, "2dplanestressrot", 16) ) {
         dType = _2dPlaneStressRotMode;
-    } else if ( !strncasecmp(typeName, "2dplanestress", 12) ) {
+    } else if ( !strncmp(typeName, "2dplanestress", 12) ) {
         dType = _2dPlaneStressMode;
-    } else if ( !strncasecmp(typeName, "planestrain", 11) ) {
+    } else if ( !strncmp(typeName, "planestrain", 11) ) {
         dType = _PlaneStrainMode;
-    } else if ( !strncasecmp(typeName, "3daxisymm", 9) ) {
+    } else if ( !strncmp(typeName, "3daxisymm", 9) ) {
         dType = _3dAxisymmMode;
-    } else if  ( !strncasecmp(typeName, "2dmindlinplate", 14) ) {
+    } else if  ( !strncmp(typeName, "2dmindlinplate", 14) ) {
         dType = _2dMindlinPlateMode;
-    } else if ( !strncasecmp(typeName, "3dshell", 7) ) {
+    } else if ( !strncmp(typeName, "3dshell", 7) ) {
         dType = _3dShellMode;
-    } else if  ( !strncasecmp(typeName, "2dtruss", 7) ) {
+    } else if  ( !strncmp(typeName, "2dtruss", 7) ) {
         dType = _2dTrussMode;
-    } else if  ( !strncasecmp(typeName, "1dtruss", 7) ) {
+    } else if  ( !strncmp(typeName, "1dtruss", 7) ) {
         dType = _1dTrussMode;
-    } else if  ( !strncasecmp(typeName, "2dbeam", 6) ) {
+    } else if  ( !strncmp(typeName, "2dbeam", 6) ) {
         dType = _2dBeamMode;
-    } else if  ( !strncasecmp(typeName, "2dlattice", 9) ) {
+    } else if  ( !strncmp(typeName, "2dlattice", 9) ) {
         dType = _2dLatticeMode;
-    } else if  ( !strncasecmp(typeName, "heattransfer", 12) ) {
+    } else if  ( !strncmp(typeName, "heattransfer", 12) ) {
         dType = _HeatTransferMode;
-    } else if  ( !strncasecmp(typeName, "mass1transfer", 13) ) {
+    } else if  ( !strncmp(typeName, "mass1transfer", 13) ) {
         dType = _Mass1TransferMode;
-    } else if  ( !strncasecmp(typeName, "hema1", 5) ) {
+    } else if  ( !strncmp(typeName, "hema1", 5) ) {
         dType = _HeatMass1Mode;
-    } else if ( !strncasecmp(typeName, "2dincompflow", 12) ) {
+    } else if ( !strncmp(typeName, "2dincompflow", 12) ) {
         dType = _2dIncompressibleFlow;
-    } else if ( !strncasecmp(typeName, "3dincompflow", 12) ) {
+    } else if ( !strncmp(typeName, "3dincompflow", 12) ) {
         dType = _3dIncompressibleFlow;
-    } else if  ( !strncasecmp(typeName, "3ddirshell", 10) ) {
+    } else if  ( !strncmp(typeName, "3ddirshell", 10) ) {
         dType = _3dDirShellMode;
-    } else if  ( !strncasecmp(typeName, "2dmasslatticetransport", 22) ) {
+    } else if  ( !strncmp(typeName, "2dmasslatticetransport", 22) ) {
         dType = _2dLatticeMassTransportMode;
-    } else if  ( !strncasecmp(typeName, "3d", 2) ) {
+    } else if  ( !strncmp(typeName, "3d", 2) ) {
         dType = _3dMode;
     } else {
         _error2("resolveDomainDofsDefaults : unknown domainType (%s)", typeName);
@@ -1512,7 +1511,7 @@ Domain :: createDofs()
             dof->setIcId(icid);
             // Slave dofs obtain their weights post-initialization, simple slave dofs must have their master node specified.
             if ( dtype == DT_simpleSlave ) {
-                static_cast< SimpleSlaveDof * >( dof )->setMasterDofManagerNum( ( * dman->giveMasterMap() ) [ id ] );
+                static_cast< SimpleSlaveDof * >(dof)->setMasterDofManagerNum( ( * dman->giveMasterMap() ) [ id ] );
             }
             dman->setDof(c, dof);
         }
@@ -1819,7 +1818,7 @@ Domain :: restoreContext(DataStream *stream, ContextMode mode, void *obj)
 
     if ( domainUpdated ) {
         if ( this->smoother ) {
-            this->smoother->init();
+            this->smoother->clear();
         }
     }
 

@@ -436,10 +436,10 @@ NonLinearDynamic :: proceedStep(int di, TimeStep *tStep)
 
     // Assemble the external forces
     FloatArray loadVector;
-    loadVector.resize( this->giveNumberOfDomainEquations(di, EModelDefaultEquationNumbering())  );
+    loadVector.resize( this->giveNumberOfDomainEquations( di, EModelDefaultEquationNumbering() ) );
     loadVector.zero();
-    this->assembleVector(loadVector, tStep, EID_MomentumBalance, ExternalForcesVector,
-                        VM_Total, EModelDefaultEquationNumbering(), this->giveDomain(di));
+    this->assembleVector( loadVector, tStep, EID_MomentumBalance, ExternalForcesVector,
+                         VM_Total, EModelDefaultEquationNumbering(), this->giveDomain(di) );
 
 #ifdef __PARALLEL_MODE
     this->updateSharedDofManagers(loadVector, EModelDefaultEquationNumbering(), LoadExchangeTag);
@@ -447,10 +447,10 @@ NonLinearDynamic :: proceedStep(int di, TimeStep *tStep)
 
     // Assembling the effective load vector
     for ( int i = 1; i <= neq; i++ ) {
-        help.at(i) = a2 * previousVelocityVector.at(i) + a3 * previousAccelerationVector.at(i)
-                     + eta * ( a4 * previousVelocityVector.at(i)
-                               + a5 * previousAccelerationVector.at(i)
-                               + a6 * previousIncrementOfDisplacement.at(i) );
+        help.at(i) = a2 * previousVelocityVector.at(i) + a3 *previousAccelerationVector.at(i)
+        + eta * ( a4 * previousVelocityVector.at(i)
+                 + a5 * previousAccelerationVector.at(i)
+                 + a6 * previousIncrementOfDisplacement.at(i) );
     }
 
     massMatrix->times(help, rhs);
@@ -485,18 +485,18 @@ NonLinearDynamic :: proceedStep(int di, TimeStep *tStep)
     }
 
     NM_Status numMetStatus = nMethod->solve(effectiveStiffnessMatrix, & rhs, NULL,
-                                    & totalDisplacement, & incrementOfDisplacement, & forcesVector,
-                                    internalForcesEBENorm, loadLevel, SparseNonLinearSystemNM :: rlm_total, currentIterations, tStep);
-    if ( !(numMetStatus & NM_Success) ) {
+                                            & totalDisplacement, & incrementOfDisplacement, & forcesVector,
+                                            internalForcesEBENorm, loadLevel, SparseNonLinearSystemNM :: rlm_total, currentIterations, tStep);
+    if ( !( numMetStatus & NM_Success ) ) {
         OOFEM_ERROR("NonLinearDynamic :: proceedStep - NRSolver failed to solve problem");
     }
 
     rhs = previousVelocityVector;
     rhs2 = previousAccelerationVector;
     for ( int i = 1; i <= neq; i++ ) {
-        accelerationVector.at(i) = a0 * incrementOfDisplacement.at(i) - a2 * rhs.at(i) - a3 * rhs2.at(i);
-        velocityVector.at(i)     = a1 * incrementOfDisplacement.at(i) - a4 * rhs.at(i) - a5 * rhs2.at(i)
-            - a6 * previousIncrementOfDisplacement.at(i);
+        accelerationVector.at(i) = a0 * incrementOfDisplacement.at(i) - a2 *rhs.at(i) - a3 *rhs2.at(i);
+        velocityVector.at(i)     = a1 * incrementOfDisplacement.at(i) - a4 *rhs.at(i) - a5 *rhs2.at(i)
+        - a6 *previousIncrementOfDisplacement.at(i);
     }
     totIterations += currentIterations;
 }
@@ -627,7 +627,7 @@ void NonLinearDynamic :: updateComponent(TimeStep *tStep, NumericalCmpn cmpn, Do
 #endif
 #ifdef TIME_REPORT
             timer.stopTimer();
-            OOFEM_LOG_DEBUG("User time consumed by updating nonlinear LHS: %.2fs\n", timer.getUtime() );
+            OOFEM_LOG_DEBUG( "User time consumed by updating nonlinear LHS: %.2fs\n", timer.getUtime() );
 #endif
         }
         break;
@@ -660,7 +660,7 @@ void NonLinearDynamic :: updateComponent(TimeStep *tStep, NumericalCmpn cmpn, Do
             }
 #ifdef TIME_REPORT
             timer.stopTimer();
-            OOFEM_LOG_DEBUG("User time consumed by updating internal RHS: %.2fs\n", timer.getUtime() );
+            OOFEM_LOG_DEBUG( "User time consumed by updating internal RHS: %.2fs\n", timer.getUtime() );
 #endif
         }
         break;
@@ -678,7 +678,7 @@ NonLinearDynamic :: printOutputAt(FILE *File, TimeStep *tStep)
         return; // Do not print even Solution step header
     }
 
-    fprintf(File, "\n\nOutput for time % .3e, solution step number %d\n", tStep->giveTargetTime(), tStep->giveNumber());
+    fprintf( File, "\n\nOutput for time % .3e, solution step number %d\n", tStep->giveTargetTime(), tStep->giveNumber() );
     fprintf(File, "Equilibrium reached in %d iterations\n\n", currentIterations);
 
 
@@ -1045,7 +1045,7 @@ NonLinearDynamic :: unpackMigratingData(TimeStep *tStep)
     //int myrank = this->giveRank();
 
     // resize target arrays
-    int neq = this->giveNumberOfDomainEquations(1, EModelDefaultEquationNumbering());
+    int neq = this->giveNumberOfDomainEquations( 1, EModelDefaultEquationNumbering() );
     totalDisplacement.resize(neq);
     incrementOfDisplacement.resize(neq);
 

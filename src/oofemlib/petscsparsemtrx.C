@@ -48,11 +48,11 @@ REGISTER_SparseMtrx(PetscSparseMtrx, SMT_PetscMtrx);
 
 
 PetscSparseMtrx :: PetscSparseMtrx(int n, int m) : SparseMtrx(n, m),
-    mtrx(NULL), symmFlag(false), leqs(0), geqs(0), di(0), kspInit(false), newValues(true), localIS(NULL), globalIS(NULL) {}
+    mtrx(NULL), symmFlag(false), leqs(0), geqs(0), di(0), kspInit(false), newValues(true), localIS(NULL), globalIS(NULL) { }
 
 
 PetscSparseMtrx :: PetscSparseMtrx() : SparseMtrx(),
-    mtrx(NULL), symmFlag(false), leqs(0), geqs(0), di(0), kspInit(false), newValues(true), localIS(NULL), globalIS(NULL) {}
+    mtrx(NULL), symmFlag(false), leqs(0), geqs(0), di(0), kspInit(false), newValues(true), localIS(NULL), globalIS(NULL) { }
 
 
 PetscSparseMtrx :: ~PetscSparseMtrx()
@@ -62,8 +62,8 @@ PetscSparseMtrx :: ~PetscSparseMtrx()
         KSPDestroy(& this->ksp);
     }
     if ( localIS ) {
-        ISDestroy( &localIS );
-        ISDestroy( &globalIS );
+        ISDestroy(& localIS);
+        ISDestroy(& globalIS);
     }
 }
 
@@ -789,7 +789,7 @@ PetscSparseMtrx :: createVecGlobal(Vec *answer) const
 #ifdef __PARALLEL_MODE
     if ( emodel->isParallel() ) {
         VecCreate(this->emodel->giveParallelComm(), answer);
-        VecSetSizes( * answer, this->leqs, this->geqs );
+        VecSetSizes(* answer, this->leqs, this->geqs);
         VecSetFromOptions(* answer);
     } else {
 #endif
@@ -818,7 +818,7 @@ PetscSparseMtrx :: scatterG2L(Vec src, FloatArray &dest) const
         VecScatterEnd(n2gvecscat, src, locVec, INSERT_VALUES, SCATTER_REVERSE);
         VecScatterDestroy(& n2gvecscat);
 
-        dest.resize( neqs );
+        dest.resize(neqs);
         VecGetArray(locVec, & ptr);
         for ( int i = 0; i < neqs; i++ ) {
             dest.at(i + 1) = ptr [ i ];
@@ -828,15 +828,15 @@ PetscSparseMtrx :: scatterG2L(Vec src, FloatArray &dest) const
         VecDestroy(& locVec);
     } else {
 #endif
-        int neqs = this->giveNumberOfRows();
-        dest.resize(neqs);
-        VecGetArray(src, & ptr);
-        for ( int i = 0; i < neqs; i++ ) {
-            dest.at(i + 1) = ptr [ i ];
-        }
-        VecRestoreArray(src, & ptr);
-#ifdef __PARALLEL_MODE
+    int neqs = this->giveNumberOfRows();
+    dest.resize(neqs);
+    VecGetArray(src, & ptr);
+    for ( int i = 0; i < neqs; i++ ) {
+        dest.at(i + 1) = ptr [ i ];
     }
+    VecRestoreArray(src, & ptr);
+#ifdef __PARALLEL_MODE
+}
 #endif
     return 1;
 }

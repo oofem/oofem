@@ -203,8 +203,8 @@ Beam2d :: computeClampedStiffnessMatrix(FloatMatrix &answer,
     for ( int i = 0; i < ir->giveNumberOfIntegrationPoints(); ++i ) {
         GaussPoint *gp = ir->getIntegrationPoint(i);
         this->computeBmatrixAt(gp, B);
-        this->computeConstitutiveMatrixAt(d, rMode, gp, tStep); 
-        double dV = gp->giveWeight() * 0.5*l;
+        this->computeConstitutiveMatrixAt(d, rMode, gp, tStep);
+        double dV = gp->giveWeight() * 0.5 * l;
         DB.beProductOf(d, B);
         answer.plusProductSymmUpper(B, DB, dV);
     }
@@ -403,7 +403,7 @@ Beam2d :: giveInternalForcesVector(FloatArray &answer, TimeStep *tStep, int useU
     if ( this->dofsToCondense ) {
         FloatMatrix stiff;
         this->computeClampedStiffnessMatrix(stiff, TangentStiffness, tStep);
-        this->condense(&stiff, NULL, &answer, this->dofsToCondense);
+        this->condense(& stiff, NULL, & answer, this->dofsToCondense);
     }
 }
 

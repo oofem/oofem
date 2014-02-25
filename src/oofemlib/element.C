@@ -838,7 +838,7 @@ Element :: isActivated(TimeStep *tStep)
 {
     if ( activityTimeFunction ) {
         if ( tStep ) {
-            return ( domain->giveFunction(activityTimeFunction)->evaluateAtTime(tStep->giveIntrinsicTime()) > 1.e-3 );
+            return ( domain->giveFunction(activityTimeFunction)->evaluateAtTime( tStep->giveIntrinsicTime() ) > 1.e-3 );
         } else {
             return false;
         }
@@ -1390,9 +1390,22 @@ Element :: adaptiveMap(Domain *oldd, TimeStep *tStep)
 }
 
 int
-Element :: mapStateVariables(const Domain &iOldDom, const TimeStep &iTStep)
+Element :: mapStateVariables(Domain &iOldDom, const TimeStep &iTStep)
 {
     int result = 1;
+
+    // create source set (this is quite inefficient here as done for each element.
+    // the alternative MaterialModelMapperInterface approach allows to cache sets on material model
+    Set sourceElemSet = Set(0, & iOldDom);
+    IntArray el;
+    // compile source list to contain all elements on old odmain with the same material id
+    for ( int i = 1; i <= iOldDom.giveNumberOfElements(); i++ ) {
+        if ( iOldDom.giveElement(i)->giveMaterial()->giveNumber() == this->giveMaterial()->giveNumber() ) {
+            // add oldd domain element to source list
+            el.followedBy(i, 10);
+        }
+    }
+    sourceElemSet.setElementList(el);
 
     for ( int i = 0; i < numberOfIntegrationRules; i++ ) {
         IntegrationRule *iRule = integrationRulesArray [ i ];
@@ -1409,7 +1422,7 @@ Element :: mapStateVariables(const Domain &iOldDom, const TimeStep &iTStep)
                 OOFEM_ERROR("In Element :: mapStateVariables(): Failed to fetch MaterialStatusMapperInterface.\n");
             }
 
-            result &= interface->MSMI_map( gp, iOldDom, iTStep, * ( ms ) );
+            result &= interface->MSMI_map( gp, iOldDom, sourceElemSet, iTStep, * ( ms ) );
         }
     }
 

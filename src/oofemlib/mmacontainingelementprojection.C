@@ -45,18 +45,16 @@ MMAContainingElementProjection :: MMAContainingElementProjection() : MaterialMap
 { }
 
 void
-MMAContainingElementProjection :: __init(Domain *dold, IntArray &type, FloatArray &coords, int region, TimeStep *tStep, bool iCohesiveZoneGP)
+MMAContainingElementProjection :: __init(Domain *dold, IntArray &type, FloatArray &coords, Set &elemSet, TimeStep *tStep, bool iCohesiveZoneGP)
 {
     SpatialLocalizer *sl = dold->giveSpatialLocalizer();
-    IntArray regionList(1);
-    regionList.at(1) = region;
     GaussPoint *jGp;
     FloatArray jGpCoords;
     double distance, minDist = 1.e6;
     IntegrationRule *iRule;
     Element *srcElem;
 
-    if ( ( srcElem = sl->giveElementContainingPoint(coords, & regionList) ) ) {
+    if ( ( srcElem = sl->giveElementContainingPoint(coords, elemSet) ) ) {
         iRule = srcElem->giveDefaultIntegrationRulePtr();
 
         this->source = NULL;

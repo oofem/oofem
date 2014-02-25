@@ -46,7 +46,7 @@
 #include "contextioerr.h"
 #include "exportmodulemanager.h"
 #ifdef __PARALLEL_MODE
-#include "parallelcontext.h"
+ #include "parallelcontext.h"
 #endif
 
 namespace oofem {

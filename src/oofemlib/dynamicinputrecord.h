@@ -41,8 +41,14 @@
 #include <set>
 
 namespace oofem {
-
 class FEMComponent;
+class DynamicInputRecord;
+
+/// Helper function for creating a dynamic input record for a node
+DynamicInputRecord *CreateNodeIR(int i, InputFieldType nodeType, const FloatArray &coord);
+
+/// Helper function for creating elements (with optional cross-section number).
+DynamicInputRecord *CreateElementIR(int i, InputFieldType elementType, const IntArray &nodes, int cs = 0);
 
 /**
  * Class representing the a dynamic Input Record.
@@ -72,9 +78,9 @@ protected:
 
 public:
     /// Creates an empty input record.
-    DynamicInputRecord();
-    /// Creates an empty input record.
-    DynamicInputRecord(FEMComponent &femc); ///@todo Make FEMComponent const
+    DynamicInputRecord(std :: string answer = "", int value = 0);
+    /// Extracts input record from given component
+    DynamicInputRecord(FEMComponent & femc); ///@todo Make FEMComponent const
     /// Copy constructor.
     DynamicInputRecord(const DynamicInputRecord &);
     /// Destructor.
@@ -99,7 +105,7 @@ public:
     virtual IRResultType giveField(std :: vector< std :: string > &answer, InputFieldType id);
     virtual IRResultType giveField(Dictionary &answer, InputFieldType id);
     virtual IRResultType giveField(std :: list< Range > &answer, InputFieldType id);
-    virtual IRResultType giveField(ScalarFunction& function, InputFieldType id); 
+    virtual IRResultType giveField(ScalarFunction &function, InputFieldType id);
 
     virtual bool hasField(InputFieldType id);
     virtual void printYourself();
@@ -116,7 +122,7 @@ public:
     virtual void setField(const std :: vector< std :: string > &item, InputFieldType id);
     virtual void setField(const Dictionary &item, InputFieldType id);
     virtual void setField(const std :: list< Range > &item, InputFieldType id);
-    virtual void setField(const ScalarFunction& function, InputFieldType id); 
+    virtual void setField(const ScalarFunction &function, InputFieldType id);
     /// Sets an empty field with given id.
     virtual void setField(InputFieldType id);
     /// Removes given field from record.

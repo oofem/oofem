@@ -79,7 +79,7 @@ public:
     /// Destructor.
     virtual ~SPRNodalRecoveryModel();
 
-    int recoverValues(InternalStateType type, TimeStep *tStep);
+    int recoverValues(Set elementSet, InternalStateType type, TimeStep *tStep);
 
 private:
     /**
@@ -91,8 +91,8 @@ private:
      */
     void initRegionMap(IntArray &regionMap, IntArray &regionTypes, InternalStateType type);
 
-    void determinePatchAssemblyPoints(IntArray &pap, int ireg, SPRPatchType regType);
-    void initPatch(IntArray &patchElems, IntArray &dofManToDetermine, IntArray &pap, int papNumber, int ireg);
+    void determinePatchAssemblyPoints(IntArray &pap, SPRPatchType regType, Set &elemset);
+    void initPatch(IntArray &patchElems, IntArray &dofManToDetermine, IntArray &pap, int papNumber, Set &elementList);
     void computePatch(FloatMatrix &a, IntArray &patchElems, int &regionValSize,
                       SPRPatchType regType, InternalStateType type, TimeStep *tStep);
     void determineValuesFromPatch(FloatArray &dofManValues, IntArray &dofManCount,
@@ -100,10 +100,11 @@ private:
                                   FloatMatrix &a, SPRPatchType type);
     void computePolynomialTerms(FloatArray &P, FloatArray &coords, SPRPatchType type);
     int  giveNumberOfUnknownPolynomialCoefficients(SPRPatchType regType);
+    SPRPatchType determinePatchType(Set &elementList);
 
 #ifdef __PARALLEL_MODE
     void initCommMaps();
-    void exchangeDofManValues(int ireg, FloatArray &dofManValues,
+    void exchangeDofManValues(FloatArray &dofManValues,
                               IntArray &dofManPatchCount, IntArray &regionNodalNumbers,
                               int regionValSize);
     int packSharedDofManData(parallelStruct *s, ProcessCommunicator &processComm);

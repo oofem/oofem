@@ -95,23 +95,23 @@ Function :: giveInputRecord(DynamicInputRecord &input)
 double
 Function :: evaluateAtTime(double t)
 {
-    std::map< std::string, FunctionArgument > valDict;
-    valDict.insert(std::make_pair("t", t));
+    std :: map< std :: string, FunctionArgument >valDict;
+    valDict.insert( std :: make_pair("t", t) );
     FloatArray v;
     this->evaluate(v, valDict);
     ///@todo This should be possible and nice to use if we have C++11
     //this->evaluate(v, {{t, "t"}});
     if ( v.giveSize() != 1 ) {
-        OOFEM_ERROR2("%s :: evaluateAtTime - Function doesn't return scalar results.", this->giveClassName());
+        OOFEM_ERROR2( "%s :: evaluateAtTime - Function doesn't return scalar results.", this->giveClassName() );
     }
     return v.at(1);
 }
 
 
 void
-Function :: evaluate(FloatArray &answer, std::map< std::string, FunctionArgument > &valDict)
+Function :: evaluate(FloatArray &answer, std :: map< std :: string, FunctionArgument > &valDict)
 {
-    std::map< std::string, FunctionArgument > :: iterator it = valDict.find("t");
+    std :: map< std :: string, FunctionArgument > :: iterator it = valDict.find("t");
 #ifdef DEBUG
     if ( it == valDict.end() ) {
         OOFEM_ERROR("Funciton :: evaluate - Missing necessary argument \"t\"");
@@ -120,5 +120,4 @@ Function :: evaluate(FloatArray &answer, std::map< std::string, FunctionArgument
     answer.resize(1);
     answer.at(1) = this->evaluateAtTime(it->second.val0);
 }
-
 } // end namespace oofem

@@ -23,11 +23,6 @@ ____________________________________________________\n"
 #define MODULE_LIST "@MODULE_LIST@"
 
 /* Headers */
-/* Define if #include<sys/time.h> exist */
-#cmakedefine HAVE_SYS_TIME_H 1
-
-/* Define if strings.h defined */
-#cmakedefine HAVE_STRINGS_H 1
 
 /* Define if unistd.h defined */
 #cmakedefine HAVE_UNISTD_H 1
@@ -35,31 +30,14 @@ ____________________________________________________\n"
 /* Define if execinfo.h defined */
 #cmakedefine HAVE_EXECINFO_H 1
 
-/* Define if program may include both 'time.h' and 'sys/time.h' */
-#cmakedefine TIME_WITH_SYS_TIME 1
-
 /* Symbols */
 /* Define if access is defined */
 #cmakedefine HAVE_ACCESS 1
-
-/* Define if strncasecmp is defined */
-#cmakedefine HAVE_STRNCASECMP 1
 
 /* Define if cbrt is defined */
 #cmakedefine HAVE_CBRT 1
 
 /* Define if isnan is defined */
 #cmakedefine HAVE_ISNAN 1
-
-/* Variables */
-/* Define if M_PI constant is defined */
-#cmakedefine HAVE_M_PI 1
-
-/* Define if M_LN2 constant is defined */
-#cmakedefine HAVE_M_LN2 1
-
-/* Other */
-/* Define if __VA_ARGS__ macro is supported by preprocessor */
-#cmakedefine HAVE_MACRO_VA_ARGS 1
 
 @OOFEM_EXPORT_HEADER@

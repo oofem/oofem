@@ -90,7 +90,7 @@ Quad10_2D_SUPG :: giveInterpolation(DofIDItem id) const
 DofManager *
 Quad10_2D_SUPG :: giveInternalDofManager(int i) const
 {
-    return const_cast< ElementDofManager * >( & pressureNode );
+    return const_cast< ElementDofManager * >(& pressureNode);
 }
 
 

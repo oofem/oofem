@@ -121,7 +121,7 @@ NonlinearFluidMaterial :: computeDeviatoricStressVector(FloatArray &answer, Gaus
         answer.at(6) *= 0.5;
     }
 
-    answer.times( 2.0 * viscosity * ( 1.0 + c * pow(normeps2, alpha*0.5) ) );
+    answer.times( 2.0 * viscosity * ( 1.0 + c * pow(normeps2, alpha * 0.5) ) );
 
     status->letTempDeviatoricStressVectorBe(answer);
     status->letTempDeviatoricStrainVectorBe(eps);
@@ -139,7 +139,7 @@ NonlinearFluidMaterial :: giveDeviatoricStiffnessMatrix(FloatMatrix &answer, Mat
     eps = status->giveTempDeviatoricStrainVector();
     normeps2 = status->giveTempStrainNorm2();
 
-    answer.resize(eps.giveSize(), eps.giveSize());
+    answer.resize( eps.giveSize(), eps.giveSize() );
     answer.zero();
     for ( int i = 1; i <= answer.giveNumberOfRows(); i++ ) {
         answer.at(i, i) = 1.;
@@ -166,10 +166,10 @@ NonlinearFluidMaterial :: giveDeviatoricStiffnessMatrix(FloatMatrix &answer, Mat
             eps.at(6) *= 0.5;
         }
         op.beDyadicProductOf(eps, eps);
-        answer.times( 2 * viscosity * ( 1 + c * pow(normeps2, alpha*0.5) ) );
-        answer.add( 2 * viscosity * c * alpha * pow(normeps2, alpha*0.5 - 1), op);
+        answer.times( 2 * viscosity * ( 1 + c * pow(normeps2, alpha * 0.5) ) );
+        answer.add(2 * viscosity * c * alpha * pow(normeps2, alpha * 0.5 - 1), op);
     } else {
-        answer.times( 2 * viscosity );
+        answer.times(2 * viscosity);
     }
 }
 
@@ -193,8 +193,7 @@ NonlinearFluidMaterialStatus :: NonlinearFluidMaterialStatus(int n, Domain *d, G
     temp_deviatoricStressVector(),
     temp_deviatoricStrainVector(),
     temp_norm2(0)
-{
-}
+{ }
 
 void
 NonlinearFluidMaterialStatus :: initTempStatus()

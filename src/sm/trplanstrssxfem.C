@@ -32,7 +32,7 @@
 #include "structuralcrosssection.h"
 #include "vtkxmlexportmodule.h"
 #ifdef __OOFEG
-#include "xfem/patchintegrationrule.h"
+ #include "xfem/patchintegrationrule.h"
 #endif
 #include "xfem/delaunay.h"
 
@@ -69,9 +69,9 @@ Interface *
 TrPlaneStress2dXFEM :: giveInterface(InterfaceType it)
 {
     if ( it == XfemElementInterfaceType ) {
-        return static_cast< XfemElementInterface * >( this );
+        return static_cast< XfemElementInterface * >(this);
     } else if ( it == VTKXMLExportModuleElementInterfaceType ) {
-        return static_cast< VTKXMLExportModuleElementInterface * >( this );
+        return static_cast< VTKXMLExportModuleElementInterface * >(this);
     } else {
         return TrPlaneStress2d :: giveInterface(it);
     }
@@ -90,20 +90,19 @@ int TrPlaneStress2dXFEM :: computeNumberOfDofs()
 
 void TrPlaneStress2dXFEM :: computeGaussPoints()
 {
-	if(giveDomain()->hasXfemManager()) {
-		XfemManager *xMan = giveDomain()->giveXfemManager();
+    if ( giveDomain()->hasXfemManager() ) {
+        XfemManager *xMan = giveDomain()->giveXfemManager();
 
-		if ( xMan->isElementEnriched(this) ) {
-			if ( !this->XfemElementInterface_updateIntegrationRule() ) {
-				TrPlaneStress2d :: computeGaussPoints();
-			}
-		} else   {
-			TrPlaneStress2d :: computeGaussPoints();
-		}
-	}
-	else {
-		TrPlaneStress2d :: computeGaussPoints();
-	}
+        if ( xMan->isElementEnriched(this) ) {
+            if ( !this->XfemElementInterface_updateIntegrationRule() ) {
+                TrPlaneStress2d :: computeGaussPoints();
+            }
+        } else {
+            TrPlaneStress2d :: computeGaussPoints();
+        }
+    } else   {
+        TrPlaneStress2d :: computeGaussPoints();
+    }
 }
 
 void TrPlaneStress2dXFEM :: computeBmatrixAt(GaussPoint *gp, FloatMatrix &answer, int li, int ui)
@@ -128,26 +127,23 @@ TrPlaneStress2dXFEM :: giveDofManDofIDMask(int inode, EquationID ut, IntArray &a
 {
     // Returns the total id mask of the dof manager = regular id's + enriched id's
 
-	if(giveDomain()->hasXfemManager()) {
-
-		XfemManager *xMan = this->domain->giveXfemManager();
-		if ( xMan != NULL ) {
-			this->giveDofManager(inode)->giveCompleteMasterDofIDArray(answer);
-		} else {
-			// Continuous part
-			TrPlaneStress2d :: giveDofManDofIDMask(inode, ut, answer);
-		}
-	}
-	else {
-		TrPlaneStress2d :: giveDofManDofIDMask(inode, ut, answer);
-	}
-
-
-    if(answer.giveSize() == 0) {
-    	// TODO: How do we fix this in a nicer way? /ES
-    	answer.setValues(2, D_u, D_v);
+    if ( giveDomain()->hasXfemManager() ) {
+        XfemManager *xMan = this->domain->giveXfemManager();
+        if ( xMan != NULL ) {
+            this->giveDofManager(inode)->giveCompleteMasterDofIDArray(answer);
+        } else {
+            // Continuous part
+            TrPlaneStress2d :: giveDofManDofIDMask(inode, ut, answer);
+        }
+    } else   {
+        TrPlaneStress2d :: giveDofManDofIDMask(inode, ut, answer);
     }
 
+
+    if ( answer.giveSize() == 0 ) {
+        // TODO: How do we fix this in a nicer way? /ES
+        answer.setValues(2, D_u, D_v);
+    }
 }
 
 void

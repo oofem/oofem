@@ -151,8 +151,10 @@ public:
      * @param aProperty id of property requested
      * @return property value
      */
-    virtual double giveProperty(int aProperty) { OOFEM_ERROR("Load :: giveProperty - Not supported for this boundary condition.");
-                                                 return 0; }
+    virtual double giveProperty(int aProperty, TimeStep *tStep) {
+        OOFEM_ERROR("Load :: giveProperty - Not supported for this boundary condition.");
+        return 0;
+    }
 
     virtual IRResultType initializeFrom(InputRecord *ir);
     virtual void giveInputRecord(DynamicInputRecord &input);
@@ -165,8 +167,10 @@ protected:
 
 public:
     void setComponentArray(FloatArray &arry) { componentArray = arry; }
-    FloatArray giveCopyOfComponentArray() { FloatArray answer = componentArray;
-                                            return answer; }
+    FloatArray giveCopyOfComponentArray() {
+        FloatArray answer = componentArray;
+        return answer;
+    }
 };
 } // end namespace oofem
 #endif // load_h

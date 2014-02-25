@@ -72,7 +72,7 @@ int
 LobattoIntegrationRule :: SetUpPointsOnSquare(int nPoints, MaterialMode mode)
 //GaussIntegrationRule :: SetUpPointsOnSquare(int nPoints_xi1, int nPoints_xi2, MaterialMode mode)
 {
-    int nPoints_xi1 = (int) floor( sqrt( double ( nPoints ) ) );
+    int nPoints_xi1 = ( int ) floor( sqrt( double ( nPoints ) ) );
     int nPoints_xi2 = nPoints_xi1;
     FloatArray coords_xi1, weights1, coords_xi2, weights2;
     this->giveLineCoordsAndWeights(nPoints_xi1, coords_xi1, weights1);
@@ -99,7 +99,7 @@ int
 LobattoIntegrationRule :: SetUpPointsOnCube(int nPoints, MaterialMode mode)
 //GaussIntegrationRule :: SetUpPointsOnCube(int nPoints_xi1, int nPoints_xi2, int nPoints_xi3, MaterialMode mode)
 {
-    int nPoints_xi1 = (int) floor(cbrt( double ( nPoints ) ) + 0.5);
+    int nPoints_xi1 = ( int ) floor(cbrt( double ( nPoints ) ) + 0.5);
     int nPoints_xi2 = nPoints_xi1;
     int nPoints_xi3 = nPoints_xi1;
     FloatArray coords_xi1, weights1, coords_xi2, weights2, coords_xi3, weights3;

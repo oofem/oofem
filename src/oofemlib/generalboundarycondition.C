@@ -96,7 +96,7 @@ bool GeneralBoundaryCondition :: isImposed(TimeStep *tStep)
     // in given time (nonzero indicates imposed b.c.).
 
     if ( isImposedTimeFunction ) {
-        return ( domain->giveFunction(isImposedTimeFunction)->evaluateAtTime(tStep->giveIntrinsicTime()) != 0. );
+        return ( domain->giveFunction(isImposedTimeFunction)->evaluateAtTime( tStep->giveIntrinsicTime() ) != 0. );
     } else {
         // zero value indicates default behavior -> b.c. is imposed
         // anytime

@@ -91,10 +91,21 @@ protected:
 
     void giveCharacteristicTensor(FloatMatrix &answer, CharTensor type, GaussPoint *gp, TimeStep *tStep);
     virtual int giveIPValue(FloatArray &answer, GaussPoint *gp, InternalStateType type, TimeStep *tStep);
-
+    virtual int computeLoadGToLRotationMtrx(FloatMatrix &answer);
     virtual void computeBodyLoadVectorAt(FloatArray &answer, Load *forLoad, TimeStep *tStep, ValueModeType mode);
 
     friend class TR_SHELL01;
+    /**
+     * @name Surface load support
+     */
+    //@{
+    virtual void computeSurfaceNMatrixAt(FloatMatrix &answer, int iSurf, GaussPoint *gp);
+    virtual void giveSurfaceDofMapping(IntArray &answer, int iSurf) const;
+    virtual IntegrationRule *GetSurfaceIntegrationRule(int iSurf);
+    virtual double computeSurfaceVolumeAround(GaussPoint *gp, int iSurf);
+    virtual void computeSurfIpGlobalCoords(FloatArray &answer, GaussPoint *gp, int iSurf);
+    virtual int computeLoadLSToLRotationMatrix(FloatMatrix &answer, int iSurf, GaussPoint *gp);
+    //@}
 
 public:
     // definition & identification
@@ -116,6 +127,8 @@ public:
         _error("cct3d :: giveLocalCoordinateSystem: calling of this function id not allowed");
         return 0;
     }
+    virtual int testElementExtension(ElementExtension ext)
+    { return ( ( ext == Element_SurfaceLoadSupport )  ? 1 : 0 ); }
 
     virtual void printOutputAt(FILE *file, TimeStep *tStep);
 };

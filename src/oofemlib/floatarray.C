@@ -50,14 +50,14 @@
 #include <cstring>
 #include <ostream>
 #if __cplusplus > 199711L
-#include <memory>
+ #include <memory>
 #endif
 
 #ifdef __PARALLEL_MODE
  #include "combuff.h"
 #endif
 
-#define ALLOC(size) new double[size];
+#define ALLOC(size) new double [ size ];
 
 #define RESIZE(n) \
     { \
@@ -121,7 +121,7 @@ FloatArray :: FloatArray(const FloatArray &src) :
 #if __cplusplus > 199711L
 FloatArray :: FloatArray(std :: initializer_list< double >list)
 {
-    this->size = this->allocatedSize = (int)list.size();
+    this->size = this->allocatedSize = ( int ) list.size();
     if ( this->size ) {
         this->values = ALLOC(this->size);
         std :: uninitialized_copy(list.begin(), list.end(), this->values);
@@ -133,7 +133,7 @@ FloatArray :: FloatArray(std :: initializer_list< double >list)
 
 FloatArray &FloatArray :: operator = ( std :: initializer_list< double >list )
 {
-    RESIZE( (int)list.size() );
+    RESIZE( ( int ) list.size() );
     std :: uninitialized_copy(list.begin(), list.end(), this->values);
     return * this;
 }
@@ -741,11 +741,11 @@ void FloatArray :: resize(int n)
     }
     values = ALLOC(allocatedSize);
     memset(this->values, 0, allocatedSize);
-#ifdef DEBUG
+ #ifdef DEBUG
     if ( !values ) {
         OOFEM_FATAL2("FloatArray :: simple - Failed in allocating %d doubles", n);
     }
-#endif
+ #endif
 #endif
 }
 
@@ -828,7 +828,7 @@ void FloatArray :: beTProductOf(const FloatMatrix &aMatrix, const FloatArray &an
 
 #  ifdef DEBUG
     if ( aMatrix.giveNumberOfRows() != anArray.giveSize() ) {
-        OOFEM_ERROR3("FloatArray :: beTProductOf : dimension mismatch, matrix rows = %d, array size = %d", aMatrix.giveNumberOfRows(), anArray.giveSize());
+        OOFEM_ERROR3( "FloatArray :: beTProductOf : dimension mismatch, matrix rows = %d, array size = %d", aMatrix.giveNumberOfRows(), anArray.giveSize() );
     }
 
 #  endif
@@ -1270,22 +1270,23 @@ void FloatArray :: beSymVectorForm(const FloatMatrix &aMatrix)
 void FloatArray :: changeComponentOrder()
 {
     // OOFEM: 			11, 22, 33, 23, 13, 12, 32, 31, 21
-	// UMAT:			11, 22, 33, 12, 13, 23, 32, 21, 31
+    // UMAT:			11, 22, 33, 12, 13, 23, 32, 21, 31
 
-	if(this->giveSize() == 6) {
-		std::swap(this->at(4), this->at(6));
-	}
-	else if( this->giveSize() == 9 ) {
-	    // OOFEM: 			11, 22, 33, 23, 13, 12, 32, 31, 21
-		// UMAT:			11, 22, 33, 12, 13, 23, 32, 21, 31
-		const int abq2oo[9] = {  1,  2,  3,  6,  5,  4,  7,  9,  8};
+    if ( this->giveSize() == 6 ) {
+        std :: swap( this->at(4), this->at(6) );
+    } else if ( this->giveSize() == 9 )    {
+        // OOFEM: 			11, 22, 33, 23, 13, 12, 32, 31, 21
+        // UMAT:			11, 22, 33, 12, 13, 23, 32, 21, 31
+        const int abq2oo [ 9 ] = {
+            1,  2,  3,  6,  5,  4,  7,  9,  8
+        };
 
-		FloatArray tmp(9);
-		for(int i = 1; i <= 9; i++) {
-				tmp.at(i) = this->at( abq2oo[i-1]);
-		}
+        FloatArray tmp(9);
+        for ( int i = 1; i <= 9; i++ ) {
+            tmp.at(i) = this->at(abq2oo [ i - 1 ]);
+        }
 
-		*this = tmp;
+        * this = tmp;
     }
 }
 

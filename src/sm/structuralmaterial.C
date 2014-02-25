@@ -1695,13 +1695,16 @@ StructuralMaterial :: giveIPValue(FloatArray &answer, GaussPoint *gp, InternalSt
     } else if ( type == IST_StrainTensor ) {
         ///@todo Fill in correct full form values here! This just adds zeros!
         StructuralMaterial :: giveFullSymVectorForm( answer, status->giveStrainVector(), gp->giveMaterialMode() );
-        if ( gp->giveMaterialMode() == _PlaneStress ) {
-            double Nxy = this->give(NYxy, gp);
-            double Nxz = this->give(NYxz, gp);
-            double Nyz = this->give(NYyz, gp);
-            double Nyx = Nxy * this->give(Ey, gp) / this->give(Ex, gp);
-            answer.at(3) = ( -( Nxz + Nxy * Nyz ) * answer.at(1) - ( Nyz + Nxz * Nyx ) * answer.at(2) ) / ( 1. - Nxy * Nyx );
-        }
+        /* commented out by Milan - this evaluation of the out-of-plane strain would be correct for elastic material only
+         *                          and for other materials can lead to misleading values
+         * if ( gp->giveMaterialMode() == _PlaneStress) {
+         *  double Nxy = this->give(NYxy, gp);
+         *  double Nxz = this->give(NYxz, gp);
+         *  double Nyz = this->give(NYyz, gp);
+         *  double Nyx = Nxy * this->give(Ey, gp) / this->give(Ex, gp);
+         *  answer.at(3) = ( -( Nxz + Nxy * Nyz ) * answer.at(1) - ( Nyz + Nxz * Nyx ) * answer.at(2) ) / ( 1. - Nxy * Nyx );
+         * }
+         */
         return 1;
     } else if ( type == IST_StrainTensor_Reduced ) {
         ///@todo Fill in correct full form values here! This just adds zeros!
@@ -1891,11 +1894,10 @@ StructuralMaterial :: computeStressIndependentStrainVector(FloatArray &answer,
 void
 StructuralMaterial :: giveFullSymVectorForm(FloatArray &answer, const FloatArray &vec, MaterialMode matMode)
 {
-    if(vec.giveSize() == 6) {
+    if ( vec.giveSize() == 6 ) {
         // If we use default 3D implementation to treat e.g. plane strain.
         answer = vec;
-    }
-    else {
+    } else   {
         IntArray indx;
         answer.resize( StructuralMaterial :: giveVoigtSymVectorMask(indx, matMode) );
         answer.zero();
@@ -1946,10 +1948,9 @@ StructuralMaterial :: giveReducedSymVectorForm(FloatArray &answer, const FloatAr
     IntArray indx;
     StructuralMaterial :: giveVoigtSymVectorMask(indx, matMode);
 
-    if(indx.giveSize() == vec.giveSize()) {
+    if ( indx.giveSize() == vec.giveSize() ) {
         answer = vec;
-    }
-    else {
+    } else   {
         answer.resize( indx.giveSize() );
         for ( int i = 1; i <= indx.giveSize(); i++ ) {
             answer.at(i) = vec.at( indx.at(i) );

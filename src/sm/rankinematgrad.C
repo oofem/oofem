@@ -127,8 +127,8 @@ RankineMatGrad :: givePDGradMatrix_kk(FloatMatrix &answer, MatResponseMode mode,
 void
 RankineMatGrad :: givePDGradMatrix_LD(FloatMatrix &answer, MatResponseMode mode, GaussPoint *gp, TimeStep *tStep)
 {
-  MaterialMode mMode = gp->giveMaterialMode();
-  OOFEM_ERROR2("RankineMatGrad :: giveDPGradMatrix_LD - mMode = %d not supported\n", mMode);
+    MaterialMode mMode = gp->giveMaterialMode();
+    OOFEM_ERROR2("RankineMatGrad :: giveDPGradMatrix_LD - mMode = %d not supported\n", mMode);
 }
 
 void

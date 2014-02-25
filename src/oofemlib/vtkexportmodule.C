@@ -67,9 +67,6 @@ REGISTER_ExportModule(VTKExportModule)
 
 VTKExportModule :: VTKExportModule(int n, EngngModel *e) : ExportModule(n, e), internalVarsToExport(), primaryVarsToExport()
 {
-    //this->mode = rbrmode;
-    this->mode = wdmode; //preserves node numbering
-    this->outMode = rbrmode; //applies only when mode == rbrmode; need to set up smoother accordingly
     smoother = NULL;
 }
 
@@ -98,9 +95,6 @@ VTKExportModule :: initializeFrom(InputRecord *ir)
     IR_GIVE_OPTIONAL_FIELD(ir, val, _IFT_VTKExportModule_stype);
     stype = ( NodalRecoveryModel :: NodalRecoveryModelType ) val;
 
-    regionsToSkip.clear();
-    IR_GIVE_OPTIONAL_FIELD(ir, regionsToSkip, _IFT_VTKExportModule_regionstoskip);
-
     return IRRT_OK;
 }
 
@@ -128,82 +122,31 @@ VTKExportModule :: doOutput(TimeStep *tStep, bool forcedOutput)
 
     // output points
 
-    if ( ( this->mode == wdmode ) || ( ( this->mode == rbrmode ) && ( this->outMode == wdmode ) ) ) {
-        int nnodes = this->giveTotalRBRNumberOfNodes(d);
-        fprintf(stream, "POINTS %d double\n", nnodes);
-        int ireg = -1;
-        int regionDofMans;
-        IntArray map( d->giveNumberOfDofManagers() );
+    fprintf(stream, "POINTS %d double\n", nnodes);
+    int ireg = -1;
+    int regionDofMans;
+    IntArray map( d->giveNumberOfDofManagers() );
 
-        // asemble local->global region map
-        this->initRegionNodeNumbering(map, regionDofMans, 0, d, ireg, 1);
+    // asemble local->global region map
+    this->initRegionNodeNumbering(map, regionDofMans, 0, d, ireg, 1);
 
-        OOFEM_LOG_DEBUG("vktexportModule: %d %d\n", nnodes, regionDofMans);
-        for ( inode = 1; inode <= regionDofMans; inode++ ) {
-            coords = d->giveNode( map.at(inode) )->giveCoordinates();
-            for ( i = 1; i <= coords->giveSize(); i++ ) {
-                fprintf( stream, "%e ", coords->at(i) );
-            }
-
-            for ( i = coords->giveSize() + 1; i <= 3; i++ ) {
-                fprintf(stream, "%e ", 0.0);
-            }
-
-            fprintf(stream, "\n");
+    OOFEM_LOG_DEBUG("vktexportModule: %d %d\n", nnodes, regionDofMans);
+    for ( inode = 1; inode <= regionDofMans; inode++ ) {
+        coords = d->giveNode( map.at(inode) )->giveCoordinates();
+        for ( i = 1; i <= coords->giveSize(); i++ ) {
+            fprintf( stream, "%e ", coords->at(i) );
         }
 
-        /*
-         * fprintf(stream, "POINTS %d double\n", nnodes);
-         * for ( inode = 1; inode <= nnodes; inode++ ) {
-         * coords = d->giveNode(inode)->giveCoordinates();
-         * for ( i = 1; i <= coords->giveSize(); i++ ) {
-         * fprintf( stream, "%e ", coords->at(i) );
-         * }
-         *
-         * for ( i = coords->giveSize() + 1; i <= 3; i++ ) {
-         * fprintf(stream, "%e ", 0.0);
-         * }
-         *
-         * fprintf(stream, "\n");
-         * }
-         */
-    } else { // outMode = rbrmode (Region By Region)
-        // output nodes Region By Region
-        int nnodes = this->giveTotalRBRNumberOfNodes(d);
-        fprintf(stream, "POINTS %d double\n", nnodes);
-        int ireg, nregions = this->smoother->giveNumberOfVirtualRegions();
-        int regionDofMans;
-        IntArray map( d->giveNumberOfDofManagers() );
-        for ( ireg = 1; ireg <= nregions; ireg++ ) {
-            if ( this->regionsToSkip.contains(ireg) ) {
-                continue;
-            }
-
-            // asemble local->global region map
-            this->initRegionNodeNumbering(map, regionDofMans, 0, d, ireg, 1);
-
-            for ( inode = 1; inode <= regionDofMans; inode++ ) {
-                coords = d->giveNode( map.at(inode) )->giveCoordinates();
-                for ( i = 1; i <= coords->giveSize(); i++ ) {
-                    fprintf( stream, "%e ", coords->at(i) );
-                }
-
-                for ( i = coords->giveSize() + 1; i <= 3; i++ ) {
-                    fprintf(stream, "%e ", 0.0);
-                }
-
-                fprintf(stream, "\n");
-            }
+        for ( i = coords->giveSize() + 1; i <= 3; i++ ) {
+            fprintf(stream, "%e ", 0.0);
         }
+
+        fprintf(stream, "\n");
     }
 
     int ielem, nelem = d->giveNumberOfElements(), elemToProcess = 0;
     int ncells, celllistsize = 0;
     for ( ielem = 1; ielem <= nelem; ielem++ ) {
-        if ( ( this->mode == rbrmode ) && ( this->regionsToSkip.contains( smoother->giveElementVirtualRegionNumber(ielem) ) ) ) {
-            continue;
-        }
-
 #ifdef __PARALLEL_MODE
         if ( d->giveElement(ielem)->giveParallelMode() != Element_local ) {
             continue;
@@ -223,121 +166,49 @@ VTKExportModule :: doOutput(TimeStep *tStep, bool forcedOutput)
     // output cells
     fprintf(stream, "\nCELLS %d %d\n", elemToProcess, celllistsize);
 
-    if ( ( this->mode == wdmode ) || ( ( this->mode == rbrmode ) && ( this->outMode == wdmode ) ) ) {
-        IntArray regionNodalNumbers(nnodes);
-        int regionDofMans = 0, offset = 0;
-        int ireg = -1;
+    IntArray regionNodalNumbers(nnodes);
+    int offset = 0;
 
-        // assemble global->local map
-        this->initRegionNodeNumbering(regionNodalNumbers, regionDofMans, offset, d, ireg, 0);
-        offset += regionDofMans;
-        for ( ielem = 1; ielem <= nelem; ielem++ ) {
-            elem = d->giveElement(ielem);
+    // assemble global->local map
+    this->initRegionNodeNumbering(regionNodalNumbers, regionDofMans, offset, d, ireg, 0);
+    offset += regionDofMans;
+    for ( ielem = 1; ielem <= nelem; ielem++ ) {
+        elem = d->giveElement(ielem);
 #ifdef __PARALLEL_MODE
-            if ( elem->giveParallelMode() != Element_local ) {
-                continue;
-            }
+        if ( elem->giveParallelMode() != Element_local ) {
+            continue;
+        }
 
 #endif
-            vtkCellType = this->giveCellType(elem);
+        vtkCellType = this->giveCellType(elem);
 
-            nelemNodes = this->giveNumberOfNodesPerCell(vtkCellType);   //elem->giveNumberOfNodes(); // It HAS to be the same size as giveNumberOfNodesPerCell, otherwise the file will be incorrect.
-            this->giveElementCell(cellNodes, elem, 0);
-            fprintf(stream, "%d ", nelemNodes);
-            for ( i = 1; i <= nelemNodes; i++ ) {
-                fprintf(stream, "%d ", regionNodalNumbers.at( cellNodes.at(i) ) - 1);
-            }
-
-            fprintf(stream, "\n");
+        nelemNodes = this->giveNumberOfNodesPerCell(vtkCellType); //elem->giveNumberOfNodes(); // It HAS to be the same size as giveNumberOfNodesPerCell, otherwise the file will be incorrect.
+        this->giveElementCell(cellNodes, elem, 0);
+        fprintf(stream, "%d ", nelemNodes);
+        for ( i = 1; i <= nelemNodes; i++ ) {
+            fprintf(stream, "%d ", regionNodalNumbers.at( cellNodes.at(i) ) - 1);
         }
 
-        // output cell types
-        int vtkCellType;
-        fprintf(stream, "\nCELL_TYPES %d\n", elemToProcess);
-        for ( ielem = 1; ielem <= nelem; ielem++ ) {
-            elem = d->giveElement(ielem);
+        fprintf(stream, "\n");
+    }
+
+    // output cell types
+    fprintf(stream, "\nCELL_TYPES %d\n", elemToProcess);
+    for ( ielem = 1; ielem <= nelem; ielem++ ) {
+        elem = d->giveElement(ielem);
 #ifdef __PARALLEL_MODE
-            if ( elem->giveParallelMode() != Element_local ) {
-                continue;
-            }
+        if ( elem->giveParallelMode() != Element_local ) {
+            continue;
+        }
 
 #endif
-            vtkCellType = this->giveCellType(elem);
-            fprintf(stream, "%d\n", vtkCellType);
-        }
+        vtkCellType = this->giveCellType(elem);
+        fprintf(stream, "%d\n", vtkCellType);
+    }
 
-        // output cell data (Material ID ...)
-        if ( cellVarsToExport.giveSize() ) {
-            exportCellVars(stream, elemToProcess, tStep);
-        }
-    } else { // rbr mode
-        IntArray regionNodalNumbers(nnodes);
-        int regionDofMans = 0, offset = 0;
-        int ireg, nregions = smoother->giveNumberOfVirtualRegions();
-        for ( ireg = 1; ireg <= nregions; ireg++ ) {
-            if ( this->regionsToSkip.contains(ireg) ) {
-                continue;
-            }
-
-            // assemble global->local map
-            this->initRegionNodeNumbering(regionNodalNumbers, regionDofMans, offset, d, ireg, 0);
-            offset += regionDofMans;
-            for ( ielem = 1; ielem <= nelem; ielem++ ) {
-                elem = d->giveElement(ielem);
-
-                if ( smoother->giveElementVirtualRegionNumber(ielem) != ireg ) {
-                    continue;
-                }
-
-                vtkCellType = this->giveCellType(elem);
-#ifdef __PARALLEL_MODE
-                if ( elem->giveParallelMode() != Element_local ) {
-                    continue;
-                }
-
-#endif
-
-                nelemNodes = elem->giveNumberOfNodes();
-                this->giveElementCell(cellNodes, elem, 0);
-
-                fprintf(stream, "%d ", nelemNodes);
-                for ( i = 1; i <= nelemNodes; i++ ) {
-                    fprintf(stream, "%d ", regionNodalNumbers.at( cellNodes.at(i) ) - 1);
-                }
-
-                fprintf(stream, "\n");
-            }
-        }
-
-        for ( ireg = 1; ireg <= nregions; ireg++ ) {
-            if ( this->regionsToSkip.contains(ireg) ) {
-                continue;
-            }
-
-            // output cell types
-            int vtkCellType;
-            fprintf(stream, "\nCELL_TYPES %d\n", elemToProcess);
-            for ( ielem = 1; ielem <= nelem; ielem++ ) {
-                elem = d->giveElement(ielem);
-                if ( smoother->giveElementVirtualRegionNumber(ielem) != ireg ) {
-                    continue;
-                }
-
-#ifdef __PARALLEL_MODE
-                if ( elem->giveParallelMode() != Element_local ) {
-                    continue;
-                }
-
-#endif
-
-                vtkCellType = this->giveCellType(elem);
-                fprintf(stream, "%d\n", vtkCellType);
-            }
-
-            if ( cellVarsToExport.giveSize() ) {
-                exportCellVars(stream, elemToProcess, tStep);
-            }
-        }
+    // output cell data (Material ID ...)
+    if ( cellVarsToExport.giveSize() ) {
+        exportCellVars(stream, elemToProcess, tStep);
     }
 
     if ( primaryVarsToExport.giveSize() || internalVarsToExport.giveSize() ) {
@@ -534,19 +405,6 @@ VTKExportModule :: exportIntVars(FILE *stream, TimeStep *tStep)
         return;
     }
 
-    //nnodes = d->giveNumberOfDofManagers();
-
-    /*
-     * #ifdef RBR_SUPPORT
-     * if (outMode == wdmode)
-     * fprintf(stream,"\n\nPOINT_DATA %d\n", nnodes);
-     * else
-     * fprintf(stream,"\n\nPOINT_DATA %d\n", this->giveTotalRBRNumberOfNodes(d));
-     ****#else
-     * fprintf(stream,"\n\nPOINT_DATA %d\n", nnodes);
-     ****#endif
-     */
-
     for ( i = 1; i <= n; i++ ) {
         type = ( InternalStateType ) internalVarsToExport.at(i);
         InternalStateValueType iType = giveInternalStateValueType(type);
@@ -685,62 +543,29 @@ VTKExportModule :: giveTotalRBRNumberOfNodes(Domain *d)
     int rbrnodes = 0, nnodes = d->giveNumberOfDofManagers(), nelems = d->giveNumberOfElements();
     std :: vector< char > map(nnodes);
     //char map[nnodes];
-    int i, j, nregions = smoother->giveNumberOfVirtualRegions();
+    int j;
     int elemnodes, ielemnode;
 
-    if ( ( this->mode == wdmode ) || ( ( this->mode == rbrmode ) && ( this->outMode == wdmode ) ) ) {
-        for ( j = 0; j < nnodes; j++ ) {
-            map [ j ] = 0;
-        }
+    for ( j = 0; j < nnodes; j++ ) {
+        map [ j ] = 0;
+    }
 
-        for ( j = 1; j <= nelems; j++ ) {
-            elem  = d->giveElement(j);
+    for ( j = 1; j <= nelems; j++ ) {
+        elem  = d->giveElement(j);
 #ifdef __PARALLEL_MODE
-            if ( d->giveElement(j)->giveParallelMode() != Element_local ) {
-                continue;
-            }
+        if ( d->giveElement(j)->giveParallelMode() != Element_local ) {
+            continue;
+        }
 
 #endif
-            elemnodes = elem->giveNumberOfNodes();
-            for ( ielemnode = 1; ielemnode <= elemnodes; ielemnode++ ) {
-                map [ elem->giveNode(ielemnode)->giveNumber() - 1 ] = 1;
-            }
+        elemnodes = elem->giveNumberOfNodes();
+        for ( ielemnode = 1; ielemnode <= elemnodes; ielemnode++ ) {
+            map [ elem->giveNode(ielemnode)->giveNumber() - 1 ] = 1;
         }
+    }
 
-        for ( j = 0; j < nnodes; j++ ) {
-            rbrnodes += map [ j ];
-        }
-    } else {
-        for ( i = 1; i <= nregions; i++ ) {
-            if ( this->regionsToSkip.contains(i) ) {
-                continue;
-            }
-
-            for ( j = 0; j < nnodes; j++ ) {
-                map [ j ] = 0;
-            }
-
-            for ( j = 1; j <= nelems; j++ ) {
-                elem = d->giveElement(j);
-#ifdef __PARALLEL_MODE
-                if ( elem->giveParallelMode() != Element_local ) {
-                    continue;
-                }
-
-#endif
-                if ( smoother->giveElementVirtualRegionNumber(j) == i ) {
-                    elemnodes = elem->giveNumberOfNodes();
-                    for ( ielemnode = 1; ielemnode <= elemnodes; ielemnode++ ) {
-                        map [ elem->giveNode(ielemnode)->giveNumber() - 1 ] = 1;
-                    }
-                }
-            }
-
-
-            for ( j = 0; j < nnodes; j++ ) {
-                rbrnodes += map [ j ];
-            }
-        }
+    for ( j = 0; j < nnodes; j++ ) {
+        rbrnodes += map [ j ];
     }
 
     return rbrnodes;
@@ -771,9 +596,6 @@ VTKExportModule :: initRegionNodeNumbering(IntArray &regionNodalNumbers, int &re
 
     for ( ielem = 1; ielem <= nelem; ielem++ ) {
         element = domain->giveElement(ielem);
-        if ( ( reg > 0 ) && ( smoother->giveElementVirtualRegionNumber(ielem) != reg ) ) {
-            continue;
-        }
 
 #ifdef __PARALLEL_MODE
         if ( element->giveParallelMode() != Element_local ) {
@@ -818,12 +640,6 @@ VTKExportModule :: initRegionNodeNumbering(IntArray &regionNodalNumbers, int &re
         }
     }
 
-    //  for (elementSide = 1; elementSide<= elemSides; elementSide++) {
-    //   node = element->giveSide(elementSide)->giveNumber();
-    //   if (regionNodalNumbers.at(node) == 0) {// assign new number
-    //    regionNodalNumbers.at(node) = currOffset++;
-    //      regionDofMans++;
-    //  }
     return 1;
 }
 
@@ -832,12 +648,17 @@ void
 VTKExportModule :: exportIntVarAs(InternalStateType valID, InternalStateValueType type, FILE *stream, TimeStep *tStep)
 {
     Domain *d = emodel->giveDomain(1);
-    int ireg, nregions = smoother->giveNumberOfVirtualRegions();
+    int ireg;
     int nnodes = d->giveNumberOfDofManagers(), inode;
-    int i, j, jsize;
+    int j, jsize;
     FloatArray iVal(3);
     FloatMatrix t(3, 3);
     const FloatArray *val = NULL;
+
+
+    // create a new set containing all elements
+    Set elemSet(0, d);
+    elemSet.addAllElements();
 
     this->giveSmoother();
 
@@ -862,190 +683,95 @@ VTKExportModule :: exportIntVarAs(InternalStateType valID, InternalStateValueTyp
         }
 
         if ( !( ( valID == IST_DisplacementVector ) || ( valID == IST_MaterialInterfaceVal ) ) ) {
-            this->smoother->recoverValues(valID, tStep);
+            this->smoother->recoverValues(elemSet, valID, tStep);
         }
 
-        if ( this->mode == wdmode ) { // (Whole Domain)
-            IntArray regionNodalNumbers(nnodes);
-            int regionDofMans = 0, offset = 0;
-            ireg = -1;
-            int defaultSize = 0;
+        IntArray regionNodalNumbers(nnodes);
+        int regionDofMans = 0, offset = 0;
+        ireg = -1;
+        int defaultSize = 0;
 
-            this->initRegionNodeNumbering(regionNodalNumbers, regionDofMans, offset, d, ireg, 1);
-            if ( !( ( valID == IST_DisplacementVector ) || ( valID == IST_MaterialInterfaceVal ) ) ) {
-                // assemble local->global map
-                defaultSize = giveInternalStateTypeSize(type);
+        this->initRegionNodeNumbering(regionNodalNumbers, regionDofMans, offset, d, ireg, 1);
+        if ( !( ( valID == IST_DisplacementVector ) || ( valID == IST_MaterialInterfaceVal ) ) ) {
+            // assemble local->global map
+            defaultSize = giveInternalStateTypeSize(type);
+        } else {
+            regionDofMans = nnodes;
+        }
+
+        for ( inode = 1; inode <= regionDofMans; inode++ ) {
+            if ( valID == IST_DisplacementVector ) {
+                iVal.resize(3);
+                val = & iVal;
+                for ( j = 1; j <= 3; j++ ) {
+                    iVal.at(j) = d->giveNode( regionNodalNumbers.at(inode) )->giveUpdatedCoordinate(j, tStep, 1.0) -
+                    d->giveNode( regionNodalNumbers.at(inode) )->giveCoordinate(j);
+                }
+            } else if ( valID == IST_MaterialInterfaceVal ) {
+                MaterialInterface *mi = emodel->giveMaterialInterface(1);
+                if ( mi ) {
+                    iVal.resize(1);
+                    val = & iVal;
+                    iVal.at(1) = mi->giveNodalScalarRepresentation( regionNodalNumbers.at(inode) );
+                }
             } else {
-                regionDofMans = nnodes;
+                this->smoother->giveNodalVector( val, regionNodalNumbers.at(inode) );
             }
 
-            for ( inode = 1; inode <= regionDofMans; inode++ ) {
-                if ( valID == IST_DisplacementVector ) {
-                    iVal.resize(3);
-                    val = & iVal;
-                    for ( j = 1; j <= 3; j++ ) {
-                        iVal.at(j) = d->giveNode( regionNodalNumbers.at(inode) )->giveUpdatedCoordinate(j, tStep, 1.0) -
-                        d->giveNode( regionNodalNumbers.at(inode) )->giveCoordinate(j);
-                    }
-                } else if ( valID == IST_MaterialInterfaceVal ) {
-                    MaterialInterface *mi = emodel->giveMaterialInterface(1);
-                    if ( mi ) {
-                        iVal.resize(1);
-                        val = & iVal;
-                        iVal.at(1) = mi->giveNodalScalarRepresentation( regionNodalNumbers.at(inode) );
-                    }
-                } else {
-                    for ( i = 1; i <= nregions; i++ ) {
-                        this->smoother->giveNodalVector(val, regionNodalNumbers.at(inode), i);
-                        if ( val ) {
-                            break;
-                        }
-                    }
+            if ( val == NULL ) {
+                iVal.resize(defaultSize);
+                iVal.zero();
+                val = & iVal;
+                //OOFEM_ERROR ("VTKExportModule::exportIntVars: internal error: invalid dofman data");
+            }
+        }
 
-                    if ( val == NULL ) {
-                        iVal.resize(defaultSize);
-                        iVal.zero();
-                        val = & iVal;
-                        //OOFEM_ERROR ("VTKExportModule::exportIntVars: internal error: invalid dofman data");
-                    }
+
+        if ( type == ISVT_SCALAR ) {
+            if ( val->giveSize() ) {
+                fprintf( stream, "%e ", val->at(1) );
+            } else {
+                fprintf(stream, "%e ", 0.0);
+            }
+        } else if ( type == ISVT_VECTOR ) {
+            jsize = min( 3, val->giveSize() );
+            for ( j = 1; j <= jsize; j++ ) {
+                fprintf( stream, "%e ", val->at(j) );
+            }
+
+            for ( j = jsize + 1; j <= 3; j++ ) {
+                fprintf(stream, "0.0 ");
+            }
+        } else if ( type == ISVT_TENSOR_S3 ) {
+            t.zero();
+            for ( int ii = 1; ii <= 6; ii++ ) {
+                if ( ii == 1 ) {
+                    t.at(1, 1) = val->at(ii);
+                } else if ( ii == 2 ) {
+                    t.at(2, 2) = val->at(ii);
+                } else if ( ii == 3 ) {
+                    t.at(3, 3) = val->at(ii);
+                } else if ( ii == 4 ) {
+                    t.at(2, 3) = val->at(ii);
+                    t.at(3, 2) = val->at(ii);
+                } else if ( ii == 5 ) {
+                    t.at(1, 3) = val->at(ii);
+                    t.at(3, 1) = val->at(ii);
+                } else if ( ii == 6 ) {
+                    t.at(1, 2) = val->at(ii);
+                    t.at(2, 1) = val->at(ii);
                 }
+            }
 
-
-                if ( type == ISVT_SCALAR ) {
-                    if ( val->giveSize() ) {
-                        fprintf( stream, "%e ", val->at(1) );
-                    } else {
-                        fprintf(stream, "%e ", 0.0);
-                    }
-                } else if ( type == ISVT_VECTOR ) {
-                    jsize = min( 3, val->giveSize() );
-                    for ( j = 1; j <= jsize; j++ ) {
-                        fprintf( stream, "%e ", val->at(j) );
-                    }
-
-                    for ( j = jsize + 1; j <= 3; j++ ) {
-                        fprintf(stream, "0.0 ");
-                    }
-                } else if ( type == ISVT_TENSOR_S3 ) {
-                    t.zero();
-                    for ( int ii = 1; ii <= 6; ii++ ) {
-                        if ( ii == 1 ) {
-                            t.at(1, 1) = val->at(ii);
-                        } else if ( ii == 2 ) {
-                            t.at(2, 2) = val->at(ii);
-                        } else if ( ii == 3 ) {
-                            t.at(3, 3) = val->at(ii);
-                        } else if ( ii == 4 ) {
-                            t.at(2, 3) = val->at(ii);
-                            t.at(3, 2) = val->at(ii);
-                        } else if ( ii == 5 ) {
-                            t.at(1, 3) = val->at(ii);
-                            t.at(3, 1) = val->at(ii);
-                        } else if ( ii == 6 ) {
-                            t.at(1, 2) = val->at(ii);
-                            t.at(2, 1) = val->at(ii);
-                        }
-                    }
-
-                    for ( int ii = 1; ii <= 3; ii++ ) {
-                        for ( int jj = 1; jj <= 3; jj++ ) {
-                            fprintf( stream, "%e ", t.at(ii, jj) );
-                        }
-
-                        fprintf(stream, "\n");
-                    }
-                } else if ( type == ISVT_TENSOR_G ) { // export general tensor values as scalars
-                    fprintf( stream, "%e ", val->at(indx) );
+            for ( int ii = 1; ii <= 3; ii++ ) {
+                for ( int jj = 1; jj <= 3; jj++ ) {
+                    fprintf( stream, "%e ", t.at(ii, jj) );
                 }
 
                 fprintf(stream, "\n");
             }
-        } else { // RBR mode
-            IntArray regionNodalNumbers(nnodes);
-            int regionDofMans = 0, offset = 0;
-            for ( ireg = 1; ireg <= nregions; ireg++ ) {
-                if ( this->regionsToSkip.contains(ireg) ) {
-                    continue;
-                }
-
-                if ( !( ( valID == IST_DisplacementVector ) || ( valID == IST_MaterialInterfaceVal ) ) ) {
-                    // assemble local->global map
-                    this->initRegionNodeNumbering(regionNodalNumbers, regionDofMans, offset, d, ireg, 1);
-                }
-
-                for ( inode = 1; inode <= regionDofMans; inode++ ) {
-                    if ( valID == IST_DisplacementVector ) {
-                        iVal.resize(3);
-                        val = & iVal;
-                        for ( j = 1; j <= 3; j++ ) {
-                            iVal.at(j) = d->giveNode( regionNodalNumbers.at(inode) )->giveUpdatedCoordinate(j, tStep, 1.0) -
-                            d->giveNode( regionNodalNumbers.at(inode) )->giveCoordinate(j);
-                        }
-                    } else if ( valID == IST_MaterialInterfaceVal ) {
-                        MaterialInterface *mi = emodel->giveMaterialInterface(1);
-                        if ( mi ) {
-                            iVal.resize(1);
-                            val = & iVal;
-                            iVal.at(1) = mi->giveNodalScalarRepresentation( regionNodalNumbers.at(inode) );
-                        }
-                    } else {
-                        this->smoother->giveNodalVector(val, regionNodalNumbers.at(inode), ireg);
-                        if ( val == NULL ) {
-                            OOFEM_ERROR("VTKExportModule::exportIntVars: internal error: invalid dofman data");
-                        }
-                    }
-
-
-                    if ( type == ISVT_SCALAR ) {
-                        if ( val->giveSize() ) {
-                            fprintf( stream, "%e ", val->at(1) );
-                        } else {
-                            fprintf(stream, "%e ", 0.0);
-                        }
-                    } else if ( type == ISVT_VECTOR ) {
-                        jsize = min( 3, val->giveSize() );
-                        for ( j = 1; j <= jsize; j++ ) {
-                            fprintf( stream, "%e ", val->at(j) );
-                        }
-
-                        for ( j = jsize + 1; j <= 3; j++ ) {
-                            fprintf(stream, "0.0 ");
-                        }
-                    } else if ( type == ISVT_TENSOR_S3 ) {
-                        t.zero();
-                        for ( int ii = 1; ii <= 6; ii++ ) {
-                            if ( ii == 1 ) {
-                                t.at(1, 1) = val->at(ii);
-                            } else if ( ii == 2 ) {
-                                t.at(2, 2) = val->at(ii);
-                            } else if ( ii == 3 ) {
-                                t.at(3, 3) = val->at(ii);
-                            } else if ( ii == 4 ) {
-                                t.at(2, 3) = val->at(ii);
-                                t.at(3, 2) = val->at(ii);
-                            } else if ( ii == 5 ) {
-                                t.at(1, 3) = val->at(ii);
-                                t.at(3, 1) = val->at(ii);
-                            } else if ( ii == 6 ) {
-                                t.at(1, 2) = val->at(ii);
-                                t.at(2, 1) = val->at(ii);
-                            }
-                        }
-
-                        for ( int ii = 1; ii <= 3; ii++ ) {
-                            for ( int jj = 1; jj <= 3; jj++ ) {
-                                fprintf( stream, "%e ", t.at(ii, jj) );
-                            }
-
-                            fprintf(stream, "\n");
-                        }
-                    } else if ( type == ISVT_TENSOR_G ) { // export general tensor values as scalars
-                        fprintf( stream, "%e ", val->at(indx) );
-                    }
-
-                    fprintf(stream, "\n");
-                }
-            }
+        } else if ( type == ISVT_TENSOR_G ) { // export general tensor values as scalars
+            fprintf( stream, "%e ", val->at(indx) );
         }
 
         fprintf(stream, "\n");
@@ -1061,12 +787,6 @@ VTKExportModule :: giveSmoother()
     if ( this->smoother == NULL ) {
         this->smoother = classFactory.createNodalRecoveryModel(this->stype, d);
         IntArray vrmap;
-
-        if ( this->mode == wdmode ) {
-            this->smoother->setRecoveryMode(0, vrmap);
-        } else { // this->mode == rbrmode
-            this->smoother->setRecoveryMode( ( -1 ) * d->giveNumberOfRegions(), vrmap );
-        }
     }
 
     return this->smoother;
@@ -1102,7 +822,7 @@ void
 VTKExportModule :: exportPrimVarAs(UnknownType valID, FILE *stream, TimeStep *tStep)
 {
     Domain *d = emodel->giveDomain(1);
-    int ireg, nregions = smoother->giveNumberOfVirtualRegions();
+    int ireg;
     int nnodes = d->giveNumberOfDofManagers(), inode;
     int j, jsize;
     FloatArray iVal, iValLCS;
@@ -1137,187 +857,84 @@ VTKExportModule :: exportPrimVarAs(UnknownType valID, FILE *stream, TimeStep *tS
     DofIDItem id;
     int numberOfDofs;
 
-    if ( this->mode == wdmode ) { // (Whole Domain)
-        IntArray regionNodalNumbers(nnodes);
-        int regionDofMans = 0, offset = 0;
-        ireg = -1;
+    IntArray regionNodalNumbers(nnodes);
+    int regionDofMans = 0, offset = 0;
+    ireg = -1;
 
 
-        // assemble local->global map
-        this->initRegionNodeNumbering(regionNodalNumbers, regionDofMans, offset, d, ireg, 1);
+    // assemble local->global map
+    this->initRegionNodeNumbering(regionNodalNumbers, regionDofMans, offset, d, ireg, 1);
 
-        // Used for special nodes/elements with mixed number of dofs.
-        this->giveSmoother();
+    // Used for special nodes/elements with mixed number of dofs.
+    this->giveSmoother();
 
-        for ( inode = 1; inode <= regionDofMans; inode++ ) {
-            dman = d->giveNode( regionNodalNumbers.at(inode) );
-            numberOfDofs = dman->giveNumberOfDofs();
+    for ( inode = 1; inode <= regionDofMans; inode++ ) {
+        dman = d->giveNode( regionNodalNumbers.at(inode) );
+        numberOfDofs = dman->giveNumberOfDofs();
 
-            if ( ( valID == DisplacementVector ) || ( valID == EigenVector ) || ( valID == VelocityVector ) ) {
-                iVal.resize(3);
-                iVal.zero();
+        if ( ( valID == DisplacementVector ) || ( valID == EigenVector ) || ( valID == VelocityVector ) ) {
+            iVal.resize(3);
+            iVal.zero();
 
-                for ( j = 1; j <= numberOfDofs; j++ ) {
-                    id = dman->giveDof(j)->giveDofID();
-                    if ( ( id == V_u ) || ( id == D_u ) ) {
-                        iVal.at(1) = dman->giveDof(j)->giveUnknown(VM_Total, tStep);
-                    } else if ( ( id == V_v ) || ( id == D_v ) ) {
-                        iVal.at(2) = dman->giveDof(j)->giveUnknown(VM_Total, tStep);
-                    } else if ( ( id == V_w ) || ( id == D_w ) ) {
-                        iVal.at(3) = dman->giveDof(j)->giveUnknown(VM_Total, tStep);
-                    }
+            for ( j = 1; j <= numberOfDofs; j++ ) {
+                id = dman->giveDof(j)->giveDofID();
+                if ( ( id == V_u ) || ( id == D_u ) ) {
+                    iVal.at(1) = dman->giveDof(j)->giveUnknown(VM_Total, tStep);
+                } else if ( ( id == V_v ) || ( id == D_v ) ) {
+                    iVal.at(2) = dman->giveDof(j)->giveUnknown(VM_Total, tStep);
+                } else if ( ( id == V_w ) || ( id == D_w ) ) {
+                    iVal.at(3) = dman->giveDof(j)->giveUnknown(VM_Total, tStep);
                 }
-
-                /*
-                 * iVal.resize(3);
-                 * for (j=1; j<= 3 ; j++) {
-                 * iVal.at(j) = d->giveNode(regionNodalNumbers.at(inode))->giveUpdatedCoordinate(j, tStep, 1.0) -
-                 * d->giveNode(regionNodalNumbers.at(inode))->giveCoordinate(j);
-                 * }
-                 */
-            } else if ( valID == FluxVector ) {
-                iVal.resize(1);
-
-                for ( j = 1; j <= numberOfDofs; j++ ) {
-                    id = dman->giveDof(j)->giveDofID();
-                    if ( id == C_1 ) {
-                        iVal.at(1) = dman->giveDof(j)->giveUnknown(VM_Total, tStep);
-                    }
-                }
-            } else if ( valID == Temperature ) {
-                iVal.resize(1);
-
-                for ( j = 1; j <= numberOfDofs; j++ ) {
-                    id = dman->giveDof(j)->giveDofID();
-                    if ( id == T_f ) {
-                        iVal.at(1) = dman->giveDof(j)->giveUnknown(VM_Total, tStep);
-                    }
-                }
-            } else if ( valID == PressureVector ) {
-                dofIDMask.setValues(1, P_f);
-                this->getDofManPrimaryVariable(iVal, dman, dofIDMask, VM_Total, tStep, IST_Pressure);
-            } else {
-                OOFEM_ERROR2( "VTKExportModule: unsupported unknownType (%s)", __UnknownTypeToString(valID) );
-                //d->giveDofManager(regionNodalNumbers.at(inode))->giveUnknownVector(iVal, d->giveDefaultNodeDofIDArry(), valID, VM_Total, tStep);
             }
+        } else if ( valID == FluxVector ) {
+            iVal.resize(1);
 
-            if ( type == ISVT_SCALAR ) {
-                if ( iVal.giveSize() ) {
-                    for ( j = 1; j <= nScalarComp; j++ ) {
-                        fprintf( stream, "%e ", iVal.at(j) );
-                    }
-                } else {
-                    fprintf(stream, "%e ", 0.0);
+            for ( j = 1; j <= numberOfDofs; j++ ) {
+                id = dman->giveDof(j)->giveDofID();
+                if ( id == C_1 ) {
+                    iVal.at(1) = dman->giveDof(j)->giveUnknown(VM_Total, tStep);
                 }
-            } else if ( type == ISVT_VECTOR ) {
-                jsize = min( 3, iVal.giveSize() );
-                //rotate back from nodal CS to global CS if applies
-                if ( d->giveNode( dman->giveNumber() )->hasLocalCS() ) {
-                    iVal.resize(3);
-                    iValLCS = iVal;
-                    iVal.beTProductOf(* d->giveNode( dman->giveNumber() )->giveLocalCoordinateTriplet(), iValLCS);
-                }
+            }
+        } else if ( valID == Temperature ) {
+            iVal.resize(1);
 
-                for ( j = 1; j <= jsize; j++ ) {
+            for ( j = 1; j <= numberOfDofs; j++ ) {
+                id = dman->giveDof(j)->giveDofID();
+                if ( id == T_f ) {
+                    iVal.at(1) = dman->giveDof(j)->giveUnknown(VM_Total, tStep);
+                }
+            }
+        } else if ( valID == PressureVector ) {
+            dofIDMask.setValues(1, P_f);
+            this->getDofManPrimaryVariable(iVal, dman, dofIDMask, VM_Total, tStep, IST_Pressure);
+        } else {
+            OOFEM_ERROR2( "VTKExportModule: unsupported unknownType (%s)", __UnknownTypeToString(valID) );
+            //d->giveDofManager(regionNodalNumbers.at(inode))->giveUnknownVector(iVal, d->giveDefaultNodeDofIDArry(), valID, VM_Total, tStep);
+        }
+
+        if ( type == ISVT_SCALAR ) {
+            if ( iVal.giveSize() ) {
+                for ( j = 1; j <= nScalarComp; j++ ) {
                     fprintf( stream, "%e ", iVal.at(j) );
                 }
-
-                for ( j = jsize + 1; j <= 3; j++ ) {
-                    fprintf(stream, "0.0 ");
-                }
+            } else {
+                fprintf(stream, "%e ", 0.0);
+            }
+        } else if ( type == ISVT_VECTOR ) {
+            jsize = min( 3, iVal.giveSize() );
+            //rotate back from nodal CS to global CS if applies
+            if ( d->giveNode( dman->giveNumber() )->hasLocalCS() ) {
+                iVal.resize(3);
+                iValLCS = iVal;
+                iVal.beTProductOf(* d->giveNode( dman->giveNumber() )->giveLocalCoordinateTriplet(), iValLCS);
             }
 
-            fprintf(stream, "\n");
-        }
-    } else {  // RBR mode
-        IntArray regionNodalNumbers(nnodes);
-        int regionDofMans = 0, offset = 0;
-        for ( ireg = 1; ireg <= nregions; ireg++ ) {
-            if ( this->regionsToSkip.contains(ireg) ) {
-                continue;
+            for ( j = 1; j <= jsize; j++ ) {
+                fprintf( stream, "%e ", iVal.at(j) );
             }
 
-            // assemble local->global map
-            this->initRegionNodeNumbering(regionNodalNumbers, regionDofMans, offset, d, ireg, 1);
-
-            for ( inode = 1; inode <= regionDofMans; inode++ ) {
-                dman = d->giveNode( regionNodalNumbers.at(inode) );
-                numberOfDofs = dman->giveNumberOfDofs();
-
-                if ( ( valID == DisplacementVector ) || ( valID == EigenVector ) || ( valID == VelocityVector ) ) {
-                    iVal.resize(3);
-                    iVal.zero();
-
-                    for ( j = 1; j <= numberOfDofs; j++ ) {
-                        id = dman->giveDof(j)->giveDofID();
-                        if ( ( id == V_u ) || ( id == D_u ) ) {
-                            iVal.at(1) = dman->giveDof(j)->giveUnknown(VM_Total, tStep);
-                        } else if ( ( id == V_v ) || ( id == D_v ) ) {
-                            iVal.at(2) = dman->giveDof(j)->giveUnknown(VM_Total, tStep);
-                        } else if ( ( id == V_w ) || ( id == D_w ) ) {
-                            iVal.at(3) = dman->giveDof(j)->giveUnknown(VM_Total, tStep);
-                        }
-                    }
-
-                    /*
-                     * iVal.resize(3);
-                     * for (j=1; j<= 3 ; j++) {
-                     * iVal.at(j) = d->giveNode(regionNodalNumbers.at(inode))->giveUpdatedCoordinate(j, tStep, 1.0) -
-                     * d->giveNode(regionNodalNumbers.at(inode))->giveCoordinate(j);
-                     * }
-                     */
-                } else if ( valID == FluxVector ) {
-                    iVal.resize(1);
-
-                    for ( j = 1; j <= numberOfDofs; j++ ) {
-                        id = dman->giveDof(j)->giveDofID();
-                        if ( id == C_1 ) {
-                            iVal.at(1) = dman->giveDof(j)->giveUnknown(VM_Total, tStep);
-                        }
-                    }
-                } else if ( valID == Temperature ) {
-                    iVal.resize(1);
-
-                    for ( j = 1; j <= numberOfDofs; j++ ) {
-                        id = dman->giveDof(j)->giveDofID();
-                        if ( id == T_f ) {
-                            iVal.at(1) = dman->giveDof(j)->giveUnknown(VM_Total, tStep);
-                        }
-                    }
-                } else if ( valID == PressureVector ) {
-                    iVal.resize(1);
-
-                    for ( j = 1; j <= numberOfDofs; j++ ) {
-                        id = dman->giveDof(j)->giveDofID();
-                        if ( id == P_f ) {
-                            iVal.at(1) = dman->giveDof(j)->giveUnknown(VM_Total, tStep);
-                        }
-                    }
-                } else {
-                    OOFEM_ERROR2( "VTKExportModule: unsupported unknownType (%s)", __UnknownTypeToString(valID) );
-                    //d->giveDofManager(regionNodalNumbers.at(inode))->giveUnknownVector(iVal, d->giveDefaultNodeDofIDArry(), valID, VM_Total, tStep);
-                }
-
-                if ( type == ISVT_SCALAR ) {
-                    if ( iVal.giveSize() ) {
-                        for ( j = 1; j <= nScalarComp; j++ ) {
-                            fprintf( stream, "%e ", iVal.at(j) );
-                        }
-                    } else {
-                        fprintf(stream, "%e ", 0.0);
-                    }
-                } else if ( type == ISVT_VECTOR ) {
-                    jsize = min( 3, iVal.giveSize() );
-                    for ( j = 1; j <= jsize; j++ ) {
-                        fprintf( stream, "%e ", iVal.at(j) );
-                    }
-
-                    for ( j = jsize + 1; j <= 3; j++ ) {
-                        fprintf(stream, "0.0 ");
-                    }
-                }
-
-                fprintf(stream, "\n");
+            for ( j = jsize + 1; j <= 3; j++ ) {
+                fprintf(stream, "0.0 ");
             }
         }
 
@@ -1337,6 +954,8 @@ VTKExportModule :: getDofManPrimaryVariable(FloatArray &answer, DofManager *dman
     // all values zero by default
     answer.zero();
 
+
+
     for ( j = 1; j <= size; j++ ) {
         if ( ( indx = dman->findDofWithDofId( ( DofIDItem ) dofIDMask.at(j) ) ) ) {
             // primary variable available directly in dof manager
@@ -1345,8 +964,13 @@ VTKExportModule :: getDofManPrimaryVariable(FloatArray &answer, DofManager *dman
             // ok primary variable not directly available
             // but equivalent InternalStateType provided
             // in this case use smoother to recover nodal value
-            this->giveSmoother()->recoverValues(iType, tStep); /// recover values if not done before
-            this->giveSmoother()->giveNodalVector(recoveredVal, dman->giveNumber(), 1);
+
+            // create a new set containing all elements
+            Set elemSet( 0, dman->giveDomain() );
+            elemSet.addAllElements();
+
+            this->giveSmoother()->recoverValues(elemSet, iType, tStep); /// recover values if not done before
+            this->giveSmoother()->giveNodalVector( recoveredVal, dman->giveNumber() );
             // here we have a lack of information about how to convert recoveredVal to response
             // if the size is compatible we accept it, otherwise an error is thrown
             if ( size == recoveredVal->giveSize() ) {

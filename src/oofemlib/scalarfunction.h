@@ -44,7 +44,6 @@
 #include <map>
 
 namespace oofem {
-
 class FunctionArgument;
 
 /**
@@ -64,7 +63,7 @@ class ScalarFunction
     /// Constant, double value.
     double dValue;
     /// Simple expression (evaluated by internal parser)
-    std::string eValue;
+    std :: string eValue;
     /// Reference to external function
     int fReference;
 
@@ -81,7 +80,7 @@ public:
      * Creates scalar funtion defined by given simple expression.
      * @param val String with simple expression
      */
-    ScalarFunction(std :: string &val);
+    ScalarFunction(std :: string & val);
     /**
      * Constructor of scalar function defined using external function.
      * @param val External function number
@@ -130,9 +129,8 @@ public:
      */
     //double eval(double time, const FloatArray &coords, Domain *d) const;
 
-    friend std :: ostream &operator<<(std :: ostream &out, const ScalarFunction &s);
+    friend std :: ostream &operator << ( std :: ostream & out, const ScalarFunction & s );
 };
-
 } // end namespace OOFEM
 
 #endif // scalarfunction_h

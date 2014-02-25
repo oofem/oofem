@@ -66,9 +66,9 @@ class FEI2dQuadLin;
  *
  * @author Mikael Öhman
  */
- class Quad1MindlinShell3D : public NLStructuralElement,
-  public ZZNodalRecoveryModelInterface,
-  public SPRNodalRecoveryModelInterface
+class Quad1MindlinShell3D : public NLStructuralElement,
+public ZZNodalRecoveryModelInterface,
+public SPRNodalRecoveryModelInterface
 {
 protected:
     /// Cached nodal coordinates in local c.s.,
@@ -138,7 +138,7 @@ public:
     virtual SPRPatchType SPRNodalRecoveryMI_givePatchType() { return SPRPatchType_2dxy; }
     virtual Element *ZZNodalRecoveryMI_giveElement() { return this; }
 
-  
+
 
 
 protected:
@@ -161,7 +161,7 @@ protected:
     //virtual IntegrationRule *GetSurfaceIntegrationRule(int i) { return NULL; }
     //virtual double computeSurfaceVolumeAround(GaussPoint *gp, int iSurf) { return 0.; }
     //virtual void computeSurfIpGlobalCoords(FloatArray &answer, GaussPoint *gp, int iSurf) { answer.clear(); }
-    void splitUnknowns (FloatArray &shellUnknowns, FloatArray &drillUnknowns, FloatArray &unknowns);
+    void splitUnknowns(FloatArray &shellUnknowns, FloatArray &drillUnknowns, FloatArray &unknowns);
 };
 } // end namespace oofem
 #endif // quad1mindlinshell3d_h

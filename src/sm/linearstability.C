@@ -223,8 +223,8 @@ void LinearStability :: solveYourselfAt(TimeStep *tStep)
     loadVector.negated();
 
     this->assembleVector( loadVector, tStep, EID_MomentumBalance, ExternalForcesVector, VM_Total,
-                          EModelDefaultEquationNumbering(), this->giveDomain(1) );
-    
+                         EModelDefaultEquationNumbering(), this->giveDomain(1) );
+
 #ifdef __PARALLEL_MODE
     this->updateSharedDofManagers(loadVector, EModelDefaultEquationNumbering(), ReactionExchangeTag);
 #endif
