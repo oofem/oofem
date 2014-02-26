@@ -38,6 +38,7 @@
 #include "floatmatrix.h"
 #include "dictionary.h"
 #include "range.h"
+#include "scalarfunction.h"
 
 #include <cstdlib>
 #include <cstdio>

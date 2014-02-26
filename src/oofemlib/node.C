@@ -56,8 +56,8 @@
 
 #ifdef __OOFEG
  #include "oofeggraphiccontext.h"
- #include "enrichmentitem.h"
- #include "xfemmanager.h"
+ #include "xfem/enrichmentitem.h"
+ #include "xfem/xfemmanager.h"
 #endif
 
 namespace oofem {

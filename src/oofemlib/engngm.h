@@ -65,10 +65,6 @@
  #include "parallelcontext.h"
 #endif
 
-#ifdef __OOFEG
- #include "oofeggraphiccontext.h"
-#endif
-
 #include <string>
 
 ///@name Input fields for general Engineering models.
@@ -107,6 +103,7 @@ class InitModuleManager;
 class ExportModuleManager;
 class FloatMatrix;
 class FloatArray;
+class oofegGraphicContext;
 
 #ifdef __PARALLEL_MODE
 class ProblemCommunicator;

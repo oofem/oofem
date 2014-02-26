@@ -65,7 +65,7 @@ CompRow_ILUPreconditioner :: init(const SparseMtrx &A)
         this->A =  ( * ( ( DynCompRow * ) & A ) );
         ( this->A ).ILUPYourself(part_fill, drop_tol);
     } else {
-        OOFEM_ERROR("unsupported sparse matrix type");
+        OOFEM_SIMPLE_ERROR("unsupported sparse matrix type");
     }
 }
 

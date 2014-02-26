@@ -52,16 +52,13 @@
 #include "contextioresulttype.h"
 #include "contextmode.h"
 
-#ifdef __OOFEG
- #include "oofeggraphiccontext.h"
-#endif
-
 namespace oofem {
 class DataStream;
 class Domain;
 class Interface;
 class TimeStep;
 class DynamicInputRecord;
+class oofegGraphicContext;
 
 /**
  * The top abstract class of all classes constituting the finite element mesh.

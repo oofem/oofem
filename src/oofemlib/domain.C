@@ -85,6 +85,10 @@
  #include "domaintransactionmanager.h"
 #endif
 
+#ifdef __OOFEG
+ #include "oofeggraphiccontext.h"
+#endif
+
 #include <cstdarg>
 #include <cstring>
 #include <vector>

@@ -49,10 +49,6 @@
  #include "entityrenumberingscheme.h"
 #endif
 
-#ifdef __OOFEG
- #include "oofeggraphiccontext.h"
-#endif
-
 ///@name Input fields for domains
 //@{
 #define _IFT_Domain_type "domain" ///< This is trouble, will not work with dynamic input record
@@ -98,6 +94,7 @@ class TopologyDescription;
 class DataReader;
 class Set;
 class FractureManager;
+class oofegGraphicContext;
 
 #ifdef __PARALLEL_MODE
 class ProcessCommunicator;

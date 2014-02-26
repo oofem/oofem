@@ -41,6 +41,7 @@
 #include "range.h"
 #include "node.h"
 #include "element.h"
+#include "scalarfunction.h"
 
 #include <sstream>
 

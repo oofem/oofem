@@ -38,7 +38,6 @@
 #include "femcmpnn.h"
 #include "floatmatrix.h"
 #include "floatarray.h"
-
 #include "alist.h"
 #include "intarray.h"
 #include "error.h"
@@ -47,12 +46,14 @@
 #include "elementgeometrytype.h"
 #include "equationid.h"
 #include "valuemodetype.h"
+#include "internalstatemode.h"
 #include "internalstatetype.h"
 #include "internalstatevaluetype.h"
 #include "elementextension.h"
 #include "entityrenumberingscheme.h"
 #include "unknowntype.h"
 #include "unknownnumberingscheme.h"
+
 
 #ifdef __OOFEG
  #include "node.h"

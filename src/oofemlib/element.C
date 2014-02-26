@@ -58,6 +58,10 @@
 #include "dynamicinputrecord.h"
 #include "matstatmapperint.h"
 
+#ifdef __OOFEG
+ #include "oofeggraphiccontext.h"
+#endif
+
 #include <cstdio>
 
 namespace oofem {
@@ -1633,8 +1637,7 @@ Element :: giveInternalStateAtNode(FloatArray &answer, InternalStateType type, I
         if ( mode == ISM_recovered ) {
             const FloatArray *nodval;
             NodalRecoveryModel *smoother = this->giveDomain()->giveSmoother();
-            int result = smoother->giveNodalVector( nodval, this->giveNode(node)->giveNumber(),
-                                                   smoother->giveElementVirtualRegionNumber(this->number) );
+            int result = smoother->giveNodalVector( nodval, this->giveNode(node)->giveNumber() );
             if ( nodval ) {
                 answer = * nodval;
             } else {

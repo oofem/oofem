@@ -40,11 +40,6 @@
 #include "nonlocmatstiffinterface.h"
 #include "cltypes.h"
 
-#ifdef __OOFEG
- #include "oofeggraphiccontext.h"
- #include "connectivitytable.h"
-#endif
-
 ///@name Input fields for TrabBoneNLEmbed
 //@{
 #define _IFT_TrabBoneNLEmbed_Name "trabbonenlembed"

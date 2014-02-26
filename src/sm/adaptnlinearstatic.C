@@ -57,6 +57,10 @@
  #include "parallelcontext.h"
 #endif
 
+#ifdef __OOFEG
+ #include "oofeggraphiccontext.h"
+#endif
+
 #include <cstdlib>
 
 namespace oofem {

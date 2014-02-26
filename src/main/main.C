@@ -62,6 +62,10 @@
  #include <Python.h>
 #endif
 
+#ifdef __OOFEG
+ #include "oofeggraphiccontext.h"
+#endif
+
 #include <cstdlib>
 #include <cstdio>
 #include <cstring>

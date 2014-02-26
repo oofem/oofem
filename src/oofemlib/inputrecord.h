@@ -38,7 +38,6 @@
 #include <vector>
 #include <list>
 #include <string>
-#include "scalarfunction.h"
 
 #include "oofemcfg.h"
 
@@ -48,6 +47,7 @@ class FloatArray;
 class FloatMatrix;
 class Dictionary;
 class Range;
+class ScalarFunction;
 
 /**
  * Type defining the return values of InputRecord reading operations.
