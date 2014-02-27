@@ -292,47 +292,15 @@ DKTPlate :: computeNmatrixAt(const FloatArray &iLocCoord, FloatMatrix &answer)
 // Note: this interpolation is not available, as the deflection is cubic along the edges,
 //       but not define in the interior of the element
 // Note: the interpolation of rotations is quadratic
+// NOTE: linear interpolation returned instead
 {
-    // get node coordinates
-    double x1, x2, x3, y1, y2, y3;
-    this->giveNodeCoordinates(x1, x2, x3, y1, y2, y3);
+    FloatArray N(3);
 
-    //
-    double l1, l2, l3, b1, b2, b3, c1, c2, c3;
-
-    b1 = y2 - y3;
-    b2 = y3 - y1;
-    b3 = y1 - y2;
-
-    c1 = x3 - x2;
-    c2 = x1 - x3;
-    c3 = x2 - x1;
-
-    l1 = iLocCoord.at(1);
-    l2 = iLocCoord.at(2);
-    l3 = 1.0 - l1 - l2;
-
-    //
     answer.resize(3, 9);
     answer.zero();
+    giveInterpolation()->evalN( N, iLocCoord, FEIElementGeometryWrapper(this) );
 
-    answer.at(1, 1) = l1;
-    answer.at(1, 2) = l1 * ( l2 * b3 - l3 * b2 ) * 0.5;
-    answer.at(1, 3) = l1 * ( l2 * c3 - l3 * c2 ) * 0.5;
-    answer.at(1, 4) = l2;
-    answer.at(1, 5) = l2 * ( l3 * b1 - l1 * b3 ) * 0.5;
-    answer.at(1, 6) = l2 * ( l3 * c1 - l1 * c3 ) * 0.5;
-    answer.at(1, 7) = l3;
-    answer.at(1, 8) = l3 * ( l1 * b2 - l2 * b1 ) * 0.5;
-    answer.at(1, 9) = l3 * ( l1 * c2 - l2 * c1 ) * 0.5;
-
-    answer.at(2, 2) = l1;
-    answer.at(2, 5) = l2;
-    answer.at(2, 8) = l3;
-
-    answer.at(3, 3) = l1;
-    answer.at(3, 6) = l2;
-    answer.at(3, 9) = l3;
+    answer.beNMatrixOf(N, 3);
 }
 
 
