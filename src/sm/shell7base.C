@@ -2540,7 +2540,13 @@ Shell7Base :: giveShellExportData(VTKPiece &vtkPiece, IntArray &primaryVarsToExp
         for ( int layer = 1; layer <= numCells; layer++ ) {     
             IntegrationRule *iRuleL = integrationRulesArray [ layer - 1 ];
             VTKXMLExportModule::computeIPAverage(average, iRuleL, this, type, tStep);
-            vtkPiece.setCellVar(i, layer, convV6ToV9Stress(average) );  
+            
+            if ( average.giveSize() == 6 ) {
+                vtkPiece.setCellVar(i, layer, convV6ToV9Stress(average) );
+            } else {
+                vtkPiece.setCellVar(i, layer, average );
+            }
+
         }
 
     }
@@ -2595,6 +2601,9 @@ Shell7Base :: recoverValuesFromIP(std::vector<FloatArray> &recoveredValues, int 
         if ( valueType == ISVT_TENSOR_S3 ) {
             recoveredValues[i-1].resize(9);
             recoveredValues[i-1] = convV6ToV9Stress(ipValues);
+        } else if ( ipValues.giveSize() == 0 ) {
+            recoveredValues[i-1].resize(giveInternalStateTypeSize(valueType));
+            recoveredValues[i-1].zero();
         } else {
             recoveredValues[i-1] = ipValues;
         }
