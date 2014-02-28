@@ -1036,7 +1036,7 @@ void EnrichmentItem :: computeIntersectionPoints(std :: vector< FloatArray > &oI
                     FloatArray ps(xS);
                     FloatArray pe(xE);
 
-                    int nDim = ps.giveSize();
+                    int nDim = std::min(ps.giveSize(), pe.giveSize());
                     FloatArray p;
                     p.resize(nDim);
 
@@ -1125,7 +1125,11 @@ void EnrichmentItem :: calcPolarCoord(double &oR, double &oTheta, const FloatArr
 {
     FloatArray q;
     q.beDifferenceOf(iPos, iOrigin);
-    q.normalize();
+
+    double tol2 = 1.0e-18;
+    if( q.computeSquaredNorm() > tol2 ) {
+    	q.normalize();
+    }
 
     // Compute polar coordinates
     oR = iOrigin.distance(iPos);
