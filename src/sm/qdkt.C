@@ -46,6 +46,7 @@
 #include "structuralcrosssection.h"
 #include "mathfem.h"
 #include "classfactory.h"
+#include "fei2dquadquad.h"
 
 #ifdef __OOFEG
  #include "oofeggraphiccontext.h"
@@ -186,10 +187,10 @@ QDKTPlate :: computeBmatrixAt(GaussPoint *gp, FloatMatrix &answer, int li, int u
 
     // derivatives of quadratic interpolation functions
     // we do not have "midside" nodes -> explicit here
-    double N3dk =  0.25*(2.0*ksi+eta)*(1.0-eta);
-    double N4dk =  0.25*(2.0*ksi-eta)*(1.0-eta);
     double N1dk =  0.25*(2.0*ksi+eta)*(1.0+eta);
     double N2dk =  0.25*(2.0*ksi-eta)*(1.0+eta);
+    double N3dk =  0.25*(2.0*ksi+eta)*(1.0-eta);
+    double N4dk =  0.25*(2.0*ksi-eta)*(1.0-eta);
     double N7dk = -ksi*(1.0-eta);
     double N8dk =  0.5*(1.0-eta*eta);
     double N5dk = -ksi*(1.0+eta);
@@ -208,10 +209,10 @@ QDKTPlate :: computeBmatrixAt(GaussPoint *gp, FloatMatrix &answer, int li, int u
       ksi/8*((y3-y4)*(x2-x1)-(y2-y1)*(x3-x4))+
       eta/8*((y4-y1)*(x3-x2)-(y3-y2)*(x4-x1));
     
-    double dxdk =  1.0/detJ * ((y3-y2)+(y4-y1+ksi*(y1-y2+y3-y4)))/4.0;
-    double dxde = -1.0/detJ * ((y2-y1)+(y3-y4+eta*(y1-y2+y3-y4)))/4.0;
-    double dydk = -1.0/detJ * ((x3-x2)+(x4-x1+ksi*(x1-x2+x3-x4)))/4.0;
-    double dyde =  1.0/detJ * ((x2-x1)+(x3-x4+eta*(x1-x2+x3-x4)))/4.0;
+    double dxdk = -1.0/detJ * ((y3-y2)+(y4-y1+ksi*(y1-y2+y3-y4)))/4.0;
+    double dxde =  1.0/detJ * ((y2-y1)+(y3-y4+eta*(y1-y2+y3-y4)))/4.0;
+    double dydk =  1.0/detJ * ((x3-x2)+(x4-x1+ksi*(x1-x2+x3-x4)))/4.0;
+    double dyde = -1.0/detJ * ((x2-x1)+(x3-x4+eta*(x1-x2+x3-x4)))/4.0;
 
     double dN102 = N1dk*dxdk+N1de*dxde;
     double dN104 = N2dk*dxdk+N2de*dxde;
