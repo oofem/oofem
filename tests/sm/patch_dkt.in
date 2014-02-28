@@ -1,0 +1,139 @@
+patchdkt.out
+"Complex Patch test of DKT elements, four cases pure bending in x, and y, twist, and shear in one"
+LinearStatic nsteps 1
+domain 2dMindlinPlate
+OutputManager tstep_all dofman_all element_all
+ndofman 20 nelem 10 ncrosssect  1 nmat 1 nbc 5 nic 0 nltf 1
+#pure bending along x axis
+node 1 coords 3  0.0  0.0  0.0   bc 3 1 1 1
+node 2 coords 3  4.0  0.0  0.0   bc 3 1 1 1 
+node 3 coords 3  4.0  4.0  0.0   bc 3 0 0 1 load 1 2
+node 4 coords 3  0.0  4.0  0.0   bc 3 0 0 1 load 1 2
+#pure bending along y axis
+node 11 coords 3  5.0  0.0  0.0   bc 3 1 1 1
+node 12 coords 3  9.0  0.0  0.0   bc 3 0 1 0 load 1 3
+node 13 coords 3  9.0  4.0  0.0   bc 3 0 1 0 load 1 3
+node 14 coords 3  5.0  4.0  0.0   bc 3 1 1 1 
+#pure twist
+node 21 coords 3  10.0  0.0  0.0   bc 3 1 0 0
+node 22 coords 3  14.0  0.0  0.0   bc 3 1 0 0
+node 23 coords 3  14.0  4.0  0.0   bc 3 0 0 0 load 1 4
+node 24 coords 3  10.0  4.0  0.0   bc 3 1 0 0
+# shear x
+node 31 coords 3  15.0  0.0  0.0   bc 3 1 1 1
+node 32 coords 3  19.0  0.0  0.0   bc 3 0 1 0 load 1 4
+node 33 coords 3  19.0  4.0  0.0   bc 3 0 1 0 load 1 4
+node 34 coords 3  15.0  4.0  0.0   bc 3 1 1 1 
+# shear y
+node 41 coords 3  20.0  0.0  0.0   bc 3 1 1 1
+node 42 coords 3  24.0  0.0  0.0   bc 3 1 1 1
+node 43 coords 3  24.0  4.0  0.0   bc 3 0 0 1 load 1 4
+node 44 coords 3  20.0  4.0  0.0   bc 3 0 0 1 load 1 4
+##
+dktplate 1 nodes 3 1 2 3 crosssect 1 mat 1 
+dktplate 2 nodes 3 1 3 4 crosssect 1 mat 1 
+#
+dktplate 11 nodes 3 11 12 13 crosssect 1 mat 1 
+dktplate 12 nodes 3 11 13 14 crosssect 1 mat 1 
+#
+dktplate 21 nodes 3 21 22 23  crosssect 1 mat 1 
+dktplate 22 nodes 3 21 23 24  crosssect 1 mat 1 
+#
+dktplate 31 nodes 3 31 32 33 crosssect 1 mat 1 
+dktplate 32 nodes 3 31 33 34 crosssect 1 mat 1 
+#
+dktplate 41 nodes 3 41 42 43 crosssect 1 mat 1 
+dktplate 42 nodes 3 41 43 44 crosssect 1 mat 1 
+#
+SimpleCS 1 thick 0.3 
+IsoLE 1 d 2500.  E 15.0  n 0.25 tAlpha 0.000012
+BoundaryCondition  1 loadTimeFunction 1 prescribedvalue 0.0 
+NodalLoad 2 loadTimeFunction 1 Components 3 0.0 -2.5 0.0
+NodalLoad 3 loadTimeFunction 1 Components 3 0.0 0.0 -2.5
+NodalLoad 4 loadTimeFunction 1 Components 3 0.5 0.0 0.0
+BoundaryCondition  5 loadTimeFunction 1 prescribedvalue 1.0 
+ConstantFunction 1 f(t) 1.0
+#
+#  exact solution
+#
+#%BEGIN_CHECK% tolerance 5.e-4
+## check reactions 
+## pure bending along x axis
+#REACTION tStep 1 number 1 dof 1 value 0.0
+#REACTION tStep 1 number 1 dof 2 value 2.5
+#REACTION tStep 1 number 2 dof 1 value 0.0
+#REACTION tStep 1 number 2 dof 2 value 2.5
+#ELEMENT tStep 1 number 1 gp 1 keyword "strains" component 4  value 0.0
+#ELEMENT tStep 1 number 1 gp 1 keyword "strains" component 5  value 34.722
+#ELEMENT tStep 1 number 1 gp 1 keyword "strains" component 6  value 0.0
+#ELEMENT tStep 1 number 1 gp 2 keyword "strains" component 4  value 0.0
+#ELEMENT tStep 1 number 1 gp 2 keyword "strains" component 5  value 34.722
+#ELEMENT tStep 1 number 1 gp 2 keyword "strains" component 6  value 0.0
+#ELEMENT tStep 1 number 1 gp 3 keyword "strains" component 4  value 0.0
+#ELEMENT tStep 1 number 1 gp 3 keyword "strains" component 5  value 34.722
+#ELEMENT tStep 1 number 1 gp 3 keyword "strains" component 6  value 0.0
+#ELEMENT tStep 1 number 1 gp 1 keyword "stresses" component 4  value 3.1250e-01
+#ELEMENT tStep 1 number 1 gp 1 keyword "stresses" component 5  value 1.2500e+0
+#ELEMENT tStep 1 number 1 gp 1 keyword "stresses" component 6  value 0.0
+#ELEMENT tStep 1 number 1 gp 2 keyword "stresses" component 4  value 3.1250e-01
+#ELEMENT tStep 1 number 1 gp 2 keyword "stresses" component 5  value 1.2500e+0
+#ELEMENT tStep 1 number 1 gp 2 keyword "stresses" component 6  value 0.0
+#ELEMENT tStep 1 number 1 gp 3 keyword "stresses" component 4  value 3.1250e-01
+#ELEMENT tStep 1 number 1 gp 3 keyword "stresses" component 5  value 1.2500e+0
+#ELEMENT tStep 1 number 1 gp 3 keyword "stresses" component 6  value 0.0
+## pure bending along y axis
+#REACTION tStep 1 number 11 dof 1 value 0.0
+#REACTION tStep 1 number 11 dof 3 value 2.5
+#REACTION tStep 1 number 14 dof 1 value 0.0
+#ELEMENT tStep 1 number 11 gp 1 keyword "strains" component 4  value -34.722
+#ELEMENT tStep 1 number 11 gp 1 keyword "strains" component 5  value 0.0
+#ELEMENT tStep 1 number 11 gp 1 keyword "strains" component 6  value 0.0
+#ELEMENT tStep 1 number 11 gp 2 keyword "strains" component 4  value -34.722
+#ELEMENT tStep 1 number 11 gp 2 keyword "strains" component 5  value 0.0
+#ELEMENT tStep 1 number 11 gp 2 keyword "strains" component 6  value 0.0
+#ELEMENT tStep 1 number 11 gp 3 keyword "strains" component 4  value -34.722
+#ELEMENT tStep 1 number 11 gp 3 keyword "strains" component 5  value 0.0
+#ELEMENT tStep 1 number 11 gp 3 keyword "strains" component 6  value 0.0
+#ELEMENT tStep 1 number 11 gp 1 keyword "stresses" component 4  value -1.2500e+00
+#ELEMENT tStep 1 number 11 gp 1 keyword "stresses" component 5  value -3.1250e-01
+#ELEMENT tStep 1 number 11 gp 1 keyword "stresses" component 6  value 0.0
+#ELEMENT tStep 1 number 11 gp 2 keyword "stresses" component 4  value -1.2500e+00
+#ELEMENT tStep 1 number 11 gp 2 keyword "stresses" component 5  value -3.1250e-01
+#ELEMENT tStep 1 number 11 gp 2 keyword "stresses" component 6  value 0.0
+#ELEMENT tStep 1 number 11 gp 3 keyword "stresses" component 4  value -1.2500e+00
+#ELEMENT tStep 1 number 11 gp 3 keyword "stresses" component 5  value -3.1250e-01
+#ELEMENT tStep 1 number 11 gp 3 keyword "stresses" component 6  value 0.0
+## pure twist
+#REACTION tStep 1 number 21 dof 1 value 0.5
+#REACTION tStep 1 number 22 dof 1 value -0.5
+#REACTION tStep 1 number 24 dof 1 value -0.5
+#ELEMENT tStep 1 number 21 gp 1 keyword "strains" component 4  value 0.0
+#ELEMENT tStep 1 number 21 gp 1 keyword "strains" component 5  value 0.0
+#ELEMENT tStep 1 number 21 gp 1 keyword "strains" component 6  value -18.51852
+#ELEMENT tStep 1 number 21 gp 2 keyword "strains" component 4  value 0.0
+#ELEMENT tStep 1 number 21 gp 2 keyword "strains" component 5  value 0.0
+#ELEMENT tStep 1 number 21 gp 2 keyword "strains" component 6  value -18.51852
+#ELEMENT tStep 1 number 21 gp 3 keyword "strains" component 4  value 0.0
+#ELEMENT tStep 1 number 21 gp 3 keyword "strains" component 5  value 0.0
+#ELEMENT tStep 1 number 21 gp 3 keyword "strains" component 6  value -18.51852
+#ELEMENT tStep 1 number 21 gp 1 keyword "stresses" component 4  value 0.0
+#ELEMENT tStep 1 number 21 gp 1 keyword "stresses" component 5  value 0.0
+#ELEMENT tStep 1 number 21 gp 1 keyword "stresses" component 6  value -0.25
+#ELEMENT tStep 1 number 21 gp 2 keyword "stresses" component 4  value 0.0
+#ELEMENT tStep 1 number 21 gp 2 keyword "stresses" component 5  value 0.0
+#ELEMENT tStep 1 number 21 gp 2 keyword "stresses" component 6  value -0.25
+#ELEMENT tStep 1 number 21 gp 3 keyword "stresses" component 4  value 0.0
+#ELEMENT tStep 1 number 21 gp 3 keyword "stresses" component 5  value 0.0
+#ELEMENT tStep 1 number 21 gp 3 keyword "stresses" component 6  value -0.25
+# shear x
+##REACTION tStep 1 number 31 dof 1 value -0.5
+##REACTION tStep 1 number 31 dof 3 value  2.0
+##REACTION tStep 1 number 31 dof 1 value -0.5
+##REACTION tStep 1 number 31 dof 3 value  2.0
+#shear y
+##REACTION tStep 1 number 41 dof 1 value -0.5
+##REACTION tStep 1 number 41 dof 2 value -2.0
+##REACTION tStep 1 number 41 dof 1 value -0.5
+##REACTION tStep 1 number 41 dof 2 value -2.0
+#%END_CHECK%
+#
