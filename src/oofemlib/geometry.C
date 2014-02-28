@@ -277,6 +277,12 @@ Triangle :: Triangle(const FloatArray &iP1, const FloatArray &iP2, const FloatAr
     mVertices.push_back(iP1);
     mVertices.push_back(iP2);
     mVertices.push_back(iP3);
+
+    for(size_t i = 0; i < mVertices.size(); i++) {
+    	if( mVertices[i].giveSize() == 2 ) {
+    		mVertices[i].setValues(3, mVertices[i].at(1), mVertices[i].at(2), 0.0 );
+    	}
+    }
 }
 
 double Triangle :: getArea()
@@ -356,6 +362,13 @@ void Triangle :: changeToAnticlockwise()
 
 bool Triangle :: pointIsInTriangle(const FloatArray &iP) const
 {
+	FloatArray P(iP);
+	if(iP.giveSize() == 2) {
+		P.setValues(3, iP.at(1), iP.at(2), 0.0);
+	}
+
+	const double tol2 = 1.0e-18;
+
     // Compute triangle normal
     FloatArray p1p2;
     p1p2.beDifferenceOf(mVertices [ 1 ], mVertices [ 0 ]);
@@ -365,15 +378,21 @@ bool Triangle :: pointIsInTriangle(const FloatArray &iP) const
 
     FloatArray N;
     N.beVectorProductOf(p1p2, p1p3);
-    N.normalize();
+    if(N.computeSquaredNorm() < tol2) {
+    	// The triangle is degenerated
+    	return false;
+    }
+    else {
+    	N.normalize();
+    }
 
     // Compute normal distance from triangle to point
     FloatArray p1p;
-    p1p.beDifferenceOf(iP, mVertices [ 0 ]);
+    p1p.beDifferenceOf(P, mVertices [ 0 ]);
     double d = p1p.dotProduct(N);
 
     // Project point onto triangle plane
-    FloatArray pProj = iP;
+    FloatArray pProj = P;
     pProj.add(-d, N);
 
     // Check if the point is on the correct side of all edges
@@ -381,10 +400,22 @@ bool Triangle :: pointIsInTriangle(const FloatArray &iP) const
     // Edge 1
     FloatArray t1;
     t1.beDifferenceOf(mVertices [ 1 ], mVertices [ 0 ]);
-    t1.normalize();
+    if(t1.computeSquaredNorm() < tol2) {
+    	// The triangle is degenerated
+    	return false;
+    }
+    else {
+    	t1.normalize();
+    }
     FloatArray a1;
     a1.beVectorProductOf(N, t1);
-    a1.normalize();
+    if(a1.computeSquaredNorm() < tol2) {
+    	// The triangle is degenerated
+    	return false;
+    }
+    else {
+    	a1.normalize();
+    }
 
     FloatArray p1pProj;
     p1pProj.beDifferenceOf(pProj, mVertices [ 0 ]);
@@ -396,10 +427,22 @@ bool Triangle :: pointIsInTriangle(const FloatArray &iP) const
     // Edge 2
     FloatArray t2;
     t2.beDifferenceOf(mVertices [ 2 ], mVertices [ 1 ]);
-    t2.normalize();
+    if(t2.computeSquaredNorm() < tol2) {
+    	// The triangle is degenerated
+    	return false;
+    }
+    else {
+    	t2.normalize();
+    }
     FloatArray a2;
     a2.beVectorProductOf(N, t2);
-    a2.normalize();
+    if(a2.computeSquaredNorm() < tol2) {
+    	// The triangle is degenerated
+    	return false;
+    }
+    else {
+    	a2.normalize();
+    }
 
     FloatArray p2pProj;
     p2pProj.beDifferenceOf(pProj, mVertices [ 1 ]);
@@ -411,10 +454,22 @@ bool Triangle :: pointIsInTriangle(const FloatArray &iP) const
     // Edge 3
     FloatArray t3;
     t3.beDifferenceOf(mVertices [ 0 ], mVertices [ 2 ]);
-    t3.normalize();
+    if(t3.computeSquaredNorm() < tol2) {
+    	// The triangle is degenerated
+    	return false;
+    }
+    else {
+    	t3.normalize();
+    }
     FloatArray a3;
     a3.beVectorProductOf(N, t3);
-    a3.normalize();
+    if(a3.computeSquaredNorm() < tol2) {
+    	// The triangle is degenerated
+    	return false;
+    }
+    else {
+    	a3.normalize();
+    }
 
     FloatArray p3pProj;
     p3pProj.beDifferenceOf(pProj, mVertices [ 2 ]);
