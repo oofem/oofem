@@ -48,7 +48,7 @@ set (sm_element
     qplanestrain.C qplanestraingrad.C
     qtrplanestrain.C qtrplanestraingrad.C
     qspacegrad.C
-    dkt.C
+    dkt.C qdkt.C
     )
 
 set (sm_crosssection

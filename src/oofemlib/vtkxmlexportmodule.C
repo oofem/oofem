@@ -1577,7 +1577,10 @@ VTKXMLExportModule :: getCellVariableFromIS(FloatArray &answer, Element *el, Int
     switch ( type ) {
         // Special scalars
     case IST_MaterialNumber:
-        OOFEM_WARNING1("VTKExportModule - Material numbers are deprecated, outputing cross section number instead...");
+        // commented by bp: do what user wants
+        //OOFEM_WARNING1("VTKExportModule - Material numbers are deprecated, outputing cross section number instead...");
+        valueArray.at(1) = ( double ) el->giveMaterial()->giveNumber();
+	break;
     case IST_CrossSectionNumber:
         valueArray.at(1) = ( double ) el->giveCrossSection()->giveNumber();
         break;
@@ -1829,8 +1832,7 @@ VTKXMLExportModule :: exportIntVarsInGpAs(IntArray valIDs, TimeStep *tStep)
 
     /* loop over regions */
     for ( int ireg = 1; ireg <= nregions; ireg++ ) {
-        IntArray elements = d->giveSet(ireg)->giveElementList();
-
+        const IntArray &elements = this->giveRegionSet(ireg)->giveElementList();
         nip = 0;
         for ( int i = 1; i <= elements.giveSize(); i++ ) {
             nip += d->giveElement( elements.at(i) )->giveDefaultIntegrationRulePtr()->giveNumberOfIntegrationPoints();
