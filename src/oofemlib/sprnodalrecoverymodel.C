@@ -364,14 +364,14 @@ SPRNodalRecoveryModel :: initPatch(IntArray &patchElems, IntArray &dofManToDeter
         }
 
 #endif
-        if ( elementSet.hasElement(ielem) ) {
+        if ( elementSet.hasElement(papDofManConnectivity->at(ielem)) ) {
             count++;
         }
     }
 
     patchElems.resize(count);
     patchElements = 0;
-    for ( int i = 1; i <= regionelements.giveSize(); i++ ) {
+    for ( int i = 1; i <= nelem; i++ ) {
         ielem = regionelements.at(i);
 #ifdef __PARALLEL_MODE
         if ( domain->giveElement( papDofManConnectivity->at(ielem) )->giveParallelMode() != Element_local ) {
@@ -379,7 +379,9 @@ SPRNodalRecoveryModel :: initPatch(IntArray &patchElems, IntArray &dofManToDeter
         }
 
 #endif
-        patchElems.at(++patchElements) = papDofManConnectivity->at(ielem);
+	if ( elementSet.hasElement(papDofManConnectivity->at(ielem)) ) {
+	  patchElems.at(++patchElements) = papDofManConnectivity->at(ielem);
+	}
     }
 
     // Invert the pap array for faster access later
@@ -614,6 +616,7 @@ SPRNodalRecoveryModel :: giveNumberOfUnknownPolynomialCoefficients(SPRPatchType 
     } else {
         return 0;
     }
+    return 0;
 }
 
 
