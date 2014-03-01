@@ -145,7 +145,7 @@ RankineMatNl :: givePlaneStressStiffMtrx(FloatMatrix &answer, MatResponseMode mo
         return;
     }
 
-    _error("RankineMatNl :: givePlaneStressStiffMtrx ... unknown type of stiffness\n");
+    OOFEM_ERROR("unknown type of stiffness\n");
 }
 
 void
@@ -224,7 +224,6 @@ RankineMatNl :: giveInterface(InterfaceType type)
 IRResultType
 RankineMatNl :: initializeFrom(InputRecord *ir)
 {
-    //const char *__proc = "initializeFrom"; // Required by IR_GIVE_FIELD macro
     //IRResultType result;                // Required by IR_GIVE_FIELD macro
 
     RankineMat :: initializeFrom(ir);

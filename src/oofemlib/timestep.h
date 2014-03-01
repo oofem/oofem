@@ -209,6 +209,8 @@ public:
      * @see saveContext member function.
      */
     contextIOResultType restoreContext(DataStream *stream, ContextMode mode, void *obj = NULL);
+
+    std :: string errorInfo(const char *func) { return std :: string("TimeStep::") + func; }
 };
 } // end namespace oofem
 #endif // timestep_h

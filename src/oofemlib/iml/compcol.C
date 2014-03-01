@@ -150,7 +150,7 @@ void CompCol :: times(const FloatArray &x, FloatArray &answer) const
 
     //      Check for compatible dimensions:
     if ( x.giveSize() != N ) {
-        OOFEM_ERROR("CompCol::times: Error in CompCol -- incompatible dimensions");
+        OOFEM_ERROR("incompatible dimensions");
     }
 
     answer.resize(M);
@@ -352,7 +352,7 @@ int CompCol :: assemble(const IntArray &loc, const FloatMatrix &mat)
 #  ifdef DEBUG
     dim = mat.giveNumberOfRows();
     if ( dim != loc.giveSize() ) {
-        OOFEM_ERROR("CompCol::assemble : dimension of 'k' and 'loc' mismatch");
+        OOFEM_ERROR("dimension of 'k' and 'loc' mismatch");
     }
 
     //this -> checkSizeTowards(loc) ;
@@ -440,7 +440,7 @@ double &CompCol :: at(int i, int j)
         }
     }
 
-    OOFEM_ERROR3("CompCol::operator(): Array accessing exception -- (%d,%d) out of bounds", i, j);
+    OOFEM_ERROR("Array accessing exception -- (%d,%d) out of bounds", i, j);
     return val_(0); // return to suppress compiler warning message
 }
 
@@ -456,7 +456,7 @@ double CompCol :: at(int i, int j) const
     if ( i <= dim_ [ 0 ] && j <= dim_ [ 1 ] ) {
         return 0.0;
     } else {
-        OOFEM_ERROR3("CompCol::operator(): Array accessing exception -- (%d,%d) out of bounds", i, j);
+        OOFEM_ERROR("Array accessing exception -- (%d,%d) out of bounds", i, j);
         return ( 0 ); // return to suppress compiler warning message
     }
 }
@@ -472,7 +472,7 @@ double CompCol :: operator() (int i, int j)  const
     if ( i < dim_ [ 0 ] && j < dim_ [ 1 ] ) {
         return 0.0;
     } else {
-        OOFEM_ERROR3("CompCol::operator(): Array accessing exception -- (%d,%d) out of bounds", i, j);
+        OOFEM_ERROR("Array accessing exception -- (%d,%d) out of bounds", i, j);
         return ( 0 ); // return to suppress compiler warning message
     }
 }
@@ -488,7 +488,7 @@ double &CompCol :: operator() (int i, int j)
         }
     }
 
-    OOFEM_ERROR3("CompCol::operator(): Array element (%d,%d) not in sparse structure -- cannot assign", i, j);
+    OOFEM_ERROR("Array element (%d,%d) not in sparse structure -- cannot assign", i, j);
     return val_(0); // return to suppress compiler warning message
 }
 
@@ -499,7 +499,7 @@ void CompCol :: timesT(const FloatArray &x, FloatArray &answer) const
 
     //      Check for compatible dimensions:
     if ( x.giveSize() != M ) {
-        OOFEM_ERROR("CompCol::timesT: Error in CompCol -- incompatible dimensions");
+        OOFEM_ERROR("Error in CompCol -- incompatible dimensions");
     }
 
     answer.resize(N);

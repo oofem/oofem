@@ -102,7 +102,7 @@ DirectErrorIndicatorRC :: giveLocalDofManDensity(int num)
         interface = static_cast< DirectErrorIndicatorRCInterface * >
                     ( d->giveElement( con->at(i) )->giveInterface(DirectErrorIndicatorRCInterfaceType) );
         if ( !interface ) {
-            OOFEM_WARNING2( "DirectErrorIndicatorRC::giveRequiredDofManDensity: elem %d does not support DirectErrorIndicatorRCInterface", con->at(i) );
+            OOFEM_WARNING("elem %d does not support DirectErrorIndicatorRCInterface", con->at(i) );
         }
 
         if ( i == 1 ) {
@@ -151,7 +151,7 @@ DirectErrorIndicatorRC :: giveLocalDofManIndicator(int inode, TimeStep *tStep)
         interface = static_cast< DirectErrorIndicatorRCInterface * >
                     ( d->giveElement( con->at(i) )->giveInterface(DirectErrorIndicatorRCInterfaceType) );
         if ( !interface ) {
-            OOFEM_WARNING2( "DirectErrorIndicatorRC::giveRequiredDofManDensity: element %d does not support DirectErrorIndicatorRCInterface", con->at(i) );
+            OOFEM_WARNING("element %d does not support DirectErrorIndicatorRCInterface", con->at(i) );
         }
 
         if ( i == 1 ) {
@@ -246,7 +246,6 @@ DirectErrorIndicatorRC :: giveRequiredDofManDensity(int num, TimeStep *tStep, in
 IRResultType
 DirectErrorIndicatorRC :: initializeFrom(InputRecord *ir)
 {
-    const char *__proc = "initializeFrom"; // Required by IR_GIVE_FIELD macro
     IRResultType result;                // Required by IR_GIVE_FIELD macro
 
     IR_GIVE_FIELD(ir, minIndicatorLimit, _IFT_DirectErrorIndicatorRC_minlim);

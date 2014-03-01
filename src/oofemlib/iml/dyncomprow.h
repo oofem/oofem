@@ -88,6 +88,7 @@ public:
     int assemble(const IntArray &rloc, const IntArray &cloc, const FloatMatrix &mat);
     bool canBeFactorized() const { return false; }
     void zero();
+    virtual const char* giveClassName() const { return "DynCompRow"; }
     SparseMtrxType  giveType() const { return SMT_DynCompRow; }
     bool isAsymmetric() const { return true; }
     void printStatistics() const;

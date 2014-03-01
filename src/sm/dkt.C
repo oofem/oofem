@@ -100,7 +100,7 @@ DKTPlate :: computeBodyLoadVectorAt(FloatArray &answer, Load *forLoad, TimeStep 
     FloatMatrix T;
 
     if ( ( forLoad->giveBCGeoType() != BodyLoadBGT ) || ( forLoad->giveBCValType() != ForceLoadBVT ) ) {
-        _error("computeBodyLoadVectorAt: unknown load type");
+        OOFEM_ERROR("unknown load type");
     }
 
     GaussIntegrationRule irule(1, this, 1, 5);
@@ -592,7 +592,7 @@ DKTPlate :: SPRNodalRecoveryMI_giveDofMansDeterminedByPatch(IntArray &answer, in
         ( pap == this->giveNode(3)->giveNumber() ) ) {
         answer.at(1) = pap;
     } else {
-        _error("SPRNodalRecoveryMI_giveDofMansDeterminedByPatch: node unknown");
+        OOFEM_ERROR("node unknown");
     }
 }
 
@@ -675,7 +675,7 @@ DKTPlate :: giveEdgeDofMapping(IntArray &answer, int iEdge) const
         answer.at(5) = 2;
         answer.at(6) = 3;
     } else {
-        _error("giveEdgeDofMapping: wrong edge number");
+        OOFEM_ERROR("wrong edge number");
     }
 }
 

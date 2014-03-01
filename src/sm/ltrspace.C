@@ -190,7 +190,6 @@ double LTRSpace :: computeVolumeAround(GaussPoint *gp)
 IRResultType
 LTRSpace :: initializeFrom(InputRecord *ir)
 {
-    //const char *__proc = "initializeFrom"; // Required by IR_GIVE_FIELD macro
     //IRResultType result;                            // Required by IR_GIVE_FIELD macro
 
     numberOfGaussPoints = 1;
@@ -302,7 +301,7 @@ LTRSpace :: SPRNodalRecoveryMI_giveDofMansDeterminedByPatch(IntArray &answer, in
     if ( found ) {
         answer.at(1) = pap;
     } else {
-        _error("SPRNodalRecoveryMI_giveDofMansDeterminedByPatch: node unknown");
+        OOFEM_ERROR("node unknown");
     }
 }
 
@@ -652,7 +651,7 @@ LTRSpace :: SpatialLocalizerI_giveDistanceFromParametricCenter(const FloatArray 
     this->computeGlobalCoordinates(gcoords, lcoords);
 
     if ( ( size = coords.giveSize() ) < ( gsize = gcoords.giveSize() ) ) {
-        _error("SpatialLocalizerI_giveDistanceFromParametricCenter: coordinates size mismatch");
+        OOFEM_ERROR("coordinates size mismatch");
     }
 
     if ( size == gsize ) {
@@ -828,7 +827,7 @@ LTRSpace :: giveEdgeDofMapping(IntArray &answer, int iEdge) const
         answer.at(5) = 11;
         answer.at(6) = 12;
     } else {
-        _error("giveEdgeDofMapping: wrong edge number");
+        OOFEM_ERROR("wrong edge number");
     }
 }
 
@@ -859,7 +858,7 @@ LTRSpace :: computeLoadLEToLRotationMatrix(FloatMatrix &answer, int iEdge, Gauss
     //
     // i.e. f(element local) = T * f(edge local)
     //
-    _error("computeLoadLEToLRotationMatrix: egde local coordinate system not supported");
+    OOFEM_ERROR("egde local coordinate system not supported");
     return 1;
 }
 
@@ -938,7 +937,7 @@ LTRSpace :: giveSurfaceDofMapping(IntArray &answer, int iSurf) const
         answer.at(8) = 8;
         answer.at(9) = 9;
     } else {
-        _error("giveSurfaceDofMapping: wrong surface number");
+        OOFEM_ERROR("wrong surface number");
     }
 }
 
@@ -979,7 +978,7 @@ LTRSpace :: computeSurfIpGlobalCoords(FloatArray &answer, GaussPoint *gp, int is
 int
 LTRSpace :: computeLoadLSToLRotationMatrix(FloatMatrix &answer, int, GaussPoint *)
 {
-    _error("computeLoadLSToLRotationMatrix: surface local coordinate system not supported");
+    OOFEM_ERROR("surface local coordinate system not supported");
     return 1;
 }
 } // end namespace oofem

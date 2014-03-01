@@ -41,8 +41,9 @@
 #include "structuralcrosssection.h"
 #include "vtkxmlexportmodule.h"
 #include "dynamicinputrecord.h"
+
 #ifdef __OOFEG
- #include "patchintegrationrule.h"
+ #include "oofeggraphiccontext.h"
 #endif
 
 namespace oofem {
@@ -182,7 +183,7 @@ void PlaneStress2dXfem :: drawRawGeometry(oofegGraphicContext &context)
     if ( !context.testElementGraphicActivity(this) ) {
         return;
     }
-
+#if 0
     XfemManager *xf = this->giveDomain()->giveXfemManager();
     if ( !xf->isElementEnriched(this) ) {
         PlaneStress2d :: drawRawGeometry(context);
@@ -202,6 +203,7 @@ void PlaneStress2dXfem :: drawRawGeometry(oofegGraphicContext &context)
             PlaneStress2d :: drawRawGeometry(context);
         }
     }
+#endif
 }
 
 void PlaneStress2dXfem :: drawScalar(oofegGraphicContext &context)
@@ -209,7 +211,7 @@ void PlaneStress2dXfem :: drawScalar(oofegGraphicContext &context)
     if ( !context.testElementGraphicActivity(this) ) {
         return;
     }
-
+#if 0
     XfemManager *xf = this->giveDomain()->giveXfemManager();
     if ( !xf->isElementEnriched(this) ) {
         PlaneStress2d :: drawScalar(context);
@@ -246,6 +248,7 @@ void PlaneStress2dXfem :: drawScalar(oofegGraphicContext &context)
             PlaneStress2d :: drawScalar(context);
         }
     }
+#endif
 }
 #endif
 

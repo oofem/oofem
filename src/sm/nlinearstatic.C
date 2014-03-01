@@ -101,11 +101,10 @@ NonLinearStatic :: ~NonLinearStatic()
 
 NumericalMethod *NonLinearStatic :: giveNumericalMethod(MetaStep *mStep)
 {
-    const char *__proc = "giveNumericalMethod"; // Required by IR_GIVE_FIELD macro
     IRResultType result;                     // Required by IR_GIVE_FIELD macro
 
     if ( mStep == NULL ) {
-        _error("giveNumericalMethod: undefined meta step");
+        OOFEM_ERROR("undefined meta step");
     }
 
     int _val = 0;
@@ -134,7 +133,7 @@ NumericalMethod *NonLinearStatic :: giveNumericalMethod(MetaStep *mStep)
 
         this->nMethod = new NRSolver(this->giveDomain(1), this);
     } else {
-        _error("giveNumericalMethod: unsupported controlMode");
+        OOFEM_ERROR("unsupported controlMode");
     }
 
     return this->nMethod;
@@ -144,7 +143,6 @@ NumericalMethod *NonLinearStatic :: giveNumericalMethod(MetaStep *mStep)
 void
 NonLinearStatic :: updateAttributes(MetaStep *mStep)
 {
-    const char *__proc = "updateAttributes"; // Required by IR_GIVE_FIELD macro
     IRResultType result;                  // Required by IR_GIVE_FIELD macro
 
     MetaStep *mStep1 = this->giveMetaStep( mStep->giveNumber() ); //this line ensures correct input file in staggered problem
@@ -179,7 +177,7 @@ NonLinearStatic :: updateAttributes(MetaStep *mStep)
     deltaT = 1.0;
     IR_GIVE_OPTIONAL_FIELD(ir, deltaT, _IFT_NonLinearStatic_deltat);
     if ( deltaT < 0. ) {
-        _error("updateAttributes: deltaT < 0");
+        OOFEM_ERROR("deltaT < 0");
     }
 
     _val = nls_tangentStiffness;
@@ -204,7 +202,6 @@ NonLinearStatic :: updateAttributes(MetaStep *mStep)
 IRResultType
 NonLinearStatic :: initializeFrom(InputRecord *ir)
 {
-    const char *__proc = "initializeFrom"; // Required by IR_GIVE_FIELD macro
     IRResultType result;                // Required by IR_GIVE_FIELD macro
 
     LinearStatic :: initializeFrom(ir);
@@ -214,7 +211,7 @@ NonLinearStatic :: initializeFrom(InputRecord *ir)
 #ifdef __PARALLEL_MODE
     //if (ir->hasField ("nodecutmode")) commMode = ProblemCommunicator::ProblemCommMode__NODE_CUT;
     //else if (ir->hasField ("elementcutmode")) commMode = ProblemCommunicator::ProblemCommMode__ELEMENT_CUT;
-    //else _error ("instanciateFrom: ProblemCommunicator comm mode not specified");
+    //else OOFEM_ERROR("ProblemCommunicator comm mode not specified");
     if ( isParallel() ) {
         //commBuff = new CommunicatorBuff (this->giveNumberOfProcesses(), CBT_dynamic);
         commBuff = new CommunicatorBuff(this->giveNumberOfProcesses(), CBT_static);
@@ -242,13 +239,13 @@ double NonLinearStatic :: giveUnknownComponent(ValueModeType mode, TimeStep *tSt
     int eq = dof->__giveEquationNumber();
 #ifdef DEBUG
     if ( eq == 0 ) {
-        _error("giveUnknownComponent: invalid equation number");
+        OOFEM_ERROR("invalid equation number");
     }
 #endif
 
 
     if ( tStep != this->giveCurrentStep() ) {
-        _error("giveUnknownComponent: unknown time step encountered");
+        OOFEM_ERROR("unknown time step encountered");
         return 0.;
     }
 
@@ -270,7 +267,7 @@ double NonLinearStatic :: giveUnknownComponent(ValueModeType mode, TimeStep *tSt
         }
 
     default:
-        _error("giveUnknownComponent: Unknown is of undefined ValueModeType for this problem");
+        OOFEM_ERROR("Unknown is of undefined ValueModeType for this problem");
     }
 
     return 0.0;
@@ -303,7 +300,7 @@ TimeStep *NonLinearStatic :: giveNextStep()
         if ( !this->giveMetaStep(mStepNum)->isStepValid(istep) ) {
             mStepNum++;
             if ( mStepNum > nMetaSteps ) {
-                OOFEM_ERROR3("giveNextStep: no next step available, mStepNum=%d > nMetaSteps=%d", mStepNum, nMetaSteps);
+                OOFEM_ERROR("no next step available, mStepNum=%d > nMetaSteps=%d", mStepNum, nMetaSteps);
             }
         }
     }
@@ -431,12 +428,12 @@ NonLinearStatic :: proceedStep(int di, TimeStep *tStep)
         }
 
         if ( stiffnessMatrix == NULL ) {
-            _error("proceedStep: sparse matrix creation failed");
+            OOFEM_ERROR("sparse matrix creation failed");
         }
 
         if ( nonlocalStiffnessFlag ) {
             if ( !stiffnessMatrix->isAsymmetric() ) {
-                _error("proceedStep: stiffnessMatrix does not support asymmetric storage");
+                OOFEM_ERROR("stiffnessMatrix does not support asymmetric storage");
             }
         }
 
@@ -508,7 +505,7 @@ NonLinearStatic :: proceedStep(int di, TimeStep *tStep)
         OOFEM_LOG_RELEVANT("initial guess found\n");
         totalDisplacement.add(incrementOfDisplacement);
     } else if ( this->initialGuessType != IG_None ) {
-        OOFEM_ERROR2("Initial guess type: %d not supported", initialGuessType);
+        OOFEM_ERROR("Initial guess type: %d not supported", initialGuessType);
     } else {
         incrementOfDisplacement.zero();
     }
@@ -583,7 +580,7 @@ NonLinearStatic :: updateComponent(TimeStep *tStep, NumericalCmpn cmpn, Domain *
         break;
 
     default:
-        _error("updateComponent: Unknown Type of component.");
+        OOFEM_ERROR("Unknown Type of component.");
     }
 }
 
@@ -837,7 +834,7 @@ NonLinearStatic :: computeExternalLoadReactionContribution(FloatArray &reactions
         reactions = initialLoadVectorOfPrescribed;
         reactions.add(loadLevel, incrementalLoadVectorOfPrescribed);
     } else {
-        _error("computeExternalLoadReactionContribution: unable to respond due to invalid solution step or domain");
+        OOFEM_ERROR("unable to respond due to invalid solution step or domain");
     }
 }
 

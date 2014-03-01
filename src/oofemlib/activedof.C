@@ -45,7 +45,7 @@ ActiveDof :: ActiveDof(int n, DofManager *aNode, int bc, DofIDItem id) : Dof(n, 
 
 void ActiveDof :: initialize(int cntOfMstrDfMngr, const IntArray &masterNodes, const IntArray *mstrDofID, const FloatArray &mstrContribution)
 {
-    OOFEM_ERROR("ActiveDof :: initialize - Shouldn't be statically initialized.");
+    OOFEM_ERROR("Shouldn't be statically initialized.");
 }
 
 ActiveBoundaryCondition *ActiveDof :: giveActiveBoundaryCondition()
@@ -53,7 +53,7 @@ ActiveBoundaryCondition *ActiveDof :: giveActiveBoundaryCondition()
     if ( !activeBC ) {
         activeBC = dynamic_cast< ActiveBoundaryCondition * >( this->dofManager->giveDomain()->giveBc(bc) );
         if ( !activeBC ) {
-            OOFEM_ERROR2("ActiveBoundaryCondition :: giveActiveBoundaryCondition - No active bc at %d\n", bc);
+            OOFEM_ERROR("No active bc at %d\n", bc);
         }
     }
     return activeBC;

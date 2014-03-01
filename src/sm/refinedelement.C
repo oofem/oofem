@@ -37,7 +37,6 @@
 #include "node.h"
 #include "dof.h"
 #include "mathfem.h"
-#include "oofem_limits.h"
 
 #include <cstdarg>
 #include <cstdlib> // For abort
@@ -89,7 +88,7 @@ RefinedElement :: giveFineNodeArray(int node)
 
     /*
      * else {
-     *   _errori ("giveNodeAssocFineNodeList: No such node list defined: ", node);
+     *   OOFEM_ERRORi ("No such node list defined: ", node);
      * }
      */
     return NULL;
@@ -148,7 +147,7 @@ RefinedElement :: giveBoundaryFlagArray(int inode, Element *element, IntArray &a
         con = hexa_con_fc [ inode - 1 ];
         break;
     default:
-        _error("giveBoundaryFlagArray: Unsupported geometry type");
+        OOFEM_ERROR("Unsupported geometry type");
     }
 
     for ( i = 0; i < dim; i++ ) {
@@ -226,7 +225,7 @@ RefinedElement :: giveBcDofArray2D(int inode, Element *element, AList< IntArray 
         con = quad_con_nd [ inode - 1 ];
         break;
     default:
-        _error("giveBcDofArray2D: Unsupported geometry type");
+        OOFEM_ERROR("Unsupported geometry type");
     }
 
     for ( iside = 0; iside < 2; iside++ ) {
@@ -292,7 +291,7 @@ RefinedElement :: giveBcDofArray3D(int inode, Element *element, AList< IntArray 
         con = hexa_con_nd [ inode - 1 ];
         break;
     default:
-        _error("giveBcDofArray3D: Unsupported geometry type");
+        OOFEM_ERROR("Unsupported geometry type");
     }
 
     for ( iside = 0; iside < 3; iside++ ) {
@@ -366,7 +365,7 @@ RefinedElement :: giveBcDofArray3D(int inode, Element *element, AList< IntArray 
 
             break;
         default:
-            _error("giveBcDofArray3D: Unsupported geometry type");
+            OOFEM_ERROR("Unsupported geometry type");
         }
     }
 
@@ -450,7 +449,7 @@ RefinedElement :: giveBoundaryLoadArray2D(int inode, Element *element, AList< In
         con = quad_con_ed [ inode - 1 ];
         break;
     default:
-        _error("giveBoundaryLoadArray2D: Unsupported geometry type");
+        OOFEM_ERROR("Unsupported geometry type");
     }
 
     for ( iside = 0; iside < 2; iside++ ) {
@@ -515,7 +514,7 @@ RefinedElement :: giveBoundaryLoadArray3D(int inode, Element *element, AList< In
         con = hexa_con_fc [ inode - 1 ];
         break;
     default:
-        _error("giveBoundaryLoadArray3D: Unsupported geometry type");
+        OOFEM_ERROR("Unsupported geometry type");
     }
 
     for ( iside = 0; iside < 3; iside++ ) {
@@ -601,7 +600,7 @@ RefinedElement :: giveCompatibleBcDofArray(Node *master_node, Node *slave_node, 
 
 #ifdef DEBUG
             if ( nodeDof->hasBc(tStep) == false ) {
-                _error("extractCompatibleBcDof: dof has no BC");
+                OOFEM_ERROR("dof has no BC");
             }
 
 #endif
@@ -668,15 +667,8 @@ RefinedElement :: giveCompatibleBcDofArray(Node *master_node, Node *slave_node, 
  * int element -> giveNode(1) -> giveDof(1) -> giveBc() -> isImposed(tStep)
  */
 
-void RefinedElement :: error(const char *file, int line, const char *format, ...) const
+std :: string RefinedElement :: errorInfo(const char *func) const
 {
-    char buffer [ MAX_ERROR_MSG_LENGTH ];
-    va_list args;
-
-    va_start(args, format);
-    vsprintf(buffer, format, args);
-    va_end(args);
-
-    __OOFEM_ERROR3(file, line, "Class: RefinedElement, number: %d\n%s", this->elementId, buffer);
+    return std :: string("RefinedElement::") + func + ", number: " + std::to_string(this->elementId);
 }
 } // end namespace oofem

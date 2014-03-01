@@ -100,7 +100,6 @@ IsotropicDamageMaterial1 :: ~IsotropicDamageMaterial1()
 IRResultType
 IsotropicDamageMaterial1 :: initializeFrom(InputRecord *ir)
 {
-    const char *__proc = "initializeFrom";     // Required by IR_GIVE_FIELD macro
     IRResultType result;                // Required by IR_GIVE_FIELD macro
 
     int equivStrainTypeRecord;
@@ -133,7 +132,7 @@ IsotropicDamageMaterial1 :: initializeFrom(InputRecord *ir)
         this->equivStrainType = EST_Griffith;
         IR_GIVE_OPTIONAL_FIELD(ir, griff_n, _IFT_IsotropicDamageMaterial1_n);
     } else {
-        OOFEM_ERROR2("Unknown equivStrainType %d", equivStrainType);
+        OOFEM_ERROR("Unknown equivStrainType %d", equivStrainType);
     }
 
     // specify the type of formula for damage evolution law
@@ -213,7 +212,7 @@ IsotropicDamageMaterial1 :: initializeFrom(InputRecord *ir)
         IR_GIVE_FIELD(ir, nd, _IFT_IsotropicDamageMaterial1_nd);
         break;
     default:
-        OOFEM_ERROR2("Softening type number %d is unknown", damageLaw);
+        OOFEM_ERROR("Softening type number %d is unknown", damageLaw);
     }
 
     if ( ( softType == ST_Exponential_Cohesive_Crack ) || ( softType == ST_Linear_Cohesive_Crack ) || ( softType == ST_BiLinear_Cohesive_Crack ) ) {
@@ -439,7 +438,7 @@ IsotropicDamageMaterial1 :: computeEquivalentStrain(double &kappa, const FloatAr
         kappa = max(kappa1, 0.0);
         kappa = max(kappa, kappa2);
     } else {
-        _error("computeEquivalentStrain: unknown EquivStrainType");
+        OOFEM_ERROR("unknown EquivStrainType");
     }
 }
 
@@ -484,7 +483,7 @@ IsotropicDamageMaterial1 :: computeEta(FloatArray &answer, const FloatArray &str
             fullStrain.computePrincipalValDir(principalStrains, N);
         } else {
             dim = 0;
-            OOFEM_ERROR("IsotropicDamageMaterial1 :: computeEta - Unknown material mode.");
+            OOFEM_ERROR("Unknown material mode.");
         }
 
         FloatArray n(dim);
@@ -570,7 +569,7 @@ IsotropicDamageMaterial1 :: computeEta(FloatArray &answer, const FloatArray &str
             dim = 3;
         } else {
             dim = 0;
-            OOFEM_ERROR("IsotropicDamageMaterial1 :: computeEta - Unknown material mode.");
+            OOFEM_ERROR("Unknown material mode.");
         }
 
         FloatArray n(dim);
@@ -660,7 +659,7 @@ IsotropicDamageMaterial1 :: computeEta(FloatArray &answer, const FloatArray &str
         answer = stress;
         answer.times(1. / lmat->give('E', gp) / kappa);
     } else {
-        _error("computeEta: unknown EquivStrainType");
+        OOFEM_ERROR("unknown EquivStrainType");
     }
 }
 
@@ -703,7 +702,7 @@ IsotropicDamageMaterial1 :: computeDamageParamForCohesiveCrack(double &omega, do
             } else if ( softType == ST_Linear_Cohesive_Crack || softType == ST_BiLinear_Cohesive_Crack ) { // (bi)linear softening law
                 wf = 2. * gf / E / e0; // wf is the crack opening
             } else {
-                OOFEM_ERROR2("Gf unsupported for softening type softType = %d", softType);
+                OOFEM_ERROR("Gf unsupported for softening type softType = %d", softType);
             }
         }
 
@@ -712,23 +711,23 @@ IsotropicDamageMaterial1 :: computeDamageParamForCohesiveCrack(double &omega, do
         ef = wf / Le;    //ef is the fracturing strain
         if ( ef < e0 ) { //check that no snapback occurs
             double minGf = 0.;
-            OOFEM_WARNING5("ef %e < e0 %e, this leads to material snapback in element %d, characteristic length %f", ef, e0, gp->giveElement()->giveNumber(), Le);
+            OOFEM_WARNING("ef %e < e0 %e, this leads to material snapback in element %d, characteristic length %f", ef, e0, gp->giveElement()->giveNumber(), Le);
             if ( gf != 0. ) { //cohesive crack
                 if ( softType == ST_Exponential_Cohesive_Crack ) { //exponential softening
                     minGf = E * e0 * e0 * Le;
                 } else if ( softType == ST_Linear_Cohesive_Crack || softType == ST_BiLinear_Cohesive_Crack ) { //(bi)linear softening law
                     minGf = E * e0 * e0 * Le / 2.;
                 } else {
-                    OOFEM_WARNING2("Gf unsupported for softening type softType = %d", softType);
+                    OOFEM_WARNING("Gf unsupported for softening type softType = %d", softType);
                 }
 
                 if ( checkSnapBack ) {
-                    OOFEM_ERROR4("Material number %d, decrease e0, or increase Gf from %f to Gf=%f", this->giveNumber(), gf, minGf);
+                    OOFEM_ERROR("Material number %d, decrease e0, or increase Gf from %f to Gf=%f", this->giveNumber(), gf, minGf);
                 }
             }
 
             if ( checkSnapBack ) { //given fracturing strain
-                OOFEM_ERROR4("Material number %d, increase ef %f to minimum e0 %f", this->giveNumber(), ef, e0);
+                OOFEM_ERROR("Material number %d, increase ef %f to minimum e0 %f", this->giveNumber(), ef, e0);
             }
         }
 
@@ -745,11 +744,11 @@ IsotropicDamageMaterial1 :: computeDamageParamForCohesiveCrack(double &omega, do
             double sigmak = E * e0 * ( ef - ek ) / ( ef - e0 );
             double epsf = 2 * ( gft - gf ) / sigmak / Le + ef;
             if ( ( ek > ef ) || ( ek < e0 ) ) {
-                OOFEM_WARNING4("ek %f is not between e0 %f and ef %f", ek, e0, ef);
+                OOFEM_WARNING("ek %f is not between e0 %f and ef %f", ek, e0, ef);
             }
 
             if ( gft < gf ) {
-                OOFEM_ERROR3("The total fracture energy gft %f must be greater than the initial fracture energy gf %f", gft, gf);
+                OOFEM_ERROR("The total fracture energy gft %f must be greater than the initial fracture energy gf %f", gft, gf);
             }
 
             if ( kappa <= ek ) {
@@ -776,26 +775,26 @@ IsotropicDamageMaterial1 :: computeDamageParamForCohesiveCrack(double &omega, do
                 Lhs = kappa - e0 *exp(-help) * kappa / ef; //- dR / (d omega)
                 omega += R / Lhs;
                 if ( nite > 40 ) {
-                    _error("computeDamageParamForCohesiveCrack: algorithm not converging");
+                    OOFEM_ERROR("computeDamageParamForCohesiveCrack: algorithm not converging");
                 }
             } while ( fabs(R) >= e0 * IDM1_ITERATION_LIMIT );
         } else {
-            OOFEM_ERROR1("Unknown softening type for cohesive crack model.");
+            OOFEM_ERROR("Unknown softening type for cohesive crack model.");
         }
 
         if ( omega > 1.0 ) {
-            OOFEM_WARNING2("computeDamageParam: damage parameter is %f, which is greater than 1, snap-back problems", omega);
+            OOFEM_WARNING("damage parameter is %f, which is greater than 1, snap-back problems", omega);
             omega = maxOmega;
             if ( checkSnapBack ) {
-                OOFEM_ERROR1("\n");
+                OOFEM_ERROR("\n");
             }
         }
 
         if ( omega < 0.0 ) {
-            OOFEM_WARNING2("computeDamageParam: damage parameter is %f, which is smaller than 0, snap-back problems", omega);
+            OOFEM_WARNING("damage parameter is %f, which is smaller than 0, snap-back problems", omega);
             omega = 0.0;
             if ( checkSnapBack ) {
-                OOFEM_ERROR1("\n");
+                OOFEM_ERROR("\n");
             }
         }
     }
@@ -841,7 +840,7 @@ IsotropicDamageMaterial1 :: damageFunction(double kappa, GaussPoint *gp)
         }
 
     default:
-        OOFEM_WARNING2("IsotropicDamageMaterial1::damageFunction ... undefined softening type %d\n", softType);
+        OOFEM_WARNING(":damageFunction ... undefined softening type %d\n", softType);
     }
 
     return 0.;         // to make the compiler happy
@@ -927,7 +926,7 @@ IsotropicDamageMaterial1 :: damageFunctionPrime(double kappa, GaussPoint *gp)
         }
     } break;
     default:
-        OOFEM_ERROR2("IsotropicDamageMaterial1::damageFunctionPrime ... undefined softening type %d\n", softType);
+        OOFEM_ERROR("undefined softening type %d\n", softType);
     }
 
     return 0.;         // to make the compiler happy
@@ -966,7 +965,7 @@ IsotropicDamageMaterial1 :: initDamaged(double kappa, FloatArray &strainVector, 
         } else if ( softType == ST_Linear_Cohesive_Crack || softType == ST_BiLinear_Cohesive_Crack ) { // (bi) linear softening law
             wf = 2. * gf / E / e0; // wf is the crack opening
         } else {
-            OOFEM_ERROR2("Gf unsupported for softening type softType = %d", softType);
+            OOFEM_ERROR("Gf unsupported for softening type softType = %d", softType);
         }
     }
 
@@ -1079,19 +1078,19 @@ IsotropicDamageMaterial1 :: initDamaged(double kappa, FloatArray &strainVector, 
         status->setCrackAngle(ca);
 
         if ( this->gf != 0. && e0 >= ( wf / le ) ) { // case for a given fracture energy
-            OOFEM_WARNING6("Fracturing strain %e is lower than the elastic strain e0=%e, possible snap-back. Element number %d, wf %e, le %e", wf / le, e0, gp->giveElement()->giveLabel(), wf, le);
+            OOFEM_WARNING("Fracturing strain %e is lower than the elastic strain e0=%e, possible snap-back. Element number %d, wf %e, le %e", wf / le, e0, gp->giveElement()->giveLabel(), wf, le);
             if ( checkSnapBack ) {
-                OOFEM_ERROR1("\n");
+                OOFEM_ERROR("\n");
             }
         } else if ( wf == 0. && e0 >= ef ) {
-            OOFEM_WARNING5( "Fracturing strain ef=%e is lower than the elastic strain e0=%f, possible snap-back. Increase fracturing strain to %f. Element number %d", ef, e0, e0, gp->giveElement()->giveLabel() );
+            OOFEM_WARNING( "Fracturing strain ef=%e is lower than the elastic strain e0=%f, possible snap-back. Increase fracturing strain to %f. Element number %d", ef, e0, e0, gp->giveElement()->giveLabel() );
             if ( checkSnapBack ) {
-                OOFEM_ERROR1("\n");
+                OOFEM_ERROR("\n");
             }
         } else if ( ef == 0. && e0 * le >= wf ) {
-            OOFEM_WARNING5( "Crack opening at zero stress wf=%f is lower than the elastic displacement w0=%f, possible snap-back. Increase crack opening wf to %f. Element number %d", wf, e0 * le, e0 * le, gp->giveElement()->giveLabel() );
+            OOFEM_WARNING( "Crack opening at zero stress wf=%f is lower than the elastic displacement w0=%f, possible snap-back. Increase crack opening wf to %f. Element number %d", wf, e0 * le, e0 * le, gp->giveElement()->giveLabel() );
             if ( checkSnapBack ) {
-                OOFEM_ERROR1("\n");
+                OOFEM_ERROR("\n");
             }
         }
     }

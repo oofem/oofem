@@ -41,6 +41,7 @@
 #include "range.h"
 #include "node.h"
 #include "element.h"
+#include "scalarfunction.h"
 
 #include <sstream>
 
@@ -375,7 +376,10 @@ void
 DynamicInputRecord :: report_error(const char *_class, const char *proc, InputFieldType id,
                                    IRResultType result, const char *file, int line)
 {
-    __OOFEM_ERROR5(file, line, "Input error: \"%s\", field keyword \"%s\"\n%s::%s", strerror(result), id, _class, proc);
+    oofem_logger.writeELogMsg(Logger :: LOG_LEVEL_ERROR, NULL, file, line,
+                              "Input error: \"%s\", field keyword \"%s\"\n%s::%s",
+                              strerror(result), id, _class, proc);
+    oofem_exit(1); ///@todo We should never directly exit when dealing with user input.
 }
 
 // Helpful macro since we have so many separate records

@@ -406,7 +406,7 @@ MPlasticMaterial :: closestPointReturn(FloatArray &answer,
             nIterations++;
 
             if ( nIterations > PLASTIC_MATERIAL_MAX_ITERATIONS ) {
-                _warning4( "GiveRealStressVector: local equlibrium not reached in %d iterations\nElement %d, gp %d, continuing",
+                OOFEM_WARNING("local equlibrium not reached in %d iterations\nElement %d, gp %d, continuing",
                           PLASTIC_MATERIAL_MAX_ITERATIONS, gp->giveElement()->giveNumber(), gp->giveNumber() );
                 answer = fullStressVector;
                 break;
@@ -655,7 +655,7 @@ MPlasticMaterial :: cuttingPlaneReturn(FloatArray &answer,
                 char buff [ 200 ], buff1 [ 150 ];
                 sprintf(buff, "GiveRealStressVector: local equlibrium not reached in %d iterations", PLASTIC_MATERIAL_MAX_ITERATIONS);
                 sprintf( buff1, "Element %d, gp %d, continuing", gp->giveElement()->giveNumber(), gp->giveNumber() );
-                _warning2(buff, buff1);
+                OOFEM_WARNING(buff, buff1);
                 //nIterations = 0; goto huhu;
                 break;
             }
@@ -1190,7 +1190,7 @@ MPlasticMaterial :: give3dMaterialStiffnessMatrix(FloatMatrix &answer,
 {
     MaterialMode originalMode = gp->giveMaterialMode();
     if ( originalMode != _3dMat ) {
-        _error("give3dMaterialStiffnessMatrix : Different stressStrain mode encountered");
+        OOFEM_ERROR("Different stressStrain mode encountered");
     }
 
     // we can force 3d response, and we obtain correct 3d tangent matrix,

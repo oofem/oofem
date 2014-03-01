@@ -348,7 +348,7 @@ RCM2Material :: giveRealPrincipalStressVector3d(FloatArray &answer, GaussPoint *
     } // loop
 
     // convergence not reached
-    _error("GiveRealStressVector3d - convergence not reached");
+    OOFEM_ERROR("convergence not reached");
 }
 
 
@@ -459,7 +459,7 @@ RCM2Material :: updateStatusForNewCrack(GaussPoint *gp, int i, double Le)
     RCM2MaterialStatus *status = static_cast< RCM2MaterialStatus * >( this->giveStatus(gp) );
 
     if ( Le <= 0 ) {
-        _error2( "Element %d returned zero char length", gp->giveElement()->giveNumber() );
+        OOFEM_ERROR("Element %d returned zero char length", gp->giveElement()->giveNumber() );
     }
 
     status->setCharLength(i, Le);
@@ -808,7 +808,7 @@ RCM2Material :: updateActiveCrackMap(GaussPoint *gp, const IntArray *activatedCr
     IntArray crackMap;
     status->giveCrackMap(crackMap);
 
-    //if (crackMap == NULL) _error ("updateActiveCrackMap: NULL pointer encountered");
+    //if (crackMap == NULL) OOFEM_ERROR("NULL pointer encountered");
 
     for ( int i = 1; i <= 3; i++ ) {
         if ( status->isCrackActive(i) ) {
@@ -830,7 +830,6 @@ RCM2Material :: updateActiveCrackMap(GaussPoint *gp, const IntArray *activatedCr
 IRResultType
 RCM2Material :: initializeFrom(InputRecord *ir)
 {
-    const char *__proc = "initializeFrom"; // Required by IR_GIVE_FIELD macro
     IRResultType result;                // Required by IR_GIVE_FIELD macro
 
     IR_GIVE_FIELD(ir, Gf, _IFT_RCM2Material_gf);
@@ -871,7 +870,7 @@ RCM2Material :: give(int aProperty, GaussPoint *gp)
         if ( linearElasticMaterial ) {
             value = this->linearElasticMaterial->give(aProperty, gp);
         } else {
-            _error("give: property not defined");
+            OOFEM_ERROR("property not defined");
         }
     }
 

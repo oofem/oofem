@@ -38,7 +38,6 @@
 #include "boundarycondition.h"
 #include "initialcondition.h"
 #include "datastream.h"
-#include "oofem_limits.h"
 #include "contextioerr.h"
 #include "unknownnumberingscheme.h"
 
@@ -117,17 +116,9 @@ void Dof :: printYourself()
 }
 
 
-void Dof :: error(const char *file, int line, const char *format, ...) const
+std :: string Dof :: errorInfo(const char *func) const
 {
-    char buffer [ MAX_ERROR_MSG_LENGTH ];
-    va_list args;
-
-    va_start(args, format);
-    vsprintf(buffer, format, args);
-    va_end(args);
-
-    __OOFEM_ERROR5(file, line, "Class: %s, number %d, of DofManager %d\n%s",
-                   this->giveClassName(), number, dofManager->giveNumber(), buffer);
+    return std::string(this->giveClassName()) + "::" + func + " number " + std::to_string(number) + ", of DofManager " + std::to_string(dofManager->giveNumber());
 }
 
 char *

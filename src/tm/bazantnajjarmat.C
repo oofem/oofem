@@ -44,7 +44,6 @@ REGISTER_Material(BazantNajjarMoistureTransferMaterial);
 IRResultType
 BazantNajjarMoistureTransferMaterial :: initializeFrom(InputRecord *ir)
 {
-    const char *__proc = "initializeFrom"; // Required by IR_GIVE_FIELD macro
     IRResultType result;                // Required by IR_GIVE_FIELD macro
 
     IsotropicMoistureTransferMaterial :: initializeFrom(ir);
@@ -83,7 +82,7 @@ BazantNajjarMoistureTransferMaterial :: giveHumidity(GaussPoint *gp, ValueModeTy
 {
     FloatArray tempState = static_cast< TransportMaterialStatus * >( giveStatus(gp) )->giveTempField();
     if ( ( tempState.at(1) > 1.0 ) || ( tempState.at(1) < 0.0 ) ) {
-        OOFEM_ERROR2( "BazantNajjarMoistureTransferMaterial :: giveHumidity : Relative humidity %.3f is out of range", tempState.at(1) );
+        OOFEM_ERROR("Relative humidity %.3f is out of range", tempState.at(1) );
         return 0.;
     } else {
         return tempState.at(1);

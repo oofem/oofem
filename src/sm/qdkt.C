@@ -425,7 +425,7 @@ QDKTPlate :: computeBodyLoadVectorAt(FloatArray &answer, Load *forLoad, TimeStep
     IntegrationRule *iRule = integrationRulesArray [ giveDefaultIntegrationRule() ];
 
     if ( ( forLoad->giveBCGeoType() != BodyLoadBGT ) || ( forLoad->giveBCValType() != ForceLoadBVT ) ) {
-        _error("computeBodyLoadVectorAt: unknown load type");
+        OOFEM_ERROR("unknown load type");
     }
 
     // note: force is assumed to be in global coordinate system.
@@ -587,7 +587,7 @@ QDKTPlate :: SPRNodalRecoveryMI_giveDofMansDeterminedByPatch(IntArray &answer, i
 	 ( pap == this->giveNode(4)->giveNumber() ) ) {
       answer.at(1) = pap;
     } else {
-        _error("SPRNodalRecoveryMI_giveDofMansDeterminedByPatch: node unknown");
+        OOFEM_ERROR("node unknown");
     }
 }
 
@@ -677,7 +677,7 @@ QDKTPlate :: giveEdgeDofMapping(IntArray &answer, int iEdge) const
         answer.at(5) = 2;
         answer.at(6) = 3;
     } else {
-        _error("giveEdgeDofMapping: wrong edge number");
+        OOFEM_ERROR("wrong edge number");
     }
 }
 

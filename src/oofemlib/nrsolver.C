@@ -118,14 +118,13 @@ NRSolver :: ~NRSolver()
 IRResultType
 NRSolver :: initializeFrom(InputRecord *ir)
 {
-    const char *__proc = "initializeFrom"; // Required by IR_GIVE_FIELD macro
     IRResultType result;                // Required by IR_GIVE_FIELD macro
 
     // Choosing a big "enough" number. (Alternative: Force input of maxinter)
     nsmax = ( int ) 1e8;
     IR_GIVE_OPTIONAL_FIELD(ir, nsmax, _IFT_NRSolver_maxiter);
     if ( nsmax < 0 ) {
-        OOFEM_ERROR("NRSolver :: initializeFrom: nsmax < 0");
+        OOFEM_ERROR("nsmax < 0");
     }
 
     minIterations = 0;
@@ -170,7 +169,7 @@ NRSolver :: initializeFrom(InputRecord *ir)
 
     numberOfPrescribedDofs = prescribedDofs.giveSize() / 2;
     if ( numberOfPrescribedDofs != prescribedDofsValues.giveSize() ) {
-        OOFEM_ERROR("NRSolver :: instanciateFrom direct displacement mask size mismatch");
+        OOFEM_ERROR("direct displacement mask size mismatch");
     }
 
     if ( numberOfPrescribedDofs ) {
@@ -279,7 +278,7 @@ NRSolver :: solve(SparseMtrx *k, FloatArray *R, FloatArray *R0,
 
         if ( errorOutOfRangeFlag ) {
             status = NM_NoSuccess;
-            OOFEM_WARNING2("NRSolver:  Divergence reached after %d iterations", nite);
+            OOFEM_WARNING("Divergence reached after %d iterations", nite);
             break;
         } else if ( converged && ( nite >= minIterations ) ) {
             break;
@@ -374,7 +373,7 @@ NRSolver :: giveLinearSolver()
 
     linSolver = classFactory.createSparseLinSolver(solverType, domain, engngModel);
     if ( linSolver == NULL ) {
-        OOFEM_ERROR("NRSolver :: giveLinearSolver: linear solver creation failed");
+        OOFEM_ERROR("linear solver creation failed");
     }
 
     return linSolver;
@@ -443,7 +442,7 @@ NRSolver :: applyConstraintsToStiffness(SparseMtrx *k)
     if ( solverType == ST_Petsc ) {
         PetscScalar diagVal = 1.0;
         if ( k->giveType() != SMT_PetscMtrx ) {
-            OOFEM_ERROR("NRSolver :: applyConstraintsToStiffness: PetscSparseMtrx Expected");
+            OOFEM_ERROR("PetscSparseMtrx Expected");
         }
 
         PetscSparseMtrx *lhs = static_cast< PetscSparseMtrx * >(k);
@@ -487,7 +486,7 @@ NRSolver :: applyConstraintsToStiffness(SparseMtrx *k)
  #ifdef __PETSC_MODULE
     if ( solverType == ST_Petsc ) {
         if ( k->giveType() != SMT_PetscMtrx ) {
-            OOFEM_ERROR("NRSolver :: applyConstraintsToStiffness: PetscSparseMtrx Expected");
+            OOFEM_ERROR("PetscSparseMtrx Expected");
         }
 
         PetscSparseMtrx *lhs = static_cast< PetscSparseMtrx * >(k);
@@ -569,7 +568,7 @@ NRSolver :: applyConstraintsToLoadIncrement(int nite, const SparseMtrx *k, Float
  #ifdef __PETSC_MODULE
         if ( solverType == ST_Petsc ) {
             if ( k->giveType() != SMT_PetscMtrx ) {
-                OOFEM_ERROR("NRSolver :: applyConstraintsToStiffness: PetscSparseMtrx Expected");
+                OOFEM_ERROR("PetscSparseMtrx Expected");
             }
 
             const PetscSparseMtrx *lhs = static_cast< const PetscSparseMtrx * >(k);
@@ -836,7 +835,7 @@ NRSolver :: checkConvergence(FloatArray &RT, FloatArray &F, FloatArray &rhs,  Fl
             }
         }
         OOFEM_LOG_INFO("\n");
-        //if ( zeroNorm ) OOFEM_WARNING("NRSolver :: checkConvergence - Had to resort to absolute error measure (marked by *)");
+        //if ( zeroNorm ) OOFEM_WARNING("Had to resort to absolute error measure (marked by *)");
     } else { // No dof grouping
         double dXX, dXdX;
 

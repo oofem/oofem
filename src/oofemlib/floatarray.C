@@ -91,7 +91,7 @@ FloatArray :: FloatArray(int n) :
         memset( values, 0, size * sizeof( double ) );
 #ifdef DEBUG
         if ( !values ) {
-            OOFEM_FATAL2("FloatArray :: FloatArray - Failed in allocating %d doubles", n);
+            OOFEM_SIMPLE_FATAL("FloatArray :: FloatArray - Failed in allocating %d doubles", n);
         }
 
 #endif
@@ -109,7 +109,7 @@ FloatArray :: FloatArray(const FloatArray &src) :
         values = ALLOC(size);
 #ifdef DEBUG
         if ( !values ) {
-            OOFEM_FATAL2("FloatArray :: FloatArray - Failed in allocating %d doubles", size);
+            OOFEM_SIMPLE_FATAL("FloatArray :: FloatArray - Failed in allocating %d doubles", size);
         }
 #endif
         memcpy( this->values, src.values, size * sizeof( double ) );
@@ -164,7 +164,7 @@ double &
 FloatArray :: operator() (int i)
 {
     if ( i >= size ) {
-        OOFEM_ERROR2("FloatArray :: operator() : array error on index : %d <= 0 \n", i);
+        OOFEM_SIMPLE_ERROR("FloatArray :: operator() : array error on index : %d <= 0 \n", i);
     }
     return values [ i ];
 }
@@ -173,7 +173,7 @@ const double &
 FloatArray :: operator() (int i) const
 {
     if ( i >= size ) {
-        OOFEM_ERROR2("FloatArray :: operator() : array error on index : %d <= 0 \n", i);
+        OOFEM_SIMPLE_ERROR("FloatArray :: operator() : array error on index : %d <= 0 \n", i);
     }
     return values [ i ];
 }
@@ -219,7 +219,7 @@ void FloatArray :: add(const FloatArray &b)
 
 #  ifdef DEBUG
     if ( size != b.size ) {
-        OOFEM_ERROR3("FloatArray :: add :  dimension mismatch in a[%d]->add(b[%d])\n", size, b.size);
+        OOFEM_SIMPLE_ERROR("FloatArray :: add :  dimension mismatch in a[%d]->add(b[%d])\n", size, b.size);
     }
 
 #  endif
@@ -255,7 +255,7 @@ void FloatArray :: add(double factor, const FloatArray &b)
 
 #  ifdef DEBUG
     if ( size != b.size ) {
-        OOFEM_ERROR3("FloatArray :: add :  dimension mismatch in a[%d]->add(b[%d])\n", size, b.size);
+        OOFEM_SIMPLE_ERROR("FloatArray :: add :  dimension mismatch in a[%d]->add(b[%d])\n", size, b.size);
     }
 
 #  endif
@@ -282,7 +282,7 @@ void FloatArray :: plusProduct(const FloatMatrix &b, const FloatArray &s, double
 
 #  ifdef DEBUG
     if ( size != b.giveNumberOfColumns() ) {
-        OOFEM_ERROR3( "FloatArray :: plusProduct :  dimension mismatch in a[%d] and b[%d, *]\n", size, b.giveNumberOfColumns() );
+        OOFEM_SIMPLE_ERROR( "FloatArray :: plusProduct :  dimension mismatch in a[%d] and b[%d, *]\n", size, b.giveNumberOfColumns() );
     }
 #  endif
 
@@ -323,7 +323,7 @@ void FloatArray :: subtract(const FloatArray &src)
 
 #  ifdef DEBUG
     if ( this->size != src.size ) {
-        OOFEM_ERROR3("FloatArray dimension mismatch in a[%d]->add(b[%d])\n", size, src.size);
+        OOFEM_SIMPLE_ERROR("FloatArray dimension mismatch in a[%d]->add(b[%d])\n", size, src.size);
     }
 
 #  endif
@@ -340,7 +340,7 @@ void FloatArray :: beMaxOf(const FloatArray &a, const FloatArray &b)
 
 #  ifdef DEBUG
     if ( n != b.size ) {
-        OOFEM_ERROR3("FloatArray dimension mismatch in beMaxOf(a[%d],b[%d])\n", n, b.size);
+        OOFEM_SIMPLE_ERROR("FloatArray dimension mismatch in beMaxOf(a[%d],b[%d])\n", n, b.size);
     }
 
 #  endif
@@ -358,7 +358,7 @@ void FloatArray :: beMinOf(const FloatArray &a, const FloatArray &b)
 
 #  ifdef DEBUG
     if ( n != b.size ) {
-        OOFEM_ERROR3("FloatArray dimension mismatch in beMinOf(a[%d],b[%d])\n", n, b.size);
+        OOFEM_SIMPLE_ERROR("FloatArray dimension mismatch in beMinOf(a[%d],b[%d])\n", n, b.size);
     }
 
 #  endif
@@ -374,7 +374,7 @@ void FloatArray :: beDifferenceOf(const FloatArray &a, const FloatArray &b)
 {
 #ifdef DEBUG
     if ( a.size != b.size ) {
-        OOFEM_ERROR3("FloatArray :: beDifferenceOf - size mismatch (%d : %d)", a.size, b.size);
+        OOFEM_SIMPLE_ERROR("FloatArray :: beDifferenceOf - size mismatch (%d : %d)", a.size, b.size);
     }
 
 #endif
@@ -388,7 +388,7 @@ void FloatArray :: beDifferenceOf(const FloatArray &a, const FloatArray &b, int 
 {
 #ifdef DEBUG
     if ( a.size < n || b.size < n ) {
-        OOFEM_ERROR3("FloatArray :: beDifferenceOf - wrong size ", a.size, b.size);
+        OOFEM_SIMPLE_ERROR("FloatArray :: beDifferenceOf - wrong size ", a.size, b.size);
     }
 
 #endif
@@ -407,7 +407,7 @@ void FloatArray :: beSubArrayOf(const FloatArray &src, const IntArray &indx)
 {
 #ifdef DEBUG
     if ( indx.maximum() > src.giveSize() || indx.minimum() < 1 ) {
-        OOFEM_ERROR("FloatArray :: beSubArrayOf - index points outside of source");
+        OOFEM_SIMPLE_ERROR("FloatArray :: beSubArrayOf - index points outside of source");
     }
 #endif
 
@@ -440,7 +440,7 @@ void FloatArray :: beVectorProductOf(const FloatArray &v1, const FloatArray &v2)
 #  if DEBUG
     // check proper bounds
     if ( ( v1.giveSize() != 3 ) || ( v2.giveSize() != 3 ) ) {
-        OOFEM_ERROR(" FloatArray::VectorProduct : size mismatch, size is not equal to 3");
+        OOFEM_SIMPLE_ERROR(" FloatArray::VectorProduct : size mismatch, size is not equal to 3");
     }
 #  endif
 
@@ -487,7 +487,7 @@ double FloatArray :: dotProduct(const FloatArray &x) const
 {
 #  ifdef DEBUG
     if ( this->size != x.size ) {
-        OOFEM_ERROR3("FloatArray :: dotProduct :  dimension mismatch in a[%d]->dotProduct(b[%d])\n", this->size, x.size);
+        OOFEM_SIMPLE_ERROR("FloatArray :: dotProduct :  dimension mismatch in a[%d]->dotProduct(b[%d])\n", this->size, x.size);
     }
 
 #  endif
@@ -505,7 +505,7 @@ double FloatArray :: dotProduct(const FloatArray &x, int size) const
 {
 #  ifdef DEBUG
     if ( size > this->size || size > x.size ) {
-        OOFEM_ERROR3("FloatArray :: dotProduct :  dimension mismatch in a[%d]->dotProduct(b[%d])\n", this->size, x.size);
+        OOFEM_SIMPLE_ERROR("FloatArray :: dotProduct :  dimension mismatch in a[%d]->dotProduct(b[%d])\n", this->size, x.size);
     }
 
 #  endif
@@ -597,7 +597,7 @@ void FloatArray :: assemble(const FloatArray &fe, const IntArray &loc)
     int n = fe.giveSize();
 #  ifdef DEBUG
     if ( n != loc.giveSize() ) {
-        OOFEM_ERROR3( "FloatArray::assemble : dimensions of 'fe' (%d) and 'loc' (%d) mismatch", fe.giveSize(), loc.giveSize() );
+        OOFEM_SIMPLE_ERROR( "FloatArray::assemble : dimensions of 'fe' (%d) and 'loc' (%d) mismatch", fe.giveSize(), loc.giveSize() );
     }
 
 #  endif
@@ -618,7 +618,7 @@ void FloatArray :: assembleSquared(const FloatArray &fe, const IntArray &loc)
     int n = fe.giveSize();
 #  ifdef DEBUG
     if ( n != loc.giveSize() ) {
-        OOFEM_ERROR3( "FloatArray::assemble : dimensions of 'fe' (%d) and 'loc' (%d) mismatch", fe.giveSize(), loc.giveSize() );
+        OOFEM_SIMPLE_ERROR( "FloatArray::assemble : dimensions of 'fe' (%d) and 'loc' (%d) mismatch", fe.giveSize(), loc.giveSize() );
     }
 
 #  endif
@@ -654,11 +654,11 @@ void FloatArray :: checkBounds(int i) const
 // Checks that the receiver's size is not smaller than 'i'.
 {
     if ( i <= 0 ) {
-        OOFEM_ERROR2("FloatArray :: checkBounds : array error on index : %d <= 0 \n", i);
+        OOFEM_SIMPLE_ERROR("FloatArray :: checkBounds : array error on index : %d <= 0 \n", i);
     }
 
     if ( i > size ) {
-        OOFEM_ERROR3("FloatArray :: checkBounds : array error on index : %d > %d \n", i, size);
+        OOFEM_SIMPLE_ERROR("FloatArray :: checkBounds : array error on index : %d > %d \n", i, size);
     }
 }
 #endif
@@ -686,7 +686,7 @@ void FloatArray :: resizeWithValues(int n, int allocChunk)
 {
 #ifdef DEBUG
     if ( allocChunk < 0 ) {
-        OOFEM_FATAL2("FloatArray :: resizeWithValues - allocChunk must be non-negative; %d", allocChunk);
+        OOFEM_SIMPLE_FATAL("FloatArray :: resizeWithValues - allocChunk must be non-negative; %d", allocChunk);
     }
 
 #endif
@@ -700,7 +700,7 @@ void FloatArray :: resizeWithValues(int n, int allocChunk)
     double *newValues = ALLOC(allocatedSize);
 #ifdef DEBUG
     if ( !newValues ) {
-        OOFEM_FATAL2("FloatArray :: resizeWithValues - Failed in allocating %d doubles", n + allocChunk);
+        OOFEM_SIMPLE_FATAL("FloatArray :: resizeWithValues - Failed in allocating %d doubles", n + allocChunk);
     }
 #endif
     memcpy( newValues, values, size * sizeof( double ) );
@@ -743,7 +743,7 @@ void FloatArray :: resize(int n)
     memset(this->values, 0, allocatedSize);
  #ifdef DEBUG
     if ( !values ) {
-        OOFEM_FATAL2("FloatArray :: simple - Failed in allocating %d doubles", n);
+        OOFEM_FATAL("FloatArray :: simple - Failed in allocating %d doubles", n);
     }
  #endif
 #endif
@@ -757,7 +757,7 @@ void FloatArray :: hardResize(int n)
     double *newValues = ALLOC(allocatedSize);
 #ifdef DEBUG
     if ( !newValues ) {
-        OOFEM_FATAL2("FloatArray :: hardResize - Failed in allocating %d doubles", n);
+        OOFEM_SIMPLE_FATAL("FloatArray :: hardResize - Failed in allocating %d doubles", n);
     }
 #endif
     memcpy( newValues, values, size * sizeof( double ) );
@@ -799,7 +799,7 @@ void FloatArray :: beProductOf(const FloatMatrix &aMatrix, const FloatArray &anA
 
 #  ifdef DEBUG
     if ( aMatrix.giveNumberOfColumns() != anArray.giveSize() ) {
-        OOFEM_ERROR("FloatArray :: beProductOf : dimension mismatch");
+        OOFEM_SIMPLE_ERROR("FloatArray :: beProductOf : dimension mismatch");
     }
 #  endif
 
@@ -828,7 +828,7 @@ void FloatArray :: beTProductOf(const FloatMatrix &aMatrix, const FloatArray &an
 
 #  ifdef DEBUG
     if ( aMatrix.giveNumberOfRows() != anArray.giveSize() ) {
-        OOFEM_ERROR3( "FloatArray :: beTProductOf : dimension mismatch, matrix rows = %d, array size = %d", aMatrix.giveNumberOfRows(), anArray.giveSize() );
+        OOFEM_SIMPLE_ERROR( "FloatArray :: beTProductOf : dimension mismatch, matrix rows = %d, array size = %d", aMatrix.giveNumberOfRows(), anArray.giveSize() );
     }
 
 #  endif
@@ -895,7 +895,7 @@ void FloatArray :: rotatedWith(FloatMatrix &r, char mode)
     } else if ( mode == 'n' ) {
         rta.beProductOf(r, * this);
     } else {
-        OOFEM_ERROR("FloatArray :: rotatedWith: unsupported mode");
+        OOFEM_SIMPLE_ERROR("FloatArray :: rotatedWith: unsupported mode");
     }
 
     * this = rta;
@@ -915,7 +915,7 @@ double FloatArray :: normalize()
 {
     double norm = this->computeNorm();
     if ( norm < 1.e-80 ) {
-        OOFEM_ERROR("FloatArray::normalize : cannot norm receiver, norm is too small");
+        OOFEM_SIMPLE_ERROR("FloatArray::normalize : cannot norm receiver, norm is too small");
     }
 
     this->times(1. / norm);
@@ -1011,7 +1011,7 @@ contextIOResultType FloatArray :: restoreYourself(DataStream *stream, ContextMod
         values = ALLOC(size);
 #ifdef DEBUG
         if ( !values ) {
-            OOFEM_FATAL2("FloatArray :: restoreYourself - Failed in allocating %d doubles", size);
+            OOFEM_SIMPLE_FATAL("FloatArray :: restoreYourself - Failed in allocating %d doubles", size);
         }
 
 #endif
@@ -1118,7 +1118,7 @@ FloatArray operator + ( const FloatArray & x, const FloatArray & y )
     int N = x.giveSize();
 #ifdef DEBUG
     if ( N != y.giveSize() ) {
-        OOFEM_ERROR("loatArray operator+ : incompatible vector lengths");
+        OOFEM_SIMPLE_ERROR("loatArray operator+ : incompatible vector lengths");
     }
 #endif
 
@@ -1135,7 +1135,7 @@ FloatArray operator - ( const FloatArray & x, const FloatArray & y )
     int N = x.giveSize();
 #ifdef DEBUG
     if ( N != y.giveSize() ) {
-        OOFEM_ERROR("FloatArray operator- : incompatible vector lengths");
+        OOFEM_SIMPLE_ERROR("FloatArray operator- : incompatible vector lengths");
     }
 #endif
 
@@ -1153,7 +1153,7 @@ FloatArray &operator += ( FloatArray & x, const FloatArray & y )
     int N = x.giveSize();
 #ifdef DEBUG
     if ( N != y.giveSize() ) {
-        OOFEM_ERROR("FloatArray& operator+= : incompatible vector lengths");
+        OOFEM_SIMPLE_ERROR("FloatArray& operator+= : incompatible vector lengths");
     }
 #endif
 
@@ -1170,7 +1170,7 @@ FloatArray &operator -= ( FloatArray & x, const FloatArray & y )
     int N = x.giveSize();
 #ifdef DEBUG
     if ( N != y.giveSize() ) {
-        OOFEM_ERROR("FloatArray& operator-= : incompatible vector lengths");
+        OOFEM_SIMPLE_ERROR("FloatArray& operator-= : incompatible vector lengths");
     }
 #endif
 
@@ -1187,7 +1187,7 @@ double dot(const FloatArray &x, const FloatArray &y)
     //  Check for compatible dimensions:
 #ifdef DEBUG
     if ( x.giveSize() != y.giveSize() ) {
-        OOFEM_ERROR("dot : incompatible dimensions");
+        OOFEM_SIMPLE_ERROR("dot : incompatible dimensions");
     }
 #endif
 
@@ -1212,7 +1212,7 @@ void FloatArray :: beVectorForm(const FloatMatrix &aMatrix)
     // Rewrites the matrix on vector form, order: 11, 22, 33, 23, 13, 12, 32, 31, 21
 #  ifdef DEBUG
     if (  aMatrix.giveNumberOfColumns() != 3 || aMatrix.giveNumberOfColumns() != 3 ) {
-        OOFEM_ERROR("FloatArray :: beFullVectorForm : matrix dimension is not 3x3");
+        OOFEM_SIMPLE_ERROR("FloatArray :: beFullVectorForm : matrix dimension is not 3x3");
     }
 
 #  endif
@@ -1234,7 +1234,7 @@ void FloatArray :: beSymVectorFormOfStrain(const FloatMatrix &aMatrix)
     // shear components are multiplied with a factor 2
 #  ifdef DEBUG
     if (  aMatrix.giveNumberOfColumns() != 3 || aMatrix.giveNumberOfColumns() != 3 ) {
-        OOFEM_ERROR("FloatArray :: beReducedVectorFormOfStrain : matrix dimension is not 3x3");
+        OOFEM_SIMPLE_ERROR("FloatArray :: beReducedVectorFormOfStrain : matrix dimension is not 3x3");
     }
 #  endif
 
@@ -1253,7 +1253,7 @@ void FloatArray :: beSymVectorForm(const FloatMatrix &aMatrix)
     // Revrites the  matrix on vector form (symmetrized matrix used), order: 11, 22, 33, 23, 13, 12
 #  ifdef DEBUG
     if (  aMatrix.giveNumberOfColumns() != 3 || aMatrix.giveNumberOfColumns() != 3 ) {
-        OOFEM_ERROR("FloatArray :: beReducedVectorForm : matrix dimension is not 3x3");
+        OOFEM_SIMPLE_ERROR("FloatArray :: beReducedVectorForm : matrix dimension is not 3x3");
     }
 
 #  endif
@@ -1295,7 +1295,7 @@ void FloatArray :: changeComponentOrder()
 //{
 //#  ifdef DEBUG
 //    if (  col > mat.giveNumberOfColumns() ) {
-//        OOFEM_ERROR3("FloatArray :: beColumnOf: column index (%d) exceeds number of columns in input matrix (%d)", col, mat.giveNumberOfColumns() );
+//        OOFEM_ERROR("column index (%d) exceeds number of columns in input matrix (%d)", col, mat.giveNumberOfColumns() );
 //    }
 //#  endif
 //
@@ -1321,7 +1321,7 @@ std :: ostream &operator << ( std :: ostream & out, const FloatArray & x )
 //    // Revrites the  matrix on vector form (symmetrized matrix used), order: 11, 22, 33, 23, 13, 12
 //#  ifdef DEBUG
 //    if (  aMatrix.giveNumberOfColumns() !=3 || aMatrix.giveNumberOfColumns() !=3) {
-//        OOFEM_ERROR("FloatArray :: beReducedVectorForm : matrix dimension is not 3x3");
+//        OOFEM_ERROR("matrix dimension is not 3x3");
 //    }
 //
 //#  endif
@@ -1338,7 +1338,7 @@ void FloatArray :: beColumnOf(const FloatMatrix &mat, int col)
 {
 #  ifdef DEBUG
     if ( col > mat.giveNumberOfColumns() ) {
-        OOFEM_ERROR3( "FloatArray :: beColumnOf: column index (%d) exceeds number of columns in input matrix (%d)", col, mat.giveNumberOfColumns() );
+        OOFEM_SIMPLE_ERROR( "FloatArray :: beColumnOf: column index (%d) exceeds number of columns in input matrix (%d)", col, mat.giveNumberOfColumns() );
     }
 #  endif
 

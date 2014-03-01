@@ -67,7 +67,6 @@ MazarsMaterial :: ~MazarsMaterial()
 IRResultType
 MazarsMaterial :: initializeFrom(InputRecord *ir)
 {
-    const char *__proc = "initializeFrom"; // Required by IR_GIVE_FIELD macro
     IRResultType result;                // Required by IR_GIVE_FIELD macro
     int ver;
 
@@ -93,7 +92,7 @@ MazarsMaterial :: initializeFrom(InputRecord *ir)
     } else if ( ver == 0 ) {
         this->modelVersion = maz_original;
     } else {
-        _error("instanciateFrom: unknown version");
+        OOFEM_ERROR("unknown version");
     }
 
     IR_GIVE_FIELD(ir, this->e0, _IFT_MazarsMaterial_e0);
@@ -392,7 +391,7 @@ double MazarsMaterial :: computeGt(double kappa, GaussPoint *gp)
         R   = kappaRefT * aux - kappa;
         if ( fabs(R) <= _MAZARS_MODEL_ITER_TOL ) {
             if ( ( gt < 0. ) || ( gt > 1.0 ) ) {
-                _error("computeDamageParam: gt out of range ");
+                OOFEM_ERROR("gt out of range ");
             }
 
             return gt * ( hReft * kappaRefT ) / ( hCurrt * kappa );
@@ -402,7 +401,7 @@ double MazarsMaterial :: computeGt(double kappa, GaussPoint *gp)
         kappaRefT += -R / aux;
     } while ( nite++ < _MAZARS_MODEL_MAX_ITER );
 
-    _error("computeDamageParam: tension objectivity iteration internal error - no convergence");
+    OOFEM_ERROR("tension objectivity iteration internal error - no convergence");
     return 0.; // just to make the compiler happy
 }
 
@@ -434,7 +433,7 @@ double MazarsMaterial :: computeGc(double kappa, GaussPoint *gp)
         kappaRefC += -R / aux;
     } while ( nite++ < _MAZARS_MODEL_MAX_ITER );
 
-    _error("computeDamageParam: compression objectivity iteration internal error - no convergence");
+    OOFEM_ERROR("compression objectivity iteration internal error - no convergence");
     return 0.; // just to make the compiler happy
 }
 

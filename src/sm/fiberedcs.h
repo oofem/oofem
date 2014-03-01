@@ -138,7 +138,7 @@ public:
     virtual bool isCharacteristicMtrxSymmetric(MatResponseMode mode);
     virtual double give(int aProperty, GaussPoint *gp)
     {
-        OOFEM_ERROR1("FiberedCrossSection :: give - not implemented yet");
+        OOFEM_ERROR("not implemented yet");
         return 0.0;
     };
     virtual FloatArray *imposeStressConstrainsOnGradient(GaussPoint *gp, FloatArray *gradientStressVector3d);
@@ -182,32 +182,32 @@ public:
 #ifdef __PARALLEL_MODE
     int packUnknowns(CommunicationBuffer &buff, TimeStep *tStep, GaussPoint *ip)
     {
-        _error("packUnknowns: not implemented");
+        OOFEM_ERROR("not implemented");
         return 0;
     }
 
     int unpackAndUpdateUnknowns(CommunicationBuffer &buff, TimeStep *tStep, GaussPoint *ip)
     {
-        _error("unpackAndUpdateUnknowns: not implemented");
+        OOFEM_ERROR("not implemented");
         return 0;
     }
 
     int estimatePackSize(CommunicationBuffer &buff, GaussPoint *ip)
     {
-        _error("estimatePackSize: not implemented");
+        OOFEM_ERROR("not implemented");
         return 0;
     }
 #endif
 
 
     virtual void giveFirstPKStresses(FloatArray &answer, GaussPoint *gp, const FloatArray &reducedFIncrement, TimeStep *tStep)
-    { OOFEM_ERROR("giveFirstPKStresses not implemented for fibered cross section"); };
+    { OOFEM_ERROR("not implemented"); };
     virtual void giveCauchyStresses(FloatArray &answer, GaussPoint *gp, const FloatArray &reducedFIncrement, TimeStep *tStep)
-    { OOFEM_ERROR("giveCauchyStresses not implemented for fibered cross section"); };
+    { OOFEM_ERROR("not implemented"); };
     virtual void giveStiffnessMatrix_dPdF(FloatMatrix &answer, MatResponseMode rMode, GaussPoint *gp, TimeStep *tStep)
-    { OOFEM_ERROR("giveStiffnessMatrix_dPdF not implemented for fibered cross section"); };
+    { OOFEM_ERROR("not implemented"); };
     virtual void giveStiffnessMatrix_dCde(FloatMatrix &answer, MatResponseMode rMode, GaussPoint *gp, TimeStep *tStep)
-    { OOFEM_ERROR("giveStiffnessMatrix_dCde not implemented for fibered cross section"); };
+    { OOFEM_ERROR("not implemented"); };
 
 
 protected:

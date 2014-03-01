@@ -85,7 +85,7 @@ NumericalMethod *NonStationaryTransportProblem :: giveNumericalMethod(MetaStep *
 
     linSolver = classFactory.createSparseLinSolver(solverType, this->giveDomain(1), this);
     if ( linSolver == NULL ) {
-        _error("giveNumericalMethod: linear solver creation failed");
+        OOFEM_ERROR("linear solver creation failed");
     }
 
     return linSolver;
@@ -94,7 +94,6 @@ NumericalMethod *NonStationaryTransportProblem :: giveNumericalMethod(MetaStep *
 IRResultType
 NonStationaryTransportProblem :: initializeFrom(InputRecord *ir)
 {
-    const char *__proc = "initializeFrom"; // Required by IR_GIVE_FIELD macro
     IRResultType result;                   // Required by IR_GIVE_FIELD macro
 
     EngngModel :: initializeFrom(ir);
@@ -151,12 +150,12 @@ double NonStationaryTransportProblem :: giveUnknownComponent(ValueModeType mode,
         if ( dof->giveUnknowns()->includes(hash) ) {
             return dof->giveUnknowns()->at(hash);
         } else {
-            OOFEM_ERROR2( "giveUnknown:  Dof unknowns dictionary does not contain unknown of value mode (%s)", __ValueModeTypeToString(mode) );
+            OOFEM_ERROR("Dof unknowns dictionary does not contain unknown of value mode (%s)", __ValueModeTypeToString(mode));
         }
     }
 
     if ( dof->__giveEquationNumber() == 0 ) {
-        OOFEM_ERROR2( "giveUnknownComponent: invalid equation number on DoF %d", dof->giveNumber() );
+        OOFEM_ERROR("invalid equation number on DoF %d", dof->giveNumber());
     }
 
     return UnknownsField->giveUnknownValue(dof, mode, tStep);
@@ -211,7 +210,7 @@ NonStationaryTransportProblem :: giveDiscreteTime(int iStep)
         return ( initT );
     }
 
-    _error("giveDiscreteTime: invalid iStep");
+    OOFEM_ERROR("invalid iStep");
     return 0.0;
 }
 
@@ -291,7 +290,7 @@ void NonStationaryTransportProblem :: solveYourselfAt(TimeStep *tStep)
 
         conductivityMatrix = classFactory.createSparseMtrx(sparseMtrxType);
         if ( conductivityMatrix == NULL ) {
-            _error("solveYourselfAt: sparse matrix creation failed");
+            OOFEM_ERROR("sparse matrix creation failed");
         }
 
         conductivityMatrix->buildInternalStructure( this, 1, EID_ConservationEquation, EModelDefaultEquationNumbering() );
@@ -519,7 +518,7 @@ NonStationaryTransportProblem :: checkConsistency()
         ePtr = domain->giveElement(i);
         sePtr = dynamic_cast< TransportElement * >(ePtr);
         if ( sePtr == NULL ) {
-            _warning2("Element %d has no TransportElement base", i);
+            OOFEM_WARNING("Element %d has no TransportElement base", i);
             return 0;
         }
     }
@@ -545,7 +544,7 @@ NonStationaryTransportProblem :: giveUnknownDictHashIndx(ValueModeType mode, Tim
     } else if ( mode == VM_RhsTotal ) { //Nodal Rhs
         return 1;
     } else {
-        _error2( "ValueModeType %s undefined", __ValueModeTypeToString(mode) );
+        OOFEM_ERROR("ValueModeType %s undefined", __ValueModeTypeToString(mode));
     }
 
     return 0;

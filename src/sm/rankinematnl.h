@@ -40,11 +40,6 @@
 #include "nonlocmatstiffinterface.h"
 #include "cltypes.h"
 
-#ifdef __OOFEG
- #include "oofeggraphiccontext.h"
- #include "connectivitytable.h"
-#endif
-
 #define _IFT_RankineMatNl_Name "rankmatnl"
 
 namespace oofem {

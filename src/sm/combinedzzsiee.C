@@ -185,7 +185,7 @@ CombinedZZSIRemeshingCriteria :: giveDofManDensity(int num)
         interface = static_cast< ZZRemeshingCriteriaInterface * >
                     ( domain->giveElement( con->at(i) )->giveInterface(DirectErrorIndicatorRCInterfaceType) );
         if ( !interface ) {
-            _error("giveDofManDensity: element does not support ZZRemeshingCriteriaInterface");
+            OOFEM_ERROR("element does not support ZZRemeshingCriteriaInterface");
         }
 
         if ( i == 1 ) {

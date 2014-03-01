@@ -680,7 +680,7 @@ TrabBone3D :: computeDamage(GaussPoint *gp,  TimeStep *tStep)
 
     double tempDam = computeDamageParam(tempKappa);
     if ( tempDam < 0 ) {
-        _error("negative damage");
+        OOFEM_ERROR("negative damage");
     }
 
     return tempDam;
@@ -1034,7 +1034,6 @@ TrabBone3D :: constructFabricTransformationMatrix(FloatMatrix &answer)
 IRResultType
 TrabBone3D :: initializeFrom(InputRecord *ir)
 {
-    const char *__proc = "initializeFrom"; // Required by IR_GIVE_FIELD macro
     IRResultType result;                // Required by IR_GIVE_FIELD macro
 
     // Mandatory parameters

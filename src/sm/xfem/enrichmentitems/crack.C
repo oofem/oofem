@@ -76,7 +76,7 @@ void Crack::AppendCohesiveZoneGaussPoint(GaussPoint *ipGP)
 		mCohesiveZoneArcPositions.insert(iteratorPos, arcPos);
 	}
 	else{
-		OOFEM_ERROR("Error in Crack::AppendCohesiveZoneGaussPoint(GaussPoint *ipGP): matStat == NULL.")
+		OOFEM_ERROR("matStat == NULL.")
 	}
 }
 

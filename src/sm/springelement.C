@@ -142,7 +142,6 @@ SpringElement :: computeNumberOfGlobalDofs()
 IRResultType
 SpringElement :: initializeFrom(InputRecord *ir)
 {
-    const char *__proc = "initializeFrom"; // Required by IR_GIVE_FIELD macro
     IRResultType result;                // Required by IR_GIVE_FIELD macro
 
     // first call parent

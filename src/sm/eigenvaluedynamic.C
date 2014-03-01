@@ -60,7 +60,7 @@ NumericalMethod *EigenValueDynamic :: giveNumericalMethod(MetaStep *mStep)
 
     nMethod = classFactory.createGeneralizedEigenValueSolver(solverType, this->giveDomain(1), this);
     if ( nMethod == NULL ) {
-        _error("giveNumericalMethod:  solver creation failed");
+        OOFEM_ERROR("solver creation failed");
     }
 
     return nMethod;
@@ -69,7 +69,6 @@ NumericalMethod *EigenValueDynamic :: giveNumericalMethod(MetaStep *mStep)
 IRResultType
 EigenValueDynamic :: initializeFrom(InputRecord *ir)
 {
-    const char *__proc = "initializeFrom"; // Required by IR_GIVE_FIELD macro
     IRResultType result;                // Required by IR_GIVE_FIELD macro
     //EngngModel::instanciateFrom (ir);
 
@@ -109,7 +108,7 @@ double EigenValueDynamic :: giveUnknownComponent(ValueModeType mode, TimeStep *t
     int eq = dof->__giveEquationNumber();
 #ifdef DEBUG
     if ( eq == 0 ) {
-        _error("giveUnknownComponent: invalid equation number");
+        OOFEM_ERROR("invalid equation number");
     }
 #endif
 
@@ -118,7 +117,7 @@ double EigenValueDynamic :: giveUnknownComponent(ValueModeType mode, TimeStep *t
         return eigVec.at( eq, ( int ) tStep->giveTargetTime() );
 
     default:
-        _error("giveUnknownComponent: Unknown is of undefined type for this problem");
+        OOFEM_ERROR("Unknown is of undefined type for this problem");
     }
 
     return 0.;

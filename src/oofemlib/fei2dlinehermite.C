@@ -152,7 +152,7 @@ double FEI2dLineHermite :: giveTransformationJacobian(const FloatArray &lcoords,
 
 IntegrationRule *FEI2dLineHermite :: giveIntegrationRule(int order)
 {
-    OOFEM_ERROR("FEI2dLineHermite :: giveIntegrationRule - Not supported.");
+    OOFEM_ERROR("Not supported.");
     return NULL;
 }
 } // end namespace oofem

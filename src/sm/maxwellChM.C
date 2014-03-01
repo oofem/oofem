@@ -173,7 +173,7 @@ MaxwellChainMaterial :: giveEigenStrainVector(FloatArray &answer,
         answer =  reducedAnswer;
     } else {
         /* error - total mode not implemented yet */
-        _error("giveEigenStrainVector - mode is not supported");
+        OOFEM_ERROR("mode is not supported");
     }
 }
 
@@ -288,7 +288,7 @@ MaxwellChainMaterialStatus :: saveContext(DataStream *stream, ContextMode mode, 
     contextIOResultType iores;
 
     if ( stream == NULL ) {
-        _error("saveContext : can't write into NULL stream");
+        OOFEM_ERROR("can't write into NULL stream");
     }
 
     if ( ( iores = RheoChainMaterialStatus :: saveContext(stream, mode, obj) ) != CIO_OK ) {

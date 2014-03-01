@@ -390,7 +390,6 @@ SimpleCrossSection :: initializeFrom(InputRecord *ir)
 // instanciates receiver from input record
 //
 {
-    const char *__proc = "initializeFrom"; // Required by IR_GIVE_FIELD macro
     IRResultType result;                // Required by IR_GIVE_FIELD macro
     double value;
 
@@ -555,7 +554,7 @@ SimpleCrossSection :: checkConsistency()
     int result = 1;
     Material *mat = this->giveDomain()->giveMaterial(this->materialNumber);
     if ( !dynamic_cast< StructuralMaterial * >(mat) ) {
-        _warning2( "checkConsistency : material %s without structural support", mat->giveClassName() );
+        OOFEM_WARNING("material %s without structural support", mat->giveClassName() );
         result = 0;
     }
 
@@ -595,7 +594,7 @@ SimpleCrossSection :: giveFirstPKStresses(FloatArray &answer, GaussPoint *gp, co
     } else if ( mode == _1dMat ) {
         mat->giveFirstPKStressVector_1d(answer, gp, reducedvF, tStep);
     } else {
-        OOFEM_ERROR2( "StructuralCrossSection :: giveStiffnessMatrix_dPdF : unknown mode (%s)", __MaterialModeToString(mode) );
+        OOFEM_ERROR("unknown mode (%s)", __MaterialModeToString(mode) );
     }
 }
 
@@ -639,7 +638,7 @@ SimpleCrossSection :: giveStiffnessMatrix_dPdF(FloatMatrix &answer,
     } else if ( mode == _1dMat ) {
         mat->give1dStressStiffMtrx_dPdF(answer, rMode, gp, tStep);
     } else {
-        OOFEM_ERROR2( "StructuralCrossSection :: giveStiffnessMatrix_dPdF : unknown mode (%s)", __MaterialModeToString(mode) );
+        OOFEM_ERROR("unknown mode (%s)", __MaterialModeToString(mode) );
     }
 }
 
@@ -661,7 +660,7 @@ SimpleCrossSection :: giveStiffnessMatrix_dCde(FloatMatrix &answer,
     } else if ( mode == _1dMat ) {
         mat->give1dStressStiffMtrx_dCde(answer, rMode, gp, tStep);
     } else {
-        OOFEM_ERROR2( "StructuralCrossSection :: giveStiffnessMatrix_dCde : unknown mode (%s)", __MaterialModeToString(mode) );
+        OOFEM_ERROR("unknown mode (%s)", __MaterialModeToString(mode) );
     }
 }
 
@@ -685,7 +684,7 @@ SimpleCrossSection :: giveTemperatureVector(FloatArray &answer, GaussPoint *gp, 
         int err;
         elem->computeGlobalCoordinates( gcoords, * gp->giveCoordinates() );
         if ( ( err = tf->evaluateAt(et2, gcoords, VM_Total, tStep) ) ) {
-            OOFEM_ERROR3("StructuralMaterial :: giveTemperatureVector: tf->evaluateAt failed, element %d, error code %d", elem->giveNumber(), err);
+            OOFEM_ERROR("tf->evaluateAt failed, element %d, error code %d", elem->giveNumber(), err);
         }
 
         if ( et2.isNotEmpty() ) {

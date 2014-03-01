@@ -51,7 +51,7 @@ LevelSetPCS :: initialize()
 {
     if ( 0 ) {
         if ( previousLevelSetValues.giveSize() != domain->giveNumberOfDofManagers() ) {
-            OOFEM_ERROR("LevelSetPCS::initialize size of levelSetValues does not match number of dof managers");
+            OOFEM_ERROR("size of levelSetValues does not match number of dof managers");
         }
     } else {
         if ( initialRefMatFlag ) {
@@ -74,7 +74,6 @@ LevelSetPCS :: initialize()
 IRResultType
 LevelSetPCS :: initializeFrom(InputRecord *ir)
 {
-    const char *__proc = "initializeFrom"; // Required by IR_GIVE_FIELD macro
     IRResultType result;
 
     IR_GIVE_OPTIONAL_FIELD(ir, previousLevelSetValues, _IFT_LevelSetPCS_levelSetValues);
@@ -125,7 +124,7 @@ LevelSetPCS :: initializeFrom(InputRecord *ir)
 void
 LevelSetPCS :: giveInputRecord(DynamicInputRecord &input)
 {
-    _error("giveInputRecord not implemented yet");
+    OOFEM_ERROR("giveInputRecord not implemented yet");
     //input.setField(this->..., _IFT_..._...);
 }
 
@@ -278,7 +277,7 @@ LevelSetPCS :: giveMaterialMixtureAt(FloatArray &answer, FloatArray &position)
                 answer.at(2) = 1.0;
             }
         } else {
-            OOFEM_ERROR("LevelSetPCS::giveMaterialMixtureAt: computeLocalCoordinates failed");
+            OOFEM_ERROR("computeLocalCoordinates failed");
         }
     } else {
         answer.at(1) = 1.0;
@@ -344,7 +343,7 @@ LevelSetPCS :: reinitialization(TimeStep *tStep)
         this->FMMReinitialization(ls1);
         levelSetValues = ls1;
     } else {
-        OOFEM_ERROR2("LevelSetPCS::reinitialization: unknown reinitialization scheme (%d)", reinit_alg);
+        OOFEM_ERROR("unknown reinitialization scheme (%d)", reinit_alg);
     }
 }
 
@@ -539,7 +538,7 @@ LevelSetPCS :: pcs_stage1(FloatArray &ls, FloatArray &fs, FloatArray &w, TimeSte
                 }
             }
         } else {
-            OOFEM_ERROR2("LevelSetPCS::updatePosition: element %d does not implement LevelSetPCSElementInterfaceType", ie);
+            OOFEM_ERROR("element %d does not implement LevelSetPCSElementInterfaceType", ie);
         }
     } // end loop over elements
 }

@@ -65,7 +65,6 @@
 #include "initmodulemanager.h"
 #include "feinterpol3d.h"
 #include "classfactory.h"
-#include "oofem_limits.h"
 #include "xfem/xfemmanager.h"
 
 #ifdef __PARALLEL_MODE
@@ -273,7 +272,7 @@ void EngngModel :: setParallelMode(bool parallelFlag)
     this->parallelFlag = parallelFlag;
     if ( this->parallelFlag ) {
 #ifndef __PARALLEL_MODE
-        OOFEM_ERROR("EngngModel :: setParallelMode - Can't do it, only compiled for sequential runs");
+        OOFEM_ERROR("Can't do it, only compiled for sequential runs");
 #else
         initParallel();
 #endif
@@ -295,7 +294,7 @@ EngngModel :: Instanciate_init(const char *dataOutputFileName, int ndomains)
     }
 
     if ( ( outputStream = fopen(this->dataOutputFileName.c_str(), "w") ) == NULL ) {
-        _error2( "instanciateYourself: Can't open output file %s", this->dataOutputFileName.c_str() );
+        OOFEM_ERROR("Can't open output file %s", this->dataOutputFileName.c_str());
     }
 
 
@@ -395,12 +394,11 @@ int EngngModel :: instanciateYourself(DataReader *dr, InputRecord *ir, const cha
 IRResultType
 EngngModel :: initializeFrom(InputRecord *ir)
 {
-    const char *__proc = "initializeFrom"; // Required by IR_GIVE_FIELD macro
     IRResultType result;                // Required by IR_GIVE_FIELD macro
 
     IR_GIVE_FIELD(ir, numberOfSteps, _IFT_EngngModel_nsteps);
     if ( numberOfSteps <= 0 ) {
-        _error("instanciateFrom: nsteps not specified, bad format");
+        OOFEM_ERROR("nsteps not specified, bad format");
     }
 
     contextOutputStep =  0;
@@ -495,7 +493,7 @@ EngngModel :: instanciateDefaultMetaStep(InputRecord *ir)
     MetaStep *mstep;
 
     if ( numberOfSteps == 0 ) {
-        _error("instanciateDefaultMetaStep: nsteps cannot be zero");
+        OOFEM_ERROR("nsteps cannot be zero");
     }
 
     // create default meta steps
@@ -858,7 +856,7 @@ void EngngModel :: assemble(SparseMtrx *answer, TimeStep *tStep, EquationID eid,
     FloatMatrix mat, R;
 
     if ( answer == NULL ) {
-        _error("assemble: NULL pointer encountered.");
+        OOFEM_ERROR("NULL pointer encountered.");
     }
 
     this->timer.resumeTimer(EngngModelTimer :: EMTT_NetComputationalStepTimer);
@@ -893,7 +891,7 @@ void EngngModel :: assemble(SparseMtrx *answer, TimeStep *tStep, EquationID eid,
  #pragma omp critical
 #endif
             if ( answer->assemble(loc, mat) == 0 ) {
-                _error("assemble: sparse matrix assemble error");
+                OOFEM_ERROR("sparse matrix assemble error");
             }
         }
     }
@@ -921,7 +919,7 @@ void EngngModel :: assemble(SparseMtrx *answer, TimeStep *tStep, EquationID eid,
     IntArray r_loc, c_loc, dofids(0);
     FloatMatrix mat, R;
     if ( answer == NULL ) {
-        OOFEM_ERROR("EngngModel :: assemble: NULL pointer encountered.");
+        OOFEM_ERROR("NULL pointer encountered.");
     }
 
     this->timer.resumeTimer(EngngModelTimer :: EMTT_NetComputationalStepTimer);
@@ -954,7 +952,7 @@ void EngngModel :: assemble(SparseMtrx *answer, TimeStep *tStep, EquationID eid,
  #pragma omp critical
 #endif
             if ( answer->assemble(r_loc, c_loc, mat) == 0 ) {
-                OOFEM_ERROR("EngngModel :: assemble: sparse matrix assemble error");
+                OOFEM_ERROR("sparse matrix assemble error");
             }
         }
     }
@@ -1316,7 +1314,7 @@ EngngModel :: updateComponent(TimeStep *tStep, NumericalCmpn cmpn, Domain *d)
 // to newly reached state
 //
 {
-    _error("updateComponent: Unknown Type of component.");
+    OOFEM_ERROR("Unknown Type of component.");
 }
 
 
@@ -1617,7 +1615,7 @@ EngngModel :: giveContextFile(FILE **contextFile, int tStepNumber, int stepVersi
     // else *contextFile = fopen(fname,"r+"); // open for reading and writing
 
     if ( ( * contextFile == NULL ) && errLevel > 0 ) {
-        _error2( "giveContextFile : can't open %s", fname.c_str() );
+        OOFEM_ERROR("can't open %s", fname.c_str());
     }
 
     return 1;
@@ -1659,45 +1657,19 @@ EngngModel :: GiveDomainDataReader(int domainNum, int domainSerNum, ContextFileM
     DataReader *dr;
 
     if ( ( dr = new OOFEMTXTDataReader( fname.c_str() ) ) == NULL ) {
-        _error("Creation of DataReader failed");
+        OOFEM_ERROR("Creation of DataReader failed");
     }
 
     return dr;
 }
 
-void
-EngngModel :: error(const char *file, int line, const char *format, ...) const
+std :: string
+EngngModel :: errorInfo(const char *func) const
 {
-    char buffer [ MAX_ERROR_MSG_LENGTH ];
-    va_list args;
-
-    va_start(args, format);
-    vsprintf(buffer, format, args);
-    va_end(args);
 #ifdef __PARALLEL_MODE
-    __OOFEM_ERROR4(file, line, "Class: %s, Rank: %d\n%s", giveClassName(), rank, buffer);
+    return std::string(this->giveClassName()) + "::" + func + ", Rank: " + std::to_string(rank);
 #else
-    __OOFEM_ERROR3(file, line, "Class: %s\n%s", giveClassName(), buffer);
-#endif
-}
-
-
-void EngngModel :: warning(const char *file, int line, const char *format, ...) const
-//
-// this function handles error reporting
-// prints errorMsg enriched by ClasName and Number
-// to the standard error stream
-{
-    char buffer [ MAX_ERROR_MSG_LENGTH ];
-    va_list args;
-
-    va_start(args, format);
-    vsprintf(buffer, format, args);
-    va_end(args);
-#ifdef __PARALLEL_MODE
-    __OOFEM_WARNING4(file, line, "Class: %s, Rank: %d\n%s", giveClassName(), rank, buffer);
-#else
-    __OOFEM_WARNING3(file, line, "Class: %s\n%s", giveClassName(), buffer);
+    return std::string(this->giveClassName()) + "::" + func;
 #endif
 }
 
@@ -1707,7 +1679,7 @@ EngngModel :: giveDomain(int i)
     if ( ( i > 0 ) && ( i <= this->ndomains ) ) {
         return this->domainList->at(i);
     } else {
-        _error("giveDomain: Undefined domain");
+        OOFEM_ERROR("Undefined domain");
     }
 
     return NULL;
@@ -1724,7 +1696,7 @@ EngngModel :: setDomain(int i, Domain *ptr, bool iDeallocateOld)
     if ( ( i > 0 ) && ( i <= this->ndomains ) ) {
         this->domainList->put(i, ptr);
     } else {
-        _error3("setDomain: Domain index %d out of range [1,%d]", i, this->ndomains);
+        OOFEM_ERROR("Domain index %d out of range [1,%d]", i, this->ndomains);
     }
 }
 
@@ -1736,12 +1708,12 @@ EngngModel :: giveParallelContext(int i)
 {
     if ( ( i > 0 ) && ( i <= this->ndomains ) ) {
         if  ( i > parallelContextList->giveSize() ) {
-            _error("giveParallelContext: context not initialized for this problem");
+            OOFEM_ERROR("context not initialized for this problem");
         }
 
         return this->parallelContextList->at(i);
     } else {
-        _error2("giveParallelContext: Undefined domain index %d ", i);
+        OOFEM_ERROR("Undefined domain index %d ", i);
     }
 
     return NULL;
@@ -1759,7 +1731,7 @@ EngngModel :: giveMetaStep(int i)
     if ( ( i > 0 ) && ( i <= this->nMetaSteps ) ) {
         return this->metaStepList->at(i);
     } else {
-        _error2("giveMetaStep: undefined metaStep (%d)", i);
+        OOFEM_ERROR("undefined metaStep (%d)", i);
     }
 
     return NULL;
@@ -1772,7 +1744,7 @@ EngngModel :: giveOutputStream()
     if ( !outputStream ) {
 #ifdef _WIN32 //_MSC_VER and __MINGW32__ included
         char *tmp = tmpnam(NULL);
-        _warning2("giveOutputStream: using default output stream %s", tmp);
+        OOFEM_WARNING("using default output stream %s", tmp);
         outputStream = fopen(tmp, "w");
 #else
         char sfn[] = "oofem.out.XXXXXX";
@@ -1786,7 +1758,7 @@ EngngModel :: giveOutputStream()
                 close(fd);
             }
 
-            OOFEM_ERROR2("Failed to create temporary file %s\n", sfn);
+            OOFEM_ERROR("Failed to create temporary file %s\n", sfn);
             return ( NULL );
         }
 
@@ -2017,7 +1989,7 @@ EngngModel :: exchangeRemoteElementData(int ExchangeTag)
  #endif
 
         if ( !( result &= nonlocCommunicator->unpackAllData(this, & EngngModel :: unpackRemoteElementData) ) ) {
-            _error("EngngModel :: exchangeRemoteElementData: Receiveng and Unpacking remote element data");
+            OOFEM_ERROR("Receiveng and Unpacking remote element data");
         }
 
         result &= nonlocCommunicator->finishExchange();
@@ -2058,7 +2030,7 @@ EngngModel :: unpackRemoteElementData(ProcessCommunicator &processComm)
         if ( element->giveParallelMode() == Element_remote ) {
             result &= element->unpackAndUpdateUnknowns( * recv_buff, this->giveCurrentStep() );
         } else {
-            _error("unpackRemoteElementData: element is not remote");
+            OOFEM_ERROR("element is not remote");
         }
     }
 
@@ -2123,7 +2095,7 @@ EngngModel :: unpackDofManagers(ArrayWithNumbering *destData, ProcessCommunicato
                 } else if ( dofmanmode == DofManager_remote ) {
                     dest->at(eqNum)  = value;
                 } else {
-                    _error("unpackReactions: unknown dof namager parallel mode");
+                    OOFEM_ERROR("unknown dof namager parallel mode");
                 }
             }
         }

@@ -102,7 +102,7 @@ TimeStep *TimeStep :: givePreviousStep()
     if ( isTheCurrentTimeStep() ) {
         return eModel->givePreviousStep();
     } else {
-        OOFEM_ERROR("TimeStep::givePreviousStep Could not return previous step of noncurrent step");
+        OOFEM_ERROR("Could not return previous step of noncurrent step");
     }
 
     return NULL; // to make compiler happy

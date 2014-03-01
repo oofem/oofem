@@ -57,7 +57,7 @@ BoundaryLoad :: computeValueAt(FloatArray &answer, TimeStep *tStep, FloatArray &
     FloatArray N;
 
     if ( ( mode != VM_Total ) && ( mode != VM_Incremental ) ) {
-        _error("computeValueAt: unknown mode");
+        OOFEM_ERROR("unknown mode");
     }
 
     answer.resize(this->nDofs);
@@ -66,7 +66,7 @@ BoundaryLoad :: computeValueAt(FloatArray &answer, TimeStep *tStep, FloatArray &
     nSize = N.giveSize();
 
     if ( ( this->componentArray.giveSize() / nSize ) != nDofs ) {
-        _error("computeValueAt: componentArray size mismatch");
+        OOFEM_ERROR("componentArray size mismatch");
     }
 
     for ( i = 1; i <= nDofs; i++ ) {
@@ -94,7 +94,6 @@ BoundaryLoad :: computeValueAt(FloatArray &answer, TimeStep *tStep, FloatArray &
 IRResultType
 BoundaryLoad :: initializeFrom(InputRecord *ir)
 {
-    const char *__proc = "initializeFrom"; // Required by IR_GIVE_FIELD macro
     IRResultType result;                // Required by IR_GIVE_FIELD macro
 
     result = Load :: initializeFrom(ir);
@@ -141,7 +140,7 @@ BoundaryLoad :: giveProperty(int aProperty, TimeStep *tStep)
             return propertyDictionary.at(aProperty);
         }
     } else {
-        _error("give: property not defined");
+        OOFEM_ERROR("property not defined");
     }
 
     return 0.0;

@@ -56,7 +56,6 @@ PythonExpression :: ~PythonExpression()
 IRResultType
 PythonExpression :: initializeFrom(InputRecord *ir)
 {
-    const char *__proc = "initializeFrom";
     IRResultType result;
 
     IR_GIVE_FIELD(ir, this->fExpression, _IFT_PythonExpression_f);
@@ -110,7 +109,7 @@ PythonExpression :: getDict(std :: map< std :: string, FunctionArgument > &valDi
             }
         } else {
             tmp = NULL;
-            OOFEM_ERROR("PythonExpression :: getDict - Unsupported FunctionArgumentType");
+            OOFEM_ERROR("Unsupported FunctionArgumentType");
         }
         PyDict_SetItemString(local_dict, val->first.c_str(), tmp);
     }
@@ -172,12 +171,12 @@ PythonExpression :: getScalar(PyObject *func, double time)
         val = PyFloat_AS_DOUBLE(ret);
     } else if ( PyList_Check(ret) ) {
         if ( PyList_GET_SIZE(ret) != 1 ) {
-            OOFEM_ERROR("PythonExpression :: getScalar - Result from python is not a real float!");
+            OOFEM_ERROR("Result from python is not a real float!");
         } else {
             val = PyFloat_AS_DOUBLE( PyList_GET_ITEM(ret, 0) );
         }
     } else {
-        OOFEM_ERROR("PythonExpression :: getScalar - Result from python is not a real float!");
+        OOFEM_ERROR("Result from python is not a real float!");
     }
 
     Py_DECREF(local_dict);

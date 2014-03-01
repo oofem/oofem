@@ -200,7 +200,7 @@ SloanGraph :: findPeripheralNodes()
     } else if ( SpineQuality == Good ) {
         InitialRoot = giveNodeWithMinDegree();
     } else {
-        OOFEM_WARNING("SloanGraph::findPeripheralNodes : Unsupported value of SpineQuality, using (Good)");
+        OOFEM_SIMPLE_WARNING("SloanGraph::findPeripheralNodes : Unsupported value of SpineQuality, using (Good)");
         InitialRoot = giveNodeWithMinDegree();
     }
 
@@ -262,7 +262,7 @@ void
 SloanGraph :: extractCandidates(std :: list< int > &candidates, SloanLevelStructure *Spine)
 {
     if ( !Spine ) {
-        OOFEM_ERROR("SloanGraph::extractCandidates : Invalid spine");
+        OOFEM_SIMPLE_ERROR("SloanGraph::extractCandidates : Invalid spine");
     }
 
     int i, NumberOfLevels = Spine->giveDepth();
@@ -483,7 +483,7 @@ SloanGraph :: assignNewNumbers()
 }
 #else
     if ( labeledNodes != domain->giveNumberOfDofManagers() ) {
-        OOFEM_ERROR2("SloanGraph :: assignNewNumbers: Internal error:\n%s", "Isolated nodes or separated sub-domains exist");
+        OOFEM_SIMPLE_ERROR("SloanGraph :: assignNewNumbers: Internal error:\n%s", "Isolated nodes or separated sub-domains exist");
     }
 
 #endif

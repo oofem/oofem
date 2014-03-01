@@ -95,7 +95,6 @@ NumericalMethod *StaticStructural :: giveNumericalMethod(MetaStep *mStep)
 IRResultType
 StaticStructural :: initializeFrom(InputRecord *ir)
 {
-    const char *__proc = "initializeFrom"; // Required by IR_GIVE_FIELD macro
     IRResultType result;                // Required by IR_GIVE_FIELD macro
 
     StructuralEngngModel :: initializeFrom(ir);
@@ -191,7 +190,7 @@ void StaticStructural :: solveYourselfAt(TimeStep *tStep)
     if ( !this->stiffnessMatrix ) {
         this->stiffnessMatrix = classFactory.createSparseMtrx(sparseMtrxType);
         if ( !this->stiffnessMatrix ) {
-            OOFEM_ERROR2("StaticStructural :: solveYourselfAt - Couldn't create requested sparse matrix of type %d", sparseMtrxType);
+            OOFEM_ERROR("Couldn't create requested sparse matrix of type %d", sparseMtrxType);
         }
 
         this->stiffnessMatrix->buildInternalStructure( this, di, EID_MomentumBalance, EModelDefaultEquationNumbering() );
@@ -229,7 +228,7 @@ void StaticStructural :: solveYourselfAt(TimeStep *tStep)
                                             tStep);
 
     if ( !( status & NM_Success ) ) {
-        OOFEM_ERROR("StaticStructural :: solveYourselfAt - No success in solving problem");
+        OOFEM_ERROR("No success in solving problem");
     }
 }
 
@@ -253,7 +252,7 @@ void StaticStructural :: updateComponent(TimeStep *tStep, NumericalCmpn cmpn, Do
         this->stiffnessMatrix->zero();
         this->assemble(this->stiffnessMatrix, tStep, EID_MomentumBalance, TangentStiffnessMatrix, EModelDefaultEquationNumbering(), d);
     } else {
-        OOFEM_ERROR("StaticStructural::updateComponent - Unknown component");
+        OOFEM_ERROR("Unknown component");
     }
 }
 

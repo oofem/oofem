@@ -339,7 +339,7 @@ template< class T > double brent(double ax, double bx, double cx, const T &f,
     }
 
     // too many iterations
-    OOFEM_WARNING("brent : too many iterations\n");
+    OOFEM_LOG_WARNING("brent : too many iterations\n");
     xmin = x;
     return fx;
 }

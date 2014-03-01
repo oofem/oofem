@@ -254,7 +254,7 @@ TrPlaneStress2d :: giveEdgeDofMapping(IntArray &answer, int iEdge) const
         answer.at(3) = 1;
         answer.at(4) = 2;
     } else {
-        _error("giveEdgeDofMapping: wrong edge number");
+        OOFEM_ERROR("wrong edge number");
     }
 }
 
@@ -300,7 +300,7 @@ TrPlaneStress2d :: computeLoadLEToLRotationMatrix(FloatMatrix &answer, int iEdge
         aNode = 3;
         bNode = 1;
     } else {
-        _error("computeLoadLEToLRotationMatrix: wrong egde number");
+        OOFEM_ERROR("wrong egde number");
     }
 
     nodeA   = this->giveNode(aNode);
@@ -436,13 +436,13 @@ TrPlaneStress2d :: giveCharacteristicSize(GaussPoint *gp, FloatArray &normalToCr
         }
 
         if ( dPhidN == 0. ) {
-            _error("Zero value of dPhidN in TrPlaneStress2d :: giveCharacteristicSize\n");
+            OOFEM_ERROR("Zero value of dPhidN");
         }
 
         return 1. / fabs(dPhidN);
     }
 
-    _error("TrPlaneStress2d :: giveCharacteristicSize: invalid method");
+    OOFEM_ERROR("invalid method");
     return 0.;
 }
 
@@ -796,7 +796,7 @@ TrPlaneStress2d :: SPRNodalRecoveryMI_giveDofMansDeterminedByPatch(IntArray &ans
         ( pap == this->giveNode(3)->giveNumber() ) ) {
         answer.at(1) = pap;
     } else {
-        _error("SPRNodalRecoveryMI_giveDofMansDeterminedByPatch: node unknown");
+        OOFEM_ERROR("node unknown");
     }
 }
 
@@ -832,7 +832,7 @@ TrPlaneStress2d :: SpatialLocalizerI_giveDistanceFromParametricCenter(const Floa
     this->computeGlobalCoordinates(gcoords, lcoords);
 
     if ( ( size = coords.giveSize() ) < ( gsize = gcoords.giveSize() ) ) {
-        _error("SpatialLocalizerI_giveDistanceFromParametricCenter: coordinates size mismatch");
+        OOFEM_ERROR("coordinates size mismatch");
     }
 
     if ( size == gsize ) {

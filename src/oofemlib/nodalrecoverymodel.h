@@ -122,6 +122,9 @@ public:
      */
     virtual int giveRegionRecordSize();
 
+    virtual const char *giveClassName() const = 0;
+    std :: string errorInfo(const char *func) { return std :: string(this->giveClassName()) + func; }
+
 protected:
     /**
      * Determine local region node numbering and determine and check nodal values size.

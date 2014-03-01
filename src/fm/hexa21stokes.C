@@ -102,7 +102,7 @@ void Hexa21Stokes :: giveDofManDofIDMask(int inode, EquationID ut, IntArray &ans
         } else if ( ut == EID_MomentumBalance_ConservationEquation ) {
             answer.setValues(4, V_u, V_v, V_w, P_f);
         } else {
-            OOFEM_ERROR("Hexa21Stokes :: giveDofManDofIDMask: Unknown equation id encountered");
+            OOFEM_ERROR("Unknown equation id encountered");
         }
     } else {
         if ( ut == EID_MomentumBalance || ut == EID_MomentumBalance_ConservationEquation ) {
@@ -110,7 +110,7 @@ void Hexa21Stokes :: giveDofManDofIDMask(int inode, EquationID ut, IntArray &ans
         } else if ( ut == EID_ConservationEquation ) {
             answer.clear();
         } else {
-            OOFEM_ERROR("Hexa21Stokes :: giveDofManDofIDMask: Unknown equation id encountered");
+            OOFEM_ERROR("Unknown equation id encountered");
         }
     }
 }
@@ -124,7 +124,7 @@ void Hexa21Stokes :: giveCharacteristicVector(FloatArray &answer, CharType mtrx,
     } else if ( mtrx == InternalForcesVector ) {
         this->computeInternalForcesVector(answer, tStep);
     } else {
-        OOFEM_ERROR("Hexa21Stokes :: giveCharacteristicVector: Unknown Type of characteristic mtrx.");
+        OOFEM_ERROR("Unknown Type of characteristic mtrx.");
     }
 }
 
@@ -135,7 +135,7 @@ void Hexa21Stokes :: giveCharacteristicMatrix(FloatMatrix &answer,
     if ( mtrx == StiffnessMatrix ) {
         this->computeStiffnessMatrix(answer, tStep);
     } else {
-        OOFEM_ERROR("Hexa21Stokes :: giveCharacteristicMatrix: Unknown Type of characteristic mtrx.");
+        OOFEM_ERROR("Unknown Type of characteristic mtrx.");
     }
 }
 
@@ -290,7 +290,7 @@ void Hexa21Stokes :: computeBoundaryLoadVector(FloatArray &answer, BoundaryLoad 
         answer.zero();
         answer.assemble(f, this->surf_ordering [ iSurf - 1 ]);
     } else {
-        OOFEM_ERROR("Hexa21Stokes :: Strange boundary condition type");
+        OOFEM_ERROR("Strange boundary condition type");
     }
 }
 

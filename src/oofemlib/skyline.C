@@ -98,7 +98,7 @@ Skyline :: at(int i, int j)
 #ifdef DEBUG
     // check size
     if ( ( i > this->giveNumberOfRows() ) || ( j > this->giveNumberOfRows() ) ) {
-        OOFEM_ERROR3("Skyline::at : dimension mismatch - accessing value at (%d,%d)", i, j);
+        OOFEM_ERROR("dimension mismatch - accessing value at (%d,%d)", i, j);
     }
 
 #endif
@@ -113,7 +113,7 @@ Skyline :: at(int i, int j)
     ind = d1 + ( j - i );
 
     if ( ( adr->at(j + 1) - adr->at(j) ) <= ( j - i ) ) {
-        OOFEM_ERROR3("Skyline::at : request for element which is not in sparse mtrx (%d,%d)", i, j);
+        OOFEM_ERROR("request for element which is not in sparse mtrx (%d,%d)", i, j);
         //
         // NOTE:
         //
@@ -139,7 +139,7 @@ Skyline :: at(int i, int j) const
 #ifdef DEBUG
     // check size
     if ( ( i > this->giveNumberOfRows() ) || ( j > this->giveNumberOfRows() ) ) {
-        OOFEM_ERROR3("Skyline::at : dimension mismatch, when accessing value at (%d,%d)", i, j);
+        OOFEM_ERROR("dimension mismatch, when accessing value at (%d,%d)", i, j);
     }
 
 #endif
@@ -154,7 +154,7 @@ Skyline :: at(int i, int j) const
     ind = d1 + ( j - i );
 
     if ( ( adr->at(j + 1) - adr->at(j) ) <= ( j - i ) ) {
-        OOFEM_ERROR3("Skyline::at : request for element which is not in sparse mtrx (%d,%d)", i, j);
+        OOFEM_ERROR("request for element which is not in sparse mtrx (%d,%d)", i, j);
         //
         // NOTE:
         //
@@ -220,7 +220,7 @@ int Skyline :: assemble(const IntArray &loc, const FloatMatrix &mat)
 #  ifdef DEBUG
     int dim = mat.giveNumberOfRows();
     if ( dim != loc.giveSize() ) {
-        OOFEM_ERROR("Skyline::assemble : dimension of 'mat' and 'loc' mismatch");
+        OOFEM_ERROR("dimension of 'mat' and 'loc' mismatch");
     }
 
 #  endif
@@ -342,7 +342,7 @@ int Skyline :: setInternalStructure(IntArray *a)
 
     mtrx = ( double * ) calloc( nwk, sizeof( double ) );
     if ( !mtrx ) {
-        OOFEM_ERROR2("Skyline :: setInternalStructure - Can't allocate: %d", nwk);
+        OOFEM_ERROR("Can't allocate: %d", nwk);
     }
     nRows = nColumns = n - 1;
 
@@ -466,7 +466,7 @@ int Skyline :: buildInternalStructure(EngngModel *eModel, int di, EquationID ut,
 
     mtrx = ( double * ) calloc( ac1, sizeof( double ) );
     if ( !mtrx ) {
-        OOFEM_ERROR2("Skyline :: buildInternalStructure - Can't allocate: %d", ac1);
+        OOFEM_ERROR("Can't allocate: %d", ac1);
     }
 
     delete mht;
@@ -569,7 +569,7 @@ void Skyline :: times(const FloatArray &x, FloatArray &answer) const
     // first check sizes
     //
     if ( this->giveNumberOfRows() != ( n = x.giveSize() ) ) {
-        OOFEM_ERROR("Skyline::times : size mismatch");
+        OOFEM_ERROR("size mismatch");
     }
 
     answer.resize(n);
@@ -666,7 +666,7 @@ SparseMtrx *Skyline :: GiveCopy() const
 
     mtrx1 = ( double * ) malloc( this->nwk * sizeof( double ) );
     if ( !mtrx1 ) {
-        OOFEM_ERROR2("Skyline :: buildInternalStructure - Can't allocate: %d", this->nwk);
+        OOFEM_ERROR("Can't allocate: %d", this->nwk);
     }
 
     for ( int i = 0; i < this->nwk; i++ ) {
