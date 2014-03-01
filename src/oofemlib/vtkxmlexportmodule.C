@@ -1829,8 +1829,7 @@ VTKXMLExportModule :: exportIntVarsInGpAs(IntArray valIDs, TimeStep *tStep)
 
     /* loop over regions */
     for ( int ireg = 1; ireg <= nregions; ireg++ ) {
-        IntArray elements = d->giveSet(ireg)->giveElementList();
-
+        const IntArray &elements = this->giveRegionSet(ireg)->giveElementList();
         nip = 0;
         for ( int i = 1; i <= elements.giveSize(); i++ ) {
             nip += d->giveElement( elements.at(i) )->giveDefaultIntegrationRulePtr()->giveNumberOfIntegrationPoints();
