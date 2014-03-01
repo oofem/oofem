@@ -247,7 +247,7 @@ int EnrichmentItem :: instanciateYourself(DataReader *dr)
     }
 
     // Set start of the enrichment dof pool for the given EI
-    int xDofPoolAllocSize = this->giveEnrichesDofsWithIdArray()->giveSize() * this->giveNumberOfEnrDofs() * 1;
+    int xDofPoolAllocSize = this->giveEnrichesDofsWithIdArray()->giveSize() * this->giveNumberOfEnrDofs() * 1 + 5; // TODO: overload for Crack
     this->startOfDofIdPool = this->giveDomain()->giveNextFreeDofID(xDofPoolAllocSize);
     this->endOfDofIdPool = this->startOfDofIdPool + xDofPoolAllocSize - 1;
 
@@ -302,6 +302,25 @@ int EnrichmentItem :: giveNumDofManEnrichments(const DofManager &iDMan) const
     }
 
     return 0;
+}
+
+int EnrichmentItem :: giveNumEnrichedDofs(const DofManager &iDMan) const
+{
+	int numEnrDofs = 0;
+
+	int startId = giveStartOfDofIdPool();
+	int endId = this->giveEndOfDofIdPool();
+
+	for(int i = 1; i <= iDMan.giveNumberOfDofs(); i++) {
+		int dofId = iDMan.giveDof(i)->giveDofID();
+
+		// If the dof belongs to this enrichment item
+		if(dofId >= startId && dofId <= endId) {
+			numEnrDofs++;
+		}
+	}
+
+	return numEnrDofs;
 }
 
 bool EnrichmentItem :: isMaterialModified(GaussPoint &iGP, Element &iEl, CrossSection * &opCS) const

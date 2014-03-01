@@ -36,7 +36,7 @@
 #define TRPLANSTRSSXFEM_H_
 
 #include "trplanstrss.h"
-#include "xfem/xfemelementinterface.h"
+#include "xfem/xfemstructuralelementinterface.h"
 #include "vtkxmlexportmodule.h"
 
 
@@ -53,7 +53,7 @@ namespace oofem {
  *
  */
 
-class TrPlaneStress2dXFEM : public TrPlaneStress2d, public XfemElementInterface, public VTKXMLExportModuleElementInterface
+class TrPlaneStress2dXFEM : public TrPlaneStress2d, public XfemStructuralElementInterface, public VTKXMLExportModuleElementInterface
 {
 protected:
     virtual void updateYourself(TimeStep *tStep);
@@ -62,7 +62,7 @@ protected:
 
 public:
 
-    TrPlaneStress2dXFEM(int n, Domain * d) : TrPlaneStress2d(n, d), XfemElementInterface(this), VTKXMLExportModuleElementInterface() { }
+    TrPlaneStress2dXFEM(int n, Domain * d) : TrPlaneStress2d(n, d), XfemStructuralElementInterface(this), VTKXMLExportModuleElementInterface() { }
 
     virtual ~TrPlaneStress2dXFEM();
 

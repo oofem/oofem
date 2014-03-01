@@ -167,6 +167,7 @@ set (sm_status
     )
 
 set (sm_xfem
+	xfem/xfemstructuralelementinterface.C
 	xfem/enrichmentitems/crack.C
 	)
 
