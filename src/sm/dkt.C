@@ -730,6 +730,57 @@ DKTPlate :: computeLoadLEToLRotationMatrix(FloatMatrix &answer, int iEdge, Gauss
 }
 
 
+
+void
+DKTPlate :: computeSurfaceNMatrixAt(FloatMatrix &answer, int iSurf, GaussPoint *sgp)
+{
+  this->computeNmatrixAt(* sgp->giveCoordinates(), answer);
+}
+
+void
+DKTPlate :: giveSurfaceDofMapping(IntArray &answer, int iSurf) const
+{
+    answer.resize(9);
+    answer.zero();
+    if ( iSurf == 1 ) {
+      for (int i = 1; i<=9; i++) {
+	answer.at(i) = i;
+      }
+    } else {
+        OOFEM_ERROR("wrong surface number");
+    }
+}
+
+IntegrationRule *
+DKTPlate :: GetSurfaceIntegrationRule(int approxOrder)
+{
+    IntegrationRule *iRule = new GaussIntegrationRule(1, this, 1, 1);
+    int npoints = iRule->getRequiredNumberOfIntegrationPoints(_Triangle, approxOrder);
+    iRule->SetUpPointsOnTriangle(npoints, _Unknown);
+    return iRule;
+}
+
+double
+DKTPlate :: computeSurfaceVolumeAround(GaussPoint *gp, int iSurf)
+{
+    return this->computeVolumeAround(gp);
+}
+
+
+void
+DKTPlate :: computeSurfIpGlobalCoords(FloatArray &answer, GaussPoint *gp, int isurf)
+{
+    this->computeGlobalCoordinates( answer, * gp->giveCoordinates() );
+}
+
+
+int
+DKTPlate :: computeLoadLSToLRotationMatrix(FloatMatrix &answer, int isurf, GaussPoint *gp)
+{
+    return 0;
+}
+
+
 //
 // io routines
 //
