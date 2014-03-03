@@ -642,40 +642,14 @@ QDKTPlate :: computeEgdeNMatrixAt(FloatMatrix &answer, int iedge, GaussPoint *gp
 void
 QDKTPlate :: giveEdgeDofMapping(IntArray &answer, int iEdge) const
 {
-    /*
-     * provides dof mapping of local edge dofs (only nonzero are taken into account)
-     * to global element dofs
-     */
-
-    answer.resize(6);
-    if ( iEdge == 1 ) { // edge between nodes 1,2
-        answer.at(1) = 1;
-        answer.at(2) = 2;
-        answer.at(3) = 3;
-        answer.at(4) = 4;
-        answer.at(5) = 5;
-        answer.at(6) = 6;
+    if ( iEdge == 1 ) { // edge between nodes 1 2
+      answer.setValues(6, 1, 2, 3, 4, 5, 6);
     } else if ( iEdge == 2 ) { // edge between nodes 2 3
-        answer.at(1) = 4;
-        answer.at(2) = 5;
-        answer.at(3) = 6;
-        answer.at(4) = 7;
-        answer.at(5) = 8;
-        answer.at(6) = 9;
+      answer.setValues(6, 4, 5, 6, 7, 8, 9);
     } else if ( iEdge == 3 ) { // edge between nodes 3 4
-        answer.at(1) = 7;
-        answer.at(2) = 8;
-        answer.at(3) = 9;
-        answer.at(4) = 10;
-        answer.at(5) = 11;
-        answer.at(6) = 12;
+      answer.setValues(6, 7, 8, 9, 10, 11, 12);
     } else if ( iEdge == 4 ) { // edge between nodes 4 1
-        answer.at(1) = 10;
-        answer.at(2) = 11;
-        answer.at(3) = 12;
-        answer.at(4) = 1;
-        answer.at(5) = 2;
-        answer.at(6) = 3;
+      answer.setValues(6, 10, 11, 12, 1, 2, 3);
     } else {
         OOFEM_ERROR("wrong edge number");
     }
@@ -729,6 +703,56 @@ QDKTPlate :: computeLoadLEToLRotationMatrix(FloatMatrix &answer, int iEdge, Gaus
     answer.at(3, 3) = dx / length;
 
     return 1;
+}
+
+
+void
+QDKTPlate :: computeSurfaceNMatrixAt(FloatMatrix &answer, int iSurf, GaussPoint *sgp)
+{
+  this->computeNmatrixAt(* sgp->giveCoordinates(), answer);
+}
+
+void
+QDKTPlate :: giveSurfaceDofMapping(IntArray &answer, int iSurf) const
+{
+    answer.resize(12);
+    answer.zero();
+    if ( iSurf == 1 ) {
+      for (int i = 1; i<=12; i++) {
+	answer.at(i) = i;
+      }
+    } else {
+        OOFEM_ERROR("wrong surface number");
+    }
+}
+
+IntegrationRule *
+QDKTPlate :: GetSurfaceIntegrationRule(int approxOrder)
+{
+    IntegrationRule *iRule = new GaussIntegrationRule(1, this, 1, 1);
+    int npoints = iRule->getRequiredNumberOfIntegrationPoints(_Square, approxOrder);
+    iRule->SetUpPointsOnSquare(npoints, _Unknown);
+    return iRule;
+}
+
+double
+QDKTPlate :: computeSurfaceVolumeAround(GaussPoint *gp, int iSurf)
+{
+    return this->computeVolumeAround(gp);
+}
+
+
+void
+QDKTPlate :: computeSurfIpGlobalCoords(FloatArray &answer, GaussPoint *gp, int isurf)
+{
+    this->computeGlobalCoordinates( answer, * gp->giveCoordinates() );
+}
+
+
+int
+QDKTPlate :: computeLoadLSToLRotationMatrix(FloatMatrix &answer, int isurf, GaussPoint *gp)
+{
+    return 0;
 }
 
 
