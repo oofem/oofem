@@ -103,6 +103,8 @@ public:
     double at(int i, int j) const;
     SparseMtrxType giveType() const { return SMT_SymCompCol; }
     bool isAsymmetric() const { return false; }
+
+    virtual const char *giveClassName() const { return "DSSMatrix";;}
 };
 
 class DSSMatrixLDL : public DSSMatrix
