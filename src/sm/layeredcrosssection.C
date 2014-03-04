@@ -473,6 +473,11 @@ LayeredCrossSection :: giveGeneralizedStress_MembraneRot(FloatArray &answer, Gau
     OOFEM_ERROR("Not supported in given cross-section (yet).");
 }
 
+void 
+LayeredCrossSection :: giveGeneralizedStress_PlateSubSoil(FloatArray &answer, GaussPoint *gp, const FloatArray &generalizedStrain, TimeStep *tStep)
+{
+    OOFEM_ERROR("Not supported in given cross-section (yet).");
+}
 
 void
 LayeredCrossSection :: giveCharMaterialStiffnessMatrix(FloatMatrix &answer,
@@ -791,6 +796,13 @@ LayeredCrossSection :: giveMembraneRotStiffMtrx(FloatMatrix &answer, MatResponse
 {
     OOFEM_ERROR("Not implemented\n");
 }
+
+void
+LayeredCrossSection :: give2dPlateSubSoilStiffMtrx(FloatMatrix &answer, MatResponseMode rMode, GaussPoint *gp, TimeStep *tStep)
+{
+    OOFEM_ERROR("Not implemented\n");
+}
+
 
 
 FloatArray *

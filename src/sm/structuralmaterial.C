@@ -78,6 +78,8 @@ StructuralMaterial :: giveRealStressVector(FloatArray &answer, GaussPoint *gp, c
         this->giveRealStressVector_PlateLayer(answer, gp, reducedStrain, tStep);
     } else if ( mode == _Fiber ) {
         this->giveRealStressVector_Fiber(answer, gp, reducedStrain, tStep);
+    } else if ( mode == _2dPlateSubSoil ) {
+        this->giveRealStressVector_2dPlateSubSoil (answer, gp, reducedStrain, tStep);
     }
 }
 
@@ -186,6 +188,12 @@ StructuralMaterial :: giveRealStressVector_Fiber(FloatArray &answer, GaussPoint 
     IntArray strainControl;
     StructuralMaterial :: giveVoigtSymVectorMask(strainControl, _Fiber);
     this->giveRealStressVector_StressControl(answer, gp, reducedStrain, strainControl, tStep);
+}
+
+void
+StructuralMaterial :: giveRealStressVector_2dPlateSubSoil(FloatArray &answer, GaussPoint *gp, const FloatArray &reducedStrain, TimeStep *tStep)
+{
+    OOFEM_ERROR("2dPlateSubSoil mode not supported");
 }
 
 
@@ -825,6 +833,10 @@ StructuralMaterial :: giveVoigtSymVectorMask(IntArray &answer, MaterialMode mmod
         answer.setValues(3, 1, 2, 3);
         return 3;
 
+    case _2dPlateSubSoil:
+        answer.setValues(3, 3, 5, 4);
+	return 6;
+
     case _Unknown:
         answer.clear();
         return 0;
@@ -1064,6 +1076,16 @@ StructuralMaterial :: giveFiberStiffMtrx(FloatMatrix &answer,
 
     answer.beInverseOf(invMatLayer);
 }
+
+void
+StructuralMaterial::give2dPlateSubSoilStiffMtrx(FloatMatrix &answer,
+						MatResponseMode mmode, GaussPoint *gp,
+						TimeStep *tStep)
+{
+  OOFEM_ERROR("No general implementation provided");
+}
+
+
 
 
 void
