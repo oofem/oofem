@@ -40,7 +40,7 @@
 #include "constantpressureload.h"
 //#include "InterfaceMaterials\Old\simpleinterfacemat.h"
 #include "connectivitytable.h"
-#include "InterfaceMaterials\intmatbilinczfagerstrom.h"
+#include "InterfaceMaterials/intmatbilinczfagerstrom.h"
 #include "mathfem.h"
 #include "node.h"
 
@@ -2238,11 +2238,10 @@ Shell7BaseXFEM :: giveCZExportData(VTKPiece &vtkPiece, IntArray &primaryVarsToEx
         int currentCell = 1;
         for ( int layer = 1; layer <= numInterfaces; layer++ ) {            
             for ( int subCell = 1; subCell <= numSubCells; subCell++ ) {
-                recoverValuesFromIP(values, layer, type, tStep);        
+                this->recoverValuesFromCZIP(values, layer, type, tStep);        
                 
                 for ( int j = 1; j <= numCellNodes; j++ ) {
                     vtkPiece.setInternalVarInNode( fieldNum, nodeNum, values[j-1] );
-                    //values[j-1].printYourself();
                     //ZZNodalRecoveryMI_recoverValues(el.nodeVars[fieldNum], layer, type, tStep);          
                     nodeNum += 1;        
                 }                                
@@ -2346,6 +2345,62 @@ Shell7BaseXFEM :: giveCZExportData(VTKPiece &vtkPiece, IntArray &primaryVarsToEx
 
 }
 
+void 
+Shell7BaseXFEM :: recoverValuesFromCZIP(std::vector<FloatArray> &recoveredValues, int interfce, InternalStateType type, TimeStep *tStep)
+{
+    // recover nodal values by coosing the ip closest to the node
+
+    //FEInterpolation *interpol = static_cast< FEInterpolation * >( &this->interpolationForExport );
+
+    // composite element interpolator
+    FloatMatrix localNodeCoords;
+    this->interpolationForExport.giveLocalNodeCoords(localNodeCoords);
+
+    int numNodes = localNodeCoords.giveNumberOfColumns();
+    recoveredValues.resize(numNodes);
+    
+    IntegrationRule *iRule = this->czIntegrationRulesArray [ interfce - 1 ];
+    IntegrationPoint *ip;
+
+    // Find closest ip to the nodes
+    IntArray closestIPArray(numNodes);
+    FloatArray nodeCoords, ipCoords, ipValues;
+
+    for ( int i = 1; i <= numNodes; i++ ) {
+        nodeCoords.beColumnOf(localNodeCoords, i);
+        double distOld = 3.0; // should not be larger
+        for ( int j = 0; j < iRule->giveNumberOfIntegrationPoints(); j++ ) {
+            ip = iRule->getIntegrationPoint(j);
+            ipCoords = *ip->giveCoordinates();
+            double dist = nodeCoords.distance(ipCoords);
+            if ( dist < distOld ) {
+                closestIPArray.at(i) = j;
+                distOld = dist;
+            }
+        }
+    }
+
+   InternalStateValueType valueType =  giveInternalStateValueType(type);
+
+    // recover ip values
+    for ( int i = 1; i <= numNodes; i++ ) {
+        ip = iRule->getIntegrationPoint( closestIPArray.at(i) );
+        //this->giveIPValue(ipValues, ip, type, tStep);
+        this->layeredCS->giveInterfaceMaterial(interfce)->giveIPValue(ipValues, ip, type, tStep);
+        if ( ipValues.giveSize() == 0 ) {
+            recoveredValues[i-1].resize(giveInternalStateTypeSize(valueType));
+            recoveredValues[i-1].zero();
+        
+        } else if ( valueType == ISVT_TENSOR_S3 ) {
+            recoveredValues[i-1].resize(9);
+            recoveredValues[i-1] = convV6ToV9Stress(ipValues);
+
+        } else {
+            recoveredValues[i-1] = ipValues;
+        }
+    }
+
+}
 
 
 
