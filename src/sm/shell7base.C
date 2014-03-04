@@ -624,13 +624,23 @@ Shell7Base :: computeLinearizedStiffness(GaussPoint *gp, StructuralMaterial *mat
 
     FloatMatrix gcov; 
 
-    if ( this->giveGlobalNumber() == 195 && gp->giveNumber() == 5 ) {
+#if 0
+    if ( this->giveGlobalNumber() == 225 && gp->giveNumber() == 1 ) {
+        // coords [0.0302 0.0298]
         FloatArray initialGenStrain;
         this->computeInitialGeneralizedStrainVector(lcoords, initialGenStrain);
+        
+        FloatMatrix F;
+        //lcoords.at(3) = 0.0;
+        this->computeFAt(lcoords, F, genEps);
+        
 
-
+        FloatMatrix gcov, Gcon;
+        this->evalCovarBaseVectorsAt(lcoords, gcov, genEps);
+        this->evalInitialContravarBaseVectorsAt(lcoords, Gcon);
+        
         std :: ofstream file;
-        std :: string iName = "GeneralizedStrain.txt";
+        std :: string iName = "GeneralizedStrain_point1.txt";
         file.open( iName.data() );
 
         // Write header
@@ -648,6 +658,40 @@ Shell7Base :: computeLinearizedStiffness(GaussPoint *gp, StructuralMaterial *mat
         }
         file << " \n";
     }
+
+    if ( this->giveGlobalNumber() == 16 && gp->giveNumber() == 1 ) {
+        // coords [0.0298 0.0022]
+        FloatArray initialGenStrain;
+        this->computeInitialGeneralizedStrainVector(lcoords, initialGenStrain);
+        
+        FloatMatrix F;
+        this->computeFAt(lcoords, F, genEps);        
+
+        FloatMatrix gcov, Gcon;
+        this->evalCovarBaseVectorsAt(lcoords, gcov, genEps);
+        this->evalInitialContravarBaseVectorsAt(lcoords, Gcon);
+
+
+        std :: ofstream file;
+        std :: string iName = "GeneralizedStrain_point2.txt";
+        file.open( iName.data() );
+
+        // Write header
+        file << "Initial generalized strain \n";
+
+        for ( size_t i = 1; i <= initialGenStrain.giveSize(); i++ ) {
+            const double &y = initialGenStrain.at(i);
+            file << y << "  ";
+        }
+        file << " \n";
+
+        for ( size_t i = 1; i <= genEps.giveSize(); i++ ) {
+            const double &y = genEps.at(i);
+            file << y << "  ";
+        }
+        file << " \n";
+    }
+#endif
 
     this->evalCovarBaseVectorsAt(lcoords, gcov, genEps);
 
