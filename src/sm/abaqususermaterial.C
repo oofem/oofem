@@ -626,7 +626,7 @@ void AbaqusUserMaterialStatus :: updateYourself(TimeStep *tStep)
 int AbaqusUserMaterial :: giveIPValue(FloatArray &answer, GaussPoint *gp, InternalStateType type, TimeStep *tStep)
 {
     AbaqusUserMaterialStatus *ms = static_cast< AbaqusUserMaterialStatus * >( this->giveStatus(gp) );
-    if ( type == IST_Undefined ) {
+    if ( type == IST_Undefined || type == IST_AbaqusStateVector ) {
         // The undefined value is used to just dump the entire state vector.
         answer = ms->giveStateVector();
         return 1;

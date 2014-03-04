@@ -2387,7 +2387,11 @@ Shell7BaseXFEM :: recoverValuesFromCZIP(std::vector<FloatArray> &recoveredValues
         ip = iRule->getIntegrationPoint( closestIPArray.at(i) );
         //this->giveIPValue(ipValues, ip, type, tStep);
         this->layeredCS->giveInterfaceMaterial(interfce)->giveIPValue(ipValues, ip, type, tStep);
-        if ( ipValues.giveSize() == 0 ) {
+        
+        if ( ipValues.giveSize() == 0 && type == IST_AbaqusStateVector) {
+            recoveredValues[i-1].resize(23);
+            recoveredValues[i-1].zero();        
+        } else if ( ipValues.giveSize() == 0 ) {
             recoveredValues[i-1].resize(giveInternalStateTypeSize(valueType));
             recoveredValues[i-1].zero();
         

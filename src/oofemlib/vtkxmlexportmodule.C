@@ -1070,9 +1070,16 @@ VTKXMLExportModule :: writeIntVars(VTKPiece &vtkPiece)
         InternalStateType type = ( InternalStateType ) internalVarsToExport.at(i);
         InternalStateValueType valType = giveInternalStateValueType(type);
         int ncomponents = giveInternalStateTypeSize(valType);
+
+        //if ( type == IST_AbaqusStateVector ) {
+        //    ncomponents = 23;
+        //}
+
         const char *name = __InternalStateTypeToString(type);
         int numNodes = vtkPiece.giveNumberOfNodes();
         FloatArray valueArray;
+        valueArray = vtkPiece.giveInternalVarInNode(i, 1);
+        ncomponents = valueArray.giveSize();
 
         // Header
 #ifdef __VTK_MODULE
@@ -1091,6 +1098,7 @@ VTKXMLExportModule :: writeIntVars(VTKPiece &vtkPiece)
         this->writeVTKPointData(name, varArray);
 
 #else
+        
         fprintf(this->fileStream, " <DataArray type=\"Float64\" Name=\"%s\" NumberOfComponents=\"%d\" format=\"ascii\"> ", name, ncomponents);
         for ( int inode = 1; inode <= numNodes; inode++ ) {
             valueArray = vtkPiece.giveInternalVarInNode(i, inode);

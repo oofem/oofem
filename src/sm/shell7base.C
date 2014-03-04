@@ -2645,9 +2645,13 @@ Shell7Base :: recoverValuesFromIP(std::vector<FloatArray> &recoveredValues, int 
         if ( valueType == ISVT_TENSOR_S3 ) {
             recoveredValues[i-1].resize(9);
             recoveredValues[i-1] = convV6ToV9Stress(ipValues);
+        } else if ( ipValues.giveSize() == 0 && type == IST_AbaqusStateVector) {
+            recoveredValues[i-1].resize(23);
+            recoveredValues[i-1].zero();
         } else if ( ipValues.giveSize() == 0 ) {
             recoveredValues[i-1].resize(giveInternalStateTypeSize(valueType));
             recoveredValues[i-1].zero();
+
         } else {
             recoveredValues[i-1] = ipValues;
         }
