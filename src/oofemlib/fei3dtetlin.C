@@ -76,7 +76,7 @@ FEI3dTetLin :: evaldNdx(FloatMatrix &answer, const FloatArray &lcoords, const FE
             ( x2 - x1 ) * ( y3 - y1 ) * ( z4 - z1 ) - ( x3 - x1 ) * ( y2 - y1 ) * ( z4 - z1 ) );
 
     if ( detJ <= 0.0 ) {
-        OOFEM_ERROR("FEI3dTetLin :: evaldNdx: negative volume");
+        OOFEM_ERROR("negative volume");
     }
 
     answer.at(1, 1) = -( ( y3 - y2 ) * ( z4 - z2 ) - ( y4 - y2 ) * ( z3 - z2 ) );
@@ -199,7 +199,7 @@ FEI3dTetLin :: giveTransformationJacobian(const FloatArray &lcoords, const FEICe
             ( x2 - x1 ) * ( y3 - y1 ) * ( z4 - z1 ) - ( x3 - x1 ) * ( y2 - y1 ) * ( z4 - z1 ) );
 
     if ( detJ <= 0.0 ) {
-        OOFEM_ERROR("FEI3dTetLin :: giveTransformationJacobian: negative volume encountered");
+        OOFEM_ERROR("negative volume encountered");
     }
 
     return detJ;
@@ -296,7 +296,7 @@ FEI3dTetLin :: computeLocalEdgeMapping(IntArray &edgeNodes, int iedge)
         aNode = 3;
         bNode = 4;
     } else {
-        OOFEM_ERROR2("FEI3dTetLin :: computeEdgeMapping: wrong egde number (%d)", iedge);
+        OOFEM_ERROR("wrong egde number (%d)", iedge);
     }
 
     edgeNodes.at(1) = ( aNode );
@@ -419,7 +419,7 @@ FEI3dTetLin :: computeLocalSurfaceMapping(IntArray &surfNodes, int isurf)
         bNode = 4;
         cNode = 3;
     } else {
-        OOFEM_ERROR2("FEI3dTetLin :: computeSurfaceMapping: wrong surface number (%d)", isurf);
+        OOFEM_ERROR("wrong surface number (%d)", isurf);
     }
 
     surfNodes.at(1) = ( aNode );

@@ -191,7 +191,7 @@ TrabBoneMaterial :: computeDamageParam(double alpha, GaussPoint *gp)
     }
 
     if ( alpha < 0. ) {
-        _error("Alpha less than zero. Not possible");
+        OOFEM_ERROR("Alpha less than zero. Not possible");
     }
 
     return dam;
@@ -247,7 +247,6 @@ TrabBoneMaterial :: giveRealStressVector_1d(FloatArray &answer, GaussPoint *gp,
 IRResultType
 TrabBoneMaterial :: initializeFrom(InputRecord *ir)
 {
-    const char *__proc = "initializeFrom"; // Required by IR_GIVE_FIELD macro
     IRResultType result;                // Required by IR_GIVE_FIELD macro
 
     // Read material properties here

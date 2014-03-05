@@ -75,7 +75,6 @@ MisesMat :: hasMaterialModeCapability(MaterialMode mode)
 IRResultType
 MisesMat :: initializeFrom(InputRecord *ir)
 {
-    const char *__proc = "initializeFrom"; // required by IR_GIVE_FIELD macro
     IRResultType result;                 // required by IR_GIVE_FIELD macro
 
     StructuralMaterial :: initializeFrom(ir);

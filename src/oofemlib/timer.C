@@ -44,22 +44,21 @@
 #endif
 
 namespace oofem {
-
-void Timer :: getUtime(std::chrono::duration<double> &answer)
+void Timer :: getUtime(std :: chrono :: duration< double > &answer)
 {
 #ifdef _WIN32 //_MSC_VER and __MINGW32__ included
     clock_t utime = clock();
-    answer = std::chrono::seconds(utime / CLOCKS_PER_SEC);
+    answer = std :: chrono :: seconds(utime / CLOCKS_PER_SEC);
 #else
     struct rusage rsg;
     getrusage(RUSAGE_SELF, & rsg);
-    answer = std::chrono::seconds(rsg.ru_utime.tv_sec) + std::chrono::microseconds(rsg.ru_utime.tv_usec);
+    answer = std :: chrono :: seconds(rsg.ru_utime.tv_sec) + std :: chrono :: microseconds(rsg.ru_utime.tv_usec);
 #endif
 }
 
-void Timer :: getTime(std::chrono::time_point<std::chrono::high_resolution_clock> &answer)
+void Timer :: getTime(std :: chrono :: time_point< std :: chrono :: high_resolution_clock > &answer)
 {
-    answer = std::chrono::high_resolution_clock::now();
+    answer = std :: chrono :: high_resolution_clock :: now();
 }
 
 Timer :: Timer()
@@ -117,7 +116,7 @@ double Timer :: getWtime()
 
 void Timer :: convert2HMS(int &nhrs, int &nmin, int &nsec, double tsec)
 {
-    long int _nsec = ( long int )tsec;
+    long int _nsec = ( long int ) tsec;
     nhrs = 0;
     nmin = 0;
     if ( _nsec > 60 ) {
@@ -135,7 +134,7 @@ void Timer :: convert2HMS(int &nhrs, int &nmin, int &nsec, double tsec)
 
 void Timer :: toString(char *buff)
 {
-    std::sprintf( buff, "ut: %f.3s, wt: %f.3s", getUtime(), getWtime() );
+    std :: sprintf( buff, "ut: %f.3s, wt: %f.3s", getUtime(), getWtime() );
 }
 
 void Timer :: updateElapsedTime()

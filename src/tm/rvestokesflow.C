@@ -120,7 +120,7 @@ RVEStokesFlowMaterialStatus :: saveContext(DataStream *stream, ContextMode mode,
 {
     contextIOResultType iores;
     if ( stream == NULL ) {
-        _error("saveContex : can't write into NULL stream");
+        OOFEM_ERROR("can't write into NULL stream");
     }
 
     if ( ( iores = TransportMaterialStatus :: saveContext(stream, mode, obj) ) != CIO_OK ) {
@@ -136,7 +136,7 @@ RVEStokesFlowMaterialStatus :: restoreContext(DataStream *stream, ContextMode mo
 {
     contextIOResultType iores;
     if ( stream == NULL ) {
-        _error("saveContex : can't write into NULL stream");
+        OOFEM_ERROR("can't write into NULL stream");
     }
 
     if ( ( iores = TransportMaterialStatus :: restoreContext(stream, mode, obj) ) != CIO_OK ) {

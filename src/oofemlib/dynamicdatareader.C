@@ -87,7 +87,7 @@ DynamicDataReader :: writeToFile(const char *fileName)
     fout << this->outputFileName << '\n';
     fout << this->description << '\n';
     for ( std :: list< InputRecord * > :: iterator it = this->recordList.begin(); it != this->recordList.end(); ++it ) {
-        fout << (*it)->giveRecordAsString() << "\n";
+        fout << ( * it )->giveRecordAsString() << "\n";
     }
     fout.close();
 }

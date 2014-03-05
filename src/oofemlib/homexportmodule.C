@@ -69,7 +69,6 @@ HOMExportModule :: ~HOMExportModule()
 IRResultType
 HOMExportModule :: initializeFrom(InputRecord *ir)
 {
-    const char *__proc = "initializeFrom"; // Required by IR_GIVE_FIELD macro
     IRResultType result;                 // Required by IR_GIVE_FIELD macro
     IRResultType val;
     this->scale = 1.;
@@ -149,8 +148,8 @@ HOMExportModule :: doOutput(TimeStep *tStep, bool forcedOutput)
                 iRule = elem->giveDefaultIntegrationRulePtr();
                 for ( int i = 0; i < iRule->giveNumberOfIntegrationPoints(); i++ ) {
                     gp  = iRule->getIntegrationPoint(i);
-                    structElem = static_cast< StructuralElement * >( elem );
-		    // structElem->computeResultingIPEigenstrainAt(VecEigStrain, tStep, gp, VM_Incremental);
+                    structElem = static_cast< StructuralElement * >(elem);
+                    // structElem->computeResultingIPEigenstrainAt(VecEigStrain, tStep, gp, VM_Incremental);
                     structElem->computeResultingIPEigenstrainAt(VecEigStrain, tStep, gp, VM_Total);
                     dV  = elem->computeVolumeAround(gp);
                     elem->giveIPValue(VecStrain, gp, IST_StrainTensor, tStep);
@@ -247,7 +246,7 @@ HOMExportModule :: initialize()
 
     std :: string fileName = emodel->giveOutputBaseFileName() + ".hom";
     if ( ( this->stream = fopen(fileName.c_str(), "w") ) == NULL ) {
-        OOFEM_ERROR2( "HOMExportModule::giveOutputStream: failed to open file %s", fileName.c_str() );
+        OOFEM_ERROR("failed to open file %s", fileName.c_str());
     }
 
     if ( domType == _HeatTransferMode || domType == _HeatMass1Mode ) {

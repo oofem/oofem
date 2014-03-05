@@ -258,6 +258,8 @@ public:
     virtual const IntArray *giveKnotSpan() { return NULL; }
 
     virtual const char *giveClassName() const { return "IntegrationRule"; }
+    /// Error printing helper.
+    std :: string errorInfo(const char *func) const { return std :: string(giveClassName()) + func; }
     virtual IntegrationRuleType giveIntegrationRuleType() const { return IRT_None; }
     virtual IRResultType initializeFrom(InputRecord *ir) { return IRRT_OK; }
 

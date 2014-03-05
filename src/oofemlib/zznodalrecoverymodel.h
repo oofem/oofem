@@ -70,7 +70,9 @@ public:
     /// Destructor.
     virtual ~ZZNodalRecoveryModel();
 
-    virtual int recoverValues(InternalStateType type, TimeStep *tStep);
+    virtual int recoverValues(Set elementSet, InternalStateType type, TimeStep *tStep);
+
+    virtual const char *giveClassName() const { return "ZZNodalRecoveryModel"; }
 
 private:
     /**
@@ -83,7 +85,7 @@ private:
 
 #ifdef __PARALLEL_MODE
     void initCommMaps();
-    void exchangeDofManValues(int ireg, FloatArray &lhs, FloatMatrix &rhs, IntArray &rn);
+    void exchangeDofManValues(FloatArray &lhs, FloatMatrix &rhs, IntArray &rn);
     int packSharedDofManData(parallelStruct *s, ProcessCommunicator &processComm);
     int unpackSharedDofManData(parallelStruct *s, ProcessCommunicator &processComm);
 #endif

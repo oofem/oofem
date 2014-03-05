@@ -55,46 +55,45 @@ VariableCrossSection :: initializeFrom(InputRecord *ir)
 // instanciates receiver from input record
 //
 {
-    const char *__proc = "initializeFrom"; // Required by IR_GIVE_FIELD macro
     IRResultType result;                // Required by IR_GIVE_FIELD macro
 
     // will read density and other inheritted parameters as constants
     // NOTE: do not call SimpleCrossSection here (as the parameter names are same, but different type is used here!!!!)
     this->CrossSection :: initializeFrom(ir);
 
-    if ( ir->hasField(_IFT_SimpleCrossSection_thick)) {
+    if ( ir->hasField(_IFT_SimpleCrossSection_thick) ) {
         IR_GIVE_OPTIONAL_FIELD(ir, thicknessExpr, _IFT_SimpleCrossSection_thick);
     }
 
-    if ( ir->hasField(_IFT_SimpleCrossSection_width)) {
+    if ( ir->hasField(_IFT_SimpleCrossSection_width) ) {
         IR_GIVE_OPTIONAL_FIELD(ir, widthExpr, _IFT_SimpleCrossSection_width);
     }
 
-    if ( ir->hasField(_IFT_SimpleCrossSection_area)) {
+    if ( ir->hasField(_IFT_SimpleCrossSection_area) ) {
         IR_GIVE_OPTIONAL_FIELD(ir, areaExpr, _IFT_SimpleCrossSection_area);
     }
 
-    if ( ir->hasField(_IFT_SimpleCrossSection_iy)) {
+    if ( ir->hasField(_IFT_SimpleCrossSection_iy) ) {
         IR_GIVE_OPTIONAL_FIELD(ir, iyExpr, _IFT_SimpleCrossSection_iy);
     }
 
-    if ( ir->hasField(_IFT_SimpleCrossSection_iy)) {
+    if ( ir->hasField(_IFT_SimpleCrossSection_iy) ) {
         IR_GIVE_OPTIONAL_FIELD(ir, izExpr, _IFT_SimpleCrossSection_iz);
     }
 
-    if ( ir->hasField(_IFT_SimpleCrossSection_ik)) {
+    if ( ir->hasField(_IFT_SimpleCrossSection_ik) ) {
         IR_GIVE_OPTIONAL_FIELD(ir, ixExpr, _IFT_SimpleCrossSection_ik);
     }
 
-    if ( ir->hasField(_IFT_SimpleCrossSection_shearareay)) {
+    if ( ir->hasField(_IFT_SimpleCrossSection_shearareay) ) {
         IR_GIVE_OPTIONAL_FIELD(ir, shearAreayExpr, _IFT_SimpleCrossSection_shearareay);
     }
 
-    if ( ir->hasField(_IFT_SimpleCrossSection_shearareaz)) {
+    if ( ir->hasField(_IFT_SimpleCrossSection_shearareaz) ) {
         IR_GIVE_OPTIONAL_FIELD(ir, shearAreazExpr, _IFT_SimpleCrossSection_shearareaz);
     }
 
-    if ( ir->hasField(_IFT_SimpleCrossSection_drillStiffness)) {
+    if ( ir->hasField(_IFT_SimpleCrossSection_drillStiffness) ) {
         IR_GIVE_OPTIONAL_FIELD(ir, drillingStiffnessExpr, _IFT_SimpleCrossSection_drillStiffness);
     }
 
@@ -121,28 +120,28 @@ void VariableCrossSection :: giveInputRecord(DynamicInputRecord &input)
 }
 
 void
-VariableCrossSection::giveExpression (const ScalarFunction** expr, CrossSectionProperty aProperty) const
+VariableCrossSection :: giveExpression(const ScalarFunction **expr, CrossSectionProperty aProperty) const
 {
-    if (aProperty == CS_Thickness) {
-        *expr = &thicknessExpr;
-    } else if (aProperty ==  CS_Width) {
-        *expr = &widthExpr;
-    } else if (aProperty == CS_Area) {
-        *expr = &areaExpr;
-    } else if (aProperty == CS_TorsionMomentX) {
-        *expr = &ixExpr;
-    } else if (aProperty == CS_InertiaMomentY) {
-        *expr = &iyExpr;
-    } else if (aProperty == CS_InertiaMomentZ) {
-        *expr = &izExpr;
-    } else if (aProperty == CS_ShearAreaY) {
-        *expr = &shearAreayExpr;
-    } else if (aProperty == CS_ShearAreaZ) {
-        *expr = &shearAreazExpr;
-    } else if (aProperty == CS_DrillingStiffness) {
-        *expr = &drillingStiffnessExpr;
+    if ( aProperty == CS_Thickness ) {
+        * expr = & thicknessExpr;
+    } else if ( aProperty ==  CS_Width ) {
+        * expr = & widthExpr;
+    } else if ( aProperty == CS_Area ) {
+        * expr = & areaExpr;
+    } else if ( aProperty == CS_TorsionMomentX ) {
+        * expr = & ixExpr;
+    } else if ( aProperty == CS_InertiaMomentY ) {
+        * expr = & iyExpr;
+    } else if ( aProperty == CS_InertiaMomentZ ) {
+        * expr = & izExpr;
+    } else if ( aProperty == CS_ShearAreaY ) {
+        * expr = & shearAreayExpr;
+    } else if ( aProperty == CS_ShearAreaZ ) {
+        * expr = & shearAreazExpr;
+    } else if ( aProperty == CS_DrillingStiffness ) {
+        * expr = & drillingStiffnessExpr;
     } else {
-        OOFEM_ERROR3("VariableCrossSection(%d)::give called with unknown ID %d", this->giveNumber(), aProperty);
+        OOFEM_ERROR("called with unknown ID %d", this->giveNumber(), aProperty);
     }
 }
 
@@ -159,37 +158,37 @@ double
 VariableCrossSection :: give(CrossSectionProperty aProperty, const FloatArray *coords, Element *elem, bool local)
 {
     double value = 0.0;
-    const ScalarFunction* expr;
+    const ScalarFunction *expr;
 
     if ( propertyDictionary->includes(aProperty) ) {
         value = propertyDictionary->at(aProperty);
     } else {
-        this->giveExpression(&expr, aProperty);
+        this->giveExpression(& expr, aProperty);
 
         FloatArray c;
-        if (this->localFormulationFlag) {
-            if (local) {
-                c = *coords;
+        if ( this->localFormulationFlag ) {
+            if ( local ) {
+                c = * coords;
             } else {
                 // convert given coords into local cs
-                if (!elem->computeLocalCoordinates(c, *coords)) {
-                    OOFEM_ERROR2("VariableCrossSection::give: computeLocalCoordinates failed (element %d)", elem->giveNumber());
+                if ( !elem->computeLocalCoordinates(c, * coords) ) {
+                    OOFEM_ERROR("computeLocalCoordinates failed (element %d)", elem->giveNumber() );
                 }
             }
         } else { // global coordinates needed
-            if (local) {
+            if ( local ) {
                 // convert given coords into global cs
-                if (!elem->computeGlobalCoordinates(c, *coords)) {
-                    OOFEM_ERROR2("VariableCrossSection::give: computeGlobalCoordinates failed (element %d)", elem->giveNumber());
+                if ( !elem->computeGlobalCoordinates(c, * coords) ) {
+                    OOFEM_ERROR("computeGlobalCoordinates failed (element %d)", elem->giveNumber() );
                 }
             } else {
-                c = *coords;
+                c = * coords;
             }
         }
-        std::map< std::string, FunctionArgument > m;
-        m.insert(std::make_pair("x", FunctionArgument(c)));
+        std :: map< std :: string, FunctionArgument >m;
+        m.insert( std :: make_pair( "x", FunctionArgument(c) ) );
         // evaluate the expression
-        value = expr->eval(m, this->giveDomain());
+        value = expr->eval( m, this->giveDomain() );
         ///@todo C++11 is really convenient;
         //value = expr->eval({{"x", c}}, this->giveDomain());
     }

@@ -71,7 +71,6 @@ StokesFlow :: ~StokesFlow()
 
 IRResultType StokesFlow :: initializeFrom(InputRecord *ir)
 {
-    const char *__proc = "initializeFrom";
     IRResultType result;
     int val;
 
@@ -139,7 +138,7 @@ void StokesFlow :: solveYourselfAt(TimeStep *tStep)
     if ( !this->stiffnessMatrix ) {
         this->stiffnessMatrix = classFactory.createSparseMtrx(sparseMtrxType);
         if ( !this->stiffnessMatrix ) {
-            OOFEM_ERROR2("StokesFlow :: solveYourselfAt - Couldn't create requested sparse matrix of type %d", sparseMtrxType);
+            OOFEM_ERROR("Couldn't create requested sparse matrix of type %d", sparseMtrxType);
         }
 
         this->stiffnessMatrix->buildInternalStructure( this, 1, EID_MomentumBalance_ConservationEquation, EModelDefaultEquationNumbering() );
@@ -152,7 +151,7 @@ void StokesFlow :: solveYourselfAt(TimeStep *tStep)
     this->externalForces.resize(neq);
     this->externalForces.zero();
     this->assembleVector( this->externalForces, tStep, EID_MomentumBalance_ConservationEquation, ExternalForcesVector, VM_Total,
-                          EModelDefaultEquationNumbering(), this->giveDomain(1) );
+                         EModelDefaultEquationNumbering(), this->giveDomain(1) );
 #ifdef __PARALLEL_MODE
     this->updateSharedDofManagers(this->externalForces, EModelDefaultEquationNumbering(), LoadExchangeTag);
 #endif
@@ -188,7 +187,7 @@ void StokesFlow :: solveYourselfAt(TimeStep *tStep)
 #endif
 
     if ( !( status & NM_Success ) ) {
-        OOFEM_ERROR2( "No success in solving problem at time step", tStep->giveNumber() );
+        OOFEM_ERROR("No success in solving problem at time step", tStep->giveNumber());
     }
 
 
@@ -222,7 +221,7 @@ void StokesFlow :: updateComponent(TimeStep *tStep, NumericalCmpn cmpn, Domain *
                        EModelDefaultEquationNumbering(), d);
         return;
     } else {
-        OOFEM_ERROR("StokesFlow::updateComponent - Unknown component");
+        OOFEM_ERROR("Unknown component");
     }
 }
 
@@ -281,7 +280,7 @@ int StokesFlow :: checkConsistency()
     for ( int i = 1; i <= nelem; i++ ) {
         sePtr = dynamic_cast< FMElement * >( domain->giveElement(i) );
         if ( sePtr == NULL ) {
-            OOFEM_WARNING2("Element %d has no FMElement base", i);
+            OOFEM_WARNING("Element %d has no FMElement base", i);
             return false;
         }
     }
@@ -298,7 +297,7 @@ void StokesFlow :: printDofOutputAt(FILE *stream, Dof *iDof, TimeStep *tStep)
     } else if ( type == P_f ) {
         iDof->printSingleOutputAt(stream, tStep, 'p', VM_Total, 1);
     } else {
-        OOFEM_ERROR("printDofOutputAt: unsupported dof type");
+        OOFEM_ERROR("unsupported dof type");
     }
 }
 

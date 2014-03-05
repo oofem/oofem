@@ -80,11 +80,13 @@ public:
      * @return Pointer to corresponding process communicator buff, NULL otherwise.
      */
     ProcessCommunicatorBuff *
-    giveProcessCommunicatorBuff(int i) { if ( i < size ) {
-                                             return processCommBuffs [ i ];
-                                         } else {
-                                             return NULL;
-                                         } }
+    giveProcessCommunicatorBuff(int i) {
+        if ( i < size ) {
+            return processCommBuffs [ i ];
+        } else {
+            return NULL;
+        }
+    }
 };
 
 
@@ -139,11 +141,13 @@ public:
      * @return Pointer to corresponding communicator, NULL otherwise.
      */
     ProcessCommunicator *
-    giveProcessCommunicator(int i) { if ( i < size ) {
-                                         return processComms [ i ];
-                                     } else {
-                                         return NULL;
-                                     } }
+    giveProcessCommunicator(int i) {
+        if ( i < size ) {
+            return processComms [ i ];
+        } else {
+            return NULL;
+        }
+    }
 
     /**
      * Pack all problemCommunicators data to their send buffers.
@@ -216,8 +220,8 @@ public:
      */
     virtual void setUpCommunicationMaps(EngngModel *pm) { }
 
-    /// Prints error message and exits
-    void error(const char *file, int line, const char *format, ...) const;
+    /// Returns string for prepending output (used by error reporting macros).
+    std :: string errorInfo(const char *func) const;
 };
 
 template< class T > int

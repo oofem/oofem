@@ -80,9 +80,9 @@ TrabBoneNLEmbed :: updateBeforeNonlocAverage(const FloatArray &strainVector, Gau
 
 void
 TrabBoneNLEmbed :: giveRealStressVector_3d(FloatArray &answer,
-                                        GaussPoint *gp,
-                                        const FloatArray &strainVector,
-                                        TimeStep *tStep)
+                                           GaussPoint *gp,
+                                           const FloatArray &strainVector,
+                                           TimeStep *tStep)
 {
     TrabBoneNLEmbedStatus *nlStatus = static_cast< TrabBoneNLEmbedStatus * >( this->giveStatus(gp) );
 
@@ -149,7 +149,6 @@ TrabBoneNLEmbed :: giveInterface(InterfaceType type)
 IRResultType
 TrabBoneNLEmbed :: initializeFrom(InputRecord *ir)
 {
-    const char *__proc = "initializeFrom"; // Required by IR_GIVE_FIELD macro
     IRResultType result;                             // Required by IR_GIVE_FIELD macro
 
     TrabBoneEmbed :: initializeFrom(ir);

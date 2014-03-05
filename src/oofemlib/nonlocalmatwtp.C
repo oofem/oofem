@@ -214,7 +214,7 @@ NonlocalMaterialWTP :: migrate()
     _locsize = domainElementDepSet.size() + 1;
     result = MPI_Allreduce(& _locsize, & _globsize, 1, MPI_INT, MPI_MAX, MPI_COMM_WORLD);
     if ( result != MPI_SUCCESS ) {
-        OOFEM_ERROR("NonlocalMaterialWTP::migrate: MPI_Allreduce to determine  broadcast buffer size failed");
+        OOFEM_SIMPLE_ERROR("MPI_Allreduce to determine  broadcast buffer size failed");
     }
 
     commBuff.resize( commBuff.givePackSize(MPI_INT, _globsize) );
@@ -455,8 +455,8 @@ int NonlocalMaterialWTP :: unpackRemoteElements(Domain *d, ProcessCommunicator &
             delete dofman;
         } else {
             d->giveTransactionManager()->addDofManTransaction(DomainTransactionManager :: DTT_ADD,
-							      dofman->giveGlobalNumber(),
-							      dofman);
+                                                              dofman->giveGlobalNumber(),
+                                                              dofman);
         }
     } while ( 1 );
 
@@ -476,7 +476,7 @@ int NonlocalMaterialWTP :: unpackRemoteElements(Domain *d, ProcessCommunicator &
         elem->setParallelMode(Element_remote);
         elem->setPartitionList(_partitions);
         d->giveTransactionManager()->addElementTransaction(DomainTransactionManager :: DTT_ADD,
-							   elem->giveGlobalNumber(), elem);
+                                                           elem->giveGlobalNumber(), elem);
     } while ( 1 );
 
     return 1;

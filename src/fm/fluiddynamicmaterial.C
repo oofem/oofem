@@ -57,7 +57,7 @@ FluidDynamicMaterial :: computeDeviatoricStressVector(FloatArray &stress_dev, do
 
 void
 FluidDynamicMaterial :: giveStiffnessMatrices(FloatMatrix &dsdd, FloatArray &dsdp, FloatArray &dedd, double &dedp,
-                                       MatResponseMode mode, GaussPoint *gp, TimeStep *tStep)
+                                              MatResponseMode mode, GaussPoint *gp, TimeStep *tStep)
 {
     this->giveDeviatoricStiffnessMatrix(dsdd, mode, gp, tStep);
     int size = dsdd.giveNumberOfRows();
@@ -122,7 +122,7 @@ FluidDynamicMaterial :: giveIPValue(FloatArray &answer, GaussPoint *gp, Internal
             answer = vec;
             return 1;
         } else {
-            OOFEM_ERROR("FluidDynamicMaterial :: giveIPValue: material mode not supported");
+            OOFEM_ERROR("material mode not supported");
             return 0;
         }
 
@@ -153,7 +153,7 @@ FluidDynamicMaterial :: giveIPValue(FloatArray &answer, GaussPoint *gp, Internal
             answer = vec;
             return 1;
         } else {
-            OOFEM_ERROR("FluidDynamicMaterial :: giveIPValue: material mode not supported");
+            OOFEM_ERROR("material mode not supported");
             return 0;
         }
 

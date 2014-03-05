@@ -68,7 +68,6 @@ POIExportModule :: ~POIExportModule()
 IRResultType
 POIExportModule :: initializeFrom(InputRecord *ir)
 {
-    const char *__proc = "initializeFrom"; // Required by IR_GIVE_FIELD macro
     IRResultType result;                // Required by IR_GIVE_FIELD macro
     int val;
 
@@ -95,7 +94,7 @@ POIExportModule :: readPOIFile(const std :: string &poiFileName)
     // Open the file;
     std :: ifstream file(poiFileName.c_str(), std :: ios :: in);
     if ( !file.is_open() ) {
-        OOFEM_ERROR2( "POIExportModule :: readPOIFile - Failed to open time data file: %s\n", poiFileName.c_str() );
+        OOFEM_ERROR("Failed to open time data file: %s\n", poiFileName.c_str() );
     }
 
     file >> nPOI; // Not actually needed.
@@ -141,7 +140,7 @@ POIExportModule :: giveOutputStream(TimeStep *tStep)
     std :: string fileName = this->giveOutputBaseFileName(tStep) + ".poi";
 
     if ( ( answer = fopen(fileName.c_str(), "w") ) == NULL ) {
-        OOFEM_ERROR2( "POIExportModule::giveOutputStream: failed to open file %s", fileName.c_str() );
+        OOFEM_ERROR("failed to open file %s", fileName.c_str() );
     }
 
     return answer;
@@ -150,8 +149,7 @@ POIExportModule :: giveOutputStream(TimeStep *tStep)
 void
 POIExportModule :: exportIntVars(FILE *stream, TimeStep *tStep)
 {
-    int i, region, n = internalVarsToExport.giveSize();
-    Domain *d = emodel->giveDomain(1);
+    int i, n = internalVarsToExport.giveSize();
     InternalStateType type;
     FloatArray poiCoords(3);
 
@@ -164,9 +162,7 @@ POIExportModule :: exportIntVars(FILE *stream, TimeStep *tStep)
     poiCoords.at(1) = ( * PoiIter ).x;
     poiCoords.at(2) = ( * PoiIter ).y;
     poiCoords.at(3) = ( * PoiIter ).z;
-    region = ( * PoiIter ).region;
-
-    this->giveMapper()->__init(d, internalVarsToExport, poiCoords, region, tStep);
+    //int region = ( * PoiIter ).region;
 
     for ( i = 1; i <= n; i++ ) {
         type = ( InternalStateType ) internalVarsToExport.at(i);
@@ -197,9 +193,9 @@ POIExportModule :: exportIntVarAs(InternalStateType valID, FILE *stream, TimeSte
         poiCoords.at(3) = ( * PoiIter ).z;
         region = ( * PoiIter ).region;
 
-        this->giveMapper()->__init(d, toMap, poiCoords, region, tStep);
+        this->giveMapper()->__init(d, toMap, poiCoords, * d->giveSet(region), tStep);
         if ( !this->giveMapper()->__mapVariable(val, poiCoords, valID, tStep) ) {
-            OOFEM_WARNING("POIExportModule :: exportIntVarAs - Failed to map variable");
+            OOFEM_WARNING("Failed to map variable");
             val.clear();
         }
         fprintf(stream, "%10d ", ( * PoiIter ).id);
@@ -223,7 +219,7 @@ POIExportModule :: giveMapper()
         } else if ( this->mtype == POI_LST ) {
             this->mapper = new MMALeastSquareProjection();
         } else {
-            OOFEM_ERROR("POIExportModule: unsupported smoother type ID");
+            OOFEM_ERROR("unsupported smoother type ID");
         }
     }
 
@@ -268,7 +264,7 @@ POIExportModule :: exportPrimVarAs(UnknownType valID, FILE *stream, TimeStep *tS
     } else if ( valID == FluxVector ) {
         type = ISVT_SCALAR;
     } else {
-        OOFEM_ERROR("POIExportModule::exportPrimVarAs: unsupported UnknownType");
+        OOFEM_ERROR("unsupported UnknownType");
     }
 
     // print header
@@ -299,7 +295,7 @@ POIExportModule :: exportPrimVarAs(UnknownType valID, FILE *stream, TimeStep *tS
                 interface->EIPrimaryUnknownMI_computePrimaryUnknownVectorAt(VM_Total, tStep, coords, pv);
             } else {
                 pv.clear();
-                OOFEM_WARNING2( "POIExportModule::exportPrimVarAs: element %d with no EIPrimaryUnknownMapperInterface support",
+                OOFEM_WARNING("element %d with no EIPrimaryUnknownMapperInterface support",
                                source->giveNumber() );
             }
 
@@ -312,8 +308,8 @@ POIExportModule :: exportPrimVarAs(UnknownType valID, FILE *stream, TimeStep *tS
 
             fprintf(stream, "\n");
         } else {
-            OOFEM_ERROR4( "POIExportModule::exportPrimVarAs: no element containing POI(%e,%e,%e) found",
-                         coords.at(1), coords.at(2), coords.at(3) );
+            OOFEM_ERROR("no element containing POI(%e,%e,%e) found",
+                        coords.at(1), coords.at(2), coords.at(3) );
         }
     }
 }

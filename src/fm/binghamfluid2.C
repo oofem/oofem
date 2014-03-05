@@ -66,7 +66,6 @@ BinghamFluidMaterial2 :: BinghamFluidMaterial2(int n, Domain *d) : FluidDynamicM
 IRResultType
 BinghamFluidMaterial2 :: initializeFrom(InputRecord *ir)
 {
-    const char *__proc = "initializeFrom"; // Required by IR_GIVE_FIELD macro
     IRResultType result;                // Required by IR_GIVE_FIELD macro
 
     this->FluidDynamicMaterial :: initializeFrom(ir);
@@ -384,7 +383,7 @@ BinghamFluidMaterial2 :: giveDeviatoricStiffnessMatrix(FloatMatrix &answer, MatR
 
         return;
     }  else {
-        _error("giveDeviatoricStiffnessMatrix: unsupportted material mode");
+        OOFEM_ERROR("giveDeviatoricStiffnessMatrix: unsupportted material mode");
     }
 }
 
@@ -409,14 +408,13 @@ double
 BinghamFluidMaterial2 :: computeActualViscosity(double Tau, double shearRate)
 {
 #ifdef BINGHAM_ALT
-  if (tau_0 > 0.0) {
-
-    shearRate = max(shearRate, BINGHAM_MIN_SHEAR_RATE);
-    return ( mu_0 + tau_0 * ( 1. - exp(-this->stressGrowthRate * shearRate) ) / shearRate );
-  } else {
-    // newtonian flow
-    return mu_0;
-  }
+    if ( tau_0 > 0.0 ) {
+        shearRate = max(shearRate, BINGHAM_MIN_SHEAR_RATE);
+        return ( mu_0 + tau_0 * ( 1. - exp(-this->stressGrowthRate * shearRate) ) / shearRate );
+    } else {
+        // newtonian flow
+        return mu_0;
+    }
 
 #else
     if ( Tau <= tau_c ) {
@@ -443,7 +441,7 @@ BinghamFluidMaterial2 :: computeDevStrainMagnitude(MaterialMode mmode, const Flo
         _val = 2.0 * ( epsd.at(1) * epsd.at(1) + epsd.at(2) * epsd.at(2) + epsd.at(3) * epsd.at(3) )
                + epsd.at(4) * epsd.at(4) + epsd.at(5) * epsd.at(5) + epsd.at(6) * epsd.at(6);
     } else {
-        _error("computeDevStrainMagnitude: unsupported material mode");
+        OOFEM_ERROR("unsupported material mode");
     }
 
     return sqrt(_val);
@@ -464,7 +462,7 @@ BinghamFluidMaterial2 :: computeDevStressMagnitude(MaterialMode mmode, const Flo
         _val = 0.5 * ( sigd.at(1) * sigd.at(1) + sigd.at(2) * sigd.at(2) + sigd.at(3) * sigd.at(3) +
                       2.0 * sigd.at(4) * sigd.at(4) + 2.0 * sigd.at(5) * sigd.at(5) + 2.0 * sigd.at(6) * sigd.at(6) );
     } else {
-        _error("computeDevStrainMagnitude: unsupported material mode");
+        OOFEM_ERROR("unsupported material mode");
     }
 
     return sqrt(_val);
@@ -502,7 +500,7 @@ BinghamFluidMaterial2 :: computeDeviatoricStrain(FloatArray &answer, const Float
         answer.at(5) = eps.at(5);
         answer.at(6) = eps.at(6);
     } else {
-        _error("computeDeviatoricStrain: unsupported material mode");
+        OOFEM_ERROR("unsupported material mode");
     }
 }
 
@@ -528,7 +526,7 @@ BinghamFluidMaterial2 :: computeDeviatoricStress(FloatArray &answer, const Float
         answer.at(5) = deps.at(5) * _nu;
         answer.at(6) = deps.at(6) * _nu;
     } else {
-        _error("computeDeviatoricStrain: unsuported material mode");
+        OOFEM_ERROR("unsuported material mode");
     }
 }
 
@@ -549,7 +547,7 @@ BinghamFluidMaterial2Status :: BinghamFluidMaterial2Status(int n, Domain *d, Gau
     } else if ( mmode == _3dFlow ) {
         _size = 6;
     } else {
-        _error("BinghamFluidMaterial2Status: unsupported material mode");
+        OOFEM_ERROR("unsupported material mode");
     }
 
     deviatoricStrainRateVector.resize(_size);
@@ -613,7 +611,7 @@ BinghamFluidMaterial2Status :: saveContext(DataStream *stream, ContextMode mode,
 {
     contextIOResultType iores;
     if ( stream == NULL ) {
-        _error("saveContex : can't write into NULL stream");
+        OOFEM_ERROR("can't write into NULL stream");
     }
 
     if ( ( iores = FluidDynamicMaterialStatus :: saveContext(stream, mode, obj) ) != CIO_OK ) {
@@ -641,7 +639,7 @@ BinghamFluidMaterial2Status :: restoreContext(DataStream *stream, ContextMode mo
 {
     contextIOResultType iores;
     if ( stream == NULL ) {
-        _error("saveContex : can't write into NULL stream");
+        OOFEM_ERROR("can't write into NULL stream");
     }
 
     if ( ( iores = FluidDynamicMaterialStatus :: restoreContext(stream, mode, obj) ) != CIO_OK ) {

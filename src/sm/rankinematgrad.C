@@ -67,7 +67,7 @@ RankineMatGrad :: giveStiffnessMatrix(FloatMatrix &answer, MatResponseMode rMode
 // Returns characteristic material matrix of the receiver
 //
 {
-    _error("giveStiffnessMatrix : Shouldn't be called.");
+    OOFEM_ERROR("Shouldn't be called.");
 }
 
 void
@@ -79,7 +79,7 @@ RankineMatGrad :: givePDGradMatrix_uu(FloatMatrix &answer, MatResponseMode mode,
         givePlaneStressStiffMtrx(answer, mode, gp, tStep);
         break;
     default:
-        OOFEM_ERROR2("RankineMatGrad :: givePDGradMatrix_uu - mMode = %d not supported\n", mMode);
+        OOFEM_ERROR("mMode = %d not supported\n", mMode);
     }
 }
 
@@ -92,7 +92,7 @@ RankineMatGrad :: givePDGradMatrix_uk(FloatMatrix &answer, MatResponseMode mode,
         givePlaneStressGprime(answer, mode, gp, tStep);
         break;
     default:
-        OOFEM_ERROR2("RankineMatGrad :: givePDGradMatrix_uk - mMode = %d not supported\n", mMode);
+        OOFEM_ERROR("mMode = %d not supported\n", mMode);
     }
 }
 
@@ -105,7 +105,7 @@ RankineMatGrad :: givePDGradMatrix_ku(FloatMatrix &answer, MatResponseMode mode,
         givePlaneStressKappaMatrix(answer, mode, gp, tStep);
         break;
     default:
-        OOFEM_ERROR2("RankineMatGrad :: givePDGradMatrix_ku - mMode = %d not supported\n", mMode);
+        OOFEM_ERROR("mMode = %d not supported\n", mMode);
     }
 }
 
@@ -120,15 +120,15 @@ RankineMatGrad :: givePDGradMatrix_kk(FloatMatrix &answer, MatResponseMode mode,
         giveInternalLength(answer, mode, gp, tStep);
         break;
     default:
-        OOFEM_ERROR2("RankineMatGrad :: givePDGradMatrix_kk - mMode = %d not supported\n", mMode);
+        OOFEM_ERROR("mMode = %d not supported\n", mMode);
     }
 }
 
 void
 RankineMatGrad :: givePDGradMatrix_LD(FloatMatrix &answer, MatResponseMode mode, GaussPoint *gp, TimeStep *tStep)
 {
-  MaterialMode mMode = gp->giveMaterialMode();
-  OOFEM_ERROR2("RankineMatGrad :: giveDPGradMatrix_LD - mMode = %d not supported\n", mMode);
+    MaterialMode mMode = gp->giveMaterialMode();
+    OOFEM_ERROR("mMode = %d not supported\n", mMode);
 }
 
 void
@@ -304,7 +304,6 @@ RankineMatGrad :: giveNonlocalCumPlasticStrain(GaussPoint *gp)
 IRResultType
 RankineMatGrad :: initializeFrom(InputRecord *ir)
 {
-    const char *__proc = "initializeFrom"; // Required by IR_GIVE_FIELD macro
     IRResultType result;                             // Required by IR_GIVE_FIELD macro
 
     RankineMat :: initializeFrom(ir);

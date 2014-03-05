@@ -74,7 +74,7 @@ FEI2dQuadConst :: local2global(FloatArray &answer, const FloatArray &lcoords, co
 int
 FEI2dQuadConst :: global2local(FloatArray &answer, const FloatArray &coords, const FEICellGeometry &cellgeo)
 {
-    OOFEM_ERROR("FEI2dQuadConst :: global2local: not implemented");
+    OOFEM_ERROR("not implemented");
     return false;
 }
 
@@ -82,7 +82,7 @@ FEI2dQuadConst :: global2local(FloatArray &answer, const FloatArray &coords, con
 double
 FEI2dQuadConst :: giveTransformationJacobian(const FloatArray &lcoords, const FEICellGeometry &cellgeo)
 {
-    OOFEM_ERROR("FEI2dQuadConst :: giveTransformationJacobian: not implemented");
+    OOFEM_ERROR("not implemented");
     return 0.0;
 }
 
@@ -96,7 +96,7 @@ FEI2dQuadConst :: edgeEvalN(FloatArray &answer, int iedge, const FloatArray &lco
 
 double FEI2dQuadConst :: edgeEvalNormal(FloatArray &answer, int iedge, const FloatArray &lcoords, const FEICellGeometry &cellgeo)
 {
-    OOFEM_ERROR("FEI2dQuadConst :: edgeEvalNormal: not implemented");
+    OOFEM_ERROR("not implemented");
     return 0.;
 }
 
@@ -104,14 +104,14 @@ void
 FEI2dQuadConst :: edgeEvaldNds(FloatArray &answer, int iedge,
                                const FloatArray &lcoords, const FEICellGeometry &cellgeo)
 {
-    OOFEM_ERROR("FEI2dQuadConst :: edgeEvaldNds: not implemented");
+    OOFEM_ERROR("not implemented");
 }
 
 void
 FEI2dQuadConst :: edgeLocal2global(FloatArray &answer, int iedge,
                                    const FloatArray &lcoords, const FEICellGeometry &cellgeo)
 {
-    OOFEM_ERROR("FEI2dQuadConst :: edgeLocal2global: not implemented");
+    OOFEM_ERROR("not implemented");
 }
 
 void
@@ -130,7 +130,7 @@ FEI2dQuadConst :: computeLocalEdgeMapping(IntArray &edgeNodes, int iedge)
         aNode = 3;
         bNode = 1;
     } else {
-        OOFEM_ERROR2("FEI2dQuadConst :: computeEdgeMapping: wrong egde number (%d)", iedge);
+        OOFEM_ERROR("wrong egde number (%d)", iedge);
     }
 
     edgeNodes.at(1) = aNode;

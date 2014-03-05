@@ -92,14 +92,13 @@ ScalarErrorIndicator :: giveElementError(EE_ErrorType type, Element *elem, TimeS
 IRResultType
 ScalarErrorIndicator :: initializeFrom(InputRecord *ir)
 {
-    const char *__proc = "initializeFrom"; // Required by IR_GIVE_FIELD macro
     IRResultType result;                // Required by IR_GIVE_FIELD macro
 
     ErrorEstimator :: initializeFrom(ir);
 
     IR_GIVE_FIELD(ir, indicatorType, _IFT_ScalarErrorIndicator_vartype);
     if ( indicatorType != 1 ) {
-        _error("instanciateFrom: usupported varType");
+        OOFEM_ERROR("usupported varType");
     }
 
     return this->giveRemeshingCrit()->initializeFrom(ir);

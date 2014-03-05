@@ -490,7 +490,8 @@ public:
      */
     void hardResize(int r, int c);
     /// Sets size of receiver to be an empty matrix. It will have zero rows and zero columns size.
-    void clear() { this->nRows = 0; this->nColumns = 0; }
+    void clear() { this->nRows = 0;
+                   this->nColumns = 0; }
     /**
      * Computes eigenvalues and eigenvectors of receiver (must be symmetric)
      * The receiver is preserved.

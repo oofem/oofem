@@ -60,7 +60,6 @@ double MixedGradientPressureBC :: domainSize()
 
 IRResultType MixedGradientPressureBC :: initializeFrom(InputRecord *ir)
 {
-    const char *__proc = "initializeFrom";
     IRResultType result;
 
     GeneralBoundaryCondition :: initializeFrom(ir);

@@ -285,7 +285,7 @@ void SymCompCol :: times(const FloatArray &x, FloatArray &answer) const
 
     //      Check for compatible dimensions:
     if ( x.giveSize() != N ) {
-        OOFEM_ERROR("SymCompCol::times: Error in CompCol -- incompatible dimensions");
+        OOFEM_ERROR("incompatible dimensions");
     }
 
     answer.resize(M);
@@ -327,7 +327,7 @@ int SymCompCol :: assemble(const IntArray &loc, const FloatMatrix &mat)
 #  ifdef DEBUG
     dim = mat.giveNumberOfRows();
     if ( dim != loc.giveSize() ) {
-        OOFEM_ERROR("SymCompCol::assemble error : dimension of 'k' and 'loc' mismatch");
+        OOFEM_ERROR("dimension of 'k' and 'loc' mismatch");
     }
 
     //this -> checkSizeTowards(loc) ;
@@ -414,7 +414,7 @@ double &SymCompCol :: at(int i, int j)
         }
     }
 
-    OOFEM_ERROR("SymCompCol::operator(): Array accessing exception -- out of bounds");
+    OOFEM_ERROR("Array accessing exception -- out of bounds");
     return val_(0); // return to suppress compiler warning message
 }
 
@@ -436,7 +436,7 @@ double SymCompCol :: at(int i, int j) const
     if ( i <= dim_ [ 0 ] && j <= dim_ [ 1 ] ) {
         return 0.0;
     } else {
-        OOFEM_ERROR3("SymCompCol::operator(): Array accessing exception -- index out of bounds (%d,%d)", i, j);
+        OOFEM_ERROR("Array accessing exception -- index out of bounds (%d,%d)", i, j);
         return ( 0 ); // return to suppress compiler warning message
     }
 }
@@ -458,7 +458,7 @@ double SymCompCol :: operator() (int i, int j)  const
     if ( i < dim_ [ 0 ] && j < dim_ [ 1 ] ) {
         return 0.0;
     } else {
-        OOFEM_ERROR3("SymCompCol::operator(): Array accessing exception, index out of bounds (%d,%d)", i, j);
+        OOFEM_ERROR("Array accessing exception, index out of bounds (%d,%d)", i, j);
         return ( 0 ); // return to suppress compiler warning message
     }
 }
@@ -480,7 +480,7 @@ double &SymCompCol :: operator() (int i, int j)
         }
     }
 
-    OOFEM_ERROR3("SymCompCol::operator(): Array element (%d,%d) not in sparse structure -- cannot assign", i, j);
+    OOFEM_ERROR("Array element (%d,%d) not in sparse structure -- cannot assign", i, j);
     return val_(0); // return to suppress compiler warning message
 }
 } // end namespace oofem

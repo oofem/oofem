@@ -90,7 +90,7 @@ Quad10_2D_SUPG :: giveInterpolation(DofIDItem id) const
 DofManager *
 Quad10_2D_SUPG :: giveInternalDofManager(int i) const
 {
-    return const_cast< ElementDofManager * >( & pressureNode );
+    return const_cast< ElementDofManager * >(& pressureNode);
 }
 
 
@@ -109,7 +109,7 @@ Quad10_2D_SUPG :: giveDofManDofIDMask(int inode, EquationID ut, IntArray &answer
     } else if ( ut == EID_ConservationEquation ) {
         answer.clear();
     } else {
-        _error("giveDofManDofIDMask: Unknown equation id encountered");
+        OOFEM_ERROR("Unknown equation id encountered");
     }
 }
 
@@ -122,7 +122,7 @@ Quad10_2D_SUPG :: giveInternalDofManDofIDMask(int i, EquationID ut, IntArray &an
     } else if ( ut == EID_ConservationEquation || ut == EID_MomentumBalance_ConservationEquation ) {
         answer.setValues(1, P_f);
     } else {
-        _error("giveDofManDofIDMask: Unknown equation id encountered");
+        OOFEM_ERROR("Unknown equation id encountered");
     }
 }
 

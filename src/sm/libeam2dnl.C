@@ -498,7 +498,7 @@ LIBeam2dNL :: giveEdgeDofMapping(IntArray &answer, int iEdge) const
      */
 
     if ( iEdge != 1 ) {
-        _error("giveEdgeDofMapping: wrong edge number");
+        OOFEM_ERROR("wrong edge number");
     }
 
 
@@ -515,7 +515,7 @@ double
 LIBeam2dNL ::   computeEdgeVolumeAround(GaussPoint *gp, int iEdge)
 {
     if ( iEdge != 1 ) { // edge between nodes 1 2
-        _error("computeEdgeVolumeAround: wrong egde number");
+        OOFEM_ERROR("wrong egde number");
     }
 
     double weight  = gp->giveWeight();

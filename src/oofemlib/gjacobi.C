@@ -70,17 +70,17 @@ GJacobi :: solve(FloatMatrix *a, FloatMatrix *b, FloatArray *eigv, FloatMatrix *
 
     // first check whether Amatrix is defined
     if ( !a ) {
-        OOFEM_ERROR("GJacobi :: solveYourselfAt: unknown A matrix");
+        OOFEM_ERROR("unknown A matrix");
     }
 
     // and whether Bmatrix
     if ( !b ) {
-        OOFEM_ERROR("GJacobi :: solveYourselfAt: unknown Bmatrx");
+        OOFEM_ERROR("unknown Bmatrx");
     }
 
     if ( a->giveNumberOfRows() != b->giveNumberOfRows() ||
         !a->isSquare() || !b->isSquare() ) {
-        OOFEM_ERROR("GJacobi :: solveYourselfAt: A matrix, B mtrix -> size mismatch");
+        OOFEM_ERROR("A matrix, B mtrix -> size mismatch");
     }
 
     int n = a->giveNumberOfRows();
@@ -88,19 +88,19 @@ GJacobi :: solve(FloatMatrix *a, FloatMatrix *b, FloatArray *eigv, FloatMatrix *
     // Check output  arrays
     //
     if ( !eigv ) {
-        OOFEM_ERROR("GJacobi :: solveYourselfAt: unknown eigv array");
+        OOFEM_ERROR("unknown eigv array");
     }
 
     if ( !x ) {
-        OOFEM_ERROR("GJacobi :: solveYourselfAt: unknown x    mtrx ");
+        OOFEM_ERROR("unknown x    mtrx ");
     }
 
     if ( eigv->giveSize() != n ) {
-        OOFEM_ERROR("GJacobi :: solveYourselfAt: eigv size mismatch");
+        OOFEM_ERROR("eigv size mismatch");
     }
 
     if ( ( !x->isSquare() ) || ( x->giveNumberOfRows() != n ) ) {
-        OOFEM_ERROR("GJacobi :: solveYourselfAt: x size mismatch");
+        OOFEM_ERROR("x size mismatch");
     }
 
     //
@@ -112,7 +112,7 @@ GJacobi :: solve(FloatMatrix *a, FloatMatrix *b, FloatArray *eigv, FloatMatrix *
     //
     for ( i = 1; i <= n; i++ ) {
         //      if((a->at(i,i) <= 0. ) && (b->at(i,i) <= 0.))
-        //        _error ("solveYourselfAt: Matrices are not positive definite");
+        //        OOFEM_ERROR("Matrices are not positive definite");
         d->at(i) = a->at(i, i) / b->at(i, i);
         eigv->at(i) = d->at(i);
     }
@@ -164,7 +164,7 @@ GJacobi :: solve(FloatMatrix *a, FloatMatrix *b, FloatArray *eigv, FloatMatrix *
                 if ( fabs(check) < GJacobi_ZERO_CHECK_TOL ) {
                     check = fabs(check);
                 } else if ( check < 0.0 ) {
-                    OOFEM_ERROR("GJacobi :: solveYourselfAt: Matrices are not positive definite");
+                    OOFEM_ERROR("Matrices are not positive definite");
                 }
 
                 sqch = sqrt(check);

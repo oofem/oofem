@@ -60,7 +60,6 @@ SUPGElement :: ~SUPGElement()
 IRResultType
 SUPGElement :: initializeFrom(InputRecord *ir)
 {
-    const char *__proc = "initializeFrom"; // Required by IR_GIVE_FIELD macro
     IRResultType result;                   // Required by IR_GIVE_FIELD macro
 
     FMElement :: initializeFrom(ir);
@@ -92,7 +91,7 @@ SUPGElement :: giveCharacteristicMatrix(FloatMatrix &answer,
 // returns characteristics matrix of receiver according to mtrx
 //
 {
-    _error("giveCharacteristicMatrix: Unknown Type of characteristic mtrx.");
+    OOFEM_ERROR("Unknown Type of characteristic mtrx.");
 }
 
 
@@ -163,7 +162,7 @@ SUPGElement :: giveCharacteristicVector(FloatArray &answer, CharType mtrx, Value
     }
 #endif
     else {
-        _error("giveCharacteristicVector: Unknown Type of characteristic mtrx.");
+        OOFEM_ERROR("Unknown Type of characteristic mtrx.");
     }
 }
 
@@ -209,7 +208,7 @@ SUPGElement :: computeBCLhsTerm_MB(FloatMatrix &answer, TimeStep *tStep)
                 this->computePenetrationWithResistanceBCTerm_MB(helpMatrix, load, side, tStep);
                 answer.add(helpMatrix);
             } else {
-                // _error("computeForceLoadVector : unsupported load type class");
+                // OOFEM_ERROR("unsupported load type class");
             }
         }
     }
@@ -286,7 +285,7 @@ SUPGElement :: giveCharacteristicValue(CharType mtrx, TimeStep *tStep)
     if ( mtrx == CriticalTimeStep ) {
         return this->computeCriticalTimeStep(tStep);
     } else {
-        _error("giveCharacteristicValue: Unknown Type of characteristic mtrx.");
+        OOFEM_ERROR("Unknown Type of characteristic mtrx.");
     }
 
     return 0.0;
@@ -305,7 +304,7 @@ SUPGElement :: checkConsistency()
     int result = 1;
     /*
      * if (!this->giveMaterial()->testMaterialExtension(Material_TransportCapability)) {
-     * _warning("checkConsistency : material without support for transport problems");
+     * OOFEM_WARNING("material without support for transport problems");
      * result =0;
      * }
      */

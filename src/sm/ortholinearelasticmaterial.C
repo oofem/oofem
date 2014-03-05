@@ -51,7 +51,6 @@ REGISTER_Material(OrthotropicLinearElasticMaterial);
 IRResultType
 OrthotropicLinearElasticMaterial :: initializeFrom(InputRecord *ir)
 {
-    const char *__proc = "initializeFrom"; // Required by IR_GIVE_FIELD macro
     IRResultType result;                // Required by IR_GIVE_FIELD macro
 
     double value;
@@ -108,7 +107,7 @@ OrthotropicLinearElasticMaterial :: initializeFrom(InputRecord *ir)
      * nyzy = this->give(NYzy);
      * nyyx = this->give(NYyx);
      * if ( ( nyzx < 0. ) || ( nyzx > 0.5 ) || ( nyzy < 0. ) || ( nyzy > 0.5 ) || ( nyyx < 0. ) || ( nyyx > 0.5 ) ) {
-     *  _warning2("instanciateFrom: suspicious parameters", 1);
+     *  OOFEM_WARNING("suspicious parameters", 1);
      * }
      */
 
@@ -124,7 +123,7 @@ OrthotropicLinearElasticMaterial :: initializeFrom(InputRecord *ir)
 
     size = triplets.giveSize();
     if ( !( ( size == 0 ) || ( size == 6 ) ) ) {
-        _warning2( "instanciateFrom: Warning: lcs in material %d is not properly defined, will be assumed as global",
+        OOFEM_WARNING("Warning: lcs in material %d is not properly defined, will be assumed as global",
                   this->giveNumber() );
     }
 
@@ -174,7 +173,7 @@ OrthotropicLinearElasticMaterial :: initializeFrom(InputRecord *ir)
         //
         size = triplets.giveSize();
         if ( !( ( size == 0 ) || ( size == 3 ) ) ) {
-            _warning2( "instanciateFrom: scs in material %d is not properly defined, will be assumed as global",
+            OOFEM_WARNING("scs in material %d is not properly defined, will be assumed as global",
                       this->giveNumber() );
         }
 
@@ -377,7 +376,7 @@ OrthotropicLinearElasticMaterial :: giveTensorRotationMatrix(FloatMatrix &answer
         // test if localCoordinateSystem is uniquely
         // defined by elementNormal and helpPlaneNormal
         if ( helpx.computeNorm() < ZERO_LENGTH ) {
-            _error("GiveTensorRotationMatrix: element normal parallel to plane normal encountered");
+            OOFEM_ERROR("element normal parallel to plane normal encountered");
         }
 
         helpy.beVectorProductOf(elementNormal, helpx);
@@ -409,7 +408,7 @@ OrthotropicLinearElasticMaterial :: giveTensorRotationMatrix(FloatMatrix &answer
         delete localCoordinateSystem;
         localCoordinateSystem = NULL;
     } else {
-        _error("GiveTensorRotationMatrix - internal error no cs defined");
+        OOFEM_ERROR("internal error no cs defined");
     }
     // t at (i,j) contains cosine of angle between elementAxis(i) and localMaterialAxis(j).
 }

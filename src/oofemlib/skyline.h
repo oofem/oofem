@@ -147,6 +147,8 @@ public:
     virtual SparseMtrxType giveType() const { return SMT_Skyline; }
     virtual bool isAsymmetric() const { return false; }
 
+    virtual const char *giveClassName() const { return "Skyline"; }
+
 protected:
     Skyline(int, int, double *, IntArray *);
 };

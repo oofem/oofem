@@ -46,11 +46,11 @@ namespace oofem {
 class OOFEM_EXPORT Timer
 {
     /// Wall clock time markers.
-    std::chrono::time_point<std::chrono::high_resolution_clock> start_wtime, end_wtime;
+    std :: chrono :: time_point< std :: chrono :: high_resolution_clock >start_wtime, end_wtime;
     /// User time.
-    std::chrono::duration<double> start_utime, end_utime;
+    std :: chrono :: duration< double >start_utime, end_utime;
     /// Accumulated wtime and utime (in seconds) from start.
-    std::chrono::duration<double> elapsedWTime, elapsedUTime;
+    std :: chrono :: duration< double >elapsedWTime, elapsedUTime;
     /// Flag indicating whether timer is running.
     bool running;
 
@@ -85,9 +85,9 @@ public:
 
 private:
     /// Platform independent wrapper for user time
-    void getUtime(std::chrono::duration<double> &answer);
+    void getUtime(std :: chrono :: duration< double > &answer);
     /// Platform independent wrapper for wall time
-    void getTime(std::chrono::time_point<std::chrono::high_resolution_clock> &answer);
+    void getTime(std :: chrono :: time_point< std :: chrono :: high_resolution_clock > &answer);
 };
 
 /**

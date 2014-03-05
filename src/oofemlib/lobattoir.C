@@ -72,7 +72,7 @@ int
 LobattoIntegrationRule :: SetUpPointsOnSquare(int nPoints, MaterialMode mode)
 //GaussIntegrationRule :: SetUpPointsOnSquare(int nPoints_xi1, int nPoints_xi2, MaterialMode mode)
 {
-    int nPoints_xi1 = (int) floor( sqrt( double ( nPoints ) ) );
+    int nPoints_xi1 = ( int ) floor( sqrt( double ( nPoints ) ) );
     int nPoints_xi2 = nPoints_xi1;
     FloatArray coords_xi1, weights1, coords_xi2, weights2;
     this->giveLineCoordsAndWeights(nPoints_xi1, coords_xi1, weights1);
@@ -99,7 +99,7 @@ int
 LobattoIntegrationRule :: SetUpPointsOnCube(int nPoints, MaterialMode mode)
 //GaussIntegrationRule :: SetUpPointsOnCube(int nPoints_xi1, int nPoints_xi2, int nPoints_xi3, MaterialMode mode)
 {
-    int nPoints_xi1 = (int) floor(cbrt( double ( nPoints ) ) + 0.5);
+    int nPoints_xi1 = ( int ) floor(cbrt( double ( nPoints ) ) + 0.5);
     int nPoints_xi2 = nPoints_xi1;
     int nPoints_xi3 = nPoints_xi1;
     FloatArray coords_xi1, weights1, coords_xi2, weights2, coords_xi3, weights3;
@@ -284,7 +284,7 @@ LobattoIntegrationRule :: SetUpPointsOnCube(int nPoints, MaterialMode mode)
 //        break;
 //
 //    default:
-//        OOFEM_ERROR2("SetUpPointsOnLine: unsupported number of IPs (%d)", nPoints);
+//        OOFEM_ERROR("unsupported number of IPs (%d)", nPoints);
 //    }
 //
 //    return nPoints;
@@ -293,7 +293,7 @@ LobattoIntegrationRule :: SetUpPointsOnCube(int nPoints, MaterialMode mode)
 int
 LobattoIntegrationRule :: SetUpPointsOnTriangle(int nPoints, MaterialMode mode)
 {
-    OOFEM_ERROR2("SetUpPointsOnTriangle: unsupported number of IPs (%d)", nPoints);
+    OOFEM_ERROR("unsupported number of IPs (%d)", nPoints);
     return nPoints;
 }
 
@@ -319,7 +319,7 @@ LobattoIntegrationRule :: getRequiredNumberOfIntegrationPoints(integrationDomain
         return requiredNIP;
 
     default:
-        OOFEM_ERROR("LobattoIntegrationRule::setUpIntegrationPoints - unknown integrationDomain");
+        OOFEM_ERROR("unknown integrationDomain");
     }
 
     return -1;
@@ -428,7 +428,7 @@ LobattoIntegrationRule :: giveLineCoordsAndWeights(int nPoints, FloatArray &coor
         break;
 
     default:
-        OOFEM_ERROR2("LobattoIntegrationRule :: giveLineCoordsAndWeights - unsupported number of IPs (%d)", nPoints);
+        OOFEM_SIMPLE_ERROR("LobattoIntegrationRule :: giveLineCoordsAndWeights - unsupported number of IPs (%d)", nPoints);
     }
 }
 } // end namespace oofem

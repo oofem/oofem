@@ -173,6 +173,8 @@ public:
     }
     /// Recursively prints structure.
     void printYourself();
+    /// Error printing helper.
+    std :: string errorInfo(const char *func) const { return std :: string("OctantRec") + func; }
 };
 
 
@@ -223,9 +225,11 @@ public:
     virtual int init(bool force = false);
 
     virtual Element *giveElementContainingPoint(const FloatArray &coords, const IntArray *regionList = NULL);
+    virtual Element *giveElementContainingPoint(const FloatArray &coords, const Set &eset);
     virtual Element *giveElementCloseToPoint(const FloatArray &coords, const IntArray *regionList = NULL);
     virtual Element *giveElementClosestToPoint(FloatArray &lcoords, FloatArray &closest, const FloatArray &gcoords, int region);
     virtual GaussPoint *giveClosestIP(const FloatArray &coords, int region, bool iCohesiveZoneGP = false);
+    virtual GaussPoint *giveClosestIP(const FloatArray &coords, Set &elemSet, bool iCohesiveZoneGP = false);
     virtual void giveAllElementsWithIpWithinBox(elementContainerType &elemSet, const FloatArray &coords, const double radius) { giveAllElementsWithIpWithinBox(elemSet, coords, radius, false); }
     virtual void giveAllElementsWithIpWithinBox(elementContainerType &elemSet, const FloatArray &coords, const double radius, bool iCohesiveZoneGP);
     virtual void giveAllNodesWithinBox(nodeContainerType &nodeList, const FloatArray &coords, const double radius);
@@ -325,15 +329,37 @@ protected:
                                    const FloatArray &coords,
                                    int region, double &dist, GaussPoint **answer, bool iCohesiveZoneGP);
     /**
+     * Returns closest IP to given point contained within given octree cell.
+     * @param currentCell Starting cell to search, all children will be searched too
+     * @param coords Point coordinates.
+     * @param elemSet set of considered elements.
+     * @param dist Threshold distance, only update answer param, if distance is smaller, distance is updated too.
+     * @param answer Pointer to IP, which has the smallest distance "distance" from given point.
+     */
+    void giveClosestIPWithinOctant(OctantRec *currentCell, //elementContainerType& visitedElems,
+                                   const FloatArray &coords,
+                                   Set &elemSet, double &dist, GaussPoint **answer, bool iCohesiveZoneGP);
+    /**
      * Returns the element containing given point.
      * The search is done only for given cell and its children, skipping the given child from search
      * @param cell Top level cell to search.
      * @param coords Point coordinates.
      * @param scannedChild Child pointer to exclude from search.
      * @param regionList Only elements within given regions are considered, if NULL all regions are considered.
+     * @note regions depreceted, use sets insteed
      */
     Element *giveElementContainingPoint(OctantRec *cell, const FloatArray &coords,
                                         OctantRec *scannedChild = NULL, const IntArray *regionList = NULL);
+    /**
+     * Returns the element containing given point.
+     * The search is done only for given cell and its children, skipping the given child from search
+     * @param cell Top level cell to search.
+     * @param coords Point coordinates.
+     * @param scannedChild Child pointer to exclude from search.
+     * @param elset Only elements in gibven set are considered, if NULL all regions are considered.
+     */
+    Element *giveElementContainingPoint(OctantRec *cell, const FloatArray &coords,
+                                        OctantRec *scannedChild = NULL, const Set *elset = NULL);
     /**
      * Returns the element close to given point as element which center is closest to the given point.
      * Only elements with IP in given cell are considered.

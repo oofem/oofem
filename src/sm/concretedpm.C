@@ -353,7 +353,6 @@ IRResultType
 ConcreteDPM :: initializeFrom(InputRecord *ir)
 {
     // Required by IR_GIVE_FIELD macro
-    const char *__proc = "initializeFrom";
     IRResultType result;
 
     // call the corresponding service for the linear elastic material
@@ -495,8 +494,8 @@ ConcreteDPM :: giveRealStressVector(FloatArray &answer,
     // (must be done !!!before!!! the update of strain and stress)
     if ( status->giveEpsLoc() < 0. ) {
         FloatArray strainIncrement, stressIncrement;
-        strainIncrement.beDifferenceOf(strainVector, status->giveStrainVector());
-        stressIncrement.beDifferenceOf(stress, status->giveStressVector());
+        strainIncrement.beDifferenceOf( strainVector, status->giveStrainVector() );
+        stressIncrement.beDifferenceOf( stress, status->giveStressVector() );
         int n = strainIncrement.giveSize();
         double work = strainIncrement.dotProduct(stressIncrement, n);
         //printf(" work : %g\n", work);
@@ -638,7 +637,7 @@ ConcreteDPM :: computeDamageParam(double kappa, GaussPoint *gp)
         aux1 = ( ft / eM ) * h / ef;
         if ( aux1 > 1 ) {
             printf("computeDamageParam: ft=%g, E=%g, wf=%g, hmax=E*wf/ft=%g, h=%g\n", ft, eM, ef, eM * ef / ft, h);
-            _error("computeDamageParam: element too large");
+            OOFEM_ERROR("element too large");
         }
 
         do {
@@ -648,7 +647,7 @@ ConcreteDPM :: computeDamageParam(double kappa, GaussPoint *gp)
             Lhs = -1. + aux1 * aux;
             omega -= R / Lhs;
             if ( nite > 40 ) {
-                _error("computeDamageParam: algorithm not converging");
+                OOFEM_ERROR("algorithm not converging");
             }
         } while ( fabs(R) >= DPM_DAMAGE_TOLERANCE );
 
@@ -675,7 +674,7 @@ ConcreteDPM :: computeDamageParam(double kappa, GaussPoint *gp)
 
 #endif
         if ( ( omega > 1.0 ) || ( omega < 0.0 ) ) {
-            _error2("computeDamageParam: internal error, omega = %g", omega);
+            OOFEM_ERROR("internal error, omega = %g", omega);
         }
     }
 
@@ -934,7 +933,7 @@ ConcreteDPM :: performRegularReturn(StressVector &effectiveStress,
 
     while ( residualNorm > yieldTol ) {
         if ( ++iterationCount == newtonIter ) {
-            _error("Closest point projection did not converge.\n");
+            OOFEM_ERROR("Closest point projection did not converge.\n");
         }
 
         //compute the stress, yield value and residuals
@@ -1682,7 +1681,7 @@ ConcreteDPM :: give3dMaterialStiffnessMatrix(FloatMatrix &answer,
             answer.times(1. - omega);
         }
     } else {
-        OOFEM_ERROR("ConcreteDPM :: give3dMaterialStiffnessMatrix - Unsupported material mode");
+        OOFEM_ERROR("Unsupported material mode");
     }
 }
 

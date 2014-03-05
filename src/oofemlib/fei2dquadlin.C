@@ -321,7 +321,7 @@ FEI2dQuadLin :: computeLocalEdgeMapping(IntArray &edgeNodes, int iedge)
         aNode = 4;
         bNode = 1;
     } else {
-        OOFEM_ERROR2("FEI2dQuadLin :: computeEdgeMapping: wrong egde number (%d)", iedge);
+        OOFEM_ERROR("wrong egde number (%d)", iedge);
     }
 
     edgeNodes.at(1) = aNode;

@@ -611,7 +611,7 @@ The node numbering is anti-clockwise. The element features are summarized in Tab
 
 
 \subsubsection {DKT Element}
-\label{cct}
+\label{dkt}
 Implementation of Discrete Kirchhoff Triangle (DKT) plate element.
 This element is suitable for thin plates, as the traswerse shear strain energy is neglected.
 The structure should be defined in x,y plane, nodes should be numbered anti-clockwise (positive rotation around
@@ -626,19 +626,46 @@ z-axis). The element features are summarized in Table~\ref{dktplatesummary}.
 \elementDescription{Features}{Layered cross section support.}
 \elementDescription{CS properties}{Cross section thickness is required.}
 \elementDescription{Loads}{Body loads are supported. Boundary load support is beta.}
-\elementDescription{Output}{On output, the shell force ($s_f$), shell strain ($s_s$), shell momentum ($s_m$), and shell curvature ($s_c$) tensors in global coordinate system are printed as vector form with 6 components, with the following meaning:
+\elementDescription{Output}{On output, the generalized shell strain/force momentum vectors in global coordinate system are printed, with the following meaning:
 \begin{eqnarray*}
-s_f&=&\{n_x, n_y, n_z, v_{yz}, v_{xz}, v_{xy}\},\\
-s_s&=&\{\varepsilon_x, \varepsilon_y, \varepsilon_z, \gamma_{yz}, \gamma_{xz}, \gamma_{xz}\},\\
-s_m&=&\{m_x, m_y, m_z, m_{yz}, m_{xz}, m_{xz}\},\\
-s_c&=&\{\kappa_x, \kappa_y, \kappa_z, \kappa_{yz}, \kappa_{xz}, \kappa_{xz}\}
+s_{\varepsilon}&=&\{\varepsilon_x, \varepsilon_y, \varepsilon_{xz}, \kappa_x, \kappa_y, \kappa_{xy}, \gamma_{xz}, \gamma_{yz}\},\\
+s_{\sigma}&=&\{n_x, n_y, n_{xy}, m_x, m_y, m_z, m_{xy}, q_{xz}, q_{yz}\}
 \end{eqnarray*}
-where $\varepsilon_x, \varepsilon_y, \varepsilon_z$ are membrane normal deformations, $\gamma_{zy}, \gamma_{zx}, \gamma_{xy}$ are (out of plane and in plane) shear componets, $\kappa_x, \kappa_y, \kappa_z, \kappa_{yz}, \kappa_{xz}, \kappa_{xz}$ are curvatures, $n_x, n_y, n_z, v_{yz}, v_{xz}, v_{xy}$ are integral forces (normal and shear forces), and $m_x, m_y, m_z, m_{yz}, m_{xz}, m_{xz}$ are bending moments. 
+where $\varepsilon_x, \varepsilon_y, \varepsilon_{xy}$ are membrane in plane normal deformations, $\gamma_{zx}, \gamma_{xz}$ are (out of plane and in plane) shear componets, $\kappa_x, \kappa_y, \kappa_{xy}$ are curvatures, $n_x, n_y, n_{xy}, q_{xz}, q_{yz}$ are integral forces (normal and shear forces), and $m_x, m_y, m_{xz}$ are bending moments. 
 Please note, for example, that bending moment $m_x$ is defined as $m_x=\int \sigma_x z\ dz$, so it acts along the y-axis and positive value causes tension in bottom layer.}
 \elementDescription{Nlgeo}{0.}
 \elementDescription{Status}{Reliable}
+\elementDescription{Reference}{J.L.Batoz, K.J.Bathe, L.W.Ho: A study of three-node triangular plate bending elements, IJNME, 15(12):1771-1812, 1980}
 \end{elementsummary}
 
+
+\subsubsection {QDKT Element}
+\label{qdkt}
+Implementation of Discrete Kirchhoff Theory plate quad element (QDKT) .
+This element is suitable for thin plates, as the traswerse shear strain energy is neglected.
+The structure should be defined in x,y plane, nodes should be numbered anti-clockwise (positive rotation around
+z-axis). The element features are summarized in Table~\ref{qdktplatesummary}.
+
+
+\begin{elementsummary}{qdktplate}{2D Discrete Kirchhoff Quad plate element}{-}{QDKTplate element summary}{qdktplatesummary}
+%\elementParam{\param{NIP}: allows to set the number of integration points for integration of membrane terms.}
+\elementDescription{Unknowns}{Three dofs (w-displacement, u and v - rotations) are required in each node.}
+\elementDescription{Approximation}{Quadratic approximation of rotations, cubic approximation of displacement along the edges. Note: there is no need to define interpolation for displacement on the element.}
+\elementDescription{Integration}{Default integration of all bending terms using four point formula.}
+\elementDescription{Features}{Layered cross section support.}
+\elementDescription{CS properties}{Cross section thickness is required.}
+\elementDescription{Loads}{Body loads are supported.}
+\elementDescription{Output}{On output, the generalized shell strain/force momentum vectors in global coordinate system are printed, with the following meaning:
+\begin{eqnarray*}
+s_{\varepsilon}&=&\{\varepsilon_x, \varepsilon_y, \varepsilon_{xz}, \kappa_x, \kappa_y, \kappa_{xy}, \gamma_{xz}, \gamma_{yz}\},\\
+s_{\sigma}&=&\{n_x, n_y, n_{xy}, m_x, m_y, m_z, m_{xy}, q_{xz}, q_{yz}\}
+\end{eqnarray*}
+where $\varepsilon_x, \varepsilon_y, \varepsilon_{xy}$ are membrane in plane normal deformations, $\gamma_{zx}, \gamma_{xz}$ are (out of plane and in plane) shear componets, $\kappa_x, \kappa_y, \kappa_{xy}$ are curvatures, $n_x, n_y, n_{xy}, q_{xz}, q_{yz}$ are integral forces (normal and shear forces), and $m_x, m_y, m_{xz}$ are bending moments. 
+Please note, for example, that bending moment $m_x$ is defined as $m_x=\int \sigma_x z\ dz$, so it acts along the y-axis and positive value causes tension in bottom layer.}
+\elementDescription{Nlgeo}{0.}
+\elementDescription{Status}{Reliable}
+\elementDescription{Reference}{J.L.Batoz, K.J.Bathe, L.W.Ho: A study of three-node triangular plate bending elements, IJNME, 15(12):1771-1812, 1980}
+\end{elementsummary}
 
 \subsubsection {CCT Element}
 \label{cct}
@@ -656,22 +683,16 @@ z-axis). The element features are summarized in Table~\ref{cctplatesummary}.
 \elementDescription{Features}{Layered cross section support.}
 \elementDescription{CS properties}{Cross section thickness is required.}
 \elementDescription{Loads}{Body loads are supported. Boundary loads are not supported now.}
-\elementDescription{Output}{On output, the shell force ($s_f$), shell strain ($s_s$), shell momentum ($s_m$), and shell curvature ($s_c$) tensors in global coordinate system are printed as vector form with 6 components, with the following meaning:
+\elementDescription{Output}{On output, the generalized shell strain/force momentum vectors in global coordinate system are printed, with the following meaning:
 \begin{eqnarray*}
-s_f&=&\{n_x, n_y, n_z, v_{yz}, v_{xz}, v_{xy}\},\\
-s_s&=&\{\varepsilon_x, \varepsilon_y, \varepsilon_z, \gamma_{yz}, \gamma_{xz}, \gamma_{xz}\},\\
-s_m&=&\{m_x, m_y, m_z, m_{yz}, m_{xz}, m_{xz}\},\\
-s_c&=&\{\kappa_x, \kappa_y, \kappa_z, \kappa_{yz}, \kappa_{xz}, \kappa_{xz}\}
+s_{\varepsilon}&=&\{\varepsilon_x, \varepsilon_y, \varepsilon_{xz}, \kappa_x, \kappa_y, \kappa_{xy}, \gamma_{xz}, \gamma_{yz}\},\\
+s_{\sigma}&=&\{n_x, n_y, n_{xy}, m_x, m_y, m_z, m_{xy}, q_{xz}, q_{yz}\}
 \end{eqnarray*}
-where $\varepsilon_x, \varepsilon_y, \varepsilon_z$ are membrane normal deformations, $\gamma_{zy}, \gamma_{zx}, \gamma_{xy}$ are (out of plane and in plane) shear componets, $\kappa_x, \kappa_y, \kappa_z, \kappa_{yz}, \kappa_{xz}, \kappa_{xz}$ are curvatures, $n_x, n_y, n_z, v_{yz}, v_{xz}, v_{xy}$ are integral forces (normal and shear forces), and $m_x, m_y, m_z, m_{yz}, m_{xz}, m_{xz}$ are bending moments. 
+where $\varepsilon_x, \varepsilon_y, \varepsilon_{xy}$ are membrane in plane normal deformations, $\gamma_{zx}, \gamma_{xz}$ are (out of plane and in plane) shear componets, $\kappa_x, \kappa_y, \kappa_{xy}$ are curvatures, $n_x, n_y, n_{xy}, q_{xz}, q_{yz}$ are integral forces (normal and shear forces), and $m_x, m_y, m_{xz}$ are bending moments. 
 Please note, for example, that bending moment $m_x$ is defined as $m_x=\int \sigma_x z\ dz$, so it acts along the y-axis and positive value causes tension in bottom layer.}
 \elementDescription{Nlgeo}{0.}
 \elementDescription{Status}{Reliable}
 \end{elementsummary}
-
-
-
-
 
 
 \subsubsection {CCT3D Element}
@@ -779,14 +800,12 @@ Implements the lumped mass matrix. The element features are summarized in Table~
 \elementDescription{Features}{Layered cross section support.}
 \elementDescription{CS properties}{Cross section thickness is required.}
 \elementDescription{Loads}{Dead weight loads, and edge loads are supported.}
-elementDescription{Output}{On output, the shell force ($s_f$), shell strain ($s_s$), shell momentum ($s_m$), and shell curvature ($s_c$) tensors in \textbf{global coordinate system} are printed as vector form with 6 components, with the following meaning:
+\elementDescription{Output}{On output, the generalized shell strain/force momentum vectors in global coordinate system are printed, with the following meaning:
 \begin{eqnarray*}
-s_f&=&\{n_x, n_y, n_z, v_{yz}, v_{xz}, v_{xy}\},\\
-s_s&=&\{\varepsilon_x, \varepsilon_y, \varepsilon_z, \gamma_{yz}, \gamma_{xz}, \gamma_{xz}\},\\
-s_m&=&\{m_x, m_y, m_z, m_{yz}, m_{xz}, m_{xz}\},\\
-s_c&=&\{\kappa_x, \kappa_y, \kappa_z, \kappa_{yz}, \kappa_{xz}, \kappa_{xz}\}
+s_{\varepsilon}&=&\{\varepsilon_x, \varepsilon_y, \varepsilon_{xz}, \kappa_x, \kappa_y, \kappa_{xy}, \gamma_{xz}, \gamma_{yz}\},\\
+s_{\sigma}&=&\{n_x, n_y, n_{xy}, m_x, m_y, m_z, m_{xy}, q_{xz}, q_{yz}\}
 \end{eqnarray*}
-where $\varepsilon_x, \varepsilon_y, \varepsilon_z$ are membrane normal deformations, $\gamma_{zy}, \gamma_{zx}, \gamma_{xy}$ are (out of plane and in plane) shear componets, $\kappa_x, \kappa_y, \kappa_z, \kappa_{yz}, \kappa_{xz}, \kappa_{xz}$ are curvatures, $n_x, n_y, n_z, v_{yz}, v_{xz}, v_{xy}$ are integral forces (normal and shear forces), and $m_x, m_y, m_z, m_{yz}, m_{xz}, m_{xz}$ are bending moments. 
+where $\varepsilon_x, \varepsilon_y, \varepsilon_{xy}$ are membrane in plane normal deformations, $\gamma_{zx}, \gamma_{xz}$ are (out of plane and in plane) shear componets, $\kappa_x, \kappa_y, \kappa_{xy}$ are curvatures, $n_x, n_y, n_{xy}, q_{xz}, q_{yz}$ are integral forces (normal and shear forces), and $m_x, m_y, m_{xz}$ are bending moments. 
 Please note, for example, that bending moment $m_x$ is defined as $m_x=\int \sigma_x z\ dz$, so it acts along the y-axis and positive value causes tension in bottom layer.}
 \elementDescription{Nlgeo}{0.}
 \elementDescription{Reference}{\cite{RobertCook1989}}

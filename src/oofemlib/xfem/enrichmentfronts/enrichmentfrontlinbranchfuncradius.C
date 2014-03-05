@@ -167,7 +167,6 @@ void EnrFrontLinearBranchFuncRadius :: evaluateEnrFuncJumps(std :: vector< doubl
 
 IRResultType EnrFrontLinearBranchFuncRadius :: initializeFrom(InputRecord *ir)
 {
-	const char *__proc = "initializeFrom";
 	IRResultType result;
 
 	IR_GIVE_FIELD(ir, mEnrichmentRadius, _IFT_EnrFrontLinearBranchFuncRadius_Radius);

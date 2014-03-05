@@ -44,7 +44,6 @@ DarcyFlow :: ~DarcyFlow()
 
 IRResultType DarcyFlow :: initializeFrom(InputRecord *ir)
 {
-    const char *__proc = "initializeFrom"; // Required by IR_GIVE_FIELD macro
     IRResultType result;                   // Required by IR_GIVE_FIELD macro
 
     EngngModel :: initializeFrom(ir);
@@ -110,7 +109,7 @@ void DarcyFlow :: solveYourselfAt(TimeStep *tStep)
     this->externalForces.resize(neq);
     this->externalForces.zero();
     this->assembleVectorFromElements( this->externalForces, tStep, EID_ConservationEquation, ExternalForcesVector, VM_Total,
-                                      EModelDefaultEquationNumbering(), this->giveDomain(1) );
+                                     EModelDefaultEquationNumbering(), this->giveDomain(1) );
 #ifdef __PARALLEL_MODE
     this->updateSharedDofManagers(this->externalForces, EModelDefaultEquationNumbering(), LoadExchangeTag);
 #endif
@@ -138,7 +137,7 @@ void DarcyFlow :: solveYourselfAt(TimeStep *tStep)
                                             tStep);
 
     if ( status & NM_NoSuccess ) {
-        OOFEM_ERROR2( "DarcyFlow :: couldn't solve for time step %d\n", tStep->giveNumber() );
+        OOFEM_ERROR("couldn't solve for time step %d\n", tStep->giveNumber() );
     }
 
 #define DUMPMATRICES 0
@@ -191,7 +190,7 @@ void DarcyFlow :: printDofOutputAt(FILE *stream, Dof *iDof, TimeStep *tStep)
     if ( type == P_f ) {
         iDof->printSingleOutputAt(stream, tStep, 'p', VM_Total, 1);
     } else {
-        _error("printDofOutputAt: unsupported dof type");
+        OOFEM_ERROR("unsupported dof type");
     }
 }
 
@@ -225,7 +224,7 @@ void DarcyFlow :: updateComponent(TimeStep *tStep, NumericalCmpn cmpn, Domain *d
         break;
 
     default:
-        _error2("updateComponent: Unknown component id (%d)", ( int ) cmpn);
+        OOFEM_ERROR("Unknown component id (%d)", ( int ) cmpn);
     }
 }
 
@@ -255,7 +254,7 @@ NumericalMethod *DarcyFlow :: giveNumericalMethod(MetaStep *mStep)
 
     this->nMethod = new NRSolver(this->giveDomain(1), this);
     if ( !nMethod ) {
-        OOFEM_ERROR("giveNumericalMethod: numerical method creation failed");
+        OOFEM_ERROR("numerical method creation failed");
     }
     return this->nMethod;
 }

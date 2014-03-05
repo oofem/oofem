@@ -66,7 +66,7 @@ char cltypesGiveUnknownTypeModeKey(ValueModeType mode)
 
     case VM_Acceleration: return 'a';
 
-    default: OOFEM_ERROR("cltypesGiveUnknownTypeModeKey : unsupported ValueModeType");
+    default: OOFEM_SIMPLE_ERROR("cltypesGiveUnknownTypeModeKey : unsupported ValueModeType");
     }
 
     return 0;
@@ -78,7 +78,7 @@ InternalStateValueType giveInternalStateValueType(InternalStateType type)
     switch ( type ) {
     case IST_StressTensor:
     case IST_StrainTensor:
-    //case IST_CurvatureTensor:
+        //case IST_CurvatureTensor:
     case IST_DamageTensor:
     case IST_DamageInvTensor:
     case IST_PrincipalDamageTensor:
@@ -208,7 +208,7 @@ InternalStateValueType giveInternalStateValueType(UnknownType type)
     } else if ( ( type == FluxVector ) || ( type == PressureVector ) || ( type == Temperature ) ) {
         return ISVT_SCALAR;
     } else {
-        OOFEM_ERROR2( "giveInternalStateValueType: unsupported UnknownType %s", __UnknownTypeToString(type) );
+        OOFEM_SIMPLE_ERROR( "giveInternalStateValueType: unsupported UnknownType %s", __UnknownTypeToString(type) );
         return ISVT_SCALAR; // To make compiler happy.
     }
 }
@@ -237,10 +237,13 @@ void
 ContextIOERR :: print()
 {
     if ( msg ) {
-        __OOFEM_ERROR3(file, line, "ContextIOERR encountered, error code: %d\n%s", error, msg);
+        oofem_logger.writeELogMsg(Logger :: LOG_LEVEL_ERROR, NULL, file, line, 
+                                  "ContextIOERR encountered, error code: %d\n%s", error, msg);
     }  else {
-        __OOFEM_ERROR2(file, line, "ContextIOERR encountered, error code: %d", error);
+        oofem_logger.writeELogMsg(Logger :: LOG_LEVEL_ERROR, NULL, file, line, 
+                                  "ContextIOERR encountered, error code: %d", error);
     }
+    oofem_exit(1);
 }
 
 /*

@@ -53,7 +53,7 @@ Tokenizer :: readStringToken(std :: size_t &pos, const std :: string &line)
     if ( line [ pos ] == '"' ) {
         pos++;            // check if terminating '"' was found
     } else {
-        OOFEM_WARNING("Tokenizer::readStringToken : Missing closing separator (\") inserted at end of line");
+        OOFEM_SIMPLE_WARNING("Tokenizer::readStringToken : Missing closing separator (\") inserted at end of line");
     }
     return x;
 }
@@ -66,7 +66,7 @@ Tokenizer :: readStructToken(std :: size_t &pos, const std :: string &line)
     if ( line [ pos ] == '}' ) {
         pos++;            // check if terminating '}' was found
     } else {
-        OOFEM_WARNING("Tokenizer::readStringToken : Missing closing separator (}) inserted at end of line");
+        OOFEM_SIMPLE_WARNING("Tokenizer::readStringToken : Missing closing separator (}) inserted at end of line");
     }
     return x + '}'; // structs are left with surrounding brackets, unlike strings ""
 }
@@ -79,7 +79,7 @@ Tokenizer :: readSimpleExpressionToken(std :: size_t &pos, const std :: string &
     if ( line [ pos ] == '$' ) {
         pos++;            // check if terminating '"' was found
     } else {
-        OOFEM_WARNING("Tokenizer::readSimpleExpressionToken : Missing closing separator (\"$\") inserted at end of line");
+        OOFEM_SIMPLE_WARNING("Tokenizer::readSimpleExpressionToken : Missing closing separator (\"$\") inserted at end of line");
     }
     return '$' + x + '$'; // simple expressions are left with surrounding '$";
 }
@@ -124,7 +124,7 @@ void Tokenizer :: tokenizeLine(const std :: string &currentLine)
             sList.push_back( this->readStringToken(bpos, currentLine) );
         } else if ( c == '{' ) {
             sList.push_back( this->readStructToken(bpos, currentLine) );
-        } else if (c == '$' ) {
+        } else if ( c == '$' ) {
             sList.push_back( this->readSimpleExpressionToken(bpos, currentLine) );
         } else {
             sList.push_back( this->readSimpleToken(bpos, currentLine) );

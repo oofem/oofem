@@ -142,7 +142,7 @@ Q4Axisymm :: computeBmatrixAt(GaussPoint *gp, FloatMatrix &answer, int li, int u
     }
 
     if ( ( size < 0 ) || ( size > 6 ) ) {
-        _error("ComputeBmatrixAt size mismatch");
+        OOFEM_ERROR("size mismatch");
     }
 
     answer.resize(size, 16);
@@ -288,7 +288,6 @@ Q4Axisymm :: computeJacobianMatrixAt(FloatMatrix &answer, GaussPoint *gp)
 IRResultType
 Q4Axisymm :: initializeFrom(InputRecord *ir)
 {
-    const char *__proc = "initializeFrom"; // Required by IR_GIVE_FIELD macro
     IRResultType result;                // Required by IR_GIVE_FIELD macro
     numberOfGaussPoints          = 4;
     result = this->StructuralElement :: initializeFrom(ir);
@@ -388,14 +387,14 @@ Q4Axisymm :: computeStrainVector(FloatArray &answer, GaussPoint *gp, TimeStep *t
             this->computeBmatrixAt(helpGaussPoint, b, 3, 6);
         } else {
             this->computeBmatrixAt(gp, b, 3, 6);
-            //_error ("ComputeStrainVector: numberOfFiAndShGaussPoints size mismatch");
+            //_error("ComputeStrainVector: numberOfFiAndShGaussPoints size mismatch");
         }
 
         Epsilon.beProductOf(b, u);
         answer.at(3) = Epsilon.at(1);
         answer.at(6) = Epsilon.at(4);
     } else if ( mode == AL ) { // actualized Lagrange formulation
-        _error("ComputeStrainVector : unsupported mode");
+        OOFEM_ERROR("unsupported mode");
     }
 }
 
@@ -404,6 +403,19 @@ Q4Axisymm :: giveDofManDofIDMask(int inode, EquationID, IntArray &answer) const
 {
     answer.setValues(2, D_u, D_v);
 }
+
+
+
+Interface *
+Q4Axisymm :: giveInterface(InterfaceType interface)
+{
+    if ( interface == ZZNodalRecoveryModelInterfaceType ) {
+        return static_cast< ZZNodalRecoveryModelInterface * >(this);
+    }
+
+    return NULL;
+}
+
 
 
 #ifdef __OOFEG

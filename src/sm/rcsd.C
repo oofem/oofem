@@ -217,7 +217,7 @@ RCSDMaterial :: giveEffectiveMaterialStiffnessMatrix(FloatMatrix &answer,
             this->giveLinearElasticMaterial()->giveStiffnessMatrix(answer, rMode, gp, tStep);
             return;
         } else {
-            _error("giveEffectiveMaterialStiffnessMatrix: usupported mode");
+            OOFEM_ERROR("unsupported mode");
         }
     }
 }
@@ -258,7 +258,6 @@ RCSDMaterial :: computeCurrEquivStrain(GaussPoint *gp, const FloatArray &reduced
 IRResultType
 RCSDMaterial :: initializeFrom(InputRecord *ir)
 {
-    const char *__proc = "initializeFrom"; // Required by IR_GIVE_FIELD macro
     IRResultType result;                // Required by IR_GIVE_FIELD macro
 
     IR_GIVE_FIELD(ir, SDTransitionCoeff, _IFT_RCSDMaterial_sdtransitioncoeff);
@@ -356,7 +355,7 @@ RCSDMaterial :: giveMinCrackStrainsForFullyOpenCrack(GaussPoint *gp, int i)
  * char errMsg [80];
  * sprintf (errMsg,"Element %d returned zero char length",
  *    gp->giveElement()->giveNumber());
- * _error (errMsg);
+ * OOFEM_ERROR(errMsg);
  * }
  *
  * status -> setCharLength(i, Le);

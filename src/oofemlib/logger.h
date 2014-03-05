@@ -44,7 +44,16 @@
 #include <cstdio>
 #include <string>
 
+// MSVC doesn't properly implement C99. (might need to wrap __func__ behind a macro to support all platforms correctly(?))
+#ifdef _MSC_VER
+# define __func__ __FUNCTION__
+#endif
+
 namespace oofem {
+/**
+ * Logger class used by OOFEM to print information during analysis.
+ * Prints warnings and errors into a separate stream from normal output.
+ */
 class OOFEM_EXPORT Logger
 {
 public:
@@ -59,25 +68,27 @@ public:
     };
 protected:
     /// Stream used for logging.
-    FILE *mylogStream;
+    FILE *logStream, *errStream;
     /// flag indicating whether to close mylogStream.
-    bool closeFlag;
+    bool closeFlag, errCloseFlag;
     /// Current log level, messages with higher level are not reported.
     logLevelType logLevel;
     /// Counter of all warning and error messages.
     int numberOfWrn, numberOfErr;
 public:
-    Logger(logLevelType level, FILE * stream);
+    Logger(logLevelType level);
     ~Logger();
     /// Redirects log output to given file name (with path).
-    void appendlogTo(const std::string &fname);
+    void appendLogTo(const std :: string &fname);
+    /// Redirects error output to given file name (with path).
+    void appendErrorTo(const std :: string &fname);
 
     /// Writes the normal log message.
     void writeLogMsg(logLevelType level, const char *format, ...);
     /// Writes extended log message with file and line info.
-    void writeELogMsg(logLevelType level, const char *_file, int _line, const char *format, ...);
+    void writeELogMsg(logLevelType level, const char *_func, const char *_file, int _line, const char *format, ...);
     /// Flushes the log stream.
-    void flush() { fflush(mylogStream); }
+    void flush() { fflush(logStream); fflush(errStream); }
 
     /// Sets log level to given one. Only log messages with level less or equal given threshold will be printed.
     void setLogLevel(logLevelType level) { logLevel = level; }
@@ -91,15 +102,14 @@ protected:
 };
 
 extern OOFEM_EXPORT Logger oofem_logger;
-extern OOFEM_EXPORT Logger oofem_errLogger;
 
 /**
  * Log reporting macros
  */
 //@{
-#define OOFEM_LOG_FATAL(...) oofem_errLogger.writeELogMsg(Logger::LOG_LEVEL_FATAL, __FILE__, __LINE__, __VA_ARGS__)
-#define OOFEM_LOG_ERROR(...) oofem_errLogger.writeELogMsg(Logger::LOG_LEVEL_ERROR, __FILE__, __LINE__, __VA_ARGS__)
-#define OOFEM_LOG_WARNING(...) oofem_errLogger.writeELogMsg(Logger::LOG_LEVEL_WARNING, __FILE__, __LINE__, __VA_ARGS__)
+#define OOFEM_LOG_FATAL(...) oofem_logger.writeELogMsg(Logger :: LOG_LEVEL_FATAL, __func__, __FILE__, __LINE__, __VA_ARGS__)
+#define OOFEM_LOG_ERROR(...) oofem_logger.writeELogMsg(Logger :: LOG_LEVEL_ERROR, __func__, __FILE__, __LINE__, __VA_ARGS__)
+#define OOFEM_LOG_WARNING(...) oofem_logger.writeELogMsg(Logger :: LOG_LEVEL_WARNING,  __func__, __FILE__, __LINE__, __VA_ARGS__)
 
 #define OOFEM_LOG_FORCED(...) oofem_logger.writeLogMsg(Logger :: LOG_LEVEL_FORCED, __VA_ARGS__)
 #define OOFEM_LOG_RELEVANT(...) oofem_logger.writeLogMsg(Logger :: LOG_LEVEL_RELEVANT, __VA_ARGS__)

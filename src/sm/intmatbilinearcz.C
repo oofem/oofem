@@ -98,7 +98,7 @@ void IntMatBilinearCZStatus :: copyStateVariables(const MaterialStatus &iStatus)
 
 void IntMatBilinearCZStatus :: addStateVariables(const MaterialStatus &iStatus)
 {
-    OOFEM_ERROR("Error: IntMatBilinearCZStatus :: addStateVariables is not implemented.\n");
+    OOFEM_ERROR("not implemented.");
 }
 
 
@@ -206,12 +206,12 @@ void IntMatBilinearCZ :: giveFirstPKTraction_3d(FloatArray &answer, GaussPoint *
         }
     }
 
-    OOFEM_ERROR("ERROR: No convergence in IntMatBilinearCZ::giveFirstPKTraction_3d().\n");
+    OOFEM_ERROR("No convergence in.");
 }
 
 void IntMatBilinearCZ :: give3dStiffnessMatrix_dTdj(FloatMatrix &answer, MatResponseMode rMode, GaussPoint *gp, TimeStep *tStep)
 {
-    OOFEM_ERROR("IntMatBilinearCZ::give3dStiffnessMatrix_dTdj is not implemented. Use numerical Jacobian instead.");
+    OOFEM_ERROR("not implemented. Use numerical Jacobian instead.");
     //this->give3dStiffnessMatrix_dTdj_Num(answer, rMode, gp, tStep);
 }
 
@@ -256,7 +256,6 @@ int IntMatBilinearCZ :: giveIPValue(FloatArray &answer, GaussPoint *gp, Internal
 
 IRResultType IntMatBilinearCZ :: initializeFrom(InputRecord *ir)
 {
-    const char *__proc = "initializeFrom";  // Required by IR_GIVE_FIELD macro
     IRResultType result;                    // Required by IR_GIVE_FIELD macro
 
     IR_GIVE_FIELD(ir, mPenaltyStiffness, _IFT_IntMatBilinearCZ_PenaltyStiffness);

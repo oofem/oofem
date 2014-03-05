@@ -159,7 +159,7 @@ Concrete3 :: giveMinCrackStrainsForFullyOpenCrack(GaussPoint *gp, int i)
  * char errMsg [80];
  * sprintf (errMsg,"Element %d returned zero char length",
  *    gp->giveElement()->giveNumber());
- * _error (errMsg);
+ * OOFEM_ERROR(errMsg);
  * }
  *
  * status -> setCharLength(i, Le);
@@ -439,7 +439,6 @@ Concrete3 :: giveNormalCrackingStress(GaussPoint *gp, double crackStrain, int i)
 IRResultType
 Concrete3 :: initializeFrom(InputRecord *ir)
 {
-    const char *__proc = "initializeFrom"; // Required by IR_GIVE_FIELD macro
     IRResultType result;                // Required by IR_GIVE_FIELD macro
 
     //double value ;

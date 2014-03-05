@@ -80,7 +80,7 @@ void
 Truss3d :: NodalAveragingRecoveryMI_computeNodalValue(FloatArray &answer, int node, InternalStateType type, TimeStep *tStep)
 {
     answer.clear();
-    _warning("Truss3d element: IP values will not be transferred to nodes. Use ZZNodalRecovery instead (parameter stype 1)");
+    OOFEM_WARNING("IP values will not be transferred to nodes. Use ZZNodalRecovery instead (parameter stype 1)");
 }
 
 
@@ -243,7 +243,7 @@ Truss3d :: giveEdgeDofMapping(IntArray &answer, int iEdge) const
      */
 
     if ( iEdge != 1 ) {
-        _error("giveEdgeDofMapping: wrong edge number");
+        OOFEM_ERROR("wrong edge number");
     }
 
     answer.resize(6);
@@ -260,7 +260,7 @@ double
 Truss3d ::   computeEdgeVolumeAround(GaussPoint *gp, int iEdge)
 {
     if ( iEdge != 1 ) { // edge between nodes 1 2
-        _error("computeEdgeVolumeAround: wrong edge number");
+        OOFEM_ERROR("wrong edge number");
     }
 
     double weight = gp->giveWeight();

@@ -576,11 +576,13 @@ public:
     /// Returns true if receiver is locally maintained.
     bool isLocal();
     /// Returns true if receiver is shared.
-    bool isShared() { if ( parallel_mode == DofManager_shared ) {
-                          return true;
-                      } else {
-                          return false;
-                      } }
+    bool isShared() {
+        if ( parallel_mode == DofManager_shared ) {
+            return true;
+        } else {
+            return false;
+        }
+    }
 #endif
 
     IntArray *giveCompleteGlobalDofIDArray() const; // JB - made it public

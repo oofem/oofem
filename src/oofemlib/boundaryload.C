@@ -57,7 +57,7 @@ BoundaryLoad :: computeValueAt(FloatArray &answer, TimeStep *tStep, FloatArray &
     FloatArray N;
 
     if ( ( mode != VM_Total ) && ( mode != VM_Incremental ) ) {
-        _error("computeValueAt: unknown mode");
+        OOFEM_ERROR("unknown mode");
     }
 
     answer.resize(this->nDofs);
@@ -66,7 +66,7 @@ BoundaryLoad :: computeValueAt(FloatArray &answer, TimeStep *tStep, FloatArray &
     nSize = N.giveSize();
 
     if ( ( this->componentArray.giveSize() / nSize ) != nDofs ) {
-        _error("computeValueAt: componentArray size mismatch");
+        OOFEM_ERROR("componentArray size mismatch");
     }
 
     for ( i = 1; i <= nDofs; i++ ) {
@@ -94,7 +94,6 @@ BoundaryLoad :: computeValueAt(FloatArray &answer, TimeStep *tStep, FloatArray &
 IRResultType
 BoundaryLoad :: initializeFrom(InputRecord *ir)
 {
-    const char *__proc = "initializeFrom"; // Required by IR_GIVE_FIELD macro
     IRResultType result;                // Required by IR_GIVE_FIELD macro
 
     result = Load :: initializeFrom(ir);
@@ -129,19 +128,19 @@ BoundaryLoad :: giveInputRecord(DynamicInputRecord &input)
 
 
 double
-BoundaryLoad :: giveProperty(int aProperty, TimeStep* tStep)
+BoundaryLoad :: giveProperty(int aProperty, TimeStep *tStep)
 // Returns the value of the property aProperty (e.g. the area
 // 'A') of the receiver.
 {
     if ( propertyDictionary.includes(aProperty) ) {
-      // check if time fuction registered under the same key
-      if ( propertyTimeFunctDictionary.includes(aProperty) ) {
-	return propertyDictionary.at(aProperty) * domain->giveFunction(propertyTimeFunctDictionary.at(aProperty))->evaluate(tStep, VM_Total);
-      } else {
-        return propertyDictionary.at(aProperty);
-      }
+        // check if time fuction registered under the same key
+        if ( propertyTimeFunctDictionary.includes(aProperty) ) {
+            return propertyDictionary.at(aProperty) * domain->giveFunction( propertyTimeFunctDictionary.at(aProperty) )->evaluate(tStep, VM_Total);
+        } else {
+            return propertyDictionary.at(aProperty);
+        }
     } else {
-        _error("give: property not defined");
+        OOFEM_ERROR("property not defined");
     }
 
     return 0.0;

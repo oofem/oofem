@@ -138,7 +138,7 @@ FEI2dTrConst :: edgeEvalN(FloatArray &answer, int iedge, const FloatArray &lcoor
 double
 FEI2dTrConst :: edgeEvalNormal(FloatArray &answer, int iedge, const FloatArray &lcoords, const FEICellGeometry &cellgeo)
 {
-    OOFEM_ERROR("FEI2dTrConst :: edgeEvalNormal - Not applicable to constant interpolation");
+    OOFEM_ERROR("Not applicable to constant interpolation");
     return 0.;
 }
 
@@ -183,7 +183,7 @@ FEI2dTrConst :: computeLocalEdgeMapping(IntArray &edgeNodes, int iedge)
         aNode = 3;
         bNode = 1;
     } else {
-        OOFEM_ERROR2("FEI2dTrConst :: computeEdgeMapping: wrong egde number (%d)", iedge);
+        OOFEM_ERROR("wrong egde number (%d)", iedge);
     }
 
     edgeNodes.at(1) = aNode;

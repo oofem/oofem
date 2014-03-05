@@ -40,6 +40,8 @@
 #include "nodalrecoverymodel.h"
 #include "interface.h"
 
+#include <vector>
+
 namespace oofem {
 class Domain;
 class Element;
@@ -56,7 +58,7 @@ public:
     /**
      * Typedefs to introduce the container type for nodal numbers
      */
-    typedef AList< FloatArray > nodalValContainerType;
+    typedef std::vector< FloatArray > nodalValContainerType;
 
     enum coordType { coordType_local, coordType_global };
 
@@ -123,7 +125,7 @@ public:
     /// Destructor
     virtual ~MMAShapeFunctProjection();
 
-    virtual void __init(Domain *dold, IntArray &type, FloatArray &coords, int region, TimeStep *tStep, bool iCohesiveZoneGP = false);
+    virtual void __init(Domain *dold, IntArray &type, FloatArray &coords, Set &sourceElemSet, TimeStep *tStep, bool iCohesiveZoneGP = false);
 
     virtual void finish(TimeStep *tStep);
 

@@ -122,8 +122,10 @@ public:
     virtual IRResultType initializeFrom(InputRecord *ir);
     virtual void giveInputRecord(DynamicInputRecord &input);
 
-    virtual void scale(double s) { devGradient.times(s);
-                                   pressure *= s; }
+    virtual void scale(double s) {
+        devGradient.times(s);
+        pressure *= s;
+    }
 
     virtual void computeFields(FloatArray &stressDev, double &vol, EquationID eid, TimeStep *tStep);
     virtual void computeTangents(FloatMatrix &Ed, FloatArray &Ep, FloatArray &Cd, double &Cp, EquationID eid, TimeStep *tStep);

@@ -81,7 +81,6 @@ SolutionbasedShapeFunction :: ~SolutionbasedShapeFunction()
 IRResultType
 SolutionbasedShapeFunction :: initializeFrom(InputRecord *ir)
 {
-    const char *__proc = "initializeFrom";
     IRResultType result;
 
     ActiveBoundaryCondition :: initializeFrom(ir);
@@ -392,7 +391,7 @@ SolutionbasedShapeFunction :: loadProblem()
                 }
             }
             if ( vlockCount == 30 ) {
-                OOFEM_WARNING5("Element over-constrained (%u)! Center coordinate: %f, %f, %f\n", e->giveNumber(), centerCoord.at(1) / 10, centerCoord.at(2) / 10, centerCoord.at(3) / 10);
+                OOFEM_WARNING("Element over-constrained (%u)! Center coordinate: %f, %f, %f\n", e->giveNumber(), centerCoord.at(1) / 10, centerCoord.at(2) / 10, centerCoord.at(3) / 10);
             }
         }
 
@@ -527,10 +526,10 @@ SolutionbasedShapeFunction :: computeBaseFunctionValueAt(FloatArray &answer, Flo
                 permuteIndex.push_back(i);
                 n++;
                 //thisMask = thisMask + pow(2.0, i - 1);   // compiler warning on conversion from double to int
-		thisMask = thisMask + ( 0x01 << (i - 1) );
+                thisMask = thisMask + ( 0x01 << ( i - 1 ) );
             }
         }
-	int _s = 0x01 << n;
+        int _s = 0x01 << n;
         for ( int i = 0; i < _s; i++ ) {
             int mask = i, counter = 1;
             FloatArray *newCoord = new(FloatArray) ( coords.giveSize() );

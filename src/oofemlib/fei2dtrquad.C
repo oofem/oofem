@@ -156,7 +156,7 @@ FEI2dTrQuad :: global2local(FloatArray &answer, const FloatArray &gcoords, const
 {
     FloatArray res, delta, guess, lcoords_guess;
     FloatMatrix jac, jacT;
-    double convergence_limit, error=0.0;
+    double convergence_limit, error = 0.0;
 
     // find a suitable convergence limit
     convergence_limit = 1e-6 * this->giveCharacteristicLength(cellgeo);
@@ -185,7 +185,7 @@ FEI2dTrQuad :: global2local(FloatArray &answer, const FloatArray &gcoords, const
         lcoords_guess.add(delta);
     }
     if ( error > convergence_limit ) { // Imperfect, could give false negatives.
-        //OOFEM_WARNING("FEI2dTrQuad :: global2local - Failed convergence");
+        //OOFEM_WARNING("Failed convergence");
         answer.setValues(3, 1. / 3., 1. / 3., 1. / 3.);
         return false;
     }
@@ -329,7 +329,7 @@ FEI2dTrQuad :: computeLocalEdgeMapping(IntArray &edgeNodes, int iedge)
         bNode = 1;
         cNode = 6;
     } else {
-        OOFEM_ERROR2("FEI2dTrQuad :: computeEdgeMapping: wrong egde number (%d)", iedge);
+        OOFEM_ERROR("wrong egde number (%d)", iedge);
     }
 
     edgeNodes.at(1) = aNode;

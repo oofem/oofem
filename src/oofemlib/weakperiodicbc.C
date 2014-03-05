@@ -64,7 +64,6 @@ WeakPeriodicBoundaryCondition :: WeakPeriodicBoundaryCondition(int n, Domain *d)
 IRResultType
 WeakPeriodicBoundaryCondition :: initializeFrom(InputRecord *ir)
 {
-    const char *__proc = "initializeFrom";
     IRResultType result;
 
     ActiveBoundaryCondition :: initializeFrom(ir);     ///@todo Carl, remove this line and use elementsidespositive/negative instead.
@@ -276,7 +275,7 @@ void WeakPeriodicBoundaryCondition :: updateDirection()
     } else if ( fabs( normal.at(3) ) > 0.99 ) {         // Normal points in Z direction
         direction = 3;
         if ( this->domain->giveNumberOfSpatialDimensions() == 2 ) {
-            _error1("3 dimensioal normal in a 2 dimensional problem.\n");
+            OOFEM_ERROR("3 dimensioal normal in a 2 dimensional problem.\n");
         } else {
             surfaceIndexes.at(1) = 1;
             surfaceIndexes.at(2) = 2;
@@ -284,7 +283,7 @@ void WeakPeriodicBoundaryCondition :: updateDirection()
     } else {
         normal.printYourself();
         Element *thisElement = this->giveDomain()->giveElement( element [ 0 ].at(0) );
-        _error3( "Only surfaces with normal in x, y or z direction supported. (el=%d, side=%d) \n", thisElement->giveLabel(), side [ 0 ].at(0) );
+        OOFEM_ERROR("Only surfaces with normal in x, y or z direction supported. (el=%d, side=%d) \n", thisElement->giveLabel(), side [ 0 ].at(0) );
     }
 }
 
@@ -346,7 +345,7 @@ void WeakPeriodicBoundaryCondition :: updateSminmax()
 void WeakPeriodicBoundaryCondition :: addElementSide(int newElement, int newSide)
 {
     //printf ("Add element %u, side %u\n", newElement, newSide);
-    //	_error1("Not supported");
+    //	_error("Not supported");
 
     FloatArray normalNew, normal0;
     int addToList = 0;

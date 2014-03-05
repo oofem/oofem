@@ -45,7 +45,6 @@ REGISTER_Material(NonlinearMassTransferMaterial);
 IRResultType
 NonlinearMassTransferMaterial :: initializeFrom(InputRecord *ir)
 {
-    const char *__proc = "initializeFrom"; // Required by IR_GIVE_FIELD macro
     IRResultType result;                   // Required by IR_GIVE_FIELD macro
 
     this->Material :: initializeFrom(ir);
@@ -89,7 +88,7 @@ NonlinearMassTransferMaterial :: giveCharacteristicMatrix(FloatMatrix &answer,
         t2.at(1, 1) = t2.at(2, 2) = t2.at(3, 3) = 1;
         break;
     default:
-        _error2( "giveCharacteristicMatrix : unknown mode (%s)", __MaterialModeToString(mMode) );
+        OOFEM_ERROR("unknown mode (%s)", __MaterialModeToString(mMode));
     }
 
     answer.clear();

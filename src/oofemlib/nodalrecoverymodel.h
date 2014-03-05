@@ -41,6 +41,7 @@
 #include "interface.h"
 #include "internalstatetype.h"
 #include "statecountertype.h"
+#include "set.h"
 
 #include <map>
 #include <vector>
@@ -56,14 +57,10 @@ class ProblemCommunicator;
  * The base class for all recovery models, which perform nodal averaging or projection
  * processes for internal variables typically stored in integration points.
  *
- * The recovery can be performed independently on regions of the domain to account for potential discontinuity
- * of recovered variable over region boundaries. To make this concept more general, the
- * virtual regions are introduced. The idea is that several real regions can map to a single virtual region.
- * The mapping is defined by so called virtualRegionMap. The whole domain recovery can be
- * obtained by a single virtual region to which all real regions map.
- *
- * The NodalRecoveryModel class provides common array of nodal dictionaries, where
- * the recovered nodal values are stored for each region.
+ * The recovery can be performed on one region. Region is defined by given set containing elements defing the region volume.
+ * The element set can be set up in the input file, or created dynamically.
+ * If Averaging over multiple regions is needed, multiple instances of nodal recovery model should be created,
+ * o single instance reused.
  */
 class OOFEM_EXPORT NodalRecoveryModel
 {
@@ -72,34 +69,15 @@ public:
 
 protected:
     /**
-     * Array of nodal dictionaries, containing nodal values for each region.
-     * The region id is dictionary key to corresponding values.
+     * Map of nodal values. Only nodes for active region are determined and stored.
+     * The node number is dictionary key to corresponding values.
      */
-    std::vector< std::map< int, FloatArray > > nodalValList;
+    std :: map< int, FloatArray >nodalValList;
     /// Determines the type of recovered values.
     InternalStateType valType;
     /// Time stamp of recovered values.
     StateCounterType stateCounter;
     Domain *domain;
-    /*
-     * Array of value record sizes per region.
-     * It is typically determined during recovery phase.
-     * The purpose of ths attribute is to cache the result for
-     * future requests.
-     */
-    // IntArray regionValSize;
-    /**
-     * Number of virtual regions, if positive.
-     * When equals to zero a single virtual region, to which all real regions map, is assumed (whole domain recovery)
-     * If negative, real regions are used instead.
-     */
-    int numberOfVirtualRegions;
-    /**
-     * Mapping from real regions to virtual regions.
-     * The size of this array should be equal to number of real regions.
-     */
-    IntArray virtualRegionMap;
-
 
 #ifdef __PARALLEL_MODE
     /// Common Communicator buffer.
@@ -123,57 +101,29 @@ public:
      * @param type Determines the type of internal variable to be recovered.
      * @param tStep Time step.
      */
-    virtual int recoverValues(InternalStateType type, TimeStep *tStep) = 0;
+    virtual int recoverValues(Set elementSet, InternalStateType type, TimeStep *tStep) = 0;
     /**
      * Clears the receiver's nodal table.
      * @return nonzero if o.k.
      */
     virtual int clear();
     /**
-     * Initializes the receiver. Called form constructor, but when domain changes,
-     * init call necessary to update data structucture.
-     * @return nonzero if o.k.
-     */
-    int init();
-
-    /**
      * Returns vector of recovered values for given node and region.
      * @param ptr Pointer to recovered values at node, NULL if not present.
      * @param node Node number.
-     * @param region Region number.
      * @return Nonzero if values are defined, zero otherwise.
      */
-    int giveNodalVector(const FloatArray * &ptr, int node, int region);
+    int giveNodalVector(const FloatArray * &ptr, int node);
     /**
-     * Returns the region record size. The default implementation scans the elements and once one belonging
-     * to given region is found it is requested for the information. Slow.
-     * The overloaded instances can cache these results, since they are easily
-     * obtainable during recovery.
+     * Returns the region record size. Available after recovery.
      * @param reg Virtual region id.
      * @param type Determines the type of variable, for which size is requested. Should be same as used
      * for recovering values.
      */
-    virtual int giveRegionRecordSize(int reg, InternalStateType type);
-    /**
-     * Sets recovery mode (region by region or whole domain mode) and allows to specify virtual region mapping.
-     * @param nvr Specifies number of regions. If set to zero, the recovery is performed over whole domain (single virtual region),
-     * when positive, it should be equal to number of virtual regions and vrmap should be provided. If negative, then recovery over
-     * real regions is used.
-     * @param vrmap When nvr positive, it defines the mapping from real (true) regions to virtual regions. The size of this array
-     * should equal to number of true regions and values should be in range <1, nvr>. When nvr is zero or negative, this parameter
-     * is ignored. The i-th value defines mapping of true region number to virtual region number. Zero or negative value causes
-     * region to be ignored.
-     */
-    void setRecoveryMode(int nvr, const IntArray &vrmap);
-    /**
-     * Returns element region number. If virtual region mapping is active, the element virtual region
-     * is returned (using map) instead of real element region number.
-     */
-    int giveElementVirtualRegionNumber(int ielem);
-    /**
-     * Returns number of recovery regions.
-     */
-    int giveNumberOfVirtualRegions() { return this->numberOfVirtualRegions; }
+    virtual int giveRegionRecordSize();
+
+    virtual const char *giveClassName() const = 0;
+    std :: string errorInfo(const char *func) { return std :: string(this->giveClassName()) + func; }
 
 protected:
     /**
@@ -183,7 +133,7 @@ protected:
      * @param reg Virtual region number.
      * @returns Nonzero if ok, zero if region has to be skipped.
      */
-    int initRegionNodeNumbering(IntArray &regionNodalNumbers, int &regionDofMans, int reg);
+    int initRegionNodeNumbering(IntArray &regionNodalNumbers, int &regionDofMans, Set &region);
 
     /**
      * Update the nodal table according to recovered solution for given region.
@@ -192,7 +142,7 @@ protected:
      * @param regionValSize Size of dofMan record.
      * @param rhs Array with recovered values.
      */
-    int updateRegionRecoveredValues(const int ireg, const IntArray &regionNodalNumbers,
+    int updateRegionRecoveredValues(const IntArray &regionNodalNumbers,
                                     int regionValSize, const FloatArray &rhs);
 };
 } // end namespace oofem

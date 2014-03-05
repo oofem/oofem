@@ -62,8 +62,6 @@ ConnectivityTable :: instanciateConnectivityTable()
 {
     int ndofMan = domain->giveNumberOfDofManagers();
     int nelems = domain->giveNumberOfElements();
-    int i, j, jnode, nnodes;
-    Element *ielem;
     IntArray dofManConnectivity(ndofMan);
 
     if ( nodalConnectivityFlag ) {
@@ -72,30 +70,30 @@ ConnectivityTable :: instanciateConnectivityTable()
 
     OOFEM_LOG_INFO("ConnectivityTable: initializing\n");
 
-    for ( i = 1; i <= nelems; i++ ) {
-        ielem = domain->giveElement(i);
-        nnodes = ielem->giveNumberOfDofManagers();
-        for ( j = 1; j <= nnodes; j++ ) {
-            jnode = ielem->giveDofManager(j)->giveNumber();
+    for ( int i = 1; i <= nelems; i++ ) {
+        Element *ielem = domain->giveElement(i);
+        int nnodes = ielem->giveNumberOfDofManagers();
+        for ( int j = 1; j <= nnodes; j++ ) {
+            int jnode = ielem->giveDofManager(j)->giveNumber();
             dofManConnectivity.at(jnode)++;
         }
     }
 
     // allocate Nodal connectivity table for domain
-    nodalConnectivity.growTo(ndofMan);
-    for ( i = 1; i <= ndofMan; i++ ) {
-        nodalConnectivity.put( i, new IntArray( dofManConnectivity.at(i) ) );
+    nodalConnectivity.resize(ndofMan);
+    for ( int i = 0; i < ndofMan; i++ ) {
+        nodalConnectivity[i].resize( dofManConnectivity(i) );
     }
 
     // build Nodal connectivity table for domain
     dofManConnectivity.zero();
 
-    for ( i = 1; i <= nelems; i++ ) {
-        ielem = domain->giveElement(i);
-        nnodes = ielem->giveNumberOfDofManagers();
-        for ( j = 1; j <= nnodes; j++ ) {
-            jnode = ielem->giveDofManager(j)->giveNumber();
-            nodalConnectivity.at(jnode)->at( ++dofManConnectivity.at(jnode) ) = i;
+    for ( int i = 1; i <= nelems; i++ ) {
+        Element *ielem = domain->giveElement(i);
+        int nnodes = ielem->giveNumberOfDofManagers();
+        for ( int j = 1; j <= nnodes; j++ ) {
+            int jnode = ielem->giveDofManager(j)->giveNumber();
+            nodalConnectivity[jnode-1].at( ++dofManConnectivity.at(jnode) ) = i;
         }
     }
 
@@ -109,34 +107,34 @@ ConnectivityTable :: giveDofManConnectivityArray(int dofman)
         this->instanciateConnectivityTable();
     }
 
-    return this->nodalConnectivity.at(dofman);
+    return &this->nodalConnectivity[dofman-1];
 }
 
 
 void
 ConnectivityTable :: giveElementNeighbourList(IntArray &answer, IntArray &elemList)
 {
-    int i, j, k, nnode, jnode, nelems = elemList.giveSize();
-    Element *ielem;
+    int nelems = elemList.giveSize();
     if ( nodalConnectivityFlag == 0 ) {
         this->instanciateConnectivityTable();
     }
 
     std :: set< int >neighbours;
 
-    for ( i = 1; i <= nelems; i++ ) {
-        ielem = domain->giveElement( elemList.at(i) );
-        nnode = ielem->giveNumberOfDofManagers();
-        for ( j = 1; j <= nnode; j++ ) {
-            jnode = ielem->giveDofManager(j)->giveNumber();
-            for ( k = 1; k <= this->nodalConnectivity.at(jnode)->giveSize(); k++ ) {
-                neighbours.insert( this->nodalConnectivity.at(jnode)->at(k) );
+    for ( int i = 1; i <= nelems; i++ ) {
+        Element *ielem = domain->giveElement( elemList.at(i) );
+        int nnode = ielem->giveNumberOfDofManagers();
+        for ( int j = 1; j <= nnode; j++ ) {
+            int jnode = ielem->giveDofManager(j)->giveNumber();
+            for ( int k = 1; k <= this->nodalConnectivity[jnode-1].giveSize(); k++ ) {
+                neighbours.insert( this->nodalConnectivity[jnode-1].at(k) );
             }
         }
     }
 
     answer.resize( neighbours.size() );
     std :: set< int > :: iterator pos;
+    int i;
     for ( pos = neighbours.begin(), i = 1; pos != neighbours.end(); ++pos, i++ ) {
         answer.at(i) = * pos;
     }
@@ -146,22 +144,23 @@ ConnectivityTable :: giveElementNeighbourList(IntArray &answer, IntArray &elemLi
 void
 ConnectivityTable :: giveNodeNeighbourList(IntArray &answer, IntArray &nodeList)
 {
-    int i, k, inode, nnodes = nodeList.giveSize();
+    int nnodes = nodeList.giveSize();
     if ( nodalConnectivityFlag == 0 ) {
         this->instanciateConnectivityTable();
     }
 
     std :: set< int >neighbours;
 
-    for ( i = 1; i <= nnodes; i++ ) {
-        inode = nodeList.at(i);
-        for ( k = 1; k <= this->nodalConnectivity.at(inode)->giveSize(); k++ ) {
-            neighbours.insert( this->nodalConnectivity.at(inode)->at(k) );
+    for ( int i = 1; i <= nnodes; i++ ) {
+        int inode = nodeList.at(i);
+        for ( int k = 1; k <= this->nodalConnectivity[inode-1].giveSize(); k++ ) {
+            neighbours.insert( this->nodalConnectivity[inode-1].at(k) );
         }
     }
 
     answer.resize( neighbours.size() );
     std :: set< int > :: iterator pos;
+    int i;
     for ( pos = neighbours.begin(), i = 1; pos != neighbours.end(); ++pos, i++ ) {
         answer.at(i) = * pos;
     }

@@ -52,7 +52,7 @@ MMALeastSquareProjection :: MMALeastSquareProjection() : MaterialMappingAlgorith
 MMALeastSquareProjection :: ~MMALeastSquareProjection() { }
 
 void
-MMALeastSquareProjection :: __init(Domain *dold, IntArray &type, FloatArray &coords, int region, TimeStep *tStep, bool iCohesiveZoneGP)
+MMALeastSquareProjection :: __init(Domain *dold, IntArray &type, FloatArray &coords, Set &elemSet, TimeStep *tStep, bool iCohesiveZoneGP)
 //(Domain* dold, IntArray& varTypes, GaussPoint* gp, TimeStep* tStep)
 {
     GaussPoint *sourceIp;
@@ -66,10 +66,10 @@ MMALeastSquareProjection :: __init(Domain *dold, IntArray &type, FloatArray &coo
 
     this->patchDomain = dold;
     // find the closest IP on old mesh
-    sourceElement = sl->giveElementContainingPoint(coords);
+    sourceElement = sl->giveElementContainingPoint(coords, elemSet);
 
     if ( !sourceElement ) {
-        OOFEM_ERROR("MMALeastSquareProjection::__init: no suitable source element found");
+        OOFEM_ERROR("no suitable source element found");
     }
 
     // determine the type of patch
@@ -79,7 +79,7 @@ MMALeastSquareProjection :: __init(Domain *dold, IntArray &type, FloatArray &coo
     } else if ( ( egt == EGT_triangle_1 ) || ( egt == EGT_quad_1 ) ) {
         this->patchType = MMALSPPatchType_2dq;
     } else {
-        OOFEM_ERROR("MMALeastSquareProjection::__init: unsupported material mode");
+        OOFEM_ERROR("unsupported material mode");
     }
 
     /* Determine the state of closest point.
@@ -120,7 +120,7 @@ MMALeastSquareProjection :: __init(Domain *dold, IntArray &type, FloatArray &coo
             if ( this->stateFilter ) {
                 element = patchDomain->giveElement( neighborList.at(i) );
                 // exclude elements in different regions
-                if ( this->regionFilter && ( element->giveRegionNumber() != region ) ) {
+                if ( !elemSet.hasElement( element->giveNumber() ) ) {
                     continue;
                 }
 
@@ -145,7 +145,7 @@ MMALeastSquareProjection :: __init(Domain *dold, IntArray &type, FloatArray &coo
             } else { // if (! yhis->stateFilter)
                 element = patchDomain->giveElement( neighborList.at(i) );
                 // exclude elements in different regions
-                if ( this->regionFilter && ( element->giveRegionNumber() != region ) ) {
+                if ( !elemSet.hasElement( element->giveNumber() ) ) {
                     continue;
                 }
 
@@ -161,7 +161,7 @@ MMALeastSquareProjection :: __init(Domain *dold, IntArray &type, FloatArray &coo
     if ( nite > 2 ) {
         // not enough points -> take closest point projection
         patchGPList.clear();
-        sourceIp = sl->giveClosestIP(coords, region);
+        sourceIp = sl->giveClosestIP(coords, elemSet);
         patchGPList.push_front(sourceIp);
         //fprintf(stderr, "MMALeastSquareProjection: too many neighbor search iterations\n");
         //exit (1);
@@ -176,7 +176,7 @@ MMALeastSquareProjection :: __init(Domain *dold, IntArray &type, FloatArray &coo
     int npoints = 0;
     // check allocation of gpList
     if ( gpList == NULL ) {
-        OOFEM_ERROR("MMALeastSquareProjection::__init:  memory allocation error");
+        OOFEM_FATAL("memory allocation error");
     }
 
     for ( int ielem = 1; ielem <= patchList.giveSize(); ielem++ ) {
@@ -201,13 +201,13 @@ MMALeastSquareProjection :: __init(Domain *dold, IntArray &type, FloatArray &coo
                     gpList [ npoints - 1 ] = srcgp;
                 }
             } else {
-                _error("init: computeGlobalCoordinates failed");
+                OOFEM_ERROR("computeGlobalCoordinates failed");
             }
         }
     }
 
     if ( npoints != actualNumberOfPoints ) {
-        OOFEM_ERROR(stderr, "MMALeastSquareProjection::__init: internal error");
+        OOFEM_ERROR("internal error");
     }
 
     //minNumberOfPoints = min (actualNumberOfPoints, minNumberOfPoints+2);
@@ -240,7 +240,7 @@ MMALeastSquareProjection :: __init(Domain *dold, IntArray &type, FloatArray &coo
     }
 
     if ( patchGPList.size() != minNumberOfPoints ) {
-        OOFEM_ERROR("MMALeastSquareProjection: internal error 2\n");
+        OOFEM_ERROR("internal error 2\n");
         exit(1);
     }
 
@@ -292,7 +292,7 @@ MMALeastSquareProjection :: __mapVariable(FloatArray &answer, FloatArray &target
         srcgp  = * pos;
         srcgp->giveElement()->giveIPValue(answer, srcgp, type, tStep);
     } else if ( size < neq ) {
-        OOFEM_ERROR("MMALeastSquareProjection::mapVariable internal error");
+        OOFEM_ERROR("internal error");
     } else {
         std :: list< GaussPoint * > :: iterator pos;
 
@@ -319,7 +319,7 @@ MMALeastSquareProjection :: __mapVariable(FloatArray &answer, FloatArray &target
                     }
                 }
             } else {
-                OOFEM_ERROR("MMALeastSquareProjection::mapVariable computeGlobalCoordinates failed");
+                OOFEM_ERROR("computeGlobalCoordinates failed");
             }
         }
 
@@ -370,7 +370,7 @@ MMALeastSquareProjection :: __mapVariable(FloatArray &answer, FloatArray &target
 int
 MMALeastSquareProjection :: mapStatus(MaterialStatus &oStatus) const
 {
-    OOFEM_ERROR("ERROR: MMALeastSquareProjection :: mapStatus() is not implemented yet.")
+    OOFEM_ERROR("not implemented yet.")
 
     return 0;
 }
@@ -403,7 +403,7 @@ MMALeastSquareProjection :: computePolynomialTerms(FloatArray &P, FloatArray &co
         P.at(2) = coords.at(1);
         P.at(3) = 1.0;
     } else {
-        OOFEM_ERROR("MMALeastSquareProjection::computePolynomialTerms - unknown regionType");
+        OOFEM_ERROR("unknown regionType");
     }
 }
 
@@ -423,7 +423,6 @@ MMALeastSquareProjection :: giveNumberOfUnknownPolynomialCoefficients(MMALeastSq
 IRResultType
 MMALeastSquareProjection :: initializeFrom(InputRecord *ir)
 {
-    const char *__proc = "initializeFrom"; // Required by IR_GIVE_FIELD macro
     IRResultType result;                // Required by IR_GIVE_FIELD macro
 
     this->stateFilter = 0;

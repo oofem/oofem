@@ -303,7 +303,7 @@ TrabBoneNL3D :: giveRemoteNonlocalStiffnessContribution(GaussPoint *gp, IntArray
 
 void
 TrabBoneNL3D :: giveRealStressVector_3d(FloatArray &answer, GaussPoint *gp,
-                                     const FloatArray &totalStrain, TimeStep *tStep)
+                                        const FloatArray &totalStrain, TimeStep *tStep)
 {
     TrabBoneNL3DStatus *nlStatus = static_cast< TrabBoneNL3DStatus * >( this->giveStatus(gp) );
     this->initGpForNewStep(gp);
@@ -379,7 +379,6 @@ TrabBoneNL3D :: giveInterface(InterfaceType type)
 IRResultType
 TrabBoneNL3D :: initializeFrom(InputRecord *ir)
 {
-    const char *__proc = "initializeFrom"; // Required by IR_GIVE_FIELD macro
     IRResultType result;                             // Required by IR_GIVE_FIELD macro
 
     TrabBone3D :: initializeFrom(ir);

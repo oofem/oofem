@@ -45,18 +45,16 @@ MMAContainingElementProjection :: MMAContainingElementProjection() : MaterialMap
 { }
 
 void
-MMAContainingElementProjection :: __init(Domain *dold, IntArray &type, FloatArray &coords, int region, TimeStep *tStep, bool iCohesiveZoneGP)
+MMAContainingElementProjection :: __init(Domain *dold, IntArray &type, FloatArray &coords, Set &elemSet, TimeStep *tStep, bool iCohesiveZoneGP)
 {
     SpatialLocalizer *sl = dold->giveSpatialLocalizer();
-    IntArray regionList(1);
-    regionList.at(1) = region;
     GaussPoint *jGp;
     FloatArray jGpCoords;
     double distance, minDist = 1.e6;
     IntegrationRule *iRule;
     Element *srcElem;
 
-    if ( ( srcElem = sl->giveElementContainingPoint(coords, & regionList) ) ) {
+    if ( ( srcElem = sl->giveElementContainingPoint(coords, elemSet) ) ) {
         iRule = srcElem->giveDefaultIntegrationRulePtr();
 
         this->source = NULL;
@@ -72,10 +70,10 @@ MMAContainingElementProjection :: __init(Domain *dold, IntArray &type, FloatArra
         }
 
         if ( !source ) {
-            OOFEM_ERROR("MMAContainingElementProjection::__init : no suitable source found");
+            OOFEM_ERROR("no suitable source found");
         }
     } else {
-        OOFEM_ERROR("MMAContainingElementProjection: No suitable element found");
+        OOFEM_ERROR("No suitable element found");
     }
 }
 
@@ -94,7 +92,7 @@ MMAContainingElementProjection :: __mapVariable(FloatArray &answer, FloatArray &
 int
 MMAContainingElementProjection :: mapStatus(MaterialStatus &oStatus) const
 {
-    OOFEM_ERROR("ERROR: MMAContainingElementProjection :: mapStatus() is not implemented yet.")
+    OOFEM_ERROR("mapStatus() is not implemented yet.")
 
     return 0;
 }

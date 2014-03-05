@@ -101,27 +101,27 @@ public:
     virtual IRResultType initializeFrom(InputRecord *ir);
 
     virtual void boundaryEdgeGiveNodes(IntArray &answer, int boundary)
-    { OOFEM_ERROR("FEInterpolation1d :: boundaryEdge... - Functions not supported for this interpolator."); }
+    { OOFEM_ERROR("Functions not supported for this interpolator."); }
     virtual void boundaryEdgeEvalN(FloatArray &answer, int boundary, const FloatArray &lcoords, const FEICellGeometry &cellgeo)
-    { OOFEM_ERROR("FEInterpolation1d :: boundaryEdge... - Functions not supported for this interpolator."); }
+    { OOFEM_ERROR("Functions not supported for this interpolator."); }
     virtual double boundaryEdgeGiveTransformationJacobian(int boundary, const FloatArray &lcoords, const FEICellGeometry &cellgeo)
-    { OOFEM_ERROR("FEInterpolation1d :: boundaryEdge... - Functions not supported for this interpolator.");
+    { OOFEM_ERROR("Functions not supported for this interpolator.");
       return 0.; }
     virtual void boundaryEdgeLocal2Global(FloatArray &answer, int boundary, const FloatArray &lcoords, const FEICellGeometry &cellgeo)
-    { OOFEM_ERROR("FEInterpolation1d :: boundaryEdge... - Functions not supported for this interpolator."); }
+    { OOFEM_ERROR("Functions not supported for this interpolator."); }
 
     virtual void boundaryGiveNodes(IntArray &answer, int boundary)
-    { OOFEM_ERROR("BSplineInterpolation :: boundaryGiveNodes - Not implemented"); }
+    { OOFEM_ERROR("Not implemented"); }
     virtual void boundaryEvalN(FloatArray &answer, int boundary, const FloatArray &lcoords, const FEICellGeometry &cellgeo)
-    { OOFEM_ERROR("BSplineInterpolation :: boundaryEvalN - Not implemented"); }
+    { OOFEM_ERROR("Not implemented"); }
     virtual double boundaryEvalNormal(FloatArray &answer, int boundary, const FloatArray &lcoords, const FEICellGeometry &cellgeo)
-    { OOFEM_ERROR("BSplineInterpolation :: boundaryEvalNormal - Not implemented");
+    { OOFEM_ERROR("Not implemented");
       return 0.; }
     virtual double boundaryGiveTransformationJacobian(int boundary, const FloatArray &lcoords, const FEICellGeometry &cellgeo)
-    { OOFEM_ERROR("BSplineInterpolation :: boundaryGiveTransformationJacobian - Not implemented");
+    { OOFEM_ERROR("boundaryGiveTransformationJacobian - Not implemented");
       return 0.; }
     virtual void boundaryLocal2Global(FloatArray &answer, int boundary, const FloatArray &lcoords, const FEICellGeometry &cellgeo)
-    { OOFEM_ERROR("BSplineInterpolation :: boundaryLocal2Global - Not implemented"); }
+    { OOFEM_ERROR("boundaryLocal2Global - Not implemented"); }
 
 
     virtual int giveNumberOfKnotSpans(int dim) { return numberOfKnotSpans [ dim - 1 ]; }
@@ -135,7 +135,7 @@ public:
     virtual double evaldNdx(FloatMatrix &answer, const FloatArray &lcoords, const FEICellGeometry &cellgeo);
     virtual void local2global(FloatArray &answer, const FloatArray &lcoords, const FEICellGeometry &cellgeo);
     virtual int global2local(FloatArray &answer, const FloatArray &lcoords, const FEICellGeometry &cellgeo) {
-        OOFEM_ERROR("BSplineInterpolation :: global2local - Not yet implemented.");
+        OOFEM_ERROR("Not yet implemented.");
         return 0;
     }
     virtual double giveTransformationJacobian(const FloatArray &lcoords, const FEICellGeometry &cellgeo);
@@ -146,13 +146,13 @@ public:
     virtual bool hasSubPatchFormulation() { return true; }
 
     virtual IntegrationRule *giveIntegrationRule(int order)
-    { OOFEM_ERROR("BSplineInterpolation :: giveIntegrationRule - Not supported.");
+    { OOFEM_ERROR("Not supported.");
       return NULL; }
     virtual IntegrationRule *giveBoundaryIntegrationRule(int order, int boundary)
-    { OOFEM_ERROR("BSplineInterpolation :: giveIntegrationRule - Not supported.");
+    { OOFEM_ERROR("Not supported.");
       return NULL; }
     virtual IntegrationRule *giveBoundaryEdgeIntegrationRule(int order, int boundary)
-    { OOFEM_ERROR("BSplineInterpolation :: giveIntegrationRule - Not supported.");
+    { OOFEM_ERROR("Not supported.");
       return NULL; }
 
 protected:

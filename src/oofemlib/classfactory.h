@@ -95,27 +95,27 @@ class FailureCriteriaStatus;
 class FailureCriteria;
 
 // Templates to wrap constructors into functions
-template< typename T >Element *elemCreator(int n, Domain *d) { return new T(n, d); }
-template< typename T >DofManager *dofmanCreator(int n, Domain *d) { return new T(n, d); }
-template< typename T >GeneralBoundaryCondition *bcCreator(int n, Domain *d) { return new T(n, d); }
-template< typename T >CrossSection *csCreator(int n, Domain *d) { return new T(n, d); }
-template< typename T >Material *matCreator(int n, Domain *d) { return new T(n, d); }
-template< typename T >EngngModel *engngCreator(int n, EngngModel *m) { return ( new T(n, m) ); }
-template< typename T >Function *funcCreator(int n, Domain *d) { return new T(n, d); }
-template< typename T >NonlocalBarrier *nlbCreator(int n, Domain *d) { return new T(n, d); }
-template< typename T >RandomFieldGenerator *rfgCreator(int n, Domain *d) { return new T(n, d); }
-template< typename T >ExportModule *exportCreator(int n, EngngModel *e) { return ( new T(n, e) ); }
-template< typename T >SparseNonLinearSystemNM *nonlinCreator(Domain *d, EngngModel *m) { return ( new T(d, m) ); }
-template< typename T >InitModule *initCreator(int n, EngngModel *e) { return ( new T(n, e) ); }
-template< typename T >TopologyDescription *topologyCreator(Domain *d) { return new T(d); }
+template< typename T > Element *elemCreator(int n, Domain *d) { return new T(n, d); }
+template< typename T > DofManager *dofmanCreator(int n, Domain *d) { return new T(n, d); }
+template< typename T > GeneralBoundaryCondition *bcCreator(int n, Domain *d) { return new T(n, d); }
+template< typename T > CrossSection *csCreator(int n, Domain *d) { return new T(n, d); }
+template< typename T > Material *matCreator(int n, Domain *d) { return new T(n, d); }
+template< typename T > EngngModel *engngCreator(int n, EngngModel *m) { return ( new T(n, m) ); }
+template< typename T > Function *funcCreator(int n, Domain *d) { return new T(n, d); }
+template< typename T > NonlocalBarrier *nlbCreator(int n, Domain *d) { return new T(n, d); }
+template< typename T > RandomFieldGenerator *rfgCreator(int n, Domain *d) { return new T(n, d); }
+template< typename T > ExportModule *exportCreator(int n, EngngModel *e) { return ( new T(n, e) ); }
+template< typename T > SparseNonLinearSystemNM *nonlinCreator(Domain *d, EngngModel *m) { return ( new T(d, m) ); }
+template< typename T > InitModule *initCreator(int n, EngngModel *e) { return ( new T(n, e) ); }
+template< typename T > TopologyDescription *topologyCreator(Domain *d) { return new T(d); }
 
-template< typename T >Dof *dofCreator(int n, DofManager *dman) { return new T(n, dman); }
-template< typename T >SparseMtrx *sparseMtrxCreator() { return new T(); }
-template< typename T >SparseLinearSystemNM *sparseLinSolCreator(Domain *d, EngngModel *m) { return new T(d, m); }
-template< typename T >ErrorEstimator *errEstCreator(int n, Domain *d) { return new T(n, d); }
+template< typename T > Dof *dofCreator(int n, DofManager *dman) { return new T(n, dman); }
+template< typename T > SparseMtrx *sparseMtrxCreator() { return new T(); }
+template< typename T > SparseLinearSystemNM *sparseLinSolCreator(Domain *d, EngngModel *m) { return new T(d, m); }
+template< typename T > ErrorEstimator *errEstCreator(int n, Domain *d) { return new T(n, d); }
 
-template< typename T >LoadBalancer *loadBalancerCreator(Domain *d) { return new T(d); }
-template< typename T >LoadBalancerMonitor *loadMonitorCreator(EngngModel *e) { return new T(e); }
+template< typename T > LoadBalancer *loadBalancerCreator(Domain *d) { return new T(d); }
+template< typename T > LoadBalancerMonitor *loadMonitorCreator(EngngModel *e) { return new T(e); }
 
 // XFEM stuff
 template< typename T > EnrichmentItem *enrichItemCreator(int n, XfemManager *x, Domain *d) { return new T(n, x, d); }
@@ -131,21 +131,21 @@ template< typename T > FailureCriteriaStatus *failureCriteriaCreator(int n, Fail
 
 ///@name Macros for registering new components. Unique dummy variables must be created as a result (design flaw in C++).
 //@{
-#define REGISTER_Element(class ) static bool __dummy_ ## class = GiveClassFactory().registerElement(_IFT_ ## class ## _Name, elemCreator< class > );
-#define REGISTER_DofManager(class ) static bool __dummy_ ## class = GiveClassFactory().registerDofManager(_IFT_ ## class ## _Name, dofmanCreator< class > );
-#define REGISTER_BoundaryCondition(class ) static bool __dummy_ ## class = GiveClassFactory().registerBoundaryCondition(_IFT_ ## class ## _Name, bcCreator< class > );
-#define REGISTER_CrossSection(class ) static bool __dummy_ ## class = GiveClassFactory().registerCrossSection(_IFT_ ## class ## _Name, csCreator< class > );
-#define REGISTER_Material(class ) static bool __dummy_ ## class = GiveClassFactory().registerMaterial(_IFT_ ## class ## _Name, matCreator< class > );
-#define REGISTER_EngngModel(class ) static bool __dummy_ ## class = GiveClassFactory().registerEngngModel(_IFT_ ## class ## _Name, engngCreator< class > );
-#define REGISTER_Function(class ) static bool __dummy_ ## class = GiveClassFactory().registerFunction(_IFT_ ## class ## _Name, funcCreator< class > );
-#define REGISTER_NonlocalBarrier(class ) static bool __dummy_ ## class = GiveClassFactory().registerNonlocalBarrier(_IFT_ ## class ## _Name, nlbCreator< class > );
-#define REGISTER_RandomFieldGenerator(class ) static bool __dummy_ ## class = GiveClassFactory().registerRandomFieldGenerator(_IFT_ ## class ## _Name, rfgCreator< class > );
-#define REGISTER_ExportModule(class ) static bool __dummy_ ## class = GiveClassFactory().registerExportModule(_IFT_ ## class ## _Name, exportCreator< class > );
-#define REGISTER_SparseNonLinearSystemNM(class ) static bool __dummy_ ## class = GiveClassFactory().registerSparseNonLinearSystemNM(_IFT_ ## class ## _Name, nonlinCreator< class > );
-#define REGISTER_InitModule(class ) static bool __dummy_ ## class = GiveClassFactory().registerInitModule(_IFT_ ## class ## _Name, initCreator< class > );
-#define REGISTER_TopologyDescription(class ) static bool __dummy_ ## class = GiveClassFactory().registerTopologyDescription(_IFT_ ## class ## _Name, topologyCreator< class > );
-#define REGISTER_LoadMonitor(class ) static bool __dummy_ ## class = GiveClassFactory().registerLoadMonitor(_IFT_ ## class ## _Name, loadMonitorCreator< class > );
-#define REGISTER_LoadBalancer(class ) static bool __dummy_ ## class = GiveClassFactory().registerLoadBalancer(_IFT_ ## class ## _Name, loadBalancerCreator< class > );
+#define REGISTER_Element(class) static bool __dummy_ ## class = GiveClassFactory().registerElement(_IFT_ ## class ## _Name, elemCreator< class > );
+#define REGISTER_DofManager(class) static bool __dummy_ ## class = GiveClassFactory().registerDofManager(_IFT_ ## class ## _Name, dofmanCreator< class > );
+#define REGISTER_BoundaryCondition(class) static bool __dummy_ ## class = GiveClassFactory().registerBoundaryCondition(_IFT_ ## class ## _Name, bcCreator< class > );
+#define REGISTER_CrossSection(class) static bool __dummy_ ## class = GiveClassFactory().registerCrossSection(_IFT_ ## class ## _Name, csCreator< class > );
+#define REGISTER_Material(class) static bool __dummy_ ## class = GiveClassFactory().registerMaterial(_IFT_ ## class ## _Name, matCreator< class > );
+#define REGISTER_EngngModel(class) static bool __dummy_ ## class = GiveClassFactory().registerEngngModel(_IFT_ ## class ## _Name, engngCreator< class > );
+#define REGISTER_Function(class) static bool __dummy_ ## class = GiveClassFactory().registerFunction(_IFT_ ## class ## _Name, funcCreator< class > );
+#define REGISTER_NonlocalBarrier(class) static bool __dummy_ ## class = GiveClassFactory().registerNonlocalBarrier(_IFT_ ## class ## _Name, nlbCreator< class > );
+#define REGISTER_RandomFieldGenerator(class) static bool __dummy_ ## class = GiveClassFactory().registerRandomFieldGenerator(_IFT_ ## class ## _Name, rfgCreator< class > );
+#define REGISTER_ExportModule(class) static bool __dummy_ ## class = GiveClassFactory().registerExportModule(_IFT_ ## class ## _Name, exportCreator< class > );
+#define REGISTER_SparseNonLinearSystemNM(class) static bool __dummy_ ## class = GiveClassFactory().registerSparseNonLinearSystemNM(_IFT_ ## class ## _Name, nonlinCreator< class > );
+#define REGISTER_InitModule(class) static bool __dummy_ ## class = GiveClassFactory().registerInitModule(_IFT_ ## class ## _Name, initCreator< class > );
+#define REGISTER_TopologyDescription(class) static bool __dummy_ ## class = GiveClassFactory().registerTopologyDescription(_IFT_ ## class ## _Name, topologyCreator< class > );
+#define REGISTER_LoadMonitor(class) static bool __dummy_ ## class = GiveClassFactory().registerLoadMonitor(_IFT_ ## class ## _Name, loadMonitorCreator< class > );
+#define REGISTER_LoadBalancer(class) static bool __dummy_ ## class = GiveClassFactory().registerLoadBalancer(_IFT_ ## class ## _Name, loadBalancerCreator< class > );
 
 // These should be converted to use strings.
 #define REGISTER_SparseMtrx(class, type) static bool __dummy_ ## class = GiveClassFactory().registerSparseMtrx(type, sparseMtrxCreator< class > );
@@ -185,9 +185,9 @@ private:
     /// Associative container containing material creators with material name as key.
     std :: map < std :: string, Material * ( * )(int, Domain *) > matList;
     /// Associative container containing engng model creators with engng model name as key.
-    std :: map< std :: string, EngngModel * ( * )( int, EngngModel * ) >engngList;
+    std :: map < std :: string, EngngModel * ( * )(int, EngngModel *) > engngList;
     /// Associative container containing load time function creators with function name as key.
-    std :: map< std :: string, Function * ( * )( int, Domain * ) >funcList;
+    std :: map < std :: string, Function * ( * )(int, Domain *) > funcList;
     /// Associative container containing nonlocal barriers creators with barrier name as key.
     std :: map < std :: string, NonlocalBarrier * ( * )(int, Domain *) > nlbList;
     /// Associative container containing random field generator creators with names as key.
@@ -329,7 +329,7 @@ public:
      * Registers a new load time function in the class factory.
      * @param name Keyword string.
      */
-    bool registerFunction( const char *name, Function * ( * creator )( int, Domain * ) );
+    bool registerFunction( const char *name, Function * ( *creator )( int, Domain * ) );
     /**
      * Creates new instance of nonlocal barrier corresponding to given keyword.
      * @param name Keyword string determining the type of new instance.

@@ -43,6 +43,10 @@
 #include "mathfem.h"
 #include "classfactory.h"
 
+#ifdef __OOFEG
+ #include "oofeggraphiccontext.h"
+#endif
+
 namespace oofem {
 REGISTER_Element(QPlaneStress2d);
 

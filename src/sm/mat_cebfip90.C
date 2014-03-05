@@ -77,7 +77,7 @@ CebFipSlip90Material :: give3dMaterialStiffnessMatrix(FloatMatrix &answer,
 // computes full constitutive matrix for case of gp stress-strain state.
 //
 {
-    _error("give3dMaterialStiffnessMatrix: not implemented");
+    OOFEM_ERROR("not implemented");
 }
 
 
@@ -168,7 +168,7 @@ CebFipSlip90Material :: give1dInterfaceMaterialStiffnessMatrix(FloatMatrix &answ
     } else if ( rMode == TangentStiffness ) {
         answer.at(1, 1) = computeBondForceStiffness( status->giveTempKappa() );
     }  else {
-        _error2( "give2dInterfaceMaterialStiffnessMatrix: unknown MatResponseMode (%s)", __MatResponseModeToString(rMode) );
+        OOFEM_ERROR("unknown MatResponseMode (%s)", __MatResponseModeToString(rMode) );
     }
 }
 
@@ -197,7 +197,6 @@ CebFipSlip90Material :: giveThermalDilatationVector(FloatArray &answer,
 IRResultType
 CebFipSlip90Material :: initializeFrom(InputRecord *ir)
 {
-    const char *__proc = "initializeFrom"; // Required by IR_GIVE_FIELD macro
     IRResultType result;                // Required by IR_GIVE_FIELD macro
 
     IR_GIVE_FIELD(ir, tmax, _IFT_CebFipSlip90Material_tmax);

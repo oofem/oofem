@@ -128,7 +128,7 @@ void Tr1BubbleStokes :: giveCharacteristicVector(FloatArray &answer, CharType mt
     } else if ( mtrx == InternalForcesVector ) {
         this->computeInternalForcesVector(answer, tStep);
     } else {
-        OOFEM_ERROR("giveCharacteristicVector: Unknown Type of characteristic mtrx.");
+        OOFEM_ERROR("Unknown Type of characteristic mtrx.");
     }
 }
 
@@ -138,7 +138,7 @@ void Tr1BubbleStokes :: giveCharacteristicMatrix(FloatMatrix &answer,
     if ( mtrx == StiffnessMatrix ) {
         this->computeStiffnessMatrix(answer, tStep);
     } else {
-        OOFEM_ERROR("giveCharacteristicMatrix: Unknown Type of characteristic mtrx.");
+        OOFEM_ERROR("Unknown Type of characteristic mtrx.");
     }
 }
 
@@ -307,7 +307,7 @@ void Tr1BubbleStokes :: computeBoundaryLoadVector(FloatArray &answer, BoundaryLo
         answer.zero();
         answer.assemble(f, this->edge_ordering [ iEdge - 1 ]);
     } else {
-        OOFEM_ERROR("Tr1BubbleStokes :: computeEdgeBCSubVectorAt - Strange boundary condition type");
+        OOFEM_ERROR("Strange boundary condition type");
     }
 }
 

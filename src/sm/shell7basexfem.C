@@ -147,7 +147,6 @@ Shell7BaseXFEM :: computeFailureCriteriaQuantities(FailureCriteriaStatus *fcStat
 
 IRResultType Shell7BaseXFEM :: initializeFrom(InputRecord *ir)
 {
-    //const char *__proc = "initializeFrom"; // Required by IR_GIVE_FIELD macro
     //IRResultType result;                   // Required by IR_GIVE_FIELD macro
 
     // old, to be removed
@@ -174,7 +173,7 @@ Interface
     if ( it != XfemElementInterfaceType ) {
         return Shell7Base :: giveInterface(it);
     } else if ( it == XfemElementInterfaceType ) {
-        return static_cast< XfemElementInterface * >( this );
+        return static_cast< XfemElementInterface * >(this);
     } else {
         return Shell7Base :: giveInterface(it); ///@todo remove
     }
@@ -1110,7 +1109,7 @@ Shell7BaseXFEM :: computeEdgeLoadVectorAt(FloatArray &answer, Load *load, int iE
         }
         return;
     } else {
-        _error("Shell7BaseXFEM :: computeEdgeLoadVectorAt: load type not supported");
+        OOFEM_ERROR("load type not supported");
         return;
     }
 }
@@ -1165,7 +1164,7 @@ Shell7BaseXFEM :: computeSurfaceLoadVectorAt(FloatArray &answer, Load *load,
 #endif
         return;
     } else {
-        _error("Shell7Base :: computeSurfaceLoadVectorAt: load type not supported");
+        OOFEM_ERROR("load type not supported");
         return;
     }
 }
