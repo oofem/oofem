@@ -313,8 +313,8 @@ AnisotropicDamageMaterial :: computeEquivalentStrain(double &kappa, const FloatA
 
         kappa = sqrt(posNorm);
     } else  {
-        _error("computeEquivalentStrain: unknown EquivStrainType");
-    }
+          OOFEM_ERROR("Unknown equivStrainType %d", this->equivStrainType);
+   }
     /*
      *  if ( this->equivStrainType == EST_Mazars ) {
      *      double posNorm = 0.0;
@@ -1715,10 +1715,6 @@ AnisotropicDamageMaterialStatus :: saveContext(DataStream *stream, ContextMode m
     ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
     contextIOResultType iores;
-
-    if ( stream == NULL ) {
-        _error("saveContext : can't write into NULL stream");
-    }
 
     // save parent class status
     if ( ( iores = StructuralMaterialStatus :: saveContext(stream, mode, obj) ) != CIO_OK ) {
