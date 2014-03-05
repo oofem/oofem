@@ -101,6 +101,9 @@ FiberedCrossSection :: giveStiffnessMatrix_1d(FloatMatrix &answer, MatResponseMo
     OOFEM_ERROR("Not supported\n");
 }
 
+
+
+
 void
 FiberedCrossSection :: giveGeneralizedStress_Beam2d(FloatArray &answer, GaussPoint *gp, const FloatArray &strain, TimeStep *tStep)
 {
@@ -183,6 +186,11 @@ FiberedCrossSection :: giveGeneralizedStress_MembraneRot(FloatArray &answer, Gau
     OOFEM_ERROR("Not supported in given cross-section (yet).");
 }
 
+void
+FiberedCrossSection :: giveGeneralizedStress_PlateSubSoil(FloatArray &answer, GaussPoint *gp, const FloatArray &strain, TimeStep *tStep)
+{
+  OOFEM_ERROR("Not supported in given cross-section.");
+}
 
 void
 FiberedCrossSection :: giveCharMaterialStiffnessMatrix(FloatMatrix &answer,
@@ -294,12 +302,18 @@ FiberedCrossSection :: give3dShellStiffMtrx(FloatMatrix &answer, MatResponseMode
     OOFEM_ERROR("Not implemented\n");
 }
 
-
 void
 FiberedCrossSection :: giveMembraneRotStiffMtrx(FloatMatrix &answer, MatResponseMode rMode, GaussPoint *gp, TimeStep *tStep)
 {
     OOFEM_ERROR("Not implemented\n");
 }
+
+void
+FiberedCrossSection :: give2dPlateSubSoilStiffMtrx(FloatMatrix &answer, MatResponseMode rMode, GaussPoint *gp, TimeStep *tStep)
+{
+     OOFEM_ERROR("Not supported\n");
+}
+
 
 
 FloatArray *

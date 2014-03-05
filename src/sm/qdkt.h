@@ -80,7 +80,7 @@ public:
 
     virtual MaterialMode giveMaterialMode()  { return _2dPlate; }
     virtual int giveApproxOrder() { return 1; }
-    virtual int testElementExtension(ElementExtension ext) { return ( ( ext == Element_EdgeLoadSupport ) ? 1 : 0 ); }
+    virtual int testElementExtension(ElementExtension ext) { return ( ( ( ext == Element_EdgeLoadSupport ) || ( ext == Element_SurfaceLoadSupport ) ) ? 1 : 0 ); }
 
 protected:
     virtual void computeGaussPoints();
@@ -96,16 +96,31 @@ protected:
                                      double *z = NULL);
 
     virtual void computeBodyLoadVectorAt(FloatArray &answer, Load *forLoad, TimeStep *tStep, ValueModeType mode);
+
+    /**
+     * @name Surface load support
+     */
+    //@{
+    virtual void computeSurfaceNMatrixAt(FloatMatrix &answer, int iSurf, GaussPoint *gp);
+    virtual void giveSurfaceDofMapping(IntArray &answer, int iSurf) const;
+    virtual IntegrationRule *GetSurfaceIntegrationRule(int iSurf);
+    virtual double computeSurfaceVolumeAround(GaussPoint *gp, int iSurf);
+    virtual void computeSurfIpGlobalCoords(FloatArray &answer, GaussPoint *gp, int iSurf);
+    virtual int computeLoadLSToLRotationMatrix(FloatMatrix &answer, int iSurf, GaussPoint *gp);
+    //@}
+    /**
+     * @name Edge load support
+     */
+    //@{
     virtual void computeEgdeNMatrixAt(FloatMatrix &answer, int iedge, GaussPoint *gp);
-    //virtual void computeSurfaceNMatrixAt(FloatMatrix &answer, GaussPoint *gp) { answer.clear(); }
     virtual void giveEdgeDofMapping(IntArray &answer, int iEdge) const;
-    //virtual void giveSurfaceDofMapping(IntArray &answer, int iSurf) const { answer.clear(); }
-    //virtual IntegrationRule *GetSurfaceIntegrationRule(int i) { return NULL; }
     virtual double computeEdgeVolumeAround(GaussPoint *gp, int iEdge);
-    //virtual double computeSurfaceVolumeAround(GaussPoint *gp, int iSurf) { return 0.; }
     virtual void computeEdgeIpGlobalCoords(FloatArray &answer, GaussPoint *gp, int iEdge);
-    //virtual void computeSurfIpGlobalCoords(FloatArray &answer, GaussPoint *gp, int iSurf) { answer.clear(); }
     virtual int computeLoadLEToLRotationMatrix(FloatMatrix &answer, int iEdge, GaussPoint *gp);
+     //@}
+
+
+
 
 public:
     // definition & identification

@@ -49,6 +49,7 @@ set (sm_element
     qtrplanestrain.C qtrplanestraingrad.C
     qspacegrad.C
     dkt.C qdkt.C
+    quad1platesubsoil.C
     )
 
 set (sm_crosssection
@@ -133,6 +134,7 @@ set (sm_material
 	InterfaceMaterials/intmatdummycz.C
     simplevitrificationmaterial.C
     anisodamagemodel.C
+    winklerpasternak.C
     )
 
 set (sm_error

@@ -112,6 +112,10 @@ SimpleCrossSection :: giveStiffnessMatrix_1d(FloatMatrix &answer, MatResponseMod
 void
 SimpleCrossSection :: giveGeneralizedStress_Beam2d(FloatArray &answer, GaussPoint *gp, const FloatArray &strain, TimeStep *tStep)
 {
+  /**Note: (by bp): This assumes that the behaviour is elastic
+     there exist a nuumber of nonlinear integral material models for beams defined directly in terms of integral forces and moments and corresponding 
+     deformations and curvatures. This would require to implement support at material model level.
+  */
     StructuralMaterial *mat = static_cast< StructuralMaterial * >( this->giveMaterial(gp) );
     FloatArray elasticStrain, et, e0;
     FloatMatrix tangent;
@@ -136,6 +140,10 @@ SimpleCrossSection :: giveGeneralizedStress_Beam2d(FloatArray &answer, GaussPoin
 void
 SimpleCrossSection :: giveGeneralizedStress_Beam3d(FloatArray &answer, GaussPoint *gp, const FloatArray &strain, TimeStep *tStep)
 {
+  /**Note: (by bp): This assumes that the behaviour is elastic
+     there exist a nuumber of nonlinear integral material models for beams defined directly in terms of integral forces and moments and corresponding 
+     deformations and curvatures. This would require to implement support at material model level.
+  */
     StructuralMaterial *mat = static_cast< StructuralMaterial * >( this->giveMaterial(gp) );
     FloatArray elasticStrain, et, e0;
     FloatMatrix tangent;
@@ -164,7 +172,12 @@ SimpleCrossSection :: giveGeneralizedStress_Beam3d(FloatArray &answer, GaussPoin
 void
 SimpleCrossSection :: giveGeneralizedStress_Plate(FloatArray &answer, GaussPoint *gp, const FloatArray &strain, TimeStep *tStep)
 {
-    StructuralMaterial *mat = static_cast< StructuralMaterial * >( this->giveMaterial(gp) );
+  /**Note: (by bp): This assumes that the behaviour is elastic
+     there exist a nuumber of nonlinear integral material models for beams/plates/shells
+     defined directly in terms of integral forces and moments and corresponding 
+     deformations and curvatures. This would require to implement support at material model level.
+  */
+   StructuralMaterial *mat = static_cast< StructuralMaterial * >( this->giveMaterial(gp) );
     FloatArray elasticStrain, et, e0;
     FloatMatrix tangent;
     elasticStrain = strain;
@@ -188,6 +201,11 @@ SimpleCrossSection :: giveGeneralizedStress_Plate(FloatArray &answer, GaussPoint
 void
 SimpleCrossSection :: giveGeneralizedStress_Shell(FloatArray &answer, GaussPoint *gp, const FloatArray &strain, TimeStep *tStep)
 {
+  /**Note: (by bp): This assumes that the behaviour is elastic
+     there exist a nuumber of nonlinear integral material models for beams/plates/shells
+     defined directly in terms of integral forces and moments and corresponding 
+     deformations and curvatures. This would require to implement support at material model level.
+  */
     StructuralMaterial *mat = static_cast< StructuralMaterial * >( this->giveMaterial(gp) );
     FloatArray elasticStrain, et, e0;
     FloatMatrix tangent;
@@ -226,7 +244,14 @@ SimpleCrossSection :: giveGeneralizedStress_MembraneRot(FloatArray &answer, Gaus
     ///@todo We should support nonlinear behavior for the membrane part. In fact, should be even bundle the rotation part with the membrane?
     /// We gain nothing from this design anyway as the rotation field is always separate. Separate manual integration by the element would be an option.
 }
-
+  
+void 
+SimpleCrossSection :: giveGeneralizedStress_PlateSubSoil(FloatArray &answer, GaussPoint *gp, const FloatArray &generalizedStrain, TimeStep *tStep)
+{
+  StructuralMaterial *mat = static_cast< StructuralMaterial * >( this->giveMaterial(gp) );
+  return mat->giveRealStressVector_2dPlateSubSoil (answer, gp, generalizedStrain, tStep);
+}
+  
 
 void
 SimpleCrossSection :: giveCharMaterialStiffnessMatrix(FloatMatrix &answer, MatResponseMode rMode, GaussPoint *gp, TimeStep *tStep)
@@ -382,6 +407,15 @@ SimpleCrossSection :: giveMembraneRotStiffMtrx(FloatMatrix &answer, MatResponseM
     answer.resizeWithData(4, 4);
     answer.at(4, 4) = this->give(CS_DrillingStiffness, gp);
 }
+
+void
+SimpleCrossSection :: give2dPlateSubSoilStiffMtrx(FloatMatrix &answer, MatResponseMode rMode, GaussPoint *gp, TimeStep *tStep)
+{
+    StructuralMaterial *mat;
+    mat = dynamic_cast< StructuralMaterial * >( this->giveMaterial(gp) );
+    mat->give2dPlateSubSoilStiffMtrx(answer, ElasticStiffness, gp, tStep);
+}
+
 
 
 IRResultType
