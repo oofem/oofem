@@ -1742,28 +1742,7 @@ EngngModel :: giveOutputStream()
 // Returns an output stream on the data file of the receiver.
 {
     if ( !outputStream ) {
-#ifdef _WIN32 //_MSC_VER and __MINGW32__ included
-        char *tmp = tmpnam(NULL);
-        OOFEM_WARNING("using default output stream %s", tmp);
-        outputStream = fopen(tmp, "w");
-#else
-        char sfn[] = "oofem.out.XXXXXX";
-        int fd = -1;
-        FILE *sfp;
-
-        if ( ( fd = mkstemp(sfn) ) == -1 ||
-            ( sfp = fdopen(fd, "w+") ) == NULL ) {
-            if ( fd != -1 ) {
-                unlink(sfn);
-                close(fd);
-            }
-
-            OOFEM_ERROR("Failed to create temporary file %s\n", sfn);
-            return ( NULL );
-        }
-
-        outputStream = sfp;
-#endif
+        OOFEM_ERROR("No output stream opened!");
     }
 
     return outputStream;
