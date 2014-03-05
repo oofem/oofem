@@ -1707,9 +1707,9 @@ Shell7BaseXFEM :: giveDisUnknownsAt(FloatArray &lcoords, EnrichmentItem *ei, Flo
 void
 Shell7BaseXFEM :: giveCompositeExportData(std::vector< VTKPiece > &vtkPieces, IntArray &primaryVarsToExport, IntArray &internalVarsToExport, IntArray cellVarsToExport, TimeStep *tStep )
 {
-    vtkPieces.resize(1);
+    vtkPieces.resize(2);
     this->giveShellExportData(vtkPieces[0], primaryVarsToExport, internalVarsToExport, cellVarsToExport, tStep );
-    //this->giveCZExportData(vtkPieces[1], primaryVarsToExport, internalVarsToExport, cellVarsToExport, tStep );
+    this->giveCZExportData(vtkPieces[1], primaryVarsToExport, internalVarsToExport, cellVarsToExport, tStep );
     
 }
 
@@ -1975,6 +1975,33 @@ Shell7BaseXFEM :: giveFictiousNodeCoordsForExport(std::vector<FloatArray> &nodes
 
 
 void 
+Shell7BaseXFEM :: giveFictiousCZNodeCoordsForExport(std::vector<FloatArray> &nodes, int layer, int subCell)
+{
+
+    // compute fictious node coords
+    FloatArray nodeLocalXi1Coords, nodeLocalXi2Coords, nodeLocalXi3Coords;
+    FloatMatrix localNodeCoords;
+    // need to return local coordinates corresponding to the nodes of the sub triangles
+    giveLocalCZNodeCoordsForExport(nodeLocalXi1Coords, nodeLocalXi2Coords, nodeLocalXi3Coords, subCell, localNodeCoords);
+
+    //this->interpolationForExport.giveLocalNodeCoords(localNodeCoords);
+
+    nodes.resize(localNodeCoords.giveNumberOfColumns());
+    for ( int i = 1; i <= localNodeCoords.giveNumberOfColumns(); i++ ){
+        FloatArray coords, localCoords(3);
+        localCoords.at(1) = nodeLocalXi1Coords.at(i);
+        localCoords.at(2) = nodeLocalXi2Coords.at(i);
+        localCoords.at(3) = nodeLocalXi3Coords.at(i);
+        localCoords.beColumnOf(localNodeCoords,i);
+
+        this->vtkEvalInitialGlobalCoordinateAt(localCoords, layer, coords);
+        nodes[i-1].resize(3); 
+        nodes[i-1] = coords;
+    }
+
+}
+
+void 
 Shell7BaseXFEM :: giveFictiousUpdatedNodeCoordsForExport(std::vector<FloatArray> &nodes, int layer, TimeStep *tStep, int subCell)
 {
     // compute fictious node coords
@@ -2023,7 +2050,7 @@ Shell7BaseXFEM :: giveFictiousUpdatedCZNodeCoordsForExport(std::vector<FloatArra
         // must get local z-coord in terms of the total thickness not layerwise
         
     } else {
-        giveLocalNodeCoordsForExport(nodeLocalXi1Coords, nodeLocalXi2Coords, nodeLocalXi3Coords, subCell, localNodeCoords);
+        giveLocalCZNodeCoordsForExport(nodeLocalXi1Coords, nodeLocalXi2Coords, nodeLocalXi3Coords, subCell, localNodeCoords);
     }
     nodes.resize(localNodeCoords.giveNumberOfColumns());
     for ( int i = 1; i <= localNodeCoords.giveNumberOfColumns(); i++ ){
@@ -2068,7 +2095,7 @@ void
 Shell7BaseXFEM :: giveLocalNodeCoordsForExport(FloatArray &nodeLocalXi1Coords, FloatArray &nodeLocalXi2Coords, FloatArray &nodeLocalXi3Coords, int subCell, FloatMatrix &localNodeCoords) 
 {
     // Local coords for a quadratic wedge element - coords for subtriangles
-    double scale = 0.999;
+    double scale = 0.9999;
     double z = 1.0*scale;
 
     // Triangle coordinates
@@ -2112,14 +2139,74 @@ Shell7BaseXFEM :: giveLocalNodeCoordsForExport(FloatArray &nodeLocalXi1Coords, F
     nodeLocalXi2Coords.setValues(15, a, b, c, a, b, c, d, e, f, d, e, f, a, b, c);
 
     nodeLocalXi3Coords.setValues(15, -z, -z, -z,  z,  z,  z, -z, -z, -z,  z,  z,  z, 0., 0., 0.);
-
-    localNodeCoords.resize(3,15);
     
+    FloatMatrix localNodeCoordsT;
+    localNodeCoordsT.resize(15,3);
+    localNodeCoordsT.setColumn(nodeLocalXi1Coords,1);
+    localNodeCoordsT.setColumn(nodeLocalXi2Coords,2);
+    localNodeCoordsT.setColumn(nodeLocalXi3Coords,3);
+    localNodeCoords.beTranspositionOf(localNodeCoordsT);
 
 }
 
 
+void
+Shell7BaseXFEM :: giveLocalCZNodeCoordsForExport(FloatArray &nodeLocalXi1Coords, FloatArray &nodeLocalXi2Coords, FloatArray &nodeLocalXi3Coords, int subCell, FloatMatrix &localNodeCoords) 
+{
+    // Local coords for a quadratic triangle element - coords for subtriangles
+    double scale = 0.999;
+    double z = 1.0*scale;
 
+    // Triangle coordinates
+    FloatArray g1, g2, g3;
+    g1 = this->allTri[subCell-1].giveVertex(1);
+    g2 = this->allTri[subCell-1].giveVertex(2);
+    g3 = this->allTri[subCell-1].giveVertex(3);
+
+    FloatArray gs1, gs2, gs3;
+    // Move the triangle nodes slightly towards the center to avoid numerical problems - controlled by 'scale' 
+    double alpha1 = scale; double alpha2 = (1.0-alpha1)*0.5; double alpha3 = alpha2;
+    gs1 = alpha1*g1 + alpha2*g2 + alpha3*g3;
+    gs2 = alpha2*g1 + alpha1*g2 + alpha3*g3;
+    gs3 = alpha2*g1 + alpha3*g2 + alpha1*g3;
+
+    // Local coordinates for the (scaled) triangle coordinates
+    FloatArray loc1, loc2, loc3;
+    this->computeLocalCoordinates(loc1, gs1);
+    this->computeLocalCoordinates(loc2, gs2);
+    this->computeLocalCoordinates(loc3, gs3);
+
+    // Compute coordinates for the three mid nodes 
+    FloatArray loc12, loc23, loc31;
+    loc12 = 0.5 * (loc1 + loc2);
+    loc23 = 0.5 * (loc2 + loc3);
+    loc31 = 0.5 * (loc3 + loc1);
+    double a = loc1.at(1);
+    double b = loc2.at(1);
+    double c = loc3.at(1);
+    double d = loc12.at(1);
+    double e = loc23.at(1);
+    double f = loc31.at(1);
+    nodeLocalXi1Coords.setValues(6, a, b, c, d, e, f);      
+    
+    a = loc1.at(2);
+    b = loc2.at(2);
+    c = loc3.at(2);
+    d = loc12.at(2);
+    e = loc23.at(2);
+    f = loc31.at(2);
+    nodeLocalXi2Coords.setValues(6, a, b, c, d, e, f);
+
+    nodeLocalXi3Coords.setValues(6, 0., 0., 0., 0., 0., 0.);
+    
+    FloatMatrix localNodeCoordsT;
+    localNodeCoordsT.resize(6,3);
+    localNodeCoordsT.setColumn(nodeLocalXi1Coords,1);
+    localNodeCoordsT.setColumn(nodeLocalXi2Coords,2);
+    localNodeCoordsT.setColumn(nodeLocalXi3Coords,3);
+    localNodeCoords.beTranspositionOf(localNodeCoordsT);
+
+}
 
 void
 Shell7BaseXFEM :: giveCZExportData(VTKPiece &vtkPiece, IntArray &primaryVarsToExport, IntArray &internalVarsToExport, IntArray cellVarsToExport, TimeStep *tStep )
@@ -2156,7 +2243,7 @@ Shell7BaseXFEM :: giveCZExportData(VTKPiece &vtkPiece, IntArray &primaryVarsToEx
             if ( numSubCells == 1 ) {
                 Shell7Base :: giveFictiousCZNodeCoordsForExport(nodeCoords, layer); 
             } else {
-                this->giveFictiousNodeCoordsForExport(nodeCoords, layer, subCell);       
+                this->giveFictiousCZNodeCoordsForExport(nodeCoords, layer, subCell);       
             }
         
             for ( int node = 1; node <= numCellNodes; node++ ) {    
@@ -2203,8 +2290,8 @@ Shell7BaseXFEM :: giveCZExportData(VTKPiece &vtkPiece, IntArray &primaryVarsToEx
                         Shell7Base :: giveFictiousCZNodeCoordsForExport(nodeCoords, layer);
                         this->giveFictiousUpdatedCZNodeCoordsForExport(updatedNodeCoords, layer, tStep, 0);
                     } else {
-                        this->giveFictiousNodeCoordsForExport(nodeCoords, layer, subCell);
-                        this->giveFictiousUpdatedNodeCoordsForExport(updatedNodeCoords, layer, tStep, subCell);
+                        this->giveFictiousCZNodeCoordsForExport(nodeCoords, layer, subCell);
+                        this->giveFictiousUpdatedCZNodeCoordsForExport(updatedNodeCoords, layer, tStep, subCell);
                     }
                     for ( int j = 1; j <= numCellNodes; j++ ) {
                         u = updatedNodeCoords[j-1];
