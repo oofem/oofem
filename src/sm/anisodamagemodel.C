@@ -1416,8 +1416,12 @@ int
 AnisotropicDamageMaterial :: giveIPValue(FloatArray &answer, GaussPoint *aGaussPoint, InternalStateType type, TimeStep *atTime)
 {
 
-	AnisotropicDamageMaterialStatus *status = static_cast< AnisotropicDamageMaterialStatus * >( this->giveStatus(aGaussPoint) );
-    if ( type == IST_DamageTensor ) {
+    AnisotropicDamageMaterialStatus *status = static_cast< AnisotropicDamageMaterialStatus * >( this->giveStatus(aGaussPoint) );
+    if ( type == IST_DamageScalar ) { // returning the trace of the damage tensor
+        answer.resize(1);
+	answer.at(1)=status->giveDamage().at(1,1)+status->giveDamage().at(2,2)+status->giveDamage().at(3,3);
+        return 1;
+    } else if ( type == IST_DamageTensor ) {
         answer.resize(6);
         answer.zero();
 		answer.at(1)=status->giveDamage().at(1,1);
@@ -1434,9 +1438,9 @@ AnisotropicDamageMaterial :: giveIPValue(FloatArray &answer, GaussPoint *aGaussP
         answer.zero();
 //        int checker12=this->checkSymmetry(status->giveDamage());
 		status->giveDamage().jaco_(eVals, eVecs, 20);
-        answer.at(1) = eVals(1);
-		answer.at(2) = eVals(2);
-		answer.at(3) = eVals(3);
+        answer.at(1) = eVals.at(1);
+		answer.at(2) = eVals.at(2);
+		answer.at(3) = eVals.at(3);
         return 1;
     } else if ( type == IST_DamageTensorTemp ) {
         answer.resize(6);
@@ -1455,9 +1459,9 @@ AnisotropicDamageMaterial :: giveIPValue(FloatArray &answer, GaussPoint *aGaussP
         answer.zero();
 //        int checker13=this->checkSymmetry(status->giveTempDamage());
 		status->giveTempDamage().jaco_(eVals, eVecs, 20);
-        answer.at(1) = eVals(1);
-		answer.at(2) = eVals(2);
-		answer.at(3) = eVals(3);
+        answer.at(1) = eVals.at(1);
+		answer.at(2) = eVals.at(2);
+		answer.at(3) = eVals.at(3);
         return 1;
     } else if ( type == IST_MaxEquivalentStrainLevel ) {
         answer.resize(1);
