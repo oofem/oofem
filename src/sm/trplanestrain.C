@@ -445,7 +445,6 @@ TrPlaneStrain :: MMAShapeFunctProjectionInterface_interpolateIntVarAt(FloatArray
                                                                       InternalStateType type, TimeStep *tStep)
 {
     FloatArray n, lcoords;
-    int vals;
 
     if ( ct == MMAShapeFunctProjectionInterface :: coordType_local ) {
         lcoords = coords;
@@ -455,12 +454,11 @@ TrPlaneStrain :: MMAShapeFunctProjectionInterface_interpolateIntVarAt(FloatArray
 
     this->interp.evalN( n, lcoords, FEIElementGeometryWrapper(this) );
 
-    vals = list.at(1)->giveSize();
-    answer.resize(vals);
-
-    for ( int i = 1; i <= vals; i++ ) {
-        answer.at(i) = n.at(1) * list.at(1)->at(i) + n.at(2) * list.at(2)->at(i) + n.at(3) * list.at(3)->at(i);
-    }
+    ///@todo Introduce support function for this type of construction..
+    answer.resize(0);
+    answer.add(n.at(1), list[0]);
+    answer.add(n.at(2), list[1]);
+    answer.add(n.at(3), list[2]);
 }
 
 

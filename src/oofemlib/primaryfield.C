@@ -45,8 +45,6 @@ namespace oofem {
 PrimaryField :: PrimaryField(EngngModel *a, int idomain,
                              FieldType ft, EquationID ut, int nHist) : Field(ft), solutionVectors(nHist + 1), solStepList(nHist + 1)
 {
-    FloatArray *sv;
-
     this->actualStepNumber = -999;
     this->actualStepIndx = 0;
     this->nHistVectors = nHist;
@@ -54,11 +52,6 @@ PrimaryField :: PrimaryField(EngngModel *a, int idomain,
 
     emodel = a;
     domainIndx = idomain;
-
-    for ( int i = 0; i <= nHist; i++ ) {
-        sv = new FloatArray();
-        solutionVectors.put(i + 1, sv);
-    }
 }
 
 PrimaryField :: ~PrimaryField()
@@ -182,7 +175,7 @@ PrimaryField :: giveSolutionVector(int i)
 {
     FloatArray *answer = NULL;
     if ( ( i >= 1 ) && ( i <= ( nHistVectors + 1 ) ) ) {
-        answer = solutionVectors.at(i); // alist 1-based access
+        answer = &solutionVectors[i-1];
     } else {
         OOFEM_ERROR("index out of range");
     }
@@ -243,7 +236,7 @@ PrimaryField :: saveContext(DataStream *stream, ContextMode mode)
     }
 
     for ( int i = 0; i <= nHistVectors; i++ ) {
-        if ( ( iores = solutionVectors.at(i + 1)->storeYourself(stream, mode) ) != CIO_OK ) {
+        if ( ( iores = solutionVectors[i].storeYourself(stream, mode) ) != CIO_OK ) {
             THROW_CIOERR(iores);
         }
     }
@@ -285,7 +278,7 @@ PrimaryField :: restoreContext(DataStream *stream, ContextMode mode)
     }
 
     for ( int i = 0; i <= nHistVectors; i++ ) {
-        if ( ( iores = solutionVectors.at(i + 1)->restoreYourself(stream, mode) ) != CIO_OK ) {
+        if ( ( iores = solutionVectors[i].restoreYourself(stream, mode) ) != CIO_OK ) {
             THROW_CIOERR(iores);
         }
     }

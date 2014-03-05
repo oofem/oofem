@@ -1207,7 +1207,7 @@ HuertaErrorEstimatorInterface :: setupRefinedElementProblem1D(Element *element, 
 
             connectivity = refinedElement->giveFineNodeArray(inode);
             refinedElement->giveBoundaryFlagArray(inode, element, boundary);
-            hasBc = refinedElement->giveBcDofArray1D(inode, element, & sideBcDofId, sideNumBc, tStep);
+            hasBc = refinedElement->giveBcDofArray1D(inode, element, sideBcDofId, sideNumBc, tStep);
 
             pos = 1;
             u = 0.0;
@@ -1621,23 +1621,19 @@ HuertaErrorEstimatorInterface :: setupRefinedElementProblem2D(Element *element, 
     }
 
     if ( mode == HuertaErrorEstimatorInterface :: NodeMode ) {
-        int iside, s1, s2, idof, index;
+        int s1, s2, idof, index;
         double x, y, z, u, v, du = 1.0 / ( level + 1 ), dv = 1.0 / ( level + 1 );
         double xc, yc, zc, xs1, ys1, zs1, xs2, ys2, zs2, xm, ym, zm;
         int bcId, bcDofId;
-        AList< IntArray >sideBcDofIdList;
-        IntArray *sideBcDofId, sideNumBc(2), dofIdArray, * loadArray;
+        std::vector< IntArray >sideBcDofIdList;
+        IntArray sideNumBc(2), dofIdArray, * loadArray;
         bool hasBc;
         Dof *nodeDof;
         FloatMatrix *lcs;
 
         dofIdArray = element->giveDomain()->giveDefaultNodeDofIDArry();
 
-        sideBcDofIdList.growTo(2);
-        for ( iside = 1; iside <= 2; iside++ ) {
-            sideBcDofId = new IntArray;
-            sideBcDofIdList.put(iside, sideBcDofId);
-        }
+        sideBcDofIdList.resize(2);
 
         for ( inode = startNode; inode <= endNode; inode++ ) {
             s1 = inode;
@@ -1788,12 +1784,12 @@ HuertaErrorEstimatorInterface :: setupRefinedElementProblem2D(Element *element, 
 
                                         // I rely on the fact that bc dofs to be reproduced are ordered with respect to the dof ordering of the corner node
 
-                                        sideBcDofId = sideBcDofIdList.at(index);
+                                        const IntArray &sideBcDofId = sideBcDofIdList[index-1];
                                         bcId = 1;
                                         for ( idof = 1; idof <= dofs; idof++ ) {
                                             bcDofId = 0;
                                             if ( bcId <= sideNumBc.at(index) ) {
-                                                nodeDof = node->giveDof( sideBcDofId->at(bcId) );
+                                                nodeDof = node->giveDof( sideBcDofId.at(bcId) );
                                                 if ( nodeDof->giveDofID() == dofIdArray.at(idof) ) {
                                                     bcDofId = nodeDof->giveBcId();
                                                     bcId++;
@@ -1829,16 +1825,12 @@ HuertaErrorEstimatorInterface :: setupRefinedElementProblem2D(Element *element, 
         int csect, iside, index;
         int nd1, nd2, nd3, nd4;
         IntArray *loadArray;
-        AList< IntArray >boundaryLoadList;
+        std::vector< IntArray >boundaryLoadList;
         bool hasLoad;
 
         csect = element->giveCrossSection()->giveNumber();
 
-        boundaryLoadList.growTo(2);
-        for ( iside = 1; iside <= 2; iside++ ) {
-            loadArray = new IntArray;
-            boundaryLoadList.put(iside, loadArray);
-        }
+        boundaryLoadList.resize(2);
 
         for ( inode = startNode; inode <= endNode; inode++ ) {
             connectivity = refinedElement->giveFineNodeArray(inode);
@@ -1881,7 +1873,7 @@ HuertaErrorEstimatorInterface :: setupRefinedElementProblem2D(Element *element, 
                                     continue;
                                 }
 
-                                loads += boundaryLoadList.at(iside)->giveSize();
+                                loads += boundaryLoadList[iside-1].giveSize();
                             }
 
                             if ( loads != 0 ) {
@@ -1890,26 +1882,25 @@ HuertaErrorEstimatorInterface :: setupRefinedElementProblem2D(Element *element, 
                                         continue;
                                     }
 
-                                    if ( ( loadArray = boundaryLoadList.at(iside) )->giveSize() == 0 ) {
+                                    if ( boundaryLoadList[iside-1].giveSize() == 0 ) {
                                         continue;
                                     }
 
-                                    ir->setField(* loadArray, "boundaryloads");
+                                    ir->setField(boundaryLoadList[iside-1], "boundaryloads");
                                 }
                             }
                         } else {
                             index = 0;
-                            if ( m == 0 && boundary.at(1) != 0 && boundaryLoadList.at(1)->giveSize() != 0 ) {
+                            if ( m == 0 && boundary.at(1) != 0 && boundaryLoadList[0].giveSize() != 0 ) {
                                 index = 1;
                             }
 
-                            if ( n == 0 && boundary.at(2) != 0 && boundaryLoadList.at(2)->giveSize() != 0 ) {
+                            if ( n == 0 && boundary.at(2) != 0 && boundaryLoadList[1].giveSize() != 0 ) {
                                 index = 2;
                             }
 
                             if ( index != 0 ) {
-                                loadArray = boundaryLoadList.at(index);
-                                ir->setField(loadArray, "boundaryloads");
+                                ir->setField(boundaryLoadList[index-1], "boundaryloads");
                             }
                         }
                     }
@@ -2228,31 +2219,22 @@ HuertaErrorEstimatorInterface :: setupRefinedElementProblem3D(Element *element, 
     }
 
     if ( mode == HuertaErrorEstimatorInterface :: NodeMode ) {
-        int iside, iface, s1, s2, s3, f1, f2, f3, idof, index;
+        int s1, s2, s3, f1, f2, f3, idof, index;
         double x, y, z, u, v, w, du = 1.0 / ( level + 1 ), dv = 1.0 / ( level + 1 ), dw = 1.0 / ( level + 1 );
         double xc, yc, zc, xm, ym, zm;
         double xs1, ys1, zs1, xs2, ys2, zs2, xs3, ys3, zs3;
         double xf1, yf1, zf1, xf2, yf2, zf2, xf3, yf3, zf3;
         int bcId, bcDofId;
-        AList< IntArray >sideBcDofIdList, faceBcDofIdList;
-        IntArray *sideBcDofId, *faceBcDofId, sideNumBc(3), faceNumBc(3), dofIdArray, * loadArray;
+        std::vector < IntArray >sideBcDofIdList, faceBcDofIdList;
+        IntArray sideNumBc(3), faceNumBc(3), dofIdArray, * loadArray;
         bool hasBc;
         Dof *nodeDof;
         FloatMatrix *lcs;
 
         dofIdArray = element->giveDomain()->giveDefaultNodeDofIDArry();
 
-        sideBcDofIdList.growTo(3);
-        for ( iside = 1; iside <= 3; iside++ ) {
-            sideBcDofId = new IntArray;
-            sideBcDofIdList.put(iside, sideBcDofId);
-        }
-
-        faceBcDofIdList.growTo(3);
-        for ( iface = 1; iface <= 3; iface++ ) {
-            faceBcDofId = new IntArray;
-            faceBcDofIdList.put(iface, faceBcDofId);
-        }
+        sideBcDofIdList.resize(3);
+        faceBcDofIdList.resize(3);
 
         for ( inode = startNode; inode <= endNode; inode++ ) {
             s1 = hexaSideNode [ inode - 1 ] [ 0 ];
@@ -2438,12 +2420,12 @@ HuertaErrorEstimatorInterface :: setupRefinedElementProblem3D(Element *element, 
 
                                                 // I rely on the fact that bc dofs to be reproduced are ordered with respect to the dof ordering of the corner node
 
-                                                sideBcDofId = sideBcDofIdList.at(index);
+                                                const IntArray &sideBcDofId = sideBcDofIdList[index-1];
                                                 bcId = 1;
                                                 for ( idof = 1; idof <= dofs; idof++ ) {
                                                     bcDofId = 0;
                                                     if ( bcId <= sideNumBc.at(index) ) {
-                                                        nodeDof = node->giveDof( sideBcDofId->at(bcId) );
+                                                        nodeDof = node->giveDof( sideBcDofId.at(bcId) );
                                                         if ( nodeDof->giveDofID() == dofIdArray.at(idof) ) {
                                                             bcDofId = nodeDof->giveBcId();
                                                             bcId++;
@@ -2473,12 +2455,12 @@ HuertaErrorEstimatorInterface :: setupRefinedElementProblem3D(Element *element, 
 
                                                 // I rely on the fact that bc dofs to be reproduced are ordered with respect to the dof ordering of the corner node
 
-                                                faceBcDofId = faceBcDofIdList.at(index);
+                                                const IntArray &faceBcDofId = faceBcDofIdList[index-1];
                                                 bcId = 1;
                                                 for ( idof = 1; idof <= dofs; idof++ ) {
                                                     bcDofId = 0;
                                                     if ( bcId <= faceNumBc.at(index) ) {
-                                                        nodeDof = node->giveDof( faceBcDofId->at(bcId) );
+                                                        nodeDof = node->giveDof( faceBcDofId.at(bcId) );
                                                         if ( nodeDof->giveDofID() == dofIdArray.at(idof) ) {
                                                             bcDofId = nodeDof->giveBcId();
                                                             bcId++;
@@ -2516,16 +2498,12 @@ HuertaErrorEstimatorInterface :: setupRefinedElementProblem3D(Element *element, 
         int csect, iside;
         int nd1, nd2, nd3, nd4, nd5, nd6, nd7, nd8;
         IntArray *loadArray;
-        AList< IntArray >boundaryLoadList;
+        std::vector< IntArray >boundaryLoadList;
         bool hasLoad;
 
         csect = element->giveCrossSection()->giveNumber();
 
-        boundaryLoadList.growTo(3);
-        for ( iside = 1; iside <= 3; iside++ ) {
-            loadArray = new IntArray;
-            boundaryLoadList.put(iside, loadArray);
-        }
+        boundaryLoadList.resize(3);
 
         for ( inode = startNode; inode <= endNode; inode++ ) {
             connectivity = refinedElement->giveFineNodeArray(inode);
@@ -2587,7 +2565,7 @@ HuertaErrorEstimatorInterface :: setupRefinedElementProblem3D(Element *element, 
                                     continue;
                                 }
 
-                                loads += boundaryLoadList.at(iside)->giveSize();
+                                loads += boundaryLoadList[iside-1].giveSize();
                             }
 
                             if ( loads != 0 ) {
@@ -2608,11 +2586,11 @@ HuertaErrorEstimatorInterface :: setupRefinedElementProblem3D(Element *element, 
                                         continue;
                                     }
 
-                                    if ( ( loadArray = boundaryLoadList.at(iside) )->giveSize() == 0 ) {
+                                    if ( boundaryLoadList[iside-1].giveSize() == 0 ) {
                                         continue;
                                     }
 
-                                    ir->setField(* loadArray, "boundaryloads");
+                                    ir->setField(boundaryLoadList[iside-1], "boundaryloads");
                                 }
                             }
                         }

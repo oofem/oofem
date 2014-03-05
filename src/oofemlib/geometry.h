@@ -305,8 +305,8 @@ public:
     virtual IRResultType initializeFrom(InputRecord *ir);
     // virtual const char *giveClassName() const { return "Circle"; }
     // virtual bool intersects(Element *element);
-    // virtual void computeIntersectionPoints(Element *element, AList< FloatArray > *intersecPoints);
-    // virtual void computeIntersectionPoints(Line *l, AList< FloatArray > *intersecPoints);
+    // virtual void computeIntersectionPoints(Element *element, std :: vector< FloatArray > *intersecPoints);
+    // virtual void computeIntersectionPoints(Line *l, std :: vector< FloatArray > *intersecPoints);
     // virtual bool isOutside(BasicGeometry *bg);
     // virtual bool isInside(Element *element);
     // virtual bool isInside(FloatArray &point);

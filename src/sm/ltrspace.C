@@ -722,7 +722,6 @@ LTRSpace :: MMAShapeFunctProjectionInterface_interpolateIntVarAt(FloatArray &ans
                                                                  coordType ct, nodalValContainerType &list,
                                                                  InternalStateType type, TimeStep *tStep)
 {
-    int i, n;
     double l1, l2, l3, l4;
     FloatArray lcoords;
     if ( ct == MMAShapeFunctProjectionInterface :: coordType_local ) {
@@ -735,12 +734,11 @@ LTRSpace :: MMAShapeFunctProjectionInterface_interpolateIntVarAt(FloatArray &ans
     l2 = lcoords.at(2);
     l3 = lcoords.at(3);
     l4 = 1.0 - l1 - l2 - l3;
-    n = list.at(1)->giveSize();
-    answer.resize(n);
-
-    for ( i = 1; i <= n; i++ ) {
-        answer.at(i) = l1 * list.at(1)->at(i) + l2 *list.at(2)->at(i) + l3 *list.at(3)->at(i) + l4 *list.at(4)->at(i);
-    }
+    answer.resize(0);
+    answer.add(l1, list[0]);
+    answer.add(l2, list[1]);
+    answer.add(l3, list[2]);
+    answer.add(l4, list[3]);
 }
 
 

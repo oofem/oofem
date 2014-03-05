@@ -483,7 +483,6 @@ Truss1d :: MMAShapeFunctProjectionInterface_interpolateIntVarAt(FloatArray &answ
                                                                 coordType ct, nodalValContainerType &list,
                                                                 InternalStateType type, TimeStep *tStep)
 {
-    int vars;
     FloatArray lcoords, n;
     if ( ct == MMAShapeFunctProjectionInterface :: coordType_local ) {
         lcoords = coords;
@@ -493,10 +492,8 @@ Truss1d :: MMAShapeFunctProjectionInterface_interpolateIntVarAt(FloatArray &answ
 
     this->interp.evalN( n, lcoords, FEIElementGeometryWrapper(this) );
 
-    vars = list.at(1)->giveSize();
-    answer.resize(vars);
-    for ( int i = 1; i <= vars; i++ ) {
-        answer.at(i) = n.at(1) * list.at(1)->at(i) + n.at(2) * list.at(2)->at(i);
-    }
+    answer.resize(0);
+    answer.add(n.at(1), list[0]);
+    answer.add(n.at(2), list[1]);
 }
 } // end namespace oofem

@@ -85,9 +85,9 @@ private:
     Domain *domain;
 
     /// List of graph nodes.
-    AList< SloanGraphNode >nodes;
+    std::vector< SloanGraphNode >nodes;
     /// List of dof managers corresponding to nodes.
-    AList< DofManager >dmans;
+    std::vector< DofManager* >dmans;
     /// Start peripheral node.
     int startNode;
     /// End peripheral node.

@@ -893,7 +893,6 @@ TrPlaneStress2d :: MMAShapeFunctProjectionInterface_interpolateIntVarAt(FloatArr
                                                                         coordType ct, nodalValContainerType &list,
                                                                         InternalStateType type, TimeStep *tStep)
 {
-    int n;
     double l1, l2, l3;
     FloatArray lcoords;
     if ( ct == MMAShapeFunctProjectionInterface :: coordType_local ) {
@@ -905,11 +904,9 @@ TrPlaneStress2d :: MMAShapeFunctProjectionInterface_interpolateIntVarAt(FloatArr
     l1 = lcoords.at(1);
     l2 = lcoords.at(2);
     l3 = 1.0 - l1 - l2;
-    n = list.at(1)->giveSize();
-    answer.resize(n);
-
-    for ( int i = 1; i <= n; i++ ) {
-        answer.at(i) = l1 * list.at(1)->at(i) + l2 *list.at(2)->at(i) + l3 *list.at(3)->at(i);
-    }
+    answer.resize(0);
+    answer.add(l1, list[0]);
+    answer.add(l2, list[1]);
+    answer.add(l3, list[2]);
 }
 } // end namespace oofem
