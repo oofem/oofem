@@ -49,7 +49,7 @@ set (sm_element
     qtrplanestrain.C qtrplanestraingrad.C
     qspacegrad.C
     dkt.C qdkt.C
-    quad1platesubsoil.C
+    quad1platesubsoil.C tria1platesubsoil.C
     )
 
 set (sm_crosssection
