@@ -163,7 +163,12 @@ public:
     }
 
     Material *giveInterfaceMaterial(int interface) {
-        return this->giveDomain()->giveMaterial( this->interfacerMaterials.at(interface) );
+        int matNum = this->giveInterfaceMaterialNum(interface);
+        if ( matNum ) {
+            return this->giveDomain()->giveMaterial( this->interfacerMaterials.at(interface) );
+        } else {
+            return NULL;
+        }
     }
 
     virtual int checkConsistency();

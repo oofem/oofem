@@ -116,14 +116,14 @@ Tr2Shell7XFEM :: computeGaussPoints()
         // Cohesive zone
         for ( int i = 1; i <= this->xMan->giveNumberOfEnrichmentItems(); i++ ) { 
             Delamination *dei =  dynamic_cast< Delamination * >( this->xMan->giveEnrichmentItem(i) ); 
-            if (dei) {
+            //if (dei) {
                 int numberOfInterfaces = this->layeredCS->giveNumberOfLayers()-1;
                 czIntegrationRulesArray = new IntegrationRule * [ numberOfInterfaces ];
                 for ( int i = 0; i < numberOfInterfaces; i++ ) {
                     czIntegrationRulesArray [ i ] = new GaussIntegrationRule(1, this);
                     czIntegrationRulesArray [ i ]->SetUpPointsOnTriangle(nPointsTri, _3dInterface);
                 }
-            }
+            //}
         }
 
         // Layered cross section for bulk integration
@@ -238,14 +238,14 @@ bool Tr2Shell7XFEM :: updateIntegrationRule()
     // Cohesive zone
     for ( int i = 1; i <= this->xMan->giveNumberOfEnrichmentItems(); i++ ) { 
         Delamination *dei =  dynamic_cast< Delamination * >( this->xMan->giveEnrichmentItem(i) ); 
-        if (dei) {
+        //if (dei) {
             int numberOfInterfaces = this->layeredCS->giveNumberOfLayers()-1;
             czIntegrationRulesArray = new IntegrationRule * [ numberOfInterfaces ];
             for ( int i = 0; i < numberOfInterfaces; i++ ) {
                 czIntegrationRulesArray [ i ] = new GaussIntegrationRule(1, this);
                 czIntegrationRulesArray [ i ]->SetUpPointsOnTriangle(nPointsTri, _3dInterface);
             }
-        }
+        //}
     }
 
     return partitionSucceeded;

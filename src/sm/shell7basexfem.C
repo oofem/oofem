@@ -1707,9 +1707,9 @@ Shell7BaseXFEM :: giveDisUnknownsAt(FloatArray &lcoords, EnrichmentItem *ei, Flo
 void
 Shell7BaseXFEM :: giveCompositeExportData(std::vector< VTKPiece > &vtkPieces, IntArray &primaryVarsToExport, IntArray &internalVarsToExport, IntArray cellVarsToExport, TimeStep *tStep )
 {
-    vtkPieces.resize(2);
+    vtkPieces.resize(1);
     this->giveShellExportData(vtkPieces[0], primaryVarsToExport, internalVarsToExport, cellVarsToExport, tStep );
-    this->giveCZExportData(vtkPieces[1], primaryVarsToExport, internalVarsToExport, cellVarsToExport, tStep );
+    //this->giveCZExportData(vtkPieces[1], primaryVarsToExport, internalVarsToExport, cellVarsToExport, tStep );
     
 }
 
@@ -2279,7 +2279,7 @@ Shell7BaseXFEM :: giveCZExportData(VTKPiece &vtkPiece, IntArray &primaryVarsToEx
 
 
 
-#if 0
+#if 1
 
 
     // Export of XFEM related quantities
@@ -2313,13 +2313,13 @@ Shell7BaseXFEM :: giveCZExportData(VTKPiece &vtkPiece, IntArray &primaryVarsToEx
                         FloatArray lCoords;
                         //lCoords.setValues(3,  nodeLocalXi1Coords.at(nodeIndx), nodeLocalXi2Coords.at(nodeIndx), nodeLocalXi3CoordsMapped.at(nodeIndx));
                         lCoords.beColumnOf(localNodeCoords, nodeIndx);
-                        Node *node = this->giveNode( wedgeToTriMap.at(nodeIndx) );
+                        //Node *node = this->giveNode( wedgeToTriMap.at(nodeIndx) );
+                        Node *node = this->giveNode( nodeIndx );
                         FloatArray valueArray;
                         const FloatArray *val = NULL;
                         if ( xfemstype == XFEMST_LevelSetPhi ) {
                             valueArray.resize(1);
                             val = & valueArray;
-                            //ei->evalLevelSetNormalInNode( valueArray.at(1), node->giveNumber() );
                             valueArray.at(1) = this->evaluateLevelSet(lCoords, ei);
                         } else if ( xfemstype == XFEMST_LevelSetGamma ) {
                             valueArray.resize(1);
@@ -2350,12 +2350,10 @@ Shell7BaseXFEM :: recoverValuesFromCZIP(std::vector<FloatArray> &recoveredValues
 {
     // recover nodal values by coosing the ip closest to the node
 
-    //FEInterpolation *interpol = static_cast< FEInterpolation * >( &this->interpolationForExport );
-
     // composite element interpolator
     FloatMatrix localNodeCoords;
-    this->interpolationForExport.giveLocalNodeCoords(localNodeCoords);
-
+    //this->interpolationForExport.giveLocalNodeCoords(localNodeCoords);
+    this->interpolationForCZExport.giveLocalNodeCoords(localNodeCoords);
     int numNodes = localNodeCoords.giveNumberOfColumns();
     recoveredValues.resize(numNodes);
     
@@ -2384,10 +2382,14 @@ Shell7BaseXFEM :: recoverValuesFromCZIP(std::vector<FloatArray> &recoveredValues
 
     // recover ip values
     for ( int i = 1; i <= numNodes; i++ ) {
-        ip = iRule->getIntegrationPoint( closestIPArray.at(i) );
-        //this->giveIPValue(ipValues, ip, type, tStep);
-        this->layeredCS->giveInterfaceMaterial(interfce)->giveIPValue(ipValues, ip, type, tStep);
         
+        if ( this->layeredCS->giveInterfaceMaterial(interfce) ) {
+            ip = iRule->getIntegrationPoint( closestIPArray.at(i) );
+            this->layeredCS->giveInterfaceMaterial(interfce)->giveIPValue(ipValues, ip, type, tStep);
+        } else {
+            ipValues.resize(0);
+        }
+
         if ( ipValues.giveSize() == 0 && type == IST_AbaqusStateVector) {
             recoveredValues[i-1].resize(23);
             recoveredValues[i-1].zero();        
