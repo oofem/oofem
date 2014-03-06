@@ -665,6 +665,8 @@ EngngModel :: solveYourself()
                 this->forceEquationNumbering();
             }
 
+            OOFEM_LOG_DEBUG("Number of equations %d\n", this->giveNumberOfDomainEquations( 1, EModelDefaultEquationNumbering()) );
+            
             this->solveYourselfAt( this->giveCurrentStep() );
             this->updateYourself( this->giveCurrentStep() );
             this->terminate( this->giveCurrentStep() );
