@@ -221,6 +221,8 @@ set (core_bc
     generalboundarycondition.C
     boundarycondition.C
     prescribedgradient.C
+    prescribedgradientbc.C
+    prescribedgradientbcneumann.C
     mixedgradientpressurebc.C
     mixedgradientpressuredirichlet.C
     mixedgradientpressureneumann.C
