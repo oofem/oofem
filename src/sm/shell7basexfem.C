@@ -1984,17 +1984,12 @@ Shell7BaseXFEM :: giveFictiousCZNodeCoordsForExport(std::vector<FloatArray> &nod
     // need to return local coordinates corresponding to the nodes of the sub triangles
     giveLocalCZNodeCoordsForExport(nodeLocalXi1Coords, nodeLocalXi2Coords, nodeLocalXi3Coords, subCell, localNodeCoords);
 
-    //this->interpolationForExport.giveLocalNodeCoords(localNodeCoords);
-
     nodes.resize(localNodeCoords.giveNumberOfColumns());
     for ( int i = 1; i <= localNodeCoords.giveNumberOfColumns(); i++ ){
         FloatArray coords, localCoords(3);
-        localCoords.at(1) = nodeLocalXi1Coords.at(i);
-        localCoords.at(2) = nodeLocalXi2Coords.at(i);
-        localCoords.at(3) = nodeLocalXi3Coords.at(i);
         localCoords.beColumnOf(localNodeCoords,i);
 
-        this->vtkEvalInitialGlobalCoordinateAt(localCoords, layer, coords);
+        this->vtkEvalInitialGlobalCZCoordinateAt(localCoords, layer, coords);
         nodes[i-1].resize(3); 
         nodes[i-1] = coords;
     }
