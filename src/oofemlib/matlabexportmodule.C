@@ -84,7 +84,6 @@ MatlabExportModule :: ~MatlabExportModule()
 IRResultType
 MatlabExportModule :: initializeFrom(InputRecord *ir)
 {
-    const char *__proc = "initializeFrom";  // Required by IR_GIVE_FIELD macro
     IRResultType result;                    // Required by IR_GIVE_FIELD macro
 
     ExportModule :: initializeFrom(ir);
@@ -403,7 +402,7 @@ MatlabExportModule :: doOutputReactionForces(TimeStep *tStep,    FILE *FID)
     } else
 #endif
     {
-        OOFEM_ERROR("MatlabExportModule :: doOutputReactionForces - Cannot export reaction forces - only implemented for structural problems.");
+        OOFEM_ERROR("Cannot export reaction forces - only implemented for structural problems.");
     }
 
     int numDofManToExport = this->reactionForcesDofManList.giveSize();
@@ -612,7 +611,7 @@ MatlabExportModule :: giveOutputStream(TimeStep *tStep)
     fileName += ".m";
 
     if ( ( answer = fopen(fileName.c_str(), "w") ) == NULL ) {
-        OOFEM_ERROR2( "MatlabExportModule::giveOutputStream: failed to open file %s", fileName.c_str() );
+        OOFEM_ERROR("failed to open file %s", fileName.c_str() );
     }
 
     return answer;

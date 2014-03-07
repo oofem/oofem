@@ -32,12 +32,6 @@
  *  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  */
 
-/*
- * The original idea for this class comes from
- * Dubois-Pelerin, Y.: "Object-Oriented  Finite Elements: Programming concepts and Implementation",
- * PhD Thesis, EPFL, Lausanne, 1992.
- */
-
 #include "intarray.h"
 #include "error.h"
 #include "datastream.h"
@@ -45,201 +39,73 @@
 #include <cstdarg>
 #include <cstdlib>
 #include <cstring>
-#if __cplusplus > 199711L
- #include <memory>
-#endif
+#include <algorithm>
+#include <memory>
 
 #ifdef __PARALLEL_MODE
  #include "combuff.h"
 #endif
 
-#define ALLOC(size) new int [ size ];
-
-#define RESIZE(n) \
-    { \
-        size = n; \
-        if ( n > allocatedSize ) { \
-            allocatedSize = n; \
-            if ( values ) { delete[] values; } \
-            values = ALLOC(size); \
-        } \
-    }
-
 namespace oofem {
-IntArray :: iterator :: iterator(const IntArray *vec, int pos) : pos(pos), vec(vec) { }
-
-bool IntArray :: iterator :: operator != ( const IntArray :: iterator & other ) const {
-    return pos != other.pos;
-}
-
-int IntArray :: iterator :: operator *( ) const {
-    return ( * vec )( pos );
-}
-
-const IntArray :: iterator &IntArray :: iterator :: operator++ ( ) {
-    ++pos;
-    return * this;
-}
-
-IntArray :: iterator IntArray :: begin() { return iterator(this, 0); }
-IntArray :: iterator IntArray :: end() { return iterator(this, this->size); }
-
-
-IntArray :: IntArray() :
-    size(0),
-    allocatedSize(0),
-    values(NULL)
-{ }
-
-
-IntArray :: IntArray(int n) :
-    size(n),
-    allocatedSize(n)
-    // Constructor : creates an array of size n (filled with garbage).
-{
-    if ( size ) {
-        values = ALLOC(size);
-        memset( values, 0, size * sizeof( int ) );
-    } else {
-        values = NULL;
-    }
-}
-
-
-IntArray :: IntArray(const IntArray &src) :
-    size(src.size),
-    allocatedSize(src.size)
-    // copy constructor
-{
-    if ( size ) {
-        values = ALLOC(this->size);
-        memcpy( values, src.values, size * sizeof( int ) );
-    } else {
-        values = NULL;
-    }
-}
-
-
-#if __cplusplus > 199711L
-IntArray :: IntArray(std :: initializer_list< int >list)
-{
-    this->size = this->allocatedSize = list.size();
-    if ( this->size ) {
-        this->values = ALLOC(this->size);
-        std :: uninitialized_copy(list.begin(), list.end(), this->values);
-    } else {
-        this->values = NULL;
-    }
-}
-
-
-IntArray &IntArray :: operator = ( std :: initializer_list< int >list )
-{
-    RESIZE( ( int ) list.size() );
-    std :: uninitialized_copy(list.begin(), list.end(), this->values);
-    return * this;
-}
-
-#endif
-
-
-IntArray :: ~IntArray()
-{
-    if ( values ) {
-        delete[] values;
-    }
-}
-
-
-IntArray &IntArray :: operator = ( const IntArray & src )
-{
-    // assignment: cleanup and copy
-    if ( values ) {
-        delete[] values;
-    }
-
-    allocatedSize = size = src.size;
-    if ( size ) {
-        values = ALLOC(this->size);
-        memcpy( values, src.values, size * sizeof( int ) );
-    } else {
-        values = NULL;
-    }
-
-    return * this;
-}
-
 
 void IntArray :: zero()
 {
-    memset( values, 0, size * sizeof( int ) );
+    std::fill(values.begin(), values.end(), 0);
 }
 
 
 void IntArray :: add(int value)
 {
-    int *p1 = values;
-
-    int i = size;
-    while ( i-- ) {
-        * p1 += value;
-        p1++;
-    }
+    for (int &x: values) x += value;
 }
 
 
 #ifdef DEBUG
 int &IntArray :: at(int i)
-// Returns the i-th coefficient of the receiver. Slow but safe.
 {
     this->checkBounds(i);
     return values [ i - 1 ];
 }
 
 int IntArray :: at(int i) const
-// Returns the i-th coefficient of the receiver. Slow but safe.
 {
     this->checkBounds(i);
     return values [ i - 1 ];
 }
 
-int &IntArray :: operator() (int i)
+int &IntArray :: operator()(int i)
 {
     this->checkBounds(i);
     return values [ i ];
 }
 
-const int &IntArray :: operator() (int i) const
+const int &IntArray :: operator()(int i) const
 {
     this->checkBounds(i);
     return values [ i ];
 }
 
-int &IntArray :: operator[] ( int i )
+int &IntArray :: operator[](int i)
 {
     this->checkBounds(i);
     return values [ i ];
 }
 
-const int &IntArray :: operator[] ( int i ) const
+const int &IntArray :: operator[](int i) const
 {
     this->checkBounds(i);
     return values [ i ];
 }
 
-#endif
-
-
-#ifdef DEBUG
 void IntArray :: checkBounds(int i) const
 // Checks that the receiver includes an index i.
 {
     if ( i < 0 ) {
-        OOFEM_ERROR2("IntArray::checkBounds : array error on index : %d < 0", i);
+        OOFEM_SIMPLE_ERROR("IntArray::checkBounds : array error on index : %d < 0", i);
     }
 
-    if ( i > size ) {
-        OOFEM_ERROR3("IntArray::checkBounds : array error on index : %d > %d", i, size);
+    if ( i > this->giveSize() ) {
+        OOFEM_SIMPLE_ERROR("IntArray::checkBounds : array error on index : %d > %d", i, this->giveSize());
     }
 }
 #endif
@@ -247,84 +113,29 @@ void IntArray :: checkBounds(int i) const
 
 void IntArray :: resizeWithValues(int n, int allocChunk)
 {
-#ifdef DEBUG
-    if ( allocChunk < 0 ) {
-        OOFEM_FATAL2("IntArray :: resize - allocChunk must be non-negative; %d", allocChunk);
+    if ( allocChunk > 0 && (int)this->values.capacity() < n ) {
+        this->values.reserve(n + allocChunk);
     }
-
-#endif
-
-    if ( n <= allocatedSize ) {
-        size = n;
-        return;
-    }
-    allocatedSize = n + allocChunk;
-
-    // For the typical small sizes we have, realloc doesn't seem to be worth it, better with just malloc.
-    int *newValues = ALLOC(allocatedSize);
-#ifdef DEBUG
-    if ( !newValues ) {
-        OOFEM_FATAL2("IntArray :: resizeWithValues - Failed in allocating %d doubles", allocatedSize);
-    }
-#endif
-    memcpy( newValues, values, size * sizeof( int ) );
-    memset( & newValues [ size ], 0, ( allocatedSize - size ) * sizeof( int ) );
-
-    if ( values ) {
-        delete[] values;
-    }
-    values = newValues;
-    size = n;
+    this->values.resize(n);
 }
+
 
 void IntArray :: resize(int n)
 {
-    size = n;
-    if ( n <= allocatedSize ) {
-        memset( values, 0, size * sizeof( int ) );
-        return;
-    }
-    allocatedSize = n;
-
-    if ( values ) {
-        delete[] values;
-    }
-    values = ALLOC(allocatedSize);
-    memset( values, 0, allocatedSize * sizeof( int ) );
-#ifdef DEBUG
-    if ( !values ) {
-        OOFEM_FATAL2("IntArray :: resize - Failed in allocating %d doubles", allocatedSize);
-    }
-#endif
+    this->values.resize(n);
+    std::fill(values.begin(), values.end(), 0);
 }
 
 
 void IntArray :: preallocate(int futureSize)
 {
-    if ( allocatedSize >= futureSize ) {
-        return;
-    }
-    allocatedSize = futureSize;
-
-    int *newValues = ALLOC(allocatedSize);
-#ifdef DEBUG
-    if ( !newValues ) {
-        OOFEM_FATAL2("IntArray :: preallocate - Failed in allocating %d doubles", allocatedSize);
-    }
-#endif
-    memcpy( newValues, values, size * sizeof( int ) );
-    memset( & newValues [ size ], 0, ( allocatedSize - size ) * sizeof( int ) );
-
-    if ( values ) {
-        delete[] values;
-    }
-    values = newValues;
+    values.reserve(futureSize);
 }
 
 
 void IntArray :: enumerate(int maxValue)
 {
-    this->resize(maxValue);
+    this->values.resize(maxValue);
     for ( int i = 1; i <= maxValue; ++i ) {
         this->at(i) = i;
     }
@@ -332,85 +143,36 @@ void IntArray :: enumerate(int maxValue)
 
 
 void IntArray :: followedBy(const IntArray &b, int allocChunk)
-// Appends the array 'b' the receiver. Returns the receiver.
 {
-    int newSize = size + b.size;
-    if ( newSize == size ) {
-        return;
+    if ( allocChunk && (int)values.capacity() < this->giveSize() + b.giveSize() ) {
+        values.reserve(values.capacity() + allocChunk + b.giveSize());
     }
-
-    if ( allocChunk < 0 ) {
-        allocChunk = 0;
-    }
-
-    if ( newSize > allocatedSize ) {
-        int *newValues = ALLOC(newSize + allocChunk);
-
-        memcpy( newValues, values, size * sizeof( int ) );
-        memcpy( newValues + size, b.values, b.size * sizeof( int ) );
-        ///@todo Do we zero or just leave the last part uninitialized?
-        memset( newValues + newSize, 0, allocChunk * sizeof( int ) );
-
-        if ( values ) {
-            delete[] values;
-        }
-        values = newValues;
-        allocatedSize = newSize + allocChunk;
-        size = newSize;
-    } else {
-        memcpy( values + size, b.values, b.size * sizeof( int ) );
-        size = newSize;
-    }
+    values.insert(values.end(), b.values.begin(), b.values.end());
 }
 
 
 void IntArray :: followedBy(int b, int allocChunk)
-// Appends the array 'b' the receiver. Returns the receiver.
 {
-    int newSize = size + 1;
-
-    if ( newSize > allocatedSize ) {
-        int *newValues = ALLOC(newSize + allocChunk);
-        memset( newValues, 0, ( newSize + allocChunk ) * sizeof( int ) );
-
-        memcpy( newValues, values, size * sizeof( int ) );
-        newValues [ size ] = b;
-
-        if ( values ) {
-            delete[] values;
-        }
-
-        values = newValues;
-        allocatedSize = newSize + allocChunk;
-        size = newSize;
-    } else {
-        * ( values + size ) = b;
-        size = newSize;
+    if ( allocChunk && (int)values.capacity() < this->giveSize() + 1 ) {
+        values.reserve(values.capacity() + allocChunk + 1);
     }
+    values.push_back(b);
 }
 
 
 void IntArray :: erase(int _pos)
 {
-    // this will erase the element at given position (1-based index)
-    // receiver size will shrink accordingly
-    // the (_pos+1, size) elements will become (_pos, size-1) elements;
-
 #ifdef DEBUG
     this->checkBounds(_pos);
 #endif
-    // adjust size; keep allocated size untouched
-    size--;
-    for ( int _i = _pos - 1; _i < size; _i++ ) {
-        values [ _i ] = values [ _i + 1 ];
-    }
+    values.erase(values.begin() + _pos - 1);
 }
 
 
 bool IntArray :: containsOnlyZeroes() const
 {
-    for ( int i = 0; i < size; i++ ) {
-        if ( values [ i ] ) {
+    for ( auto x: values ) {
+        if ( x ) {
             return false;
         }
     }
@@ -422,49 +184,37 @@ bool IntArray :: containsOnlyZeroes() const
 int IntArray :: minimum() const
 {
 #ifdef DEBUG
-    if ( size == 0 ) {
-        OOFEM_ERROR("IntArray :: minimum - Empty array.");
+    if ( this->isEmpty() ) {
+        OOFEM_SIMPLE_ERROR("IntArray :: minimum - Empty array.");
     }
 #endif
-    int x = values [ 0 ];
-    for ( int i = 1; i < size; ++i ) {
-        if ( values [ i ] < x ) {
-            x = values [ i ];
-        }
-    }
-    return x;
+    return *std::min_element(values.begin(), values.end());
 }
 
 
 int IntArray :: maximum() const
 {
 #ifdef DEBUG
-    if ( size == 0 ) {
-        OOFEM_ERROR("IntArray :: maximum - Empty array.");
+    if ( this->isEmpty() ) {
+        OOFEM_SIMPLE_ERROR("IntArray :: maximum - Empty array.");
     }
 #endif
-    int x = values [ 0 ];
-    for ( int i = 1; i < size; ++i ) {
-        if ( values [ i ] > x ) {
-            x = values [ i ];
-        }
-    }
-    return x;
+    return *std::max_element(values.begin(), values.end());
 }
 
 
 void IntArray :: findNonzeros(const IntArray &logical)
 {
     int newsize = 0;
-    for ( int i = 1; i <= logical.size; ++i ) {
-        if ( logical.at(i) ) {
+    for ( const int &x: logical.values) {
+        if ( x ) {
             ++newsize;
         }
     }
-    this->resize(newsize);
+    this->values.resize(newsize);
 
     int pos = 1;
-    for ( int i = 1; i <= logical.size; ++i ) {
+    for ( int i = 1; i <= logical.giveSize(); ++i ) {
         if ( logical.at(i) ) {
             this->at(pos++) = i;
         }
@@ -475,8 +225,8 @@ void IntArray :: findNonzeros(const IntArray &logical)
 void IntArray :: printYourself() const
 // Prints the receiver on screen.
 {
-    printf("IntArray of size : %d\n", size);
-    for ( int i = 1; i <= size; ++i ) {
+    printf("IntArray of size : %d\n", this->giveSize());
+    for ( int i = 1; i <= this->giveSize(); ++i ) {
         if ( i > 42 ) {
             printf("   (other components not printed)");
             break;
@@ -490,18 +240,15 @@ void IntArray :: printYourself() const
 
 
 contextIOResultType IntArray :: storeYourself(DataStream *stream, ContextMode mode) const
-// writes receiver's binary image into stream
-// use id to distinguish some instances
-// return value >0 succes
-//              =0 file i/o error
 {
     // write size
+    int size = this->giveSize();
     if ( !stream->write(& size, 1) ) {
         return ( CIO_IOERR );
     }
 
     // write raw data
-    if ( !stream->write(values, size) ) {
+    if ( !stream->write(values.data(), this->giveSize()) ) {
         return ( CIO_IOERR );
     }
 
@@ -510,30 +257,17 @@ contextIOResultType IntArray :: storeYourself(DataStream *stream, ContextMode mo
 }
 
 contextIOResultType IntArray :: restoreYourself(DataStream *stream, ContextMode mode)
-// reads receiver from stream
-// warning - overwrites existing data!
-// returns 0 if file i/o error
-//        -1 if id od class id is not correct
 {
     // read size
+    int size;
     if ( !stream->read(& size, 1) ) {
         return ( CIO_IOERR );
     }
 
-    if ( values != NULL ) {
-        delete[] values;
-    }
+    values.resize(size);
 
-    if ( size ) {
-        values = ALLOC(size);
-        allocatedSize = size;
-    } else {
-        values = NULL;
-        allocatedSize = 0;
-    }
-
-    // write raw data
-    if ( !stream->read(values, size) ) {
+    // read raw data
+    if ( !stream->read(values.data(), size) ) {
         return ( CIO_IOERR );
     }
 
@@ -542,18 +276,16 @@ contextIOResultType IntArray :: restoreYourself(DataStream *stream, ContextMode 
 }
 
 
-int IntArray :: findFirstIndexOf(int value)   const
+int IntArray :: findFirstIndexOf(int value) const
 {
     // finds index of value in receiver
+    auto it = std::find(values.begin(), values.end(), value);
     // if such value  does not exists, returns zero index
-    for ( int i = 0; i < size; i++ ) {
-        if ( values [ i ] == value ) {
-            return i + 1;
-        }
+    if ( it == values.end() ) {
+        return 0;
+    } else {
+        return (int)(it - values.begin() + 1);
     }
-
-    // nothing found
-    return 0;
 }
 
 
@@ -561,7 +293,7 @@ void IntArray :: setValues(int n, ...)
 {
     va_list vl;
     va_start(vl, n);
-    this->resize(n);
+    this->values.resize(n);
     for ( int i = 0; i < n; i++ ) {
         this->values [ i ] = va_arg(vl, int);
     }
@@ -569,127 +301,35 @@ void IntArray :: setValues(int n, ...)
 }
 
 
-int IntArray :: findSorted(int _val)   const
+int IntArray :: insertSorted(int val, int allocChunk)
 {
-    int first = 0;
-    int last = size - 1;
-    int mid;
-
-    while ( first <= last ) { //while we haven't reached the end of
-        mid = ( first + last ) / 2; //rule out half of the data by spliting the array
-        if ( values [ mid ] == _val ) { //if we have found the target
-            return mid + 1;
-        } else if ( values [ mid ] > _val ) {
-            last = mid - 1; //the desired value is in the lower part of the array
-        } else {
-            first = mid + 1; //the desired value is in the upper part of the array
-        }
+    if ( allocChunk > 0 && values.size() + 1 >= values.capacity() ) {
+        values.reserve(allocChunk + values.capacity());
     }
-
-    return 0; //there is no such element in the array
+    auto low = std::lower_bound(values.begin(), values.end(), val);
+    values.insert(low, val);
+    return (int)(low - values.begin() + 1); // return 1-based index
 }
 
 
-int IntArray :: insertSorted(int _val, int allocChunk)
+int IntArray :: insertSortedOnce(int val, int allocChunk)
 {
-    int pos, i = size;
-    int newSize = size + 1;
-    int *newValues = NULL, *p1, *p2;
-
-    if ( newSize > allocatedSize ) { // realocate if needed
-        newValues = ALLOC(newSize + allocChunk);
-        memset( values, 0, ( newSize + allocChunk ) * sizeof( int ) );
-
-        p1 = values;
-        p2 = newValues;
-    } else {
-        p1 = p2 = values;
+    if ( allocChunk > 0 && values.size() + 1 >= values.capacity() ) {
+        values.reserve(allocChunk + values.capacity());
     }
-
-    while ( ( i > 0 ) && values [ i - 1 ] > _val ) { // copy values larger than _val into destination
-        p2 [ i ] = p1 [ i - 1 ];
-        i--;
+    auto low = std::lower_bound(values.begin(), values.end(), val);
+    if ( low == values.end() || *low != val ) {
+        values.insert(low, val);
     }
-
-    pos = i;
-    p2 [ pos ] = _val; // insert _val
-    i--;
-
-    // if allocated copy smaller values to destination
-    if ( newSize > allocatedSize ) {
-        // if allocated copy smaller values to destination
-        while ( i >= 0 ) {
-            p2 [ i ] = p1 [ i ];
-            i--;
-        }
-
-        // dealocate original space
-        if ( values ) {
-            delete[] values;
-        }
-
-        values = newValues;
-        allocatedSize = newSize + allocChunk;
-    }
-
-    // update size
-    size   = newSize;
-    return pos + 1; // return 1-based index
-}
-
-
-int IntArray :: insertSortedOnce(int _val, int allocChunk)
-{
-    int first = 0;
-    int last = size - 1;
-
-    if ( size == 0 || values [ first ] > _val ) {
-        // first = 0 is correct already
-    } else if ( values [ last ] < _val ) {
-        first = size;
-    } else {
-        while ( first <= last ) { //while we haven't reached the end of
-            int mid = ( first + last ) / 2; //rule out half of the data by spliting the array
-            if ( values [ mid ] == _val ) { //if we have found the target
-                return mid + 1;
-            } else if ( values [ mid ] > _val ) {
-                last = mid - 1; //the desired value is in the lower part of the array
-            } else {
-                first = mid + 1; //the desired value is in the upper part of the array
-            }
-        }
-    }
-    // After this loop, "first" is the new position to fill in
-
-    int newSize = size + 1;
-    if ( newSize > allocatedSize ) {
-        int *newValues = ALLOC(newSize + allocChunk);
-        if ( values ) {
-            memcpy(newValues, values, sizeof( int ) * first); // Copy over the values before _val
-            memcpy( & newValues [ first + 1 ], & values [ first ], sizeof( int ) * ( size - first ) ); // Copy over the values after _val, leaving a gap
-            // Replace the old data:
-            delete[] values;
-        }
-        values = newValues;
-        allocatedSize = newSize + allocChunk;
-        size = newSize;
-    } else {
-        memmove( & values [ first + 1 ], & values [ first ], sizeof( int ) * ( size - first ) );
-        size = newSize;
-    }
-    // Finally we can insert the new value:
-    values [ first ] = _val;
-
-    return first;
+    return (int)(low - values.begin() + 1); // return 1-based index
 }
 
 
 void IntArray :: eraseSorted(int value)
 {
-    int pos;
-
-    if ( ( pos = findSorted(value) ) ) {
-        erase(pos);
+    auto low = std::lower_bound(values.begin(), values.end(), value);
+    if ( *low == value ) {
+        values.erase(low);
     }
 }
 
@@ -701,7 +341,7 @@ int IntArray :: findCommonValuesSorted(const IntArray &iarray, IntArray &common,
     for ( int j = 1; j <= iarray.giveSize(); j++ ) {
         val = iarray.at(j);
 
-        while ( i < size ) {
+        while ( i < this->giveSize() ) {
             if ( values [ i ] == val ) {
                 common.followedBy(val, allocChunk);
                 i++;
@@ -715,7 +355,7 @@ int IntArray :: findCommonValuesSorted(const IntArray &iarray, IntArray &common,
             i++;
         }
 
-        if ( i == size ) {
+        if ( i == this->giveSize() ) {
             break;
         }
     }
@@ -730,7 +370,7 @@ int IntArray :: insertOnce(int _p)
         this->followedBy(_p, 2);
     }
 
-    return size;
+    return this->giveSize();
 }
 
 
@@ -739,9 +379,9 @@ int IntArray :: packToCommBuffer(CommunicationBuffer &buff) const
 {
     int result = 1;
     // pack size
-    result &= buff.packInt(size);
+    result &= buff.packInt(this->giveSize());
     // pack data
-    result &= buff.packArray(this->values, size);
+    result &= buff.packArray(this->values.data(), this->giveSize());
 
     return result;
 }
@@ -753,8 +393,8 @@ int IntArray :: unpackFromCommBuffer(CommunicationBuffer &buff)
     // unpack size
     result &= buff.unpackInt(newSize);
     // resize yourself
-    this->resize(newSize);
-    result &= buff.unpackArray(this->values, newSize);
+    this->values.resize(newSize);
+    result &= buff.unpackArray(this->values.data(), newSize);
 
     return result;
 }
@@ -762,15 +402,15 @@ int IntArray :: unpackFromCommBuffer(CommunicationBuffer &buff)
 
 int IntArray :: givePackSize(CommunicationBuffer &buff)
 {
-    return buff.givePackSize(MPI_INT, 1) + buff.givePackSize(MPI_INT, this->size);
+    return buff.givePackSize(MPI_INT, 1) + buff.givePackSize(MPI_INT, this->giveSize());
 }
 #endif
 
-std :: ostream &operator << ( std :: ostream & out, const IntArray & x )
+std :: ostream &operator<<(std :: ostream &out, const IntArray &x)
 {
-    out << x.size;
-    for ( int i = 0; i < x.size; ++i ) {
-        out << " " << x(i);
+    out << x.giveSize();
+    for ( const int &val: x ) {
+        out << " " << val;
     }
     return out;
 }

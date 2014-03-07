@@ -152,7 +152,7 @@ public:
      * @return property value
      */
     virtual double giveProperty(int aProperty, TimeStep *tStep) {
-        OOFEM_ERROR("Load :: giveProperty - Not supported for this boundary condition.");
+        OOFEM_ERROR("Not supported for this boundary condition.");
         return 0;
     }
 

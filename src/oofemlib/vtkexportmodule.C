@@ -82,7 +82,6 @@ VTKExportModule :: ~VTKExportModule()
 IRResultType
 VTKExportModule :: initializeFrom(InputRecord *ir)
 {
-    const char *__proc = "initializeFrom"; // Required by IR_GIVE_FIELD macro
     IRResultType result;                // Required by IR_GIVE_FIELD macro
     int val;
 
@@ -243,7 +242,7 @@ VTKExportModule :: giveOutputStream(TimeStep *tStep)
     FILE *answer;
     fileName = this->giveOutputBaseFileName(tStep) + ".vtk";
     if ( ( answer = fopen(fileName.c_str(), "w") ) == NULL ) {
-        OOFEM_ERROR2( "VTKExportModule::giveOutputStream: failed to open file %s", fileName.c_str() );
+        OOFEM_ERROR("failed to open file %s", fileName.c_str());
     }
     return answer;
 }
@@ -280,7 +279,7 @@ VTKExportModule :: giveCellType(Element *elem)
     } else if ( elemGT == EGT_wedge_2 ) {
         vtkCellType = 26;
     } else {
-        OOFEM_ERROR("VTKExportModule: unsupported element gemetry type");
+        OOFEM_ERROR("unsupported element gemetry type");
     }
 
     return vtkCellType;
@@ -322,7 +321,7 @@ VTKExportModule :: giveNumberOfNodesPerCell(int cellType)
         return 20;
 
     default:
-        OOFEM_ERROR("VTKExportModule: unsupported cell type ID");
+        OOFEM_ERROR("unsupported cell type ID");
     }
 
     return 0; // to make compiler happy
@@ -365,7 +364,7 @@ VTKExportModule :: giveElementCell(IntArray &answer, Element *elem, int cell)
             answer.at(i) = elem->giveNode(WedgeQuadNodeMapping [ i - 1 ])->giveNumber();
         }
     } else {
-        OOFEM_ERROR("VTKExportModule: unsupported element geometry type");
+        OOFEM_ERROR("unsupported element geometry type");
     }
 }
 
@@ -384,7 +383,7 @@ VTKExportModule :: giveNumberOfElementCells(Element *elem)
         ( elemGT == EGT_wedge_1 ) || ( elemGT == EGT_wedge_2 ) ) {
         return 1;
     } else {
-        OOFEM_ERROR("VTKExportModule: unsupported element geometry type");
+        OOFEM_ERROR("unsupported element geometry type");
     }
 
     return 0;
@@ -440,12 +439,12 @@ VTKExportModule :: exportCellVars(FILE *stream, int elemToProcess, TimeStep *tSt
                 }
 #endif
                 if ( type == IST_MaterialNumber || type == IST_CrossSectionNumber ) {
-                    OOFEM_WARNING1("VTKExportModule - Material numbers are deprecated, outputing cross section number instead...");
+                    OOFEM_WARNING("Material numbers are deprecated, outputing cross section number instead...");
                     fprintf( stream, "%d\n", elem->giveCrossSection()->giveNumber() );
                 } else if ( type == IST_ElementNumber ) {
                     fprintf( stream, "%d\n", elem->giveNumber() );
                 } else {
-                    OOFEM_ERROR2( "Unsupported Cell variable %s\n", __InternalStateTypeToString(type) );
+                    OOFEM_ERROR("Unsupported Cell variable %s\n", __InternalStateTypeToString(type));
                 }
             }
 
@@ -520,7 +519,7 @@ VTKExportModule :: exportCellVars(FILE *stream, int elemToProcess, TimeStep *tSt
                 }
 #endif
             default:
-                OOFEM_ERROR2( "Quantity %s not handled yet.", __InternalStateTypeToString(type) );
+                OOFEM_ERROR("Quantity %s not handled yet.", __InternalStateTypeToString(type));
             }
         }
 
@@ -722,7 +721,7 @@ VTKExportModule :: exportIntVarAs(InternalStateType valID, InternalStateValueTyp
                 iVal.resize(defaultSize);
                 iVal.zero();
                 val = & iVal;
-                //OOFEM_ERROR ("VTKExportModule::exportIntVars: internal error: invalid dofman data");
+                //OOFEM_ERROR("internal error: invalid dofman data");
             }
         }
 
@@ -837,7 +836,7 @@ VTKExportModule :: exportPrimVarAs(UnknownType valID, FILE *stream, TimeStep *tS
         type = ISVT_SCALAR;
         //nScalarComp = d->giveNumberOfDefaultNodeDofs();
     } else {
-        OOFEM_ERROR2( "VTKExportModule::exportPrimVarAs: unsupported UnknownType (%s)", __UnknownTypeToString(valID) );
+        OOFEM_ERROR("unsupported UnknownType (%s)", __UnknownTypeToString(valID) );
     }
 
     // print header
@@ -908,7 +907,7 @@ VTKExportModule :: exportPrimVarAs(UnknownType valID, FILE *stream, TimeStep *tS
             dofIDMask.setValues(1, P_f);
             this->getDofManPrimaryVariable(iVal, dman, dofIDMask, VM_Total, tStep, IST_Pressure);
         } else {
-            OOFEM_ERROR2( "VTKExportModule: unsupported unknownType (%s)", __UnknownTypeToString(valID) );
+            OOFEM_ERROR("unsupported unknownType (%s)", __UnknownTypeToString(valID) );
             //d->giveDofManager(regionNodalNumbers.at(inode))->giveUnknownVector(iVal, d->giveDefaultNodeDofIDArry(), valID, VM_Total, tStep);
         }
 
@@ -976,7 +975,7 @@ VTKExportModule :: getDofManPrimaryVariable(FloatArray &answer, DofManager *dman
             if ( size == recoveredVal->giveSize() ) {
                 answer.at(j) = recoveredVal->at(j);
             } else {
-                OOFEM_WARNING2("VTKExportModule :: getDofManPrimaryVariable: recovered variable size mismatch for %d", iType);
+                OOFEM_WARNING("recovered variable size mismatch for %d", iType);
                 answer.at(j) = 0.0;
             }
         }

@@ -147,7 +147,7 @@ FEI3dHexaQuad :: global2local(FloatArray &answer, const FloatArray &gcoords, con
         answer.add(delta);
     }
     if ( error > convergence_limit ) { // Imperfect, could give false negatives.
-        //OOFEM_ERROR ("global2local: no convergence after 10 iterations");
+        //OOFEM_ERROR("no convergence after 10 iterations");
         answer.zero();
         return false;
     }
@@ -251,7 +251,7 @@ FEI3dHexaQuad :: computeLocalEdgeMapping(IntArray &edgeNodes, int iedge)
     } else if ( iedge == 12 ) {
         edgeNodes.setValues(3,  4, 8, 20);
     } else {
-        OOFEM_ERROR2("FEI3dHexaQuad :: computeLocalEdgeMapping: wrong edge number (%d)", iedge);
+        OOFEM_ERROR("wrong edge number (%d)", iedge);
     }
 }
 
@@ -361,7 +361,7 @@ FEI3dHexaQuad :: computeLocalSurfaceMapping(IntArray &nodes, int isurf)
     } else if ( isurf == 6 ) {
         nodes.setValues(8,  4, 1, 5, 8, 12, 17, 16, 20);
     } else {
-        OOFEM_ERROR2("FEI3dHexaQuad :: computeLocalSurfaceMapping: wrong surface number (%d)", isurf);
+        OOFEM_ERROR("wrong surface number (%d)", isurf);
     }
 
 #if 0
@@ -422,7 +422,7 @@ FEI3dHexaQuad :: computeLocalSurfaceMapping(IntArray &nodes, int isurf)
         nodes.at(7) = 17;
         nodes.at(8) = 12;
     } else {
-        OOFEM_ERROR2("FEI3dHexaQuad :: computeLocalSurfaceMapping: wrong surface number (%d)", isurf);
+        OOFEM_ERROR("wrong surface number (%d)", isurf);
     }
 #endif
 }

@@ -62,7 +62,6 @@ LoadBalancer :: LoadBalancer(Domain *d)  : wtpList(0)
 IRResultType
 LoadBalancer :: initializeFrom(InputRecord *ir)
 {
-    const char *__proc = "initializeFrom"; // Required by IR_GIVE_FIELD macro
     IRResultType result;                 // Required by IR_GIVE_FIELD macro
 
     IntArray wtp;
@@ -85,7 +84,7 @@ LoadBalancer :: initializeWtp(IntArray &wtp)
             if ( wtp.at(i) == 1 ) {
                 plugin = new NonlocalMaterialWTP(this);
             } else {
-                OOFEM_ERROR("LoadBalancer::initializeWtp: Unknown work transfer plugin type");
+                OOFEM_SIMPLE_ERROR("Unknown work transfer plugin type");
             }
 
             wtpList.put(i, plugin);
@@ -360,7 +359,7 @@ LoadBalancer :: unpackMigratingData(Domain *d, ProcessCommunicator &pc)
             break;
 
         default:
-            OOFEM_ERROR2("LoadBalancer::unpackMigratingData: unexpected dof manager mode (%d)", _mode);
+            OOFEM_SIMPLE_ERROR("unexpected dof manager mode (%d)", _mode);
         }
     } while ( 1 );
 
@@ -431,7 +430,7 @@ LoadBalancer :: deleteRemoteDofManagers(Domain *d)
             dman->setPartitionList(& _empty);
             dman->setParallelMode(DofManager_local);
         } else {
-            OOFEM_ERROR("Domain::deleteRemoteDofManagers: unknown dmode encountered");
+            OOFEM_SIMPLE_ERROR("deleteRemoteDofManagers: unknown dmode encountered");
         }
     }
 }
@@ -514,15 +513,15 @@ WallClockLoadBalancerMonitor :: decide(TimeStep *tStep)
     double neqelems, sum_relcomppowers;
 
     if ( node_solutiontimes == NULL ) {
-        OOFEM_ERROR("LoadBalancer::LoadEvaluation failed to allocate node_solutiontimes array");
+        OOFEM_SIMPLE_ERROR("failed to allocate node_solutiontimes array");
     }
 
     if ( node_relcomppowers == NULL ) {
-        OOFEM_ERROR("LoadBalancer::LoadEvaluation failed to allocate node_relcomppowers array");
+        OOFEM_SIMPLE_ERROR("failed to allocate node_relcomppowers array");
     }
 
     if ( node_equivelements == NULL ) {
-        OOFEM_ERROR("LoadBalancer::LoadEvaluation failed to allocate node_equivelements array");
+        OOFEM_SIMPLE_ERROR("failed to allocate node_equivelements array");
     }
 
 
@@ -650,7 +649,7 @@ WallClockLoadBalancerMonitor :: decide(TimeStep *tStep)
             delete[] procWeights;
 
             if ( fabs(sumWeight - 1.0) > 1.0e-10 ) {
-                OOFEM_ERROR2("[%d] WallClockLoadBalancerMonitor:processing weights do not sum to 1.0 (sum = %e)\n", sumWeight);
+                OOFEM_SIMPLE_ERROR("[%d] processing weights do not sum to 1.0 (sum = %e)\n", sumWeight);
             }
 
             OOFEM_LOG_RELEVANT("[%d] LoadBalancer: wall clock imbalance rel=%.2f\%,abs=%.2fs, recovering load\n", myrank, 100 * relWallClockImbalance, absWallClockImbalance);
@@ -678,7 +677,6 @@ WallClockLoadBalancerMonitor :: decide(TimeStep *tStep)
 IRResultType
 LoadBalancerMonitor :: initializeFrom(InputRecord *ir)
 {
-    const char *__proc = "initializeFrom"; // Required by IR_GIVE_FIELD macro
     IRResultType result;                 // Required by IR_GIVE_FIELD macro
     int nproc = emodel->giveNumberOfProcesses();
     int nodeWeightMode = 0;
@@ -696,12 +694,12 @@ LoadBalancerMonitor :: initializeFrom(InputRecord *ir)
     } else if ( nodeWeightMode == 2 ) { // user defined static weights
         IR_GIVE_OPTIONAL_FIELD(ir, nodeWeights, _IFT_LoadBalancerMonitor_initialnodeweights);
         if ( nodeWeights.giveSize() != nproc ) {
-            OOFEM_ERROR("nodeWeights size not equal to number of processors");
+            OOFEM_SIMPLE_ERROR("nodeWeights size not equal to number of processors");
         }
 
         staticNodeWeightFlag = true;
     } else {
-        OOFEM_ERROR("unsupported node weight type, using default value");
+        OOFEM_SIMPLE_ERROR("unsupported node weight type, using default value");
         staticNodeWeightFlag = false;
     }
 
@@ -711,7 +709,6 @@ LoadBalancerMonitor :: initializeFrom(InputRecord *ir)
 IRResultType
 WallClockLoadBalancerMonitor :: initializeFrom(InputRecord *ir)
 {
-    const char *__proc = "initializeFrom"; // Required by IR_GIVE_FIELD macro
     IRResultType result;                 // Required by IR_GIVE_FIELD macro
 
     result = LoadBalancerMonitor :: initializeFrom(ir);
@@ -734,7 +731,7 @@ WallClockLoadBalancerMonitor :: initializeFrom(InputRecord *ir)
     processingWeights.clear();
     IR_GIVE_OPTIONAL_FIELD(ir, processingWeights, _IFT_WallClockLoadBalancerMonitor_processingweights);
     if ( recoveredSteps.giveSize() != processingWeights.giveSize() ) {
-        OOFEM_ERROR("WallClockLoadBalancerMonitor::initializeFrom - mismatch size of lbrecoveredsteps and lbprocessingweights");
+        OOFEM_SIMPLE_ERROR("mismatch size of lbrecoveredsteps and lbprocessingweights");
     }
 
 #endif

@@ -35,8 +35,6 @@
 #ifndef scalarfunction_h
 #define scalarfunction_h
 
-#include "floatarray.h"
-#include "domain.h"
 #include "parser.h"
 #include "error.h"
 
@@ -45,6 +43,8 @@
 
 namespace oofem {
 class FunctionArgument;
+class Domain;
+class FloatArray;
 
 /**
  * Implementation of Scalar function. The scalar function can be defined as

@@ -69,7 +69,6 @@ HOMExportModule :: ~HOMExportModule()
 IRResultType
 HOMExportModule :: initializeFrom(InputRecord *ir)
 {
-    const char *__proc = "initializeFrom"; // Required by IR_GIVE_FIELD macro
     IRResultType result;                 // Required by IR_GIVE_FIELD macro
     IRResultType val;
     this->scale = 1.;
@@ -132,7 +131,7 @@ HOMExportModule :: doOutput(TimeStep *tStep, bool forcedOutput)
 #ifdef __SM_MODULE
         StructuralElement *structElem;
         //int nnodes = d->giveNumberOfDofManagers();
-        FloatArray VecStrain, VecStress, VecEigStrain, tempStrain(6), tempStress(6), tempEigStrain(6), SumStrain(6), SumStress(6), SumEigStrain(6), tempFloatAr, damage;
+        FloatArray VecStrain, VecStress, VecEigStrain, VecEigStrainReduced, tempStrain(6), tempStress(6), tempEigStrain(6), SumStrain(6), SumStress(6), SumEigStrain(6), tempFloatAr, damage;
         double sumDamage = 0.;
         //stress and strain vectors are always in global c.s.
         SumStrain.zero(); //xx, yy, zz, yz, zx, xy
@@ -151,7 +150,12 @@ HOMExportModule :: doOutput(TimeStep *tStep, bool forcedOutput)
                     gp  = iRule->getIntegrationPoint(i);
                     structElem = static_cast< StructuralElement * >(elem);
                     // structElem->computeResultingIPEigenstrainAt(VecEigStrain, tStep, gp, VM_Incremental);
-                    structElem->computeResultingIPEigenstrainAt(VecEigStrain, tStep, gp, VM_Total);
+                    structElem->computeResultingIPEigenstrainAt(VecEigStrainReduced, tStep, gp, VM_Total);
+		    if( VecEigStrainReduced.giveSize() == 0 ){
+                        VecEigStrain.resize(0);
+                    } else {
+                        ((StructuralMaterial*)structElem->giveMaterial())->giveFullSymVectorForm(VecEigStrain, VecEigStrainReduced,  gp->giveMaterialMode());
+                    }
                     dV  = elem->computeVolumeAround(gp);
                     elem->giveIPValue(VecStrain, gp, IST_StrainTensor, tStep);
                     elem->giveIPValue(VecStress, gp, IST_StressTensor, tStep);
@@ -247,7 +251,7 @@ HOMExportModule :: initialize()
 
     std :: string fileName = emodel->giveOutputBaseFileName() + ".hom";
     if ( ( this->stream = fopen(fileName.c_str(), "w") ) == NULL ) {
-        OOFEM_ERROR2( "HOMExportModule::giveOutputStream: failed to open file %s", fileName.c_str() );
+        OOFEM_ERROR("failed to open file %s", fileName.c_str());
     }
 
     if ( domType == _HeatTransferMode || domType == _HeatMass1Mode ) {

@@ -78,7 +78,7 @@ NumericalMethod *IncrementalLinearStatic :: giveNumericalMethod(MetaStep *mStep)
 
     nMethod = classFactory.createSparseLinSolver(solverType, this->giveDomain(1), this);
     if ( nMethod == NULL ) {
-        _error("giveNumericalMethod: linear solver creation failed");
+        OOFEM_ERROR("linear solver creation failed");
     }
 
     return nMethod;
@@ -87,7 +87,6 @@ NumericalMethod *IncrementalLinearStatic :: giveNumericalMethod(MetaStep *mStep)
 
 IRResultType IncrementalLinearStatic :: initializeFrom(InputRecord *ir)
 {
-    const char *__proc = "initializeFrom";
     IRResultType result;
 
     IR_GIVE_OPTIONAL_FIELD(ir, discreteTimes, _IFT_IncrementalLinearStatic_prescribedtimes);
@@ -127,7 +126,7 @@ double IncrementalLinearStatic :: giveDiscreteTime(int iStep)
         }
     }
 
-    _error("giveDiscreteTime: invalid iStep");
+    OOFEM_ERROR("invalid iStep");
     return 0.0;
 }
 
@@ -255,7 +254,7 @@ void IncrementalLinearStatic :: solveYourselfAt(TimeStep *tStep)
 
     stiffnessMatrix = classFactory.createSparseMtrx(sparseMtrxType);
     if ( stiffnessMatrix == NULL ) {
-        _error("solveYourselfAt: sparse matrix creation failed");
+        OOFEM_ERROR("sparse matrix creation failed");
     }
 
     stiffnessMatrix->buildInternalStructure( this, 1, EID_MomentumBalance, EModelDefaultEquationNumbering() );
@@ -269,7 +268,7 @@ void IncrementalLinearStatic :: solveYourselfAt(TimeStep *tStep)
     this->giveNumericalMethod( this->giveCurrentMetaStep() );
     NM_Status s = nMethod->solve(stiffnessMatrix, & loadVector, & incrementOfDisplacementVector);
     if ( !( s & NM_Success ) ) {
-        OOFEM_ERROR("IncrementalLinearStatic :: solverYourselfAt - No success in solving system.");
+        OOFEM_ERROR("No success in solving system.");
     }
 }
 
@@ -281,7 +280,7 @@ double IncrementalLinearStatic :: giveUnknownComponent(ValueModeType mode, TimeS
         if ( dof->giveUnknowns()->includes(hash) ) {
             return dof->giveUnknowns()->at(hash);
         } else {
-            OOFEM_ERROR2( "giveUnknown:  Dof unknowns dictionary does not contain unknown of value mode (%s)", __ValueModeTypeToString(mode) );
+            OOFEM_ERROR("Dof unknowns dictionary does not contain unknown of value mode (%s)", __ValueModeTypeToString(mode) );
         }
     } else {
         OOFEM_ERROR("Only the mode requiresUnknownsDictionaryUpdate() is supported");

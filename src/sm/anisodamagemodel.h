@@ -75,6 +75,10 @@ protected:
     FloatMatrix damage;
     /// Non-equilibrated second order damage tensor
     FloatMatrix tempDamage;
+    /// Out-of-plane value for 2dPlaneStress mode
+    double tempStrainZ;
+    /// Non-equilibrated out-of-plane value for 2dPlaneStress mode
+    double strainZ;
     /// This flag turns into 1 and remains 1 when the trace of the damage tensor is >1 in compression (tr(strainTensor)<0)
     int flag;
     int tempFlag;
@@ -92,7 +96,7 @@ protected:
 
 public:
     /// Constructor
-    AnisotropicDamageMaterialStatus(int n, Domain * d, GaussPoint * g);
+    AnisotropicDamageMaterialStatus(int n, Domain *d, GaussPoint *g);
     /// Destructor
     virtual ~AnisotropicDamageMaterialStatus();
 
@@ -113,12 +117,19 @@ public:
     // Assigns temp. damage tensor to given tensor d
     //	void setTempDamage(FloatMatrix &d){tempDamage = d;}
     void setTempDamage(FloatMatrix d) { tempDamage = d; }
+    /// Returns the last equilibrated scalar measure of the out-of-plane strain to given value (for 2dPlaneStress mode).
+    double giveStrainZ() { return strainZ; }
+    /// Returns the temp scalar measure of the out-of-plane strain to given value (for 2dPlaneStress mode).
+    double giveTempStrainZ() { return tempStrainZ; }
+    /// Sets the temp scalar measure of the out-of-plane strain to given value (for 2dPlaneStress mode).
+    void setTempStrainZ(double newStrainZ) { tempStrainZ = newStrainZ; }
     /// Returns the value of the flag.
     int giveFlag() { return flag; }
     /// Sets the value of the temporary value of flag.
     void setTempFlag(int newflag) { tempFlag = newflag; }
     /// Returns the value of the temporary value of flag.
     int giveTempFlag() { return tempFlag; }
+
 
 
 #ifdef keep_track_of_dissipated_energy
@@ -175,7 +186,7 @@ protected:
 
 public:
     /// Constructor
-    AnisotropicDamageMaterial(int n, Domain * d);
+    AnisotropicDamageMaterial(int n, Domain *d);
     /// Destructor
     virtual ~AnisotropicDamageMaterial();
 
@@ -258,9 +269,11 @@ protected:
     virtual void give1dStressStiffMtrx(FloatMatrix &answer, MatResponseMode mmode,
                                        GaussPoint *gp,
                                        TimeStep *tStep);
+    virtual void computePlaneStressStrain(FloatMatrix &answer, FloatMatrix damageTensor, FloatArray totalStrain,        GaussPoint *gp,
+                                          TimeStep *atTime);
 
     virtual void computeDamageTensor(FloatMatrix &answer, GaussPoint *gp,
-                                     const FloatArray &totalStrain,
+                                     const FloatArray &totalStrain, double equivStrain,
                                      TimeStep *atTime);
 
 
@@ -268,6 +281,10 @@ protected:
                                        FloatMatrix damageTensor, GaussPoint *gp);
 
     double computeK(GaussPoint *gp);
+
+    double computeKappa(FloatMatrix damageTensor);
+
+    double computeTraceTempD(double equivStrain);
 };
 } // end namespace oofem
 #endif // anisodamagemodel_h

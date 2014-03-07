@@ -195,7 +195,6 @@ TrabBoneNL :: giveInterface(InterfaceType type)
 IRResultType
 TrabBoneNL :: initializeFrom(InputRecord *ir)
 {
-    const char *__proc = "initializeFrom"; // Required by IR_GIVE_FIELD macro
     IRResultType result;                             // Required by IR_GIVE_FIELD macro
 
     TrabBoneMaterial :: initializeFrom(ir);

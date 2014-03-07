@@ -90,7 +90,7 @@ FreemInterface :: createInput(Domain *d, TimeStep *tStep)
     for ( int i = 1; i <= nelem; i++ ) {
         ielem = d->giveElement(i);
         if ( ielem->giveGeometryType() != EGT_quad_1 ) {
-            OOFEM_ERROR("FreemInterface::createInput : unsupported element type (not a bilinear quad)");
+            OOFEM_SIMPLE_ERROR("FreemInterface::createInput : unsupported element type (not a bilinear quad)");
         }
 
         fprintf( outputStrem, "backgroundMeshElem %d  nodes 4 %d %d %d %d\n", i,

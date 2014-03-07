@@ -44,7 +44,6 @@ CompRow_ILUPreconditioner(const SparseMtrx &A, InputRecord &attributes) : Precon
 IRResultType
 CompRow_ILUPreconditioner :: initializeFrom(InputRecord *ir)
 {
-    const char *__proc = "initializeFrom"; // Required by IR_GIVE_FIELD macro
     IRResultType result;                // Required by IR_GIVE_FIELD macro
 
     Preconditioner :: initializeFrom(ir);
@@ -66,7 +65,7 @@ CompRow_ILUPreconditioner :: init(const SparseMtrx &A)
         this->A =  ( * ( ( DynCompRow * ) & A ) );
         ( this->A ).ILUPYourself(part_fill, drop_tol);
     } else {
-        OOFEM_ERROR("CompRow_ILUPreconditioner::init : unsupported sparse matrix type");
+        OOFEM_SIMPLE_ERROR("unsupported sparse matrix type");
     }
 }
 

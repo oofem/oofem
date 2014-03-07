@@ -41,7 +41,6 @@
 #include "femcmpnn.h"
 #include "error.h"
 #include "datastream.h"
-#include "oofem_limits.h"
 #include "contextioerr.h"
 #include "dynamicinputrecord.h"
 
@@ -86,30 +85,10 @@ FEMComponent :: giveInputRecord(DynamicInputRecord &input)
 }
 
 
-void
-FEMComponent :: error(const char *file, int line, const char *format, ...) const
+std :: string
+FEMComponent :: errorInfo(const char *func) const
 {
-    char buffer [ MAX_ERROR_MSG_LENGTH ];
-    va_list args;
-
-    va_start(args, format);
-    vsprintf(buffer, format, args);
-    va_end(args);
-
-    __OOFEM_ERROR4(file, line, "Class: %s, number: %d\n%s", giveClassName(), giveNumber(), buffer);
+    return std :: string(this->giveClassName()) + "::" + func + ", number: " + std::to_string(this->giveNumber());
 }
 
-
-void
-FEMComponent :: warning(const char *file, int line, const char *format, ...) const
-{
-    char buffer [ MAX_ERROR_MSG_LENGTH ];
-    va_list args;
-
-    va_start(args, format);
-    vsprintf(buffer, format, args);
-    va_end(args);
-
-    __OOFEM_WARNING4(file, line, "Class: %s, number: %d\n%s", giveClassName(), giveNumber(), buffer);
-}
 } // end namespace oofem

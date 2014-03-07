@@ -40,7 +40,6 @@
 #include "enrichmentdomain.h"
 #include "cltypes.h"
 #include "connectivitytable.h"
-#include "oofem_limits.h"
 #include "classfactory.h"
 #include "fracturemanager.h"
 #include "mathfem.h"
@@ -110,7 +109,6 @@ EnrichmentItem :: ~EnrichmentItem()
 
 IRResultType EnrichmentItem :: initializeFrom(InputRecord *ir)
 {
-    const char *__proc = "initializeFrom"; // Required by IR_GIVE_FIELD macro
     IRResultType result; // Required by IR_GIVE_FIELD macro
 
     mEnrFrontIndex = 0;
@@ -172,7 +170,6 @@ void EnrichmentItem :: appendInputRecords(DynamicDataReader &oDR)
 
 int EnrichmentItem :: instanciateYourself(DataReader *dr)
 {
-    const char *__proc = "instanciateYourself"; // Required by IR_GIVE_FIELD macro
     IRResultType result; // Required by IR_GIVE_FIELD macro
     std :: string name;
 
@@ -181,14 +178,14 @@ int EnrichmentItem :: instanciateYourself(DataReader *dr)
     result = mir->giveRecordKeywordField(name);
 
     if ( result != IRRT_OK ) {
-        IR_IOERR(giveClassName(), __proc, "", mir, result);
+        mir->report_error(this->giveClassName(), __func__, "", result, __FILE__, __LINE__);
     }
 
     mpEnrichmentFunc = classFactory.createEnrichmentFunction( name.c_str(), 1, this->giveDomain() );
     if ( mpEnrichmentFunc != NULL ) {
         mpEnrichmentFunc->initializeFrom(mir);
     } else {
-        OOFEM_ERROR2( "EnrichmentItem::instanciateYourself: failed to create enrichment function (%s)", name.c_str() );
+        OOFEM_ERROR("failed to create enrichment function (%s)", name.c_str() );
     }
 
 
@@ -196,12 +193,12 @@ int EnrichmentItem :: instanciateYourself(DataReader *dr)
     mir = dr->giveInputRecord(DataReader :: IR_geoRec, 1);
     result = mir->giveRecordKeywordField(name);
     if ( result != IRRT_OK ) {
-        IR_IOERR(giveClassName(), __proc, "", mir, result);
+        mir->report_error(this->giveClassName(), __func__, "", result, __FILE__, __LINE__);
     }
 
     mpEnrichmentDomain = classFactory.createEnrichmentDomain( name.c_str() );
     if ( mpEnrichmentDomain == NULL ) {
-        OOFEM_ERROR2( "EnrichmentItem::instanciateYourself: unknown enrichment domain (%s)", name.c_str() );
+        OOFEM_ERROR("unknown enrichment domain (%s)", name.c_str() );
     }
 
     if ( giveDomain()->giveXfemManager()->giveVtkDebug() ) {
@@ -224,7 +221,7 @@ int EnrichmentItem :: instanciateYourself(DataReader *dr)
         if ( mpEnrichmentFront != NULL ) {
             mpEnrichmentFront->initializeFrom(enrFrontir);
         } else {
-            OOFEM_ERROR2( "EnrichmentItem::instanciateYourself: Failed to create enrichment front (%s)", enrFrontName.c_str() );
+            OOFEM_ERROR("Failed to create enrichment front (%s)", enrFrontName.c_str() );
         }
     }
 
@@ -242,12 +239,12 @@ int EnrichmentItem :: instanciateYourself(DataReader *dr)
         if ( mpPropagationLaw != NULL ) {
             mpPropagationLaw->initializeFrom(propLawir);
         } else {
-            OOFEM_ERROR2( "EnrichmentItem::instanciateYourself: Failed to create propagation law (%s)", propLawName.c_str() );
+            OOFEM_ERROR("Failed to create propagation law (%s)", propLawName.c_str() );
         }
     }
 
     // Set start of the enrichment dof pool for the given EI
-    int xDofPoolAllocSize = this->giveEnrichesDofsWithIdArray()->giveSize() * this->giveNumberOfEnrDofs() * 1;
+    int xDofPoolAllocSize = this->giveEnrichesDofsWithIdArray()->giveSize() * this->giveNumberOfEnrDofs() * 1 + 5; // TODO: overload for Crack
     this->startOfDofIdPool = this->giveDomain()->giveNextFreeDofID(xDofPoolAllocSize);
     this->endOfDofIdPool = this->startOfDofIdPool + xDofPoolAllocSize - 1;
 
@@ -302,6 +299,25 @@ int EnrichmentItem :: giveNumDofManEnrichments(const DofManager &iDMan) const
     }
 
     return 0;
+}
+
+int EnrichmentItem :: giveNumEnrichedDofs(const DofManager &iDMan) const
+{
+	int numEnrDofs = 0;
+
+	int startId = giveStartOfDofIdPool();
+	int endId = this->giveEndOfDofIdPool();
+
+	for(int i = 1; i <= iDMan.giveNumberOfDofs(); i++) {
+		int dofId = iDMan.giveDof(i)->giveDofID();
+
+		// If the dof belongs to this enrichment item
+		if(dofId >= startId && dofId <= endId) {
+			numEnrDofs++;
+		}
+	}
+
+	return numEnrDofs;
 }
 
 bool EnrichmentItem :: isMaterialModified(GaussPoint &iGP, Element &iEl, CrossSection * &opCS) const
@@ -1166,7 +1182,6 @@ bool Inclusion :: isMaterialModified(GaussPoint &iGP, Element &iEl, CrossSection
 IRResultType Inclusion :: initializeFrom(InputRecord *ir)
 {
     EnrichmentItem :: initializeFrom(ir);
-    const char *__proc = "initializeFrom";
     IRResultType result;
     int crossSectionIndex = 0;
     IR_GIVE_FIELD(ir, crossSectionIndex, _IFT_Inclusion_CrossSection);
@@ -1230,7 +1245,6 @@ Delamination :: Delamination(int n, XfemManager *xm, Domain *aDomain) : Enrichme
 IRResultType Delamination :: initializeFrom(InputRecord *ir)
 {
     EnrichmentItem :: initializeFrom(ir);
-    const char *__proc = "initializeFrom"; // Required by IR_GIVE_FIELD macro
     IRResultType result;                   // Required by IR_GIVE_FIELD macro
 
     // Compute the delamination xi-coord
@@ -1239,7 +1253,7 @@ IRResultType Delamination :: initializeFrom(InputRecord *ir)
 
     LayeredCrossSection *layeredCS = dynamic_cast< LayeredCrossSection * >( this->giveDomain()->giveCrossSection(this->crossSectionNum) );
     if ( layeredCS == NULL ) {
-        OOFEM_ERROR("Delamination :: initializeFrom - requires a layered cross section reference as input");
+        OOFEM_ERROR("requires a layered cross section reference as input");
     }
 
     this->delamXiCoord = -1.0;

@@ -329,7 +329,7 @@ public:
             return pcBuffer;
         }
 
-        OOFEM_ERROR("ProcessCommunicator::giveRecvBuff : ProcessCommunicatorBuff undefined");
+        OOFEM_SIMPLE_ERROR("ProcessCommunicator::giveRecvBuff : ProcessCommunicatorBuff undefined");
         return NULL;
     }
 

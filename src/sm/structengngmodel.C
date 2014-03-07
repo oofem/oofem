@@ -177,7 +177,7 @@ StructuralEngngModel :: checkConsistency()
         StructuralElementEvaluator *see = dynamic_cast< StructuralElementEvaluator * >(ePtr);
 
         if ( sePtr == NULL && see == NULL && siePtr == NULL ) {
-            _warning2("checkConsistency: element %d has no Structural support", i);
+            OOFEM_WARNING("element %d has no Structural support", i);
             return 0;
         }
     }
@@ -258,7 +258,7 @@ StructuralEngngModel :: buildReactionTable(IntArray &restrDofMans, IntArray &res
                     eqn.at(count) = rindex;
                 } else {
                     // NullDof has no equation number and no prescribed equation number
-                    //_error ("No prescribed equation number assigned to supported DOF");
+                    //_error("No prescribed equation number assigned to supported DOF");
                 }
             }
         }

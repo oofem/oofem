@@ -59,7 +59,6 @@ IRResultType IGAElement :: initializeFrom(InputRecord *ir)
 #ifdef __PARALLEL_MODE
     int numberOfKnotSpans = 0;
 
-    const char *__proc = "initializeFrom"; // Required by IR_GIVE_FIELD macro
 #endif
 
     IRResultType result = Element :: initializeFrom(ir); // read nodes , material, cross section
@@ -171,7 +170,7 @@ IRResultType IGAElement :: initializeFrom(InputRecord *ir)
             }
         }
     } else {
-        OOFEM_ERROR2("unsupported number of spatial dimensions (nsd = %d)", nsd);
+        OOFEM_SIMPLE_ERROR("unsupported number of spatial dimensions (nsd = %d)", nsd);
     }
 
 #ifdef __PARALLEL_MODE
@@ -199,7 +198,7 @@ IGAElement :: giveKnotSpanParallelMode(int knotSpanIndex) const
     } else if ( emode == Element_local ) {
         return ( elementParallelMode ) this->knotSpanParallelMode.at(knotSpanIndex + 1);
     } else {
-        _error("Cannot determine elementParallelMode");
+        OOFEM_SIMPLE_ERROR("Cannot determine elementParallelMode");
     }
 
     return Element_local; //to make compiler happy
@@ -277,7 +276,7 @@ IRResultType IGATSplineElement :: initializeFrom(InputRecord *ir)
             }
         }
     } else {
-        OOFEM_ERROR2("unsupported number of spatial dimensions (nsd = %d)", nsd);
+        OOFEM_SIMPLE_ERROR("unsupported number of spatial dimensions (nsd = %d)", nsd);
     }
 
     return IRRT_OK;
@@ -1004,7 +1003,7 @@ void IGAElement :: drawRawGeometry(oofegGraphicContext &gc)
             }
         }                 // end loop over knot spans (irules)
     } else {
-        OOFEM_ERROR2("drawRawGeometry: not implemented for nsd = %d", nsd);
+        OOFEM_SIMPLE_ERROR("not implemented for nsd = %d", nsd);
     }
 }
 
@@ -1235,7 +1234,7 @@ void drawIGAPatchDeformedGeometry(Element *elem, StructuralElementEvaluator *se,
             }
         }                 // end loop over knot spans (irules)
     } else {
-        OOFEM_ERROR2("drawDeformedGeometry: not implemented for nsd = %d", nsd);
+        OOFEM_SIMPLE_ERROR("not implemented for nsd = %d", nsd);
     }
 }
 

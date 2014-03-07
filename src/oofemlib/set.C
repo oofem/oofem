@@ -50,7 +50,6 @@
 namespace oofem {
 IRResultType Set :: initializeFrom(InputRecord *ir)
 {
-    const char *__proc = "initializeFrom";
     IRResultType result;
 
     FEMComponent :: initializeFrom(ir);
@@ -191,15 +190,13 @@ void Set :: setEdgeList(const IntArray &newEdges) { this->elementEdges = newEdge
 
 void Set :: setNodeList(const IntArray &newNodes) { this->nodes = newNodes; }
 
-void Set :: addAllElements() {
-    int numEl = this->giveDomain()->giveNumberOfElements();
-    this->elements.resize(numEl);
-    for ( int i = 1; i <= numEl; i++ ) {
-        this->elements.at(i) = i;
-    }
+void Set :: addAllElements()
+{
+    this->elements.enumerate(this->giveDomain()->giveNumberOfElements());
 }
 
-bool Set :: hasElement(int number) const {
+bool Set :: hasElement(int number) const
+{
     return this->elements.contains(number);
 }
 

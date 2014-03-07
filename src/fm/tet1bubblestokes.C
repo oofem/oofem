@@ -128,7 +128,7 @@ void Tet1BubbleStokes :: giveCharacteristicVector(FloatArray &answer, CharType m
     } else if ( mtrx == InternalForcesVector ) {
         this->computeInternalForcesVector(answer, tStep);
     } else {
-        OOFEM_ERROR("giveCharacteristicVector: Unknown Type of characteristic mtrx.");
+        OOFEM_ERROR("Unknown Type of characteristic mtrx.");
     }
 }
 
@@ -139,7 +139,7 @@ void Tet1BubbleStokes :: giveCharacteristicMatrix(FloatMatrix &answer,
     if ( mtrx == StiffnessMatrix ) {
         this->computeStiffnessMatrix(answer, tStep);
     } else {
-        OOFEM_ERROR("giveCharacteristicMatrix: Unknown Type of characteristic mtrx.");
+        OOFEM_ERROR("Unknown Type of characteristic mtrx.");
     }
 }
 
@@ -207,7 +207,7 @@ void Tet1BubbleStokes :: computeExternalForcesVector(FloatArray &answer, TimeSte
         if ( ltype == SurfaceLoadBGT ) {
             this->computeBoundaryLoadVector(vec, static_cast< BoundaryLoad * >(load), load_id, ExternalForcesVector, VM_Total, tStep);
         } else {
-            OOFEM_ERROR2("Tet1BubbleStokes :: computeLoadVector - Unsupported boundary condition: %d", load_id);
+            OOFEM_ERROR("Unsupported boundary condition: %d", load_id);
         }
 
         answer.add(vec);
@@ -221,7 +221,7 @@ void Tet1BubbleStokes :: computeExternalForcesVector(FloatArray &answer, TimeSte
             this->computeLoadVector(vec, load, ExternalForcesVector, VM_Total, tStep);
             answer.add(vec);
         } else {
-            OOFEM_ERROR2("Tet1BubbleStokes :: computeLoadVector - Unsupported body load: %d", load);
+            OOFEM_ERROR("Unsupported body load: %d", load);
         }
     }
 }
@@ -321,7 +321,7 @@ void Tet1BubbleStokes :: computeBoundaryLoadVector(FloatArray &answer, BoundaryL
         answer.zero();
         answer.assemble(f, this->surf_ordering [ iSurf - 1 ]);
     } else {
-        OOFEM_ERROR("Tet1BubbleStokes :: computeBoundaryLoadVector - Strange boundary condition type");
+        OOFEM_ERROR("Strange boundary condition type");
     }
 }
 

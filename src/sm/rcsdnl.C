@@ -270,8 +270,8 @@ RCSDNLMaterial :: giveRealStressVector(FloatArray &answer, GaussPoint *gp,
                 // test for internal consistency error
                 // we should switch to scalar damage, but no softening take place
                 if ( ipos == 0 ) {
-                    //RCSDEMaterial :: _error ("giveRealStressVector: can not switch to sd mode, while no cracking");
-                    _error("giveRealStressVector: can not switch to sd mode, while no cracking");
+                    //RCSDEMaterial :: OOFEM_ERROR("can not switch to sd mode, while no cracking");
+                    OOFEM_ERROR("can not switch to sd mode, while no cracking");
                 }
 
                 //if (minSofteningPrincStress <= this->SDTransitionCoeff * CurrFt) printf (".");
@@ -352,7 +352,6 @@ RCSDNLMaterial :: giveRealStressVector(FloatArray &answer, GaussPoint *gp,
 IRResultType
 RCSDNLMaterial :: initializeFrom(InputRecord *ir)
 {
-    const char *__proc = "initializeFrom"; // Required by IR_GIVE_FIELD macro
     IRResultType result;                // Required by IR_GIVE_FIELD macro
 
     //RCSDEMaterial::instanciateFrom (ir);
@@ -382,7 +381,7 @@ RCSDNLMaterial :: initializeFrom(InputRecord *ir)
         IR_GIVE_FIELD(ir, this->Gf, _IFT_RCSDNLMaterial_gf);
         this->ef = this->Gf / this->Ft;
     } else {
-        _error("initializeFrom: cannont determine Gf and ef from input data");
+        OOFEM_ERROR("cannot determine Gf and ef from input data");
     }
 
     return IRRT_OK;
@@ -424,7 +423,7 @@ RCSDNLMaterial :: computeWeightFunction(const FloatArray &src, const FloatArray 
  * char errMsg [80];
  * sprintf (errMsg,"Element %d returned zero char length",
  *    gp->giveElement()->giveNumber());
- * RCSDMaterial::_error (errMsg);
+ * RCSDMaterial::_error(errMsg);
  * }
  *
  * //status -> setCharLength(i, Le);

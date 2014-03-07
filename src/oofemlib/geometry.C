@@ -218,7 +218,6 @@ void Line :: transformIntoPolar(FloatArray *point, FloatArray &answer)
 
 IRResultType Line :: initializeFrom(InputRecord *ir)
 {
-    const char *__proc = "initializeFrom"; // Required by IR_GIVE_FIELD macro
     IRResultType result; // Required by IR_GIVE_FIELD macro
 
     FloatArray *start = new FloatArray(2);
@@ -441,7 +440,6 @@ void Circle :: computeNormalSignDist(double &oDist, const FloatArray &iPoint) co
 
 IRResultType Circle :: initializeFrom(InputRecord *ir)
 {
-    const char *__proc = "initializeFrom"; // Required by IR_GIVE_FIELD macro
     IRResultType result; // Required by IR_GIVE_FIELD macro
 
     FloatArray *center = new FloatArray(2);
@@ -818,7 +816,7 @@ void PolygonLine :: computeTangentialSignDist(double &oDist, const FloatArray &i
 
             return;
         } else {
-            OOFEM_ERROR2("PolygonLine :: computeTangentialSignDist: Index of minDistSegIndex not covered in loop: %d\n", minDistSegIndex);
+            OOFEM_ERROR("Index of minDistSegIndex not covered in loop: %d\n", minDistSegIndex);
         }
     }
 }
@@ -886,7 +884,6 @@ void PolygonLine :: giveSubPolygon(std :: vector< FloatArray > &oPoints, const d
 
 IRResultType PolygonLine :: initializeFrom(InputRecord *ir)
 {
-    const char *__proc = "initializeFrom"; // Required by IR_GIVE_FIELD macro
     IRResultType result; // Required by IR_GIVE_FIELD macro
 
 
@@ -1252,7 +1249,6 @@ void PolygonLine :: printVTK(int iTStepIndex, int iLineIndex)
 
 IRResultType PointSwarm :: initializeFrom(InputRecord *ir)
 {
-    const char *__proc = "initializeFrom"; // Required by IR_GIVE_FIELD macro
     IRResultType result; // Required by IR_GIVE_FIELD macro
     IntArray idList;
 

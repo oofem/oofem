@@ -289,7 +289,7 @@ PerfectlyPlasticMaterial :: giveEffectiveMaterialStiffnessMatrix(FloatMatrix &an
         lMat->giveStiffnessMatrix(stiff, mode, gp, tStep);
         this->giveFullSymMatrixForm( answer, stiff, gp->giveMaterialMode() );
     } else {
-        OOFEM_ERROR("PerfectlyPlasticMaterial :: giveEffectiveMaterialStiffnessMatrix - unsupported material mode");
+        OOFEM_ERROR("giveEffectiveMaterialStiffnessMatrix - unsupported material mode");
     }
 }
 
@@ -374,7 +374,7 @@ PerfectlyPlasticMaterial :: give3dMaterialStiffnessMatrix(FloatMatrix &answer,
 {
     MaterialMode originalMode = gp->giveMaterialMode();
     if ( originalMode != _3dMat ) {
-        _error("give3dMaterialStiffnessMatrix : Different stressStrain mode encountered");
+        OOFEM_ERROR("Different stressStrain mode encountered");
     }
 
     // we can force 3d response, and we obtain correct 3d tangent matrix,
@@ -659,7 +659,7 @@ PerfectlyPlasticMaterial :: give(int aProperty, GaussPoint *gp)
         if ( linearElasticMaterial ) {
             value = this->linearElasticMaterial->give(aProperty, gp);
         } else {
-            _error("give: property not defined");
+            OOFEM_ERROR("property not defined");
         }
     }
 

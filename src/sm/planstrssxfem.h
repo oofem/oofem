@@ -36,7 +36,7 @@
 #define planstrssxfem_h
 
 #include "planstrss.h"
-#include "xfem/xfemelementinterface.h"
+#include "xfem/xfemstructuralelementinterface.h"
 #include "vtkxmlexportmodule.h"
 
 #define _IFT_PlaneStress2dXfem_Name "planestress2dxfem"
@@ -47,7 +47,7 @@ namespace oofem {
  * in the usual case instead of PlaneStress2dXfem
  * there will be the standard PlaneStress2d
  */
-class PlaneStress2dXfem : public PlaneStress2d, public XfemElementInterface, public VTKXMLExportModuleElementInterface
+class PlaneStress2dXfem : public PlaneStress2d, public XfemStructuralElementInterface, public VTKXMLExportModuleElementInterface
 {
 protected:
     virtual void updateYourself(TimeStep *tStep);
@@ -55,7 +55,7 @@ protected:
 
 public:
     /// Constructor
-    PlaneStress2dXfem(int n, Domain * d) : PlaneStress2d(n, d), XfemElementInterface(this), VTKXMLExportModuleElementInterface() { }
+    PlaneStress2dXfem(int n, Domain * d) : PlaneStress2d(n, d), XfemStructuralElementInterface(this), VTKXMLExportModuleElementInterface() { }
     /// Destructor
     virtual ~PlaneStress2dXfem() { };
 

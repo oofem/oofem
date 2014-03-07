@@ -68,7 +68,7 @@ AdaptiveLinearStatic :: updateYourself(TimeStep *tStep)
             //this->terminateAnalysis();
             //exit(1);
         } else {
-            _error("solveYourselfAt: MesherInterface::createMesh failed");
+            OOFEM_ERROR("MesherInterface::createMesh failed");
         }
     }
 }
@@ -104,7 +104,7 @@ AdaptiveLinearStatic :: initializeAdaptive(int tStepNumber)
      * Domain* dNew = new Domain (1, sernum, this);
      * FILE* domainInputFile;
      * this->giveDomainFile (&domainInputFile, 1, sernum, contextMode_read);
-     * if (!dNew -> instanciateYourself(domainInputFile)) _error ("initializeAdaptive: domain Instanciation failed");
+     * if (!dNew -> instanciateYourself(domainInputFile)) OOFEM_ERROR("domain Instanciation failed");
      * fclose (domainInputFile);
      *
      * printf ("\ndeleting old domain\n");
@@ -140,7 +140,6 @@ IRResultType
 AdaptiveLinearStatic :: initializeFrom(InputRecord *ir)
 // input from inputString
 {
-    const char *__proc = "initializeFrom"; // Required by IR_GIVE_FIELD macro
     IRResultType result;                // Required by IR_GIVE_FIELD macro
 
     LinearStatic :: initializeFrom(ir);

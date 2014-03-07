@@ -77,13 +77,14 @@ public:
     FEIVoidCellGeometry() : FEICellGeometry() { }
     virtual ~FEIVoidCellGeometry() { }
     int giveNumberOfVertices() const {
-        OOFEM_ERROR("FEIVoidCellGeometry: no reference geometry");
+        OOFEM_ERROR("no reference geometry");
         return 0;
     }
     const FloatArray *giveVertexCoordinates(int i) const {
-        OOFEM_ERROR("FEIVoidCellGeometry: no reference geometry");
+        OOFEM_ERROR("no reference geometry");
         return NULL;
     }
+    std :: string errorInfo(const char *func) const { return func; } ///@todo Class name?
 };
 
 /**
@@ -175,7 +176,7 @@ public:
      * @param cellgeo Underlying cell geometry.
      */
     virtual void evald2Ndx2(FloatMatrix &answer, const FloatArray &lcoords, const FEICellGeometry &cellgeo) {
-        OOFEM_ERROR("FEInterpolation::evald2Ndx2: not implemented");
+        OOFEM_ERROR("not implemented");
     }
     /**
      * Evaluates the matrix of derivatives of interpolation functions (shape functions) at given point.
@@ -185,7 +186,7 @@ public:
      * @param cellgeo Underlying cell geometry.
      */
     virtual void evaldNdxi(FloatMatrix &answer, const FloatArray &lcoords, const FEICellGeometry &cellgeo) {
-        OOFEM_ERROR("FEInterpolation::evaldNdxi: not implemented");
+        OOFEM_ERROR("not implemented");
     }
     /**
      * Evaluates global coordinates from given local ones.
@@ -313,7 +314,7 @@ public:
      * @return Evaluated integral.
      */
     virtual double evalNXIntegral(int boundary, const FEICellGeometry &cellgeo) {
-        OOFEM_ERROR("FEInterpolation :: evalNXIntegral - Not implemented");
+        OOFEM_ERROR("Not implemented");
         return 0.;
     }
     //@}
@@ -367,7 +368,7 @@ public:
      * @param cellgeo Element geometry.
      */
     virtual void giveJacobianMatrixAt(FloatMatrix &jacobianMatrix, const FloatArray &lcoords, const FEICellGeometry &cellgeo)
-    { OOFEM_ERROR("FEInterpolation::giveJacobianMatrixAt : Not overloaded."); }
+    { OOFEM_ERROR("Not overloaded."); }
 
     /**
      * Sets up a suitable integration rule for numerical integrating over volume.
@@ -389,6 +390,8 @@ public:
      * @param boundary Boundary number.
      */
     virtual IntegrationRule *giveBoundaryEdgeIntegrationRule(int order, int boundary) = 0;
+    
+    std :: string errorInfo(const char *func) const { return func; } ///@todo Class name?
 };
 } // end namespace oofem
 #endif // feinterpol_h

@@ -32,11 +32,18 @@
  *  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  */
 
-#ifndef oofem_limits_h
-#define oofem_limits_h
+#include "xfemstructuralelementinterface.h"
 
 namespace oofem {
-/// Maximum length of error message.
-#define MAX_ERROR_MSG_LENGTH 2048
-} // end namespace oofem
-#endif // oofem_limits_h
+
+XfemStructuralElementInterface::XfemStructuralElementInterface(Element *e):
+XfemElementInterface(e)
+{
+
+}
+
+XfemStructuralElementInterface::~XfemStructuralElementInterface() {
+
+}
+
+} /* namespace oofem */

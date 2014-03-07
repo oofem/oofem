@@ -373,7 +373,6 @@ Beam2d :: giveLocalCoordinateSystem(FloatMatrix &answer)
 IRResultType
 Beam2d :: initializeFrom(InputRecord *ir)
 {
-    const char *__proc = "initializeFrom"; // Required by IR_GIVE_FIELD macro
     IRResultType result;                // Required by IR_GIVE_FIELD macro
     // first call parent
     StructuralElement :: initializeFrom(ir);
@@ -382,7 +381,7 @@ Beam2d :: initializeFrom(InputRecord *ir)
         IntArray val;
         IR_GIVE_FIELD(ir, val, _IFT_Beam2d_dofstocondense);
         if ( val.giveSize() >= 6 ) {
-            _error("instanciateFrom: wrong input data for condensed dofs");
+            OOFEM_ERROR("wrong input data for condensed dofs");
         }
 
         dofsToCondense = new IntArray(val);
@@ -440,7 +439,7 @@ Beam2d :: computeEdgeLoadVectorAt(FloatArray &answer, Load *load, int iedge, Tim
     BoundaryLoad *edgeLoad = dynamic_cast< BoundaryLoad * >(load);
     if ( edgeLoad ) {
         if ( edgeLoad->giveNumberOfDofs() != 3 ) {
-            _error("computeEdgeLoadVectorAt: load number of dofs mismatch");
+            OOFEM_ERROR("load number of dofs mismatch");
         }
 
         answer.resize(6);
@@ -542,7 +541,7 @@ Beam2d :: computeEdgeLoadVectorAt(FloatArray &answer, Load *load, int iedge, Tim
             break;
 
         default:
-            _error("computeEdgeLoadVectorAt: unsupported load type");
+            OOFEM_ERROR("unsupported load type");
         }
     }
 }

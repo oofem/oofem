@@ -73,7 +73,7 @@ void FE2FluidMaterial :: computeDeviatoricStressVector(FloatArray &answer, Gauss
     }
 
     if ( r_vol > 1e-9 ) {
-        OOFEM_ERROR("FE2FluidMaterialStatus :: computeDeviatoricStressVector - RVE seems to be compressible;"
+        OOFEM_ERROR("RVE seems to be compressible;"
                     " extended macro-formulation which doesn't assume incompressibility is required");
     }
 }
@@ -258,7 +258,6 @@ void FE2FluidMaterial :: giveStiffnessMatrices(FloatMatrix &dsdd, FloatArray &ds
 
 IRResultType FE2FluidMaterial :: initializeFrom(InputRecord *ir)
 {
-    const char *__proc = "initializeFrom";
     IRResultType result;
     IR_GIVE_FIELD(ir, this->inputfile, _IFT_FE2FluidMaterial_fileName);
     return this->FluidDynamicMaterial :: initializeFrom(ir);
@@ -328,7 +327,7 @@ FE2FluidMaterialStatus :: FE2FluidMaterialStatus(int n, Domain *d, GaussPoint *g
     this->oldTangents = true;
 
     if ( !this->createRVE(n, gp, inputfile) ) {
-        OOFEM_ERROR("FE2FluidMaterialStatus :: Constructor - Couldn't create RVE");
+        OOFEM_ERROR("Couldn't create RVE");
     }
 }
 
@@ -366,7 +365,7 @@ bool FE2FluidMaterialStatus :: createRVE(int n, GaussPoint *gp, const std :: str
 
     this->bc = dynamic_cast< MixedGradientPressureBC * >( this->rve->giveDomain(1)->giveBc(1) );
     if ( !this->bc ) {
-        OOFEM_ERROR("FE2FluidMaterialStatus :: createRVE - RVE doesn't have necessary boundary condition; should have MixedGradientPressure as first b.c. (in first domain)");
+        OOFEM_ERROR("RVE doesn't have necessary boundary condition; should have MixedGradientPressure as first b.c. (in first domain)");
     }
 
     return true;
@@ -418,7 +417,7 @@ void FE2FluidMaterialStatus :: markOldTangents() { this->oldTangents = true; }
 void FE2FluidMaterialStatus :: computeTangents(TimeStep *tStep)
 {
     if ( !tStep->isTheCurrentTimeStep() ) {
-        OOFEM_ERROR("FE2FluidMaterialStatus :: computeTangents - Only current timestep supported.\n");
+        OOFEM_ERROR("Only current timestep supported.\n");
     }
 
     if ( this->oldTangents ) {

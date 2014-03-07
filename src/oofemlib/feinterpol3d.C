@@ -39,7 +39,7 @@
 namespace oofem {
 double FEInterpolation3d :: giveVolume(const FEICellGeometry &cellgeo) const
 {
-    OOFEM_ERROR("FEInterpolation3d :: giveVolume - Not implemented in subclass.");
+    OOFEM_ERROR("Not implemented in subclass.");
     return 0;
 }
 
@@ -122,17 +122,17 @@ IntegrationRule *FEInterpolation3d :: giveBoundaryEdgeIntegrationRule(int order,
 
 void FEInterpolation3d :: edgeEvaldNdxi(FloatArray &answer, int iedge, const FloatArray &lcoords, const FEICellGeometry &cellgeo)
 {
-    OOFEM_ERROR("FEInterpolation3D :: edgeEvaldNdxi - Not implemented");
+    OOFEM_ERROR("Not implemented");
 }
 
 void FEInterpolation3d :: surfaceEvaldNdx(FloatMatrix &answer, int isurf, const FloatArray &lcoords, const FEICellGeometry &cellgeo)
 {
-    OOFEM_ERROR("FEInterpolation3D :: surfaceEvaldNdx - Not implemented");
+    OOFEM_ERROR("Not implemented");
 }
 
 double FEInterpolation3d :: surfaceEvalNormal(FloatArray &answer, int isurf, const FloatArray &lcoords, const FEICellGeometry &cellgeo)
 {
-    OOFEM_ERROR("FEInterpolation3D :: surfaceEvalNormal - Not implemented");
+    OOFEM_ERROR("Not implemented");
     return -1.0;
 }
 } // end namespace oofem

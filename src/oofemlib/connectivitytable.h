@@ -36,7 +36,8 @@
 #define contable_h
 
 #include "oofemcfg.h"
-#include "alist.h"
+
+#include <vector>
 
 namespace oofem {
 class IntArray;
@@ -58,7 +59,7 @@ private:
     Domain *domain;
 
     /// Nodal connectivity table for domain.
-    AList< IntArray >nodalConnectivity;
+    std::vector< IntArray > nodalConnectivity;
     /// Flag indicating assembled connectivity table for domain.
     int nodalConnectivityFlag;
 
@@ -66,7 +67,7 @@ public:
     /**
      * Constructor. Creates new Connectivity table belonging to given domain.
      */
-    ConnectivityTable(Domain * d) : domain(d), nodalConnectivity(0), nodalConnectivityFlag(0) { }
+    ConnectivityTable(Domain * d) : domain(d), nodalConnectivity(), nodalConnectivityFlag(0) { }
     /// Destructor
     ~ConnectivityTable();
     /// reset receiver to an initial state (will force table update, when needed next time)

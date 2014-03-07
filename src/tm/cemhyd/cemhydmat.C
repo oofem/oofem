@@ -118,13 +118,13 @@ CemhydMat :: computeInternalSourceVector(FloatArray &val, GaussPoint *gp, TimeSt
                 val.at(1) = ms->PartHeat;
             }
         } else {
-            OOFEM_ERROR2( "Undefined mode %s\n", __ValueModeTypeToString(mode) );
+            OOFEM_ERROR( "Undefined mode %s\n", __ValueModeTypeToString(mode) );
         }
     } else { //return released heat from the master
         if ( mode == VM_Total ) {
             val.at(1) = MasterCemhydMatStatus->PartHeat;
         } else {
-            OOFEM_ERROR2( "Undefined mode %s\n", __ValueModeTypeToString(mode) );
+            OOFEM_ERROR( "Undefined mode %s\n", __ValueModeTypeToString(mode) );
         }
     }
 
@@ -179,7 +179,7 @@ double CemhydMat :: giveIsotropicConductivity(GaussPoint *gp)
     } else if ( conductivityType == 1 ) { //compute according to Ruiz, Schindler, Rasmussen. Kim, Chang: Concrete temperature modeling and strength prediction using maturity concepts in the FHWA HIPERPAV software, 7th international conference on concrete pavements, Orlando (FL), USA, 2001
         conduct = IsotropicHeatTransferMaterial :: give('k', gp) * ( 1.33 - 0.33 * ms->GiveDoHActual() );
     } else {
-        OOFEM_ERROR2("Unknown conductivityType %d\n", conductivityType);
+        OOFEM_ERROR("Unknown conductivityType %d\n", conductivityType);
     }
 
 
@@ -187,7 +187,7 @@ double CemhydMat :: giveIsotropicConductivity(GaussPoint *gp)
     conduct = conduct * ( 1. - this->reinforcementDegree ) + 20. * this->reinforcementDegree;
 
     if ( !this->nowarnings.at(2) && ( conduct < 0.3 || conduct > 5 ) ) {
-        OOFEM_WARNING2("Weird concrete thermal conductivity %f W/m/K\n", conduct);
+        OOFEM_WARNING("Weird concrete thermal conductivity %f W/m/K\n", conduct);
     }
 
     conduct *= this->scaling.at(2);
@@ -212,14 +212,14 @@ double CemhydMat :: giveConcreteCapacity(GaussPoint *gp)
     } else if ( capacityType == 2 ) { //compute from CEMHYD3D directly
         capacityConcrete = 1000 * ms->GiveCp();
     } else {
-        OOFEM_ERROR2("Unknown capacityType %d\n", capacityType);
+        OOFEM_ERROR("Unknown capacityType %d\n", capacityType);
     }
 
     //Parallel Voigt model, 500 J/kg/K for steel
     capacityConcrete = capacityConcrete * ( 1. - this->reinforcementDegree ) + 500. * this->reinforcementDegree;
 
     if ( !this->nowarnings.at(3) && ( capacityConcrete < 500 || capacityConcrete > 2000 ) ) {
-        OOFEM_WARNING2("Weird concrete heat capacity %f J/kg/K\n", capacityConcrete);
+        OOFEM_WARNING("Weird concrete heat capacity %f J/kg/K\n", capacityConcrete);
     }
 
     capacityConcrete *= this->scaling.at(3);
@@ -241,14 +241,14 @@ double CemhydMat :: giveConcreteDensity(GaussPoint *gp)
     } else if ( densityType == 1 ) { //get from XML input file
         concreteBulkDensity = ms->GiveDensity();
     } else {
-        OOFEM_ERROR2("Unknown densityType %d\n", densityType);
+        OOFEM_ERROR("Unknown densityType %d\n", densityType);
     }
 
     //Parallel Voigt model, 7850 kg/m3 for steel
     concreteBulkDensity = concreteBulkDensity * ( 1. - this->reinforcementDegree ) + 7850. * this->reinforcementDegree;
 
     if ( !this->nowarnings.at(1) && ( concreteBulkDensity < 1000 || concreteBulkDensity > 4000 ) ) {
-        OOFEM_WARNING2("Weird concrete density %f kg/m3\n", concreteBulkDensity);
+        OOFEM_WARNING("Weird concrete density %f kg/m3\n", concreteBulkDensity);
     }
 
     concreteBulkDensity *= this->scaling.at(1);
@@ -292,7 +292,7 @@ CemhydMat :: giveCharacteristicValue(MatResponseMode mode, GaussPoint *gp, TimeS
 
         return val;
     } else {
-        OOFEM_ERROR2( "giveCharacteristicValue : unknown mode (%s)\n", __MatResponseModeToString(mode) );
+        OOFEM_ERROR("unknown mode (%s)\n", __MatResponseModeToString(mode) );
     }
 
     return 0.;
@@ -415,10 +415,8 @@ void CemhydMat :: averageTemperature()
 
 IRResultType CemhydMat :: initializeFrom(InputRecord *ir)
 {
-    const char *__proc = "initializeFrom"; // Required by IR_GIVE_FIELD macro
     IRResultType result;                   // Required by IR_GIVE_FIELD macro
     castingTime = 0.;
-    int i;
 
     this->IsotropicHeatTransferMaterial :: initializeFrom(ir); //read d,k,c
     conductivityType = 0;
@@ -428,7 +426,7 @@ IRResultType CemhydMat :: initializeFrom(InputRecord *ir)
     nowarnings.resize(4);
     nowarnings.zero();
     scaling.resize(3);
-    for ( i = 1; i <= scaling.giveSize(); i++ ) {
+    for ( int i = 1; i <= scaling.giveSize(); i++ ) {
         scaling.at(i) = 1.;
     }
 
@@ -440,12 +438,12 @@ IRResultType CemhydMat :: initializeFrom(InputRecord *ir)
     IR_GIVE_OPTIONAL_FIELD(ir, eachGP, _IFT_CemhydMat_eachgp);
     IR_GIVE_OPTIONAL_FIELD(ir, nowarnings, _IFT_CemhydMat_nowarnings);
     if ( nowarnings.giveSize() != 4 ) {
-        OOFEM_ERROR2( "Incorrect size %d of nowarnings", nowarnings.giveSize() );
+        OOFEM_ERROR("Incorrect size %d of nowarnings", nowarnings.giveSize() );
     }
 
     IR_GIVE_OPTIONAL_FIELD(ir, scaling, _IFT_CemhydMat_scaling);
     if ( scaling.giveSize() != 3 ) {
-        OOFEM_ERROR2( "Incorrect size %d of scaling", nowarnings.giveSize() );
+        OOFEM_ERROR("Incorrect size %d of scaling", nowarnings.giveSize() );
     }
 
     IR_GIVE_OPTIONAL_FIELD(ir, reinforcementDegree, _IFT_CemhydMat_reinforcementDegree);
@@ -3713,7 +3711,7 @@ void CemhydMatStatus :: distrib3d()
             for ( j = 1; j <= SYSIZE; j++ ) {
                 for ( i = 1; i <= SYSIZE; i++ ) {
                     if ( fscanf(infile, "%d", & valin) != 1 ) {
-                        OOFEM_ERROR("CemhydMatStatus :: distrib3d reading error");
+                        OOFEM_ERROR("distrib3d reading error");
                     }
 
                     mask [ i ] [ j ] [ k ] = valin;
@@ -4233,62 +4231,61 @@ void CemhydMatStatus :: init()
         /* Read in values for slag characteristics */
 
         if ( ( slagfile = fopen("slagchar.dat", "r") ) == NULL ) {
-            printf("Slag file can not be opened\n");
-            exit(1);
+            OOFEM_ERROR("Slag file can not be opened\n");
         }
 
 
         if ( fscanf(slagfile, "%lf", & slagin) != 1 ) {
-            OOFEM_ERROR("CemhydMatStatus::init: slagfile reading error");
+            OOFEM_ERROR("slagfile reading error");
         }
 
         if ( fscanf(slagfile, "%lf", & slagin) != 1 ) {
-            OOFEM_ERROR("CemhydMatStatus::init: slagfile reading error");
+            OOFEM_ERROR("slagfile reading error");
         }
 
         if ( fscanf(slagfile, "%lf", & slagin) != 1 ) {
-            OOFEM_ERROR("CemhydMatStatus::init: slagfile reading error");
+            OOFEM_ERROR("slagfile reading error");
         }
 
         specgrav [ SLAG ] = slagin;
         if ( fscanf(slagfile, "%lf", & slagin) != 1 ) {
-            OOFEM_ERROR("CemhydMatStatus::init: slagfile reading error");
+            OOFEM_ERROR("slagfile reading error");
         }
 
         specgrav [ SLAGCSH ] = slagin;
         if ( fscanf(slagfile, "%lf", & slagin) != 1 ) {
-            OOFEM_ERROR("CemhydMatStatus::init: slagfile reading error");
+            OOFEM_ERROR("slagfile reading error");
         }
 
         molarv [ SLAG ] = slagin;
         if ( fscanf(slagfile, "%lf", & slagin) != 1 ) {
-            OOFEM_ERROR("CemhydMatStatus::init: slagfile reading error");
+            OOFEM_ERROR("slagfile reading error");
         }
 
         molarv [ SLAGCSH ] = slagin;
         if ( fscanf(slagfile, "%lf", & slagcasi) != 1 ) {
-            OOFEM_ERROR("CemhydMatStatus::init: slagfile reading error");
+            OOFEM_ERROR("slagfile reading error");
         }
 
         if ( fscanf(slagfile, "%lf", & slaghydcasi) != 1 ) {
-            OOFEM_ERROR("CemhydMatStatus::init: slagfile reading error");
+            OOFEM_ERROR("slagfile reading error");
         }
 
         if ( fscanf(slagfile, "%lf", & siperslag) != 1 ) {
-            OOFEM_ERROR("CemhydMatStatus::init: slagfile reading error");
+            OOFEM_ERROR("slagfile reading error");
         }
 
         if ( fscanf(slagfile, "%lf", & slagin) != 1 ) {
-            OOFEM_ERROR("CemhydMatStatus::init: slagfile reading error");
+            OOFEM_ERROR("slagfile reading error");
         }
 
         waterc [ SLAGCSH ] = slagin * siperslag;
         if ( fscanf(slagfile, "%lf", & slagc3a) != 1 ) {
-            OOFEM_ERROR("CemhydMatStatus::init: slagfile reading error");
+            OOFEM_ERROR("slagfile reading error");
         }
 
         if ( fscanf(slagfile, "%lf", & slagreact) != 1 ) {
-            OOFEM_ERROR("CemhydMatStatus::init: slagfile reading error");
+            OOFEM_ERROR("slagfile reading error");
         }
 
         waterc [ SLAG ] = 0.0;

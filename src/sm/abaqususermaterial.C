@@ -74,7 +74,6 @@ AbaqusUserMaterial :: ~AbaqusUserMaterial()
 
 IRResultType AbaqusUserMaterial :: initializeFrom(InputRecord *ir)
 {
-    const char *__proc = "initializeFrom";
     IRResultType result;
     std :: string umatname;
 
@@ -91,7 +90,7 @@ IRResultType AbaqusUserMaterial :: initializeFrom(InputRecord *ir)
     ///@todo Check all the windows support.
     this->umatobj = ( void * ) LoadLibrary( filename.c_str() );
     if ( !this->umatobj ) {
-        OOFEM_ERROR2( "AbaqusUserMaterial :: initializeFrom - couldn't load \"%s\",\ndlerror: %s", filename.c_str() );
+        OOFEM_ERROR("couldn't load \"%s\",\ndlerror: %s", filename.c_str() );
     }
 
     //     * ( void ** )( & this->umat ) = GetProcAddress( ( HMODULE ) this->umatobj, "umat_" );
@@ -99,19 +98,19 @@ IRResultType AbaqusUserMaterial :: initializeFrom(InputRecord *ir)
     if ( !this->umat ) {
         //         char *dlresult = GetLastError();
         DWORD dlresult = GetLastError(); //works for MinGW 32bit
-        OOFEM_ERROR2("AbaqusUserMaterial :: initializeFrom - couldn't load symbol umat,\nerror: %s\n", dlresult);
+        OOFEM_ERROR("couldn't load symbol umat,\nerror: %s\n", dlresult);
     }
 
 #else
     this->umatobj = dlopen(filename.c_str(), RTLD_NOW);
     if ( !this->umatobj ) {
-        OOFEM_ERROR3( "AbaqusUserMaterial :: initializeFrom - couldn't load \"%s\",\ndlerror: %s", filename.c_str(), dlerror() );
+        OOFEM_ERROR("couldn't load \"%s\",\ndlerror: %s", filename.c_str(), dlerror() );
     }
 
     * ( void ** ) ( & this->umat ) = dlsym(this->umatobj, "umat_");
     char *dlresult = dlerror();
     if ( dlresult ) {
-        OOFEM_ERROR2("AbaqusUserMaterial :: initializeFrom - couldn't load symbol umat,\ndlerror: %s\n", dlresult);
+        OOFEM_ERROR("couldn't load symbol umat,\ndlerror: %s\n", dlresult);
     }
 
 #endif

@@ -91,14 +91,13 @@ DofManager *MixedGradientPressureWeakPeriodic :: giveInternalDofManager(int i)
 
 IRResultType MixedGradientPressureWeakPeriodic :: initializeFrom(InputRecord *ir)
 {
-    const char *__proc = "initializeFrom";
     IRResultType result;
 
     MixedGradientPressureBC :: initializeFrom(ir);
 
     IR_GIVE_FIELD(ir, this->order, _IFT_MixedGradientPressureWeakPeriodic_order);
     if ( this->order < 0 ) {
-        OOFEM_ERROR("MixedGradientPressureWeakPeriodic :: initializeFrom - order must be at least 0");
+        OOFEM_ERROR("order must be at least 0");
     }
 
     int nsd = this->domain->giveNumberOfSpatialDimensions();
@@ -145,7 +144,7 @@ void MixedGradientPressureWeakPeriodic :: constructFullMatrixForm(FloatMatrix &d
         d.resize(1, 1);
         d.at(1, 1) = d_voigt.at(1);
     } else {
-        OOFEM_ERROR("MixedGradientPressureWeakPeriodic :: setPrescribedDeviatoricGradientFromVoigt: Tensor is in strange voigt format. Should be 3 or 6. Use setPrescribedTensor directly if needed.");
+        OOFEM_ERROR("Tensor is in strange voigt format. Should be 3 or 6. Use setPrescribedTensor directly if needed.");
     }
 }
 
@@ -636,7 +635,7 @@ void MixedGradientPressureWeakPeriodic :: computeTangents(FloatMatrix &Ed, Float
     // Set up and assemble tangent FE-matrix which will make up the sensitivity analysis for the macroscopic material tangent.
     Kff = classFactory.createSparseMtrx(stype);
     if ( !Kff ) {
-        OOFEM_ERROR2("MixedGradientPressureWeakPeriodic :: computeTangents - Couldn't create sparse matrix of type %d\n", stype);
+        OOFEM_ERROR("Couldn't create sparse matrix of type %d\n", stype);
     }
     Kff->buildInternalStructure(rve, this->domain->giveNumber(), eid, fnum);
     rve->assemble(Kff, tStep, eid, StiffnessMatrix, fnum, fnum, this->domain);
@@ -809,7 +808,7 @@ void MixedGradientPressureWeakPeriodic :: giveInputRecord(DynamicInputRecord &in
 {
     MixedGradientPressureBC :: giveInputRecord(input);
     input.setField(this->pressure, _IFT_MixedGradientPressure_pressure);
-    OOFEM_ERROR("MixedGradientPressureWeakPeriodic :: giveInputRecord - Not supported yet\n");
+    OOFEM_ERROR("Not supported yet\n");
     //FloatArray devGradientVoigt;
     //input.setField(devGradientVoigt, _IFT_MixedGradientPressure_devGradient);
 }

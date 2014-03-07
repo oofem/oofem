@@ -314,7 +314,7 @@ TrPlanestressRotAllman :: giveEdgeDofMapping(IntArray &answer, int iEdge) const
         answer.at(5) = 2;
         answer.at(6) = 3;
     } else {
-        _error("giveEdgeDofMapping: wrong edge number");
+        OOFEM_ERROR("wrong edge number");
     }
 }
 
@@ -363,7 +363,7 @@ TrPlanestressRotAllman :: giveEdgeDofMapping(IntArray &answer, int iEdge) const
  *      aNode = 3;
  *      bNode = 1;
  *  } else {
- *      _error("computeEdgeVolumeAround: wrong egde number");
+ *      OOFEM_ERROR("wrong egde number");
  *  }
  *
  *  nodeA   = this->giveNode(aNode);

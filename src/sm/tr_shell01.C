@@ -68,13 +68,13 @@ TR_SHELL01 :: initializeFrom(InputRecord *ir)
     /*
      * IR_GIVE_OPTIONAL_FIELD(ir, val, _IFT_Element_nip);
      * if ( val != -1 ) {
-     *  _error("key word NIP is not allowed for element TR_SHELL01");
+     *  OOFEM_ERROR("key word NIP is not allowed for element TR_SHELL01");
      * }
      *
      *
      * IR_GIVE_OPTIONAL_FIELD(ir, val, _IFT_TrPlaneStrRot_niprot, "niprot");
      * if ( val != -1 ) {
-     *  _error("key word NIProt is not allowed for element TR_SHELL01");
+     *  OOFEM_ERROR("key word NIProt is not allowed for element TR_SHELL01");
      * }
      */
 
@@ -91,7 +91,7 @@ TR_SHELL01 :: postInitialize()
     StructuralElement :: postInitialize();
 
     if ( plate->giveDefaultIntegrationRulePtr()->giveNumberOfIntegrationPoints() != membrane->giveDefaultIntegrationRulePtr()->giveNumberOfIntegrationPoints() ) {
-        OOFEM_ERROR("TR_SHELL01: incompatible integration rules detected");
+        OOFEM_ERROR("incompatible integration rules detected");
     }
 }
 
@@ -605,11 +605,10 @@ TR_SHELL01 :: drawScalar(oofegGraphicContext &context)
         result += this->giveInternalStateAtNode(v3, context.giveIntVarType(), context.giveIntVarMode(), 3, tStep);
     } else if ( context.giveIntVarMode() == ISM_local ) {
         int nip = plate->giveDefaultIntegrationRulePtr()->giveNumberOfIntegrationPoints();
-        FloatArray a, v(12);
-        v.zero();
+        FloatArray a, v;
         for ( int _i = 1; _i <= nip; _i++ ) {
-            this->giveIPValue(a, plate->giveDefaultIntegrationRulePtr()->getIntegrationPoint(_i - 1), IST_ShellForceMomentumTensor, tStep);
-            v += a;
+            this->giveIPValue(a, plate->giveDefaultIntegrationRulePtr()->getIntegrationPoint(_i - 1), IST_ShellMomentumTensor, tStep);
+            v.add(a);
         }
         v.times(1. / nip);
         v1 = v;

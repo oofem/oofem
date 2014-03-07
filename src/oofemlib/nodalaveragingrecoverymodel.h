@@ -71,6 +71,8 @@ public:
 
     int recoverValues(Set elementSet, InternalStateType type, TimeStep *tStep);
 
+    virtual const char *giveClassName() const { return "NodalAveragingRecoveryModel"; }
+
 private:
 #ifdef __PARALLEL_MODE
     void initCommMaps();

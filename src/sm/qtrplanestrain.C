@@ -189,7 +189,7 @@ QTrPlaneStrain :: SpatialLocalizerI_giveDistanceFromParametricCenter(const Float
     this->computeGlobalCoordinates(gcoords, lcoords);
 
     if ( ( size = coords.giveSize() ) < ( gsize = gcoords.giveSize() ) ) {
-        _error("SpatialLocalizerI_giveDistanceFromParametricCenter: coordinates size mismatch");
+        OOFEM_ERROR("coordinates size mismatch");
     }
 
     if ( size == gsize ) {
@@ -418,7 +418,7 @@ QTrPlaneStrain :: SPRNodalRecoveryMI_giveDofMansDeterminedByPatch(IntArray &answ
         answer.at(2) = this->giveNode(6)->giveNumber();
         answer.at(3) = this->giveNode(5)->giveNumber();
     } else {
-        _error("SPRNodalRecoveryMI_giveDofMansDeterminedByPatch: node unknown");
+        OOFEM_ERROR("node unknown");
     }
 }
 

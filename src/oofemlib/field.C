@@ -34,33 +34,13 @@
 
 #include "field.h"
 #include "error.h"
-#include "oofem_limits.h"
 
 #include <cstdarg>
 
 namespace oofem {
-void Field :: error(const char *file, int line, const char *format, ...) const
+std :: string Field :: errorInfo(const char *func) const
 {
-    char buffer [ MAX_ERROR_MSG_LENGTH ];
-    va_list args;
-
-    va_start(args, format);
-    vsprintf(buffer, format, args);
-    va_end(args);
-
-    __OOFEM_ERROR3(file, line, "Class: %s\n%s", giveClassName(), buffer);
+    return std :: string(this->giveClassName()) + "::" + func;
 }
 
-
-void Field :: warning(const char *file, int line, const char *format, ...) const
-{
-    char buffer [ MAX_ERROR_MSG_LENGTH ];
-    va_list args;
-
-    va_start(args, format);
-    vsprintf(buffer, format, args);
-    va_end(args);
-
-    __OOFEM_WARNING3(file, line, "Class: %s\n%s", giveClassName(), buffer);
-}
 } // end namespace oofem

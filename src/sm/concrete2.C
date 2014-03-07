@@ -61,7 +61,6 @@ Concrete2 :: ~Concrete2()
 IRResultType
 Concrete2 :: initializeFrom(InputRecord *ir)
 {
-    const char *__proc = "initializeFrom"; // Required by IR_GIVE_FIELD macro
     IRResultType result;                // Required by IR_GIVE_FIELD macro
 
     this->Material :: initializeFrom(ir);
@@ -696,15 +695,15 @@ Concrete2 :: dtp3(GaussPoint *gp, FloatArray *e, FloatArray *s, FloatArray *ep,
     double yy, ey, e0, yy1, yy2, s0, sci = 0.0, scj = 0.0, sck = 0.0;
 
     if ( e->giveSize() != 3 ) {
-        _error("dtp3 : principal strains size mismatch");
+        OOFEM_ERROR("principal strains size mismatch");
     }
 
     if ( s->giveSize() != 3 ) {
-        _error("dtp3 : principal stress size mismatch");
+        OOFEM_ERROR("principal stress size mismatch");
     }
 
     if ( ep->giveSize() != 3 ) {
-        _error("dtp3 : plastic strains size mismatch");
+        OOFEM_ERROR("plastic strains size mismatch");
     }
 
     * ifplas = 0;
@@ -900,15 +899,15 @@ Concrete2 :: dtp2(GaussPoint *gp, FloatArray *e, FloatArray *s, FloatArray *ep,
     // Dictionary *flags = gp->matInfo->flagDictionary;
 
     if ( e->giveSize() != 3 ) {
-        _error("dtp3 : principal strains size mismatch");
+        OOFEM_ERROR("principal strains size mismatch");
     }
 
     if ( s->giveSize() != 3 ) {
-        _error("dtp3 : principal stress size mismatch");
+        OOFEM_ERROR("principal stress size mismatch");
     }
 
     if ( ep->giveSize() != 3 ) {
-        _error("dtp3 : plastic strains size mismatch");
+        OOFEM_ERROR("plastic strains size mismatch");
     }
 
     * ifplas = 0;

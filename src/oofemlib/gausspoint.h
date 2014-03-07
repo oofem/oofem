@@ -197,7 +197,7 @@ public:
     IntegrationPointStatus *setMaterialStatus(IntegrationPointStatus *ptr)
     {
         if ( this->materialStatus != NULL ) {
-            OOFEM_ERROR(" MaterialStatus :: setMaterialStatus status already exist");
+            OOFEM_SIMPLE_ERROR(" MaterialStatus :: setMaterialStatus status already exist");
         }
         this->materialStatus = ptr;
         return ptr;

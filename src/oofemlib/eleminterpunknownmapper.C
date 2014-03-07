@@ -107,7 +107,7 @@ EIPrimaryUnknownMapper :: mapAndUpdate(FloatArray &answer, ValueModeType mode,
                 answer.assemble(unknownValues, locationArray);
             }
         } else {
-            OOFEM_ERROR2("EIPrimaryUnknownMapper :: mapAndUpdate - evaluateAt service failed for node %d", inode);
+            OOFEM_ERROR("evaluateAt service failed for node %d", inode);
         }
     }
 
@@ -137,7 +137,7 @@ EIPrimaryUnknownMapper :: evaluateAt(FloatArray &answer, IntArray &dofMask, Valu
             oelem = oldd->giveSpatialLocalizer()->giveElementCloseToPoint(coords, & regList);
         }
         if ( !oelem ) {
-            OOFEM_WARNING("EIPrimaryUnknownMapper :: evaluateAt - Couldn't find any element containing point.");
+            OOFEM_WARNING("Couldn't find any element containing point.");
             return false;
         }
     }
@@ -165,7 +165,7 @@ EIPrimaryUnknownMapper :: evaluateAt(FloatArray &answer, IntArray &dofMask, Valu
         }
     }
     if ( !oelem ) {
-        OOFEM_WARNING("EIPrimaryUnknownMapper :: evaluateAt - Couldn't find any element containing point.");
+        OOFEM_WARNING("Couldn't find any element containing point.");
         return false;
     }
 #endif
@@ -179,7 +179,7 @@ EIPrimaryUnknownMapper :: evaluateAt(FloatArray &answer, IntArray &dofMask, Valu
         interface->EIPrimaryUnknownMI_computePrimaryUnknownVectorAtLocal(mode, tStep, lcoords, answer);
 #endif
     } else {
-        OOFEM_ERROR("EIPrimaryUnknownMapper :: evaluateAt - Element does not support EIPrimaryUnknownMapperInterface");
+        OOFEM_ERROR("Element does not support EIPrimaryUnknownMapperInterface");
     }
 
     return true;

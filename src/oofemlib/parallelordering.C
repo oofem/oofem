@@ -377,7 +377,7 @@ Natural2GlobalOrdering :: init(EngngModel *emodel, int di, const UnknownNumberin
                         if ( globloc.find(shdm) != globloc.end() ) {
                             ldm = globloc [ shdm ];
                         } else {
-                            OOFEM_ERROR3("[%d] Natural2GlobalOrdering :: init: invalid shared dofman received, globnum %d\n", myrank, shdm);
+                                OOFEM_SIMPLE_ERROR("[%d] invalid shared dofman received, globnum %d\n", myrank, shdm);
                             ldm = 0;
                         }
 

@@ -93,7 +93,7 @@ FEI3dWedgeLin :: local2global(FloatArray &answer, const FloatArray &lcoords, con
 int
 FEI3dWedgeLin :: global2local(FloatArray &answer, const FloatArray &coords, const FEICellGeometry &cellgeo)
 {
-    OOFEM_ERROR("FEI3dHexaQuad :: global2local not implemented");
+    OOFEM_ERROR("not implemented");
     return 1;
 }
 
@@ -168,7 +168,7 @@ FEI3dWedgeLin :: edgeEvalN(FloatArray &answer, int iedge, const FloatArray &lcoo
 void
 FEI3dWedgeLin :: edgeEvaldNdx(FloatMatrix &answer, int iedge, const FloatArray &lcoords, const FEICellGeometry &cellgeo)
 {
-    OOFEM_ERROR("FEI3dWedgeLin :: edgeEvaldNdx not implemented");
+    OOFEM_ERROR("not implemented");
 }
 
 
@@ -210,7 +210,7 @@ FEI3dWedgeLin :: computeLocalEdgeMapping(IntArray &edgeNodes, int iedge)
     } else if ( iedge == 9 ) {
         edgeNodes.setValues(2, 3, 6);
     } else {
-        OOFEM_ERROR2("FEI3dWedgeQuad :: computeLocalEdgeMapping - Edge %d doesn't exist.\n", iedge);
+        OOFEM_ERROR("Edge %d doesn't exist.\n", iedge);
     }
 }
 
@@ -218,7 +218,7 @@ FEI3dWedgeLin :: computeLocalEdgeMapping(IntArray &edgeNodes, int iedge)
 double
 FEI3dWedgeLin :: edgeGiveTransformationJacobian(int iedge, const FloatArray &lcoords, const FEICellGeometry &cellgeo)
 {
-    OOFEM_ERROR("FEI3dWedgeLin :: edgeGiveTransformationJacobian not implemented");
+    OOFEM_ERROR("not implemented");
     return 0.0;
 }
 
@@ -275,7 +275,7 @@ FEI3dWedgeLin :: computeLocalSurfaceMapping(IntArray &nodes, int isurf)
     } else if ( isurf == 5 ) {
         nodes.setValues(4, 3, 1, 4, 6);
     } else {
-        OOFEM_ERROR2("FEI3dWedgeQuad :: computeLocalSurfaceMapping - Surface %d doesn't exist.\n", isurf);
+        OOFEM_ERROR("Surface %d doesn't exist.\n", isurf);
     }
 }
 
@@ -284,7 +284,7 @@ double
 FEI3dWedgeLin :: surfaceGiveTransformationJacobian(int isurf, const FloatArray &lcoords,
                                                    const FEICellGeometry &cellgeo)
 {
-    OOFEM_ERROR("FEI3dWedgeLin :: surfaceGiveTransformationJacobian not implemented");
+    OOFEM_ERROR("not implemented");
     return 0;
 }
 

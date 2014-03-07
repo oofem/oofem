@@ -32,12 +32,6 @@
  *  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  */
 
-/*
- * The original idea for this class comes from
- * Dubois-Pelerin, Y.: "Object-Oriented  Finite Elements: Programming concepts and Implementation",
- * PhD Thesis, EPFL, Lausanne, 1992.
- */
-
 #ifndef intarray_h
 #define intarray_h
 
@@ -45,84 +39,58 @@
 #include "contextioresulttype.h"
 #include "contextmode.h"
 
+#include <cstdio>
+#include <vector>
 #include <iosfwd>
-#if __cplusplus > 199711L
- #include <initializer_list>
-#endif
+#include <initializer_list>
 
 namespace oofem {
 class DataStream;
 #ifdef __PARALLEL_MODE
 class CommunicationBuffer;
 #endif
+
 /**
- * Class implementing an array of integers. Array can grow or shrink to desired dimension.
+ * Class implementing an array of integers.
+ * Acts as a wrapper for std::vector of integers, but adds many convenience functions that are commonly used in OOFEM.
+ * Array can grow or shrink to desired dimension.
  * The lower value index of array is 1, upper depends on array size.
- *
- * Tasks:
- * - Storing and returning coefficients (method 'at')
- * - Appending another IntArray to itself
- *
- * The allocatedSize variable to allow dynamic rescaling of array
- * size possibly without memory reallocation. At startup an array occupies space
- * given by allocatedSpace = size. Then there can be
- * further request for resizing array to smaller dimension
- * then we only change size variable, but allocatedSize
- * variable remain untouched - expecting possible array grow and then re-using
- * previously allocated space.
- * if further request for growing then is necessary memory reallocation.
- * This process is controlled in resize member function.
+ * 
+ * @author Mikael Öhman
+ * @author many others
  */
 class OOFEM_EXPORT IntArray
 {
 private:
-    /// Size of array.
-    int size;
-    /// Allocated size for array.
-    int allocatedSize;
     /// Stored values.
-    int *values;
+    std::vector< int > values;
 
 public:
     /// @name Iterator for for-each loops:
     //@{
-    class iterator
-    {
-private:
-        int pos;
-        const IntArray *vec;
-
-public:
-        iterator(const IntArray * vec, int pos);
-
-        bool operator != ( const IntArray :: iterator & other ) const;
-
-        int operator *( ) const;
-
-        const IntArray :: iterator &operator++ ( );
-    };
-
-    IntArray :: iterator begin();
-    IntArray :: iterator end();
+    std::vector< int > :: iterator begin() { return this->values.begin(); }
+    std::vector< int > :: iterator end() { return this->values.end(); }
+    std::vector< int > :: const_iterator begin() const { return this->values.begin(); }
+    std::vector< int > :: const_iterator end() const { return this->values.end(); }
     //@}
 
-    /// Constructor for zero sized array
-    IntArray();
     /// Constructor for sized array. Data is zeroed.
-    IntArray(int n);
+    IntArray(int n = 0) : values(n) { }
     /// Copy constructor. Creates the array from another array.
-    IntArray(const IntArray &);
-#if __cplusplus > 199711L
+    IntArray(const IntArray &src) : values(src.values) { }
+    /// Move constructor. Creates the array from another array.
+    IntArray(IntArray &&src) : values(std::move(src.values)) {  printf("()Moving!\n"); }
     /// Initializer list constructor.
-    IntArray(std :: initializer_list< int >list);
-    /// Assignment operator.
-    IntArray &operator = ( std :: initializer_list< int >list );
-#endif
+    inline IntArray(std :: initializer_list< int >list) : values(list) { }
     /// Destructor.
-    ~IntArray();
+    ~IntArray() {};
 
     /// Assignment operator
-    IntArray &operator = ( const IntArray & );
+    IntArray &operator = (const IntArray &src) { values = src.values; return *this; }
+    /// Move operator
+    IntArray &operator = (IntArray &&src) { values = std::move(src.values); return *this; }
+    /// Assignment operator.
+    inline IntArray &operator = (std :: initializer_list< int >list) { values = list; return *this; }
 
     /**
      * Coefficient access function. Returns l-value of coefficient at given
@@ -155,9 +123,7 @@ public:
 #ifdef DEBUG
     int &operator() (int i);
 #else
-    inline int &operator() (int i) {
-        return values [ i ];
-    }
+    inline int &operator() (int i) { return values [ i ]; }
 #endif
     /**
      * Coefficient access function. Returns value of coefficient at given
@@ -174,17 +140,13 @@ public:
 #ifdef DEBUG
     int &operator[] ( int i );
 #else
-    inline int &operator[] ( int i ) {
-        return values [ i ];
-    }
+    inline int &operator[] ( int i ) { return values [ i ]; }
 #endif
 
 #ifdef DEBUG
     const int &operator[] ( int i ) const;
 #else
-    inline const int &operator[] ( int i ) const {
-        return values [ i ];
-    }
+    inline const int &operator[] ( int i ) const { return values [ i ]; }
 #endif
 
 #ifdef DEBUG
@@ -211,13 +173,11 @@ public:
      */
     void resize(int n);
     /**
-     * Clears receiver (zero size).
-     * Same effect as resizing to zero, but has a clearer meaning and intent when used.
+     * Clears the array (zero size).
      */
-    void clear() { size = 0; }
+    void clear() { this->values.clear(); }
     /**
      * Preallocates receiver to given futureSize if larger then allocatedSize.
-     * @note{After this operation array values are in undefined state, programmer should zero receiver.}
      * @param futureSize Size to be allocated.
      */
     void preallocate(int futureSize);
@@ -241,12 +201,12 @@ public:
      */
     void followedBy(int b, int allocChunk = 0);
     /// @return Size of receiver.
-    int giveSize() const { return size; }
+    int giveSize() const { return (int)values.size(); }
     /**
      * Checks if receiver is empty (i.e., zero sized).
      * @return True is size is zero.
      */
-    bool isEmpty() const { return size == 0; }
+    bool isEmpty() const { return values.size() == 0; }
     /**
      * Checks if receiver is all zero.
      * @return True is receiver contains only zeroes.
@@ -358,7 +318,7 @@ public:
      * Breaks encapsulation. Avoid using this unless absolutely necessary.
      * @return Internal pointer to stored values.
      */
-    int *givePointer() const { return values; }
+    int *givePointer() const { return const_cast< int* >(values.data()); }
 
     /**
      * Stores array to output stream.

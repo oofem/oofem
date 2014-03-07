@@ -81,7 +81,6 @@ SolutionbasedShapeFunction :: ~SolutionbasedShapeFunction()
 IRResultType
 SolutionbasedShapeFunction :: initializeFrom(InputRecord *ir)
 {
-    const char *__proc = "initializeFrom";
     IRResultType result;
 
     ActiveBoundaryCondition :: initializeFrom(ir);
@@ -392,7 +391,7 @@ SolutionbasedShapeFunction :: loadProblem()
                 }
             }
             if ( vlockCount == 30 ) {
-                OOFEM_WARNING5("Element over-constrained (%u)! Center coordinate: %f, %f, %f\n", e->giveNumber(), centerCoord.at(1) / 10, centerCoord.at(2) / 10, centerCoord.at(3) / 10);
+                OOFEM_WARNING("Element over-constrained (%u)! Center coordinate: %f, %f, %f\n", e->giveNumber(), centerCoord.at(1) / 10, centerCoord.at(2) / 10, centerCoord.at(3) / 10);
             }
         }
 

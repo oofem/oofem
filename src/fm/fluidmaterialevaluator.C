@@ -56,7 +56,6 @@ FluidMaterialEvaluator :: ~FluidMaterialEvaluator()
 
 IRResultType FluidMaterialEvaluator :: initializeFrom(InputRecord *ir)
 {
-    const char *__proc = "initializeFrom";
     IRResultType result;
 
     this->deltaT = 1.0;
@@ -92,7 +91,7 @@ void FluidMaterialEvaluator :: solveYourself()
 
     MaterialMode mode;
     if ( ndim == 1 ) {
-        OOFEM_ERROR("FluidMaterialEvaluator :: solveYourself - 1d flow not supported (should be added)")
+        OOFEM_ERROR("1d flow not supported (should be added)")
         //mode = _1dFlow;
         mode = _Unknown;
     } else if ( ndim == 2 ) {

@@ -100,7 +100,7 @@ DKTPlate :: computeBodyLoadVectorAt(FloatArray &answer, Load *forLoad, TimeStep 
     FloatMatrix T;
 
     if ( ( forLoad->giveBCGeoType() != BodyLoadBGT ) || ( forLoad->giveBCValType() != ForceLoadBVT ) ) {
-        _error("computeBodyLoadVectorAt: unknown load type");
+        OOFEM_ERROR("unknown load type");
     }
 
     GaussIntegrationRule irule(1, this, 1, 5);
@@ -292,47 +292,15 @@ DKTPlate :: computeNmatrixAt(const FloatArray &iLocCoord, FloatMatrix &answer)
 // Note: this interpolation is not available, as the deflection is cubic along the edges,
 //       but not define in the interior of the element
 // Note: the interpolation of rotations is quadratic
+// NOTE: linear interpolation returned instead
 {
-    // get node coordinates
-    double x1, x2, x3, y1, y2, y3;
-    this->giveNodeCoordinates(x1, x2, x3, y1, y2, y3);
+    FloatArray N(3);
 
-    //
-    double l1, l2, l3, b1, b2, b3, c1, c2, c3;
-
-    b1 = y2 - y3;
-    b2 = y3 - y1;
-    b3 = y1 - y2;
-
-    c1 = x3 - x2;
-    c2 = x1 - x3;
-    c3 = x2 - x1;
-
-    l1 = iLocCoord.at(1);
-    l2 = iLocCoord.at(2);
-    l3 = 1.0 - l1 - l2;
-
-    //
     answer.resize(3, 9);
     answer.zero();
+    giveInterpolation()->evalN( N, iLocCoord, FEIElementGeometryWrapper(this) );
 
-    answer.at(1, 1) = l1;
-    answer.at(1, 2) = l1 * ( l2 * b3 - l3 * b2 ) * 0.5;
-    answer.at(1, 3) = l1 * ( l2 * c3 - l3 * c2 ) * 0.5;
-    answer.at(1, 4) = l2;
-    answer.at(1, 5) = l2 * ( l3 * b1 - l1 * b3 ) * 0.5;
-    answer.at(1, 6) = l2 * ( l3 * c1 - l1 * c3 ) * 0.5;
-    answer.at(1, 7) = l3;
-    answer.at(1, 8) = l3 * ( l1 * b2 - l2 * b1 ) * 0.5;
-    answer.at(1, 9) = l3 * ( l1 * c2 - l2 * c1 ) * 0.5;
-
-    answer.at(2, 2) = l1;
-    answer.at(2, 5) = l2;
-    answer.at(2, 8) = l3;
-
-    answer.at(3, 3) = l1;
-    answer.at(3, 6) = l2;
-    answer.at(3, 9) = l3;
+    answer.beNMatrixOf(N, 3);
 }
 
 
@@ -516,22 +484,22 @@ DKTPlate :: giveIPValue(FloatArray &answer, GaussPoint *gp, InternalStateType ty
     answer.resize(9);
     if ( ( type == IST_ShellForceTensor ) || ( type == IST_ShellMomentumTensor ) ) {
         help = static_cast< StructuralMaterialStatus * >( gp->giveMaterialStatus() )->giveStressVector();
-        if ( type == IST_ShellForceTensor ) {
-            answer.at(1) = help.at(1); // nx
-            answer.at(2) = help.at(3); // vxy
-            answer.at(3) = help.at(7); // vxz
-            answer.at(4) = help.at(3); // vxy
-            answer.at(5) = help.at(2); // ny
-            answer.at(6) = help.at(8); // vyz
-            answer.at(7) = help.at(7); // vxy
-            answer.at(8) = help.at(8); // ny
-            answer.at(9) = 0.0;
+       if ( type == IST_ShellForceTensor ) {
+            answer.at(1) = 0.0; // nx
+            answer.at(2) = 0.0; // vxy
+            answer.at(3) = help.at(4); // vxz
+            answer.at(4) = 0.0; // vyx
+            answer.at(5) = 0.0; // ny
+            answer.at(6) = help.at(5); // vyz
+            answer.at(7) = help.at(4); // vzx
+            answer.at(8) = help.at(5); // vzy
+            answer.at(9) = 0.0; // nz
         } else {
-            answer.at(1) = help.at(4); // mx
-            answer.at(2) = help.at(6); // mxy
+            answer.at(1) = help.at(1); // mx
+            answer.at(2) = help.at(3); // mxy
             answer.at(3) = 0.0;      // mxz
-            answer.at(4) = help.at(6); // mxy
-            answer.at(5) = help.at(5); // my
+            answer.at(4) = help.at(3); // mxy
+            answer.at(5) = help.at(2); // my
             answer.at(6) = 0.0;      // myz
             answer.at(7) = 0.0;      // mzx
             answer.at(8) = 0.0;      // mzy
@@ -541,21 +509,21 @@ DKTPlate :: giveIPValue(FloatArray &answer, GaussPoint *gp, InternalStateType ty
     } else if ( ( type == IST_ShellStrainTensor )  || ( type == IST_ShellCurvatureTensor ) ) {
         help = static_cast< StructuralMaterialStatus * >( gp->giveMaterialStatus() )->giveStrainVector();
         if ( type == IST_ShellForceTensor ) {
-            answer.at(1) = help.at(1); // nx
-            answer.at(2) = help.at(3); // vxy
-            answer.at(3) = help.at(7); // vxz
-            answer.at(4) = help.at(3); // vxy
-            answer.at(5) = help.at(2); // ny
-            answer.at(6) = help.at(8); // vyz
-            answer.at(7) = help.at(7); // vxy
-            answer.at(8) = help.at(8); // ny
-            answer.at(9) = 0.0;
+            answer.at(1) = 0.0; // nx
+            answer.at(2) = 0.0; // vxy
+            answer.at(3) = help.at(4); // vxz
+            answer.at(4) = 0.0; // vyx
+            answer.at(5) = 0.0; // ny
+            answer.at(6) = help.at(5); // vyz
+            answer.at(7) = help.at(4); // vzx
+            answer.at(8) = help.at(5); // nzy
+            answer.at(9) = 0.0; // nz
         } else {
-            answer.at(1) = help.at(4); // mx
-            answer.at(2) = help.at(6); // mxy
+            answer.at(1) = help.at(1); // mx
+            answer.at(2) = help.at(3); // mxy
             answer.at(3) = 0.0;      // mxz
-            answer.at(4) = help.at(6); // mxy
-            answer.at(5) = help.at(5); // my
+            answer.at(4) = help.at(3); // mxy
+            answer.at(5) = help.at(2); // my
             answer.at(6) = 0.0;      // myz
             answer.at(7) = 0.0;      // mzx
             answer.at(8) = 0.0;      // mzy
@@ -624,7 +592,7 @@ DKTPlate :: SPRNodalRecoveryMI_giveDofMansDeterminedByPatch(IntArray &answer, in
         ( pap == this->giveNode(3)->giveNumber() ) ) {
         answer.at(1) = pap;
     } else {
-        _error("SPRNodalRecoveryMI_giveDofMansDeterminedByPatch: node unknown");
+        OOFEM_ERROR("node unknown");
     }
 }
 
@@ -707,7 +675,7 @@ DKTPlate :: giveEdgeDofMapping(IntArray &answer, int iEdge) const
         answer.at(5) = 2;
         answer.at(6) = 3;
     } else {
-        _error("giveEdgeDofMapping: wrong edge number");
+        OOFEM_ERROR("wrong edge number");
     }
 }
 
@@ -759,6 +727,57 @@ DKTPlate :: computeLoadLEToLRotationMatrix(FloatMatrix &answer, int iEdge, Gauss
     answer.at(3, 3) = dx / length;
 
     return 1;
+}
+
+
+
+void
+DKTPlate :: computeSurfaceNMatrixAt(FloatMatrix &answer, int iSurf, GaussPoint *sgp)
+{
+  this->computeNmatrixAt(* sgp->giveCoordinates(), answer);
+}
+
+void
+DKTPlate :: giveSurfaceDofMapping(IntArray &answer, int iSurf) const
+{
+    answer.resize(9);
+    answer.zero();
+    if ( iSurf == 1 ) {
+      for (int i = 1; i<=9; i++) {
+	answer.at(i) = i;
+      }
+    } else {
+        OOFEM_ERROR("wrong surface number");
+    }
+}
+
+IntegrationRule *
+DKTPlate :: GetSurfaceIntegrationRule(int approxOrder)
+{
+    IntegrationRule *iRule = new GaussIntegrationRule(1, this, 1, 1);
+    int npoints = iRule->getRequiredNumberOfIntegrationPoints(_Triangle, approxOrder);
+    iRule->SetUpPointsOnTriangle(npoints, _Unknown);
+    return iRule;
+}
+
+double
+DKTPlate :: computeSurfaceVolumeAround(GaussPoint *gp, int iSurf)
+{
+    return this->computeVolumeAround(gp);
+}
+
+
+void
+DKTPlate :: computeSurfIpGlobalCoords(FloatArray &answer, GaussPoint *gp, int isurf)
+{
+    this->computeGlobalCoordinates( answer, * gp->giveCoordinates() );
+}
+
+
+int
+DKTPlate :: computeLoadLSToLRotationMatrix(FloatMatrix &answer, int isurf, GaussPoint *gp)
+{
+    return 0;
 }
 
 

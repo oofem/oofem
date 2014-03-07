@@ -60,7 +60,6 @@ J2Mat :: ~J2Mat()
 IRResultType
 J2Mat :: initializeFrom(InputRecord *ir)
 {
-    const char *__proc = "initializeFrom"; // Required by IR_GIVE_FIELD macro
     IRResultType result;                 // Required by IR_GIVE_FIELD macro
     double value;
 

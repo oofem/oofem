@@ -581,7 +581,7 @@ void MixedGradientPressureNeumann :: computeTangents(FloatMatrix &Ed, FloatArray
     // Set up and assemble tangent FE-matrix which will make up the sensitivity analysis for the macroscopic material tangent.
     Kff = classFactory.createSparseMtrx(stype);
     if ( !Kff ) {
-        OOFEM_ERROR2("MixedGradientPressureNeumann :: computeTangents - Couldn't create sparse matrix of type %d\n", stype);
+        OOFEM_ERROR("Couldn't create sparse matrix of type %d\n", stype);
     }
     Kff->buildInternalStructure(rve, this->domain->giveNumber(), eid, fnum);
     rve->assemble(Kff, tStep, eid, StiffnessMatrix, fnum, fnum, this->domain);
@@ -696,7 +696,7 @@ void MixedGradientPressureNeumann :: giveInputRecord(DynamicInputRecord &input)
 {
     MixedGradientPressureBC :: giveInputRecord(input);
     input.setField(this->pressure, _IFT_MixedGradientPressure_pressure);
-    OOFEM_ERROR("MixedGradientPressureNeumann :: giveInputRecord - Not supported yet\n");
+    OOFEM_ERROR("Not supported yet\n");
     //FloatArray devGradientVoigt;
     //input.setField(devGradientVoigt, _IFT_MixedGradientPressure_devGradient);
 }

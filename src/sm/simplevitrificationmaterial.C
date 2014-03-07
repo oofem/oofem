@@ -45,7 +45,6 @@ SimpleVitrificationMaterial :: ~SimpleVitrificationMaterial() { }
 
 IRResultType SimpleVitrificationMaterial :: initializeFrom(InputRecord *ir)
 {
-    const char *__proc = "initializeFrom";
     IRResultType result;
 
     StructuralMaterial :: initializeFrom(ir);
