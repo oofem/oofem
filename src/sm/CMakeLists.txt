@@ -50,6 +50,7 @@ set (sm_element
     qspacegrad.C
     dkt.C qdkt.C
     quad1platesubsoil.C tria1platesubsoil.C
+    interfaceelem2dlin.C
     )
 
 set (sm_crosssection
