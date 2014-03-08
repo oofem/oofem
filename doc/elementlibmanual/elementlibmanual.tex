@@ -1149,6 +1149,33 @@ w-displacement) are required in each node, according to element mode (determined
 \elementDescription{Note}{Element requires material model with \_1dInterface support.}
 \end{elementsummary}
 
+\subsubsection{Interface2dlin element}
+Implementation of a two dimensional interface element with linear
+approximation of displacement field. Can be used to glue together two elements with linear displacement approximation along the shared edge. Note, that the nodes along the interface are doubled, each couple with identical coordinates. Nodes on the negative side are numbered first, followed by nodes on the positive part. Requires material model with \_2dInterface support.  The element features are summarized in Table~\ref{Interface2dlinsummary}.
+
+\begin{figure}[htb]
+ \centering
+ \begin{makeimage}
+ \input{interf2d_lin.tikz}
+ \end{makeimage}
+ \caption{Interface2dlin element with linear interpolation. Definition and node numbering convention}
+ \label{interf2d_quad_fig}
+\end{figure}
+
+\begin{elementsummary}{Interface2dlin}{2D  interface element with linear approximation}{-}{Interface2dlin element summary}{Interface2dlinsummary}
+%\elementParam{\param{refnode}: determines the reference node, which is used to specify a reference direction (the direction vector is obtained by subtracting the coordinates of the first node from the reference node).}
+\elementDescription{Unknowns}{Two dofs (u-displacement, v-displacement) are required in each node.}
+\elementDescription{Approximation}{Linear approximation of displacements and geometry.}
+\elementDescription{Integration}{Full integration of all strain components using two point integration formula.}
+\elementDescription{Features}{-}
+\elementDescription{CS properties}{-}
+\elementDescription{Loads}{-}
+\elementDescription{Nlgeo}{0}
+\elementDescription{Status}{Reliable}
+\elementDescription{Note}{Element requires material model with \_2dInterface support.}
+\end{elementsummary}
+
+
 \subsubsection{Interface2dquad element}
 Implementation of a two dimensional interface element with quadratic
 approximation of displacement field. Can be used to glue together two elements with quadratic displacement approximation along the shared edge. Note, that the nodes along the interface are doubled, each couple with identical coordinates. Nodes on the negative side are numbered first, followed by nodes on the positive part. Requires material model with \_2dInterface support.  The element features are summarized in Table~\ref{Interface2dquadsummary}.
