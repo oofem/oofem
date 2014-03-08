@@ -267,6 +267,30 @@ Supported modes& 3dMat\\
 %\end{center}
 \end{table}
 
+\subsection{Winkler-Pasternak model}
+Implementation of 2D winkler-pasternak model for plate (and potentially beam) subsoil model.
+\begin{table}[!htb]
+%\begin{center}
+\begin{mmt}
+\hline
+Description & Winkler Pasternak isotropic material for subsoil interaction\\
+\hline
+Record Format & \descitem{winklerpasternak}  \elemparam{}{in}
+\elemparam{d}{rn} \elemparam{c1}{rn} \elemparam{c2}{rn} \\
+Parameters &- \param{} material number\\
+&- \param{d} material density\\
+&- \param{c1} C1 Winkler parameter (foundation modulus) \\
+&- \param{c2} C2 shear interaction modulus \\
+Supported modes& 2dPlateSubSoil\\
+\hline
+\end{mmt}
+\caption{Winkler Pasternak material - summary.}
+\label{hyperElMat_table}
+%\end{center}
+\end{table}
+
+
+
 \subsection{Large-strain master material}
 In this section, a large-strain master model based on generalized stress-strain measures is described. 
 In the first step, strain measure is computed from equation (\ref{generalizedStrainMeasures}).
