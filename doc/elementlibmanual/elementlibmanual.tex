@@ -835,6 +835,38 @@ The element features are summarized in Table~\ref{quad1mindlinsummary}.
 \end{elementsummary}
 
 
+\subsubsection{Sub-soil Elements}
+\subsubsection{quad1plateSubsoil Element} \label{quad1platesubsoil}
+This class implements an quadrilateral, bilinear, four-node plate subsoil element.
+Typically this element is combined with suitable plate element with quadrilateral geometry to model plate element on 
+(elastic) subsoill foundation, but it can be used alone. The element geometry should be define in xy plane.
+The element features are summarized in Table~\ref{quad1platesubsoilsummary}.
+
+\begin{elementsummary}{quad1plateSubsoil}{Quadrilateral, bilinear, four-node sub-soil plate element}{}{quad1platesubsoil element summary}{quad1platesubsoilsummary}
+%\elementParam{\param{NIP}: allows to set the number of integration points for integration of membrane terms.}
+\elementDescription{Unknowns}{One dof (w-displacement) is required in each node.}
+\elementDescription{Approximation}{Linear for transwersal displacement.}
+\elementDescription{Integration}{4 integration points.}
+\elementDescription{Loads}{Surface load support.}
+\elementDescription{Note}{Requires material model with 2dPlateSubSoil mode support.}
+\elementDescription{Reference}{\cite{BittnarSejnoha1996}}
+\end{elementsummary}
+
+\subsubsection{Tria1PlateSubSoil Element} \label{tria1platesubsoil}
+This class implements an quadrilateral, bilinear, four-node plate subsoil element.
+Typically this element is combined with suitable plate element with quadrilateral geometry to model plate element on 
+(elastic) subsoill foundation, but it can be used alone. The element geometry should be define in xy plane.
+The element features are summarized in Table~\ref{quad1platesubsoilsummary}.
+
+\begin{elementsummary}{tria1platesubsoil}{Tringular, three-node sub-soil plate element with linear interpolation}{}{tria1platesubsoil element summary}{tria1platesubsoilsummary}
+\elementDescription{Unknowns}{One dof (w-displacement) is required in each node.}
+\elementDescription{Approximation}{Linear for transwersal displacement.}
+\elementDescription{Integration}{1 integration points.}
+\elementDescription{Loads}{Surface load support.}
+\elementDescription{Note}{Requires material model with 2dPlateSubSoil mode support.}
+\elementDescription{Reference}{\cite{BittnarSejnoha1996}}
+\end{elementsummary}
+
 
 %-----------------------------------------------------------------------------------------------
 \clearpage
