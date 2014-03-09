@@ -40,6 +40,7 @@
 #include "contextioerr.h"
 #include "classfactory.h"
 #include "intmatbilinearcz.h"
+#include "dynamicinputrecord.h"
 
 namespace oofem {
 REGISTER_Material(IntMatBilinearCZ);

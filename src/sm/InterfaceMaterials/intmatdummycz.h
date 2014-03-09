@@ -32,26 +32,11 @@
  *  Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
  */
 
-/**
- *
- *	IntMatDummyCZ
- *
- *	Dummy cohesive zone model. The purpose of the model is
- *	to store, and thus allow export of, the displacement jump.
- *
- *  Created on: Jan 24, 2014
- *  @author: Erik Svenning
- */
-
-
-
 #ifndef INTMATDUMMYCZ_H_
 #define INTMATDUMMYCZ_H_
 
 #include "structuralinterfacematerial.h"
 #include "structuralinterfacematerialstatus.h"
-
-#include "dynamicinputrecord.h"
 
 ///@name Input fields for IntMatDummyCZ
 //@{
@@ -60,11 +45,18 @@
 
 namespace oofem {
 
+/**
+ * Dummy cohesive zone model. The purpose of the model is
+ * to store, and thus allow export of, the displacement jump.
+ *
+ * @date Jan 24, 2014
+ * @author Erik Svenning
+ */
 class IntMatDummyCZ : public StructuralInterfaceMaterial
 {
 public:
-	IntMatDummyCZ(int n, Domain *d);
-	virtual ~IntMatDummyCZ();
+    IntMatDummyCZ(int n, Domain *d);
+    virtual ~IntMatDummyCZ();
 
     virtual const char *giveClassName() const { return "IntMatBilinearCZ"; }
     virtual const char *giveInputRecordName() const { return _IFT_IntMatDummyCZ_Name; }
