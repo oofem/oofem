@@ -7,7 +7,7 @@ include (CheckCXXSourceCompiles)
 include (GenerateExportHeader)
 include (UsePkgConfig)
 
-project (oofem CXX)
+project (oofem CXX C)
 set (oofem_VERSION_MAJOR 2)
 set (oofem_VERSION_MINOR 4)
 set (oofem_VERSION_PATCH 0) # Unused
