@@ -60,16 +60,8 @@ StressStrainBaseVector :: StressStrainBaseVector(const FloatArray &src, Material
 StressStrainBaseVector &
 StressStrainBaseVector :: operator = ( const StressStrainBaseVector & src )
 {
-    // assignment: cleanup and copy
-    double *srcVal;
-
     if ( this != & src ) { // beware of s=s;
-        this->resize(src.size);
-
-        srcVal = src.givePointer();
-        for ( int i = 0; i < size; i++ ) {
-            this->values [ i ] = srcVal [ i ];
-        }
+        this->values = src.values;
     }
 
     this->mode = src.mode;
@@ -100,7 +92,7 @@ StressStrainBaseVector :: convertFromFullForm(const FloatArray &vector, Material
     IntArray indx;
 
     if ( mode == _3dMat ) {
-        if ( size != 6 ) {
+        if ( this->giveSize() != 6 ) {
             OOFEM_SIMPLE_ERROR("convertFromFullForm - full vector size mismatch");
         }
 
