@@ -299,6 +299,11 @@ void IntArray :: setValues(int n, ...)
     va_end(vl);
 }
 
+int IntArray :: findSorted(int _val)   const
+{
+    return std::binary_search (values.begin(), values.end(), _val);
+}
+
 
 int IntArray :: insertSorted(int val, int allocChunk)
 {
