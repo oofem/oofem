@@ -38,7 +38,7 @@
 #include <vector>
 #include <list>
 #include <string>
-#inlcude "logger.h" // for missing __func__ in MSC
+#include "logger.h" // for missing __func__ in MSC
 
 #include "oofemcfg.h"
 
