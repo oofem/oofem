@@ -191,18 +191,18 @@ public:
     virtual MaterialStatus *CreateStatus(GaussPoint *gp) const;
 
 protected:
-    void dtp3(GaussPoint *gp, FloatArray *e, FloatArray *s, FloatArray *ep,
+    void dtp3(GaussPoint *gp, FloatArray &e, FloatArray &s, FloatArray &ep,
               double SCC, double SCT, int *ifplas);
-    void dtp2(GaussPoint *gp, FloatArray *e, FloatArray *s, FloatArray *ep,
+    void dtp2(GaussPoint *gp, FloatArray &e, FloatArray &s, FloatArray &ep,
               double SCC, double SCT, int *ifplas);
     void stirr(double dez, double srf);
-    void strsoft(GaussPoint *gp, double epsult, FloatArray *ep, double &ep1,
+    void strsoft(GaussPoint *gp, double epsult, FloatArray &ep, double &ep1,
                  double &ep2, double &ep3, double SCC, double SCT, int &ifupd);
 
     // two functions used to initialize and updating temporary variables in
     // gp's status. These variables are used to control process, when
     // we try to find equilibrium state.
-    void updateStirrups(GaussPoint *gp, FloatArray *strainIncrement);
+    void updateStirrups(GaussPoint *gp, FloatArray &strainIncrement);
 
 public:
     virtual double give(int, GaussPoint *gp);

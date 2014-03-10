@@ -145,7 +145,7 @@ Lattice2d_mt :: computeNSubMatrixAt(FloatMatrix &answer, const FloatArray &coord
     ksi = coords.at(1);
     n1  = ( 1. - ksi ) * 0.5;
     n2  = ( 1. + ksi ) * 0.5;
-    //answer = new FloatMatrix(2,4) ;
+
     answer.resize(1, 2);
     answer.zero();
 
