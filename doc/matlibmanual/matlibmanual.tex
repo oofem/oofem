@@ -267,6 +267,30 @@ Supported modes& 3dMat\\
 %\end{center}
 \end{table}
 
+\subsection{Winkler-Pasternak model}
+Implementation of 2D winkler-pasternak model for plate (and potentially beam) subsoil model.
+\begin{table}[!htb]
+%\begin{center}
+\begin{mmt}
+\hline
+Description & Winkler Pasternak isotropic material for subsoil interaction\\
+\hline
+Record Format & \descitem{winklerpasternak}  \elemparam{}{in}
+\elemparam{d}{rn} \elemparam{c1}{rn} \elemparam{c2}{rn} \\
+Parameters &- \param{} material number\\
+&- \param{d} material density\\
+&- \param{c1} C1 Winkler parameter (foundation modulus) \\
+&- \param{c2} C2 shear interaction modulus \\
+Supported modes& 2dPlateSubSoil\\
+\hline
+\end{mmt}
+\caption{Winkler Pasternak material - summary.}
+\label{hyperElMat_table}
+%\end{center}
+\end{table}
+
+
+
 \subsection{Large-strain master material}
 In this section, a large-strain master model based on generalized stress-strain measures is described. 
 In the first step, strain measure is computed from equation (\ref{generalizedStrainMeasures}).
@@ -2280,11 +2304,17 @@ The damage evolution law is postulated in an explicit form, relating
 the damage variable $\omega$ to the largest previously reached 
 equivalent ``strain'' level, $\kappa$.
 
-The equivalent ``strain'', $\tilde\varepsilon$, is a scalar measure derived from the displacement jump vector. The choice of the specific expression
+The equivalent ``strain'', $\tilde\varepsilon$, is a scalar measure of the displacement jump vector. The choice of the specific expression
 for the equivalent strain affects the shape of the elastic domain
 in the strain space and plays a similar role to the choice of a yield
 condition in plasticity.
-Currently, in the present implementation,  $\tilde\varepsilon$ is equal to the positive part of the normal displacement jump (opening of the interface).
+Currently, in the present implementation,  the equivalent strain is given by
+$$
+\tilde\varepsilon = \sqrt{\langle w_n\rangle^2 + \beta w_t^2}}
+$$ 
+where $\langle w_n\rangle$ is the positive part of the normal displacement jump (opening of the interface)
+and $w_t$ is the norm of the tangential part of displacement jump (sliding of the interface). Parameter $\beta$
+is optional and its default value is 0, in which case damage depends on the opening only (not on the sliding).
 Only the exponential softening damage law is supported:
 $$
 \omega = 1 - \frac{\varepsilon_0}{\kappa}  \exp\left( - \frac{f_t( \kappa - \varepsilon_0 )}{G_f} \right)
@@ -2305,9 +2335,10 @@ Parameters & - \param{d} material density\\
 &- \param{ks} elastic stifness in tangential direction\\
 &- \param{ft} tensile strength\\
 &- \param{gf} fracture energy\\
-&- \param{maxomega} maximum damage, used for convergence improvement
+&- \optparam{maxomega} maximum damage, used for convergence improvement
 (its value is between 0 and 0.999999 (default), 
 and it affects only the secant stiffness but not the stress)\\
+&- \optparam{beta} parameter controlling the effect of sliding part of displacement jump on equivalent strain, default value 0\\
 Supported modes& 2dInterface, 3dInterface\\
 Features & \\
 \hline

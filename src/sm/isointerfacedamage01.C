@@ -51,6 +51,7 @@ IsoInterfaceDamageMaterial :: IsoInterfaceDamageMaterial(int n, Domain *d) : Str
     //
 {
     maxOmega = 0.999999;
+    beta = 0.;
 }
 
 
@@ -125,11 +126,7 @@ IsoInterfaceDamageMaterial :: giveRealStressVector(FloatArray &answer, GaussPoin
     }
 
     this->giveStiffnessMatrix(de, ElasticStiffness, gp, tStep);
-    // damage in tension only
-    if ( equivStrain >= 0.0 ) {
-        de.times(1.0 - omega);
-    }
-
+    de.times(1.0 - omega);
     answer.beProductOf(de, reducedTotalStrainVector);
 
     // update gp
@@ -345,6 +342,9 @@ IsoInterfaceDamageMaterial :: initializeFrom(InputRecord *ir)
     maxOmega = min(maxOmega, 0.999999);
     maxOmega = max(maxOmega, 0.0);
 
+    beta = 0.;
+    IR_GIVE_OPTIONAL_FIELD(ir, beta, _IFT_IsoInterfaceDamageMaterial_beta);
+
     IR_GIVE_FIELD(ir, tempDillatCoeff, _IFT_IsoInterfaceDamageMaterial_talpha);
     return StructuralMaterial :: initializeFrom(ir);
 }
@@ -369,7 +369,13 @@ IsoInterfaceDamageMaterial :: giveInputRecord(DynamicInputRecord &input)
 void
 IsoInterfaceDamageMaterial :: computeEquivalentStrain(double &kappa, const FloatArray &strain, GaussPoint *gp, TimeStep *tStep)
 {
-    kappa = macbra( strain.at(1) );
+  // kappa = macbra( strain.at(1) );
+    double epsNplus = macbra( strain.at(1) );
+    double epsT2 = strain.at(2)*strain.at(2);
+    if (strain.giveSize()==3){
+      epsT2 += strain.at(3)*strain.at(3);
+    }
+    kappa = sqrt(epsNplus*epsNplus + beta*epsT2);
 }
 
 void

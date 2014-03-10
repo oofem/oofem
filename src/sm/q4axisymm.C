@@ -405,6 +405,19 @@ Q4Axisymm :: giveDofManDofIDMask(int inode, EquationID, IntArray &answer) const
 }
 
 
+
+Interface *
+Q4Axisymm :: giveInterface(InterfaceType interface)
+{
+    if ( interface == ZZNodalRecoveryModelInterfaceType ) {
+        return static_cast< ZZNodalRecoveryModelInterface * >(this);
+    }
+
+    return NULL;
+}
+
+
+
 #ifdef __OOFEG
 
 void Q4Axisymm :: drawRawGeometry(oofegGraphicContext &gc)
