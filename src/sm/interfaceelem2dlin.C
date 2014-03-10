@@ -60,6 +60,7 @@ InterfaceElem2dLin :: InterfaceElem2dLin(int n, Domain *aDomain) :
     StructuralElement(n, aDomain)
 {
     numberOfDofMans       = 4;
+    axisymmode            = false;
 }
 
 
@@ -102,14 +103,23 @@ InterfaceElem2dLin :: computeVolumeAround(GaussPoint *gp)
 // Returns the length of the receiver. This method is valid only if 1
 // Gauss point is used.
 {
+  double r = 1.0;
+  if (this->axisymmode) {
+    FloatArray n(2);
+    this->interp.evalN( n, * gp->giveCoordinates(), FEIElementGeometryWrapper(this) );
+    r = n.at(1)*this->giveNode(1)->giveCoordinate(1) + n.at(2)*this->giveNode(2)->giveCoordinate(1);
+  }
+
+
   double result = this->interp.giveTransformationJacobian(* gp->giveCoordinates(), FEIElementGeometryWrapper(this));
-  return result * gp->giveWeight();
+  return result * gp->giveWeight() * r;
 }
 
 
 IRResultType
 InterfaceElem2dLin :: initializeFrom(InputRecord *ir)
 {
+    this->axisymmode = ir->hasField(_IFT_InterfaceElem2dLin_axisymmode);
     return StructuralElement :: initializeFrom(ir);
 }
 

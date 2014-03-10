@@ -38,6 +38,7 @@
 #include "structuralelement.h"
 
 #define _IFT_InterfaceElem2dLin_Name "interface2dlin"
+#define _IFT_InterfaceElem2dLin_axisymmode "axisymmode"
 
 namespace oofem {
 class FEI2dLineLin;
@@ -50,6 +51,8 @@ class InterfaceElem2dLin : public StructuralElement
 {
 protected:
     static FEI2dLineLin interp;
+    /// Flag controlling axisymmetric mode (integration over unit circumferential angle)
+    bool axisymmode;
 
 public:
     InterfaceElem2dLin(int n, Domain * d);
