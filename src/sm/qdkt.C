@@ -761,7 +761,7 @@ QDKTPlate :: computeLoadLSToLRotationMatrix(FloatMatrix &answer, int isurf, Gaus
 //
 #ifdef __OOFEG
 void
-DKTPlate :: drawRawGeometry(oofegGraphicContext &gc)
+QDKTPlate :: drawRawGeometry(oofegGraphicContext &gc)
 {
     WCRec p [ 4 ];
     GraphicObj *go;
@@ -800,7 +800,7 @@ DKTPlate :: drawRawGeometry(oofegGraphicContext &gc)
 
 
 void
-DKTPlate :: drawDeformedGeometry(oofegGraphicContext &gc, UnknownType type)
+QDKTPlate :: drawDeformedGeometry(oofegGraphicContext &gc, UnknownType type)
 {
     WCRec p [ 4 ];
     GraphicObj *go;
@@ -839,7 +839,7 @@ DKTPlate :: drawDeformedGeometry(oofegGraphicContext &gc, UnknownType type)
 
 
 void
-DKTPlate :: drawScalar(oofegGraphicContext &context)
+QDKTPlate :: drawScalar(oofegGraphicContext &context)
 {
     int i, indx, result = 0;
     WCRec p [ 4 ];

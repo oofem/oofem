@@ -44,6 +44,7 @@ class SPRNodalRecoveryModelInterface;
 class ProcessCommunicator;
 
 enum SPRPatchType {
+    SPRPatchType_none = 0,
     SPRPatchType_2dxy = 1,
     SPRPatchType_3dBiLin,
     SPRPatchType_2dquadratic,

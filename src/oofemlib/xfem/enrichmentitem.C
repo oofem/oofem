@@ -74,9 +74,9 @@ EnrichmentItem :: EnrichmentItem(int n, XfemManager *xMan, Domain *aDomain) : FE
     mpPropagationLaw(NULL),
     mPropLawIndex(0),
     mInheritBoundaryConditions(false),
-    mpEnrichesDofsWithIdArray(),
     startOfDofIdPool(-1),
     endOfDofIdPool(-1),
+    mpEnrichesDofsWithIdArray(),
     mLevelSetsNeedUpdate(true),
     mLevelSetTol2(1.0e-12)
 {

@@ -294,7 +294,7 @@ AnisotropicDamageMaterial :: computeEquivalentStrain(double &kappa, const FloatA
 
         // if plane stress mode -> compute strain in z-direction from condition of zero stress in corresponding direction
         if ( gp->giveMaterialMode() == _PlaneStress ) {
-            double nu = lmat->give(NYxz, gp);
+	    //                double nu = lmat->give(NYxz, gp);
             //                fullstrain.at(3) = -nu * ( fullstrain.at(1) + fullstrain.at(2) ) / ( 1. - nu );
             fullstrain.at(3) = status->giveTempStrainZ();
         } else if ( gp->giveMaterialMode() == _1dMat ) {
@@ -704,7 +704,7 @@ AnisotropicDamageMaterial :: computeTraceD(FloatMatrix tempDamageTensor, FloatMa
 {
     AnisotropicDamageMaterialStatus *status = static_cast< AnisotropicDamageMaterialStatus * >( this->giveStatus(gp) );
     int flag = status->giveFlag();
-    int tempFlag = status->giveTempFlag();
+    //int tempFlag = status->giveTempFlag();
     double Dc = 1, trD = 0;
     // If flag = 0, the trace of the damage tensor has never been greater than 1 before
     if ( flag == 0 ) {
@@ -971,8 +971,8 @@ AnisotropicDamageMaterial :: computeDamageTensor(FloatMatrix &answer, GaussPoint
     // how to correctly update gp records
     //
     AnisotropicDamageMaterialStatus *status = static_cast< AnisotropicDamageMaterialStatus * >( this->giveStatus(gp) );
-    LinearElasticMaterial *lmat = this->giveLinearElasticMaterial();
-    ;
+    //LinearElasticMaterial *lmat = this->giveLinearElasticMaterial();
+
     double Dc = 1.00;
     double Kappa;
     FloatMatrix de, strainTensor, damageTensor, tempDamageTensor, eVecs;
@@ -993,7 +993,7 @@ AnisotropicDamageMaterial :: computeDamageTensor(FloatMatrix &answer, GaussPoint
         FloatArray eVals, fullStrainVector;
         FloatMatrix eVecs, strainTensor, positiveStrainTensor, positiveStrainTensorSquared, tempDamageTensor0;
         MaterialMode mode = gp->giveMaterialMode();
-        double nu = lmat->give(NYxz, gp);
+        // double nu = lmat->give(NYxz, gp);
         // Compute square of positive part of strain tensor
         //1.- converts strain vector to full form;
         StructuralMaterial :: giveFullSymVectorForm(fullStrainVector, reducedTotalStrainVector, mode);
@@ -1567,7 +1567,6 @@ AnisotropicDamageMaterial :: giveIPValue(FloatArray &answer, GaussPoint *aGaussP
 IRResultType
 AnisotropicDamageMaterial :: initializeFrom(InputRecord *ir)
 {
-    const char *__proc = "initializeFrom"; // Required by IR_GIVE_FIELD macro
     IRResultType result;                // Required by IR_GIVE_FIELD macro
 
     linearElasticMaterial->initializeFrom(ir);
