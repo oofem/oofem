@@ -95,7 +95,7 @@ RigidArmNode :: postInitialize()
     for ( int i = 1; i <= numberOfDofs; i++ ) {
         SlaveDof *sdof = dynamic_cast< SlaveDof * >(dofArray [ i - 1 ]);
         if ( sdof ) {
-            sdof->initialize(countOfMasterDofs.at(i), masterNodes, &masterDofID [ i - 1 ], masterContribution [ i - 1 ]);
+            sdof->initialize(countOfMasterDofs.at(i), masterNodes, masterDofID [ i - 1 ], masterContribution [ i - 1 ]);
         }
     }
 
