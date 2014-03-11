@@ -3983,6 +3983,7 @@ Subdivision :: bisectMesh()
     int myrank = this->giveRank();
     int problem_size = this->giveNumberOfProcesses();
     int value;
+    int *partitionsIrregulars = new int[ problem_size ];
 #endif
 
 #ifdef __PARALLEL_MODE
@@ -4120,7 +4121,7 @@ Subdivision :: bisectMesh()
  #ifdef __VERBOSE_PARALLEL
         OOFEM_LOG_INFO("[%d] Subdivision::bisectMesh: number of new local irregulars is %d\n", myrank, localIrregulars);
  #endif
-        int irank, localOffset = 0, gnum, partitionsIrregulars [ problem_size ];
+        int irank, localOffset = 0, gnum;
         // gather number of local irregulars from all partitions
         MPI_Allgather(& localIrregulars, 1, MPI_INT, partitionsIrregulars, 1, MPI_INT, MPI_COMM_WORLD);
         // compute local offset
@@ -4241,6 +4242,11 @@ Subdivision :: bisectMesh()
  #endif
 #endif
     }
+#ifdef __PARALLEL_MODE
+    if (partitionsIrregulars) {
+      delete[] partitionsIrregulars;
+    }
+#endif
 }
 
 
@@ -5318,7 +5324,8 @@ Subdivision :: assignGlobalNumbersToElements(Domain *d)
 {
     int problem_size = this->giveNumberOfProcesses();
     int myrank = this->giveRank();
-    int i, nelems, numberOfLocalElementsToNumber = 0, partitionNumberOfElements [ problem_size ];
+    int i, nelems, numberOfLocalElementsToNumber = 0;
+    int *partitionNumberOfElements = new int[ problem_size ];
     int localMaxGlobnum = 0, globalMaxGlobnum;
 
     // idea: first determine the number of local elements waiting for new global id
@@ -5366,6 +5373,11 @@ Subdivision :: assignGlobalNumbersToElements(Domain *d)
      * }
      */
  #endif
+
+    if (partitionNumberOfElements) {
+      delete[] partitionNumberOfElements;
+    }
+
 }
 
 
