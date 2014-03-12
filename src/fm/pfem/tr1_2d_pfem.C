@@ -44,6 +44,7 @@
 #include "domain.h"
 #include "mathfem.h"
 #include "engngm.h"
+#include "pfem.h"
 #include "fluiddynamicmaterial.h"
 #include "load.h"
 #include "timestep.h"
@@ -572,7 +573,7 @@ TR1_2D_PFEM :: checkConsistency()
 double
 TR1_2D_PFEM :: computeCriticalTimeStep(TimeStep *tStep)
 {
-    double deltaT = tStep->giveTimeIncrement();
+    double deltaT = domain->giveEngngModel()->giveSolutionStepWhenIcApply()->giveTimeIncrement();
 #if 1
     /*FloatArray u;
      * this->computeVectorOf(EID_MomentumBalance, VM_Total, tStep, u);
