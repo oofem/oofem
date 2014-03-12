@@ -120,7 +120,6 @@ void
 PFEMParticle :: printOutputAt(FILE *stream, TimeStep *stepN)
 {
     DofManager :: printOutputAt(stream, stepN);
-    fprintf( stream, "  coordinates %3.6f %3.5f %3.6f \n", this->giveCoordinate(1), this->giveCoordinate(2), this->giveCoordinate(3) );
 }
 
 #ifdef __OOFEG

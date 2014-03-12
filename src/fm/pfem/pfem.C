@@ -180,6 +180,8 @@ PFEM :: initializeFrom(InputRecord *ir)
     IR_GIVE_OPTIONAL_FIELD(ir, val, _IFT_PFEM_printVolumeReport);
     printVolumeReport = ( val == 1 );
 
+	IR_GIVE_OPTIONAL_FIELD(ir, discretizationScheme, _IFT_PFEM_discretizationScheme);
+
     return IRRT_OK;
 }
 
@@ -427,10 +429,10 @@ PFEM :: solveYourselfAt(TimeStep *tStep)
         }
     }
 
-    FloatArray velocityResiduum(auxmomneq);
-    double velocityResiduumNorm = 1.0;
-    FloatArray pressureResiduum(presneq);
-    double pressureResiduumNorm = 1.0;
+//    FloatArray velocityResiduum(auxmomneq);
+//    double velocityResiduumNorm = 1.0;
+//   FloatArray pressureResiduum(presneq);
+//    double pressureResiduumNorm = 1.0;
 
     int iteration = 0;
     do {
@@ -452,11 +454,15 @@ PFEM :: solveYourselfAt(TimeStep *tStep)
             tStep->givePreviousStep()->setNumber(-1);
             tStepNumberTricked = true;
         }
-
-        if ( iteration > 1 ) {
-            this->assembleVectorFromElements( rhs, tStep, EID_AuxMomentumBalance, LaplaceVelocityVector, VM_Total, avns, this->giveDomain(1) );
-        }
-
+		
+		if ( discretizationScheme == 1 ) { //implicit
+			if ( iteration > 1 ) {
+				this->assembleVectorFromElements( rhs, tStep, EID_AuxMomentumBalance, LaplaceVelocityVector, VM_Total, avns, this->giveDomain(1) );
+			}
+		}
+		else if ( discretizationScheme == 0 ) { // explicit
+			this->assembleVectorFromElements( rhs, tStep->givePreviousStep(), EID_AuxMomentumBalance, LaplaceVelocityVector, VM_Total, avns, this->giveDomain(1) );
+		}
 
         rhs.times(-1.0);
 
@@ -470,7 +476,7 @@ PFEM :: solveYourselfAt(TimeStep *tStep)
             tStep->givePreviousStep()->setNumber(0);
         }
 
-        rhs.subtract(velocityResiduum);
+//        rhs.subtract(velocityResiduum);
 
         this->giveNumericalMethod( this->giveMetaStep( tStep->giveMetaStepNumber() ) );
         nMethod->solve(avLhs, & rhs, & AuxVelocity);
@@ -486,7 +492,7 @@ PFEM :: solveYourselfAt(TimeStep *tStep)
 
         this->assembleVectorFromElements( rhs, tStep, EID_ConservationEquation, DivergenceAuxVelocityVector, VM_Total, pns, this->giveDomain(1) );
 
-        rhs.subtract(pressureResiduum);
+//        rhs.subtract(pressureResiduum);
 
         this->giveNumericalMethod( this->giveMetaStep( tStep->giveMetaStepNumber() ) );
         pressureVector->resize(presneq);
@@ -576,32 +582,32 @@ PFEM :: solveYourselfAt(TimeStep *tStep)
             }
         }
 
-        velocityResiduum.zero();
+//        velocityResiduum.zero();
+//
+//        FloatArray helpArray(auxmomneq);
+//        this->assembleVectorFromElements( helpArray, tStep->givePreviousStep(), EID_AuxMomentumBalance, MassVelocityVector, VM_Total, avns, this->giveDomain(1) );
 
-        FloatArray helpArray(auxmomneq);
-        this->assembleVectorFromElements( helpArray, tStep->givePreviousStep(), EID_AuxMomentumBalance, MassVelocityVector, VM_Total, avns, this->giveDomain(1) );
+//        this->assembleVectorFromElements( velocityResiduum, tStep, EID_AuxMomentumBalance, LoadVector, VM_Total, avns, this->giveDomain(1) );
+//        this->assembleVectorFromElements( velocityResiduum, tStep, EID_AuxMomentumBalance, DivergenceDeviatoricStressVector, VM_Total, avns, this->giveDomain(1) );
+//        velocityResiduum.times(-1.0);
+//        this->assembleVectorFromElements( velocityResiduum, tStep, EID_AuxMomentumBalance, PressureGradientVector, VM_Total, avns, this->giveDomain(1) );
+//        velocityResiduum.times(deltaT);
 
-        this->assembleVectorFromElements( velocityResiduum, tStep, EID_AuxMomentumBalance, LoadVector, VM_Total, avns, this->giveDomain(1) );
-        this->assembleVectorFromElements( velocityResiduum, tStep, EID_AuxMomentumBalance, DivergenceDeviatoricStressVector, VM_Total, avns, this->giveDomain(1) );
-        velocityResiduum.times(-1.0);
-        this->assembleVectorFromElements( velocityResiduum, tStep, EID_AuxMomentumBalance, PressureGradientVector, VM_Total, avns, this->giveDomain(1) );
-        velocityResiduum.times(deltaT);
+//        velocityResiduum.subtract(helpArray);
+//        this->assembleVectorFromElements( velocityResiduum, tStep, EID_AuxMomentumBalance, MassVelocityVector, VM_Total, avns, this->giveDomain(1) );
 
-        velocityResiduum.subtract(helpArray);
-        this->assembleVectorFromElements( velocityResiduum, tStep, EID_AuxMomentumBalance, MassVelocityVector, VM_Total, avns, this->giveDomain(1) );
+//        velocityResiduumNorm = velocityResiduum.computeNorm();
+//        printf("Iteration %i\nNorm of the residuum in momentum balance equation %f\n", iteration, velocityResiduumNorm);
 
-        velocityResiduumNorm = velocityResiduum.computeNorm();
-        printf("Iteration %i\nNorm of the residuum in momentum balance equation %f\n", iteration, velocityResiduumNorm);
+//        pressureResiduum.zero();
+//        this->assembleVectorFromElements( pressureResiduum, tStep, EID_ConservationEquation, PrescribedRhsVector, VM_Total, pns, this->giveDomain(1) );
+//        pressureResiduum.times(-1.0);
+//        this->assembleVectorFromElements( pressureResiduum, tStep, EID_ConservationEquation, DivergenceVelocityVector, VM_Total, pns, this->giveDomain(1) );
+//        pressureResiduumNorm = pressureResiduum.computeNorm();
+//        printf("Norm of the residuum in continuity equation %f\n", pressureResiduumNorm);
+//    } while ( ( velocityResiduumNorm > 1.e-6 || pressureResiduumNorm > 1.e-6 ) && iteration < 50 && tStep->giveNumber() > 1 );
 
-        pressureResiduum.zero();
-        this->assembleVectorFromElements( pressureResiduum, tStep, EID_ConservationEquation, PrescribedRhsVector, VM_Total, pns, this->giveDomain(1) );
-        pressureResiduum.times(-1.0);
-        this->assembleVectorFromElements( pressureResiduum, tStep, EID_ConservationEquation, DivergenceVelocityVector, VM_Total, pns, this->giveDomain(1) );
-        pressureResiduumNorm = pressureResiduum.computeNorm();
-        printf("Norm of the residuum in continuity equation %f\n", pressureResiduumNorm);
-    } while ( ( velocityResiduumNorm > 1.e-6 || pressureResiduumNorm > 1.e-6 ) && iteration < 50 && tStep->giveNumber() > 1 );
-
-    //} while ( ( d_vnorm > 1.e-8 || d_pnorm > 1.e-8 ) && iteration < 50 );
+    } while ( discretizationScheme == 1 && ( d_vnorm > 1.e-8 || d_pnorm > 1.e-8 ) && iteration < 50 );
 
     if ( iteration > 49 ) {
         OOFEM_ERROR("Maximal iteration count exceded");
@@ -945,6 +951,16 @@ PFEM :: printDofOutputAt(FILE *stream, Dof *iDof, TimeStep *atTime)
     if ( ( type == V_u ) || ( type == V_v ) || ( type == V_w ) ) {
         iDof->printSingleOutputAt(stream, atTime, '*', VM_Intermediate);
         iDof->printSingleOutputAt(stream, atTime, 'u', VM_Total);
+		
+		// printing coordinate in DofMan Output
+		DofManager* dman = iDof->giveDofManager();
+		double coordinate = 0.0;
+		switch ( type ) {
+		case V_u: coordinate = dman->giveCoordinate(1); break;
+		case V_v: coordinate = dman->giveCoordinate(2); break;
+		case V_w: coordinate = dman->giveCoordinate(3); break;
+		}
+		fprintf(stream, "  dof %d   c % .8e\n", iDof->giveNumber(), coordinate);
     } else if ( ( type == P_f ) ) {
         iDof->printSingleOutputAt(stream, atTime, 'p', VM_Total);
     } else {

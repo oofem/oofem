@@ -58,6 +58,7 @@
 #define _IFT_PFEM_alphashapecoef "alphashapecoef"
 #define _IFT_PFEM_particalRemovalRatio "removalratio"
 #define _IFT_PFEM_printVolumeReport "volumereport"
+#define _IFT_PFEM_discretizationScheme "scheme"
 
 //@}
 
@@ -104,6 +105,8 @@ protected:
 
     int initFlag;
 
+	int discretizationScheme;
+
     bool printVolumeReport;
 
     int numberOfMomentumEqs, numberOfConservationEqs;
@@ -138,6 +141,7 @@ public:
         numberOfMomentumEqs = numberOfConservationEqs = numberOfPrescribedMomentumEqs = numberOfPrescribedConservationEqs = 0;
         domainVolume = 0.0;
         printVolumeReport = false;
+		discretizationScheme = 1; // implicit iterative scheme is default
     }
     ~PFEM() { }
 
