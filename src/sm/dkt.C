@@ -484,7 +484,8 @@ DKTPlate :: giveIPValue(FloatArray &answer, GaussPoint *gp, InternalStateType ty
     answer.resize(9);
     if ( ( type == IST_ShellForceTensor ) || ( type == IST_ShellMomentumTensor ) ) {
         help = static_cast< StructuralMaterialStatus * >( gp->giveMaterialStatus() )->giveStressVector();
-       if ( type == IST_ShellForceTensor ) {
+        this->computeShearForces(help, gp, tStep); // postprocess shear forces
+        if ( type == IST_ShellForceTensor ) {
             answer.at(1) = 0.0; // nx
             answer.at(2) = 0.0; // vxy
             answer.at(3) = help.at(4); // vxz
@@ -734,7 +735,7 @@ DKTPlate :: computeLoadLEToLRotationMatrix(FloatMatrix &answer, int iEdge, Gauss
 void
 DKTPlate :: computeSurfaceNMatrixAt(FloatMatrix &answer, int iSurf, GaussPoint *sgp)
 {
-  this->computeNmatrixAt(* sgp->giveCoordinates(), answer);
+    this->computeNmatrixAt(* sgp->giveCoordinates(), answer);
 }
 
 void
@@ -743,9 +744,9 @@ DKTPlate :: giveSurfaceDofMapping(IntArray &answer, int iSurf) const
     answer.resize(9);
     answer.zero();
     if ( iSurf == 1 ) {
-      for (int i = 1; i<=9; i++) {
-	answer.at(i) = i;
-      }
+        for ( int i = 1; i <= 9; i++ ) {
+            answer.at(i) = i;
+        }
     } else {
         OOFEM_ERROR("wrong surface number");
     }
@@ -778,6 +779,66 @@ int
 DKTPlate :: computeLoadLSToLRotationMatrix(FloatMatrix &answer, int isurf, GaussPoint *gp)
 {
     return 0;
+}
+
+void
+DKTPlate :: computeVertexBendingMoments(FloatMatrix &answer, TimeStep *tStep)
+{
+#ifdef DKT_EnableVertexMomentsCache
+    if ( stateCounter == tStep->giveSolutionStateCounter() ) {
+        answer = vertexMoments;
+        return;
+    }
+#endif
+
+    // the results should be cached somehow, as computing on the fly is highly inefficient
+    // due to multiple requests
+    FloatMatrix dndx;
+    answer.resize(5, 3);
+
+    FloatMatrix b;
+    FloatArray eps, m;
+    FloatArray coords [ 3 ]; // vertex local coordinates
+    coords [ 0 ] = {
+        1.0, 0.0
+    };
+    coords [ 1 ] = {
+        0.0, 1.0
+    };
+    coords [ 2 ] = {
+        0.0, 0.0
+    };
+
+    GaussIntegrationRule iRule = GaussIntegrationRule(1, this, 1, 1); // dummy rule used to evaluate B at vertices
+    iRule.SetUpPointsOnTriangle(1, _Unknown);
+    GaussPoint *vgp = iRule.getIntegrationPoint(0);
+
+    for ( int i = 1; i <= this->numberOfDofMans; i++ ) {
+        vgp->setCoordinates(coords [ i - 1 ]);
+        this->computeStrainVector(eps, vgp, tStep);
+        this->giveStructuralCrossSection()->giveGeneralizedStress_Plate(m, vgp, eps, tStep);
+        answer.setColumn(m, i);
+    }
+
+#ifdef DKT_EnableVertexMomentsCache
+    this->vertexMoments = answer;
+    this->stateCounter = tStep->giveSolutionStateCounter();
+#endif
+}
+
+void
+DKTPlate :: computeShearForces(FloatArray &answer, GaussPoint *gp, TimeStep *tStep)
+{
+    // as shear strains are enforced to be zero (art least on element edges) the shear forces are computed from equlibrium
+    FloatMatrix m, dndx;
+    answer.resize(5);
+
+    this->computeVertexBendingMoments(m, tStep);
+    this->interp_lin.evaldNdx( dndx, * gp->giveCoordinates(), FEIElementGeometryWrapper(this) );
+    for ( int i = 1; i <= this->numberOfDofMans; i++ ) {
+        answer.at(4) += m.at(1, i) * dndx.at(i, 1) + m.at(3, i) * dndx.at(i, 2); //dMxdx + dMxydy
+        answer.at(5) += m.at(2, i) * dndx.at(i, 2) + m.at(3, i) * dndx.at(i, 1); //dMydy + dMxydx
+    }
 }
 
 
