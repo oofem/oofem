@@ -57,12 +57,19 @@ REGISTER_Element(Hexa21Stokes);
 FEI3dHexaLin Hexa21Stokes :: interpolation_lin;
 FEI3dHexaTriQuad Hexa21Stokes :: interpolation_quad;
 // Set up ordering vectors (for assembling)
-IntArray Hexa21Stokes :: momentum_ordering(81);
-IntArray Hexa21Stokes :: conservation_ordering(8);
+IntArray Hexa21Stokes :: momentum_ordering = {
+     1,  2,  3,  5,  6,  7,  9, 10, 11, 13, 14, 15, 17, 18, 19, 21, 22, 23, 25, 26, 27, 29, 30, 31, 33, 34, 35,
+    37, 38, 39, 41, 42, 43, 45, 46, 47, 49, 50, 51, 53, 54, 55, 57, 58, 59, 61, 62, 63, 65, 66, 67, 69, 70, 71,
+    73, 74, 75, 77, 78, 79, 81, 82, 83, 85, 86, 87, 89, 90, 91, 93, 94, 95, 97, 98, 99, 101, 102, 103, 105, 106, 107};
+IntArray Hexa21Stokes :: conservation_ordering = {4, 8, 12, 16, 20, 24, 28, 32};
 IntArray Hexa21Stokes :: surf_ordering [ 6 ] = {
-    IntArray(), IntArray(), IntArray(), IntArray(), IntArray(), IntArray()
+    { 5,  6,  7,  1,  2,  3, 13, 14, 15,  9, 10, 11, 33, 34, 35, 42, 43, 44, 39, 40, 41, 36, 37, 38, 69, 70, 71},
+    {17, 18, 19, 21, 22, 23, 25, 26, 27, 29, 30, 31, 45, 46, 47, 48, 49, 50, 51, 52, 53, 54, 55, 56, 72, 73, 74},
+    { 1,  2,  3, 17, 18, 19, 21, 22, 23,  5,  6,  7, 57, 58, 59, 45, 46, 47, 60, 61, 62, 33, 34, 35, 75, 76, 77},
+    { 5,  6,  7,  9, 10, 11, 25, 26, 27, 21, 22, 23, 36, 37, 38, 63, 64, 65, 48, 49, 50, 60, 61, 62, 78, 79, 80},
+    { 9, 10, 11, 13, 14, 15, 29, 30, 31, 25, 26, 27, 39, 40, 41, 66, 67, 68, 51, 52, 53, 63, 64, 65, 81, 82, 83},
+    {13, 14, 15,  1,  2,  3, 17, 18, 19, 29, 30, 31, 42, 43, 44, 57, 58, 59, 54, 55, 56, 66, 67, 68, 84, 85, 86}
 };
-bool Hexa21Stokes :: __initialized = Hexa21Stokes :: initOrdering();
 
 Hexa21Stokes :: Hexa21Stokes(int n, Domain *aDomain) : FMElement(n, aDomain)
 {

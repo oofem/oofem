@@ -54,12 +54,13 @@ REGISTER_Element(Tr1BubbleStokes);
 // Set up interpolation coordinates
 FEI2dTrLin Tr1BubbleStokes :: interp(1, 2);
 // Set up ordering vectors (for assembling)
-IntArray Tr1BubbleStokes :: momentum_ordering;
-IntArray Tr1BubbleStokes :: conservation_ordering;
+IntArray Tr1BubbleStokes :: momentum_ordering = {1, 2, 4, 5, 7, 8, 10, 11};
+IntArray Tr1BubbleStokes :: conservation_ordering = {3, 6, 9};
 IntArray Tr1BubbleStokes :: edge_ordering [ 3 ] = {
-    IntArray(4), IntArray(4), IntArray(4)
+    {1, 2, 4, 5},
+    {4, 5, 7, 8},
+    {7, 8, 1, 2}
 };
-bool Tr1BubbleStokes :: __initialized = Tr1BubbleStokes :: initOrdering();
 
 Tr1BubbleStokes :: Tr1BubbleStokes(int n, Domain *aDomain) : FMElement(n, aDomain)
 {

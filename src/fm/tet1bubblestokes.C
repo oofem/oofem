@@ -53,12 +53,14 @@ REGISTER_Element(Tet1BubbleStokes);
 
 FEI3dTetLin Tet1BubbleStokes :: interp;
 // Set up ordering vectors (for assembling)
-IntArray Tet1BubbleStokes :: momentum_ordering(15);
-IntArray Tet1BubbleStokes :: conservation_ordering(4);
+IntArray Tet1BubbleStokes :: momentum_ordering = {1, 2, 3, 5, 6, 7, 9, 10, 11, 13, 14, 15, 17, 18, 19};
+IntArray Tet1BubbleStokes :: conservation_ordering = {4, 8, 12, 16};
 IntArray Tet1BubbleStokes :: surf_ordering [ 4 ] = {
-    IntArray(9), IntArray(9), IntArray(9), IntArray(9)
+    {1, 2, 3,  9, 10, 11,  5,  6,  7},
+    {1, 2, 3,  5,  6,  7, 13, 14, 15},
+    {5, 6, 7,  9, 10, 11, 13, 14, 15},
+    {1, 2, 3, 13, 14, 15,  9, 10, 11}
 };
-bool Tet1BubbleStokes :: __initialized = Tet1BubbleStokes :: initOrdering();
 
 Tet1BubbleStokes :: Tet1BubbleStokes(int n, Domain *aDomain) : FMElement(n, aDomain)
 {

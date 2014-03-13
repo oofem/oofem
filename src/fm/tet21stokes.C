@@ -57,12 +57,15 @@ REGISTER_Element(Tet21Stokes);
 FEI3dTetLin Tet21Stokes :: interpolation_lin;
 FEI3dTetQuad Tet21Stokes :: interpolation_quad;
 // Set up ordering vectors (for assembling)
-IntArray Tet21Stokes :: momentum_ordering(30);
-IntArray Tet21Stokes :: conservation_ordering(4);
+IntArray Tet21Stokes :: momentum_ordering = {1, 2, 3, 5, 6, 7, 9, 10, 11, 13, 14, 15, 17, 18, 19, 21,
+                                             22, 23, 25, 26, 27, 29, 30, 31, 33, 34, 35, 37, 38, 39};
+IntArray Tet21Stokes :: conservation_ordering = {4, 8, 12, 16};
 IntArray Tet21Stokes :: surf_ordering [ 4 ] = {
-    IntArray(18), IntArray(18), IntArray(18), IntArray(18)
+    { 1,  2,  3,  9, 10, 11,  5,  6,  7, 23, 24, 25, 20, 21, 22, 17, 18, 19},
+    { 1,  2,  3,  5,  6,  7, 13, 14, 15, 17, 18, 19, 29, 30, 31, 26, 27, 28},
+    { 5,  6,  7,  9, 10, 11, 13, 14, 15, 20, 21, 22, 32, 33, 34, 29, 30, 31},
+    { 1,  2,  3, 13, 14, 15,  9, 10, 11, 26, 27, 28, 32, 33, 34, 23, 24, 25}
 };
-bool Tet21Stokes :: __initialized = Tet21Stokes :: initOrdering();
 
 Tet21Stokes :: Tet21Stokes(int n, Domain *aDomain) : FMElement(n, aDomain)
 {

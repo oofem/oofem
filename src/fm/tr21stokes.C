@@ -56,12 +56,13 @@ REGISTER_Element(Tr21Stokes);
 FEI2dTrLin Tr21Stokes :: interpolation_lin(1, 2);
 FEI2dTrQuad Tr21Stokes :: interpolation_quad(1, 2);
 // Set up ordering vectors (for assembling)
-IntArray Tr21Stokes :: momentum_ordering;
-IntArray Tr21Stokes :: conservation_ordering;
+IntArray Tr21Stokes :: momentum_ordering = {1, 2, 4, 5, 7, 8, 10, 11, 12, 13, 14, 15};
+IntArray Tr21Stokes :: conservation_ordering = {3, 6, 9};
 IntArray Tr21Stokes :: edge_ordering [ 3 ] = {
-    IntArray(), IntArray(), IntArray()
+    {1, 2, 4, 5, 10, 11},
+    {4, 5, 7, 8, 12, 13},
+    {7, 8, 1, 2, 14, 15}
 };
-bool Tr21Stokes :: __initialized = Tr21Stokes :: initOrdering();
 
 Tr21Stokes :: Tr21Stokes(int n, Domain *aDomain) : FMElement(n, aDomain)
 {
