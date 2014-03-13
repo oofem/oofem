@@ -90,11 +90,11 @@ void
 TR1_2D_SUPG :: giveDofManDofIDMask(int inode, EquationID ut, IntArray &answer) const
 {
     if ( ut == EID_MomentumBalance ) {
-        answer.setValues(2, V_u, V_v);
+        answer = {V_u, V_v};
     } else if ( ut == EID_ConservationEquation ) {
-        answer.setValues(1, P_f);
+        answer = {P_f};
     } else if ( ut == EID_MomentumBalance_ConservationEquation ) {
-        answer.setValues(3, V_u, V_v, P_f);
+        answer = {V_u, V_v, P_f};
     } else {
         OOFEM_ERROR("Unknown equation id encountered");
     }

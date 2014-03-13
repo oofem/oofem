@@ -98,8 +98,7 @@ StructuralInterfaceCrossSection :: give2dStiffnessMatrix_Eng(FloatMatrix &answer
     if ( mat->useNumericalTangent ) {
         FloatMatrix answer3D;
         mat->giveStiffnessMatrix_dTdj_Num(answer3D, rMode, gp, tStep);
-        IntArray mask;
-        mask.setValues(2,  1, 3);
+        IntArray mask = {1, 3};
         answer.beSubMatrixOf(answer3D, mask, mask);
     } else if ( mat->hasAnalyticalTangentStiffness() ) {
         mat->give2dStiffnessMatrix_Eng(answer, rMode, gp, tStep);

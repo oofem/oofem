@@ -283,7 +283,7 @@ Beam2d :: computeStrainVectorInLayer(FloatArray &answer, const FloatArray &maste
 void
 Beam2d :: giveDofManDofIDMask(int inode, EquationID, IntArray &answer) const
 {
-    answer.setValues(3, D_u, D_w, R_v);
+    answer = {D_u, D_w, R_v};
 }
 
 

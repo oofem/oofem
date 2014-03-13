@@ -482,8 +482,8 @@ bool TriangleMesherInterface :: meshPSLG(const Triangle_PSLG &pslg,
             int a, b, c;
             std :: set< std :: size_t >tris = node_triangle [ segment.at(1) - 1 ];
             // Now look up any triangle with the other point included.
-            for ( std :: set< std :: size_t > :: iterator it = tris.begin(); it != tris.end(); ++it ) {
-                IntArray &triangle = triangles [ * it ];
+            for ( auto tri: tris ) {
+                IntArray &triangle = triangles [ tri ];
                 if ( ( b = triangle.findFirstIndexOf( segment.at(2) ) ) > 0 ) {
                     a = triangle.findFirstIndexOf( segment.at(1) );
                     if ( a + b == 3 ) {

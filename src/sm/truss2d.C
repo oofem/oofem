@@ -299,11 +299,11 @@ void
 Truss2d :: giveDofManDofIDMask(int inode, EquationID, IntArray &answer) const
 {
     if ( cs_mode == 0 ) {
-        answer.setValues(2, D_u, D_w);
+        answer = {D_u, D_w};
     } else if ( cs_mode == 1 ) {
-        answer.setValues(2, D_u, D_v);
+        answer = {D_u, D_v};
     } else if ( cs_mode == 2 ) {
-        answer.setValues(2, D_v, D_w);
+        answer = {D_v, D_w};
     }
 }
 

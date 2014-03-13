@@ -154,7 +154,7 @@ Truss1d :: initializeFrom(InputRecord *ir)
 void
 Truss1d :: giveDofManDofIDMask(int inode, EquationID, IntArray &answer) const
 {
-    answer.setValues(1, D_u);
+    answer = {D_u};
 }
 
 
@@ -466,7 +466,7 @@ Truss1d :: EIPrimaryUnknownMI_computePrimaryUnknownVectorAt(ValueModeType mode,
     result = this->computeLocalCoordinates(ksi, coords);
     this->interp.evalN( n, ksi, FEIElementGeometryWrapper(this) );
     this->computeVectorOf(EID_MomentumBalance, mode, tStep, u);
-    answer.setValues( 1, n.dotProduct(u) );
+    answer = {n.dotProduct(u) };
     return result;
 }
 

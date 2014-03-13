@@ -90,7 +90,7 @@ FEI2dQuadConst :: giveTransformationJacobian(const FloatArray &lcoords, const FE
 void
 FEI2dQuadConst :: edgeEvalN(FloatArray &answer, int iedge, const FloatArray &lcoords, const FEICellGeometry &cellgeo)
 {
-    answer.setValues(1, 1.);
+    answer = {1.};
 }
 
 

@@ -228,23 +228,23 @@ void
 FEI3dWedgeQuad :: computeLocalEdgeMapping(IntArray &edgeNodes, int iedge)
 {
     if ( iedge == 1 ) {
-        edgeNodes.setValues(3, 1, 2, 7);
+        edgeNodes = {1, 2, 7};
     } else if ( iedge == 2 ) {
-        edgeNodes.setValues(3, 2, 3, 8);
+        edgeNodes = {2, 3, 8};
     } else if ( iedge == 3 ) {
-        edgeNodes.setValues(3, 3, 1, 9);
+        edgeNodes = {3, 1, 9};
     } else if ( iedge == 4 ) {
-        edgeNodes.setValues(3, 4, 5, 10);
+        edgeNodes = {4, 5, 10};
     } else if ( iedge == 5 ) {
-        edgeNodes.setValues(3, 5, 6, 11);
+        edgeNodes = {5, 6, 11};
     } else if ( iedge == 6 ) {
-        edgeNodes.setValues(3, 6, 4, 12);
+        edgeNodes = {6, 4, 12};
     } else if ( iedge == 7 ) {
-        edgeNodes.setValues(3, 1, 4, 13);
+        edgeNodes = {1, 4, 13};
     } else if ( iedge == 8 ) {
-        edgeNodes.setValues(3, 2, 5, 14);
+        edgeNodes = {2, 5, 14};
     } else if ( iedge == 9 ) {
-        edgeNodes.setValues(3, 3, 6, 15);
+        edgeNodes = {3, 6, 15};
     } else {
         OOFEM_ERROR("Edge %d doesn't exist.\n", iedge);
     }
@@ -312,15 +312,15 @@ void
 FEI3dWedgeQuad :: computeLocalSurfaceMapping(IntArray &nodes, int isurf)
 {
     if ( isurf == 1 ) {
-        nodes.setValues(6, 1, 2, 3, 7, 8, 9);
+        nodes = {1, 2, 3, 7, 8, 9};
     } else if ( isurf == 2 ) {
-        nodes.setValues(6, 4, 5, 6, 10, 11, 12);
+        nodes = {4, 5, 6, 10, 11, 12};
     } else if ( isurf == 3 ) {
-        nodes.setValues(8, 1, 2, 5, 4, 7, 14, 10, 13);
+        nodes = {1, 2, 5, 4, 7, 14, 10, 13};
     } else if ( isurf == 4 ) {
-        nodes.setValues(8, 2, 3, 6, 5, 8, 15, 11, 14);
+        nodes = {2, 3, 6, 5, 8, 15, 11, 14};
     } else if ( isurf == 5 ) {
-        nodes.setValues(8, 3, 1, 4, 6, 9, 13, 12, 15);
+        nodes = {3, 1, 4, 6, 9, 13, 12, 15};
     } else {
         OOFEM_ERROR("Surface %d doesn't exist.\n", isurf);
     }

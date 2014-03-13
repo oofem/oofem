@@ -188,17 +188,17 @@ void
 FEI3dHexaTriQuad :: computeLocalSurfaceMapping(IntArray &nodes, int isurf)
 {
     if ( isurf == 1 ) {
-        nodes.setValues(9,  2, 1, 4, 3,  9, 12, 11, 10, 21);
+        nodes = { 2, 1, 4, 3,  9, 12, 11, 10, 21};
     } else if ( isurf == 2 ) {
-        nodes.setValues(9,  5, 6, 7, 8, 13, 14, 15, 16, 22);
+        nodes = { 5, 6, 7, 8, 13, 14, 15, 16, 22};
     } else if ( isurf == 3 ) {
-        nodes.setValues(9,  1, 2, 6, 5,  9, 18, 13, 17, 23);
+        nodes = { 1, 2, 6, 5,  9, 18, 13, 17, 23};
     } else if ( isurf == 4 ) {
-        nodes.setValues(9,  2, 3, 7, 6, 10, 19, 14, 18, 24);
+        nodes = { 2, 3, 7, 6, 10, 19, 14, 18, 24};
     } else if ( isurf == 5 ) {
-        nodes.setValues(9,  3, 4, 8, 7, 11, 20, 15, 19, 25);
+        nodes = { 3, 4, 8, 7, 11, 20, 15, 19, 25};
     } else if ( isurf == 6 ) {
-        nodes.setValues(9,  4, 1, 5, 8, 12, 17, 16, 20, 26);
+        nodes = { 4, 1, 5, 8, 12, 17, 16, 20, 26};
     } else {
         OOFEM_ERROR("wrong surface number (%d)", isurf);
     }

@@ -702,7 +702,7 @@ RerShell :: printOutputAt(FILE *file, TimeStep *tStep)
 void
 RerShell :: giveDofManDofIDMask(int inode, EquationID, IntArray &answer) const
 {
-    answer.setValues(6, D_u, D_v, D_w, R_u, R_v, R_w);
+    answer = {D_u, D_v, D_w, R_u, R_v, R_w};
 }
 
 

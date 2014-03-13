@@ -615,8 +615,7 @@ void PolygonLine :: computeNormalSignDist(double &oDist, const FloatArray &iPoin
 
     // TODO: This can probably be done in a nicer way.
     // Ensure that we work in 2d.
-    FloatArray point;
-    point.setValues( 2, iPoint.at(1), iPoint.at(2) );
+    FloatArray point = {iPoint.at(1), iPoint.at(2)};
 
     for ( int segId = 1; segId <= numSeg; segId++ ) {
         // Crack segment
@@ -702,8 +701,7 @@ void PolygonLine :: computeNormalSignDist(double &oDist, const FloatArray &iPoin
         FloatArray t;
         t.beDifferenceOf(crackP2, crackP1);
 
-        FloatArray n;
-        n.setValues( 2, -t.at(2), t.at(1) );
+        FloatArray n = {-t.at(2), t.at(1)};
 
         FloatArray lineToP;
         lineToP.beDifferenceOf(point, crackP1);
@@ -725,8 +723,7 @@ void PolygonLine :: computeTangentialSignDist(double &oDist, const FloatArray &i
 
     // TODO: This can probably be done in a nicer way.
     // Ensure that we work in 2d.
-    FloatArray point;
-    point.setValues( 2, iPoint.at(1), iPoint.at(2) );
+    FloatArray point = {iPoint.at(1), iPoint.at(2)};
 
 
     const FloatArray &crackPS( this->giveVertex(1) );

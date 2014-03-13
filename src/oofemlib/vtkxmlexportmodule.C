@@ -73,7 +73,7 @@ VTKXMLExportModule :: VTKXMLExportModule(int n, EngngModel *e) : ExportModule(n,
 {
     primVarSmoother = NULL;
     smoother = NULL;
-    redToFull.setValues(6, 1, 5, 9, 6, 3, 2); //position of xx, yy, zz, yz, xz, xy in tensor
+    redToFull = {1, 5, 9, 6, 3, 2}; //position of xx, yy, zz, yz, xz, xy in tensor
 
 #ifdef __VTK_MODULE
     //this->intVarArray = vtkSmartPointer<vtkDoubleArray>::New();
@@ -1394,7 +1394,7 @@ VTKXMLExportModule :: getNodalVariableFromPrimaryField(FloatArray &answer, DofMa
 
     dofIDMask.clear();
     if ( ( type == DisplacementVector ) || ( type == EigenVector ) || ( type == VelocityVector ) ) {
-        dofIDMask.setValues(3, ( int ) Undef, ( int ) Undef, ( int ) Undef);
+        dofIDMask = {( int ) Undef, ( int ) Undef, ( int ) Undef};
         for ( int j = 1; j <= dman->giveNumberOfDofs(); j++ ) {
             id = dman->giveDof(j)->giveDofID();
             if ( ( id == V_u ) || ( id == D_u ) ) {
@@ -1632,12 +1632,12 @@ VTKXMLExportModule :: getCellVariableFromIS(FloatArray &answer, Element *el, Int
         if ( ncomponents == 9 && temp.giveSize() != 9 ) { // If it has 9 components, then it is assumed to be proper already.
             this->makeFullForm(valueArray, temp);
         } else if ( valType == ISVT_VECTOR && temp.giveSize() < 3 ) {
-            valueArray.setValues(3,
-                                 temp.giveSize() > 1 ? temp.at(1) : 0.0,
-                                 temp.giveSize() > 2 ? temp.at(2) : 0.0,
-                                 0.0);
+            valueArray = {temp.giveSize() > 1 ? temp.at(1) : 0.0,
+                          temp.giveSize() > 2 ? temp.at(2) : 0.0,
+                          0.0};
         } else if ( ncomponents != temp.giveSize() ) { // Trying to gracefully handle bad cases, just output zeros.
             valueArray.resize(9);
+            valueArray.zero();
         } else {
             valueArray = temp;
         }
@@ -1734,8 +1734,8 @@ VTKXMLExportModule :: writeVTKCollection()
     //     outfile << buff;
 
     outfile << "<?xml version=\"1.0\"?>\n<VTKFile type=\"Collection\" version=\"0.1\">\n<Collection>\n";
-    for ( std :: list< std :: string > :: iterator it = this->pvdBuffer.begin(); it != this->pvdBuffer.end(); ++it ) {
-        outfile << * it << "\n";
+    for ( auto pvd: this->pvdBuffer ) {
+        outfile << pvd << "\n";
     }
 
     outfile << "</Collection>\n</VTKFile>";

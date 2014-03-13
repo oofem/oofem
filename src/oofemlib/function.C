@@ -94,12 +94,11 @@ Function :: giveInputRecord(DynamicInputRecord &input)
 double
 Function :: evaluateAtTime(double t)
 {
-    std :: map< std :: string, FunctionArgument >valDict;
-    valDict.insert( std :: make_pair("t", t) );
+    std :: map< std :: string, FunctionArgument >valDict = {{"t",t}};
     FloatArray v;
     this->evaluate(v, valDict);
     ///@todo This should be possible and nice to use if we have C++11
-    //this->evaluate(v, {{t, "t"}});
+    //this->evaluate(v, {{"t", t}});
     if ( v.giveSize() != 1 ) {
         OOFEM_ERROR("Function doesn't return scalar results.");
     }

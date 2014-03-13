@@ -104,7 +104,7 @@ FEI3dLineLin :: global2local(FloatArray &answer, const FloatArray &coords, const
     double l2 = vec.computeSquaredNorm();
     double xvec = x.dotProduct(vec);
 
-    answer.setValues(1, 2.0 * xvec / l2 - 1.0);
+    answer = {2.0 * xvec / l2 - 1.0};
     answer.at(1) = clamp(answer.at(1), -1.0, 1.0);
     return false; // No point to check if point is "inside".
 }
@@ -155,7 +155,7 @@ FEI3dLineLin :: computeLocalEdgeMapping(IntArray &edgeNodes, int iedge)
     if ( iedge != 1 ) {
         OOFEM_ERROR("wrong edge number (%d)", iedge);
     }
-    edgeNodes.setValues(2, 1, 2);
+    edgeNodes = {1, 2};
 }
 
 void

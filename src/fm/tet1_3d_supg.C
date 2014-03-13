@@ -78,11 +78,11 @@ void
 Tet1_3D_SUPG :: giveDofManDofIDMask(int inode, EquationID ut, IntArray &answer) const
 {
     if ( ut == EID_MomentumBalance ) {
-        answer.setValues(3, V_u, V_v, V_w);
+        answer = {V_u, V_v, V_w};
     } else if ( ut == EID_ConservationEquation ) {
-        answer.setValues(1, P_f);
+        answer = {P_f};
     } else if ( ut == EID_MomentumBalance_ConservationEquation ) {
-        answer.setValues(4, V_u, V_v, V_w, P_f);
+        answer = {V_u, V_v, V_w, P_f};
     } else {
         OOFEM_ERROR("Unknown equation id encountered");
     }

@@ -1223,18 +1223,15 @@ HuertaErrorEstimatorInterface :: setupRefinedElementProblem1D(Element *element, 
                     y = yc * ( 1.0 - u ) + ym * u;
                     z = zc * ( 1.0 - u ) + zm * u;
 
-                    FloatArray coord;
-                    coord.setValues(3, x, y, z);
+                    FloatArray coord = {x, y, z};
                     newNodes.push_back(coord);
 
                     ir->setRecordKeywordField(_IFT_Node_Name, localNodeId);
                     ir->setField(coord, _IFT_Node_coords);
 
                     if ( ( lcs = node->giveLocalCoordinateTriplet() ) != NULL ) {
-                        FloatArray lcs_vec;
-                        lcs_vec.setValues( 6,
-                                          lcs->at(1, 1), lcs->at(1, 2), lcs->at(1, 3),
-                                          lcs->at(2, 1), lcs->at(2, 2), lcs->at(2, 3) );
+                        FloatArray lcs_vec = {lcs->at(1, 1), lcs->at(1, 2), lcs->at(1, 3),
+                                              lcs->at(2, 1), lcs->at(2, 2), lcs->at(2, 3)};
                         ir->setField(lcs_vec, _IFT_Node_lcs);
                     }
 
@@ -1374,10 +1371,7 @@ HuertaErrorEstimatorInterface :: setupRefinedElementProblem1D(Element *element, 
                     }
                 }
 
-                FloatArray nd(2);
-                nd.setValues(nd1, nd2);
-
-                ir->setField(nd, "nodes");
+                ir->setField({nd1, nd2}, "nodes");
                 ir->setField(csect2, "crosssect");
 
                 // copy body and boundary loads
@@ -1684,15 +1678,11 @@ HuertaErrorEstimatorInterface :: setupRefinedElementProblem2D(Element *element, 
                         y = ( yc * ( 1.0 - u ) + ys1 * u ) * ( 1.0 - v ) + ( ys2 * ( 1.0 - u ) + ym * u ) * v;
                         z = ( zc * ( 1.0 - u ) + zs1 * u ) * ( 1.0 - v ) + ( zs2 * ( 1.0 - u ) + zm * u ) * v;
 
-                        FloatArray coords;
-                        coords.setValues(3, x, y, z);
-
-                        ir->setField(coords, "coords");
+                        ir->setField({x, y, z}, "coords");
 
                         if ( ( lcs = node->giveLocalCoordinateTriplet() ) != NULL ) {
-                            FloatArray lcs_vec;
-                            lcs_vec.setValues( 6, lcs->at(1, 1), lcs->at(1, 2), lcs->at(1, 3),
-                                              lcs->at(2, 1), lcs->at(2, 2), lcs->at(2, 3) );
+                            FloatArray lcs_vec = {lcs->at(1, 1), lcs->at(1, 2), lcs->at(1, 3),
+                                                  lcs->at(2, 1), lcs->at(2, 2), lcs->at(2, 3)};
                             ir->setField(lcs_vec, _IFT_Node_lcs);
                         }
 
@@ -1851,10 +1841,7 @@ HuertaErrorEstimatorInterface :: setupRefinedElementProblem2D(Element *element, 
                     nd3 = localNodeIdArray.at( connectivity->at(nd + level + 3) );
                     nd4 = localNodeIdArray.at( connectivity->at(nd + level + 2) );
 
-                    IntArray nd;
-                    nd.setValues(4, nd1, nd2, nd3, nd4);
-
-                    ir->setField(nd, "nodes");
+                    ir->setField({nd1, nd2, nd3, nd4}, "nodes");
                     ir->setField(csect, "crosssect");
 
                     // copy body and boundary loads
@@ -2308,14 +2295,11 @@ HuertaErrorEstimatorInterface :: setupRefinedElementProblem3D(Element *element, 
                             z = ( ( zc * ( 1.0 - u ) + zs1 * u ) * ( 1.0 - v ) + ( zs2 * ( 1.0 - u ) + zf1 * u ) * v ) * ( 1.0 - w )
                                 + ( ( zs3 * ( 1.0 - u ) + zf2 * u ) * ( 1.0 - v ) + ( zf3 * ( 1.0 - u ) + zm * u ) * v ) * w;
 
-                            FloatArray coords;
-                            coords.setValues(3, x, y, z);
-                            ir->setField(coords, "coords");
+                            ir->setField({x, y, z}, "coords");
 
                             if ( ( lcs = node->giveLocalCoordinateTriplet() ) != NULL ) {
-                                FloatArray lcs_vec;
-                                lcs_vec.setValues( 6, lcs->at(1, 1), lcs->at(1, 2), lcs->at(1, 3),
-                                                  lcs->at(2, 1), lcs->at(2, 2), lcs->at(2, 3) );
+                                FloatArray lcs_vec = {lcs->at(1, 1), lcs->at(1, 2), lcs->at(1, 3),
+                                                      lcs->at(2, 1), lcs->at(2, 2), lcs->at(2, 3)};
                                 ir->setField(lcs_vec, _IFT_Node_lcs);
                             }
 
@@ -2531,11 +2515,8 @@ HuertaErrorEstimatorInterface :: setupRefinedElementProblem3D(Element *element, 
                         nd7 = localNodeIdArray.at( connectivity->at(nd + level + 3) );
                         nd8 = localNodeIdArray.at( connectivity->at(nd + level + 2) );
 
-                        FloatArray nd;
-                        nd.setValues(nd1, nd2, nd3, nd4, nd5, nd6, nd7, nd8);
-
                         ir->setRecordKeywordField(hexatype, localElemId);
-                        ir->setField(nd, "nodes");
+                        ir->setField({nd1, nd2, nd3, nd4, nd5, nd6, nd7, nd8}, "nodes");
                         ir->setField(csect, "crosssect");
 
                         // copy body and boundary loads

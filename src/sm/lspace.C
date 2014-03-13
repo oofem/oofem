@@ -223,7 +223,7 @@ LSpace :: initializeFrom(InputRecord *ir)
 void
 LSpace :: giveDofManDofIDMask(int inode, EquationID ut, IntArray &answer) const
 {
-    answer.setValues(3, D_u, D_v, D_w);
+    answer = {D_u, D_v, D_w};
 }
 
 

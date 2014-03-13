@@ -116,10 +116,9 @@ ExportModule :: testTimeStepOutput(TimeStep *tStep)
         }
     }
 
-    std :: list< Range > :: iterator tstepsIter;
-    for ( tstepsIter = tsteps_out.begin(); tstepsIter != tsteps_out.end(); ++tstepsIter ) {
+    for ( auto &step: tsteps_out ) {
         // test if INCLUDED
-        if ( ( * tstepsIter ).test( tStep->giveNumber() ) ) {
+        if ( step.test( tStep->giveNumber() ) ) {
             return true;
         }
     }

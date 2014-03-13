@@ -158,11 +158,8 @@ NonlocalMaterialExtensionInterface :: buildNonlocalPointTable(GaussPoint *gp)
 #endif
     // initialize iList
 
-
-    SpatialLocalizer :: elementContainerType :: iterator pos;
-
-    for ( pos = elemSet.begin(); pos !=  elemSet.end(); ++pos ) {
-        ielem = this->giveDomain()->giveElement(* pos);
+    for ( auto elindx: elemSet ) {
+        ielem = this->giveDomain()->giveElement(elindx);
         if ( regionMap.at( ielem->giveRegionNumber() ) == 0 ) {
             iRule = ielem->giveDefaultIntegrationRulePtr();
             for ( int j = 0; j < iRule->giveNumberOfIntegrationPoints(); j++ ) {
@@ -309,10 +306,9 @@ NonlocalMaterialExtensionInterface :: rebuildNonlocalPointTable(GaussPoint *gp, 
         statusExt->setIntegrationScale(integrationVolume); // remember scaling factor
 #ifdef __PARALLEL_MODE
  #ifdef __VERBOSE_PARALLEL
-        std :: list< localIntegrationRecord > :: iterator pos;
         fprintf( stderr, "%d(%d):", gp->giveElement()->giveGlobalNumber(), gp->giveNumber() );
-        for ( pos = iList->begin(); pos != iList->end(); ++pos ) {
-            fprintf(stderr, "%d,%d(%e)", pos->nearGp->giveElement()->giveGlobalNumber(), pos->nearGp->giveNumber(), pos->weight);
+        for ( auto &lir: iList ) {
+            fprintf(stderr, "%d,%d(%e)", lir.nearGp->giveElement()->giveGlobalNumber(), lir.nearGp->giveNumber(), lir.weight);
         }
 
         fprintf(stderr, "\n");

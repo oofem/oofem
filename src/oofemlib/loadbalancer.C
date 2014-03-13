@@ -531,9 +531,8 @@ WallClockLoadBalancerMonitor :: decide(TimeStep *tStep)
 #ifdef __LB_DEBUG
     // perturb solution time artificially if requested
     bool perturb = false;
-    std :: list< Range > :: iterator perturbedStepsIter;
-    for ( perturbedStepsIter = perturbedSteps.begin(); perturbedStepsIter != perturbedSteps.end(); ++perturbedStepsIter ) {
-        if ( ( * perturbedStepsIter ).test( tStep->giveNumber() ) ) {
+    for ( auto perturbedStep: perturbedSteps ) {
+        if ( perturbedStep.test( tStep->giveNumber() ) ) {
             perturb  = true;
             break;
         }

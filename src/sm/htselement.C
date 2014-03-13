@@ -65,9 +65,9 @@ HTSelement :: giveDofManDofIDMask(int inode, EquationID ut, IntArray &answer) co
 
 {
     if ( inode <= numberOfEdges ) {
-        answer.setValues(0);
+        answer.clear();
     } else {
-        answer.setValues(4, D_u_edge_const, D_u_edge_lin, D_v_edge_const, D_v_edge_lin);
+        answer = {D_u_edge_const, D_u_edge_lin, D_v_edge_const, D_v_edge_lin};
     }
 }
 

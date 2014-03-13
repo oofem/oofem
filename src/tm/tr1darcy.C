@@ -267,7 +267,7 @@ void Tr1Darcy :: giveDofManDofIDMask(int inode, EquationID ut, IntArray &answer)
 
     if ( ( inode == 1 ) || ( inode == 2 ) || ( inode == 3 ) ) {
         if ( ut == EID_ConservationEquation ) {
-            answer.setValues(1, P_f);
+            answer = {P_f};
         } else {
             OOFEM_ERROR("Unknown equation id encountered");
         }

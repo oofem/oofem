@@ -466,6 +466,8 @@ public:
 
     friend std :: ostream &operator << ( std :: ostream & out, const FloatArray & x );
 
+    friend class FloatMatrix;
+
     ///@name IML compatibility
     //@{
     /// Assignment of scalar to all components of receiver

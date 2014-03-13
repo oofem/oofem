@@ -88,8 +88,8 @@ protected:
     static bool __initialized;
     /// Defines the ordering of the dofs in the local stiffness matrix.
     static bool initOrdering() {
-        shellOrdering.setValues(20,  1, 2, 3, 4, 5, 7, 8, 9, 10, 11, 13, 14, 15, 16, 17, 19, 20, 21, 22, 23);
-        drillOrdering.setValues(4,  6, 12, 18, 24);
+        shellOrdering = { 1, 2, 3, 4, 5, 7, 8, 9, 10, 11, 13, 14, 15, 16, 17, 19, 20, 21, 22, 23};
+        drillOrdering = { 6, 12, 18, 24};
         return true;
     }
 
