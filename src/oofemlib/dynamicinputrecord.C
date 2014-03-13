@@ -323,7 +323,8 @@ void DynamicInputRecord :: setField(const FloatArray &item, InputFieldType id)
 
 void DynamicInputRecord :: setField(std :: initializer_list< double > item, InputFieldType id)
 {
-    this->floatArrayRecord.emplace(id, item);
+  //this->floatArrayRecord.emplace(id, item);
+  this->floatArrayRecord.insert(std::make_pair(id, FloatArray(item)));
 }
 
 void DynamicInputRecord :: setField(const IntArray &item, InputFieldType id)
@@ -333,7 +334,8 @@ void DynamicInputRecord :: setField(const IntArray &item, InputFieldType id)
 
 void DynamicInputRecord :: setField(std :: initializer_list< int > item, InputFieldType id)
 {
-    this->intArrayRecord.emplace(id, item);
+  //this->intArrayRecord.emplace(id, item);
+  this->intArrayRecord.insert(std::make_pair(id, IntArray(item)));
 }
 
 void DynamicInputRecord :: setField(const FloatMatrix &item, InputFieldType id)
