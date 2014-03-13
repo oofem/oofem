@@ -1366,11 +1366,14 @@ The spring element has no mass associated, the mass can be added using LumpedMas
     1 & 2D spring element in xy plane,\\
     & requires D\_u and D\_v DOFs in each node \\
     & (orientation vector should be in xy plane)\\
-    2 & 2D torsional spring element in xz plane,\\
+    2 & 2D spring element in xz plane,\\
+    & requires D\_u and D\_w DOFs in each node \\
+    & (orientation vector should be in xz plane)\\
+    3 & 2D torsional spring element in xz plane,\\
     & requires R\_v DOFs in each node\\
-    3 & 3D spring element in space,\\
+    4 & 3D spring element in space,\\
     & requires D\_u, D\_v, and D\_w DOFs in each node\\
-    4 & 3D torsional spring in space,\\
+    5 & 3D torsional spring in space,\\
     & requires R\_u, R\_v, and R\_w DOFs in each node\\
     \hline
   \end{tabular}
