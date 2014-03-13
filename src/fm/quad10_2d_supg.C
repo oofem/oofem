@@ -105,7 +105,7 @@ void
 Quad10_2D_SUPG :: giveDofManDofIDMask(int inode, EquationID ut, IntArray &answer) const
 {
     if ( ut == EID_MomentumBalance || ut == EID_MomentumBalance_ConservationEquation ) {
-        answer.setValues(2, V_u, V_v);
+        answer = {V_u, V_v};
     } else if ( ut == EID_ConservationEquation ) {
         answer.clear();
     } else {
@@ -120,7 +120,7 @@ Quad10_2D_SUPG :: giveInternalDofManDofIDMask(int i, EquationID ut, IntArray &an
     if ( ut == EID_MomentumBalance ) {
         answer.clear();
     } else if ( ut == EID_ConservationEquation || ut == EID_MomentumBalance_ConservationEquation ) {
-        answer.setValues(1, P_f);
+        answer = {P_f};
     } else {
         OOFEM_ERROR("Unknown equation id encountered");
     }

@@ -186,7 +186,7 @@ FEI2dTrQuad :: global2local(FloatArray &answer, const FloatArray &gcoords, const
     }
     if ( error > convergence_limit ) { // Imperfect, could give false negatives.
         //OOFEM_WARNING("Failed convergence");
-        answer.setValues(3, 1. / 3., 1. / 3., 1. / 3.);
+        answer = {1. / 3., 1. / 3., 1. / 3.};
         return false;
     }
 

@@ -90,10 +90,8 @@ FastMarchingMethod :: initialize(FloatArray &dmanValues,
     // tag points with boundary value as known
     // then tag as trial all points that are one grid point away
     // finally tag as far all other grid points
-    int i, k, l;
-    int jnode, neighborNode, nnode = domain->giveNumberOfDofManagers();
-    Element *neighborElem;
-    const IntArray *neighborElemList;
+    int i;
+    int nnode = domain->giveNumberOfDofManagers();
     ConnectivityTable *ct = domain->giveConnectivityTable();
 
     // all points are far by default
@@ -105,8 +103,8 @@ FastMarchingMethod :: initialize(FloatArray &dmanValues,
     // first tag all boundary points
     std :: list< int > :: const_iterator it;
 
-    for ( it = bcDofMans.begin(); it != bcDofMans.end(); ++it ) {
-        if ( ( jnode = * it ) > 0 ) {
+    for ( int jnode: bcDofMans ) {
+        if ( jnode > 0 ) {
             dmanRecords.at(jnode - 1).status = FMM_Status_KNOWN;
         } else {
             dmanRecords.at(-jnode - 1).status = FMM_Status_KNOWN_BOUNDARY;
@@ -114,18 +112,19 @@ FastMarchingMethod :: initialize(FloatArray &dmanValues,
     }
 
     // tag as trial all points that are one grid point away
-    for ( it = bcDofMans.begin(); it != bcDofMans.end(); ++it ) {
-        jnode = abs(* it);
+    for ( int jnode: bcDofMans ) {
+        jnode = abs(jnode);
 
-        neighborElemList = ct->giveDofManConnectivityArray(jnode);
-        for ( k = 1; k <= neighborElemList->giveSize(); k++ ) {
+        const IntArray *neighborElemList = ct->giveDofManConnectivityArray(jnode);
+        for ( int k = 1; k <= neighborElemList->giveSize(); k++ ) {
+            ///@todo This uses "i" which will always be equal to "node" from the earlier loop. Unsafe coding.
             if ( neighborElemList->at(k) == i ) {
                 continue;
             }
 
-            neighborElem = domain->giveElement( neighborElemList->at(k) );
-            for ( l = 1; l <= neighborElem->giveNumberOfDofManagers(); l++ ) {
-                neighborNode = neighborElem->giveDofManagerNumber(l);
+            Element *neighborElem = domain->giveElement( neighborElemList->at(k) );
+            for ( int l = 1; l <= neighborElem->giveNumberOfDofManagers(); l++ ) {
+                int neighborNode = neighborElem->giveDofManagerNumber(l);
                 if ( ( dmanRecords.at(neighborNode - 1).status != FMM_Status_KNOWN ) &&
                     ( dmanRecords.at(neighborNode - 1).status != FMM_Status_KNOWN_BOUNDARY ) &&
                     ( dmanRecords.at(neighborNode - 1).status != FMM_Status_TRIAL ) ) {

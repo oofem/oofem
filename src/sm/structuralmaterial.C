@@ -818,23 +818,23 @@ StructuralMaterial :: giveVoigtSymVectorMask(IntArray &answer, MaterialMode mmod
         return 7;
 
     case _1dInterface:
-        answer.setValues(1, 1);
+        answer = {1};
         return 1;
 
     case _2dInterface:
-        answer.setValues(2, 1, 2);
+        answer = {1, 2};
         return 2;
 
     case _3dInterface:
-        answer.setValues(3, 1, 2, 3);
+        answer = {1, 2, 3};
         return 3;
 
     case _2dLattice:
-        answer.setValues(3, 1, 2, 3);
+        answer = {1, 2, 3};
         return 3;
 
     case _2dPlateSubSoil:
-        answer.setValues(3, 3, 5, 4);
+        answer = {3, 5, 4};
 	return 6;
 
     case _Unknown:

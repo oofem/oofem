@@ -975,7 +975,7 @@ Shell7BaseXFEM :: computeMassMatrixNum(FloatMatrix &answer, TimeStep *tStep)
             this->giveUnknownsAt(localCoords, solVec, xbar, m, gam, tStep);
             //this->computeNmatrixAt(gp, N);
             //unknowns.beProductOf(N,a); // [xbar, m, gam]^T
-            //m.setValues(3, unknowns.at(4), unknowns.at(5), unknowns.at(6) );
+            //m = {unknowns.at(4), unknowns.at(5), unknowns.at(6) };
             //double gam = unknowns.at(7);
 
 

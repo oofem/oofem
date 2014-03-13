@@ -104,15 +104,15 @@ void
 SpringElement :: giveDofManDofIDMask(int inode, EquationID, IntArray &answer) const
 {
     if ( this->mode == SE_1D_SPRING ) {
-        answer.setValues(1, D_u);
+        answer = {D_u};
     } else if ( this->mode == SE_2D_SPRING_XY ) {
-        answer.setValues(2, D_u, D_v);
+        answer = {D_u, D_v};
     } else if ( this->mode == SE_2D_TORSIONALSPRING_XZ ) {
-        answer.setValues(1, R_v);
+        answer = {R_v};
     } else if ( this->mode == SE_3D_SPRING ) {
-        answer.setValues(3, D_u, D_v, D_w);
+        answer = {D_u, D_v, D_w};
     } else if ( this->mode == SE_3D_TORSIONALSPRING ) {
-        answer.setValues(3, R_u, R_v, R_w);
+        answer = {R_u, R_v, R_w};
     }
 }
 

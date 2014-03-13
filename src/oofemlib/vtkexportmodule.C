@@ -904,7 +904,7 @@ VTKExportModule :: exportPrimVarAs(UnknownType valID, FILE *stream, TimeStep *tS
                 }
             }
         } else if ( valID == PressureVector ) {
-            dofIDMask.setValues(1, P_f);
+            dofIDMask = {P_f};
             this->getDofManPrimaryVariable(iVal, dman, dofIDMask, VM_Total, tStep, IST_Pressure);
         } else {
             OOFEM_ERROR("unsupported unknownType (%s)", __UnknownTypeToString(valID) );

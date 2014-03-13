@@ -185,12 +185,8 @@ VariableCrossSection :: give(CrossSectionProperty aProperty, const FloatArray *c
                 c = * coords;
             }
         }
-        std :: map< std :: string, FunctionArgument >m;
-        m.insert( std :: make_pair( "x", FunctionArgument(c) ) );
         // evaluate the expression
-        value = expr->eval( m, this->giveDomain() );
-        ///@todo C++11 is really convenient;
-        //value = expr->eval({{"x", c}}, this->giveDomain());
+        value = expr->eval({{"x", c}}, this->giveDomain());
     }
 
     return value;

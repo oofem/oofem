@@ -246,13 +246,11 @@ void DynCompCol :: times(const FloatArray &x, FloatArray &answer) const
     }
 
 #else
-    int j;
     double rhs;
-    std :: map< int, double > :: iterator pos;
 
-    for ( j = 0; j < nColumns; j++ ) {
+    for ( int j = 0; j < nColumns; j++ ) {
         rhs = x(j);
-        for ( pos = columns [ j ]->begin(); pos != columns [ j ]->end(); ++pos ) {
+        for ( int row: columns [ j ]->begin(); pos != columns [ j ]->end(); ++pos ) {
             answer(pos->first) += pos->second * rhs;
         }
     }

@@ -1069,9 +1069,8 @@ void DofManager :: updateLocalNumbering(EntityRenumberingFunctor &f)
 {
     //update masterNode numbering
     if ( this->dofMastermap ) {
-        std :: map< int, int > :: iterator it = this->dofMastermap->begin();
-        for ( ; it != this->dofMastermap->end(); it++ ) {
-            ( * it ).second = f( ( * it ).second, ERS_DofManager );
+        for ( auto mapper: *this->dofMastermap ) {
+            mapper.second = f( mapper.second, ERS_DofManager );
         }
     }
     for ( int i = 1; i <= numberOfDofs; i++ ) {

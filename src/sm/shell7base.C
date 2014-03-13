@@ -110,7 +110,7 @@ Interface *Shell7Base :: giveInterface(InterfaceType it)
 void
 Shell7Base :: giveDofManDofIDMask(int inode, EquationID ut, IntArray &answer) const
 {
-    answer.setValues(7, D_u, D_v, D_w, W_u, W_v, W_w, Gamma);
+    answer = {D_u, D_v, D_w, W_u, W_v, W_w, Gamma};
 }
 
 
@@ -367,9 +367,9 @@ Shell7Base :: edgeEvalCovarBaseVectorsAt(FloatArray &lcoords, const int iedge, F
     genEpsEdge.beProductOf(B, solVecEdge); // [dxdxi, dmdxi, m, dgamdxi, gam]^T
 
     FloatArray dxdxi, m, dmdxi;
-    dxdxi.setValues( 3, genEpsEdge.at(1), genEpsEdge.at(2), genEpsEdge.at(3) );
-    dmdxi.setValues( 3, genEpsEdge.at(4), genEpsEdge.at(5), genEpsEdge.at(6) );
-    m.setValues( 3, genEpsEdge.at(7), genEpsEdge.at(8), genEpsEdge.at(9) );
+    dxdxi = {genEpsEdge.at(1), genEpsEdge.at(2), genEpsEdge.at(3) };
+    dmdxi = {genEpsEdge.at(4), genEpsEdge.at(5), genEpsEdge.at(6) };
+    m = {genEpsEdge.at(7), genEpsEdge.at(8), genEpsEdge.at(9) };
     double dgamdxi = genEpsEdge.at(10);
     double gam     = genEpsEdge.at(11);
 
@@ -500,7 +500,7 @@ Shell7Base :: computeLambdaNMatrix(FloatMatrix &lambda, FloatArray &genEps, doub
 {
     // computes the lambda^n matrix associated with the variation and linearization of the position vector x.
     FloatArray m(3);
-    m.setValues( 3, genEps.at(13), genEps.at(14), genEps.at(15) );
+    m = {genEps.at(13), genEps.at(14), genEps.at(15) };
     double gam = genEps.at(18);
 
     // thickness coefficients
@@ -1067,7 +1067,7 @@ Shell7Base :: computeMassMatrix(FloatMatrix &answer, TimeStep *tStep)
         this->computeNmatrixAt(lCoords, N);
         FloatArray unknowns, m(3);
         unknowns.beProductOf(N, solVec);        // [x, m, gam]^T
-        m.setValues( 3, unknowns.at(4), unknowns.at(5), unknowns.at(6) );
+        m = {unknowns.at(4), unknowns.at(5), unknowns.at(6) };
         double gam = unknowns.at(7);
 
         // Analytically integrated through the tickness
@@ -1351,9 +1351,9 @@ Shell7Base :: computeConvectiveMassForce(FloatArray &answer, TimeStep *tStep)
 
         a.beProductOf(N, aVec);        // [ x,  m,  gam]^T
         da.beProductOf(N, daVec);        // [dx, dm, dgam]^T
-        m.setValues( 3,  a.at(4),  a.at(5),  a.at(6) );
+        m = { a.at(4),  a.at(5),  a.at(6) };
         gam =  a.at(7);
-        dm.setValues( 3, da.at(4), da.at(5), da.at(6) );
+        dm = {da.at(4), da.at(5), da.at(6) };
         dgam = da.at(7);
 
         double a1, a2, a3, h, h2, h3, h5, fac1, fac2, fac3, rho;
@@ -1574,8 +1574,8 @@ Shell7Base :: computeTractionForce(FloatArray &answer, const int iEdge, Boundary
             Q.beTranspositionOf(gcov);
 
             FloatArray distrForces(3), distrMoments(3), t1, t2;
-            distrForces.setValues( 3, components.at(1), components.at(2), components.at(3) );
-            distrMoments.setValues( 3, components.at(4), components.at(5), components.at(6) );
+            distrForces = {components.at(1), components.at(2), components.at(3) };
+            distrMoments = {components.at(4), components.at(5), components.at(6) };
             t1.beTProductOf(Q, distrForces);
             t2.beTProductOf(Q, distrMoments);
             fT.addSubVector(t1, 1);
@@ -2075,11 +2075,11 @@ void
 Shell7Base :: giveGeneralizedStrainComponents(FloatArray genEps, FloatArray &dphidxi1, FloatArray &dphidxi2, FloatArray &dmdxi1,
                                               FloatArray &dmdxi2, FloatArray &m, double &dgamdxi1, double &dgamdxi2, double &gam) {
     // generealized strain vector  [dxdxi, dmdxi, m, dgamdxi, gam]^T
-    dphidxi1.setValues( 3, genEps.at(1), genEps.at(2), genEps.at(3) );
-    dphidxi2.setValues( 3, genEps.at(4), genEps.at(5), genEps.at(6) );
-    dmdxi1.setValues( 3, genEps.at(7), genEps.at(8), genEps.at(9) );
-    dmdxi2.setValues( 3, genEps.at(10), genEps.at(11), genEps.at(12) );
-    m.setValues( 3, genEps.at(13), genEps.at(14), genEps.at(15) );
+    dphidxi1 = {genEps.at(1), genEps.at(2), genEps.at(3) };
+    dphidxi2 = {genEps.at(4), genEps.at(5), genEps.at(6) };
+    dmdxi1 = {genEps.at(7), genEps.at(8), genEps.at(9) };
+    dmdxi2 = {genEps.at(10), genEps.at(11), genEps.at(12) };
+    m = {genEps.at(13), genEps.at(14), genEps.at(15) };
     dgamdxi1 = genEps.at(16);
     dgamdxi2 = genEps.at(17);
     gam = genEps.at(18);
@@ -2669,7 +2669,7 @@ Shell7Base :: recoverValuesFromIP(std :: vector< FloatArray > &recoveredValues, 
     giveLocalNodeCoordsForExport(nodeLocalXi1Coords, nodeLocalXi2Coords, nodeLocalXi3Coords);
 
     for ( int i = 1; i <= numNodes; i++ ) {
-        nodeCoords.setValues( 3, nodeLocalXi1Coords.at(i), nodeLocalXi2Coords.at(i), nodeLocalXi3Coords.at(i) );
+        nodeCoords = {nodeLocalXi1Coords.at(i), nodeLocalXi2Coords.at(i), nodeLocalXi3Coords.at(i) };
         double distOld = 3.0; // should not be larger
         for ( int j = 0; j < iRule->giveNumberOfIntegrationPoints(); j++ ) {
             ip = iRule->getIntegrationPoint(j);
@@ -2860,9 +2860,9 @@ void
 Shell7Base :: giveLocalNodeCoordsForExport(FloatArray &nodeLocalXi1Coords, FloatArray &nodeLocalXi2Coords, FloatArray &nodeLocalXi3Coords) {
     // Local coords for a quadratic wedge element (VTK cell type 26)
     double z = 0.999;
-    nodeLocalXi1Coords.setValues(15, 1., 0., 0., 1., 0., 0., .5, 0., .5, .5, 0., .5, 1., 0., 0.);
-    nodeLocalXi2Coords.setValues(15, 0., 1., 0., 0., 1., 0., .5, .5, 0., .5, .5, 0., 0., 1., 0.);
-    nodeLocalXi3Coords.setValues(15, -z, -z, -z,  z,  z,  z, -z, -z, -z,  z,  z,  z, 0., 0., 0.);
+    nodeLocalXi1Coords = {1., 0., 0., 1., 0., 0., .5, 0., .5, .5, 0., .5, 1., 0., 0.};
+    nodeLocalXi2Coords = {0., 1., 0., 0., 1., 0., .5, .5, 0., .5, .5, 0., 0., 1., 0.};
+    nodeLocalXi3Coords = {-z, -z, -z,  z,  z,  z, -z, -z, -z,  z,  z,  z, 0., 0., 0.};
 }
 
 #endif

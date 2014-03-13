@@ -71,11 +71,11 @@ protected:
     static bool __initialized;
     /// Defines the ordering of the dofs in the local stiffness matrix.
     static bool initOrdering() {
-        momentum_ordering.setValues(8,  1, 2, 4, 5, 7, 8, 10, 11);
-        conservation_ordering.setValues(3,  3, 6, 9);
-        edge_ordering [ 0 ].setValues(4,  1, 2, 4, 5);
-        edge_ordering [ 1 ].setValues(4,  4, 5, 7, 8);
-        edge_ordering [ 2 ].setValues(4,  7, 8, 1, 2);
+        momentum_ordering = {1, 2, 4, 5, 7, 8, 10, 11};
+        conservation_ordering = {3, 6, 9};
+        edge_ordering [ 0 ] = {1, 2, 4, 5};
+        edge_ordering [ 1 ] = {4, 5, 7, 8};
+        edge_ordering [ 2 ] = {7, 8, 1, 2};
         return true;
     }
 

@@ -190,7 +190,7 @@ Quad1Mindlin :: initializeFrom(InputRecord *ir)
 void
 Quad1Mindlin :: giveDofManDofIDMask(int inode, EquationID, IntArray &answer) const
 {
-    answer.setValues(3, D_w, R_u, R_v);
+    answer = {D_w, R_u, R_v};
 }
 
 
@@ -323,13 +323,13 @@ void
 Quad1Mindlin :: giveEdgeDofMapping(IntArray &answer, int iEdge) const
 {
     if ( iEdge == 1 ) { // edge between nodes 1 2
-        answer.setValues(6, 1, 2, 3, 4, 5, 6);
+        answer = {1, 2, 3, 4, 5, 6};
     } else if ( iEdge == 2 ) { // edge between nodes 2 3
-        answer.setValues(6, 4, 5, 6, 7, 8, 9);
+        answer = {4, 5, 6, 7, 8, 9};
     } else if ( iEdge == 3 ) { // edge between nodes 3 4
-        answer.setValues(6, 7, 8, 9, 10, 11, 12);
+        answer = {7, 8, 9, 10, 11, 12};
     } else if ( iEdge == 4 ) { // edge between nodes 4 1
-        answer.setValues(6, 10, 11, 12, 1, 2, 3);
+        answer = {10, 11, 12, 1, 2, 3};
     } else {
         OOFEM_ERROR("wrong edge number");
     }

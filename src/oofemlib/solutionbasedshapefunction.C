@@ -311,8 +311,7 @@ SolutionbasedShapeFunction :: computeDofTransformation(ActiveDof *dof, FloatArra
     masterContribs.resize( this->giveDomain()->giveNumberOfSpatialDimensions() );
     masterContribs2.resize( this->giveDomain()->giveNumberOfSpatialDimensions() );
 
-    IntArray dofIDs;
-    dofIDs.setValues( 1, ( int ) dof->giveDofID() );
+    IntArray dofIDs = {dof->giveDofID()};
 
     bool isPlus, isMinus, isZero, found;
     whichBoundary(* dof->giveDofManager()->giveCoordinates(), isPlus, isMinus, isZero);

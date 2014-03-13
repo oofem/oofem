@@ -790,13 +790,13 @@ void MixedGradientPressureWeakPeriodic :: computeTangents(FloatMatrix &Ed, Float
     }
 
     // Reorder to voigt form:
-    IntArray indx(nd);
+    IntArray indx;
     if ( nsd == 3 ) {
-        indx.setValues(6,  1, 4, 6, 5, 3, 2);
+        indx = { 1, 4, 6, 5, 3, 2};
     } else if ( nsd == 2 ) {
-        indx.setValues(3,  1, 3, 2);
+        indx = { 1, 3, 2};
     } else if ( nsd == 1 ) {
-        indx.setValues(1,  1);
+        indx = { 1};
     }
     Ed.beSubMatrixOf(Ed_tmp, indx, indx);
 

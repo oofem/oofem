@@ -354,7 +354,7 @@ DKTPlate :: initializeFrom(InputRecord *ir)
 void
 DKTPlate :: giveDofManDofIDMask(int inode, EquationID, IntArray &answer) const
 {
-    answer.setValues(3, D_w, R_u, R_v);
+    answer = {D_w, R_u, R_v};
 }
 
 

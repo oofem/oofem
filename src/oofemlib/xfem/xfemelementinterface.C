@@ -123,8 +123,8 @@ void XfemElementInterface :: ComputeBOrBHMatrix(FloatMatrix &oAnswer, GaussPoint
     const IntArray &elNodes = iEl.giveDofManArray();
 
     // Compute global coordinates of Gauss point
-    FloatArray globalCoord;
-    globalCoord.setValues(2, 0.0, 0.0);
+    FloatArray globalCoord(2);
+    globalCoord.zero();
 
     for ( int i = 1; i <= nDofMan; i++ ) {
         DofManager *dMan = iEl.giveDofManager(i);
@@ -274,8 +274,8 @@ void XfemElementInterface :: XfemElementInterface_createEnrNmatrixAt(FloatMatrix
     const IntArray &elNodes = iEl.giveDofManArray();
 
     // Compute global coordinates of Gauss point
-    FloatArray globalCoord;
-    globalCoord.setValues(2, 0.0, 0.0);
+    FloatArray globalCoord(2);
+    globalCoord.zero();
 
     for ( int i = 1; i <= nDofMan; i++ ) {
         DofManager *dMan = iEl.giveDofManager(i);
@@ -462,8 +462,7 @@ bool XfemElementInterface :: XfemElementInterface_updateIntegrationRule()
                             crackTang.beDifferenceOf(crackPolygon [ segIndex + 1 ], crackPolygon [ segIndex         ]);
                             crackTang.normalize();
 
-                            FloatArray crackNormal;
-                            crackNormal.setValues( 2, -crackTang.at(2), crackTang.at(1) );
+                            FloatArray crackNormal = {-crackTang.at(2), crackTang.at(1)};
 
                             mpCZIntegrationRules [ segIndex ]->SetUpPointsOn2DEmbeddedLine(mCSNumGaussPoints, matMode, coords);
 
@@ -544,8 +543,7 @@ bool XfemElementInterface :: XfemElementInterface_updateIntegrationRule()
                                 crackTang.beDifferenceOf(crackPolygon [ segIndex + 1 ], crackPolygon [ segIndex         ]);
                                 crackTang.normalize();
 
-                                FloatArray crackNormal;
-                                crackNormal.setValues( 2, -crackTang.at(2), crackTang.at(1) );
+                                FloatArray crackNormal = {-crackTang.at(2), crackTang.at(1)};
 
                                 mpCZIntegrationRules [ newRuleInd ]->SetUpPointsOn2DEmbeddedLine(mCSNumGaussPoints, matMode, coords);
 
@@ -1090,15 +1088,12 @@ void XfemElementInterface :: computeGlobalCohesiveTractionVector(FloatArray &oT,
     F.beUnitMatrix();     // TODO: Compute properly
 
 
-    FloatArray jump3D;
-    jump3D.setValues(3, iJump.at(1), iJump.at(2), 0.0);
+    FloatArray jump3D = {iJump.at(1), iJump.at(2), 0.0};
 
 
-    FloatArray crackNormal3D;
-    crackNormal3D.setValues(3, iCrackNormal.at(1), iCrackNormal.at(2), 0.0);
+    FloatArray crackNormal3D = {iCrackNormal.at(1), iCrackNormal.at(2), 0.0};
 
-    FloatArray ez;
-    ez.setValues(3, 0.0, 0.0, 1.0);
+    FloatArray ez = {0.0, 0.0, 1.0};
     FloatArray crackTangent3D;
     crackTangent3D.beVectorProductOf(crackNormal3D, ez);
 
@@ -1110,18 +1105,17 @@ void XfemElementInterface :: computeGlobalCohesiveTractionVector(FloatArray &oT,
     FloatArray TLoc(3), jump3DLoc, TLocRenumbered(3);
     jump3DLoc.beTProductOf(locToGlob, jump3D);
 
-    FloatArray jump3DLocRenumbered;
-    jump3DLocRenumbered.setValues( 3, jump3DLoc.at(3), jump3DLoc.at(1), jump3DLoc.at(2) );
+    FloatArray jump3DLocRenumbered = {jump3DLoc.at(3), jump3DLoc.at(1), jump3DLoc.at(2)};
 
     mpCZMat->giveFirstPKTraction_3d(TLocRenumbered, & iGP, jump3DLocRenumbered, F, tStep);
 
-    TLoc.setValues( 3, TLocRenumbered.at(2), TLocRenumbered.at(3), TLocRenumbered.at(1) );
+    TLoc = {TLocRenumbered.at(2), TLocRenumbered.at(3), TLocRenumbered.at(1)};
 
 
     FloatArray T;
     T.beProductOf(locToGlob, TLoc);
 
-    oT.setValues( 2, T.at(1), T.at(2) );
+    oT = {T.at(1), T.at(2)};
 }
 
 void XfemElementInterface :: computeCohesiveTangent(FloatMatrix &answer, TimeStep *tStep)
@@ -1150,8 +1144,7 @@ void XfemElementInterface :: computeCohesiveTangent(FloatMatrix &answer, TimeSte
                 FloatArray jump2D;
                 computeDisplacementJump(gp, jump2D, solVec, NMatrix);
 
-                FloatArray jump3D;
-                jump3D.setValues( 3, 0.0, jump2D.at(1), jump2D.at(2) );
+                FloatArray jump3D = {0.0, jump2D.at(1), jump2D.at(2)};
 
                 // Compute traction
                 FloatMatrix F;
@@ -1195,11 +1188,9 @@ void XfemElementInterface :: computeCohesiveTangent(FloatMatrix &answer, TimeSte
 
                     FloatArray crackNormal( ms->giveNormal() );
 
-                    FloatArray crackNormal3D;
-                    crackNormal3D.setValues(3, crackNormal.at(1), crackNormal.at(2), 0.0);
+                    FloatArray crackNormal3D = {crackNormal.at(1), crackNormal.at(2), 0.0};
 
-                    FloatArray ez;
-                    ez.setValues(3, 0.0, 0.0, 1.0);
+                    FloatArray ez = {0.0, 0.0, 1.0};
                     FloatArray crackTangent3D;
                     crackTangent3D.beVectorProductOf(crackNormal3D, ez);
 

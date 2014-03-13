@@ -99,21 +99,21 @@ void Tr21Stokes :: giveDofManDofIDMask(int inode, EquationID ut, IntArray &answe
 
     if ( inode <= 3 ) {
         if ( ut == EID_MomentumBalance ) {
-            answer.setValues(2, V_u, V_v);
+            answer = {V_u, V_v};
         } else if ( ut == EID_ConservationEquation ) {
-            answer.setValues(1, P_f);
+            answer = {P_f};
         } else if ( ut == EID_MomentumBalance_ConservationEquation ) {
-            answer.setValues(3, V_u, V_v, P_f);
+            answer = {V_u, V_v, P_f};
         } else {
             OOFEM_ERROR("Unknown equation id encountered");
         }
     } else {
         if ( ut == EID_MomentumBalance ) {
-            answer.setValues(2, V_u, V_v);
+            answer = {V_u, V_v};
         } else if ( ut == EID_ConservationEquation ) {
             answer.clear();
         } else if ( ut == EID_MomentumBalance_ConservationEquation ) {
-            answer.setValues(2, V_u, V_v);
+            answer = {V_u, V_v};
         } else {
             OOFEM_ERROR("Unknown equation id encountered");
         }
@@ -448,14 +448,13 @@ int Tr21Stokes :: EIPrimaryUnknownMI_computePrimaryUnknownVectorAt(ValueModeType
 
 void Tr21Stokes :: EIPrimaryUnknownMI_givePrimaryUnknownVectorDofID(IntArray &answer)
 {
-    answer.setValues(3, V_u, V_v, P_f);
+    answer = {V_u, V_v, P_f};
 }
 
 double Tr21Stokes :: SpatialLocalizerI_giveDistanceFromParametricCenter(const FloatArray &coords)
 {
     FloatArray center;
-    FloatArray lcoords;
-    lcoords.setValues(3, 0.333333, 0.333333, 0.333333);
+    FloatArray lcoords = {0.333333, 0.333333, 0.333333};
     interpolation_quad.local2global( center, lcoords, FEIElementGeometryWrapper(this) );
     return center.distance(coords);
 }

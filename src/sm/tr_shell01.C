@@ -125,11 +125,11 @@ TR_SHELL01 :: giveCharacteristicVector(FloatArray &answer, CharType mtrx, ValueM
     answer.zero();
 
     plate->giveCharacteristicVector(aux, mtrx, mode, tStep);
-    loc.setValues(9, 3, 4, 5, 9, 10, 11, 15, 16, 17);
+    loc = {3, 4, 5, 9, 10, 11, 15, 16, 17};
     answer.assemble(aux, loc);
 
     membrane->giveCharacteristicVector(aux, mtrx, mode, tStep);
-    loc.setValues(9, 1, 2, 6, 7, 8, 12, 13, 14, 18);
+    loc = {1, 2, 6, 7, 8, 12, 13, 14, 18};
     answer.assemble(aux, loc);
 }
 
@@ -139,18 +139,18 @@ TR_SHELL01 :: giveCharacteristicMatrix(FloatMatrix &answer, CharType mtrx, TimeS
 // returns characteristics matrix of receiver accordind to mtrx
 //
 {
-    IntArray loc(9);
+    IntArray loc;
     FloatMatrix aux;
 
     answer.resize(18, 18);
     answer.zero();
 
     plate->giveCharacteristicMatrix(aux, mtrx, tStep);
-    loc.setValues(9, 3, 4, 5, 9, 10, 11, 15, 16, 17);
+    loc = {3, 4, 5, 9, 10, 11, 15, 16, 17};
     answer.assemble(aux, loc);
 
     membrane->giveCharacteristicMatrix(aux, mtrx, tStep);
-    loc.setValues(9, 1, 2, 6, 7, 8, 12, 13, 14, 18);
+    loc = {1, 2, 6, 7, 8, 12, 13, 14, 18};
     answer.assemble(aux, loc);
 }
 
@@ -159,7 +159,7 @@ TR_SHELL01 :: giveRotationMatrix(FloatMatrix &answer, EquationID eid)
 {
     IntArray loc(9);
     FloatMatrix aux1, aux2;
-    int i, j, ncol;
+    int ncol;
 
     bool t1 = plate->giveRotationMatrix(aux1, eid);
     bool t2 =  membrane->giveRotationMatrix(aux2, eid);
@@ -172,16 +172,16 @@ TR_SHELL01 :: giveRotationMatrix(FloatMatrix &answer, EquationID eid)
         ncol = aux1.giveNumberOfColumns();
         answer.resize(18, ncol);
 
-        loc.setValues(9, 3, 4, 5, 9, 10, 11, 15, 16, 17);
-        for ( i = 1; i <= 9; i++ ) { // row index
-            for ( j = 1; j <= ncol; j++ ) {
+        loc = {3, 4, 5, 9, 10, 11, 15, 16, 17};
+        for ( int i = 1; i <= 9; i++ ) { // row index
+            for ( int j = 1; j <= ncol; j++ ) {
                 answer.at(loc.at(i), j) = aux1.at(i, j);
             }
         }
 
-        loc.setValues(9, 1, 2, 6, 7, 8, 12, 13, 14, 18);
-        for ( i = 1; i <= 9; i++ ) { // row index
-            for ( j = 1; j <= ncol; j++ ) {
+        loc = {1, 2, 6, 7, 8, 12, 13, 14, 18};
+        for ( int i = 1; i <= 9; i++ ) { // row index
+            for ( int j = 1; j <= ncol; j++ ) {
                 answer.at(loc.at(i), j) = aux2.at(i, j);
             }
         }

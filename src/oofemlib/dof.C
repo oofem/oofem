@@ -68,7 +68,7 @@ void Dof :: giveEquationNumbers(IntArray &masterEqNumbers, const UnknownNumberin
 
 void Dof :: giveDofIDs(IntArray &masterDofIDs)
 {
-    masterDofIDs.setValues( 1, this->giveDofID() );
+    masterDofIDs = {this->giveDofID()};
 }
 
 int

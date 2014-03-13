@@ -325,7 +325,7 @@ FEI3dHexaLin :: computeLocalEdgeMapping(IntArray &edgeNodes, int iedge)
         OOFEM_ERROR("wrong egde number (%d)", iedge);
     }
 
-    edgeNodes.setValues(2, aNode, bNode);
+    edgeNodes = {aNode, bNode};
 }
 
 double
@@ -447,7 +447,7 @@ FEI3dHexaLin :: computeLocalSurfaceMapping(IntArray &surfNodes, int isurf)
         OOFEM_ERROR("wrong surface number (%d)", isurf);
     }
 
-    surfNodes.setValues(4, aNode, bNode, cNode, dNode);
+    surfNodes = {aNode, bNode, cNode, dNode};
 }
 
 void

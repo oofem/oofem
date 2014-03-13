@@ -189,12 +189,11 @@ TrPlanestressRotAllman :: computeStiffnessMatrixZeroEnergyStabilization(FloatMat
 {
     FloatMatrix b(1, 9), d(1, 1);
     FloatMatrix dnx;
-    FloatArray lxy [ 6 ], lec;
+    FloatArray lxy [ 6 ], lec = {0.333333333333, 0.333333333333, 0.333333333333}; // element center in local coordinates
     const FloatArray *lxyptr[] = {
         lxy, lxy + 1, lxy + 2, lxy + 3, lxy + 4, lxy + 5
     };
 
-    lec.setValues(3, 0.333333333333, 0.333333333333, 0.333333333333); // element center in local coordinates
     this->computeLocalNodalCoordinates(lxy); // get ready for tranformation into 3d
     this->qinterpolation.evaldNdx( dnx, lec, FEIVertexListGeometryWrapper(6, lxyptr) );
 
@@ -229,7 +228,7 @@ TrPlanestressRotAllman :: computeStiffnessMatrixZeroEnergyStabilization(FloatMat
 void
 TrPlanestressRotAllman :: giveDofManDofIDMask(int inode, EquationID, IntArray &answer) const
 {
-    answer.setValues(3, D_u, D_v, R_w);
+    answer = {D_u, D_v, R_w};
 }
 
 

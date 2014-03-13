@@ -257,14 +257,13 @@ DynamicCommunicationBuffer :: iSend(int dest, int tag)
 {
     int result = 1;
 
-    std :: list< CommunicationPacket * > :: const_iterator it;
     /// set last (active) send packet as eof
     active_packet->setEOFFlag();
 
     active_rank = dest;
     active_tag = tag;
-    for ( it = packet_list.begin(); it != packet_list.end(); ++it ) {
-        result &= ( * it )->iSend(communicator, dest, tag);
+    for ( auto &packet: packet_list ) {
+        result &= packet->iSend(communicator, dest, tag);
     }
 
     /*
@@ -341,10 +340,8 @@ int DynamicCommunicationBuffer :: sendCompleted()
         return 1;
     }
 
-    std :: list< CommunicationPacket * > :: const_iterator it;
-
-    for ( it = packet_list.begin(); it != packet_list.end(); ++it ) {
-        result &= ( * it )->testCompletion();
+    for ( auto &packet: packet_list ) {
+        result &= packet->testCompletion();
     }
 
     completed = result;
@@ -418,9 +415,8 @@ DynamicCommunicationBuffer :: freePacket(CommunicationPacket *p)
 void
 DynamicCommunicationBuffer :: clear()
 {
-    std :: list< CommunicationPacket * > :: const_iterator it;
-    for ( it = packet_list.begin(); it != packet_list.end(); ++it ) {
-        this->freePacket(* it);
+    for ( auto &packet: packet_list ) {
+        this->freePacket(packet);
     }
 
     packet_list.clear();
@@ -512,10 +508,9 @@ CommunicationPacketPool :: clear()
         OOFEM_SIMPLE_WARNING("CommunicationPacketPool::clear: some packets still leased");
     }
 
-    std :: list< CommunicationPacket * > :: iterator it;
-    for ( it = available_packets.begin(); it != available_packets.end(); ++it ) {
-        if ( * it ) {
-            delete *it;
+    for ( auto &packet: available_packets ) {
+        if ( packet ) {
+            delete packet;
         }
     }
 
