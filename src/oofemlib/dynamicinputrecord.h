@@ -117,7 +117,9 @@ public:
     virtual void setField(bool item, InputFieldType id);
     virtual void setField(const std :: string &item, InputFieldType id);
     virtual void setField(const FloatArray &item, InputFieldType id);
+    virtual void setField(std :: initializer_list< double > item, InputFieldType id);
     virtual void setField(const IntArray &item, InputFieldType id);
+    virtual void setField(std :: initializer_list< int > item, InputFieldType id);
     virtual void setField(const FloatMatrix &item, InputFieldType id);
     virtual void setField(const std :: vector< std :: string > &item, InputFieldType id);
     virtual void setField(const Dictionary &item, InputFieldType id);
