@@ -52,9 +52,9 @@
 #include <numeric>
 
 #define FAST_RESIZE(newsize) \
-    if ( (newsize) > this->giveSize() ) { \
+    if ( (newsize) < this->giveSize() ) { \
         this->values.resize((newsize)); \
-    } else if ( (newsize) < this->giveSize() ) { \
+    } else if ( (newsize) > this->giveSize() ) { \
         this->values.assign((newsize), 0.); \
     }
 
