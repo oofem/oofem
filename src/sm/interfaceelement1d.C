@@ -296,17 +296,17 @@ InterfaceElem1d :: giveDofManDofIDMask(int inode, EquationID, IntArray &answer) 
     case _2dPlaneStressMode:
     case _PlaneStrainMode:
     case _3dAxisymmMode:
-        answer.setValues(2, D_u, D_v);
+        answer = {D_u, D_v};
         break;
     case _3dMode:
-        answer.setValues(3, D_u, D_v, D_w);
+        answer = {D_u, D_v, D_w};
         break;
     case _2dTrussMode:
     case _2dBeamMode:
-        answer.setValues(2, D_u, D_w);
+        answer = {D_u, D_w};
         break;
     case _1dTrussMode:
-        answer.setValues(1, D_u);
+        answer = {D_u};
         break;
     default:
         OOFEM_ERROR("unsupported mode");

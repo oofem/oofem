@@ -68,9 +68,9 @@ void
 QTruss1dGrad :: giveDofManDofIDMask(int inode, EquationID ut, IntArray &answer) const
 {
     if ( inode < 3 ) {
-        answer.setValues(2, D_u, G_0);
+        answer = {D_u, G_0};
     } else {
-        answer.setValues(1, D_u);
+        answer = {D_u};
     }
 }
 

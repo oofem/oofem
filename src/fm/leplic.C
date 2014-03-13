@@ -173,7 +173,7 @@ LEPlic :: doLagrangianPhase(TimeStep *tStep)
     EngngModel *emodel = domain->giveEngngModel();
     int err;
 #endif
-    velocityMask.setValues(2, V_u, V_v);
+    velocityMask = {V_u, V_v};
 
     updated_XCoords.resize(ndofman);
     updated_YCoords.resize(ndofman);

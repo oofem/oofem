@@ -352,7 +352,7 @@ QDKTPlate :: initializeFrom(InputRecord *ir)
 void
 QDKTPlate :: giveDofManDofIDMask(int inode, EquationID, IntArray &answer) const
 {
-    answer.setValues(3, D_w, R_u, R_v);
+    answer = {D_w, R_u, R_v};
 }
 
 
@@ -643,13 +643,13 @@ void
 QDKTPlate :: giveEdgeDofMapping(IntArray &answer, int iEdge) const
 {
     if ( iEdge == 1 ) { // edge between nodes 1 2
-      answer.setValues(6, 1, 2, 3, 4, 5, 6);
+      answer = {1, 2, 3, 4, 5, 6};
     } else if ( iEdge == 2 ) { // edge between nodes 2 3
-      answer.setValues(6, 4, 5, 6, 7, 8, 9);
+      answer = {4, 5, 6, 7, 8, 9};
     } else if ( iEdge == 3 ) { // edge between nodes 3 4
-      answer.setValues(6, 7, 8, 9, 10, 11, 12);
+      answer = {7, 8, 9, 10, 11, 12};
     } else if ( iEdge == 4 ) { // edge between nodes 4 1
-      answer.setValues(6, 10, 11, 12, 1, 2, 3);
+      answer = {10, 11, 12, 1, 2, 3};
     } else {
         OOFEM_ERROR("wrong edge number");
     }
@@ -761,7 +761,7 @@ QDKTPlate :: computeLoadLSToLRotationMatrix(FloatMatrix &answer, int isurf, Gaus
 //
 #ifdef __OOFEG
 void
-DKTPlate :: drawRawGeometry(oofegGraphicContext &gc)
+QDKTPlate :: drawRawGeometry(oofegGraphicContext &gc)
 {
     WCRec p [ 4 ];
     GraphicObj *go;
@@ -800,7 +800,7 @@ DKTPlate :: drawRawGeometry(oofegGraphicContext &gc)
 
 
 void
-DKTPlate :: drawDeformedGeometry(oofegGraphicContext &gc, UnknownType type)
+QDKTPlate :: drawDeformedGeometry(oofegGraphicContext &gc, UnknownType type)
 {
     WCRec p [ 4 ];
     GraphicObj *go;
@@ -839,7 +839,7 @@ DKTPlate :: drawDeformedGeometry(oofegGraphicContext &gc, UnknownType type)
 
 
 void
-DKTPlate :: drawScalar(oofegGraphicContext &context)
+QDKTPlate :: drawScalar(oofegGraphicContext &context)
 {
     int i, indx, result = 0;
     WCRec p [ 4 ];

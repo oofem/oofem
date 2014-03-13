@@ -103,12 +103,10 @@ void EnrFrontLinearBranchFuncRadius :: evaluateEnrFuncAt(std :: vector< double >
 	giveNodeTipIndices(iNodeInd, tipIndices);
 
 	for ( size_t i = 0; i < tipIndices.size(); i++ ) {
-		FloatArray xTip;
 		int tipInd = tipIndices [ i ];
-		xTip.setValues( 2, mTipInfo [ tipInd ].mGlobalCoord.at(1), mTipInfo [ tipInd ].mGlobalCoord.at(2) );
+		FloatArray xTip = {mTipInfo [ tipInd ].mGlobalCoord.at(1), mTipInfo [ tipInd ].mGlobalCoord.at(2)};
 
-		FloatArray pos;
-		pos.setValues( 2, iPos.at(1), iPos.at(2) );
+		FloatArray pos = {iPos.at(1), iPos.at(2)};
 
 		// Crack tip tangent and normal
 		const FloatArray &t = mTipInfo [ tipInd ].mTangDir;

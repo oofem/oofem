@@ -80,8 +80,8 @@ Tr2Shell7XFEM :: giveOrdering(SolutionField fieldType) const
 void
 Tr2Shell7XFEM :: giveLocalNodeCoords(FloatArray &nodeLocalXiCoords, FloatArray &nodeLocalEtaCoords)
 {
-    nodeLocalXiCoords.setValues(6, 1., 0., 0., .5, 0., .5);  // corner nodes then midnodes, uncertain of node numbering
-    nodeLocalEtaCoords.setValues(6, 0., 1., 0., .5, .5, 0.);
+    nodeLocalXiCoords = {1., 0., 0., .5, 0., .5};  // corner nodes then midnodes, uncertain of node numbering
+    nodeLocalEtaCoords = {0., 1., 0., .5, .5, 0.};
 }
 
 
@@ -141,11 +141,11 @@ Tr2Shell7XFEM :: giveEdgeDofMapping(IntArray &answer, int iEdge) const
      */
 
     if ( iEdge == 1 ) {        // edge between nodes 1-4-2
-        answer.setValues(21, 1, 2, 3, 8, 9, 10, 22, 23, 24,  4, 5, 6, 11, 12, 13, 25, 26, 27,   7, 14, 28);
+        answer = {1, 2, 3, 8, 9, 10, 22, 23, 24,  4, 5, 6, 11, 12, 13, 25, 26, 27,   7, 14, 28};
     } else if ( iEdge == 2 ) { // edge between nodes 2-5-3
-        answer.setValues(21,   8, 9, 10, 15, 16, 17, 29, 30, 31,   11, 12, 13, 18, 19, 20, 32, 33, 34,   14, 21, 35);
+        answer = {  8, 9, 10, 15, 16, 17, 29, 30, 31,   11, 12, 13, 18, 19, 20, 32, 33, 34,   14, 21, 35};
     } else if ( iEdge == 3 ) { // edge between nodes 3-6-1
-        answer.setValues(21,   15, 16, 17, 1, 2, 3, 36, 37, 38,   18, 19, 20, 4, 5, 6, 39, 40, 41,   21, 7, 42);
+        answer = {  15, 16, 17, 1, 2, 3, 36, 37, 38,   18, 19, 20, 4, 5, 6, 39, 40, 41,   21, 7, 42};
     } else {
         OOFEM_ERROR("wrong edge number");
     }

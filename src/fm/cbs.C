@@ -115,8 +115,7 @@ CBS :: initializeFrom(InputRecord *ir)
         this->materialInterface = new LEPlic( 1, this->giveDomain(1) );
         // export velocity field
         FieldManager *fm = this->giveContext()->giveFieldManager();
-        IntArray mask;
-        mask.setValues(3, V_u, V_v, V_w);
+        IntArray mask = {V_u, V_v, V_w};
 
 #ifdef FIELDMANAGER_USE_SHARED_PTR
         //std::tr1::shared_ptr<Field> _velocityField = make_shared<MaskedPrimaryField>(FT_Velocity, &this->VelocityField, mask);

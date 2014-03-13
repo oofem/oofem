@@ -159,7 +159,7 @@ void HangingNode :: postInitialize()
             // If this assumption is changed in FEIElementGeometryWrapper + friends,
             // masterNode will also need to be modified for each dof accordingly.
             fei->evalN( masterContribution, lcoords, FEIElementGeometryWrapper(e) );
-            sdof->initialize(masterContribution.giveSize(), masterNodes, NULL, masterContribution);
+            sdof->initialize(masterContribution.giveSize(), masterNodes, IntArray(), masterContribution);
 #endif
         }
     }

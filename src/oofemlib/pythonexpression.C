@@ -130,7 +130,7 @@ PythonExpression :: getArray(FloatArray &answer, PyObject *func, std :: map< std
             answer(i) = PyFloat_AS_DOUBLE( PyList_GET_ITEM(ret, i) );
         }
     } else {
-        answer.setValues( 1, PyFloat_AS_DOUBLE(ret) );
+        answer = {PyFloat_AS_DOUBLE(ret) };
     }
     Py_DECREF(local_dict);
     Py_DECREF(dummy);

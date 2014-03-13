@@ -175,9 +175,9 @@ StructuralInterfaceElement :: giveInternalForcesVector(FloatArray &answer,
         //    // modify sizes if stored traction has 3 components and the spatial dimension is less
         //    int spatialDim = this->giveSpatialDimension();
         //    if ( traction.giveSize() == 3 && spatialDim == 1 ) {
-        //        traction.setValues(1, tractionTemp.at(3) );
+        //        traction = {tractionTemp.at(3) };
         //    } else if ( traction.giveSize() == 3 && spatialDim == 2 ) {
-        //        traction.setValues(2, tractionTemp.at(1), tractionTemp.at(3) );
+        //        traction = {tractionTemp.at(1), tractionTemp.at(3) };
         //    } else {
         //        traction = tractionTemp;
         //    }

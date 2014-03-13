@@ -42,6 +42,7 @@
 #include "classfactory.h"
 #include "shell7base.h"
 #include "intmatbilinczfagerstrom.h"
+#include "dynamicinputrecord.h"
 //#include "vld.h"
 
 namespace oofem {

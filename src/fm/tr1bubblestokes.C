@@ -94,11 +94,11 @@ int Tr1BubbleStokes :: computeNumberOfDofs()
 void Tr1BubbleStokes :: giveDofManDofIDMask(int inode, EquationID ut, IntArray &answer) const
 {
     if ( ut == EID_MomentumBalance ) {
-        answer.setValues(2, V_u, V_v);
+        answer = {V_u, V_v};
     } else if ( ut == EID_ConservationEquation ) {
-        answer.setValues(1, P_f);
+        answer = {P_f};
     } else if ( ut == EID_MomentumBalance_ConservationEquation ) {
-        answer.setValues(3, V_u, V_v, P_f);
+        answer = {V_u, V_v, P_f};
     } else {
         answer.clear();
     }
@@ -107,7 +107,7 @@ void Tr1BubbleStokes :: giveDofManDofIDMask(int inode, EquationID ut, IntArray &
 void Tr1BubbleStokes :: giveInternalDofManDofIDMask(int i, EquationID eid, IntArray &answer) const
 {
     if ( eid == EID_MomentumBalance_ConservationEquation || eid == EID_MomentumBalance ) {
-        answer.setValues(2, V_u, V_v);
+        answer = {V_u, V_v};
     } else {
         answer.clear();
     }
@@ -445,14 +445,13 @@ int Tr1BubbleStokes :: EIPrimaryUnknownMI_computePrimaryUnknownVectorAt(ValueMod
 
 void Tr1BubbleStokes :: EIPrimaryUnknownMI_givePrimaryUnknownVectorDofID(IntArray &answer)
 {
-    answer.setValues(3, V_u, V_v, P_f);
+    answer = {V_u, V_v, P_f};
 }
 
 double Tr1BubbleStokes :: SpatialLocalizerI_giveDistanceFromParametricCenter(const FloatArray &coords)
 {
     FloatArray center;
-    FloatArray lcoords;
-    lcoords.setValues(3, 0.333333, 0.333333, 0.333333);
+    FloatArray lcoords = {0.333333, 0.333333, 0.333333};
     this->interp.local2global( center, lcoords, FEIElementGeometryWrapper(this) );
     return center.distance(coords);
 }

@@ -1148,41 +1148,41 @@ Domain :: giveDefaultNodeDofIDArry()
     }
 
     if ( dType == _2dPlaneStressRotMode ) {
-        defaultNodeDofIDArry.setValues(3, D_u, D_v, R_w);
+        defaultNodeDofIDArry = {D_u, D_v, R_w};
     } else if ( dType == _2dPlaneStressMode ) {
-        defaultNodeDofIDArry.setValues(2, D_u, D_v);
+        defaultNodeDofIDArry = {D_u, D_v};
     } else if ( dType == _PlaneStrainMode ) {
-        defaultNodeDofIDArry.setValues(2, D_u, D_v);
+        defaultNodeDofIDArry = {D_u, D_v};
     } else if  ( dType == _3dMode ) {
-        defaultNodeDofIDArry.setValues(3, D_u, D_v, D_w);
+        defaultNodeDofIDArry = {D_u, D_v, D_w};
     } else if ( dType == _3dAxisymmMode ) {
-        defaultNodeDofIDArry.setValues(3, D_u, D_v, R_w);
+        defaultNodeDofIDArry = {D_u, D_v, R_w};
     } else if  ( dType == _2dMindlinPlateMode ) {
-        defaultNodeDofIDArry.setValues(3, D_w, R_u, R_v);
+        defaultNodeDofIDArry = {D_w, R_u, R_v};
     } else if ( dType == _3dShellMode ) {
-        defaultNodeDofIDArry.setValues(6, D_u, D_v, D_w, R_u, R_v, R_w);
+        defaultNodeDofIDArry = {D_u, D_v, D_w, R_u, R_v, R_w};
     } else if  ( dType == _2dTrussMode ) {
-        defaultNodeDofIDArry.setValues(2, D_u, D_w);
+        defaultNodeDofIDArry = {D_u, D_w};
     } else if  ( dType == _1dTrussMode ) {
-        defaultNodeDofIDArry.setValues(1, D_u);
+        defaultNodeDofIDArry = {D_u};
     } else if  ( dType == _2dBeamMode ) {
-        defaultNodeDofIDArry.setValues(3, D_u, D_w, R_v);
+        defaultNodeDofIDArry = {D_u, D_w, R_v};
     } else if  ( dType == _2dLatticeMode ) {
-        defaultNodeDofIDArry.setValues(3, D_u, D_v, R_w);
+        defaultNodeDofIDArry = {D_u, D_v, R_w};
     } else if  ( dType == _HeatTransferMode ) {
-        defaultNodeDofIDArry.setValues(1, T_f);
+        defaultNodeDofIDArry = {T_f};
     } else if  ( dType == _Mass1TransferMode ) {
-        defaultNodeDofIDArry.setValues(1, C_1);
+        defaultNodeDofIDArry = {C_1};
     } else if  ( dType == _HeatMass1Mode ) {
-        defaultNodeDofIDArry.setValues(2, T_f, C_1);
+        defaultNodeDofIDArry = {T_f, C_1};
     }  else if ( dType == _2dIncompressibleFlow ) {
-        defaultNodeDofIDArry.setValues(3, V_u, V_v, P_f);
+        defaultNodeDofIDArry = {V_u, V_v, P_f};
     }  else if ( dType == _3dIncompressibleFlow ) {
-        defaultNodeDofIDArry.setValues(4, V_u, V_v, V_w, P_f);
+        defaultNodeDofIDArry = {V_u, V_v, V_w, P_f};
     }  else if ( dType == _3dDirShellMode ) {
-        defaultNodeDofIDArry.setValues(7, D_u, D_v, D_w, W_u, W_v, W_w, Gamma);
+        defaultNodeDofIDArry = {D_u, D_v, D_w, W_u, W_v, W_w, Gamma};
     }  else if ( dType == _2dLatticeMassTransportMode ) {
-        defaultNodeDofIDArry.setValues(1, P_f);
+        defaultNodeDofIDArry = {P_f};
     } else {
         OOFEM_ERROR("unknown domainType (%s)", __domainTypeToString(dType));
     }
@@ -1454,8 +1454,7 @@ Domain :: createDofs()
         int c = 0;
         //printf("Dofs in node %d (of %d) = %d\n", i, this->giveNumberOfDofManagers(), node_dofs[i-1].size());
         dman->setNumberOfDofs( node_dofs [ i - 1 ].size() );
-        for ( std :: set< int > :: iterator it = node_dofs [ i - 1 ].begin(); it != node_dofs [ i - 1 ].end(); ++it ) {
-            DofIDItem id = ( DofIDItem ) * it;
+        for ( int id: node_dofs [ i - 1 ] ) {
             // Find bc and ic if there are any, otherwise zero.
             int bcid = dof_bc [ i - 1 ].find(id) != dof_bc [ i - 1 ].end() ? dof_bc [ i - 1 ] [ id ] : 0;
             int icid = dof_ic [ i - 1 ].find(id) != dof_ic [ i - 1 ].end() ? dof_ic [ i - 1 ] [ id ] : 0;
@@ -1487,7 +1486,7 @@ Domain :: createDofs()
             // Finally create the new DOF:
             //printf("Creating: node %d, id = %d, dofType = %d, bc = %d, ic = %d\n", i, id, dtype, bcid, icid);
             Dof *dof = classFactory.createDof(dtype, ++c, dman);
-            dof->setDofID(id);
+            dof->setDofID((DofIDItem)id);
             dof->setBcId(bcid); // Note: slave dofs and such will simple ignore this.
             dof->setIcId(icid);
             // Slave dofs obtain their weights post-initialization, simple slave dofs must have their master node specified.

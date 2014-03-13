@@ -115,7 +115,6 @@ FreemInterface :: smoothNodalDensities(Domain *d,  FloatArray &nodalDensities, T
     Element *jelem;
     Node *candNode;
     std :: list< int >queue;
-    std :: list< int > :: iterator pos;
 
 
     // loop over nodes
@@ -154,8 +153,9 @@ FreemInterface :: smoothNodalDensities(Domain *d,  FloatArray &nodalDensities, T
                         nodalDensities.at(neighbour) = max( 1.0 * dist, nodalDensities.at(candidate) );
                         // printf ("o");
                         // put candidate into queue if not yet added present
-                        for ( found = 0, pos = queue.begin(); pos != queue.end(); ++pos ) {
-                            if ( * pos == neighbour ) {
+                        found = 0;
+                        for ( int q: queue ) {
+                            if ( q == neighbour ) {
                                 found = 1;
                                 break;
                             }
@@ -171,8 +171,9 @@ FreemInterface :: smoothNodalDensities(Domain *d,  FloatArray &nodalDensities, T
                         nodalDensities.at(neighbour) = nodalDensities.at(candidate) + 2.2 * dist;
                         //printf ("g");
                         // put candidate into queue if not yet added present
-                        for ( found = 0, pos = queue.begin(); pos != queue.end(); ++pos ) {
-                            if ( * pos == neighbour ) {
+                        found = 0;
+                        for ( int q: queue ) {
+                            if ( q == neighbour ) {
                                 found = 1;
                                 break;
                             }

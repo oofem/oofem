@@ -835,6 +835,38 @@ The element features are summarized in Table~\ref{quad1mindlinsummary}.
 \end{elementsummary}
 
 
+\subsubsection{Sub-soil Elements}
+\subsubsection{quad1plateSubsoil Element} \label{quad1platesubsoil}
+This class implements an quadrilateral, bilinear, four-node plate subsoil element.
+Typically this element is combined with suitable plate element with quadrilateral geometry to model plate element on 
+(elastic) subsoill foundation, but it can be used alone. The element geometry should be define in xy plane.
+The element features are summarized in Table~\ref{quad1platesubsoilsummary}.
+
+\begin{elementsummary}{quad1plateSubsoil}{Quadrilateral, bilinear, four-node sub-soil plate element}{}{quad1platesubsoil element summary}{quad1platesubsoilsummary}
+%\elementParam{\param{NIP}: allows to set the number of integration points for integration of membrane terms.}
+\elementDescription{Unknowns}{One dof (w-displacement) is required in each node.}
+\elementDescription{Approximation}{Linear for transwersal displacement.}
+\elementDescription{Integration}{4 integration points.}
+\elementDescription{Loads}{Surface load support.}
+\elementDescription{Note}{Requires material model with 2dPlateSubSoil mode support.}
+\elementDescription{Reference}{\cite{BittnarSejnoha1996}}
+\end{elementsummary}
+
+\subsubsection{Tria1PlateSubSoil Element} \label{tria1platesubsoil}
+This class implements an quadrilateral, bilinear, four-node plate subsoil element.
+Typically this element is combined with suitable plate element with quadrilateral geometry to model plate element on 
+(elastic) subsoill foundation, but it can be used alone. The element geometry should be define in xy plane.
+The element features are summarized in Table~\ref{quad1platesubsoilsummary}.
+
+\begin{elementsummary}{tria1platesubsoil}{Tringular, three-node sub-soil plate element with linear interpolation}{}{tria1platesubsoil element summary}{tria1platesubsoilsummary}
+\elementDescription{Unknowns}{One dof (w-displacement) is required in each node.}
+\elementDescription{Approximation}{Linear for transwersal displacement.}
+\elementDescription{Integration}{1 integration points.}
+\elementDescription{Loads}{Surface load support.}
+\elementDescription{Note}{Requires material model with 2dPlateSubSoil mode support.}
+\elementDescription{Reference}{\cite{BittnarSejnoha1996}}
+\end{elementsummary}
+
 
 %-----------------------------------------------------------------------------------------------
 \clearpage
@@ -1117,6 +1149,33 @@ w-displacement) are required in each node, according to element mode (determined
 \elementDescription{Note}{Element requires material model with \_1dInterface support.}
 \end{elementsummary}
 
+\subsubsection{Interface2dlin element}
+Implementation of a two dimensional interface element with linear
+approximation of displacement field. Can be used to glue together two elements with linear displacement approximation along the shared edge. Note, that the nodes along the interface are doubled, each couple with identical coordinates. Nodes on the negative side are numbered first, followed by nodes on the positive part. Requires material model with \_2dInterface support.  The element features are summarized in Table~\ref{Interface2dlinsummary}.
+
+\begin{figure}[htb]
+ \centering
+ \begin{makeimage}
+ \input{interf2d_lin.tikz}
+ \end{makeimage}
+ \caption{Interface2dlin element with linear interpolation. Definition and node numbering convention}
+ \label{interf2d_quad_fig}
+\end{figure}
+
+\begin{elementsummary}{Interface2dlin}{2D  interface element with linear approximation}{\optField{axisymmode}{}}{Interface2dlin element summary}{Interface2dlinsummary}
+\elementParam{\param{axisymmode}: Flag controlling axisymmetric mode (integration over unit circumferential angle).}
+\elementDescription{Unknowns}{Two dofs (u-displacement, v-displacement) are required in each node.}
+\elementDescription{Approximation}{Linear approximation of displacements and geometry.}
+\elementDescription{Integration}{Full integration of all strain components using two point integration formula.}
+\elementDescription{Features}{-}
+\elementDescription{CS properties}{-}
+\elementDescription{Loads}{-}
+\elementDescription{Nlgeo}{0}
+\elementDescription{Status}{Reliable}
+\elementDescription{Note}{Element requires material model with \_2dInterface support.}
+\end{elementsummary}
+
+
 \subsubsection{Interface2dquad element}
 Implementation of a two dimensional interface element with quadratic
 approximation of displacement field. Can be used to glue together two elements with quadratic displacement approximation along the shared edge. Note, that the nodes along the interface are doubled, each couple with identical coordinates. Nodes on the negative side are numbered first, followed by nodes on the positive part. Requires material model with \_2dInterface support.  The element features are summarized in Table~\ref{Interface2dquadsummary}.
@@ -1130,8 +1189,8 @@ approximation of displacement field. Can be used to glue together two elements w
  \label{interf2d_quad_fig}
 \end{figure}
 
-\begin{elementsummary}{Interface2dquad}{2D  interface element with quadratic approximation}{-}{Interface2dquad element summary}{Interface2dquadsummary}
-%\elementParam{\param{refnode}: determines the reference node, which is used to specify a reference direction (the direction vector is obtained by subtracting the coordinates of the first node from the reference node).}
+\begin{elementsummary}{Interface2dquad}{2D  interface element with quadratic approximation}{\optField{axisymmode}{}}{Interface2dquad element summary}{Interface2dquadsummary}
+\elementParam{\param{axisymmode}: Flag controlling axisymmetric mode (integration over unit circumferential angle).}
 \elementDescription{Unknowns}{Two dofs (u-displacement, v-displacement) are required in each node.}
 \elementDescription{Approximation}{Quadratic approximation of displacements and geometry.}
 \elementDescription{Integration}{Full integration of all strain components using four point integration formula.}
@@ -1307,11 +1366,14 @@ The spring element has no mass associated, the mass can be added using LumpedMas
     1 & 2D spring element in xy plane,\\
     & requires D\_u and D\_v DOFs in each node \\
     & (orientation vector should be in xy plane)\\
-    2 & 2D torsional spring element in xz plane,\\
+    2 & 2D spring element in xz plane,\\
+    & requires D\_u and D\_w DOFs in each node \\
+    & (orientation vector should be in xz plane)\\
+    3 & 2D torsional spring element in xz plane,\\
     & requires R\_v DOFs in each node\\
-    3 & 3D spring element in space,\\
+    4 & 3D spring element in space,\\
     & requires D\_u, D\_v, and D\_w DOFs in each node\\
-    4 & 3D torsional spring in space,\\
+    5 & 3D torsional spring in space,\\
     & requires R\_u, R\_v, and R\_w DOFs in each node\\
     \hline
   \end{tabular}

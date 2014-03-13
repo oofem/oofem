@@ -122,8 +122,7 @@ void IntArray :: resizeWithValues(int n, int allocChunk)
 
 void IntArray :: resize(int n)
 {
-    this->values.resize(n);
-    std::fill(values.begin(), values.end(), 0);
+    this->values.assign(n, 0);
 }
 
 
@@ -300,6 +299,11 @@ void IntArray :: setValues(int n, ...)
     va_end(vl);
 }
 
+int IntArray :: findSorted(int _val)   const
+{
+    return std::binary_search (values.begin(), values.end(), _val);
+}
+
 
 int IntArray :: insertSorted(int val, int allocChunk)
 {
@@ -336,10 +340,9 @@ void IntArray :: eraseSorted(int value)
 
 int IntArray :: findCommonValuesSorted(const IntArray &iarray, IntArray &common, int allocChunk) const
 {
-    int i = 0, val;
+    int i = 0;
 
-    for ( int j = 1; j <= iarray.giveSize(); j++ ) {
-        val = iarray.at(j);
+    for ( int val: iarray ) {
 
         while ( i < this->giveSize() ) {
             if ( values [ i ] == val ) {

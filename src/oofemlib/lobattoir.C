@@ -335,100 +335,61 @@ LobattoIntegrationRule :: giveLineCoordsAndWeights(int nPoints, FloatArray &coor
 
     switch ( nPoints ) {
     case 1:
-
-        coords_xi.setValues(1, 0.0);
-        weights.setValues(1, 2.0);
-
+        coords_xi = {0.0};
+        weights = {2.0};
         break;
 
     case 2:
-
-        coords_xi.setValues(2,
-                            -1.0,
-                            1.0
-                            );
-
-        weights.setValues(2,
-                          1.0,
-                          1.0
-                          );
-
+        coords_xi = {-1.0, 1.0};
+        weights = {1.0, 1.0};
         break;
 
     case 3:
-
-        coords_xi.setValues(3,
-                            -1.0,
-                            0.0,
-                            1.0
-                            );
-
-        weights.setValues(3,
-                          0.333333333333333,
-                          1.333333333333333,
-                          0.333333333333333
-                          );
-
+        coords_xi = {-1.0, 0.0, 1.0};
+        weights = {0.333333333333333, 1.333333333333333, 0.333333333333333};
         break;
+
     case 4:
-
-        coords_xi.setValues(4,
-                            -1.0,
-                            -0.447213595499958,
-                            0.447213595499958,
-                            1.0
-                            );
-
-        weights.setValues(4,
-                          0.166666666666667,
-                          0.833333333333333,
-                          0.833333333333333,
-                          0.166666666666667
-                          );
+        coords_xi = {-1.0,
+                     -0.447213595499958,
+                      0.447213595499958,
+                      1.0};
+        weights = { 0.166666666666667,
+                    0.833333333333333,
+                    0.833333333333333,
+                    0.166666666666667};
         break;
 
     case 5:
-
-        coords_xi.setValues(5,
-                            -1.0,
-                            -0.654653670707977,
-                            0.0,
-                            0.654653670707977,
-                            1.0
-                            );
-
-        weights.setValues(5,
-                          0.1,
-                          0.544444444444444,
-                          0.711111111111111,
-                          0.544444444444444,
-                          0.1
-                          );
+        coords_xi = {-1.0,
+                     -0.654653670707977,
+                      0.0,
+                      0.654653670707977,
+                      1.0};
+        weights = { 0.1,
+                    0.544444444444444,
+                    0.711111111111111,
+                    0.544444444444444,
+                    0.1};
         break;
 
     case 6:
-
-        coords_xi.setValues(6,
-                            -1.0,
-                            -0.765055323929465,
-                            -0.285231516480645,
-                            0.285231516480645,
-                            0.765055323929465,
-                            1.0
-                            );
-
-        weights.setValues(6,
-                          0.066666666666667,
-                          0.378474956297847,
-                          0.554858377035486,
-                          0.554858377035486,
-                          0.378474956297847,
-                          0.066666666666667
-                          );
+        coords_xi = {-1.0,
+                     -0.765055323929465,
+                     -0.285231516480645,
+                      0.285231516480645,
+                      0.765055323929465,
+                      1.0};
+        weights = { 0.066666666666667,
+                    0.378474956297847,
+                    0.554858377035486,
+                    0.554858377035486,
+                    0.378474956297847,
+                    0.066666666666667};
         break;
 
     default:
-        OOFEM_SIMPLE_ERROR("LobattoIntegrationRule :: giveLineCoordsAndWeights - unsupported number of IPs (%d)", nPoints);
+        OOFEM_SIMPLE_ERROR("unsupported number of IPs (%d)", nPoints);
     }
 }
 } // end namespace oofem

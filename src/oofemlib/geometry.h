@@ -154,7 +154,7 @@ class OOFEM_EXPORT Line : public BasicGeometry
 public:
     Line() : BasicGeometry() { }
     virtual ~Line() { }
-    Line(FloatArray * pointA, FloatArray * pointB);
+    Line(FloatArray &pointA, FloatArray &pointB);
 
     virtual BasicGeometry *Clone() { return new Line(*this); }
 
@@ -214,7 +214,7 @@ protected:
 public:
     Circle() : BasicGeometry(), radius(0.0), mTangSignDist(1.0) { }
     virtual ~Circle() { }
-    Circle(FloatArray * center, double radius);
+    Circle(FloatArray &center, double radius);
 
     virtual BasicGeometry *Clone() { return new Circle(*this); }
 

@@ -69,11 +69,11 @@ void
 TransportElement :: giveElementDofIDMask(EquationID, IntArray &answer) const
 {
     if ( emode == HeatTransferEM ) {
-        answer.setValues(1, T_f);
+        answer = {T_f};
     } else if ( emode == HeatMass1TransferEM ) {
-        answer.setValues(2, T_f, C_1);
+        answer = {T_f, C_1};
     } else if ( emode == Mass1TransferEM ) {
-        answer.setValues(1, C_1);
+        answer = {C_1};
     } else {
         OOFEM_ERROR("Unknown ElementMode");
     }
@@ -85,11 +85,11 @@ TransportElement :: giveDofManDofIDMask(int inode, EquationID eid, IntArray &ans
 {
     if ( eid == EID_ConservationEquation ) {
         if ( emode == HeatTransferEM ) {
-            answer.setValues(1, T_f);
+            answer = {T_f};
         } else if ( emode == HeatMass1TransferEM ) {
-            answer.setValues(2, T_f, C_1);
+            answer = {T_f, C_1};
         } else if ( emode == Mass1TransferEM ) {
-            answer.setValues(1, C_1);
+            answer = {C_1};
         } else {
             OOFEM_ERROR("Unknown ElementMode");
         }

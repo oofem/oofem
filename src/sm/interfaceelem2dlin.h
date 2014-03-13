@@ -10,7 +10,7 @@
  *
  *             OOFEM : Object Oriented Finite Element Code
  *
- *               Copyright (C) 1993 - 2013   Borek Patzak
+ *               Copyright (C) 1993 - 2014   Borek Patzak
  *
  *
  *
@@ -32,37 +32,35 @@
  *  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  */
 
-#ifndef interfaceelem2dquad_h
-#define interfaceelem2dquad_h
+#ifndef interfaceelem2dlin_h
+#define interfaceelem2dlin_h
 
 #include "structuralelement.h"
 
-#define _IFT_InterfaceElem2dQuad_Name "interface2dquad"
-#define _IFT_InterfaceElem2dQuad_axisymmode "axisymmode"
+#define _IFT_InterfaceElem2dLin_Name "interface2dlin"
+#define _IFT_InterfaceElem2dLin_axisymmode "axisymmode"
 
 namespace oofem {
-class FEI2dLineQuad;
+class FEI2dLineLin;
 
 /**
  * This class implements a two dimensional interface element.
- * Even if geometry approx is quadratic, the element is assumed straight
- * If not straight, the rotation matrix depends on actual integration point
- * and stiffness and strain computations should be modified.
+ * The approximatuion of geometry and unknowns is linear.
  */
-class InterfaceElem2dQuad : public StructuralElement
+class InterfaceElem2dLin : public StructuralElement
 {
 protected:
-    static FEI2dLineQuad interp;
+    static FEI2dLineLin interp;
     /// Flag controlling axisymmetric mode (integration over unit circumferential angle)
     bool axisymmode;
 
 public:
-    InterfaceElem2dQuad(int n, Domain * d);
-    virtual ~InterfaceElem2dQuad() { }
+    InterfaceElem2dLin(int n, Domain * d);
+    virtual ~InterfaceElem2dLin() { }
 
     virtual FEInterpolation *giveInterpolation() const;
 
-    virtual int computeNumberOfDofs() { return 12; }
+    virtual int computeNumberOfDofs() { return 8; }
     virtual void giveDofManDofIDMask(int inode, EquationID ut, IntArray &answer) const;
 
     virtual double computeVolumeAround(GaussPoint *gp);
@@ -79,8 +77,8 @@ public:
 #endif
 
     // definition & identification
-    virtual const char *giveInputRecordName() const { return _IFT_InterfaceElem2dQuad_Name; }
-    virtual const char *giveClassName() const { return "InterfaceElem2dQuad"; }
+    virtual const char *giveInputRecordName() const { return _IFT_InterfaceElem2dLin_Name; }
+    virtual const char *giveClassName() const { return "InterfaceElem2dLin"; }
     virtual IRResultType initializeFrom(InputRecord *ir);
     virtual MaterialMode giveMaterialMode() { return _2dInterface; }
 
@@ -93,4 +91,4 @@ protected:
     virtual bool computeGtoLRotationMatrix(FloatMatrix &answer);
 };
 } // end namespace oofem
-#endif // interfaceelem2dquad_h
+#endif // interfaceelem2dlin_h

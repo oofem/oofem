@@ -348,7 +348,7 @@ L4Axisymm :: giveCharacteristicLenght(GaussPoint *gp, const FloatArray &normalTo
 void
 L4Axisymm :: giveDofManDofIDMask(int inode, EquationID, IntArray &answer) const
 {
-    answer.setValues(2, D_u, D_v);
+    answer = {D_u, D_v};
 }
 
 void

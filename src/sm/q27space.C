@@ -77,7 +77,7 @@ Q27Space :: initializeFrom(InputRecord *ir)
 void
 Q27Space :: giveDofManDofIDMask(int inode, EquationID ut, IntArray &answer) const
 {
-    answer.setValues(3, D_u, D_v, D_w);
+    answer = {D_u, D_v, D_w};
 }
 
 MaterialMode

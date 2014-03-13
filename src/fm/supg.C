@@ -140,7 +140,7 @@ SUPG :: initializeFrom(InputRecord *ir)
         // export velocity field
         FieldManager *fm = this->giveContext()->giveFieldManager();
         IntArray mask;
-        mask.setValues(3, V_u, V_v, V_w);
+        mask = {V_u, V_v, V_w};
 
 #ifdef  FIELDMANAGER_USE_SHARED_PTR
         std :: tr1 :: shared_ptr< Field > _velocityField( new MaskedPrimaryField ( FT_Velocity, this->VelocityPressureField, mask ) );

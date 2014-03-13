@@ -96,17 +96,17 @@ void Tet21Stokes :: giveDofManDofIDMask(int inode, EquationID ut, IntArray &answ
 
     if ( inode <= 4 ) {
         if ( ut == EID_MomentumBalance ) {
-            answer.setValues(3, V_u, V_v, V_w);
+            answer = {V_u, V_v, V_w};
         } else if ( ut == EID_ConservationEquation ) {
-            answer.setValues(1, P_f);
+            answer = {P_f};
         } else if ( ut == EID_MomentumBalance_ConservationEquation ) {
-            answer.setValues(4, V_u, V_v, V_w, P_f);
+            answer = {V_u, V_v, V_w, P_f};
         } else {
             OOFEM_ERROR("Unknown equation id encountered");
         }
     } else {
         if ( ut == EID_MomentumBalance || ut == EID_MomentumBalance_ConservationEquation ) {
-            answer.setValues(3, V_u, V_v, V_w);
+            answer = {V_u, V_v, V_w};
         } else if ( ut == EID_ConservationEquation ) {
             answer.clear();
         } else {
@@ -442,14 +442,13 @@ int Tet21Stokes :: EIPrimaryUnknownMI_computePrimaryUnknownVectorAt(ValueModeTyp
 
 void Tet21Stokes :: EIPrimaryUnknownMI_givePrimaryUnknownVectorDofID(IntArray &answer)
 {
-    answer.setValues(4, V_u, V_v, V_w, P_f);
+    answer = {V_u, V_v, V_w, P_f};
 }
 
 double Tet21Stokes :: SpatialLocalizerI_giveDistanceFromParametricCenter(const FloatArray &coords)
 {
     FloatArray center;
-    FloatArray lcoords;
-    lcoords.setValues(3, 0.3333333, 0.3333333, 0.3333333);
+    FloatArray lcoords = {0.3333333, 0.3333333, 0.3333333};
     this->computeGlobalCoordinates(center, lcoords);
     return center.distance(coords);
 }

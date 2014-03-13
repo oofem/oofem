@@ -46,9 +46,7 @@
 
 namespace oofem {
 class DataStream;
-#ifdef __PARALLEL_MODE
 class CommunicationBuffer;
-#endif
 
 /**
  * Class implementing an array of integers.
@@ -79,7 +77,7 @@ public:
     /// Copy constructor. Creates the array from another array.
     IntArray(const IntArray &src) : values(src.values) { }
     /// Move constructor. Creates the array from another array.
-    IntArray(IntArray &&src) : values(std::move(src.values)) {  printf("()Moving!\n"); }
+    IntArray(IntArray &&src) : values(std::move(src.values)) { }
     /// Initializer list constructor.
     inline IntArray(std :: initializer_list< int >list) : values(list) { }
     /// Destructor.

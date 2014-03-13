@@ -313,11 +313,10 @@ int CompCol :: buildInternalStructure(EngngModel *eModel, int di, EquationID ut,
     colptr_.resize(neq + 1);
     indx = 0;
 
-    std :: set< int > :: iterator pos;
     for ( j = 0; j < neq; j++ ) { // column loop
         colptr_(j) = indx;
-        for ( pos = columns [ j ].begin(); pos != columns [ j ].end(); ++pos ) { // row loop
-            rowind_(indx++) = * pos;
+        for ( int row: columns [  j ] ) { // row loop
+            rowind_(indx++) = row;
         }
     }
 

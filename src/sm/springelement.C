@@ -87,6 +87,12 @@ SpringElement :: computeGtoLRotationMatrix(FloatMatrix &answer)
         answer.at(1, 2) = this->dir.at(2);
         answer.at(2, 3) = this->dir.at(1);
         answer.at(2, 4) = this->dir.at(2);
+    } else if ( this->mode == SE_2D_SPRING_XZ ) {
+        answer.resize(2, 4);
+        answer.at(1, 1) = this->dir.at(1);
+        answer.at(1, 2) = this->dir.at(3);
+        answer.at(2, 3) = this->dir.at(1);
+        answer.at(2, 4) = this->dir.at(3);
     } else if ( ( this->mode == SE_3D_SPRING ) || ( this->mode == SE_3D_TORSIONALSPRING ) ) {
         answer.resize(2, 6);
         answer.at(1, 1) = this->dir.at(1);
@@ -104,15 +110,17 @@ void
 SpringElement :: giveDofManDofIDMask(int inode, EquationID, IntArray &answer) const
 {
     if ( this->mode == SE_1D_SPRING ) {
-        answer.setValues(1, D_u);
+        answer = {D_u};
     } else if ( this->mode == SE_2D_SPRING_XY ) {
-        answer.setValues(2, D_u, D_v);
+       answer = {D_u, D_v};
+    } else if ( this->mode == SE_2D_SPRING_XZ ) {
+       answer = {D_u, D_w};
     } else if ( this->mode == SE_2D_TORSIONALSPRING_XZ ) {
-        answer.setValues(1, R_v);
+        answer = {R_v};
     } else if ( this->mode == SE_3D_SPRING ) {
-        answer.setValues(3, D_u, D_v, D_w);
+        answer = {D_u, D_v, D_w};
     } else if ( this->mode == SE_3D_TORSIONALSPRING ) {
-        answer.setValues(3, R_u, R_v, R_w);
+        answer = {R_u, R_v, R_w};
     }
 }
 
@@ -130,7 +138,7 @@ SpringElement :: computeNumberOfGlobalDofs()
 {
     if ( ( this->mode == SE_1D_SPRING ) || ( this->mode == SE_2D_TORSIONALSPRING_XZ ) ) {
         return 2;
-    } else if ( this->mode == SE_2D_SPRING_XY ) {
+    } else if ( ( this->mode == SE_2D_SPRING_XY ) || ( this->mode == SE_2D_SPRING_XZ ) ) {
         return 4;
     } else if ( ( this->mode == SE_3D_SPRING ) || ( this->mode == SE_3D_TORSIONALSPRING ) ) {
         return 6;

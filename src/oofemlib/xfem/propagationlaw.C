@@ -93,10 +93,9 @@ void PLCrackPrescribedDir :: propagateInterfaces(Domain &iDomain, EnrichmentDoma
     ioEnrDom.giveTipInfos(tipInfo);
 
     int tipIndex = 1;
-    FloatArray dir;
     double angleRad = mAngle * M_PI / 180.0;
-    dir.setValues( 2, cos(angleRad), sin(angleRad) );
-    dir.normalize();
+    FloatArray dir = {cos(angleRad), sin(angleRad)};
+    dir.normalize(); ///@todo Why? /Mikael
 
 
     std :: vector< TipPropagation >tipPropagations;
@@ -231,8 +230,8 @@ void PLHoopStressCirc :: propagateInterfaces(Domain &iDomain, EnrichmentDomain &
 
 
                             // Compute global coordinates of Gauss point
-                            FloatArray globalCoord;
-                            globalCoord.setValues(2, 0.0, 0.0);
+                            FloatArray globalCoord(2);
+                            globalCoord.zero();
 
                             for ( int i = 1; i <= gpEl->giveNumberOfDofManagers(); i++ ) {
                                 DofManager *dMan = gpEl->giveDofManager(i);

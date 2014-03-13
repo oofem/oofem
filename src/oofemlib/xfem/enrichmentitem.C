@@ -74,18 +74,16 @@ EnrichmentItem :: EnrichmentItem(int n, XfemManager *xMan, Domain *aDomain) : FE
     mpPropagationLaw(NULL),
     mPropLawIndex(0),
     mInheritBoundaryConditions(false),
+    startOfDofIdPool(-1),
+    endOfDofIdPool(-1),
+    mpEnrichesDofsWithIdArray(),
     mLevelSetsNeedUpdate(true),
     mLevelSetTol2(1.0e-12)
 {
-    this->startOfDofIdPool = -1;
-    this->endOfDofIdPool = -1;
-    this->mpEnrichesDofsWithIdArray = new IntArray;
 }
 
 EnrichmentItem :: ~EnrichmentItem()
 {
-    delete this->mpEnrichesDofsWithIdArray;
-
     if ( mpEnrichmentDomain != NULL ) {
         delete mpEnrichmentDomain;
         mpEnrichmentDomain = NULL;
@@ -524,8 +522,8 @@ void EnrichmentItem :: updateNodeEnrMarker(XfemManager &ixFemMan, const Enrichme
         double minPhi = std :: numeric_limits< double > :: max();
         double maxPhi = std :: numeric_limits< double > :: min();
 
-        FloatArray elCenter;
-        elCenter.setValues(2, 0.0, 0.0);
+        FloatArray elCenter(2);
+        elCenter.zero();
 
         for ( int elNodeInd = 1; elNodeInd <= nElNodes; elNodeInd++ ) {
             int nGlob = el->giveNode(elNodeInd)->giveGlobalNumber();
@@ -1148,7 +1146,7 @@ Inclusion :: Inclusion(int n, XfemManager *xm, Domain *aDomain) :
     EnrichmentItem(n, xm, aDomain),
     mpCrossSection(NULL)
 {
-    mpEnrichesDofsWithIdArray->setValues(3, D_u, D_v, D_w);
+    mpEnrichesDofsWithIdArray = {D_u, D_v, D_w};
 }
 
 Inclusion :: ~Inclusion()
@@ -1235,7 +1233,7 @@ Delamination :: updateGeometry(FailureCriteriaStatus *fc, TimeStep *tStep)
 
 Delamination :: Delamination(int n, XfemManager *xm, Domain *aDomain) : EnrichmentItem(n, xm, aDomain)
 {
-    mpEnrichesDofsWithIdArray->setValues(6, D_u, D_v, D_w, W_u, W_v, W_w);
+    mpEnrichesDofsWithIdArray = {D_u, D_v, D_w, W_u, W_v, W_w};
     this->interfaceNum = -1;
     this->crossSectionNum = -1;
     this->matNum = 0;

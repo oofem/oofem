@@ -106,15 +106,15 @@ GJacobi :: solve(FloatMatrix *a, FloatMatrix *b, FloatArray *eigv, FloatMatrix *
     //
     // Create temporary arrays
     //
-    FloatArray *d = new FloatArray(n);
+    FloatArray d(n);
     //
     // Initialize EigenValue and EigenVector Matrices
     //
     for ( i = 1; i <= n; i++ ) {
         //      if((a->at(i,i) <= 0. ) && (b->at(i,i) <= 0.))
         //        OOFEM_ERROR("Matrices are not positive definite");
-        d->at(i) = a->at(i, i) / b->at(i, i);
-        eigv->at(i) = d->at(i);
+        d.at(i) = a->at(i, i) / b->at(i, i);
+        eigv->at(i) = d.at(i);
     }
 
     for ( i = 1; i <= n; i++ ) {
@@ -276,8 +276,8 @@ GJacobi :: solve(FloatMatrix *a, FloatMatrix *b, FloatArray *eigv, FloatMatrix *
         // check for convergence
         //
         for ( i = 1; i <= n; i++ ) {       // label 230
-            tol = rtol * d->at(i);
-            dif = ( eigv->at(i) - d->at(i) );
+            tol = rtol * d.at(i);
+            dif = ( eigv->at(i) - d.at(i) );
             if ( fabs(dif) > tol ) {
                 goto label280;
             }
@@ -310,7 +310,7 @@ GJacobi :: solve(FloatMatrix *a, FloatMatrix *b, FloatArray *eigv, FloatMatrix *
         //
 label280:
         for ( i = 1; i <= n; i++ ) {
-            d->at(i) = eigv->at(i);
+            d.at(i) = eigv->at(i);
         }
     } while ( nsweep < nsmax );
 
@@ -330,7 +330,6 @@ label280:
     }                                  // label 270
 
     solved = 1;
-    delete d;
     return NM_Success;
 }
 } // end namespace oofem
