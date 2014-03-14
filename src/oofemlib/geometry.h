@@ -153,7 +153,7 @@ class OOFEM_EXPORT Line : public BasicGeometry
 public:
     Line() : BasicGeometry() { }
     virtual ~Line() { }
-    Line(FloatArray * pointA, FloatArray * pointB);
+    Line(const FloatArray &iPointA, const FloatArray &iPointB);
 
     virtual BasicGeometry *Clone() { return new Line(*this); }
 
@@ -175,6 +175,8 @@ public:
     bool isPointInside(FloatArray *point);
     virtual bool intersects(Element *element);
     virtual bool isOutside(BasicGeometry *bg);
+
+    double giveLength() const {return mVertices[0].distance( mVertices[1] );}
 };
 
 class OOFEM_EXPORT Triangle : public BasicGeometry

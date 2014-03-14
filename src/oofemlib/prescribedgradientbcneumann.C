@@ -11,8 +11,11 @@
 #include "masterdof.h"
 #include "element.h"
 #include "feinterpol.h"
+#include "feinterpol2d.h"
 #include "gausspoint.h"
 #include "sparsemtrx.h"
+#include "xfem/xfemelementinterface.h"
+#include "xfem/integrationrules/discsegintegrationrule.h"
 
 #include <cmath>
 
@@ -115,8 +118,13 @@ void PrescribedGradientBCNeumann::assembleVector(FloatArray &answer, TimeStep *t
 
             // Fetch the element information;
             e->giveInterpolation()->boundaryGiveNodes(bNodes, boundary);
-            e->giveBoundaryLocationArray(loc, bNodes, eid, s, & masterDofIDs);
-            e->computeBoundaryVectorOf(bNodes, eid, mode, tStep, e_u);
+//            e->giveBoundaryLocationArray(loc, bNodes, eid, s, & masterDofIDs);
+
+            IntArray elNodes = e->giveDofManArray();
+            e->giveBoundaryLocationArray(loc, elNodes, eid, s, & masterDofIDs);
+
+//            e->computeBoundaryVectorOf(bNodes, eid, mode, tStep, e_u);
+            e->computeBoundaryVectorOf(elNodes, eid, mode, tStep, e_u);
 
             this->integrateTangent(Ke, e, boundary);
 
@@ -169,8 +177,13 @@ void PrescribedGradientBCNeumann::assemble(SparseMtrx *answer, TimeStep *tStep, 
 
             // Fetch the element information;
             e->giveInterpolation()->boundaryGiveNodes(bNodes, boundary);
-            e->giveBoundaryLocationArray(loc_r, bNodes, eid, r_s);
-            e->giveBoundaryLocationArray(loc_c, bNodes, eid, c_s);
+//            e->giveBoundaryLocationArray(loc_r, bNodes, eid, r_s);
+//            e->giveBoundaryLocationArray(loc_c, bNodes, eid, c_s);
+
+            IntArray elNodes = e->giveDofManArray();
+            e->giveBoundaryLocationArray(loc_r, elNodes, eid, r_s);
+            e->giveBoundaryLocationArray(loc_c, elNodes, eid, c_s);
+
             this->integrateTangent(Ke, e, boundary);
             Ke.negated();
             KeT.beTranspositionOf(Ke);
@@ -212,8 +225,12 @@ void PrescribedGradientBCNeumann::giveLocationArrays(std :: vector< IntArray > &
         int boundary = boundaries.at(pos * 2);
 
         e->giveInterpolation()->boundaryGiveNodes(bNodes, boundary);
-        e->giveBoundaryLocationArray(loc_r, bNodes, dofids, r_s);
-        e->giveBoundaryLocationArray(loc_c, bNodes, dofids, c_s);
+//        e->giveBoundaryLocationArray(loc_r, bNodes, dofids, r_s);
+//        e->giveBoundaryLocationArray(loc_c, bNodes, dofids, c_s);
+
+        IntArray elNodes = e->giveDofManArray();
+        e->giveBoundaryLocationArray(loc_r, elNodes, dofids, r_s);
+        e->giveBoundaryLocationArray(loc_c, elNodes, dofids, c_s);
 
         // For most uses, loc_r == loc_c, and sigma_loc_r == sigma_loc_c.
         rows [ i ] = loc_r;
@@ -232,13 +249,40 @@ void PrescribedGradientBCNeumann::integrateTangent(FloatMatrix &oTangent, Elemen
     FloatMatrix nMatrix, E_n;
     FloatMatrix contrib;
 
+    Domain *domain = e->giveDomain();
+    XfemElementInterface *xfemElInt = dynamic_cast<XfemElementInterface*> (e);
+
     FEInterpolation *interp = e->giveInterpolation(); // Geometry interpolation
 
     int nsd = e->giveDomain()->giveNumberOfSpatialDimensions();
 
     // Interpolation order
     int order = interp->giveInterpolationOrder();
-    IntegrationRule *ir = interp->giveBoundaryIntegrationRule(order, iBndIndex);
+    IntegrationRule *ir = NULL;
+
+    IntArray edgeNodes;
+    FEInterpolation2d *interp2d = dynamic_cast<FEInterpolation2d*> (interp);
+    if(interp2d == NULL) {
+    	OOFEM_ERROR("In PrescribedGradientBCNeumann::integrateTangent: failed to cast to FEInterpolation2d.\n")
+    }
+    interp2d->computeLocalEdgeMapping(edgeNodes, iBndIndex);
+
+    const FloatArray &xS = *(e->giveDofManager(edgeNodes.at(1))->giveCoordinates());
+    const FloatArray &xE = *(e->giveDofManager(edgeNodes.at(edgeNodes.giveSize()))->giveCoordinates());
+
+    if(xfemElInt != NULL && domain->hasXfemManager() ) {
+
+    	std::vector<Line> segments;
+    	xfemElInt->partitionEdgeSegment( iBndIndex, segments );
+
+        MaterialMode matMode = e->giveMaterialMode();
+    	ir = new DiscontinuousSegmentIntegrationRule(1, e, segments, xS, xE);
+    	int numPointsPerSeg = 1;
+    	ir->SetUpPointsOnLine(numPointsPerSeg, matMode);
+    }
+    else {
+    	ir = interp->giveBoundaryIntegrationRule(order, iBndIndex);
+    }
 
     oTangent.clear();
 
@@ -250,9 +294,38 @@ void PrescribedGradientBCNeumann::integrateTangent(FloatMatrix &oTangent, Elemen
         // Evaluate the normal;
         double detJ = interp->boundaryEvalNormal(normal, iBndIndex, lcoords, cellgeo);
 
-        // Evaluate the velocity/displacement coefficients
         interp->boundaryEvalN(n, iBndIndex, lcoords, cellgeo);
-        nMatrix.beNMatrixOf(n, nsd);
+        // If cracks cross the edge, special treatment is necessary.
+        // Exploit the XfemElementInterface to minimize duplication of code.
+        if(xfemElInt != NULL && domain->hasXfemManager()) {
+            // Compute global coordinates of Gauss point
+            FloatArray globalCoord;
+            globalCoord.setValues(2, 0.0, 0.0);
+
+            for(int j = 1; j <= n.giveSize(); j++) {
+            	globalCoord.at(1) += n.at(j)*(e->giveDofManager(edgeNodes.at(j))->giveCoordinate(1));
+            	globalCoord.at(2) += n.at(j)*(e->giveDofManager(edgeNodes.at(j))->giveCoordinate(2));
+            }
+
+        	// Compute local coordinates on the element
+            FloatArray locCoord;
+            e->computeLocalCoordinates(locCoord, globalCoord);
+
+            std::vector<int> edgeNodesVec;
+            for(int j = 1; j <= edgeNodes.giveSize(); j++) {
+            	edgeNodesVec.push_back(edgeNodes.at(j));
+            }
+
+//            xfemElInt->XfemElementInterface_createEnrNmatrixAt(nMatrix, locCoord, *e, edgeNodesVec);
+            xfemElInt->XfemElementInterface_createEnrNmatrixAt(nMatrix, locCoord, *e);
+
+            FloatMatrix NmatrixAlt;
+            NmatrixAlt.beNMatrixOf(n, nsd);
+        }
+        else {
+            // Evaluate the velocity/displacement coefficients
+            nMatrix.beNMatrixOf(n, nsd);
+        }
 
         if ( nsd == 3 ) {
         	OOFEM_ERROR("PrescribedGradientBCNeumann::integrateTangent() not implemented for nsd == 3.\n")

@@ -72,12 +72,10 @@ bool Line :: intersects(Element *element)
     return ( ip > 0 );
 }
 
-Line :: Line(FloatArray *pointA, FloatArray *pointB) : BasicGeometry()
+Line :: Line(const FloatArray &iPointA, const FloatArray &iPointB) : BasicGeometry()
 {
-    mVertices.push_back(* pointA);
-    delete pointA;
-    mVertices.push_back(* pointB);
-    delete pointB;
+    mVertices.push_back(iPointA);
+    mVertices.push_back(iPointB);
 }
 
 double Line :: computeDistanceTo(const FloatArray *point)
@@ -558,12 +556,12 @@ void Circle :: computeIntersectionPoints(Element *element, std :: vector< FloatA
     if ( intersects(element) ) {
         for ( int i = 1; i <= element->giveNumberOfBoundarySides(); i++ ) {
             std :: vector< FloatArray >oneLineIntersects;
-            FloatArray *a = new FloatArray( * ( element->giveDofManager ( i )->giveCoordinates() ) );
-            FloatArray *b = NULL;
+            FloatArray a = ( * ( element->giveDofManager ( i )->giveCoordinates() ) );
+            FloatArray b;
             if ( i != element->giveNumberOfBoundarySides() ) {
-                b = new FloatArray( * ( element->giveDofManager ( i + 1 )->giveCoordinates() ) );
+                b = ( * ( element->giveDofManager ( i + 1 )->giveCoordinates() ) );
             } else {
-                b = new FloatArray( * ( element->giveDofManager ( 1 )->giveCoordinates() ) );
+                b = ( * ( element->giveDofManager ( 1 )->giveCoordinates() ) );
             }
 
             Line l(a, b);

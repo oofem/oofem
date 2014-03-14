@@ -264,6 +264,19 @@ void XfemElementInterface :: ComputeBOrBHMatrix(FloatMatrix &oAnswer, GaussPoint
 
 void XfemElementInterface :: XfemElementInterface_createEnrNmatrixAt(FloatMatrix &oAnswer, const FloatArray &iLocCoord, Element &iEl)
 {
+	std::vector<int> elNodes;
+
+	int numElNodes = iEl.giveNumberOfDofManagers();
+
+	for(int i = 0; i < numElNodes; i++) {
+		elNodes.push_back(i+1);
+	}
+
+	XfemElementInterface_createEnrNmatrixAt(oAnswer, iLocCoord, iEl, elNodes);
+}
+
+void XfemElementInterface :: XfemElementInterface_createEnrNmatrixAt(FloatMatrix &oAnswer, const FloatArray &iLocCoord, Element &iEl, const std::vector<int> &iLocNodeInd)
+{
     const int dim = 2;
     const int nDofMan = iEl.giveNumberOfDofManagers();
 
@@ -288,14 +301,16 @@ void XfemElementInterface :: XfemElementInterface_createEnrNmatrixAt(FloatMatrix
     XfemManager *xMan = iEl.giveDomain()->giveXfemManager();
 
 
-    std :: vector< FloatMatrix > Bd(nDofMan);  // One Bd per node
+//    std :: vector< FloatMatrix > Bd(nDofMan);  // One Bd per node
 
-    int counter = nDofMan * dim;
+    int counter = iLocNodeInd.size() * dim;
 
-    std :: vector< std :: vector< double > > Nd(nDofMan);
+    std :: vector< std :: vector< double > > Nd(iLocNodeInd.size());
 
-    for ( int j = 1; j <= nDofMan; j++ ) {
-        DofManager *dMan = iEl.giveDofManager(j);
+//    for ( int j = 1; j <= nDofMan; j++ ) {
+    for ( int j = 1; j <= iLocNodeInd.size(); j++ ) {
+//        DofManager *dMan = iEl.giveDofManager(j);
+        DofManager *dMan = iEl.giveDofManager( iLocNodeInd[j-1] );
 
         // Compute the total number of enrichments for node j
         int numEnrNode = 0;
@@ -348,9 +363,11 @@ void XfemElementInterface :: XfemElementInterface_createEnrNmatrixAt(FloatMatrix
         }
     }
 
-    int numN = nDofMan;
+//    int numN = nDofMan;
+    int numN = iLocNodeInd.size();
 
-    for ( int j = 1; j <= nDofMan; j++ ) {
+//    for ( int j = 1; j <= nDofMan; j++ ) {
+    for ( int j = 1; j <= iLocNodeInd.size(); j++ ) {
         numN += Nd [ j - 1 ].size();
     }
 
@@ -359,8 +376,9 @@ void XfemElementInterface :: XfemElementInterface_createEnrNmatrixAt(FloatMatrix
     NTot.zero();
     int column = 1;
 
-    for ( int i = 1; i <= nDofMan; i++ ) {
-        NTot.at(column) = Nc.at(i);
+//    for ( int i = 1; i <= nDofMan; i++ ) {
+    for ( int i = 1; i <= iLocNodeInd.size(); i++ ) {
+        NTot.at(column) = Nc.at( iLocNodeInd[i-1]);
         column++;
 
         const std :: vector< double > &NdNode = Nd [ i - 1 ];
@@ -528,9 +546,9 @@ bool XfemElementInterface :: XfemElementInterface_updateIntegrationRule()
                             std :: vector< FloatArray >crackPolygon;
                             crack->giveSubPolygon(crackPolygon, startXi, endXi);
 
-                            size_t numSeg = crackPolygon.size() - 1;
+                            int numSeg = crackPolygon.size() - 1;
 
-                            for ( size_t segIndex = 0; segIndex < numSeg; segIndex++ ) {
+                            for ( int segIndex = 0; segIndex < numSeg; segIndex++ ) {
                                 int czRuleNum = 1;
                                 mpCZIntegrationRules.push_back( new GaussIntegrationRule(czRuleNum, element) );
                                 size_t newRuleInd = mpCZIntegrationRules.size() - 1;
@@ -956,6 +974,111 @@ void XfemElementInterface :: putPointsInCorrectPartition(std :: vector< std :: v
         }
     }
 }
+
+void XfemElementInterface :: partitionEdgeSegment(int iBndIndex, std::vector<Line> &oSegments)
+{
+	const double levelSetTol2 = 1.0e-12;
+
+    XfemManager *xMan = this->element->giveDomain()->giveXfemManager();
+
+    FEInterpolation *interp = element->giveInterpolation(); // Geometry interpolation
+    IntArray edgeNodes;
+    FEInterpolation2d *interp2d = dynamic_cast<FEInterpolation2d*> (interp);
+    if(interp2d == NULL) {
+    	OOFEM_ERROR("In XfemElementInterface :: partitionEdgeSegment: failed to cast to FEInterpolation2d.\n")
+    }
+    interp2d->computeLocalEdgeMapping(edgeNodes, iBndIndex);
+
+	// Fetch start and end points.
+    const FloatArray &xS = *( element->giveDofManager(edgeNodes.at(1))->giveCoordinates() );
+    const FloatArray &xE = *( element->giveDofManager(edgeNodes.at(2))->giveCoordinates() );
+
+    // The point of departure is the original edge segment.
+    // This segment will be subdivided as many times as necessary.
+    Line seg1(xS, xE);
+//    oSegments.clear();
+    oSegments.push_back(seg1);
+
+
+    // Loop over enrichment items
+    int numEI = xMan->giveNumberOfEnrichmentItems();
+    for ( int eiIndex = 1; eiIndex <= numEI; eiIndex++ ) {
+
+    	EnrichmentItem *ei = xMan->giveEnrichmentItem(eiIndex);
+
+        std::vector<Line> newSegments;
+
+    	// Loop over segments
+    	size_t numSeg = oSegments.size();
+    	for(size_t segInd = 0; segInd < numSeg; segInd++) {
+
+    		// Check if the segment is cut by the current enrichment item
+
+    		const FloatArray &seg_xS = oSegments[segInd].giveVertex(1);
+    		const FloatArray &seg_xE = oSegments[segInd].giveVertex(2);
+
+            // Local coordinates of vertices
+            FloatArray xiS;
+            element->computeLocalCoordinates(xiS, seg_xS);
+            FloatArray xiE;
+            element->computeLocalCoordinates(xiE, seg_xE);
+
+            const IntArray &elNodes = element->giveDofManArray();
+            FloatArray Ns, Ne;
+            interp->evalN( Ns, xiS, FEIElementGeometryWrapper(element) );
+            interp->evalN( Ne, xiE, FEIElementGeometryWrapper(element) );
+
+            double phiS         = 0.0, phiE     = 0.0;
+            double gammaS       = 0.0, gammaE   = 0.0;
+
+            for ( int i = 1; i <= Ns.giveSize(); i++ ) {
+                double phiNode = 0.0;
+                ei->evalLevelSetNormalInNode(phiNode, elNodes [ i - 1 ]);
+
+                double gammaNode = 0.0;
+                ei->evalLevelSetTangInNode(gammaNode, elNodes [ i - 1 ]);
+
+                phiS += Ns.at(i) * phiNode;
+                gammaS += Ns.at(i) * gammaNode;
+
+                phiE += Ne.at(i) * phiNode;
+                gammaE += Ne.at(i) * gammaNode;
+            }
+
+            if ( phiS * phiE < levelSetTol2 ) {
+                double xi = EnrichmentItem::calcXiZeroLevel(phiS, phiE);
+                double gamma = 0.5 * ( 1.0 - xi ) * gammaS + 0.5 * ( 1.0 + xi ) * gammaE;
+
+                // If we are inside in tangential direction
+                if ( gamma > 0.0 ) {
+                	// If so, subdivide it ...
+
+                	// Compute global coordinates of the intersection point
+                    int nDim = std::min(seg_xS.giveSize(), seg_xE.giveSize());
+                    FloatArray p;
+                    p.resize(nDim);
+
+                    for ( int i = 1; i <= nDim; i++ ) {
+                        ( p.at(i) ) = 0.5 * ( 1.0 - xi ) * ( ( seg_xS.at(i) ) ) + 0.5 * ( 1.0 + xi ) * ( ( seg_xE.at(i) ) );
+                    }
+
+                    Line segA(seg_xS, p);
+                    newSegments.push_back(segA);
+                    Line segB(p, seg_xE);
+                    newSegments.push_back(segB);
+                }
+            }
+            else {
+            	// ... else keep the segment.
+            	newSegments.push_back(oSegments[segInd]);
+            }
+    	}
+
+    	oSegments = newSegments;
+    }
+
+}
+
 
 void XfemElementInterface :: XfemElementInterface_computeConstitutiveMatrixAt(FloatMatrix &answer, MatResponseMode rMode, GaussPoint *gp, TimeStep *tStep)
 {
