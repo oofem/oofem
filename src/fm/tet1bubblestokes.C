@@ -159,8 +159,7 @@ void Tet1BubbleStokes :: computeInternalForcesVector(FloatArray &answer, TimeSte
 
     FloatArray momentum, conservation;
 
-    for ( int i = 0; i < iRule->giveNumberOfIntegrationPoints(); i++ ) {
-        GaussPoint *gp = iRule->getIntegrationPoint(i);
+    for ( GaussPoint *gp: *iRule ) {
         FloatArray *lcoords = gp->giveCoordinates();
 
         double detJ = fabs( this->interp.evaldNdx( dN, * lcoords, FEIElementGeometryWrapper(this) ) );
@@ -238,23 +237,21 @@ void Tet1BubbleStokes :: computeLoadVector(FloatArray &answer, Load *load, CharT
 
     FluidDynamicMaterial *mat = static_cast< FluidCrossSection * >( this->giveCrossSection() )->giveFluidMaterial();
     IntegrationRule *iRule = this->integrationRulesArray [ 0 ];
-    GaussPoint *gp;
-    FloatArray N, gVector, *lcoords, temparray(15);
+    FloatArray N, gVector, temparray(15);
     double dV, detJ, rho;
 
     // This is assumed to be the dead weight (thus multiplied by rho)
     load->computeComponentArrayAt(gVector, tStep, VM_Total);
     temparray.zero();
     if ( gVector.giveSize() ) {
-        for ( int k = 0; k < iRule->giveNumberOfIntegrationPoints(); k++ ) {
-            gp = iRule->getIntegrationPoint(k);
-            lcoords = gp->giveCoordinates();
+        for ( GaussPoint *gp: *iRule ) {
+            const FloatArray &lcoords = * gp->giveCoordinates();
 
             rho = mat->give('d', gp);
-            detJ = fabs( this->interp.giveTransformationJacobian( * lcoords, FEIElementGeometryWrapper(this) ) );
+            detJ = fabs( this->interp.giveTransformationJacobian( lcoords, FEIElementGeometryWrapper(this) ) );
             dV = detJ * gp->giveWeight() * rho;
 
-            this->interp.evalN( N, * lcoords, FEIElementGeometryWrapper(this) );
+            this->interp.evalN( N, lcoords, FEIElementGeometryWrapper(this) );
             for ( int j = 0; j < N.giveSize(); j++ ) {
                 temparray(3 * j + 0) += N(j) * rho * gVector(0) * dV;
                 temparray(3 * j + 1) += N(j) * rho * gVector(1) * dV;
@@ -286,26 +283,24 @@ void Tet1BubbleStokes :: computeBoundaryLoadVector(FloatArray &answer, BoundaryL
         int numberOfIPs = ( int ) ceil( ( boundaryLoad->giveApproxOrder() + 2. ) / 2. );
 
         GaussIntegrationRule iRule(1, this, 1, 1);
-        GaussPoint *gp;
         FloatArray N, t, f(9);
         IntArray edge_mapping;
 
         f.zero();
         iRule.SetUpPointsOnTriangle(numberOfIPs, _Unknown);
 
-        for ( int i = 0; i < iRule.giveNumberOfIntegrationPoints(); i++ ) {
-            gp = iRule.getIntegrationPoint(i);
-            FloatArray *lcoords = gp->giveCoordinates();
+        for ( GaussPoint *gp: iRule ) {
+            FloatArray &lcoords = * gp->giveCoordinates();
 
-            this->interp.surfaceEvalN( N, iSurf, * lcoords, FEIElementGeometryWrapper(this) );
-            double detJ = fabs( this->interp.surfaceGiveTransformationJacobian( iSurf, * lcoords, FEIElementGeometryWrapper(this) ) );
+            this->interp.surfaceEvalN( N, iSurf, lcoords, FEIElementGeometryWrapper(this) );
+            double detJ = fabs( this->interp.surfaceGiveTransformationJacobian( iSurf, lcoords, FEIElementGeometryWrapper(this) ) );
             double dA = gp->giveWeight() * detJ;
 
             if ( boundaryLoad->giveFormulationType() == Load :: FT_Entity ) { // Edge load in xi-eta system
-                boundaryLoad->computeValueAt(t, tStep, * lcoords, VM_Total);
+                boundaryLoad->computeValueAt(t, tStep, lcoords, VM_Total);
             } else { // Edge load in x-y system
                 FloatArray gcoords;
-                this->interp.boundaryLocal2Global( gcoords, iSurf, * lcoords, FEIElementGeometryWrapper(this) );
+                this->interp.boundaryLocal2Global( gcoords, iSurf, lcoords, FEIElementGeometryWrapper(this) );
                 boundaryLoad->computeValueAt(t, tStep, gcoords, VM_Total);
             }
 
@@ -316,7 +311,7 @@ void Tet1BubbleStokes :: computeBoundaryLoadVector(FloatArray &answer, BoundaryL
                 f(3 * j + 2) += N(j) * t(2) * dA;
             }
 
-            this->interp.surfaceEvalNormal( N, iSurf, * lcoords, FEIElementGeometryWrapper(this) );
+            this->interp.surfaceEvalNormal( N, iSurf, lcoords, FEIElementGeometryWrapper(this) );
         }
 
         answer.resize(19);
@@ -332,23 +327,21 @@ void Tet1BubbleStokes :: computeStiffnessMatrix(FloatMatrix &answer, TimeStep *t
     // Note: Working with the components; [K, G+Dp; G^T+Dv^T, C] . [v,p]
     FluidDynamicMaterial *mat = static_cast< FluidCrossSection * >( this->giveCrossSection() )->giveFluidMaterial();
     IntegrationRule *iRule = this->integrationRulesArray [ 0 ];
-    GaussPoint *gp;
     FloatMatrix B(6, 15), EdB, K(15, 15), G, Dp, DvT, C, Ed, dN;
-    FloatArray *lcoords, dNv(15), N, Ep, Cd, tmpA, tmpB;
+    FloatArray dNv(15), N, Ep, Cd, tmpA, tmpB;
     double Cp;
 
     K.zero();
     G.zero();
     B.zero();
 
-    for ( int i = 0; i < iRule->giveNumberOfIntegrationPoints(); i++ ) {
+    for ( GaussPoint *gp: *iRule ) {
         // Compute Gauss point and determinant at current element
-        gp = iRule->getIntegrationPoint(i);
-        lcoords = gp->giveCoordinates();
+        const FloatArray &lcoords = * gp->giveCoordinates();
 
-        double detJ = fabs( this->interp.evaldNdx( dN, * lcoords, FEIElementGeometryWrapper(this) ) );
+        double detJ = fabs( this->interp.evaldNdx( dN, lcoords, FEIElementGeometryWrapper(this) ) );
         double dV = detJ * gp->giveWeight();
-        this->interp.evalN( N, * lcoords, FEIElementGeometryWrapper(this) );
+        this->interp.evalN( N, lcoords, FEIElementGeometryWrapper(this) );
 
         for ( int j = 0, k = 0; j < 4; j++, k += 3 ) {
             dNv(k + 0) = B(0, k + 0) = B(5, k + 1) = B(4, k + 2) = dN(j, 0);

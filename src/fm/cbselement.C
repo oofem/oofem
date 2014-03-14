@@ -182,14 +182,13 @@ CBSElement :: checkConsistency()
 void
 CBSElement :: updateInternalState(TimeStep *tStep)
 {
-    IntegrationRule *iRule;
     FloatArray stress;
 
     // force updating strains & stresses
     for ( int i = 0; i < numberOfIntegrationRules; i++ ) {
-        iRule = integrationRulesArray [ i ];
-        for ( int j = 0; j < iRule->giveNumberOfIntegrationPoints(); j++ ) {
-            computeDeviatoricStress(stress, iRule->getIntegrationPoint(j), tStep);
+        IntegrationRule *iRule = integrationRulesArray [ i ];
+        for ( GaussPoint *gp: *iRule ) {
+            computeDeviatoricStress(stress, gp, tStep);
         }
     }
 }

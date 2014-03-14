@@ -2253,22 +2253,13 @@ TR1_2D_SUPG :: LS_PCS_computeVOFFractions(FloatArray &answer, FloatArray &fi)
 void
 TR1_2D_SUPG :: giveLocalVelocityDofMap(IntArray &map)
 {
-    map.resize(6);
-    map.at(1) = 1;
-    map.at(2) = 2;
-    map.at(3) = 4;
-    map.at(4) = 5;
-    map.at(5) = 7;
-    map.at(6) = 8;
+    map = {1, 2, 4, 5, 7, 8};
 }
 
 void
 TR1_2D_SUPG :: giveLocalPressureDofMap(IntArray &map)
 {
-    map.resize(3);
-    map.at(1) = 3;
-    map.at(2) = 6;
-    map.at(3) = 9;
+    map = {3, 6, 9};
 }
 
 

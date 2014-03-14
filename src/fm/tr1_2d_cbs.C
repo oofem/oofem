@@ -403,7 +403,7 @@ TR1_2D_CBS :: computeDensityRhsVelocityTerms(FloatArray &answer, TimeStep *tStep
     //double rho = this->giveMaterial()->give('d');
     double theta1 = static_cast< CBS * >( domain->giveEngngModel() )->giveTheta1();
     double rho = this->giveMaterial()->give( 'd', integrationRulesArray [ 0 ]->getIntegrationPoint(0) );
-    FloatArray u(6), ustar(6);
+    FloatArray u, ustar;
 
     answer.resize(9);
     answer.zero();
@@ -585,7 +585,7 @@ void
 TR1_2D_CBS :: computeDensityRhsPressureTerms(FloatArray &answer, TimeStep *tStep)
 {
     // computes pressure terms on RHS for density equation
-    FloatArray p(3);
+    FloatArray p;
     double theta1 = static_cast< CBS * >( domain->giveEngngModel() )->giveTheta1();
 
     this->computeVectorOf(EID_ConservationEquation, VM_Total, tStep->givePreviousStep(), p);
@@ -626,7 +626,7 @@ void
 TR1_2D_CBS :: computeCorrectionRhs(FloatArray &answer, TimeStep *tStep)
 {
     //Evaluates the RHS of velocity correction step
-    FloatArray p(3), u(6);
+    FloatArray p, u;
     double pn1, ar3;
     double usum, vsum, coeff;
 
@@ -1112,8 +1112,7 @@ void
 TR1_2D_CBS :: NodalAveragingRecoveryMI_computeNodalValue(FloatArray &answer, int node,
                                                          InternalStateType type, TimeStep *tStep)
 {
-    GaussPoint *gp;
-    gp = integrationRulesArray [ 0 ]->getIntegrationPoint(0);
+    GaussPoint *gp = integrationRulesArray [ 0 ]->getIntegrationPoint(0);
     this->giveIPValue(answer, gp, type, tStep);
 }
 

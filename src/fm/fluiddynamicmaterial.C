@@ -78,9 +78,8 @@ FluidDynamicMaterialStatus :: printOutputAt(FILE *File, TimeStep *tNow)
 // Prints the strains and stresses on the data file.
 {
     fprintf(File, "\n deviatoric stresses");
-    int n = deviatoricStressVector.giveSize();
-    for ( int i = 1; i <= n; i++ ) {
-        fprintf( File, " % .4e", deviatoricStressVector.at(i) );
+    for ( double e: deviatoricStressVector ) {
+        fprintf( File, " % .4e", e );
     }
 
     fprintf(File, "\n");

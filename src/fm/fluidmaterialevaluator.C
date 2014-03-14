@@ -219,8 +219,8 @@ void FluidMaterialEvaluator :: doStepOutput(TimeStep *tStep)
     Domain *d = this->giveDomain(1);
     if ( tStep->isTheFirstStep() ) {
         this->outfile << "# Time";
-        for ( int j = 1; j <= this->vars.giveSize(); ++j ) {
-            this->outfile << ", " << __InternalStateTypeToString( ( InternalStateType ) this->vars.at(j) );
+        for ( int var: this->vars ) {
+            this->outfile << ", " << __InternalStateTypeToString( ( InternalStateType ) var );
         }
 
         this->outfile << '\n';
