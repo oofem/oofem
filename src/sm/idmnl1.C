@@ -356,7 +356,6 @@ IDNLMaterial :: computeEquivalentStrain(double &kappa, const FloatArray &strain,
     // or nonlocal compliance variable gamma (depending on averagedVar)
 
     std :: list< localIntegrationRecord > *list = this->giveIPIntegrationList(gp); // !
-    std :: list< localIntegrationRecord > :: iterator pos;
 
     double sigmaRatio = 0.; //ratio sigma2/sigma 1used for stress-based averaging
     double eigenVectorAngle = 0.; //angle betwen the first eigenvector and the x-axis used for stress-based averaging
@@ -371,16 +370,16 @@ IDNLMaterial :: computeEquivalentStrain(double &kappa, const FloatArray &strain,
     }
 
     //Loop over all Gauss points which are in gp's integration domain
-    for ( pos = list->begin(); pos != list->end(); ++pos ) {
-        GaussPoint *neargp = pos->nearGp;
+    for ( auto &lir: *list ) {
+        GaussPoint *neargp = lir.nearGp;
         nonlocStatus = static_cast< IDNLMaterialStatus * >( neargp->giveMaterialStatus() );
         nonlocalContribution = nonlocStatus->giveLocalEquivalentStrainForAverage();
         if ( this->nlvar == NLVT_StressBased && flag == 1 ) { //Check if Stress Based Averaging is requested and calculate nonlocal contribution
-            double stressBasedWeight = computeStressBasedWeight(eigenVectorAngle, sigmaRatio, gp, neargp, pos->weight); //Compute new weight
+            double stressBasedWeight = computeStressBasedWeight(eigenVectorAngle, sigmaRatio, gp, neargp, lir.weight); //Compute new weight
             updatedIntegrationVolume +=  stressBasedWeight;
             nonlocalContribution *= stressBasedWeight;
         } else {
-            nonlocalContribution *= pos->weight;
+            nonlocalContribution *= lir.weight;
         }
 
         nonlocalEquivalentStrain += nonlocalContribution;

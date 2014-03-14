@@ -1296,16 +1296,15 @@ LayeredCrossSection :: mapLayerGpCoordsToShellCoords(IntegrationRule ** &layerIn
     for ( int layer = 1; layer <= numberOfLayers; layer++ ) {
         IntegrationRule *iRule = layerIntegrationRulesArray [ layer - 1 ];
 
-        for ( int j = 1; j <= iRule->giveNumberOfIntegrationPoints(); j++ ) {
-            GaussPoint *gp = iRule->getIntegrationPoint(j - 1);
+        for ( GaussPoint *gp: *iRule ) {
 
             // Map local layer cs to local shell cs
             double zMid_i = this->giveLayerMidZ(layer); // global z-coord
             double xiMid_i = 1.0 - 2.0 * ( totalThickness - this->midSurfaceZcoordFromBottom - zMid_i ) / totalThickness; // local z-coord
             double deltaxi = gp->coordinates->at(3) * this->giveLayerThickness(layer) / totalThickness; // distance from layer mid
             double xinew = xiMid_i + deltaxi * scaleFactor;
-            iRule->getIntegrationPoint(j - 1)->coordinates->at(3) = xinew;
-            iRule->getIntegrationPoint(j - 1)->number = number;   // fix gp ordering
+            gp->coordinates->at(3) = xinew;
+            gp->number = number;   // fix gp ordering
             number++;
         }
     }

@@ -217,28 +217,27 @@ XFEMStatic :: terminate(TimeStep *tStep)
 
                         for ( size_t czIndex = 0; czIndex < numCzRules; czIndex++ ) {
                             if ( xFemEl->mpCZIntegrationRules [ czIndex ] != NULL ) {
-                                for ( int j = 0; j < xFemEl->mpCZIntegrationRules [ czIndex ]->giveNumberOfIntegrationPoints(); j++ ) {
-                                    GaussPoint &gp = * ( xFemEl->mpCZIntegrationRules [ czIndex ]->getIntegrationPoint(j) );
+                                for ( GaussPoint *gp: *xFemEl->mpCZIntegrationRules [ czIndex ] ) {
 
-                                    MaterialStatus *ms = xFemEl->mpCZMat->giveStatus(& gp);
+                                    MaterialStatus *ms = xFemEl->mpCZMat->giveStatus(gp);
                                     if ( ms == NULL ) {
                                         OOFEM_ERROR("Failed to fetch material status.\n");
                                     }
 
                                     MaterialStatusMapperInterface *interface = dynamic_cast< MaterialStatusMapperInterface * >
-                                                                               ( xFemEl->mpCZMat->giveStatus(& gp) );
+                                                                               ( xFemEl->mpCZMat->giveStatus(gp) );
 
                                     if ( interface == NULL ) {
                                         OOFEM_ERROR("Failed to fetch MaterialStatusMapperInterface.\n");
                                     }
 
 
-                                    MaterialStatus *matStat = dynamic_cast< MaterialStatus * >( xFemEl->mpCZMat->giveStatus(& gp) );
+                                    MaterialStatus *matStat = dynamic_cast< MaterialStatus * >( xFemEl->mpCZMat->giveStatus(gp) );
                                     StructuralInterfaceMaterialStatus *siMatStat = dynamic_cast< StructuralInterfaceMaterialStatus * >(matStat);
                                     if ( siMatStat == NULL ) {
                                         OOFEM_ERROR("Failed to cast to StructuralInterfaceMaterialStatus.\n");
                                     }
-                                    interface->MSMI_map(gp, * domain, elemSet, * tStep, * siMatStat);
+                                    interface->MSMI_map(*gp, * domain, elemSet, * tStep, * siMatStat);
                                 }
                             }
                         }

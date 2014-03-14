@@ -260,8 +260,6 @@ void QPlaneStress2d :: drawScalar(oofegGraphicContext &context)
     TimeStep *tStep = this->giveDomain()->giveEngngModel()->giveCurrentStep();
     FloatArray v [ 8 ];
     double s [ 9 ], ss [ 4 ], defScale;
-    int ip;
-    GaussPoint *gp;
 
     if ( !context.testElementGraphicActivity(this) ) {
         return;
@@ -288,8 +286,7 @@ void QPlaneStress2d :: drawScalar(oofegGraphicContext &context)
         // computed as average of the values at all Gauss points
 
         s [ 8 ] = 0.;
-        for ( ip = 1; ip <= integrationRulesArray [ 0 ]->giveNumberOfIntegrationPoints(); ip++ ) {
-            gp = integrationRulesArray [ 0 ]->getIntegrationPoint(ip - 1);
+        for ( GaussPoint *gp: *iRule ) {
             if ( giveIPValue(v [ 0 ], gp, context.giveIntVarType(), tStep) == 0 ) {
                 return;
             }
@@ -444,8 +441,7 @@ void QPlaneStress2d :: drawScalar(oofegGraphicContext &context)
         pp [ 8 ].y = 0.25 * ( pp [ 0 ].y + pp [ 1 ].y + pp [ 2 ].y + pp [ 3 ].y );
         pp [ 8 ].z = 0.;
 
-        for ( ip = 1; ip <= integrationRulesArray [ 0 ]->giveNumberOfIntegrationPoints(); ip++ ) {
-            gp = integrationRulesArray [ 0 ]->getIntegrationPoint(ip - 1);
+        for ( GaussPoint *gp: *iRule ) {
             gpCoords = gp->giveCoordinates();
             if ( ( gpCoords->at(1) > 0. ) && ( gpCoords->at(2) > 0. ) ) {
                 ind.at(1) = 0;

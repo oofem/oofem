@@ -414,18 +414,17 @@ VTKExportModule :: exportIntVars(FILE *stream, TimeStep *tStep)
 void
 VTKExportModule :: exportCellVars(FILE *stream, int elemToProcess, TimeStep *tStep)
 {
-    int i, ielem, pos;
+    int ielem, pos;
     InternalStateType type;
     Element *elem;
     Domain *d  = emodel->giveDomain(1);
     int nelem = d->giveNumberOfElements();
     FloatMatrix mtrx(3, 3);
     FloatArray temp, vec;
-    GaussPoint *gp;
     double gptot;
 
     fprintf(stream, "\nCELL_DATA %d\n", elemToProcess);
-    for ( i = 1; i <= cellVarsToExport.giveSize(); i++ ) {
+    for ( int i = 1; i <= cellVarsToExport.giveSize(); i++ ) {
         type = ( InternalStateType ) cellVarsToExport.at(i);
         switch ( type ) {
         case IST_MaterialNumber:
@@ -493,8 +492,7 @@ VTKExportModule :: exportCellVars(FILE *stream, int elemToProcess, TimeStep *tSt
 #endif
                     gptot = 0;
                     vec.clear();
-                    for ( int i = 0; i < elem->giveDefaultIntegrationRulePtr()->giveNumberOfIntegrationPoints(); ++i ) {
-                        gp = elem->giveDefaultIntegrationRulePtr()->getIntegrationPoint(i);
+                    for ( GaussPoint *gp: *elem->giveDefaultIntegrationRulePtr() ) {
                         elem->giveIPValue(temp, gp, type, tStep);
                         gptot += gp->giveWeight();
                         vec.add(gp->giveWeight(), temp);

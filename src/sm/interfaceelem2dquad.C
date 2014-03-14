@@ -198,7 +198,6 @@ InterfaceElem2dQuad :: giveInterpolation() const
  *                                             TimeStep* tStep)
  * // Computes numerically the stiffness matrix of the receiver.
  * {
- * int         j ;
  * double      dV ;
  * FloatMatrix d, bj, bjl, dbj, t;
  * GaussPoint  *gp ;
@@ -210,8 +209,7 @@ InterfaceElem2dQuad :: giveInterpolation() const
  *
  * iRule = integrationRulesArray[giveDefaultIntegrationRule()];
  *
- * for (j=0 ; j < iRule->giveNumberOfIntegrationPoints() ; j++) {
- *  gp = iRule->getIntegrationPoint(j) ;
+ * for ( GaussPoint *gp: *iRule ) {
  *  this -> computeBmatrixAt(gp, bjl) ;
  *  this -> computeConstitutiveMatrixAt(d, rMode, gp, tStep);
  *  this -> computeGtoLRotationMatrix(t, gp);

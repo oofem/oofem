@@ -211,8 +211,7 @@ ZZNodalRecoveryModelInterface :: ZZNodalRecoveryMI_computeNValProduct(FloatMatri
     IntegrationRule *iRule = elem->giveDefaultIntegrationRulePtr();
 
     answer.clear();
-    for ( int i = 0; i < iRule->giveNumberOfIntegrationPoints(); i++ ) {
-        GaussPoint *gp = iRule->getIntegrationPoint(i);
+    for ( GaussPoint *gp: *iRule ) {
         double dV = elem->computeVolumeAround(gp);
         //this-> computeStressVector(stressVector, gp, tStep);
         if ( !elem->giveIPValue(stressVector, gp, type, tStep) ) {
@@ -251,8 +250,7 @@ ZZNodalRecoveryModelInterface :: ZZNodalRecoveryMI_computeNNMatrix(FloatArray &a
     fullAnswer.zero();
     double pok = 0.0;
 
-    for ( int i = 0; i < iRule->giveNumberOfIntegrationPoints(); i++ ) {
-        GaussPoint *gp = iRule->getIntegrationPoint(i);
+    for ( GaussPoint *gp: *iRule ) {
         double dV = elem->computeVolumeAround(gp);
         interpol->evalN( n, * gp->giveCoordinates(), FEIElementGeometryWrapper(elem) );
         fullAnswer.plusDyadSymmUpper(n, dV);

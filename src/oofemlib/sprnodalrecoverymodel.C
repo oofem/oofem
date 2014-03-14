@@ -509,8 +509,7 @@ SPRNodalRecoveryModel :: computePatch(FloatMatrix &a, IntArray &patchElems, int 
         Element *element = domain->giveElement( patchElems.at(ielem) );
         if ( ( interface = static_cast< SPRNodalRecoveryModelInterface * >( element->giveInterface(SPRNodalRecoveryModelInterfaceType) ) ) ) {
             IntegrationRule *iRule = element->giveDefaultIntegrationRulePtr();
-            for ( int i = 0; i < iRule->giveNumberOfIntegrationPoints(); i++ ) {
-                GaussPoint *gp = iRule->getIntegrationPoint(i);
+            for ( GaussPoint *gp: *iRule ) {
                 int hasVal = element->giveIPValue(ipVal, gp, type, tStep);
                 if ( !hasVal ) {
                     ipVal.resize(regionValSize);

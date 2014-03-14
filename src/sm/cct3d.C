@@ -365,7 +365,6 @@ CCTPlate3d :: computeBodyLoadVectorAt(FloatArray &answer, Load *forLoad, TimeSte
 //  different coordinate system in each node)
 {
     double dens, dV, load;
-    GaussPoint *gp = NULL;
     FloatArray force;
     FloatMatrix T;
 
@@ -380,7 +379,7 @@ CCTPlate3d :: computeBodyLoadVectorAt(FloatArray &answer, Load *forLoad, TimeSte
     forLoad->computeComponentArrayAt(force, tStep, mode);
 
     if ( force.giveSize() ) {
-        gp = irule.getIntegrationPoint(0);
+        GaussPoint *gp = irule.getIntegrationPoint(0);
 
         dens = this->giveStructuralCrossSection()->give('d', gp); // constant density assumed
         dV   = this->computeVolumeAround(gp) * this->giveCrossSection()->give(CS_Thickness, gp); // constant thickness assumed
@@ -490,17 +489,12 @@ void
 CCTPlate3d :: printOutputAt(FILE *file, TimeStep *tStep)
 // Performs end-of-step operations.
 {
-    int i, j;
-    GaussPoint *gp;
     FloatArray v;
 
     fprintf( file, "element %d (%8d) :\n", this->giveLabel(), this->giveNumber() );
 
-    for ( i = 0; i < numberOfIntegrationRules; i++ ) {
-        for ( j = 0; j < integrationRulesArray [ i ]->giveNumberOfIntegrationPoints(); j++ ) {
-            gp = integrationRulesArray [ i ]->getIntegrationPoint(j);
-
-            // gp   -> printOutputAt(file,tStep) ;
+    for ( int i = 0; i < numberOfIntegrationRules; i++ ) {
+        for ( GaussPoint *gp: *integrationRulesArray [ i ] ) {
 
             fprintf( file, "  GP %2d.%-2d :", i + 1, gp->giveNumber() );
 

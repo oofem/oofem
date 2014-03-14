@@ -223,8 +223,7 @@ void MixedGradientPressureWeakPeriodic :: integrateTractionVelocityTangent(Float
     mMatrix.resize(nsd, total);
 
     answer.clear();
-    for ( int i = 0; i < ir->giveNumberOfIntegrationPoints(); ++i ) {
-        GaussPoint *gp = ir->getIntegrationPoint(i);
+    for ( GaussPoint *gp: *ir ) {
         FloatArray &lcoords = * gp->giveCoordinates();
         FEIElementGeometryWrapper cellgeo(el);
 
@@ -275,8 +274,7 @@ void MixedGradientPressureWeakPeriodic :: integrateTractionXTangent(FloatMatrix 
     surfCoords.resize(nsd - 1);
 
     FloatArray tmpAnswer;
-    for ( int i = 0; i < ir->giveNumberOfIntegrationPoints(); ++i ) {
-        GaussPoint *gp = ir->getIntegrationPoint(i);
+    for ( GaussPoint *gp: *ir ) {
         FloatArray &lcoords = * gp->giveCoordinates();
         FEIElementGeometryWrapper cellgeo(el);
 
@@ -326,8 +324,7 @@ void MixedGradientPressureWeakPeriodic :: integrateTractionDev(FloatArray &answe
     contrib.resize(total);
     answer.clear();
 
-    for ( int i = 0; i < ir->giveNumberOfIntegrationPoints(); ++i ) {
-        GaussPoint *gp = ir->getIntegrationPoint(i);
+    for ( GaussPoint *gp: *ir ) {
         FloatArray &lcoords = * gp->giveCoordinates();
         FEIElementGeometryWrapper cellgeo(el);
 
@@ -552,8 +549,7 @@ void MixedGradientPressureWeakPeriodic :: computeFields(FloatArray &sigmaDev, do
         IntegrationRule *ir = interp->giveBoundaryIntegrationRule(maxorder, boundary);
 
         surfCoords.resize(nsd - 1);
-        for ( int i = 0; i < ir->giveNumberOfIntegrationPoints(); ++i ) {
-            GaussPoint *gp = ir->getIntegrationPoint(i);
+        for ( GaussPoint *gp: *ir ) {
             FloatArray &lcoords = * gp->giveCoordinates();
             FEIElementGeometryWrapper cellgeo(el);
 
@@ -731,8 +727,7 @@ void MixedGradientPressureWeakPeriodic :: computeTangents(FloatMatrix &Ed, Float
             IntegrationRule *ir = interp->giveBoundaryIntegrationRule(maxorder, boundary);
 
             surfCoords.resize(nsd - 1);
-            for ( int i = 0; i < ir->giveNumberOfIntegrationPoints(); ++i ) {
-                GaussPoint *gp = ir->getIntegrationPoint(i);
+            for ( GaussPoint *gp: *ir ) {
                 FloatArray &lcoords = * gp->giveCoordinates();
                 FEIElementGeometryWrapper cellgeo(el);
 

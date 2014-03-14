@@ -394,11 +394,8 @@ NonStationaryTransportProblem :: updateYourself(TimeStep *tStep)
 void
 NonStationaryTransportProblem :: updateInternalState(TimeStep *tStep)
 {
-    int nelem;
-    Domain *domain;
-
     for ( int idomain = 1; idomain <= this->giveNumberOfDomains(); idomain++ ) {
-        domain = this->giveDomain(idomain);
+        Domain *domain = this->giveDomain(idomain);
 
         if ( requiresUnknownsDictionaryUpdate() ) {
             //update temperature vector
@@ -408,7 +405,7 @@ NonStationaryTransportProblem :: updateInternalState(TimeStep *tStep)
         }
 
         if ( internalVarUpdateStamp != tStep->giveSolutionStateCounter() ) {
-            nelem = domain->giveNumberOfElements();
+            int nelem = domain->giveNumberOfElements();
             for ( int j = 1; j <= nelem; j++ ) {
                 domain->giveElement(j)->updateInternalState(tStep);
             }
@@ -507,18 +504,16 @@ NonStationaryTransportProblem :: checkConsistency()
     // check internal consistency
     // if success returns nonzero
     int nelem;
-    Element *ePtr;
-    TransportElement *sePtr;
     Domain *domain = this->giveDomain(1);
 
     nelem = domain->giveNumberOfElements();
     // check for proper element type
 
     for ( int i = 1; i <= nelem; i++ ) {
-        ePtr = domain->giveElement(i);
-        sePtr = dynamic_cast< TransportElement * >(ePtr);
+        Element *ePtr = domain->giveElement(i);
+        TransportElement *sePtr = dynamic_cast< TransportElement * >(ePtr);
         if ( sePtr == NULL ) {
-            OOFEM_WARNING("Element %d has no TransportElement base", i);
+            OOFEM_WARNING("Element %d has no TransportElement base", ePtr->giveNumber());
             return 0;
         }
     }

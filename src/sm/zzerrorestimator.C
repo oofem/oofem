@@ -277,8 +277,7 @@ ZZErrorEstimatorInterface :: ZZErrorEstimatorI_computeElementContributions(doubl
 
     // compute  the e-norm and s-norm
     if ( norm == ZZErrorEstimator :: L2Norm ) {
-        for ( int i = 0; i < iRule->giveNumberOfIntegrationPoints(); i++ ) {
-            GaussPoint *gp = iRule->getIntegrationPoint(i);
+        for ( GaussPoint *gp: *iRule ) {
             double dV = elem->computeVolumeAround(gp);
             interpol->evalN( n, * gp->giveCoordinates(), FEIElementGeometryWrapper(elem) );
 
@@ -296,8 +295,7 @@ ZZErrorEstimatorInterface :: ZZErrorEstimatorI_computeElementContributions(doubl
         FloatMatrix D, DInv;
         StructuralElement *selem = static_cast< StructuralElement * >(elem);
 
-        for ( int i = 0; i < iRule->giveNumberOfIntegrationPoints(); i++ ) {
-            GaussPoint *gp = iRule->getIntegrationPoint(i);
+        for ( GaussPoint *gp: *iRule ) {
             double dV = elem->computeVolumeAround(gp);
             interpol->evalN( n, * gp->giveCoordinates(), FEIElementGeometryWrapper(elem) );
             selem->computeConstitutiveMatrixAt(D, TangentStiffness, gp, tStep);

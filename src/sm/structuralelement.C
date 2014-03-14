@@ -131,8 +131,7 @@ void StructuralElement :: computeBoundaryLoadVector(FloatArray &answer, Boundary
 
     IntegrationRule *iRule = fei->giveBoundaryIntegrationRule(load->giveApproxOrder(), boundary);
 
-    for ( int i = 0; i < iRule->giveNumberOfIntegrationPoints(); i++ ) {
-        GaussPoint *gp = iRule->getIntegrationPoint(i);
+    for ( GaussPoint *gp: *iRule ) {
         FloatArray &lcoords = * gp->giveCoordinates();
 
         if ( load->giveFormulationType() == Load :: FT_Entity ) {
@@ -427,8 +426,7 @@ StructuralElement :: computeConsistentMassMatrix(FloatMatrix &answer, TimeStep *
 
     mass = 0.;
 
-    for ( int i = 0; i < iRule.giveNumberOfIntegrationPoints(); i++ ) {
-        GaussPoint *gp = iRule.getIntegrationPoint(i);
+    for ( GaussPoint *gp: iRule ) {
         this->computeNmatrixAt(* ( gp->giveLocalCoordinates() ), n);
         density = this->giveCrossSection()->give('d', gp);
 
@@ -668,7 +666,6 @@ StructuralElement :: computeStiffnessMatrix(FloatMatrix &answer, MatResponseMode
     int iStartIndx, iEndIndx, jStartIndx, jEndIndx;
     double dV;
     FloatMatrix d, bi, bj, dbj, dij;
-    GaussPoint *gp;
     IntegrationRule *iRule;
     bool matStiffSymmFlag = this->giveCrossSection()->isCharacteristicMtrxSymmetric(rMode);
 
@@ -693,8 +690,7 @@ StructuralElement :: computeStiffnessMatrix(FloatMatrix &answer, MatResponseMode
                     iRule = integrationRulesArray [ j ];
                 }
 
-                for ( int k = 0; k < iRule->giveNumberOfIntegrationPoints(); k++ ) {
-                    gp = iRule->getIntegrationPoint(k);
+                for ( GaussPoint *gp: *iRule ) {
                     this->computeBmatrixAt(gp, bi, iStartIndx, iEndIndx);
                     this->computeConstitutiveMatrixAt(d, rMode, gp, tStep);
                     dij.beSubMatrixOf(d, iStartIndx, iEndIndx, jStartIndx, jEndIndx);
@@ -717,8 +713,7 @@ StructuralElement :: computeStiffnessMatrix(FloatMatrix &answer, MatResponseMode
     } else { // numberOfIntegrationRules == 1
         iRule = integrationRulesArray [ giveDefaultIntegrationRule() ];
 
-        for ( int j = 0; j < iRule->giveNumberOfIntegrationPoints(); j++ ) {
-            gp = iRule->getIntegrationPoint(j);
+        for ( GaussPoint *gp: *iRule ) {
             this->computeBmatrixAt(gp, bj);
             this->computeConstitutiveMatrixAt(d, rMode, gp, tStep);
             dV = this->computeVolumeAround(gp);
@@ -756,8 +751,7 @@ void StructuralElement :: computeStiffnessMatrix_withIRulesAsSubcells(FloatMatri
     for ( int ir = 0; ir < numberOfIntegrationRules; ir++ ) {
         IntegrationRule *iRule = integrationRulesArray [ ir ];
         // loop over individual integration points
-        for ( int j = 0; j < iRule->giveNumberOfIntegrationPoints(); j++ ) {
-            GaussPoint *gp = iRule->getIntegrationPoint(j);
+        for ( GaussPoint *gp: *iRule ) {
             double dV = this->computeVolumeAround(gp);
             this->computeBmatrixAt(gp, bj);
             this->computeConstitutiveMatrixAt(d, rMode, gp, tStep);
@@ -847,8 +841,7 @@ StructuralElement :: giveInternalForcesVector(FloatArray &answer,
     // zero answer will resize accordingly when adding first contribution
     answer.clear();
 
-    for ( int i = 0; i < iRule->giveNumberOfIntegrationPoints(); i++ ) {
-        GaussPoint *gp = iRule->getIntegrationPoint(i);
+    for ( GaussPoint *gp: *iRule ) {
         StructuralMaterialStatus *matStat = static_cast< StructuralMaterialStatus * >( gp->giveMaterialStatus() );
         this->computeBmatrixAt(gp, b);
 
@@ -930,8 +923,7 @@ StructuralElement :: giveInternalForcesVector_withIRulesAsSubcells(FloatArray &a
     for ( int ir = 0; ir < numberOfIntegrationRules; ir++ ) {
         IntegrationRule *iRule = integrationRulesArray [ ir ];
 
-        for ( int i = 0; i < iRule->giveNumberOfIntegrationPoints(); i++ ) {
-            GaussPoint *gp = iRule->getIntegrationPoint(i);
+        for ( GaussPoint *gp: *iRule ) {
             StructuralMaterialStatus *matStat = static_cast< StructuralMaterialStatus * >( gp->giveMaterialStatus() );
             this->computeBmatrixAt(gp, b);
 
@@ -1052,8 +1044,7 @@ StructuralElement :: updateInternalState(TimeStep *tStep)
     // force updating strains & stresses
     for ( int i = 0; i < numberOfIntegrationRules; i++ ) {
         IntegrationRule *iRule = integrationRulesArray [ i ];
-        for ( int j = 0; j < iRule->giveNumberOfIntegrationPoints(); j++ ) {
-            GaussPoint *gp = iRule->getIntegrationPoint(j);
+        for ( GaussPoint *gp: *iRule ) {
             this->computeStrainVector(strain, gp, tStep);
             this->computeStressVector(stress, strain, gp, tStep);
         }
@@ -1083,21 +1074,20 @@ StructuralElement :: updateBeforeNonlocalAverage(TimeStep *tStep)
     // force updating local quantities
     for ( int i = 0; i < numberOfIntegrationRules; i++ ) {
         iRule = integrationRulesArray [ i ];
-        for ( int j = 0; j < iRule->giveNumberOfIntegrationPoints(); j++ ) {
-            IntegrationPoint *ip = iRule->getIntegrationPoint(j);
-            this->computeStrainVector(epsilon, ip, tStep);
+        for ( GaussPoint *gp: *iRule ) {
+            this->computeStrainVector(epsilon, gp, tStep);
             // provide material local strain increment - as is provided to computeRealStresVector
             // allows to update internal vars to be averaged to new state
 
             // not possible - produces wrong result
             StructuralNonlocalMaterialExtensionInterface *materialExt;
             materialExt =  static_cast< StructuralNonlocalMaterialExtensionInterface * >( this->giveStructuralCrossSection()->
-                                                                                         giveMaterialInterface(NonlocalMaterialExtensionInterfaceType, ip) );
+                                                                                         giveMaterialInterface(NonlocalMaterialExtensionInterfaceType, gp) );
 
             if ( !materialExt ) {
                 return;             //_error("updateBeforeNonlocalAverage: material with no StructuralNonlocalMaterial support");
             }
-            materialExt->updateBeforeNonlocAverage(epsilon, iRule->getIntegrationPoint(j), tStep);
+            materialExt->updateBeforeNonlocAverage(epsilon, gp, tStep);
         }
     }
 }
@@ -1362,9 +1352,8 @@ void StructuralElement :: createMaterialStatus()
     StructuralCrossSection *cs = giveStructuralCrossSection();
     for ( int i = 0; i < numberOfIntegrationRules; i++ ) {
         IntegrationRule *iRule = integrationRulesArray [ i ];
-        for ( int j = 0; j < iRule->giveNumberOfIntegrationPoints(); j++ ) {
-            GaussPoint &gp = * ( iRule->getIntegrationPoint(j) );
-            cs->createMaterialStatus(gp);
+        for ( GaussPoint *gp: *iRule ) {
+            cs->createMaterialStatus(*gp);
         }
     }
 }

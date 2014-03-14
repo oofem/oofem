@@ -307,12 +307,11 @@ MatlabExportModule :: doOutputData(TimeStep *tStep, FILE *FID)
 void
 MatlabExportModule :: doOutputSpecials(TimeStep *tStep,    FILE *FID)
 {
-    FloatMatrix v_hat, GradPTemp, v_hatTemp;
+    FloatArray v_hat, GradPTemp, v_hatTemp;
 
     Domain *domain  = emodel->giveDomain(1);
 
-    v_hat.resize(ndim, 1);
-    v_hat.zero();
+    v_hat.clear();
 
     for ( int i = 1; i <= domain->giveNumberOfElements(); i++ ) {
 #ifdef __FM_MODULE
@@ -333,12 +332,12 @@ MatlabExportModule :: doOutputSpecials(TimeStep *tStep,    FILE *FID)
 
     std :: vector< double >V;
 
-    for ( int i = 0; i < ndim; i++ ) {
-        intrinsicSize = intrinsicSize * ( smax.at(i) - smin.at(i) );
+    for ( int i = 0; i < (int)smax.size(); i++ ) {
+        intrinsicSize *= ( smax.at(i) - smin.at(i) );
     }
 
-    for ( int i = 1; i <= ndim; i++ ) {
-        V.push_back(v_hat.at(i, 1) / intrinsicSize);
+    for ( double vh: v_hat ) {
+        V.push_back(vh / intrinsicSize);
     }
 
     fprintf(FID, "\tspecials.velocitymean=[");

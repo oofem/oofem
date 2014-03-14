@@ -1412,10 +1412,9 @@ Element :: mapStateVariables(Domain &iOldDom, const TimeStep &iTStep)
 
     for ( int i = 0; i < numberOfIntegrationRules; i++ ) {
         IntegrationRule *iRule = integrationRulesArray [ i ];
-        for ( int j = 0; j < iRule->giveNumberOfIntegrationPoints(); j++ ) {
-            GaussPoint &gp = * ( iRule->getIntegrationPoint(j) );
+        for ( GaussPoint *gp: *iRule ) {
 
-            MaterialStatus *ms = dynamic_cast< MaterialStatus * >( gp.giveMaterialStatus() );
+            MaterialStatus *ms = dynamic_cast< MaterialStatus * >( gp->giveMaterialStatus() );
             if ( ms == NULL ) {
                 OOFEM_ERROR("failed to fetch MaterialStatus.\n");
             }
@@ -1425,7 +1424,7 @@ Element :: mapStateVariables(Domain &iOldDom, const TimeStep &iTStep)
                 OOFEM_ERROR("Failed to fetch MaterialStatusMapperInterface.\n");
             }
 
-            result &= interface->MSMI_map( gp, iOldDom, sourceElemSet, iTStep, * ( ms ) );
+            result &= interface->MSMI_map( *gp, iOldDom, sourceElemSet, iTStep, * ( ms ) );
         }
     }
 
@@ -1494,10 +1493,9 @@ int
 Element :: packUnknowns(CommunicationBuffer &buff, TimeStep *tStep)
 {
     int result = 1;
-    IntegrationRule *iRule;
 
     for ( int i = 0; i < numberOfIntegrationRules; i++ ) {
-        iRule = integrationRulesArray [ i ];
+        IntegrationRule *iRule = integrationRulesArray [ i ];
         for ( int j = 0; j < iRule->giveNumberOfIntegrationPoints(); j++ ) {
             result &= this->giveCrossSection()->packUnknowns( buff, tStep, iRule->getIntegrationPoint(j) );
         }
@@ -1511,10 +1509,9 @@ int
 Element :: unpackAndUpdateUnknowns(CommunicationBuffer &buff, TimeStep *tStep)
 {
     int result = 1;
-    IntegrationRule *iRule;
 
     for ( int i = 0; i < numberOfIntegrationRules; i++ ) {
-        iRule = integrationRulesArray [ i ];
+        IntegrationRule *iRule = integrationRulesArray [ i ];
         for ( int j = 0; j < iRule->giveNumberOfIntegrationPoints(); j++ ) {
             result &= this->giveCrossSection()->unpackAndUpdateUnknowns( buff, tStep, iRule->getIntegrationPoint(j) );
         }
@@ -1528,10 +1525,9 @@ int
 Element :: estimatePackSize(CommunicationBuffer &buff)
 {
     int result = 0;
-    IntegrationRule *iRule;
 
     for ( int i = 0; i < numberOfIntegrationRules; i++ ) {
-        iRule = integrationRulesArray [ i ];
+        IntegrationRule *iRule = integrationRulesArray [ i ];
         for ( int j = 0; j < iRule->giveNumberOfIntegrationPoints(); j++ ) {
             result += this->giveCrossSection()->estimatePackSize( buff, iRule->getIntegrationPoint(j) );
         }

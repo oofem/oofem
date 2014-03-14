@@ -87,7 +87,6 @@ Quad1Mindlin :: computeBodyLoadVectorAt(FloatArray &answer, Load *forLoad, TimeS
 {
     // Only gravity load
     double dV, load;
-    GaussPoint *gp;
     FloatArray force, gravity, n;
 
     if ( ( forLoad->giveBCGeoType() != BodyLoadBGT ) || ( forLoad->giveBCValType() != ForceLoadBVT ) ) {
@@ -100,8 +99,7 @@ Quad1Mindlin :: computeBodyLoadVectorAt(FloatArray &answer, Load *forLoad, TimeS
     force.clear();
     if ( gravity.giveSize() ) {
         IntegrationRule *ir = integrationRulesArray [ 0 ]; ///@todo Other/higher integration for lumped mass matrices perhaps?
-        for ( int i = 0; i < ir->giveNumberOfIntegrationPoints(); ++i ) {
-            gp = ir->getIntegrationPoint(i);
+        for ( GaussPoint *gp: *ir ) {
 
             this->interp_lin.evalN( n, * gp->giveCoordinates(), FEIElementGeometryWrapper(this) );
             dV = this->computeVolumeAround(gp) * this->giveCrossSection()->give(CS_Thickness, gp);
@@ -228,12 +226,10 @@ void
 Quad1Mindlin :: computeLumpedMassMatrix(FloatMatrix &answer, TimeStep *tStep)
 // Returns the lumped mass matrix of the receiver.
 {
-    GaussPoint *gp;
     double dV, mass = 0.;
 
     IntegrationRule *ir = integrationRulesArray [ 0 ]; ///@todo Other/higher integration for lumped mass matrices perhaps?
-    for ( int i = 0; i < ir->giveNumberOfIntegrationPoints(); ++i ) {
-        gp = ir->getIntegrationPoint(i);
+    for ( GaussPoint *gp: *ir ) {
 
         dV = this->computeVolumeAround(gp);
         mass += dV * this->giveStructuralCrossSection()->give('d', gp);

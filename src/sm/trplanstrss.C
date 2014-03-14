@@ -688,7 +688,6 @@ TrPlaneStress2d :: drawSpecial(oofegGraphicContext &gc)
 {
     WCRec l [ 2 ];
     GraphicObj *tr;
-    GaussPoint *gp;
     TimeStep *tStep = domain->giveEngngModel()->giveCurrentStep();
     double defScale = gc.getDefScale();
     FloatArray crackStatuses, cf;
@@ -703,8 +702,7 @@ TrPlaneStress2d :: drawSpecial(oofegGraphicContext &gc)
         double ax, ay, bx, by, norm, xc, yc, length;
         FloatArray crackDir;
 
-        for ( int i = 1; i <= integrationRulesArray [ 0 ]->giveNumberOfIntegrationPoints(); i++ ) {
-            gp = integrationRulesArray [ 0 ]->getIntegrationPoint(i - 1);
+        for ( GaussPoint *gp: *integrationRulesArray [ 0 ] ) {
             if ( this->giveIPValue(cf, gp, IST_CrackedFlag, tStep) == 0 ) {
                 return;
             }

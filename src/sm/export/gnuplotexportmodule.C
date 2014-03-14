@@ -240,14 +240,12 @@ void GnuplotExportModule::outputXFEM(EnrichmentItem &iEI)
 void GnuplotExportModule::outputXFEM(Crack &iCrack)
 {
 	const std::vector<GaussPoint*> &czGaussPoints = iCrack.giveCohesiveZoneGaussPoints();
-	size_t numPoints = czGaussPoints.size();
 
 	std::vector<double> arcLengthPositions, normalJumps, tangJumps;
 
 	const EnrichmentDomain *ed = iCrack.giveEnrichmentDomain();
 
-	for(size_t i = 0; i < numPoints; i++) {
-		GaussPoint *gp = czGaussPoints[i];
+	for( GaussPoint *gp: czGaussPoints ) {
 
 		StructuralInterfaceMaterialStatus *matStat = dynamic_cast<StructuralInterfaceMaterialStatus*> ( gp->giveMaterialStatus() );
 		if(matStat != NULL) {

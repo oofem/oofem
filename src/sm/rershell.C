@@ -654,15 +654,11 @@ void
 RerShell :: printOutputAt(FILE *file, TimeStep *tStep)
 // Performs end-of-step operations.
 {
-    GaussPoint *gp;
     FloatArray v;
 
     fprintf(file, "element %d :\n", number);
 
-    for ( int i = 1; i <= integrationRulesArray [ 0 ]->giveNumberOfIntegrationPoints(); i++ ) {
-        gp = integrationRulesArray [ 0 ]->getIntegrationPoint(i - 1);
-        //gp->printOutputAt(file,tStep);
-
+    for ( GaussPoint *gp: *integrationRulesArray [ 0 ] ) {
 
         fprintf( file, "  GP %d :", gp->giveNumber() );
         this->giveIPValue(v, gp, IST_ShellStrainTensor, tStep);

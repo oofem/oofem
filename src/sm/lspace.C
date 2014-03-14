@@ -298,7 +298,6 @@ LSpace :: NodalAveragingRecoveryMI_computeNodalValue(FloatArray &answer, int nod
                                                      InternalStateType type, TimeStep *tStep)
 {
     double x1 = 0.0, x2 = 0.0, x3 = 0.0, y = 0.0;
-    GaussPoint *gp;
     IntegrationRule *iRule = integrationRulesArray [ 0 ];
     FloatMatrix A(4, 4);
     FloatMatrix b, r;
@@ -307,12 +306,10 @@ LSpace :: NodalAveragingRecoveryMI_computeNodalValue(FloatArray &answer, int nod
 
     int size = 0;
 
-    for ( int i = 0; i < iRule->giveNumberOfIntegrationPoints(); i++ ) {
-        gp = iRule->getIntegrationPoint(i);
+    for ( GaussPoint *gp: *iRule ) {
         giveIPValue(val, gp, type, tStep);
-        if ( i == 0 ) {
+        if ( size == 0 ) {
             size = val.giveSize();
-            answer.resize(size);
             b.resize(4, size);
             r.resize(4, size);
             A.zero();
@@ -815,11 +812,10 @@ void LSpace :: drawScalar(oofegGraphicContext &context)
 void
 LSpace :: drawSpecial(oofegGraphicContext &gc)
 {
-    int igp, i, j, k;
+    int i, j, k;
     WCRec q [ 4 ];
     GraphicObj *tr;
     IntegrationRule *iRule;
-    GaussPoint *gp;
     TimeStep *tStep = domain->giveEngngModel()->giveCurrentStep();
     FloatArray crackStatuses, cf;
 
@@ -834,8 +830,7 @@ LSpace :: drawSpecial(oofegGraphicContext &gc)
         FloatArray crackDir;
 
         iRule = integrationRulesArray [ giveDefaultIntegrationRule() ];
-        for ( igp = 0; igp < iRule->giveNumberOfIntegrationPoints(); igp++ ) {
-            gp = iRule->getIntegrationPoint(igp);
+        for ( GaussPoint *gp: *iRule ) {
             if ( this->giveIPValue(cf, gp, IST_CrackedFlag, tStep) == 0 ) {
                 return;
             }

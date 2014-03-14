@@ -151,8 +151,6 @@ Lattice2d_mt :: computeNSubMatrixAt(FloatMatrix &answer, const FloatArray &coord
 
     answer.at(1, 1) = n1;
     answer.at(1, 2) = n2;
-
-    return;
 }
 
 void
@@ -174,26 +172,20 @@ Lattice2d_mt :: computeGradientMatrixAt(FloatMatrix &answer, GaussPoint *gp)
     answer.at(1, 2) = 1.;
 
     answer.times(1. / l);
-
-    return;
 }
 
 void
 Lattice2d_mt :: updateInternalState(TimeStep *tStep)
 // Updates the receiver at end of step.
 {
-    int i, j;
-    IntegrationRule *iRule;
     FloatArray f, r;
     FloatMatrix n;
     TransportMaterial *mat = static_cast< TransportMaterial * >( this->giveMaterial() );
-    GaussPoint *gp;
 
     // force updating ip values
-    for ( i = 0; i < numberOfIntegrationRules; i++ ) {
-        iRule = integrationRulesArray [ i ];
-        for ( j = 0; j < iRule->giveNumberOfIntegrationPoints(); j++ ) {
-            gp = iRule->getIntegrationPoint(j);
+    for ( int i = 0; i < numberOfIntegrationRules; i++ ) {
+        IntegrationRule *iRule = integrationRulesArray [ i ];
+        for ( GaussPoint *gp: *iRule ) {
             this->computeNmatrixAt( n, * gp->giveCoordinates() );
             this->computeVectorOf(EID_ConservationEquation, VM_Total, tStep, r);
             f.beProductOf(n, r);
@@ -293,9 +285,8 @@ Lattice2d_mt :: computeCapacityMatrix(FloatMatrix &answer, TimeStep *tStep)
 {
     double dV, c;
     FloatMatrix n;
-    GaussPoint *gp;
     IntegrationRule *iRule = integrationRulesArray [ 0 ];
-    gp  = iRule->getIntegrationPoint(0);
+    GaussPoint *gp = iRule->getIntegrationPoint(0);
     answer.resize(2, 2);
     answer.zero();
     answer.at(1, 1) = 2.;
@@ -312,12 +303,11 @@ Lattice2d_mt :: computeCapacityMatrix(FloatMatrix &answer, TimeStep *tStep)
 void
 Lattice2d_mt :: computeInternalSourceRhsVectorAt(FloatArray &answer, TimeStep *tStep, ValueModeType mode)
 {
-    int i, j, n, nLoads;
+    int n, nLoads;
     double dV;
     bcGeomType ltype;
     Load *load;
     IntegrationRule *iRule = integrationRulesArray [ 0 ];
-    GaussPoint *gp;
     Node *nodeA, *nodeB;
 
 
@@ -329,8 +319,8 @@ Lattice2d_mt :: computeInternalSourceRhsVectorAt(FloatArray &answer, TimeStep *t
 
     FloatArray gravityHelp(2);
 
-    nLoads    = this->giveBodyLoadArray()->giveSize();
-    for ( i = 1; i <= nLoads; i++ ) {
+    nLoads = this->giveBodyLoadArray()->giveSize();
+    for ( int i = 1; i <= nLoads; i++ ) {
         n     = bodyLoadArray.at(i);
         load  = domain->giveLoad(n);
         ltype = load->giveBCGeoType();
@@ -344,7 +334,7 @@ Lattice2d_mt :: computeInternalSourceRhsVectorAt(FloatArray &answer, TimeStep *t
             deltaX.at(3) = nodeB->giveCoordinate(2) - nodeA->giveCoordinate(2);
 
             //Compute the local coordinate system
-            gp  = iRule->getIntegrationPoint(0);
+            GaussPoint *gp = iRule->getIntegrationPoint(0);
 
             gravityHelp.at(1) = 1.;
             gravityHelp.at(2) = -1.;
@@ -363,15 +353,13 @@ Lattice2d_mt :: computeInternalSourceRhsVectorAt(FloatArray &answer, TimeStep *t
                 helpLoadVector.resize( gravityHelp.giveSize() );
             }
 
-            for ( j = 1; j <= gravityHelp.giveSize(); j++ ) {
+            for ( int j = 1; j <= gravityHelp.giveSize(); j++ ) {
                 helpLoadVector.at(j) += gravityHelp.at(j);
             }
         }
 
         answer.add(helpLoadVector);
     }
-
-    return;
 }
 
 
@@ -381,8 +369,6 @@ Lattice2d_mt :: giveGpCoordinates(FloatArray &answer)
     answer.resize(3);
     answer.at(1) = this->gpCoords.at(1);
     answer.at(2) = this->gpCoords.at(2);
-
-    return;
 }
 
 int
@@ -518,8 +504,6 @@ Lattice2d_mt :: giveCrossSectionCoordinates(FloatArray &coords)
     coords.at(4) = this->gpCoords.at(1) + shearDirection.at(1) * this->width / 2.;
     coords.at(5) = this->gpCoords.at(2) + shearDirection.at(2) * this->width / 2.;
     coords.at(6) = 0.;
-
-    return;
 }
 
 

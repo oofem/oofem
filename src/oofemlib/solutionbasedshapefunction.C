@@ -171,8 +171,7 @@ SolutionbasedShapeFunction :: computeCorrectionFactors(modeStruct &myMode, IntAr
         int n = iRule.getRequiredNumberOfIntegrationPoints(_Triangle, order);
         iRule.setUpIntegrationPoints(_Triangle, n, _Unknown);
 
-        for ( int j = 0; j < iRule.giveNumberOfIntegrationPoints(); j++ ) {
-            GaussPoint *gp = iRule.getIntegrationPoint(j);
+        for ( GaussPoint *gp: iRule ) {
             FloatArray *lcoords = gp->giveCoordinates();
             FloatArray gcoords, normal, N;
             FloatArray Phi;

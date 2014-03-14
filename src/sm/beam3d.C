@@ -209,8 +209,7 @@ Beam3d :: computeClampedStiffnessMatrix(FloatMatrix &answer,
     FloatMatrix B, DB, d;
     IntegrationRule *ir = this->giveDefaultIntegrationRulePtr();
     answer.clear();
-    for ( int i = 0; i < ir->giveNumberOfIntegrationPoints(); ++i ) {
-        GaussPoint *gp = ir->getIntegrationPoint(i);
+    for ( GaussPoint *gp: *ir ) {
         this->computeBmatrixAt(gp, B);
         this->computeConstitutiveMatrixAt(d, rMode, gp, tStep);
         double dV = gp->giveWeight() * 0.5 * l;

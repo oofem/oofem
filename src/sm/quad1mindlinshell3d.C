@@ -114,7 +114,6 @@ Quad1MindlinShell3D :: computeBodyLoadVectorAt(FloatArray &answer, Load *forLoad
 {
     // Only gravity load
     double dV, density;
-    GaussPoint *gp;
     FloatArray forceX, forceY, forceZ, glob_gravity, gravity, n;
 
     if ( ( forLoad->giveBCGeoType() != BodyLoadBGT ) || ( forLoad->giveBCValType() != ForceLoadBVT ) ) {
@@ -128,8 +127,7 @@ Quad1MindlinShell3D :: computeBodyLoadVectorAt(FloatArray &answer, Load *forLoad
 
     if ( gravity.giveSize() ) {
         IntegrationRule *ir = integrationRulesArray [ 0 ];
-        for ( int i = 0; i < ir->giveNumberOfIntegrationPoints(); ++i ) {
-            gp = ir->getIntegrationPoint(i);
+        for ( GaussPoint *gp: *ir ) {
 
             this->interp.evalN( n, * gp->giveCoordinates(), FEIVoidCellGeometry() );
             dV = this->computeVolumeAround(gp) * this->giveCrossSection()->give(CS_Thickness, gp);
@@ -180,8 +178,7 @@ Quad1MindlinShell3D :: computeSurfaceLoadVectorAt(FloatArray &answer, Load *load
         //int approxOrder = surfLoad->giveApproxOrder() + this->giveApproxOrder();
 
         iRule = this->integrationRulesArray [ 0 ];
-        for ( int i = 0; i < iRule->giveNumberOfIntegrationPoints(); i++ ) {
-            GaussPoint *gp = iRule->getIntegrationPoint(i);
+        for ( GaussPoint *gp: *iRule ) {
             double dV = this->computeVolumeAround(gp);
             this->interp.evalN( n, * gp->giveCoordinates(), FEIVoidCellGeometry() );
             this->interp.local2global( gcoords, * gp->giveCoordinates(), FEIElementGeometryWrapper(this) );
@@ -316,8 +313,7 @@ Quad1MindlinShell3D :: giveInternalForcesVector(FloatArray &answer, TimeStep *tS
     StructuralCrossSection *cs = this->giveStructuralCrossSection();
 
     IntegrationRule *iRule = integrationRulesArray [ 0 ];
-    for ( int i = 0; i < iRule->giveNumberOfIntegrationPoints(); i++ ) {
-        GaussPoint *gp = iRule->getIntegrationPoint(i);
+    for ( GaussPoint *gp: *iRule ) {
         this->computeBmatrixAt(gp, b);
         double dV = this->computeVolumeAround(gp);
         double drillCoeff = cs->give(CS_DrillingStiffness, gp);
@@ -366,8 +362,7 @@ Quad1MindlinShell3D :: computeStiffnessMatrix(FloatMatrix &answer, MatResponseMo
     drillStiffness.zero();
 
     IntegrationRule *iRule = integrationRulesArray [ 0 ];
-    for ( int i = 0; i < iRule->giveNumberOfIntegrationPoints(); i++ ) {
-        GaussPoint *gp = iRule->getIntegrationPoint(i);
+    for ( GaussPoint *gp: *iRule ) {
         this->computeBmatrixAt(gp, b);
         double dV = this->computeVolumeAround(gp);
         double drillCoeff = this->giveStructuralCrossSection()->give(CS_DrillingStiffness, gp);
@@ -452,8 +447,7 @@ Quad1MindlinShell3D :: computeLumpedMassMatrix(FloatMatrix &answer, TimeStep *tS
     double mass = 0.;
 
     IntegrationRule *ir = integrationRulesArray [ 0 ];
-    for ( int i = 0; i < ir->giveNumberOfIntegrationPoints(); ++i ) {
-        GaussPoint *gp = ir->getIntegrationPoint(i);
+    for ( GaussPoint *gp: *ir ) {
         mass += this->computeVolumeAround(gp) * this->giveStructuralCrossSection()->give('d', gp);
     }
 

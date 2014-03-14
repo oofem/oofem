@@ -378,8 +378,7 @@ Shell7BaseXFEM :: discComputeSectionalForces(FloatArray &answer, TimeStep *tStep
         IntegrationRule *iRuleL = integrationRulesArray [ layer - 1 ];
         Material *mat = domain->giveMaterial( this->layeredCS->giveLayerMaterial(layer) );
 
-        for ( int j = 1; j <= iRuleL->giveNumberOfIntegrationPoints(); j++ ) {
-            GaussPoint *gp = iRuleL->getIntegrationPoint(j - 1);
+        for ( GaussPoint *gp: *iRuleL ) {
             lCoords = * gp->giveCoordinates();
             double levelSet = lCoords.at(3) - dei->giveDelamXiCoord();
             dei->evaluateEnrFuncAt(ef, lCoords, levelSet);
@@ -962,8 +961,7 @@ Shell7BaseXFEM :: computeMassMatrixNum(FloatMatrix &answer, TimeStep *tStep)
         IntegrationRule *iRuleL = integrationRulesArray [ layer - 1 ];
         Material *mat = domain->giveMaterial( layeredCS->giveLayerMaterial(layer) );
 
-        for ( int j = 1; j <= iRuleL->giveNumberOfIntegrationPoints(); j++ ) {
-            GaussPoint *gp = iRuleL->getIntegrationPoint(j - 1);
+        for ( GaussPoint *gp: *iRule ) {
 
             FloatMatrix N11, N22, N33, N;
             //this->computeNmatricesAt(gp, N11, N22, N33);

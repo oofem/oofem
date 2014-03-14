@@ -131,7 +131,7 @@ public:
 
         bool operator != ( const IntegrationRule :: iterator & other ) const;
 
-        GaussPoint &operator *( ) const;
+        GaussPoint *operator *( ) const;
 
         const IntegrationRule :: iterator &operator++ ( );
     };

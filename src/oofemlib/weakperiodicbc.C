@@ -186,8 +186,7 @@ double WeakPeriodicBoundaryCondition :: computeProjectionCoefficient(int vIndex,
 
         iRule.setUpIntegrationPoints(sideGeom, n, _Unknown);
 
-        for ( int i = 0; i < iRule.giveNumberOfIntegrationPoints(); i++ ) {
-            GaussPoint *gp = iRule.getIntegrationPoint(i);
+        for ( GaussPoint *gp: iRule ) {
 
             FloatArray *lcoords = gp->giveCoordinates();
             FloatArray gcoords;
@@ -395,8 +394,7 @@ void WeakPeriodicBoundaryCondition :: computeElementTangent(FloatMatrix &B, Elem
     }
     iRule.setUpIntegrationPoints(sideGeom, ngp, _Unknown);
 
-    for ( int i = 0; i < iRule.giveNumberOfIntegrationPoints(); i++ ) {
-        GaussPoint *gp = iRule.getIntegrationPoint(i);
+    for ( GaussPoint *gp: iRule ) {
         FloatArray *lcoords = gp->giveCoordinates();
 
         FloatArray N;

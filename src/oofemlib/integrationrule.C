@@ -47,9 +47,9 @@ IntegrationRule :: iterator :: operator != ( const IntegrationRule :: iterator &
     return pos != other.pos;
 }
 
-GaussPoint &
+GaussPoint *
 IntegrationRule :: iterator :: operator *( ) const {
-    return * ( ir->getIntegrationPoint(pos) );
+    return ir->getIntegrationPoint(pos);
 }
 
 const IntegrationRule :: iterator &

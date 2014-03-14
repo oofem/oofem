@@ -97,12 +97,6 @@ Quad1_ht :: initializeFrom(InputRecord *ir)
         return result;
     }
 
-    if ( !( ( numberOfGaussPoints == 4 ) ||
-           ( numberOfGaussPoints == 9 ) ||
-           ( numberOfGaussPoints == 16 ) ) ) {
-        numberOfGaussPoints = 4;
-    }
-
     return IRRT_OK;
 }
 

@@ -354,8 +354,6 @@ void QPlaneStrain :: drawScalar(oofegGraphicContext &context)
             return;
         }
 
-        int ip;
-        GaussPoint *gp;
         IntArray ind(4);
         FloatArray *gpCoords;
         WCRec pp [ 9 ];
@@ -378,8 +376,7 @@ void QPlaneStrain :: drawScalar(oofegGraphicContext &context)
         pp [ 8 ].y = 0.25 * ( pp [ 0 ].y + pp [ 1 ].y + pp [ 2 ].y + pp [ 3 ].y );
         pp [ 8 ].z = 0.;
 
-        for ( ip = 1; ip <= integrationRulesArray [ 0 ]->giveNumberOfIntegrationPoints(); ip++ ) {
-            gp = integrationRulesArray [ 0 ]->getIntegrationPoint(ip - 1);
+        for ( GaussPoint *gp: *iRule ) {
             gpCoords = gp->giveCoordinates();
             if ( ( gpCoords->at(1) > 0. ) && ( gpCoords->at(2) > 0. ) ) {
                 ind.at(1) = 0;

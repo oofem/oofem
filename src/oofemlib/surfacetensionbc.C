@@ -208,8 +208,7 @@ void SurfaceTensionBoundaryCondition :: computeTangentFromElement(FloatMatrix &a
             FloatArray N;
             FloatArray gcoords;
             FloatArray tmpB(2 *nodes);
-            for ( int k = 0; k < iRule->giveNumberOfIntegrationPoints(); k++ ) {
-                GaussPoint *gp = iRule->getIntegrationPoint(k);
+            for ( GaussPoint *gp: *iRule ) {
                 fei2d->edgeEvaldNds( dNds, side, * gp->giveCoordinates(), FEIElementGeometryWrapper(e) );
                 fei->boundaryEvalN( N, side, * gp->giveCoordinates(), FEIElementGeometryWrapper(e) );
                 double J = fei->boundaryGiveTransformationJacobian( side, * gp->giveCoordinates(), FEIElementGeometryWrapper(e) );
@@ -234,8 +233,7 @@ void SurfaceTensionBoundaryCondition :: computeTangentFromElement(FloatMatrix &a
                 answer.plusDyadUnsym(tmpA, tmpA, -r * dV);
             }
         } else {
-            for ( int k = 0; k < iRule->giveNumberOfIntegrationPoints(); k++ ) {
-                GaussPoint *gp = iRule->getIntegrationPoint(k);
+            for ( GaussPoint *gp: *iRule ) {
                 double t = e->giveCrossSection()->give(CS_Thickness, gp); ///@todo The thickness is not often relevant or used in FM.
                 fei2d->edgeEvaldNds( dNds, side, * gp->giveCoordinates(), FEIElementGeometryWrapper(e) );
                 double J = fei->boundaryGiveTransformationJacobian( side, * gp->giveCoordinates(), FEIElementGeometryWrapper(e) );
@@ -273,8 +271,7 @@ void SurfaceTensionBoundaryCondition :: computeTangentFromElement(FloatMatrix &a
         FloatArray n;
         answer.resize(3 * nodes, 3 * nodes);
         answer.zero();
-        for ( int k = 0; k < iRule->giveNumberOfIntegrationPoints(); k++ ) {
-            GaussPoint *gp = iRule->getIntegrationPoint(k);
+        for ( GaussPoint *gp: *iRule ) {
             fei3d->surfaceEvaldNdx( dNdx, side, * gp->giveCoordinates(), FEIElementGeometryWrapper(e) );
             /*double J = */ fei->boundaryEvalNormal( n, side, * gp->giveCoordinates(), FEIElementGeometryWrapper(e) );
             //double dV = gamma * J * gp->giveWeight();
@@ -332,8 +329,7 @@ void SurfaceTensionBoundaryCondition :: computeLoadVectorFromElement(FloatArray 
         if ( e->giveDomain()->isAxisymmetric() ) {
             FloatArray N;
             FloatArray gcoords;
-            for ( int k = 0; k < iRule->giveNumberOfIntegrationPoints(); k++ ) {
-                GaussPoint *gp = iRule->getIntegrationPoint(k);
+            for ( GaussPoint *gp: *iRule ) {
                 fei2d->edgeEvaldNds( dNds, side, * gp->giveCoordinates(), FEIElementGeometryWrapper(e) );
                 fei->boundaryEvalN( N, side, * gp->giveCoordinates(), FEIElementGeometryWrapper(e) );
                 double J = fei->boundaryGiveTransformationJacobian( side, * gp->giveCoordinates(), FEIElementGeometryWrapper(e) );
@@ -350,8 +346,7 @@ void SurfaceTensionBoundaryCondition :: computeLoadVectorFromElement(FloatArray 
                 answer.add(dA, tmp);
             }
         } else {
-            for ( int k = 0; k < iRule->giveNumberOfIntegrationPoints(); k++ ) {
-                GaussPoint *gp = iRule->getIntegrationPoint(k);
+            for ( GaussPoint *gp: *iRule ) {
                 double t = e->giveCrossSection()->give(CS_Thickness, gp);
                 fei2d->edgeEvaldNds( dNds, side, * gp->giveCoordinates(), FEIElementGeometryWrapper(e) );
                 double J = fei->boundaryGiveTransformationJacobian( side, * gp->giveCoordinates(), FEIElementGeometryWrapper(e) );
@@ -382,8 +377,7 @@ void SurfaceTensionBoundaryCondition :: computeLoadVectorFromElement(FloatArray 
         FloatArray n;
         answer.resize(3 * nodes);
         answer.zero();
-        for ( int k = 0; k < iRule->giveNumberOfIntegrationPoints(); k++ ) {
-            GaussPoint *gp = iRule->getIntegrationPoint(k);
+        for ( GaussPoint *gp: *iRule ) {
             fei3d->surfaceEvaldNdx( dNdx, side, * gp->giveCoordinates(), FEIElementGeometryWrapper(e) );
             double J = fei->boundaryEvalNormal( n, side, * gp->giveCoordinates(), FEIElementGeometryWrapper(e) );
 

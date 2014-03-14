@@ -3076,8 +3076,6 @@ HuertaErrorEstimator :: solveRefinedElementProblem(int elemId, IntArray &localNo
         FloatMatrix Nmatrix;
         FloatArray elementVectorGp, patchVectorGp, coarseVectorGp;
         IntegrationRule *iRule;
-        GaussPoint *gp;
-        int igp;
         double dV;
 
         eNorm = uNorm = 0.0;
@@ -3087,8 +3085,7 @@ HuertaErrorEstimator :: solveRefinedElementProblem(int elemId, IntArray &localNo
             iRule = element->giveDefaultIntegrationRulePtr();
 
             elementNorm = patchNorm = mixedNorm = 0.0;
-            for ( igp = 0; igp < iRule->giveNumberOfIntegrationPoints(); igp++ ) {
-                gp = iRule->getIntegrationPoint(igp);
+            for ( GaussPoint *gp: *iRule ) {
                 dV = element->computeVolumeAround(gp);
 
                 interface->HuertaErrorEstimatorI_computeNmatrixAt(gp, Nmatrix);
@@ -3854,8 +3851,6 @@ HuertaErrorEstimator :: solveRefinedWholeProblem(IntArray &localNodeIdArray, Int
         FloatMatrix Nmatrix;
         FloatArray errorVectorGp, coarseVectorGp, fineVectorGp;
         IntegrationRule *iRule;
-        GaussPoint *gp;
-        int igp;
         double dV;
         /*
          * exactENorm = dotProduct(errorSolution.givePointer(), errorSolution.givePointer(), size);
@@ -3868,8 +3863,7 @@ HuertaErrorEstimator :: solveRefinedWholeProblem(IntArray &localNodeIdArray, Int
             interface = static_cast< HuertaErrorEstimatorInterface * >( element->giveInterface(HuertaErrorEstimatorInterfaceType) );
             iRule = element->giveDefaultIntegrationRulePtr();
 
-            for ( igp = 0; igp < iRule->giveNumberOfIntegrationPoints(); igp++ ) {
-                gp = iRule->getIntegrationPoint(igp);
+            for ( GaussPoint *gp: *iRule ) {
                 dV = element->computeVolumeAround(gp);
 
                 interface->HuertaErrorEstimatorI_computeNmatrixAt(gp, Nmatrix);

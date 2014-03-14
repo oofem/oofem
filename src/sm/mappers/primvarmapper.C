@@ -122,10 +122,8 @@ void LSPrimaryVariableMapper :: mapPrimaryVariables(FloatArray &oU, Domain &iOld
             // Loop over Gauss points
             for ( int intRuleInd = 0; intRuleInd < elNew->giveNumberOfIntegrationRules(); intRuleInd++ ) {
                 IntegrationRule *iRule = elNew->giveIntegrationRule(intRuleInd);
-                int numGP = iRule->giveNumberOfIntegrationPoints();
 
-                for ( int gpInd = 0; gpInd < numGP; gpInd++ ) {
-                    GaussPoint *gp = iRule->getIntegrationPoint(gpInd);
+                for ( GaussPoint *gp: *iRule ) {
 
                     // New N-matrix
                     FloatMatrix NNew;

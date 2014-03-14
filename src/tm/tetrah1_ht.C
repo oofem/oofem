@@ -181,7 +181,7 @@ Tetrah1_ht :: SpatialLocalizerI_giveDistanceFromParametricCenter(const FloatArra
     double dist;
     int size, gsize;
 
-    lcoords.at(1) = lcoords.at(2) = lcoords.at(3) = 0.0;
+    lcoords.zero();
     this->computeGlobalCoordinates(gcoords, lcoords);
 
     if ( ( size = coords.giveSize() ) < ( gsize = gcoords.giveSize() ) ) {
