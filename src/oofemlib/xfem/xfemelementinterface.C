@@ -1067,6 +1067,9 @@ void XfemElementInterface :: partitionEdgeSegment(int iBndIndex, std::vector<Lin
                     Line segB(p, seg_xE);
                     newSegments.push_back(segB);
                 }
+                else {
+                	newSegments.push_back(oSegments[segInd]);
+                }
             }
             else {
             	// ... else keep the segment.

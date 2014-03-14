@@ -120,7 +120,11 @@ void PrescribedGradientBCNeumann::assembleVector(FloatArray &answer, TimeStep *t
             e->giveInterpolation()->boundaryGiveNodes(bNodes, boundary);
 //            e->giveBoundaryLocationArray(loc, bNodes, eid, s, & masterDofIDs);
 
-            IntArray elNodes = e->giveDofManArray();
+//            IntArray elNodes = e->giveDofManArray();
+            IntArray elNodes(e->giveNumberOfDofManagers());
+            for(int j = 1; j <= elNodes.giveSize(); j++) {
+            	elNodes.at(j) = j;
+            }
             e->giveBoundaryLocationArray(loc, elNodes, eid, s, & masterDofIDs);
 
 //            e->computeBoundaryVectorOf(bNodes, eid, mode, tStep, e_u);
@@ -180,7 +184,11 @@ void PrescribedGradientBCNeumann::assemble(SparseMtrx *answer, TimeStep *tStep, 
 //            e->giveBoundaryLocationArray(loc_r, bNodes, eid, r_s);
 //            e->giveBoundaryLocationArray(loc_c, bNodes, eid, c_s);
 
-            IntArray elNodes = e->giveDofManArray();
+//            IntArray elNodes = e->giveDofManArray();
+            IntArray elNodes(e->giveNumberOfDofManagers());
+            for(int j = 1; j <= elNodes.giveSize(); j++) {
+            	elNodes.at(j) = j;
+            }
             e->giveBoundaryLocationArray(loc_r, elNodes, eid, r_s);
             e->giveBoundaryLocationArray(loc_c, elNodes, eid, c_s);
 
@@ -228,7 +236,12 @@ void PrescribedGradientBCNeumann::giveLocationArrays(std :: vector< IntArray > &
 //        e->giveBoundaryLocationArray(loc_r, bNodes, dofids, r_s);
 //        e->giveBoundaryLocationArray(loc_c, bNodes, dofids, c_s);
 
-        IntArray elNodes = e->giveDofManArray();
+//        IntArray elNodes = e->giveDofManArray();
+        IntArray elNodes(e->giveNumberOfDofManagers());
+        for(int j = 1; j <= elNodes.giveSize(); j++) {
+        	elNodes.at(j) = j;
+        }
+
         e->giveBoundaryLocationArray(loc_r, elNodes, dofids, r_s);
         e->giveBoundaryLocationArray(loc_c, elNodes, dofids, c_s);
 
@@ -271,10 +284,8 @@ void PrescribedGradientBCNeumann::integrateTangent(FloatMatrix &oTangent, Elemen
     const FloatArray &xE = *(e->giveDofManager(edgeNodes.at(edgeNodes.giveSize()))->giveCoordinates());
 
     if(xfemElInt != NULL && domain->hasXfemManager() ) {
-
     	std::vector<Line> segments;
     	xfemElInt->partitionEdgeSegment( iBndIndex, segments );
-
         MaterialMode matMode = e->giveMaterialMode();
     	ir = new DiscontinuousSegmentIntegrationRule(1, e, segments, xS, xE);
     	int numPointsPerSeg = 1;
@@ -354,7 +365,6 @@ void PrescribedGradientBCNeumann::integrateTangent(FloatMatrix &oTangent, Elemen
         oTangent.add(detJ * gp->giveWeight(), contrib);
     }
     delete ir;
-
 }
 
 
