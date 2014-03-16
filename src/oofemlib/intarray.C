@@ -288,17 +288,6 @@ int IntArray :: findFirstIndexOf(int value) const
 }
 
 
-void IntArray :: setValues(int n, ...)
-{
-    va_list vl;
-    va_start(vl, n);
-    this->values.resize(n);
-    for ( int i = 0; i < n; i++ ) {
-        this->values [ i ] = va_arg(vl, int);
-    }
-    va_end(vl);
-}
-
 int IntArray :: findSorted(int _val)   const
 {
     return std::binary_search (values.begin(), values.end(), _val);

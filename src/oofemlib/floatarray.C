@@ -132,19 +132,6 @@ void FloatArray :: checkBounds(int i) const
 
 
 void
-FloatArray :: setValues(int n, ...)
-{
-    va_list vl;
-    va_start(vl, n);
-    this->values.resize(n);
-    for ( int i = 0; i < n; i++ ) {
-        this->values [ i ] = va_arg(vl, double);
-    }
-    va_end(vl);
-}
-
-
-void
 FloatArray :: beScaled(double s, const FloatArray &b)
 {
     FAST_RESIZE(b.giveSize());
