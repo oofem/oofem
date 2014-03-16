@@ -1606,8 +1606,7 @@ TR1_2D_SUPG2_AXI :: updateIntegrationRules()
      *
      * __area=0.0;
      * for (ifluid = 0; ifluid< 2; ifluid++) {
-     *  for (ip=0 ; ip < integrationRulesArray[ifluid]->giveNumberOfIntegrationPoints() ; ip++) {
-     *    gp = integrationRulesArray[ifluid]->getIntegrationPoint(ip) ;
+     *  for (GaussPoint *gp: *integrationRulesArray[ifluid]) {
      *    dV = this->computeVolumeAroundID(gp,id[ifluid], vcoords[ifluid]) ;
      *    // compute integral here
      *    __area += dV;

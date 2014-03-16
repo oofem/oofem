@@ -216,11 +216,8 @@ void PLHoopStressCirc :: propagateInterfaces(Domain &iDomain, EnrichmentDomain &
                     for ( std :: set< int > :: const_iterator elIt = elIndices.begin(); elIt != elIndices.end(); ++elIt ) {
                         int elIndex = * elIt;
                         Element *gpEl = iDomain.giveElement(elIndex);
-                        IntegrationRule *iRule = gpEl->giveDefaultIntegrationRulePtr();
 
-                        int numGP = iRule->giveNumberOfIntegrationPoints();
-                        for ( int gpIndex = 0; gpIndex < numGP; gpIndex++ ) {
-                            GaussPoint *gp_i = iRule->getIntegrationPoint(gpIndex);
+                        for ( GaussPoint *gp_i: *gpEl->giveDefaultIntegrationRulePtr() ) {
 
                             ////////////////////////////////////////
                             // Compute global gp coordinates

@@ -194,9 +194,7 @@ void MicroMaterial :: giveRealStressVector(FloatArray &answer, GaussPoint *gp, c
     //     for ( int ielem = 1; ielem <= nelem; ielem++ ) { //return stress as average through all elements of the same MicroMaterial
     //         Element *elem = microDomain->giveElement(ielem);
     //         iRule = elem->giveDefaultIntegrationRulePtr();
-    //         for ( int i = 0; i < iRule->giveNumberOfIntegrationPoints(); i++ ) {
-    //             gpL = iRule->getIntegrationPoint(i);
-    //             gpL->giveCoordinate(1);
+    //         for ( GaussPoint *gpL: *iRule ) {
     //             dV  = elem->computeVolumeAround(gpL);
     //             VolTot += dV;
     //             //OOFEM_LOG_INFO("Element %d GP %d Vol %f\n", elem->giveNumber(), gp->giveNumber(), dV);

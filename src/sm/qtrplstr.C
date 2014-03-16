@@ -435,26 +435,25 @@ void QTrPlaneStress2d :: drawScalar(oofegGraphicContext &context)
             }
         }
 
-        for ( ip = 1; ip <= integrationRulesArray [ 0 ]->giveNumberOfIntegrationPoints(); ip++ ) {
-            gp = integrationRulesArray [ 0 ]->getIntegrationPoint(ip - 1);
+        for ( GaussPoint *gp: *integrationRulesArray [ 0 ] ) {
             //gpCoords = gp->giveCoordinates();
-            switch ( ip ) {
-            case 2:
+            switch ( gp->giveNumber() ) {
+            case 3:
                 ind.at(1) = 0;
                 ind.at(2) = 3;
                 ind.at(3) = 5;
                 break;
-            case 3:
+            case 4:
                 ind.at(1) = 1;
                 ind.at(2) = 4;
                 ind.at(3) = 3;
                 break;
-            case 1:
+            case 2:
                 ind.at(1) = 2;
                 ind.at(2) = 5;
                 ind.at(3) = 4;
                 break;
-            case 4:
+            case 5:
             default:
                 ind.at(1) = 3;
                 ind.at(2) = 4;
@@ -542,12 +541,9 @@ QTrPlaneStress2d :: SPRNodalRecoveryMI_givePatchType()
 double
 QTrPlaneStress2d :: DirectErrorIndicatorRCI_giveCharacteristicSize()
 {
-    IntegrationRule *iRule = this->giveDefaultIntegrationRulePtr();
-    GaussPoint *gp;
     double volume = 0.0;
 
-    for ( int i = 0; i < iRule->giveNumberOfIntegrationPoints(); i++ ) {
-        gp  = iRule->getIntegrationPoint(i);
+    for ( GaussPoint *gp: *this->giveDefaultIntegrationRulePtr() ) {
         volume += this->computeVolumeAround(gp) / this->giveCrossSection()->give(CS_Thickness, gp);
     }
 

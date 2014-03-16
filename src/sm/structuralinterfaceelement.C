@@ -82,8 +82,7 @@ StructuralInterfaceElement :: computeStiffnessMatrix(FloatMatrix &answer, MatRes
 
     IntegrationRule *iRule = integrationRulesArray [ giveDefaultIntegrationRule() ];
     FloatMatrix rotationMatGtoL;
-    for ( int j = 0; j < iRule->giveNumberOfIntegrationPoints(); j++ ) {
-        IntegrationPoint *ip = iRule->getIntegrationPoint(j);
+    for ( IntegrationPoint *ip: *iRule ) {
 
         if ( this->nlGeometry == 0 ) {
             this->giveStiffnessMatrix_Eng(D, rMode, ip, tStep);
@@ -166,8 +165,7 @@ StructuralInterfaceElement :: giveInternalForcesVector(FloatArray &answer,
     // zero answer will resize accordingly when adding first contribution
     answer.clear();
 
-    for ( int i = 0; i < iRule->giveNumberOfIntegrationPoints(); i++ ) {
-        IntegrationPoint *ip = iRule->getIntegrationPoint(i);
+    for ( IntegrationPoint *ip: *iRule ) {
         this->computeNmatrixAt(ip, N);
 
         //if ( useUpdatedGpRecord == 1 ) {
@@ -294,10 +292,9 @@ StructuralInterfaceElement :: updateInternalState(TimeStep *tStep)
     // force updating strains & stresses
     for ( int i = 0; i < numberOfIntegrationRules; i++ ) {
         IntegrationRule *iRule = integrationRulesArray [ i ];
-        for ( int j = 0; j < iRule->giveNumberOfIntegrationPoints(); j++ ) {
-            IntegrationPoint *ip = iRule->getIntegrationPoint(j);
-            this->computeSpatialJump(jumpL, ip, tStep);
-            this->computeTraction(tractionG, ip, jumpL, tStep);
+        for ( GaussPoint *gp: *iRule ) {
+            this->computeSpatialJump(jumpL, gp, tStep);
+            this->computeTraction(tractionG, gp, jumpL, tStep);
         }
     }
 }

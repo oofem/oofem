@@ -545,7 +545,7 @@ LTRSpace :: drawSpecial(oofegGraphicContext &gc)
             return;
         }
 
-        //   for (igp=1 ; igp<= integrationRulesArray [ 0 ]->giveNumberOfIntegrationPoints() ; igp++) {
+        //   for (GaussPoint *gp: *integrationRulesArray [ 0 ] ) {
         {
             gp = iRule->getIntegrationPoint(0);
             if ( this->giveIPValue(cf, gp, IST_CrackedFlag, tStep) == 0 ) {

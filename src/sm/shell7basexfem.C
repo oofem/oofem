@@ -418,12 +418,11 @@ Shell7BaseXFEM :: giveMaxCZDamages(FloatArray &answer, TimeStep *tStep)
         if ( hasCohesiveZone(i + 1) ) {
             IntegrationRule *iRule = czIntegrationRulesArray [ i ];
             double max = 0.0;
-            for ( int j = 0; j < iRule->giveNumberOfIntegrationPoints(); j++ ) {
-                IntegrationPoint *ip = iRule->getIntegrationPoint(j);
+            for ( GaussPoint *gp: *iRule ) {
 
                 mat = static_cast< StructuralInterfaceMaterial * >( this->layeredCS->giveInterfaceMaterial(i + 1) );
                 //mat = static_cast < StructuralInterfaceMaterial * > ( this->czMat );
-                mat->giveIPValue(ipValues, ip, IST_DamageScalar, tStep);
+                mat->giveIPValue(ipValues, gp, IST_DamageScalar, tStep);
 
                 double val = ipValues.at(1);
                 if ( val > max ) {
@@ -458,10 +457,9 @@ Shell7BaseXFEM :: computeCohesiveForces(FloatArray &answer, TimeStep *tStep, Flo
     FloatArray Fp, T, interfaceXiCoords, nCov, xd, unknowns, genEpsC, genEpsD;
     this->layeredCS->giveInterfaceXiCoords(interfaceXiCoords);
 
-    for ( int i = 1; i <= iRuleL->giveNumberOfIntegrationPoints(); i++ ) {
-        IntegrationPoint *ip = iRuleL->getIntegrationPoint(i - 1);
-        lCoords.at(1) = ip->giveCoordinate(1);
-        lCoords.at(2) = ip->giveCoordinate(2);
+    for ( GaussPoint *gp: *iRuleL ) {
+        lCoords.at(1) = gp->giveCoordinate(1);
+        lCoords.at(2) = gp->giveCoordinate(2);
         lCoords.at(3) = dei->giveDelamXiCoord();
 
         this->computeBmatrixAt(lCoords, B);
@@ -487,12 +485,12 @@ Shell7BaseXFEM :: computeCohesiveForces(FloatArray &answer, TimeStep *tStep, Flo
         F.rotatedWith(Q, 'n');
 
         // Compute cohesive traction based on jump
-        intMat->giveFirstPKTraction_3d(T, ip, xd, F, tStep);
+        intMat->giveFirstPKTraction_3d(T, gp, xd, F, tStep);
         lambdaN.beProductOf(lambda, N);
         T.rotatedWith(Q, 't'); // transform back to global coord system
 
         Fp.beTProductOf(lambdaN, T);
-        double dA = this->computeAreaAround(ip, xi);
+        double dA = this->computeAreaAround(gp, xi);
         answerTemp.add(dA, Fp);
     }
 
@@ -567,10 +565,9 @@ Shell7BaseXFEM :: computeCohesiveTangentAt(FloatMatrix &answer, TimeStep *tStep,
     FloatArray nCov;
     FloatArray interfaceXiCoords;
     this->layeredCS->giveInterfaceXiCoords(interfaceXiCoords);
-    for ( int i = 1; i <= iRuleL->giveNumberOfIntegrationPoints(); i++ ) {
-        IntegrationPoint *ip = iRuleL->getIntegrationPoint(i - 1);
-        lCoords.at(1) = ip->giveCoordinate(1);
-        lCoords.at(2) = ip->giveCoordinate(2);
+    for ( GaussPoint *gp: *iRuleL ) {
+        lCoords.at(1) = gp->giveCoordinate(1);
+        lCoords.at(2) = gp->giveCoordinate(2);
         lCoords.at(3) = dei->giveDelamXiCoord();
 
         double zeta = this->giveGlobalZcoord(xi, lCoords);
@@ -578,14 +575,14 @@ Shell7BaseXFEM :: computeCohesiveTangentAt(FloatMatrix &answer, TimeStep *tStep,
 
         this->computeNmatrixAt(lCoords, N);
 
-        intMat->give3dStiffnessMatrix_dTdj(K, TangentStiffness, ip, tStep);
+        intMat->give3dStiffnessMatrix_dTdj(K, TangentStiffness, gp, tStep);
         this->evalInitialCovarNormalAt(nCov, lCoords);
         Q.beLocalCoordSys(nCov);
         K.rotatedWith(Q, 't');   // rotate back to global coord system
 
         this->computeTripleProduct(temp, lambda, K, lambda);
         this->computeTripleProduct(tangent, N, temp, N);
-        double dA = this->computeAreaAround(ip, xi);
+        double dA = this->computeAreaAround(gp, xi);
         answerTemp.add(dA, tangent);
     }
 
@@ -622,10 +619,9 @@ Shell7BaseXFEM :: computeStiffnessMatrix(FloatMatrix &answer, MatResponseMode rM
         IntegrationRule *iRule = integrationRulesArray [ layer - 1 ];
         Material *mat = domain->giveMaterial( this->layeredCS->giveLayerMaterial(layer) );
 
-        for ( int i = 0; i < iRule->giveNumberOfIntegrationPoints(); i++ ) {
-            IntegrationPoint *ip = iRule->getIntegrationPoint(i);
-            this->discComputeBulkTangentMatrix(KCC, KCD, KDD, ip, mat, layer, tStep);
-            lCoords = * ip->giveCoordinates();
+        for ( GaussPoint *gp: *iRule ) {
+            this->discComputeBulkTangentMatrix(KCC, KCD, KDD, gp, mat, layer, tStep);
+            lCoords = * gp->giveCoordinates();
 
             // Continuous part K_{c,c}
             answer.assemble(KCC, orderingC, orderingC);
@@ -699,9 +695,8 @@ Shell7BaseXFEM :: computeStiffnessMatrix(FloatMatrix &answer, MatResponseMode rM
         if ( ConstantPressureLoad * pLoad = dynamic_cast< ConstantPressureLoad * >(load) ) {
             IntegrationRule *iRule = specialIntegrationRulesArray [ 1 ];
 
-            for ( int i = 0; i < iRule->giveNumberOfIntegrationPoints(); i++ ) {
-                IntegrationPoint *ip = iRule->getIntegrationPoint(i);
-                this->computePressureTangentMatrixDis(KCC, KCD, KDD, ip, load, iSurf, tStep);
+            for ( GaussPoint *gp: *iRule ) {
+                this->computePressureTangentMatrixDis(KCC, KCD, KDD, gp, load, iSurf, tStep);
                 // Continuous part
                 answer.assemble(KCC, orderingC, orderingC);
 

@@ -340,10 +340,7 @@ PlaneStress2d :: giveCharacteristicSize(GaussPoint *gp, FloatArray &normalToCrac
 
     // evaluate average strain and its maximum principal direction
     FloatArray sumstrain, averageNormal;
-    IntegrationRule *iRule = giveDefaultIntegrationRulePtr();
-    int nGP = iRule->giveNumberOfIntegrationPoints();
-    for ( int i = 0; i < nGP; i++ ) {
-        GaussPoint *gpi = iRule->getIntegrationPoint(i);
+    for ( GaussPoint *gpi: *this->giveDefaultIntegrationRulePtr() ) {
         StructuralMaterialStatus *matstatus = dynamic_cast< StructuralMaterialStatus * >( gpi->giveMaterialStatus() );
         if ( matstatus ) {
             sumstrain.add( matstatus->giveTempStrainVector() );
@@ -963,13 +960,9 @@ PlaneStress2d :: SpatialLocalizerI_giveDistanceFromParametricCenter(const FloatA
 double
 PlaneStress2d :: DirectErrorIndicatorRCI_giveCharacteristicSize()
 {
-    IntegrationRule *iRule;
-    GaussPoint *gp;
     double volume = 0.0;
 
-    iRule = integrationRulesArray [ giveDefaultIntegrationRule() ];
-    for ( int i = 0; i < iRule->giveNumberOfIntegrationPoints(); i++ ) {
-        gp  = iRule->getIntegrationPoint(i);
+    for ( GaussPoint *gp: *this->giveDefaultIntegrationRulePtr() ) {
         volume += this->computeVolumeAround(gp) / this->giveCrossSection()->give(CS_Thickness, gp);
     }
 

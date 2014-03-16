@@ -1697,8 +1697,7 @@ VTKXMLExportModule :: computeIPAverage(FloatArray &answer, IntegrationRule *iRul
     answer.clear();
     FloatArray temp;
     if ( iRule ) {
-        for ( int i = 0; i < iRule->giveNumberOfIntegrationPoints(); ++i ) {
-            IntegrationPoint *ip = iRule->getIntegrationPoint(i);
+        for ( IntegrationPoint *ip: *iRule ) {
             elem->giveIPValue(temp, ip, isType, tStep);
             gptot += ip->giveWeight();
             answer.add(ip->giveWeight(), temp);
@@ -1810,8 +1809,7 @@ void
 VTKXMLExportModule :: exportIntVarsInGpAs(IntArray valIDs, TimeStep *tStep)
 {
     Domain *d = emodel->giveDomain(1);
-    int nip;
-    int j, k, nc = 0;
+    int nc = 0;
     FloatArray *lc, gc, value;
     FILE *stream;
     InternalStateType isttype;
@@ -1832,7 +1830,7 @@ VTKXMLExportModule :: exportIntVarsInGpAs(IntArray valIDs, TimeStep *tStep)
     /* loop over regions */
     for ( int ireg = 1; ireg <= nregions; ireg++ ) {
         const IntArray &elements = this->giveRegionSet(ireg)->giveElementList();
-        nip = 0;
+        int nip = 0;
         for ( int i = 1; i <= elements.giveSize(); i++ ) {
             nip += d->giveElement( elements.at(i) )->giveDefaultIntegrationRulePtr()->giveNumberOfIntegrationPoints();
         }
@@ -1843,15 +1841,14 @@ VTKXMLExportModule :: exportIntVarsInGpAs(IntArray valIDs, TimeStep *tStep)
         for ( int i = 1; i <= elements.giveSize(); i++ ) {
             int ielem = elements.at(i);
 
-            int enip = d->giveElement(ielem)->giveDefaultIntegrationRulePtr()->giveNumberOfIntegrationPoints();
-            for ( j = 0; j < enip; j++ ) {
-                lc = d->giveElement(ielem)->giveDefaultIntegrationRulePtr()->getIntegrationPoint(j)->giveCoordinates();
+            for ( GaussPoint *gp: *d->giveElement(ielem)->giveDefaultIntegrationRulePtr() ) {
+                lc = gp->giveCoordinates();
                 d->giveElement(ielem)->computeGlobalCoordinates(gc, * lc);
-                for ( k = 1; k <= gc.giveSize(); k++ ) {
-                    fprintf( stream, "%e ", gc.at(k) );
+                for ( double c: gc ) {
+                    fprintf( stream, "%e ", c );
                 }
 
-                for ( k = gc.giveSize() + 1; k <= 3; k++ ) {
+                for ( int k = gc.giveSize() + 1; k <= 3; k++ ) {
                     fprintf(stream, "%e ", 0.0);
                 }
             }
@@ -1861,19 +1858,19 @@ VTKXMLExportModule :: exportIntVarsInGpAs(IntArray valIDs, TimeStep *tStep)
         fprintf(stream, "</Points>\n");
         fprintf(stream, "<Cells>\n");
         fprintf(stream, " <DataArray type=\"Int32\" Name=\"connectivity\" format=\"ascii\">");
-        for ( j = 0; j < nip; j++ ) {
+        for ( int j = 0; j < nip; j++ ) {
             fprintf(stream, "%d ", j);
         }
 
         fprintf(stream, " </DataArray>\n");
         fprintf(stream, " <DataArray type=\"Int32\" Name=\"offsets\" format=\"ascii\">");
-        for ( j = 1; j <= nip; j++ ) {
+        for ( int j = 1; j <= nip; j++ ) {
             fprintf(stream, "%d ", j);
         }
 
         fprintf(stream, " </DataArray>\n");
         fprintf(stream, " <DataArray type=\"UInt8\" Name=\"types\" format=\"ascii\">");
-        for ( j = 1; j <= nip; j++ ) {
+        for ( int j = 1; j <= nip; j++ ) {
             fprintf(stream, "1 ");
         }
 
@@ -1927,19 +1924,17 @@ VTKXMLExportModule :: exportIntVarsInGpAs(IntArray valIDs, TimeStep *tStep)
             for ( int i = 1; i <= elements.giveSize(); i++ ) {
                 int ielem = elements.at(i);
 
-                nip = d->giveElement(ielem)->giveDefaultIntegrationRulePtr()->giveNumberOfIntegrationPoints();
                 // loop over default IRule gps
-                for ( int ip = 0; ip < nip; ip++ ) {
-                    d->giveElement(ielem)->giveIPValue(value, d->giveElement(ielem)->giveDefaultIntegrationRulePtr()->getIntegrationPoint(ip),
-                                                       isttype, tStep);
+                for ( GaussPoint *gp: *d->giveElement(ielem)->giveDefaultIntegrationRulePtr() ) {
+                    d->giveElement(ielem)->giveIPValue(value, gp, isttype, tStep);
 
                     if ( ( vtype == ISVT_TENSOR_S3 ) || ( vtype == ISVT_TENSOR_S3E ) ) {
                         FloatArray help = value;
                         this->makeFullForm(value, help);
                     }
 
-                    for ( j = 1; j <= nc; j++ ) {
-                        fprintf( stream, "%e ", value.at(j) );
+                    for ( double v: value ) {
+                        fprintf( stream, "%e ", v );
                     }
                 } // end loop over IPs
             } // end loop over elements
@@ -1954,12 +1949,14 @@ VTKXMLExportModule :: exportIntVarsInGpAs(IntArray valIDs, TimeStep *tStep)
     fclose(stream);
 }
 
-int VTKXMLExportModule :: giveNumberOfRegions() {
+int VTKXMLExportModule :: giveNumberOfRegions()
+{
     /// Returns number of regions (aka sets)
     return this->regionSets.giveSize();
 }
 
-Set *VTKXMLExportModule :: giveRegionSet(int i) {
+Set *VTKXMLExportModule :: giveRegionSet(int i)
+{
     int setid = regionSets.at(i);
     if ( setid > 0 ) {
         return emodel->giveDomain(1)->giveSet(setid);

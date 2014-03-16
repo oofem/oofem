@@ -298,8 +298,7 @@ void InterfaceElem2dQuad :: drawDeformedGeometry(oofegGraphicContext &gc, Unknow
 
 void InterfaceElem2dQuad :: drawScalar(oofegGraphicContext &context)
 {
-    int i, indx, result = 0;
-    GaussPoint *gp;
+    int indx, result = 0;
     IntegrationRule *iRule = integrationRulesArray [ giveDefaultIntegrationRule() ];
     TimeStep *tStep = this->giveDomain()->giveEngngModel()->giveCurrentStep();
     FloatArray gcoord(3), v1;
@@ -315,9 +314,8 @@ void InterfaceElem2dQuad :: drawScalar(oofegGraphicContext &context)
         return;
     }
 
-    for ( i = 0; i < iRule->giveNumberOfIntegrationPoints(); i++ ) {
+    for ( GaussPoint *gp: *iRule ) {
         result = 0;
-        gp  = iRule->getIntegrationPoint(i);
         result += giveIPValue(v1, gp, context.giveIntVarType(), tStep);
         if ( result != 1 ) {
             continue;

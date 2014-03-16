@@ -439,12 +439,9 @@ QTrPlaneStrain :: SPRNodalRecoveryMI_givePatchType()
 double
 QTrPlaneStrain :: DirectErrorIndicatorRCI_giveCharacteristicSize()
 {
-    IntegrationRule *iRule = this->giveDefaultIntegrationRulePtr();
-    GaussPoint *gp;
     double volume = 0.0;
 
-    for ( int i = 0; i < iRule->giveNumberOfIntegrationPoints(); i++ ) {
-        gp  = iRule->getIntegrationPoint(i);
+    for ( GaussPoint *gp: *this->giveDefaultIntegrationRulePtr() ) {
         volume += this->computeVolumeAround(gp) / this->giveCrossSection()->give(CS_Thickness, gp);
     }
 

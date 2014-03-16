@@ -614,9 +614,9 @@ bool XfemElementInterface :: XfemElementInterface_updateIntegrationRule()
 
             std :: vector< FloatArray >czGPCoord;
 
-            for ( size_t czRulInd = 0; czRulInd < mpCZIntegrationRules.size(); czRulInd++ ) {
-                for ( int i = 0; i < mpCZIntegrationRules [ czRulInd ]->giveNumberOfIntegrationPoints(); i++ ) {
-                    czGPCoord.push_back( * ( mpCZIntegrationRules [ czRulInd ]->getIntegrationPoint(i)->giveCoordinates() ) );
+            for ( IntegrationRule *iRule: mpCZIntegrationRules ) {
+                for ( GaussPoint *gp: *iRule ) {
+                    czGPCoord.push_back( * ( gp->giveCoordinates() ) );
                 }
             }
 

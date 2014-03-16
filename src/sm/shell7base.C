@@ -729,19 +729,18 @@ Shell7Base :: computePressureTangentMatrix(FloatMatrix &answer, Load *load, cons
     int ndof = Shell7Base :: giveNumberOfDofs();
     answer.resize(ndof, ndof);
     answer.zero();
-    for ( int i = 0; i < iRule->giveNumberOfIntegrationPoints(); i++ ) {
-        IntegrationPoint *ip = iRule->getIntegrationPoint(i);
-        lcoords.at(1) = ip->giveCoordinate(1);
-        lcoords.at(2) = ip->giveCoordinate(2);
+    for ( GaussPoint *gp: *iRule ) {
+        lcoords.at(1) = gp->giveCoordinate(1);
+        lcoords.at(2) = gp->giveCoordinate(2);
         lcoords.at(3) = xi;     // local coord where load is applied
 
-        double zeta = this->giveGlobalZcoord( xi, * ip->giveCoordinates() );
+        double zeta = this->giveGlobalZcoord( xi, * gp->giveCoordinates() );
         this->computeNmatrixAt(lcoords, N);
         this->computeBmatrixAt(lcoords, B);
         genEps.beProductOf(B, solVec);
 
         // Traction tangent, L =  lambdaN * ( W2*lambdaG_1 - W1*lambdaG_2  )
-        load->computeValueAt(pressure, tStep, * ( ip->giveCoordinates() ), VM_Total);        // pressure component
+        load->computeValueAt(pressure, tStep, * ( gp->giveCoordinates() ), VM_Total);        // pressure component
         this->evalCovarBaseVectorsAt(lcoords, gcov, genEps);
         g1.beColumnOf(gcov, 1);
         g2.beColumnOf(gcov, 2);
@@ -760,7 +759,7 @@ Shell7Base :: computePressureTangentMatrix(FloatMatrix &answer, Load *load, cons
 
         // Tangent matrix (K = N^T*L*B*dA)
         this->computeTripleProduct(NLB, N, L, B);
-        double dA = this->computeAreaAround(ip, xi);
+        double dA = this->computeAreaAround(gp, xi);
         answer.add(dA, NLB);
     }
 }
@@ -1799,7 +1798,6 @@ Shell7Base :: ZZNodalRecoveryMI_computeNValProductInLayer(FloatMatrix &answer, i
     FloatArray stressVector, n;
     Element *elem  = this->ZZNodalRecoveryMI_giveElement();
     IntegrationRule *iRule = integrationRulesArray [ layer - 1 ];
-    GaussPoint *gp;
 
     //int size = ZZNodalRecoveryMI_giveDofManRecordSize(type);
     int size = 6; ///@todo this is hard coded for stress recovery
@@ -1807,8 +1805,7 @@ Shell7Base :: ZZNodalRecoveryMI_computeNValProductInLayer(FloatMatrix &answer, i
     answer.resize(numDofMans, size);
 
     answer.zero();
-    for ( int i = 0; i < iRule->giveNumberOfIntegrationPoints(); i++ ) {
-        gp  = iRule->getIntegrationPoint(i);
+    for ( GaussPoint *gp: *iRule ) {
         double dV = this->computeVolumeAroundLayer(gp, layer);
 
         if ( !elem->giveIPValue(stressVector, gp, type, tStep) ) {
@@ -1837,13 +1834,11 @@ Shell7Base :: ZZNodalRecoveryMI_computeNNMatrixInLayer(FloatArray &answer, int l
     FloatMatrix fullAnswer;
     FloatArray n;
     IntegrationRule *iRule = integrationRulesArray [ layer - 1 ];
-    GaussPoint *gp;
 
     int size = 15;
     fullAnswer.resize(size, size);
     fullAnswer.zero();
-    for ( int i = 0; i < iRule->giveNumberOfIntegrationPoints(); i++ ) {
-        gp  = iRule->getIntegrationPoint(i);
+    for ( GaussPoint *gp: *iRule ) {
         double dV = this->computeVolumeAroundLayer(gp, layer);
         this->ZZNodalRecoveryMI_ComputeEstimatedInterpolationMtrx(n, gp, type);
         //fullAnswer.plusDyadSymmUpper(n, n, dV);
@@ -2648,7 +2643,6 @@ Shell7Base :: recoverValuesFromIP(std :: vector< FloatArray > &recoveredValues, 
     recoveredValues.resize(numNodes);
 
     IntegrationRule *iRule = integrationRulesArray [ layer - 1 ];
-    IntegrationPoint *ip;
 
     // Find closest ip to the nodes
     IntArray closestIPArray(numNodes);
@@ -2659,12 +2653,11 @@ Shell7Base :: recoverValuesFromIP(std :: vector< FloatArray > &recoveredValues, 
     for ( int i = 1; i <= numNodes; i++ ) {
         nodeCoords = {nodeLocalXi1Coords.at(i), nodeLocalXi2Coords.at(i), nodeLocalXi3Coords.at(i) };
         double distOld = 3.0; // should not be larger
-        for ( int j = 0; j < iRule->giveNumberOfIntegrationPoints(); j++ ) {
-            ip = iRule->getIntegrationPoint(j);
-            ipCoords = * ip->giveCoordinates();
+        for ( GaussPoint *gp: *iRule ) {
+            ipCoords = * gp->giveCoordinates();
             double dist = nodeCoords.distance(ipCoords);
             if ( dist < distOld ) {
-                closestIPArray.at(i) = j;
+                closestIPArray.at(i) = gp->giveNumber();
                 distOld = dist;
             }
         }
@@ -2672,8 +2665,8 @@ Shell7Base :: recoverValuesFromIP(std :: vector< FloatArray > &recoveredValues, 
 
     // recover ip values
     for ( int i = 1; i <= numNodes; i++ ) {
-        ip = iRule->getIntegrationPoint( closestIPArray.at(i) );
-        this->giveIPValue(ipValues, ip, type, tStep);
+        GaussPoint *gp = iRule->getIntegrationPoint( closestIPArray.at(i) );
+        this->giveIPValue(ipValues, gp, type, tStep);
         recoveredValues [ i - 1 ].resize(9);
         recoveredValues [ i - 1 ] = convV6ToV9Stress(ipValues);
     }
@@ -2710,11 +2703,11 @@ Shell7Base :: recoverShearStress(TimeStep *tStep)
         }
         int numInPlaneIP = 6;
 
-        for ( int i = 0; i < iRuleThickness->giveNumberOfIntegrationPoints(); i++ ) {
-            double dz = thickness * iRuleThickness->getIntegrationPoint(i)->giveWeight();
+        for ( GaussPoint *thickGp: *iRuleThickness ) {
+            double dz = thickness * thickGp->giveWeight();
 
             for ( int j = 0; j < numInPlaneIP; j++ ) {
-                int point = i * numInPlaneIP + j; // integration point number
+                int point = (thickGp->giveNumber()-1) * numInPlaneIP + j; // integration point number
                 GaussPoint *gp = iRuleL->getIntegrationPoint(point);
 
                 this->computeBmatrixForStressRecAt(* gp->giveCoordinates(), B, layer);

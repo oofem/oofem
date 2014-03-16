@@ -256,18 +256,14 @@ void
 LIBeam2dNL :: computeInitialStressMatrix(FloatMatrix &answer, TimeStep *tStep)
 {
     double dV;
-    GaussPoint *gp;
-    IntegrationRule *iRule;
     FloatArray stress;
     FloatMatrix A;
 
     answer.resize(6, 6);
     answer.zero();
 
-    iRule = integrationRulesArray [ giveDefaultIntegrationRule() ];
     // assemble initial stress matrix
-    for ( int i = 0; i < iRule->giveNumberOfIntegrationPoints(); i++ ) {
-        gp = iRule->getIntegrationPoint(i);
+    for ( GaussPoint *gp: *this->giveDefaultIntegrationRulePtr() ) {
         dV = this->computeVolumeAround(gp);
         stress = static_cast< StructuralMaterialStatus * >( gp->giveMaterialStatus() )->giveStressVector();
         if ( stress.giveSize() ) {

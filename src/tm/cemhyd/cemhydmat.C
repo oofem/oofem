@@ -353,13 +353,8 @@ CemhydMat :: giveIPValue(FloatArray &answer, GaussPoint *gp, InternalStateType t
 int
 CemhydMat :: initMaterial(Element *element)
 {
-    IntegrationRule *iRule;
-    GaussPoint *gp;
-    CemhydMatStatus *ms;
-
-    iRule = element->giveDefaultIntegrationRulePtr();
-    for ( int i = 0; i < iRule->giveNumberOfIntegrationPoints(); i++ ) {
-        gp  = iRule->getIntegrationPoint(i);
+    for ( GaussPoint *gp: *element->giveDefaultIntegrationRulePtr() ) {
+        CemhydMatStatus *ms;
         if ( !MasterCemhydMatStatus && !eachGP ) {
             ms = new CemhydMatStatus(1, domain, gp, NULL, this, 1);
             MasterCemhydMatStatus = ms;
@@ -377,14 +372,9 @@ CemhydMat :: initMaterial(Element *element)
 
 void CemhydMat :: clearWeightTemperatureProductVolume(Element *element)
 {
-    IntegrationRule *iRule;
-    GaussPoint *gp;
     CemhydMatStatus *ms;
-    int i;
-    iRule = element->giveDefaultIntegrationRulePtr();
 
-    for ( i = 0; i < iRule->giveNumberOfIntegrationPoints(); i++ ) {
-        gp  = iRule->getIntegrationPoint(i);
+    for ( GaussPoint *gp: *element->giveDefaultIntegrationRulePtr() ) {
         ms = static_cast< CemhydMatStatus * >( this->giveStatus(gp) );
         ms->setAverageTemperatureVolume(0.0, 0.0);
     }

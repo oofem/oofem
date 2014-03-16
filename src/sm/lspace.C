@@ -235,12 +235,10 @@ LSpace :: giveCharacteristicLenght(GaussPoint *gp, const FloatArray &normalToCra
         return this->giveLenghtInDir(normalToCrackPlane) / factor;
     } else {
         IntegrationRule *iRule;
-        GaussPoint *gp;
         double volume = 0.0;
 
         iRule = integrationRulesArray [ giveDefaultIntegrationRule() ];
-        for ( int i = 0; i < iRule->giveNumberOfIntegrationPoints(); i++ ) {
-            gp  = iRule->getIntegrationPoint(i);
+        for ( GaussPoint *gp: *iRule ) {
             volume += this->computeVolumeAround(gp);
         }
 
@@ -564,15 +562,11 @@ LSpace :: HuertaErrorEstimatorI_setupRefinedElementProblem(RefinedElement *refin
 
 
 double
-LSpace :: HuertaRemeshingCriteriaI_giveCharacteristicSize() {
-    int i;
-    IntegrationRule *iRule;
-    GaussPoint *gp;
+LSpace :: HuertaRemeshingCriteriaI_giveCharacteristicSize()
+{
     double volume = 0.0;
 
-    iRule = integrationRulesArray [ giveDefaultIntegrationRule() ];
-    for ( i = 0; i < iRule->giveNumberOfIntegrationPoints(); i++ ) {
-        gp  = iRule->getIntegrationPoint(i);
+    for ( GaussPoint *gp: *this->giveDefaultIntegrationRulePtr() ) {
         volume += this->computeVolumeAround(gp);
     }
 

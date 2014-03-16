@@ -370,20 +370,19 @@ void StructuralElementEvaluator :: updateInternalState(TimeStep *tStep)
 
 #if 0
     // Original unoptimized version
-    int i, j;
     IntegrationRule *iRule;
     FloatArray stress;
     Element *elem = this->giveElement();
     // force updating strains & stresses
-    for ( i = 0; i < elem->giveNumberOfIntegrationRules(); i++ ) {
+    for ( int i = 0; i < elem->giveNumberOfIntegrationRules(); i++ ) {
  #ifdef __PARALLEL_MODE
         if ( this->giveElement()->giveKnotSpanParallelMode(i) == Element_remote ) {
             continue;
         }
  #endif
         iRule = elem->giveIntegrationRule(i);
-        for ( j = 0; j < iRule->giveNumberOfIntegrationPoints(); j++ ) {
-            computeStressVector(stress, iRule->getIntegrationPoint(j), tStep);
+        for ( GaussPoint *gp: *iRule ) {
+            computeStressVector(stress, gp, tStep);
         }
     }
 #endif

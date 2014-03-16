@@ -836,14 +836,9 @@ Quad1PlaneStrain :: SpatialLocalizerI_giveDistanceFromParametricCenter(const Flo
 double
 Quad1PlaneStrain :: DirectErrorIndicatorRCI_giveCharacteristicSize()
 {
-    int i;
-    IntegrationRule *iRule;
-    GaussPoint *gp;
     double volume = 0.0;
 
-    iRule = integrationRulesArray [ giveDefaultIntegrationRule() ];
-    for ( i = 0; i < iRule->giveNumberOfIntegrationPoints(); i++ ) {
-        gp  = iRule->getIntegrationPoint(i);
+    for ( GaussPoint *gp: *this->giveDefaultIntegrationRulePtr() ) {
         volume += this->computeVolumeAround(gp) / this->giveCrossSection()->give(CS_Thickness, gp);
     }
 

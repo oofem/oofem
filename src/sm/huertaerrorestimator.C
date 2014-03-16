@@ -743,8 +743,7 @@ HuertaRemeshingCriteria :: estimateMeshDensities(TimeStep *tStep)
     EE_ErrorType errorType = unknownET;
     HuertaRemeshingCriteriaInterface *interface;
     bool refine = false;
-    IntegrationRule *iRule;
-    int nip, result;
+    int result;
     double sval, maxVal;
     FloatArray val;
 
@@ -837,10 +836,8 @@ HuertaRemeshingCriteria :: estimateMeshDensities(TimeStep *tStep)
                 // chtelo by tez zaridit spusteni remeshingu, kdyz tato situace nastane -> combined
                 // huerta + error indicator
                 maxVal = 0.0;
-                iRule = ielem->giveDefaultIntegrationRulePtr();
-                nip = iRule->giveNumberOfIntegrationPoints();
-                for ( int k = 0; k < nip; k++ ) {
-                    result = ielem->giveIPValue(val, iRule->getIntegrationPoint(k), IST_PrincipalDamageTensor, tStep);
+                for ( GaussPoint *gp: *ielem->giveDefaultIntegrationRulePtr() ) {
+                    result = ielem->giveIPValue(val, gp, IST_PrincipalDamageTensor, tStep);
                     if ( result ) {
                         sval = val.computeNorm();
                         maxVal = max(maxVal, sval);
@@ -953,10 +950,8 @@ HuertaRemeshingCriteria :: estimateMeshDensities(TimeStep *tStep)
         // chtelo by tez zaridit spusteni remeshingu, kdyz tato situace nastane -> combined
         // huerta + error indicator
         maxVal = 0.0;
-        iRule = ielem->giveDefaultIntegrationRulePtr();
-        nip = iRule->giveNumberOfIntegrationPoints();
-        for ( int k = 0; k < nip; k++ ) {
-            result = ielem->giveIPValue(val, iRule->getIntegrationPoint(k), IST_PrincipalDamageTensor, tStep);
+        for ( GaussPoint *gp: *ielem->giveDefaultIntegrationRulePtr() ) {
+            result = ielem->giveIPValue(val, gp, IST_PrincipalDamageTensor, tStep);
             if ( result ) {
                 sval = val.computeNorm();
                 maxVal = max(maxVal, sval);
@@ -3205,17 +3200,14 @@ HuertaErrorEstimator :: solveRefinedElementProblem(int elemId, IntArray &localNo
     double eeeNorm = 0.0;
 
 #ifdef HUHU
-    IntegrationRule *iRule;
-    int nip, result;
+    int result;
     double sval, maxVal;
     int k;
 
     maxVal = 0.0;
     element = domain->giveElement(elemId);
-    iRule = element->giveDefaultIntegrationRulePtr();
-    nip = iRule->giveNumberOfIntegrationPoints();
-    for ( k = 0; k < nip; k++ ) {
-        result = element->giveIPValue(val, iRule->getIntegrationPoint(k), IST_PrincipalDamageTensor, tStep);
+    for ( GaussPoint *gp: *element->giveDefaultIntegrationRulePtr() ) {
+        result = element->giveIPValue(val, gp, IST_PrincipalDamageTensor, tStep);
         if ( result ) {
             sval = sqrt( dotProduct( val, val, val.giveSize() ) );
             maxVal = max(maxVal, sval);

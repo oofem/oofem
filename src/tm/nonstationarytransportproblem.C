@@ -757,19 +757,13 @@ NonStationaryTransportProblem :: averageOverElements(TimeStep *tStep)
     ///@todo Verify this, the function is completely unused.
     Domain *domain = this->giveDomain(1);
     int nelem = domain->giveNumberOfElements();
-    TransportElement *element;
-    IntegrationRule *iRule;
-    GaussPoint *gp;
     FloatArray vecTemperature;
-    TransportMaterial *mat;
 
     for ( int ielem = 1; ielem <= nelem; ielem++ ) {
-        element = static_cast< TransportElement * >( domain->giveElement(ielem) );
-        mat = static_cast< CemhydMat * >( element->giveMaterial() );
+        TransportElement *element = static_cast< TransportElement * >( domain->giveElement(ielem) );
+        TransportMaterial *mat = static_cast< CemhydMat * >( element->giveMaterial() );
         if ( mat ) {
-            iRule = element->giveDefaultIntegrationRulePtr();
-            for ( int i = 0; i < iRule->giveNumberOfIntegrationPoints(); i++ ) {
-                gp  = iRule->getIntegrationPoint(i);
+            for ( GaussPoint *gp: element->giveDefaultIntegrationRulePtr() ) {
                 element->giveIPValue(vecTemperature, gp, IST_Temperature, tStep);
                 //mat->IP_volume += dV;
                 //mat->average_temp += vecState.at(1) * dV;
@@ -778,7 +772,7 @@ NonStationaryTransportProblem :: averageOverElements(TimeStep *tStep)
     }
 
     for ( int i = 1; i <= domain->giveNumberOfMaterialModels(); i++ ) {
-        mat = static_cast< CemhydMat * >( domain->giveMaterial(i) );
+        CemhydMat *mat = static_cast< CemhydMat * >( domain->giveMaterial(i) );
         if ( mat ) {
             //mat->average_temp /= mat->IP_volume;
         }
