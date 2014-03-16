@@ -1032,13 +1032,8 @@ protected:
 template< class T > void
 Element :: ipEvaluator( T *src, void ( T :: *f )( GaussPoint *gp ) )
 {
-    int ir, ip, nip;
-    GaussPoint *gp;
-
-    for ( ir = 0; ir < numberOfIntegrationRules; ir++ ) {
-        nip = integrationRulesArray [ ir ]->giveNumberOfIntegrationPoints();
-        for ( ip = 0; ip < nip; ip++ ) {
-            gp = integrationRulesArray [ ir ]->getIntegrationPoint(ip);
+    for ( int ir = 0; ir < numberOfIntegrationRules; ir++ ) {
+        for ( GaussPoint *gp: *integrationRulesArray [ ir ] ) {
             ( src->*f )(gp);
         }
     }
@@ -1047,13 +1042,8 @@ Element :: ipEvaluator( T *src, void ( T :: *f )( GaussPoint *gp ) )
 template< class T, class S > void
 Element :: ipEvaluator(T *src, void ( T :: *f )( GaussPoint *, S & ), S &_val)
 {
-    int ir, ip, nip;
-    GaussPoint *gp;
-
-    for ( ir = 0; ir < numberOfIntegrationRules; ir++ ) {
-        nip = integrationRulesArray [ ir ]->giveNumberOfIntegrationPoints();
-        for ( ip = 0; ip < nip; ip++ ) {
-            gp = integrationRulesArray [ ir ]->getIntegrationPoint(ip);
+    for ( int ir = 0; ir < numberOfIntegrationRules; ir++ ) {
+        for ( GaussPoint *gp: *integrationRulesArray [ ir ] ) {
             ( src->*f )(gp, _val);
         }
     }

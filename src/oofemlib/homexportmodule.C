@@ -86,18 +86,15 @@ HOMExportModule :: initializeFrom(InputRecord *ir)
 void
 HOMExportModule :: doOutput(TimeStep *tStep, bool forcedOutput)
 {
-    Element *elem;
     if ( !( testTimeStepOutput(tStep) || forcedOutput ) ) {
         return;
     }
 
-    Domain *d  = emodel->giveDomain(1);
+    Domain *d = emodel->giveDomain(1);
     int nelem = d->giveNumberOfElements();
     double dV, VolTot = 0.;
     double sumState = 0.;
     FloatArray vecState, vecFlow, sumFlow(3);
-    GaussPoint *gp;
-    IntegrationRule *iRule;
     IntArray Mask;
     FloatMatrix baseGCS;
 
@@ -106,11 +103,9 @@ HOMExportModule :: doOutput(TimeStep *tStep, bool forcedOutput)
 
     if ( domType == _HeatTransferMode || domType == _HeatMass1Mode ) {
         for ( int ielem = 1; ielem <= nelem; ielem++ ) {
-            elem = d->giveElement(ielem);
+            Element *elem = d->giveElement(ielem);
             if ( this->matnum.giveSize() == 0 || this->matnum.contains( elem->giveMaterial()->giveNumber() ) ) {
-                iRule = elem->giveDefaultIntegrationRulePtr();
-                for ( int i = 0; i < iRule->giveNumberOfIntegrationPoints(); i++ ) {
-                    gp  = iRule->getIntegrationPoint(i);
+                for ( GaussPoint *gp: *elem->giveDefaultIntegrationRulePtr() ) {
                     dV  = elem->computeVolumeAround(gp);
                     VolTot += dV;
                     elem->giveIPValue(vecState, gp, IST_Temperature, tStep);
@@ -139,19 +134,17 @@ HOMExportModule :: doOutput(TimeStep *tStep, bool forcedOutput)
         SumEigStrain.zero();
 
         for ( int ielem = 1; ielem <= nelem; ielem++ ) {
+            Element *elem = d->giveElement(ielem);
             tempStrain.zero();
             tempStress.zero();
             tempEigStrain.zero();
 
-            elem = d->giveElement(ielem);
             if ( this->matnum.giveSize() == 0 || this->matnum.contains( elem->giveMaterial()->giveNumber() ) ) {
-                iRule = elem->giveDefaultIntegrationRulePtr();
-                for ( int i = 0; i < iRule->giveNumberOfIntegrationPoints(); i++ ) {
-                    gp  = iRule->getIntegrationPoint(i);
+                for ( GaussPoint *gp: *elem->giveDefaultIntegrationRulePtr() ) {
                     structElem = static_cast< StructuralElement * >(elem);
                     // structElem->computeResultingIPEigenstrainAt(VecEigStrain, tStep, gp, VM_Incremental);
                     structElem->computeResultingIPEigenstrainAt(VecEigStrainReduced, tStep, gp, VM_Total);
-		    if( VecEigStrainReduced.giveSize() == 0 ){
+                    if( VecEigStrainReduced.giveSize() == 0 ){
                         VecEigStrain.resize(0);
                     } else {
                         ((StructuralMaterial*)structElem->giveMaterial())->giveFullSymVectorForm(VecEigStrain, VecEigStrainReduced,  gp->giveMaterialMode());
@@ -195,14 +188,9 @@ HOMExportModule :: doOutput(TimeStep *tStep, bool forcedOutput)
                         sumDamage += damage.at(1) * dV;
                     }
 
-                    for ( int j = 1; j <= 6; j++ ) {
-                        SumStrain.at(j) += VecStrain.at(j);
-                        if ( VecEigStrain.giveSize() ) {
-                            SumEigStrain.at(j) += VecEigStrain.at(j);
-                        }
-
-                        SumStress.at(j) += VecStress.at(j);
-                    }
+                    SumStrain.add(VecStrain);
+                    SumEigStrain.add(VecEigStrain);
+                    SumStress.add(VecStress);
 
                     //VecStrain.printYourself();
                     //VecEigStrain.printYourself();
@@ -220,18 +208,18 @@ HOMExportModule :: doOutput(TimeStep *tStep, bool forcedOutput)
         //SumEigStrain.printYourself();
         //SumStress.printYourself();
         fprintf( this->stream, "%f   ", tStep->giveTargetTime() );
-        for ( int j = 0; j < 6; j++ ) { //strain
-            fprintf( this->stream, "%06.5e ", SumStrain(j) );
+        for ( double s: SumStrain ) { //strain
+            fprintf( this->stream, "%06.5e ", s );
         }
 
         fprintf(this->stream, "    ");
-        for ( int j = 0; j < 6; j++ ) { //stress
-            fprintf( this->stream, "%06.5e ", SumStress(j) );
+        for ( double s: SumStress ) { //stress
+            fprintf( this->stream, "%06.5e ", s );
         }
 
         fprintf(this->stream, "    ");
-        for ( int j = 0; j < 6; j++ ) { //eigenstrain
-            fprintf( this->stream, "%06.5e ", SumEigStrain(j) );
+        for ( double s: SumEigStrain ) { //eigenstrain
+            fprintf( this->stream, "%06.5e ", s );
         }
 
         fprintf(this->stream, "Vol %06.5e ", VolTot);

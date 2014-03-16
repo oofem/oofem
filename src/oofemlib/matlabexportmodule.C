@@ -522,18 +522,17 @@ MatlabExportModule :: doOutputIntegrationPointFields(TimeStep *tStep,    FILE *F
                     ielem, i, iRule->giveNumberOfIntegrationPoints() );
 
             // Loop over integration points
-            for ( int j = 1; j <= iRule->giveNumberOfIntegrationPoints(); j++ ) {
-                IntegrationPoint *ip = iRule->getIntegrationPoint(j - 1);
+            for ( GaussPoint *ip: *iRule ) {
 
                 double weight = ip->giveWeight();
 
                 fprintf(FID, "\tIntegrationPointFields.Elements{%i}.integrationRule{%i}.ip{%i}.ipWeight = %e; \n ",
-                        ielem, i, j, weight);
+                        ielem, i, ip->giveNumber(), weight);
 
 
                 // export Gauss point coordinates
                 fprintf(FID, "\tIntegrationPointFields.Elements{%i}.integrationRule{%i}.ip{%i}.coords = [",
-                        ielem, i, j);
+                        ielem, i, ip->giveNumber());
 
                 FloatArray coords;
                 el->computeGlobalCoordinates( coords, * ( ip->giveCoordinates() ) );
@@ -544,11 +543,11 @@ MatlabExportModule :: doOutputIntegrationPointFields(TimeStep *tStep,    FILE *F
 
                 // export internal variables
                 fprintf(FID, "\tIntegrationPointFields.Elements{%i}.integrationRule{%i}.ip{%i}.valArray = cell(%i,1); \n",
-                        ielem, i, j, numVars);
+                        ielem, i, ip->giveNumber(), numVars);
 
                 for ( int iv = 1; iv <= numVars; iv++ ) {
                     fprintf(FID, "\tIntegrationPointFields.Elements{%i}.integrationRule{%i}.ip{%i}.valArray{%i} = [",
-                            ielem, i, j, iv);
+                            ielem, i, ip->giveNumber(), iv);
                     InternalStateType vartype = ( InternalStateType ) this->internalVarsToExport.at(iv);
                     el->giveIPValue(valueArray, ip, vartype, tStep);
                     int nv = valueArray.giveSize();

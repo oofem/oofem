@@ -1068,12 +1068,10 @@ Element :: computeVolumeAreaOrLength()
 // the element computes its volume, area or length
 // (depending on the spatial dimension of that element)
 {
-    GaussPoint *gp;
     double answer = 0.;
     IntegrationRule *iRule = integrationRulesArray [ giveDefaultIntegrationRule() ];
     if ( iRule ) {
-        for ( int i = 0; i < iRule->giveNumberOfIntegrationPoints(); i++ ) {
-            gp  = iRule->getIntegrationPoint(i);
+        for ( GaussPoint *gp: *iRule ) {
             answer += this->computeVolumeAround(gp);
         }
 
@@ -1374,7 +1372,6 @@ int
 Element :: adaptiveMap(Domain *oldd, TimeStep *tStep)
 {
     int result = 1;
-    IntegrationRule *iRule;
     MaterialModelMapperInterface *interface = static_cast< MaterialModelMapperInterface * >
                                               ( this->giveMaterial()->giveInterface(MaterialModelMapperInterfaceType) );
 
@@ -1383,9 +1380,9 @@ Element :: adaptiveMap(Domain *oldd, TimeStep *tStep)
     }
 
     for ( int i = 0; i < numberOfIntegrationRules; i++ ) {
-        iRule = integrationRulesArray [ i ];
-        for ( int j = 0; j < iRule->giveNumberOfIntegrationPoints(); j++ ) {
-            result &= interface->MMI_map(iRule->getIntegrationPoint(j), oldd, tStep);
+        IntegrationRule *iRule = integrationRulesArray [ i ];
+        for ( GaussPoint *gp: *iRule ) {
+            result &= interface->MMI_map(gp, oldd, tStep);
         }
     }
 
@@ -1435,23 +1432,25 @@ Element :: mapStateVariables(Domain &iOldDom, const TimeStep &iTStep)
 int
 Element :: adaptiveFinish(TimeStep *tStep)
 {
-    int result = 1;
-    IntegrationRule *iRule;
     MaterialModelMapperInterface *interface = static_cast< MaterialModelMapperInterface * >
                                               ( this->giveMaterial()->giveInterface(MaterialModelMapperInterfaceType) );
 
     if ( !interface ) {
         return 0;
     }
-
+#if 0
+    int result = 1;
     for ( int i = 0; i < numberOfIntegrationRules; i++ ) {
-        iRule = integrationRulesArray [ i ];
-        for ( int j = 0; j < iRule->giveNumberOfIntegrationPoints(); j++ ) {
+        IntegrationRule *iRule = integrationRulesArray [ i ];
+        for ( GaussPoint *gp: *iRule ) {
             result &= interface->MMI_finish(tStep);
         }
     }
 
     return result;
+#else
+    return interface->MMI_finish(tStep);
+#endif
 }
 
 
@@ -1496,8 +1495,8 @@ Element :: packUnknowns(CommunicationBuffer &buff, TimeStep *tStep)
 
     for ( int i = 0; i < numberOfIntegrationRules; i++ ) {
         IntegrationRule *iRule = integrationRulesArray [ i ];
-        for ( int j = 0; j < iRule->giveNumberOfIntegrationPoints(); j++ ) {
-            result &= this->giveCrossSection()->packUnknowns( buff, tStep, iRule->getIntegrationPoint(j) );
+        for ( GaussPoint *gp: *iRule ) {
+            result &= this->giveCrossSection()->packUnknowns( buff, tStep, gp );
         }
     }
 
@@ -1512,8 +1511,8 @@ Element :: unpackAndUpdateUnknowns(CommunicationBuffer &buff, TimeStep *tStep)
 
     for ( int i = 0; i < numberOfIntegrationRules; i++ ) {
         IntegrationRule *iRule = integrationRulesArray [ i ];
-        for ( int j = 0; j < iRule->giveNumberOfIntegrationPoints(); j++ ) {
-            result &= this->giveCrossSection()->unpackAndUpdateUnknowns( buff, tStep, iRule->getIntegrationPoint(j) );
+        for ( GaussPoint *gp: *iRule ) {
+            result &= this->giveCrossSection()->unpackAndUpdateUnknowns( buff, tStep, gp );
         }
     }
 
@@ -1528,8 +1527,8 @@ Element :: estimatePackSize(CommunicationBuffer &buff)
 
     for ( int i = 0; i < numberOfIntegrationRules; i++ ) {
         IntegrationRule *iRule = integrationRulesArray [ i ];
-        for ( int j = 0; j < iRule->giveNumberOfIntegrationPoints(); j++ ) {
-            result += this->giveCrossSection()->estimatePackSize( buff, iRule->getIntegrationPoint(j) );
+        for ( GaussPoint *gp: *iRule ) {
+            result += this->giveCrossSection()->estimatePackSize( buff, gp );
         }
     }
 
@@ -1540,12 +1539,10 @@ Element :: estimatePackSize(CommunicationBuffer &buff)
 double
 Element :: predictRelativeComputationalCost()
 {
-    int nip;
     double wgt = 0;
     IntegrationRule *iRule = this->giveDefaultIntegrationRulePtr();
-    nip = iRule->giveNumberOfIntegrationPoints();
-    for ( int j = 0; j < nip; j++ ) {
-        wgt += this->giveCrossSection()->predictRelativeComputationalCost( iRule->getIntegrationPoint(j) );
+    for ( GaussPoint *gp: *iRule ) {
+        wgt += this->giveCrossSection()->predictRelativeComputationalCost( gp );
     }
 
     return ( this->giveRelativeSelfComputationalCost() * wgt );
