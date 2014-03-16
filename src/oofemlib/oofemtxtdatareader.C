@@ -125,7 +125,6 @@ OOFEMTXTDataReader :: giveRawLineFromInput(std :: string &line)
     do {
         this->lineNumber++;
         std :: getline(this->inputStream, line);
-#if __cplusplus > 199711L
         if ( line.back() == '\\' ) {
             line.pop_back();
             std :: string continuedLine;
@@ -136,7 +135,6 @@ OOFEMTXTDataReader :: giveRawLineFromInput(std :: string &line)
                 line += continuedLine;
             } while ( continuedLine.back() == '\\' );
         }
-#endif
     } while ( line [ 0 ] == '#' ); // skip comments
 }
 } // end namespace oofem
