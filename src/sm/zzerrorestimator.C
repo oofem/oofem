@@ -318,7 +318,7 @@ ZZErrorEstimatorInterface :: ZZErrorEstimatorI_computeElementContributions(doubl
             sNorm += lsig_reduced.dotProduct(help) * dV;
         }
     } else {
-        OOFEM_SIMPLE_ERROR("ZZErrorEstimatorInterface::ZZErrorEstimatorI_computeElementContributions unsupported norm type");
+        OOFEM_ERROR("unsupported norm type");
     }
 
     eNorm = sqrt(eNorm);

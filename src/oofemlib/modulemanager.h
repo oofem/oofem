@@ -109,7 +109,7 @@ public:
             // read type of module
             module = this->CreateModule(name.c_str(), i, emodel);
             if ( module == NULL ) {
-                OOFEM_SIMPLE_ERROR( "InitModuleManager::instanciateYourself: unknown module (%s)", name.c_str() );
+                OOFEM_ERROR("unknown module (%s)", name.c_str());
             }
 
             module->initializeFrom(mir);
@@ -140,7 +140,7 @@ public:
         if ( moduleList->includes(num) ) {
             elem = moduleList->at(num);
         } else {
-            OOFEM_SIMPLE_ERROR("ModuleManager::giveOuputModule: No module no. %d defined", num);
+            OOFEM_ERROR("No module no. %d defined", num);
         }
 
         return elem;

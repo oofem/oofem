@@ -775,7 +775,7 @@ IsotropicDamageMaterial1 :: computeDamageParamForCohesiveCrack(double &omega, do
                 Lhs = kappa - e0 *exp(-help) * kappa / ef; //- dR / (d omega)
                 omega += R / Lhs;
                 if ( nite > 40 ) {
-                    OOFEM_ERROR("computeDamageParamForCohesiveCrack: algorithm not converging");
+                    OOFEM_ERROR("algorithm not converging");
                 }
             } while ( fabs(R) >= e0 * IDM1_ITERATION_LIMIT );
         } else {

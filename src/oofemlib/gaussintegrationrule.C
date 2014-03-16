@@ -947,7 +947,7 @@ GaussIntegrationRule :: giveTetCoordsAndWeights(int nPoints, FloatArray &coords_
         break;
 
     default:
-        OOFEM_ERROR("unsupported number of IPs (%d)", nPoints);
+        OOFEM_SERROR("unsupported number of IPs (%d)", nPoints);
     }
 }
 
@@ -957,9 +957,6 @@ GaussIntegrationRule :: giveTriCoordsAndWeights(int nPoints, FloatArray &coords_
 // Coordinates xi1 and xi2 are the two first area coordinates of the triangle.
 // Dunavant quadrature rules for triangles in area coordinates. Taken from http://www.mems.rice.edu/~akin/Elsevier/Chap_10.pdf
 {
-    coords_xi1.resize(nPoints);
-    coords_xi2.resize(nPoints);
-    weights.resize(nPoints);
     switch ( nPoints ) {
     case 1:
         coords_xi1 = {0.333333333333};
@@ -1366,7 +1363,7 @@ GaussIntegrationRule :: giveTriCoordsAndWeights(int nPoints, FloatArray &coords_
         break;
 
     default:
-        OOFEM_SIMPLE_ERROR("unsupported number of IPs (%d)", nPoints);
+        OOFEM_SERROR("unsupported number of IPs (%d)", nPoints);
     }
 }
 
@@ -1376,9 +1373,6 @@ void
 GaussIntegrationRule :: giveLineCoordsAndWeights(int nPoints, FloatArray &coords_xi, FloatArray &weights)
 // Create arrays of coordinates and weights for Gauss Integration Points of a line with 'nPoints' integrationpoints
 {
-    coords_xi.resize(nPoints);
-    weights.resize(nPoints);
-
     switch ( nPoints ) {
     case 1:
         coords_xi = {0.0};
@@ -1800,7 +1794,7 @@ GaussIntegrationRule :: giveLineCoordsAndWeights(int nPoints, FloatArray &coords
         break;
 
     default:
-        OOFEM_SIMPLE_ERROR("SetUpPointsOnLine: unsupported number of IPs (%d)", nPoints);
+        OOFEM_SERROR("unsupported number of IPs (%d)", nPoints);
     }
 }
 } // end namespace oofem

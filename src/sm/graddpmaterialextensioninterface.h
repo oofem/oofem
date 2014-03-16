@@ -128,9 +128,9 @@ public:
     /// Stress-based averaging
     virtual void givePDGradMatrix_LD(FloatMatrix &answer, MatResponseMode mode, GaussPoint *gp, TimeStep *tStep) = 0;
     /// gradient - based giveRealStressVector
-    virtual void giveRealStressVectorGrad(FloatArray &answer1, double &answer2, GaussPoint *gp, const FloatArray &totalStrain, double nonlocalDamageDrivningVariable, TimeStep *tStep) { OOFEM_SIMPLE_ERROR("giveRealStressVectorGrad is nor implemented") }
-    virtual void giveFirstPKStressVectorGrad(FloatArray &answer1, double &answer2, GaussPoint *gp, const FloatArray &totalStrain, double nonlocalDamageDrivningVariable, TimeStep *tStep) { OOFEM_SIMPLE_ERROR("giveFirstPKStressVectorGrad is nor implemented") }
-    virtual void giveCauchyStressVectorGrad(FloatArray &answer1, double &answer2, GaussPoint *gp, const FloatArray &totalStrain, double nonlocalDamageDrivningVariable, TimeStep *tStep) { OOFEM_SIMPLE_ERROR("giveCauchyStressVectorGrad is nor implemented") }
+    virtual void giveRealStressVectorGrad(FloatArray &answer1, double &answer2, GaussPoint *gp, const FloatArray &totalStrain, double nonlocalDamageDrivningVariable, TimeStep *tStep) { OOFEM_ERROR("not implemented") }
+    virtual void giveFirstPKStressVectorGrad(FloatArray &answer1, double &answer2, GaussPoint *gp, const FloatArray &totalStrain, double nonlocalDamageDrivningVariable, TimeStep *tStep) { OOFEM_ERROR("not implemented") }
+    virtual void giveCauchyStressVectorGrad(FloatArray &answer1, double &answer2, GaussPoint *gp, const FloatArray &totalStrain, double nonlocalDamageDrivningVariable, TimeStep *tStep) { OOFEM_ERROR("not implemented") }
 
     virtual IRResultType initializeFrom(InputRecord *ir);
     int giveAveragingType() { return averType; }

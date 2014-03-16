@@ -106,7 +106,7 @@ EnrichmentItem *XfemManager :: giveEnrichmentItem(int n)
     if ( enrichmentItemList->includes(n) ) {
         return enrichmentItemList->at(n);
     } else {
-        OOFEM_SIMPLE_ERROR("giveEnrichmentItem: undefined enrichmentItem (%d)", n);
+        OOFEM_ERROR("undefined enrichmentItem (%d)", n);
     }
 
     return NULL;
@@ -178,7 +178,7 @@ int XfemManager :: instanciateYourself(DataReader *dr)
 
         EnrichmentItem *ei = classFactory.createEnrichmentItem( name.c_str(), i, this, this->giveDomain() );
         if ( ei == NULL ) {
-            OOFEM_SIMPLE_ERROR( "XfemManager::instanciateYourself: unknown enrichment item (%s)", name.c_str() );
+            OOFEM_ERROR( "unknown enrichment item (%s)", name.c_str() );
         }
 
         ei->initializeFrom(mir);

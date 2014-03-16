@@ -562,7 +562,7 @@ SkylineUnsym :: backSubstitutionWith(FloatArray &y) const
         diag = this->giveRowColumn(k)->atDiag();
 #     ifdef DEBUG
         if ( fabs(diag) < SkylineUnsym_TINY_PIVOT ) {
-            OOFEM_ERROR("diagScaling: pivot %d is small", k);
+            OOFEM_ERROR("pivot %d is small", k);
         }
 
 #     endif

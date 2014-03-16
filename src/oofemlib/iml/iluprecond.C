@@ -68,7 +68,7 @@ CompCol_ILUPreconditioner :: init(const SparseMtrx &A)
     } else if ( A.giveType() == SMT_DynCompCol ) {
         this->initialize( * ( ( DynCompCol * ) & A ) );
     } else {
-        OOFEM_SIMPLE_ERROR("unsupported sparse matrix type");
+        OOFEM_ERROR("unsupported sparse matrix type");
     }
 
 #ifdef TIME_REPORT

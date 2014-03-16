@@ -158,7 +158,7 @@ AdaptiveNonLinearStatic :: solveYourselfAt(TimeStep *tStep)
             this->terminateAnalysis();
             throw OOFEM_Terminate();
         } else {
-            OOFEM_ERROR("MesherInterface::createMesh failed");
+            OOFEM_ERROR("createMesh failed");
         }
     }
 }

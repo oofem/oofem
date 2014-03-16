@@ -373,7 +373,7 @@ void Homogenize :: herveZaoui(FloatMatrix &PhaseMatrix)
     double temp1;
 
     if ( NumPhases < 3 ) {
-        OOFEM_SIMPLE_ERROR("Number of considered phases must be at least 3 (including hom. medium)\n");
+        OOFEM_ERROR("Number of considered phases must be at least 3 (including hom. medium)\n");
     }
 
     F(NumPhases - 1) = lambda_0 / 3.;
@@ -583,11 +583,11 @@ void Homogenize :: herveZaoui(FloatMatrix &PhaseMatrix)
     //solve quadratic equation, report higher number
     sqr = b * b - 4. * a * c;
     if ( sqr < 0 ) {
-        OOFEM_SIMPLE_ERROR("Shear modulus does not yield a real number\n");
+        OOFEM_ERROR("Shear modulus does not yield a real number\n");
     }
 
     if ( ( -b - pow(sqr, 0.5) ) >= 0 ) {
-        OOFEM_SIMPLE_WARNING("Two solutions for the shear modulus were found, continuing with the higher value\n");
+        OOFEM_WARNING("Two solutions for the shear modulus were found, continuing with the higher value\n");
     }
 
     //usually this higher value is reported
@@ -622,7 +622,7 @@ void Homogenize :: hansen(FloatMatrix &PhaseMatrix) {
     double f_i, E_i, f_m, E_m;
 
     if ( PhaseMatrix.giveNumberOfRows() != 2 ) {
-        OOFEM_SIMPLE_ERROR("Only two phases are allowed\n");
+        OOFEM_ERROR("Only two phases are allowed\n");
     }
 
     checkVolFraction(PhaseMatrix);
@@ -642,7 +642,7 @@ void Homogenize :: counto(FloatMatrix &PhaseMatrix)
 {
     double E_i, f_m, E_m, nu_m;
     if ( PhaseMatrix.giveNumberOfRows() != 2 ) {
-        OOFEM_SIMPLE_ERROR("Only two phases are allowed\n");
+        OOFEM_ERROR("Only two phases are allowed\n");
     }
 
     checkVolFraction(PhaseMatrix);
@@ -665,7 +665,7 @@ void Homogenize :: kusterToksoz(FloatMatrix &PhaseMatrix)
     double k_KT, mu_KT, nom, denom;
     double f_i, E_i, nu_i, k_i, mu_i, f_m, E_m, nu_m, mu_m, k_m;
     if ( PhaseMatrix.giveNumberOfRows() != 2 ) {
-        OOFEM_SIMPLE_ERROR("Only two phases are allowed\n");
+        OOFEM_ERROR("Only two phases are allowed\n");
     }
 
     checkVolFraction(PhaseMatrix);
@@ -746,7 +746,7 @@ void Homogenize :: checkVolFraction(FloatMatrix &PhaseMatrix)
     }
 
     if ( volTot < 0.99 || volTot > 1.01 ) {
-        OOFEM_SIMPLE_ERROR("Volumetric fraction of phases 0-%d is %f, which not the unity\n", NumPhases, volTot);
+        OOFEM_ERROR("Volumetric fraction of phases 0-%d is %f, which not the unity\n", NumPhases, volTot);
     }
 }
 

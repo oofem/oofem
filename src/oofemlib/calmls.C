@@ -1243,7 +1243,7 @@ CylindricalALM :: computeDeltaLambda(double &deltaLambda, const FloatArray &dX, 
         denom = colv(1);
 #endif
         if ( fabs(denom) < calm_SMALL_NUM ) {
-            OOFEM_ERROR("calm: zero denominator in linearized control");
+            OOFEM_ERROR("zero denominator in linearized control");
         }
 
         deltaLambda = ( deltaL - nom ) / denom;

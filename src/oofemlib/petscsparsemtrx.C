@@ -72,22 +72,17 @@ SparseMtrx *
 PetscSparseMtrx :: GiveCopy() const
 {
     PetscSparseMtrx *answer = new PetscSparseMtrx(nRows, nColumns);
-    if ( answer ) {
-        MatDuplicate( this->mtrx, MAT_COPY_VALUES, & ( answer->mtrx ) );
-        answer->symmFlag = this->symmFlag;
-        answer->mType    = this->mType;
-        answer->leqs     = this->leqs;
-        answer->geqs     = this->geqs;
-        answer->di       = this->di;
-        answer->emodel   = this->emodel;
-        answer->kspInit  = false;
-        answer->newValues = this->newValues;
+    MatDuplicate( this->mtrx, MAT_COPY_VALUES, & ( answer->mtrx ) );
+    answer->symmFlag = this->symmFlag;
+    answer->mType    = this->mType;
+    answer->leqs     = this->leqs;
+    answer->geqs     = this->geqs;
+    answer->di       = this->di;
+    answer->emodel   = this->emodel;
+    answer->kspInit  = false;
+    answer->newValues = this->newValues;
 
-        return answer;
-    } else {
-        OOFEM_FATAL("PetscSparseMtrx :: GiveCopy allocation failed");
-        return NULL;
-    }
+    return answer;
 }
 
 void

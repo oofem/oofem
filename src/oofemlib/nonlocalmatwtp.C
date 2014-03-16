@@ -214,7 +214,7 @@ NonlocalMaterialWTP :: migrate()
     _locsize = domainElementDepSet.size() + 1;
     result = MPI_Allreduce(& _locsize, & _globsize, 1, MPI_INT, MPI_MAX, MPI_COMM_WORLD);
     if ( result != MPI_SUCCESS ) {
-        OOFEM_SIMPLE_ERROR("MPI_Allreduce to determine  broadcast buffer size failed");
+        OOFEM_ERROR("MPI_Allreduce to determine  broadcast buffer size failed");
     }
 
     commBuff.resize( commBuff.givePackSize(MPI_INT, _globsize) );

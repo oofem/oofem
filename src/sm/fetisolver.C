@@ -363,7 +363,7 @@ FETISolver :: masterMapRBM()
                     locpos++;
                     // test if position of nonzero dof is allowed
                     if ( locpos > locationArray.giveSize() ) {
-                        OOFEM_ERROR("FETISolver :: Consistency dof error");
+                        OOFEM_ERROR("Consistency dof error");
                     }
                 }
 
@@ -554,7 +554,7 @@ FETISolver :: masterMapSolution()
                 locpos++;
                 // test if position of nonzero dof is allowed
                 if ( locpos > locationArray.giveSize() ) {
-                    OOFEM_ERROR("FETISolver :: Consistency dof error");
+                    OOFEM_ERROR("Consistency dof error");
                 }
             }
 
@@ -696,7 +696,7 @@ FETISolver :: masterMapResiduals()
                 locpos++;
                 // test if position of nonzero dof is allowed
                 if ( locpos > locationArray.giveSize() ) {
-                    OOFEM_ERROR("FETISolver :: Consistency dof error");
+                    OOFEM_ERROR("Consistency dof error");
                 }
             }
 
@@ -833,7 +833,7 @@ FETISolver :: masterMapDirectionVector()
                 locpos++;
                 // test if position of nonzero dof is allowed
                 if ( locpos > locationArray.giveSize() ) {
-                    OOFEM_ERROR("FETISolver :: Consistency dof error");
+                    OOFEM_ERROR("Consistency dof error");
                 }
             }
 
@@ -974,7 +974,7 @@ FETISolver :: masterMapPPVector()
                 locpos++;
                 // test if position of nonzero dof is allowed
                 if ( locpos > locationArray.giveSize() ) {
-                    OOFEM_ERROR("FETISolver :: Consistency dof error");
+                    OOFEM_ERROR("Consistency dof error");
                 }
             }
 
@@ -1064,13 +1064,13 @@ FETISolver :: solve(SparseMtrx *A, FloatArray *partitionLoad, FloatArray *partit
     Skyline *partitionStiffness;
 
     if ( A->giveType() != SMT_Skyline ) {
-        OOFEM_ERROR("FETISolver :: solve: unsuported sparse matrix type");
+        OOFEM_ERROR("unsuported sparse matrix type");
     }
 
     partitionStiffness = static_cast< Skyline * >(A);
 
     if ( ( partitionSolution->giveSize() ) != partitionLoad->giveSize() ) {
-        OOFEM_ERROR("FETISolver :: solveYourselfAt: size mismatch");
+        OOFEM_ERROR("size mismatch");
     }
 
     int neq = partitionStiffness->giveNumberOfRows();

@@ -330,9 +330,6 @@ void
 LobattoIntegrationRule :: giveLineCoordsAndWeights(int nPoints, FloatArray &coords_xi, FloatArray &weights)
 // Create arrays of coordinates and weights for Lobatto Integration Points of a line with 'nPoints' integrationpoints
 {
-    coords_xi.resize(nPoints);
-    weights.resize(nPoints);
-
     switch ( nPoints ) {
     case 1:
         coords_xi = {0.0};
@@ -373,7 +370,7 @@ LobattoIntegrationRule :: giveLineCoordsAndWeights(int nPoints, FloatArray &coor
                     0.1};
         break;
 
-    case 6:
+    default:
         coords_xi = {-1.0,
                      -0.765055323929465,
                      -0.285231516480645,
@@ -386,10 +383,10 @@ LobattoIntegrationRule :: giveLineCoordsAndWeights(int nPoints, FloatArray &coor
                     0.554858377035486,
                     0.378474956297847,
                     0.066666666666667};
+        if ( nPoints > 6 ) {
+            OOFEM_LOG_WARNING("Unsupported number of IPs (%d) for LobattoIR, using 6 ips instead.", nPoints);
+        }
         break;
-
-    default:
-        OOFEM_SIMPLE_ERROR("unsupported number of IPs (%d)", nPoints);
     }
 }
 } // end namespace oofem

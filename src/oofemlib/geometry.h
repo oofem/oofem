@@ -186,8 +186,8 @@ public:
 
     virtual BasicGeometry *Clone() { return new Triangle(*this); }
 
-    virtual void computeNormalSignDist(double &oDist, const FloatArray &iPoint) const { OOFEM_SIMPLE_ERROR("Triangle::computeNormalSignDist -- not implemented"); };
-    virtual void computeTangentialSignDist(double &oDist, const FloatArray &iPoint, double &oMinDistArcPos) const { OOFEM_SIMPLE_ERROR("Triangle::computeTangentialSignDist -- not implemented"); };
+    virtual void computeNormalSignDist(double &oDist, const FloatArray &iPoint) const { OOFEM_ERROR("not implemented"); };
+    virtual void computeTangentialSignDist(double &oDist, const FloatArray &iPoint, double &oMinDistArcPos) const { OOFEM_ERROR("not implemented"); };
 
     double getArea();
     void computeBarycentrCoor(FloatArray &answer) const;

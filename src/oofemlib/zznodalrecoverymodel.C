@@ -242,7 +242,7 @@ ZZNodalRecoveryModelInterface :: ZZNodalRecoveryMI_computeNNMatrix(FloatArray &a
     IntegrationRule *iRule = elem->giveDefaultIntegrationRulePtr();
 
     if ( !interpol ) {
-        OOFEM_SIMPLE_ERROR( "ZZNodalRecoveryMI_computeNNMatrix: Element %d not providing interpolation", elem->giveNumber() );
+        OOFEM_ERROR( "Element %d not providing interpolation", elem->giveNumber() );
     }
 
     int size = elem->giveNumberOfDofManagers();

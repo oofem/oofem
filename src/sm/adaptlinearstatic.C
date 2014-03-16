@@ -68,7 +68,7 @@ AdaptiveLinearStatic :: updateYourself(TimeStep *tStep)
             //this->terminateAnalysis();
             //exit(1);
         } else {
-            OOFEM_ERROR("MesherInterface::createMesh failed");
+            OOFEM_ERROR("createMesh failed");
         }
     }
 }

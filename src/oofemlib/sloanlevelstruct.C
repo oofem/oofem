@@ -136,7 +136,7 @@ SloanLevelStructure :: giveLevel(int num)
     }
 
     if ( num < 1 || num > giveDepth() ) {
-        OOFEM_SIMPLE_WARNING("LevelStructureClass::give_level - out of bounds (%d)", num);
+        OOFEM_WARNING("out of bounds (%d)", num);
         return NULL;
     }
 

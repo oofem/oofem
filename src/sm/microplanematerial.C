@@ -54,7 +54,7 @@ MicroplaneMaterial :: giveMicroplane(int i, GaussPoint *masterGp)
         // check for proper dimensions - slave can be NULL if index too high or if not
         // slaves previously defined
         if ( ( i < 0 ) || ( i > ( this->numberOfMicroplanes - 1 ) ) ) {
-            OOFEM_ERROR("giveMicroplane: no such microplane defined");
+            OOFEM_ERROR("no such microplane defined");
         }
 
         // create new slave record in masterGp

@@ -104,13 +104,13 @@ IRResultType IGAElement :: initializeFrom(InputRecord *ir)
                 integrationRulesArray [ indx ]->setUpIntegrationPoints(_Square, numberOfGaussPoints, _PlaneStress); // HUHU _PlaneStress, rectangle
 
                 // remap local subelement gp coordinates into knot span coordinates and update integration weight
-                for ( int i = 0; i < integrationRulesArray [ indx ]->giveNumberOfIntegrationPoints(); i++ ) {
-                    gpcoords = integrationRulesArray [ indx ]->getIntegrationPoint(i)->giveCoordinates();
+                for ( GaussPoint *gp: *integrationRulesArray [ indx ] ) {
+                    gpcoords = gp->giveCoordinates();
 
                     newgpcoords.at(1) = knotValuesU->at(ui) + du * ( gpcoords->at(1) / 2.0 + 0.5 );
                     newgpcoords.at(2) = knotValuesV->at(vi) + dv * ( gpcoords->at(2) / 2.0 + 0.5 );
-                    integrationRulesArray [ indx ]->getIntegrationPoint(i)->setCoordinates(newgpcoords);
-                    integrationRulesArray [ indx ]->getIntegrationPoint(i)->setWeight(integrationRulesArray [ indx ]->getIntegrationPoint(i)->giveWeight() / 4.0 * du * dv);
+                    gp->setCoordinates(newgpcoords);
+                    gp->setWeight(gp->giveWeight() / 4.0 * du * dv);
                 }
 
                 indx++;
@@ -155,14 +155,14 @@ IRResultType IGAElement :: initializeFrom(InputRecord *ir)
                     integrationRulesArray [ indx ]->setUpIntegrationPoints(_Cube, numberOfGaussPoints, _3dMat);
 
                     // remap local subelement gp coordinates into knot span coordinates and update integration weight
-                    for ( int i = 0; i < integrationRulesArray [ indx ]->giveNumberOfIntegrationPoints(); i++ ) {
-                        gpcoords = integrationRulesArray [ indx ]->getIntegrationPoint(i)->giveCoordinates();
+                    for ( GaussPoint *gp: *integrationRulesArray [ indx ] ) {
+                        gpcoords = gp->giveCoordinates();
 
                         newgpcoords.at(1) = knotValuesU->at(ui) + du * ( gpcoords->at(1) / 2.0 + 0.5 );
                         newgpcoords.at(2) = knotValuesV->at(vi) + dv * ( gpcoords->at(2) / 2.0 + 0.5 );
                         newgpcoords.at(3) = knotValuesW->at(wi) + dw * ( gpcoords->at(3) / 2.0 + 0.5 );
-                        integrationRulesArray [ indx ]->getIntegrationPoint(i)->setCoordinates(newgpcoords);
-                        integrationRulesArray [ indx ]->getIntegrationPoint(i)->setWeight(integrationRulesArray [ indx ]->getIntegrationPoint(i)->giveWeight() / 8.0 * du * dv * dw);
+                        gp->setCoordinates(newgpcoords);
+                        gp->setWeight(gp->giveWeight() / 8.0 * du * dv * dw);
                     }
 
                     indx++;
@@ -170,7 +170,7 @@ IRResultType IGAElement :: initializeFrom(InputRecord *ir)
             }
         }
     } else {
-        OOFEM_SIMPLE_ERROR("unsupported number of spatial dimensions (nsd = %d)", nsd);
+        OOFEM_ERROR("unsupported number of spatial dimensions (nsd = %d)", nsd);
     }
 
 #ifdef __PARALLEL_MODE
@@ -198,7 +198,7 @@ IGAElement :: giveKnotSpanParallelMode(int knotSpanIndex) const
     } else if ( emode == Element_local ) {
         return ( elementParallelMode ) this->knotSpanParallelMode.at(knotSpanIndex + 1);
     } else {
-        OOFEM_SIMPLE_ERROR("Cannot determine elementParallelMode");
+        OOFEM_ERROR("Cannot determine elementParallelMode");
     }
 
     return Element_local; //to make compiler happy
@@ -213,7 +213,7 @@ IRResultType IGATSplineElement :: initializeFrom(InputRecord *ir)
 {
     TSplineInterpolation *interpol = static_cast< TSplineInterpolation * >( this->giveInterpolation() );
 
-    int indx = 0, ui, vi, i, nsd, numberOfGaussPoints = 1;
+    int indx = 0, ui, vi, nsd, numberOfGaussPoints = 1;
     double du, dv;
     const FloatArray *gpcoords;
     FloatArray newgpcoords;
@@ -263,20 +263,20 @@ IRResultType IGATSplineElement :: initializeFrom(InputRecord *ir)
                 integrationRulesArray [ indx ]->setUpIntegrationPoints(_Square, numberOfGaussPoints, _PlaneStress); // HUHU _PlaneStress, rectangle
 
                 // remap local subelement gp coordinates into knot span coordinates and update integration weight
-                for ( i = 0; i < integrationRulesArray [ indx ]->giveNumberOfIntegrationPoints(); i++ ) {
-                    gpcoords = integrationRulesArray [ indx ]->getIntegrationPoint(i)->giveCoordinates();
+                for ( GaussPoint *gp: *integrationRulesArray [ indx ] ) {
+                    gpcoords = gp->giveCoordinates();
 
                     newgpcoords.at(1) = knotValuesU->at(ui) + du * ( gpcoords->at(1) / 2.0 + 0.5 );
                     newgpcoords.at(2) = knotValuesV->at(vi) + dv * ( gpcoords->at(2) / 2.0 + 0.5 );
-                    integrationRulesArray [ indx ]->getIntegrationPoint(i)->setCoordinates(newgpcoords);
-                    integrationRulesArray [ indx ]->getIntegrationPoint(i)->setWeight(integrationRulesArray [ indx ]->getIntegrationPoint(i)->giveWeight() / 4.0 * du * dv);
+                    gp->setCoordinates(newgpcoords);
+                    gp->setWeight(gp->giveWeight() / 4.0 * du * dv);
                 }
 
                 indx++;
             }
         }
     } else {
-        OOFEM_SIMPLE_ERROR("unsupported number of spatial dimensions (nsd = %d)", nsd);
+        OOFEM_ERROR("unsupported number of spatial dimensions (nsd = %d)", nsd);
     }
 
     return IRRT_OK;
@@ -1003,7 +1003,7 @@ void IGAElement :: drawRawGeometry(oofegGraphicContext &gc)
             }
         }                 // end loop over knot spans (irules)
     } else {
-        OOFEM_SIMPLE_ERROR("not implemented for nsd = %d", nsd);
+        OOFEM_ERROR("not implemented for nsd = %d", nsd);
     }
 }
 
@@ -1234,7 +1234,7 @@ void drawIGAPatchDeformedGeometry(Element *elem, StructuralElementEvaluator *se,
             }
         }                 // end loop over knot spans (irules)
     } else {
-        OOFEM_SIMPLE_ERROR("not implemented for nsd = %d", nsd);
+        OOFEM_ERROR("not implemented for nsd = %d", nsd);
     }
 }
 

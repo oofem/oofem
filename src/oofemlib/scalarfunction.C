@@ -125,14 +125,14 @@ ScalarFunction :: eval(std :: map< std :: string, FunctionArgument >valDict, Dom
         // evaluate the expression
         double value = p.eval(buff.str().c_str(), err);
         if ( err ) {
-            OOFEM_SIMPLE_ERROR( "ScalarFunction::eval parser syntax error (expr=\"%s\")", buff.str().c_str() );
+            OOFEM_ERROR( "parser syntax error (expr=\"%s\")", buff.str().c_str() );
         }
         return value;
     } else if ( this->dvType == DV_FunctionReferenceType ) {
         FloatArray val;
         d->giveFunction(this->fReference)->evaluate(val, valDict);
         if ( val.giveSize() != 1 ) {
-            OOFEM_SIMPLE_ERROR( "ScalarFunction::eval - Function @%d did not return a scalar (size = %d)", this->fReference, val.giveSize() );
+            OOFEM_ERROR( "Function @%d did not return a scalar (size = %d)", this->fReference, val.giveSize() );
         }
         return val.at(1);
     }

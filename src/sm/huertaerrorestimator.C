@@ -1202,7 +1202,7 @@ HuertaErrorEstimatorInterface :: setupRefinedElementProblem1D(Element *element, 
             node = element->giveNode(inode);
 
             if ( node->giveNumberOfDofs() != dofs ) {
-                OOFEM_SIMPLE_ERROR("HuertaErrorEstimatorInterface::setupRefinedElementProblem1D : Dof mismatch");
+                OOFEM_ERROR("Dof mismatch");
             }
 
             connectivity = refinedElement->giveFineNodeArray(inode);
@@ -1654,7 +1654,7 @@ HuertaErrorEstimatorInterface :: setupRefinedElementProblem2D(Element *element, 
             node = element->giveNode(inode);
 
             if ( node->giveNumberOfDofs() != dofs ) {
-                OOFEM_SIMPLE_ERROR("HuertaErrorEstimatorInterface::setupRefinedElementProblem2D : Dof mismatch");
+                OOFEM_ERROR("Dof mismatch");
             }
 
             connectivity = refinedElement->giveFineNodeArray(inode);
@@ -2266,7 +2266,7 @@ HuertaErrorEstimatorInterface :: setupRefinedElementProblem3D(Element *element, 
             node = element->giveNode(inode);
 
             if ( node->giveNumberOfDofs() != dofs ) {
-                OOFEM_SIMPLE_ERROR("HuertaErrorEstimatorInterface::setupRefinedElementProblem3D : Dof mismatch");
+                OOFEM_ERROR("Dof mismatch");
             }
 
             connectivity = refinedElement->giveFineNodeArray(inode);

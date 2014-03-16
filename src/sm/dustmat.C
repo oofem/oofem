@@ -686,7 +686,7 @@ DustMaterial :: computePlastStrainDirM1(StrainVector &answer, const StressVector
         answer.at(2) += temp;
         answer.at(3) += temp;
     } else {
-        OOFEM_ERROR("Incorrect mode of stressstrainvector in DustMaterial :: computePlastStrainDirM1\n");
+        OOFEM_ERROR("Incorrect mode of stressstrainvector");
     }
 }
 
@@ -704,7 +704,7 @@ DustMaterial :: computePlastStrainDirM2(StrainVector &answer, const StressVector
         answer.at(2) -= temp;
         answer.at(3) -= temp;
     } else {
-        OOFEM_ERROR("Incorrect mode of stressstrainvector in DustMaterial :: computePlastStrainDirM2\n");
+        OOFEM_ERROR("Incorrect mode of stressstrainvector");
     }
 }
 
@@ -723,7 +723,7 @@ DustMaterial :: computePlastStrainDirM3(StrainVector &answer, const StressVector
         answer.at(2) += temp;
         answer.at(3) += temp;
     } else {
-        OOFEM_ERROR("Incorrect mode of stressstrainvector in DustMaterial :: computePlastStrainDirM3\n");
+        OOFEM_ERROR("Incorrect mode of stressstrainvector");
     }
 }
 

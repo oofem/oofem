@@ -82,7 +82,7 @@ using namespace oofem;
 void freeStoreError()
 // This function is called whenever operator "new" is unable to allocate memory.
 {
-    OOFEM_SIMPLE_FATAL("free store exhausted");
+    OOFEM_FATAL("free store exhausted");
 }
 
 // debug

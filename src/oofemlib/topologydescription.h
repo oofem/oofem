@@ -86,7 +86,7 @@ public:
      * @param tStep Active time step.
      */
     virtual void doOutput(TimeStep *tStep)
-    { OOFEM_SIMPLE_ERROR( "%s::doOutput - Not implemented", this->giveClassName() ); };
+    { OOFEM_ERROR( "Not implemented" ); };
 
     /**
      * Generates the FE components from the bare mesh.
@@ -94,7 +94,7 @@ public:
      * @todo Placing it in a new domain is probably preferable.
      */
     virtual void replaceFEMesh() // (Domain *& newDomain)
-    { OOFEM_SIMPLE_ERROR( "%s::replaceFEMesh - Not implemented", this->giveClassName() ); }
+    { OOFEM_ERROR( "Not implemented" ); }
 
     /**
      * Changes the connected domain of receiver.

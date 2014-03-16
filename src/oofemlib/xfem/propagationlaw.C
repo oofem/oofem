@@ -261,7 +261,7 @@ void PLHoopStressCirc :: propagateInterfaces(Domain &iDomain, EnrichmentDomain &
                                 // Get stress
                                 StructuralMaterialStatus *ms = dynamic_cast< StructuralMaterialStatus * >( gp_i->giveMaterialStatus() );
                                 if ( ms == NULL ) {
-                                    OOFEM_SIMPLE_ERROR("In PLHoopStressCirc :: propagateInterfaces(): failed to fetch MaterialStatus.\n");
+                                    OOFEM_ERROR("failed to fetch MaterialStatus.");
                                 }
 
                                 FloatArray stressVecGP = ms->giveStressVector();
@@ -293,7 +293,7 @@ void PLHoopStressCirc :: propagateInterfaces(Domain &iDomain, EnrichmentDomain &
                         // Compute stresses
                         StructuralMaterialStatus *ms = dynamic_cast< StructuralMaterialStatus * >( gp.giveMaterialStatus() );
                         if ( ms == NULL ) {
-                            OOFEM_SIMPLE_ERROR("In PLHoopStressCirc :: propagateInterfaces(): failed to fetch MaterialStatus.\n");
+                            OOFEM_ERROR("failed to fetch MaterialStatus.");
                         }
 
                         stressVec = ms->giveStressVector();
@@ -308,7 +308,7 @@ void PLHoopStressCirc :: propagateInterfaces(Domain &iDomain, EnrichmentDomain &
                     // Compute stresses
                     StructuralMaterialStatus *ms = dynamic_cast< StructuralMaterialStatus * >( gp.giveMaterialStatus() );
                     if ( ms == NULL ) {
-                        OOFEM_SIMPLE_ERROR("In PLHoopStressCirc :: propagateInterfaces(): failed to fetch MaterialStatus.\n");
+                        OOFEM_ERROR("failed to fetch MaterialStatus.");
                     }
 
                     stressVec = ms->giveStressVector();

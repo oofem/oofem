@@ -99,7 +99,7 @@ void LSPrimaryVariableMapper :: mapPrimaryVariables(FloatArray &oU, Domain &iOld
         for ( int elIndex = 1; elIndex <= numElNew; elIndex++ ) {
             StructuralElement *elNew = dynamic_cast< StructuralElement * >( iNewDom.giveElement(elIndex) );
             if ( elNew == NULL ) {
-                OOFEM_SIMPLE_ERROR("In LSPrimaryVariableMapper::mapPrimaryVariables(): Failed to cast Element new to StructuralElement.\n");
+                OOFEM_ERROR("Failed to cast Element new to StructuralElement.");
             }
 
             ///////////////////////////////////
@@ -158,7 +158,7 @@ void LSPrimaryVariableMapper :: mapPrimaryVariables(FloatArray &oU, Domain &iOld
                     FloatArray localCoordOld(dim), pointCoordOld(dim);
                     StructuralElement *elOld = dynamic_cast< StructuralElement * >( iOldDom.giveSpatialLocalizer()->giveElementClosestToPoint(localCoordOld, pointCoordOld, globalCoord, 0) );
                     if ( elOld == NULL ) {
-                        OOFEM_SIMPLE_ERROR("In LSPrimaryVariableMapper::mapPrimaryVariables(): Failed to cast Element old to StructuralElement.\n");
+                        OOFEM_ERROR("Failed to cast Element old to StructuralElement.");
                     }
 
 

@@ -84,7 +84,7 @@ LoadBalancer :: initializeWtp(IntArray &wtp)
             if ( wtp.at(i) == 1 ) {
                 plugin = new NonlocalMaterialWTP(this);
             } else {
-                OOFEM_SIMPLE_ERROR("Unknown work transfer plugin type");
+                OOFEM_ERROR("Unknown work transfer plugin type");
             }
 
             wtpList.put(i, plugin);
@@ -359,7 +359,7 @@ LoadBalancer :: unpackMigratingData(Domain *d, ProcessCommunicator &pc)
             break;
 
         default:
-            OOFEM_SIMPLE_ERROR("unexpected dof manager mode (%d)", _mode);
+            OOFEM_ERROR("unexpected dof manager mode (%d)", _mode);
         }
     } while ( 1 );
 
@@ -430,7 +430,7 @@ LoadBalancer :: deleteRemoteDofManagers(Domain *d)
             dman->setPartitionList(& _empty);
             dman->setParallelMode(DofManager_local);
         } else {
-            OOFEM_SIMPLE_ERROR("deleteRemoteDofManagers: unknown dmode encountered");
+            OOFEM_ERROR("unknown dmode encountered");
         }
     }
 }
@@ -513,15 +513,15 @@ WallClockLoadBalancerMonitor :: decide(TimeStep *tStep)
     double neqelems, sum_relcomppowers;
 
     if ( node_solutiontimes == NULL ) {
-        OOFEM_SIMPLE_ERROR("failed to allocate node_solutiontimes array");
+        OOFEM_ERROR("failed to allocate node_solutiontimes array");
     }
 
     if ( node_relcomppowers == NULL ) {
-        OOFEM_SIMPLE_ERROR("failed to allocate node_relcomppowers array");
+        OOFEM_ERROR("failed to allocate node_relcomppowers array");
     }
 
     if ( node_equivelements == NULL ) {
-        OOFEM_SIMPLE_ERROR("failed to allocate node_equivelements array");
+        OOFEM_ERROR("failed to allocate node_equivelements array");
     }
 
 
@@ -648,7 +648,7 @@ WallClockLoadBalancerMonitor :: decide(TimeStep *tStep)
             delete[] procWeights;
 
             if ( fabs(sumWeight - 1.0) > 1.0e-10 ) {
-                OOFEM_SIMPLE_ERROR("[%d] processing weights do not sum to 1.0 (sum = %e)\n", sumWeight);
+                OOFEM_ERROR("[%d] processing weights do not sum to 1.0 (sum = %e)\n", sumWeight);
             }
 
             OOFEM_LOG_RELEVANT("[%d] LoadBalancer: wall clock imbalance rel=%.2f\%,abs=%.2fs, recovering load\n", myrank, 100 * relWallClockImbalance, absWallClockImbalance);
@@ -693,12 +693,12 @@ LoadBalancerMonitor :: initializeFrom(InputRecord *ir)
     } else if ( nodeWeightMode == 2 ) { // user defined static weights
         IR_GIVE_OPTIONAL_FIELD(ir, nodeWeights, _IFT_LoadBalancerMonitor_initialnodeweights);
         if ( nodeWeights.giveSize() != nproc ) {
-            OOFEM_SIMPLE_ERROR("nodeWeights size not equal to number of processors");
+            OOFEM_ERROR("nodeWeights size not equal to number of processors");
         }
 
         staticNodeWeightFlag = true;
     } else {
-        OOFEM_SIMPLE_ERROR("unsupported node weight type, using default value");
+        OOFEM_ERROR("unsupported node weight type, using default value");
         staticNodeWeightFlag = false;
     }
 
@@ -730,7 +730,7 @@ WallClockLoadBalancerMonitor :: initializeFrom(InputRecord *ir)
     processingWeights.clear();
     IR_GIVE_OPTIONAL_FIELD(ir, processingWeights, _IFT_WallClockLoadBalancerMonitor_processingweights);
     if ( recoveredSteps.giveSize() != processingWeights.giveSize() ) {
-        OOFEM_SIMPLE_ERROR("mismatch size of lbrecoveredsteps and lbprocessingweights");
+        OOFEM_ERROR("mismatch size of lbrecoveredsteps and lbprocessingweights");
     }
 
 #endif

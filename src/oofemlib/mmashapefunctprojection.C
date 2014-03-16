@@ -131,7 +131,7 @@ MMAShapeFunctProjection :: __mapVariable(FloatArray &answer, FloatArray &coords,
 {
     Element *elem = domain->giveSpatialLocalizer()->giveElementContainingPoint(coords);
     if ( !elem ) {
-        OOFEM_ERROR("MMAShapeFunctProjection::__mapVariable: no suitable source found");
+        OOFEM_ERROR("no suitable source found");
     }
 
     int nnodes = elem->giveNumberOfDofManagers();

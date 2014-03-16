@@ -667,7 +667,7 @@ DruckerPragerPlasticitySM :: giveRegAlgorithmicStiffMatrix(FloatMatrix &answer,
 
     //exclude division by zero
     if ( hStar == 0. ) {
-        OOFEM_ERROR("DruckerPragerPlasticitySM :: computeYieldStressPrime is zero. This happens mainly due to excessive softening.");
+        OOFEM_ERROR("computeYieldStressPrime is zero. This happens mainly due to excessive softening.");
     }
 
     double a_const = 1. + deltaLambdaStar;

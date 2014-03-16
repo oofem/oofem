@@ -74,7 +74,7 @@ double &
 FloatArray :: operator() (int i)
 {
     if ( i >= this->giveSize() ) {
-        OOFEM_SIMPLE_ERROR("array error on index : %d <= 0", i);
+        OOFEM_ERROR("array error on index : %d <= 0", i);
     }
     return values [ i ];
 }
@@ -83,7 +83,7 @@ const double &
 FloatArray :: operator() (int i) const
 {
     if ( i >= this->giveSize() ) {
-        OOFEM_SIMPLE_ERROR("array error on index : %d <= 0", i);
+        OOFEM_ERROR("array error on index : %d <= 0", i);
     }
     return values [ i ];
 }
@@ -91,7 +91,7 @@ double &
 FloatArray :: operator[] (int i)
 {
     if ( i >= this->giveSize() ) {
-        OOFEM_SIMPLE_ERROR("array error on index : %d <= 0", i);
+        OOFEM_ERROR("array error on index : %d <= 0", i);
     }
     return values [ i ];
 }
@@ -100,7 +100,7 @@ const double &
 FloatArray :: operator[] (int i) const
 {
     if ( i >= this->giveSize() ) {
-        OOFEM_SIMPLE_ERROR("array error on index : %d <= 0", i);
+        OOFEM_ERROR("array error on index : %d <= 0", i);
     }
     return values [ i ];
 }
@@ -121,11 +121,11 @@ void FloatArray :: checkBounds(int i) const
 // Checks that the receiver's size is not smaller than 'i'.
 {
     if ( i <= 0 ) {
-        OOFEM_SIMPLE_ERROR("array error on index : %d <= 0", i);
+        OOFEM_ERROR("array error on index : %d <= 0", i);
     }
 
     if ( i > this->giveSize() ) {
-        OOFEM_SIMPLE_ERROR("array error on index : %d > %d", i, this->giveSize());
+        OOFEM_ERROR("array error on index : %d > %d", i, this->giveSize());
     }
 }
 #endif
@@ -171,7 +171,7 @@ void FloatArray :: add(const FloatArray &b)
 
 #  ifdef DEBUG
     if ( this->giveSize() != b.giveSize() ) {
-        OOFEM_SIMPLE_ERROR("dimension mismatch in a[%d]->add(b[%d])", this->giveSize(), b.giveSize());
+        OOFEM_ERROR("dimension mismatch in a[%d]->add(b[%d])", this->giveSize(), b.giveSize());
     }
 
 #  endif
@@ -208,7 +208,7 @@ void FloatArray :: add(double factor, const FloatArray &b)
 
 #  ifdef DEBUG
     if ( this->giveSize() != b.giveSize() ) {
-        OOFEM_SIMPLE_ERROR("dimension mismatch in a[%d]->add(b[%d])", this->giveSize(), b.giveSize());
+        OOFEM_ERROR("dimension mismatch in a[%d]->add(b[%d])", this->giveSize(), b.giveSize());
     }
 
 #  endif
@@ -237,7 +237,7 @@ void FloatArray :: plusProduct(const FloatMatrix &b, const FloatArray &s, double
 
 #  ifdef DEBUG
     if ( this->giveSize() != b.giveNumberOfColumns() ) {
-        OOFEM_SIMPLE_ERROR( "dimension mismatch in a[%d] and b[%d, *]", this->giveSize(), b.giveNumberOfColumns() );
+        OOFEM_ERROR( "dimension mismatch in a[%d] and b[%d, *]", this->giveSize(), b.giveNumberOfColumns() );
     }
 #  endif
 
@@ -276,7 +276,7 @@ void FloatArray :: subtract(const FloatArray &src)
 
 #  ifdef DEBUG
     if ( this->giveSize() != src.giveSize() ) {
-        OOFEM_SIMPLE_ERROR("dimension mismatch in a[%d]->add(b[%d])", this->giveSize(), src.giveSize());
+        OOFEM_ERROR("dimension mismatch in a[%d]->add(b[%d])", this->giveSize(), src.giveSize());
     }
 
 #  endif
@@ -293,7 +293,7 @@ void FloatArray :: beMaxOf(const FloatArray &a, const FloatArray &b)
 
 #  ifdef DEBUG
     if ( n != b.giveSize() ) {
-        OOFEM_SIMPLE_ERROR("dimension mismatch in beMaxOf(a[%d],b[%d])", n, b.giveSize());
+        OOFEM_ERROR("dimension mismatch in beMaxOf(a[%d],b[%d])", n, b.giveSize());
     }
 
 #  endif
@@ -312,7 +312,7 @@ void FloatArray :: beMinOf(const FloatArray &a, const FloatArray &b)
 
 #  ifdef DEBUG
     if ( n != b.giveSize() ) {
-        OOFEM_SIMPLE_ERROR("dimension mismatch in beMinOf(a[%d],b[%d])", n, b.giveSize());
+        OOFEM_ERROR("dimension mismatch in beMinOf(a[%d],b[%d])", n, b.giveSize());
     }
 
 #  endif
@@ -328,7 +328,7 @@ void FloatArray :: beDifferenceOf(const FloatArray &a, const FloatArray &b)
 {
 #ifdef DEBUG
     if ( a.giveSize() != b.giveSize() ) {
-        OOFEM_SIMPLE_ERROR("size mismatch (%d : %d)", a.giveSize(), b.giveSize());
+        OOFEM_ERROR("size mismatch (%d : %d)", a.giveSize(), b.giveSize());
     }
 
 #endif
@@ -351,7 +351,7 @@ void FloatArray :: beDifferenceOf(const FloatArray &a, const FloatArray &b, int 
 {
 #ifdef DEBUG
     if ( a.giveSize() < n || b.giveSize() < n ) {
-        OOFEM_SIMPLE_ERROR("wrong size ", a.giveSize(), b.giveSize());
+        OOFEM_ERROR("wrong size ", a.giveSize(), b.giveSize());
     }
 
 #endif
@@ -370,7 +370,7 @@ void FloatArray :: beSubArrayOf(const FloatArray &src, const IntArray &indx)
 {
 #ifdef DEBUG
     if ( indx.maximum() > src.giveSize() || indx.minimum() < 1 ) {
-        OOFEM_SIMPLE_ERROR("index points outside of source");
+        OOFEM_ERROR("index points outside of source");
     }
 #endif
 
@@ -403,7 +403,7 @@ void FloatArray :: beVectorProductOf(const FloatArray &v1, const FloatArray &v2)
 #  if DEBUG
     // check proper bounds
     if ( ( v1.giveSize() != 3 ) || ( v2.giveSize() != 3 ) ) {
-        OOFEM_SIMPLE_ERROR("size mismatch, size is not equal to 3");
+        OOFEM_ERROR("size mismatch, size is not equal to 3");
     }
 #  endif
 
@@ -450,7 +450,7 @@ double FloatArray :: dotProduct(const FloatArray &x) const
 {
 #  ifdef DEBUG
     if ( this->giveSize() != x.giveSize() ) {
-        OOFEM_SIMPLE_ERROR("dimension mismatch in a[%d]->dotProduct(b[%d])", this->giveSize(), x.giveSize());
+        OOFEM_ERROR("dimension mismatch in a[%d]->dotProduct(b[%d])", this->giveSize(), x.giveSize());
     }
 
 #  endif
@@ -463,7 +463,7 @@ double FloatArray :: dotProduct(const FloatArray &x, int size) const
 {
 #  ifdef DEBUG
     if ( size > this->giveSize() || size > x.giveSize() ) {
-        OOFEM_SIMPLE_ERROR("dimension mismatch in a[%d]->dotProduct(b[%d])", this->giveSize(), x.giveSize());
+        OOFEM_ERROR("dimension mismatch in a[%d]->dotProduct(b[%d])", this->giveSize(), x.giveSize());
     }
 
 #  endif
@@ -545,7 +545,7 @@ void FloatArray :: assemble(const FloatArray &fe, const IntArray &loc)
     int n = fe.giveSize();
 #  ifdef DEBUG
     if ( n != loc.giveSize() ) {
-        OOFEM_SIMPLE_ERROR("dimensions of 'fe' (%d) and 'loc' (%d) mismatch", fe.giveSize(), loc.giveSize() );
+        OOFEM_ERROR("dimensions of 'fe' (%d) and 'loc' (%d) mismatch", fe.giveSize(), loc.giveSize() );
     }
 
 #  endif
@@ -566,7 +566,7 @@ void FloatArray :: assembleSquared(const FloatArray &fe, const IntArray &loc)
     int n = fe.giveSize();
 #  ifdef DEBUG
     if ( n != loc.giveSize() ) {
-        OOFEM_SIMPLE_ERROR("dimensions of 'fe' (%d) and 'loc' (%d) mismatch", fe.giveSize(), loc.giveSize() );
+        OOFEM_ERROR("dimensions of 'fe' (%d) and 'loc' (%d) mismatch", fe.giveSize(), loc.giveSize() );
     }
 
 #  endif
@@ -599,7 +599,7 @@ void FloatArray :: resizeWithValues(int n, int allocChunk)
 {
 #ifdef DEBUG
     if ( allocChunk < 0 ) {
-        OOFEM_SIMPLE_FATAL("allocChunk must be non-negative; %d", allocChunk);
+        OOFEM_FATAL("allocChunk must be non-negative; %d", allocChunk);
     }
 
 #endif
@@ -654,7 +654,7 @@ void FloatArray :: beProductOf(const FloatMatrix &aMatrix, const FloatArray &anA
 
 #  ifdef DEBUG
     if ( aMatrix.giveNumberOfColumns() != anArray.giveSize() ) {
-        OOFEM_SIMPLE_ERROR("dimension mismatch");
+        OOFEM_ERROR("dimension mismatch");
     }
 #  endif
 
@@ -683,7 +683,7 @@ void FloatArray :: beTProductOf(const FloatMatrix &aMatrix, const FloatArray &an
 
 #  ifdef DEBUG
     if ( aMatrix.giveNumberOfRows() != anArray.giveSize() ) {
-        OOFEM_SIMPLE_ERROR( "dimension mismatch, matrix rows = %d, array size = %d", aMatrix.giveNumberOfRows(), anArray.giveSize() );
+        OOFEM_ERROR( "dimension mismatch, matrix rows = %d, array size = %d", aMatrix.giveNumberOfRows(), anArray.giveSize() );
     }
 
 #  endif
@@ -750,7 +750,7 @@ void FloatArray :: rotatedWith(FloatMatrix &r, char mode)
     } else if ( mode == 'n' ) {
         rta.beProductOf(r, * this);
     } else {
-        OOFEM_SIMPLE_ERROR("unsupported mode");
+        OOFEM_ERROR("unsupported mode");
     }
 
     * this = rta;
@@ -771,7 +771,7 @@ double FloatArray :: normalize()
 {
     double norm = this->computeNorm();
     if ( norm < 1.e-80 ) {
-        OOFEM_SIMPLE_ERROR("cannot norm receiver, norm is too small");
+        OOFEM_ERROR("cannot norm receiver, norm is too small");
     }
 
     this->times(1. / norm);
@@ -955,7 +955,7 @@ void FloatArray :: beVectorForm(const FloatMatrix &aMatrix)
     // Rewrites the matrix on vector form, order: 11, 22, 33, 23, 13, 12, 32, 31, 21
 #  ifdef DEBUG
     if (  aMatrix.giveNumberOfColumns() != 3 || aMatrix.giveNumberOfColumns() != 3 ) {
-        OOFEM_SIMPLE_ERROR("matrix dimension is not 3x3");
+        OOFEM_ERROR("matrix dimension is not 3x3");
     }
 
 #  endif
@@ -978,7 +978,7 @@ void FloatArray :: beSymVectorFormOfStrain(const FloatMatrix &aMatrix)
     // shear components are multiplied with a factor 2
 #  ifdef DEBUG
     if (  aMatrix.giveNumberOfColumns() != 3 || aMatrix.giveNumberOfColumns() != 3 ) {
-        OOFEM_SIMPLE_ERROR("matrix dimension is not 3x3");
+        OOFEM_ERROR("matrix dimension is not 3x3");
     }
 #  endif
 
@@ -998,7 +998,7 @@ void FloatArray :: beSymVectorForm(const FloatMatrix &aMatrix)
     // Revrites the  matrix on vector form (symmetrized matrix used), order: 11, 22, 33, 23, 13, 12
 #  ifdef DEBUG
     if (  aMatrix.giveNumberOfColumns() != 3 || aMatrix.giveNumberOfColumns() != 3 ) {
-        OOFEM_SIMPLE_ERROR("matrix dimension is not 3x3");
+        OOFEM_ERROR("matrix dimension is not 3x3");
     }
 
 #  endif

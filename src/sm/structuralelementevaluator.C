@@ -139,7 +139,7 @@ void StructuralElementEvaluator :: giveCharacteristicMatrix(FloatMatrix &answer,
     } else if ( mtrx == LumpedMassMatrix ) {
         this->computeLumpedMassMatrix(answer, tStep);
     } else {
-        OOFEM_SIMPLE_ERROR( "giveCharacteristicMatrix: Unknown Type of characteristic mtrx (%s)", __CharTypeToString(mtrx) );
+        OOFEM_ERROR( "Unknown Type of characteristic mtrx (%s)", __CharTypeToString(mtrx) );
     }
 }
 
@@ -190,7 +190,7 @@ void StructuralElementEvaluator :: computeLumpedMassMatrix(FloatMatrix &answer, 
     }
 
     if ( indx != ldofs ) {
-        OOFEM_SIMPLE_ERROR("computeMassMatrix : internal consistency check failed");
+        OOFEM_ERROR("internal consistency check failed");
     }
 
     dim = dimFlag.at(1) + dimFlag.at(2) + dimFlag.at(3);
@@ -220,7 +220,7 @@ void StructuralElementEvaluator :: computeConsistentMassMatrix(FloatMatrix &answ
     }
 
     if ( ( iRule = this->giveMassMtrxIntegrationRule() ) ) {
-        OOFEM_SIMPLE_ERROR("computeConsistentMassMatrix no integration rule available");
+        OOFEM_ERROR("no integration rule available");
     }
 
     this->giveMassMtrxIntegrationMask(mask);

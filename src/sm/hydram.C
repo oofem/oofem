@@ -608,7 +608,7 @@ HydrationModelInterface :: initializeFrom(InputRecord *ir)
     if ( value >= 0. ) {
         OOFEM_LOG_INFO("HydratingMaterial: creating HydrationModel.");
         if ( !( hydrationModel = new HydrationModel() ) ) {
-            OOFEM_SIMPLE_ERROR("Could not create HydrationModel instance.");
+            OOFEM_ERROR("Could not create HydrationModel instance.");
         }
 
         hydrationModel->initializeFrom(ir);
@@ -618,7 +618,7 @@ HydrationModelInterface :: initializeFrom(InputRecord *ir)
         constantHydrationDegree = -value;
         OOFEM_LOG_INFO("HydratingMaterial: Hydration degree set to %.2f.", -value);
     } else {
-        OOFEM_SIMPLE_ERROR("HydrationModelInterface :: initializeFrom - Hydration degree input incorrect, use -1..<0 for constant hydration degree, 0..1 to set initial material hydration degree.");
+        OOFEM_ERROR("Hydration degree input incorrect, use -1..<0 for constant hydration degree, 0..1 to set initial material hydration degree.");
     }
 
     // Material cast time - start of hydration
