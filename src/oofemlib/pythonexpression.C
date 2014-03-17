@@ -32,11 +32,12 @@
  *  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  */
 
+#include <Python.h>
+
 #include "pythonexpression.h"
 #include "dynamicinputrecord.h"
 #include "classfactory.h"
 
-#include <Python.h>
 #include <sstream>
 
 // Defines the name for the return variable;
