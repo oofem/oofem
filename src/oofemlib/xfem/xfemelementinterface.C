@@ -308,7 +308,7 @@ void XfemElementInterface :: XfemElementInterface_createEnrNmatrixAt(FloatMatrix
     std :: vector< std :: vector< double > > Nd(iLocNodeInd.size());
 
 //    for ( int j = 1; j <= nDofMan; j++ ) {
-    for ( int j = 1; j <= iLocNodeInd.size(); j++ ) {
+    for ( int j = 1; j <= int(iLocNodeInd.size()); j++ ) {
 //        DofManager *dMan = iEl.giveDofManager(j);
         DofManager *dMan = iEl.giveDofManager( iLocNodeInd[j-1] );
 
@@ -367,7 +367,7 @@ void XfemElementInterface :: XfemElementInterface_createEnrNmatrixAt(FloatMatrix
     int numN = iLocNodeInd.size();
 
 //    for ( int j = 1; j <= nDofMan; j++ ) {
-    for ( int j = 1; j <= iLocNodeInd.size(); j++ ) {
+    for ( int j = 1; j <= int(iLocNodeInd.size()); j++ ) {
         numN += Nd [ j - 1 ].size();
     }
 
@@ -377,7 +377,7 @@ void XfemElementInterface :: XfemElementInterface_createEnrNmatrixAt(FloatMatrix
     int column = 1;
 
 //    for ( int i = 1; i <= nDofMan; i++ ) {
-    for ( int i = 1; i <= iLocNodeInd.size(); i++ ) {
+    for ( int i = 1; i <= int(iLocNodeInd.size()); i++ ) {
         NTot.at(column) = Nc.at( iLocNodeInd[i-1]);
         column++;
 
