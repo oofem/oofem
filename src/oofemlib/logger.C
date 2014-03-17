@@ -163,7 +163,7 @@ Logger :: appendLogTo(const std :: string &fname)
     }
 
     if ( stream == NULL ) {
-        OOFEM_WARNING2( "Logger::appendlogTo : file opening error (%s)", fname.c_str() );
+        OOFEM_SIMPLE_WARNING( "Logger::appendLogTo : file opening error (%s)", fname.c_str() );
     } else {
         this->logStream = stream;
     }
@@ -182,7 +182,7 @@ Logger :: appendErrorTo(const std :: string &fname)
     }
 
     if ( stream == NULL ) {
-        OOFEM_WARNING2( "Logger::appendlogTo : file opening error (%s)", fname.c_str() );
+        OOFEM_SIMPLE_WARNING( "Logger::appendErrorTo : file opening error (%s)", fname.c_str() );
     } else {
         this->errStream = stream;
     }
@@ -220,7 +220,7 @@ Logger :: writeLogMsg(logLevelType level, const char *format, ...)
 }
 
 void
-Logger :: writeELogMsg(logLevelType level, const char *_file, int _line, const char *format, ...)
+Logger :: writeELogMsg(logLevelType level, const char *_func, const char *_file, int _line, const char *format, ...)
 {
     va_list args;
 
@@ -238,6 +238,9 @@ Logger :: writeELogMsg(logLevelType level, const char *_file, int _line, const c
             fprintf(stream, "%s\n%s: (%s:%d)\n", LOG_ERR_HEADER, giveLevelName(level), _file, _line);
         } else {
             fprintf(stream, "%s\n%s:\n", LOG_ERR_HEADER, giveLevelName(level) );
+        }
+        if ( _func ) {
+            fprintf(stream, "In %s:\n", _func );
         }
 
         va_start(args, format);

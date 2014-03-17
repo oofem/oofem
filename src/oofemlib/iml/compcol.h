@@ -121,6 +121,7 @@ public:
     virtual double at(int i, int j) const;
     virtual void toFloatMatrix(FloatMatrix &answer) const;
     virtual void printYourself() const;
+    virtual const char* giveClassName() const { return "CompCol"; }
     SparseMtrxType giveType() const { return SMT_CompCol; }
     bool isAsymmetric() const { return true; }
 

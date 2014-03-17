@@ -289,7 +289,7 @@ PerfectlyPlasticMaterial :: giveEffectiveMaterialStiffnessMatrix(FloatMatrix &an
         lMat->giveStiffnessMatrix(stiff, mode, gp, tStep);
         this->giveFullSymMatrixForm( answer, stiff, gp->giveMaterialMode() );
     } else {
-        OOFEM_ERROR("PerfectlyPlasticMaterial :: giveEffectiveMaterialStiffnessMatrix - unsupported material mode");
+        OOFEM_ERROR("giveEffectiveMaterialStiffnessMatrix - unsupported material mode");
     }
 }
 
@@ -374,7 +374,7 @@ PerfectlyPlasticMaterial :: give3dMaterialStiffnessMatrix(FloatMatrix &answer,
 {
     MaterialMode originalMode = gp->giveMaterialMode();
     if ( originalMode != _3dMat ) {
-        _error("give3dMaterialStiffnessMatrix : Different stressStrain mode encountered");
+        OOFEM_ERROR("Different stressStrain mode encountered");
     }
 
     // we can force 3d response, and we obtain correct 3d tangent matrix,
@@ -549,7 +549,6 @@ PerfectlyPlasticMaterial :: computePlasticStiffnessAt(FloatMatrix &answer,
     FloatArray *yeldStressGrad, *loadingStressGrad;
     FloatArray help;
     double denominator, nominator;
-    int i;
     //
     // force de to be elastic even if gp in plastic state
     // to do this, a flag in this class exist -> ForceElasticResponce
@@ -562,13 +561,13 @@ PerfectlyPlasticMaterial :: computePlasticStiffnessAt(FloatMatrix &answer,
     yeldStressGrad = this->GiveYCStressGradient(gp, currentStressVector,
                                                 currentPlasticStrainVector);
     crossSection->imposeStressConstrainsOnGradient(gp, yeldStressGrad);
-    yeldStressGradMat = new FloatMatrix(yeldStressGrad, 1); // transpose
+    yeldStressGradMat = new FloatMatrix(*yeldStressGrad, 1); // transpose
 
     loadingStressGrad = this->GiveLCStressGradient(gp, currentStressVector,
                                                    currentPlasticStrainVector);
 
     crossSection->imposeStrainConstrainsOnGradient(gp, loadingStressGrad);
-    loadingStressGradMat = new FloatMatrix(yeldStressGrad);
+    loadingStressGradMat = new FloatMatrix(*yeldStressGrad);
 
     help.beProductOf(de, * loadingStressGrad);
     delete loadingStressGrad;
@@ -579,7 +578,7 @@ PerfectlyPlasticMaterial :: computePlasticStiffnessAt(FloatMatrix &answer,
     delete loadingStressGradMat;
 
     denominator = 0.;
-    for ( i = 1; i <= 6; i++ ) {
+    for ( int i = 1; i <= 6; i++ ) {
         denominator += yeldStressGrad->at(i) * help.at(i);
     }
 
@@ -590,7 +589,7 @@ PerfectlyPlasticMaterial :: computePlasticStiffnessAt(FloatMatrix &answer,
     if ( strainIncrement3d != NULL ) { // compute proportional factor lambda
         nominator = 0.;
         help.beProductOf(de, * strainIncrement3d);
-        for ( i = 1; i <= 6; i++ ) {
+        for ( int i = 1; i <= 6; i++ ) {
             nominator += yeldStressGrad->at(i) * help.at(i);
         }
 
@@ -659,7 +658,7 @@ PerfectlyPlasticMaterial :: give(int aProperty, GaussPoint *gp)
         if ( linearElasticMaterial ) {
             value = this->linearElasticMaterial->give(aProperty, gp);
         } else {
-            _error("give: property not defined");
+            OOFEM_ERROR("property not defined");
         }
     }
 

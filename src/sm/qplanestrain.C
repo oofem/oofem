@@ -41,6 +41,10 @@
 #include "intarray.h"
 #include "classfactory.h"
 
+#ifdef __OOFEG
+ #include "oofeggraphiccontext.h"
+#endif
+
 namespace oofem {
 REGISTER_Element(QPlaneStrain);
 
@@ -174,7 +178,7 @@ QPlaneStrain :: computeVolumeAround(GaussPoint *gp)
 void
 QPlaneStrain :: giveDofManDofIDMask(int inode, EquationID, IntArray &answer) const
 {
-    answer.setValues(2, D_u, D_v);
+    answer = {D_u, D_v};
 }
 
 

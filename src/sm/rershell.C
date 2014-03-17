@@ -552,7 +552,7 @@ RerShell :: giveLocalCoordinates(FloatArray &answer, const FloatArray &global)
 {
     // test the parameter
     if ( global.giveSize() != 3 ) {
-        _error("GiveLocalCoordinate : cannot transform coordinates- size mismatch");
+        OOFEM_ERROR("cannot transform coordinates- size mismatch");
         exit(1);
     }
 
@@ -613,7 +613,7 @@ RerShell :: giveCharacteristicTensor(FloatMatrix &answer, CharTensor type, Gauss
         answer.at(1, 2) = curv.at(6) / 2.;
         answer.at(2, 1) = curv.at(6) / 2.;
     } else {
-        _error("GiveCharacteristicTensor: unsupported tensor mode");
+        OOFEM_ERROR("unsupported tensor mode");
         exit(1);
     }
 
@@ -702,7 +702,7 @@ RerShell :: printOutputAt(FILE *file, TimeStep *tStep)
 void
 RerShell :: giveDofManDofIDMask(int inode, EquationID, IntArray &answer) const
 {
-    answer.setValues(6, D_u, D_v, D_w, R_u, R_v, R_w);
+    answer = {D_u, D_v, D_w, R_u, R_v, R_w};
 }
 
 

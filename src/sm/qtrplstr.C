@@ -114,7 +114,7 @@ QTrPlaneStress2d :: initializeFrom(InputRecord *ir)
            ( numberOfGaussPoints == 4 ) ||
            ( numberOfGaussPoints == 7 ) ||
            ( numberOfGaussPoints == 13 ) ) ) {
-        _warning("number of Gauss points in QTrPlaneStress2d changed to 4\n");
+        OOFEM_WARNING("number of Gauss points in QTrPlaneStress2d changed to 4\n");
         numberOfGaussPoints = 4;
     }
 
@@ -192,7 +192,7 @@ void QTrPlaneStress2d :: computeGaussPoints()
 void
 QTrPlaneStress2d :: giveDofManDofIDMask(int inode, EquationID, IntArray &answer) const
 {
-    answer.setValues(2, D_u, D_v);
+    answer = {D_u, D_v};
 }
 
 
@@ -215,7 +215,7 @@ QTrPlaneStress2d :: SpatialLocalizerI_giveDistanceFromParametricCenter(const Flo
     this->computeGlobalCoordinates(gcoords, lcoords);
 
     if ( ( size = coords.giveSize() ) < ( gsize = gcoords.giveSize() ) ) {
-        _error("SpatialLocalizerI_giveDistanceFromParametricCenter: coordinates size mismatch");
+        OOFEM_ERROR("coordinates size mismatch");
     }
 
     if ( size == gsize ) {
@@ -520,7 +520,7 @@ QTrPlaneStress2d :: SPRNodalRecoveryMI_giveDofMansDeterminedByPatch(IntArray &an
         answer.at(2) = this->giveNode(6)->giveNumber();
         answer.at(3) = this->giveNode(5)->giveNumber();
     } else {
-        _error("SPRNodalRecoveryMI_giveDofMansDeterminedByPatch: node unknown");
+        OOFEM_ERROR("node unknown");
     }
 }
 

@@ -173,6 +173,8 @@ public:
     }
     /// Recursively prints structure.
     void printYourself();
+    /// Error printing helper.
+    std :: string errorInfo(const char *func) const { return std :: string("OctantRec") + func; }
 };
 
 

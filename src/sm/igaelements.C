@@ -70,7 +70,7 @@ IRResultType BsplinePlaneStressElement :: initializeFrom(InputRecord *ir)
 
     // HUHU checkConsistency()
     if ( giveNumberOfDofManagers() != interpol->giveNumberOfControlPoints(1) * interpol->giveNumberOfControlPoints(2) ) {
-        OOFEM_ERROR("BsplinePlaneStressElement::initializeFrom - number of control points mismatch");
+        OOFEM_ERROR("number of control points mismatch");
     }
 
     return IRRT_OK;
@@ -89,7 +89,7 @@ IRResultType NURBSPlaneStressElement :: initializeFrom(InputRecord *ir)
 
     // HUHU
     if ( giveNumberOfDofManagers() != interpol->giveNumberOfControlPoints(1) * interpol->giveNumberOfControlPoints(2) ) {
-        OOFEM_ERROR("NURBSPlaneStressElement::initializeFrom - number of control points mismatch");
+        OOFEM_ERROR("number of control points mismatch");
     }
 
     return IRRT_OK;
@@ -112,7 +112,7 @@ IRResultType NURBSSpace3dElement :: initializeFrom(InputRecord *ir)
 
     // HUHU
     if ( giveNumberOfDofManagers() != interpol->giveNumberOfControlPoints(1) * interpol->giveNumberOfControlPoints(2) * interpol->giveNumberOfControlPoints(3) ) {
-        OOFEM_ERROR("NURBSSpace3dElement::initializeFrom - number of control points mismatch");
+        OOFEM_ERROR("number of control points mismatch");
     }
 
     return IRRT_OK;
@@ -168,7 +168,7 @@ void BsplinePlaneStressElement :: drawScalar(oofegGraphicContext &context)
         sign [ 3 ].at(1) = 1;
         sign [ 3 ].at(2) = -1;
     } else {
-        OOFEM_ERROR2("drawRawGeometry: not implemented for nsd = %d", nsd);
+        OOFEM_ERROR("not implemented for nsd = %d", nsd);
     }
 
     indx = context.giveIntVarIndx();
@@ -285,7 +285,7 @@ void NURBSPlaneStressElement :: drawScalar(oofegGraphicContext &context)
         sign [ 3 ].at(1) = 1;
         sign [ 3 ].at(2) = -1;
     } else {
-        OOFEM_ERROR2("drawRawGeometry: not implemented for nsd = %d", nsd);
+        OOFEM_ERROR("not implemented for nsd = %d", nsd);
     }
 
     indx = context.giveIntVarIndx();
@@ -492,7 +492,7 @@ void TSplinePlaneStressElement :: drawScalar(oofegGraphicContext &context)
         sign [ 3 ].at(1) = 1;
         sign [ 3 ].at(2) = -1;
     } else {
-        OOFEM_ERROR2("drawRawGeometry: not implemented for nsd = %d", nsd);
+        OOFEM_ERROR("not implemented for nsd = %d", nsd);
     }
 
     indx = context.giveIntVarIndx();
@@ -627,7 +627,7 @@ void NURBSSpace3dElement :: drawScalar(oofegGraphicContext &context)
         sign [ 7 ].at(2) = -1;
         sign [ 7 ].at(3) = -1;
     } else {
-        OOFEM_ERROR2("drawRawGeometry: not implemented for nsd = %d", nsd);
+        OOFEM_ERROR("not implemented for nsd = %d", nsd);
     }
 
     indx = context.giveIntVarIndx();

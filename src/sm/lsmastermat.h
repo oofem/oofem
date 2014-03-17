@@ -95,7 +95,7 @@ public:
                                                TimeStep *tStep);
 
     virtual void giveRealStressVector(FloatArray &answer, GaussPoint *, const FloatArray &, TimeStep *)
-    { OOFEM_ERROR("LsMasterMat: giveRealStressVector is not implemented, this material is designed for large strains only"); }
+    { OOFEM_ERROR("not implemented, this material is designed for large strains only"); }
     virtual void giveFirstPKStressVector_3d(FloatArray &answer, GaussPoint *gp, const FloatArray &vF, TimeStep *tStep);
 
     /// transformation matrices

@@ -271,7 +271,7 @@ IDNLMaterial :: computeAngleAndSigmaRatio(double &angle, double &ratio, GaussPoi
     MaterialMode matMode;
     matMode = gp->giveMaterialMode();
     if ( ( matMode == _3dMat ) || ( matMode == _1dMat ) ) { //Check if the stress-based approach can be applied
-        _error("computeAngleAndSigmaRatio: 3D or 1D realisation for Stress-based averaging not supported");
+        OOFEM_ERROR("3D or 1D realisation for Stress-based averaging not supported");
     }
 
     //Get the temporary strain vector
@@ -439,7 +439,6 @@ IDNLMaterial :: giveInterface(InterfaceType type)
 IRResultType
 IDNLMaterial :: initializeFrom(InputRecord *ir)
 {
-    const char *__proc = "initializeFrom"; // Required by IR_GIVE_FIELD macro
     IRResultType result;                // Required by IR_GIVE_FIELD macro
 
     IsotropicDamageMaterial1 :: initializeFrom(ir);
@@ -817,10 +816,10 @@ IDNLMaterial :: giveRemoteNonlocalStiffnessContribution(GaussPoint *gp, IntArray
                     principalStress.at(indx) = principalStress.at(3);
                     principalStress.at(3) = swap;
                 } else if ( zeroFlag == 0 ) {
-                    _error("giveRemoteNonlocalStiffnessContribution: internal error");
+                    OOFEM_ERROR("internal error");
                 }
             } else {
-                _error("giveRemoteNonlocalStiffnessContribution: equivStrainType not supported");
+                OOFEM_ERROR("equivStrainType not supported");
             }
         }
 
@@ -900,7 +899,7 @@ IDNLMaterial :: giveRemoteNonlocalStiffnessContribution(GaussPoint *gp, IntArray
         nu = stress;
         coeff = 1.0 / ( lmat->give('E', gp) * equivStrain );
     } else {
-        _error("giveRemoteNonlocalStiffnessContribution: equivStrainType not supported");
+        OOFEM_ERROR("equivStrainType not supported");
     }
 
 

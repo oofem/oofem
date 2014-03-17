@@ -96,7 +96,6 @@ SpoolesSolver :: ~SpoolesSolver()
 IRResultType
 SpoolesSolver :: initializeFrom(InputRecord *ir)
 {
-    const char *__proc = "initializeFrom"; // Required by IR_GIVE_FIELD macro
     IRResultType result;                // Required by IR_GIVE_FIELD macro
 
     int val;
@@ -144,28 +143,28 @@ SpoolesSolver :: solve(SparseMtrx *A, FloatArray *b, FloatArray *x)
 
     // first check whether Lhs is defined
     if ( !A ) {
-        _error("solveYourselfAt: unknown Lhs");
+        OOFEM_ERROR("unknown Lhs");
     }
 
     // and whether Rhs
     if ( !b ) {
-        _error("solveYourselfAt: unknown Rhs");
+        OOFEM_ERROR("unknown Rhs");
     }
 
     // and whether previous Solution exist
     if ( !x ) {
-        _error("solveYourselfAt: unknown solution array");
+        OOFEM_ERROR("unknown solution array");
     }
 
     if ( x->giveSize() != b->giveSize() ) {
-        _error("solveYourselfAt: size mismatch");
+        OOFEM_ERROR("size mismatch");
     }
 
     Timer timer;
     timer.startTimer();
 
     if ( A->giveType() != SMT_SpoolesMtrx ) {
-        _error("solveYourselfAt: SpoolesSparseMtrx Expected");
+        OOFEM_ERROR("SpoolesSparseMtrx Expected");
     }
 
     mtxA = ( ( SpoolesSparseMtrx * ) A )->giveInpMtrx();

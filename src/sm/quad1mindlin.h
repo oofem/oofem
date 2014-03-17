@@ -36,10 +36,12 @@
 #define quad1mindlin_H
 
 #include "nlstructuralelement.h"
+#include "zznodalrecoverymodel.h"
+#include "sprnodalrecoverymodel.h"
 #include "fei2dquadlin.h"
 
 #define _IFT_Quad1Mindlin_Name "quad1mindlin"
-
+#define _IFT_Quad1Mindlin_ReducedIntegration "reducedintegration"
 namespace oofem {
 /**
  * This class implements an quadrilateral four-node Mindlin plate.
@@ -57,10 +59,14 @@ namespace oofem {
  *
  * @author Mikael Öhman
  */
-class Quad1Mindlin : public NLStructuralElement
+class Quad1Mindlin : public NLStructuralElement,
+public ZZNodalRecoveryModelInterface,
+public SPRNodalRecoveryModelInterface
 {
 protected:
     static FEI2dQuadLin interp_lin;
+    /// Flag controlling reduced (one - point) integration for shear
+    bool reducedIntegrationFlag;
 
 public:
     Quad1Mindlin(int n, Domain * d);
@@ -91,6 +97,7 @@ public:
     { computeLumpedMassMatrix(answer, tStep); }
 
     virtual int giveIPValue(FloatArray &answer, GaussPoint *gp, InternalStateType type, TimeStep *tStep);
+    virtual Interface *giveInterface(InterfaceType it);
 
 protected:
     virtual void computeGaussPoints();
@@ -110,6 +117,11 @@ protected:
     //virtual IntegrationRule *GetSurfaceIntegrationRule(int i) { return NULL; }
     //virtual double computeSurfaceVolumeAround(GaussPoint *gp, int iSurf) { return 0.; }
     //virtual void computeSurfIpGlobalCoords(FloatArray &answer, GaussPoint *gp, int iSurf) { answer.clear(); }
+    virtual void SPRNodalRecoveryMI_giveSPRAssemblyPoints(IntArray &pap);
+    virtual void SPRNodalRecoveryMI_giveDofMansDeterminedByPatch(IntArray &answer, int pap);
+    virtual int SPRNodalRecoveryMI_giveNumberOfIP() { return this->numberOfGaussPoints; }
+    virtual SPRPatchType SPRNodalRecoveryMI_givePatchType() { return SPRPatchType_2dxy; }
+    virtual Element *ZZNodalRecoveryMI_giveElement() { return this; }
 };
 } // end namespace oofem
 #endif // quad1mindlin_H

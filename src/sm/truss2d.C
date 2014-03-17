@@ -274,14 +274,13 @@ Truss2d :: resolveCoordIndices(int &c1, int &c2)
         c1 = 2;
         c2 = 3;
     } else {
-        _error("resolveCoordIndices: Unknow cs_mode");
+        OOFEM_ERROR("Unknow cs_mode");
     }
 }
 
 IRResultType
 Truss2d :: initializeFrom(InputRecord *ir)
 {
-    const char *__proc = "initializeFrom"; // Required by IR_GIVE_FIELD macro
     IRResultType result;                            // Required by IR_GIVE_FIELD macro
     this->NLStructuralElement :: initializeFrom(ir);
 
@@ -289,7 +288,7 @@ Truss2d :: initializeFrom(InputRecord *ir)
     IR_GIVE_OPTIONAL_FIELD(ir, cs_mode, _IFT_Truss2d_cs);
 
     if ( cs_mode != 0 && cs_mode != 1 && cs_mode != 2 ) {
-        _error("Unsupported value of cs_mode");
+        OOFEM_ERROR("Unsupported value of cs_mode");
     }
 
     return IRRT_OK;
@@ -300,11 +299,11 @@ void
 Truss2d :: giveDofManDofIDMask(int inode, EquationID, IntArray &answer) const
 {
     if ( cs_mode == 0 ) {
-        answer.setValues(2, D_u, D_w);
+        answer = {D_u, D_w};
     } else if ( cs_mode == 1 ) {
-        answer.setValues(2, D_u, D_v);
+        answer = {D_u, D_v};
     } else if ( cs_mode == 2 ) {
-        answer.setValues(2, D_v, D_w);
+        answer = {D_v, D_w};
     }
 }
 
@@ -344,7 +343,7 @@ Truss2d :: giveEdgeDofMapping(IntArray &answer, int iEdge) const
      */
 
     if ( iEdge != 1 ) {
-        _error("giveEdgeDofMapping: wrong edge number");
+        OOFEM_ERROR("wrong edge number");
     }
 
 
@@ -359,7 +358,7 @@ double
 Truss2d ::   computeEdgeVolumeAround(GaussPoint *gp, int iEdge)
 {
     if ( iEdge != 1 ) { // edge between nodes 1 2
-        _error("computeEdgeVolumeAround: wrong egde number");
+        OOFEM_ERROR("wrong egde number");
     }
 
     double weight  = gp->giveWeight();

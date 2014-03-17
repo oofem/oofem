@@ -94,60 +94,102 @@ AnisotropicDamageMaterial :: giveRealStressVector(FloatArray &answer, GaussPoint
     AnisotropicDamageMaterialStatus *status = static_cast< AnisotropicDamageMaterialStatus * >( this->giveStatus(gp) );
     LinearElasticMaterial *lmat = this->giveLinearElasticMaterial();
     FloatArray strainVector, reducedTotalStrainVector;
-    FloatMatrix de;
-    double f, equivStrain, tempKappa = 0.0;
+    FloatMatrix de, tempDamageTensor;
+    double equivStrain, Kappa = 0.0, tempKappa = 0.0, traceTempD, tempStrainZ;
+    ;
+    FloatArray eVals, effectiveStressVector, fullEffectiveStressVector, stressVector;
+    FloatMatrix eVecs, effectiveStressTensor, stressTensor, strainTensor, Dn;
     MaterialMode mode = gp->giveMaterialMode();
-    FloatMatrix strainTensor;
-    //    double traceTempD = (this->A)*(equivStrain-this->kappa0);
-    double traceTempD;
-    FloatArray eVals;
-    FloatMatrix eVecs;
-    FloatMatrix damageTensor;
-
     this->initGpForNewStep(gp);
-
     // subtract stress independent part
     // note: eigenStrains (temperature) is not contained in mechanical strain stored in gp
     // therefore it is necessary to subtract always the total eigen strain value
     this->giveStressDependentPartOfStrainVector(reducedTotalStrainVector, gp, totalStrain, atTime, VM_Total);
-
     // compute equivalent strain
     this->computeEquivalentStrain(equivStrain, reducedTotalStrainVector, gp, atTime);
-    FloatMatrix tempDamageTensor = status->giveDamage();
-    //    tempKappa = this->computeK(gp);
-    tempKappa = ( tempDamageTensor.at(1, 1) + tempDamageTensor.at(2, 2) + tempDamageTensor.at(3, 3) ) / this->A + this->kappa0;
+    Dn = status->giveDamage();
+    Kappa = this->computeKappa(Dn);
+    double nu = lmat->give(NYxz, gp);
 
-    FloatArray effectiveStressVector, fullEffectiveStressVector, stressVector;
-    FloatMatrix effectiveStressTensor, stressTensor;
+    if ( equivStrain <= Kappa ) { // damage does not grow
+        if ( Kappa <= this->kappa0 ) {
+            // elastic behavior
+            tempDamageTensor = Dn;
+            tempKappa = Kappa;
+            if ( mode == _PlaneStress ) {
+                tempStrainZ = -nu * ( reducedTotalStrainVector.at(1) + reducedTotalStrainVector.at(2) ) / ( 1. - nu );
+            }
+        } else  {
+            // damage was produced in the past but does not grow in this step
+            tempDamageTensor = Dn;
+            tempKappa = Kappa;
+            if ( mode == _PlaneStress ) {
+                this->computePlaneStressStrain(strainTensor, Dn, reducedTotalStrainVector, gp, atTime);
+                tempStrainZ = strainTensor.at(3, 3);
+            }
+        }
+    } else  { //damage grows in this step and must be updated
+        tempKappa = equivStrain;
+        if ( mode == _PlaneStress ) {
+            // since the out-of-plane stress and the damage tensor depend on each other, iterations are needed to find the correct values
+            //          this->computePlaneStressStrain(strainTensorA, Dn, reducedTotalStrainVector, gp, atTime);
+            //          status->setTempStrainZ(strainTensorA.at(3,3));
+            //          reducedTotalStrainVectorA.at(3)=strainTensorA.at(3,3);
+            //          this->computeEquivalentStrain(equivStrainA, reducedTotalStrainVectorA, gp, atTime);
+            //          AnisotropicDamageMaterial :: computeDamageTensor(DnB, gp, reducedTotalStrainVectorA, equivStrainA, atTime);
+            //          this->computePlaneStressStrain(strainTensorB, DnB, reducedTotalStrainVectorA, gp, atTime);
+            //          eps=strainTensorB.at(3,3)-strainTensorA.at(3,3);
+
+            double equivStrain0, ez0, ez1, ez2, eps0, eps1;
+            FloatMatrix strainTensor0, strainTensor1, Dn1;
+            this->computePlaneStressStrain(strainTensor0, Dn, reducedTotalStrainVector, gp, atTime);
+            ez0 = strainTensor0.at(3, 3);
+            status->setTempStrainZ(ez0);
+            this->computeEquivalentStrain(equivStrain0, reducedTotalStrainVector, gp, atTime);
+            AnisotropicDamageMaterial :: computeDamageTensor(Dn1, gp, reducedTotalStrainVector, equivStrain0, atTime);
+            this->computePlaneStressStrain(strainTensor1, Dn1, reducedTotalStrainVector, gp, atTime);
+            ez1 = strainTensor1.at(3, 3);
+            eps0 = strainTensor1.at(3, 3) - ez0;        // first error is obtained
+            // The following loop performs a fix-point iteration algorithm to find the out-of-plane strain and the corresponding
+            // damage tensor.
+            int count = 0;
+            do {
+                status->setTempStrainZ(ez1);
+                this->computeEquivalentStrain(equivStrain0, reducedTotalStrainVector, gp, atTime);
+                AnisotropicDamageMaterial :: computeDamageTensor(Dn1, gp, reducedTotalStrainVector, equivStrain0, atTime);
+                this->computePlaneStressStrain(strainTensor1, Dn1, reducedTotalStrainVector, gp, atTime);
+                eps1 = strainTensor1.at(3, 3) - ez1;                    // next error is obtained
+                if ( ( eps0 / eps1 ) < 0.0 ) {
+                    ez2 = ez0 + ( fabs(eps0) / fabs(eps0) + fabs(eps1) ) * ( ez1 - ez0 );
+                } else  {
+                    if ( fabs(eps1) > fabs(eps0) ) {
+                        ez2 = ez0 - ( ( ez1 - ez0 ) * eps0 ) / ( eps1 - eps0 );
+                    } else  {
+                        ez2 = ez1 + ( ( ez1 - ez0 ) * eps1 ) / ( eps0 - eps1 );
+                    }
+                }
+                ez1 = ez2;
+                count = count + 1;
+            } while ( fabs(eps1) > 1.0e-12 && count <= 1000 );
+            tempStrainZ = ez1;
+            tempDamageTensor = Dn1;
+        } else  {
+            AnisotropicDamageMaterial :: computeDamageTensor(tempDamageTensor, gp, reducedTotalStrainVector, equivStrain, atTime);
+        }
+    }
+
     lmat->giveStiffnessMatrix(de, ElasticStiffness, gp, atTime);
     effectiveStressVector.beProductOf(de, reducedTotalStrainVector);
-    f = equivStrain - tempKappa;
 
-    if ( ( tempKappa < this->kappa0 ) && ( equivStrain < tempKappa ) ) { // no damage has been developed yet and the material behaves elastically
+    if ( ( equivStrain <= Kappa ) && ( Kappa <= this->kappa0 ) ) {      // elastic behavior
         answer = effectiveStressVector;
-        //       	FloatMatrix tempDamageTensor = status->giveDamage();// changed, before: status->giveTempDamage();(18.2.14)
     } else  {
-        if ( f <= 0.0 ) {
-            //			FloatMatrix tempDamageTensor = status->giveDamage();// changed, before: status->giveTempDamage();(18.2.14)
-        } else  {
-            AnisotropicDamageMaterial :: computeDamageTensor(tempDamageTensor, gp, totalStrain, atTime);
-        }
-
         StructuralMaterial :: giveFullSymVectorForm(fullEffectiveStressVector, effectiveStressVector, mode);
         effectiveStressTensor.beMatrixForm(fullEffectiveStressVector);
-        double nu = lmat->give(NYxz, gp);
         strainTensor.resize(3, 3);
         strainTensor.zero();
         if ( mode == _PlaneStress ) {
-            strainTensor.at(1, 1) = reducedTotalStrainVector.at(1);
-            strainTensor.at(2, 2) = reducedTotalStrainVector.at(2);
-            strainTensor.at(3, 3) = -nu * ( reducedTotalStrainVector.at(1) + reducedTotalStrainVector.at(2) ) / ( 1. - nu );
-            strainTensor.at(2, 3) = 0.0;
-            strainTensor.at(3, 2) = 0.0;
-            strainTensor.at(1, 3) = 0.0;
-            strainTensor.at(3, 1) = 0.0;
-            strainTensor.at(1, 2) = reducedTotalStrainVector.at(3) / 2.0;
-            strainTensor.at(2, 1) = reducedTotalStrainVector.at(3) / 2.0;
+            this->computePlaneStressStrain(strainTensor, tempDamageTensor, reducedTotalStrainVector, gp, atTime);
         } else  {
             strainTensor.at(1, 1) = reducedTotalStrainVector.at(1);
             strainTensor.at(2, 2) = reducedTotalStrainVector.at(2);
@@ -159,6 +201,7 @@ AnisotropicDamageMaterial :: giveRealStressVector(FloatArray &answer, GaussPoint
             strainTensor.at(1, 2) = reducedTotalStrainVector.at(6) / 2.0;
             strainTensor.at(2, 1) = reducedTotalStrainVector.at(6) / 2.0;
         }
+        // @TODO: check if computeTraceD is necessary and check its implementation
         // Correct the trace of the damage tensor if necessary (see section 8.1 of the reference paper)
         traceTempD = computeTraceD(tempDamageTensor, strainTensor, gp);
         double effectiveStressTrace = effectiveStressTensor.at(1, 1) + effectiveStressTensor.at(2, 2) + effectiveStressTensor.at(3, 3);
@@ -198,16 +241,8 @@ AnisotropicDamageMaterial :: giveRealStressVector(FloatArray &answer, GaussPoint
             }
         }
         scalar = scalar / ( 3. - traceTempD );
-        /*		if (fabs(3.-traceTempD)<0.001)
-         *              {
-         *                      scalar=0.0;
-         *              }*/
         AuxMatrix = ImD;
         AuxMatrix.times(scalar);
-        /*		if (equivStrain>100.0)
-         *              {
-         *                      AuxMatrix.zero();
-         *              }*/
 
         stressTensor.subtract(AuxMatrix);
         // Third term of the equation 53 of the reference paper
@@ -218,10 +253,6 @@ AnisotropicDamageMaterial :: giveRealStressVector(FloatArray &answer, GaussPoint
         } else {
             AuxMatrix.times(effectiveStressTrace);
         }
-        /*		if (equivStrain>100.0)
-         *              {
-         *                      AuxMatrix.zero();
-         *              }*/
         stressTensor.add(AuxMatrix);
         stressVector.beSymVectorForm(stressTensor);
         StructuralMaterial :: giveReducedSymVectorForm(answer, stressVector, mode);
@@ -236,6 +267,7 @@ AnisotropicDamageMaterial :: giveRealStressVector(FloatArray &answer, GaussPoint
     status->letTempStressVectorBe(answer);
     status->setTempDamage(tempDamageTensor);
     status->setTempKappa(tempKappa);
+    status->setTempStrainZ(tempStrainZ);
 #ifdef keep_track_of_dissipated_energy
     status->computeWork(gp);
 #endif
@@ -246,11 +278,13 @@ void
 AnisotropicDamageMaterial :: computeEquivalentStrain(double &kappa, const FloatArray &strain, GaussPoint *gp, TimeStep *atTime)
 {
     LinearElasticMaterial *lmat = this->giveLinearElasticMaterial();
+    AnisotropicDamageMaterialStatus *status = static_cast< AnisotropicDamageMaterialStatus * >( this->giveStatus(gp) );
 
     if ( strain.isEmpty() ) {
         kappa = 0.;
         return;
     }
+
 
     if ( this->equivStrainType == EST_Mazars ) {
         double posNorm = 0.0;
@@ -260,8 +294,9 @@ AnisotropicDamageMaterial :: computeEquivalentStrain(double &kappa, const FloatA
 
         // if plane stress mode -> compute strain in z-direction from condition of zero stress in corresponding direction
         if ( gp->giveMaterialMode() == _PlaneStress ) {
-            double nu = lmat->give(NYxz, gp);
-            fullstrain.at(3) = -nu * ( fullstrain.at(1) + fullstrain.at(2) ) / ( 1. - nu );
+	    //                double nu = lmat->give(NYxz, gp);
+            //                fullstrain.at(3) = -nu * ( fullstrain.at(1) + fullstrain.at(2) ) / ( 1. - nu );
+            fullstrain.at(3) = status->giveTempStrainZ();
         } else if ( gp->giveMaterialMode() == _1dMat ) {
             double nu = lmat->give(NYxz, gp);
             fullstrain.at(2) = -nu *fullstrain.at(1);
@@ -277,98 +312,133 @@ AnisotropicDamageMaterial :: computeEquivalentStrain(double &kappa, const FloatA
         }
 
         kappa = sqrt(posNorm);
-    } else if ( ( this->equivStrainType == EST_Rankine_Smooth ) || ( this->equivStrainType == EST_Rankine_Standard ) ) {
-        // EST_Rankine equiv strain measure
-        double sum = 0.;
-        FloatArray stress, fullStress, principalStress;
-        FloatMatrix de;
-
-        lmat->giveStiffnessMatrix(de, SecantStiffness, gp, atTime);
-        stress.beProductOf(de, strain);
-        StructuralMaterial :: giveFullSymVectorForm( fullStress, stress, gp->giveMaterialMode() );
-        this->computePrincipalValues(principalStress, fullStress, principal_stress);
-        for ( int i = 1; i <= 3; i++ ) {
-            if ( principalStress.at(i) > 0.0 ) {
-                if ( this->equivStrainType == EST_Rankine_Smooth ) {
-                    sum += principalStress.at(i) * principalStress.at(i);
-                } else if ( sum < principalStress.at(i) ) {
-                    sum = principalStress.at(i);
-                }
-            } else if ( sum < principalStress.at(i) ) {
-                sum = principalStress.at(i);
-            }
-        }
-
-        if ( this->equivStrainType == EST_Rankine_Smooth ) {
-            sum = sqrt(sum);
-        }
-
-        kappa = sum / lmat->give('E', gp);
-    } else if ( ( this->equivStrainType == EST_ElasticEnergy ) || ( this->equivStrainType == EST_ElasticEnergyPositiveStress ) || ( this->equivStrainType == EST_ElasticEnergyPositiveStrain ) ) {
-        // equivalent strain expressions based on elastic energy
-        FloatMatrix de;
-        FloatArray stress;
-        double sum;
-
-        lmat->giveStiffnessMatrix(de, SecantStiffness, gp, atTime);
-        if ( this->equivStrainType == EST_ElasticEnergy ) {
-            // standard elastic energy
-            stress.beProductOf(de, strain);
-            sum = strain.dotProduct(stress);
-        } else if ( this->equivStrainType == EST_ElasticEnergyPositiveStress ) {
-            // elastic energy corresponding to positive part of stress
-            FloatArray fullStress, principalStress;
-            StructuralMaterial :: giveFullSymVectorForm( fullStress, stress, gp->giveMaterialMode() );
-            this->computePrincipalValues(principalStress, fullStress, principal_stress);
-            // TO BE FINISHED
-            sum = 0.;
-            OOFEM_ERROR("Elastic energy corresponding to positive part of stress not finished\n");
-        } else {
-            // elastic energy corresponding to positive part of strain
-            // TO BE DONE
-            sum = 0.;
-            OOFEM_ERROR("Elastic energy corresponding to positive part of strain not finished\n");
-        }
-
-        kappa = sqrt( sum / lmat->give('E', gp) );
-    } else if ( this->equivStrainType == EST_Griffith ) {
-        double sum = 0.;
-        FloatArray stress, fullStress, principalStress;
-        FloatMatrix de;
-
-        lmat->giveStiffnessMatrix(de, SecantStiffness, gp, atTime);
-        stress.beProductOf(de, strain);
-        StructuralMaterial :: giveFullSymVectorForm( fullStress, stress, gp->giveMaterialMode() );
-        this->computePrincipalValues(principalStress, fullStress, principal_stress);
-        for ( int i = 1; i <= 3; i++ ) {
-            if ( principalStress.at(i) > 0.0 && sum < principalStress.at(i) ) {
-                sum = principalStress.at(i);
-            }
-        }
-
-        //Use Griffith criterion if Rankine not applied
-        if ( sum == 0. ) {
-            sum = -pow(principalStress.at(1) - principalStress.at(3), 2.) / 8. / ( principalStress.at(1) + principalStress.at(3) );
-        }
-        sum = max(sum, 0.);
-        kappa = sum / lmat->give('E', gp);
-    } else {
-        _error("computeEquivalentStrain: unknown EquivStrainType");
-    }
+    } else  {
+          OOFEM_ERROR("Unknown equivStrainType %d", this->equivStrainType);
+   }
+    /*
+     *  if ( this->equivStrainType == EST_Mazars ) {
+     *      double posNorm = 0.0;
+     *      FloatArray principalStrains, fullstrain;
+     *
+     *      StructuralMaterial :: giveFullSymVectorForm( fullstrain, strain, gp->giveMaterialMode() );
+     *
+     *      // if plane stress mode -> compute strain in z-direction from condition of zero stress in corresponding direction
+     *      if ( gp->giveMaterialMode() == _PlaneStress ) {
+     *          double nu = lmat->give(NYxz, gp);
+     *          fullstrain.at(3) = -nu * ( fullstrain.at(1) + fullstrain.at(2) ) / ( 1. - nu );
+     *      } else if ( gp->giveMaterialMode() == _1dMat ) {
+     *          double nu = lmat->give(NYxz, gp);
+     *          fullstrain.at(2) = -nu *fullstrain.at(1);
+     *          fullstrain.at(3) = -nu *fullstrain.at(1);
+     *      }
+     *
+     *      this->computePrincipalValues(principalStrains, fullstrain, principal_strain);
+     *
+     *      for ( int i = 1; i <= 3; i++ ) {
+     *          if ( principalStrains.at(i) > 0.0 ) {
+     *              posNorm += principalStrains.at(i) * principalStrains.at(i);
+     *          }
+     *      }
+     *
+     *      kappa = sqrt(posNorm);
+     *  } else if ( ( this->equivStrainType == EST_Rankine_Smooth ) || ( this->equivStrainType == EST_Rankine_Standard ) ) {
+     *      // EST_Rankine equiv strain measure
+     *      double sum = 0.;
+     *      FloatArray stress, fullStress, principalStress;
+     *      FloatMatrix de;
+     *
+     *      lmat->giveStiffnessMatrix(de, SecantStiffness, gp, atTime);
+     *      stress.beProductOf(de, strain);
+     *      StructuralMaterial :: giveFullSymVectorForm( fullStress, stress, gp->giveMaterialMode() );
+     *      this->computePrincipalValues(principalStress, fullStress, principal_stress);
+     *      for ( int i = 1; i <= 3; i++ ) {
+     *          if ( principalStress.at(i) > 0.0 ) {
+     *              if ( this->equivStrainType == EST_Rankine_Smooth ) {
+     *                  sum += principalStress.at(i) * principalStress.at(i);
+     *              } else if ( sum < principalStress.at(i) ) {
+     *                  sum = principalStress.at(i);
+     *              }
+     *          } else if ( sum < principalStress.at(i) ) {
+     *              sum = principalStress.at(i);
+     *          }
+     *      }
+     *
+     *      if ( this->equivStrainType == EST_Rankine_Smooth ) {
+     *          sum = sqrt(sum);
+     *      }
+     *
+     *      kappa = sum / lmat->give('E', gp);
+     *  } else if ( ( this->equivStrainType == EST_ElasticEnergy ) || ( this->equivStrainType == EST_ElasticEnergyPositiveStress ) || ( this->equivStrainType == EST_ElasticEnergyPositiveStrain ) ) {
+     *      // equivalent strain expressions based on elastic energy
+     *      FloatMatrix de;
+     *      FloatArray stress;
+     *      double sum;
+     *
+     *      lmat->giveStiffnessMatrix(de, SecantStiffness, gp, atTime);
+     *      if ( this->equivStrainType == EST_ElasticEnergy ) {
+     *          // standard elastic energy
+     *          stress.beProductOf(de, strain);
+     *          sum = strain.dotProduct(stress);
+     *      } else if ( this->equivStrainType == EST_ElasticEnergyPositiveStress ) {
+     *          // elastic energy corresponding to positive part of stress
+     *          FloatArray fullStress, principalStress;
+     *          StructuralMaterial :: giveFullSymVectorForm( fullStress, stress, gp->giveMaterialMode() );
+     *          this->computePrincipalValues(principalStress, fullStress, principal_stress);
+     *          // TO BE FINISHED
+     *          sum = 0.;
+     *          OOFEM_ERROR("Elastic energy corresponding to positive part of stress not finished\n");
+     *      } else {
+     *          // elastic energy corresponding to positive part of strain
+     *          // TO BE DONE
+     *          sum = 0.;
+     *          OOFEM_ERROR("Elastic energy corresponding to positive part of strain not finished\n");
+     *      }
+     *
+     *      kappa = sqrt( sum / lmat->give('E', gp) );
+     *  } else if ( this->equivStrainType == EST_Griffith ) {
+     *      double sum = 0.;
+     *      FloatArray stress, fullStress, principalStress;
+     *      FloatMatrix de;
+     *
+     *      lmat->giveStiffnessMatrix(de, SecantStiffness, gp, atTime);
+     *      stress.beProductOf(de, strain);
+     *      StructuralMaterial :: giveFullSymVectorForm( fullStress, stress, gp->giveMaterialMode() );
+     *      this->computePrincipalValues(principalStress, fullStress, principal_stress);
+     *      for ( int i = 1; i <= 3; i++ ) {
+     *          if ( principalStress.at(i) > 0.0 && sum < principalStress.at(i) ) {
+     *              sum = principalStress.at(i);
+     *          }
+     *      }
+     *
+     *      //Use Griffith criterion if Rankine not applied
+     *      if (sum == 0.){
+     *          sum = -pow(principalStress.at(1)-principalStress.at(3),2.)/8./(principalStress.at(1)+principalStress.at(3));
+     *      }
+     *      sum = max(sum,0.);
+     *      kappa = sum / lmat->give('E', gp);
+     *  } else {
+     *      _error("computeEquivalentStrain: unknown EquivStrainType");
+     *  }
+     */
 }
 
 // Computes Kappa according to the first damage law proposed in reference paper.
 double
-AnisotropicDamageMaterial :: computeK(GaussPoint *gp)
+AnisotropicDamageMaterial :: computeKappa(FloatMatrix damageTensor)
 {
     double K, trace;
-    FloatMatrix DamageTensor;
-    AnisotropicDamageMaterialStatus *status = static_cast< AnisotropicDamageMaterialStatus * >( this->giveStatus(gp) );
-    DamageTensor = status->giveDamage();   ///changed, before: status->giveTempDamage();(18.2.14)
-    trace = DamageTensor.at(1, 1) + DamageTensor.at(2, 2) + DamageTensor.at(3, 3);
+    trace = damageTensor.at(1, 1) + damageTensor.at(2, 2) + damageTensor.at(3, 3);
     K = ( 1 / this->A ) * trace + this->kappa0;
     return K;
 }
+double
+AnisotropicDamageMaterial :: computeTraceTempD(double equivStrain)
+{
+    double traceTempD;
+    traceTempD = this->A * ( equivStrain - this->kappa0 );
+    return traceTempD;
+}
+
 
 // Computes the percentage of deltaD that needs to be added so the first eigenvalue of (tempDamageTensor + alpha*deltaD) reaches Dc
 // To do this, the middle point algorithm is used.
@@ -402,7 +472,6 @@ AnisotropicDamageMaterial :: obtainAlpha1(FloatMatrix tempDamageTensor, double d
     eps = maxDamage - damageThreshold;
     do {
         if ( eps > 0.0 ) {
-            //			alpha_a=alpha_a;
             alpha_b = newAlpha;
             newAlpha = ( alpha_a + alpha_b ) / 2;
             deltaD = positiveStrainTensorSquared;
@@ -426,7 +495,6 @@ AnisotropicDamageMaterial :: obtainAlpha1(FloatMatrix tempDamageTensor, double d
             }
         } else   {
             alpha_a = newAlpha;
-            //			alpha_b=alpha_b;
             newAlpha = ( alpha_a + alpha_b ) / 2;
             deltaD = positiveStrainTensorSquared;
             deltaD.times(newAlpha * deltaLambda);
@@ -484,7 +552,6 @@ AnisotropicDamageMaterial :: obtainAlpha2(FloatMatrix tempDamageTensor, double d
     eps = maxDamage - damageThreshold;
     do {
         if ( eps > 0.0 ) {
-            //			alpha_a=alpha_a;
             alpha_b = newAlpha;
             newAlpha = ( alpha_a + alpha_b ) / 2;
             deltaD = projPosStrainTensor;
@@ -509,7 +576,6 @@ AnisotropicDamageMaterial :: obtainAlpha2(FloatMatrix tempDamageTensor, double d
             }
         } else   {
             alpha_a = newAlpha;
-            //			alpha_b=alpha_b;
             newAlpha = ( alpha_a + alpha_b ) / 2;
             deltaD = projPosStrainTensor;
             deltaD.times(newAlpha * deltaLambda);
@@ -564,7 +630,6 @@ AnisotropicDamageMaterial :: obtainAlpha3(FloatMatrix tempDamageTensor, double d
     eps = eVals.at(1) + eVals.at(2) + eVals.at(3) - 3 * damageThreshold;
     do {
         if ( eps > 0.0 ) {
-            //			alpha_a=alpha_a;
             alpha_b = newAlpha;
             newAlpha = ( alpha_a + alpha_b ) / 2;
             deltaD.beDyadicProductOf(vec3, vec3);
@@ -581,7 +646,6 @@ AnisotropicDamageMaterial :: obtainAlpha3(FloatMatrix tempDamageTensor, double d
             }
         } else   {
             alpha_a = newAlpha;
-            //			alpha_b=alpha_b;
             newAlpha = ( alpha_a + alpha_b ) / 2;
             deltaD.beDyadicProductOf(vec3, vec3);
             deltaD.times(newAlpha * deltaLambda * aux);
@@ -640,30 +704,16 @@ AnisotropicDamageMaterial :: computeTraceD(FloatMatrix tempDamageTensor, FloatMa
 {
     AnisotropicDamageMaterialStatus *status = static_cast< AnisotropicDamageMaterialStatus * >( this->giveStatus(gp) );
     int flag = status->giveFlag();
-    int tempFlag = status->giveTempFlag();
-
-    // If flag = 0, the trace of the damage tensor has never been greater than 1 in any previous step
-    if ( flag == 0 ) {
-        if ( tempFlag == 0 ) {
-            flag = 0;
-        } else                                {
-            flag = 1;
-        }
-    } else   {
-        flag = 1;
-    }
-
-
+    //int tempFlag = status->giveTempFlag();
     double Dc = 1, trD = 0;
-
     // If flag = 0, the trace of the damage tensor has never been greater than 1 before
     if ( flag == 0 ) {
         if ( ( strainTensor.at(1, 1) + strainTensor.at(2, 2) + strainTensor.at(3, 3) ) < 0 ) { // Compression
             trD = tempDamageTensor.at(1, 1) + tempDamageTensor.at(2, 2) + tempDamageTensor.at(3, 3);
-            if ( trD >= 1 ) {           // The trace of the damage tensor is greater than 1 for the first time, then, flag turns into 1
+            if ( trD >= 1 ) {
                 status->setTempFlag(1);
-            }
-        } else   {                                                                                                                                              // Tension
+            }                                                   // The trace of the damage tensor is greater than 1 for the first time, then, flag turns into 1
+        } else  {                                                                                                                                               // Tension
             if ( ( tempDamageTensor.at(1, 1) + tempDamageTensor.at(2, 2) + tempDamageTensor.at(3, 3) ) >= 1 ) {
                 trD = Dc;
             } else                  {
@@ -671,19 +721,13 @@ AnisotropicDamageMaterial :: computeTraceD(FloatMatrix tempDamageTensor, FloatMa
             }
         }
     }
-
     // If flag = 1, the trace of the damage tensor has become greater than 1 before
     if ( flag == 1 ) {
         if ( ( strainTensor.at(1, 1) + strainTensor.at(2, 2) + strainTensor.at(3, 3) ) < 0 ) { // Compression
             trD = tempDamageTensor.at(1, 1) + tempDamageTensor.at(2, 2) + tempDamageTensor.at(3, 3);
-        } else   {                                                                                                                                                  // Tension
+        } else                                                                                   {
             trD = Dc;
-            /*			if ((tempDamageTensor.at(1,1)+tempDamageTensor.at(2,2)+tempDamageTensor.at(3,3)) >= 1){
-             *                              trD=Dc;}
-             *                      else{
-             *                              trD=tempDamageTensor.at(1,1)+tempDamageTensor.at(2,2)+tempDamageTensor.at(3,3);}
-             */
-        }
+        }                                                                                                                                                   // Tension
     }
     return trD;
 }
@@ -699,33 +743,33 @@ AnisotropicDamageMaterial :: give3dMaterialStiffnessMatrix(FloatMatrix &answer,
 {
     AnisotropicDamageMaterialStatus *status = static_cast< AnisotropicDamageMaterialStatus * >( this->giveStatus(gp) );
     if ( mode == ElasticStiffness ) {
-        this->giveLinearElasticMaterial()->give3dMaterialStiffnessMatrix(answer, mode, gp, atTime);
-        //		this->giveLinearElasticMaterial()->giveStiffnessMatrix(answer, mode, gp, atTime);
+        this->giveLinearElasticMaterial()->giveStiffnessMatrix(answer, mode, gp, atTime);
     } else {
-        FloatArray strain = status->giveTempStrainVector();
-        FloatArray totalStrain;
+        FloatArray totalStrain = status->giveTempStrainVector();
+        FloatArray reducedTotalStrainVector;
+        this->giveStressDependentPartOfStrainVector(reducedTotalStrainVector, gp, totalStrain, atTime, VM_Total);
+        //		FloatArray totalStrain;
         FloatMatrix damageTensor, strainTensor;
         // The strain vector is turned into a tensor; for that, the elements that are out of the diagonal
         // must be divided by 2
         strainTensor.resize(3, 3);
         strainTensor.zero();
-        strainTensor.at(1, 1) = strain.at(1);
-        strainTensor.at(2, 2) = strain.at(2);
-        strainTensor.at(3, 3) = strain.at(3);
-        strainTensor.at(2, 3) = strain.at(4) / 2.0;
-        strainTensor.at(3, 2) = strain.at(4) / 2.0;
-        strainTensor.at(1, 3) = strain.at(5) / 2.0;
-        strainTensor.at(3, 1) = strain.at(5) / 2.0;
-        strainTensor.at(1, 2) = strain.at(6) / 2.0;
-        strainTensor.at(2, 1) = strain.at(6) / 2.0;
+        strainTensor.at(1, 1) = reducedTotalStrainVector.at(1);
+        strainTensor.at(2, 2) = reducedTotalStrainVector.at(2);
+        strainTensor.at(3, 3) = reducedTotalStrainVector.at(3);
+        strainTensor.at(2, 3) = reducedTotalStrainVector.at(4) / 2.0;
+        strainTensor.at(3, 2) = reducedTotalStrainVector.at(4) / 2.0;
+        strainTensor.at(1, 3) = reducedTotalStrainVector.at(5) / 2.0;
+        strainTensor.at(3, 1) = reducedTotalStrainVector.at(5) / 2.0;
+        strainTensor.at(1, 2) = reducedTotalStrainVector.at(6) / 2.0;
+        strainTensor.at(2, 1) = reducedTotalStrainVector.at(6) / 2.0;
         // The damage tensor is read
         damageTensor = status->giveTempDamage();
-        totalStrain = status->giveTempStrainVector();
-        //		AnisotropicDamageMaterial :: computeDamageTensor(damageTensor, gp, totalStrain, atTime);
+        //		totalStrain=status->giveTempStrainVector();
         AnisotropicDamageMaterial :: computeSecantOperator(answer, strainTensor, damageTensor, gp);
         for ( int j = 4; j <= 6; j++ ) {
             for ( int i = 1; i <= 6; i++ ) {
-                answer.at(i, j) = answer.at(i, j) / 2;
+                answer.at(i, j) = answer.at(i, j) / 2.0;
             }
         }
     }
@@ -741,30 +785,25 @@ void AnisotropicDamageMaterial :: givePlaneStressStiffMtrx(FloatMatrix &answer, 
     FloatArray totalStrain;
     AnisotropicDamageMaterialStatus *status = static_cast< AnisotropicDamageMaterialStatus * >( this->giveStatus(gp) );
     if ( mode == ElasticStiffness ) {
-        //		this->giveLinearElasticMaterial()->give3dMaterialStiffnessMatrix(answer, mode, gp, atTime);
         this->giveLinearElasticMaterial()->giveStiffnessMatrix(answer, mode, gp, atTime);
     } else {
-        FloatArray strain = status->giveTempStrainVector();
+        FloatArray totalStrain = status->giveTempStrainVector();
+        FloatArray reducedTotalStrainVector;
+        this->giveStressDependentPartOfStrainVector(reducedTotalStrainVector, gp, totalStrain, atTime, VM_Total);
         FloatMatrix damageTensor, strainTensor;
-        // The strain vector is turned into a tensor; for that, the elements that are out of the diagonal
-        // must be divided by 2
+        // The damage tensor is read
         damageTensor.resize(3, 3);
         damageTensor.zero();
-        strainTensor.resize(3, 3);
-        strainTensor.zero();
-        strainTensor.at(1, 1) = strain.at(1);
-        strainTensor.at(2, 2) = strain.at(2);
-        strainTensor.at(3, 3) = -nu * ( strain.at(1) + strain.at(2) ) / ( 1. - nu );
-        strainTensor.at(2, 3) = 0.0;
-        strainTensor.at(3, 2) = 0.0;
-        strainTensor.at(1, 3) = 0.0;
-        strainTensor.at(3, 1) = 0.0;
-        strainTensor.at(1, 2) = strain.at(3) / 2.0;
-        strainTensor.at(2, 1) = strain.at(3) / 2.0;
-        // The damage tensor is read
         damageTensor = status->giveTempDamage();
-        totalStrain = status->giveTempStrainVector();
-        AnisotropicDamageMaterial :: computeDamageTensor(damageTensor, gp, totalStrain, atTime);
+        this->computePlaneStressStrain(strainTensor, damageTensor, reducedTotalStrainVector, gp, atTime);
+        // The strain vector is turned into a tensor; for that, the elements that are out of the diagonal
+        // must be divided by 2
+        //		totalStrain=status->giveTempStrainVector();
+        //		double reducedTotalStrainVector;
+        //		double equivStrain;
+        //		this->giveStressDependentPartOfStrainVector(reducedTotalStrainVector, gp, totalStrain, atTime, VM_Total);
+        //		this->computeEquivalentStrain(equivStrain, reducedTotalStrainVector, gp, atTime);
+        //		AnisotropicDamageMaterial :: computeDamageTensor(damageTensor, gp, totalStrain, equivStrain , atTime);
         FloatMatrix secantOperator;
         secantOperator.resize(6, 6);
         AnisotropicDamageMaterial :: computeSecantOperator(secantOperator, strainTensor, damageTensor, gp);
@@ -855,10 +894,74 @@ void AnisotropicDamageMaterial :: give1dStressStiffMtrx(FloatMatrix &answer, Mat
     }
 }
 
+void
+AnisotropicDamageMaterial :: computePlaneStressStrain(FloatMatrix &answer, FloatMatrix damageTensor, FloatArray reducedTotalStrainVector, GaussPoint *gp,
+                                                      TimeStep *atTime)
+//
+{
+    FloatMatrix inPlaneStrain, B, Aux, eVecs, inPlaneStrainRotated, C, Ct;
+    FloatArray eVals;
+    double outOfPlaneStrain;
+    B.resize(2, 2);
+    B.at(1, 1) = 1. - damageTensor.at(1, 1);
+    B.at(1, 2) = 0. - damageTensor.at(1, 2);
+    B.at(2, 1) = 0. - damageTensor.at(2, 1);
+    B.at(2, 2) = 1. - damageTensor.at(2, 2);
+    //The eigenVectors for the change of base must be computed using the damageTensor, NOT the B matrix!!!
+    //	B.jaco_(eVals, eVecs, 40);
+    FloatMatrix Auxiliar;
+    Auxiliar.resize(2, 2);
+    Auxiliar.at(1, 1) = damageTensor.at(1, 1);
+    Auxiliar.at(2, 2) = damageTensor.at(2, 2);
+    Auxiliar.at(1, 2) = damageTensor.at(1, 2);
+    Auxiliar.at(2, 1) = damageTensor.at(2, 1);
+
+    Auxiliar.jaco_(eVals, eVecs, 40);
+
+    // Change of base of reducedTotalStrainVector from the canonical to the base formed by the eigenvectors of B
+    this->initGpForNewStep(gp);
+    inPlaneStrain.resize(2, 2);
+    inPlaneStrain.at(1, 1) = reducedTotalStrainVector.at(1);
+    inPlaneStrain.at(2, 2) = reducedTotalStrainVector.at(2);
+    inPlaneStrain.at(1, 2) = reducedTotalStrainVector.at(3) / 2.0;
+    inPlaneStrain.at(2, 1) = reducedTotalStrainVector.at(3) / 2.0;
+    C = eVecs;          // C is the matrix for the change of base
+    Ct.beTranspositionOf(C);
+    Aux.beProductOf(inPlaneStrain, Ct);
+    inPlaneStrainRotated.beProductOf(C, Aux);
+    LinearElasticMaterial *lmat = this->giveLinearElasticMaterial();
+    double nu = lmat->give(NYxz, gp);
+    double term1, term2, term3, B1, B2, Bz, trD, h;
+    B1 = B.at(1, 1);
+    B2 = B.at(2, 2);
+    Bz = 1. - damageTensor.at(3, 3);
+    trD = damageTensor.at(1, 1) + damageTensor.at(2, 2) + damageTensor.at(3, 3);
+    h = 1.0;
+    term1 = 3. * Bz * B1 * ( 1. - 2. * nu ) - ( 3. - trD ) * ( 1. - h * trD ) * ( 1. + nu );
+    term2 = 3. * Bz * B2 * ( 1. - 2. * nu ) - ( 3. - trD ) * ( 1. - h * trD ) * ( 1. + nu );
+    term3 = 3. * Bz * ( 1. - 2. * nu ) * ( B1 + B2 ) + ( 3. - trD ) * ( 1. - h * trD ) * ( 1. + nu );
+    outOfPlaneStrain = ( term1 * inPlaneStrainRotated.at(1, 1) + term2 * inPlaneStrainRotated.at(2, 2) ) / term3;
+    double trStrain;
+    trStrain = inPlaneStrain.at(1, 1) + inPlaneStrain.at(2, 2) + outOfPlaneStrain;
+    if ( trStrain < 0.0 ) {
+        h = 0.0;
+        term1 = 3. * Bz * B1 * ( 1. - 2. * nu ) - ( 3. - trD ) * ( 1. - h * trD ) * ( 1. + nu );
+        term2 = 3. * Bz * B2 * ( 1. - 2. * nu ) - ( 3. - trD ) * ( 1. - h * trD ) * ( 1. + nu );
+        term3 = 3. * Bz * ( 1. - 2. * nu ) * ( B1 + B2 ) + ( 3. - trD ) * ( 1. - h * trD ) * ( 1. + nu );
+        outOfPlaneStrain = ( term1 * inPlaneStrainRotated.at(1, 1) + term2 * inPlaneStrainRotated.at(2, 2) ) / term3;
+    }
+    answer.resize(3, 3);
+    answer.zero();
+    answer.at(1, 1) = inPlaneStrain.at(1, 1);
+    answer.at(1, 2) = inPlaneStrain.at(1, 2);
+    answer.at(2, 1) = inPlaneStrain.at(2, 1);
+    answer.at(2, 2) = inPlaneStrain.at(2, 2);
+    answer.at(3, 3) = outOfPlaneStrain;
+}
 
 void
 AnisotropicDamageMaterial :: computeDamageTensor(FloatMatrix &answer, GaussPoint *gp,
-                                                 const FloatArray &totalStrain,
+                                                 const FloatArray &reducedTotalStrainVector, double equivStrain,
                                                  TimeStep *atTime)
 //
 {
@@ -868,56 +971,29 @@ AnisotropicDamageMaterial :: computeDamageTensor(FloatMatrix &answer, GaussPoint
     // how to correctly update gp records
     //
     AnisotropicDamageMaterialStatus *status = static_cast< AnisotropicDamageMaterialStatus * >( this->giveStatus(gp) );
-    LinearElasticMaterial *lmat = this->giveLinearElasticMaterial();
-    FloatArray strainVector, reducedTotalStrainVector;
-    FloatMatrix de;
+    //LinearElasticMaterial *lmat = this->giveLinearElasticMaterial();
+
     double Dc = 1.00;
-    double f, equivStrain = 0.0, tempKappa;
-    //	    MaterialMode mode = gp->giveMaterialMode();
-    FloatMatrix strainTensor;
-    //	    double traceTempD = (this->A)*(equivStrain-this->kappa0);
-    FloatArray eVals;
-    FloatMatrix eVecs;
-
-    FloatMatrix damageTensor;
-
+    double Kappa;
+    FloatMatrix de, strainTensor, damageTensor, tempDamageTensor, eVecs;
+    FloatArray strainVector, eVals;
     this->initGpForNewStep(gp);
-
-    // subtract stress independent part
-    // note: eigenStrains (temperature) is not contained in mechanical strain stored in gp
-    // therefore it is necessary to subtract always the total eigen strain value
-    this->giveStressDependentPartOfStrainVector(reducedTotalStrainVector, gp, totalStrain, atTime, VM_Total);
-
-    // compute equivalent strain
-    this->computeEquivalentStrain(equivStrain, reducedTotalStrainVector, gp, atTime);
-
-    // test of the damage condition: first we obtain kappa with the function computeK, and then we check the damage condition
-    /* 		if (this->computeK(gp) > status->giveKappa()) {
-     *              tempKappa = this->computeK(gp);
-     *          }else{
-     *              tempKappa = status->giveKappa();
-     *          }
-     */
-    tempKappa = this->computeK(gp);
-    f = equivStrain - tempKappa;
-    FloatMatrix tempDamageTensor = status->giveDamage();            // changed, before: status->giveTempDamage();(18.2.14)
-
+    //	    this->computeEquivalentStrain(equivStrain, reducedTotalStrainVector, gp, atTime);
+    FloatMatrix Dn = status->giveDamage();
+    Kappa = this->computeKappa(Dn);
     //	damageTensor = status->giveDamage();
-    if ( f <= 0.0 ) {
-        // damage does not grow
-        //		tempKappa = status->giveKappa();
+
+    if ( equivStrain <= Kappa ) {                       // damage does not grow. Elastic behaviour
         answer.resize(3, 3);
         answer.zero();
-        answer = tempDamageTensor;
-    } else {
-        // damage grows
-        tempKappa = equivStrain;
+        answer = Dn;
+    } else {                                                            // damage grows
+        Kappa = equivStrain;
         double deltaLambda;
         FloatArray eVals, fullStrainVector;
         FloatMatrix eVecs, strainTensor, positiveStrainTensor, positiveStrainTensorSquared, tempDamageTensor0;
         MaterialMode mode = gp->giveMaterialMode();
-        double nu = lmat->give(NYxz, gp);
-
+        // double nu = lmat->give(NYxz, gp);
         // Compute square of positive part of strain tensor
         //1.- converts strain vector to full form;
         StructuralMaterial :: giveFullSymVectorForm(fullStrainVector, reducedTotalStrainVector, mode);
@@ -926,15 +1002,7 @@ AnisotropicDamageMaterial :: computeDamageTensor(FloatMatrix &answer, GaussPoint
         strainTensor.resize(3, 3);
         strainTensor.zero();
         if ( mode == _PlaneStress ) {
-            strainTensor.at(1, 1) = reducedTotalStrainVector.at(1);
-            strainTensor.at(2, 2) = reducedTotalStrainVector.at(2);
-            strainTensor.at(3, 3) = -nu * ( reducedTotalStrainVector.at(1) + reducedTotalStrainVector.at(2) ) / ( 1. - nu );
-            strainTensor.at(2, 3) = 0.0;
-            strainTensor.at(3, 2) = 0.0;
-            strainTensor.at(1, 3) = 0.0;
-            strainTensor.at(3, 1) = 0.0;
-            strainTensor.at(1, 2) = reducedTotalStrainVector.at(3) / 2.0;
-            strainTensor.at(2, 1) = reducedTotalStrainVector.at(3) / 2.0;
+            this->computePlaneStressStrain(strainTensor, Dn, reducedTotalStrainVector, gp, atTime);
         } else  {
             strainTensor.at(1, 1) = reducedTotalStrainVector.at(1);
             strainTensor.at(2, 2) = reducedTotalStrainVector.at(2);
@@ -965,8 +1033,9 @@ AnisotropicDamageMaterial :: computeDamageTensor(FloatMatrix &answer, GaussPoint
         positiveStrainTensorSquared.beProductOf(positiveStrainTensor, positiveStrainTensor);
         //compute delta Lambda
         //		double traceD = damageTensor.at(1,1) + damageTensor.at(2,2) + damageTensor.at(3,3);
-        double traceD = tempDamageTensor.at(1, 1) + tempDamageTensor.at(2, 2) + tempDamageTensor.at(3, 3);
-        double traceTempD = ( this->A ) * ( equivStrain - this->kappa0 );
+        double traceD = Dn.at(1, 1) + Dn.at(2, 2) + Dn.at(3, 3);
+
+        double traceTempD = this->computeTraceTempD(equivStrain);
         // equation 50 of the reference paper
         deltaLambda =  ( traceTempD - traceD ) / equivStrain / equivStrain;
         //compute delta D: equation 48 of the reference paper
@@ -975,7 +1044,7 @@ AnisotropicDamageMaterial :: computeDamageTensor(FloatMatrix &answer, GaussPoint
         deltaD.times(deltaLambda);
         this->correctBigValues(deltaD);
         // compute new damage tensor
-        tempDamageTensor0 = tempDamageTensor;
+        tempDamageTensor0 = Dn;
         tempDamageTensor0.add(deltaD);                          //damage tensor is equal to tempDamageTensor+deltaD
         // The following loop implements the algorithm for a case in which the maximum damage threshold is reached,
         // in such a case, the remaining damage is projected on the other two directions available and, finally,
@@ -985,21 +1054,21 @@ AnisotropicDamageMaterial :: computeDamageTensor(FloatMatrix &answer, GaussPoint
         // This part of the code is based on the section 8.2 of the reference paper.
         //			int checker15 = this->checkSymmetry(tempDamageTensor0);
         tempDamageTensor0.jaco_(eVals, eVecs, 20);
-        if ( ( eVals.at(1) > ( Dc ) ) || ( eVals.at(2) > ( Dc ) ) || ( eVals.at(3) > ( Dc ) ) ) {
+        if ( ( eVals.at(1) > ( Dc * 1.001 ) ) || ( eVals.at(2) > ( Dc * 1.001 ) ) || ( eVals.at(3) > ( Dc * 1.001 ) ) ) {
             double alpha = 0, deltaLambda1 = 0, Aux1 = 0, Aux2 = 0, Aux3 = 0;
             FloatMatrix deltaD1(3, 3), positiveStrainTensorSquared(3, 3), ProjMatrix(3, 3), tempDamageTensor1(3, 3), deltaD2(3, 3), N11(3, 3), N12(3, 3), N13(3, 3), N12sym(3, 3), N13sym(3, 3), projPosStrainTensor(3, 3);
             FloatMatrix part1(3, 3), part2(3, 3), part3(3, 3);
             FloatArray auxVals(3), auxVec1(3), auxVec2(3), auxVec3(3);
 
             // the percentage alpha of deltaD that needs to be added so the first eigenvalue reaches Dc is obtained
-            alpha = obtainAlpha1(tempDamageTensor, deltaLambda, positiveStrainTensor, Dc);
+            alpha = obtainAlpha1(Dn, deltaLambda, positiveStrainTensor, Dc);
 
             // deltaD1 is obtained --> deltaD1=alpha*deltaD
             positiveStrainTensorSquared.beProductOf(positiveStrainTensor, positiveStrainTensor);
             deltaD1 = positiveStrainTensorSquared;
             deltaD1.times(alpha * deltaLambda);
             this->correctBigValues(deltaD1);
-            tempDamageTensor1 = tempDamageTensor;
+            tempDamageTensor1 = Dn;
             tempDamageTensor1.add(deltaD1);
             // The following lines describe the process to apply the equation 64 of the reference paper. First, the
             // eigenvalues and eigenvectors of the damage tensor resulting at the moment when the threshold is reached
@@ -1007,8 +1076,8 @@ AnisotropicDamageMaterial :: computeDamageTensor(FloatMatrix &answer, GaussPoint
             // (note: the equation 64 is not correctly written in the paper, it should be as implemented here:
             // D_dot = lambda_dot * [ <e>^2-(nI·<e>^2 nI)(nI x nI) - 2(nII·<e>^2 nI)(nI x nII)_sym - 2(nIII·<e>^2 nI)(nI x nIII)_sym ]
             //				int checker16 = this->checkSymmetry(tempDamageTensor1);
-            tempDamageTensor1.jaco_(eVals, eVecs, 40);
 
+            tempDamageTensor1.jaco_(eVals, eVecs, 40);
             // The eigenvalues and eigenvectors are ordered, with the maximum eigenvalue being I, as its corresponding
             // eigenvector, and the other two being II and III. This is necessary so the equation 64 of the reference
             // paper can be applied
@@ -1097,19 +1166,18 @@ AnisotropicDamageMaterial :: computeDamageTensor(FloatMatrix &answer, GaussPoint
             deltaD2.times(deltaLambda1);
             this->correctBigValues(deltaD2);
             tempDamageTensor1.add(deltaD2);                             //damage tensor is equal to tempDamageTensor+deltaD1+deltaD2
-
             // The following loop checks if after the addition of D2, any other eigenvalue of the damage tensor
             // has reached the threshold. If it has, it repeats the process, but this time projecting the
             // remaining damage on the direction of the remaining eigenvector
             //				int checker17 = this->checkSymmetry(tempDamageTensor1);
             tempDamageTensor1.jaco_(eVals, eVecs, 40);
-            if ( ( eVals.at(1) > ( Dc ) ) || ( eVals.at(2) > ( Dc ) ) || ( eVals.at(3) > ( Dc ) ) ) {
+            if ( ( eVals.at(1) > ( Dc * 1.001 ) ) || ( eVals.at(2) > ( Dc * 1.001 ) ) || ( eVals.at(3) > ( Dc * 1.001 ) ) ) {
                 FloatMatrix deltaD3(3, 3), projPosStrainTensor_new(3, 3), tempDamageTensor2(3, 3), deltaD4(3, 3);
                 FloatArray vec3(3);
                 double alpha2 = 0, deltaLambda2 = 0, Aux4 = 0;
                 // double val3=0;
                 // Restoring the value of tempDamageTensor1 = tempDamageTensor + deltaD1
-                tempDamageTensor1 = tempDamageTensor;
+                tempDamageTensor1 = Dn;
                 tempDamageTensor1.add(deltaD1);
                 // the percentage alpha2 of deltaD2 that needs to be added to (tempDamageTensor+deltaD1) so the second eigenvalue
                 // reaches Dc is obtained
@@ -1161,10 +1229,10 @@ AnisotropicDamageMaterial :: computeDamageTensor(FloatMatrix &answer, GaussPoint
                 // to the damage threshold Dc
                 //					int checker19 = this->checkSymmetry(tempDamageTensor2);
                 tempDamageTensor2.jaco_(eVals, eVecs, 40);
-                if ( ( eVals.at(1) > ( Dc ) ) || ( eVals.at(2) > ( Dc ) ) || ( eVals.at(3) > ( Dc ) ) ) {
+                if ( ( eVals.at(1) > ( Dc * 1.001 ) ) || ( eVals.at(2) > ( Dc * 1.001 ) ) || ( eVals.at(3) > ( Dc * 1.001 ) ) ) {
                     double alpha3 = 0;
                     FloatMatrix deltaD5, tempDamageTensor3;
-                    tempDamageTensor2 = tempDamageTensor;
+                    tempDamageTensor2 = Dn;
                     tempDamageTensor2.add(deltaD1);
                     tempDamageTensor2.add(deltaD3);
                     alpha3 = obtainAlpha3(tempDamageTensor2, deltaLambda2, positiveStrainTensor, vec3, Dc);
@@ -1184,15 +1252,6 @@ AnisotropicDamageMaterial :: computeDamageTensor(FloatMatrix &answer, GaussPoint
         }
         answer = tempDamageTensor;
     }
-    /*	    if (equivStrain>1.0)
-     *          {
-     *              answer.resize(3,3);
-     *              answer.zero();
-     *              for (int i=1; i<=3 ;i++)
-     *              {
-     *                      answer.at(i,i)=1.00;
-     *              }
-     *          }*/
 }
 
 void
@@ -1213,6 +1272,7 @@ AnisotropicDamageMaterial :: computeSecantOperator(FloatMatrix &answer, FloatMat
     G = E / ( 2.0 * ( 1.0 + nu ) );
     K = E / ( 3.0 * ( 1.0 - 2.0 * nu ) );
     //	tempDamageTensor = status->giveTempDamage();
+    //@TODO Check if computeTraceD is necessary and check its implementation
     //Compute the trace of the damage tensor, correcting it if necessary (see section 8.1 of the reference paper)
     traceD = computeTraceD(damageTensor, strainTensor, gp);
     if ( fabs(3. - traceD) < 0.001 ) {
@@ -1407,7 +1467,11 @@ int
 AnisotropicDamageMaterial :: giveIPValue(FloatArray &answer, GaussPoint *aGaussPoint, InternalStateType type, TimeStep *atTime)
 {
     AnisotropicDamageMaterialStatus *status = static_cast< AnisotropicDamageMaterialStatus * >( this->giveStatus(aGaussPoint) );
-    if ( type == IST_DamageTensor ) {
+    if ( type == IST_DamageScalar ) { // returning the trace of the damage tensor
+        answer.resize(1);
+        answer.at(1) = status->giveDamage().at(1, 1) + status->giveDamage().at(2, 2) + status->giveDamage().at(3, 3);
+        return 1;
+    } else if ( type == IST_DamageTensor ) {
         answer.resize(6);
         answer.zero();
         answer.at(1) = status->giveDamage().at(1, 1);
@@ -1424,9 +1488,9 @@ AnisotropicDamageMaterial :: giveIPValue(FloatArray &answer, GaussPoint *aGaussP
         answer.zero();
         //        int checker12=this->checkSymmetry(status->giveDamage());
         status->giveDamage().jaco_(eVals, eVecs, 20);
-        answer.at(1) = eVals(1);
-        answer.at(2) = eVals(2);
-        answer.at(3) = eVals(3);
+        answer.at(1) = eVals.at(1);
+        answer.at(2) = eVals.at(2);
+        answer.at(3) = eVals.at(3);
         return 1;
     } else if ( type == IST_DamageTensorTemp ) {
         answer.resize(6);
@@ -1445,9 +1509,9 @@ AnisotropicDamageMaterial :: giveIPValue(FloatArray &answer, GaussPoint *aGaussP
         answer.zero();
         //        int checker13=this->checkSymmetry(status->giveTempDamage());
         status->giveTempDamage().jaco_(eVals, eVecs, 20);
-        answer.at(1) = eVals(1);
-        answer.at(2) = eVals(2);
-        answer.at(3) = eVals(3);
+        answer.at(1) = eVals.at(1);
+        answer.at(2) = eVals.at(2);
+        answer.at(3) = eVals.at(3);
         return 1;
     } else if ( type == IST_MaxEquivalentStrainLevel ) {
         answer.resize(1);
@@ -1485,7 +1549,7 @@ AnisotropicDamageMaterial :: giveIPValue(FloatArray &answer, GaussPoint *aGaussP
  *  } else if (  type == IST_PrincipalDamageTensor || type == IST_PrincipalDamageTempTensor ) {
  *      return ISVT_VECTOR;
  *
- #ifdef keep_track_of_dissipated_energy
+ * #ifdef keep_track_of_dissipated_energy
  *  } else if ( type == IST_DissWorkDensity ) {
  *      return ISVT_SCALAR;
  *  } else if ( type == IST_StressWorkDensity ) {
@@ -1493,7 +1557,7 @@ AnisotropicDamageMaterial :: giveIPValue(FloatArray &answer, GaussPoint *aGaussP
  *  } else if ( type == IST_FreeEnergyDensity ) {
  *      return ISVT_SCALAR;
  *
- #endif
+ * #endif
  *  } else {
  *      return StructuralMaterial :: giveIPValueType(type);
  *  }
@@ -1503,7 +1567,6 @@ AnisotropicDamageMaterial :: giveIPValue(FloatArray &answer, GaussPoint *aGaussP
 IRResultType
 AnisotropicDamageMaterial :: initializeFrom(InputRecord *ir)
 {
-    const char *__proc = "initializeFrom"; // Required by IR_GIVE_FIELD macro
     IRResultType result;                // Required by IR_GIVE_FIELD macro
 
     linearElasticMaterial->initializeFrom(ir);
@@ -1552,6 +1615,7 @@ AnisotropicDamageMaterialStatus :: AnisotropicDamageMaterialStatus(int n, Domain
     damage.zero();
     tempDamage.resize(3, 3);
     tempDamage.zero();
+    strainZ = tempStrainZ = 0.0;
     flag = tempFlag = 0;
 
 #ifdef keep_track_of_dissipated_energy
@@ -1573,11 +1637,11 @@ AnisotropicDamageMaterialStatus :: printOutputAt(FILE *file, TimeStep *tStep)
      *  } else if ( this->damage > 0.0 ) {
      * //        fprintf( file, "kappa %f, damage %f crackVector %f %f %f", this->kappa, this->damage, this->crackVector.at(1), this->crackVector.at(2), this->crackVector.at(3) );
      *
-     #ifdef keep_track_of_dissipated_energy
+     * #ifdef keep_track_of_dissipated_energy
      *      fprintf(file, ", dissW %f, freeE %f, stressW %f ", this->dissWork, ( this->stressWork ) - ( this->dissWork ), this->stressWork);
      *  } else {
      *      fprintf(file, "stressW %f ", this->stressWork);
-     #endif
+     * #endif
      *  }
      */
     //	fprintf( file, "kappa %f, damage %f %f %f", this->kappa, this->damage);
@@ -1592,6 +1656,7 @@ AnisotropicDamageMaterialStatus :: initTempStatus()
     StructuralMaterialStatus :: initTempStatus();
     this->tempKappa = this->kappa;
     this->tempDamage = this->damage;
+    this->tempStrainZ = this->strainZ;
 #ifdef keep_track_of_dissipated_energy
     this->tempStressWork = this->stressWork;
     this->tempDissWork = this->dissWork;
@@ -1605,6 +1670,7 @@ AnisotropicDamageMaterialStatus :: updateYourself(TimeStep *atTime)
     StructuralMaterialStatus :: updateYourself(atTime);
     this->kappa = this->tempKappa;
     this->damage = this->tempDamage;
+    this->strainZ = this->tempStrainZ;
     this->flag = this->tempFlag;
 #ifdef keep_track_of_dissipated_energy
     this->stressWork = this->tempStressWork;
@@ -1632,7 +1698,7 @@ AnisotropicDamageMaterialStatus :: saveContext(DataStream *stream, ContextMode m
      *      THROW_CIOERR(CIO_IOERR);
      *  }
      *
-     #ifdef keep_track_of_dissipated_energy
+     * #ifdef keep_track_of_dissipated_energy
      *  if ( !stream->write(& stressWork, 1) ) {
      *      THROW_CIOERR(CIO_IOERR);
      *  }
@@ -1641,17 +1707,13 @@ AnisotropicDamageMaterialStatus :: saveContext(DataStream *stream, ContextMode m
      *      THROW_CIOERR(CIO_IOERR);
      *  }
      *
-     #endif
+     * #endif
      */
     ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
     ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
     contextIOResultType iores;
-
-    if ( stream == NULL ) {
-        _error("saveContext : can't write into NULL stream");
-    }
 
     // save parent class status
     if ( ( iores = StructuralMaterialStatus :: saveContext(stream, mode, obj) ) != CIO_OK ) {
@@ -1704,7 +1766,7 @@ AnisotropicDamageMaterialStatus :: restoreContext(DataStream *stream, ContextMod
      *      THROW_CIOERR(CIO_IOERR);
      *  }
      *
-     #ifdef keep_track_of_dissipated_energy
+     * #ifdef keep_track_of_dissipated_energy
      *  if ( !stream->read(& stressWork, 1) ) {
      *      THROW_CIOERR(CIO_IOERR);
      *  }
@@ -1713,7 +1775,7 @@ AnisotropicDamageMaterialStatus :: restoreContext(DataStream *stream, ContextMod
      *      THROW_CIOERR(CIO_IOERR);
      *  }
      *
-     #endif
+     * #endif
      */
 
     contextIOResultType iores;

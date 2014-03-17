@@ -78,13 +78,13 @@ void
 Tet1_3D_SUPG :: giveDofManDofIDMask(int inode, EquationID ut, IntArray &answer) const
 {
     if ( ut == EID_MomentumBalance ) {
-        answer.setValues(3, V_u, V_v, V_w);
+        answer = {V_u, V_v, V_w};
     } else if ( ut == EID_ConservationEquation ) {
-        answer.setValues(1, P_f);
+        answer = {P_f};
     } else if ( ut == EID_MomentumBalance_ConservationEquation ) {
-        answer.setValues(4, V_u, V_v, V_w, P_f);
+        answer = {V_u, V_v, V_w, P_f};
     } else {
-        _error("giveDofManDofIDMask: Unknown equation id encountered");
+        OOFEM_ERROR("Unknown equation id encountered");
     }
 }
 
@@ -580,7 +580,7 @@ Tet1_3D_SUPG :: LS_PCS_computeVOFFractions(FloatArray &answer, FloatArray &fi)
                 }
 
                 if ( ( __vol < 0 ) || ( fabs(__vol) / vol > 1.0000001 ) ) {
-                    OOFEM_ERROR("Tet1_3D_SUPG::LS_PCS_computeVOFFractions: internal consistency error");
+                    OOFEM_ERROR("internal consistency error");
                 }
 
                 if ( pos > neg ) {
@@ -593,7 +593,7 @@ Tet1_3D_SUPG :: LS_PCS_computeVOFFractions(FloatArray &answer, FloatArray &fi)
                     answer.at(2) = 1.0 - answer.at(1);
                 }
             } else {
-                OOFEM_ERROR("Tet1_3D_SUPG::LS_PCS_computeVOFFractions: internal consistency error");
+                OOFEM_ERROR("internal consistency error");
             }
         } else if ( max(pos, neg) == 2 ) {
             // two vertices positive; two negative; compute positive volume
@@ -670,16 +670,16 @@ Tet1_3D_SUPG :: LS_PCS_computeVOFFractions(FloatArray &answer, FloatArray &fi)
                 double vol = LS_PCS_computeVolume();
 
                 if ( ( __vol < 0 ) || ( fabs(__vol) / vol > 1.0000001 ) ) {
-                    OOFEM_ERROR("Tet1_3D_SUPG::LS_PCS_computeVOFFractions: internal consistency error");
+                    OOFEM_ERROR("internal consistency error");
                 }
 
                 answer.at(1) = min(fabs(__vol) / vol, 1.0);
                 answer.at(2) = 1.0 - answer.at(1);
             } else {
-                OOFEM_ERROR("Tet1_3D_SUPG::LS_PCS_computeVOFFractions: internal consistency error");
+                OOFEM_ERROR("internal consistency error");
             }
         } else {
-            OOFEM_ERROR("Tet1_3D_SUPG::LS_PCS_computeVOFFractions: internal consistency error");
+            OOFEM_ERROR("internal consistency error");
         }
     }
 }

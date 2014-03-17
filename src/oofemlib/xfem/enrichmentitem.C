@@ -40,7 +40,6 @@
 #include "enrichmentdomain.h"
 #include "cltypes.h"
 #include "connectivitytable.h"
-#include "oofem_limits.h"
 #include "classfactory.h"
 #include "fracturemanager.h"
 #include "mathfem.h"
@@ -75,18 +74,16 @@ EnrichmentItem :: EnrichmentItem(int n, XfemManager *xMan, Domain *aDomain) : FE
     mpPropagationLaw(NULL),
     mPropLawIndex(0),
     mInheritBoundaryConditions(false),
+    startOfDofIdPool(-1),
+    endOfDofIdPool(-1),
+    mpEnrichesDofsWithIdArray(),
     mLevelSetsNeedUpdate(true),
     mLevelSetTol2(1.0e-12)
 {
-    this->startOfDofIdPool = -1;
-    this->endOfDofIdPool = -1;
-    this->mpEnrichesDofsWithIdArray = new IntArray;
 }
 
 EnrichmentItem :: ~EnrichmentItem()
 {
-    delete this->mpEnrichesDofsWithIdArray;
-
     if ( mpEnrichmentDomain != NULL ) {
         delete mpEnrichmentDomain;
         mpEnrichmentDomain = NULL;
@@ -110,7 +107,6 @@ EnrichmentItem :: ~EnrichmentItem()
 
 IRResultType EnrichmentItem :: initializeFrom(InputRecord *ir)
 {
-    const char *__proc = "initializeFrom"; // Required by IR_GIVE_FIELD macro
     IRResultType result; // Required by IR_GIVE_FIELD macro
 
     mEnrFrontIndex = 0;
@@ -172,7 +168,6 @@ void EnrichmentItem :: appendInputRecords(DynamicDataReader &oDR)
 
 int EnrichmentItem :: instanciateYourself(DataReader *dr)
 {
-    const char *__proc = "instanciateYourself"; // Required by IR_GIVE_FIELD macro
     IRResultType result; // Required by IR_GIVE_FIELD macro
     std :: string name;
 
@@ -181,14 +176,14 @@ int EnrichmentItem :: instanciateYourself(DataReader *dr)
     result = mir->giveRecordKeywordField(name);
 
     if ( result != IRRT_OK ) {
-        IR_IOERR(giveClassName(), __proc, "", mir, result);
+        mir->report_error(this->giveClassName(), __func__, "", result, __FILE__, __LINE__);
     }
 
     mpEnrichmentFunc = classFactory.createEnrichmentFunction( name.c_str(), 1, this->giveDomain() );
     if ( mpEnrichmentFunc != NULL ) {
         mpEnrichmentFunc->initializeFrom(mir);
     } else {
-        OOFEM_ERROR2( "EnrichmentItem::instanciateYourself: failed to create enrichment function (%s)", name.c_str() );
+        OOFEM_ERROR("failed to create enrichment function (%s)", name.c_str() );
     }
 
 
@@ -196,12 +191,12 @@ int EnrichmentItem :: instanciateYourself(DataReader *dr)
     mir = dr->giveInputRecord(DataReader :: IR_geoRec, 1);
     result = mir->giveRecordKeywordField(name);
     if ( result != IRRT_OK ) {
-        IR_IOERR(giveClassName(), __proc, "", mir, result);
+        mir->report_error(this->giveClassName(), __func__, "", result, __FILE__, __LINE__);
     }
 
     mpEnrichmentDomain = classFactory.createEnrichmentDomain( name.c_str() );
     if ( mpEnrichmentDomain == NULL ) {
-        OOFEM_ERROR2( "EnrichmentItem::instanciateYourself: unknown enrichment domain (%s)", name.c_str() );
+        OOFEM_ERROR("unknown enrichment domain (%s)", name.c_str() );
     }
 
     if ( giveDomain()->giveXfemManager()->giveVtkDebug() ) {
@@ -224,7 +219,7 @@ int EnrichmentItem :: instanciateYourself(DataReader *dr)
         if ( mpEnrichmentFront != NULL ) {
             mpEnrichmentFront->initializeFrom(enrFrontir);
         } else {
-            OOFEM_ERROR2( "EnrichmentItem::instanciateYourself: Failed to create enrichment front (%s)", enrFrontName.c_str() );
+            OOFEM_ERROR("Failed to create enrichment front (%s)", enrFrontName.c_str() );
         }
     }
 
@@ -242,7 +237,7 @@ int EnrichmentItem :: instanciateYourself(DataReader *dr)
         if ( mpPropagationLaw != NULL ) {
             mpPropagationLaw->initializeFrom(propLawir);
         } else {
-            OOFEM_ERROR2( "EnrichmentItem::instanciateYourself: Failed to create propagation law (%s)", propLawName.c_str() );
+            OOFEM_ERROR("Failed to create propagation law (%s)", propLawName.c_str() );
         }
     }
 
@@ -527,8 +522,8 @@ void EnrichmentItem :: updateNodeEnrMarker(XfemManager &ixFemMan, const Enrichme
         double minPhi = std :: numeric_limits< double > :: max();
         double maxPhi = std :: numeric_limits< double > :: min();
 
-        FloatArray elCenter;
-        elCenter.setValues(2, 0.0, 0.0);
+        FloatArray elCenter(2);
+        elCenter.zero();
 
         for ( int elNodeInd = 1; elNodeInd <= nElNodes; elNodeInd++ ) {
             int nGlob = el->giveNode(elNodeInd)->giveGlobalNumber();
@@ -1155,7 +1150,7 @@ Inclusion :: Inclusion(int n, XfemManager *xm, Domain *aDomain) :
     EnrichmentItem(n, xm, aDomain),
     mpCrossSection(NULL)
 {
-    mpEnrichesDofsWithIdArray->setValues(3, D_u, D_v, D_w);
+    mpEnrichesDofsWithIdArray = {D_u, D_v, D_w};
 }
 
 Inclusion :: ~Inclusion()
@@ -1189,7 +1184,6 @@ bool Inclusion :: isMaterialModified(GaussPoint &iGP, Element &iEl, CrossSection
 IRResultType Inclusion :: initializeFrom(InputRecord *ir)
 {
     EnrichmentItem :: initializeFrom(ir);
-    const char *__proc = "initializeFrom";
     IRResultType result;
     int crossSectionIndex = 0;
     IR_GIVE_FIELD(ir, crossSectionIndex, _IFT_Inclusion_CrossSection);
@@ -1243,7 +1237,7 @@ Delamination :: updateGeometry(FailureCriteriaStatus *fc, TimeStep *tStep)
 
 Delamination :: Delamination(int n, XfemManager *xm, Domain *aDomain) : EnrichmentItem(n, xm, aDomain)
 {
-    mpEnrichesDofsWithIdArray->setValues(6, D_u, D_v, D_w, W_u, W_v, W_w);
+    mpEnrichesDofsWithIdArray = {D_u, D_v, D_w, W_u, W_v, W_w};
     this->interfaceNum = -1;
     this->crossSectionNum = -1;
     this->matNum = 0;
@@ -1253,7 +1247,6 @@ Delamination :: Delamination(int n, XfemManager *xm, Domain *aDomain) : Enrichme
 IRResultType Delamination :: initializeFrom(InputRecord *ir)
 {
     EnrichmentItem :: initializeFrom(ir);
-    const char *__proc = "initializeFrom"; // Required by IR_GIVE_FIELD macro
     IRResultType result;                   // Required by IR_GIVE_FIELD macro
 
     // Compute the delamination xi-coord
@@ -1262,7 +1255,7 @@ IRResultType Delamination :: initializeFrom(InputRecord *ir)
 
     LayeredCrossSection *layeredCS = dynamic_cast< LayeredCrossSection * >( this->giveDomain()->giveCrossSection(this->crossSectionNum) );
     if ( layeredCS == NULL ) {
-        OOFEM_ERROR("Delamination :: initializeFrom - requires a layered cross section reference as input");
+        OOFEM_ERROR("requires a layered cross section reference as input");
     }
 
     this->delamXiCoord = -1.0;

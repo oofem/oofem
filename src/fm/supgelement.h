@@ -165,31 +165,31 @@ public:
      * Computes Lhs term due to applied slip with friction bc.
      */
     virtual void computeSlipWithFrictionBCTerm_MB(FloatMatrix &answer, Load *load, int side, TimeStep *tStep) {
-        _warning("computeSlipWithFrictionBCTerm_MB not implemented");
+        OOFEM_WARNING("computeSlipWithFrictionBCTerm_MB not implemented");
         answer.clear();
     }
     /**
      * Computes Lhs contribution due to applied Penetration bc.
      */
     virtual void computePenetrationWithResistanceBCTerm_MB(FloatMatrix &answer, Load *load, int side, TimeStep *tStep) {
-        _warning("computePenetrationWithResistanceBCTerm_MB not implemented");
+        OOFEM_WARNING("computePenetrationWithResistanceBCTerm_MB not implemented");
         answer.clear();
     }
     /**
      * Computes Lhs contribution due to outflow BC.
      */
     virtual void computeOutFlowBCTerm_MB(FloatMatrix &answer, int side, TimeStep *tStep) {
-        _warning("computeOutFlowBCTerm_MB not implemented");
+        OOFEM_WARNING("computeOutFlowBCTerm_MB not implemented");
         answer.clear();
     }
 
 
     virtual void computeHomogenizedReinforceTerm_MB(FloatMatrix &answer,  Load *load, TimeStep *tStep) {
-        _warning("computeHomogenizedReinforceTerm_MB");
+        OOFEM_WARNING("computeHomogenizedReinforceTerm_MB");
         answer.clear();
     }
     virtual void computeHomogenizedReinforceTerm_MC(FloatMatrix &answer,  Load *load, TimeStep *tStep) {
-        _warning("computeHomogenizedReinforceTerm_MB");
+        OOFEM_WARNING("computeHomogenizedReinforceTerm_MB");
         answer.clear();
     }
 

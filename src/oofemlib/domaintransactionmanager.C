@@ -48,7 +48,7 @@ DomainTransactionManager :: DomainTransactionManager(Domain *d)
 DomainTransactionManager :: ~DomainTransactionManager()
 {
     if ( !( dofmanTransactions.empty() && elementTransactions.empty() ) ) {
-        OOFEM_WARNING("DomainTransactionManager::~DomainTransactionManager: uncommited transactions exist");
+        OOFEM_SIMPLE_WARNING("DomainTransactionManager::~DomainTransactionManager: uncommited transactions exist");
     }
 }
 

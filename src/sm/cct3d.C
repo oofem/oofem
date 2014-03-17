@@ -60,7 +60,7 @@ CCTPlate3d :: giveLocalCoordinates(FloatArray &answer, FloatArray &global)
     FloatArray offset;
     // test the parametr
     if ( global.giveSize() != 3 ) {
-        _error("giveLocalCoordinate : cannot transform coordinates - size mismatch");
+        OOFEM_ERROR("cannot transform coordinates - size mismatch");
         exit(1);
     }
 
@@ -105,7 +105,7 @@ CCTPlate3d :: giveNodeCoordinates(double &x1, double &x2, double &x3,
 void
 CCTPlate3d :: giveDofManDofIDMask(int inode, EquationID ut, IntArray &answer) const
 {
-    answer.setValues(6, D_u, D_v, D_w, R_u, R_v, R_w);
+    answer = {D_u, D_v, D_w, R_u, R_v, R_w};
 }
 
 
@@ -268,7 +268,7 @@ CCTPlate3d :: giveCharacteristicTensor(FloatMatrix &answer, CharTensor type, Gau
         answer.at(1, 2) = charVect.at(3) / 2.;
         answer.at(2, 1) = charVect.at(3) / 2.;
     } else {
-        _error("GiveCharacteristicTensor: unsupported tensor mode");
+        OOFEM_ERROR("unsupported tensor mode");
         exit(1);
     }
 
@@ -370,7 +370,7 @@ CCTPlate3d :: computeBodyLoadVectorAt(FloatArray &answer, Load *forLoad, TimeSte
     FloatMatrix T;
 
     if ( ( forLoad->giveBCGeoType() != BodyLoadBGT ) || ( forLoad->giveBCValType() != ForceLoadBVT ) ) {
-        _error("computeBodyLoadVectorAt: unknown load type");
+        OOFEM_ERROR("unknown load type");
     }
 
     GaussIntegrationRule irule(1, this, 1, 5);
@@ -453,7 +453,7 @@ CCTPlate3d :: giveSurfaceDofMapping(IntArray &answer, int iSurf) const
         answer.at(16) = 8;
         answer.at(17) = 9;
     } else {
-        _error("giveSurfaceDofMapping: wrong surface number");
+        OOFEM_ERROR("wrong surface number");
     }
 }
 

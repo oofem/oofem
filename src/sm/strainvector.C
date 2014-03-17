@@ -53,12 +53,12 @@ StrainVector :: computeDeviatoricVolumetricSplit(StrainVector &dev, double &vol)
 
     if ( myMode == _1dMat ) {
         // 1D model
-        OOFEM_ERROR("StrainVector::computeDeviatoricVolumetricSplit: No Split for 1D!");
+        OOFEM_SIMPLE_ERROR("StrainVector::computeDeviatoricVolumetricSplit: No Split for 1D!");
         //  dev.resize(1); dev.at(1) = 0.0;
         // vol = this->at (1);
     } else if ( myMode == _PlaneStress ) {
         // plane stress problem
-        OOFEM_ERROR("StrainVector::computeDeviatoricVolumetricSplit: No Split for plane stress!");
+        OOFEM_SIMPLE_ERROR("StrainVector::computeDeviatoricVolumetricSplit: No Split for plane stress!");
         //  dev = *this;
         // vol = (this->at(1)+this->at(2))/2.0;
         //    dev.at(1) -= vol;
@@ -80,12 +80,12 @@ StrainVector :: computeDeviatoricVolumetricSum(StrainVector &answer, const doubl
 
     if ( myMode == _1dMat ) {
         // 1D model
-        OOFEM_ERROR("StrainVector::computeDeviatoricVolumetricSum: No sum for 1D!");
+        OOFEM_SIMPLE_ERROR("StrainVector::computeDeviatoricVolumetricSum: No sum for 1D!");
         //  dev.resize(1); dev.at(1) = 0.0;
         // vol = this->at (1);
     } else if ( myMode == _PlaneStress ) {
         // plane stress problem
-        OOFEM_ERROR("StrainVector::computeDeviatoricVolumetricSum: No sum for plane stress!");
+        OOFEM_SIMPLE_ERROR("StrainVector::computeDeviatoricVolumetricSum: No sum for plane stress!");
         //  dev = *this;
         // vol = (this->at(1)+this->at(2))/2.0;
         //    dev.at(1) -= vol;
@@ -108,7 +108,6 @@ StrainVector :: computePrincipalValues(FloatArray &answer) const
     //
 
     MaterialMode myMode = this->giveStressStrainMode();
-    double swap;
     int size = this->giveSize();
     int nonzeroFlag = 0;
 
@@ -135,7 +134,7 @@ StrainVector :: computePrincipalValues(FloatArray &answer) const
         D = dst * dst + this->at(3) * this->at(3);
 
         if ( D < 0. ) {
-            OOFEM_ERROR("StrainVector::computePrincipalValues: Imaginar roots ");
+            OOFEM_SIMPLE_ERROR("StrainVector::computePrincipalValues: Imaginar roots ");
         }
 
         D = sqrt(D);
@@ -146,19 +145,16 @@ StrainVector :: computePrincipalValues(FloatArray &answer) const
         if ( answer.at(1) > answer.at(2) ) {
             return;
         } else {
-            swap = answer.at(1);
-            answer.at(1) = answer.at(2);
-            answer.at(2) = swap;
+            std::swap(answer.at(1), answer.at(2));
             return;
         }
     } else {
         // 3D problem
         double I1 = 0.0, I2 = 0.0, I3 = 0.0, s1, s2, s3;
-        int i, j;
         FloatArray s;
 
         this->convertToFullForm(s);
-        for ( i = 1; i <= size; i++ ) {
+        for ( int i = 1; i <= size; i++ ) {
             if ( fabs( s.at(i) ) > 1.e-20 ) {
                 nonzeroFlag = 1;
             }
@@ -181,6 +177,7 @@ StrainVector :: computePrincipalValues(FloatArray &answer) const
          * Call cubic3r to ensure, that all three real eigenvalues will be found, because we have symmetric tensor.
          * This aloows to overcome various rounding errors when solving general cubic equation.
          */
+        int i;
         cubic3r( ( double ) -1., I1, -I2, I3, & s1, & s2, & s3, & i );
 
         if ( i > 0 ) {
@@ -196,17 +193,13 @@ StrainVector :: computePrincipalValues(FloatArray &answer) const
         }
 
         // sort results
-        for ( i = 1; i < 3; i++ ) {
-            for ( j = 1; j < 3; j++ ) {
+        for ( int i = 1; i < 3; i++ ) {
+            for ( int j = 1; j < 3; j++ ) {
                 if ( answer.at(j + 1) > answer.at(j) ) {
-                    swap = answer.at(j + 1);
-                    answer.at(j + 1) = answer.at(j);
-                    answer.at(j) = swap;
+                    std::swap(answer.at(j + 1), answer.at(j));
                 }
             }
         }
-
-        return;
     }
 }
 
@@ -222,8 +215,7 @@ StrainVector :: computeMaxPrincipalDir(FloatArray &answer) const
     this->computePrincipalValDir(princval, princdir);
     int n = princval.giveSize();
     answer.resize(n);
-    int i;
-    for ( i = 1; i <= n; i++ ) {
+    for ( int i = 1; i <= n; i++ ) {
         answer.at(i) = princdir.at(i, 1);
     }
 }
@@ -242,8 +234,7 @@ StrainVector :: computePrincipalValDir(FloatArray &answer, FloatMatrix &dir) con
 
     FloatMatrix ss;
     FloatArray sp;
-    double swap;
-    int i, ii, jj, kk, nval;
+    int nval;
     int nonzeroFlag = 0;
     int size = this->giveSize();
     MaterialMode myMode = this->giveStressStrainMode();
@@ -259,7 +250,7 @@ StrainVector :: computePrincipalValDir(FloatArray &answer, FloatMatrix &dir) con
         ss.resize(2, 2);
         answer.resize(2);
 
-        for ( i = 1; i <= size; i++ ) {
+        for ( int i = 1; i <= size; i++ ) {
             if ( fabs( this->at(i) ) > 1.e-20 ) {
                 nonzeroFlag = 1;
             }
@@ -267,7 +258,6 @@ StrainVector :: computePrincipalValDir(FloatArray &answer, FloatMatrix &dir) con
 
         if ( nonzeroFlag == 0 ) {
             answer.zero();
-            ss.zero();
             return;
         }
 
@@ -283,7 +273,7 @@ StrainVector :: computePrincipalValDir(FloatArray &answer, FloatMatrix &dir) con
         answer.resize(3);
 
         this->convertToFullForm(s);
-        for ( i = 1; i <= size; i++ ) {
+        for ( int i = 1; i <= size; i++ ) {
             if ( fabs( s.at(i) ) > 1.e-20 ) {
                 nonzeroFlag = 1;
             }
@@ -291,7 +281,6 @@ StrainVector :: computePrincipalValDir(FloatArray &answer, FloatMatrix &dir) con
 
         if ( nonzeroFlag == 0 ) {
             answer.zero();
-            ss.zero();
             return;
         }
 
@@ -314,17 +303,13 @@ StrainVector :: computePrincipalValDir(FloatArray &answer, FloatMatrix &dir) con
         nval = 2;
     }
 
-    for ( ii = 1; ii < nval; ii++ ) {
-        for ( jj = 1; jj < nval; jj++ ) {
+    for ( int ii = 1; ii < nval; ii++ ) {
+        for ( int jj = 1; jj < nval; jj++ ) {
             if ( answer.at(jj + 1) > answer.at(jj) ) {
                 // swap eigenvalues and eigenvectors
-                swap = answer.at(jj + 1);
-                answer.at(jj + 1) = answer.at(jj);
-                answer.at(jj) = swap;
-                for ( kk = 1; kk <= nval; kk++ ) {
-                    swap = dir.at(kk, jj + 1);
-                    dir.at(kk, jj + 1) = dir.at(kk, jj);
-                    dir.at(kk, jj) = swap;
+                std::swap(answer.at(jj + 1), answer.at(jj));
+                for ( int kk = 1; kk <= nval; kk++ ) {
+                    std::swap(dir.at(kk, jj + 1), dir.at(kk, jj));
                 }
             }
         }
@@ -335,8 +320,8 @@ void
 StrainVector :: printYourself() const
 {
     printf("StrainVector (MaterialMode %d)\n", mode);
-    for ( int i = 1; i <= size; ++i ) {
-        printf( "%10.3e  ", this->at(i) );
+    for ( double x: this->values ) {
+        printf( "%10.3e  ", x );
     }
 
     printf("\n");
@@ -397,26 +382,26 @@ StrainVector :: applyElasticStiffness(StressVector &stress, const double EModulu
     if ( myMode == _1dMat ) {
         stress(0) = EModulus * values [ 0 ];
     } else if ( myMode == _PlaneStress ) {
-        const double factor = EModulus / ( 1. - nu * nu );
+        double factor = EModulus / ( 1. - nu * nu );
         stress(0) = factor * ( values [ 0 ] + nu * values [ 1 ] );
         stress(1) = factor * ( nu * values [ 0 ] + values [ 1 ] );
         stress(2) = factor * ( ( ( 1 - nu ) / 2. ) * values [ 2 ] );
     } else if ( myMode == _PlaneStrain ) {
         if ( nu >= 0.5 ) {
-            OOFEM_ERROR("StrainVector::applyElasticStiffness: nu must be less than 0.5");
+            OOFEM_SIMPLE_ERROR("StrainVector::applyElasticStiffness: nu must be less than 0.5");
         }
 
-        const double factor = EModulus / ( ( 1. + nu ) * ( 1. - 2. * nu ) );
+        double factor = EModulus / ( ( 1. + nu ) * ( 1. - 2. * nu ) );
         stress(0) = factor * ( ( 1. - nu ) * values [ 0 ] + nu * values [ 1 ] );
         stress(1) = factor * ( nu * values [ 0 ] + ( 1. - nu ) * values [ 1 ] );
         stress(2) = nu * ( stress(0) + stress(1) );
         stress(3) = factor * ( ( ( 1. - 2. * nu ) / 2. ) * values [ 3 ] );
     } else {
         if ( nu >= 0.5 ) {
-            OOFEM_ERROR("StrainVector::applyElasticStiffness: nu must be less than 0.5");
+            OOFEM_SIMPLE_ERROR("StrainVector::applyElasticStiffness: nu must be less than 0.5");
         }
 
-        const double factor = EModulus / ( ( 1. + nu ) * ( 1. - 2. * nu ) );
+        double factor = EModulus / ( ( 1. + nu ) * ( 1. - 2. * nu ) );
         stress(0) = factor * ( ( 1. - nu ) * values [ 0 ] + nu * values [ 1 ] + nu * values [ 2 ] );
         stress(1) = factor * ( nu * values [ 0 ] + ( 1. - nu ) * values [ 1 ] + nu * values [ 2 ] );
         stress(2) = factor * ( nu * values [ 0 ] + nu * values [ 1 ] + ( 1. - nu ) * values [ 2 ] );
@@ -448,9 +433,9 @@ StrainVector :: applyDeviatoricElasticStiffness(StressVector &stress,
 
     MaterialMode myMode = giveStressStrainMode();
     if ( myMode == _1dMat ) {
-        OOFEM_ERROR("StrainVector::applyDeviatoricElasticStiffness: No Split for 1D");
+        OOFEM_SIMPLE_ERROR("StrainVector::applyDeviatoricElasticStiffness: No Split for 1D");
     } else if ( myMode == _PlaneStress ) {
-        OOFEM_ERROR("StrainVector::applyDeviatoricElasticStiffness: No Split for Plane Stress");
+        OOFEM_SIMPLE_ERROR("StrainVector::applyDeviatoricElasticStiffness: No Split for Plane Stress");
     } else if ( myMode == _PlaneStrain ) {
         if ( stress.giveStressStrainMode() != _PlaneStrain ) {
             stress.letStressStrainModeBe(_PlaneStrain);

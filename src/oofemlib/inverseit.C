@@ -68,15 +68,15 @@ InverseIteration :: solve(SparseMtrx *a, SparseMtrx *b, FloatArray *_eigv, Float
     //
     nc = min(2 * nroot, nroot + 8);
     if ( ( !a ) || ( !b ) ) {
-        OOFEM_ERROR("SubspaceIteration :: solveYourselfAt : matrices are not defined\n");
+        OOFEM_ERROR("matrices are not defined\n");
     }
 
     if ( a->giveNumberOfColumns() != b->giveNumberOfColumns() ) {
-        OOFEM_ERROR("SubspaceIteration :: solveYourselfAt : matrices size mismatch\n");
+        OOFEM_ERROR("matrices size mismatch\n");
     }
 
     if ( !a->canBeFactorized() ) {
-        OOFEM_ERROR("SubspaceIteration :: a matrix not support factorization");
+        OOFEM_ERROR("The a matrix does not support factorization");
     }
 
     //
@@ -193,7 +193,7 @@ InverseIteration :: solve(SparseMtrx *a, SparseMtrx *b, FloatArray *_eigv, Float
     if ( i < nitem ) {
         OOFEM_LOG_INFO("InverseIt info: convergence reached in %d iterations\n", i);
     } else {
-        OOFEM_WARNING2("InverseIt info: convergence not reached after %d iterations\n", i);
+        OOFEM_WARNING("convergence not reached after %d iterations\n", i);
     }
 
     solved = 1;

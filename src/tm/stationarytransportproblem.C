@@ -75,7 +75,6 @@ NumericalMethod *StationaryTransportProblem :: giveNumericalMethod(MetaStep *mSt
 IRResultType
 StationaryTransportProblem :: initializeFrom(InputRecord *ir)
 {
-    const char *__proc = "initializeFrom"; // Required by IR_GIVE_FIELD macro
     IRResultType result;                // Required by IR_GIVE_FIELD macro
 
     EngngModel :: initializeFrom(ir);
@@ -132,7 +131,7 @@ double StationaryTransportProblem :: giveUnknownComponent(ValueModeType mode, Ti
 {
 #ifdef DEBUG
     if ( dof->__giveEquationNumber() == 0 ) {
-        _error("giveUnknownComponent: invalid equation number");
+        OOFEM_ERROR("invalid equation number");
     }
 #endif
     return UnknownsField->giveUnknownValue(dof, mode, tStep);
@@ -176,7 +175,7 @@ void StationaryTransportProblem :: solveYourselfAt(TimeStep *tStep)
 
         conductivityMatrix = classFactory.createSparseMtrx(sparseMtrxType);
         if ( conductivityMatrix == NULL ) {
-            _error("solveYourselfAt: sparse matrix creation failed");
+            OOFEM_ERROR("sparse matrix creation failed");
         }
 
         conductivityMatrix->buildInternalStructure( this, 1, EID_ConservationEquation, EModelDefaultEquationNumbering() );
@@ -255,7 +254,7 @@ StationaryTransportProblem :: updateComponent(TimeStep *tStep, NumericalCmpn cmp
         }
         return;
     } else {
-        OOFEM_ERROR("StationaryTransportProblem::updateComponent - Unknown component");
+        OOFEM_ERROR("Unknown component");
     }
 }
 
@@ -353,7 +352,7 @@ StationaryTransportProblem :: checkConsistency()
     for ( int i = 1; i <= nelem; i++ ) {
         Element *ePtr = domain->giveElement(i);
         if ( !dynamic_cast< TransportElement * >(ePtr) ) {
-            _warning2("Element %d has no TransportElement base", i);
+            OOFEM_WARNING("Element %d has no TransportElement base", i);
             return 0;
         }
     }

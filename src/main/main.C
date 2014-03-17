@@ -62,6 +62,10 @@
  #include <Python.h>
 #endif
 
+#ifdef __OOFEG
+ #include "oofeggraphiccontext.h"
+#endif
+
 #include <cstdlib>
 #include <cstdio>
 #include <cstring>
@@ -78,7 +82,7 @@ using namespace oofem;
 void freeStoreError()
 // This function is called whenever operator "new" is unable to allocate memory.
 {
-    OOFEM_FATAL("freeStoreError : free store exhausted");
+    OOFEM_SIMPLE_FATAL("free store exhausted");
 }
 
 // debug

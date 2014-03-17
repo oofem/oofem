@@ -44,6 +44,7 @@ class SPRNodalRecoveryModelInterface;
 class ProcessCommunicator;
 
 enum SPRPatchType {
+    SPRPatchType_none = 0,
     SPRPatchType_2dxy = 1,
     SPRPatchType_3dBiLin,
     SPRPatchType_2dquadratic,
@@ -79,7 +80,9 @@ public:
     /// Destructor.
     virtual ~SPRNodalRecoveryModel();
 
-    int recoverValues(Set elementSet, InternalStateType type, TimeStep *tStep);
+    virtual int recoverValues(Set elementSet, InternalStateType type, TimeStep *tStep);
+
+    virtual const char *giveClassName() const { return "SPRNodalRecoveryModel"; }
 
 private:
     /**

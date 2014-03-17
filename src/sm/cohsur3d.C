@@ -224,7 +224,7 @@ CohesiveSurface3d :: computeVolumeAround(GaussPoint *gp)
 void
 CohesiveSurface3d :: giveDofManDofIDMask(int inode, EquationID, IntArray &answer) const
 {
-    answer.setValues(6, D_u, D_v, D_w, R_u, R_v, R_w);
+    answer = {D_u, D_v, D_w, R_u, R_v, R_w};
 }
 
 double
@@ -349,7 +349,6 @@ CohesiveSurface3d :: evaluateLocalCoordinateSystem()
 IRResultType
 CohesiveSurface3d :: initializeFrom(InputRecord *ir)
 {
-    const char *__proc = "initializeFrom";
     IRResultType result;
 
     // first call parent
@@ -358,7 +357,7 @@ CohesiveSurface3d :: initializeFrom(InputRecord *ir)
     // read the area from the input file
     IR_GIVE_FIELD(ir, area, _IFT_CohSur3d_area);
     if ( area < 0. ) {
-        _error("CohesiveSurface3d::instanciateFrom: negative area specified");
+        OOFEM_ERROR("negative area specified");
     }
 
     // read shift constants of second (periodic) particle form the input file (if defined)
@@ -370,11 +369,11 @@ CohesiveSurface3d :: initializeFrom(InputRecord *ir)
     // evaluate number of Dof Managers
     numberOfDofMans = dofManArray.giveSize();
     if ( numberOfDofMans <= 0 ) {
-        OOFEM_ERROR2( "CohesiveSurface3d :: initializeFrom: unread nodes: Element %d", this->giveNumber() );
+        OOFEM_ERROR("unread nodes: Element %d", this->giveNumber() );
     }
 
     if ( ( numberOfDofMans == 3 ) & ( kx == 0 ) & ( ky == 0 ) & ( kz == 0 ) ) {
-        OOFEM_ERROR2( "CohesiveSurface3d :: initializeFrom: no periodic shift defined: Element %d", this->giveNumber() );
+        OOFEM_ERROR("no periodic shift defined: Element %d", this->giveNumber() );
     }
 
 
@@ -390,7 +389,7 @@ CohesiveSurface3d :: initializeFrom(InputRecord *ir)
     // evaluate the length
     giveLength();
     if ( length <= 0. ) {
-        OOFEM_ERROR2( "CohesiveSurface3d::initializeFrom: negative length evaluated: Element %d", this->giveNumber() )
+        OOFEM_ERROR("negative length evaluated: Element %d", this->giveNumber() )
 
         // evaluate the coordinates of the center
         evaluateCenter();

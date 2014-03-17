@@ -45,12 +45,12 @@ void FEInterpolation1d :: boundaryEvalN(FloatArray &answer, int boundary, const 
 
 void FEInterpolation1d :: boundaryGiveNodes(IntArray &answer, int boundary)
 {
-    OOFEM_ERROR("FEInterpolation1d :: boundaryGiveNodes - Not implemented");
+    OOFEM_ERROR("Not implemented");
 }
 
 double FEInterpolation1d :: boundaryEvalNormal(FloatArray &answer, int boundary, const FloatArray &lcoords, const FEICellGeometry &cellgeo)
 {
-    OOFEM_ERROR("FEInterpolation1d :: boundaryGiveNodes - Not implemented");
+    OOFEM_ERROR("Not implemented");
     return 1.;
 }
 
@@ -81,7 +81,7 @@ IntegrationRule *FEInterpolation1d :: giveBoundaryIntegrationRule(int order, int
 
 IntegrationRule *FEInterpolation1d :: giveBoundaryEdgeIntegrationRule(int order, int boundary)
 {
-    OOFEM_ERROR("FEInterpolation1d :: giveBoundaryEdgeIntegrationRule - Not supported by ");
+    OOFEM_ERROR("Not supported by ");
     return NULL;
 }
 } // end namespace oofem

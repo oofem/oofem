@@ -51,6 +51,7 @@ IsoInterfaceDamageMaterial :: IsoInterfaceDamageMaterial(int n, Domain *d) : Str
     //
 {
     maxOmega = 0.999999;
+    beta = 0.;
 }
 
 
@@ -79,7 +80,7 @@ IsoInterfaceDamageMaterial :: give3dMaterialStiffnessMatrix(FloatMatrix &answer,
 // computes full constitutive matrix for case of gp stress-strain state.
 //
 {
-    _error("give3dMaterialStiffnessMatrix: not implemented");
+    OOFEM_ERROR("not implemented");
 }
 
 
@@ -125,11 +126,7 @@ IsoInterfaceDamageMaterial :: giveRealStressVector(FloatArray &answer, GaussPoin
     }
 
     this->giveStiffnessMatrix(de, ElasticStiffness, gp, tStep);
-    // damage in tension only
-    if ( equivStrain >= 0.0 ) {
-        de.times(1.0 - omega);
-    }
-
+    de.times(1.0 - omega);
     answer.beProductOf(de, reducedTotalStrainVector);
 
     // update gp
@@ -215,7 +212,7 @@ IsoInterfaceDamageMaterial :: give2dInterfaceMaterialStiffnessMatrix(FloatMatrix
             }
         }
     }  else {
-        _error("give2dInterfaceMaterialStiffnessMatrix: unknown MatResponseMode");
+        OOFEM_ERROR("unknown MatResponseMode");
     }
 }
 
@@ -274,7 +271,7 @@ IsoInterfaceDamageMaterial :: give3dInterfaceMaterialStiffnessMatrix(FloatMatrix
             }
         }
     }  else {
-        _error("give2dInterfaceMaterialStiffnessMatrix: unknown MatResponseMode");
+        OOFEM_ERROR("unknown MatResponseMode");
     }
 }
 
@@ -331,7 +328,6 @@ IsoInterfaceDamageMaterial :: giveThermalDilatationVector(FloatArray &answer,
 IRResultType
 IsoInterfaceDamageMaterial :: initializeFrom(InputRecord *ir)
 {
-    const char *__proc = "initializeFrom"; // Required by IR_GIVE_FIELD macro
     IRResultType result;                // Required by IR_GIVE_FIELD macro
 
     IR_GIVE_FIELD(ir, kn, _IFT_IsoInterfaceDamageMaterial_kn);
@@ -345,6 +341,9 @@ IsoInterfaceDamageMaterial :: initializeFrom(InputRecord *ir)
     IR_GIVE_OPTIONAL_FIELD(ir, maxOmega, _IFT_IsoInterfaceDamageMaterial_maxOmega);
     maxOmega = min(maxOmega, 0.999999);
     maxOmega = max(maxOmega, 0.0);
+
+    beta = 0.;
+    IR_GIVE_OPTIONAL_FIELD(ir, beta, _IFT_IsoInterfaceDamageMaterial_beta);
 
     IR_GIVE_FIELD(ir, tempDillatCoeff, _IFT_IsoInterfaceDamageMaterial_talpha);
     return StructuralMaterial :: initializeFrom(ir);
@@ -370,7 +369,13 @@ IsoInterfaceDamageMaterial :: giveInputRecord(DynamicInputRecord &input)
 void
 IsoInterfaceDamageMaterial :: computeEquivalentStrain(double &kappa, const FloatArray &strain, GaussPoint *gp, TimeStep *tStep)
 {
-    kappa = macbra( strain.at(1) );
+  // kappa = macbra( strain.at(1) );
+    double epsNplus = macbra( strain.at(1) );
+    double epsT2 = strain.at(2)*strain.at(2);
+    if (strain.giveSize()==3){
+      epsT2 += strain.at(3)*strain.at(3);
+    }
+    kappa = sqrt(epsNplus*epsNplus + beta*epsT2);
 }
 
 void

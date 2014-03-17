@@ -42,7 +42,7 @@ REGISTER_EnrichmentItem(Crack)
 
 Crack :: Crack(int n, XfemManager *xm, Domain *aDomain) : EnrichmentItem(n, xm, aDomain)
 {
-	mpEnrichesDofsWithIdArray->setValues(3, D_u, D_v, D_w);
+	mpEnrichesDofsWithIdArray = {D_u, D_v, D_w};
 }
 
 IRResultType Crack :: initializeFrom(InputRecord *ir)
@@ -76,7 +76,7 @@ void Crack::AppendCohesiveZoneGaussPoint(GaussPoint *ipGP)
 		mCohesiveZoneArcPositions.insert(iteratorPos, arcPos);
 	}
 	else{
-		OOFEM_ERROR("Error in Crack::AppendCohesiveZoneGaussPoint(GaussPoint *ipGP): matStat == NULL.")
+		OOFEM_ERROR("matStat == NULL.")
 	}
 }
 

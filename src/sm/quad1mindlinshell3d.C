@@ -118,7 +118,7 @@ Quad1MindlinShell3D :: computeBodyLoadVectorAt(FloatArray &answer, Load *forLoad
     FloatArray forceX, forceY, forceZ, glob_gravity, gravity, n;
 
     if ( ( forLoad->giveBCGeoType() != BodyLoadBGT ) || ( forLoad->giveBCValType() != ForceLoadBVT ) ) {
-        _error("computeBodyLoadVectorAt: unknown load type");
+        OOFEM_ERROR("unknown load type");
     }
 
     // note: force is assumed to be in global coordinate system.
@@ -197,7 +197,7 @@ Quad1MindlinShell3D :: computeSurfaceLoadVectorAt(FloatArray &answer, Load *load
             answer.negated();
         }
     } else {
-        OOFEM_ERROR("Quad1MindlinShell3D only supports constant pressure boundary load.");
+        OOFEM_ERROR("only supports constant pressure boundary load.");
     }
 }
 
@@ -232,23 +232,23 @@ Quad1MindlinShell3D :: computeBmatrixAt(GaussPoint *gp, FloatMatrix &answer, int
     for ( int i = 0; i < 4; ++i ) {
         ///@todo Check the rows for both parts here, to be consistent with _3dShell material definition
         // Part related to the membrane (columns represent coefficients for D_u, D_v)
-        answer(0, 0 + i * 5) = dn(i, 0);
-        answer(1, 1 + i * 5) = dn(i, 1);
-        answer(2, 0 + i * 5) = dn(i, 1);
+        answer(0, 0 + i * 5) = dn(i, 0);//eps_x = du/dx
+        answer(1, 1 + i * 5) = dn(i, 1);//eps_y = dv/dy
+        answer(2, 0 + i * 5) = dn(i, 1);//gamma_xy = du/dy+dv/dx
         answer(2, 1 + i * 5) = dn(i, 0);
 
         // Part related to the plate (columns represent the dofs D_w, R_u, R_v)
         ///@todo Check sign here
-        answer(3 + 0, 2 + 1 + i * 5) = dn(i, 0);
-        answer(3 + 1, 2 + 2 + i * 5) = dn(i, 1);
-        answer(3 + 2, 2 + 1 + i * 5) = dn(i, 1);
-        answer(3 + 2, 2 + 2 + i * 5) = dn(i, 0);
+        answer(3 + 0, 2 + 2 + i * 5) = dn(i, 0);// kappa_x = d(fi_y)/dx
+        answer(3 + 1, 2 + 1 + i * 5) =-dn(i, 1);// kappa_y = -d(fi_x)/dy
+        answer(3 + 2, 2 + 2 + i * 5) = dn(i, 1);// kappa_xy=d(fi_y)/dy-d(fi_x)/dx
+        answer(3 + 2, 2 + 1 + i * 5) =-dn(i, 0);
 
         // shear strains
-        answer(3 + 3, 2 + 0 + i * 5) = -dns(i, 0);
-        answer(3 + 3, 2 + 1 + i * 5) = ns(i);
-        answer(3 + 4, 2 + 0 + i * 5) = -dns(i, 1);
-        answer(3 + 4, 2 + 2 + i * 5) = ns(i);
+        answer(3 + 3, 2 + 0 + i * 5) = dns(i, 0);// gamma_xz = fi_y+dw/dx
+        answer(3 + 3, 2 + 2 + i * 5) = ns(i);
+        answer(3 + 4, 2 + 0 + i * 5) = dns(i, 1);// gamma_yz = -fi_x+dw/dy
+        answer(3 + 4, 2 + 1 + i * 5) = -ns(i);
     }
 }
 
@@ -411,7 +411,7 @@ Quad1MindlinShell3D :: initializeFrom(InputRecord *ir)
 void
 Quad1MindlinShell3D :: giveDofManDofIDMask(int inode, EquationID, IntArray &answer) const
 {
-    answer.setValues(6, D_u, D_v, D_w, R_u, R_v, R_w);
+    answer = {D_u, D_v, D_w, R_u, R_v, R_w};
 }
 
 
@@ -545,15 +545,15 @@ void
 Quad1MindlinShell3D :: giveEdgeDofMapping(IntArray &answer, int iEdge) const
 {
     if ( iEdge == 1 ) { // edge between nodes 1 2
-        answer.setValues(12,  1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12);
+        answer = { 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12};
     } else if ( iEdge == 2 ) { // edge between nodes 2 3
-        answer.setValues(12,  7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18);
+        answer = { 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18};
     } else if ( iEdge == 3 ) { // edge between nodes 3 4
-        answer.setValues(12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24);
+        answer = {13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24};
     } else if ( iEdge == 4 ) { // edge between nodes 4 1
-        answer.setValues(12, 19, 20, 21, 22, 23, 24, 1, 2, 3, 4, 5, 6);
+        answer = {19, 20, 21, 22, 23, 24, 1, 2, 3, 4, 5, 6};
     } else {
-        _error("giveEdgeDofMapping: wrong edge number");
+        OOFEM_ERROR("wrong edge number");
     }
 }
 
@@ -685,7 +685,7 @@ Quad1MindlinShell3D :: SPRNodalRecoveryMI_giveDofMansDeterminedByPatch(IntArray 
     if ( found ) {
         answer.at(1) = pap;
     } else {
-        _error("SPRNodalRecoveryMI_giveDofMansDeterminedByPatch: node unknown");
+        OOFEM_ERROR("node unknown");
     }
 }
 } // end namespace oofem

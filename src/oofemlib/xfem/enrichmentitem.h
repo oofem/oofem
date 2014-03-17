@@ -119,12 +119,12 @@ public:
      * EnrichmentDomain, EnrichmentFront and PropagationLaw
      * without have to keep track of them globally.
      */
-    virtual void giveInputRecord(DynamicInputRecord &input) { OOFEM_ERROR("In EnrichmentItem::giveInputRecord(): This function must be called with DynamicDataReader as input.\n"); }
+    virtual void giveInputRecord(DynamicInputRecord &input) { OOFEM_ERROR("This function must be called with DynamicDataReader as input.\n"); }
     virtual void appendInputRecords(DynamicDataReader &oDR);
 
     int instanciateYourself(DataReader *dr);
     virtual const char *giveClassName() const = 0;
-    const IntArray *giveEnrichesDofsWithIdArray() const { return mpEnrichesDofsWithIdArray; }
+    const IntArray *giveEnrichesDofsWithIdArray() const { return &mpEnrichesDofsWithIdArray; }
     int giveNumberOfEnrDofs() const;
 
     // Spatial query
@@ -237,7 +237,7 @@ protected:
     int endOfDofIdPool;
 
     /// Geometry associated with EnrichmentItem.
-    IntArray *mpEnrichesDofsWithIdArray;
+    IntArray mpEnrichesDofsWithIdArray;
 
 
     // Level set for signed distance to the interface.

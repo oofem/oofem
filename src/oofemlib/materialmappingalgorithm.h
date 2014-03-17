@@ -157,7 +157,9 @@ public:
      */
     virtual void giveInputRecord(DynamicInputRecord &input) { }
     /// Returns class name of the receiver.
-    virtual const char *giveClassName() const  = 0;
+    virtual const char *giveClassName() const = 0;
+    /// Error printing helper.
+    std :: string errorInfo(const char *func) const { return std :: string(giveClassName()) + func; }
 };
 } // end namespace oofem
 #endif // materialmappingalgorithm_h

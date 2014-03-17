@@ -106,7 +106,7 @@ L4Axisymm :: computeBmatrixAt(GaussPoint *gp, FloatMatrix &answer, int li, int u
     }
 
     if ( ( size < 0 ) || ( size > 6 ) ) {
-        _error("ComputeBmatrixAt size mismatch");
+        OOFEM_ERROR("ComputeBmatrixAt size mismatch");
     }
 
     answer.resize(size, 8);
@@ -296,7 +296,7 @@ L4Axisymm :: computeStrainVector(FloatArray &answer, GaussPoint *gp, TimeStep *t
 
             this->computeBmatrixAt(helpGaussPoint, b, 3, 6);
         } else {
-            _error("computeStrainVector: numberOfFiAndShGaussPoints size mismatch");
+            OOFEM_ERROR("numberOfFiAndShGaussPoints size mismatch");
         }
 
         Epsilon.beProductOf(b, u);
@@ -304,10 +304,10 @@ L4Axisymm :: computeStrainVector(FloatArray &answer, GaussPoint *gp, TimeStep *t
         answer.at(6) = Epsilon.at(4);
 
         if ( nlGeometry ) {
-            OOFEM_ERROR("L4Axisymm :: computeStrainVector - only supports nlGeometry = 0");
+            OOFEM_ERROR("only supports nlGeometry = 0");
         }
     } else if ( mode == AL ) { // actualized Lagrange formulation
-        _error("computeStrainVector : unsupported mode");
+        OOFEM_ERROR("unsupported mode");
     }
 }
 
@@ -348,7 +348,7 @@ L4Axisymm :: giveCharacteristicLenght(GaussPoint *gp, const FloatArray &normalTo
 void
 L4Axisymm :: giveDofManDofIDMask(int inode, EquationID, IntArray &answer) const
 {
-    answer.setValues(2, D_u, D_v);
+    answer = {D_u, D_v};
 }
 
 void
@@ -375,7 +375,7 @@ L4Axisymm :: SPRNodalRecoveryMI_giveDofMansDeterminedByPatch(IntArray &answer, i
     if ( found ) {
         answer.at(1) = pap;
     } else {
-        _error("SPRNodalRecoveryMI_giveDofMansDeterminedByPatch: node unknown");
+        OOFEM_ERROR("node unknown");
     }
 }
 
@@ -463,7 +463,7 @@ L4Axisymm :: giveEdgeDofMapping(IntArray &answer, int iEdge) const
         answer.at(3) = 1;
         answer.at(4) = 2;
     } else {
-        _error("giveEdgeDofMapping: wrong edge number");
+        OOFEM_ERROR("wrong edge number");
     }
 }
 

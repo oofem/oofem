@@ -142,7 +142,7 @@ TrPlaneStress2dXFEM :: giveDofManDofIDMask(int inode, EquationID ut, IntArray &a
 
     if ( answer.giveSize() == 0 ) {
         // TODO: How do we fix this in a nicer way? /ES
-        answer.setValues(2, D_u, D_v);
+        answer = {D_u, D_v};
     }
 }
 

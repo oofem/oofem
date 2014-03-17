@@ -81,7 +81,6 @@ SolutionbasedShapeFunction :: ~SolutionbasedShapeFunction()
 IRResultType
 SolutionbasedShapeFunction :: initializeFrom(InputRecord *ir)
 {
-    const char *__proc = "initializeFrom";
     IRResultType result;
 
     ActiveBoundaryCondition :: initializeFrom(ir);
@@ -312,8 +311,7 @@ SolutionbasedShapeFunction :: computeDofTransformation(ActiveDof *dof, FloatArra
     masterContribs.resize( this->giveDomain()->giveNumberOfSpatialDimensions() );
     masterContribs2.resize( this->giveDomain()->giveNumberOfSpatialDimensions() );
 
-    IntArray dofIDs;
-    dofIDs.setValues( 1, ( int ) dof->giveDofID() );
+    IntArray dofIDs = {dof->giveDofID()};
 
     bool isPlus, isMinus, isZero, found;
     whichBoundary(* dof->giveDofManager()->giveCoordinates(), isPlus, isMinus, isZero);
@@ -392,7 +390,7 @@ SolutionbasedShapeFunction :: loadProblem()
                 }
             }
             if ( vlockCount == 30 ) {
-                OOFEM_WARNING5("Element over-constrained (%u)! Center coordinate: %f, %f, %f\n", e->giveNumber(), centerCoord.at(1) / 10, centerCoord.at(2) / 10, centerCoord.at(3) / 10);
+                OOFEM_WARNING("Element over-constrained (%u)! Center coordinate: %f, %f, %f\n", e->giveNumber(), centerCoord.at(1) / 10, centerCoord.at(2) / 10, centerCoord.at(3) / 10);
             }
         }
 

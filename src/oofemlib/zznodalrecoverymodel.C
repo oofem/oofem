@@ -189,7 +189,7 @@ ZZNodalRecoveryModel :: recoverValues(Set elementSet, InternalStateType type, Ti
         if ( i > 20 ) {
             msg << "...";
         }
-        OOFEM_WARNING( "ZZNodalRecoveryModel::recoverValues: some values of some dofmanagers undetermined\n[%s]", msg.str().c_str() );
+        OOFEM_WARNING("some values of some dofmanagers undetermined\n[%s]", msg.str().c_str() );
     }
 
 
@@ -243,7 +243,7 @@ ZZNodalRecoveryModelInterface :: ZZNodalRecoveryMI_computeNNMatrix(FloatArray &a
     IntegrationRule *iRule = elem->giveDefaultIntegrationRulePtr();
 
     if ( !interpol ) {
-        OOFEM_ERROR2( "ZZNodalRecoveryMI_computeNNMatrix: Element %d not providing interpolation", elem->giveNumber() );
+        OOFEM_SIMPLE_ERROR( "ZZNodalRecoveryMI_computeNNMatrix: Element %d not providing interpolation", elem->giveNumber() );
     }
 
     int size = elem->giveNumberOfDofManagers();
@@ -292,7 +292,7 @@ ZZNodalRecoveryModel :: initCommMaps()
             OOFEM_LOG_INFO("ZZNodalRecoveryModel :: initCommMaps: initialized comm maps");
             initCommMap = false;
         } else {
-            OOFEM_ERROR("ZZNodalRecoveryModel :: initCommMaps: unsupported comm mode");
+            OOFEM_ERROR("unsupported comm mode");
         }
     }
 
@@ -314,7 +314,7 @@ ZZNodalRecoveryModel :: exchangeDofManValues(FloatArray &lhs, FloatMatrix &rhs, 
         communicator->unpackAllData(this, & ls, & ZZNodalRecoveryModel :: unpackSharedDofManData);
         communicator->finishExchange();
     } else {
-        OOFEM_ERROR("ZZNodalRecoveryModel :: exchangeDofManValues: Unsupported commMode");
+        OOFEM_ERROR("Unsupported commMode");
     }
 }
 

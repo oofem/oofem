@@ -38,6 +38,7 @@
 #include "femcmpnn.h"
 #include "domain.h"
 #include "valuemodetype.h"
+#include "floatarray.h"
 
 #include <map>
 #include <algorithm>

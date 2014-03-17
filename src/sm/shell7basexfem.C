@@ -147,7 +147,6 @@ Shell7BaseXFEM :: computeFailureCriteriaQuantities(FailureCriteriaStatus *fcStat
 
 IRResultType Shell7BaseXFEM :: initializeFrom(InputRecord *ir)
 {
-    //const char *__proc = "initializeFrom"; // Required by IR_GIVE_FIELD macro
     //IRResultType result;                   // Required by IR_GIVE_FIELD macro
 
     // old, to be removed
@@ -976,7 +975,7 @@ Shell7BaseXFEM :: computeMassMatrixNum(FloatMatrix &answer, TimeStep *tStep)
             this->giveUnknownsAt(localCoords, solVec, xbar, m, gam, tStep);
             //this->computeNmatrixAt(gp, N);
             //unknowns.beProductOf(N,a); // [xbar, m, gam]^T
-            //m.setValues(3, unknowns.at(4), unknowns.at(5), unknowns.at(6) );
+            //m = {unknowns.at(4), unknowns.at(5), unknowns.at(6) };
             //double gam = unknowns.at(7);
 
 
@@ -1110,7 +1109,7 @@ Shell7BaseXFEM :: computeEdgeLoadVectorAt(FloatArray &answer, Load *load, int iE
         }
         return;
     } else {
-        _error("Shell7BaseXFEM :: computeEdgeLoadVectorAt: load type not supported");
+        OOFEM_ERROR("load type not supported");
         return;
     }
 }
@@ -1165,7 +1164,7 @@ Shell7BaseXFEM :: computeSurfaceLoadVectorAt(FloatArray &answer, Load *load,
 #endif
         return;
     } else {
-        _error("Shell7Base :: computeSurfaceLoadVectorAt: load type not supported");
+        OOFEM_ERROR("load type not supported");
         return;
     }
 }

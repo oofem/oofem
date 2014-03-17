@@ -257,14 +257,13 @@ DynamicCommunicationBuffer :: iSend(int dest, int tag)
 {
     int result = 1;
 
-    std :: list< CommunicationPacket * > :: const_iterator it;
     /// set last (active) send packet as eof
     active_packet->setEOFFlag();
 
     active_rank = dest;
     active_tag = tag;
-    for ( it = packet_list.begin(); it != packet_list.end(); ++it ) {
-        result &= ( * it )->iSend(communicator, dest, tag);
+    for ( auto &packet: packet_list ) {
+        result &= packet->iSend(communicator, dest, tag);
     }
 
     /*
@@ -341,10 +340,8 @@ int DynamicCommunicationBuffer :: sendCompleted()
         return 1;
     }
 
-    std :: list< CommunicationPacket * > :: const_iterator it;
-
-    for ( it = packet_list.begin(); it != packet_list.end(); ++it ) {
-        result &= ( * it )->testCompletion();
+    for ( auto &packet: packet_list ) {
+        result &= packet->testCompletion();
     }
 
     completed = result;
@@ -418,9 +415,8 @@ DynamicCommunicationBuffer :: freePacket(CommunicationPacket *p)
 void
 DynamicCommunicationBuffer :: clear()
 {
-    std :: list< CommunicationPacket * > :: const_iterator it;
-    for ( it = packet_list.begin(); it != packet_list.end(); ++it ) {
-        this->freePacket(* it);
+    for ( auto &packet: packet_list ) {
+        this->freePacket(packet);
     }
 
     packet_list.clear();
@@ -435,7 +431,7 @@ DynamicCommunicationBuffer :: popNewRecvPacket()
     active_packet = ( * recvIt );
     ++recvIt;
     if ( active_packet == NULL ) {
-        OOFEM_ERROR("DynamicCommunicationBuffer::popNewRecvPacket: no more packets received");
+        OOFEM_SIMPLE_ERROR("no more packets received");
     }
 
     //active_packet->init(communicator);
@@ -451,7 +447,7 @@ DynamicCommunicationBuffer :: pushNewRecvPacket(CommunicationPacket *p)
 int
 DynamicCommunicationBuffer :: bcast(int root)
 {
-    OOFEM_ERROR("DynamicCommunicationBuffer::bcast: not implemented");
+    OOFEM_SIMPLE_ERROR("not implemented");
     return 0;
 }
 
@@ -465,7 +461,7 @@ CommunicationPacketPool :: popPacket(MPI_Comm comm)
     if ( available_packets.empty() ) {
         // allocate new packet
         if ( ( result = new CommunicationPacket(comm, 0) ) == NULL ) {
-            OOFEM_ERROR("CommunicationPacketPool :: popPacket: allocation of new packed failed");
+            OOFEM_SIMPLE_ERROR("allocation of new packed failed");
         }
 
         allocatedPackets++;
@@ -494,7 +490,7 @@ CommunicationPacketPool :: pushPacket(CommunicationPacket *p)
         leased_packets.erase(it);
         available_packets.push_back(p);
     } else {
-        OOFEM_ERROR("CommunicationPacketPool::pushPacket: request to push strange packet (not allocated by pool)");
+        OOFEM_SIMPLE_ERROR("request to push strange packet (not allocated by pool)");
     }
 
 #else
@@ -509,13 +505,12 @@ void
 CommunicationPacketPool :: clear()
 {
     if ( !leased_packets.empty() ) {
-        OOFEM_WARNING("CommunicationPacketPool::clear: some packets still leased");
+        OOFEM_SIMPLE_WARNING("CommunicationPacketPool::clear: some packets still leased");
     }
 
-    std :: list< CommunicationPacket * > :: iterator it;
-    for ( it = available_packets.begin(); it != available_packets.end(); ++it ) {
-        if ( * it ) {
-            delete *it;
+    for ( auto &packet: available_packets ) {
+        if ( packet ) {
+            delete packet;
         }
     }
 

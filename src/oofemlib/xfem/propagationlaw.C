@@ -65,8 +65,8 @@ void PLDoNothing :: giveInputRecord(DynamicInputRecord &input)
     input.setRecordKeywordField(this->giveInputRecordName(), number);
 }
 
-IRResultType PLCrackPrescribedDir :: initializeFrom(InputRecord *ir) {
-    const char *__proc = "initializeFrom";
+IRResultType PLCrackPrescribedDir :: initializeFrom(InputRecord *ir)
+{
     IRResultType result;
 
     IR_GIVE_FIELD(ir, mAngle, _IFT_PLCrackPrescribedDir_Dir);
@@ -86,16 +86,16 @@ void PLCrackPrescribedDir :: giveInputRecord(DynamicInputRecord &input)
     input.setField(mIncrementLength, _IFT_PLCrackPrescribedDir_IncLength);
 }
 
-void PLCrackPrescribedDir :: propagateInterfaces(Domain &iDomain, EnrichmentDomain &ioEnrDom) {
+void PLCrackPrescribedDir :: propagateInterfaces(Domain &iDomain, EnrichmentDomain &ioEnrDom)
+{
     // Fetch crack tip data
     std :: vector< TipInfo >tipInfo;
     ioEnrDom.giveTipInfos(tipInfo);
 
     int tipIndex = 1;
-    FloatArray dir;
     double angleRad = mAngle * M_PI / 180.0;
-    dir.setValues( 2, cos(angleRad), sin(angleRad) );
-    dir.normalize();
+    FloatArray dir = {cos(angleRad), sin(angleRad)};
+    dir.normalize(); ///@todo Why? /Mikael
 
 
     std :: vector< TipPropagation >tipPropagations;
@@ -111,8 +111,8 @@ void PLCrackPrescribedDir :: propagateInterfaces(Domain &iDomain, EnrichmentDoma
 
 
 /////////////////////////////////////////////
-IRResultType PLHoopStressCirc :: initializeFrom(InputRecord *ir) {
-    const char *__proc = "initializeFrom";
+IRResultType PLHoopStressCirc :: initializeFrom(InputRecord *ir)
+{
     IRResultType result;
 
     IR_GIVE_FIELD(ir, mRadius,                          _IFT_PLHoopStressCirc_Radius);
@@ -230,8 +230,8 @@ void PLHoopStressCirc :: propagateInterfaces(Domain &iDomain, EnrichmentDomain &
 
 
                             // Compute global coordinates of Gauss point
-                            FloatArray globalCoord;
-                            globalCoord.setValues(2, 0.0, 0.0);
+                            FloatArray globalCoord(2);
+                            globalCoord.zero();
 
                             for ( int i = 1; i <= gpEl->giveNumberOfDofManagers(); i++ ) {
                                 DofManager *dMan = gpEl->giveDofManager(i);
@@ -261,7 +261,7 @@ void PLHoopStressCirc :: propagateInterfaces(Domain &iDomain, EnrichmentDomain &
                                 // Get stress
                                 StructuralMaterialStatus *ms = dynamic_cast< StructuralMaterialStatus * >( gp_i->giveMaterialStatus() );
                                 if ( ms == NULL ) {
-                                    OOFEM_ERROR("In PLHoopStressCirc :: propagateInterfaces(): failed to fetch MaterialStatus.\n");
+                                    OOFEM_SIMPLE_ERROR("In PLHoopStressCirc :: propagateInterfaces(): failed to fetch MaterialStatus.\n");
                                 }
 
                                 FloatArray stressVecGP = ms->giveStressVector();
@@ -293,7 +293,7 @@ void PLHoopStressCirc :: propagateInterfaces(Domain &iDomain, EnrichmentDomain &
                         // Compute stresses
                         StructuralMaterialStatus *ms = dynamic_cast< StructuralMaterialStatus * >( gp.giveMaterialStatus() );
                         if ( ms == NULL ) {
-                            OOFEM_ERROR("In PLHoopStressCirc :: propagateInterfaces(): failed to fetch MaterialStatus.\n");
+                            OOFEM_SIMPLE_ERROR("In PLHoopStressCirc :: propagateInterfaces(): failed to fetch MaterialStatus.\n");
                         }
 
                         stressVec = ms->giveStressVector();
@@ -308,7 +308,7 @@ void PLHoopStressCirc :: propagateInterfaces(Domain &iDomain, EnrichmentDomain &
                     // Compute stresses
                     StructuralMaterialStatus *ms = dynamic_cast< StructuralMaterialStatus * >( gp.giveMaterialStatus() );
                     if ( ms == NULL ) {
-                        OOFEM_ERROR("In PLHoopStressCirc :: propagateInterfaces(): failed to fetch MaterialStatus.\n");
+                        OOFEM_SIMPLE_ERROR("In PLHoopStressCirc :: propagateInterfaces(): failed to fetch MaterialStatus.\n");
                     }
 
                     stressVec = ms->giveStressVector();

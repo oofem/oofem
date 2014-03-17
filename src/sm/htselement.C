@@ -65,9 +65,9 @@ HTSelement :: giveDofManDofIDMask(int inode, EquationID ut, IntArray &answer) co
 
 {
     if ( inode <= numberOfEdges ) {
-        answer.setValues(0);
+        answer.clear();
     } else {
-        answer.setValues(4, D_u_edge_const, D_u_edge_lin, D_v_edge_const, D_v_edge_lin);
+        answer = {D_u_edge_const, D_u_edge_lin, D_v_edge_const, D_v_edge_lin};
     }
 }
 
@@ -75,7 +75,6 @@ HTSelement :: giveDofManDofIDMask(int inode, EquationID ut, IntArray &answer) co
 IRResultType
 HTSelement :: initializeFrom(InputRecord *ir)
 {
-    //const char *__proc = "initializeFrom"; // Required by IR_GIVE_FIELD macr
     //IRResultType result;                 // Required by IR_GIVE_FIELD macro
     this->StructuralElement :: initializeFrom(ir);
     numberOfGaussPoints = 8;
@@ -338,7 +337,7 @@ HTSelement :: computeForceLoadVector(FloatArray &answer, TimeStep *tStep, ValueM
                 answer.add(helpLoadVector);
             }
         } else {
-            OOFEM_ERROR3("HTSelement :: computeLocalForceLoadVector - boundary load %d is of unsupported type (%d)", id, ltype);
+            OOFEM_ERROR("boundary load %d is of unsupported type (%d)", id, ltype);
         }
     }
     this->computePrescribedDisplacementLoadVectorAt(helpLoadVector, tStep, mode);

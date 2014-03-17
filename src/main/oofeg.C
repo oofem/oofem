@@ -1597,7 +1597,7 @@ void beamForcePlot(Widget w, XtPointer ptr, XtPointer call_data)
 
     //deleteLayerGraphics(OOFEG_VARPLOT_PATTERN_LAYER);
     ac = * ( ( int * ) ptr );
-    gc [ OOFEG_VARPLOT_PATTERN_LAYER ].setInternalStateType(IST_ShellForceMomentumTensor);
+    gc [ OOFEG_VARPLOT_PATTERN_LAYER ].setInternalStateType(IST_ShellMomentumTensor);
     gc [ OOFEG_VARPLOT_PATTERN_LAYER ].setIntVarIndx(ac);
     gc [ OOFEG_VARPLOT_PATTERN_LAYER ].setPlotMode(OGC_scalarPlot);
 
@@ -1772,7 +1772,9 @@ setupSmoother(oofegGraphicContext &gc)
                 smoother = domain->giveSmoother();
             }
 
-            smoother->recoverValues( gc.giveIntVarType(), gc.getActiveProblem()->giveCurrentStep() );
+            Set wholeDomain(0, domain);
+            wholeDomain.addAllElements();
+            smoother->recoverValues( wholeDomain, gc.giveIntVarType(), gc.getActiveProblem()->giveCurrentStep() );
             //   problem->giveSmoother()->giveMinMaxVal(&min,&max);
         }
     }
@@ -1802,10 +1804,10 @@ void setSmoother(SmootherType mode)
         } else if ( mode == Smoother_SPR ) {
             gc [ 0 ].getActiveProblem()->giveDomain(id)->setSmoother( new SPRNodalRecoveryModel( gc [ 0 ].getActiveProblem()->giveDomain(id) ) );
         } else {
-            OOFEM_ERROR("Unrecognized nodal recovery model");
+            OOFEM_SIMPLE_ERROR("Unrecognized nodal recovery model");
         }
 
-        gc [ 0 ].getActiveProblem()->giveDomain(id)->giveSmoother()->setRecoveryMode( -1, IntArray() );
+//         gc [ 0 ].getActiveProblem()->giveDomain(id)->giveSmoother()->setRecoveryMode( -1, IntArray() );
     }
 
     gc [ 0 ].setSmootherType(mode);

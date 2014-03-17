@@ -79,7 +79,7 @@ public:
     virtual void timesT(const FloatArray &x, FloatArray &answer) const;
     virtual void times(double x);
     virtual int buildInternalStructure(EngngModel *, int, EquationID, const UnknownNumberingScheme &s);
-    int setInternalStructure(IntArray *a);
+    int setInternalStructure(IntArray &a);
     virtual int assemble(const IntArray &loc, const FloatMatrix &mat);
     virtual int assemble(const IntArray &rloc, const IntArray &cloc, const FloatMatrix &mat);
     virtual bool canBeFactorized() const { return true; }
@@ -94,6 +94,7 @@ public:
     virtual void writeToFile(const char *fname) const;
     virtual SparseMtrxType giveType() const { return SMT_SkylineU; }
     virtual bool isAsymmetric() const { return true; }
+    virtual const char *giveClassName() const { return "SkylineU"; }
 
 protected:
     void checkSizeTowards(const IntArray &);

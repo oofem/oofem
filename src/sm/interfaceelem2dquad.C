@@ -60,6 +60,7 @@ InterfaceElem2dQuad :: InterfaceElem2dQuad(int n, Domain *aDomain) :
     StructuralElement(n, aDomain)
 {
     numberOfDofMans       = 6;
+    axisymmode            = false;
 }
 
 
@@ -127,13 +128,24 @@ InterfaceElem2dQuad :: computeVolumeAround(GaussPoint *gp)
     double dx = ( dn1 * x1 ) + ( dn2 * x2 ) + ( dn3 * x3 );
     double dy = ( dn1 * y1 ) + ( dn2 * y2 ) + ( dn3 * y3 );
     double thickness   = this->giveCrossSection()->give(CS_Thickness, gp);
-    return sqrt(dx * dx + dy * dy) * weight * thickness;
+
+    double r = 1.0;
+    if (this->axisymmode) {
+      double ksi = gp->giveCoordinate(1);
+      double n3  = 1. - ksi * ksi;
+      double n1  = ( 1. - ksi ) * 0.5 - 0.5 * n3;
+      double n2  = ( 1. + ksi ) * 0.5 - 0.5 * n3;
+      r = n1*this->giveNode(1)->giveCoordinate(1) + n2*this->giveNode(2)->giveCoordinate(1)+ n3*this->giveNode(3)->giveCoordinate(1);
+    }
+
+    return sqrt(dx * dx + dy * dy) * weight * thickness * r;
 }
 
 
 IRResultType
 InterfaceElem2dQuad :: initializeFrom(InputRecord *ir)
 {
+    this->axisymmode = ir->hasField(_IFT_InterfaceElem2dQuad_axisymmode);
     return StructuralElement :: initializeFrom(ir);
 }
 
@@ -141,7 +153,7 @@ InterfaceElem2dQuad :: initializeFrom(InputRecord *ir)
 void
 InterfaceElem2dQuad :: giveDofManDofIDMask(int inode, EquationID, IntArray &answer) const
 {
-    answer.setValues(2, D_u, D_v);
+    answer = {D_u, D_v};
 }
 
 

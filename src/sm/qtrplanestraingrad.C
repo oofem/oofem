@@ -62,16 +62,15 @@ void
 QTrPlaneStrainGrad :: giveDofManDofIDMask(int inode, EquationID ut, IntArray &answer) const
 {
     if ( inode <= nSecNodes ) {
-        answer.setValues(3, D_u, D_v, G_0);
+        answer = {D_u, D_v, G_0};
     } else {
-        answer.setValues(2, D_u, D_v);
+        answer = {D_u, D_v};
     }
 }
 
 IRResultType
 QTrPlaneStrainGrad :: initializeFrom(InputRecord *ir)
 {
-    //const char *__proc = "initializeFrom"; // Required by IR_GIVE_FIELD macro
     //IRResultType result;                 // Required by IR_GIVE_FIELD macro
     this->StructuralElement :: initializeFrom(ir);
     numberOfGaussPoints = 4;

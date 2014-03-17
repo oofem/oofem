@@ -70,10 +70,10 @@ MMAContainingElementProjection :: __init(Domain *dold, IntArray &type, FloatArra
         }
 
         if ( !source ) {
-            OOFEM_ERROR("MMAContainingElementProjection::__init : no suitable source found");
+            OOFEM_ERROR("no suitable source found");
         }
     } else {
-        OOFEM_ERROR("MMAContainingElementProjection: No suitable element found");
+        OOFEM_ERROR("No suitable element found");
     }
 }
 
@@ -92,7 +92,7 @@ MMAContainingElementProjection :: __mapVariable(FloatArray &answer, FloatArray &
 int
 MMAContainingElementProjection :: mapStatus(MaterialStatus &oStatus) const
 {
-    OOFEM_ERROR("ERROR: MMAContainingElementProjection :: mapStatus() is not implemented yet.")
+    OOFEM_ERROR("mapStatus() is not implemented yet.")
 
     return 0;
 }

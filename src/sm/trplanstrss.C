@@ -254,7 +254,7 @@ TrPlaneStress2d :: giveEdgeDofMapping(IntArray &answer, int iEdge) const
         answer.at(3) = 1;
         answer.at(4) = 2;
     } else {
-        _error("giveEdgeDofMapping: wrong edge number");
+        OOFEM_ERROR("wrong edge number");
     }
 }
 
@@ -300,7 +300,7 @@ TrPlaneStress2d :: computeLoadLEToLRotationMatrix(FloatMatrix &answer, int iEdge
         aNode = 3;
         bNode = 1;
     } else {
-        _error("computeLoadLEToLRotationMatrix: wrong egde number");
+        OOFEM_ERROR("wrong egde number");
     }
 
     nodeA   = this->giveNode(aNode);
@@ -436,20 +436,20 @@ TrPlaneStress2d :: giveCharacteristicSize(GaussPoint *gp, FloatArray &normalToCr
         }
 
         if ( dPhidN == 0. ) {
-            _error("Zero value of dPhidN in TrPlaneStress2d :: giveCharacteristicSize\n");
+            OOFEM_ERROR("Zero value of dPhidN");
         }
 
         return 1. / fabs(dPhidN);
     }
 
-    _error("TrPlaneStress2d :: giveCharacteristicSize: invalid method");
+    OOFEM_ERROR("invalid method");
     return 0.;
 }
 
 void
 TrPlaneStress2d :: giveDofManDofIDMask(int inode, EquationID, IntArray &answer) const
 {
-    answer.setValues(2, D_u, D_v);
+    answer = {D_u, D_v};
 }
 
 
@@ -796,7 +796,7 @@ TrPlaneStress2d :: SPRNodalRecoveryMI_giveDofMansDeterminedByPatch(IntArray &ans
         ( pap == this->giveNode(3)->giveNumber() ) ) {
         answer.at(1) = pap;
     } else {
-        _error("SPRNodalRecoveryMI_giveDofMansDeterminedByPatch: node unknown");
+        OOFEM_ERROR("node unknown");
     }
 }
 
@@ -832,7 +832,7 @@ TrPlaneStress2d :: SpatialLocalizerI_giveDistanceFromParametricCenter(const Floa
     this->computeGlobalCoordinates(gcoords, lcoords);
 
     if ( ( size = coords.giveSize() ) < ( gsize = gcoords.giveSize() ) ) {
-        _error("SpatialLocalizerI_giveDistanceFromParametricCenter: coordinates size mismatch");
+        OOFEM_ERROR("coordinates size mismatch");
     }
 
     if ( size == gsize ) {
@@ -893,7 +893,6 @@ TrPlaneStress2d :: MMAShapeFunctProjectionInterface_interpolateIntVarAt(FloatArr
                                                                         coordType ct, nodalValContainerType &list,
                                                                         InternalStateType type, TimeStep *tStep)
 {
-    int n;
     double l1, l2, l3;
     FloatArray lcoords;
     if ( ct == MMAShapeFunctProjectionInterface :: coordType_local ) {
@@ -905,11 +904,9 @@ TrPlaneStress2d :: MMAShapeFunctProjectionInterface_interpolateIntVarAt(FloatArr
     l1 = lcoords.at(1);
     l2 = lcoords.at(2);
     l3 = 1.0 - l1 - l2;
-    n = list.at(1)->giveSize();
-    answer.resize(n);
-
-    for ( int i = 1; i <= n; i++ ) {
-        answer.at(i) = l1 * list.at(1)->at(i) + l2 *list.at(2)->at(i) + l3 *list.at(3)->at(i);
-    }
+    answer.resize(0);
+    answer.add(l1, list[0]);
+    answer.add(l2, list[1]);
+    answer.add(l3, list[2]);
 }
 } // end namespace oofem

@@ -149,7 +149,7 @@ IsotropicDamageMaterial :: giveRealStressVector(FloatArray &answer, GaussPoint *
             //printf (".");
         }
     } else {
-        _error("giveRealStressVector: unsupported loading/uloading criteria");
+        OOFEM_ERROR("unsupported loading/uloading criteria");
     }
 
 
@@ -346,7 +346,6 @@ double IsotropicDamageMaterial :: give(int aProperty, GaussPoint *gp)
 IRResultType
 IsotropicDamageMaterial :: initializeFrom(InputRecord *ir)
 {
-    const char *__proc = "initializeFrom"; // Required by IR_GIVE_FIELD macro
     IRResultType result;                // Required by IR_GIVE_FIELD macro
 
     //Set limit on the maximum isotropic damage parameter if needed

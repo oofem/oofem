@@ -216,18 +216,11 @@ void Line :: transformIntoPolar(FloatArray *point, FloatArray &answer)
 
 IRResultType Line :: initializeFrom(InputRecord *ir)
 {
-    const char *__proc = "initializeFrom"; // Required by IR_GIVE_FIELD macro
     IRResultType result; // Required by IR_GIVE_FIELD macro
 
-    FloatArray *start = new FloatArray(2);
-    FloatArray *end = new FloatArray(2);
-    IR_GIVE_FIELD(ir, * start, _IFT_Line_start);
-    IR_GIVE_FIELD(ir, * end, _IFT_Line_end);
-
-    mVertices.push_back(* start);
-    delete start;
-    mVertices.push_back(* end);
-    delete end;
+    mVertices.resize(2);
+    IR_GIVE_FIELD(ir, mVertices [ 0 ], _IFT_Line_start);
+    IR_GIVE_FIELD(ir, mVertices [ 1 ], _IFT_Line_end);
     return IRRT_OK;
 }
 
@@ -478,11 +471,10 @@ bool Triangle :: pointIsInTriangle(const FloatArray &iP) const
     return true;
 }
 
-Circle :: Circle(FloatArray *center, double radius) :
+Circle :: Circle(FloatArray &center, double radius) :
     mTangSignDist(1.0)
 {
-    mVertices.push_back(* center);
-    delete center;
+    mVertices.push_back(center);
 
     this->radius = radius;
 }
@@ -494,14 +486,11 @@ void Circle :: computeNormalSignDist(double &oDist, const FloatArray &iPoint) co
 
 IRResultType Circle :: initializeFrom(InputRecord *ir)
 {
-    const char *__proc = "initializeFrom"; // Required by IR_GIVE_FIELD macro
     IRResultType result; // Required by IR_GIVE_FIELD macro
 
-    FloatArray *center = new FloatArray(2);
-    IR_GIVE_FIELD(ir, * center, _IFT_Circle_center);
+    mVertices.resize(1);
+    IR_GIVE_FIELD(ir, mVertices [ 0 ], _IFT_Circle_center);
     IR_GIVE_FIELD(ir, radius, _IFT_Circle_radius);
-    mVertices.push_back(* center);
-    delete center;
     return IRRT_OK;
 }
 
@@ -556,12 +545,13 @@ void Circle :: computeIntersectionPoints(Element *element, std :: vector< FloatA
     if ( intersects(element) ) {
         for ( int i = 1; i <= element->giveNumberOfBoundarySides(); i++ ) {
             std :: vector< FloatArray >oneLineIntersects;
-            FloatArray a = ( * ( element->giveDofManager ( i )->giveCoordinates() ) );
+            ///@todo Move semantics or something would be useful here to avoid multiple copies.
+            FloatArray a = * element->giveDofManager ( i )->giveCoordinates();
             FloatArray b;
             if ( i != element->giveNumberOfBoundarySides() ) {
-                b = ( * ( element->giveDofManager ( i + 1 )->giveCoordinates() ) );
+                b = * element->giveDofManager ( i + 1 )->giveCoordinates();
             } else {
-                b = ( * ( element->giveDofManager ( 1 )->giveCoordinates() ) );
+                b = * element->giveDofManager ( 1 )->giveCoordinates();
             }
 
             Line l(a, b);
@@ -680,8 +670,7 @@ void PolygonLine :: computeNormalSignDist(double &oDist, const FloatArray &iPoin
 
     // TODO: This can probably be done in a nicer way.
     // Ensure that we work in 2d.
-    FloatArray point;
-    point.setValues( 2, iPoint.at(1), iPoint.at(2) );
+    FloatArray point = {iPoint.at(1), iPoint.at(2)};
 
     for ( int segId = 1; segId <= numSeg; segId++ ) {
         // Crack segment
@@ -790,8 +779,7 @@ void PolygonLine :: computeTangentialSignDist(double &oDist, const FloatArray &i
 
     // TODO: This can probably be done in a nicer way.
     // Ensure that we work in 2d.
-    FloatArray point;
-    point.setValues( 2, iPoint.at(1), iPoint.at(2) );
+    FloatArray point = {iPoint.at(1), iPoint.at(2)};
 
 
     const FloatArray &crackPS( this->giveVertex(1) );
@@ -871,7 +859,7 @@ void PolygonLine :: computeTangentialSignDist(double &oDist, const FloatArray &i
 
             return;
         } else {
-            OOFEM_ERROR2("PolygonLine :: computeTangentialSignDist: Index of minDistSegIndex not covered in loop: %d\n", minDistSegIndex);
+            OOFEM_ERROR("Index of minDistSegIndex not covered in loop: %d\n", minDistSegIndex);
         }
     }
 }
@@ -939,21 +927,16 @@ void PolygonLine :: giveSubPolygon(std :: vector< FloatArray > &oPoints, const d
 
 IRResultType PolygonLine :: initializeFrom(InputRecord *ir)
 {
-    const char *__proc = "initializeFrom"; // Required by IR_GIVE_FIELD macro
     IRResultType result; // Required by IR_GIVE_FIELD macro
 
 
-    FloatArray *points = new FloatArray();
-    IR_GIVE_FIELD(ir, * points, _IFT_PolygonLine_points);
+    FloatArray points;
+    IR_GIVE_FIELD(ir, points, _IFT_PolygonLine_points);
 
-    int numPoints = points->giveSize() / 2;
+    int numPoints = points.giveSize() / 2;
 
     for ( int i = 1; i <= numPoints; i++ ) {
-        FloatArray *pos = new FloatArray(2);
-        pos->at(1) = points->at(2 * ( i - 1 ) + 1);
-        pos->at(2) = points->at( 2 * ( i   ) );
-        mVertices.push_back(* pos);
-        delete pos;
+        mVertices.push_back({points.at(2 * ( i - 1 ) + 1), points.at( 2 * ( i   ) )});
     }
 
 
@@ -961,8 +944,6 @@ IRResultType PolygonLine :: initializeFrom(InputRecord *ir)
     // Precompute bounding box to speed up calculation of intersection points.
     calcBoundingBox(LC, UC);
 #endif
-
-    delete points;
 
     return IRRT_OK;
 }
@@ -1121,18 +1102,19 @@ void PolygonLine :: computeIntersectionPoints(Element *element, std :: vector< F
 
     for ( int i = 1; i <= element->giveNumberOfBoundarySides(); i++ ) {
         std :: vector< FloatArray >oneLineIntersects;
-        FloatArray *a = new FloatArray( * ( element->giveDofManager ( i )->giveCoordinates() ) );
-        FloatArray *b = NULL;
+        ///@todo Move semantics or something would be useful here to avoid multiple copies.
+        FloatArray a = * element->giveDofManager ( i )->giveCoordinates();
+        FloatArray b;
         if ( i != element->giveNumberOfBoundarySides() ) {
-            b = new FloatArray( * ( element->giveDofManager ( i + 1 )->giveCoordinates() ) );
+            b = * element->giveDofManager ( i + 1 )->giveCoordinates();
         } else {
-            b = new FloatArray( * ( element->giveDofManager ( 1 )->giveCoordinates() ) );
+            b = * element->giveDofManager ( 1 )->giveCoordinates();
         }
 
         Line l(a, b);
 
         computeIntersectionPoints(& l, oneLineIntersects);
-        for ( int j = 1; j <= int ( oneLineIntersects.size() ); j++ ) {
+        for ( FloatArray &interSect: oneLineIntersects ) {
             // Check that the intersection point has not already been identified.
             // This may happen if the crack intersects the element exactly at a node,
             // so that intersection is detected for both element edges in that node.
@@ -1142,11 +1124,10 @@ void PolygonLine :: computeIntersectionPoints(Element *element, std :: vector< F
 
             bool alreadyFound = false;
 
-            bPoint2 pNew( oneLineIntersects [ j - 1 ].at(1), oneLineIntersects [ j - 1 ].at(2) );
+            bPoint2 pNew( interSect.at(1), interSect.at(2) );
 
-            int numPointsOld = oIntersectionPoints.size();
-            for ( int k = 1; k <= numPointsOld; k++ ) {
-                bPoint2 pOld( oIntersectionPoints [ k - 1 ].at(1), oIntersectionPoints [ k - 1 ].at(2) );
+            for ( FloatArray &pInterSect: oIntersectionPoints ) {
+                bPoint2 pOld( pInterSect.at(1), pInterSect.at(2) );
 
                 if ( bDist(pOld, pNew) < distTol ) {
                     alreadyFound = true;
@@ -1155,10 +1136,7 @@ void PolygonLine :: computeIntersectionPoints(Element *element, std :: vector< F
             }
 
             if ( !alreadyFound ) {
-                //				int sz = intersecPoints->giveSize();
-                //				intersecPoints->put( sz + 1, oneLineIntersects.at(j) );
-                //				oneLineIntersects.unlink(j);
-                oIntersectionPoints.push_back(oneLineIntersects [ j - 1 ]);
+                oIntersectionPoints.push_back(interSect);
             }
         }
     }
@@ -1198,18 +1176,7 @@ void PolygonLine :: computeIntersectionPoints(Line *l, std :: vector< FloatArray
         if ( d < distTol ) {
             if ( !foundOverlap ) {
                 foundOverlap = true;
-
-
-                //				int sz = intersecPoints->giveSize();
-                //				FloatArray *pos = new FloatArray(2);
-                //				pos->at(1) = intersectionPoint.x();
-                //				pos->at(2) = intersectionPoint.y();
-                //				intersecPoints->put( sz + 1, pos );
-
-                FloatArray pos(2);
-                pos.at(1) = intersectionPoint.x();
-                pos.at(2) = intersectionPoint.y();
-                oIntersectionPoints.push_back(pos);
+                oIntersectionPoints.emplace_back({intersectionPoint.x(), intersectionPoint.y()});
             }
         }
     }
@@ -1305,7 +1272,6 @@ void PolygonLine :: printVTK(int iTStepIndex, int iLineIndex)
 
 IRResultType PointSwarm :: initializeFrom(InputRecord *ir)
 {
-    const char *__proc = "initializeFrom"; // Required by IR_GIVE_FIELD macro
     IRResultType result; // Required by IR_GIVE_FIELD macro
     IntArray idList;
 

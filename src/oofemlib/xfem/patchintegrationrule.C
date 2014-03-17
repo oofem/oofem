@@ -221,7 +221,7 @@ PatchIntegrationRule :: saveContext(DataStream *stream, ContextMode mode, void *
      *
      *      patch->saveContext(stream, mode, obj);
      *  } else {
-     *      OOFEM_ERROR("saveContex : can't store NULL patch");
+     *      OOFEM_ERROR("can't store NULL patch");
      *  }
      */
     return CIO_OK;
@@ -240,7 +240,7 @@ PatchIntegrationRule :: restoreContext(DataStream *stream, ContextMode mode, voi
     contextIOResultType iores;
 
     if ( stream == NULL ) {
-        OOFEM_ERROR("restoreContex : can't write into NULL stream");
+        OOFEM_ERROR("can't write into NULL stream");
     }
 
     if ( ( iores = IntegrationRule :: restoreContext(stream, mode, obj) ) != CIO_OK ) {

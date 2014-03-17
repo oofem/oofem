@@ -45,8 +45,6 @@ namespace oofem {
 PrimaryField :: PrimaryField(EngngModel *a, int idomain,
                              FieldType ft, EquationID ut, int nHist) : Field(ft), solutionVectors(nHist + 1), solStepList(nHist + 1)
 {
-    FloatArray *sv;
-
     this->actualStepNumber = -999;
     this->actualStepIndx = 0;
     this->nHistVectors = nHist;
@@ -54,11 +52,6 @@ PrimaryField :: PrimaryField(EngngModel *a, int idomain,
 
     emodel = a;
     domainIndx = idomain;
-
-    for ( int i = 0; i <= nHist; i++ ) {
-        sv = new FloatArray();
-        solutionVectors.put(i + 1, sv);
-    }
 }
 
 PrimaryField :: ~PrimaryField()
@@ -78,7 +71,7 @@ PrimaryField :: initialize(ValueModeType mode, TimeStep *tStep, FloatArray &answ
         answer = * ( this->giveSolutionVector(tStep) );
         answer.subtract( * this->giveSolutionVector(indxm1) );
     } else {
-        _error2( "giveUnknownValue: unsupported mode %s", __ValueModeTypeToString(mode) );
+        OOFEM_ERROR("unsupported mode %s", __ValueModeTypeToString(mode));
     }
 }
 
@@ -88,7 +81,7 @@ PrimaryField :: giveUnknownValue(Dof *dof, ValueModeType mode, TimeStep *tStep)
 {
     int eq = dof->giveEquationNumber( emodel->giveUnknownNumberingScheme(this->ut) );
     if ( eq == 0 ) {
-        _error("giveUnknownValue: invalid equation number");
+        OOFEM_ERROR("invalid equation number");
     }
 
     if ( mode == VM_Total ) {
@@ -97,7 +90,7 @@ PrimaryField :: giveUnknownValue(Dof *dof, ValueModeType mode, TimeStep *tStep)
         int indxm1 = this->resolveIndx(tStep, -1);
         return ( this->giveSolutionVector(tStep)->at(eq) - this->giveSolutionVector(indxm1)->at(eq) );
     } else {
-        _error("giveUnknownValue: unsupported mode");
+        OOFEM_ERROR("unsupported mode");
     }
 
     return 0.0;
@@ -136,7 +129,7 @@ PrimaryField :: __evaluateAt(FloatArray &answer, FloatArray &coords,
     SpatialLocalizer *sl = domain->giveSpatialLocalizer();
     // locate background element
     if ( ( bgelem = sl->giveElementContainingPoint(coords) ) == NULL ) {
-        //_error ("PrimaryField::evaluateAt: point not found in domain\n");
+        //_error("PrimaryField::evaluateAt: point not found in domain\n");
         return 1;
     }
 
@@ -150,7 +143,7 @@ PrimaryField :: __evaluateAt(FloatArray &answer, FloatArray &coords,
             return interface->EIPrimaryFieldI_evaluateFieldVectorAt(answer, * this, coords, elemDofId, mode, tStep);
         }
     } else {
-        _error("ScalarPrimaryField::operator(): background element does not support EIPrimaryFiledInterface\n");
+        OOFEM_ERROR("background element does not support EIPrimaryFiledInterface\n");
         return 1; // failed
     }
 }
@@ -182,9 +175,9 @@ PrimaryField :: giveSolutionVector(int i)
 {
     FloatArray *answer = NULL;
     if ( ( i >= 1 ) && ( i <= ( nHistVectors + 1 ) ) ) {
-        answer = solutionVectors.at(i); // alist 1-based access
+        answer = &solutionVectors[i-1];
     } else {
-        _error("giveSolutionVector: index out of range");
+        OOFEM_ERROR("index out of range");
     }
 
     return answer;
@@ -200,7 +193,7 @@ PrimaryField :: resolveIndx(TimeStep *tStep, int shift)
     if ( ( relPos >= 0 ) && ( relPos <= nHistVectors ) ) {
         return ( actualStepIndx + relPos ) % ( nHistVectors + 1 ) + 1;
     } else {
-        _error3("resolveIndx: History not available for relative step no. %d to step no. %d", shift, tStepo);
+        OOFEM_ERROR("History not available for relative step no. %d to step no. %d", shift, tStepo);
     }
 
     return 0;
@@ -216,7 +209,7 @@ PrimaryField :: advanceSolution(TimeStep *tStep)
         return;
     }
     if ( ( actualStepNumber >= 0 ) && ( actualStepNumber + 1 != tStep->giveNumber() ) ) {
-        _error("advanceSolution: can not advance due to steps skipped");
+        OOFEM_ERROR("can not advance due to steps skipped");
     }
 
     actualStepIndx = ( actualStepIndx > 0 ) ? actualStepIndx - 1 : nHistVectors;
@@ -243,7 +236,7 @@ PrimaryField :: saveContext(DataStream *stream, ContextMode mode)
     }
 
     for ( int i = 0; i <= nHistVectors; i++ ) {
-        if ( ( iores = solutionVectors.at(i + 1)->storeYourself(stream, mode) ) != CIO_OK ) {
+        if ( ( iores = solutionVectors[i].storeYourself(stream, mode) ) != CIO_OK ) {
             THROW_CIOERR(iores);
         }
     }
@@ -285,7 +278,7 @@ PrimaryField :: restoreContext(DataStream *stream, ContextMode mode)
     }
 
     for ( int i = 0; i <= nHistVectors; i++ ) {
-        if ( ( iores = solutionVectors.at(i + 1)->restoreYourself(stream, mode) ) != CIO_OK ) {
+        if ( ( iores = solutionVectors[i].restoreYourself(stream, mode) ) != CIO_OK ) {
             THROW_CIOERR(iores);
         }
     }

@@ -51,7 +51,7 @@ LevelSetPCS :: initialize()
 {
     if ( 0 ) {
         if ( previousLevelSetValues.giveSize() != domain->giveNumberOfDofManagers() ) {
-            OOFEM_ERROR("LevelSetPCS::initialize size of levelSetValues does not match number of dof managers");
+            OOFEM_ERROR("size of levelSetValues does not match number of dof managers");
         }
     } else {
         if ( initialRefMatFlag ) {
@@ -74,7 +74,6 @@ LevelSetPCS :: initialize()
 IRResultType
 LevelSetPCS :: initializeFrom(InputRecord *ir)
 {
-    const char *__proc = "initializeFrom"; // Required by IR_GIVE_FIELD macro
     IRResultType result;
 
     IR_GIVE_OPTIONAL_FIELD(ir, previousLevelSetValues, _IFT_LevelSetPCS_levelSetValues);
@@ -125,7 +124,7 @@ LevelSetPCS :: initializeFrom(InputRecord *ir)
 void
 LevelSetPCS :: giveInputRecord(DynamicInputRecord &input)
 {
-    _error("giveInputRecord not implemented yet");
+    OOFEM_ERROR("giveInputRecord not implemented yet");
     //input.setField(this->..., _IFT_..._...);
 }
 
@@ -172,9 +171,9 @@ LevelSetPCS :: updatePosition(TimeStep *tStep)
                 double v;
                 // get velocity in inode
                 if ( nsd == 2 ) {
-                    mask.setValues(2, V_u, V_v);
+                    mask = {V_u, V_v};
                 } else if ( nsd == 3 ) {
-                    mask.setValues(3, V_u, V_v, V_w);
+                    mask = {V_u, V_v, V_w};
                 }
 
                 domain->giveDofManager(inode)->giveUnknownVector( un, mask, VM_Total, tStep->givePreviousStep() );
@@ -278,7 +277,7 @@ LevelSetPCS :: giveMaterialMixtureAt(FloatArray &answer, FloatArray &position)
                 answer.at(2) = 1.0;
             }
         } else {
-            OOFEM_ERROR("LevelSetPCS::giveMaterialMixtureAt: computeLocalCoordinates failed");
+            OOFEM_ERROR("computeLocalCoordinates failed");
         }
     } else {
         answer.at(1) = 1.0;
@@ -344,7 +343,7 @@ LevelSetPCS :: reinitialization(TimeStep *tStep)
         this->FMMReinitialization(ls1);
         levelSetValues = ls1;
     } else {
-        OOFEM_ERROR2("LevelSetPCS::reinitialization: unknown reinitialization scheme (%d)", reinit_alg);
+        OOFEM_ERROR("unknown reinitialization scheme (%d)", reinit_alg);
     }
 }
 
@@ -539,7 +538,7 @@ LevelSetPCS :: pcs_stage1(FloatArray &ls, FloatArray &fs, FloatArray &w, TimeSte
                 }
             }
         } else {
-            OOFEM_ERROR2("LevelSetPCS::updatePosition: element %d does not implement LevelSetPCSElementInterfaceType", ie);
+            OOFEM_ERROR("element %d does not implement LevelSetPCSElementInterfaceType", ie);
         }
     } // end loop over elements
 }
@@ -581,21 +580,19 @@ LevelSetPCS :: FMMReinitialization(FloatArray &dmanValues)
     // tag points with boundary value as known
     // then tag as trial all points that are one grid point away
     // finally tag as far all other grid points
-    int i, j, jnode, enodes, __pos, __neg, nelem = domain->giveNumberOfElements();
+    int jnode, enodes, __pos, __neg, nelem = domain->giveNumberOfElements();
     double _lsval;
-    Element *ie;
     std :: list< int >bcDofMans;
-    std :: list< int > :: iterator it;
 
     dmanValues.resize( domain->giveNumberOfDofManagers() );
     // here we loop over elements and identify those, that have zero level set
     // then nodes belonging to these elements are boundary ones (with known distance)
-    for ( i = 1; i <= nelem; i++ ) {
-        ie = domain->giveElement(i);
+    for ( int i = 1; i <= nelem; i++ ) {
+        Element *ie = domain->giveElement(i);
         enodes = ie->giveNumberOfDofManagers();
         __pos = 0;
         __neg = 0;       // count positive and negative level set values in element nodes
-        for ( j = 1; j <= enodes; j++ ) {
+        for ( int j = 1; j <= enodes; j++ ) {
             _lsval = this->giveLevelSetDofManValue( ie->giveDofManagerNumber(j) );
             if ( _lsval > 0.0 ) {
                 __pos++;
@@ -609,7 +606,7 @@ LevelSetPCS :: FMMReinitialization(FloatArray &dmanValues)
         if ( ( __pos && __neg ) || ( __pos + __neg < enodes ) ) {
             // zero level set within element
             // we have to tag element nodes as known and compute their boundary value
-            for ( j = 1; j <= enodes; j++ ) {
+            for ( int j = 1; j <= enodes; j++ ) {
                 // simplified (here we use original level set values)
                 jnode = ie->giveDofManagerNumber(j);
                 if ( ( dmanValues.at(jnode) = this->giveLevelSetDofManValue(jnode) ) >= 0. ) {
@@ -625,8 +622,8 @@ LevelSetPCS :: FMMReinitialization(FloatArray &dmanValues)
     // fast marching for positive level set values
     fmm.solve(dmanValues, bcDofMans, 1.0);
     // revert bcDofMans signs
-    for ( it = bcDofMans.begin(); it != bcDofMans.end(); ++it ) {
-        * it = -* it;
+    for ( int &node: bcDofMans ) {
+        node = -node;
     }
 
     // fast marching for negative level set values

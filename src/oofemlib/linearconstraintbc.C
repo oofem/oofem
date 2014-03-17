@@ -62,7 +62,6 @@ LinearConstraintBC :: LinearConstraintBC(int n, Domain *d) : ActiveBoundaryCondi
 IRResultType LinearConstraintBC :: initializeFrom(InputRecord *ir)
 {
     ActiveBoundaryCondition :: initializeFrom(ir);
-    const char *__proc = "initializeFrom";
     IRResultType result;
     rhsTf = 0;
 
@@ -71,7 +70,7 @@ IRResultType LinearConstraintBC :: initializeFrom(InputRecord *ir)
     IR_GIVE_FIELD(ir, dofmans, _IFT_LinearConstraintBC_dofmans);
     IR_GIVE_FIELD(ir, dofs, _IFT_LinearConstraintBC_dofs);
     if ( weights.giveSize() != dofmans.giveSize() ) {
-        OOFEM_ERROR3( "Size mismatch, weights %d and dofmans %d", weights.giveSize(), dofmans.giveSize() );
+        OOFEM_ERROR("Size mismatch, weights %d and dofmans %d", weights.giveSize(), dofmans.giveSize());
     }
     IR_GIVE_OPTIONAL_FIELD(ir, weightsTf, _IFT_LinearConstraintBC_weightsfuncs);
     IR_GIVE_OPTIONAL_FIELD(ir, rhsTf, _IFT_LinearConstraintBC_rhsfuncs);

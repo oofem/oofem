@@ -60,7 +60,6 @@ Skyline :: Skyline(int n) : SparseMtrx(n, n)
     // skyline is square mtrx, so size is n,n
     //
     nwk          = 0;
-    adr          = NULL;
     mtrx         = NULL;
     isFactorized = false;
 }
@@ -71,7 +70,6 @@ Skyline :: Skyline() : SparseMtrx()
     // Constructor. Creates a skyline of size 0.
     // nRows = nColumns = 0;  // set by SparseMtrx constructor
     nwk          = 0;
-    adr          = NULL;
     mtrx         = NULL;
     isFactorized = false;
 }
@@ -82,7 +80,6 @@ Skyline :: ~Skyline()
     // Destructor.
     if ( this->giveNumberOfRows() ) {
         free(mtrx);
-        delete(adr);
     }
 }
 
@@ -98,7 +95,7 @@ Skyline :: at(int i, int j)
 #ifdef DEBUG
     // check size
     if ( ( i > this->giveNumberOfRows() ) || ( j > this->giveNumberOfRows() ) ) {
-        OOFEM_ERROR3("Skyline::at : dimension mismatch - accessing value at (%d,%d)", i, j);
+        OOFEM_ERROR("dimension mismatch - accessing value at (%d,%d)", i, j);
     }
 
 #endif
@@ -109,11 +106,11 @@ Skyline :: at(int i, int j)
         j = k;
     }
 
-    d1 = this->adr->at(j);
+    d1 = this->adr.at(j);
     ind = d1 + ( j - i );
 
-    if ( ( adr->at(j + 1) - adr->at(j) ) <= ( j - i ) ) {
-        OOFEM_ERROR3("Skyline::at : request for element which is not in sparse mtrx (%d,%d)", i, j);
+    if ( ( adr.at(j + 1) - adr.at(j) ) <= ( j - i ) ) {
+        OOFEM_ERROR("request for element which is not in sparse mtrx (%d,%d)", i, j);
         //
         // NOTE:
         //
@@ -139,7 +136,7 @@ Skyline :: at(int i, int j) const
 #ifdef DEBUG
     // check size
     if ( ( i > this->giveNumberOfRows() ) || ( j > this->giveNumberOfRows() ) ) {
-        OOFEM_ERROR3("Skyline::at : dimension mismatch, when accessing value at (%d,%d)", i, j);
+        OOFEM_ERROR("dimension mismatch, when accessing value at (%d,%d)", i, j);
     }
 
 #endif
@@ -150,11 +147,11 @@ Skyline :: at(int i, int j) const
         j = k;
     }
 
-    d1 = this->adr->at(j);
+    d1 = this->adr.at(j);
     ind = d1 + ( j - i );
 
-    if ( ( adr->at(j + 1) - adr->at(j) ) <= ( j - i ) ) {
-        OOFEM_ERROR3("Skyline::at : request for element which is not in sparse mtrx (%d,%d)", i, j);
+    if ( ( adr.at(j + 1) - adr.at(j) ) <= ( j - i ) ) {
+        OOFEM_ERROR("request for element which is not in sparse mtrx (%d,%d)", i, j);
         //
         // NOTE:
         //
@@ -179,7 +176,7 @@ Skyline :: isAllocatedAt(int i, int j) const
         j = k;
     }
 
-    if ( ( adr->at(j + 1) - adr->at(j) ) <= ( j - i ) ) {
+    if ( ( adr.at(j + 1) - adr.at(j) ) <= ( j - i ) ) {
         answer = 0;
     }
 
@@ -200,8 +197,8 @@ Skyline :: toFloatMatrix(FloatMatrix &answer) const
     answer.zero();
 
     for ( int j = 1; j <= size; j++ ) {
-        d1 = adr->at(j);
-        d2 = adr->at(j + 1);
+        d1 = adr.at(j);
+        d2 = adr.at(j + 1);
         pk = j;
         for ( int i = d1; i < d2; i++ ) {
             answer.at(pk, j) = mtrx [ i ];
@@ -220,7 +217,7 @@ int Skyline :: assemble(const IntArray &loc, const FloatMatrix &mat)
 #  ifdef DEBUG
     int dim = mat.giveNumberOfRows();
     if ( dim != loc.giveSize() ) {
-        OOFEM_ERROR("Skyline::assemble : dimension of 'mat' and 'loc' mismatch");
+        OOFEM_ERROR("dimension of 'mat' and 'loc' mismatch");
     }
 
 #  endif
@@ -243,7 +240,7 @@ int Skyline :: assemble(const IntArray &loc, const FloatMatrix &mat)
                 continue;
             }
 
-            mtrx [ adr->at(ac2) + ac2 - ac1 ] += mat.at(i, j);
+            mtrx [ adr.at(ac2) + ac2 - ac1 ] += mat.at(i, j);
         }
     }
 
@@ -293,8 +290,8 @@ FloatArray *Skyline :: backSubstitutionWith(FloatArray &y) const
     /************************************/
     n = size;
     for ( k = 2; k <= n; k++ ) {
-        ack = adr->at(k);
-        ack1 = adr->at(k + 1);
+        ack = adr.at(k);
+        ack1 = adr.at(k + 1);
         s = 0.0;
         acs = k - ( ack1 - ack ) + 1;
         for ( i = ack1 - 1; i > ack; i-- ) {
@@ -309,13 +306,13 @@ FloatArray *Skyline :: backSubstitutionWith(FloatArray &y) const
     /*  zpetny chod  */
     /*****************/
     for ( k = 1; k <= n; k++ ) {
-        acs = adr->at(k);
+        acs = adr.at(k);
         y.at(k) /= mtrx [ acs ];
     }
 
     for ( k = n; k > 0; k-- ) {
-        ack = adr->at(k);
-        ack1 = adr->at(k + 1);
+        ack = adr.at(k);
+        ack1 = adr.at(k + 1);
         solution.at(k) = y.at(k);
         acs = k - ( ack1 - ack ) + 1;
         for ( i = ack1 - 1; i > ack; i-- ) {
@@ -328,21 +325,21 @@ FloatArray *Skyline :: backSubstitutionWith(FloatArray &y) const
     return & y;
 }
 
-int Skyline :: setInternalStructure(IntArray *a)
+int Skyline :: setInternalStructure(IntArray &a)
 {
     // allocates and built structure according to given
     // array of maximal column heights
     //
-    adr = new IntArray(*a);
-    int n = a->giveSize();
-    nwk = adr->at(n); // check
+    adr = a;
+    int n = a.giveSize();
+    nwk = adr.at(n); // check
     if ( mtrx ) {
         free(mtrx);
     }
 
     mtrx = ( double * ) calloc( nwk, sizeof( double ) );
     if ( !mtrx ) {
-        OOFEM_ERROR2("Skyline :: setInternalStructure - Can't allocate: %d", nwk);
+        OOFEM_ERROR("Can't allocate: %d", nwk);
     }
     nRows = nColumns = n - 1;
 
@@ -369,20 +366,17 @@ int Skyline :: buildInternalStructure(EngngModel *eModel, int di, EquationID ut,
         if ( mtrx ) {
             delete mtrx;
         }
-        if ( adr ) {
-            delete adr;
-        }
         mtrx = NULL;
-        adr = NULL;
+        adr.clear();
         return true;
     }
 
     IntArray loc;
-    IntArray *mht = new IntArray(neq);
+    IntArray mht(neq);
     Domain *domain = eModel->giveDomain(di);
 
     for ( int j = 1; j <= neq; j++ ) {
-        mht->at(j) = j; // initialize column height, maximum is line number (since it only stores upper triangular)
+        mht.at(j) = j; // initialize column height, maximum is line number (since it only stores upper triangular)
     }
 
     int nelem = domain->giveNumberOfElements();
@@ -402,7 +396,7 @@ int Skyline :: buildInternalStructure(EngngModel *eModel, int di, EquationID ut,
         for ( int j = 1; j <= js; j++ ) {
             int ieq = loc.at(j);
             if ( ieq != 0 ) {
-                mht->at(ieq) = min( maxle, mht->at(ieq) );
+                mht.at(ieq) = min( maxle, mht.at(ieq) );
             }
         }
     }
@@ -428,7 +422,7 @@ int Skyline :: buildInternalStructure(EngngModel *eModel, int di, EquationID ut,
                 for ( int j = 1; j <= kcloc.giveSize(); j++ ) {
                     jj = kcloc.at(j);
                     if ( jj ) {
-                        mht->at(jj) = min( maxle, mht->at(jj) );
+                        mht.at(jj) = min( maxle, mht.at(jj) );
                     }
                 }
             }
@@ -445,19 +439,15 @@ int Skyline :: buildInternalStructure(EngngModel *eModel, int di, EquationID ut,
     // This method also increases column height.
 
 
-    if ( this->adr ) {
-        delete adr;
-    }
-
-    adr = new IntArray(neq + 1);
+    adr.resize(neq + 1);
 
     ac1 = 1;
     for ( int i = 1; i <= neq; i++ ) {
-        adr->at(i) = ac1;
-        ac1 += ( i - mht->at(i) + 1 );
+        adr.at(i) = ac1;
+        ac1 += ( i - mht.at(i) + 1 );
     }
 
-    adr->at(neq + 1) = ac1;
+    adr.at(neq + 1) = ac1;
     nRows = nColumns = neq;
     nwk  = ac1;
     if ( mtrx ) {
@@ -466,10 +456,8 @@ int Skyline :: buildInternalStructure(EngngModel *eModel, int di, EquationID ut,
 
     mtrx = ( double * ) calloc( ac1, sizeof( double ) );
     if ( !mtrx ) {
-        OOFEM_ERROR2("Skyline :: buildInternalStructure - Can't allocate: %d", ac1);
+        OOFEM_ERROR("Can't allocate: %d", ac1);
     }
-
-    delete mht;
 
     // increment version
     this->version++;
@@ -504,13 +492,13 @@ SparseMtrx *Skyline :: factorized()
 
     for ( int k = 2; k <= n; k++ ) {
         /*  smycka pres sloupce matice  */
-        ack = adr->at(k);
-        ack1 = adr->at(k + 1);
+        ack = adr.at(k);
+        ack1 = adr.at(k + 1);
         acrk = k - ( ack1 - ack ) + 1;
         for ( int i = acrk + 1; i < k; i++ ) {
             /*  smycka pres prvky jednoho sloupce matice  */
-            aci = adr->at(i);
-            aci1 = adr->at(i + 1);
+            aci = adr.at(i);
+            aci1 = adr.at(i + 1);
             acri = i - ( aci1 - aci ) + 1;
             if ( acri < acrk ) {
                 ac = acrk;
@@ -534,7 +522,7 @@ SparseMtrx *Skyline :: factorized()
         s = 0.0;
         for ( int i = ack1 - 1; i > ack; i-- ) {
             g = mtrx [ i ];
-            acs = adr->at(acrk);
+            acs = adr.at(acrk);
             acrk++;
             mtrx [ i ] /= mtrx [ acs ];
             s += mtrx [ i ] * g;
@@ -569,7 +557,7 @@ void Skyline :: times(const FloatArray &x, FloatArray &answer) const
     // first check sizes
     //
     if ( this->giveNumberOfRows() != ( n = x.giveSize() ) ) {
-        OOFEM_ERROR("Skyline::times : size mismatch");
+        OOFEM_ERROR("size mismatch");
     }
 
     answer.resize(n);
@@ -577,8 +565,8 @@ void Skyline :: times(const FloatArray &x, FloatArray &answer) const
 
     acc = 1;
     for ( int i = 1; i <= n; i++ ) {
-        aci = adr->at(i);
-        aci1 = adr->at(i + 1);
+        aci = adr.at(i);
+        aci1 = adr.at(i + 1);
         ac = i - ( aci1 - aci ) + 1;
         s = 0.0;
         acb = ac;
@@ -653,32 +641,26 @@ void Skyline :: zero()
 SparseMtrx *Skyline :: GiveCopy() const
 {
     Skyline *answer;
-    IntArray *adr1;
     double *mtrx1;
     int neq;
 
     neq = this->giveNumberOfRows();
-    adr1 = new IntArray(neq + 1);
-
-    for ( int i = 1; i <= neq + 1; i++ ) {
-        adr1->at(i) = this->adr->at(i);
-    }
 
     mtrx1 = ( double * ) malloc( this->nwk * sizeof( double ) );
     if ( !mtrx1 ) {
-        OOFEM_ERROR2("Skyline :: buildInternalStructure - Can't allocate: %d", this->nwk);
+        OOFEM_ERROR("Can't allocate: %d", this->nwk);
     }
 
     for ( int i = 0; i < this->nwk; i++ ) {
         mtrx1 [ i ] = this->mtrx [ i ];
     }
 
-    answer = new Skyline(neq, this->nwk, mtrx1, adr1);
+    answer = new Skyline(neq, this->nwk, mtrx1, adr);
 
     return answer;
 }
 
-Skyline :: Skyline(int neq, int nwk1, double *mtrx1, IntArray *adr1) : SparseMtrx(neq, neq)
+Skyline :: Skyline(int neq, int nwk1, double *mtrx1, const IntArray &adr1) : SparseMtrx(neq, neq)
 {
     // constructor
     // sets internal member data to given parameters
@@ -717,8 +699,8 @@ void Skyline :: rbmodes(FloatMatrix &r, int &nse, IntArray &se,
 
         /*  cyklus pres radky, ktere maji byt odkondezovany  */
         for ( i = 2; i <= neq; i++ ) {
-            lj = adr->at(i);
-            uj = adr->at(i + 1) - 2;
+            lj = adr.at(i);
+            uj = adr.at(i + 1) - 2;
 
             /*  minimalni radkovy index v i tem sloupci  */
             mi = i - ( uj - lj ) - 1;
@@ -726,8 +708,8 @@ void Skyline :: rbmodes(FloatMatrix &r, int &nse, IntArray &se,
 
             /*  cyklus pres mimodiagonalni prvky zpracovavaneho radku  */
             for ( jj = uj; jj > lj; jj-- ) {
-                li = adr->at(j);
-                ui = adr->at(j + 1) - 1;
+                li = adr.at(j);
+                ui = adr.at(j + 1) - 1;
                 k = j - ( ui - li );
 
                 /*  vyber nizsiho sloupce a tim urceni rozsahu cyklu  */
@@ -755,7 +737,7 @@ void Skyline :: rbmodes(FloatMatrix &r, int &nse, IntArray &se,
             j = mi;
             for ( jj = uj + 1; jj > lj; jj-- ) {
                 g = mtrx [ jj ];
-                mtrx [ jj ] /= mtrx [ adr->at(j) ];
+                mtrx [ jj ] /= mtrx [ adr.at(j) ];
                 s += mtrx [ jj ] * g;
                 j++;
             }
@@ -781,8 +763,8 @@ void Skyline :: rbmodes(FloatMatrix &r, int &nse, IntArray &se,
 
                 /*  vynulovani prvku radku v poli a  */
                 for ( j = i + 1; j <= neq; j++ ) {
-                    if ( j - ( adr->at(j + 1) - adr->at(j) ) < i ) {
-                        mtrx [ adr->at(j) + j - i ] = 0.0;
+                    if ( j - ( adr.at(j + 1) - adr.at(j) ) < i ) {
+                        mtrx [ adr.at(j) + j - i ] = 0.0;
                     }
                 }
             }
@@ -795,8 +777,8 @@ void Skyline :: rbmodes(FloatMatrix &r, int &nse, IntArray &se,
         /*  navrat puvodne vynulovanych slozek  */
         ise = nse;
         for ( i = 1; i <= ise; i++ ) {
-            uj = adr->at(se.at(i) + 1) - 1;
-            lj = adr->at( se.at(i) );
+            uj = adr.at(se.at(i) + 1) - 1;
+            lj = adr.at( se.at(i) );
             ib = adrb.at(i);
             for ( jj = uj; jj > lj; jj-- ) {
                 mtrx [ jj ] = b.at(ib);
@@ -817,8 +799,8 @@ void Skyline :: rbmodes(FloatMatrix &r, int &nse, IntArray &se,
             for ( j = neq; j > 0; j-- ) {
                 r.at(se.at(i), i) = 1.0;
                 s = r.at(j, i);
-                uk = adr->at(j + 1) - 1;
-                lk = adr->at(j);
+                uk = adr.at(j + 1) - 1;
+                lk = adr.at(j);
                 k = j - ( uk - lk );
                 for ( kk = uk; kk > lk; kk-- ) {
                     r.at(k, i) -= mtrx [ kk ] * s;
@@ -872,8 +854,8 @@ void Skyline :: ldl_feti_sky(FloatArray &x, FloatArray &y,
     /*******************************************************/
     k = 0;
     for ( i = 1; i <= neq; i++ ) {
-        lj = adr->at(i);
-        uj = adr->at(i + 1) - 1;
+        lj = adr.at(i);
+        uj = adr.at(i + 1) - 1;
         ii = i - uj + lj;
         s = 0.0;
         for ( j = uj; j > lj; j-- ) {
@@ -919,7 +901,7 @@ void Skyline :: ldl_feti_sky(FloatArray &x, FloatArray &y,
     /*  deleni prvku vektoru prave strany diagonalnimi prvky  */
     /**********************************************************/
     for ( i = 1; i <= neq; i++ ) {
-        y.at(i) /= mtrx [ adr->at(i) ];
+        y.at(i) /= mtrx [ adr.at(i) ];
     }
 
     /*****************************************************/
@@ -928,8 +910,8 @@ void Skyline :: ldl_feti_sky(FloatArray &x, FloatArray &y,
     /*****************************************************/
     k = nse;
     for ( i = neq; i > 0; i-- ) {
-        lj = adr->at(i);
-        uj = adr->at(i + 1);
+        lj = adr.at(i);
+        uj = adr.at(i + 1);
         if ( k > 0 ) {
             if ( se.at(k) == i ) {
                 y.at(i) = 1.0;
