@@ -82,6 +82,8 @@ protected:
     /// This flag turns into 1 and remains 1 when the trace of the damage tensor is >1 in compression (tr(strainTensor)<0)
     int flag;
     int tempFlag;
+    double storedFactor;
+    double tempStoredFactor;
 
 #ifdef keep_track_of_dissipated_energy
     /// Density of total work done by stresses on strain increments.
@@ -129,6 +131,14 @@ public:
     void setTempFlag(int newflag) { tempFlag = newflag; }
     /// Returns the value of the temporary value of flag.
     int giveTempFlag() { return tempFlag; }
+    /// Returns the last Stored Factor.
+    double giveStoredFactor() { return storedFactor; }
+    /// Sets the Stored Factor to given value .
+    void setStoredFactor(double newStoredFactor) { storedFactor = newStoredFactor; }
+    /// Returns the last Temp Stored Factor.
+    double giveTempStoredFactor() { return tempStoredFactor; }
+    /// Sets the Temp Stored Factor to given value .
+    void setTempStoredFactor(double newTempStoredFactor) { tempStoredFactor = newTempStoredFactor; }
 
 
 
@@ -215,6 +225,8 @@ public:
     void correctBigValues(FloatMatrix &matrix);
 
     double computeTraceD(FloatMatrix tempDamageTensor, FloatMatrix strainTensor, GaussPoint *gp);
+
+    double computeCorrectionFactor(FloatMatrix tempDamageTensor, FloatMatrix strainTensor, GaussPoint *gp);
 
     virtual void give3dMaterialStiffnessMatrix(FloatMatrix &answer,
                                                MatResponseMode mode,
