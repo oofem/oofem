@@ -64,9 +64,6 @@ int DiscontinuousSegmentIntegrationRule::SetUpPointsOnLine(int iNumPointsPerSeg,
     ////////////////////////////////////////////
 
     double totalLength = mXS.distance(mXE);
-//    for(size_t i = 0; i < mSegments.size(); i++) {
-//    	totalLength += mSegments[i].giveVertex(1).distance(mSegments[i].giveVertex(2));
-//    }
 
     FEI1dLin linInterp(1);
 
@@ -74,16 +71,6 @@ int DiscontinuousSegmentIntegrationRule::SetUpPointsOnLine(int iNumPointsPerSeg,
 
     // Loop over line segments
     for(size_t i = 0; i < mSegments.size(); i++) {
-        // TODO: Probably unnecessary to allocate here
-        const FloatArray **coords = new const FloatArray * [ mSegments [ i ].giveNrVertices() ];
-        // this we should put into the function before
-        for ( int k = 0; k < mSegments [ i ].giveNrVertices(); k++ ) {
-            coords [ k ] = new FloatArray( ( mSegments [ i ].giveVertex ( k + 1 ) ) );
-        }
-
-        // Can not be used because it writes to the start of the array instead of appending.
-        //		int nPointsTri = GaussIntegrationRule :: SetUpPointsOnTriangle(nPoints, mode);
-
         for ( int j = 0; j < iNumPointsPerSeg; j++ ) {
             FloatArray global;
             GaussPoint * &gp = this->gaussPointArray [ pointsPassed ];
@@ -92,10 +79,6 @@ int DiscontinuousSegmentIntegrationRule::SetUpPointsOnLine(int iNumPointsPerSeg,
             coord->at(1) = coords_xi.at(j + 1);
             gp = new GaussPoint(this, pointsPassed + 1, coord, weights.at ( j + 1 ), mode);
 
-
-
-//            linInterp.local2global( global, * gp->giveCoordinates(),
-//                                    FEIVertexListGeometryWrapper(mSegments [ i ].giveNrVertices(), coords) );
 
             global.resize( mXS.giveSize() );
             for(int m = 1; m <= mXS.giveSize(); m++) {
@@ -106,29 +89,15 @@ int DiscontinuousSegmentIntegrationRule::SetUpPointsOnLine(int iNumPointsPerSeg,
 
 
             FloatArray local;
-//            this->elem->computeLocalCoordinates(local, global);
+            // Local coordinate along the line segment
             double xi = 2.0*( global.distance(mXS)/totalLength - 0.5 );
-//            double xi = global.distance(mXS)/totalLength;
             local.setValues(1, xi);
             gp->setCoordinates(local);
 
-
-
-
-            double refElArea = 1.0;//this->elem->giveParentElSize();
-
-            gp->setWeight( refElArea * gp->giveWeight() * mSegments [ i ].giveLength() / totalLength); // update integration weight
-
+            gp->setWeight( 1.0 * gp->giveWeight() * mSegments [ i ].giveLength() / totalLength); // update integration weight
 
             pointsPassed++;
         }
-
-        for ( int k = 0; k < mSegments [ i ].giveNrVertices(); k++ ) {
-            delete coords [ k ];
-        }
-
-        delete [] coords;
-
     }
 
     numberOfIntegrationPoints = pointsPassed;
