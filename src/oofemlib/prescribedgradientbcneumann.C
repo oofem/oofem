@@ -72,16 +72,6 @@ void PrescribedGradientBCNeumann::assembleVector(FloatArray &answer, TimeStep *t
                             CharType type, ValueModeType mode,
                             const UnknownNumberingScheme &s, FloatArray *eNorm)
 {
-#if 0
-    // Boundary condition only acts on the momentumbalance part.
-    if ( eid == EID_MomentumBalance_ConservationEquation ) {
-        eid = EID_MomentumBalance;
-    }
-
-    if ( eid != EID_MomentumBalance ) {
-        return;
-    }
-#endif
     Set *setPointer = this->giveDomain()->giveSet(this->set);
     const IntArray &boundaries = setPointer->giveBoundaryList();
 
@@ -97,8 +87,7 @@ void PrescribedGradientBCNeumann::assembleVector(FloatArray &answer, TimeStep *t
         FloatArray gradVoigt;
         giveGradientVoigt(gradVoigt);
 
-        int nsd = this->domain->giveNumberOfSpatialDimensions();
-        stressLoad.beScaled(-rve_size/double(nsd), gradVoigt);
+        stressLoad.beScaled(-rve_size, gradVoigt);
         answer.assemble(stressLoad, sigma_loc);
 
     } else if ( type == InternalForcesVector ) {
@@ -118,16 +107,18 @@ void PrescribedGradientBCNeumann::assembleVector(FloatArray &answer, TimeStep *t
 
             // Fetch the element information;
             e->giveInterpolation()->boundaryGiveNodes(bNodes, boundary);
-//            e->giveBoundaryLocationArray(loc, bNodes, eid, s, & masterDofIDs);
 
-//            IntArray elNodes = e->giveDofManArray();
             IntArray elNodes(e->giveNumberOfDofManagers());
             for(int j = 1; j <= elNodes.giveSize(); j++) {
             	elNodes.at(j) = j;
             }
             e->giveBoundaryLocationArray(loc, elNodes, eid, s, & masterDofIDs);
 
-//            e->computeBoundaryVectorOf(bNodes, eid, mode, tStep, e_u);
+            // Here, we could use only the nodes actually located on the boundary, but we don't.
+            // Instead, we use all nodes belonging to the element, which is allowed because the
+            // basis functions related to the interior nodes will be zero on the boundary.
+            // Obviously, this is less efficient, so why do we want to do it this way?
+            // Because it is easier when XFEM enrichments are present. /ES
             e->computeBoundaryVectorOf(elNodes, eid, mode, tStep, e_u);
 
             this->integrateTangent(Ke, e, boundary);
@@ -153,8 +144,6 @@ void PrescribedGradientBCNeumann::assembleVector(FloatArray &answer, TimeStep *t
 void PrescribedGradientBCNeumann::assemble(SparseMtrx *answer, TimeStep *tStep, EquationID eid,
                       CharType type, const UnknownNumberingScheme &r_s, const UnknownNumberingScheme &c_s)
 {
-//	printf("Entering PrescribedGradientBCNeumann::assemble().\n");
-
     if ( eid == EID_MomentumBalance_ConservationEquation ) {
         eid = EID_MomentumBalance;
     }
@@ -167,7 +156,6 @@ void PrescribedGradientBCNeumann::assemble(SparseMtrx *answer, TimeStep *tStep, 
     if ( type == TangentStiffnessMatrix || type == SecantStiffnessMatrix || type == StiffnessMatrix || type == ElasticStiffnessMatrix ) {
         FloatMatrix Ke, KeT;
         IntArray loc_r, loc_c, sigma_loc_r, sigma_loc_c;
-        IntArray bNodes;
         Set *set = this->giveDomain()->giveSet(this->set);
         const IntArray &boundaries = set->giveBoundaryList();
 
@@ -179,12 +167,11 @@ void PrescribedGradientBCNeumann::assemble(SparseMtrx *answer, TimeStep *tStep, 
             Element *e = this->giveDomain()->giveElement( boundaries.at(pos * 2 - 1) );
             int boundary = boundaries.at(pos * 2);
 
-            // Fetch the element information;
-            e->giveInterpolation()->boundaryGiveNodes(bNodes, boundary);
-//            e->giveBoundaryLocationArray(loc_r, bNodes, eid, r_s);
-//            e->giveBoundaryLocationArray(loc_c, bNodes, eid, c_s);
-
-//            IntArray elNodes = e->giveDofManArray();
+            // Here, we could use only the nodes actually located on the boundary, but we don't.
+            // Instead, we use all nodes belonging to the element, which is allowed because the
+            // basis functions related to the interior nodes will be zero on the boundary.
+            // Obviously, this is less efficient, so why do we want to do it this way?
+            // Because it is easier when XFEM enrichments are present. /ES
             IntArray elNodes(e->giveNumberOfDofManagers());
             for(int j = 1; j <= elNodes.giveSize(); j++) {
             	elNodes.at(j) = j;
@@ -233,10 +220,13 @@ void PrescribedGradientBCNeumann::giveLocationArrays(std :: vector< IntArray > &
         int boundary = boundaries.at(pos * 2);
 
         e->giveInterpolation()->boundaryGiveNodes(bNodes, boundary);
-//        e->giveBoundaryLocationArray(loc_r, bNodes, dofids, r_s);
-//        e->giveBoundaryLocationArray(loc_c, bNodes, dofids, c_s);
 
-//        IntArray elNodes = e->giveDofManArray();
+
+        // Here, we could use only the nodes actually located on the boundary, but we don't.
+        // Instead, we use all nodes belonging to the element, which is allowed because the
+        // basis functions related to the interior nodes will be zero on the boundary.
+        // Obviously, this is less efficient, so why do we want to do it this way?
+        // Because it is easier when XFEM enrichments are present. /ES
         IntArray elNodes(e->giveNumberOfDofManagers());
         for(int j = 1; j <= elNodes.giveSize(); j++) {
         	elNodes.at(j) = j;
@@ -327,7 +317,6 @@ void PrescribedGradientBCNeumann::integrateTangent(FloatMatrix &oTangent, Elemen
             	edgeNodesVec.push_back(edgeNodes.at(j));
             }
 
-//            xfemElInt->XfemElementInterface_createEnrNmatrixAt(nMatrix, locCoord, *e, edgeNodesVec);
             xfemElInt->XfemElementInterface_createEnrNmatrixAt(nMatrix, locCoord, *e);
 
             FloatMatrix NmatrixAlt;
@@ -350,9 +339,9 @@ void PrescribedGradientBCNeumann::integrateTangent(FloatMatrix &oTangent, Elemen
             E_n.at(2, 2) = normal.at(2);
 
             E_n.at(3, 1) = normal.at(2);
-            E_n.at(3, 2) = 0.0;//normal.at(2);
+            E_n.at(3, 2) = 0.0;
 
-            E_n.at(4, 1) = 0.0;//normal.at(1);
+            E_n.at(4, 1) = 0.0;
             E_n.at(4, 2) = normal.at(1);
 
 
