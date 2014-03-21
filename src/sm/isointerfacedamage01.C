@@ -114,7 +114,7 @@ IsoInterfaceDamageMaterial :: giveRealStressVector(FloatArray &answer, GaussPoin
     // compute value of loading function if strainLevel crit apply
     tempKappa = status->giveKappa();
 
-    if ( tempKappa <= equivStrain ) {
+    if ( tempKappa >= equivStrain ) {
         // damage does not grow
         omega = status->giveDamage();
     } else {
