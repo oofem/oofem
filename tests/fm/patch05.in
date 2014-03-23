@@ -38,8 +38,8 @@ Set 3 nodes 3 7 8 9
 Set 4 elementranges {(1 8)}
 
 #%BEGIN_CHECK%
-#NODE tStep 6.00000000e-02 number 5 dof 1 unknown v value 9.51246533e-01
-#NODE tStep 6.00000000e-02 number 8 dof 1 unknown v value 1.04790673e+00
+#NODE tStep 6.00000000e-02 number 5 dof 7 unknown d value 9.51246533e-01
+#NODE tStep 6.00000000e-02 number 8 dof 7 unknown d value 1.04790673e+00
 #%END_CHECK%
 
 

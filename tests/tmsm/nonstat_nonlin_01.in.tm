@@ -16,11 +16,11 @@ constantedgeload 1 loadTimeFunction 1 ndofs 1 components 1 -320.0 loadtype 2
 InitialCondition 1 Conditions 1 u 0.0
 ConstantFunction 1 f(t) 1.0
 #%BEGIN_CHECK%
-#NODE tStep 0.0 number 1 dof 1 unknown f value 10.0
-#NODE tStep 0.0 number 3 dof 1 unknown f value 10.0
-#NODE tStep 3600 number 1 dof 1 unknown f value 20.0
-#NODE tStep 3600 number 3 dof 1 unknown f value 20.0
-#NODE tStep 7200 number 1 dof 1 unknown f value 30.0
-#NODE tStep 7200 number 3 dof 1 unknown f value 30.0
+#NODE tStep 0.0 number 1 dof 10 unknown d value 10.0
+#NODE tStep 0.0 number 3 dof 10 unknown d value 10.0
+#NODE tStep 3600 number 1 dof 10 unknown d value 20.0
+#NODE tStep 3600 number 3 dof 10 unknown d value 20.0
+#NODE tStep 7200 number 1 dof 10 unknown d value 30.0
+#NODE tStep 7200 number 3 dof 10 unknown d value 30.0
 #%END_CHECK%
 

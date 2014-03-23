@@ -186,12 +186,7 @@ void DarcyFlow :: DumpMatricesToFile(FloatMatrix *LHS, FloatArray *RHS, FloatArr
 
 void DarcyFlow :: printDofOutputAt(FILE *stream, Dof *iDof, TimeStep *tStep)
 {
-    DofIDItem type = iDof->giveDofID();
-    if ( type == P_f ) {
-        iDof->printSingleOutputAt(stream, tStep, 'p', VM_Total, 1);
-    } else {
-        OOFEM_ERROR("unsupported dof type");
-    }
+    iDof->printSingleOutputAt(stream, tStep, 'd', VM_Total);
 }
 
 void DarcyFlow :: updateYourself(TimeStep *tStep)

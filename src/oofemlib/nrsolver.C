@@ -677,9 +677,7 @@ NRSolver :: checkConvergence(FloatArray &RT, FloatArray &F, FloatArray &rhs,  Fl
 #endif
 
             // loop over individual dofs
-            int ndof = dofman->giveNumberOfDofs();
-            for ( int idof = 1; idof <= ndof; idof++ ) {
-                Dof *dof = dofman->giveDof(idof);
+            for ( Dof *dof: *dofman ) {
                 if ( !dof->isPrimaryDof() ) {
                     continue;
                 }
@@ -710,10 +708,8 @@ NRSolver :: checkConvergence(FloatArray &RT, FloatArray &F, FloatArray &rhs,  Fl
             // loop over element internal Dofs
             for ( int idofman = 1; idofman <= elem->giveNumberOfInternalDofManagers(); idofman++ ) {
                 DofManager *dofman = elem->giveInternalDofManager(idofman);
-                int ndof = dofman->giveNumberOfDofs();
                 // loop over individual dofs
-                for ( int idof = 1; idof <= ndof; idof++ ) {
-                    Dof *dof = dofman->giveDof(idof);
+                for ( Dof *dof: *dofman ) {
                     if ( !dof->isPrimaryDof() ) {
                         continue;
                     }
@@ -744,10 +740,8 @@ NRSolver :: checkConvergence(FloatArray &RT, FloatArray &F, FloatArray &rhs,  Fl
             // loop over element internal Dofs
             for ( int idofman = 1; idofman <= bc->giveNumberOfInternalDofManagers(); idofman++ ) {
                 DofManager *dofman = bc->giveInternalDofManager(idofman);
-                int ndof = dofman->giveNumberOfDofs();
                 // loop over individual dofs
-                for ( int idof = 1; idof <= ndof; idof++ ) {
-                    Dof *dof = dofman->giveDof(idof);
+                for ( Dof *dof: *dofman ) {
                     if ( !dof->isPrimaryDof() ) {
                         continue;
                     }

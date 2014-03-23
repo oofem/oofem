@@ -171,9 +171,9 @@ void IncrementalLinearStatic :: solveYourselfAt(TimeStep *tStep)
         Domain *d = this->giveDomain(1);
         for ( int i = 1; i <= d->giveNumberOfDofManagers(); i++ ) {
             DofManager *dofman = d->giveDofManager(i);
-            for ( int j = 1; j <= dofman->giveNumberOfDofs(); j++ ) {
-                dofman->giveDof(j)->updateUnknownsDictionary(tStep->givePreviousStep(), VM_Total, 0.);
-                dofman->giveDof(j)->updateUnknownsDictionary(tStep, VM_Total, 0.);
+            for ( Dof *dof: *dofman ) {
+                dof->updateUnknownsDictionary(tStep->givePreviousStep(), VM_Total, 0.);
+                dof->updateUnknownsDictionary(tStep, VM_Total, 0.);
             }
         }
 
@@ -186,9 +186,9 @@ void IncrementalLinearStatic :: solveYourselfAt(TimeStep *tStep)
                 int ndman = abc->giveNumberOfInternalDofManagers();
                 for ( int i = 1; i <= ndman; i++ ) {
                     DofManager *dofman = abc->giveInternalDofManager(i);
-                    for ( int j = 1; j <= dofman->giveNumberOfDofs(); j++ ) {
-                        dofman->giveDof(j)->updateUnknownsDictionary(tStep->givePreviousStep(), VM_Total, 0.);
-                        dofman->giveDof(j)->updateUnknownsDictionary(tStep, VM_Total, 0.);
+                    for ( Dof *dof: *dofman ) {
+                        dof->updateUnknownsDictionary(tStep->givePreviousStep(), VM_Total, 0.);
+                        dof->updateUnknownsDictionary(tStep, VM_Total, 0.);
                     }
                 }
             }
@@ -199,8 +199,7 @@ void IncrementalLinearStatic :: solveYourselfAt(TimeStep *tStep)
     Domain *d = this->giveDomain(1);
     for ( int i = 1; i <= d->giveNumberOfDofManagers(); i++ ) {
         DofManager *dofman = d->giveDofManager(i);
-        for ( int j = 1; j <= dofman->giveNumberOfDofs(); j++ ) {
-            Dof *dof = dofman->giveDof(j);
+        for ( Dof *dof: *dofman ) {
             double tot = dof->giveUnknown( VM_Total, tStep->givePreviousStep() );
             if ( dof->hasBc(tStep) ) {
                 tot += dof->giveBcValue(VM_Incremental, tStep);
@@ -305,22 +304,19 @@ void IncrementalLinearStatic :: updateDofUnknownsDictionary(DofManager *inode, T
     // particular DOFs may changed, and it is necessary to keep them
     // in DOF level.
 
-    int ndofs = inode->giveNumberOfDofs();
-    Dof *iDof;
     double val;
-    for ( int i = 1; i <= ndofs; i++ ) {
-        iDof = inode->giveDof(i);
+    for ( Dof *dof: *inode ) {
         // skip slave DOFs (only master (primary) DOFs have to be updated).
-        if ( !iDof->isPrimaryDof() ) {
+        if ( !dof->isPrimaryDof() ) {
             continue;
         }
-        val = iDof->giveUnknown(VM_Total, tStep);
-        if ( !iDof->hasBc(tStep) ) {
-            val += this->incrementOfDisplacementVector.at( iDof->__giveEquationNumber() );
+        val = dof->giveUnknown(VM_Total, tStep);
+        if ( !dof->hasBc(tStep) ) {
+            val += this->incrementOfDisplacementVector.at( dof->__giveEquationNumber() );
         }
 
-        iDof->updateUnknownsDictionary(tStep->givePreviousStep(), VM_Total, val);
-        iDof->updateUnknownsDictionary(tStep, VM_Total, val);
+        dof->updateUnknownsDictionary(tStep->givePreviousStep(), VM_Total, val);
+        dof->updateUnknownsDictionary(tStep, VM_Total, val);
     }
 }
 

@@ -23,5 +23,5 @@ Set 1 nodes 2 1 4
 Set 2 nodes 2 2 3
 
 #%BEGIN_CHECK%
-#NODE tStep 1 number 5 dof 1 unknown p value 5.00000000e-01
+#NODE tStep 1 number 5 dof 11 unknown d value 5.00000000e-01
 #%END_CHECK%

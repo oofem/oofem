@@ -40,11 +40,11 @@ UsrDefLTF 2 f(t) 1-h(36000.)
 UsrDefLTF 3 f(t) h(36000.)
 
 #%BEGIN_CHECK%
-#NODE tStep 7.20000000e+03 number 1 dof 1 unknown f value 2.52431928e+01
-#NODE tStep 7.20000000e+03 number 6 dof 1 unknown f value 2.00000000e+01
+#NODE tStep 7.20000000e+03 number 1 dof 10 unknown d value 2.52431928e+01
+#NODE tStep 7.20000000e+03 number 6 dof 10 unknown d value 2.00000000e+01
 #ELEMENT tStep 7.200000e+03 number 2 gp 3 keyword "DoH" component 1 value 0.0
-#NODE tStep 6.48000000e+04 number 1 dof 1 unknown f value 5.73913380e+01
-#NODE tStep 6.48000000e+04 number 6 dof 1 unknown f value 4.21978609e+01
+#NODE tStep 6.48000000e+04 number 1 dof 10 unknown d value 5.73913380e+01
+#NODE tStep 6.48000000e+04 number 6 dof 10 unknown d value 4.21978609e+01
 #ELEMENT tStep 6.48000000e+04 number 1 gp 3 keyword "DoH" component 1 value 0.502450
 #ELEMENT tStep 6.48000000e+04 number 2 gp 3 keyword "DoH" component 1 value 0.363599
 #%END_CHECK%

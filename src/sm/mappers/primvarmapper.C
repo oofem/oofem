@@ -174,12 +174,10 @@ void LSPrimaryVariableMapper :: mapPrimaryVariables(FloatArray &oU, Domain &iOld
                     for ( int i = 1; i <= elNodes.giveSize(); i++ ) {
                         DofManager *dMan = elNew->giveDofManager(i);
 
-                        for ( int j = 1; j <= dMan->giveNumberOfDofs(); j++ ) {
+                        for ( Dof *dof: *dMan ) {
                             if ( elDofsGlob.at(dofsPassed) != 0 ) {
                                 nodeDispNew.at(dofsPassed) = oU.at( elDofsGlob.at(dofsPassed) );
                             } else {
-                                Dof *dof = dMan->giveDof(j);
-
                                 if ( dof->hasBc(& iTStep) ) {
                                     nodeDispNew.at(dofsPassed) = dof->giveBcValue(iMode, & iTStep);
                                 }

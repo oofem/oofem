@@ -362,9 +362,8 @@ StaticStructural :: estimateMaxPackSize(IntArray &commMap, CommunicationBuffer &
         for ( int i = 1; i <= mapSize; i++ ) {
             DofManager *dman = domain->giveDofManager( commMap.at(i) );
             int ndofs = dman->giveNumberOfDofs();
-            for ( int j = 1; j <= ndofs; j++ ) {
-                Dof *jdof = dman->giveDof(j);
-                if ( jdof->isPrimaryDof() && jdof->__giveEquationNumber() > 0 ) {
+            for ( Dof *dof: *dman ) {
+                if ( dof->isPrimaryDof() && dof->__giveEquationNumber() > 0 ) {
                     count++;
                 } else {
                     pcount++;

@@ -646,24 +646,24 @@ BoundaryCondition 3 loadTimeFunction 1 prescribedvalue 0.0
 ConstantFunction 1 f(t) 1.0
 
 #%BEGIN_CHECK% tolerance 1.e-1
-#NODE tStep 1.e3 number 2 dof 1 unknown v value  0.2
-#NODE tStep 1.e3 number 3 dof 1 unknown v value  0.2
-#NODE tStep 1.e3 number 24 dof 1 unknown v value 0.2
-#NODE tStep 1.e3 number 25 dof 1 unknown v value 0.2
-#NODE tStep 1.e3 number 26 dof 1 unknown v value 0.2
-#NODE tStep 1.e3 number 27 dof 1 unknown v value 0.2
-#NODE tStep 1.e3 number 28 dof 1 unknown v value 0.2
-#NODE tStep 1.e3 number 29 dof 1 unknown v value 0.2
-#NODE tStep 1.e3 number 30 dof 1 unknown v value 0.2
-#NODE tStep 1.e3 number 31 dof 1 unknown v value 0.2
-#NODE tStep 1.e3 number 32 dof 1 unknown v value 0.2
-#NODE tStep 1.e3 number 24 dof 2 unknown v value 0.0
-#NODE tStep 1.e3 number 25 dof 2 unknown v value 0.0
-#NODE tStep 1.e3 number 26 dof 2 unknown v value 0.0
-#NODE tStep 1.e3 number 27 dof 2 unknown v value 0.0
-#NODE tStep 1.e3 number 28 dof 2 unknown v value 0.0
-#NODE tStep 1.e3 number 29 dof 2 unknown v value 0.0
-#NODE tStep 1.e3 number 30 dof 2 unknown v value 0.0
-#NODE tStep 1.e3 number 31 dof 2 unknown v value 0.0
-#NODE tStep 1.e3 number 32 dof 2 unknown v value 0.0
+#NODE tStep 1.e3 number 2 dof 7 unknown d value  0.2
+#NODE tStep 1.e3 number 3 dof 7 unknown d value  0.2
+#NODE tStep 1.e3 number 24 dof 7 unknown d value 0.2
+#NODE tStep 1.e3 number 25 dof 7 unknown d value 0.2
+#NODE tStep 1.e3 number 26 dof 7 unknown d value 0.2
+#NODE tStep 1.e3 number 27 dof 7 unknown d value 0.2
+#NODE tStep 1.e3 number 28 dof 7 unknown d value 0.2
+#NODE tStep 1.e3 number 29 dof 7 unknown d value 0.2
+#NODE tStep 1.e3 number 30 dof 7 unknown d value 0.2
+#NODE tStep 1.e3 number 31 dof 7 unknown d value 0.2
+#NODE tStep 1.e3 number 32 dof 7 unknown d value 0.2
+#NODE tStep 1.e3 number 24 dof 8 unknown d value 0.0
+#NODE tStep 1.e3 number 25 dof 8 unknown d value 0.0
+#NODE tStep 1.e3 number 26 dof 8 unknown d value 0.0
+#NODE tStep 1.e3 number 27 dof 8 unknown d value 0.0
+#NODE tStep 1.e3 number 28 dof 8 unknown d value 0.0
+#NODE tStep 1.e3 number 29 dof 8 unknown d value 0.0
+#NODE tStep 1.e3 number 30 dof 8 unknown d value 0.0
+#NODE tStep 1.e3 number 31 dof 8 unknown d value 0.0
+#NODE tStep 1.e3 number 32 dof 8 unknown d value 0.0
 #%END_CHECK%

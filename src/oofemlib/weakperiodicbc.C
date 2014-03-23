@@ -117,9 +117,11 @@ WeakPeriodicBoundaryCondition :: initializeFrom(InputRecord *ir)
     // Create dofs for coefficients
     bcID = this->giveNumber();
     gammaDman = new Node(0, this->domain);
-
+    gamma_ids.clear();
     for ( int i = 0; i < ndof; i++ ) {
-        gammaDman->appendDof( new MasterDof( i, gammaDman, ( DofIDItem ) this->domain->giveNextFreeDofID() ) );
+        int dofid = this->domain->giveNextFreeDofID();
+        gamma_ids.followedBy(dofid);
+        gammaDman->appendDof( new MasterDof( i, gammaDman, ( DofIDItem )dofid ) );
     }
 
     //	computeOrthogonalBasis();
@@ -434,8 +436,8 @@ void WeakPeriodicBoundaryCondition :: assemble(SparseMtrx *answer, TimeStep *tSt
     }
 
     IntArray c_loc, r_loc;
-    gammaDman->giveCompleteLocationArray(r_loc, r_s);
-    gammaDman->giveCompleteLocationArray(c_loc, c_s);
+    gammaDman->giveLocationArray(gamma_ids, r_loc, r_s);
+    gammaDman->giveLocationArray(gamma_ids, c_loc, c_s);
 
     FloatMatrix B, BT;
     FloatArray gcoords, normal;
@@ -552,11 +554,10 @@ void WeakPeriodicBoundaryCondition :: assembleVector(FloatArray &answer, TimeSte
     }
 
     // Fetch unknowns of this boundary condition
-    IntArray gammaLoc, gammaDofIDs;
+    IntArray gammaLoc;
     FloatArray gamma;
-    gammaDman->giveCompleteUnknownVector(gamma, mode, tStep);
-    gammaDman->giveCompleteLocationArray(gammaLoc, s);
-    gammaDman->giveCompleteMasterDofIDArray(gammaDofIDs);
+    gammaDman->giveUnknownVector(gamma, gamma_ids, mode, tStep);
+    gammaDman->giveLocationArray(gamma_ids, gammaLoc, s);
 
     // Values from solution
     FloatArray a;
@@ -585,7 +586,7 @@ void WeakPeriodicBoundaryCondition :: assembleVector(FloatArray &answer, TimeSte
             FEInterpolation *interpolation = thisElement->giveInterpolation( ( DofIDItem ) dofid );
             interpolation->boundaryGiveNodes( bNodes, side [ thisSide ].at(ielement) );
 
-            ///@todo Carl, change to this:
+            ///@todo Carl, change to this?
             //thisElement->giveBoundaryLocationArray(sideLocation, bNodes, &dofids, eid, s, &masterDofIDs);
             //thisElement->computeBoundaryVectorOf(bNodes, eid, VM_Total, tStep, a);
 
@@ -594,24 +595,21 @@ void WeakPeriodicBoundaryCondition :: assembleVector(FloatArray &answer, TimeSte
             a.clear();
             dofCountOnBoundary = 0;
             for ( int i = 1; i <= bNodes.giveSize(); i++ ) {
-                thisElement->giveDofManDofIDMask(bNodes.at(i), EID_MomentumBalance_ConservationEquation, nodeDofIDMask);
+                DofManager *node = thisElement->giveDofManager( bNodes.at(i) );
 
-                for ( int j = 1; j <= nodeDofIDMask.giveSize(); j++ ) {
-                    if ( nodeDofIDMask.at(j) == dofid ) {
-                        thisElement->giveDofManager( bNodes.at(i) )->giveLocationArray(periodicDofIDMask, nodalArray, s);
-                        sideLocation.followedBy(nodalArray);
-                        thisElement->giveDofManager( bNodes.at(i) )->giveMasterDofIDArray(periodicDofIDMask, nodalArray);
-                        masterDofIDs.followedBy(nodalArray);
+                auto it = node->findDofWithDofId((DofIDItem)dofid);
+                if ( it != node->end() ) {
+                    node->giveLocationArray(periodicDofIDMask, nodalArray, s);
+                    sideLocation.followedBy(nodalArray);
+                    node->giveMasterDofIDArray(periodicDofIDMask, nodalArray);
+                    masterDofIDs.followedBy(nodalArray);
 
-                        double value = thisElement->giveDofManager( bNodes.at(i) )->giveDof(j)->giveUnknown(mode, tStep);
-                        a.resizeWithValues( sideLocation.giveSize() );
-                        a.at( sideLocation.giveSize() ) = value;
-                        dofCountOnBoundary++;
-                        break;
-                    }
+                    double value = (*it)->giveUnknown(mode, tStep);
+                    a.resizeWithValues( sideLocation.giveSize() );
+                    a.at( sideLocation.giveSize() ) = value;
+                    dofCountOnBoundary++;
                 }
             }
-
 
             this->computeElementTangent( B, thisElement, side [ thisSide ].at(ielement) );
             B.times(normalSign);
@@ -621,16 +619,8 @@ void WeakPeriodicBoundaryCondition :: assembleVector(FloatArray &answer, TimeSte
             myProdGamma.beProductOf(B, gamma);
 
             if ( eNorms ) {
-                for ( int i = 1; i <= gammaLoc.giveSize(); ++i ) {
-                    if ( gammaLoc.at(i) ) {
-                        eNorms->at( gammaDofIDs.at(i) ) += myProd.at(i) * myProd.at(i);
-                    }
-                }
-                for ( int i = 1; i <= sideLocation.giveSize(); ++i ) {
-                    if ( sideLocation.at(i) ) {
-                        eNorms->at( masterDofIDs.at(i) ) += myProdGamma.at(i) * myProdGamma.at(i);
-                    }
-                }
+                eNorms->assembleSquared( myProd, gamma_ids );
+                eNorms->assembleSquared( myProdGamma, masterDofIDs);
             }
 
             answer.assemble(myProd, gammaLoc);

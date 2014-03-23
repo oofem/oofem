@@ -391,8 +391,7 @@ void MicroMaterial :: giveMacroStiffnessMatrix(FloatMatrix &answer, TimeStep *tS
     //     boundaryDofNode.clear();
     //     for ( i = 1; i <= microDomain->giveNumberOfDofManagers(); i++){
     //       DofMan = microDomain->giveDofManager(i);
-    //       for ( j = 1; j <= DofMan->giveNumberOfDofs(); j++){
-    //         dof = DofMan->giveDof(j);
+    //       for ( Dof *dof: *DofMan ){
     //         eqNumber = giveDofEquationNumber(dof);
     //         if(microBoundaryNodes.contains( DofMan->giveGlobalNumber())){
     //           boundaryDofNode.followedBy(eqNumber);
@@ -457,7 +456,7 @@ void MicroMaterial :: giveMacroStiffnessMatrix(FloatMatrix &answer, TimeStep *tS
     //     for ( i = 1; i <= microMasterNodes.giveSize(); i++ ) {//8 nodes
     //       node = microMasterNodes.at(i);
     //       DofMan = microDomain->giveDofManager(node);
-    //       dof = DofMan->giveDof(1);
+    //       dof = DofMan->giveDofWithID(D_u);
     //       j = boundaryDofNode.findFirstIndexOf(giveDofEquationNumber(dof));
     //       if(!j)
     //         OOFEM_ERROR("Not found equation number %d in reduced stiffness matrix of node %d\n", giveDofEquationNumber(dof), DofMan->giveGlobalNumber());
@@ -469,7 +468,7 @@ void MicroMaterial :: giveMacroStiffnessMatrix(FloatMatrix &answer, TimeStep *tS
     for ( int i = 1; i <= microBoundaryNodes.giveSize(); i++ ) {
         node = microBoundaryNodes.at(i);
         DofMan = microDomain->giveDofManager(node);
-        dof = DofMan->giveDof(1);
+        dof = DofMan->giveDofWithID(D_u);
         nodePos = microBoundaryDofsArr.findFirstIndexOf( giveDofEquationNumber(dof) ); //row(column) of reduced stiffness matrix
         if ( !nodePos ) {
             OOFEM_ERROR("Not found equation number %d in reduced stiffness matrix of node %d\n", giveDofEquationNumber(dof), DofMan->giveGlobalNumber() );
@@ -595,10 +594,7 @@ void MicroMaterial :: setMacroProperties(Domain *macroDomain, MacroLSpace *macro
     //     //the pointer to underlying problem is problemMicro
     //   DofManager *DofMan;
     //   int i, j, counter = 0;
-    //   IntArray ut, dofIDArry(3);
-    //   for ( i = 1; i <= 3; i++ ) {
-    //     dofIDArry.at(i) = i;
-    //   }
+    //   IntArray ut, dofIDArry = {D_u, D_v, D_w};1
     //
     //   for ( i = 1; i <= problemMicro->giveDomain(1)->giveNumberOfDofManagers(); i++ ) { //for each node
     //     DofMan = problemMicro->giveDomain(1)->giveDofManager(i);
@@ -633,7 +629,7 @@ int MicroMaterial :: giveDofEquationNumber(Dof *dof) const
     int numDofMan, numDof;
 
     numDofMan = dof->giveDofManNumber();
-    numDof = dof->giveNumber();
+    numDof = dof->giveDofID(); // Note: Relieas on D_u, D_v, D_w being 1, 2, 3
 
     //depending on the assembly of submatrix, swith to equation numbering
     switch ( DofEquationNumbering ) {

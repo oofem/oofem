@@ -300,7 +300,7 @@ Shell7BaseXFEM :: computeOrderingArray(IntArray &orderingArray, IntArray &active
         }
 
         for ( int j = 1; j <= dofManDofIdMask.giveSize(); j++ ) {
-            int pos = dMan->findDofWithDofId( ( DofIDItem ) dofManDofIdMask.at(j) );
+            int pos = dMan->findDofWithDofId( ( DofIDItem ) dofManDofIdMask.at(j) ) - dMan->begin() + 1;
             activeDofPos++;
             ordering_temp.at(activeDofPos) = orderingDofIndex + pos;
             activeDofsArrayTemp.at(activeDofPos) = activeDofIndex   + j;

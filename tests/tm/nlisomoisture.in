@@ -106,13 +106,13 @@ ConstantFunction 1 f(t) 0.5
 #
 #
 #%BEGIN_CHECK% tolerance 1.e-5
-#NODE tStep 3.900000e-01 number 1  dof 1 unknown f value 7.164393e-01
-#NODE tStep 3.900000e-01 number 7  dof 1 unknown f value 7.629528e-01
-#NODE tStep 3.900000e-01 number 13 dof 1 unknown f value 9.092467e-01
-#NODE tStep 3.900000e-01 number 19 dof 1 unknown f value 7.948855e-01
-#NODE tStep 3.900000e-01 number 25 dof 1 unknown f value 7.785578e-01
-#NODE tStep 3.900000e-01 number 31 dof 1 unknown f value 7.832541e-01
-#NODE tStep 3.900000e-01 number 37 dof 1 unknown f value 8.468254e-01
+#NODE tStep 3.900000e-01 number 1  dof 14 unknown d value 7.164393e-01
+#NODE tStep 3.900000e-01 number 7  dof 14 unknown d value 7.629528e-01
+#NODE tStep 3.900000e-01 number 13 dof 14 unknown d value 9.092467e-01
+#NODE tStep 3.900000e-01 number 19 dof 14 unknown d value 7.948855e-01
+#NODE tStep 3.900000e-01 number 25 dof 14 unknown d value 7.785578e-01
+#NODE tStep 3.900000e-01 number 31 dof 14 unknown d value 7.832541e-01
+#NODE tStep 3.900000e-01 number 37 dof 14 unknown d value 8.468254e-01
 #%END_CHECK%
 
 

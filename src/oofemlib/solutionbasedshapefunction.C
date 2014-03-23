@@ -100,6 +100,7 @@ SolutionbasedShapeFunction :: initializeFrom(InputRecord *ir)
         int DofID = this->domain->giveNextFreeDofID();
         MasterDof *newDof = new MasterDof(i, myNode, ( DofIDItem ) DofID);
         myNode->appendDof(newDof);
+        myDofIDs.followedBy(DofID);
     }
 
     init();
@@ -110,8 +111,8 @@ SolutionbasedShapeFunction :: initializeFrom(InputRecord *ir)
 bool
 SolutionbasedShapeFunction :: isCoeff(ActiveDof *dof)
 {
-    for ( int i = 1; i <= myNode->giveNumberOfDofs(); i++ ) {
-        if ( dof == myNode->giveDof(i) ) {
+    for ( Dof *myDof: *myNode ) {
+        if ( dof == myDof ) {
             return true;
         }
     }
@@ -291,7 +292,7 @@ SolutionbasedShapeFunction :: giveUnknown(ValueModeType mode, TimeStep *tStep, A
     computeDofTransformation(dof, shapeFunctionValues);
 
     FloatArray gamma;
-    myNode->giveCompleteUnknownVector(gamma, mode, tStep);  // alpha1, alpha2,...
+    myNode->giveUnknownVector(gamma, myDofIDs, mode, tStep);  // alpha1, alpha2,...
 
     double out = shapeFunctionValues.dotProduct(gamma);
 
@@ -352,7 +353,7 @@ SolutionbasedShapeFunction :: computeDofTransformation(ActiveDof *dof, FloatArra
 Dof *
 SolutionbasedShapeFunction :: giveMasterDof(ActiveDof *dof, int mdof)
 {
-    return myNode->giveDof(mdof);
+    return myNode->giveDofWithID(myDofIDs.at(mdof));
 }
 
 void
@@ -382,8 +383,8 @@ SolutionbasedShapeFunction :: loadProblem()
             for ( int k = 1; k <= e->giveNumberOfDofManagers(); k++ ) {
                 DofManager *dman = e->giveDofManager(k);
                 centerCoord.add( * dman->giveCoordinates() );
-                for ( int l = 1; l <= 3; l++ ) {
-                    if ( dman->giveDof(l)->giveBcId() != 0 ) {
+                for ( Dof *dof: *dman ) {
+                    if ( dof->giveBcId() != 0 ) {
                         vlockCount++;
                     }
                 }

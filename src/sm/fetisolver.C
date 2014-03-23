@@ -68,8 +68,7 @@ FETISolver :: estimateMaxPackSize(IntArray &map, CommunicationBuffer &buff, int 
 {
     int rank = domain->giveEngngModel()->giveRank();
     int mapSize = map.giveSize();
-    int eqNum, ndofs, count = 0;
-    IntArray locationArray;
+    int eqNum, count = 0;
     EModelDefaultEquationNumbering dn;
 
     if ( rank == 0 ) {
@@ -79,10 +78,8 @@ FETISolver :: estimateMaxPackSize(IntArray &map, CommunicationBuffer &buff, int 
         }
     } else {
         for ( int i = 1; i <= mapSize; i++ ) {
-            domain->giveDofManager( map.at(i) )->giveCompleteLocationArray(locationArray, dn);
-            ndofs = locationArray.giveSize();
-            for ( int j = 1; j <= ndofs; j++ ) {
-                if ( ( eqNum = locationArray.at(j) ) ) {
+            for ( Dof *dof: *domain->giveDofManager( map.at(i) ) ) {
+                if ( dof->giveEquationNumber(dn) != 0 ) {
                     count++;
                 }
             }

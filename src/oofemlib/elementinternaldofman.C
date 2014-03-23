@@ -63,15 +63,9 @@ IRResultType ElementDofManager :: initializeFrom(InputRecord *ir)
 void ElementDofManager :: printYourself()
 // Prints the receiver on screen.
 {
-    int i;
-
     printf("InternalElementDofManager %d \n", number);
-    for ( i = 0; i < numberOfDofs; i++ ) {
-        if ( dofArray [ i ] ) {
-            dofArray [ i ]->printYourself();
-        } else {
-            printf("dof %d is nil \n", i + 1);
-        }
+    for ( Dof *dof: *this ) {
+        dof->printYourself();
     }
 
     loadArray.printYourself();

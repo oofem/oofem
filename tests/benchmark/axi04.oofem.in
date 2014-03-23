@@ -649,12 +649,12 @@ deadweight 4 components 2 0.0 -9.81 loadTimeFunction 1 valtype 2
 ConstantFunction 1 f(t) 1.0
 
 #%BEGIN_CHECK% tolerance 1.e-2
-#NODE tStep 1.e-5 number 1 dof 3 unknown p value 19.62
-#NODE tStep 1.e-5 number 2 dof 3 unknown p value 19.62
-#NODE tStep 1.e-5 number 7 dof 3 unknown p value 19.62
-#NODE tStep 1.e-5 number 11 dof 3 unknown p value 19.62
-#NODE tStep 4.e-5 number 1 dof 3 unknown p value 19.62
-#NODE tStep 4.e-5 number 2 dof 3 unknown p value 19.62
-#NODE tStep 4.e-5 number 7 dof 3 unknown p value 19.62
-#NODE tStep 4.e-5 number 11 dof 3 unknown p value 19.62
+#NODE tStep 1.e-5 number 1 dof 11 unknown d value 19.62
+#NODE tStep 1.e-5 number 2 dof 11 unknown d value 19.62
+#NODE tStep 1.e-5 number 7 dof 11 unknown d value 19.62
+#NODE tStep 1.e-5 number 11 dof 11 unknown d value 19.62
+#NODE tStep 4.e-5 number 1 dof 11 unknown d value 19.62
+#NODE tStep 4.e-5 number 2 dof 11 unknown d value 19.62
+#NODE tStep 4.e-5 number 7 dof 11 unknown d value 19.62
+#NODE tStep 4.e-5 number 11 dof 11 unknown d value 19.62
 #%END_CHECK%

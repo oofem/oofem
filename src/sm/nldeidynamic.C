@@ -222,9 +222,7 @@ void NlDEIDynamic :: solveYourselfAt(TimeStep *tStep)
     int nman  = domain->giveNumberOfDofManagers();
 
     DofManager *node;
-    Dof *iDof;
 
-    int nDofs;
     int i, k, j, jj;
     double coeff, maxDt, maxOm = 0.;
     double prevIncrOfDisplacement, incrOfDisplacement;
@@ -256,7 +254,6 @@ void NlDEIDynamic :: solveYourselfAt(TimeStep *tStep)
             Dof *jdof;
             for ( int dm = 1; dm <= ndofman; dm++ ) {
                 dman = domain->giveDofManager(dm);
-                ndofs = dman->giveNumberOfDofs();
                 dofmanmode = dman->giveParallelMode();
 
                 // Skip all remote and null dofmanagers
@@ -268,9 +265,8 @@ void NlDEIDynamic :: solveYourselfAt(TimeStep *tStep)
                 }
 
                 // For shared nodes we add locally an average = 1/givePartitionsConnectivitySize()*contribution,
-                for ( j = 1; j <= ndofs; j++ ) {
-                    jdof = dman->giveDof(j);
-                    if ( jdof->isPrimaryDof() && ( eqNum = jdof->__giveEquationNumber() ) ) {
+                for ( Dof *dof: *dman ) {
+                    if ( dof->isPrimaryDof() && ( eqNum = dof->__giveEquationNumber() ) ) {
                         my_pMp += coeff * loadRefVector.at(eqNum) * loadRefVector.at(eqNum) / massMatrix.at(eqNum);
                     }
                 }
@@ -312,22 +308,20 @@ void NlDEIDynamic :: solveYourselfAt(TimeStep *tStep)
 
         for ( j = 1; j <= nman; j++ ) {
             node = domain->giveDofManager(j);
-            nDofs = node->giveNumberOfDofs();
 
-            for ( k = 1; k <= nDofs; k++ ) {
+            for ( Dof *dof: *node ) {
                 // Ask for initial values obtained from
                 // bc (boundary conditions) and ic (initial conditions)
                 // all dofs are expected to be  DisplacementVector type.
-                iDof  =  node->giveDof(k);
-                if ( !iDof->isPrimaryDof() ) {
+                if ( !dof->isPrimaryDof() ) {
                     continue;
                 }
 
-                jj = iDof->__giveEquationNumber();
+                jj = dof->__giveEquationNumber();
                 if ( jj ) {
-                    displacementVector.at(jj) = iDof->giveUnknown(VM_Total, tStep);
-                    velocityVector.at(jj)     = iDof->giveUnknown(VM_Velocity, tStep);
-                    accelerationVector.at(jj) = iDof->giveUnknown(VM_Acceleration, tStep);
+                    displacementVector.at(jj) = dof->giveUnknown(VM_Total, tStep);
+                    velocityVector.at(jj)     = dof->giveUnknown(VM_Velocity, tStep);
+                    accelerationVector.at(jj) = dof->giveUnknown(VM_Acceleration, tStep);
                 }
             }
         }
@@ -404,9 +398,8 @@ void NlDEIDynamic :: solveYourselfAt(TimeStep *tStep)
             }
 
             // For shared nodes we add locally an average= 1/givePartitionsConnectivitySize()*contribution.
-            for ( j = 1; j <= ndofs; j++ ) {
-                jdof = dman->giveDof(j);
-                if ( jdof->isPrimaryDof() && ( eqNum = jdof->__giveEquationNumber() ) ) {
+            for ( Dof *dof: *dman ) {
+                if ( dof->isPrimaryDof() && ( eqNum = dof->__giveEquationNumber() ) ) {
                     my_pt += coeff * internalForces.at(eqNum) * loadRefVector.at(eqNum) / massMatrix.at(eqNum);
                 }
             }
@@ -440,7 +433,6 @@ void NlDEIDynamic :: solveYourselfAt(TimeStep *tStep)
 
         for ( int dm = 1; dm <= ndofman; dm++ ) {
             dman = domain->giveDofManager(dm);
-            ndofs = dman->giveNumberOfDofs();
             dofmanmode = dman->giveParallelMode();
             // Skip all remote and null dofmanagers.
             coeff = 1.0;
@@ -451,9 +443,8 @@ void NlDEIDynamic :: solveYourselfAt(TimeStep *tStep)
             }
 
             // For shared nodes we add locally an average= 1/givePartitionsConnectivitySize()*contribution.
-            for ( j = 1; j <= ndofs; j++ ) {
-                jdof = dman->giveDof(j);
-                if ( jdof->isPrimaryDof() && ( eqNum = jdof->__giveEquationNumber() ) ) {
+            for ( Dof *dof: *dman ) {
+                if ( dof->isPrimaryDof() && ( eqNum = dof->__giveEquationNumber() ) ) {
                     my_err += coeff * loadVector.at(eqNum) * loadVector.at(eqNum) / massMatrix.at(eqNum);
                 }
             }
@@ -705,25 +696,21 @@ WARNING: NOT SUPPORTED MESSAGE PARSING LIBRARY
 int
 NlDEIDynamic :: estimateMaxPackSize(IntArray &commMap, CommunicationBuffer &buff, int packUnpackType)
 {
-    int mapSize = commMap.giveSize();
-    int i, j, ndofs, count = 0, pcount = 0;
+    int count = 0, pcount = 0;
     IntArray locationArray;
     Domain *domain = this->giveDomain(1);
-    DofManager *dman;
-    Dof *jdof;
 
     if ( packUnpackType == ProblemCommMode__ELEMENT_CUT ) {
-        for ( i = 1; i <= mapSize; i++ ) {
-            count += domain->giveDofManager( commMap.at(i) )->giveNumberOfDofs();
+        for ( int inod: commMap ) {
+            count += domain->giveDofManager( inod )->giveNumberOfDofs();
         }
 
         return ( buff.givePackSize(MPI_DOUBLE, 1) * count );
     } else if ( packUnpackType == ProblemCommMode__NODE_CUT ) {
-        for ( i = 1; i <= mapSize; i++ ) {
-            ndofs = ( dman = domain->giveDofManager( commMap.at(i) ) )->giveNumberOfDofs();
-            for ( j = 1; j <= ndofs; j++ ) {
-                jdof = dman->giveDof(j);
-                if ( jdof->isPrimaryDof() && ( jdof->__giveEquationNumber() ) ) {
+        for ( int inod: commMap ) {
+            DofManager *dman = domain->giveDofManager( inod );
+            for ( Dof *dof: *dman ) {
+                if ( dof->isPrimaryDof() && ( dof->__giveEquationNumber() ) ) {
                     count++;
                 } else {
                     pcount++;
@@ -733,8 +720,8 @@ NlDEIDynamic :: estimateMaxPackSize(IntArray &commMap, CommunicationBuffer &buff
 
         return ( buff.givePackSize(MPI_DOUBLE, 1) * max(count, pcount) );
     } else if ( packUnpackType == ProblemCommMode__REMOTE_ELEMENT_MODE ) {
-        for ( i = 1; i <= mapSize; i++ ) {
-            count += domain->giveElement( commMap.at(i) )->estimatePackSize(buff);
+        for ( int inod: commMap ) {
+            count += domain->giveElement( inod )->estimatePackSize(buff);
         }
 
         return count;

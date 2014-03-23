@@ -96,8 +96,8 @@ public:
     /**
      * Compute vector of master contribution coefficients - SUMA of contributions == 1.0
      */
-    void computeMasterContribution(IntArray &countOfMasterDofs, std::vector< IntArray > &masterDofID, 
-                                   std::vector< FloatArray > &masterContribution);
+    void computeMasterContribution(std::map< DofIDItem, IntArray > &masterDofID, 
+                                   std::map< DofIDItem, FloatArray > &masterContribution);
 
     virtual const char *giveClassName() const { return "RigidArmNode"; }
     virtual const char *giveInputRecordName() const { return _IFT_RigidArmNode_Name; }

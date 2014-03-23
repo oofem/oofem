@@ -516,12 +516,11 @@ CylindricalALM :: checkConvergence(const FloatArray &R, const FloatArray *R0, co
      * std::list<__DofIDSet> __ccDofGroups;
      * int nccdg; // number of Convergence Criteria Dof Groups
      */
-    int _dg, _idofman, _ielem, _idof, _eq, _ndof, _ng = nccdg, ndofman = domain->giveNumberOfDofManagers();
+    int _dg, _idofman, _ielem, _eq, _ng = nccdg, ndofman = domain->giveNumberOfDofManagers();
     int nelem = domain->giveNumberOfElements();
     double forceErr, dispErr, _val;
     DofManager *_idofmanptr;
     Element *_ielemptr;
-    Dof *_idofptr;
     FloatArray rhs; // residual of momentum balance eq (unbalanced nodal forces)
     FloatArray dg_forceErr(nccdg), dg_dispErr(nccdg), dg_totalLoadLevel(nccdg), dg_totalDisp(nccdg);
     bool answer;
@@ -559,10 +558,8 @@ CylindricalALM :: checkConvergence(const FloatArray &R, const FloatArray *R0, co
 
 #endif
 
-            _ndof = _idofmanptr->giveNumberOfDofs();
             // loop over individual dofs
-            for ( _idof = 1; _idof <= _ndof; _idof++ ) {
-                _idofptr = _idofmanptr->giveDof(_idof);
+            for ( Dof *_idofptr: *_idofmanptr ) {
                 // loop over dof groups
                 for ( _dg = 1; _dg <= _ng; _dg++ ) {
                     // test if dof ID is in active set
@@ -607,10 +604,8 @@ CylindricalALM :: checkConvergence(const FloatArray &R, const FloatArray *R0, co
 #endif
             // loop over element internal Dofs
             for ( _idofman = 1; _idofman <= _ielemptr->giveNumberOfInternalDofManagers(); _idofman++ ) {
-                _ndof = _ielemptr->giveInternalDofManager(_idofman)->giveNumberOfDofs();
                 // loop over individual dofs
-                for ( _idof = 1; _idof <= _ndof; _idof++ ) {
-                    _idofptr = _ielemptr->giveInternalDofManager(_idofman)->giveDof(_idof);
+                for ( Dof *_idofptr: *_ielemptr->giveInternalDofManager(_idofman) ) {
                     // loop over dof groups
                     for ( _dg = 1; _dg <= _ng; _dg++ ) {
                         // test if dof ID is in active set

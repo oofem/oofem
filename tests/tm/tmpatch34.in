@@ -26,6 +26,6 @@ BoundaryCondition  1 loadTimeFunction 1 prescribedvalue 0.0
 BoundaryCondition  2 loadTimeFunction 1 prescribedvalue 15.0 
 ConstantFunction 1 f(t) 1.0
 #%BEGIN_CHECK%
-#NODE tStep 4.80000000e+06 number 5 dof 1 unknown f value 6.11951769e+00
-#NODE tStep 1.19400000e+08 number 5 dof 1 unknown f value 7.5
+#NODE tStep 4.80000000e+06 number 5 dof 10 unknown d value 6.11951769e+00
+#NODE tStep 1.19400000e+08 number 5 dof 10 unknown d value 7.5
 #%END_CHECK%

@@ -306,8 +306,8 @@ int EnrichmentItem :: giveNumEnrichedDofs(const DofManager &iDMan) const
 	int startId = giveStartOfDofIdPool();
 	int endId = this->giveEndOfDofIdPool();
 
-	for(int i = 1; i <= iDMan.giveNumberOfDofs(); i++) {
-		int dofId = iDMan.giveDof(i)->giveDofID();
+    for( Dof *dof: iDMan ) {
+        int dofId = dof->giveDofID();
 
 		// If the dof belongs to this enrichment item
 		if(dofId >= startId && dofId <= endId) {
@@ -369,16 +369,12 @@ EnrichmentItem :: computeDofManDofIdArray(IntArray &answer, DofManager *dMan)
     int numEnrFunc = this->giveNumDofManEnrichments(* dMan);
 
     // Go through the list of dofs that the EI supports and compare with the available dofs in the dofMan.
-    // Store matches in dofMask
-    IntArray dofMask(eiEnrSize *numEnrFunc);
-    dofMask.zero();
     int count = 0;
 
     for ( int i = 1; i <= numEnrFunc; i++ ) {
         for ( int j = 1; j <= eiEnrSize; j++ ) {
             if ( dMan->hasDofID( ( DofIDItem ) enrichesDofsWithIdArray->at(j) ) ) {
                 count++;
-                dofMask.at(count) = dMan->giveDofWithID( enrichesDofsWithIdArray->at(j) )->giveNumber();
             }
         }
     }
@@ -698,8 +694,7 @@ void EnrichmentItem :: createEnrichedDofs()
                 		// Dirichlet BCs. If so, let the new enriched dof
                 		// inherit the same BC.
                 		bool foundBC = false;
-                		for(int n = 1; n <= nDofs; n++) {
-                			Dof *dof = dMan->giveDof(n);
+                		for( Dof *dof: *dMan ) {
                 			if(dof->giveBcId() > 0) {
                 				foundBC = true;
                 				bcIndex = dof->giveBcId();
@@ -736,9 +731,7 @@ void EnrichmentItem :: createEnrichedDofs()
 
         computeDofManDofIdArray(dofIdArray, dMan);
         std :: vector< DofIDItem >dofsToRemove;
-        int numNodeDofs = dMan->giveNumberOfDofs();
-        for ( int j = 1; j <= numNodeDofs; j++ ) {
-            Dof *dof = dMan->giveDof(j);
+        for ( Dof *dof: *dMan ) {
             DofIDItem dofID = dof->giveDofID();
 
             if ( dofID >= DofIDItem(poolStart) && dofID <= DofIDItem(poolEnd) ) {
@@ -1211,8 +1204,8 @@ Delamination :: updateGeometry(FailureCriteriaStatus *fc, TimeStep *tStep)
             // without setting Dirichlet BCs on the enriched dofs. //ES
 #if 1
             bool hasBc = false;
-            for ( int j = 1; j <= el->giveDofManager(i)->giveNumberOfDofs(); j++ ) {
-                if ( el->giveDofManager(i)->giveDof(j)->hasBc(tStep) ) {
+            for ( Dof *dof: *el->giveDofManager(i) ) {
+                if ( dof->hasBc(tStep) ) {
                     hasBc = true;
                     continue;
                 }

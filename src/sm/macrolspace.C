@@ -179,9 +179,9 @@ void MacroLSpace :: changeMicroBoundaryConditions(TimeStep *tStep)
     for ( int i = 1; i <= this->giveNumberOfNodes(); i++ ) { //8 nodes
         DofMan = microDomain->giveDofManager(i);
         //global displacements
-        displ_x.at(i) = this->giveNode(i)->giveDof(1)->giveUnknown(VM_Total, tStep);
-        displ_y.at(i) = this->giveNode(i)->giveDof(2)->giveUnknown(VM_Total, tStep);
-        displ_z.at(i) = this->giveNode(i)->giveDof(3)->giveUnknown(VM_Total, tStep);
+        displ_x.at(i) = this->giveNode(i)->giveDofWithID(D_u)->giveUnknown(VM_Total, tStep);
+        displ_y.at(i) = this->giveNode(i)->giveDofWithID(D_v)->giveUnknown(VM_Total, tStep);
+        displ_z.at(i) = this->giveNode(i)->giveDofWithID(D_w)->giveUnknown(VM_Total, tStep);
     }
 
     //overrides the first load-time function to be a constant
@@ -211,10 +211,11 @@ void MacroLSpace :: changeMicroBoundaryConditions(TimeStep *tStep)
             this->evalInterpolation( n, microMaterial->microMasterCoords, * DofMan->giveCoordinates() );
             //n.printYourself();
 
-            for ( int j = 1; j <= 3; j++ ) {
+            for ( Dof *dof: *DofMan ) {
                 this->microBoundaryDofManager.at(counter) = DofMan->giveGlobalNumber();
-                DofMan->giveDof(j)->setBcId(counter);
-                displ = n.dotProduct( j == 1 ? displ_x : ( j == 2 ? displ_y : displ_z ) );
+                dof->setBcId(counter);
+                DofIDItem id = dof->giveDofID();
+                displ = n.dotProduct( id == D_u ? displ_x : ( id == D_v ? displ_y : displ_z ) );
                 ir_bc.setRecordKeywordField("boundarycondition", counter);
                 ir_bc.setField(1, _IFT_GeneralBoundaryCondition_timeFunct);
                 ir_bc.setField(displ, _IFT_BoundaryCondition_PrescribedValue);
@@ -226,8 +227,8 @@ void MacroLSpace :: changeMicroBoundaryConditions(TimeStep *tStep)
                 counter++;
             }
         } else {
-            for ( int j = 1; j <= 3; j++ ) {
-                DofMan->giveDof(j)->setBcId(0);
+            for ( Dof *dof: *DofMan ) {
+                dof->setBcId(0);
             }
         }
     }

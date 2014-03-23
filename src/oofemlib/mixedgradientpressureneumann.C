@@ -60,12 +60,15 @@ REGISTER_BoundaryCondition(MixedGradientPressureNeumann);
 
 MixedGradientPressureNeumann :: MixedGradientPressureNeumann(int n, Domain *d) : MixedGradientPressureBC(n, d)
 {
+    ///@todo Rethink this. Should be created as part of createDofs()
     int nsd = d->giveNumberOfSpatialDimensions();
     int components = nsd * nsd - 1;
     this->sigmaDev = new Node(0, d); // Node number lacks meaning here.
     for ( int i = 0; i < components; i++ ) {
+        int dofid = d->giveNextFreeDofID();
+        dev_id.followedBy(dofid);
         // Just putting in X_i id-items since they don't matter.
-        sigmaDev->appendDof( new MasterDof( i + 1, sigmaDev, ( DofIDItem ) ( d->giveNextFreeDofID() ) ) );
+        sigmaDev->appendDof( new MasterDof( i + 1, sigmaDev, ( DofIDItem )dofid ) );
     }
 }
 
@@ -247,8 +250,8 @@ void MixedGradientPressureNeumann :: giveLocationArrays(std :: vector< IntArray 
     }
 
     // Fetch the columns/rows for the stress contributions;
-    this->sigmaDev->giveCompleteLocationArray(sigma_loc_r, r_s);
-    this->sigmaDev->giveCompleteLocationArray(sigma_loc_c, c_s);
+    this->sigmaDev->giveLocationArray(dev_id, sigma_loc_r, r_s);
+    this->sigmaDev->giveLocationArray(dev_id, sigma_loc_c, c_s);
 
     Set *set = this->giveDomain()->giveSet(this->set);
     const IntArray &boundaries = set->giveBoundaryList();
@@ -414,9 +417,9 @@ void MixedGradientPressureNeumann :: assembleVector(FloatArray &answer, TimeStep
     const IntArray &boundaries = set->giveBoundaryList();
 
     IntArray loc, sigma_loc;  // For the velocities and stress respectively
-    IntArray masterDofIDs, sigmaMasterDofIDs;
+    IntArray masterDofIDs;
     IntArray bNodes;
-    this->sigmaDev->giveCompleteLocationArray(sigma_loc, s);
+    this->sigmaDev->giveLocationArray(dev_id, sigma_loc, s);
 
     if ( type == ExternalForcesVector ) {
         // The external forces have two contributions. On the additional equations for sigmaDev, the load is simple the deviatoric gradient.
@@ -446,9 +449,7 @@ void MixedGradientPressureNeumann :: assembleVector(FloatArray &answer, TimeStep
         FloatArray s_dev, e_v;
 
         // Fetch the current values of the stress;
-        this->sigmaDev->giveCompleteUnknownVector(s_dev, mode, tStep);
-        // and the master dof ids for sigmadev used for the internal norms
-        this->sigmaDev->giveCompleteMasterDofIDArray(sigmaMasterDofIDs);
+        this->sigmaDev->giveUnknownVector(s_dev, dev_id, mode, tStep);
 
         // Assemble: int delta_v (x) n dA : E_i s_i
         //           int v (x) n dA : E_i delta_s_i
@@ -473,7 +474,7 @@ void MixedGradientPressureNeumann :: assembleVector(FloatArray &answer, TimeStep
             answer.assemble(fe_v, sigma_loc); // Contribution to delta_s_i equations
             if ( eNorms ) {
                 eNorms->assembleSquared(fe_s, masterDofIDs);
-                eNorms->assembleSquared(fe_v, sigmaMasterDofIDs);
+                eNorms->assembleSquared(fe_v, dev_id);
             }
         }
     }
@@ -499,8 +500,8 @@ void MixedGradientPressureNeumann :: assemble(SparseMtrx *answer, TimeStep *tSte
         const IntArray &boundaries = set->giveBoundaryList();
 
         // Fetch the columns/rows for the stress contributions;
-        this->sigmaDev->giveCompleteLocationArray(sigma_loc_r, r_s);
-        this->sigmaDev->giveCompleteLocationArray(sigma_loc_c, c_s);
+        this->sigmaDev->giveLocationArray(dev_id, sigma_loc_r, r_s);
+        this->sigmaDev->giveLocationArray(dev_id, sigma_loc_c, c_s);
 
         for ( int pos = 1; pos <= boundaries.giveSize() / 2; ++pos ) {
             Element *e = this->giveDomain()->giveElement( boundaries.at(pos * 2 - 1) );
@@ -531,7 +532,7 @@ void MixedGradientPressureNeumann :: computeFields(FloatArray &sigmaDev, double 
     // Fetch the current values of the stress in deviatoric base;
     sigmaDevBase.resize( this->sigmaDev->giveNumberOfDofs() );
     for ( int i = 1; i <= this->sigmaDev->giveNumberOfDofs(); i++ ) {
-        sigmaDevBase.at(i) = this->sigmaDev->giveDof(i)->giveUnknown(VM_Total, tStep);
+        sigmaDevBase.at(i) = this->sigmaDev->giveDofWithID(dev_id.at(i))->giveUnknown(VM_Total, tStep);
     }
     // Convert it back from deviatoric base:
     if ( nsd == 3 ) {
@@ -600,7 +601,7 @@ void MixedGradientPressureNeumann :: computeTangents(FloatMatrix &Ed, FloatArray
     // Unit pertubations for d_dev
     ddev_pert.zero();
     for ( int i = 1; i <= ndev; ++i ) {
-        int eqn = this->sigmaDev->giveDof(i)->giveEquationNumber(fnum);
+        int eqn = this->sigmaDev->giveDofWithID(dev_id.at(i))->giveEquationNumber(fnum);
         ddev_pert.at(eqn, i) = -1.0 * rve_size;
     }
 
@@ -627,7 +628,7 @@ void MixedGradientPressureNeumann :: computeTangents(FloatMatrix &Ed, FloatArray
     FloatArray sigma_p(ndev);
     FloatMatrix sigma_d(ndev, ndev);
     for ( int i = 1; i <= ndev; ++i ) {
-        int eqn = this->sigmaDev->giveDof(i)->giveEquationNumber(fnum);
+        int eqn = this->sigmaDev->giveDofWithID(dev_id.at(i))->giveEquationNumber(fnum);
         sigma_p.at(i) = s_p.at(eqn);
         for ( int j = 1; j <= ndev; ++j ) {
             sigma_d.at(i, j) = s_d.at(eqn, j);

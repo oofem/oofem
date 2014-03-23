@@ -532,7 +532,7 @@ int
 RefinedElement :: giveCompatibleBcDofArray(Node *master_node, Node *slave_node, IntArray &dofArray, int dofs,
                                            IntArray &answer, ValueModeType mode, TimeStep *tStep)
 {
-    Dof *dof, *nodeDof;
+    Dof *nodeDof;
     FloatMatrix *Lcs, *nodeLcs, trFromNodeLcsToLcs;
     bool compatibleCS, newLcs, newNodeLcs;
     double epsilon = 1.0e-9;
@@ -598,8 +598,7 @@ RefinedElement :: giveCompatibleBcDofArray(Node *master_node, Node *slave_node, 
             bcId = nodeDof->giveBcId();
             bcValue = nodeDof->giveBcValue(mode, tStep);
 
-            for ( int j = 1; j <= master_node->giveNumberOfDofs(); j++ ) {
-                dof = master_node->giveDof(j);
+            for ( Dof *dof: *master_node ) {
                 if ( dof->hasBc(tStep) == false ) {
                     continue;
                 }
@@ -635,26 +634,6 @@ RefinedElement :: giveCompatibleBcDofArray(Node *master_node, Node *slave_node, 
     return ( compDofs );
 }
 
-
-/*
- *
- * int element -> giveNode(1) -> giveNumberOfDofs()
- * Dof* element -> giveNode(1) -> giveDof(1)
- * int element -> giveNode(1) -> giveDof(1) -> hasBc(tStep)
- * int element -> giveNode(1) -> giveDof(1) -> hasIc(tStep)
- * int element -> giveNode(1) -> giveDof(1) -> giveBcIdValue()
- * double element -> giveNode(1) -> giveDof(1) -> giveBcValue(UnknownMode_Total, tStep)
- * DofIDItem element -> giveNode(1) -> giveDof(1) -> giveDofID()
- *
- * int element -> giveNode(1) -> hasLocalCS()
- * FloatMatrix* element -> giveNode(1) -> giveLocalCoordinateTriplet ()
- * prvni dva radky je normalizovany vstup za lcs
- *
- * BoundaryCondition* = element -> giveNode(1) -> giveDof(1) -> giveBc()
- * InitialCondition* = element -> giveNode(1) -> giveDof(1) -> giveIc()
- *
- * int element -> giveNode(1) -> giveDof(1) -> giveBc() -> isImposed(tStep)
- */
 
 std :: string RefinedElement :: errorInfo(const char *func) const
 {

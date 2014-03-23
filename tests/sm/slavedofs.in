@@ -23,8 +23,8 @@ ConstantFunction 1 f(t) 1.0
 #%BEGIN_CHECK% tolerance 1.e-4
 ## check reactions 
 #REACTION tStep 1 number 1 dof 1 value 0.0
-#REACTION tStep 1 number 1 dof 2 value 7.5e-1
-#REACTION tStep 1 number 2 dof 2 value 2.5e-1
+#REACTION tStep 1 number 1 dof 3 value 7.5e-1
+#REACTION tStep 1 number 2 dof 3 value 2.5e-1
 ## check all nodes
 ## check element stress vector
 #BEAM_ELEMENT tStep 1 number 1 gp 1 keyword "forces" component 1  value -0.5

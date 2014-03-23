@@ -263,26 +263,20 @@ MatlabExportModule :: doOutputData(TimeStep *tStep, FILE *FID)
     Domain *domain  = emodel->giveDomain(1);
     std :: vector< int >DofIDList;
     std :: vector< int > :: iterator it;
-    std :: vector< std :: vector< double > * >valuesList;
-    std :: vector< double > *values;
+    std :: vector< std :: vector< double > >valuesList;
 
     for ( int i = 1; i <= domain->giveNumberOfDofManagers(); i++ ) {
-        for ( int j = 1; j <= domain->giveDofManager(i)->giveNumberOfDofs(); j++ ) {
-            Dof *thisDof;
-            thisDof = domain->giveDofManager(i)->giveDof(j);
+        for ( Dof *thisDof: *domain->giveDofManager(i) ) {
             it = std :: find( DofIDList.begin(), DofIDList.end(), thisDof->giveDofID() );
 
+            double value = thisDof->giveUnknown(VM_Total, tStep);
             if ( it == DofIDList.end() ) {
                 DofIDList.push_back( thisDof->giveDofID() );
-                values = new(std :: vector< double > );
-                valuesList.push_back(values);
+                valuesList.push_back({value});
             } else {
                 std :: size_t pos = it - DofIDList.begin();
-                values = valuesList.at(pos);
+                valuesList[pos].push_back(value);
             }
-
-            double value = thisDof->giveUnknown(VM_Total, tStep);
-            values->push_back(value);
         }
     }
 
@@ -295,8 +289,8 @@ MatlabExportModule :: doOutputData(TimeStep *tStep, FILE *FID)
 
     for ( size_t i = 0; i < valuesList.size(); i++ ) {
         fprintf(FID, "\tdata.a{%lu}=[", static_cast< long unsigned int >(i) + 1);
-        for ( size_t j = 0; j < valuesList.at(i)->size(); j++ ) {
-            fprintf( FID, "%f,", valuesList.at(i)->at(j) );
+        for ( double val: valuesList[i] ) {
+            fprintf( FID, "%f,", val );
         }
 
         fprintf(FID, "];\n");
@@ -358,10 +352,10 @@ MatlabExportModule :: doOutputSpecials(TimeStep *tStep,    FILE *FID)
             for ( int j = 1; j <= wpbc->giveNumberOfInternalDofManagers(); j++ ) {
                 fprintf( FID, "\tspecials.weakperiodic{%u}.descType=%u;\n", wpbccount, wpbc->giveBasisType() );
                 fprintf(FID, "\tspecials.weakperiodic{%u}.coefficients=[", wpbccount);
-                for ( int k = 1; k <= wpbc->giveInternalDofManager(j)->giveNumberOfDofs(); k++ ) {
+                for ( Dof *dof: *wpbc->giveInternalDofManager(j) ) {
                     FloatArray unknowns;
                     IntArray DofMask;
-                    double X = wpbc->giveInternalDofManager(j)->giveDof(k)->giveUnknown(VM_Total, tStep);
+                    double X = dof->giveUnknown(VM_Total, tStep);
                     fprintf(FID, "%e\t", X);
                 }
 
@@ -372,10 +366,10 @@ MatlabExportModule :: doOutputSpecials(TimeStep *tStep,    FILE *FID)
         SolutionbasedShapeFunction *sbsf = dynamic_cast< SolutionbasedShapeFunction * >( domain->giveBc(i) );
         if ( sbsf ) {
             fprintf(FID, "\tspecials.solutionbasedsf{%u}.values=[", sbsfcount);
-            for ( int k = 1; k <= sbsf->giveInternalDofManager(1)->giveNumberOfDofs(); k++ ) {                  // Only one internal dof manager
+            for ( Dof *dof: *sbsf->giveInternalDofManager(1) ) {                  // Only one internal dof manager
                 FloatArray unknowns;
                 IntArray DofMask;
-                double X = sbsf->giveInternalDofManager(1)->giveDof(k)->giveUnknown(VM_Total, tStep);
+                double X = dof->giveUnknown(VM_Total, tStep);
                 fprintf(FID, "%e\t", X);
             }
             fprintf(FID, "];\n");
@@ -392,11 +386,11 @@ MatlabExportModule :: doOutputReactionForces(TimeStep *tStep,    FILE *FID)
     Domain *domain  = emodel->giveDomain(domainIndex);
 
     FloatArray reactions;
-    IntArray dofManMap, dofMap, eqnMap;
+    IntArray dofManMap, dofidMap, eqnMap;
 #ifdef __SM_MODULE
     StructuralEngngModel *strEngMod = dynamic_cast< StructuralEngngModel * >(emodel);
     if ( strEngMod ) {
-        strEngMod->buildReactionTable(dofManMap, dofMap, eqnMap, tStep, domainIndex);
+        strEngMod->buildReactionTable(dofManMap, dofidMap, eqnMap, tStep, domainIndex);
         strEngMod->computeReaction(reactions, tStep, 1);
     } else
 #endif
@@ -448,7 +442,7 @@ MatlabExportModule :: doOutputReactionForces(TimeStep *tStep,    FILE *FID)
                 int pos = eqnMap.findFirstIndexOf(num);
                 dofIDs.at(j) = ( int ) dof->giveDofID();
                 if ( pos > 0 ) {
-                    fprintf( FID, "%e ", reactions.at(pos) );
+                    fprintf(FID, "%e ", reactions.at(pos));
                 } else {
                     fprintf(FID, "%e ", 0.0);   // if not prescibed output zero
                 }
@@ -460,8 +454,8 @@ MatlabExportModule :: doOutputReactionForces(TimeStep *tStep,    FILE *FID)
 
         fprintf(FID, "\tReactionForces.DofIDs{%i} = [", i);
         if ( dofManMap.contains(dManNum) ) {
-            for ( int j = 1; j <= dofIDs.giveSize(); j++ ) {
-                fprintf( FID, "%i ", dofIDs.at(j) );
+            for ( int id: dofIDs ) {
+                fprintf( FID, "%i ", id );
             }
         }
         fprintf(FID, "];\n");

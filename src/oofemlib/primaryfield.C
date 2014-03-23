@@ -106,10 +106,7 @@ PrimaryField :: __evaluateAt(FloatArray &answer, DofManager *dman,
             dman->giveUnknownVector(answer, * dofId, * this, mode, tStep);
             return 0; // ok
         } else { // all dofs requested
-            int size = dman->giveNumberOfDofs();
-            for ( int i = 1; i <= size; i++ ) {
-                answer.at(i) = dman->giveDof(i)->giveUnknown(* this, mode, tStep);
-            }
+            dman->giveCompleteUnknownVector(answer, mode, tStep);
             return 0; // ok
         }
     } else {

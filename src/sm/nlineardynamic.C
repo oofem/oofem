@@ -360,21 +360,19 @@ NonLinearDynamic :: proceedStep(int di, TimeStep *tStep)
         // Considering initial conditions.
         for ( int j = 1; j <= nman; j++ ) {
             DofManager *node = this->giveDomain(di)->giveDofManager(j);
-            int nDofs = node->giveNumberOfDofs();
 
-            for ( int k = 1; k <= nDofs; k++ ) {
+            for ( Dof *dof: *node ) {
                 // Ask for initial values obtained from
                 // bc (boundary conditions) and ic (initial conditions).
-                Dof *iDof = node->giveDof(k);
-                if ( !iDof->isPrimaryDof() ) {
+                if ( !dof->isPrimaryDof() ) {
                     continue;
                 }
 
-                int jj = iDof->__giveEquationNumber();
+                int jj = dof->__giveEquationNumber();
                 if ( jj ) {
-                    totalDisplacement.at(jj)  = iDof->giveUnknown(VM_Total, stepWhenIcApply);
-                    velocityVector.at(jj)     = iDof->giveUnknown(VM_Velocity, stepWhenIcApply);
-                    accelerationVector.at(jj) = iDof->giveUnknown(VM_Acceleration, stepWhenIcApply);
+                    totalDisplacement.at(jj)  = dof->giveUnknown(VM_Total, stepWhenIcApply);
+                    velocityVector.at(jj)     = dof->giveUnknown(VM_Velocity, stepWhenIcApply);
+                    accelerationVector.at(jj) = dof->giveUnknown(VM_Acceleration, stepWhenIcApply);
                 }
             }
         }
@@ -938,18 +936,17 @@ NonLinearDynamic :: estimateMaxPackSize(IntArray &commMap, CommunicationBuffer &
     Domain *domain = this->giveDomain(1);
 
     if ( packUnpackType == ProblemCommMode__ELEMENT_CUT ) {
-        for ( int i = 1; i <= mapSize; i++ ) {
-            count += domain->giveDofManager( commMap.at(i) )->giveNumberOfDofs();
+        for ( int map: commMap ) {
+            count += domain->giveDofManager( map )->giveNumberOfDofs();
         }
 
         return ( buff.givePackSize(MPI_DOUBLE, 1) * count );
     } else if ( packUnpackType == ProblemCommMode__NODE_CUT ) {
-        for ( int i = 1; i <= mapSize; i++ ) {
-            DofManager *dman = domain->giveDofManager( commMap.at(i) );
+        for ( int map: commMap ) {
+            DofManager *dman = domain->giveDofManager( map );
             int ndofs = dman->giveNumberOfDofs();
-            for ( int j = 1; j <= ndofs; j++ ) {
-                Dof *jdof = dman->giveDof(j);
-                if ( jdof->isPrimaryDof() && ( jdof->__giveEquationNumber() ) ) {
+            for ( Dof *dof: *dman ) {
+                if ( dof->isPrimaryDof() && ( dof->__giveEquationNumber() ) ) {
                     count++;
                 } else {
                     pcount++;
@@ -960,8 +957,8 @@ NonLinearDynamic :: estimateMaxPackSize(IntArray &commMap, CommunicationBuffer &
         //printf ("\nestimated count is %d\n",count);
         return ( buff.givePackSize(MPI_DOUBLE, 1) * max(count, pcount) );
     } else if ( packUnpackType == ProblemCommMode__REMOTE_ELEMENT_MODE ) {
-        for ( int i = 1; i <= mapSize; i++ ) {
-            count += domain->giveElement( commMap.at(i) )->estimatePackSize(buff);
+        for ( int map: commMap ) {
+            count += domain->giveElement( map )->estimatePackSize(buff);
         }
 
         return count;
@@ -1022,9 +1019,7 @@ NonLinearDynamic :: packMigratingData(TimeStep *tStep)
 
     for ( int idofman = 1; idofman <= ndofman; idofman++ ) {
         DofManager *_dm = domain->giveDofManager(idofman);
-        int ndofs = _dm->giveNumberOfDofs();
-        for ( int idof = 1; idof <= ndofs; idof++ ) {
-            Dof *_dof = _dm->giveDof(idof);
+        for ( Dof *_dof: *_dm ) {
             if ( _dof->isPrimaryDof() ) {
                 if ( ( _eq = _dof->__giveEquationNumber() ) ) {
                     // pack values in solution vectors
@@ -1049,9 +1044,7 @@ NonLinearDynamic :: unpackMigratingData(TimeStep *tStep)
 
     for ( int idofman = 1; idofman <= ndofman; idofman++ ) {
         DofManager *_dm = domain->giveDofManager(idofman);
-        int ndofs = _dm->giveNumberOfDofs();
-        for ( int idof = 1; idof <= ndofs; idof++ ) {
-            Dof *_dof = _dm->giveDof(idof);
+        for ( Dof *_dof: *_dm ) {
             if ( _dof->isPrimaryDof() ) {
                 if ( ( _eq = _dof->__giveEquationNumber() ) ) {
                     // pack values in solution vectors

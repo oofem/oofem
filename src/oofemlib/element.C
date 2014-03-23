@@ -281,14 +281,12 @@ Element :: computeNumberOfPrimaryMasterDofs(EquationID ut)
 
     for ( int i = 1; i <= numberOfDofMans; i++ ) {
         this->giveDofManDofIDMask(i, ut, nodeDofIDMask);
-        this->giveDofManager(i)->giveDofArray(nodeDofIDMask, dofMask);
-        answer += this->giveDofManager(i)->giveNumberOfPrimaryMasterDofs(dofMask);
+        answer += this->giveDofManager(i)->giveNumberOfPrimaryMasterDofs(nodeDofIDMask);
     }
 
     for ( int i = 1; i <= giveNumberOfInternalDofManagers(); i++ ) {
         this->giveInternalDofManDofIDMask(i, ut, nodeDofIDMask);
-        this->giveInternalDofManager(i)->giveDofArray(nodeDofIDMask, dofMask);
-        answer += this->giveInternalDofManager(i)->giveNumberOfPrimaryMasterDofs(dofMask);
+        answer += this->giveInternalDofManager(i)->giveNumberOfPrimaryMasterDofs(nodeDofIDMask);
     }
     return answer;
 }

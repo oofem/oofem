@@ -64,6 +64,7 @@ class OOFEM_EXPORT SolutionbasedShapeFunction : public ActiveBoundaryCondition
 {
 private:
     Node *myNode;
+    IntArray myDofIDs;
     int set;
     int externalSet;
     int order;

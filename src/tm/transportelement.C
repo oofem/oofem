@@ -1122,19 +1122,19 @@ TransportElement :: giveInternalStateAtNode(FloatArray &answer, InternalStateTyp
 {
     Node *n = this->giveNode(node);
     if ( type == IST_Temperature ) {
-        int dofindx;
-        if ( ( dofindx = n->findDofWithDofId(T_f) ) ) {
+        auto dofindx = n->findDofWithDofId(T_f);
+        if ( dofindx != n->end() ) {
             answer.resize(1);
-            answer.at(1) = n->giveDof(dofindx)->giveUnknown(VM_Total, tStep);
+            answer.at(1) = (*dofindx)->giveUnknown(VM_Total, tStep);
             return 1;
         } else {
             return 0;
         }
     } else if ( type == IST_MassConcentration_1 ) {
-        int dofindx;
-        if ( ( dofindx = n->findDofWithDofId(C_1) ) ) {
+        auto dofindx = n->findDofWithDofId(C_1);
+        if ( dofindx != n->end() ) {
             answer.resize(1);
-            answer.at(1) = n->giveDof(dofindx)->giveUnknown(VM_Total, tStep);
+            answer.at(1) = (*dofindx)->giveUnknown(VM_Total, tStep);
             return 1;
         } else {
             return 0;

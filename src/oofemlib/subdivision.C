@@ -3546,7 +3546,7 @@ Subdivision :: createMesh(TimeStep *tStep, int domainNumber, int domainSerNum, D
  #endif
 #endif
 
-    Dof *idofPtr, *dof;
+    Dof *dof;
     DofManager *parentNodePtr, *node;
     Element *elem;
     CrossSection *crossSection;
@@ -3571,24 +3571,24 @@ Subdivision :: createMesh(TimeStep *tStep, int domainNumber, int domainSerNum, D
             parentNodePtr = domain->giveNode(parent);
             // inherit all data from parent (bc, ic, load, etc.)
             node = classFactory.createDofManager(parentNodePtr->giveInputRecordName(), inode, * dNew);
-            int ndofs = parentNodePtr->giveNumberOfDofs();
-            node->setNumberOfDofs(ndofs);
+            node->setNumberOfDofs(0);
             node->setLoadArray( * parentNodePtr->giveLoadArray() );
             // create individual DOFs
-            for ( int idof = 1; idof <= ndofs; idof++ ) {
-                idofPtr = parentNodePtr->giveDof(idof);
+            int count = 1;
+            for ( Dof *idofPtr: *parentNodePtr ) {
                 if ( idofPtr->isPrimaryDof() ) {
-                    dof = new MasterDof( idof, node, idofPtr->giveBcId(), idofPtr->giveIcId(), idofPtr->giveDofID() );
+                    dof = new MasterDof( count, node, idofPtr->giveBcId(), idofPtr->giveIcId(), idofPtr->giveDofID() );
                 } else {
                     SimpleSlaveDof *simpleSlaveDofPtr = dynamic_cast< SimpleSlaveDof * >(idofPtr);
                     if ( simpleSlaveDofPtr ) {
-                        dof = new SimpleSlaveDof( idof, node, simpleSlaveDofPtr->giveMasterDofManagerNum(), idofPtr->giveDofID() );
+                        dof = new SimpleSlaveDof( count, node, simpleSlaveDofPtr->giveMasterDofManagerNum(), idofPtr->giveDofID() );
                     } else {
                         OOFEM_ERROR("unsupported DOF type");
                         dof = NULL;
                     }
                 }
-                node->setDof(idof, dof);
+                count ++;
+                node->appendDof(dof);
             }
 
 #ifdef __PARALLEL_MODE
@@ -3601,7 +3601,7 @@ Subdivision :: createMesh(TimeStep *tStep, int domainNumber, int domainSerNum, D
             node = new Node(inode, *dNew);
             //create new node with default DOFs
             int ndofs = dofIDArrayPtr.giveSize();
-            node->setNumberOfDofs(ndofs);
+            node->setNumberOfDofs(0);
 
             // create individual DOFs
             for ( int idof = 1; idof <= ndofs; idof++ ) {
@@ -3756,7 +3756,7 @@ Subdivision :: createMesh(TimeStep *tStep, int domainNumber, int domainSerNum, D
   #endif
  #endif
 #endif
-                node->setDof(idof, dof);
+                node->appendDof(dof);
             }
 
 #ifdef __PARALLEL_MODE

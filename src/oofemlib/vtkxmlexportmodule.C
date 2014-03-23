@@ -1383,11 +1383,10 @@ VTKXMLExportModule :: getNodalVariableFromPrimaryField(FloatArray &answer, DofMa
 {
     // This code is not perfect. It should be rewritten to handle all cases more gracefully.
     ///@todo This method needs to be cleaned up - maybe define the common vector types so
-    // certain dofid's are associated with them /JB
+    /// certain dofid's are associated with them /JB
 
     IntArray dofIDMask(3);
-    int indx, size;
-    DofIDItem id;
+    int size;
     const FloatArray *recoveredVal;
 
     InternalStateType iState = IST_DisplacementVector; // Shouldn't be necessary
@@ -1395,8 +1394,8 @@ VTKXMLExportModule :: getNodalVariableFromPrimaryField(FloatArray &answer, DofMa
     dofIDMask.clear();
     if ( ( type == DisplacementVector ) || ( type == EigenVector ) || ( type == VelocityVector ) ) {
         dofIDMask = {( int ) Undef, ( int ) Undef, ( int ) Undef};
-        for ( int j = 1; j <= dman->giveNumberOfDofs(); j++ ) {
-            id = dman->giveDof(j)->giveDofID();
+        for ( Dof *dof: *dman ) {
+            DofIDItem id = dof->giveDofID();
             if ( ( id == V_u ) || ( id == D_u ) ) {
                 dofIDMask.at(1) = id;
             } else if ( ( id == V_v ) || ( id == D_v ) ) {
@@ -1420,8 +1419,8 @@ VTKXMLExportModule :: getNodalVariableFromPrimaryField(FloatArray &answer, DofMa
         iState = IST_Pressure;
         answer.resize(1);
     } else if ( type == DirectorField ) {
-        for ( int j = 1; j <= dman->giveNumberOfDofs(); j++ ) {
-            id = dman->giveDof(j)->giveDofID();
+        for ( Dof *dof: *dman ) {
+            DofIDItem id = dof->giveDofID();
             if ( ( id == W_u ) || ( id == W_v ) || ( id == W_w ) ) {
                 dofIDMask.followedBy(id);
             }
@@ -1438,12 +1437,11 @@ VTKXMLExportModule :: getNodalVariableFromPrimaryField(FloatArray &answer, DofMa
     answer.zero();
 
     for ( int j = 1; j <= size; j++ ) {
-        id = ( DofIDItem ) dofIDMask.at(j);
+        DofIDItem id = ( DofIDItem ) dofIDMask.at(j);
         if ( id == Undef ) {
             answer.at(j) = 0.;
         } else if ( iState == IST_DirectorField ) {
-            indx = dman->findDofWithDofId( ( DofIDItem ) dofIDMask.at(j) );
-            answer.at(j) = dman->giveDof(indx)->giveUnknown(VM_Total, tStep);
+            answer.at(j) = dman->giveDofWithID(id)->giveUnknown(VM_Total, tStep);
             // recover values if not done before
             this->givePrimVarSmoother()->recoverValues(* this->giveRegionSet(ireg), iState, tStep);
             this->givePrimVarSmoother()->giveNodalVector( recoveredVal, dman->giveNumber() );
@@ -1453,9 +1451,9 @@ VTKXMLExportModule :: getNodalVariableFromPrimaryField(FloatArray &answer, DofMa
                 OOFEM_WARNING("recovered variable size mismatch for %d", type);
                 answer.at(j) = 0.0;
             }
-        } else if ( ( indx = dman->findDofWithDofId(id) ) ) {
+        } else if ( dman->hasDofID(id) ) {
             // primary variable available directly in DOF-manager
-            answer.at(j) = dman->giveDof(indx)->giveUnknown(VM_Total, tStep);
+            answer.at(j) = dman->giveDofWithID(id)->giveUnknown(VM_Total, tStep);
         } else if ( iState != IST_Undefined ) {
             // primary variable not directly available
             // but equivalent InternalStateType provided

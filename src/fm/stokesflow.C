@@ -288,15 +288,7 @@ int StokesFlow :: checkConsistency()
 
 void StokesFlow :: printDofOutputAt(FILE *stream, Dof *iDof, TimeStep *tStep)
 {
-    DofIDItem type = iDof->giveDofID();
-    ///@todo This won't work with slave dofs, xfem etc.
-    if ( ( type == V_u ) || ( type == V_v ) || ( type == V_w ) ) {
-        iDof->printSingleOutputAt(stream, tStep, 'v', VM_Total, 1);
-    } else if ( type == P_f ) {
-        iDof->printSingleOutputAt(stream, tStep, 'p', VM_Total, 1);
-    } else {
-        OOFEM_ERROR("unsupported dof type");
-    }
+    iDof->printSingleOutputAt(stream, tStep, 'd', VM_Total);
 }
 
 void StokesFlow :: updateInternalState(TimeStep *tStep)

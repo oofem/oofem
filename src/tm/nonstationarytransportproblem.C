@@ -634,7 +634,7 @@ NonStationaryTransportProblem :: assembleAlgorithmicPartOfRhs(FloatArray &answer
 void
 NonStationaryTransportProblem :: printDofOutputAt(FILE *stream, Dof *iDof, TimeStep *tStep)
 {
-    iDof->printSingleOutputAt(stream, tStep, 'f', VM_Total);
+    iDof->printSingleOutputAt(stream, tStep, 'd', VM_Total);
 }
 
 void
@@ -648,7 +648,6 @@ NonStationaryTransportProblem :: applyIC(TimeStep *stepWhenIcApply)
 #ifdef VERBOSE
     OOFEM_LOG_INFO("Applying initial conditions\n");
 #endif
-    int nDofs;
     int nman  = domain->giveNumberOfDofManagers();
 
     UnknownsField->advanceSolution(stepWhenIcApply);
@@ -658,23 +657,21 @@ NonStationaryTransportProblem :: applyIC(TimeStep *stepWhenIcApply)
 
     for ( int j = 1; j <= nman; j++ ) {
         DofManager *node = domain->giveDofManager(j);
-        nDofs = node->giveNumberOfDofs();
 
-        for ( int k = 1; k <= nDofs; k++ ) {
+        for ( Dof *dof: *node ) {
             // ask for initial values obtained from
             // bc (boundary conditions) and ic (initial conditions)
-            Dof *iDof = node->giveDof(k);
-            if ( !iDof->isPrimaryDof() ) {
+            if ( !dof->isPrimaryDof() ) {
                 continue;
             }
 
-            int jj = iDof->__giveEquationNumber();
+            int jj = dof->__giveEquationNumber();
             if ( jj ) {
-                val = iDof->giveUnknown(VM_Total, stepWhenIcApply);
+                val = dof->giveUnknown(VM_Total, stepWhenIcApply);
                 solutionVector->at(jj) = val;
                 //update in dictionary, if the problem is growing/decreasing
                 if ( this->changingProblemSize ) {
-                    iDof->updateUnknownsDictionary(stepWhenIcApply, VM_Total, val);
+                    dof->updateUnknownsDictionary(stepWhenIcApply, VM_Total, val);
                 }
             }
         }

@@ -1453,7 +1453,7 @@ Domain :: createDofs()
         DofManager *dman = this->giveDofManager(i);
         int c = 0;
         //printf("Dofs in node %d (of %d) = %d\n", i, this->giveNumberOfDofManagers(), node_dofs[i-1].size());
-        dman->setNumberOfDofs( node_dofs [ i - 1 ].size() );
+        dman->setNumberOfDofs(0);
         for ( int id: node_dofs [ i - 1 ] ) {
             // Find bc and ic if there are any, otherwise zero.
             int bcid = dof_bc [ i - 1 ].find(id) != dof_bc [ i - 1 ].end() ? dof_bc [ i - 1 ] [ id ] : 0;
@@ -1493,7 +1493,7 @@ Domain :: createDofs()
             if ( dtype == DT_simpleSlave ) {
                 static_cast< SimpleSlaveDof * >(dof)->setMasterDofManagerNum( ( * dman->giveMasterMap() ) [ id ] );
             }
-            dman->setDof(c, dof);
+            dman->appendDof(dof);
         }
     }
 

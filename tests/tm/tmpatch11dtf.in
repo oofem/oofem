@@ -22,6 +22,6 @@ ConstantFunction 1 f(t) 1.0
 UsrDefLTF 2 f(t) 2^(t-2)
 #%BEGIN_CHECK%
 #TIME
-#NODE tStep 5.24287000e+05 number 3 dof 1 unknown f value 1.13374890e+00
+#NODE tStep 5.24287000e+05 number 3 dof 10 unknown d value 1.13374890e+00
 #ELEMENT tStep 5.24287000e+05 number 1 gp 1 keyword "flow" component 1 value -5.6687e-01
 #%END_CHECK%

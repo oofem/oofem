@@ -71,7 +71,7 @@ public:
 
     virtual dofType giveDofType() { return DT_slave; }
 
-    void initialize(int cntOfMstrDfMngr, const IntArray &masterNodes, const IntArray &mstrDofID, const FloatArray &mstrContribution);
+    void initialize(const IntArray &masterNodes, const IntArray &mstrDofID, const FloatArray &mstrContribution);
     virtual int giveNumberOfPrimaryMasterDofs();
     virtual void giveMasterDofManArray(IntArray &answer);
     virtual void giveUnknowns(FloatArray &masterUnknowns, ValueModeType mode, TimeStep *tStep);

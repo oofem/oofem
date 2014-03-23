@@ -130,27 +130,26 @@ void SloanGraph :: initialize()
     ///@todo Add connections from dof managers to boundary condition internal dof managers.
 
     std :: set< int, std :: less< int > >masters;
-    std :: set< int, std :: less< int > > :: iterator it;
 
     IntArray dofMasters;
     for ( int i = 1; i <= nnodes; i++ ) {
         if ( domain->giveDofManager(i)->hasAnySlaveDofs() ) {
+            DofManager *iDofMan = domain->giveDofManager(i);
             // slave dofs are present in dofManager
             // first - ask for masters, these may be different for each dof
             masters.clear();
-            DofManager *iDofMan = domain->giveDofManager(i);
-            for ( int j = 1; j <= iDofMan->giveNumberOfDofs(); j++ ) {
-                if ( !iDofMan->giveDof(j)->isPrimaryDof() ) {
-                    iDofMan->giveDof(j)->giveMasterDofManArray(dofMasters);
-                    for ( int k = 1; k <= dofMasters.giveSize(); k++ ) {
-                        masters.insert( dofMasters.at(k) );
+            for ( Dof *dof: *iDofMan ) {
+                if ( !dof->isPrimaryDof() ) {
+                    dof->giveMasterDofManArray(dofMasters);
+                    for ( int mdof: masters ) {
+                        masters.insert( mdof );
                     }
                 }
             }
 
-            for ( it = masters.begin(); it != masters.end(); ++it ) {
-                this->giveNode(i)->addNeighbor( * ( it ) );
-                this->giveNode( * ( it ) )->addNeighbor(i);
+            for ( int connection: masters ) {
+                this->giveNode(i)->addNeighbor(connection);
+                this->giveNode(connection)->addNeighbor(i);
             }
         }
     } // end dof man loop

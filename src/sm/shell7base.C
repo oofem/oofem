@@ -1945,11 +1945,11 @@ Shell7Base :: computeVectorOfDofIDs(const IntArray &dofIdArray, ValueModeType u,
     for ( int i = 1; i <= numberOfDofMans; i++ ) {
         DofManager *dMan = this->giveDofManager(i);
         for ( int j = 1; j <= dofIdArray.giveSize(); j++ ) {
+            auto it = dMan->findDofWithDofId((DofIDItem)dofIdArray.at(j));
             //k++;
-            if ( dMan->hasDofID( ( DofIDItem ) dofIdArray.at(j) ) ) {
-                Dof *d = dMan->giveDofWithID( dofIdArray.at(j) );
+            if ( it != dMan->end() ) {
+                Dof *d = *it;
                 /// @todo: will fail if any other dof then gamma is excluded from enrichment
-                /// since I only add "j". Instead I should skip certain dof numbers when incrementing
                 answer.at(k + j) = d->giveUnknown(VM_Total, tStep);
             }
         }
@@ -1963,7 +1963,7 @@ Shell7Base :: temp_computeBoundaryVectorOf(IntArray &dofIdArray, int boundary, V
     ///@todo: NOT CHECKED!!!
     // Routine to extract vector given an array of dofid items
     // If a certain dofId does not exist a zero is used as value
-
+OOFEM_ERROR("CHECK!");
     IntArray bNodes;
     this->fei->computeLocalEdgeMapping(bNodes, boundary);
 
@@ -1973,10 +1973,10 @@ Shell7Base :: temp_computeBoundaryVectorOf(IntArray &dofIdArray, int boundary, V
     for ( int i = 1; i <= bNodes.giveSize(); i++ ) {
         DofManager *dMan = this->giveDofManager( bNodes.at(i) );
         for ( int j = 1; j <= dofIdArray.giveSize(); j++ ) {
-            Dof *d = dMan->giveDof(j);
+            auto it = dMan->findDofWithDofId((DofIDItem)dofIdArray.at(j));
             k++;
-            if ( dMan->hasDofID( ( DofIDItem ) dofIdArray.at(j) ) ) {
-                answer.at(k) = d->giveUnknown(VM_Total, tStep);
+            if ( it != dMan->end() ) {
+                answer.at(k) = (*it)->giveUnknown(VM_Total, tStep);
             }
         }
     }

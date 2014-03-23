@@ -546,8 +546,7 @@ void Tr21Stokes :: giveIntegratedVelocity(FloatArray &answer, TimeStep *tStep)
     v.zero();
 
     for ( int i = 1; i <= this->giveNumberOfDofManagers(); i++ ) {
-        for ( int j = 1; j <= this->giveDofManager(i)->giveNumberOfDofs(); j++ ) {
-            Dof *d = this->giveDofManager(i)->giveDof(j);
+        for ( Dof *d: *this->giveDofManager(i) ) {
             if ( ( d->giveDofID() == V_u ) || ( d->giveDofID() == V_v ) ) {
                 k = k + 1;
                 v.at(k) = d->giveUnknown(VM_Total, tStep);

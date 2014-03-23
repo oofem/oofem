@@ -101,6 +101,8 @@ protected:
 
     /// DOF-manager containing the unknown deviatoric stress.
     Node *sigmaDev;
+    /// Dof IDs for the lagrange multipliers in sigmaDev
+    IntArray dev_id;
 
 public:
     /**

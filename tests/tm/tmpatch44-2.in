@@ -24,8 +24,8 @@ ConstantFunction 1 f(t) 1.0
 
 #exact solution for this case is 20*log(x)+10, T(2.2)=25.7691, T(4.)=37.72588
 #%BEGIN_CHECK%
-#NODE tStep 1 number 2 dof 1 unknown f value 2.50523801e+01
-#NODE tStep 1 number 5 dof 1 unknown f value 2.49592599e+01
+#NODE tStep 1 number 2 dof 10 unknown d value 2.50523801e+01
+#NODE tStep 1 number 5 dof 10 unknown d value 2.49592599e+01
 #ELEMENT tStep 1 number 1 gp 1 keyword "flow" component 1 value -3.7631e+01
 #ELEMENT tStep 1 number 2 gp 1 keyword "flow" component 1 value -3.7398e+01
 #ELEMENT tStep 1 number 3 gp 1 keyword "flow" component 1 value -1.9534e+01
