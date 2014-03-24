@@ -178,7 +178,7 @@ void XfemElementInterface :: ComputeBOrBHMatrix(FloatMatrix &oAnswer, GaussPoint
 #else
 			int globalNodeInd = dMan->giveGlobalNumber();
 			const std::vector<int> &nodeEiIndices = xMan->giveNodeEnrichmentItemIndices(globalNodeInd);
-			for ( int i = 0; i < nodeEiIndices.size(); i++ ) {
+			for ( size_t i = 0; i < nodeEiIndices.size(); i++ ) {
 				EnrichmentItem *ei = xMan->giveEnrichmentItem( nodeEiIndices[i]);
 				if ( ei->isDofManEnriched(* dMan) ) {
 					numEnrNode += ei->giveNumDofManEnrichments(* dMan);
@@ -203,7 +203,7 @@ void XfemElementInterface :: ComputeBOrBHMatrix(FloatMatrix &oAnswer, GaussPoint
                 EnrichmentItem *ei = xMan->giveEnrichmentItem(i);
 #else
             const std::vector<int> &nodeEiIndices = xMan->giveNodeEnrichmentItemIndices(globalNodeInd);
-            for ( int i = 0; i < nodeEiIndices.size(); i++ ) {
+            for ( size_t i = 0; i < nodeEiIndices.size(); i++ ) {
                 EnrichmentItem *ei = xMan->giveEnrichmentItem(nodeEiIndices[i]);
 #endif
 

@@ -313,7 +313,7 @@ void XfemManager :: updateNodeEnrichmentItemMap()
 
 		const std :: vector< int > &enrNodeInd = ei->giveEnrNodeIndices();
 
-		for(int i = 0; i < enrNodeInd.size(); i++) {
+		for(size_t i = 0; i < enrNodeInd.size(); i++) {
 			mNodeEnrichmentItemIndices[ enrNodeInd[i]-1 ].push_back(eiIndex);
 		}
 
