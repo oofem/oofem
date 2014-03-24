@@ -365,6 +365,7 @@ public:
      * Written by Erik Svenning, August 2013.
      */
     double distance(const FloatArray &iP1, const FloatArray &iP2, double &oXi) const;
+    double distance_square(const FloatArray &iP1, const FloatArray &iP2, double &oXi) const;
 
     /**
      * Computes the square of distance between position represented by receiver and position given as parameter.
