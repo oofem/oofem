@@ -146,7 +146,12 @@ public:
 
     int giveStartOfDofIdPool() const { return this->startOfDofIdPool; };
     int giveEndOfDofIdPool() const { return this->endOfDofIdPool; };
-    virtual void computeDofManDofIdArray(IntArray &DofIdArray, DofManager *dMan); // list of id's a particular dof manager supports
+
+    /**
+     * Compute Id's of enriched dofs for a given DofManager.
+     */
+    virtual void computeEnrichedDofManDofIdArray(IntArray &oDofIdArray, DofManager &iDMan);
+
     void giveEIDofIdArray(IntArray &answer) const; // list of id's for the enrichment dofs
 
 
@@ -164,7 +169,7 @@ public:
     // an IntArray, a std::vector<int> or something else.
     // Any container that contains int and implements [] is legal.
     template< typename T >
-    void interpLevelSet(double &oLevelSet, const FloatArray &iN, const T &iNodeInd) const;
+    inline void interpLevelSet(double &oLevelSet, const FloatArray &iN, const T &iNodeInd) const;
 
     template< typename T >
     void interpLevelSetTangential(double &oLevelSet, const FloatArray &iN, const T &iNodeInd) const;
@@ -208,6 +213,7 @@ public:
 
     const EnrichmentDomain *giveEnrichmentDomain() const {return mpEnrichmentDomain;}
 
+    const std :: vector< int > &giveEnrNodeIndices() const {return mEnrNodeIndices;}
 protected:
 
     EnrichmentDomain *mpEnrichmentDomain;
@@ -318,7 +324,7 @@ public:
 // Function implementations
 
 template< typename T >
-void EnrichmentItem :: interpLevelSet(double &oLevelSet, const FloatArray &iN, const T &iNodeInd) const
+inline void EnrichmentItem :: interpLevelSet(double &oLevelSet, const FloatArray &iN, const T &iNodeInd) const
 {
     oLevelSet = 0.0;
     for ( int i = 1; i <= iN.giveSize(); i++ ) {

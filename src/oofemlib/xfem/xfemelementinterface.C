@@ -123,8 +123,7 @@ void XfemElementInterface :: ComputeBOrBHMatrix(FloatMatrix &oAnswer, GaussPoint
     const IntArray &elNodes = iEl.giveDofManArray();
 
     // Compute global coordinates of Gauss point
-    FloatArray globalCoord(2);
-    globalCoord.zero();
+    FloatArray globalCoord = {0.0, 0.0};
 
     for ( int i = 1; i <= nDofMan; i++ ) {
         DofManager *dMan = iEl.giveDofManager(i);
@@ -169,12 +168,24 @@ void XfemElementInterface :: ComputeBOrBHMatrix(FloatMatrix &oAnswer, GaussPoint
         int numEnrNode = 0;
 
         if( xMan != NULL ) {
+#if 0
 			for ( int i = 1; i <= xMan->giveNumberOfEnrichmentItems(); i++ ) {
 				EnrichmentItem *ei = xMan->giveEnrichmentItem(i);
 				if ( ei->isDofManEnriched(* dMan) ) {
 					numEnrNode += ei->giveNumDofManEnrichments(* dMan);
 				}
 			}
+#else
+			int globalNodeInd = dMan->giveGlobalNumber();
+			const std::vector<int> &nodeEiIndices = xMan->giveNodeEnrichmentItemIndices(globalNodeInd);
+			for ( int i = 0; i < nodeEiIndices.size(); i++ ) {
+				EnrichmentItem *ei = xMan->giveEnrichmentItem( nodeEiIndices[i]);
+				if ( ei->isDofManEnriched(* dMan) ) {
+					numEnrNode += ei->giveNumDofManEnrichments(* dMan);
+				}
+			}
+#endif
+
         }
 
         if ( numEnrNode > 0 ) {
@@ -187,8 +198,14 @@ void XfemElementInterface :: ComputeBOrBHMatrix(FloatMatrix &oAnswer, GaussPoint
 
             int nodeEnrCounter = 0;
 
+#if 0
             for ( int i = 1; i <= xMan->giveNumberOfEnrichmentItems(); i++ ) {
                 EnrichmentItem *ei = xMan->giveEnrichmentItem(i);
+#else
+            const std::vector<int> &nodeEiIndices = xMan->giveNodeEnrichmentItemIndices(globalNodeInd);
+            for ( int i = 0; i < nodeEiIndices.size(); i++ ) {
+                EnrichmentItem *ei = xMan->giveEnrichmentItem(nodeEiIndices[i]);
+#endif
 
                 double levelSetGP = 0.0;
                 ei->interpLevelSet(levelSetGP, N, elNodes);
@@ -399,6 +416,8 @@ void XfemElementInterface :: XfemElementInterface_partitionElement(std :: vector
 
 bool XfemElementInterface :: XfemElementInterface_updateIntegrationRule()
 {
+	const double tol2 = 1.0e-18;
+
     bool partitionSucceeded = false;
 
 
@@ -478,7 +497,10 @@ bool XfemElementInterface :: XfemElementInterface_updateIntegrationRule()
                             // Compute crack normal
                             FloatArray crackTang;
                             crackTang.beDifferenceOf(crackPolygon [ segIndex + 1 ], crackPolygon [ segIndex         ]);
-                            crackTang.normalize();
+
+                            if(crackTang.computeSquaredNorm() > tol2) {
+                            	crackTang.normalize();
+                            }
 
                             FloatArray crackNormal = {-crackTang.at(2), crackTang.at(1)};
 
@@ -559,7 +581,10 @@ bool XfemElementInterface :: XfemElementInterface_updateIntegrationRule()
                                 // Compute crack normal
                                 FloatArray crackTang;
                                 crackTang.beDifferenceOf(crackPolygon [ segIndex + 1 ], crackPolygon [ segIndex         ]);
-                                crackTang.normalize();
+
+                                if(crackTang.computeSquaredNorm() > tol2) {
+                                	crackTang.normalize();
+                                }
 
                                 FloatArray crackNormal = {-crackTang.at(2), crackTang.at(1)};
 

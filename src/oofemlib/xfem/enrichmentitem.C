@@ -250,6 +250,23 @@ int EnrichmentItem :: instanciateYourself(DataReader *dr)
     XfemManager *xMan = this->giveDomain()->giveXfemManager();
     mpEnrichmentDomain->CallNodeEnrMarkerUpdate(* this, * xMan);
 
+
+    // For debugging only
+    if ( mpEnrichmentDomain->getVtkDebug() ) {
+
+    	int tStepInd = 0;//this->domain->giveEngngModel()->giveCurrentStep()->giveNumber();
+
+    	EnrichmentDomain_BG *enrDomBG = dynamic_cast<EnrichmentDomain_BG*> (mpEnrichmentDomain);
+
+    	if(enrDomBG != NULL) {
+			PolygonLine *pl = dynamic_cast< PolygonLine * >( enrDomBG->bg );
+			if ( pl != NULL ) {
+				pl->printVTK(tStepInd, number);
+			}
+    	}
+    }
+
+
     return 1;
 }
 
@@ -357,35 +374,37 @@ void EnrichmentItem :: propagateFronts()
 }
 
 void
-EnrichmentItem :: computeDofManDofIdArray(IntArray &answer, DofManager *dMan)
+EnrichmentItem :: computeEnrichedDofManDofIdArray(IntArray &oDofIdArray, DofManager &iDMan)
 {
-    // Gives an array containing the dofId's that should be created as new dofs (which dofs to enrich).
+
+    // Gives an array containing the dofId's that
+	// are candidated for enrichment. At the moment,
+	// regular dofs are considered as candidates. In
+	// the future, we may also consider enriching
+	// enriched dofs from other enrichment items.
     const IntArray *enrichesDofsWithIdArray = this->giveEnrichesDofsWithIdArray();
 
-    // Number of new dofs for one enrichment function
-    int eiEnrSize = enrichesDofsWithIdArray->giveSize();
+    // Number of candidates for enrichment
+    int numEnrCand = enrichesDofsWithIdArray->giveSize();
 
     // Number of active enrichment functions
-    int numEnrFunc = this->giveNumDofManEnrichments(* dMan);
+    int numEnrFunc = this->giveNumDofManEnrichments( iDMan );
 
-    // Go through the list of dofs that the EI supports and compare with the available dofs in the dofMan.
-    // Store matches in dofMask
-    IntArray dofMask(eiEnrSize *numEnrFunc);
-    dofMask.zero();
+    // Go through the list of dofs that the EI supports
+    // and compare with the available dofs in the dofMan.
     int count = 0;
 
     for ( int i = 1; i <= numEnrFunc; i++ ) {
-        for ( int j = 1; j <= eiEnrSize; j++ ) {
-            if ( dMan->hasDofID( ( DofIDItem ) enrichesDofsWithIdArray->at(j) ) ) {
+        for ( int j = 1; j <= numEnrCand; j++ ) {
+            if ( iDMan.hasDofID( ( DofIDItem ) enrichesDofsWithIdArray->at(j) ) ) {
                 count++;
-                dofMask.at(count) = dMan->giveDofWithID( enrichesDofsWithIdArray->at(j) )->giveNumber();
             }
         }
     }
 
-    answer.resize(count);
+    oDofIdArray.resize(count);
     for ( int i = 1; i <= count; i++ ) {
-        answer.at(i) = this->giveStartOfDofIdPool() + i - 1;
+    	oDofIdArray.at(i) = this->giveStartOfDofIdPool() + i - 1;
     }
 }
 
@@ -687,19 +706,24 @@ void EnrichmentItem :: createEnrichedDofs()
         DofManager *dMan = this->giveDomain()->giveDofManager(i);
 
         if ( isDofManEnriched(* dMan) ) {
+        	int dofsPassed = dMan->giveNumberOfDofs();
             //printf("dofMan %i is enriched \n", dMan->giveNumber());
-            computeDofManDofIdArray(dofIdArray, dMan);
-            int nDofs = dMan->giveNumberOfDofs();
+        	computeEnrichedDofManDofIdArray(dofIdArray, *dMan);
             for ( int m = 1; m <= dofIdArray.giveSize(); m++ ) {
+            	dofsPassed++;
+
                 if ( !dMan->hasDofID( ( DofIDItem ) ( dofIdArray.at(m) ) ) ) {
 
                 	if( mInheritBoundaryConditions ) {
                 		// Check if the other dofs in the dof manager have
                 		// Dirichlet BCs. If so, let the new enriched dof
                 		// inherit the same BC.
+                		IntArray nodeDofIdArray;
+            			dMan->giveCompleteMasterDofIDArray(nodeDofIdArray);
+                        int nDofs = nodeDofIdArray.giveSize();
                 		bool foundBC = false;
                 		for(int n = 1; n <= nDofs; n++) {
-                			Dof *dof = dMan->giveDof(n);
+                			Dof *dof = dMan->giveDofWithID( nodeDofIdArray.at(n) );
                 			if(dof->giveBcId() > 0) {
                 				foundBC = true;
                 				bcIndex = dof->giveBcId();
@@ -709,17 +733,17 @@ void EnrichmentItem :: createEnrichedDofs()
 
                 		if(foundBC) {
                 			// Append dof with BC
-                    		dMan->appendDof( new MasterDof( nDofs + m, dMan, bcIndex, icIndex, ( DofIDItem ) ( dofIdArray.at(m) ) ) );
+                    		dMan->appendDof( new MasterDof( dofsPassed, dMan, bcIndex, icIndex, ( DofIDItem ) ( dofIdArray.at(m) ) ) );
                 		}
                 		else {
                     		// No BC found, append enriched dof without BC
-                    		dMan->appendDof( new MasterDof( nDofs + m, dMan, ( DofIDItem ) ( dofIdArray.at(m) ) ) );
+                    		dMan->appendDof( new MasterDof( dofsPassed, dMan, ( DofIDItem ) ( dofIdArray.at(m) ) ) );
                 		}
 
                 	}
                 	else {
                 		// Append enriched dof without BC
-                		dMan->appendDof( new MasterDof( nDofs + m, dMan, ( DofIDItem ) ( dofIdArray.at(m) ) ) );
+                		dMan->appendDof( new MasterDof( dofsPassed, dMan, ( DofIDItem ) ( dofIdArray.at(m) ) ) );
                 	}
 
                 }
@@ -734,12 +758,17 @@ void EnrichmentItem :: createEnrichedDofs()
     for ( int i = 1; i <= nrDofMan; i++ ) {
         DofManager *dMan = this->giveDomain()->giveDofManager(i);
 
-        computeDofManDofIdArray(dofIdArray, dMan);
+        computeEnrichedDofManDofIdArray(dofIdArray, *dMan);
         std :: vector< DofIDItem >dofsToRemove;
-        int numNodeDofs = dMan->giveNumberOfDofs();
-        for ( int j = 1; j <= numNodeDofs; j++ ) {
-            Dof *dof = dMan->giveDof(j);
-            DofIDItem dofID = dof->giveDofID();
+
+		IntArray nodeDofIdArray;
+		dMan->giveCompleteMasterDofIDArray(nodeDofIdArray);
+        int nDofs = nodeDofIdArray.giveSize();
+
+        for ( int j = 1; j <= nDofs; j++ ) {
+//            Dof *dof = dMan->giveDof(j);
+//            DofIDItem dofID = dof->giveDofID();
+        	DofIDItem dofID = DofIDItem ( nodeDofIdArray.at(j) );
 
             if ( dofID >= DofIDItem(poolStart) && dofID <= DofIDItem(poolEnd) ) {
                 bool dofIsInIdArray = false;
@@ -1118,16 +1147,16 @@ double EnrichmentItem :: calcXiZeroLevel(const double &iQ1, const double &iQ2)
 
 void EnrichmentItem :: calcPolarCoord(double &oR, double &oTheta, const FloatArray &iOrigin, const FloatArray &iPos, const FloatArray &iN, const FloatArray &iT)
 {
-    FloatArray q;
-    q.beDifferenceOf(iPos, iOrigin);
+	FloatArray q = {iPos.at(1) - iOrigin.at(1), iPos.at(2) - iOrigin.at(2)};
 
-    double tol2 = 1.0e-18;
-    if( q.computeSquaredNorm() > tol2 ) {
-    	q.normalize();
-    }
+	const double tol = 1.0e-12;
 
     // Compute polar coordinates
     oR = iOrigin.distance(iPos);
+
+    if( oR > tol ) {
+    	q.times(1.0/oR);
+    }
 
     if ( q.dotProduct(iN) > 0.0 ) {
         oTheta =  acos( q.dotProduct(iT) );

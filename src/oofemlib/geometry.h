@@ -105,7 +105,7 @@ public:
     /// Gives intersection points between this Geometry and Element.
     virtual void computeIntersectionPoints(Element *element, std :: vector< FloatArray > &oIntersectionPoints) { }
 
-    const FloatArray &giveVertex(int n) const { return mVertices [ n - 1 ]; }
+    inline const FloatArray &giveVertex(int n) const { return mVertices [ n - 1 ]; }
 
     void setVertex(FloatArray *vertex);
 

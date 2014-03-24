@@ -112,6 +112,11 @@ protected:
     /// If extra debug vtk files should be written.
     bool mDebugVTK;
 
+    /**
+     * Let the XfemManager keep track of enrichment items enriching each
+     * node, to allow more efficient computations.
+     */
+    std::vector< std::vector<int> > mNodeEnrichmentItemIndices;
 public:
 
     /**
@@ -129,7 +134,7 @@ public:
 
     bool isElementEnriched(const Element *elem);
 
-    EnrichmentItem *giveEnrichmentItem(int n);
+    inline EnrichmentItem *giveEnrichmentItem(int n) {return enrichmentItemList->at(n);}
     int giveNumberOfEnrichmentItems() const { return enrichmentItemList->giveSize(); }
 
     void createEnrichedDofs();
@@ -175,6 +180,10 @@ public:
 
     bool giveVtkDebug() const { return mDebugVTK; }
     void setVtkDebug(bool iDebug) { mDebugVTK = iDebug; }
+
+    void updateNodeEnrichmentItemMap();
+
+    const std::vector<int> &giveNodeEnrichmentItemIndices(int iNodeIndex) const {return mNodeEnrichmentItemIndices[iNodeIndex-1];}
 };
 } // end namespace oofem
 #endif // xfemmanager_h

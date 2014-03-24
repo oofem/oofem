@@ -63,6 +63,8 @@ XfemManager :: XfemManager(Domain *domain)
     doVTKExport = false;
     mDebugVTK = false;
     vtkExportFields.clear();
+
+    mNodeEnrichmentItemIndices.resize(0);
 }
 
 XfemManager :: ~XfemManager()
@@ -99,19 +101,6 @@ bool XfemManager :: isElementEnriched(const Element *elem)
 
     return false;
 }
-
-EnrichmentItem *XfemManager :: giveEnrichmentItem(int n)
-{
-    // Returns the n-th enrichment item.
-    if ( enrichmentItemList->includes(n) ) {
-        return enrichmentItemList->at(n);
-    } else {
-        OOFEM_SIMPLE_ERROR("giveEnrichmentItem: undefined enrichmentItem (%d)", n);
-    }
-
-    return NULL;
-}
-
 
 void
 XfemManager :: createEnrichedDofs()
@@ -185,6 +174,8 @@ int XfemManager :: instanciateYourself(DataReader *dr)
         ei->instanciateYourself(dr);
         this->enrichmentItemList->put(i, ei);
     }
+
+    updateNodeEnrichmentItemMap();
 
     return 1;
 }
@@ -269,6 +260,8 @@ void XfemManager :: updateYourself()
     for ( int i = 1; i <= enrichmentItemList->giveSize(); i++ ) {
         enrichmentItemList->at(i)->updateGeometry();
     }
+
+    updateNodeEnrichmentItemMap();
 }
 
 void XfemManager :: propagateFronts()
@@ -304,4 +297,27 @@ bool XfemManager :: hasPropagatingFronts()
 
     return false;
 }
+
+void XfemManager :: updateNodeEnrichmentItemMap()
+{
+	Domain *domain = giveDomain();
+	int nDMan = domain->giveNumberOfDofManagers();
+
+	mNodeEnrichmentItemIndices.clear();
+	mNodeEnrichmentItemIndices.resize(nDMan);
+
+	int nEI = giveNumberOfEnrichmentItems();
+
+	for(int eiIndex = 1; eiIndex <= nEI; eiIndex++) {
+		EnrichmentItem *ei = giveEnrichmentItem(eiIndex);
+
+		const std :: vector< int > &enrNodeInd = ei->giveEnrNodeIndices();
+
+		for(int i = 0; i < enrNodeInd.size(); i++) {
+			mNodeEnrichmentItemIndices[ enrNodeInd[i]-1 ].push_back(eiIndex);
+		}
+
+	}
+}
+
 } // end namespace oofem
